@@ -1,0 +1,19 @@
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: 30 Aug 2005 
+# Climate Record: 01 Jan 1951 -> 01 Aug 2005
+# Site Information: [IA1533] CLARINDA
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+ TWELVE SIGNIFICANT RAINFALL EVENTS  
+ MONTH  DAY  YEAR   AMOUNT
+   7      9  1987     7.60
+   6     24  2000     5.38
+   7      6  2000     5.33
+   7     22  1962     5.05
+   8      9  1977     4.77
+   8     31  1980     4.65
+   7      2  1958     4.48
+   4     29  1963     4.40
+   9     12  1961     4.28
+   7     25  1979     4.02
+   8     28  1977     3.70
+   7     18  2005     3.65

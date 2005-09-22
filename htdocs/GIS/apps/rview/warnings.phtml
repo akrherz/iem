@@ -1,0 +1,405 @@
+<?php
+$baseuri = "warnings.phtml";
+putenv("TZ=GMT");
+
+if (isset($_GET["img_x"]) && isset($_GET["img_y"]) )
+{
+  $arExtents = explode(",", $_GET["extents"]);
+  $ll_x = $arExtents[0];  
+  $ll_y = $arExtents[1];
+  $ur_x = $arExtents[2];
+  $ur_y = $arExtents[3];
+
+  $dy = ($ur_y - $ll_y) / floatval(480);
+  $dx = ($ur_x - $ll_x) / floatval(640);
+
+  $_GET["lon0"] = ($_GET["img_x"] * $dx) + $ll_x ;
+  $_GET["lat0"] = $ur_y - ($_GET["img_y"] * $dy) ;
+  $_GET["site"] = "user";
+}
+
+$cu = isset($_GET["cu"]) ? $_GET["cu"]: 0;
+$loop = isset($_GET["loop"]) ? $_GET["loop"] : 0;
+$tz = isset($_GET["tz"]) ? $_GET["tz"] : "CDT";
+$tzdict = Array("UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000, "CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200, "PST" => 28800);
+
+$tzoff = $tzdict[$tz];
+
+$filter = isset($_GET["filter"]) ? $_GET["filter"]: 0;
+
+$site = isset($_GET["site"]) ? $_GET["site"]: "DMX";
+$sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "issued";
+$sortdir = isset($_GET["sortdir"]) ? $_GET["sortdir"]: 0;
+$lon0 = isset($_GET["lon0"]) ? $_GET["lon0"]: 0;
+$lat0 = isset($_GET["lat0"]) ? $_GET["lat0"]: 0;
+$zoom = isset($_GET["zoom"]) ? $_GET["zoom"]: 250;
+
+$isarchive = $_GET["archive"] == "yes" ? 1 : 0;
+$archive = isset($_GET["archive"]) ? $_GET["archive"] : "";
+//if ($isarchive) { $loop = 0; }
+$a = time();
+$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", $a - $tzoff);
+$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", $a - $tzoff);
+$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", $a - $tzoff);
+$hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : date("H", $a - $tzoff);
+$m = isset($_GET["minute"]) ? intval($_GET["minute"]) : date("i", $a - $tzoff);
+
+if ($m >= 55) $ma = "55";
+else if ($m >= 50) $ma = "50";
+else if ($m >= 45) $ma = "45";
+else if ($m >= 40) $ma = "40";
+else if ($m >= 35) $ma = "35";
+else if ($m >= 30) $ma = "30";
+else if ($m >= 25) $ma = "25";
+else if ($m >= 20) $ma = "20";
+else if ($m >= 15) $ma = "15";
+else if ($m >= 10) $ma = "10";
+else if ($m >= 5) $ma = "05";
+else $ma = "00";
+//if (! $isarchive ) {$m = $ma;}
+$m = $ma;
+$basets = mktime($hour, $m, 0, $month, $day, $year);
+$wfo_filter_ts = mktime(0,0,0,8,29,2004);
+if ($isarchive && $basets < $wfo_filter_ts)
+{
+  $filter = 0;
+}
+
+include('/mesonet/php/include/wfoLocs.php');
+include('/mesonet/php/include/forms.php');
+include('lib.php');
+$uri = "$baseuri?site=$site&cu=$cu&archive=$archive&year=$year&month=$month&day=$day&hour=$hour&minute=$minute&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom";
+$uri_nowfo = "$baseuri?archive=$archive&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$minute&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom";
+
+/* Scenario 1, user coordinates are posted */
+if ($_GET["site"] == "user")
+{
+  $uri .= "&lat0=$lat0&lon0=$lon0";
+}
+/* Scenario 2, some site is posted */
+else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0)
+{
+  $lat0 = $wfos[$site]["lat"];
+  $lon0 = $wfos[$site]["lon"];
+}
+
+if (! $isarchive)
+{
+  $REFRESH = "<meta http-equiv=\"refresh\" content=\"180\">";
+}
+$TITLE = "IEM | RADAR & NWS Warnings";
+$HEADEXTRA = "<script language=\"JavaScript\">
+function addTime() {
+var d = new Date();
+document.form.tzoff.value=(d.getTimezoneOffset()*60);
+
+}
+</script>";
+
+include("/mesonet/php/include/header.php");
+?>
+<b>Nav:</b> <a href="/current/">Current Data</a> <b> > </b>
+  <a href="/current/radar.phtml">Radar Products</a> <b> > </b>
+  NEXRAD & Warnings <a href="<?php echo $baseuri; ?>">RESET APP!</a><br>
+
+<?php
+$width = "640";
+$height = "480";
+
+dl("php_mapscript_442.so");
+
+?>
+
+<table bgcolor="black" width="100%" cellpadding=2 border=0 cellspacing=0>
+  <tr><td>
+<table width="100%" bgcolor="white" cellpadding=2 border=0 cellspacing=0>
+  <tr><td valign="TOP" bgcolor="#dddddd">
+
+<form method="GET" name="form" action="<?php echo $baseuri; ?>">
+<input type="hidden" name="tzoff" value="0">
+<?php if (isset($_GET["lat0"])) { ?>
+<input type="hidden" value="<?php echo $lat0; ?>" name="lat0">
+<input type="hidden" value="<?php echo $lon0; ?>" name="lon0">
+<?php } ?>
+
+<table style="padding: 2px;" border="1">
+<thead>
+<tr><th>Select WFO</th><th>Timezone:</th><th>Loop?:</th><th>WFO Filter:</th><th>Sort</th><th>Zoom</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><select name="site">
+<?php
+while( list($key, $value) = each($wfos) ){
+  echo "<option value=\"$key\" ";
+  if ($site == $key) echo "SELECTED";
+  echo ">[".$key."] ". $wfos[$key]["city"] ."\n";
+}
+if ( $_GET["site"] == "user" ) { 
+echo "<option value=\"user\" SELECTED>User Selected\n";
+}
+?>
+</select></td>
+
+
+<td><select name="tz">
+  <option value="UTC" <?php if ($tz == "UTC") echo "SELECTED"; ?>>UTC
+  <option value="EDT" <?php if ($tz == "EDT") echo "SELECTED"; ?>>EDT
+  <option value="EST" <?php if ($tz == "EST") echo "SELECTED"; ?>>EST
+  <option value="CDT" <?php if ($tz == "CDT") echo "SELECTED"; ?>>CDT
+  <option value="CST" <?php if ($tz == "CST") echo "SELECTED"; ?>>CST
+  <option value="MDT" <?php if ($tz == "MDT") echo "SELECTED"; ?>>MDT
+  <option value="MST" <?php if ($tz == "MST") echo "SELECTED"; ?>>MST
+  <option value="PDT" <?php if ($tz == "PDT") echo "SELECTED"; ?>>PDT
+  <option value="PST" <?php if ($tz == "PST") echo "SELECTED"; ?>>PST
+</select></td>
+
+<td><select name="loop">
+  <option value="0" <?php if ($loop == 0) echo "SELECTED"; ?>>No
+  <option value="1" <?php if ($loop == 1) echo "SELECTED"; ?>>Java Script
+  <option value="2" <?php if ($loop == 2) echo "SELECTED"; ?>>Applet
+</select></td>
+
+<td><select name="filter">
+  <option value="0" <?php if ($filter == 0) echo "SELECTED"; ?>>No
+  <option value="1" <?php if ($filter == 1) echo "SELECTED"; ?>>Yes
+</select></td>
+
+<td><select name="sortdir">
+  <option value="0" <?php if ($sortdir == 0) echo "SELECTED"; ?>>DESC
+  <option value="1" <?php if ($sortdir == 1) echo "SELECTED"; ?>>ASC
+</select></td>
+
+<td><select name="zoom">
+ <option value="25" <?php if ($zoom == 25) echo "SELECTED"; ?>>25km
+ <option value="50" <?php if ($zoom == 50) echo "SELECTED"; ?>>50km
+ <option value="100" <?php if ($zoom == 100) echo "SELECTED"; ?>>100km
+ <option value="250" <?php if ($zoom == 250) echo "SELECTED"; ?>>250km
+ <option value="500" <?php if ($zoom == 500) echo "SELECTED"; ?>>500km
+</select></td>
+
+<td><input type="submit" value="Show Map"></td></tr></table>
+</td></tr>
+
+<tr><td>
+
+<?php
+
+if ($site == "user") 
+{
+  echo sprintf("User selected Latitude: %.3f Longitude: %.3f", $lat0, $lon0);
+} else {
+  echo "NEXRAD Site:</b> ". $wfos[$site]["city"] ." (".$site.")\n";
+}
+
+if (intval($loop) ==  1){
+
+  $urls = Array();
+
+  for ($i=0;$i<9;$i++){
+   $imgi = 8 - $i;
+   include("warnings_plot.php");
+   $urls[$i] = $url;
+  }
+
+  include ("loop.php");
+  printHTML($urls, $radTimes);
+} else if (intval($loop) == 2){
+  $urls = Array();
+  $fts = time();
+  $f = fopen("/mesonet/www/html/tmp/". $fts .".dat", 'w');
+
+  for ($i=0;$i<9;$i++){
+   $imgi = 8 - $i;
+   include("warnings_plot.php");
+   $urls[$i] = $url;
+   fwrite($f, "http://mesonet.agron.iastate.edu". $url ."\n");
+  }
+  fclose($f);
+?>
+  <applet codebase="/current/class/" code="AniS.class" width="640" height="580" alt="You must enable Java in your browser to view the radar loop">
+        <param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
+        <param name="rate" value="80">
+	<PARAM name="no_enh" value="true">
+        <param name="pause_percent" value="800">
+        <param name="file_of_filenames" value="/tmp/<?php echo $fts; ?>.dat">
+</applet>
+
+<?php
+} else {
+  $imgi = 0;
+  include("warnings_plot.php");
+
+  echo "<br><center><input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\"></center>\n";
+
+}
+
+echo "
+  </td></tr>\n</table>
+</td></tr>\n</table>\n";
+
+echo "<input type=\"hidden\" name=\"extents\" value=\"". $map->extent->minx .",". $map->extent->miny .",". $map->extent->maxx .",". $map->extent->maxy ."\">\n";
+
+$connection = pg_connect("host=10.10.10.40 port=5432 dbname=postgis user=mesonet");
+
+$scols = Array("wfo", "phenomena", "cname", "expire", "sname", "issue", "updated", "status", "fcster", "eventid");
+if (! in_array($sortcol, $scols) ){
+ $sortcol = "issue";
+}
+if ($sortdir == 1) $sortdir = "ASC";
+else $sortdir = "DESC";
+
+$wtable = "warnings";
+$tsextra = "CURRENT_TIMESTAMP and issue < CURRENT_TIMESTAMP ";
+if ($isarchive)
+{
+  $wtable = "warnings_$year";
+  $tsextra = "'". strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff ) ."' and w.issue < '". strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff ) ."'";
+}
+if ($cu == 1) $cuextra = " and w.phenomena IN ('SV','TO') ";
+$query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire, 
+  w.updated as updated, w.status as status, w.fcster as fcster, 
+  w.eventid as eventid,
+  w.issue as issue, u.state as sname, xmax(w.geom) as lon0, 
+  ymax(w.geom) as lat0, w.wfo as wfo
+  from $wtable w, nws_ugc u
+  WHERE w.expire > $tsextra
+   and w.gtype = 'C' and w.ugc = u.ugc $cuextra ORDER by $sortcol $sortdir";
+
+pg_exec($connection, "set time zone 'GMT'");
+$result = pg_exec($connection, $query);
+
+pg_close($connection);
+
+$afos = Array("SV" => "Svr Tstorm",
+  "TO" => "Tornado",
+  "FF" => "Flash Flood");
+?>
+Warnings Valid at: <b><?php 
+if ($tzoff == 0)
+{
+  if ($isarchive)
+  echo strftime("%d %b %Y %H:%M %Z", $basets); 
+  else
+  echo strftime("%d %b %Y %H:%M %Z"); 
+}
+else 
+{
+  if ($isarchive)
+  echo strftime("%d %b %Y %I:%M %p ", $basets) . $tz; 
+  else
+  echo strftime("%d %b %Y %I:%M %p ", time() - $tzoff) . $tz; 
+}
+?></b>
+ &nbsp; Warnings Filter: <input type="radio" value="0" name="cu" <?php if ($cu == 0) { echo "checked"; } ?>>Show All
+<input type="radio" value="1" name="cu" <?php if ($cu == 1) { echo "checked"; } ?>>Convective Only
+<table width="100%" style="padding: 3px;" border="1">
+<thead>
+<tr>
+ <th <?php if ($sortcol == "wfo") echo "style='background: #f00;'"; ?>><a href="<?php echo "$uri&sortcol=wfo";?>">WFO</a></th>
+
+ <th <?php if ($sortcol == "phenomena") echo "style='background: #f00;'"; ?> ><a href="<?php echo "$uri&sortcol=phenomena";?>">Warn</a></th>
+
+ <th <?php if ($sortcol == "eventid") echo "style='background: #f00;'"; ?>><a href="<?php echo "$uri&sortcol=eventid";?>">VTEC#</a></th>
+
+ <th <?php if ($sortcol == "cname") echo "style='background: #f00;'"; ?>><a href="<?php echo "$uri&sortcol=cname";?>">County</a></th>
+
+ <th <?php if ($sortcol == "expire") echo "style='background: #f00;'"; ?>><a href="<?php echo "$uri&sortcol=expire";?>">Expires</a></th>
+
+ <th <?php if ($sortcol == "sname") echo "style='background: #f00;'"; ?>><a href="<?php echo "$uri&sortcol=sname";?>">State</a></th>
+
+ <th <?php if ($sortcol == "issue") echo "style='background: #f00;'"; ?>><a href="<?php echo "$uri&sortcol=issue";?>">Issued</a></th>
+
+ <th <?php if ($sortcol == "updated") echo "style='background: #f00;'"; ?>><a href="<?php echo "$uri&sortcol=updated";?>">Updated</a></th>
+
+ <th <?php if ($sortcol == "status") echo "style='background: #f00;'"; ?>><a href="<?php echo "$uri&sortcol=status";?>">Status</a></th>
+
+ <th <?php if ($sortcol == "fcster") echo "style='background: #f00;'"; ?>><a href="<?php echo "$uri&sortcol=fcster";?>">Forecaster</a></th>
+</tr>
+</thead>
+<tbody>
+<?php
+$k = 0;
+if ($tzoff == 0)
+{
+  $dformat = "%H:%M GMT";
+}
+else
+{
+  $dformat = "%I:%M %p";
+}
+for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
+  $wfo = $row["wfo"];
+  if ($filter && $wfo != $site) continue; 
+  $k += 1;
+  $issue = strtotime($row["issue"]) - $tzoff;
+  $expire = strtotime($row["expire"]) - $tzoff;
+  $updated = strtotime($row["updated"]) - $tzoff;
+
+ echo "<tr ";
+ if ($k % 2 == 0) echo "bgcolor=\"#EEEEEE\"";
+ echo "><td><a href=\"$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$minute&archive=$archive&tzoff=$tzoff&site=". $row["wfo"] ."\">". $row["wfo"] ."</a></td><td><a href=\"warnings_cat.phtml?archive=$archive&year=$year&id=". $row["oid"] ."\"> ". $row["phenomena"] ."</a></td> 
+ <td>". $row["eventid"] ."</td>";
+if (floatval($row["lon0"]) < 0 && floatval($row["lat0"]) > 0) {
+     echo "<td><a href=\"$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$minute&archive=$archive&tzoff=$tzoff&site=user&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=". $row["lon0"] ."&lat0=". $row["lat0"] ."\">". $row["cname"] ."</a></td>";
+} else {
+     echo "<td>". $row["cname"] ."</td>";
+
+}
+    echo "<td>". strftime($dformat, $expire) ."</td>
+    <td>". $row["sname"] ."</td>
+    <td>". strftime($dformat, $issue) ."</td>
+    <td>". strftime($dformat, $updated) ."</td>
+    <td><a href=\"warnings_cat.phtml?archive=$archive&year=$year&id=". $row["oid"] ."#svs\">". $row["status"] ."</a></td>
+    <td>". $row["fcster"] ."</td>
+    </tr>\n";
+
+}
+if ($k == 0 && $filter){
+ $msg = "No warnings currently valid for ". $wfos[$site]["city"] ;
+} else if ($k == 0) {
+ $msg = "No warnings valid in the United States";
+}
+if ($k == 0){
+  echo "<tr><td colspan=\"10\">$msg</td></tr>";
+}
+?>
+</tbody>
+</table>
+
+<p><b>Time Settings in <?php echo $tz; ?>:</b> <i>Not used unless 'Archived Mode?' is checked</i><br />
+<table style="padding: 3px;" border="1">
+<thead><tr><th>&nbsp;</th><th>Year:</th><th>Month:</th><th>Day:</th><th>Hour:</th><th>Minute</th><td></td></tr></thead>
+<tbody>
+<tr>
+<td><input type="checkbox" value="yes" name="archive" <?php if($isarchive) echo
+"CHECKED=CHECKED"; ?>>Archived Mode?</td>
+<td><?php echo yearSelect(2003, $year, "year"); ?></td>
+<td><?php echo monthSelect($month, "month"); ?></td>
+<td><?php echo daySelect($day, "day"); ?></td>
+<td><?php echo hourSelect($hour, "hour"); ?></td>
+<td><?php echo local5MinuteSelect($m, "minute"); ?></td>
+<td><input type="submit" value="Show Map"></td>
+</tr>
+</tbody></table>
+
+</form>
+<?php if (! $isarchive) { ?>
+<img src="/images/gisready.png">Download <a href="http://mesonet.agron.iastate.edu/data/gis/shape/unproj/us/current_ww.zip">GIS shapefile of current warnings</a> and/or <a href="http://mesonet.agron.iastate.edu/GIS/data/gis/images/unproj/USCOMP/n0r_0.gtif.Z">GeoTiff of NEXRAD base reflectivity</a>.
+<?php } ?>
+
+<font size="-1">
+<p><b>Notes:</b>
+<ul>
+ <li>This application is research grade and should not be used operationally.</li>
+ <li>Flash Flood Warnings (FFW) do not have VTEC IDs, so those columns are blank for FFWs.</li>
+ <li>The status column is simply the status of the warning.  The warning is in 'NEW' state until a SVS is issued, then it goes to 'CON' for continued.</li>
+ <li>Warnings identified by WFO are available after 29 Aug 2004.</li>
+ <li>NEXRAD composite is available since 1 Aug 2003.</li>
+ <li>Prior to the NWS adoption of VTEC, warnings were not expired nor canceled.</li>
+ <li>SVS updates were added in 2005.</li>
+ <li>Archive of watches begins 13 August 2004.</li>
+</ul>
+</font>
+
+<?php  include ("/mesonet/php/include/footer.php");?>

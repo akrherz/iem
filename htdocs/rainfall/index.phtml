@@ -1,0 +1,125 @@
+<?php
+include("../../config/settings.inc.php");
+$TITLE = "IEM | Rainfall";
+include("$rootpath/include/header.php");
+include("$rootpath/include/forms.php");
+?>
+
+<h3 class="heading">IEM Rainfall</h3>
+
+<p>IEM rainfall is a high resolution depiction of rainfall estimates over
+the state of Iowa.  These estimates are provided freely via the Internet with
+no warranty or claim of accuracy.  Currently, there are a number of ways you
+can view/download this dataset.</p>
+
+<h3 class="subtitle">Request Data by Point</h3>
+<div class="iem-form">
+<form method="GET" action="bypoint.phtml" name="bypoint">
+<b>Instructions:</b> With this form you can request daily estimates of rainfall
+for a particular year and for a particular point.  This point can be specified 
+in a number of ways. <b>Caveat:</b>  Geocoding is not perfect.  Your address may not be found in the database.  If you first attempt fails, try using a popular building address for a location near you.
+
+<p><b>Select Year:</b>
+<?php echo yearSelect(1997, date("Y"), "year"); ?>
+<br /><b>View Options:</b>
+<select name="view">
+	<option value="online">Online
+	<option value="download">Download to disk
+</select>
+<table>
+<thead>
+<tr>
+	<th colspan="6">Choose a method to select data point:</th>
+</tr></thead>
+
+<tbody>
+<tr>
+	<td colspan="2"><input type="radio" name="method" value="latlon">Specify Latitude &amp; Longitude</td>
+	<td colspan="2"><input type="radio" name="method" value="geocode" checked="checked">Geocode An Address</td>
+	<td colspan="2"><input type="radio" name="method" value="id">Specify IEM Site ID</td></tr>
+
+<tr>
+<td><b>Latitude:</b></td> <td><input type="text" name="lat" size="6"></td>
+<td><b>Street Address:</b></td> <td> <input type="text" name="street"></td>
+<td><b>Enter ID:</b></td> <td> <input type="text" name="nwsli" size="6"></td>
+</tr>
+<tr>
+<td><b>Longitude:</b></td> <td> <input type="text" name="lon" size="6"></td>
+<td><b>City in Iowa:</b></td> <td> <input type="text" name="city"></td>
+<td></td></td> <td></tr>
+</tbody>
+</table>
+<input type="submit" value="Show Data">
+</form>
+</div>
+
+<h3 class="subtitle">Daily GIS Shapefiles</h3>
+<form method="GET" action="dshape.php" name="shapefile">
+<div class="iem-form">
+<b>Instructions:</b>  Please select the date you would like to download a zip 
+file containing a shapefile of rainfall estimates.
+<table>
+<thead>
+<tr>
+	<th>Month:</th><th>Day:</th><th>Year:</th><th>Coverage Type:</th>
+	<th>Projection:</th>
+</tr></thead>
+<tbody>
+<tr>
+	<td><?php echo monthSelect( date("m", time() - 86400) ); ?></td>
+	<td><?php echo daySelect( date("d", time() - 86400) ); ?></td>
+	<td><?php echo yearSelect(1997, date("Y", time() - 86400), "year"); ?></td>
+	<td><select name="geometry">
+	<option value="point">Point
+	<option value="polygon">Polygon
+	</select></td>
+	<td><select name="epsg">
+	<option value="4326">Geographic
+	<option value="26915">NAD83 UTM Zone15N
+	</select></td>
+</tr>
+</tbody>
+</table>
+<input type="submit" value="Generate .zip file">
+</form>
+<br />The point coverage is simply the centroid of the polygon coverage.
+</div>
+
+<h3 class="subtitle">OGC Web Services</h3>
+
+<div class="iem-form">
+If your GIS system supports accessing Web Map Service (WMS) or Web Feature
+Service (WFS) servers, you can directly pull in some of these rainfall estimates
+from the IEM server.  Our WMS URI is:
+<pre>
+http://mesonet.agron.iastate.edu/wms/rainfall.php?
+</pre>
+and our WFS URI is:
+<pre>
+http://mesonet.agron.iastate.edu/wfs/rainfall.php?
+</pre>
+
+<p>Pulling data into GIS applications via these services has not been widely
+tested.  If you run into any problems, please let us know!
+
+</div>
+
+<h3 class="subtitle">About Rainfall Estimates</h3>
+
+<div style="margin-left: 30px">These rainfall estimates are directly based on
+the <a href="http://wwwt.emc.ncep.noaa.gov/mmb/ylin/pcpanl/stage4/">Stage 4</a> precipitation analysis produced by the <a href="http://www.ncep.noaa.gov">National Center for 
+Environmental Prediction</a>.  The IEM processes this data source in the following ways:
+<ul>
+	<li>Extract data valid for Iowa from the national analyses.</li>
+	<li>Convert the data from Grib format to a relational database.</li>
+	<li>Produce summary totals for the local day instead of GMT day.</li>
+	<li>Provide instant access to this data from this page and others.</li>
+</ul>
+
+<p>Rainfall estimates are produced each day at 3:30 AM for the previous day.
+These estimates are later revised as more information is made available to 
+better refine the estimates.  If you downloaded data for yesterday at the time,
+you may wish to redownload that dataset again later, since the estimates may 
+be refined then.  Sounds confusing.  Please <a href="/info/contacts.php">contact us</a> if you have questions.</p>
+</div>
+<?php include("$rootpath/include/footer.php"); ?>

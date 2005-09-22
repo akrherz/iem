@@ -1,0 +1,88 @@
+<?php
+ include("/mesonet/php/include/all_locs.php");
+
+ $TITLE = "IEM | Site Comparisons";
+ include("/mesonet/php/lib/selectWidget.php");
+
+ $network = isset($_GET['network']) && $_GET['network'] != "" ? $_GET['network'] : "IA_ASOS";
+ $station1 = isset($_GET['station']) && $_GET['station'] != "" ? strtoupper($_GET['station']) : "";
+ $station2 = isset($_GET['station1']) && $_GET['station1'] != "" ? strtoupper($_GET['station1']) : "";
+ $var = isset($_GET['var']) ? $_GET['var'] : "tmpf";
+
+
+ $uri = "/plotting/compare/index.phtml?";
+ $ar = Array();
+ if (strlen($station1) > 0)
+ {
+   $ar["station1"] = $station1;
+ } if (strlen($station2) > 0)
+ {
+   $ar["station1"] = $station2;
+ }
+ if (strlen($station2) > 0)
+ {
+   $uri = "/plotting/compare/index.phtml?station1=$station2";
+ }
+
+ $sw = new selectWidget("/plotting/compare/index.phtml?", 
+        $uri, $network );
+ $sw->logic($_GET);
+ $sw->setformvars($ar);
+ $ar = Array("IA_ASOS", "AWOS", "IA_RWIS", "KELO", "KCCI", "KIMT", 
+"ND_ASOS", "SD_ASOS", "NE_ASOS", "KS_ASOS", "KS_RWIS", "MO_ASOS", "IL_ASOS", "IN_ASOS", "OH_ASOS", "MI_ASOS", "WI_ASOS", "WI_RWIS", "MN_ASOS", "MN_RWIS");
+ $sw->set_networks($ar);
+ include("/mesonet/php/include/header.php"); 
+?>
+
+<h3 class="heading">IEM Site Comparisons</h3>
+
+<p>This application plots a timeseries comparison between two sites of your
+choice for a variable of your choice.  If you know the official IDs, you 
+can enter them below.  Otherwise use the site selector below to build your
+choices. 
+
+<form method="GET" name="re" action="index.phtml">
+<table border="1">
+<tr><td></td><th>Site Identifier</th><th>Site Name</th><th>Network:</th><td></td></tr>
+
+<tr>
+  <th>Station 1:</th>
+  <td><input type="text" size="10" name="station" value="<?php echo $station1; ?>"></td>
+  <td><?php echo $cities[$station1]['city']; ?></td>
+  <td><?php echo $cities[$station1]['network']; ?></td>
+  <td><a href="index.phtml?station1=<?php echo $station2; ?>&network=<?php echo $cities[$station1]['network']; ?>">Select from Map</a></td>
+</tr>
+<tr>
+  <th>Station 2:</th>
+  <td><input type="text" size="10" name="station1" value="<?php echo $station2; ?>"></td>
+  <td><?php echo $cities[$station2]['city']; ?></td>
+  <td><?php echo $cities[$station2]['network']; ?></td>
+  <td><a href="index.phtml?station1=<?php echo $station1; ?>&network=<?php echo $cities[$station2]['network']; ?>">Select from Map</a></td>
+</tr>
+
+<tr><th>Variable:</th><td colspan="3"><SELECT name="var">
+<option value="tmpf" <? if ($var == "tmpf") echo "SELECTED"; ?>>Temperature
+<option value="dwpf" <? if ($var == "dwpf") echo "SELECTED"; ?>>Dewpoint
+<option value="sknt" <? if ($var == "sknt") echo "SELECTED"; ?>>Wind Speed (knots)
+<option value="drct" <? if ($var == "drct") echo "SELECTED"; ?>>Wind Direction
+<option value="alti" <? if ($var == "alti") echo "SELECTED"; ?>>Altimeter
+<option value="phour" <? if ($var == "phour") echo "SELECTED"; ?>>Precip
+</SELECT>
+</td></tr>
+
+<tr><td colspan="4"><INPUT TYPE="SUBMIT" VALUE="Build Comparison"> <a href="index.phtml">Reset App</a></td></tr>
+</table>
+</form>
+
+<?php 
+if (strlen($station1) == 0 || strlen($station2) == 0)
+{
+  echo $sw->printInterface(); 
+} else
+{
+  echo "<img src='plot.php?var=$var&station1=$station1&station2=$station2'>\n";
+  echo "<br /><b>Loading Comparison, please be patient...</b>";
+}
+?>
+
+<?php include("/mesonet/php/include/footer.php"); ?>

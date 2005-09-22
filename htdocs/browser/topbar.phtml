@@ -1,0 +1,42 @@
+<?php 
+ include("../config/settings.inc.php");
+ include("$rooturl/include/forms.php"); 
+ $mode = $_GET["mode"];
+ if (strlen($mode) == 0) $mode = "hourly";
+ $year = date("Y");
+ $month = date("m");
+ $day = date("d");
+ $hour = date("H");
+?>
+<html>
+<body bgcolor="#336699">
+
+<font color="#fafad2" size="+1"><b>Iowa Environmental Mesonet Archived Data Browser</b></font> [<a style="color:white" href="<?php echo $rooturl; ?>/archive/" target="_top"><b>Get me out of here!</b></a>]
+
+<table>
+<tr>
+ <th bgcolor="#eedd82">Set Mode:</th>
+ <th colspan=9 bgcolor="#fafad2">Select (Local not GMT) Time:</th>
+</tr>
+<tr>
+ <td>
+<form name="setmode" method="GET" action="topbar.phtml">
+<SELECT name="setmode" onChange="location=this.form.setmode.options[this.form.setmode.selectedIndex].value">
+ <option value="topbar.phtml?mode=hourly" <?php if ($mode == "hourly") echo "SELECTED"; ?>>Hourly Data
+ <option value="topbar.phtml?mode=daily" <?php if ($mode == "daily") echo "SELECTED"; ?>>Daily Data
+</select>
+</form>
+
+<form name="bigger" method="GET" target="side" action="side.phtml">
+<input type="hidden" name="mode" value="<?php echo $mode; ?>">
+ </td>
+ <td>Year:</td><td><?php yearSelect(1997, $year); ?></td>
+ <td>Month:</td><td><?php monthSelect($month); ?></td>
+ <td>Day:</td><td><?php daySelect($day); ?></td>
+<?php if ($mode == "hourly") { ?>
+ <td>Hour:</td><td><?php localHourSelect($hour, "hour"); ?></td>
+<?php } ?>
+ <td><input type="submit" value="Go"></td></tr>
+</table>
+</form>
+

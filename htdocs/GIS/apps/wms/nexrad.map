@@ -1,0 +1,227 @@
+#
+# Start of map file
+#
+NAME "radar"
+STATUS ON
+SIZE 450 350
+#SYMBOLSET symbols/symbol.sym
+FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+EXTENT -126 24 -66 50
+UNITS DD
+SHAPEPATH "/mesonet/www/html/GIS/data/"
+SYMBOLSET "/mesonet/www/html/GIS/data/symbols/wind.sym"
+IMAGECOLOR -1 -1 -1
+
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+   "init=epsg:4326"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+#  HEADER ia_header.html
+  TEMPLATE ia.html
+#  FOOTER ia_footer.html
+  MINSCALE 90000
+  MAXSCALE 4650000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/w0.log"
+  METADATA
+   "wms_title" "IEM WMS Service"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.radar?map=/mesonet/www/html/GIS/apps/wms/bywfo.map&amp;"
+   "wms_srs" "EPSG:4326"
+   "wms_abstract" "Ba Ba Ba"
+#   "wms_fees" "None"
+   "wms_keywords" "Ba"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+  NAME nexrad
+  STATUS ON
+  DATA "/mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "US RADAR"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0
+END
+
+LAYER
+  NAME nexrad_mw
+  STATUS ON
+  DATA "/mesonet/data/gis/images/unproj/MWCOMP/n0r_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "MW RADAR"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0
+END
+
+
+LAYER
+  NAME DMX_N0R
+  STATUS ON
+  DATA "/mesonet/data/gis/images/unproj/DMX/n0r_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "DMX Base Reflect"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0
+END
+
+LAYER
+  NAME ARX_N0R
+  STATUS ON
+  DATA "/mesonet/data/gis/images/unproj/ARX/n0r_0.tif" 
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "ARX Base Reflect"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0
+END 
+
+LAYER
+  NAME DVN_N0R
+  STATUS ON
+  DATA "/mesonet/data/gis/images/unproj/DVN/n0r_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "DVN Base Reflect"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0
+END 
+
+LAYER
+  NAME EAX_N0R
+  STATUS ON
+  DATA "/mesonet/data/gis/images/unproj/EAX/n0r_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "EAX Base Reflect"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0
+END 
+
+LAYER
+  NAME OAX_N0R
+  STATUS ON
+  DATA "/mesonet/data/gis/images/unproj/OAX/n0r_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "OAX Base Reflect"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0
+END
+
+LAYER
+  NAME FSD_N0R
+  STATUS ON
+  DATA "/mesonet/data/gis/images/unproj/FSD/n0r_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "FSD Base Reflect"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0
+END
+
+LAYER
+  NAME MPX_N0R
+  STATUS ON
+  DATA "/mesonet/data/gis/images/unproj/MPX/n0r_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "MPX Base Reflect"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0
+END
+
+LAYER
+  NAME ABR_N0R
+  STATUS ON
+  DATA "/mesonet/data/gis/images/unproj/ABR/n0r_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "ABR Base Reflect"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0
+END
+
+LAYER
+  NAME UDX_N0R
+  STATUS ON
+  DATA "/mesonet/data/gis/images/unproj/UDX/n0r_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "UDX Base Reflect"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0
+END
+
+END

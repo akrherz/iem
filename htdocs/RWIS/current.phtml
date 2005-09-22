@@ -1,0 +1,218 @@
+<?php
+ include("../../config/settings.inc.php");
+$network = isset($_GET['network']) ? $_GET['network'] : 'IA_RWIS';
+ $TITLE = "IEM | RWIS | Currents";
+ $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=current.phtml?sortcol=$sortcol&network=$network\">";
+ $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+<!--//BEGIN Script
+function new_window(url) {
+ link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
+} 
+//END Script-->
+</script>
+<script type="text/javascript" src="/js/tableruler.js"></script>
+<script type="text/javascript">
+    window.onload=function(){tableruler();}
+</script>';
+ include("$rootpath/include/header.php"); ?>
+<?php include("$rootpath/include/mlib.php"); ?>
+<?php 
+  include("$rootpath/include/iemaccess.php");
+  include("$rootpath/include/iemaccessob.php");
+
+$iem = new IEMAccess();
+$rwis = $iem->getNetwork($network);
+
+
+?>
+
+<?php
+if (strlen($sortcol) == 0) {
+  $sortcol = "sid";
+} 
+
+$vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
+  "sknt" => "Wind Speed [knots]", "wdir" => "Wind Direction [deg]",
+  "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
+  "ts" => "Observation Time [local]", "feel" => "Feels Like",
+  "min_tmpf" => "Today's Low Temperature",
+  "max_tmpf" => "Today's High Temperature", "sname" => "Station Name",
+  "sid" => "Station ID", "relh" => "Relative Humidity");
+
+?>
+
+<div class="text">
+<b>Nav:</b><a href="/RWIS/">RWIS</a> <b> > </b> Current Conditions
+<?php $current_network = "RWIS"; include("../include/current_bar.inc.php"); ?>
+<form method="GET" action="current.phtml">
+<select name="network">
+  <option value="IA_RWIS" <?php if ($network == "IA_RWIS") echo "SELECTED"; ?>>Iowa
+  <option value="KS_RWIS" <?php if ($network == "KS_RWIS") echo "SELECTED"; ?>>Kansas
+  <option value="MN_RWIS" <?php if ($network == "MN_RWIS") echo "SELECTED"; ?>>Minnesota
+  <option value="WI_RWIS" <?php if ($network == "WI_RWIS") echo "SELECTED"; ?>>Wisconsin
+</select>
+<input type="submit" value="Show State">
+</form><p>
+
+<h3 class="subtitle"><center>Current RWIS Conditions</center></h3><p>
+
+<?php
+echo "Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
+a column to sort it.<br>\n";
+?>
+
+<form method="POST" action="/my/current.php">
+<table style="font-size: 10pt;" class="ruler">
+<thead>
+<tr>
+  <th rowspan="2">ADD:</th>
+  <th rowspan="2"><a href="current.php?network=<?php echo $network; ?>&sortcol=sname">Station:</a></th>
+  <th rowspan="2"><a href="current.php?sortcol=ts">Ob Time</a></th>
+  <th colspan="3" bgcolor="#acdcda">Temps &deg;F</th>
+  <th>&nbsp;</th>
+  <th colspan="3" bgcolor="#EEEEEE">Wind [knots]</th>
+  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=pday">Precip</a></th>
+</tr>
+<tr>
+  
+  <th>
+   <a href="current.php?network=<?php echo $network; ?>&sortcol=tmpf">Air</a>
+   (<a href="current.php?network=<?php echo $network; ?>&sortcol=max_tmpf">Hi</a> /
+   <a href="current.php?network=<?php echo $network; ?>&sortcol=min_tmpf">Lo</a>)
+</th>
+  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=dwpf">DewP</a></th>
+  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=feel">Feels</a></th>
+  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=relh">RH%</a></th>
+  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=sknt">Speed</a></th>
+  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=drct">Direction</a></th>
+  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=peak">Gust</a>
+    @<a href="current.php?network=<?php echo $network; ?>&sortcol=peak_ts">Time</a></th>
+  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=pday">Accum</a> [1]</th>
+</tr></thead>
+<tbody>
+<?php
+function aSortBySecondIndex($multiArray, $secondIndex) {
+        while (list($firstIndex, ) = each($multiArray))
+                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+        arsort($indexMap);
+        while (list($firstIndex, ) = each($indexMap))
+                if (is_numeric($firstIndex))
+                        $sortedArray[] = $multiArray[$firstIndex];
+                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+        return $sortedArray;
+}
+
+  $mydata = Array();
+
+  while (list($key, $iemob) = each($rwis) ){
+    $mydata[$key] = $iemob->db;
+    $mydata[$key]["ts"] = $iemob->ts;
+    $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
+    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
+       f2c($mydata[$key]["dwpf"]) );
+    $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
+       $mydata[$key]["relh"], $mydata[$key]["sped"]);
+    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
+      $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
+      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+    } else {
+      $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
+      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+    }
+
+  }
+
+
+  $finalA = Array();
+  $finalA = aSortBySecondIndex($mydata, $sortcol);
+  $i = 0;
+  $now = time();
+
+  // Loop though all data 
+  while (list ($key, $val) = each ($finalA))  {
+    $parts = $finalA[$key];
+    $i++;
+    $tdiff = $now - $parts["ts"];
+      // Don't show stations over 5 days old
+    if ($tdiff > 86400*5){
+      continue;
+    }
+     // Dont show IAC
+    if ($key == "RIOW"){
+      continue;
+    }
+
+	  echo "<tr";
+	  if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
+            
+          echo ">";
+   echo "<td><input type=\"checkbox\" name=\"st[]\" 
+               value=\"".$key."\"></td>";
+  echo "<td>". $parts["sname"] . "</td><td ";
+  if ($tdiff > 11900){
+    echo 'bgcolor="red"';
+    $format = "%b-%d-%y %I:%M %p";
+  } else if ($tdiff > 6900){
+    echo 'bgcolor="orange"';
+    $format = "%I:%M %p";
+  } else if ($tdiff > 1800){
+    echo 'bgcolor="green"';
+    $format = "%I:%M %p";
+  } else {
+    $format = "%I:%M %p";
+  }
+  echo ">". strftime($format, $parts["ts"]) ."</td>
+  <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
+  round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
+  round($parts["min_tmpf"],0) ."</font>)</td>
+ <td>". round($parts["dwpf"],0) ."</td>
+ <td>". round($parts["feel"],0) ."</td>
+ <td>". $parts["relh"] ."</td>
+ <td>". round($parts["sknt"],0) ;
+  if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
+              echo "G". round($parts["gust"],0);
+  } 
+  echo "</td>
+            <td>". $parts["drct"] ."</td>
+	    <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td>
+            <td>". round($parts["pday"],2) ."</td>
+	    </tr>\n";
+   }
+
+?>
+</tbody>
+<tfoot>
+<tr>
+ <td colspan=3>&nbsp;</td>
+<?php $c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=".$network."&var="; ?>
+ <td><a href="<?php echo $c; ?>tmpf');">Plot</a>
+    (<a href="<?php echo $c; ?>max_tmpf');">Plot</a> /
+     <a href="<?php echo $c; ?>min_tmpf');">Plot</a>)</td>
+ <td><a href="<?php echo $c; ?>dwpf');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>feel');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>relh');">Plot</a></td>
+ <td colspan=2><a href="<?php echo $c; ?>barb');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>max_sknt');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>pday');">Plot</a></td>
+
+</tr></tfoot>
+</table>
+<input type="submit" value="Add to Favorites">
+<input type="reset" value="Reset">
+
+</form>
+
+
+<br><br>
+
+<b>Notes:</b><br>
+<b>1</b> Not all sites have the ability to measure precip (-1).  Values are in
+inches.<br>
+<b>2</b> The Iowa City (I-80) RWIS site does not have atmospheric sensors on it
+, so it is not included on this page.<br>
+<b>3</b> Stations with data over 5 days old is not included on this page.
+
+
+<br><br></div>
+
+<?php include("$rootpath/include/footer.php"); ?>

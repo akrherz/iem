@@ -1,0 +1,116 @@
+
+<?php 
+  include("../../../include/forms.php");
+  $var = $_GET["var"];
+  $year = $_GET["year"];
+  $month = $_GET["month"];
+  $day = $_GET["day"];
+  if (strlen($year) > 0 && strlen($month) > 0 && strlen($day) > 0){
+    $date = $year ."-". $month ."-". $day;
+  }
+  if (strlen($date) == 0){
+    $ts = time() - 86400 - (7 * 3600);
+    $month = strftime("%m", $ts);
+    $year = strftime("%Y", $ts);
+    $day = strftime("%d", $ts);
+  }
+  $ts = mktime(0,0,0, $month, $day, $year);
+  $uri = "dayplot.phtml?year=".$year."&month=".$month."&day=".$day."&";
+
+  $page = "isuag";
+  $TITLE = "IEM | ISUAG Daily Data Plots";
+  include("/mesonet/php/include/header.php"); 
+?>
+<div class="text">
+<table width="700">
+<tr>
+  <td colspan=2><h3 class="heading">ISU AgClimate Daily Data Plots</h3></td></tr>
+
+<tr>
+ <td rowspan=2 valign="TOP">
+<table width="100%">
+<tr>
+  <td><h3 class="subtitle">Dynamic Historical Data:</h3></td></tr>
+<tr>
+  <td>
+    <b>Daily Data Plots</b>
+    <br><a href="gsplot.phtml">Growing Season Plots</a>
+  </td></tr>
+<tr>
+  <td><h3 class="subtitle">Switch Parameter:</h3></td></tr>
+<tr>
+  <td><ul>
+   <li><a href="<?php echo $uri; ?>var=c11&var2=c12">High & Low Temperatures</a></li>
+   <li><a href="<?php echo $uri; ?>var=c30">Average Soil Temperatures</a></li>
+   <li><a href="<?php echo $uri; ?>var=c300">High & Low Soil Temperatures</a></li>
+   <li><a href="<?php echo $uri; ?>var=c70">Potential Evapotranspiration</a></li>
+   <li><a href="<?php echo $uri; ?>var=c40">Average Wind Velocity</a></li>
+   <li><a href="<?php echo $uri; ?>var=c529">Five Second Wind Gust</a></li>
+   <li><a href="<?php echo $uri; ?>var=c90">Precipitation</a></li>
+   <li><a href="<?php echo $uri; ?>var=c80">Total Solar Radiation</a></li>
+   <li><a href="<?php echo $uri; ?>var=dwpf">Max/Min Dew Points</a></li></ul>
+  </td></tr>
+</table>
+ </td>
+ <td>
+  <form method="GET" action="dayplot.phtml">
+  <input type="hidden" name="var" value="<?php echo $var; ?>">
+  <table>
+    <tr><th>Year:</th><th>Month:</th><th>Day:</th><td></td></tr>
+    <tr>
+      <td><?php yearSelect(1998, $year); ?></td>
+      <td><?php monthSelect($month); ?></td>
+      <td><?php daySelect($day); ?></td>
+      <td><input type="submit" value="Make Plot"></td>
+    </tr>
+  </table>
+   </form>
+ </td>
+</tr>
+<tr>
+ <td>
+   <?php include('plot.php'); ?>
+ </td>
+</tr>
+
+<tr>
+<td colspan=2>
+<center><img src="/images/gisready.png"><h3 class="subtitle"> Data Listing</h3>
+</center>
+
+<pre>
+<?php
+ $ndate = strftime("%b %d, %Y", $ts);
+ $tr = "# ".$ndate." ". $varDef[$var . $var2] ."\n";
+ $tr .= "#-----------------------snip------------------\n";
+ if (strlen($var2) > 0 || $var == 'dwpfh'){
+   $tr .= sprintf("%20s,%10s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $var, $var2);
+  } else {
+   $tr .= sprintf("%20s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $var);
+  }
+
+ foreach($data as $key => $value){
+   if ($key == "A133259" || $key == "A130219") continue;
+   if (strlen($var2) > 0 || $var == 'dwpfh'){
+     $tr .= sprintf("%20s,%10s,%10s,%10s,%10s\n", $ISUAGcities[$key]['city'],
+  $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], $data[$key]['var'],
+  $data[$key]['var2'] );
+   } else {
+     $tr .= sprintf("%20s,%10s,%10s,%10s\n", $ISUAGcities[$key]['city'],
+  $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], $data[$key]['var'] );
+   }
+
+ }
+ echo $tr;
+?>
+</pre>
+</td></tr>
+</table>
+<p>You should be able to 'copy & paste' this raw data listing into a simple
+text editor and save the data file on your machine.  Most GIS systems can 
+then import this dataset as a layer.  You may have to omit the commented lines
+(#) if your GIS has trouble importing the data.
+</div>
+
+
+<?php include("/mesonet/php/include/footer.php"); ?>

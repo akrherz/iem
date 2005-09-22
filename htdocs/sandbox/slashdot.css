@@ -1,0 +1,19 @@
+a {
+	text-decoration: none;
+	color: #0000ff;
+}
+a:hover {
+	color: #00000c;
+}
+#iem-header {
+	background-color: #0a0;
+}
+#iem-menu{
+	background-color: #0a0;
+}
+#iem-content {
+	background-color: #0b0;
+}
+#iem-footer {
+	background-color: #0c0;
+}

@@ -1,0 +1,75 @@
+<?php $TITLE = "IEM | 1 Minute Time Series";
+include("/mesonet/php/include/header.php"); ?>
+<?php include("../../include/forms.php"); ?>
+
+<div class="text">
+<a href="/other/">Other Networks</a> &nbsp;<b> > </b> &nbsp; Cluster Room
+
+<?php
+  $station = "mesonorth";
+?>
+
+<p>Data points for this location are 10 minute averages 
+of samples taken every 10 seconds.<br>Note that the archive begins 
+24 Jul 2003.</p>
+
+<table>
+<tr class="even"><td>
+
+
+  <form method="GET" action="ot_10min.phtml">
+  <?php
+
+    if (strlen($month) == 0 ){
+	$month = date("m");
+    }
+    if (strlen($day) == 0 ){
+        $day = date("d");
+    }
+    if (strlen($year) == 0 ){
+        $year = date("Y");
+    }
+
+  ?>
+  <?php yearSelect2(2003, $year, "year"); ?>
+
+  <select name="month">
+    <option value="01" <?php if ($month == "01") echo "SELECTED"; ?> >January
+    <option value="02" <?php if ($month == "02") echo "SELECTED"; ?> >February
+    <option value="03" <?php if ($month == "03") echo "SELECTED"; ?> >March
+    <option value="04" <?php if ($month == "04") echo "SELECTED"; ?> >April
+    <option value="05" <?php if ($month == "05") echo "SELECTED"; ?> >May
+    <option value="06" <?php if ($month == "06") echo "SELECTED"; ?> >June
+    <option value="07" <?php if ($month == "07") echo "SELECTED"; ?> >July
+    <option value="08" <?php if ($month == "08") echo "SELECTED"; ?> >August
+    <option value="09" <?php if ($month == "09") echo "SELECTED"; ?> >September
+    <option value="10" <?php if ($month == "10") echo "SELECTED"; ?> >October
+    <option value="11" <?php if ($month == "11") echo "SELECTED"; ?> >November
+    <option value="12" <?php if ($month == "12") echo "SELECTED"; ?> >December
+  </select>
+
+  <select name="day">
+<?php
+  for ($k=1;$k<32;$k++){
+   echo "<option value=\"".$k."\" ";
+   if ($k == (int)$day){
+     echo "SELECTED";
+   }
+   echo ">".$k."\n";
+  }
+?>
+  </select>
+
+  <input type="submit" value="Make Plot"></form>
+
+</td></tr><tr><td>
+
+<BR>
+<img src="http://mesonet.agron.iastate.edu/plotting/mesonorth/1min_ot.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
+<BR>
+<img src="http://mesonet.agron.iastate.edu/plotting/mesonorth/battery.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
+<BR>
+</td></tr></table></div>
+
+<?php include("/mesonet/php/include/footer.php"); ?>
+

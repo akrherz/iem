@@ -1,0 +1,55 @@
+<?php
+ $station = isset($_GET["station"]) ? $_GET["station"] : "2031";
+ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 3*86400);
+ $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 3*86400);
+ $day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 3*86400);
+ $plot = isset($_GET["plot"]) ? $_GET["plot"] : "0";
+
+$u = Array("radn5temps.php", "radn5temps2.php");
+$myu = $u[intval($plot)];
+
+ include("../../include/forms.php");
+ $ploturl = "$myu?station=$station&year=$year&month=$month&day=$day";
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+	<TITLE>IEM | SCAN Plotting</TITLE>
+	<META NAME="AUTHOR" CONTENT="Daryl Herzmann">
+	<link rel="stylesheet" type="text/css" href="/css/mesonet.css">
+</HEAD>
+
+<?php include("../../include/header2.php"); ?>
+
+<form method="GET" action="index.phtml" name="control">
+<table>
+<tr>
+  <th>SCAN Site:</th>
+  <th>Plot Type:</th>
+  <th>Year:</th>
+  <th>Month:</th>
+  <th>Day:</th></tr>
+
+<tr>
+  <td>
+<select name="station">
+ <option value="2031" <?php if ($station == "2031") echo "SELECTED"; ?>>Ames, IA
+ <option value="2068" <?php if ($station == "2068") echo "SELECTED"; ?>>Shagbark Hills, IA
+</select></td>
+  <td>
+<select name="plot">
+ <option value="0" <?php if ($plot == 0) echo "SELECTED"; ?>>Soil Temps + Solar Rad
+ <option value="1" <?php if ($plot == 1) echo "SELECTED"; ?>>Soil/Air Temps + Solar Rad
+ <option value="2" <?php if ($plot == 2) echo "SELECTED"; ?>>Soil Moisture + Solar Rad
+</select></td>
+  <td><?php echo yearSelect(2004, $year, "year"); ?></td>
+  <td><?php echo monthSelect($month, "month"); ?></td>
+  <td><?php echo daySelect($day, "day"); ?></td>
+  <td><input type="submit" value="Make Plot!"></td>
+</tr>
+</table></form>
+
+<img src="<?php echo $ploturl; ?>">
+
+
+<?php include("../../include/footer2.php"); ?>

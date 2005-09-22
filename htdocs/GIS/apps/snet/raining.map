@@ -1,0 +1,320 @@
+#
+# Start of map file
+#
+NAME raining
+STATUS ON
+SIZE 500 400
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
+EXTENT 200000 4400000 710000 4900000
+UNITS METERS
+SHAPEPATH "/mesonet/data/gis/shape/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+IMAGECOLOR 220 220 220
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+  "init=epsg:26915"
+#  "proj=lcc"
+#   "lat_1=20"
+#   "lat_2=60"
+#   "lat_0=40"
+#   "lon_0=-96"
+#   "x_0=0"
+#   "y_0=0"  
+END
+
+#
+# Start of web interface definition
+#
+WEB
+  HEADER q_header.html
+  TEMPLATE fancy.html
+  FOOTER q_footer.html
+  MINSCALE 90000
+  MAXSCALE 40000000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/fancy.log"
+END
+
+
+
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+#LAYER
+#  NAME background
+#  DATA images/back1.tif
+#  TYPE RASTER
+#  STATUS ON
+#  PROJECTION
+#   "proj=latlong"
+#  END
+#END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME sites
+  # Connect to a remote spatial database
+  CONNECTION "user=nobody dbname=iem port=9999 host=10.10.10.30"
+  # Get the lines from the 'geom' column of the 'roads' table
+  DATA "geom from (select geom, station, 
+    oid from current WHERE (valid > CURRENT_TIMESTAMP - '2 hours'::interval)
+    and network = 'KCCI') as foo using unique oid using srid=4326"
+  STATUS DEFAULT
+  TYPE POINT
+  LABELCACHE OFF
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+   #TEMPLATE http://kcci.mesonet.agron.iastate.edu/site.phtml?station=[station]
+   SYMBOL 'circle'
+   SIZE 10
+   COLOR 0 0 0
+  END
+END
+
+
+LAYER
+  NAME states
+  STATUS ON
+  TYPE LINE
+  DATA "4326/us/states.shp"
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    STYLE 
+      COLOR  0 0 0
+      SYMBOL 'circle'
+      SIZE 3
+    END
+  END
+END
+
+LAYER
+  NAME counties
+  STATUS ON
+  TYPE LINE
+  DATA "4326/us/uscounties.shp"
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    STYLE 
+      COLOR  0 0 0
+      SYMBOL 'circle'
+      SIZE 1
+    END
+  END
+END
+
+LAYER
+  NAME DMX
+  STATUS ON
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/unproj/DMX/n0r_0.tif
+  OFFSITE 0 0 0
+  PROJECTION
+   "init=epsg:4326"
+  END
+END
+
+
+LAYER
+  NAME EAX
+  STATUS ON
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/unproj/EAX/n0r_0.tif
+  OFFSITE  0 0 0
+  PROJECTION
+   "init=epsg:4326"
+  END
+END
+
+LAYER
+  NAME KCCI
+  STATUS ON
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/26915/KCCI/KCCI_N0R_0.tif
+  #DATA /mesonet/www/html/GIS/data/images/kcci2.tif
+  OFFSITE  0 0 0
+  TRANSPARENCY 80
+  PROJECTION
+   "init=epsg:26915"
+  END
+END
+
+
+LAYER
+  NAME FSD
+  STATUS ON
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/unproj/FSD/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+LAYER
+  NAME ABR
+  STATUS ON
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/unproj/ABR/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+LAYER
+  NAME UDX
+  STATUS ON
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/unproj/UDX/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+LAYER
+  NAME MPX
+  STATUS ON
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/unproj/MPX/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+
+LAYER
+  NAME ARX
+  STATUS ON
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/unproj/ARX/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+LAYER
+  NAME DVN
+  STATUS ON
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/unproj/DVN/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+LAYER
+  NAME OAX
+  STATUS ON
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/unproj/OAX/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+
+LAYER
+  TYPE POINT
+  NAME site
+  STATUS ON
+  CLASS
+   SYMBOL 'x'
+   COLOR 0 0 0
+   SIZE 8
+  END
+  CLASS
+   SYMBOL 'circle'
+   COLOR 255 255 255
+   SIZE 8
+  END
+  CLASS
+   SYMBOL 'triangle'
+   COLOR 250 250 0
+   SIZE 8
+ END
+END
+
+LAYER
+  TYPE POINT
+  NAME dot
+  STATUS ON
+  CLASS 
+   SYMBOL 1
+   COLOR 0 0 0
+   SIZE 8
+    LABEL
+      COLOR  255 255 255
+      OUTLINECOLOR 0 0 0 
+      SHADOWCOLOR 0 0 0
+      SHADOWSIZE 1 2
+      SIZE 8
+      MINSIZE 4
+      MAXSIZE 18
+      TYPE TRUETYPE
+      FONT arialblk
+      ANTIALIAS false
+      BUFFER 1
+      FORCE true
+      POSITION AUTO
+      PARTIALS false
+    END
+  END
+  CLASS
+    COLOR -1 -1 -1
+    LABEL
+      COLOR  255 255 255
+      OUTLINECOLOR 0 0 0
+      SHADOWCOLOR 0 0 0
+      SHADOWSIZE 1 2
+      SIZE 8
+      MINSIZE 4
+      MAXSIZE 18
+      TYPE TRUETYPE
+      FONT arialblk
+      ANTIALIAS true
+      BUFFER 1
+      FORCE true
+      POSITION LC
+      PARTIALS false
+      OFFSET 0 10
+    END
+  END
+END
+
+LAYER
+  NAME credits
+  TYPE ANNOTATION
+  STATUS default
+  TRANSFORM FALSE
+  LABELCACHE ON
+  CLASS
+    NAME 'credits'
+    LABEL
+      COLOR 0 0 0
+      BACKGROUNDCOLOR 250 250 250
+#      SHADOWSIZE 1 1
+#      SHADOWCOLOR 0 0 0
+#      BACKGROUNDSHADOWCOLOR 0 0 0
+#      BACKGROUNDSHADOWSIZE 1 1
+      TYPE TRUETYPE
+      SIZE 16
+      FONT 'kcci'
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+      BUFFER 2
+    END
+  END
+END
+
+
+END

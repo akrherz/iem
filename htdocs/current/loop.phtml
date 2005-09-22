@@ -1,0 +1,88 @@
+<?php
+ /* Script to generate a loop of whatever */
+ $prod = isset($_GET['prod']) ? $_GET['prod'] : 'mesonet';
+ $java = isset($_GET['java']) ? $_GET['java'] : 'applet';
+ $frames = isset($_GET['frames']) ? $_GET['frames'] : 10;
+
+$products = Array(
+ "mesonet" => Array("aformat" => 'mesonet_%H00.gif',
+		"tint" => 3600, "width" => 900, "height" => 700, "minute" => 8,
+		"name" => "Iowa Mesonet Plot"),
+ "mwmesonet" => Array("aformat" => 'MWmesonet_%H00.gif',
+		"tint" => 3600, "width" => 900, "height" => 700, "minute" => 8,
+		"name" => "Midwest Mesonet Plot"),
+ "nexradprecip" => Array("aformat" => 'nexradPrecip1h_%H00.gif',
+		"tint" => 3600, "width" => 650, "height" => 500, "minute" => 8,
+		"name" => "NEXRAD 1 Hour Precip")
+);
+
+$baseurl = 'http://mesonet.agron.iastate.edu/archive/data/';
+$files = "";
+$hrefs = "";
+$loopendts = time();
+$m = date("i");
+if ($m < $products[$prod]["minute"])  $loopendts = time() - 3600;
+
+$q = $frames - 1;
+for($i=$q; $i >= 0; $i--)
+{
+	$ts = $loopendts - ($products[$prod]["tint"] * $i);
+	$gts = strtotime( gmdate("Y-m-d H:i", $ts) );
+	$u = $baseurl . strftime("%Y/%m/%d/". $products[$prod]["aformat"], $gts);
+	$hrefs .= "<br><img src=\"$u\">";
+	$files .= $u .","; 
+}
+
+/* ========================================================= */
+?>
+<?php $TITLE = "IEM Product Looper"; include("/mesonet/php/include/header.php"); ?>
+
+<h3>IEM Product Looper</h3>
+
+<div style="padding: 10px; border: 2px solid #000;">
+
+<form method="GET" action="loop.phtml">
+<table style="padding: 2px; border:0px; margin: 2px;">
+<tr>
+ <th>Loop Mode:</th>
+ <th>Select Product:</th>
+ <th>Frames:</th>
+ <td rowspan="2"><input type="submit" value="Generate Loop"></td></tr>
+
+<tr>
+ <td><select name="java">
+ <option value="applet" <?php if ($java == "applet") echo "SELECTED"; ?> >Java Applet
+ <option value="none" <?php if ($java == "none") echo "SELECTED"; ?> >List Images
+</select></td>
+ <td><select name="prod">
+<?php
+while( list($k, $v) = each($products) )
+{
+	echo "<option value=\"$k\" ";
+	if ($prod == $k) echo " SELECTED ";
+	echo ">". $products[$k]["name"] ."\n";
+}
+?>
+</select></td>
+<td><input type="text" name="frames" value="<?php echo $frames; ?>" size="3"></tr></table>
+
+
+</form>
+
+<?php if ($java == "applet") { ?>
+<applet codebase="http://mesonet.agron.iastate.edu/current/class/"
+	code="AniS.class" width="<?php echo $products[$prod]["width"]; ?>" height="<?php echo ($products[$prod]["height"] + 100); ?>" 
+	alt="You must enable Java in your browser to view the loop">
+	<param name="controls" value="startstop, looprock, step, speed, toggle,zoom">
+	<param name="rate" value="80">
+	<param name="no_enh" value="true">
+	<param name="pause_percent" value="800">
+	<param name="filenames" value="<?php echo $files; ?>">
+</applet>
+<?php } else { 
+	echo $hrefs;
+} ?>
+
+</div>
+
+<?php include("/mesonet/php/include/footer.php"); ?>

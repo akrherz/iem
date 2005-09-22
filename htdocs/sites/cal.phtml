@@ -1,0 +1,70 @@
+<?php 
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+include("setup.php");
+
+        $current="cal";
+   include("$rootpath/include/header.php");
+   include("$rootpath/include/nav_site.php");
+?>
+
+
+<table border="1" cellpadding="2" cellspacing="0">
+<thead><tr>
+ <th>ID#:</th>
+ <th>Station ID:</th>
+ <th>Valid:</th>
+ <th>Parameter:</th>
+ <th>Final Value:</th>
+ <th>Adjustment:</th>
+</tr></thead>
+
+<?php
+$network = $row["network"];
+$portfolio = "";
+if ($network == "AWOS") $portfolio = "iaawos";
+if ($network == "KCCI") $portfolio = "kccisnet";
+if ($network == "KELO") $portfolio = "kelosnet";
+if ($network == "KIMT") $portfolio = "kimtsnet";
+if ($network == "IA_RWIS") $portfolio = "iarwis";
+
+$varDict = Array("tmpf" => "Air Temperature [F]",
+  "dwpf" => "Dew Point [F]");
+
+if ($portfolio != "")
+{
+  $conn = iemdb("portfolio");
+  $sql = "SELECT * from iem_calibration WHERE portfolio = '$portfolio' and station = '$station' ORDER by valid DESC";
+  $rs = pg_exec($conn, $sql);
+
+ if (pg_numrows($rs) == 0){
+    echo "<tr><th colspan=6>No events found in database.</th></tr>";
+ }
+
+ $rowDict = Array();
+ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+ {
+    $param = $row["parameter"];
+    $color = "#00f";
+    $ts = strtotime(substr($row["valid"], 0, 16));
+    $ds = date("d M Y, h:i A", $ts);
+    if (floatval($row["adjustment"]) > 0){ $color = "#f00"; }
+    $rowDict[$param] .= sprintf("<tr style=\"color: $color;\"><th>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", $row["id"], $row["station"], $ds, $row["parameter"], $row["final"], $row["adjustment"]);
+    if (strlen($row["comments"]) > 0){ $rowDict[$param] .= "<tr><td></td><td colspan=5>Comments: ". $row["comments"] ."</td></tr>"; }
+ }
+
+
+ while (list($param,$tbl) = each($rowDict)){
+    echo "<tr><th colspan=\"6\" align=\"left\" style=\"background: #eee; border-bottom: 1px solid #000\">". $varDict[$param] ."</th></tr>";
+    echo $tbl;
+ }
+
+} else {
+  echo "<tr><td colspan=6>Sorry no calibration information is collected for $network network</td></tr>";
+}
+
+?>
+
+</table>
+
+<?php include("$rootpath/include/footer.php"); ?>

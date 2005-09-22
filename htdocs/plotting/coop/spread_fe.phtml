@@ -1,0 +1,41 @@
+<?php
+$month = isset($_GET['month']) ? $_GET['month'] : date("m");
+$day = isset($_GET['day']) ? $_GET['day'] : date("d");
+$ts = strtotime("2003-$month-$day");
+$pts = strftime("2003-%m-%d", $ts);
+?>
+
+<?php
+ $page = "plotting";
+ $TITLE = "IEM | Daily Temperature Spreads";
+include("/mesonet/php/include/header.php"); 
+ include("../../include/forms.php"); ?>
+
+<p><h3 class="heading">Daily Temperature Spread</h3><p>
+
+<p>Related: <a href="gspread.phtml">View by Season</a>
+ <b>|</b> <a href="mspread.phtml">View by Month</a>
+
+<div class="text">
+<h3 class="subtitle">Information</h3><p>
+Select a date from the following menu and a chart is generated with the
+frequency of high and low temperature occurances for sites in the Iowa NWS
+COOP network. The dashed lines represent the number of occurances for a particular temperature for a certain day.  The solid curve line is the cumulative distribution with vertical lines placed at 5%, 50%, and 95%.
+
+<form name="ddd" action="spread_fe.phtml">
+<table border=1 cellspacing=0 cellpadding=3>
+<tr>
+<th>Select Month:</th>
+<th><?php echo monthSelect($month); ?></th>
+<th>Select Day:</th>
+<th><?php echo daySelect($day); ?></th>
+<td><input type="submit" value="Gen Chart"></form></tr>
+
+<tr><td colspan=5>
+<img src="spread.php?ts=<?php echo $pts; ?>">
+</td></tr>
+</table>
+
+</div>
+
+<?php include("/mesonet/php/include/footer.php"); ?>

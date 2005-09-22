@@ -1,0 +1,58 @@
+<?php
+ include("../../../config/settings.inc.php");
+ $TITLE = "IEM | Projects";
+ include("$rootpath/include/header.php"); 
+?>
+
+<h3 class="heading">iembot</h3>
+
+<p><i>iembot</i> is a Jabber chat bot that relays National Weather Service issued
+warnings to Jabber chat rooms hosted at the <a href="http://www.iemchat.com/">IEMChat Project.</a>  <i>iembot</i> was written to aid the dissemination and use of NWS issued warnings by their media partners.
+
+<h3 class="subtitle">How does <i>iembot</i> work?</h3>
+
+<p><i>iembot</i> consists of two programs that run on the Iowa Mesonet server.  The first is a parser that ingests text products issued by the NWS.  The parser picks out the important information regarding the product and sends it via a Jabber message to the bot logged in on the chat server.  The bot then routes the incoming message to a WFO chatroom from which the product was issued.</p>
+
+<h3 class="subtitle">Why was <i>iembot</i> written?</h3>
+<ol>
+ <li>During chats, the NWS should not need to relay details of already issued products to the chatroom.  Replication should always be avoided.</li>
+ <li>During onair coverage, the media often are not able to quickly read severe text products that come off the printer.  Instead, they can quickly view the chatroom and clearly see what has just been issued.</li>
+ <li>The NWS can get instant verification that their product was disseminated over NOAAport and processed by a computerized ingestor.</li>
+ <li>With the advent of VTEC, the NWS can issue complex SVS statements.  The bot's report of these products can help clear confusion with the media partners.</li>
+ <li>With the products and timestamps in the chatroom logs, it is an outstanding log of how the severe weather event played out for historical review.</li>
+ <li>It is a proof of concept for how NWS products can be disseminated securely and synchronously to clients in an Open Source framework.</li>
+</ol>
+
+<h3 class="subtitle">What can / can't <i>iembot</i> do?</h3>
+
+<p><b><i>iembot</i> can:</b>
+<ul>
+ <li>Alert chatroom users when a NWS office issues a Severe Thunderstorm or Tornado warning. The alert text gives the counties involved and duration of the warning.</li>
+ <li>Update chatroom users when a NWS office either continues, expires, or cancels a Severe Thunderstorm or Tornado warning.  In the case of an update which does multiple actions for different counties (segmented SVS), <i>iembot</i> will send multiple messages broken down by county.</li>
+</ul>
+
+<p><b><i>iembot</i> can't:</b>
+<ul>
+ <li>Interact with users.  (The bot ignores user messages.)</li>
+ <li>Process flash flood warnings.  This will be implemented when VTEC support is added to that warning by the NWS.</li>
+</ul>
+
+<h3 class="subtitle">What does <i>iembot</i> look like in the chatroom?</h3>
+
+<p>Here is a screenshot from the "botstalk" chatroom where <i>iembot</i> dumps all processed messages.<br />
+
+<img src="iembot.png" style="margin: 10px; ">
+
+<h3 class="subtitle"><i>iembot</i> TODO list</h3>
+
+<ul>
+ <li>Add support to answer user requested information</li>
+ <li>Release source code on this website</li>
+ <li>Add support to allow private chats</li>
+ <li>Customize the display of timestamps on a per chatroom basis, currently everything is in Central Standard/Daylight Time.</li>
+</ul>
+
+
+<?php 
+ include("$rootpath/include/footer.php"); 
+?>

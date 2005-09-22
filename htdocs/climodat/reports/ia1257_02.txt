@@ -1,0 +1,19 @@
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: 30 Aug 2005 
+# Climate Record: 01 Jan 1951 -> 01 Aug 2005
+# Site Information: [IA1257] CASCADE
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+ TWELVE SIGNIFICANT RAINFALL EVENTS  
+ MONTH  DAY  YEAR   AMOUNT
+   8     22  2002     7.55
+   6      4  2002     5.05
+   7      8  1951     4.30
+   9     14  1967     4.18
+   6     17  1973     4.03
+   7     19  1963     3.85
+   7     18  1993     3.73
+   6     20  1964     3.57
+   9     14  2003     3.54
+  11      4  2003     3.30
+   9     13  1961     3.25
+   5     13  1978     3.10

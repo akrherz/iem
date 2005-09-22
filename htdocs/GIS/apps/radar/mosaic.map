@@ -1,0 +1,277 @@
+#
+# Start of map file
+#
+NAME mosaic
+STATUS ON
+SIZE 450 350
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
+EXTENT -2223813 -1746393 2207341 1701506
+#EXTENT -2131274.95 2529023.10 2627568.78 6241958.85
+UNITS METERS
+SHAPEPATH "/mesonet/data/gis/shape/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+IMAGECOLOR 0 0 0
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+
+#
+PROJECTION
+  "proj=lcc"
+  "lat_1=20"
+  "lat_2=60"
+  "lat_0=40"
+  "lon_0=-96"
+  "x_0=0"
+  "y_0=0"  
+# "init=epsg:26915"
+END
+
+#
+WEB
+  HEADER q_header.html
+  TEMPLATE warning0.html
+  FOOTER q_footer.html
+  MINSCALE 90000
+  MAXSCALE 40000000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/warning0.log"
+  METADATA
+   "wms_title" "IEM WMS Service"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/warning0/warning0.map&amp;"
+   "wms_srs" "EPSG:4269"
+   "wms_abstract" "Ba Ba Ba"
+#   "wms_fees" "None"
+   "wms_keywords" "Ba"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+  END
+
+END
+
+#
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+LAYER
+  NAME smooth_radar
+  DATA /mesonet/data/gis/images/unproj/MWCOMP/n0r_0.tif
+  TYPE RASTER
+  STATUS ON
+  METADATA
+    "wms_title" "Composite NEXRAD"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  PROJECTION
+   "init=epsg:4326"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME inex
+  STATUS ON
+  TYPE POLYGON
+  DATA "4326/iem/nex_rings.shp"
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    OUTLINECOLOR 255 0 0
+  END
+END
+
+LAYER
+  NAME icwa
+  STATUS ON
+  TYPE POLYGON
+  DATA "4326/iem/cwas.shp"
+  PROJECTION
+   "proj=latlong"
+  END
+  LABELITEM "CWA"
+  CLASS
+    OUTLINECOLOR 0 250 0
+    LABEL
+        TYPE BITMAP
+        SIZE MEDIUM
+	FORCE TRUE
+        COLOR 250 250 250
+    END
+  END
+END
+
+LAYER
+  NAME states
+  STATUS DEFAULT
+  TYPE LINE
+  DATA "4326/us/states.shp"
+  METADATA
+    "wms_title" "US States"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    COLOR 250 250 250
+    SIZE 2
+    SYMBOL 'circle'
+  END
+END
+
+LAYER
+  NAME iowa_counties
+  STATUS ON
+  TYPE POLYGON
+  DATA shape/iem/counties.shp
+  METADATA
+    "wms_title" "Iowa Counties"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    OUTLINECOLOR 0 255 0
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings0_c
+  CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
+  DATA "geom from warnings"
+  STATUS ON
+  TYPE POLYGON
+  METADATA
+    "wms_title" "Current County Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    COLOR -1 -1 -1
+    BACKGROUNDCOLOR 255 0 0
+    OUTLINECOLOR 255 0 0
+#    SYMBOL 1
+#    SIZE 10
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings1d_c
+  CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
+  DATA "geom from warnings"
+  STATUS ON
+  TYPE POLYGON
+  METADATA
+    "wms_title" "Todays County Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'C'"
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    COLOR 255 0 0
+    BACKGROUNDCOLOR 255 0 0
+    OUTLINECOLOR 255 0 0
+#    SYMBOL 1
+#    SIZE 10
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings0_p
+  CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
+  DATA "geom from warnings"
+  STATUS ON
+  TYPE POLYGON
+  METADATA
+    "wms_title" "Current Polygon Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    COLOR -1 -1 -1
+    BACKGROUNDCOLOR -1 -1 -1
+    OUTLINECOLOR 0 0 0
+#    SYMBOL 1
+#    SIZE 10
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings1d_p
+  CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
+  DATA "geom from warnings"
+  STATUS ON
+  TYPE POLYGON
+  METADATA
+    "wms_title" "Todays Polygon Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'P'"
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    COLOR -1 -1 -1
+    BACKGROUNDCOLOR -1 -1 -1
+    OUTLINECOLOR 0 0 0
+#    SYMBOL 1
+#    SIZE 10
+  END
+END
+
+LAYER
+  NAME credits
+  TYPE ANNOTATION
+  STATUS default
+  TRANSFORM FALSE
+  LABELCACHE OFF
+  CLASS
+    NAME 'credits'
+    LABEL
+      COLOR 250 250 250
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+    END
+  END
+END
+
+
+END

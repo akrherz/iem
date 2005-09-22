@@ -1,0 +1,75 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/forms.php");
+
+$TITLE = "IEM | NSTL Flux Sites";
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/header.php"); ?>
+
+<TR><TD>
+
+<h3 class="heading">USDA-ARS-National Soil Tilth Lab Flux Sites</h3>
+
+<p>The IEM is pleased to host the data from a set of observing platforms operated by the USDA-ARS-National Soil Tilth Lab.  These sites measure
+<ul>
+ <li>Net Radiation,</li>
+ <li>Soil Heat Flux,</li>
+ <li>Latent Heat Flux,</li>
+ <li>Sensible Heat Flux,</li>
+ <li>and C02 Flux</li>
+</ul>
+ at 30 minute intervals.  Data from these sites is updated daily with the most recent complete record being 2 days ago.
+<br><br>
+<a href="plots.phtml">Generate comparison plots</a>
+
+<br clear="left" />
+<p><div class="iem-form">
+<thead>
+<?php
+
+$lats = Array("nstl11" => 41.97482, "nstl10" => 41.9749, "nspr" => 41.55865);
+$lons = Array("nstl11" => -94.69367, "nstl10" => -93.6914, "nspr" =>-93.29286);
+
+?>
+
+<table width="100%">
+<thead><tr><th colspan="6" align="left">Site Information:</th></tr></thead>
+<tr><th align="left">ID</th><th align="left">Status</th><th align="left">Lat</th><th align="left">Lon</th><th
+align="left">First Observation</th><th align="left">Last Observation</th></tr></thead>
+<tbody>
+<?php
+$pg_conn = iemdb("other");
+$sql = "SELECT * from flux_meta ORDER by sts ASC";
+$rs = pg_exec($pg_conn, $sql);
+
+for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+{
+  echo sprintf("<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", $row["station"], $row["surface"], $lats[$row["station"]], $lons[$row["station"]], substr($row["sts"],0,10), substr($row["ets"],0,10) );
+}
+?>
+</tbody>
+</table><p>
+
+<table width="100%"><thead>
+<tr><th colspan="2" align="left"><b>Download Data:</b></th></tr></thead>
+<tbody><tr><td align="center">
+<h3 class="subtitle">Request Date:</h3><br />
+<form method="GET" action="dl.phtml" name="single">
+<table><tr><td><b>Year:</b></td><td><?php echo yearSelect(2002, $year, "year"); ?></td></tr>
+<tr><td><b>Month:</b></td><td><?php echo monthSelect($month, "month"); ?></td></tr>
+<tr><td><b>Day:</b></td><td><?php echo daySelect($day, "day"); ?></td></tr></table>
+<input type="submit" value="Download Date">
+</form>
+</td><td style="border-left: 1px #006666 solid;" valign="top" align="center">
+<h3 class="subtitle">Request Everything!</h3><br />
+<form method="GET" action="dl.phtml" name="all">
+<br /><br /><br /><br /><input type="hidden" name="all" value="all">
+<b>Year:</b><?php echo yearSelect(2002, $year, "year"); ?>
+<input type="submit" value="Download Everything!">
+</form>
+</td></tr></tbody></table></div>
+
+<br>
+
+
+<?php include("$rootpath/include/footer.php"); ?>

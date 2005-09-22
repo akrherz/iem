@@ -1,0 +1,259 @@
+<html>
+<head>
+  <title>Iowa Erosion Project | Erosion Estimates</title>
+  <link rel="stylesheet" type="text/css" href="/css/mesonet.css">
+</head>
+<?php include("/mesonet/www/html/wepp/header.phtml"); ?>
+<?php
+include("../../../include/forms.php");
+$year = $_GET['year'];
+$month = $_GET['month'];
+$day = $_GET['day'];
+$option = $_GET['option'];
+$var = $_GET['var'];
+$metric = $_GET['metric'];
+if (strlen($var) == 0) $var = 1;
+if (strlen($metric) == 0) $metric = 0;
+$var = intval($var) + intval($metric);
+if (strlen($year) == 0 or strlen($month) == 0 or strlen($day) == 0) {
+  $day = 4;
+  $month = 5;
+  $year = 2003;
+}
+$ts = mktime(0, 0, 0, $month, $day, $year);
+
+$previousDay = $ts - 86400;
+$nextDay = $ts + 86400;
+$previousURL = strftime('test.phtml?year=%Y&month=%m&day=%d&var='. $var, $previousDay);
+$nextURL = strftime('test.phtml?year=%Y&month=%m&day=%d&var='. $var , $nextDay);
+
+
+$today = time();
+$lday = strftime("%d", $today - 2*86400);
+$nicedate = strftime("%d %b %Y", $ts);
+
+function mktitle($map, $imgObj, $titlet) {
+  $layer = $map->getLayerByName("credits");
+
+  // point feature with text for location
+  $point = ms_newpointobj();
+  $point->setXY(30, 30);
+
+  $point->draw($map, $layer, $imgObj, "credits",
+    $titlet);
+}
+
+function mkLegendTitle($map, $imgObj, $titlet) {
+  $layer = $map->getLayerByName("credits");
+
+  // point feature with text for location
+  $point = ms_newpointobj();
+  $point->setXY(10, 430);
+
+  $point->draw($map, $layer, $imgObj, "credits",
+    $titlet);
+}
+
+
+function mkclrbar($map, $imgObj, $c, $i) {
+  $layer = $map->getLayerByName("singlebox");
+  
+  $x = 10;
+  $width = 40;
+  for ($k=0;$k<9;$k++){
+    $x = $x + $width;
+    $p = ms_newRectObj();
+    $p->setextent($x, 460, $x + $width, 450);
+    $c0 = $layer->getClass(0);
+    $c0->set("color", $c[$k]);
+    $p->draw($map, $layer, $imgObj, 0, $i[$k]);
+    $p->free();
+  }
+}
+
+
+dl("php_mapscript.so");
+$map = ms_newMapObj("wepp.map");
+$map->setextent(260000, 4550000, 360000, 4650000);
+
+$c = Array();
+$c[0] = $map->addColor(0,   160, 246); // 
+$c[1] = $map->addColor(0,     0, 246); // 
+$c[2] = $map->addColor(0,   255,   0); // 
+$c[3] = $map->addColor(0,   200,   0); // 
+$c[4] = $map->addColor(255, 255,   0); // 
+$c[5] = $map->addColor(231, 192,   0); // 
+$c[6] = $map->addColor(255, 144,   0); // 
+$c[7] = $map->addColor(255,   0, 255); // 
+$c[8] = $map->addColor(153,  85, 201); // 
+
+/** These are in pairs.  The second is metric */ 
+$plotables = Array(
+  1 => Array("dbkey" => "r.avg_runoff / 25.4", 
+             "title" => "Estimated Average Runoff",
+             "legendRange" => Array(0.1, 0.2, 0.5, 1, 1.5, 2, 3, 4), 
+             "legendText" => "inches" ), 
+  2 => Array("dbkey" => "r.avg_runoff", 
+             "title" => "Estimated Average Runoff",
+             "legendRange" => Array(2.5, 5, 10, 20, 35, 50, 75, 100), 
+             "legendText" => "millimeters" ), 
+
+  3 => Array("dbkey" => "r.max_runoff / 25.4", 
+             "title" => "Estimated Maximum Runoff",
+             "legendRange" => Array(0.1, 0.2, 0.5, 1, 1.5, 2, 3, 4),
+             "legendText" => "inches" ),
+  4 => Array("dbkey" => "r.max_runoff", 
+             "title" => "Estimated Maximum Runoff",
+             "legendRange" => Array(2.5, 5, 10, 20, 35, 50, 75, 100),
+             "legendText" => "millimeters" ),
+
+  5 => Array("dbkey" => "r.avg_loss * 4.463", 
+             "title" => "Estimated Average Loss",
+             "legendRange" => Array(1, 2, 4, 8, 16, 32, 64, 128), 
+             "legendText" => "tons per acre" ), 
+  6 => Array("dbkey" => "r.avg_loss * 10.0", 
+             "title" => "Estimated Average Soil Loss",
+             "legendRange" => Array(1, 2, 4, 8, 16, 32, 64, 128), 
+             "legendText" => "tons per hectre" ), 
+
+  7 => Array("dbkey" => "r.max_loss * 4.463", 
+             "title" => "Estimated Maximum Soil Loss",
+             "legendRange" => Array(1, 2, 4, 8, 16, 32, 64, 128),
+             "legendText" => "tons per acre" ),
+  8 => Array("dbkey" => "r.max_loss * 10.0", 
+             "title" => "Estimated Maximum Soil Loss",
+             "legendRange" => Array(1, 2, 4, 8, 16, 32, 64, 128),
+             "legendText" => "tons per hectre" ),
+
+   9 => Array("dbkey" => "r.min_precip / 25.4", 
+              "title" => "Estimated Minimum Rainfall",
+              "legendRange" => Array(0.2, 0.5, 1, 2, 4, 6, 7, 8),
+              "legendText" => "inches" ),
+  10 => Array("dbkey" => "r.min_precip", 
+              "title" => "Estimated Minimum Rainfall",
+              "legendRange" => Array(2.5, 5, 10, 20, 35, 50, 75, 100),
+              "legendText" => "millimeters" ),
+
+  11 => Array("dbkey" => "r.avg_precip / 25.4", 
+             "title" => "Estimated Average Rainfall",
+             "legendRange" => Array(0.2, 0.5, 1, 2, 4, 6, 7, 8),
+             "legendText" => "inches" ),
+  12 => Array("dbkey" => "r.avg_precip", 
+              "title" => "Estimated Average Rainfall",
+              "legendRange" => Array(2.5, 5, 10, 20, 35, 50, 75, 100),
+              "legendText" => "millimeters" ),
+
+  13 => Array("dbkey" => "r.max_precip / 25.4", 
+              "title" => "Estimated Maximum Rainfall",
+              "legendRange" => Array(0.2, 0.5, 1, 2, 4, 6, 7, 8), 
+              "legendText" => "inches" ),
+  14 => Array("dbkey" => "r.max_precip", 
+              "title" => "Estimated Maximum Rainfall",
+              "legendRange" => Array(2.5, 5, 10, 20, 35, 50, 75, 100),
+              "legendText" => "millimeters"),
+
+  15 => Array("dbkey" => "r.run_points", 
+              "title" => "Number of Runs",
+              "legendRange" => Array(1, 2, 4, 8, 16, 32, 64, 128), 
+              "legendText" => "Count"),
+  16 => Array("dbkey" => "r.run_points", 
+              "title" => "Number of Runs",
+              "legendRange" => Array(1, 2, 4, 8, 16, 32, 64, 128), 
+              "legendText" => "Count")
+);
+
+$counties = $map->getlayerbyname("counties");
+$counties->set("status", MS_ON);
+
+$erosion = $map->getlayerbyname("erosion");
+$erosion->set("status", MS_ON);
+$erosion->set("data", "the_geom from (select t.oid as oid, ". $plotables[$var]["dbkey"] ." as val, t.the_geom as the_geom from results_by_twp r LEFT OUTER JOIN iatwp t on (t.model_twp = r.model_twp) WHERE r.valid = '". strftime("%Y-%m-%d", $ts) ."') as foo using unique oid using srid=26915");
+
+$c0 = ms_newClassObj($erosion);
+$c0->set("color", $c[0]);
+$c0->setexpression("([val] < ". $plotables[$var]["legendRange"][0] .")");
+
+$c1 = ms_newClassObj($erosion);
+$c1->set("color", $c[1]);
+$c1->setexpression("([val] < ". $plotables[$var]["legendRange"][1] .")");
+
+$c2 = ms_newClassObj($erosion);
+$c2->set("color", $c[2]);
+$c2->setexpression("([val] < ". $plotables[$var]["legendRange"][2] .")");
+
+$c3 = ms_newClassObj($erosion);
+$c3->set("color", $c[3]);
+$c3->setexpression("([val] < ". $plotables[$var]["legendRange"][3] .")");
+
+$c4 = ms_newClassObj($erosion);
+$c4->set("color", $c[4]);
+$c4->setexpression("([val] < ". $plotables[$var]["legendRange"][4] .")");
+
+$c5 = ms_newClassObj($erosion);
+$c5->set("color", $c[5]);
+$c5->setexpression("([val] < ". $plotables[$var]["legendRange"][5] .")");
+
+$c6 = ms_newClassObj($erosion);
+$c6->set("color", $c[6]);
+$c6->setexpression("([val] < ". $plotables[$var]["legendRange"][6] .")");
+
+$c7 = ms_newClassObj($erosion);
+$c7->set("color", $c[7]);
+$c7->setexpression("([val] < ". $plotables[$var]["legendRange"][7] .")");
+
+$c8 = ms_newClassObj($erosion);
+$c8->set("color", $c[8]);
+
+$img = $map->prepareImage();
+
+$counties->draw($img);
+$erosion->draw($img);
+$title =  $plotables[$var]["title"] ." on ${nicedate}";
+mktitle($map, $img, ${title});
+mkLegendTitle($map, $img, $plotables[$var]["legendText"]);
+$i = $plotables[$var]["legendRange"];
+mkclrbar($map, $img, $c, $i);
+
+$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+?>
+
+<form name="daily" method="GET" action="test.phtml">
+<table>
+<tr>
+ <th>Daily Totals:</th>
+ <th>Year:</th>
+ <td><?php yearSelect(2001, $year); ?></td>
+ <th>Month:</th>
+ <td><?php monthSelect($month); ?></td>
+ <th>Day:</th>
+ <td><?php daySelect($day); ?></td></tr>
+<tr>
+  <th>Plot Variable:</th>
+  <td><select name="var">
+<?php
+if ($metric == 1) $fvar = $var - 1;
+else $fvar = $var;
+for ($j=1;$j<16;$j = $j+2){
+  echo "<option value=\"$j\" ";
+  if ($fvar == $j) echo "SELECTED";
+  echo "> ". $plotables[$j]["title"] ."\n"; 
+}
+?>
+  </select></th>
+  <th>Units:</th>
+ <td><select name="metric">
+   <option value=0 <?php if ($metric == 0) echo "SELECTED"; ?>>English
+   <option value=1 <?php if ($metric == 1) echo "SELECTED"; ?>>Metric
+  </select></td>
+  <td><input type="submit" value="Generate Map"></td>
+</tr></table>
+</form>
+
+<p><a href="<?php echo $previousURL; ?>">Previous Day</a>  &nbsp;
+<a href="<?php echo $nextURL; ?>">Next Day</a> 
+
+<p>
+<img src="<?php echo $url; ?>" border=1>
+
+<?php include("/mesonet/www/html/wepp/footer.phtml"); ?>
+

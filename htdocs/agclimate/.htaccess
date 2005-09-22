@@ -1,0 +1,5 @@
+Redirect /agclimate/index.html http://mesonet.agron.iastate.edu/agclimate/index.phtml
+Redirect /agclimate/index.php http://mesonet.agron.iastate.edu/agclimate/index.phtml
+Redirect /agclimate/index.pl http://mesonet.agron.iastate.edu/agclimate/index.phtml
+Redirect /agclimate/daily-pics http://mesonet.agron.iastate.edu/agclimate/daily_pics
+Redirect /agclimate/daily_pics http://mesonet.agron.iastate.edu/data/agclimate

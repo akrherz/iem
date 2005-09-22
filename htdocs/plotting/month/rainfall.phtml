@@ -1,0 +1,49 @@
+<?php
+ $station = $_GET['station'];
+ $network = isset($network) ? $_GET['network'] : "IA_ASOS";
+ $year = isset($_GET['year']) ? $_GET['year'] : date("Y");
+ $month = isset($_GET['month']) ? $_GET['month'] : date("m");
+ include("/mesonet/php/lib/selectWidget.php");
+ $sw = new selectWidget("rainfall.phtml", "rainfall.phtml?", $network);
+ $sw->logic($_GET);
+?>
+
+<?php 	$TITLE = "IEM | Monthly Rainfall Traces";
+include("/mesonet/php/include/header.php"); ?>
+
+<h3 class="heading">Monthly Rainfall Traces</h3>
+
+<div class="text">
+<P>Pick network to select station from:
+<br><a href="rainfall.phtml?network=IA_ASOS">ASOS</a>
+ -or- <a href="rainfall.phtml?network=AWOS">AWOS</a>
+ -or- <a href="rainfall.phtml?network=IA_COOP">NWS COOP</a>
+ -or- <a href="rainfall.phtml?network=KCCI">KCCI SchoolNet</a>
+
+<?php if (strlen($station) > 0 ) { ?>
+<?php include_once("../../include/forms.php"); ?>
+<form name="ds" action="rainfall.phtml" method="GET">
+<input type="hidden" value="<?php echo $station; ?>" name="station">
+<table cellspacing=2 border=1 cellpadding=2>
+<tr><th>Site ID:</th><th>Select Year:</th><th>Select Month:</th></tr>
+<tr><td><input type="text" name="station" value="<?php echo $station; ?>" size="6"></td>
+  <td><?php yearSelect(2004,$year,"year"); ?></td>
+    <td><?php monthSelect($month); ?></td></tr>
+</table>
+<input type="submit" value="Make Plot">
+</form>
+
+<CENTER>
+<img src="rainfall_plot.php?<?php echo "station=$station&month=$month&year=$year"; ?>" ALT="Time Series">
+</CENTER>
+
+<?php } else { ?>
+
+
+<?php
+echo $sw->printInterface();
+	}
+?>
+</div>
+
+<?php include("/mesonet/php/include/footer.php"); ?>

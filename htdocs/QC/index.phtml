@@ -1,0 +1,58 @@
+<?php
+include("../../config/settings.inc.php");
+$TITLE = "IEM | Quality Control";
+include("$rootpath/include/header.php"); ?>
+
+<h3 class="heading">Quality Control Products</h3><p>
+
+<div class="text">
+This page contains links to Quality Control (QC) products generated on the IEM server.</p>
+
+<UL>
+	<LI><a href="<?php echo $rooturl; ?>/data/report.txt">Current Mesonet statistics</a></LI>
+	<LI>Yesterday's <a href="<?php echo $rooturl; ?>/data/text/IEMAZOSTP.txt">ASOS/AWOS extremes and observation count</a></LI>
+	<LI>Yesterday's <a href="<?php echo $rooturl; ?>/data/text/IEMRWISTP.txt">RWIS extremes and observation count</a></LI>
+ <li>FSL's MADIS <a href="http://www-sdd.fsl.noaa.gov/MSAS/qcms_data/qc20/qchour.txt">QC Messages</a> for this hour.</li>
+ <li><a href="<?php echo $rooturl; ?>/QC/madis/network.phtml">MADIS Raw QC</a></li>
+ <li><a href="<?php echo $rooturl; ?>/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
+</ul>
+
+<table border=0>
+<tr><td width="50%" valign="top">
+
+<p><h3 class="subtitle">IEM Tracker Links:</h3>
+<ul>
+   <li>Sites currently <a href="<?php echo $rooturl; ?>/QC/offline.php">offline</a></li>
+   <li><a href="<?php echo $rooturl; ?>/QC/tickets.phtml">Active Trouble Tickets</a></li>
+</ul>
+
+<P><h3 class="subtitle">Data Quantity Charts:</h3>
+<UL>
+	<LI>48 h  <a href="<?php echo $rooturl; ?>/plotting/stats/reports.php?network=asos">Plot</a> of saved ASOS obs</a></LI>
+	<LI>48 h  <a href="<?php echo $rooturl; ?>/plotting/stats/reports.php?network=awos">Plot</a> of saved AWOS obs</a></LI>
+	<LI>48 h  <a href="<?php echo $rooturl; ?>/plotting/stats/reports.php?network=rwis">Plot</a> of saved RWIS obs</a></LI>
+<!--
+  <li>Recent <a href="http://mesonet.agron.iastate.edu/plotting/stats/tstncf.php">IDS Product Latencies</a> from the UNIDATA IDD Internet feed.</li>
+-->
+</UL>
+
+</td><td width="50%" valign="top">
+
+<P><h3 class="subtitle">Data Logs:</h3>
+<UL>
+	<LI><a href="<?php echo $rooturl; ?>/data/asos.log">ASOS/AWOS Recent Data Log</a></LI>
+	<LI><a href="<?php echo $rooturl; ?>/data/awos.log">AWOS Recent Data Log</a></LI>
+	<LI><a href="<?php echo $rooturl; ?>/data/rwis.log">RWIS Recent Data Log</a></LI>
+</UL>
+
+<P><h3 class="subtitle">Experimental QC'd Plots:</h3>
+<UL>
+	<LI>ASOS/AWOS GDD <a href="<?php echo $rooturl; ?>/data/summary/gdd_qc.gif">Plot</a> or <a href="<?php echo $rooturl; ?>/data/summary/gdd_qc_contour.gif">Contour</a> &nbsp; &nbsp; 
+	(<a class="redl" href="methods/gdd.php">Method</a>)</LI>
+
+</UL>
+
+<BR><BR>
+
+</td></tr></table></div>
+<?php include("$rootpath/include/footer.php"); ?>

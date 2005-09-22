@@ -1,0 +1,19 @@
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: 19 May 2005 
+# Climate Record: 01 Jan 1951 -> 01 Apr 2005
+# Site Information: [IA0149] ALLERTON
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+ TWELVE SIGNIFICANT RAINFALL EVENTS  
+ MONTH  DAY  YEAR   AMOUNT
+   8     27  2004     3.48
+   8      4  2004     2.85
+   8     19  2002     2.72
+   9     12  2003     2.52
+   9     14  2003     2.49
+   5     14  2001     2.42
+   6     21  2001     1.87
+   5     30  2004     1.83
+   3      5  2004     1.82
+   5     31  2001     1.75
+   2      9  2001     1.73
+   8     28  2004     1.68

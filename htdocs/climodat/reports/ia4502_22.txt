@@ -1,0 +1,77 @@
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: 01 Sep 2005 
+# Climate Record: 01 Jan 1951 -> 01 Aug 2005
+# Site Information: [IA4502] KNOXVILLE
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+# Low Temperature exceedence probabilities
+# (On a certain date, what is the chance a temperature below a certain
+#  threshold would have been observed)
+ Date    <33  <29  <27  <23
+ Aug 17    0    0    0    0
+ Aug 19    0    0    0    0
+ Aug 21    0    0    0    0
+ Aug 23    0    0    0    0
+ Aug 25    0    0    0    0
+ Aug 27    0    0    0    0
+ Aug 29    0    0    0    0
+ Aug 31    0    0    0    0
+ Sep 02    0    0    0    0
+ Sep 04    0    0    0    0
+ Sep 06    0    0    0    0
+ Sep 08    0    0    0    0
+ Sep 10    0    0    0    0
+ Sep 12    0    0    0    0
+ Sep 14    0    0    0    0
+ Sep 16    0    0    0    0
+ Sep 18    1    0    0    0
+ Sep 20    1    0    0    0
+ Sep 22    5    0    0    0
+ Sep 24    7    0    0    0
+ Sep 26    9    0    0    0
+ Sep 28   14    0    0    0
+ Sep 30   20    0    0    0
+ Oct 02   27    1    0    0
+ Oct 04   33    1    0    0
+ Oct 06   42    7    3    1
+ Oct 08   44    9    7    1
+ Oct 10   50   14   11    3
+ Oct 12   57   18   14    3
+ Oct 14   64   18   14    3
+ Oct 16   66   22   16    5
+ Oct 18   75   29   18    5
+ Oct 20   81   33   24    9
+ Oct 22   85   37   27   11
+ Oct 24   87   48   35   11
+ Oct 26   90   59   44   14
+ Oct 28   92   64   48   14
+ Oct 30   96   70   55   22
+ Nov 01   96   74   61   31
+ Nov 03  100   81   68   38
+ Nov 05  100   88   77   46
+ Nov 07  100   88   81   51
+ Nov 09  100   92   88   55
+ Nov 11  100   92   88   62
+ Nov 13  100   98   94   68
+ Nov 15  100  100   96   74
+ Nov 17  100  100   96   77
+ Nov 19  100  100   98   81
+ Nov 21  100  100   98   83
+ Nov 23  100  100  100   87
+ Nov 25  100  100  100   90
+ Nov 27  100  100  100   92
+ Nov 29  100  100  100   94
+ Dec 01  100  100  100   94
+ Dec 03  100  100  100   94
+ Dec 05  100  100  100   96
+ Dec 07  100  100  100   98
+ Dec 09  100  100  100   98
+ Dec 11  100  100  100   98
+ Dec 13  100  100  100   98
+ Dec 15  100  100  100   98
+ Dec 17  100  100  100   98
+ Dec 19  100  100  100   98
+ Dec 21  100  100  100   98
+ Dec 23  100  100  100  100
+ Dec 25  100  100  100  100
+ Dec 27  100  100  100  100
+ Dec 29  100  100  100  100

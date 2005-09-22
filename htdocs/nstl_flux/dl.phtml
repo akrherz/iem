@@ -1,0 +1,29 @@
+<?php
+ /* Download NSTL Data */
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 86400);
+$month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 86400);
+$day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 86400);
+$all = isset($_GET["all"]);
+
+
+$pg_conn = iemdb("other");
+
+if ($all) { $sql = sprintf("SELECT * from flux%s ORDER by valid ASC", $year); }
+else { $sql = sprintf("SELECT * from flux%s WHERE date(valid) = '%s-%s-%s'", $year, $year, $month, $day); }
+
+$rs = pg_exec($pg_conn, $sql);
+
+header("Content-type: application/octet-stream");
+header("Content-Disposition: attachment; filename=fluxdata.txt");
+
+echo sprintf("station,valid,netrad,soilheat,latent,sensible,co2,\n");
+for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+{
+  echo sprintf("%s,%s,%s,%s,%s,%s,%s,\n", $row["station"], $row["valid"], $row["netrad"], $row["soilheat"], $row["latent"], $row["sensible"], $row["co2"]);
+
+}
+
+?>

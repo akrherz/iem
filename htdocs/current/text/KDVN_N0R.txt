@@ -1,0 +1,10 @@
+/data/nexrad/DVN_N0R_9.gif
+/data/nexrad/DVN_N0R_8.gif
+/data/nexrad/DVN_N0R_7.gif
+/data/nexrad/DVN_N0R_6.gif
+/data/nexrad/DVN_N0R_5.gif
+/data/nexrad/DVN_N0R_4.gif
+/data/nexrad/DVN_N0R_3.gif
+/data/nexrad/DVN_N0R_2.gif
+/data/nexrad/DVN_N0R_1.gif
+/data/nexrad/DVN_N0R_0.gif

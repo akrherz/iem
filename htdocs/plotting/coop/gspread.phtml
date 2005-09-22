@@ -1,0 +1,24 @@
+<?php
+$month = isset($_GET['month']) ? $_GET['month'] : date("m");
+$day = isset($_GET['day']) ? $_GET['day'] : date("d");
+$ts = strtotime("2003-$month-$day");
+$pts = strftime("2003-%m-%d", $ts);
+?>
+
+<?php
+ $page = "plotting";
+ $TITLE = "IEM | Monthly Temperature Spreads";
+include("/mesonet/php/include/header.php"); 
+ include("../../include/forms.php"); ?>
+
+<p><h3 class="heading">Seasonal Temperature Spreads</h3><p>
+
+<p>Related: <a href="spread_fe.phtml">View by Date</a>
+<b>|</b> <a href="mspread.phtml">View by Month</a>
+
+<p><img src="images/spread_djf.png">
+<p><img src="images/spread_mam.png">
+<p><img src="images/spread_jja.png">
+<p><img src="images/spread_son.png">
+
+<?php include("/mesonet/php/include/footer.php"); ?>

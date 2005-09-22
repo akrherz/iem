@@ -1,0 +1,12 @@
+<?php 
+ $prod = isset($_GET['prod']) ? $_GET['prod'] : "bdeckt_12";
+?>
+
+<applet codebase="/current/class/" code="AniS.class" width="800" height="800" alt="You must enable Java in your browser to view the radar loop">
+
+        <param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
+        <param name="rate" value="80">
+
+        <param name="pause_percent" value="800">
+        <param name="file_of_filenames" value="/frost/loop/<?php echo $prod; ?>.txt">
+</applet>

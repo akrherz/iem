@@ -1,0 +1,44 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+
+$title = $_POST["title"];
+$body = $_POST["body"];
+$author = $_POST["author"];
+$url = $_POST["url"];
+
+if (strlen($title) > 0) {
+ $conn = iemdb("mesosite");
+ pg_exec($conn, "INSERT into news(body, author, title, url) VALUES 
+  ('$body', '$author', '$title', '$url')");
+ pg_close($conn);
+ echo "<p>Story entered!";
+}
+?>
+<html>
+<head>
+  <title>IEM Admin | Add News Item</title>
+</head>
+<body>
+
+<a href="/admin/">Back to admin home</a>
+
+<p>
+<form method="POST" action="add_news.phtml">
+
+<p>Enter Title:<input type="text" name="title" size="30">
+
+<p>Reference URL?:
+<input type="text" name="url" size="50">
+
+<p>Enter Story:
+<textarea NAME='body' wrap="hard" ROWS="20" COLS="70"></textarea>
+
+<p>Enter Author:
+ <input type="text" name="author" value="Daryl Herzmann">
+
+<p>Post Story:
+ <input type="submit"><input type="reset">
+
+
+</form>

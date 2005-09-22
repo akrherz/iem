@@ -1,0 +1,224 @@
+#
+# Start of map file
+#
+NAME simpl
+STATUS ON
+SIZE 640 480
+#SYMBOLSET symbols/symbol.sym
+FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+#EXTENT 487973.3125 4357344 627029 4696320.5 
+# Iowa
+# 3 x 2 600km by 400 km
+EXTENT 200000 4400000 800000 4800000
+# Washington County
+#EXTENT 567973 4537344 647029 4616582
+UNITS METERS
+SHAPEPATH "/mesonet/www/html/GIS/data/"
+SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+IMAGECOLOR -1 -1 -1
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+  "init=epsg:26915"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+  HEADER q_header.html
+  TEMPLATE fancy.html
+  FOOTER q_footer.html
+  MINSCALE 90000
+  MAXSCALE 40000000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/fancy.log"
+END
+
+
+
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+LAYER
+  NAME background
+  DATA images/ia/topo.png
+  TYPE RASTER
+  STATUS ON
+  PROJECTION
+   "proj=utm"
+   "ellps=GRS80"
+   "zone=15"
+   "north"
+   "no_defs"
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME iatwp
+  CONNECTION "user=akrherz dbname=wepp host=db1.mesonet.agron.iastate.edu"
+  DATA "the_geom from (select oid, the_geom, random() * 200 as runoff from iatwp) as foo using unique oid using srid=26915"
+#  DATA "the_geom from (select t.oid, t.the_geom, t.model_twp as mtwp, r.runoff from results r, combos c, iatwp t WHERE r.valid = '2002-07-09' and r.run_id = c.id and c.model_twp = t.model_twp) as foo"
+  STATUS OFF
+  TYPE POLYGON
+  TEMPLATE q_template.html
+#  CLASSITEM 'model_twp'
+#  FILTER " model_twp in ('T74NR06W', 'T74NR07W', 'T74NR08W', 'T74NR09W', 'T75NR06W', 'T75NR07W', 'T75NR08W', 'T75NR09W', 'T76NR06W', 'T76NR07W', 'T76NR08W', 'T77NR08W', 'T77NR09W') "
+
+  PROJECTION
+    "proj=utm"
+    "ellps=GRS80"
+    "zone=15"
+    "north"
+    "no_defs"
+  END
+  CLASS
+    OUTLINECOLOR 0 0 255
+  END
+#  CLASS
+#    EXPRESSION ([runoff] < 10)
+#    COLOR 135 206 235  # Sky Blue
+#  END
+#  CLASS
+#    EXPRESSION ([runoff] < 20) 
+#    COLOR 123 104 238 # Medium Slate Blue
+#  END
+#  CLASS
+#    EXPRESSION ([runoff] < 50) 
+#    COLOR 0 0 255 # Blue
+#  END
+#  CLASS
+#    EXPRESSION ([runoff] < 90) 
+#    COLOR 233 150 122 # dark salmon
+#  END
+#  CLASS
+#    EXPRESSION ([runoff] < 120) 
+#    COLOR 210 105 30 # Chocolate
+#  END
+#  CLASS
+#    EXPRESSION ([runoff] < 200) 
+#    COLOR 255 0 0 # Big Red
+#  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME ppoints
+  CONNECTION "user=akrherz dbname=wepp host=db1.mesonet.agron.iastate.edu"
+  DATA "geom from precip_points"
+  FILTER " iowa = 'T'"
+  STATUS ON
+  TYPE POINT
+PROJECTION
+  "proj=latlong"
+END
+  CLASS
+    COLOR 0 0 255
+    BACKGROUNDCOLOR -1 -1 -1
+    SYMBOL 1
+    SIZE 3
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME temp
+  CONNECTION "user=akrherz dbname=wepp host=db1.mesonet.agron.iastate.edu"
+  DATA "the_geom from temp"
+  STATUS ON
+  TYPE POINT
+  PROJECTION
+    "proj=utm"
+    "ellps=GRS80"
+    "zone=15"
+    "north"
+    "no_defs"
+  END
+  CLASSITEM 'model_twp'
+  CLASS
+    EXPRESSION 'T86NR29W'
+    COLOR 0 0 255
+    BACKGROUNDCOLOR -1 -1 -1
+    SYMBOL 1
+    SIZE 1
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME erosion
+  CONNECTION "user=akrherz dbname=wepp host=10.10.10.20"
+  DATA "the_geom from (select t.oid as oid, max(r.runoff) as runoff, t.the_geom as the_geom from results r, combos c, iatwp t WHERE r.valid = '2003-04-30' and r.run_id = c.id and c.model_twp = t.model_twp GROUP by t.the_geom, t.oid) as foo using unique oid using srid=26915"
+  STATUS DEFAULT
+  TYPE POLYGON
+  PROJECTION
+    "init=epsg:26915"
+#    "proj=utm"
+#    "ellps=GRS80"
+#    "zone=15"
+#    "north"
+#    "no_defs"
+  END
+  CLASS
+    EXPRESSION ([runoff] < 10)
+    COLOR 135 206 235  # Sky Blue
+  END
+  CLASS
+    EXPRESSION ([runoff] < 20) 
+    COLOR 123 104 238 # Medium Slate Blue
+  END
+  CLASS
+    EXPRESSION ([runoff] < 50) 
+    COLOR 0 0 255 # Blue
+  END
+  CLASS
+    EXPRESSION ([runoff] < 60) 
+    COLOR 233 150 122 # dark salmon
+  END
+  CLASS
+    EXPRESSION ([runoff] < 70) 
+    COLOR 210 105 30 # Chocolate
+  END
+  CLASS
+    EXPRESSION ([runoff] < 90) 
+    COLOR 255 0 0 # Big Red
+  END
+END
+
+
+LAYER
+  NAME counties
+  STATUS DEFAULT
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/26915/iowa/iacounties.shp
+  PROJECTION
+   "init=epsg:26915"
+  END
+  CLASS
+    OUTLINECOLOR 255 0 0
+    COLOR -1 -1 -1
+  END
+END
+
+END

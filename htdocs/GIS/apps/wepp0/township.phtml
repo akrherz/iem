@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>Iowa Soil Erosion Project</title>
+<link rel="stylesheet" type="text/css" href="/wepp/style.css">
+<script language="JavaScript" type="text/javascript">
+window.name = "content";
+function new_window(url) {
+ link = window.open(url,"Link","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=810,height=810");
+} 
+</script>
+</head>
+<?php include("/mesonet/www/html/wepp/headerbar.phtml"); ?>
+<?php 
+// Something to display township level detail
+$twp = $_GET["twp"];
+?>
+
+<table>
+<tr><td valign="TOP">
+
+<p><?php include("township_setdate.php"); ?>
+
+<p>
+<table border=1>
+<tr><td>
+<b>Data for this township:</b>
+<li><a href="township.phtml?twp=<?php echo $twp; ?>&events=all">All Events</a></li>
+</td></tr>
+</table>
+
+<p>
+<table border=1>
+<tr><td>
+<b>Maps for this Date:</b><br>
+<li><a href="erosion.phtml?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>">Erosion Estimates</a></li>
+<li><a href="rainfall.phtml?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>">Rainfall Estimates</a></li>
+</td></tr>
+</table>
+
+<p>
+<table border=1>
+<tr><td>
+<b>Overhead Imagery:</b><br>
+<?php // include("township_plot.php"); ?>
+<br><a href="javascript:new_window('township_plot.php?twp=<?php echo $twp; ?>&height=800&width=800');">Ortho Photography</a>
+</td></tr>
+</table>
+
+</td><td valign="TOP">
+
+<p><h3>Township ID: <?php echo $twp; ?></h3>
+
+<p>This is an idea for a framework to display township level detail...
+
+<p>
+<?php 
+ if (isset($events) ) include("township_year.php"); 
+ else include("township_event.php"); ?>
+
+</td></tr></table>
+
+<?php include("/mesonet/www/html/wepp/footer.phtml"); ?>

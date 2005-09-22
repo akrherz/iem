@@ -1,0 +1,77 @@
+<?php
+$layers =  isset( $_GET['layers']) ? $_GET['layers'] : Array("radar", "labels");
+
+function sel($svar, $var, $txt){
+  echo "<option value='".$var."' ";
+  if ($var == $svar) echo "SELECTED";
+  echo ">". $txt ."</option>\n";
+}
+?>
+<html>
+<head>
+  <title>Dynamic Currents Plot</title>
+</head>
+<body bgcolor="#f0f0f0">
+
+<table width="800">
+<tr>
+<tr><th colspan=2 bgcolor="#EEEEEE">
+IEM Dynamic Plotter
+</th></tr>
+<tr>
+ <td valign="top" width=160>
+<form method="GET" action="currents.phtml">
+<input type="hidden" name="layers[]" value="map">
+<input type="hidden" name="network" value="<?php echo $network; ?>">
+<b>Select Layers:</b>
+<br><input type="checkbox" name="layers[]" <?php if (in_array('county', $layers)) echo "CHECKED"; ?> value="county">Counties
+<br><input type="checkbox" name="layers[]" <?php if (in_array('radar', $layers)) echo "CHECKED"; ?> value="radar">Current RADAR
+<br><input type="checkbox" name="layers[]" <?php if (in_array('cwa', $layers)) echo "CHECKED"; ?> value="cwa">NWS CWAs
+<br><input type="checkbox" name="layers[]" <?php if (in_array('labels', $layers)) echo "CHECKED"; ?> value="labels">Site Labels
+
+<p><b>Variable:</b>
+<select name="var">
+       <?php
+          sel($var, "tmpf", "Temperature");
+          sel($var, "dwpf", "Dew Point");
+          sel($var, "vsby", "Visibility");
+          sel($var, "feel", "Feels Like");
+          sel($var, "alti", "Altimeter");
+          sel($var, "pres", "Pressure");
+          sel($var, "barb", "Wind Barb");
+          sel($var, "max_gust", "Wind Gust");
+          sel($var, "sknt", "Wind Speed [knts]");
+          sel($var, "max_tmpf", "High Temp");
+          sel($var, "min_tmpf", "Low Temp");
+          sel($var, "pday", "Today Rainfall");
+          sel($var, "pmonth", "Month Rainfall");
+          sel($var, "snow", "Snowfall");
+          sel($var, "snowd", "Snowfall Depth");
+        ?>
+</select>
+
+<?php if (strlen($network) == 0){ ?>
+<p><b>Sites Shown:</b>
+<br><select name="st[]" size=5 multiple>
+<?php
+  foreach ($st as $key => $value){
+   if (strlen($value) > 0){
+   echo "<option value=\"". strtoupper($value) ."\" SELECTED>". strtoupper($value) ."\n";
+   }
+  } 
+?>
+</select>
+
+<br>add ID:<input type="text" name="st[]" size="5">
+<?php } ?>
+
+<p><input type="Submit" value="Go!">
+</form>
+</td>
+<td bgcolor="000" width=640><img src="http://mesonet.agron.iastate.edu/GIS/apps/php/currents.php?<?php echo $QUERY_STRING; ?>"></td>
+</tr>
+</table>
+
+</table>
+
+</body></html>

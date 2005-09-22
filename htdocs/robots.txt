@@ -1,0 +1,13 @@
+# Robots file for IEM 
+
+User-agent: *
+Disallow: /tmp/
+Disallow: /usage/
+Disallow: /archive/raw/
+Disallow: /archive/data/
+Disallow: /plotting/24h/
+Disallow: /plotting/48h/
+Disallow: /plotting/snet/
+Disallow: /kcci/plotting/
+Disallow: /data/NIDS/
+Disallow: /archive/nexrad/

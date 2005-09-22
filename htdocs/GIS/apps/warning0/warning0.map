@@ -1,0 +1,398 @@
+#
+# Start of map file
+#
+NAME warning0
+STATUS ON
+SIZE 640 480
+FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+#EXTENT -2223813 -1746393 2207341 1701506
+EXTENT -2110437.902319 -2251067.927455 2548326.285559 1239063.127472
+UNITS METERS
+#EXTENT -126 26 -66 50
+#UNITS DD
+#SHAPEPATH "/mesonet/www/html/GIS/data/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+IMAGECOLOR 0 0 250
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+
+#
+PROJECTION
+  "init=epsg:2163"
+END
+
+#
+WEB
+  HEADER q_header.html
+  TEMPLATE warning0.html
+  FOOTER q_footer.html
+#  MINSCALE 90000
+#  MAXSCALE 40000000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/warning0.log"
+  METADATA
+   "wms_title" "IEM WMS Service"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/warning0/warning0.map&amp;"
+   "wms_srs" "EPSG:4326"
+   "wms_abstract" "Ba Ba Ba"
+#   "wms_fees" "None"
+   "wms_keywords" "Ba"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+  END
+
+END
+
+#
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+
+LAYER
+  NAME namerica
+  STATUS DEFAULT
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/2163/world/namerica.shp
+  PROJECTION
+   "init=epsg:2163"
+  END
+  CLASSITEM "FIRST_FIPS"
+  CLASS
+    EXPRESSION /US/
+    COLOR  105 105 105
+  END
+  CLASS
+    COLOR 191 191 191
+  END
+END
+
+LAYER
+  NAME lakes
+  STATUS DEFAULT
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/2163/usa/major_lakes.shp
+  PROJECTION
+   "init=epsg:2163"
+  END
+  CLASS
+    COLOR 0 0 250
+  END
+END
+
+LAYER
+  GROUP smooth_radar
+  NAME smooth_radar_img
+  DATA /mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif
+  TYPE RASTER
+  STATUS ON
+  METADATA
+    "wms_title" "Composite NEXRAD"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  PROJECTION
+   "init=epsg:4326"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME USCOMP_N0R_TS
+  GROUP smooth_radar
+  STATUS ON
+  DATA "/mesonet/data/gis/images/4326/USCOMP/meta/USCOMP_n0r_0.shp"
+  TYPE ANNOTATION
+  TRANSFORM FALSE
+  LABELITEM "TS"
+  METADATA
+    "wms_title" "USCOMP N0R TS"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "200000 4400000 710000 4900000"
+  END
+  CLASS
+    LABEL
+      COLOR 0 0 0
+      BACKGROUNDCOLOR 250 250 250
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION CR
+      FORCE TRUE
+    END
+  END
+END
+
+
+
+LAYER
+  NAME counties
+  STATUS ON
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/2163/usa/nwscounties.shp
+  PROJECTION
+   "init=epsg:2163"
+  END
+  CLASS
+    OUTLINECOLOR 54 54 54
+  END
+  TRANSPARENCY 80
+END
+
+LAYER
+  NAME states
+  STATUS DEFAULT
+  TYPE LINE
+  DATA /mesonet/data/gis/shape/2163/usa/states.shp
+  PROJECTION
+   "init=epsg:2163"
+  END
+  CLASS
+  #  COLOR 105 105 105
+    COLOR 0 0 0
+    SYMBOL 0
+    SIZE 2
+  END
+  TRANSPARENCY 80
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings0_c
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+  DATA "geom from (select type as wtype, geom, oid from warnings WHERE gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo"
+  STATUS ON
+  TYPE LINE
+  METADATA
+    "wms_title" "Current County Warnings"
+     "wms_srs" "EPSG:4326"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASSITEM "wtype"
+  CLASS
+    EXPRESSION 'TOR'
+    STYLE
+      COLOR 255 0 0
+      SIZE 2
+      SYMBOL 1
+    END
+  END
+  CLASS
+    EXPRESSION 'SVR'
+    STYLE
+      COLOR 255 255 0
+      SIZE 2
+      SYMBOL 1
+    END
+  END
+  CLASS
+    EXPRESSION 'FFW'
+    STYLE
+      COLOR 0 255 0
+      SIZE 3
+      SYMBOL 1
+    END
+    STYLE
+      COLOR 255 255 255
+      SIZE 1
+      SYMBOL 1
+    END
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings1d_c
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+  DATA "geom from (select type as wtype, geom, oid from warnings WHERE gtype = 'C' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by expire, type ASC) as foo"
+  STATUS ON
+  STATUS ON
+  TYPE LINE
+  METADATA
+    "wms_title" "Todays County Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASSITEM "wtype"
+  CLASS
+    EXPRESSION 'TOR'
+    STYLE
+      COLOR 255 0 0
+      SIZE 2
+      SYMBOL 1
+    END
+  END
+  CLASS
+    EXPRESSION 'SVR'
+    STYLE
+      COLOR 255 255 0
+      SIZE 2
+      SYMBOL 1
+    END
+  END
+  CLASS
+    EXPRESSION 'FFW'
+    STYLE
+      COLOR 0 255 0
+      SIZE 3
+      SYMBOL 1
+    END
+    STYLE
+      COLOR 255 255 255
+      SIZE 1
+      SYMBOL 1
+    END
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings0_p
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+  DATA "geom from (select type, geom, oid from warnings WHERE gtype = 'P' and
+       expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo"
+  STATUS ON
+  TYPE LINE
+  METADATA
+    "wms_title" "Current Polygon Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    COLOR -1 -1 -1
+    BACKGROUNDCOLOR -1 -1 -1
+    OUTLINECOLOR 250 250 250
+#    SYMBOL 1
+#    SIZE 10
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings1d_p
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+  DATA "geom from (select type, geom, oid from warnings WHERE gtype = 'P' and
+       expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by expire, type ASC) as foo"
+  STATUS ON
+  TYPE POLYGON
+  METADATA
+    "wms_title" "Todays Polygon Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    COLOR -1 -1 -1
+    BACKGROUNDCOLOR -1 -1 -1
+    OUTLINECOLOR 250 250 250
+#    SYMBOL 1
+#    SIZE 10
+  END
+END
+
+LAYER
+ CONNECTIONTYPE postgis
+ NAME watches
+ CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+ DATA "geom from watches"
+ PROJECTION
+  "proj=latlong"
+ END
+ TYPE LINE
+ STATUS ON
+ FILTER "expired > CURRENT_TIMESTAMP"
+ CLASSITEM 'type'
+  CLASS
+    EXPRESSION /SVR/
+    COLOR 255 255 0
+    SIZE 2
+    SYMBOL 1
+  END
+  CLASS
+    EXPRESSION /TOR/
+    COLOR 255 0 0
+    SIZE 2
+    SYMBOL 1
+  END
+END
+
+LAYER
+ CONNECTIONTYPE postgis
+ NAME watches_all
+ CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+ DATA "geom from watches"
+ PROJECTION
+  "proj=latlong"
+ END
+ TYPE LINE
+ STATUS ON
+ #FILTER "expired > 'TODAY'"
+ CLASSITEM 'type'
+  CLASS
+    EXPRESSION /SVR/
+    COLOR 255 255 0
+    SIZE 2
+    SYMBOL 1
+  END
+  CLASS
+    EXPRESSION /TOR/
+    COLOR 255 0 0
+    SIZE 2
+    SYMBOL 1
+  END
+END
+
+
+LAYER
+ CONNECTIONTYPE postgis
+ NAME watches_today
+ CONNECTION "user=akrherz dbname=postgis host=10.10.10.10"
+ DATA "geom from watches"
+ PROJECTION
+  "proj=latlong"
+ END
+ TYPE LINE
+ STATUS ON
+ FILTER "expired > 'TODAY'"
+ CLASSITEM 'type'
+  CLASS
+    EXPRESSION /SVR/
+    COLOR 255 255 0
+    SIZE 2
+    SYMBOL 1
+  END
+  CLASS
+    EXPRESSION /TOR/
+    COLOR 255 0 0
+    SIZE 2
+    SYMBOL 1
+  END
+END
+
+
+END

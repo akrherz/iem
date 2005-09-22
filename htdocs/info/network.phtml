@@ -1,0 +1,30 @@
+<?php
+ include("../../config/settings.inc.php");
+ include("$rootpath/include/selectWidget.php");
+ $network = isset($_GET["network"]) ? $_GET["network"] : die("No Network Specified");
+ 
+ $sw = new selectWidget("network.phtml?", "network.phtml?network=$network&", $network );
+ $sw->setformvars( Array("report" => $report) );
+ $sw->logic($_GET);
+
+?>
+<?php 
+	$TITLE = "IEM Networks";
+	include("$rootpath/include/header.php"); 
+?>
+
+
+<h3 class="heading">IEM Network [<?php echo $network; ?>] Sites</h3>
+
+<?php echo $sw->printInterface(); ?>
+
+<?php if (isset($station)) { 
+  include("$rootpath/include/all_locs.php");
+  $d = $cities[$station];
+  echo "<h3>Selected Location</h3><div class=\"table\"><table><thead><tr><th>ID</th><th>Station Name</th><th>Lat:</th><th>Lon:</th></tr></thead>";
+  echo sprintf("<tbody><tr><td>%s</td><td>%s</td><td>%.4f</td><td>%.4f</td></tr></tbody>", $station, $d["city"], $d["lat"], $d["lon"]); 
+  echo "</table></div>";
+
+} ?>
+
+<?php include("$rootpath/include/footer.php"); ?>

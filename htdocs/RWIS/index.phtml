@@ -1,0 +1,90 @@
+<?php 
+include("../../config/settings.inc.php");
+  $page = 'rwis';
+  $TITLE = "IEM | IaDOT RWIS Data";
+include("$rootpath/include/header.php"); 
+?>
+
+<h3 class="heading">Roadway Weather Information System</h3><p>
+
+<div class="text">
+<table><tr><td style="width: 650px" valign="top">
+The Iowa Department of Transportation maintains a set 
+of observing stations located along major roads in the state.  These stations
+measure pavement temperatures as well as atmospherics.  The DOT has a good
+website called <a href="http://www.weatherview.dot.state.ia.us/">WeatherView</a>, which contains recent obs and a 
+wealth of other information.  The products on this page are intended to 
+supplement their site.</td><td>
+
+<div class="ninfo">
+<b>RWIS Network</b>
+<br>Sampled: 3x / hour
+<br>Stations: 53
+<br><a href="/info/network.phtml?network=IA_RWIS">Locations</a>
+</div></td></tr></table>
+
+<table width="100%">
+<tr>
+  <td valign="top" width="50%">
+
+  <h3 class="subtitle">Current Conditions</h3><ul>
+    <li><a href="current.php">Atmospherics</a></li>
+    <li><a href="currentSF.php">Pavement</a></li>
+  <LI><a
+  href="<?php echo $rooturl; ?>/GIS/apps/iem/freeze.phtml">IEM
+  Freeze</a><br><dd>Combine air and pavement temperatures with current
+  RADAR.</dd></LI></ul>
+
+  <h3 class="subtitle">Time Series Plots:</h3>
+<ul>
+   <li><a href="/plotting/rwis/sf_fe.php">Recent Air/Pavement Temps</a></li>
+   <li><a href="/plotting/hr/1station.php">Plot time series for 1 station</a></li>
+</ul>
+
+  <h3 class="subtitle">Plots with RWIS data</h3><ul>
+   <li><a href="/data/mesonet.gif">Combined Mesonet</a></li>
+   <li><a href="/data/rwis.gif">RWIS Mesonet</a></li>
+   <li><a href="/data/rwis_sf.gif">Pavement Temperatures</a> 
+     <a href="/help/imageHelp.php?iod=0"> <img src="/icons/ihelp.png" border="0"></a></li>
+   <li><a href="../data/heat.gif">Heat Index</a></li>
+   <li><a href="../data/wcht.gif">Wind Chill Index</a></li>
+   <li><a href="/data/rwis.txt">Current RWIS Raw Text File</a></li></ul>
+
+<a href="/request/rwis/fe.phtml">Download</a> data from the archive
+
+</td><td valign="top" width="50%">
+
+  <h3 class="subtitle">Station Plot with NEXRAD</h3><ul>
+   <li><a href="../data/DMX_radar.gif">Des Moines</a></li>
+   <li><a href="../data/OAX_radar.gif">Omaha</a></li>
+   <li><a href="../data/DVN_radar.gif">Davenport</a></li>
+   <li><a href="../data/FSD_radar.gif">Sioux Falls</a></li>
+   <li><a href="../data/ARX_radar.gif">LaCrosse</a></li></ul>
+  </p>
+
+  <h3 class="subtitle">Comparisons:</h3>
+<ul>
+   <li><a href="/data/temps.gif">Temperatures vs ASOS/AWOS</a></li>
+   <li><a href="/data/dewps.gif">Dew Points vs ASOS/AWOS</a></li>
+   <li><a href="/data/winds.gif">Winds vs ASOS/AWOS</a></li>
+   <li><a href="/plotting/compare/">Plot Recent Comparisions</a></li>
+</ul>
+
+  <h3 class="subtitle">QC Info:</h3>
+<ul>
+  <li><a href="/data/text/IEMRWISTP.txt">Yesterday's Totals</a></LI>
+  <li>A note about RWIS data <a href="timing.php">timing</a></li>
+  <li>Sites <a href="/QC/offline.php">offline</a> [<a href="<?php echo $rooturl; ?>/GIS/apps/stations/offline.php?network=rwis">Graphical View</a>]</li>
+  <li>Recent data <a href="/plotting/stats/reports.php?network=rwis">quantity</a></li>
+  <li>FSL MADIS QC Messages:
+  <br /><a href="http://www-sdd.fsl.noaa.gov/MSAS/qcms_data/qc17/qchour.txt">Last Hour</a>
+  <br /><a href="http://www-sdd.fsl.noaa.gov/MSAS/qcms_data/qc17/qcday.txt">Today</a>
+  <br /><a href="http://www-sdd.fsl.noaa.gov/MSAS/qcms_data/qc17/qcweek.txt">Weekly</a>
+  <br /><a href="http://www-sdd.fsl.noaa.gov/MSAS/qcms_data/qc17/qcmonth.txt">Monthly</a>
+</ul>
+</p>
+
+</td></tr>
+</table></div>
+
+<?php include("$rootpath/include/footer.php"); ?>

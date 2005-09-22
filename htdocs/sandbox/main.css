@@ -1,0 +1,30 @@
+#iem-header {
+	height: 60px;
+}
+#iem-header-title h3 {
+	margin: 0px;
+}
+#iem-header-logo img {
+	float: left;
+	border: 0px;
+	margin: 5px;
+}
+#iem-header-items {
+	position: absolute;
+	right: 10px;
+	top: 15px;
+	text-align: right;
+	display: inline;
+	font-size: 0.8em;
+}
+#iem-menu{
+	clear: left;
+	text-align: center;
+}
+
+#iem-content {
+	clear: left;
+}
+#iem-footer {
+	clear: left;
+}

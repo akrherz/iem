@@ -1,0 +1,78 @@
+<?php
+include("../../config/settings.inc.php");
+$TITLE = "IEM | Open GIS Consortium Web Services";
+include("$rootpath/include/header.php"); ?>
+
+
+<h3 class="heading">OGC Web Services</h3>
+
+<p>The <a href="http://www.opengeospatial.org">Open Geospatial Consortium, Inc</a> (OGC) is a standards organization leading the development of geospatial and location based services.  The OGC has adopted a number of specifications, some of which are used by the IEM.  This page lists these services.</p>
+
+<h4>Web Map Service (WMS)</h4>
+
+<p>A WMS defines a protocol for web based retrieval of geodata in raster map format.</p>
+
+<div class="iem-form">
+<strong>Services</strong>
+<ul>
+<li>CONUS NEXRAD Base Reflectivity (n0r) 
+ <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?</code></li>
+<li>CONUS NEXRAD 1 Hour Precipitation (n1p) 
+ <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n1p.cgi?</code></li>
+<li>CONUS NEXRAD Storm Total Precipitation (ntp) 
+ <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ntp.cgi?</code></li>
+
+<li>Des Moines NEXRAD, KCCI-TV Live Super Doppler8
+ <br /><code>http://mesonet.agron.iastate.edu/wms/radar.php?</code></li>
+
+<li>Iowa Rainfall Estimates
+ <br /><code>http://mesonet.agron.iastate.edu/wms/rainfall.php?</code></li>
+
+<li>Iowa Road Conditions
+ <br /><code>http://mesonet.agron.iastate.edu/roads/wms.php?</code></li>
+
+</ul>
+</div>
+
+<h4>Web Feature Service (WFS)</h4>
+
+<p>A WFS is a service that provides geodata as simple features in Geography Markup Language (GML).</p>
+
+<div class="iem-form">
+<strong>Services</strong>
+<ul>
+
+<li>Iowa Rainfall Estimates
+ <br /><code>http://mesonet.agron.iastate.edu/wfs/rainfall.php?</code></li>
+
+<li>National Weather Service Warnings Current
+ <br /><code>http://mesonet.agron.iastate.edu/wfs/ww.php?</code></li>
+
+<li>National Weather Service Warnings Archive (since 11 Jul 2002)
+ <br /><code>http://mesonet.agron.iastate.edu/wfs/ww.php?date=YYYY-MM-DD&amp;</code></li>
+
+<li>Iowa Road Conditions
+ <br /><code>http://mesonet.agron.iastate.edu/roads/wfs.php?</code></li>
+
+</ul>
+</div>
+
+<h4>Web Coverage Service (WCS)</h4>
+
+<p>Extends WMS and WFS to allow access to 'coverages' or spatial/temporal varying geodata.</p>
+
+<div class="iem-form">
+<strong>Services</strong>
+
+<p>This service is experimental.  We currently don't have anybody with a client that is able to test this.  If you do test it, please let us know!
+
+<ul>
+
+<li>CONUS NEXRAD
+<br /><code>http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.441?map=/mesonet/www/html/GIS/apps/wcs/access.map&amp;</code></li>
+
+</ul>
+
+</div>
+
+<?php include("$rootpath/include/footer.php"); ?>

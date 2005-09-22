@@ -1,0 +1,169 @@
+#
+# Start of map file
+#
+NAME adjust
+STATUS ON
+SIZE 600 400
+#SYMBOLSET symbols/symbol.sym
+FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+#EXTENT 200000 4400000 710000 4900000
+# Iowa Utm 83 Zone 14
+EXTENT 340000 4650000 640000 5110000
+#EXTENT -103.5 42 -95 48
+#EXTENT -93.7 41.85 -93.2 42.25 
+#UNITS DD
+UNITS METERS
+SHAPEPATH "/mesonet/www/html/GIS/data/"
+SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+IMAGECOLOR 230 230 230
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+
+# SD
+#SIZE 600 400
+#EXTENT 340000 4650000 640000 5110000
+#    "init=epsg:26914"
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+#  "proj=latlong"
+#    "init=epsg:26915"
+    "init=epsg:26914"
+#   "proj=lcc"
+#   "lat_1=42.0666"
+#   "lat_2=43.2666"
+#   "lat_0=41.5"
+#   "lon_0=-94"
+#   "x_0=2000000"
+#   "y_0=1000000"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+  HEADER q_header.html
+  TEMPLATE stations.html
+  FOOTER q_footer.html
+  MINSCALE 90000
+  MAXSCALE 46500000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/stations.log"
+END
+
+
+
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+#
+#
+
+#
+# Start of layer definitions
+#
+
+LAYER
+  NAME counties
+  STATUS DEFAULT
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/unproj/iowa/iacounties.shp
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    OUTLINECOLOR 0 0 0
+    SIZE 1
+    SYMBOL 1
+#    TEXT ([NAME] County)
+#    LABEL
+#     TYPE BITMAP
+#     SIZE MEDIUM
+#     POSITION CC
+#     PARTIALS FALSE
+#    END
+  END
+END
+
+LAYER
+  NAME states
+  STATUS DEFAULT
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/unproj/us/states.shp
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    OUTLINECOLOR 255 0 0
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME kcci
+  CONNECTION "host=10.10.10.10 user=akrherz dbname=mesosite"
+  DATA "geom from stations"
+  FILTER "network = 'KELO'"
+  STATUS ON
+  TYPE POINT
+#  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  PROJECTION
+   "proj=latlong"
+  END
+#  CLASSITEM 'id'
+  CLASS
+#    EXPRESSION 'SNVI4'
+#    TEMPLATE q_template.html
+    COLOR 0 0 0
+    BACKGROUNDCOLOR -1 -1 -1
+#    OUTLINECOLOR 0 0 0
+    SYMBOL 1
+    SIZE 8
+    TEXT ([ plot_name ])
+    LABEL
+      COLOR 132 31 31
+      BACKGROUNDCOLOR 255 255 255
+      BACKGROUNDSHADOWCOLOR  0 0 0
+      TYPE TRUETYPE
+      SIZE 8
+      FORCE true
+      PARTIALS false
+      MINSIZE 6
+      MAXSIZE 18
+      FONT VeraBd
+      ANTIALIAS true
+      POSITION AUTO
+      BUFFER 1
+    END
+  END
+END
+
+LAYER
+  NAME radar
+  DATA /mesonet/www/html/GIS/apps/rview/usethis.png
+  TYPE RASTER
+  STATUS DEFAULT
+  OFFSITE 0
+  TRANSPARENCY 100
+  PROJECTION
+   "init=epsg:26915"
+  END
+END
+
+END

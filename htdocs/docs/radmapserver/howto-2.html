@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.20">
+ <TITLE>Mapserver + NEXRAD Composite HOWTO: Requirements</TITLE>
+ <LINK HREF="howto-3.html" REL=next>
+ <LINK HREF="howto-1.html" REL=previous>
+ <LINK HREF="howto.html#toc2" REL=contents>
+</HEAD>
+<BODY>
+<A HREF="howto-3.html">Next</A>
+<A HREF="howto-1.html">Previous</A>
+<A HREF="howto.html#toc2">Contents</A>
+<HR>
+<H2><A NAME="s2">2.</A> <A HREF="howto.html#toc2">Requirements</A></H2>
+
+<H2><A NAME="ss2.1">2.1</A> <A HREF="howto.html#toc2.1">Software and Data Access</A>
+</H2>
+
+<P>The following items must be installed and configured before any of this HOWTO
+could potentially work for you.  Describing the installation of any of these 
+packages is beyond the scope of this document.
+<UL>
+<LI> You should be using the Linux operating system, but there is no reason
+this won't work on Solaris or a BSD variant.</LI>
+<LI> GEMPAK, for converting the NIDS file format into RASTER</LI>
+<LI> Some mechanism for NIDS data access
+<UL>
+<LI>Realtime access via UNIDATA IDD using LDM</LI>
+<LI>Or FTP access to NIDS files via NOAA</LI>
+<LI>Or locally available NIDS files on your hard-drive.</LI>
+</UL>
+</LI>
+<LI> A webserver, which should be Apache.</LI>
+<LI> ImageMagick: used to <I>convert</I> the GIF files to TIFF.</LI>
+</UL>
+</P>
+<P>The following items will be installed during this howto.  The installation of
+Proj.4 will require privileged access to your system.  The Mapserver components
+will require access to your webserver's CGI-BIN directory. 
+<UL>
+<LI>Proj.4</LI>
+<LI>Mapserver</LI>
+<LI>Simple Mapserver application</LI>
+</UL>
+</P>
+<H2><A NAME="ss2.2">2.2</A> <A HREF="howto.html#toc2.2">Hardware</A>
+</H2>
+
+<P>Hardware requirements is a tricky topic.  I have seen 300 MHz machines outperform 1 GHz machines when properly configured.  Common sense applies here.  If you want to generate nationwide composites every 5 minutes, you will need a healthy machine.  If you are supporting a small intranet, a modest machine will do. </P>
+<P>For our purposes, Mapserver will not introduce a performance bottleneck
+on your system.  It is extremely fast and robust!  Any slowness typically comes
+when you start reprojecting massive raster layers, but we aren't going to 
+do that!</P>
+<H2><A NAME="ss2.3">2.3</A> <A HREF="howto.html#toc2.3">System Environment</A>
+</H2>
+
+<P>You are going to need root privileges on your system.  So either know your 
+root password or be very kind to the system administrator! We will be installing
+Proj.4 into /usr/local, which is a standard place to put 3rd party software.
+Mapserver will be installed into the cgi-bin directory of your webserver.</P>
+<HR>
+<A HREF="howto-3.html">Next</A>
+<A HREF="howto-1.html">Previous</A>
+<A HREF="howto.html#toc2">Contents</A>
+</BODY>
+</HTML>

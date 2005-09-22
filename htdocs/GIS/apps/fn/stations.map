@@ -1,0 +1,197 @@
+#
+# Start of map file
+#
+NAME adjust
+STATUS ON
+SIZE 640 480
+#SYMBOLSET /mesonet/data/gis/symbols/symbol.sym
+#FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+#EXTENT 200000 4400000 710000 4900000
+#EXTENT 340000 4480000 540000 4780000
+# Iowa Utm 83 Zone 14
+#EXTENT 700000 4400000 1210000 4900000
+#EXTENT  0 3500000 1210000 4900000
+#EXTENT -99 40 -90 45
+#EXTENT -93.7 41.85 -93.2 42.25 
+#UNITS DD
+EXTENT -2343813 -1746393 2000000 1701506
+UNITS METERS
+#SHAPEPATH "/mesonet/www/html/GIS/data/"
+#SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+IMAGECOLOR 230 230 230
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+  "proj=stere"
+  "lat_0=38"
+  "lon_0=-96"
+  "x_0=0"
+  "y_0=0"  
+#  "proj=latlong"
+#    "init=epsg:26915"
+#    "init=epsg:26914"
+#   "proj=lcc"
+#   "lat_1=42.0666"
+#   "lat_2=43.2666"
+#   "lat_0=41.5"
+#   "lon_0=-94"
+#   "x_0=2000000"
+#   "y_0=1000000"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+  HEADER q_header.html
+  TEMPLATE stations.html
+  FOOTER q_footer.html
+  MINSCALE 90000
+  MAXSCALE 46500000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/stations.log"
+END
+
+
+
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+#
+#
+
+#
+# Start of layer definitions
+#
+
+LAYER
+  NAME counties
+  STATUS ON
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/unproj/iowa/iacounties.shp
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    OUTLINECOLOR 0 0 0
+    SIZE 1
+    SYMBOL 1
+#    TEXT ([NAME] County)
+#    LABEL
+#     TYPE BITMAP
+#     SIZE MEDIUM
+#     POSITION CC
+#     PARTIALS FALSE
+#    END
+  END
+END
+
+LAYER
+  NAME radar
+  DATA /mesonet/www/html/GIS/apps/fn/radar.png
+  TYPE RASTER
+  STATUS ON
+  OFFSITE 0
+  TRANSPARENCY 100
+  #OFFSITE 16
+END
+
+LAYER
+  NAME states
+  STATUS ON
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/unproj/us/states.shp
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASSITEM "STATE_NAME"
+  CLASS
+    EXPRESSION /Georgia/
+    OUTLINECOLOR 255 0 0
+#    COLOR 255 255 0
+ #   SYMBOL 1
+    TEXT ([STATE_NAME])
+    LABEL
+     TYPE BITMAP
+     SIZE MEDIUM
+     POSITION CC
+     FORCE TRUE
+     PARTIALS TRUE
+    END
+  END
+  CLASS
+#    COLOR 169 169 169
+    OUTLINECOLOR 255 0 0
+    TEXT ([STATE_NAME])
+    LABEL
+     TYPE BITMAP
+     SIZE MEDIUM
+     POSITION CC
+     FORCE TRUE
+     PARTIALS TRUE
+    END
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME kcci
+  CONNECTION "host=10.10.10.10 user=akrherz dbname=mesosite"
+  DATA "geom from stations"
+  FILTER "network = 'KCCI'"
+  STATUS ON
+  TYPE POINT
+#  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASSITEM 'id'
+  CLASS
+    EXPRESSION 'SNVI4'
+#    TEMPLATE q_template.html
+    COLOR 0 0 0
+    BACKGROUNDCOLOR -1 -1 -1
+#    OUTLINECOLOR 0 0 0
+    SYMBOL 1
+    SIZE 8
+    TEXT ([ plot_name ])
+    LABEL
+      COLOR 132 31 31
+      BACKGROUNDCOLOR 255 255 255
+      BACKGROUNDSHADOWCOLOR  0 0 0
+      TYPE TRUETYPE
+      SIZE 10
+      FORCE false
+      PARTIALS false
+      OFFSET 10 10
+      MINSIZE 6
+      MAXSIZE 18
+      FONT VeraBd
+      ANTIALIAS true
+      POSITION LC
+      BUFFER 4
+    END
+  END
+END
+
+END

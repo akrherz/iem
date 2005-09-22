@@ -1,0 +1,64 @@
+<?php 
+  $TITLE = "IEM | AWOS Archive | Sky Coverages";
+include("/mesonet/php/include/header.php"); 
+?>
+
+<h3 class="heading">AWOS Sky Coverages</h3>
+
+<div class="text">
+<p>The Iowa DOT provides the IEM with an <a href="/request/awos/1min.php">archive of 1 minute observations</a>
+from their AWOS network.  This archive contains numerically coded values for
+sky coverage.  Unfortunately, there does not appear to be a definitive cross
+reference to match these values up to something humans can understand (ex. overcast).  Here is our (Harry Hillaker and Daryl Herzmann's) educated guess at a cross reference to what the 
+sky coverage codes mean that are found in the archive.<p>
+
+<table border=1 cellpadding=2 cellspacing=0>
+<tr>
+  <th>Code</th>
+  <th>Translated Code:</th>
+  <th>Meaning</th></tr>
+
+<tr><th>0</th><th>NOREPORT</th>
+  <td>No report, since lower cloud layers are obstructing.</td></tr>
+
+<tr><th>1</th><th>SCATTERED</th>
+  <td>Scattered (10% to 50% coverage)</td></tr>
+
+<tr><th>2</th><th>BROKEN</th>
+  <td>Broken (60% to 90% coverage)</td></tr>
+
+<tr><th>4</th><th>OVERCAST</th>
+  <td>Overcast (More than 90% coverage)</td></tr>
+
+<tr><th>8</th><th>OBSCURATION</th>
+  <td>Full obscuration (no ceiling or cloud amount available)</td></tr>
+
+<tr><th>17</th><th>OBSCURATION</th>
+  <td>Partial obscuration, lowest cloud layer is scattered.</td></tr>
+
+<tr><th>18</th><th>OBSCURATION</th>
+  <td>Partial obscuration, lowest cloud layer is broken.</td></tr>
+
+<tr><th>20</th><th>OBSCURATION</th>
+  <td>Partial obscuration, lowest cloud layer is overcast.</td></tr>
+
+<tr><th>32</th><th>INDEFINITE</th>
+  <td>Indefinite ceiling (no cloud cover amount available?)</td></tr>
+
+<tr><th>64</th><th>CLEAR</th>
+  <td>No clouds below 12000 feet</td></tr>
+
+<tr><th>128</th><th>FEW</th>
+  <td>Few (less than 10% coverage)</td></tr>
+
+<tr><th>255</th><th>MISSING</th>
+  <td>Missing (sky condition not measured).</td></tr>
+
+<tr><th>*</th><th>UNKNOWNCODE</th>
+  <td>All other values that may appear in the database.</td></tr>
+
+</table>
+
+</div>
+
+<?php include("/mesonet/php/include/footer.php"); ?>

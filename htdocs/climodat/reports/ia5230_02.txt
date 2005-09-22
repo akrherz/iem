@@ -1,0 +1,19 @@
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: 30 Aug 2005 
+# Climate Record: 01 Jan 1951 -> 01 Aug 2005
+# Site Information: [IA5230] MASON-CITY
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+ TWELVE SIGNIFICANT RAINFALL EVENTS  
+ MONTH  DAY  YEAR   AMOUNT
+   8     10  1980     6.25
+   9      8  1964     5.20
+   9     20  1983     5.02
+   5     22  2004     4.88
+   8     22  1954     4.76
+   8     29  1995     4.40
+   6      8  1984     4.34
+   8     30  1962     4.23
+   7     27  1990     4.00
+   5     10  1963     3.92
+   7     21  1999     3.88
+   8     27  1981     3.83

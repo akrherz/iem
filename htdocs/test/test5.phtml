@@ -1,0 +1,61 @@
+<?php
+include("/mesonet/php/include/forms.php");
+
+$TITLE = "IEM | NSTL Flux Sites";
+include("/mesonet/php/include/header.php"); ?>
+
+<TR><TD>
+
+<h3 class="heading">National Soil Tilth Lab Flux Sites</h3>
+
+<p>The IEM is pleased to host the data from a set of observing platforms operated by the National Soil Tilth Lab.  These sites measure
+<ul>
+ <li>Net Radiation,</li>
+ <li>Soil Heat Flux,</li>
+ <li>Latent Heat Flux,</li>
+ <li>Sensible Heat Flux,</li>
+ <li>and C02 Flux</li>
+</ul>
+ at 30 minute intervals.  Data from these sites is updated daily with the most recent complete record being 2 days ago.
+<br><br>
+<a href="plots.phtml">Generate comparison plots</a>
+
+<br clear="left" />
+<p><div class="iem-form">
+<thead>
+
+<table width="100%">
+<thead><tr><th colspan="6" align="left">Site Information:</th></tr></thead>
+<tr><th align="left">ID</th><th align="left">Name</th><th align="left">Lat</th><th align="left">Lon</th><th
+align="left">First Observation</th><th align="left">Last Observation</th></tr></thead>
+
+<tbody>
+<tr><td>corn</td><td>Over Corn Residue</td><td>41.97482</td><td>-94.69367</td><td>1 Apr 2005</td><td>Ongoing</td></tr>
+<tr><td>sbean</td><td>Over Soybean Residue</td><td>41.9749</td><td>-93.6914</td><td>1 Jan 2005</td><td>8 Apr 2005</td></tr>
+<tr><td>nspr</td><td>Over Prairie</td><td>41.55865</td><td>-93.29286</td><td>21 Mar 2005</td><td>Ongoing</td></tr>
+</tr>
+</tbody>
+</table><p>
+
+<table width="100%"><thead>
+<tr><th colspan="2" align="left"><b>Download Data:</b></th></tr></thead>
+<tbody><tr><td align="center">
+<h3 class="subtitle">Request Date:</h3><br />
+<form method="GET" action="dl.phtml" name="single">
+<table><tr><td><b>Year:</b> 2005 <input type="hidden" value="2005" name="year"></td></tr>
+<tr><td><b>Month:</b><?php echo monthSelect($month, "month"); ?></td></tr>
+<tr><td><b>Day:</b><?php echo daySelect($day, "day"); ?></td></tr></table>
+<input type="submit" value="Download Date">
+</form>
+</td><td style="border-left: 1px #006666 solid;" valign="top" align="center">
+<h3 class="subtitle">Request Everything!</h3><br />
+<form method="GET" action="dl.phtml" name="all">
+<br /><br /><br /><br /><input type="hidden" name="all" value="all">
+<input type="submit" value="Download Everything!">
+</form>
+</td></tr></tbody></table></div>
+
+<br>
+
+
+<?php include("/mesonet/php/include/footer.php"); ?>

@@ -1,0 +1,4 @@
+Redirect /climodat/index.html http://mesonet.agron.iastate.edu/climodat/index.phtml
+Redirect /climodat/default.html http://mesonet.agron.iastate.edu/climodat/index.phtml
+Redirect /climodat/table.html http://mesonet.agron.iastate.edu/climodat/index.phtml
+

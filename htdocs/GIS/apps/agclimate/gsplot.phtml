@@ -1,0 +1,390 @@
+<?php
+  /** gsplot.phtml
+   * - Make Growing Season Plots
+   */
+$var = $_GET["var"];
+$year = $_GET["year"];
+$smonth = $_GET["smonth"];
+$sday = $_GET["sday"];
+$emonth = $_GET["emonth"];
+$eday = $_GET["eday"];
+
+$gs_start = Array(
+  1998 => mktime(0,0,0,5,1,1998),
+  1999 => mktime(0,0,0,5,1,1999),
+  2000 => mktime(0,0,0,5,1,2000),
+  2001 => mktime(0,0,0,5,1,2001),
+  2002 => mktime(0,0,0,5,1,2002),
+  2003 => mktime(0,0,0,5,1,2003),
+  2004 => mktime(0,0,0,5,1,2004),
+  2005 => mktime(0,0,0,5,1,2005) );
+$gs_end = Array(
+  1998 => mktime(0,0,0,10,1,1998),
+  1999 => mktime(0,0,0,10,1,1999),
+  2000 => mktime(0,0,0,10,1,2000),
+  2001 => mktime(0,0,0,10,16,2001),
+  2002 => mktime(0,0,0,10,7,2002),
+  2003 => mktime(0,0,0,10,1,2003),
+  2004 => mktime(0,0,0,10,1,2004),
+  2005 => time() );
+
+if (strlen($var) == 0)  $var = "gdd50";
+if (strlen($year) == 0)  $year = 2005;
+if (strlen($smonth) > 0 && strlen($sday) > 0)
+  $gs_start[$year] = mktime(0,0,0,$smonth,$sday,$year);
+if (strlen($emonth) > 0 && strlen($eday) > 0)
+  $gs_end[$year] = mktime(0,0,0,$emonth,$eday,$year);
+
+$round = Array("prec" => 2);
+
+$today = time();
+if ($gs_end[$year] >= $today)  $gs_end[$year] = $today;
+
+$emonth = strftime("%m", $gs_end[$year]);
+$eday = strftime("%d", $gs_end[$year]);
+$smonth = strftime("%m", $gs_start[$year]);
+$sday = strftime("%d", $gs_start[$year]);
+
+include("../../../include/forms.php");
+
+?>
+
+<?php 
+        $page = "isuag";
+	$TITLE = "IEM | ISUAG Growing Season Data";
+	$HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+<!--//BEGIN Script
+function new_window(url) {
+        link = 
+       
+window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
+} 
+//END Script-->
+</script>';
+        include("/mesonet/php/include/header.php"); 
+?>
+
+
+<h3 class="heading">Growing Season Charts</h3><p>
+<div class="text">
+<form method="GET" action="gsplot.phtml">
+<table> <tr>
+   <th class="subtitle">Plot Parameter</th>
+   <th class="subtitle">Year</th>
+   <th class="subtitle">Month</th>
+   <th class="subtitle">Day</th>
+   <td></td>
+  </tr>
+ <tr>
+  <td rowspan=2><select name="var">
+     <option value="gdd50" <?php if($var == "gdd50") echo "SELECTED"; ?>>Growing Degree Days (base=50,cap=86)</option>
+     <option value="gdd32" <?php if($var == "gdd32") echo "SELECTED"; ?>>Growing Degree Days (base=32,cap=86)</option>
+     <option value="et" <?php if($var == "et") echo "SELECTED"; ?>>Potential Evapotranspiration</option>
+     <option value="prec" <?php if($var == "prec") echo "SELECTED"; ?>>Precipitation</option>
+     <option value="sgdd50" <?php if($var == "sgdd50") echo "SELECTED"; ?>>Soil Growing Degree Days (base=50)</option>
+     <option value="sdd86" <?php if($var == "sdd86") echo "SELECTED"; ?>>Stress Degree Days (base=86)</option>
+    </select></td>
+  <td rowspan=2><?php yearSelect(1998, $year, "year"); ?></td>
+  <td><?php monthSelect2($smonth, 'smonth'); ?></td>
+  <td><?php daySelect2($sday, 'sday'); ?></td>
+  <td rowspan=2><input type="submit" value="Make Plot"></td>
+  </tr>
+ <tr>
+  <td><?php monthSelect2($emonth, 'emonth'); ?></td>
+  <td><?php daySelect2($eday, 'eday'); ?></td>
+  </tr>
+</table>
+ 
+
+<?php
+dl("php_mapscript_401.so");
+include('../../../include/agclimateLoc.php');
+
+function mktitlelocal($map, $imgObj, $titlet) { 
+ 
+  $layer = $map->getLayerByName("credits");
+ 
+     // point feature with text for location
+  $point = ms_newpointobj();
+  $point->setXY( 0, 10);
+  $point->draw($map, $layer, $imgObj, 0,
+    $titlet ."                                                           ");
+  $point->free();
+
+     // point feature with text for location
+  $point = ms_newpointobj();
+  $point->setXY( 0, 330);
+  $point->draw($map, $layer, $imgObj, 1,
+    "  Iowa Environmental Mesonet | Iowa State Ag Climate Network ");
+  $point->free();
+}
+
+function plotNoData($map, $img){
+  $layer = $map->getLayerByName("credits");
+
+  $point = ms_newpointobj();
+  $point->setXY( 100, 200);
+  $point->draw($map, $layer, $img, 1,
+    "  No data found for this date! ");
+  $point->free();
+
+}
+
+$varDef = Array("gdd50" => "Growing Degree Days (base=50)",
+  "gdd32" => "Growing Degree Days (base=32)",
+  "et" => "Potential Evapotranspiration",
+  "prec" => "Precipitation",
+  "sgdd50" => "Soil Growing Degree Days (base=50)",
+  "sdd86" => "Stress Degree Days (base=86)"
+);
+
+
+
+$rnd = Array("gdd50" => 0,
+  "gdd32" => 0,
+  "et" => 2,
+  "prec" => 2,
+  "sgdd50" => 0,
+  "sdd86" => 0);
+
+
+$myStations = $ISUAGcities;
+$height = 350;
+$width = 450;
+
+$proj = "proj=tmerc,lat_0=41.5,lon_0=-93.65,x_0=0,y_0=0,k=0.9999";
+
+$map = ms_newMapObj("base.map");
+$map->setProjection($proj);
+
+$map->setextent(-252561, -133255, 300625, 277631);
+
+
+$counties = $map->getlayerbyname("counties");
+$counties->set("status", MS_ON);
+
+$snet = $map->getlayerbyname("snet");
+$snet->set("status", MS_ON);
+$sclass = $snet->getClass(0);
+
+$iards = $map->getlayerbyname("iards");
+$iards->set("status", 1);
+
+
+$ponly = $map->getlayerbyname("pointonly");
+$ponly->set("status", MS_ON);
+
+$img = $map->prepareImage();
+$counties->draw($img);
+$iards->draw($img);
+
+$c = pg_connect("10.10.10.40","5432","isuag");
+
+$sstr = strftime("%Y-%m-%d", $gs_start[$year]);
+$estr = strftime("%Y-%m-%d", $gs_end[$year]);
+$sstr_txt = strftime("%b %d", $gs_start[$year]);
+$estr_txt = strftime("%b %d", $gs_end[$year]);
+
+/* ------------------------------------------------------- */
+if ($var == 'gdd32') {
+  $q = "SELECT station, c11, c12
+     from t${year}_daily WHERE valid >= '". $sstr ."'
+     and valid < '". $estr ."'";
+
+  $gdds = Array();
+  $rs =  pg_exec($c, $q);
+  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    $stid = $row['station'];
+    $high = (float)$row['c11'];
+    $low  = (float)$row['c12'];
+
+    if ($low < 32)  $low = 32.00;
+    if ($high > 86) $high = 86.00;
+    if ($high < 32) $tgdd = 0.00;
+    else $tgdd = (($high+$low)/2.00) - 32.00;
+
+    $gdds[$stid] = $gdds[$stid] + $tgdd;
+  }
+  $vals = $gdds;
+} 
+/* ------------------------------------------------------- */
+if ($var == 'gdd50') {
+  $q = "SELECT station, c11, c12
+     from t${year}_daily WHERE valid >= '". $sstr ."'
+     and valid < '". $estr ."'";
+
+  $gdds = Array();
+  $rs =  pg_exec($c, $q);
+  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    $stid = $row['station'];
+    $high = (float)$row['c11'];
+    $low  = (float)$row['c12'];
+
+    if ($low < 50)  $low = 50.00;
+    if ($high > 86) $high = 86.00;
+    if ($high < 50) $tgdd = 0.00;
+    else $tgdd = (($high+$low)/2.00) - 50.00;
+
+    $gdds[$stid] = $gdds[$stid] + $tgdd;
+  }
+  $vals = $gdds;
+}  
+/* ------------------------------------------------------- */
+if ($var == 'sdd86') {
+  $q = "SELECT station, c11, c12
+     from t${year}_daily WHERE valid >= '". $sstr ."'
+     and valid < '". $estr ."'";
+
+  $gdds = Array();
+  $rs =  pg_exec($c, $q);
+  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    $stid = $row['station'];
+    $high = (float)$row['c11'];
+    $low  = (float)$row['c12'];
+
+    if ($low < 86)  $low = 86.00;
+    if ($high < 86) $tgdd = 0.00;
+    else $tgdd = (($high+$low)/2.00) - 86.00;
+
+    $gdds[$stid] = $gdds[$stid] + $tgdd;
+  }
+  $vals = $gdds;
+}  
+/* ------------------------------------------------------- */
+else if ($var == 'sgdd50') {
+  $q = "SELECT station, date(valid) as dvalid, 
+     max(c300) as high, min(c300) as low
+     from t${year}_hourly WHERE valid >= '". $sstr ."'
+     and valid < '". $estr ."' GROUP by station, dvalid";
+
+  $gdds = Array();
+  $rs =  pg_exec($c, $q);
+  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    $stid = $row['station'];
+    $high = (float)$row['high'];
+    $low  = (float)$row['low'];
+
+    if ($low < 50)  $low = 50.00;
+    if ($high > 86) $high = 86.00;
+    if ($high < 50) $tgdd = 0.00;
+    else $tgdd = (($high+$low)/2.00) - 50.00;
+
+    $gdds[$stid] = $gdds[$stid] + $tgdd;
+  }
+  $vals = $gdds;
+}  
+/* ------------------------------------------------------- */
+else if ($var == 'et') {
+  $q = "SELECT station, sum(c70) as et
+     from t${year}_daily WHERE valid >= '". $sstr ."'
+     and valid < '". $estr ."' GROUP by station";
+
+  $vals = Array();
+  $rs =  pg_exec($c, $q);
+  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    $stid = $row['station'];
+    $vals[$stid] = $row['et'];
+  }
+}  
+/* ------------------------------------------------------- */
+else if ($var == 'prec') {
+  $q = "SELECT station, sum(c90) as prec
+     from t${year}_daily WHERE valid >= '". $sstr ."'
+     and valid < '". $estr ."' GROUP by station";
+
+  $vals = Array();
+  $rs =  pg_exec($c, $q);
+  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    $stid = $row['station'];
+    $vals[$stid] = $row['prec'];
+  }
+}  
+/* ------------------------------------------------------- */
+
+
+$tr = "# ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .")\n";
+$tr .= "#-----------------------snip------------------\n";
+$tr .= sprintf("%20s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $var);
+foreach($vals as $key => $value){
+  if ($key == "A133259" || $key == "A130219") continue;
+
+  $tr .= sprintf("%20s,%10s,%10s,%10s\n", $ISUAGcities[$key]['city'],
+  $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], round($value, $round[$var]) );
+
+  // Red Dot... 
+  $pt = ms_newPointObj();
+  $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+  $pt->draw($map, $ponly, $img, 0, ' ' );
+  $pt->free();
+
+  // Value UL
+  $pt = ms_newPointObj();
+  $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+  $pt->draw($map, $snet, $img, 0, 
+     round($value, $rnd[$var]) );
+  $pt->free();
+
+  if (strlen($var2) > 0) {
+    // Value LL
+    $pt = ms_newPointObj();
+    $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+    if ($var2 == 'c530'){
+      $pt->draw($map, $snet, $img, 2, 
+        $row[$var2] ." ". $row[$var2 .'_f'] );
+    } else {
+      $pt->draw($map, $snet, $img, 2, 
+        round($row[$var2], $rnd[$var2]) ." ". $row[$var2 .'_f'] );
+    }
+    $pt->free();
+  }
+
+  // City Name
+  $pt = ms_newPointObj();
+  $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+  $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['city'] );
+  $pt->free();
+}
+if ($i == 0)
+   plotNoData($map, $img);
+
+mktitlelocal($map, $img, " ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .") ");
+$map->drawLabelCache($img);
+
+$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+
+?>
+<center><font class="bluet">Plot</font></center>
+<table>
+<tr><td valign="top">
+<table width="100%">
+<tr>
+  <td><h3 class="heading">Dynamic Historical Data:</h3></td></tr>
+<tr>
+  <td class="subtitle">
+    <b><a href="dayplot.phtml">Daily Data Plots</a>
+    <br><b>Growing Season Plots</b>
+  </td></tr>
+</table>
+
+  <p>Open this plot in a <a href="javascript:new_window('image.phtml?f=<?php echo $url; ?>');">new window</a> for comparison with other plots. Once the
+image is loaded up in another window, you can modify this plots 
+parameters.
+
+<p>*Note: Precipitation is not recorded during the cold season.</td>
+  <td>
+  <img src="<?php echo $url; ?>" border=1>
+</td></tr>
+</table>
+
+<p>
+<center><img src="/images/gisready.png"><h3 class="subtitle"> Data Listing</h3></center>
+<pre><?php echo $tr; ?></pre>
+
+<p>You should be able to 'copy & paste' this raw data listing into a simple
+text editor and save the data file on your machine.  Most GIS systems can 
+then import this dataset as a layer.  You may have to omit the commented lines
+(#) if your GIS has trouble importing the data.
+</div>
+<?php 
+  include("/mesonet/php/include/footer.php");
+?>
