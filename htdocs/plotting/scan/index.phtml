@@ -1,0 +1,56 @@
+<?php
+ $station = isset($_GET["station"]) ? $_GET["station"] : "2031";
+ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 3*86400);
+ $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 3*86400);
+ $day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 3*86400);
+ $plot = isset($_GET["plot"]) ? $_GET["plot"] : "0";
+
+$u = Array("radn5temps.php", "radn5temps2.php", "smv.php", "winds.php", "precip.php");
+$myu = $u[intval($plot)];
+
+ include("../../include/forms.php");
+ $ploturl = "$myu?station=$station&year=$year&month=$month&day=$day";
+?>
+
+<?php $TITLE = "IEM | SCAN Plotting";
+include("/mesonet/php/include/header.php"); ?>
+<div class="text">
+<b>Nav:</b> <a href="/scan/">SCAN</a> <b> > </b> Current/Historical Data Traces
+
+<form method="GET" action="index.phtml" name="control">
+<table>
+<tr>
+  <th class="subtitle">SCAN Site:</th>
+  <th class="subtitle">Plot Type:</th>
+  <th class="subtitle">Year:</th>
+  <th class="subtitle">Month:</th>
+  <th class="subtitle">Day:</th></tr>
+
+<tr>
+  <td>
+<select name="station">
+ <option value="2031" <?php if ($station == "2031") echo "SELECTED"; ?>>Ames, IA
+ <option value="2068" <?php if ($station == "2068") echo "SELECTED"; ?>>Shagbark Hills, IA
+ <option value="2001" <?php if ($station == "2001") echo "SELECTED"; ?>>Rodger's Farm, NE
+ <option value="2047" <?php if ($station == "2047") echo "SELECTED"; ?>>Spickard, MO
+ <option value="2004" <?php if ($station == "2004") echo "SELECTED"; ?>>Mason, IL
+</select></td>
+  <td>
+<select name="plot">
+ <option value="0" <?php if ($plot == 0) echo "SELECTED"; ?>>Soil Temps + Solar Rad
+ <option value="1" <?php if ($plot == 1) echo "SELECTED"; ?>>Soil/Air Temps + Solar Rad
+ <option value="2" <?php if ($plot == 2) echo "SELECTED"; ?>>Soil Moisture + Solar Rad
+ <option value="3" <?php if ($plot == 3) echo "SELECTED"; ?>>Wind Speed + Direction
+ <option value="4" <?php if ($plot == 4) echo "SELECTED"; ?>>Precipitation
+</select></td>
+  <td><?php echo yearSelect(2004, $year, "year"); ?></td>
+  <td><?php echo monthSelect($month, "month"); ?></td>
+  <td><?php echo daySelect($day, "day"); ?></td>
+  <td><input type="submit" value="Make Plot!"></td>
+</tr>
+</table></form>
+
+<img src="<?php echo $ploturl; ?>">
+</div>
+
+<?php include("/mesonet/php/include/footer.php"); ?>

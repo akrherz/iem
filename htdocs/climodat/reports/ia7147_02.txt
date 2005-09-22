@@ -1,0 +1,19 @@
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: 30 Aug 2005 
+# Climate Record: 01 Jan 1951 -> 01 Aug 2005
+# Site Information: [IA7147] ROCK-RAPIDS
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+ TWELVE SIGNIFICANT RAINFALL EVENTS  
+ MONTH  DAY  YEAR   AMOUNT
+   8     16  1977     4.15
+   8      2  1959     4.01
+   7      6  1982     3.85
+   9     15  2004     3.74
+   8     19  1990     3.60
+   4     23  2001     3.60
+   7     19  1990     3.58
+   6     13  2001     3.56
+   7     25  2005     3.54
+   8     23  1989     3.50
+   7     10  1971     3.49
+   5     30  1993     3.44

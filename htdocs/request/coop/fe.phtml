@@ -1,0 +1,120 @@
+<?php 
+        $TITLE = "IEM | COOP Data Download";
+include("/mesonet/php/include/header.php"); 
+?>
+<div class="text">
+<b>Nav:</b> <a href="/COOP/">COOP</a> <b> > </b>
+  Download Data
+
+<?php include("../../include/forms.php"); ?>
+
+<p>This page allows you to download daily observations for the NWS COOP network.Some items of note:
+<ul>
+	<li>In general, the snowfall data is mostly there.  Some years are missing data.</li>
+	<li>Please don't run nasty web scrappers against this download application. Please just <a href="/info/contacts.php">contact us</a> for your very large data requests.</li>
+	<li>If you are looking to download the entire dataset, please check out <a href="http://mesonet.agron.iastate.edu/pickup/coop_data/">This Directory!</a></li>
+	<li>If you find errors in the dataset, please let us know!  There are numerous folks working on the data quality of this important dataset and we are always interested in feedback.</li>
+</ul></p>
+
+<p>Data is currently updated to 1 August 2005.</p>
+
+<form method="GET" action="dl.php">
+
+<table>
+<tr><td width="50%">
+
+<p><h3 class="subtitle">1. Select Station:</h3><br>
+<i>Select One or More or All stations in the network.  When requesting multiple
+sites, your timespan is limited to one year.</i><br />
+<select name="station[]" size="5" MULTIPLE>
+	<option value="_ALL">--Select ALL--
+<?php include("../../include/COOPstations.php");
+while( list($key, $val) = each($cities) ){
+  if (strlen($val["dont"]) > 0) continue;
+  echo "<option value=\"$key\"";
+  if ($key == $id) echo " SELECTED ";
+  echo ">". $val["city"] ." [". $val["startYear"] ."]\n";
+}
+?></select>
+
+
+<p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
+<i>Please note the start year in the station selector. Some sites start
+in 1951 others are earlier. If you only want data for one day, set the
+start and end times to the same value.</i>
+<table>
+  <tr>
+    <td></td>
+    <th>Year</th><th>Month</th><th>Day</th>
+  </tr>
+
+  <tr>
+    <th>Start:</th>
+    <td>
+     <?php yearSelect2(1893, 1893, "year1"); ?>
+    </td>
+    <td>
+     <?php monthSelect2(1, "month1"); ?>
+    </td>
+    <td>
+     <?php daySelect2(1, "day1"); ?>
+    </td>
+  </tr>
+
+  <tr>
+    <th>End:</th>
+    <td>
+     <?php yearSelect2(1893, date("Y"), "year2"); ?>
+    </td>
+    <td>
+     <?php monthSelect2(date("m"), "month2"); ?>
+    </td>
+    <td>
+     <?php daySelect2(1, "day2"); ?>
+    </td>
+  </tr>
+</table>
+
+<p><h3 class="subtitle">3. Select Variables:</h3><br>
+<select size=5 name="vars[]" MULTIPLE>
+  <option value="high">High Temperature [F]
+  <option value="low">Low Temperature [F]
+  <option value="precip">Rainfall [inch]
+  <option value="snow">Snowfall [inch]
+</select>
+
+</td><td valign="TOP">
+
+<p><h3 class="subtitle">4. How to view?</h3><br>
+<select name="what">
+  <option value="download">Download to Disk
+  <option value="view">View on-line
+</select>
+
+<p><h3 class="subtitle">5. Data Delimitation:</h3><br>
+How shall the output values be seperated?
+<br><select name="delim">
+    <option value="comma">Comma
+    <option value="space">Space
+    <option value="tab">Tab
+   </select>
+
+<p>
+<h3 class="subtitle">6. Include Lat / Lons?</h3><img src="/images/gisready.png"><br>
+ <select name="gis">
+   <option value="no">No
+   <option value="yes">Yes
+ </select>
+
+
+<p><h3 class="subtitle">7. Submit Form:</h3>
+<br /><i>Please be patient and only submit this form once.  It may take 10-20
+seconds to get a response.</i><br />
+<input type="submit" value="Process Data Request">
+<input type="reset">
+
+</td></tr></table>
+</form></div>
+
+
+<?php include("/mesonet/php/include/footer.php"); ?>

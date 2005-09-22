@@ -1,0 +1,159 @@
+#
+# Start of map file
+#
+NAME fancybase
+STATUS ON
+SIZE 640 480
+#SYMBOLSET symbols/symbol.sym
+FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+EXTENT -2223813 -1746393 2207341 1701506
+UNITS METERS
+SHAPEPATH "/mesonet/www/html/GIS/data/"
+SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+IMAGECOLOR -1 -1 -1
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+  "proj=latlong"
+#  "proj=lcc"
+#   "lat_1=20"
+#   "lat_2=60"
+#   "lat_0=40"
+#   "lon_0=-96"
+#   "x_0=0"
+#   "y_0=0"  
+END
+
+#
+# Start of web interface definition
+#
+WEB
+  HEADER q_header.html
+  TEMPLATE fancy.html
+  FOOTER q_footer.html
+  MINSCALE 90000
+  MAXSCALE 40000000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/fancy.log"
+END
+
+
+
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+#LAYER
+#  NAME background
+#  DATA images/back1.tif
+#  TYPE RASTER
+#  STATUS ON
+#  PROJECTION
+#   "proj=latlong"
+#  END
+#END
+
+LAYER
+  NAME states
+  STATUS ON
+  TYPE POLYGON
+  DATA shape/iem/states.shp
+  PROJECTION
+   "proj=latlong"
+  END
+#  CLASSITEM "STATE_FIPS"
+  CLASS
+#    NAME "IOWA"
+#    EXPRESSION "13"
+    OUTLINECOLOR 0 255 0
+    COLOR 110 135 95
+  END
+END
+
+LAYER
+  NAME counties
+  STATUS ON
+  TYPE POLYGON
+  DATA shape/iacounties3.shp
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    OUTLINECOLOR 255 0 0
+    COLOR 200 200 200
+  END
+END
+
+
+
+
+LAYER
+  TYPE POINT
+  NAME dot
+  STATUS ON
+  CLASS 
+   SYMBOL 1
+   COLOR 0 0 255
+   SIZE 12
+  END
+  CLASS 
+   SYMBOL 1
+   COLOR 255 0 0
+   SIZE 12
+  END
+  CLASS 
+   SYMBOL 1
+   COLOR 0 0 0
+   SIZE 12
+  END
+  CLASS 
+   SYMBOL 1
+   COLOR 0 255 255
+   SIZE 12
+  END
+  CLASS 
+   SYMBOL 1
+   COLOR 119 136 153
+   SIZE 12
+  END
+  CLASS 
+   SYMBOL 1
+   COLOR 0 100 0
+   SIZE 12
+  END
+  CLASS 
+   SYMBOL 1
+   COLOR 173 255 47
+   SIZE 12
+  END
+  CLASS 
+   SYMBOL 1
+   COLOR 205 133 63
+   SIZE 12
+  END
+  CLASS 
+   SYMBOL 1
+   COLOR 255 182 193
+   SIZE 12
+  END
+
+END
+
+END

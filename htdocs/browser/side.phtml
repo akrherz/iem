@@ -1,0 +1,86 @@
+<?php
+
+$year = $_GET["year"];
+$month = $_GET["month"];
+$day = $_GET["day"];
+$hour = $_GET["hour"];
+$mode = $_GET["mode"];
+if (strlen($mode) == 0) $mode = "hourly";
+if (strlen($year) == 0 || strlen($month) == 0 || strlen($day) == 0 ){
+  die("Please select a date from above!");
+}
+
+$s = date ("M d Y H:i:s", mktime ($hour,0,0,$month,$day,$year));
+$lts = strtotime( $s );
+$st = gmdate ("M d Y H:i:s", mktime ($hour,0,0,$month,$day,$year));
+$gts = strtotime( $st );
+
+$base = "http://mesonet.agron.iastate.edu/archive/data/";
+$IEM_hourly = Array(
+  "IEM Plot" => $base ."%Y/%m/%d/mesonet_%H00.gif",
+  "MidWest w/ RADAR" => $base ."%Y/%m/%d/MWoverlay_%H00.gif",
+  "MidWest Plot" => $base ."%Y/%m/%d/MWmesonet_%H00.gif",
+  "Heat Index" => $base ."%Y/%m/%d/heat_%H00.gif",
+  "Wind Chill Index" => $base ."%Y/%m/%d/wceq_%H00.gif",
+  "IEM Data Report" => $base ."%Y/%m/%d/report_%H.txt",
+  "NEXRAD 1h Precip" => $base ."%Y/%m/%d/nexradPrecip1h_%H00.gif",
+  "Surface Divergence" => $base ."%Y/%m/%d/surfaceDIV_%H00.gif",
+  "Surface Moisture Divergence" => $base ."%Y/%m/%d/surfaceMD_%H00.gif",
+  "Surface Frontogenesis" => $base ."%Y/%m/%d/surfaceFRNT_%H00.gif",
+  "1H Pressure Change" => $base ."%Y/%m/%d/presdelt_%H00.png");
+
+$IEM_daily = Array(
+  "ASOS/AWOS Summary" => $base ."%Y/%m/%d/IEMAZOSTP.txt",
+  "COOP Climate Avg Temp" => $base ."%Y/%m/%d/coopAveTemp.gif",
+  "COOP Climate Rec Temp" => $base ."%Y/%m/%d/coopRecTemp.gif",
+  "COOP Ob Hi/Lo" => $base ."%Y/%m/%d/coopHighLow.gif",
+  "COOP Ob Precip" => $base ."%Y/%m/%d/coopPrecPlot.gif",
+  "COOP Ob Snow Depth" => $base ."%Y/%m/%d/coopSnowDepth.gif",
+  "COOP Ob Snowfall" => $base ."%Y/%m/%d/coopSnowPlot.gif",
+  "IEM Rainfall Plot" => $base ."%Y/%m/%d/iemPrecipPlot.gif",
+  "IEM Rainfall Contour" => $base ."%Y/%m/%d/iemPrecipContour.gif",
+  "Peak Gusts" => $base ."%Y/%m/%d/peakGust.gif",
+  "RWIS Summary" => $base ."%Y/%m/%d/IEMRWISTP.txt");
+
+
+$base = "http://www.pals.iastate.edu/archivewx/data/";
+$PALS_hourly = Array(
+ "Des Moines NEXRAD Base Ref" => $base ."%Y_%m_%d/DMX%y%m%d%H.gif",
+ "US Dew Points" => $base ."%Y_%m_%d/dew%y%m%d%H.gif",
+ "US Lightning" => $base ."%Y_%m_%d/light%y%m%d%H.gif",
+ "US Moisture Divergence" => $base ."%Y_%m_%d/moist%y%m%d%H.gif",
+ "US NowRad" => $base ."%Y_%m_%d/nowrad%y%m%d%H.gif",
+ "US IR Sat" => $base ."%Y_%m_%d/sat%y%m%d%H.gif",
+ "US WV Sat" => $base ."%Y_%m_%d/wv%y%m%d%H.gif",
+ "US Surface" => $base ."%Y_%m_%d/sfc%y%m%d%H.gif",
+ "US Surface Plot" => $base ."%Y_%m_%d/sfcPLOT%y%m%d%H.gif",
+ "US Temperatures" => $base ."%Y_%m_%d/temp%y%m%d%H.gif"
+);
+
+//------------------------------------------
+if ($mode == "hourly"){
+echo strftime("%b %d %Y %H:00", $lts);
+
+echo "<p><b>IEM Plots:</b>\n";
+foreach($IEM_hourly as $key => $value ){
+  echo "<li><a href=\"". strftime($IEM_hourly[$key], $gts) ."\" target=\"display\"> ". $key ."</a></li>\n";
+}
+
+/*
+echo "<p><b>PALS Plots:</b>\n";
+foreach($PALS_hourly as $key => $value ){
+  echo "<li><a href=\"". strftime($PALS_hourly[$key], $gts) ."\" target=\"display\"> ". $key ."</a></li>\n";
+}
+*/
+}
+//--------------------------------------------
+if ($mode == "daily"){
+echo strftime("%b %d %Y", $lts);
+
+echo "<p><b>IEM Plots:</b>\n";
+foreach($IEM_daily as $key => $value ){
+  echo "<li><a href=\"". strftime($IEM_daily[$key], $gts) ."\" target=\"display\"> ". $key ."</a></li>\n";
+}
+
+}
+?>

@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+     "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+	<TITLE>IEM Robin Tracker</TITLE>
+	<META NAME="AUTHOR" CONTENT="Daryl Herzmann">
+	<link rel="stylesheet" type="text/css" href="/css/mesonet.css">
+</HEAD>
+
+<?php 
+	$title = "IEM | News & Notes";
+	include("../include/header2.php"); 
+?>
+
+The Red Robin is a welcome sign of spring in Iowa!  Here is a graphical 
+view and listing of reports received at the IEM of Robin sightings.  If you
+have a report to add, please send it to Daryl (<a href="mailto:akrherz@iastate.edu">akrherz@iastate.edu</a>).
+
+<table>
+<tr>
+ <td><img src="/onsite/features/2003/03/030310.gif" width=150></td>
+ <td><img src="http://mesonet.agron.iastate.edu/GIS/apps/onsite/robins.php"></td>
+</tr>
+
+<tr>
+ <td colspan="2">
+
+<table width="100%">
+<tr>
+  <th align="left">Map ID</th>
+  <th align="left">Person</th>
+  <th align="left">Date</th>
+  <th align="left">Where</th>
+</tr>
+
+<?php
+
+$connection = pg_connect("10.10.10.40","5432","postgis");
+$q = "SELECT * from robins ORDER by id";
+$rs = pg_exec($q);
+
+
+for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+
+  echo "<tr> <td>". $row["mapid"] ."</td> 
+    <td>". $row["name"] ."</td>
+    <td>". $row["day"] ."</td>
+    <td>". $row["city"] ."</td>
+    </tr>\n";
+
+}
+
+echo "</table>\n";
+
+
+?>
+</td></tr>
+</table>
+
+
+<?php include("../include/footer2.php"); ?>

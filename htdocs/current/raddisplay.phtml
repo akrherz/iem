@@ -1,0 +1,60 @@
+<?php 
+	$page = "current";
+	$TITLE = "IEM | Current RADAR Data";
+	$HEADEXTRA = '<BASE HREF="http://mesonet.agron.iastate.edu/data/nexrad/"><script language="JavaScript">
+
+function changeSite(newSite, newSname) {
+
+	document.myForm.sname.value = newSname ;
+	document.myForm.site.value = newSite ;
+
+} // End of changeSite
+
+</script>';
+	include("/mesonet/php/include/header.php"); 
+?>
+<div class="text">
+<b>Nav:</b>  <a href="http://mesonet.agron.iastate.edu/current/radar.phtml">Current RADAR Data</a><br>
+
+<?php
+
+$prod = $_GET['prod'];
+$site = $_GET['site'];
+$product = substr($prod,0,3);
+
+if (strlen($site) == 0) $site = 'DMX';
+
+if ($prod == 'N0R' || $prod == 'N0V'){
+  echo "<img src=\"/data/nexrad/${site}_${prod}_0.gif\">";
+}
+else if ($prod == 'N0R_loop_nj' || $prod == 'N0V_loop_nj'){
+  include ('../data/nexrad/NIDSloop.php');
+}else if ($prod == 'N0R_loop' || $prod == 'N0V_loop'){
+    $rprod = substr($prod,0, 3);
+//  include ('../data/nexrad/NIDSloop.php');
+?>
+<applet codebase="/current/class/" code="AniS.class" width=650 height=600 alt="You must enable Java in your browser to view the radar loop">
+        <param name="controls" value="startstop, looprock, step, speed, toggle, 
+zoom">
+        <param name="rate" value="80">
+		<param name="no_enh" value="true">
+        <param name="pause_percent" value="800">
+        <param name="file_of_filenames" value="/current/text/K<?php echo $site ."_". $rprod; ?>.txt">
+        <br><br><br><br><span class="red"><b>Java must be enabled for radar loop
+s to display.
+        <br><br>In Netscape:<br>Select: Edit -> Preferences -> Advanced<br>Check
+ "Enable Java" and "Enable Javascript"
+        <br><br>In Internet Explorer<br>Select: Tools -> Internet Options -> Security tab<br>Select the Internet zone and set the Security level for the zone to
+ "Medium"
+        <br><br><br>You may need to restart your browser after making these changes.</b></span>
+        </applet>
+<?php
+}
+else if ($prod == "wiem") {
+  echo "<img src=\"/data/${site}_radar.gif\">";
+}
+
+
+?></div>
+
+<?php include("/mesonet/php/include/footer.php"); ?>

@@ -1,0 +1,88 @@
+<?php 
+include("../../config/settings.inc.php");
+  $TITLE = "IEM | SCAN Site Data";
+include("$rootpath/include/header.php"); 
+?>
+
+<h3 class="heading">SCAN Network</h3><p>
+
+<div class="text">
+<table><tr><td style="width: 650px" valign="top">
+This page contains data for the Ames SCAN site
+provided by the National Water & Climate Center (NWCC).  SCAN is
+an acronym for <i>Soil Climate Analysis Network</i>. Although this station
+does provide atmospheric data, its main purpose is to provide soil
+information from five depths.</td><td>
+
+<div class="ninfo">
+<b>SCAN</b>
+<br>Reports: 1x per Hour
+<br>IA Stations: 2
+<br><a href="/info/network.phtml?network=SCAN">Locations</a>
+</div></td></tr></table>
+
+<h3 class="subtitle">Data Products:</h3>
+
+<ul>
+ <li><a href="/scan/current.phtml">Sortable Current Conditions</a></li>
+ <li><a href="/plotting/scan/">Current/Historical Timeseries Plots</a></li>
+</ul>
+
+
+
+<p><h3 class="subtitle">Station Locations</h3><br>
+<table width="100%">
+<tr>
+  <th>Station</th>
+  <th align="left">Site #</th>
+  <th align="left">Latitude</th>
+  <th align="left">Longitude</th>
+  <th align="left">Elevation</th>
+</tr>
+
+<tr>
+  <th><a href="http://www.wcc.nrcs.usda.gov/scan/site.pl?sitenum=2031&state=ia">Ames, IA</a></th>
+  <td>2031</td>
+  <td>42&deg;00' N</td>
+  <td>93&deg;43' W</td>
+  <td>1073 Feet</td>
+</tr>
+
+<tr>
+  <th><a href="http://www.wcc.nrcs.usda.gov/scan/site.pl?sitenum=2068&state=ia">Shagbark Hills, IA</a></th>
+  <td>2068</td>
+  <td>42&deg;26' N</td>
+  <td>95&deg;46' W</td>
+  <td>1400 Feet</td>
+</tr>
+
+
+<tr>
+  <th><a href="http://www.wcc.nrcs.usda.gov/scan/site.pl?sitenum=2001&state=ne">Rodger's Farm, NE</a></th>
+  <td>2001</td>
+  <td>40&deg;51' N</td>
+  <td>96&deg;28' W</td>
+  <td>1215 Feet</td>
+</tr>
+
+<tr>
+  <th><a href="http://www.wcc.nrcs.usda.gov/scan/site.pl?sitenum=2047&state=mo">Spickard, MO</a></th>
+  <td>2047</td>
+  <td>40&deg;14' N</td>
+  <td>93&deg;42' W</td>
+  <td>911 Feet</td>
+</tr>
+
+<tr>
+  <th><a href="http://www.wcc.nrcs.usda.gov/scan/site.pl?sitenum=2004&state=il">Mason, IL</a></th>
+  <td>2004</td>
+  <td>40&deg;19' N</td>
+  <td>89&deg;54' W</td>
+  <td>495 Feet</td>
+</tr>
+
+
+</table></div>
+
+
+<?php include("$rootpath/include/footer.php"); ?>

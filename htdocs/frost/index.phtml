@@ -1,0 +1,136 @@
+<?php 
+    include("../../config/settings.inc.php");
+	$title = "IEM | Frost Forecasting";
+	include("$rootpath/include/header.php"); 
+?>
+
+
+<BR>
+
+<table><tr><td valign="top">
+<img align="left" src="images/Station_bridge.jpg"></td><td>
+
+<h3 class="heading">Frost Forecasting</h3>
+
+<p>This page is the homepage of our frost modeling and prediction effort. 
+Products presented here are for educational use only.
+
+<h2 class="subtitle">IEM Useful Links:</h2><ul>
+<li><a href="<?php echo $rooturl; ?>/GIS/apps/iem/freeze.phtml">IEM Freeze</a></li>
+<li><a href="<?php echo $rooturl; ?>/data/mesonet.gif">Mesonet plot</a></li>
+<li><a href="<?php echo $rooturl; ?>/data/rwis_sf.gif">RWIS pavement temps plot</a></li>
+<li><a href="<?php echo $rooturl; ?>/RWIS/current.phtml">RWIS sortable
+currents</a></li></ul>
+</td></tr></table>
+
+<br clear="all">
+<h2 class="subtitle">Frost Model Schedule</h2>
+<table border=1>
+<tr>
+ <th>Model Run:</th><td>MM5 Init:</td><td>Frost Model Init:</td><td>Products Delivered:</td></tr>
+<tr>
+ <th>00Z (6PM):</th>
+ <td>04Z (10PM)</td>
+ <td>05Z (11PM)</td>
+ <td>06Z (Midnight)</td></tr>
+<tr>
+ <th>12Z (6AM):</th>
+ <td>16Z (10AM)</td>
+ <td>17Z (11AM)</td>
+ <td>18Z (Noon)</td></tr>
+</table>
+
+<h2 class="subtitle">Output graphics:</h2>
+
+<table border=1 cellspacing=0 cellpadding=2>
+<tr><th colspan=49>00Z Output</th></tr>
+<tr>
+ <td>Product:</td>
+<?php
+ for($i=1;$i<49;$i++){
+   echo "<td>". $i ."</td>";
+ }
+?></tr>
+<tr>
+ <th>Frost Depth:</th>
+<?php
+ for($i=1;$i<49;$i++){
+   echo "<td><a href=\"/data/model/frost/00/frostd_0_f". $i .".gif\">X</a></td>";
+ }
+?></tr>
+<tr>
+ <th>Frost Present?:</th>
+<?php
+ for($i=1;$i<49;$i++){
+   echo "<td><a href=\"/data/model/frost/00/ifrost_0_f". $i .".gif\">X</a></td>";
+ }
+?></tr>
+<tr>
+ <th>Bridget Deck Temp:</th>
+<?php
+ for($i=1;$i<49;$i++){
+   echo "<td><a href=\"/data/model/frost/00/bdeckt_0_f". $i .".gif\">X</a></td>";
+ }
+?></tr>
+<tr><th colspan=49>12Z Output</th></tr>
+<tr>
+ <th>Frost Depth:</th>
+<?php
+ for($i=1;$i<49;$i++){
+   echo "<td><a href=\"/data/model/frost/12/frostd_12_f". $i .".gif\">X</a></td>";
+ }
+?></tr>
+<tr>
+ <th>Frost Present?:</th>
+<?php
+ for($i=1;$i<49;$i++){
+   echo "<td><a href=\"/data/model/frost/12/ifrost_12_f". $i .".gif\">X</a></td>";
+ }
+?></tr>
+<tr>
+ <th>Bridget Deck Temp:</th>
+<?php
+ for($i=1;$i<49;$i++){
+   echo "<td><a href=\"/data/model/frost/12/bdeckt_12_f". $i .".gif\">X</a></td>";
+ }
+?></tr>
+</table>
+
+<p><b>View a loop!</b> <form name="loop" method="GET" action="loop/index.phtml">
+<select name="prod">
+ <option value="bdeckt_00">00Z Run -- Bridge Deck Temp
+ <option value="ifrost_00">00Z Run -- Frost Present
+ <option value="frostd_00">00Z Run -- Frost Depth
+ <option value="lwdown_00">00Z Run -- Long Wave
+ <option value="swdown_00">00Z Run -- Short Wave
+ <option value="cflux_00">00Z Run -- Convective Flux Down
+ <option value="bdeckt_12">12Z Run -- Bridge Deck Temp
+ <option value="ifrost_12">12Z Run -- Frost Present
+ <option value="frostd_12">12Z Run -- Frost Depth
+ <option value="lwdown_12">12Z Run -- Long Wave
+ <option value="swdown_12">12Z Run -- Short Wave
+ <option value="cflux_12">12Z Run -- Convective Flux Down
+</select>
+<input type="submit" value="View Loop"> (<i>Requires java</i>)
+</form>
+
+<!--
+<h3>Time series:</h3>
+<li><a href="<?php echo $rooturl; ?>/plotting/24h/1station.php?station=AMW">Recent Ames ASOS</a></li>
+<li><a href="<?php echo $rooturl; ?>/plotting/scan/radn5temps.php">SCAN site recent soil temps w/ rad</a></li>
+
+<h3>Frost Forecasts:</h3>
+&nbsp; &nbsp; <b>ISU Frost Model</b>
+<BR><a href="/plotting/frost/accum.php?model=MM5">with ISU MM5 input data</a>
+<BR><a href="/plotting/frost/accum.php?model=SSI">with SSI input data</a>
+
+<h3>Forecast Comparison:</h3>
+<a href="/plotting/frost/f201.php?varnum=4">MM5 Skin Temp vs SSI Pavement</a>
+<br><a href="/plotting/frost/f201.php?varnum=5">MM5 2m Air Temp vs SSI Air Temp</a>
+<br><a href="/plotting/frost/f201.php?varnum=6">MM5 2m Dew Point vs SSI Dew Point</a>
+<br><a href="/plotting/frost/f201.php?varnum=7">MM5 2m Wind Speed vs SSI Wind Speed</a>
+
+<BR><BR>
+-->
+
+<?php include("$rootpath/include/footer.php"); ?>

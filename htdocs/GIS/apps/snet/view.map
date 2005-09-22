@@ -1,0 +1,146 @@
+#
+# Start of map file
+#
+NAME raining
+STATUS ON
+SIZE 500 400
+#SYMBOLSET symbols/symbol.sym
+FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+EXTENT 200000 4400000 710000 4900000
+UNITS METERS
+SHAPEPATH "/mesonet/data/gis/shape/"
+SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+IMAGECOLOR -1 -1 -1
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+  "init=epsg:26915"
+#  "proj=lcc"
+#   "lat_1=20"
+#   "lat_2=60"
+#   "lat_0=40"
+#   "lon_0=-96"
+#   "x_0=0"
+#   "y_0=0"  
+END
+
+#
+# Start of web interface definition
+#
+WEB
+  HEADER q_header.html
+  TEMPLATE fancy.html
+  FOOTER q_footer.html
+  MINSCALE 90000
+  MAXSCALE 40000000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/fancy.log"
+END
+
+
+
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+#LAYER
+#  NAME background
+#  DATA images/back1.tif
+#  TYPE RASTER
+#  STATUS ON
+#  PROJECTION
+#   "proj=latlong"
+#  END
+#END
+
+
+LAYER
+  NAME counties
+  STATUS DEFAULT
+  TYPE POLYGON
+  DATA unproj/iowa/iacounties.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    OUTLINECOLOR 255 0 0
+    COLOR 200 200 200
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME sites
+  # Connect to a remote spatial database
+  CONNECTION "user=nobody dbname=iem port=9999 host=10.10.10.30"
+  # Get the lines from the 'geom' column of the 'roads' table
+  DATA "geom from (select geom, station,
+    oid from current WHERE (valid > CURRENT_TIMESTAMP - '2 hours'::interval)
+    and network = 'KCCI') as foo using unique oid using srid=4326"
+  STATUS DEFAULT
+  TYPE POINT
+  LABELCACHE OFF
+  PROJECTION
+   "init=epsg:4326"
+  END
+  TEMPLATE "http://kcci.mesonet.agron.iastate.edu/site.phtml?station=[station]"
+  TOLERANCE 200
+  CLASS
+   SYMBOL 'circle'
+   SIZE 10
+   COLOR 0 0 0
+  END
+END
+
+
+LAYER
+  NAME states
+  STATUS ON
+  TYPE POLYGON
+  DATA unproj/us/states.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+#  CLASSITEM "STATE_FIPS"
+  CLASS
+#    NAME "IOWA"
+#    EXPRESSION "13"
+    OUTLINECOLOR 0 255 0
+    COLOR 110 135 95
+  END
+END
+
+
+
+LAYER
+  NAME KCCI
+  STATUS DEFAULT
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/26915/KCCI/KCCI_N0R_0.tif
+  #DATA /mesonet/www/html/GIS/data/images/kcci2.tif
+  OFFSITE 0 0 0
+  TRANSPARENCY 80
+  PROJECTION
+   "init=epsg:26915"
+  END
+END
+
+
+END

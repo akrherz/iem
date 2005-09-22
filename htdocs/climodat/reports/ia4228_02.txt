@@ -1,0 +1,19 @@
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: 30 Aug 2005 
+# Climate Record: 01 Jan 1951 -> 01 Aug 2005
+# Site Information: [IA4228] JEFFERSON
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+ TWELVE SIGNIFICANT RAINFALL EVENTS  
+ MONTH  DAY  YEAR   AMOUNT
+   7      9  1993     7.83
+   6     30  1986     5.51
+   8     22  1954     5.50
+   4     24  1955     4.90
+   9     13  1978     4.67
+   7      9  2003     4.61
+   7     25  1992     4.53
+   6     16  1957     3.98
+   6     21  1954     3.83
+   7      4  1981     3.77
+   6      4  1991     3.63
+   5      5  2003     3.58

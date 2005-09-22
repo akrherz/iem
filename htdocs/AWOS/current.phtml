@@ -1,0 +1,207 @@
+<?php 
+include("../../config/settings.inc.php");
+  $REFRESH = "<meta http-equiv=\"refresh\" content=\"300; URL=current.php?sortcol=$sortcol\">";
+  $TITLE = "IEM | AWOS Network Current Conditions";
+  $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+<!--//BEGIN Script
+function new_window(url) {
+ link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
+} 
+//END Script-->
+</script>
+<script type="text/javascript" src="/js/tableruler.js"></script>
+<script type="text/javascript">
+    window.onload=function(){tableruler();}
+</script>';
+  include("$rootpath/include/header.php"); 
+  include("$rootpath/include/mlib.php"); 
+  include("$rootpath/include/iemaccess.php");
+  include("$rootpath/include/iemaccessob.php");
+
+  $iem = new IEMAccess();
+  $awos = $iem->getNetwork("AWOS");
+?>
+<div class="text">
+<b>Nav:</b><a href="/AWOS">AWOS</a> <b> > </b> Current Conditions
+
+<?php $current_network = "AWOS"; include("$rootpath/include/current_bar.inc.php"); ?>
+
+<p><h3 class="subtitle"><center>Current AWOS Conditions</center></h3>
+
+<p>** This page will automatically refresh every five minutes.
+
+<?php
+if (strlen($sortcol) == 0) {
+  $sortcol = "station";
+}
+$vals = Array("station" => "Station ID", "gmt_ts" => "Ob Time", 
+"relh" => "Relative Humidity", "sname" => "Site Name",
+  "min_tmpf" => "Today's Low Temperature",
+  "max_tmpf" => "Today's High Temperature",
+"tmpf" => "Temperature", "dwpf" => "Dew Point", "vsby" => "Visibility",
+"sknt" => "Speed", "peak" => "Peak Gust [knots]","alti" => "Altimeter",
+"peak_ts" => "Gust Time", "phour" => "1 hr Rainfall", "pday" => "Today Rainfall", "feel" => "Feels Like");
+
+echo "<br>Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on a column to sort it.<br>\n";
+
+
+?>
+
+<form method="POST" action="/my/current.php">
+
+<table style="font-size: 10pt;" class="ruler">
+<thead>
+<tr>
+  <th rowspan=2>Add</th>
+  <th rowspan=2><a href="current.phtml?sortcol=sname">Station:</a></th>
+  <th rowspan=2><a href="current.phtml?sortcol=gmt_ts">Ob Time</a></th>
+  <th colspan=4>&nbsp;</th>
+  <th colspan=3>Wind [knots]</th>
+  <th colspan=2>&nbsp;</th>
+  <th colspan=2>Rainfall</th></tr>
+
+<tr>
+  <th>
+   <a href="current.phtml?sortcol=tmpf">Temp</a>
+   (<a href="current.phtml?sortcol=max_tmpf">Hi</a> /
+   <a href="current.phtml?sortcol=min_tmpf">Lo</a>)
+ </th>
+  <th><a href="current.phtml?sortcol=dwpf">DewP</a></th>
+  <th><a href="current.phtml?sortcol=feel">Feels</a></th>
+  <th><a href="current.phtml?sortcol=relh">RH%</a></th>
+  <th>Dir</th>
+  <th><a href="current.phtml?sortcol=sknt">Speed</a></th>
+  <th><a href="current.phtml?sortcol=peak">Peak Gust</a>
+   <br>@ <a href="current.phtml?sortcol=peak_ts">Time</a></th>
+  <th><a href="current.phtml?sortcol=alti">Alti</a></th>
+  <th><a href="current.phtml?sortcol=vsby">Vsby</a></th>
+  <th><a href="current.phtml?sortcol=phour">Hour</a></th>
+  <th><a href="current.phtml?sortcol=pday">Today</a></th>
+</tr>
+</thead><tbody>
+<?php
+// http://www.php.net/manual/en/function.asort.php
+
+function aSortBySecondIndex($multiArray, $secondIndex) {
+	while (list($firstIndex, ) = each($multiArray))
+		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+	arsort($indexMap);
+	while (list($firstIndex, ) = each($indexMap))
+		if (is_numeric($firstIndex))
+			$sortedArray[] = $multiArray[$firstIndex];
+		else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+	return $sortedArray;
+}
+
+  while (list($key, $iemob) = each($awos) ){
+    $mydata[$key] = $iemob->db;
+    $mydata[$key]["ts"] = $iemob->ts;
+    $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
+    if ($mydata[$key]["tmpf"] > -99) {
+      $mydata[$key]["tmpf"] = round($mydata[$key]["tmpf"], 0);
+      $mydata[$key]["dwpf"] = round($mydata[$key]["dwpf"], 0);
+      $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
+       f2c($mydata[$key]["dwpf"]) );
+      $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"],
+       $mydata[$key]["relh"], $mydata[$key]["sped"]);
+   } else {
+      $mydata[$key]["tmpf"] = "M";
+      $mydata[$key]["dwpf"] = "M";
+      $mydata[$key]["feel"] = "M";
+      $mydata[$key]["relh"] = "M";
+   } 
+   if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
+      $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
+      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+    } else {
+      $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
+      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+    }
+
+	if ($mydata[$key]["pday"] < 0) $mydata[$key]["pday"] = 0;                                                                               
+  }
+$mydata["MXO"]["pday"] = ' NA '; $mydata["MXO"]["phour"] = ' NA ';
+$mydata["PEA"]["pday"] = ' NA '; $mydata["PEA"]["phour"] = ' NA ';
+$mydata["MPZ"]["pday"] = ' NA '; $mydata["MPZ"]["phour"] = ' NA ';
+$mydata["IIB"]["pday"] = ' NA '; $mydata["IIB"]["phour"] = ' NA ';
+$mydata["VTI"]["pday"] = ' NA '; $mydata["VTI"]["phour"] = ' NA ';
+
+ $finalA = Array();
+ $finalA = aSortBySecondIndex($mydata, $sortcol);
+ $now = time();
+ while (list ($key, $val) = each ($finalA))  { 
+	$parts = $finalA[$key];
+        echo "<tr ";
+        if ($shade) echo "bgcolor=\"#EEEEEE\"";
+        echo ">\n 
+         <td><input type=\"checkbox\" name=\"st[]\" 
+            value=\"".$key."\"></td>";
+
+         $tdiff = $now - $parts["ts"];
+         echo "<td>". $parts["sname"] . "</td>";
+         echo "<td ";
+         if ($tdiff > 10000){
+           echo 'bgcolor="red"';
+           $format = "%d %b %I:%M %p";
+         } else if ($tdiff > 7200){
+           echo 'bgcolor="orange"';
+           $format = "%d %b %I:%M %p";
+         } else if ($tdiff > 3600){
+           echo 'bgcolor="green"';
+           $format = "%d %b %I:%M %p";
+         } else {
+           $format = "%I:%M %p";
+         }
+         echo ">" . strftime($format, $parts["ts"]) ."</td>
+ <td align='center'>". $parts["tmpf"] ."(<font color=\"#ff0000\">".
+ round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
+ round($parts["min_tmpf"],0) ."</font>)</td>
+          <td>". $parts["dwpf"] ."</td>
+          <td>". $parts["feel"] ."</td>
+          <td>". $parts["relh"] ."</td>
+          <td>". $parts["drct"] ."</td>
+          <td>". $parts["sknt"] ;
+          if (intval($parts["gust"]) > 0){
+            echo "G". $parts["gust"];
+          } echo "</td>";
+          echo "<td>". $parts["peak"] ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ."</td>
+          <td>". $parts["alti"] ."</td>
+          <td>". $parts["vsby"] ."</td>
+          <td>". $parts["phour"] ."</td>
+          <td>". $parts["pday"] ."</td></tr>\n";
+      $shade = ! $shade;
+}
+
+
+?>
+</tbody><tfoot>
+<tr>
+ <td colspan=3></td>
+<?php $c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=AWOS&var="; ?>
+ <td><a href="<?php echo $c; ?>tmpf');">Plot</a>
+    (<a href="<?php echo $c; ?>max_tmpf');">Plot</a> /
+     <a href="<?php echo $c; ?>min_tmpf');">Plot</a>)</td>
+ <td><a href="<?php echo $c; ?>dwpf');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>feel');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>relh');">Plot</a></td>
+ <td colspan=2><a href="<?php echo $c; ?>barb');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>max_sknt');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>alti');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>vsby');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>phour');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>pday');">Plot</a></td>
+</tr>
+</tfoot>
+
+</table>
+
+<input type="submit" value="Add to Favorites">
+<input type="reset" value="Reset">
+
+</form>
+
+
+<br><br>
+</div>
+
+<?php include("$rootpath/include/footer.php"); ?>

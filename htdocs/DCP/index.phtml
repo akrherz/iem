@@ -1,0 +1,51 @@
+<?php 
+include("../../config/settings.inc.php");
+  $page = "dcp";
+  $TITLE = "IEM | GEOS DCP";
+include("$rootpath/include/header.php"); ?>
+
+<h3 class="heading">GEOS DCP</h3>
+
+<div class="text">
+<table><tr><td style="width: 600px" valign="top">
+The Geostationary Operational Environmental Satellites 
+(GOES) Data Collection Platforms (DCPs) are a set of hydrologic and meteorologic
+data collection points.  The DCPs are a collection of networks owned and operated 
+by a host of entities. [<b>1</b>]  The IEM receives this dataset from our UNIDATA
+feed, which contains the products produced by the Office of Hydrological Development
+of the National Weather Service.<p>
+
+The NWS has a fantastic 
+<a href="http://www.nws.noaa.gov/oh/hads/">website</a> if you are curious 
+about this dataset.</td><td>
+
+<div class="ninfo">
+GEOS DCP
+<br>Reports: every 15-60 min
+<br>Stations: 161
+<br><b>Locations</b>
+<br><a href="images/loc_cia.png">Central Iowa</a>
+<br><a href="images/loc_eia.png">Eastern Iowa</a>
+<br><a href="images/loc_ia.png">Iowa</a>
+<br><a href="images/loc_neia.png">NE Iowa</a>
+<br><a href="images/loc_polk.png">Polk County</a>
+</div></td></tr></table>
+
+<p><h3 class="subtitle">Data Products</h3></p>
+<ul>
+<li><a href='/DCP/current.phtml'>Sortable Current Conditions</a></li>
+<li><a href='/DCP/cat.phtml'>View Current/Past Hourly Data</a></li>
+</ul>
+<p>
+
+
+<b>References:</b><br>
+<b>1</b> <a
+href="http://www.nws.noaa.gov/oh/hads/dcp_operators.html">http://www.nws.noaa.gov/oh/hads/dcp_operators.html</a>
+, viewed 25 Feb 2002
+<br><b>2</b> <a href="http://water.usgs.gov/pubs/circ/circ1123/">http://water.usgs.gov/pubs/circ/circ1123/</a>
+ , viewed: 21 Jun 2003
+
+<br></div>
+
+<?php include("$rootpath/include/footer.php"); ?>

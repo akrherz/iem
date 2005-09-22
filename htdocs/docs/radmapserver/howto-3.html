@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.20">
+ <TITLE>Mapserver + NEXRAD Composite HOWTO: Building the composites with GEMPAK</TITLE>
+ <LINK HREF="howto-4.html" REL=next>
+ <LINK HREF="howto-2.html" REL=previous>
+ <LINK HREF="howto.html#toc3" REL=contents>
+</HEAD>
+<BODY>
+<A HREF="howto-4.html">Next</A>
+<A HREF="howto-2.html">Previous</A>
+<A HREF="howto.html#toc3">Contents</A>
+<HR>
+<H2><A NAME="s3">3.</A> <A HREF="howto.html#toc3">Building the composites with GEMPAK</A></H2>
+
+<P>Probably the easiest component of this HOWTO is building the composite 
+image within GEMPAK!  If you are running a version of GEMPAK before 5.6.j, you
+will need to download and install the nex2img program.  If you already have
+nex2img, then you can skip the next subsection.</P>
+<P>GEMPAK is publicly available from the 
+<A HREF="http://my.unidata.ucar.edu/content/software/gempak/index.html">UNIDATA website</A>.  Installing GEMPAK 
+is way outside the scope of this HOWTO.</P>
+<P>Nex2img was written by Steve Chiswell at the UNIDATA Program Center.  His 
+program is the key to making this whole system work.  Before nex2img, it was
+extremely tricky to get the geo-referencing of RASTERs, produced in GEMPAK, correct for use 
+within GIS.</P>
+<H2><A NAME="ss3.1">3.1</A> <A HREF="howto.html#toc3.1">Building nex2img</A>
+</H2>
+
+<P>Building nex2img is very straightforward with GEMPAK already installed.
+<BLOCKQUOTE><CODE>
+<HR>
+<PRE>
+$ cd $NAWIPS
+$ wget http://mesonet.agron.iastate.edu/docs/radmapserver/nex2img.tar.gz
+$ tar -zxvf nex2img.tar.gz
+$ cd unidata/programs/nex2img
+$ make clean
+$ make all
+$ make install
+$ make clean
+$ rehash
+$ which nex2img
+</PRE>
+<HR>
+</CODE></BLOCKQUOTE>
+</P>
+<P>With the nex2img program built, you are now ready to generate the composites.</P>
+<H2><A NAME="ss3.2">3.2</A> <A HREF="howto.html#toc3.2">Scripting the generation of the composite</A>
+</H2>
+
+<P>This simple script will crank out an image.  I am specifying a GRDAREA for
+Iowa and extended. You will want to modify for your own needs.  Keep in mind
+that this application composites individual site NEXRADs,  you can't build a nationwide 
+composite without having all the individual sites. 
+<BLOCKQUOTE><CODE>
+<HR>
+<PRE>
+#!/bin/csh
+
+# Replace to fit your environment!
+source /home/nawips/Gemenviron
+
+set gtime=`date -u +'%y%m%d/%H%M'`
+
+rm -f radar.gif radar.tif >&amp; /dev/null
+
+nex2img &lt;&lt; EOF > nex2img.log
+ GRDAREA  = 37.00;-104.00;48.99;-87.01
+ PROJ     = CED
+ KXKY     = 1700;1200
+ CPYFIL   =  
+ GFUNC    = n0r
+ RADTIM   = ${gtime}
+ RADDUR   = 15
+ RADFRQ   = 
+ STNFIL   = nexrad.tbl
+ RADMODE  = P
+ RADFIL   = radar.gif
+ LUTFIL   = upc_rad24.tbl
+ list
+ run
+
+ exit
+EOF
+
+if (-e radar.gif) then
+  convert radar.gif radar.tif
+  cp radar.tif /var/www/htdocs/radmapserver/gisdata
+endif
+</PRE>
+<HR>
+</CODE></BLOCKQUOTE>
+</P>
+<P>The nex2img program will generate an image called "radar.gif".  In order to 
+work with most GIS systems, you will probably want to convert this file
+to another format namely TIFF, but you can choose JPG or PNG.  We then place
+the radar.tif file in the webserver directory for later use by mapserver.</P>
+<P>Without getting too long winded, lets discuss image formats.  The easiest 
+format for use within GIS is probably TIFF.  Although very large, uncompressed
+tiff files are extremely fast within GIS.  The reason is that the application 
+can "seek" the file to only pull needed data.  With compressed formats, an
+entire set of data needs to be uncompressed and then processed.  Also, most 
+people will probably try loading the image in ESRI's ArcView.  ArcView likes
+TIFF files and has built in support for them.</P>
+<H2><A NAME="ss3.3">3.3</A> <A HREF="howto.html#toc3.3">Geo-referencing the composite image</A>
+</H2>
+
+<P>Now that we have an image, we need to georeference it.  Georeferencing of 
+images is done with a world file.  A world file is simply a file with 6 lines
+of meta data describing the navigation of an image.  The format is for 
+example:
+<BLOCKQUOTE><CODE>
+<HR>
+<PRE>
+0.010 (size of pixel in x direction)
+0.000000000000 (rotation term for row) *Typically zero
+0.000000000000 (rotation term for column) *Typically zero
+-0.010 (size of pixel in y direction)
+-95.0000 (x coordinate of centre of upper left pixel in map units)
+42.300 (y coordinate of centre of upper left pixel in map units) 
+</PRE>
+<HR>
+</CODE></BLOCKQUOTE>
+
+Note that the units of the geo-referencing are in the same units of the
+projection.  Since we are in lat-lon space, the units are decimal degrees.
+If you were in UTM space, it would probably be meters.
+For the image generated from my example of nex2img, my world file 
+would look like
+<BLOCKQUOTE><CODE>
+<HR>
+<PRE>
+   0.01000
+   0.00000
+   0.00000
+  -0.01000
+-104.00000
+  49.00000
+</PRE>
+<HR>
+</CODE></BLOCKQUOTE>
+</P>
+<H3>Naming the world file</H3>
+
+<P>Depending on your GIS, the naming convention of your world file may be 
+different.  Many systems use a generic <I>.wld</I> to describe any world 
+file.  Others use variants on the image format nomenclature, for instance, the world file
+for TIF formated files is <I>.tfw</I> and for PNG is <I>.pngw</I>. For our
+purposes, we will use <I>.wld</I>.</P>
+<H2><A NAME="ss3.4">3.4</A> <A HREF="howto.html#toc3.4">Lets pause for a second</A>
+</H2>
+
+<P>If you have made it this far, you are probably wondering what to do with the
+RASTER image with no political borders or other denotations and this silly
+6 line world file.  The next section shows an example of taking this image
+and using the powerful Mapserver to produce a Web Map application.  Trust me, 
+this is not the only application of this data.</P>
+<HR>
+<A HREF="howto-4.html">Next</A>
+<A HREF="howto-2.html">Previous</A>
+<A HREF="howto.html#toc3">Contents</A>
+</BODY>
+</HTML>

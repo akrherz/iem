@@ -1,0 +1,132 @@
+<?php 
+include("../../config/settings.inc.php");
+$page = "gis";
+$TITLE = "IEM | RadView";
+include("$rootpath/include/header.php"); ?>
+<b>Nav:</b> <a href="/GIS/">GIS</a> > IEM RadView
+
+<h3 class="heading">IEM RadView</h3>
+
+<div class="text">
+<p>Our RadView project is an effort to get real time NWS NEXRAD information
+into GIS applications.  We are currently arriving at solutions from a 
+variety of angles and are looking for public interest in this dataset.  
+Please <a href="/info/contacts.php">contact us</a> if you are at all interested...
+
+<p>Data provided from this service is for educational purposes only.  Errors
+can and do happen.
+
+<h3 class="subtitle">News:</h3>
+<ul>
+ <li><b>28 Apr 2004:</b> Release the <a href="/request/gis/nids2gis.phtml">NIDS 2 GIS</a> application.
+ <li><b>26 Apr 2004:</b> Add in links for the nationwide composites of NTP (storm total precip) and N1P (1 hour precip)!
+ <li><b>13 Jan 2004:</b> Release the nationwide composite WMS!
+ <li><b>16 Sep 2003:</b> Add US base reflectivity, remove Iowa NTP product.
+ <li><b>04 Jul 2003:</b> The composite base reflectivity plot has been 
+greatly improved.  The geo-referencing is nearly perfect!
+ <li><b>01 Jul 2003:</b> Initial release to the public.</li>
+</ul>
+
+<h3 class="subtitle">NEXRAD + Mapserver Howto:</h3>
+
+<br>Here is a <a href="/docs/radmapserver/">HOWTO</a> on generating NEXRAD 
+composites with GEMPAK and then displaying them in Mapserver.  Feedback
+is certainly welcome.<p>
+
+<h3 class="subtitle">Geo-referenced Images:</h3>
+
+<br>Using geo-referenced images is probably the simpliest way of getting data 
+into your GIS.  Displaying timestamps and color bars are tricky business. The
+following URLs contain pure RASTER data layers. 
+
+<table border=1>
+<tr>
+  <th>RADAR</th>
+  <td><a href="http://www.epsg.org">EPSG Proj Code</a></td>
+  <td>Data Files</td>
+  <td>World File</td>
+</tr>
+
+<tr>
+  <td>Iowa Base Reflectivity Composite<br>(generated every 5 minutes)</td>
+  <td>4326<br> <i>(Lat-Lon)</i></td>
+  <td>
+   <li><a href="/GIS/data/gis/images/unproj/MWCOMP/n0r_0.png">PNG format</a></li>
+   <li><a href="/GIS/data/gis/images/unproj/MWCOMP/n0r_0.tif">8bit TIFF</a></li></td>
+  <td><a href="/GIS/data/gis/images/unproj/MWCOMP/n0r_0.tfw">Decimal Degree Units</a></td>
+</tr>
+
+<tr>
+  <td>US Base Reflectivity (N0R) Composite<br>(generated every 5 minutes)</td>
+  <td>4326<br> <i>(Lat-Lon)</i></td>
+  <td>
+   <li><a href="/GIS/data/gis/images/unproj/USCOMP/n0r_0.png">PNG format</a></li>
+   <li><a href="/GIS/data/gis/images/unproj/USCOMP/n0r_0.tif">8bit TIFF</a></li></td>
+  <td><a href="/GIS/data/gis/images/unproj/USCOMP/n0r_0.tfw">Decimal Degree Units</a></td>
+</tr>
+
+<tr>
+  <td>US Storm Total Precip (NTP) Composite<br>(generated every 5 minutes)</td>
+  <td>4326<br> <i>(Lat-Lon)</i></td>
+  <td>
+   <li><a href="/GIS/data/gis/images/unproj/USCOMP/ntp_0.png">PNG format</a></li>
+   <li><a href="/GIS/data/gis/images/unproj/USCOMP/ntp_0.tif">8bit TIFF</a></li></td>
+  <td><a href="/GIS/data/gis/images/unproj/USCOMP/ntp_0.tfw">Decimal Degree Units</a></td>
+</tr>
+
+<tr>
+  <td>US 1 Hour Precip (N1P) Composite<br>(generated every 5 minutes)</td>
+  <td>4326<br> <i>(Lat-Lon)</i></td>
+  <td>
+   <li><a href="/GIS/data/gis/images/unproj/USCOMP/n1p_0.png">PNG format</a></li>
+   <li><a href="/GIS/data/gis/images/unproj/USCOMP/n1p_0.tif">8bit TIFF</a></li></td>
+  <td><a href="/GIS/data/gis/images/unproj/USCOMP/n1p_0.wld">Decimal Degree Units</a></td>
+</tr>
+
+
+<tr>
+  <td>KCCI-TV SuperDoppler<br>(generated every 2-3 minutes)</td>
+  <td>26915
+   <br><i>UTM Zone 15N</i></td>
+  <td>
+    <li><a href="/GIS/data/gis/images/26915/KCCI/KCCI_N0R_0.png">PNG format</a></li>
+    <li><a href="/GIS/data/gis/images/26915/KCCI/KCCI_N0R_0.tif">8bit TIFF</a></li></td>
+  <td><a href="/GIS/data/gis/images/26915/KCCI/KCCI_N0R_0.wld">Meters</a></td>
+</tr>
+
+</table><p>
+
+<h3 class="subtitle">Web Map Service (WMS):</h3>
+
+<br><a href="http://www.opengis.org/techno/specs/01-068r3.pdf">WMS</a> is a neat way to pull in images into your GIS, if your GIS can act
+as a WMS client.  Describing WMS is beyond the scope of this page, but we have
+set up a WMS on our webserver.  Point your WMS aware client at 
+<br><br><code><?php echo $rooturl; ?>/wms/radar.php?</code><br><br>
+for Iowa imagery in EPSG: 26915 (<i>NAD83 / UTM Zone 15N</i>)
+
+<br><b>-or</b>
+
+<br />Base Reflectivity: &nbsp; <code><?php echo $rooturl; ?>/cgi-bin/wms/nexrad/n0r.cgi?</code>
+<br />1 Hour Rainfall: &nbsp; <code><?php echo $rooturl; ?>/cgi-bin/wms/nexrad/n1p.cgi?</code>
+<br />Storm Total Rainfall: &nbsp; <code><?php echo $rooturl; ?>/cgi-bin/wms/nexrad/ntp.cgi?</code>
+
+<br /><br />for United States imagery in EPSG: 4326 (<i>unprojected lat-lon</i>)
+
+<p><b>Note:</b> The WMS service should be able to send back an image in the
+projection of your choice.  This has worked during the limited testing done in house.
+
+<p>There are many free web WMS clients available on the Internet.  Recently,
+ESRI has released an <a href="http://www.opengis.org">OGC</a> extension 
+supporting WMS for their free client called <a href="http://www.esri.com/software/arcexplorer/">ArcExplorer</a>.  After downloading ArcExplorer, you will want to also download the <a href="http://gis.esri.com/download/index.cfm?downloadid=321">Interoperability Extension</a>.  ESRI has also released an extension for 
+ArcIMS! 
+
+<h3 class="subtitle">Notes and Caveats:</h3>
+<ol>
+<li>The storm total precipitation (NTP) product does not directly composite.  Each 
+NEXRAD site reports the value for a different timespan.  Basically, once the
+radar detects rain, it will begin to accumulate the rainfall in the NTP product.
+Once it stops raining for an hour, the value is reset to zero.  Since all sites
+reset at different times, you see the issue.</li>
+</ol></div>
+
+<?php include("$rootpath/include/footer.php"); ?>

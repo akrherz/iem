@@ -1,0 +1,130 @@
+<?php
+/** POC of doing some interesting things with county level maps */
+
+$county = $_GET['county'];
+$cntyext = $_GET['cntyext'];
+$ul_x = $_GET["ul_x"];
+$ul_y = $_GET["ul_y"];
+$lr_x = $_GET["lr_x"];
+$lr_y = $_GET["lr_y"];
+$map_x = $_GET["map_x"];
+$map_y = $_GET["map_y"];
+$map_height = $_GET["map_height"];
+$map_width = $_GET["map_width"];
+
+if ($ul_x != ""){
+  $dx = ($ul_x - $lr_x) / $map_width;
+  $dy = ($ul_y - $lr_y) / $map_height;
+  $clickx = ($map_x * (0 - $dx) ) + $ul_x;
+  $clicky = ($map_y * (0 - $dy) ) + $ul_y;
+  $extents = Array($clickx - 0.3, $clicky - 0.3, $clickx + 0.3, $clicky + 0.3);
+}else if ($cntyext != ""){
+  $extents = explode(" ", $cntyext);
+} else {
+  $extents = Array(-96.639706, 39.1497,-90.140061, 44.726);
+}
+?>
+
+<?php
+dl("php_mapscript_401.so");
+$TITLE = "IEM | GIS RADAR Comparison";
+include("/mesonet/php/include/header.php");
+include("lib.php");
+include("/mesonet/www/html/include/nexradLoc.php");
+
+
+$latlon = ms_newprojectionobj("proj=latlong");
+$p26915 = ms_newprojectionobj("init=epsg:26915");
+
+
+
+$cntyMdpoint = ms_newpointobj();
+$cntyMdpoint->setXY( ($extents[0] + $extents[2])/2, 
+                     ($extents[1] + $extents[3])/2 );
+$cntyMdpoint->project($latlon, $p26915);
+
+$n = Array("DMX", "DVN", "ARX", "MPX", "FSD", "OAX", "EAX", "KCCI");
+$nexrads["KCCI"] = Array("lat"=> 41.8072, "lon"=> -93.6214);
+$distances = Array();
+while (list($key, $site) = each($n) ){
+  $r = ms_newpointobj();
+  $r->setXY($nexrads[$site]['lon'], $nexrads[$site]['lat']);
+  $r->project($latlon, $p26915);
+  $distances[$site] = round( $r->distanceToPoint($cntyMdpoint) / 1000 , 0);
+
+}
+
+//print_r($distances);
+
+$site = "DMX"; $dmx_url = drawCountyNEXRAD($site, $extents);
+$site = "DVN"; $dvn_url = drawCountyNEXRAD($site, $extents);
+$site = "ARX"; $arx_url = drawCountyNEXRAD($site, $extents);
+$site = "FSD"; $fsd_url = drawCountyNEXRAD($site, $extents);
+$site = "OAX"; $oax_url = drawCountyNEXRAD($site, $extents);
+$site = "MPX"; $mpx_url = drawCountyNEXRAD($site, $extents);
+$site = "EAX"; $eax_url = drawCountyNEXRAD($site, $extents);
+$kcci_url = drawKCCI($extents);
+?>
+
+<a href="/current/radar.phtml">Current RADAR Products</a> <b> > </b> RADAR comparison
+
+<h3 class="heading">RADAR Base Reflectivity Comparison:</h3><p>
+<div class="text">
+<table>
+<tr>
+ <td><b>DMX - Des Moines:</b>
+   <br><i>Distance:</i> <?php echo $distances['DMX']; ?> km
+   <br><img src="<?php echo $dmx_url; ?>"></td>
+ <td><b>KCCI-TV - Des Moines:</b>
+   <br><i>Distance:</i> <?php echo $distances['KCCI']; ?> km
+   <br><img src="<?php echo $kcci_url; ?>"></td>
+ <td rowspan=4 valign="TOP">
+  <b>Directions:</b> Click on the State NEXRAD view to change your comparison 
+  area (shown in white)<br>
+  <?php 
+  drawStateNEXRAD($extents); 
+ 
+  $fcontents = file('/mesonet/data/gis/images/unproj/DMX/DMX.log');
+  while (list ($line_num, $line) = each ($fcontents)) {
+    $radTimes[$line_num] = substr($line,0,12);
+  }
+  $radTS = substr($radTimes[8], 4, 2) ."/". substr($radTimes[8], 6, 2) ." ". substr($radTimes[8], 8, 4) ."Z";
+  echo "<a href=\"compare.phtml\">Reset app</a> <i>(view state)</i>";
+  echo "<br>RADAR composite valid: $radTS ";
+  ?>
+<p><b>Notes:</b>
+<li>This app is purely for educational purposes.</li>
+<li>Distances are measured from the RADAR site to the midpoint of the area 
+ you selected.
+<li>Only radars in precip mode are shown.</li>
+
+</td>
+</tr>
+<tr>
+ <td><b>ARX - LaCrosse:</b>
+   <br><i>Distance:</i> <?php echo $distances['ARX']; ?> km
+   <br><img src="<?php echo $arx_url; ?>"></td>
+ <td><b>MPX - Minneapolis:</b>
+   <br><i>Distance:</i> <?php echo $distances['MPX']; ?> km
+   <br><img src="<?php echo $mpx_url; ?>"></td>
+</tr>
+<tr>
+ <td><b>FSD - Sioux Falls:</b>
+   <br><i>Distance:</i> <?php echo $distances['FSD']; ?> km
+   <br><img src="<?php echo $fsd_url; ?>"></td>
+ <td><b>OAX - Omaha:</b>
+   <br><i>Distance:</i> <?php echo $distances['OAX']; ?> km
+   <br><img src="<?php echo $oax_url; ?>"></td>
+</tr>
+<tr>
+ <td><b>DVN - Davenport:</b>
+   <br><i>Distance:</i> <?php echo $distances['DVN']; ?> km
+   <br><img src="<?php echo $dvn_url; ?>"></td>
+ <td><b>EAX - Pleasant Hill:</b>
+   <br><i>Distance:</i> <?php echo $distances['EAX']; ?> km
+   <br><img src="<?php echo $eax_url; ?>"></td>
+</tr>
+
+</table></div>
+
+<?php include("/mesonet/php/include/footer.php"); ?>

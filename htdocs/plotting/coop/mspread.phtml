@@ -1,0 +1,32 @@
+<?php
+$month = isset($_GET['month']) ? $_GET['month'] : date("m");
+$day = isset($_GET['day']) ? $_GET['day'] : date("d");
+$ts = strtotime("2003-$month-$day");
+$pts = strftime("2003-%m-%d", $ts);
+?>
+
+<?php
+ $page = "plotting";
+ $TITLE = "IEM | Monthly Temperature Spreads";
+include("/mesonet/php/include/header.php"); 
+ include("../../include/forms.php"); ?>
+
+<p><h3 class="heading">Monthly Temperature Spreads</h3><p>
+
+<p>Related: <a href="spread_fe.phtml">View by Date</a>
+<b>|</b> <a href="gspread.phtml">View by Season</a>
+
+<p><img src="images/spread_jan.png">
+<p><img src="images/spread_feb.png">
+<p><img src="images/spread_mar.png">
+<p><img src="images/spread_apr.png">
+<p><img src="images/spread_may.png">
+<p><img src="images/spread_jun.png">
+<p><img src="images/spread_jul.png">
+<p><img src="images/spread_aug.png">
+<p><img src="images/spread_sep.png">
+<p><img src="images/spread_oct.png">
+<p><img src="images/spread_nov.png">
+<p><img src="images/spread_dec.png">
+
+<?php include("/mesonet/php/include/footer.php"); ?>

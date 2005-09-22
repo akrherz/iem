@@ -1,0 +1,91 @@
+<?php  
+include("../../config/settings.inc.php");
+$TITLE = "IEM | School Network Wind Gusts";
+include("$rootpath/include/header.php");  ?>
+
+<h3 class="heading">Automated Wind Gust Alerts</h3><p>
+
+<div class="text">
+<div style="float: left; width:300px; font-size: smaller; margin: 5px; border: 1px solid #000; text-align: center;">
+<img src="nws-alerts.png"><br />Forecasters at the Des Moines Forecast Office evaluating a wind gust alert.</div>
+<p>The KCCI and KELO network of weather sensors based at schools (hereafter: SchoolNet) relays live weather information to the IEM.  This feed is monitored for
+wind gusts of 50 MPH and higher.  When such an observation is received, an
+alert message is generated and immediately sent to the NWS AWIPS system.  This
+page describes this data relay and also tries to explain the wind gust reports.</p>
+
+<p>First, a caveat.  We are well aware of the siting issues at some of the 
+SchoolNet sites.  Local effects of buildings and sensor elevation can enhance
+the wind flow past a sensor.  The instantaneous nature of the wind observations
+also tend to produce gustier winds than an averaged value.  Having said all of
+that, the sensors provide valuable information for many communities that do
+not have an automated sensor.  Wind gust alerts are <b>NOT A PROXY</b> to
+issuing a weather warning.  They are evaluated along with the other data
+sources to provide accurate information for the public.</p>
+
+<p>Here is what a wind gust alert looks like.  Line numbers have been added
+for reference. (Fictitious report shown)</p>
+
+<br clear="all" />
+
+<pre style="text-align: left; margin: 5px; padding: 5px; background: #eeeeee; border: 1px solid #000;"> 1 .A SPEI4 0320  C DH1454/UG 51
+ 2 : IEM [DSM] Wind Gust Alert 51 MPH for PELLA MS
+ 3 :    [Threshold: 50 MPH]
+ 4 : Details:
+ 5 :    Site:  PELLA MS  [SPEI4]
+ 6 :    Latest Observation @ 2004-03-20 02:54 PM
+ 7 :    Alert Gust: 51 from the N
+ 8 :    Air Temp : 53 [F]  Rain Today: 0.0 [inch]
+ 9 :    Today's Max Gust:  55 MPH from the N   @ 02:27 PM
+10 : All Wind Obs since last ob at: 20 Mar 2004 02:53 PM
+11 :    42 MPH from the N
+12 :    45 MPH from the NNW
+13 :    34 MPH from the N
+14 :    29 MPH from the N
+15 :    43 MPH from the NNW
+16 :    34 MPH from the N
+17 :    51 MPH from the N
+18 :    44 MPH from the N
+19 :    37 MPH from the N
+20 :    38 MPH from the N
+</pre>
+
+<p>
+<ul>
+ <li>This product is SHEF encoded so that computers can read the report as 
+  well as humans.  <i>Line 1</i> contains the SHEF formatted message.</li>
+ <li><i>Line 2</i> quickly gives the basics of this alert.  Speed and site.  Forecasters are very busy during severe weather and don't need to be reading confusing products to be getting the necessary info.</li>
+ <li><i>Line 3</i> has the current threshold that was exceeded for this alert to be generated.  During some events, the threshold will be increased to 55 or 60 MPH to cut down on the alerts.  This is typically during strong synoptic events and not during thunderstorms.</li>
+ <li><i>Line 4-9</i> give the latest observation from the site as well as the maximum gust for the day.</li>
+ <li><i>Line 10-20</i> give all of the wind observations since the last time the source was checked for threshold criteria winds.  For this alert, you can see that 10 obs were reported in the past minute!  This is common for the SchoolNet sites.</li>
+</ul>
+
+<p>Sometimes, this line of text may appear in the report:</p>
+<pre style="text-align: left; margin: 5px; padding: 5px; background: #eeeeee; border: 1px solid #000;">: WARNING: First ob since 14 Mar 2004 12:31 AM [674 minutes]. Perhaps Offline?
+</pre>
+<p>This indicates that the site just recently came back online and the wind
+alert may not be current.  This sometimes happens when a school looses power
+during a thunderstorm and once power is restored, the peak wind gust shows
+up in the feed. Due to the nature of the data flow, we can not identify the
+exact time of the gust during the period of being offline.</p>
+
+<h3 class="subtitle">Auto Relay to the NWS:</h3>
+
+<p>Here is the first alert that was automatically relayed to the NWS on
+16 April 2002.</p>
+
+<pre style="text-align: left; margin: 5px; padding: 5px; background: #eeeeee; border: 1px solid #000;">KCCI SNET OB: [19:30]   51 MPH GUST SPAI4 Panorama _ Panora
+   LATEST OB: [19:30] 75/65 26MPH from SW  P: 00.00" RR: 00.00"
+</pre>
+
+<p>The alerts are automatically sent to the NWS's Local Data Acquistion and
+Dissemination [LDAD] server via <a href="http://my.unidata.ucar.edu/content/software/ldm/index.html">UNIDATA's LDM</a> software.  LDM makes the transfer of
+the alert on the IEM server to the NWS AWIPS system very easy and fast!</p>
+
+<p>Individual NWS offices can subscribe to any number of the sites in the 
+SchoolNets.  Some choose to subscribe to sites upstream of their CWA (County Warning Area) to give them situational awareness of approaching storms.</p>
+
+<h3 class="subtitle">Questions?</h3>
+
+<p>Please feel free to <a href="<?php echo $rooturl; ?>/info/contacts.php">contact us</a> if you have any questions!</p>
+</div>
+<?php include("$rootpath/include/footer.php"); ?>

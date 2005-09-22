@@ -1,0 +1,320 @@
+body {
+	font-family:Arial,Helvetica,Sans-serif;
+	font-size:80%;
+  margin: 3px;
+  background-color:#ffffff;
+}
+.f14{
+ font-size: 14pt;
+}
+.kcci{
+ background: #00bfff;
+}
+.kelo{
+ background: #e9967a;
+}
+.tabcommands{
+        color: blue; 
+        font-size: 12pt; 
+        text-decoration: none; 
+}
+div.def{
+ margin-left: 15pt;
+ margin-top: 0pt;
+}
+.warn{
+  background: yellow;
+  font-weight: bold;
+}
+font.def{
+  font-weight: bold;
+  color: green;
+  font-size: 12pt;
+}
+.ninfo{
+  font-size: smaller;
+  float: right;
+  margin: 3px;
+  padding: 3px;
+  border: 1px solid #000;
+  background-color: #EEEEEE;
+}
+div.ptitle{
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+div.left{
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: left;
+}
+font.ref{
+  font-size: 11pt;
+  font-weight: bold;
+}
+.tdtop{
+  background-color: #EEEEEE;
+}
+thead th,tfoot td{
+        background:#ddd;
+}
+tr.ruled{
+        background:#9cf;
+}
+table.ruler{
+        border:1px solid #000;
+        border-collapse:collapse;
+}
+th.ruler,td.ruler{
+        border:1px solid #000;
+        border-collapse:collapse;
+        padding: 2px;
+}
+table.std{
+  padding: 0;
+  border: 0;
+  width: 100%;
+}
+table.top{
+  letter-spacing: 0;
+  background-color: #FFFFFF;
+}
+td.heading{
+  background: #336699;
+  color: #fffacd;
+  font-size: 120%;
+  font-weight: bolder;
+}
+table.subpage{
+  width: 510px;
+}
+table.nav{
+  width: 200px;
+  color: #FFFFFF;
+  background: #336699;
+  height: 400px;
+  vertical-align: top;
+  padding: 0;
+}
+table.subsites{
+  width: 490px;
+  height: 350px;
+  margin-left: 10px;
+}
+tr.grey
+{
+  width: 100%;
+  background: #EEEEEE;
+}
+tr.white
+{
+  width: 100%;
+  background: #FFFFFF;
+}
+td.header{
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: left;
+  width: 50px;
+}
+td.tlink{
+  width: 100px;
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: center;
+}
+.hlink{
+  font-size: 12pt;
+  font-weight: bold;
+}
+td.llink{
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: left;
+  vertical-align: top;
+}
+td.spacer{
+  width: 200px;
+}
+td.shortspacer{
+  width: 150px;
+}
+td.short{
+  margin: 0;
+  height: 5px;
+  text-align: left;
+}
+td.clear{
+  background: transparent;
+}
+td.prodnav{
+  width: 150px;
+  background: #336699;
+  vertical-align: top;
+  color: #FFFFFF;
+}
+img.header{
+  padding: 0;
+  border: 0;
+  background-color: #336699;
+}
+img.pics{
+  text-align: center;
+  width: 328px;
+}
+img.sites{
+  border: 2px;
+}
+A:link, A:visited, A:active, A:hover {
+  color: blue;
+}
+a.nav:link, A.nav:visited, A.nav:active, A.nav:hover {
+  color: white;
+}
+A.select:link, A.select:visited, A.select:active, A.select:hover {
+  color: #ff0000;
+}
+
+a.hlink {
+  color: blue;
+  font-size: 12pt;
+  font-weight: bold;
+  text-decoration: none;
+}
+a.nav{
+  color: #ffffff; 
+  font-size: 12pt;
+  font-weight: bold;
+  text-decoration: none;
+}
+a.select {
+  color: #000000;
+  font-size: 12pt;
+  text-decoration: none;
+}
+a.alink {
+  color: red;
+  font-size: 12pt;
+  font-weight: bold;
+  text-decoration: none;
+}
+a.links{
+  font-size: 12pt;
+  font-weight: bold;
+  text-decoration: none;
+}
+.title{
+  font-size: 16pt;
+  line-height: 20pt;
+  color: #FFFFFF;
+}
+.subtitle{
+  font-size: 12pt;
+  color: #FFFFFF;
+}
+h2 {
+  color: #336699; 
+  font-size: 110%;
+  font-weight: bolder;
+  margin: 5px 5px 5px 0px;
+  padding: 0px;
+}
+.bluet{
+  font-size: 14pt;
+  line-height: 14pt;
+  color: #336699;
+  font-weight: bold;
+  border-bottom-width: 2px;
+  border-color: blue;
+  letter-spacing: 1px;
+}
+.bluet12{
+  font-size: 12pt;
+  line-height: 14pt;
+  color: #336699;
+  font-weight: bold;
+  border-bottom-width: 2px;
+  border-color: blue;
+}
+.blackt{
+  font-size: 12pt;
+  line-height: 12pt;
+  color: black;
+  font-weight: bold;
+  border-bottom-width: 2px;
+  border-color: black;
+  letter-spacing: 2px;
+}
+.greent12{
+  font-size: 12pt;
+  line-height: 14pt;
+  color: green;
+  font-weight: bold;
+  border-bottom-width: 2px;
+  border-color: blue;
+}
+.redt{
+  font-size: 14pt;
+  line-height: 14pt;
+  color: red;
+  font-weight: bold;
+  border-bottom-width: 2px;
+  border-color: blue;
+  letter-spacing: 2px;
+}
+.intro{
+  text-indent: 10px;
+}
+.story{
+  margin-left: 10px;
+}
+.references{
+  font-size: 11px;
+  margin-left: 10px;
+}
+h2.heads  {
+        margin-bottom : 0;
+        font-size : 110%;
+        font-weight : bold;
+        color : #336699;
+        letter-spacing : 0.1em;
+        border-top: black solid 1pt;
+        text-align : left;
+}
+
+div.descript{
+  font-size: smaller;
+  margin-left: 10px;
+  padding-left: 2px;
+  border-left:1px solid black;
+}
+
+#navBar
+{ background-color:#666; padding-left:8px }
+#navBar TD
+{ padding:4px 8px 0px 4px }
+#navLinks
+{ color:#f7f7f7; font:bold 12px verdana,arial,helvetica,sans-serif }
+#navLinks A:link, #navLinks A:visited
+{ color:#f7f7f7; text-decoration:none }
+#navLinks A:hover
+{ color:#ccc; text-decoration:none }
+
+#footer
+{ background-color:#f1f1f1; border-top:1px solid #666; padding:3px 2px }
+#footerLeft
+{ width:165px; white-space:nowrap }
+
+#footer A:link, #footer A:visited
+{ color:#000; text-decoration:none }
+#footer A:hover
+{ color:#444; text-decoration:underline }
+
+#footer HR
+{ display:none }
+#footer TD
+{ font-size:12px; line-height:1.5em; text-align:left }
+

@@ -1,0 +1,19 @@
+# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+# Report Generated: 30 Aug 2005 
+# Climate Record: 01 Jan 1951 -> 01 Aug 2005
+# Site Information: [IA7726] SIOUX-RAPIDS
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+ TWELVE SIGNIFICANT RAINFALL EVENTS  
+ MONTH  DAY  YEAR   AMOUNT
+   8     22  1988     6.33
+   8     23  1973     5.97
+   9     14  2004     5.26
+   8      6  1998     4.82
+   8      5  1972     4.57
+   7      7  1952     3.93
+   8     30  1962     3.80
+   6     25  1969     3.78
+   6      7  1971     3.75
+   6     18  1954     3.68
+   6     16  1996     3.55
+   8     25  1992     3.48

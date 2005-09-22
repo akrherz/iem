@@ -1,0 +1,213 @@
+<html>
+
+<head>
+<style>
+<!--
+BODY { font-family: Georgia; font-size: 10pt; margin-left: 10px; margin-right: 10px; margin-top: 5px; margin-bottom: 5px }
+H1 { font-family: Georgia, serif; font-size: 32pt; color: rgb(128,0,0) }
+H2 { font-family: Georgia, serif; font-size: 26pt }
+H3 { font-family: Georgia, serif; font-size: 18pt }
+H4 { font-family: Georgia, serif; font-size: 16pt }
+H5 { font-family: Georgia, serif; font-size: 14pt }
+H6 { font-family: Georgia, serif; font-size: 12pt }
+P { font-family: Georgia, serif; font-size: 10pt }
+.Indent { text-indent: 20px }
+.Teal { color: rgb(0,128,128) }
+.Maroon {color: rgb(128,0,0) }
+.Small { font-size: 8pt }
+I, EM, ADDRESS { font-family: Georgia, serif }
+B, STRONG { font-family: Georgia, serif }
+TD, TR { font-family: Georgia, serif; font-size: 10pt }
+TH { font-family: Georgia, serif; font-size: 12pt; font-weight: bold }
+-->
+</style>
+<title>MapServer tutorial - Example4.map</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+<p align="center" class="Small"><a href="http://terrasip.gis.umn.edu/cgi-bin/mapserv?map=/terrasipProjects/tutorial/example5.map&layer=state_parks&layer=lakes&layer=counties">Back to Example 5</a> | <a
+href="example5_code.html">View Example 5 Template File</a></p>
+
+<pre>NAME EX5
+EXTENT 74000 4775000 798000 5500000
+SIZE 300 400
+SHAPEPATH &quot;/web01/docs/mis/gis/gislis99/data&quot;
+UNITS meters
+
+LABELOVERLAP FALSE
+
+  WEB
+    TEMPLATE example5.html
+    IMAGEPATH "/data/tmp/"
+    IMAGEURL "/tmp/"
+  END
+
+  SCALEBAR
+    STATUS ON
+    INTERVALS 4
+    SIZE 200 2
+    COLOR 0 0 0
+    OUTLINECOLOR 0 0 0
+    UNITS miles
+    LABEL
+      COLOR 0 0 0
+      SIZE small
+    END
+  END
+
+  REFERENCE
+    STATUS ON
+    IMAGE graphics/reference_150.gif
+    SIZE 150 150
+    EXTENT  125105.727952 4785412.819496 788393.592828 5488749.153129
+    COLOR -1 -1 -1
+    OUTLINECOLOR 255 0 0
+  END
+
+  LAYER
+    NAME &quot;minnesota&quot;
+    DATA minnesota
+    STATUS DEFAULT
+    TYPE POLYGON
+    CLASS
+      COLOR 212 212 212      
+    END
+  END
+
+  LAYER
+    NAME &quot;state_parks&quot;
+    DATA stprkpy3
+    STATUS OFF
+    TYPE POLYGON
+    CLASS
+      NAME &quot;State Parks&quot;
+      COLOR 250 175 25
+    END
+
+    HEADER &quot;state_park_header.html&quot;
+    FOOTER &quot;state_park_footer.html&quot;
+    QUERY     
+      TEMPLATE &quot;state_park_template.html&quot;
+    END
+  END
+
+  LAYER
+    NAME &quot;lakes&quot;
+    DATA lakes_low_sort
+    STATUS OFF
+    TYPE POLYGON
+    MAXFEATURES 75
+    MINSCALE 400000
+    CLASS
+      NAME &quot;Lakes &amp; Rivers&quot;
+      COLOR 128 128 255
+    END
+  END
+
+  LAYER
+    NAME &quot;lakes&quot;
+    DATA lakes
+    STATUS OFF
+    TYPE POLYGON
+    MAXSCALE 400000
+    SYMBOLSCALE 100000
+    LABELITEM &quot;name&quot;
+    CLASS
+      SIZE 2
+      MINSIZE 2
+      MAXSIZE 2
+      SYMBOL 3
+      NAME &quot;Lakes &amp; Rivers&quot;
+      COLOR 128 128 255
+      BACKGROUNDCOLOR 255 255 255
+      LABEL
+        SIZE 12
+        MINSIZE 8
+        MAXSIZE 14
+        COLOR 0 0 0
+        BACKGROUNDCOLOR 255 255 255
+        TYPE TRUETYPE
+        FONT times-italic
+        ANTIALIAS
+        BUFFER 4
+      END
+    END
+  END
+
+  LAYER
+    NAME &quot;state_parks&quot;
+    DATA stprklab
+    STATUS OFF
+    TYPE ANNOTATION
+    LABELITEM &quot;text&quot;
+    SYMBOLSCALE 100000
+    CLASS
+      COLOR -1 -1 -1 # no marker will be drawn
+      LABEL
+        SIZE 16
+        MINSIZE 6
+        MAXSIZE 18
+        COLOR 132 31 31
+        BACKGROUNDCOLOR 255 255 255
+        TYPE TRUETYPE
+        FONT arial-bold
+        ANTIALIAS
+        BUFFER 4
+      END
+    END
+  END
+
+  LAYER
+    NAME &quot;counties&quot;
+    DATA ctybdln2
+    STATUS OFF
+    TYPE LINE
+    CLASS
+      NAME &quot;County Boundaries&quot;
+      COLOR 128 128 128
+    END
+  END
+
+END
+
+</pre>
+
+<hr>
+
+<h3>Description of keywords used in this map file</h3>
+
+<p>&nbsp;By now we have used most of the common keywords in a map file.&nbsp; We
+should now recognize that some of these keywords are used in different objects
+(contexts) and might have slightly different usage within these different
+objects.&nbsp; The keyword SIZE, for example, is used to define the label or
+font size within a LABEL object.&nbsp; It is also used to define the dimensions
+of the GIF image in a reference object, or the width and height of the scale
+bar.&nbsp; COLOR, on the other hand, is used by different objects but it uses
+the RGB values in all instances.</p>
+
+<p>Example 3 introduced us to the elements of a basic interactive
+interface.&nbsp; Example 4 builds on the previous example by adding the ability
+to create labels on the map and to turn the different layers on and off.</p>
+
+<p>In addition to the objects in Example 3 map file, we now introduce a new layer object called &quot;lakes&quot;
+and another called &quot;state_parks&quot;.&nbsp; Notice we now have several layers with
+the same names.&nbsp; The &quot;lakes&quot; layers are activated/deactivated at different scales
+using the keyword SYMBOLSCALE.&nbsp;&nbsp;The &quot;state_parks&quot; layers are
+two different layer types--one is a polygon layer that defines the park
+boundaries and the other is an annotation layer used to label the parks.</p>
+
+<p>As before the layers are ordered LIFO (last in, first out) so that the layer
+closest to the end of the map file is drawn as the top feature in the map.</p>
+
+<p align="center" class="Small"><a href="http://mapserver.gis.umn.edu/mapfile.html">Map
+File Keyword Definition</a> | <a href="http://mapserver.gis.umn.edu/templates.html">Template
+File Keyword Definition</a></p>
+
+<hr>
+
+<p align="center" class="Small"><a href="http://terrasip.gis.umn.edu/cgi-bin/mapserv?map=/terrasipProjects/tutorial/example5.map&layer=state_parks&layer=lakes&layer=counties">Back to Example 5</a> | <a
+href="example5_code.html">View Example 5 Template File</a></p>
+
+</body>
+</html>

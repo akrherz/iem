@@ -1,0 +1,51 @@
+IEM Climodat Reports http://mesonet.agron.iastate.edu/climodat
+README for monthly 'Kitchen Sink' reports
+
+Data Source:
+
+   - Daily observations from the National Weather Service Cooperative
+     Observer (COOP) network in Iowa dating back to 1951.
+
+Data File(s):
+
+   - One per year with the nomenclature of <year>_monthly.csv
+
+Data Format:
+
+   - Comma delimited.  Should directly import into most any spreadsheet
+     or stats package.   The latitude and longitude columns should also 
+     make this file an easy import into GIS as an event theme.
+
+Data Units:
+   - Rainfall is in inches
+   - Temperatures are in Fahrenhit
+
+Data Fields:
+
+   stationID   => Identification for a site
+   stationName => Traditional name for the site
+   Latitude    => Current latitude of the site
+   Longitude   => Current longitude of the site
+   
+   (Now for each month of the year [01 -> 12], there are 6 columns.)
+
+   ##_MINT  -> Average minimum temperature for month ## of year ????
+   C##_MINT -> Climatological average minimum temperature for month ##
+   ##_MAXT  -> Average maximum temperature for month ## of year ???? 
+   C##_MAXT -> Climatological average maximum temperature for month ##
+   ##_PREC  -> Total precipitation for month ## of year ????
+   C##_PREC -> Climatological average precipitation for month ##
+
+   (Then the 6 columns are yearly summaries)
+
+   ????_MINT -> Average minimum temperature for year ????
+   CYR_MINT  -> Climatological average minimum temperature
+   ????_MAXT -> Average maximum temperature for year ????
+   CYR_MAXT  -> Climatological average maximum temperature
+   ????_PREC -> Total precipitation for year ????
+   CYR_PREC  -> Climatological average yearly precipitation 
+
+
+Data Contact:
+
+   Daryl Herzmann 515.294.5978  akrherz@iastate.edu

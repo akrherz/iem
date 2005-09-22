@@ -1,0 +1,86 @@
+<?php 
+include("../../config/settings.inc.php");
+	$page = "current";
+	$TITLE = "IEM | Current Data";
+	include("$rootpath/include/header.php"); 
+?>
+
+<div id="iem-section">
+<center><table>
+<tr><th>Surface Data</th>
+<th><a href="radar.phtml">RADAR/Sat Data</a></th>
+<th><a href="misc.phtml">Advanced Met Plots</a></th>
+<th><a href="camera.phtml">Web Cameras</a></th>
+<th>&nbsp;</th>
+</tr></table></center></div>
+
+<div class="text">
+<table border=0 width=780px>
+<tr><td valign="top">
+
+<h3 class="subtitle">Mesonet Plots</h3>
+<ul>
+ <li><a href="<?php echo $rooturl; ?>/data/mesonet.gif">Iowa Mesonet Plot</a> [<a href="/data/loop.phtml?prod=mesonet">Loop</a>]</li>
+ <li><a href="<?php echo $rooturl; ?>/data/MWmesonet.gif">Upper Mid-West</a> [<a href="/data/loop.phtml?prod=mwmesonet">Loop</a>]</li>
+ <li><a href="<?php echo $rooturl; ?>/data/iem_gray.gif">Large Font</a></li>
+</ul>
+
+<h3 class="subtitle">Zoomed In Mesonet Plots</h3>
+<ul>
+  <li><a href="<?php echo $rooturl; ?>/data/CBF_mesonet.gif">Council Bluffs</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/CID_mesonet.gif">Cedar Rapids</a></li>
+  <li><a href="/data/<?php echo $rooturl; ?>DSM_mesonet.gif">Des Moines</a></li>
+</ul>
+
+<h3 class="subtitle">Precipitation</h3>
+<ul>
+  <li><a href="<?php echo $rooturl; ?>/data/1hprecip.gif">ASOS + AWOS (Last Hour)</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/summary/today_prec.gif">ASOS + AWOS (Today)</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/nexradPrecip1h.gif">NEXRAD 1 hour est.</a></li>
+</ul>
+
+</td><td valign="top">
+
+<h3 class="subtitle">Individual Network Plots</h3>
+<ul>
+  <li><a href="<?php echo $rooturl; ?>/data/asos.gif">ASOS + AWOS</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/awos.gif">AWOS</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/rwis.gif">RWIS</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/snet/mesonet.gif">SchoolNets</a></li>
+</ul>
+
+<h3 class="subtitle">Parameter 
+Plots</h3>
+<ul>  <li><a href="<?php echo $rooturl; ?>/data/mesonet_altm.gif">Altimeter</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/ceil.gif">Ceiling</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/heat.gif">Heat Index</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/relh.gif">Relative Humidity</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/vsby.gif">Visibility</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/wcht.gif">Wind Chill Index</a></li>
+</ul>
+
+</td><td valign="top">
+
+<h3 class="subtitle">Temporal Change Plots</h3>
+<ul>
+  <li><a href="<?php echo $rooturl; ?>/GIS/apps/delta/plot.php?i=15m">15min Pressure Change</a></li>
+  <li><a href="<?php echo $rooturl; ?>/GIS/apps/delta/plot.php">1 hour Pressure Change</a></li>
+</ul>
+
+
+<h3 class="subtitle">Sortable Current Conditions</h3>
+<ul>
+ <li><a href="/ASOS/current.php">ASOS</a></li>
+ <li><a href="/AWOS/current.php">AWOS</a></li>
+ <li><a href="/COOP/current.phtml">COOP</a></li>
+ <li><a href="/DCP/current.phtml">DCP</a></li>
+ <li><a href="/schoolnet/current.php">SchoolNet</a></li>
+ <li><a href="/RWIS/current.php">RWIS</a></li>
+ <li><a href="/current/all.phtml">All of Iowa</a></li>
+</ul>
+
+<p><a href="/wx/afos/">NWS Text Product Finder</a>
+
+</td></tr></table></div>
+
+<?php include("$rootpath/include/footer.php"); ?>

@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.20">
+ <TITLE>Mapserver + NEXRAD Composite HOWTO: Building Proj.4 &amp; Mapserver</TITLE>
+ <LINK HREF="howto-5.html" REL=next>
+ <LINK HREF="howto-3.html" REL=previous>
+ <LINK HREF="howto.html#toc4" REL=contents>
+</HEAD>
+<BODY>
+<A HREF="howto-5.html">Next</A>
+<A HREF="howto-3.html">Previous</A>
+<A HREF="howto.html#toc4">Contents</A>
+<HR>
+<H2><A NAME="s4">4.</A> <A HREF="howto.html#toc4">Building Proj.4 &amp; Mapserver</A></H2>
+
+<P>Like many Open Source packages, Mapserver relies on external libraries to handle
+much of the heavy lifting.  This is both a good thing and a bad thing.  The good thing is that the Mapserver folks don't have to program all the needed functionality, the bad thing is that you can reach dependency-hell with this setup.  For our purposes, we will only build with Proj.4 support, but you can rebuild mapserver later 
+to link with other libraries for more functionality.</P>
+<H2><A NAME="ss4.1">4.1</A> <A HREF="howto.html#toc4.1">Building Proj.4</A>
+</H2>
+
+<P>
+<A HREF="http://www.remotesensing.org/proj/">Proj.4</A> provides projection and reprojection support for Mapserver.  Building and installing is hopefully
+simple, if you have ever built an open source package before.  Make sure
+that /usr/local/lib is included in /etc/ld.so.conf, so that Mapserver can
+link to that library without special configuration.
+<BLOCKQUOTE><CODE>
+<HR>
+<PRE>
+$ wget ftp://ftp.remotesensing.org/pub/proj/proj-4.4.8.tar.gz
+$ tar -zxvf proj-4.4.8.tar.gz
+$ cd proj-4.4.8
+$ ./configure; make
+$ su -l
+# make install   #(as root, to install in /usr/local!)
+# /sbin/ldconfig
+# exit
+$ make clean
+</PRE>
+<HR>
+</CODE></BLOCKQUOTE>
+</P>
+<P>If everything went well, you should notice a libproj in /usr/local/lib that 
+mapserver can link to.</P>
+<H2><A NAME="ss4.2">4.2</A> <A HREF="howto.html#toc4.2">Building Mapserver</A>
+</H2>
+
+<P>As I write this (28 Jul 2004), Mapserver is at version 4.2.1 .  It is preferable that you be running this version for this HOWTO, but it is not required.
+For our purposes, the
+only difference between the current version 4.2.1 and the old 3.6.x versions
+is the 'OFFSITE' keyword in the .map file.  In Mapserver 4.x, this is a RGB value and in Mapserver 3.x, this is a color map index value. 
+<BLOCKQUOTE><CODE>
+<HR>
+<PRE>
+$ wget http://cvs.gis.umn.edu/dist/mapserver-4.2.1.tar.gz
+$ tar -zxvf mapserver-4.2.1.tar.gz
+$ cd mapserver-4.2.1
+$ ./configure --with-proj --with-png 
+$ make
+$ cp -i mapserv /var/www/cgi-bin/mapserv
+</PRE>
+<HR>
+</CODE></BLOCKQUOTE>
+</P>
+<P>Now, if the build process worked, you should have a binary called 'mapserv'
+if your current working directory.  Verify that the mapserv binary is okay 
+by executing
+<BLOCKQUOTE><CODE>
+<HR>
+<PRE>
+$ ./mapserv -v
+</PRE>
+<HR>
+</CODE></BLOCKQUOTE>
+
+This command will spit out the capabilities of Mapserver.  For this demo, 
+we need support for SHAPEFILES and the TIFF file format.  The output from the
+above command should contain <I>OUTPUT=PNG INPUT=TIFF INPUT=SHAPEFILE</I>.</P>
+<H2><A NAME="ss4.3">4.3</A> <A HREF="howto.html#toc4.3">Lets pause again!</A>
+</H2>
+
+<P>If you got this far with these instructions, you are much smarter than I am. 
+Since I couldn't even get this to work following my own instructions.  Anyway,
+we now have a CGI application that we can install on our webserver and begin 
+building a web mapping application!  Yeah!</P>
+<HR>
+<A HREF="howto-5.html">Next</A>
+<A HREF="howto-3.html">Previous</A>
+<A HREF="howto.html#toc4">Contents</A>
+</BODY>
+</HTML>

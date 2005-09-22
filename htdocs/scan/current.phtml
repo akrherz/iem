@@ -1,0 +1,260 @@
+<?php 
+include("../../config/settings.inc.php");
+ $TITLE = "IEM | SCAN | Currents";
+ $REFRESH = "<meta http-equiv=\"refresh\" content=\"3600;
+ URL=current.phtml?sortcol=<?php echo $sortcol; ?>\">";
+ $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+<!--//BEGIN Script
+function new_window(url) {
+ link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=650,height=500");
+} 
+//END Script-->
+</script>
+<script type="text/javascript" src="/js/tableruler.js"></script>
+<script type="text/javascript">
+    window.onload=function(){tableruler();}
+</script>';
+ include("/mesonet/php/include/header.php"); ?>
+<?php include("$rootpath/include/mlib.php"); ?>
+<?php include("$rootpath/include/all_locs.php"); ?>
+<?php 
+  include("$rootpath/include/iemaccess.php");
+  include("$rootpath/include/iemaccessob.php");
+
+$iem = new IEMAccess();
+$rwis = $iem->getNetwork("SCAN");
+
+
+?>
+
+<?php
+if (strlen($sortcol) == 0) {
+  $sortcol = "sid";
+} 
+
+$vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
+  "sknt" => "Wind Speed [knots]", "wdir" => "Wind Direction [deg]",
+  "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
+  "ts" => "Observation Time [local]", "feel" => "Feels Like",
+  "min_tmpf" => "Today's Low Temperature",
+  "max_tmpf" => "Today's High Temperature",
+  "sid" => "Station ID", "relh" => "Relative Humidity");
+
+?>
+
+<div class="text">
+<b>Nav:</b><a href="/scan/">SCAN</a> <b> > </b> Current Conditions
+<?php $current_network = "SCAN"; include("../include/current_bar.inc.php"); ?>
+
+<p><h3 class="subtitle"><center>Current SCAN Conditions</center></h3><p>
+
+<?php
+echo "Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
+a column to sort it.<br>\n";
+?>
+
+<form method="POST" action="/my/current.php">
+<table style="font-size: 10pt;" class="ruler">
+<thead>
+<tr>
+  <th rowspan="2">ADD:</th>
+  <th rowspan="2">Station:</th>
+  <th rowspan="2"><a href="current.phtml?sortcol=ts">Ob Time</a></th>
+  <th colspan="3">Temps &deg;F</th>
+  <th>&nbsp;</th>
+  <th colspan="3">Wind [knots]</th>
+  <th>&nbsp;</th>
+<tr>
+  
+  <th>
+   <a href="current.phtml?sortcol=tmpf">Air</a>
+   (<a href="current.phtml?sortcol=max_tmpf">Hi</a> /
+   <a href="current.phtml?sortcol=min_tmpf">Lo</a>)
+</th>
+  <th><a href="current.phtml?sortcol=dwpf">DewP</a></th>
+  <th><a href="current.phtml?sortcol=feel">Feels</a></th>
+  <th><a href="current.phtml?sortcol=relh">RH%</a></th>
+  <th><a href="current.phtml?sortcol=sknt">Speed</a></th>
+  <th><a href="current.phtml?sortcol=drct">Direction</a></th>
+  <th><a href="current.phtml?sortcol=max_sknt">Gust</a>
+    @<a href="current.phtml?sortcol=gtim">Time</a></th>
+  <th><a href="current.phtml?sortcol=srad">Solar Rad</a></th>
+</tr></thead>
+<tbody>
+<?php
+function aSortBySecondIndex($multiArray, $secondIndex) {
+        while (list($firstIndex, ) = each($multiArray))
+                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+        arsort($indexMap);
+        while (list($firstIndex, ) = each($indexMap))
+                if (is_numeric($firstIndex))
+                        $sortedArray[] = $multiArray[$firstIndex];
+                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+        return $sortedArray;
+}
+
+  $mydata = Array();
+
+  while (list($key, $iemob) = each($rwis) ){
+    $mydata[$key] = $iemob->db;
+    $mydata[$key]["ts"] = $iemob->ts;
+    $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
+    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
+       f2c($mydata[$key]["dwpf"]) );
+    $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
+       $mydata[$key]["relh"], $mydata[$key]["sped"]);
+    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
+      $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
+      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+    } else {
+      $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
+      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+    }
+
+  }
+
+
+  $finalA = Array();
+  $finalA = aSortBySecondIndex($mydata, $sortcol);
+  $i = 0;
+  $now = time();
+
+  // Loop though all data 
+  while (list ($key, $val) = each ($finalA))  {
+    $parts = $finalA[$key];
+    $i++;
+    $tdiff = $now - $parts["ts"];
+      // Don't show stations over 5 days old
+    if ($tdiff > 86400*5){
+      continue;
+    }
+	  echo "<tr";
+	  if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
+            
+          echo ">";
+   echo "<td><input type=\"checkbox\" name=\"st[]\" 
+               value=\"".$key."\"></td>";
+  echo "<td>". $cities[$key]["city"] . "</td><td ";
+  if ($tdiff > 11900){
+    echo 'bgcolor="red"';
+    $format = "%b-%d-%y %I:%M %p";
+  } else if ($tdiff > 6900){
+    echo 'bgcolor="orange"';
+    $format = "%I:%M %p";
+  } else if ($tdiff > 1800){
+    echo 'bgcolor="green"';
+    $format = "%I:%M %p";
+  } else {
+    $format = "%I:%M %p";
+  }
+  echo ">". strftime($format, $parts["ts"]) ."</td>
+  <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
+  round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
+  round($parts["min_tmpf"],0) ."</font>)</td>
+ <td>". round($parts["dwpf"],0) ."</td>
+ <td>". $parts["feel"] ."</td>
+ <td>". $parts["relh"] ."</td>
+ <td>". round($parts["sknt"],0) ;
+  if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
+              echo "G". $parts["gust"];
+  } 
+  echo "</td>
+            <td>". round($parts["drct"],0) ."</td>
+	    <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td>
+  <td>". round($parts["srad"],0) ."</td>
+	    </tr>\n";
+   }
+
+?>
+</tbody>
+<tfoot>
+<tr>
+ <td colspan=3>&nbsp;</td>
+<?php $c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=SCAN&var="; ?>
+ <td><a href="<?php echo $c; ?>tmpf');">Plot</a>
+    (<a href="<?php echo $c; ?>max_tmpf');">Plot</a> /
+     <a href="<?php echo $c; ?>min_tmpf');">Plot</a>)</td>
+ <td><a href="<?php echo $c; ?>dwpf');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>feel');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>relh');">Plot</a></td>
+ <td colspan=2><a href="<?php echo $c; ?>barb');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>max_sknt');">Plot</a></td>
+ <td>&nbsp;</td>
+</tr></tfoot>
+</table>
+<input type="submit" value="Add to Favorites">
+<input type="reset" value="Reset">
+
+</form>
+
+<br><br>
+
+<h3 class="subtitle"><center>SCAN Soil Conditions</center></h3><p>
+
+<table style="font-size: 10pt;" class="ruler">
+<thead>
+ <tr>
+  <th colspan=2>&nbsp;</th>
+  <th colspan=2>2 inch</th>
+  <th colspan=2>4 inch</th>
+  <th colspan=2>8 inch</th>
+  <th colspan=2>20 inch</th>
+  <th colspan=2>40 inch</th>
+ </tr>
+ <tr>
+  <th>Station:</th>
+  <th>Ob Time:</th>
+  <th>Moist:</th><th>Temp:</th>
+  <th>Moist:</th><th>Temp:</th>
+  <th>Moist:</th><th>Temp:</th>
+  <th>Moist:</th><th>Temp:</th>
+  <th>Moist:</th><th>Temp:</th>
+ </tr></thead>
+<tbody>
+<?php
+  $n = $finalA;
+  while (list ($key, $val) = each ($n))  {
+    $parts = $finalA[$key];
+    $tdiff = $now - $parts["ts"];
+      // Don't show stations over 5 days old
+    if ($tdiff > 86400*5){
+      continue;
+    }
+    $i++;
+	  echo "<tr";
+	  if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
+            
+          echo ">";
+  echo "<td>". $cities[$key]["city"] . "</td><td ";
+  if ($tdiff > 11900){
+    echo 'bgcolor="red"';
+    $format = "%b-%d-%y %I:%M %p";
+  } else if ($tdiff > 6900){
+    echo 'bgcolor="orange"';
+    $format = "%I:%M %p";
+  } else if ($tdiff > 1800){
+    echo 'bgcolor="green"';
+    $format = "%I:%M %p";
+  } else {
+    $format = "%I:%M %p";
+  }
+  echo ">". strftime($format, $parts["ts"]) ."</td>
+    <td>". round($parts["c1smv"],0) ."</td><td>". round($parts["c1tmpf"],0) ."</td>
+    <td>". round($parts["c2smv"],0) ."</td><td>". round($parts["c2tmpf"],0) ."</td>
+    <td>". round($parts["c3smv"],0) ."</td><td>". round($parts["c3tmpf"],0) ."</td>
+    <td>". round($parts["c4smv"],0) ."</td><td>". round($parts["c4tmpf"],0) ."</td>
+    <td>". round($parts["c5smv"],0) ."</td><td>". round($parts["c5tmpf"],0) ."</td>";
+
+  echo "</tr>";
+ }
+?>
+</tbody>
+<tfoot>
+<tr>
+<td colspan="12">&nbsp;</td>
+</tr>
+</tfoot>
+</table>
+<br><br></div>
+
+<?php include("$rootpath/include/footer.php"); ?>

@@ -1,0 +1,216 @@
+#
+# Start of map file
+#
+NAME stations
+STATUS ON
+SIZE 450 350
+#SYMBOLSET symbols/symbol.sym
+FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+EXTENT -98.50 38.25 -88.30 45.75
+UNITS DD
+SHAPEPATH "/mesonet/www/html/GIS/data/"
+SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+IMAGECOLOR -1 -1 -1
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+  "proj=utm"
+  "ellps=GRS80"
+  "zone=15"
+  "north"
+  "no_defs"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+  HEADER q_header.html
+  TEMPLATE stations.html
+  FOOTER q_footer.html
+  MINSCALE 90000
+  MAXSCALE 9650000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/wepp0.log"
+END
+
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+LAYER
+  NAME iards
+  TYPE LINE
+  STATUS ON
+  DATA shape/iards.shp
+  CLASSITEM "FCC"
+  CLASS
+    EXPRESSION /A1[0-9]/
+    COLOR 255 0 0
+    SYMBOL 1
+    SIZE 2
+  END
+END
+
+LAYER
+  NAME iards
+  TYPE LINE
+  STATUS ON
+  DATA shape/iards.shp
+  MAXSCALE 600000
+  CLASSITEM "FCC"
+  CLASS
+    EXPRESSION /A[2-3][0-9]/
+    COLOR 255 0 0
+    SYMBOL 1
+    SIZE 2
+  END
+END
+
+
+### Labels for the interstates
+LAYER
+    NAME iards
+    DATA shape/iards.shp
+    STATUS ON
+    TYPE ANNOTATION
+#    MINSCALE 50000
+    MAXSCALE 14000000
+    SYMBOLSCALE 2500000
+    LABELITEM 'hwyname'
+    CLASSITEM "FCC"
+    CLASS
+      EXPRESSION /A1[0-9]/
+      COLOR 0 0 0
+      SYMBOL 'interstate_shield'
+      LABEL
+        MINFEATURESIZE 50
+        MINDISTANCE 150
+        POSITION CC
+        SIZE TINY
+        COLOR 255 255 255
+        WRAP 'Y'
+      END
+    END
+    CLASS
+      EXPRESSION /A[2-3][0-9]/
+      COLOR 0 0 0
+      LABEL
+        ANGLE AUTO
+        MINFEATURESIZE 50
+        MINDISTANCE 150
+        POSITION AUTO
+        SIZE TINY
+        COLOR 0 0 0 
+      END
+    END
+  END
+
+#
+#
+
+#
+# Start of layer definitions
+#
+
+#-----------> RIVERS <---------
+#
+LAYER
+  NAME rivers
+  STATUS ON
+  TYPE LINE
+  DATA shape/iarivers.shp
+  MAXSCALE 1400000
+  CLASS 
+   COLOR 0 0 255
+  END
+END
+
+
+
+##
+## ASOS
+##
+LAYER
+  CONNECTIONTYPE postgis
+  NAME wepp
+  CONNECTION "user=mesonet dbname=wepp host=db1.mesonet"
+  DATA "geom from bpdata"
+  FILTER "valid = '2002-10-03'"
+  STATUS ON
+  TYPE POINT
+#  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  CLASSITEM "total"
+  CLASS
+    EXPRESSION ( [total] < 42)
+    TEMPLATE q_template.html
+    COLOR 255 0 255
+#    BACKGROUNDCOLOR 198 226 255
+    SYMBOL 1
+    SIZE 5
+  END
+  CLASS
+    EXPRESSION ( [total] < 43 )
+    TEMPLATE q_template.html
+    COLOR 255 0 0
+#    BACKGROUNDCOLOR 198 226 255
+    SYMBOL 1
+    SIZE 5
+  END
+  CLASS
+    EXPRESSION ( [total] < 44 )
+    TEMPLATE q_template.html
+    COLOR 0 255 0 
+#    BACKGROUNDCOLOR 198 226 255
+    SYMBOL 1
+    SIZE 5
+  END
+  CLASS
+    EXPRESSION ( [total] > 44 )
+    TEMPLATE q_template.html
+    COLOR 0 0 255
+#    BACKGROUNDCOLOR 198 226 255
+    SYMBOL 1
+    SIZE 5
+  END
+END
+
+LAYER
+  NAME counties
+  STATUS DEFAULT
+  TYPE POLYGON
+  DATA shape/iacounties3.shp
+  LABELITEM 'Name'
+  LABELMAXSCALE 1800000
+  CLASS
+    OUTLINECOLOR 0 0 0
+    LABEL
+      COLOR 0 0 0
+      OUTLINECOLOR -1 -1 -1
+      TYPE BITMAP
+      SIZE TINY
+      POSITION CC
+      PARTIALS FALSE 
+    END
+  END
+END
+
+END

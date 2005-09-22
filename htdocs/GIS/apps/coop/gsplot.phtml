@@ -1,0 +1,321 @@
+<?php
+  /** gsplot.phtml
+   * - Make Growing Season Plots
+   */
+$var = $_GET["var"];
+$year = $_GET["year"];
+$smonth = $_GET["smonth"];
+$sday = $_GET["sday"];
+$emonth = $_GET["emonth"];
+$eday = $_GET["eday"];
+
+/** Need to use external date lib *
+  * http://php.weblogs.com/adodb_date_time_library
+  */
+include("adodb-time.inc.php");
+
+$gs_start = Array(
+  1998 => adodb_mktime(0,0,0,5,1,1998),
+  1999 => adodb_mktime(0,0,0,5,1,1999),
+  2000 => adodb_mktime(0,0,0,5,1,2000),
+  2001 => adodb_mktime(0,0,0,5,1,2001),
+  2002 => adodb_mktime(0,0,0,5,1,2002),
+  2003 => adodb_mktime(0,0,0,5,1,2003),
+  2004 => adodb_mktime(0,0,0,5,1,2004),
+  2005 => adodb_mktime(0,0,0,5,1,2005) );
+$gs_end = Array(
+  1998 => adodb_mktime(0,0,0,10,1,1998),
+  1999 => adodb_mktime(0,0,0,10,1,1999),
+  2000 => adodb_mktime(0,0,0,10,1,2000),
+  2001 => adodb_mktime(0,0,0,10,16,2001),
+  2002 => adodb_mktime(0,0,0,10,7,2002),
+  2003 => adodb_mktime(0,0,0,10,1,2003),
+  2004 => adodb_mktime(0,0,0,10,1,2004),
+  2005 => adodb_mktime(0,0,0,10,1,2005) );
+
+if (strlen($var) == 0)  $var = "gdd50";
+if (strlen($year) == 0)  $year = 2004;
+//if ($year > 2003) $year = 2003;
+if (strlen($smonth) > 0 && strlen($sday) > 0)
+  $gs_start[$year] = adodb_mktime(0,0,0,$smonth,$sday,$year);
+if (strlen($emonth) > 0 && strlen($eday) > 0)
+  $gs_end[$year] = adodb_mktime(0,0,0,$emonth,$eday,$year);
+
+
+$round = Array("prec" => 2);
+
+$today = time();
+if ($gs_end[$year] >= $today)  $gs_end[$year] = $today;
+
+$emonth = strftime("%m", $gs_end[$year]);
+$eday = strftime("%d", $gs_end[$year]);
+$smonth = strftime("%m", $gs_start[$year]);
+$sday = strftime("%d", $gs_start[$year]);
+
+include("../../../include/forms.php");
+
+?>
+
+<?php $TITLE = "IEM | NWS COOP Growing Season Data";
+$HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+<!--//BEGIN Script
+function new_window(url) {
+        link = 
+        window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
+} 
+//END Script-->
+</script>';
+include("/mesonet/php/include/header.php"); ?>
+
+<div class="text">
+<a href="http://mesonet.agron.iastate.edu/COOP/">NWS COOP</a> &nbsp;<b> > </b>
+&nbsp; Growing Season Data
+
+<p>With this application, you can total a parameter of your
+choice over a duration of your choice.  The resulting data is presented 
+graphically as well as textually for use in a GIS.  Data is updated through a couple of months ago.
+
+<form method="GET" action="gsplot.phtml">
+<table>
+ <tr>
+  <th colspan=5><h3 class="subtitle">Growing Season Charts</h3></th></tr>
+ <tr>
+   <th>Select Parameter:</th>
+   <th>Year</th>
+   <th>Month</th>
+   <th>Day</th>
+   <td></td>
+  </tr>
+ <tr>
+  <td rowspan=2><select name="var">
+     <option value="gdd50" <?php if($var == "gdd50") echo "SELECTED"; ?>>Growing Degree Days (base=50)</option>
+     <option value="prec" <?php if($var == "prec") echo "SELECTED"; ?>>Precipitation</option>
+     <option value="sdd86" <?php if($var == "sdd86") echo "SELECTED"; ?>>Stress Degree Days (base=86)</option>
+    </select></td>
+  <td rowspan=2><?php echo yearselect(1893, $year); ?></td>
+  <td><?php monthSelect2($smonth, 'smonth'); ?></td>
+  <td><?php daySelect2($sday, 'sday'); ?></td>
+  <td rowspan=2><input type="submit" value="Make Plot"></td>
+  </tr>
+ <tr>
+  <td><?php monthSelect2($emonth, 'emonth'); ?></td>
+  <td><?php daySelect2($eday, 'eday'); ?></td>
+  </tr>
+</table>
+ 
+
+<?php
+dl("php_mapscript_440.so");
+include('../../../include/allLoc.php');
+
+function mktitlelocal($map, $imgObj, $titlet) { 
+ 
+  $layer = $map->getLayerByName("credits");
+ 
+     // point feature with text for location
+  $point = ms_newpointobj();
+  $point->setXY( 0, 10);
+  $point->draw($map, $layer, $imgObj, 0,
+    $titlet ."                                                                                ");
+  $point->free();
+
+     // point feature with text for location
+  $point = ms_newpointobj();
+  $point->setXY( 0, 460);
+  $point->draw($map, $layer, $imgObj, 1,
+    "  Iowa Environmental Mesonet | NWS COOP ");
+  $point->free();
+}
+
+function plotNoData($map, $img){
+  $layer = $map->getLayerByName("credits");
+
+  $point = ms_newpointobj();
+  $point->setXY( 100, 200);
+  $point->draw($map, $layer, $img, 1,
+    "  No data found for this date! ");
+  $point->free();
+
+}
+
+$varDef = Array("gdd50" => "Growing Degree Days (base=50)",
+  "et" => "Potential Evapotranspiration",
+  "prec" => "Precipitation",
+  "sgdd50" => "Soil Growing Degree Days (base=50)",
+  "sdd86" => "Stress Degree Days (base=86)"
+);
+
+
+
+$rnd = Array("gdd50" => 0,
+  "et" => 2,
+  "prec" => 2,
+  "sgdd50" => 0,
+  "sdd86" => 0);
+
+
+$myStations = $cities;
+$height = 480;
+$width = 640;
+
+$proj = "init=epsg:26915";
+
+$map = ms_newMapObj("base.map");
+$map->setProjection($proj);
+
+$map->setextent(250000, 4450000, 690000, 4880000);
+
+$counties = $map->getlayerbyname("counties");
+$counties->set("status", MS_ON);
+
+$snet = $map->getlayerbyname("snet");
+$snet->set("status", MS_ON);
+
+$iards = $map->getlayerbyname("iards");
+$iards->set("status", 1);
+
+$ponly = $map->getlayerbyname("pointonly");
+$ponly->set("status", MS_ON);
+
+$img = $map->prepareImage();
+$counties->draw($img);
+$iards->draw($img);
+
+$c = pg_connect("10.10.10.20","5432","coop");
+
+$sstr     = adodb_date("Y-m-d", $gs_start[$year]);
+$estr     = adodb_date("Y-m-d", $gs_end[$year]);
+$sstr_txt = adodb_date("M d", $gs_start[$year]);
+$estr_txt = adodb_date("M d", $gs_end[$year]);
+
+/* ------------------------------------------------------- */
+if ($var == 'gdd50') {
+  $q = "SELECT stationid, high, low
+     from alldata WHERE year = ". $year ." and 
+     day >= '". $sstr ."'  and day < '". $estr ."' and high > low ";
+
+  $gdds = Array();
+  $rs =  pg_exec($c, $q);
+  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    $stid = strtoupper($row['stationid']);
+    $high = (float)$row['high'];
+    $low  = (float)$row['low'];
+
+    if ($low < 50)  $low = 50.00;
+    if ($high > 86) $high = 86.00;
+    if ($high < 50) $tgdd = 0.00;
+    else $tgdd = (($high+$low)/2.00) - 50.00;
+
+    $gdds[$stid] = $gdds[$stid] + $tgdd;
+  }
+  $vals = $gdds;
+}  
+/* ------------------------------------------------------- */
+if ($var == 'sdd86') {
+  $q = "SELECT stationid, high, low
+     from alldata WHERE year = $year and
+     day >= '". $sstr ."' and day < '". $estr ."'";
+
+  $gdds = Array();
+  $rs =  pg_exec($c, $q);
+  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    $stid = strtoupper($row['stationid']);
+    $high = (float)$row['high'];
+    $low  = (float)$row['low'];
+
+    if ($low < 86)  $low = 86.00;
+    if ($high < 86) $tgdd = 0.00;
+    else $tgdd = (($high+$low)/2.00) - 86.00;
+
+    $gdds[$stid] = $gdds[$stid] + $tgdd;
+  }
+  $vals = $gdds;
+}  
+/* ------------------------------------------------------- */
+else if ($var == 'prec') {
+  $q = "SELECT stationid, sum(precip) as prec
+     from alldata WHERE year = $year and 
+     day >= '". $sstr ."' and day < '". $estr ."' GROUP by stationid";
+
+  $vals = Array();
+  $rs =  pg_exec($c, $q);
+  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    $stid = strtoupper( $row['stationid'] );
+    $vals[$stid] = $row['prec'];
+  }
+}  
+/* ------------------------------------------------------- */
+
+
+$tr = "# ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .")
+# Download From: http://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.phtml
+# Download Date: ". strftime("%d %b %Y") ."
+# Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+#-----------------------snip------------------\n";
+$tr .= sprintf("%10s,%20s,%10s,%10s,%10s\n", 'ID', 'StationName', 'Latitude', 'Longitude', $var);
+foreach($vals as $key => $value){
+
+  $tr .= sprintf("%10s,%-20s,%10.4f,%10.4f,%10s\n", $key, $cities[$key]['city'],
+  $cities[$key]['lat'], $cities[$key]['lon'], round($value, $round[$var]) );
+
+  // Red Dot... 
+  $pt = ms_newPointObj();
+  $pt->setXY($cities[$key]['lon'], $cities[$key]['lat'], 0);
+  $pt->draw($map, $ponly, $img, 0, '' );
+  $pt->free();
+
+  // City Name
+  $pt = ms_newPointObj();
+  $pt->setXY($cities[$key]['lon'], $cities[$key]['lat'], 0);
+  $pt->draw($map, $snet, $img, 1, $cities[$key]['city'] );
+  $pt->free();
+}
+
+reset($vals);
+foreach($vals as $key => $value){
+  // Value UL
+  $pt = ms_newPointObj();
+  $pt->setXY($cities[$key]['lon'], $cities[$key]['lat'], 0);
+  $pt->draw($map, $snet, $img, 0, 
+     round($value, $rnd[$var]) );
+  $pt->free();
+}
+$map->drawLabelCache($img);
+
+
+if ($i == 0)
+   plotNoData($map, $img);
+
+mktitlelocal($map, $img, " ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .") ");
+$map->drawLabelCache($img);
+
+$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+
+?>
+<p><h3 class="heading">Plot</h3>
+<table>
+<tr><td valign="TOP">
+
+  <p>Open this plot in a <a href="javascript:new_window('image.phtml?f=<?php echo $url; ?>');">new window</a> for comparison with other plots. Once the
+image is loaded up in another window, you can modify this plots 
+parameters.
+
+<p>*Note: Only a sub-sample of stations are plotted on the map due to 
+space restrictions.</td>
+  <td>
+  <img src="<?php echo $url; ?>" border=1>
+</td></tr>
+</table>
+
+<p>
+<img src="/images/gisready.png"><h3 class="heading"> Data Listing</h3>
+<pre><?php echo $tr; ?></pre>
+
+<p>You should be able to 'copy & paste' this raw data listing into a simple
+text editor and save the data file on your machine.  Most GIS systems can 
+then import this dataset as a layer.  You may have to omit the commented lines
+(#) if your GIS has trouble importing the data.</div>
+
+<?php 
+  include("/mesonet/php/include/footer.php");
+?>

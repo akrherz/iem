@@ -1,0 +1,81 @@
+<?php
+ include("../../include/COOPstations.php");
+ $station = strtolower($_GET['station']);
+ $network = "COOPDB";
+
+ $syear = isset($_GET['syear']) ? $_GET['syear'] : date("Y");
+ $smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 1;
+ $sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
+
+ $eyear = isset($_GET['eyear']) ? $_GET['eyear'] : date("Y");
+ $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 6;
+ $eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
+
+ $dcgi = "syear=$syear&smonth=$smonth&sday=$sday&eyear=$eyear&emonth=$emonth&eday=$eday&";
+
+ include("/mesonet/php/lib/selectWidget.php");
+ $sw = new selectWidget("acc.phtml", "acc.phtml?$dcgi", $network);
+ $sw->logic($_GET);
+?>
+
+<?php 	$TITLE = "IEM | Accumulated Traces";
+include("/mesonet/php/include/header.php"); ?>
+
+<a href="/COOP/">NWS COOP Network</a> 
+
+<h3 class="heading">Accumulated Data Traces</h3>
+
+<p>This application plots a graph of accumulated rainfall and growing degree 
+days for a time period of your choice!  If you are looking for the raw 
+data, you can download on the <a href="/request/coop/fe.phtml">COOP data download</a> page.  Your plot time duration can not exceed 5 years.  This page may take a few seconds to load, so please be patient.</p>
+
+<div class="text">
+
+<?php include_once("../../include/forms.php"); ?>
+<form name="ds" action="acc.phtml" method="GET">
+
+<table style="padding: 3px; border: 0px; margin: 0px;">
+<thead>
+<tr><th>Climate Site:</th><td></td><th>Year:</th><th>Month:</th><th>Day:</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td rowspan="2"><select name="station">
+<?php 
+while( list($key, $val) = each($cities) ){
+  if (strlen($val["dont"]) > 0) continue;
+  echo "<option value=\"$key\"";
+  if ($key == $station) echo " SELECTED ";
+  echo ">". $val["city"] ." [". $val["startYear"] ."]\n";
+}
+?></select>
+	<br /><a href="acc.phtml?<?php echo $dcgi; ?>">Select via map.</a></td>
+  <td>Start Date:</td>
+  <td><?php yearSelect2(1893,$syear,"syear"); ?></td>
+  <td><?php monthSelect2($smonth,"smonth"); ?></td>
+  <td><?php daySelect2($sday,"sday"); ?></td>
+</tr>
+<tr>
+  <td>End Date:</td>
+  <td><?php yearSelect2(1893,$eyear,"eyear"); ?></td>
+  <td><?php monthSelect2($emonth,"emonth"); ?></td>
+  <td><?php daySelect2($eday,"eday"); ?></td>
+</tr>
+</tbody>
+</table>
+<input type="submit" value="Make Plot">
+</form>
+
+<?php if (strlen($station) > 0 ) { ?>
+
+<p><img src="acc_gdd_plot.php?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
+<p><img src="acc_rain_plot.php?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
+
+<?php } else { 
+
+echo $sw->printInterface();
+	}
+?>
+</div>
+
+<?php include("/mesonet/php/include/footer.php"); ?>

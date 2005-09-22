@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.20">
+ <TITLE>Mapserver + NEXRAD Composite HOWTO: Building your Web Mapping Application</TITLE>
+ <LINK HREF="howto-6.html" REL=next>
+ <LINK HREF="howto-4.html" REL=previous>
+ <LINK HREF="howto.html#toc5" REL=contents>
+</HEAD>
+<BODY>
+<A HREF="howto-6.html">Next</A>
+<A HREF="howto-4.html">Previous</A>
+<A HREF="howto.html#toc5">Contents</A>
+<HR>
+<H2><A NAME="s5">5.</A> <A HREF="howto.html#toc5">Building your Web Mapping Application</A></H2>
+
+<H2><A NAME="ss5.1">5.1</A> <A HREF="howto.html#toc5.1">Getting Started</A>
+</H2>
+
+<P>It is somewhat hard to keep this generic, when everyone does things differently.
+I will assume a base RPM install of apache on Red Hat Linux.  If your 
+environment is different, you should know how it is different!</P>
+<P>Assuming that your web directory root is <I>/var/www/htdocs</I> and that
+your CGI-BIN directory is <I>/var/www/cgi-bin</I>, you will want to issue the
+following commands as a privileged user to these directories.
+<BLOCKQUOTE><CODE>
+<HR>
+<PRE>
+$ cd /tmp
+$ wget http://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-files.tar.gz
+$ cd /var/www/htdocs
+$ mkdir mstmp
+$ chown apache mstmp
+$ tar -xzvf /tmp/radmapserver-files.tar.gz 
+</PRE>
+<HR>
+</CODE></BLOCKQUOTE>
+
+The mstmp directory is needed by mapserver to write temporary files to.  The
+radmapserver directory is where we will build our application interface at.</P>
+<H2><A NAME="ss5.2">5.2</A> <A HREF="howto.html#toc5.2">The Mapserver .map file</A>
+</H2>
+
+<P>Fundamental to the Mapserver application, is a .map configuration file.  For 
+our demo, we will build a simple map file called radmapserver.map in our
+<I>/var/www/htdocs/radmapserver</I> directory.  The file is as follows.
+<BLOCKQUOTE><CODE>
+<HR>
+<PRE>
+# Start of Mapfile (radmapserver.map)
+NAME radmapserver
+STATUS ON
+SIZE 450 350
+EXTENT -104 37 -87 49
+UNITS DD
+IMAGETYPE PNG
+
+# Map projection definition
+PROJECTION
+  "proj=epsg:4326"
+END
+
+
+# Map interface definition
+WEB
+  LOG "/var/www/htdocs/mstmp/radmapserver.log"
+  TEMPLATE radmapserver.html
+  IMAGEPATH "/var/www/htdocs/mstmp/"
+  IMAGEURL "/mstmp/"
+END
+
+# Our Geo-referenced RADAR layer
+LAYER
+  TYPE RASTER
+  STATUS ON
+  NAME radar
+  DATA "/var/www/htdocs/radmapserver/gisdata/radar.tif"
+  PROJECTION
+   "proj=epsg:4326"
+  END
+  # For Mapserver 3.x, we would use
+  # OFFSITE 0
+  OFFSITE 0 0 0
+END
+
+# Our states shapefile, just to get some political boundaries
+LAYER
+  TYPE POLYGON
+  STATUS ON
+  NAME states
+  DATA "/var/www/htdocs/radmapserver/gisdata/states.shp"
+  PROJECTION
+    "proj=epsg:4326"
+  END
+  CLASS
+    OUTLINECOLOR 255 0 0
+  END
+END
+
+END # End of mapfile radmapserver.map
+</PRE>
+<HR>
+</CODE></BLOCKQUOTE>
+</P>
+<P>In the Web definition of our mapfile, we referenced a file called <I>radmapserver.html</I>.
+This file is a HTML template mapserver uses to generate an interface.  Our
+example radmapserver.html file is as follows.
+<BLOCKQUOTE><CODE>
+<HR>
+<PRE>
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;RadMapserver Test&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;form method="GET" action="/cgi-bin/mapserv" name="mapserv"&gt;
+&lt;input type="hidden" value="[mapext]" name="imgext"&gt;
+&lt;!-- imgxy is set to half of your display image size --&gt;
+&lt;input type="hidden" value="225 175" name="imgxy"&gt;
+&lt;input type="hidden" value="[map]" name="map"&gt;
+&lt;input type="hidden" value="browse" name="mode"&gt;
+
+&lt;table border="1"&gt;
+&lt;tr&gt;&lt;td&gt;
+
+&lt;input name="img" type="image" src="[img]" border="0"&gt;
+
+&lt;/td&gt;&lt;td&gt;
+
+&lt;p&gt; &lt;b&gt; Select layers to display &lt;/b&gt; 
+&lt;br&gt;&lt;input type="checkbox" value="radar" name="layer" [radar_check] &gt; RADAR layer
+&lt;br&gt;&lt;input type="checkbox" value="states" name="layer" [states_check] &gt; States layer
+
+&lt;p&gt;  Set your zoom option:
+&lt;br&gt;  
+&lt;select name="zoom" size="1"&gt;  
+  &lt;option value="4" [zoom_4_select]&gt; Zoom in 4 times 
+  &lt;option value="3" [zoom_3_select]&gt; Zoom in 3 times 
+  &lt;option value="2" [zoom_2_select]&gt; Zoom in 2 times 
+  &lt;option value="1" [zoom_1_select]&gt; Recenter Map 
+  &lt;option value="-2" [zoom_-2_select]&gt; Zoom out 2 times 
+  &lt;option value="-3" [zoom_-3_select]&gt; Zoom out 3 times 
+  &lt;option value="-4" [zoom_-4_select]&gt; Zoom out 4 times 
+&lt;/select&gt;
+
+&lt;p&gt;
+&lt;input type="submit" value="Make Map!"&gt;
+&lt;form&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;html&gt;
+</PRE>
+<HR>
+</CODE></BLOCKQUOTE>
+</P>
+<P>Believe it or not, we are ready to rock and roll!  Get your favorite Open Source
+web browser loaded up and point it at your website with the following URL
+<HR>
+<PRE>
+http://your.web.site/cgi-bin/mapserv?map=/var/www/htdocs/radmapserver/radmapserver.map&amp;layers=states
+</PRE>
+<HR>
+</P>
+<HR>
+<A HREF="howto-6.html">Next</A>
+<A HREF="howto-4.html">Previous</A>
+<A HREF="howto.html#toc5">Contents</A>
+</BODY>
+</HTML>

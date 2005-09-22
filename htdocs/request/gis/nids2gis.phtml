@@ -1,0 +1,148 @@
+<?php
+/* Long TODO item to generate NEXRAD composites */
+
+function printNIDSMenu($prod){
+?>
+<p><b>2. Select NIDS Product:</b>
+<br>
+<select name="prod">
+  <option value="N0R" <?php if ($prod == 'N0R') echo 'SELECTED'; ?>>N0R -- Base Reflect 
+  <option value="N1P" <?php if ($prod == 'N1P') echo 'SELECTED'; ?>>N1P -- 1 Hour Precip
+  <option value="N1R" <?php if ($prod == 'N1R') echo 'SELECTED'; ?>>N1R -- Tilt 2 Reflect
+  <option value="N2R" <?php if ($prod == 'N2R') echo 'SELECTED'; ?>>N2R -- Tilt 3 Reflect
+  <option value="N3R" <?php if ($prod == 'N3R') echo 'SELECTED'; ?>>N3R -- Tilt 4 Reflect
+  <option value="NCR" <?php if ($prod == 'NCR') echo 'SELECTED'; ?>>NCR -- Composite Reflect 
+  <option value="NTP" <?php if ($prod == 'NTP') echo 'SELECTED'; ?>>NTP -- Storm Total Precip 
+  <option value="NVL" <?php if ($prod == 'NVL') echo 'SELECTED'; ?>>NVL -- VIL 
+</select>
+
+<?php
+}
+
+?>
+<?php $TITLE = "IEM | NIDS 2 GIS";
+include("/mesonet/php/include/header.php"); ?>
+
+<h3 class="heading">Recent NIDS Imagery to GIS RASTERs</h3>
+
+<div class="text">
+<p>The form allows you to generate a Geo-referenced TIFF or JPEG from most any NIDS
+product from NEXRAD sites near Iowa.  The archive contains NIDS products back
+10 days.  If you would like products prior to this date, please 
+<a href="/info/contacts.php">contact us</a>.
+
+<?php if (! isset($_GET['rad'])) {
+/** Print interface to select site! */ ?>
+<form method="GET" action="nids2gis.phtml" name="s">
+<p><b>1. Select NEXRAD site:</b>
+<br>
+<select name="rad">
+  <option value="ABR" <?php if ($rad == 'ABR') echo 'SELECTED'; ?>>[ABR] Aberdeen, SD
+  <option value="ARX" <?php if ($rad == 'ARX') echo 'SELECTED'; ?>>[ARX] LaCrosse, WI
+  <option value="DMX" <?php if ($rad == 'DMX') echo 'SELECTED'; ?>>[DMX] Des Moines, IA
+  <option value="DVN" <?php if ($rad == 'DVN') echo 'SELECTED'; ?>>[DVN] Davenport, IA
+  <option value="EAX" <?php if ($rad == 'EAX') echo 'SELECTED'; ?>>[EAX] Pleasant Hill, MO
+  <option value="FSD" <?php if ($rad == 'FSD') echo 'SELECTED'; ?>>[FSD] Sioux Falls, SD
+  <option value="MPX" <?php if ($rad == 'MPX') echo 'SELECTED'; ?>>[MPX] Minneapolis, MN
+  <option value="OAX" <?php if ($rad == 'OAX') echo 'SELECTED'; ?>>[OAX] Omaha,
+NE
+  <option value="UDX" <?php if ($rad == 'UDX') echo 'SELECTED'; ?>>[UDX] Rapid City, SD
+</select>
+
+<?php printNIDSMenu($prod); ?>
+
+<p><b>3. Select Date (UTC):</b>
+<br>
+<select name="day">
+<?php
+for ($i=0;$i<10;$i++)
+{
+  echo "<option value=\"". date("Ymd", (date("U") - $i*86400) ) ."\"> ". date("M d", (date("U") - $i*86400 ) ) ."\n";
+}
+?>
+</select>
+
+<p><input type="submit" value="View Available Volume Scans">
+
+</form>
+
+<?php } else if (isset($_GET['rad']) && ! isset($_GET['fp']) ) {
+/** Present a listing of time available */
+ $rad = substr($_GET['rad'], 0, 3);
+ $prod = substr($_GET['prod'], 0, 3);
+ $day = substr($_GET['day'], 0, 8);
+
+ $baseref = "/mesonet/data/nexrad/NIDS/$rad/$prod/";
+
+ $handle = opendir($baseref);
+ $files = Array();
+ while (false !== ($file = readdir($handle))) {
+    if ($file != "." && $file != "..") {
+	 $yyyymmdd = substr($file, 4, 8);
+	 $hhmm = substr($file, 13, 4);
+     if ($yyyymmdd == $day)
+		$files[] = $hhmm;
+    }
+ }
+ sort($files);
+?>
+
+<form method="GET" action="nids2gis.php" name="s">
+<input type="hidden" name="rad" value="<?php echo $rad; ?>">
+
+<p><b>1. Selected NEXRAD:</b> <?php echo $rad; ?> <a href="nids2gis.phtml">Change</a>
+
+<?php printNIDSMenu($prod); ?>
+
+<p><b>3. Select Date (UTC) to limit request:</b> <?php echo $day; ?> <a href="nids2gis.phtml">Change</a>
+
+<p><b>4. Select Volume Scan:</b>
+<br><select name="fp">
+<?php
+	while( list($key, $tm) = each($files) ){
+		$fp = $prod ."_". $day ."_". $tm ;
+		echo "<option value=\"". $fp ."\">". $tm ."Z (". intval(filesize($baseref . $fp ) / 1000) ."KB)";
+    }
+ ?>
+</select>
+
+<p><b>5. Specify Projection:</b>
+<br><select name="epsg">
+ <option value="4326">Lat-Lon WGS84 EPSG:4326
+ <option value="26914">NAD83 Zone 14 North EPSG:26914
+ <option value="26915">NAD83 Zone 15 North EPSG:26915
+</select>
+
+<p><b>6. Select Output Format:</b>
+<br><select name="frmt">
+ <option value="tiff">Geo-TIFF
+ <option value="jpeg">JPEG
+</select>
+
+<p><input type="submit" value="Generate Zip File!"></form>
+
+
+<?php } ?>
+
+<p><b>Tips/Tricks/Caveats:</b>
+<ul>
+  <li>Once you have made all of your selections, a zip file will be made 
+available for you to download.  This zip file will contain the TIFF image
+and a .tfw world file, which geo-references the image.</li>
+  <li>Legends/Scalebars.  I am really not sure how to resolve this needed
+meta-data to make sense of the imagery.  I would be happy to hear some
+ideas.</li>
+  <li>Option 4 presents available volume scans for the date of choice.  The
+value listed in parenthesis is the size of the NIDS data file.  When you 
+are looking at the Storm Total (NTP) product, the size value is important
+to note when the size goes from larger values to smaller values between 
+2 volume scans.  This is when the RADAR NTP product was reset to zero.</li>
+  <li>Some of you may wish to write scripts against this service.  Here is 
+a template for the URL.<code>/request/gis/nids2gis.php?rad=ABR&amp;prod=N0R&amp;fp=N0R_20040426_0005</code> .  You do need to know the volume scan times before 
+making a request from a script.</li>
+</ul>
+
+</div>
+
+<?php include("/mesonet/php/include/footer.php"); ?>
+

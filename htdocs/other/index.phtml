@@ -1,0 +1,27 @@
+<?php 
+include("../../config/settings.inc.php");
+include("$rootpath/include/iemaccess.php");
+include("$rootpath/include/iemaccessob.php");
+$TITLE = "IEM | Other Data Networks";
+include("$rootpath/include/header.php");  ?>
+
+<h3 class="heading">Other Data Networks</h3>
+
+<p>These are miscellaneous stations that don't necessary belong to a network.
+
+<p><a href="/info/network.phtml?network=OT">Station Locations</a>
+
+<p><h3 class="subtitle">Data Traces:</h3>
+
+<ul>
+<li><a href="/plotting/mesonorth/ot_10min.phtml">Indoor Temperature for Met Cluster Room</a></li>
+<li><a href="/plotting/isumet/1station_1min.phtml">ISU AMS Station</a></li>
+<li><a href="/plotting/mesoeast/main.phtml">Mesonet Northeast Ames</a></li>
+</ul>
+
+
+<p><h3 class="subtitle">Current Conditions:</h3>
+
+<ul><li><a href="/other/current.phtml">Sortable Current Conditions</a></li></ul>
+
+<?php include("$rootpath/include/footer.php"); ?>

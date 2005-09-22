@@ -1,0 +1,262 @@
+#
+# Start of map file
+#
+NAME usradar
+STATUS ON
+SIZE 640 480
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
+#EXTENT -823363.662623459 -2372075.10549482 2411363.74104652 299987.580773154
+#EXTENT -823363.662623459 -2372075.10549482 1211363.74104652 -999987.580773154
+# 3x2
+EXTENT -89671.45300326 -713811.073132402 1034764.00146607 183473.679247423
+# Midwest
+# 4x3  2040km 1530km
+#EXTENT -340000 -950000 1710000 580000
+#EXTENT -340000 -950000 1710000 580000
+UNITS METERS
+#SHAPEPATH "/mesonet/data/gis/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+IMAGECOLOR 0 0 250
+IMAGETYPE PNG
+TRANSPARENT OFF
+INTERLACE off
+
+#
+PROJECTION
+  "init=epsg:2163"
+END
+
+#
+WEB
+  TEMPLATE radar.html
+  MINSCALE 90000
+  MAXSCALE 40000000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/warning0.log"
+END
+
+#
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+LAYER
+  NAME namerica
+  STATUS ON
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/2163/world/namerica.shp
+  PROJECTION
+   "init=epsg:2163"
+  END
+  CLASSITEM "FIRST_FIPS"
+  CLASS
+    EXPRESSION /US/
+    COLOR  105 105 105
+  END
+  CLASS
+    COLOR 191 191 191
+  END
+END
+
+LAYER
+  NAME lakes
+  STATUS ON
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/2163/usa/major_lakes.shp
+  PROJECTION
+   "init=epsg:2163"
+  END
+  CLASS
+    COLOR 0 0 250
+  END
+END
+
+LAYER
+ NAME radar
+ STATUS ON
+ TYPE RASTER
+ DATA "/mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif"
+ OFFSITE 0 0 0
+ PROJECTION
+  "init=epsg:4326"
+ END
+END
+
+LAYER
+  NAME counties
+  STATUS ON
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/2163/usa/nwscounties.shp
+  PROJECTION
+   "init=epsg:2163"
+  END
+  CLASS
+    OUTLINECOLOR 54 54 54
+  END
+  TRANSPARENCY 80
+END
+
+LAYER
+  NAME states
+  STATUS ON
+  TYPE LINE
+  DATA /mesonet/data/gis/shape/2163/usa/states.shp
+  PROJECTION
+   "init=epsg:2163"
+  END
+  CLASS
+  #  COLOR 105 105 105
+    COLOR 0 0 0
+    SYMBOL 'circle'
+    SIZE 2
+  END
+  TRANSPARENCY 80
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings0_c
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.10"
+ DATA "geom from (select type, geom, oid from warnings WHERE gtype = 'C' and
+       expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo"
+  STATUS ON
+  TYPE POLYGON
+  METADATA
+    "wms_title" "Current County Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+#  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASSITEM 'type'
+  CLASS
+    EXPRESSION /FFW/
+    COLOR -1 -1 -1
+    OUTLINECOLOR 0 255 0
+    SIZE 2
+    SYMBOL 1
+  END
+  CLASS
+    EXPRESSION /SVR/
+    COLOR -1 -1 -1
+    OUTLINECOLOR 255 255 0
+    SIZE 2
+    SYMBOL 1
+  END
+  CLASS
+    EXPRESSION /TOR/
+    COLOR -1 -1 -1
+    OUTLINECOLOR 255 0 0
+    SIZE 2
+    SYMBOL 1
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings0_p
+  CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
+  DATA "geom from warnings"
+  STATUS ON
+  TYPE POLYGON
+  METADATA
+    "wms_title" "Current Polygon Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASSITEM 'type'
+  CLASS
+        EXPRESSION /TOR|SVR/
+    COLOR -1 -1 -1
+    OUTLINECOLOR 255 255 255
+#    SYMBOL 1
+#    SIZE 10
+  END
+END
+
+
+LAYER
+ CONNECTIONTYPE postgis
+ NAME watches
+ CONNECTION "user=akrherz dbname=postgis host=10.10.10.10"
+ DATA "geom from watches"
+ PROJECTION
+  "proj=latlong"
+ END
+ TYPE LINE
+ STATUS DEFAULT
+ FILTER "expired > CURRENT_TIMESTAMP"
+ CLASSITEM 'type'
+  CLASS
+    EXPRESSION /SVR/
+    COLOR 255 255 0
+    SIZE 2
+    SYMBOL 1
+  END
+  CLASS
+    EXPRESSION /TOR/
+    COLOR 255 0 0
+    SIZE 2
+    SYMBOL 1
+  END
+END
+
+LAYER
+  NAME credits
+  TYPE ANNOTATION
+  STATUS default
+  TRANSFORM FALSE
+  CLASS
+    NAME 'credits'
+    LABEL
+      COLOR 0 0 0
+      BACKGROUNDCOLOR 250 250 250
+#      SHADOWSIZE 1 1
+#      SHADOWCOLOR 0 0 0
+#      BACKGROUNDSHADOWCOLOR 0 0 0
+#      BACKGROUNDSHADOWSIZE 1 1
+      TYPE TRUETYPE
+      SIZE 16
+      FONT 'kcci'
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+      BUFFER 2
+    END
+  END
+END
+
+
+LAYER
+  NAME logo
+  TYPE POINT
+  STATUS default
+  TRANSFORM FALSE
+  TRANSPARENCY 10
+  CLASS
+    SYMBOL 'iem_logo'
+    SIZE 40
+        COLOR 0 0 0
+  END
+END
+
+
+END

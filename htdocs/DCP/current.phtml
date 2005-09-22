@@ -1,0 +1,128 @@
+<?php
+ include("../../config/settings.inc.php");
+ $shef = isset($_GET['shef']) ? $_GET['shef'] : 0;
+?>
+ 
+<?php
+  $TITLE = "IEM | DCP Network";
+   $REFRESH = "<meta http-equiv=\"refresh\" content=\"600;\">";
+  $HEADEXTRA = '<script type="text/javascript" src="/js/tableruler.js"></script>
+<script type="text/javascript">
+    window.onload=function(){tableruler();}
+</script>';
+  include("$rootpath/include/header.php");
+?>
+<div class="text">
+<a href="/DCP/">DCP Network</a> &nbsp; <b> > </b> &nbsp; Current Conditions
+<?php
+ $sortcol = $_GET["sortcol"];
+ if ($sortcol == "") $sortcol = "ts";
+ include("$rootpath/include/iemaccess.php");
+ include("$rootpath/include/iemaccessob.php");
+
+ $iem = new IEMAccess();
+ $network = $iem->getNetwork("DCP");
+
+
+
+ $db = Array();
+ while (list($site, $iemob) = each($network) ){
+  $db[$site] = Array();
+  if ($iemob->db["tmpf"] != -99) {
+    $db[$site]['tmpf'] = $iemob->db["tmpf"];
+    $db[$site]['max_tmpf'] = $iemob->db["max_tmpf"];
+    $db[$site]['min_tmpf'] = $iemob->db["min_tmpf"];
+  }
+  $db[$site]['sname'] = $iemob->db["sname"];
+  if ($iemob->db["phour"] != -99)
+    $db[$site]['phour'] = $iemob->db["phour"];
+  $db[$site]['ts'] = $iemob->ts;
+  $db[$site]['sid'] = $site;
+  $db[$site]['pday'] = $iemob->db["pday"];
+  $db[$site]['raw'] = $iemob->db["raw"];
+  if ($iemob->db["rstage"] > 0)
+    $db[$site]['rstage'] = $iemob->db["rstage"];
+ }
+
+function aSortBySecondIndex($multiArray, $secondIndex) {
+        while (list($firstIndex, ) = each($multiArray))
+                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
+        while (list($firstIndex, ) = each($indexMap))
+                if (is_numeric($firstIndex))
+                        $sortedArray[] = $multiArray[$firstIndex];
+                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+        return $sortedArray;
+}
+
+$db = aSortBySecondIndex($db, $sortcol);
+
+$cols = Array("ts" => "Valid", "sid" => "Site ID", "sname" => "Station Name",
+  "tmpf" => "Air Temperature", "phour" => "Rainfall One Hour");
+?>
+
+<?php $current_network = "DCP"; include("../include/current_bar.inc.php"); ?>
+<form method="GET" action="current.phtml">
+<input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
+<b>Show SHEF obs:</b>
+<select name="shef">
+ <option value="0" <?php if (! $shef) echo "SELECTED"; ?>>No
+ <option value="1" <?php if ($shef) echo "SELECTED"; ?>>Yes
+</select>
+<input type="submit" value="Go!">
+</form>
+
+
+
+<?php
+echo "<p>Sorted by: ". $cols[$sortcol] ;
+ $baseurl = "current.phtml?shef=$shef&sortcol=";
+?>
+<table style="font-size: 10pt;" class="ruler">
+<thead>
+<tr>
+  <th><a href="<?php echo $baseurl; ?>sid">SiteID:</a></th>
+  <th><a href="<?php echo $baseurl; ?>sname">Station Name:</a></th>
+  <th><a href="<?php echo $baseurl; ?>ts">Valid:</a></th>
+  <th><a href="<?php echo $baseurl; ?>rstage">Stage</a> [ft]</th>
+  <th><a href="<?php echo $baseurl; ?>tmpf">Temp</a> [F]</th>
+  <th><a href="<?php echo $baseurl; ?>phour">1h Rain</a> [in]</th>
+  <th><a href="<?php echo $baseurl; ?>pday">Today Rain</a> [in]</th></tr></thead>
+<tbody>
+<?php
+ $oddrow = true;
+ $now = time();
+ while (list($site, $value) = each($db) ){
+   echo "<tr ";
+   if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
+   echo "><td> $site </td>
+    <td>". $value["sname"] ."</font></td>";
+   echo "<td ";
+   $tdiff = $now - $value["ts"];
+   if ($tdiff > (6*3600) ){
+       echo 'bgcolor="red"';
+   }
+   echo ">". strftime("%d %b %I:%M %p", $value["ts"]) ."</td>
+    <td>". $value["rstage"] ."</td>";
+   if ($value["tmpf"] != ""){
+   echo "<td>". $value["tmpf"] ." (<font color=\"#ff0000\">". $value["max_tmpf"] ."</font> / <font color=\"#0000ff\">". $value["min_tmpf"] ."</font>)</td>";
+   } else{
+    echo "<td></td>";
+   }
+   echo "<td>". $value["phour"] ."</td>
+    <td>". $value["pday"] ."</td>
+    </tr>";
+	if ($shef)
+	{
+		echo "<tr align=\"center\" ";
+		if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
+		echo "><td colspan=7><font style=\"color: brown; font-size: smaller;\">". $value["raw"] ."</font></td></tr>";
+	}
+   $oddrow = ! $oddrow;
+ }
+?>
+</tbody><tfoot>
+<tr><td colspan=7>&nbsp;</td></tr>
+</tfoot></table></div>
+
+<?php include("$rootpath/include/footer.php");
+?>

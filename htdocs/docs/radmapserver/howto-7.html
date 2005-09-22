@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.20">
+ <TITLE>Mapserver + NEXRAD Composite HOWTO: Conclusions </TITLE>
+ <LINK HREF="howto-6.html" REL=previous>
+ <LINK HREF="howto.html#toc7" REL=contents>
+</HEAD>
+<BODY>
+Next
+<A HREF="howto-6.html">Previous</A>
+<A HREF="howto.html#toc7">Contents</A>
+<HR>
+<H2><A NAME="s7">7.</A> <A HREF="howto.html#toc7">Conclusions </A></H2>
+
+<P>This HOWTO demonstrated a very primitive component of GIS, web mapping.  There
+is just so much more that can be done.  For those of you familiar with PHP, 
+Mapserver has an outstanding PHP interface to the Mapserver API.  You can 
+create some of the neatest applications using the Mapserver API and the power
+of PHP.  The Iowa Environmental Mesonet has implemented most of its Mapserver
+interfaces using the PHP mapscript module.  The source code for these applications is licensed under the GPL, but I just don't place the code on the website to download.  Just
+email me if you would like a copy...</P>
+<H2><A NAME="ss7.1">7.1</A> <A HREF="howto.html#toc7.1">Future Work</A>
+</H2>
+
+<P>I would suspect that most people will not have the ability to generate nationwide NEXRAD composites.  One of the neat things Mapserver can do is act as a 
+Web Map Service (WMS) server and client.  Potentially a WMS server could be
+set up somewhere on the Internet and then your mapserver could make a remote
+WMS call to it get the image.</P>
+<P>Another option, will be for either UNIDATA, the IEM, or somebody else to generate the nationwide composite (in 'unprojected' coordinates) and make that available on the IDD.  This is probably
+the easiest way to get this data to the community. </P>
+<P>Although never covered in this HOWTO, timestamps are a big issue with this 
+system.  I have built hacks using DBF files in order to get timestamps on the 
+generated images.  Here is an example of output using this 'hack'.  At some 
+point, I will add this hack to the HOWTO.
+<BLOCKQUOTE><CODE>
+<A HREF="http://mesonet.agron.iastate.edu/data/mwcomp.png">http://mesonet.agron.iastate.edu/data/mwcomp.png</A></CODE></BLOCKQUOTE>
+</P>
+<H2><A NAME="ss7.2">7.2</A> <A HREF="howto.html#toc7.2">Contact info</A>
+</H2>
+
+<P>If you have questions, shoot me an email (akrherz@iastate.edu) or give me a call (515.294.5978).  Good luck!</P>
+<HR>
+Next
+<A HREF="howto-6.html">Previous</A>
+<A HREF="howto.html#toc7">Contents</A>
+</BODY>
+</HTML>

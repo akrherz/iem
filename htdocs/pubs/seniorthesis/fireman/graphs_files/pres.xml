@@ -1,0 +1,53 @@
+<xml xmlns:v="urn:schemas-microsoft-com:vml"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:p="urn:schemas-microsoft-com:office:powerpoint">
+ <p:presentation>
+  <p:master id="4" type="main" href="master04.htm" xmlhref="master04.xml"
+   template="Soaring" layout="title_body"
+   slots="title,body,dateTime,footer,slideNumber">
+   <p:schemes>
+    <p:colorscheme
+     colors="#0000FF,#FFFFFF,#000000,#FFCC66,#00FFFF,#3366FF,#FF0033,#FFFF00"/>
+    <p:colorscheme
+     colors="#FFFFFF,#000000,#CCECFF,#000000,#6699FF,#66CCFF,#CC99FF,#00CCCC"/>
+    <p:colorscheme
+     colors="#FFFFFF,#000000,#FFFFFF,#000000,#CBCBCB,#EAEAEA,#5F5F5F,#969696"/>
+    <p:colorscheme
+     colors="#008080,#FFFFFF,#000000,#FFCC66,#0099CC,#009999,#6600CC,#FFFF00"/>
+    <p:colorscheme
+     colors="#993300,#FFFFFF,#000000,#FFCC66,#FF6633,#CC6600,#CC0000,#FFFF00"/>
+   </p:schemes>
+  </p:master>
+  <p:master id="5" type="title" href="master05.htm" xmlhref="master05.xml"
+   layout="title_subtitle"
+   slots="centerTitle,subTitle,dateTime,footer,slideNumber"/>
+  <p:slide id="2" href="slide0002.htm" layout="title_body" slots="title,body"
+   omitmastershapes="t"/>
+  <p:slide id="3" href="slide0003.htm" layout="title_only" slots="title"
+   omitmastershapes="t"/>
+  <p:slide id="7" href="slide0007.htm" omitmastershapes="t"/>
+  <p:slide id="8" href="slide0008.htm" omitmastershapes="t"/>
+  <p:slide id="9" href="slide0009.htm" omitmastershapes="t"/>
+  <p:slide id="10" href="slide0010.htm" omitmastershapes="t"/>
+  <p:slide id="11" href="slide0011.htm" omitmastershapes="t"/>
+  <p:slide id="12" href="slide0012.htm" omitmastershapes="t"/>
+  <p:slide id="13" href="slide0013.htm" omitmastershapes="t"/>
+  <p:slide id="15" href="slide0015.htm" omitmastershapes="t"/>
+  <p:slide id="16" href="slide0016.htm" omitmastershapes="t"/>
+  <p:slide id="17" href="slide0017.htm" omitmastershapes="t"/>
+  <p:slide id="18" href="slide0018.htm" omitmastershapes="t"/>
+  <p:slide id="19" href="slide0019.htm" omitmastershapes="t"/>
+  <p:slide id="20" href="slide0020.htm" omitmastershapes="t"/>
+  <p:slide id="21" href="slide0021.htm" omitmastershapes="t"/>
+  <p:viewstate type="outline" slidehref="slide0020.htm"/>
+  <p:font name="Times New Roman" charset="0" type="4" family="18"/>
+  <p:font name="Arial" charset="0" type="4" family="34"/>
+  <p:font name="Wingdings" charset="2" type="4" family="2"/>
+  <p:headersfooters noheader="t"/>
+  <p:pptdocumentsettings framecolors="WhiteTextOnBlack" hideslideanimation="t"
+   browsersupport="dual"/>
+ </p:presentation>
+ <o:shapedefaults v:ext="edit" spidmax="33794" style='mso-wrap-style:none'>
+  <o:colormru v:ext="edit" colors="yellow,red,green,#090,maroon,white,none [4]"/>
+  <o:colormenu v:ext="edit" strokecolor="none [2]"/>
+ </o:shapedefaults></xml>

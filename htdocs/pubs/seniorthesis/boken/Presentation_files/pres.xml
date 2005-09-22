@@ -1,0 +1,89 @@
+<xml xmlns:v="urn:schemas-microsoft-com:vml"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:p="urn:schemas-microsoft-com:office:powerpoint">
+ <p:presentation hidecomments="t">
+  <p:master id="3" type="main" href="master03.htm" xmlhref="master03.xml"
+   template="Generic (Standard)" layout="title_body"
+   slots="title,body,dateTime,footer,slideNumber">
+   <p:schemes>
+    <p:colorscheme
+     colors="#FFFFFF,#009999,#010000,#336699,#CCECFF,#FFFFCC,#FF9966,#FFFFCC"/>
+    <p:colorscheme
+     colors="#000000,#FFFFFF,#800000,#FFFFCC,#000000,#000099,#800000,#000000"/>
+    <p:colorscheme
+     colors="#FFFFFF,#000000,#CBCBCB,#000000,#C0C0C0,#DDDDDD,#5F5F5F,#DDDDDD"/>
+   </p:schemes>
+  </p:master>
+  <p:master id="4" type="title" href="master04.htm" xmlhref="master04.xml"
+   layout="title_subtitle"
+   slots="centerTitle,subTitle,dateTime,footer,slideNumber"/>
+  <p:master id="1" type="notes" href="master01.htm" layout="notes"
+   slots="header,dateTime,slideImage,body,footer,slideNumber"/>
+  <p:master id="2" type="handout" href="master02.htm" layout="handout"
+   slots="header,dateTime,footer,slideNumber"/>
+  <p:slide id="30" href="slide0030.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="21" href="slide0021.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="10" href="slide0010.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="2" href="slide0002.htm" layout="title_body" slots="title,body">
+   <p:headersfooters noheader="t"/>
+  </p:slide>
+  <p:slide id="3" href="slide0003.htm" layout="title_body" slots="title,body">
+   <p:headersfooters noheader="t"/>
+  </p:slide>
+  <p:slide id="4" href="slide0004.htm" layout="title_body" slots="title,body">
+   <p:headersfooters noheader="t"/>
+  </p:slide>
+  <p:slide id="5" href="slide0005.htm" layout="title_body" slots="title,body">
+   <p:headersfooters noheader="t"/>
+  </p:slide>
+  <p:slide id="6" href="slide0006.htm" layout="title_body" slots="title,body">
+   <p:headersfooters noheader="t"/>
+  </p:slide>
+  <p:slide id="12" href="slide0012.htm" layout="title_body" slots="title,table"/>
+  <p:slide id="7" href="slide0007.htm" layout="title_body" slots="title,body">
+   <p:headersfooters noheader="t"/>
+  </p:slide>
+  <p:slide id="8" href="slide0008.htm" layout="title_body" slots="title,body">
+   <p:headersfooters noheader="t"/>
+  </p:slide>
+  <p:slide id="13" href="slide0013.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="14" href="slide0014.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="31" href="slide0031.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="32" href="slide0032.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="33" href="slide0033.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="16" href="slide0016.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="17" href="slide0017.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="18" href="slide0018.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="19" href="slide0019.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="20" href="slide0020.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="34" href="slide0034.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="35" href="slide0035.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="25" href="slide0025.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="22" href="slide0022.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="23" href="slide0023.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="24" href="slide0024.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="26" href="slide0026.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="27" href="slide0027.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="28" href="slide0028.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="29" href="slide0029.htm" layout="title_body" slots="title,body"/>
+  <p:slide id="9" href="slide0009.htm" layout="title_body" slots="title,body">
+   <p:headersfooters noheader="t"/>
+  </p:slide>
+  <p:viewstate type="slideView"/>
+  <p:slideshowsettings pencolor="schemeText" restarttime="300000"/>
+  <p:kinsoku language="Japanese" level="levelOne"/>
+  <p:font name="Times New Roman" charset="0" type="4"/>
+  <p:font name="Helvetica" charset="0" type="4"/>
+  <p:font name="Arial" charset="0" type="4"/>
+  <p:font name="Monotype Sorts" charset="2" type="4"/>
+  <p:font name="Times" charset="0" type="4"/>
+  <p:font name="Symbol" charset="2" type="4"/>
+  <p:headersfooters noheader="t"/>
+  <p:headersfooters notes="t" slidenumber="t" nouserdate="t" todaydate="t"/>
+  <p:pptdocumentsettings framecolors="WhiteTextOnBlack" hideslideanimation="t"
+   browsersupport="dual"/>
+ </p:presentation>
+ <o:shapedefaults v:ext="edit" spidmax="49154">
+  <o:colormru v:ext="edit" colors="#9f6,silver,#6cf,#f06,#ffc,#03c,blue,#33f"/>
+  <o:colormenu v:ext="edit" fillcolor="#ffc" strokecolor="#33f"/>
+ </o:shapedefaults></xml>

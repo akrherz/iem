@@ -1,0 +1,244 @@
+<?php
+ include("../../config/settings.inc.php");
+ $network = $_GET['network'];
+ if (strlen($network) > 10 || strlen($network) == 0) $network = 'IA_ASOS';
+ $metar = $_GET['metar'];
+ if ($metar == "") $metar = "no";
+ $sortcol = isset($_GET['sortcol'])  ? $_GET['sortcol']: "ts";
+?>
+
+<?php
+  $TITLE = "IEM | ASOS | Current Conditions";
+  $REFRESH = "<meta http-equiv=\"refresh\" content=\"1200;\">";
+  $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+<!--//BEGIN Script
+function new_window(url) {
+ link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
+} 
+//END Script-->
+</script>
+<script type="text/javascript" src="/js/tableruler.js"></script>
+<script type="text/javascript">
+    window.onload=function(){tableruler();}
+</script>';
+  include("$rootpath/include/header.php"); 
+  include("$rootpath/include/mlib.php"); 
+  include("$rootpath/include/all_locs.php"); 
+  include("$rootpath/include/iemaccess.php");
+  include("$rootpath/include/iemaccessob.php");
+
+$iem = new IEMAccess();
+$asos = $iem->getNetwork($network);
+
+
+$vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
+  "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
+  "alti" => "Altimeter [mb]", "peak" => "Today's Wind Gust [knots]",
+  "peak_ts" => "Time of Peak Gust", "relh" => "Relative Humidity",
+  "feel" => "Feels Like [F]", "vsby" => "Visibility [miles]",
+  "ts" => "Observation Time", "phour" => "Last Hour Rainfall [inch]",
+  "min_tmpf" => "Today's Low Temperature", "sname" => "Station Name",
+  "max_tmpf" => "Today's High Temperature",
+  "pday" => "Today Rainfall [inch]", );
+
+?>
+
+<div class="text">
+<b>Nav:</b><a href="/current/">Current Conditions</a>
+
+<?php $current_network = "ASOS"; include("$rootpath/include/current_bar.inc.php"); ?>
+<p>
+<h3 class="subtitle"><center>Neighboring ASOS Conditions</center></h3><p>
+<table border=1 cellspacing=0 cellpadding=1>
+<tr>
+  <th>View Options:</th>
+  <td>
+<form method="GET" action="current.phtml">
+<input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
+Select State:<select name="network">
+ <option value="AL_ASOS" <?php if ($network == "AL_ASOS") echo "SELECTED"; ?>>Alabama
+ <option value="FL_ASOS" <?php if ($network == "FL_ASOS") echo "SELECTED"; ?>>Florida
+ <option value="IL_ASOS" <?php if ($network == "IL_ASOS") echo "SELECTED"; ?>>Illinois
+ <option value="IN_ASOS" <?php if ($network == "IN_ASOS") echo "SELECTED"; ?>>Indiana
+ <option value="IA_ASOS" <?php if ($network == "IA_ASOS") echo "SELECTED"; ?>>Iowa
+ <option value="KS_ASOS" <?php if ($network == "KS_ASOS") echo "SELECTED"; ?>>Kansas
+ <option value="LA_ASOS" <?php if ($network == "LA_ASOS") echo "SELECTED"; ?>>Louisana
+ <option value="MI_ASOS" <?php if ($network == "MI_ASOS") echo "SELECTED"; ?>>Michigan
+ <option value="MN_ASOS" <?php if ($network == "MN_ASOS") echo "SELECTED"; ?>>Minnesota
+ <option value="MS_ASOS" <?php if ($network == "MS_ASOS") echo "SELECTED"; ?>>Mississippi
+ <option value="MO_ASOS" <?php if ($network == "MO_ASOS") echo "SELECTED"; ?>>Missouri
+ <option value="NE_ASOS" <?php if ($network == "NE_ASOS") echo "SELECTED"; ?>>Nebraska
+ <option value="NC_ASOS" <?php if ($network == "NC_ASOS") echo "SELECTED"; ?>>North Carolina
+ <option value="ND_ASOS" <?php if ($network == "ND_ASOS") echo "SELECTED"; ?>>North Dakota
+ <option value="NV_ASOS" <?php if ($network == "NV_ASOS") echo "SELECTED"; ?>>Nevada
+ <option value="NY_ASOS" <?php if ($network == "NY_ASOS") echo "SELECTED"; ?>>New York
+ <option value="OH_ASOS" <?php if ($network == "OH_ASOS") echo "SELECTED"; ?>>Ohio
+ <option value="OK_ASOS" <?php if ($network == "OK_ASOS") echo "SELECTED"; ?>>Oklahoma
+ <option value="OR_ASOS" <?php if ($network == "OR_ASOS") echo "SELECTED"; ?>>Oregon
+ <option value="SD_ASOS" <?php if ($network == "SD_ASOS") echo "SELECTED"; ?>>South Dakota
+ <option value="TX_ASOS" <?php if ($network == "TX_ASOS") echo "SELECTED"; ?>>Texas
+ <option value="WV_ASOS" <?php if ($network == "WV_ASOS") echo "SELECTED"; ?>>West Virginia
+ <option value="WI_ASOS" <?php if ($network == "WI_ASOS") echo "SELECTED"; ?>>Wisconsin
+</select></td>
+  <td>Include METARS:
+  <input value="no" type="radio" name="metar" <?php if ($metar == "no") echo  "CHECKED"; ?>> No
+  <input value="yes" type="radio" name="metar" <?php if ($metar == "yes") echo  "CHECKED"; ?>> Yes
+</td>
+<td><input type="submit" value="Go!"></form></td>
+</tr></table>
+
+
+
+
+<?php
+echo "<br>Times are in CDT. Table sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
+a column to sort it.<br>\n";
+?>
+
+<form method="POST" action="/my/current.php">
+
+
+<table style="font-size: 10pt;" class="ruler">
+<thead>
+<tr>
+  <th rowspan="2">ADD:</th>
+  <th rowspan="2"><a href="current.phtml?sortcol=sname&metar=<?php echo $metar; ?>&network=<?php echo $network; ?>">Station</a></th>
+  <th rowspan="2"><a href="current.phtml?sortcol=ts&metar=<?php echo $metar; ?>&network=<?php echo $network; ?>">Ob Time</a></th>
+  <th colspan="3">Temps &deg;F</th>
+  <th colspan="3">&nbsp;</th>
+  <th colspan="3">Wind [knots]</th>
+  <th colspan="2">Precip</font></th>
+<tr>
+  <?php $uri = "current.phtml?metar=$metar&network=$network&sortcol="; ?>
+  <th>
+ <a href="<?php echo $uri; ?>tmpf">Air</a>
+ (<a href="<?php echo $uri; ?>max_tmpf">Hi</a> /
+ <a href="<?php echo $uri; ?>min_tmpf">Lo</a>)
+</th>
+  <th><a href="<?php echo $uri; ?>dwpf">Dewp</a></th>
+  <th><a href="<?php echo $uri; ?>feel">Feels Like</a></th>
+  <th><a href="<?php echo $uri; ?>relh">RH %</a></th>
+  <th><a href="<?php echo $uri; ?>alti">Alti</a></th>
+  <th><a href="<?php echo $uri; ?>vsby">Vsby</a></th>
+  <th><a href="<?php echo $uri; ?>sknt">Speed</a></th>
+  <th><a href="<?php echo $uri; ?>drct">Direction</a></th>
+  <th><a href="<?php echo $uri; ?>peak">Gust</a>
+    @ <a href="<?php echo $uri; ?>peak_ts">Time</a></th>
+  <th><a href="<?php echo $uri; ?>phour">Last Hour</a></th>
+  <th><a href="<?php echo $uri; ?>pday">Today</a></th>
+</tr></thead>
+<tbody>
+<?php
+function aSortBySecondIndex($multiArray, $secondIndex) {
+        while (list($firstIndex, ) = each($multiArray))
+                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+        arsort($indexMap);
+        while (list($firstIndex, ) = each($indexMap))
+                if (is_numeric($firstIndex))
+                        $sortedArray[] = $multiArray[$firstIndex];
+                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+        return $sortedArray;
+}
+
+  $mydata = Array();
+
+  while (list($key, $iemob) = each($asos) ){
+    $mydata[$key] = $iemob->db;
+    $mydata[$key]["ts"] = $iemob->ts;
+    $mydata[$key]["sname"] = $cities[$key]["city"];
+    $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
+    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
+       f2c($mydata[$key]["dwpf"]) );
+    $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
+       $mydata[$key]["relh"], $mydata[$key]["sped"]);
+    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
+      $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
+      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+    } else {
+      $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
+      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+    }
+
+  }
+
+  $finalA = Array();
+
+  $finalA = aSortBySecondIndex($mydata, $sortcol);
+  $now = time();
+  $i = 0;
+  while (list ($key, $val) = each ($finalA))  {
+    $i++;
+    $parts = $finalA[$key];
+
+    echo "<tr";
+    if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
+    echo "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
+
+    $tdiff = $now - $asos[$key]->ts;
+    echo "<td>". $cities[$key]["city"] . " (". $key .")</td>";
+    echo "<td ";
+    if ($tdiff > 10000){
+      $fmt = "%d %b %I:%M %p";
+      echo 'bgcolor="red"';
+    } else if ($tdiff > 7200){
+      $fmt = "%I:%M %p";
+      echo 'bgcolor="orange"';
+    } else if ($tdiff > 3600){
+      $fmt = "%I:%M %p";
+      echo 'bgcolor="green"';
+    } else {
+      $fmt = "%I:%M %p";
+    }
+    echo ">". strftime($fmt, $asos[$key]->ts) ."</td>
+     <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font>)</td>
+     <td>". round($parts["dwpf"],0) ."</td>
+     <td>". round($parts["feel"],0) ."</td>
+	    <td>". $parts["relh"] ."</td>
+	    <td>". $parts["alti"] ."</td>
+	    <td>". $parts["vsby"] ."</td>
+             <td>". $parts["sknt"] ;
+            if (strlen($parts["gust"] != 0)){
+              echo "G". $parts["gust"];
+            } echo "</td>";
+            echo "<td>". drct2txt( $parts["drct"] ) ."</td>
+	    <td>". $parts["peak"] ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ."</td>
+            <td>". $parts["phour"] ."</td>
+            <td>". $parts["pday"] ."</td>
+	    </tr>\n";
+         if ($metar == "yes") {
+            echo "<tr";
+            if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";
+            echo ">";
+            echo "<td colspan=14 align=\"CENTER\">
+             <font color=\"brown\">". $parts["raw"] ."</font></td>
+             </tr>\n";
+         }
+   }
+
+ $uri = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network";
+?>
+</tbody>
+<tfoot>
+<tr>
+ <td colspan="3">&nbsp;</td>
+ <td><a href="<?php echo $uri; ?>&var=tmpf');">Plot</a></td>
+ <td><a href="<?php echo $uri; ?>&var=dwpf');">Plot</a></td>
+ <td><a href="<?php echo $uri; ?>&var=feel');">Plot</a></td>
+ <td><a href="<?php echo $uri; ?>&var=relh');">Plot</a></td>
+ <td><a href="<?php echo $uri; ?>&var=alti');">Plot</a></td>
+ <td><a href="<?php echo $uri; ?>&var=vsby');">Plot</a></td>
+ <td><a href="<?php echo $uri; ?>&var=sknt');">Plot</a></td>
+ <td>&nbsp;</td>
+ <td><a href="<?php echo $uri; ?>&var=max_sknt');">Plot</a></td>
+ <td><a href="<?php echo $uri; ?>&var=phour');">Plot</a></td>
+ <td><a href="<?php echo $uri; ?>&var=pday');">Plot</a></td>
+</tr></tfoot>
+</table>
+
+<input type="submit" value="Add to Favorites">
+<input type="reset" value="Reset">
+
+</form></div>
+
+
+<?php include("$rootpath/include/footer.php"); ?>

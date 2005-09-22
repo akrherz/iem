@@ -1,0 +1,797 @@
+{\rtf1\ansi
+{\fonttbl
+{\f0\fswiss Helvetica;}
+{\f1\fmodern Courier;}
+{\f2\froman Times;}
+{\f3\froman Symbol;}
+}
+{\info{\comment Translated from SGML to RTF w/ Linuxdoc-SGML}}
+
+\page{\pard\plain\keepn\f0\fs36\b\tx576{1 Introduction}}
+{}#{\footnote TOC_0}
+
+${\footnote Introduction}
++{\footnote browse}
+\par\pard\plain\li500\sb200\fi0
+{}K{\footnote Introduction}
+
+Almost every weather website on the Internet has some sort of \url{NEXRAD data display}. Unfortunately almost all of these sites are only fulfilling a single purpose, allowing the user to view an image.  Geographical Information Systems (GIS) goes beyond this single purpose model to allow the user to view the image, but then also process it within a GIS system.  Processing could involve working with the RASTER data, reprojecting the image, querying the image, or many other things.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+This HOWTO covers a mechanism to produce geo-referenced NEXRAD imagery from \url{GEMPAK}. As a GIS web mapping example, we use \url{Mapserver} to create a simple, but 
+powerfull web application. This HOWTO assumes that you are running a  
+modern version of Linux.  Other UNIXs with \url{GNU software} installed  
+should work as well.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+This HOWTO is geared for those in the \url{UNIDATA community} with an active \url{Internet Data Distribution} feed and already have GEMPAK installed.  If you don't have  
+either of these, you will probably just be interested in the Mapserver sections. 
+The {\i radmapserver-files.tar.gz} contains an example RADAR image ready 
+for use with Mapserver or any other raster supporting GIS.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{1.1 411 on abbreviations}}
+{}#{\footnote TOC_1}
+{}K{\footnote 411 on abbreviations}
+
+Some of the abbreviations used in this HOWTO. 
+\cellx2000
+\cellx4000
+\cellx6000
+\cellx8000
+\cellx10000
+\cellx12000
+\cellx14000
+\cellx16000
+\cellx18000
+\intbl
+IEM
+\cell
+Iowa Environmental Mesonet
+\cell\row\intbl 
+UNIDATA
+\cell
+University meteorological research group
+\cell\row\intbl 
+NEXRAD
+\cell
+Network of Next Generation (WSR-88D) RADAR used by the National Weather Service
+\cell\row\intbl 
+NWS
+\cell
+National Weather Service
+\cell\row\intbl 
+GEMPAK
+\cell
+General Meteorological Application Package. Useful for dealing with NWS produced formats
+\cell\row\pard
+\li500{}\par\pard\plain
+\li500{}
+\sb200\fi0
+\qc Abbreviations<@@par>
+\pard
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{1.2 Reading this HOWTO}}
+{}#{\footnote TOC_2}
+{}K{\footnote Reading this HOWTO}
+
+Some of you reading this may have no interest in generating the composites,  
+but wish to use the composites.  Currently, I am not aware of a group  
+generating this data source for free.  I have started generating a national 
+base composite reflectivity as a proof of concept.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{1.3 The Quick and Dirty version}}
+{}#{\footnote TOC_3}
+{}K{\footnote The Quick and Dirty version}
+
+The files used in this howto are available here: \url{urlnam}.
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7} Download and install Proj.4 from \url{urlnam} .
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7} Download and compile Mapserver with proj, TIFF and PNG support from \url{urlnam}  . Place the resulting 'mapserv' binary in your 
+webserver's CGI-BIN directory.
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7}  Extract the {\i radmapserver-files.tar.gz} archive into your web root.
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7}  Point your browser at \url{urlnam} .
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{1.4 Links}}
+{}#{\footnote TOC_4}
+{}K{\footnote Links}
+
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7} \url{UNIDATA}
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7} \url{Mapserver} 
+\par\pard\plain
+\li1500{}
+\sb200\fi0
+\li1500{}\fi-200{\f3\'B7} \url{Mapserver Docs}
+\par\pard\plain
+\li1500{}
+\sb200\fi0
+\li1500{}\fi-200{\f3\'B7} \url{Mapserver WIKI}
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+\page{\pard\plain\keepn\f0\fs36\b\tx576{2 Requirements}}
+{}#{\footnote TOC_5}
+
+${\footnote Requirements}
++{\footnote browse}
+\par\pard\plain\li500\sb200\fi0
+{}K{\footnote Requirements}
+
+
+{\pard\sb200\plain\f0\fs24\b\tx576{2.1 Software and Data Access}}
+{}#{\footnote TOC_6}
+{}K{\footnote Software and Data Access}
+
+The following items must be installed and configured before any of this HOWTO 
+could potentially work for you.  Describing the installation of any of these  
+packages is beyond the scope of this document. 
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7}  You should be using the Linux operating system, but there is no reason 
+this won't work on Solaris or a BSD variant.
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7}  GEMPAK, for converting the NIDS file format into RASTER
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7}  Some mechanism for NIDS data access 
+\par\pard\plain
+\li1500{}
+\sb200\fi0
+\li1500{}\fi-200{\f3\'B7} Realtime access via UNIDATA IDD using LDM
+\par\pard\plain
+\li1500{}
+\sb200\fi0
+\li1500{}\fi-200{\f3\'B7} Or FTP access to NIDS files via NOAA
+\par\pard\plain
+\li1500{}
+\sb200\fi0
+\li1500{}\fi-200{\f3\'B7} Or locally available NIDS files on your hard-drive.
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7}  A webserver, which should be Apache.
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7}  ImageMagick: used to {\i convert} the GIF files to TIFF.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+The following items will be installed during this howto.  The installation of 
+Proj.4 will require privileged access to your system.  The Mapserver components 
+will require access to your webserver's CGI-BIN directory.  
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7} Proj.4
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7} Mapserver
+\par\pard\plain
+\li1000{}
+\sb200\fi0
+\li1000{}\fi-200{\f3\'B7} Simple Mapserver application
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{2.2 Hardware}}
+{}#{\footnote TOC_7}
+{}K{\footnote Hardware}
+
+Hardware requirements is a tricky topic.  I have seen 300 MHz machines outperform 1 GHz machines when properly configured.  Common sense applies here.  If you want to generate nationwide composites every 5 minutes, you will need a healthy machine.  If you are supporting a small intranet, a modest machine will do. 
+\par\pard\plain
+\li500{}
+\sb200\fi0
+For our purposes, Mapserver will not introduce a performance bottleneck 
+on your system.  It is extremely fast and robust!  Any slowness typically comes 
+when you start reprojecting massive raster layers, but we aren't going to  
+do that!
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{2.3 System Environment}}
+{}#{\footnote TOC_8}
+{}K{\footnote System Environment}
+
+You are going to need root privileges on your system.  So either know your  
+root password or be very kind to the system administrator! We will be installing 
+Proj.4 into /usr/local, which is a standard place to put 3rd party software. 
+Mapserver will be installed into the cgi-bin directory of your webserver.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+\page{\pard\plain\keepn\f0\fs36\b\tx576{3 Building the composites with GEMPAK}}
+{}#{\footnote TOC_9}
+
+${\footnote Building_the_composites_with_GEMPAK}
++{\footnote browse}
+\par\pard\plain\li500\sb200\fi0
+{}K{\footnote Building the composites with GEMPAK}
+
+Probably the easiest component of this HOWTO is building the composite  
+image within GEMPAK!  If you are running a version of GEMPAK before 5.6.j, you 
+will need to download and install the nex2img program.  If you already have 
+nex2img, then you can skip the next subsection.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+GEMPAK is publicly available from the \url{UNIDATA website}.  Installing GEMPAK  
+is way outside the scope of this HOWTO.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+Nex2img was written by Steve Chiswell at the UNIDATA Program Center.  His  
+program is the key to making this whole system work.  Before nex2img, it was 
+extremely tricky to get the geo-referencing of RASTERs, produced in GEMPAK, correct for use  
+within GIS.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{3.1 Building nex2img}}
+{}#{\footnote TOC_10}
+{}K{\footnote Building nex2img}
+
+Building nex2img is very straightforward with GEMPAK already installed. 
+
+\par\pard\sb200\keep\li1000{}{\f1 \line
+\line
+\par\pard\sb200\keep\li1500{}{\f1 $ cd $NAWIPS \line
+$ wget http://mesonet.agron.iastate.edu/docs/radmapserver/nex2img.tar.gz \line
+$ tar -zxvf nex2img.tar.gz \line
+$ cd unidata/programs/nex2img \line
+$ make clean \line
+$ make all \line
+$ make install \line
+$ make clean \line
+$ rehash \line
+$ which nex2img}\line
+\par\pard\sb200\li1000{}}
+\par\pard\sb200\li500{}\par\pard\plain
+\li500{}
+\sb200\fi0
+With the nex2img program built, you are now ready to generate the composites.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{3.2 Scripting the generation of the composite}}
+{}#{\footnote TOC_11}
+{}K{\footnote Scripting the generation of the composite}
+
+This simple script will crank out an image.  I am specifying a GRDAREA for 
+Iowa and extended. You will want to modify for your own needs.  Keep in mind 
+that this application composites individual site NEXRADs,  you can't build a nationwide  
+composite without having all the individual sites.  
+
+\par\pard\sb200\keep\li1000{}{\f1 \line
+\line
+\par\pard\sb200\keep\li1500{}{\f1 #!/bin/csh \line
+\line
+# Replace to fit your environment! \line
+source /home/nawips/Gemenviron \line
+\line
+set gtime=`date -u +'%y%m%d/%H%M'` \line
+\line
+rm -f radar.gif radar.tif >& /dev/null \line
+\line
+nex2img << EOF > nex2img.log \line
+ GRDAREA  = 37.00;-104.00;48.99;-87.01 \line
+ PROJ     = CED \line
+ KXKY     = 1700;1200 \line
+ CPYFIL   =   \line
+ GFUNC    = n0r \line
+ RADTIM   = ${gtime} \line
+ RADDUR   = 15 \line
+ RADFRQ   =  \line
+ STNFIL   = nexrad.tbl \line
+ RADMODE  = P \line
+ RADFIL   = radar.gif \line
+ LUTFIL   = upc_rad24.tbl \line
+ list \line
+ run \line
+\line
+ exit \line
+EOF \line
+\line
+if (-e radar.gif) then \line
+  convert radar.gif radar.tif \line
+  cp radar.tif /var/www/htdocs/radmapserver/gisdata \line
+endif \line
+}\line
+\par\pard\sb200\li1000{}}
+\par\pard\sb200\li500{}\par\pard\plain
+\li500{}
+\sb200\fi0
+The nex2img program will generate an image called "radar.gif".  In order to  
+work with most GIS systems, you will probably want to convert this file 
+to another format namely TIFF, but you can choose JPG or PNG.  We then place 
+the radar.tif file in the webserver directory for later use by mapserver.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+Without getting too long winded, lets discuss image formats.  The easiest  
+format for use within GIS is probably TIFF.  Although very large, uncompressed 
+tiff files are extremely fast within GIS.  The reason is that the application  
+can "seek" the file to only pull needed data.  With compressed formats, an 
+entire set of data needs to be uncompressed and then processed.  Also, most  
+people will probably try loading the image in ESRI's ArcView.  ArcView likes 
+TIFF files and has built in support for them.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{3.3 Geo-referencing the composite image}}
+{}#{\footnote TOC_12}
+{}K{\footnote Geo-referencing the composite image}
+
+Now that we have an image, we need to georeference it.  Georeferencing of  
+images is done with a world file.  A world file is simply a file with 6 lines 
+of meta data describing the navigation of an image.  The format is for  
+example: 
+
+\par\pard\sb200\keep\li1000{}{\f1 \line
+\line
+\par\pard\sb200\keep\li1500{}{\f1 0.010 (size of pixel in x direction) \line
+0.000000000000 (rotation term for row) *Typically zero \line
+0.000000000000 (rotation term for column) *Typically zero \line
+-0.010 (size of pixel in y direction) \line
+-95.0000 (x coordinate of centre of upper left pixel in map units) \line
+42.300 (y coordinate of centre of upper left pixel in map units) }\line
+\par\pard\sb200\li1000{}}
+\par\pard\sb200\li500{} 
+Note that the units of the geo-referencing are in the same units of the 
+projection.  Since we are in lat-lon space, the units are decimal degrees. 
+If you were in UTM space, it would probably be meters. 
+For the image generated from my example of nex2img, my world file  
+would look like 
+
+\par\pard\sb200\keep\li1000{}{\f1 \line
+\line
+\par\pard\sb200\keep\li1500{}{\f1    0.01000 \line
+   0.00000 \line
+   0.00000 \line
+  -0.01000 \line
+-104.00000 \line
+  49.00000}\line
+\par\pard\sb200\li1000{}}
+\par\pard\sb200\li500{}\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\plain\f0\sb200\fs24\b\tx576{Naming the world file}}
+{}K{\footnote Naming the world file}\par\pard\plain\li500\sb200\fi0
+
+Depending on your GIS, the naming convention of your world file may be  
+different.  Many systems use a generic {\i .wld} to describe any world  
+file.  Others use variants on the image format nomenclature, for instance, the world file 
+for TIF formated files is {\i .tfw} and for PNG is {\i .pngw}. For our 
+purposes, we will use {\i .wld}.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{3.4 Lets pause for a second}}
+{}#{\footnote TOC_13}
+{}K{\footnote Lets pause for a second}
+
+If you have made it this far, you are probably wondering what to do with the 
+RASTER image with no political borders or other denotations and this silly 
+6 line world file.  The next section shows an example of taking this image 
+and using the powerful Mapserver to produce a Web Map application.  Trust me,  
+this is not the only application of this data.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+\page{\pard\plain\keepn\f0\fs36\b\tx576{4 Building Proj.4 & Mapserver}}
+{}#{\footnote TOC_14}
+
+${\footnote Building_Proj_4___Mapserver}
++{\footnote browse}
+\par\pard\plain\li500\sb200\fi0
+{}K{\footnote Building Proj.4 & Mapserver}
+
+Like many Open Source packages, Mapserver relies on external libraries to handle 
+much of the heavy lifting.  This is both a good thing and a bad thing.  The good thing is that the Mapserver folks don't have to program all the needed functionality, the bad thing is that you can reach dependency-hell with this setup.  For our purposes, we will only build with Proj.4 support, but you can rebuild mapserver later  
+to link with other libraries for more functionality.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{4.1 Building Proj.4}}
+{}#{\footnote TOC_15}
+{}K{\footnote Building Proj.4}
+
+\url{Proj.4} provides projection and reprojection support for Mapserver.  Building and installing is hopefully 
+simple, if you have ever built an open source package before.  Make sure 
+that /usr/local/lib is included in /etc/ld.so.conf, so that Mapserver can 
+link to that library without special configuration. 
+
+\par\pard\sb200\keep\li1000{}{\f1 \line
+\line
+\par\pard\sb200\keep\li1500{}{\f1 $ wget ftp://ftp.remotesensing.org/pub/proj/proj-4.4.8.tar.gz \line
+$ tar -zxvf proj-4.4.8.tar.gz \line
+$ cd proj-4.4.8 \line
+$ ./configure; make \line
+$ su -l \line
+# make install   #(as root, to install in /usr/local!) \line
+# /sbin/ldconfig \line
+# exit \line
+$ make clean}\line
+\par\pard\sb200\li1000{}}
+\par\pard\sb200\li500{}\par\pard\plain
+\li500{}
+\sb200\fi0
+If everything went well, you should notice a libproj in /usr/local/lib that  
+mapserver can link to.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{4.2 Building Mapserver}}
+{}#{\footnote TOC_16}
+{}K{\footnote Building Mapserver}
+
+As I write this (28 Jul 2004), Mapserver is at version 4.2.1 .  It is preferable that you be running this version for this HOWTO, but it is not required. 
+For our purposes, the 
+only difference between the current version 4.2.1 and the old 3.6.x versions 
+is the 'OFFSITE' keyword in the .map file.  In Mapserver 4.x, this is a RGB value and in Mapserver 3.x, this is a color map index value.  
+
+\par\pard\sb200\keep\li1000{}{\f1 \line
+\line
+\par\pard\sb200\keep\li1500{}{\f1 $ wget http://cvs.gis.umn.edu/dist/mapserver-4.2.1.tar.gz \line
+$ tar -zxvf mapserver-4.2.1.tar.gz \line
+$ cd mapserver-4.2.1 \line
+$ ./configure --with-proj --with-png  \line
+$ make \line
+$ cp -i mapserv /var/www/cgi-bin/mapserv}\line
+\par\pard\sb200\li1000{}}
+\par\pard\sb200\li500{}\par\pard\plain
+\li500{}
+\sb200\fi0
+Now, if the build process worked, you should have a binary called 'mapserv' 
+if your current working directory.  Verify that the mapserv binary is okay  
+by executing 
+
+\par\pard\sb200\keep\li1000{}{\f1 \line
+\line
+\par\pard\sb200\keep\li1500{}{\f1 $ ./mapserv -v}\line
+\par\pard\sb200\li1000{}}
+\par\pard\sb200\li500{} 
+This command will spit out the capabilities of Mapserver.  For this demo,  
+we need support for SHAPEFILES and the TIFF file format.  The output from the 
+above command should contain {\i OUTPUT=PNG INPUT=TIFF INPUT=SHAPEFILE}.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{4.3 Lets pause again!}}
+{}#{\footnote TOC_17}
+{}K{\footnote Lets pause again!}
+
+If you got this far with these instructions, you are much smarter than I am.  
+Since I couldn't even get this to work following my own instructions.  Anyway, 
+we now have a CGI application that we can install on our webserver and begin  
+building a web mapping application!  Yeah!
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+\page{\pard\plain\keepn\f0\fs36\b\tx576{5 Building your Web Mapping Application}}
+{}#{\footnote TOC_18}
+
+${\footnote Building_your_Web_Mapping_Application}
++{\footnote browse}
+\par\pard\plain\li500\sb200\fi0
+{}K{\footnote Building your Web Mapping Application}
+
+
+{\pard\sb200\plain\f0\fs24\b\tx576{5.1 Getting Started}}
+{}#{\footnote TOC_19}
+{}K{\footnote Getting Started}
+
+It is somewhat hard to keep this generic, when everyone does things differently. 
+I will assume a base RPM install of apache on Red Hat Linux.  If your  
+environment is different, you should know how it is different!
+\par\pard\plain
+\li500{}
+\sb200\fi0
+Assuming that your web directory root is {\i /var/www/htdocs} and that 
+your CGI-BIN directory is {\i /var/www/cgi-bin}, you will want to issue the 
+following commands as a privileged user to these directories. 
+
+\par\pard\sb200\keep\li1000{}{\f1 \line
+\line
+\par\pard\sb200\keep\li1500{}{\f1 $ cd /tmp \line
+$ wget http://mesonet.agron.iastate.edu/docs/radmapserver/radmapserver-files.tar.gz \line
+$ cd /var/www/htdocs \line
+$ mkdir mstmp \line
+$ chown apache mstmp \line
+$ tar -xzvf /tmp/radmapserver-files.tar.gz }\line
+\par\pard\sb200\li1000{}}
+\par\pard\sb200\li500{} 
+The mstmp directory is needed by mapserver to write temporary files to.  The 
+radmapserver directory is where we will build our application interface at.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{5.2 The Mapserver .map file}}
+{}#{\footnote TOC_20}
+{}K{\footnote The Mapserver .map file}
+
+Fundamental to the Mapserver application, is a .map configuration file.  For  
+our demo, we will build a simple map file called radmapserver.map in our 
+{\i /var/www/htdocs/radmapserver} directory.  The file is as follows. 
+
+\par\pard\sb200\keep\li1000{}{\f1 \line
+\line
+\par\pard\sb200\keep\li1500{}{\f1 # Start of Mapfile (radmapserver.map) \line
+NAME radmapserver \line
+STATUS ON \line
+SIZE 450 350 \line
+EXTENT -104 37 -87 49 \line
+UNITS DD \line
+IMAGETYPE PNG \line
+\line
+# Map projection definition \line
+PROJECTION \line
+  "proj=epsg:4326" \line
+END \line
+\line
+ \line
+# Map interface definition \line
+WEB \line
+  LOG "/var/www/htdocs/mstmp/radmapserver.log" \line
+  TEMPLATE radmapserver.html \line
+  IMAGEPATH "/var/www/htdocs/mstmp/" \line
+  IMAGEURL "/mstmp/" \line
+END \line
+\line
+# Our Geo-referenced RADAR layer \line
+LAYER \line
+  TYPE RASTER \line
+  STATUS ON \line
+  NAME radar \line
+  DATA "/var/www/htdocs/radmapserver/gisdata/radar.tif" \line
+  PROJECTION \line
+   "proj=epsg:4326" \line
+  END \line
+  # For Mapserver 3.x, we would use \line
+  # OFFSITE 0 \line
+  OFFSITE 0 0 0 \line
+END \line
+\line
+# Our states shapefile, just to get some political boundaries \line
+LAYER \line
+  TYPE POLYGON \line
+  STATUS ON \line
+  NAME states \line
+  DATA "/var/www/htdocs/radmapserver/gisdata/states.shp" \line
+  PROJECTION \line
+    "proj=epsg:4326" \line
+  END \line
+  CLASS \line
+    OUTLINECOLOR 255 0 0 \line
+  END \line
+END \line
+\line
+END # End of mapfile radmapserver.map}\line
+\par\pard\sb200\li1000{}}
+\par\pard\sb200\li500{}\par\pard\plain
+\li500{}
+\sb200\fi0
+In the Web definition of our mapfile, we referenced a file called {\i radmapserver.html}. 
+This file is a HTML template mapserver uses to generate an interface.  Our 
+example radmapserver.html file is as follows. 
+
+\par\pard\sb200\keep\li1000{}{\f1 \line
+\line
+\par\pard\sb200\keep\li1500{}{\f1 [lt    ]html[gt    ] \line
+[lt    ]head[gt    ] \line
+  [lt    ]title[gt    ]RadMapserver Test[lt    ]/title[gt    ] \line
+[lt    ]/head[gt    ] \line
+\line
+[lt    ]form method="GET" action="/cgi-bin/mapserv" name="mapserv"[gt    ] \line
+[lt    ]input type="hidden" value="[mapext]" name="imgext"[gt    ] \line
+[lt    ]!-- imgxy is set to half of your display image size --[gt    ] \line
+[lt    ]input type="hidden" value="225 175" name="imgxy"[gt    ] \line
+[lt    ]input type="hidden" value="[map]" name="map"[gt    ] \line
+[lt    ]input type="hidden" value="browse" name="mode"[gt    ] \line
+\line
+[lt    ]table border="1"[gt    ] \line
+[lt    ]tr[gt    ][lt    ]td[gt    ] \line
+\line
+[lt    ]input name="img" type="image" src="[img]" border="0"[gt    ] \line
+\line
+[lt    ]/td[gt    ][lt    ]td[gt    ] \line
+\line
+[lt    ]p[gt    ] [lt    ]b[gt    ] Select layers to display [lt    ]/b[gt    ]  \line
+[lt    ]br[gt    ][lt    ]input type="checkbox" value="radar" name="layer" [radar_check] [gt    ] RADAR layer \line
+[lt    ]br[gt    ][lt    ]input type="checkbox" value="states" name="layer" [states_check] [gt    ] States layer \line
+\line
+[lt    ]p[gt    ]  Set your zoom option: \line
+[lt    ]br[gt    ]   \line
+[lt    ]select name="zoom" size="1"[gt    ]   \line
+  [lt    ]option value="4" [zoom_4_select][gt    ] Zoom in 4 times  \line
+  [lt    ]option value="3" [zoom_3_select][gt    ] Zoom in 3 times  \line
+  [lt    ]option value="2" [zoom_2_select][gt    ] Zoom in 2 times  \line
+  [lt    ]option value="1" [zoom_1_select][gt    ] Recenter Map  \line
+  [lt    ]option value="-2" [zoom_-2_select][gt    ] Zoom out 2 times  \line
+  [lt    ]option value="-3" [zoom_-3_select][gt    ] Zoom out 3 times  \line
+  [lt    ]option value="-4" [zoom_-4_select][gt    ] Zoom out 4 times  \line
+[lt    ]/select[gt    ] \line
+\line
+[lt    ]p[gt    ] \line
+[lt    ]input type="submit" value="Make Map!"[gt    ] \line
+[lt    ]form[gt    ] \line
+[lt    ]/td[gt    ][lt    ]/tr[gt    ][lt    ]/table[gt    ] \line
+\line
+[lt    ]html[gt    ]}\line
+\par\pard\sb200\li1000{}}
+\par\pard\sb200\li500{}\par\pard\plain
+\li500{}
+\sb200\fi0
+Believe it or not, we are ready to rock and roll!  Get your favorite Open Source 
+web browser loaded up and point it at your website with the following URL 
+
+\par\pard\sb200\keep\li1000{}{\f1 http://your.web.site/cgi-bin/mapserv?map=/var/www/htdocs/radmapserver/radmapserver.map[amp   ]layers=states}\line
+\par\pard\sb200\li500{}\par\pard\plain
+\li500{}
+\sb200\fi0
+
+\page{\pard\plain\keepn\f0\fs36\b\tx576{6 GIS-Ready! NEXRAD information}}
+{}#{\footnote TOC_21}
+
+${\footnote GIS_Ready__NEXRAD_information}
++{\footnote browse}
+\par\pard\plain\li500\sb200\fi0
+{}K{\footnote GIS-Ready! NEXRAD information}
+
+This section contains links to folks already generating GIS-Ready products  
+from NEXRAD data.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{6.1 Iowa Environmental Mesonet}}
+{}#{\footnote TOC_22}
+{}K{\footnote Iowa Environmental Mesonet}
+
+The IEM is generating a nationwide composite of base reflectivity every 5 
+minutes.  This product is available in this directory: 
+
+\par\pard\sb200\keep\li1000{}{\f1 http://mesonet.agron.iastate.edu/data/gis/images/unproj/USCOMP/}\line
+\par\pard\sb200\li500{} 
+The IEM is generating a PNG and TIFF formatted image.  There is also a  
+compressed TIFF image available in that directory as well.  The file prefix 
+{\i n0r[lowbar]0} contains the current data.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\plain\f0\sb200\fs24\b\tx576{Scripting an automated download}}
+{}K{\footnote Scripting an automated download}\par\pard\plain\li500\sb200\fi0
+
+Here is an example script which would allow you to automatically download files 
+from the IEM website and then save them to a local directory 
+
+\par\pard\sb200\keep\li1000{}{\f1 \line
+\line
+\par\pard\sb200\keep\li1500{}{\f1 #!/bin/csh \line
+\line
+set DATADIR="/set/me/to/something" \line
+\line
+cd /tmp \line
+\line
+wget -q http://mesonet.agron.iastate.edu/data/gis/images/unproj/USCOMP/n0r_0.tif.Z \line
+uncompress n0r_0.tif.Z \line
+\line
+cd ${DATADIR} \line
+\line
+foreach i (9 8 7 6 5 4 3 2 1 0) \line
+  cp -f n0r_${num}.tif n0r_`echo ${num} + 1 | bc`.tif \line
+end \line
+\line
+mv /tmp/n0r_0.tif n0r_0.tif \line
+\line
+exit}\line
+\par\pard\sb200\li1000{}}
+\par\pard\sb200\li500{}\par\pard\plain
+\li500{}
+\sb200\fi0
+
+\page{\pard\plain\keepn\f0\fs36\b\tx576{7 Conclusions }}
+{}#{\footnote TOC_23}
+
+${\footnote Conclusions}
++{\footnote browse}
+\par\pard\plain\li500\sb200\fi0
+{}K{\footnote Conclusions}
+
+This HOWTO demonstrated a very primitive component of GIS, web mapping.  There 
+is just so much more that can be done.  For those of you familiar with PHP,  
+Mapserver has an outstanding PHP interface to the Mapserver API.  You can  
+create some of the neatest applications using the Mapserver API and the power 
+of PHP.  The Iowa Environmental Mesonet has implemented most of its Mapserver 
+interfaces using the PHP mapscript module.  The source code for these applications is licensed under the GPL, but I just don't place the code on the website to download.  Just 
+email me if you would like a copy...
+\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{7.1 Future Work}}
+{}#{\footnote TOC_24}
+{}K{\footnote Future Work}
+
+I would suspect that most people will not have the ability to generate nationwide NEXRAD composites.  One of the neat things Mapserver can do is act as a  
+Web Map Service (WMS) server and client.  Potentially a WMS server could be 
+set up somewhere on the Internet and then your mapserver could make a remote 
+WMS call to it get the image.
+\par\pard\plain
+\li500{}
+\sb200\fi0
+Another option, will be for either UNIDATA, the IEM, or somebody else to generate the nationwide composite (in 'unprojected' coordinates) and make that available on the IDD.  This is probably 
+the easiest way to get this data to the community. 
+\par\pard\plain
+\li500{}
+\sb200\fi0
+Although never covered in this HOWTO, timestamps are a big issue with this  
+system.  I have built hacks using DBF files in order to get timestamps on the  
+generated images.  Here is an example of output using this 'hack'.  At some  
+point, I will add this hack to the HOWTO. 
+
+\par\pard\sb200\keep\li1000{}{\f1 \url{urlnam}}\line
+\par\pard\sb200\li500{}\par\pard\plain
+\li500{}
+\sb200\fi0
+
+{\pard\sb200\plain\f0\fs24\b\tx576{7.2 Contact info}}
+{}#{\footnote TOC_25}
+{}K{\footnote Contact info}
+
+If you have questions, shoot me an email (akrherz@iastate.edu) or give me a call (515.294.5978).  Good luck!
+\par\pard\plain
+\li500{}
+\sb200\fi0
+}

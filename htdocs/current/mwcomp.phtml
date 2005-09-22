@@ -1,0 +1,17 @@
+<?php
+$REFRESH = "<meta http-equiv=\"refresh\" content=\"300; URL=http://mesonet.agron.iastate.edu/data/mwcomp.phtml\">";
+$TITLE = "IEM | Iowa NEXRAD + Warnings";
+  include("/mesonet/php/include/header.php");?>
+
+<a href="/current/radar.phtml">Current RADAR Products</a>
+&nbsp; <b>|</b> &nbsp; <a href="/current/mcview.phtml">Loop RADAR</a>
+&nbsp; <b>|</b> &nbsp; <a href="uscomp.phtml">Switch to US View</a>
+&nbsp; <b>|</b> &nbsp; <a href="/GIS/apps/rview/warnings.phtml">Current Warnings</a>
+
+<br /><img src="mwcomp.png?<?php echo time(); ?>">
+
+<br /><i>(Image refreshes every 5 minutes)</i>
+ 
+<?php include("/mesonet/php/include/footer.php"); ?>
+
+

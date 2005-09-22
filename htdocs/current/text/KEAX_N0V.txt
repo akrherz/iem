@@ -1,0 +1,10 @@
+/data/nexrad/EAX_N0V_9.gif
+/data/nexrad/EAX_N0V_8.gif
+/data/nexrad/EAX_N0V_7.gif
+/data/nexrad/EAX_N0V_6.gif
+/data/nexrad/EAX_N0V_5.gif
+/data/nexrad/EAX_N0V_4.gif
+/data/nexrad/EAX_N0V_3.gif
+/data/nexrad/EAX_N0V_2.gif
+/data/nexrad/EAX_N0V_1.gif
+/data/nexrad/EAX_N0V_0.gif

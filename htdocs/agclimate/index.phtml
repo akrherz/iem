@@ -1,0 +1,39 @@
+<?php 
+ include("../../config/settings.inc.php");
+ $TITLE = "IEM | ISU Ag Climate"; 
+ include("$rootpath/include/header.php");
+?>
+
+<div class="text">
+<table width="100%">
+<TR>
+<TD valign="top">
+	<CENTER><img src="images/agclimate.jpg" ALT="ISU Ag Climate"><BR></CENTER>
+
+<p><h3 class="subtitle">Information:</h3>
+<br><a href="<?php echo $rooturl; ?>/info/network.phtml?network=ISUAG">Location</a> of observing stations in Iowa.<BR>
+<a href="<?php echo $rooturl; ?>/agclimate/info.txt">Information</a> about network stations.
+
+
+<p><h3 class="subtitle">News:</h3> 
+
+<p><b>No news is good news</b>
+
+<BR><BR>
+
+
+<h3 class="subtitle">Disclaimer:</h3>
+<P class="intro"> Any precipation data taken during the cold season is incorrect.  
+Please read <A HREF="/agclimate/hist/prec_winter.html">this disclaimer</A>.</p>
+
+
+</TD>
+<TD valign="TOP" width="250">
+
+	<?php include("include/dataLinks.php"); ?>
+
+
+</TD></TR>
+</table></div>
+
+<?php include("$rootpath/include/footer.php"); ?>

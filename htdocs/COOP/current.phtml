@@ -1,0 +1,212 @@
+<?php 
+include("../../config/settings.inc.php");
+$network = isset($_GET['network']) ? $_GET['network'] : 'IA_COOP'; 
+  $winter = 1;
+  $shef = isset($_GET['shef']) ? $_GET['shef'] : 0;
+?>
+
+<?php  
+$TITLE = "IEM | COOP | Last Observation";
+$HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+	<!--//BEGIN Script
+	function new_window(url) {
+ 	link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
+	}
+	//END Script-->
+	</script>
+<script type="text/javascript" src="/js/tableruler.js"></script>
+<script type="text/javascript">
+    window.onload=function(){tableruler();}
+</script>';
+include("$rootpath/include/header.php"); ?>
+<div class="text">
+<a href="/COOP/">COOP Network</a> &nbsp; <b> > </b> &nbsp; Last Observation
+<?php
+ $sortcol = $_GET["sortcol"];
+ if ($sortcol == "") $sortcol = "ts";
+ include("$rootpath/include/all_locs.php");
+ include("$rootpath/include/iemaccess.php");
+ include("$rootpath/include/iemaccessob.php");
+
+ $iem = new IEMAccess();
+ $net = $iem->getNetwork($network);
+
+ $db = Array();
+ while (list($site, $iemob) = each($net) ){
+  $db[$site] = Array();
+  $db[$site]['ts'] = $iemob->ts;
+  $db[$site]['sid'] = $site;
+  $db[$site]['sname'] = $iemob->db["sname"];
+  $db[$site]['raw'] = $iemob->db["raw"];
+  $db[$site]['county'] = $cities[$site]["county"];
+  if ( date("Ymd") != date("Ymd", $iemob->ts) ){
+    continue;
+  }
+  if ($iemob->db["tmpf"] != -99) {
+    $db[$site]['tmpf'] = $iemob->db["tmpf"];
+    $db[$site]['max_tmpf'] = $iemob->db["max_tmpf"];
+    $db[$site]['min_tmpf'] = $iemob->db["min_tmpf"];
+  }
+  if ($iemob->db["phour"] != -99)
+    $db[$site]['phour'] = $iemob->db["phour"];
+  $db[$site]['pday'] = $iemob->db["pday"];
+  $db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : " ";
+  $db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : " ";
+  $db[$site]["ratio"] = -1;
+  if ($db[$site]["snow"] > 0 && $db[$site]["pday"] > 0)
+   {
+     $db[$site]["ratio"] = intval( $db[$site]["snow"] / $db[$site]["pday"] );
+   }
+ }
+
+function aSortBySecondIndex($multiArray, $secondIndex) {
+        while (list($firstIndex, ) = each($multiArray))
+                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
+        while (list($firstIndex, ) = each($indexMap))
+                if (is_numeric($firstIndex))
+                        $sortedArray[] = $multiArray[$firstIndex];
+                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+        return $sortedArray;
+}
+
+$db = aSortBySecondIndex($db, $sortcol);
+
+$cols = Array("ts" => "Valid", "county" => "County",
+  "sid" => "Site ID", "sname" => "Station Name",
+  "tmpf" => "Ob Temperature", "max_tmpf" => "24 hour High",
+  "min_tmpf" => "24 hour Low", "snow" => "24 hour Snowfall",
+  "snowd" => "Snowfall Depth", "pday" => "24 hour rainfall",
+  "phour" => "Rainfall One Hour");
+?>
+
+<?php $current_network = "COOP"; include("$rootpath/include/current_bar.inc.php"); ?>
+
+<form method="GET" action="current.phtml" name="stctrl">
+<b>Show State:</b><select name="network">
+  <option value="IA_COOP" <?php if ($network == "IA_COOP") echo "SELECTED"; ?>>Iowa
+  <option value="IN_COOP" <?php if ($network == "IN_COOP") echo "SELECTED"; ?>>Indiana
+  <option value="IL_COOP" <?php if ($network == "IL_COOP") echo "SELECTED"; ?>>Illinois
+  <option value="KS_COOP" <?php if ($network == "KS_COOP") echo "SELECTED"; ?>>Kansas
+  <option value="MI_COOP" <?php if ($network == "MI_COOP") echo "SELECTED"; ?>>Michigan
+  <option value="MN_COOP" <?php if ($network == "MN_COOP") echo "SELECTED"; ?>>Minnesota
+  <option value="MO_COOP" <?php if ($network == "MO_COOP") echo "SELECTED"; ?>>Missouri
+  <option value="NE_COOP" <?php if ($network == "NE_COOP") echo "SELECTED"; ?>>Nebraska
+  <option value="ND_COOP" <?php if ($network == "ND_COOP") echo "SELECTED"; ?>>North Dakota
+  <option value="OH_COOP" <?php if ($network == "OH_COOP") echo "SELECTED"; ?>>Ohio
+  <option value="SD_COOP" <?php if ($network == "SD_COOP") echo "SELECTED"; ?>>South Dakota
+  <option value="WI_COOP" <?php if ($network == "WI_COOP") echo "SELECTED"; ?>>Wisconsin
+</select>
+<b>Show SHEF obs:</b>
+<select name="shef">
+ <option value="0" <?php if (! $shef) echo "SELECTED"; ?>>No
+ <option value="1" <?php if ($shef) echo "SELECTED"; ?>>Yes
+</select>
+<input type="submit" value="Go!">
+</form>
+
+
+<?php
+echo "<p>Sorted by: ". $cols[$sortcol] ;
+
+
+ $baseurl = "current.phtml?network=$network&shef=$shef&sortcol=";
+?>
+<form name="st" action="/my/current.php" method="GET">
+<table style="font-size: 10pt;" class="ruler">
+<thead>
+<tr>
+  <th rowspan=2>Add:</th>
+  <th rowspan=2><a href="<?php echo $baseurl; ?>sid">SiteID:</a></th>
+  <th rowspan=2><a href="<?php echo $baseurl; ?>sname">Station Name:</a></th>
+  <th rowspan=2><a href="<?php echo $baseurl; ?>county">County:</a></th>
+  <th rowspan=2><a href="<?php echo $baseurl; ?>ts">Valid:</a></th>
+  <th colspan=3>Temperatures [F]</th>
+  <th colspan=4>Hydro</th></tr>
+
+<tr>
+  <th><a href="<?php echo $baseurl; ?>tmpf">At Ob</a></th>
+  <th><a href="<?php echo $baseurl; ?>max_tmpf">24h High</a></th>
+  <th><a href="<?php echo $baseurl; ?>min_tmpf">24h Low</a></th>
+  <th><a href="<?php echo $baseurl; ?>pday">24hour Rain</a></th>
+<?php if($winter) { ?>
+  <th><a href="<?php echo $baseurl; ?>snow">Snowfall</a></th>
+  <th><a href="<?php echo $baseurl; ?>ratio">Ratio</a></th>
+  <th><a href="<?php echo $baseurl; ?>snowd">Snow Depth</a></th>
+<?php } ?>
+</tr></thead>
+<tbody>
+<?php
+ $oddrow = true;
+ $now = time();
+ while (list($site, $value) = each($db) ){
+   $oddrow = ! $oddrow;
+   $tdiff = $now - $value["ts"];
+   if ( intval( date("Y", $value["ts"]) ) < 2003 ) continue;
+
+   echo "<tr ";
+   if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
+   echo "><th><input type=\"checkbox\" name=\"st[]\"
+   value=\"".$site."\"></th><td> $site </td>
+    <td>". $value["sname"] ."</td>
+    <td>". $value["county"] ."</td>";
+   echo "<td ";
+   if ($tdiff > (24*3600) || date("Ymd") != date("Ymd", $value["ts"]) ){
+     echo 'bgcolor="red">'. strftime("%d %b %I:%M %p", $value["ts"]) .'</td>';
+   } else {
+     echo ">". strftime("%I:%M %p", $value["ts"]) ."</td>";
+   }
+
+   if ( date("Ymd") != date("Ymd", $value["ts"]) ){
+     echo "<td colspan=\"6\">No report for today</td>";
+     continue;
+   }
+
+   if ($value["tmpf"] != ""){
+   echo "<td>". $value["tmpf"] ."</td>
+   <td><font color=\"#ff0000\">". $value["max_tmpf"] ."</font></td>
+   <td><font color=\"#0000ff\">". $value["min_tmpf"] ."</font></td>";
+   } else{
+    echo "<td colspan=3></td>";
+   }
+   if ($value["pday"] == 0.0001) $value["pday"] = "T";
+   if ($value["pday"] < 0) $value["pday"] = "M";
+   if ($value["snow"] == 0.0001) $value["snow"] = "T";
+   if ($value["snow"] < 0) $value["snow"] = "M";
+
+   echo "<td>". $value["pday"] ."</td>";
+   if ($winter) 
+   {
+    echo "<td>". $value["snow"] ."</td>";
+    if ($value["ratio"] > 0) echo "<td>". $value["ratio"] ."</td>";
+    else echo "<td></td>";
+    echo "<td>". $value["snowd"] ."</td>";
+   }
+   echo "</tr>";
+   if ($shef) 
+   {
+	echo "<tr align=\"center\" ";
+    if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
+    echo "><td colspan=\"9\"><font color=\"brown\">". $value["raw"]
+    ."</font></td></tr>";
+   }
+ }
+?>
+</tbody><tfoot>
+<tr>
+ <td colspan=5>&nbsp;</td>
+<?php $c = "javascript:new_window('$rooturl/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network&var="; ?>
+ <td><a href="<?php echo $c; ?>max_tmpf');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>min_tmpf');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>pday');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>snow');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>snowd');">Plot</a></td>
+</tr></tfoot>
+
+<?php
+ echo "</table>";
+ echo "<input type=\"submit\" value=\"Add to Favorites\">\n</form>";
+?>
+</div>
+
+<?php include("$rootpath/include/footer.php");
+?>

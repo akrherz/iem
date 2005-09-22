@@ -1,0 +1,89 @@
+<?php
+include("../../config/settings.inc.php");
+  // cat.phtml 
+  //   Print hourly DCP obs to a HTML sortable table
+
+$minute = $_GET['minute'];
+$hour = $_GET['hour'];
+$day = $_GET['day'];
+$month = $_GET['month'];
+$year = $_GET['year'];
+$now = time() - 3600;
+
+if (strlen($year) == 0 || strlen($month) == 0 || strlen($minute) == 0 
+ || strlen($hour) == 0 || strlen($day) == 0){
+  $month = strftime("%m", $now); 
+  $day = strftime("%d", $now); 
+  $year = strftime("%Y", $now); 
+  $hour = strftime("%H", $now);
+  $minute = 0; 
+}
+$ts = mktime($hour, $minute, 0, $month, $day, $year);
+
+$page = 'DCP';
+$TITLE = "IEM | GEOS DCP";
+include("$rootpath/include/header.php"); 
+include("$rootpath/include/forms.php");
+include("$rootpath/include/dcpLoc.php");
+include("$rootpath/include/database.inc.php");
+?>
+<div class=text">
+<form method="GET" action="cat.phtml">
+<table>
+<tr>
+  <th>Year</th>
+  <th>Month</th>
+  <th>Day</th>
+  <th>Hour</th>
+  <th>Minute</th>
+  <td></td>
+</tr>
+
+<tr>
+  <td><?php yearSelect(2002, $year, "year"); ?></td>
+  <td><?php monthSelect($month); ?></td>
+  <td><?php daySelect($day); ?></td>
+  <td><?php localHourSelect($hour, 'hour'); ?></td>
+  <td><select name="minute">
+    <option value="00" <?php if ($minute == "00") echo "SELECTED"; ?>>00
+    <option value="15" <?php if ($minute == "15") echo "SELECTED"; ?>>15
+    <option value="30" <?php if ($minute == "30") echo "SELECTED"; ?>>30
+    <option value="45" <?php if ($minute == "45") echo "SELECTED"; ?>>45
+   </select></td>
+  <td><input type="Submit" value="GET DATA"></td>
+</tr>
+
+</table>
+</form>
+
+<b>Legend:</b>  TAI = Air Temp (F), PCI = Rainfall Counter, PPH = Hourly Precip, UDI = Wind Direction, USI = Wind Speed
+<?php
+
+$tbl = strftime("t%Y", $ts);
+$dstr = strftime("%Y-%m-%d %H:%M", $ts);
+$ldate = strftime("%d %b %Y %I:%M %p", $ts);
+
+$c = pg_connect("10.10.10.20", 5432, "hads");
+$sql = "SELECT * from $tbl WHERE valid = '$dstr' ORDER by station";
+$rs = pg_exec($c, $sql);
+pg_close($c);
+
+$fmt = "%5s %-24s %7s %7s %7s %7s %7s\n";
+
+
+echo "<pre>\n";
+echo "  IEM HADS/DCP Data Report valid: $ldate \n";
+echo sprintf($fmt, "NWSLI", "Site Name", "TAI", "PCI", "PPH", "UDI", "USI");
+
+// strftime("%d %b %Y %I:%M %p", strtotime($row["valid"]))
+
+for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+  echo sprintf($fmt,  
+     $row["station"] , substr($cities[$row["station"]]['city'], 0, 24), 
+     $row["tai"], $row["pci"], $row["pph"], $row["udi"], $row["usi"] );
+}
+echo "</pre>\n";
+?>
+</div>
+
+<?php include("$rootpath/include/footer.php"); ?>

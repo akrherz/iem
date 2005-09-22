@@ -1,0 +1,69 @@
+a {
+	text-decoration: none;
+	color: #666666;
+}
+a:hover {
+	color: #999999;
+}
+#iem-header {
+	background-color: #336699;
+}
+#iem-header a {
+	color: #FFFFFF;
+}
+#iem-header a:hover {
+	color: #999999;
+}
+#iem-header-title h3 {
+	color: #FFFFFF;
+}
+#iem-header-title h4 {
+	color: #FFFFFF;
+}
+#iem-header-items {
+	color: #FFFFFF;
+}
+#iem-header-items a:hover {
+	color: #CCCCCC;
+}
+div.iem-menu{
+	background-color: #666666;
+}
+#iem-content a:hover {
+	color: #003366;
+}
+#iem-content li {
+	color: #003366;
+}
+#iem-footer {
+	background-color: #FEFEFE;
+}
+#iem-footer a:hover {
+	color: #003366;
+}
+#iem-main {
+	background-color: #FEFEFE;
+}
+.iem-form {
+	border-color: #003366;
+}
+#iem-form2 {
+	border-color: #003366;
+}
+#iem-form2 th {
+	background-color: #6699CC;
+}
+tr.even {
+	background-color: #99CCFF;
+}
+tr.odd {
+	background-color: #FEFEFE;
+}
+h3.heading {
+	border-color: #336699;
+	background-color: #CCCCCC;
+	color: #003366;
+}
+h3.subtitle {
+	color: #6699CC;
+}

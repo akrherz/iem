@@ -1,0 +1,229 @@
+<?php
+include("../../config/settings.inc.php");
+$network = isset($_GET['network']) ? $_GET['network'] : 'IA_RWIS';
+?>
+
+<?php 
+ $TITLE = "IEM | RWIS | SF Currents";
+ $REFRESH = "<meta http-equiv=\"refresh\" content=\"600;
+ URL=currentSF.phtml?sortcol=$sortcol&network=$network\">";
+ $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+<!--//BEGIN Script
+function new_window(url) {
+ link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
+} 
+//END Script-->
+</script>
+<script type="text/javascript" src="/js/tableruler.js"></script>
+<script type="text/javascript">
+    window.onload=function(){tableruler();}
+</script>';
+ include("$rootpath/include/header.php"); ?>
+<?php include("$rootpath/include/mlib.php"); ?>
+<?php 
+  include("$rootpath/include/iemaccess.php");
+  include("$rootpath/include/iemaccessob.php");
+
+$iem = new IEMAccess();
+$rwis = $iem->getNetwork($network);
+
+
+?>
+
+<?php
+if (strlen($sortcol) == 0) {
+  $sortcol = "city";
+} 
+
+$vals = Array("tsf0" => "Sensor 1 - Temp [F]", 
+  "tmpf" => "Air Temp [F]",
+  "dwpf" => "Dew Point [F]",
+  "tsf1" => "Sensor 2 - Temp [F]",
+  "tsf2" => "Sensor 3 - Temp [F]",
+  "tsf3" => "Sensor 4 - Temp [F]",
+  "pave_avg" => "Ave Surf Temp",
+  "dry0" => "Sensor 1 - Cond [F]",
+  "dry1" => "Sensor 2 - Cond [F]",
+  "dry2" => "Sensor 3 - Cond [F]",
+  "dry3" => "Sensor 4 - Cond [F]",
+  "ts" => "Observation Time",
+  "sname" => "Site Name",
+  "rwis_subf" => "Sub-Surface Temperature"
+);
+
+?>
+
+<div class="text">
+<b>Nav:</b><a href="/RWIS/">RWIS</a> <b> > </b> Current Conditions
+<?php $current_network = "RWIS_SF"; include("../include/current_bar.inc.php"); ?>
+<form method="GET" action="currentSF.phtml">
+<select name="network">
+  <option value="IA_RWIS" <?php if ($network == "IA_RWIS") echo "SELECTED"; ?>>Iowa
+  <option value="KS_RWIS" <?php if ($network == "KS_RWIS") echo "SELECTED"; ?>>Kansas
+  <option value="MN_RWIS" <?php if ($network == "MN_RWIS") echo "SELECTED"; ?>>Minnesota
+  <option value="WI_RWIS" <?php if ($network == "WI_RWIS") echo "SELECTED"; ?>>Wisconsin
+</select>
+<input type="submit" value="Show State">
+</form><p>
+
+
+<h3 class="subtitle"><center>Current RWIS Surface Conditions</center></h3>
+
+<p>** This page will automatically refresh every 10 minutes.
+<br>Click on a column to sort it.</p>
+
+<?php
+echo "<p>Sorted by: <b>". $vals[$sortcol] ."</b><br>\n";
+?>
+
+<form method="POST" action="/my/current.php">
+<table style="font-size: 10pt;" class="ruler">
+<thead>
+<tr>
+  <th rowspan="2">ADD:</th>
+  <th rowspan="2"><a href="currentSF.phtml?network=<?php echo $network; ?>&sortcol=sname">Station:</a></th>
+  <th rowspan="2"><a href="currentSF.phtml?network=<?php echo $network; ?>&sortcol=ts">Ob Time</a></th>
+  <th colspan="2">Air:</th>
+  <th>Sensor 1</th>
+  <th>Sensor 2</th>
+  <th>Sensor 3</th>
+  <th>Sensor 4</th>
+  <th>&nbsp;</th>
+  <th>&nbsp;</th>
+<tr>
+  
+  <th><a href="currentSF.phtml?network=<?php echo $network; ?>&sortcol=tmpf">Temp</a></th>
+  <th><a href="currentSF.phtml?network=<?php echo $network; ?>&sortcol=dwpf">Dew P</a></th>
+  <th><a href="currentSF.phtml?network=<?php echo $network; ?>&sortcol=tsf0">Temp</a></th>
+  <th><a href="currentSF.phtml?network=<?php echo $network; ?>&sortcol=tsf1">Temp</a></th>
+  <th><a href="currentSF.phtml?network=<?php echo $network; ?>&sortcol=tsf2">Temp</a></th>
+  <th><a href="currentSF.phtml?network=<?php echo $network; ?>&sortcol=tsf3">Temp</a></th>
+  <th><a href="currentSF.phtml?network=<?php echo $network; ?>&sortcol=rwis_subf">Sub T</a></th>
+  <th><a href="currentSF.phtml?network=<?php echo $network;
+  ?>&sortcol=pave_avg">Ave Surface Temp</a> [<b>1</b>]</th>
+</tr></thead>
+<tbody>
+<?php
+function aSortBySecondIndex($multiArray, $secondIndex) {
+        while (list($firstIndex, ) = each($multiArray))
+                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+        arsort($indexMap);
+        while (list($firstIndex, ) = each($indexMap))
+                if (is_numeric($firstIndex))
+                        $sortedArray[] = $multiArray[$firstIndex];
+                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+        return $sortedArray;
+}
+
+  $mydata = Array();
+
+  while (list($key, $iemob) = each($rwis) ){
+    $mydata[$key] = $iemob->db;
+    $mydata[$key]["ts"] = $iemob->ts;
+
+    $t = Array($mydata[$key]['tsf0'], $mydata[$key]['tsf1'], 
+      $mydata[$key]['tsf2'], $mydata[$key]['tsf3']);
+    arsort($t);
+    //if ($key == "RSID") print_r($t);
+    while (min($t) == -99.99){  
+      $ba = array_pop($t); 
+      if (sizeof($t) == 0) break;
+      }
+    asort($t);
+    if (sizeof($t) > 0){
+      while ((max($t) - min($t)) > 20){ $ba = array_pop($t); }
+      $mydata[$key]['pave_avg'] = array_sum($t) / sizeof($t);
+    } else {
+      $mydata[$key]['pave_avg'] = -99.99;
+    }
+
+
+  }
+
+
+
+  $finalA = Array();
+  $finalA = aSortBySecondIndex($mydata, $sortcol);
+  $i = 0;
+  $now = time();
+  while (list ($key, $val) = each ($finalA))  {
+    $parts = $finalA[$key];
+          $i++;
+          $tdiff = $now - $parts["ts"];
+    if ($tdiff > 86400*5){
+      continue;
+    }
+	  echo "<tr";
+	  if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
+            
+          echo ">";
+          echo "<td><input type=\"checkbox\" name=\"st[]\" 
+            value=\"".$key."_SF\"></td>";
+          echo "<td>". $parts["sname"] . "</td>";
+  echo "<td";
+  if ($tdiff > 11900){
+    echo ' bgcolor="red">'. strftime("%b-%d-%y %I:%M %p", $parts["ts"]) .'</td>';
+  } else if ($tdiff > 7200){
+    echo ' bgcolor="orange">'. strftime("%b-%d %I:%M %p", $parts["ts"]) .'</td>';
+  } else if ($tdiff > 3600){
+    echo ' bgcolor="green">'. strftime("%I:%M %p", $parts["ts"]) .'</td>';
+  } else {
+    echo '>'. strftime("%I:%M %p", $parts["ts"]) .'</td>';
+  }
+     if ($parts["tsf0"] < -90) $tmpf0 = "M";
+     else $tmpf0 = round($parts["tsf0"], 1);
+     if ($parts["tsf1"] < -90) $tmpf1 = "M";
+     else $tmpf1 = round($parts["tsf1"], 1);
+     if ($parts["tsf2"] < -90) $tmpf2 = "M";
+     else $tmpf2 = round($parts["tsf2"], 1);
+     if ($parts["tsf3"] < -90) $tmpf3 = "M";
+     else $tmpf3 = round($parts["tsf3"], 1);
+     if ($parts["rwis_subf"] < -90) $subt = "M";
+     else $subt = round($parts["rwis_subf"], 1);
+     if ($parts["pave_avg"] < -90) $pave_avg = "M";
+     else $pave_avg = round($parts["pave_avg"], 1);
+
+            echo "<td>". $parts["tmpf"] ."</td>
+	    <td>". $parts["dwpf"] ."</td>
+	    <td>". $tmpf0 ."</td>
+	    <td>". $tmpf1 ."</td>
+	    <td>". $tmpf2 ."</td>
+	    <td>". $tmpf3 ."</td>
+            <td>". $subt ."</td>
+            <td>". $pave_avg ."</td>
+	    </tr>\n";
+   }
+
+
+?>
+</tbody>
+<tfoot>
+<tr>
+ <td colspan=3>&nbsp;</td>
+<?php $c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network&var="; ?>
+ <td><a href="<?php echo $c; ?>tmpf');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>dwpf');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>tsf0');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>tsf1');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>tsf2');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>tsf3');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>rwis_subf');">Plot</a></td>
+ <td>&nbsp;</td>
+</tr></tfoot>
+</table>
+<input type="submit" value="Add to Favorites">
+<input type="reset" value="Reset">
+
+</form>
+
+
+<br><br>
+
+<b>Notes:</b><br>
+<b>1</b>  The average surface temperature is calculated by the IEM using some
+logic to account for sites without 4 sensors or broken sensors.
+
+
+<br><br></div>
+
+<?php include("$rootpath/include/footer.php"); ?>

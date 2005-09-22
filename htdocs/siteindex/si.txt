@@ -1,0 +1,465 @@
+#Comment, got to ISUAG
+.|Iowa Mesonet Home|http://mesonet.agron.iastate.edu/|The Iowa Environmental Mesonet||bodyframe
+.|Information|http://mesonet.agron.iastate.edu/info.php|||bodyframe
+..|Background|http://mesonet.agron.iastate.edu/info/iem.php|||bodyframe
+..|Partners|http://mesonet.agron.iastate.edu/info/members.php|||bodyframe
+..|Links|http://mesonet.agron.iastate.edu/info/links.php|||bodyframe
+..|Abbreviations|http://mesonet.agron.iastate.edu/help/abbreviations.php|||bodyframe
+..|Disclaimer|http://mesonet.agron.iastate.edu/disclaimer.php|||bodyframe
+..|Station Locations
+...|Station Locator App|http://mesonet.agron.iastate.edu/sites/locate.php|||bodyframe
+....|ASOS|http://mesonet.agron.iastate.edu/sites/locate.php?network=IA_ASOS|||bodyframe
+....|AWOS|http://mesonet.agron.iastate.edu/sites/locate.php?network=AWOS|||bodyframe
+....|RWIS|http://mesonet.agron.iastate.edu/sites/locate.php?network=IA_RWIS|||bodyframe
+....|SchoolNet|http://mesonet.agron.iastate.edu/sites/locate.php?network=KCCI|||bodyframe
+....|WeatherNet|http://mesonet.agron.iastate.edu/sites/locate.php?network=KELO|||bodyframe
+...|Lat/Lon Tables|http://mesonet.agron.iastate.edu/sites/networks.php|||bodyframe
+...|ASOS Plot|http://mesonet.agron.iastate.edu/images/asosLocs.jpg|||bodyframe
+...|AWOS Plot|http://mesonet.agron.iastate.edu/images/awosLocs.jpg|||bodyframe
+...|RWIS Plot|http://mesonet.agron.iastate.edu/images/rwis_sites.gif|||bodyframe
+...|COOP Plot|http://mesonet.agron.iastate.edu/images/coop_sites.gif|||bodyframe
+...|ISU Ag Plot|http://mesonet.agron.iastate.edu/images/isuag_sites.gif|||bodyframe
+..|Variables Reported|http://mesonet.agron.iastate.edu/info/variables.phtml|||bodyframe
+..|Software Utilized|http://mesonet.agron.iastate.edu/info/software.php|||bodyframe
+..|Mailing Lists|http://mesonet.agron.iastate.edu/ml/|||bodyframe
+...|Story County Warnings|http://mesonet.agron.iastate.edu/mailman/listinfo/story_warn|||bodyframe
+...|Boone County Warnings|http://mesonet.agron.iastate.edu/mailman/listinfo/boone_warn|||bodyframe
+...|IEM Daily Bulletin|http://mesonet.agron.iastate.edu/mailman/listinfo/dailyb|||bodyframe
+...|RWIS Wind Alerts|http://mesonet.agron.iastate.edu/mailman/listinfo/iarwis-alert|||bodyframe
+..|ISU Senior Theses|http://mesonet.agron.iastate.edu/pubs/seniorthesis/|||bodyframe
+..|Real-time Data Howto|http://mesonet.agron.iastate.edu/request/ldm.php|||bodyframe
+..|Web Cameras|http://mesonet.agron.iastate.edu/current/camera.phtml|||bodyframe
+..|Current Mesonet Statistics|http://mesonet.agron.iastate.edu/data/report.txt|||bodyframe
+..|Past Features|http://mesonet.agron.iastate.edu/onsite/features/past.php|||bodyframe
+..|Past Feature Titles|http://mesonet.agron.iastate.edu/onsite/features/titles.php|||bodyframe
+..|Daily Bulletin|http://mesonet.agron.iastate.edu/data/iemdb.txt|||bodyframe
+..|Recent News Events|http://mesonet.agron.iastate.edu/onsite/news.phtml|||bodyframe
+..|Cool Stuff|http://mesonet.agron.iastate.edu/cool/|||bodyframe
+.|Mesonet Plots
+..|IEM Plot|http://mesonet.agron.iastate.edu/data/mesonet.gif|||bodyframe
+..|Upper Midwest|http://mesonet.agron.iastate.edu/data/MWmesonet.gif|||bodyframe
+..|Large Font Plot|http://mesonet.agron.iastate.edu/data/iem_gray.gif|||bodyframe
+..|ASOS+AWOS|http://mesonet.agron.iastate.edu/data/asos.gif|||bodyframe
+..|AWOS Plot|http://mesonet.agron.iastate.edu/data/awos.gif|||bodyframe
+..|RWIS Plot|http://mesonet.agron.iastate.edu/data/rwis.gif|||bodyframe
+..|Schoolnet
+...|20min Plot|http://mesonet.agron.iastate.edu/data/snet/mesonet.gif|||bodyframe
+...|1min Plot|http://db1.mesonet.agron.iastate.edu/GIS/apps/mesoplot/plot.php|||bodyframe
+...|Des Moines Area|http://db1.mesonet.agron.iastate.edu/GIS/apps/mesoplot/plot.php?zoom=1|||bodyframe
+..|Council Bluffs Area|http://mesonet.agron.iastate.edu/data/CBF_mesonet.gif|||bodyframe
+..|Cedar Rapids Area|http://mesonet.agron.iastate.edu/data/CID_mesonet.gif|||bodyframe
+..|Des Moines Area|http://mesonet.agron.iastate.edu/data/DSM_mesonet.gif|||bodyframe
+.|Variable Plots
+..|Wind Chill Index|http://mesonet.agron.iastate.edu/data/wcht.gif|||bodyframe
+..|Heat Index|http://mesonet.agron.iastate.edu/data/heat.gif|||bodyframe
+..|Schoolnet
+...|Solar Radiation|http://mesonet.agron.iastate.edu/data/snet/solarRad.gif|||bodyframe
+...|Pressure (mb)|http://mesonet.agron.iastate.edu/data/snet/snet_altm.gif|||bodyframe
+...|Pressure (in)|http://mesonet.agron.iastate.edu/data/snet/snet_alti.gif|||bodyframe
+..|Altimeter|http://mesonet.agron.iastate.edu/data/mesonet_altm.gif|||bodyframe
+..|Ceiling|http://mesonet.agron.iastate.edu/data/ceil.gif|||bodyframe
+..|Visibility|http://mesonet.agron.iastate.edu/data/vsby.gif|||bodyframe
+..|Relative Humidity|http://mesonet.agron.iastate.edu/data/relh.gif|||bodyframe
+.|Gridded Surface Plots
+..|Stills
+...|Temps|http://mesonet.agron.iastate.edu/data/0surfaceTW.gif|||bodyframe
+...|Dewps|http://mesonet.agron.iastate.edu/data/0surfaceDW.gif|||bodyframe
+...|Theta E|http://mesonet.agron.iastate.edu/data/0surfaceTE.gif|||bodyframe
+...|Moisture Divergence|http://mesonet.agron.iastate.edu/data/0surfaceMD.gif|||bodyframe
+...|Frontogenesis|http://mesonet.agron.iastate.edu/data/0surfaceFRNT.gif|||bodyframe
+...|Divergence|http://mesonet.agron.iastate.edu/data/0surfaceDIV.gif|||bodyframe
+..|Loops
+...|Temps|http://mesonet.agron.iastate.edu/data/SFloop.php?product=TW|||bodyframe
+...|Dewps|http://mesonet.agron.iastate.edu/data/SFloop.php?product=DW|||bodyframe
+...|Theta E|http://mesonet.agron.iastate.edu/data/SFloop.php?product=TE|||bodyframe
+...|Moisture Divergence|http://mesonet.agron.iastate.edu/data/SFloop.php?product=MD|||bodyframe
+...|Frontogenesis|http://mesonet.agron.iastate.edu/data/SFloop.php?product=FRNT|||bodyframe
+...|Divergence|http://mesonet.agron.iastate.edu/data/SFloop.php?product=DIV|||bodyframe
+.|Composite Plots
+..|Des Moines NEXRAD|http://mesonet.agron.iastate.edu/data/DMX_radar.gif|||bodyframe 
+..|Omaha NEXRAD|http://mesonet.agron.iastate.edu/data/OAX_radar.gif|||bodyframe 
+..|Davenport NEXRAD|http://mesonet.agron.iastate.edu/data/DVN_radar.gif|||bodyframe 
+..|Sioux Falls NEXRAD|http://mesonet.agron.iastate.edu/data/FSD_radar.gif|||bodyframe 
+..|LaCrosse NEXRAD|http://mesonet.agron.iastate.edu/data/ARX_radar.gif|||bodyframe 
+..|Schoolnet
+...|Mesonet NEXRAD|http://mesonet.agron.iastate.edu/data/snetRADAR_0.gif|||bodyframe
+..|15min dP NEXRAD|http://mesonet.agron.iastate.edu/GIS/apps/delta/plot.php?i=15m|||bodyframe
+..|1hr dP NEXRAD|http://mesonet.agron.iastate.edu/GIS/apps/delta/plot.php|||bodyframe
+..|Loops
+...|Des Moines NEXRAD|http://mesonet.agron.iastate.edu/data/20radarLoop.html|||bodyframe
+...|Composite Overlay|http://mesonet.agron.iastate.edu/data/MWoverlayLoop.html|||bodyframe
+.|Radar
+..|Stills
+...|Midwest NEXRAD+warnings|http://mesonet.agron.iastate.edu/data/mwcomp.phtml|||bodyframe
+...|Iowa NEXRAD+warnings|http://db1.mesonet.agron.iastate.edu/GIS/apps/rview/warnings.phtml|||bodyframe
+...|Base Reflectivity
+....|Aberdeen|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ABR&sname=Aberdeen%2C+SD&prod=N0R&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Davenport|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DVN&sname=Davenport%2C+IA&prod=N0R&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Des Moines|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DMX&sname=Des+Moines%2C+IA&prod=N0R&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|LaCrosse|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ARX&sname=LaCrosse%2C+WI&prod=N0R&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Minneapolis|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=MPX&sname=Minneapolis%2C+MN&prod=N0R&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Omaha|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=OAX&sname=Omaha%2C+NE&prod=N0R&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Pleasant Hill|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=EAX&sname=Pleasant+Hill%2C+MO&prod=N0R&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Rapid City|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=UDX&sname=Rapid+City%2C+SD&prod=N0R&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Sioux Falls|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=FSD&sname=Sioux+Falls%2C+SD&prod=N0R&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+...|Base Velocity
+....|Aberdeen|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ABR&sname=Aberdeen%2C+SD&prod=N0V&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Davenport|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DVN&sname=Davenport%2C+IA&prod=N0V&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Des Moines|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DMX&sname=Des+Moines%2C+IA&prod=N0V&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|LaCrosse|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ARX&sname=LaCrosse%2C+WI&prod=N0V&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Minneapolis|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=MPX&sname=Minneapolis%2C+MN&prod=N0V&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Omaha|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=OAX&sname=Omaha%2C+NE&prod=N0V&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Pleasant Hill|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=EAX&sname=Pleasant+Hill%2C+MO&prod=N0V&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Rapid City|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=UDX&sname=Rapid+City%2C+SD&prod=N0V&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Sioux Falls|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=FSD&sname=Sioux+Falls%2C+SD&prod=N0V&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+..|Loops
+...|Composite NEXRAD loops|http://mesonet.agron.iastate.edu/current/mcview.phtml|||bodyframe
+...|Javascript Loops
+....|Base Reflectivity
+.....|Aberdeen|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ABR&sname=Aberdeen%2C+SD&prod=N0R_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Davenport|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DVN&sname=Davenport%2C+IA&prod=N0R_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Des Moines|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DMX&sname=Des+Moines%2C+IA&prod=N0R_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|LaCrosse|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ARX&sname=LaCrosse%2C+WI&prod=N0R_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Minneapolis|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=MPX&sname=Minneapolis%2C+MN&prod=N0R_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Omaha|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=OAX&sname=Omaha%2C+NE&prod=N0R_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Pleasant Hill|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=EAX&sname=Pleasant+Hill%2C+MO&prod=N0R_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Rapid City|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=UDX&sname=Rapid+City%2C+SD&prod=N0R_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Sioux Falls|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=FSD&sname=Sioux+Falls%2C+SD&prod=N0R_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Base Velocity
+.....|Aberdeen|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ABR&sname=Aberdeen%2C+SD&prod=N0V_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Davenport|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DVN&sname=Davenport%2C+IA&prod=N0V_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Des Moines|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DMX&sname=Des+Moines%2C+IA&prod=N0V_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|LaCrosse|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ARX&sname=LaCrosse%2C+WI&prod=N0V_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Minneapolis|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=MPX&sname=Minneapolis%2C+MN&prod=N0V_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Omaha|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=OAX&sname=Omaha%2C+NE&prod=N0V_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Pleasant Hill|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=EAX&sname=Pleasant+Hill%2C+MO&prod=N0V_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Rapid City|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=UDX&sname=Rapid+City%2C+SD&prod=N0V_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Sioux Falls|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=FSD&sname=Sioux+Falls%2C+SD&prod=N0V_loop_nj&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+...|Java Applet Loops
+....|Base Reflectivity
+.....|Aberdeen|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ABR&sname=Aberdeen%2C+SD&prod=N0R_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Davenport|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DVN&sname=Davenport%2C+IA&prod=N0R_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Des Moines|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DMX&sname=Des+Moines%2C+IA&prod=N0R_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|LaCrosse|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ARX&sname=LaCrosse%2C+WI&prod=N0R_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Minneapolis|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=MPX&sname=Minneapolis%2C+MN&prod=N0R_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Omaha|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=OAX&sname=Omaha%2C+NE&prod=N0R_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Pleasant Hill|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=EAX&sname=Pleasant+Hill%2C+MO&prod=N0R_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Rapid City|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=UDX&sname=Rapid+City%2C+SD&prod=N0R_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Sioux Falls|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=FSD&sname=Sioux+Falls%2C+SD&prod=N0R_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+....|Base Velocity
+.....|Aberdeen|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ABR&sname=Aberdeen%2C+SD&prod=N0V_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Davenport|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DVN&sname=Davenport%2C+IA&prod=N0V_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Des Moines|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=DMX&sname=Des+Moines%2C+IA&prod=N0V_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|LaCrosse|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=ARX&sname=LaCrosse%2C+WI&prod=N0V_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Minneapolis|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=MPX&sname=Minneapolis%2C+MN&prod=N0V_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Omaha|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=OAX&sname=Omaha%2C+NE&prod=N0V_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Pleasant Hill|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=EAX&sname=Pleasant+Hill%2C+MO&prod=N0V_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Rapid City|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=UDX&sname=Rapid+City%2C+SD&prod=N0V_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.....|Sioux Falls|http://mesonet.agron.iastate.edu/current/raddisplay.phtml?site=FSD&sname=Sioux+Falls%2C+SD&prod=N0V_loop&sitesearch=mesonet.agron.iastate.edu&q=|||bodyframe
+.|Applications
+..|IEM Rainfall App|http://mesonet.agron.iastate.edu/rainfall/|||bodyframe
+..|IEM Freeze|http://db1.mesonet.agron.iastate.edu/GIS/apps/iem/freeze.phtml|||bodyframe
+..|Surface Obs+Radar|http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.radar?map=%2Fhome%2Fhttpd%2Fhtml%2FGIS%2Fapps%2FIAoverlay%2Fia.map&layer=temperatures&layer=drct&layer=counties&layer=radar&zoomsize=2|||bodyframe
+..|NEXRAD vs ASOS/AWOS precip compare|http://db1.mesonet.agron.iastate.edu/GIS/apps/pcs/|||bodyframe
+..|NWS Text Product Finder|http://mesonet.agron.iastate.edu/wx/afos/|||bodyframe
+..|Iowa Tornado Database|http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=%2Fhome%2Fhttpd%2Fhtml%2FGIS%2Fapps%2Fiatorn%2Fiatorn.map|||bodyframe
+..|Birthday Weather|http://mesonet.agron.iastate.edu/onsite/birthday/|||bodyframe
+..|Bugzilla|http://mesonet.agron.iastate.edu/bugzilla/|||bodyframe
+..|NIDS 2 GIS App|http://mesonet.agron.iastate.edu/request/gis/nids2gis.phtml|||bodyframe
+..|Growing Season Plots|http://db1.mesonet.agron.iastate.edu/GIS/apps/agclimate/gsplot.phtml|||bodyframe
+..|Realtime Precip|http://mesonet.agron.iastate.edu/GIS/apps/precip/|||bodyframe
+..|Iowa Base Reflectivity Comparison|http://db1.mesonet.agron.iastate.edu/GIS/apps/rview/compare.phtml|||bodyframe
+..|NEXRAD by Warning Location
+...|Nationwide Current|http://db1.mesonet.agron.iastate.edu/GIS/apps/rview/warnings.phtml|||bodyframe
+...|Iowa|http://db1.mesonet.agron.iastate.edu/GIS/apps/iawarn/iawarn.php
+..|Current and Past Day Warnings|http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/home/httpd/html/GIS/apps/warning0/warning0.map|||bodyframe
+..|Radar Data by Location|http://mesonet.agron.iastate.edu/current/radar.phtml|||bodyframe
+..|Climate Apps
+...|Climodat Interface|http://mesonet.agron.iastate.edu/climodat/index.phtml|||bodyframe
+...|Fall freezing dates|http://mesonet.agron.iastate.edu/COOP/freezing.php|||bodyframe
+...|COOP Climate Data|http://db1.mesonet.agron.iastate.edu/GIS/apps/coop/|||bodyframe
+...|Temp Extremes
+....|Daily Text|http://mesonet.agron.iastate.edu/COOP/extremes.php|||bodyframe
+....|Daily Plot|http://db1.mesonet.agron.iastate.edu/GIS/apps/coop/index.php|||bodyframe
+....|Yearly Plot|http://mesonet.agron.iastate.edu/plotting/coop/extremes_fe.php|||bodyframe
+...|Annual Avg Temps|http://mesonet.agron.iastate.edu/plotting/coop/climate_fe.php|||bodyframe
+...|Seasonal Temps|http://mesonet.agron.iastate.edu/plotting/coop/yearly_fe.php|||bodyframe
+...|Departures|http://mesonet.agron.iastate.edu/plotting/coop/vyear_fe.php|||bodyframe
+...|1 Station Time Series
+....|ASOS|http://mesonet.agron.iastate.edu/plotting/hr/1station.php?network=IA_ASOS|||bodyframe
+....|AWOS|http://mesonet.agron.iastate.edu/plotting/hr/1station.php?network=AWOS|||bodyframe
+....|RWIS|http://mesonet.agron.iastate.edu/plotting/hr/1station.php?network=IA_RWIS|||bodyframe
+...|2 Station Times Series
+....|ASOS/AWOS Sites|http://mesonet.agron.iastate.edu/plotting/48h/2compare.php|||bodyframe
+....|RWIS Sites|http://mesonet.agron.iastate.edu/plotting/48h/2compare.php?rwis=yes|||bodyframe
+...|Historical Time Series
+....|ASOS/AWOS|http://mesonet.agron.iastate.edu/plotting/histts/pickts.php|||bodyframe
+....|RWIS|http://mesonet.agron.iastate.edu/plotting/histts/pickts.php?network=rwis|||bodyframe
+...|60 day Highs/Lows
+....|ASOS/AWOS|http://mesonet.agron.iastate.edu/plotting/histts/60hilow.php|||bodyframe
+....|RWIS|http://mesonet.agron.iastate.edu/plotting/histts/60hilow.php?rwis=yes|||bodyframe
+...|Difference Plots
+....|ASOS/AWOS|http://mesonet.agron.iastate.edu/plotting/48h/2diff.php|||bodyframe
+....|RWIS|http://mesonet.agron.iastate.edu/plotting/48h/2diff.php?rwis=yes|||bodyframe
+...|Monthly Rainfall Plots
+....|ASOS|http://mesonet.agron.iastate.edu/plotting/month/rainfall.phtml?network=IA_ASOS|||bodyframe
+....|AWOS|http://mesonet.agron.iastate.edu/plotting/month/rainfall.phtml?network=AWOS|||bodyframe
+....|COOP|http://mesonet.agron.iastate.edu/plotting/month/rainfall.phtml?network=IA_COOP|||bodyframe
+....|Schoolnet|http://mesonet.agron.iastate.edu/plotting/month/rainfall.phtml?network=KCCI|||bodyframe
+.|GIS Info|http://mesonet.agron.iastate.edu/GIS/|||bodyframe
+..|NEXRAD+Mapserver|http://mesonet.agron.iastate.edu/docs/radmapserver/|||bodyframe
+..|AMS Presentation|http://mesonet.agron.iastate.edu/GIS/ams_030211.phtml|||bodyframe
+..|GIS Day|http://mesonet.agron.iastate.edu/GIS/isu_021120.phtml|||bodyframe
+..|GIS Software|http://mesonet.agron.iastate.edu/GIS/software.php|||bodyframe
+..|IEM RadView|http://mesonet.agron.iastate.edu/GIS/radview.phtml|||bodyframe
+..|Stored GIS Data|http://mesonet.agron.iastate.edu/data/gis/|||bodyframe
+..|OGC Web Services|http://mesonet.agron.iastate.edu/ogc/|||bodyframe
+.|Sortable Currents
+..|ASOS|http://mesonet.agron.iastate.edu/ASOS/current.php|||bodyframe
+..|AWOS|http://mesonet.agron.iastate.edu/AWOS/current.phtml|||bodyframe
+..|COOP|http://mesonet.agron.iastate.edu/COOP/current.phtml|||bodyframe
+...|Iowa|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=IA_COOP&shef=0|||bodyframe
+...|Indiana|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=IN_COOP&shef=0|||bodyframe
+...|Illinois|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=IL_COOP&shef=0|||bodyframe
+...|Kansas|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=KS_COOP&shef=0|||bodyframe
+...|Michigan|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=MI_COOP&shef=0|||bodyframe
+...|Minnesota|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=MN_COOP&shef=0|||bodyframe
+...|Missouri|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=MO_COOP&shef=0|||bodyframe
+...|Nebraska|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=NE_COOP&shef=0|||bodyframe
+...|North Dakota|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=ND_COOP&shef=0|||bodyframe
+...|Ohio|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=OH_COOP&shef=0|||bodyframe
+...|South Dakota|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=SD_COOP&shef=0|||bodyframe
+...|Wisconsin|http://mesonet.agron.iastate.edu/COOP/current.phtml?network=WI_COOP&shef=0|||bodyframe
+..|DCP|http://mesonet.agron.iastate.edu/DCP/current.phtml|||bodyframe
+..|SchoolNet|http://mesonet.agron.iastate.edu/schoolnet/current.phtml|||bodyframe
+..|RAWS|http://mesonet.agron.iastate.edu/RAWS/current.phtml|||bodyframe
+...|Iowa|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=IA_RAWS|||bodyframe
+...|Indiana|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=IN_RAWS|||bodyframe
+...|Illinois|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=IL_RAWS|||bodyframe
+...|Kansas|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=KS_RAWS|||bodyframe
+...|Michigan|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=MI_RAWS|||bodyframe
+...|Minnesota|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=MN_RAWS|||bodyframe
+...|Missouri|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=MO_RAWS|||bodyframe
+...|Nebraska|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=NE_RAWS|||bodyframe
+...|North Dakota|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=ND_RAWS|||bodyframe
+...|Ohio|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=OH_RAWS|||bodyframe
+...|South Dakota|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=SD_RAWS|||bodyframe
+...|Wisconsin|http://mesonet.agron.iastate.edu/RAWS/current.phtml?network=WI_RAWS|||bodyframe
+..|RWIS|http://mesonet.agron.iastate.edu/RWIS/current.phtml|||bodyframe
+...|Iowa|http://mesonet.agron.iastate.edu/RWIS/current.phtml?network=IA_RWIS|||bodyframe
+...|Kansas|http://mesonet.agron.iastate.edu/RWIS/current.phtml?network=KS_RWIS|||bodyframe
+...|Minnesota|http://mesonet.agron.iastate.edu/RWIS/current.phtml?network=MN_RWIS|||bodyframe
+..|RWIS_SF|http://mesonet.agron.iastate.edu/RWIS/currentSF.phtml|||bodyframe
+...|Iowa|http://mesonet.agron.iastate.edu/RWIS/currentSF.phtml?network=IA_RWIS|||bodyframe
+...|Kansas|http://mesonet.agron.iastate.edu/RWIS/currentSF.phtml?network=KS_RWIS|||bodyframe
+...|Minnesota|http://mesonet.agron.iastate.edu/RWIS/currentSF.phtml?network=MN_RWIS|||bodyframe
+..|SCAN|http://mesonet.agron.iastate.edu/scan/current.phtml|||bodyframe
+..|Neighboring ASOS|http://mesonet.agron.iastate.edu/current/neighbors.php|||bodyframe
+..|Other Networks|http://mesonet.agron.iastate.edu/other/current.phtml|||bodyframe
+..|My Favorites|http://mesonet.agron.iastate.edu/my/current.php|||bodyframe
+.|Dynamic Charts
+..|1 minute trace
+...|AWOS|http://mesonet.agron.iastate.edu/plotting/awos/1station_1min.php|||bodyframe
+...|Current Conditions|http://mesonet.agron.iastate.edu/my/current.php|||bodyframe
+.|Download Pages
+..|ASOS+AWOS+RWIS|http://mesonet.agron.iastate.edu/request/download.phtml|||bodyframe
+..|AWOS 1min data|http://mesonet.agron.iastate.edu/request/awos/1min.php|||bodyframe
+..|COOP|http://mesonet.agron.iastate.edu/cgi-bin/request/iowacoop/index.py|||bodyframe
+..|ISU AgClimate
+...|Hourly Data|http://mesonet.agron.iastate.edu/agclimate/hist/hourlyRequest.php|||bodyframe
+...|Daily Data|http://mesonet.agron.iastate.edu/agclimate/hist/dailyRequest.php|||bodyframe
+..|SchoolNet|http://mesonet.agron.iastate.edu/schoolnet/dl/|||bodyframe
+.|Ag Climate|http://mesonet.agron.iastate.edu/agclimate/index.php|||bodyframe
+..|Station Information|http://mesonet.agron.iastate.edu/agclimate/info.txt|||bodyframe
+..|Cold Season Disclaimer|http://mesonet.agron.iastate.edu/agclimate/hist/prec_winter.html|||bodyframe
+.|Growing Season
+..|Quality Control|http://mesonet.agron.iastate.edu/QC/methods/gdd.php|||bodyframe
+...|Growing Degree Days
+....|GDD Plot|http://mesonet.agron.iastate.edu/data/summary/gdd_qc.gif|||bodyframe
+....|GDD Contour Map|http://mesonet.agron.iastate.edu/data/summary/gdd_qc_contour.gif|||bodyframe
+....|ASOS/AWOS|http://mesonet.agron.iastate.edu/data/summary/gdd_qc_asos.gif|||bodyframe
+....|RWIS|http://mesonet.agron.iastate.edu/data/summary/gdd_qc_rwis.gif|||bodyframe
+....|Schoolnet|http://mesonet.agron.iastate.edu/data/summary/gdd_qc_snet.gif|||bodyframe
+....|ISU Ag|http://mesonet.agron.iastate.edu/agclimate/daily_pics/gs-gdd-out.png|||bodyframe
+...|Stress Degree Days
+....|SDD Plot|http://mesonet.agron.iastate.edu/data/summary/sdd_qc.gif|||bodyframe
+....|SDD Contour Map|http://mesonet.agron.iastate.edu/data/summary/sdd_qc_contour.gif|||bodyframe
+....|ASOS/AWOS|http://mesonet.agron.iastate.edu/data/summary/sdd_qc_asos.gif|||bodyframe
+....|RWIS|http://mesonet.agron.iastate.edu/data/summary/sdd_qc_rwis.gif|||bodyframe
+....|Schoolnet|http://mesonet.agron.iastate.edu/data/summary/sdd_qc_snet.gif|||bodyframe
+..|Non Quality Control
+...|Growing Degree Days
+....|GDD Plot|http://mesonet.agron.iastate.edu/data/summary/gdd.gif|||bodyframe
+....|GDD Contour Map|http://mesonet.agron.iastate.edu/data/summary/gdd_contour.gif|||bodyframe
+....|ASOS/AWOS|http://mesonet.agron.iastate.edu/data/summary/gdd_asos.gif|||bodyframe
+....|RWIS|http://mesonet.agron.iastate.edu/data/summary/gdd_rwis.gif|||bodyframe
+....|Schoolnet|http://mesonet.agron.iastate.edu/data/summary/gdd_snet.gif|||bodyframe
+...|Stress Degree Days
+....|SDD Plot|http://mesonet.agron.iastate.edu/data/summary/sdd.gif|||bodyframe
+....|SDD Contour Map|http://mesonet.agron.iastate.edu/data/summary/sdd_contour.gif|||bodyframe
+....|ASOS/AWOS|http://mesonet.agron.iastate.edu/data/summary/sdd_asos.gif|||bodyframe
+....|RWIS|http://mesonet.agron.iastate.edu/data/summary/sdd_rwis.gif|||bodyframe
+....|Schoolnet|http://mesonet.agron.iastate.edu/data/summary/sdd_snet.gif|||bodyframe
+..|COOP|http://db1.mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.phtml|||bodyframe
+.|Network Mainpages
+..|ASOS|http://mesonet.agron.iastate.edu/ASOS/|||bodyframe
+..|AWOS|http://mesonet.agron.iastate.edu/AWOS/|||bodyframe
+..|COOP|http://mesonet.agron.iastate.edu/COOP/|||bodyframe
+..|DCP|http://mesonet.agron.iastate.edu/DCP/|||bodyframe
+..|ISU Ag|http://mesonet.agron.iastate.edu/agclimate/|||bodyframe
+..|RWIS|http://mesonet.agron.iastate.edu/RWIS/|||bodyframe
+..|SCAN|http://mesonet.agron.iastate.edu/scan/|||bodyframe
+..|School Net|http://mesonet.agron.iastate.edu/schoolnet/|||bodyframe
+..|Other|http://mesonet.agron.iastate.edu/other/|||bodyframe
+.|Comparisons
+..|ASOS/AWOS versus
+...|RUC2 Model
+....|2m Temps|http://mesonet.agron.iastate.edu/wx/data/models/ruc2_iem_T.gif|||bodyframe
+....|2m Dewps|http://mesonet.agron.iastate.edu/wx/data/models/ruc2_iem_Td.gif|||bodyframe
+....|10m winds|http://mesonet.agron.iastate.edu/wx/data/models/ruc2_iem_V.gif|||bodyframe
+....|2m RH|http://mesonet.agron.iastate.edu/wx/data/models/ruc2_iem_Rh.gif|||bodyframe
+...|RWIS
+....|Temps|http://mesonet.agron.iastate.edu/data/temps.gif|||bodyframe
+....|Dewps|http://mesonet.agron.iastate.edu/data/dewps.gif|||bodyframe
+....|Winds|http://mesonet.agron.iastate.edu/data/winds.gif|||bodyframe
+...|Schoolnet
+....|Temps|http://mesonet.agron.iastate.edu/data/snet/Tcompare.gif|||bodyframe
+....|Dewps|http://mesonet.agron.iastate.edu/data/snet/Dcompare.gif|||bodyframe
+....|Pressure (mb)|http://mesonet.agron.iastate.edu/data/snet/Pcompare.gif|||bodyframe
+....|Pressure (in)|http://mesonet.agron.iastate.edu/data/snet/P2compare.gif|||bodyframe
+.|Rainfall Totals
+..|IEM Rainfall App|http://mesonet.agron.iastate.edu/rainfall/|||bodyframe
+..|ASOS
+...|Hourly|http://mesonet.agron.iastate.edu/cgi-bin/precip/catAZOS.py|||bodyframe
+...|Yesterday|http://mesonet.agron.iastate.edu/data/text/IEMAZOSTP.txt|||bodyframe
+...|Monthly|http://mesonet.agron.iastate.edu/data/text/IEMAZOMPR.txt|||bodyframe
+...|2003|http://mesonet.agron.iastate.edu/ASOS/reports/2003precip.phtml|||bodyframe
+..|AWOS
+...|Hourly|http://mesonet.agron.iastate.edu/cgi-bin/precip/catAZOS.py|||bodyframe
+...|2002|http://mesonet.agron.iastate.edu/ASOS/reports/2002precip.phtml|||bodyframe
+...|2003|http://mesonet.agron.iastate.edu/ASOS/reports/2003precip.phtml|||bodyframe
+..|COOP
+...|Today
+....|Plot|http://mesonet.agron.iastate.edu/data/coopPrecPlot.gif|||bodyframe
+...|Month
+....|Plot|http://mesonet.agron.iastate.edu/data/coopMonthPlot.gif|||bodyframe
+....|Text|http://mesonet.agron.iastate.edu/data/text/IEMNWSMPR.txt|||bodyframe
+...|This Year|http://mesonet.agron.iastate.edu/data/text/IEMNWSYPR.txt|||bodyframe
+..|Graphic Plots
+...|ASOS+AWOS
+....|Last Hour|http://mesonet.agron.iastate.edu/data/1hprecip.gif|||bodyframe
+....|Today|http://mesonet.agron.iastate.edu/data/summary/today_prec.gif|||bodyframe
+...|NEXRAD 1hr Est. Precip|http://mesonet.agron.iastate.edu/data/nexradPrecip1h.gif|||bodyframe
+.|Snowfall Totals
+..|COOP
+...|Today|http://mesonet.agron.iastate.edu/data/coopSnowPlot.gif|||bodyframe
+...|Month|http://mesonet.agron.iastate.edu/data/coopMonthSPlot.gif|||bodyframe
+...|Snowdepth|http://mesonet.agron.iastate.edu/data/coopSnowDepth.gif|||bodyframe
+.|Climatology|http://mesonet.agron.iastate.edu/climate/|||bodyframe
+..|Observed Values
+...|Today
+....|13Z High/Low Temps|http://mesonet.agron.iastate.edu/data/coopHighLow.gif|||bodyframe
+....|Morning Low Temps|http://mesonet.agron.iastate.edu/data/summary/12z_low.gif|||bodyframe
+....|24hr Precip Totals|http://mesonet.agron.iastate.edu/data/summary/12z_prec.gif|||bodyframe
+....|Precip so far Today|http://mesonet.agron.iastate.edu/data/summary/today_prec.gif|||bodyframe
+....|COOP Precip Totals|http://mesonet.agron.iastate.edu/data/coopPrecPlot.gif|||bodyframe
+....|COOP Snowfall Totals|http://mesonet.agron.iastate.edu/data/coopSnowPlot.gif|||bodyframe
+....|COOP Snow Depth|http://mesonet.agron.iastate.edu/data/coopSnowDepth.gif|||bodyframe
+....|Peak Winds|http://mesonet.agron.iastate.edu/data/summary/today_gust.gif|||bodyframe
+....|High Temps|http://mesonet.agron.iastate.edu/data/summary/today_high.png|||bodyframe
+....|12Z AWOS RTP First Guess|http://mesonet.agron.iastate.edu/data/awos_rtp.shef|||bodyframe
+...|Yesterday
+....|24hr High/Low Temps
+.....|Iowa||http://mesonet.agron.iastate.edu/data/summary/asos_hilo.gif|||bodyframe
+.....|Cedar Rapids Area|http://mesonet.agron.iastate.edu/data/summary/CID_hilo.gif|||bodyframe
+.....|Council Bluffs Area|http://mesonet.agron.iastate.edu/data/summary/CBF_hilo.gif|||bodyframe
+.....|Des Moines Area|http://mesonet.agron.iastate.edu/data/summary/DSM_hilo.gif|||bodyframe
+.....|Ag Climate Network|http://mesonet.agron.iastate.edu/agclimate/display.php?src=/agclimate/daily_pics/air-temp-out.png|||bodyframe
+....|00Z 24hr Precip Totals|http://mesonet.agron.iastate.edu/data/summary/00z_prec.gif
+....|Precip Totals for Period|http://mesonet.agron.iastate.edu/data/summary/asos_prec.gif|||bodyframe
+....|Peak Winds|http://mesonet.agron.iastate.edu/data/summary/yest_gust.gif|||bodyframe
+....|ASOS/AWOS Tabular Data|http://mesonet.agron.iastate.edu/data/text/IEMAZOSTP.txt|||bodyframe
+....|4in Soil Temps|http://mesonet.agron.iastate.edu/agclimate/display.php?src=/agclimate/daily_pics/soil-hilo-out.png|||bodyframe
+....|Solar Radiation|http://mesonet.agron.iastate.edu/agclimate/display.php?src=/agclimate/daily_pics/rad-out.png|||bodyframe
+....|Ag Climate Precip Plot|http://mesonet.agron.iastate.edu/agclimate/display.php?src=/agclimate/daily_pics/prec-out.png|||bodyframe
+....|Evapotranspiration|http://mesonet.agron.iastate.edu/agclimate/display.php?src=/agclimate/daily_pics/et-out.png|||bodyframe
+....|Wind Gust|http://mesonet.agron.iastate.edu/agclimate/display.php?src=/agclimate/daily_pics/pk-wind-out.png|||bodyframe
+....|Avg Wind Speed|http://mesonet.agron.iastate.edu/agclimate/display.php?src=/agclimate/daily_pics/avewind-out.png|||bodyframe
+....|High/Low Dews|http://mesonet.agron.iastate.edu/agclimate/display.php?src=/agclimate/daily_pics/dwpts.png|||bodyframe
+...|Week
+....|Precip Totals|http://mesonet.agron.iastate.edu/data/summary/week_prec.gif|||bodyframe
+...|Month
+....|ASOS/AWOS Precip Totals|http://mesonet.agron.iastate.edu/data/summary/month_prec.gif|||bodyframe
+....|COOP Precip Totals|http://mesonet.agron.iastate.edu/data/coopMonthPlot.gif|||bodyframe
+....|Ag Climate Precip Totals|http://mesonet.agron.iastate.edu/agclimate/display.php?src=/agclimate/daily_pics/mon-prec-out.png|||bodyframe
+....|COOP Snowfall|http://mesonet.agron.iastate.edu/data/coopMonthSPlot.gif|||bodyframe
+....|ASOS Tabular Highs/Lows|http://mesonet.agron.iastate.edu/data/text/IEMAZOMPR.txt|||bodyframe
+....|COOP Tabular Precip|http://mesonet.agron.iastate.edu/data/text/IEMNWSMPR.txt|||bodyframe
+....|Evapotranspiration|http://mesonet.agron.iastate.edu/agclimate/display.php?src=/agclimate/daily_pics/mon-et-out.png|||bodyframe
+...|Season
+....|Fall/Winter Min Temps|http://mesonet.agron.iastate.edu/data/summary/fallLow.gif|||bodyframe
+....|Min Temps Contour Map|http://mesonet.agron.iastate.edu/data/summary/fallLowC.gif|||bodyframe
+..|Averages
+...|High/Low Today|http://mesonet.agron.iastate.edu/data/summary/coopAveTemp.gif|||bodyframe
+...|High/Low Yesterday|http://mesonet.agron.iastate.edu/archive/data/2004/05/17/coopAveTemp.gif|||bodyframe
+...|COOP Annual Highs/Lows|http://mesonet.agron.iastate.edu/plotting/coop/climate_fe.php|||bodyframe
+...|Wind Roses|ftp://ftp.wcc.nrcs.usda.gov/downloads/climate/windrose/iowa/|||bodyframe
+...|Yesterday 4in soil temps|http://mesonet.agron.iastate.edu/agclimate/display.php?src=/agclimate/daily_pics/4in-temp-out.png|||bodyframe
+..|Records
+...|High/Low Today|http://mesonet.agron.iastate.edu/data/summary/coopRecTemp.gif|||bodyframe
+...|High/Low Yesterday|http://mesonet.agron.iastate.edu/archive/data/2004/05/17/coopRecTemp.gif|||bodyframe
+...|COOP Temp Extreme Plots|http://mesonet.agron.iastate.edu/plotting/coop/extremes_fe.php|||bodyframe
+..|Departures
+...|Month Precip Departure|http://mesonet.agron.iastate.edu/data/summary/monthPrecDiff.gif|||bodyframe
+...|Year Temp Departure|http://mesonet.agron.iastate.edu/plotting/coop/vyear_fe.php|||bodyframe
+...|Month GDD Departure|http://mesonet.agron.iastate.edu/data/summary/gdd_diff.gif|||bodyframe
+.|Quality Control|http://mesonet.agron.iastate.edu/QC/|||bodyframe
+..|ASOS/AWOS extremes and obs|http://mesonet.agron.iastate.edu/data/text/IEMAZOSTP.txt|||bodyframe
+..|RWIS extremes and obs|http://mesonet.agron.iastate.edu/data/text/IEMRWISTP.txt|||bodyframe
+..|Hourly QC Messages|http://www-sdd.fsl.noaa.gov/MSAS/qcms_data/qc20/qchour.txt|||bodyframe
+..|Raw QC|http://mesonet.agron.iastate.edu/QC/madis/network.phtml|||bodyframe
+..|Offline Sites|http://mesonet.agron.iastate.edu/QC/offline.php|||bodyframe
+..|Offline Sites Graphics
+...|All Networks|http://db1.mesonet.agron.iastate.edu/GIS/apps/stations/offline.php|||bodyframe
+...|SchoolNet Only|http://db1.mesonet.agron.iastate.edu/GIS/apps/stations/offline.php?network=snet|||bodyframe
+...|RWIS Only|http://mesonet.agron.iastate.edu/GIS/apps/stations/offline.php?network=rwis|||bodyframe
+...|AWOS Only|http://mesonet.agron.iastate.edu/GIS/apps/stations/offline.php?network=awos|||bodyframe
+...|ASOS Only|http://mesonet.agron.iastate.edu/GIS/apps/stations/offline.php?network=asos|||bodyframe
+..|Trouble Tickets|http://mesonet.agron.iastate.edu/QC/tickets.phtml|||bodyframe
+..|Data Quantity Charts
+...|48hr ASOS obs plot|http://mesonet.agron.iastate.edu/plotting/stats/reports.php?network=asos|||bodyframe
+...|48hr AWOS obs plot|http://mesonet.agron.iastate.edu/plotting/stats/reports.php?network=awos|||bodyframe
+...|48hr RWIS obs plot|http://mesonet.agron.iastate.edu/plotting/stats/reports.php?network=rwis|||bodyframe
+...|IDS Product Latencies|http://mesonet.agron.iastate.edu/plotting/stats/tstncf.php|||bodyframe
+..|Data Logs
+...|ASOS/AWOS|http://mesonet.agron.iastate.edu/data/asos.log|||bodyframe
+...|AWOS|http://mesonet.agron.iastate.edu/data/awos.log|||bodyframe
+...|RWIS|http://mesonet.agron.iastate.edu/data/rwis.log|||bodyframe
+.|Summary
+..|COOP
+...|Today|http://mesonet.agron.iastate.edu/data/coopHighLow.gif|||bodyframe
+.|Archive
+..|Archived Data Browser App|http://mesonet.agron.iastate.edu/browser/|||bodyframe
+..|IEM Plots|http://mesonet.agron.iastate.edu/archive/data/|||bodyframe
+...|2001|http://mesonet.agron.iastate.edu/archive/data/2001/|||bodyframe
+...|2002|http://mesonet.agron.iastate.edu/archive/data/2002/|||bodyframe
+...|2003|http://mesonet.agron.iastate.edu/archive/data/2003/|||bodyframe
+...|2004|http://mesonet.agron.iastate.edu/archive/data/2004/|||bodyframe
+..|IEM GEMPAK Data|http://mesonet.agron.iastate.edu/archive/gempak/|||bodyframe
+...|ASOS Surface|http://mesonet.agron.iastate.edu/archive/gempak/surface/ASOS/|||bodyframe
+...|AWOS Surface|http://mesonet.agron.iastate.edu/archive/gempak/surface/AWOS/|||bodyframe
+...|RWIS Surface|http://mesonet.agron.iastate.edu/archive/gempak/surface/RWIS/|||bodyframe
+...|COOP Surface|http://mesonet.agron.iastate.edu/archive/gempak/surface/coop/|||bodyframe
+...|Corp Surface|http://mesonet.agron.iastate.edu/archive/gempak/surface/corp/|||bodyframe
+...|Gauges|http://mesonet.agron.iastate.edu/archive/gempak/surface/gauges/|||bodyframe
+...|Mesonet|http://mesonet.agron.iastate.edu/archive/gempak/surface/mesonet/|||bodyframe
+...|sao|http://mesonet.agron.iastate.edu/archive/gempak/surface/sao/|||bodyframe
+...|Schoolnet|http://mesonet.agron.iastate.edu/archive/gempak/surface/snet/|||bodyframe
+..|MOS Guidance Archive|http://mesonet.agron.iastate.edu/archive/|||bodyframe
+..|NEXRAD Data Archive|http://mesonet.agron.iastate.edu/archive/nexrad/|||bodyframe
+..|IEM Raw Data|http://mesonet.agron.iastate.edu/archive/raw/|||bodyframe
+..|PALS Image Archive|http://www.pals.iastate.edu/archivewx/data/|||bodyframe
+..|1min AWOS Data App|http://mesonet.agron.iastate.edu/request/awos/1min.php|||bodyframe
+..|1min Schoolnet Data App|http://mesonet.agron.iastate.edu/schoolnet/dl/|||bodyframe
+..|1hr ASOS/AWOS Precip|http://mesonet.agron.iastate.edu/cgi-bin/precip/catAZOS.py|||bodyframe
+..|1hr ASOS/AWOS/RWIS Obs|http://mesonet.agron.iastate.edu/request/download.phtml|||bodyframe

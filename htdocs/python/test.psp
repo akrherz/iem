@@ -1,0 +1,10 @@
+<html>
+<%
+if form.has_key('name'):
+   greet = 'Hello, %s!' % form['name'].capitalize()
+else:
+   greet = 'Hello there!'
+# end
+%>
+  <h1><%= greet %></h1>
+</html>

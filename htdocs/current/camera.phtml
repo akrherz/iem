@@ -1,0 +1,109 @@
+<?php 
+ include("../../config/settings.inc.php");
+/* CGI GET Requests */
+ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+ $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
+ $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+ $hour = isset($_GET["hour"]) ? $_GET["hour"] : date("H");
+ $minute = isset($_GET["minute"]) ? $_GET["minute"] : date("i");
+ $isarchive = isset($_GET["archive"]);
+
+ include("$rootpath/include/cameras.inc.php"); 
+ while (list($id, $val) = each($cameras))
+ {
+	$cameras[$id]["url"] = sprintf("/data/camera/stills/%s.jpg?%s", $id, time() );
+
+ if ($isarchive)
+ {
+    $cameras[$id]["active"] = true;
+    $ts = mktime($hour, $minute, 0, $month, $day, $year);
+    $ts5 = mktime($hour, $minute - ($minute % 5), 0, $month, $day, $year);
+
+    $fp = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
+    $url = "http://mesonet.agron.iastate.edu/archive/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
+    $fp5 = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
+    $url5 = "http://mesonet.agron.iastate.edu/archive/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
+
+    if (is_file($fp)) $cameras[$id]["url"] = $url;
+    else if (is_file($fp5)) $cameras[$id]["url"] = $url5;
+    else $cameras[$id]["active"] = false;
+ }
+
+}/* End of while */
+
+ksort($cameras);
+reset($cameras);
+
+	$TITLE = "IEM | Web Cameras";
+if (! $isarchive)
+	$REFRESH = "<meta http-equiv=\"refresh\" content=\"300; URL=camera.phtml\">";
+	include("$rootpath/include/header.php"); 
+	include("$rootpath/include/forms.php"); 
+?>
+
+<div id="iem-section">
+<center><table>
+<tr><th><a href="index.phtml">Surface Data</a></th>
+<th><a href="radar.phtml">RADAR/Sat Data</a></th>
+<th><a href="misc.phtml">Advanced Met Plots</a></th>
+<th>Web Cameras</th>
+<th>&nbsp;</th>
+</tr></table></center></div>
+<div class="text">
+<p>Thanks to the sponsorship of <a href="http://www.cipco.net">CIPCO</a>, the 
+<a href="http://www.schoolnet8.com/">KCCI SchoolNet</a> has been 
+able to place a network of web cameras in Central Iowa.  Here is a view of 
+the latest images from these 12 cameras.  You can build current and historical
+loops on their <a href="http://www.schoolnet8.com/camera/">webcamera homepage</a>.  This page will refresh every 5 minutes.</p>
+
+<form method="GET" action="camera.phtml">
+<table><caption>Time Settings:</caption>
+<thead><tr><th>&nbsp;</th><th>Year:</th><th>Month:</th><th>Day:</th><th>Hour:</th><th>Minute</th><td></td></tr></thead>
+<tbody>
+<tr>
+<td><input type="checkbox" value="yes" name="archive" <?php if($isarchive) echo "CHECKED=CHECKED"; ?>>Archived Images</td>
+<td><?php echo yearSelect(2003, $year, "year"); ?></td>
+<td><?php echo monthSelect($month, "month"); ?></td>
+<td><?php echo daySelect($day, "day"); ?></td>
+<td><?php echo hourSelect($hour, "hour"); ?></td>
+<td><?php echo minuteSelect($minute, "minute"); ?></td>
+<td><input type="submit" value="GO!"></td>
+</tr>
+</tbody></table>
+</form>
+
+<?php $t = time(); ?>
+<center>
+<table width="700px">
+
+<?php
+ $i=1;
+ $misstxt = "Cameras Missing: ";
+ while (list($id, $v) = each($cameras))
+ {
+   if (! $v["active"] ){
+     if ($id == "S03I4") continue;
+     $misstxt .= $v["name"] ." , ";
+     continue;
+   }
+   if ($i) echo "<tr>";
+   echo sprintf("<td><b>%s</b> (%s County)<br /><img src=\"%s\"></td>", $v["name"], $v["county"], $v["url"]);
+   if (! $i) echo "</tr>";
+   $i = ! $i;
+ }
+?>
+</table></center>
+
+<?php echo substr($misstxt, 0, -2); ?>
+
+<p><b>Cool Shots!</b>
+<ul>
+ <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2004&month=6&day=11&hour=19&minute=32">11 Jun 2004 - 7:32 PM, Webster City Tornado</a></li>
+ <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2005&month=5&day=26&hour=19&minute=15">26 May 2005 - 7:15 PM, Pella Double Rainbow</a></li>
+ <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2005&month=6&day=8&hour=20&minute=55">8 Jun 2005 - 8:55 PM, All sorts of colours</a></li>
+ <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2005&month=9&day=8&hour=12&minute=30">8 Sep 2005 - 12:30 PM, Blurry shot of Ames Tornado</a></li>
+</ul>
+
+</div>
+
+<?php include("$rootpath/include/footer.php"); ?>

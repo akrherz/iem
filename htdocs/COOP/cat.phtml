@@ -1,0 +1,145 @@
+<?php
+ include("../../config/settings.inc.php");
+ $station = isset($_GET["station"])? substr($_GET["station"],0,5) : "";
+ $network = isset($_GET["network"])? substr($_GET["network"],0,7) : "IA_COOP";
+ $date = isset($_GET["date"]) ? substr($_GET["date"],0, 10) : "";
+ $sortvar = isset($_GET["sortvar"]) ? substr($_GET["sortvar"], 0, 10): "";
+ $year = isset($_GET["year"]) ? substr($_GET["year"], 0, 4): date("Y");
+
+ if ($date == "" && $station == "") $station = "AMSI4";
+ include("$rootpath/include/forms.php");
+?>
+
+<?php $TITLE = "IEM | COOP Obs";
+include("$rootpath/include/header.php"); ?>
+
+<div class="text"
+<b>Nav:</b> <a href="/COOP/">NWS COOP</a> <b> > </b> Print Obs
+
+<?php if (strlen($station) > 0) {
+  $link = "cat.phtml?station=".$station."&network=". $network ."&sortvar=";
+  if ($sortvar == "") $sortvar = "day";
+ ?>
+<h3 class="subtitle">COOP obs listed by station</h3>(<i>Click on a date to get all obs for a particular date.</i>)
+<form name="switchnwsli" action="cat.phtml" method="GET">
+<p>Enter NWSLI:<input type="text" size="6" maxlength="5" name="station" value="<?php echo $station; ?>">
+Select Year: <?php echo yearSelect(2004, $year, "year"); ?>
+<input type="submit" value="View COOP Station"></form>
+<?php } ?>
+
+<?php if (strlen($date) > 0) { 
+  $link = "cat.phtml?date=".$date."&network=". $network ."&sortvar=";
+  if ($sortvar == "") $sortvar = "station";
+?>
+<h3 class="subtitle">COOP obs listed by date</h3>(<i>Click on the NWSLI to view all obs from one station.</i>)
+<form name="switchdate" action="cat.phtml" method="GET">
+<p>Enter 2004 Date:<input type="text" size="11" maxlength="10" name="date" value="<?php echo $date; ?>">
+Select State: <select name="network">
+  <option value="IA_COOP" <?php if ($network == "IA_COOP") echo "SELECTED"; ?>>Iowa
+  <option value="IN_COOP" <?php if ($network == "IN_COOP") echo "SELECTED"; ?>>Indiana
+  <option value="IL_COOP" <?php if ($network == "IL_COOP") echo "SELECTED"; ?>>Illinois
+  <option value="KS_COOP" <?php if ($network == "KS_COOP") echo "SELECTED"; ?>>Kansas
+  <option value="MI_COOP" <?php if ($network == "MI_COOP") echo "SELECTED"; ?>>Michigan
+  <option value="MN_COOP" <?php if ($network == "MN_COOP") echo "SELECTED"; ?>>Minnesota
+  <option value="MO_COOP" <?php if ($network == "MO_COOP") echo "SELECTED"; ?>>Missouri
+  <option value="NE_COOP" <?php if ($network == "NE_COOP") echo "SELECTED"; ?>>Nebraska
+  <option value="ND_COOP" <?php if ($network == "ND_COOP") echo "SELECTED"; ?>>North Dakota
+  <option value="OH_COOP" <?php if ($network == "OH_COOP") echo "SELECTED"; ?>>Ohio
+  <option value="SD_COOP" <?php if ($network == "SD_COOP") echo "SELECTED"; ?>>South Dakota
+  <option value="WI_COOP" <?php if ($network == "WI_COOP") echo "SELECTED"; ?>>Wisconsin
+</select>
+
+<input type="submit" value="View Date"></form>
+<?php } ?>
+
+<p><table border="1" cellspacing=0 cellpadding=2>
+<tr>
+  <th><a href="<?php echo $link; ?>station">NWSLI:</a></th>
+  <th>Site Name:</th>
+  <th><a href="<?php echo $link; ?>day">Date:</a></th>
+  <th><a href="<?php echo $link; ?>max_tmpf">Max Air Temp</a></th>
+  <th><a href="<?php echo $link; ?>min_tmpf">Min Air Temp</a></th>
+  <th><a href="<?php echo $link; ?>pday">Precip</a></th>
+  <th><a href="<?php echo $link; ?>snow">Snowfall</a></th>
+  <th><a href="<?php echo $link; ?>snowd">Snow Depth</a></th></tr>
+
+<?php 
+ include("$rootpath/include/iemaccess.php");
+ include("$rootpath/include/allLoc.php");
+ $iem = new IEMAccess();
+
+ $sortdir = "ASC";
+ if ($sortvar == "pday" || $sortvar == "snow" || $sortvar == "snowd" ||
+     $sortvar == "max_tmpf") 
+   $sortdir = "DESC";
+ if (strlen($station) > 0) {
+   $rs = $iem->query("SELECT * from summary_$year WHERE station = '$station'
+     ORDER by $sortvar $sortdir");
+ } else {
+   $rs = $iem->query("SELECT * from summary_$year WHERE day = '$date' and
+     network = '$network' ORDER by $sortvar $sortdir");
+ }
+ $hirow = 1;
+ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+   $nwsli = $row["station"];
+
+   $high = $row["max_tmpf"];
+   if ($high == "-99" || $high == "") $high = "M";
+   if ($high > 130 || $high < -50) $high = "M";
+
+   $low = $row["min_tmpf"];
+   if ($low == "99" || $low == "" || $low == -99) $low = "M";
+   if ($low > 130 || $low < -50) $low = "M";
+
+   $rain = $row["pday"];
+   if ($rain == 0.0001) $rain = "T";
+   if ($rain == -99 || $rain == "") $rain = "M";
+   if ($rain > 10 || $rain < 0) $rain = "M";
+
+   $snow = $row["snow"];
+   if ($snow == 0.0001) $snow = "T";
+   if ($snow == -99 || $snow == "") $snow = "M";
+   if ($snow > 100 || $snow < 0) $snow = "M";
+
+   $snowd = $row["snowd"];
+   if ($snowd == 0.0001) $snowd = "T";
+   if ($snowd == -99 || $snowd == "") $snowd = "M";
+   if ($snowd > 1000 || $snowd < 0) $snowd = "M";
+
+   echo "<tr";
+   if ($hirow) echo " class=\"even\"";
+   $hirow = ! $hirow;
+   echo "><td>";
+   if (strlen($station) > 0){
+     echo $nwsli;
+   } else {
+     echo "<a href=\"cat.phtml?station=". $nwsli ."&network=". $network ."\">". $nwsli ."</a>";
+   }
+
+   echo "</td><td>". $cities[$nwsli]["city"] ."</td><td>";
+
+   if (strlen($date) > 0){
+      echo $row["day"];
+   } else {
+      echo "<a href=\"cat.phtml?date=". $row["day"] ."&network=". $network ."\">". $row["day"] ."</a>";
+   }
+
+   echo "</td><td>". $high ."</td>
+      <td>". $low ."</td><td>". $rain ."</td>
+      <td>". $snow ."</td><td>". $snowd ."</td></tr>";
+ }
+
+ 
+?>
+
+
+</table>
+
+<p>Theoretically, you should be able to highlight the entire table with 
+your cursor and then copy-paste it into a spreadsheet program if you 
+like.
+
+<p>Errors exist in this dataset and you should evaluate the observations
+before using...</div>
+
+<?php include("$rootpath/include/footer.php"); ?>

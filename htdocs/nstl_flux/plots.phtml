@@ -1,0 +1,39 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/forms.php");
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 86400);
+$month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 86400);
+$day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 86400);
+
+$TITLE = "IEM | NSTL Flux Sites";
+include("$rootpath/include/header.php"); ?>
+<a href="/nstl_flux/">NSTL Flux Sites</a> <b> &gt; </b> Comparison Plots
+
+<h3 class="heading">Comparison Plots</h3>
+
+
+<form method="GET" name="selector">
+
+<table>
+<thead><tr><th colspan="3">Select Date:</th>
+          <td rowspan="3"><input type="submit" value="Generate Plots"></td></tr></thead>
+<tbody>
+<tr><th>Year:</th><th>Month:</th><th>Day:</th></tr>
+<tr>
+ <td><?php echo yearSelect(2002, $year, "year"); ?></td>
+ <td><?php echo monthSelect($month, "month"); ?></td>
+ <td><?php echo daySelect($day, "day"); ?></td>
+</tr>
+</table>
+<?php $u = sprintf("/plotting/flux/plot_rad.php?var=netrad&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<br /><img src="<?php echo $u; ?>">
+<?php $u = sprintf("/plotting/flux/plot_rad.php?var=soilheat&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<br /><img src="<?php echo $u; ?>">
+<?php $u = sprintf("/plotting/flux/plot_rad.php?var=latent&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<br /><img src="<?php echo $u; ?>">
+<?php $u = sprintf("/plotting/flux/plot_rad.php?var=sensible&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<br /><img src="<?php echo $u; ?>">
+<?php $u = sprintf("/plotting/flux/plot_rad.php?var=co2&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<br /><img src="<?php echo $u; ?>">
+
+<?php include("$rootpath/include/footer.php"); ?>

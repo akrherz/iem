@@ -1,0 +1,55 @@
+<?php 
+include("../../config/settings.inc.php");
+$page = "gis";
+$TITLE = "IEM | ISU GIS Day 2002";
+include("$rootpath/include/header.php"); ?>
+
+<h3 class="heading">Iowa State GIS Day</h3>
+
+<div class="text">
+<p>On 20 Nov 2002, the IEM was privileged to be invitied as the
+keynote speaker for the <a href="http://www.gis.iastate.edu/gisday02/home.htm">Iowa State GIS Day</a>.
+  This page provides a link to the 
+<a href="/present/021120_isugis/">presentation</a> and URLS for applications referenced in the talk.</p>
+
+
+<p><b><a href="<?php echo $rooturl; ?>/GIS/apps/precip/">Example 1.</a>
+Precipitation Analysis</b>
+<br>Web mapping application that combines NEXRAD precipitation estimates with
+observations in near real-time.</p>
+
+<p><b><a href="<?php echo $rooturl; ?>/cgi-bin/mapserv/mapserv?map=%2Fhome%2Fhttpd%2Fhtml%2FGIS%2Fapps%2Fiatorn%2Fiatorn.map">Example 2</a>  Iowa Tornado Database</b>
+<br>Based on an Iowa Tornado reports archive, this web application allows you
+the ability to dynamically plot and query tornado reports.</p>
+
+
+<!-- Not working
+<p><b><a href="<?php echo $rooturl; ?>/cgi-bin/mapserv/mapserv?map=/home/httpd/html/GIS/apps/warning0/warning0.map">Example 3</a> NWS Archive Warnings with National Composite NEXRAD</b>
+-->
+<p><b>Example 3 NWS Archive Warnings with National Composite NEXRAD</b> (reworking)
+<br>NWS severe bulletins are ingested into the IEM spatial database in real-time
+and combined with a recent national RADAR mosiac.</p>
+
+<p><b><a href="<?php echo $rooturl; ?>/cgi-bin/mapserv/mapserv?map=/home/httpd/html/GIS/apps/precipv0/precipv0.map">Example 4</a> 3-4 June 2002 Flooding</b>
+<br>This application was quickly produced last summer in response to flooding in Eastern Iowa on
+the dates of 3-4 June 2002.</p>
+
+<p><b><a href="<?php echo $rooturl; ?>/my/current.php">Example 5</a> Dynamic Variable Plotting</b>
+<br>With the IEM Currents page, you can dynamically select stations you would 
+like to plot and the variable of your choice.  The link may take you to a blank
+page, if so, you will want to select a data network and add stations to your
+favorites list.</p>
+
+<p><b><a href="<?php echo $rooturl; ?>/GIS/apps/pcs/">Example 6</a> Archived NEXRAD vs ASOS/AWOS precipitation comparisons</b>
+<br>This application allows dynamic comparisons between historical hourly rainfall
+estimates from the NEXRAD and observations from the AWOS/ASOS.  Eventually, this 
+application will work in real-time and archived mode and with other networks.</p>
+
+<p><b><a href="<?php echo $rooturl; ?>/sites/locate.php">Example 7</a> IEM Site Location Maps</b>
+<br>This slick application combines topography, photography and other layers
+with an IEM site location to produce a zoomable plot of a site's location. The
+maps are <b>fascinating</b> to look at.  Once you follow the link, you will
+want to select a station and then "Location Maps".</p></div>
+
+
+<?php include("$rootpath/include/footer.php"); ?>

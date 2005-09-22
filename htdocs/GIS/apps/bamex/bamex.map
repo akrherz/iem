@@ -1,0 +1,364 @@
+#
+# Start of map file
+#
+NAME bamex
+STATUS ON
+SIZE 450 350
+#SYMBOLSET symbols/symbol.sym
+FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+EXTENT -102 31 -81 46
+UNITS DD
+SHAPEPATH "/mesonet/www/html/GIS/data/"
+SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+IMAGECOLOR -1 -1 -1
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+  "proj=utm"
+  "ellps=GRS80"
+  "zone=15"
+  "north"
+  "no_defs"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+  HEADER q_header.html
+  TEMPLATE bamex.html
+  FOOTER q_footer.html
+  MINSCALE 90000
+  MAXSCALE 465000000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/stations.log"
+END
+
+
+
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+
+#
+#-129.381647+14.785822+-62.949340+66.455394
+REFERENCE
+  COLOR 255 255 255
+  EXTENT -123.381 15.78 -68.949  55.455394
+  IMAGE /mesonet/www/html/GIS/data/images/us_ref.png
+  OUTLINECOLOR 255 0 0
+  STATUS ON
+  SIZE 175 90
+END
+
+
+
+LAYER
+  NAME counties
+  STATUS ON
+  TYPE POLYGON
+  DATA shape/counties.shp
+  LABELITEM 'Name'
+  LABELMAXSCALE 1800000
+  CLASS
+    OUTLINECOLOR 0 0 0
+    LABEL
+      COLOR 0 0 0
+      OUTLINECOLOR -1 -1 -1
+      TYPE BITMAP
+      SIZE TINY
+      POSITION CC
+      PARTIALS FALSE 
+    END
+  END
+END
+
+
+LAYER
+  NAME states
+  STATUS ON
+  TYPE POLYGON
+  DATA shape/states.shp
+  CLASS
+    OUTLINECOLOR 0 0 255
+    
+  END
+END
+
+
+LAYER
+  NAME okmeso
+  STATUS ON
+  TYPE POINT
+  DATA shape/okmeso/oklahomamesonet.shp
+  CLASS
+    COLOR 0 0 0
+    SIZE 10
+    SYMBOL 1
+  END
+END
+
+
+
+##
+## SAO
+##
+LAYER
+  CONNECTIONTYPE postgis
+  NAME sao
+  CONNECTION "user=akrherz dbname=postgis"
+  DATA "geom from bamex"
+  FILTER "network = 'METAR'"
+  STATUS ON
+  TYPE POINT
+  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  CLASS
+    TEMPLATE q_template.html
+    COLOR 0 255 255
+    BACKGROUNDCOLOR 0 255 255
+    SYMBOL 1
+    SIZE 10
+    TEXT ([ sid ])
+    LABEL
+      COLOR 0 255 255
+      BACKGROUNDCOLOR -1 -1 -1
+      TYPE TRUETYPE
+      SIZE 8
+      FORCE true
+      MINSIZE 6
+      MAXSIZE 18
+      FONT arial
+      ANTIALIAS true
+      POSITION AUTO
+      BUFFER 4
+    END
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME miss
+  CONNECTION "user=akrherz dbname=postgis"
+  DATA "geom from bamex"
+  FILTER "network = 'MISS'"
+  STATUS ON
+  TYPE POINT
+  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  CLASS
+    TEMPLATE q_template.html
+    COLOR 0 0 255
+    BACKGROUNDCOLOR 0 0 255
+    SYMBOL 1
+    SIZE 10
+    TEXT ([ sid ])
+    LABEL
+      COLOR 0 0 255
+      BACKGROUNDCOLOR -1 -1 -1
+      TYPE TRUETYPE
+      SIZE 8
+      FORCE true
+      MINSIZE 6
+      MAXSIZE 18
+      FONT arial
+      ANTIALIAS true
+      POSITION AUTO
+      BUFFER 4
+    END
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME isff
+  CONNECTION "user=akrherz dbname=postgis"
+  DATA "geom from bamex"
+  FILTER "network = 'ISFF'"
+  STATUS ON
+  TYPE POINT
+  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  CLASS
+    TEMPLATE q_template.html
+    COLOR 139 35 35
+    BACKGROUNDCOLOR 139 35 35
+    SYMBOL 1
+    SIZE 10
+    TEXT ([ sid ])
+    LABEL
+      COLOR 139 35 35
+      BACKGROUNDCOLOR -1 -1 -1
+      TYPE TRUETYPE
+      SIZE 8
+      FORCE true
+      MINSIZE 6
+      MAXSIZE 18
+      FONT arial
+      ANTIALIAS true
+      POSITION AUTO
+      BUFFER 4
+    END
+ END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME isuc
+  CONNECTION "user=akrherz dbname=postgis"
+  DATA "geom from bamex"
+  FILTER "network = 'ISUC'"
+  STATUS ON
+  TYPE POINT
+  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  CLASS
+    TEMPLATE q_template.html
+    COLOR 139 35 35
+    BACKGROUNDCOLOR 139 35 35
+    SYMBOL 1
+    SIZE 10
+    TEXT ([ sid ])
+    LABEL
+      COLOR 139 35 35
+      BACKGROUNDCOLOR -1 -1 -1
+      TYPE TRUETYPE
+      SIZE 8
+      FORCE true
+      MINSIZE 6
+      MAXSIZE 18
+      FONT arial
+      ANTIALIAS true
+      POSITION AUTO
+      BUFFER 4
+    END
+  END 
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME scan
+  CONNECTION "user=akrherz dbname=postgis"
+  DATA "geom from bamex"
+  FILTER "network = 'SCAN'"
+  STATUS ON
+  TYPE POINT
+  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  CLASS
+    TEMPLATE q_template.html
+    COLOR 139 35 35
+    BACKGROUNDCOLOR 139 35 35
+    SYMBOL 1
+    SIZE 10
+    TEXT ([ sid ])
+    LABEL
+      COLOR 139 35 35
+      BACKGROUNDCOLOR -1 -1 -1
+      TYPE TRUETYPE
+      SIZE 8
+      FORCE true
+      MINSIZE 6
+      MAXSIZE 18
+      FONT arial
+      ANTIALIAS true
+      POSITION AUTO
+      BUFFER 4
+    END
+  END
+END
+
+##
+## RWIS
+##
+LAYER
+  CONNECTIONTYPE postgis
+  NAME rwis
+  CONNECTION "user=akrherz dbname=postgis"
+  DATA "geom from bamex"
+  FILTER "network = 'RWIS'"
+  STATUS ON
+  TYPE POINT
+  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  CLASS
+    TEMPLATE q_template.html
+    COLOR 255 0 0
+    BACKGROUNDCOLOR 255 0 0
+    SYMBOL 1
+    SIZE 10
+    TEXT ([ sid ])
+    LABEL
+      COLOR 255 0 0
+      BACKGROUNDCOLOR -1 -1 -1
+      TYPE TRUETYPE
+      SIZE 8
+      FORCE true
+      MINSIZE 6
+      MAXSIZE 18
+      FONT arial
+      ANTIALIAS true
+      POSITION AUTO
+      BUFFER 4
+    END
+  END
+END
+
+
+##
+## KCCI
+##
+LAYER
+  CONNECTIONTYPE postgis
+  NAME snet
+  CONNECTION "user=akrherz dbname=postgis"
+  DATA "geom from bamex"
+  FILTER "network = 'SNET'"
+  STATUS ON
+  TYPE POINT
+  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  CLASS
+    TEMPLATE q_template.html
+    COLOR 0 255 0
+    BACKGROUNDCOLOR  0 255 0
+    SYMBOL 1
+    SIZE 10
+    TEXT ([ sid ])
+    LABEL
+      COLOR 0 255 0
+      BACKGROUNDCOLOR -1 -1 -1
+      TYPE TRUETYPE
+      SIZE 8
+      FORCE true
+      MINSIZE 6
+      MAXSIZE 18
+      FONT arial
+      ANTIALIAS true
+      POSITION AUTO
+      BUFFER 4
+    END
+  END
+END
+
+
+
+END

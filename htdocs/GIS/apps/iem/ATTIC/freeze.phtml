@@ -1,0 +1,168 @@
+<?php
+$state = isset($_GET['state']) ? $_GET['state'] : 'IA' ;
+$radar = isset($_GET['radar']) ? $_GET['radar'] : 1;
+  // freeze.php
+$uri = "freeze.phtml";
+
+function mktitle($map, $imgObj, $titlet) {
+  $layer = $map->getLayerByName("credits");
+                                                                                 
+  // point feature with text for location
+  $point = ms_newpointobj();
+  $point->setXY(10, 15);
+                                                                                 
+  $point->draw($map, $layer, $imgObj, "credits",
+    $titlet);
+}
+                                                                                 
+function mklogolocal($map, $imgObj) {
+                                                                                 
+ $layer = $map->getLayerByName("logo");
+                                                                                 
+ // point feature with text for location
+ $point = ms_newpointobj();
+ $point->setXY(44, 24);
+                                                                                 
+ $point->draw($map, $layer, $imgObj, "logo", "");
+}
+
+
+/** Load mapscript so */
+dl("php_mapscript.so");
+
+$map = ms_newMapObj("freeze.map");
+
+if ($state == "MN_N")
+  $map->setextent(-96, 44, -91, 49);
+else if ($state == "MN_S")
+  $map->setextent(-96, 42, -91, 47);
+else if ($state == "ND")
+  $map->setextent(-105, 45, -96, 47);
+else if ($state == "SD")
+  $map->setextent(-105, 42, -96, 47);
+else if ($state == "KS")
+  $map->setextent(-102.5, 37, -94.5, 40);
+else if ($state == "NE")
+  $map->setextent(-104, 40, -95.3, 43);
+else if ($state == "WI")
+  $map->setextent(-95, 43, -87, 47);
+else if ($state == "IL")
+  $map->setextent(-93, 37, -87, 43);
+else if ($state == "MO")
+  $map->setextent(-95, 36, -90, 41);
+else if ($state == "IA_NE")
+  $map->setextent(-93.6, 41.9, -90, 43.8);
+else if ($state == "IA_SE")
+  $map->setextent(-93.6, 40.3, -90, 41.9);
+else if ($state == "IA_SW")
+  $map->setextent(-96.6, 40.3, -93.6, 41.9);
+else if ($state == "IA_NW")
+  $map->setextent(-96.6, 41.9, -93.6, 43.8);
+else if ($state == "IA")
+  $map->setextent(-96, 40, -91, 45);
+
+$states = $map->getlayerbyname("states");
+$states->set("status", MS_ON);
+
+$sites = $map->getlayerbyname("sites");
+$sites->set("status", MS_ON);
+
+$counties = $map->getlayerbyname("counties");
+$counties->set("status", MS_ON);
+
+$surface = $map->getlayerbyname("surface");
+$surface->set("status", MS_ON);
+
+$n0r = $map->getlayerbyname("n0r");
+$n0r->set("status", MS_ON);
+
+$img = $map->prepareImage();
+$counties->draw($img);
+$states->draw($img);
+if ($radar)
+  $n0r->draw($img);
+$surface->draw($img);
+$sites->draw($img);
+
+$d = date("d F Y h:i a");
+
+mktitle($map, $img, "                        IEM Freeze Prototype valid: ". $d);
+$map->drawLabelCache($img);
+mklogolocal($map, $img);
+
+$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+?>
+<html>
+<head>
+  <title>IEM Freeze Prototype</title>
+  <link rel="stylesheet" type="text/css" href="/css/mesonet.css">
+</head>
+<?php include("../../../include/header2.php"); ?>
+
+<h3 align="center">IEM Freeze Prototype (version 0.2)</h3>
+
+<form method="GET" action="<?php echo $uri; ?>" name="ba">
+
+<table cellpadding=2 cellspacing=0 border=0>
+<tr><td colspan=2 bgcolor="#8c905a">
+<b>Select View:</b>
+<select name="state">
+ <option value="A" <?php if ($state == "A") echo "SELECTED"; ?>>View All
+ <option value="IL" <?php if ($state == "IL") echo "SELECTED"; ?>>Illinois
+ <option value="IA" <?php if ($state == "IA") echo "SELECTED"; ?>>Iowa
+ <option value="IA_NE" <?php if ($state == "IA_NE") echo "SELECTED"; ?>>Iowa (NE)
+ <option value="IA_SE" <?php if ($state == "IA_SE") echo "SELECTED"; ?>>Iowa (SE)
+ <option value="IA_SW" <?php if ($state == "IA_SW") echo "SELECTED"; ?>>Iowa (SW)
+ <option value="IA_NW" <?php if ($state == "IA_NW") echo "SELECTED"; ?>>Iowa (NW)
+ <option value="KS" <?php if ($state == "KS") echo "SELECTED"; ?>>Kansas
+ <option value="NE" <?php if ($state == "NE") echo "SELECTED"; ?>>Nebraska
+ <option value="MN_N" <?php if ($state == "MN_N") echo "SELECTED"; ?>>Minnesota (North)
+ <option value="MN_S" <?php if ($state == "MN_S") echo "SELECTED"; ?>>Minnesota (South)
+ <option value="MO" <?php if ($state == "MO") echo "SELECTED"; ?>>Missouri
+ <option value="ND" <?php if ($state == "ND") echo "SELECTED"; ?>>North Dakota
+ <option value="SD" <?php if ($state == "SD") echo "SELECTED"; ?>>South Dakota
+ <option value="WI" <?php if ($state == "WI") echo "SELECTED"; ?>>Wisconsin
+</select>
+
+<b>Radar Layer? </b>
+<select name="radar">
+  <option value="1" <?php if ($radar) echo "SELECTED"; ?>>Show
+  <option value="0" <?php if (! $radar) echo "SELECTED"; ?>>Hide
+</select>
+<input type="submit" value="View">
+</form>
+
+</td></tr>
+<tr><td>
+<?php echo "<img src=\"$url\">"; ?>
+</td><td bgcolor="#000" align="center">
+<b><font color="white"><u>Temperature Key:</u></font></b>
+
+<br><b><font color="#1e8914"> >= 35 </font></b>
+<br><b><font color="#2ac11d"> >= 34 </font></b>
+<br><b><font color="#35e025"> >= 33 </font></b>
+<br><b><font color="#e840e2"> >= 32 </font></b>
+<br><b><font color="#e872e2"> >= 31 </font></b>
+<br><b><font color="#e8a4e2"> >= 30 </font></b>
+<br><b><font color="#e8d6e2"> < 30 </font></b>
+
+</td></tr>
+</table>
+<br>
+<table width="50%">
+<tr><td></td></tr>
+<tr><td>
+<p><b>IEM Freeze</b> lets you quickly evaluate air
+and pavement temperatures, along with concurrent radar observations
+of precipitation:<br>
+<li><b>Pavement temperatures</b> are indicated by color-coded dots.</li>
+<li><b>Air temperatures</b> are given by numerical values (also color-coded).</li>
+<li><b>Current Composite RADAR</b> also is overlain on each plot.</li>
+
+</td></tr>
+</table>
+<p>Your feedback is needed!  Please let me know how you would like this 
+application to behave.
+
+
+<?php include("../../../include/footer2.php"); ?>

@@ -1,0 +1,680 @@
+#
+# Start of map file
+#
+NAME adjust
+STATUS ON
+SIZE 1024 768
+#SYMBOLSET symbols/symbol.sym
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
+# Good for Iowa
+#EXTENT 250000 4450000 690000 4880000
+#EXTENT 154000 4420187.5 766000 4879812.5
+# Ames
+#EXTENT 440000 4645000 450000 4660000
+# Ames & Boone
+#EXTENT 430000 4635000 460000 4670000
+# 3x2 
+#EXTENT 180000 4470000 758000 4830000
+# Iowa Utm 83 Zone 14
+# MW
+#EXTENT 50000 4250000 890000 5080000
+#EXTENT 50000 4250000 890000 5080000
+#EXTENT 340000 4650000 640000 5110000
+EXTENT -125 30 -60 45
+EXTENT -2110437 -2251067 2548326 1239063
+#EXTENT -97.50 39.25 -89.30 44.75
+UNITS DD
+#UNITS METERS
+SHAPEPATH "/mesonet/www/html/GIS/data/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+#IMAGECOLOR 230 230 230
+IMAGECOLOR 0 0 250
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+#EXTENT 1243813 -463393 2000000 300000
+#UNITS METERS
+CONFIG MS_NONSQUARE YES
+
+# SD
+#SIZE 600 400
+#EXTENT 340000 4650000 640000 5110000
+#    "init=epsg:26914"
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+#  "proj=stere"
+#  "lat_0=38"
+#  "lon_0=-96"
+#  "x_0=0"
+#  "y_0=0"
+
+  "init=epsg:2163"
+#    "init=epsg:26915"
+#    "init=epsg:26914"
+#   "proj=lcc"
+#   "lat_1=42.0666"
+#   "lat_2=43.2666"
+#   "lat_0=41.5"
+#   "lon_0=-94"
+#   "x_0=2000000"
+#   "y_0=1000000"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+  HEADER q_header.html
+  TEMPLATE stations.html
+  FOOTER q_footer.html
+  MINSCALE 90000
+  MAXSCALE 46500000
+  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/home/httpd/html/tmp/stations.log"
+END
+
+
+
+SCALEBAR
+  IMAGECOLOR 255 255 255
+  LABEL
+    COLOR 0 0 0
+    SIZE tiny
+  END
+  STYLE 1
+  SIZE 50 2
+  COLOR 0 0 0
+  UNITS MILES
+  INTERVALS 1
+  TRANSPARENT TRUE
+  STATUS TRUE
+END
+
+#
+#
+
+#
+# Start of layer definitions
+#
+
+LAYER
+  NAME namerica
+  STATUS ON
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/4326/world/world_borders.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM "FIPS_CNTRY"
+  CLASS
+    EXPRESSION /US/
+    COLOR  105 105 105
+  END
+  CLASS
+    COLOR 191 191 191
+  END
+END
+
+LAYER
+  NAME lakes
+  STATUS ON
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/4326/us/major_lakes.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    COLOR 0 0 250
+  END
+END
+
+LAYER
+ CONNECTIONTYPE postgis
+ NAME watches
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+  DATA "geom from (select type as wtype, geom, oid from watches WHERE expired > '2005-01-01' ORDER by type ASC) as foo"
+ PROJECTION
+  "init=epsg:4326"
+ END
+ TYPE POLYGON
+ STATUS DEFAULT
+ CLASSITEM 'wtype'
+  CLASS
+    EXPRESSION /SVR/
+    COLOR 255 255 0
+    #SIZE 2
+    #SYMBOL 1
+  END
+  CLASS
+    EXPRESSION /TOR/
+    COLOR 255 0 0
+    #SIZE 2
+    #SYMBOL 1
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings0_c
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+#  DATA "geom from (select type as wtype, geom, oid from warnings WHERE gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo"
+  DATA "geom from (select type as wtype, geom, oid from warnings_2005 WHERE gtype = 'C' ORDER by type ASC) as foo"
+  STATUS ON
+  TYPE POLYGON
+  TEMPLATE q_template.html
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM "wtype"
+  CLASS
+    EXPRESSION 'TOR'
+    STYLE
+      COLOR 255 0 0
+      #SIZE 3
+      #SYMBOL 1
+    END
+    #STYLE 
+    #  COLOR 255 255 255
+    #  #SIZE 1
+    #  #SYMBOL 1
+    #END
+  END
+  CLASS
+    EXPRESSION 'SVR'
+    STYLE
+      COLOR 255 255 0
+      #SIZE 3
+      #SYMBOL 1
+    END
+   # STYLE 
+   #   COLOR 220 220 220
+   #   #SIZE 1
+   #   #SYMBOL 1
+   # END
+  END
+  CLASS
+    EXPRESSION 'FFW'
+    STYLE
+      COLOR 0 140 0
+  #    SIZE 3
+  #    SYMBOL 1
+    END
+  #  STYLE 
+  #    COLOR 255 255 255
+  #    SIZE 1
+  #    SYMBOL 1
+  #  END
+  END
+END
+
+
+LAYER
+  NAME counties
+  STATUS DEFAULT
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/unproj/iowa/iacounties.shp
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASS
+    #OUTLINECOLOR 205 201 165
+    OUTLINECOLOR 0 0 0
+    SIZE 1
+    SYMBOL 1
+#    TEXT ([NAME] County)
+#    LABEL
+#     TYPE BITMAP
+#     SIZE MEDIUM
+#     POSITION CC
+#     PARTIALS FALSE
+#    END
+  END
+END
+
+LAYER
+ NAME us_n0r
+ STATUS DEFAULT
+ CONNECTIONTYPE WMS
+ TYPE RASTER
+ CONNECTION "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.radar?map=/mesonet/www/html/GIS/apps/wms/compradar.map&amp;"
+ PROJECTION
+  "init=epsg:4326"
+ END
+ METADATA
+  "wms_srs"             "EPSG:4326"
+  "wms_name"            "nexrad"
+  "wms_server_version"  "1.1.0"
+  "wms_formatlist"      "image/png,image/jpeg,image/wbmp"
+  "wms_format"          "image/png"
+ END
+END
+
+
+LAYER
+  NAME mwcounties
+  STATUS DEFAULT
+  TYPE POLYGON
+  DATA /mesonet/data/gis/shape/26915/mw/mwcounties.shp
+  PROJECTION
+   "init=epsg:26915"
+  END
+  CLASS
+    #OUTLINECOLOR 205 201 165
+    OUTLINECOLOR 0 0 0
+    SIZE 1
+    SYMBOL 1
+#    TEXT ([NAME] County)
+#    LABEL
+#     TYPE BITMAP
+#     SIZE MEDIUM
+#     POSITION CC
+#     PARTIALS FALSE
+#    END
+  END
+END
+
+LAYER
+  NAME cwa
+  STATUS ON
+  TYPE LINE
+  DATA /mesonet/data/gis/shape/unproj/us/cwas.shp
+  PROJECTION
+   "proj=latlong"
+  END
+  TEMPLATE test.html
+  #LABELITEM "CWA"
+  CLASS
+    COLOR 255 165 0
+    SYMBOL 'circle'
+    SIZE 3
+   # LABEL
+   #     TYPE BITMAP
+   #     SIZE MEDIUM
+   #     FORCE TRUE
+   #     COLOR 250 250 250
+   # END
+  END
+END
+
+
+LAYER
+  NAME states
+  STATUS DEFAULT
+  TYPE LINE
+  DATA /mesonet/data/gis/shape/26915/usa/states.shp
+  PROJECTION
+   "init=epsg:26915"
+  END
+  CLASSITEM "STATE_NAME"
+  CLASS
+   # EXPRESSION /Iowa/
+    STYLE
+      COLOR 0 0 0
+      SIZE 2
+      SYMBOL "circle"
+    END
+#    STYLE
+#      COLOR 250 0 0
+#      SIZE 1
+#      SYMBOL "circle"
+#    END
+  END
+  CLASS
+#    OUTLINECOLOR 0 0 0
+
+#    COLOR 0 0 0
+  END
+END
+
+LAYER
+  NAME iards
+  TYPE LINE
+  STATUS ON
+  PROJECTION
+   "proj=latlong"
+  END
+  DATA /mesonet/data/gis/shape/unproj/iowa/interstates.shp
+  CLASS
+    SYMBOL "circle"
+    COLOR 0 0 0
+    SIZE 4
+    OVERLAYSYMBOL "circle"
+    OVERLAYCOLOR 105 105 105
+    OVERLAYSIZE 2
+    LABEL
+      ANGLE AUTO
+      TYPE TRUETYPE
+      ANTIALIAS TRUE
+      FONT "kcci"
+      MINDISTANCE 300
+      MINFEATURESIZE 10
+      BUFFER 4
+      SIZE 8
+      POSITION AUTO
+      OFFSET 0 3
+      COLOR 0 0 0
+      OUTLINECOLOR 255 255 204
+    END
+  END
+END
+
+LAYER
+  NAME iards_label
+  TYPE ANNOTATION
+  STATUS ON
+  PROJECTION
+   "proj=latlong"
+  END
+  LABELITEM HWYNAME
+  DATA /mesonet/data/gis/shape/unproj/iowa/interstates.shp
+  CLASS
+    EXPRESSION ([HWYNAME] < 100)
+    COLOR -1 -1 -1
+    SYMBOL 'interstate_shield'
+    LABEL
+      TYPE TRUETYPE
+      FONT arialblk
+      POSITION CC
+      MINDISTANCE 100
+      MINFEATURESIZE 10
+      SIZE 8
+      COLOR 255 255 255
+      PARTIALS FALSE
+    END
+  END
+END
+
+LAYER
+  NAME roads
+  STATUS ON
+  TYPE LINE
+#  MAXSCALE 1000000
+#  TILEINDEX "/mesonet/data/gis/shape/26915/iowa/iaroads/iaroads"
+  DATA "/mesonet/data/gis/shape/26915/iowa/iaroads_26915"
+#  CLASSITEM "SYSCODE"
+  CLASS
+#    EXPRESSION /1/
+    SYMBOL "circle"
+    COLOR 0 0 0
+    SIZE 3
+    OVERLAYSYMBOL "circle"
+    OVERLAYCOLOR 250 250 250
+    OVERLAYSIZE 1
+    LABEL
+      ANGLE AUTO
+      TYPE TRUETYPE
+      ANTIALIAS TRUE
+      FONT "kcci"
+      MINDISTANCE 300
+      MINFEATURESIZE 10
+      BUFFER 4
+      SIZE 8
+     POSITION AUTO
+      OFFSET 0 3
+      COLOR 0 0 0
+      OUTLINECOLOR 255 255 204
+    END
+  END
+  CLASS
+#    EXPRESSION /2|3/
+    SYMBOL "circle"
+    COLOR 0 0 0
+    SIZE 3
+    OVERLAYSYMBOL "circle"
+    OVERLAYCOLOR 255 255 255
+    OVERLAYSIZE 1
+    LABEL
+      ANGLE AUTO
+      TYPE TRUETYPE
+      ANTIALIAS TRUE
+      FONT "kcci"
+      MINDISTANCE 300
+      MINFEATURESIZE 10
+      BUFFER 4
+      SIZE 8
+      POSITION AUTO
+      OFFSET 0 3
+      COLOR 0 0 0
+      OUTLINECOLOR 255 255 204
+    END
+  END
+END
+
+LAYER
+  NAME cities
+  TYPE POINT
+  PROJECTION
+   "proj=latlong"
+  END
+  DATA /mesonet/data/gis/shape/unproj/iowa/iacities.shp
+  LABELITEM 'Name'
+  CLASS
+    OUTLINECOLOR 255 255 0
+    SIZE 4
+    SYMBOL 1
+    LABEL
+     COLOR 255 255 0
+      OUTLINECOLOR -1 -1 -1
+      TYPE TRUETYPE
+      FONT 'kcci'
+      SIZE 16
+      POSITION UL
+      PARTIALS FALSE 
+    END
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME sites
+  CONNECTION "host=10.10.10.30 user=mesonet dbname=iem port=9999"
+  DATA "geom from (select station, oid, snoww, geom from summary WHERE snoww > 0 and day >= '2004-02-16') as foo using unique oid srid=4326"
+  #FILTER "network = 'IA_RWIS'"
+  STATUS ON
+  TYPE POINT
+  LABELCACHE ON
+#  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    SYMBOL 'triangle'
+    COLOR 0 0 0
+    SIZE 5
+     #TEXT ([snoww]_[station])
+     TEXT ([snoww])
+    LABEL
+     COLOR 0 0 250 
+      OUTLINECOLOR 250 250 250
+      TYPE TRUETYPE
+      FONT 'vera'
+      ANTIALIAS TRUE
+      SIZE 8
+      POSITION AUTO
+      PARTIALS TRUE
+      FORCE FALSE
+      BUFFER 1
+      WRAP "_"
+    END
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME kcci
+  CONNECTION "host=10.10.10.10 user=akrherz dbname=mesosite"
+  DATA "geom from (select oid, geom, network from stations) as foo using unique oid using srid=4326"
+#  FILTER "state = 'IA'"
+  FILTER "network = 'IA_RWIS'"
+  STATUS ON
+  TYPE POINT
+#  LABELMAXSCALE 600000
+#  MINSCALE 600000
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM 'network'
+  CLASS
+    EXPRESSION 'ASOS'
+    SYMBOL 'airplane'
+  END
+  CLASS
+    EXPRESSION 'AWOS'
+    SYMBOL 'airplane_yellow'
+  END
+  CLASS
+    EXPRESSION 'IA_RWIS'
+    SYMBOL 'interstate_shield'
+  
+  END
+  CLASS
+    EXPRESSION 'DCP'
+    SYMBOL 'water'
+  END
+  CLASS
+    EXPRESSION 'KCCI'
+    SYMBOL 'schoolhouse'
+  END
+  CLASS
+    EXPRESSION 'KELO'
+    SYMBOL 'schoolhouse'
+  END
+  CLASS
+    EXPRESSION 'COOP'
+    SYMBOL 'nws'
+  END
+  CLASS
+    EXPRESSION 'ISUAG'
+    SYMBOL 'cyclone'
+  END
+  CLASS
+    EXPRESSION 'SCAN'
+    SYMBOL 'nrcs'
+  END
+  CLASS
+    EXPRESSION 'AWS'
+#    TEMPLATE q_template.html
+#    COLOR 255 228 181
+    BACKGROUNDCOLOR -1 -1 -1
+#    OUTLINECOLOR 0 0 0
+    SYMBOL 'airplane_yellow'
+#    SIZE 25
+    TEXT ([ plot_name ])
+#    LABEL
+#      COLOR 132 31 31
+#      BACKGROUNDCOLOR 255 255 255
+#      BACKGROUNDSHADOWCOLOR  0 0 0
+#      TYPE TRUETYPE
+#      SIZE 8
+#      FORCE true
+#      PARTIALS false
+#      MINSIZE 6
+#      MAXSIZE 18
+#      FONT VeraBd
+#      ANTIALIAS true
+#      POSITION AUTO
+#      BUFFER 1
+#    END
+  END
+END
+
+LAYER
+  NAME radar
+  DATA /mesonet/data/gis/images/4326/USCOMP/n0r_0.tif
+  TYPE RASTER
+  STATUS DEFAULT
+  OFFSITE 0 0 0
+  TRANSPARENCY 100
+  PROJECTION
+   "init=epsg:4326"
+  END
+END
+
+LAYER
+  NAME topo
+  DATA /mesonet/data/gis/images/stereo/ustopo4_stere.tif
+  TYPE RASTER
+  STATUS ON
+  OFFSITE 0 0 0
+  PROJECTION
+     "proj=stere"
+  "lat_0=38"
+  "lon_0=-96"
+  "x_0=0"
+  "y_0=0"
+
+  END
+END
+
+
+LAYER
+  NAME isabel
+  DATA /mesonet/data/gis/images/unproj/ISABEL/n0r_0.tif
+  TYPE RASTER
+  STATUS ON
+  OFFSITE 0 0 0
+  PROJECTION
+   "proj=latlong"
+  END
+END
+
+LAYER
+  NAME credits
+  TYPE ANNOTATION
+  STATUS default
+  TRANSFORM FALSE
+  LABELCACHE OFF
+  CLASS
+    NAME 'credits'
+    LABEL
+      WRAP "_"
+      COLOR 0 0 0
+      OUTLINECOLOR 255 255 255
+   #   SHADOWSIZE 1 1
+   #   SHADOWCOLOR 0 0 0
+   #   BACKGROUNDSHADOWCOLOR 0 0 0
+   #   BACKGROUNDSHADOWSIZE 1 1
+      TYPE TRUETYPE
+      SIZE 14
+      FONT 'arial'
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+      ANTIALIAS TRUE
+    END
+  END
+END
+
+LAYER
+  NAME bars
+  TYPE POLYGON
+  TRANSFORM FALSE
+  STATUS ON
+  FEATURE
+    POINTS 0 0 0 20 640 20 640 0 0 0 END
+  END
+  TRANSPARENCY 70
+  LABELCACHE FALSE
+  CLASS
+    COLOR 0 0 0
+  END
+END
+
+
+LAYER 
+  NAME logo
+  TYPE POINT
+  STATUS default
+  TRANSFORM FALSE
+  CLASS
+    SYMBOL 'iem_logo'
+    COLOR 0 0 0
+  END
+END
+END
