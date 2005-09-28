@@ -1,4 +1,5 @@
 <?php
+include("../../../../config/settings.inc.php");
 
 function mktitle($map, $imgObj, $titlet) {
   $layer = $map->getLayerByName("credits");
@@ -13,7 +14,7 @@ function mktitle($map, $imgObj, $titlet) {
 
 
 
-dl("php_mapscript_442.so");
+dl($mapscript);
 
 $map = ms_newMapObj("mosaic.map");
 $map->set("width", 300);
@@ -42,11 +43,11 @@ $icwa->draw($img);
 
 $map->drawLabelCache($img);
 
-$ts = @filemtime("/mesonet/data/gis/images/unproj/MWCOMP/n0r_0.png");
+$ts = @filemtime("/mesonet/data/gis/images/4326/MWCOMP/n0r_0.png");
   if ($ts == 0 || $ts == "")
   {
     sleep(10);
-    $ts = @filemtime("/mesonet/data/gis/images/unproj/MWCOMP/n0r_0.png");
+    $ts = @filemtime("/mesonet/data/gis/images/4326/MWCOMP/n0r_0.png");
   }
   $d = date("d F Y h:i A" ,  $ts + 15);
 
@@ -55,6 +56,4 @@ mktitle($map, $img, " ". $d ." ");
 
 header("Content-type: image/png");
 $img->saveImage('');
-
-
 ?>

@@ -1,23 +1,19 @@
 body{
-	font-family: "Luxi Sans", "Bitstream Vera Sans", "Lucida Grande", "Trebuchet MS", helvetica, verdana, arial, sans-serif;
+	/* font-family: "Luxi Sans", "Bitstream Vera Sans", "Lucida Grande", "Trebuchet MS", helvetica, verdana, arial, sans-serif; */
 	/* font-family: helvetica, verdana, sans-serif; */
+    font-family: verdana, sans-serif;
 	margin: 0px;
-	background-color: #666666;
+	/* background-color: #666666; */
 }
 #iem-main {
-	width: 800px;
-	margin-top: 5px;
-	margin-left: 5px;
+/*	width: 800px; */
 	border: 1px #000 solid;
 }
 #iem-mainwide {
-	width: 800px;
+/*	width: 800px; */
 	min-width: 800px;
 	border: 1px #000 solid;
 	background-color: #FEFEFE;
-}
-#iem-mainwide {
-	width/**/: auto;
 }
 #iem-image {
 	width: 100%;
