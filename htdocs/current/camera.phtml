@@ -11,7 +11,7 @@
  include("$rootpath/include/cameras.inc.php"); 
  while (list($id, $val) = each($cameras))
  {
-	$cameras[$id]["url"] = sprintf("/data/camera/stills/%s.jpg?%s", $id, time() );
+	$cameras[$id]["url"] = sprintf("$rooturl/data/camera/stills/%s.jpg?%s", $id, time() );
 
  if ($isarchive)
  {
@@ -20,7 +20,7 @@
     $ts5 = mktime($hour, $minute - ($minute % 5), 0, $month, $day, $year);
 
     $fp = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
-    $url = "http://mesonet.agron.iastate.edu/archive/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
+    $url = "$rooturl/archive/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
     $fp5 = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
     $url5 = "http://mesonet.agron.iastate.edu/archive/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
 
