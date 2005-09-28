@@ -29,7 +29,7 @@
   }
 
 
-  $fref = "/mesonet/www/html/onsite/features/". $row["imageref"] ."_s.gif";
+  $fref = "/mesonet/data/features/". $row["imageref"] ."_s.gif";
   list($width, $height, $type, $attr) = getimagesize($fref);
   $width += 2;
 

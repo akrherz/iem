@@ -1,0 +1,10 @@
+AuthUserFile /home/httpd/.security/admin.users
+AuthGroupFile /dev/null
+AuthName Administrative
+AuthType Basic
+
+<LIMIT GET>
+order deny,allow
+require user akrherz
+</LIMIT>
+

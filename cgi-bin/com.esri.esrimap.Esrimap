@@ -1,0 +1,573 @@
+#!/mesonet/python/bin/python
+
+# =======================================================================
+#
+# PyIMS Facade 0.1.1
+#
+# Python MapScript application which mimics ArcIMS 4.  Based on the
+# Perl IMS emulator from refractions.net.
+#
+# 22 July 2003
+#
+# =======================================================================
+# CHANGES
+#
+# 0.1.2: Now correctly handles service names containing mix of whitespace
+# and upper case.
+#
+# =======================================================================
+# 
+# Copyright (c) 2003 Sean C. Gillies
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# 
+# ========================================================================
+
+# Required libs
+import cgi
+from cgi import parse_qs
+import os, sys, re, time, struct
+import StringIO
+from elementtree import ElementTree
+from elementtree.ElementTree import Element
+from mapscript import *
+
+# Constants
+inchesPerUnit = (1, 12, 63360.0, 39.3701, 39370.1, 4374754)
+visibleByStatus = ("false","true","true","false")
+unitsByUnit = ("INCHES","FEET","MILES","METERS","KILOMETERS","DECIMAL_DEGREES")
+
+# Log file
+query_log_file = '/tmp/com.esri.esrimap.Esrimap.log'
+
+# Configuration
+config_file = '/mesonet/www/html/GIS/maps/pyims.xml'
+
+###############################################################################
+# Functions
+
+def respond_ping():
+    "Respond to a ping"
+    print 'Content-Type: text/plain'
+    print ''
+    print 'IMS v4.0'
+	
+def respond_getversion():
+    "Respond to getversion requests"
+    print 'Content-Type: text/plain'
+    print ''
+    print 'Version=4.0'
+    print 'Build_Number=542.1591'
+
+def respond_service_catalog(log, custom_stream=0):
+    "Respond to a catalog request with XML"
+
+    # Root of the Element Tree
+    arcxml = Element('ARCXML', version='1.0')
+    
+    # The RESPONSE Element
+    response = Element('RESPONSE')
+    arcxml.append(response)
+    
+    # The SERVICES Element
+    services = Element('SERVICES')
+    response.append(services)
+
+    # Declare the map services
+    for servicename in ms_map_services.keys():
+        service = Element('SERVICE', 
+            NAME          = servicename,
+            SERVICEGROUP  = servicename,
+            ACCESS        = 'PUBLIC',
+            TYPE          = 'ImageServer',
+            DESC          = '',
+            VERSION       = '',
+            GROUP         = '*',
+            STATUS        = 'ENABLED' )
+        image = Element('IMAGE',
+            TYPE          = ms_map_services[servicename]['IMAGETYPE'])
+        service.append(image)
+        environment = Element('ENVIRONMENT')
+        locale = Element('LOCALE',
+            COUNTRY       = 'US',
+            LANGUAGE      = 'en',
+            VARIANT       = '' )
+        environment.append(locale)
+        service.append(environment)
+        services.append(service)
+    
+    # The XML response
+    fh_response = StringIO.StringIO()
+    ElementTree.ElementTree(arcxml).write(fh_response)
+    xml_prolog = '<?xml version="1.0" ?>'
+    xml_response = fh_response.getvalue()
+
+    # Log response
+    log.write(xml_response)
+    
+    # Output
+    sys.stdout.write('Content-Type: text/plain\n\n')
+    if custom_stream:
+        # According to Chris Nicholas, the custom stream means a serialized
+        # int(100) to output followed by the content length as an integer
+        # followed by the XML.
+        cus_hdr = struct.pack('!ll', 100, len(xml_prolog) + len(xml_response))
+        sys.stdout.write(cus_hdr)
+        sys.stdout.write(xml_prolog)
+        sys.stdout.write(xml_response)
+        sys.stdout.write(struct.pack('!l', 102))
+    else:
+        sys.stdout.write(xml_prolog)
+        sys.stdout.write(xml_response)
+
+    return 1
+
+def respond_service_info(servicename, element, log, custom_stream=0):
+    "Respond to a request for service info"
+    # Instantiate the appropriate map
+    mapfile = ms_map_services[servicename]['MAPFILE']
+    mapobj = mapObj(mapfile)
+    
+    arcxml = Element('ARCXML', version='1.1')
+    log.write ('made the map obj')
+    
+    response = Element('RESPONSE')
+    arcxml.append(response)
+    
+    serviceinfo = Element('SERVICEINFO')
+    response.append(serviceinfo)
+    
+    properties = Element('PROPERTIES')
+    serviceinfo.append(properties)
+     
+    # Return service extents
+    extent = mapobj.extent
+    envelope = Element('ENVELOPE',
+        name = 'Initial Extent',
+        minx = str(mapobj.extent.minx),
+        miny = str(mapobj.extent.miny),
+        maxx = str(mapobj.extent.maxx),
+        maxy = str(mapobj.extent.maxy) )
+    properties.append(envelope)
+
+    # Coordinate System
+    epsg = mapobj.getMetaData('WMS_SRS').split(':')[1]
+    featurecoordsys = Element('FEATURECOORDSYS', id = epsg)
+    properties.append(featurecoordsys)
+    filtercoordsys = Element('FILTERCOORDSYS', id = epsg)
+    properties.append(filtercoordsys)
+
+    # Color
+    bgcolor = mapobj.imagecolor
+    background = Element('BACKGROUND', 
+        color = '%d,%d,%d' % (bgcolor.red, bgcolor.green, bgcolor.blue) )
+    properties.append(background)
+
+    # Layers
+    for i in range(mapobj.numlayers):
+        layerobj = mapobj.getLayer(i)
+        
+        # don't display default layers
+        if not layerobj.status == MS_DEFAULT:
+            layerinfo = Element('LAYERINFO',
+                type    = 'image',
+                name    = layerobj.name,
+                visible = visibleByStatus[layerobj.status],
+                id      = str(i) )
+            # ArcIMS scales are in dpi
+            if layerobj.minscale > 0:
+                layerinfo.attrib['minscale'] = str(layerobj.minscale \
+                    /(mapobj.resolution/inchesPerUnits[mapobj.units]))
+            if layerobj.maxscale > 0:
+                layerinfo.attrib['maxscale'] = str(layerobj.maxscale \
+                    /(mapobj.resolution/inchesPerUnits[mapobj.units]))
+            
+            layerinfo.append(Element('ENVELOPE', 
+                                      minx = str(mapobj.extent.minx),
+                                      miny = str(mapobj.extent.miny),
+                                      maxx = str(mapobj.extent.maxx),
+                                      maxy = str(mapobj.extent.maxy) ))
+            serviceinfo.append(layerinfo)
+    log.write('looped through the layers')
+    
+    # The XML response
+    fh_response = StringIO.StringIO()
+    ElementTree.ElementTree(arcxml).write(fh_response)
+    xml_prolog = '<?xml version="1.0" encoding="Cp1252"?>'
+    xml_response = fh_response.getvalue()
+
+    # Log response
+    log.write(xml_response)
+
+    # Output
+    sys.stdout.write('Content-Type: text/plain\n\n')
+    if custom_stream:
+        # According to Chris Nicholas, the custom stream means a serialized
+        # int(100) to output followed by the content length as an integer
+        # followed by the XML.
+        cus_hdr = struct.pack('!ll', 100, len(xml_prolog) + len(xml_response))
+        sys.stdout.write(cus_hdr)
+        sys.stdout.write(xml_prolog)
+        sys.stdout.write(xml_response)
+        sys.stdout.write(struct.pack('!l', 102))
+    else:
+        sys.stdout.write(xml_prolog)
+        sys.stdout.write(xml_response)
+
+    return 1
+
+def respond_service_image(servicename, props, log, custom_stream=0):
+    """Respond to a request for service image.  The props argument is the
+    element tagged 'PROPERTIES' in the ArcXML"""
+
+    # Instatiate the appropriate MapServer map
+    mapfile = ms_map_services[servicename]['MAPFILE']
+    mapobj = mapObj(mapfile)
+    
+    # Address elements under PROPERTIES
+    # Background color
+    bg = props.find('BACKGROUND')
+    if bg is not None:
+        try:
+            bgstr = bg.attrib['color']
+            c = colorObj()
+            c.red, c.green, c.blue = map(int, bg.attrib['color'].split(','))
+            mapobj.imagecolor = c
+        except KeyError:
+            # No color attribute
+            pass
+    
+    # Image size
+    imgsize = props.find('IMAGESIZE')
+    if imgsize is not None:
+        mapobj.height = int(imgsize.attrib['height'])
+        mapobj.width = int(imgsize.attrib['width'])
+
+    # Layer listing
+    layerlist = props.find('LAYERLIST')
+    if layerlist is not None:
+        layers = layerlist.findall('LAYERDEF')
+        if layers:
+            # First turn all layers off
+            for i in range(mapobj.numlayers):
+                layerobj = mapobj.getLayer(i)
+                if layerobj.status != MS_DEFAULT:
+                    layerobj.status = MS_OFF
+            # Turn on specified layers
+            for layer in layers:
+                # Are layers referenced by id or name?
+                # No scalebar generator at this moment,
+                if layer.attrib['id'] != 'ScaleBar':
+                    try:
+                        id = int(layer.attrib['id'])
+                        layerobj = mapobj.getLayer(id)
+                        if layer.attrib['visible'] == 'true':
+                    	    layerobj.status = MS_ON
+                    except KeyError: # no id
+                        try:
+                            name = layer.attrib['name']
+                            layerobj = mapobj.getLayerByName(name)
+                            if layer.attrib['visible'] == 'true':
+                                layerobj.status = MS_ON
+                        except KeyError:
+                            raise KeyError
+
+    # Feature Coordsys
+    featcs = props.find('FEATURECOORDSYS')
+    if featcs is not None:
+        featcs_id = None
+        featcs_wkt = None
+        try:
+            featcs_id = featcs.attrib['id']
+        except KeyError:
+            pass
+        try:
+            featcs_wkt = featcs.attrib['string']
+            featcs_wkt.replace('"Albers"', '"Albers_Conic_Equal_Area"')
+        except KeyError:
+            pass
+        
+        # Reproject as necessary
+        if featcs_id == '0':
+            mapobj.setProjection('init=epsg:4267')
+        elif featcs_id:
+            mapobj.setProjection('init=epsg:' + str(featcs_id))
+        elif featcs_wkt:
+            mapobj.setWKTProjection(featcs_wkt)
+        else:
+            epsg = mapobj.getMetaData('WMS_SRS').split(':')[1]
+            mapobj.setProjection('init=epsg:' + epsg)
+            
+    # Envelope
+    req_envelope = props.find('ENVELOPE')
+    if req_envelope is not None:
+        req_extent = rectObj()
+        req_extent.minx = float(req_envelope.attrib['minx'])
+        req_extent.miny = float(req_envelope.attrib['miny'])
+        req_extent.maxx = float(req_envelope.attrib['maxx'])
+        req_extent.maxy = float(req_envelope.attrib['maxy'])
+    else:
+        req_extent = mapobj.extent
+
+    # Filter Coordsys
+    filtcs = props.find('FILTERCOORDSYS')
+    if filtcs is not None:
+        filtcs_id = None
+        filtcs_wkt = None
+        try:
+            filtcs_id = filtcs.attrib['id']
+        except KeyError:
+            pass
+        try:
+            filtcs_wkt = filtcs.attrib['string']
+            filtcs_wkt.replace('"Albers"', '"Albers_Conic_Equal_Area"')
+        except KeyError:
+            pass
+        #filtcs_id = filtcs.attrib['id']
+        filtcs_id = 0        
+
+        # Reproject request extents as necessary
+        if filtcs_id == '0':
+            pass
+        elif filtcs_id:
+            req_extent.project(projectionObj('init=epsg:' + filtcs_id),
+                               projectionObj(mapobj.getProjection()))
+        elif filtcs_wkt:
+            # Need to create a layer to use setWKTProjection
+            foo = layerObj(mapobj)
+            foo.status == MS_OFF
+            foo.setWKTProjection(filtcs_wkt)
+            #req_extent.project(foo.projection, mapobj.projection)
+        else:
+            epsg = mapobj.getMetaData('WMS_SRS').split(':')[1]
+            req_extent.project(projectionObj('init=epsg:' + epsg),
+                               projectionObj(mapobj.getProjection()))
+    
+    # Now set map extents
+    mapobj.extent =  req_extent
+    # Draw
+    imgobj = mapobj.draw()
+
+    # Make a unique filename using map name, time, and process id
+    pid = os.getpid()
+    ts = str(time.time()).replace('.', '') # eliminate the decimal point
+    filename = '%s_%s_%d.%s' % (mapobj.name, ts, pid, imgobj.format.extension)
+    
+    # Save the file
+    imgobj.save(os.path.join(mapobj.web.imagepath, filename))
+    
+    # Finish the response elements
+    arcxml = Element('ARCXML', version='1.1')
+    response = Element('RESPONSE')
+    image = Element('IMAGE')
+    envelope = Element('ENVELOPE',
+        minx = str(req_extent.minx),
+        miny = str(req_extent.miny),
+        maxx = str(req_extent.maxx),
+        maxy = str(req_extent.maxy) )
+    image.append(envelope)
+    output = Element('OUTPUT',
+        type = mapobj.imagetype,
+        url  = os.path.join(mapobj.web.imageurl, filename) )
+    image.append(output)
+    response.append(image)
+    arcxml.append(response)
+    
+    # The XML response
+    fh_response = StringIO.StringIO()
+    ElementTree.ElementTree(arcxml).write(fh_response)
+    xml_prolog = '<?xml version="1.0" encoding="Cp1252"?>'
+    xml_response = fh_response.getvalue()
+
+    # Log response
+    log.write(xml_response)
+
+    # Output
+    sys.stdout.write('Content-Type: text/plain\n\n')
+    if custom_stream:
+        # According to Chris Nicholas, the custom stream means a serialized
+        # int(100) to output followed by the content length as an integer
+        # followed by the XML.
+        cus_hdr = struct.pack('!ll', 100, len(xml_prolog) + len(xml_response))
+        sys.stdout.write(cus_hdr)
+        sys.stdout.write(xml_prolog)
+        sys.stdout.write(xml_response)
+        sys.stdout.write(struct.pack('!l', 102))
+    else:
+        sys.stdout.write(xml_prolog)
+        sys.stdout.write(xml_response)
+
+    return 1
+
+###############################################################################
+# Main
+
+# Parse the config file
+ms_map_services = {}
+config_tree = ElementTree.parse(config_file)
+
+config_root = config_tree.getroot()
+services = config_root.find('SERVICES')
+for service in services:
+    name = service.attrib['name']
+    props = {}
+    properties = service.find('PROPERTIES')
+    props['IMAGETYPE'] = properties.attrib['imagetype']
+    props['MAPFILE'] = properties.attrib['mapfile']
+    ms_map_services[name] = props
+
+# Open a log file
+try:
+    log = open(query_log_file, 'a')
+except:
+    log = open('com.esri.esrimap.Esrimap.log', 'a')
+
+config_tree.write(log)
+log.write('\n')
+
+config_root = config_tree.getroot()
+services = config_root.find('SERVICES')
+for service in services:
+    name = service.attrib['name']
+    props = {}
+    properties = service.find('PROPERTIES')
+    props['IMAGETYPE'] = properties.attrib['imagetype']
+    props['MAPFILE'] = properties.attrib['mapfile']
+    ms_map_services[name] = props
+
+# Read in the standard input.
+doc_in = sys.stdin.read()
+
+# Write to log the QUERY_STRING and what's been read from STDIN
+log.write('\n==========\n')
+log.write('QUERY_STRING: ')
+try:
+    log.write(os.environ['QUERY_STRING'] + '\n')
+except:
+    log.write('None\n')
+log.write('STDIN: ')
+log.write(doc_in + '\n')
+
+# Request parameters may be coming on standard input or in the
+# QUERY_STRING environment variable
+
+request_tree = None
+form_envir = {}
+form_stdin = {}
+params = {}
+
+# Parse environment QUERY_STRING
+try:
+    form_envir = parse_qs(os.environ['QUERY_STRING'])
+except KeyError:
+    pass
+
+# XML from standard input?
+pat_xml_prolog = re.compile('\<\?xml')
+if pat_xml_prolog.match(doc_in):
+    # Create an ElementTree from it
+    log.write(doc_in)
+    request_tree = ElementTree.parse(StringIO.StringIO(doc_in))
+    log.write('request_tree: ' + repr(request_tree))
+else: # Standard input has encoded form data
+    form_stdin = parse_qs(doc_in)
+
+# convert all form field names to lower case
+for key in form_envir.keys():
+    value = form_envir[key][0]
+    params[key.lower()] = value
+    
+for key in form_stdin.keys():
+    value = form_stdin[key][0]
+    # Use unquote_plus from urllib
+    params[key.lower()] = value
+
+#
+# Now we handle the requests and respond
+#
+
+# Handle commands
+if params.has_key('cmd'):
+    cmd = params['cmd'].lower().strip()
+    if cmd == 'getversion':
+        respond_getversion()
+    elif cmd == 'ping':
+        respond_ping()
+    else:
+        pass
+
+# Handle service requests
+elif params.has_key('servicename'):
+    
+    servicename = params['servicename']
+
+    # Do we use the custom stream for ArcExplorer?
+    custom_stream = 0
+    try:
+        if params['customstream'].lower() == 'true':
+            custom_stream = 1
+
+    except KeyError:
+        # No custom stream
+        config_file = '/mesonet/www/html/GIS/maps/pyims.xml'
+        config_tree = ElementTree.parse(config_file)
+        config_root = config_tree.getroot()
+        services = config_root.find('SERVICES')
+        for service in services:
+            name = service.attrib['name']
+            props = {}
+            properties = service.find('PROPERTIES')
+            props['IMAGETYPE'] = properties.attrib['imagetype']
+            props['MAPFILE'] = properties.attrib['mapfile']
+            ms_map_services[name] = props
+	pass
+        
+    # General catalog request
+    if servicename == 'catalog':
+        respond_service_catalog(log, custom_stream)
+    
+    # Request to a specific service
+    elif servicename in ms_map_services.keys():
+        # Check the request ElementTree for the request type
+        request = request_tree.find('REQUEST')
+        #log.write(request)
+        # Presuming that our request type element is the first
+        request_sub = request[0]
+        properties = request_sub.find('PROPERTIES')
+        log.write('\nPROPERTIES: ' + repr(properties) + '\n')
+        
+        if request_sub.tag == 'GET_SERVICE_INFO':
+            log.write('going to get info')
+            respond_service_info(servicename, properties, log, custom_stream)
+        elif request_sub.tag == 'GET_IMAGE':
+            respond_service_image(servicename, properties, log, custom_stream)
+        else:
+            pass
+
+    else:
+        log.write('%s is not a service.\n' % (servicename))
+
+else:
+    pass
+
+log.close()
+
+
+
