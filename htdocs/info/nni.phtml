@@ -1,0 +1,32 @@
+<?php
+ include("../../config/settings.inc.php");
+
+ $TITLE = "IEM Representivity";
+ include("$rootpath/include/header.php");
+?>
+
+<h2>IEM Representivity Analysis</h2>
+
+<h3>Motivation:</h3>
+
+<p>This document provides information and statistics regarding
+representativity of the IEM.  This work follows Dubois 2000.
+
+<h3>Introduction:</h3>
+
+<p>The IEM is a collection of environmental monitoring networks.  To various
+extents, each network has differenting sensors, reporting times, siting, 
+maintainance schedules, and quality control. Because of these differences, we
+have split up the IEM into its component networks in order to evaluate each
+on its own merits.  Similiar networks in data quality are then aggregated
+to explore the spatial statistical benefits of the IEM partnership.
+
+<p>The following abbreviations are used to represent networks and collections
+of networks.
+<br />
+<table>
+<tr><th>Abbreviation</th><th>Description</th></tr>
+<tr><th>ASOS</th><td><a href="<?php echo $webroot; ?>/ASOS/">Iowa Automated Surface Observing System</a> sites. </td></tr>
+</table>
+
+<?php include("$rootpath/include/footer.php"); ?>

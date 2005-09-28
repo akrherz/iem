@@ -13,16 +13,14 @@ ln -s /mesonet/ARCHIVE/rer ./htdocs/archive/rer
 ./htdocs/content/kimt_fe.php
 ./htdocs/GIS/apps/stations/arialblk.ttf
 ./htdocs/GIS/apps/fancy/kcci.ttf
-ln -s ./htdocs/tmp ./htdocs/mstmp
 ln -s /home/akrherz/projects/nwnwebsite/html ./htdocs/nwnwebsite
-./htdocs/plotting/jpgraph-1.10/jpgraph
 ./htdocs/plotting/month/varMonth.php
 ./htdocs/plotting/month/this_month.php
-./htdocs/plotting/dev
-./htdocs/plotting/dev17/src/.#settings.txt
-./htdocs/plotting/dev17/utils/jpdocgen/.#jpdb.php
-./htdocs/plotting/jpgraph
 ./htdocs/plotting/mesoeast/index.html
 ./htdocs/pubs/seniorthesis/huskermos/index.html
 ln -s /home/akrherz/projects/roads/htdocs ./htdocs/roads
 ln -s /home/akrherz/projects/squaw/html ./htdocs/squaw
+ln -s /mesonet/data/features/2005 htdocs/onsite/features/2005
+ln -s /mesonet/data/features/2004 htdocs/onsite/features/2004
+ln -s /mesonet/data/features/2003 htdocs/onsite/features/2003
+ln -s /mesonet/data/features/2002 htdocs/onsite/features/2002
