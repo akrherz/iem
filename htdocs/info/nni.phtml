@@ -25,8 +25,23 @@ to explore the spatial statistical benefits of the IEM partnership.
 of networks.
 <br />
 <table>
-<tr><th>Abbreviation</th><th>Description</th></tr>
-<tr><th>ASOS</th><td><a href="<?php echo $webroot; ?>/ASOS/">Iowa Automated Surface Observing System</a> sites. </td></tr>
+<tr><th>Abbreviation</th><th>Description</th><th>Map</th></tr>
+<tr><th>ASOS</th><td>The <a href="<?php echo $webroot; ?>/ASOS/">Iowa Automated Surface Observing System</a> sites are located at primary airports and are maintained by the National Weather Service.  This network is rigorously checked and maintained.  For Iowa, the main issue is the lack of ASOS sites in Westcentral and Southwest Iowa.</td><td><img src="nni_images/asos_locs.png"></tr>
+
+<tr><th>AWOS</th><td>The <a href="<?php echo $webroot; ?>/AWOS/">Iowa Automated Weather Observing System</a> sites are located at secondary airports and are maintained by the Iowa State Department of Transportation via 3rd party contractor.  Data quality should be comparable with the ASOS network, but a number of factors produce biases when compared with the ASOS network.  The main issues include siting, maintainance schedules, network communication, and instrumentation.  Most of the big differences between the ASOS and AWOS network show up in the temperature and dew point variables. </td><td><img src="nni_images/awos_locs.png"></tr>
+
+<tr><th>RWIS</th><td>The <a href="<?php echo $webroot; ?>/RWIS/">Iowa Roadway Weather Information System</a> sites are located along side interstates and highways.  They are maintained by the Iowa Department of Transportation via 3rd party contractor.  Atmospheric data from this network is of lesser quality than the ASOS or AWOS networks.  Their primary purpose is for automated observation of winter weather. </td><td><img src="nni_images/rwis_locs.png"></tr>
+
+<tr><th>SchoolNet</th><td><a href="<?php echo $webroot; ?>/schoolnet/">SchoolNet</a> sites. </td><td><img src="nni_images/snet_locs.png"></tr>
+
+<tr><th>ISUAG</th><td><a href="<?php echo $webroot; ?>/agclimate/">ISU Ag Climate</a> sites. </td><td><img src="nni_images/isuag_locs.png"></tr>
+
+<tr><th>Tier 1</th><td>ASOS + AWOS </td><td><img src="nni_images/tier1_locs.png"></tr>
+
+<tr><th>Tier 2</th><td>ASOS + AWOS + RWIS</td><td><img src="nni_images/tier2_locs.png"></tr>
+
+<tr><th>Tier 3</th><td>ASOS + AWOS + RWIS + SchoolNet + ISUAG</td><td><img src="nni_images/tier3_locs.png"></tr>
+
 </table>
 
 <h3>Nearest Neighbors Index (NNI)</h3>
@@ -92,5 +107,23 @@ of networks.
  <td>132,272</td>
 </tr>
 </table>
+
+<h3>Morisita Index</h3>
+
+<img src="nni_images/morisita.gif">
+
+<h3>Thiessen/Voronoi polygons</h3>
+
+<table>
+<tr><td><img src="nni_images/tier1_areas.png"></td><td><img src="nni_images/tier1_th.png"></td></tr>
+<tr><td><img src="nni_images/tier2_areas.png"></td><td><img src="nni_images/tier2_th.png"></td></tr>
+<tr><td><img src="nni_images/tier3_areas.png"></td><td><img src="nni_images/tier3_th.png"></td></tr>
+</table>
+
+<h3>Coefficient of Representativity</h3>
+
+<img src="nni_images/tier1_cr.png">
+<img src="nni_images/tier2_cr.png">
+<img src="nni_images/tier3_cr.png">
 
 <?php include("$rootpath/include/footer.php"); ?>
