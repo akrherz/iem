@@ -101,12 +101,12 @@ class selectWidget
   function logic($f)
   {
 	/** If zoom is 100, we go to full-view */
-	if ($f["zoom"] == 100)
+	if (array_key_exists('zoom', $f) && $f["zoom"] == 100)
 	{
 		$this->extents = $this->fullextents;
 	}
 	/** If zoom is set, then we need to do a map operation */
-	if (isset($f["zoom"]) && isset($f["map_x"]) )
+	if (array_key_exists('zoom', $f) && isset($f["map_x"]) )
 	{
 		/** If zoom is 0, we are querying! */
 		if ($f["zoom"] == 0)
