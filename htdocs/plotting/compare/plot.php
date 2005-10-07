@@ -59,7 +59,7 @@ $graph->xaxis->SetTitle("Valid Local Time");
 $graph->yaxis->SetTitle($titles[$var]);
 $graph->tabtitle->Set('Recent Comparison');
 
-  $graph->tabtitle->SetFont(FF_ARIAL,FS_BOLD,16);
+  $graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);
   $graph->SetColor('wheat');
 
   $graph->legend->SetLayout(LEGEND_HOR);
