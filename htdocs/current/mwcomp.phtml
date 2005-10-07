@@ -5,12 +5,12 @@ $REFRESH = "<meta http-equiv=\"refresh\" content=\"300; URL=http://mesonet.agron
 $TITLE = "IEM | Iowa NEXRAD + Warnings";
   include("$rootpath/include/header.php");?>
 
-<a href="/current/radar.phtml">Current RADAR Products</a>
-&nbsp; <b>|</b> &nbsp; <a href="/current/mcview.phtml">Loop RADAR</a>
+<a href="radar.phtml">Current RADAR Products</a>
+&nbsp; <b>|</b> &nbsp; <a href="mcview.phtml">Loop RADAR</a>
 &nbsp; <b>|</b> &nbsp; <a href="uscomp.phtml">Switch to US View</a>
-&nbsp; <b>|</b> &nbsp; <a href="/GIS/apps/rview/warnings.phtml">Current Warnings</a>
+&nbsp; <b>|</b> &nbsp; <a href="<?php echo $rooturl; ?>/GIS/apps/rview/warnings.phtml">Current Warnings</a>
 
-<br /><img src="mwcomp.png?<?php echo time(); ?>">
+<br /><img src="<?php echo $rooturl; ?>/data/mwcomp.png?<?php echo time(); ?>">
 
 <br /><i>(Image refreshes every 5 minutes)</i>
  

@@ -1,4 +1,6 @@
 <?php
+include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 $baseuri = "warnings.phtml";
 putenv("TZ=GMT");
 
@@ -34,15 +36,24 @@ $lon0 = isset($_GET["lon0"]) ? $_GET["lon0"]: 0;
 $lat0 = isset($_GET["lat0"]) ? $_GET["lat0"]: 0;
 $zoom = isset($_GET["zoom"]) ? $_GET["zoom"]: 250;
 
-$isarchive = $_GET["archive"] == "yes" ? 1 : 0;
+$isarchive = (isset($_GET["archive"]) && $_GET["archive"] == "yes") ? 1 : 0;
 $archive = isset($_GET["archive"]) ? $_GET["archive"] : "";
 //if ($isarchive) { $loop = 0; }
 $a = time();
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", $a - $tzoff);
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", $a - $tzoff);
-$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", $a - $tzoff);
-$hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : date("H", $a - $tzoff);
-$m = isset($_GET["minute"]) ? intval($_GET["minute"]) : date("i", $a - $tzoff);
+if ($isarchive)
+{
+  $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", $a - $tzoff);
+  $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", $a - $tzoff);
+  $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", $a - $tzoff);
+  $hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : date("H", $a - $tzoff);
+  $m = isset($_GET["minute"]) ? intval($_GET["minute"]) : date("i", $a - $tzoff);
+} else {
+  $year = date("Y", $a - $tzoff);
+  $month = date("m", $a - $tzoff);
+  $day = date("d", $a - $tzoff);
+  $hour = date("H", $a - $tzoff);
+  $m = date("i", $a - $tzoff);
+}
 
 if ($m >= 55) $ma = "55";
 else if ($m >= 50) $ma = "50";
@@ -65,14 +76,14 @@ if ($isarchive && $basets < $wfo_filter_ts)
   $filter = 0;
 }
 
-include('/mesonet/php/include/wfoLocs.php');
-include('/mesonet/php/include/forms.php');
+include("$rootpath/include/wfoLocs.php");
+include("$rootpath/include/forms.php");
 include('lib.php');
-$uri = "$baseuri?site=$site&cu=$cu&archive=$archive&year=$year&month=$month&day=$day&hour=$hour&minute=$minute&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom";
-$uri_nowfo = "$baseuri?archive=$archive&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$minute&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom";
+$uri = "$baseuri?site=$site&cu=$cu&archive=$archive&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom";
+$uri_nowfo = "$baseuri?archive=$archive&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom";
 
 /* Scenario 1, user coordinates are posted */
-if ($_GET["site"] == "user")
+if (isset($_GET["site"]) && $_GET["site"] == "user")
 {
   $uri .= "&lat0=$lat0&lon0=$lon0";
 }
@@ -96,17 +107,17 @@ document.form.tzoff.value=(d.getTimezoneOffset()*60);
 }
 </script>";
 
-include("/mesonet/php/include/header.php");
+include("$rootpath/include/header.php");
 ?>
-<b>Nav:</b> <a href="/current/">Current Data</a> <b> > </b>
-  <a href="/current/radar.phtml">Radar Products</a> <b> > </b>
+<b>Nav:</b> <a href="<?php echo $rooturl; ?>/current/">Current Data</a> <b> > </b>
+  <a href="<?php echo $rooturl; ?>/current/radar.phtml">Radar Products</a> <b> > </b>
   NEXRAD & Warnings <a href="<?php echo $baseuri; ?>">RESET APP!</a><br>
 
 <?php
 $width = "640";
 $height = "480";
 
-dl("php_mapscript_442.so");
+dl($mapscript);
 
 ?>
 
@@ -203,6 +214,7 @@ if (intval($loop) ==  1){
   }
 
   include ("loop.php");
+  $radTimes = Array();
   printHTML($urls, $radTimes);
 } else if (intval($loop) == 2){
   $urls = Array();
@@ -213,11 +225,11 @@ if (intval($loop) ==  1){
    $imgi = 8 - $i;
    include("warnings_plot.php");
    $urls[$i] = $url;
-   fwrite($f, "http://mesonet.agron.iastate.edu". $url ."\n");
+   fwrite($f, "$rooturl/$url\n");
   }
   fclose($f);
 ?>
-  <applet codebase="/current/class/" code="AniS.class" width="640" height="580" alt="You must enable Java in your browser to view the radar loop">
+  <applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="640" height="580" alt="You must enable Java in your browser to view the radar loop">
         <param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
         <param name="rate" value="80">
 	<PARAM name="no_enh" value="true">
@@ -240,7 +252,7 @@ echo "
 
 echo "<input type=\"hidden\" name=\"extents\" value=\"". $map->extent->minx .",". $map->extent->miny .",". $map->extent->maxx .",". $map->extent->maxy ."\">\n";
 
-$connection = pg_connect("host=10.10.10.40 port=5432 dbname=postgis user=mesonet");
+$connection = iemdb("postgis");
 
 $scols = Array("wfo", "phenomena", "cname", "expire", "sname", "issue", "updated", "status", "fcster", "eventid");
 if (! in_array($sortcol, $scols) ){
@@ -256,6 +268,7 @@ if ($isarchive)
   $wtable = "warnings_$year";
   $tsextra = "'". strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff ) ."' and w.issue < '". strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff ) ."'";
 }
+$cuextra = "";
 if ($cu == 1) $cuextra = " and w.phenomena IN ('SV','TO') ";
 $query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire, 
   w.updated as updated, w.status as status, w.fcster as fcster, 
@@ -338,10 +351,10 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
 
  echo "<tr ";
  if ($k % 2 == 0) echo "bgcolor=\"#EEEEEE\"";
- echo "><td><a href=\"$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$minute&archive=$archive&tzoff=$tzoff&site=". $row["wfo"] ."\">". $row["wfo"] ."</a></td><td><a href=\"warnings_cat.phtml?archive=$archive&year=$year&id=". $row["oid"] ."\"> ". $row["phenomena"] ."</a></td> 
+ echo "><td><a href=\"$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=". $row["wfo"] ."\">". $row["wfo"] ."</a></td><td><a href=\"warnings_cat.phtml?archive=$archive&year=$year&id=". $row["oid"] ."\"> ". $row["phenomena"] ."</a></td> 
  <td>". $row["eventid"] ."</td>";
 if (floatval($row["lon0"]) < 0 && floatval($row["lat0"]) > 0) {
-     echo "<td><a href=\"$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$minute&archive=$archive&tzoff=$tzoff&site=user&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=". $row["lon0"] ."&lat0=". $row["lat0"] ."\">". $row["cname"] ."</a></td>";
+     echo "<td><a href=\"$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=user&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=". $row["lon0"] ."&lat0=". $row["lat0"] ."\">". $row["cname"] ."</a></td>";
 } else {
      echo "<td>". $row["cname"] ."</td>";
 
@@ -385,7 +398,7 @@ if ($k == 0){
 
 </form>
 <?php if (! $isarchive) { ?>
-<img src="/images/gisready.png">Download <a href="http://mesonet.agron.iastate.edu/data/gis/shape/unproj/us/current_ww.zip">GIS shapefile of current warnings</a> and/or <a href="http://mesonet.agron.iastate.edu/GIS/data/gis/images/unproj/USCOMP/n0r_0.gtif.Z">GeoTiff of NEXRAD base reflectivity</a>.
+<img src="<?php echo $rooturl; ?>/images/gisready.png">Download <a href="<?php echo $rooturl; ?>/data/gis/shape/unproj/us/current_ww.zip">GIS shapefile of current warnings</a> and/or <a href="<?php echo $rooturl; ?>/GIS/data/gis/images/unproj/USCOMP/n0r_0.gtif.Z">GeoTiff of NEXRAD base reflectivity</a>.
 <?php } ?>
 
 <font size="-1">
@@ -402,4 +415,4 @@ if ($k == 0){
 </ul>
 </font>
 
-<?php  include ("/mesonet/php/include/footer.php");?>
+<?php  include ("$rootpath/include/footer.php");?>

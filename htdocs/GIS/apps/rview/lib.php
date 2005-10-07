@@ -57,7 +57,7 @@ function drawStateNEXRAD($hlext) {
  $rt->free();
 
   
- $url = $img->saveWebImage(MS_PNG, 0,0,-1);
+ $url = $img->saveWebImage();
 
  echo "<form name=\"img\" method=\"GET\" action=\"compare.phtml\">";
 

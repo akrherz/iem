@@ -1,6 +1,7 @@
 <?php  
+include("../../../config/settings.inc.php");
   $TITLE = "IEM | Birthday Weather";
-include("/mesonet/php/include/header.php"); 
+include("$rootpath/include/header.php"); 
 ?>
 
 <H3 class="heading">The Weather on your Birthday!!</H3>
@@ -12,7 +13,7 @@ include("/mesonet/php/include/header.php");
 		$startYear = "1951";
 	}
 
-	include("../../include/COOPstations.php");		
+	include("$rootpath/include/COOPstations.php");		
 ?>
 <div class="text">
 If you were born in Iowa between 1900 and 1998, you can fill out the form below and discover the weather
@@ -104,4 +105,4 @@ born, you will be presented a list of stations with data for that time.<p>
 purposes only.
 </div>
 
-<?php include("/mesonet/php/include/footer.php") ?>
+<?php include("$rootpath/include/footer.php") ?>
