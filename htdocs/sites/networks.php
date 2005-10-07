@@ -1,4 +1,5 @@
 <?php
+include("../../config/settings.inc.php");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 $format = isset($_GET['format']) ? $_GET['format'] : 'html';
@@ -8,7 +9,8 @@ if ($nohtml) header("Content-type: text/plain");
 
 if (! $nohtml) {
 $TITLE = "IEM Station Locations";
-include("/mesonet/php/include/header.php"); ?>
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">Network Location Tables</h3>
 
@@ -73,7 +75,7 @@ table that you need, please let use know.</p>
 }
 
 	if (strlen($network) > 0){
-		$connection = pg_connect("10.10.10.40", "5432", "mesosite");
+		$connection = iemdb("mesosite");
 		$query = "SELECT * from stations WHERE online = 'y' and 
 			network = '". $network ."' ORDER by name ";
 		$result = pg_exec($connection, $query);
@@ -194,5 +196,5 @@ if (! $nohtml) {
 
 <!-- Begin the bottom of the page-->
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
 <?php } ?>
