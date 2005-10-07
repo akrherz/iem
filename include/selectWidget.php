@@ -231,7 +231,7 @@ class selectWidget
     $states->draw($img);
     $sites->draw($img);
     $this->map->drawLabelCache($img);
-    $this->imgurl = $img->saveWebImage(MS_PNG, 0,0,-1);
+    $this->imgurl = $img->saveWebImage();
 
     $this->extents = Array( $this->map->extent->minx, 
         $this->map->extent->miny, $this->map->extent->maxx,
