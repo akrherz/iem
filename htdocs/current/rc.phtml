@@ -1,4 +1,5 @@
 <?php
+ include("../../config/settings.inc.php");
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "segid";
 ?>
 
@@ -10,9 +11,10 @@
     window.onload=function(){tableruler();}
 </script>
 <?php
-  include("/mesonet/php/include/header.php"); 
+  include("$rootpath/include/header.php"); 
+  include("$rootpath/include/database.inc.php"); 
 
-$conn = pg_connect("dbname=postgis");
+$conn = iemdb("postgis");
 
 $sql = "SELECT * from roads_current r, roads_base b, roads_conditions c WHERE
   r.segid = b.segid and r.cond_code = c.code";
@@ -46,7 +48,7 @@ $vals = Array("number" => "Route #", "type" => "Road Classification",
 <div class="text">
 <b>Nav:</b><a href="/current/">Current Conditions</a>
 
-<?php $current_network = "Road Conditions"; include("../include/current_bar.inc.php"); ?>
+<?php $current_network = "Road Conditions"; include("$rootpath/include/current_bar.inc.php"); ?>
 <p>
 <h3 class="subtitle"><center>Iowa Road Conditions valid <?php echo $valid; ?></center></h3><p>
 
@@ -101,4 +103,4 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 </table>
 
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

@@ -43,7 +43,7 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 
 <div class="text">
 <b>Nav:</b><a href="/RWIS/">RWIS</a> <b> > </b> Current Conditions
-<?php $current_network = "RWIS"; include("../include/current_bar.inc.php"); ?>
+<?php $current_network = "RWIS"; include("$rootpath/include/current_bar.inc.php"); ?>
 <form method="GET" action="current.phtml">
 <select name="network">
   <option value="IA_RWIS" <?php if ($network == "IA_RWIS") echo "SELECTED"; ?>>Iowa
