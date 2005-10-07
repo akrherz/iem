@@ -1,6 +1,7 @@
 <?php
-include("/mesonet/php/include/all_locs.php");
-include("/mesonet/www/html/include/iemaccess.php");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/all_locs.php");
+include("$rootpath/include/iemaccess.php");
 $iem = new IEMAccess();
 
 /* Get vars */
