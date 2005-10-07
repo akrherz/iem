@@ -76,7 +76,7 @@ foreach($myStations as $key => $value){
 
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+$url = $img->saveWebImage();
 
 //   $white, $Font, "Sites Offline ". $ts );
 ?>
