@@ -14,7 +14,7 @@ function new_window(url) {
 <script type="text/javascript">
     window.onload=function(){tableruler();}
 </script>';
- include("/mesonet/php/include/header.php"); ?>
+ include("$rootpath/include/header.php"); ?>
 <?php include("$rootpath/include/mlib.php"); ?>
 <?php include("$rootpath/include/all_locs.php"); ?>
 <?php 
@@ -44,7 +44,7 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 
 <div class="text">
 <b>Nav:</b><a href="/scan/">SCAN</a> <b> > </b> Current Conditions
-<?php $current_network = "SCAN"; include("../include/current_bar.inc.php"); ?>
+<?php $current_network = "SCAN"; include("$rootpath/include/current_bar.inc.php"); ?>
 
 <p><h3 class="subtitle"><center>Current SCAN Conditions</center></h3><p>
 

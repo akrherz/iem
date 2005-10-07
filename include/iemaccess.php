@@ -5,6 +5,8 @@
  * Daryl Herzmann 18 June 2003
  */
 
+include_once("$rootpath/include/database.inc.php");
+
 class IEMAccess {
   var $DBHOST = "10.10.10.30";
   var $DBPORT = "9999";
@@ -17,7 +19,8 @@ class IEMAccess {
     $cString = sprintf("dbname=%s host=%s port=%s user=%s password=%s", 
       $this->DBNAME, $this->DBHOST, $this->DBPORT,
       $this->DBUSER, $this->DBPASS );
-    $this->dbconn = pg_connect($cString);
+    //$this->dbconn = pg_connect($cString);
+    $this->dbconn = iemdb("access");
  
   } // End of IEMAccess Constructor
 
