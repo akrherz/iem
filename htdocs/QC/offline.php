@@ -38,7 +38,7 @@ function networkOffline($network)
   for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
   {
      $valid = $row["v"];
-     $tracker_id = $row["tracker_id"];
+     $tracker_id = $row["trackerid"];
      $station = $row["station"];
      $name = $cities[$station]['city'];
      echo "<tr><td>$station</td><td>$name</td><td>$valid</td></tr>\n";
