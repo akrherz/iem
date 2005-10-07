@@ -1,8 +1,9 @@
 <?php
-dl("php_mapscript_442.so");
-include('../../../include/mlib.php');
-include('/mesonet/php/include/all_locs.php');
-include('/mesonet/www/html/include/iemaccess.php');
+include("../../../../config/settings.inc.php");
+dl($mapscript);
+include("$rootpath/include/mlib.php");
+include("$rootpath/include/all_locs.php");
+include("$rootpath/include/iemaccess.php");
 $iemaccess = new IEMAccess();
 
 $network = isset($_GET['network']) ? $_GET['network'] : die('No Network Set.');
@@ -80,8 +81,8 @@ $url = $img->saveWebImage(MS_PNG, 0,0,-1);
 //   $white, $Font, "Sites Offline ". $ts );
 ?>
 
-<?php include("/mesonet/php/include/header.php"); ?>
+<?php include("$rootpath/include/header.php"); ?>
 
 <?php echo "<img src=\"$url\">"; ?>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
