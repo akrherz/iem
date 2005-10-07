@@ -1,6 +1,7 @@
 <?php
 
 function printHTML($urls, $radTimes){
+global $rooturl;
 ?>
 
 <script LANGUAGE="JavaScript">
@@ -58,7 +59,6 @@ if (first_image > last_image)
 theImages[0] = new Image();
 theImages[0].src = "<?php echo $urls[0]; ?>";
 imageNum[0] = true;
-radtimes[0] = "<?php echo $radTimes[0]; ?>";
 
 //==============================================================
 //== All previous statements are performed as the page loads. ==
@@ -256,39 +256,30 @@ function change_mode(mode)
 function launch()
 {
 
-
 theImages[1] = new Image();
 theImages[1].src = "<?php echo $urls[1]; ?>";
 document.animation.src = theImages[1].src;
-radtimes[1] = "<?php echo $radTimes[1]; ?>";
 theImages[2] = new Image();
 theImages[2].src = "<?php echo $urls[2]; ?>";
 document.animation.src = theImages[2].src;
-radtimes[2] = "<?php echo $radTimes[2]; ?>";
 theImages[3] = new Image();
 theImages[3].src = "<?php echo $urls[3]; ?>";
 document.animation.src = theImages[3].src;
-radtimes[3] = "<?php echo $radTimes[3]; ?>";
 theImages[4] = new Image();
 theImages[4].src = "<?php echo $urls[4]; ?>";
 document.animation.src = theImages[4].src;
-radtimes[4] = "<?php echo $radTimes[4]; ?>";
 theImages[5] = new Image();
 theImages[5].src = "<?php echo $urls[5]; ?>";
 document.animation.src = theImages[5].src;
-radtimes[5] = "<?php echo $radTimes[5]; ?>";
 theImages[6] = new Image();
 theImages[6].src = "<?php echo $urls[6]; ?>";
 document.animation.src = theImages[6].src;
-radtimes[6] = "<?php echo $radTimes[6]; ?>";
 theImages[7] = new Image();
 theImages[7].src = "<?php echo $urls[7]; ?>";
 document.animation.src = theImages[7].src;
-radtimes[7] = "<?php echo $radTimes[7]; ?>";
 theImages[8] = new Image();
 theImages[8].src = "<?php echo $urls[8]; ?>";
 document.animation.src = theImages[8].src;
-radtimes[8] = "<?php echo $radTimes[8]; ?>";
 
 
    // this needs to be done to set the right mode when the page is manually reloaded
@@ -328,40 +319,40 @@ function animation()
 <td BGCOLOR="#AAAAAA" NOWRAP ALIGN=CENTER VALIGN=MIDDLE>
 <font SIZE=-1 COLOR="#3300CC"> Loop Mode:</font><br>
 <a HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><img BORDER=0 WIDTH=29
-HEIGHT=24 SRC="http://mesonet.agron.iastate.edu/icons/nrm_button.gif" ALT="Normal"></a>
+HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/nrm_button.gif" ALT="Normal"></a>
 <a HREF="JavaScript: func()" onClick="sweep()"><img BORDER=0 WIDTH=29 HEIGHT=24
-SRC="http://mesonet.agron.iastate.edu/icons/swp_button.gif" ALT="Sweep"></a><br> <hr WIDTH="70%" SIZE=2>
+SRC="<?php echo $rooturl; ?>/images/swp_button.gif" ALT="Sweep"></a><br> <hr WIDTH="70%" SIZE=2>
 <font SIZE=-1 COLOR="#3300CC">Animate Frames:</font><br>
 
 <a HREF="JavaScript: func()" onClick="change_mode(1);rev()"><img BORDER=0 WIDTH=35
-HEIGHT=35 SRC="http://mesonet.agron.iastate.edu/icons/rev_button.gif" ALT="REV"></a>
+HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/rev_button.gif" ALT="REV"></a>
 <a HREF="JavaScript: func()" onClick="stop()"><img BORDER=0 WIDTH=35 HEIGHT=35
-SRC="http://mesonet.agron.iastate.edu/icons/stp_button.gif" ALT="STOP"></a>
+SRC="<?php echo $rooturl; ?>/images/stp_button.gif" ALT="STOP"></a>
 <a HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><img BORDER=0 WIDTH=35
-HEIGHT=35 SRC="http://mesonet.agron.iastate.edu/icons/fwd_button.gif" ALT="FWD"></a><br> <hr WIDTH="70%" SIZE=2>
+HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/fwd_button.gif" ALT="FWD"></a><br> <hr WIDTH="70%" SIZE=2>
 
 <font SIZE=-1 COLOR="#3300CC"> Dwell First:</font><br>
 <a HREF="JavaScript: func()" onClick="change_start_dwell(-dwell_step)"><img BORDER=0
-WIDTH=29 HEIGHT=24 SRC="http://mesonet.agron.iastate.edu/icons/dw1_minus.gif" ALT="dec"></a>
+WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw1_minus.gif" ALT="dec"></a>
 <a HREF="JavaScript: func()" onClick="change_start_dwell(dwell_step)"><img BORDER=0
-WIDTH=29 HEIGHT=24 SRC="http://mesonet.agron.iastate.edu/icons/dw1_plus.gif" ALT="inc"></a><br>
+WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw1_plus.gif" ALT="inc"></a><br>
 
 <font SIZE=-1 COLOR="#3300CC"> Dwell Last:</font><br>
 <a HREF="JavaScript: func()" onClick="change_end_dwell(-dwell_step)"><img BORDER=0
-WIDTH=29 HEIGHT=24 SRC="http://mesonet.agron.iastate.edu/icons/dw2_minus.gif" ALT="dec"></a>
+WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw2_minus.gif" ALT="dec"></a>
 <a HREF="JavaScript: func()" onClick="change_end_dwell(dwell_step)"><img BORDER=0
-WIDTH=29 HEIGHT=24 SRC="http://mesonet.agron.iastate.edu/icons/dw2_plus.gif" ALT="inc"></a><br> <hr WIDTH="70%" SIZE=2>
+WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw2_plus.gif" ALT="inc"></a><br> <hr WIDTH="70%" SIZE=2>
 <font SIZE=-1 COLOR="#3300CC">Adjust Speed:</font><br>
 <a HREF="JavaScript: func()" onClick="change_speed(delay_step)"><img BORDER=0 WIDTH=35
-HEIGHT=35 SRC="http://mesonet.agron.iastate.edu/icons/slw_button.gif" ALT="--"></a>
+HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/slw_button.gif" ALT="--"></a>
 <a HREF="JavaScript: func()" onClick="change_speed(-delay_step)"><img BORDER=0 WIDTH=35
-HEIGHT=35 SRC="http://mesonet.agron.iastate.edu/icons/fst_button.gif" ALT="++"></a><br> <hr WIDTH="70%" SIZE=2>
+HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/fst_button.gif" ALT="++"></a><br> <hr WIDTH="70%" SIZE=2>
 
 <font SIZE=-1 COLOR="#3300CC">Advance One:</font><br>
 <a HREF="JavaScript: func()" onClick="decrementImage(--current_image)"><img BORDER=0
-WIDTH=35 HEIGHT=35 SRC="http://mesonet.agron.iastate.edu/icons/mns_button.gif" ALT="-1"></a>
+WIDTH=35 HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/mns_button.gif" ALT="-1"></a>
 <a HREF="JavaScript: func()" onClick="incrementImage(++current_image)"><img BORDER=0
-WIDTH=35 HEIGHT=35 SRC="http://mesonet.agron.iastate.edu/icons/pls_button.gif" ALT="+1"></a>
+WIDTH=35 HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/pls_button.gif" ALT="+1"></a>
 
 <hr WIDTH="70%" SIZE=2>
 </td>

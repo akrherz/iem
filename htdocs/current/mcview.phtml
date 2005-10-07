@@ -1,6 +1,7 @@
 <?php
+ include("../../config/settings.inc.php");
  $uri = 'mcview.phtml';
- include("/mesonet/php/include/forms.php");
+ include("$rootpath/include/forms.php");
 
  /** Import our variables */
  $prod = isset($_GET["prod"]) ? $_GET["prod"] : "comprad";
@@ -8,11 +9,11 @@
  $mode = isset($_GET["mode"]) ? $_GET["mode"] : "realtime";
  $frames = isset($_GET["frames"]) ? $_GET["frames"] : 13;
  $interval = $_GET["interval"];
- $year = $_GET["year"];
- $month = $_GET["month"];
- $day = $_GET["day"];
- $hour = $_GET["hour"];
- $minute = $_GET["minute"];
+ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+ $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
+ $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+ $hour = isset($_GET["hour"]) ? $_GET["hour"] : date("h");
+ $minute = isset($_GET["minute"]) ? $_GET["minute"] : date("i");
 
  /** Acceptable number of frames are between 1 and 100 */
  if (intval($frames) > 100 || intval($frames) < 1) $frames = 13;
@@ -96,8 +97,8 @@ $files = "";
 $images = Array();
 $hrefs = Array();
 for ($i=0; $i < intval($frames); $i++){
-  $myuri = "http://mesonet.agron.iastate.edu/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."$prod/n0r_". gmdate('Ymd_Hi', $loopts + ($i * (intval($interval) * 60)) ) .".png";
-  $myhref = "http://mesonet.agron.iastate.edu/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."GIS/uscomp/n0r_". gmdate('YmdHi', $loopts + ($i * (intval($interval) * 60)) ) .".png";
+  $myuri = "$rooturl/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."$prod/n0r_". gmdate('Ymd_Hi', $loopts + ($i * (intval($interval) * 60)) ) .".png";
+  $myhref = "$rooturl/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."GIS/uscomp/n0r_". gmdate('YmdHi', $loopts + ($i * (intval($interval) * 60)) ) .".png";
   $files .= $myuri .",";
   $images[] = $myuri;
   $hrefs[] = $myhref;
@@ -107,7 +108,7 @@ for ($i=0; $i < intval($frames); $i++){
 <html>
 <head>
   <title>Current & Historical IEM NEXRAD Composite Loop</title>
-   <link rel="stylesheet" type="text/css" href="/css/mesonet.css">
+   <link rel="stylesheet" type="text/css" href="../css/mesonet.css">
  <?php if ($mode == "realtime") { ?>
   <meta http-equiv="refresh" content="300; URL=<?php echo "$uri?java=$java&frames=$frames&interval=$interval&prod=$prod"; ?>">
  <?php } ?>
@@ -123,7 +124,7 @@ function switchToArchiveMode()
 </script>
 </head>
 <body>
-<a href="/current/">Current Data</a> &nbsp; <b>></b> &nbsp; <font size="+1"><b>IEM NEXRAD Composite</b></font>
+<a href="<?php echo $rooturl; ?>/current/">Current Data</a> &nbsp; <b>></b> &nbsp; <font size="+1"><b>IEM NEXRAD Composite</b></font>
 &nbsp; &nbsp; <a href="<?php echo $uri; ?>">Reset Application for a Current Loop</a>
 
 <br><form method="GET" action="<?php echo $uri; ?>" name="controls">
@@ -240,7 +241,7 @@ function switchToArchiveMode()
 <?php if ($mode == "realtime") echo " &nbsp; <b>REAL-TIME mode:</b> Will refresh in 5 minutes"; ?> 
 
 <?php if ($java == "applet") { ?>
-<applet codebase="/current/class/" code="AniS.class" width="<? echo $lwidth; ?>" height="<?php echo $lheight; ?>" alt="You must enable Java in your browser to view the radar loop">
+<applet codebase="class/" code="AniS.class" width="<? echo $lwidth; ?>" height="<?php echo $lheight; ?>" alt="You must enable Java in your browser to view the radar loop">
  <param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
  <param name="rate" value="80">
  <PARAM name="no_enh" value="true">
@@ -300,4 +301,4 @@ foreach ($hrefs as $value ){
 ?>
 </ul>
 
-<?php include("../include/footer2.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

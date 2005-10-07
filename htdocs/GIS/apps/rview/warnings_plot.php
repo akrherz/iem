@@ -1,4 +1,5 @@
 <?php
+global $_DATABASES;
 
 if ($isarchive)
 {
@@ -67,10 +68,12 @@ $cwas = $map->getlayerbyname("cwas");
 $cwas->set("status", 1);
 
 $watches = $map->getlayerbyname("watches");
+$watches->set("connection", $_DATABASES["postgis"] );
 $watches->set("status", 1);
 $watches->setFilter("expired > '".$db_ts."' and issued <= '".$db_ts."'");
 
 $c0 = $map->getlayerbyname("warnings0_c");
+$c0->set("connection", $_DATABASES["postgis"] );
 $c0->set("status", 1);
 if ($isarchive)
 { 
@@ -80,6 +83,7 @@ $c0->setFilter("expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'"
 $q = "expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'";
 
 $p0 = $map->getlayerbyname("warnings0_p");
+$p0->set("connection", $_DATABASES["postgis"] );
 $p0->set("status", 1);
 if ($isarchive)
 { 
@@ -108,6 +112,6 @@ mktitle($map, $img, "                  IEM NEXRAD composite base reflect valid: 
 $map->drawLabelCache($img);
 mklogolocal($map, $img);
 
-$url = $img->saveWebImage(MS_PNG);
+$url = $img->saveWebImage();
 
 ?>
