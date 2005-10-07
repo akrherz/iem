@@ -2,15 +2,15 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-<title><?php echo $TITLE; ?></title>
+<title><?php echo isset($TITLE) ? $TITLE: "Iowa Environmental Mesonet"; ?></title>
  <link rel="stylesheet" type="text/css" href="<?php echo $rooturl; ?>/css/main.css" />
  <link rel="stylesheet" type="text/css" href="<?php echo $rooturl; ?>/css/main-theme.css" />
  <link rel="alternate stylesheet" type="text/css" media="screen" href="<?php echo $rooturl; ?>/css/red.css"
 title="red" />
  <link rel="alternate stylesheet" type="text/css" media="screen" href="<?php echo $rooturl; ?>/css/slashdot.css" title="slashdot" />
  <script type="text/javascript" src="<?php echo $rooturl; ?>/js/styleswitcher.js"></script>
- <?php echo $REFRESH; ?>
- <?php echo $HEADEXTRA; ?>
+ <?php if (isset($REFRESH)){ echo $REFRESH; } ?>
+ <?php if (isset($HEADEXTRA)){ echo $HEADEXTRA;} ?>
 </head>
 <body>
 <?php include("$rootpath/include/webring.html"); ?>
