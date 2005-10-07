@@ -1,4 +1,5 @@
 <?php
+ include("../../config/settings.inc.php");
  $metar = $_GET['metar'];
  if ($metar == "") $metar = "no";
 
@@ -15,13 +16,13 @@ function new_window(url) {
 <script type="text/javascript">
     window.onload=function(){tableruler();}
 </script>';
- include("/mesonet/php/include/header.php");
+ include("$rootpath/include/header.php");
 ?>
 <?php
-  include("../include/mlib.php"); 
-  include("/mesonet/php/include/all_locs.php"); 
-  include("../include/iemaccess.php");
-  include("../include/iemaccessob.php");
+  include("$rootpath/include/mlib.php"); 
+  include("$rootpath/include/all_locs.php"); 
+  include("$rootpath/include/iemaccess.php");
+  include("$rootpath/include/iemaccessob.php");
 
 $iem = new IEMAccess();
 $asos = $iem->getAll();
@@ -43,16 +44,16 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 ?>
 
 <div class="text">
-<b>Nav:</b><a href="/current/">Current Conditions</a>
+<b>Nav:</b><a href="<?php echo $webroot; ?>/current/">Current Conditions</a>
 
-<?php $current_network = "All"; include("../include/current_bar.inc.php"); ?>
+<?php $current_network = "All"; include("$rootpath/include/current_bar.inc.php"); ?>
 
 <?php
 echo "<p>Top 30 values of <b>". $vals[$sortcol] ."</b> displayed from the combination
 of RWIS, ASOS, AWOS and SchoolNet stations in Iowa.";
 ?>
 
-<form method="POST" action="/my/current.php">
+<form method="POST" action="<?php echo $webroot; ?>/my/current.php">
 
 
 <table style="font-size: 10pt;" class="ruler">
@@ -171,7 +172,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
          }
    }
 
- $uri = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network";
+ $uri = "javascript:new_window('<?php echo $webroot; ?>/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network";
 ?>
 </tbody>
 <tfoot>
@@ -197,4 +198,4 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 </form></div>
 
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
