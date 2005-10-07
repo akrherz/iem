@@ -1,9 +1,9 @@
 <?php
  include("../../config/settings.inc.php");
- $metar = $_GET['metar'];
- if ($metar == "") $metar = "no";
+ $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "";
+ $metar = isset($_GET["metar"]) ? $_GET['metar'] : "no";
 
- $REFRESH = "<meta http-equiv=\"refresh\" content=\"60; URL=all.phtml?sortcol=$sortcol&network=$network&metar=$metar\">";
+ $REFRESH = "<meta http-equiv=\"refresh\" content=\"60; URL=all.phtml?sortcol=$sortcol&metar=$metar\">";
  $TITLE = "IEM | ALL Current Conditions";
  $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
@@ -67,7 +67,7 @@ of RWIS, ASOS, AWOS and SchoolNet stations in Iowa.";
   <th colspan="3">Wind [knots]</th>
   <th colspan="2">Precip</font></th>
 <tr>
-  <?php $uri = "all.phtml?metar=$metar&network=$network&sortcol="; ?>
+  <?php $uri = "all.phtml?metar=$metar&sortcol="; ?>
   <th>
  <a href="<?php echo $uri; ?>tmpf">Air</a>
  (<a href="<?php echo $uri; ?>max_tmpf">Hi</a> /
@@ -112,7 +112,10 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
       $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
     } else {
       $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+      if ($mydata[$key]["max_sknt_ts"] > 0)
+      {
+        $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+      }
     }
 
   }
@@ -172,7 +175,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
          }
    }
 
- $uri = "javascript:new_window('<?php echo $webroot; ?>/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network";
+ $uri = "javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels";
 ?>
 </tbody>
 <tfoot>
