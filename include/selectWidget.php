@@ -1,4 +1,5 @@
 <?php
+include_once("$rootpath/include/database.inc.php");
 
 
 class selectWidget
