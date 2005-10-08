@@ -1,4 +1,4 @@
-AuthUserFile /mesonet/www/.security/admin.users
+AuthUserFile ../../config/admin.users
 AuthGroupFile /dev/null
 AuthName Administrative
 AuthType Basic
