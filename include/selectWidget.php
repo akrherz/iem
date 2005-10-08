@@ -244,6 +244,7 @@ class selectWidget
 
   function printInterface()
   {
+    global $rooturl;
 	$s = "<form method=\"GET\" name=\"selectwidget\" action=\"". $this->appurl ."\">\n";
 	while (list($key,$val) = each($this->formvars))
 	{
@@ -254,19 +255,19 @@ class selectWidget
     $s .= "<input type=\"hidden\" name=\"extents\" value=\"". $this->extents[0] .", ". $this->extents[1] .", ".$this->extents[2] .", ".$this->extents[3] ."\">\n";
     $s .= "<script Language=\"JavaScript\">
  function resetButtons(){
-   document.panButton.src = '/GIS/apps/imagenav/button_pan_off.png';
-   document.zoominButton.src = '/GIS/apps/imagenav/button_zoomin_off.png';
-   document.zoomoutButton.src = '/GIS/apps/imagenav/button_zoomout_off.png';
-   document.queryButton.src = '/GIS/apps/imagenav/button_query_off.png';
-   document.zoomfullButton.src = '/GIS/apps/imagenav/button_zoomfull_off.png';
+   document.panButton.src = '$rooturl/images/button_pan_off.png';
+   document.zoominButton.src = '$rooturl/images/button_zoomin_off.png';
+   document.zoomoutButton.src = '$rooturl/images/button_zoomout_off.png';
+   document.queryButton.src = '$rooturl/images/button_query_off.png';
+   document.zoomfullButton.src = '$rooturl/images/button_zoomfull_off.png';
  }
 </script>
 <div style=\"background: #000; margin: 2px; border: 0px; padding: 3px; width: 484px;\"><font style=\"color: #fff; font-weight: bold;\">IEM Site Selector: </font>
-<img src=\"/GIS/apps/imagenav/button_zoomin_off.png\" name=\"zoominButton\" alt=\"Zoom In\" onClick=\"javascript: resetButtons(); document.zoominButton.src = '/GIS/apps/imagenav/button_zoomin_on.png'; document.selectwidget.zoom.value = -2;\">
-<img src=\"/GIS/apps/imagenav/button_pan_off.png\" name=\"panButton\" alt=\"Pan\" onClick=\"javascript: resetButtons(); document.panButton.src = '/GIS/apps/imagenav/button_pan_on.png'; document.selectwidget.zoom.value = 1;\">
-<img src=\"/GIS/apps/imagenav/button_zoomout_off.png\" name=\"zoomoutButton\" alt=\"Zoom Out\" onClick=\"javascript: resetButtons(); document.zoomoutButton.src = '/GIS/apps/imagenav/button_zoomout_on.png'; document.selectwidget.zoom.value = 2;\">
-<img src=\"/GIS/apps/imagenav/button_query_on.png\" name=\"queryButton\" alt=\"Select\" onClick=\"javascript: resetButtons(); document.queryButton.src = '/GIS/apps/imagenav/button_query_on.png'; document.selectwidget.zoom.value = 0;\">
-<img src=\"/GIS/apps/imagenav/button_zoomfull_off.png\" name=\"zoomfullButton\" alt=\"Zoom Full\" onClick=\"javascript: resetButtons(); document.zoomfullButton.src = '/GIS/apps/imagenav/button_zoomfull_on.png'; document.selectwidget.zoom.value = 100; document.selectwidget.submit(); \">";
+<img src=\"$rooturl/images/button_zoomin_off.png\" name=\"zoominButton\" alt=\"Zoom In\" onClick=\"javascript: resetButtons(); document.zoominButton.src = '$rooturl/images/button_zoomin_on.png'; document.selectwidget.zoom.value = -2;\">
+<img src=\"$rooturl/images/button_pan_off.png\" name=\"panButton\" alt=\"Pan\" onClick=\"javascript: resetButtons(); document.panButton.src = '$rooturl/images/button_pan_on.png'; document.selectwidget.zoom.value = 1;\">
+<img src=\"$rooturl/images/button_zoomout_off.png\" name=\"zoomoutButton\" alt=\"Zoom Out\" onClick=\"javascript: resetButtons(); document.zoomoutButton.src = '$rooturl/images/button_zoomout_on.png'; document.selectwidget.zoom.value = 2;\">
+<img src=\"$rooturl/images/button_query_on.png\" name=\"queryButton\" alt=\"Select\" onClick=\"javascript: resetButtons(); document.queryButton.src = '$rooturl/images/button_query_on.png'; document.selectwidget.zoom.value = 0;\">
+<img src=\"$rooturl/images/button_zoomfull_off.png\" name=\"zoomfullButton\" alt=\"Zoom Full\" onClick=\"javascript: resetButtons(); document.zoomfullButton.src = '$rooturl/images/button_zoomfull_on.png'; document.selectwidget.zoom.value = 100; document.selectwidget.submit(); \">";
 	$s .= "<input type=\"image\" name=\"map\" src=\"". $this->imgurl ."\" border=0>";
     $s .= "<br /><font style=\"color: #fff; font-weight: bold;\">Select Network:</font>\n";
     $s .= $this->networkSelectInterface();

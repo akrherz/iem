@@ -1,23 +1,24 @@
 <?php 
+ include("../../../config/settings.inc.php");
  include('../../schoolnet/switchtv.php'); 
- include("/mesonet/php/lib/selectWidget.php");
+ include("$rootpath/include/selectWidget.php");
 
 $year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
 $month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
 $day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
 
- $sw = new selectWidget("/plotting/snet/1station_1min.php", "/plotting/snet/1station_1min.php?tv=KCCI", strtoupper($tv) );
+ $sw = new selectWidget("$rooturl/plotting/snet/1station_1min.php", "$rooturl/plotting/snet/1station_1min.php?tv=KCCI", strtoupper($tv) );
  $sw->logic($_GET);
 
- $station = $_GET['station'];
+ $station = isset($_GET['station']) ? $_GET["station"]: "";
 ?>
 
 <?php 
 	$TITLE = "IEM | 1 Minute Time Series";
-include("/mesonet/php/include/header.php"); 
-	include("../../include/forms.php"); 
+include("$rootpath/include/header.php"); 
+	include("$rootpath/include/forms.php"); 
 ?>
-<?php include("/mesonet/php/include/imagemaps.php"); ?>
+<?php include("$rootpath/include/imagemaps.php"); ?>
 
 <div class="text">
 <b>Nav:</b> <a href="/schoolnet/">School Network</a> <b> > </b>
@@ -127,4 +128,4 @@ The blue dots represent wind direction and are shown every 10 minutes.</p>
 
 <br><br></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

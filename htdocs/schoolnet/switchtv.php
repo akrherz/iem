@@ -3,12 +3,13 @@
 $expiry = 60*60*24*100; // 100 days
 session_start();
 setcookie(session_name(), session_id(), time()+$expiry, "/");
-$ntv = $_GET["ntv"];
+$ntv = isset($_GET["ntv"]) ? $_GET["ntv"] : "";
 
 if (strlen($ntv) > 0){
   $_SESSION['tv'] = strtoupper($ntv);
-} else if (strlen($tv) == 0){
-  $_SESSION['tv'] = 'KCCI';
-  $tv = 'KCCI';
+} else if (isset($tv) && strlen($tv) > 0){
+  $_SESSION['tv'] = $tv;
 }
+if (! isset($_SESSION['tv']) ) $_SESSION['tv'] = 'KCCI';
+$tv = $_SESSION['tv'];
 ?>
