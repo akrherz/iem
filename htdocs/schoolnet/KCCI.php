@@ -7,7 +7,7 @@
 <ul>
  <li><a href="current.php">Current Conditions</a> (sortable)</li>
  <li><a href="<?php echo $rooturl; ?>/GIS/apps/snet/raining.php">Where's it raining?</a></li>
- <li><a href="/GIS/data/datasets/snet_current.zip"><img src="/images/gisready.png" border=0>GIS Shapefile</a></li>
+ <li><a href="/GIS/data/datasets/snet_current.zip"><img src="<?php echo $rooturl; ?>/images/gisready.png" border=0>GIS Shapefile</a></li>
 </ul>
 
 <p><h3 class="subtitle">Station Plots</h3>
@@ -28,9 +28,9 @@
 
 <p><h3 class="subtitle">Comparisons</h3>
 <ul>
- <li><a href="/data/snet/Tcompare.gif">Temperatures</a></li>
- <li><a href="/data/snet/Dcompare.gif">Dew Points</a></li>
- <li>Barometer: <a href="/data/snet/Pcompare.gif">millibar</a> or <a href="/data/snet/P2compare.gif">inches</a></li>
+ <li><a href="<?php echo $rooturl; ?>/data/snet/Tcompare.gif">Temperatures</a></li>
+ <li><a href="<?php echo $rooturl; ?>/data/snet/Dcompare.gif">Dew Points</a></li>
+ <li>Barometer: <a href="<?php echo $rooturl; ?>/data/snet/Pcompare.gif">millibar</a> or <a href="/data/snet/P2compare.gif">inches</a></li>
 </ul>
 
 </td><td valign="top" width="350">
@@ -39,37 +39,37 @@
   <div class="snet-precip-table">
      <b>Daily Precipitation Totals</b>
   <div style="background: white; padding: 3px;">
-  <a href="/data/snet/precToday.gif">Today</a> &nbsp; 
+  <a href="<?php echo $rooturl; ?>/data/snet/precToday.gif">Today</a> &nbsp; 
   <?php
-  echo "<a href=\"/archive/data/". date("Y/m/d/", (date("U") - 86400 ) )
+  echo "<a href=\"$rooturl/archive/data/". date("Y/m/d/", (date("U") - 86400 ) )
     ."snetPrec.gif\">Yesterday</a> &nbsp; \n";
   for ($i=2;$i<8;$i++){
-    echo "<a href=\"/archive/data/". date("Y/m/d/", (date("U") - $i*86400 ) )
+    echo "<a href=\"$rooturl/archive/data/". date("Y/m/d/", (date("U") - $i*86400 ) )
     ."snetPrec.gif\">". date("M d", (date("U") - $i*86400 ) )  ."</a> &nbsp; \n";
   }
   ?>
-   <br><a href="/data/snet/precMonth.gif">This Month</a>
+   <br><a href="<?php echo $rooturl; ?>/data/snet/precMonth.gif">This Month</a>
 
   </div>
   </div>
   
   <p><h3 class="subtitle">Historical Data</h3>
 <ul>
- <li><a href="/schoolnet/dl/">Download</a> from the archive!</a></li>
- <li><a href="/cgi-bin/precip/catSNET.py">Hourly Rainfall</a> tables</a></li>
- <li><a href="/schoolnet/rates/">Rainfall Rates</a></li>
+ <li><a href="<?php echo $rooturl; ?>/schoolnet/dl/">Download</a> from the archive!</a></li>
+ <li><a href="<?php echo $rooturl; ?>/cgi-bin/precip/catSNET.py">Hourly Rainfall</a> tables</a></li>
+ <li><a href="<?php echo $rooturl; ?>/schoolnet/rates/">Rainfall Rates</a></li>
 </ul>
 
 <p><h3 class="subtitle">QC Info</h3>
 <ul>
- <li><a href="/QC/offline.php">Stations Offline</a> [<a href="<?php echo $rooturl; ?>/GIS/apps/stations/offline.php?network=snet">Graphical View</a>]</li>
- <li><a href="/QC/madis/network.phtml?network=KCCI">MADIS QC Values</a></li>
+ <li><a href="<?php echo $rooturl; ?>/QC/offline.php">Stations Offline</a> [<a href="<?php echo $rooturl; ?>/GIS/apps/stations/offline.php?network=snet">Graphical View</a>]</li>
+ <li><a href="<?php echo $rooturl; ?>/QC/madis/network.phtml?network=KCCI">MADIS QC Values</a></li>
 </ul>
 
 <p><h3 class="subtitle">Plotting Time Series</h3>
 <ul>
- <li><a href="/plotting/snet/1station_1min.php">1 station</a> [1 minute data]</li>
- <li><a href="/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
+ <li><a href="<?php echo $rooturl; ?>/plotting/snet/1station_1min.php">1 station</a> [1 minute data]</li>
+ <li><a href="<?php echo $rooturl; ?>/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
 </ul></p>
 
 </td></tr></table>

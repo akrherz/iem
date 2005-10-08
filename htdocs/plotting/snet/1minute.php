@@ -1,9 +1,10 @@
 <?php
+include("../../../config/settings.inc.php");
   // 1minute.php
 
 /** Vars */
-include_once("/mesonet/php/include/snet_locs.php");
-  include ("../../include/mlib.php");
+include_once("$rootpath/include/snet_locs.php");
+  include ("$rootpath/include/mlib.php");
   include ("fillholes.inc.php");
 
 $tbl = $cities[strtoupper($tv)][$station];
