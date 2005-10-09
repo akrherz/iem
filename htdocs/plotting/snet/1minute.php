@@ -91,7 +91,7 @@ $missing = 0;
 $min_dwpf = 100;
 $max_tmpf = 0;
 $hasgust = 0;
-$peakgust = 0;
+$peakGust = 0;
 $peaksped = 0;
 
 while (list ($line_num, $line) = each ($fcontents)) {
@@ -114,8 +114,8 @@ while (list ($line_num, $line) = each ($fcontents)) {
   if ($thisMPH > $peaksped) $peaksped = $thisMPH;
   $thisDRCT = $dirTrans[$parts[2]];
   $thisGust = $parts[12];
-  if ($thisGust < $peakgust)  $thisGust = $peakGust;
-  else $peakgust = $thisGust;
+  if ($thisGust < $peakGust)  $thisGust = $peakGust;
+  else $peakGust = $thisGust;
   if (sizeof($parts) > 13) $hasgust = 1;
   $thisALTI = substr($parts[8],0,-1);
   $thisPREC = substr($parts[9],0,-2);
@@ -188,7 +188,7 @@ $xpre = array(0 => '12 AM', '1', '2', '3', '4', '5',
         '1', '2', '3', '4', '5', '6', '7',
         '8', '9', '10', '11', 'Mid');
 
-if ($peaksped > $peakgust) $peakgust = $peaksped;
+if ($peaksped > $peakGust) $peakGust = $peaksped;
 
 for ($j=0; $j<25; $j++){
   $xlabel[$j*60] = $xpre[$j];
