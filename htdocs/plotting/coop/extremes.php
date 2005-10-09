@@ -1,5 +1,7 @@
 <?php
-$connection = pg_connect("10.10.10.20","5432","coop");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("coop");
 
 
 $query2 = "SELECT max_".$var." as max, min_".$var." as min, ".$var." as avg, years, to_char(valid, 'mm dd') as valid from climate WHERE station = '". $station ."' ORDER by valid ASC";
