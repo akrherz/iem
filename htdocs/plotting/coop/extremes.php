@@ -2,6 +2,9 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
+$station = isset($_GET["station"]) ? $_GET["station"] : die();
+$var = isset($_GET["var"]) ? $_GET["var"]: die();
+
 
 
 $query2 = "SELECT max_".$var." as max, min_".$var." as min, ".$var." as avg, years, to_char(valid, 'mm dd') as valid from climate WHERE station = '". $station ."' ORDER by valid ASC";
