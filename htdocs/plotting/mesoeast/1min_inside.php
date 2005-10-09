@@ -1,4 +1,5 @@
 <?php
+include("../../../config/settings.inc.php");
 //  1 minute data plotter 
 
 function dwpf($tmpf, $relh){
@@ -140,8 +141,8 @@ if ($sr[0] == ""){
   $sr[0] = 0;
 }
 
-include ("../dev17/jpgraph.php");
-include ("../dev17/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -159,7 +160,6 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetTextTickInterval(60);
 
 $graph->xaxis->SetLabelAngle(90);
-$graph->yaxis->scale->ticks->SetPrecision(0);
 $graph->yaxis->scale->ticks->Set(2,1);
 $graph->yaxis->scale->SetGrace(10);
 $graph->title->Set($Scities[$Sconv[$station]]['city'] ."Inside Temperatures");
@@ -169,19 +169,18 @@ $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01,0.075);
 
 //[DMF]$graph->y2axis->scale->ticks->Set(100,25);
-//[DMF]$graph->y2axis->scale->ticks->SetPrecision(0);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,14);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
 
 //[DMF]$graph->y2axis->SetTitle("Solar Radiation [W m**-2]");
 
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FFONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 //$graph->yaxis->SetTitleMargin(48);
 $graph->yaxis->SetTitleMargin(40);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FFONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
