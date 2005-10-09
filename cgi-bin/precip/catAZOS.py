@@ -6,7 +6,8 @@
 # 10 Jan 2004	Fixes!
 # 25 Aug 2004	ASOS DB moved
 
-import iemdb, stationTable, mx.DateTime, cgi
+import mx.DateTime, cgi
+from pyIEM import iemdb, stationTable
 i = iemdb.iemdb()
 mydb = i["asos"]
 st = stationTable.stationTable("/mesonet/TABLES/iowa.stns")
