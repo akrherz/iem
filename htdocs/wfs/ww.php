@@ -1,6 +1,7 @@
 <?php
   header("Content-type: application/vnd.ogc.gml");
  $d = isset($_GET["date"]) ? $_GET["date"] : date("Y-m-d");
+ $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
  $year = substr($year, 0, 4);
  $sts = "$d%2000:00";
  $ets = "$d%2023:59";
