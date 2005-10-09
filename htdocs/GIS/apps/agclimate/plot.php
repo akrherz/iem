@@ -1,8 +1,8 @@
 <?php
+include("../../../../config/settings.inc.php");
 
-
-dl("php_mapscript_401.so");
-include('../../../include/agclimateLoc.php');
+dl($mapscript);
+include("$rootpath/include/agclimateLoc.php");
 
 function mktitlelocal($map, $imgObj, $titlet) { 
  
@@ -176,11 +176,11 @@ if ($i == 0)
 mktitlelocal($map, $img, "     ". $varDef[$var . $var2] ." on ". date("d M Y", $ts) ."    ");
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+$url = $img->saveWebImage();
 
 if (strlen($direct) > 0) { 
   header("Content-type: image/png");
-  $img->saveImage('', MS_PNG, 0, 0, -1);
+  $img->saveImage('');
 } else {
 ?>
 <img src="<?php echo $url; ?>" border=1>
