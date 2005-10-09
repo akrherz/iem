@@ -8,7 +8,7 @@
  $java = isset($_GET["java"]) ? $_GET["java"] : "applet";
  $mode = isset($_GET["mode"]) ? $_GET["mode"] : "realtime";
  $frames = isset($_GET["frames"]) ? $_GET["frames"] : 13;
- $interval = $_GET["interval"];
+ $interval = isset($_GET["interval"]) ? $_GET["interval"]: 5;
  $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
  $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
