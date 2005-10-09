@@ -1,6 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+$data = $_GET["day"];
 $TITLE = "IEM | Past Feature"; 
       include("$rootpath/include/header.php"); ?>
 <b>Nav:</b> <a href="/index.php">IEM Home</a> &nbsp;<b> > </b> &nbsp; Features
