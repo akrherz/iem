@@ -1,5 +1,8 @@
-<?php $TITLE = "IEM | Past Feature"; 
-      include("/mesonet/php/include/header.php"); ?>
+<?php 
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$TITLE = "IEM | Past Feature"; 
+      include("$rootpath/include/header.php"); ?>
 <b>Nav:</b> <a href="/index.php">IEM Home</a> &nbsp;<b> > </b> &nbsp; Features
 
 <table><tr><td>
@@ -7,7 +10,7 @@
 <?php 
   $day = substr($day, 0, 10);
 
-  $connection = pg_connect("10.10.10.40","5432","mesosite");
+  $connection = iemdb("mesosite");
   $query1 = "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
                 to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
                 WHERE date(valid) = '". $day ."' ";
@@ -32,5 +35,5 @@ te/features/". $row["imageref"] ."_s.gif\" BORDER=0 ALT=\"Feature\"></a>";
 
 <BR><BR>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
 
