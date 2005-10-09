@@ -1,4 +1,5 @@
 <?php
+include("../../../config/settings.inc.php");
 //  1 minute data plotter 
 
 $station = intval($station);
@@ -123,8 +124,8 @@ if ($sr[0] == ""){
   $sr[0] = 0;
 }
 
-include ("../dev17/jpgraph.php");
-include ("../dev17/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -149,7 +150,6 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetTextTickInterval(60);
 
 $graph->xaxis->SetLabelAngle(90);
-$graph->yaxis->scale->ticks->SetPrecision(2);
 //$graph->yaxis->scale->ticks->Set(0.1,0.05);
 //$graph->yscale->SetGrace(10);
 $graph->title->Set($Scities[$Sconv[$station]]['city'] ."Daily Precipitation");
@@ -159,19 +159,18 @@ $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01,0.075);
 
 //[DMF]$graph->y2axis->scale->ticks->Set(100,25);
-//[DMF]$graph->y2axis->scale->ticks->SetPrecision(0);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,14);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Accumulated Precip [Inches]");
 
 //[DMF]$graph->y2axis->SetTitle("Solar Radiation [W m**-2]");
 
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 //$graph->yaxis->SetTitleMargin(48);
 $graph->yaxis->SetTitleMargin(40);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
