@@ -1,4 +1,6 @@
 <?php $TITLE = "IEM | Feature Analysis";
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 include("/mesonet/php/include/header.php"); ?>
 
 <h3 class="heading">IEM <i>Feature</i> Analysis</h3>
@@ -16,7 +18,7 @@ you see, none have been repeated.</p>
 
 <?php 
 
-  $connection = pg_connect("10.10.10.40","5432","mesosite");
+  $connection = iemdb("mesosite");
   $query1 = "SELECT count(title), title, 
       to_char(valid, 'YYYY-MM-DD') as href
       from feature GROUP by title, href ORDER by title ASC";
