@@ -3,11 +3,11 @@ include("../../config/settings.inc.php");
   // cat.phtml 
   //   Print hourly DCP obs to a HTML sortable table
 
-$minute = $_GET['minute'];
-$hour = $_GET['hour'];
-$day = $_GET['day'];
-$month = $_GET['month'];
-$year = $_GET['year'];
+$minute = isset($_GET['minute']) ? $_GET["minute"] : date("i");
+$hour = isset($_GET['hour']) ? $_GET["hour"] : date("h");
+$day = isset($_GET['day']) ? $_GET["day"] : date("d");
+$month = isset($_GET['month']) ? $_GET["month"] : date("m");
+$year = isset($_GET['year']) ? $_GET["year"] : date("Y");
 $now = time() - 3600;
 
 if (strlen($year) == 0 || strlen($month) == 0 || strlen($minute) == 0 
