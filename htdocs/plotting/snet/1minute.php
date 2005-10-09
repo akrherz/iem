@@ -175,7 +175,7 @@ $alti = fillholes($alti);
 
 /* Correct precip */
 $r = 0;
-for ($i=60;$i<=1441;$i++)
+for ($i=60;$i<1441;$i++)
 {
   if ($prec[$i] < $r){
     $prec[$i] = $r;
