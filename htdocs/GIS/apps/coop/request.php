@@ -1,11 +1,15 @@
 <?php
+include("../../../../config/settings.inc.php");
  // -----------------------------------------------------------------
  // request.php
  //   Give the user the climate data in the format they want...
  // -----------------------------------------------------------------
 
 // Load MapScript
-dl("php_mapscript_440b.so");
+dl($mapscript);
+include("$rootpath/include/database.inc.php");
+$month = isset($_GET["month"]) ? $_GET["month"] : die();
+$day = isset($_GET["day"]) ? $_GET["day"] : die();
 
 function addPoint( $row ){
   GLOBAL $shpFile, $dbfFile;
@@ -50,7 +54,7 @@ $sqlDate = strftime('%Y-%m-%d', $ts);
 $filePre = strftime('%m%d', $ts) ."_coop";
 
 
-$pgcon = pg_connect("10.10.10.20", 5432, "coop");
+$pgcon = iemdb("coop");
 $rs = pg_exec($pgcon, "select s.*, c.*, 
    to_char(c.valid, 'YYYYMMDD') as cvalid from 
    stations s, climate c WHERE c.station = lower(s.id) 
@@ -59,7 +63,7 @@ $rs = pg_exec($pgcon, "select s.*, c.*,
 pg_close($pgcon);
 
 
-$shpFname = "/home/httpd/html/tmp/". $filePre;
+$shpFname = "/var/www/htdocs/tmp/". $filePre;
 $shpFile = ms_newShapeFileObj($shpFname, MS_SHP_POINT);
 $dbfFile = dbase_create( $shpFname.".dbf", array(
    array("SITE", "C", 6),
@@ -90,7 +94,7 @@ $shpFile->free();
 dbase_close($dbfFile);
 
 // Generate zip file
-chdir("/home/httpd/html/tmp/");
+chdir("/var/www/htdocs/tmp/");
 popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf", 'r');  
 
 echo "Shapefile Generation Complete.<br>";
