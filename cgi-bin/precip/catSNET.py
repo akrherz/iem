@@ -3,8 +3,10 @@
 # Daryl Herzmann 06 Mar 2003
 #  7 Mar 2003:	Do some more cleanups
 
-import pg, stationTable, mx.DateTime, cgi
-mydb = pg.connect("snet", "10.10.10.20", 5432)
+import pg, mx.DateTime, cgi
+from pyIEM import stationTable, iemdb
+i = iemdb.iemdb()
+mydb = i["snet"]
 st = stationTable.stationTable("/mesonet/TABLES/snet.stns")
 
 requireHrs = [0]*25
