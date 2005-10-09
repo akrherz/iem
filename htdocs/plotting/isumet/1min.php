@@ -1,4 +1,5 @@
 <?php
+include("../../../config/settings.inc.php");
 //  1 minute data plotter 
 
 $station = intval($station);
@@ -120,8 +121,8 @@ if ($sr[0] == ""){
   $sr[0] = 0;
 }
 
-include ("../dev17/jpgraph.php");
-include ("../dev17/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
