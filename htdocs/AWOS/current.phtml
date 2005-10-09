@@ -131,6 +131,7 @@ $mydata["VTI"]["pday"] = ' NA '; $mydata["VTI"]["phour"] = ' NA ';
  $finalA = Array();
  $finalA = aSortBySecondIndex($mydata, $sortcol);
  $now = time();
+ $shade = 1;
  while (list ($key, $val) = each ($finalA))  { 
 	$parts = $finalA[$key];
         echo "<tr ";
