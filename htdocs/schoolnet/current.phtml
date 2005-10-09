@@ -147,7 +147,9 @@ function arSortBySecondIndex($multiArray, $secondIndex) {
       $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
     } else {
       $mydata[$key]["peak"] = $mydata[$key]["max_sknt"] * 1.15078;
-      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+      if ($mydata[$key]["max_sknt_ts"] > 0){
+        $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+      }
     }
                                                                                 
   }
@@ -179,7 +181,7 @@ while (list ($key, $val) = each ($finalA))  {
 
   echo "<td ";
   if ($tdiff < 200){
-    echo ">". strftime("%I:%M %p", $parts[ts]);
+    echo ">". strftime("%I:%M %p", $parts['ts']);
   } else if ($tdiff < 600){
     echo "bgcolor=\"green\">". strftime("%I:%M %p", $parts[ts]);
   } else {
