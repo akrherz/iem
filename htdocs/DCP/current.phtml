@@ -1,6 +1,7 @@
 <?php
  include("../../config/settings.inc.php");
  $shef = isset($_GET['shef']) ? $_GET['shef'] : 0;
+ $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : "valid";
 ?>
  
 <?php
@@ -16,7 +17,6 @@
 <a href="/DCP/">DCP Network</a> &nbsp; <b> > </b> &nbsp; Current Conditions
 <?php
  $sortcol = $_GET["sortcol"];
- if ($sortcol == "") $sortcol = "ts";
  include("$rootpath/include/iemaccess.php");
  include("$rootpath/include/iemaccessob.php");
 
