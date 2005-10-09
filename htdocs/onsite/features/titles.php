@@ -1,7 +1,7 @@
 <?php $TITLE = "IEM | Feature Analysis";
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("/mesonet/php/include/header.php"); ?>
+include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">IEM <i>Feature</i> Analysis</h3>
 
@@ -43,5 +43,5 @@ you see, none have been repeated.</p>
 
 <BR><BR></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
 
