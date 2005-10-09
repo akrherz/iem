@@ -1,5 +1,7 @@
-<?php $TITLE = "IEM | COOP Extremes Plots";
-include("/mesonet/php/include/header.php"); ?>
+<?php 
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | COOP Extremes Plots";
+include("$rootpath/include/header.php"); ?>
 
 <div class="text">
 <B>Navigation:</B>
@@ -12,7 +14,7 @@ include("/mesonet/php/include/header.php"); ?>
 temperature extremes.  You can create a annual plot of this dataset for a
 station of your choice.</p> 
 
-<?php include("../../include/COOPstations.php"); ?>
+<?php include("$rootpath/include/COOPstations.php"); ?>
 
 <form method="GET" action="extremes_fe.php">
 
@@ -58,4 +60,4 @@ station of your choice.</p>
   }
 ?></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
