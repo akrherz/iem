@@ -1,4 +1,5 @@
 <?php
+include("../../../config/settings.inc.php");
 // 1 minute schoolnet data plotter
 // 18 Sep 2002 - Denote when the averaging scheme happened!
 //  3 Dec 2002 - Make sure that scale of wind axis is okay!
@@ -126,9 +127,9 @@ for ($j=0; $j<24; $j++){
 }
 
 
-include ("../dev17/jpgraph.php");
-include ("../dev17/jpgraph_line.php");
-include ("../dev17/jpgraph_scatter.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -140,7 +141,7 @@ $graph->xaxis->SetTickLabels($xlabel);
 //$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
-$graph->yaxis->scale->ticks->SetPrecision(1);
+//$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->title->Set($Scities[$Sconv[$station]]['city'] ." Time Series");
 $graph->subtitle->Set($titleDate );
 
@@ -148,23 +149,23 @@ $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01,0.08);
 
 $graph->yaxis->scale->ticks->Set(90,15);
-$graph->yaxis->scale->ticks->SetPrecision(0);
-$graph->yaxis->scale->ticks->SetPrecision(0);
+//$graph->yaxis->scale->ticks->SetPrecision(0);
+//$graph->yaxis->scale->ticks->SetPrecision(0);
 
 $graph->yaxis->SetColor("blue");
 $graph->y2axis->SetColor("red");
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,14);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 
 $graph->yaxis->SetTitle("Wind Direction");
 $graph->y2axis->SetTitle("Wind Speed [MPH]");
 
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 $graph->yaxis->SetTitleMargin(30);
 //$graph->y2axis->SetTitleMargin(28);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
