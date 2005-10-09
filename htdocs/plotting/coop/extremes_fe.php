@@ -3,6 +3,7 @@ include("../../../config/settings.inc.php");
 $TITLE = "IEM | COOP Extremes Plots";
 include("$rootpath/include/header.php");
 $station = isset($_GET["station"]) ? $_GET["station"] : ""; 
+$var = isset($_GET["var"]) ? $_GET["var"]: "";
 ?>
 
 <div class="text">
