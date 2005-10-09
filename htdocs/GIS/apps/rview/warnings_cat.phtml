@@ -1,13 +1,18 @@
 <?php
+include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 // How simple can it get!
 // Daryl Herzmann
 
+$id = isset($_GET["id"]) ? $_GET["id"] : die();
+$img_x = isset($_GET["img_x"]) ? $_GET["img_x"] : "";
+$img_y = isset($_GET["img_y"]) ? $_GET["img_y"] : "";
 $oid = intval($id);
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 0;
 $isarchive = $_GET["archive"] == "yes" ? 1 : 0;
 
 if ( strlen($img_x) > 0){  // Augh, they clicked!!
-  dl("php_mapscript_423.so");
+  dl($mapscript);
   $extents = Array("DMX" => Array(1270178, 863000, 1755341, 1276783),
    "FSD" => Array(540178, -34000, 800341, 450783),
    "ARX" => Array(760178, -30000, 900341, 450783),
@@ -55,7 +60,7 @@ if ( strlen($img_x) > 0){  // Augh, they clicked!!
     $query = "SELECT * from warnings WHERE oid = $oid ";
 }
 
-$connect = pg_connect("host=10.10.10.40 dbname=postgis user=mesonet");
+$connect = iemdb("postgis");
 
 
 $result = pg_exec($connect, $query);
