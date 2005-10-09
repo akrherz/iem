@@ -142,6 +142,7 @@ function arSortBySecondIndex($multiArray, $secondIndex) {
       $mydata[$key]["feel"] = "";
       $mydata[$key]["dwpf"] = "";
     }
+    
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"] * 1.15078;
       $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
@@ -149,6 +150,8 @@ function arSortBySecondIndex($multiArray, $secondIndex) {
       $mydata[$key]["peak"] = $mydata[$key]["max_sknt"] * 1.15078;
       if ($mydata[$key]["max_sknt_ts"] > 0){
         $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+      } else {
+        $mydata[$key]["peak_ts"] = 0;
       }
     }
                                                                                 
@@ -214,7 +217,7 @@ while (list ($key, $val) = each ($skippedStations) ) {
   echo "<th><a href=\"javascript:new_window
 ('/content/". strtolower($tv) ."_fe.php?station=".$key."');\">". $parts["sname"] . "</a></th>";
 
-  echo "<td bgcolor=\"red\">". strftime("%d %b %I:%M %p", $parts[ts]) ."</td>";
+  echo "<td bgcolor=\"red\">". strftime("%d %b %I:%M %p", $parts['ts']) ."</td>";
 
   if ($parts["ts"] < $today) {
     echo "<th colspan=10>Site Offline!</th></tr>";
