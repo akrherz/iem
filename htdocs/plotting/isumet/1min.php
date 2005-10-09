@@ -151,7 +151,7 @@ $graph->legend->Pos(0.01,0.075);
 //[DMF]$graph->y2axis->scale->ticks->Set(100,25);
 //[DMF]$graph->y2axis->scale->ticks->SetPrecision(0);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,14);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
 
 //[DMF]$graph->y2axis->SetTitle("Solar Radiation [W m**-2]");
