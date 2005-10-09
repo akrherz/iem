@@ -1,4 +1,5 @@
 <?php
+include("../../../config/settings.inc.php");
 // 1 minute schoolnet data plotter
 // Cool.....
 
@@ -95,8 +96,8 @@ for ($j=0; $j<24; $j++){
 
 $max = max($prec);
 
-include ("../dev17/jpgraph.php");
-include ("../dev17/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -120,17 +121,17 @@ $graph->subtitle->Set($titleDate );
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01,0.08);
 
-$graph->yaxis->scale->ticks->SetPrecision(2);
+//$graph->yaxis->scale->ticks->SetPrecision(2);
 
 $graph->yscale->SetGrace(10);
 $graph->yaxis->SetColor("blue");
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,14);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Accumulated Precipitation [inches]");
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 $graph->yaxis->SetTitleMargin(43);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 //$graph->SetAxisStyle(AXSTYLE_YBOXIN);
 $graph->xaxis->SetPos("min");
 
