@@ -1,4 +1,5 @@
 <?php
+include("../../../config/settings.inc.php");
 //  1 minute data plotter 
 
 $station = intval($station);
@@ -123,8 +124,8 @@ if ($sr[0] == ""){
 }
 
 
-include ("../dev17/jpgraph.php");
-include ("../dev17/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -141,7 +142,7 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetTextTickInterval(60);
 
 $graph->xaxis->SetLabelAngle(90);
-$graph->yaxis->scale->ticks->SetPrecision(1);
+//$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->yaxis->scale->ticks->Set(1,0.5);
 //$graph->yscale->SetGrace(10);
 $graph->title->Set($Scities[$Sconv[$station]]['city'] ."Map Room Temperature");
@@ -150,16 +151,16 @@ $graph->subtitle->Set($titleDate );
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01,0.075);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,14);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
 
 
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 //$graph->yaxis->SetTitleMargin(48);
 $graph->yaxis->SetTitleMargin(40);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
