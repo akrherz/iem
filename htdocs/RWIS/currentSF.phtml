@@ -2,6 +2,7 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/all_locs.php");
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_RWIS';
+$sort = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
 ?>
 
 <?php 
@@ -32,9 +33,6 @@ $rwis = $iem->getNetwork($network);
 ?>
 
 <?php
-if (strlen($sortcol) == 0) {
-  $sortcol = "city";
-} 
 
 $vals = Array("tsf0" => "Sensor 1 - Temp [F]", 
   "tmpf" => "Air Temp [F]",
