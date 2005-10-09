@@ -28,18 +28,23 @@
  $db = Array();
  while (list($site, $iemob) = each($network) ){
   $db[$site] = Array();
+  $db[$site]['tmpf'] = "";
+  $db[$site]['max_tmpf'] = "";
+  $db[$site]['min_tmpf'] = "";
   if ($iemob->db["tmpf"] != -99) {
     $db[$site]['tmpf'] = $iemob->db["tmpf"];
     $db[$site]['max_tmpf'] = $iemob->db["max_tmpf"];
     $db[$site]['min_tmpf'] = $iemob->db["min_tmpf"];
   }
   $db[$site]['sname'] = $iemob->db["sname"];
+  $db[$site]['phour'] = "";
   if ($iemob->db["phour"] != -99)
     $db[$site]['phour'] = $iemob->db["phour"];
   $db[$site]['ts'] = $iemob->ts;
   $db[$site]['sid'] = $site;
   $db[$site]['pday'] = $iemob->db["pday"];
   $db[$site]['raw'] = $iemob->db["raw"];
+   $db[$site]['rstage'] = "";
   if ($iemob->db["rstage"] > 0)
     $db[$site]['rstage'] = $iemob->db["rstage"];
  }
