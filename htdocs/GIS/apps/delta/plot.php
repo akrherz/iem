@@ -65,5 +65,5 @@ mktitle($map, $img, "  Recent 15 minute Pressure Change [inches] valid $t");
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
-$img->saveWebImage();
+$img->saveImage('');
 ?>
