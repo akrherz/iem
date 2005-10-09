@@ -2,14 +2,9 @@
 	$width = 87;
 	$height = 60;
 	$Font = '/mesonet/www/html/content/handgotn.TTF';
-
-	if (strlen($year) == 0){
-		$year = date("Y");
-	} if (strlen($month) == 0){
-		$month = date("F");
-	} if (strlen($day) == 0){
-                $day = date("d");
-        } 
+    $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+    $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
+    $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 
 
 	$gif = ImageCreate($width,$height);
