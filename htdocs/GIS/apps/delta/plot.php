@@ -1,4 +1,5 @@
 <?php
+include("../../../../config/settings.inc.php");
 //  mesoplot/plot.php
 //  - Replace GEMPAK mesoplots!!!
 $i = isset($_GET["i"]) ? $_GET["i"] : "1h";
@@ -13,7 +14,7 @@ if ($i == "1h")
 	}
 }
 
-dl("php_mapscript_401.so");
+dl($mapscript);
 
 function mktitle($map, $imgObj, $titlet) { 
  
@@ -64,5 +65,5 @@ mktitle($map, $img, "  Recent 15 minute Pressure Change [inches] valid $t");
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
-$img->saveImage('', MS_PNG, 0, 0, -1);
+$img->saveImage();
 ?>
