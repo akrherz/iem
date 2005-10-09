@@ -3,6 +3,7 @@ include("../../../../config/settings.inc.php");
 $date = isset($_GET["date"]) ? $_GET["date"] : date("Y-m-d", time() - 86400 - (7 * 3600));
 $var = isset($_GET["var"]) ? $_GET["var"] : "c11";
 $var2 = isset($_GET["var2"]) ? $_GET["var2"] : "c12";
+$direct = isset($_GET["direct"]) ? $_GET['direct']: "";
 
 dl($mapscript);
 include("$rootpath/include/agclimateLoc.php");
