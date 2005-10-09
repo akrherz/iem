@@ -1,5 +1,8 @@
 <?php
 include("../../../../config/settings.inc.php");
+$date = isset($_GET["date"]) ? $_GET["date"] : date("Y-m-d", time() - 86400 - (7 * 3600));
+$var = isset($_GET["var"]) ? $_GET["var"] : "c11";
+$var2 = isset($_GET["var2"]) ? $_GET["var2"] : "c12";
 
 dl($mapscript);
 include("$rootpath/include/agclimateLoc.php");
@@ -34,16 +37,8 @@ function plotNoData($map, $img){
 
 }
 
-if (strlen($date) == 0){
-  $ts = time() - 86400 - (7 * 3600);
-} else {
   $ts = strtotime($date);
-}
 
-if (strlen($var) == 0){
-  $var = "c11";
-  $var2 = "c12";
-}
 
 $varDef = Array("c11" => "High Air Temperatures",
   "c12" => "Low Air Temperatures [F]",

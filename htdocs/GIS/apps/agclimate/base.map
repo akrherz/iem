@@ -62,14 +62,9 @@ LAYER
   NAME counties
   STATUS ON
   TYPE POLYGON
-  DATA shape/kcci/iacounties.shp
+  DATA shape/26915/iowa/iacounties.shp
   PROJECTION
-    "proj=tmerc"
-    "lat_0=41.5"
-    "lon_0=-93.65"
-    "x_0=0"
-    "y_0=0"
-    "k=0.9999"
+    "init=epsg:26915"
   END
   LABELCACHE OFF
 #  LABELITEM 'NAME'
@@ -150,7 +145,7 @@ LAYER
   PROJECTION
    "proj=latlong"
   END
-  DATA shape/ia/interstates.shp
+  DATA shape/unproj/iowa/interstates.shp
 #  CLASSITEM "FCC"
   CLASS
 #    EXPRESSION /A1[0-9]/
