@@ -1,12 +1,11 @@
 <html>
 <head>
 <?php
-  $station = $_GET['station'];
-  include('../include/keloLoc.php');
-  include("../include/imagemaps.php");
- if (strlen($station) == 0){
-   $station = "SKCI4";
- }
+  include("../../config/settings.inc.php");
+  $station = isset($_GET['station']) ? $_GET["station"]: "SSAS2";
+  $min = isset($_GET["min"]) ? $_GET["min"] : 1;
+  include("$rootpath/include/keloLoc.php");
+  include("$rootpath/include/imagemaps.php");
  if (strlen($min) == 0){
    $secs = 600;
    $min = 1;
