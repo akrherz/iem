@@ -1,6 +1,8 @@
 <?php
 include("../../config/settings.inc.php");
  $tbl = isset($_GET["tbl"]) ? $_GET["tbl"] : "all";
+ $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
+ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 
  if ($tbl == "all")
    $tblname = "climate";
@@ -106,6 +108,7 @@ contains records for sites that do and don't have data before 1951.
 
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
  {
+   if ($station == "ia7842" || $station == "ia4381") continue;
    echo "<tr ";
    if ( ($i % 2) == 0) 
      echo "class='even'";
