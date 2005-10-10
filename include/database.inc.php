@@ -7,10 +7,10 @@ $iem20 = 'db1.mesonet.agron.iastate.edu';
 $iem30 = 'kcci.mesonet.agron.iastate.edu';
 $_DATABASES = Array(
  'access' => "dbname=iem port=9999 host=$iem30 user=nobody",
- 'coop' => "dbname=coop host=$iem20 user=akrherz",
+ 'coop' => "dbname=coop host=$iem20 user=nobody",
  'wepp' => "dbname=wepp host=$iem20 user=akrherz",
  'snet' => "dbname=snet host=$iem20 user=akrherz",
- 'mesosite' => "dbname=mesosite host=$iem40 user=akrherz",
+ 'mesosite' => "dbname=mesosite host=$iem40 user=nobody",
  'isuag' => "dbname=isuag host=$iem40 user=akrherz",
  'other' => "dbname=other host=$iem40 user=akrherz",
  'postgis' => "dbname=postgis host=$iem40 user=akrherz",

@@ -39,8 +39,8 @@ echo "</select>\n";
 
 
 function snetSelect($selected){
-
-include("/mesonet/www/html/include/snetLoc.php");
+global $rootpath;
+include("$rootpath/include/snetLoc.php");
 echo "<select name=\"station\">\n";
 
 for ($i = 0; $i < count($Scities); $i++) {
@@ -58,8 +58,8 @@ echo "</select>\n";
 } 
 
 function keloSelect($selected){
-
-include("/mesonet/www/html/include/keloLoc.php");
+    global $rootpath;
+include("$rootpath/include/keloLoc.php");
 echo "<select name=\"station\">\n";
 
 for ($i = 0; $i < count($Scities); $i++) {
@@ -77,8 +77,8 @@ echo "</select>\n";
 }
 
 function kcciSelectAuto($selected, $pre, $post){
-
-include("/mesonet/www/html/include/kcciLoc.php");
+global $rootpath;
+include("$rootpath/include/kcciLoc.php");
 echo "<form><select name=\"station\" onChange=\"location=this.form.station.options[this.form.station.selectedIndex].value\">\n";
 
 for ($i = 0; $i < count($Scities); $i++) {
@@ -97,8 +97,8 @@ echo "</select></form>\n";
 
 
 function kcciSelect($selected){
-
-include("/mesonet/www/html/include/kcciLoc.php");
+global $rootpath;
+include("$rootpath/include/kcciLoc.php");
 echo "<select name=\"station\">\n";
 
 for ($i = 0; $i < count($Scities); $i++) {
@@ -116,8 +116,8 @@ echo "</select>\n";
 }
 
 function kcci2Select($selected){
-
-include("/mesonet/www/html/include/kcciLoc.php");
+global $rootpath;
+include("$rootpath/include/kcciLoc.php");
 echo "<select name=\"station\">\n";
 
 for ($i = 0; $i < count($Scities); $i++) {
@@ -141,7 +141,8 @@ echo "</select>\n";
 <?php
 
 function awosSelect($selected){
-include("/mesonet/www/html/include/awosLoc.php");
+global $rootpath;
+include("$rootpath/include/awosLoc.php");
   echo "<select name=\"station\">\n";
   print_r ($Wcities);
   for ($i = 0; $i < count($Wcities); $i++) {
@@ -158,7 +159,8 @@ include("/mesonet/www/html/include/awosLoc.php");
 }
 
 function awosMultiSelect($selected, $size){
-include("/mesonet/www/html/include/awosLoc.php");
+global $rootpath;
+include("$rootpath/include/awosLoc.php");
   echo "<select name=\"station[]\" size=\"". $size ."\" MULTIPLE>\n";
   echo "<option value=\"_ALL\">Select All</option>\n";
   for ($i = 0; $i < count($Wcities); $i++) {
@@ -175,7 +177,8 @@ include("/mesonet/www/html/include/awosLoc.php");
 }
 
 function rwisMultiSelect($selected, $size){
-include("/mesonet/www/html/include/rwisLoc.php");
+global $rootpath;
+include("$rootpath/include/rwisLoc.php");
   echo "<select name=\"station[]\" size=\"". $size ."\" MULTIPLE>\n";
   echo "<option value=\"_ALL\">Select All</option>\n";
   for ($i = 0; $i < count($Rcities); $i++) {
@@ -194,8 +197,8 @@ include("/mesonet/www/html/include/rwisLoc.php");
 
 
 function asosSelect($selected){
-
-include("/mesonet/www/html/include/azosLoc.php");
+global $rootpath;
+include("$rootpath/include/azosLoc.php");
 echo "<select name=\"station\">\n";
 
 for ($i = 0; $i < count($Zcities); $i++) {
@@ -399,8 +402,8 @@ Selected Station: <input type="text" name="city" size="50">
 <?php
 
 function rwisSelect($selected){
-
-include("/mesonet/www/html/include/rwisLoc.php");
+global $rootpath;
+include("$rootpath/include/rwisLoc.php");
 echo "<select name=\"station\">\n";
 
 for ($i = 0; $i < count($Rcities); $i++) {
