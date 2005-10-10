@@ -1,4 +1,5 @@
 <?php
+include("../../config/settings.inc.php");
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_RAWS';
 ?>
 
@@ -18,10 +19,10 @@ function new_window(url) {
     window.onload=function(){tableruler();}
 </script>';
   $TITLE = "IEM | RAWS | Current Conditions";
-  include("/mesonet/php/include/header.php"); 
-  include("../include/mlib.php"); 
-  include("../include/iemaccess.php");
-  include("../include/iemaccessob.php");
+  include("$rootpath/include/header.php"); 
+  include("$rootpath/include/mlib.php"); 
+  include("$rootpath/include/iemaccess.php");
+  include("$rootpath/include/iemaccessob.php");
 
   $iem = new IEMAccess();
   $awos = $iem->getNetwork($network);
@@ -190,4 +191,4 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 
 <br><br></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
