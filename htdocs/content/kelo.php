@@ -1,4 +1,5 @@
 <?
+include("../../config/settings.inc.php");
 function dwp($tmpf, $relh){
   if ($relh == 0){
     return "";
