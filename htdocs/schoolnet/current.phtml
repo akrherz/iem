@@ -186,9 +186,9 @@ while (list ($key, $val) = each ($finalA))  {
   if ($tdiff < 200){
     echo ">". strftime("%I:%M %p", $parts['ts']);
   } else if ($tdiff < 600){
-    echo "bgcolor=\"green\">". strftime("%I:%M %p", $parts[ts]);
+    echo "bgcolor=\"green\">". strftime("%I:%M %p", $parts['ts']);
   } else {
-    echo "bgcolor=\"red\">". strftime("%d %b %I:%M %p", $parts[ts]);
+    echo "bgcolor=\"red\">". strftime("%d %b %I:%M %p", $parts['ts']);
   }
   echo "</td>";
   echo "<td align='center'>". $parts["tmpf"] ."(<font color=\"#ff0000\">".
