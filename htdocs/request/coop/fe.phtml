@@ -29,7 +29,7 @@ include("$rootpath/include/header.php");
 sites, your timespan is limited to one year.</i><br />
 <select name="station[]" size="5" MULTIPLE>
 	<option value="_ALL">--Select ALL--
-<?php include("../../include/COOPstations.php");
+<?php include("$rootpath/include/COOPstations.php");
 while( list($key, $val) = each($cities) ){
   if (strlen($val["dont"]) > 0) continue;
   echo "<option value=\"$key\"";
