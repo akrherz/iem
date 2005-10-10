@@ -10,7 +10,7 @@ function dwpf($tmpf, $relh){
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) $_GET["day"] : date("d");
+$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 
 
 if (strlen($year) == 4 && strlen($month) > 0 && strlen(day) > 0 ){
