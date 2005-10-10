@@ -5,11 +5,11 @@ NAME fancybase
 STATUS ON
 SIZE 640 480
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT -2223813 -1746393 2207341 1701506
 UNITS METERS
 #SHAPEPATH "/mesonet/www/html/GIS/data/"
-SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR 140 144 90
 IMAGETYPE PNG
 TRANSPARENT off
