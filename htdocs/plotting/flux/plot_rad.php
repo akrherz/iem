@@ -1,4 +1,6 @@
 <?php
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 /* We need to get some CGI vars! */
 $year = isset($_GET['year']) ? $_GET['year'] : date("Y");
 $month = isset($_GET['month']) ? $_GET['month'] : date("m");
@@ -17,7 +19,7 @@ $units = Array("netrad" => "Wm^-2",
   "co2" => "mg/m^2/s",
   "sensible" => "Wm^-2");
 
-$pgconn = pg_connect("10.10.10.40","5432","other");
+$pgconn = iemdb("other");
 
 $sql = sprintf("SELECT * from flux%s WHERE date(valid) = '%s-%s-%s' ORDER by valid ASC", $year, $year, $month, $day);
 

@@ -1,7 +1,9 @@
 <?php
+ include("../../config/settings.inc.php");
+ include("$rootpath/include/database.inc.php");
  $id = intval($_GET["id"]);
  $TITLE = "IEM | News & Notes";
- include("/mesonet/php/include/header.php");
+ include("$rootpath/include/header.php");
 ?>
 <b>Nav:</b> <a href="/index.php">Homepage</a> &nbsp; <b> > </b> &nbsp; News & Notes
 
@@ -12,7 +14,7 @@
   else echo "<h4>10 most recent posts:</h4>";
   // Here is where we start pulling station Information
 
-  $connection = pg_connect("10.10.10.40","5432","mesosite");
+  $connection = iemdb("mesosite");
   if ($id > 0) {
     $q = "SELECT *, to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
            from news WHERE id = $id ";
@@ -52,4 +54,4 @@
 
 </TD></TR>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
