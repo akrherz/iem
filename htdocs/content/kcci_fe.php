@@ -1,16 +1,11 @@
 <html>
 <head>
 <?php
-  $station = $_GET['station'];
-  include('../include/kcciLoc.php');
-  include("../include/imagemaps.php");
- if (strlen($station) == 0){
-   $station = "SKCI4";
- }
- if (strlen($min) == 0){
-   $secs = 600;
-   $min = 1;
- }
+  include("../../config/settings.inc.php");
+  $station = isset($_GET['station']) ? $_GET["station"] : 'SKCI4';
+  $min = isset($_GET["min"]) ? $_GET["min"] : 1;
+  include("$rootpath/include/kcciLoc.php");
+  include("$rootpath/include/imagemaps.php");
  $secs = intval($min) * 60;
 ?>
   <title>IEM | KCCI SchoolNet | <?php echo $Scities[$station]["short"]; ?></title>
@@ -42,7 +37,6 @@ echo "</select>\n";
 </form>
 <p>
 <?php
-  echo "<a href=\"/kcci/tool/clicktru.php?station=".$station."\" target=\"_new\"><img src=\"/kcci/spics/kcci_".$station .".gif\" border=0></a><br>\n";
   echo "<img src=\"http://mesonet.agron.iastate.edu/content/kcci.php?station=".$station ."\">\n";
 ?>
 

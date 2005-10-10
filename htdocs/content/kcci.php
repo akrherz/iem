@@ -8,10 +8,12 @@ function dwp($tmpf, $relh){
   return round( ( $dwpk - 273.15 ) * 9.00/5.00 + 32 , 0);
 
 }
+include("../../config/settings.inc.php");
         $station = $_GET['station'];
-        include("../include/snetLoc.php");
-        include("../include/currentOb.php");
-        include("../include/mlib.php");
+        include("$rootpath/include/snet_locs.php");
+        include("$rootpath/include/currentOb.php");
+        include("$rootpath/include/mlib.php");
+        $site = isset($_GET["station"]) ? $_GET["station"]: 'SKCI4';
         $site = substr($station, 0, 5);
         if (strlen($site) == 0)  $site = 'SKCI4';
 
