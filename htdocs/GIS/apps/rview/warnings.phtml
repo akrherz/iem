@@ -146,7 +146,7 @@ while( list($key, $value) = each($wfos) ){
   if ($site == $key) echo "SELECTED";
   echo ">[".$key."] ". $wfos[$key]["city"] ."\n";
 }
-if ( $_GET["site"] == "user" ) { 
+if ( isset($_GET["site"]) && $_GET["site"] == "user" ) { 
 echo "<option value=\"user\" SELECTED>User Selected\n";
 }
 ?>
