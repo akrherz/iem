@@ -1,4 +1,5 @@
 <?php
+ include("../../../../config/settings.inc.php");
  $rad = isset($_GET['rad']) ? $_GET['rad'] : 'DMX';
  $tv = isset($_GET['rad']) ? strtoupper(substr($_GET['tv'],0,4)) : 'KCCI';
  $station = isset($_GET['station']) ? $_GET['station'] : '';
@@ -9,7 +10,7 @@
 $REFRESH = "<meta http-equiv=\"refresh\" content=\"60\">";
 
 $TITLE = "IEM | SchoolNet | Where's it raining?";
-include("/mesonet/php/include/header.php");
+include("$rootpath/include/header.php");
 ?>
 
 <div class="text">
@@ -54,14 +55,14 @@ include("/mesonet/php/include/header.php");
 </form>
 
 <?php
-dl("php_mapscript_440b.so");
-include('/mesonet/php/include/snet_locs.php');
+dl($mapscript);
+include("$rootpath/include/snet_locs.php");
 $stbl = $cities[$tv];
 
-include('../../../include/mlib.php');
-include('../../../include/nexlib2.php');
-include('../../../include/iemaccess.php');
-include('../../../include/iemaccessob.php');
+include("$rootpath/include/mlib.php");
+include("$rootpath/include/nexlib2.php");
+include("$rootpath/include/iemaccess.php");
+include("$rootpath/include/iemaccessob.php");
 
 $iemdb = new IEMAccess();
 $iemdata = $iemdb->getNetwork($tv);
@@ -201,7 +202,7 @@ $radTS = substr($radTimes[8], 4, 2) ."/". substr($radTimes[8], 6, 2) ." ". subst
 mktitle($map, $img, " SNET 15min rain ending: ". $ts ." , NEXRAD valid: ". $radTS ."                  ");
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+$url = $img->saveWebImage();
 
 echo"<table><tr><td valign=\"TOP\">";
 
@@ -268,6 +269,6 @@ echo "</td></tr></table>\n";
 ?></div>
 
 <?php
-include ("/mesonet/php/include/footer.php");
+include ("$rootpath/include/footer.php");
 
 ?>
