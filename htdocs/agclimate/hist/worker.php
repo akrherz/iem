@@ -6,7 +6,7 @@ include("$rootpath/include/database.inc.php");
  // Daryl Herzmann 26 Mar 2003
 header("Content-type: text/plain");
 
-include("../../include/agclimateLoc.php");
+include("$rootpath/include/agclimateLoc.php");
 
 $d = Array("comma" => "," , "tab" => "\t", "space" => " ");
 
