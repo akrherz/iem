@@ -9,7 +9,7 @@ FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT -126 26 -76 50
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/wind.sym"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE png
 
