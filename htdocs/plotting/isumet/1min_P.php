@@ -57,7 +57,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
   // We are good, write data, increment i
   if ( $shouldbe == $timestamp ){
     $prec[$i] = $thisPREC;
-    $alti[$i] = $thisALTI * 33.8639;
     if ($alti[$i] < 900)   $alti[$i] = " ";
     $i++;
     continue;
@@ -73,7 +72,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
       $missing++;
     }
     $prec[$i] = $thisPREC;
-    $alti[$i] = $thisALTI * 33.8639;
     if ($alti[$i] < 900)   $alti[$i] = " ";
     $i++;
     continue;
