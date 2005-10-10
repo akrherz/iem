@@ -83,7 +83,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
       $drct[$i] = "-199";
     }
     $mph[$i] = $thisMPH;
-    $gust[$i] = $thisGust;
     $i++;
     continue;
   
@@ -106,7 +105,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
       $drct[$i] = "-199";
     }
     $mph[$i] = $thisMPH;
-#    $gust[$i] = $thisGust;
     $i++;
     continue;
     
