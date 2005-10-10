@@ -2,7 +2,10 @@
 include("../../../config/settings.inc.php");
 //  1 minute data plotter 
 
-$station = intval($station);
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
+$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+
 
 
 if (strlen($year) == 4 && strlen($month) > 0 && strlen(day) > 0 ){
@@ -139,7 +142,7 @@ $graph->xaxis->SetLabelAngle(90);
 //$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->yaxis->scale->ticks->Set(1,0.5);
 //$graph->yscale->SetGrace(10);
-$graph->title->Set($Scities[$Sconv[$station]]['city'] ."Map Room Temperature");
+$graph->title->Set("Map Room Temperature");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
