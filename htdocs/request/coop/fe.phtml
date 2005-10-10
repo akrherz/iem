@@ -1,12 +1,13 @@
 <?php 
+include("../../../config/settings.inc.php");
         $TITLE = "IEM | COOP Data Download";
-include("/mesonet/php/include/header.php"); 
+include("$rootpath/include/header.php"); 
 ?>
 <div class="text">
 <b>Nav:</b> <a href="/COOP/">COOP</a> <b> > </b>
   Download Data
 
-<?php include("../../include/forms.php"); ?>
+<?php include("$rootpath/include/forms.php"); ?>
 
 <p>This page allows you to download daily observations for the NWS COOP network.Some items of note:
 <ul>
@@ -117,4 +118,4 @@ seconds to get a response.</i><br />
 </form></div>
 
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
