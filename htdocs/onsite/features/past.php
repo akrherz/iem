@@ -4,8 +4,12 @@
   //  30 Dec 2002  Daryl Herzmann
 ?>
 
-<?php $TITLE = "IEM | Past Features";
-include("/mesonet/php/include/header.php"); ?>
+<?php 
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | Past Features";
+$ts = isset($_GET["ts"]) ? $_GET["ts"] : 0;
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/header.php"); ?>
 
 <div class="text">
 <b>Nav:</b> <a href="/index.php">IEM Home</a> &nbsp;<b> > </b> &nbsp; Past Features
@@ -28,7 +32,7 @@ include("/mesonet/php/include/header.php"); ?>
 
   $firstday = date("d M Y", $ts);
 
-  $c = pg_connect("10.10.10.40","5432","mesosite");
+  $c = iemdb("mesosite");
   $q = "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
                 to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
 		to_char(valid, 'Dy Mon DD, YYYY') as calhead,
@@ -81,5 +85,5 @@ include("/mesonet/php/include/header.php"); ?>
 
 <BR><BR></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
 
