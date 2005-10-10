@@ -37,7 +37,7 @@ echo "</select>\n";
 </form>
 <p>
 <?php
-  echo "<img src=\"http://mesonet.agron.iastate.edu/content/kcci.php?station=".$station ."\">\n";
+  echo "<img src=\"kcci.php?station=".$station ."\">\n";
 ?>
 
 <?php if (! isset($mode) ){ ?>
