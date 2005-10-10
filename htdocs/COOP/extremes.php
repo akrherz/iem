@@ -19,12 +19,7 @@ include("$rootpath/include/header.php");
 
 <?
  $connection = iemdb("coop");
- if ( strlen($month) > 0){
-  if ( strlen($month) == 1) {
-    $month = "0". $month;
-  }
 
- }
  if ( strlen($day) > 0){
    if ( strlen($day) == 1) {
      $date = $month ."-0". $day ;
