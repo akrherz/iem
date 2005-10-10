@@ -44,7 +44,7 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 ?>
 
 <div class="text">
-<b>Nav:</b><a href="<?php echo $webroot; ?>/current/">Current Conditions</a>
+<b>Nav:</b><a href="<?php echo $rooturl; ?>/current/">Current Conditions</a>
 
 <?php $current_network = "All"; include("$rootpath/include/current_bar.inc.php"); ?>
 
@@ -53,7 +53,7 @@ echo "<p>Top 30 values of <b>". $vals[$sortcol] ."</b> displayed from the combin
 of RWIS, ASOS, AWOS and SchoolNet stations in Iowa.";
 ?>
 
-<form method="POST" action="<?php echo $webroot; ?>/my/current.php">
+<form method="POST" action="<?php echo $rooturl; ?>/my/current.php">
 
 
 <table style="font-size: 10pt;" class="ruler">
@@ -61,7 +61,7 @@ of RWIS, ASOS, AWOS and SchoolNet stations in Iowa.";
 <tr>
   <th rowspan="2">ADD:</th>
   <th rowspan="2">Station:</th>
-  <th rowspan="2"><a href="all.php?sortcol=ts&metar=<?php echo $metar; ?>&network=<?php echo $network; ?>">Ob Time</a></th>
+  <th rowspan="2"><a href="all.php?sortcol=ts&metar=<?php echo $metar; ?>">Ob Time</a></th>
   <th colspan="3">Temps &deg;F</th>
   <th colspan="3">&nbsp;</th>
   <th colspan="3">Wind [knots]</th>
