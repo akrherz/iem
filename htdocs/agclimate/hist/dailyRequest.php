@@ -59,7 +59,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
   <TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
   <TR><TH>Starting On:</TH>
     <TD rowspan="2">
-      <?php echo yearSelect(1997, $year); ?>
+      <?php echo yearSelect(1997, 2005); ?>
    </TD>
    <td><SELECT name="startMonth">
       <option value="1">January
