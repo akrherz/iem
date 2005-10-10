@@ -1,6 +1,7 @@
 <?php
  include("../../config/settings.inc.php");
  include("$rootpath/include/selectWidget.php");
+ $report = isset($_GET["report"]) ? $_GET["report"] : "";
  $network = isset($_GET["network"]) ? $_GET["network"] : die("No Network Specified");
  
  $sw = new selectWidget("network.phtml?", "network.phtml?network=$network&", $network );
