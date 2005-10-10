@@ -2,7 +2,8 @@
 include("../../config/settings.inc.php");
  $tbl = isset($_GET["tbl"]) ? $_GET["tbl"] : "all";
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
- $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+ $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+ $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
 
  if ($tbl == "all")
    $tblname = "climate";
@@ -30,12 +31,9 @@ include("$rootpath/include/header.php");
    $date = date("m-d"); 
  }
  
- if (strlen($sort) == 0 || strlen($sort) > 10 ){
-   $sort = 'station';
- }
 
  $query = "SELECT * from $tblname WHERE 
-     to_char(valid, 'mm-dd') = '".$date."' ORDER by ". $sort ." DESC";
+     to_char(valid, 'mm-dd') = '".$date."' ORDER by ". $sortcol ." DESC";
  $rs = pg_exec($connection, $query);
 
  $tokens = split("-", $date);
@@ -80,23 +78,23 @@ contains records for sites that do and don't have data before 1951.
 <?
  echo "<table cellpadding=2 rowspacing=0 cellspacing=0 width='700px'>
   <tr>
-   <th rowspan='2' class='subtitle' valign='top'><a href='extremes.php?sort=station&day=".$day."&month=".$month."'>Station</a></th>
+   <th rowspan='2' class='subtitle' valign='top'><a href='extremes.php?sortcol=station&day=".$day."&month=".$month."'>Station</a></th>
    <th rowspan='2' class='subtitle' valign='top'>Years</th>
    <th colspan='4' class='subtitle'>High Temperature</th>
    <th colspan='4' class='subtitle'>Low Temperature</th>
    <th colspan='2' class='subtitle'>Precipitation</th>
   </tr>
   <tr>
-    <th><a href='extremes.php?sort=max_high&day=".$day."&month=".$month."'>Max:</a></th>
-       <th><a href='extremes.php?sort=max_high_yr&day=".$day."&month=".$month."'>Year:</a></th>
-    <th><a href='extremes.php?sort=min_high&day=".$day."&month=".$month."'>Min:</a></th>
-       <th><a href='extremes.php?sort=min_high_yr&day=".$day."&month=".$month."'>Year:</a></th>
-    <th><a href='extremes.php?sort=max_low&day=".$day."&month=".$month."'>Max:</a></th>
-       <th><a href='extremes.php?sort=max_low_yr&day=".$day."&month=".$month."'>Year:</a></th>
-    <th><a href='extremes.php?sort=min_low&day=".$day."&month=".$month."'>Min:</a></th>
-        <th><a href='extremes.php?sort=min_low_yr&day=".$day."&month=".$month."'>Year:</a></th>
-    <th><a href='extremes.php?sort=max_precip&day=".$day."&month=".$month."'>Max:</a></th>
-        <th><a href='extremes.php?sort=max_precip_yr&day=".$day."&month=".$month."'>Year:</a></th>
+    <th><a href='extremes.php?sortcol=max_high&day=".$day."&month=".$month."'>Max:</a></th>
+       <th><a href='extremes.php?sortcol=max_high_yr&day=".$day."&month=".$month."'>Year:</a></th>
+    <th><a href='extremes.php?sortcol=min_high&day=".$day."&month=".$month."'>Min:</a></th>
+       <th><a href='extremes.php?sortcol=min_high_yr&day=".$day."&month=".$month."'>Year:</a></th>
+    <th><a href='extremes.php?sortcol=max_low&day=".$day."&month=".$month."'>Max:</a></th>
+       <th><a href='extremes.php?sortcol=max_low_yr&day=".$day."&month=".$month."'>Year:</a></th>
+    <th><a href='extremes.php?sortcol=min_low&day=".$day."&month=".$month."'>Min:</a></th>
+        <th><a href='extremes.php?sortcol=min_low_yr&day=".$day."&month=".$month."'>Year:</a></th>
+    <th><a href='extremes.php?sortcol=max_precip&day=".$day."&month=".$month."'>Max:</a></th>
+        <th><a href='extremes.php?sortcol=max_precip_yr&day=".$day."&month=".$month."'>Year:</a></th>
   </tr>
  ";
 
