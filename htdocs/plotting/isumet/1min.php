@@ -7,7 +7,7 @@ $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 
 
-if (strlen($year) == 4 && strlen($month) > 0 && strlen(day) > 0 ){
+if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
   $myTime = strtotime($year."-".$month."-".$day);
 } else {
   $myTime = strtotime(date("Y-m-d"));
@@ -42,7 +42,7 @@ while (list ($line_num, $line) = each ($fcontents)) {
   $inTmpf = round (substr($line, 31, 5),2);
 
   if ($thisTmpf < -50 || $thisTmpf > 150 ){
-    $thisTmpf = " ";
+    $thisTmpf = "";
   } else {
     if ($max_yaxis < $thisTmpf){
       $max_yaxis = $thisTmpf;
@@ -76,9 +76,9 @@ while (list ($line_num, $line) = each ($fcontents)) {
     $tester = $shouldbe + 60;
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
-      $tmpf[$i] = " ";
-      $dwpf[$i] = " ";
-      $sr[$i] = " ";
+      $tmpf[$i] = "";
+      $dwpf[$i] = "";
+      $sr[$i] = "";
       $xlabel[$i] ="";
       $i++;
       $missing++;

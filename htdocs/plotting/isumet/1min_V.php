@@ -90,8 +90,7 @@ while (list ($line_num, $line) = each ($fcontents)) {
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
       $drct[$i] = "-199";
-      $mph[$i] = " ";
-#      $gust[$i] = " ";
+      $mph[$i] = "";
 
       $i++;
       $missing++;
