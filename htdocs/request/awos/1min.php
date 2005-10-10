@@ -2,6 +2,7 @@
 include("../../../config/settings.inc.php");
         $TITLE = "IEM | AWOS 1 Minute Data Download";
 include("$rootpath/include/header.php"); 
+$bogus = 0;
 ?>
 
 <div class="text">
@@ -49,7 +50,7 @@ in this archive up until that point.</i><br>
   <tr>
     <th>Start:</th>
     <td rowspan="2">
-     <?php yearSelect(1995, $year, "year"); ?>
+     <?php echo yearSelect(1995, 2005, "year"); ?>
     </td>
     <td rowspan="2">
      <?php monthSelect($bogus); ?>
@@ -61,7 +62,7 @@ in this archive up until that point.</i><br>
      <?php gmtHourSelect($bogus, "hour1"); ?>
     </td>
     <td>
-     <?php localMinuteSelect($bogus, "minute1"); ?>
+     <?php echo minuteSelect($bogus, "minute1"); ?>
     </td>
   </tr>
 
@@ -74,7 +75,7 @@ in this archive up until that point.</i><br>
      <?php gmtHourSelect($bogus, "hour2"); ?>
     </td>
     <td>
-     <?php localMinuteSelect($bogus, "minute2"); ?>
+     <?php echo minuteSelect($bogus, "minute2"); ?>
     </td>
   </tr>
 </table>
