@@ -24,6 +24,7 @@ $i = 0;
 $new_contents = array_slice($fcontents,2);
 while (list ($line_num, $line) = each ($new_contents)) {
   $parts = split (",", $line);
+  if (sizeof($parts) < 3) continue;
   $hhmm = str_pad($parts[3],4,"0",STR_PAD_LEFT);
   $hh = substr($hhmm,0,2);
   if ($hh == 24){$hh = 00;}
@@ -64,7 +65,7 @@ $graph->xaxis->SetLabelAngle(90);
 //$graph->yaxis->scale->ticks->SetPrecision(2);
 $graph->yaxis->scale->ticks->Set(0.01,0.005);
 $graph->yscale->SetGrace(20);
-$graph->title->Set($Scities[$Sconv[$station]]['city'] ."Logger Battery Voltage");
+$graph->title->Set("Logger Battery Voltage");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);

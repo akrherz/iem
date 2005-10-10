@@ -27,6 +27,7 @@ $i = 0;
 $new_contents = array_slice($fcontents,2);
 while (list ($line_num, $line) = each ($new_contents)) {
   $parts = split (",", $line); 
+  if (sizeof($parts) < 3) continue;
   $hhmm = str_pad($parts[3],4,"0",STR_PAD_LEFT);
   $hh = substr($hhmm,0,2);
   if ($hh == 24){$hh = 00;}
