@@ -46,7 +46,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
   $thisTmpf = $parts[14];
   $timestamp = mktime($hour,$min,0,$month,$day,$year); 
 //  if ($thisTmpf < -50 || $thisTmpf > 150 ){
-//    $thisTmpf = " ";
 //  } else {
   if ($max_yaxis < $thisTmpf){
     $max_yaxis = $thisTmpf;
@@ -80,9 +79,9 @@ while (list ($line_num, $line) = each ($fcontents)) {
     $tester = $shouldbe + 60;
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
-      $tmpf[$i] = " ";
-      $dwpf[$i] = " ";
-      $sr[$i] = " ";
+      $tmpf[$i] = "";
+      $dwpf[$i] = "";
+      $sr[$i] = "";
       $xlabel[$i] ="";
       $i++;
       $missing++;

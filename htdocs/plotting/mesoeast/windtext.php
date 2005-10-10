@@ -52,8 +52,8 @@ while (list ($line_num, $line) = each ($fcontents)) {
     $tester = $shouldbe + 60;
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
-      $gust = " ";
-      $gust_time = " ";
+      $gust = "";
+      $gust_time = "";
       $i++;
       $missing++;
     }

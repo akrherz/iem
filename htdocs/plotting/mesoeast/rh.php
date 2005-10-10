@@ -46,10 +46,10 @@ while (list ($line_num, $line) = each ($fcontents)) {
   $thisRhi = intval($parts[18]);
   $timestamp = mktime($hour,$min,0,$month,$day,$year); 
   if ($thisRhf < 0 || $thisRhf > 100 ){
-    $thisRhf = " ";
+    $thisRhf = "";
   } 
   if ($thisRhi < 0 || $thisRhi > 100 ){
-    $thisRhi = " ";
+    $thisRhi = "";
   } 
 
   $shouldbe = intval( $start ) + 60 * $i;
@@ -69,8 +69,8 @@ while (list ($line_num, $line) = each ($fcontents)) {
     $tester = $shouldbe + 60;
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
-      $rhf[$i] = " ";
-      $rhi[$i] = " ";
+      $rhf[$i] = "";
+      $rhi[$i] = "";
       $xlabel[$i] ="";
       $i++;
       $missing++;
