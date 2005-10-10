@@ -1,5 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
+$sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "sid";
 function aSortBySecondIndex($multiArray, $secondIndex) {
         while (list($firstIndex, ) = each($multiArray))
                 $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];

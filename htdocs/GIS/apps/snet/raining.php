@@ -76,6 +76,7 @@ $dir = "/mesonet/data/current/${tv}_events/";
 $handle = opendir($dir);
 while (false !== ($file = readdir($handle))) { 
   if ($file != "." && $file != "..") {
+    $data[$nwsli]["p15m"] = 0;
     if ( $now - filemtime( $dir . $file ) < 15*60){
       $nwsli = substr($file,0,5);
       $a = split("\n", implode('', file($dir . $file) ) );
