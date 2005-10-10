@@ -43,8 +43,7 @@ while (list ($line_num, $line) = each ($fcontents)) {
   $thisMax = $parts[6];
   $thisMin = $parts[7];
   $timestamp = mktime($hour,$min,0,$month,$day,$year); 
-  if ($thisMax < -50 || $thisTmpf > 150 ){
-    $thisTmpf = " ";
+  if ($thisMax < -50  ){
   } else {
     if ($max_yaxis < $thisMax){
       $max_yaxis = $thisMax;
@@ -60,7 +59,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
 #    echo " EQUALS <br>";
     $maxtmp[$i] = $thisMax;
     $mintmp[$i] = $thisMin;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
   
@@ -78,7 +76,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
     }
     $maxtmp[$i] = $thisMax;
     $mintmp[$i] = $thisMin;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
     
