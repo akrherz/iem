@@ -8,7 +8,10 @@ function dwpf($tmpf, $relh){
   return round( ($dwpk - 273.15) * 9.00/5.00 + 32,2 );
 }
 
-$station = intval($station);
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
+$day = isset($_GET["day"]) $_GET["day"] : date("d");
+
 
 if (strlen($year) == 4 && strlen($month) > 0 && strlen(day) > 0 ){
   $myTime = strtotime($year."-".$month."-".$day);
