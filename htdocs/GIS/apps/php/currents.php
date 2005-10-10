@@ -1,4 +1,5 @@
 <?php
+include("../../../../config/settings.inc.php");
 
 $layers =  isset( $_GET['layers']) ? $_GET['layers'] : Array("radar", "labels");
 $var    =  isset( $_GET['var']) ? $_GET['var'] : "tmpf";
@@ -16,10 +17,10 @@ function mktitle($map, $imgObj, $titlet) {
 }
 
 
-dl("php_mapscript_442.so");
-include('../../../include/mlib.php');
-include('../../../include/iemaccess.php');
-include('../../../include/iemaccessob.php');
+dl($mapscrpt);
+include("$rootpath/include/mlib.php");
+include("$rootpath/include/iemaccess.php");
+include("$rootpath/include/iemaccessob.php");
 
 function skntChar($sknt){
   if ($sknt < 2)  return chr(0);
