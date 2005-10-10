@@ -1,5 +1,6 @@
 <?php
- include("/mesonet/php/lib/selectWidget.php");
+ include("../../config/settings.inc.php");
+ include("$rootpath/include/selectWidget.php");
  $report = isset($_GET["report"])? substr($_GET["report"],0,2): "01";
  $station = isset($_GET["station"])? strtolower( substr($_GET["station"],0,6) ): "";
 
@@ -23,7 +24,7 @@
 <?php 
 	$page = "current";
 	$TITLE = "IEM Climodat";
-	include("/mesonet/php/include/header.php"); 
+	include("$rootpath/include/header.php"); 
 ?>
 
 
@@ -45,7 +46,7 @@ at the IEM.
   <tr><th>Select Climate Station:</th><th>Select Report:</th><td></td></tr>
 
 <tr><td><select name="station" size="1">
-<?php include("../include/COOPstations.php"); 
+<?php include("$rootpath/include/COOPstations.php"); 
 while( list($key, $val) = each($cities) ){
   if (strlen($val["dont"]) > 0) continue;
   echo "<option value=\"$key\"";
@@ -129,4 +130,4 @@ if you would like to see other variables in these files or have any other commen
 </div>
 
 <?php } ?>
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
