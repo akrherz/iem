@@ -1,6 +1,7 @@
 <?php 
+include("../../../config/settings.inc.php");
         $TITLE = "IEM | AWOS 1 Minute Data Download";
-include("/mesonet/php/include/header.php"); 
+include("$rootpath/include/header.php"); 
 ?>
 
 <div class="text">
@@ -15,10 +16,10 @@ month's archive of one minute data.  We process this data into our database
 and make the observations available here for download.  Please don't make
 giant data requests through this interface, instead feel free to email Daryl (akrherz@iastate.edu) and make your request.</p>
 
-<p><b>Latest Monthly Data Upload:</b> 2005 August</p>
+<p><b>Latest Monthly Data Upload:</b> 2005 September</p>
 
-<?php include("../../include/imagemaps.php"); ?>
-<?php include("../../include/forms.php"); ?>
+<?php include("$rootpath/include/imagemaps.php"); ?>
+<?php include("$rootpath/include/forms.php"); ?>
 
 <p>
 
@@ -143,4 +144,4 @@ How shall the output values be seperated?
 </form>
 </div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

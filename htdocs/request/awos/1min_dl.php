@@ -1,4 +1,6 @@
 <?php
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 /**
  * Script that does the processing or hands off to plotter.
  * Must send content-type early, if we want this to work
@@ -7,7 +9,7 @@
  * 24 Mar 2004	Support AWOS sky coverage codes
  */
 
-include("/mesonet/www/html/include/awosLoc.php");
+include("$rootpath/include/awosLoc.php");
 
 $skycover = Array(
  0 => "NOREPORT",
@@ -91,8 +93,8 @@ if ($what == "download"){
  header("Content-type: application/octet-stream");
  header("Content-Disposition: attachment; filename=changeme.txt");
 } else if ($what == "plot"){
- include ("../../plotting/jpgraph/jpgraph.php");
-include ("../../plotting/jpgraph/jpgraph_line.php");
+ include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
  if ($selectAll){
   foreach ($Wcities as $key => $value){
    $station = $key;
@@ -110,7 +112,7 @@ include ("../../plotting/jpgraph/jpgraph_line.php");
 }
 
 if ($what != "plot"){
- $connection = pg_connect("10.10.10.20","5432","awos");
+ $connection = iemdb("awos");
 
  $query1 = "SET TIME ZONE 'GMT'";
 
