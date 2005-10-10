@@ -82,8 +82,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
 #    echo " EQUALS <br>";
     $tmpf[$i] = $thisTmpf;
     $dwpf[$i] = $thisDwpf;
-    $sr[$i] = $thisSR;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
   
@@ -102,8 +100,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
     }
     $tmpf[$i] = $thisTmpf;
     $dwpf[$i] = $thisDwpf;
-    $sr[$i] = $thisSR;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
     
