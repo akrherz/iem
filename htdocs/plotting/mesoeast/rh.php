@@ -61,7 +61,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
 //    echo " EQUALS <br>";
     $rhf[$i] = $thisRhf;
     $rhi[$i] = $thisRhi;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
   // Missed an ob, leave blank numbers, inc 
@@ -78,7 +77,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
     }
     $rhf[$i] = $thisRhf;
     $rhi[$i] = $thisRhi;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
     

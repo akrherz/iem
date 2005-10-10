@@ -76,9 +76,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
   if ( $shouldbe == $timestamp ){
 #    echo " EQUALS <br>";
     $tmpf[$i] = $thisTmpf;
-    $dwpf[$i] = $thisDwpf;
-    $sr[$i] = $thisSR;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
   
@@ -96,9 +93,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
       $missing++;
     }
     $tmpf[$i] = $thisTmpf;
-    $dwpf[$i] = $thisDwpf;
-    $sr[$i] = $thisSR;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
     
