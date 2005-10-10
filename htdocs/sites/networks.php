@@ -109,10 +109,10 @@ table that you need, please let use know.</p>
 		  if (! $nohtml)  echo "</pre>\n";
 		}
   else if ($format == "shapefile") {
-    dl("php_mapscript_461.so");
+    dl($mapscript);
     /* Create SHP,DBF bases */
     $filePre = "${network}_locs";
-    $shpFname = "/mesonet/www/html/tmp/$filePre";
+    $shpFname = "/var/www/htdocs/tmp/$filePre";
     @unlink($shpFname.".shp");
     @unlink($shpFname.".shx");
     @unlink($shpFname.".dbf");
@@ -141,7 +141,7 @@ table that you need, please let use know.</p>
 
     $shpFile->free();
     dbase_close($dbfFile);
-    chdir("/mesonet/www/html/tmp/");
+    chdir("/var/www/htdocs/tmp/");
     copy("/mesonet/data/gis/meta/4326.prj", $filePre.".prj");
     popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf ".$filePre.".prj", 'r');
     echo "Shapefile Generation Complete.<br>";
