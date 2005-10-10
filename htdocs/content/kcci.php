@@ -9,9 +9,8 @@ function dwp($tmpf, $relh){
 
 }
 include("../../config/settings.inc.php");
-        $station = $_GET['station'];
 include("$rootpath/include/snet_locs.php");
-        include("$rootpath/include/mlib.php");
+include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
 $station = isset($_GET["station"]) ? substr($_GET["station"],0,5) : 'SSAS2';
@@ -64,7 +63,7 @@ $myOb = $iemdb->getSingleSite($station);
 //imagettftext ( resource image, int size, int angle, int x, int y, int col, string fontfile, string text)
 
 // imagefilledrectangle ( $gif, 167, 25, 264, 36, $black);
- ImageTTFText($gif, 10, 0, 169 , 34, $white, "./kcci.ttf", strtoupper(substr($Scities[$site]["short"], 0, 16)) );
+ ImageTTFText($gif, 10, 0, 169 , 34, $white, "./kcci.ttf", strtoupper(substr($cities[$site]["short"], 0, 16)) );
 
  // Box to hold current dew Point!
 // imagerectangle ( $gif, 10, 40, 40, 60, $black);
