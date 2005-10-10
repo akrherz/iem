@@ -17,7 +17,6 @@ $titleDate = strftime("%b %d, %Y", $myTime);
 $fcontents = file('/mesonet/ARCHIVE/raw/isumet/'.$dirRef.'.dat');
 
 $prec = array();
-$alti = array();
 $xlabel = array();
 $firstPREC = 0.0;
 $prevPREC = 0.0;
@@ -57,7 +56,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
   // We are good, write data, increment i
   if ( $shouldbe == $timestamp ){
     $prec[$i] = $thisPREC;
-    if ($alti[$i] < 900)   $alti[$i] = " ";
     $i++;
     continue;
   
@@ -67,12 +65,10 @@ while (list ($line_num, $line) = each ($fcontents)) {
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
       $prec[$i] = " ";
-      $alti[$i] = " ";
       $i++;
       $missing++;
     }
     $prec[$i] = $thisPREC;
-    if ($alti[$i] < 900)   $alti[$i] = " ";
     $i++;
     continue;
     $line_num--;
@@ -132,11 +128,6 @@ $graph->yaxis->SetTitleMargin(43);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 //$graph->SetAxisStyle(AXSTYLE_YBOXIN);
 $graph->xaxis->SetPos("min");
-
-// Create the linear plot
-//$lineplot=new LinePlot($alti);
-//$lineplot->SetLegend("Pressure");
-//$lineplot->SetColor("black");
 
 // Create the linear plot
 $lineplot=new LinePlot($prec);
