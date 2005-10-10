@@ -143,7 +143,7 @@ $graph->xaxis->SetTickLabels($xlabel);
 //$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set($Scities[$Sconv[$station]]['city'] ." Time Series");
+$graph->title->Set(" Time Series");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);

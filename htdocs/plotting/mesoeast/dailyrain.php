@@ -68,9 +68,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
   if ( $shouldbe == $timestamp ){
 #    echo " EQUALS <br>";
     $tmpf[$i] = $thisTmpf;
-    $dwpf[$i] = $thisDwpf;
-    $sr[$i] = $thisSR;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
   
@@ -88,9 +85,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
       $missing++;
     }
     $tmpf[$i] = $thisTmpf;
-    $dwpf[$i] = $thisDwpf;
-    $sr[$i] = $thisSR;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
     
@@ -152,7 +146,7 @@ $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
 //$graph->yaxis->scale->ticks->Set(0.1,0.05);
 //$graph->yscale->SetGrace(10);
-$graph->title->Set($Scities[$Sconv[$station]]['city'] ."Daily Precipitation");
+$graph->title->Set("Daily Precipitation");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
