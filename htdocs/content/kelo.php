@@ -10,9 +10,9 @@ function dwp($tmpf, $relh){
 }
 	$station = $_GET['station'];
 include('/mesonet/php/include/snet_locs.php');
-        include("/mesonet/php/include/mlib.php");
-include('../include/iemaccess.php');
-include('../include/iemaccessob.php');
+        include("$rootpath/include/mlib.php");
+include("$rootpath/include/iemaccess.php");
+include("$rootpath/include/iemaccessob.php");
 $station = isset($_GET["station"]) ? substr($_GET["station"],0,5) : 'SSAS2';
 $iemdb = new IEMAccess();
 $myOb = $iemdb->getSingleSite($station);
