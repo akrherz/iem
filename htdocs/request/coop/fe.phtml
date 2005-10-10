@@ -31,9 +31,8 @@ sites, your timespan is limited to one year.</i><br />
 	<option value="_ALL">--Select ALL--
 <?php include("$rootpath/include/COOPstations.php");
 while( list($key, $val) = each($cities) ){
-  if (strlen($val["dont"]) > 0) continue;
+  if (isset($val["dont"]) ) continue;
   echo "<option value=\"$key\"";
-  if ($key == $id) echo " SELECTED ";
   echo ">". $val["city"] ." [". $val["startYear"] ."]\n";
 }
 ?></select>
