@@ -1,25 +1,18 @@
 
 <?php 
-  include("../../../include/forms.php");
-  $var = $_GET["var"];
-  $year = $_GET["year"];
-  $month = $_GET["month"];
-  $day = $_GET["day"];
-  if (strlen($year) > 0 && strlen($month) > 0 && strlen($day) > 0){
-    $date = $year ."-". $month ."-". $day;
-  }
-  if (strlen($date) == 0){
-    $ts = time() - 86400 - (7 * 3600);
-    $month = strftime("%m", $ts);
-    $year = strftime("%Y", $ts);
-    $day = strftime("%d", $ts);
-  }
+  include("../../../../config/settings.inc.php");
+  include("$rootpath/include/forms.php");
+  $var = isset($_GET["var"]) ? $_GET["var"]: "";
+  $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400 - (7 * 3600) );
+  $month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 86400 - (7 * 3600) );
+  $day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 86400 - (7 * 3600) );
+  $date = $year ."-". $month ."-". $day;
   $ts = mktime(0,0,0, $month, $day, $year);
   $uri = "dayplot.phtml?year=".$year."&month=".$month."&day=".$day."&";
 
   $page = "isuag";
   $TITLE = "IEM | ISUAG Daily Data Plots";
-  include("/mesonet/php/include/header.php"); 
+  include("$rootpath/include/header.php"); 
 ?>
 <div class="text">
 <table width="700">
