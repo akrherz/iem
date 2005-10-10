@@ -48,7 +48,7 @@ at the IEM.
 <tr><td><select name="station" size="1">
 <?php include("$rootpath/include/COOPstations.php"); 
 while( list($key, $val) = each($cities) ){
-  if (strlen($val["dont"]) > 0) continue;
+  if (isset($val["dont"]) ) continue;
   echo "<option value=\"$key\"";
   if ($key == $station) echo " SELECTED ";
   echo ">". $val["city"] ."\n";
