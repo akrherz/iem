@@ -299,6 +299,7 @@ function totime($ts){
 //____________________________________________________________
 function cdf($fc, $format){
   $tokens = split(",", $fc);
+  if (sizeof($tokens) == 0) { return Array(); }
   $stData = Array();
   while( list($key, $val) = each($format) ){
 #    echo $tokens[$key] ." == ". $format[$key] ;
