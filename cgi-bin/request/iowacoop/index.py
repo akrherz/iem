@@ -5,8 +5,8 @@
 # 28 Aug 2002:	coop db is on db1.mesonet
 # 3 Mar 2004	updates!
 
-import os, functs
-from pyIEM import style, std_table, calendar
+import os, functs, calendar
+from pyIEM import style, std_table
 from cgi import *
 
 
