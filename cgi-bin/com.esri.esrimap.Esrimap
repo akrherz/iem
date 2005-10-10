@@ -58,7 +58,7 @@ unitsByUnit = ("INCHES","FEET","MILES","METERS","KILOMETERS","DECIMAL_DEGREES")
 query_log_file = '/tmp/com.esri.esrimap.Esrimap.log'
 
 # Configuration
-config_file = '/mesonet/www/html/GIS/maps/pyims.xml'
+config_file = '/var/www/htdocs/GIS/maps/pyims.xml'
 
 ###############################################################################
 # Functions
