@@ -10,30 +10,30 @@ function dwp($tmpf, $relh){
 }
 include("../../config/settings.inc.php");
         $station = $_GET['station'];
-        include("$rootpath/include/snet_locs.php");
-        include("$rootpath/include/currentOb.php");
+include("$rootpath/include/snet_locs.php");
         include("$rootpath/include/mlib.php");
-        $site = isset($_GET["station"]) ? $_GET["station"]: 'SKCI4';
-        $site = substr($station, 0, 5);
-        if (strlen($site) == 0)  $site = 'SKCI4';
+include("$rootpath/include/iemaccess.php");
+include("$rootpath/include/iemaccessob.php");
+$station = isset($_GET["station"]) ? substr($_GET["station"],0,5) : 'SSAS2';
+$iemdb = new IEMAccess();
+$myOb = $iemdb->getSingleSite($station);
+//print_r($myOb);
+          $tmpf = $myOb->db["tmpf"];
+          $relh = $myOb->db["relh"];
+          $alti = $myOb->db["alti"];
+          $pday = $myOb->db["pday"];
+          $drct = drct2txt($myOb->db["drct"]);
+          $gust = round($myOb->db["max_gust"],0);
+          $sped = round($myOb->db["sknt"] * 1.15,0);
+          $feel = feels_like($tmpf, $relh, $sped);
+          $time = "Valid: ". date("d M Y h:i a", $myOb->db["ts"]);
+          $dwpf = $myOb->db["dwpf"];
 
-        $myOb = currentOb($station ."XXX");
+          $gustDir = drct2txt($myOb->db["max_drct"]);
+          $maxTemp =  $myOb->db["max_tmpf"];
 
-          $tmpf = $myOb["tmpf"];
-          $relh = $myOb["relh"];
-          $alti = $myOb["alti"];
-          $pday = $myOb["pday"];
-          $drct = $myOb["drctTxt"];
-          $gust = $myOb["gmph"];
-          $time = "Valid: ". $myOb["date"] ." ". $myOb["time"];
-          $sped = $myOb["sped"];
-          $dwpf = $myOb["dwpf"];
-          $feel = $myOb["feel"];
+          $minTemp = $myOb->db["min_tmpf"];
 
-          $gustDir = $myOb["drctTxt_max"];
-          $maxTemp =  $myOb["tmpf_max"];
-
-          $minTemp = $myOb["tmpf_min"];
 
 	$width = 320;
 	$height = 240;
