@@ -1,5 +1,6 @@
 <?php
  include("../../../config/settings.inc.php");
+ $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
  $network = isset($_GET["network"])? substr($_GET["network"],0,10): "IA_ASOS";
  $b = 'network.phtml?network='. $network;
 ?>
