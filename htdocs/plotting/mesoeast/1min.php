@@ -158,7 +158,7 @@ $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
 $graph->yaxis->scale->ticks->Set(2,1);
 //$graph->yscale->SetGrace(10);
-$graph->title->Set($Scities[$Sconv[$station]]['city'] ."Outside Temperatures");
+$graph->title->Set("Outside Temperatures");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);

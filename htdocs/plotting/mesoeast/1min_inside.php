@@ -86,8 +86,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
 #    echo " EQUALS <br>";
     $tmpf[$i] = $thisTmpf;
     $dwpf[$i] = $thisDwpf;
-    $sr[$i] = $thisSR;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
   
@@ -106,8 +104,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
     }
     $tmpf[$i] = $thisTmpf;
     $dwpf[$i] = $thisDwpf;
-    $sr[$i] = $thisSR;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
     
@@ -165,7 +161,7 @@ $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
 $graph->yaxis->scale->ticks->Set(2,1);
 $graph->yaxis->scale->SetGrace(10);
-$graph->title->Set($Scities[$Sconv[$station]]['city'] ."Inside Temperatures");
+$graph->title->Set("Inside Temperatures");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
