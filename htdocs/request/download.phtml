@@ -1,5 +1,6 @@
 <?php 
-include("/mesonet/php/lib/selectWidget.php");
+include("../../config/settings.inc.php");
+include("$rootpath/include/selectWidget.php");
 
 $network = isset($_GET['network']) && $_GET['network'] != "" ? $_GET['network'] : "IA_ASOS";
 $station = isset($_GET['station']) && $_GET['station'] != "" ? strtoupper($_GET['station']) : "";
@@ -186,5 +187,5 @@ don't hesitate to contact us.
 
 </TD></TR></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
 
