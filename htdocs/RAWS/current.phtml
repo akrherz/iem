@@ -1,6 +1,7 @@
 <?php
 include("../../config/settings.inc.php");
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_RAWS';
+$sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : 'station';
 ?>
 
 <?php 
@@ -55,10 +56,7 @@ function new_window(url) {
 ** This page will automatically refresh every five minutes.
 
 <?php
-if (strlen($sortcol) == 0) {
-  $sortcol = "sid";
-}
-$vals = Array("sid" => "Station ID", "gmt_ts" => "Ob Time", 
+$vals = Array("station" => "Station ID", "gmt_ts" => "Ob Time", 
 "relh" => "Relative Humidity",
   "min_tmpf" => "Today's Low Temperature",
   "max_tmpf" => "Today's High Temperature",
