@@ -25,6 +25,9 @@ $skycover = Array(
  128 => "FEW",
  255 => "MISSING");
 
+$gis = isset($_GET["gis"]) ? $_GET["gis"]: 'no';
+$delim = isset($_GET["delim"]) ? $_GET["delim"]: ",";
+
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
 $month = isset($_GET["month"]) ? $_GET["month"]: die("No month specified");
