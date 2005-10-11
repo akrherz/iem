@@ -194,7 +194,7 @@ function currentOb_rwis($station){
   $stData["gtim"] = totime(0);
   $stData["max_sknt_ts"] = totime(0);
   $stData["gmt_ts"] = totime($stData["gmt_ts"]);
-  $stData["city"] = $Rcities[$station]["city"];
+  $stData["city"] = @$Rcities[$station]["city"];
   $stData["tmpf"] = round($stData["tmpf"],0);
   $stData["dwpf"] = round($stData["dwpf"],0);
   $stData["tmpc"] = f2c($stData["tmpf"]);
