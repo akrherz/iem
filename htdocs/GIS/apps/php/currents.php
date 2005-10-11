@@ -17,7 +17,7 @@ function mktitle($map, $imgObj, $titlet) {
 }
 
 
-dl($mapscrpt);
+dl($mapscript);
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");

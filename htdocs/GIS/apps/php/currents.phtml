@@ -1,4 +1,5 @@
 <?php
+include("../../../../config/settings.inc.php");
 $layers =  isset( $_GET['layers']) ? $_GET['layers'] : Array("radar", "labels");
 
 function sel($svar, $var, $txt){
@@ -68,7 +69,7 @@ IEM Dynamic Plotter
 <p><input type="Submit" value="Go!">
 </form>
 </td>
-<td bgcolor="000" width=640><img src="http://mesonet.agron.iastate.edu/GIS/apps/php/currents.php?<?php echo $QUERY_STRING; ?>"></td>
+<td bgcolor="000" width=640><img src="http://mesonet.agron.iastate.edu/GIS/apps/php/currents.php?<?php echo $ENV["QUERY_STRING"]; ?>"></td>
 </tr>
 </table>
 
