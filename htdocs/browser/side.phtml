@@ -1,14 +1,10 @@
 <?php
 
-$year = $_GET["year"];
-$month = $_GET["month"];
-$day = $_GET["day"];
-$hour = $_GET["hour"];
-$mode = $_GET["mode"];
-if (strlen($mode) == 0) $mode = "hourly";
-if (strlen($year) == 0 || strlen($month) == 0 || strlen($day) == 0 ){
-  die("Please select a date from above!");
-}
+$day = isset($_GET["day"]) ? $_GET["day"] : die("No day specified");
+$month = isset($_GET["month"]) ? $_GET["month"]: die("No month specified");
+$year = isset($_GET["year"]) ? $_GET["year"] : die("No year specified");
+$hour = isset($_GET["hour"]) ? $_GET["hour"]: die("No hour specified");
+$mode = isset($_GET["mode"]) ? $_GET["mode"]: "hourly";
 
 $s = date ("M d Y H:i:s", mktime ($hour,0,0,$month,$day,$year));
 $lts = strtotime( $s );
