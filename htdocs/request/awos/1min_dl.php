@@ -25,7 +25,8 @@ $skycover = Array(
  128 => "FEW",
  255 => "MISSING");
 
-$day = isset($_GET["day"]) ? $_GET["day"] : die("No day specified");
+$day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
+$day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
 $month = isset($_GET["month"]) ? $_GET["month"]: die("No month specified");
 $year = isset($_GET["year"]) ? $_GET["year"] : die("No year specified");
 $hour1 = isset($_GET["hour1"]) ? $_GET["hour1"]: die("No hour1 specified");
