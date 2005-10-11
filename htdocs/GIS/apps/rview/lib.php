@@ -100,7 +100,7 @@ function drawCountyNEXRAD($site, $extents) {
   $radarL->draw($img);
   $counties->draw($img);
   
-  $url = $img->saveWebImage(MS_PNG, 0,0,-1);
+  $url = $img->saveWebImage();
   return $url;
 
 }
@@ -130,7 +130,7 @@ function drawKCCI($extents) {
   $radarL->draw($img);
   $counties->draw($img);
   
-  $url = $img->saveWebImage(MS_PNG, 0,0,-1);
+  $url = $img->saveWebImage();
   return $url;
 
 }
