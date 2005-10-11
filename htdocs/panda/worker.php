@@ -41,18 +41,18 @@ $wtypeSQL = "";
 reset($wtype);
 while( list($k,$v) = each($wtype)){ $wtypeSQL .= sprintf("'%s',",$v); }
 $wtypeSQL .= "'ZZ'"; /* Hack */
-$sql = sprintf("SELECT distinct * from 
+$sql = sprintf("select *, astext(geom) as tgeom from (SELECT distinct * from 
    (select *, area(transform(geom,2163)) / 1000000.0 as area,
     xmax(geom) as lon0, ymax(geom) as lat0 from 
     warnings_%s WHERE wfo = '%s' and issue >= '%s' and expire < '%s' 
-    and phenomena IN (%s) ORDER by issue ASC) as foo",
+    and phenomena IN (%s) ORDER by issue ASC) as foo) as foo",
    date("Y", $sts), $wfo, $stsSQL, $etsSQL, $wtypeSQL);
 $DEBUG .=  "<br />". $sql;
 $rs = pg_query($conn, $sql);
 for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
 {
   $key = sprintf("%s-%s-%s", $row["wfo"], $row["phenomena"], $row["eventid"]);
-  if ( $warnings[$key] == null ){ $warnings[$key] = Array(); }
+  if ( ! isset($warnings[$key]) ){ $warnings[$key] = Array(); }
   $warnings[$key]["issue"] = $row["issue"];
   $warnings[$key]["expire"] = $row["expire"];
   $warnings[$key]["phenomena"] = $row["phenomena"];
@@ -66,7 +66,7 @@ for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
   $warnings[$key]["eventid"] = $row["eventid"];
   $warnings[$key]["lead0"] = -1;
   if ($row["gtype"] == "P"){ 
-    $warnings[$key]["geom"] = $row["geom"]; 
+    $warnings[$key]["geom"] = $row["tgeom"]; 
     $warnings[$key]["gtype"] = $row["gtype"];
   }
   $warnings[$key]["verify"] = 0;
@@ -76,6 +76,7 @@ for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
      $DEBUG .= "<br />". $sql;
      $crs = pg_query($conn, $sql);
      $crow = pg_fetch_array($crs,0);
+     if (! isset($warnings[$key]["counties"]) ) $warnings[$key]["counties"] = "";
      $warnings[$key]["counties"] .= sprintf("%s,%s ", $crow["name"], $crow["state"]);
   }
 }
@@ -90,7 +91,8 @@ while( list($k,$v) = each($ltype)){
  else if ($v == "FF") $ltypeSQL .= sprintf("'%s',","F"); 
 }
 $ltypeSQL .= "'ZZZ'"; /* Hack */
-$sql = sprintf("SELECT distinct *, x(geom) as lon0, y(geom) as lat0
+$sql = sprintf("SELECT distinct *, x(geom) as lon0, y(geom) as lat0, 
+        astext(geom) as tgeom 
         from lsrs WHERE wfo = '%s' and 
         valid >= '%s' and valid < '%s' and type in (%s) and
         (type = 'F' or (type = 'H' and magnitude >= $hail) or
@@ -106,6 +108,7 @@ for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
   // $q = strtotime($row["valid"]);
   // if ($q < 10000){ print_r($row);  continue; }
    $lsrs[$key] = $row;
+   $lsrs[$key]['geom'] = $row["tgeom"];
    $lsrs[$key]["ts"] = strtotime($row["valid"]);
    $lsrs[$key]["warned"] = 0;
    $lsrs[$key]["tdq"] = 0; /* Tornado DQ */
