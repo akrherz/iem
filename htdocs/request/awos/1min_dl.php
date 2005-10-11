@@ -27,6 +27,8 @@ $skycover = Array(
 
 $gis = isset($_GET["gis"]) ? $_GET["gis"]: 'no';
 $delim = isset($_GET["delim"]) ? $_GET["delim"]: ",";
+$sample = isset($_GET["sample"]) ? $_GET["sample"]: "1min";
+$what = isset($_GET["what"]) ? $_GET["what"]: 'dl';
 
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
@@ -59,7 +61,7 @@ if ($selectAll){
 $stationString = substr($stationString, 0, -1);
 $stationString .= ")";
 
-if ((strlen($day) > 0))
+if (isset($_GET["day"]))
   die("Incorrect CGI param, use day1, day2");
 
 $ts1 = mktime($hour1, $minute1, 0, $month, $day1, $year) or 
