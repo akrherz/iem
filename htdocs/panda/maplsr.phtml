@@ -1,4 +1,5 @@
 <?php
+include("../../config/settings.inc.php");
 /* Map warnings and a LSR */
 include("../GIS/apps/rview/lib.php");
 
@@ -34,7 +35,7 @@ $basets = mktime($hour, $m, 0, $month, $day, $year);
 
 dl($mapscript);
 
-$map = ms_newMapObj("$rootpath/GIS/apps/rview/mosaic2.map");
+$map = ms_newMapObj("$rootpath/htdocs/GIS/apps/rview/mosaic2.map");
 
 $map->setProjection("proj=latlong");
 $map->set("width", 450);
