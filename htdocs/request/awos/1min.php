@@ -53,7 +53,7 @@ in this archive up until that point.</i><br>
      <?php echo yearSelect(1995, 2005, "year"); ?>
     </td>
     <td rowspan="2">
-     <?php monthSelect($bogus); ?>
+     <?php echo monthSelect($bogus); ?>
     </td>
     <td>
      <?php daySelect2($bogus, "day1"); ?>
