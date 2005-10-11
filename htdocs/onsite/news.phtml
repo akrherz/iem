@@ -1,7 +1,7 @@
 <?php
  include("../../config/settings.inc.php");
  include("$rootpath/include/database.inc.php");
- $id = intval($_GET["id"]);
+ $id = isset($_GET["id"]) ? intval($_GET["id"]): 0;
  $TITLE = "IEM | News & Notes";
  include("$rootpath/include/header.php");
 ?>
