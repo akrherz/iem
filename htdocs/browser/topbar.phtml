@@ -1,8 +1,7 @@
 <?php 
- include("../config/settings.inc.php");
- include("$rooturl/include/forms.php"); 
- $mode = $_GET["mode"];
- if (strlen($mode) == 0) $mode = "hourly";
+ include("../../config/settings.inc.php");
+ include("$rootpath/include/forms.php"); 
+ $mode = isset($_GET["mode"]) ? $_GET["mode"]: "hourly";
  $year = date("Y");
  $month = date("m");
  $day = date("d");
@@ -30,11 +29,11 @@
 <form name="bigger" method="GET" target="side" action="side.phtml">
 <input type="hidden" name="mode" value="<?php echo $mode; ?>">
  </td>
- <td>Year:</td><td><?php yearSelect(1997, $year); ?></td>
- <td>Month:</td><td><?php monthSelect($month); ?></td>
- <td>Day:</td><td><?php daySelect($day); ?></td>
+ <td>Year:</td><td><?php echo yearSelect(1997, $year); ?></td>
+ <td>Month:</td><td><?php echo monthSelect($month); ?></td>
+ <td>Day:</td><td><?php echo daySelect($day); ?></td>
 <?php if ($mode == "hourly") { ?>
- <td>Hour:</td><td><?php localHourSelect($hour, "hour"); ?></td>
+ <td>Hour:</td><td><?php echo hourSelect($hour, "hour"); ?></td>
 <?php } ?>
  <td><input type="submit" value="Go"></td></tr>
 </table>
