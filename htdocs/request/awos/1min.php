@@ -35,7 +35,7 @@ giant data requests through this interface, instead feel free to email Daryl (ak
 where converted to ASOS in September of 2000.  Data for these sites exists 
 in this archive up until that point.</i><br>
 <div class="story">
-  <?php awosMultiSelect($station, 5); ?>
+  <?php awosMultiSelect("", 5); ?>
 </div>
 
 <p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
