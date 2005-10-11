@@ -1,4 +1,5 @@
 <?php 
+include("../../config/settings.inc.php");
 	$page = "current";
 	$TITLE = "IEM | Current RADAR Data";
 	$HEADEXTRA = '<BASE HREF="http://mesonet.agron.iastate.edu/data/nexrad/"><script language="JavaScript">
@@ -11,7 +12,7 @@ function changeSite(newSite, newSname) {
 } // End of changeSite
 
 </script>';
-	include("/mesonet/php/include/header.php"); 
+	include("$rootpath/include/header.php"); 
 ?>
 <div class="text">
 <b>Nav:</b>  <a href="http://mesonet.agron.iastate.edu/current/radar.phtml">Current RADAR Data</a><br>
@@ -28,7 +29,7 @@ if ($prod == 'N0R' || $prod == 'N0V'){
   echo "<img src=\"/data/nexrad/${site}_${prod}_0.gif\">";
 }
 else if ($prod == 'N0R_loop_nj' || $prod == 'N0V_loop_nj'){
-  include ('../data/nexrad/NIDSloop.php');
+  include ('NIDSloop.php');
 }else if ($prod == 'N0R_loop' || $prod == 'N0V_loop'){
     $rprod = substr($prod,0, 3);
 //  include ('../data/nexrad/NIDSloop.php');
@@ -57,4 +58,4 @@ else if ($prod == "wiem") {
 
 ?></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
