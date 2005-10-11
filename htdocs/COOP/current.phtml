@@ -32,7 +32,8 @@ include("$rootpath/include/header.php"); ?>
 
  $db = Array();
  while (list($site, $iemob) = each($net) ){
-  $db[$site] = Array();
+  $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"",
+                      'min_tmpf'=>"", 'max_tmpf'=>"", 'tmpf'=>"");
   $db[$site]['ts'] = $iemob->ts;
   $db[$site]['sid'] = $site;
   $db[$site]['sname'] = $iemob->db["sname"];
