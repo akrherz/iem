@@ -1,5 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 $format = isset($_GET['format']) ? $_GET['format'] : 'html';
@@ -9,7 +10,6 @@ if ($nohtml) header("Content-type: text/plain");
 
 if (! $nohtml) {
 $TITLE = "IEM Station Locations";
-include("$rootpath/include/database.inc.php");
 include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">Network Location Tables</h3>
