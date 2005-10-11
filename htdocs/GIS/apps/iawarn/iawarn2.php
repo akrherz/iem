@@ -70,7 +70,7 @@ function drawRADAR($site, $imgi, $extents, $projs, $radValid, $fips){
 
   $map->drawLabelCache($img);
 
-  $url = $img->saveWebImage(MS_PNG, 0,0,-1);
+  $url = $img->saveWebImage();
   return $url;
 }
 
