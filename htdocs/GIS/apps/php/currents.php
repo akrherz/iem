@@ -75,7 +75,7 @@ $varDef = Array("tmpf" => "Temperatures",
   "max_sknt" => "Peak Gust Today [knots]",
   "feel" => "Feel's Like");
 
-$rnd = Array("alti" => 2, "phour" => 2, "vsby" => 1,"tmpf" => 0,
+$rnd = Array("alti" => 2, "phour" => 2, "vsby" => 1,"tmpf" => 0,"dwpf"=>0,
   "pday" => 2, "pmonth" => 2, "pres" => 2);
 
 $lats = Array();

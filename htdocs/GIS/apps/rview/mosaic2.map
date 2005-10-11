@@ -9,7 +9,7 @@ FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT -200000 4300000 1000000 5100000
 #EXTENT -104 37 -87 49
 UNITS METERS
-SHAPEPATH "/mesonet/www/html/GIS/data/"
+SHAPEPATH "/mesonet/data/gis/"
 SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR 0 0 250
 IMAGETYPE PNG
@@ -29,9 +29,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 40000000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/warning0.log"
+  LOG "/var/www/htdocs/tmp/warning0.log"
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/warning0/warning0.map&amp;"
