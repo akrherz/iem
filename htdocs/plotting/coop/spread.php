@@ -1,10 +1,12 @@
 <?php
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 $ts = isset($_GET['ts']) ? strtotime($_GET['ts']) : date("%Y-%m-%d");
 $dts = strftime("%m%d", $ts);
 $plotts = strftime("%d %b", $ts);
 
 
-$connection = pg_connect("10.10.10.20","5432","coop");
+$connection = iemdb("coop");
 
 $station = 'ia0600';
 
@@ -98,10 +100,10 @@ foreach ($xlabel as $key => $value){
 
 pg_close($connection);
 
-include ("../jpgraph/jpgraph.php");
-include ("../jpgraph/jpgraph_bar.php");
-include ("../jpgraph/jpgraph_line.php");
-include ("../../include/COOPstations.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_bar.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/COOPstations.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(800,480,"example1");
