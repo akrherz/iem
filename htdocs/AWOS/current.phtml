@@ -1,5 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
+$sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
   $REFRESH = "<meta http-equiv=\"refresh\" content=\"300; URL=current.php?sortcol=$sortcol\">";
   $TITLE = "IEM | AWOS Network Current Conditions";
   $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
@@ -31,9 +32,6 @@ function new_window(url) {
 <p>** This page will automatically refresh every five minutes.
 
 <?php
-if (strlen($sortcol) == 0) {
-  $sortcol = "station";
-}
 $vals = Array("station" => "Station ID", "gmt_ts" => "Ob Time", 
 "relh" => "Relative Humidity", "sname" => "Site Name",
   "min_tmpf" => "Today's Low Temperature",
