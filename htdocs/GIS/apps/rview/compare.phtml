@@ -1,16 +1,17 @@
 <?php
+include("../../../../config/settings.inc.php");
 /** POC of doing some interesting things with county level maps */
 
-$county = $_GET['county'];
-$cntyext = $_GET['cntyext'];
-$ul_x = $_GET["ul_x"];
-$ul_y = $_GET["ul_y"];
-$lr_x = $_GET["lr_x"];
-$lr_y = $_GET["lr_y"];
-$map_x = $_GET["map_x"];
-$map_y = $_GET["map_y"];
-$map_height = $_GET["map_height"];
-$map_width = $_GET["map_width"];
+$county = isset($_GET['county']) ? $_GET["county"]: "";
+$cntyext = isset($_GET['cntyext']) ? $_GET["cntyext"]: "";
+$ul_x = isset($_GET["ul_x"]) ? $_GET["ul_x"]: "";
+$ul_y = isset($_GET["ul_y"]) ? $_GET["ul_y"]: "";
+$lr_x = isset($_GET["lr_x"]) ? $_GET["lr_x"]: "";
+$lr_y = isset($_GET["lt_y"]) ? $_GET["lr_y"]: "";
+$map_x = isset($_GET["map_x"]) ? $_GET["map_x"]: "";
+$map_y = isset($_GET["map_y"]) ? $_GET["map_y"]: "";
+$map_height = isset($_GET["map_height"]) ? $_GET["map_height"]: "";
+$map_width = isset($_GET["map_width"]) ? $_GET["map_width"]: "";
 
 if ($ul_x != ""){
   $dx = ($ul_x - $lr_x) / $map_width;
@@ -26,11 +27,11 @@ if ($ul_x != ""){
 ?>
 
 <?php
-dl("php_mapscript_401.so");
+dl($mapscript);
 $TITLE = "IEM | GIS RADAR Comparison";
-include("/mesonet/php/include/header.php");
+include("$rootpath/include/header.php");
 include("lib.php");
-include("/mesonet/www/html/include/nexradLoc.php");
+include("$rootpath/include/nexradLoc.php");
 
 
 $latlon = ms_newprojectionobj("proj=latlong");
@@ -127,4 +128,4 @@ $kcci_url = drawKCCI($extents);
 
 </table></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
