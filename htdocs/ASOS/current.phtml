@@ -1,9 +1,7 @@
 <?php
  include("../../config/settings.inc.php");
- $network = $_GET['network'];
- if (strlen($network) > 10 || strlen($network) == 0) $network = 'IA_ASOS';
- $metar = $_GET['metar'];
- if ($metar == "") $metar = "no";
+ $network = isset($_GET['network']) ? $_GET["network"] : 'IA_ASOS';
+ $metar = isset($_GET['metar']) ? $_GET["metar"] : "no";
  $sortcol = isset($_GET['sortcol'])  ? $_GET['sortcol']: "ts";
 ?>
 
@@ -156,7 +154,9 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
       $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
     } else {
       $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+      if ($mydata[$key]["max_sknt_ts"] > 0) {
+         $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+      }
     }
 
   }
