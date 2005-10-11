@@ -1,7 +1,8 @@
 <?php
+include("../../../../config/settings.inc.php");
  $TITLE = "IEM GIS | RADAR & NWS Warnings";
  $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=http://mesonet.agron.iastate.edu/GIS/apps/iawarn/iawarn.php?site=${site}\">";
- include("/mesonet/php/include/header.php");
+ include("$rootpath/include/header.php");
 ?>
 <div class="text">
 <b>Nav:</b> <a href="/current/radar.phtml">Current RADAR Data</a> <b> > </b>
@@ -11,11 +12,11 @@
 $width = "450";
 $height = "450";
 
-dl("php_mapscript_401.so");
-include('../../../include/mlib.php');
-include('../../../include/currentOb.php');
-include('../../../include/allLoc.php');
-include('../../../include/nexlib2.php');
+dl($mapscript);
+include("$rootpath/include/mlib.php");
+include("$rootpath/include/currentOb.php");
+include("$rootpath/include/all_locs.php");
+include("$rootpath/include/nexlib2.php");
 
 if (strlen($site) == 0){
  $site = "DMX";
@@ -176,5 +177,5 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
 echo "</table></div>\n";
 
 
- include ("/mesonet/php/include/footer.php");
+ include ("$rootpath/include/footer.php");
 ?>
