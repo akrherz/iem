@@ -160,7 +160,7 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
      continue;
    }
 
-   if ($value["tmpf"] != ""){
+   if (isset($value["tmpf"])){
    echo "<td>". $value["tmpf"] ."</td>
    <td><font color=\"#ff0000\">". $value["max_tmpf"] ."</font></td>
    <td><font color=\"#0000ff\">". $value["min_tmpf"] ."</font></td>";
