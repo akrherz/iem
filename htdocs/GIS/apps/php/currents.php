@@ -3,7 +3,7 @@ include("../../../../config/settings.inc.php");
 
 $layers =  isset( $_GET['layers']) ? $_GET['layers'] : Array("radar", "labels");
 $var    =  isset( $_GET['var']) ? $_GET['var'] : "tmpf";
-$network = isset($_GET['network']) ? $_GET["network"] : "";
+$network = isset($_GET['network']) ? $_GET['network'] : "";
 $set = isset($_GET['st']) ? $_GET['st'] : Array();
 
 function mktitle($map, $imgObj, $titlet) {
