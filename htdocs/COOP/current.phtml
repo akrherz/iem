@@ -45,6 +45,10 @@ include("$rootpath/include/header.php"); ?>
     $db[$site]['tmpf'] = $iemob->db["tmpf"];
     $db[$site]['max_tmpf'] = $iemob->db["max_tmpf"];
     $db[$site]['min_tmpf'] = $iemob->db["min_tmpf"];
+  } else {
+    $db[$site]['tmpf'] = "";
+    $db[$site]['max_tmpf'] = "";
+    $db[$site]['min_tmpf'] = "";
   }
   if ($iemob->db["phour"] != -99)
     $db[$site]['phour'] = $iemob->db["phour"];
