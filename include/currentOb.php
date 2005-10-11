@@ -183,20 +183,16 @@ function currentSFOb2_rwis($station){
 //___________________________________________________________
 function currentOb_rwis($station){
   include('rwisLoc.php');
-  $dataDir = '/mesonet/data/current/ALL/';
+  //echo $station;
+  $dataDir = '/mesonet/data/current/rwis/';
   $fc = implode('', file($dataDir . $station .".dat") );
   $rwisFormat = Array("station", "gmt_ts", "tmpf", "dwpf", 
      "drct", "sknt", "pday", "gust");
   $stData = cdf($fc, $rwisFormat);
 
-  $dataDir = '/mesonet/data/current/asos_ex/';
-  $fc = @implode('', @file($dataDir . $station ) );
-  $format = Array("bogus", "max_tmpc", "max_tmpc_ts",
-    "max_sknt", "max_sknt_ts", "min_tmpc", "min_tmpc_ts");
-  $stData += cdf($fc, $format);
 
-  $stData["gtim"] = totime($stData["max_sknt_ts"]);
-  $stData["max_sknt_ts"] = totime($stData["max_sknt_ts"]);
+  $stData["gtim"] = totime(0);
+  $stData["max_sknt_ts"] = totime(0);
   $stData["gmt_ts"] = totime($stData["gmt_ts"]);
   $stData["city"] = $Rcities[$station]["city"];
   $stData["tmpf"] = round($stData["tmpf"],0);
@@ -301,6 +297,8 @@ function cdf($fc, $format){
   $tokens = split(",", $fc);
   if (sizeof($tokens) == 0) { return Array(); }
   $stData = Array();
+  //print_r($tokens);
+  //print_r($format);
   while( list($key, $val) = each($format) ){
 #    echo $tokens[$key] ." == ". $format[$key] ;
     $stData[$format[$key]] = $tokens[$key];
