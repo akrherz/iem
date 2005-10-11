@@ -31,7 +31,7 @@ function new_window(url) {
 <div class="text">
 <b>Nav:</b><a href="/RAWS/">RAWS</a> <b> > </b> Current Conditions
 
-<?php $current_network = "RAWS"; include("../include/current_bar.inc.php"); ?>
+<?php $current_network = "RAWS"; include("$rootpath/include/current_bar.inc.php"); ?>
 <form method="GET" action="current.phtml" name="stctrl">
 <select name="network">
   <option value="IA_RAWS" <?php if ($network == "IA_RAWS") echo "SELECTED"; ?>>Iowa
@@ -119,8 +119,10 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
       $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
     } else {
       $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
+      if ($mydata[$key]["max_sknt_ts"] > 0){
       $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
     }
+  }
                                                                                 
   }
 
