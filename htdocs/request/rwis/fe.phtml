@@ -1,13 +1,15 @@
 <?php 
+include("../../../config/settings.inc.php");
+
         $TITLE = "IEM | RWIS Data Download";
-include("/mesonet/php/include/header.php"); 
+include("$rootpath/include/header.php"); 
 ?>
 <div class="text">
 <b>Nav:</b> <a href="/RWIS/">RWIS</a> <b> > </b>
   Download Data
 
-<?php include("../../include/imagemaps.php"); ?>
-<?php include("../../include/forms.php"); ?>
+<?php include("$rootpath/include/imagemaps.php"); ?>
+<?php include("$rootpath/include/forms.php"); ?>
 
 <p>
 
@@ -34,16 +36,16 @@ include("/mesonet/php/include/header.php");
   <tr>
     <th>Start:</th>
     <td rowspan="2">
-     <?php yearSelect(2001, $year, "year"); ?>
+     <?php echo yearSelect(2001, 2005, "year"); ?>
     </td>
     <td rowspan="2">
-     <?php monthSelect($bogus); ?>
+     <?php echo monthSelect(""); ?>
     </td>
     <td>
-     <?php daySelect2($bogus, "day1"); ?>
+     <?php echo daySelect2("", "day1"); ?>
     </td>
     <td>
-     <?php gmtHourSelect($bogus, "hour1"); ?>
+     <?php echo gmtHourSelect("", "hour1"); ?>
 	<input type="hidden" name="minute1" value="0">
     </td>
   </tr>
@@ -51,10 +53,10 @@ include("/mesonet/php/include/header.php");
   <tr>
     <th>End:</th>
     <td>
-     <?php daySelect2($bogus, "day2"); ?>
+     <?php echo daySelect2("", "day2"); ?>
     </td>
     <td>
-     <?php gmtHourSelect($bogus, "hour2"); ?>
+     <?php echo gmtHourSelect("", "hour2"); ?>
 	<input type="hidden" name="minute2" value="0">
     </td>
   </tr>
@@ -109,4 +111,4 @@ How shall the output values be seperated?
 </form></div>
 
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

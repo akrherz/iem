@@ -1,9 +1,23 @@
 <?php
-/**
- * dl.php  26 Jun 2004 
- */
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/rwisLoc.php");
 
-include("/mesonet/www/html/include/rwisLoc.php");
+$gis = isset($_GET["gis"]) ? $_GET["gis"]: 'no';
+$delim = isset($_GET["delim"]) ? $_GET["delim"]: ",";
+$sample = isset($_GET["sample"]) ? $_GET["sample"]: "1min";
+$what = isset($_GET["what"]) ? $_GET["what"]: 'dl';
+
+$day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
+$day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
+$month = isset($_GET["month"]) ? $_GET["month"]: die("No month specified");
+$year = isset($_GET["year"]) ? $_GET["year"] : die("No year specified");
+$hour1 = isset($_GET["hour1"]) ? $_GET["hour1"]: die("No hour1 specified");
+$hour2 = isset($_GET["hour2"]) ? $_GET["hour2"]: die("No hour2 specified");
+$minute1 = isset($_GET["minute1"]) ? $_GET["minute1"]: die("No minute1 specified");
+$minute2 = isset($_GET["minute2"]) ? $_GET["minute2"]: die("No minute2 specified");
+$vars = isset($_GET["vars"]) ? $_GET["vars"] : die("No vars specified");
+
 
 $station = $_GET["station"];
 $stations = $_GET["station"];
@@ -27,7 +41,7 @@ if ($selectAll){
 $stationString = substr($stationString, 0, -1);
 $stationString .= ")";
 
-if ((strlen($day) > 0))
+if (isset($_GET["day"]))
   die("Incorrect CGI param, use day1, day2");
 
 $ts1 = mktime($hour1, $minute1, 0, $month, $day1, $year) or 
@@ -90,7 +104,7 @@ include ("../../plotting/jpgraph/jpgraph_line.php");
 }
 
 if ($what != "plot"){
- $connection = pg_connect("10.10.10.20","5432","rwis");
+ $connection = iemdb("rwis");
 
  $query1 = "SET TIME ZONE 'GMT'";
 
