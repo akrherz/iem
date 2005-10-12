@@ -1,8 +1,9 @@
 <?php
 include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 $date = isset($_GET["date"]) ? $_GET["date"] : date("Y-m-d", time() - 86400 - (7 * 3600));
-$var = isset($_GET["var"]) ? $_GET["var"] : "c11";
-$var2 = isset($_GET["var2"]) ? $_GET["var2"] : "c12";
+$var = (isset($_GET["var"]) && $_GET["var"] != "" ) ? $_GET["var"] : "c11";
+$var2 = (isset($_GET["var2"]) && $_GET["var2"] != "" ) ? $_GET["var2"] : "";
 $direct = isset($_GET["direct"]) ? $_GET['direct']: "";
 
 dl($mapscript);
@@ -58,8 +59,8 @@ $varDef = Array("c11" => "High Air Temperatures",
   "dwpfhdwpfl" => "Max and Min Dew Points [F]"
 );
 
-$rnd = Array("c11" => 0,
-  "c70" => 2,
+$rnd = Array("c11" => 0, "c12" => 0, "c30" => 0,"c300h" => 0, "c300l" => 0,
+  "c70" => 2, "c40" => 1 ,"c80" => 0, "dwpfl" => 0, "dwpfh" => 0,
   "c90" => 2,
   "c529" => 0,
   "c530" => 2,
@@ -97,7 +98,7 @@ $img = $map->prepareImage();
 $counties->draw($img);
 $iards->draw($img);
 
-$c = pg_connect("10.10.10.40","5432","isuag");
+$c = iemdb("isuag");
 $tbl = strftime("t%Y", $ts);
 $dstamp = strftime("%Y-%m-%d", $ts);
 if ($var == 'c300') {
@@ -126,10 +127,13 @@ $rs =  pg_exec($c, $q);
 $data = Array();
 for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $key = $row['station'];
+  if ($key == "A133259" || $key == "A130219") continue;
   $data[$key] = Array();
   $data[$key]['city'] = $ISUAGcities[$key]['city'];
   $data[$key]['lon'] = $ISUAGcities[$key]['lon'];
   $data[$key]['lat'] = $ISUAGcities[$key]['lat'];
+  //print_r($row);
+  //echo "::$var::";
   $data[$key]['var'] = $row[$var];
 
   // Red Dot... 
