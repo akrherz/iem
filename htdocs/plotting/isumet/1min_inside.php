@@ -79,8 +79,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
       $tmpf[$i] = "";
-      $dwpf[$i] = "";
-      $sr[$i] = "";
       $xlabel[$i] ="";
       $i++;
       $missing++;
@@ -112,12 +110,6 @@ for ($j=0; $j<24; $j++){
 // Fix y[0] problems
 if ($tmpf[0] == ""){
   $tmpf[0] = 0;
-}
-if ($dwpf[0] == ""){
-  $dwpf[0] = 0;
-}
-if ($sr[0] == ""){
-  $sr[0] = 0;
 }
 
 
