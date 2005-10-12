@@ -1,4 +1,6 @@
 <?php 
+  include("../../../config/settings.inc.php");
+  include("$rootpath/include/database.inc.php");
   define('FPDF_FONTPATH','pdf/font/');
   require('pdf/fpdf.php');
 
@@ -33,7 +35,7 @@ function Header()
 function LoadData()
 {
   global $station, $month;
-  $c0 = pg_connect('db1.mesonet.agron.iastate.edu', 5432, 'snet');
+  $c0 = iemdb('snet');
   $q0 = "SELECT *, to_char(valid, 'Dy Mon DD') as dvalid from t2002_daily 
     WHERE station = '". $station ."' 
     and extract(month from valid) = $month ORDER by valid";

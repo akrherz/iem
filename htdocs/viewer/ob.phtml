@@ -1,4 +1,6 @@
 <?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
  $extents = $_GET['extents']; 
  $click_x = $_GET['img_x'];
  $click_y = $_GET['img_y'];
@@ -19,7 +21,7 @@
 
  $sql = "SELECT s.*, c.* from summary s, current c WHERE c.station = (select station from current ORDER by distance(geom, setsrid(GeometryFromText('POINT($centerX $centerY)'), 4326)) ASC LIMIT 1) and c.station = s.station and s.day = 'TODAY'";
 
- $conn = pg_connect("dbname=iem port=9999 host=10.10.10.30");
+ $conn = iemdb("access");
  $rs = pg_exec($conn, $sql);
  $row = pg_fetch_array($rs,0);
 
