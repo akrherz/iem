@@ -1,13 +1,13 @@
 <?php
-  /** gsplot.phtml
-   * - Make Growing Season Plots
-   */
-$var = $_GET["var"];
-$year = $_GET["year"];
-$smonth = $_GET["smonth"];
-$sday = $_GET["sday"];
-$emonth = $_GET["emonth"];
-$eday = $_GET["eday"];
+include("../../../../config/settings.inc.php");
+
+$var = isset($_GET["var"]) ? $_GET["var"] : "gdd50";
+
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]:  5;
+$emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: 10;
+$sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
+$eday = isset($_GET["eday"]) ? $_GET["eday"]: 1;
 
 $gs_start = Array(
   1998 => mktime(0,0,0,5,1,1998),
@@ -35,7 +35,7 @@ if (strlen($smonth) > 0 && strlen($sday) > 0)
 if (strlen($emonth) > 0 && strlen($eday) > 0)
   $gs_end[$year] = mktime(0,0,0,$emonth,$eday,$year);
 
-$round = Array("prec" => 2);
+$round = Array("prec" => 2, "gdd50" => 0, "gdd32" => 0, "et" => 2, "sgdd50" => 0, "sdd86" => 0);
 
 $today = time();
 if ($gs_end[$year] >= $today)  $gs_end[$year] = $today;
@@ -45,7 +45,7 @@ $eday = strftime("%d", $gs_end[$year]);
 $smonth = strftime("%m", $gs_start[$year]);
 $sday = strftime("%d", $gs_start[$year]);
 
-include("../../../include/forms.php");
+include("$rootpath/include/forms.php");
 
 ?>
 
@@ -61,7 +61,7 @@ window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,s
 } 
 //END Script-->
 </script>';
-        include("/mesonet/php/include/header.php"); 
+        include("$rootpath/include/header.php"); 
 ?>
 
 
@@ -84,7 +84,7 @@ window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,s
      <option value="sgdd50" <?php if($var == "sgdd50") echo "SELECTED"; ?>>Soil Growing Degree Days (base=50)</option>
      <option value="sdd86" <?php if($var == "sdd86") echo "SELECTED"; ?>>Stress Degree Days (base=86)</option>
     </select></td>
-  <td rowspan=2><?php yearSelect(1998, $year, "year"); ?></td>
+  <td rowspan=2><?php echo yearSelect(1998, $year, "year"); ?></td>
   <td><?php monthSelect2($smonth, 'smonth'); ?></td>
   <td><?php daySelect2($sday, 'sday'); ?></td>
   <td rowspan=2><input type="submit" value="Make Plot"></td>
@@ -97,8 +97,8 @@ window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,s
  
 
 <?php
-dl("php_mapscript_401.so");
-include('../../../include/agclimateLoc.php');
+dl($mapscript);
+include("$rootpath/include/agclimateLoc.php");
 
 function mktitlelocal($map, $imgObj, $titlet) { 
  
@@ -142,7 +142,7 @@ $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
 
 $rnd = Array("gdd50" => 0,
   "gdd32" => 0,
-  "et" => 2,
+  "et" => 2, "c11" => 2,
   "prec" => 2,
   "sgdd50" => 0,
   "sdd86" => 0);
@@ -178,7 +178,8 @@ $img = $map->prepareImage();
 $counties->draw($img);
 $iards->draw($img);
 
-$c = pg_connect("10.10.10.40","5432","isuag");
+include("$rootpath/include/database.inc.php");
+$c = iemdb("isuag");
 
 $sstr = strftime("%Y-%m-%d", $gs_start[$year]);
 $estr = strftime("%Y-%m-%d", $gs_end[$year]);
@@ -203,6 +204,7 @@ if ($var == 'gdd32') {
     if ($high < 32) $tgdd = 0.00;
     else $tgdd = (($high+$low)/2.00) - 32.00;
 
+    if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
   }
   $vals = $gdds;
@@ -224,7 +226,7 @@ if ($var == 'gdd50') {
     if ($high > 86) $high = 86.00;
     if ($high < 50) $tgdd = 0.00;
     else $tgdd = (($high+$low)/2.00) - 50.00;
-
+    if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
   }
   $vals = $gdds;
@@ -246,6 +248,7 @@ if ($var == 'sdd86') {
     if ($high < 86) $tgdd = 0.00;
     else $tgdd = (($high+$low)/2.00) - 86.00;
 
+    if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
   }
   $vals = $gdds;
@@ -269,6 +272,7 @@ else if ($var == 'sgdd50') {
     if ($high < 50) $tgdd = 0.00;
     else $tgdd = (($high+$low)/2.00) - 50.00;
 
+    if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
   }
   $vals = $gdds;
@@ -324,7 +328,7 @@ foreach($vals as $key => $value){
      round($value, $rnd[$var]) );
   $pt->free();
 
-  if (strlen($var2) > 0) {
+  if (isset($_GET["var2"])) {
     // Value LL
     $pt = ms_newPointObj();
     $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
@@ -350,7 +354,7 @@ if ($i == 0)
 mktitlelocal($map, $img, " ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .") ");
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+$url = $img->saveWebImage();
 
 ?>
 <center><font class="bluet">Plot</font></center>
