@@ -7,6 +7,7 @@ $iem20 = 'db1.mesonet.agron.iastate.edu';
 $iem30 = 'kcci.mesonet.agron.iastate.edu';
 $_DATABASES = Array(
  'access' => "dbname=iem port=9999 host=$iem30 user=nobody",
+ 'hads' => "dbname=hads host=$iem20 user=nobody",
  'coop' => "dbname=coop host=$iem20 user=nobody",
  'awos' => "dbname=awos host=$iem20 user=nobody",
  'rwis' => "dbname=rwis host=$iem20 user=nobody",
