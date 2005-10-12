@@ -1,5 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
   // cat.phtml 
   //   Print hourly DCP obs to a HTML sortable table
 
@@ -63,7 +64,7 @@ $tbl = strftime("t%Y", $ts);
 $dstr = strftime("%Y-%m-%d %H:%M", $ts);
 $ldate = strftime("%d %b %Y %I:%M %p", $ts);
 
-$c = pg_connect("10.10.10.20", 5432, "hads");
+$c = iemdb("hads");
 $sql = "SELECT * from $tbl WHERE valid = '$dstr' ORDER by station";
 $rs = pg_exec($c, $sql);
 pg_close($c);
