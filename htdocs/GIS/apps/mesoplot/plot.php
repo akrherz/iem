@@ -61,9 +61,7 @@ foreach ($Scities as $key => $value) {
     $myStations[$key] = "hi";
 }
 
-if (strlen($var) == 0){
-  $var = "tmpf";
-}
+$var = isset($_GET["var"]) ? $_GET["var"] : "tmpf";
 
 $height = 350;
 $width = 450;
