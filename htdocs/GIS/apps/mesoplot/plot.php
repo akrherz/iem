@@ -103,7 +103,7 @@ $map->set("width", $width);
 $map->set("height", $height);
 
 $map->setprojection($proj);
-if (isset($zoom))
+if (isset($_GET["zoom"]))
   $map->setextent(375000, 4575000, 475000, 4675000);
 else
 {
