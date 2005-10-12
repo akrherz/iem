@@ -5,11 +5,11 @@ NAME sites
 STATUS ON
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT 1220178 885000 1797341 1226783
 UNITS METERS
-SHAPEPATH "/mesonet/www/html/GIS/data/"
-SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+SHAPEPATH "/mesonet/data/gis/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off
@@ -37,9 +37,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 40000000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/fancy.log"
+  LOG "var/www/htdocs/tmp/fancy.log"
 END
 
 
