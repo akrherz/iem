@@ -1,13 +1,18 @@
 <?php
 include("../../../../config/settings.inc.php");
 
+$plot = isset($_GET["plot"]) ? $_GET["plot"]: "high";
+$area = isset($_GET["area"]) ? $_GET["area"]: "all";
+$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
+$day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+
 $TITLE = "IEM | NWS COOP | GIS Plotting";
 include("$rootpath/include/header.php");
 ?>
 
 <?php
 dl($mapscript);
-include("$rootpath/include/allLoc.php");
+include("$rootpath/include/all_locs.php");
 include("$rootpath/include/mlib.php");
 
 $height = 350;
@@ -16,18 +21,6 @@ $width = 350;
 $map = ms_newMapObj("sites.map");
 $map->setProjection("proj=lcc,lat_1=42.0666,lat_2=43.2666,lat_0=41.5,lon_0=-93.5,x_0=1500000,y_0=1000000");
 
-if (strlen($plot) == 0){
-  $plot = 'high';
-}
-if (strlen($area) == 0){
- $area = "all";
-}
-if (strlen($month) == 0){
-  $month = date('m');
-}
-if (strlen($day) == 0){
-  $day = date('d');
-}
 $lx = 1220000;
 $ux = 1797000;
 $ly =  885000;
