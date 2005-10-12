@@ -25,8 +25,7 @@ $page = 'DCP';
 $TITLE = "IEM | GEOS DCP";
 include("$rootpath/include/header.php"); 
 include("$rootpath/include/forms.php");
-include("$rootpath/include/dcpLoc.php");
-include("$rootpath/include/database.inc.php");
+include("$rootpath/include/all_locs.php");
 ?>
 <div class=text">
 <form method="GET" action="cat.phtml">
@@ -41,10 +40,10 @@ include("$rootpath/include/database.inc.php");
 </tr>
 
 <tr>
-  <td><?php yearSelect(2002, $year, "year"); ?></td>
-  <td><?php monthSelect($month); ?></td>
-  <td><?php daySelect($day); ?></td>
-  <td><?php localHourSelect($hour, 'hour'); ?></td>
+  <td><?php echo yearSelect(2002, $year, "year"); ?></td>
+  <td><?php echo monthSelect($month); ?></td>
+  <td><?php echo daySelect($day); ?></td>
+  <td><?php echo hourSelect($hour, 'hour'); ?></td>
   <td><select name="minute">
     <option value="00" <?php if ($minute == "00") echo "SELECTED"; ?>>00
     <option value="15" <?php if ($minute == "15") echo "SELECTED"; ?>>15
