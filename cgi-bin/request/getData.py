@@ -2,7 +2,8 @@
 # Script to control download of most data from mesonet site
 # Daryl Herzmann 19 Nov 2001
 
-import iemdb, cgi, re, string, sys, mx.DateTime
+import cgi, re, string, sys, mx.DateTime
+from pyIEM import iemdb
 i = iemdb.iemdb()
 asosdb = i['asos']
 rwisdb = i['rwis']
