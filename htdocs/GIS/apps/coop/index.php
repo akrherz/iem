@@ -1,13 +1,14 @@
 <?php
+include("../../../../config/settings.inc.php");
 
 $TITLE = "IEM | NWS COOP | GIS Plotting";
-include("/mesonet/php/include/header.php");
+include("$rootpath/include/header.php");
 ?>
 
 <?php
-dl("php_mapscript_442.so");
-include('../../../include/allLoc.php');
-include('../../../include/mlib.php');
+dl($mapscript);
+include("$rootpath/include/allLoc.php");
+include("$rootpath/include/mlib.php");
 
 $height = 350;
 $width = 350;
@@ -141,9 +142,9 @@ $datal->draw($img);
 
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+$url = $img->saveWebImage();
 
-$im = @imagecreatefrompng("/mesonet/www/html/". $url );
+$im = @imagecreatefrompng("/var/www/htdocs/". $url );
 
 echo "<h3 class=\"heading\">COOP Climate Data</h3><p>
  <div class=\"text\">Using the COOP data archive, daily averages and extremes
@@ -280,6 +281,5 @@ echo "<table border=0>
 ?>
 
 <?php
-include ("/mesonet/php/include/footer.php");
-
+include ("$rootpath/include/footer.php");
 ?>
