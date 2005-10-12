@@ -1,5 +1,9 @@
 <?php
 include("../../../../config/settings.inc.php");
+ $site = isset($_GET["site"]) ? $_GET["site"]: "DMX";
+ $loop = isset($_GET["loop"]) ? $_GET["loop"]: "";
+ $fips = isset($_GET["fips"]) ? $_GET["fips"]: "";
+
  $TITLE = "IEM GIS | RADAR & NWS Warnings";
  $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=http://mesonet.agron.iastate.edu/GIS/apps/iawarn/iawarn.php?site=${site}\">";
  include("$rootpath/include/header.php");
@@ -18,9 +22,6 @@ include("$rootpath/include/currentOb.php");
 include("$rootpath/include/all_locs.php");
 include("$rootpath/include/nexlib2.php");
 
-if (strlen($site) == 0){
- $site = "DMX";
-}
 
 ?>
 
@@ -165,7 +166,10 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
   $issue = strtotime($row["issue"]);
   $expire = strtotime($row["expire"]);
 
-  echo "<tr> <td><a href=\"cat.php?id=". $row["oid"] ."\"> ". $afos[$row["phenomena"]] ."</a></td> 
+  $t = $row["phenomena"];
+  if (isset($afos[$t])) $t = $afos[$row["phenomena"]] ;
+
+  echo "<tr> <td><a href=\"cat.php?id=". $row["oid"] ."\">$t</a></td> 
     <td>". $row["cname"] ."</td> 
     <td>". $row["sname"] ."</td>
     <td>". strftime("%I:%M %p", $issue) ."</td>
