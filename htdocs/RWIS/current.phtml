@@ -110,6 +110,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
        f2c($mydata[$key]["dwpf"]) );
     $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
        $mydata[$key]["relh"], $mydata[$key]["sped"]);
+     $mydata[$key]["peak_ts"] = 0;
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
       $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
