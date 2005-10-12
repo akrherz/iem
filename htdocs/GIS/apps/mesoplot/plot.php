@@ -1,13 +1,14 @@
 <?php
+include("../../../../config/settings.inc.php");
 //  mesoplot/plot.php
 //  - Replace GEMPAK mesoplots!!!
 
-dl("php_mapscript_442.so");
+dl($mapscript);
 
-include('../../../include/mlib.php');
-include('../../../include/iemaccess.php');
-include('../../../include/iemaccessob.php');
-include('/mesonet/php/include/snet_locs.php');
+include("$rootpath/include/mlib.php");
+include("$rootpath/include/iemaccess.php");
+include("$rootpath/include/iemaccessob.php");
+include("$rootpath/include/snet_locs.php");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'KCCI';
 $Scities = $cities[$network];
