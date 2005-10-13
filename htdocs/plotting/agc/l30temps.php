@@ -1,10 +1,13 @@
 <?php
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-$connection = iemdb("campbelldaily");
+$connection = iemdb("isuag");
 
-$table1 = $station ."_2004";
-$table2 = $station ."_2005";
+$station = $_GET["station"];
+$ts = time() - 86400 - 7*3600;
+$table = sprintf("t%s_daily", date("Y", $ts) );
+$date = date("Y-m-d", $ts);
+
 
 $queryData = "c11 as dater, c12 as dater2";
 $ylabel = "Temperature [F]";
@@ -15,10 +18,8 @@ $ylabel = "Temperature [F]";
 //	$y2label = "4in Soil Temp [F]";
 //}
 
-$query2 = "SELECT ". $queryData .", to_char(day, 'yy/mm/dd') as valid from ". $table1 ." WHERE 
-	(day + '60 days'::interval) > CURRENT_TIMESTAMP  UNION 
-	SELECT ". $queryData .", to_char(day, 'yy/mm/dd') as valid from ". $table2 ." WHERE
-	(day + '60 days'::interval) > CURRENT_TIMESTAMP ORDER by valid ASC ";
+$query2 = "SELECT ". $queryData .", to_char(valid, 'yy/mm/dd') as valid from ". $table ." WHERE station = '$station' and 
+	(valid + '60 days'::interval) > CURRENT_TIMESTAMP  ORDER by valid ASC";
 
 $result = pg_exec($connection, $query2);
 
@@ -34,23 +35,18 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
   $xlabel[$i] = $row["valid"];
 }
 
-//  $xlabel = array_reverse( $xlabel );
-//  $ydata  = array_reverse( $ydata );
-//  $ydata2  = array_reverse( $ydata2 );
-//  $ydata3  = array_reverse( $ydata3 );
-
 pg_close($connection);
 
-include ("../../include/agclimateLoc.php");
-include ("../dev/jpgraph.php");
-include ("../dev/jpgraph_line.php");
+include ("$rootpath/include/agclimateLoc.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(500,350,"example1");
 $graph->SetScale("textlin");
 //$graph->SetY2Scale("lin");
 $graph->img->SetMargin(40,10,45,80);
-$graph->xaxis->SetFont(FONT1,FS_BOLD);
+$graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set("Last 60 days Hi/Low Temp for  ". $ISUAGcities[ $station]["city"] );

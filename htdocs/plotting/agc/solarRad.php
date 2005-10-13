@@ -12,7 +12,7 @@ $queryData = "c100 as dater, c300 as dater2, c800";
 $y2label = "Temperature [F]";
 
 
-$query2 = "SELECT ". $queryData .", to_char(valid, 'mmdd/HH24') as valid from ". $table ." WHERE 
+$query2 = "SELECT ". $queryData .", to_char(valid, 'mmdd/HH24') as valid from ". $table ." WHERE station = '$station' and 
 	date(valid) = '". $date ."'::date ORDER by valid ASC ";
 
 $result = pg_exec($connection, $query2);
