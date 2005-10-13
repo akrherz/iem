@@ -7,13 +7,13 @@
 <?php 
 include("../../../config/settings.inc.php");
 $TITLE = "IEM | Past Features";
-$ts = isset($_GET["ts"]) ? $_GET["ts"] : 0;
+$ts = isset($_GET["ts"]) ? $_GET["ts"] : time();
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/header.php"); ?>
 
 <div class="text">
 <b>Nav:</b> <a href="/index.php">IEM Home</a> &nbsp;<b> > </b> &nbsp; Past Features
-<br>List all <a href="/onsite/features/titles.php">feature titles</a>.
+<br>List all <a href="titles.php">feature titles</a>.
 
 <?php 
  
