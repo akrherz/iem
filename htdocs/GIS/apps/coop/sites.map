@@ -127,7 +127,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME datal
-  CONNECTION "host=10.10.10.20 user=akrherz dbname=coop"
+  CONNECTION "host=db1.mesonet.agron.iastate.edu user=akrherz dbname=coop"
   DATA "geom from (SELECT data.years as yrs, 
       map.OID, map.geom, round(data.high::numeric,0)::int as d 
       from stations map, climate data

@@ -1,13 +1,15 @@
 <?php
+include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
   /** gsplot.phtml
    * - Make Growing Season Plots
    */
-$var = $_GET["var"];
-$year = $_GET["year"];
-$smonth = $_GET["smonth"];
-$sday = $_GET["sday"];
-$emonth = $_GET["emonth"];
-$eday = $_GET["eday"];
+$var = isset($_GET["var"]) ? $_GET["var"]: "";
+$year = isset($_GET["year"]) ? $_GET["year"]: "";
+$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: 5;
+$sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
+$emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: 10;
+$eday = isset($_GET["eday"]) ? $_GET["eday"]: 1;
 
 /** Need to use external date lib *
   * http://php.weblogs.com/adodb_date_time_library
@@ -42,7 +44,7 @@ if (strlen($emonth) > 0 && strlen($eday) > 0)
   $gs_end[$year] = adodb_mktime(0,0,0,$emonth,$eday,$year);
 
 
-$round = Array("prec" => 2);
+$round = Array("prec" => 2, "gdd50" => 0);
 
 $today = time();
 if ($gs_end[$year] >= $today)  $gs_end[$year] = $today;
@@ -52,7 +54,7 @@ $eday = strftime("%d", $gs_end[$year]);
 $smonth = strftime("%m", $gs_start[$year]);
 $sday = strftime("%d", $gs_start[$year]);
 
-include("../../../include/forms.php");
+include("$rootpath/include/forms.php");
 
 ?>
 
@@ -65,7 +67,7 @@ function new_window(url) {
 } 
 //END Script-->
 </script>';
-include("/mesonet/php/include/header.php"); ?>
+include("$rootpath/include/header.php"); ?>
 
 <div class="text">
 <a href="http://mesonet.agron.iastate.edu/COOP/">NWS COOP</a> &nbsp;<b> > </b>
@@ -105,8 +107,8 @@ graphically as well as textually for use in a GIS.  Data is updated through a co
  
 
 <?php
-dl("php_mapscript_440.so");
-include('../../../include/allLoc.php');
+dl($mapscript);
+include("$rootpath/include/all_locs.php");
 
 function mktitlelocal($map, $imgObj, $titlet) { 
  
@@ -181,7 +183,7 @@ $img = $map->prepareImage();
 $counties->draw($img);
 $iards->draw($img);
 
-$c = pg_connect("10.10.10.20","5432","coop");
+$c = iemdb("coop");
 
 $sstr     = adodb_date("Y-m-d", $gs_start[$year]);
 $estr     = adodb_date("Y-m-d", $gs_end[$year]);
@@ -197,7 +199,7 @@ if ($var == 'gdd50') {
   $gdds = Array();
   $rs =  pg_exec($c, $q);
   for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-    $stid = strtoupper($row['stationid']);
+    $stid = $row['stationid'];
     $high = (float)$row['high'];
     $low  = (float)$row['low'];
 
@@ -205,7 +207,7 @@ if ($var == 'gdd50') {
     if ($high > 86) $high = 86.00;
     if ($high < 50) $tgdd = 0.00;
     else $tgdd = (($high+$low)/2.00) - 50.00;
-
+    if (! isset($gdds[$stid])) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
   }
   $vals = $gdds;
@@ -219,7 +221,7 @@ if ($var == 'sdd86') {
   $gdds = Array();
   $rs =  pg_exec($c, $q);
   for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-    $stid = strtoupper($row['stationid']);
+    $stid = $row['stationid'];
     $high = (float)$row['high'];
     $low  = (float)$row['low'];
 
@@ -227,6 +229,7 @@ if ($var == 'sdd86') {
     if ($high < 86) $tgdd = 0.00;
     else $tgdd = (($high+$low)/2.00) - 86.00;
 
+    if (! isset($gdds[$stid])) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
   }
   $vals = $gdds;
@@ -240,7 +243,7 @@ else if ($var == 'prec') {
   $vals = Array();
   $rs =  pg_exec($c, $q);
   for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-    $stid = strtoupper( $row['stationid'] );
+    $stid = $row['stationid'];
     $vals[$stid] = $row['prec'];
   }
 }  
@@ -254,20 +257,21 @@ $tr = "# ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .")
 #-----------------------snip------------------\n";
 $tr .= sprintf("%10s,%20s,%10s,%10s,%10s\n", 'ID', 'StationName', 'Latitude', 'Longitude', $var);
 foreach($vals as $key => $value){
-
-  $tr .= sprintf("%10s,%-20s,%10.4f,%10.4f,%10s\n", $key, $cities[$key]['city'],
-  $cities[$key]['lat'], $cities[$key]['lon'], round($value, $round[$var]) );
+  $ukey = strtoupper($key);
+  if (! isset($cities[$ukey]) ) continue;
+  $tr .= sprintf("%10s,%-20s,%10.4f,%10.4f,%10s\n", $key, $cities[$ukey]['city'],
+  $cities[$ukey]['lat'], $cities[$ukey]['lon'], round($value, $round[$var]) );
 
   // Red Dot... 
   $pt = ms_newPointObj();
-  $pt->setXY($cities[$key]['lon'], $cities[$key]['lat'], 0);
+  $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
   $pt->draw($map, $ponly, $img, 0, '' );
   $pt->free();
 
   // City Name
   $pt = ms_newPointObj();
-  $pt->setXY($cities[$key]['lon'], $cities[$key]['lat'], 0);
-  $pt->draw($map, $snet, $img, 1, $cities[$key]['city'] );
+  $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+  $pt->draw($map, $snet, $img, 1, $cities[$ukey]['city'] );
   $pt->free();
 }
 
@@ -275,7 +279,7 @@ reset($vals);
 foreach($vals as $key => $value){
   // Value UL
   $pt = ms_newPointObj();
-  $pt->setXY($cities[$key]['lon'], $cities[$key]['lat'], 0);
+  $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
   $pt->draw($map, $snet, $img, 0, 
      round($value, $rnd[$var]) );
   $pt->free();
@@ -289,7 +293,7 @@ if ($i == 0)
 mktitlelocal($map, $img, " ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .") ");
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+$url = $img->saveWebImage();
 
 ?>
 <p><h3 class="heading">Plot</h3>
@@ -317,5 +321,5 @@ then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.</div>
 
 <?php 
-  include("/mesonet/php/include/footer.php");
+  include("$rootpath/include/footer.php");
 ?>

@@ -12,6 +12,7 @@ include("$rootpath/include/header.php");
 
 <?php
 dl($mapscript);
+include("$rootpath/include/database.inc.php");
 include("$rootpath/include/all_locs.php");
 include("$rootpath/include/mlib.php");
 
@@ -118,11 +119,15 @@ $dbarray = Array("high" => "round(data.high::numeric, 0)::int",
     "precip" => "to_char(data.precip, '99.99')");
 }
 
-$datal->set('data', "geom from 
+$sql = "geom from 
     (SELECT data.years as yrs, map.OID, map.geom, ". $dbarray[$plot] ." as d 
     from stations map, climate data
     WHERE data.station = lower(map.id) and 
-    data.valid = '". $dbdate ."') as foo");
+    data.valid = '". $dbdate ."') as foo";
+$datal->set('data', $sql);
+//global $_DATABASES;
+//print_r($_DATABASES);
+$datal->set('connection', $_DATABASES["coop"]);
 
 $st_cl = ms_newclassobj($stlayer);
 //$st_cl->set("outlinecolor", $green);
