@@ -1,5 +1,10 @@
-<?php $TITLE = "IEM | CCOP Climate Plots";
-include("/mesonet/php/include/header.php"); ?>
+<?php 
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | CCOP Climate Plots";
+$station1 = isset($_GET["station1"]) ? $_GET["station1"] : "";
+$station2 = isset($_GET["station2"]) ? $_GET["station2"] : "";
+$mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
+include("$rootpath/include/header.php"); ?>
 
 <div class="text">
 <B>Navigation:</B>
@@ -12,7 +17,7 @@ include("/mesonet/php/include/header.php"); ?>
 based on a climatology from the COOP stations.  You can interactively generate 
 a plot from this dataset.</p>
 
-<?php include("../../include/COOPstations.php"); ?>
+<?php include("$rootpath/include/COOPstations.php"); ?>
 
 <div style="padding: 3px;">
      <b>Make Plot Selections:</b>
@@ -89,4 +94,4 @@ a plot from this dataset.</p>
   }
 ?></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

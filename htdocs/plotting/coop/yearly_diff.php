@@ -1,5 +1,13 @@
 <?php
-$connection = pg_connect("10.10.10.20","5432","coop");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("coop");
+
+
+$station1 = isset($_GET["station1"]) ? $_GET["station1"] : die("No station1");
+$station2 = isset($_GET["station2"]) ? $_GET["station2"] : die("No station2");
+$season = isset($_GET["season"]) ? $_GET["season"]: "";
+
 
 $months = Array("spring" => "(3, 4, 5)" ,
   "summer" => "(6, 7, 8)",
@@ -11,7 +19,7 @@ $labels = Array("spring" => "Spring (MAM)",
   "fall" => "Fall (SON)",
   "winter" => "Winter (DJF)" );
 
-if ($season != all){
+if ($season != "all"){
   $sqlAddition = " + '1 month'::timespan ";
   $sqlAddition2 = " and month IN ". $months[$season] ." ";
   $label = $labels[$season];
@@ -71,9 +79,9 @@ for( $i=0; $row = @pg_fetch_array($result2,$i); $i++)
 
 pg_close($connection);
 
-include ("../dev17/jpgraph.php");
-include ("../dev17/jpgraph_line.php");
-include ("../../include/COOPstations.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/COOPstations.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(650,450,"example1");
@@ -85,13 +93,13 @@ $graph->xaxis->SetTextTickInterval(5);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set($label ." Yearly Averages Comparison");
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitle("Temperature [F]");
 $graph->yscale->SetGrace(10);
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Year");
 $graph->xaxis->SetTitleMargin(35);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 $graph->legend->Pos(0.01, 0.06);

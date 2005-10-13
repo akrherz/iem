@@ -1,5 +1,11 @@
 <?php
-$connection = pg_connect("10.10.10.20","5432","coop");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("coop");
+
+
+$station1 = isset($_GET["station1"]) ? $_GET["station1"] : die("No station1");
+$station2 = isset($_GET["station2"]) ? $_GET["station2"] : die("No station2");
 
 
 $query2 = "SELECT high, low, years, to_char(valid, 'mm dd') as valid from climate WHERE station = '". $station1 ."' ORDER by valid ASC";
@@ -45,9 +51,9 @@ $xlabel[365] = "Dec 31"; //366
 
 pg_close($connection);
 
-include ("/mesonet/php/include/jpgraph/jpgraph.php");
-include ("/mesonet/php/include/jpgraph/jpgraph_line.php");
-include ("../../include/COOPstations.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/COOPstations.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);

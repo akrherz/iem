@@ -1,5 +1,9 @@
 <?php
-$connection = pg_connect("10.10.10.20","5432","coop");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("coop");
+$station = isset($_GET["station"]) ? $_GET["station"] : die("No station");
+$season = isset($_GET["season"]) ? $_GET["season"]: "";
 
 $months = Array("spring" => "(3, 4, 5)" ,
   "summer" => "(6, 7, 8)",
@@ -11,7 +15,8 @@ $labels = Array("spring" => "Spring (MAM)",
   "fall" => "Fall (SON)",
   "winter" => "Winter (DJF)" );
 
-if ($season != all){
+$sqlAddition2 = "";
+if ($season != "all"){
   $sqlAddition = " + '1 month'::timespan ";
   $sqlAddition2 = " and month IN ". $months[$season] ." ";
   $label = $labels[$season];
@@ -37,10 +42,12 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
   $xlabel[$i]  = $row["year"];
 }
 
-if (sizeof($ydata) == 51) { // 1951!!
+$decades = 10;
+$offset = 7;
+if (sizeof($ydata) == 53) { // 1951!!
  $offset = 9;
  $decades = 4;
-}else if (sizeof($ydata) == 110) { // 1893 !!
+}else if (sizeof($ydata) == 113) { // 1893 !!
  $offset = 7;
  $decades = 10;
 }
@@ -49,9 +56,9 @@ if (sizeof($ydata) == 51) { // 1951!!
 
 pg_close($connection);
 
-include ("/mesonet/php/include/jpgraph/jpgraph.php");
-include ("/mesonet/php/include/jpgraph/jpgraph_line.php");
-include ("../../include/COOPstations.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/COOPstations.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);
