@@ -5,7 +5,7 @@ NAME wepp
 STATUS ON
 SIZE 640 480
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 # Iowa
 #EXTENT 200000 4400000 710000 4900000
 # 3x2  600x400
@@ -13,7 +13,7 @@ EXTENT 160000 4450000 760000 4850000
 # Washington County
 #EXTENT 567973 4537344 647029 4616582
 UNITS METERS
-SHAPEPATH "/mesonet/www/html/GIS/data/"
+SHAPEPATH "/mesonet/data/gis/"
 SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR 255 255 255
 IMAGETYPE PNG
@@ -36,9 +36,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 40000000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/fancy.log"
+  LOG "/var/www/htdocs/tmp/fancy.log"
 END
 
 

@@ -5,7 +5,7 @@ NAME simpl
 STATUS ON
 SIZE 640 480
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 #EXTENT 487973.3125 4357344 627029 4696320.5 
 # Iowa
 # 3 x 2 600km by 400 km
@@ -13,8 +13,8 @@ EXTENT 200000 4400000 800000 4800000
 # Washington County
 #EXTENT 567973 4537344 647029 4616582
 UNITS METERS
-SHAPEPATH "/mesonet/www/html/GIS/data/"
-SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+SHAPEPATH "/mesonet/data/gis/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off
@@ -36,9 +36,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 40000000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/fancy.log"
+  LOG "/var/www/htdocs/tmp/fancy.log"
 END
 
 

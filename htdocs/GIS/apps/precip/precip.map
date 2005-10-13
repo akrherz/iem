@@ -5,11 +5,11 @@ NAME precip
 STATUS ON
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT -98.50 37.00 -89.30 46.0
 UNITS DD
-SHAPEPATH "/mesonet/www/html/GIS/data/"
-SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+SHAPEPATH "/mesonet/data/gis/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off
@@ -36,9 +36,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 6650000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/stations.log"
+  LOG "/var/www/htdocs/tmp/stations.log"
   METADATA
    "wms_title" "IEM Precipitation Analysis"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv"
@@ -49,7 +49,7 @@ END
 REFERENCE
   COLOR 255 255 255
   EXTENT -96.7 39.35 -90 44.12
-  IMAGE /mesonet/www/html/GIS/data/images/iowabase.png
+  IMAGE /mesonet/data/gis/images/iowabase.png
   OUTLINECOLOR 255 0 0
   STATUS ON
   SIZE 100 59

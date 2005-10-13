@@ -5,7 +5,7 @@ NAME adjust
 STATUS ON
 SIZE 640 480
 #SYMBOLSET /mesonet/data/gis/symbols/symbol.sym
-#FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+#FONTSET "/mesonet/data/gis/fonts/fonts.list"
 #EXTENT 200000 4400000 710000 4900000
 #EXTENT 340000 4480000 540000 4780000
 # Iowa Utm 83 Zone 14
@@ -16,8 +16,8 @@ SIZE 640 480
 #UNITS DD
 EXTENT -2343813 -1746393 2000000 1701506
 UNITS METERS
-#SHAPEPATH "/mesonet/www/html/GIS/data/"
-#SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+#SHAPEPATH "/mesonet/data/gis/"
+#SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR 230 230 230
 IMAGETYPE PNG
 TRANSPARENT off
@@ -53,9 +53,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 46500000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/stations.log"
+  LOG "/var/www/htdocs/tmp/stations.log"
 END
 
 

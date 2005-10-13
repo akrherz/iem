@@ -3,11 +3,11 @@
 NAME iem
 STATUS ON
 SIZE 950 1000
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT 900000 2500000 690000 5500000 
 UNITS METERS
-SHAPEPATH "/mesonet/www/html/GIS/data/"
-SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+SHAPEPATH "/mesonet/data/gis/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off
@@ -24,9 +24,9 @@ END
 WEB
   MINSCALE 60000
   MAXSCALE 40000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/fancy.log"
+  LOG "/var/www/htdocs/tmp/fancy.log"
 END
 
 LAYER

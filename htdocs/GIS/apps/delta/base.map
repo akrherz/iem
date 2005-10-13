@@ -2,7 +2,7 @@
 NAME iem
 STATUS ON
 SIZE 640 480
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 #  Iowa, yeah!
 # 3x2  
 #EXTENT -105 36 -86 50
@@ -27,7 +27,7 @@ WEB
   MAXSCALE 40000000
   IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/fancy.log"
+  LOG "/var/www/htdocs/tmp/fancy.log"
   TEMPLATE test.html
 END
 

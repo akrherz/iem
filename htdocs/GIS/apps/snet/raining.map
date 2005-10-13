@@ -155,7 +155,7 @@ LAYER
   STATUS ON
   TYPE RASTER
   DATA /mesonet/data/gis/images/26915/KCCI/KCCI_N0R_0.tif
-  #DATA /mesonet/www/html/GIS/data/images/kcci2.tif
+  #DATA /mesonet/data/gis/images/kcci2.tif
   OFFSITE  0 0 0
   TRANSPARENCY 80
   PROJECTION
