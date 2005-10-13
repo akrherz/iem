@@ -65,13 +65,13 @@ if ( $totCount > 48 ){
 	$graph->xaxis->SetTextTicks(3);
 }
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 $graph->yaxis->SetTitle("Wind Speed [knots]");
 $graph->y2axis->SetTitle("Direction [N 0]");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Time");
 $graph->xaxis->SetTitleMargin(55);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 $graph->legend->Pos(0.01, 0.07);
 $graph->legend->SetLayout(LEGEND_HOR);

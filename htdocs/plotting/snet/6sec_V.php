@@ -104,7 +104,7 @@ $graph->SetColor("#f0f0f0");
 $graph->img->SetMargin(55,55,55,60);
 
 $graph->title->Set($Scities[$Sconv[$station]]['city'] ." Time Series");
-$graph->title->SetFont(FF_ARIAL,FS_BOLD,20);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,20);
 $graph->subtitle->Set($titleDate );
 
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
@@ -112,27 +112,27 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetTitle("Plot between 2 and 3:30 PM on 11 Sept 2003");
 $graph->xaxis->SetTitleMargin(25);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 
-$graph->yaxis->SetFont(FF_ARIAL,FS_BOLD, 14);
+$graph->yaxis->SetFont(FF_FONT1,FS_BOLD, 14);
 $graph->yaxis->scale->ticks->Set(45,15);
 $graph->yaxis->SetTitle("Wind Direction");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitleMargin(40);
 
 
 $graph->y2axis->SetFont(FF_FONT1,FS_BOLD);
 $graph->y2axis->scale->ticks->Set(10,5);
 $graph->y2axis->SetTitle("Wind Speed [MPH]");
-$graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->y2axis->SetTitleMargin(40);
 $graph->y2axis->SetColor("red");
 
 $graph->legend->SetLayout(LEGEND_VERT);
 $graph->legend->Pos(0.05,0.07);
-$graph->legend->SetFont(FF_ARIAL,FS_BOLD,14);
+$graph->legend->SetFont(FF_FONT1,FS_BOLD,14);
 
 // Create the linear plot
 $lineplot=new LinePlot($mph);

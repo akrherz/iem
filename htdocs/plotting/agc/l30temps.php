@@ -1,5 +1,7 @@
 <?php
-$connection = pg_connect("localhost","5432","campbelldaily");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("campbelldaily");
 
 $table1 = $station ."_2004";
 $table2 = $station ."_2005";
@@ -53,14 +55,14 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set("Last 60 days Hi/Low Temp for  ". $ISUAGcities[ $station]["city"] );
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitle("Temperature [F]");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Year/Month/Day");
 //$graph->y2axis->SetTitle( $y2label );
-//$graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+//$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitleMargin(49);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 //$graph->y2axis->SetColor("blue");
 //$graph->yaxis->SetColor("red");

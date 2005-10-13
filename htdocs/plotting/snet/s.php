@@ -104,15 +104,15 @@ $graph->legend->Pos(0.01,0.075);
 
 $graph->yaxis->scale->ticks->SetPrecision(0);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 $graph->yaxis->SetTitle("Solar Radiation [Wm**-2]");
 $graph->yaxis->SetTitleMargin(35);
 
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 //$graph->yaxis->SetTitleMargin(48);
 //$graph->y2axis->SetTitleMargin(28);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot

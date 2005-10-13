@@ -1,5 +1,7 @@
-<?php $TITLE = "IEM | ISU Ag Plotting";
-include("/mesonet/php/include/header.php"); ?>
+<?php 
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | ISU Ag Plotting";
+include("$rootpath/include/header.php"); ?>
 
 <div class="text">
 Back to <a href="/agclimate/">ISU Ag Climate</a> Homepage.<p>
@@ -14,7 +16,7 @@ have a particular plot you would like to see, please let us know.
 This program will plot a timeseries of hourly solar radiation values with 4in soil temperatures
 and air temperatures.  You will need to select a station to plot.
 <P>
-<FORM name="rad" METHOD="GET" ACTION="/plotting/agc/solarRad.php">
+<FORM name="rad" METHOD="GET" ACTION="solarRad.php">
 <TABLE>
 <TR>
 <TD>
@@ -43,7 +45,7 @@ and air temperatures.  You will need to select a station to plot.
 This program will plot the daily high and low temperatures for the previous 60 days.
 You need to select a station below.
 <P>
-<FORM name="temps" METHOD="GET" ACTION="/plotting/agc/l30temps.php">
+<FORM name="temps" METHOD="GET" ACTION="l30temps.php">
 <TABLE>
 <TR>
 <TD>
@@ -72,7 +74,7 @@ You need to select a station below.
 This program will plot the daily average 4in soil temperatures with daily solar 
 radiation values. You need to select a station below.
 <P>
-<FORM name="rad2" METHOD="GET" ACTION="/plotting/agc/l60rad.php">
+<FORM name="rad2" METHOD="GET" ACTION="l60rad.php">
 <TABLE>
 <TR>
 <TD>
@@ -105,7 +107,7 @@ order to create the plot.
 be carefully considered.
 
 <P>
-<FORM name="prec2" METHOD="GET" ACTION="/plotting/agc/l60p-et.php">
+<FORM name="prec2" METHOD="GET" ACTION="l60p-et.php">
 <TABLE>
 <TR>
 <TD>
@@ -131,4 +133,4 @@ be carefully considered.
 </form></div>
 
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

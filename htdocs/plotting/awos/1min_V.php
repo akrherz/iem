@@ -131,17 +131,17 @@ $graph->yaxis->scale->ticks->SetPrecision(0);
 $graph->yaxis->SetColor("blue");
 $graph->y2axis->SetColor("red");
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 
 $graph->yaxis->SetTitle("Wind Direction");
 $graph->y2axis->SetTitle("Wind Speed [MPH]");
 
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 $graph->yaxis->SetTitleMargin(30);
 //$graph->y2axis->SetTitleMargin(28);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot

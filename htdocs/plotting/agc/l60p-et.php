@@ -1,5 +1,7 @@
 <?php
-$connection = pg_connect("localhost","5432","campbelldaily");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("campbelldaily");
 
 $table1 = $station ."_2004";
 $table2 = $station ."_2005";
@@ -63,15 +65,15 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set("Last 60 days accumulated (Obs Prec - PET) for  ". $ISUAGcities[ $station]["city"] );
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitle("inches");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Month/Day");
 //$graph->y2axis->SetTitle("Solar Radiation [Langleys]");
-//$graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+//$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitleMargin(48);
 $graph->yaxis->SetTitleMargin(35);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 //$graph->y2axis->SetColor("red");

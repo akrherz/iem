@@ -46,16 +46,16 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set("24 h winds for ". $Scities[$station]["city"]);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,14);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Wind Speed [knots]");
 $graph->y2axis->SetTitle("Direction [N 0]");
 $graph->yaxis->SetColor("red");
 $graph->y2axis->SetColor("blue");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Local Valid Time");
 $graph->xaxis->SetTextLabelInterval(3);
 $graph->xaxis->SetTitleMargin(55);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 $graph->legend->Pos(0.01, 0.09);
 $graph->legend->SetLayout(LEGEND_HOR);

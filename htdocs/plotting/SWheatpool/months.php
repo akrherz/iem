@@ -95,11 +95,11 @@ $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set($stationx ." vs ".$stationy." 2001 Dew Points");
 $graph->subtitle->Set($subt);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 $graph->yaxis->SetTitle($stationy ." Dewp");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle($stationx ." Dewp");
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitleMargin(20);
 $graph->xaxis->SetPos("min");
 

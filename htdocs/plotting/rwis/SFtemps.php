@@ -213,7 +213,7 @@ if ($interval > 1 ){
 $graph->xaxis->SetLabelAngle(90);
 
 //$graph->title->Set("Recent Meteogram for ". $station);
-//$graph->title->SetFont(FF_ARIAL,FS_BOLD,16);
+//$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 
 $graph->yaxis->SetTitle("Temperature [F]");
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);

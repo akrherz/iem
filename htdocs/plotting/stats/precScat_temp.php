@@ -45,12 +45,12 @@ $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set("Both Wet ScatterPlot");
 $graph->subtitle->Set("Both Greater Than Zero");
 
-$graph->title->SetFont(FF_ARIAL,FS_BOLD,10);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,10);
 $graph->yaxis->SetTitle("Observed");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,10);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,10);
 $graph->yaxis->SetTitleMargin(30);
 $graph->xaxis->SetTitle("NEXRAD Estimate");
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,10);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,10);
 $graph->xaxis->SetTitleMargin(10);
 $graph->xaxis->SetPos("min");
 

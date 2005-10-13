@@ -71,7 +71,7 @@ $graph->SetY2Scale("lin", 0, 1.50);
 $graph->SetColor("#f0f0f0");
 
 $graph->title->Set($Scities[$Sconv[$station]]['city'] ." Time Series");
-$graph->title->SetFont(FF_ARIAL,FS_BOLD,20);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,20);
 $graph->subtitle->Set($titleDate );
 
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
@@ -79,28 +79,28 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetTitle("Plot between 2 and 3:30 PM on 11 Sept 2003");
 $graph->xaxis->SetTitleMargin(25);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 
-$graph->yaxis->SetFont(FF_ARIAL,FS_BOLD, 14);
+$graph->yaxis->SetFont(FF_FONT1,FS_BOLD, 14);
 $graph->yaxis->scale->ticks->Set(2,1);
 $graph->yaxis->SetTitle("Pressure [mb]");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitleMargin(60);
 
 
 $graph->y2axis->SetFont(FF_FONT1,FS_BOLD);
 $graph->y2axis->scale->ticks->Set(0.50,0.10);
 $graph->y2axis->SetTitle("Accumulated Rainfall [inches]");
-$graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->y2axis->SetTitleMargin(40);
 $graph->y2axis->SetColor("blue");
 
 
 $graph->legend->SetLayout(LEGEND_VERT);
 $graph->legend->Pos(0.10,0.10);
-$graph->legend->SetFont(FF_ARIAL,FS_BOLD,14);
+$graph->legend->SetFont(FF_FONT1,FS_BOLD,14);
 
 
 

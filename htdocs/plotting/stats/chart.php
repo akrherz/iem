@@ -31,7 +31,7 @@ $graph->xaxis->SetTickLabels($xlabel);
 
 $graph->title->Set("The Iowa Environmental Mesonet Archive");
 $graph->subtitle->Set("Archived observations in millions");
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 
 $bplot = new BarPlot($obs);
 $bplot->SetFillColor('darkblue');
@@ -41,7 +41,7 @@ $bplot->SetShadow('darkgray');
 
 $bplot->value->Show();
 // Must use TTF fonts if we want text at an arbitrary angle
-$bplot->value->SetFont(FF_ARIAL,FS_NORMAL,8);
+$bplot->value->SetFont(FF_FONT1,FS_NORMAL,8);
 $bplot->value->SetFormat('%d');
 // Black color for positive values and darkred for negative values
 $bplot->value->SetColor("black","darkred");

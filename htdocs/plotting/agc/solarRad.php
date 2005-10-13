@@ -1,24 +1,19 @@
 <?php
-$station = $_GET['station'];
-$connection = pg_connect("10.10.10.40","5432","campbellhourly");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("isuag");
 
-$table = $station ."_2005";
+$station = $_GET['station'];
+$ts = time() - 86400 - 7*3600;
+$table = sprintf("t%s_hourly", date("Y", $ts) );
+$date = date("Y-m-d", $ts);
 
 $queryData = "c100 as dater, c300 as dater2, c800";
 $y2label = "Temperature [F]";
 
 
-//if ($plot == "soil"){
-//	$queryData = "c300 as dater, c800";
-//	$y2label = "4in Soil Temp [F]";
-//}
-
-if ( strlen($date) == 0){
-	$date = "Yesterday";
-}
-
-$query2 = "SELECT ". $queryData .", to_char(day, 'mmdd/HH24') as valid from ". $table ." WHERE 
-	date(day) = '". $date ."'::date ORDER by day DESC ";
+$query2 = "SELECT ". $queryData .", to_char(valid, 'mmdd/HH24') as valid from ". $table ." WHERE 
+	date(valid) = '". $date ."'::date ORDER by valid ASC ";
 
 $result = pg_exec($connection, $query2);
 
@@ -36,41 +31,36 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
   $xlabel[$i] = $row["valid"];
 }
 
-  $xlabel = array_reverse( $xlabel );
-  $ydata  = array_reverse( $ydata );
-  $ydata2  = array_reverse( $ydata2 );
-  $ydata3  = array_reverse( $ydata3 );
 
 pg_close($connection);
 
-include ("../../include/agclimateLoc.php");
-include ("../dev/jpgraph.php");
-include ("../dev/jpgraph_line.php");
+include ("$rootpath/include/agclimateLoc.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(400,350,"example1");
 $graph->SetScale("textlin");
 $graph->SetY2Scale("lin",0,1000);
 $graph->img->SetMargin(50,40,45,90);
-$graph->xaxis->SetFont(FONT1,FS_BOLD);
+$graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetPos("min");
-$graph->title->Set($date ." Solar Rad & Temps for  ". $ISUAGcities[ $station]["city"] );
+$graph->title->Set($date ." Solar Rad & Temps for  ". $ISUAGcities[$station]["city"] );
 
 $graph->y2axis->scale->ticks->Set(100,50);
-$graph->y2axis->scale->ticks->SetPrecision(0);
 
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->y2axis->SetTitle("Solar Radiation [kilo-calorie m**-2]");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Local Valid Time");
 $graph->yaxis->SetTitle( $y2label );
-$graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitleMargin(55);
 $graph->yaxis->SetTitleMargin(37);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 //$graph->y2axis->SetColor("blue");
 $graph->y2axis->SetColor("red");

@@ -69,19 +69,19 @@ $graph->title->Set("Solar Rad & Soil Temps for ".$sites[$station]["city"]." SCAN
 $graph->y2axis->scale->ticks->Set(100,25);
 //$graph->y2axis->scale->ticks->SetPrecision(0);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->y2axis->SetTitle("Solar Radiation [Watts m**-2]");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Local Valid Time");
 $graph->yaxis->SetTitle( $y2label );
-$graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitleMargin(35);
 if ($i > 72){
   $graph->xaxis->SetTextTickInterval(6);
 }
 $graph->y2axis->SetTitleMargin(35);
 $graph->xaxis->SetTitleMargin(55);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 //$graph->y2axis->SetColor("blue");
 $graph->y2axis->SetColor("red");
