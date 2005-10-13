@@ -1,12 +1,15 @@
 <?php
-$connection = pg_connect("10.10.10.10","5432","iowa");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("access");
 
-if ( strlen( $network) == 0  ){
-	$network = "asos";
-}
+$network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
 
 $query1 = "SET TIME ZONE 'GMT'";
-$query2 = "SELECT to_char(valid, 'mmdd/HH24MI') as tvalid, count(valid) as tcount from ". $network ." WHERE (valid + '48 hours'::interval) > CURRENT_TIMESTAMP GROUP by tvalid ORDER by tvalid";
+$query2 = "select count(*), tvalid from ( 
+    select station, to_char(valid, 'mmdd/HH24') as tvalid, count(*)
+    from current_log WHERE network= '$network' GROUP by station, tvalid) as foo
+  GROUP by tvalid ORDER by tvalid ASC";
 
 $result = pg_exec($connection, $query1);
 $result = pg_exec($connection, $query2);
@@ -18,30 +21,15 @@ $xlabel= array();
 $j = 0;
 for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
 {
-
-//  echo ":". $row["tcount"] .":";  
-  $ydata[$i]  = $row["tcount"];
-
-
-  if ( $i % 3 == 0 && $network != "asos") {
-	$xlabel[$j] = $row["tvalid"];
-	$j = $j +1 ;
-  } elseif ($network == "asos") {
-	$xlabel[$i] = $row["tvalid"];
-  }
-//  echo ":". $xlabel[$i] .":";
+  $ydata[$i]  = $row["count"];
+  $xlabel[$i] = $row["tvalid"];
 }
-
-//  $xlabel = array_reverse( $xlabel );
-//  $ydata2 = array_reverse( $ydata2 );
-//  $ydata  = array_reverse( $ydata );
- 
 
 pg_close($connection);
 
 
-include ("../dev/jpgraph.php");
-include ("../dev/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 $goal = Array("awos" => 35, "asos" => 15, "rwis" => 50);
 
@@ -55,21 +43,17 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 
 $graph->yaxis->scale->ticks->Set(5,1);
-$graph->yaxis->scale->ticks->SetPrecision(0);
 
 $graph->title->Set("Total $network observations per valid time");
 //$graph->subtitle->Set("Total Possible: ". $goal[$network] );
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 $graph->yaxis->SetTitle("Total Valid Obs");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid GMT Time");
 $graph->xaxis->SetTitleMargin(55);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 
-if ($network != "asos") {
-	$graph->xaxis->SetTextTicks(3);
-}
 
 // Create the linear plot
 $lineplot=new LinePlot($ydata);
