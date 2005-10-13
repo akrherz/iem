@@ -35,7 +35,6 @@ $vars = $_GET['vars'];
 $yyyy = $_GET['year'];
 $s_mo = $_GET['startMonth'];
 $s_dy = $_GET['startDay'];
-$s_hr = $_GET['startHour'];
 $e_mo = $_GET['endMonth'];
 $e_dy = $_GET['endDay'];
 $delim= $_GET['delim'];
@@ -46,9 +45,9 @@ if (sizeof($st) == 0) die("You did not select a station");
 if (sizeof($vars) == 0) die("You did not select a variable");
 
 
-$rtype = "hourly";
-if (strlen($s_hr) == 0)
-  $rtype = "daily";
+$rtype = "daily";
+if (isset($_GET["s_hr"]) )
+  $rtype = "hourly";
 if (strlen($delim) == 0)
   $delim = "tab";
 
