@@ -1,5 +1,11 @@
-<?php $TITLE = "IEM | COOP Data vs Year";
-include("/mesonet/php/include/header.php"); ?>
+<?php 
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | COOP Data vs Year";
+include("$rootpath/include/header.php"); 
+
+$station = isset($_GET["station"]) ? $_GET["station"] : "";
+$year = isset($_GET["year"]) ? $_GET["year"]: 2004;
+?>
 
 <div class="text">
 <B>Navigation:</B>
@@ -13,7 +19,7 @@ climatology for a station.  Please note the first year of record for a
 station before entering the year you would like to plot against. Data 
 for 2001 is currently not available.</p>
 
-<?php include("../../include/COOPstations.php"); ?>
+<?php include("$rootpath/include/COOPstations.php"); ?>
 
 <form method="GET" action="vyear_fe.php">
 
@@ -56,7 +62,7 @@ for 2001 is currently not available.</p>
   }
 ?></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
 
 </body>
 </HTML>

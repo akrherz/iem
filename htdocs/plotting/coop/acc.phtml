@@ -1,7 +1,8 @@
 <?php
- include("../../include/COOPstations.php");
- $station = strtolower($_GET['station']);
- $network = "COOPDB";
+ include("../../../config/settings.inc.php");
+ include("$rootpath/include/COOPstations.php");
+ $station = isset($_GET["station"]) ? $_GET["station"]: "";
+ $network = "IACLIMATE";
 
  $syear = isset($_GET['syear']) ? $_GET['syear'] : date("Y");
  $smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 1;
@@ -13,13 +14,13 @@
 
  $dcgi = "syear=$syear&smonth=$smonth&sday=$sday&eyear=$eyear&emonth=$emonth&eday=$eday&";
 
- include("/mesonet/php/lib/selectWidget.php");
+ include("$rootpath/include/selectWidget.php");
  $sw = new selectWidget("acc.phtml", "acc.phtml?$dcgi", $network);
  $sw->logic($_GET);
 ?>
 
 <?php 	$TITLE = "IEM | Accumulated Traces";
-include("/mesonet/php/include/header.php"); ?>
+include("$rootpath/include/header.php"); ?>
 
 <a href="/COOP/">NWS COOP Network</a> 
 
@@ -31,7 +32,7 @@ data, you can download on the <a href="/request/coop/fe.phtml">COOP data downloa
 
 <div class="text">
 
-<?php include_once("../../include/forms.php"); ?>
+<?php include_once("$rootpath/include/forms.php"); ?>
 <form name="ds" action="acc.phtml" method="GET">
 
 <table style="padding: 3px; border: 0px; margin: 0px;">
@@ -43,7 +44,7 @@ data, you can download on the <a href="/request/coop/fe.phtml">COOP data downloa
   <td rowspan="2"><select name="station">
 <?php 
 while( list($key, $val) = each($cities) ){
-  if (strlen($val["dont"]) > 0) continue;
+  if (isset($val["dont"])) continue;
   echo "<option value=\"$key\"";
   if ($key == $station) echo " SELECTED ";
   echo ">". $val["city"] ." [". $val["startYear"] ."]\n";
@@ -78,4 +79,4 @@ echo $sw->printInterface();
 ?>
 </div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

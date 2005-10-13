@@ -1,6 +1,8 @@
 <?php
+include("../../../config/settings.inc.php");
 include("adodb-time.inc.php");
-include("../../include/COOPstations.php");
+include("$rootpath/include/COOPstations.php");
+include("$rootpath/include/database.inc.php");
 
 
 $station = isset($_GET['station']) ? strtolower($_GET['station']) : die("No station");
@@ -30,7 +32,7 @@ $e2date = adodb_date("2000-m-d", $ets);
 
 $today = time();
 
-$coopdb = pg_connect("10.10.10.20","5432","coop");
+$coopdb = iemdb("coop");
 
 function calcGDD($high,$low)
 {
@@ -94,9 +96,9 @@ $xlabels[] = "";
 pg_close($coopdb);
 
 
-include ("../jpgraph-1.13/jpgraph.php");
-include ("../jpgraph-1.13/jpgraph_line.php");
-include ("../jpgraph-1.13/jpgraph_bar.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480,"example1");
