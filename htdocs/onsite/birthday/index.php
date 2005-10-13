@@ -8,7 +8,7 @@ include("$rootpath/include/header.php");
 <BR>
 
 <?php
-	if (!$startYear)
+	if (! isset($_GET["startYear"]) )
 	{
 		$startYear = "1951";
 	}
@@ -16,7 +16,7 @@ include("$rootpath/include/header.php");
 	include("$rootpath/include/COOPstations.php");		
 ?>
 <div class="text">
-If you were born in Iowa between 1900 and 1998, you can fill out the form below and discover the weather
+If you were born in Iowa between 1900 and 2005, you can fill out the form below and discover the weather
 conditions at a location near to you.  Just follow the instructions below.
 
 
