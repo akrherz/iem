@@ -55,16 +55,16 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 <tbody><tr><td align="center">
 <h3 class="subtitle">Request Date:</h3><br />
 <form method="GET" action="dl.phtml" name="single">
-<table><tr><td><b>Year:</b></td><td><?php echo yearSelect(2002, $year, "year"); ?></td></tr>
-<tr><td><b>Month:</b></td><td><?php echo monthSelect($month, "month"); ?></td></tr>
-<tr><td><b>Day:</b></td><td><?php echo daySelect($day, "day"); ?></td></tr></table>
+<table><tr><td><b>Year:</b></td><td><?php echo yearSelect(2002, date("Y"), "year"); ?></td></tr>
+<tr><td><b>Month:</b></td><td><?php echo monthSelect(date("m"), "month"); ?></td></tr>
+<tr><td><b>Day:</b></td><td><?php echo daySelect(date("d"), "day"); ?></td></tr></table>
 <input type="submit" value="Download Date">
 </form>
 </td><td style="border-left: 1px #006666 solid;" valign="top" align="center">
 <h3 class="subtitle">Request Everything!</h3><br />
 <form method="GET" action="dl.phtml" name="all">
 <br /><br /><br /><br /><input type="hidden" name="all" value="all">
-<b>Year:</b><?php echo yearSelect(2002, $year, "year"); ?>
+<b>Year:</b><?php echo yearSelect(2002, date("Y"), "year"); ?>
 <input type="submit" value="Download Everything!">
 </form>
 </td></tr></tbody></table></div>
