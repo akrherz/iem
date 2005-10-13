@@ -1,5 +1,13 @@
-<?php $TITLE = "IEM | COOP Climate Plots";
-include("/mesonet/php/include/header.php"); ?>
+<?php 
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | COOP Climate Plots";
+include("$rootpath/include/header.php"); 
+
+$station1 = isset($_GET["station1"]) ? $_GET["station1"] : "";
+$station2 = isset($_GET["station2"]) ? $_GET["station2"] : "";
+$mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
+$season = isset($_GET["season"]) ? $_GET["season"]: "";
+?>
 
 <div class="text">
 <B>Navigation:</B>
@@ -11,7 +19,7 @@ include("/mesonet/php/include/header.php"); ?>
 temperature averages.  You can plot averages for a single station or compare
 two stations side-by-side.</p>
 
-<?php include("../../include/COOPstations.php"); ?>
+<?php include("$rootpath/include/COOPstations.php"); ?>
 
 <div style="padding: 3px;">
      <b>Make Plot Selections:</b>
@@ -119,4 +127,4 @@ two stations side-by-side.</p>
   }
 ?></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
