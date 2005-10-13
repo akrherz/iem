@@ -5,7 +5,8 @@
 # UPDATE 4/7/99: Adding in multi-station search
 # 3 Mar 2004	Use site python
 
-import style, functs, engine, sys
+from pyIEM import style
+import functs, engine, sys
 from cgi import *
 
 
