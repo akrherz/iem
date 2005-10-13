@@ -111,12 +111,6 @@ for ($j=0; $j<24; $j++){
 if ($tmpf[0] == ""){
   $tmpf[0] = 0;
 }
-if ($dwpf[0] == ""){
-  $dwpf[0] = 0;
-}
-if ($sr[0] == ""){
-  $sr[0] = 0;
-}
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");

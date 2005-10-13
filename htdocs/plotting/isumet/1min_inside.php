@@ -8,7 +8,7 @@ $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 
 
 
-if (strlen($year) == 4 && strlen($month) > 0 && strlen(day) > 0 ){
+if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
   $myTime = strtotime($year."-".$month."-".$day);
 } else {
   $myTime = strtotime(date("Y-m-d"));
