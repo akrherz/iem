@@ -83,10 +83,10 @@ $h95=-99; $l95 = -99;
 $hm=-99;$lm=-99;
 foreach ($xlabel as $key => $value){
   $xl[$i] = $value;
-  $y1[$i] = $ydata[$key];
-  $y2[$i] = $ydata2[$key];
-  $rh += floatval($ydata[$key]);
-  $rl += floatval($ydata2[$key]);
+  $y1[$i] = @$ydata[$key];
+  $y2[$i] = @$ydata2[$key];
+  $rh += @floatval($ydata[$key]);
+  $rl += @floatval($ydata2[$key]);
   $cy1[$i] = $rh / $hi_tot * 100.0;
   if ($cy1[$i] >= 5 && $h5 == -99) $h5 = $i;
   if ($cy1[$i] >= 50 && $hm == -99) $hm = $i;
@@ -117,19 +117,19 @@ $graph->xaxis->SetTickLabels($xl);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set("Daily High and Low Temperatures for $plotts");
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 
 $graph->yaxis->SetTitle("Cumulative Distribution (percent)");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitleMargin(35);
 
 $graph->y2axis->SetTitle("Occurances");
-$graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->y2axis->SetTitleMargin(35);
 
 $graph->xaxis->SetTitle("Temperature [F]");
 $graph->xaxis->SetTextTickInterval(5);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 $graph->xaxis->SetTitleMargin(15);
 
