@@ -70,12 +70,12 @@ $graph->legend->Pos(0.01, 0.06, "right", "top");
 //$graph->legend->SetBackground("white");
 
 $graph->title->Set("Last ". $tlength ." h Average ". $varname ." Obs");
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 $graph->yaxis->SetTitle($varname ." (F)");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("GMT Valid Time");
 $graph->xaxis->SetTitleMargin(55);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 
 // Create the linear plot

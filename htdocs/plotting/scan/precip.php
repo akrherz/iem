@@ -49,13 +49,13 @@ $graph->title->Set("Hourly Precipitation for ".$sites[$station]["city"]." SCAN S
 $graph->yaxis->scale->ticks->Set(.25,.1);
 //$graph->yaxis->scale->ticks->SetPrecision(2);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitle("Precipitation [in]");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Local Valid Time");
 $graph->xaxis->SetTitleMargin(55);
 $graph->yaxis->SetTitleMargin(35);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 if ($i > 72){
   $graph->xaxis->SetTextTickInterval(6);
 }

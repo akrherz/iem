@@ -70,12 +70,12 @@ $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");
 
 $graph->title->Set("Last ". $tlength ." h Standard Deviations for ".$varname." Obs");
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitle($varname ." STD_DEV (F)");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,10);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,10);
 $graph->xaxis->SetTitle("Valid Time");
 $graph->xaxis->SetTitleMargin(55);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 
 // Create the linear plot

@@ -110,19 +110,19 @@ $graph->xaxis->SetTickLabels($xl);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set("Daily High and Low Temperatures for $plotts");
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 
 $graph->yaxis->SetTitle("Cumulative Distribution (percent)");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitleMargin(35);
 
 $graph->y2axis->SetTitle("Days per month");
-$graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->y2axis->SetTitleMargin(35);
 
 $graph->xaxis->SetTitle("Temperature [F]");
 $graph->xaxis->SetTextTickInterval(5);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 $graph->xaxis->SetTitleMargin(15);
 

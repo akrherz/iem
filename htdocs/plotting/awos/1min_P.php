@@ -130,17 +130,17 @@ $graph->yaxis->SetColor("black");
 $graph->yscale->SetGrace(10);
 $graph->y2axis->SetColor("blue");
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 
 $graph->yaxis->SetTitle("Altimeter [mb]");
 $graph->y2axis->SetTitle("Accumulated Precipitation [inches]");
 
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->xaxis->SetTitleMargin(30);
 $graph->yaxis->SetTitleMargin(43);
 //$graph->y2axis->SetTitleMargin(28);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot

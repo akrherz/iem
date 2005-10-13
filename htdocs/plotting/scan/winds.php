@@ -49,15 +49,15 @@ $graph->title->Set("Wind Direction/Speed for ".$sites[$station]["city"]." SCAN S
 $graph->yaxis->scale->ticks->Set(90,15);
 //$graph->yaxis->scale->ticks->SetPrecision(0);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitle("Wind Direction [Deg]");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Local Valid Time");
 $graph->y2axis->SetTitle("Wind Speed [knots]");
-$graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->y2axis->SetTitleMargin(35);
 $graph->xaxis->SetTitleMargin(55);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 if ($i > 72){
   $graph->xaxis->SetTextTickInterval(6);
 }

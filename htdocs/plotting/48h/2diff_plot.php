@@ -67,13 +67,13 @@ $graph->title->Set("48 h Difference: ". $station1 ." - ". $station2 );
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.03, 0.05, "right", "top");
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 $graph->xaxis->SetTitle("Valid Time");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitle( $ylabel );
 $graph->xaxis->SetTitleMargin(75);
 $graph->yaxis->SetTitleMargin(40);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 
 // Create the linear plot

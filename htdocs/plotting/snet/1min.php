@@ -141,17 +141,17 @@ $graph->y2axis->scale->ticks->Set(100,25);
 $graph->y2axis->scale->ticks->SetPrecision(0);
 $graph->yaxis->scale->ticks->SetPrecision(0);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,14);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 
 $graph->yaxis->SetTitle("Temperature [F]");
 $graph->y2axis->SetTitle("Solar Radiation [W m**-2]");
 
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time  ");
 $graph->xaxis->SetTitleMargin(30);
 //$graph->yaxis->SetTitleMargin(48);
 //$graph->y2axis->SetTitleMargin(28);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot

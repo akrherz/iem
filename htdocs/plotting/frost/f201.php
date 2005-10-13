@@ -77,14 +77,14 @@ $graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->title->Set("MM5 vs SSI Forecast for Ames");
 $graph->legend->Pos(0.01,0.01);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 
 $graph->yaxis->SetTitle($varname ." [". $varunit ."]");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid GMT Time");
 $graph->xaxis->SetTitleMargin(105);
 $graph->yaxis->SetTitleMargin(48);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot

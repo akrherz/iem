@@ -222,25 +222,25 @@ function common_graph($graph)
   $graph->xaxis->SetTextTickInterval(120);
   $graph->xaxis->SetPos("min");
 
-  $graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,14);
-  $graph->xaxis->SetFont(FF_ARIAL,FS_BOLD,12);
+  $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,14);
+  $graph->xaxis->SetFont(FF_FONT1,FS_BOLD,12);
   $graph->xaxis->title->SetBox( array(150,150,150), $tcolor, true);
   $graph->xaxis->title->SetColor( $tcolor );
   $graph->xaxis->SetTitleMargin(15);
 
-  $graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,14);
-  $graph->yaxis->SetFont(FF_ARIAL,FS_BOLD,12);
+  $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,14);
+  $graph->yaxis->SetFont(FF_FONT1,FS_BOLD,12);
   $graph->yaxis->title->SetBox( array(150,150,150), $tcolor, true);
   $graph->yaxis->title->SetColor( $tcolor );
   $graph->yaxis->SetTitleMargin(50);
 
-  $graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,14);
-  $graph->y2axis->SetFont(FF_ARIAL,FS_BOLD,12);
+  $graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,14);
+  $graph->y2axis->SetFont(FF_FONT1,FS_BOLD,12);
   $graph->y2axis->title->SetBox( array(150,150,150), $tcolor, true);
   $graph->y2axis->title->SetColor( $tcolor );
   $graph->y2axis->SetTitleMargin(40);
 
-  $graph->tabtitle->SetFont(FF_ARIAL,FS_BOLD,16);
+  $graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);
   $graph->SetColor('wheat');
 
   $graph->legend->SetLayout(LEGEND_HOR);

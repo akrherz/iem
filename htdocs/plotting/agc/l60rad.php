@@ -1,6 +1,9 @@
 <?php
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("campbelldaily");
+
 $station = $_GET['station'];
-$connection = pg_connect("10.10.10.40","5432","campbelldaily");
 
 $table1 = $station ."_2004";
 $table2 = $station ."_2005";
@@ -54,14 +57,14 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set("Last 60 daily 4in Soil Temp & Solar Raditaion values for  ". $ISUAGcities[ $station]["city"] );
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,10);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,10);
 $graph->yaxis->SetTitle("Temperature [F]");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Month/Day");
 $graph->y2axis->SetTitle("Solar Radiation [Langleys]");
-$graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitleMargin(48);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 $graph->y2axis->SetColor("red");
 //$graph->yaxis->SetColor("red");

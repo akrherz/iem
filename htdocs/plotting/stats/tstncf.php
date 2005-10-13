@@ -49,12 +49,12 @@ if ($interval > 1 ){
 $graph->title->Set("UNIDATA IDS PRODUCT LATENCY AT THE IEM");
 $graph->subtitle->Set("Latency of 1 minute is normal");
 //$graph->subtitle->Set("Total Possible: ". $goal[$network] );
-$graph->title->SetFont(FF_ARIAL,FS_BOLD,16);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 $graph->yaxis->SetTitle("Latency [minutes]");
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("UTC Time");
 $graph->xaxis->SetTitleMargin(55);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
 
 // Create the linear plot

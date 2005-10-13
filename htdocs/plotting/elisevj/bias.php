@@ -93,12 +93,12 @@ $graph->yaxis->scale->ticks->SetPrecision(1);
 
 $graph->title->Set("RWIS vs ASOS $varname Comparison");
 $graph->subtitle->Set("Grouped by $groupname ");
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,10);
+$graph->title->SetFont(FF_FONT1,FS_BOLD,10);
 $graph->yaxis->SetTitle("RWIS $var - ASOS $var");
 $graph->yaxis->SetTitleMargin(35);
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,10);
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,10);
 $graph->xaxis->SetTitle($xal);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,10);
+$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,10);
 $graph->xaxis->SetTitleMargin(100);
 //$graph->xaxis->SetPos("min");
 $graph->legend->Pos(0.2, 0.12);
