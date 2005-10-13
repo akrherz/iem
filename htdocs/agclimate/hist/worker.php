@@ -38,11 +38,8 @@ $s_dy = $_GET['startDay'];
 $s_hr = $_GET['startHour'];
 $e_mo = $_GET['endMonth'];
 $e_dy = $_GET['endDay'];
-$e_hr = $_GET['endHour'];
-$qcflg= $_GET['qcflags'];
 $delim= $_GET['delim'];
-$todisk=$_GET['todisk'];
-$cr = $_GET['lf'] == "dos" ? "\r\n" : "\n";
+$cr = isset($_GET['lf']) ? "\r\n" : "\n";
 
 // Error Catching
 if (sizeof($st) == 0) die("You did not select a station");
@@ -56,7 +53,7 @@ if (strlen($delim) == 0)
   $delim = "tab";
 
 $fvars = Array();
-if (strlen($qcflg) > 0){  // They want QC too!
+if (isset($_GET["qcflg"])){  // They want QC too!
   foreach ($vars as $var){
     $fvars[] = $var;
     $fvars[] = $var ."_f";
@@ -67,8 +64,8 @@ if (strlen($qcflg) > 0){  // They want QC too!
 }
 $num_vars = sizeof($fvars);
 
-$sts  = mktime($s_hr,0,0, $s_mo, $s_dy, $yyyy);
-$ets  = mktime($e_hr,0,0, $e_mo, $e_dy, $yyyy);
+$sts  = mktime(0,0,0, $s_mo, $s_dy, $yyyy);
+$ets  = mktime(0,0,0, $e_mo, $e_dy, $yyyy);
 
 if ($sts > $ets) die("Your start time is greater than your end time!");
 
@@ -92,7 +89,7 @@ $c = iemdb("isuag");
 $rs = pg_exec($c, $sql);
 pg_close($c);
 
-if (strlen($todisk) > 0) {
+if ( isset($_GET["todisk"]) ) {
   header("Content-type: application/octet-stream");
   header("Content-Disposition: attachment; filename=changeme.txt");
 }

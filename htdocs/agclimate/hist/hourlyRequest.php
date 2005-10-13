@@ -57,7 +57,7 @@ wish to change this to <a href="dailyRequest.php">daily data</a>.
 				<TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
 				<TR><TH>Starting On:</TH>
 				<TD rowspan="2">
-                                <?php yearSelect(1997, $year); ?>
+                                <?php echo yearSelect(1997, date("Y") ); ?>
 				</TD>
 				<td><SELECT name="startMonth">
 					<option value="1">January
