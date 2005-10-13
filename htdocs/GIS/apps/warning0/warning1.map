@@ -4,14 +4,14 @@
 NAME warning1
 STATUS ON
 SIZE 450 350
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 # lcc pro
 #EXTENT -2000000 -1400000 2000000 1400000
 # 4269
 EXTENT -116 25 -66 50
 UNITS DD
-SHAPEPATH "/mesonet/www/html/GIS/data/"
-SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+SHAPEPATH "/mesonet/data/gis/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off
@@ -36,9 +36,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 40000000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/warning0.log"
+  LOG "/var/www/htdocs/tmp/warning0.log"
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/warning0/warning1.map&amp;"

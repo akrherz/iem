@@ -5,7 +5,7 @@ NAME adjust
 STATUS ON
 SIZE 640 480
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 # Iowa
 EXTENT 230000 4450000 710000 4900000
 # Central Iowa
@@ -17,8 +17,8 @@ EXTENT 230000 4450000 710000 4900000
 # NE Iowa
 EXTENT 538000 4700000 711000 4830000
 UNITS METERS
-SHAPEPATH "/mesonet/www/html/GIS/data/"
-SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+SHAPEPATH "/mesonet/data/gis/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off
@@ -40,9 +40,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 46500000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/stations.log"
+  LOG "/var/www/htdocs/tmp/stations.log"
 END
 
 

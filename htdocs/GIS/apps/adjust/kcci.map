@@ -5,7 +5,7 @@ NAME adjust
 STATUS ON
 SIZE 400 400
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 #EXTENT 200000 4400000 710000 4900000
 # Good one
 #EXTENT 322800 4499278 545147 4753732
@@ -16,8 +16,8 @@ EXTENT 322800 4549278 435147 4753732
 #EXTENT -93.7 41.85 -93.2 42.25 
 #UNITS DD
 UNITS METERS
-SHAPEPATH "/mesonet/www/html/GIS/data/"
-SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+SHAPEPATH "/mesonet/data/gis/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR 230 230 230
 IMAGETYPE PNG
 TRANSPARENT off
@@ -51,9 +51,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 46500000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/stations.log"
+  LOG "/var/www/htdocs/tmp/stations.log"
 END
 
 

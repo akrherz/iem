@@ -5,11 +5,11 @@ NAME raining
 STATUS ON
 SIZE 500 400
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT 200000 4400000 710000 4900000
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/shape/"
-SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off
@@ -38,9 +38,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 40000000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/fancy.log"
+  LOG "/var/www/htdocs/tmp/fancy.log"
 END
 
 
@@ -134,7 +134,7 @@ LAYER
   STATUS DEFAULT
   TYPE RASTER
   DATA /mesonet/data/gis/images/26915/KCCI/KCCI_N0R_0.tif
-  #DATA /mesonet/www/html/GIS/data/images/kcci2.tif
+  #DATA /mesonet/data/gis/images/kcci2.tif
   OFFSITE 0 0 0
   TRANSPARENCY 80
   PROJECTION

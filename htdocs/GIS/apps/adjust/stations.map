@@ -25,7 +25,7 @@ EXTENT -2110437 -2251067 2548326 1239063
 #EXTENT -97.50 39.25 -89.30 44.75
 UNITS DD
 #UNITS METERS
-SHAPEPATH "/mesonet/www/html/GIS/data/"
+SHAPEPATH "/mesonet/data/gis/"
 SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 #IMAGECOLOR 230 230 230
 IMAGECOLOR 0 0 250
@@ -71,9 +71,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 46500000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/stations.log"
+  LOG "/var/www/htdocs/tmp/stations.log"
 END
 
 

@@ -5,13 +5,13 @@ NAME stations
 STATUS ON
 SIZE 640 480
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/fonts/fonts.list"
 #EXTENT -2223813 -1746393 2207341 1701506
 #UNITS METERS
 EXTENT -99 38 -90 46
 UNITS DD
-#SHAPEPATH "/mesonet/www/html/GIS/data/"
-SYMBOLSET "/mesonet/www/html/GIS/data/symbols/stations.sym"
+#SHAPEPATH "/mesonet/data/gis/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR 255 255 255
 IMAGETYPE PNG
 TRANSPARENT off
@@ -33,9 +33,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 40000000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/iawarn.log"
+  LOG "/var/www/htdocs/tmp/iawarn.log"
 END
 
 

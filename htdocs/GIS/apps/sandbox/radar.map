@@ -31,9 +31,9 @@ WEB
   TEMPLATE radar.html
   MINSCALE 90000
   MAXSCALE 40000000
-  IMAGEPATH "/home/httpd/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/home/httpd/html/tmp/warning0.log"
+  LOG "/var/www/htdocs/tmp/warning0.log"
 END
 
 #
