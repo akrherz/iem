@@ -22,7 +22,7 @@ recent data is from yesterday.</p>
 <tr>
   <th class="subtitle">Select Station:</th>
   <td>
-<?php echo snetSelectMultiple($station); ?>
+<?php echo snetSelectMultiple(" "); ?>
   </td>
 </tr>
 
@@ -67,7 +67,7 @@ recent data is from yesterday.</p>
      <tr>
       <th class="subtitle">Start:</th>
       <th rowspan=2>
-<?php yearSelect(2002, "year"); ?>
+<?php echo yearSelect(2002, "year"); ?>
       </th>
       <td rowspan=2>
 <select name="month">
