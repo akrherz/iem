@@ -13,14 +13,17 @@ if (!isset($_SESSION['stations'])){
   }
 } 
 
-if (isset($st)){
+$st = isset($_POST["st"]) ? $_POST["st"] : "";
+$str = isset($_POST["str"]) ? $_POST["str"] : "";
+
+if (sizeof($st) > 0){
     foreach ($st as $key => $value) {
       if (strlen($value) > 0 && $value != "ahack") {
         array_push( $_SESSION['stations'], $value);
       }
     }
   }
-  if (isset($str)){
+  if (sizeof($str) > 0){
    foreach ($str as $key => $value) {
       if (strlen($value) > 0 && $value != "ahack") {
         foreach ($_SESSION['stations'] as $key2 => $value2){
