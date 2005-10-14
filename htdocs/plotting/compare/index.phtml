@@ -11,7 +11,7 @@
  $var = isset($_GET['var']) ? $_GET['var'] : "tmpf";
 
 
- $uri = "/plotting/compare/index.phtml?";
+ $uri = "$rooturl/plotting/compare/index.phtml?";
  $ar = Array();
  if (strlen($station1) > 0)
  {
@@ -22,10 +22,10 @@
  }
  if (strlen($station2) > 0)
  {
-   $uri = "/plotting/compare/index.phtml?station1=$station2";
+   $uri = "$rooturl/plotting/compare/index.phtml?station1=$station2";
  }
 
- $sw = new selectWidget("/plotting/compare/index.phtml?", 
+ $sw = new selectWidget("$rooturl/plotting/compare/index.phtml?", 
         $uri, $network );
  $sw->logic($_GET);
  $sw->setformvars($ar);
@@ -49,16 +49,16 @@ choices.
 <tr>
   <th>Station 1:</th>
   <td><input type="text" size="10" name="station" value="<?php echo $station1; ?>"></td>
-  <td><?php echo $cities[$station1]['city']; ?></td>
-  <td><?php echo $cities[$station1]['network']; ?></td>
-  <td><a href="index.phtml?station1=<?php echo $station2; ?>&network=<?php echo $cities[$station1]['network']; ?>">Select from Map</a></td>
+  <td><?php echo @$cities[$station1]['city']; ?></td>
+  <td><?php echo @$cities[$station1]['network']; ?></td>
+  <td><a href="index.phtml?station1=<?php echo $station2; ?>&network=<?php echo @$cities[$station1]['network']; ?>">Select from Map</a></td>
 </tr>
 <tr>
   <th>Station 2:</th>
   <td><input type="text" size="10" name="station1" value="<?php echo $station2; ?>"></td>
-  <td><?php echo $cities[$station2]['city']; ?></td>
-  <td><?php echo $cities[$station2]['network']; ?></td>
-  <td><a href="index.phtml?station1=<?php echo $station1; ?>&network=<?php echo $cities[$station2]['network']; ?>">Select from Map</a></td>
+  <td><?php echo @$cities[$station2]['city']; ?></td>
+  <td><?php echo @$cities[$station2]['network']; ?></td>
+  <td><a href="index.phtml?station1=<?php echo $station1; ?>&network=<?php echo @$cities[$station2]['network']; ?>">Select from Map</a></td>
 </tr>
 
 <tr><th>Variable:</th><td colspan="3"><SELECT name="var">
