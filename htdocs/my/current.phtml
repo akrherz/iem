@@ -13,8 +13,8 @@ if (!isset($_SESSION['stations'])){
   }
 } 
 
-$st = isset($_POST["st"]) ? $_POST["st"] : "";
-$str = isset($_POST["str"]) ? $_POST["str"] : "";
+$st = isset($_GET["st"]) ? $_GET["st"] : "";
+$str = isset($_GET["str"]) ? $_GET["str"] : "";
 
 if (sizeof($st) > 0){
     foreach ($st as $key => $value) {
