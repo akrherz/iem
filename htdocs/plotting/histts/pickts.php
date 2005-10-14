@@ -1,11 +1,12 @@
 <?php 
+include("../../../config/settings.inc.php");
 	$TITLE = "IEM | Historical Time Series";
-include("/mesonet/php/include/header.php"); 
-	include("../../include/forms.php"); 
+include("$rootpath/include/header.php"); 
+	include("$rootpath/include/forms.php"); 
 ?>
 
 
-<?php include("../../include/imagemaps.php"); ?>
+<?php include("$rootpath/include/imagemaps.php"); ?>
 
 <div class="text">
 <P>Back to <a href="/plotting/index.php">Interactive Plotting</a>.<p>
@@ -136,4 +137,4 @@ if (strlen($station) > 0 && strlen($month) > 0 ) {
 
 </div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
