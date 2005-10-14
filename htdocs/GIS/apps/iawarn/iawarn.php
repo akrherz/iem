@@ -1,11 +1,12 @@
 <?php
 include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
  $site = isset($_GET["site"]) ? $_GET["site"]: "DMX";
  $loop = isset($_GET["loop"]) ? $_GET["loop"]: "";
  $fips = isset($_GET["fips"]) ? $_GET["fips"]: "";
 
  $TITLE = "IEM GIS | RADAR & NWS Warnings";
- $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=http://mesonet.agron.iastate.edu/GIS/apps/iawarn/iawarn.php?site=${site}\">";
+ $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=$rooturl/GIS/apps/iawarn/iawarn.php?site=${site}\">";
  include("$rootpath/include/header.php");
 ?>
 <div class="text">
@@ -21,8 +22,6 @@ include("$rootpath/include/mlib.php");
 include("$rootpath/include/currentOb.php");
 include("$rootpath/include/all_locs.php");
 include("$rootpath/include/nexlib2.php");
-
-
 ?>
 
 <table bgcolor="black" width="100%" cellpadding=2 border=0 cellspacing=0>
@@ -140,7 +139,7 @@ while (list ($line_num, $line) = each ($fcontents)) {
   $lastT = $line;
 }
 
-$connection = pg_connect("host=10.10.10.40 port=5432 dbname=postgis user=mesonet");
+$connection = iemdb("postgis");
 
 $query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire, 
   w.issue as issue, s.state_name as sname from warnings w, nws_ugc u, states s
