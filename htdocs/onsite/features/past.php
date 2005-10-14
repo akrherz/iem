@@ -61,7 +61,7 @@ include("$rootpath/include/header.php"); ?>
       <td colspan=\"2\" style=\"text-align: center;\">". $row["calhead"] ."</td></tr>
       <tr>
       <td valign=\"top\">
-      <a href=\"/onsite/features/". $row["imageref"] .".gif\"><img src=\"/onsite/features/". $row["imageref"] ."_s.gif\" BORDER=0 ALT=\"Feature\"></a></td>";
+      <a href=\"$rooturl/onsite/features/". $row["imageref"] .".gif\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.gif\" BORDER=0 ALT=\"Feature\"></a></td>";
 
     echo "<td><b>". $row["title"] ."</b>\n";
     echo "<br><font size='-1' style='color:black'>". $row["webdate"] ."</font>\n";
