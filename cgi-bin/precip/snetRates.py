@@ -1,7 +1,9 @@
 #!/mesonet/python/bin/python
 
-import pg, mx.DateTime, cgi, sys
-mydb = pg.connect('snet', 'iem20')
+import  mx.DateTime, cgi, sys
+from pyIEM import iemdb
+i = iemdb.iemdb()
+mydb = i['snet']
 
 def diff(nowVal, pastVal, mulli):
   if (nowVal < 0 or pastVal < 0): return "%5s," % ("M")
