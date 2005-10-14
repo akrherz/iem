@@ -1,6 +1,7 @@
 <?php
 
 function drawRADAR($site, $imgi, $extents, $projs, $radValid, $fips){
+  global $_DATABASES;
   $width = "450";
   $height = "450";
   // radValid process 200208170100
@@ -42,9 +43,11 @@ function drawRADAR($site, $imgi, $extents, $projs, $radValid, $fips){
 
   $c0 = $map->getlayerbyname("warnings0_c");
   $c0->set("status", 1);
+  $c0->set("connection", $_DATABASES["postgis"]);
   $c0->setFilter("(expire > '".$db_ts."' and issue < ('".$db_ts."'::timestamp + '5 minutes'::interval) and gtype = 'C')");
 
   $p0 = $map->getlayerbyname("warnings0_p");
+  $p0->set("connection", $_DATABASES["postgis"]);
   $p0->set("status", 1);
   $p0->setFilter("(expire > '".$db_ts."' and issue < ('". $db_ts."'::timestamp + '5 minutes'::interval) and gtype = 'P')");
 
