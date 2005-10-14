@@ -16,14 +16,14 @@ if (!isset($_SESSION['stations'])){
 $st = isset($_GET["st"]) ? $_GET["st"] : "";
 $str = isset($_GET["str"]) ? $_GET["str"] : "";
 
-if (sizeof($st) > 1){
+if ($st != ""){
     foreach ($st as $key => $value) {
       if (strlen($value) > 0 && $value != "ahack") {
         array_push( $_SESSION['stations'], $value);
       }
     }
   }
-  if (sizeof($str) > 1){
+  if ($str != ""){
    foreach ($str as $key => $value) {
       if (strlen($value) > 0 && $value != "ahack") {
         foreach ($_SESSION['stations'] as $key2 => $value2){
