@@ -1,6 +1,7 @@
 <?php 
+include("../../config/settings.inc.php");
 	$TITLE = "IEM | LDM Request HOWTO";
-include("/mesonet/php/include/header.php"); 
+include("$rootpath/include/header.php"); 
 ?>
 
 <h3 class="heading">Real-time IEM data feeds with LDM HOWTO</h3>
@@ -115,4 +116,4 @@ Daryl Herzmann
 <br> (akrherz@iastate.edu)
 <br> Rev: 26 Dec 2002 </div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
