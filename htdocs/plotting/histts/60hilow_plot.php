@@ -1,6 +1,9 @@
 <?php
-$connection = pg_connect("10.10.10.30","9999","iem");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("access");
 
+$station = isset($_GET["station"]) ? $_GET["station"] : "AMW";
 
 $ylabel = "Temperature [F]";
 
@@ -48,8 +51,8 @@ for( $j=0; $j < 59 ; $j++)
 
 pg_close($connection);
 
-include ("../jpgraph/jpgraph.php");
-include ("../jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,350,"example1");

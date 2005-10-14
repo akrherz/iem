@@ -1,11 +1,19 @@
 <?php 
-	$TITLE = "IEM | Last 60 days High Low";
-include("/mesonet/php/include/header.php"); 
+include("../../../config/settings.inc.php");
+include("$rootpath/include/selectWidget.php");
+$station = isset($_GET["station"]) ? $_GET["station"] : "";
+$network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
+
+$sw = new selectWidget("60hilow.php?", "60hilow.php?network=$network&", $network );
+$sw->set_networks("ALL");
+$sw->logic($_GET);
+
+
+$TITLE = "IEM | Last 60 days High Low";
+include("$rootpath/include/header.php");
 ?>
 
-<?php include("../../include/imagemaps.php"); ?>
 
-<div class="text">
 <P>Back to <a href="/plotting/index.php">Interactive Plotting</a>.
 
 
@@ -13,12 +21,9 @@ include("/mesonet/php/include/header.php");
 if (strlen($station) > 0 ) {
 
 ?>
-
-
 <CENTER>
 <BR><BR>
-<P><a href="60hilow.php">Different ASOS/AWOS Location</a>
-<P><a href="60hilow.php?rwis=yes">Different RWIS Location</a
+<P><a href="60hilow.php">Different Location</a>
 <P>
 <BR><BR>
 
@@ -33,25 +38,9 @@ missing data.
 
 <BR><BR>
 <?php
-} elseif ( strlen($rwis) > 0) {
+} else {
+ echo $sw->printInterface(); 
+}
 ?>
 
-<P><a href="60hilow.php">Different ASOS/AWOS Location</a>
-
-<?php
-	echo print_rwis("60hilow.php?station");
-
-}else {
-?>
-
-<P>Switch to<a href="60hilow.php?rwis=yes">RWIS</a> stations.
-
-
-<?php 
-	echo print_asos("60hilow.php?station");
-
-	}
-?>
-</div>
-
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
