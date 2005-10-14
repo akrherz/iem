@@ -32,9 +32,9 @@ for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
   $cnt[$s] += 1;
 }
 
-include ("/mesonet/php/include/jpgraph/jpgraph.php");
-include ("/mesonet/php/include/jpgraph/jpgraph_line.php");
-include ("/mesonet/php/include/jpgraph/jpgraph_date.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
