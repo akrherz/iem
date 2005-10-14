@@ -1,6 +1,9 @@
-<?php include("../../include/snetLoc.php"); ?>
-<?php include("../../include/forms.php"); ?>
-<?php include("../../include/imagemaps.php"); ?>
+<?php 
+include("../../../config/settings.inc.php");
+include("$rootpath/include/snetLoc.php");
+include("$rootpath/include/forms.php");
+include("$rootpath/include/imagemaps.php");
+ ?>
 <body bgcolor="#FFC0CB">
 
 <form method="GET" action="/cgi-bin/precip/snetRates.py" target="display">
@@ -15,10 +18,10 @@
   <th>Day:</th>
 </tr>
 <tr>
-  <td><?php echo kcciSelect($station); ?></td>
-  <td><?php echo yearSelect(2002, $station); ?></td>
-  <td><?php echo monthSelect($station); ?></td>
-  <td><?php echo daySelect($station); ?></td>
+  <td><?php echo kcciSelect(""); ?></td>
+  <td><?php echo yearSelect(2002, date("Y")); ?></td>
+  <td><?php echo monthSelect( date("m") ); ?></td>
+  <td><?php echo daySelect( date("d") ); ?></td>
   <td><input type="submit" value="View"></td>
 </tr>
 
