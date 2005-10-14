@@ -19,7 +19,7 @@ function changeSite(newSite, newSname) {
 
 <?php
 
-$prod = $_GET['prod'];
+$prod = isset($_GET['prod']) ? $_GET["prod"]: "";
 $site = $_GET['site'];
 $product = substr($prod,0,3);
 
