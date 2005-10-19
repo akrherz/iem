@@ -2,6 +2,7 @@
 
 import mx.DateTime
 from pyIEM import iemAccess, iemdb
+iemaccess = iemAccess.iemAccess()
 i = iemdb.iemdb()
 climatedb = i["coop"]
 
@@ -49,7 +50,7 @@ def main():
         'avg_high': 'M', 'avg_low': 'M'}
     now += interval
 
-  rs = iemAccess.iemdb.query("SELECT day, max_tmpf, min_tmpf from summary_%s \
+  rs = iemaccess.query("SELECT day, max_tmpf, min_tmpf from summary_%s \
     WHERE station = 'ORC'" % (now.year, ) ).dictresult()
 
   for i in range(len(rs)):
