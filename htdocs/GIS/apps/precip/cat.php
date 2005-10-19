@@ -1,4 +1,6 @@
 <?php
+include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 if (strlen($verbose) > 0){
 header("Content-type: text/plain");
 } else {
@@ -15,7 +17,7 @@ header("Content-Disposition: attachment; filename=iemprecip.txt");
     "p12z" => "24 Hour Accumulation ending 12Z",
     "pday" => "Today's Accumulation");
 
- $connection = pg_connect("10.10.10.30", "9999", "iem");
+ $connection = iemdb("access");
  $var = substr($param, 0, 4);
 
  $query = "SELECT ".$var." as data, station, X(geom) as x, Y(geom) as y 

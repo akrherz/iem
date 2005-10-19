@@ -1,4 +1,6 @@
 <?php
+ include_once("../../config/settings.inc.php");
+ include_once("$rootpath/include/database.inc.php");
  /* Make sure all is well! */
  $station = isset($_GET["station"]) ? $_GET["station"] : "";
  if (strlen($station) == 0)

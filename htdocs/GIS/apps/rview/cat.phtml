@@ -1,4 +1,5 @@
 <?php
+include("../../../../config/settings.inc.php");
 
 /* $_GET vars */
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : die("variable wfo not set. Exit.");
@@ -6,14 +7,14 @@ $event_id = isset($_GET["event_id"]) ? intval($_GET["event_id"]) : die("variable
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : die("variable phenomena not set. Exit.");
 
 
-$connect = pg_connect("host=10.10.10.40 dbname=postgis user=mesonet");
+$connect = iemdb("postgis");
 $query = "SELECT report, svs from warnings_2005 WHERE wfo = '$wfo' and eventid = $event_id and phenomena = '$phenomena'";
 
 $result = pg_exec($connect, $query);
 
 $row = pg_fetch_array($result, 0);
 ?>
-<?php include("/mesonet/php/include/header.php"); ?>
+<?php include("$rootpath/include/header.php"); ?>
 <pre><?php echo $row["report"]; ?></pre>
 <?php
 if (strlen($row["svs"]) > 0 )
@@ -24,4 +25,4 @@ if (strlen($row["svs"]) > 0 )
    echo "<h4><a name=\"svs\">SVS Update</a>:</h4><pre>". $parts[$i] ."</pre>\n"; }
 }
 ?>
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

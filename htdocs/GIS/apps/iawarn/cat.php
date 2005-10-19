@@ -1,11 +1,13 @@
 <?php
 // How simple can it get!
 // Daryl Herzmann
+include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 
 $oid = intval($id);
 
 if ( strlen($img_x) > 0){  // Augh, they clicked!!
-  dl("php_mapscript_42.so");
+  dl($mapscript);
   $extents = Array("DMX" => Array(1270178, 863000, 1755341, 1276783),
    "FSD" => Array(540178, -34000, 800341, 450783),
    "ARX" => Array(760178, -30000, 900341, 450783),
@@ -50,7 +52,7 @@ if ( strlen($img_x) > 0){  // Augh, they clicked!!
   $query = "SELECT * from warnings WHERE oid = $oid ";
 }
 
-$connect = pg_connect("host=10.10.10.40 dbname=postgis user=mesonet");
+$connect = iemdb("postgis");
 
 
 $result = pg_exec($connect, $query);

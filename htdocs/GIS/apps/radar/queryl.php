@@ -1,4 +1,6 @@
 <?php
+include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 // Figure out feature just clicked
 // $imgx, $imgy, $site, $fips
 
@@ -35,7 +37,7 @@ $point = $point->project($projOutObj, $projInObj);
 $query = "SELECT linkitem, name from nws_counties WHERE 
   GeometryFromText('POINT(". $point->x ." ". $point->y .")', -1) && the_geom";
 
-$connection = pg_connect("host=mesonet.agron.iastate.edu port=5432 dbname=postgis user=mesonet");
+$connection = iemdb("postgis");
 
 
 $result = pg_exec($connection, $query);
