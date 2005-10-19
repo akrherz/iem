@@ -1,12 +1,13 @@
 #!/mesonet/python/bin/python
 
-import mx.DateTime, iemAccess, iemdb
+import mx.DateTime
+from pyIEM import iemAccess, iemdb
 i = iemdb.iemdb()
 climatedb = i["coop"]
 
 ADJUSTMENT = 0
-s = mx.DateTime.DateTime(2005,8,19)
-e = mx.DateTime.DateTime(2005,9,18)
+s = mx.DateTime.DateTime(2005,9,19)
+e = mx.DateTime.DateTime(2005,10,18)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 def averageTemp(db, hi="high", lo="low"):
