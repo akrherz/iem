@@ -1,10 +1,12 @@
 <?php
+include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
  /* Draw Details of Warning */
  $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0,3) : 'DMX';
  $type = isset($_GET["type"]) ? substr($_GET["type"], 0,3) : 'SVR';
  $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 3;
 
-$pgconn = pg_connect("host=10.10.10.40 port=5432 dbname=postgis user=mesonet");
+$pgconn = iemdb("postgis");
 
 /* First we query to see if this is a valid polygon */
 $sql = "SELECT *, xmax(geom) as xmax, xmin(geom) as xmin, ymax(geom) as ymax, ymin(geom) as ymin from warnings_2005 WHERE wfo = '$wfo' and eventid = '$eventid' and type = '$type' and gtype = 'P'";

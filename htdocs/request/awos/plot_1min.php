@@ -1,4 +1,6 @@
 <?php
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 
 $sqlStr = "SELECT station, ";
 for ($i=0; $i< $num_vars;$i++){
@@ -12,7 +14,7 @@ $sqlStr .= " and station = '". $station ."' ORDER by valid ASC";
 
 echo $sqlStr;
 
-$connection = pg_connect("db1.mesonet.agron.iastate.edu","5432","awos");
+$connection = iemdb("awos");
 
 $query1 = "SET TIME ZONE 'GMT'";
 
