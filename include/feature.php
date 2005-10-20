@@ -30,15 +30,29 @@
 
 
   $fref = "/mesonet/data/features/". $row["imageref"] ."_s.gif";
-  list($width, $height, $type, $attr) = getimagesize($fref);
+  list($width, $height, $type, $attr) = @getimagesize($fref);
   $width += 2;
 
-  echo "<b>". $row["title"] ."</b><br />\n";
-  echo "<div style=\"float: right; border: 1px solid #000; padding: 3px; margin: 5px; width: ${width}px;\"><a href=\"$rooturl/onsite/features/". $row["imageref"] .".gif\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.gif\" alt=\"Feature\" /></a>";
+  $s = "<b>". $row["title"] ."</b><br />\n";
+  $s .= "<div style=\"float: right; border: 1px solid #000; padding: 3px; margin: 5px; width: ${width}px;\"><a href=\"$rooturl/onsite/features/". $row["imageref"] .".gif\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.gif\" alt=\"Feature\" /></a>";
 
-  echo "<br />". $row["caption"] ."</div>";
+  $s .= "<br />". $row["caption"] ."</div>";
 
-  echo $row["webdate"] ."\n";
-  echo "<br /><div class='story'>". $row["story"] ."</div>";
+  $s .= $row["webdate"] ."\n";
+  $s .= "<br /><div class='story'>". $row["story"] ."</div>";
+  $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
+
+    //$_ENV["REMOTE_ADDR"] == "69.5.128.198" ||
+if ($_ENV["REMOTE_ADDR"] == "127.0.0.1" || 
+    $_ENV["REMOTE_ADDR"] == "65.110.243.170" ||
+    $_ENV["REMOTE_ADDR"] == "65.110.243.175" ||
+    $_ENV["REMOTE_ADDR"] == "65.110.243.147") 
+{
+ $s = "<img src=\"images/smokey_909.jpg\" style=\"float: left; margin: 5px;\">
+Smokey,
+<br /> &nbsp; &nbsp; &nbsp; &nbsp; It is such a priviledge to be able to
+feature you everyday in my life for the past six weeks.  <p>Happy anniversary!!<br /> &nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+}
+
+echo $s;
 ?>
-<br style="clear: right;" /><b>Rate Feature:</b> <a href="<?php echo $rooturl; ?>/index.phtml?feature_good">Good</a> (<?php echo $good; ?> votes) or <a href="<?php echo $rooturl; ?>/index.phtml?feature_bad">Bad</a> (<?php echo $bad; ?> votes) &nbsp; &nbsp;<a href="<?php echo $rooturl; ?>/onsite/features/past.php">Past Features</a>
