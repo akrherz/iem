@@ -46,7 +46,7 @@ if (sizeof($vars) == 0) die("You did not select a variable");
 
 
 $rtype = "daily";
-if (isset($_GET["s_hr"]) )
+if (isset($_GET["startHour"]) )
   $rtype = "hourly";
 if (strlen($delim) == 0)
   $delim = "tab";
