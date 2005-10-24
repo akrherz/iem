@@ -5,25 +5,37 @@
  include("$rootpath/include/header.php");
 ?>
 
+<div style="width: 800px;">
+
 <h2>IEM Representivity Analysis (<i>Draft</i>)</h2>
 
 <p>This document provides information and statistics regarding
-representativity of the IEM.  This work follows Dubois 2000.
+representativity of the Iowa Environmental Mesonet (IEM).
+  This work follows Dubois (2000).
 
 <h3>1. Introduction:</h3>
 
-<p>The IEM is a collection of environmental monitoring networks.  To various
-extents, each network has differenting sensors, reporting times, siting, 
+<p>The IEM is a collection of environmental monitoring networks. The purpose
+of this collection is to produce more a precise analysis of weather and 
+climatic variables in the state.  The process of spatial analysis usually 
+involves some sort of gridding of point data onto a regular grid.  This 
+process is not arbitrary due to the numerous tunable parameters to most any
+analysis algorithm.  It is important to investigate the characteristics of
+our mesonet to determine the appropriate scales at which we can analyze
+phenomena.
+
+<p>Each observing network in the IEM has differenting sensors, reporting times, siting, 
 maintainance schedules, and quality control. Because of these differences, we
 have split up the IEM into its component networks in order to evaluate each
 on its own merits.  Similiar networks in data quality are then aggregated
 to explore the spatial statistical benefits of the IEM partnership.
 
-<p>The following abbreviations are used to represent networks and collections
-of networks.
-<br />
-<table>
+<p>
+<table cellpadding="3" cellspacing="0" border="1">
+<caption>Table 1 provides an overview of the IEM networks used in this study.</caption>
+<thead>
 <tr><th>Abbreviation</th><th>Description</th><th>Map</th></tr>
+</thead>
 <tr><th>ASOS</th><td>The <a href="<?php echo $webroot; ?>/ASOS/">Iowa Automated Surface Observing System</a> sites are located at primary airports and are maintained by the National Weather Service.  This network is rigorously checked and maintained.  For Iowa, the main issue is the lack of ASOS sites in Westcentral and Southwest Iowa.</td><td><img src="nni_images/asos_locs.png"></tr>
 
 <tr><th>AWOS</th><td>The <a href="<?php echo $webroot; ?>/AWOS/">Iowa Automated Weather Observing System</a> sites are located at secondary airports and are maintained by the Iowa State Department of Transportation via 3rd party contractor.  Data quality should be comparable with the ASOS network, but a number of factors produce biases when compared with the ASOS network.  The main issues include siting, maintainance schedules, network communication, and instrumentation.  Most of the big differences between the ASOS and AWOS network show up in the temperature and dew point variables. </td><td><img src="nni_images/awos_locs.png"></tr>
@@ -33,7 +45,15 @@ of networks.
 <tr><th>SchoolNet</th><td>The IEM collects data from a number of <a href="<?php echo $webroot; ?>/schoolnet/">SchoolNets</a>.  For the purposes of this document, we only consider the KCCI-TV SchoolNet.  Data quality is close to that of the RWIS network, but siting issues make variables like wind and precipitation problematic. </td><td><img src="nni_images/snet_locs.png"></td></tr>
 
 <tr><th>ISUAG</th><td>The <a href="<?php echo $webroot; ?>/agclimate/">ISU Ag Climate</a> sites primarily provide soil temperature and solar radiation readings.They are maintained by the Iowa State University Extension.  The main issue with this network is the timing of observations received.  Each station is called daily to download its observation record. </td><td><img src="nni_images/isuag_locs.png"></td></tr>
+</table>
 
+
+<table cellpadding="3" cellspacing="0" border="1">
+<caption>Table 2 lists our proposed combination of networks based on data quality 
+and reliability.</caption>
+<thead>
+<tr><th>Abbreviation</th><th>Description</th><th>Map</th></tr>
+</thead>
 <tr><th>Tier 1</th><td>ASOS + AWOS:  The combination of these two networks is commonly used in the meteorological community to produce various analysis products.  Both networks are located at airports and are for the most part, well sited.</td><td><img src="nni_images/tier1_locs.png"></tr>
 
 <tr><th>Tier 2</th><td>ASOS + AWOS + RWIS:  The RWIS network is included in this grouping, since it has the closest data quality reputation to the ASOS+AWOS networks.  </td><td><img src="nni_images/tier2_locs.png"></tr>
@@ -44,67 +64,68 @@ of networks.
 
 <h3>2. Nearest Neighbors Index (NNI)</h3>
 
-<p>The NNI is a statistic comparing the mean minimum distances between sampling points and that expected by chance over some sampling area.
+<p>The NNI is a statistic comparing the mean minimum distances between sampling points to that which is expected by chance over some sampling area.
 
 <h4>Procedure:</h4>
 
-<p>Point shapefile coverages for each of the network groups was created.  These files were loaded into ESRI's ArcGIS 9.1.  An ArcGIS extension called 'Nearest Neighbor Analysis / Event-Event Distances' written by Dr M. Sawada was used to compute the resulting data.
+<p>Point shapefile coverages for each of the network groups was created.  These files were loaded into ESRI's ArcGIS 9.1.  An ArcGIS extension called <a href="http://arcscripts.esri.com/details.asp?dbid=12227"><i>Nearest Neighbor Analysis / Event-Event Distances</i></a> written by Dr M. Sawada was used to compute the NNI.
 
 <h4>Data:</h4>
-<table cellpadding=2 cellspacing=1 border=1>
+<table cellpadding=2 cellspacing=0 border=1>
+<caption>Table 3 shows NNI values along with other relevant statistics used in the NNI calculation.</caption>
 <thead>
-<tr><th>Network</th><th>NNI</th><th>Z</th><th>Avg Distance</th><th>Exp Distance</th><th>Area</th></tr>
+<tr><th>Network</th><th>Sites</th><th>NNI</th><th>Z</th><th>Avg Min Distance<br />[km]</th><th>Expected Min Distance<br />[km]</th><th>Area [km^2]</th></tr>
 </thead>
-<tr><th>ASOS</th>
-    <td>1.58</td>
+<tr><th>ASOS</th><td>15</td>
+    <td style="background: #ff0;">1.58</td>
     <td>3.85</td>
     <td>71.9</td>
     <td>45.5</td>
     <td>97,920</td>
 </tr>
-<tr><th>AWOS</th>
+<tr><th>AWOS</th><td>39</td>
  <td>1.28</td>
  <td>3.05</td>
  <td>38.1</td>
  <td>29.8</td>
  <td>120,650</td>
 </tr>
-<tr><th>RWIS</th>
+<tr><th>RWIS</th><td>53</td>
  <td>1.45</td>
  <td>5.80</td>
  <td>36.6</td>
  <td>25.2</td>
  <td>120,103</td>
 </tr>
-<tr><th>SchoolNet</th>
+<tr><th>SchoolNet</th><td>68</td>
  <td>1.45</td>
  <td>6.61</td>
  <td>20.0</td>
  <td>13.7</td>
  <td>45,841</td>
 </tr>
-<tr><th>ISUAG</th>
+<tr><th>ISUAG</th><td>12</td>
  <td>1.69</td>
  <td>4.08</td>
  <td>74.7</td>
  <td>44.2</td>
  <td>71,362</td>
 </tr>
-<tr><th>Tier 1</th>
+<tr><th>Tier 1</th><td>54</td>
  <td>1.32</td>
  <td>4.27</td>
  <td>34.2</td>
  <td>25.7</td>
  <td>127,572</td>
 </tr>
-<tr><th>Tier 2</th>
- <td>0.95</td>
+<tr><th>Tier 2</th><td>107</td>
+ <td style="background: #ff0;">0.95</td>
  <td>0.90</td>
  <td>17.4</td>
  <td>18.3</td>
  <td>132,272</td>
 </tr>
-<tr><th>Tier 3</th>
+<tr><th>Tier 3</th><td>187</td>
  <td>0.94</td>
  <td>1.51</td>
  <td>12.9</td>
@@ -115,9 +136,20 @@ of networks.
 
 <h4>Analysis:</h4>
 
-<p>NNI values close to one indicate sampling points with a uniform distribution.  Values less than one indicate clustering and values greater than one indicate dispersion of the samples.
+<table cellpadding=2 cellspacing=0 border=1>
+<caption>Table 4 details NNI interpretation</caption>
+<thead>
+<tr><th>NNI Value</th><th>Details</th></tr>
+</thead>
+<tr><td>&gt; 1</td><td>indicates dispersion of samples</td></tr>
+<tr><td> ~~ 1</td><td>indicates sampling points have a uniform distribution</td></tr>
+<tr><td> &lt; 1</td><td>indicates samples are clustered</td></tr>
+</table>
 
-<p>The uninformity of the ASOS and ISUAG network stands out with values over 1.5.    The addition of the more spread out AWOS network to the Tier1 group shows how the AWOS network nicely compliments the ASOS network.  This is because of the large number of AWOS sites in SW Iowa versus no ASOS sites.
+<p>Table 3 shows the results of the NNI computation.  The ASOS network has
+ a relatively high value of 1.58 which indicates dispersion of the sampling
+points.  This spread was one of the main reasons the IEM was created, since
+the baseline ASOS network doesn't have good representivity at even a 50 km scale over the state.  The NNI value of 0.95 for the combination of the AWOS and RWIS networks to the ASOS network in Tier 2 shows the benefit of the IEM collaboration.  Tier 2's value of 0.95 is very close to unity and indicates that the network has a nearly uniform distribution.
 
 <h3>3.  Fractal Dimension</h3>
 
@@ -196,5 +228,7 @@ to only gain more clustering in limited areas and other areas suffer even more f
 <p>Dubois G (2000) How representative are samples in a sampling network? <i>J Geographic Info Decision Anal<i> 4:1-10
 
 <p>
+
+</div>
 
 <?php include("$rootpath/include/footer.php"); ?>
