@@ -20,6 +20,7 @@ Body{
 }
 #iem-header {
 	border-bottom: 1px #000 solid;
+    height: 45px;
 }
 #iem-header-title h3 {
 	margin-top: 0px;
@@ -34,7 +35,7 @@ Body{
 #iem-header-logo img {
 	float: left;
 	border: 0px;
-	margin: 5px;
+	margin-right: 5px;
     height: 65px;
 	background-color: transparent;
 }
