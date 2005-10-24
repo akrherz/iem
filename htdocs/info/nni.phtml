@@ -153,7 +153,32 @@ the baseline ASOS network doesn't have good representivity at even a 50 km scale
 
 <h3>3.  Fractal Dimension</h3>
 
+<p>The fractal dimension is a measure of the variation of the average number
+of observing points found within circles of certain radius of each point 
+centered at that point.  The motivation of this statistic is to resolve the
+scales at which phenomena can be resolved.
+
+<h4>Procedure</h4>
+
+<p>A python script was written to compute the needed variables for the fractal
+dimension statistic.  The spatial computations were done in the PostGIS 
+database using the NAD83 UTM Zone15 North projection.
+
+<h4>Data</h4>
 <p><img src="nni_images/fractal.png">
+
+<table cellpadding=2 cellspacing=0 border=1>
+<caption>Table 5: Fractal dimension results</caption>
+<thead><th>Distance</th><th>ASOS</th><th>AWOS</th><th>RWIS</th><th>SchoolNet</th><th>ISUAG</th><th>Tier 1</th><th>Tier 2</th><th>Tier 3</th></tr></thead>
+
+<tr><td>0-100km</td><td>0.033</td><td>0.15</td><td>0.19</td><td>0.29</td><td>-0.016</td><td>0.18</td><td>0.25</td><td>0.32</td></tr>
+<tr><td>0-300km</td><td>0.19</td><td>0.27</td><td>0.30</td><td>0.33</td><td>0.17</td><td>0.29</td><td>0.35</td><td>0.40</td></tr>
+
+</table>
+
+<h4>Analysis</h4>
+
+<p>Need to look up some references on this one :(
 
 <h3>4. Morisita Index</h3>
 
@@ -165,14 +190,27 @@ point inside?
 <h4>Procedure:</h4>
 
 <p>A script was written to compute this value.  The spatial computations were
-done in NAD83 UTM Zone 15N, which is a common projection for Iowa.
+done in NAD83 UTM Zone 15N, which is a common projection for Iowa.  Figures 2 and 3 illustrate the morisita index.  You have some area of interest with a number of observations points.  You then divide this area up into equal sized cells and then count the number of cells with sites in them. 
+
+<table cellpadding="3" cellspacing="0" border="1">
+<thead>
+<tr><th>Observation Points</th><th>Divided up by 25 cells</th></tr>
+</thead>
+<tr><td><img src="nni_images/morisita_1.png" border="2"></td>
+    <td><img src="nni_images/morisita_2.png" border="2"></td>
+</tr></table>
+
+<p>In this example, the Morisita index is around 13.  You then itterate over
+a number of different grid cell sizes to get trends and a better understanding 
+of how the clustering varies at different scales.
 
 <h4>Data:</h4>
 <img src="nni_images/morisita.gif">
 
 <h4>Analysis:</h4>
 
-<p>The basics of this chart is that the larger the number, the more clustering exists.  This chart clearly shows the problems of the Tier2 and Tier3 networks at small scales.  RWIS sites tend to be located in the same urban areas as airport sensors from the ASOS and AWOS network.  This materializes in the clustering n oted at 10-30 km cell sizes.
+<p>For the Morisita Index, values above 1 indicate clustering at that scale.
+  This chart clearly shows clustering of the Tier2 and Tier3 networks at small scales.  RWIS sites tend to be located in the same urban areas as airport sensors from the ASOS and AWOS network.  This materializes in the clustering noted at 10-30 km cell sizes.
 
 <p>It is interesting to note the clustering at 200-250 km within the SchoolNet.  This is a result of the KCCI SchoolNet being confined to Central Iowa.  When the index is computed, a large clustering occurs at that scale.
 
@@ -186,9 +224,12 @@ done in NAD83 UTM Zone 15N, which is a common projection for Iowa.
 
 <h4>Data:</h4>
 
-<table>
+<table cellspacing="0" cellpadding="3" border="1">
+<thead><tr><th colspan="2">Tier 1</th></tr></thead>
 <tr><td><img src="nni_images/tier1_areas.png"></td><td><img src="nni_images/tier1_th.png"></td></tr>
+<thead><tr><th colspan="2">Tier 2</th></tr></thead>
 <tr><td><img src="nni_images/tier2_areas.png"></td><td><img src="nni_images/tier2_th.png"></td></tr>
+<thead><tr><th colspan="2">Tier 3</th></tr></thead>
 <tr><td><img src="nni_images/tier3_areas.png"></td><td><img src="nni_images/tier3_th.png"></td></tr>
 </table>
 
