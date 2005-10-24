@@ -35,13 +35,13 @@ Body{
 	float: left;
 	border: 0px;
 	margin: 5px;
+    height: 65px;
 	background-color: transparent;
 }
 #iem-header-items {
 	position: absolute;
 	top: 35px;
-	left: 650px;
-	width: 150px;
+	right: 10px;
 	text-align: right;
 	font-size: 0.8em;
 }
