@@ -4,8 +4,24 @@
  $TITLE = "IEM Representivity";
  include("$rootpath/include/header.php");
 ?>
+<style>
+.figure {
+  background: #eee;
+  border: 2px dashed #000;
+  text-align: center;
+}
+.ptext h3 {
+  border-bottom: 1px solid #00f;
+  padding-top: 30px;
+}
+.ptext h4 {
+  padding-left: 45px;
+  color: #f00;
 
-<div style="width: 800px;">
+}
+</style>
+
+<div class="ptext" style="width: 800px;">
 
 <h2>IEM Representivity Analysis (<i>Draft</i>)</h2>
 
@@ -13,12 +29,23 @@
 representativity of the Iowa Environmental Mesonet (IEM).
   This work follows Dubois (2000).
 
-<h3>1. Introduction:</h3>
+<ol>
+ <li><a href="#introduction">Introduction</a></li>
+ <li><a href="#nearest">Nearest Neighbor Index</a></li>
+ <li><a href="#fractal">Fractal Dimension</a></li>
+ <li><a href="#morisita">Morisita Index</a></li>
+ <li><a href="#thiessen">Thiessen Polygons</a></li>
+ <li><a href="#represent">Coefficient of Representativity</a></li>
+ <li><a href="#conclusions">Conclusions</a></li>
+</ol>
+
+<h3><a name="introduction">1. Introduction:</a></h3>
 
 <p>The IEM is a collection of environmental monitoring networks. The purpose
 of this collection is to produce more a precise analysis of weather and 
-climatic variables in the state.  The process of spatial analysis usually 
-involves some sort of gridding of point data onto a regular grid.  This 
+climatic variables in the state.  To produce higher resolution products for
+the entire state, point observations are often grided onto a regular grid
+using well known algorithms like nearest neighbor or the barnes scheme.  This 
 process is not arbitrary due to the numerous tunable parameters to most any
 analysis algorithm.  It is important to investigate the characteristics of
 our mesonet to determine the appropriate scales at which we can analyze
@@ -62,7 +89,7 @@ and reliability.</caption>
 
 </table>
 
-<h3>2. Nearest Neighbors Index (NNI)</h3>
+<h3><a name="nearest">2. Nearest Neighbors Index (NNI)</a></h3>
 
 <p>The NNI is a statistic comparing the mean minimum distances between sampling points to that which is expected by chance over some sampling area.
 
@@ -151,12 +178,14 @@ and reliability.</caption>
 points.  This spread was one of the main reasons the IEM was created, since
 the baseline ASOS network doesn't have good representivity at even a 50 km scale over the state.  The NNI value of 0.95 for the combination of the AWOS and RWIS networks to the ASOS network in Tier 2 shows the benefit of the IEM collaboration.  Tier 2's value of 0.95 is very close to unity and indicates that the network has a nearly uniform distribution.
 
-<h3>3.  Fractal Dimension</h3>
+<h3><a name="fractal">3.  Fractal Dimension</a></h3>
 
 <p>The fractal dimension is a measure of the variation of the average number
 of observing points found within circles of certain radius of each point 
-centered at that point.  The motivation of this statistic is to resolve the
-scales at which phenomena can be resolved.
+centered at that point.  The motivation of this statistic is to obtain the 
+fractal dimension of the observing network such that any phenomena with 
+fractal dimension less than the space dimension minus the fractal dimension of 
+the network can not be resolved.
 
 <h4>Procedure</h4>
 
@@ -165,22 +194,28 @@ dimension statistic.  The spatial computations were done in the PostGIS
 database using the NAD83 UTM Zone15 North projection.
 
 <h4>Data</h4>
-<p><img src="nni_images/fractal.png">
+<div class="figure">
+<img src="nni_images/fractal.png">
+<br />Figure 1: Fractal Dimension
+</div>
 
 <table cellpadding=2 cellspacing=0 border=1>
 <caption>Table 5: Fractal dimension results</caption>
 <thead><th>Distance</th><th>ASOS</th><th>AWOS</th><th>RWIS</th><th>SchoolNet</th><th>ISUAG</th><th>Tier 1</th><th>Tier 2</th><th>Tier 3</th></tr></thead>
 
-<tr><td>0-100km</td><td>0.033</td><td>0.15</td><td>0.19</td><td>0.29</td><td>-0.016</td><td>0.18</td><td>0.25</td><td>0.32</td></tr>
-<tr><td>0-300km</td><td>0.19</td><td>0.27</td><td>0.30</td><td>0.33</td><td>0.17</td><td>0.29</td><td>0.35</td><td>0.40</td></tr>
+<tr><td>30-100km</td><td>1.05</td><td>0.72</td><td>0.85</td><td>0.73</td><td>0.69</td><td>0.82</td><td>0.77</td><td>0.74</td></tr>
+
+<tr><td>30-300km</td><td>2.23</td><td>1.65</td><td>1.75</td><td>1.25</td><td>1.99</td><td>1.78</td><td>1.67</td><td>1.56</td></tr>
+
 
 </table>
 
 <h4>Analysis</h4>
 
-<p>Need to look up some references on this one :(
+<p>(<i>I am having a tough time understanding fractals...  Still researching...</i>)  For data varying in 2 dimensions, a network is able to resolve phenomena
+that is 2 minus the factal dimension.
 
-<h3>4. Morisita Index</h3>
+<h3><a name="morisita">4. Morisita Index</a></h3>
 
 <p>The Morisita index investigates the amount of contagion in a sampling
 network.  It basically looks at how much clustering occurs when a sampling
@@ -190,8 +225,9 @@ point inside?
 <h4>Procedure:</h4>
 
 <p>A script was written to compute this value.  The spatial computations were
-done in NAD83 UTM Zone 15N, which is a common projection for Iowa.  Figures 2 and 3 illustrate the morisita index.  You have some area of interest with a number of observations points.  You then divide this area up into equal sized cells and then count the number of cells with sites in them. 
+done in NAD83 UTM Zone 15N, which is a common projection for Iowa.  Figures 2 illustrates the morisita index.  You have some area of interest with a number of observations points.  You then divide this area up into equal sized cells and then count the number of cells with sites in them. 
 
+<div class="figure">
 <table cellpadding="3" cellspacing="0" border="1">
 <thead>
 <tr><th>Observation Points</th><th>Divided up by 25 cells</th></tr>
@@ -199,13 +235,18 @@ done in NAD83 UTM Zone 15N, which is a common projection for Iowa.  Figures 2 an
 <tr><td><img src="nni_images/morisita_1.png" border="2"></td>
     <td><img src="nni_images/morisita_2.png" border="2"></td>
 </tr></table>
+<br />Figure 2:  Illustration of Morisita Index
+</div>
 
 <p>In this example, the Morisita index is around 13.  You then itterate over
 a number of different grid cell sizes to get trends and a better understanding 
 of how the clustering varies at different scales.
 
 <h4>Data:</h4>
+<div class="figure">
 <img src="nni_images/morisita.gif">
+<br />Figure 3: Morisita Index 
+</div>
 
 <h4>Analysis:</h4>
 
@@ -214,7 +255,7 @@ of how the clustering varies at different scales.
 
 <p>It is interesting to note the clustering at 200-250 km within the SchoolNet.  This is a result of the KCCI SchoolNet being confined to Central Iowa.  When the index is computed, a large clustering occurs at that scale.
 
-<h3>5. Thiessen/Voronoi polygons</h3>
+<h3><a name="thiessen">5. Thiessen/Voronoi polygons</a></h3>
 
 <p>Thiessen polygons have been a traditional staple of the spatial statistian.  Think of them as polygon areas where any point inside that polygon is the closest to 1 sampling point within that polygon as well.  So there is one polygon per sampling point.
 
@@ -223,46 +264,76 @@ of how the clustering varies at different scales.
 <p>The point coverage shapefiles were loaded into ArcGIS 9.1.  The Thiessen polygon tool was then used to generate the polygons.  These polygons were then clipped by the border of Iowa within ArcGIS as well.  The resulting coverage was exported to Shapefile and then loaded into the IEM's spatial database for analysis.
 
 <h4>Data:</h4>
-
+<div class="figure">
 <table cellspacing="0" cellpadding="3" border="1">
-<thead><tr><th colspan="2">Tier 1</th></tr></thead>
+<thead><tr><th colspan="2">Figure 4: Tier 1</th></tr></thead>
 <tr><td><img src="nni_images/tier1_areas.png"></td><td><img src="nni_images/tier1_th.png"></td></tr>
-<thead><tr><th colspan="2">Tier 2</th></tr></thead>
+<thead><tr><th colspan="2">Figure 5: Tier 2</th></tr></thead>
 <tr><td><img src="nni_images/tier2_areas.png"></td><td><img src="nni_images/tier2_th.png"></td></tr>
-<thead><tr><th colspan="2">Tier 3</th></tr></thead>
+<thead><tr><th colspan="2">Figure 6: Tier 3</th></tr></thead>
 <tr><td><img src="nni_images/tier3_areas.png"></td><td><img src="nni_images/tier3_th.png"></td></tr>
 </table>
+</div>
 
 <h4>Analysis:</h4>
 
-<p>Thiessen polygon's can give quick insight into areas of the state that have
-few observing platforms, since polygons in those areas will be much larger. It is interesting to note how with tier1, the larger polygons are found in western and eastern Iowa, while for tier3, the largest polygons are mainly in Eastern Iowa.
+<p>Thiessen polygon's provide a quick synopsis of how large of an area is 
+represented by a single point.  Areas in a network that are undersampled can
+quickly be seen.  Figure 4 shows the interesting contrast between the more
+densely sampled areas of Central Iowa and along the I-380 cooridor in Eastern
+Iowa.  The largest polygons can be seen in Northeast and Southern Iowa.  The 
+histogram for Tier 1 also nicely details the collection of smaller polygons
+around 2,000 km**2 
+along with a second mode of larger polygons around 5,000 km**2.  Unfortunately,
+this bi-modal distribution is not greatly helped by the addition of the RWIS sensors in Tier 2.  The clustering of the RWIS sensors simply splits some of the
+larger polygons, but a couple of rather large polygons in Northeastern Iowa still exist.
 
-<h3>6. Coefficient of Representativity</h3>
+<p>For Tier 3, the clustering of sites in Central Iowa with the SchoolNet 
+network creates a large number of smaller polygons and doesn't help the eliminate
+the larger polygons in Eastern Iowa.  The average polygon size on the maps are
+only interesting in the fact that they indicate what the ideal size would be
+if all of the sites were spread out equally. 
+
+<h3><a name="represent">6. Coefficient of Representativity</a></h3>
 
 <h4>Procedure:</h4>
 
 <p>The thiessen polygons and network coverages were loaded into the IEM spatial
 database.  Python scripts were then written to analyze distances and compute
-other parameters.  All spatial math was done in NAD83 UTM Zone15N.
+other parameters needed for the coefficient of representativity (CR).  
+All spatial math was done in NAD83 UTM Zone15N.
 
 <h4>Data:</h4>
-<img src="nni_images/tier1_cr.png">
-<img src="nni_images/tier2_cr.png">
-<img src="nni_images/tier3_cr.png">
+<div class="figure">
+<table>
+<tr><td>Figure 7:<br/><img src="nni_images/tier1_cr.png"></td>
+    <td>Figure 8:<br/><img src="nni_images/tier2_cr.png"></td></tr>
+<tr><td>Figure 9:<br/><img src="nni_images/tier3_cr.png"></td>
+    <td></td></tr>
+</table>
+</div>
 
 <h4>Analysis:</h4>
 
-<p>In the case of CR, values around one represent areas that are nearly uniformly
-sampled without clusters present.  Values greater than one indicate areas with sparse sampling points and values less than one indicate clustering.
+<table cellspacing="0" cellpadding="3" border="1">
+<thead><tr><th>CR Value</th><th>Conclusion</th></tr></thead>
+<tr><td>CR &gt; 1</td><td>The measure is isolated.</td></tr>
+<tr><td>CR ~~ 1</td><td>Ideal case, measure is spatially uniform.</td></tr>
+<tr><td>CR &lt; 1</td><td>The measure is clustered</td></tr>
+</table>
 
 <p>Tier 1 clearly shows the undersampled portions of the state, which are 
 NE Iowa and parts of SW Iowa.  By adding the RWIS network in tier 2, we appear 
 to only gain more clustering in limited areas and other areas suffer even more from sparse observation.  Tier 3 clearly shows the affect of adding 60+ SchoolNet sites in Central Iowa, since the clustering goes up and the sparse areas get even worse.
 
-<h3>7. Conclusions</h3>
+<h3><a name="conclusions">7. Conclusions</a></h3>
 
-<p>To be written :)
+<p>A representativity analysis was performed following work done by Dubois.
+The statistical benefits of the IEM collaboration show up in almost every 
+variable, but there are certain caveats that appear as well.  
+The main caveat is that the addition of networks to the baseline ASOS and
+AWOS network often only add clustering to the network as a whole.
+
 
 <h3>References</h3>
 
