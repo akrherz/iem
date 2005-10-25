@@ -57,9 +57,11 @@ $vals = Array("tsf0" => "Sensor 1 - Temp [F]",
 <?php $current_network = "RWIS_SF"; include("$rootpath/include/current_bar.inc.php"); ?>
 <form method="GET" action="currentSF.phtml">
 <select name="network">
+  <option value="IN_RWIS" <?php if ($network == "IN_RWIS") echo "SELECTED"; ?>>Indiana
   <option value="IA_RWIS" <?php if ($network == "IA_RWIS") echo "SELECTED"; ?>>Iowa
   <option value="KS_RWIS" <?php if ($network == "KS_RWIS") echo "SELECTED"; ?>>Kansas
   <option value="MN_RWIS" <?php if ($network == "MN_RWIS") echo "SELECTED"; ?>>Minnesota
+  <option value="ND_RWIS" <?php if ($network == "ND_RWIS") echo "SELECTED"; ?>>North Dakota
   <option value="WI_RWIS" <?php if ($network == "WI_RWIS") echo "SELECTED"; ?>>Wisconsin
 </select>
 <input type="submit" value="Show State">
