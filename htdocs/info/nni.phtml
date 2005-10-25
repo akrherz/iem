@@ -67,13 +67,14 @@ to explore the spatial statistical benefits of the IEM partnership.
 
 <tr><th>AWOS</th><td>The <a href="<?php echo $webroot; ?>/AWOS/">Iowa Automated Weather Observing System</a> sites are located at secondary airports and are maintained by the Iowa State Department of Transportation via 3rd party contractor.  Data quality should be comparable with the ASOS network, but a number of factors produce biases when compared with the ASOS network.  The main issues include siting, maintainance schedules, network communication, and instrumentation.  Most of the big differences between the ASOS and AWOS network show up in the temperature and dew point variables. </td><td><img src="nni_images/awos_locs.png"></tr>
 
-<tr><th>RWIS</th><td>The <a href="<?php echo $webroot; ?>/RWIS/">Iowa Roadway Weather Information System</a> sites are located along side interstates and highways.  They are maintained by the Iowa Department of Transportation via 3rd party contractor.  Atmospheric data from this network is of lesser quality than the ASOS or AWOS networks.  Their primary purpose is for automated observation of winter weather. </td><td><img src="nni_images/rwis_locs.png"></td></tr>
+<tr><th>RWIS</th><td>The <a href="<?php echo $webroot; ?>/RWIS/">Iowa Roadway Weather Information System</a> sites are located along side interstates and highways.  They are maintained by the Iowa Department of Transportation via a 3rd party contractor.  Atmospheric data from this network is of lesser quality than the ASOS or AWOS networks.  Their primary purpose is for automated observation of winter weather. </td><td><img src="nni_images/rwis_locs.png"></td></tr>
 
 <tr><th>SchoolNet</th><td>The IEM collects data from a number of <a href="<?php echo $webroot; ?>/schoolnet/">SchoolNets</a>.  For the purposes of this document, we only consider the KCCI-TV SchoolNet.  Data quality is close to that of the RWIS network, but siting issues make variables like wind and precipitation problematic. </td><td><img src="nni_images/snet_locs.png"></td></tr>
 
-<tr><th>ISUAG</th><td>The <a href="<?php echo $webroot; ?>/agclimate/">ISU Ag Climate</a> sites primarily provide soil temperature and solar radiation readings.They are maintained by the Iowa State University Extension.  The main issue with this network is the timing of observations received.  Each station is called daily to download its observation record. </td><td><img src="nni_images/isuag_locs.png"></td></tr>
+<tr><th>ISUAG</th><td>The <a href="<?php echo $webroot; ?>/agclimate/">ISU Ag Climate</a> sites primarily provide soil temperature and solar radiation readings.They are maintained by the Iowa State University Extension.  The main issue with this network is the timing of observations received.  Each station is called daily to download its observation record from the previous day. </td><td><img src="nni_images/isuag_locs.png"></td></tr>
 </table>
 
+<p>
 
 <table cellpadding="3" cellspacing="0" border="1">
 <caption>Table 2 lists our proposed combination of networks based on data quality 
@@ -99,7 +100,7 @@ and reliability.</caption>
 
 <h4>Data:</h4>
 <table cellpadding=2 cellspacing=0 border=1>
-<caption>Table 3 shows NNI values along with other relevant statistics used in the NNI calculation.</caption>
+<caption>Table 3 shows NNI values along with other relevant statistics used in the NNI calculation. (DARYL: Figure out what Z is...)</caption>
 <thead>
 <tr><th>Network</th><th>Sites</th><th>NNI</th><th>Z</th><th>Avg Min Distance<br />[km]</th><th>Expected Min Distance<br />[km]</th><th>Area [km^2]</th></tr>
 </thead>
@@ -185,7 +186,7 @@ of observing points found within circles of certain radius of each point
 centered at that point.  The motivation of this statistic is to obtain the 
 fractal dimension of the observing network such that any phenomena with 
 fractal dimension less than the space dimension minus the fractal dimension of 
-the network can not be resolved.
+the network can not be resolved. (DARYL doesn't fully understand what he is saying yet)
 
 <h4>Procedure</h4>
 
@@ -198,6 +199,8 @@ database using the NAD83 UTM Zone15 North projection.
 <img src="nni_images/fractal.png">
 <br />Figure 1: Fractal Dimension
 </div>
+
+<p>
 
 <table cellpadding=2 cellspacing=0 border=1>
 <caption>Table 5: Fractal dimension results</caption>
@@ -219,13 +222,17 @@ that is 2 minus the factal dimension.
 
 <p>The Morisita index investigates the amount of contagion in a sampling
 network.  It basically looks at how much clustering occurs when a sampling
-network is broken up into cells.  For example, how many cells have a sampling 
-point inside?
+network is broken up into regular cells. If each cell has the same number of
+observation points inside of it, then the index should indicate uniformity in
+space at that scale.
 
 <h4>Procedure:</h4>
 
-<p>A script was written to compute this value.  The spatial computations were
-done in NAD83 UTM Zone 15N, which is a common projection for Iowa.  Figures 2 illustrates the morisita index.  You have some area of interest with a number of observations points.  You then divide this area up into equal sized cells and then count the number of cells with sites in them. 
+<p>A python script was written to compute this value.  The spatial computations were
+done in NAD83 UTM Zone 15N, which is a common projection for Iowa.  Figures 2 illustrates the morisita index.  You have some area of interest with a 
+number of observations points (leftside graphic).  You then divide this 
+area up into equal sized cells and then count the number of cells 
+with sites in them (rightside graphic). 
 
 <div class="figure">
 <table cellpadding="3" cellspacing="0" border="1">
@@ -238,7 +245,8 @@ done in NAD83 UTM Zone 15N, which is a common projection for Iowa.  Figures 2 il
 <br />Figure 2:  Illustration of Morisita Index
 </div>
 
-<p>In this example, the Morisita index is around 13.  You then itterate over
+<p>In this example, the Morisita index is around 13.  This is a very high
+number and indicates clustering.  You then itterate over
 a number of different grid cell sizes to get trends and a better understanding 
 of how the clustering varies at different scales.
 
@@ -280,7 +288,7 @@ of how the clustering varies at different scales.
 <p>Thiessen polygon's provide a quick synopsis of how large of an area is 
 represented by a single point.  Areas in a network that are undersampled can
 quickly be seen.  Figure 4 shows the interesting contrast between the more
-densely sampled areas of Central Iowa and along the I-380 cooridor in Eastern
+densely sampled areas of Central Iowa and along the I-380 corridor in Eastern
 Iowa.  The largest polygons can be seen in Northeast and Southern Iowa.  The 
 histogram for Tier 1 also nicely details the collection of smaller polygons
 around 2,000 km**2 
@@ -289,7 +297,7 @@ this bi-modal distribution is not greatly helped by the addition of the RWIS sen
 larger polygons, but a couple of rather large polygons in Northeastern Iowa still exist.
 
 <p>For Tier 3, the clustering of sites in Central Iowa with the SchoolNet 
-network creates a large number of smaller polygons and doesn't help the eliminate
+network creates a large number of smaller polygons and doesn't help to eliminate
 the larger polygons in Eastern Iowa.  The average polygon size on the maps are
 only interesting in the fact that they indicate what the ideal size would be
 if all of the sites were spread out equally. 
@@ -324,7 +332,7 @@ All spatial math was done in NAD83 UTM Zone15N.
 
 <p>Tier 1 clearly shows the undersampled portions of the state, which are 
 NE Iowa and parts of SW Iowa.  By adding the RWIS network in tier 2, we appear 
-to only gain more clustering in limited areas and other areas suffer even more from sparse observation.  Tier 3 clearly shows the affect of adding 60+ SchoolNet sites in Central Iowa, since the clustering goes up and the sparse areas get even worse.
+to only gain more clustering in limited areas and other areas suffer even more from sparse observation.  Tier 3 clearly shows the affect of adding 60+ SchoolNet sites in Central Iowa, since the clustering goes up and the sparse areas get even worse due to the increased number of stations.
 
 <h3><a name="conclusions">7. Conclusions</a></h3>
 
@@ -334,6 +342,7 @@ variable, but there are certain caveats that appear as well.
 The main caveat is that the addition of networks to the baseline ASOS and
 AWOS network often only add clustering to the network as a whole.
 
+<p>(DARYL: adds more conclusions here...)
 
 <h3>References</h3>
 
