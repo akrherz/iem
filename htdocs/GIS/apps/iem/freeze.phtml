@@ -1,5 +1,7 @@
 <?php
 include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+
 $state = isset($_GET['state']) ? $_GET['state'] : '' ;
 $radar = isset($_GET['radar']) ? $_GET['radar'] : 1;
 $refresh = isset($_GET['refresh']) ? $_GET['refresh'] : 0;
@@ -95,6 +97,7 @@ $counties->set("status", MS_ON);
 
 $surface = $map->getlayerbyname("surface");
 $surface->set("status", MS_ON);
+$surface->set("connection", $_DATABASES["access"] );
 
 $n0r = $map->getlayerbyname("n0r");
 $n0r->set("status", MS_ON);
