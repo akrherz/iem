@@ -322,7 +322,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
   DATA "geom from (select type as wtype, geom, oid from warnings WHERE gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE POLYGON
@@ -358,7 +358,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
-  CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
  DATA "geom from watches"
  PROJECTION
   "proj=latlong"

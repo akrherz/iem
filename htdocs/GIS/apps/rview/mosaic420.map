@@ -269,7 +269,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=akrherz dbname=postgis host=10.10.10.10"
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
 #  DATA "geom from warnings"
  DATA "geom from (select type, geom, oid from warnings WHERE gtype = 'C' and 
 	expire > '2004-07-19 15:00' ORDER by expire, type ASC) as foo"
