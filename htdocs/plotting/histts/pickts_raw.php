@@ -1,6 +1,17 @@
 <?php
-$connection = pg_connect("localhost","5432","asos");
-$connection2 = pg_connect("localhost","5432","rwis");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("asos");
+$connection2 = iemdb("rwis");
+
+$station = isset($_GET["station"]) ? $_GET["station"]: "";
+$network = isset($_GET["network"]) ? $_GET["network"]: "IA_ASOS";
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
+$day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+$shour = isset($_GET["shour"]) ? $_GET["shour"]: 0;
+$duration = isset($_GET["duration"])? $_GET["duration"]: 12;
+
 
 $stime = $year ."-". $month ."-". $day ." ". $shour .":00:00";
 

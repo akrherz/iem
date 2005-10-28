@@ -1,8 +1,24 @@
 <?php 
 include("../../../config/settings.inc.php");
-	$TITLE = "IEM | Historical Time Series";
-include("$rootpath/include/header.php"); 
 	include("$rootpath/include/forms.php"); 
+
+$station = isset($_GET["station"]) ? $_GET["station"]: "";
+$network = isset($_GET["network"]) ? $_GET["network"]: "IA_ASOS";
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
+$day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+$shour = isset($_GET["shour"]) ? $_GET["shour"]: 0;
+$duration = isset($_GET["duration"])? $_GET["duration"]: 12;
+
+
+ include("$rootpath/include/selectWidget.php");
+ $sw = new selectWidget("pickts.php", "pickts.php?", $network);
+ $sw->set_networks( Array("IA_ASOS","AWOS","IA_RWIS") );
+ $sw->logic($_GET);
+
+$TITLE = "IEM | Historical Time Series";
+include("$rootpath/include/header.php"); 
+
 ?>
 
 
@@ -18,7 +34,7 @@ of your choice
 if (strlen($station) > 0 && strlen($month) > 0 ) {
 ?>
 <P><a href="pickts.php">Different ASOS/AWOS Location</a>
-<BR><a href="pickts.php?network=rwis">Different RWIS Location</a>
+<BR><a href="pickts.php?network=IA_RWIS">Different RWIS Location</a>
 <BR><a href="pickts.php?station=<?php echo $station; ?>">Different Time</a>
 
 <P>
@@ -118,20 +134,9 @@ if (strlen($station) > 0 && strlen($month) > 0 ) {
 <BR><BR>
 <?php
 } elseif ( strlen($network) > 0 ) {
-?>
-<P>Please click on one of the stations in the map.
-<BR>Or select a <a href="pickts.php">AWOS/ASOS station</a>.
 
-<?php
-	echo print_rwis("pickts.php?station");
+echo $sw->printInterface();
 
-} else {
-?>
-<P>Please click on one of the stations in the map.
-<BR>Or select a <a href="pickts.php?network=rwis">RWIS station</a>.
-
-<?php
-	echo print_asos("pickts.php?station");
 }
 ?>
 

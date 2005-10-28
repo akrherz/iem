@@ -1,6 +1,17 @@
 <?php
-$connection = pg_connect("localhost","5432","asos");
-$connection2 = pg_connect("localhost","5432","rwis");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("asos");
+$connection2 = iemdb("rwis");
+
+$station = isset($_GET["station"]) ? $_GET["station"]: "";
+$network = isset($_GET["network"]) ? $_GET["network"]: "IA_ASOS";
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
+$day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+$shour = isset($_GET["shour"]) ? $_GET["shour"]: 0;
+$duration = isset($_GET["duration"])? $_GET["duration"]: 12;
+
 
 $stime = $year ."-". $month ."-". $day ." ". $shour .":00:00";
 
@@ -43,21 +54,19 @@ pg_close($connection);
 pg_close($connection2);
 
 
-include ("../dev/jpgraph.php");
-include ("../dev/jpgraph_line.php");
-include ("../dev/jpgraph_scatter.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
 
 
 // Create the graph. These two calls are always required
 $graph = new Graph(580,350,"example1");
 $graph->SetScale("textlin", 0, 50);
 $graph->yaxis->scale->ticks->Set(5,1);
-$graph->yaxis->scale->ticks->SetPrecision(0);
 $graph->SetY2Scale("lin", 0, 360);
 $graph->y2axis->scale->ticks->Set(30,15);
-$graph->y2axis->scale->ticks->SetPrecision(0);
 $graph->img->SetMargin(40,40,25,90);
-$graph->xaxis->SetFont(FONT1,FS_BOLD);
+$graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set($duration ." h winds for ". $station);
