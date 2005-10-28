@@ -16,6 +16,7 @@ if (isset($_GET["oid"]) ) {
 
 include("$rootpath/include/header.php");
 
+
 $connect = iemdb("postgis");
 
 
@@ -23,7 +24,9 @@ $result = pg_exec($connect, $query);
 
 $row = pg_fetch_array($result, 0);
 
-echo "<pre>". $row["report"] ."</pre>";
+echo sprintf("<a href=\"%s\">Go back to warnings display</a>", getenv("HTTP_REFERER") );
+
+echo "<p><pre>". $row["report"] ."</pre>";
 
 if (strlen($row["svs"]) > 0 ) 
 {
