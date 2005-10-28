@@ -1,4 +1,6 @@
 <?php
+include("../../../config/settings.inc.php");
+
 $station = isset($_GET['station']) ? $_GET['station'] : "DSM";
 $month = isset($_GET['month']) ? $_GET['month']: date("m");
 $year = isset($_GET['year']) ? $_GET['year']: date("Y");
@@ -6,9 +8,9 @@ $ts = mktime(0,0,0, $month, 1, $year);
 
 $today = time();
 
-include("../../include/iemaccess.php");
-include("../../include/allLoc.php");
-$coopdb = pg_connect("10.10.10.20","5432","coop");
+include("$rootpath/include/iemaccess.php");
+include("$rootpath/include/all_locs.php");
+$coopdb = iemdb("coop");
 $iem = new IEMAccess();
 
 $climate_site = $cities[$station]["climate_site"];
@@ -54,9 +56,9 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 pg_close($coopdb);
 
 
-include ("../jpgraph15/jpgraph.php");
-include ("../jpgraph15/jpgraph_line.php");
-include ("../jpgraph15/jpgraph_bar.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,400,"example1");
