@@ -43,7 +43,7 @@ if ($method == "geocode")
 }
 else if ($method == "id")
 {
-	include("../include/allLoc.php");
+	include("$rootpath/include/all_locs.php");
 	$id = strtoupper($_GET["nwsli"]);
 	$latitude = round($cities[$id]["lat"],4);
 	$longitude = round($cities[$id]["lon"],4);
@@ -51,7 +51,7 @@ else if ($method == "id")
 
 	if (intval($year) >= 2004)
 	{
-		include("../include/iemaccess.php");
+		include("$rootpath/include/iemaccess.php");
 		$iem = new IEMAccess();
 		$rs = $iem->query("SELECT day, pday from summary WHERE station = '$id'");
 		while ($row = pg_fetch_array($rs))
