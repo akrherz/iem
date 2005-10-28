@@ -30,10 +30,6 @@ $iem = new IEMAccess();
 $rwis = $iem->getNetwork($network);
 
 
-?>
-
-<?php
-
 $vals = Array("tsf0" => "Sensor 1 - Temp [F]", 
   "tmpf" => "Air Temp [F]",
   "dwpf" => "Dew Point [F]",
@@ -151,9 +147,10 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
     $parts = $finalA[$key];
           $i++;
           $tdiff = $now - $parts["ts"];
-    if ($tdiff > 86400*5){
+/*    if ($tdiff > 86400*5){
       continue;
     }
+*/
 	  echo "<tr";
 	  if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
             
