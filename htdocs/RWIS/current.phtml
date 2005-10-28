@@ -137,9 +137,11 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
     $i++;
     $tdiff = $now - $parts["ts"];
       // Don't show stations over 5 days old
+/*
     if ($tdiff > 86400*5){
       continue;
     }
+*/
      // Dont show IAC
     if ($key == "RIOW"){
       continue;
