@@ -268,7 +268,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
- CONNECTION "user=akrherz dbname=postgis host=10.10.10.10"
+ CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
  DATA "geom from watches"
  PROJECTION
   "proj=latlong"
@@ -296,7 +296,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=akrherz dbname=postgis host=10.10.10.10"
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
   DATA "geom from warnings_2004"
   STATUS ON
   TYPE POLYGON

@@ -74,7 +74,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME robins
-  CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
   DATA "the_geom from robins"
   STATUS DEFAULT
   TYPE POINT

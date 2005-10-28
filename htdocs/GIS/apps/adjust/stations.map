@@ -134,7 +134,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
-  CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
   DATA "geom from (select type as wtype, geom, oid from watches WHERE expired > '2005-01-01' ORDER by type ASC) as foo"
  PROJECTION
   "init=epsg:4326"
@@ -160,7 +160,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=akrherz dbname=postgis host=10.10.10.40"
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
 #  DATA "geom from (select type as wtype, geom, oid from warnings WHERE gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo"
   DATA "geom from (select type as wtype, geom, oid from warnings_2005 WHERE gtype = 'C' ORDER by type ASC) as foo"
   STATUS ON

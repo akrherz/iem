@@ -63,7 +63,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME datal
-  CONNECTION "host=10.10.10.40 user=akrherz dbname=postgis"
+  CONNECTION "host=10.10.10.20 user=akrherz dbname=postgis"
   DATA "geom from (SELECT map.oid, 
       round(data.p01i::numeric,2)::float::text as p01i, data.station, 
       setsrid(map.geom, -1) as geom

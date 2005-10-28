@@ -269,7 +269,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=akrherz dbname=postgis host=10.10.10.10"
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
   DATA "geom from warnings"
   STATUS ON
   TYPE POLYGON

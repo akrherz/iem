@@ -233,7 +233,7 @@ available in this system</i><br>
     <th align="left">Ob - NEX</th>
   </tr>
 <?php
- $c = pg_connect("10.10.10.40", 5432, "postgis");
+ $c = pg_connect("10.10.10.20", 5432, "postgis");
  $q = "SELECT n.valid, n.station, round((CASE WHEN n.p01i < 0 
    THEN 0 ELSE n.p01i END)::numeric, 2)
    as n_p01i, round(h.p01i::numeric,2) as h_p01i from nex_2002 n LEFT JOIN hp_2002 h 
