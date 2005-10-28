@@ -508,7 +508,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME kcci
-  CONNECTION "host=10.10.10.10 user=akrherz dbname=mesosite"
+  CONNECTION "host=10.10.10.20 user=akrherz dbname=mesosite"
   DATA "geom from (select oid, geom, network from stations) as foo using unique oid using srid=4326"
 #  FILTER "state = 'IA'"
   FILTER "network = 'IA_RWIS'"

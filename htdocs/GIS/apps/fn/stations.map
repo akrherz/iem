@@ -155,7 +155,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME kcci
-  CONNECTION "host=10.10.10.10 user=akrherz dbname=mesosite"
+  CONNECTION "host=10.10.10.20 user=akrherz dbname=mesosite"
   DATA "geom from stations"
   FILTER "network = 'KCCI'"
   STATUS ON
