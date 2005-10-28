@@ -20,8 +20,14 @@ function printNIDSMenu($prod){
 }
 
 ?>
-<?php $TITLE = "IEM | NIDS 2 GIS";
-include("/mesonet/php/include/header.php"); ?>
+<?php 
+include("../../../config/settings.inc.php");
+
+$rad = isset($_GET["rad"]) ? $_GET["rad"] : "DMX";
+$prod = isset($_GET["prod"]) ? $_GET["prod"]: "N0R";
+
+$TITLE = "IEM | NIDS 2 GIS";
+include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">Recent NIDS Imagery to GIS RASTERs</h3>
 
@@ -144,5 +150,4 @@ making a request from a script.</li>
 
 </div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
-
+<?php include("$rootpath/include/footer.php"); ?>
