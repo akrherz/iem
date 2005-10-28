@@ -30,6 +30,7 @@ $ts = substr($_GET['fp'], 6,6) ."/". substr($_GET['fp'],13,4);
 $fp = $prod . substr($_GET['fp'], 3);
 $epsg = isset($_GET['epsg']) ? $_GET['epsg'] : '4326';
 $frmt = isset($_GET['frmt']) ? $_GET['frmt'] : 'tiff';
+$rad = isset($_GET["rad"]) ? $_GET["rad"]: "DMX";
 
 $script = "/tmp/nids2gis/". time() .".csh";
 $temp = fopen( $script, 'w');
