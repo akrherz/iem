@@ -471,7 +471,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME sites
-  CONNECTION "host=10.10.10.30 user=mesonet dbname=iem port=9999"
+  CONNECTION "host=10.10.10.20 user=mesonet dbname=iem"
   DATA "geom from (select station, oid, snoww, geom from summary WHERE snoww > 0 and day >= '2004-02-16') as foo using unique oid srid=4326"
   #FILTER "network = 'IA_RWIS'"
   STATUS ON

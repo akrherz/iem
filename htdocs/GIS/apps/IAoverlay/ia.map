@@ -101,7 +101,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME sid
-  CONNECTION "user=nobody dbname=iem port=9999 host=10.10.10.30"
+  CONNECTION "user=nobody dbname=iem host=10.10.10.20"
   DATA "geom from (select geom, station, 
     oid from current WHERE (valid > CURRENT_TIMESTAMP - '2 hours'::interval)
     ) as foo using unique oid using srid=4326"
@@ -130,7 +130,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME ts
-  CONNECTION "user=nobody dbname=iem port=9999 host=10.10.10.30"
+  CONNECTION "user=nobody dbname=iem host=10.10.10.20"
   DATA "geom from (select geom, to_char(valid, 'HH24:MI') as tvalid,
     oid from current WHERE (valid > CURRENT_TIMESTAMP - '2 hours'::interval)
     ) as foo using unique oid using srid=4326"
@@ -161,7 +161,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME tmpf
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem port=9999 host=10.10.10.30"
+  CONNECTION "user=nobody dbname=iem host=10.10.10.20"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, tmpf, 
     oid from current WHERE (valid > CURRENT_TIMESTAMP - '2 hours'::interval)
@@ -192,7 +192,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME dwpf
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem port=9999 host=10.10.10.30"
+  CONNECTION "user=nobody dbname=iem host=10.10.10.20"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, dwpf,
     oid from current WHERE (valid > CURRENT_TIMESTAMP - '2 hours'::interval)
@@ -225,7 +225,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME sknt
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem port=9999 host=10.10.10.30"
+  CONNECTION "user=nobody dbname=iem host=10.10.10.20"
   DATA "geom from (select geom, sknt, 
     oid from current WHERE (valid > CURRENT_TIMESTAMP - '2 hours'::interval)
     and sknt between 0 and 100) as foo using unique oid using srid=4326"
@@ -258,7 +258,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME barbs
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem port=9999 host=10.10.10.30"
+  CONNECTION "user=nobody dbname=iem host=10.10.10.20"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, 
     case WHEN sknt between 0 and 4.99 THEN chr(227)

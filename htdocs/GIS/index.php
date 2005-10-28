@@ -56,7 +56,7 @@ IEM webpages.  It signifies that the data link is ready for most GIS systems.
  <li><a href="/climodat/index.phtml#ks">Iowa Climate Summaries</a>
   <br />GIS ready data files of monthly and yearly climate summaries dating
 back to 1951.</li>
-	<li><a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a>
+	<li><a href="<?php echo $rooturl; ?>/GIS/apps/iem/freeze.phtml">IEM Freeze</a>
 	<br />Web mapping application to support winter weather nowcasting.</li>
 	<li><a href="/GIS/radview.phtml">IEM Radview</a>
 	<br />Our effort to provide NEXRAD information in realtime to GIS systems.</li>
