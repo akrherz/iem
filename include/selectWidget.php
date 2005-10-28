@@ -18,6 +18,7 @@ class selectWidget
   var $network = 'IA_ASOS';
   var $netlib = Array(
    "IACLIMATE" => "Iowa Climate Sites",
+   "IA_COOP" => "Iowa NWS COOP Sites",
    "IA_ASOS" => "Iowa ASOS",
    "AWOS" => "Iowa AWOS",
    "IA_RWIS" => "Iowa RWIS",
