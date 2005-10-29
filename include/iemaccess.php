@@ -8,18 +8,9 @@
 include_once("$rootpath/include/database.inc.php");
 
 class IEMAccess {
-  var $DBHOST = "10.10.10.30";
-  var $DBPORT = "9999";
-  var $DBNAME = "iem";
-  var $DBUSER = "nobody";
-  var $DBPASS = "nobody";
   var $dbconn;
 
   function IEMAccess() {
-    $cString = sprintf("dbname=%s host=%s port=%s user=%s password=%s", 
-      $this->DBNAME, $this->DBHOST, $this->DBPORT,
-      $this->DBUSER, $this->DBPASS );
-    //$this->dbconn = pg_connect($cString);
     $this->dbconn = iemdb("access");
  
   } // End of IEMAccess Constructor
@@ -30,18 +21,18 @@ class IEMAccess {
 
   function getSingleSite($sid) {
     $sid = strtoupper($sid);
-    $rs = pg_exec($this->dbconn, "select *, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station) WHERE c.station = '$sid' and s.day = 'TODAY'");
+    $rs = pg_exec($this->dbconn, "select *, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station, network) WHERE c.station = '$sid' and s.day = 'TODAY'");
     return new IEMAccessOb(@pg_fetch_array($rs,0));
   }
 
   function getSingleSiteYest($sid) {
-    $rs = pg_exec($this->dbconn, "select * from current c LEFT JOIN summary s USING (station) WHERE c.station = '$sid' and s.day = 'YESTERDAY'");
+    $rs = pg_exec($this->dbconn, "select * from current c LEFT JOIN summary s USING (station, network) WHERE c.station = '$sid' and s.day = 'YESTERDAY'");
     return new IEMAccessOb(pg_fetch_array($rs,0));
   }
 
   function getNetwork($network) {
     $ret = Array();
-    $rs = pg_exec($this->dbconn, "select *, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station) WHERE c.network = '$network' and s.day = 'TODAY'");
+    $rs = pg_exec($this->dbconn, "select *, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station, network) WHERE c.network = '$network' and s.day = 'TODAY'");
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
       $ret[$row["station"]] = new IEMAccessOb($row);
     }
@@ -50,7 +41,7 @@ class IEMAccess {
 
   function getAll() {
     $ret = Array();
-    $rs = pg_exec($this->dbconn, "select *, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station) WHERE c.network IN ('IA_RWIS', 'IA_ASOS', 'AWOS', 'KCCI', 'KIMT') and s.day = 'TODAY' and c.valid > 'TODAY' ");
+    $rs = pg_exec($this->dbconn, "select *, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station, network) WHERE c.network IN ('IA_RWIS', 'IA_ASOS', 'AWOS', 'KCCI', 'KIMT') and s.day = 'TODAY' and c.valid > 'TODAY' ");
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
       $ret[$row["station"]] = new IEMAccessOb($row);
     }
@@ -60,7 +51,7 @@ class IEMAccess {
 
   function getNetworkSummary($network, $valid) {
     $ret = Array();
-    $rs = pg_exec($this->dbconn, "select *, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station) WHERE c.network = '$network' and s.day = '$valid'");
+    $rs = pg_exec($this->dbconn, "select *, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station, network) WHERE c.network = '$network' and s.day = '$valid'");
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
       $ret[$row["station"]] = new IEMAccessOb($row);
       $ret[$row["station"]]->db["obtime"] = $valid;
