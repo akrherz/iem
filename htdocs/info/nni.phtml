@@ -195,27 +195,47 @@ the baseline ASOS network is poorly representative at even a 50 km scale over th
 
 <h3><a name="fractal">3.  Fractal Dimension</a></h3>
 
-<p>The fractal dimension is a measure of the variation of the average number
-of observing points found within circles of certain radius when centered on each node of the network.  This statistic compares the 
-fractal dimension of the observing network to the space dimension 
-to arrive at an estimate of the degree of spatial resolution across the network.
+<p>The fractal dimension (D<sub>m</sub>) is used to characterize the distribution of a 
+geophysical data array (Lovejoy 1986).   An uniform distribution of 
+elements on the surface of the Earth will have a fractal dimension of 2.
+All other distributions should have a value between 0 and 2, with the degree
+of inhomogeneity being measured by 2 - D<sub>m</sub>.
+
+<p>The correlation dimension (D<sub>c</sub>) is often used as an approximation
+to the fractal dimension since it is easier to compute.  To compute 
+(D<sub>c</sub>), rings of increasing radius are formed around each member of
+the observing network.  The number of stations are then counted within each
+of these rings and then averaged for rings of the same radius.  The result is
+an average station density at various distances.
+
+<p>Doswell and Lasher-Trapp (1997) point out two problems with the 
+computation of the correlation dimension.  The first is the problem of 
+considering stations located near the edge of the observing network.  These
+stations will only have a majority of their neighbors to one preferred 
+direction.  Data from these stations will bias the computation.  The other
+issue is the arbitrary nature of actually computing the correlation
+dimension which involves computing the slope of a line comparing the
+natural log of the station count versus the natural log of station density.
+This slope of this line, thus the correlation dimension, is often not 
+consistent throughout the range of data.  Two parts of the curve may appear
+to be very linear, but their slopes will often be much different.
 
 <h4>Procedure</h4>
 
-<p>A python script was written to compute the needed variables for the fractal
-dimension statistic.  The spatial computations were done in the PostGIS 
-database using the NAD83 UTM Zone15 North projection.
+<p>A python script was written to compute the needed variables for the 
+correlation dimension statistic.  The spatial computations were done in 
+the PostGIS database using the NAD83 UTM Zone15 North projection.
 
 <h4>Data</h4>
 <div class="figure">
 <img src="nni_images/fractal.png">
-<br />Figure 1: Fractal Dimension
+<br />Figure 1: Correlation Dimension
 </div>
 
 <p>
 
 <table cellpadding=2 cellspacing=0 border=1>
-<caption>Table 5: Fractal dimension results</caption>
+<caption>Table 5: Correlation dimension results</caption>
 <thead><th>Distance</th><th>ASOS</th><th>AWOS</th><th>RWIS</th><th>SchoolNet</th><th>ISUAG</th><th>Tier 1</th><th>Tier 2</th><th>Tier 3</th></tr></thead>
 
 <tr><td>30-100km</td><td>1.05</td><td>0.72</td><td>0.85</td><td>0.73</td><td>0.69</td><td>0.82</td><td>0.77</td><td>0.74</td></tr>
@@ -227,8 +247,15 @@ database using the NAD83 UTM Zone15 North projection.
 
 <h4>Analysis</h4>
 
-<p>(<i>I am having a tough time understanding fractals...  Still researching...</i>)  For data varying in 2 dimensions, a network is able to resolve phenomena
-that is 2 minus the factal dimension.
+<p>The issues pointed out in Doswell (1997) are evident in this analysis as 
+well.  The arbitrary selection of points used in the linear regression 
+yield results that may not be accurate for the entire range of scales 
+represented.  Ideally, values should not exceed 2 with 2 being an uniform
+distribution in 2 dimensions.  In both ranges, values decrease with the 
+inclusion of Tier 1, 2, and 3 collections.  The reason for this is the 
+increased bias introduced by edge effects as the center of the domain becomes
+more densely populated and the exterior portions of the state (namely Northeast
+and southern Iowa) become comparitively less.
 
 <h3><a name="morisita">4. Morisita Index</a></h3>
 
