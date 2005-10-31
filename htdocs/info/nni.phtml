@@ -41,7 +41,7 @@ table {
 and time over which a measurement represents true conditions. This 
 document provides information and statistics regarding the spatial
 representativity of the Iowa Environmental Mesonet (IEM)
-following Dubois (2000).
+following methodology described by Dubois (2000).
 
 <ol>
  <li><a href="#introduction">Introduction</a></li>
@@ -73,7 +73,7 @@ to explore the spatial statistical benefits of the IEM partnership.
 
 <p>
 <table cellpadding="3" cellspacing="0" border="1">
-<caption>Table 1 provides an overview of the IEM networks used in this study.</caption>
+<caption>Table 1: An overview of the IEM networks used in this study.</caption>
 <thead>
 <tr><th>Abbreviation</th><th>Description</th><th>Map</th></tr>
 </thead>
@@ -105,7 +105,7 @@ They are maintained by the Iowa State University Extension.  The main issue with
 <p>
 
 <table cellpadding="3" cellspacing="0" border="1">
-<caption>Table 2 lists proposed combination of networks based on data quality 
+<caption>Table 2: Proposed combination of networks based on data quality 
 and reliability.</caption>
 <thead>
 <tr><th>Abbreviation</th><th>Description</th><th>Map</th></tr>
@@ -126,11 +126,11 @@ networks included.</td><td><img src="nni_images/tier3_locs.png"></tr>
 
 <h3><a name="nearest">2. Nearest Neighbors Index (NNI)</a></h3>
 
-<p>The NNI is a statistic comparing the mean minimum distances between sampling points to that which is expected by chance over some sampling area.
+<p>The NNI is a statistic comparing the mean minimum distances between sampling points to those that are expected by chance over some sampling area.
 
 <h4>Procedure:</h4>
 
-<p>Point shapefile coverages for each of the network groups was created.  These files were loaded into ESRI's ArcGIS 9.1 software.  An ArcGIS extension named
+<p>Point shapefile coverages for each of the network groups were created.  These files were loaded into ESRI's ArcGIS 9.1 software.  An ArcGIS extension named
  <a href="http://arcscripts.esri.com/details.asp?dbid=12227"><i>Nearest Neighbor Analysis / Event-Event Distances</i></a> written by Dr M. Sawada was used to compute the NNI.
 
 <h4>Data:</h4>
@@ -140,7 +140,7 @@ networks included.</td><td><img src="nni_images/tier3_locs.png"></tr>
 <tr><th>Network</th><th>Sites</th><th>NNI</th><th>Z</th><th>Avg Min Distance<br />[km]</th><th>Expected Min Distance<br />[km]</th><th>Area [km^2]</th></tr>
 </thead>
 <tr><th>ASOS</th><td>15</td>
-    <td style="background: #ff0;">1.58</td>
+    <td>1.58</td>
     <td>3.85</td>
     <td>71.9</td>
     <td>45.5</td>
@@ -182,7 +182,7 @@ networks included.</td><td><img src="nni_images/tier3_locs.png"></tr>
  <td>127,572</td>
 </tr>
 <tr><th>Tier 2</th><td>107</td>
- <td style="background: #ff0;">0.95</td>
+ <td>0.95</td>
  <td>0.90</td>
  <td>17.4</td>
  <td>18.3</td>
@@ -214,11 +214,12 @@ of each network and network group.
 <tr><td> &lt; 1</td><td>decreasing values less than 1 indicate more clustering</td></tr>
 </table>
 
-<p>Table 3 shows the results of the NNI computation.  The ASOS network has
- a relatively high value of 1.58 which indicates dispersion of the sampling
+<p>Table 3 shows the results of the NNI computation.  The NNI for the 
+ASOS network is
+ a relatively high value (1.58) which indicates dispersion of the sampling
 points.  This spread was one of the main reasons the IEM was created, since
-the baseline ASOS network is poorly representative at even a 50 km scale over the state.  The NNI value of 0.95 for the combination of the AWOS and RWIS networks to the ASOS network in Tier 2 shows the benefit of the IEM collaboration.  
-The Tier 2 value of 0.95 is very close to unity and indicates that the 
+the baseline ASOS network is poorly representative at even a 50 km scale over the state.  The NNI value of 0.95 for the combination of the AWOS and RWIS networks to the ASOS network (Tier 2) shows the benefit of the IEM collaboration.  
+The NNI for the Tier 2 network (0.95) is very close to unity and indicates that the 
 network has a nearly uniform distribution.  The addition on the SchoolNet and 
 ISUAG networks into the Tier 3 has no effect on the NNI.
 
@@ -285,15 +286,17 @@ the PostGIS database using the NAD83 UTM Zone15 North projection.
 
 <h4>Analysis</h4>
 
-<p>The issues pointed out in Doswell (1997) are evident in this analysis as 
-well.  The arbitrary selection of points used in the linear regression 
+<p>The issues pointed out in Doswell (1997) are evident in this analysis.
+  The arbitrary selection of points used in the linear regression 
 yield results that may not be accurate for the entire range of scales 
 represented.  Ideally, values should not exceed 2 with 2 being an uniform
 distribution in 2 dimensions.  In both ranges, values decrease with the 
 inclusion of Tier 1, 2, and 3 collections.  The reason for this is the 
 increased bias introduced by edge effects as the center of the domain becomes
 more densely populated and the exterior portions of the state (namely Northeast
-and Southern Iowa) become comparatively less.
+and Southern Iowa) become comparatively less. In practice the IEM uses 
+sampling nodes from surrounding states for many types of analysis, so the
+bias indicated from fractal analysis will be reduced.
 
 <h3><a name="morisita">4. Morisita Index</a></h3>
 
