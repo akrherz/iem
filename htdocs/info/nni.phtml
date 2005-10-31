@@ -18,6 +18,12 @@
   padding-left: 45px;
   color: #f00;
 }
+.equation img {
+  float: left;
+}
+.equation span {
+  font-size: 0.8em;
+} 
 table {
   caption-side: bottom;
 }
@@ -274,9 +280,17 @@ and southern Iowa) become comparitively less.
 <p>The Morisita index investigates how much clustering occurs when a sampling
 network is broken up into regular cells. If each cell has the same number of
 observation points inside of it, then the index should indicate uniformity in
-space at that scale.
+space at that scale. The equation is as follows:
 
-<p><img src="nni_images/morisita_eqn.png">
+<p>
+<div class="equation">
+<img src="nni_images/morisita_eqn.png">
+<span>where Q is the total number of cells, 
+n<sub>i</sub> is the number of samples in i<sup>th</sup> cell, and N is the
+total number of sampling points.</span> 
+</div>
+
+<br clear="all" />
 
 <h4>Procedure:</h4>
 
@@ -309,12 +323,32 @@ of how the clustering varies at different scales.
 <br />Figure 3: Morisita Index 
 </div>
 
+
+
 <h4>Analysis:</h4>
 
-<p>For the Morisita Index, values above 1 indicate clustering at that scale.
-  This chart clearly shows clustering of the Tier2 and Tier3 networks at small scales.  RWIS sites tend to be located in the same urban areas as airport sensors from the ASOS and AWOS network and this is reflected in clustering noted at 10-30 km cell sizes.
+<div class="table">
+<table cellspacing="0" cellpadding="3" border="1">
+<caption>Table 6: Morisita Index Interruptation
+<thead>
+<tr><th>Value</th><th>Conclusion</th></tr>
+</thead>
+<tr><td>0</td><td>No clustering.  All of the cells had 1 or fewer sampling points.</td></tr>
+<tr><td>approaches 1</td><td>for regular distributions, the index increases to 
+a value of 1 with increasing cell size.</td></tr>
 
-<p>It is interesting to note the clustering at 200-250 km within the SchoolNet.  This is a result of the KCCI SchoolNet being confined to Central Iowa.  When the index is computed, a large clustering occurs at that scale.
+<tr><td>nearly 1</td><td>if the distribution of samples is random but homogenous, the value will fluctuate around 1</td></tr>
+
+<tr><td> &gt; 1</td><td>clusters are present</td></tr>
+</table> 
+</div>
+
+<p>Figure 3 indicates the scales at which clustering (values larger than 1) 
+is occuring.  At the smallest scales of 10-40 km, clustering is evident in
+the Tier 2 and Tier 3 networks.  This makes practical sense considering 
+the co-placement of RWIS sites near cities with ASOS/AWOS sites in Tier 2 and
+the overall clustering of SchoolNet sites in Tier 3.
+
 
 <h3><a name="thiessen">5. Thiessen/Voronoi polygons</a></h3>
 
@@ -390,7 +424,7 @@ All spatial math was done in NAD83 UTM Zone15N.
 <h4>Analysis:</h4>
 
 <table cellspacing="0" cellpadding="3" border="1">
-<caption>Table 6: CR Interruptation</caption>
+<caption>Table 7: CR Interruptation</caption>
 <thead><tr><th>CR Value</th><th>Conclusion</th></tr></thead>
 <tr><td>CR &gt; 1</td><td>The measure is isolated.</td></tr>
 <tr><td>CR ~~ 1</td><td>Ideal case, measure is spatially uniform.</td></tr>
