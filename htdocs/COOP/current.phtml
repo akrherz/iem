@@ -3,7 +3,7 @@ include("../../config/settings.inc.php");
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_COOP'; 
   $winter = 1;
   $shef = isset($_GET['shef']) ? $_GET['shef'] : 0;
-  $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'sname';
+  $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
 ?>
 
 <?php  
@@ -86,6 +86,7 @@ $cols = Array("ts" => "Valid", "county" => "County",
 <?php $current_network = "COOP"; include("$rootpath/include/current_bar.inc.php"); ?>
 
 <form method="GET" action="current.phtml" name="stctrl">
+<input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
 <b>Show State:</b><select name="network">
   <option value="IA_COOP" <?php if ($network == "IA_COOP") echo "SELECTED"; ?>>Iowa
   <option value="IN_COOP" <?php if ($network == "IN_COOP") echo "SELECTED"; ?>>Indiana
