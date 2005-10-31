@@ -28,7 +28,8 @@ table {
 
 <h2>IEM Representivity Analysis (<i>Draft</i>)</h2>
 
-<h4>Dr Jeff Wolt and Daryl Herzmann</h4>
+<h4>Daryl Herzmann and Jeff Wolt
+<br />Department of Agronomy, Iowa State University</h4>
 
 <p>The scale of representivity of a sampling network determines the area 
 and time over which a measurement represents true conditions. This 
@@ -179,7 +180,7 @@ of each network and network group.
 <h4>Analysis:</h4>
 
 <table cellpadding=2 cellspacing=0 border=1>
-<caption>Table 4 details NNI interpretation</caption>
+<caption>Table 4: NNI interpretation</caption>
 <thead>
 <tr><th>NNI Value</th><th>Details</th></tr>
 </thead>
@@ -191,7 +192,18 @@ of each network and network group.
 <p>Table 3 shows the results of the NNI computation.  The ASOS network has
  a relatively high value of 1.58 which indicates dispersion of the sampling
 points.  This spread was one of the main reasons the IEM was created, since
-the baseline ASOS network is poorly representative at even a 50 km scale over the state.  The NNI value of 0.95 for the combination of the AWOS and RWIS networks to the ASOS network in Tier 2 shows the benefit of the IEM collaboration.  Tier 2's value of 0.95 is very close to unity and indicates that the network has a nearly uniform distribution.
+the baseline ASOS network is poorly representative at even a 50 km scale over the state.  The NNI value of 0.95 for the combination of the AWOS and RWIS networks to the ASOS network in Tier 2 shows the benefit of the IEM collaboration.  
+The Tier 2 value of 0.95 is very close to unity and indicates that the network has a nearly uniform distribution.  The addition on the SchoolNet and ISUAG 
+networks into the Tier 3 has no effect on the NNI.
+
+<p>The Z statistic is also presented in Table 3.  It gives an indication if
+the observed pattern is significantly different from random.  If the value is
+above 1.96 or below -1.96, we are 95% confident tat the distribution is not
+randomly distributed.  Values of 0.90 and 1.51 for Tier 2 and Tier 3, 
+respectively, would indicate some randomness to the distribution.  This may
+be a result of the combination of networks that are physically located in 
+different venues (ASOS/AWOS: airports, RWIS: rural roads, SchoolNet: Urban 
+cities, and ISUAG rural farms).  
 
 <h3><a name="fractal">3.  Fractal Dimension</a></h3>
 
@@ -298,17 +310,17 @@ of how the clustering varies at different scales.
 <h4>Analysis:</h4>
 
 <p>For the Morisita Index, values above 1 indicate clustering at that scale.
-  This chart clearly shows clustering of the Tier2 and Tier3 networks at small scales.  RWIS sites tend to be located in the same urban areas as airport sensors from the ASOS and AWOS network and is reflected in clustering noted at 10-30 km cell sizes.
+  This chart clearly shows clustering of the Tier2 and Tier3 networks at small scales.  RWIS sites tend to be located in the same urban areas as airport sensors from the ASOS and AWOS network and this is reflected in clustering noted at 10-30 km cell sizes.
 
 <p>It is interesting to note the clustering at 200-250 km within the SchoolNet.  This is a result of the KCCI SchoolNet being confined to Central Iowa.  When the index is computed, a large clustering occurs at that scale.
 
 <h3><a name="thiessen">5. Thiessen/Voronoi polygons</a></h3>
 
 <p>Thiessen polygons have been a traditional staple of the spatial statistian. Each polygon contains exactly one measurement point while having the property of
-all points within the polygon being closer to said measurement point than any 
+all points within the polygon being closer to this measurement point than any 
 other point.  Isolated measurements will therefore have larger polygons than
 clustered measurements.  Histograms of the area covered by these polygons 
-gives insight into the homogenity of the network.
+provide insight into network homogenity.
 
 <h4>Procedure:</h4>
 
@@ -347,11 +359,18 @@ if all of the sites were spread out equally.
 
 <h3><a name="represent">6. Coefficient of Representativity</a></h3>
 
+<p>The Coefficient of Representativity (CR) was proposed by Dubois (2000) as a
+measure to combine the Thiessen polygons and the distance to the nearest
+neighbor.  The CR is a product of two terms, the first is a simple ratio of 
+the area of the Thiessen polygon to the mean Thiessen polygon (total area 
+divided by number of sampling points); the second is a ratio between the 
+squared distance between nearest neighbors and the same mean Thiessen polygon.
+
 <h4>Procedure:</h4>
 
 <p>Thiessen polygons and network coverages were loaded into the IEM spatial
 database.  Python scripts were then written to analyze distances and compute
-other parameters needed for the coefficient of representativity (CR).  
+other parameters needed for the CR.  
 All spatial math was done in NAD83 UTM Zone15N.
 
 <h4>Data:</h4>
@@ -375,17 +394,38 @@ All spatial math was done in NAD83 UTM Zone15N.
 </table>
 
 <p>Tier 1 clearly shows the undersampled portions of the state, which are 
-NE Iowa and parts of SW Iowa.  By adding the RWIS network in tier 2, we appear 
-to only gain more clustering in limited areas and other areas suffer even more from sparse observation.  Tier 3 clearly shows the affect of adding 60+ SchoolNet sites in Central Iowa, since the clustering goes up and the sparse areas get even worse due to the increased number of stations.
+NE Iowa and parts of SW Iowa.  Adding the RWIS network in tier 2 increases
+localized clustering at the expense of other areas where observations become
+even more sparse.  Tier 3 clearly shows the affect of adding 60+ SchoolNet sites in Central Iowa, since the clustering goes up and the sparse areas get even worse due to the increased number of stations.
 
 <h3><a name="conclusions">7. Conclusions</a></h3>
 
-<p>A representativity analysis was performed following work done by Dubois.
-The statistical benefits of the IEM collaboration show up in almost every 
-variable, but there are certain caveats that appear as well.  
-The main caveat is that the addition of networks to the baseline ASOS and
-AWOS network often only add clustering to the network as a whole.
+<p>To evaluate the spatial representativity of the Iowa Environmental Mesonet
+(IEM),
+five spatial statistics were computed following the work done by Dubois (2000).
+While each statistic showed some positive aspects of the Mesonet collaboration,
+they clearly point out the need for caution before blindly combining all 
+available data into a high resolution product.
 
+<p>The CR figures most clearly illustrate the difficulties of adding stations
+from other networks and their localized impact on the overall analysis. Most of 
+Northeast and a portion of Southcentral Iowa are clearly undersampled as 
+shown by Figure 7 for Tier 1.  The easy solution would be to add stations
+in those areas to 'fill in the holes'.  Up until this study, 
+the IEM has focused on adding other networks to fill in these holes without 
+realizing the implications of additional clustering in areas like Central and 
+Eastern Iowa.  This "catch-22" can clearly be seen in Figure 8 for Tier 2 when
+the RWIS sites, which are often located near the same towns as ASOS/AWOS sites, 
+are added.  The addition of nearly 70 SchoolNet sites in Central Iowa only 
+futher exasberbates the situation with undersampled areas showing up over the
+rest of the state as shown in Figure 9.
+
+<p>Clearly, this study points out the need for a disciplined approach before
+adding networks in an ad-hoc manner to produce an analysis.  Perhaps 
+non-standard networks included in Tier 2 and Tier 3 can be subsampled to 
+selectively augment undersampled areas as shown in Figure 7.  There will 
+always be trade offs when working with combining network and data.  It is 
+important that one of these trade offs is not degredation in data quality.
 
 <h3>References</h3>
 
