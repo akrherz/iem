@@ -59,7 +59,7 @@ following Dubois (2000).
 been linked to produce a more precise analysis of weather and 
 climatic variables in the state than can be achieved with any single network.
 To produce higher resolution products for
-the entire state, point observations are often grided onto a regular grid
+the entire state, point observations are often gridded onto a regular grid
 using well known algorithms like nearest neighbor or a weighting function.  
 This 
 process is not arbitrary due to the numerous tunable parameters to most any
@@ -68,8 +68,8 @@ the Iowa Environmental Mesonet to determine the appropriate scales at which we c
 phenomena.
 
 <p>Each observing network in the IEM has differenting sensors, reporting times, siting, 
-maintainance schedules, and quality control. Because of these differences, we
-first analyze the component networks in order to evaluate their representativity.  Similiar networks in data quality are then aggregated
+maintenance schedules, and quality control. Because of these differences, we
+first analyze the component networks in order to evaluate their representativity.  Similar networks in data quality are then aggregated
 to explore the spatial statistical benefits of the IEM partnership.
 
 <p>
@@ -81,13 +81,14 @@ to explore the spatial statistical benefits of the IEM partnership.
 <tr><th>ASOS</th><td>The <a href="<?php echo $webroot; ?>/ASOS/">Iowa Automated Surface Observing System</a> sites are located at primary airports and are maintained by the National Weather Service.  This network is rigorously checked and maintained.  For Iowa, a limitation of the ASOS network is the lack of sites 
 located in Westcentral and Southwest Iowa.</td><td><img src="nni_images/asos_locs.png"></tr>
 
-<tr><th>AWOS</th><td>The <a href="<?php echo $webroot; ?>/AWOS/">Iowa Automated Weather Observing System</a> sites are located at secondary airports and are maintained by the Iowa State Department of Transportation via 3rd party contractor.  Data quality should be comparable with the ASOS network, but a number of factors produce biases when compared with the ASOS network.  The main issues include siting, maintainance schedules, network communication, and instrumentation.  Most of the big differences between the ASOS and AWOS network show up in the temperature and dew point measurements. </td><td><img src="nni_images/awos_locs.png"></tr>
+<tr><th>AWOS</th><td>The <a href="<?php echo $webroot; ?>/AWOS/">Iowa Automated Weather Observing System</a> sites are located at secondary airports and are maintained by the Iowa State Department of Transportation via 3rd party contractor.  Data quality should be comparable with the ASOS network, but a number of factors produce biases when compared with the ASOS network.  The main issues include siting, maintenance schedules, network communication, and instrumentation.  Most of the big differences between the ASOS and AWOS network show up in the temperature and dew point measurements. </td><td><img src="nni_images/awos_locs.png"></tr>
 
 <tr><th>RWIS</th><td>The <a href="<?php echo $webroot; ?>/RWIS/">Iowa Roadway Weather Information System</a> sites are located along side interstates and highways.  They are maintained by the Iowa Department of Transportation via a 3rd party contractor.  Atmospheric data from this network is of lesser quality than the ASOS or AWOS networks.  The primary purpose of the RWIS network is for automated observation of winter weather. </td><td><img src="nni_images/rwis_locs.png"></td></tr>
 
 <tr><th>SchoolNet</th><td>The IEM collects data from a number of <a href="<?php echo $webroot; ?>/schoolnet/">SchoolNets</a>.  For the purposes of this document, we only consider the KCCI-TV SchoolNet.  Data quality is close to that of the RWIS network, but siting issues make measurements like wind and precipitation problematic. </td><td><img src="nni_images/snet_locs.png"></td></tr>
 
-<tr><th>ISUAG</th><td>The <a href="<?php echo $webroot; ?>/agclimate/">ISU Ag Climate</a> sites primarily provide soil temperature and solar radiation readings.They are maintained by the Iowa State University Extension.  The main issue with this network is the timing of observations received.  Each station is called daily to download its observation record from the previous day. </td><td><img src="nni_images/isuag_locs.png"></td></tr>
+<tr><th>ISUAG</th><td>The <a href="<?php echo $webroot; ?>/agclimate/">ISU Ag Climate</a> sites primarily provide soil temperature and solar radiation readings.
+They are maintained by the Iowa State University Extension.  The main issue with this network is the timing of observations received.  Each station is called daily to download its observation record from the previous day. </td><td><img src="nni_images/isuag_locs.png"></td></tr>
 </table>
 
 <p>
@@ -180,7 +181,7 @@ and reliability.</caption>
 
 <p>Table 3 presents the results of the NNI computation.  Also presented are
 the Z statistic, average minimum distance between two sites, expected minimum distance
-based on a homogenous in space distribution of sites, and areal coverage
+based on a homogeneous in space distribution of sites, and areal coverage
 of each network and network group.
 
 <h4>Analysis:</h4>
@@ -273,7 +274,7 @@ distribution in 2 dimensions.  In both ranges, values decrease with the
 inclusion of Tier 1, 2, and 3 collections.  The reason for this is the 
 increased bias introduced by edge effects as the center of the domain becomes
 more densely populated and the exterior portions of the state (namely Northeast
-and southern Iowa) become comparitively less.
+and southern Iowa) become comparatively less.
 
 <h3><a name="morisita">4. Morisita Index</a></h3>
 
@@ -296,10 +297,10 @@ total number of sampling points.</span>
 
 <p>A python script was written to compute this value.  The spatial computations were
 done in NAD83 UTM Zone 15N, which is a common projection for Iowa.  Figures 2 illustrates the Morisita index.  Within an area of interest there is a distribution 
-number of observation points (leftside graphic).  In the case of the IEM, we
+number of observation points (left side graphic).  In the case of the IEM, we
 are concerned with the nodes within a network distributed across Iowa.  
 The area of interest is divided up into equal sized cells; the number of cells 
-with sites in them (rightside graphic) represents the Morisita index.
+with sites in them (right side graphic) represents the Morisita index.
 
 <div class="figure">
 <table cellpadding="3" cellspacing="0" border="1">
@@ -313,7 +314,7 @@ with sites in them (rightside graphic) represents the Morisita index.
 </div>
 
 <p>In this example, the Morisita index is around 13.  This is a very high
-number and indicates clustering.  This procedure is itterated over
+number and indicates clustering.  This procedure is iterated over
 a range of grid cell sizes to arrive at a better understanding 
 of how the clustering varies at different scales.
 
@@ -337,14 +338,15 @@ of how the clustering varies at different scales.
 <tr><td>approaches 1</td><td>for regular distributions, the index increases to 
 a value of 1 with increasing cell size.</td></tr>
 
-<tr><td>nearly 1</td><td>if the distribution of samples is random but homogenous, the value will fluctuate around 1</td></tr>
+<tr><td>nearly 1</td><td>if the distribution of samples is random but 
+homogeneous, the value will fluctuate around 1</td></tr>
 
 <tr><td> &gt; 1</td><td>clusters are present</td></tr>
 </table> 
 </div>
 
 <p>Figure 3 indicates the scales at which clustering (values larger than 1) 
-is occuring.  At the smallest scales of 10-40 km, clustering is evident in
+is ocurring.  At the smallest scales of 10-40 km, clustering is evident in
 the Tier 2 and Tier 3 networks.  This makes practical sense considering 
 the co-placement of RWIS sites near cities with ASOS/AWOS sites in Tier 2 and
 the overall clustering of SchoolNet sites in Tier 3.
@@ -352,11 +354,11 @@ the overall clustering of SchoolNet sites in Tier 3.
 
 <h3><a name="thiessen">5. Thiessen/Voronoi polygons</a></h3>
 
-<p>Thiessen polygons have been a traditional staple of the spatial statistian. Each polygon contains exactly one measurement point while having the property of
+<p>Thiessen polygons have been a traditional staple of the spatial statistician. Each polygon contains exactly one measurement point while having the property of
 all points within the polygon being closer to this measurement point than any 
 other point.  Isolated measurements will therefore have larger polygons than
 clustered measurements.  Histograms of the area covered by these polygons 
-provide insight into network homogenity.
+provide insight into network homogeneity.
 
 <h4>Procedure:</h4>
 
@@ -377,7 +379,7 @@ provide insight into network homogenity.
 <h4>Analysis:</h4>
 
 <p>Thiessen polygons provide a quick synopsis of how large of an area is 
-represented by a single point.  Areas in a network that are undersampled can
+represented by a single point.  Areas in a network that are under sampled can
 quickly be seen.  Figure 4 shows the interesting contrast between the more
 densely sampled areas of Central Iowa and along the I-380 corridor in Eastern
 Iowa.  The largest polygons can be seen in Northeast and Southern Iowa.  The 
@@ -397,12 +399,17 @@ if all of the sites were spread out equally.
 
 <p>The Coefficient of Representativity (CR) was proposed by Dubois (2000) as a
 measure to combine the Thiessen polygons and the distance to the nearest
-neighbor.  The CR is a product of two terms, the first is a simple ratio of 
-the area of the Thiessen polygon to the mean Thiessen polygon (total area 
-divided by number of sampling points); the second is a ratio between the 
-squared distance between nearest neighbors and the same mean Thiessen polygon.
+neighbor.  
 
-<p><img src="nni_images/cr_eqn.png">
+<p>
+<div class="equation">
+<img src="nni_images/cr_eqn.png">
+<span>The CR is a product of two terms, the first (A) is a simple ratio of 
+the area of the Thiessen polygon (S<sub>Th</sub>) to the mean 
+Thiessen polygon (S<sub>m</sub>): total area divided by number of 
+sampling points); the second (B) is a ratio between the 
+squared distance between nearest neighbors and the same mean Thiessen polygon.</span>
+</div>
 
 <h4>Procedure:</h4>
 
@@ -431,7 +438,7 @@ All spatial math was done in NAD83 UTM Zone15N.
 <tr><td>CR &lt; 1</td><td>The measure is clustered</td></tr>
 </table>
 
-<p>Tier 1 clearly shows the undersampled portions of the state, which are 
+<p>Tier 1 clearly shows the under sampled portions of the state, which are 
 NE Iowa and parts of SW Iowa.  Adding the RWIS network in tier 2 increases
 localized clustering at the expense of other areas where observations become
 even more sparse.  Tier 3 clearly shows the affect of adding 60+ SchoolNet sites in Central Iowa, since the clustering goes up and the sparse areas get even worse due to the increased number of stations.
@@ -447,7 +454,7 @@ available data into a high resolution product.
 
 <p>The CR figures most clearly illustrate the difficulties of adding stations
 from other networks and their localized impact on the overall analysis. Most of 
-Northeast and a portion of Southcentral Iowa are clearly undersampled as 
+Northeast and a portion of Southcentral Iowa are clearly under sampled as 
 shown by Figure 7 for Tier 1.  The easy solution would be to add stations
 in those areas to 'fill in the holes'.  Up until this study, 
 the IEM has focused on adding other networks to fill in these holes without 
@@ -455,7 +462,7 @@ realizing the implications of additional clustering in areas like Central and
 Eastern Iowa.  This "catch-22" can clearly be seen in Figure 8 for Tier 2 when
 the RWIS sites, which are often located near the same towns as ASOS/AWOS sites, 
 are added.  The addition of nearly 70 SchoolNet sites in Central Iowa only 
-futher exasberbates the situation with undersampled areas showing up over the
+further exasperates the situation with under sampled areas showing up over the
 rest of the state as shown in Figure 9.
 
 <p>Clearly, this study points out the need for a disciplined approach before
@@ -463,7 +470,7 @@ adding networks in an ad-hoc manner to produce an analysis.  Perhaps
 non-standard networks included in Tier 2 and Tier 3 can be subsampled to 
 selectively augment undersampled areas as shown in Figure 7.  There will 
 always be trade offs when working with combining network and data.  It is 
-important that one of these trade offs is not degredation in data quality.
+important that one of these trade offs is not degradation in data quality.
 
 <h3>References</h3>
 
