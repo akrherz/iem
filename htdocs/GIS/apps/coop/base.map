@@ -57,7 +57,7 @@ LAYER
   NAME counties
   STATUS ON
   TYPE POLYGON
-  DATA shape/26915/iowa/counties.shp
+  DATA shape/26915/iowa/iacounties.shp
   PROJECTION
     "init=epsg:26915"
   END
