@@ -1,9 +1,17 @@
 <?php 
+include("../../../config/settings.inc.php");
+
+$station = isset($_GET["station"]) ? $_GET["station"] : "";
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
+$day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+
+
 	$TITLE = "IEM | 1 Minute Time Series";
-include("/mesonet/php/include/header.php"); 
+include("$rootpath/include/header.php"); 
 ?>
-<?php include("../../include/imagemaps.php"); ?>
-<?php include("../../include/forms.php"); ?>
+<?php include("$rootpath/include/imagemaps.php"); ?>
+<?php include("$rootpath/include/forms.php"); ?>
 
 <div class="text">
 <b>Nav:</b> <a href="/AWOS/">AWOS Network</a> <b> > </b>
@@ -20,14 +28,6 @@ but are available for some times earlier in the archive.<p>
   <form method="GET" action="1station_1min.php">
   <?php
 
-    if (strlen($month) == 0 ){
-	$month = date("m");
-    }
-    if (strlen($day) == 0 ){
-        $day = date("d");
-    }
-
-  //  echo " <a href=\"1station_1min.php\">Select Visually</a><br> \n";
     echo "Make plot selections: <br>";
     echo awosSelect($station); 
  
@@ -110,4 +110,4 @@ The blue dots represent wind direction and are shown every 10 minutes.</p>
 
 <br><br>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

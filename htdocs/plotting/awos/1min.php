@@ -1,14 +1,18 @@
 <?php
 // 1 minute schoolnet data plotter
 // Cool.....
+include("../../../config/settings.inc.php");
 
-include ("../../include/awosLoc.php");
+include ("$rootpath/include/awosLoc.php");
+include("$rootpath/include/database.inc.php");
 
-if (strlen($year) == 4 && strlen($month) > 0 && strlen(day) > 0 ){
+$station = isset($_GET["station"]) ? $_GET["station"] : "ADU";
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
+$day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+
+
   $myTime = strtotime($year."-".$month."-".$day);
-} else {
-  $myTime = strtotime(date("Y-m-d"));
-}
 
 
 $titleDate = strftime("%b %d, %Y", $myTime);
@@ -16,7 +20,7 @@ $tableName = strftime("t%Y_%m", $myTime);
 $sqlDate = strftime("%Y-%m-%d", $myTime);
 
 /** Time to get data from database **/
-$connection = pg_connect("db1.mesonet.agron.iastate.edu","5432","awos");
+$connection = iemdb("awos");
 $query = "SELECT to_char(valid, 'HH24:MI') as tvalid, tmpf, dwpf from 
   ". $tableName ." WHERE station = '". $station ."' and 
   date(valid) = '". $sqlDate ."' ORDER by tvalid";
@@ -120,8 +124,8 @@ if ($dwpf[0] == ""){
 
 
 
-include ("../dev15/jpgraph.php");
-include ("../dev15/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -133,7 +137,6 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetTextTickInterval(60);
 
 $graph->xaxis->SetLabelAngle(90);
-$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->yscale->SetGrace(10);
 $graph->title->Set($Wcities[$station]['city'] ." Time Series");
 $graph->subtitle->Set($titleDate );
@@ -141,7 +144,6 @@ $graph->subtitle->Set($titleDate );
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01,0.07);
 
-$graph->yaxis->scale->ticks->SetPrecision(0);
 
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,16);
