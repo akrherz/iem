@@ -144,7 +144,6 @@ function awosSelect($selected){
 global $rootpath;
 include("$rootpath/include/awosLoc.php");
   echo "<select name=\"station\">\n";
-  print_r ($Wcities);
   for ($i = 0; $i < count($Wcities); $i++) {
     $city = current($Wcities);
     echo "<option value=\"". $city["id"] ."\"";
