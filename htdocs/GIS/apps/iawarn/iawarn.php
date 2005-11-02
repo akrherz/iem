@@ -168,7 +168,8 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
   $t = $row["phenomena"];
   if (isset($afos[$t])) $t = $afos[$row["phenomena"]] ;
 
-  echo "<tr> <td><a href=\"cat.php?id=". $row["oid"] ."\">$t</a></td> 
+  $caturl = "$rootpath/GIS/apps/rview/warnings_cat.phtml?year=". strftime("%Y", $issue) ."&wfo=". $row["wfo"] ."&phenomena=". $row["phenomena"] ."&eventid=". $row["eventid"] ;
+  echo "<tr> <td><a href=\"". $caturl ."\">$t</a></td> 
     <td>". $row["cname"] ."</td> 
     <td>". $row["sname"] ."</td>
     <td>". strftime("%I:%M %p", $issue) ."</td>
