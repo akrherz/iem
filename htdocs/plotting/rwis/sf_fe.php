@@ -28,7 +28,7 @@ $s3 = isset($_GET["s3"]) ? $_GET["s3"]: "";
 ?>
 <?php include("$rootpath/include/imagemaps.php"); ?>
 <?php include("$rootpath/include/forms.php"); ?>
-<b>Nav:</b> <a href="/RWIS/">RWIS</a> <b> > </b>
+<b>Nav:</b> <a href="<?php echo $rooturl; ?>/RWIS/">RWIS</a> <b> > </b>
 Pavement Temperature Time Series
 
 <br><br>

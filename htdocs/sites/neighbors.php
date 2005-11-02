@@ -19,7 +19,7 @@ include("setup.php");
    }
 
    function neighbors($stations,$lat,$lon){
-     $con = pg_connect("10.10.10.40", 5432, "mesosite");
+     $con = iemdb("mesosite");
      $sqlStr = "SELECT * from stations WHERE point_inside_circle(geom, ".$lon.", ".$lat.", 0.25) and id != '$stations'";
      $result = pg_exec($con, $sqlStr);
      pg_close($con);

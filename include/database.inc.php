@@ -13,6 +13,7 @@ $_DATABASES = Array(
  'coop' => "dbname=coop host=$iem20 user=nobody",
  'awos' => "dbname=awos host=$iem20 user=nobody",
  'rwis' => "dbname=rwis host=$iem20 user=nobody",
+ 'rwis2' => "dbname=rwis2 host=$iem20 user=nobody",
  'wepp' => "dbname=wepp host=$iem20 user=akrherz",
  'snet' => "dbname=snet host=$iem20 user=nobody",
  'mesosite' => "dbname=mesosite host=$iem20 user=nobody",
