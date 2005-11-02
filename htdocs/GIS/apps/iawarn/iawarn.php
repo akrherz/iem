@@ -115,16 +115,6 @@ if (strlen($loop) > 0){
 
  echo "<br><b>Valid at:</b> ". $radTS;
 
-/**
- echo "<form method=\"GET\" action=\"cat.php\">\n";
- echo "<input type=\"hidden\" value=\"".$site."\" name=\"site\">\n";
- echo "<input type=\"hidden\" value=\"".($Srect->minx)."\" name=\"lon_ll\">\n";
- echo "<input type=\"hidden\" value=\"".($Srect->miny)."\" name=\"lat_ll\">\n";
- echo "<input type=\"hidden\" value=\"".($Srect->maxx)."\" name=\"lon_ur\">\n";
- echo "<input type=\"hidden\" value=\"".($Srect->maxy)."\" name=\"lat_ur\">\n";
- echo "<input border=2 name=\"img\" type=\"image\" src=\"". $url ."\">\n";
- echo "</form>\n";
-*/
 echo "<br><center><img src=\"". $url ."\" border=\"1\" width=\"450\"></center>\n";
 
 }
