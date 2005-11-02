@@ -1,5 +1,8 @@
 <?php
-$connection = pg_connect("10.10.10.20","5432","scan");
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+
+$connection = iemdb("scan");
  $station = isset($_GET["station"]) ? $_GET["station"] : "2031";
  $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 3*86400);
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 3*86400);
@@ -43,9 +46,9 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 
 pg_close($connection);
 
-include ("../../include/scanLoc.php");
-include ("../jpgraph/jpgraph.php");
-include ("../jpgraph/jpgraph_line.php");
+include ("$rootpath/include/scanLoc.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(660,450,"example1");
