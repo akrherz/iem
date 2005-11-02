@@ -1,4 +1,6 @@
 <?php
+include("../../../config/settings.inc.php");
+
  $station = isset($_GET["station"]) ? $_GET["station"] : "2031";
  $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 3*86400);
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 3*86400);
@@ -8,14 +10,14 @@
 $u = Array("radn5temps.php", "radn5temps2.php", "smv.php", "winds.php", "precip.php");
 $myu = $u[intval($plot)];
 
- include("../../include/forms.php");
+ include("$rootpath/include/forms.php");
  $ploturl = "$myu?station=$station&year=$year&month=$month&day=$day";
 ?>
 
 <?php $TITLE = "IEM | SCAN Plotting";
-include("/mesonet/php/include/header.php"); ?>
+include("$rootpath/include/header.php"); ?>
 <div class="text">
-<b>Nav:</b> <a href="/scan/">SCAN</a> <b> > </b> Current/Historical Data Traces
+<b>Nav:</b> <a href="<?php echo $rooturl; ?>/scan/">SCAN</a> <b> > </b> Current/Historical Data Traces
 
 <form method="GET" action="index.phtml" name="control">
 <table>
@@ -53,4 +55,4 @@ include("/mesonet/php/include/header.php"); ?>
 <img src="<?php echo $ploturl; ?>">
 </div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
