@@ -141,7 +141,7 @@ while (list ($line_num, $line) = each ($fcontents)) {
 
 $connection = iemdb("postgis");
 
-$query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire, 
+$query = "SELECT w.eventid, w.wfo, w.phenomena, w.oid, u.name as cname, w.expire as expire, 
   w.issue as issue, s.state_name as sname from warnings w, nws_ugc u, states s
   WHERE w.expire > CURRENT_TIMESTAMP 
    and w.gtype = 'C' and u.ugc = w.ugc 
