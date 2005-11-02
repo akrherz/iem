@@ -1,21 +1,26 @@
 <?php
 // Cool.....
 
+include("../../../config/settings.inc.php");
 
-include ("../../include/awosLoc.php");
+include ("$rootpath/include/awosLoc.php");
+include("$rootpath/include/database.inc.php");
 
-if (strlen($year) == 4 && strlen($month) > 0 && strlen(day) > 0 ){
+$station = isset($_GET["station"]) ? $_GET["station"] : "ADU";
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
+$day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+
   $myTime = strtotime($year."-".$month."-".$day);
-} else {
-  $myTime = strtotime( date("Y-m-d") );
-}
+
+
 
 $titleDate = strftime("%b %d, %Y", $myTime);
 $tableName = strftime("t%Y_%m", $myTime);
 $sqlDate = strftime("%Y-%m-%d", $myTime);
 
 
-$connection = pg_connect("db1.mesonet.agron.iastate.edu","5432","awos");
+$connection = iemdb("awos");
 $query = "SELECT to_char(valid, 'HH24:MI') as tvalid, p01i, alti from 
   ". $tableName ." WHERE station = '". $station ."' and 
   date(valid) = '". $sqlDate ."' ORDER by tvalid";
@@ -101,8 +106,8 @@ for ($j=0; $j<24; $j++){
   $xlabel[$j*60] = $xpre[$j];
 }
 
-include ("../dev17/jpgraph.php");
-include ("../dev17/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -114,7 +119,6 @@ $graph->xaxis->SetTickLabels($xlabel);
 //$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
-//$graph->yaxis->scale->ticks->SetPrecision(0.01);
 $graph->title->Set($Wcities[$station]['city'] ." Time Series");
 $graph->subtitle->Set($titleDate );
 
@@ -123,8 +127,6 @@ $graph->legend->Pos(0.01,0.07);
 
 //$graph->yaxis->scale->ticks->Set(90,15);
 $graph->y2axis->scale->ticks->Set(1,0.25);
-$graph->yaxis->scale->ticks->SetPrecision(2);
-$graph->y2axis->scale->ticks->SetPrecision(1);
 
 $graph->yaxis->SetColor("black");
 $graph->yscale->SetGrace(10);
