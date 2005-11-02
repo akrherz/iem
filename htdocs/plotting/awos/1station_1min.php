@@ -14,11 +14,11 @@ include("$rootpath/include/header.php");
 <?php include("$rootpath/include/forms.php"); ?>
 
 <div class="text">
-<b>Nav:</b> <a href="/AWOS/">AWOS Network</a> <b> > </b>
+<b>Nav:</b> <a href="<?php echo $rooturl; ?>/AWOS/">AWOS Network</a> <b> > </b>
 One minute time series
 
 <p><b>Note:</b>The archive currently contains data from 1 Jan 1995 
-till 31 August 2004.  Fort Dodge and Clinton were converted to ~ASOS, 
+till the end of the previous month.  Fort Dodge and Clinton were converted to ~ASOS, 
 but are available for some times earlier in the archive.<p>
 
 <table width="100%">
