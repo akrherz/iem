@@ -1,26 +1,33 @@
 <?php
-  $station = $_GET['station'];
-  if (strlen($mode) == 0) $mode = "rt";
-  if ($ostation != $station ){
-    $s0 = "on";
-    $s1 = "on";
-    $s2 = "on";
-    $s3 = "on";
-    $tmpf = "on";
-    $dwpf = "on";
-  }
+ include("../../../config/settings.inc.php");
+ include("$rootpath/include/database.inc.php");
 
- include("/mesonet/php/lib/selectWidget.php");
- $sw = new selectWidget("/plotting/rwis/sf_fe.php", "/plotting/rwis/sf_fe.php?", "IA_RWIS");
+  $ostation = isset($_GET["ostation"]) ? $_GET["ostation"] : "";
+  $station = isset($_GET['station']) ? $_GET["station"] : "";
+  $mode = isset($_GET["mode"]) ? $_GET["mode"]: "rt";
+$syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
+$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: date("m");
+$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d");
+$days = isset($_GET["days"]) ? $_GET["days"]: 2;
+$subc = isset($_GET["subc"]) ? $_GET["subc"] : "";
+$dwpf = isset($_GET["dwpf"]) ? $_GET["dwpf"] : "";
+$tmpf = isset($_GET["tmpf"]) ? $_GET["tmpf"] : "";
+$s0 = isset($_GET["s0"]) ? $_GET["s0"]: "";
+$s1 = isset($_GET["s1"]) ? $_GET["s1"]: "";
+$s2 = isset($_GET["s2"]) ? $_GET["s2"]: "";
+$s3 = isset($_GET["s3"]) ? $_GET["s3"]: "";
+
+ include("$rootpath/include/selectWidget.php");
+ $sw = new selectWidget("$rooturl/plotting/rwis/sf_fe.php", "$rooturl/plotting/rwis/sf_fe.php?", "IA_RWIS");
  $swf = Array("network" => "IA_RWIS");
  $sw->setformvars($swf);
  $sw->logic($_GET);
  $swinterface = $sw->printInterface();
 
-	include("/mesonet/php/include/header.php"); 
+	include("$rootpath/include/header.php"); 
 ?>
-<?php include("../../include/imagemaps.php"); ?>
-<?php include("../../include/forms.php"); ?>
+<?php include("$rootpath/include/imagemaps.php"); ?>
+<?php include("$rootpath/include/forms.php"); ?>
 <b>Nav:</b> <a href="/RWIS/">RWIS</a> <b> > </b>
 Pavement Temperature Time Series
 
@@ -57,7 +64,7 @@ Select from list: <?php echo rwisSelect($station); ?> or
 <h2 class="heads">Modify Plot:</h2>
 <?php
 
-  $c0 = pg_connect('localhost', 5432, 'rwis');
+  $c0 = iemdb('rwis2');
   $q0 = "SELECT * from sensors WHERE station = '". $station ."' ";
   $r0 = pg_exec($c0, $q0);
 
@@ -73,12 +80,12 @@ Select from list: <?php echo rwisSelect($station); ?> or
   echo "<table width=\"100%\">
       <tr><td><b>Restrict Plot:</b>
       <br><input type=\"checkbox\" name=\"limit\" value=\"yes\" ";
-  if (isset($limit)) echo "CHECKED";
+  if (isset($_GET["limit"])) echo "CHECKED";
   echo ">Temps between 25-35
     </td><td><b>Pavement Sensors:</b><br>\n";
   if (strlen($ns0) > 0) {
     echo "<input type=\"checkbox\" name=\"s0\" ";
-    if (isset($s0)) {
+    if (isset($_GET["s0"])) {
       echo "CHECKED";
       $cgiStr .= "&s0=yes";
       }
@@ -86,7 +93,7 @@ Select from list: <?php echo rwisSelect($station); ?> or
   }
   if (strlen($ns1) > 0) {
     echo "<br><input type=\"checkbox\" name=\"s1\" ";
-    if (isset($s1)) {
+    if (isset($_GET["s1"])) {
       echo "CHECKED";
       $cgiStr .= "&s1=yes";
     }
@@ -94,7 +101,7 @@ Select from list: <?php echo rwisSelect($station); ?> or
   }
   if (strlen($ns2) > 0) {
     echo "<br><input type=\"checkbox\" name=\"s2\" ";
-    if (isset($s2)) {
+    if (isset($_GET["s2"])) {
       echo "CHECKED";
       $cgiStr .= "&s2=yes";
     }
@@ -102,7 +109,7 @@ Select from list: <?php echo rwisSelect($station); ?> or
   }
   if (strlen($ns3) > 0) {
     echo "<br><input type=\"checkbox\" name=\"s3\" ";
-    if (isset($s3)) {
+    if (isset($_GET["s3"])) {
       echo "CHECKED";
       $cgiStr .= "&s3=yes";
     }
@@ -110,26 +117,26 @@ Select from list: <?php echo rwisSelect($station); ?> or
   }
   echo "</td><td><b>Other Sensors:</b><br>\n";
   echo "<input type=\"checkbox\" name=\"tmpf\" ";
-  if (isset($tmpf)) {
+  if (isset($_GET["tmpf"])) {
      echo "CHECKED";
       $cgiStr .= "&tmpf=yes";
     }
   echo ">Air Temperature\n";
   echo "<br><input type=\"checkbox\" name=\"dwpf\" ";
-  if (isset($dwpf)) {
+  if (isset($_GET["dwpf"])) {
      echo "CHECKED";
       $cgiStr .= "&dwpf=yes";
     }
   echo ">Dew Point\n";
   echo "<br><input type=\"checkbox\" name=\"subc\" ";
-  if (isset($subc)) {
+  if (isset($_GET["subc"])) {
      echo "CHECKED";
       $cgiStr .= "&subc=yes";
     }
   echo ">Sub Surface\n";
   echo "</td></tr></table>";
 
-  if (isset($limit))  $cgiStr .= "&limit=yes";
+  if (isset($_GET["limit"]))  $cgiStr .= "&limit=yes";
 
   ?>
   <input type="submit" value="Generate Plot">
@@ -154,4 +161,4 @@ Select from list: <?php echo rwisSelect($station); ?> or
 
 <br><br>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

@@ -1,23 +1,25 @@
 <?php
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 // 19 Nov 2002:  Darren requested a bigger image!
 // 27 Nov 2002:  Get rid of status indicators
 //  3 Jul 2003	We are going to support historical requests as well here
 //		lets not support reg_globals anymore
 
 /** We need these vars to make this work */
-$subc = $_GET["subc"];
-$dwpf = $_GET["dwpf"];
-$tmpf = $_GET["tmpf"];
-$s0 = $_GET["s0"];
-$s1 = $_GET["s1"];
-$s2 = $_GET["s2"];
-$s3 = $_GET["s3"];
-$station = $_GET["station"];
-$sday = $_GET["sday"];
-$smonth = $_GET["smonth"];
-$syear = $_GET["syear"];
-$days = $_GET["days"];
-$mode = $_GET["mode"];
+$subc = isset($_GET["subc"]) ? $_GET["subc"] : "";
+$dwpf = isset($_GET["dwpf"]) ? $_GET["dwpf"] : "";
+$tmpf = isset($_GET["tmpf"]) ? $_GET["tmpf"] : "";
+$s0 = isset($_GET["s0"]) ? $_GET["s0"]: "";
+$s1 = isset($_GET["s1"]) ? $_GET["s1"]: "";
+$s2 = isset($_GET["s2"]) ? $_GET["s2"]: "";
+$s3 = isset($_GET["s3"]) ? $_GET["s3"]: "";
+$syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
+$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: date("m");
+$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d");
+$days = isset($_GET["days"]) ? $_GET["days"]: 2;
+  $station = isset($_GET['station']) ? $_GET["station"] : "";
+  $mode = isset($_GET["mode"]) ? $_GET["mode"]: "rt";
 
 /** Lets assemble a time period if this plot is historical */
 if (strlen($days) > 0) {
@@ -35,14 +37,14 @@ $tableName = "rwis_sf";
 $dbName = "iowa";
 //$station = 'RAME';
 
-$c1 = pg_connect("10.10.10.40","5432", 'rwis');
+$c1 = iemdb('rwis2');
 
 $val = "> -50";
-if (isset($limit)) $val = "between 25 and 35";
+if (isset($_GET["limit"])) $val = "between 25 and 35";
 
 if ($mode == "rt"){
  //$c0 = pg_connect("10.10.10.10","5432", 'iowa');
- $c0 = pg_connect("10.10.10.30","9999", 'iem');
+ $c0 = iemdb('access');
  $q0 = "SELECT
     valid, gvalid, max(tmpf) as tmpf,
     max(dwpf) as dwpf, max(tcs0) as tcs0, max(tcs1) as tcs1,
@@ -74,7 +76,7 @@ if ($mode == "rt"){
  GROUP by valid, gvalid ORDER by gvalid ASC";
  $minInterval = 20;
 } else {
- $c0 = pg_connect("10.10.10.20","5432", 'rwis');
+ $c0 = iemdb('rwis');
  $tableName = "t". $syear;
  $q0 = "SELECT
     valid, gvalid, max(tmpf) as tmpf, 
@@ -192,10 +194,10 @@ pg_close($c0);
 pg_close($c1);
 
 
-include ("/mesonet/php/include/jpgraph/jpgraph.php");
-include ("/mesonet/php/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
-include ("../../include/rwisLoc.php");
+include ("$rootpath/include/rwisLoc.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(650,550,"example1");
@@ -283,17 +285,21 @@ $tx2 = new Text("Time series showing temperatures
 $tx2->Pos(0.01,0.11, 'left', 'top');
 $tx2->SetFont(FF_FONT1, FS_NORMAL, 10);
 
-include ("../../include/mlib.php");
-include ("../../include/currentSFOb.php");
+include ("$rootpath/include/mlib.php");
+/*
+include ("$rootpath/include/currentSFOb.php");
 $mySOb = currentSFOb($station);
-include ("../../include/currentOb.php");
+include ("$rootpath/include/currentOb.php");
 $myOb = currentOb($station);
+*/
+$mySOb = Array();
 
 
 if ($mode == "hist"){
  $ptext = "Historical Plot for dates:\n";
  $tx3 = new Text($ptext . $plotTitle);
 } else {
+/*
  $tx3 = new Text("Last Ob @ ". strftime("%m/%d %I:%M %p", $mySOb['ts']) ." 
   Sensor 0: ". $mySOb['tmpf0'] ." F 
   Sensor 1: ". $mySOb['tmpf1'] ." F 
@@ -303,31 +309,31 @@ if ($mode == "hist"){
  Dew Point: ". $myOb['dwpf'] ." F
  SubS Temp: ". $mySOb['subt'] ." F
 ");
-
+*/
 }
-$tx3->Pos(0.31,0.001, 'left', 'top');
-$tx3->SetFont(FF_FONT1, FS_NORMAL, 8);
-$tx3->SetColor("blue");
+//$tx3->Pos(0.31,0.001, 'left', 'top');
+//$tx3->SetFont(FF_FONT1, FS_NORMAL, 8);
+//$tx3->SetColor("blue");
 
 $graph->AddText($tx1);
 $graph->AddText($tx2);
-$graph->AddText($tx3);
+//$graph->AddText($tx3);
 
 // Add the plot to the graph
 $graph->Add($fz);
-if (max($tcs0) != "" && isset($s0) )
+if (max($tcs0) != "" && isset($_GET["s0"]) )
   $graph->Add($lineplot);
-if (max($tcs1) != "" && isset($s1) )
+if (max($tcs1) != "" && isset($_GET["s1"]) )
   $graph->Add($lineplot2);
-if (max($tcs2) != "" && isset($s2) )
+if (max($tcs2) != "" && isset($_GET["s2"]) )
   $graph->Add($lineplot3);
-if (max($tcs3) != "" && isset($s3) )
+if (max($tcs3) != "" && isset($_GET["s3"]) )
   $graph->Add($lineplot4);
-if (max($Asubc) != "" && isset($subc) )
+if (max($Asubc) != "" && isset($_GET["subc"]) )
   $graph->Add($lineplot5);
-if (max($Atmpf) != "" && isset($tmpf) )
+if (max($Atmpf) != "" && isset($_GET["tmpf"]) )
   $graph->Add($lineplot6);
-if (max($Adwpf) != "" && isset($dwpf) )
+if (max($Adwpf) != "" && isset($_GET["dwpf"]) )
   $graph->Add($lineplot7);
 
 
