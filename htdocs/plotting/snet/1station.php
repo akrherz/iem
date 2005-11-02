@@ -1,52 +1,14 @@
 <?php 
+include("../../../config/settings.inc.php");
 	$TITLE = "IEM | 24 Hour Plotting";
-include("/mesonet/php/include/header.php"); 
+include("$rootpath/include/header.php"); 
 ?>
 
-<h3 class="heading">Plot Time Series</h3>
+<h3 class="heading">Resource Moved</h3>
 
-<div class="text">
-<?php include("../../include/imagemaps.php"); ?>
+<p>The 20 minute interval plots have been depreciated.  Please use the 
+1 minute interval plotter found here:
 
+<p><a href="<?php echo $rooturl; ?>/plotting/snet/1station_1min.php"><?php echo $rooturl; ?>/plotting/snet/1station_1min.php</a>
 
-<?php
-if (strlen($station) > 0 ) {
-
-?>
-
-<CENTER>
-<P><a href="1station.php">Different Location</a>
-<P>
-<BR><BR>
-
-<img src="1temps.php?station=<?php echo $station; ?>" ALT="Time Series">
-<BR>
-<img src="winds.php?station=<?php echo $station; ?>" ALT="Time Series">
-</CENTER>
-
-<BR>
-
-<P>Data only valid within the past 24 hours is displayed on this chart.
-
-<P>Please take note of the timestamp labels.  The graph may have inconsistancies in it, if the series has 
-missing data.
-
-<BR><BR>
-
-<?php
-
-}else {
-?>
-
-<br>
-<div align="center">
-<?php 
-	echo print_snet("1station.php?station");
-
-	}
-?>
-</div>
-<br><br>
-
-
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
