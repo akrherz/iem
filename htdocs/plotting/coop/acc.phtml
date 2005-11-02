@@ -46,7 +46,7 @@ data, you can download on the <a href="/request/coop/fe.phtml">COOP data downloa
 while( list($key, $val) = each($cities) ){
   if (isset($val["dont"])) continue;
   echo "<option value=\"$key\"";
-  if ($key == $station) echo " SELECTED ";
+  if ($key == strtolower($station)) echo " SELECTED ";
   echo ">". $val["city"] ." [". $val["startYear"] ."]\n";
 }
 ?></select>
@@ -71,6 +71,7 @@ while( list($key, $val) = each($cities) ){
 
 <p><img src="acc_gdd_plot.php?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
 <p><img src="acc_rain_plot.php?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
+<p><img src="acc_sdd_plot.php?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
 
 <?php } else { 
 
