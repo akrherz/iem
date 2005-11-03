@@ -35,15 +35,18 @@ function networkOffline($network)
   global $iem, $cities;
   $rs = pg_query($iem->dbconn, "SELECT *, to_char(valid, 'Mon DD YYYY HH:MI AM') as v from offline WHERE network = '$network' ORDER by valid ASC");
 
+  $q = 0;
   for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
   {
      $valid = $row["v"];
      $tracker_id = $row["trackerid"];
      $station = $row["station"];
+     if (! isset($cities[$station]))  continue;
      $name = $cities[$station]['city'];
      echo "<tr><td>$station</td><td>$name</td><td>$valid</td></tr>\n";
+     $q = 1;
   }
-  if ($i == 0){ echo "<tr><td colspan=3>All Sites Online!!!</td></tr>\n"; }
+  if ($q == 0){ echo "<tr><td colspan=3>All Sites Online!!!</td></tr>\n"; }
 }
 
 ?>
