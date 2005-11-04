@@ -2,6 +2,7 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/selectWidget.php");
 
+$year = date("Y");
 $network = isset($_GET['network']) && $_GET['network'] != "" ? $_GET['network'] : "IA_ASOS";
 $station = isset($_GET['station']) && $_GET['station'] != "" ? strtoupper($_GET['station']) : "";
 
@@ -85,7 +86,7 @@ don't hesitate to contact us.
 
 <TR>
  <TD colspan="2" align="center">
-  <?php echo yearSelect(1995, 2004, "year"); ?>
+  <?php echo yearSelect(1995, $year, "year"); ?>
  </TD>
 </TR>
 
