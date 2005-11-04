@@ -4,7 +4,7 @@
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "station";
 
  $TITLE = "IEM | Other | Currents";
- $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=current.phtml?sortcol=<?php echo $sortcol; ?>\">";
+ $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=current.phtml?sortcol=$sortcol\">";
  $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
