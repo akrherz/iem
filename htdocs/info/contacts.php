@@ -7,7 +7,6 @@ include("$rootpath/include/header.php"); ?>
 
 <table><tr><td>
 
-<div class="text">
 <p><h3 class="subtitle">IEM Coordinator:</h3><br>
 <div style="margin-left: 20px">
 Dr Raymond Arritt
@@ -43,8 +42,6 @@ expressed in this material are those of the author(s) and do not necessarily
 reflect the views of the National Science Foundation.
 
 </td></tr></table>
-
-<br><br><br></div>
 
 <!-- Begin the bottom of the page -->
 
