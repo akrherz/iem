@@ -1,8 +1,10 @@
 <?php
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
  // precScat.php
  //  Plots scatter plots of precip values...
 
- $c = pg_connect("10.10.10.40", 5432, "postgis");
+ $c = iemdb("postgis");
  $q =  "SELECT n.valid, n.station, round(CASE WHEN n.p01i < 0 
    THEN 0::numeric ELSE n.p01i::numeric END, 2)
    as n_p01i, round(h.p01i::numeric,2) as h_p01i from nex_2002 n 
@@ -30,9 +32,9 @@
 
  pg_close($c);
 
- include ("../dev19/jpgraph.php");
- include ("../dev19/jpgraph_line.php");
- include ("../dev19/jpgraph_scatter.php");
+ include ("$rootpath/include/jpgraph/jpgraph.php");
+ include ("$rootpath/include/jpgraph/jpgraph_line.php");
+ include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
 
 $graph = new Graph(250,250,"example1");
 $graph->SetScale("lin");

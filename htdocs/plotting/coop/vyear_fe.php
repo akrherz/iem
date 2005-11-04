@@ -16,8 +16,7 @@ $year = isset($_GET["year"]) ? $_GET["year"]: 2004;
 <BR>
 <p class="intro">With this form, you can interactively plot one year vs 
 climatology for a station.  Please note the first year of record for a 
-station before entering the year you would like to plot against. Data 
-for 2001 is currently not available.</p>
+station before entering the year you would like to plot against.</p>
 
 <?php include("$rootpath/include/COOPstations.php"); ?>
 
