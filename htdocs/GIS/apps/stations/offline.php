@@ -20,6 +20,7 @@ $rs = pg_query($iemaccess->dbconn, "SELECT * from offline WHERE network = '$netw
 for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
   $station = $row["station"];
+  if (! isset($cities[$station])) continue;
   $lats[$station] = $cities[$station]["lat"];
   $lons[$station] = $cities[$station]["lon"];
   $myStations[] = $station;
