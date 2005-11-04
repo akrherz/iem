@@ -21,7 +21,7 @@ def stations():
 
 def convert_station(code):
         code = code[-4:]
-        file = '/home/httpd/html/src/stations.con'
+        file = 'stations.con'
         f = open(file,'r').read()
 
         lines = re.split('\n',f)
