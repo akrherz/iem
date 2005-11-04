@@ -1,5 +1,6 @@
 <?php
- include("/mesonet/php/lib/selectWidget.php");
+include("../../../config/settings.inc.php");
+ include("$rootpath/include/selectWidget.php");
  $network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
 
  $sw = new selectWidget("/plotting/hr/1station.php", "/plotting/hr/1station.php?", $network);
@@ -14,9 +15,9 @@
 
 <?php 
 	$TITLE = "IEM | Time Series";
-include("/mesonet/php/include/header.php"); 
+include("$rootpath/include/header.php"); 
 ?>
-<?php include("../../include/imagemaps.php"); ?>
+<?php include("$rootpath/include/imagemaps.php"); ?>
 <b>Nav:</b> <a href="/plotting/">Interactive Plotting</a> <b> > </b>
 One station time series
 
@@ -80,4 +81,4 @@ missing data.
 
 <br><br></div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
