@@ -1,15 +1,24 @@
 <?php
+include("../../../../config/settings.inc.php");
 
 $TITLE = "IEM | Archived Precipitation Comparison";
-include("/mesonet/php/include/header.php");
+include("$rootpath/include/header.php");
+include("$rootpath/include/database.inc.php");
+
+$area = isset($_GET["area"]) ? $_GET["area"] : "";
+$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
+$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$hour = isset($_GET["hour"]) ? $_GET["hour"]: date("h");
+$plot = isset($_GET["plot"]) ? $_GET["plot"]: "";
+
 ?>
 <div class="text">
 <b>Nav:</b> <a href="/QC/">Quality Control</a> &nbsp; > &nbsp; 
   NEXRAD Estimates versus ASOS/AWOS observations
 <?php
-dl("php_mapscript_440.so");
-include('../../../include/allLoc.php');
-include('../../../include/mlib.php');
+dl($mapscript);
+include("$rootpath/include/all_locs.php");
+include("$rootpath/include/mlib.php");
 
 $height = 350;
 $width = 350;
@@ -97,7 +106,7 @@ $datal->draw($img);
 
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+$url = $img->saveWebImage();
 
 
 echo "<table border=0>
@@ -233,7 +242,7 @@ available in this system</i><br>
     <th align="left">Ob - NEX</th>
   </tr>
 <?php
- $c = pg_connect("10.10.10.20", 5432, "postgis");
+ $c = iemdb("postgis");
  $q = "SELECT n.valid, n.station, round((CASE WHEN n.p01i < 0 
    THEN 0 ELSE n.p01i END)::numeric, 2)
    as n_p01i, round(h.p01i::numeric,2) as h_p01i from nex_2002 n LEFT JOIN hp_2002 h 
@@ -265,6 +274,6 @@ available in this system</i><br>
 ?>
 </div>
 <?php
-include ("/mesonet/php/include/footer.php");
+include("$rootpath/include/footer.php");
 
 ?>
