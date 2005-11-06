@@ -141,7 +141,7 @@ LAYER
   NAME counties
   STATUS DEFAULT
   TYPE POLYGON
-  DATA shape/iacounties3.shp
+  DATA shape/4326/iowa/iacounties.shp
   LABELITEM 'Name'
   LABELMAXSCALE 1800000
   CLASS
