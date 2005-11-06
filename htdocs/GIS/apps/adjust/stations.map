@@ -96,6 +96,53 @@ END
 #
 #
 
+LAYER
+  NAME dm
+  STATUS ON
+  TYPE LINE
+  DATA /mesonet/data/gis/shape/4326/us/usdm/dm_current.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM "DCAT"
+  CLASS
+    EXPRESSION /0/
+    COLOR 100 0 0
+    TEXT "D0"
+    LABEL
+      COLOR 255 255 255
+    END
+  END
+  CLASS
+    EXPRESSION /1/
+    COLOR 120 0 0
+    TEXT "D1"
+    LABEL
+      COLOR 255 255 255
+    END
+  END
+  CLASS
+    EXPRESSION /2/
+    COLOR 160 0 0
+    TEXT "D2"
+    LABEL
+      COLOR 255 255 255
+    END
+  END
+  CLASS
+    EXPRESSION /3/
+    COLOR 200 0 0
+    TEXT "D3"
+    LABEL
+      COLOR 255 255 255
+    END
+  END
+  CLASS
+    EXPRESSION /4/
+    COLOR 255 0 0
+  END
+END
+
 #
 # Start of layer definitions
 #

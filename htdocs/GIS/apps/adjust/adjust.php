@@ -1,5 +1,7 @@
 <body bgcolor="white">
 <?php
+include("../../../../config/settings.inc.php");
+
 set_time_limit(200);
 
 
@@ -26,7 +28,7 @@ function mktitle($map, $imgObj, $titlet) {
 }
 
 
-dl("php_mapscript_442.so");
+dl($mapscript);
 
 $map = ms_newMapObj("stations.map");
 $map->set("height", 768);
@@ -50,8 +52,8 @@ $locs->set("status", MS_ON);
 $bars = $map->getlayerbyname("bars");
 $bars->set("status", MS_ON);
 
-$w0c = $map->getlayerbyname("warnings0_c");
-$w0c->set("status", MS_ON);
+$dm = $map->getlayerbyname("dm");
+$dm->set("status", MS_ON);
 
 /**
 $cwa = $map->getlayerbyname("cwa");
@@ -93,8 +95,8 @@ $lakes->draw($img);
 //$roads->draw($img);
 //$iards->draw($img);
 //$iards_label->draw($img);
-//$w0c->draw($img);
-$watches->draw($img);
+$dm->draw($img);
+//$watches->draw($img);
 $states->draw($img);
 //$cities->draw($img);
 
@@ -104,7 +106,7 @@ $map->drawLabelCache($img);
 mktitle($map, $img, "                     2005 NWS Watches (unofficial) [thru 3 Jun]  Tornado (Red), Svr Thunder (Yellow) ");
 mkl($map, $img);
 
-$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+$url = $img->saveWebImage();
 
 
 echo "<img src=\"$url\">";
