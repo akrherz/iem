@@ -43,7 +43,7 @@ END
 REFERENCE
   COLOR 255 255 255
   EXTENT -97.50 39.25 -89.30 44.75
-  IMAGE /mesonet/data/gis/images/iowabase.png
+  IMAGE /mesonet/data/gis/images/26915/iowa/iowabase.png
   OUTLINECOLOR 255 0 0
   STATUS ON
   SIZE 100 59
@@ -69,7 +69,7 @@ LAYER
   NAME iards
   TYPE LINE
   STATUS ON
-  DATA shape/iards.shp
+  DATA shape/26915/iowa/iaroads_123.shp
   CLASSITEM "FCC"
   CLASS
     EXPRESSION /A1[0-9]/
@@ -83,7 +83,7 @@ LAYER
   NAME iards
   TYPE LINE
   STATUS ON
-  DATA shape/iards.shp
+  DATA shape/26915/iowa/iaroads_123.shp
   MAXSCALE 600000
   CLASSITEM "FCC"
   CLASS
@@ -96,7 +96,7 @@ END
 
 LAYER
     NAME iards
-    DATA shape/iards.shp
+    DATA shape/26915/iowa/iaroads_123.shp
     STATUS ON
     TYPE ANNOTATION
 #    MINSCALE 50000
@@ -161,7 +161,7 @@ LAYER
   NAME cities
   STATUS ON
   TYPE POINT
-  DATA shape/iacities.shp
+  DATA shape/26915/iowa/incorporated_cities_2000.shp
   LABELITEM 'Name'
   LABELMAXSCALE 600000
   MAXSCALE 1600000
@@ -184,7 +184,7 @@ LAYER
   NAME tornadoes
   STATUS ON
   TYPE POINT
-  DATA shape/torn/iowatorn.shp
+  DATA shape/4326/iowa/iowatorn.shp
   CLASS
     TEMPLATE q_template.html
     COLOR 0 0 255
@@ -197,7 +197,7 @@ LAYER
   NAME killer
   STATUS ON
   TYPE POINT
-  DATA shape/torn/iowatorn.shp
+  DATA shape/4326/iowa/iowatorn.shp
   CLASSITEM "DEATHS"
   CLASS
     EXPRESSION ([DEATHS] > 0)
@@ -213,7 +213,7 @@ LAYER
   NAME f0
   STATUS ON
   TYPE POINT
-  DATA shape/torn/iowatorn.shp
+  DATA shape/4326/iowa/iowatorn.shp
   CLASSITEM 'F_SCALE'
   CLASS
     TEMPLATE q_template.html
@@ -230,7 +230,7 @@ LAYER
   NAME f1
   STATUS ON
   TYPE POINT
-  DATA shape/torn/iowatorn.shp
+  DATA shape/4326/iowa/iowatorn.shp
   CLASSITEM 'F_SCALE'
   CLASS
     TEMPLATE q_template.html
@@ -245,7 +245,7 @@ LAYER
   NAME f2
   STATUS ON
   TYPE POINT
-  DATA shape/torn/iowatorn.shp
+  DATA shape/4326/iowa/iowatorn.shp
   CLASSITEM 'F_SCALE'  
   CLASS
     TEMPLATE q_template.html
@@ -260,7 +260,7 @@ LAYER
   NAME f3
   STATUS ON
   TYPE POINT
-  DATA shape/torn/iowatorn.shp
+  DATA shape/4326/iowa/iowatorn.shp
   CLASSITEM 'F_SCALE'
   CLASS
     TEMPLATE q_template.html
@@ -275,7 +275,7 @@ LAYER
   NAME f4
   STATUS ON
   TYPE POINT
-  DATA shape/torn/iowatorn.shp
+  DATA shape/4326/iowa/iowatorn.shp
   CLASSITEM 'F_SCALE'
   CLASS
     TEMPLATE q_template.html
@@ -290,7 +290,7 @@ LAYER
   NAME f5
   STATUS ON
   TYPE POINT
-  DATA shape/torn/iowatorn.shp
+  DATA shape/4326/iowa/iowatorn.shp
   CLASSITEM 'F_SCALE'
   CLASS
     TEMPLATE q_template.html
