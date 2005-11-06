@@ -22,7 +22,7 @@ natural to integrate IEM data into GIS applications.<p>
 
 <p><h3 class="subtitle">Web Applications:</h3>
 <ul>
-  <LI><a href="/cgi-bin/mapserv/mapserv?map=%2Fhome%2Fhttpd%2Fhtml%2FGIS%2Fapps%2Fiatorn%2Fiatorn.map">Historical Iowa Tornado Database</a></LI>
+  <LI><a href="/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS%2Fapps%2Fiatorn%2Fiatorn.map">Historical Iowa Tornado Database</a></LI>
   <LI><a href="/GIS/apps/precip/">Realtime Precipitation Analysis</a></LI>
   <LI><a href="<?php echo $rooturl; ?>/GIS/apps/pcs/">2002 NEXRAD vs ASOS Precip Comparison</a></LI>
   <li><a href="<?php echo $rooturl; ?>/GIS/apps/rview/warnings.phtml">NEXRAD w/ warnings</a></li>
