@@ -121,7 +121,7 @@ $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
 $graph->yaxis->scale->ticks->Set(10,5);
 $graph->yaxis->scale->SetGrace(10);
-$graph->title->Set($Scities[$Sconv[$station]]['city'] ."Relative Humidity");
+$graph->title->Set("Relative Humidity");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
