@@ -85,8 +85,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
       $tmpf[$i] = "";
-      $dwpf[$i] = "";
-      $sr[$i] = "";
       $xlabel[$i] ="";
       $i++;
       $missing++;
@@ -118,12 +116,6 @@ for ($j=0; $j<24; $j++){
 if ($tmpf[0] == ""){
   $tmpf[0] = 0;
 }
-if ($dwpf[0] == ""){
-  $dwpf[0] = 0;
-}
-if ($sr[0] == ""){
-  $sr[0] = 0;
-}
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
@@ -140,7 +132,7 @@ $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
 $graph->yaxis->scale->ticks->Set(1,0.5);
 $graph->yaxis->scale->SetGrace(10);
-$graph->title->Set($Scities[$Sconv[$station]]['city'] ."Pressure");
+$graph->title->Set("Pressure");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
