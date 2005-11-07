@@ -220,7 +220,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_c
   CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
-  DATA "geom from (select type as wtype, geom, oid from warnings WHERE gtype = 'C' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by expire, type ASC) as foo"
+  DATA "geom from (select phenomena as wtype, geom, oid from warnings WHERE gtype = 'C' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by expire, type ASC) as foo"
   STATUS ON
   STATUS ON
   TYPE LINE
@@ -234,7 +234,7 @@ LAYER
   END
   CLASSITEM "wtype"
   CLASS
-    EXPRESSION 'TOR'
+    EXPRESSION 'TO'
     STYLE
       COLOR 255 0 0
       SIZE 2
@@ -242,7 +242,7 @@ LAYER
     END
   END
   CLASS
-    EXPRESSION 'SVR'
+    EXPRESSION 'SV'
     STYLE
       COLOR 255 255 0
       SIZE 2
@@ -250,7 +250,7 @@ LAYER
     END
   END
   CLASS
-    EXPRESSION 'FFW'
+    EXPRESSION 'FF'
     STYLE
       COLOR 0 255 0
       SIZE 3
