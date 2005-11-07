@@ -7,7 +7,7 @@ $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 
 
-if (strlen($year) == 4 && strlen($month) > 0 && strlen(day) > 0 ){
+if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
   $myTime = strtotime($year."-".$month."-".$day);
 } else {
   $myTime = strtotime(date("Y-m-d"));
@@ -20,8 +20,6 @@ $fcontents = file('/mesonet/ARCHIVE/raw/ot/ot0006/'.$dirRef.'.dat');
 
 $parts = array();
 $tmpf = array();
-//[DMF]$dwpf = array();
-//[DMF]$sr = array();
 $xlabel = array();
 
 $start = intval( $myTime );
@@ -80,8 +78,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
       $tmpf[$i] = "";
-      $dwpf[$i] = "";
-      $sr[$i] = "";
       $xlabel[$i] ="";
       $i++;
       $missing++;
@@ -112,12 +108,6 @@ for ($j=0; $j<24; $j++){
 // Fix y[0] problems
 if ($tmpf[0] == ""){
   $tmpf[0] = 0;
-}
-if ($dwpf[0] == ""){
-  $dwpf[0] = 0;
-}
-if ($sr[0] == ""){
-  $sr[0] = 0;
 }
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
