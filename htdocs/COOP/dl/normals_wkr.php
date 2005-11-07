@@ -1,5 +1,5 @@
 <?php
- include("../../config/settings.inc.php");
+ include("../../../config/settings.inc.php");
  /** normals_wkr.php
   *  - Download daily climate values
   */
