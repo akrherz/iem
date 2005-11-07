@@ -52,7 +52,7 @@ $grey = ImageColorAllocate($png, 220, 220, 220);
 $margin_left = 40;
 $margin_right = 4;
 $margin_top = 40;
-$margin_botton = 4;
+$margin_bottom = 4;
 ImageRectangleWithRoundedCorners($png, $margin_left,$margin_top,$width-$margin_right,$height-$margin_bottom,10,$black);
 ImageRectangleWithRoundedCorners($png, $margin_left+4,$margin_top+4,$width-$margin_right-4,$height-$margin_bottom-4,10,$white);
 
