@@ -137,6 +137,8 @@ table.footer {
 .subtitle {
 	font-size: 12pt;
 	color: #FFFFFF;
+border-bottom: 1px solid #00f;
+  padding-top: 30px;
 }
 .heading { 
 	font-size:120%;
