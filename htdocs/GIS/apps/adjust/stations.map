@@ -20,10 +20,11 @@ FONTSET "/mesonet/data/gis/fonts/fonts.list"
 #EXTENT 50000 4250000 890000 5080000
 #EXTENT 50000 4250000 890000 5080000
 #EXTENT 340000 4650000 640000 5110000
-EXTENT -125 30 -60 45
+#EXTENT -125 30 -60 45
+#US
 EXTENT -2110437 -2251067 2548326 1239063
 #EXTENT -97.50 39.25 -89.30 44.75
-UNITS DD
+#UNITS DD
 #UNITS METERS
 SHAPEPATH "/mesonet/data/gis/"
 SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
@@ -108,7 +109,9 @@ LAYER
   CLASS
     EXPRESSION /0/
     COLOR 100 0 0
+    SIZE 4
     TEXT "D0"
+    SYMBOL 'circle'
     LABEL
       COLOR 255 255 255
     END
@@ -117,6 +120,8 @@ LAYER
     EXPRESSION /1/
     COLOR 120 0 0
     TEXT "D1"
+    SIZE 4
+    SYMBOL 'circle'
     LABEL
       COLOR 255 255 255
     END
@@ -125,6 +130,8 @@ LAYER
     EXPRESSION /2/
     COLOR 160 0 0
     TEXT "D2"
+    SIZE 4
+    SYMBOL 'circle'
     LABEL
       COLOR 255 255 255
     END
@@ -133,6 +140,8 @@ LAYER
     EXPRESSION /3/
     COLOR 200 0 0
     TEXT "D3"
+    SYMBOL 'circle'
+    SIZE 4
     LABEL
       COLOR 255 255 255
     END
@@ -140,6 +149,12 @@ LAYER
   CLASS
     EXPRESSION /4/
     COLOR 255 0 0
+    SIZE 4
+    SYMBOL 'circle'
+    TEXT "D4"
+    LABEL
+      COLOR 255 255 255
+    END
   END
 END
 

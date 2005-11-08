@@ -31,8 +31,8 @@ function mktitle($map, $imgObj, $titlet) {
 dl($mapscript);
 
 $map = ms_newMapObj("stations.map");
-$map->set("height", 768);
-$map->set("width", 1024);
+$map->set("height", 600);
+$map->set("width",  800);
 
 $namer = $map->getlayerbyname("namerica");
 $namer->set("status", MS_ON);
@@ -103,8 +103,8 @@ $states->draw($img);
 $map->drawLabelCache($img);
 //$bars->draw($img);
 
-mktitle($map, $img, "                     2005 NWS Watches (unofficial) [thru 3 Jun]  Tornado (Red), Svr Thunder (Yellow) ");
-mkl($map, $img);
+mktitle($map, $img, " 3 Nov Drought Monitor ");
+//mkl($map, $img);
 
 $url = $img->saveWebImage();
 
