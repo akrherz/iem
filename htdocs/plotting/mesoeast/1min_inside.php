@@ -97,7 +97,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
       $tester = $tester + 60 ;
       $tmpf[$i] = "";
       $dwpf[$i] = "";
-      $sr[$i] = "";
       $xlabel[$i] ="";
       $i++;
       $missing++;
@@ -135,9 +134,6 @@ if ($dwpf[0] == ""){
   $dwpf[0] = 0;
   if ($min_yaxis > 0) $min_yaxis = 0;
   if ($max_yaxis < 0) $max_yaxis = 0;
-}
-if ($sr[0] == ""){
-  $sr[0] = 0;
 }
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
@@ -193,9 +189,6 @@ $lineplot2->SetLegend("Dew Point");
 $lineplot2->SetColor("blue");
 
 // Create the linear plot
-//[DMF]$lineplot3=new LinePlot($sr);
-//[DMF]$lineplot3->SetLegend("Solar Rad");
-//[DMF]$lineplot3->SetColor("black");
 
 // Box for error notations
 //[DMF]$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
