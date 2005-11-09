@@ -110,7 +110,7 @@ echo "<br>Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on a co
 
 function aSortBySecondIndex($multiArray, $secondIndex) {
 	while (list($firstIndex, ) = each($multiArray))
-		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+		$indexMap[$firstIndex] = @$multiArray[$firstIndex][$secondIndex];
 	arsort($indexMap);
 	while (list($firstIndex, ) = each($indexMap))
 		if (is_numeric($firstIndex))
@@ -120,7 +120,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 }
 function sortBySecondIndex($multiArray, $secondIndex) {
     while (list($firstIndex, ) = each($multiArray))
-        $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+        $indexMap[$firstIndex] = @$multiArray[$firstIndex][$secondIndex];
     asort($indexMap);
     while (list($firstIndex, ) = each($indexMap))
         if (is_numeric($firstIndex))
