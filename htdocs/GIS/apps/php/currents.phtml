@@ -1,7 +1,9 @@
 <?php
 include("../../../../config/settings.inc.php");
+$st = isset($_GET["st"]) ? $_GET["st"] : Array();
 $network = isset($_GET["network"]) ? $_GET["network"]: "";
 $var = isset($_GET["var"]) ? $_GET["var"] : "tmpf";
+if ($var == "max_sknt") $var = "max_gust";
 $layers =  isset( $_GET['layers']) ? $_GET['layers'] : Array("radar", "labels");
 
 function sel($svar, $var, $txt){
