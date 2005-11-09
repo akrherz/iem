@@ -145,6 +145,7 @@ function sortBySecondIndex($multiArray, $secondIndex) {
        $mydata[$value]["relh"], $mydata[$value]["sped"]);
 
     $mydata[$value]["peak_ts"] = 0;
+    $mydata[$value]["peak"] = 0;
     if ($mydata[$value]["max_gust"] > $mydata[$value]["max_sknt"]){
       $mydata[$value]["peak"] = $mydata[$value]["max_gust"];
       $mydata[$value]["peak_ts"] = strtotime(substr( $mydata[$value]["max_gust_ts"],0,16) );
