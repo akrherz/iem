@@ -19,6 +19,7 @@ class selectWidget
   var $netlib = Array(
    "IACLIMATE" => "Iowa Climate Sites",
    "IA_COOP" => "Iowa NWS COOP Sites",
+   "COOPDB" =>"Iowa Climate Sites",
    "IA_ASOS" => "Iowa ASOS",
    "AWOS" => "Iowa AWOS",
    "IA_RWIS" => "Iowa RWIS",
