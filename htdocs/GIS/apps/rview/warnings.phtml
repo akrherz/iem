@@ -276,7 +276,7 @@ $query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire,
   w.issue as issue, u.state as sname, xmax(w.geom) as lon0, 
   ymax(w.geom) as lat0, w.wfo as wfo
   from $wtable w, nws_ugc u
-  WHERE w.expire > $tsextra
+  WHERE w.expire > $tsextra and w.significance != 'A'
    and w.gtype = 'C' and w.ugc = u.ugc $cuextra ORDER by $sortcol $sortdir";
 
 pg_exec($connection, "set time zone 'GMT'");
