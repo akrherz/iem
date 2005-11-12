@@ -79,7 +79,7 @@ if ($isarchive)
 { 
   $c0->set("data", "geom from warnings_$year");
 }
-$c0->setFilter("expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'");
+$c0->setFilter("significance != 'A' and expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'");
 $q = "expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'";
 
 $p0 = $map->getlayerbyname("warnings0_p");
@@ -89,7 +89,7 @@ if ($isarchive)
 { 
   $p0->set("data", "geom from warnings_$year");
 }
-$p0->setFilter("expire > '".$db_ts."' and issue < '". $db_ts."' and gtype = 'P'");
+$p0->setFilter("significane != 'A' and expire > '".$db_ts."' and issue < '". $db_ts."' and gtype = 'P'");
 
 $radar = $map->getlayerbyname("radar2");
 $radar->set("data", $radfile);
