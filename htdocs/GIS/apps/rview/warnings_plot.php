@@ -12,7 +12,7 @@ if ($isarchive)
     if (! is_file("/tmp/". date('YmdHi', $ts) .".png"))
     {
     copy($fp, "/tmp/". date('YmdHi', $ts) .".png");
-    copy("/mesonet/data/gis/images/4326/USCOMP/n0r_0.wld", "/tmp/". date('YmdHi', $ts) .".wld");
+    copy("/mesonet/ARCHIVE/data/". date('Y/m/d') ."/GIS/uscomp/n0r.tfw", "/tmp/". date('YmdHi', $ts) .".wld");
     }
   }
   $radfile = "/tmp/". date('YmdHi', $ts) .".png";
@@ -70,7 +70,8 @@ $cwas->set("status", 1);
 $watches = $map->getlayerbyname("watches");
 $watches->set("connection", $_DATABASES["postgis"] );
 $watches->set("status", 1);
-$watches->setFilter("expired > '".$db_ts."' and issued <= '".$db_ts."'");
+//$watches->setFilter("expired > '".$db_ts."' and issued <= '".$db_ts."'");
+$watches->set("data", "geom from (select type as wtype, geom, oid from watches where expired > '".$db_ts."' and issued <= '".$db_ts."') as foo using unique oid using srid=4326");
 
 $c0 = $map->getlayerbyname("warnings0_c");
 $c0->set("connection", $_DATABASES["postgis"] );

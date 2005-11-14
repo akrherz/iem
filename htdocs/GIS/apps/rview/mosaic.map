@@ -290,11 +290,11 @@ LAYER
  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
  DATA "geom from watches"
  PROJECTION
-  "proj=latlong"
+  "init=epsg:4326"
  END
  TYPE LINE
- FILTER "expired > CURRENT_TIMESTAMP"
- CLASSITEM 'type'
+ #FILTER "expired > CURRENT_TIMESTAMP"
+ CLASSITEM 'wtype'
   CLASS
     EXPRESSION /SVR/
     STYLE
