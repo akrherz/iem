@@ -12,4 +12,6 @@ if (strlen($ntv) > 0){
 }
 if (! isset($_SESSION['tv']) ) $_SESSION['tv'] = 'KCCI';
 $tv = $_SESSION['tv'];
+
+session_write_close();
 ?>
