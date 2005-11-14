@@ -8,8 +8,8 @@ $month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
 $day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
 
  $sw = new selectWidget("$rooturl/plotting/snet/1station_1min.php", "$rooturl/plotting/snet/1station_1min.php?tv=$tv", strtoupper($tv) );
+ $sw->setformvars( Array("tv" => $tv) );
  $sw->logic($_GET);
-
  $station = isset($_GET['station']) ? $_GET["station"]: "";
 ?>
 
