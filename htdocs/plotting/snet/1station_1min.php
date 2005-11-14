@@ -7,7 +7,7 @@ $year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
 $month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
 $day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
 
- $sw = new selectWidget("$rooturl/plotting/snet/1station_1min.php", "$rooturl/plotting/snet/1station_1min.php?tv=KCCI", strtoupper($tv) );
+ $sw = new selectWidget("$rooturl/plotting/snet/1station_1min.php", "$rooturl/plotting/snet/1station_1min.php?tv=$tv", strtoupper($tv) );
  $sw->logic($_GET);
 
  $station = isset($_GET['station']) ? $_GET["station"]: "";
