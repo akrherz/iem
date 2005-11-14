@@ -7,10 +7,11 @@ $ntv = isset($_GET["ntv"]) ? $_GET["ntv"] : "";
 
 if (strlen($ntv) > 0){
   $_SESSION['tv'] = strtoupper($ntv);
-} else if (isset($tv) && strlen($tv) > 0){
+} else if (isset($_GET["tv"]) && strlen($_GET["tv"]) > 0){
   $_SESSION['tv'] = $tv;
 }
 if (! isset($_SESSION['tv']) ) $_SESSION['tv'] = 'KCCI';
+
 $tv = $_SESSION['tv'];
 
 session_write_close();
