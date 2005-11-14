@@ -12,7 +12,7 @@ if ($isarchive)
     if (! is_file("/tmp/". date('YmdHi', $ts) .".png"))
     {
     copy($fp, "/tmp/". date('YmdHi', $ts) .".png");
-    copy("/mesonet/ARCHIVE/data/". date('Y/m/d') ."/GIS/uscomp/n0r.tfw", "/tmp/". date('YmdHi', $ts) .".wld");
+    copy("/mesonet/ARCHIVE/data/". date('Y/m/d', $ts) ."/GIS/uscomp/n0r.tfw", "/tmp/". date('YmdHi', $ts) .".wld");
     }
   }
   $radfile = "/tmp/". date('YmdHi', $ts) .".png";
