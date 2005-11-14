@@ -90,7 +90,7 @@ if ($isarchive)
 { 
   $p0->set("data", "geom from warnings_$year");
 }
-$p0->setFilter("significane != 'A' and expire > '".$db_ts."' and issue < '". $db_ts."' and gtype = 'P'");
+$p0->setFilter("significance != 'A' and expire > '".$db_ts."' and issue < '". $db_ts."' and gtype = 'P'");
 
 $radar = $map->getlayerbyname("radar2");
 $radar->set("data", $radfile);
