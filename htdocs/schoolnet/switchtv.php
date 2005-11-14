@@ -10,7 +10,7 @@ if (strlen($ntv) > 0){
 } else if (isset($_GET["tv"]) && strlen($_GET["tv"]) > 0){
   $_SESSION['tv'] = $tv;
 }
-//if (! isset($_SESSION['tv']) ) $_SESSION['tv'] = 'KCCI';
+if (! isset($_SESSION['tv']) ) $_SESSION['tv'] = 'KCCI';
 
 $tv = $_SESSION['tv'];
 
