@@ -6,7 +6,7 @@ import pg, cgi, string, os, sys
 def Main():
   print 'Content-type: text/plain \n\n'
   try:
-    mydb = pg.connect('afos', 'mtarchive.geol.iastate.edu')
+    mydb = pg.connect('afos', 'mtarchive.geol.iastate.edu', user='nobody')
   except:
     print 'Error Connecting to Database, please try again!'
     sys.exit(0)
