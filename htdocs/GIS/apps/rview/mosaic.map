@@ -377,18 +377,18 @@ LAYER
       SYMBOL 1
     END
   END
-  CLASS
-    STYLE
-      COLOR 0 0 0
-      SIZE 4
-      SYMBOL 1
-    END
-    STYLE
-      COLOR 255 0 255
-      SIZE 2
-      SYMBOL 1
-    END
-  END
+#  CLASS
+#    STYLE
+#      COLOR 0 0 0
+#      SIZE 4
+#      SYMBOL 1
+#    END
+#    STYLE
+#      COLOR 255 0 255
+#      SIZE 2
+#      SYMBOL 1
+#    END
+#  END
 END
 
 
