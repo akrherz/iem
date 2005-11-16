@@ -6,7 +6,7 @@
   <Name>GetMap</Name> <!-- WMT defined -->
   <Title>IEM WMS Service</Title>
   <Abstract>Ba Ba Ba</Abstract>
-  <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/wms/kcci.map&amp;"/>
+  <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/var/www/htdocs/GIS/apps/wms/kcci.map&amp;"/>
   <ContactInformation>
     <ContactPersonPrimary>
       <ContactPerson>Daryl Herzmann</ContactPerson>
@@ -22,8 +22,8 @@
       <Format>application/vnd.ogc.wms_xml</Format>
       <DCPType>
         <HTTP>
-          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/wms/kcci.map&amp;"/></Get>
-          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/wms/kcci.map&amp;"/></Post>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/var/www/htdocs/GIS/apps/wms/kcci.map&amp;"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/var/www/htdocs/GIS/apps/wms/kcci.map&amp;"/></Post>
         </HTTP>
       </DCPType>
     </GetCapabilities>
@@ -33,8 +33,8 @@
       <Format>image/wbmp</Format>
       <DCPType>
         <HTTP>
-          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/wms/kcci.map&amp;"/></Get>
-          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/wms/kcci.map&amp;"/></Post>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/var/www/htdocs/GIS/apps/wms/kcci.map&amp;"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/var/www/htdocs/GIS/apps/wms/kcci.map&amp;"/></Post>
         </HTTP>
       </DCPType>
     </GetMap>
@@ -44,8 +44,8 @@
       <Format>application/vnd.ogc.gml</Format>
       <DCPType>
         <HTTP>
-          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/wms/kcci.map&amp;"/></Get>
-          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/wms/kcci.map&amp;"/></Post>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/var/www/htdocs/GIS/apps/wms/kcci.map&amp;"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/var/www/htdocs/GIS/apps/wms/kcci.map&amp;"/></Post>
         </HTTP>
       </DCPType>
     </GetFeatureInfo>
