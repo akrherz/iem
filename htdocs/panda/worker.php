@@ -129,7 +129,9 @@ while (list($k,$v) = each($warnings))
   $sql = sprintf("SELECT distinct * from lsrs WHERE 
          geom && SetSrid(GeometryFromText('%s'),4326) and 
          contains(SetSrid(GeometryFromText('%s'),4326), geom) 
-         and type IN (%s) and wfo = '%s'
+         and type IN (%s) and wfo = '%s' and
+        (type = 'F' or (type = 'H' and magnitude >= $hail) or
+         type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D')
          and valid >= '%s' and valid <= '%s' ",
          $geom, $geom, $ltypeSQL, $wfo, $wstsSQL, $wetsSQL);
   $DEBUG .= "<br />". $sql;
