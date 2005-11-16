@@ -96,6 +96,22 @@ $radar = $map->getlayerbyname("radar2");
 $radar->set("data", $radfile);
 $radar->set("status", 1);
 
+$lsrs = $map->getlayerbyname("lsrs");
+$lsrs->set("connection", $_DATABASES["postgis"] );
+$lsrs->set("status", 1);
+if ($lsrwindow == 0)
+{
+  $lsrs->set("status", 0);
+}
+$lsr_btime = strftime("%Y-%m-%d %H:%M:00+00", $ts - ($lsrwindow * 60) );
+if ($lsrlook == "+") 
+   $lsr_btime = strftime("%Y-%m-%d %H:%M:00+00", $ts);
+$lsr_etime = strftime("%Y-%m-%d %H:%M:00+00", $ts + ($lsrwindow * 60) );
+if ($lsrlook == "-") 
+   $lsr_etime = strftime("%Y-%m-%d %H:%M:00+00", $ts);
+$lsrs->setFilter("valid >= '$lsr_btime' and valid <= '$lsr_etime'");
+
+
 $img = $map->prepareImage();
 
 $Srect = $map->extent;
@@ -108,6 +124,7 @@ $cwas->draw( $img);
 $watches->draw($img); 
 $c0->draw($img);
 $p0->draw($img);
+$lsrs->draw($img);
 
 mktitle($map, $img, "                  IEM NEXRAD composite base reflect valid: $d");
 $map->drawLabelCache($img);

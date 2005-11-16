@@ -28,7 +28,8 @@ $tzdict = Array("UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000, "CST
 $tzoff = $tzdict[$tz];
 
 $filter = isset($_GET["filter"]) ? $_GET["filter"]: 0;
-
+$lsrwindow = isset($_GET["lsrwindow"]) ? $_GET["lsrwindow"] : "0";
+$lsrlook = isset($_GET["lsrlook"]) ? $_GET["lsrlook"] : "+";
 $site = isset($_GET["site"]) ? $_GET["site"]: "DMX";
 $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "issued";
 $sortdir = isset($_GET["sortdir"]) ? $_GET["sortdir"]: 0;
@@ -134,11 +135,8 @@ dl($mapscript);
 <?php } ?>
 
 <table style="padding: 2px;" border="1">
-<thead>
-<tr><th>Select WFO</th><th>Timezone:</th><th>Loop?:</th><th>WFO Filter:</th><th>Sort</th><th>Zoom</th></tr>
-</thead>
-<tbody>
 <tr>
+<th>Select WFO</th>
 <td><select name="site">
 <?php
 while( list($key, $value) = each($wfos) ){
@@ -152,7 +150,7 @@ echo "<option value=\"user\" SELECTED>User Selected\n";
 ?>
 </select></td>
 
-
+<th>Timezone:</th>
 <td><select name="tz">
   <option value="UTC" <?php if ($tz == "UTC") echo "SELECTED"; ?>>UTC
   <option value="EDT" <?php if ($tz == "EDT") echo "SELECTED"; ?>>EDT
@@ -165,22 +163,7 @@ echo "<option value=\"user\" SELECTED>User Selected\n";
   <option value="PST" <?php if ($tz == "PST") echo "SELECTED"; ?>>PST
 </select></td>
 
-<td><select name="loop">
-  <option value="0" <?php if ($loop == 0) echo "SELECTED"; ?>>No
-  <option value="1" <?php if ($loop == 1) echo "SELECTED"; ?>>Java Script
-  <option value="2" <?php if ($loop == 2) echo "SELECTED"; ?>>Applet
-</select></td>
-
-<td><select name="filter">
-  <option value="0" <?php if ($filter == 0) echo "SELECTED"; ?>>No
-  <option value="1" <?php if ($filter == 1) echo "SELECTED"; ?>>Yes
-</select></td>
-
-<td><select name="sortdir">
-  <option value="0" <?php if ($sortdir == 0) echo "SELECTED"; ?>>DESC
-  <option value="1" <?php if ($sortdir == 1) echo "SELECTED"; ?>>ASC
-</select></td>
-
+<th>Zoom</th>
 <td><select name="zoom">
  <option value="25" <?php if ($zoom == 25) echo "SELECTED"; ?>>25km
  <option value="50" <?php if ($zoom == 50) echo "SELECTED"; ?>>50km
@@ -188,6 +171,51 @@ echo "<option value=\"user\" SELECTED>User Selected\n";
  <option value="250" <?php if ($zoom == 250) echo "SELECTED"; ?>>250km
  <option value="500" <?php if ($zoom == 500) echo "SELECTED"; ?>>500km
 </select></td>
+
+<th>Loop?</th>
+<td><select name="loop">
+  <option value="0" <?php if ($loop == 0) echo "SELECTED"; ?>>No
+  <option value="1" <?php if ($loop == 1) echo "SELECTED"; ?>>Java Script
+  <option value="2" <?php if ($loop == 2) echo "SELECTED"; ?>>Applet
+</select></td>
+
+
+</tr>
+</table>
+
+
+<table style="padding: 2px;" border="1">
+<tr>
+<th>WFO Filter:</th>
+<td><select name="filter">
+  <option value="0" <?php if ($filter == 0) echo "SELECTED"; ?>>No
+  <option value="1" <?php if ($filter == 1) echo "SELECTED"; ?>>Yes
+</select></td>
+
+<th>Sort</th>
+<td><select name="sortdir">
+  <option value="0" <?php if ($sortdir == 0) echo "SELECTED"; ?>>DESC
+  <option value="1" <?php if ($sortdir == 1) echo "SELECTED"; ?>>ASC
+</select></td>
+
+
+<th>LSR Window</th>
+<td>
+<select name="lsrlook">
+ <option value="+" <?php if ($lsrlook == "+") echo "SELECTED" ?>>+
+ <option value="-" <?php if ($lsrlook == "-") echo "SELECTED" ?>>-
+ <option value="+/-" <?php if ($lsrlook == "+/-") echo "SELECTED" ?>>+/-
+</select>
+<select name="lsrwindow">
+ <option value="0" <?php if ($lsrwindow == 0) echo "SELECTED"; ?>>Hide
+ <option value="5" <?php if ($lsrwindow == 5) echo "SELECTED"; ?>>5 minutes
+ <option value="10" <?php if ($lsrwindow == 10) echo "SELECTED"; ?>>10 minutes
+ <option value="15" <?php if ($lsrwindow == 15) echo "SELECTED"; ?>>15 minutes
+ <option value="30" <?php if ($lsrwindow == 30) echo "SELECTED"; ?>>30 minutes
+ <option value="60" <?php if ($lsrwindow == 60) echo "SELECTED"; ?>>60 minutes
+
+</select></td>
+
 
 <td><input type="submit" value="Show Map"></td></tr></table>
 </td></tr>
@@ -200,7 +228,7 @@ if ($site == "user")
 {
   echo sprintf("User selected Latitude: %.3f Longitude: %.3f", $lat0, $lon0);
 } else {
-  echo "NEXRAD Site:</b> ". $wfos[$site]["city"] ." (".$site.")\n";
+  echo "Selected WFO:</b> ". $wfos[$site]["city"] ." (".$site.")\n";
 }
 
 if (intval($loop) ==  1){

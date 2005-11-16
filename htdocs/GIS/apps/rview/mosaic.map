@@ -63,6 +63,82 @@ SCALEBAR
 END
 
 LAYER
+  CONNECTIONTYPE postgis
+  NAME lsrs
+  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
+  DATA "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs) as foo USING unique k USING SRID=4326 "
+  STATUS ON
+  TYPE POINT
+  TEMPLATE q_template.html
+  FILTER "valid > 'YESTERDAY'::timestamp"
+  PROJECTION
+   "proj=latlong"
+  END
+  CLASSITEM "ltype"
+  CLASS
+    EXPRESSION /G/
+    TEXT (G[magnitude] MPH)
+    LABEL
+      OUTLINECOLOR 0 0 0
+      COLOR 255 255 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION AUTO
+      PARTIALS FALSE
+    END
+    COLOR 255 255 255
+    SYMBOL 'circle'
+    SIZE 10
+  END
+  CLASS
+    EXPRESSION /T/
+    TEXT (TORNADO [magnitude])
+    LABEL
+      OUTLINECOLOR 0 0 0
+      COLOR 255 255 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION AUTO
+      PARTIALS FALSE
+    END
+    COLOR 255 255 255
+    SYMBOL 'tornado'
+    SIZE 10
+  END
+  CLASS
+    EXPRESSION /H/
+    TEXT (HAIL [magnitude])
+    LABEL
+      OUTLINECOLOR 0 0 0
+      COLOR 255 255 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION AUTO
+      PARTIALS FALSE
+    END
+    COLOR 255 255 255
+    SYMBOL 'triangle'
+    SIZE 10
+  END
+  CLASS
+    EXPRESSION /D/
+    TEXT (WND DMG [city])
+    LABEL
+      OUTLINECOLOR 0 0 0
+      COLOR 255 255 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION AUTO
+      PARTIALS FALSE
+    END
+    COLOR 255 255 255
+    SYMBOL 'triangle'
+    SIZE 10
+  END
+END
+
+
+LAYER
   TYPE POLYGON
   NAME rect
   STATUS ON
