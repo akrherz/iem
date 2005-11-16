@@ -62,12 +62,12 @@ $clayer->set("status", 1);
 $c0 = $map->getlayerbyname("warnings0_c");
 $c0->set("status", 1);
 $c0->set("data", "geom from warnings_$year");
-$c0->setFilter("issue < '$tsSQL' and expire > '$tsSQL' and gtype = 'C'");
+$c0->setFilter("issue < '$tsSQL' and expire > '$tsSQL' and gtype = 'C' and significance != 'A'");
 
 $p0 = $map->getlayerbyname("warnings0_p");
 $p0->set("status", 1);
 $p0->set("data", "geom from warnings_$year");
-$p0->setFilter("issue < '$tsSQL' and expire > '$tsSQL' and gtype = 'P'");
+$p0->setFilter("issue < '$tsSQL' and expire > '$tsSQL' and gtype = 'P' and significance != 'A'");
 
 $lsrs = $map->getlayerbyname("lsrs");
 $lsrs->set("status",1);
