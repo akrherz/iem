@@ -1,5 +1,6 @@
 <?php
 include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 
 /* $_GET vars */
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : die("variable wfo not set. Exit.");
