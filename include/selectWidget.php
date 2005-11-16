@@ -294,9 +294,11 @@ while( list($k, $v) = each($this->networks) )
 
   function siteSelectInterface($selected)
   {
+     global $rootpath;
+     include_once("$rootpath/include/database.inc.php");
      $s = "<select name=\"station\" onChange=\"javascript: this.form.submit()\">";
      /* Query database for stations! */
-     $conn = pg_connect("10.10.10.40", 5432, "mesosite");
+     $conn = iemdb("mesosite");
      $rs = pg_exec($conn, "SELECT *  from stations WHERE 
                            network = '". $this->network ."' ORDER by name ASC");
      pg_close($conn);
