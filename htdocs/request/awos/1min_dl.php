@@ -1,6 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include_once("$rootpath/include/database.inc.php");
 /**
  * Script that does the processing or hands off to plotter.
  * Must send content-type early, if we want this to work
