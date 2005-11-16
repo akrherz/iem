@@ -1,7 +1,7 @@
 <?php
+include("../../../../config/settings.inc.php");
 
-
-dl("php_mapscript_dev.so");
+dl($mapscript);
 
 
 $map = ms_newMapObj("test.map");
@@ -19,7 +19,7 @@ $site->set("status", MS_ON);
 $rect = $map->getlayerbyname("rect");
 $rect->set("status", MS_ON);
 
-include("../../../include/allLoc.php");
+include("$rootpath/include/all_locs.php");
 
 $projInObj = ms_newprojectionobj("proj=latlong");
 $projOutObj = ms_newprojectionobj( $map->getProjection() );
@@ -68,7 +68,7 @@ $rt->free();
 
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage(MS_PNG, 0,0,-1);
+$url = $img->saveWebImage();
 ?>
 
 <img src="<?php echo $url; ?>" border="1">

@@ -1,4 +1,8 @@
 <?php
+include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$c = iemdb("mesosite");
+
 // 19 Nov 2002:  Finalize into production!
 // 19 Nov 2002:  Allow zooming.
 $type = $_GET["type"];
@@ -7,7 +11,7 @@ $id = $_GET["station"];
 if (strlen($id) > 6 || strlen($id) == 0) $id = 'DSM';
 if (strlen($type) == 0) $type="doqqs";
 
-dl("php_mapscript_423.so");
+dl($mapscript);
 
 $map = ms_newMapObj("test.map");
 
@@ -27,8 +31,8 @@ $site->set("status", MS_ON);
 $rect = $map->getlayerbyname("rect");
 $rect->set("status", MS_ON);
 
-include("../../../include/dbloc.php");
-$loc = dbloc26915($id);
+include("$nwnpath/include/dbloc.php");
+$loc = dbloc26915($c, $id);
 
 
 $incr = 500;
@@ -76,8 +80,8 @@ $rt->free();
 $img2 = $map->drawScaleBar();
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage(MS_PNG, 0,0,-1);
-$url2 = $img2->saveWebImage(MS_PNG, 0,0,-1);
+$url = $img->saveWebImage();
+$url2 = $img2->saveWebImage();
 ?>
 
 <img src="<?php echo $url; ?>" border="1">
