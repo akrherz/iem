@@ -80,7 +80,7 @@ include("setup.php");
   $lat1 = $row["latitude"] + $interval;
   $lon0 = $row["longitude"] - $interval;
   $lon1 = $row["longitude"] + $interval;
-  $imgbase = "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?imgbox=-1+-1+-1+-1&imgxy=99.5+99.5&imgext=".$lon0."+".$lat0."+".$lon1."+".$lat1."&map=%2Fhome%2Fhttpd%2Fhtml%2FGIS%2Fapps%2Fsmap0%2Fstations.map&zoom=1&layer=". $row["network"];
+  $imgbase = "$rootcgi/cgi-bin/mapserv/mapserv?imgbox=-1+-1+-1+-1&imgxy=99.5+99.5&imgext=".$lon0."+".$lat0."+".$lon1."+".$lat1."&map=$rootpath/htdocs/GIS%2Fapps%2Fsmap0%2Fstations.map&zoom=1&layer=". $row["network"];
   $imgref = $imgbase ."&mode=map";
   $refref = $imgbase ."&mode=reference";
 

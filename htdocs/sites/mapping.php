@@ -3,27 +3,29 @@ include("setup.php");
 
         $current="maps";
 	$TITLE = "IEM | Site Location";
-	include("/mesonet/php/include/header.php"); 
-        include("../include/nav_site.php");
-        include("../include/getcurrent.php");
-        include("../include/mlib.php");
+    include("../../config/settings.inc.php");
+	include("$rootpath/include/header.php"); 
+        include("$rootpath/include/nav_site.php");
+        include("$rootpath/include/getcurrent.php");
+        include("$rootpath/include/mlib.php");
 
         if (strlen($station) > 6 || strlen($station) == 0){
            $station = 'DSM';
 	}
 
-        if (strlen($type) == 0) $type= "doqqs";
-        if (strlen($zoom) == 0) $zoom = 3;
+        $type = isset($_GET["type"]) ? $_GET["type"] : "doqqs";
+        $zoom = isset($_GET["zoom"]) ? $_GET["zoom"] : 3;
         if ($zoom < 0) $zoom = 0;
         if ($zoom > 5) $zoom = 5; 
 
         $network=$row["network"];
-        $URL='http://mesonet.agron.iastate.edu/GIS/apps/ortho/site.php?station='.$station.'&zoom='.$zoom.'&type='.$type;
-        $URL_BASE='http://mesonet.agron.iastate.edu/sites/mapping.php?station='.$station.'&type='.$type;
+        $URL=$rooturl.'/GIS/apps/ortho/site.php?station='.$station.'&zoom='.$zoom.'&type='.$type;
+        $URL_BASE=$rooturl.'/sites/mapping.php?station='.$station.'&type='.$type;
 ?>
 <?php
-          echo '<form method="POST" action="mapping.php">
+          echo '<form method="GET" action="mapping.php">
             <input type="hidden" name="station" value="'.$station.'">
+            <input type="hidden" name="network" value="'.$network.'">
             <input type="hidden" name="zoom" value="'.$zoom.'">
             <input type="hidden" name="type" value="'.$type.'">';
 ?>
@@ -67,4 +69,4 @@ include("setup.php");
         </TD>
 </TR>
 </TABLE></div>
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
