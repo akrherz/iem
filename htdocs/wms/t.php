@@ -12,7 +12,7 @@
   <Keywords>
     Ba
   </Keywords>
-  <OnlineResource>http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/mesonet/www/html/GIS/apps/rainfall/rainfall.map&amp;amp;&amp;</OnlineResource>
+  <OnlineResource>http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/var/www/htdocs/GIS/apps/rainfall/rainfall.map&amp;amp;&amp;</OnlineResource>
   <Fees>None</Fees>
   <AccessConstraints>None</AccessConstraints>
 </Service>
@@ -22,12 +22,12 @@
     <GetCapabilities>
       <DCPType>
         <HTTP>
-          <Get onlineResource="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/mesonet/www/html/GIS/apps/rainfall/rainfall.map&amp;amp;&amp;" />
+          <Get onlineResource="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/var/www/htdocs/GIS/apps/rainfall/rainfall.map&amp;amp;&amp;" />
         </HTTP>
       </DCPType>
       <DCPType>
         <HTTP>
-          <Post onlineResource="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/mesonet/www/html/GIS/apps/rainfall/rainfall.map&amp;amp;&amp;" />
+          <Post onlineResource="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/var/www/htdocs/GIS/apps/rainfall/rainfall.map&amp;amp;&amp;" />
         </HTTP>
       </DCPType>
     </GetCapabilities>
@@ -52,12 +52,12 @@
       </ResultFormat>
       <DCPType>
         <HTTP>
-          <Get onlineResource="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/mesonet/www/html/GIS/apps/rainfall/rainfall.map&amp;amp;&amp;" />
+          <Get onlineResource="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/var/www/htdocs/GIS/apps/rainfall/rainfall.map&amp;amp;&amp;" />
         </HTTP>
       </DCPType>
       <DCPType>
         <HTTP>
-          <Post onlineResource="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/mesonet/www/html/GIS/apps/rainfall/rainfall.map&amp;amp;&amp;" />
+          <Post onlineResource="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/var/www/htdocs/GIS/apps/rainfall/rainfall.map&amp;amp;&amp;" />
         </HTTP>
       </DCPType>
     </GetFeature>
