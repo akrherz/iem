@@ -3,8 +3,8 @@
 &nbsp; &nbsp; <b>Switch to:</b>
 <?php
  /* Network Selector Widget */
- include_once("/mesonet/php/lib/selectWidget.php");
- $sw2 = new selectWidget("/sites/site.php", "/sites/site.php?", $network);
+ include_once("$rootpath/include/selectWidget.php");
+ $sw2 = new selectWidget("$rooturl/sites/site.php", "$rooturl/sites/site.php?", $network);
  echo $sw2->siteSelectInterface($station); 
 ?> <a href="locate.php?network=<?php echo $network; ?>">select from map</a>
 </form>
@@ -12,14 +12,14 @@
 <?php
   echo '<div id="iem-section">';
   echo '<center><table><tr>';
-  $sites='<th><a href="/sites/site.php?station='.$station.'">Site Info</a></th>';
-  $conditions='<th><a href="/sites/current.php?station='.$station.'">Current Conditions</a></th>';
-  $parms='<th><a href="/sites/parm.php?station='.$station.'">Parameters</a></th>';
-  $pics='<th><a href="/sites/pics.php?station='.$station.'&dir=N">Photos</a></th>';
+  $sites='<th><a href="'.$rooturl.'/sites/site.php?network='.$network.'&station='.$station.'">Site Info</a></th>';
+  $conditions='<th><a href="'.$rooturl.'/sites/current.php?network='.$network.'&station='.$station.'">Current Conditions</a></th>';
+  $parms='<th><a href="'.$rooturl.'/sites/parm.php?network='.$network.'&station='.$station.'">Parameters</a></th>';
+  $pics='<th><a href="'.$rooturl.'/sites/pics.php?network='.$network.'&station='.$station.'&dir=N">Photos</a></th>';
 //  $facts='<th><a href="/sites/facts.php?id='.$id.'">Facts</a></th>';
-  $neighbors='<th><a href="/sites/neighbors.php?station='.$station.'">Neighbors</a></th>';
-  $mapping='<th><a href="/sites/mapping.php?station='.$station.'">Location Maps</a></th>';
-  $cal='<th><a href="/sites/cal.phtml?station='.$station.'">Calibrations</a></th>';
+  $neighbors='<th><a href="'.$rooturl.'/sites/neighbors.php?network='.$network.'&station='.$station.'">Neighbors</a></th>';
+  $mapping='<th><a href="'.$rooturl.'/sites/mapping.php?network='.$network.'&station='.$station.'">Location Maps</a></th>';
+  $cal='<th><a href="'.$rooturl.'/sites/cal.phtml?network='.$network.'&station='.$station.'">Calibrations</a></th>';
 
 
   switch($current){
