@@ -56,7 +56,7 @@ function new_window(url) {
 ** This page will automatically refresh every five minutes.
 
 <?php
-$vals = Array("station" => "Station ID", "gmt_ts" => "Ob Time", 
+$vals = Array("station" => "Station ID", "ts" => "Ob Time", 
 "relh" => "Relative Humidity",
   "min_tmpf" => "Today's Low Temperature",
   "max_tmpf" => "Today's High Temperature",
@@ -76,7 +76,7 @@ echo "<br>Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on a co
 <tr>
   <th>ADD:</th>
   <th>Station:</th>
-  <th><a href="current.phtml?network=<?php echo $network; ?>&sortcol=gmt_ts">Ob Time</a></th>
+  <th><a href="current.phtml?network=<?php echo $network; ?>&sortcol=ts">Ob Time</a></th>
   <th>
    <a href="current.phtml?network=<?php echo $network; ?>&sortcol=tmpf">Temp</a>
    (<a href="current.phtml?network=<?php echo $network; ?>&sortcol=max_tmpf">Hi</a> /
