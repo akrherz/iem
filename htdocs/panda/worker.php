@@ -333,4 +333,4 @@ else {
 <table cellspacing="1" cellpadding="2" border="1">
 <tr><th>lsr</th><th>Valid</th><th>Lead Time:</th><th>County</th><th>City</th><th>Type</th><th>Magnitude</th></tr>
 <?php echo $ls; ?></table>
-<?php // echo $DEBUG; ?>
+<?php //echo $DEBUG; ?>
