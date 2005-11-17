@@ -12,7 +12,7 @@ title="red" />
  <?php if (isset($REFRESH)){ echo $REFRESH; } ?>
  <?php if (isset($HEADEXTRA)){ echo $HEADEXTRA;} ?>
 </head>
-<body>
+<body <?php if (isset($BODYEXTRA)){ echo $BODYEXTRA;} ?>>
 <?php include("$rootpath/include/webring.html"); ?>
 <div id="iem-main">
  
