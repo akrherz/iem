@@ -17,7 +17,7 @@ if (isset($_GET["img_x"]) && isset($_GET["img_y"]) )
 
   $_GET["lon0"] = ($_GET["img_x"] * $dx) + $ll_x ;
   $_GET["lat0"] = $ur_y - ($_GET["img_y"] * $dy) ;
-  $_GET["site"] = "user";
+  /* $_GET["site"] = "user"; */
 }
 
 $cu = isset($_GET["cu"]) ? $_GET["cu"]: 0;
@@ -26,16 +26,21 @@ $tz = isset($_GET["tz"]) ? $_GET["tz"] : "CST";
 $tzdict = Array("UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000, "CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200, "PST" => 28800);
 
 $tzoff = $tzdict[$tz];
-
+$autopilot = isset($_GET["autopilot"]) ? $_GET["autopilot"] : 0;
 $filter = isset($_GET["filter"]) ? $_GET["filter"]: 0;
 $lsrwindow = isset($_GET["lsrwindow"]) ? $_GET["lsrwindow"] : "0";
 $lsrlook = isset($_GET["lsrlook"]) ? $_GET["lsrlook"] : "+";
 $site = isset($_GET["site"]) ? $_GET["site"]: "DMX";
+$osite = isset($_GET["osite"]) ? $_GET["osite"]: "DMX";
 $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "issued";
 $sortdir = isset($_GET["sortdir"]) ? $_GET["sortdir"]: 0;
 $lon0 = isset($_GET["lon0"]) ? $_GET["lon0"]: 0;
 $lat0 = isset($_GET["lat0"]) ? $_GET["lat0"]: 0;
 $zoom = isset($_GET["zoom"]) ? $_GET["zoom"]: 250;
+$imgsize = isset($_GET["imgsize"]) ? $_GET["imgsize"] : "640x480";
+$ar = explode("x", $imgsize);
+$width = $ar[0];
+$height = $ar[1];
 
 $isarchive = (isset($_GET["archive"]) && $_GET["archive"] == "yes") ? 1 : 0;
 $archive = isset($_GET["archive"]) ? $_GET["archive"] : "";
@@ -84,12 +89,12 @@ $uri = "$baseuri?site=$site&cu=$cu&archive=$archive&year=$year&month=$month&day=
 $uri_nowfo = "$baseuri?archive=$archive&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom";
 
 /* Scenario 1, user coordinates are posted */
-if (isset($_GET["site"]) && $_GET["site"] == "user")
+if (isset($_GET["lat0"]) && isset($_GET["lon0"]) )
 {
   $uri .= "&lat0=$lat0&lon0=$lon0";
 }
 /* Scenario 2, some site is posted */
-else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0)
+else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site)
 {
   $lat0 = $wfos[$site]["lat"];
   $lon0 = $wfos[$site]["lon"];
@@ -97,26 +102,58 @@ else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0)
 
 if (! $isarchive)
 {
-  $REFRESH = "<meta http-equiv=\"refresh\" content=\"180\">";
+  // $REFRESH = "<meta http-equiv=\"refresh\" content=\"180; $uri\">";
 }
 $TITLE = "IEM | RADAR & NWS Warnings";
 $HEADEXTRA = "<script language=\"JavaScript\">
 function addTime() {
 var d = new Date();
 document.form.tzoff.value=(d.getTimezoneOffset()*60);
-
 }
+
+function reverseLayer(lyr) {
+  if ( document.getElementById ) {
+    var w = document.getElementById(lyr);
+    if (w.style.display == \"none\") { w.style.display = \"block\"; }
+    else { w.style.display = \"none\"; }
+  }
+}
+
+function handsOff2( ) {
+  reverseLayer(\"iem-header\");
+  reverseLayer(\"form-control\");
+  reverseLayer(\"iem-footer\");
+}
+function handsOff( ) {
+  reverseLayer(\"iem-header\");
+  reverseLayer(\"form-control\");
+  reverseLayer(\"iem-footer\");
+  if (document.myform.autopilot.value == 1){
+    document.myform.autopilot.value = 0;
+  } else {
+    document.myform.autopilot.value = 1;
+  }
+}
+
+setTimeout(\"document.myform.submit()\", 300000);
 </script>";
 
-include("$rootpath/include/header.php");
+if ($autopilot) $BODYEXTRA = "onLoad=\"handsOff2();\"";
 ?>
+
+<?php include("$rootpath/include/header.php");?>
+
+<form method="GET" name="myform" action="<?php echo $baseuri; ?>">
+<input type="hidden" value="<?php echo $autopilot; ?>" name="autopilot">
+<input type="hidden" value="<?php echo $site; ?>" name="osite">
+
 <b>Nav:</b> <a href="<?php echo $rooturl; ?>/current/">Current Data</a> <b> > </b>
   <a href="<?php echo $rooturl; ?>/current/radar.phtml">Radar Products</a> <b> > </b>
-  NEXRAD & Warnings <a href="<?php echo $baseuri; ?>">RESET APP!</a><br>
+  NEXRAD & Warnings <a href="<?php echo $baseuri; ?>">RESET APP!</a> &nbsp; 
+ <input type="submit" onClick="javascript: handsOff(); return false;" value="Auto Pilot">
+<br>
 
 <?php
-$width = "640";
-$height = "480";
 
 dl($mapscript);
 
@@ -125,9 +162,56 @@ dl($mapscript);
 <table bgcolor="black" width="100%" cellpadding=2 border=0 cellspacing=0>
   <tr><td>
 <table width="100%" bgcolor="white" cellpadding=2 border=0 cellspacing=0>
-  <tr><td valign="TOP" bgcolor="#dddddd">
+<tr><td>
+<?php
+if (intval($loop) ==  1){
 
-<form method="GET" name="form" action="<?php echo $baseuri; ?>">
+  $urls = Array();
+
+  for ($i=0;$i<9;$i++){
+   $imgi = 8 - $i;
+   include("warnings_plot.php");
+   $urls[$i] = $url;
+  }
+
+  include ("loop.php");
+  $radTimes = Array();
+  printHTML($urls, $radTimes);
+} else if (intval($loop) == 2){
+  $urls = Array();
+  $fts = time();
+  $f = fopen("/var/www/htdocs/tmp/". $fts .".dat", 'w');
+
+  for ($i=0;$i<9;$i++){
+   $imgi = 8 - $i;
+   include("warnings_plot.php");
+   $urls[$i] = $url;
+   fwrite($f, "$rooturl/$url\n");
+  }
+  fclose($f);
+?>
+  <applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="<?php echo $width; ?>" height="<?php echo $height + 100; ?>" alt="You must enable Java in your browser to view the radar loop">
+        <param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
+        <param name="rate" value="80">
+	<PARAM name="no_enh" value="true">
+        <param name="pause_percent" value="800">
+        <param name="file_of_filenames" value="/tmp/<?php echo $fts; ?>.dat">
+</applet>
+
+<?php
+} else {
+  $imgi = 0;
+  include("warnings_plot.php");
+
+  echo "<center><input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\"></center>\n";
+
+}
+
+?>
+</td></tr>
+
+  <tr><td valign="TOP" bgcolor="#dddddd">
+<div id="form-control">
 <input type="hidden" name="tzoff" value="0">
 <?php if (isset($_GET["lat0"])) { ?>
 <input type="hidden" value="<?php echo $lat0; ?>" name="lat0">
@@ -144,9 +228,11 @@ while( list($key, $value) = each($wfos) ){
   if ($site == $key) echo "SELECTED";
   echo ">[".$key."] ". $wfos[$key]["city"] ."\n";
 }
+/*
 if ( isset($_GET["site"]) && $_GET["site"] == "user" ) { 
 echo "<option value=\"user\" SELECTED>User Selected\n";
 }
+*/
 ?>
 </select></td>
 
@@ -213,66 +299,50 @@ echo "<option value=\"user\" SELECTED>User Selected\n";
  <option value="15" <?php if ($lsrwindow == 15) echo "SELECTED"; ?>>15 minutes
  <option value="30" <?php if ($lsrwindow == 30) echo "SELECTED"; ?>>30 minutes
  <option value="60" <?php if ($lsrwindow == 60) echo "SELECTED"; ?>>60 minutes
-
 </select></td>
 
+<th>Size</th>
+<td><select name="imgsize">
+ <option value="640x480" <?php if ($imgsize == "640x480") echo "SELECTED"; ?>>640x480
+ <option value="800x600" <?php if ($imgsize == "800x600") echo "SELECTED"; ?>>800x600
+ <option value="1024x768" <?php if ($imgsize == "1024x768") echo "SELECTED"; ?>>1024x768
+ <option value="1280x1024" <?php if ($imgsize == "1280x1024") echo "SELECTED"; ?>>1280x1024
+</select></td>
 
-<td><input type="submit" value="Show Map"></td></tr></table>
+</tr></table>
+
+<table style="padding: 3px;" border="1">
+<thead><tr><th>&nbsp;</th><th>Year:</th><th>Month:</th><th>Day:</th><th>Hour:</th><th>Minute</th><td></td></tr></thead>
+<tbody>
+<tr>
+<td><input type="checkbox" value="yes" name="archive" <?php if($isarchive) echo
+"CHECKED=CHECKED"; ?>>Archived Mode?</td>
+<td><?php echo yearSelect(2003, $year, "year"); ?></td>
+<td><?php echo monthSelect($month, "month"); ?></td>
+<td><?php echo daySelect($day, "day"); ?></td>
+<td><?php echo hourSelect($hour, "hour"); ?></td>
+<td><?php echo local5MinuteSelect($m, "minute"); ?></td>
+<td><input type="submit" value="Show Map"></td>
+</tr>
+</tbody></table>
+</div>
+
+
 </td></tr>
 
 <tr><td>
 
 <?php
 
-if ($site == "user") 
+/* if ($site == "user") 
 {
   echo sprintf("User selected Latitude: %.3f Longitude: %.3f", $lat0, $lon0);
 } else {
   echo "Selected WFO:</b> ". $wfos[$site]["city"] ." (".$site.")\n";
-}
+} */
+  echo "Selected WFO:</b> ". $wfos[$site]["city"] ." (".$site.")\n";
 
-if (intval($loop) ==  1){
 
-  $urls = Array();
-
-  for ($i=0;$i<9;$i++){
-   $imgi = 8 - $i;
-   include("warnings_plot.php");
-   $urls[$i] = $url;
-  }
-
-  include ("loop.php");
-  $radTimes = Array();
-  printHTML($urls, $radTimes);
-} else if (intval($loop) == 2){
-  $urls = Array();
-  $fts = time();
-  $f = fopen("/var/www/htdocs/tmp/". $fts .".dat", 'w');
-
-  for ($i=0;$i<9;$i++){
-   $imgi = 8 - $i;
-   include("warnings_plot.php");
-   $urls[$i] = $url;
-   fwrite($f, "$rooturl/$url\n");
-  }
-  fclose($f);
-?>
-  <applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="640" height="580" alt="You must enable Java in your browser to view the radar loop">
-        <param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
-        <param name="rate" value="80">
-	<PARAM name="no_enh" value="true">
-        <param name="pause_percent" value="800">
-        <param name="file_of_filenames" value="/tmp/<?php echo $fts; ?>.dat">
-</applet>
-
-<?php
-} else {
-  $imgi = 0;
-  include("warnings_plot.php");
-
-  echo "<br><center><input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\"></center>\n";
-
-}
 
 echo "
   </td></tr>\n</table>
@@ -392,7 +462,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
  echo "><td><a href=\"$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo\">$wfo</a></td><td><a href=\"$warningscat\">$phenomena</a></td><td>$eventid</td>";
 
 if (floatval($row["lon0"]) < 0 && floatval($row["lat0"]) > 0) {
-     echo "<td><a href=\"$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=user&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=". $row["lon0"] ."&lat0=". $row["lat0"] ."\">". $row["cname"] ."</a></td>";
+     echo "<td><a href=\"$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=". $row["lon0"] ."&lat0=". $row["lat0"] ."\">". $row["cname"] ."</a></td>";
 } else {
      echo "<td>". $row["cname"] ."</td>";
 
@@ -417,22 +487,6 @@ if ($k == 0){
 ?>
 </tbody>
 </table>
-
-<p><b>Time Settings in <?php echo $tz; ?>:</b> <i>Not used unless 'Archived Mode?' is checked</i><br />
-<table style="padding: 3px;" border="1">
-<thead><tr><th>&nbsp;</th><th>Year:</th><th>Month:</th><th>Day:</th><th>Hour:</th><th>Minute</th><td></td></tr></thead>
-<tbody>
-<tr>
-<td><input type="checkbox" value="yes" name="archive" <?php if($isarchive) echo
-"CHECKED=CHECKED"; ?>>Archived Mode?</td>
-<td><?php echo yearSelect(2003, $year, "year"); ?></td>
-<td><?php echo monthSelect($month, "month"); ?></td>
-<td><?php echo daySelect($day, "day"); ?></td>
-<td><?php echo hourSelect($hour, "hour"); ?></td>
-<td><?php echo local5MinuteSelect($m, "minute"); ?></td>
-<td><input type="submit" value="Show Map"></td>
-</tr>
-</tbody></table>
 
 </form>
 <?php if (! $isarchive) { ?>
