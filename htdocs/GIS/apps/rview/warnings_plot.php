@@ -98,10 +98,10 @@ $radar->set("status", 1);
 
 $lsrs = $map->getlayerbyname("lsrs");
 $lsrs->set("connection", $_DATABASES["postgis"] );
-$lsrs->set("status", 1);
+$lsrs->set("status", MS_ON);
 if ($lsrwindow == 0)
 {
-  $lsrs->set("status", 0);
+  $lsrs->set("status", MS_OFF);
 }
 $lsr_btime = strftime("%Y-%m-%d %H:%M:00+00", $ts - ($lsrwindow * 60) );
 if ($lsrlook == "+") 
@@ -124,7 +124,8 @@ $cwas->draw( $img);
 $watches->draw($img); 
 $c0->draw($img);
 $p0->draw($img);
-$lsrs->draw($img);
+if ($lsrwindow != 0)
+  $lsrs->draw($img);
 
 mktitle($map, $img, "                  IEM NEXRAD composite base reflect valid: $d");
 $map->drawLabelCache($img);
