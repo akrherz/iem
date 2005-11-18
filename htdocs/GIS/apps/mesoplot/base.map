@@ -245,7 +245,7 @@ LAYER
  NAME mwradar
  STATUS ON
  TYPE RASTER
- DATA "/mesonet/data/gis/images/unproj/MWCOMP/n0r_0.tif"
+ DATA "/mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif"
  OFFSITE 0 0 0
  PROJECTION
   "init=epsg:4326"

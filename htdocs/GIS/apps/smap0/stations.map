@@ -69,7 +69,7 @@ LAYER
   NAME counties
   STATUS DEFAULT
   TYPE POLYGON
-  DATA shape/iacounties3.shp
+  DATA shape/4326/iowa/iacounties.shp
   LABELITEM 'Name'
   LABELMAXSCALE 1800000
   CLASS
@@ -92,7 +92,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME ASOS
-  CONNECTION "user=akrherz dbname=mesosite host=10.10.10.20"
+  CONNECTION "user=akrherz dbname=mesosite host=db1.mesonet.agron.iastate.edu"
   DATA "geom from stations"
   FILTER "network = 'ASOS'"
   STATUS OFF
@@ -120,7 +120,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME RWIS
-  CONNECTION "user=akrherz dbname=mesosite host=10.10.10.20"
+  CONNECTION "user=akrherz dbname=mesosite host=db1.mesonet.agron.iastate.edu"
   DATA "geom from stations"
   FILTER "network = 'RWIS'"
   STATUS OFF
@@ -149,7 +149,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME AWOS
-  CONNECTION "user=akrherz dbname=mesosite host=10.10.10.20"
+  CONNECTION "user=akrherz dbname=mesosite host=db1.mesonet.agron.iastate.edu"
   DATA "geom from stations"
   FILTER "network = 'AWOS'"
   STATUS OFF
@@ -177,7 +177,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME KCCI
-  CONNECTION "user=akrherz dbname=mesosite host=10.10.10.20"
+  CONNECTION "user=akrherz dbname=mesosite host=db1.mesonet.agron.iastate.edu"
   DATA "geom from stations"
   FILTER "network = 'KCCI'"
   STATUS OFF

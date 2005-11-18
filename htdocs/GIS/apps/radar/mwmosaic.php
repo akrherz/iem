@@ -43,11 +43,11 @@ $icwa->draw($img);
 
 $map->drawLabelCache($img);
 
-$ts = @filemtime("/mesonet/data/gis/images/4326/MWCOMP/n0r_0.png");
+$ts = @filemtime("/mesonet/data/gis/images/4326/USCOMP/n0r_0.png");
   if ($ts == 0 || $ts == "")
   {
     sleep(10);
-    $ts = @filemtime("/mesonet/data/gis/images/4326/MWCOMP/n0r_0.png");
+    $ts = @filemtime("/mesonet/data/gis/images/4326/USCOMP/n0r_0.png");
   }
   $d = date("d F Y h:i A" ,  $ts + 15);
 

@@ -28,7 +28,7 @@ $radar->draw($img);
 $w0c->draw($img);
 $w0p->draw($img);
 
-$ts = @filemtime("/mesonet/data/gis/images/unproj/MWCOMP/n0r_0.png");
+$ts = @filemtime("/mesonet/data/gis/images/unproj/USCOMP/n0r_0.png");
 $d = date("d F Y h:i A" ,  $ts + 15);
 
 mktitle($map, $img, "                  IEM NEXRAD composite base reflect valid: $d");
