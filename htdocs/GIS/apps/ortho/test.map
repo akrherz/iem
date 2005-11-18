@@ -8,7 +8,7 @@ FONTSET "/mesonet/data/gis/fonts/fonts.list"
 #EXTENT 198759 4446551 738087 4856974
 EXTENT  450560 4653852 453260 4654552
 UNITS METERS
-SYMBOLSET "/mesonet/data/gis/symbols/one.sym"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 SHAPEPATH "/mesonet/data/gis/"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG

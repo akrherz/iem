@@ -101,7 +101,7 @@ END
 
 LAYER
   NAME radar
-  DATA /mesonet/data/gis/images/unproj/MWCOMP/n0r_0.tif
+  DATA /mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif
   TYPE RASTER
   STATUS ON
   METADATA

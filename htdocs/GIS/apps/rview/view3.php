@@ -12,7 +12,7 @@ $dbts = strftime("%Y-%m-%d %H:%M", $ts);
 
 $png = sprintf("/mesonet/ARCHIVE/data/%s/%s/%s/GIS/mwcomp/n0r_%s%s%s%s%s.png", $year, $month, $day, $year, $month, $day, $hour, $minute);
 
-copy("/mesonet/data/gis/images/unproj/MWCOMP/n0r_0.wld", "/tmp/n0r.tfw");
+copy("/mesonet/data/gis/images/unproj/USCOMP/n0r_0.wld", "/tmp/n0r.tfw");
 `convert $png /tmp/n0r.tif`;
 
 dl("php_mapscript.so");

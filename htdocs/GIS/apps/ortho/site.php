@@ -7,6 +7,7 @@ $c = iemdb("mesosite");
 // 19 Nov 2002:  Allow zooming.
 $type = $_GET["type"];
 $id = $_GET["station"];
+$zoom = isset($_GET["zoom"]) ? $_GET["zoom"] : 1;
 
 if (strlen($id) > 6 || strlen($id) == 0) $id = 'DSM';
 if (strlen($type) == 0) $type="doqqs";
@@ -31,7 +32,7 @@ $site->set("status", MS_ON);
 $rect = $map->getlayerbyname("rect");
 $rect->set("status", MS_ON);
 
-include("$nwnpath/include/dbloc.php");
+include("$rootpath/include/dbloc.php");
 $loc = dbloc26915($c, $id);
 
 
@@ -64,7 +65,7 @@ $ll->draw($img);
 
 $pt = ms_newPointObj();
 $pt->setXY($loc["x"], $loc["y"], 0);
-$pt->draw($map, $site, $img, 0, "  ". $loc['city']);
+$pt->draw($map, $site, $img, 0, "  ");
 $pt->free();
 
 /**
