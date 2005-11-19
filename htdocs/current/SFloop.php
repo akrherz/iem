@@ -57,7 +57,7 @@ if (first_image > last_image)
 
 
 theImages[0] = new Image();
-theImages[0].src = "9surface<?php echo($product); ?>.gif";
+theImages[0].src = "surface<?php echo($product); ?>9.gif";
 imageNum[0] = true;
 
 //==============================================================
@@ -254,31 +254,31 @@ function launch()
 
 
 theImages[1] = new Image();
-theImages[1].src = "8surface<?php echo($product); ?>.gif";
+theImages[1].src = "surface<?php echo($product); ?>8.gif";
 document.animation.src = theImages[1].src;
 theImages[2] = new Image();
-theImages[2].src = "7surface<?php echo($product); ?>.gif";
+theImages[2].src = "surface<?php echo($product); ?>7.gif";
 document.animation.src = theImages[2].src;
 theImages[3] = new Image();
-theImages[3].src = "6surface<?php echo($product); ?>.gif";
+theImages[3].src = "surface<?php echo($product); ?>6.gif";
 document.animation.src = theImages[3].src;
 theImages[4] = new Image();
-theImages[4].src = "5surface<?php echo($product); ?>.gif";
+theImages[4].src = "surface<?php echo($product); ?>5.gif";
 document.animation.src = theImages[4].src;
 theImages[5] = new Image();
-theImages[5].src = "4surface<?php echo($product); ?>.gif";
+theImages[5].src = "surface<?php echo($product); ?>4.gif";
 document.animation.src = theImages[5].src;
 theImages[6] = new Image();
-theImages[6].src = "3surface<?php echo($product); ?>.gif";
+theImages[6].src = "surface<?php echo($product); ?>3.gif";
 document.animation.src = theImages[6].src;
 theImages[7] = new Image();
-theImages[7].src = "2surface<?php echo($product); ?>.gif";
+theImages[7].src = "surface<?php echo($product); ?>2.gif";
 document.animation.src = theImages[7].src;
 theImages[8] = new Image();
-theImages[8].src = "1surface<?php echo($product); ?>.gif";
+theImages[8].src = "surface<?php echo($product); ?>1.gif";
 document.animation.src = theImages[8].src;
 theImages[9] = new Image();
-theImages[9].src = "0surface<?php echo($product); ?>.gif";
+theImages[9].src = "surface<?php echo($product); ?>0.gif";
 document.animation.src = theImages[9].src;
 
 
