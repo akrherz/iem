@@ -28,7 +28,7 @@ def get_content(field):
 
 def convert_month(month):
         month = month[-2:]
-        file = '/home/httpd/html/src/months.con'
+        file = 'months.con'
         f = open(file,'r').read()
 
         lines = re.split('\n',f)
