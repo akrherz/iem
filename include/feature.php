@@ -50,7 +50,7 @@ if (getenv("REMOTE_ADDR") == "65.110.243.170" ||
 {
  $s = "<img src=\"images/smokey_909.jpg\" style=\"float: left; margin: 5px;\">
 Smokey,
-<br /> &nbsp; &nbsp; &nbsp; &nbsp; Ten weeks down, a whole lot to go!  Happy anniversary!!<br /> &nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+<br /> &nbsp; &nbsp; &nbsp; &nbsp; Eleven weeks down, a whole lot to go!  Happy anniversary!!<br /> &nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 }
 
 echo $s;

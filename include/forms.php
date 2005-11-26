@@ -18,7 +18,7 @@ function local5MinuteSelect($selected, $name){
   for ($i=0; $i<60;$i=$i+5) {
     echo "<option value='".$i."' ";
     if ($i == intval($selected)) echo "SELECTED";
-    echo ">". $i ."\n";
+    echo sprintf(">%02d\n", $i );
   }
   echo "</select>\n";
 }
