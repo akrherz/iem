@@ -1,18 +1,3 @@
 <?php
- include("../../config/settings.inc.php");
-$REFRESH = "<meta http-equiv=\"refresh\" content=\"300; URL=http://mesonet.agron.iastate.edu/current/uscomp.phtml\">";
-$TITLE = "IEM | US NEXRAD";
-  include("$rootpath/include/header.php");?>
-
-<a href="radar.phtml">Current RADAR Products</a>
-&nbsp; <b>|</b> &nbsp; <a href="mcview.phtml?prod=usrad">Loop RADAR</a>
-&nbsp; <b>|</b> &nbsp; <a href="mwcomp.phtml">Switch to MidWest View</a>
-&nbsp; <b>|</b> &nbsp; <a href="<?php echo $rooturl; ?>/GIS/apps/rview/warnings.phtml">Current Warnings</a>
-
-<br /><img src="../data/uscomp.png?<?php echo time(); ?>">
-
-<br /><i>(Image refreshes every 5 minutes)</i>
- 
-<?php include("$rootpath/include/footer.php"); ?>
-
-
+Header("Location: mcview.phtml?prod=usrad&java=none&mode=realtime&frames=1");
+?>
