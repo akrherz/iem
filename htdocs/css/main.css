@@ -247,3 +247,9 @@ img.pics{
 	border: 1px dashed;
 	background-color: #eee;
 }
+div.iembox {
+  padding-left: 5px;
+}
+div.iembox h4 {
+  margin: 2px;
+}
