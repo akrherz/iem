@@ -99,20 +99,15 @@ $hrefs = Array();
 for ($i=0; $i < intval($frames); $i++){
   $myuri = "$rooturl/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."$prod/n0r_". gmdate('Ymd_Hi', $loopts + ($i * (intval($interval) * 60)) ) .".png";
   $myhref = "$rooturl/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."GIS/uscomp/n0r_". gmdate('YmdHi', $loopts + ($i * (intval($interval) * 60)) ) .".png";
+  $gisbase = "$rooturl/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."GIS/uscomp/";
   $files .= $myuri .",";
   $images[] = $myuri;
   $hrefs[] = $myhref;
 }
-?>
 
-<html>
-<head>
-  <title>Current & Historical IEM NEXRAD Composite Loop</title>
-   <link rel="stylesheet" type="text/css" href="../css/mesonet.css">
- <?php if ($mode == "realtime") { ?>
-  <meta http-equiv="refresh" content="300; URL=<?php echo "$uri?java=$java&frames=$frames&interval=$interval&prod=$prod"; ?>">
- <?php } ?>
-<script LANGUAGE="JavaScript1.2" type="text/javascript">
+/* We finally start output */
+
+$HEADEXTRA = "<script LANGUAGE=\"JavaScript1.2\" type=\"text/javascript\">
 //<!--
 
 function switchToArchiveMode()
@@ -121,10 +116,12 @@ function switchToArchiveMode()
 }
 
 -->
-</script>
-</head>
-<body>
-<a href="<?php echo $rooturl; ?>/current/">Current Data</a> &nbsp; <b>></b> &nbsp; <font size="+1"><b>IEM NEXRAD Composite</b></font>
+</script>";
+  if ($mode == "realtime") $REFRESH = "<meta http-equiv=\"refresh\" content=\"300; URL=$uri?java=$java&frames=$frames&interval=$interval&prod=$prod\">";
+  $TITLE = "Current & Historical IEM NEXRAD Composite Loop";
+  include("$rootpath/include/header.php");
+?>
+<a href="<?php echo $rooturl; ?>/current/">Current Data</a> &nbsp; <b>></b> &nbsp; <b>IEM NEXRAD Composite</b>
 &nbsp; &nbsp; <a href="<?php echo $uri; ?>">Reset Application for a Current Loop</a>
 
 <br><form method="GET" action="<?php echo $uri; ?>" name="controls">
@@ -132,8 +129,10 @@ function switchToArchiveMode()
 <table cellpadding=2 cellspacing=0>
  <tr><td valign="top" style="width: 170px;">
 
-<p><b>Composite Product:</b>
-<br /><select name="prod">
+
+<div class="iembox" style="width: 200px;">
+<h4>Composite Product:</h4>
+<select name="prod">
   <option value="comprad" <?php if ($prod == "comprad") echo "SELECTED"; ?>>A1. Iowa (Default)</option>
   <option value="usrad" <?php if ($prod == "usrad") echo "SELECTED"; ?>>A2. United States</option>
   <option value="hunrad" <?php if ($prod == "hunrad") echo "SELECTED"; ?>>A3. Huntsville, AL</option>
@@ -153,23 +152,23 @@ function switchToArchiveMode()
 <br /><b>A3.</b> 3 Nov 2004
 <br /><b>A4.</b> 21 Sep 2005
 
-<p><b>Display Tool:</b>
-<br /><select name="java">
+<h4>Display Tool:</h4>
+<select name="java">
   <option value="applet" <?php if ($java == "applet") echo "SELECTED"; ?>>Java Applet</option>
   <option value="script" <?php if ($java == "script") echo "SELECTED"; ?>>Java Script</option>
   <option value="none" <?php if ($java == "none") echo "SELECTED"; ?>>List Images</option>
 </select>
 
-<p><b>Mode:</b>
-<br /><select name="mode">
+<h4>Mode:</h4>
+<select name="mode">
   <option value="realtime" <?php if ($mode == "realtime") echo "SELECTED"; ?>>RealTime
   <option value="archive" <?php if ($mode == "archive") echo "SELECTED"; ?>>Archived
 </select>
 
-<p><b>Frames:</b>
+<h4>Frames:</h4>
 <input type="text" size="3" name="frames" value="<?php echo $frames; ?>">
 
-<p><b>Loop Interval:</b>
+<h4>Loop Interval:</h4>
 <select name="interval">
   <option value="5" <?php if ($interval == 5) echo "SELECTED"; ?>>5 min (DEFAULT)
   <option value="10" <?php if ($interval == 10) echo "SELECTED"; ?>>10 min
@@ -179,8 +178,8 @@ function switchToArchiveMode()
   <option value="60" <?php if ($interval == 60) echo "SELECTED"; ?>>60 min
 </select>
 
-<p><b>Date:</b>
-<br /><?php 
+<h4>Date:</h4>
+<?php 
   $start = intval(2003);
   $now = time();
   $tyear = strftime("%Y", $now);
@@ -212,8 +211,8 @@ function switchToArchiveMode()
   echo "</select>\n";
 
 ?>
-<p><b>Time:</b>
-<br /><?php
+<h4>Time:</h4>
+<?php
 
   echo "<select name='hour'  onChange=\"javascript: switchToArchiveMode(); \">\n";
   for ($i=0; $i<24;$i++) {
@@ -228,16 +227,21 @@ function switchToArchiveMode()
   for ($i=0; $i<60;$i=$i+5) {
     echo "<option value='".$i."' ";
     if ($i == intval($minute)) echo "SELECTED";
-    echo ">". $i ."\n";
+    echo sprintf(">%02d\n", $i );
   }
   echo "</select>\n";
 
 ?>
 
 <p><input type="submit" value="Generate Loop"> 
-</form>
 
+<h4>Related Links:</h4> 
+<a href="<?php $rooturl; ?>/GIS/apps/rview/warnings.phtml">Interactive RADAR</a>
+<br /><a href="<?php $rooturl; ?>/panda/">Warning Verification</a>
+</div>
+</form>
 </td><td>
+
 <?php if ($mode == "realtime") echo " &nbsp; <b>REAL-TIME mode:</b> Will refresh in 5 minutes"; ?> 
 
 <?php if ($java == "applet") { ?>
@@ -289,9 +293,12 @@ launch();
 
 </td></tr></table>
 
-<p><b>RADAR layers used in this loop:</b>
-<br>All of these images are GIS Ready! Use 
-<a href="/data/gis/images/unproj/USCOMP/n0r_0.wld">this world file</a> to correctly georeference them.  The projection of these images is geographic NAD83 (<i>unprojected</i>).  You will need to rename the world file to match the filename of the RADAR layer.
+<p><b>GIS NEXRAD layers</b>
+<br />The NEXRAD layer used in these images are available in a georeferenced 
+RASTER format. You will need this <a href="<?php echo $gisbase; ?>/n0r_0.wld">this world file</a> to correctly georeference them.  The projection of 
+these images is geographic NAD83 (<i>unprojected</i>).  You will need to 
+rename the world file to match the filename of the RADAR layer before loading
+into your GIS.
 <br>
 <ul>
 <?php
