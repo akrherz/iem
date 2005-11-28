@@ -108,6 +108,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
       $mydata[$key]["feel"] = "M";
       $mydata[$key]["relh"] = "M";
    } 
+   $mydata[$key]["peak_ts"] = 0;
    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
       $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
