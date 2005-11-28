@@ -43,7 +43,7 @@
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 
 //if (getenv("REMOTE_ADDR") == "127.0.0.1" || 
-if (getenv("REMOTE_ADDR") == "65.110.243.170" ||
+if (getenv("REMOTE_ADDR") == "65.110.243.174" ||
     getenv("REMOTE_ADDR") == "69.5.128.198" ||
     getenv("REMOTE_ADDR") == "65.110.243.175" ||
     getenv("REMOTE_ADDR") == "65.110.243.147") 
