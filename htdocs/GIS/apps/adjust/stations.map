@@ -196,25 +196,25 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
-  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
-  DATA "geom from (select type as wtype, geom, oid from watches WHERE expired > '2005-01-01' ORDER by type ASC) as foo"
+  CONNECTION "user=nobody dbname=postgis host=db1.mesonet.agron.iastate.edu"
+  DATA "geom from (select type as wtype, geom, oid from watches WHERE date(expired) = '1997-04-01'  ORDER by type ASC) as foo"
  PROJECTION
   "init=epsg:4326"
  END
- TYPE POLYGON
+ TYPE LINE
  STATUS DEFAULT
  CLASSITEM 'wtype'
   CLASS
     EXPRESSION /SVR/
     COLOR 255 255 0
-    #SIZE 2
-    #SYMBOL 1
+    SIZE 3
+    SYMBOL 1
   END
   CLASS
     EXPRESSION /TOR/
     COLOR 255 0 0
-    #SIZE 2
-    #SYMBOL 1
+    SIZE 3
+    SYMBOL 1
   END
 END
 
