@@ -404,17 +404,17 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
   CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
-  DATA "geom from warnings"
+  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'C') as foo using unique oid using SRID=4326"
 # DATA "geom from (select type, geom, oid from warnings WHERE gtype = 'C' and 
 #	expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE LINE
   METADATA
     "wms_title" "Current County Warnings"
-     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+     "wms_srs" "EPSG:4326"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "significane != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'C'"
+#  FILTER "significane != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'C'"
   PROJECTION
    "proj=latlong"
   END
@@ -472,7 +472,8 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_c
   CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
-  DATA "geom from warnings"
+  #DATA "geom from warnings"
+  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and issue > 'YESTERDAY'::timestamp and gtype = 'P') as foo using unique oid using SRID=4326"
   STATUS ON
   TYPE POLYGON
   METADATA
@@ -480,7 +481,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "significance != 'A' and issue > 'YESTERDAY'::timestamp and gtype = 'C'"
+  #FILTER "significance != 'A' and issue > 'YESTERDAY'::timestamp and gtype = 'C'"
   PROJECTION
    "proj=latlong"
   END
@@ -497,7 +498,8 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
   CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
-  DATA "geom from warnings"
+  #DATA "geom from warnings"
+  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
   STATUS ON
   TYPE POLYGON
   METADATA
@@ -505,7 +507,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P'"
+  #FILTER "significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P'"
   PROJECTION
    "proj=latlong"
   END

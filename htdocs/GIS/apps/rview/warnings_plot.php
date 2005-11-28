@@ -78,9 +78,12 @@ $c0->set("connection", $_DATABASES["postgis"] );
 $c0->set("status", 1);
 if ($isarchive)
 { 
-  $c0->set("data", "geom from warnings_$year");
+   $c0->set("data", "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+  //$c0->set("data", "geom from warnings_$year");
+}else {
+  //$c0->setFilter("significance != 'A' and expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'");
+   $c0->set("data", "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
 }
-$c0->setFilter("significance != 'A' and expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'");
 $q = "expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'";
 
 $p0 = $map->getlayerbyname("warnings0_p");
@@ -88,10 +91,12 @@ $p0->set("connection", $_DATABASES["postgis"] );
 $p0->set("status", 1);
 if ($isarchive)
 { 
-  $p0->set("data", "geom from warnings_$year");
+   $p0->set("data", "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
+//  $p0->set("data", "geom from warnings_$year");
+} else {
+ $p0->set("data", "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
+//$p0->setFilter("significance != 'A' and expire > '".$db_ts."' and issue < '". $db_ts."' and gtype = 'P'");
 }
-$p0->setFilter("significance != 'A' and expire > '".$db_ts."' and issue < '". $db_ts."' and gtype = 'P'");
-
 $radar = $map->getlayerbyname("radar2");
 $radar->set("data", $radfile);
 $radar->set("status", 1);
