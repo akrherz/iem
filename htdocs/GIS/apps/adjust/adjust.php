@@ -2,6 +2,8 @@
 <?php
 include("../../../../config/settings.inc.php");
 
+$d = isset($_GET["d"]) ? $_GET["d"] : "1997-04-01";
+
 set_time_limit(200);
 
 
@@ -82,6 +84,7 @@ $cities->set("status", MS_ON);
 
 $watches = $map->getlayerbyname("watches");
 $watches->set("status", MS_ON);
+$watches->set("data", "geom from (select type as wtype, geom, oid from watches WHERE date(expired) = '$d'  ORDER by type ASC) as foo");
 
 $iards = $map->getlayerbyname("iards");
 $iards->set("status", MS_ON);
@@ -95,19 +98,22 @@ $lakes->draw($img);
 //$roads->draw($img);
 //$iards->draw($img);
 //$iards_label->draw($img);
-$dm->draw($img);
-//$watches->draw($img);
+//$dm->draw($img);
 $states->draw($img);
+$watches->draw($img);
 //$cities->draw($img);
 
 $map->drawLabelCache($img);
 //$bars->draw($img);
 
-mktitle($map, $img, " 3 Nov Drought Monitor ");
+mktitle($map, $img, "            SPC Watches for $d ");
 //mkl($map, $img);
 
 $url = $img->saveWebImage();
 
+echo "<form method=\"GET\" action=\"adjust.php\">
+<input type=\"text\" name=\"d\" value=\"$d\">
+<input type=\"submit\"><br />";
 
 echo "<img src=\"$url\">";
 
