@@ -70,13 +70,13 @@ function networkOffline($network)
 
 <tr>
  <td colspan=3 class="subtitle" bgcolor="#CCCCCC"><b>RWIS Network</b>
-  [<a href="<?php echo $rooturl; ?>/GIS/apps/stations/offline.php?network=rwis">Graphical View</a>]  (1 hour tolerance)</td>
+  [<a href="<?php echo $rooturl; ?>/GIS/apps/stations/offline.php?network=IA_RWIS">Graphical View</a>]  (1 hour tolerance)</td>
 </tr>
 <?php networkOffline("IA_RWIS"); ?>
 
 <tr>
  <td colspan=3 class="subtitle" bgcolor="#CCCCCC"><b>AWOS Network</b>
-  [<a href="<?php echo $rooturl; ?>/GIS/apps/stations/offline.php?network=awos">Graphical View</a>] (90 minute tolerance)</td>
+  [<a href="<?php echo $rooturl; ?>/GIS/apps/stations/offline.php?network=AWOS">Graphical View</a>] (90 minute tolerance)</td>
 </tr>
 <?php networkOffline("AWOS"); ?>
 
