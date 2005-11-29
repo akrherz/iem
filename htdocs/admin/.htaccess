@@ -1,4 +1,4 @@
-AuthUserFile ../../config/admin.users
+AuthUserFile /var/www/config/admin.users
 AuthGroupFile /dev/null
 AuthName Administrative
 AuthType Basic
