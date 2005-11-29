@@ -73,7 +73,7 @@ while (list($key, $iemob) = each($iemdata) ){
 }
 
 $now = time();
-$dir = "/mesonet/data/current/${tv}_events/";
+$dir = "/mesonet/share/${tv}_events/";
 $handle = opendir($dir);
 while (false !== ($file = readdir($handle))) { 
   if ($file != "." && $file != "..") {
