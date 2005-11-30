@@ -1,7 +1,13 @@
 <?php
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-$date = isset($_GET["date"]) ? $_GET["date"] : date("Y-m-d", time() - 86400 - (7 * 3600));
+  $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400 - (7 * 3600) );
+  $month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 86400 - (7 * 3600) );
+  $day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 86400 - (7 * 3600) );
+  $date = $year ."-". $month ."-". $day;
+  $ts = mktime(0,0,0, $month, $day, $year);
+
+
 $var = (isset($_GET["var"]) && $_GET["var"] != "" ) ? $_GET["var"] : "c11";
 $var2 = (isset($_GET["var2"]) && $_GET["var2"] != "" ) ? $_GET["var2"] : "";
 $direct = isset($_GET["direct"]) ? $_GET['direct']: "";
