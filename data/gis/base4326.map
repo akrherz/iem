@@ -1,0 +1,17 @@
+# The only mapfile!
+NAME base4326
+STATUS ON
+SIZE 640 480
+FONTSET "../fonts/fonts.list"
+EXTENT -104 37 -87 49
+UNITS DD
+SHAPEPATH "./"
+SYMBOLSET "base.sym"
+IMAGETYPE PNG
+#IMAGECOLOR -1 -1 -1
+#TRANSPARENT ON
+#INTERLACE off
+
+
+
+
