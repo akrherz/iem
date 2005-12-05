@@ -57,15 +57,13 @@ $site->setProjection("proj=latlong");
 
 $coop = $map->getlayerbyname("coop");
 $coop->set("status", MS_OFF);
-$coop->setProjection("proj=latlong");
+$coop->set("data", $_DATABASES["coop"]);
 
 $datal = $map->getlayerbyname("datal");
 $datal->set("status", MS_ON);
-$datal->setProjection("proj=latlong");
 
 $ttt = $map->getlayerbyname("ttt");
 $ttt->set("status", MS_ON);
-$ttt->setProjection("proj=latlong");
 
 $img = $map->prepareImage();
 
@@ -123,10 +121,8 @@ $sql = "geom from
     (SELECT data.years as yrs, map.OID, map.geom, ". $dbarray[$plot] ." as d 
     from stations map, climate data
     WHERE data.station = lower(map.id) and 
-    data.valid = '". $dbdate ."') as foo";
+    data.valid = '". $dbdate ."') as foo using UNIQUE oid using SRID=4326";
 $datal->set('data', $sql);
-//global $_DATABASES;
-//print_r($_DATABASES);
 $datal->set('connection', $_DATABASES["coop"]);
 
 $st_cl = ms_newclassobj($stlayer);
