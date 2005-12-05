@@ -19,13 +19,14 @@ INTERLACE off
 # Projection definition, consult the PROJ.4 documentation for parameter discussion
 #
 PROJECTION
- "proj=lcc"
- "lat_1=42.0666"
- "lat_2=43.2666"
- "lat_0=41.5"
- "lon_0=-93.5"
- "x_0=1500000"
-  "y_0=1000000"
+ "init=epsg:26915"
+# "proj=lcc"
+# "lat_1=42.0666"
+# "lat_2=43.2666"
+# "lat_0=41.5"
+# "lon_0=-93.5"
+# "x_0=1500000"
+#  "y_0=1000000"
 END
 
 #
@@ -65,7 +66,7 @@ LAYER
   TYPE POLYGON
   DATA shape/4326/us/states.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
 #  CLASSITEM "STATE_FIPS"
   CLASS
@@ -82,7 +83,7 @@ LAYER
   TYPE POLYGON
   DATA shape/4326/us/uscounties.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     OUTLINECOLOR 0 0 255
@@ -99,7 +100,7 @@ LAYER
   STATUS ON
   TYPE POINT
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR 0 0 0
@@ -127,24 +128,21 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME datal
-  CONNECTION "host=db1.mesonet.agron.iastate.edu user=akrherz dbname=coop"
-  DATA "geom from (SELECT data.years as yrs, 
-      map.OID, map.geom, round(data.high::numeric,0)::int as d 
-      from stations map, climate data
-      WHERE data.station = lower(map.id) and data.valid = '2000-02-10') as foo"
+  CONNECTION "host=db1.mesonet.agron.iastate.edu user=nobody dbname=coop"
+  DATA "geom from (SELECT data.years as yrs, map.OID, map.geom, round(data.high::numeric,0)::int as d from stations map, climate data WHERE data.station = lower(map.id) and data.valid = '2000-02-10') as foo using UNIQUE oid using SRID=4326"
   STATUS ON
   TYPE POINT
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
-  CLASSITEM "yrs"
+  #CLASSITEM "yrs"
   CLASS
     EXPRESSION ([yrs] > 80)
     COLOR 0 0 0
     BACKGROUNDCOLOR 0 0 0
     SYMBOL 1
     SIZE 5
-    TEXT ([ d ])
+    TEXT ([d])
     LABEL
       COLOR 255 255 255
       OUTLINECOLOR 0 0 0
@@ -193,7 +191,7 @@ LAYER
   STATUS ON
   TYPE POINT
   PROJECTION
-    "proj=latlong"
+    "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
