@@ -41,8 +41,10 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 $graph = new Graph(640,400,"example1");
 $graph->SetScale("datlin");
 $graph->img->SetMargin(60,10,60,100);
+
 $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->scale->SetDateFormat("M d h A");
+$graph->xaxis->SetPos("min");
 
 $titles = Array(
  "tmpf" => "Air Temperature [F]",
@@ -88,4 +90,3 @@ $graph->Add($lineplot2);
 // Display the graph
 $graph->Stroke();
 ?>
-
