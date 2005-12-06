@@ -4,7 +4,7 @@
 // Description:	Bar plot extension for JpGraph
 // Created: 	2001-01-08
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_bar.php 76 2005-06-25 21:59:52Z ljp $
+// Ver:		$Id: jpgraph_bar.php 211 2005-10-06 16:29:37Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -512,6 +512,7 @@ class BarPlot extends Plot {
 	    if( !empty($this->csimtargets[$i]) ) {
 		$this->csimareas .= '<area shape="poly" coords="'.$csimcoord.'" ';    	    
 		$this->csimareas .= " href=\"".htmlentities($this->csimtargets[$i])."\"";
+		$sval='';
 		if( !empty($this->csimalts[$i]) ) {
 		    $sval=sprintf($this->csimalts[$i],$this->coords[0][$i]);
 		    $this->csimareas .= " title=\"$sval\" ";

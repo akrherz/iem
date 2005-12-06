@@ -4,7 +4,7 @@
 // Description:	Classes to handle Date scaling
 // Created: 	2005-05-02
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_date.php 28 2005-06-05 16:36:26Z ljp $
+// Ver:		$Id: jpgraph_date.php 220 2005-10-15 16:53:53Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -230,10 +230,16 @@ class DateScale extends LinearScale {
 // Returns an array ($start,$end,$major,$minor,$format)
 //------------------------------------------------------------------------------------------
     function DoDateAutoScale($aStartTime,$aEndTime,$aDensity=0,$aAdjust=true) {
+	// Format of array
+	// array ( Decision point,  array( array( Major-scale-step-array ),  
+	//			    array( Minor-scale-step-array ), 
+	//			    array( 0=date-adjust, 1=time-adjust, adjustment-alignment) )
+	//
 	$scalePoints = 
 	    array(
 		/* Intervall larger than 10 years */
-		SECPERYEAR*10,array(array(SECPERYEAR*5,SECPERYEAR*2),array(SECPERYEAR), 
+		SECPERYEAR*10,array(array(SECPERYEAR*5,SECPERYEAR*2),
+				    array(SECPERYEAR), 
 				    array(0,YEARADJ_1, 0,YEARADJ_1) ),
 
 		/* Intervall larger than 2 years */
@@ -241,27 +247,33 @@ class DateScale extends LinearScale {
 				   array(0,YEARADJ_1) ),
 
 		/* Intervall larger than 90 days (approx 3 month) */
-		SECPERDAY*90,array(array(SECPERDAY*30,SECPERDAY*14,SECPERDAY*7,SECPERDAY),array(SECPERDAY*5,SECPERDAY*7,SECPERDAY,SECPERDAY), 
+		SECPERDAY*90,array(array(SECPERDAY*30,SECPERDAY*14,SECPERDAY*7,SECPERDAY),
+				   array(SECPERDAY*5,SECPERDAY*7,SECPERDAY,SECPERDAY), 
 				   array(0,MONTHADJ_1, 0,DAYADJ_WEEK, 0,DAYADJ_1, 0,DAYADJ_1)),
 
 		/* Intervall larger than 30 days (approx 1 month) */
-		SECPERDAY*30,array(array(SECPERDAY*14,SECPERDAY*7,SECPERDAY*2, SECPERDAY),array(SECPERDAY,SECPERDAY.SECPERDAY,SECPERDAY), 
+		SECPERDAY*30,array(array(SECPERDAY*14,SECPERDAY*7,SECPERDAY*2, SECPERDAY),
+				   array(SECPERDAY,SECPERDAY.SECPERDAY,SECPERDAY), 
 				   array(0,DAYADJ_WEEK, 0,DAYADJ_1, 0,DAYADJ_1, 0,DAYADJ_1)),
 
 		/* Intervall larger than 7 days */
-		SECPERDAY*7,array(array(SECPERDAY,SECPERHOUR*12,SECPERHOUR*6,SECPERHOUR*2),array(SECPERHOUR*6,SECPERHOUR*3,SECPERHOUR,SECPERHOUR),
+		SECPERDAY*7,array(array(SECPERDAY,SECPERHOUR*12,SECPERHOUR*6,SECPERHOUR*2),
+				  array(SECPERHOUR*6,SECPERHOUR*3,SECPERHOUR,SECPERHOUR),
 				  array(0,DAYADJ_1, 1,HOURADJ_12, 1,HOURADJ_6, 1,HOURADJ_1)),
 
 		/* Intervall larger than 1 day */
-		SECPERDAY,array(array(SECPERDAY,SECPERHOUR*12,SECPERHOUR*6,SECPERHOUR*2,SECPERHOUR),array(SECPERHOUR*6,SECPERHOUR*2,SECPERHOUR,SECPERHOUR,SECPERHOUR),
+		SECPERDAY,array(array(SECPERDAY,SECPERHOUR*12,SECPERHOUR*6,SECPERHOUR*2,SECPERHOUR),
+				array(SECPERHOUR*6,SECPERHOUR*2,SECPERHOUR,SECPERHOUR,SECPERHOUR),
 				array(1,HOURADJ_12, 1,HOURADJ_6, 1,HOURADJ_1, 1,HOURADJ_1)),
 
 		/* Intervall larger than 12 hours */
-		SECPERHOUR*12,array(array(SECPERHOUR*2,SECPERHOUR,SECPERMIN*30,900,600),array(1800,1800,900,300,300),
+		SECPERHOUR*12,array(array(SECPERHOUR*2,SECPERHOUR,SECPERMIN*30,900,600),
+				    array(1800,1800,900,300,300),
 				    array(1,HOURADJ_1, 1,MINADJ_30, 1,MINADJ_15, 1,MINADJ_10, 1,MINADJ_5) ),
 
 		/* Intervall larger than 2 hours */
-		SECPERHOUR*2,array(array(SECPERHOUR,SECPERMIN*30,900,600,300),array(1800,900,300,120,60),
+		SECPERHOUR*2,array(array(SECPERHOUR,SECPERMIN*30,900,600,300),
+				   array(1800,900,300,120,60),
 				   array(1,HOURADJ_1, 1,MINADJ_30, 1,MINADJ_15, 1,MINADJ_10, 1,MINADJ_5) ),
 
 		/* Intervall larger than 1 hours */
@@ -269,18 +281,24 @@ class DateScale extends LinearScale {
 				 array(1,MINADJ_30, 1,MINADJ_15, 1,MINADJ_10, 1,MINADJ_5) ),
 
 		/* Intervall larger than 30 min */
-		SECPERMIN*30,array(array(SECPERMIN*15,SECPERMIN*10,SECPERMIN*5,SECPERMIN),array(300,300,60,10),
+		SECPERMIN*30,array(array(SECPERMIN*15,SECPERMIN*10,SECPERMIN*5,SECPERMIN),
+				   array(300,300,60,10),
 				   array(1,MINADJ_15, 1,MINADJ_10, 1,MINADJ_5, 1,MINADJ_1)),
 
 		/* Intervall larger than 1 min */
-		SECPERMIN,array(array(SECPERMIN,15,10,5),array(15,5,2,1),
+		SECPERMIN,array(array(SECPERMIN,15,10,5),
+				array(15,5,2,1),
 				array(1,MINADJ_1, 1,SECADJ_15, 1,SECADJ_10, 1,SECADJ_5)),
 
 		/* Intervall larger than 10 sec */
-		10,array(array(5,2),array(1,1),array(1,SECADJ_5, 1,SECADJ_1)),
+		10,array(array(5,2),
+			 array(1,1),
+			 array(1,SECADJ_5, 1,SECADJ_1)),
 
 		/* Intervall larger than 1 sec */
-		1,array(array(1),array(1),array(1,SECADJ_1)),
+		1,array(array(1),
+			array(1),
+			array(1,SECADJ_1)),
 		);
 
 	$ns = count($scalePoints);
@@ -379,7 +397,12 @@ class DateScale extends LinearScale {
 
 
     function AutoScale(&$img,$aStartTime,$aEndTime,$aNumSteps) {
-	assert($aStartTime < $aEndTime);
+	if( $aStartTime == $aEndTime ) {
+	    // Special case when we only have one data point.
+	    // Create a small artifical intervall to do the autoscaling
+	    $aStartTime -= 10;
+	    $aEndTime += 10;
+	}
 	$done=false;
 	$i=0;
 	while( ! $done && $i < 5) {

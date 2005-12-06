@@ -4,7 +4,7 @@
 // Description:	PHP4 Graph Plotting library. Extension module.
 // Created: 	2004-02-18
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_iconplot.php 21 2005-05-30 20:35:34Z ljp $
+// Ver:		$Id: jpgraph_iconplot.php 184 2005-08-31 16:17:19Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -23,6 +23,7 @@ class IconPlot {
     var $iAnchors = array('left','right','top','bottom','center');
     var $iCountryFlag='',$iCountryStdSize=3;
     var $iScalePosY=null,$iScalePosX=null;
+    var $iImgString='';
 
     function IconPlot($aFile="",$aX=0,$aY=0,$aScale=1.0,$aMix=100) {
 	$this->iFile = $aFile;
@@ -33,6 +34,10 @@ class IconPlot {
 	    JpGraphError::Raise('Mix value for icon must be between 0 and 100.');
 	}
 	$this->iMix = $aMix ;
+    }
+
+    function CreateFromString($aStr) {
+	$this->iImgString = $aStr;
     }
 
     function SetCountryFlag($aFlag,$aX=0,$aY=0,$aScale=1.0,$aMix=100,$aStdSize=3) {
@@ -130,6 +135,9 @@ class IconPlot {
 	}
 	if( $this->iFile != '' ) {
 	    $gdimg = Graph::LoadBkgImage('',$this->iFile);
+	}
+	elseif( $this->iImgString != '') {
+	    $gdimg = Image::CreateFromString($this->iImgString);
 	}
 	else {
 	    if( ! class_exists('FlagImages') ) {

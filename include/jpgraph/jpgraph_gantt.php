@@ -4,7 +4,7 @@
 // Description:	JpGraph Gantt plot extension
 // Created: 	2001-11-12
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_gantt.php 41 2005-06-06 10:46:10Z ljp $
+// Ver:		$Id: jpgraph_gantt.php 286 2005-11-28 22:09:25Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -13,6 +13,10 @@
 require_once('jpgraph_plotband.php'); 
 require_once('jpgraph_iconplot.php'); 
 require_once('jpgraph_plotmark.inc');
+
+// Maximum size for Automatic Gantt chart
+DEFINE('MAX_GANTTIMG_SIZE_W',4000);
+DEFINE('MAX_GANTTIMG_SIZE_H',5000);
 
 // Scale Header types
 DEFINE("GANTT_HDAY",1);
@@ -377,8 +381,8 @@ class GanttGraph extends Graph {
 
     // A utility function to help create basic Gantt charts
     function CreateSimple($data,$constrains=array(),$progress=array()) {
-	
-	for( $i=0; $i < count($data); ++$i) {
+	$num = count($data);
+	for( $i=0; $i < $num; ++$i) {
 	    switch( $data[$i][1] ) {
 		case ACTYPE_GROUP:
 		    // Create a slightly smaller height bar since the
@@ -491,7 +495,8 @@ class GanttGraph extends Graph {
 		$this->AddIcon($aObject);
 	    }
 	    else {
-		for($i=0; $i < count($aObject); ++$i)
+		$n = count($aObject);
+		for($i=0; $i < $n; ++$i)
 		    $this->iObj[] = $aObject[$i];
 	    }
 	}
@@ -532,7 +537,8 @@ class GanttGraph extends Graph {
 	if( $this->iObj != null ) {
 	    $marg = $this->scale->actinfo->iLeftColMargin+$this->scale->actinfo->iRightColMargin;
 	    $m = $this->iObj[0]->title->GetWidth($this->img)+$marg;
-	    for($i=1; $i < count($this->iObj); ++$i) {
+	    $n = count($this->iObj);
+	    for($i=1; $i < $n; ++$i) {
 		if( !empty($this->iObj[$i]->title) ) {
 		    if( $this->iObj[$i]->title->HasTabs() ) {
 			list($tot,$w) = $this->iObj[$i]->title->GetWidth($this->img,true);
@@ -551,7 +557,8 @@ class GanttGraph extends Graph {
 	$m=0;
 	if( $this->iObj != null ) {
 	    $m = $this->iObj[0]->title->GetHeight($this->img);
-	    for($i=1; $i<count($this->iObj); ++$i) {
+	    $n = count($this->iObj);
+	    for($i=1; $i < $n; ++$i) {
 		if( !empty($this->iObj[$i]->title) ) {
 		    $m=max($m,$this->iObj[$i]->title->GetHeight($this->img));
 		}
@@ -564,7 +571,8 @@ class GanttGraph extends Graph {
 	$m=0;
 	if( $this->iObj != null ) {
 	    $m = $this->iObj[0]->GetAbsHeight($this->img);
-	    for($i=1; $i<count($this->iObj); ++$i) {
+	    $n = count($this->iObj);
+	    for($i=1; $i < $n; ++$i) {
 		$m=max($m,$this->iObj[$i]->GetAbsHeight($this->img));
 	    }
 	}
@@ -576,7 +584,8 @@ class GanttGraph extends Graph {
 	$m=0;
 	if( $this->iObj != null ) {
 	    $m = $this->iObj[0]->GetLineNbr();
-	    for($i=1; $i < count($this->iObj); ++$i) {
+	    $n = count($this->iObj);
+	    for($i=1; $i < $n; ++$i) {
 		$m=max($m,$this->iObj[$i]->GetLineNbr());
 	    }
 	}
@@ -587,7 +596,8 @@ class GanttGraph extends Graph {
     function GetBarMinMax() {
 	$start = 0 ;
 	$n = count($this->iObj);
-	while( $this->iObj[$start]->GetMaxDate() === false && $start < $n )
+
+	while( $start < $n && $this->iObj[$start]->GetMaxDate() === false )
 	    ++$start;
 	if( $start >= $n ) {
 	    JpgraphError::Raise('Cannot autoscale Gantt chart. No dated activities exist. [GetBarMinMax() start >= n]');
@@ -595,6 +605,7 @@ class GanttGraph extends Graph {
 
 	$max=$this->scale->NormalizeDate($this->iObj[$start]->GetMaxDate());
 	$min=$this->scale->NormalizeDate($this->iObj[$start]->GetMinDate());
+
 	for($i=$start+1; $i < $n; ++$i) {
 	    $rmax = $this->scale->NormalizeDate($this->iObj[$i]->GetMaxDate());
 	    if( $rmax != false ) 
@@ -652,9 +663,7 @@ class GanttGraph extends Graph {
 	    // as the base size unit.
 	    // If only weeks or above is displayed we use a modified unit to
 	    // get a smaller image.
-
-	    if( $this->scale->IsDisplayDay() || $this->scale->IsDisplayHour() || 
-		$this->scale->IsDisplayMinute() ) {
+	    if( $this->scale->IsDisplayHour() || $this->scale->IsDisplayMinute() ) {
 		// Add 2 pixel margin on each side
 		$fw=$this->scale->day->GetFontWidth($this->img)+4; 
 	    }
@@ -667,6 +676,7 @@ class GanttGraph extends Graph {
 	    else {
 		$fw = 2;
 	    }
+
 	    $nd=$this->scale->GetNumberOfDays();
 
 	    if( $this->scale->IsDisplayDay() ) {
@@ -702,6 +712,9 @@ class GanttGraph extends Graph {
 			break;
 		    case DAYSTYLE_SHORTDATE3 :
 			$txt =  "Mon 23";
+			break;
+		    case DAYSTYLE_SHORTDATE4 :
+			$txt =  "88";
 			break;
 		    case DAYSTYLE_CUSTOM :
 			$txt = date($this->scale->day->iLabelFormStr,
@@ -852,6 +865,12 @@ class GanttGraph extends Graph {
 	    }
 	    else
 		$width = $this->img->width;
+
+	    $width = round($width);
+	    $height = round($height);
+	    if( $width > MAX_GANTTIMG_SIZE_W || $height > MAX_GANTTIMG_SIZE_H ) {
+		JpgraphError::Raise("Sanity check for automatic Gantt chart size failed. Either the width (=$width) or height (=$height) is larger than MAX_GANTTIMG_SIZE. This could potentially be caused by a wrong date in one of the activities.");
+	    }
 						
 	    $this->img->CreateImgCanvas($width,$height);			
 	    $this->img->SetMargin($lm,$rm,$tm,$bm);
@@ -1573,7 +1592,8 @@ class TextProperty {
 	    }
 	    else {
 		$tot=0;
-		for($i=0; $i < count($tmp); ++$i) {
+		$n = count($tmp);
+		for($i=0; $i < $n; ++$i) {
 		    $res[$i] = $aImg->GetTextWidth($tmp[$i]);
 		    $tot += $res[$i]*$aTabExtraMargin;
 		}
@@ -2085,7 +2105,7 @@ class GanttScale {
     }
 	
     // Get week number 
-    function GetWeekNbr($aDate) {
+    function GetWeekNbr($aDate,$aSunStart=true) {
 	// We can't use the internal strftime() since it gets the weeknumber
 	// wrong since it doesn't follow ISO on all systems since this is
 	// system linrary dependent.
@@ -2096,7 +2116,9 @@ class GanttScale {
 	// Credit to Nicolas Hoizey <nhoizey@phpheaven.net> for this elegant
 	// version of Week Nbr calculation. 
 
-	$day = $this->NormalizeDate($aDate);
+	$day = $this->NormalizeDate($aDate) ;
+	if( $aSunStart )
+	    $day += 60*60*24;
 		
 	/*-------------------------------------------------------------------------
 	  According to ISO-8601 :
@@ -2209,8 +2231,13 @@ class GanttScale {
     // Convert a date to timestamp
     function NormalizeDate($aDate) {
 	if( $aDate === false ) return false; 
-	if( is_string($aDate) )
-	    return strtotime($aDate);
+	if( is_string($aDate) ) {
+	    $t = strtotime($aDate);
+	    if( $t === FALSE || $t === -1 ) {	    
+		JpGraphError::Raise("Date string ($aDate) specified for Gantt activity can not be interpretated. Please make sure it is a valid time string, e.g. 2005-04-23 13:30");
+	    }
+	    return $t;
+	}
 	elseif( is_int($aDate) || is_float($aDate) )
 	    return $aDate;
 	else

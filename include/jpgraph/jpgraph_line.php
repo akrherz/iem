@@ -4,7 +4,7 @@
 // Description:	Line plot extension for JpGraph
 // Created: 	2001-01-08
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_line.php 72 2005-06-22 21:28:32Z ljp $
+// Ver:		$Id: jpgraph_line.php 222 2005-11-04 04:31:40Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -83,11 +83,18 @@ class LinePlot extends Plot{
 	
     function Legend(&$graph) {
 	if( $this->legend!="" ) {
-	    if( $this->filled ) {
+	    if( $this->filled && !$this->fillgrad ) {
 		$graph->legend->Add($this->legend,
 				    $this->fill_color,$this->mark,0,
 				    $this->legendcsimtarget,$this->legendcsimalt);
-	    } else {
+	    } 
+	    elseif( $this->fillgrad ) {
+		$color=array($this->fillgrad_fromcolor,$this->fillgrad_tocolor);
+		// In order to differentiate between gradients and cooors specified as an RGB triple
+		$graph->legend->Add($this->legend,$color,"",-2 /* -GRAD_HOR */,
+				    $this->legendcsimtarget,$this->legendcsimalt);
+	    }	
+	    else {
 		$graph->legend->Add($this->legend,
 				    $this->color,$this->mark,$this->line_style,
 				    $this->legendcsimtarget,$this->legendcsimalt);
@@ -406,16 +413,18 @@ class AccLinePlot extends Plot {
 //---------------
 // PUBLIC METHODS	
     function Legend(&$graph) {
-	foreach( $this->plots as $p )
-	    $p->DoLegend($graph);
+	$n=count($this->plots);
+	for($i=0; $i < $n; ++$i )
+	    $this->plots[$i]->DoLegend($graph);
     }
 	
     function Max() {
 	list($xmax) = $this->plots[0]->Max();
 	$nmax=0;
-	for($i=0; $i<count($this->plots); ++$i) {
-	    $n = count($this->plots[$i]->coords[0]);
-	    $nmax = max($nmax,$n);
+	$n = count($this->plots);
+	for($i=0; $i < $n; ++$i) {
+	    $nc = count($this->plots[$i]->coords[0]);
+	    $nmax = max($nmax,$nc);
 	    list($x) = $this->plots[$i]->Max();
 	    $xmax = Max($xmax,$x);
 	}
@@ -438,9 +447,10 @@ class AccLinePlot extends Plot {
     function Min() {
 	$nmax=0;
 	list($xmin,$ysetmin) = $this->plots[0]->Min();
-	for($i=0; $i<count($this->plots); ++$i) {
-	    $n = count($this->plots[$i]->coords[0]);
-	    $nmax = max($nmax,$n);
+	$n = count($this->plots);
+	for($i=0; $i < $n; ++$i) {
+	    $nc = count($this->plots[$i]->coords[0]);
+	    $nmax = max($nmax,$nc);
 	    list($x,$y) = $this->plots[$i]->Min();
 	    $xmin = Min($xmin,$x);
 	    $ysetmin = Min($y,$ysetmin);
