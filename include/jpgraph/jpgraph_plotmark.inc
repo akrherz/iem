@@ -4,7 +4,7 @@
 // Description:	Class file. Handles plotmarks
 // Created: 	2003-03-21
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_plotmark.inc 41 2005-06-06 10:46:10Z ljp $
+// Ver:		$Id: jpgraph_plotmark.inc 209 2005-09-26 17:23:08Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -332,6 +332,9 @@ class PlotMark {
 	    
 	    $dw = round($imgscale * $w );
 	    $dh = round($imgscale * $h );
+
+	    // Do potential rotation
+	    list($x,$y) = $img->Rotate($x,$y);
 
 	    $dx = round($x-$dw*$anchor_x);
 	    $dy = round($y-$dh*$anchor_y);

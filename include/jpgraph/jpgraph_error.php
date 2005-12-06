@@ -4,7 +4,7 @@
 // Description:	Error plot extension for JpGraph
 // Created: 	2001-01-08
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_error.php 21 2005-05-30 20:35:34Z ljp $
+// Ver:		$Id: jpgraph_error.php 88 2005-08-07 17:18:51Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -90,7 +90,8 @@ class ErrorLinePlot extends ErrorPlot {
     function ErrorLinePlot(&$datay,$datax=false) {
 	$this->ErrorPlot($datay,$datax);
 	// Calculate line coordinates as the average of the error limits
-	for($i=0; $i < count($datay); $i+=2 ) {
+	$n = count($datay);
+	for($i=0; $i < $n; $i+=2 ) {
 	    $ly[]=($datay[$i]+$datay[$i+1])/2;
 	}		
 	$this->line=new LinePlot($ly,$datax);
@@ -127,7 +128,7 @@ class LineErrorPlot extends ErrorPlot {
 	    JpGraphError::Raise('Error in input data to LineErrorPlot.'.
 		'Number of data points must be a multiple of 3');
 	}
-	for($i=0; $i < count($datay); $i+=3 ) {
+	for($i=0; $i < $n; $i+=3 ) {
 	    $ly[]=$datay[$i];
 	    $ey[]=$datay[$i]+$datay[$i+1];
 	    $ey[]=$datay[$i]+$datay[$i+2];

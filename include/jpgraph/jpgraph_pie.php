@@ -4,7 +4,7 @@
 // Description:	Pie plot extension for JpGraph
 // Created: 	2001-02-14
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_pie.php 73 2005-06-25 11:16:43Z ljp $
+// Ver:		$Id: jpgraph_pie.php 88 2005-08-07 17:18:51Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -1168,11 +1168,13 @@ class PieGraph extends Graph {
 	    //$csim.= $this->legend->GetCSIMareas();
 	    if (preg_match_all("/area shape=\"(\w+)\" coords=\"([0-9\, ]+)\"/", $csim, $coords)) {
 		$this->img->SetColor($this->csimcolor);
-		for ($i=0; $i<count($coords[0]); $i++) {
+		$n = count($coords[0]);
+		for ($i=0; $i < $n; $i++) {
 		    if ($coords[1][$i]=="poly") {
 			preg_match_all('/\s*([0-9]+)\s*,\s*([0-9]+)\s*,*/',$coords[2][$i],$pts);
 			$this->img->SetStartPoint($pts[1][count($pts[0])-1],$pts[2][count($pts[0])-1]);
-			for ($j=0; $j<count($pts[0]); $j++) {
+			$m = count($pts[0]);
+			for ($j=0; $j < $m; $j++) {
 			    $this->img->LineTo($pts[1][$j],$pts[2][$j]);
 			}
 		    } else if ($coords[1][$i]=="rect") {
