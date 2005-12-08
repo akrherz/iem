@@ -51,16 +51,16 @@ IEM webpages.  It signifies that the data link is ready for most GIS systems.
 
 <p><h3 class="subtitle">IEM GIS Projects</h3>
 <ul>
- <li><a href="/ogc/">Open GIS Web Services</a>
+ <li><a href="<?php echo $rooturl; ?>/ogc/">Open GIS Web Services</a>
   <br />A listing of OGC web services offered by the IEM</li>
  <li><a href="/climodat/index.phtml#ks">Iowa Climate Summaries</a>
   <br />GIS ready data files of monthly and yearly climate summaries dating
 back to 1951.</li>
 	<li><a href="<?php echo $rooturl; ?>/GIS/apps/iem/freeze.phtml">IEM Freeze</a>
 	<br />Web mapping application to support winter weather nowcasting.</li>
-	<li><a href="/GIS/radview.phtml">IEM Radview</a>
+	<li><a href="<?php echo $rooturl; ?>/GIS/radview.phtml">IEM Radview</a>
 	<br />Our effort to provide NEXRAD information in realtime to GIS systems.</li>
- <li><a href="/rainfall/">IEM Rainfall</a>
+ <li><a href="<?php echo $rooturl; ?>/rainfall/">IEM Rainfall</a>
   <br />Gridded rainfall estimates in GIS formats dating back to 2002 for Iowa.</li>
  <li><a href="/roads/">IEM Iowa Road Conditions</a>
   <br />Current and archived Iowa road conditions.</li>
@@ -70,15 +70,13 @@ back to 1951.</li>
 
 <p><h3 class="subtitle">GIS Shapefiles:</h3>
 <ul>
- <li><a href="/GIS/data/datasets/iaclimate.zip">1970-2000 Iowa Climate</a>
+ <li><a href="datasets/iaclimate.zip">1970-2000 Iowa Climate</a>
   <br>1970-2000 average annual precipitation, average temperature as 
     calculated from the IEM databases.</li>
- <li><a href="/GIS/data/datasets/snet_current.zip">Current School Network</a> 
-   <br>Obs from the SchoolNet</li>
- <li><a href="/data/gis/shape/unproj/us/current_ww.zip">Current NWS Warnings</a>
+ <li><a href="/data/gis/shape/4326/us/current_ww.zip">Current NWS Warnings</a>
  <br />A shapefile of active county based and polygon based weather warnings. 
 This file is updated every 5 minutes at 0,5,10 ... after the hour.</li>
- <li><a href="/GIS/data/datasets/coopobs.zip">NWS COOP Observations</a>
+ <li><a href="/data/gis/shape/4326/iem/coopobs.zip">NWS COOP Observations</a>
    <br>Today's climate reports</li>
  <li><a href="/data/gis/">Browse</a> GIS data stored on the IEM website.</li>
 </ul>
