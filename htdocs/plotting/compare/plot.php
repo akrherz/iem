@@ -1,5 +1,5 @@
 <?php
-if ($argv)
+if (isset($argv))
    for ($i=1;$i<count($argv);$i++)
    {
        $it = split("=",$argv[$i]);
