@@ -57,7 +57,7 @@ include("$rootpath/include/jpgraph/jpgraph_line.php");
 
 
 $graph = new Graph(300,250,"auto");
-$graph->SetScale("textlin", min($lows)-7, max($ahighs)+2);
+$graph->SetScale("textlin", min($lows)-4, max($ahighs)+2);
 $graph->SetMarginColor('white');
 
 $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCFF@0.5');
@@ -68,6 +68,7 @@ $graph->SetMargin(40,5,50,40);
 
 $graph->xaxis->SetTickLabels($xlabels);
 $graph->xaxis->SetLabelAngle(90);
+$graph->xaxis->SetPos("min");
 
 $graph->yscale->SetGrace(5);
 $graph->yaxis->SetTitle("Temperature [F]");
