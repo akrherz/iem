@@ -107,7 +107,7 @@ function animate_fwd()
          }
    }
  
-   document.form.radtime.value = radtimes[current_image-first_image];
+   //document.form.radtime.value = radtimes[current_image-first_image];
    document.animation.src = theImages[current_image-first_image].src;   //display image onto screen
 
    delay_time = delay;
@@ -151,7 +151,7 @@ function animate_rev()
          }
    }
  
-document.form.radtime.value = radtimes[current_image-first_image];
+  //document.form.radtime.value = radtimes[current_image-first_image];
    document.animation.src = theImages[current_image-first_image].src;   //display image onto screen
 
    delay_time = delay;
@@ -198,7 +198,7 @@ function incrementImage(number)
    }
  
    current_image = number;
-   document.form.radtime.value = radtimes[current_image-first_image];
+   //document.form.radtime.value = radtimes[current_image-first_image];
    document.animation.src = theImages[current_image-first_image].src;   //display image
 }
 //===> Decrement to next image
@@ -216,7 +216,7 @@ function decrementImage(number)
    }
  
    current_image = number;
-   document.form.radtime.value = radtimes[current_image-first_image];
+   //document.form.radtime.value = radtimes[current_image-first_image];
    document.animation.src = theImages[current_image-first_image].src;   //display image
 }
  
