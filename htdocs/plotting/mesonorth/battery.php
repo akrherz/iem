@@ -56,7 +56,7 @@ include ("/mesonet/php/include/jpgraph/jpgraph_date.php");
 $graph = new Graph(600,300);
 $graph->SetScale("datlin");
 //$graph->xaxis->scale->SetDateFormat("h A");
-$graph->xaxis->SetLabelFormatString("M d h A", true);
+$graph->xaxis->SetLabelFormatString("h:i A", true);
 $graph->img->SetMargin(65,40,45,60);
 //$graph->xaxis->SetFont(FONT1,FS_BOLD);
 //$graph->xaxis->SetTickLabels($xlabel);
