@@ -20,6 +20,7 @@ if (isset($_GET["img_x"]) && isset($_GET["img_y"]) )
   /* $_GET["site"] = "user"; */
 }
 
+$layers = isset($_GET["layers"]) ? $_GET["layers"]: Array("cwas", "warnings", "uscounties", "nexrad");
 $cu = isset($_GET["cu"]) ? $_GET["cu"]: 0;
 $loop = isset($_GET["loop"]) ? $_GET["loop"] : 0;
 $tz = isset($_GET["tz"]) ? $_GET["tz"] : "CST";
@@ -159,9 +160,7 @@ dl($mapscript);
 
 ?>
 
-<table bgcolor="black" width="100%" cellpadding=2 border=0 cellspacing=0>
-  <tr><td>
-<table width="100%" bgcolor="white" cellpadding=2 border=0 cellspacing=0>
+<table>
 <tr><td>
 <?php
 if (intval($loop) ==  1){
@@ -203,13 +202,29 @@ if (intval($loop) ==  1){
   $imgi = 0;
   include("warnings_plot.php");
 
-  echo "<center><input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\"></center>\n";
+  echo "<input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\">\n";
 
 }
 
 ?>
-</td></tr>
+</td><td valign="top">
+<b>Warnings Legend:</b>
+<br />
+<img src="static/warnings_legend.png">
+<br /><b>Layers:</b>
+<input type="hidden" name="layers[]" value="blank">
+<br /><input name="layers[]" type="checkbox" value="cwas" <?php if (in_array("cwas", $layers)) echo "checked='CHECKED'"; ?>>WFO Boundaries
+<br /><input name="layers[]" type="checkbox" value="warnings" <?php if (in_array("warnings", $layers)) echo "checked='CHECKED'"; ?>>Warnings
+<br /><input name="layers[]" type="checkbox" value="uscounties" <?php if (in_array("uscounties", $layers)) echo "checked='CHECKED'"; ?>>US Counties
+<br /><input name="layers[]" type="checkbox" value="usdm" <?php if (in_array("usdm", $layers)) echo "checked='CHECKED'"; ?>>US Drought Monitor
+<br /><input name="layers[]" type="checkbox" value="nexrad" <?php if (in_array("nexrad", $layers)) echo "checked='CHECKED'"; ?>>US NEXRAD
 
+<p><input type="submit" value="Show Map">
+</td></tr></table>
+
+<table bgcolor="black" width="100%" cellpadding=2 border=0 cellspacing=0>
+  <tr><td>
+<table width="100%" bgcolor="white" cellpadding=2 border=0 cellspacing=0>
   <tr><td valign="TOP" bgcolor="#dddddd">
 <div id="form-control">
 <input type="hidden" name="tzoff" value="0">
@@ -256,6 +271,8 @@ echo "<option value=\"user\" SELECTED>User Selected\n";
  <option value="100" <?php if ($zoom == 100) echo "SELECTED"; ?>>100km
  <option value="250" <?php if ($zoom == 250) echo "SELECTED"; ?>>250km
  <option value="500" <?php if ($zoom == 500) echo "SELECTED"; ?>>500km
+ <option value="1000" <?php if ($zoom == 1000) echo "SELECTED"; ?>>1000km
+ <option value="3000" <?php if ($zoom == 3000) echo "SELECTED"; ?>>3000km
 </select></td>
 
 <th>Loop?</th>
