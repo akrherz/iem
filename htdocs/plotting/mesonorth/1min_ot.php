@@ -66,7 +66,7 @@ $graph->img->SetMargin(65,40,45,60);
 $graph->xaxis->SetTextTickInterval(6);
 $graph->xaxis->SetLabelAngle(90);
 //$graph->xaxis->scale->SetDateFormat("h A");
-$graph->xaxis->SetLabelFormatString("h:i A", true);
+$graph->xaxis->SetLabelFormatString("h A", true);
 
 //$graph->yaxis->scale->ticks->SetPrecision(1);
 //$graph->yaxis->scale->ticks->Set(1.2,0.5);
