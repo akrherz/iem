@@ -51,8 +51,8 @@ $graph->SetScale("datlin");
 $graph->img->SetMargin(60,10,60,100);
 
 $graph->xaxis->SetLabelAngle(90);
-//$graph->xaxis->SetLabelFormatString("M d h A", true);
-$graph->xaxis->scale->SetDateFormat("M d h A");
+$graph->xaxis->SetLabelFormatString("M d h A", true);
+//$graph->xaxis->scale->SetDateFormat("M d h A");
 $graph->xaxis->SetPos("min");
 
 $titles = Array(
