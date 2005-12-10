@@ -19,14 +19,14 @@
  if ($sts < $abegin){ $sts = $abegin; }
  if ($ets < $sts){ $n = $sts; $sts = $ets; $ets = $n; }
 
- $TITLE = "IEM Panda";
+ $TITLE = "IEM Cow";
  include("$rootpath/include/header.php");
  include("$rootpath/include/forms.php");
  include("$rootpath/include/wfoLocs.php");
  include("$rootpath/include/database.inc.php");
 ?>
-<a href="/panda/">Reset Application</a> (All timestamps are displayed in UTC)
-<form method="GET" name="panda">
+<a href="/cow/">Reset Application</a> (All timestamps are displayed in UTC)
+<form method="GET" name="cow">
 <table>
 <tr>
  <th>Start:</th><td><?php echo yearSelect2(2005,$syear,"syear"); ?><?php echo monthSelect($smonth, "smonth"); ?><?php echo daySelect2($sday, "sday"); ?><?php echo gmtHourSelect($shour, "shour"); ?></td>
@@ -63,14 +63,14 @@ while( list($key, $value) = each($wfos) ){
 <input name="ltype[]" type="checkbox" value="SV" <?php if (in_array("SV", $ltype)) echo "CHECKED"; ?>>Svr T'storm
 </td></tr>
 </table>
-<input type="submit" value="Go Panda Go"></form>
+<input type="submit" value="Go Cow Go"></form>
 
 <?php if (isset($_GET["hail"])){ include("worker.php"); }
       else {
 ?>
-<h3 class="heading">IEM Panda (NWS Warning Polygon Verification)</h3>
+<h3 class="heading">IEM Cow (NWS Warning Polygon Verification)</h3>
 
-<p><img src="panda.jpg" align="right" style="margin: 5px;">Data presented here is <b>unofficial</b> and should be used for 
+<p><img src="cow.jpg" align="right" style="margin: 5px;">Data presented here is <b>unofficial</b> and should be used for 
 educational purposes only.  This application allows you to view warnings
 and storm reports issued by a Weather Forecast Office (WFO) for a period
 of time of your choice.  The application attempts to automatically provide

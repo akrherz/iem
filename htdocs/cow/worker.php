@@ -298,7 +298,7 @@ else {
  <tr><th>Non TOR LSRs during TOR warning</th><th><?php echo $dqs; ?></th></tr>
  </table>
 </td>
-<td><img src="panda.jpg"></td>
+<td><img src="cow.jpg"></td>
 </tr>
 <tr>
 <td colspan="4">
