@@ -64,7 +64,7 @@ back to 1951.</li>
   <br />Gridded rainfall estimates in GIS formats dating back to 2002 for Iowa.</li>
  <li><a href="/roads/">IEM Iowa Road Conditions</a>
   <br />Current and archived Iowa road conditions.</li>
- <li><a href="/panda/">IEM Panda</a>
+ <li><a href="/cow/">IEM Cow</a>
   <br />Unofficial NWS polygon warning verification.</li>
 </ul>
 
