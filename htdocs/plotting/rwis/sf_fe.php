@@ -65,7 +65,7 @@ Select from list: <?php echo rwisSelect($station); ?> or
 <h2 class="heads">Modify Plot:</h2>
 <?php
 
-  $c0 = iemdb('rwis2');
+  $c0 = iemdb('rwis');
   $q0 = "SELECT * from sensors WHERE station = '". $station ."' ";
   $r0 = pg_exec($c0, $q0);
 
