@@ -48,7 +48,7 @@ Select from list: <?php echo rwisSelect($station); ?> or
  <tr>
    <td valign="TOP"><input type="radio" name="mode" value="rt" <?php if ($mode == "rt") echo "CHECKED"; ?>>Current</td>
    <td><input type="radio" name="mode" value="hist" <?php if ($mode == "hist") echo "CHECKED"; ?>>Historical
-  <br>Start Year:<?php echo yearSelect2(2002, $syear, "syear"); ?>
+  <br>Start Year:<?php echo yearSelect2(1995, $syear, "syear"); ?>
   Start Month:<?php echo monthSelect2($smonth, "smonth"); ?>
   Start Day:<?php echo daySelect2($sday, "sday"); ?>
   <br>Number of days:
