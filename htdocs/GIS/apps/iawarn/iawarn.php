@@ -84,12 +84,17 @@ is purely educational.  Errors can and do occur.
 echo "<p><b>NEXRAD Site:</b> ". $wfos[$site] ." (".$site.")</p>\n";
 
 $radTimes = Array();
-$fcontents = file('/mesonet/data/gis/images/unproj/'.$site.'/'.$site.'.log');
-while (list ($line_num, $line) = each ($fcontents)) {
-  $radTimes[$line_num] = substr($line,0,12);
+//$fcontents = file('/mesonet/data/gis/images/unproj/'.$site.'/'.$site.'.log');
+//while (list ($line_num, $line) = each ($fcontents)) {
+//  $radTimes[$line_num] = substr($line,0,12);
+//}
+for($l=0;$l<10;$l++)
+{
+  $radTimes[] = filemtime("/mesonet/data/gis/images/4326/$site/n0r_$l.png");
 }
-$lastT = $radTimes[8];
-$radTS = substr($radTimes[8], 4, 2) ."/". substr($radTimes[8], 6, 2) ." ". substr($radTimes[8], 8, 4) ."Z";
+
+//$lastT = $radTimes[8];
+//$radTS = substr($radTimes[8], 4, 2) ."/". substr($radTimes[8], 6, 2) ." ". substr($radTimes[8], 8, 4) ."Z";
 
 include("iawarn2.php");
 
@@ -104,7 +109,7 @@ if (strlen($loop) > 0){
    $urls[$i] = drawRADAR($site, $imgi, $extents, $projs, $radValid, $fips);
   }
 
-  echo "<br><b>Last Image Valid at:</b> ". $radTS;
+  //echo "<br><b>Last Image Valid at:</b> ". $radTS;
   include ("loop.php");
   array_reverse($urls);
   printHTML($urls, $radTimes);
@@ -113,7 +118,7 @@ if (strlen($loop) > 0){
   $imgi = 0;
   $url = drawRADAR($site, $imgi, $extents, $projs, $radValid, $fips);
 
- echo "<br><b>Valid at:</b> ". $radTS;
+ //echo "<br><b>Valid at:</b> ". $radTS;
 
 echo "<br><center><img src=\"". $url ."\" border=\"1\" width=\"450\"></center>\n";
 
@@ -124,10 +129,10 @@ echo "
 </td></tr>\n</table>\n";
 
 
-$fcontents = file('/mesonet/data/gis/images/unproj/'.$site.'/'.$site.'.log');
-while (list ($line_num, $line) = each ($fcontents)) {
-  $lastT = $line;
-}
+//$fcontents = file('/mesonet/data/gis/images/unproj/'.$site.'/'.$site.'.log');
+//while (list ($line_num, $line) = each ($fcontents)) {
+//  $lastT = $line;
+//}
 
 $connection = iemdb("postgis");
 
