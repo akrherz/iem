@@ -43,7 +43,7 @@ $val = "> -50";
 if (isset($_GET["limit"])) $val = "between 25 and 35";
 
 if ($mode == "rt"){
- //$c0 = pg_connect("10.10.10.10","5432", 'iowa');
+ $c1 = iemdb('rwis');
  $c0 = iemdb('access');
  $q0 = "SELECT
     valid, gvalid, max(tmpf) as tmpf,
@@ -77,6 +77,7 @@ if ($mode == "rt"){
  $minInterval = 20;
 } else {
  $c0 = iemdb('rwis');
+ $c1 = $c0;
  $tableName = "t". $syear;
  $q0 = "SELECT
     valid, gvalid, max(tmpf) as tmpf, 
@@ -115,7 +116,7 @@ $q1 = "SELECT * from sensors WHERE station = '". $station ."' ";
 
 //echo $q0;
 $result = pg_exec($c0, $q0);
-$r1 = pg_exec($c0, $q1);
+$r1 = pg_exec($c1, $q1);
 
 $row = @pg_fetch_array($r1, 0);
 $ns0 = $row['sensor0'];
