@@ -18,8 +18,8 @@ $syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
 $smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: date("m");
 $sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d");
 $days = isset($_GET["days"]) ? $_GET["days"]: 2;
-  $station = isset($_GET['station']) ? $_GET["station"] : "";
-  $mode = isset($_GET["mode"]) ? $_GET["mode"]: "rt";
+$station = isset($_GET['station']) ? $_GET["station"] : "";
+$mode = isset($_GET["mode"]) ? $_GET["mode"]: "rt";
 
 /** Lets assemble a time period if this plot is historical */
 if (strlen($days) > 0) {
@@ -37,7 +37,7 @@ $tableName = "rwis_sf";
 $dbName = "iowa";
 //$station = 'RAME';
 
-$c1 = iemdb('rwis2');
+//$c1 = iemdb('rwis2');
 
 $val = "> -50";
 if (isset($_GET["limit"])) $val = "between 25 and 35";
@@ -105,7 +105,7 @@ if ($mode == "rt"){
       $tableName 
     WHERE 
       station = '$station' and 
-      local_date(valid) IN ($dbDateString) 
+      date(valid) IN ($dbDateString) 
     ORDER by valid ASC) as foo)  as bar 
  GROUP by valid, gvalid ORDER by gvalid ASC";
  $minInterval = 20;
@@ -113,8 +113,9 @@ if ($mode == "rt"){
 
 $q1 = "SELECT * from sensors WHERE station = '". $station ."' ";
 
+//echo $q0;
 $result = pg_exec($c0, $q0);
-$r1 = pg_exec($c1, $q1);
+$r1 = pg_exec($c0, $q1);
 
 $row = @pg_fetch_array($r1, 0);
 $ns0 = $row['sensor0'];
@@ -191,7 +192,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 }
 
 pg_close($c0);
-pg_close($c1);
+//pg_close($c1);
 
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
