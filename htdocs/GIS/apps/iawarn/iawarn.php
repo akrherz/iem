@@ -90,7 +90,7 @@ $radTimes = Array();
 //}
 for($l=0;$l<10;$l++)
 {
-  $radTimes[] = filemtime("/mesonet/data/gis/images/4326/$site/n0r_$l.png");
+  $radTimes[] = filemtime("/mesonet/data/gis/images/4326/$site/n0r_$l.tif");
 }
 
 //$lastT = $radTimes[8];
