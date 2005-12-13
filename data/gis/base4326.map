@@ -296,7 +296,7 @@ LAYER
     # Advisories
     CLASS
         NAME "Winter Advisory"
-        EXPRESSION (('[phenomena]' = 'BZ' or '[phenomena]' = 'SN' or '[phenomena]' = 'WS' or '[phenomena]' = 'BS' or '[phenomena]' = 'SB' or '[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'Y')
+        EXPRESSION (('[phenomena]' = 'WW' or '[phenomena]' = 'BZ' or '[phenomena]' = 'SN' or '[phenomena]' = 'WS' or '[phenomena]' = 'BS' or '[phenomena]' = 'SB' or '[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'Y')
         STYLE
           COLOR 176 224 230
           SIZE  3
