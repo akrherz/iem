@@ -296,10 +296,25 @@ LAYER
     # Advisories
     CLASS
         NAME "Winter Advisory"
-        EXPRESSION (('[phenomena]' = 'WW' or '[phenomena]' = 'BZ' or '[phenomena]' = 'SN' or '[phenomena]' = 'WS' or '[phenomena]' = 'BS' or '[phenomena]' = 'SB' or '[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'Y')
+        EXPRESSION (('[phenomena]' = 'WW' or '[phenomena]' = 'BZ'  or '[phenomena]' = 'WS' or '[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'Y')
+        STYLE
+          COLOR  222 184 135
+          SIZE  3
+          SYMBOL    'circle'
+        END
+        #STYLE
+        #  COLOR 222 184 135
+        #  SIZE  1
+        #  SYMBOL    'circle'
+        #END
+    END
+    # Snow and Blowing snow
+    CLASS
+        NAME "Sn or Blow Sn Adv"
+        EXPRESSION (('[phenomena]' = 'SN' or '[phenomena]' = 'BS' or '[phenomena]' = 'SB') and '[significance]' = 'Y')
         STYLE
           COLOR 176 224 230
-          SIZE  3
+          SIZE  3 
           SYMBOL    'circle'
         END
         STYLE
@@ -308,6 +323,7 @@ LAYER
           SYMBOL    'circle'
         END
     END
+
     # Heavy Snow
     CLASS
         NAME "Heavy Snow Warn"
