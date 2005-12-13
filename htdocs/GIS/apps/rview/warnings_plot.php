@@ -22,6 +22,7 @@ if ($isarchive)
   $ts = filemtime("/mesonet/data/gis/images/unproj/USCOMP/n0r_".$imgi.".png") - ($imgi * 300);
   $radfile = "/mesonet/data/gis/images/unproj/USCOMP/n0r_".$imgi.".tif";
 }
+if ($imgi >0) $isarchive = 1;
 
 if ($tzoff == 0)
 {
@@ -84,7 +85,7 @@ if ($isarchive)
 { 
    $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
 }else {
-   $sql = "geom from (select significance, phenomena, geom, oid from warnings WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326";
+   $sql = "geom from (select significance, phenomena, geom, oid from warnings WHERE expire > '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326";
    $c0->set("data", $sql);
 }
 $q = "expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'";
