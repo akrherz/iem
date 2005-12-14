@@ -95,7 +95,7 @@ if (isset($_GET["lat0"]) && isset($_GET["lon0"]) )
   $uri .= "&lat0=$lat0&lon0=$lon0";
 }
 /* Scenario 2, some site is posted */
-else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site)
+if ($osite != $site)
 {
   $lat0 = $wfos[$site]["lat"];
   $lon0 = $wfos[$site]["lon"];
@@ -216,6 +216,7 @@ if (intval($loop) ==  1){
 <input type="hidden" name="layers[]" value="blank">
 <br /><input name="layers[]" type="checkbox" value="cwas" <?php if (in_array("cwas", $layers)) echo "checked='CHECKED'"; ?>>WFO Boundaries
 <br /><input name="layers[]" type="checkbox" value="warnings" <?php if (in_array("warnings", $layers)) echo "checked='CHECKED'"; ?>>Warnings
+<!-- <br /><input name="layers[]" type="checkbox" value="warnings_summary" <?php if (in_array("warnings_summary", $layers)) echo "checked='CHECKED'"; ?>>Warning Summary -->
 <br /><input name="layers[]" type="checkbox" value="uscounties" <?php if (in_array("uscounties", $layers)) echo "checked='CHECKED'"; ?>>US Counties
 <br /><input name="layers[]" type="checkbox" value="usdm" <?php if (in_array("usdm", $layers)) echo "checked='CHECKED'"; ?>>US Drought Monitor
 <br /><input name="layers[]" type="checkbox" value="nexrad" <?php if (in_array("nexrad", $layers)) echo "checked='CHECKED'"; ?>>US NEXRAD

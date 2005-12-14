@@ -90,6 +90,13 @@ if ($isarchive)
 }
 $q = "expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'";
 
+
+$warnsum = $map->getlayerbyname("warnings_summary");
+$warnsum->set("connection", $_DATABASES["postgis"] );
+$warnsum->set("status", in_array("warnings_summary", $layers) );
+//$warnsum->set("data", "geom from (select significance, phenomena, geom, oid from warnings_summary ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+
+/* Polygon Warnings */
 $p0 = $map->getlayerbyname("warnings0_p");
 $p0->set("connection", $_DATABASES["postgis"] );
 $p0->set("status", in_array("warnings", $layers) );
@@ -132,6 +139,7 @@ $radar->draw($img);
 $cwas->draw( $img);
 $watches->draw($img); 
 $c0->draw($img);
+$warnsum->draw($img);
 $p0->draw($img);
 $usdm->draw($img);
 if ($lsrwindow != 0)
