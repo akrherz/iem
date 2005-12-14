@@ -100,6 +100,7 @@ if ($osite != $site)
   $osite = $site;
   $lat0 = $wfos[$site]["lat"];
   $lon0 = $wfos[$site]["lon"];
+  $uri .= "&lat0=$lat0&lon0=$lon0";
 }
 
 if (! $isarchive)
