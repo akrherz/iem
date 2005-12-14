@@ -95,7 +95,7 @@ if (isset($_GET["lat0"]) && isset($_GET["lon0"]) )
   $uri .= "&lat0=$lat0&lon0=$lon0";
 }
 /* Scenario 2, some site is posted */
-if ($osite != $site)
+else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site)
 {
   $osite = $site;
   $lat0 = $wfos[$site]["lat"];
