@@ -397,7 +397,7 @@ $cuextra = "";
 if ($cu == 1) $cuextra = " and w.phenomena IN ('SV','TO') ";
 $query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire, 
   w.updated as updated, w.status as status, w.fcster as fcster, 
-  w.eventid as eventid,
+  w.eventid as eventid, w.significance as significance, 
   w.issue as issue, u.state as sname, xmax(w.geom) as lon0, 
   ymax(w.geom) as lat0, w.wfo as wfo
   from $wtable w, nws_ugc u
@@ -466,12 +466,42 @@ else
 {
   $dformat = "%I:%M %p";
 }
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
-  $wfo = $row["wfo"];
-  $phenomena = $row["phenomena"];
-  $eventid = $row["eventid"];
-  $oid = $row["oid"];
-  if ($filter && $wfo != $site) continue; 
+
+/* Loop thru results from database! */
+$wA = Array();
+$oA = Array();
+$iA = Array();
+$uA = Array();
+$fA = Array();
+for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
+{
+  /* Save the drama! */
+  if ($filter && $row["wfo"] != $site) continue; 
+
+  /* key is wfo_state_vtecP_vtecE_vtecSig_expire_status */
+  $key = sprintf("%s|%s|%s|%s|%s|%s|%s", $row["wfo"], $row["sname"], 
+     $row["phenomena"], $row["eventid"], $row["significance"], $row["expire"],
+     $row["status"]);
+
+  $oA[$key] = $row["oid"];
+  $iA[$key] = $row["issue"];
+  $uA[$key] = $row["updated"];
+  $fA[$key] = $row["fcster"];
+  @$wA[$key] .= "<a href=\"$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=". $row["lon0"] ."&lat0=". $row["lat0"] ."\">". $row["cname"] ."</a>, ";
+}
+
+/* Now we loop thru aggregated warnings */
+while ( list($key, $val) = each($wA) )
+{
+  $tokens = explode("|", $key);
+  $wfo = $tokens[0];
+  $sname = $tokens[1];
+  $phenomena = $tokens[2];
+  $eventid = $tokens[3];
+  $significance = $tokens[4];
+  $expire = $tokens[5];
+  $status = $tokens[6];
+  $oid = $oA[$key];
 
   if ($eventid > 0) {
     $warningscat = "warnings_cat.phtml?year=$year&wfo=$wfo&phenomena=$phenomena&eventid=$eventid";
@@ -480,26 +510,22 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
   }
 
   $k += 1;
-  $issue = strtotime($row["issue"]) - $tzoff;
-  $expire = strtotime($row["expire"]) - $tzoff;
-  $updated = strtotime($row["updated"]) - $tzoff;
+  $issue = strtotime($iA[$key]) - $tzoff;
+  $expire = strtotime($expire) - $tzoff;
+  $updated = strtotime($uA[$key]) - $tzoff;
 
  echo "<tr ";
  if ($k % 2 == 0) echo "bgcolor=\"#EEEEEE\"";
  echo "><td><a href=\"$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo\">$wfo</a></td><td><a href=\"$warningscat\">$phenomena</a></td><td>$eventid</td>";
 
-if (floatval($row["lon0"]) < 0 && floatval($row["lat0"]) > 0) {
-     echo "<td><a href=\"$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=". $row["lon0"] ."&lat0=". $row["lat0"] ."\">". $row["cname"] ."</a></td>";
-} else {
-     echo "<td>". $row["cname"] ."</td>";
+ echo "<td>". $wA[$key] ."</td>";
 
-}
-    echo "<td>". strftime($dformat, $expire) ."</td>
-    <td>". $row["sname"] ."</td>
+ echo "<td>". strftime($dformat, $expire) ."</td>
+    <td>". $sname ."</td>
     <td>". strftime($dformat, $issue) ."</td>
     <td>". strftime($dformat, $updated) ."</td>
-    <td><a href=\"". $warningscat ."#svs\">". $row["status"] ."</a></td>
-    <td>". $row["fcster"] ."</td>
+    <td><a href=\"". $warningscat ."#svs\">$status</a></td>
+    <td>". $fA[$key] ."</td>
     </tr>\n";
 
 }
