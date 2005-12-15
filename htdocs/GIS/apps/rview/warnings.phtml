@@ -89,12 +89,18 @@ include('lib.php');
 $uri = "$baseuri?site=$site&cu=$cu&archive=$archive&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom";
 $uri_nowfo = "$baseuri?archive=$archive&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom";
 
-/* Scenario 1, user coordinates are posted */
-if (isset($_GET["lat0"]) && isset($_GET["lon0"]) )
+/*
+ Okay, complicated location stuff here...
+  + case1: Default DMX (first page load)
+  + case2: User clicks on map
+  + case3: User selects different WFO  ($osite != $site)
+  + case4: Nothing happens. lat0 lon0 are defined
+*/
+
+if (isset($_GET["lat0"]) && isset($_GET["lon0"]) && $osite == $site)
 {
   $uri .= "&lat0=$lat0&lon0=$lon0";
 }
-/* Scenario 2, some site is posted */
 else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site)
 {
   $osite = $site;
