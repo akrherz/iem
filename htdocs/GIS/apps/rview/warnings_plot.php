@@ -22,7 +22,8 @@ if ($isarchive)
   $ts = filemtime("/mesonet/data/gis/images/unproj/USCOMP/n0r_".$imgi.".png") - ($imgi * 300);
   $radfile = "/mesonet/data/gis/images/unproj/USCOMP/n0r_".$imgi.".tif";
 }
-if ($imgi >0) $isarchive = 1;
+$archive = 0;
+if ($imgi >0) $archive = 1;
 
 if ($tzoff == 0)
 {
@@ -61,10 +62,10 @@ $stlayer = $map->getlayerbyname("states");
 $stlayer->set("status", 1);
 
 $goes_east1V = $map->getlayerbyname("goes_east1V");
-$goes_east1V->set("status", in_array("goes_east1V", $layers) );
+$goes_east1V->set("status", (in_array("goes_east1V", $layers) && ! $archive) );
 
 $goes_west1V = $map->getlayerbyname("goes_west1V");
-$goes_west1V->set("status", in_array("goes_west1V", $layers) );
+$goes_west1V->set("status", (in_array("goes_west1V", $layers) && ! $archive) );
 
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
@@ -76,7 +77,7 @@ $cwas = $map->getlayerbyname("cwas");
 $cwas->set("status", in_array("cwas", $layers) );
 
 $usdm = $map->getlayerbyname("usdm");
-$usdm->set("status", (in_array("usdm", $layers) && ! $isarchive) );
+$usdm->set("status", (in_array("usdm", $layers) && ! $archive) );
 
 $watches = $map->getlayerbyname("watches");
 $watches->set("connection", $_DATABASES["postgis"] );
