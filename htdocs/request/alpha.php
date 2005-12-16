@@ -16,6 +16,6 @@
  echo $ob->db["pday"] ."\n";
  echo $ob->db["relh"] ."\n";
  echo $ob->db["pres"] ."\n";
- echo feels_like($ob->db['tmpf'], $ob->db['relh'], $ob['sknt']) ."\n";
+ echo feels_like($ob->db['tmpf'], $ob->db['relh'], $ob->db['sknt']) ."\n";
 
 ?>
