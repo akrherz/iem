@@ -60,6 +60,12 @@ $namer->set("status", 1);
 $stlayer = $map->getlayerbyname("states");
 $stlayer->set("status", 1);
 
+$goes_east1V = $map->getlayerbyname("goes_east1V");
+$goes_east1V->set("status", in_array("goes_east1V", $layers) );
+
+$goes_west1V = $map->getlayerbyname("goes_west1V");
+$goes_west1V->set("status", in_array("goes_west1V", $layers) );
+
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
 
@@ -131,6 +137,8 @@ $img = $map->prepareImage();
 
 $Srect = $map->extent;
 $namer->draw($img);
+$goes_east1V->draw($img);
+$goes_west1V->draw($img);
 $clayer->draw( $img );
 $stlayer->draw( $img);
 $lakes->draw($img);
