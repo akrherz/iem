@@ -46,6 +46,25 @@ LEGEND
   POSITION LR
 END
 
+LAYER
+  NAME goes_east1V
+  STATUS OFF
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/4326/goes/east1V_0.tif
+  PROJECTION
+    "init=epsg:4326"
+  END
+END
+
+LAYER
+  NAME goes_west1V
+  STATUS OFF
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/4326/goes/west1V_0.tif
+  PROJECTION
+    "init=epsg:4326"
+  END
+END
 
 # North America!!!
 LAYER
@@ -244,6 +263,105 @@ LAYER
   END
 END
 
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings_summary
+  CONNECTION "user=nobody dbname=postgis host=db1.mesonet.agron.iastate.edu"
+  DATA "geom from (select expire, phenomena, significance, geom, oid from warnings_summary) as foo using unique oid using SRID=4326"
+  STATUS OFF
+  TYPE POLYGON
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    NAME "Flash Flood Warn"
+    EXPRESSION (('[phenomena]' = 'FF' or '[phenomena]' = 'MA') and '[significance]' = 'W')
+    STYLE
+      COLOR 0 255 0
+      #SIZE 2
+      #SYMBOL 1
+    END
+  END
+  CLASS
+    NAME "Svr T'storm Warn"
+    EXPRESSION ('[phenomena]' = 'SV' and '[significance]' = 'W')
+    STYLE
+      COLOR 255 255 0
+      #SIZE 2
+      #SYMBOL 1
+    END
+  END
+  CLASS
+    NAME "Tornado Warn"
+    EXPRESSION ('[phenomena]' = 'TO' and '[significance]' = 'W')
+    STYLE
+      COLOR 255 0 0
+      #SIZE 2
+      #SYMBOL 1
+    END
+  END
+
+    # Advisories
+    CLASS
+        NAME "Winter Advisory"
+        EXPRESSION (('[phenomena]' = 'WW' or '[phenomena]' = 'BZ'  or '[phenomena]' = 'WS' or '[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'Y')
+        STYLE
+          COLOR  222 184 135
+          #SIZE  3
+          #SYMBOL    'circle'
+        END
+        #STYLE
+        #  COLOR 222 184 135
+        #  SIZE  1
+        #  SYMBOL    'circle'
+        #END
+    #TEXT ([expire])
+    #LABEL
+    #  COLOR 255 255 255
+    #  SIZE LARGE
+    #  TYPE BITMAP
+    #END
+    END
+    # Snow and Blowing snow
+    CLASS
+        NAME "Sn or Blow Sn Adv"
+        EXPRESSION (('[phenomena]' = 'SN' or '[phenomena]' = 'BS' or '[phenomena]' = 'SB') and '[significance]' = 'Y')
+        STYLE
+          COLOR 176 224 230
+          #SIZE  3 
+          #SYMBOL    'circle'
+        END
+    END
+
+    # Heavy Snow
+    CLASS
+        NAME "Heavy Snow Warn"
+        EXPRESSION ('[phenomena]' = 'HS' and '[significance]' = 'W')
+        STYLE
+          COLOR 138 43 226
+        END
+    END
+    # WW Warning
+    CLASS
+        NAME "Winter Storm Warn"
+        EXPRESSION (('[phenomena]' = 'WS' or '[phenomena]' = 'WW') and '[significance]' = 'W')
+        COLOR   255 105 180
+    END
+    # Sleet Fz
+    CLASS
+        NAME "Ice/Frz/Sleet Warn"
+        EXPRESSION (('[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'W')
+        COLOR   255 20 147
+    END
+    # Blizzard
+    CLASS
+        NAME "Blizzard Warn"
+        EXPRESSION ('[phenomena]' = 'BZ' and '[significance]' = 'W')
+        COLOR   255 0 0
+    END
+    TRANSPARENCY 70
+END
+
 
 LAYER
   CONNECTIONTYPE postgis
@@ -361,8 +479,6 @@ LAYER
         SIZE    3
         SYMBOL  'circle'
     END
-
-
 END
 
 LAYER
