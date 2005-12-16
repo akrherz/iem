@@ -11,7 +11,9 @@ include("$rootpath/include/header.php");
 <?php include("$rootpath/include/imagemaps.php"); ?>
 <?php include("$rootpath/include/forms.php"); ?>
 
-<p>
+<p>Filling out this form will provide you with whatever archive data the
+IEM has from the RWIS network.  The archive has some holes in it around the
+year 2000 and 2001, but it mostly in tack outside of those dates.</p>
 
 
 <form method="GET" action="dl.php">
@@ -21,11 +23,11 @@ include("$rootpath/include/header.php");
 
 <p><h3 class="subtitle">1. Select Station:</h3><br>
 <i>Select One or More or All stations in the network.</i><br />
-<?php rwisMultiSelect($station, 5); ?>
+<?php rwisMultiSelect("", 5); ?>
 
 
 <p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
-<i>Times are in UTC. Archive starts on 18 June 2001.</i>
+<i>Times are in UTC. Archive starts in 1995.</i>
 <table>
   <tr>
     <td></td>
@@ -36,7 +38,7 @@ include("$rootpath/include/header.php");
   <tr>
     <th>Start:</th>
     <td rowspan="2">
-     <?php echo yearSelect(2001, 2005, "year"); ?>
+     <?php echo yearSelect(1995, date("Y"), "year"); ?>
     </td>
     <td rowspan="2">
      <?php echo monthSelect(""); ?>
