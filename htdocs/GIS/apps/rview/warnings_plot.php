@@ -67,6 +67,12 @@ $goes_east1V->set("status", (in_array("goes_east1V", $layers) && ! $archive) );
 $goes_west1V = $map->getlayerbyname("goes_west1V");
 $goes_west1V->set("status", (in_array("goes_west1V", $layers) && ! $archive) );
 
+$goes_west04I4 = $map->getlayerbyname("goes_west04I4");
+$goes_west04I4->set("status", (in_array("goes_west04I4", $layers) && ! $archive) );
+
+$goes_east04I4 = $map->getlayerbyname("goes_east04I4");
+$goes_east04I4->set("status", (in_array("goes_east04I4", $layers) && ! $archive) );
+
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
 
@@ -140,6 +146,8 @@ $Srect = $map->extent;
 $namer->draw($img);
 $goes_east1V->draw($img);
 $goes_west1V->draw($img);
+$goes_east04I4->draw($img);
+$goes_west04I4->draw($img);
 $clayer->draw( $img );
 $stlayer->draw( $img);
 $lakes->draw($img);
