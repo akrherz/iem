@@ -57,6 +57,28 @@ LAYER
 END
 
 LAYER
+  NAME goes_east04I4
+  STATUS OFF
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/4326/goes/east04I4_0.tif
+  PROJECTION
+    "init=epsg:4326"
+  END
+END
+
+LAYER
+  NAME goes_west04I4
+  STATUS OFF
+  TYPE RASTER
+  DATA /mesonet/data/gis/images/4326/goes/west04I4_0.tif
+  PROJECTION
+    "init=epsg:4326"
+  END
+END
+
+
+
+LAYER
   NAME goes_west1V
   STATUS OFF
   TYPE RASTER
