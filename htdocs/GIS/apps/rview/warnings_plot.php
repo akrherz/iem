@@ -61,17 +61,49 @@ $namer->set("status", 1);
 $stlayer = $map->getlayerbyname("states");
 $stlayer->set("status", 1);
 
+$GOESBASE = "/mesonet/data/gis/images/4326/goes";
 $goes_east1V = $map->getlayerbyname("goes_east1V");
-$goes_east1V->set("status", (in_array("goes_east1V", $layers) && ! $archive) );
+if (in_array("goes_east1V", $layers)) 
+{
+  $a = find_sat("east1V", $ts);
+  if ($a >= 0)
+  {
+    $goes_east1V->set("data", "${GOESBASE}/east1V_${a}.tif");
+    $goes_east1V->set("status", 1);
+  }
+}
 
 $goes_west1V = $map->getlayerbyname("goes_west1V");
-$goes_west1V->set("status", (in_array("goes_west1V", $layers) && ! $archive) );
-
+if (in_array("goes_west1V", $layers))
+{
+  $a = find_sat("west1V", $ts);
+  if ($a >= 0)
+  {
+    $goes_west1V->set("data", "${GOESBASE}/west1V_${a}.tif");
+    $goes_west1V->set("status", 1);
+  }
+}
 $goes_west04I4 = $map->getlayerbyname("goes_west04I4");
-$goes_west04I4->set("status", (in_array("goes_west04I4", $layers) && ! $archive) );
+if (in_array("goes_west04I4", $layers))
+{
+  $a = find_sat("west04I4", $ts);
+  if ($a >= 0)
+  {
+    $goes_west04I4->set("data", "${GOESBASE}/west04I4_${a}.tif");
+    $goes_west04I4->set("status", 1);
+  }
+}
 
 $goes_east04I4 = $map->getlayerbyname("goes_east04I4");
-$goes_east04I4->set("status", (in_array("goes_east04I4", $layers) && ! $archive) );
+if (in_array("goes_east04I4", $layers))
+{
+  $a = find_sat("east04I4", $ts);
+  if ($a >= 0)
+  {
+    $goes_east04I4->set("data", "${GOESBASE}/east04I4_${a}.tif");
+    $goes_east04I4->set("status", 1);
+  }
+}
 
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
