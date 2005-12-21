@@ -95,7 +95,7 @@ $lon0 = min($lons);
 $lon1 = max($lons);
 
 
-$map = ms_newMapObj("base.map");
+$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 
 $pad = 0.6;
 $lpad = 0.6;
@@ -103,11 +103,33 @@ $lpad = 0.6;
 //$map->setextent(-83760, -2587, 478797, 433934);
 $map->setextent($lon0 - $lpad, $lat0 - $pad, $lon1 + $lpad, $lat1 + $pad);
 
+$namer = $map->getlayerbyname("namerica");
+$namer->set("status", 1);
+$lakes = $map->getlayerbyname("lakes");
+$lakes->set("status", 1);
+
+$GOESBASE="/mesonet/data/gis/images/4326/goes";
+$goes_east1V = $map->getlayerbyname("goes_east1V");
+$goes_east1V->set("data", "${GOESBASE}/east1V_0.tif");
+$goes_east1V->set("status", in_array("goes_east1V", $layers) );
+
+$goes_west1V = $map->getlayerbyname("goes_west1V");
+$goes_west1V->set("data", "${GOESBASE}/west1V_0.tif");
+$goes_west1V->set("status", in_array("goes_west1V", $layers) );
+
+$goes_west04I4 = $map->getlayerbyname("goes_west04I4");
+$goes_west04I4->set("data", "${GOESBASE}/west04I4_0.tif");
+$goes_west04I4->set("status",in_array("goes_west04I4", $layers) );
+
+$goes_east04I4 = $map->getlayerbyname("goes_east04I4");
+$goes_east04I4->set("data", "${GOESBASE}/east04I4_0.tif");
+$goes_east04I4->set("status", in_array("goes_east04I4", $layers));
+
 
 $currents = $map->getlayerbyname("currents");
 $currents->set("status", MS_ON);
 
-$counties = $map->getlayerbyname("counties");
+$counties = $map->getlayerbyname("uscounties");
 $counties->set("status", MS_ON);
 
 $sname = $map->getlayerbyname("sname");
@@ -116,16 +138,25 @@ $sname->set("status", MS_ON);
 $stlayer = $map->getlayerbyname("states");
 $stlayer->set("status", 1);
 
-$radar = $map->getlayerbyname("radar");
+$radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("status", 1);
 
-$cwa = $map->getlayerbyname("cwa");
+$cwa = $map->getlayerbyname("cwas");
 $cwa->set("status", 1);
 
 $st_cl = ms_newclassobj($stlayer);
 $st_cl->set("status", MS_ON);
 
 $img = $map->prepareImage();
+$namer->draw($img);
+$lakes->draw($img);
+
+$goes_east1V->draw($img);
+$goes_west1V->draw($img);
+$goes_east04I4->draw($img);
+$goes_west04I4->draw($img);
+
+
 
 $ly = ms_newlayerobj($map);
 $ly->set("status", MS_ON);
@@ -165,7 +196,7 @@ foreach($sts as $key => $value){
        f2c($bzz->db["dwpf"]) );
   $bzz->db["feel"] = feels_like($bzz->db["tmpf"], 
        $bzz->db["relh"], $sped);
-  $val = round($bzz->db[$var], $rnd[$var]);
+  $val = round(@$bzz->db[$var], @$rnd[$var]);
   $mynetwork = $bzz->db["network"];
   if ( (($now - $bzz->ts) < 3900 || (substr($mynetwork,3,4) == "COOP") && ($now - $bzz->ts) < 86400) && $val > -99 & $val != 99){ 
    if ($var == "barb" && $bzz->db["sknt"] > -1) {
@@ -179,7 +210,7 @@ foreach($sts as $key => $value){
                                                                                 
     $pt = ms_newPointObj();
     $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
-    $pt->draw($map, $currents, $img, 0, round($bzz->db['sknt'], $rnd['sknt']) );
+    $pt->draw($map, $currents, $img, 0, round($bzz->db['sknt'], @$rnd['sknt']) );
     $pt->free();
    } else if ($var != "barb" && $val > -99){
      $pt = ms_newPointObj();
@@ -204,6 +235,8 @@ foreach($sts as $key => $value){
 }
 
 $ts = strftime("%d %b @ %I:%M %p");
+
+
 
 if (in_array('county', $layers))
   $counties->draw($img);
