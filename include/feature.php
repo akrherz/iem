@@ -42,13 +42,11 @@
   $s .= "<br /><div class='story'>". $row["story"] ."</div>";
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 
-if (getenv("REMOTE_ADDR") == "65.110.243.174" ||
-    getenv("REMOTE_ADDR") == "65.110.243.175" ||
-    getenv("REMOTE_ADDR") == "65.110.243.147") 
+if (getenv("REMOTE_ADDR") == "71.114.48.88" )
 {
  $s = "<img src=\"images/smokey_909.jpg\" style=\"float: left; margin: 5px;\">
 Smokey,
-<br /> &nbsp; &nbsp; &nbsp; &nbsp; Fourteen weeks is a long time! :)  Happy anniversary!!<br /> &nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+<br /> &nbsp; &nbsp; &nbsp; &nbsp; 15 weeks is a long time! :)  Happy anniversary!!<br /> &nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 }
 
 echo $s;
