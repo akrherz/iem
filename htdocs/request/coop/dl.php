@@ -71,7 +71,7 @@ $nicedate = adodb_date("Y-m-d", $ts1);
 
 $d = Array("space" => " ", "comma" => "," , "tab" => "\t");
 
-$sqlStr .= "day as dvalid from ".$table ;
+$sqlStr .= "to_char(day, 'YYYY/mm/dd') as dvalid from ".$table ;
 $sqlStr .= " WHERE day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ";
 $sqlStr .= " and stationid IN ". $stationString ." ORDER by day ASC";
 
