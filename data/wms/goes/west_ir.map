@@ -1,7 +1,7 @@
 #
 # Start of map file
 #
-NAME "goes_conus_ir"
+NAME "goes_west_ir"
 STATUS ON
 SIZE 450 350
 EXTENT -126 24 -66 50
@@ -24,10 +24,10 @@ WEB
   LOG "/mesonet/www/html/tmp/w0.log"
   METADATA
    "wms_title" "IEM GOES IR WMS Service"
-   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/data/wms/goes/conus_ir.map&amp;"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/data/wms/goes/west_ir.map&amp;"
    "wms_srs" "EPSG:4326"
    "wms_abstract" "IEM generated CONUS composite of GOES IR Satellite."
-   "wms_keywords" "GOES,IR"
+   "wms_keywords" "GOES,WEST,IR"
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
@@ -37,15 +37,15 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "conus_ir_4km"
+  NAME "west_ir_4km"
   STATUS ON
-  DATA "/mesonet/data/gis/images/4326/sat/conus_goes_ir4km.tif"
+  DATA "/mesonet/data/gis/images/4326/goes/west04I4_0.tif"
   TYPE RASTER
   PROJECTION
     "init=epsg:4326"
   END
   METADATA
-    "wms_title" "GOES CONUS IR"
+    "wms_title" "GOES WEST IR"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
   END
