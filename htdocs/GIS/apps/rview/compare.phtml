@@ -7,7 +7,7 @@ $cntyext = isset($_GET['cntyext']) ? $_GET["cntyext"]: "";
 $ul_x = isset($_GET["ul_x"]) ? $_GET["ul_x"]: "";
 $ul_y = isset($_GET["ul_y"]) ? $_GET["ul_y"]: "";
 $lr_x = isset($_GET["lr_x"]) ? $_GET["lr_x"]: "";
-$lr_y = isset($_GET["lt_y"]) ? $_GET["lr_y"]: "";
+$lr_y = isset($_GET["lr_y"]) ? $_GET["lr_y"]: "";
 $map_x = isset($_GET["map_x"]) ? $_GET["map_x"]: "";
 $map_y = isset($_GET["map_y"]) ? $_GET["map_y"]: "";
 $map_height = isset($_GET["map_height"]) ? $_GET["map_height"]: "";
@@ -85,11 +85,8 @@ $kcci_url = drawKCCI($extents);
   <?php 
   drawStateNEXRAD($extents); 
  
-  $fcontents = file('/mesonet/data/gis/images/unproj/DMX/DMX.log');
-  while (list ($line_num, $line) = each ($fcontents)) {
-    $radTimes[$line_num] = substr($line,0,12);
-  }
-  $radTS = substr($radTimes[8], 4, 2) ."/". substr($radTimes[8], 6, 2) ." ". substr($radTimes[8], 8, 4) ."Z";
+  $ftime = filemtime('/mesonet/data/gis/images/4326/DMX/n0r_0.tif'); 
+  $radTS = date("m/d h:i a", $ftime);
   echo "<a href=\"compare.phtml\">Reset app</a> <i>(view state)</i>";
   echo "<br>RADAR composite valid: $radTS ";
   ?>
