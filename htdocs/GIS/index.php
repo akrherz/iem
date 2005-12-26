@@ -51,6 +51,8 @@ IEM webpages.  It signifies that the data link is ready for most GIS systems.
 
 <p><h3 class="subtitle">IEM GIS Projects</h3>
 <ul>
+ <li><a href="goes.phtml">GOES Satellite GIS Products</a>
+  <br />Current and archived GIS products from NOAA's GOES satellites</li>
  <li><a href="<?php echo $rooturl; ?>/ogc/">Open GIS Web Services</a>
   <br />A listing of OGC web services offered by the IEM</li>
  <li><a href="/climodat/index.phtml#ks">Iowa Climate Summaries</a>
