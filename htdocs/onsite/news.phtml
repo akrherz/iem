@@ -2,43 +2,52 @@
  include("../../config/settings.inc.php");
  include("$rootpath/include/database.inc.php");
  $id = isset($_GET["id"]) ? intval($_GET["id"]): 0;
+ $q = isset($_GET["q"]) ? pg_escape_string($_GET["q"]) : "";
  $TITLE = "IEM | News & Notes";
  include("$rootpath/include/header.php");
-?>
-<b>Nav:</b> <a href="<?php echo $rooturl; ?>">Homepage</a> &nbsp; <b> > </b> &nbsp; News & Notes
 
-<br><br>
+ $connection = iemdb("mesosite");
+
+?>
+<a href="<?php echo $rooturl; ?>">Homepage</a> &nbsp; <b> > </b> &nbsp; News & Notes
+
+<p><form method="GET" action="news.phtml" name="searchnews">
+<b>Search Archive:</b> <input type="text" name="q" value="<?php echo $q; ?>" size="20"><input type="submit" value="Go!">
+</form>
 
 <?php
-  if ($id > 0) echo "<b>News ID#: $id </b><br><a href=\"news.phtml\">View Last Ten</a><br>";
-  else echo "<h4>10 most recent posts:</h4>";
-  // Here is where we start pulling station Information
 
-  $connection = iemdb("mesosite");
   if ($id > 0) {
     $q = "SELECT *, to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
            from news WHERE id = $id ";
     pg_exec($connection, "UPDATE news SET views = views + 1 WHERE id = $id");
-  } else {
+  } else if ($q != "") {
     $q = "SELECT *, to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
-           from news ORDER by entered DESC LIMIT 10";
+           from news WHERE (title ~* '$q' or body ~* '$q') 
+           ORDER by entered DESC";
   }
   $result = pg_exec($connection, $q);
   $count = pg_numrows($result);
 ?>
-<p><br><table>
 <?php
   if ($count > 0 ){
     for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
     { 
-       echo "<tr><th class=\"even\">Title:</th><td><b>". $row["title"] ."</b></td></tr>\n";
-       echo "<tr><th class=\"even\">Author:</th><td><b>". $row["author"] ."</b></td></tr>\n";
-       echo "<tr><th class=\"even\">Posted On:</th><td><b>". $row["webdate"] ."</b></td></tr>\n";
-       echo "<tr><th class=\"even\">Views:</th><td><b>". $row["views"] ."</b></td></tr>\n";
+      $prev = intval($row["id"]) -1;
+      $next = intval($row["id"]) +1;
+      if ($count == 1)
+      {
+        echo "<a href=\"news.phtml?id=$prev\">&lt;&lt; Previous</a> &nbsp; &nbsp; &nbsp;";
+        echo "<a href=\"news.phtml?id=$next\">Next &gt;&gt;</a>\n";
+      }
+       echo "<h3 style=\"border-top: 2px solid #00f;\">". $row["title"] ."</h3>\n";
+       echo "<i>Posted On:</i> ". $row["webdate"] ." &nbsp; &nbsp; &nbsp;";
+       echo "<i>Author:</i> ". $row["author"] ." &nbsp; &nbsp; &nbsp;";
+       echo "<i>Views:</i> ". $row["views"] ;
      if (strlen($row["url"]) > 0)
-       echo "<tr><th class=\"even\">Link:</th><td><a href=\"". $row["url"] ."\">". $row["url"] ."</a></td></tr>\n";
+       echo "<br /><i>Link:</i> <a href=\"". $row["url"] ."\">". $row["url"] ."</a>\n";
 
-       echo "<tr><td></td><td><blockquote><pre>". $row["body"] ."</pre></blockquote></td></tr>";
+       echo "<br /><blockquote><pre>". $row["body"] ."</pre></blockquote>";
     } // End of for
 
   } else {
@@ -46,12 +55,6 @@
   }
 
 ?>
-</table>
 
-
-<BR><BR>
-
-
-</TD></TR>
 
 <?php include("$rootpath/include/footer.php"); ?>
