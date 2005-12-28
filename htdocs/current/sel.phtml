@@ -20,7 +20,7 @@
  $rs = pg_exec($conn, $sql);
  $row = @pg_fetch_array($rs);
 
- echo "<pre>". $row["report"] ."</pre>";
+ echo $row["report"] ;
 
 ?>
 <?php } else { ?>
