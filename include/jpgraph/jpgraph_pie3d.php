@@ -4,7 +4,7 @@
 // Description: 3D Pie plot extension for JpGraph
 // Created: 	2001-03-24
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_pie3d.php 41 2005-06-06 10:46:10Z ljp $
+// Ver:		$Id: jpgraph_pie3d.php 332 2005-12-14 18:21:37Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -38,7 +38,7 @@ class PiePlot3D extends PiePlot {
 	
     // Set label arrays
     function SetLegends($aLegend) {
-	$this->legends = array_reverse($aLegend);
+	$this->legends = array_reverse(array_slice($aLegend,0,count($this->data)));
     }
 
     function SetSliceColors($aColors) {

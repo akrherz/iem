@@ -4,7 +4,7 @@
 // Description:	Bar plot extension for JpGraph
 // Created: 	2001-01-08
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_bar.php 211 2005-10-06 16:29:37Z ljp $
+// Ver:		$Id: jpgraph_bar.php 334 2005-12-15 22:34:17Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -511,7 +511,7 @@ class BarPlot extends Plot {
 	    }	    	    
 	    if( !empty($this->csimtargets[$i]) ) {
 		$this->csimareas .= '<area shape="poly" coords="'.$csimcoord.'" ';    	    
-		$this->csimareas .= " href=\"".htmlentities($this->csimtargets[$i])."\"";
+		$this->csimareas .= " href=\"".$this->csimtargets[$i]."\"";
 		$sval='';
 		if( !empty($this->csimalts[$i]) ) {
 		    $sval=sprintf($this->csimalts[$i],$this->coords[0][$i]);
@@ -539,7 +539,12 @@ class GroupBarPlot extends BarPlot {
 	$this->plots = $plots;
 	$this->nbrplots = count($plots);
 	if( $this->nbrplots < 1 ) {
-	    JpGraphError::Raise('You must have at least one barplot in the array to be able to create a Grouped Bar Plot.');
+	    JpGraphError::Raise('Cannot create GroupBarPlot from empty plot array.');
+	}
+	for($i=0; $i < $this->nbrplots; ++$i ) {
+	    if( empty($this->plots[$i]) || !isset($this->plots[$i]) ) {
+		JpGraphError::Raise("Group bar plot element nbr $i is undefined or empty.");
+	    }
 	}
 	$this->numpoints = $plots[0]->numpoints;
     }
@@ -622,6 +627,14 @@ class AccBarPlot extends BarPlot {
     function AccBarPlot($plots) {
 	$this->plots = $plots;
 	$this->nbrplots = count($plots);
+	if( $this->nbrplots < 1 ) {
+	    JpGraphError::Raise('Cannot create AccBarPlot from empty plot array.');
+	}
+	for($i=0; $i < $this->nbrplots; ++$i ) {
+	    if( empty($this->plots[$i]) || !isset($this->plots[$i]) ) {
+		JpGraphError::Raise("Acc bar plot element nbr $i is undefined or empty.");
+	    }
+	}
 	$this->numpoints = $plots[0]->numpoints;		
 	$this->value = new DisplayValue();
     }
@@ -642,7 +655,7 @@ class AccBarPlot extends BarPlot {
     function Max() {
 	list($xmax) = $this->plots[0]->Max();
 	$nmax=0;
-	for($i=0; $i<count($this->plots); ++$i) {
+	for($i=0; $i < count($this->plots); ++$i) {
 	    $n = count($this->plots[$i]->coords[0]);
 	    $nmax = max($nmax,$n);
 	    list($x) = $this->plots[$i]->Max();
@@ -674,7 +687,7 @@ class AccBarPlot extends BarPlot {
     function Min() {
 	$nmax=0;
 	list($xmin,$ysetmin) = $this->plots[0]->Min();
-	for($i=0; $i<count($this->plots); ++$i) {
+	for($i=0; $i < count($this->plots); ++$i) {
 	    $n = count($this->plots[$i]->coords[0]);
 	    $nmax = max($nmax,$n);
 	    list($x,$y) = $this->plots[$i]->Min();
@@ -708,7 +721,6 @@ class AccBarPlot extends BarPlot {
 	    $accy = 0;
 	    $accy_neg = 0; 
 	    for($j=0; $j < $this->nbrplots; ++$j ) {				
-	    
 		$img->SetColor($this->plots[$j]->color);
 
 		if ( $this->plots[$j]->coords[0][$i] >= 0) {

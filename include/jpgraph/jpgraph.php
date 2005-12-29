@@ -4,7 +4,7 @@
 // Description:	PHP Graph Plotting library. Base module.
 // Created: 	2001-01-08
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph.php 297 2005-11-30 22:12:49Z ljp $
+// Ver:		$Id: jpgraph.php 336 2005-12-28 11:05:44Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -12,7 +12,7 @@
 require_once('jpg-config.inc');
 
 // Version info
-DEFINE('JPG_VERSION','1.19dev');
+DEFINE('JPG_VERSION','1.21-dev');
 
 // For internal use only
 DEFINE("_JPG_DEBUG",false);
@@ -1344,6 +1344,14 @@ class Graph {
 	for( $i=0; $i < $n; ++$i ) 
 	    $csim .= $this->y2plots[$i]->GetCSIMareas();
 
+	$n = count($this->ynaxis);
+	for( $i=0; $i < $n; ++$i ) {
+	    $m = count($this->ynplots[$i]); 
+	    for($j=0; $j < $m; ++$j ) {
+		$csim .= $this->ynplots[$i][$j]->GetCSIMareas();
+	    }
+	}
+
 	return $csim;
     }
 	
@@ -1411,6 +1419,10 @@ class Graph {
 	    $r = rand(0,100000);
 	    $aCSIMName='__mapname'.$r.'__';
 	}
+
+	if( $aScriptName=='auto' )
+	    $aScriptName=basename($_SERVER['PHP_SELF']);
+
 	if( empty($_GET[_CSIM_DISPLAY]) ) {
 	    // First determine if we need to check for a cached version
 	    // This differs from the standard cache in the sense that the
@@ -4567,16 +4579,20 @@ class LinearTicks extends Ticks {
 	    $f=$this->label_formfunc;
 	    $l = call_user_func($f,$aVal);
 	}	
-	elseif( $this->label_formatstr != '' ) {
+	elseif( $this->label_formatstr != '' || $this->label_dateformatstr != '' ) {
 	    if( $this->label_usedateformat ) {
 		$l = date($this->label_formatstr,$aVal);
 	    }
 	    else {
-		$l = sprintf($this->label_formatstr,$aVal);
+		if( $this->label_dateformatstr !== '' )
+		    $l = date($this->label_dateformatstr,$aVal);
+		else
+		    $l = sprintf($this->label_formatstr,$aVal);
 	    }
 	}
-	else
+	else {
 	    $l = sprintf('%01.'.$precision.'f',round($aVal,$precision));
+	}
 	
 	if( ($this->supress_zerolabel && $l==0) ||  ($this->supress_first && $aIdx==0) ||
 	    ($this->supress_last  && $aIdx==$aNbrTicks-1) ) {
