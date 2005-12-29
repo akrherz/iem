@@ -36,7 +36,7 @@ $basets = mktime($hour, $m, 0, $month, $day, $year);
 
 dl($mapscript);
 
-$map = ms_newMapObj("$rootpath/htdocs/GIS/apps/rview/mosaic2.map");
+$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 
 $map->setProjection("proj=latlong");
 $map->set("width", 450);
@@ -57,7 +57,7 @@ $stlayer->set("status", 1);
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
 
-$clayer = $map->getlayerbyname("counties_unproj");
+$clayer = $map->getlayerbyname("uscounties");
 $clayer->set("status", 1);
 
 $c0 = $map->getlayerbyname("warnings0_c");
@@ -98,7 +98,7 @@ $clayer->draw( $img );
 $stlayer->draw( $img);
 $lakes->draw($img);
 
-$radar = $map->getlayerbyname("radar2");
+$radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("data", $radfile);
 $radar->set("status", 1);
 $radar->draw($img);
