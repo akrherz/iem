@@ -3,6 +3,7 @@ include("../../config/settings.inc.php");
  $tbl = isset($_GET["tbl"]) ? $_GET["tbl"] : "all";
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
  $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+ $valid = mktime(0,0,0,$month, $day, 2000);
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
 
  if ($tbl == "all")
@@ -21,19 +22,11 @@ include("$rootpath/include/header.php");
 <?
  $connection = iemdb("coop");
 
- if ( strlen($day) > 0){
-   if ( strlen($day) == 1) {
-     $date = $month ."-0". $day ;
-   } else {
-     $date = $month ."-". $day;
-   }
- } else {
-   $date = date("m-d"); 
- }
+ $date = date("Y-m-d", $valid); 
  
 
  $query = "SELECT * from $tblname WHERE 
-     to_char(valid, 'mm-dd') = '".$date."' ORDER by ". $sortcol ." DESC";
+     valid = '".$date."' ORDER by ". $sortcol ." DESC";
  $rs = pg_exec($connection, $query);
 
  $tokens = split("-", $date);
