@@ -50,7 +50,7 @@ LAYER
   NAME goes_east1V
   STATUS OFF
   TYPE RASTER
-  DATA /mesonet/data/gis/images/4326/goes/east1V_0.tif
+  DATA /home/ldm/data/gis/images/4326/goes/east1V_0.tif
   PROJECTION
     "init=epsg:4326"
   END
@@ -60,7 +60,7 @@ LAYER
   NAME goes_east04I4
   STATUS OFF
   TYPE RASTER
-  DATA /mesonet/data/gis/images/4326/goes/east04I4_0.tif
+  DATA /home/ldm/data/gis/images/4326/goes/east04I4_0.tif
   PROJECTION
     "init=epsg:4326"
   END
@@ -70,7 +70,7 @@ LAYER
   NAME goes_west04I4
   STATUS OFF
   TYPE RASTER
-  DATA /mesonet/data/gis/images/4326/goes/west04I4_0.tif
+  DATA /home/ldm/data/gis/images/4326/goes/west04I4_0.tif
   PROJECTION
     "init=epsg:4326"
   END
@@ -82,7 +82,7 @@ LAYER
   NAME goes_west1V
   STATUS OFF
   TYPE RASTER
-  DATA /mesonet/data/gis/images/4326/goes/west1V_0.tif
+  DATA /home/ldm/data/gis/images/4326/goes/west1V_0.tif
   PROJECTION
     "init=epsg:4326"
   END
@@ -187,7 +187,7 @@ LAYER
   NAME usdm
   STATUS OFF
   TYPE LINE
-  DATA /mesonet/data/gis/shape/4326/us/dm_current.shp
+  DATA /home/ldm/data/gis/shape/4326/us/dm_current.shp
   PROJECTION
    "init=epsg:4326"
   END
