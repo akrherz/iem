@@ -19,8 +19,8 @@ if ($isarchive)
   $radfile = "/tmp/". date('YmdHi', $ts) .".png";
 } else 
 {
-  $ts = filemtime("/mesonet/data/gis/images/unproj/USCOMP/n0r_".$imgi.".png") - ($imgi * 300);
-  $radfile = "/mesonet/data/gis/images/unproj/USCOMP/n0r_".$imgi.".tif";
+  $ts = filemtime("/home/ldm/data/gis/images/4326/USCOMP/n0r_".$imgi.".png") - ($imgi * 300);
+  $radfile = "/home/ldm/data/gis/images/4326/USCOMP/n0r_".$imgi.".tif";
 }
 $archive = 0;
 if ($imgi >0) $archive = 1;
@@ -61,7 +61,7 @@ $namer->set("status", 1);
 $stlayer = $map->getlayerbyname("states");
 $stlayer->set("status", 1);
 
-$GOESBASE = "/mesonet/data/gis/images/4326/goes";
+$GOESBASE = "/home/ldm/data/gis/images/4326/goes";
 $goes_east1V = $map->getlayerbyname("goes_east1V");
 if (in_array("goes_east1V", $layers)) 
 {
