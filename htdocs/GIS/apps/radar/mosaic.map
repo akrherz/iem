@@ -69,7 +69,7 @@ END
 
 LAYER
   NAME smooth_radar
-  DATA /mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif
+  DATA /home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif
   TYPE RASTER
   STATUS ON
   METADATA
