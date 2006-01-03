@@ -60,18 +60,18 @@
 $ar = localtime($ts);
 $m = $ar[1];
 
-if ($m > 58) $ma = "55";
-else if ($m > 54) $ma = "50";
-else if ($m > 48) $ma = "45";
-else if ($m > 43) $ma = "40";
-else if ($m > 38) $ma = "35";
-else if ($m > 33) $ma = "30";
-else if ($m > 28) $ma = "25";
-else if ($m > 23) $ma = "20";
-else if ($m > 18) $ma = "15";
-else if ($m > 13) $ma = "10";
-else if ($m > 8) $ma = "05";
-else if ($m > 3) $ma = "00";
+if ($m > 56) $ma = "55";
+else if ($m > 51) $ma = "50";
+else if ($m > 46) $ma = "45";
+else if ($m > 41) $ma = "40";
+else if ($m > 36) $ma = "35";
+else if ($m > 31) $ma = "30";
+else if ($m > 26) $ma = "25";
+else if ($m > 21) $ma = "20";
+else if ($m > 16) $ma = "15";
+else if ($m > 11) $ma = "10";
+else if ($m > 6) $ma = "05";
+else if ($m > 1) $ma = "00";
 else {
   $formts = $formts - ($m * 60) - (5 * 60);
   $ma = $m;
