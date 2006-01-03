@@ -167,7 +167,7 @@ END
 
 LAYER
   NAME radar
-  DATA /mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif
+  DATA /home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif
   TYPE RASTER
   STATUS ON
   METADATA
@@ -183,7 +183,7 @@ END
 
 LAYER
   NAME DMX
-  DATA /mesonet/data/gis/images/unproj/DMX/n0r_0.tif
+  DATA /home/ldm/data/gis/images/4326/DMX/n0r_0.tif
   TYPE RASTER
   STATUS ON
   METADATA
@@ -200,7 +200,7 @@ END
 
 LAYER
   NAME radar2
-  DATA /mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif
+  DATA /home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif
   TYPE RASTER
   STATUS ON
   METADATA

@@ -93,7 +93,7 @@ function drawCountyNEXRAD($site, $extents) {
 
   $radarL = $map->getlayerbyname("DMX");
   $radarL->set("status", MS_ON);
-  $radarL->set("data", "/mesonet/data/gis/images/unproj/". $site ."/n0r_0.tif");
+  $radarL->set("data", "/home/ldm/data/gis/images/4326/". $site ."/n0r_0.tif");
 
   $img = $map->prepareImage();
   $namerica->draw($img);
@@ -134,6 +134,4 @@ function drawKCCI($extents) {
   return $url;
 
 }
-
-
 ?>
