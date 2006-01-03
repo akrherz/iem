@@ -15,7 +15,7 @@
                                                                                 
                                                                                 
 <div class="iem-footer-text">
-Copyright &copy; 2001-2005, Iowa State University of Science and Technology.
+Copyright &copy; 2001-2006, Iowa State University of Science and Technology.
 All rights reserved.
 <br />
                                                                                 
