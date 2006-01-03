@@ -39,7 +39,7 @@ END
 LAYER
   NAME "east_ir_4km"
   STATUS ON
-  DATA "/mesonet/data/gis/images/4326/goes/east04I4_0.tif"
+  DATA "/home/ldm/data/gis/images/4326/goes/east04I4_0.tif"
   TYPE RASTER
   PROJECTION
     "init=epsg:4326"

@@ -39,7 +39,7 @@ END
 LAYER
   NAME "conus_vis_4km"
   STATUS ON
-  DATA "/mesonet/data/gis/images/4326/sat/conus_goes_vis4km.tif"
+  DATA "/home/ldm/data/gis/images/4326/sat/conus_goes_vis4km.tif"
   TYPE RASTER
   PROJECTION
     "init=epsg:4326"
