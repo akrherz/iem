@@ -16,7 +16,9 @@ include("$rootpath/include/header.php"); ?>
 <div class="text"
 <b>Nav:</b> <a href="/COOP/">NWS COOP</a> <b> > </b> Print Obs
 
-<?php if (strlen($station) > 0) {
+<?php 
+
+if (strlen($station) > 0) {
   $link = "cat.phtml?station=".$station."&network=". $network ."&sortvar=";
   if ($sortvar == "") $sortvar = "day";
  ?>
@@ -25,15 +27,16 @@ include("$rootpath/include/header.php"); ?>
 <p>Enter NWSLI:<input type="text" size="6" maxlength="5" name="station" value="<?php echo $station; ?>">
 Select Year: <?php echo yearSelect(2004, $year, "year"); ?>
 <input type="submit" value="View COOP Station"></form>
-<?php } ?>
-
-<?php if (strlen($date) > 0) { 
+<?php } 
+ 
+if (strlen($date) > 0) { 
+  $year = substr($date,0,4);
   $link = "cat.phtml?date=".$date."&network=". $network ."&sortvar=";
   if ($sortvar == "") $sortvar = "station";
 ?>
 <h3 class="subtitle">COOP obs listed by date</h3>(<i>Click on the NWSLI to view all obs from one station.</i>)
 <form name="switchdate" action="cat.phtml" method="GET">
-<p>Enter 2004 Date:<input type="text" size="11" maxlength="10" name="date" value="<?php echo $date; ?>">
+<p>Enter Date:<input type="text" size="11" maxlength="10" name="date" value="<?php echo $date; ?>">
 Select State: <select name="network">
   <option value="IA_COOP" <?php if ($network == "IA_COOP") echo "SELECTED"; ?>>Iowa
   <option value="IN_COOP" <?php if ($network == "IN_COOP") echo "SELECTED"; ?>>Indiana
