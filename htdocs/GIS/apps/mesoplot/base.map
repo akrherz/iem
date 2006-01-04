@@ -81,12 +81,12 @@ LAYER
   NAME DMX
   STATUS ON
   TYPE RASTER
-  DATA /mesonet/data/gis/images/26915/DMX/DMX_N0R_0.tif
+  DATA /home/ldm/data/gis/images/4326/DMX/n0r_0.tif
 #  OFFSITE 255 255 255
   OFFSITE 0 0 0
   TRANSPARENCY 80
   PROJECTION
-    "init=epsg:26915"
+    "init=epsg:4326"
   END
 END
 
@@ -94,9 +94,12 @@ LAYER
   NAME KCCI
   STATUS ON
   TYPE RASTER
-  DATA /mesonet/data/kcci/max.tif
+  DATA /home/ldm/data/gis/images/26915/KCCI/KCCI_N0R_0.png
   OFFSITE 0 0 0
   TRANSPARENCY 80
+  PROJECTION
+   "init=epsg:26915"
+  END
 END
 
 LAYER
@@ -245,7 +248,7 @@ LAYER
  NAME mwradar
  STATUS ON
  TYPE RASTER
- DATA "/mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif"
+ DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif"
  OFFSITE 0 0 0
  PROJECTION
   "init=epsg:4326"
