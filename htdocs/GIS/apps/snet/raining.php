@@ -192,15 +192,10 @@ foreach($data as $key => $value){
 $map->drawLabelCache($img);
 
 $radTimes = Array();
-$fcontents = file('/mesonet/data/gis/images/unproj/'. substr($rad, 0, 3) .'/'.substr($rad, 0, 3) .'.log');
-while (list ($line_num, $line) = each ($fcontents)) {
-  $radTimes[$line_num] = substr($line, 0, 12);
-  $lastT = $line;
-}
+$radTS = filemtime("/home/ldm/data/gis/images/4326/$rad/n0r_0.tif");
+$r = date("m/d h:i a", $radTS);
 
-$radTS = substr($radTimes[8], 4, 2) ."/". substr($radTimes[8], 6, 2) ." ". substr($radTimes[8], 8, 4) ."Z";
-
-mktitle($map, $img, " SNET 15min rain ending: ". $ts ." , NEXRAD valid: ". $radTS ."                  ");
+mktitle($map, $img, " SNET 15min rain ending: ". $ts ." , NEXRAD valid: $r");
 $map->drawLabelCache($img);
 
 $url = $img->saveWebImage();
