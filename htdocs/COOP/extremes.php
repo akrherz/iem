@@ -22,17 +22,12 @@ include("$rootpath/include/header.php");
 <?
  $connection = iemdb("coop");
 
- $date = date("Y-m-d", $valid); 
- 
+ $td = date("Y-m-d", $valid); 
 
  $query = "SELECT * from $tblname WHERE 
-     valid = '".$date."' ORDER by ". $sortcol ." DESC";
+     valid = '".$td."' ORDER by ". $sortcol ." DESC";
  $rs = pg_exec($connection, $query);
 
- $tokens = split("-", $date);
- $month = $tokens[0];
- $day = $tokens[1];
- $ts = mktime(0, 0, 0, $tokens[0], $tokens[1], 2000);
 ?> 
 
 <h3 class="heading">COOP Extremes for <?php echo $month ."/". $day ; ?></h3>
