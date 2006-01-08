@@ -53,7 +53,7 @@ else if ($method == "id")
 	{
 		include("$rootpath/include/iemaccess.php");
 		$iem = new IEMAccess();
-		$rs = $iem->query("SELECT day, pday from summary WHERE station = '$id'");
+		$rs = $iem->query("SELECT day, pday from summary_$year WHERE station = '$id'");
 		while ($row = pg_fetch_array($rs))
 		{
 			if ($row["pday"] >= 0)
@@ -119,11 +119,11 @@ if ($view == "download")
 	die();
 }
 
-include("/mesonet/php/include/header.php"); ?>
+include("$rootpath/include/header.php"); ?>
 <h3 class="heading"><a href="/rainfall/">IEM Rainfall</a></h3>
 <pre>
 <?php echo $data; ?>
 </pre>
 
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
