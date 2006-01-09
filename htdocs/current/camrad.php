@@ -1,0 +1,104 @@
+<?php
+/* Generate a radar image with camera locs for some time */
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/kcciLoc.php");
+
+$db_ts = strftime("%Y-%m-%d %H:%M", $ts );
+
+dl($mapscript);
+$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+$map->setExtent(-95.1,40.6,-92.4,43.1);
+$map->set("width", 320);
+$map->set("height", 240);
+
+$namer = $map->getlayerbyname("namerica");
+$namer->set("status", 1);
+
+$stlayer = $map->getlayerbyname("states");
+$stlayer->set("status", 1);
+
+$counties = $map->getlayerbyname("iacounties");
+$counties->set("status", 1);
+
+$c0 = $map->getlayerbyname("warnings0_c");
+$c0->set("connection", $_DATABASES["postgis"] );
+$c0->set("status", MS_ON );
+if ($isarchive)
+{
+   $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+}else {
+   $sql = "geom from (select significance, phenomena, geom, oid from warnings WHERE expire > '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326";
+   $c0->set("data", $sql);
+}
+
+$radar = $map->getlayerbyname("nexrad_n0r");
+$radar->set("status", MS_ON );
+if ($isarchive) 
+{
+  $fp = "/mesonet/ARCHIVE/data/". gmdate('Y/m/d/', $radts) ."GIS/uscomp/n0r_". gmdate('YmdHi', $radts) .".png";
+  if (! is_file($fp))
+    echo "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
+  else
+  {
+    if (! is_file("/tmp/". gmdate('YmdHi', $radts) .".png"))
+    {
+     copy($fp, "/tmp/". gmdate('YmdHi', $radts) .".png");
+     copy("/mesonet/ARCHIVE/data/". gmdate('Y/m/d', $radts) ."/GIS/uscomp/n0r.tfw", "/tmp/". gmdate('YmdHi', $radts) .".wld");
+     }
+  }
+  $radfile = "/tmp/". gmdate('YmdHi', $radts) .".png";
+  $radar->set("data", $radfile);
+}
+
+
+$cp = ms_newLayerObj($map);
+$cp->set("type", MS_SHAPE_POINT);
+$cp->set("status", MS_ON);
+$cl = ms_newClassObj($cp);
+$cl->label->set("type", MS_BITMAP);
+$cl->label->set("size", MS_MEDIUM);
+$cl->label->set("position", MS_UR);
+$cl->label->set("force", MS_ON);
+$cl->label->outlinecolor->setRGB(255, 255, 255);
+$sl = ms_newStyleObj($cl);
+$sl->set("symbolname", "circle");
+$sl->set("size", 8);
+$sl->color->setRGB(255, 255, 255);
+$sl = ms_newStyleObj($cl);
+$sl->set("symbolname", "circle");
+$sl->set("size", 6);
+$sl->color->setRGB(0, 0, 0);
+
+
+$img = $map->prepareImage();
+$namer->draw($img);
+$counties->draw($img);
+$stlayer->draw( $img);
+$radar->draw($img);
+$c0->draw($img);
+
+/* Draw Points */
+reset($cameras);
+while (list($key, $val) = each($cameras))
+{
+   if (! $cameras[$key]["active"]) continue;
+   $pt = ms_newPointObj();
+   $pt->setXY($Scities[$key]["lon"], $Scities[$key]["lat"], 0);
+   $pt->draw($map, $cp, $img, 0, $cameras[$key]['num'] );
+   $pt->free();
+
+}
+$d = date("m/d/Y h:i A", $radts);
+
+$layer = $map->getLayerByName("credits");
+$point = ms_newpointobj();
+$point->setXY(1, 230);
+$point->draw($map, $layer, $img, "credits",  "RADAR: $d");
+
+$map->drawLabelCache($img);
+
+$url = $img->saveWebImage();
+
+echo "<td><b>Radar View:</b><br /><img src=\"$url\"></td>";
+?>

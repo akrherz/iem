@@ -7,7 +7,10 @@
  $hour = isset($_GET["hour"]) ? $_GET["hour"] : date("H");
  $minute = isset($_GET["minute"]) ? $_GET["minute"] : date("i");
  $isarchive = isset($_GET["archive"]);
+ $ts = time();
+ $radts = mktime($hour, $minute, 0, $month, $day, $year) - (($minute % 5) * 60);
 
+ $num = 1;
  include("$rootpath/include/cameras.inc.php"); 
  while (list($id, $val) = each($cameras))
  {
@@ -28,7 +31,8 @@
     else if (is_file($fp5)) $cameras[$id]["url"] = $url5;
     else $cameras[$id]["active"] = false;
  }
-
+ 
+ if ($cameras[$id]["active"]){ $cameras[$id]["num"] = $num; $num += 1; }
 }/* End of while */
 
 ksort($cameras);
@@ -77,8 +81,10 @@ loops on their <a href="http://www.schoolnet8.com/camera/">webcamera homepage</a
 <table width="700px">
 
 <?php
- $i=1;
+ include("camrad.php");
+ $i=0;
  $misstxt = "Cameras Missing: ";
+ reset($cameras);
  while (list($id, $v) = each($cameras))
  {
    if (! $v["active"] ){
@@ -87,7 +93,7 @@ loops on their <a href="http://www.schoolnet8.com/camera/">webcamera homepage</a
      continue;
    }
    if ($i) echo "<tr>";
-   echo sprintf("<td><b>%s</b> (%s County)<br /><img src=\"%s\"></td>", $v["name"], $v["county"], $v["url"]);
+   echo sprintf("<td><b>%s. %s</b> (%s County)<br /><img src=\"%s\"></td>", $v["num"], $v["name"], $v["county"], $v["url"]);
    if (! $i) echo "</tr>";
    $i = ! $i;
  }
