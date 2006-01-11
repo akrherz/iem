@@ -243,7 +243,7 @@ while (list ($key, $val) = each ($skippedStations) ) {
 <tfoot>
 <tr>
 <td colspan=3></td>
-<?php $c = "javascript:new_window_big('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=". strtoupper($tv)."&var="; ?>
+<?php $c = "javascript:new_window_big('$rooturl/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=". strtoupper($tv)."&var="; ?>
  <td><a href="<?php echo $c; ?>tmpf');">Plot</a>
     (<a href="<?php echo $c; ?>max_tmpf');">Plot</a> /
      <a href="<?php echo $c; ?>min_tmpf');">Plot</a>)</td>
