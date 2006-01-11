@@ -39,7 +39,7 @@ $cameras = Array(
 		"iserviceurl" => "http://showcase.netins.net/web/jtco/",
 		"ip" => "216.248.72.225", "county" => "Greene"), 
   "SCEI4" => Array("sts" => mktime(23,0,0,6, 18,2004), "ets" => time(),
-		"name" => "Lake Rathbun", "active" => false,
+		"name" => "Lake Rathbun", "active" => true,
 		"iservice" => "Rathbun Lake Army Corp. of Engineers",
 		"iserviceurl" => "http://www.nwk.usace.army.mil/rathbun/rathbun_home.htm",
 		"ip" => "65.248.192.73", "county" => "Appanoose"),
