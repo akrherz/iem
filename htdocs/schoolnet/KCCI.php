@@ -7,7 +7,6 @@
 <ul>
  <li><a href="current.php">Current Conditions</a> (sortable)</li>
  <li><a href="<?php echo $rooturl; ?>/GIS/apps/snet/raining.php">Where's it raining?</a></li>
- <li><a href="/GIS/data/datasets/snet_current.zip"><img src="<?php echo $rooturl; ?>/images/gisready.png" border=0>GIS Shapefile</a></li>
 </ul>
 
 <p><h3 class="subtitle">Station Plots</h3>
