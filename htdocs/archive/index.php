@@ -32,6 +32,11 @@ then, only base reflectivity was saved.</dd></li>
 
 </ul>
 
+<h3>Satellite</h3>
+<ul>
+ <li><a href="http://www.class.noaa.gov/">NOAA Satellite and Information Service</a><br />
+ <dd>A wonderful site to download historical satellite data</dd></li>
+</ul>
 
 <h3>Misc</h3>
 <ul>
