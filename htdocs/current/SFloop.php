@@ -1,3 +1,6 @@
+<?php
+ $product = isset($_GET["product"]) ? $_GET["product"] : "TW";
+?>
 <HTML><HEAD></HEAD>
 
 <HTML>
