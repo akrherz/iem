@@ -9,6 +9,8 @@
  $mode = isset($_GET["mode"]) ? $_GET["mode"] : "realtime";
  $frames = isset($_GET["frames"]) ? $_GET["frames"] : 13;
  $interval = isset($_GET["interval"]) ? $_GET["interval"]: 5;
+
+/* Lets see what the form is set to */
  $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
  $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
@@ -17,7 +19,7 @@
 
  /** Acceptable number of frames are between 1 and 100 */
  if (intval($frames) > 100 || intval($frames) < 1) $frames = 13;
- /** Acceptable interval is between 5 and 100 */
+ /** Acceptable interval is between 5 and 60 */
  if (intval($interval) > 60 || intval($interval) < 5) $interval = 5;
 
  $astart = Array("comprad" => mktime(19,0,0,4,31,2003),
@@ -40,42 +42,40 @@
  $now = mktime() - 60;
  $aend = mktime();
 
- /* Real-time mode */
- if ($mode == "realtime"){
-   $ts = $now - ($frames -1) * (intval($interval) * 60);
- } else { /* Historical */
-   $ots = mktime($hour, $minute, 0, $month, $day, $year);
-   /* Make sure archive request is not sooner than archive start */
-   if ($ots < $astart[$prod])  
-     $ts = $astart[$prod];
-   /* Make sure archive request is not in the future */
-   else if ($ots > $now)    
-     $ts = $now - (($frames) * (intval($interval) * 60) ) ;
-   /* Set the timestamp */
-   else 
-     $ts = $ots;
- }
- $formts = $ts;
+/* Figure when the lapse starts! $ts */
+if ($mode == "realtime"){
+  $ts = $now - ($frames -1) * (intval($interval) * 60);
+} else { /* Historical */
+  $ots = mktime($hour, $minute, 0, $month, $day, $year);
+  /* Make sure archive request is not sooner than archive start */
+  if ($ots < $astart[$prod])  
+    $ts = $astart[$prod];
+  /* Make sure archive request is not in the future */
+  else if ($ots > $now)    
+    $ts = $now - (($frames) * (intval($interval) * 60) ) ;
+  /* Set the timestamp */
+  else 
+    $ts = $ots;
+}
+
+// This is what we set the form time to
+$formts = $ts;
 
 $ar = localtime($ts);
 $m = $ar[1];
 
-if ($m > 56) $ma = "55";
-else if ($m > 51) $ma = "50";
-else if ($m > 46) $ma = "45";
-else if ($m > 41) $ma = "40";
-else if ($m > 36) $ma = "35";
-else if ($m > 31) $ma = "30";
-else if ($m > 26) $ma = "25";
-else if ($m > 21) $ma = "20";
-else if ($m > 16) $ma = "15";
-else if ($m > 11) $ma = "10";
-else if ($m > 6) $ma = "05";
-else if ($m > 1) $ma = "00";
-else {
-  $formts = $formts - ($m * 60) - (5 * 60);
-  $ma = $m;
-}
+if ($m >= 55) $ma = "55";
+else if ($m >= 50) $ma = "50";
+else if ($m >= 45) $ma = "45";
+else if ($m >= 40) $ma = "40";
+else if ($m >= 35) $ma = "35";
+else if ($m >= 30) $ma = "30";
+else if ($m >= 25) $ma = "25";
+else if ($m >= 20) $ma = "20";
+else if ($m >= 15) $ma = "15";
+else if ($m >= 10) $ma = "10";
+else if ($m >= 5) $ma = "05";
+else if ($m >= 0) $ma = "00";
 
 $diff = $m - intval($ma);
 
@@ -83,9 +83,8 @@ $hour  = date("H", $formts);
 $day   = date("d", $formts);
 $month = date("m", $formts);
 $year  = date("Y", $formts);
+$minute = $ma;
 
-/* Difference between minutes */
-$minute_diff = $m - intval($ma);
 /* Our actual loop start time! */
 $loopts = $ts - ($diff * 60);
 $switchts = mktime(0,0,0, 8,22,2004);
