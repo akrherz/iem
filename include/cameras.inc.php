@@ -86,7 +86,7 @@ $cameras = Array(
 		"name" => "Tama", "active" => true,
 		"ip" => "169.203.116.12", "county" => "Tama"),
   "SWBI4" => Array("sts" => mktime(0,0,0, 8,28,2003), "ets" => time(),
-		"name" => "Webster City", "active" => false,
+		"name" => "Webster City", "active" => true,
 		"iservice" => "WMNTEL.NET", "iserviceurl" => "http://www.wmtel.net",
 		"ip" => "216.51.195.93", "county" => "Hamilton"),
   "SWII4" => Array("sts" => mktime(17,30,0, 5,14,2004), "ets" => time(),
