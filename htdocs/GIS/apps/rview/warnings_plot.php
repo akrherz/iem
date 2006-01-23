@@ -105,6 +105,14 @@ if (in_array("goes_east04I4", $layers))
   }
 }
 
+$airtemps = $map->getlayerbyname("airtemps");
+$airtemps->set("status", (in_array("airtemps", $layers) && ! $archive) );
+$airtemps->set("connection", $_DATABASES["access"] );
+
+$surface = $map->getlayerbyname("surface");
+$surface->set("status", (in_array("surface", $layers) && ! $archive) );
+$surface->set("connection", $_DATABASES["access"] );
+
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
 
@@ -169,8 +177,8 @@ if ($lsrlook == "+")
 $lsr_etime = strftime("%Y-%m-%d %H:%M:00+00", $ts + ($lsrwindow * 60) );
 if ($lsrlook == "-") 
    $lsr_etime = strftime("%Y-%m-%d %H:%M:00+00", $ts);
-$lsrs->setFilter("valid >= '$lsr_btime' and valid <= '$lsr_etime'");
-
+//$lsrs->setFilter("valid >= '$lsr_btime' and valid <= '$lsr_etime'");
+$lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs WHERE valid >= '$lsr_btime' and valid <= '$lsr_etime') as foo USING unique k USING SRID=4326 ");
 
 $img = $map->prepareImage();
 
@@ -192,6 +200,9 @@ $p0->draw($img);
 $usdm->draw($img);
 if ($lsrwindow != 0)
   $lsrs->draw($img);
+
+$surface->draw($img);
+$airtemps->draw($img);
 
 $map->embedScalebar($img);
 mktitle($map, $img, "                  IEM NEXRAD composite base reflect valid: $d");
