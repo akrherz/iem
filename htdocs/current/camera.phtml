@@ -88,7 +88,7 @@ loops on their <a href="http://www.schoolnet8.com/camera/">webcamera homepage</a
  while (list($id, $v) = each($cameras))
  {
    if (! $v["active"] ){
-     if ($id == "S03I4") continue;
+     if ($id == "S03I4" || $id == "SMAI4" || $id == "SCAI4") continue;
      $misstxt .= $v["name"] ." , ";
      continue;
    }
