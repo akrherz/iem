@@ -77,29 +77,32 @@ to explore the spatial statistical benefits of the IEM partnership.
 <thead>
 <tr><th>Abbreviation</th><th>Description</th><th>Map</th></tr>
 </thead>
-<tr><th>ASOS</th><td>The <a href="<?php echo $rooturl; ?>/ASOS/">Iowa Automated Surface Observing System</a> sites are located at primary airports and are maintained by the National Weather Service.  This network is rigorously checked and
+<tr><th>ASOS</th><td>The <a href="<?php echo $rooturl; ?>/ASOS/">Automated Surface Observing System</a> sites are located at primary airports and are maintained by the National Weather Service.  This network is rigorously checked and
  quality controlled.  For Iowa, a limitation of the ASOS network is the 
 lack of sites located in Westcentral and Southwest Iowa.</td><td><img src="nni_images/asos_locs.png"></tr>
 
-<tr><th>AWOS</th><td>The <a href="<?php echo $rooturl; ?>/AWOS/">Iowa Automated Weather Observing System</a> sites are located at secondary airports and 
-are maintained by the Iowa State Department of Transportation via a third 
-party contractor.  Data quality should be comparable with the ASOS network
+<tr><th>AWOS</th><td>The <a href="<?php echo $rooturl; ?>/AWOS/">Automated Weather Observing System</a> sites are located at secondary airports and 
+are maintained by state government entities via third 
+party contractors.  Data quality should be comparable with the ASOS network
 since they are using similar instrumentation, but a number of factors 
 produce biases when compared with the ASOS network.  The main issues include 
-siting, maintenance schedules, and network communication.  Most of the big 
+siting, maintenance schedules, and network communication.  Most of the significant  
 differences between the ASOS and AWOS network show up in the temperature 
 and dew point measurements due to siting. </td><td><img src="nni_images/awos_locs.png"></tr>
 
-<tr><th>RWIS</th><td>The <a href="<?php echo $rooturl; ?>/RWIS/">Iowa Roadway Weather Information System</a> sites are located along side interstates and highways.  They are maintained by the Iowa Department of Transportation via a 
+<tr><th>RWIS</th><td>The <a href="<?php echo $rooturl; ?>/RWIS/">Roadway Weather Information System</a> sites are located along side interstates and highways.  They are maintained by their respective state department of transportation via a 
 third party contractor.  Atmospheric data from this network is of lesser 
-quality than the ASOS or AWOS networks.  The primary purpose of the RWIS network is for automated observation of winter weather. </td><td><img src="nni_images/rwis_locs.png"></td></tr>
+quality than the ASOS or AWOS networks.  The primary purpose of the RWIS network is for automated observation of winter weather. The IEM collects RWIS data
+from Iowa, Minnesota, Wisconsin, Nebraska, and Kansas.  Other states may have
+RWIS networks, but often their data is proprietary.</td><td><img src="nni_images/rwis_locs.png"></td></tr>
 
-<tr><th>SchoolNet</th><td>The IEM collects data from a number of <a href="<?php echo $rooturl; ?>/schoolnet/">SchoolNets</a>.  For the purposes of this document, the KCCI-TV SchoolNet is only included.  Data quality is close to that of 
-the RWIS network, but siting issues make measurements like wind and 
-precipitation problematic. </td><td><img src="nni_images/snet_locs.png"></td></tr>
+<tr><th>SchoolNet</th><td>The IEM collects data from a number of <a href="<?php echo $rooturl; ?>/schoolnet/">SchoolNets</a>.  The IEM collects data from three
+SchoolNet data networks operated by KCCI-TV, KIMT-TV, and KELO-TV.  Data 
+quality is close to that of the RWIS network, but siting issues make 
+measurements like wind and precipitation problematic. </td><td><img src="nni_images/snet_locs.png"></td></tr>
 
 <tr><th>ISUAG</th><td>The <a href="<?php echo $rooturl; ?>/agclimate/">ISU Ag Climate</a> sites primarily provide soil temperature and solar radiation readings.
-They are maintained by the Iowa State University Extension.  The main issue with this network is the timing of observations received.  Each station is called daily to download its observation record from the previous day. </td><td><img src="nni_images/isuag_locs.png"></td></tr>
+They are maintained by the Iowa State University Experiment Station.  The main issue with this network is the timing of observations received.  Each station is called daily to download its observation record from the previous day. </td><td><img src="nni_images/isuag_locs.png"></td></tr>
 </table>
 
 <p>
@@ -113,11 +116,12 @@ and reliability.</caption>
 <tr><th>Tier 1</th><td>ASOS + AWOS:  The combination of these two networks is 
 commonly used in the meteorological community to produce various analysis 
 products.  Both networks are located at airports and are for the most part 
-well maintained.</td><td><img src="nni_images/tier1_locs.png"></tr>
+well maintained.  Their instrumentation is very similiar as well.</td><td><img src="nni_images/tier1_locs.png"></tr>
 
 <tr><th>Tier 2</th><td>ASOS + AWOS + RWIS:  The RWIS network is included in 
 this grouping, since it has the closest data quality reputation to the 
-ASOS+AWOS networks.  </td><td><img src="nni_images/tier2_locs.png"></tr>
+ASOS+AWOS networks.  The quality of the instrumentation used on the RWIS sites
+is close to those found on the AWOS sites.</td><td><img src="nni_images/tier2_locs.png"></tr>
 
 <tr><th>Tier 3</th><td>ASOS + AWOS + RWIS + SchoolNet + ISUAG:  All 
 networks included.</td><td><img src="nni_images/tier3_locs.png"></tr>
@@ -134,7 +138,7 @@ networks included.</td><td><img src="nni_images/tier3_locs.png"></tr>
  <a href="http://arcscripts.esri.com/details.asp?dbid=12227"><i>Nearest Neighbor Analysis / Event-Event Distances</i></a> written by Dr M. Sawada was used to compute the NNI.
 
 <h4>Data:</h4>
-<table cellpadding=2 cellspacing=0 border=1>
+<table cellpadding=3 cellspacing=0 border=1>
 <caption>Table 3:  NNI and associated statistics.</caption>
 <thead>
 <tr><th>Network</th><th>Sites</th><th>NNI</th><th>Z</th><th>Avg Min Distance<br />[km]</th><th>Expected Min Distance<br />[km]</th></tr>
@@ -190,9 +194,8 @@ networks included.</td><td><img src="nni_images/tier3_locs.png"></tr>
 </table>
 
 <p>Table 3 presents the results of the NNI computation.  Also presented are
-the Z statistic, average minimum distance between two sites, expected minimum distance
-based on a homogeneous in space distribution of sites, and areal coverage
-of each network and network group.
+the Z statistic, average minimum distance between two sites and expected minimum distance
+based on a homogeneous in space distribution of sites.
 
 <h4>Analysis:</h4>
 
@@ -206,25 +209,27 @@ of each network and network group.
 <tr><td> &lt; 1</td><td>decreasing values less than 1 indicate more clustering</td></tr>
 </table>
 
-<p>Table 3 shows the results of the NNI computation.  The NNI for the 
-ASOS network is
- a relatively high value (1.58) which indicates dispersion of the sampling
-points.  This spread was one of the main reasons the IEM was created, since
-the baseline ASOS network is poorly representative at even a 50 km scale over the state.  The NNI value of 0.95 for the combination of the AWOS and RWIS networks to the ASOS network (Tier 2) shows the benefit of the IEM collaboration.  
-The NNI for the Tier 2 network (0.95) is very close to unity and indicates that the 
-network has a nearly uniform distribution.  The addition on the SchoolNet and 
-ISUAG networks into the Tier 3 has no effect on the NNI.
+<p>Table 3 shows the results of the NNI computation. For NNI, the closest 
+value to unity (which is desired for this statistic) is the ASOS network. 
+This implies that the ASOS network is representative at the expected minimum
+distance of 36.5 km.  For the most part, the AWOS and RWIS networks have 
+values close to unity as well.  The SchoolNet and ISUAG values well below 
+unity indicate clustering.  When the networks are grouped together, Tier 1
+has the closest values to unity.  The addition of more clustered networks in
+Tier 2 and Tier 3 negatively impact the NNI statistics.
 
 <p>The Z statistic is also presented in Table 3.   If the NNI statistic 
 indicates dispersion or clustering, the Z statistic tests to see if the
 difference of NNI from unity (randomness) is significant (Clark 1954).  
 Values above 1.96 or below -1.96 indicate a 95% confidence that the 
-distribution is not randomly distributed.  Values of 0.90 and 1.51 for Tier 2 
-and Tier 3, 
-respectively, would indicate some randomness to the distribution.  This may
-be a result of the combination of networks that are physically located in 
-different venues (ASOS/AWOS: airports, RWIS: rural roads, SchoolNet: Urban 
-cities, and ISUAG: rural farms).  
+distribution is <b>not</b> randomly distributed.   The only networks within
+this desired range are the ASOS, RWIS, and ISUAG networks.  The large value
+of 5.54 for the SchoolNet clearly indicates the clustering of this network
+given our domain of interest.  It is interesting to note that all three
+"tiers" of networks have rather large Z values.  This can be explained by
+considering that many cities (spatially confined area) have a station from 
+a couple of the networks.  Thus the combination of networks into tiers 
+produces some clustering.
 
 <h3><a name="fractal">3.  Fractal Dimension</a></h3>
 
@@ -288,9 +293,7 @@ distribution in 2 dimensions.  In both ranges, values decrease with the
 inclusion of Tier 1, 2, and 3 collections.  The reason for this is the 
 increased bias introduced by edge effects as the center of the domain becomes
 more densely populated and the exterior portions of the state (namely Northeast
-and Southern Iowa) become comparatively less. In practice the IEM uses 
-sampling nodes from surrounding states for many types of analysis, so the
-bias indicated from fractal analysis will be reduced.
+and Southern Iowa) become comparatively less. 
 
 <h3><a name="morisita">4. Morisita Index</a></h3>
 
@@ -368,7 +371,8 @@ homogeneous, the value will fluctuate around 1</td></tr>
 is ocurring.  At the smallest scales of 10-40 km, clustering is evident in
 the Tier 2 and Tier 3 networks.  This makes practical sense considering 
 the co-placement of RWIS sites near cities with ASOS/AWOS sites in Tier 2 and
-the overall clustering of SchoolNet sites in Tier 3.
+the overall clustering of SchoolNet sites in Tier 3.  The general clustering
+of Schoolnet sites is very evident with values well above unity.
 
 
 <h3><a name="thiessen">5. Thiessen/Voronoi polygons</a></h3>
@@ -386,7 +390,7 @@ provide insight into network homogeneity.
 <p>The point coverage shapefiles were loaded into ArcGIS 9.1.  The ArcInfo 
 Thiessen polygon tool was then used to generate the polygons.  These 
 polygons were then clipped by the border of Iowa within ArcGIS as well.  
-The resulting coverage was exported to Shapefile and then loaded into the 
+The resulting coverage was exported to shapefile and then loaded into the 
 IEM's spatial database for analysis.
 
 <h4>Data:</h4>
@@ -405,20 +409,28 @@ IEM's spatial database for analysis.
 
 <p>Thiessen polygons provide a quick synopsis of how large of an area is 
 represented by a single point.  Areas in a network that are under sampled can
-quickly be seen.  Figure 4 shows the interesting contrast between the more
-densely sampled areas of Central Iowa and along the I-380 corridor in Eastern
-Iowa.  The largest polygons can be seen in Northeast and Southern Iowa.  The 
-histogram for Tier 1 also nicely details the collection of smaller polygons
-around 2,000 km**2 
-along with a second mode of larger polygons around 5,000 km**2.  Unfortunately,
-this bi-modal distribution is not greatly helped by the addition of the RWIS sensors in Tier 2.  The clustering of the RWIS sensors simply splits some of the
-larger polygons, but a couple of rather large polygons in Northeastern Iowa still exist.
+quickly be seen, since large anonolous polygons will visually stick out.
+
+<p>Figure 4 shows the histogram and Thiessen Polygons for Tier 1.  The 
+undersampled areas of Northern Missouri, Northeastern Kansas, and South 
+Dakota are clearly seen by their comparatively large polygons.  The histogram
+illustrates this difference with a large clustering of smaller polygons and 
+then numerous large ones outside of Iowa.
+
+<p>The addition of the RWIS networks in Tier 2, shown in Figure 5, almost
+exasperates the situation.  The lack of RWIS sites in Missouri and South Dakota
+don't help shrink the size of the polygons in those areas.  The result can 
+be seen in the histogram with the general trend of smaller polygons, but still
+possessing some very large ones as well.
 
 <p>For Tier 3, the clustering of sites in Central Iowa with the SchoolNet 
 network creates a large number of smaller polygons and doesn't help to eliminate
-the larger polygons in Eastern Iowa.  The average polygon size on the maps are
-only interesting in the fact that they indicate what the ideal size would be
-if all of the sites were spread out equally. 
+the larger polygons in Missouri and Illinois.  The histogram shows a mode 
+around 500 km^2 with around 15% of the polygons at least 7 times larger.  The 
+conclusion is that for the <b>entire domain</b>, the addition of other networks
+is only beneficial when those networks have stations in each state used for 
+this analysis.
+
 
 <h3><a name="represent">6. Coefficient of Representativity</a></h3>
 
@@ -462,10 +474,22 @@ other parameters needed for the CR.
 <tr><td>CR &lt; 1</td><td>The measure is clustered</td></tr>
 </table>
 
-<p>Tier 1 clearly shows the under sampled portions of the state, which are 
-NE Iowa and parts of SW Iowa.  Adding the RWIS network in tier 2 increases
-localized clustering at the expense of other areas where observations become
-even more sparse.  Tier 3 clearly shows the affect of adding 60+ SchoolNet sites in Central Iowa, since the clustering goes up and the sparse areas get even sparser due to the increased number of stations.
+<p>Tier 1 clearly shows the lack of observing sensors in Missouri, Nebraska,
+and South Dakota.  Ideally, the "white" color would dominate the map
+indicating areas of uniform representativity.  The analysis shows that perhaps
+only portions of Northcentral Iowa are representatively measured by sensors
+in Tier 1.
+
+<p>It is interesting to note the dark blotches that appear in Figure 8 for 
+Tier 2.  The dark blues represent clustering and those are locations where
+a RWIS site is located close to one or more ASOS/AWOS sites.  The overall
+impact of adding RWIS sites is to increase the sparsity in states where the
+IEM doesn't collect RWIS data.
+
+<p>The addition of SchoolNet data in Tier 3 only makes the contrast more
+distinct.  It is interesting to note the strong gradient of CR along the 
+Iowa/Missouri border.  This is a result of a dearth of observations in 
+Northern Missouri.
 
 <h3><a name="conclusions">7. Conclusions</a></h3>
 
@@ -477,9 +501,9 @@ they clearly point out the need for caution before blindly combining all
 available data into a high resolution product.
 
 <p>The CR figures most clearly illustrate the difficulties of adding stations
-from other networks and their localized impact on the overall analysis. Most of 
-Northeast and a portion of Southcentral Iowa are clearly under sampled as 
-shown by Figure 7 for Tier 1.  The easy solution would be to add stations
+from other networks and their localized impact on the overall analysis.  It
+is particularly dangerous to add networks that are not uniformly distributed
+across our domain of interest. The easy solution would be to add stations
 in those areas to 'fill in the holes'.  Up until this study, 
 the IEM has focused on adding other networks to fill in these holes without 
 realizing the implications of additional clustering in areas like Central and 
