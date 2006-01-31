@@ -29,6 +29,7 @@
 "ia1954" => array("city" => "Cresco","id" => "ia1954","startYear" => "1951","lat" => 43.38,"lon" => -92.08),
 "ia2110" => array("city" => "Decorah","id" => "ia2110","startYear" => "1893", "lat" => 43.3, "lon" => -91.8),
 "ia2171" => array("city" => "Denison","id" => "ia2171","startYear" => "1893","lat" => 42.03,"lon" => -95.32),
+"ia2203" => array("city" => "Des Moines","id" => "ia2203","startYear" => "1951","lat" => 41.53,"lon" => -93.65),
 "ia2364" => array("city" => "Dubuque","id" => "ia2364","startYear" => "1951","lat" => 42.53,"lon" => -90.63),
 "ia2689" => array("city" => "Emmetsburg","id" => "ia2689","startYear" => "1951","lat" => 43.1,"lon" => -94.67),
 "ia2724" => array("city" => "Estherville","id" => "ia2724","startYear" => "1951", "lat" => 43.38, "lon" => -94.83),
