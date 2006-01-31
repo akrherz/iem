@@ -1,0 +1,223 @@
+<?php
+include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+
+$var = isset($_GET["var"]) ? $_GET["var"]: "high";
+$year = isset($_GET["year"]) ? $_GET["year"]: 2005;
+$month = isset($_GET["month"]) ? $_GET["month"]: 5;
+$day = isset($_GET["day"]) ? $_GET["day"]: 1;
+
+/** Need to use external date lib *
+  * http://php.weblogs.com/adodb_date_time_library
+  */
+include("adodb-time.inc.php");
+
+$ts = adodb_mktime(0,0,0,$month,$day,$year);
+$ndate = adodb_date("Y-m-d", $ts);
+
+include("$rootpath/include/forms.php");
+
+?>
+
+<?php $TITLE = "IEM | NWS COOP Daily Plotter";
+$HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+<!--//BEGIN Script
+function new_window(url) {
+        link = 
+        window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
+} 
+//END Script-->
+</script>';
+include("$rootpath/include/header.php"); ?>
+
+<div class="text">
+<a href="http://mesonet.agron.iastate.edu/COOP/">NWS COOP</a> &nbsp;<b> > </b>
+&nbsp; Daily Data Plotter
+
+<p>With this application, you can plot COOP observations for a date of your
+choice.
+
+<form method="GET">
+<table>
+ <tr>
+  <th colspan=5><h3 class="subtitle">Plot Selections</h3></th></tr>
+ <tr>
+   <th>Select Parameter:</th>
+   <th>Year</th>
+   <th>Month</th>
+   <th>Day</th>
+   <td></td>
+  </tr>
+ <tr>
+  <td rowspan=2><select name="var">
+     <option value="high" <?php if($var == "high") echo "SELECTED"; ?>>High Temperature</option>
+     <option value="low" <?php if($var == "low") echo "SELECTED"; ?>>Low Temperature</option>
+     <option value="precip" <?php if($var == "precip") echo "SELECTED"; ?>>Precipitation</option>
+    </select></td>
+  <td rowspan=2><?php echo yearselect(1893, $year); ?></td>
+  <td><?php monthSelect2($month, 'month'); ?></td>
+  <td><?php daySelect2($day, 'day'); ?></td>
+  <td rowspan=2><input type="submit" value="Make Plot"></td>
+  </tr>
+</table>
+ 
+
+<?php
+dl($mapscript);
+include("$rootpath/include/all_locs.php");
+
+function mktitlelocal($map, $imgObj, $titlet) { 
+ 
+  $layer = $map->getLayerByName("credits");
+ 
+     // point feature with text for location
+  $point = ms_newpointobj();
+  $point->setXY( 0, 10);
+  $point->draw($map, $layer, $imgObj, 0,
+    $titlet ."                                                                                ");
+  $point->free();
+
+     // point feature with text for location
+  $point = ms_newpointobj();
+  $point->setXY( 0, 740);
+  $point->draw($map, $layer, $imgObj, 1,
+    "  Iowa Environmental Mesonet | NWS COOP ");
+  $point->free();
+}
+
+function plotNoData($map, $img){
+  $layer = $map->getLayerByName("credits");
+
+  $point = ms_newpointobj();
+  $point->setXY( 100, 200);
+  $point->draw($map, $layer, $img, 1,
+    "  No data found for this date! ");
+  $point->free();
+
+}
+
+$varDef = Array("low" => "Low Temperature",
+  "precip" => "Precipitation",
+  "high" => "High Temperature"
+);
+
+
+
+$rnd = Array("gdd50" => 0,
+  "et" => 2,
+  "prec" => 2,
+  "sgdd50" => 0,
+  "sdd86" => 0);
+
+
+$myStations = $cities;
+$height = 480;
+$width = 640;
+
+$proj = "init=epsg:26915";
+
+$map = ms_newMapObj("base.map");
+$map->set("width",1024);
+$map->set("height",768);
+$map->setProjection($proj);
+
+$map->setextent(250000, 4450000, 690000, 4880000);
+
+$counties = $map->getlayerbyname("counties");
+$counties->set("status", MS_ON);
+
+$snet = $map->getlayerbyname("snet");
+$snet->set("status", MS_ON);
+
+$cityname = $map->getlayerbyname("cityname");
+$cityname->set("status", MS_ON);
+
+$iards = $map->getlayerbyname("iards");
+$iards->set("status", 1);
+
+$ponly = $map->getlayerbyname("pointonly");
+$ponly->set("status", MS_ON);
+
+$img = $map->prepareImage();
+$counties->draw($img);
+$iards->draw($img);
+
+$c = iemdb("coop");
+
+
+$sql = sprintf("SELECT * from alldata WHERE day = '%s'", adodb_date("Y-m-d", $ts) );
+
+$rs =  pg_exec($c, $sql);
+$vals = Array();
+for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+  $stid = $row['stationid'];
+  $vals[$stid] = (float)$row[$var];
+}
+/* ------------------------------------------------------- */
+
+
+$tr = "# ".$ndate." ". $varDef[$var] ."
+# Download From: http://mesonet.agron.iastate.edu/GIS/apps/coop/plot.phtml
+# Download Date: ". strftime("%d %b %Y") ."
+# Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
+#-----------------------snip------------------\n";
+$tr .= sprintf("%10s,%20s,%10s,%10s,%10s,%10s\n", 'ID', 'StationName', 'Date', 'Latitude', 'Longitude', $var);
+foreach($vals as $key => $value){
+  $ukey = strtoupper($key);
+  if (! isset($cities[$ukey]) ) continue;
+  if (intval($value) == -99) continue;
+
+  $tr .= sprintf("%10s,%-20s,%10s,%10.4f,%10.4f,%10s\n", $key, $cities[$ukey]['city'], $ndate,
+  $cities[$ukey]['lat'], $cities[$ukey]['lon'], $value );
+
+  if ($ukey == "IA0807") $cities["IA0807"]["lon"] -= 0.1;
+
+  // Red Dot... 
+  $pt = ms_newPointObj();
+  $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+  $pt->draw($map, $ponly, $img, 0, '' );
+  $pt->free();
+
+  // ID
+  $pt = ms_newPointObj();
+  $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+  $pt->draw($map, $cityname, $img, 0, substr($key,2,4) );
+  $pt->free();
+
+  // Value UL
+  $pt = ms_newPointObj();
+  $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+  $pt->draw($map, $snet, $img, 2, $value);
+  $pt->free();
+}
+$map->drawLabelCache($img);
+
+
+if ($i == 0)
+   plotNoData($map, $img);
+
+mktitlelocal($map, $img, " $ndate ". $varDef[$var] ."  ");
+$map->drawLabelCache($img);
+
+$url = $img->saveWebImage();
+
+?>
+<p><h3 class="heading">Plot</h3>
+  <p>Open this plot in a <a href="javascript:new_window('image.phtml?f=<?php echo $url; ?>');">new window</a> for comparison with other plots. Once the
+image is loaded up in another window, you can modify this plots 
+parameters.
+
+<br />  <img src="<?php echo $url; ?>" border=1>
+
+<p>
+<img src="/images/gisready.png"><h3 class="heading"> Data Listing</h3>
+<pre><?php echo $tr; ?></pre>
+
+<p>You should be able to 'copy & paste' this raw data listing into a simple
+text editor and save the data file on your machine.  Most GIS systems can 
+then import this dataset as a layer.  You may have to omit the commented lines
+(#) if your GIS has trouble importing the data.</div>
+
+<?php 
+  include("$rootpath/include/footer.php");
+?>

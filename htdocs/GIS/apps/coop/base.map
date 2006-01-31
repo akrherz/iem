@@ -70,6 +70,26 @@ LAYER
 END
 
 LAYER
+  NAME cityname
+  STATUS ON
+  TYPE POINT
+  LABELCACHE OFF
+  PROJECTION
+    "init=epsg:4326"
+  END
+  CLASS
+    COLOR -1 -1 -1
+    LABEL
+      COLOR 0 0 0
+      SIZE MEDIUM
+      TYPE BITMAP
+      POSITION LC
+      FORCE TRUE
+    END
+  END
+END
+
+LAYER
   NAME snet
   STATUS ON
   TYPE POINT
@@ -115,6 +135,7 @@ LAYER
     END
   END
   CLASS
+    COLOR -1 -1 -1
     LABEL
       COLOR  255 255 0
       OUTLINECOLOR  0 0 0
@@ -127,9 +148,8 @@ LAYER
       FONT kcci
       ANTIALIAS TRUE
       BUFFER 2
-      FORCE FALSE
-      POSITION LC
-      OFFSET 0 5
+      FORCE TRUE
+      POSITION UC
     END
   END
 END
