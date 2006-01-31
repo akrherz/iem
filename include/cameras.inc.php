@@ -2,7 +2,7 @@
 $cameras = Array(
   "SAMI4" => Array("sts" => mktime(16,0,0,4,14,2005), "ets" => time(),
                 "name" => "Ames", "active" => true,
-                "ip" => "129.186.26.175", "county" => "Story"),
+                "ip" => "129.186.185.31", "county" => "Story"),
   "SBZI4" => Array("sts" => mktime(19,0,0,5,13,2004), "ets" => time(),
 		"name" => "Blank Park Zoo", "active" => true,
 		"ip" => "63.227.72.138", "county" => "Polk"),
