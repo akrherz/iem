@@ -94,7 +94,7 @@
 "ia7678" => array("city" => "Sigourney","id" => "ia7678","startYear" => "1951","lat" => 41.32,"lon" => -92.18),
 "ia7708" => array("city" => "Sioux City","id" => "ia7708","startYear" => "1951","lat" => 42.38,"lon" => -96.37),
 "ia7726" => array("city" => "Sioux Rapids","id" => "ia7726","startYear" => "1951","lat" => 42.88,"lon" => -95.05),
-"ia7844" => array("city" => "Spencer","id" => "ia7726","startYear" => "1951","lat" => 43.17,"lon" => -95.21),
+"ia7842" => array("city" => "Spencer","id" => "ia7726","startYear" => "1951","lat" => 43.17,"lon" => -95.21),
 "ia7979" => array("city" => "Storm Lake","id" => "ia7979","startYear" => "1893","lat" => 42.63,"lon" => -95.17),
 "ia8266" => array("city" => "Tipton","id" => "ia8266","startYear" => "1893","lat" => 41.82,"lon" => -91.08),
 "ia8296" => array("city" => "Toledo","id" => "ia8296","startYear" => "1951","lat" => 42.03,"lon" => -92.57),
