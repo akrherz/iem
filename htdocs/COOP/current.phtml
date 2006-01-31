@@ -57,7 +57,7 @@ include("$rootpath/include/header.php"); ?>
   $db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : " ";
   $db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : " ";
   $db[$site]["ratio"] = -1;
-  if ($db[$site]["snow"] > 0 && $db[$site]["pday"] > 0)
+  if ($db[$site]["snow"] > 0.001 && $db[$site]["pday"] > 0.001)
    {
      $db[$site]["ratio"] = intval( $db[$site]["snow"] / $db[$site]["pday"] );
    }
