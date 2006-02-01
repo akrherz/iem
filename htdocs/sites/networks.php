@@ -26,7 +26,7 @@ table that you need, please let use know.</p>
   <td><SELECT name="network" size="1">
   <option value="IA_ASOS" <?php if($network == "IA_ASOS") echo "SELECTED"; ?>>ASOS (Automated Surface Observing System)
   <option value="AWOS" <?php if($network == "AWOS") echo "SELECTED"; ?>>AWOS (Automated Weather Observing System)
-  <option value="COOPDB" <?php if($network == "COOPDB") echo "SELECTED"; ?>>Iowa Climate Sites (IEM Tracked)
+  <option value="IACLIMATE" <?php if($network == "IACLIMATE") echo "SELECTED"; ?>>Iowa Climate Sites (IEM Tracked)
   <option value="DCP" <?php if($network == "DCP") echo "SELECTED"; ?>>DCP (GEOS Data Collection Platforms)
   <option value="ISUAG" <?php if($network == "ISUAG") echo "SELECTED"; ?>>Iowa State AgClimate
   <option value="KCCI" <?php if($network == "KCCI") echo "SELECTED"; ?>>KCCI SchoolNET8 Stations
@@ -42,7 +42,9 @@ table that you need, please let use know.</p>
   <option value="IL_ASOS" <?php if($network == "IL_ASOS") echo "SELECTED"; ?>>Illinios ASOS/AWOS
   <option value="MO_ASOS" <?php if($network == "MO_ASOS") echo "SELECTED"; ?>>Missouri ASOS/AWOS
   <option value="KS_ASOS" <?php if($network == "KS_ASOS") echo "SELECTED"; ?>>Kansas ASOS/AWOS
-  <option value="NE_ASOS" <?php if($network == "NE_ASOS") echo "SELECTED"; ?>>Nebraska ASOS/AWOS
+  <option value="NE_ASOS" <?php if($network == "NE_ASOS") echo "SELECTED"; ?>>Nebraska ASOS
+  <option value="NE_AWOS" <?php if($network == "NE_AWOS") echo "SELECTED"; ?>>Nebraska AWOS
+  <option value="NE_RWIS" <?php if($network == "NE_RWIS") echo "SELECTED"; ?>>Nebraska RWIS
   <option value="SD_ASOS" <?php if($network == "SD_ASOS") echo "SELECTED"; ?>>South Dakota ASOS/AWOS
   <option value="ND_ASOS" <?php if($network == "ND_ASOS") echo "SELECTED"; ?>>North Dakota ASOS/AWOS
  </SELECT>
