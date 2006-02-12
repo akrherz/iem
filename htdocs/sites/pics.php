@@ -1,11 +1,26 @@
 <?php 
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 include("setup.php");
+
+$dir = isset($_GET["dir"]) ? $_GET["dir"]: "";
 
 $current="pics";
 $TITLE = "IEM | Current Data";
-include("/mesonet/php/include/header.php"); 
-include("../include/nav_site.php");
-include("../include/filecheck.php");
+include("$rootpath/include/header.php"); 
+include("$rootpath/include/nav_site.php");
+
+function filecheck($file){
+  global $rooturl;
+  $test=file_exists($file);
+  if ($test!="TRUE")
+   {
+     $file="$rooturl/images/nophoto.png";
+   }
+
+  return $file;
+}
+
 
 function printtd($instr,$selected,$station){
 
@@ -72,4 +87,4 @@ var subWindow=window.open(link,"new","width=<?php echo ($size[0]);?>,height=<?ph
 </TD></TR>
 </TABLE>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
