@@ -9,7 +9,7 @@ EXTENT -105 36 -86 50
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/"
 SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
-IMAGECOLOR 0 0 0
+IMAGECOLOR 105 105 105
 IMAGETYPE PNG
 TRANSPARENT off
 INTERLACE off
@@ -210,7 +210,7 @@ LAYER
     TEXT ([ tmpf ])
     COLOR -1 -1 -1
     LABEL
-      COLOR 30 137 20
+      COLOR 0 0 0
       #OUTLINECOLOR 250 250 250
       TYPE BITMAP
       SIZE MEDIUM
@@ -288,7 +288,8 @@ LAYER
     TEXT ([ tmpf ])
     COLOR -1 -1 -1
     LABEL
-      COLOR 232 164 226
+      #COLOR 232 164 226
+      COLOR 230 130 216
       TYPE BITMAP
       SIZE MEDIUM
       POSITION UL
@@ -303,7 +304,8 @@ LAYER
     TEXT ([ tmpf ])
     COLOR -1 -1 -1
     LABEL
-      COLOR 232 214 226
+      #COLOR 232 214 226
+      COLOR 255 255 255
       TYPE BITMAP
       SIZE MEDIUM
       POSITION UL

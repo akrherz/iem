@@ -21,10 +21,13 @@ FONTSET "/mesonet/data/gis/fonts/fonts.list"
 #EXTENT 50000 4250000 890000 5080000
 #EXTENT 340000 4650000 640000 5110000
 #EXTENT -125 30 -60 45
-#US
+##US
 EXTENT -2110437 -2251067 2548326 1239063
-#EXTENT -97.50 39.25 -89.30 44.75
-#UNITS DD
+UNITS METERS
+
+# IEM Box
+#EXTENT -27018.228515625 4217628 939122.4375 5111577
+#UNITS METERS
 #UNITS METERS
 SHAPEPATH "/mesonet/data/gis/"
 SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
@@ -184,7 +187,7 @@ LAYER
   NAME lakes
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/4326/us/major_lakes.shp
+  DATA /home/akrherz/projects/iemwebsite/data/gis/shape/4326/us/major_lakes.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -196,25 +199,25 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
-  CONNECTION "user=nobody dbname=postgis host=db1.mesonet.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=postgis host=mesonet-db1.agron.iastate.edu"
   DATA "geom from (select type as wtype, geom, oid from watches WHERE date(expired) = '1997-04-01'  ORDER by type ASC) as foo"
  PROJECTION
   "init=epsg:4326"
  END
- TYPE LINE
- STATUS DEFAULT
+ TYPE POLYGON
+ STATUS OFF
  CLASSITEM 'wtype'
   CLASS
     EXPRESSION /SVR/
     COLOR 255 255 0
-    SIZE 3
-    SYMBOL 1
+    #SIZE 3
+    #SYMBOL 1
   END
   CLASS
     EXPRESSION /TOR/
     COLOR 255 0 0
-    SIZE 3
-    SYMBOL 1
+    #SIZE 3
+    #SYMBOL 1
   END
 END
 
@@ -222,23 +225,30 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
-#  DATA "geom from (select type as wtype, geom, oid from warnings WHERE gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo"
-  DATA "geom from (select type as wtype, geom, oid from warnings_2005 WHERE gtype = 'C' ORDER by type ASC) as foo"
+  CONNECTION "dbname=postgis host=mesonet-db1.agron.iastate.edu user=nobody"
+  #DATA "geom from (select phenomena, buffer(collect(geom),0) as geom from warnings WHERE gtype = 'C' and expire > now() GROUP by phenomena) as foo USING UNIQUE phenomena using SRID=4326"
+  DATA "geom from (select phenomena, type as wtype, geom, oid from warnings_2005 WHERE gtype = 'C' and significance = 'W' and phenomena = 'SV' ORDER by type ASC) as foo"
+#  DATA "geom from (select expire, oid, geom, phenomena from warnings_summary) as foo USING unique oid using SRID=4326"
   STATUS ON
   TYPE POLYGON
   TEMPLATE q_template.html
   PROJECTION
    "init=epsg:4326"
   END
-  CLASSITEM "wtype"
+  CLASSITEM "phenomena"
   CLASS
-    EXPRESSION 'TOR'
+    EXPRESSION 'TO'
     STYLE
       COLOR 255 0 0
       #SIZE 3
       #SYMBOL 1
     END
+    #TEXT ([phenomena] [expire])
+    #LABEL
+    #  COLOR 255 255 255
+    #  SIZE LARGE
+    #  TYPE BITMAP
+    #END
     #STYLE 
     #  COLOR 255 255 255
     #  #SIZE 1
@@ -246,7 +256,7 @@ LAYER
     #END
   END
   CLASS
-    EXPRESSION 'SVR'
+    EXPRESSION 'SV'
     STYLE
       COLOR 255 255 0
       #SIZE 3
@@ -276,7 +286,7 @@ END
 
 LAYER
   NAME counties
-  STATUS DEFAULT
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/shape/unproj/iowa/iacounties.shp
   PROJECTION
@@ -299,7 +309,7 @@ END
 
 LAYER
  NAME us_n0r
- STATUS DEFAULT
+ STATUS OFF
  CONNECTIONTYPE WMS
  TYPE RASTER
  CONNECTION "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.radar?map=/mesonet/www/html/GIS/apps/wms/compradar.map&amp;"
@@ -318,7 +328,7 @@ END
 
 LAYER
   NAME mwcounties
-  STATUS DEFAULT
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/shape/26915/mw/mwcounties.shp
   PROJECTION
@@ -343,7 +353,7 @@ LAYER
   NAME cwa
   STATUS ON
   TYPE LINE
-  DATA /mesonet/data/gis/shape/unproj/us/cwas.shp
+  DATA /home/akrherz/projects/iemwebsite/data/gis/shape/4326/nws/cwas.shp
   PROJECTION
    "proj=latlong"
   END
@@ -352,7 +362,7 @@ LAYER
   CLASS
     COLOR 255 165 0
     SYMBOL 'circle'
-    SIZE 3
+    SIZE 2
    # LABEL
    #     TYPE BITMAP
    #     SIZE MEDIUM
@@ -569,11 +579,11 @@ END
 
 LAYER
   CONNECTIONTYPE postgis
-  NAME kcci
-  CONNECTION "host=10.10.10.20 user=akrherz dbname=mesosite"
-  DATA "geom from (select oid, geom, network from stations) as foo using unique oid using srid=4326"
+  NAME locs
+  CONNECTION "host=mesonet-db1.agron.iastate.edu user=nobody dbname=mesosite"
+  DATA "geom from (select oid, geom, network from stations WHERE (network ~* 'ASOS') and contains('SRID=4326;POLYGON((-97.632 39.651, -97.632 44.319, -89.317 44.319, -89.317 39.651, -97.632 39.651))',geom) ) as foo using unique oid using srid=4326"
 #  FILTER "state = 'IA'"
-  FILTER "network = 'IA_RWIS'"
+#  FILTER "network = 'IA_RWIS'"
   STATUS ON
   TYPE POINT
 #  LABELMAXSCALE 600000
@@ -582,6 +592,11 @@ LAYER
    "init=epsg:4326"
   END
   CLASSITEM 'network'
+  CLASS
+    SYMBOL 'circle'
+    SIZE 3
+    COLOR 255 255 255
+  END
   CLASS
     EXPRESSION 'ASOS'
     SYMBOL 'airplane'
@@ -627,7 +642,7 @@ LAYER
 #    OUTLINECOLOR 0 0 0
     SYMBOL 'airplane_yellow'
 #    SIZE 25
-    TEXT ([ plot_name ])
+#    TEXT ([ plot_name ])
 #    LABEL
 #      COLOR 132 31 31
 #      BACKGROUNDCOLOR 255 255 255
@@ -650,7 +665,7 @@ LAYER
   NAME radar
   DATA /mesonet/data/gis/images/4326/USCOMP/n0r_0.tif
   TYPE RASTER
-  STATUS DEFAULT
+  STATUS OFF
   OFFSITE 0 0 0
   TRANSPARENCY 100
   PROJECTION
@@ -709,6 +724,30 @@ LAYER
       FORCE TRUE
       PARTIALS TRUE
       ANTIALIAS TRUE
+    END
+  END
+END
+
+LAYER
+  NAME iembox
+  TYPE LINE
+  STATUS OFF
+  FEATURE
+    POINTS -97.632 39.651 -97.632 44.319 -89.317 44.319 -89.317 39.651 -97.632 39.651 END
+  END
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    STYLE
+      COLOR 255 0 0
+      SIZE 3
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 255 255
+      SIZE 1
+      SYMBOL 'circle'
     END
   END
 END
