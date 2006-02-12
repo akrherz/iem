@@ -111,7 +111,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME iatwp
-  CONNECTION "user=akrherz dbname=wepp host=db1.mesonet.agron.iastate.edu"
+  CONNECTION "user=akrherz dbname=wepp host=mesonet-db1.agron.iastate.edu"
   DATA "the_geom from (select oid, the_geom, random() * 200 as runoff from iatwp) as foo using unique oid using srid=26915"
 #  DATA "the_geom from (select t.oid, t.the_geom, t.model_twp as mtwp, r.runoff from results r, combos c, iatwp t WHERE r.valid = '2002-07-09' and r.run_id = c.id and c.model_twp = t.model_twp) as foo"
   STATUS ON
@@ -159,7 +159,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME ppoints
-  CONNECTION "user=akrherz dbname=wepp host=db1.mesonet.agron.iastate.edu"
+  CONNECTION "user=akrherz dbname=wepp host=mesonet-db1.agron.iastate.edu"
   DATA "geom from precip_points"
   FILTER " iowa = 'T'"
   STATUS ON
@@ -178,7 +178,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME temp
-  CONNECTION "user=akrherz dbname=wepp host=db1.mesonet.agron.iastate.edu"
+  CONNECTION "user=akrherz dbname=wepp host=mesonet-db1.agron.iastate.edu"
   DATA "the_geom from temp"
   STATUS ON
   TYPE POINT

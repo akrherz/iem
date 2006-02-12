@@ -151,7 +151,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME wepp
-  CONNECTION "user=mesonet dbname=wepp host=db1.mesonet"
+  CONNECTION "user=mesonet dbname=wepp host=mesonet-db1"
   DATA "geom from bpdata"
   FILTER "valid = '2002-10-03'"
   STATUS ON
