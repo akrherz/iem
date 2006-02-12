@@ -1,10 +1,13 @@
 <?php 
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+
 include("setup.php");
 
     $current="parms";
     $TITLE = "IEM | Current Data";
-    include("/mesonet/php/include/header.php"); 
-    include("../include/nav_site.php");
+    include("$rootpath/include/header.php"); 
+    include("$rootpath/include/nav_site.php");
 
 ?><br>
 <div class="text">
@@ -24,4 +27,4 @@ while( list($i) = each($tokens) ){
 }
 ?>
  	 </UL></div>
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

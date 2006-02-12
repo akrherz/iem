@@ -1,10 +1,12 @@
 <?php 
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 include("setup.php");
 
    $current="neighbors";
    $TITLE = "IEM | Current Data";
-   include("/mesonet/php/include/header.php");  
-   include("../include/nav_site.php");
+   include("$rootpath/include/header.php");  
+   include("$rootpath/include/nav_site.php");
 
    $elevation=$row["elevation"];
 
@@ -37,7 +39,7 @@ include("setup.php");
   $lat1 = $row["latitude"] + $interval;
   $lon0 = $row["longitude"] - $interval;
   $lon1 = $row["longitude"] + $interval;
-  $imgbase = "/cgi-bin/mapserv/mapserv?imgbox=-1+-1+-1+-1&imgxy=99.5+99.5&imgext=".$lon0."+".$lat0."+".$lon1."+".$lat1."&map=%2Fhome%2Fhttpd%2Fhtml%2FGIS%2Fapps%2Fsmap0%2Fstations.map&zoom=1&layer=". $row["network"];
+  $imgbase = "/cgi-bin/mapserv/mapserv?imgbox=-1+-1+-1+-1&imgxy=99.5+99.5&imgext=".$lon0."+".$lat0."+".$lon1."+".$lat1."&map=$rootpath/htdocs%2FGIS%2Fapps%2Fsmap0%2Fstations.map&zoom=1&layer=". $row["network"];
   $imgref = $imgbase ."&mode=map";
   $refref = $imgbase ."&mode=reference";
 
@@ -62,7 +64,7 @@ include("setup.php");
 <TR>
        <TD><img border="2" src="<?php echo $imgref; ?>" 
            ALT="County Map">
-           <br /><br /><img border="2" src="<?php echo $refref; ?>" ALT="Iowa Map"></TD>
+           <br /></TD>
        <TD valign="top" width="600px">
          <TABLE width="100%">
            <TR><TD>
@@ -73,4 +75,4 @@ include("setup.php");
 </TR>
 </TABLE>
 </div>
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

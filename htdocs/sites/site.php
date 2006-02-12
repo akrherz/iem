@@ -90,8 +90,7 @@ include("setup.php");
            <TR><TD valign="top">
             <img border="2" src="<?php echo $imgref; ?>" ALT="County Map"></TD>
             <TD>
-            <img border="2" src="<?php echo $refref; ?>" ALT="Iowa Map"><br
-	    /><br /></td></tr>
+	    </td></tr>
                <TR><TD class="subtitle"><b>Station ID</b></TD><TD><?php echo $station ?></TD></TR>
                <TR><TD class="subtitle"><b>Network</b></TD><TD>
                    <a href="http://www.mesonet.agron.iastate.edu/<?php echo $row["network"]; ?>/"><?php echo eval_network($row["network"]); ?></a></TD></TR>

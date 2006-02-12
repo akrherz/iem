@@ -1,12 +1,14 @@
 <?php 
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 include("setup.php");
 
         $current="conditions";
 	$TITLE = "IEM | Current Data";
-	include("/mesonet/php/include/header.php"); 
-        include("../include/nav_site.php");
-        include("../include/getcurrent.php");
-        include("../include/mlib.php");
+	include("$rootpath/include/header.php"); 
+        include("$rootpath/include/nav_site.php");
+        include("$rootpath/include/getcurrent.php");
+        include("$rootpath/include/mlib.php");
 
 
 ?><br>
@@ -16,4 +18,4 @@ include("setup.php");
         </TD>
 </TR>
 </TABLE></div>
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
