@@ -6,7 +6,6 @@ $TITLE = "IEM | Past Feature";
       include("$rootpath/include/header.php"); ?>
 <b>Nav:</b> <a href="/index.php">IEM Home</a> &nbsp;<b> > </b> &nbsp; Features
 
-<table><tr><td>
 
 <?php 
   $day = substr($day, 0, 10);
@@ -18,23 +17,31 @@ $TITLE = "IEM | Past Feature";
   $result = pg_exec($connection, $query1);
   $row = @pg_fetch_array($result,0);
 
-  echo "<div align=\"center\">";
-  echo "<a href=\"/onsite/features/". $row["imageref"] .".gif\"><img src=\"/onsi
-te/features/". $row["imageref"] ."_s.gif\" BORDER=0 ALT=\"Feature\"></a>";
-  echo "<br />". $row["caption"];
-  echo "</div>\n";
+  $thumb = sprintf("%s/onsite/features/%s_s.gif", $rooturl, $row["imageref"]);
+  $big = sprintf("%s/onsite/features/%s.gif", $rooturl, $row["imageref"]);
 
-  echo "<b>". $row["title"] ."</b>\n";
-  echo "<br><font size='-1' style='color:black'>". $row["webdate"] ."</font>\n";
-  echo "<br><div class='story'>". $row["story"] ."</div>";
-
-
+  $fref = "/mesonet/share/features/". $row["imageref"] ."_s.gif";
+  list($width, $height, $type, $attr) = @getimagesize($fref);
+  $width += 20;
 
 ?>
+<div style="width: 640px;">
+<div style="float: left; width: <?php echo $width; ?>px;">
+<img src="<?php echo $thumb; ?>" style="margin: 5px;">
+<br /><a href="<?php echo $big; ?>">View larger image</a>
+<br /><?php echo $row["caption"]; ?>
+</div>
+<?php
+  echo "<h3>". $row["title"] ."</h3>\n";
+  echo "<font size='-1' style='color:black'>". $row["webdate"] ."</font>\n";
+  echo "<br><div class='story'>". $row["story"] ;
+  if (intval($row["good"]) > 0 || intval($row["bad"]) > 0)
+  {
+    echo "<br /><br /><b>Voting:</b><br />Good = ". $row["good"] ." <br />Bad = ". $row["bad"] ;
+  }
+?>
+</div>
 
-</td></tr></table>
-
-<BR><BR>
 
 <?php include("$rootpath/include/footer.php"); ?>
 
