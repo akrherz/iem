@@ -266,7 +266,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
- CONNECTION "dbname=postgis host=db1.mesonet.agron.iastate.edu"
+ CONNECTION "dbname=postgis host=mesonet-db1.agron.iastate.edu"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
@@ -305,7 +305,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings_summary
-  CONNECTION "user=nobody dbname=postgis host=db1.mesonet.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=postgis host=mesonet-db1.agron.iastate.edu"
   DATA "geom from (select expire, phenomena, significance, geom, oid from warnings_summary) as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
@@ -405,7 +405,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=nobody dbname=postgis host=db1.mesonet.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=postgis host=mesonet-db1.agron.iastate.edu"
   DATA "geom from (select phenomena, significance, geom, oid from warnings WHERE  expire > CURRENT_TIMESTAMP and gtype = 'C') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE LINE
@@ -507,7 +507,9 @@ LAYER
     # Sleet Fz
     CLASS
         NAME "Ice/Frz/Sleet Warn"
-        EXPRESSION (('[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'W')         COLOR   255 20 147         SIZE    3
+        EXPRESSION (('[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'W')         
+        COLOR   255 20 147
+        SIZE    3
         SYMBOL  'circle'
     END
     # Blizzard
@@ -523,7 +525,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
-  CONNECTION "dbname=postgis host=db1.mesonet.agron.iastate.edu"
+  CONNECTION "dbname=postgis host=mesonet-db1.agron.iastate.edu"
   #DATA "geom from warnings"
   DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
   STATUS OFF
@@ -551,7 +553,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME lsrs
-  CONNECTION "dbname=postgis host=db1.mesonet.agron.iastate.edu"
+  CONNECTION "dbname=postgis host=mesonet-db1.agron.iastate.edu"
   DATA "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs WHERE valid > 'YESTERDAY'::timestamp) as foo USING unique k USING SRID=4326 "
   STATUS OFF
   TYPE POINT
