@@ -57,10 +57,10 @@ while (list ($line_num, $line) = each ($fcontents)) {
 // When logger spits out bad data, the inside temperature
 // is 0 degrees F.  Let's use this as a flag for poor data.
                                                                                 
-  if ($inTmpf <= 0.0){
-    $thisMPH = $prevMPH;
-    $thisDRCT = $prevDRCT;
-  }
+  //if ($inTmpf <= 0.0){
+  //  $thisMPH = $prevMPH;
+  //  $thisDRCT = $prevDRCT;
+  //}
   $prevMPH = $thisMPH;
   $PrevDRCT = $thisDRCT;
 
