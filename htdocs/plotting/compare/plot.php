@@ -30,14 +30,15 @@ $sql = "SELECT extract(EPOCH from valid) as epoch, $var as data, station
 $rs = pg_query($iem->dbconn, $sql);
 
 /* Assign into data arrays */
-$cnt=array($station1 => 0, $station2 => 0);
+//$cnt=array($station1 => 0, $station2 => 0);
 
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $s = $row["station"];
-  $datay[$s][ $cnt[$s] ] = $row["data"];
-  $datax[$s][ $cnt[$s] ] = $row["epoch"];
-  $cnt[$s] += 1;
+  if ($var == "drct" && floatval($row["data"]) == 0) { continue; }
+  $datay[$s][] = $row["data"];
+  $datax[$s][] = $row["epoch"];
+  //$cnt[$s] += 1;
 }
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
