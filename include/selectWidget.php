@@ -77,7 +77,7 @@ class selectWidget
   {
     global $mapscript, $rootpath;
     dl($mapscript);
-    $this->map = ms_newMapObj("$rootpath/include/selectWidget.map");
+    $this->map = ms_newMapObj("$rootpath/data/gis/base26915.map");
     $this->destination = $mydestination;
     $this->networks[] = $mynetwork;
 	$this->appurl = $myapp;
@@ -265,15 +265,17 @@ class selectWidget
    document.zoomfullButton.src = '$rooturl/images/button_zoomfull_off.png';
  }
 </script>
-<div style=\"background: #000; margin: 2px; border: 0px; padding: 3px; width: 484px;\"><font style=\"color: #fff; font-weight: bold;\">IEM Site Selector: </font>
-<img src=\"$rooturl/images/button_zoomin_off.png\" name=\"zoominButton\" alt=\"Zoom In\" onClick=\"javascript: resetButtons(); document.zoominButton.src = '$rooturl/images/button_zoomin_on.png'; document.selectwidget.zoom.value = -2;\">
-<img src=\"$rooturl/images/button_pan_off.png\" name=\"panButton\" alt=\"Pan\" onClick=\"javascript: resetButtons(); document.panButton.src = '$rooturl/images/button_pan_on.png'; document.selectwidget.zoom.value = 1;\">
-<img src=\"$rooturl/images/button_zoomout_off.png\" name=\"zoomoutButton\" alt=\"Zoom Out\" onClick=\"javascript: resetButtons(); document.zoomoutButton.src = '$rooturl/images/button_zoomout_on.png'; document.selectwidget.zoom.value = 2;\">
-<img src=\"$rooturl/images/button_query_on.png\" name=\"queryButton\" alt=\"Select\" onClick=\"javascript: resetButtons(); document.queryButton.src = '$rooturl/images/button_query_on.png'; document.selectwidget.zoom.value = 0;\">
-<img src=\"$rooturl/images/button_zoomfull_off.png\" name=\"zoomfullButton\" alt=\"Zoom Full\" onClick=\"javascript: resetButtons(); document.zoomfullButton.src = '$rooturl/images/button_zoomfull_on.png'; document.selectwidget.zoom.value = 100; document.selectwidget.submit(); \">";
-	$s .= "<input type=\"image\" name=\"map\" src=\"". $this->imgurl ."\" border=0>";
-    $s .= "<br /><font style=\"color: #fff; font-weight: bold;\">Select Network:</font>\n";
-    $s .= $this->networkSelectInterface();
+<div style=\"margin: 2px; border: 0px; padding: 0px; text-align: left; width: 520px; height: 400px;\">
+<span style=\"height: 25px; padding: 3px; letter-spacing: 0.3em; font-weight: bold; background: #cc0; float: left;\">IEM Site Selector:</span>
+    <div style=\"float: right; font-weight: bold;\">Select Network:". $this->networkSelectInterface() ."</div><br clear=\"all\"/>
+<div style=\"float: left; background: #cc0; padding-top: 10px; padding-left: 2px; padding-right: 2px; \">
+<img src=\"$rooturl/images/button_zoomin_off.png\" name=\"zoominButton\" alt=\"Zoom In\" onClick=\"javascript: resetButtons(); document.zoominButton.src = '$rooturl/images/button_zoomin_on.png'; document.selectwidget.zoom.value = -2;\"><br />
+<img src=\"$rooturl/images/button_pan_off.png\" name=\"panButton\" alt=\"Pan\" onClick=\"javascript: resetButtons(); document.panButton.src = '$rooturl/images/button_pan_on.png'; document.selectwidget.zoom.value = 1;\"><br />
+<img src=\"$rooturl/images/button_zoomout_off.png\" name=\"zoomoutButton\" alt=\"Zoom Out\" onClick=\"javascript: resetButtons(); document.zoomoutButton.src = '$rooturl/images/button_zoomout_on.png'; document.selectwidget.zoom.value = 2;\"><br />
+<img src=\"$rooturl/images/button_query_on.png\" name=\"queryButton\" alt=\"Select\" onClick=\"javascript: resetButtons(); document.queryButton.src = '$rooturl/images/button_query_on.png'; document.selectwidget.zoom.value = 0;\"><br />
+<img src=\"$rooturl/images/button_zoomfull_off.png\" name=\"zoomfullButton\" alt=\"Zoom Full\" onClick=\"javascript: resetButtons(); document.zoomfullButton.src = '$rooturl/images/button_zoomfull_on.png'; document.selectwidget.zoom.value = 100; document.selectwidget.submit(); \"><br />
+</div>";
+	$s .= "<div style=\"background: #cc0; float: left; padding: 3px;\"><input type=\"image\" name=\"map\" src=\"". $this->imgurl ."\" border=0></div>";
     $s .= "</div></form>";
     return $s;
  }
