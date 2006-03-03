@@ -1,9 +1,9 @@
- SYMBOL
-   NAME 'circle'
-   TYPE ELLIPSE
-   Filled TRUE
-   POINTS 1 1 END
- END
+SYMBOL
+  NAME 'circle'
+  TYPE ELLIPSE
+  Filled TRUE
+  POINTS 1 1 END
+END
 
 SYMBOL
   NAME "triangle"
@@ -33,5 +33,18 @@ Symbol
   Type PIXMAP
   Image 'symbols/iem_logo.png'
   Transparent 0
+END
+
+Symbol
+  Name 'arrow'
+  Type PIXMAP
+  Image 'symbols/arrow.png'
+END
+
+Symbol
+ Name 'interstate_shield'
+ Type PIXMAP
+ Image 'symbols/interstate-2.png'
+ Transparent 0
 END
 
