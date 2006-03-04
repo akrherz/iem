@@ -6,6 +6,7 @@
 
 function getdata($station, $network)
 {
+    global $rootpath;
 	include ('iemaccess.php');
 	include ('iemaccessob.php');
 	$iem = new IEMAccess();
@@ -21,12 +22,10 @@ function printTable($station, $network){
  $vardict = Array("valid" => "Observation Time", "tmpf" => "Air Temp [F]",
    "dwpf" => "Dew Point [F]", "relh" => "Relative Humidity [%]",
    "drct" => "Wind Direction", "sknt" => "Wind Speed [knots]",
-   "smph" => "Wind Speed [MPH]", "srad" => "Solar Radiation",
+   "srad" => "Solar Radiation",
    "alti" => "Altimeter [inches]", "pday" => "Daily Precipitation [inches]",
-   "pmonth" => "Monthly Precipitation [inches]", "prat" => "Precipitation Rate [in/hr]",
-   "gmph" => "Wind Gust [MPH]", "20gu" => "20 Minute Gust [MPH]",
-   "gtim" => "Time of Peak Gust", "gmt_ts" => "Observation Time [GMT]",
-   "pmsl" => "Barometer [mb]");
+   "pmonth" => "Monthly Precipitation [inches]",
+   "gust" => "Wind Gust [knots]");
 
  foreach ( $vardict as $key => $value ) { 
    if ($rs[$key] != "")
