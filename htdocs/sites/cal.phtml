@@ -3,10 +3,9 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("setup.php");
 
-        $current="cal";
    include("$rootpath/include/header.php");
-   include("$rootpath/include/nav_site.php");
 ?>
+<?php $current = "cal"; include("sidebar.php"); ?>
 
 
 <table border="1" cellpadding="2" cellspacing="0">
@@ -20,7 +19,6 @@ include("setup.php");
 </tr></thead>
 
 <?php
-$network = $row["network"];
 $portfolio = "";
 if ($network == "AWOS") $portfolio = "iaawos";
 if ($network == "KCCI") $portfolio = "kccisnet";
