@@ -160,7 +160,7 @@ $p0->set("status", in_array("warnings", $layers) );
 if ($isarchive)
 { 
   $sql = "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
-  echo $sql;
+  //echo $sql;
   $p0->set("data", $sql);
 } else {
  $p0->set("data", "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
