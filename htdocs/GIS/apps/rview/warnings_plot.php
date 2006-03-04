@@ -13,7 +13,12 @@ if ($isarchive)
     if (! is_file("/tmp/". date('YmdHi', $ts) .".png"))
     {
     copy($fp, "/tmp/". date('YmdHi', $ts) .".png");
-    copy("/mesonet/ARCHIVE/data/". date('Y/m/d', $ts) ."/GIS/uscomp/n0r.tfw", "/tmp/". date('YmdHi', $ts) .".wld");
+    if (! is_file("/mesonet/ARCHIVE/data/". date('Y/m/d', $ts) ."/GIS/uscomp/n0r.tfw"))
+    {
+      copy("/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tfw", "/tmp/". date('YmdHi', $ts) .".wld");
+    }else{
+      copy("/mesonet/ARCHIVE/data/". date('Y/m/d', $ts) ."/GIS/uscomp/n0r.tfw", "/tmp/". date('YmdHi', $ts) .".wld");
+    }
     }
   }
   $radfile = "/tmp/". date('YmdHi', $ts) .".png";
@@ -154,8 +159,9 @@ $p0->set("connection", $_DATABASES["postgis"] );
 $p0->set("status", in_array("warnings", $layers) );
 if ($isarchive)
 { 
-   $p0->set("data", "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
-//  $p0->set("data", "geom from warnings_$year");
+  $sql = "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
+  echo $sql;
+  $p0->set("data", $sql);
 } else {
  $p0->set("data", "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
 //$p0->setFilter("significance != 'A' and expire > '".$db_ts."' and issue < '". $db_ts."' and gtype = 'P'");
