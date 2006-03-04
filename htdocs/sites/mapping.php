@@ -1,14 +1,13 @@
 <?php 
 include("setup.php");
 
-        $current="maps";
-	$TITLE = "IEM | Site Location";
-    include("../../config/settings.inc.php");
-	include("$rootpath/include/header.php"); 
-        include("$rootpath/include/nav_site.php");
-        include("$rootpath/include/getcurrent.php");
-        include("$rootpath/include/mlib.php");
-
+ $TITLE = "IEM | Site Location";
+ include("../../config/settings.inc.php");
+ include("$rootpath/include/header.php"); 
+ include("$rootpath/include/mlib.php");
+?>
+<?php $current = "loc"; include("sidebar.php"); ?>
+<?php
         if (strlen($station) > 6 || strlen($station) == 0){
            $station = 'DSM';
 	}
@@ -18,7 +17,6 @@ include("setup.php");
         if ($zoom < 0) $zoom = 0;
         if ($zoom > 5) $zoom = 5; 
 
-        $network=$row["network"];
         $URL=$rooturl.'/GIS/apps/ortho/site.php?station='.$station.'&zoom='.$zoom.'&type='.$type;
         $URL_BASE=$rooturl.'/sites/mapping.php?station='.$station.'&type='.$type;
 ?>

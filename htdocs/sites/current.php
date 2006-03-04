@@ -6,16 +6,35 @@ include("setup.php");
         $current="conditions";
 	$TITLE = "IEM | Current Data";
 	include("$rootpath/include/header.php"); 
-        include("$rootpath/include/nav_site.php");
-        include("$rootpath/include/getcurrent.php");
-        include("$rootpath/include/mlib.php");
+?>
+<?php $current = "current"; include("sidebar.php"); ?>
+<?php 
+  include ("$rootpath/include/iemaccess.php");
+  include ("$rootpath/include/iemaccessob.php");
+  $iem = new IEMAccess();
+  $iemob = $iem->getSingleSite($station);
+  $rs = $iemob->db;
 
-
-?><br>
-         <div class="text"> <TABLE>
-            <?php printTable($station,$network); ?> 
-          </TABLE>
-        </TD>
-</TR>
-</TABLE></div>
+ $vardict = Array("valid" => "Observation Time", "tmpf" => "Air Temp [F]",
+   "dwpf" => "Dew Point [F]", "relh" => "Relative Humidity [%]",
+   "drct" => "Wind Direction", "sknt" => "Wind Speed [knots]",
+   "srad" => "Solar Radiation",
+   "alti" => "Altimeter [inches]", "pday" => "Daily Precipitation [inches]",
+   "pmonth" => "Monthly Precipitation [inches]",
+   "gust" => "Wind Gust [knots]");
+?>
+<table>
+<?php
+  foreach ( $vardict as $key => $value ) {
+    if ($rs[$key] != "") {
+      if ($key == "gmt_ts" || $key == "gtim") {
+        $time = strftime("%c", $rs[$key]);
+        echo '<tr><td><b>'. $value .'</b></td><td>'. $time .' GMT</td></tr>';
+      } else {
+        echo '<tr><td><b>'. $value .'</b></td><td>'. $rs[$key] .'</td></tr>';
+      } // End if
+    } // End if
+  } 
+?>
+</table>
 <?php include("$rootpath/include/footer.php"); ?>

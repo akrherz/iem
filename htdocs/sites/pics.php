@@ -5,11 +5,11 @@ include("setup.php");
 
 $dir = isset($_GET["dir"]) ? $_GET["dir"]: "";
 
-$current="pics";
 $TITLE = "IEM | Current Data";
 include("$rootpath/include/header.php"); 
-include("$rootpath/include/nav_site.php");
-
+?>
+<?php $current = "pics"; include("sidebar.php"); ?>
+<?php
 function filecheck($file){
   global $rooturl;
   $test=file_exists($file);

@@ -3,12 +3,10 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("setup.php");
 
-   $current="neighbors";
    $TITLE = "IEM | Current Data";
    include("$rootpath/include/header.php");  
-   include("$rootpath/include/nav_site.php");
+   $current="neighbors"; include('sidebar.php');
 
-   $elevation=$row["elevation"];
 
    function elev_check($elevation){
 
@@ -28,36 +26,20 @@ include("setup.php");
  
      for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
         if ($stations!=$row["id"]){
-          echo '<a class="llink" href="/sites/site.php?id='.$row["id"].'">'
-                .$row["name"].' - '.$row["network"].'</a><br />';
+          echo '<a class="llink" href="site.php?station='.$row["id"].'&network='.$row["network"].'">'
+                .$row["name"].'</a> ('.$row["network"].' )<br />';
         }
      }
    }
 
   $interval = 0.25;
-  $lat0 = $row["latitude"] - $interval;
-  $lat1 = $row["latitude"] + $interval;
-  $lon0 = $row["longitude"] - $interval;
-  $lon1 = $row["longitude"] + $interval;
-  $imgbase = "/cgi-bin/mapserv/mapserv?imgbox=-1+-1+-1+-1&imgxy=99.5+99.5&imgext=".$lon0."+".$lat0."+".$lon1."+".$lat1."&map=$rootpath/htdocs%2FGIS%2Fapps%2Fsmap0%2Fstations.map&zoom=1&layer=". $row["network"];
+  $lat0 = $metadata["lat"] - $interval;
+  $lat1 = $metadata["lat"] + $interval;
+  $lon0 = $metadata["lon"] - $interval;
+  $lon1 = $metadata["lon"] + $interval;
+  $imgbase = "/cgi-bin/mapserv/mapserv?imgbox=-1+-1+-1+-1&imgxy=99.5+99.5&imgext=".$lon0."+".$lat0."+".$lon1."+".$lat1."&map=$rootpath/htdocs%2FGIS%2Fapps%2Fsmap0%2Fstations.map&zoom=1&layer=". $network;
   $imgref = $imgbase ."&mode=map";
   $refref = $imgbase ."&mode=reference";
-
-
-/**
- id        | character varying(6)  | 
- synop     | integer               | 
- name      | character varying(40) |  
- state     | character(2)          |  IA
- country   | character(2)          | 
- latitude  | real                  | 
- longitude | real                  | 
- elevation | real                  |  341 is unknown
- network   | character varying(20) | 
- online    | boolean               | 
- lat_dms   | character varying(10) | 
- lon_dms   | character varying(10) | 
-**/
 
 ?><div class="text">
 <TABLE>
@@ -69,7 +51,7 @@ include("setup.php");
          <TABLE width="100%">
            <TR><TD>
            <h3 class="subtitle">Neighboring Stations</h3><br>
-           <?php neighbors($station,$row["latitude"],$row["longitude"]); ?></TD></TR>
+           <?php neighbors($station,$metadata["lat"],$metadata["lon"]); ?></TD></TR>
          </TABLE>
        </TD>
 </TR>
