@@ -17,7 +17,7 @@ month's archive of one minute data.  We process this data into our database
 and make the observations available here for download.  Please don't make
 giant data requests through this interface, instead feel free to email Daryl (akrherz@iastate.edu) and make your request.</p>
 
-<p><b>Latest Monthly Data Upload:</b> 2006 January</p>
+<p><b>Latest Monthly Data Upload:</b> 2006 February</p>
 
 <?php include("$rootpath/include/imagemaps.php"); ?>
 <?php include("$rootpath/include/forms.php"); ?>
