@@ -97,7 +97,7 @@ END
 LAYER
   GROUP smooth_radar
   NAME smooth_radar_img
-  DATA /mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif
+  DATA /home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif
   TYPE RASTER
   STATUS ON
   METADATA
@@ -110,30 +110,30 @@ LAYER
   OFFSITE 0 0 0
 END
 
-LAYER
-  NAME USCOMP_N0R_TS
-  GROUP smooth_radar
-  STATUS ON
-  DATA "/mesonet/data/gis/images/4326/USCOMP/meta/USCOMP_n0r_0.shp"
-  TYPE ANNOTATION
-  TRANSFORM FALSE
-  LABELITEM "TS"
-  METADATA
-    "wms_title" "USCOMP N0R TS"
-    "wms_srs"   "EPSG:4326"
-    "wms_extent" "200000 4400000 710000 4900000"
-  END
-  CLASS
-    LABEL
-      COLOR 0 0 0
-      BACKGROUNDCOLOR 250 250 250
-      TYPE BITMAP
-      SIZE MEDIUM
-      POSITION CR
-      FORCE TRUE
-    END
-  END
-END
+#LAYER
+#  NAME USCOMP_N0R_TS
+#  GROUP smooth_radar
+#  STATUS ON
+#  DATA "/mesonet/data/gis/images/4326/USCOMP/meta/USCOMP_n0r_0.shp"
+#  TYPE ANNOTATION
+#  TRANSFORM FALSE
+#  LABELITEM "TS"
+#  METADATA
+#    "wms_title" "USCOMP N0R TS"
+#    "wms_srs"   "EPSG:4326"
+#    "wms_extent" "200000 4400000 710000 4900000"
+#  END
+#  CLASS
+#    LABEL
+#      COLOR 0 0 0
+#      BACKGROUNDCOLOR 250 250 250
+#      TYPE BITMAP
+#      SIZE MEDIUM
+#      POSITION CR
+#      FORCE TRUE
+#    END
+#  END
+#END
 
 
 
