@@ -220,7 +220,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_c
   CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
-  DATA "geom from (select phenomena as wtype, geom, oid from warnings WHERE significance = 'W' and gtype = 'C' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by expire, type ASC) as foo"
+  DATA "geom from (select report, phenomena as wtype, geom, oid from warnings WHERE significance = 'W' and gtype = 'C' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by expire, type ASC) as foo"
   STATUS ON
   STATUS ON
   TYPE LINE
@@ -268,7 +268,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
   CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
-  DATA "geom from (select type, geom, oid from warnings WHERE significance = 'W' and gtype = 'P' and expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo"
+  DATA "geom from (select report, phenomena, geom, oid from warnings WHERE significance = 'W' and gtype = 'P' and expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE LINE
   METADATA
@@ -293,7 +293,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_p
   CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
-  DATA "geom from (select type, geom, oid from warnings WHERE gtype = 'P' and significance = 'W' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by expire, type ASC) as foo"
+  DATA "geom from (select report, type, geom, oid from warnings WHERE gtype = 'P' and significance = 'W' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE POLYGON
   METADATA
