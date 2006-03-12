@@ -1,16 +1,18 @@
 <?php
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-  $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400 - (7 * 3600) );
-  $month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 86400 - (7 * 3600) );
-  $day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 86400 - (7 * 3600) );
-  $date = $year ."-". $month ."-". $day;
-  $ts = mktime(0,0,0, $month, $day, $year);
+
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400 - (7 * 3600) );
+$month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 86400 - (7 * 3600) );
+$day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 86400 - (7 * 3600) );
+$date = isset($_GET["date"]) ? $_GET["date"]: $year ."-". $month ."-". $day;
 
 
 $var = (isset($_GET["var"]) && $_GET["var"] != "" ) ? $_GET["var"] : "c11";
 $var2 = (isset($_GET["var2"]) && $_GET["var2"] != "" ) ? $_GET["var2"] : "";
 $direct = isset($_GET["direct"]) ? $_GET['direct']: "";
+
+$ts = strtotime($date);
 
 dl($mapscript);
 include("$rootpath/include/agclimateLoc.php");
@@ -45,7 +47,6 @@ function plotNoData($map, $img){
 
 }
 
-  $ts = strtotime($date);
 
 
 $varDef = Array("c11" => "High Air Temperatures",
