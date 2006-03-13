@@ -376,7 +376,7 @@ LAYER
  END
  TYPE LINE
  STATUS ON
- FILTER "expired > 'TODAY'"
+ FILTER "expire > (CURRENT_TIMESTAMP - '24 hours'::interval)"
  CLASSITEM 'type'
   CLASS
     EXPRESSION /SVR/
