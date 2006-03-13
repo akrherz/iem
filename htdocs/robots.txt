@@ -10,4 +10,5 @@ Disallow: /plotting/48h/
 Disallow: /plotting/snet/
 Disallow: /kcci/plotting/
 Disallow: /data/NIDS/
+Disallow: /data/nexrd2/
 Disallow: /archive/nexrad/
