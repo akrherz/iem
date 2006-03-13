@@ -21,7 +21,7 @@ if (isset($_GET["img_x"]) && isset($_GET["img_y"]) )
   /* $_GET["site"] = "user"; */
 }
 
-$layers = isset($_GET["layers"]) ? $_GET["layers"]: Array("cwas", "warnings", "uscounties", "nexrad");
+$layers = isset($_GET["layers"]) ? $_GET["layers"]: Array("cwas", "warnings", "uscounties", "nexrad", "watches");
 $cu = isset($_GET["cu"]) ? $_GET["cu"]: 0;
 $loop = isset($_GET["loop"]) ? $_GET["loop"] : 0;
 $tz = isset($_GET["tz"]) ? $_GET["tz"] : "CST";
