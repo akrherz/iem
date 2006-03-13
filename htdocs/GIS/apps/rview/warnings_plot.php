@@ -132,7 +132,7 @@ $usdm->set("status", (in_array("usdm", $layers) && ! $archive) );
 
 $watches = $map->getlayerbyname("watches");
 $watches->set("connection", $_DATABASES["postgis"] );
-$watches->set("status", 1);
+$watches->set("status", (in_array("watches", $layers) );
 //$watches->setFilter("expired > '".$db_ts."' and issued <= '".$db_ts."'");
 $watches->set("data", "geom from (select type as wtype, geom, oid from watches where expired > '".$db_ts."' and issued <= '".$db_ts."') as foo using unique oid using srid=4326");
 
