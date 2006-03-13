@@ -220,7 +220,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_c
   CONNECTION "user=akrherz dbname=postgis host=10.10.10.20"
-  DATA "geom from (select report, phenomena as wtype, geom, oid from warnings WHERE significance = 'W' and gtype = 'C' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by expire, type ASC) as foo"
+  DATA "geom from (select report, phenomena as wtype, geom, oid from warnings WHERE significance = 'W' and gtype = 'C' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by type ASC) as foo"
   STATUS ON
   STATUS ON
   TYPE LINE
