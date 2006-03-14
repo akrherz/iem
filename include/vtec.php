@@ -61,7 +61,7 @@ $vtec_significance = Array(
  'A' => 'Watch',
  'S' => 'Statement');
 
-$vtec_status Array(
+$vtec_status = Array(
  'NEW'=> 'issues',
  'CON'=> 'continues',
  'EXA'=> 'extends area of',
