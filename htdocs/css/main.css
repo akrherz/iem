@@ -20,7 +20,6 @@ Body{
 }
 #iem-header {
 	border-bottom: 1px #000 solid;
-    height: 60px;
 }
 #iem-header-title h3 {
 	margin-top: 0px;
@@ -32,11 +31,12 @@ Body{
 	margin-left: 0px;
 	margin-bottom: 0px;
 }
-#iem-header-logo img {
+#iem-header-logo {
 	float: left;
-	border: 0px;
 	margin-right: 5px;
-    height: 65px;
+}
+#iem-header-logo img {
+	border: 0px;
 	background-color: transparent;
 }
 #iem-header-items {
@@ -115,7 +115,7 @@ ul.iem-list {
 	width: 650px;
 }
 #iem-footer {
-	clear: left;
+	clear: both;
 	width: auto;
 	font-size: 10pt;
 	line-height: 1.1em;
@@ -202,27 +202,21 @@ th.ruler,td.ruler{
 	padding: 3px;
 }
 
+#iem-warning-bar {
+	width: 100%;
+	float: left;
+	text-align: center;
+	border: 0px;
+	margin: 0px;
+}
 #iem-warning-bar a {
   	background-color: #cc0000;
   	border-bottom: 1px solid #000000;
-	width: 100%;
-	display: block;
 	text-decoration: none;
   	color: #CCCCCC;
-	text-align: center;
 }
 #iem-warning-bar a:hover {
 	color: #EEEEEE;
-}
-
-#iem-warning-bar-old {
-	width: 400;
-	text-align: center;
-	background-color: #CC0000;
-	border: 1px #000 solid;
-}
-#iem-warning-bar-old a {
-	color: #CCCCCC;
 }
 .iem-form {
 	border: 1px dashed;
