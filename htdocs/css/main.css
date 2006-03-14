@@ -6,7 +6,7 @@ Body{
 	/* background-color: #666666; */
 }
 #iem-main {
-/*	width: 800px; */
+	min-width: 800px; 
 	border: 1px #000 solid;
 }
 #iem-mainwide {
