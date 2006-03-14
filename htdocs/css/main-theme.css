@@ -1,10 +1,8 @@
 a {
-	text-decoration: none;
 	color: #000099;
 }
 a:hover {
 	color: #999999;
-	text-decoration: underline;
 }
 #iem-header {
 	background-color: #336699;
