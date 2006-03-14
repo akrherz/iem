@@ -1,9 +1,6 @@
-Body{
-	/* font-family: "Luxi Sans", "Bitstream Vera Sans", "Lucida Grande", "Trebuchet MS", helvetica, verdana, arial, sans-serif; */
-	/* font-family: helvetica, verdana, sans-serif; */
+body{
     font-family: verdana, sans-serif;
 	margin: 0px;
-	/* background-color: #666666; */
 }
 #iem-main {
 	min-width: 800px; 
@@ -196,7 +193,6 @@ th.ruler,td.ruler{
 }
 .tabcommands{
         font-size: 12pt; 
-        text-decoration: none;
 }
 .snet-precip-table {
 	padding: 3px;
@@ -212,7 +208,6 @@ th.ruler,td.ruler{
 #iem-warning-bar a {
   	background-color: #cc0000;
   	border-bottom: 1px solid #000000;
-	text-decoration: none;
   	color: #CCCCCC;
 }
 #iem-warning-bar a:hover {
