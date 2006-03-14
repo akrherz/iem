@@ -61,4 +61,17 @@ $vtec_significance = Array(
  'A' => 'Watch',
  'S' => 'Statement');
 
+$vtec_status Array(
+ 'NEW'=> 'issues',
+ 'CON'=> 'continues',
+ 'EXA'=> 'extends area of',
+ 'EXT'=> 'extends time of',
+ 'EXB'=> 'extends area+time of',
+ 'UPG'=> 'issues upgrade to',
+ 'CAN'=> 'cancels',
+ 'EXP'=> 'expires',
+ 'ROU'=> 'routine',
+ 'COR'=> 'corrects');
+
+
 ?>
