@@ -1,6 +1,5 @@
-</div><!-- End #iem-content -->                                                                                 
-                                                                                
-                                                                                 <div id="iem-footer">
+</div><!-- End #iem-content -->
+<div id="iem-footer">
 <table class="footer"><tr><td>
 <b>IEM Networks:</b> <a href="<?php echo $rooturl; ?>/ASOS/"><acronym title="Automated Surface Observing System">ASOS</acronym></a>
  &middot; <a href="<?php echo $rooturl; ?>/AWOS/"><acronym title="Automated Weather Observing System">AWOS</acronym></a>
