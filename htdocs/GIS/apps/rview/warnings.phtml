@@ -171,8 +171,8 @@ if (intval($loop) ==  1){
   $fts = time();
   $f = fopen("/var/www/htdocs/tmp/". $fts .".dat", 'w');
 
-  for ($i=0;$i<9;$i++){
-   $imgi = 8 - $i;
+  for ($i=0;$i<$frames;$i++){
+   $imgi = $frames - 1 - $i;
    include("warnings_plot.php");
    $urls[$i] = $url;
    fwrite($f, "$rooturl/$url\n");
