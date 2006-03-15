@@ -2,9 +2,11 @@
 include_once("../../../../config/settings.inc.php");
 global $_DATABASES;
 
-if ($isarchive)
+/* If this is an archive request, or if it is for not current images */
+if ($isarchive || ($imgi != 0) )
 {
-  $ts = $basets + $tzoff - ($imgi * 300);
+  /* Set us ahead to GMT and then back into the archive */
+  $ts = $basets + $tzoff - ($imgi * 60 * $interval );
   $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $ts) ."GIS/uscomp/n0r_". date('YmdHi', $ts) .".png";
   if (! is_file($fp)) 
     echo "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
@@ -27,8 +29,8 @@ if ($isarchive)
   $ts = filemtime("/home/ldm/data/gis/images/4326/USCOMP/n0r_".$imgi.".png") - ($imgi * 300);
   $radfile = "/home/ldm/data/gis/images/4326/USCOMP/n0r_".$imgi.".tif";
 }
-$archive = 0;
-if ($imgi >0) $archive = 1;
+$myarchive = 0;
+if ($imgi >0) $myarchive = 1;
 
 if ($tzoff == 0)
 {
@@ -111,11 +113,11 @@ if (in_array("goes_east04I4", $layers))
 }
 
 $airtemps = $map->getlayerbyname("airtemps");
-$airtemps->set("status", (in_array("airtemps", $layers) && ! $archive) );
+$airtemps->set("status", (in_array("airtemps", $layers) && ! $myarchive) );
 $airtemps->set("connection", $_DATABASES["access"] );
 
 $surface = $map->getlayerbyname("surface");
-$surface->set("status", (in_array("surface", $layers) && ! $archive) );
+$surface->set("status", (in_array("surface", $layers) && ! $myarchive) );
 $surface->set("connection", $_DATABASES["access"] );
 
 $lakes = $map->getlayerbyname("lakes");
@@ -128,7 +130,7 @@ $cwas = $map->getlayerbyname("cwas");
 $cwas->set("status", in_array("cwas", $layers) );
 
 $usdm = $map->getlayerbyname("usdm");
-$usdm->set("status", (in_array("usdm", $layers) && ! $archive) );
+$usdm->set("status", (in_array("usdm", $layers) && ! $myarchive) );
 
 $watches = $map->getlayerbyname("watches");
 $watches->set("connection", $_DATABASES["postgis"] );

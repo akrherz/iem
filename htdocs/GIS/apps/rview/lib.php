@@ -14,12 +14,15 @@ function mktitle($map, $imgObj, $titlet) {
 function mklogolocal($map, $imgObj) {
                                                                                 
  $layer = $map->getLayerByName("logo");
-                                                                                
+ //$layer->set("transparency", MS_GD_ALPHA);
+
  // point feature with text for location
  $point = ms_newpointobj();
- $point->setXY(44, 24);
+ $point->setXY(40, 26);
                                                                                 
  $point->draw($map, $layer, $imgObj, "logo", "");
+ $point->free();
+
 }
 
 function drawStateNEXRAD($hlext) {
