@@ -1,10 +1,11 @@
 <?php
 
-function printHTML($urls, $radTimes){
+function printHTML($urls){
 global $rooturl;
+$frames = sizeof($urls);
 ?>
 
-<script LANGUAGE="JavaScript">
+<script language="JavaScript1.2" type="text/javascript">
 
 // <!--
 
@@ -25,13 +26,13 @@ global $rooturl;
  
 
 first_image = 0;
-last_image = 8;
+last_image = <?php echo $frames-1; ?>;
 
 
 //=== global variables ====
 theImages = new Array();      //holds the images
 imageNum = new Array();       //keeps track of which images to omit from loop
-radtimes = new Array();
+//radtimes = new Array();
 normal_delay = 300;
 delay = normal_delay;         //delay between frames in 1/100 seconds
 delay_step = 50;
@@ -255,32 +256,13 @@ function change_mode(mode)
 //===> Load and initialize everything once page is downloaded (called from 'onLoad' in <BODY>)
 function launch()
 {
-
-theImages[1] = new Image();
-theImages[1].src = "<?php echo $urls[1]; ?>";
-document.animation.src = theImages[1].src;
-theImages[2] = new Image();
-theImages[2].src = "<?php echo $urls[2]; ?>";
-document.animation.src = theImages[2].src;
-theImages[3] = new Image();
-theImages[3].src = "<?php echo $urls[3]; ?>";
-document.animation.src = theImages[3].src;
-theImages[4] = new Image();
-theImages[4].src = "<?php echo $urls[4]; ?>";
-document.animation.src = theImages[4].src;
-theImages[5] = new Image();
-theImages[5].src = "<?php echo $urls[5]; ?>";
-document.animation.src = theImages[5].src;
-theImages[6] = new Image();
-theImages[6].src = "<?php echo $urls[6]; ?>";
-document.animation.src = theImages[6].src;
-theImages[7] = new Image();
-theImages[7].src = "<?php echo $urls[7]; ?>";
-document.animation.src = theImages[7].src;
-theImages[8] = new Image();
-theImages[8].src = "<?php echo $urls[8]; ?>";
-document.animation.src = theImages[8].src;
-
+<?php
+for ($q=1;$q<$frames;$q++){
+  echo "theImages[$q] = new Image();\n";
+  echo "theImages[$q].src = \"". $urls[$q]."\";\n";
+  echo "document.animation.src = theImages[$q].src;\n";
+} 
+?>
 
    // this needs to be done to set the right mode when the page is manually reloaded
    change_mode (1);
@@ -307,63 +289,34 @@ function animation()
 }
 // -->
 </SCRIPT>
-</head>
 
 <body BGCOLOR="#FFFFFF" onLoad="launch()">
 
-<p>If you think these images are old, hold down the shift key and click reload<br>
+<div style="width: 100%; text-align: center;">
 
-<table ALIGN=CENTER BORDER=2 CELLPADDING=0 CELLSPACING=2>
-
-<tr>
-<td BGCOLOR="#AAAAAA" NOWRAP ALIGN=CENTER VALIGN=MIDDLE>
-<font SIZE=-1 COLOR="#3300CC"> Loop Mode:</font><br>
-<a HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><img BORDER=0 WIDTH=29
-HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/nrm_button.gif" ALT="Normal"></a>
+<img NAME="animation" BORDER=0 SRC="<?php echo $urls[0]; ?>">
+<br />
+<a HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><img BORDER=0 WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/nrm_button.gif" ALT="Normal"></a>
 <a HREF="JavaScript: func()" onClick="sweep()"><img BORDER=0 WIDTH=29 HEIGHT=24
-SRC="<?php echo $rooturl; ?>/images/swp_button.gif" ALT="Sweep"></a><br> <hr WIDTH="70%" SIZE=2>
-<font SIZE=-1 COLOR="#3300CC">Animate Frames:</font><br>
+SRC="<?php echo $rooturl; ?>/images/swp_button.gif" ALT="Sweep"></a>
 
-<a HREF="JavaScript: func()" onClick="change_mode(1);rev()"><img BORDER=0 WIDTH=35
-HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/rev_button.gif" ALT="REV"></a>
-<a HREF="JavaScript: func()" onClick="stop()"><img BORDER=0 WIDTH=35 HEIGHT=35
-SRC="<?php echo $rooturl; ?>/images/stp_button.gif" ALT="STOP"></a>
-<a HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><img BORDER=0 WIDTH=35
-HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/fwd_button.gif" ALT="FWD"></a><br> <hr WIDTH="70%" SIZE=2>
+<a HREF="JavaScript: func()" onClick="change_mode(1);rev()"><img BORDER=0 WIDTH=35 HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/rev_button.gif" ALT="REV"></a>
+<a HREF="JavaScript: func()" onClick="stop()"><img BORDER=0 WIDTH=35 HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/stp_button.gif" ALT="STOP"></a>
+<a HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><img BORDER=0 WIDTH=35 HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/fwd_button.gif" ALT="FWD"></a>
 
-<font SIZE=-1 COLOR="#3300CC"> Dwell First:</font><br>
-<a HREF="JavaScript: func()" onClick="change_start_dwell(-dwell_step)"><img BORDER=0
-WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw1_minus.gif" ALT="dec"></a>
-<a HREF="JavaScript: func()" onClick="change_start_dwell(dwell_step)"><img BORDER=0
-WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw1_plus.gif" ALT="inc"></a><br>
+<a HREF="JavaScript: func()" onClick="change_start_dwell(-dwell_step)"><img BORDER=0 WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw1_minus.gif" ALT="dec"></a>
+<a HREF="JavaScript: func()" onClick="change_start_dwell(dwell_step)"><img BORDER=0 WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw1_plus.gif" ALT="inc"></a>
 
-<font SIZE=-1 COLOR="#3300CC"> Dwell Last:</font><br>
-<a HREF="JavaScript: func()" onClick="change_end_dwell(-dwell_step)"><img BORDER=0
-WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw2_minus.gif" ALT="dec"></a>
-<a HREF="JavaScript: func()" onClick="change_end_dwell(dwell_step)"><img BORDER=0
-WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw2_plus.gif" ALT="inc"></a><br> <hr WIDTH="70%" SIZE=2>
-<font SIZE=-1 COLOR="#3300CC">Adjust Speed:</font><br>
-<a HREF="JavaScript: func()" onClick="change_speed(delay_step)"><img BORDER=0 WIDTH=35
-HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/slw_button.gif" ALT="--"></a>
-<a HREF="JavaScript: func()" onClick="change_speed(-delay_step)"><img BORDER=0 WIDTH=35
-HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/fst_button.gif" ALT="++"></a><br> <hr WIDTH="70%" SIZE=2>
+<a HREF="JavaScript: func()" onClick="change_end_dwell(-dwell_step)"><img BORDER=0 WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw2_minus.gif" ALT="dec"></a>
+<a HREF="JavaScript: func()" onClick="change_end_dwell(dwell_step)"><img BORDER=0 WIDTH=29 HEIGHT=24 SRC="<?php echo $rooturl; ?>/images/dw2_plus.gif" ALT="inc"></a>
 
-<font SIZE=-1 COLOR="#3300CC">Advance One:</font><br>
-<a HREF="JavaScript: func()" onClick="decrementImage(--current_image)"><img BORDER=0
-WIDTH=35 HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/mns_button.gif" ALT="-1"></a>
-<a HREF="JavaScript: func()" onClick="incrementImage(++current_image)"><img BORDER=0
-WIDTH=35 HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/pls_button.gif" ALT="+1"></a>
+<a HREF="JavaScript: func()" onClick="change_speed(delay_step)"><img BORDER=0 WIDTH=35 HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/slw_button.gif" ALT="--"></a>
+<a HREF="JavaScript: func()" onClick="change_speed(-delay_step)"><img BORDER=0 WIDTH=35 HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/fst_button.gif" ALT="++"></a>
 
-<hr WIDTH="70%" SIZE=2>
-</td>
-<td BGCOLOR="#AAAAAA" ALIGN=CENTER VALIGN=MIDDLE>
-<img NAME="animation" BORDER=0 SRC="<?php echo $urls[0]; ?>" ALT="IEM Mesonet">
-</td>
+<a HREF="JavaScript: func()" onClick="decrementImage(--current_image)"><img BORDER=0 WIDTH=35 HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/mns_button.gif" ALT="-1"></a>
+<a HREF="JavaScript: func()" onClick="incrementImage(++current_image)"><img BORDER=0 WIDTH=35 HEIGHT=35 SRC="<?php echo $rooturl; ?>/images/pls_button.gif" ALT="+1"></a>
 
-</tr>
-
-<input type="hidden" name="radtime">
-</table>
+</div>
 
 <?php
 } 
