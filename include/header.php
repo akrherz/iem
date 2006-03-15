@@ -19,8 +19,7 @@ title="red" />
 <div id="iem-header">
  
 <div id="iem-header-logo">
-<a href="<?php echo $rooturl; ?>/"><img
-src="<?php echo $rooturl; ?>/images/logo_small.gif" alt="IEM" /></a>
+<a href="<?php echo $rooturl; ?>/"><img src="<?php echo $rooturl; ?>/images/logo_small.gif" alt="IEM" /></a>
 </div>
                                                                                 
 <div id="iem-header-title">

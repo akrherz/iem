@@ -1,4 +1,4 @@
-<h3 class="heading"><?php echo $sname; ?></h3>
+<h3 class="heading"><?php echo $metadata["city"]; ?></h3>
 <form method="GET">
 &nbsp; &nbsp; <b>Switch to:</b>
 <?php

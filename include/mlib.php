@@ -80,7 +80,6 @@ return round($PR_HEAT,0);
 function wcht_idx($tmpf, $sped){
   if ($sped < 3) return $tmpf;
   $wci = pow($sped,0.16);
-
   $PR_WCHT = 35.74 + .6215 * $tmpf - 35.75 * $wci +
      + .4275 * $tmpf * $wci;
 
