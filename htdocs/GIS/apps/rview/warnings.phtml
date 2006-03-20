@@ -153,7 +153,7 @@ if ($autopilot) $BODYEXTRA = "onLoad=\"handsOff2();\"";
 <?php
 
 dl($mapscript);
-
+$heightadd = 0;
 if (intval($loop) ==  1){
 
   $urls = Array();
@@ -167,6 +167,7 @@ if (intval($loop) ==  1){
   include ("loop.php");
   printHTML($urls);
 } else if (intval($loop) == 2){
+  $heightadd = 100;
   $urls = Array();
   $fts = time();
   $f = fopen("/var/www/htdocs/tmp/". $fts .".dat", 'w');
@@ -237,7 +238,7 @@ $afos = Array("SV" => "Svr Tstorm",
   "TO" => "Tornado",
   "FF" => "Flash Flood");
 ?>
-<div style="clear: both; margin-top: <?php echo $height +70; ?>px;">
+<div style="clear: both; margin-top: <?php echo $height +70 +$heightadd; ?>px;">
 Warnings Valid at: <b><?php 
 if ($tzoff == 0)
 {
