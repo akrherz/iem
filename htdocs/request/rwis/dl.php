@@ -1,7 +1,7 @@
 <?php
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/rwisLoc.php");
+include("$rootpath/include/all_locs.php");
 
 $gis = isset($_GET["gis"]) ? $_GET["gis"]: 'no';
 $delim = isset($_GET["delim"]) ? $_GET["delim"]: ",";
@@ -128,9 +128,9 @@ if ($what != "plot"){
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
   $sid = $row["station"];
-  echo $sid . $d[$delim] . $Rcities[$sid]["city"] ;
+  echo $sid . $d[$delim] . $cities[$sid]["city"] ;
   if ($gis == "yes"){
-     echo  $d[$delim] . $Rcities[$sid]["lat"] . $d[$delim] .  $Rcities[$sid]["lon"] ;
+     echo  $d[$delim] . $cities[$sid]["lat"] . $d[$delim] .  $cities[$sid]["lon"] ;
   } 
   echo $d[$delim] . $row["dvalid"] . $d[$delim];
   for ($j=0; $j < $num_vars;$j++){
