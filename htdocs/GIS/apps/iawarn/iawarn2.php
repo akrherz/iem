@@ -62,7 +62,7 @@ function drawRADAR($site, $imgi, $extents, $projs, $radValid, $fips){
 
   $radarL = $map->getlayerbyname("nexrad_n0r");
   $radarL->set("status", MS_ON);
-  $radarL->set("data", "/mesonet/data/gis/images/4326/". $site ."/n0r_".$imgi.".tif");
+  $radarL->set("data", "/home/ldm/data/gis/images/4326/". $site ."/n0r_".$imgi.".tif");
 
   $img = $map->prepareImage();
 
