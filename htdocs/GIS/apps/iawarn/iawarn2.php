@@ -16,7 +16,7 @@ function drawRADAR($site, $imgi, $extents, $projs, $radValid, $fips){
     echo "<b><font color='#ff0000'>Warning: RADAR data is very old!</font></b><br>";
   }
 
-  $db_ts = strftime("%Y-%m-%d %H:%M:00+00", $radValid);
+  $db_ts = strftime("%Y-%m-%d %H:%M", $radValid);
   if (strlen($site) == 0){
     $site = "DMX";
   }
