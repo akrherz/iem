@@ -11,10 +11,10 @@ function drawRADAR($site, $imgi, $extents, $projs, $radValid, $fips){
   //  substr($radValid, 4, 2), substr($radValid, 6, 2), substr($radValid, 0, 4) );
 
   $now = time();
-  if (($now - $radValid) > 1200) {
-    $ts = $now + 5*3600;
-    echo "<b><font color='#ff0000'>Warning: RADAR data is very old!</font></b><br>";
-  }
+  //if (($now - $radValid) > 1200) {
+  //  $ts = $now + 5*3600;
+  //  echo "<b><font color='#ff0000'>Warning: RADAR data is very old!</font></b><br>";
+  //}
 
   $db_ts = strftime("%Y-%m-%d %H:%M", $radValid);
   if (strlen($site) == 0){
