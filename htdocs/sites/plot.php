@@ -10,6 +10,7 @@ include("setup.php");
  $prod = isset($_GET["prod"]) ? $_GET["prod"]: 0;
  $products = Array(
 0 => "7day_hilo_plot.php",
+1 => "month_hilo_plot.php",
 );
 ?>
 <div style="float: left;">
