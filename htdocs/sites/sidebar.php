@@ -9,6 +9,7 @@ $o = Array(
   "loc" => Array("name" => "Location Maps", "uri" => "mapping.php?"),
   "neighbors" => Array("name" => "Neighbors", "uri" => "neighbors.php?"),
   "7dayhilo" => Array("name" => "7 Day High/Low Plot", "uri" => "plot.php?prod=0&"),
+  "monthhilo" => Array("name" => "Month High/Low Plot", "uri" => "plot.php?prod=1&"),
 );
 
 while (list($key,$val) = each($o))
