@@ -1,5 +1,4 @@
 body{
-    font-family: verdana, sans-serif;
 	margin: 0px;
 }
 #iem-main {
@@ -18,6 +17,19 @@ body{
 #iem-header {
 	border-bottom: 1px #000 solid;
 }
+#iem-header:after {
+    content: ".";
+    display: block;
+    height: 0;
+    overflow: hidden;
+    clear: both;
+    visibility: hidden;
+    }
+
+    /* Holly Hack Targets IE Win only \*/
+    * html #iem-header {height: 1%;}
+    /* End Holly Hack */
+
 #iem-header-title h3 {
 	margin-top: 0px;
 	margin-left: 0px;
@@ -115,7 +127,6 @@ ul.iem-list {
 	clear: both;
 	width: auto;
 	font-size: 10pt;
-	line-height: 1.1em;
 	border-top: 1px #000 solid;
 	padding-left: 5px;
 	padding-bottom: 2px;
@@ -123,12 +134,10 @@ ul.iem-list {
 table.footer {
 	font-size: 10pt;
 	width: 100%;
-	line-height: 15px;
 }
 
 .title {
 	font-size: 16pt;
-	line-height: 20pt;
 	color: #FFFFFF;
 }
 .subtitle {
