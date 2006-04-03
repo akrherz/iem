@@ -1,6 +1,9 @@
 body{
 	margin: 0px;
 }
+html, body, h2, h3, h4, div, p, ul, li, input {
+        font-family: "Gill Sans MT", "Gill sans", "Trebuchet ms", sans-serif;
+}
 #iem-main {
 	min-width: 800px; 
 	border: 1px #000 solid;
