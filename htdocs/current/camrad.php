@@ -100,5 +100,5 @@ $map->drawLabelCache($img);
 
 $url = $img->saveWebImage();
 
-echo "<td><b>Radar View:</b><br /><img src=\"$url\"></td>";
+echo "<div style=\"float: left;\"><b>Radar View:</b><br /><img src=\"$url\"></div>";
 ?>
