@@ -46,13 +46,13 @@ if (! $isarchive)
 ?>
 
 <div id="iem-section">
-<center><table>
+<table>
 <tr><th><a href="index.phtml">Surface Data</a></th>
 <th><a href="radar.phtml">RADAR/Sat Data</a></th>
 <th><a href="misc.phtml">Advanced Met Plots</a></th>
 <th>Web Cameras</th>
 <th>&nbsp;</th>
-</tr></table></center></div>
+</tr></table></div>
 <div class="text">
 <p>Thanks to the sponsorship of <a href="http://www.cipco.net">CIPCO</a>, the 
 <a href="http://www.schoolnet8.com/">KCCI SchoolNet</a> has been 
@@ -77,12 +77,9 @@ loops on their <a href="http://www.schoolnet8.com/camera/">webcamera homepage</a
 </form>
 
 <?php $t = time(); ?>
-<center>
-<table width="700px">
 
 <?php
  include("camrad.php");
- $i=0;
  $misstxt = "Cameras Missing: ";
  reset($cameras);
  while (list($id, $v) = each($cameras))
@@ -92,15 +89,14 @@ loops on their <a href="http://www.schoolnet8.com/camera/">webcamera homepage</a
      $misstxt .= $v["name"] ." , ";
      continue;
    }
-   if ($i) echo "<tr>";
-   echo sprintf("<td><b>%s. %s</b> (%s County)<br /><img src=\"%s\"></td>", $v["num"], $v["name"], $v["county"], $v["url"]);
-   if (! $i) echo "</tr>";
-   $i = ! $i;
+   echo sprintf("<div style=\"float: left; margin-left: 5px;\"><b>%s. %s</b> (%s County)<br /><img src=\"%s\"></div>", $v["num"], $v["name"], $v["county"], $v["url"]);
  }
 ?>
-</table></center>
 
-<?php echo substr($misstxt, 0, -2); ?>
+
+</div>
+
+<br style="clear: both;">
 
 <p><b>Cool Shots!</b>
 <ul>
@@ -112,6 +108,5 @@ loops on their <a href="http://www.schoolnet8.com/camera/">webcamera homepage</a
  <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2005&month=11&day=12&hour=17&minute=00">12 Nov 2005 - 5:00 PM, Ames tornado</a></li>
 </ul>
 
-</div>
 
 <?php include("$rootpath/include/footer.php"); ?>
