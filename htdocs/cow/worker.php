@@ -25,7 +25,7 @@ function printWARN($warn)
 {
   $background = "#0f0";
   $ts = $warn["sts"] + 5*60;
-  $uri = sprintf("/GIS/apps/rview/cat.phtml?wfo=%s&event_id=%s&phenomena=%s", $warn["wfo"], $warn["eventid"], $warn["phenomena"]);
+  $uri = sprintf("/GIS/apps/rview/cat.phtml?year=%s&wfo=%s&event_id=%s&phenomena=%s", date("Y", $ts), $warn["wfo"], $warn["eventid"], $warn["phenomena"]);
   $uri2 = sprintf("/GIS/apps/rview/warnings.phtml?tz=UTC&cu=1&year=%s&month=%s&day=%s&hour=%s&minute=%s&filter=1&archive=yes&tzoff=0&site=%s&lon0=%s&lat0=%s", gmdate("Y", $ts), gmdate("m", $ts), gmdate("d",$ts), gmdate("H",$ts), gmdate("i",$ts), $warn["wfo"], $warn["lon0"], $warn["lat0"]);
   if ($warn["verify"] == 0) $background = "#f00";
   return sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f km^2</td></tr>", 
