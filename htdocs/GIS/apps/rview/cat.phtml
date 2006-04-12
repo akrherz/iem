@@ -6,10 +6,11 @@ include("$rootpath/include/database.inc.php");
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : die("variable wfo not set. Exit.");
 $event_id = isset($_GET["event_id"]) ? intval($_GET["event_id"]) : die("variable event_id not set. Exit.");
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : die("variable phenomena not set. Exit.");
+$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
 
 
 $connect = iemdb("postgis");
-$query = "SELECT report, svs from warnings_2005 WHERE wfo = '$wfo' and eventid = $event_id and phenomena = '$phenomena'";
+$query = "SELECT report, svs from warnings_$year WHERE wfo = '$wfo' and eventid = $event_id and phenomena = '$phenomena'";
 
 $result = pg_exec($connect, $query);
 
