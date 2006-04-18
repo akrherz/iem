@@ -2,8 +2,6 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
  // worker.php
- // Fascilitate download of AgClimate Data
- // Daryl Herzmann 26 Mar 2003
 header("Content-type: text/plain");
 
 include("$rootpath/include/agclimateLoc.php");
@@ -52,7 +50,7 @@ if (strlen($delim) == 0)
   $delim = "tab";
 
 $fvars = Array();
-if (isset($_GET["qcflg"])){  // They want QC too!
+if (isset($_GET["qcflags"])){  // They want QC too!
   foreach ($vars as $var){
     $fvars[] = $var;
     $fvars[] = $var ."_f";
