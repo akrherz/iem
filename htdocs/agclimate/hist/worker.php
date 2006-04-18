@@ -30,7 +30,8 @@ $vardict = Array(
 
 $st   = $_GET['sts'];
 $vars = $_GET['vars']; 
-$yyyy = $_GET['year'];
+$s_yr = $_GET['startYear'];
+$e_yr = $_GET['endYear'];
 $s_mo = $_GET['startMonth'];
 $s_dy = $_GET['startDay'];
 $e_mo = $_GET['endMonth'];
@@ -61,12 +62,11 @@ if (isset($_GET["qcflags"])){  // They want QC too!
 }
 $num_vars = sizeof($fvars);
 
-$sts  = mktime(0,0,0, $s_mo, $s_dy, $yyyy);
-$ets  = mktime(0,0,0, $e_mo, $e_dy, $yyyy);
+$sts  = mktime(0,0,0, $s_mo, $s_dy, $s_yr);
+$ets  = mktime(0,0,0, $e_mo, $e_dy, $e_yr);
 
 if ($sts > $ets) die("Your start time is greater than your end time!");
 
-$tbl = strftime("t%Y", $sts) ."_". $rtype;
 
 $str_stns = implode("','", $st);
 $str_vars = implode(",", $fvars);
@@ -76,21 +76,10 @@ if ($rtype == 'hourly')
 else
   $str_ets  = strftime("%Y-%m-%d %H:00", $ets );
 
-$sql = "SELECT station, to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid, 
-   $str_vars from $tbl 
-   WHERE station IN ('$str_stns') and
-   valid BETWEEN '$str_sts' and '$str_ets'
-   ORDER by station, valid";
-
-$c = iemdb("isuag");
-$rs = pg_exec($c, $sql);
-pg_close($c);
-
 if ( isset($_GET["todisk"]) ) {
   header("Content-type: application/octet-stream");
   header("Content-Disposition: attachment; filename=changeme.txt");
 }
-
 
 echo "# ISU Ag Climate Download -- Iowa Environmental Mesonet $cr";
 echo "# For units and more information: $cr";
@@ -98,13 +87,23 @@ echo "#    http://mesonet.agron.iastate.edu/agclimate/info.txt $cr";
 echo "# Data Contact: $cr";
 echo "#    Daryl Herzmann akrherz@iastate.edu 515.294.5978 $cr";
 
-
 echo "Site ID" . $d[$delim] ."Site Name". $d[$delim] . "valid".  $d[$delim];
 for ($j=0; $j < $num_vars;$j++){
   echo $vardict[$fvars[$j]]. $d[$delim];
 }
 echo $cr;
 
+$c = iemdb("isuag");
+$rs = Array();
+for($yr=date("Y", $sts);$yr<=date("Y", $ets);$yr++)
+{
+  $tbl = sprintf("t%s_%s", $yr, $rtype);
+  $sql = "SELECT station, to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid, 
+   $str_vars from $tbl 
+   WHERE station IN ('$str_stns') and
+   valid BETWEEN '$str_sts' and '$str_ets'
+   ORDER by station, valid";
+  $rs = pg_exec($c, $sql);
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   echo $row["station"] . $d[$delim] . $ISUAGcities[$row["station"]]['city'] 
@@ -114,5 +113,9 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   }
   echo $cr;
 }
-?>
 
+
+}
+pg_close($c);
+
+?>

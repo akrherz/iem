@@ -58,9 +58,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <TABLE>
   <TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
   <TR><TH>Starting On:</TH>
-    <TD rowspan="2">
-      <?php echo yearSelect(1997, 2005); ?>
-   </TD>
+    <TD><?php echo yearSelect2(1997, date("Y"), "startYear"); ?></TD>
    <td><SELECT name="startMonth">
       <option value="1">January
       <option value="2">February
@@ -87,6 +85,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 </SELECT></td>
 </TR>
 <TR><TH>Ending On:</TH>
+    <TD><?php echo yearSelect2(1997, date("Y"), "endYear"); ?></TD>
 	<td><SELECT name="endMonth">
 <option value="1">January
 <option value="2">Febuary
