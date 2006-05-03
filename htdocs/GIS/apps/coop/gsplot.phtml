@@ -24,7 +24,8 @@ $gs_start = Array(
   2002 => adodb_mktime(0,0,0,5,1,2002),
   2003 => adodb_mktime(0,0,0,5,1,2003),
   2004 => adodb_mktime(0,0,0,5,1,2004),
-  2005 => adodb_mktime(0,0,0,5,1,2005) );
+  2005 => adodb_mktime(0,0,0,5,1,2005),
+  2006 => adodb_mktime(0,0,0,5,1,2006) );
 $gs_end = Array(
   1998 => adodb_mktime(0,0,0,10,1,1998),
   1999 => adodb_mktime(0,0,0,10,1,1999),
@@ -33,7 +34,8 @@ $gs_end = Array(
   2002 => adodb_mktime(0,0,0,10,7,2002),
   2003 => adodb_mktime(0,0,0,10,1,2003),
   2004 => adodb_mktime(0,0,0,10,1,2004),
-  2005 => adodb_mktime(0,0,0,10,1,2005) );
+  2005 => adodb_mktime(0,0,0,10,1,2005),
+  2006 => adodb_mktime(0,0,0,10,1,2006) );
 
 if (strlen($var) == 0)  $var = "gdd50";
 if (strlen($year) == 0)  $year = 2004;
@@ -277,6 +279,8 @@ foreach($vals as $key => $value){
 
 reset($vals);
 foreach($vals as $key => $value){
+  $ukey = strtoupper($key);
+  if (! isset($cities[$ukey]) ) continue;
   // Value UL
   $pt = ms_newPointObj();
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
