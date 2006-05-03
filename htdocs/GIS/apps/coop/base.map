@@ -104,14 +104,14 @@ LAYER
       OUTLINECOLOR  0 0 0
       SHADOWCOLOR 0 0 0
       SHADOWSIZE 1 1
-      SIZE 16
+      SIZE 14
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
       FONT kcci
       ANTIALIAS TRUE
       BUFFER 2
-      FORCE FALSE
+      FORCE TRUE
       POSITION UC
       OFFSET 0 3
     END
