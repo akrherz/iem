@@ -3,8 +3,8 @@ include("../../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 
 $var = isset($_GET["var"]) ? $_GET["var"]: "high";
-$year = isset($_GET["year"]) ? $_GET["year"]: 2005;
-$month = isset($_GET["month"]) ? $_GET["month"]: 5;
+$year = isset($_GET["year"]) ? $_GET["year"]: 2006;
+$month = isset($_GET["month"]) ? $_GET["month"]: 2;
 $day = isset($_GET["day"]) ? $_GET["day"]: 1;
 $source = isset($_GET["source"]) ? $_GET["source"]: "qc";
 
@@ -51,7 +51,7 @@ choice.
  <tr>
   <td><select name="source">
   <option value="qc" <?php if($source == "qc") echo "SELECTED"; ?>>Quality Controlled (1893-few months ago)
-  <option value="prelim" <?php if($source == "prelim") echo "SELECTED"; ?>>Preliminary Reports (2003-today)
+  <option value="prelim" <?php if($source == "prelim") echo "SELECTED"; ?>>Preliminary Reports (2004-today)
   </select></td>
   <td><select name="var">
      <option value="high" <?php if($var == "high") echo "SELECTED"; ?>>High Temperature</option>
@@ -157,7 +157,7 @@ if ($source == "qc")
   $c = iemdb("access");
   $cutstring1 = 0;
   $cutstring2 = 5;
-  $sql = sprintf("SELECT station as stationid, day, max_tmpf as high, min_tmpf as low, pday as precip from summary_%s WHERE day = '%s' and network = 'IA_COOP'", adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
+  $sql = sprintf("SELECT station as stationid, day, max_tmpf as high, min_tmpf as low, pday as precip from summary_%s WHERE day = '%s' and network = 'IA_COOP' and min_tmpf < 90 and max_tmpf > -90", adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
 }
 
 $rs =  pg_exec($c, $sql);
