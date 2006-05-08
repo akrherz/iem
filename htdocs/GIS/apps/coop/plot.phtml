@@ -145,7 +145,7 @@ $iards->draw($img);
 $c = iemdb("coop");
 
 
-$sql = sprintf("SELECT * from alldata WHERE day = '%s'", adodb_date("Y-m-d", $ts) );
+$sql = sprintf("SELECT * from alldata WHERE day = '%s' and %s is not null", adodb_date("Y-m-d", $ts), $var );
 
 $rs =  pg_exec($c, $sql);
 $vals = Array();
