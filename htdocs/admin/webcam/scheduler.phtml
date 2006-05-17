@@ -100,7 +100,7 @@ $sql = "SELECT *, oid from webcam_scheduler ORDER by cid ASC";
 $rs = pg_exec($conn, $sql);
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-  echo sprintf("<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><a href=\"schedule.phtml?oid=%s\">Delete</a></tr>", $cameras[$row["cid"]]["name"], $row["begints"], $row["endts"], $row["is_daily"], $row["filename"], $row["oid"]);
+  echo sprintf("<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><a href=\"scheduler.phtml?oid=%s\">Delete</a></tr>", $cameras[$row["cid"]]["name"], $row["begints"], $row["endts"], $row["is_daily"], $row["filename"], $row["oid"]);
 }
 ?>
 </table>
