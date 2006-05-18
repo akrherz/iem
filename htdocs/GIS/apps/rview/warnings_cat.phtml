@@ -11,7 +11,8 @@ if (isset($_GET["oid"]) ) {
   $wfo = isset($_GET["wfo"]) ? $_GET["wfo"] : die("WFO Not Defined!");
   $eventid = isset($_GET["eventid"]) ? $_GET["eventid"] : die("eventid not defined");
   $phenomena = isset($_GET["phenomena"]) ? $_GET["phenomena"] : die("phenomena not defined");
-  $query = "SELECT * from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and eventid = $eventid ";
+  $significance = isset($_GET["significance"]) ? $_GET["significance"] : "W";
+  $query = "SELECT * from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and eventid = $eventid and significance = '$significance'";
 }
 
 include("$rootpath/include/header.php");
