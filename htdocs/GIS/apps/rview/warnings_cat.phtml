@@ -24,7 +24,7 @@ $result = pg_exec($connect, $query);
 
 $row = pg_fetch_array($result, 0);
 
-echo sprintf("<a href=\"%s\">Go back to warnings display</a>", getenv("HTTP_REFERER") );
+//echo sprintf("<a href=\"%s\">Go back to warnings display</a>", getenv("HTTP_REFERER") );
 
 echo "<p><pre>". $row["report"] ."</pre>";
 
