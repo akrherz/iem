@@ -1,15 +1,16 @@
 <?php
- $station = $_GET['station'];
+ $station = isset($_GET['station']) ? $_GET['station']: "";
  $network = isset($network) ? $_GET['network'] : "IA_ASOS";
  $year = isset($_GET['year']) ? $_GET['year'] : date("Y");
  $month = isset($_GET['month']) ? $_GET['month'] : date("m");
- include("/mesonet/php/lib/selectWidget.php");
+ include("../../../config/settings.inc.php");
+ include("$rootpath/include/selectWidget.php");
  $sw = new selectWidget("fe.phtml", "fe.phtml?", $network);
  $sw->logic($_GET);
 ?>
 
 <?php 	$TITLE = "IEM | Growing Season Traces";
-include("/mesonet/php/include/header.php"); ?>
+include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">Growing Season Traces</h3>
 
@@ -26,7 +27,7 @@ can cause errors in the accumulated values.</p>
  -or- <a href="fe.phtml?network=KCCI">KCCI SchoolNet</a>
 
 <?php if (strlen($station) > 0 ) { ?>
-<?php include_once("../../include/forms.php"); ?>
+<?php include_once("$rootpath/include/forms.php"); ?>
 <form name="ds" action="fe.phtml" method="GET">
 <input type="hidden" value="<?php echo $station; ?>" name="station">
 <table cellspacing=2 border=1 cellpadding=2>
@@ -35,7 +36,7 @@ can cause errors in the accumulated values.</p>
 </thead>
 <tbody>
 <tr><td><input type="text" name="station" value="<?php echo $station; ?>" size="6"></td>
-  <td><?php yearSelect(2004,$year,"year"); ?></td></tr>
+  <td><?php echo yearSelect(2004,$year,"year"); ?></td></tr>
 </tbody>
 </table>
 <input type="submit" value="Make Plot">
@@ -53,4 +54,4 @@ echo $sw->printInterface();
 ?>
 </div>
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>

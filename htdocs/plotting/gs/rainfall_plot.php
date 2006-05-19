@@ -1,6 +1,7 @@
 <?php
+include("../../../config/settings.inc.php");
+
 $station = isset($_GET['station']) ? $_GET['station'] : "DSM";
-$ts = mktime(0,0,0, $month, 1, $year);
 $year = isset($_GET['year']) ? $_GET['year']: date("Y");
 $sts = mktime(0,0,0,  5, 1, $year);
 $ets = mktime(0,0,0, 10, 1, $year);
@@ -12,17 +13,17 @@ $e2date = date("2000-m-d", $ets);
 
 $today = time();
 
-include("../../include/iemaccess.php");
-include("../../include/allLoc.php");
-$coopdb = pg_connect("10.10.10.20","5432","coop");
-$iem = new IEMAccess();
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/all_locs.php");
+$coopdb = iemdb("coop");
+$iem = iemdb("access");
 
 $climate_site = $cities[$station]["climate_site"];
 
 $q = "SELECT pday, day from summary_$year
 		WHERE station = '$station' and day between '$sdate' and '$edate'
 		ORDER by day ASC";
-$rs = $iem->query($q);
+$rs = pg_exec($iem, $q);
 $obs = Array();
 $aobs = Array();
 $atot = 0;
@@ -52,8 +53,8 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 	$p = $row["precip"];
 	$climate[$i] = $p;
 	$atot += $p;
-	if ($aobs[$i] > 0)
-	$cdiff[$i] = $aobs[$i] - $atot ;
+	if (@$aobs[$i] > 0) $cdiff[$i] = $aobs[$i] - $atot ;
+    else $cdiff[$i] = "";
 	$aclimate[$i] = $atot;
 	$zeros[$i] = 0;
 	$xlabels[$i] = "";
@@ -66,9 +67,9 @@ $xlabels[30] = "Jun 1";
 $xlabels[61] = "Jul 1";
 $xlabels[91] = "Aug 1";
 
-include ("../jpgraph-1.13/jpgraph.php");
-include ("../jpgraph-1.13/jpgraph_line.php");
-include ("../jpgraph-1.13/jpgraph_bar.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,400,"example1");
