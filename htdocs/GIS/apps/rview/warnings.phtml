@@ -157,13 +157,17 @@ $heightadd = 0;
 if (intval($loop) ==  1){
 
   $urls = Array();
+  $fts = time();
+  $f = fopen("/var/www/htdocs/tmp/". $fts .".dat", 'w');
 
   for ($i=0;$i<$frames;$i++){
    $imgi = $frames - 1 - $i;
    include("warnings_plot.php");
    $urls[$i] = $url;
+   fwrite($f, "$rooturl/$url\n");
   }
-
+  fclose($f);
+  echo "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
   include ("loop.php");
   printHTML($urls);
 } else if (intval($loop) == 2){
@@ -179,6 +183,7 @@ if (intval($loop) ==  1){
    fwrite($f, "$rooturl/$url\n");
   }
   fclose($f);
+  echo "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
 ?>
   <applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="<?php echo $width; ?>" height="<?php echo $height + 100; ?>" alt="You must enable Java in your browser to view the radar loop">
         <param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
