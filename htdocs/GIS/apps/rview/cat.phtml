@@ -25,7 +25,7 @@ if (strlen($row["svs"]) > 0 )
  $parts = explode('__', $row["svs"]);
  for ($i=1;$i<(sizeof($parts) - 1);$i++)
  {
-   echo "<h4><a name=\"svs\">SVS Update</a>:</h4><pre>". $parts[$i] ."</pre>\n"; }
+   echo "<h4><a name=\"svs\">Updates</a>:</h4><pre>". $parts[$i] ."</pre>\n"; }
 }
 ?>
 <?php include("$rootpath/include/footer.php"); ?>
