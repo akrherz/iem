@@ -4,7 +4,12 @@ header("Content-Disposition: attachment; filename=changeme.txt");
 // 1 minute schoolnet data plotter
 // Cool.....
 
-include ("../../include/snetLoc.php");
+$year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
+$month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
+$day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
+$station = isset($_GET['station']) ? $_GET["station"]: "";
+
+include ("../../../include/snetLoc.php");
 
 if (strlen($station) > 3){
     $station = $SconvBack[$station];
