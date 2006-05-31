@@ -16,7 +16,7 @@ $dur = isset($_GET["dur"]) ? intval($_GET["dur"]): 60;
 $movie_seconds = isset($_GET["movie_seconds"]) ? intval($_GET["movie_seconds"]): 8;
 
 $is_daily = isset($_GET["is_daily"]);
-$filename = isset($_GET["filename"]) ? $_GET["filename"]: "mymoviefile";
+$filename = isset($_GET["filename"]) ? strtolower($_GET["filename"]): "mymoviefile";
 $sts = mktime($hour, $minute, 0, $month, $day, $year);
 $ets = $sts + ($dur * 60);
 
