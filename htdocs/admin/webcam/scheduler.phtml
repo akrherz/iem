@@ -13,6 +13,7 @@ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $hour = isset($_GET["hour"]) ? $_GET["hour"]: date("H");
 $minute = isset($_GET["minute"]) ? $_GET["minute"]: 0;
 $dur = isset($_GET["dur"]) ? intval($_GET["dur"]): 60;
+$movie_seconds = isset($_GET["movie_seconds"]) ? intval($_GET["movie_seconds"]): 8;
 
 $is_daily = isset($_GET["is_daily"]);
 $filename = isset($_GET["filename"]) ? $_GET["filename"]: "mymoviefile";
@@ -29,7 +30,7 @@ if (strlen($id) > 0)
 {
   $d = 1;
   if (! $is_daily) $d = 0;
-  $sql = sprintf("INSERT into webcam_scheduler values ('%s','%s','%s','%s','%s')", $id, date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $d, $filename);
+  $sql = sprintf("INSERT into webcam_scheduler values ('%s','%s','%s','%s','%s', %s)", $id, date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $d, $filename, $movie_seconds);
   pg_exec($conn, $sql);
 
 }
@@ -81,26 +82,30 @@ from now will be processed.
 
 <h4>Step 5: Daily Scheduler</h4>
 This lapse will run every day for the time and duration.
-<br /><input type="checkbox" value="yes" name="is_daily">Schedule Daily!
+<br /><input type="checkbox" value="yes" name="is_daily" <?php if ($is_daily) echo "CHECKED=\"CHECKED\""; ?>>Schedule Daily!
 
 <h4>Step 6: Output filename:</h4>
 Filename (no spaces, funny characters please!) This is the filename,
 <br />that will appear on the Live box in E:\live\content\movies\webcam_scheduler
 <br /><input type="text" name="filename" value="<?php echo $filename; ?>">
 
-<h4>Step 7: Buy daryl steak and submit form!</h4>
+<h4>Step 7: Movie duration:</h4>
+How long of a movie will this be? (in seconds)
+<br /><input type="text" size="4" name="movie_seconds" value="<?php echo $movie_seconds; ?>">
+
+<h4>Step 8: Buy daryl steak and submit form!</h4>
 <input type="submit" value="Make it so number 1">
 </form>
 
 <h3>Current Schedule:</h3>
 <table border="1" cellpadding="2">
-<tr><th>Camera:</th><th>Begin:</th><th>End:</th><th>Is Daily</th><th>Filename</th><td></td></tr>
+<tr><th>Camera:</th><th>Begin:</th><th>End:</th><th>Is Daily</th><th>Filename</th><td>Movie Duration</td><td></td></tr>
 <?php
 $sql = "SELECT *, oid from webcam_scheduler ORDER by cid ASC";
 $rs = pg_exec($conn, $sql);
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-  echo sprintf("<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><a href=\"scheduler.phtml?oid=%s\">Delete</a></tr>", $cameras[$row["cid"]]["name"], $row["begints"], $row["endts"], $row["is_daily"], $row["filename"], $row["oid"]);
+  echo sprintf("<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><a href=\"scheduler.phtml?oid=%s\">Delete</a></tr>", $cameras[$row["cid"]]["name"], $row["begints"], $row["endts"], $row["is_daily"], $row["filename"], $row["movie_seconds"], $row["oid"]);
 }
 ?>
 </table>
