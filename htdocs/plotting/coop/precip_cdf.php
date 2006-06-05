@@ -85,12 +85,12 @@ $graph->img->SetMargin(40,5,35,60);
 $graph->xaxis->SetTickLabels($xdata);
 $graph->xaxis->SetTextTickInterval(100);
 $graph->xaxis->SetLabelAngle(90);
-$graph->xaxis->SetTitle("Rainfall [inches]");
+$graph->xaxis->SetTitle("Precip [inches]");
 $graph->xaxis->SetTitleMargin(30);
 
 $graph->yaxis->SetTitle("Cumulative Distribution (percent)");
 
-$graph->title->Set($cities[$stationid]['city'] ." Rainfall Accumulation Probabilities");
+$graph->title->Set($cities[$stationid]['city'] ." Precip Accumulation Probabilities");
 $graph->subtitle->Set($subtitle);
 
 $l1=new LinePlot($ydata);
