@@ -1,0 +1,63 @@
+<?php
+include("../../../config/settings.inc.php");
+include ("$rootpath/include/COOPstations.php");
+
+$smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 5;
+$sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
+$emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 5;
+$eday = isset($_GET['eday']) ? $_GET['eday'] : 31;
+$stationid = isset($_GET["stationid"]) ? $_GET['stationid']: 'ia0200';
+$uri = sprintf("precip_cdf.php?stationid=%s&smonth=%s&sday=%s&emonth=%s&eday=%s", $stationid, $smonth, $sday, $emonth, $eday);
+?>
+
+<?php
+ $TITLE = "IEM | Rainfall Accumulation Probabilities";
+include("$rootpath/include/header.php"); 
+ include("$rootpath/include/forms.php"); ?>
+
+<p><h3 class="heading">Rainfall Accumulation Probabilities</h3><p>
+
+<div class="text">
+<h3 class="subtitle">Information</h3><p>
+This application charts out rainfall accumulation probabilities between 
+two dates of the year and a site of your choice.  The chart may take a 
+few seconds to load, so please be patient.
+
+<form name="ddd" method="GET">
+<table border=1 cellspacing=0 cellpadding=3>
+<tr>
+ <th>Station</th><td></td><th>Month</th><th>Day</th><td></td></tr>
+<tr>
+<td rowspan="2">
+<SELECT name="stationid">
+<?php
+        for(reset($cities); $key = key($cities); next($cities))
+        {
+                print("<option value=\"" . $cities[$key]["id"] ."\"");
+                if ($cities[$key]["id"] == $stationid) print(" SELECTED ");
+
+                print(">" . $cities[$key]["city"] . "\n");
+        }
+?>
+</SELECT>
+</td>
+<td>Start Date:</td>
+<th><?php echo monthSelect($smonth, "smonth"); ?></th>
+<th><?php echo daySelect($sday, "sday"); ?></th>
+<td rowspan="2"><input type="submit" value="Gen Chart"></form></tr>
+</tr>
+
+<tr>
+<td>End Date:</td>
+<th><?php echo monthSelect($emonth, "emonth"); ?></th>
+<th><?php echo daySelect($eday, "eday"); ?></th>
+</tr>
+
+</table>
+
+<p>
+<img src="<?php echo $uri; ?>">
+
+</div>
+
+<?php include("$rootpath/include/footer.php"); ?>
