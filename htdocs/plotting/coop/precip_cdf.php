@@ -61,7 +61,7 @@ $h95 = -99;
 $i=0;
 for ($r=$lowVal; $r <= $hiVal; $r=$r+0.01)
 {
-  $xdata[] = $r;
+  $xdata[] = sprintf("%.2f", $r);
   $s = sprintf("%.2f",$r);
   if (array_key_exists( $s, $data)) $running -= $data[$s];
   $c = ($running / $rowcount) * 100.0;
