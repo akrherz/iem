@@ -115,7 +115,19 @@
 'SMSS2' => array("short" => "Mission, SD", "city" => "Mission, SD", "id" =>  "SMSS2"),  
 'SHUS2' => array("short" => "Huron, SD", "city" => "Huron, SD", "id" =>  "SHUS2"),
 'SYAS2' => array("short" => "Yankton, SD", "city" => "Yankton, SD", "id" =>  "SYAS2"), 
-'SHII4' => array("short" => "Hull, IA", "city" => "Hull, IA", "id" =>  "SHII4")
+'SHII4' => array("short" => "Hull, IA", "city" => "Hull, IA", "id" =>  "SHII4"),
+
+"SBLM5" => array("short" => "Albert Lea","city" => "Albert Lea", "id" => "SBLM5", "lat" => "43.6431", "lon" => "-93.3919", "network" => "KIMT", "county" => "Freeborn", "climate_site" => "none"),
+"SASM5" => array("short" => "Austin","city" => "Austin", "id" => "SASM5", "lat" => "43.6623", "lon" => "-92.9522", "network" => "KIMT", "county" => "Mower", "climate_site" => "none"),
+"SCCI4" => array("short" => "Charles City","city" => "Charles City", "id" => "SCCI4", "lat" => "43.068", "lon" => "-92.6722", "network" => "KIMT", "county" => "Floyd", "climate_site" => "ia1402"),
+"SCKI4" => array("short" => "Clear Lake","city" => "Clear Lake", "id" => "SCKI4", "lat" => "43.1399", "lon" => "-93.3683", "network" => "KIMT", "county" => "Cerro Gordo", "climate_site" => "ia5235"),
+"SCQI4" => array("short" => "Cresco","city" => "Cresco", "id" => "SCQI4", "lat" => "43.3761", "lon" => "-92.1031", "network" => "KIMT", "county" => "Howard", "climate_site" => "ia1954"),
+"SFCI4" => array("short" => "Forest City","city" => "Forest City", "id" => "SFCI4", "lat" => "43.2657", "lon" => "-93.6491", "network" => "KIMT", "county" => "Winnebago", "climate_site" => "ia2977"),
+"SKWI4" => array("short" => "Kanawha","city" => "Kanawha", "id" => "SKWI4", "lat" => "42.93682", "lon" => "-93.78675", "network" => "KIMT", "county" => "Hancock", "climate_site" => "ia4308"),
+"SLEM5" => array("short" => "LeRoy","city" => "LeRoy", "id" => "SLEM5", "lat" => "43.5131", "lon" => "-92.5095", "network" => "KIMT", "county" => "Mower", "climate_site" => "none"),
+"SMYI4" => array("short" => "Mason City","city" => "Mason City", "id" => "SMYI4", "lat" => "43.1506", "lon" => "-93.1691", "network" => "KIMT", "county" => "Cerro Gordo", "climate_site" => "ia5230"),
+"SOAI4" => array("short" => "Osage","city" => "Osage", "id" => "SOAI4", "lat" => "43.277", "lon" => "-92.8102", "network" => "KIMT", "county" => "Mitchell", "climate_site" => "ia6305"),
+
 );
 
 $Sconv = array(
