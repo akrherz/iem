@@ -84,11 +84,6 @@
         <Title>Rainfall Yesterday</Title>
         <SRS>EPSG:26915</SRS>
     </Layer>
-    <Layer queryable="0" opaque="0" cascaded="0">
-        <Name>counties</Name>
-        <Title>Iowa Counties</Title>
-        <SRS>EPSG:26915</SRS>
-    </Layer>
   </Layer>
 </Capability>
 </WMT_MS_Capabilities>
