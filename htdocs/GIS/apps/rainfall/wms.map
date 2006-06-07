@@ -327,23 +327,4 @@ LAYER
 	END
 END
 
-LAYER
-  NAME counties
-  STATUS ON
-  TYPE POLYGON
-  DUMP true
-  DATA shape/ia/counties_ia.shp
-  METADATA 
-    "wms_title" "Iowa Counties"
-     "wms_srs" "EPSG:26915"
-  END
-  PROJECTION
-    "init=epsg:26915"
-  END
-  CLASS
-    COLOR -1 -1 -1
-    OUTLINECOLOR 0 0 0 
-  END
-END
-
 END
