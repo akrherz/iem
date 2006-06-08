@@ -1,5 +1,6 @@
 <?php
         $Scities = array(
+"SSTI4" => array("short" => "Stuart", "city" => "Stuart", "id" => "SSTI4"),
 "SLKS2" => array("short" => "Clear Lake", "city" => "Clear Lake, SD", "id" => "SLKS2"),
 "SEKS2" => array("short" => "Elkton", "city" => "Elkton, SD", "id" => "SEKS2"),
 "SALS2" => array("short" => "Alcester", "city" => "Alcester, SD", "id" => "SALS2"),
@@ -199,6 +200,7 @@ $Sconv = array(
 170 => 'SMDI4',
 172 => 'SUNI4',
 173 => 'STQI4',
+239 => 'SSTI4',
  1 => 'SPIS2', 
 49 => 'SWAS2',  
  9 => 'SRAS2',
@@ -317,6 +319,7 @@ $SconvBack = array(
 'SMDI4' => '170',
 'SUNI4' => '172',
 'STQI4' => '173',
+'SSTI4' => '239',
 'SPIS2'=>  '1',
 'SWAS2'=> '49',  
 'SRAS2'=>  '9',
