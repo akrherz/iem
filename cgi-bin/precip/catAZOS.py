@@ -25,12 +25,11 @@ def doHeader():
   <title>IEM | Hourly Precip Grid</title>
 </head>
 <body bgcolor="white">
-<a href="/index.php">Iowa Mesonet</a> > 
-<a href="/climate/">Climatology</a> >
+<a href="/index.php">Iowa Mesonet</a> &gt;
+<a href="/climate/">Climatology</a> &gt;
 Hourly Precipitation [ASOS/AWOS]
 
 """
-  print '<br>* This page usually takes 10-20 seconds to load\n'
   print '<h3 align="center">Hourly Precip [inches] Grid</h3>'
   form = cgi.FormContent()
   try:
@@ -132,7 +131,7 @@ def Main():
     valid = '"+td+" 17:00' or valid = '"+td+" 18:00' or \
     valid = '"+td+" 19:00' or valid = '"+td+" 20:00' or \
     valid = '"+td+" 21:00' or valid = '"+td+" 22:00' or \
-    valid = '"+td+" 23:00' or valid = '"+tm+" 00:00'  "
+    valid = '"+td+" 23:00' or valid = '"+tm+" 00:00' "
 
   rs = ""
   try:
