@@ -7,7 +7,7 @@
                 ORDER by valid DESC LIMIT 1";
   $result = pg_exec($connection, $query1);
   $row = @pg_fetch_array($result,0);
-  $foid = $row["oid"];
+  $foid = intval($row["oid"]);
   $good = intval($row["good"]);
   $bad = intval($row["bad"]);
   /* Hehe, check for a IEM vote! */
