@@ -7,11 +7,11 @@
                 ORDER by valid DESC LIMIT 1";
   $result = pg_exec($connection, $query1);
   $row = @pg_fetch_array($result,0);
-  $foid = intval($row["oid"]);
+  $foid = $row["oid"];
   $good = intval($row["good"]);
   $bad = intval($row["bad"]);
   /* Hehe, check for a IEM vote! */
-  if (array_key_exists('foid', $_SESSION) && intval($_SESSION["foid"]) == $foid)
+  if (array_key_exists('foid', $_SESSION) && $_SESSION["foid"] == $foid)
   {
 
   } elseif (isset($_GET["feature_good"]))
