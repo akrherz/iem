@@ -15,7 +15,7 @@ $iem = new IEMAccess();
 
 $climate_site = $cities[$station]["climate_site"];
 
-$q = "SELECT pday, extract(day from day) as day from summary 
+$q = "SELECT pday, extract(day from day) as day from summary_$year
 		WHERE station = '$station' and extract(month from day) = $month 
 		ORDER by day ASC";
 $rs = $iem->query($q);
