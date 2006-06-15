@@ -268,13 +268,6 @@ class SimpleLinearRegression {
     return $Probability;
   }
 
-  function getStudentProb($T, $df) {    
-    $Probability = 0.0;   
-    $cmd = "echo 'dt($T, $df)' | $this->RPath --slave";   
-    $result = shell_exec($cmd);    
-    list($LineNumber, $Probability) = explode(" ", trim($result));    
-    return $Probability;
-  }
 
   function getInverseStudentProb($alpha, $df) {    
     $InverseProbability = 0.0;   
