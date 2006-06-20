@@ -84,7 +84,7 @@ $cameras = Array(
 		"iserviceurl" => "http://www.iowatelecom.com/",
 		"ip" => "69.66.29.140", "county" => "Calhoun"),
   "SPKI4" => Array("sts" => mktime(11,0,0, 7,2,2005), "ets" => time(),
-		"name" => "Saylorville Lake", "active" => true,
+		"name" => "Saylorville Lake", "active" => false,
 		"ip" => "67.41.111.192", "county" => "Polk"),
   "STQI4" => Array("sts" => mktime(0,0,0, 5,18,2005), "ets" => time(),
 		"name" => "Tama", "active" => true,
