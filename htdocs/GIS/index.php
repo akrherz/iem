@@ -80,6 +80,9 @@ back to 1951.</li>
  <li><a href="/data/gis/shape/4326/us/current_ww.zip">Current NWS Warnings</a>
  <br />A shapefile of active county based and polygon based weather warnings. 
 This file is updated every 5 minutes at 0,5,10 ... after the hour.</li>
+ <li><a href="/data/gis/shape/4326/us/current_nexattr.zip">Current NEXRAD Storm Attributes</a>
+  <br />Point shapefile generated every minute containing a summary of
+   NEXRAD storm attributes.</li>
  <li><a href="/data/gis/shape/4326/iem/coopobs.zip">NWS COOP Observations</a>
    <br>Today's climate reports</li>
  <li><a href="/data/gis/">Browse</a> GIS data stored on the IEM website.</li>
