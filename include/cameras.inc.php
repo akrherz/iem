@@ -17,7 +17,7 @@ $cameras = Array(
 
   "SCSI4" => Array("sts" => mktime(0,0,0, 9,20,2003), 
 					"ets" => time(),
-		"name" => "Creston", "active" => false,
+		"name" => "Creston", "active" => true,
 		"iservice" => "Iowa Telecom.", 
 		"iserviceurl" => "http://www.iowatelecom.com/",
 		"ip" => "69.66.29.70", "county" => "Union"),
