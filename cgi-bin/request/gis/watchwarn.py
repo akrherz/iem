@@ -5,10 +5,10 @@
 import shapelib, dbflib, mx.DateTime, zipfile, os, sys, shutil, cgi
 from pyIEM import wellknowntext, iemdb
 
-#i = iemdb.iemdb()
-#mydb = i["postgis"]
-import pg
-mydb = pg.connect('postgis', 'mesonet-db1.agron.iastate.edu',user='nobody')
+i = iemdb.iemdb()
+mydb = i["postgis"]
+#import pg
+#mydb = pg.connect('postgis', 'mesonet-db1.agron.iastate.edu',user='nobody')
 
 mydb.query("SET TIME ZONE 'GMT'")
 
