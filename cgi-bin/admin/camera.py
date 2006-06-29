@@ -17,10 +17,12 @@ def printForm(selcam):
 	print '<form method="GET" action="camera.py">'
 	print "<b>Select Camera:</b>"
 	print '<select name="id">'
-	for cam in cameras.cams.keys():
+	k = cameras.cams.keys()
+	k.sort()
+	for cam in k:
 		print '<option value="'+ cam +'" ',
 		if (cam == selcam): print " SELECTED ",
-		print '>'+ st.sts[cam]['name']
+		print '>[%s] %s' % (cam, st.sts[cam]['name'])
 	print '</select><input type="submit"></form>'
 
 def printInterface(cam):
