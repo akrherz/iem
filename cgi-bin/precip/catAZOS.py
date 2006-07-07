@@ -156,7 +156,8 @@ def Main():
       except KeyError:
         continue
 
-  stData['MXO'] = ["M"]*25
+  if (ts < mx.DateTime.DateTime(2006,6,1)):
+    stData['MXO'] = ["M"]*25
   stData['IIB'] = ["M"]*25
   stData['VTI'] = ["M"]*25
   stData['MPZ'] = ["M"]*25
