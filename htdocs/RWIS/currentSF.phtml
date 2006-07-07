@@ -6,7 +6,7 @@ $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
 ?>
 
 <?php 
- $TITLE = "IEM | RWIS | SF Currents";
+ $TITLE = "IEM | RWIS | Surface Currents";
  $REFRESH = "<meta http-equiv=\"refresh\" content=\"600;
  URL=currentSF.phtml?sortcol=$sortcol&network=$network\">";
  $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
@@ -117,17 +117,19 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
   $mydata = Array();
 
   while (list($key, $iemob) = each($rwis) ){
+
     $mydata[$key] = $iemob->db;
     $mydata[$key]["ts"] = $iemob->ts;
 
     $t = Array($mydata[$key]['tsf0'], $mydata[$key]['tsf1'], 
       $mydata[$key]['tsf2'], $mydata[$key]['tsf3']);
     arsort($t);
-    //if ($key == "RSID") print_r($t);
-    while (min($t) == -99.99){  
+    
+    while (min($t) == -99){  
       $ba = array_pop($t); 
       if (sizeof($t) == 0) break;
-      }
+    }
+    
     asort($t);
     if (sizeof($t) > 0){
       while ((max($t) - min($t)) > 20){ $ba = array_pop($t); }
