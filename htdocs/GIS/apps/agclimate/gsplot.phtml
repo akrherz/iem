@@ -9,25 +9,6 @@ $emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: 10;
 $sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
 $eday = isset($_GET["eday"]) ? $_GET["eday"]: 1;
 
-$gs_start = Array(
-  1998 => mktime(0,0,0,5,1,1998),
-  1999 => mktime(0,0,0,5,1,1999),
-  2000 => mktime(0,0,0,5,1,2000),
-  2001 => mktime(0,0,0,5,1,2001),
-  2002 => mktime(0,0,0,5,1,2002),
-  2003 => mktime(0,0,0,5,1,2003),
-  2004 => mktime(0,0,0,5,1,2004),
-  2005 => mktime(0,0,0,5,1,2005) );
-$gs_end = Array(
-  1998 => mktime(0,0,0,10,1,1998),
-  1999 => mktime(0,0,0,10,1,1999),
-  2000 => mktime(0,0,0,10,1,2000),
-  2001 => mktime(0,0,0,10,16,2001),
-  2002 => mktime(0,0,0,10,7,2002),
-  2003 => mktime(0,0,0,10,1,2003),
-  2004 => mktime(0,0,0,10,1,2004),
-  2005 => time() );
-
 if (strlen($var) == 0)  $var = "gdd50";
 if (strlen($year) == 0)  $year = 2005;
 if (strlen($smonth) > 0 && strlen($sday) > 0)
@@ -35,7 +16,7 @@ if (strlen($smonth) > 0 && strlen($sday) > 0)
 if (strlen($emonth) > 0 && strlen($eday) > 0)
   $gs_end[$year] = mktime(0,0,0,$emonth,$eday,$year);
 
-$round = Array("prec" => 2, "gdd50" => 0, "gdd32" => 0, "et" => 2, "sgdd50" => 0, "sdd86" => 0);
+$round = Array("prec" => 2, "gdd50" => 0, "gdd32" => 0, "et" => 2, "sgdd50" => 0, "sdd86" => 0, "srad" => 0);
 
 $today = time();
 if ($gs_end[$year] >= $today)  $gs_end[$year] = $today;
@@ -66,6 +47,9 @@ window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,s
 
 
 <h3 class="heading">Growing Season Charts</h3><p>
+
+
+
 <div class="text">
 <form method="GET" action="gsplot.phtml">
 <table> <tr>
@@ -82,6 +66,7 @@ window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,s
      <option value="et" <?php if($var == "et") echo "SELECTED"; ?>>Potential Evapotranspiration</option>
      <option value="prec" <?php if($var == "prec") echo "SELECTED"; ?>>Precipitation</option>
      <option value="sgdd50" <?php if($var == "sgdd50") echo "SELECTED"; ?>>Soil Growing Degree Days (base=50)</option>
+     <option value="srad" <?php if($var == "srad") echo "SELECTED"; ?>>Solar Radiation (langleys)</option>
      <option value="sdd86" <?php if($var == "sdd86") echo "SELECTED"; ?>>Stress Degree Days (base=86)</option>
     </select></td>
   <td rowspan=2><?php echo yearSelect(1998, $year, "year"); ?></td>
@@ -134,6 +119,7 @@ $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
   "gdd32" => "Growing Degree Days (base=32)",
   "et" => "Potential Evapotranspiration",
   "prec" => "Precipitation",
+  "srad" => "Solar Radiation (langleys)",
   "sgdd50" => "Soil Growing Degree Days (base=50)",
   "sdd86" => "Stress Degree Days (base=86)"
 );
@@ -144,6 +130,7 @@ $rnd = Array("gdd50" => 0,
   "gdd32" => 0,
   "et" => 2, "c11" => 2,
   "prec" => 2,
+  "srad" => 0,
   "sgdd50" => 0,
   "sdd86" => 0);
 
@@ -289,7 +276,20 @@ else if ($var == 'et') {
     $stid = $row['station'];
     $vals[$stid] = $row['et'];
   }
-}  
+}
+/* ------------------------------------------------------- */
+else if ($var == 'srad') {
+  $q = "SELECT station, sum(c80) as srad
+     from t${year}_daily WHERE valid >= '". $sstr ."'
+     and valid < '". $estr ."' GROUP by station";
+
+  $vals = Array();
+  $rs =  pg_exec($c, $q);
+  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    $stid = $row['station'];
+    $vals[$stid] = $row['srad'];
+  }
+}
 /* ------------------------------------------------------- */
 else if ($var == 'prec') {
   $q = "SELECT station, sum(c90) as prec
@@ -360,17 +360,11 @@ $url = $img->saveWebImage();
 <center><font class="bluet">Plot</font></center>
 <table>
 <tr><td valign="top">
-<table width="100%">
-<tr>
-  <td><h3 class="heading">Dynamic Historical Data:</h3></td></tr>
-<tr>
-  <td class="subtitle">
-    <b><a href="dayplot.phtml">Daily Data Plots</a>
-    <br><b>Growing Season Plots</b>
-  </td></tr>
-</table>
+<h3 class="heading">Dynamic Historical Data:</h3>
+<a href="dayplot.phtml">Daily Data Plots</a>
+<br /><b>Growing Season Plots</b>
 
-  <p>Open this plot in a <a href="javascript:new_window('image.phtml?f=<?php echo $url; ?>');">new window</a> for comparison with other plots. Once the
+<p>Open this plot in a <a href="javascript:new_window('image.phtml?f=<?php echo $url; ?>');">new window</a> for comparison with other plots. Once the
 image is loaded up in another window, you can modify this plots 
 parameters.
 
