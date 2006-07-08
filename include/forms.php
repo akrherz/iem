@@ -37,7 +37,9 @@ function hourSelect($selected, $name){
 function gmtHourSelect($selected, $name){
   echo "<select name='".$name."'>\n";
   for ($i=0; $i<24;$i++) {
-    echo "<option value='".$i."'>". $i ." Z</option>";
+    echo "<option value='".$i."' ";
+    if ($i == intval($selected)) echo "SELECTED";
+    echo ">". $i ." Z</option>";
   }
   echo "</select>\n";
 }
