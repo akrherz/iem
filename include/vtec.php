@@ -1,5 +1,5 @@
 <?php
-$vtec_phenomea = Array(
+$vtec_phenomena = Array(
   'BZ' => 'Blizzard',
   'WS' => 'Winter Storm',
   'WW' => 'Winter Weather',
