@@ -7,23 +7,10 @@ if ($isarchive || ($imgi != 0) )
 {
   /* Set us ahead to GMT and then back into the archive */
   $ts = $basets + $tzoff - ($imgi * 60 * $interval );
-  $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $ts) ."GIS/uscomp/n0r_". date('YmdHi', $ts) .".png";
-  if (! is_file($fp)) 
-    echo "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
-  else
-  {
-    if (! is_file("/tmp/". date('YmdHi', $ts) .".png"))
-    {
-    copy($fp, "/tmp/". date('YmdHi', $ts) .".png");
-    if (! is_file("/mesonet/ARCHIVE/data/". date('Y/m/d', $ts) ."/GIS/uscomp/n0r.tfw"))
-    {
-      copy("/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tfw", "/tmp/". date('YmdHi', $ts) .".wld");
-    }else{
-      copy("/mesonet/ARCHIVE/data/". date('Y/m/d', $ts) ."/GIS/uscomp/n0r.tfw", "/tmp/". date('YmdHi', $ts) .".wld");
-    }
-    }
-  }
-  $radfile = "/tmp/". date('YmdHi', $ts) .".png";
+  $radfile = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $ts) ."GIS/uscomp/n0r_". date('YmdHi', $ts) .".png";
+  if (! is_file($radfile)) {
+    echo "<br /><i><b>NEXRAD composite not available: $radfile</b></i>";
+  } 
 } else 
 {
   $ts = filemtime("/home/ldm/data/gis/images/4326/USCOMP/n0r_".$imgi.".png") - ($imgi * 300);
