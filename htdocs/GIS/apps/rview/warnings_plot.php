@@ -1,6 +1,22 @@
 <?php
 include_once("../../../../config/settings.inc.php");
 global $_DATABASES;
+/**
+Variables that need to be set before including this
+$isarchive -  is this an archived call?
+$imgi - for loop sequence
+$tzoff - time zone offset
+$interval - minutes between frames
+$ts - GMT valid time
+$width - image width
+$height - image height
+$zoom - km zoom extent
+$lat0 $lon0 - where shall we center it!
+$layers - array of layers to map out
+$lsrwindow - how far do we look out
+$lsrlook - +/-/0
+ */
+
 
 /* If this is an archive request, or if it is for not current images */
 if ($isarchive || ($imgi != 0) )
@@ -29,9 +45,7 @@ else
 }
 //$db_ts = strftime("%Y-%m-%d %H:%M:00+00", $ts + 5 *3600);
 $db_ts = strftime("%Y-%m-%d %H:%M:00+00", $ts );
-if (strlen($site) == 0){
-  $site = "DMX";
-}
+
 
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 $map->set("width", $width);
@@ -200,7 +214,7 @@ $surface->draw($img);
 $airtemps->draw($img);
 
 $map->embedScalebar($img);
-mktitle($map, $img, "                  IEM NEXRAD composite base reflect valid: $d");
+mktitle($map, $img, "                 $maptitle $d");
 $map->drawLabelCache($img);
 mklogolocal($map, $img);
 

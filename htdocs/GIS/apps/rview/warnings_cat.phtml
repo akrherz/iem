@@ -1,30 +1,121 @@
 <?php
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/vtec.php");
+include("$rootpath/include/wfoLocs.php");
+include('lib.php');
+putenv("TZ=GMT");
+
+function determine_time_base($t)
+{
+  $year = date("Y", $t);
+  $month = date("m", $t);
+  $day = date("d", $t);
+  $hour = date("H", $t);
+  $m = date("i", $t);
+
+  if ($m >= 55) $ma = "55";
+  else if ($m >= 50) $ma = "50";
+  else if ($m >= 45) $ma = "45";
+  else if ($m >= 40) $ma = "40";
+  else if ($m >= 35) $ma = "35";
+  else if ($m >= 30) $ma = "30";
+  else if ($m >= 25) $ma = "25";
+  else if ($m >= 20) $ma = "20";
+  else if ($m >= 15) $ma = "15";
+  else if ($m >= 10) $ma = "10";
+  else if ($m >= 5) $ma = "05";
+  else $ma = "00";
+
+  return mktime($hour, $ma, 0, $month, $day, $year);
+}
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 0;
 
 if (isset($_GET["oid"]) ) {
   $oid = isset($_GET["oid"]) ? $_GET["oid"] : 0;
-  $query = "SELECT * from warnings_$year WHERE oid = $oid";
+  $query = "SELECT *, x( centroid(geom) ) as lon0, y( centroid(geom)) as lat0 from warnings_$year WHERE oid = $oid";
 } else {
   $wfo = isset($_GET["wfo"]) ? $_GET["wfo"] : die("WFO Not Defined!");
-  $eventid = isset($_GET["eventid"]) ? $_GET["eventid"] : die("eventid not defined");
+  $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : die("eventid not defined");
   $phenomena = isset($_GET["phenomena"]) ? $_GET["phenomena"] : die("phenomena not defined");
   $significance = isset($_GET["significance"]) ? $_GET["significance"] : "W";
-  $query = "SELECT * from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and eventid = $eventid and significance = '$significance'";
+  $query = "SELECT *, x( centroid(geom) ) as lon0, y( centroid(geom)) as lat0 from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and eventid = $eventid and significance = '$significance'";
 }
 
 include("$rootpath/include/header.php");
 
 $connect = iemdb("postgis");
+pg_exec($connect, "SET TIME ZONE 'GMT'");
 $result = pg_exec($connect, $query);
 
 if (pg_num_rows($result) == 0) die("Could not find this product in the database!");
 $row = pg_fetch_array($result, 0);
 
+/* Determine time base, 4 minutes from product issuance */
+$issue = strtotime(substr($row["issue"],0,16)) + 240;
+$cow_issue = strtotime(substr($row["issue"],0,16)) - 21600;
+$cow_expire = strtotime(substr($row["issue"],0,16)) + 21600;
 
-echo "<p><pre>". str_replace("\001", "", $row["report"]) ."</pre>";
+$cow_url = sprintf("%s/cow/?syear=%s&smonth=%s&sday=%s&shour=%s&eyear=%s&emonth=%s&eday=%s&ehour=%s&wfo=%s&wtype[]=TO&wtype[]=SV&hail=0.75&ltype[]=TO&ltype[]=SV", $rooturl, date("Y", $cow_issue), date("m", $cow_issue),date("d", $cow_issue),date("H", $cow_issue), date("Y", $cow_expire), date("m", $cow_expire), date("d", $cow_expire), date("H", $cow_expire), $row["wfo"]);
+
+$cow = "";
+if ($row["significance"] == "W") $cow = "<li><a href=\"$cow_url\">Polygon Verification</a></li>";
+
+$gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=%s&minute1=0&month2=%s&day2=%s&hour2=%s&minute2=0",  date("Y", $cow_issue), date("m", $cow_issue),date("d", $cow_issue),date("H", $cow_issue), date("m", $cow_expire), date("d", $cow_expire), date("H", $cow_expire) );
+
+$radar_url = sprintf("%s/GIS/apps/rview/warnings.phtml?archive=yes&tz=UTC&cu=0&year=%s&month=%s&day=%s&hour=%s&minute=%s&tzoff=0&sortdir=DESC&loop=0&sortcol=issue&c=yes&lon0=%s&lat0=%s", $rooturl, date("Y", $issue), date("m", $issue), date("d", $issue), date("H", $issue), date("i", $issue), $row["lon0"], $row["lat0"]);
+
+$next_eventid = $eventid + 1;
+$last_eventid = $eventid - 1;
+$next_link = sprintf("<a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s\">Next</a> ", $rooturl, $year, $row["wfo"], $phenomena, $next_eventid, $significance);
+
+$last_link = "";
+if ($last_eventid > 0)
+  $last_link = sprintf(" <a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s\">Previous</a> ", $rooturl, $year, $row["wfo"], $phenomena, $last_eventid, $significance);
+
+
+$ts = determine_time_base($issue);
+$basets = $ts;
+$isarchive = 1;
+$imgi = 0;
+$tzoff = 0;
+$interval = 5;
+$width = 400;
+$height = 300;
+$zoom = 100;
+$lat0 = $row["lat0"];
+$lon0 = $row["lon0"];
+$layers = array("uscounties", "watches", "warnings", "nexrad");
+$lsrwindow = 0;
+$lsrlook = 0;
+$maptitle = "IEM NEXRAD valid:";
+dl($mapscript);
+include("warnings_plot.php");
+
+echo "<table border=\"2\" cellpadding=\"5\" cellspacing=\"0\">
+<tr><td valign=\"top\">
+<h4>VTEC Summary:</h4>
+<table>
+<tr><td>NWS WFO:</td><td>". $wfos[$row["wfo"]]["city"] ."</td></tr>
+<tr><td>Event ID:</td><td>$last_link ". $row["eventid"] ." $next_link</td></tr>
+<tr><td>Phenomena:</td><td>". $vtec_phenomena[ $row["phenomena"] ] ."</td></tr>
+<tr><td>Significance:</td><td>". $vtec_significance[ $row["significance"] ] ."</td></tr>
+<tr><td>Status:</td><td>". $vtec_status[ $row["status"] ] ."</td></tr>
+<tr><td>Issued:</td><td>". substr($row["issue"],0,16) ." GMT</td></tr>
+<tr><td>Expires:</td><td>". substr($row["expire"],0,16) ." GMT</td></tr>
+</table>
+<h4>Links:</h4>
+<ul>
+ $cow
+ <li><a href=\"$gis_url\">Download Shapefile of Warnings</a></li>
+ <li><a href=\"$radar_url\">Interactive RADAR Display</a></li>
+</ul>
+</td><td><img src=\"$url\"></td></tr>
+</table>";
+
+/* Print out the raw report */
+echo "<h4>Text Product:</h4><pre>". str_replace("\001", "", $row["report"]) ."</pre>";
 
 if (strlen($row["svs"]) > 0 ) 
 {
