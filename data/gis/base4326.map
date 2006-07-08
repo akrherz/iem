@@ -262,6 +262,39 @@ LAYER
 END
 
 
+# USDM!
+LAYER
+  NAME usdm_polygon
+  STATUS OFF
+  TYPE POLYGON
+  DATA /home/ldm/data/gis/shape/4326/us/dm_current.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM "DCAT"
+  CLASS
+    EXPRESSION /0/
+    COLOR 100 0 0
+  END
+  CLASS
+    EXPRESSION /1/
+    COLOR 120 0 0
+  END
+  CLASS
+    EXPRESSION /2/
+    COLOR 160 0 0
+  END
+  CLASS
+    EXPRESSION /3/
+    COLOR 200 0 0
+  END
+  CLASS
+    EXPRESSION /4/
+    COLOR 255 0 0
+  END
+END
+
+
 # watches
 LAYER
  CONNECTIONTYPE postgis
@@ -541,7 +574,7 @@ LAYER
   END
   CLASSITEM 'phenomena'
   CLASS
-    EXPRESSION /TO|SV/
+    EXPRESSION /TO|SV|MA/
     COLOR -1 -1 -1
     OUTLINECOLOR 255 255 255
 #    SYMBOL 1
