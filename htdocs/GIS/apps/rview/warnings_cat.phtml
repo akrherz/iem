@@ -75,7 +75,7 @@ if ($last_eventid > 0)
   $last_link = sprintf(" <a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s\">Previous</a> ", $rooturl, $year, $row["wfo"], $phenomena, $last_eventid, $significance);
 
 
-$ts = determine_time_base($issue);
+$ts = determine_time_base($issue - 240);
 $basets = $ts;
 $isarchive = 1;
 $imgi = 0;
