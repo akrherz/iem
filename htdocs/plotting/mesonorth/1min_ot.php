@@ -96,7 +96,7 @@ $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 $sensors = Array("Out of Subfloor", "Inbound Top", "Outbound Top", "Room");
-if ($myTime > mktime(0,0,0,7,10,2006)
+if ($myTime > mktime(0,0,0,7,10,2006))
   $sensors = Array("In Air Handler", "Out Air Handler", "Out Floor", "Room");
 
 // Create the linear plot
