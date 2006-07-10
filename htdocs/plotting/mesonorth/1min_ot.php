@@ -1,4 +1,6 @@
 <?php
+include("../../../config/settings.inc.php");
+
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
@@ -50,9 +52,9 @@ while (list ($line_num, $line) = each ($new_contents)) {
 } // End of while
 
 
-include ("/mesonet/php/include/jpgraph/jpgraph.php");
-include ("/mesonet/php/include/jpgraph/jpgraph_line.php");
-include ("/mesonet/php/include/jpgraph/jpgraph_date.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
@@ -93,10 +95,14 @@ $graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
+$sensors = Array("Out of Subfloor", "Inbound Top", "Outbound Top", "Room");
+if ($myTime > mktime(0,0,0,7,10,2006)
+  $sensors = Array("In Air Handler", "Out Air Handler", "Out Floor", "Room");
+
 // Create the linear plot
 $lineplot=new LinePlot($t1, $times);
 if (sizeof($t2) > 0) {
-  $lineplot->SetLegend("Out of Subfloor");
+  $lineplot->SetLegend($sensors[0]);
 } else {
   $lineplot->SetLegend("Room Temp");
 }
@@ -106,19 +112,19 @@ $graph->Add($lineplot);
 if (sizeof($t2) > 0) {
 // Create the linear plot
 $lineplot2=new LinePlot($t2, $times);
-$lineplot2->SetLegend("Inbound Top");
+$lineplot2->SetLegend($sensors[1]);
 $lineplot2->SetColor("blue");
 $graph->Add($lineplot2);
 
 // Create the linear plot
 $lineplot3=new LinePlot($t3, $times);
-$lineplot3->SetLegend("Outbound Top");
+$lineplot3->SetLegend($sensors[2]);
 $lineplot3->SetColor("green");
 $graph->Add($lineplot3);
 
 // Create the linear plot
 $lineplot4=new LinePlot($t4, $times);
-$lineplot4->SetLegend("Room");
+$lineplot4->SetLegend($sensors[3]);
 $lineplot4->SetColor("purple");
 $graph->Add($lineplot4);
 }
