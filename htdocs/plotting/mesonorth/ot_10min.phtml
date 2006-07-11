@@ -4,6 +4,7 @@ $TITLE = "IEM | 1 Minute Time Series";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+$ts = mktime(0,0,0,$month, $day, $year);
 include("$rootpath/include/header.php"); ?>
 <?php include("$rootpath/include/forms.php"); ?>
 
@@ -37,7 +38,7 @@ temperatures.
     }
 
   ?>
-  <?php yearSelect2(2003, $year, "year"); ?>
+  <?php echo yearSelect2(2003, $year, "year"); ?>
 
   <select name="month">
     <option value="01" <?php if ($month == "01") echo "SELECTED"; ?> >January
@@ -73,7 +74,9 @@ temperatures.
 <BR>
 <img src="1min_ot.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
 <BR>
-<img src="battery.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
+<?php if ($ts < mktime(0,0,0,7,9,2006)) { ?>
+  <img src="battery.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
+<?php } ?>
 <BR>
 </td></tr></table></div>
 
