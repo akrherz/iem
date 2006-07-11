@@ -1,5 +1,8 @@
 <?php
 $cameras = Array(
+  "SAGI4" => Array("sts" => mktime(14,0,0,7,11,2006), "ets" => time(),
+                "name" => "Algona", "active" => true,
+                "ip" => "63.86.197.94", "county" => "Kossuth"),
   "SAMI4" => Array("sts" => mktime(16,0,0,4,14,2005), "ets" => time(),
                 "name" => "Ames", "active" => true,
                 "ip" => "129.186.185.31", "county" => "Story"),
