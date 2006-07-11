@@ -1,4 +1,6 @@
 <?php
+include("../../../config/settings.inc.php");
+
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
@@ -48,9 +50,9 @@ while (list ($line_num, $line) = each ($new_contents)) {
 } // End of while
 
 
-include ("/mesonet/php/include/jpgraph/jpgraph.php");
-include ("/mesonet/php/include/jpgraph/jpgraph_line.php");
-include ("/mesonet/php/include/jpgraph/jpgraph_date.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300);

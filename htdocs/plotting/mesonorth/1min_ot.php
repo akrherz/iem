@@ -107,6 +107,7 @@ if (sizeof($t2) > 0) {
   $lineplot->SetLegend("Room Temp");
 }
 $lineplot->SetColor("red");
+$lineplot->SetWeight(2);
 $graph->Add($lineplot);
 
 if (sizeof($t2) > 0) {
@@ -114,18 +115,21 @@ if (sizeof($t2) > 0) {
 $lineplot2=new LinePlot($t2, $times);
 $lineplot2->SetLegend($sensors[1]);
 $lineplot2->SetColor("blue");
+$lineplot2->SetWeight(2);
 $graph->Add($lineplot2);
 
 // Create the linear plot
 $lineplot3=new LinePlot($t3, $times);
 $lineplot3->SetLegend($sensors[2]);
 $lineplot3->SetColor("green");
+$lineplot3->SetWeight(2);
 $graph->Add($lineplot3);
 
 // Create the linear plot
 $lineplot4=new LinePlot($t4, $times);
 $lineplot4->SetLegend($sensors[3]);
-$lineplot4->SetColor("purple");
+$lineplot4->SetColor("black");
+$lineplot4->SetWeight(2);
 $graph->Add($lineplot4);
 }
 
