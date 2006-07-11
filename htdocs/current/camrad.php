@@ -8,7 +8,7 @@ $db_ts = strftime("%Y-%m-%d %H:%M", $ts );
 
 dl($mapscript);
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
-$map->setExtent(-95.1,40.6,-92.4,43.1);
+$map->setExtent(-95.1,40.6,-92.2,43.3);
 $map->set("width", 320);
 $map->set("height", 240);
 
