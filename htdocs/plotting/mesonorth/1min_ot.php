@@ -61,14 +61,14 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 $graph = new Graph(600,500);
 $graph->SetScale("datlin");
 
-$graph->img->SetMargin(65,40,45,60);
+$graph->img->SetMargin(65,20,45,70);
 //$graph->xaxis->SetFont(FONT1,FS_BOLD);
 //$graph->xaxis->SetTickLabels($xlabel);
 //$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(6);
 $graph->xaxis->SetLabelAngle(90);
 //$graph->xaxis->scale->SetDateFormat("h A");
-$graph->xaxis->SetLabelFormatString("h A", true);
+$graph->xaxis->SetLabelFormatString("h:i A", true);
 
 //$graph->yaxis->scale->ticks->SetPrecision(1);
 //$graph->yaxis->scale->ticks->Set(1.2,0.5);
@@ -89,7 +89,7 @@ $graph->yaxis->SetTitle("Temperature [F]");
 
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
-$graph->xaxis->SetTitleMargin(30);
+$graph->xaxis->SetTitleMargin(40);
 //$graph->yaxis->SetTitleMargin(48);
 $graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
