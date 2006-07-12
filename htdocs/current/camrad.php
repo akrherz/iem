@@ -39,15 +39,7 @@ if ($isarchive)
   $fp = "/mesonet/ARCHIVE/data/". gmdate('Y/m/d/', $radts) ."GIS/uscomp/n0r_". gmdate('YmdHi', $radts) .".png";
   if (! is_file($fp))
     echo "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
-  else
-  {
-    if (! is_file("/tmp/". gmdate('YmdHi', $radts) .".png"))
-    {
-     copy($fp, "/tmp/". gmdate('YmdHi', $radts) .".png");
-     copy("/mesonet/ARCHIVE/data/". gmdate('Y/m/d', $radts) ."/GIS/uscomp/n0r.tfw", "/tmp/". gmdate('YmdHi', $radts) .".wld");
-     }
-  }
-  $radfile = "/tmp/". gmdate('YmdHi', $radts) .".png";
+  $radfile = $fp;
   $radar->set("data", $radfile);
 }
 
