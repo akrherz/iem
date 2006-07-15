@@ -28,7 +28,7 @@ if ($method == "geocode")
 	$s = isset($_GET["street"]) ? $_GET["street"] : "100 Main Street";
 	$c = $_GET["city"] .", IA";
 	$data .= "# Request Method: Geocoded $s , $c IA \n";
-	$u = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/geocoder.py?street=%s&city=%s", $s, $c);
+	$u = sprintf("http://localhost/cgi-bin/geocoder.py?street=%s&city=%s", $s, $c);
 	$res = trim( file_get_contents(str_replace(" ", "%20", $u)) );
 	//echo "GEOCODER RESPONSE:::$res::: $u :::";
 	if (substr($res,0,5) != "ERROR")
