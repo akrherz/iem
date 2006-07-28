@@ -32,7 +32,7 @@ $rwis = $iem->getNetwork("WTM");
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "sknt" => "Wind Speed [knots]", "wdir" => "Wind Direction [deg]",
-  "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
+  "pday" => "Precip Accum [inches]", "max_gust" => "Wind Gust [knots]",
   "ts" => "Observation Time [local]", "feel" => "Feels Like",
   "min_tmpf" => "Today's Low Temperature",
   "max_tmpf" => "Today's High Temperature",
@@ -74,7 +74,7 @@ a column to sort it.<br>\n";
   <th><a href="wtm.phtml?sortcol=relh">RH%</a></th>
   <th><a href="wtm.phtml?sortcol=sknt">Speed</a></th>
   <th><a href="wtm.phtml?sortcol=drct">Direction</a></th>
-  <th><a href="wtm.phtml?sortcol=max_sknt">Gust</a>
+  <th><a href="wtm.phtml?sortcol=max_gust">Gust</a>
     @<a href="wtm.phtml?sortcol=gtim">Time</a></th>
 </tr></thead><tbody>
   
@@ -176,7 +176,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
  <td><a href="<?php echo $c; ?>feel');">Plot</a></td>
  <td><a href="<?php echo $c; ?>relh');">Plot</a></td>
  <td colspan=2><a href="<?php echo $c; ?>barb');">Plot</a></td>
- <td><a href="<?php echo $c; ?>max_sknt');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>max_gust');">Plot</a></td>
 </tr></tfoot>
 </table>
 <input type="submit" value="Add to Favorites">
