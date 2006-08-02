@@ -50,7 +50,7 @@ END
 LAYER
   NAME kcci
   STATUS ON
-  DATA "/mesonet/data/gis/images/26915/KCCI/KCCI_N0R_0.tif"
+  DATA "/home/ldm/data/gis/images/26915/KCCI/KCCI_N0R_0.png"
   TYPE RASTER
   PROJECTION
     "init=epsg:26915"
@@ -68,10 +68,10 @@ LAYER
   NAME DMX_N0R_IMG
   GROUP DMX_N0R
   STATUS ON
-  DATA "/mesonet/data/gis/images/26915/DMX/DMX_N0R_0.tif"
+  DATA "/home/ldm/data/gis/images/4326/DMX/n0r_0.tif"
   TYPE RASTER
   PROJECTION
-    "init=epsg:26915"
+    "init=epsg:4326"
   END
   METADATA
     "wms_title" "DMX RADAR N0R"
@@ -110,10 +110,10 @@ LAYER
   NAME DVN_N0R_IMG
   GROUP DVN_N0R
   STATUS ON
-  DATA "/mesonet/data/gis/images/26915/DVN/DVN_N0R_0.tif"
+  DATA "/home/ldm/data/gis/images/4326/DVN/n0r_0.tif"
   TYPE RASTER
   PROJECTION
-    "init=epsg:26915"
+    "init=epsg:4326"
   END
   METADATA
     "wms_title" "DVN RADAR N0R"
