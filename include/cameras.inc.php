@@ -59,7 +59,7 @@ $cameras = Array(
 		"iserviceurl" => "http://www.nwk.usace.army.mil/rathbun/rathbun_home.htm",
 		"ip" => "65.248.192.73", "county" => "Appanoose"),
   "SKNI4" => Array("sts" => mktime(17,0,0,9, 26,2005), "ets" => time(),
-		"name" => "Knoxville", "active" => true,
+		"name" => "Knoxville", "active" => false,
 		"ip" => "69.66.33.2", "county" => "Marion"),
   "SNEI4" => Array("sts" => mktime(19,0,0, 4,16,2004), "ets" => time(),
 		"name" => "Newton", "active" => true,
