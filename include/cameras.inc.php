@@ -15,7 +15,7 @@ $cameras = Array(
 		"iserviceurl" => "http://www.dybb.com/",
 		"ip" => "216.203.109.40", "county" => "Carroll"),
   "SCHI4" => Array("sts" => mktime(14,0,0,6,11,2006), "ets" => time(),
-        "name" => "Chariton", "active" => true, "removed" => false,
+        "name" => "Chariton", "active" => false, "removed" => false,
         "ip" => "69.66.60.199", "county" => "Lucas"),
   "SCGI4" => Array("sts" => mktime(13,0,0,6,27,2006), "ets" => time(),
         "name" => "Clarion", "active" => true, "removed" => false,
