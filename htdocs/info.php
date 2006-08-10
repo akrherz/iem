@@ -21,11 +21,11 @@ include("$rootpath/include/header.php"); ?>
 <p>
 <h3 class="subtitle">Station Locations: (graphical)</h3>
 <ul>
-	<li><a href="images/asosLocs.jpg">ASOS Locations</a></li>
-	<li><a href="images/awosLocs.jpg">AWOS Locations</a></li>
-	<li><a href="images/rwis_sites.gif">RWIS Locations</a></li>
-	<li><a href="images/coop_sites.gif">COOP Locations</a></li>
-	<li><a href="images/isuag_sites.gif">ISU Agclimate Locations</a></li>
+	<li><a href="<?php echo $rooturl; ?>/info/network.phtml?network=IA_ASOS">ASOS Locations</a></li>
+	<li><a href="<?php echo $rooturl; ?>/info/network.phtml?network=AWOS">AWOS Locations</a></li>
+	<li><a href="<?php echo $rooturl; ?>/info/network.phtml?network=IA_RWIS">RWIS Locations</a></li>
+	<li><a href="<?php echo $rooturl; ?>/info/network.phtml?network=IA_COOP">COOP Locations</a></li>
+	<li><a href="<?php echo $rooturl; ?>/info/network.phtml?network=ISUAG">ISU Agclimate Locations</a></li>
 </ul>
 
 </td><td width="50%" valign="top">
