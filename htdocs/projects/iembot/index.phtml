@@ -1,65 +1,78 @@
 <?php
  include("../../../config/settings.inc.php");
- $TITLE = "IEM | Projects";
+ $TITLE = "IEM Projects | iembot";
  include("$rootpath/include/header.php"); 
 ?>
 
 <h3 class="heading">iembot</h3>
 
 <p><i>iembot</i> is a Jabber chat bot that relays National Weather Service issued
-warnings to Jabber chat rooms hosted at the <a href="http://www.iemchat.com/">IEM Chat Project.</a>  <i>iembot</i> was written to aid the dissemination and use of NWS issued warnings by their media partners.
+text products to Jabber chat rooms hosted at the <a href="http://www.iemchat.com/">IEM Chat Project.</a>  <i>iembot</i> was written to aid the dissemination and use of NWS issued warnings by their chat partners.
 
 <h3 class="subtitle">How does <i>iembot</i> work?</h3>
 
-<p><i>iembot</i> consists of two programs that run on the Iowa Mesonet server.  The first is a parser that ingests text products issued by the NWS.  The parser picks out the important information regarding the product and sends it via a Jabber message to the bot logged in on the chat server.  The bot then routes the incoming message to a WFO chatroom from which the product was issued.</p>
+<p><i>iembot</i> consists of two programs that run on the Iowa Mesonet server.  The first is a parser that ingests text products issued by the NWS.  The parser picks out the important information regarding the product and sends it via a Jabber instant message to the bot logged in on the chat server.  The bot then 
+routes the incoming message to a WFO chatroom from which the product was 
+issued.  The entire process takes much less than a second.</p>
 
 <h3 class="subtitle">Why was <i>iembot</i> written?</h3>
 <ol>
  <li>During chats, the NWS should not need to relay details of already issued products to the chatroom.  Replication should always be avoided.</li>
  <li>During onair coverage, the media often are not able to quickly read severe text products that come off the printer.  Instead, they can quickly view the chatroom and clearly see what has just been issued.</li>
  <li>The NWS can get instant verification that their product was disseminated over NOAAport and processed by a computerized ingestor.</li>
- <li>With the advent of VTEC, the NWS can issue complex SVS statements.  The bot's report of these products can help clear confusion with the media partners.</li>
+ <li>With the advent of Valid Time Extent Code (VTEC), the NWS can issue complex statements.  The bot's report of these products can help clear confusion with the media partners.</li>
  <li>With the products and timestamps in the chatroom logs, it is an outstanding log of how the severe weather event played out for historical review.</li>
- <li>It is a proof of concept for how NWS products can be disseminated securely and synchronously to clients in an Open Source framework.</li>
+ <li>It is a proof of concept for how NWS products can be disseminated securely and synchronously to clients in an Open Source and standards based framework.</li>
 </ol>
 
-<h3 class="subtitle">What can / can't <i>iembot</i> do?</h3>
-
-<p><b><i>iembot</i> can:</b>
-<ul>
- <li>Alert chatroom users when a NWS office issues a Severe Thunderstorm or Tornado warning. The alert text gives the counties involved and duration of the warning.</li>
- <li>Update chatroom users when a NWS office either continues, expires, or cancels a Severe Thunderstorm or Tornado warning.  In the case of an update which does multiple actions for different counties (segmented SVS), <i>iembot</i> will send multiple messages broken down by county.</li>
-</ul>
-
-<p><b><i>iembot</i> can't:</b>
-<ul>
- <li>Interact with users.  (The bot ignores user messages.)</li>
- <li>Process flash flood warnings.  This will be implemented when VTEC support is added to that warning by the NWS.</li>
-</ul>
-
-<table>
-<tr><td>
 <h3 class="subtitle">What does <i>iembot</i> look like in the chatroom?</h3>
 
-<p>Here is a screenshot from the "botstalk" chatroom where <i>iembot</i> dumps all processed messages.<br />
+<p>Here is a screenshot from the "botstalk" chatroom where <i>iembot</i> dumps all processed messages.  The text in blue can be clicked on for the product text and perhaps a visual display.<br />
 
 <img src="iembot.png" style="margin: 10px; ">
 
-</td><td>
+<h3 class="subtitle">Example <i>iembot</i> messages</h3>
 
-<h3>Products iembot understands</h3>
+<p>These are example messages that appear in the chatroom from the iembot user.
+
 <ul>
- <li>Tornado and Severe Thunderstorm Warnings</li>
- <li>Special Marine Warnings</li>
- <li>Non-precipitating warnings (requires VTEC)</li>
- <li>SPC Mesoscale Convective Discussions (MCD)</li>
- <li>SPC Tornado and Severe Thunderstorm watches</li>
- <li>National Hurricane Center products</li>
- <li>ASOS extreme wind gusts</li>
- <li>Local Storm Reports (LSR)</li>
+ <li>Tornado and Severe Thunderstorm Warnings
+  <br /><span style="background: #ccc;">DMX issues <a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings_cat.phtml?year=2006&wfo=DMX&phenomena=SV&eventid=294&significance=W">Severe Thunderstorm Warning</a> for  Madison [IA] till 3:45 AM CDT</span></li>
+ <li>Special Marine Warnings
+  <br /><span style="background: #ccc;">MFL issues <a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings_cat.phtml?year=2006&wfo=MFL&phenomena=MA&eventid=171&significance=W">Marine Warning</a> for  Biscayne Bay, Coastal waters from Deerfield Beach to Ocean Reef FL out 20 nm [AM] till 8:45 AM EDT</span></li>
+ <li>Non-precipitating warnings (requires VTEC)
+  <br /><span style="background: #ccc;">OUN issues <a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings_cat.phtml?year=2006&wfo=OUN&phenomena=FW&eventid=43&significance=W">Fire Weather Warning</a> valid at Aug 18, 12:00 PM CDT for  Comanche, Stephens, Garvin, Murray, Pontotoc, Coal, Cotton, Jefferson, Carter, Johnston, Atoka, Love, Marshall, Bryan [OK] and Archer, Clay, Wichita [TX] till Aug 18, 8:00 PM CDT</span></li>
+ <li>SPC Mesoscale Convective Discussions (MCD)
+  <br /><span style="background: #ccc;">Storm Prediction Center issues <a href="http://www.spc.noaa.gov/products/md/md1836.html">Mesoscale Discussion #1836</a></span></li>
+ <li>SPC Tornado and Severe Thunderstorm watches
+  <br /><span style="background: #ccc;">Storm Prediction Center issues <a href="http://www.spc.noaa.gov/products/watch/ww0728.html">SEVERE TSTM watch</a> till 17:00 UTC</span></li>
+ <li>National Hurricane Center products
+  <br /><span style="background: #ccc;"><a href="http://mesonet.agron.iastate.edu/p.php?id=5376">TCPAT1</a></span></li>
+ <li>ASOS extreme wind gusts
+  <br /><span style="background: #ccc;">WINNER,SD (KSFD) ASOS reports gust of 55 knots from SSE @ 0344Z
+<br />KSFD 150353Z AUTO 16035G55KT 7SM FEW110 28/12 A2957 RMK AO2 PK WND     15055/0344 SLP991 T02780122 TSNO $</span></li>
+ <li>Local Storm Reports (LSR)
+  <br /><span style="background: #ccc;">Monroe [Turner Co, SD] emergency mngr reports <a href="http://mesonet.agron.iastate.edu/cow/maplsr.phtml?lat0=43.49&lon0=-97.22&ts=2006-08-18%2017:18">TSTM WND DMG</a> at 12:18 PM CDT -- 4 to 8 inch diameter tree limbs knocked down</a></span></li>
+ <li>WFO optional links to NOW casts, RER statements, Flood warnings/statements, Hurricane Statements, others can be added.
+  <br /><span style="background: #ccc;">SJU issues <a href="http://mesonet.agron.iastate.edu/p.php?id=17302">Flood Advisory (FLS)</a></li>
+ <li>NESDIS Satellite Precipitation Estimates (SPE)
+  <br /><span style="background: #ccc;">NESDIS issues <a href="http://mesonet.agron.iastate.edu/p.php?id=17254">Satellite Precipitation Estimates</a></span></li>
+ <li>IEM provided SchoolNet wind gust alerts
+   <br /><span style="background: #ccc;">UNITED COMMUNITY _ BOONE [Boone County] SNET reports 55 MPH from the N   @ 05:55 AM</span></li>
+ <li>West Texas Mesonet wind gust alerts
+   <br /><span style="background: #ccc;">GRAHAM,TX (XGHS) ASOS reports gust of 52 knots from SSE @ 2110Z
+<br />XGHS 162110Z 15033G52KT -RA 23/19 A3006 RMK AO1 T02280187 P0001  RH 080%
+</span></li>
+ <li>Special Weather Statements (SPS)
+  <br /><span style="background: #ccc;">EPZ ISSUES <a href="http://mesonet.agron.iastate.edu/p.php?id=16997">THIS IS A REISSUE OF THE RIVER FLOOD WARNING FOR THE RIO GRANDE  IN EL PASO</a> for  El Paso [TX] till 7:00 AM MDT</span></li>
 </ul>
 
-</td></tr></table>
+<h3 class="subtitle">How can I access <i>iembot?</i></h3>
+
+<p><i>iembot</i> works day and night on two chat servers.  The first one is one
+the private iemchat.com server, which is dedicated for NWS users and their chat
+partners.  The second is a public version of this server to which anybody can
+participate.  Details on this server can be found <a href="https://iemchat.com/public.phtml">here</a>.
 
 <h3 class="subtitle"><i>iembot</i> TODO list</h3>
 
