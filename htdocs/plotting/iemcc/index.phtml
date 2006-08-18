@@ -1,0 +1,31 @@
+<?php 
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | 1 Minute Time Series";
+include("$rootpath/include/header.php"); 
+
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
+$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+
+?>
+<?php include("$rootpath/include/forms.php"); ?>
+
+<a href="/other/">Other Networks</a> &nbsp;<b> > </b> &nbsp; IEM Central Command
+
+<p>You can plot 1 minute data for this location.  Note that 
+the archive begins 17 Aug 2006.</p>
+
+<form method="GET">
+<?php 
+  yearSelect2(2003, $year, "year"); 
+  echo monthSelect($month);
+  echo daySelect($day);
+?>
+  <input type="submit" value="Make Plot">
+</form>
+
+<p>
+<?php include("graphs-inc.php"); ?>
+
+
+<?php include("$rootpath/include/footer.php"); ?>
