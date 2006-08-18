@@ -23,7 +23,7 @@ function f2c($tmpf){
 function dwpf($tmpf, $relh){
  $tmpk = 273.15 + (5.00/9.00 * ($tmpf - 32.00));
  $dwpk = $tmpk / (1 + 0.000425 * $tmpk * - (log10($relh/100)));
- return round( ($dwpk - 273.15) * 9.00/5.00 + 32 );
+ return ($dwpk - 273.15) * 9.00/5.00 + 32 ;
 }
 
 
