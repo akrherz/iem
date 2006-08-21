@@ -1,0 +1,126 @@
+<?php
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | Unidata Equipment Grant Report";
+include("$rootpath/include/header.php"); ?>
+
+
+
+<div style="width: 800px;">
+
+<div style="float: center; width: 100%;">
+<h3>Increasing GIS Web Services Capacity to Serve The Unidata Community.</h3>
+William Gallus Jr
+<br />Daryl Herzmann
+</div>
+
+<p>The recent few years have seen an explosion in the need and use of 
+environmental data provided via web services and standard formats to 
+Geographic Information Systems (GIS).  Unidata has been a pioneer in 
+developing software and stimulating its community to meet this growing 
+need.  To that end, the <a href="http://www.unidata.ucar.edu/community/equipaward/">Unidata Equipment Grants program</a> provided funding 
+to the <a href="http://mesonet.agron.iastate.edu">Iowa Environmental Mesonet</a> (IEM) of <a href="http://www.iastate.edu">Iowa State University</a> to 
+increase its capacity to serve Unidata provided datasets to the increasing 
+traditional GIS userbase growing in the Unidata Community.
+
+<h4>Hardware Purchased</h4>
+
+<div style="float: right; border: 2px solid #000; margin: 5px;">
+<img src="webfarm.png">
+<br />Figure 1: IEM server configuration
+</div>
+
+<p>Using funds provided by the Unidata Equipment Grant and supplemental local 
+funds, the IEM was able to build a mostly fault tolerant and scalable 
+infrastructure to support the mass dissemination of GIS products and web 
+services.  Specifically, two powerful Dell servers (PowerEdge 2850) along 
+with nearly 1 terabyte of fast disk space were purchased with the Unidata 
+grant.  After some beurocratic fun, these systems were placed in 
+production on November 29, 2005.
+
+<p>These new servers were configured as participants in a <a href="http://www.linuxvirtualserver.org/">Linux Virtual 
+Server</a> (LVS) cluster.  Figure 1 shows the current topology of the cluster 
+with the Unidata grant providing the "LDM Processor" and "Spatial 
+Database" components.  A LVS cluster provides a software based solution to 
+do high availability and load balanced computing.  Two "director" nodes 
+create a redundant virtual presence providing services by brokering 
+traffic between external clients and cluster internal services.  These 
+services include a Local Data Manager (LDM) instance, Spatial database, and web 
+servers.
+
+<p style="clear: both;"><h4>Delivering Unidata datasets to GIS</h4>
+
+<p>Our project proposal outlined a number of Unidata provided datasets that 
+would be provided via web services and GIS formats.  During the last year, 
+some of these datasets are now being provided in GIS formats/services by 
+institutions such as the National Weather Service (NWS).  The NWS should 
+be commended for efforts such as their <a href="http://radar.weather.gov/ridge/">RIDGE RADAR</a> data display system and 
+the <a href="http://www.srh.noaa.gov/rfcshare/precip_analysis_new.php">Precipitation Analysis</a> website which provides the GIS community with 
+operationally supported datasets.  All of our work was not done by others 
+though, so this grant helped to increase our capacity to serve:
+
+<ol>
+<li>CONUS NEXRAD base reflectivity composites
+   <br /><i>Availability:</i> LDM/IDD, <a href="http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?">OGC WMS-T</a>, <a href="http://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/">HTTP GeoTiff</a>
+   <br /><i>Notes:</i> This dataset is by far the most requested and the most
+    widely used dataset the IEM provides.  It is produced by using the <a href="http://www.unidata.ucar.edu/software/gempak/help_and_documentation/manual/programs/chap4.php?prog=nex2img">'nex2img'</a>
+    <a href="http://www.unidata.ucar.edu/software/gempak/">GEMPAK</a> program written by the Unidata Program Center.  Nationwide ~1 km 
+    resolution products are generated every 5 minutes.  The equipment grant
+    allowed the IEM to provide a <a href="http://www.opengeospatial.org/standards/wms">Web Map Service</a> (WMS) that supports the time
+    specification (WMS-T).  This feature exposes our entire 5 minute interval 
+    archive to WMS-T aware GIS clients!
+</li>
+
+<li>NWS watch/warning products
+   <br /><i>Availability:</i> LDM/IDD, <a href="http://mesonet.agron.iastate.edu/wfs/ww.php?">OGC WFS</a>, <a href="http://mesonet.agron.iastate.edu/data/gis/shape/4326/us/current_ww.zip">HTTP Shapefile</a>, <a href="http://mesonet.agron.iastate.edu/projects/iembot/">XMPP Jabber</a>
+   <br /><i>Notes:</i> Utilizing the robust and extremely fast LDM/IDD 
+    infrastructure provided by Unidata, the IEM wrote a number of decoders
+    to ingest various NWS issued products into a spatial database (PostGIS).
+    It is our intention to release these decoders to the Unidata community
+    under an Open Source license. We would be happy to provide beta-test 
+    quality releases to interested parties.  
+</li> 
+
+<li>GOES satellite composites
+   <br /><i>Availability:</i> <a href="http://mesonet.agron.iastate.edu/ogc/">OGC WMS</a>, <a href="http://mesonet.agron.iastate.edu/data/gis/images/4326/goes/">HTTP GeoTiff</a>
+   <br /><i>Notes:</i> GOES East and West IR and VIS imagery is available.  CONUS composites are also generated.
+</li>
+
+<li>"Stage 4" NWS precipitation estimates
+  <br /><i>Availability:</i> <a href="http://www.srh.noaa.gov/rfcshare/precip_analysis_new.php">NWS Precipitation Analysis</a> 
+  <br /><i>Notes:</i> The NWS has provided this wonderful service, so there was
+   no need for the IEM to duplicate this effort.  At some point, we would like to
+   provide OGC WMS, WFS, and WCS services of this dataset.
+</li>
+
+<li>National Digital Forecast Database (NDFD)
+  <br /><i>Availability:</i> <a href="http://www.weather.gov/xml/">XML/Soap</a>, <a href="http://www.nws.noaa.gov/mdl/NDFD_GRIB2Decoder/">GIS Formats</a>
+  <br /><i>Notes:</i> The NWS has done a good job exposing their NDFD dataset
+   to a wider audience.
+</li>
+
+</ol>
+
+<p>Here is an example interface utilizing the WMS-T service.  The interface 
+code is a part of the <a href="http://www.openlayers.org/">OpenLayers</a>
+toolkit.  The default time display shows Hurricane Katrina making landfall.
+
+<p>
+<iframe src="wmst.html" style="width: 550px; height: 450px;"></iframe>
+
+<p><h4>Summary:</h4>
+
+<p>The Unidata equipment grant provided funding necessary to increase the 
+capacity of the IEM to provide datasets to the GIS community.  Since the
+installation, the IEM web farm is now handling 4 times the number of 
+web hits than when it was previously at full capacity.  The infrastructure in
+place should allow another 8 fold increase in traffic before more 
+substrancial resources would need to be purchased.
+
+<p>As always, the IEM continues to work with other members in the Unidata 
+community, NWS, and private/public sector to increase the use of these
+services.  Please do not hesitate to contact <a href="/info/contacts.php">Daryl Herzmann</a> if you have
+any questions or suggestions.
+
+</div>
+
+<?php include("$rootpath/include/footer.php"); ?>
