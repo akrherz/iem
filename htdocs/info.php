@@ -42,25 +42,11 @@ include("$rootpath/include/header.php"); ?>
 	<li><a href="/ml/">Mailing Lists</a></li>
 </ul>
 
-<h3 class="subtitle">Documents:</h3>
-<ul>
-        <li><B>IEM Meeting Agenda:</B> (<a href="/pubs/iem-agenda.doc">DOC</a> )
-          <BR><i>Author:</i> Dennis Todey &nbsp; &nbsp; 10 May 2001
-        </li>
-
-        <li><B>Data Acquisition: (WIP)</B> (<a href="/pubs/dataSources.pdf">PDF</a> )
-         <BR><i>Author:</i> Daryl Herzmann &nbsp; &nbsp; 05 Oct 2001
-        </li>
-
-        <li><B>RWIS Data Inventory:</B> (<a href="/pubs/RWISinv.pdf">PDF</a> )
-         <BR><i>Author:</i> Daryl Herzmann &nbsp; &nbsp; 1 Jan 2002
-        </li>
-</ul>
-
 <h3 class="subtitle">Papers/Presentations</h3>
 <ul>
   <li><a href="/pubs/seniorthesis/">ISU Senior Thesis Presentations</a></li>
   <li><a href="/present/">IEM Presentation Archive</a></li>
+  <li><a href="docs/unidata2006">Unidata Equipment Grant Report</a> (21 Aug 2006)</li>
 </ul>
 
 </td></tr></table></div>
