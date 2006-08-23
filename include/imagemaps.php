@@ -196,17 +196,17 @@ include("$rootpath/include/rwisLoc.php");
 
 function asosSelect($selected){
 global $rootpath;
-include("$rootpath/include/azosLoc.php");
+include("$rootpath/include/asosLoc.php");
 echo "<select name=\"station\">\n";
 
-for ($i = 0; $i < count($Zcities); $i++) {
-  $city = current($Zcities);
+for ($i = 0; $i < count($Acities); $i++) {
+  $city = current($Acities);
   echo "<option value=\"". $city["id"] ."\"";
   if ($selected == $city["id"]){
   	echo " SELECTED ";
   }
   echo " >". $city["city"] ."\n";
-  next($Zcities);
+  next($Acities);
 } 
 
 echo "</select>\n";
