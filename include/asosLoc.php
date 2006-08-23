@@ -1,21 +1,21 @@
 <?php
         $Acities = array(
-"DSM" => array("city" => "Des Moines","id" => "dsm"),
-"ALO" => array("city" => "Waterloo", "id" => "alo"),
-"DBQ" => array("city" => "Dubuque", "id" => "dbq"),
-"DVN" => array("city" => "Davenport", "id" => "dvn"),
-"CID" => array("city" => "Cedar Rapids", "id" => "cid"),
-"BRL" => array("city" => "Burlington", "id" => "brl"),
-"OTM" => array("city" => "Ottumwa", "id" => "otm"),
-"LWD" => array("city" => "Lamoni", "id" => "lwd"),
-"AMW" => array("city" => "Ames", "id" => "amw"),
-"MIW" => array("city" => "Marshalltown", "id" => "miw"),
-"MCW" => array("city" => "Mason City", "id" => "mcw"),
-"EST" => array("city" => "Estherville", "id" => "est"),
-"SPW" => array("city" => "Spencer", "id" => "spw"),
-"CBF" => array("city" => "Council Bluffs", "id" => "cbf"),
-"IOW" => array("city" => "Iowa City", "id" => "iow"),
-"SUX" => array("city" => "Sioux City", "id" => "sux")
+"DSM" => array("city" => "Des Moines","id" => "DSM"),
+"ALO" => array("city" => "Waterloo", "id" => "ALO"),
+"DBQ" => array("city" => "Dubuque", "id" => "DBQ"),
+"DVN" => array("city" => "Davenport", "id" => "DVN"),
+"CID" => array("city" => "Cedar Rapids", "id" => "CID"),
+"BRL" => array("city" => "Burlington", "id" => "BRL"),
+"OTM" => array("city" => "Ottumwa", "id" => "OTM"),
+"LWD" => array("city" => "Lamoni", "id" => "LWD"),
+"AMW" => array("city" => "Ames", "id" => "AMW"),
+"MIW" => array("city" => "Marshalltown", "id" => "MIW"),
+"MCW" => array("city" => "Mason City", "id" => "MCW"),
+"EST" => array("city" => "Estherville", "id" => "EST"),
+"SPW" => array("city" => "Spencer", "id" => "SPW"),
+"CBF" => array("city" => "Council Bluffs", "id" => "CBF"),
+"IOW" => array("city" => "Iowa City", "id" => "IOW"),
+"SUX" => array("city" => "Sioux City", "id" => "SUX")
  );
         $A2cities = array(
 "DSM" => array("city" => "Des Moines","id" => "dsm"),
