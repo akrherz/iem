@@ -1,0 +1,118 @@
+<?php
+/* Plot watches since SPC's site sometimes gets slow..... */
+include("../../../../config/settings.inc.php");
+include("$rootpath/include/header.php");
+
+/* Needed GET variables */
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+$num = isset($_GET["num"]) ? $_GET["num"] : 1;
+
+include("$rootpath/include/database.inc.php");
+include("lib.php");
+$db = iemdb("postgis");
+pg_exec($db, "SET TIME ZONE 'GMT'");
+
+$sql = "SELECT *, xmin(geom) as x0, xmax(geom) as x1, ymin(geom) as y0, ymax(geom) as y1 from watches where extract(year from issued) = $year and num = $num";
+$rs = pg_exec($db, $sql);
+$row = pg_fetch_array($rs,0);
+//echo $row["report"];
+
+$ts = strtotime($row["issued"]);
+$d = date("d F Y H:i" ,  $ts);
+
+$month = date("m", $ts);
+$day = date("d", $ts);
+$hour = date("H", $ts);
+$m = date("i", $ts);
+
+if ($m >= 55) $ma = "55";
+else if ($m >= 50) $ma = "50";
+else if ($m >= 45) $ma = "45";
+else if ($m >= 40) $ma = "40";
+else if ($m >= 35) $ma = "35";
+else if ($m >= 30) $ma = "30";
+else if ($m >= 25) $ma = "25";
+else if ($m >= 20) $ma = "20";
+else if ($m >= 15) $ma = "15";
+else if ($m >= 10) $ma = "10";
+else if ($m >= 5) $ma = "05";
+else $ma = "00";
+$m = $ma;
+$basets = mktime($hour, $m, 0, $month, $day, $year);
+
+
+dl($mapscript);
+$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+$map->set("width", 640);
+$map->set("height", 480);
+
+$margin = 0.5;
+$map->setextent($row["x0"] -$margin,
+                $row["y0"]-$margin,
+                $row["x1"]+$margin,
+                $row["y1"]+$margin);
+
+
+$namer = $map->getlayerbyname("namerica");
+$namer->set("status", 1);
+
+$stlayer = $map->getlayerbyname("states");
+$stlayer->set("status", 1);
+
+$lakes = $map->getlayerbyname("lakes");
+$lakes->set("status", 1);
+
+$clayer = $map->getlayerbyname("uscounties");
+$clayer->set("status", 1);
+
+$watches = $map->getlayerbyname("watches");
+$watches->set("connection", $_DATABASES["postgis"] );
+$watches->set("status", 1);
+$watches->set("data", "geom from (select type as wtype, geom, oid from watches where extract(year from issued) = $year and num = $num) as foo using unique oid using srid=4326");
+
+$fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets) ."GIS/uscomp/n0r_". date('YmdHi', $basets) .".png";
+if (! is_file($fp))
+    echo "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
+$radfile = $fp;
+$radar = $map->getlayerbyname("nexrad_n0r");
+$radar->set("data", $radfile);
+$radar->set("status", 1);
+
+
+
+$img = $map->prepareImage();
+$namer->draw($img);
+$clayer->draw( $img );
+$stlayer->draw( $img);
+$lakes->draw($img);
+$radar->draw($img);
+$watches->draw($img);
+
+mktitle($map, $img, "                 SPC Watch #$num: $d UTC");
+
+$map->drawLabelCache($img);
+mklogolocal($map, $img);
+
+$url = $img->saveWebImage();
+
+/*____________ web interface _________*/
+
+?>
+
+<h3>SPC Watch Quick View</h3>
+
+<p><a href="watch.phtml?year=<?php echo $year; ?>&num=<?php echo $num -1; ?>">Previous Watch</a> ....  <a href="watch.phtml?year=<?php echo $year; ?>&num=<?php echo $num +1; ?>">Next Watch</a> 
+
+<form method="GET" action="watch.phtml">
+<table>
+<tr><th>Type:</th><td><?php echo $row["type"]; ?></td></tr>
+<tr><th>Watch #:</th><td><input type="hidden" value="<?php echo $year; ?>" name="year"><input name="num" type="text" size="5" value="<?php echo $row["num"]; ?>"> <input type="submit" value="GO!"></td></tr>
+<tr><th>Issue:</th><td><?php echo substr($row["issued"],0,16); ?> GMT</td></tr>
+<tr><th>Expired/Cancelled:</th><td><?php echo substr($row["expired"],0,16); ?> GMT</td></tr>
+</table>
+</form>
+
+<p>Watch box with NEXRAD composite at watch issuance:
+<br /><img src="<?php echo $url; ?>">
+
+<?php include("$rootpath/include/footer.php"); ?>
