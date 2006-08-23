@@ -2,15 +2,16 @@
 include("../../../config/settings.inc.php");
  include("$rootpath/include/selectWidget.php");
  $network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
+ $hours = isset($_GET["hours"]) ? $_GET["hours"] : 24;
 
- $sw = new selectWidget("/plotting/hr/1station.php", "/plotting/hr/1station.php?", $network);
+ $sw = new selectWidget("$rooturl/plotting/hr/1station.php", "$rooturl/plotting/hr/1station.php?", $network);
  $swf = Array("network" => $network);
  $sw->setformvars($swf);
  $sw->logic($_GET);
  $swinterface = $sw->printInterface();
 
 
- $station = $_GET['station'];
+ $station = isset($_GET['station']) ? strtoupper( $_GET['station'] ): "";
 ?>
 
 <?php 
@@ -18,8 +19,6 @@ include("../../../config/settings.inc.php");
 include("$rootpath/include/header.php"); 
 ?>
 <?php include("$rootpath/include/imagemaps.php"); ?>
-<b>Nav:</b> <a href="/plotting/">Interactive Plotting</a> <b> > </b>
-One station time series
 
 <br><br>
 <div class="text">
@@ -59,6 +58,8 @@ if (strlen($station) > 0 ) {
 <img src="1temps.php?hours=<?php echo $hours; ?>&station=<?php echo $station; ?>" ALT="Time Series">
 <BR>
 <img src="winds.php?hours=<?php echo $hours; ?>&station=<?php echo $station; ?>" ALT="Time Series">
+<br />
+<img src="pres.php?hours=<?php echo $hours; ?>&station=<?php echo $station; ?>" ALT="Time Series">
 </CENTER>
 
 <BR>

@@ -1,101 +1,45 @@
 <?php
+include("../../../config/settings.inc.php");
 $station = $_GET['station'];
+$hours = $_GET["hours"];
 
-$tableName = "t2004";
-$dbName = "asos";
-if ( strlen($date) == 0) {
-  $dbName = "iowa";
-  if ( strlen($station) == 3 ) {
-    $tableName = "azos";
-  } else {
-    $tableName = "rwis";
-  }
-} else {
-  $tableName = "t2003";
-  if ( strlen($station) == 3 ) {
-    $dbName = "asos";
-  } else {
-    $dbName = "rwis";
-  }
-}
+include("$rootpath/include/database.inc.php");
 
-if ( strlen($hours) == 0 ){
-        $hours = "24";
-}
-
-
-$connection = pg_connect("10.10.10.40","5432", $dbName);
+$connection = iemdb("access");
 
 
 $query1 = "SET TIME ZONE 'GMT'";
-$query2 = "SELECT alti,
-	valid from ".$tableName." WHERE station = '". $station ."' 
-	and valid + '".$hours." hours' > CURRENT_TIMESTAMP ORDER by valid ASC";
+$query2 = "SELECT tmpf, alti
+        , valid from current_log WHERE alti > 0 and station = '". $station ."'
+        and valid + '".$hours." hours' > CURRENT_TIMESTAMP ORDER by valid ASC";
 
 // $result = pg_exec($connection, $query1);
 $result = pg_exec($connection, $query2);
 
-$asos = Array("AMW" => 1, "CID" => 1, "IOW" => 1, "BRL" => 1, 
-  "DBQ" => 1, "ALO" => 1, "MCW" => 1, "MIW" => 1,
-  "DVN" => 1, "DSM" => 1, "LWD" => 1, "SPW" => 1, 
-  "EST" => 1, "SUX" => 1, "OTM" => 1);
-
-$minInterval = 20;
-if (strlen($asos[$station]) > 0) {
-  $minInterval = 60;
-} 
-
-$shouldbe = 0;
-$timestep = $minInterval * 60; # 20 minutes
-
-$ai = 0;
-$missing = 0;
-
 
 $ydata = array();
-$ydata2 = array();
-$xlabel= array();
+$times= array();
 
 for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
 { 
-  $ts = strtotime( $row["valid"] );
-
-  if ($shouldbe == 0){
-    $shouldbe = $ts;
-  }
-#  echo $row["valid"] ." || ". $ts ." || ". $shouldbe ."<br>";
-  if ($shouldbe == $ts) {  // Good!!!
-    $ydata[$ai] = $row["alti"];
-    $xlabel[$ai] = strftime("%m/%d %I %p", $shouldbe);
-  }
-  else if ($shouldbe < $ts) { // Observation is missing
-    while ($shouldbe < $ts) {
-      $shouldbe = $shouldbe + $timestep;
-#      echo "== ". $row["valid"] ." || ". $ts ." || ". $shouldbe ."<br>";
-      $ydata[$ai] = " ";
-      $xlabel[$ai] = strftime("%m/%d %I %p", $shouldbe);
-      $ai++;
-      $missing++;
-    }
-    $ydata[$ai] = $row["alti"];
-    $xlabel[$ai] = strftime("%m/%d %I %p", $shouldbe);
-  }
-  $ai++;
-  $shouldbe = $shouldbe + $timestep;
+  $ydata[] = $row["alti"];
+  $times[] = strtotime( $row["valid"] );
 }
+
 
 pg_close($connection);
 
 
-include ("../jpgraph/jpgraph.php");
-include ("../jpgraph/jpgraph_line.php");
-include ("../jpgraph/jpgraph_scatter.php");
-include ("../../include/allLoc.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
+include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("$rootpath/include/all_locs.php");
 
 
 // Create the graph. These two calls are always required
 $graph = new Graph(400,350,"example1");
-$graph->SetScale("textlin");
+$graph->SetScale("datlin");
 $graph->yaxis->scale->ticks->Set(5,1);
 //$graph->yaxis->scale->ticks->SetPrecision(0);
 //$graph->SetY2Scale("lin", 0, 360);
@@ -103,7 +47,6 @@ $graph->yaxis->scale->ticks->Set(5,1);
 //$graph->y2axis->scale->ticks->SetPrecision(0);
 $graph->img->SetMargin(40,40,25,90);
 //$graph->xaxis->SetFont(FONT1,FS_BOLD);
-$graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 $graph->title->Set($hours." Altimeter for ". $cities[$station]['city']);
 
@@ -111,22 +54,16 @@ $graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 //$graph->yaxis->SetTitle("Wind Speed [knots]");
 //$graph->y2axis->SetTitle("Direction [N 0]");
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-$graph->xaxis->SetTitle("Local Valid Time");
+//$graph->xaxis->SetTitle("Local Valid Time");
 $graph->xaxis->SetTitleMargin(55);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-
-$interval = intval( sizeof($xlabel) / 12 );
-if ($interval > 1 ){
-  $graph->xaxis->SetTextLabelInterval(2);
-  $graph->xaxis->SetTextTickInterval($interval);
-}
-
+$graph->xaxis->SetLabelFormatString("M d h A", true);
 
 $graph->legend->Pos(0.01, 0.07);
 $graph->legend->SetLayout(LEGEND_HOR);
 
 // Create the linear plot
-$lineplot=new LinePlot($ydata);
+$lineplot=new LinePlot($ydata, $times);
 // $lineplot->SetLegend("Temp (F)");
 $lineplot->SetColor("red");
 
