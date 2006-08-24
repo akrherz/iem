@@ -2,6 +2,8 @@
 /* Plot watches since SPC's site sometimes gets slow..... */
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/header.php");
+putenv("TZ=GMT");
+
 
 /* Needed GET variables */
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
