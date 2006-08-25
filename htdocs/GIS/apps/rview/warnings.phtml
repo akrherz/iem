@@ -321,7 +321,7 @@ while ( list($key, $val) = each($wA) )
   $updated = strtotime($uA[$key]) - $tzoff;
   $resetApp = "$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo";
 
-  echo "<div class=\"wwa-state\">$sname</div><div class=\"wwa$significance\"><span style=\"font-size: 14pt;\">". $vtec_phenomea[$phenomena] ." ". $vtec_significance[$significance] ."</span> (<a href=\"$warningscat\">View Text</a>) expires ". strftime($dformat, $expire) ." by <a href=\"$resetApp\">$wfo</a> (". $fA[$key] .")<br />". $wA[$key] ."in $sname  <br /><div class=\"vtec\">VTEC# $eventid ($status)</div><div class=\"issued\">Issued: ".strftime($dformat, $issue) ."</div><div class=\"updated\">Updated: ".  strftime($dformat, $updated) ."</div>&nbsp;</div>\n";
+  echo "<div class=\"wwa-state\">$sname</div><div class=\"wwa$significance\"><span style=\"font-size: 14pt;\">". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] ."</span> (<a href=\"$warningscat\">View Text</a>) expires ". strftime($dformat, $expire) ." by <a href=\"$resetApp\">$wfo</a> (". $fA[$key] .")<br />". $wA[$key] ."in $sname  <br /><div class=\"vtec\">VTEC# $eventid ($status)</div><div class=\"issued\">Issued: ".strftime($dformat, $issue) ."</div><div class=\"updated\">Updated: ".  strftime($dformat, $updated) ."</div>&nbsp;</div>\n";
 
 
 }
