@@ -7,21 +7,22 @@ include("$rootpath/include/header.php");  ?>
 
 <h3 class="heading">Other Data Networks</h3>
 
-<p>These are miscellaneous stations that don't necessary belong to a network.
+<p>The IEM collects data from a number of stand alone sensors.  This page
+contains links to data from these sites.
 
-<p><a href="<?php echo $rooturl; ?>/info/network.phtml?network=OT">Station Locations</a>
-
-<p><h3 class="subtitle">Data Traces:</h3>
+<h3>Agronomy Hall, ISU:</h3>
 
 <ul>
-<li><a href="<?php echo $rooturl; ?>/plotting/mesonorth/ot_10min.phtml">Indoor Temperature for Met Cluster Room</a></li>
-<li><a href="<?php echo $rooturl; ?>/plotting/isumet/1station_1min.phtml">ISU AMS Station</a></li>
+<li><a href="<?php echo $rooturl; ?>/plotting/mesonorth/ot_10min.phtml">Indoor Temperature for Met Cluster Room</a>, B548 Agronomy Hall.  Outfitted with 4 One-Wire sensors reporting every minute.</li>
+<li><a href="<?php echo $rooturl; ?>/plotting/isumet/1station_1min.phtml">ISU AMS Station</a>, On the roof.  Davis Weather station reporting every minute.</li>
+<li><a href="<?php echo $rooturl; ?>/plotting/iemcc/">IEM Central Command</a>, On the roof.  High quality Campbell Scientific sensors reporting every minute.</li>
+</ul>
+
+<h3>City of Ames</h3>
+<ul>
 <li><a href="<?php echo $rooturl; ?>/plotting/mesoeast/main.phtml">Mesonet Northeast Ames</a></li>
 </ul>
 
 
-<p><h3 class="subtitle">Current Conditions:</h3>
-
-<ul><li><a href="/other/current.phtml">Sortable Current Conditions</a></li></ul>
 
 <?php include("$rootpath/include/footer.php"); ?>
