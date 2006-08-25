@@ -17,7 +17,7 @@ include("setup.php");
         if ($zoom < 0) $zoom = 0;
         if ($zoom > 5) $zoom = 5; 
 
-        $URL=$rooturl.'/GIS/apps/ortho/site.php?station='.$station.'&zoom='.$zoom.'&type='.$type;
+        $URL= 'http://localhost/GIS/apps/ortho/site.php?station='.$station.'&zoom='.$zoom.'&type='.$type;
         $URL_BASE=$rooturl.'/sites/mapping.php?station='.$station.'&type='.$type;
 ?>
 <?php
