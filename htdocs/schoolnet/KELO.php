@@ -1,7 +1,7 @@
 <a href="alerts/">About wind gust alerts</a> sent to the Weather Service.
 
 <table width="100%" bgcolor="white" border=0>
-<tr><td colspan=2>KELO's WeatherNet sites were just to the IEM on 11 Sept
+<tr><td colspan=2>KELO's WeatherNet sites were added to the IEM on 11 Sept
 2002.</td></tr>
 
 <tr><td valign="top" width="300">
