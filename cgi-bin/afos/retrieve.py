@@ -34,7 +34,6 @@ def Main():
     print "%s doesn't exist in AFOS database, looking in IEM's archive\n" % (pil,)
     access = pg.connect('iem', '10.10.10.20', user='nobody')
     rs = access.query("SELECT raw from current WHERE station = '%s'" % (pil[3:],) ).dictresult()
-    print rs
     if (len(rs) == 1):
       print rs[0]['raw']
     
