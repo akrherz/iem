@@ -31,7 +31,7 @@ def Main():
     print "Could not Find: "+pil
 
   if (len(rs) == 0 and pil[:3] == "MTR"):
-    print "%s doesn't exist in AFOS database, looking in IEM's archive\n" % (pil,)
+    #print "%s doesn't exist in AFOS database, looking in IEM's archive\n" % (pil,)
     access = pg.connect('iem', '10.10.10.20', user='nobody')
     sql = "SELECT raw from current WHERE station = '%s'" % (pil[3:].strip(),)
     rs = access.query( sql ).dictresult()
@@ -39,7 +39,7 @@ def Main():
       print rs[0]['raw']
     
     if (LIMIT > 1):
-      sql = "SELECT raw from current_log WHERE station = '%s' ORDER by valid DESC LIMIT %s" % (pil[3:].strip(), LIMIT)
+      sql = "SELECT raw from current_log WHERE raw IS NOT NULL and station = '%s' ORDER by valid DESC LIMIT %s" % (pil[3:].strip(), LIMIT)
       rs = access.query( sql ).dictresult()
       for i in range(len(rs)):
         print rs[i]['raw']
