@@ -1,5 +1,4 @@
 #!/mesonet/python/bin/python
-# 11 Sep 2003	Lets cleanup!
 
 import pg, cgi, string, os, sys
 
@@ -19,10 +18,6 @@ def Main():
     print 'Invalid PIL, try again'
     sys.exit(0)
 
-  #if ( os.path.isfile('/tmp/AFOS.lock') ):
-  #  print 'Database is currently locked'
-  #  sys.exit(0)
-	
 
   rs = mydb.query("SELECT * from current WHERE pil = '"+pil+"' \
      ORDER by entered DESC LIMIT "+LIMIT).dictresult()
@@ -31,7 +26,22 @@ def Main():
   for i in range(len(rs)):
     print rs[i]["data"]
     print "\003\001\n"
-    if (len(rs) == 0):
-      print "Could not Find: "+pil
+
+  if (len(rs) == 0 and pil[:3] != "MTR"):
+    print "Could not Find: "+pil
+
+  if (len(rs) == 0 and pil[:3] == "MTR"):
+    print "%s doesn't exist in AFOS database, looking in IEM's archive\n" % (pil,)
+    access = pg.connect('iem', '10.10.10.20', user='nobody')
+    rs = access.query("SELECT raw from current WHERE station = '%s'" % (pil[3:],) ).dictresult()
+    if (len(rs) == 1):
+      print rs[0]['raw']
+    
+    if (LIMIT > 1):
+      rs = access.query("SELECT raw from current_log WHERE station = '%s' ORDER by valid DESC LIMIT %s" % (pil[3:], LIMIT) ).dictresult()
+      for i in range(len(rs)):
+        print rs[i]['raw']
+        print "\003\001\n"
+         
 
 Main()
