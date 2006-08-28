@@ -39,7 +39,7 @@ def Main():
       print rs[0]['raw']
     
     if (LIMIT > 1):
-      sql = "SELECT raw from current_log WHERE raw IS NOT NULL and station = '%s' ORDER by valid DESC LIMIT %s" % (pil[3:].strip(), LIMIT)
+      sql = "SELECT raw from current_log WHERE raw != '' and station = '%s' ORDER by valid DESC LIMIT %s" % (pil[3:].strip(), LIMIT)
       rs = access.query( sql ).dictresult()
       for i in range(len(rs)):
         print rs[i]['raw']
