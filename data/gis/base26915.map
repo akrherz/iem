@@ -132,7 +132,7 @@ LAYER
   TYPE POINT
   CONNECTIONTYPE POSTGIS
   CONNECTION "user=akrherz dbname=mesosite host=10.10.10.40"
-  DATA "geom from (select geom, id, plot_name, oid, network, case when is_climate_site THEN 't' ELSE 'f' END as is_climate_site  from stations WHERE online = 't') as foo using unique oid using srid=4326"
+  DATA "geom from (select geom, id, plot_name, msoid, network, case when is_climate_site THEN 't' ELSE 'f' END as is_climate_site  from stations WHERE online = 't') as foo using unique msoid using srid=4326"
   PROJECTION
    "init=epsg:4326"
   END
