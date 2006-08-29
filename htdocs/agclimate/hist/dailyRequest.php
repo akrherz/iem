@@ -120,7 +120,6 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <br>How should the values be separated?: 
 <select name="delim">
   <option value="comma">by commas
-  <option value="space">by spaces
   <option value="tab">by tabs
 </select>
 <br />Text file format:
