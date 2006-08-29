@@ -116,7 +116,6 @@ wish to change this to <a href="dailyRequest.php">daily data</a>.
 <br><input type="checkbox" name="todisk" value="yes">Download directly to disk
 <br>Delimination: <select name="delim">
   <option value="comma">Comma Delimited
-  <option value="space">Space Delimited
   <option value="tab">Tab Delimited
 </select>
 
