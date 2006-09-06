@@ -33,6 +33,7 @@ natural to integrate IEM data into GIS applications.<p>
 
 <p><h3 class="subtitle">Links:</h3>
 <ul>
+ <li><a href="http://gis.ncdc.noaa.gov/aimstools/gis.jsp">NCDC GIS Portal</a><br />National Climate Data Center GIS goodies</li>
  <li><a href="http://wdssii.nssl.noaa.gov/geotiff/">NSSL Google Earth Data</a>
   <br />Weather data integrated into Google Earth!</li>
 	<li><a href="http://www.ocs.orst.edu/prism/products/matrix.phtml">Oregon State PRISM</a>
