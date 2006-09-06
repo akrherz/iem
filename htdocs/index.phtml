@@ -2,6 +2,15 @@
 session_start();
 include("../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/cameras.inc.php");
+$rancam = "";
+while ($rancam == "")
+{
+  srand ((float) microtime() * 10000000);
+  $t = array_rand($cameras);
+  if ($cameras[$t]["active"]) $rancam = $t;
+}
+
 
 $TITLE = "Iowa Environmental Mesonet";
 $HEADEXTRA = "<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS feed\" href=\"/rss.php\" />";
@@ -71,9 +80,9 @@ src="images/ptfmark.gif" alt="Agronomy Path to the Future" style="border:
 0px;" height="40" /></a></div></div></td><td valign="top">
 
 <div id="right" style="padding-left: 3px;">
-<h3 class="heading">Ames Webcam:</h3>
+<h3 class="heading"><?php echo $cameras[$rancam]["name"]; ?> Webcam:</h3>
 <table width="100%">
-<tr><td><a href="<?php echo $rooturl; ?>/current/camera.phtml"><img src="<?php echo $rooturl; ?>/data/webcam.jpg?<?php echo time(); ?>" width="240" border="0"></a>
+<tr><td><a href="<?php echo $rooturl; ?>/current/camera.phtml"><img src="<?php echo $rooturl; ?>/data/camera/stills/<?php echo $rancam; ?>.jpg?<?php echo time(); ?>" width="240" border="0"></a>
 <ul class="iem-list"><li><a href="<?php echo $rooturl; ?>/current/camera.phtml">View other webcams</a></li></ul></td></tr>
 </table>
 
