@@ -20,6 +20,7 @@
  "FFL" => array("city" => "FAIRFIELD", "id" => "FFL", "lat" => "41.05", "lon" => "-91.98"),
  "FOD" => array("city" => "FORT DODGE", "id" => "FOD", "lat" => "42.55", "lon" => "-94.18"),
  "FSW" => array("city" => "FORT MADISON", "id" => "FSW", "lat" => "40.67", "lon" => "-91.33"),
+ "GGI" => array("city" => "GRINNELL", "id" => "GGI", "lat" => "41.70916", "lon" => "-92.73491"),
  "HNR" => array("city" => "HARLAN", "id" => "HNR", "lat" => "41.59", "lon" => "-95.34"),
  "ICL" => array("city" => "CLARINDA", "id" => "ICL", "lat" => "40.72", "lon" => "-95.03"),
  "IIB" => array("city" => "INDEPENDENCE", "id" => "IIB", "lat" => "42.45", "lon" => "-91.95"),
