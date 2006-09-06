@@ -130,26 +130,27 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
   }
 
 
-  $finalA = Array();
-  $finalA = aSortBySecondIndex($mydata, $sortcol);
-  $i = 0;
-  $now = time();
+$finalA = Array();
+$finalA = aSortBySecondIndex($mydata, $sortcol);
+$i = 0;
+$now = time();
+$skippedStations = Array();
 
   // Loop though all data 
   while (list ($key, $val) = each ($finalA))  {
     $parts = $finalA[$key];
-    $i++;
     $tdiff = $now - $parts["ts"];
-      // Don't show stations over 5 days old
-/*
-    if ($tdiff > 86400*5){
-      continue;
-    }
-*/
+
      // Dont show IAC
     if ($key == "RIOW"){
       continue;
     }
+    if ($tdiff > 6900){
+      $skippedStations[$key] = $parts;
+      continue;
+    }
+
+    $i++;
 
 	  echo "<tr";
 	  if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
@@ -187,6 +188,26 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
             <td>". round($parts["pday"],2) ."</td>
 	    </tr>\n";
    }
+
+
+
+
+while (list ($key, $val) = each ($skippedStations) ) {
+  $parts = $finalA[$key];
+  $i++;
+
+	  echo "<tr";
+	  if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
+            
+          echo ">";
+   echo "<td><input type=\"checkbox\" name=\"st[]\" 
+               value=\"".$key."\"></td>";
+  echo "<td>". $parts["sname"] . "</td><td ";
+  echo 'bgcolor="red"';
+  $format = "%b-%d-%y %I:%M %p";
+  echo ">". strftime($format, $parts["ts"]) ."</td>
+  <th align='center' colspan='8'>Site Offline</th></tr>\n";
+}
 
 ?>
 </tbody>
