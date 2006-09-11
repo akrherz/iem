@@ -28,7 +28,7 @@ $cameras = Array(
 		"ip" => "69.66.29.70", "county" => "Union"),
   "SGLI4" => Array("sts" => mktime(0,0,0,1,19,2006), "ets" => time(),
         "name" => "Glidden", "active" => true,
-        "ip" => "70.41.36.36", "county" => "Carroll"),
+        "ip" => "67.54.186.247", "county" => "Carroll"),
   "SFOI4" => Array("sts" => mktime(15,0,0,7,14,2006), "ets" => time(),
         "name" => "Greenfield", "active" => true,
         "ip" => "69.66.238.215", "county" => "Adair"),
