@@ -44,7 +44,7 @@ natural to integrate IEM data into GIS applications.<p>
 <li>Iowa <a href="http://www.igsb.uiowa.edu/nrgis/gishome.htm">Natural Resources Geographic Information System (NRGIS)</a></li>
 
 <li>NOAA's Ken Waters work with <a href="http://www.prh.noaa.gov/regsci/gis/">GIS and NWS warnings</a><br />They have some historical GIS datasets of warnings too.</li>
-
+<li><a href="http://pnwpest.org/US/index.html">Index to Degree-Day Data</a></li>
 </ul>
 
 </td><td width=350 valign="top">
