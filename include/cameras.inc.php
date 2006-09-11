@@ -31,7 +31,7 @@ $cameras = Array(
         "ip" => "70.41.36.36", "county" => "Carroll"),
   "SFOI4" => Array("sts" => mktime(15,0,0,7,14,2006), "ets" => time(),
         "name" => "Greenfield", "active" => true,
-        "ip" => "69.66.238.211", "county" => "Adair"),
+        "ip" => "69.66.238.215", "county" => "Adair"),
   "SHUI4" => Array("sts" => mktime(0,0,0,12, 4,2003), "ets" => time(),
 		"name" => "Humboldt", "active" => true,
 		"iservice" => "TRV Communications",
