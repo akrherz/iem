@@ -50,7 +50,7 @@ in this archive up until that point.</i><br>
   <tr>
     <th>Start:</th>
     <td rowspan="2">
-     <?php echo yearSelect(1995, 2005, "year"); ?>
+     <?php echo yearSelect(1995, date("Y"), "year"); ?>
     </td>
     <td rowspan="2">
      <?php echo monthSelect($bogus); ?>
