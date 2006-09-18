@@ -12,8 +12,6 @@ $sqlStr .= " WHERE valid >= '".$sqlTS1."' and valid <= '".$sqlTS2 ."' ";
 $sqlStr .= " and extract(minute from valid)::int % ".$sampleStr[$sample] ." = 0 ";
 $sqlStr .= " and station = '". $station ."' ORDER by valid ASC";
 
-echo $sqlStr;
-
 $connection = iemdb("awos");
 
 $query1 = "SET TIME ZONE 'GMT'";
@@ -24,7 +22,7 @@ $rs =  pg_exec($connection, $sqlStr);
 pg_close($connection);
 
 $dataA = Array();
-$xlabel = Array();
+$times = Array();
 
 for ($j=0; $j<$num_vars; $j++){
   $dataA[$j] = Array();
@@ -32,7 +30,7 @@ for ($j=0; $j<$num_vars; $j++){
 
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){
-  $xlabel[$i] = substr($row["dvalid"], 5, 14);
+  $times[$i] = strtotime($row["dvalid"]);
   for ($j=0; $j<$num_vars; $j++){
    $dataA[$j][$i] = $row["var".$j];
   }
@@ -41,11 +39,11 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,400,"example3");
-$graph->SetScale("textlin");
+$graph->SetScale("datlin");
 $graph->img->SetMargin(40,20,50,100);
 
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
-$graph->xaxis->SetTickLabels($xlabel);
+//$graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 
 //$graph->yaxis->scale->ticks->Set(5,1);
@@ -60,8 +58,9 @@ $graph->xaxis->SetTitle("Valid GMT");
 $graph->xaxis->SetTitleMargin(70);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
-$ints = $i % 60 ;
-$graph->xaxis->SetTextLabelInterval($ints);
+//$ints = $i % 60 ;
+//if ($ints > 1)
+//$graph->xaxis->SetTextLabelInterval($ints);
 $graph->legend->Pos(0.01, 0.01, "right", "top");
 $graph->yscale->SetGrace(10);
 
@@ -71,7 +70,7 @@ $lp = Array();
 
 for ($j=0;$j<$num_vars;$j++){
   // Create the linear plot
-  $lp[$j]=new LinePlot($dataA[$j]);
+  $lp[$j]=new LinePlot($dataA[$j], $times);
   $lp[$j]->SetColor($colors[$j]);
   $lp[$j]->SetLegend($vars[$j]);
 

@@ -109,6 +109,7 @@ if ($what == "download"){
 } else if ($what == "plot"){
  include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_date.php");
  if ($selectAll){
   foreach ($Wcities as $key => $value){
    $station = $key;
