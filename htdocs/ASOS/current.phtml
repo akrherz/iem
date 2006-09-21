@@ -223,7 +223,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 	    <td>". $parts["alti"] ."</td>
 	    <td>". $parts["vsby"] ."</td>
              <td>". $parts["sknt"] ;
-            if (strlen($parts["gust"] != 0)){
+            if (floatval($parts["gust"] > 0)){
               echo "G". $parts["gust"];
             } echo "</td>";
             echo "<td>". drct2txt( $parts["drct"] ) ."</td>
