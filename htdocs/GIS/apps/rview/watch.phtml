@@ -2,8 +2,9 @@
 /* Plot watches since SPC's site sometimes gets slow..... */
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/header.php");
+include("$rootpath/include/forms.php");
 putenv("TZ=GMT");
-
+$ERROR = "";
 
 /* Needed GET variables */
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -16,6 +17,8 @@ pg_exec($db, "SET TIME ZONE 'GMT'");
 
 $sql = "SELECT *, xmin(geom) as x0, xmax(geom) as x1, ymin(geom) as y0, ymax(geom) as y1 from watches where extract(year from issued) = $year and num = $num";
 $rs = pg_exec($db, $sql);
+if (pg_numrows($rs) == 0) die("Watch not found, sorry!");
+
 $row = pg_fetch_array($rs,0);
 //echo $row["report"];
 
@@ -74,7 +77,7 @@ $watches->set("data", "geom from (select type as wtype, geom, oid from watches w
 
 $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets) ."GIS/uscomp/n0r_". date('YmdHi', $basets) .".png";
 if (! is_file($fp))
-    echo "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
+    $ERROR .= "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
 $radfile = $fp;
 $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("data", $radfile);
@@ -97,24 +100,66 @@ mklogolocal($map, $img);
 
 $url = $img->saveWebImage();
 
+
+/*____________________________ Draw overview */
+$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+$map->set("width", 320);
+$map->set("height", 240);
+
+$margin = 0.5;
+$map->setextent(-125,26,-65,50);
+
+$namer = $map->getlayerbyname("namerica");
+$namer->set("status", 1);
+
+$stlayer = $map->getlayerbyname("states");
+$stlayer->set("status", 1);
+
+$lakes = $map->getlayerbyname("lakes");
+$lakes->set("status", 1);
+
+$watches = $map->getlayerbyname("watches");
+$watches->set("connection", $_DATABASES["postgis"] );
+$watches->set("status", 1);
+$watches->set("data", "geom from (select type as wtype, geom, oid from watches where issued <= '". date("Y-m-d H:i", $basets) .":00+00' and expired > '". date("Y-m-d H:i", $basets)  .":00+00') as foo using unique oid using srid=4326");
+
+
+$img = $map->prepareImage();
+$namer->draw($img);
+$stlayer->draw( $img);
+$lakes->draw($img);
+$watches->draw($img);
+
+mktitle($map, $img, "               $d UTC");
+
+$map->drawLabelCache($img);
+mklogolocal($map, $img);
+
+$ourl = $img->saveWebImage();
+
 /*____________ web interface _________*/
 
 ?>
 
 <h3>SPC Watch Quick View</h3>
 
-<p><a href="watch.phtml?year=<?php echo $year; ?>&num=<?php echo $num -1; ?>">Previous Watch</a> ....  <a href="watch.phtml?year=<?php echo $year; ?>&num=<?php echo $num +1; ?>">Next Watch</a> 
 
 <form method="GET" action="watch.phtml">
 <table>
+<tr><td><img src="<?php echo $ourl; ?>"></td>
+<td valign="top">
+<p><a href="watch.phtml?year=<?php echo $year; ?>&num=<?php echo $num -1; ?>">Previous Watch</a> ....  <a href="watch.phtml?year=<?php echo $year; ?>&num=<?php echo $num +1; ?>">Next Watch</a> 
+<table>
 <tr><th>Type:</th><td><?php echo $row["type"]; ?></td></tr>
-<tr><th>Watch #:</th><td><input type="hidden" value="<?php echo $year; ?>" name="year"><input name="num" type="text" size="5" value="<?php echo $row["num"]; ?>"> <input type="submit" value="GO!"></td></tr>
+<tr><th>Watch #:</th><td><?php echo yearSelect(1997,$year); ?><input name="num" type="text" size="5" value="<?php echo $row["num"]; ?>"> <input type="submit" value="GO!"></td></tr>
 <tr><th>Issue:</th><td><?php echo substr($row["issued"],0,16); ?> GMT</td></tr>
 <tr><th>Expired/Cancelled:</th><td><?php echo substr($row["expired"],0,16); ?> GMT</td></tr>
 </table>
+</td></tr></table>
 </form>
 
 <p>Watch box with NEXRAD composite at watch issuance:
+<br /><?php echo $ERROR;?>
 <br /><img src="<?php echo $url; ?>">
 
 <?php include("$rootpath/include/footer.php"); ?>
