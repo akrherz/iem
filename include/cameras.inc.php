@@ -81,7 +81,7 @@ $cameras = Array(
         "name" => "Nevada", "active" => true, "removed" => false,
         "ip" => "69.66.56.19", "county" => "Story"),
   "SPAI4" => Array("sts" => mktime(22,0,0,5,19,2004), "ets" => time(),
-		"name" => "Panora", "active" => false,
+		"name" => "Panora", "active" => true,
 		"iservice" => "Panora Coop Telephone Assoc.",
 		"iserviceurl" => "http://www.panoratelco.com",
 		"ip" => "66.43.253.165", "county" => "Guthrie"),
