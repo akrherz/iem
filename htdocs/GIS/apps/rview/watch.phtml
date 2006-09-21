@@ -124,11 +124,15 @@ $watches->set("connection", $_DATABASES["postgis"] );
 $watches->set("status", 1);
 $watches->set("data", "geom from (select type as wtype, geom, oid from watches where issued <= '". date("Y-m-d H:i", $basets) .":00+00' and expired > '". date("Y-m-d H:i", $basets)  .":00+00') as foo using unique oid using srid=4326");
 
+$radar = $map->getlayerbyname("nexrad_n0r");
+$radar->set("data", $radfile);
+$radar->set("status", 1);
 
 $img = $map->prepareImage();
 $namer->draw($img);
 $stlayer->draw( $img);
 $lakes->draw($img);
+$radar->draw($img);
 $watches->draw($img);
 
 mktitle($map, $img, "               $d UTC");
@@ -141,8 +145,7 @@ $ourl = $img->saveWebImage();
 /*____________ web interface _________*/
 
 ?>
-
-<h3>SPC Watch Quick View</h3>
+<a href="<?php echo $rooturl;?>/current/radar.phtml">Current Products</a> &gt; <b>SPC Watch Quick View</b>
 
 
 <form method="GET" action="watch.phtml">
@@ -156,6 +159,7 @@ $ourl = $img->saveWebImage();
 <tr><th>Issue:</th><td><?php echo substr($row["issued"],0,16); ?> GMT</td></tr>
 <tr><th>Expired/Cancelled:</th><td><?php echo substr($row["expired"],0,16); ?> GMT</td></tr>
 </table>
+<br />* Watch archive mostly complete back to 1997. May-Dec 2000 is missing tho.
 </td></tr></table>
 </form>
 
