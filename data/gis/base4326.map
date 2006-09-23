@@ -625,6 +625,21 @@ LAYER
     SIZE 10
   END
   CLASS
+    EXPRESSION /M/
+    TEXT (G[magnitude] MPH)
+    LABEL
+      OUTLINECOLOR 0 0 0
+      COLOR 255 255 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION AUTO
+      PARTIALS FALSE
+    END
+    COLOR 255 255 255
+    SYMBOL 'circle'
+    SIZE 10
+  END
+  CLASS
     EXPRESSION /T/
     TEXT (TORNADO [magnitude])
     LABEL
