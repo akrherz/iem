@@ -23,6 +23,7 @@ $row = pg_fetch_array($rs,0);
 //echo $row["report"];
 
 $ts = strtotime($row["issued"]);
+$expires = strtotime($row["expired"]);
 $d = date("d F Y H:i" ,  $ts);
 
 $month = date("m", $ts);
@@ -101,6 +102,61 @@ mklogolocal($map, $img);
 
 $url = $img->saveWebImage();
 
+/*____________________________ Plot LSRs */
+if ($expires < time())
+{
+ $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+ $map->set("width", 640);
+ $map->set("height", 480);
+
+ $margin = 0.5;
+ $map->setextent($row["x0"] -$margin,
+                $row["y0"]-$margin,
+                $row["x1"]+$margin,
+                $row["y1"]+$margin);
+
+
+ $namer = $map->getlayerbyname("namerica");
+ $namer->set("status", 1);
+
+ $stlayer = $map->getlayerbyname("states");
+ $stlayer->set("status", 1);
+
+ $lakes = $map->getlayerbyname("lakes");
+ $lakes->set("status", 1);
+
+ $clayer = $map->getlayerbyname("uscounties");
+ $clayer->set("status", 1);
+
+ $watches = $map->getlayerbyname("watches");
+ $watches->set("connection", $_DATABASES["postgis"] );
+ $watches->set("status", 1);
+ $watches->set("data", "geom from (select type as wtype, geom, oid from watches where extract(year from issued) = $year and num = $num) as foo using unique oid using srid=4326");
+
+ $lsrs = $map->getlayerbyname("lsrs");
+ $lsrs->set("connection", $_DATABASES["postgis"]);
+ $lsrs->set("status",1);
+ $lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs WHERE valid > '". date("Y-m-d H:i", $ts) .":00+00' and valid < '". date("Y-m-d H:i", $expires) .":00+00') as foo USING unique k USING SRID=4326");
+
+
+
+ $img = $map->prepareImage();
+ $namer->draw($img);
+ $clayer->draw( $img );
+ $stlayer->draw( $img);
+ $lakes->draw($img);
+ $watches->draw($img);
+ $lsrs->draw($img);
+
+ mktitle($map, $img, "               Storm reports during watch #$num: ". date("Y-m-d H:i", $ts) ." - ". date("Y-m-d H:i", $expires) ." UTC");
+
+ $map->drawLabelCache($img);
+ mklogolocal($map, $img);
+
+ $lurl = $img->saveWebImage();
+
+}
+
 
 /*____________________________ Draw overview */
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
@@ -149,7 +205,7 @@ $ourl = $img->saveWebImage();
 
 
 <form method="GET" action="watch.phtml">
-<table>
+<table style="width: 750px;">
 <tr><td><img src="<?php echo $ourl; ?>"></td>
 <td valign="top">
 <p><a href="watch.phtml?year=<?php echo $year; ?>&num=<?php echo $num -1; ?>">Previous Watch</a> ....  <a href="watch.phtml?year=<?php echo $year; ?>&num=<?php echo $num +1; ?>">Next Watch</a> 
@@ -159,12 +215,13 @@ $ourl = $img->saveWebImage();
 <tr><th>Issue:</th><td><?php echo substr($row["issued"],0,16); ?> GMT</td></tr>
 <tr><th>Expired/Cancelled:</th><td><?php echo substr($row["expired"],0,16); ?> GMT</td></tr>
 </table>
-<br />* Watch archive mostly complete back to 1997. May-Dec 2000 is missing tho.
+<br />* Watch archive mostly complete back to 1997. May-Dec 2000 is missing.
 </td></tr></table>
 </form>
 
 <p>Watch box with NEXRAD composite at watch issuance:
 <br /><?php echo $ERROR;?>
 <br /><img src="<?php echo $url; ?>">
+<br /><?php if (isset($lurl)){ echo "Local Storm Reports:<br /><img src=\"$lurl\">"; } ?>
 
 <?php include("$rootpath/include/footer.php"); ?>
