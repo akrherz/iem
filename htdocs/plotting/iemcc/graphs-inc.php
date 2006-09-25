@@ -6,6 +6,7 @@ $myTime = strtotime($year."-".$month."-".$day);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
 $titleDate = strftime("%b %d, %Y", $myTime);
+$jday = strftime("%j", $myTime);
 
 $fcontents = file('/mnt/a1/ARCHIVE/data/'.$dirRef.'/text/ot/ot0007.dat');
 
@@ -22,6 +23,8 @@ $pcpn = 0;
 while (list ($line_num, $line) = each ($fcontents)) {
  $tokens = split (",", $line);
  if (sizeof($tokens) != 11) continue;
+
+ if ($jday != $tokens[2]) continue;
 
  $hhmm = str_pad($tokens[3],4,"0",STR_PAD_LEFT);
  $hh = substr($hhmm,0,2);
