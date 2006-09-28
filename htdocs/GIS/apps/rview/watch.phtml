@@ -103,7 +103,7 @@ mklogolocal($map, $img);
 $url = $img->saveWebImage();
 
 /*____________________________ Plot LSRs */
-if ($expires < time())
+if ($expires < time() && $year > 2002)
 {
  $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
  $map->set("width", 640);
@@ -215,7 +215,7 @@ $ourl = $img->saveWebImage();
 <tr><th>Issue:</th><td><?php echo substr($row["issued"],0,16); ?> GMT</td></tr>
 <tr><th>Expired/Cancelled:</th><td><?php echo substr($row["expired"],0,16); ?> GMT</td></tr>
 </table>
-<br />* Watch archive mostly complete back to 1997. May-Dec 2000 is missing.
+<br />* Watch archive should be complete back to 1997.
 </td></tr></table>
 </form>
 
