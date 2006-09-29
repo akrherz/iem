@@ -2,7 +2,7 @@
 /* Generate a radar image with camera locs for some time */
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/kcciLoc.php");
+include("$rootpath/include/snet_locs.php");
 
 $db_ts = strftime("%Y-%m-%d %H:%M", $ts );
 
@@ -76,7 +76,7 @@ while (list($key, $val) = each($cameras))
 {
    if (! $cameras[$key]["active"]) continue;
    $pt = ms_newPointObj();
-   $pt->setXY($Scities[$key]["lon"], $Scities[$key]["lat"], 0);
+   $pt->setXY($cities["KCCI"][$key]["lon"], $cities["KCCI"][$key]["lat"], 0);
    $pt->draw($map, $cp, $img, 0, $cameras[$key]['num'] );
    $pt->free();
 
