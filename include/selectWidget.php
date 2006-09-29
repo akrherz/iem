@@ -205,7 +205,10 @@ class selectWidget
     $rs = $sites->getresult(0);
     $shp = $sites->getShape(-1,  $rs->shapeindex);
 	//print_r($shp);
+	//print_r($rs);
     $this->selectedSite = $shp->values["id"];
+    //echo $this->selectedSite;
+    //echo $this->network;
   }
   function drawMap()
   {
