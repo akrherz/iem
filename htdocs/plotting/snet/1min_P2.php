@@ -3,7 +3,7 @@
 // Cool.....
 
 
-include ("../../include/snetLoc.php");
+include ("../../include/snet_locs.php");
 
 if (strlen($station) > 3){
     $station = $SconvBack[$station];

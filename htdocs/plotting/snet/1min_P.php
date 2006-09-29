@@ -3,7 +3,7 @@
 // Cool.....
 
 
-include ("../../include/snetLoc.php");
+include ("../../include/snet_locs.php");
 include("fillholes.inc.php");
 
 if (strlen($station) > 3){

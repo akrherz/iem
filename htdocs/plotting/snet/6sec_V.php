@@ -1,33 +1,15 @@
 <?php
 // 1 minute schoolnet data plotter
 // Cool.....
+include("../../../config/settings.inc.php");
 
-
-include ("../../include/snetLoc.php");
-
-$station = "68";
-if (strlen($station) > 3){
-    $station = $SconvBack[$station];
-} 
-
-$station = intval($station);
-
-
-if (strlen($year) == 4 && strlen($month) > 0 && strlen(day) > 0 ){
-  $myTime = strtotime($year."-".$month."-".$day);
-} else {
-  $myTime = strtotime( date("Y-m-d") );
-}
-
-$dirRef = strftime("%Y_%m/%d", $myTime);
-$titleDate = strftime("%b %d, %Y", $myTime);
-
-$fcontents = file('data/030911_68.dat');
+$fcontents = file("data/SMDI4_051112.txt");
+$sts = mktime(16,0,0,11,12,2005);
+$ets = mktime(17,0,0,11,12,2005);
 
 $mph = array();
 $drct = array();
-$gust = array();
-$xlabel = array();
+$alti = array();
 
 $dirTrans = array(
   'N' => '360',
@@ -47,7 +29,6 @@ $dirTrans = array(
  'NW' => '305',
  'NNW' => '335');
 
-$start = intval( $myTime );
 $i = 0;
 
 $dups = 0;
@@ -55,65 +36,62 @@ $missing = 0;
 $hasgust = 0;
 $peakgust = 0;
 $peaksped = 0;
+$times = Array();
+$lts = 0;
 
 while (list ($line_num, $line) = each ($fcontents)) {
   $parts = split (",", $line);
-  $thisTime = $parts[1];
-  $thisDate = $parts[2];
   $thisGust = 0;
-  if ($thisGust < $peakgust)  $thisGust = $peakGust;
-  else $peakgust = $thisGust;
-  if (sizeof($parts) > 13) $hasgust = 1;
-  $dateTokens = split("/", $thisDate);
-  $strDate = "20". $dateTokens[2] ."-". $dateTokens[0] ."-". $dateTokens[1]; 
-  $timestamp = strtotime($strDate ." ". $thisTime );
-#  echo $thisTime ."||";
-
-  $thisMPH = intval( substr($parts[4],0,-3) );
-  if ($thisMPH > $peaksped) $peaksped = $thisMPH;
-  $thisDRCT = $dirTrans[$parts[3]];
-
-//  if ($start == 0) {
-//    $start = intval($timestamp);
-//  } 
-  
-  $shouldbe = intval( $start ) + 60 * $i;
+  $timestamp = $parts[0];
  
-   $drct[$i] = $thisDRCT;
-    $mph[$i] = $thisMPH;
-    $gust[$i] = $thisGust;
-    $xlabel[$i] =  strftime("%I:%M", $timestamp);
-    $i++;
+  $thisMPH = intval( substr($parts[6],0,-3) );
+  $thisALTI =  substr($parts[11],0,-1);
+  $thisDRCT = $dirTrans[$parts[5]];
 
+  if ($lts > 0 && ($timestamp - $lts > 70))
+  {
+    $times[] = $timestamp + 40;
+    $drct[] = "";
+    $mph[] = "";
+    $alti[] = "";
+  }
+
+  if ($timestamp >= $sts && $timestamp < $ets)
+  {
+    $times[] = $timestamp;
+    $drct[] = $thisDRCT;
+    $mph[] = $thisMPH;
+    $alti[] = $thisALTI;
+  }
+  $lts = $timestamp;
 } // End of while
 
 
-if ($peaksped > $peakgust) $peakgust = $peaksped;
-
-
-
-include ("../jpgraph/jpgraph.php");
-include ("../jpgraph/jpgraph_line.php");
-include ("../jpgraph/jpgraph_scatter.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
 
 // Create the graph. These two calls are always required
-$graph = new Graph(600,400,"example1");
-$graph->SetScale("textlin",0, 360);
-$graph->SetY2Scale("lin", 0, 60);
+$graph = new Graph(640,480);
+$graph->SetScale('datlin',0,360);
+$graph->SetYScale(0,'lin',0,60);
+$graph->SetYScale(1,'lin');
 $graph->SetColor("#f0f0f0");
-$graph->img->SetMargin(55,55,55,60);
+$graph->img->SetMargin(55,110,55,60);
 
-$graph->title->Set($Scities[$Sconv[$station]]['city'] ." Time Series");
+$graph->title->Set("SchoolNet Sub 1 Minute Time Series");
 $graph->title->SetFont(FF_FONT1,FS_BOLD,20);
-$graph->subtitle->Set($titleDate );
+$graph->subtitle->Set("St Ceilia / Ames");
 
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
-$graph->xaxis->SetTickLabels($xlabel);
-$graph->xaxis->SetTextTickInterval(60);
-$graph->xaxis->SetTitle("Plot between 2 and 3:30 PM on 11 Sept 2003");
-$graph->xaxis->SetTitleMargin(25);
+$graph->xaxis->SetTitle("Times on the afternoon of 12 Nov 2005");
+$graph->xaxis->SetTitleMargin(27);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
+$graph->xaxis->SetLabelFormatString("h:i", true);
+$graph->xaxis->scale->SetTimeAlign(MINADJ_1);
+$graph->xaxis->SetLabelAngle(90);
 
 
 $graph->yaxis->SetFont(FF_FONT1,FS_BOLD, 14);
@@ -123,21 +101,34 @@ $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitleMargin(40);
 
 
-$graph->y2axis->SetFont(FF_FONT1,FS_BOLD);
-$graph->y2axis->scale->ticks->Set(10,5);
-$graph->y2axis->SetTitle("Wind Speed [MPH]");
-$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
-$graph->y2axis->SetTitleMargin(40);
-$graph->y2axis->SetColor("red");
+$graph->ynaxis[0]->SetFont(FF_FONT1,FS_BOLD);
+$graph->ynaxis[0]->scale->ticks->Set(10,5);
+$graph->ynaxis[0]->SetTitle("Wind Speed [MPH]");
+$graph->ynaxis[0]->title->SetFont(FF_FONT1,FS_BOLD,12);
+$graph->ynaxis[0]->SetTitleMargin(30);
+$graph->ynaxis[0]->SetColor("red", "red");
 
-$graph->legend->SetLayout(LEGEND_VERT);
-$graph->legend->Pos(0.05,0.07);
+
+//$graph->ynaxis[1]->SetFont(FF_FONT1,FS_BOLD);
+//$graph->ynaxis[1]->scale->ticks->Set(0.01,0.005);
+$graph->ynaxis[1]->SetTitle("Pressure");
+$graph->ynaxis[1]->title->SetFont(FF_FONT1,FS_BOLD,12);
+$graph->ynaxis[1]->SetTitleMargin(45);
+$graph->ynaxis[1]->SetColor("black", "black");
+$graph->ynaxis[1]->SetLabelFormat('%0.3f');
+
+$graph->legend->SetLayout(LEGEND_HOR);
+$graph->legend->Pos(0.01,0.05);
 $graph->legend->SetFont(FF_FONT1,FS_BOLD,14);
 
 // Create the linear plot
-$lineplot=new LinePlot($mph);
+$lineplot=new LinePlot($mph, $times);
 $lineplot->SetLegend("Instant Wind Speed");
 $lineplot->SetColor("red");
+
+$lineplot2=new LinePlot($alti, $times);
+$lineplot2->SetLegend("Pressure");
+$lineplot2->SetColor("black");
 
 //if ($hasgust == 1){
   // Create the linear plot
@@ -147,14 +138,15 @@ $lineplot->SetColor("red");
 //}
 
 // Create the linear plot
-$sp1=new ScatterPlot($drct);
+$sp1=new ScatterPlot($drct, $times);
 $sp1->mark->SetType(MARK_FILLEDCIRCLE);
 $sp1->mark->SetFillColor("blue");
 $sp1->mark->SetWidth(3);
 
 
 $graph->Add($sp1);
-$graph->AddY2($lineplot);
+$graph->AddY(0,$lineplot);
+$graph->AddY(1,$lineplot2);
 //$graph->AddY2($lp1);
 $graph->Stroke();
 ?>
