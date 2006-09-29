@@ -160,7 +160,7 @@ function PutLink($URL,$txt)
 } // End of FPDF
 
 
-include("../../include/snetLoc.php"); 
+include("../../include/snet_locs.php"); 
 if (strlen($station) == 0){
  $station = 'SKCI4';
 }
