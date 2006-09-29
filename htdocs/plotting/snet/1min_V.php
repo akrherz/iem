@@ -3,7 +3,7 @@
 // 18 Sep 2002 - Denote when the averaging scheme happened!
 //  3 Dec 2002 - Make sure that scale of wind axis is okay!
 
-include ("../../include/snetLoc.php");
+include ("../../include/snet_locs.php");
 include("fillholes.inc.php");
 
 if (strlen($station) > 3){

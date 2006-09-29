@@ -3,7 +3,7 @@
 // Cool.....
 
 
-include ("../../include/snetLoc.php");
+include ("../../include/snet_locs.php");
 
 $station = "68";
 if (strlen($station) > 3){

@@ -7,10 +7,13 @@
 //		little reporting (temporally)
 //  3 Apr 2005  What the heck am I doing?
 
-include ("../../include/snetLoc.php");
+include ("../../include/snet_locs.php");
 include ("fillholes.inc.php");
 
-$station = isset( $_GET["station"] ) ? intval($SconvBack[ $_GET["station"] ]): 'SKCI4';
+$network = $_GET["network"];
+$sid = isset( $_GET["station"] ) ? $_GET["station"]: 'SKCI4';
+$station = $cities[$network][$station]["nwn_id"];
+
 //echo "HELLO:$station:HELLO";
 $year = isset( $_GET["year"] ) ? $_GET["year"] : date("%Y");
 $month = isset( $_GET["month"] ) ? $_GET["month"] : date("%m");

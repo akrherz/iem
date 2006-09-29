@@ -28,7 +28,7 @@ pg_close($connection);
 
 include ("../dev15/jpgraph.php");
 include ("../dev15/jpgraph_line.php");
-include ("../../include/snetLoc.php");
+include ("../../include/snet_locs.php");
 
 
 // Create the graph. These two calls are always required

@@ -9,7 +9,7 @@ $month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
 $day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
 $station = isset($_GET['station']) ? $_GET["station"]: "";
 
-include ("../../../include/snetLoc.php");
+include ("../../../include/snet_locs.php");
 
 if (strlen($station) > 3){
     $station = $SconvBack[$station];
