@@ -8,7 +8,7 @@
   include("$rootpath/include/imagemaps.php");
  $secs = intval($min) * 60;
 ?>
-  <title>IEM | KCCI SchoolNet | <?php echo $Scities[$station]["short"]; ?></title>
+  <title>IEM | KCCI SchoolNet | <?php echo $cities["KCCI"][$station]["short"]; ?></title>
   <meta http-equiv="refresh" content="<?php echo $secs; ?>; URL=kcci_fe.php?min=<?php echo $min; ?>&station=<?php echo $station; ?>">
 
 </head>
