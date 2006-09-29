@@ -55,14 +55,14 @@ class Histogram {
 
 		/* make the STATS array */
 		$this->STATS =	array (
-									MIN=>$this->MIN,
-									MAX=>$this->MAX,
-									N=>$this->N,
-									SUM=>$this->SUM,
-									SUM2=>$this->SUM2,
-									AVG=>$this->AVG,
-									STDV=>$this->STDV,
-									NBINS=>$this->NBINS
+									'MIN'=>$this->MIN,
+									'MAX'=>$this->MAX,
+									'N'=>$this->N,
+									'SUM'=>$this->SUM,
+									'SUM2'=>$this->SUM2,
+									'AVG'=>$this->AVG,
+									'STDV'=>$this->STDV,
+									'NBINS'=>$this->NBINS
 								);
 
 		/* calculate frequencies and populate bins array */

@@ -3,7 +3,7 @@
 //$iem20 = '10.10.10.20';
 //$iem30 = '10.10.10.30';
 $iem40 = 'mesonet.agron.iastate.edu';
-$iem20 = 'db1.mesonet.agron.iastate.edu';
+$iem20 = 'mesonet-db1.agron.iastate.edu';
 $iem30 = 'kcci.mesonet.agron.iastate.edu';
 global $_DATABASES;
 $_DATABASES = Array(
