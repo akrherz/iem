@@ -4,7 +4,7 @@
   include("../../config/settings.inc.php");
   $station = isset($_GET['station']) ? $_GET["station"]: "SSAS2";
   $min = isset($_GET["min"]) ? $_GET["min"] : 1;
-  include("$rootpath/include/keloLoc.php");
+  include("$rootpath/include/snet_locs.php");
   include("$rootpath/include/imagemaps.php");
  if (strlen($min) == 0){
    $secs = 600;
@@ -12,7 +12,7 @@
  }
  $secs = intval($min) * 60;
 ?>
-  <title>IEM | KELO WeatherNet | <?php echo $Scities[$station]["short"]; ?></title>
+  <title>IEM | KELO WeatherNet | <?php echo $cities["KELO"][$station]["short"]; ?></title>
   <meta http-equiv="refresh" content="<?php echo $secs; ?>; URL=kelo_fe.php?min=<?php echo $min; ?>&station=<?php echo $station; ?>">
 
 </head>
@@ -25,15 +25,15 @@
   echo "SchoolNet Site: ";
 echo "<select  onChange=\"location=this.form.station.options[this.form.station.selectedIndex].value\" name=\"station\">\n";
 
-for ($i = 0; $i < count($Scities); $i++) {
-  $city = current($Scities);
-  echo "<option value=\"/content/kelo_fe.php?min=".$min."&station=". $city["id"] ."\"";
-  if ($station == $city["id"]){
+$Scities = $cities["KELO"];
+while( list($key, $val) = each($Scities) ){
+  echo "<option value=\"$rooturl/content/kelo_fe.php?min=".$min."&station=". $key ."\"";
+  if ($station == $key){
         echo " SELECTED ";
   }
-  echo " >". $city["city"] ."\n";
-  next($Scities);
+  echo " >". $val["city"] ."\n";
 }
+
 
 echo "</select>\n";
 
