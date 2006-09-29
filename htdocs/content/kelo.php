@@ -10,7 +10,7 @@ function dwp($tmpf, $relh){
 
 }
 	$station = $_GET['station'];
-include('/mesonet/php/include/snet_locs.php');
+include("$rootpath/include/snet_locs.php");
         include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
