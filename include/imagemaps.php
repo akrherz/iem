@@ -22,17 +22,22 @@ function networkSelect($network, $selected)
 
 function snetSelectMultiple($selected){
 global $rootpath;
-include("$rootpath/include/snetLoc.php");
-asort($Scities);
+include("$rootpath/include/snet_locs.php");
 echo "<select name=\"station[]\" size=7 MULTIPLE >\n";
-                                                                                
-for ($i = 0; $i < count($Scities); $i++) {
-  $city = current($Scities);
-  echo "<option value=\"". $city["id"] ."\"";
-  if ($selected == $city["id"]){
-        echo " SELECTED ";
-  }   echo " >". $city["city"] ."</option>\n";
-  next($Scities); }                                                                                 
+
+reset($cities);
+while( list($tv, $tbl) = each($cities) )
+{
+  while( list($station, $v) = each($tbl) )
+  {
+    echo "<option value=\"". $station ."\"";
+    if ($selected == $station){
+      echo " SELECTED ";
+    }
+    echo " >". $v["city"] ."</option>\n";
+  }
+}
+                                                                               
 echo "</select>\n";
                                                                                 
 }
@@ -40,17 +45,20 @@ echo "</select>\n";
 
 function snetSelect($selected){
 global $rootpath;
-include("$rootpath/include/snetLoc.php");
+include("$rootpath/include/snet_locs.php");
 echo "<select name=\"station\">\n";
 
-for ($i = 0; $i < count($Scities); $i++) {
-  $city = current($Scities);
-  echo "<option value=\"". $city["id"] ."\"";
-  if ($selected == $city["id"]){
-  	echo " SELECTED ";
+reset($cities);
+while( list($tv, $tbl) = each($cities) )
+{
+  while( list($station, $v) = each($tbl) )
+  {
+    echo "<option value=\"". $station ."\"";
+    if ($selected == $station){
+      echo " SELECTED ";
+    }
+    echo " >". $v["city"] ."</option>\n";
   }
-  echo " >". $city["city"] ."</option>\n";
-  next($Scities);
 } 
 
 echo "</select>\n";
