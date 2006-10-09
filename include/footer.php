@@ -33,7 +33,12 @@ All rights reserved.
                                                                                 
                                                                                 
 </div> <!-- End of iem-main -->
-                                                                                
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-784549-2";
+urchinTracker();
+</script>
 </body>
 </html>
 
