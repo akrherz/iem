@@ -38,10 +38,52 @@ END
 #------------------------------------------------------
 #
 LAYER
+        NAME warnings_p
+        STATUS OFF
+        TYPE LINE
+        DATA "/home/ldm/data/gis/shape/4326/us/current_ww.shp"
+        MINSCALE 0
+        MAXSCALE 465000000
+  METADATA
+    "wms_title" "NWS Polygon Warnings"
+  END
+        PROJECTION
+                "init=epsg:4326"
+        END
+        #CLASSITEM "TYPE"
+        FILTERITEM "GTYPE"
+        FILTER /P/
+        CLASS
+                NAME "Svr T'storm Warn"
+        EXPRESSION ('[type]' = 'SV' and '[sig]' = 'W')
+                COLOR   255 255 0
+                SIZE    3
+                SYMBOL  'circle'
+        END
+        CLASS
+                NAME "Marnine Warn"
+        EXPRESSION ('[type]' = 'MA' and '[sig]' = 'W')
+                COLOR   0 255 0
+                SIZE    3
+                SYMBOL  'circle'
+        END
+        CLASS
+                NAME "Tornado Warn"
+        EXPRESSION ('[type]' = 'TO' and '[sig]' = 'W')
+                COLOR   255 0 0
+                SIZE    3
+                SYMBOL  'circle'
+        END
+END
+
+
+#------------------------------------------------------
+#
+LAYER
         NAME warnings_c
         STATUS OFF
         TYPE LINE
-        DATA "/home/ldm/data/gis/shape/unproj/us/current_ww.shp"
+        DATA "/home/ldm/data/gis/shape/4326/us/current_ww.shp"
         MINSCALE 0
         MAXSCALE 465000000
   METADATA
