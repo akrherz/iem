@@ -37,7 +37,6 @@ WEB
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?"
    "wms_srs" "EPSG:4326"
    "wms_abstract" "Ba Ba Ba"
-#   "wms_fees" "None"
    "wms_keywords" "Ba"
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
@@ -56,7 +55,6 @@ LAYER
   METADATA
     "wms_group_title" "RAIN7"
     "wms_title" "RAIN7"
-    "wms_srs"   "EPSG:26915"
   END
   PROJECTION
     "init=epsg:26915"
@@ -135,7 +133,6 @@ LAYER
     METADATA
       "wms_group_title" "RAIN7"
     "wms_title" "rain7 legend"
-    "wms_srs"   "EPSG:26915"
     END
 	FEATURE
 		POINTS 240 20 END
@@ -161,7 +158,6 @@ LAYER
   METADATA
     "wms_group_title" "YESTRAIN"
     "wms_title" "YESTRAIN"
-    "wms_srs"   "EPSG:26915"
   END
   MINSCALE 0
   MAXSCALE 465000000
@@ -244,7 +240,6 @@ LAYER
   METADATA
     "wms_group_title" "YESTRAIN"
     "wms_title" "yestrain legend"
-    "wms_srs"   "EPSG:26915"
    END
 	CLASS
 		SYMBOL 'precip'
@@ -267,7 +262,6 @@ LAYER
   METADATA
     "wms_group_title" "MONTHRAIN"
     "wms_title" "MONTHRAIN"
-    "wms_srs"   "EPSG:4326"
   END
   PROJECTION
     "init=epsg:26915"
@@ -348,7 +342,6 @@ LAYER
   METADATA
     "wms_group_title" "MONTHRAIN"
     "wms_title" "monthrain legend"
-    "wms_srs"   "EPSG:26915"
   END
 	CLASS
 		SYMBOL 'precip'
