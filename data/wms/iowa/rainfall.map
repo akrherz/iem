@@ -17,7 +17,7 @@ IMAGECOLOR -1 -1 -1
 # Projection definition, consult the PROJ.4 documentation for parameter discussion
 #
 PROJECTION
-   "init=epsg:26915"
+   "init=epsg:4326"
 END
 
 #
@@ -35,7 +35,7 @@ WEB
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?"
-   "wms_srs" "EPSG:26915"
+   "wms_srs" "EPSG:4326"
    "wms_abstract" "Ba Ba Ba"
 #   "wms_fees" "None"
    "wms_keywords" "Ba"
