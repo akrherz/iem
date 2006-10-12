@@ -68,6 +68,13 @@ LAYER
                 SYMBOL  'circle'
         END
         CLASS
+                NAME "Marnine Warn"
+        EXPRESSION ('[type]' = 'MA' and '[sig]' = 'W')
+                COLOR   0 255 0
+                SIZE    3
+                SYMBOL  'circle'
+        END
+        CLASS
                 NAME "Tornado Warn"
         EXPRESSION ('[type]' = 'TO' and '[sig]' = 'W')
                 COLOR   255 0 0
