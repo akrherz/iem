@@ -59,7 +59,7 @@ END
 LAYER
   NAME kcci
   STATUS ON
-  DATA "/mesonet/data/gis/images/26915/KCCI/KCCI_N0R_0.tif"
+  DATA "/home/ldm/data/gis/images/26915/KCCI/KCCI_N0R_0.png"
   TYPE RASTER
   PROJECTION
     "init=epsg:26915"
