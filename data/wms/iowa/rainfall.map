@@ -35,7 +35,7 @@ WEB
   METADATA
    "wms_title" "IEM WMS Iowa Rainfall"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?"
-   "wms_srs" "EPSG:26915"
+   "wms_srs" "EPSG:26915 EPSG:4326"
    "wms_abstract" "Ba Ba Ba"
    "wms_keywords" "Ba"
    "wms_accessconstraints" "None"
@@ -55,7 +55,7 @@ LAYER
   METADATA
     "wms_group_title" "RAIN7"
     "wms_title" "Past 7 days"
-    "wms_srs" "EPSG:26915"
+   "wms_srs" "EPSG:26915 EPSG:4326"
   END
   PROJECTION
     "init=epsg:26915"
@@ -134,7 +134,7 @@ LAYER
     METADATA
       "wms_group_title" "RAIN7"
     "wms_title" "rain7 legend"
-    "wms_srs" "EPSG:26915"
+   "wms_srs" "EPSG:26915 EPSG:4326"
     END
 	FEATURE
 		POINTS 240 20 END
@@ -160,7 +160,7 @@ LAYER
   METADATA
     "wms_group_title" "YESTRAIN"
     "wms_title" "Yesterday"
-    "wms_srs" "EPSG:26915"
+   "wms_srs" "EPSG:26915 EPSG:4326"
   END
   MINSCALE 0
   MAXSCALE 465000000
@@ -243,7 +243,7 @@ LAYER
   METADATA
     "wms_group_title" "YESTRAIN"
     "wms_title" "yestrain legend"
-    "wms_srs" "EPSG:26915"
+   "wms_srs" "EPSG:26915 EPSG:4326"
    END
 	CLASS
 		SYMBOL 'precip'
@@ -266,7 +266,7 @@ LAYER
   METADATA
     "wms_group_title" "MONTHRAIN"
     "wms_title" "This month"
-    "wms_srs" "EPSG:26915"
+   "wms_srs" "EPSG:26915 EPSG:4326"
   END
   PROJECTION
     "init=epsg:26915"
@@ -347,7 +347,7 @@ LAYER
   METADATA
     "wms_group_title" "MONTHRAIN"
     "wms_title" "monthrain legend"
-    "wms_srs" "EPSG:26915"
+   "wms_srs" "EPSG:26915 EPSG:4326"
   END
 	CLASS
 		SYMBOL 'precip'
