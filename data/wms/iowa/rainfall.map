@@ -54,7 +54,7 @@ LAYER
   TYPE POLYGON
   METADATA
     "wms_group_title" "RAIN7"
-    "wms_title" "RAIN7"
+    "wms_title" "Past 7 days"
     "wms_srs" "EPSG:26915"
   END
   PROJECTION
@@ -159,7 +159,7 @@ LAYER
   TYPE POLYGON
   METADATA
     "wms_group_title" "YESTRAIN"
-    "wms_title" "YESTRAIN"
+    "wms_title" "Yesterday"
     "wms_srs" "EPSG:26915"
   END
   MINSCALE 0
@@ -265,7 +265,7 @@ LAYER
   MAXSCALE 465000000
   METADATA
     "wms_group_title" "MONTHRAIN"
-    "wms_title" "MONTHRAIN"
+    "wms_title" "This month"
     "wms_srs" "EPSG:26915"
   END
   PROJECTION
