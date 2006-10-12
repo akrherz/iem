@@ -38,7 +38,7 @@ COOP stations.  Some records may have occured on multiple years, only one
 is listed here.  You may click on a column to sort it. You can pick from 
 two record databases, once contains all records since 1951 and the other
 contains records for sites that do and don't have data before 1951.
-<b>Note:  This database does not contain data from 2005.</b>
+<b>Note:  This database does not contain data from approximately the most recent 2 months.</b>
 
 <form method="GET" action="extremes.php">
 <table cellpadding=2 cellspacing=0 border=2>
