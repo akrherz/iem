@@ -1,0 +1,126 @@
+#
+# Start of map file
+#
+NAME "wwa"
+STATUS ON
+SIZE 450 350
+EXTENT -126 24 -66 50
+UNITS DD
+SHAPEPATH "/mesonet/data/gis/"
+IMAGECOLOR -1 -1 -1
+
+#
+PROJECTION
+   "init=epsg:4326"
+END
+
+#
+WEB
+  TEMPLATE ia.html
+  MINSCALE 0
+  MAXSCALE 465000000
+  IMAGEPATH "/mesonet/www/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/mesonet/www/html/tmp/w0.log"
+  METADATA
+   "wms_title" "IEM NWS Warnings WMS Service"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?"
+   "wms_srs" "EPSG:4326"
+   "wms_abstract" "NWS warnings."
+   "wms_keywords" "NWS"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+        NAME warnings_c
+        STATUS OFF
+        TYPE LINE
+        DATA "/home/ldm/data/gis/shape/unproj/us/current_ww.shp"
+        MINSCALE 0
+        MAXSCALE 465000000
+  METADATA
+    "wms_title" "NWS County Warnings"
+  END
+        PROJECTION
+                "init=epsg:4326"
+        END
+        #CLASSITEM "TYPE"
+        FILTERITEM "GTYPE"
+        FILTER /C/
+        CLASS
+                NAME "Svr T'storm Warn"
+        EXPRESSION ('[type]' = 'SV' and '[sig]' = 'W')
+                COLOR   255 255 0
+                SIZE    3
+                SYMBOL  'circle'
+        END
+        CLASS
+                NAME "Flash Flood Warn"
+        EXPRESSION ('[type]' = 'FF' and '[sig]' = 'W')
+                COLOR   0 255 0
+                SIZE    3
+                SYMBOL  'circle'
+        END
+        CLASS
+                NAME "Tornado Warn"
+        EXPRESSION ('[type]' = 'TO' and '[sig]' = 'W')
+                COLOR   255 0 0
+                SIZE    3
+                SYMBOL  'circle'
+        END
+    # Advisories
+    CLASS
+        NAME "Winter Advisory"
+        EXPRESSION (('[type]' = 'BZ' or '[type]' = 'SN' or '[type]' = 'WS' or '[type]' = 'BS' or '[type]' = 'SB' or '[type]' = 'IP' or '[type]' = 'HP' or '[type]' = 'ZR' or '[type]' = 'IS') and '[sig]' = 'Y')
+        STYLE
+                  COLOR 176 224 230
+                  SIZE  3
+                  SYMBOL        'circle'
+        END
+        STYLE
+                  COLOR 255 255 255
+                  SIZE  1
+                  SYMBOL        'circle'
+        END
+        END
+    # Heavy Snow
+    CLASS
+        NAME "Heavy Snow Warn"
+        EXPRESSION ('[type]' = 'HS' and '[sig]' = 'W')
+        COLOR 138 43 226
+        SIZE 3
+        SYMBOL 'circle'
+    END
+    # WW Warning
+    CLASS
+        NAME "Winter Storm Warn"
+        EXPRESSION (('[type]' = 'WS' or '[type]' = 'WW') and '[sig]' = 'W')
+                COLOR   255 105 180
+                SIZE    3
+                SYMBOL  'circle'
+        END
+    # Sleet Fz
+    CLASS
+        NAME "Ice/Frz/Sleet Warn"
+        EXPRESSION (('[type]' = 'IP' or '[type]' = 'HP' or '[type]' = 'ZR' or '[type]' = 'IS') and '[sig]' = 'W')
+                COLOR   255 20 147
+                SIZE    3
+                SYMBOL  'circle'
+        END
+    # Blizzard
+    CLASS
+        NAME "Blizzard Warn"
+        EXPRESSION ('[type]' = 'BZ' and '[sig]' = 'W')
+                COLOR   255 0 0
+                SIZE    3
+                SYMBOL  'circle'
+        END
+END
+
+
+END
