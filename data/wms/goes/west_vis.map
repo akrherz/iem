@@ -17,8 +17,8 @@ END
 #
 WEB
   TEMPLATE ia.html
-  MINSCALE 90000
-  MAXSCALE 4650000
+  MINSCALE 0
+  MAXSCALE 465000000
   IMAGEPATH "/mesonet/www/html/tmp/"
   IMAGEURL "/tmp/"
   LOG "/mesonet/www/html/tmp/w0.log"
@@ -41,6 +41,8 @@ LAYER
   STATUS ON
   DATA "/home/ldm/data/gis/images/4326/goes/west1V_0.tif"
   TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
