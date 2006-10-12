@@ -55,6 +55,7 @@ LAYER
   METADATA
     "wms_group_title" "RAIN7"
     "wms_title" "RAIN7"
+    "wms_srs" "EPSG:4326"
   END
   PROJECTION
     "init=epsg:26915"
@@ -133,6 +134,7 @@ LAYER
     METADATA
       "wms_group_title" "RAIN7"
     "wms_title" "rain7 legend"
+    "wms_srs" "EPSG:4326"
     END
 	FEATURE
 		POINTS 240 20 END
@@ -158,6 +160,7 @@ LAYER
   METADATA
     "wms_group_title" "YESTRAIN"
     "wms_title" "YESTRAIN"
+    "wms_srs" "EPSG:4326"
   END
   MINSCALE 0
   MAXSCALE 465000000
@@ -240,6 +243,7 @@ LAYER
   METADATA
     "wms_group_title" "YESTRAIN"
     "wms_title" "yestrain legend"
+    "wms_srs" "EPSG:4326"
    END
 	CLASS
 		SYMBOL 'precip'
@@ -262,6 +266,7 @@ LAYER
   METADATA
     "wms_group_title" "MONTHRAIN"
     "wms_title" "MONTHRAIN"
+    "wms_srs" "EPSG:4326"
   END
   PROJECTION
     "init=epsg:26915"
@@ -342,6 +347,7 @@ LAYER
   METADATA
     "wms_group_title" "MONTHRAIN"
     "wms_title" "monthrain legend"
+    "wms_srs" "EPSG:4326"
   END
 	CLASS
 		SYMBOL 'precip'
