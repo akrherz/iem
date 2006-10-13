@@ -60,12 +60,32 @@ for i in range(len(rs)):
 del(dbf)
 del(shp)
 
+o = open(fp+".txt", 'w')
+o.write("""
+IEM Modelled Soil Moisture from the Iowa Daily Erosion Project
+http://wepp.mesonet.agron.iastate.edu
+
+DBF Columns are:
+  MODL_TWP  Model township
+  VALID     Date data is valid for YYYYMMDD
+  VSM       Volumetric Soil Moisture [%]
+  VSM_STDD  VSM Standard Deviation within model township
+  S10CM     0-10 cm depth soil moisture [mm]
+  S20CM     10-20 cm depth soil moisture [mm]
+
+Data Contact:
+  Daryl Herzmann akrherz@iastate.edu  515.294.5978
+
+""")
+o.close()
+
 shutil.copyfile("/mesonet/data/gis/meta/4326.prj", fp+".prj")
 z = zipfile.ZipFile(fp+".zip", 'w', zipfile.ZIP_DEFLATED)
 z.write(fp+".shp")
 z.write(fp+".shx")
 z.write(fp+".dbf")
 z.write(fp+".prj")
+z.write(fp+".txt")
 z.close()
 
 print file(fp+".zip", 'r').read(),
@@ -74,3 +94,4 @@ os.remove(fp+".shp")
 os.remove(fp+".shx")
 os.remove(fp+".dbf")
 os.remove(fp+".prj")
+os.remove(fp+".txt")
