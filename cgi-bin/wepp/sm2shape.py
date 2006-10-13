@@ -68,7 +68,7 @@ http://wepp.mesonet.agron.iastate.edu
 DBF Columns are:
   MODL_TWP  Model township
   VALID     Date data is valid for YYYYMMDD
-  VSM       Volumetric Soil Moisture [%]
+  VSM       Volumetric Soil Moisture [%] over root zone depth
   VSM_STDD  VSM Standard Deviation within model township
   S10CM     0-10 cm depth soil moisture [mm]
   S20CM     10-20 cm depth soil moisture [mm]
