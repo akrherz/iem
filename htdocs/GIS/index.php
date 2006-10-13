@@ -36,15 +36,16 @@ natural to integrate IEM data into GIS applications.<p>
  <li><a href="http://gis.ncdc.noaa.gov/aimstools/gis.jsp">NCDC GIS Portal</a><br />National Climate Data Center GIS goodies</li>
  <li><a href="http://wdssii.nssl.noaa.gov/geotiff/">NSSL Google Earth Data</a>
   <br />Weather data integrated into Google Earth!</li>
-	<li><a href="http://www.ocs.orst.edu/prism/products/matrix.phtml">Oregon State PRISM</a>
+ <li><a href="http://www.ocs.orst.edu/prism/products/matrix.phtml">Oregon State PRISM</a>
 	<br />These folks provide nationwide GIS ready datasets of climate data.  Their site is outstanding!</li>
-<li><a href="/GIS/software.php">GIS Software</a></li>
-<li>Scott Shipley's <a href="http://geog.gmu.edu/projects/wxproject/nex2shp/nexrad.htm">NEXRAD to shapefile</a> converter.
-<li><a href="http://www.ftw.nrcs.usda.gov/prism/prism.html">USDA PRISM</a> data page (GIS Climate Data).</li>
-<li>Iowa <a href="http://www.igsb.uiowa.edu/nrgis/gishome.htm">Natural Resources Geographic Information System (NRGIS)</a></li>
-
-<li>NOAA's Ken Waters work with <a href="http://www.weather.gov/regsci/gis/">GIS and NWS warnings</a><br />They have some historical GIS datasets of warnings too.</li>
-<li><a href="http://pnwpest.org/US/index.html">Index to Degree-Day Data</a></li>
+ <li><a href="/GIS/software.php">GIS Software</a></li>
+ <li>Scott Shipley's <a href="http://geog.gmu.edu/projects/wxproject/nex2shp/nexrad.htm">NEXRAD to shapefile</a> converter.
+ <li><a href="http://www.ftw.nrcs.usda.gov/prism/prism.html">USDA PRISM</a> data page (GIS Climate Data).</li>
+ <li>Iowa <a href="http://www.igsb.uiowa.edu/nrgis/gishome.htm">Natural Resources Geographic Information System (NRGIS)</a></li>
+ <li>NOAA's Ken Waters work with <a href="http://www.weather.gov/regsci/gis/">GIS and NWS warnings</a><br />They have some historical GIS datasets of warnings too.</li>
+ <li><a href="http://pnwpest.org/US/index.html">Index to Degree-Day Data</a></li>
+ <li><a href="http://map06.gsfc.nasa.gov/">NASA MAP'06 program</a>
+  <br />Has some GIS satellite data.</li>
 </ul>
 
 </td><td width=350 valign="top">
