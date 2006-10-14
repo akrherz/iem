@@ -16,7 +16,7 @@
  pg_close($conn);
  for ($i=0; $row = @pg_fetch_array($rs, $i); $i++) {
   echo "<item>\n";
-  echo "<title>". $row["title"] ."</title>\n";
+  echo "<title>". ereg_replace("&","&amp;",$row["title"]) ."</title>\n";
   echo "<author>". $row["author"] ."</author>\n";
   echo "<link>http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</link>\n";
   echo "</item>\n";
