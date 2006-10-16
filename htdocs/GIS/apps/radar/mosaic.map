@@ -8,7 +8,7 @@ FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT -2223813 -1746393 2207341 1701506
 #EXTENT -2131274.95 2529023.10 2627568.78 6241958.85
 UNITS METERS
-SHAPEPATH "/mesonet/data/gis/shape/"
+SHAPEPATH "/mesonet/data/gis/static/shape/"
 SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR 0 0 0
 IMAGETYPE PNG
@@ -86,7 +86,7 @@ LAYER
   NAME inex
   STATUS ON
   TYPE POLYGON
-  DATA "4326/iem/nex_rings.shp"
+  DATA "/mesonet/data/gis/static/shape/4326/iem/nex_rings.shp"
   PROJECTION
    "init=epsg:4326"
   END
@@ -99,7 +99,7 @@ LAYER
   NAME icwa
   STATUS ON
   TYPE POLYGON
-  DATA "4326/iem/cwas.shp"
+  DATA "/mesonet/data/gis/static/shape/4326/iem/cwas.shp"
   PROJECTION
    "proj=latlong"
   END
@@ -119,7 +119,7 @@ LAYER
   NAME states
   STATUS DEFAULT
   TYPE LINE
-  DATA "4326/us/states.shp"
+  DATA "/mesonet/data/gis/static/shape/4326/us/states.shp"
   METADATA
     "wms_title" "US States"
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
@@ -138,7 +138,7 @@ LAYER
   NAME iowa_counties
   STATUS ON
   TYPE POLYGON
-  DATA shape/iem/counties.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   METADATA
     "wms_title" "Iowa Counties"
      "wms_srs" "EPSG:4269"  # Specify as Latlong?

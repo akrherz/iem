@@ -73,7 +73,7 @@ LAYER
   NAME counties
   STATUS DEFAULT
   TYPE POLYGON
-  DATA shape/iacounties3.shp
+  DATA /mesonet/data/gis/static/shape/4326/iowa/iacounties.shp
   PROJECTION
    "proj=latlong"
   END
@@ -87,7 +87,7 @@ LAYER
   NAME rivers
   STATUS DEFAULT
   TYPE LINE
-  DATA /mesonet/data/gis/shape/26915/iowa/iarivers.shp
+  DATA /mesonet/data/gis/static/shape/26915/iowa/iarivers.shp
   PROJECTION 
    "init=epsg:26915"
   END

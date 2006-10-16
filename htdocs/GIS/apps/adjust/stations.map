@@ -80,6 +80,16 @@ WEB
   LOG "/var/www/htdocs/tmp/stations.log"
 END
 
+LEGEND
+  STATUS EMBED
+  OUTLINECOLOR 0 0 0
+  IMAGECOLOR 0 0 0
+  LABEL
+    COLOR 255 255 255
+  END
+  POSITION UL
+END
+
 
 
 SCALEBAR
@@ -104,7 +114,7 @@ LAYER
   NAME dm
   STATUS ON
   TYPE LINE
-  DATA /mesonet/data/gis/shape/4326/us/usdm/dm_current.shp
+  DATA /home/ldm/data/gis/shape/4326/us/usdm/dm_current.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -169,7 +179,7 @@ LAYER
   NAME namerica
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/4326/world/world_borders.shp
+  DATA /mesonet/data/gis/static/shape/4326/world/world_borders.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -187,7 +197,7 @@ LAYER
   NAME lakes
   STATUS ON
   TYPE POLYGON
-  DATA /home/akrherz/projects/iemwebsite/data/gis/shape/4326/us/major_lakes.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/major_lakes.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -288,7 +298,7 @@ LAYER
   NAME counties
   STATUS OFF
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/unproj/iowa/iacounties.shp
+  DATA /mesonet/data/gis/static/shape/4326/iowa/iacounties.shp
   PROJECTION
    "proj=latlong"
   END
@@ -330,7 +340,7 @@ LAYER
   NAME mwcounties
   STATUS OFF
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/26915/mw/mwcounties.shp
+  DATA /mesonet/data/gis/static/shape/26915/us/counties.shp
   PROJECTION
    "init=epsg:26915"
   END
@@ -353,7 +363,7 @@ LAYER
   NAME cwa
   STATUS ON
   TYPE LINE
-  DATA /home/akrherz/projects/iemwebsite/data/gis/shape/4326/nws/cwas.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/cwas.shp
   PROJECTION
    "proj=latlong"
   END
@@ -377,7 +387,7 @@ LAYER
   NAME states
   STATUS DEFAULT
   TYPE LINE
-  DATA /mesonet/data/gis/shape/26915/usa/states.shp
+  DATA /mesonet/data/gis/static/shape/26915/us/states.shp
   PROJECTION
    "init=epsg:26915"
   END
@@ -409,7 +419,7 @@ LAYER
   PROJECTION
    "proj=latlong"
   END
-  DATA /mesonet/data/gis/shape/unproj/iowa/interstates.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/interstates.shp
   CLASS
     SYMBOL "circle"
     COLOR 0 0 0
@@ -442,7 +452,7 @@ LAYER
    "proj=latlong"
   END
   LABELITEM HWYNAME
-  DATA /mesonet/data/gis/shape/unproj/iowa/interstates.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/interstates.shp
   CLASS
     EXPRESSION ([HWYNAME] < 100)
     COLOR -1 -1 -1
@@ -466,7 +476,7 @@ LAYER
   TYPE LINE
 #  MAXSCALE 1000000
 #  TILEINDEX "/mesonet/data/gis/shape/26915/iowa/iaroads/iaroads"
-  DATA "/mesonet/data/gis/shape/26915/iowa/iaroads_26915"
+  DATA "/mesonet/data/gis/static/shape/26915/iowa/iaroads.shp"
 #  CLASSITEM "SYSCODE"
   CLASS
 #    EXPRESSION /1/
@@ -522,7 +532,7 @@ LAYER
   PROJECTION
    "proj=latlong"
   END
-  DATA /mesonet/data/gis/shape/unproj/iowa/iacities.shp
+  DATA /mesonet/data/gis/static/shape/4326/iowa/iacities.shp
   LABELITEM 'Name'
   CLASS
     OUTLINECOLOR 255 255 0
@@ -708,7 +718,6 @@ LAYER
   TRANSFORM FALSE
   LABELCACHE OFF
   CLASS
-    NAME 'credits'
     LABEL
       WRAP "_"
       COLOR 0 0 0

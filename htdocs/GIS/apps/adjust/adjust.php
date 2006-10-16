@@ -1,6 +1,7 @@
 <body bgcolor="white">
 <?php
 include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
 
 $d = isset($_GET["d"]) ? $_GET["d"] : "1997-04-01";
 
@@ -33,8 +34,8 @@ function mktitle($map, $imgObj, $titlet) {
 dl($mapscript);
 
 $map = ms_newMapObj("stations.map");
-$map->set("height", 600);
-$map->set("width",  800);
+$map->set("height", 1024);
+$map->set("width",  1280);
 
 $namer = $map->getlayerbyname("namerica");
 $namer->set("status", MS_ON);
@@ -45,11 +46,15 @@ $lakes->set("status", MS_ON);
 $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
 
+$iembox = $map->getlayerbyname("iembox");
+$iembox->set("status", MS_ON);
+
 $counties = $map->getlayerbyname("counties");
 $counties->set("status", MS_ON);
 
-$locs = $map->getlayerbyname("isabel");
-$locs->set("status", MS_ON);
+$locs = $map->getlayerbyname("locs");
+$locs->set("status", MS_OFF);
+$locs->set("connection", $_DATABASES["mesosite"]);
 
 $bars = $map->getlayerbyname("bars");
 $bars->set("status", MS_ON);
@@ -57,10 +62,13 @@ $bars->set("status", MS_ON);
 $dm = $map->getlayerbyname("dm");
 $dm->set("status", MS_ON);
 
-/**
+$warnings0_c = $map->getlayerbyname("warnings0_c");
+$warnings0_c->set("status", MS_ON);
+
 $cwa = $map->getlayerbyname("cwa");
 $cwa->set("status", MS_ON);
 
+/*
 $cwa->queryByAttributes("WFO", "DMX", MS_SINGLE);
 $cwa->open();
 $rs = $cwa->getresult(0);
@@ -80,33 +88,36 @@ $rect->project($projin, $projout);
 //$roads->set("status", MS_ON);
 
 $cities = $map->getlayerbyname("sites");
-$cities->set("status", MS_ON);
+$cities->set("status", MS_OFF);
 
 $watches = $map->getlayerbyname("watches");
-$watches->set("status", MS_ON);
-$watches->set("data", "geom from (select type as wtype, geom, oid from watches WHERE date(expired) = '$d'  ORDER by type ASC) as foo");
+$watches->set("status", MS_OFF);
+$watches->set("data", "geom from (select type as wtype, geom, oid from watches WHERE extract(year from expired) = 2005 and type = 'TOR' ORDER by type ASC) as foo");
 
 $iards = $map->getlayerbyname("iards");
-$iards->set("status", MS_ON);
+$iards->set("status", MS_OFF);
 $iards_label = $map->getlayerbyname("iards_label");
-$iards_label->set("status", MS_ON);
+$iards_label->set("status", MS_OFF);
 
 $img = $map->prepareImage();
 $namer->draw($img);
-$lakes->draw($img);
 //$counties->draw($img);
 //$roads->draw($img);
 //$iards->draw($img);
 //$iards_label->draw($img);
 //$dm->draw($img);
-$states->draw($img);
+$lakes->draw($img);
+$warnings0_c->draw($img);
 $watches->draw($img);
-//$cities->draw($img);
+$states->draw($img);
+$cwa->draw($img);
+$locs->draw($img);
+//$iembox->draw($img);
 
 $map->drawLabelCache($img);
 //$bars->draw($img);
 
-mktitle($map, $img, "            SPC Watches for $d ");
+mktitle($map, $img, "         2005 Severe Thunderstorm Warnings (County)");
 //mkl($map, $img);
 
 $url = $img->saveWebImage();

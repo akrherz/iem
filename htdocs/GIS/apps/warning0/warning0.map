@@ -67,7 +67,7 @@ LAYER
   NAME namerica
   STATUS DEFAULT
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/2163/world/namerica.shp
+  DATA /mesonet/data/gis/static/shape/2163/world/namerica.shp
   PROJECTION
    "init=epsg:2163"
   END
@@ -85,7 +85,7 @@ LAYER
   NAME lakes
   STATUS DEFAULT
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/2163/usa/major_lakes.shp
+  DATA /mesonet/data/gis/static/shape/2163/usa/major_lakes.shp
   PROJECTION
    "init=epsg:2163"
   END
@@ -141,7 +141,7 @@ LAYER
   NAME counties
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/2163/usa/nwscounties.shp
+  DATA /mesonet/data/gis/static/shape/2163/usa/nwscounties.shp
   PROJECTION
    "init=epsg:2163"
   END
@@ -155,7 +155,7 @@ LAYER
   NAME states
   STATUS DEFAULT
   TYPE LINE
-  DATA /mesonet/data/gis/shape/2163/usa/states.shp
+  DATA /mesonet/data/gis/static/shape/2163/usa/states.shp
   PROJECTION
    "init=epsg:2163"
   END

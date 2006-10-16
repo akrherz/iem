@@ -171,7 +171,7 @@ LAYER
   NAME inex
   STATUS ON
   TYPE POLYGON
-  DATA shape/iem/nex_rings.shp
+  DATA /mesonet/data/gis/static/shape/4326/iem/nex_rings.shp
   PROJECTION
    "proj=latlong"
   END
@@ -184,7 +184,7 @@ LAYER
   NAME icwa
   STATUS ON
   TYPE POLYGON
-  DATA shape/iem/cwas.shp
+  DATA /mesonet/data/gis/static/shape/4326/iem/cwas.shp
   PROJECTION
    "proj=latlong"
   END
@@ -204,7 +204,7 @@ LAYER
   NAME states
   STATUS DEFAULT
   TYPE LINE
-  DATA /mesonet/data/gis/shape/unproj/us/states.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/states.shp
   METADATA
     "wms_title" "US States"
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
@@ -226,7 +226,7 @@ LAYER
   PROJECTION
    "proj=latlong"
   END
-  DATA /mesonet/data/gis/shape/unproj/iowa/interstates.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/interstates.shp
   CLASS
     COLOR 255 0 0
     SYMBOL 'circle'
@@ -241,7 +241,7 @@ LAYER
   NAME counties
   STATUS ON
   TYPE LINE
-  DATA /mesonet/data/gis/shape/26915/mw/mwcounties.shp
+  DATA /mesonet/data/gis/static/shape/26915/us/counties.shp
   PROJECTION
    "init=epsg:26915"
   END
@@ -256,7 +256,7 @@ LAYER
   NAME counties_unproj
   STATUS ON
   TYPE LINE
-  DATA /mesonet/data/gis/shape/unproj/iem/counties.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
    "proj=latlong"
   END
@@ -272,7 +272,7 @@ LAYER
   NAME uscounties
   STATUS ON
   TYPE LINE
-  DATA /mesonet/data/gis/shape/unproj/us/uscounties.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
    "proj=latlong"
   END
@@ -419,7 +419,7 @@ LAYER
   NAME iowa_counties
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/unproj/iem/cwa_counties.shp
+  DATA /mesonet/data/gis/static/shape/4326/iem/cwa_counties.shp
   PROJECTION
    "proj=latlong"
   END
@@ -442,7 +442,7 @@ LAYER
   NAME cwas
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/unproj/us/cwas.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/cwas.shp
   PROJECTION
    "proj=latlong"
   END

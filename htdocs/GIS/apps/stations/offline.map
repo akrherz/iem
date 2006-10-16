@@ -8,7 +8,7 @@ SIZE 450 350
 FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT -2223813 -1746393 2207341 1701506
 UNITS METERS
-SHAPEPATH "/mesonet/data/gis/shape"
+SHAPEPATH "/mesonet/data/gis/static/shape"
 SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
@@ -74,7 +74,7 @@ LAYER
   NAME states
   STATUS ON
   TYPE LINE
-  DATA "4326/us/states.shp"
+  DATA "/mesonet/data/gis/static/shape/4326/us/states.shp"
   PROJECTION
    "proj=latlong"
   END
@@ -94,7 +94,7 @@ LAYER
   NAME counties
   STATUS ON
   TYPE POLYGON
-  DATA "4326/us/uscounties.shp"
+  DATA "/mesonet/data/gis/static/shape/4326/us/uscounties.shp"
   PROJECTION
    "proj=latlong"
   END

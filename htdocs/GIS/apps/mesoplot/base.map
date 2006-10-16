@@ -57,7 +57,7 @@ LAYER
   NAME counties
   STATUS DEFAULT
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/26915/mw/mwcounties.shp
+  DATA /mesonet/data/gis/static/shape/26915/us/counties.shp
   PROJECTION
     "init=epsg:26915"
   END
@@ -264,7 +264,7 @@ LAYER
  PROJECTION
   "init=epsg:4326"
  END
- DATA "/mesonet/data/gis/shape/4326/us/interstates.shp"
+ DATA "/mesonet/data/gis/static/shape/4326/us/interstates.shp"
  CLASS
    COLOR 0 0 0
    SYMBOL "circle"
@@ -280,7 +280,7 @@ LAYER
   NAME states
   STATUS ON
   TYPE LINE
-  DATA /mesonet/data/gis/shape/4326/us/states.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/states.shp
   PROJECTION
    "init=epsg:4326"
   END

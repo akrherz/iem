@@ -75,7 +75,7 @@ END
 LAYER
   NAME counties
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/26915/iowa/iacounties.shp
+  DATA /mesonet/data/gis/static/shape/26915/iowa/iacounties.shp
   STATUS DEFAULT
   LABELITEM "CO_NAME"
   LABELMAXSCALE 1000
