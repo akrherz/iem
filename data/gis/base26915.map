@@ -39,7 +39,7 @@ LAYER
   NAME counties
   STATUS ON
   TYPE POLYGON
-  DATA "shape/26915/us/counties.shp"
+  DATA "/mesonet/data/gis/static/shape/26915/us/counties.shp"
   PROJECTION
     "init=epsg:26915"
   END
@@ -65,7 +65,7 @@ LAYER
 	NAME states
 	STATUS ON
 	TYPE LINE
-	DATA "shape/26915/us/states.shp"
+	DATA "/mesonet/data/gis/static/shape/26915/us/states.shp"
 	PROJECTION
 	  "init=epsg:26915"
 	END
@@ -85,7 +85,7 @@ LAYER
   PROJECTION
    "init=epsg:4326"
   END
-  DATA "shape/4326/us/interstates.shp"
+  DATA "/mesonet/data/gis/static/shape/4326/us/interstates.shp"
   CLASS
     COLOR 255 0 0
     SYMBOL 'circle'
@@ -105,7 +105,7 @@ LAYER
    "init=epsg:4326"
   END
   LABELITEM HWYNAME
-  DATA "shape/4326/us/interstates.shp"
+  DATA "/mesonet/data/gis/static/shape/4326/us/interstates.shp"
   CLASS
 #    EXPRESSION ([HWYNAME] < 100)
     COLOR -1 -1 -1

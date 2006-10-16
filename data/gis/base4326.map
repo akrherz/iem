@@ -93,7 +93,7 @@ LAYER
   NAME namerica
   STATUS OFF
   TYPE POLYGON
-  DATA shape/4326/world/world_borders.shp
+  DATA /mesonet/data/gis/static/shape/4326/world/world_borders.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -112,7 +112,7 @@ LAYER
   NAME states
   STATUS OFF
   TYPE LINE
-  DATA shape/4326/us/states.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/states.shp
   METADATA
     "wms_title" "US States"
      "wms_srs" "EPSG:4326"  # Specify as Latlong?
@@ -134,7 +134,7 @@ LAYER
   NAME lakes
   STATUS OFF
   TYPE POLYGON
-  DATA shape/4326/us/major_lakes.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/major_lakes.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -148,7 +148,7 @@ LAYER
   NAME uscounties
   STATUS OFF
   TYPE LINE
-  DATA shape/4326/us/uscounties.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -164,7 +164,7 @@ LAYER
   NAME iacounties
   STATUS OFF
   TYPE LINE
-  DATA shape/4326/iowa/iacounties.shp
+  DATA /mesonet/data/gis/static/shape/4326/iowa/iacounties.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -180,7 +180,7 @@ LAYER
   NAME cwas
   STATUS OFF
   TYPE POLYGON
-  DATA shape/4326/nws/cwas.shp
+  DATA /mesonet/data/gis/static/shape/4326/nws/cwas.shp
   PROJECTION
    "init=epsg:4326"
   END
