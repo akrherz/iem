@@ -137,7 +137,7 @@ function sortBySecondIndex($multiArray, $secondIndex) {
      $doSF = 1;
    } else {
      $iemob = $iem->getSingleSite($value);
-     if (sizeof($iemob->db) == 0){continue; }
+     if (isset($iemob->invalid)){continue; }
      $mydata[$value] = $iemob->db;
     $mydata[$value]["sped"] = $mydata[$value]["sknt"] * 1.15078;
     $mydata[$value]["relh"] = relh(f2c($mydata[$value]["tmpf"]), 
