@@ -3,6 +3,7 @@
 class IEMAccessOb {
 
   function IEMAccessOb($row){
+    if ($row == ""){ $this->invalid = 1; return; }
     $this->ts = strtotime($row["valid"]);
     $this->db = $row;
     $this->db["ts"] = strtotime(substr($row["valid"],0,16));
