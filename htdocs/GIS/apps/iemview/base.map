@@ -34,7 +34,7 @@ LAYER
   NAME states
   STATUS DEFAULT
   TYPE LINE
-  DATA /mesonet/data/gis/shape/unproj/us/states.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/states.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -104,7 +104,7 @@ LAYER
   NAME counties
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/unproj/iem/iemcounties.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
     "init=epsg:4326"
   END

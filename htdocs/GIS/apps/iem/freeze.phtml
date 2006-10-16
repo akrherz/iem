@@ -81,28 +81,37 @@ function mklogolocal($map, $imgObj) {
 /** Load mapscript so */
 dl($mapscript);
 
-$map = ms_newMapObj("freeze.map");
+$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 
 $arExtents = explode(",", $extents);
 $map->setextent($arExtents[0], $arExtents[1], $arExtents[2], $arExtents[3]);
 
+$namer = $map->getlayerbyname("namerica");
+$namer->set("status", MS_ON);
+
+$lakes = $map->getlayerbyname("lakes");
+$lakes->set("status", MS_ON);
+
 $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
 
-$sites = $map->getlayerbyname("sites");
+$sites = $map->getlayerbyname("airtemps");
 $sites->set("status", MS_ON);
+$sites->set("connection", $_DATABASES["access"] );
 
-$counties = $map->getlayerbyname("counties");
-$counties->set("status", MS_ON);
+$counties = $map->getlayerbyname("uscounties");
+$counties->set("status", MS_OFF);
 
 $surface = $map->getlayerbyname("surface");
 $surface->set("status", MS_ON);
 $surface->set("connection", $_DATABASES["access"] );
 
-$n0r = $map->getlayerbyname("n0r");
+$n0r = $map->getlayerbyname("nexrad_n0r");
 $n0r->set("status", MS_ON);
 
 $img = $map->prepareImage();
+$namer->draw($img);
+$lakes->draw($img);
 if ($radar)
   $n0r->draw($img);
 $counties->draw($img);
@@ -115,6 +124,10 @@ $d = date("d F Y h:i a");
 mktitle($map, $img, "                        IEM Freeze valid: ". $d);
 $map->drawLabelCache($img);
 mklogolocal($map, $img);
+
+$ltmp = $map->drawLegend();
+$legendsrc = $ltmp->saveWebImage();
+
 
 $url = $img->saveWebImage();
 ?>
@@ -197,6 +210,8 @@ $url = $img->saveWebImage();
 </select></form>
 <b><font color="white"><u>Temperature Key:</u></font></b>
 
+<img src="<?php echo $legendsrc; ?>">
+<!--
 <br><b><font color="#1e8914"> >= 35 </font></b>
 <br><b><font color="#2ac11d"> >= 34 </font></b>
 <br><b><font color="#35e025"> >= 33 </font></b>
@@ -204,6 +219,7 @@ $url = $img->saveWebImage();
 <br><b><font color="#e872e2"> >= 31 </font></b>
 <br><b><font color="#e8a4e2"> >= 30 </font></b>
 <br><b><font color="#e8d6e2"> < 30 </font></b>
+-->
 
 </td></tr>
 </table>

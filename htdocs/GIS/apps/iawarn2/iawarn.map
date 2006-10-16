@@ -71,7 +71,7 @@ LAYER
   NAME states
   STATUS DEFAULT
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/unproj/iem/states.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/states.shp
   PROJECTION
    "proj=latlong"
   END
@@ -84,7 +84,7 @@ LAYER
   NAME iowa_counties
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/unproj/iem/cwa_counties.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
    "proj=latlong"
   END
@@ -107,7 +107,7 @@ LAYER
   NAME more_counties
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/unproj/iem/sd_cwa_counties.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
    "proj=latlong"
   END
@@ -123,7 +123,7 @@ LAYER
   NAME cwas
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/unproj/us/cwas.shp
+  DATA /mesonet/data/gis/static/shape/4326/iem/cwas.shp
   PROJECTION
    "proj=latlong"
   END

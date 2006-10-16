@@ -241,7 +241,7 @@ LAYER
   STATUS ON
   TYPE POLYGON
   DUMP true
-  DATA /mesonet/data/gis/shape/26915/iowa/iacounties.shp
+  DATA /mesonet/data/gis/static/shape/26915/iowa/iacounties.shp
   METADATA 
     "wms_title" "Iowa Counties"
      "wms_srs" "EPSG:26915"
@@ -260,7 +260,7 @@ LAYER
   NAME states
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/26915/usa/states.shp
+  DATA /mesonet/data/gis/static/shape/26915/us/states.shp
   PROJECTION
    "init=epsg:26915"
   END

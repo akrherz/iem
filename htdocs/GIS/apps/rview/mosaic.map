@@ -246,7 +246,7 @@ LAYER
   NAME namerica
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/4326/world/world_borders.shp
+  DATA /mesonet/data/gis/static/shape/4326/world/world_borders.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -264,7 +264,7 @@ LAYER
   NAME inex
   STATUS ON
   TYPE POLYGON
-  DATA shape/iem/nex_rings.shp
+  DATA /mesonet/data/gis/static/shape/4326/iem/nex_rings.shp
   PROJECTION
    "proj=latlong"
   END
@@ -277,7 +277,7 @@ LAYER
   NAME icwa
   STATUS ON
   TYPE POLYGON
-  DATA shape/iem/cwas.shp
+  DATA /mesonet/data/gis/static/shape/4326/iem/cwas.shp
   PROJECTION
    "proj=latlong"
   END
@@ -297,7 +297,7 @@ LAYER
   NAME states
   STATUS DEFAULT
   TYPE LINE
-  DATA /mesonet/data/gis/shape/4326/us/states.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/states.shp
   METADATA
     "wms_title" "US States"
      "wms_srs" "EPSG:4326"  # Specify as Latlong?
@@ -318,7 +318,7 @@ LAYER
   NAME counties
   STATUS ON
   TYPE LINE
-  DATA /mesonet/data/gis/shape/26915/mw/mwcounties.shp
+  DATA /mesonet/data/gis/static/shape/26915/us/counties.shp
   PROJECTION
    "init=epsg:26915"
   END
@@ -333,7 +333,7 @@ LAYER
   NAME counties_unproj
   STATUS ON
   TYPE LINE
-  DATA /mesonet/data/gis/shape/4326/us/uscounties.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -349,7 +349,7 @@ LAYER
   NAME uscounties
   STATUS ON
   TYPE LINE
-  DATA /mesonet/data/gis/shape/unproj/us/uscounties.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
    "proj=latlong"
   END
@@ -563,7 +563,7 @@ LAYER
   NAME iowa_counties
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/unproj/iem/cwa_counties.shp
+  DATA /mesonet/data/gis/static/shape/4326/iem/cwa_counties.shp
   PROJECTION
    "proj=latlong"
   END
@@ -586,7 +586,7 @@ LAYER
   NAME lakes
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/4326/us/major_lakes.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/major_lakes.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -600,7 +600,7 @@ LAYER
   NAME cwas
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/shape/unproj/us/cwas.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/cwas.shp
   PROJECTION
    "proj=latlong"
   END
