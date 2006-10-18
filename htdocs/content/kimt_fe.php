@@ -9,13 +9,13 @@
  $secs = intval($min) * 60;
 ?>
   <title>IEM | KIMT SchoolNet | <?php echo $cities["KIMT"][$station]["short"]; ?></title>
-  <meta http-equiv="refresh" content="<?php echo $secs; ?>; URL=kcci_fe.php?min=<?php echo $min; ?>&station=<?php echo $station; ?>">
+  <meta http-equiv="refresh" content="<?php echo $secs; ?>; URL=kimt_fe.php?min=<?php echo $min; ?>&station=<?php echo $station; ?>">
 
 </head>
 <body bgcolor="#96aae7">
 
 <center>
-<form method="POST" action="kcci_fe.php" name="st">
+<form method="POST" action="kimt_fe.php" name="st">
 <?php
  
   echo "SchoolNet Site: ";
@@ -23,7 +23,7 @@ echo "<select  onChange=\"location=this.form.station.options[this.form.station.s
 
 $Scities = $cities["KIMT"];
 while( list($key, $val) = each($Scities) ){
-  echo "<option value=\"$rooturl/content/kcci_fe.php?min=".$min."&station=". $key ."\"";
+  echo "<option value=\"$rooturl/content/kimt_fe.php?min=".$min."&station=". $key ."\"";
   if ($station == $key){
         echo " SELECTED ";
   }
@@ -36,12 +36,12 @@ echo "</select>\n";
 </form>
 <p>
 <?php
-  echo "<img src=\"kcci.php?station=".$station ."\">\n";
+  echo "<img src=\"kimt.php?station=".$station ."\">\n";
 ?>
 
 <?php if (! isset($mode) ){ ?>
 <br>Refresh Every: 
-<form name="refresh" action="kcci_fe.php">
+<form name="refresh" action="kimt_fe.php">
 <?php
   $mins = Array(1, 5, 10, 20);
   while (list($key, $val) = each($mins) ){
