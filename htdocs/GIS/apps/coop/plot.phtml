@@ -57,6 +57,7 @@ choice.
      <option value="high" <?php if($var == "high") echo "SELECTED"; ?>>High Temperature</option>
      <option value="low" <?php if($var == "low") echo "SELECTED"; ?>>Low Temperature</option>
      <option value="precip" <?php if($var == "precip") echo "SELECTED"; ?>>Precipitation</option>
+     <option value="snow" <?php if($var == "snow") echo "SELECTED"; ?>>Snow [1]</option>
     </select></td>
   <td><?php echo yearselect(1893, $year); ?></td>
   <td><?php monthSelect2($month, 'month'); ?></td>
@@ -64,7 +65,7 @@ choice.
   <td><input type="submit" value="Make Plot"></td>
   </tr>
 </table>
- 
+<br />[1] Snowfall data is not complete.  Please be careful using the data.
 
 <?php
 dl($mapscript);
@@ -102,6 +103,7 @@ function plotNoData($map, $img){
 
 $varDef = Array("low" => "Low Temperature",
   "precip" => "Precipitation",
+  "snow" => "Snowfall",
   "high" => "High Temperature"
 );
 
@@ -110,6 +112,7 @@ $varDef = Array("low" => "Low Temperature",
 $rnd = Array("gdd50" => 0,
   "et" => 2,
   "prec" => 2,
+  "snow" => 0,
   "sgdd50" => 0,
   "sdd86" => 0);
 
@@ -200,6 +203,7 @@ foreach($vals as $key => $value){
   // Value UL
   $pt = ms_newPointObj();
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+  if ($value == 0.0001) $value = "T";
   $pt->draw($map, $snet, $img, 2, $value);
   $pt->free();
 }
