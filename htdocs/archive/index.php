@@ -80,6 +80,9 @@ then, only base reflectivity was saved.</li>
 <li><a href="<?php echo $rooturl; ?>/browser/">Archived Data Browser</a>
   <br />Browse the archive of products via this frames based interface.</li> 
 
+<li><a href="http://locust.mmm.ucar.edu/case-selection/">UCAR plot archive</a>
+  <br />Assorted RADAR, satellite, and model plots back to 1998.</li>
+
 <li><a href="<?php echo $rooturl; ?>/archive/data/">IEM Generated Plots</a>
   <br>Images and data products mostly displayed in real time on the current
 data page.  Iowa Mesonet plots, hourly precip plots, mesonet stats and 
