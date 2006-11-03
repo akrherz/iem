@@ -5,7 +5,7 @@ NAME adjust
 STATUS ON
 SIZE 1024 768
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 # Good for Iowa
 #EXTENT 250000 4450000 690000 4880000
 #EXTENT 154000 4420187.5 766000 4879812.5
@@ -30,7 +30,7 @@ UNITS METERS
 #UNITS METERS
 #UNITS METERS
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SYMBOLSET "../../../../data/gis/symbols/stations.sym"
 #IMAGECOLOR 230 230 230
 IMAGECOLOR 0 0 250
 IMAGETYPE PNG
