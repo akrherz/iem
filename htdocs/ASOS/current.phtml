@@ -227,7 +227,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
               echo "G". $parts["gust"];
             } echo "</td>";
             echo "<td>". drct2txt( $parts["drct"] ) ."</td><td>";
-  if (isset($parts["peak_ts"])) echo "<td>". $parts["peak"] ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ."</td>";
+  if (isset($parts["peak_ts"])) echo  $parts["peak"] ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ;
        echo "</td><td>". $parts["phour"] ."</td>
             <td>". $parts["pday"] ."</td>
 	    </tr>\n";
