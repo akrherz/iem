@@ -119,6 +119,12 @@ wish to change this to <a href="dailyRequest.php">daily data</a>.
   <option value="tab">Tab Delimited
 </select>
 
+<br />Text file format:
+<select name="lf">
+  <option value="dos">Windows/DOS
+  <option value="unix">UNIX/MacOSX
+</select>
+
 
 <p><b><h4 class="subtitle">Submit your request:</h4></b>
 	<input type="submit" value="Submit Query">
