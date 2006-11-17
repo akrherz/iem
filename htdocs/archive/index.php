@@ -101,6 +101,14 @@ archives of RUC, ETA, and AVN model plots.  National radar summaries,
 surface plots and other plots.</li>
 </ul>
 
+<h3>US Daily Weather Maps</h3>
+<ul>
+ <li><a href="http://www.hpc.ncep.noaa.gov/dailywxmap/pdffiles.html">Recent maps from NCEP</a></li>
+ <li><a href="http://www.hpc.ncep.noaa.gov/dailywxmap/index.html">Daily maps</a></li>
+ <li><a href="http://docs.lib.noaa.gov/rescue/dwm/data_rescue_daily_weather_maps.html">Maps from 1872 to 2002</a></li>
+ <li><a href="http://www7.ncdc.noaa.gov/IPS/">NCDC Image and Publications System</a></li>
+</ul>
+
 <h3>Data download forms</h3>
 <ul>
 <li><a href="<?php echo $rooturl; ?>/request/awos/1min.php">1 minute AWOS data</a>
