@@ -1,0 +1,22 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$connection = iemdb("access");
+
+$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+$network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
+$ts = mktime(0,0,0,$month, $day, $year);
+
+$sql = sprintf("SELECT *, x(geom) as x, y(geom) as y from summary_%s WHERE network = '%s' and day = '%s' ORDER by station ASC", date("Y", $ts), $network, date("Y-m-d", $ts) );
+$rs = pg_exec($connection, $sql);
+
+header("Content-type: text/plain");
+echo "station,date,longitude,latitide,max_tmpf,min_tmpf,\n";
+
+for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+{
+  echo sprintf("%s,%s,%s,%s,%s,%s,\n", $row["station"], date("Y-m-d", $ts), $row["y"], $row["x"], $row["max_tmpf"], $row["min_tmpf"]);  
+}
+?>
