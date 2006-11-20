@@ -13,7 +13,7 @@ $sql = sprintf("SELECT *, x(geom) as x, y(geom) as y from summary_%s WHERE netwo
 $rs = pg_exec($connection, $sql);
 
 header("Content-type: text/plain");
-echo "station,date,longitude,latitide,max_tmpf,min_tmpf,\n";
+echo "station,date,latitide,longitude,max_tmpf,min_tmpf,\n";
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
