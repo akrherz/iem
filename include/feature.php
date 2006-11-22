@@ -14,6 +14,9 @@
   if (array_key_exists('foid', $_SESSION) && $_SESSION["foid"] == $foid)
   {
 
+  } elseif (getenv("REMOTE_ADDR") == "129.186.142.22") 
+  {
+
   } elseif (isset($_GET["feature_good"]))
   {
     $_SESSION["foid"] = $foid;
@@ -46,7 +49,7 @@ if (getenv("REMOTE_ADDR") == "206.61.97.204" )
 {
  $s = "<img src=\"images/smokey_1021.jpg\" style=\"float: left; margin: 5px;\">
 Smokey,
-<br /> &nbsp; &nbsp; &nbsp; &nbsp; 62 weeks now! :) <br /> muah! muah! Lots and lots of weeks now :) &nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+<br /> &nbsp; &nbsp; &nbsp; &nbsp; 63 weeks now! :) <br /> One long trip down and two more to go!  All of the time we will be spending together this week!  Yippeee! &nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 }
 
 echo $s;
