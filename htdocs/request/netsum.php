@@ -13,10 +13,13 @@ $sql = sprintf("SELECT *, x(geom) as x, y(geom) as y from summary_%s WHERE netwo
 $rs = pg_exec($connection, $sql);
 
 header("Content-type: text/plain");
-echo "station,date,latitide,longitude,max_tmpf,min_tmpf,\n";
+echo "station,date,latitide,longitude,max_tmpf,min_tmpf,rain_inch,\n";
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
-  echo sprintf("%s,%s,%s,%s,%s,%s,\n", $row["station"], date("Y-m-d", $ts), $row["y"], $row["x"], $row["max_tmpf"], $row["min_tmpf"]);  
+  $maxt = ($row["max_tmpf"] > -90) ? $row["max_tmpf"] : "M";
+  $mint = ($row["min_tmpf"] < 90) ? $row["min_tmpf"] : "M";
+  $rain = ($row["pday"] >= 0) ? $row["pday"] : "M";
+  echo sprintf("%s,%s,%s,%s,%s,%s,%s,\n", $row["station"], date("Y-m-d", $ts), $row["y"], $row["x"], $maxt, $mint, $rain);  
 }
 ?>
