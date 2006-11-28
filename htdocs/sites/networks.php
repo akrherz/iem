@@ -1,6 +1,7 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/networks.php");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 $format = isset($_GET['format']) ? $_GET['format'] : 'html';
@@ -24,29 +25,15 @@ table that you need, please let use know.</p>
 <tr>
   <th>Select Observing Network:</th>
   <td><SELECT name="network" size="1">
-  <option value="IA_ASOS" <?php if($network == "IA_ASOS") echo "SELECTED"; ?>>ASOS (Automated Surface Observing System)
-  <option value="AWOS" <?php if($network == "AWOS") echo "SELECTED"; ?>>AWOS (Automated Weather Observing System)
-  <option value="IACLIMATE" <?php if($network == "IACLIMATE") echo "SELECTED"; ?>>Iowa Climate Sites (IEM Tracked)
-  <option value="DCP" <?php if($network == "DCP") echo "SELECTED"; ?>>DCP (GEOS Data Collection Platforms)
-  <option value="ISUAG" <?php if($network == "ISUAG") echo "SELECTED"; ?>>Iowa State AgClimate
-  <option value="KCCI" <?php if($network == "KCCI") echo "SELECTED"; ?>>KCCI SchoolNET8 Stations
-  <option value="KELO" <?php if($network == "KELO") echo "SELECTED"; ?>>KELO WeatherNet Stations
-  <option value="KIMT" <?php if($network == "KIMT") echo "SELECTED"; ?>>KIMT StormNet Stations
-  <option value="IA_COOP" <?php if($network == "IA_COOP") echo "SELECTED"; ?>>NWS COOP Observers
-  <option value="IA_RWIS" <?php if($network == "IA_RWIS") echo "SELECTED"; ?>>Iowa RWIS (Roadway Weather Information System)
-  <option value="KS_RWIS" <?php if($network == "KS_RWIS") echo "SELECTED"; ?>>Kansas RWIS (Roadway Weather Information System)
-  <option value="MN_RWIS" <?php if($network == "MN_RWIS") echo "SELECTED"; ?>>Minnesota RWIS (Roadway Weather Information System)
-  <option value="WI_RWIS" <?php if($network == "WI_RWIS") echo "SELECTED"; ?>>Wisconsin RWIS (Roadway Weather Information System)
-  <option value="MN_ASOS" <?php if($network == "MN_ASOS") echo "SELECTED"; ?>>Minnesota ASOS/AWOS
-  <option value="WI_ASOS" <?php if($network == "WI_ASOS") echo "SELECTED"; ?>>Wisconsin ASOS/AWOS
-  <option value="IL_ASOS" <?php if($network == "IL_ASOS") echo "SELECTED"; ?>>Illinios ASOS/AWOS
-  <option value="MO_ASOS" <?php if($network == "MO_ASOS") echo "SELECTED"; ?>>Missouri ASOS/AWOS
-  <option value="KS_ASOS" <?php if($network == "KS_ASOS") echo "SELECTED"; ?>>Kansas ASOS/AWOS
-  <option value="NE_ASOS" <?php if($network == "NE_ASOS") echo "SELECTED"; ?>>Nebraska ASOS
-  <option value="NE_AWOS" <?php if($network == "NE_AWOS") echo "SELECTED"; ?>>Nebraska AWOS
-  <option value="NE_RWIS" <?php if($network == "NE_RWIS") echo "SELECTED"; ?>>Nebraska RWIS
-  <option value="SD_ASOS" <?php if($network == "SD_ASOS") echo "SELECTED"; ?>>South Dakota ASOS/AWOS
-  <option value="ND_ASOS" <?php if($network == "ND_ASOS") echo "SELECTED"; ?>>North Dakota ASOS/AWOS
+<?php
+  reset($networks);
+  while (list($sid, $tbl) = each($networks))
+  {
+     echo  "<option value=\"$sid\" ";
+     if ($network == $sid) { echo "SELECTED"; }
+     echo ">". $tbl["name"] ."</option>\n";
+  }
+?>
  </SELECT>
   </td>
 </tr>
