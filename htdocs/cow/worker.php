@@ -301,6 +301,7 @@ else {
 <td><img src="cow.jpg"></td>
 </tr>
 <tr>
+<!-- PARSEME: FAR:<?php echo $far; ?> POD:<?php echo $pod; ?> CSI:<?php echo $csi; ?> -->
 <td colspan="4">
  <table cellspacing="1" cellpadding="2" border="1">
  <tr>
