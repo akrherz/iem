@@ -73,7 +73,7 @@ dl($mapscript);
 include("warnings_plot.php");
 
 
-$query = "select sum(pop2004) as pop, sum(males) as males, sum(females) as females from blockgroup WHERE the_geom && 'SRID=4326;${geom}' and overlaps('SRID=4326;${geom}', the_geom)";
+$query = "select sum(hse_units) as housing_units, sum(pop2004) as pop, sum(males) as males, sum(females) as females from blockgroup WHERE the_geom && 'SRID=4326;${geom}' and overlaps('SRID=4326;${geom}', the_geom)";
 $blockgroup = pg_exec($postgis, $query);
 $blocktotal = pg_fetch_array($blockgroup,0);
 
@@ -93,6 +93,7 @@ $placepoly = pg_exec($postgis, $query);
  <tr><th>Population:</th><td><?php echo $blocktotal["pop"]; ?></td></tr>
  <tr><th>Males:</th><td><?php echo $blocktotal["males"]; ?></td></tr>
  <tr><th>Females:</th><td><?php echo $blocktotal["females"]; ?></td></tr>
+ <tr><th>Housing Units:</th><td><?php echo $blocktotal["housing_units"]; ?></td></tr>
 </table>
 
 </div>
