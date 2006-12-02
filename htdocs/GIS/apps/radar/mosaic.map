@@ -4,12 +4,12 @@
 NAME mosaic
 STATUS ON
 SIZE 450 350
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 EXTENT -2223813 -1746393 2207341 1701506
 #EXTENT -2131274.95 2529023.10 2627568.78 6241958.85
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/static/shape/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR 0 0 0
 IMAGETYPE PNG
 TRANSPARENT off
