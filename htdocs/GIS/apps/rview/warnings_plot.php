@@ -51,15 +51,16 @@ $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 $map->set("width", $width);
 $map->set("height", $height);
 
-$lpad = $zoom / 100.0;
 
 if (isset($x0))
   $map->setextent($x0,$y0,$x1,$y1);
-else
+else {
+  $lpad = $zoom / 100.0;
   $map->setextent($lon0 - $lpad,
                 $lat0 - $lpad,
                 $lon0 + $lpad,
                 $lat0 + $lpad);
+}
 
 $map->setProjection("proj=latlong");
 
