@@ -66,7 +66,7 @@ for i in range(len(rs)):
 	d["COUNTY"] = rs[i]['county']
 	d["SOURCE"] = rs[i]['source']
 	d["REMARK"] = rs[i]['remark']
-    print d
+	print d
     
 	obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[f]] )
 	shp.write_object(-1, obj)
