@@ -1,0 +1,81 @@
+<?php 
+include("../../../config/settings.inc.php");
+
+$TITLE = "IEM | Local Storm Reports shapefiles";
+include("$rootpath/include/forms.php");
+include("$rootpath/include/header.php"); ?>
+
+<h3 class="heading">Archived Local Storm Reports Shapefiles</h3>
+
+<p>This page allows you to generate a GIS shapefile of NWS issued Local Storm
+Reports for a time period of your choice.  Please be sure to read the
+archive status and dbf schema below. The IEM's archive is certainly not complete or official.  If you are looking for a real-time source of lsr shapefiles, you can find that <a href="http://mesonet.agron.iastate.edu/data/gis/shape/4326/us/lsr_24hour.zip">here.</a></p>
+
+<form method="GET" action="/cgi-bin/request/gis/lsr.py">
+<h4>Select time interval</h4>
+<i>(Times are in UTC.  LSRs <b>issued</b> between these times
+will be included in the output GIS file...)</i>
+<table>
+  <tr>
+    <td></td>
+    <th>Year</th><th>Month</th><th>Day</th>
+    <th>Hour</th><th>Minute</th>
+  </tr>
+
+  <tr>
+    <th>Start:</th>
+    <td rowspan="2">
+     <?php echo yearSelect(2003, date("Y"), "year"); ?>
+    </td>
+    <td>
+     <?php echo monthSelect2(0,"month1"); ?>
+    </td>
+    <td>
+     <?php daySelect2(0, "day1"); ?>
+    </td>
+    <td>
+     <?php gmtHourSelect(0, "hour1"); ?>
+    </td>
+    <td>
+     <?php echo minuteSelect(0, "minute1"); ?>
+    </td>
+  </tr>
+
+  <tr>
+    <th>End:</th>
+    <td>
+     <?php echo monthSelect2(0,"month2"); ?>
+    </td>
+    <td>
+     <?php daySelect2(0, "day2"); ?>
+    </td>
+    <td>
+     <?php gmtHourSelect(0, "hour2"); ?>
+    </td>
+    <td>
+     <?php echo minuteSelect(0, "minute2"); ?>
+    </td>
+  </tr>
+</table>
+
+<p><input type="submit" value="Giveme shapefile now!">
+</form>
+
+<h4>Shapefile DBF schema:</h4>
+<pre>
+VALID    Timestamp of LSR in GMT/UTC time
+MAG      Magnitude value of the LSR
+WFO      Weather Forecast Office originating the LSR
+TYPECODE 1 character identifier of the report type
+CITY     Location used for the LSR 
+COUNTY   County/Parish of the LSR city
+SOURCE   Who reported the LSR
+REMARK   Text summary with the LSR
+</pre>
+
+<h4>Archive notes:</h4>
+<ul>
+ <li>Before 1 Dec 2006, there was no differentiation between Snow and Sleet reports.</li>
+</ul>
+
+<?php include("$rootpath/include/footer.php"); ?>
