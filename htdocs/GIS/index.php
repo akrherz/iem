@@ -81,9 +81,11 @@ back to 1951.</li>
  <li><a href="datasets/iaclimate.zip">1970-2000 Iowa Climate</a>
   <br>1970-2000 average annual precipitation, average temperature as 
     calculated from the IEM databases.</li>
+ <li><a href="/data/gis/shape/4326/us/lsr_24hour.zip">Past 24 hours of Storm Reports</a>
+ <br />A shapefile of Local Storm Reports (LSRs) valid for the past 24 hours.  The file is updated every 5 minutes.</li>
  <li><a href="/data/gis/shape/4326/us/current_ww.zip">Current NWS Warnings</a>
  <br />A shapefile of active county based and polygon based weather warnings. 
-This file is updated every 5 minutes at 0,5,10 ... after the hour.</li>
+This file is updated every 5 minutes.</li>
  <li><a href="/request/gis/watchwarn.phtml">Archived NWS Warnings</a>
  <br />Generate a shapefile of weather warnings for a time period of your
  choice!</li>
