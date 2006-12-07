@@ -45,7 +45,7 @@ dbf.add_field("REMARK", dbflib.FTString, 200, 0)
 
 sql = "SELECT distinct *, astext(geom) as tgeom from lsrs WHERE \
 	issue >= '%s' and issue < '%s' \
-	ORDER by issue ASC" % (sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M") )
+	ORDER by valid ASC" % (sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M") )
 rs = mydb.query(sql).dictresult()
 
 cnt = 0
