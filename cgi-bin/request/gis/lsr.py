@@ -49,6 +49,7 @@ sql = "SELECT distinct *, astext(geom) as tgeom from lsrs WHERE \
 rs = mydb.query(sql).dictresult()
 
 cnt = 0
+print 'Content-type: text/plain\n\n'
 for i in range(len(rs)):
 	s = rs[i]["tgeom"]
 	if (s == None or s == ""):
