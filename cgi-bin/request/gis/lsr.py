@@ -40,7 +40,7 @@ dbf.add_field("TYPETEXT", dbflib.FTString, 40, 0)
 dbf.add_field("CITY", dbflib.FTString, 40, 0)
 dbf.add_field("COUNTY", dbflib.FTString, 40, 0)
 dbf.add_field("SOURCE", dbflib.FTString, 40, 0)
-dbf.add_field("REMARK", dbflib.FTString, 200, 0)
+dbf.add_field("REMARK", dbflib.FTString, 400, 0)
 
 
 sql = "SELECT distinct *, astext(geom) as tgeom from lsrs WHERE \
@@ -49,7 +49,7 @@ sql = "SELECT distinct *, astext(geom) as tgeom from lsrs WHERE \
 rs = mydb.query(sql).dictresult()
 
 cnt = 0
-print 'Content-type: text/plain\n\n'
+#print 'Content-type: text/plain\n\n'
 for i in range(len(rs)):
 	s = rs[i]["tgeom"]
 	if (s == None or s == ""):
@@ -66,8 +66,8 @@ for i in range(len(rs)):
 	d["CITY"] = rs[i]['city']
 	d["COUNTY"] = rs[i]['county']
 	d["SOURCE"] = rs[i]['source']
-	d["REMARK"] = rs[i]['remark']
-	print d
+	d["REMARK"] = rs[i]['remark'][:400]
+	#print d
     
 	obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[f]] )
 	shp.write_object(-1, obj)
