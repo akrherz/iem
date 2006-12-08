@@ -1,4 +1,5 @@
-View Scale: <select name="zoom">
+<p><strong>Map Extent:</strong>
+<br />View Scale: <select name="zoom">
  <option value="25" <?php if ($zoom == 25) echo "SELECTED"; ?>>25km
  <option value="50" <?php if ($zoom == 50) echo "SELECTED"; ?>>50km
  <option value="100" <?php if ($zoom == 100) echo "SELECTED"; ?>>100km
@@ -16,12 +17,14 @@ View Scale: <select name="zoom">
  <option value="1280x1024" <?php if ($imgsize == "1280x1024") echo "SELECTED"; ?>>1280x1024
 </select>
 
-<br />Loop Display: <select name="loop">
-  <option value="0" <?php if ($loop == 0) echo "SELECTED"; ?>>No
-  <option value="1" <?php if ($loop == 1) echo "SELECTED"; ?>>Java Script
-  <option value="2" <?php if ($loop == 2) echo "SELECTED"; ?>>Applet
+<p><strong>Loop Options</strong>
+<br /><select name="loop">
+  <option value="0" <?php if ($loop == 0) echo "SELECTED"; ?>>1 image only
+  <option value="1" <?php if ($loop == 1) echo "SELECTED"; ?>>Java Script Loop
+  <option value="2" <?php if ($loop == 2) echo "SELECTED"; ?>>Java Applet Loop
 </select>
-<br />Loop Frames: <input type="text" value="<?php echo $frames; ?>" name="frames" size="3">
+<br />Loop Frames: 
+<input type="text" value="<?php echo $frames; ?>" name="frames" size="3">
 <br />Loop Frame Interval: 
 <select name="interval">
   <option value="5" <?php if ($interval == 5) echo "SELECTED"; ?>>5 minutes
@@ -33,7 +36,7 @@ View Scale: <select name="zoom">
   <option value="1440" <?php if ($interval == 1440) echo "SELECTED"; ?>>1 day
 </select>
 
-<br /><strong>Text Warning Listing</strong>
+<p><strong>Text Warning Listing</strong>
 <br />Filter by WFO:<select name="filter">
   <option value="0" <?php if ($filter == 0) echo "SELECTED"; ?>>No
   <option value="1" <?php if ($filter == 1) echo "SELECTED"; ?>>Yes
@@ -61,7 +64,7 @@ View Scale: <select name="zoom">
   <option value="1" <?php if ($sortdir == 1) echo "SELECTED"; ?>>ASC
 </select>
 
-<br /><strong>Local Storm Reports</strong>
+<p><strong>Local Storm Reports</strong>
 <br />Direction in time:<select name="lsrlook">
  <option value="+" <?php if ($lsrlook == "+") echo "SELECTED" ?>>+
  <option value="-" <?php if ($lsrlook == "-") echo "SELECTED" ?>>-

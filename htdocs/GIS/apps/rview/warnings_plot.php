@@ -188,7 +188,7 @@ $lsr_etime = strftime("%Y-%m-%d %H:%M:00+00", $ts + ($lsrwindow * 60) );
 if ($lsrlook == "-") 
    $lsr_etime = strftime("%Y-%m-%d %H:%M:00+00", $ts);
 //$lsrs->setFilter("valid >= '$lsr_btime' and valid <= '$lsr_etime'");
-$lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs WHERE valid >= '$lsr_btime' and valid <= '$lsr_etime') as foo USING unique k USING SRID=4326 ");
+$lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_${year} WHERE valid >= '$lsr_btime' and valid <= '$lsr_etime') as foo USING unique k USING SRID=4326 ");
 
 $img = $map->prepareImage();
 
