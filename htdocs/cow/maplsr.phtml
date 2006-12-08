@@ -75,7 +75,7 @@ $p0->set("data", "geom from (select phenomena, geom, oid from warnings_$year WHE
 $lsrs = $map->getlayerbyname("lsrs");
 $lsrs->set("connection", $_DATABASES["postgis"]);
 $lsrs->set("status",1);
-$lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs WHERE valid = '$tsSQL') as foo USING unique k USING SRID=4326");
+$lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_${year} WHERE valid = '$tsSQL') as foo USING unique k USING SRID=4326");
 
 $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets) ."GIS/uscomp/n0r_". date('YmdHi', $basets) .".png";
 if (! is_file($fp))

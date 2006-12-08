@@ -93,12 +93,12 @@ while( list($k,$v) = each($ltype)){
 $ltypeSQL .= "'ZZZ'"; /* Hack */
 $sql = sprintf("SELECT distinct *, x(geom) as lon0, y(geom) as lat0, 
         astext(geom) as tgeom 
-        from lsrs WHERE wfo = '%s' and 
+        from lsrs_%s WHERE wfo = '%s' and 
         valid >= '%s' and valid < '%s' and type in (%s) and
         (type = 'F' or (type = 'H' and magnitude >= $hail) or
          type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D')
         ORDER by valid ASC",
-        $wfo, $stsSQL, $etsSQL, $ltypeSQL);
+        date("Y", $sts), $wfo, $stsSQL, $etsSQL, $ltypeSQL);
 $DEBUG .= "<br />". $sql;
 $rs = pg_query($conn, $sql);
 for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
@@ -126,13 +126,13 @@ while (list($k,$v) = each($warnings))
   $geom = $v["geom"];
   $lw = "";
   /* Now we query LSRS! */  
-  $sql = sprintf("SELECT distinct * from lsrs WHERE 
+  $sql = sprintf("SELECT distinct * from lsrs_%s WHERE 
          geom && SetSrid(GeometryFromText('%s'),4326) and 
          contains(SetSrid(GeometryFromText('%s'),4326), geom) 
          and type IN (%s) and wfo = '%s' and
         (type = 'F' or (type = 'H' and magnitude >= $hail) or
          type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D')
-         and valid >= '%s' and valid <= '%s' ",
+         and valid >= '%s' and valid <= '%s' ", date("Y", $wsts),
          $geom, $geom, $ltypeSQL, $wfo, $wstsSQL, $wetsSQL);
   $DEBUG .= "<br />". $sql;
   $rs = pg_query($conn, $sql);
