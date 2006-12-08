@@ -83,6 +83,9 @@ back to 1951.</li>
     calculated from the IEM databases.</li>
  <li><a href="/data/gis/shape/4326/us/lsr_24hour.zip">Past 24 hours of Storm Reports</a>
  <br />A shapefile of Local Storm Reports (LSRs) valid for the past 24 hours.  The file is updated every 5 minutes.</li>
+ <li><a href="/request/gis/lsrs.phtml">Archived Local Storm Reports</a>
+ <br />Generate a shapefile of LSRs for a period of your choice dating back 
+  to 2003!</li>
  <li><a href="/data/gis/shape/4326/us/current_ww.zip">Current NWS Warnings</a>
  <br />A shapefile of active county based and polygon based weather warnings. 
 This file is updated every 5 minutes.</li>
