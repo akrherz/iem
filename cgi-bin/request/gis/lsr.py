@@ -43,9 +43,9 @@ dbf.add_field("SOURCE", dbflib.FTString, 40, 0)
 dbf.add_field("REMARK", dbflib.FTString, 400, 0)
 
 
-sql = "SELECT distinct *, astext(geom) as tgeom from lsrs WHERE \
+sql = "SELECT distinct *, astext(geom) as tgeom from lsrs_%s WHERE \
 	valid >= '%s' and valid < '%s' \
-	ORDER by valid ASC" % (sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M") )
+	ORDER by valid ASC" % (sTS.year, sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M") )
 rs = mydb.query(sql).dictresult()
 
 cnt = 0
