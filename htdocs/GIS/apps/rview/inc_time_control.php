@@ -1,4 +1,4 @@
-<strong>Select Time Zone</strong><br />
+<p><strong>Select Time Zone</strong><br />
 <select name="tz">
   <option value="UTC" <?php if ($tz == "UTC") echo "SELECTED"; ?>>UTC
   <option value="EDT" <?php if ($tz == "EDT") echo "SELECTED"; ?>>EDT
@@ -11,10 +11,14 @@
   <option value="PST" <?php if ($tz == "PST") echo "SELECTED"; ?>>PST
 </select>
 
-<br /><strong>Archive Options</strong><br />
+<p><strong>Archive Options</strong><br />
 <input type="checkbox" value="yes" name="archive" <?php if($isarchive) echo
 "CHECKED=CHECKED"; ?>>Set Archive Mode</td>
-<br />Year: <?php echo yearSelect(2003, $year, "year"); ?>
-<br />Month: <?php echo monthSelect($month, "month"); ?>
-<br />Day: <?php echo daySelect($day, "day"); ?>
-<br />Time: <?php echo hourSelect($hour, "hour"); ?>:<?php echo local5MinuteSelect($m, "minute"); ?>
+<table cellpadding="2" cellspacing="0" border="0">
+<tr><th>Year:</th><td><?php echo yearSelect(2003, $year, "year"); ?></td></tr>
+<tr><th>Month:</th><td><?php echo monthSelect($month, "month"); ?></td></tr>
+<tr><th>Day:</th><td><?php echo daySelect($day, "day"); ?></td></tr>
+<tr><th>Time:</th><td><?php echo hourSelect($hour, "hour"); ?>:<?php echo local5MinuteSelect($m, "minute"); ?></td></tr>
+</table>
+
+<p>

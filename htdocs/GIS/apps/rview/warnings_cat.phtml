@@ -165,11 +165,11 @@ while( list($key, $value) = each($vtec_significance) ){
 if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO"))
 {
   /* Lets go dig for LSR reports */
-  $sql = sprintf("SELECT distinct * from lsrs WHERE
+  $sql = sprintf("SELECT distinct * from lsrs_%s WHERE
          geom && SetSrid(GeometryFromText('%s'),4326) and
          contains(SetSrid(GeometryFromText('%s'),4326), geom)
          and wfo = '%s' and
-         valid >= '%s' and valid <= '%s' ORDER by valid ASC",
+         valid >= '%s' and valid <= '%s' ORDER by valid ASC", $year,
           $row["t"], $row["t"], $wfo, $row["issue"], $row["expire"]);
   $result = pg_exec($connect, $sql);
   echo "<p><b>Storm Reports within this polygon valid during warning</b><br /><table border=\"1\" cellspacing=\"0\" cellpadding=\"2\"><tr><th>Time (GMT):</th><th>Type:</th><th>Magnitude:</th><th>City</th><th>County</th></tr>";
