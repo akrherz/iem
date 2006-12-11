@@ -700,6 +700,21 @@ LAYER
     SIZE 10
   END
   CLASS
+    EXPRESSION /S/
+    TEXT (SNOW [magnitude]inch)
+    LABEL
+      OUTLINECOLOR 0 0 0
+      COLOR 255 255 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION AUTO
+      PARTIALS FALSE
+    END
+    COLOR 255 255 255
+    SYMBOL 'circle'
+    SIZE 7
+  END
+  CLASS
     EXPRESSION /D/
     TEXT (WND DMG [city])
     LABEL
