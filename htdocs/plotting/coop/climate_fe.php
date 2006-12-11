@@ -1,6 +1,6 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | CCOP Climate Plots";
+$TITLE = "IEM | COOP Climate Plots";
 $station1 = isset($_GET["station1"]) ? $_GET["station1"] : "";
 $station2 = isset($_GET["station2"]) ? $_GET["station2"] : "";
 $mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
