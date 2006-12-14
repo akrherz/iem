@@ -54,6 +54,7 @@ $ramps = Array(
 	1 => Array(-10, 0, 10, 20, 30, 40, 50, 60,70,80,90),
 	2 => Array(0, 10, 20, 30, 40, 50, 60,70,80,90,100),
 	3 =>  Array(0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,0.7,0.8,0.9), // Rainfall (inch)
+	4 =>  Array(0.1, 0.5, 1, 2, 3, 4, 5, 7,10,15,20), // Rainfall (inch)
 );
 
 $params = Array(
@@ -113,6 +114,18 @@ $params = Array(
   'units' => 'in', 'cramp' => $cr,
   'title' => "Evaporation for: ",
   'table' => "bogus", 'myramp' => 3,
+  'maplayer' => 'data', 
+  'dbdate' => strftime("%Y-%m-%d", $ts),
+  'sql' => "the_geom from (select d.fips,
+    evaporation / 25.4 as DA,
+    the_geom from weather d, counties c
+    WHERE d.valid = '". strftime("%Y-%m-%d", $ts) ."' and d.fips = c.fips) as foo
+    using unique fips using srid=4326"),
+
+"solar" => Array('dbstr' => 'bogus',
+  'units' => 'MJ', 'cramp' => $cr,
+  'title' => "Solar Radiation for: ",
+  'table' => "bogus", 'myramp' => 4,
   'maplayer' => 'data', 
   'dbdate' => strftime("%Y-%m-%d", $ts),
   'sql' => "the_geom from (select d.fips,
