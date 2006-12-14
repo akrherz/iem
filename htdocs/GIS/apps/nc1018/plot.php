@@ -162,8 +162,11 @@ $rainfall->set("data", $param["sql"]);
 
 $bins = $param["ramp"];
 
-$cz = ms_newClassObj($rainfall);
-$cz->setexpression("([DA] == 0)");
+if ($var == "rainfall_in")
+{
+  $cz = ms_newClassObj($rainfall);
+  $cz->setexpression("([DA] == 0)");
+}
 
 $c0 = ms_newClassObj($rainfall);
 $c0->setexpression("([DA] < ". $bins[0] .")");
