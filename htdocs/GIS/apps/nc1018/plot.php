@@ -129,7 +129,7 @@ $params = Array(
   'maplayer' => 'data', 
   'dbdate' => strftime("%Y-%m-%d", $ts),
   'sql' => "the_geom from (select d.fips,
-    evaporation / 25.4 as DA,
+    solar as DA,
     the_geom from weather d, counties c
     WHERE d.valid = '". strftime("%Y-%m-%d", $ts) ."' and d.fips = c.fips) as foo
     using unique fips using srid=4326"),
