@@ -53,6 +53,7 @@ $ramps = Array(
 	0 =>  Array(0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2,3,5,7), // Rainfall (inch)
 	1 => Array(-10, 0, 10, 20, 30, 40, 50, 60,70,80,90),
 	2 => Array(0, 10, 20, 30, 40, 50, 60,70,80,90,100),
+	3 =>  Array(0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,0.7,0.8,0.9), // Rainfall (inch)
 );
 
 $params = Array(
@@ -111,7 +112,7 @@ $params = Array(
 "evap" => Array('dbstr' => 'bogus',
   'units' => 'in', 'cramp' => $cr,
   'title' => "Evaporation for: ",
-  'table' => "bogus", 'myramp' => 0,
+  'table' => "bogus", 'myramp' => 3,
   'maplayer' => 'data', 
   'dbdate' => strftime("%Y-%m-%d", $ts),
   'sql' => "the_geom from (select d.fips,
