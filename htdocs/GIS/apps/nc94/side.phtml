@@ -1,0 +1,36 @@
+<?php
+
+if (! extension_loaded('MapScript') ) dl($mapscript);
+$map = ms_newMapObj("base.map");
+
+/* Set Extents */
+$arExtents = explode(",", $extents);
+$map->setextent($arExtents[0], $arExtents[1], $arExtents[2], $arExtents[3]);
+
+//$ref = $map->drawReferenceMap();
+//$refurl = $ref->saveWebImage();
+
+/* We need to do some math to figure out our zoom scale */
+//$refExtents = Array(154000,4420187.5,766000,4879812.5);
+//$arExtents = explode(",", $extents);
+//$refWidth = $refExtents[2] - $refExtents[0];
+//$curWidth = $arExtents[2] - $arExtents[0];
+//$zoomscale = 0.0 - ($refWidth / $curWidth);
+?>
+<!--
+<div class="wepp-side-left-content">
+<b>Reference Map:</b><br /><i>Click on this map to recenter.</i><br />
+<form name="refform" method="GET">
+<?php
+  while( list($kvarname, $kvar) = @each($keep_vars) ) {
+      echo "<input type=\"hidden\" name=\"$kvarname\" value=\"$kvar\">\n";
+    }
+?>
+<input type="hidden" name="extents" value="154000,4420187.5,766000,4879812.5">
+<input type="hidden" name="zoom" value="<?php echo $zoomscale; ?>">
+<input type="hidden" name="map_height" value="105">
+<input type="hidden" name="map_width" value="140">
+<br> <input type="image" name="img" src="<?php echo $refurl; ?>">
+</form>
+</div>
+-->

@@ -2,14 +2,14 @@
 NAME iem
 STATUS ON
 SIZE 640 480
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 #  Iowa, yeah!
 # 3x2  
 EXTENT -104.2 36 -80 50
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
-IMAGECOLOR 0 0 0
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+IMAGECOLOR 125 125 125
 IMAGETYPE PNG
 TRANSPARENT off
 INTERLACE off
@@ -34,27 +34,65 @@ END
 
 LAYER
   NAME credits
-  TYPE ANNOTATION
+  TYPE POINT
   STATUS default
   TRANSFORM FALSE
+  LABELCACHE OFF
   CLASS
     NAME 'credits'
     LABEL
-      COLOR 0 0 0
-      BACKGROUNDCOLOR 250 250 250
-#      SHADOWSIZE 1 1
-#      SHADOWCOLOR 0 0 0
-#      BACKGROUNDSHADOWCOLOR 0 0 0
-#      BACKGROUNDSHADOWSIZE 1 1
+      COLOR 250 250 250
+      BACKGROUNDCOLOR 0 0 200
+      SHADOWSIZE 1 1
+      SHADOWCOLOR 0 0 0
+      BACKGROUNDSHADOWCOLOR 0 0 0
+      BACKGROUNDSHADOWSIZE 1 1
       TYPE TRUETYPE
       SIZE 16
-      FONT 'kcci'
+      FONT 'arial'
       POSITION CR
       FORCE TRUE
       PARTIALS TRUE
-      BUFFER 2
     END
   END
+  CLASS
+        NAME 'smalltxt'
+        LABEL
+      COLOR 250 250 250
+      BACKGROUNDCOLOR 0 0 0
+      SHADOWSIZE 1 1
+      SHADOWCOLOR 0 0 0
+      BACKGROUNDSHADOWCOLOR 0 0 0
+      BACKGROUNDSHADOWSIZE 1 1
+      TYPE BITMAP
+          SIZE MEDIUM
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+        END
+  END
+END
+
+
+LAYER
+  NAME bar
+  TYPE POLYGON
+  TRANSFORM FALSE
+  STATUS ON
+  #TRANSPARENCY 70
+  LABELCACHE FALSE
+  CLASS
+    COLOR 0 0 0
+  END
+END
+
+
+LAYER
+  NAME singlebox
+  TYPE POLYGON
+  STATUS ON
+  TRANSFORM FALSE
+  LABELCACHE OFF
 END
 
  
@@ -72,18 +110,19 @@ END
 
 LAYER
   NAME counties
-  STATUS ON
-  TYPE POLYGON
-  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
+  STATUS DEFAULT
+  TYPE LINE
+  DATA /mesonet/data/gis/static/shape/4326/iem/nc1018_counties.shp
   PROJECTION
     "init=epsg:4326"
   END
   LABELCACHE OFF
-  LABELITEM 'COUNTYNAME'
-  MAXSCALE 5000000
+  #MAXSCALE 5000000
   CLASS
-    OUTLINECOLOR 186 116 13
-#    COLOR 140 144 90
+#    OUTLINECOLOR 186 116 13
+    COLOR 0 0 0
+    SIZE 1
+    SYMBOL 'circle'
 #    LABEL
 #      SIZE TINY
 #      TYPE BITMAP
@@ -94,7 +133,7 @@ LAYER
 #      FORCE FALSE
 #    END
   END
-  TRANSPARENCY 75
+#  TRANSPARENCY 75
 END
 
 #create function get_geom(varchar) returns geometry AS 'select the_geom from counties WHERE fips = $1' LANGUAGE 'sql';
@@ -104,108 +143,18 @@ LAYER
   CONNECTIONTYPE postgis
   NAME highs
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=nc94 host=10.10.10.30"
+  CONNECTION "user=nobody dbname=nc1018 host=10.10.10.20"
   # Get the lines from the 'geom' column of the 'roads' table
-  DATA "geom from (select d.oid as oid, 
+  DATA "the_geom from (select d.fips, 
     round(((1.8 * d.high::real) + 32.0)::numeric, 0) as high, 
-    get_geom(d.id::varchar) as geom from data d 
-    WHERE d.day = '1978-05-19') as foo 
-    using unique oid using srid=4326"
+    the_geom from weather d, counties c
+    WHERE d.valid = '1978-05-19' and d.fips = c.fips) as foo 
+    using unique fips using srid=4326"
   STATUS DEFAULT
   TYPE POLYGON
   LABELCACHE OFF
   PROJECTION
    "init=epsg:4326"
-  END
-#  LABELITEM "high"
-#  CLASS
-#    LABEL
-#      SIZE MEDIUM
-#      COLOR 250 250 250
-#      TYPE BITMAP
-#    END
-#  END
-
-  CLASSITEM "high"
-  CLASS
-    EXPRESSION ([high] >= 90)
-    COLOR 250 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 85)
-    COLOR 240 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 80)
-    COLOR 230 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 75)
-    COLOR 220 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 70)
-    COLOR 210 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 65)
-    COLOR 200 0 0 
-  END
-  CLASS
-    EXPRESSION ([high] >= 60)
-    COLOR 190 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 55)
-    COLOR 180 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 50)
-    COLOR 170 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 45)
-    COLOR 160 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 40)
-    COLOR 150 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 35)
-    COLOR 140 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 30)
-    COLOR 130 0 0 
-  END
-  CLASS
-    EXPRESSION ([high] >= 25)
-    COLOR 120 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 20)
-    COLOR 110 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 15)
-    COLOR 100 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 10)
-    COLOR 90 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 5)
-    COLOR 80 0 0
-  END
-  CLASS
-    EXPRESSION ([high] >= 0)
-    COLOR 70 0 0
-  END
-  CLASS
-    EXPRESSION ([high] < 0)
-    COLOR 60 0 0 
   END
 END
 
