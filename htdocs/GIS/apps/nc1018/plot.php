@@ -84,7 +84,7 @@ $params = Array(
 
 
 "dailylow" => Array('dbstr' => 'bogus',
-  'units' => 'in', 'cramp' => $cr,
+  'units' => 'Fahrenhit', 'cramp' => $cr,
   'title' => "Low Temperature for: ",
   'table' => "bogus", 'myramp' => 1,
   'maplayer' => 'data', 
@@ -97,7 +97,7 @@ $params = Array(
 
 
 "dailyhigh" => Array('dbstr' => 'bogus',
-  'units' => 'in', 'cramp' => $cr,
+  'units' => 'Fahrenhit', 'cramp' => $cr,
   'title' => "High Temperature for: ",
   'table' => "bogus", 'myramp' => 1,
   'maplayer' => 'data', 
@@ -111,7 +111,7 @@ $params = Array(
 
 
 "evap" => Array('dbstr' => 'bogus',
-  'units' => 'in', 'cramp' => $cr,
+  'units' => 'inches', 'cramp' => $cr,
   'title' => "Evaporation for: ",
   'table' => "bogus", 'myramp' => 3,
   'maplayer' => 'data', 
