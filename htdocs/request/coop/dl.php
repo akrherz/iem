@@ -16,7 +16,7 @@ $sample = isset($_GET["sample"]) ? $_GET["sample"]: "1min";
 $what = isset($_GET["what"]) ? $_GET["what"]: 'dl';
 
 
-include("$rootpath/include/COOPstations.php");
+include("$rootpath/include/all_locs.php");
 include("adodb-time.inc.php");
 
 $station = $_GET["station"];
@@ -108,9 +108,9 @@ if ($what != "plot"){
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
   $sid = $row["stationid"];
-  echo $sid . $d[$delim] . $cities[$sid]["city"] ;
+  echo $sid . $d[$delim] . $cities[strtoupper($sid)]["city"] ;
   if ($gis == "yes"){
-     echo  $d[$delim] . $cities[$sid]["lat"] . $d[$delim] .  $cities[$sid]["lon"] ;
+     echo  $d[$delim] . $cities[strtoupper($sid)]["lat"] . $d[$delim] .  $cities[strtoupper($sid)]["lon"] ;
   } 
   echo $d[$delim] . $row["dvalid"] . $d[$delim];
   for ($j=0; $j < $num_vars;$j++){
