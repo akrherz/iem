@@ -4,7 +4,7 @@
 // Description:	Classes to handle Date scaling
 // Created: 	2005-05-02
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_date.php 220 2005-10-15 16:53:53Z ljp $
+// Ver:		$Id: jpgraph_date.php 572 2006-03-04 10:41:12Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -377,6 +377,7 @@ class DateScale extends LinearScale {
     // Overrides the automatic determined date format. Must be a valid date() format string
     function SetDateFormat($aFormat) {
 	$this->date_format = $aFormat;
+	$this->ticks->SetLabelDateFormat($this->date_format);
     }
 
     function SetDateAlign($aStartAlign,$aEndAlign=false) {
@@ -427,7 +428,8 @@ class DateScale extends LinearScale {
 	*/
 	
 	if( $this->iStartTimeAlign !== false && $this->iStartAlign !== false ) {
-	    JpGraphError::Raise('It is only possible to use either SetDateAlign() or SetTimeAlign() but not both');
+	    JpGraphError::RaiseL(3001);
+//('It is only possible to use either SetDateAlign() or SetTimeAlign() but not both');
 	}
 
 	if( $this->iStartTimeAlign !== false ) {
