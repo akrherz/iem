@@ -4,7 +4,7 @@
 // Description:	PHP4 Graph Plotting library. Extension module.
 // Created: 	2004-02-18
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_plotband.php 21 2005-05-30 20:35:34Z ljp $
+// Ver:		$Id: jpgraph_plotband.php 483 2006-02-04 12:19:43Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -68,7 +68,8 @@ class RectPattern {
 
     function SetDensity($aDens) {
 	if( $aDens < 1 || $aDens > 100 )
-	    JpGraphError::Raise(" Desity for pattern must be between 1 and 100. (You tried $aDens)");
+	    JpGraphError::RaiseL(16001,$aDens);
+//(" Desity for pattern must be between 1 and 100. (You tried $aDens)");
 	// 1% corresponds to linespacing=50
 	// 100 % corresponds to linespacing 1
 	$this->linespacing = floor(((100-$aDens)/100.0)*50)+1;
@@ -77,7 +78,8 @@ class RectPattern {
 
     function Stroke(&$aImg) {
 	if( $this->rect == null )
-	    JpGraphError::Raise(" No positions specified for pattern.");
+	    JpGraphError::RaiseL(16002);
+//(" No positions specified for pattern.");
 
 	if( !(is_numeric($this->iBackgroundColor) && $this->iBackgroundColor==-1) ) {
 	    $aImg->SetColor($this->iBackgroundColor);
@@ -523,7 +525,8 @@ class RectPatternFactory {
 		$obj =  new RectPatternDiagCross($aColor,$aWeight);
 		break;
 	    default:
-		JpGraphError::Raise(" Unknown pattern specification ($aPattern)");
+		JpGraphError::RaiseL(16003,$aPattern);
+//(" Unknown pattern specification ($aPattern)");
 	}
 	return $obj;
     }
@@ -545,7 +548,8 @@ class PlotBand {
 	$f =  new RectPatternFactory();
 	$this->prect = $f->Create($aPattern,$aColor,$aWeight);
 	if( is_numeric($aMin) && is_numeric($aMax) && ($aMin > $aMax) ) 
-	    JpGraphError::Raise('Min value for plotband is larger than specified max value. Please correct.');
+	    JpGraphError::RaiseL(16004);
+//('Min value for plotband is larger than specified max value. Please correct.');
 	$this->dir = $aDir;
 	$this->min = $aMin;
 	$this->max = $aMax;

@@ -4,7 +4,7 @@
 // Description:	Configuration file for JpGraph library
 // Created: 	2004-03-27
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpg-config.inc 242 2005-11-20 11:34:41Z ljp $
+// Ver:		$Id: jpg-config.inc 637 2006-05-26 13:21:04Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -64,6 +64,13 @@ DEFINE("CSIMCACHE_HTTP_DIR","csimcache/");
 // either FF_CHINESE or FF_BIG5
 DEFINE('CHINESE_TTF_FONT','bkai00mp.ttf');
 
+// Special unicode greek language support
+DEFINE("LANGUAGE_GREEK",false);
+
+// If you are setting this config to true the conversion of greek characters
+// will assume that the input text is windows 1251 
+DEFINE("GREEK_FROM_WINDOWS",false);
+
 // Special unicode cyrillic language support
 DEFINE("LANGUAGE_CYRILLIC",false);
 
@@ -72,17 +79,53 @@ DEFINE("LANGUAGE_CYRILLIC",false);
 // false it will assume koi8-r
 DEFINE("CYRILLIC_FROM_WINDOWS",false);
 
+// The following constant is used to auto-detect
+// whether cyrillic conversion is really necessary
+// if enabled. Just replace 'windows-1251' with a variable
+// containing the input character encoding string
+// of your application calling jpgraph.
+// A typical such string would be 'UTF-8' or 'utf-8'.
+// The comparison is case-insensitive.
+// If this charset is not a 'koi8-r' or 'windows-1251'
+// derivate then no conversion is done.
+//
+// This constant can be very important in multi-user
+// multi-language environments where a cyrillic conversion
+// could be needed for some cyrillic people
+// and resulting in just erraneous conversions
+// for not-cyrillic language based people.
+//
+// Example: In the free project management
+// software dotproject.net $locale_char_set is dynamically
+// set by the language environment the user has chosen.
+//
+// Usage: DEFINE('LANGUAGE_CHARSET', $locale_char_set);
+//
+// where $locale_char_set is a GLOBAL (string) variable
+// from the application including JpGraph.
+// 
+DEFINE('LANGUAGE_CHARSET', null);
+
 // Japanese TrueType font used with FF_MINCHO, FF_PMINCHO, FF_GOTHIC, FF_PGOTHIC
 DEFINE('MINCHO_TTF_FONT','ipam.ttf');
 DEFINE('PMINCHO_TTF_FONT','ipamp.ttf');
 DEFINE('GOTHIC_TTF_FONT','ipag.ttf');
 DEFINE('PGOTHIC_TTF_FONT','ipagp.ttf');
 
+// Assume that Japanese text have been entered in EUC-JP encoding.
+// If this define is true then conversion from EUC-JP to UTF8 is done 
+// automatically in the library using the mbstring module in PHP.
+DEFINE('ASSUME_EUCJP_ENCODING',false);
+
 //------------------------------------------------------------------------
 // Various JpGraph Settings. Adjust accordingly to your
 // preferences. Note that cache functionality is turned off by
 // default (Enable by setting USE_CACHE to true)
 //------------------------------------------------------------------------
+
+// Deafult locale for error messages.
+// This defaults to English = 'en'
+DEFINE('DEFAULT_ERR_LOCALE','en');
 
 // Deafult graphic format set to "auto" which will automatically
 // choose the best available format in the order png,gif,jpeg

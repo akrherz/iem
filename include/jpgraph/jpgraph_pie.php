@@ -4,7 +4,7 @@
 // Description:	Pie plot extension for JpGraph
 // Created: 	2001-02-14
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_pie.php 88 2005-08-07 17:18:51Z ljp $
+// Ver:		$Id: jpgraph_pie.php 768 2006-09-24 20:10:52Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -173,12 +173,12 @@ class PiePlot {
 	if( in_array($aTheme,array_keys($this->themearr)) )
 	    $this->theme = $aTheme;
 	else
-	    JpGraphError::Raise("PiePLot::SetTheme() Unknown theme: $aTheme");
+	    JpGraphError::RaiseL(15001,$aTheme);//("PiePLot::SetTheme() Unknown theme: $aTheme");
     }
 	
     function ExplodeSlice($e,$radius=20) {
 	if( ! is_integer($e) ) 
-	    JpGraphError::Raise('Argument to PiePlot::ExplodeSlice() must be an integer');
+	    JpGraphError::RaiseL(15002);//('Argument to PiePlot::ExplodeSlice() must be an integer');
 	$this->explode_radius[$e]=$radius;
     }
 
@@ -189,21 +189,22 @@ class PiePlot {
 
     function Explode($aExplodeArr) {
 	if( !is_array($aExplodeArr) ) {
-	    JpGraphError::Raise("Argument to PiePlot::Explode() must be an array with integer distances.");
+	    JpGraphError::RaiseL(15003);
+//("Argument to PiePlot::Explode() must be an array with integer distances.");
 	}
 	$this->explode_radius = $aExplodeArr;
     }
 
     function SetStartAngle($aStart) {
 	if( $aStart < 0 || $aStart > 360 ) {
-	    JpGraphError::Raise('Slice start angle must be between 0 and 360 degrees.');
+	    JpGraphError::RaiseL(15004);//('Slice start angle must be between 0 and 360 degrees.');
 	}
 	$this->startangle = 360-$aStart;
 	$this->startangle *= M_PI/180;
     }
 	
     function SetFont($family,$style=FS_NORMAL,$size=10) {
-		JpGraphError::Raise('PiePlot::SetFont() is deprecated. Use PiePlot->value->SetFont() instead.');
+	JpGraphError::RaiseL(15005);//('PiePlot::SetFont() is deprecated. Use PiePlot->value->SetFont() instead.');
     }
 	
     // Size in percentage
@@ -211,13 +212,13 @@ class PiePlot {
 	if( ($aSize>0 && $aSize<=0.5) || ($aSize>10 && $aSize<1000) )
 	    $this->radius = $aSize;
 	else
-	    JpGraphError::Raise("PiePlot::SetSize() Radius for pie must either be specified as a fraction
-                                [0, 0.5] of the size of the image or as an absolute size in pixels 
-                                in the range [10, 1000]");
+	    JpGraphError::RaiseL(15006);
+//("PiePlot::SetSize() Radius for pie must either be specified as a fraction [0, 0.5] of the size of the image or as an absolute size in pixels  in the range [10, 1000]");
     }
 	
     function SetFontColor($aColor) {
-	JpGraphError::Raise('PiePlot::SetFontColor() is deprecated. Use PiePlot->value->SetColor() instead.');
+	JpGraphError::RaiseL(15007);
+//('PiePlot::SetFontColor() is deprecated. Use PiePlot->value->SetColor() instead.');
     }
 	
     // Set label arrays
@@ -238,7 +239,8 @@ class PiePlot {
     // Should we display actual value or percentage?
     function SetLabelType($t) {
 	if( $t < 0 || $t > 2 ) 
-	    JpGraphError::Raise("PiePlot::SetLabelType() Type for pie plots must be 0 or 1 (not $t).");
+	    JpGraphError::RaiseL(15008,$t);
+//("PiePlot::SetLabelType() Type for pie plots must be 0 or 1 (not $t).");
 	$this->labeltype=$t;
     }
 
@@ -262,14 +264,14 @@ class PiePlot {
 
    	if( $this->setslicecolors==null ) {
 	    $numcolors=count($ta);
-	    if( get_class($this)==='pieplot3d' ) {
+	    if( is_a($this,'PiePlot3D') ) {
 		$ta = array_reverse(array_slice($ta,0,$n));
 	    }
 	}
    	else {
 	    $this->setslicecolors = array_slice($this->setslicecolors,0,$n);
 	    $numcolors=count($this->setslicecolors); 
-	    if( $graph->pieaa && get_class($this)==='pieplot' ) { 
+	    if( $graph->pieaa && is_a($this,'PiePlot') ) { 
 		$this->setslicecolors = array_reverse($this->setslicecolors);
 	    }
 	}
@@ -280,7 +282,7 @@ class PiePlot {
 
 	// Bail out with error if the sum is 0
 	if( $sum==0 )
-	    JpGraphError::Raise("Illegal pie plot. Sum of all data is zero for Pie!");
+	    JpGraphError::RaiseL(15009);//("Illegal pie plot. Sum of all data is zero for Pie!");
 
 	// Make sure we don't plot more values than data points
 	// (in case the user added more legends than data points)
@@ -410,7 +412,7 @@ class PiePlot {
 	
 	// Bail out with error if the sum is 0
 	if( $sum==0 )
-	    JpGraphError::Raise("Sum of all data is 0 for Pie.");
+	    JpGraphError::RaiseL(15009);//("Sum of all data is 0 for Pie.");
 	
 	// Set up the pie-circle
 	if( $this->radius <= 1 )
@@ -448,6 +450,8 @@ class PiePlot {
 		if( empty($this->explode_radius[$j]) )
 		    $this->explode_radius[$j]=0;
 
+		if( $d < 0.00001 ) continue;
+
 		$la = 2*M_PI - (abs($angle2-$angle1)/2.0+$angle1);
 
 		$xcm = $xc + $this->explode_radius[$j]*cos($la)*$expscale;
@@ -456,8 +460,7 @@ class PiePlot {
 		$xcm += $this->ishadowdrop*$expscale;
 		$ycm += $this->ishadowdrop*$expscale;
 
-		$img->CakeSlice($xcm,$ycm,$radius,$radius,
-				$angle1*180/M_PI,$angle2*180/M_PI,$this->ishadowcolor);
+		$img->CakeSlice($xcm,$ycm,$radius,$radius,$angle1*180/M_PI,$angle2*180/M_PI,$this->ishadowcolor);
 		
 	    }
 	}
@@ -475,7 +478,7 @@ class PiePlot {
 	    $angle2 = $this->startangle+2*M_PI*$accsum/$sum;
 	    $this->la[$i] = 2*M_PI - (abs($angle2-$angle1)/2.0+$angle1);
 
-	    if( $d == 0 ) continue;
+	    if( $d < 0.00001 ) continue;
 
 	    if( $this->setslicecolors==null )
 		$slicecolor=$colors[$ta[$i%$numcolors]];
@@ -559,7 +562,7 @@ class PiePlot {
 	    return 3;
     }
 
-    function StrokeGuideLabels($img,$xc,$yc,$radius) {
+    function StrokeGuideLabels(&$img,$xc,$yc,$radius) {
 	$n = count($this->labels);
 
 	//-----------------------------------------------------------------------
@@ -826,7 +829,7 @@ class PiePlot {
 	}
     }
 
-    function StrokeAllLabels($img,$xc,$yc,$radius) {
+    function StrokeAllLabels(&$img,$xc,$yc,$radius) {
 	// First normalize all angles for labels
 	$n = count($this->la);
 	for($i=0; $i < $n; ++$i) {
@@ -846,7 +849,7 @@ class PiePlot {
     }
 
     // Position the labels of each slice
-    function StrokeLabel($label,$img,$xc,$yc,$a,$radius) {
+    function StrokeLabel($label,&$img,$xc,$yc,$a,$radius) {
 
 	// Default value
 	if( $this->ilabelposadj === 'auto' )
@@ -1042,7 +1045,7 @@ class PiePlotC extends PiePlot {
     }
 
 
-    function Stroke($img,$aaoption=0) {
+    function Stroke(&$img,$aaoption=0) {
 
 	// Stroke the pie but don't stroke values
 	$tmp =  $this->value->show;
@@ -1131,13 +1134,13 @@ class PieGraph extends Graph {
     function Add($aObj) {
 
 	if( is_array($aObj) && count($aObj) > 0 )
-	    $cl = get_class($aObj[0]);
+	    $cl = $aObj[0];
 	else
-	    $cl = get_class($aObj);
+	    $cl = $aObj;
 
-	if( $cl == 'text' ) 
+	if( is_a($cl,'Text') ) 
 	    $this->AddText($aObj);
-	elseif( $cl == 'iconplot' ) 
+	elseif( is_a($cl,'IconPlot') ) 
 	    $this->AddIcon($aObj);
 	else {
 	    if( is_array($aObj) ) {
@@ -1216,7 +1219,7 @@ class PieGraph extends Graph {
 		    $this->StrokeFrameBackground();		
 		}
 		else {
-		    $this->StrokeFrame();		
+		    $this->StrokeFrame();
 		}
 	    }
 
@@ -1231,11 +1234,16 @@ class PieGraph extends Graph {
 	    $this->img->FilledRectangle(0,0,2*$w-1,2*$h-1);
 
 	    // Make all icons *2 i size since we will be scaling down the
-	    // imahe to do the anti aliasing
+	    // image to do the anti aliasing
 	    $ni = count($this->iIcons);
 	    for($i=0; $i < $ni; ++$i) {
 		$this->iIcons[$i]->iScale *= 2 ;
+		if( $this->iIcons[$i]->iX > 1 ) 
+		    $this->iIcons[$i]->iX *= 2 ;
+		if( $this->iIcons[$i]->iY > 1 ) 
+		    $this->iIcons[$i]->iY *= 2 ;
 	    }
+
 	    $this->StrokeIcons();
 
 	    for($i=0; $i < $n; ++$i) {
@@ -1251,7 +1259,6 @@ class PieGraph extends Graph {
 		if( $this->plots[$i]->posy > 1 ) 
 		    $this->plots[$i]->posy /= 2 ;
 	    }
-
 	    $indent = $this->doframe ? ($this->frame_weight + ($this->doshadow ? $this->shadow_width : 0 )) : 0 ;
 	    $indent += $this->framebevel ? $this->framebeveldepth + 1 : 0 ;
 	    $this->img->CopyCanvasH($oldimg,$this->img->img,$indent,$indent,$indent,$indent,
@@ -1268,18 +1275,18 @@ class PieGraph extends Graph {
 
 	}
 	else {
-
+	    // No antialias
 	    if( !$_csim ) {
 		if( $this->background_image != "" ) {
 		    $this->StrokeFrameBackground();		
 		}
 		else {
-		    $this->StrokeFrame();		
+		    $this->StrokeFrame();
+		    $this->StrokeBackgroundGrad();
 		}
 	    }
 
 	    $this->StrokeIcons();
-
 	    for($i=0; $i < $n; ++$i) {
 		$this->plots[$i]->Stroke($this->img);
 		$this->plots[$i]->Legend($this);

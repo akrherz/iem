@@ -4,7 +4,7 @@
 // Description:	Polar plot extension for JpGraph
 // Created: 	2003-02-02
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_polar.php 21 2005-05-30 20:35:34Z ljp $
+// Ver:		$Id: jpgraph_polar.php 487 2006-02-04 12:25:38Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -50,7 +50,8 @@ class PolarPlot {
     function PolarPlot($aData) {
 	$n = count($aData);
 	if( $n & 1 ) {
-	    JpGraphError::Raise('Polar plots must have an even number of data point. Each data point is a tuple (angle,radius).');
+	    JpGraphError::RaiseL(17001);
+//('Polar plots must have an even number of data point. Each data point is a tuple (angle,radius).');
 	}
 	$this->numpoints = $n/2;
 	$this->coord = $aData;
@@ -112,7 +113,7 @@ class PolarPlot {
 	}
     }
 
-    function Stroke($img,$scale) {
+    function Stroke(&$img,$scale) {
 
 	$i=0;
 	$p=array();
@@ -498,8 +499,8 @@ class PolarAxis extends Axis {
 	elseif($this->title_adjust=="low")
 	    $this->title->Pos($this->img->left_margin,$y,"left","top");
 	else {	
-	    JpGraphError::Raise('Unknown alignment specified for X-axis title. ('.
-				$this->title_adjust.')');
+	    JpGraphError::RaiseL(17002,$this->title_adjust);
+//('Unknown alignment specified for X-axis title. ('.$this->title_adjust.')');
 	}
 
 	
@@ -668,7 +669,7 @@ class PolarGraph extends Graph {
 	    $this->scale = new PolarLogScale($rmax,$this);
 	}
 	else {
-	    JpGraphError::Raise('Unknown scale type for polar graph. Must be "lin" or "log"');
+	    JpGraphError::RaiseL(17004);//('Unknown scale type for polar graph. Must be "lin" or "log"');
 	}
 
 	$this->axis = new PolarAxis($this->img,$this->scale);
@@ -690,7 +691,7 @@ class PolarGraph extends Graph {
 	$m = $this->plots[0]->Max();
 	$i=1;
 	while($i < $n) {
-	    $m = max($this->plots[$i]->Max());
+	    $m = max($this->plots[$i]->Max(),$m);
 	    ++$i;
 	}
 	return $m;

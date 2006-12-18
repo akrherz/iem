@@ -4,7 +4,7 @@
 // Description:	Error plot extension for JpGraph
 // Created: 	2001-01-08
 // Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_error.php 88 2005-08-07 17:18:51Z ljp $
+// Ver:		$Id: jpgraph_error.php 461 2006-02-04 12:06:40Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -47,7 +47,8 @@ class ErrorPlot extends Plot {
 
 	if( isset($this->coords[1]) ) {
 	    if( count($this->coords[1])!=$numpoints )
-		JpGraphError::Raise("Number of X and Y points are not equal. Number of X-points:".count($this->coords[1])." Number of Y-points:$numpoints");
+		JpGraphError::RaiseL(2003,count($this->coords[1]),$numpoints);
+//("Number of X and Y points are not equal. Number of X-points:".count($this->coords[1])." Number of Y-points:$numpoints");
 	    else
 		$exist_x = true;
 	}
@@ -125,8 +126,8 @@ class LineErrorPlot extends ErrorPlot {
 	$ly=array(); $ey=array();
 	$n = count($datay);
 	if( $n % 3 != 0 ) {
-	    JpGraphError::Raise('Error in input data to LineErrorPlot.'.
-		'Number of data points must be a multiple of 3');
+	    JpGraphError::RaiseL(4002);
+//('Error in input data to LineErrorPlot. Number of data points must be a multiple of 3');
 	}
 	for($i=0; $i < $n; $i+=3 ) {
 	    $ly[]=$datay[$i];
