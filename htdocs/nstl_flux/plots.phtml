@@ -25,15 +25,15 @@ include("$rootpath/include/header.php"); ?>
  <td><?php echo daySelect($day, "day"); ?></td>
 </tr>
 </table>
-<?php $u = sprintf("/plotting/flux/plot_rad.php?var=netrad&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<?php $u = sprintf("$rooturl/plotting/flux/plot_rad.php?var=rn_total_avg&year=%s&month=%s&day=%s", $year, $month, $day); ?>
 <br /><img src="<?php echo $u; ?>">
-<?php $u = sprintf("/plotting/flux/plot_rad.php?var=soilheat&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<?php $u = sprintf("$rooturl/plotting/flux/plot_rad.php?var=shf1_avg&year=%s&month=%s&day=%s", $year, $month, $day); ?>
 <br /><img src="<?php echo $u; ?>">
-<?php $u = sprintf("/plotting/flux/plot_rad.php?var=latent&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<?php $u = sprintf("$rooturl/plotting/flux/plot_rad.php?var=le_wpl&year=%s&month=%s&day=%s", $year, $month, $day); ?>
 <br /><img src="<?php echo $u; ?>">
-<?php $u = sprintf("/plotting/flux/plot_rad.php?var=sensible&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<?php $u = sprintf("$rooturl/plotting/flux/plot_rad.php?var=fc_wpl&year=%s&month=%s&day=%s", $year, $month, $day); ?>
 <br /><img src="<?php echo $u; ?>">
-<?php $u = sprintf("/plotting/flux/plot_rad.php?var=co2&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<?php $u = sprintf("$rooturl/plotting/flux/plot_rad.php?var=hs&year=%s&month=%s&day=%s", $year, $month, $day); ?>
 <br /><img src="<?php echo $u; ?>">
 
 <?php include("$rootpath/include/footer.php"); ?>
