@@ -40,7 +40,8 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
   $times[$stid][] = $ts;
 }
 
-$labels = Array();
+$labels = Array("nstlnsp" => "Unknown", "nstl11" => "Unknown", 
+        "nstl10" => "Unknown", "nstl30ft" => "Unknown");
 $rs = pg_exec($pgconn, sprintf("SELECT * from flux_meta WHERE sts < '%s-%s-%s' and ets > '%s-%s-%s'", $year, $month, $day, $year, $month, $day) );
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
@@ -94,7 +95,7 @@ $graph->legend->Pos(0.10, 0.92, "left", "top");
 if (sizeof($data["nstl11"]) > 1) {
  $lineplot=new LinePlot($data["nstl11"], $times["nstl11"]);
  $lineplot->SetColor("red");
- $lineplot->SetLegend("NSTL11");
+ $lineplot->SetLegend( $labels["nstl11"] );
  $lineplot->SetWeight(2);
  $graph->Add($lineplot);
 }
@@ -102,7 +103,7 @@ if (sizeof($data["nstl11"]) > 1) {
 if (sizeof($data["nstl10"]) > 1) {
  $lineplot2=new LinePlot($data["nstl10"], $times["nstl10"]);
  $lineplot2->SetColor("blue");
- $lineplot2->SetLegend("NSTL10");
+ $lineplot2->SetLegend( $labels["nstl10"] );
  $lineplot2->SetWeight(2);
  $graph->Add($lineplot2);
 }
@@ -111,7 +112,7 @@ if (sizeof($data["nstl10"]) > 1) {
 if (sizeof($data["nstlnsp"]) > 1) {
  $lineplot3=new LinePlot($data["nstlnsp"], $times["nstlnsp"]);
  $lineplot3->SetColor("black");
- $lineplot3->SetLegend("NSPR");
+ $lineplot3->SetLegend( $labels["nstlnsp"] );
  $lineplot3->SetWeight(2);
  $graph->Add($lineplot3);
 }
@@ -120,7 +121,7 @@ if (sizeof($data["nstlnsp"]) > 1) {
 if (sizeof($data["nstl30ft"]) > 1) {
  $lineplot4=new LinePlot($data["nstl30ft"], $times["nstl30ft"]);
  $lineplot4->SetColor("green");
- $lineplot4->SetLegend("NSTL30FT");
+ $lineplot4->SetLegend( $labels["nstl30ft"] );
  $lineplot4->SetWeight(2);
  $graph->Add($lineplot4);
 }
