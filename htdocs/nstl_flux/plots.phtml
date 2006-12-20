@@ -1,9 +1,39 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/forms.php");
+include("$rootpath/include/database.inc.php");
+
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 86400);
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 86400);
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 86400);
+$pvar1 = isset($_GET["pvar1"]) ? $_GET["pvar1"] : "fc_wpl";
+$pvar2 = isset($_GET["pvar2"]) ? $_GET["pvar2"] : "le_wpl";
+$pvar3 = isset($_GET["pvar3"]) ? $_GET["pvar3"] : "hs";
+$pvar4 = isset($_GET["pvar4"]) ? $_GET["pvar4"] : "rn_total_avg";
+
+$other = iemdb("other");
+$sql = "SELECT * from flux_vars ORDER by details ASC";
+$rows = pg_exec($other, $sql);
+$var_names = Array();
+$var_details = Array();
+for( $i=0; $row = @pg_fetch_array($rows,$i); $i++)
+{
+  $var_names[] = $row["name"];
+  $var_details[] = $row["details"];
+}
+
+function genselect($name, $selected, $ids, $values)
+{
+  $s = "<select name=\"$name\">\n";
+  reset($ids);
+  while( list($k,$v) = each($ids) )
+  {
+    $s .= "<option value=\"$v\" ";
+    if ($selected == $v) $s .= "selected=\"selected\"";
+    $s .= ">". $values[$k] ."</option>";
+  }
+  return $s;
+}
 
 $TITLE = "IEM | NSTL Flux Sites";
 include("$rootpath/include/header.php"); ?>
@@ -20,20 +50,23 @@ include("$rootpath/include/header.php"); ?>
 <tbody>
 <tr><th>Year:</th><th>Month:</th><th>Day:</th></tr>
 <tr>
- <td><?php echo yearSelect(2002, $year, "year"); ?></td>
+ <td><?php echo yearSelect(2005, $year, "year"); ?></td>
  <td><?php echo monthSelect($month, "month"); ?></td>
  <td><?php echo daySelect($day, "day"); ?></td>
+ <td><?php echo genselect("pvar1", $pvar1, $var_names, $var_details); ?>
+ <br /><?php echo genselect("pvar2", $pvar2, $var_names, $var_details); ?>
+ <br /><?php echo genselect("pvar3", $pvar3, $var_names, $var_details); ?>
+ <br /><?php echo genselect("pvar4", $pvar4, $var_names, $var_details); ?>
+</td>
 </tr>
 </table>
-<?php $u = sprintf("$rooturl/plotting/flux/plot_rad.php?var=rn_total_avg&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<?php $u = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar1, $year, $month, $day); ?>
 <br /><img src="<?php echo $u; ?>">
-<?php $u = sprintf("$rooturl/plotting/flux/plot_rad.php?var=shf1_avg&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<?php $u = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar2, $year, $month, $day); ?>
 <br /><img src="<?php echo $u; ?>">
-<?php $u = sprintf("$rooturl/plotting/flux/plot_rad.php?var=le_wpl&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<?php $u = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar3, $year, $month, $day); ?>
 <br /><img src="<?php echo $u; ?>">
-<?php $u = sprintf("$rooturl/plotting/flux/plot_rad.php?var=fc_wpl&year=%s&month=%s&day=%s", $year, $month, $day); ?>
-<br /><img src="<?php echo $u; ?>">
-<?php $u = sprintf("$rooturl/plotting/flux/plot_rad.php?var=hs&year=%s&month=%s&day=%s", $year, $month, $day); ?>
+<?php $u = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar4, $year, $month, $day); ?>
 <br /><img src="<?php echo $u; ?>">
 
 <?php include("$rootpath/include/footer.php"); ?>
