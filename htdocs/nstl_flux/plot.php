@@ -40,15 +40,15 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
   $times[$stid][] = $ts;
 }
 
+$labels = Array();
 $rs = pg_exec($pgconn, sprintf("SELECT * from flux_meta WHERE sts < '%s-%s-%s' and ets > '%s-%s-%s'", $year, $month, $day, $year, $month, $day) );
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
   $st = $row["station"];
-  if ($st == 'nstl11') $nstl11_lbl = "Over ". $row["surface"];
-  if ($st == 'nstl10') $nstl10_lbl = "Over ". $row["surface"];
+  $labels[$st] =  $row["surface"];
 }
 
-$ts_lbl = date("d F Y", $sts);
+$ts_lbl = date("d M Y", $sts);
 
 pg_close($pgconn);
 
@@ -59,23 +59,36 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 // Create the graph. These two calls are always required
 $graph = new Graph(640,350);
 $graph->SetScale("datlin");
-$graph->img->SetMargin(50,40,45,90);
-$graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
+$graph->img->SetMargin(65,8,45,70);
+$graph->SetMarginColor('white');
+// Box around plotarea
+$graph->SetBox();
+
+// Setup the X and Y grid
+$graph->ygrid->SetFill(true,'#DDDDDD@0.5','#BBBBBB@0.5');
+$graph->ygrid->SetLineStyle('dashed');
+$graph->ygrid->SetColor('gray');
+$graph->xgrid->Show();
+$graph->xgrid->SetLineStyle('dashed');
+$graph->xgrid->SetColor('gray');
+
+$graph->xaxis->SetFont(FF_FONT1, FS_NORMAL);
+$graph->xaxis->title->SetFont(FF_GEORGIA,FS_BOLD,12);
 $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetPos("min");
-$graph->title->Set($vars[$pvar]["details"]);
-$graph->subtitle->Set(" Timeseries for ${ts_lbl}");
+$graph->xaxis->SetLabelFormatString("h A", true);
+$graph->xaxis->SetTitleMargin(35);
 
-$graph->title->SetFont(FF_FONT1,FS_BOLD,12);
-$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-$graph->xaxis->SetTitle("Local Valid Time");
+$graph->tabtitle->Set($vars[$pvar]["details"]);
+$graph->tabtitle->SetFont(FF_GEORGIA,FS_BOLD,14);
+
+$graph->yaxis->title->SetFont(FF_GEORGIA,FS_BOLD,10);
+$graph->xaxis->SetTitle("Timeseries for ${ts_lbl}");
 $graph->yaxis->SetTitle($vars[$pvar]["details"] ." [". $vars[$pvar]["units"] ."]");
-$graph->xaxis->SetTitleMargin(55);
-$graph->yaxis->SetTitleMargin(37);
-$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
+$graph->yaxis->SetTitleMargin(45);
 
 $graph->legend->SetLayout(LEGEND_HOR);
-$graph->legend->Pos(0.10, 0.9, "left", "top");
+$graph->legend->Pos(0.10, 0.92, "left", "top");
 
 // Create the linear plot
 if (sizeof($data["nstl11"]) > 1) {
