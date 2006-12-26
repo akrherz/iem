@@ -63,7 +63,7 @@ $cameras = Array(
 		"ip" => "65.248.192.73", "county" => "Appanoose"),
   "SKNI4" => Array("sts" => mktime(17,0,0,9, 26,2005), "ets" => time(),
 		"name" => "Knoxville", "active" => true,
-		"ip" => "71.7.58.111", "county" => "Marion"),
+		"ip" => "69.66.146.121", "county" => "Marion"),
   "SNEI4" => Array("sts" => mktime(19,0,0, 4,16,2004), "ets" => time(),
 		"name" => "Newton", "active" => true,
 		"iservice" => "Dynamic Broadband", 
