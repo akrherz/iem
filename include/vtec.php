@@ -13,6 +13,7 @@ $vtec_phenomena = Array(
   'DS' => 'Dust Storm',
   'EC' => 'Extreme Cold',
   'EH' => 'Excessive Heat',
+  'FA' => 'Areal Flood',
   'FF' => 'Flash Flood',
   'FL' => 'Flood',
   'FR' => 'Frost',
