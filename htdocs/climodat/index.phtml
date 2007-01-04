@@ -1,6 +1,7 @@
 <?php
  include("../../config/settings.inc.php");
  include("$rootpath/include/selectWidget.php");
+ include("$rootpath/include/constants.php");
  $report = isset($_GET["report"])? substr($_GET["report"],0,2): "01";
  $station = isset($_GET["station"])? strtolower( substr($_GET["station"],0,6) ): "";
 
@@ -35,7 +36,7 @@
 <?php } ?>
 
 These "Climodat" reports provide some answers to the most common climatological
-questions we get routinely asked.  These reports are based on the daily climate observations from the <a href="/COOP/">NWS COOP</a> network.  We also provide <a href="index.phtml#ks">"kitchen sink"</a> data files which contain the much of the raw information used to generate the reports. Values from <b>1 Jan 1951 till 1 Nov 2006</b> were used in the formulation of 
+questions we get routinely asked.  These reports are based on the daily climate observations from the <a href="/COOP/">NWS COOP</a> network.  We also provide <a href="index.phtml#ks">"kitchen sink"</a> data files which contain the much of the raw information used to generate the reports. Values from <b>1 Jan 1951 till <?php echo date('d M Y', $coop_archive_end); ?></b> were used in the formulation of 
 these reports.  Data for 2006 will continue to be updated as it is received
 at the IEM.
 
