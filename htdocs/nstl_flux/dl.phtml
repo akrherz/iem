@@ -19,11 +19,29 @@ $rs = pg_exec($pg_conn, $sql);
 header("Content-type: application/octet-stream");
 header("Content-Disposition: attachment; filename=fluxdata.txt");
 
-echo sprintf("station,valid,netrad,soilheat,latent,sensible,co2,\n");
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
-{
-  echo sprintf("%s,%s,%s,%s,%s,%s,%s,\n", $row["station"], $row["valid"], $row["netrad"], $row["soilheat"], $row["latent"], $row["sensible"], $row["co2"]);
 
+for( $i=0; $row = @pg_fetch_array($rs,$i, PGSQL_ASSOC); $i++)
+{
+  if ($i == 0) /* Print el-header */
+  {
+    echo "station,valid,";
+    $cols = array_keys($row);
+    $printCols = Array();
+    foreach ($cols as $k => $v)
+    {
+       if ($v == "station" || $v == "valid") { continue; }
+       $printCols[] = $v;
+       echo ",$v";
+    }
+    echo "\n";
+  }
+  echo sprintf("%s,%s,", $row["station"], $row["valid"]);
+  reset($printCols);
+  foreach( $printCols as $k => $v)
+  {
+    echo $row[$v] .",";
+  }
+  echo "\n";
 }
 
 ?>
