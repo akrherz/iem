@@ -79,7 +79,12 @@ $watches->set("data", "geom from (select type as wtype, geom, oid from watches w
 
 $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets) ."GIS/uscomp/n0r_". date('YmdHi', $basets) .".png";
 if (! is_file($fp))
-    $ERROR .= "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
+{
+    $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets - 300.0) ."GIS/uscomp/n0r_". date('YmdHi', $basets - 300.0) .".png";
+    
+    if (! is_file($fp))
+      $ERROR .= "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
+}
 $radfile = $fp;
 $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("data", $radfile);
