@@ -42,7 +42,8 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 $labels = Array("nstlnsp" => "Unknown", "nstl11" => "Unknown", 
         "nstl10" => "Unknown", "nstl30ft" => "Unknown");
-$rs = pg_exec($pgconn, sprintf("SELECT * from flux_meta WHERE sts < '%s-%s-%s' and ets > '%s-%s-%s'", $year, $month, $day, $year, $month, $day) );
+$sql = sprintf("SELECT * from flux_meta WHERE sts < '%s-%s-%s' and ets > '%s-%s-%s'", $year, $month, $day, $year, $month, $day);
+$rs = pg_exec($pgconn, $sql);
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
   $st = $row["station"];
@@ -112,7 +113,7 @@ if (sizeof($data["nstl10"]) > 1) {
 if (sizeof($data["nstlnsp"]) > 1) {
  $lineplot3=new LinePlot($data["nstlnsp"], $times["nstlnsp"]);
  $lineplot3->SetColor("black");
- $lineplot3->SetLegend( $labels["nstlnsp"] );
+ $lineplot3->SetLegend( $labels["nspr"] );
  $lineplot3->SetWeight(2);
  $graph->Add($lineplot3);
 }
