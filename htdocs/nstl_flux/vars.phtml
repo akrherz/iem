@@ -1,0 +1,37 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/forms.php");
+
+$TITLE = "IEM | NSTL Flux Sites | Variables";
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/header.php"); ?>
+
+<TR><TD>
+
+<h3 class="heading">USDA-ARS-National Soil Tilth Lab Flux Sites</h3>
+
+<p>This page lists out variables collected on the 4 sites in this network.
+Each variable is not collected at every site. 
+
+<table width="100%">
+<thead><tr><th colspan="3" align="left">Site Information:</th></tr></thead>
+<tr><th align="left">ID</th><th align="left">Units</th><th align="left">Details</th></tr>
+</thead>
+<tbody>
+<?php
+$pg_conn = iemdb("other");
+$sql = "SELECT * from flux_vars ORDER by name ASC";
+$rs = pg_exec($pg_conn, $sql);
+
+for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+{
+  echo sprintf("<tr><th>%s</th><td>%s</td><td>%s</td></tr>", $row["name"], $row["units"], $row["details"]); 
+}
+?>
+</tbody>
+</table>
+
+<br>
+
+
+<?php include("$rootpath/include/footer.php"); ?>
