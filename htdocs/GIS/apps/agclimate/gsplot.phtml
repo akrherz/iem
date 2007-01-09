@@ -2,29 +2,24 @@
 include("../../../../config/settings.inc.php");
 
 $var = isset($_GET["var"]) ? $_GET["var"] : "gdd50";
-
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+$year = isset($_GET["year"]) ? $_GET["year"] : 2006;
 $smonth = isset($_GET["smonth"]) ? $_GET["smonth"]:  5;
 $emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: 10;
 $sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
 $eday = isset($_GET["eday"]) ? $_GET["eday"]: 1;
 
-if (strlen($var) == 0)  $var = "gdd50";
-if (strlen($year) == 0)  $year = 2005;
-if (strlen($smonth) > 0 && strlen($sday) > 0)
-  $gs_start[$year] = mktime(0,0,0,$smonth,$sday,$year);
-if (strlen($emonth) > 0 && strlen($eday) > 0)
-  $gs_end[$year] = mktime(0,0,0,$emonth,$eday,$year);
+$gs_start = mktime(0,0,0,$smonth,$sday,$year);
+$gs_end = mktime(0,0,0,$emonth,$eday,$year);
 
 $round = Array("prec" => 2, "gdd50" => 0, "gdd32" => 0, "et" => 2, "sgdd50" => 0, "sdd86" => 0, "srad" => 0);
 
 $today = time();
-if ($gs_end[$year] >= $today)  $gs_end[$year] = $today;
+if ($gs_end >= $today)  $gs_end = $today;
 
-$emonth = strftime("%m", $gs_end[$year]);
-$eday = strftime("%d", $gs_end[$year]);
-$smonth = strftime("%m", $gs_start[$year]);
-$sday = strftime("%d", $gs_start[$year]);
+$emonth = strftime("%m", $gs_end);
+$eday = strftime("%d", $gs_end);
+$smonth = strftime("%m", $gs_start);
+$sday = strftime("%d", $gs_start);
 
 include("$rootpath/include/forms.php");
 
@@ -48,9 +43,6 @@ window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,s
 
 <h3 class="heading">Growing Season Charts</h3><p>
 
-
-
-<div class="text">
 <form method="GET" action="gsplot.phtml">
 <table> <tr>
    <th class="subtitle">Plot Parameter</th>
@@ -168,10 +160,10 @@ $iards->draw($img);
 include("$rootpath/include/database.inc.php");
 $c = iemdb("isuag");
 
-$sstr = strftime("%Y-%m-%d", $gs_start[$year]);
-$estr = strftime("%Y-%m-%d", $gs_end[$year]);
-$sstr_txt = strftime("%b %d", $gs_start[$year]);
-$estr_txt = strftime("%b %d", $gs_end[$year]);
+$sstr = strftime("%Y-%m-%d", $gs_start);
+$estr = strftime("%Y-%m-%d", $gs_end);
+$sstr_txt = strftime("%b %d", $gs_start);
+$estr_txt = strftime("%b %d", $gs_end);
 
 /* ------------------------------------------------------- */
 if ($var == 'gdd32') {
@@ -368,7 +360,9 @@ $url = $img->saveWebImage();
 image is loaded up in another window, you can modify this plots 
 parameters.
 
-<p>*Note: Precipitation is not recorded during the cold season.</td>
+<p><b>*Note:</b> Precipitation recorded from this network is not reliable.
+ You should precipitation obs from the <a href="<?php echo $rooturl; ?>/COOP/">COOP</a> network.
+</td>
   <td>
   <img src="<?php echo $url; ?>" border=1>
 </td></tr>
@@ -382,7 +376,7 @@ parameters.
 text editor and save the data file on your machine.  Most GIS systems can 
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
-</div>
+
 <?php 
   include("$rootpath/include/footer.php");
 ?>

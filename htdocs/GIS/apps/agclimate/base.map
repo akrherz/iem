@@ -5,11 +5,11 @@ NAME fancybase
 STATUS ON
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 EXTENT -2223813 -1746393 2207341 1701506
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off
@@ -62,7 +62,7 @@ LAYER
   NAME counties
   STATUS ON
   TYPE POLYGON
-  DATA shape/26915/iowa/iacounties.shp
+  DATA static/shape/26915/iowa/iacounties.shp
   PROJECTION
     "init=epsg:26915"
   END
@@ -145,7 +145,7 @@ LAYER
   PROJECTION
    "proj=latlong"
   END
-  DATA shape/unproj/iowa/interstates.shp
+  DATA static/shape/4326/us/interstates.shp
 #  CLASSITEM "FCC"
   CLASS
 #    EXPRESSION /A1[0-9]/
