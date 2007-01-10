@@ -81,7 +81,7 @@ $cameras = Array(
         "ip" => "69.66.30.247", "county" => "Boone"),
   "SNVI4" => Array("sts" => mktime(18,10,0,7, 22,2006),
          "ets" => time(),
-        "name" => "Nevada", "active" => false, "removed" => false,
+        "name" => "Nevada", "active" => true, "removed" => false,
         "ip" => "69.66.56.19", "county" => "Story"),
   "SPAI4" => Array("sts" => mktime(22,0,0,5,19,2004), "ets" => time(),
 		"name" => "Panora", "active" => true,
