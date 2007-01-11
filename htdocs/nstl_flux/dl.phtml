@@ -24,7 +24,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i, PGSQL_ASSOC); $i++)
 {
   if ($i == 0) /* Print el-header */
   {
-    echo "station,valid,";
+    echo "station,valid";
     $cols = array_keys($row);
     $printCols = Array();
     foreach ($cols as $k => $v)
