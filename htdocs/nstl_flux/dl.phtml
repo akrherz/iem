@@ -12,7 +12,7 @@ $all = isset($_GET["all"]);
 $pg_conn = iemdb("other");
 
 if ($all) { $sql = sprintf("SELECT * from flux%s ORDER by valid ASC", $year); }
-else { $sql = sprintf("SELECT * from flux%s WHERE date(valid) = '%s-%s-%s'", $year, $year, $month, $day); }
+else { $sql = sprintf("SELECT * from flux%s WHERE date(valid) = '%s-%s-%s' ORDER by valid ASC", $year, $year, $month, $day); }
 
 $rs = pg_exec($pg_conn, $sql);
 
