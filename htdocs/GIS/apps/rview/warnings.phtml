@@ -310,7 +310,7 @@ while ( list($key, $val) = each($wA) )
   $oid = $oA[$key];
 
   if ($eventid > 0) {
-    $warningscat = "warnings_cat.phtml?year=$year&wfo=$wfo&phenomena=$phenomena&eventid=$eventid";
+    $warningscat = "warnings_cat.phtml?year=$year&wfo=$wfo&phenomena=$phenomena&eventid=$eventid&significance=$significance";
   } else { /* Old warnings have no VTEC! */
     $warningscat = "warnings_old.phtml?year=$year&oid=$oid";
   }
