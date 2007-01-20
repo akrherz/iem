@@ -1,4 +1,5 @@
 body{
+    background: #fff url(../images/hbar.gif) repeat-x;
 	margin: 0px;
 }
 html, body, h2, h3, h4, div, p, ul, li, input {
@@ -6,7 +7,7 @@ html, body, h2, h3, h4, div, p, ul, li, input {
 }
 #iem-main {
 	min-width: 800px; 
-	border: 1px #000 solid;
+	/* border: #000 solid; */
 }
 #iem-mainwide {
 /*	width: 800px; */
@@ -18,7 +19,9 @@ html, body, h2, h3, h4, div, p, ul, li, input {
 	width: 100%;
 }
 #iem-header {
-	border-bottom: 1px #000 solid;
+	/* border-bottom: 1px #000 solid;*/
+  height: 70px;
+  width: 100%;
 }
 #iem-header:after {
     content: ".";
@@ -33,18 +36,28 @@ html, body, h2, h3, h4, div, p, ul, li, input {
     * html #iem-header {height: 1%;}
     /* End Holly Hack */
 
+#iem-header-title{
+  position: absolute;
+  top: 26px;
+  left: 90px;
+  width: 500px;
+}
 #iem-header-title h3 {
 	margin-top: 0px;
 	margin-left: 0px;
 	margin-bottom: 0px;
+    color: #f6f623;
 }
 #iem-header-title h4 {
-	margin-top: 2px;
+	margin-top: 0px;
 	margin-left: 0px;
 	margin-bottom: 0px;
+    color: #f6f623;
 }
 #iem-header-logo {
-	float: left;
+	position: absolute;
+    left: 5px;
+    top: 5px;
 	margin-right: 5px;
 }
 #iem-header-logo img {
@@ -53,25 +66,55 @@ html, body, h2, h3, h4, div, p, ul, li, input {
 }
 #iem-header-items {
 	position: absolute;
-	top: 35px;
+	top: 30px;
 	right: 10px;
+    width: 250px;
 	text-align: right;
 	font-size: 0.8em;
 }
-#iem-header-items-wide {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        width: 150px; 
-        text-align: right;
-        font-size: 0.8em;
+#iem-header-items a{
+    color: #fff;
+	font-weight: bold;
 }
 
-div.iem-menu{
-	margin-top: 3px;
-	padding: 1px;
-	font-size: 10pt;
+#iemwebring {
+  font-size: 85%;
+  padding: .1em 0;
+  text-align: center;
+  clear: both;
+  margin-top: 3px;
 }
+#iemwebring a {
+  padding: 0 .2em 0 .4em;
+  text-decoration: none;
+  border: none;
+}
+#iemwebring li {
+  list-style: none;
+  display: inline;
+}
+
+
+#iemmenu {
+  position: absolute;
+  top: 75px;
+  left: 5px;
+  width: 750px;
+  padding: 0px;
+  text-align: left;
+  margin-top: 0px;
+  clear: both;
+}
+#iemmenu li {
+  list-style: none;
+  display: inline;
+}
+#iemmenu a {
+  padding: 0 .2em 0 .4em;
+  border: none;
+  text-decoration: none;
+}
+
 
 #iem-content {
 	clear: left;
@@ -253,4 +296,95 @@ div.iembox {
 }
 div.iembox h4 {
   margin: 2px;
+}
+a {
+	color: #000099;
+}
+a:hover {
+	color: #999999;
+}
+#iem-header-items {
+	color: #FFFFFF;
+}
+#iem-header-items a:hover {
+	color: #CCCCCC;
+}
+div.iem-menu{
+	background-color: #666666;
+}
+#iem-content a:hover {
+	color: #000066;
+}
+#iem-content li {
+	color: #000000;
+}
+#iem-footer {
+	background-color: #FEFEFE;
+}
+#iem-footer a:hover {
+	color: #003366;
+}
+.even {
+	background-color: #99CCFF;
+}
+.odd {
+	background-color: #FEFEFE;
+}
+.heading {
+	border-color: #336699;
+	background-color: #CCCCCC;
+	color: #003366;
+}
+tr.ruled {
+	background: #99CCFF;
+}
+.climo-header-left {
+	background-color: #CCCCCC;
+	color: #336699;
+}
+.climo-header-right {
+	border-color: #336699;
+	background-color: #CCCCCC;
+	color: #336699;
+}
+.subtitle {
+	color: #6699CC;
+}
+.snet-precip-table {
+	background-color: #99CCFF;
+	border-color: #99CCFF;
+}
+.kcci{
+ background: #99CCFF;
+}
+.kelo{
+ background: #6699CC;
+}
+.kimt{
+ background: #00efef;
+}
+.tabcommands {
+	color: #003366;
+}
+.iem-form {
+	border-color: #003366;
+}
+#iem-form2 {
+	border-color: #003366;
+}
+#iem-form2 th {
+	background-color: #6699CC;
+}
+thead th,tfoot td{
+        background:#6699CC;
+}
+#helpwindow {
+	border-color: #003366;
+}
+div.iembox {
+  background: #D4F4F9;
+  border: #004662 1px solid;
+}
+div.iembox h4 {
+  color: #241F51;
 }

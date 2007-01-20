@@ -4,21 +4,6 @@ a {
 a:hover {
 	color: #999999;
 }
-#iem-header {
-	background-color: #336699;
-}
-#iem-header a {
-	color: #FFFFFF;
-}
-#iem-header a:hover {
-	color: #999999;
-}
-#iem-header-title h3 {
-	color: #FFFFFF;
-}
-#iem-header-title h4 {
-	color: #FFFFFF;
-}
 #iem-header-items {
 	color: #FFFFFF;
 }
@@ -39,9 +24,6 @@ div.iem-menu{
 }
 #iem-footer a:hover {
 	color: #003366;
-}
-#iem-main {
-	background-color: #FEFEFE;
 }
 .even {
 	background-color: #99CCFF;
