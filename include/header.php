@@ -31,15 +31,15 @@
 </div>
 
 <ul id="iemmenu">
-<li><a href="<?php echo $rooturl; ?>/archive/">&middot;Archive</a></li>
-<li><a href="<?php echo $rooturl; ?>/current/">&middot;Current</a></li>
-<li><a href="<?php echo $rooturl; ?>/climate/">&middot;Climatology</a></li>
-<li><a href="<?php echo $rooturl; ?>/climodat/">&middot;Climodat</a></li>
-<li><a href="<?php echo $rooturl; ?>/cool/">&middot;Cool Stuff</a></li>
-<li><a href="<?php echo $rooturl; ?>/sites/locate.php">&middot;IEM Sites</a></li>
-<li><a href="<?php echo $rooturl; ?>/GIS/">&middot;GIS</a></li>
-<li><a href="<?php echo $rooturl; ?>/info.php">&middot;Info</a></li>
-<li><a href="<?php echo $rooturl; ?>/QC/">&middot;Quality Control</a></li>
+<li><a href="<?php echo $rooturl; ?>/archive/">&middot; Archive</a></li>
+<li><a href="<?php echo $rooturl; ?>/current/">&middot; Current</a></li>
+<li><a href="<?php echo $rooturl; ?>/climate/">&middot; Climatology</a></li>
+<li><a href="<?php echo $rooturl; ?>/climodat/">&middot; Climodat</a></li>
+<li><a href="<?php echo $rooturl; ?>/cool/">&middot; Cool Stuff</a></li>
+<li><a href="<?php echo $rooturl; ?>/sites/locate.php">&middot; IEM Sites</a></li>
+<li><a href="<?php echo $rooturl; ?>/GIS/">&middot; GIS</a></li>
+<li><a href="<?php echo $rooturl; ?>/info.php">&middot; Info</a></li>
+<li><a href="<?php echo $rooturl; ?>/QC/">&middot; Quality Control</a></li>
 </ul> 
  
 </div><!-- End of iem-header -->
