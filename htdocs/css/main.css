@@ -33,7 +33,7 @@ html, body, h2, h3, h4, div, p, ul, li, input {
     }
 
     /* Holly Hack Targets IE Win only \*/
-    * html #iem-header {height: 1%;}
+    * html #iem-header {height: 70px;}
     /* End Holly Hack */
 
 #iem-header-title{
