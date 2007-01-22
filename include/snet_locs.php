@@ -97,7 +97,6 @@ $cities = Array(
 "SHOS2" => array("short" => "Howard", "online" => "t", "city" => "Howard", "nwn_id" => "505", "lat" => "44.01", "lon" => "-97.5261", "network" => "KELO", "county" => "Miner", "climate_site" => "none"),
 "SHII4" => array("short" => "Hull", "online" => "t", "city" => "Hull", "nwn_id" => "25", "lat" => "43.1899986267", "lon" => "-96.1299972534", "network" => "KELO", "county" => "Sioux", "climate_site" => "ia7147"),
 "SHUS2" => array("short" => "Huron", "online" => "t", "city" => "Huron", "nwn_id" => "3", "lat" => "44.3499984741", "lon" => "-98.2300033569", "network" => "KELO", "county" => "Beadle", "climate_site" => "none"),
-"SIWI4" => array("short" => "Inwood", "online" => "t", "city" => "Inwood", "nwn_id" => "None", "lat" => "43.3319", "lon" => "-96.4322", "network" => "KELO", "county" => "US", "climate_site" => "ia7152"),
 "ICSI4" => array("short" => "Inwood", "online" => "t", "city" => "Inwood, IA _ Inwood Christian School", "nwn_id" => "918", "lat" => "43.3055", "lon" => "-96.435", "network" => "KELO", "county" => "Lyon", "climate_site" => "ia7147"),
 "KKAS2" => array("short" => "Kadoka", "online" => "t", "city" => "Kadoka School", "nwn_id" => "913", "lat" => "43.8367", "lon" => "-101.5219", "network" => "KELO", "county" => "Jackson", "climate_site" => "none"),
 "RRCM5" => array("short" => "Lamberton", "online" => "t", "city" => "Lamberton, MN _ Red Rock Central", "nwn_id" => "902", "lat" => "44.2272", "lon" => "-95.2633", "network" => "KELO", "county" => "Redwood", "climate_site" => "none"),
@@ -139,6 +138,7 @@ $cities = Array(
 "SLEM5" => array("short" => "LeRoy", "online" => "t", "city" => "LeRoy", "nwn_id" => "609", "lat" => "43.5131", "lon" => "-92.5095", "network" => "KIMT", "county" => "Mower", "climate_site" => "none"),
 "SMYI4" => array("short" => "Mason City", "online" => "t", "city" => "Mason City", "nwn_id" => "610", "lat" => "43.1506", "lon" => "-93.1691", "network" => "KIMT", "county" => "Cerro Gordo", "climate_site" => "ia5230"),
 "SOAI4" => array("short" => "Osage", "online" => "t", "city" => "Osage", "nwn_id" => "605", "lat" => "43.277", "lon" => "-92.8102", "network" => "KIMT", "county" => "Mitchell", "climate_site" => "ia6305"),
+"SRRI4" => array("short" => "Rockford", "online" => "t", "city" => "Rockford", "nwn_id" => "615", "lat" => "43.05", "lon" => "-92.93", "network" => "KIMT", "county" => "Floyd", "climate_site" => "ia1402"),
 ),
 ); 
 $Sconv = Array(
@@ -247,6 +247,7 @@ $Sconv = Array(
 609 => 'SLEM5',
 610 => 'SMYI4',
 611 => 'SBLM5',
+615 => 'SRRI4',
 899 => 'S03I4',
 900 => 'CHAS2',
 901 => 'CLYI4',
