@@ -397,7 +397,7 @@ LAYER
     # Snow and Blowing snow
     CLASS
         NAME "Sn or Blow Sn Adv"
-        EXPRESSION (('[phenomena]' = 'SN' or '[phenomena]' = 'BS' or '[phenomena]' = 'SB') and '[significance]' = 'Y')
+        EXPRESSION (('[phenomena]' = 'SN' or '[phenomena]' = 'BS' or '[phenomena]' = 'SB' or '[phenomena]' = 'LE') and '[significance]' = 'Y')
         STYLE
           COLOR 176 224 230
           #SIZE  3 
@@ -416,7 +416,7 @@ LAYER
     # WW Warning
     CLASS
         NAME "Winter Storm Warn"
-        EXPRESSION (('[phenomena]' = 'WS' or '[phenomena]' = 'WW') and '[significance]' = 'W')
+        EXPRESSION (('[phenomena]' = 'LE' or '[phenomena]' = 'WS' or '[phenomena]' = 'WW') and '[significance]' = 'W')
         COLOR   255 105 180
     END
     # Sleet Fz
