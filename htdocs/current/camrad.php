@@ -8,7 +8,7 @@ $db_ts = strftime("%Y-%m-%d %H:%M", $ts );
 
 dl($mapscript);
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
-$map->setExtent(-95.1,40.6,-92.2,43.3);
+$map->setExtent(-95.0,40.45,-92.1,43.3);
 $map->set("width", 320);
 $map->set("height", 240);
 
@@ -85,7 +85,7 @@ $d = date("m/d/Y h:i A", $radts);
 
 $layer = $map->getLayerByName("credits");
 $point = ms_newpointobj();
-$point->setXY(1, 230);
+$point->setXY(125, 10);
 $point->draw($map, $layer, $img, "credits",  "RADAR: $d");
 
 $map->drawLabelCache($img);
