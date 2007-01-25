@@ -10,6 +10,7 @@ $o = Array(
   "neighbors" => Array("name" => "Neighbors", "uri" => "neighbors.php?"),
   "7dayhilo" => Array("name" => "7 Day High/Low Plot", "uri" => "plot.php?prod=0&"),
   "monthhilo" => Array("name" => "Month High/Low Plot", "uri" => "plot.php?prod=1&"),
+  "windrose" => Array("name" => "Wind Roses", "uri" => "windrose.phtml?"),
 );
 
 while (list($key,$val) = each($o))

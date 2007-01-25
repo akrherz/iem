@@ -1,0 +1,44 @@
+<?php 
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+include("setup.php");
+
+   $TITLE = "IEM | Site Wind Roses";
+   include("$rootpath/include/header.php");  
+   $current="windrose"; include('sidebar.php');
+?>
+
+<h3>Wind Roses</h4>
+
+<p>Wind roses are an information packed plot providing frequencies of 
+wind direction and wind speed.  A wind rose can quickly indicate the dominate
+wind directions and direction of strongest wind speeds.  The IEM has generated
+wind roses based on the our archive.  The archive does contain errors and
+non representative data, so please use care when using these plots.  In 
+general, data from the airports is of good quality and representative of the 
+local surrounding area.
+
+<?php // If has yearly plot, it will have monthly too
+if (file_exists("/mesonet/share/windrose/climate/yearly/${station}_yearly.png"))
+{
+  echo "<p><strong>Yearly Climatology:</strong><br /><img src=\"$rooturl/onsite/windrose/climate/yearly/${station}_yearly.png\">";
+
+ echo "<p><strong>Monthly Climatology: </strong> (click thumbnail)<br /><table cellpadding=3 cellspacing=0><tr>";
+ for ($mon=1;$mon<13;$mon++)
+ {
+  $ts = mktime(0,0,0,$mon,1,2006);
+  $url = sprintf("%s/onsite/windrose/climate/monthly/%02d/%s_%s.png", $rooturl, $mon, $station, strtolower(date("M", $ts)) );
+
+  echo "<td><strong>".date("F", $ts) ."</strong><a href=\"$url\"><img src=\"$url\" style=\"border: 1px; width: 200px;\"></a></td>\n";
+  if ($mon % 4 == 0) echo "</tr>";
+  if ($mon % 4 == 0 && $mon != 12) echo "<tr>";
+ } 
+ echo "</table>";
+}else 
+{
+  echo "<p>Sorry, no wind roses are available for this site.";
+}
+?>
+
+
+<?php include("$rootpath/include/footer.php"); ?>

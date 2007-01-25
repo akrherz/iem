@@ -3,7 +3,7 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("setup.php");
 
-   $TITLE = "IEM | Current Data";
+   $TITLE = "IEM | Site Neighbors";
    include("$rootpath/include/header.php");  
    $current="neighbors"; include('sidebar.php');
 
