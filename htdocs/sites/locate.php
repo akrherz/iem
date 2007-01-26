@@ -8,7 +8,7 @@
  $swf = Array("network" => $network);
  $sw->setformvars($swf);
  $sw->logic($_GET);
- $ar = Array("IA_ASOS", "AWOS", "IA_RWIS", "KELO", "KCCI", "KIMT");
+ $ar = Array("IA_ASOS", "AWOS", "IA_RWIS", "KELO", "KCCI", "KIMT","SD_ASOS", "MN_ASOS", "WI_ASOS", "IL_ASOS", "MO_ASOS", "KS_ASOS", "NE_ASOS");
  $sw->set_networks($ar);
  $swinterface = $sw->printInterface();
 ?>
