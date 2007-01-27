@@ -61,7 +61,7 @@ window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,s
      <option value="srad" <?php if($var == "srad") echo "SELECTED"; ?>>Solar Radiation (langleys)</option>
      <option value="sdd86" <?php if($var == "sdd86") echo "SELECTED"; ?>>Stress Degree Days (base=86)</option>
     </select></td>
-  <td rowspan=2><?php echo yearSelect(1998, $year, "year"); ?></td>
+  <td rowspan=2><?php echo yearSelect(1988, $year, "year"); ?></td>
   <td><?php monthSelect2($smonth, 'smonth'); ?></td>
   <td><?php daySelect2($sday, 'sday'); ?></td>
   <td rowspan=2><input type="submit" value="Make Plot"></td>
