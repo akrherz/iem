@@ -5,7 +5,7 @@ $connection = iemdb("isuag");
 
 $station = $_GET["station"];
 $ts = time() - 86400 - 7*3600;
-$table = sprintf("t%s_daily", date("Y", $ts) );
+$table = "daily";
 $date = date("Y-m-d", $ts);
 
 

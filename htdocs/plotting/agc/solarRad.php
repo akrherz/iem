@@ -5,7 +5,7 @@ $connection = iemdb("isuag");
 
 $station = $_GET['station'];
 $ts = time() - 86400 - 7*3600;
-$table = sprintf("t%s_hourly", date("Y", $ts) );
+$table = "hourly";
 $date = date("Y-m-d", $ts);
 
 $queryData = "c100 as dater, c300 as dater2, c800";

@@ -5,7 +5,7 @@ $connection = iemdb("isuag");
 
 $station = $_GET['station'];
 $ts = time() - 86400 - 7*3600;
-$table = sprintf("t%s_daily", date("Y", $ts) );
+$table = "daily";
 $date = date("Y-m-d", $ts);
 
 
@@ -14,7 +14,7 @@ $ylabel = "Temperature [F]";
 
 
 
-$query2 = "SELECT ". $queryData .", to_char(valid, 'mm/dd/yy') as valid from ". $table ." WHERE station = '$station' and  
+$query2 = "SELECT ". $queryData .", valid, to_char(valid, 'mm/dd/yy') as dvalid from ". $table ." WHERE station = '$station' and  
 	(valid + '60 days'::interval) > CURRENT_TIMESTAMP  ORDER by valid ASC";
 
 $result = pg_exec($connection, $query2);
@@ -28,7 +28,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 { 
   $ydata[$i]  = $row["dater"];
   $ydata2[$i] = $row["dater2"];
-  $xlabel[$i] = $row["valid"];
+  $xlabel[$i] = $row["dvalid"];
 }
 
 pg_close($connection);
@@ -38,7 +38,7 @@ include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph//jpgraph_line.php");
 
 // Create the graph. These two calls are always required
-$graph = new Graph(600,350,"example1");
+$graph = new Graph(600,450);
 $graph->SetScale("textlin");
 $graph->SetY2Scale("lin");
 $graph->img->SetMargin(40,40,45,80);
