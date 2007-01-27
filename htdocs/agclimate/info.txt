@@ -2,23 +2,26 @@ ISU Agclimate Data information::
 
 ------> Station Id conversion table
 
-StationId:	Station Name:		Data Starts At: *	Lat	Long     Elevation(ft)
-a130209		Ames			Dec 21, 1997		42.03	-93.80   1160
-a131069		Calmar			Sep 21, 2001            42.16   -93.87   1289 
-a131299		Castana			Dec 21, 1997		42.06	-95.82   1428
-a131329		Cedar Rapids		Jun 22, 1998		41.90	-91.50   0787
-a131559		Chariton		Dec 21, 1997		41.00	-93.32
-a131909		Crawfordsville		Dec 21, 1997		41.20	-91.50
-a135879		Nashua			Dec 21, 1997		42.75	-92.50
-a138019		Sutherland		Dec 21, 1997		42.96	-95.50   1461
-a134759		Lewis			Dec 21, 1997		41.40	-95.00
-a136949		Rhodes			May 17, 1999		42.00   -93.25   1028
-a134309		Kanawha			Dec 21, 1997		42.94	-93.90   1233
-a135849		Muscatine		Mar 27, 2000		41.22	-91.06
+StationId:	Station Name:   Data Starts At: *
+a130209		Ames			Jul 01, 1986	
+a130219                     Aug 28, 1986
+a131069		Calmar			Sep 21, 2001   
+a131299		Castana			May 19, 1988
+a131329		Cedar Rapids    Jun 22, 1998
+a131559		Chariton		Aug 17, 1988
+a131909		Crawfordsville  Jan 01, 1990
+a135879		Nashua			Sep 01, 1988
+a138019		Sutherland		Jul 23, 1988
+a134759		Lewis			Jun 19, 1997
+a136949		Rhodes			May 17, 1999
+a134309		Kanawha			Jun 19, 1997
+a135849		Muscatine		Mar 27, 2000
+a133259                     Jan 01, 1990
 
 		* Note that the data may not be complete for every
 		  day after the data started
 
+You can get lat/lon information from this page
 
 ------> Units for Data
 
