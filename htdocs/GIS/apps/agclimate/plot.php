@@ -111,24 +111,24 @@ $dstamp = strftime("%Y-%m-%d", $ts);
 if ($var == 'c300') {
   $q = "SELECT station, max(c300) as c300h, max(c300_f) as c300h_f,
      min(c300) as c300l, max(c300_f) as c300l_f
-     from ${tbl}_hourly WHERE date(valid) = '${dstamp}' GROUP by station";
+     from hourly WHERE date(valid) = '${dstamp}' GROUP by station";
   $var = 'c300h';
   $var2 = 'c300l';
 } else if ($var == 'dwpf') {
   $q = "select MAX( k2f( dewpt( f2k(c100), c200)))::numeric(7,2) as dwpfh,
       station, MIN( k2f( dewpt( f2k(c100), c200)))::numeric(7,2) as dwpfl,
       max(c100_f) as dwpfh_f, max(c100_f) as dwpfl_f
-      from ${tbl}_hourly WHERE c200 > 0 and date(valid) = '${dstamp}' GROUP by station";
+      from hourly WHERE c200 > 0 and date(valid) = '${dstamp}' GROUP by station";
   $var = 'dwpfh';
   $var2 = 'dwpfl';
 } else if ($var == "c529") {
   $q = "SELECT station, c529, c529_f, 
     substring(c530,length(c530) - 3,2) || ':' || 
     substring(c530, length(c530) - 1,2) as c530 , 
-    c530_f from ${tbl}_daily WHERE valid = '${dstamp}' ";
+    c530_f from daily WHERE valid = '${dstamp}' ";
   $var2 = 'c530';
 } else {
-  $q = "SELECT * from ${tbl}_daily WHERE valid = '${dstamp}' ";
+  $q = "SELECT * from daily WHERE valid = '${dstamp}' ";
 }  
 $rs =  pg_exec($c, $q);
 $data = Array();
