@@ -97,7 +97,7 @@ $c = iemdb("isuag");
 $rs = Array();
 for($yr=date("Y", $sts);$yr<=date("Y", $ets);$yr++)
 {
-  $tbl = sprintf("t%s_%s", $yr, $rtype);
+  $tbl = sprintf("%s", $rtype);
   $sql = "SELECT station, to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid, 
    $str_vars from $tbl 
    WHERE station IN ('$str_stns') and
