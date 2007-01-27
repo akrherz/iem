@@ -95,10 +95,8 @@ echo $cr;
 
 $c = iemdb("isuag");
 $rs = Array();
-for($yr=date("Y", $sts);$yr<=date("Y", $ets);$yr++)
-{
-  $tbl = sprintf("%s", $rtype);
-  $sql = "SELECT station, to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid, 
+$tbl = sprintf("%s", $rtype);
+$sql = "SELECT station, to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid, 
    $str_vars from $tbl 
    WHERE station IN ('$str_stns') and
    valid BETWEEN '$str_sts' and '$str_ets'
@@ -115,7 +113,6 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
 }
 
 
-}
 pg_close($c);
 
 ?>
