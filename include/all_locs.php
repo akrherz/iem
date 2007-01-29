@@ -1326,7 +1326,7 @@
 "CDWM4" => array("city" => "COLDWATER STATE SCHOOL", "id" => "CDWM4", "lat" => "41.96", "lon" => "-84.99", "network" => "MI_COOP", "county" => "Branch", "climate_site" => "none"),
 "CWPM4" => array("city" => "COLDWATER WASTEWTR PLT", "id" => "CWPM4", "lat" => "41.94", "lon" => "-85.02", "network" => "MI_COOP", "county" => "Branch", "climate_site" => "none"),
 "CLEN1" => array("city" => "COLERIDGE", "id" => "CLEN1", "lat" => "42.51", "lon" => "-97.21", "network" => "NE_COOP", "county" => "Cedar", "climate_site" => "none"),
-"RCFI4" => array("city" => "Colfax", "id" => "RCFI4", "lat" => "41.6893", "lon" => "-93.2648", "network" => "IA_RWIS", "county" => "None", "climate_site" => "none"),
+"RCFI4" => array("city" => "Colfax", "id" => "RCFI4", "lat" => "41.6893", "lon" => "-93.2648", "network" => "IA_RWIS", "county" => "Jasper", "climate_site" => "ia5992"),
 "CFXI4" => array("city" => "COLFAX", "id" => "CFXI4", "lat" => "41.67", "lon" => "-93.23", "network" => "IA_COOP", "county" => "Jasper", "climate_site" => "ia5992"),
 "CFXI2" => array("city" => "COLFAX 2 S", "id" => "CFXI2", "lat" => "40.53", "lon" => "-88.6", "network" => "IL_COOP", "county" => "McLean", "climate_site" => "none"),
 "CGTN8" => array("city" => "COLGATE", "id" => "CGTN8", "lat" => "47.24", "lon" => "-97.66", "network" => "ND_COOP", "county" => "Cass", "climate_site" => "none"),
