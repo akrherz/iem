@@ -1,24 +1,13 @@
 <?php
  include("../../config/settings.inc.php");
- $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "";
+ $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "peak";
  $metar = isset($_GET["metar"]) ? $_GET['metar'] : "no";
+ $sorder = isset($_GET["sorder"]) ? $_GET["sorder"] : "desc";
 
- $REFRESH = "<meta http-equiv=\"refresh\" content=\"60; URL=all.phtml?sortcol=$sortcol&metar=$metar\">";
+ $REFRESH = "<meta http-equiv=\"refresh\" content=\"60;\">";
  $TITLE = "IEM | ALL Current Conditions";
- $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
-<!--//BEGIN Script
-function new_window(url) {
- link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-} 
-//END Script-->
-</script>
-<script type="text/javascript" src="/js/tableruler.js"></script>
-<script type="text/javascript">
-    window.onload=function(){tableruler();}
-</script>';
- include("$rootpath/include/header.php");
-?>
-<?php
+
+  include("$rootpath/include/header.php"); 
   include("$rootpath/include/mlib.php"); 
   include("$rootpath/include/all_locs.php"); 
   include("$rootpath/include/iemaccess.php");
@@ -27,9 +16,6 @@ function new_window(url) {
 $iem = new IEMAccess();
 $asos = $iem->getAll();
 
-if (strlen($sortcol) == 0) {
-  $sortcol = "peak";
-} 
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
@@ -43,10 +29,26 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 
 ?>
 
-<div class="text">
-<b>Nav:</b><a href="<?php echo $rooturl; ?>/current/">Current Conditions</a>
-
 <?php $current_network = "All"; include("$rootpath/include/current_bar.inc.php"); ?>
+
+<p>
+<form method="GET" action="all.phtml" name="work">
+<input type="hidden" value="<?php echo $sortcol; ?>" name="sortcol">
+<table border=1 cellspacing=0 cellpadding=1>
+<tr>
+  <th>View Options:</th>
+  <td>Include METARS:
+  <input value="no" type="radio" name="metar" <?php if ($metar == "no") echo  "CHECKED"; ?>> No
+  <input value="yes" type="radio" name="metar" <?php if ($metar == "yes") echo
+"CHECKED"; ?>> Yes
+</td>
+<td>Sort Order:
+<select name="sorder">
+  <option value="asc" <?php if ($sorder == "asc") echo "SELECTED"; ?>>Ascending
+  <option value="desc" <?php if ($sorder == "desc") echo "SELECTED"; ?>>Decending
+</select></td>
+<td><input type="submit" value="Go!"></form></td>
+</tr></table>
 
 <?php
 echo "<p>Top 30 values of <b>". $vals[$sortcol] ."</b> displayed from the combination
@@ -56,18 +58,18 @@ of RWIS, ASOS, AWOS and SchoolNet stations in Iowa.";
 <form method="GET" action="<?php echo $rooturl; ?>/my/current.phtml">
 
 
-<table style="font-size: 10pt;" class="ruler">
+<?php $uri = "all.phtml?metar=$metar&sorder=$sorder&sortcol="; ?>
+<table style="font-size: 10pt;" cellspacing=0 cellpadding=1 border=1>
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
   <th rowspan="2">Station:</th>
-  <th rowspan="2"><a href="all.php?sortcol=ts&metar=<?php echo $metar; ?>">Ob Time</a></th>
+  <th rowspan="2"><a href="<?php echo $uri; ?>ts">Ob Time</a></th>
   <th colspan="3">Temps &deg;F</th>
   <th colspan="3">&nbsp;</th>
   <th colspan="3">Wind [knots]</th>
   <th colspan="2">Precip</font></th>
 <tr>
-  <?php $uri = "all.phtml?metar=$metar&sortcol="; ?>
   <th>
  <a href="<?php echo $uri; ?>tmpf">Air</a>
  (<a href="<?php echo $uri; ?>max_tmpf">Hi</a> /
@@ -88,8 +90,12 @@ of RWIS, ASOS, AWOS and SchoolNet stations in Iowa.";
 <tbody>  
 <?php
 function aSortBySecondIndex($multiArray, $secondIndex) {
+  global $sorder;
         while (list($firstIndex, ) = each($multiArray))
                 $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+  if ($sorder == "asc")
+        asort($indexMap);
+  else
         arsort($indexMap);
         while (list($firstIndex, ) = each($indexMap))
                 if (is_numeric($firstIndex))
@@ -102,8 +108,12 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
   while (list($key, $iemob) = each($asos) ){
     $mydata[$key] = $iemob->db;
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
-    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
-       f2c($mydata[$key]["dwpf"]) );
+    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), f2c($mydata[$key]["dwpf"]) );
+    if ($mydata[$key]["relh"] < 5)
+    {
+      $mydata[$key]["relh"] = "M";
+      $mydata[$key]["dewpf"] = "M";
+    }
     $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
        $mydata[$key]["relh"], $mydata[$key]["sped"]);
 
