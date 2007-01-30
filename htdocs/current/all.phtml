@@ -91,8 +91,10 @@ of RWIS, ASOS, AWOS and SchoolNet stations in Iowa.";
 <?php
 function aSortBySecondIndex($multiArray, $secondIndex) {
   global $sorder;
-        while (list($firstIndex, ) = each($multiArray))
-                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+  while (list($firstIndex, $val) = each($multiArray)){
+    if ($val == 0) continue;
+    $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+  }
   if ($sorder == "asc")
         asort($indexMap);
   else
@@ -113,9 +115,38 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
     {
       $mydata[$key]["relh"] = "M";
       $mydata[$key]["dewpf"] = "M";
+      if ($sortcol == "feel" || $sortcol == "dwpf" || $sortcol == "relh") {
+          $mydata[$key] = 0;
+          continue;
+      }
     }
-    $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
-       $mydata[$key]["relh"], $mydata[$key]["sped"]);
+    if ($mydata[$key]["tmpf"] < -60)
+    {
+      $mydata[$key]["tmpf"] = "M";
+      if ($sortcol == "tmpf" || $sortcol == "feel" || $sortcol == "dwpf" || $sortcol == "relh") {
+          $mydata[$key] = 0;
+          continue;
+      }
+    }
+    if ($mydata[$key]["alti"] < -60)
+    {
+      $mydata[$key]["alti"] = "M";
+      if ($sortcol == "alti") {
+          $mydata[$key] = 0;
+          continue;
+      }
+    }
+    if ($mydata[$key]["vsby"] < 0)
+    {
+      $mydata[$key]["vsby"] = "M";
+      if ($sortcol == "vsby") {
+          $mydata[$key] = 0;
+          continue;
+      }
+    }
+
+
+    $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"],  $mydata[$key]["relh"], $mydata[$key]["sped"]);
 
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
