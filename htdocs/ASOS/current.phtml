@@ -3,22 +3,12 @@
  $network = isset($_GET['network']) ? $_GET["network"] : 'IA_ASOS';
  $metar = isset($_GET['metar']) ? $_GET["metar"] : "no";
  $sortcol = isset($_GET['sortcol'])  ? $_GET['sortcol']: "ts";
+ $sorder = isset($_GET['sorder']) ? $_GET['sorder']: "desc";
 ?>
 
 <?php
   $TITLE = "IEM | ASOS | Current Conditions";
   $REFRESH = "<meta http-equiv=\"refresh\" content=\"1200;\">";
-  $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
-<!--//BEGIN Script
-function new_window(url) {
- link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-} 
-//END Script-->
-</script>
-<script type="text/javascript" src="/js/tableruler.js"></script>
-<script type="text/javascript">
-    window.onload=function(){tableruler();}
-</script>';
   include("$rootpath/include/header.php"); 
   include("$rootpath/include/mlib.php"); 
   include("$rootpath/include/all_locs.php"); 
@@ -41,12 +31,9 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 
 ?>
 
-<div class="text">
-<b>Nav:</b><a href="/current/">Current Conditions</a>
 
 <?php $current_network = "ASOS"; include("$rootpath/include/current_bar.inc.php"); ?>
-<p>
-<h3 class="subtitle"><center>Neighboring ASOS Conditions</center></h3><p>
+<h3 class="subtitle">ASOS Conditions</h3><p>
 <table border=1 cellspacing=0 cellpadding=1>
 <tr>
   <th>View Options:</th>
@@ -108,6 +95,11 @@ Select State:<select name="network">
   <input value="no" type="radio" name="metar" <?php if ($metar == "no") echo  "CHECKED"; ?>> No
   <input value="yes" type="radio" name="metar" <?php if ($metar == "yes") echo  "CHECKED"; ?>> Yes
 </td>
+<td>Sort Order:
+<select name="sorder">
+  <option value="asc" <?php if ($sorder == "asc") echo "SELECTED"; ?>>Ascending
+  <option value="desc" <?php if ($sorder == "desc") echo "SELECTED"; ?>>Decending
+</select></td>
 <td><input type="submit" value="Go!"></form></td>
 </tr></table>
 
@@ -115,47 +107,50 @@ Select State:<select name="network">
 
 
 <?php
-echo "<br>Times are in CDT. Table sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
+echo "<br>Times are in CST/CDT. Table sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
 a column to sort it.<br>\n";
 ?>
 
 <form method="GET" action="<?php echo $rooturl; ?>/my/current.phtml">
 
 
-<table style="font-size: 10pt;" class="ruler">
+<?php $uri = "current.phtml?sorder=$sorder&metar=$metar&network=$network&sortcol="; ?>
+
+<table style="font-size: 10pt;" cellspacing=0 cellpadding=1 border=1>
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
-  <th rowspan="2"><a href="current.phtml?sortcol=sname&metar=<?php echo $metar; ?>&network=<?php echo $network; ?>">Station</a></th>
-  <th rowspan="2"><a href="current.phtml?sortcol=ts&metar=<?php echo $metar; ?>&network=<?php echo $network; ?>">Ob Time</a></th>
-  <th colspan="3">Temps &deg;F</th>
+  <th rowspan="2"><a href="<?php echo $uri; ?>sname">Station</a></th>
+  <th rowspan="2"><a href="<?php echo $uri; ?>ts">Ob Time</a></th>
+  <th colspan="5">Temps &deg;F</th>
   <th colspan="3">&nbsp;</th>
   <th colspan="3">Wind [knots]</th>
   <th colspan="2">Precip</font></th>
 <tr>
-  <?php $uri = "current.phtml?metar=$metar&network=$network&sortcol="; ?>
-  <th>
- <a href="<?php echo $uri; ?>tmpf">Air</a>
- (<a href="<?php echo $uri; ?>max_tmpf">Hi</a> /
- <a href="<?php echo $uri; ?>min_tmpf">Lo</a>)
-</th>
+  <th><a href="<?php echo $uri; ?>tmpf">Air</a></th>
+  <th><a href="<?php echo $uri; ?>max_tmpf">Hi</a></th>
+  <th><a href="<?php echo $uri; ?>min_tmpf">Lo</a></th>
   <th><a href="<?php echo $uri; ?>dwpf">Dewp</a></th>
-  <th><a href="<?php echo $uri; ?>feel">Feels Like</a></th>
+  <th><a href="<?php echo $uri; ?>feel">Feels</a></th>
   <th><a href="<?php echo $uri; ?>relh">RH %</a></th>
   <th><a href="<?php echo $uri; ?>alti">Alti</a></th>
   <th><a href="<?php echo $uri; ?>vsby">Vsby</a></th>
   <th><a href="<?php echo $uri; ?>sknt">Speed</a></th>
-  <th><a href="<?php echo $uri; ?>drct">Direction</a></th>
+  <th><a href="<?php echo $uri; ?>drct">Drct</a></th>
   <th><a href="<?php echo $uri; ?>peak">Gust</a>
     @ <a href="<?php echo $uri; ?>peak_ts">Time</a></th>
-  <th><a href="<?php echo $uri; ?>phour">Last Hour</a></th>
+  <th><a href="<?php echo $uri; ?>phour">1 Hour</a></th>
   <th><a href="<?php echo $uri; ?>pday">Today</a></th>
 </tr></thead>
 <tbody>
 <?php
 function aSortBySecondIndex($multiArray, $secondIndex) {
+  global $sorder;
         while (list($firstIndex, ) = each($multiArray))
                 $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+  if ($sorder == "asc")
+        asort($indexMap);
+  else 
         arsort($indexMap);
         while (list($firstIndex, ) = each($indexMap))
                 if (is_numeric($firstIndex))
@@ -216,7 +211,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
       $fmt = "%I:%M %p";
     }
     echo ">". strftime($fmt, $asos[$key]->ts) ."</td>
-     <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font>)</td>
+     <td align='center'>". round($parts["tmpf"],0) ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
      <td>". round($parts["dwpf"],0) ."</td>
      <td>". round($parts["feel"],0) ."</td>
 	    <td>". $parts["relh"] ."</td>
@@ -235,7 +230,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
             echo "<tr";
             if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";
             echo ">";
-            echo "<td colspan=14 align=\"CENTER\">
+            echo "<td colspan=16>
              <font color=\"brown\">". $parts["raw"] ."</font></td>
              </tr>\n";
          }
@@ -248,6 +243,8 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 <tr>
  <td colspan="3">&nbsp;</td>
  <td><a href="<?php echo $uri; ?>&var=tmpf');">Plot</a></td>
+ <td><a href="<?php echo $uri; ?>&var=max_tmpf');">Plot</a></td>
+ <td><a href="<?php echo $uri; ?>&var=min_tmpf');">Plot</a></td>
  <td><a href="<?php echo $uri; ?>&var=dwpf');">Plot</a></td>
  <td><a href="<?php echo $uri; ?>&var=feel');">Plot</a></td>
  <td><a href="<?php echo $uri; ?>&var=relh');">Plot</a></td>
@@ -264,7 +261,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 <input type="submit" value="Add to Favorites">
 <input type="reset" value="Reset">
 
-</form></div>
+</form>
 
 
 <?php include("$rootpath/include/footer.php"); ?>
