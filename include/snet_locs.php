@@ -137,9 +137,10 @@ $cities = Array(
 "SKWI4" => array("short" => "Kanawha", "online" => "t", "city" => "Kanawha", "nwn_id" => "604", "lat" => "42.93682", "lon" => "-93.78675", "network" => "KIMT", "county" => "Hancock", "climate_site" => "ia4308"),
 "SLEM5" => array("short" => "LeRoy", "online" => "t", "city" => "LeRoy", "nwn_id" => "609", "lat" => "43.5131", "lon" => "-92.5095", "network" => "KIMT", "county" => "Mower", "climate_site" => "none"),
 "SMYI4" => array("short" => "Mason City", "online" => "t", "city" => "Mason City", "nwn_id" => "610", "lat" => "43.1506", "lon" => "-93.1691", "network" => "KIMT", "county" => "Cerro Gordo", "climate_site" => "ia5230"),
-"SNKI4" => array("short" => "Northwood", "online" => "t", "city" => "Northwood", "nwn_id" => "613", "lat" => "43.45", "lon" => "-93.2", "network" => "KIMT", "county" => "None", "climate_site" => "none"),
+"SNKI4" => array("short" => "Northwood", "online" => "t", "city" => "Northwood", "nwn_id" => "613", "lat" => "43.45", "lon" => "-93.2", "network" => "KIMT", "county" => "Worth", "climate_site" => "ia6103"),
 "SOAI4" => array("short" => "Osage", "online" => "t", "city" => "Osage", "nwn_id" => "605", "lat" => "43.277", "lon" => "-92.8102", "network" => "KIMT", "county" => "Mitchell", "climate_site" => "ia6305"),
 "SRRI4" => array("short" => "Rockford", "online" => "t", "city" => "Rockford", "nwn_id" => "615", "lat" => "43.05", "lon" => "-92.93", "network" => "KIMT", "county" => "Floyd", "climate_site" => "ia1402"),
+"SNII4" => array("short" => "Thompson", "online" => "t", "city" => "Thompson", "nwn_id" => "617", "lat" => "43.36", "lon" => "-93.7", "network" => "KIMT", "county" => "None", "climate_site" => "none"),
 ),
 ); 
 $Sconv = Array(
@@ -250,6 +251,7 @@ $Sconv = Array(
 611 => 'SBLM5',
 613 => 'SNKI4',
 615 => 'SRRI4',
+617 => 'SNII4',
 899 => 'S03I4',
 900 => 'CHAS2',
 901 => 'CLYI4',
