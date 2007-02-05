@@ -64,7 +64,7 @@ $titles = Array(
  "drct" => "Wind Direction"
 );
 $graph->yaxis->SetTitleMargin(40);
-$graph->xaxis->SetTitleMargin(60);
+$graph->xaxis->SetTitleMargin(70);
 
 
 $graph->xaxis->SetTitle("Valid Local Time");
