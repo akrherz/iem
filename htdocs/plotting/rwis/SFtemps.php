@@ -199,7 +199,7 @@ pg_close($c0);
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
-include ("$rootpath/include/rwisLoc.php");
+include ("$rootpath/include/all_locs.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(650,550,"example1");
@@ -277,7 +277,7 @@ $fz=new LinePlot($freezing);
 $fz->SetColor("blue");
 
 // Title Box
-$tx1 = new Text($Rcities[$station]['city'] ." \nMeteogram ");
+$tx1 = new Text($cities[$station]['city'] ." \nMeteogram ");
 $tx1->Pos(0.01,0.01, 'left', 'top');
 $tx1->SetFont(FF_FONT1, FS_BOLD, 16);
 
