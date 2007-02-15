@@ -2,6 +2,7 @@
 include("../../../config/settings.inc.php");
         $TITLE = "IEM | AWOS 1 Minute Data Download";
 include("$rootpath/include/header.php"); 
+include_once("$rootpath/include/constants.php");
 $bogus = 0;
 ?>
 
@@ -17,7 +18,7 @@ month's archive of one minute data.  We process this data into our database
 and make the observations available here for download.  Please don't make
 giant data requests through this interface, instead feel free to email Daryl (akrherz@iastate.edu) and make your request.</p>
 
-<p><b>Latest Monthly Data Upload:</b> 2006 December</p>
+<p><b>Archive complete till:</b> <?php echo date('d M Y', $awos_archive_end); ?></p>
 
 <?php include("$rootpath/include/imagemaps.php"); ?>
 <?php include("$rootpath/include/forms.php"); ?>
