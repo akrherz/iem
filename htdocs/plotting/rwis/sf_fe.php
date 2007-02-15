@@ -37,7 +37,7 @@ Pavement Temperature Time Series
 <form method="GET" action="sf_fe.php" name="menu">
 <input type="hidden" name="ostation" value="<?php echo $station; ?>">
 <h2 class="heads">Site Selection:</h2>
-Select from list: <?php echo rwisSelect($station); ?> or 
+Select from list: <?php echo networkSelect("IA_RWIS",$station); ?> or 
 <a href="sf_fe.php">Select Visually</a>
 
 <?php 
