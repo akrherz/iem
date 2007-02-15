@@ -1,14 +1,14 @@
 <?php 
-        $TITLE = "IEM | ASOS 2006 Precip Report";
+        $TITLE = "IEM | ASOS 2007 Precip Report";
 include("/mesonet/php/include/header.php"); 
 ?>
 
-<h3 class="heading">2006 Iowa ASOS Precipitation Report</h3><p>
+<h3 class="heading">2007 Iowa ASOS Precipitation Report</h3><p>
 
 <div class="text">
 <b>Download this dataset:</b> 
-  <a href="asos2006.gnumeric">Gnumeric</a>  or 
-  <a href="asos2006.dat">CDF Text</a>
+  <a href="asos2007.xls">Excel</a>  or 
+  <a href="asos2007.txt">CDF Text</a>
 
 <TABLE border=1 cellpadding=2 cellspacing=0 width="100%">
 <TR>
@@ -30,7 +30,7 @@ include("/mesonet/php/include/header.php");
 </TR>
 <?php
  $data = Array();
- $fc = file('asos2006.csv');
+ $fc = file('asos2007.txt');
  while (list ($line_num, $line) = each ($fc)) {
      if (intval($line_num) > 0){
       $tokens = split (",", $line);
