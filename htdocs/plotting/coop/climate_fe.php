@@ -1,7 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
 $TITLE = "IEM | COOP Climate Plots";
-$station1 = isset($_GET["station1"]) ? $_GET["station1"] : "";
+$station1 = isset($_GET["station1"]) ? $_GET["station1"] : "iowa";
 $station2 = isset($_GET["station2"]) ? $_GET["station2"] : "";
 $mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
 include("$rootpath/include/header.php"); ?>
@@ -36,6 +36,7 @@ a plot from this dataset.</p>
 <tr>
 <td>
 <SELECT name="station1">
+  <option value="iowa" <?php if ($station1 == "iowa") echo "SELECTED"; ?>>Iowa Average
 <?php
 	for(reset($cities); $key = key($cities); next($cities))
 	{
@@ -87,10 +88,10 @@ a plot from this dataset.</p>
 <?php
 
   if ($mode == "c"){
-    echo "<img src=\"climate_diff.php?station1=".$station1."&station2=".$station2."\">\n";
+    echo "<img src=\"climate.php?station1=".$station1."&station2=".$station2."\">\n";
 
   }else if (strlen($station1) > 0 ){
-    echo "<img src=\"climate.php?station=". $station1 ."\">\n";
+    echo "<img src=\"climate.php?station1=". $station1 ."\">\n";
   }
 ?></div>
 
