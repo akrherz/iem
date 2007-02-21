@@ -2,25 +2,40 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
-$station = isset($_GET["station"]) ? $_GET["station"] : die("No station");
+$station1 = isset($_GET["station1"]) ? $_GET["station1"] : die("At least 1 station needs to be specified");
+$station2 = isset($_GET["station2"]) ? $_GET["station2"] : false;
 
-
-$query2 = "SELECT high, low, years, to_char(valid, 'mm dd') as valid from climate WHERE station = '". $station ."' ORDER by valid ASC";
-
-$result = pg_exec($connection, $query2);
-
-$ydata = array();
-$ydata2 = array();
+$st1_hi = array();
+$st1_lo = array();
+$st2_hi = array();
+$st2_lo = array();
 $xlabel= array();
-$years = 0;
+$years = 51;
 
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
-{ 
-  $ydata[$i]  = $row["high"];
-  $ydata2[$i]  = $row["low"];
-  $xlabel[$i]  = "";
-  $years = $row["years"];
+if ($station1 == "iowa") {
+  $query1 = "SELECT avg(high) as high, avg(low) as low, to_char(valid, 'mm dd') as valid from climate51 GROUP by valid ORDER by valid ASC";
+} else {
+  $query1 = "SELECT high, low, years, to_char(valid, 'mm dd') as valid from climate51 WHERE station = '". $station1 ."' ORDER by valid ASC";
 }
+$result1 = pg_exec($connection, $query1);
+for( $i=0; $row = @pg_fetch_array($result1,$i); $i++) 
+{ 
+  $st1_hi[$i]  = $row["high"];
+  $st1_lo[$i]  = $row["low"];
+  $xlabel[$i]  = "";
+}
+
+
+if ($station2) {
+  $query2 = "SELECT high, low, years, to_char(valid, 'mm dd') as valid from climate51 WHERE station = '". $station2 ."' ORDER by valid ASC";
+  $result2 = pg_exec($connection, $query2);
+  for( $i=0; $row = @pg_fetch_array($result2,$i); $i++) 
+  { 
+    $st2_hi[$i]  = $row["high"];
+    $st2_lo[$i]  = $row["low"];
+  }
+}
+
 
 $xlabel[0] = "Jan 1";  // 1
 $xlabel[31] = "Feb 1"; // 32
@@ -41,6 +56,7 @@ pg_close($connection);
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
 include ("$rootpath/include/COOPstations.php");
+$cities["iowa"] = Array("city" => "Iowa Statewide");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);
@@ -49,8 +65,8 @@ $graph->img->SetMargin(40,40,55,90);
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set("Average Daily High/Lows for ". $cities[$station]["city"]);
-$graph->subtitle->Set("Climate Record: " . $years ." years");
+$graph->title->Set("Average Daily High and Low Temperatures");
+$graph->subtitle->Set("Climate Record: 1951 - ". date("Y") );
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 $graph->yaxis->SetTitle("Temperature [F]");
@@ -64,18 +80,39 @@ $graph->legend->Pos(0.01, 0.07);
 $graph->legend->SetLayout(LEGEND_HOR);
 
 // Create the linear plot
-$lineplot=new LinePlot($ydata);
-$lineplot->SetLegend("High (F)");
+$lineplot=new LinePlot($st1_hi);
+$lineplot->SetLegend($cities[$station1]["city"] ." High");
 $lineplot->SetColor("red");
+$lineplot->SetWeight(2);
 
 // Create the linear plot
-$lineplot2=new LinePlot($ydata2);
-$lineplot2->SetLegend("Low (F)");
+$lineplot2=new LinePlot($st1_lo);
+$lineplot2->SetLegend($cities[$station1]["city"] ." Low");
 $lineplot2->SetColor("blue");
+$lineplot2->SetWeight(2);
 
 // Add the plot to the graph
 $graph->Add($lineplot);
 $graph->Add($lineplot2);
+
+if ($station2){
+  // Create the linear plot
+  $lineplot3=new LinePlot($st2_hi);
+  $lineplot3->SetLegend($cities[$station2]["city"] ." High");
+  $lineplot3->SetColor("brown");
+  $lineplot3->SetWeight(2);
+
+  // Create the linear plot
+  $lineplot4=new LinePlot($st2_lo);
+  $lineplot4->SetLegend($cities[$station2]["city"] ." Low");
+  $lineplot4->SetColor("purple");
+  $lineplot4->SetWeight(2);
+
+  // Add the plot to the graph
+  $graph->Add($lineplot3);
+  $graph->Add($lineplot4);
+ 
+}
 
 $graph->AddLine(new PlotLine(VERTICAL,31,"tan",1));
 $graph->AddLine(new PlotLine(VERTICAL,60,"tan",1));
