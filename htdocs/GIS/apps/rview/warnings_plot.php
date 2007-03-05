@@ -215,10 +215,12 @@ $surface->draw($img);
 $airtemps->draw($img);
 
 if (! isset($_GET["iem"])) {
-$map->embedScalebar($img);
-mktitle($map, $img, "                 $maptitle $d");
-$map->drawLabelCache($img);
-mklogolocal($map, $img);
+ $map->embedScalebar($img);
+ mktitle($map, $img, "                 $maptitle $d");
+ $map->drawLabelCache($img);
+ mklogolocal($map, $img);
+} else {
+ tv_logo($map,$img, "    $d");
 }
 
 $url = $img->saveWebImage();
