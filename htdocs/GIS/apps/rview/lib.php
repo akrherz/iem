@@ -1,5 +1,27 @@
 <?php
 
+function tv_logo($map, $imgObj, $titlet) 
+{
+ $layer = $map->getLayerByName("credits");
+
+  // point feature with text for location
+ $point = ms_newpointobj();
+ $point->setXY(80, 400);
+
+ $point->draw($map, $layer, $imgObj, 1, $titlet);
+ $map->drawLabelCache($imgObj);
+
+ $layer = $map->getLayerByName("logo");
+
+ $point = ms_newpointobj();
+ $point->setXY(80, 400);
+
+ $point->draw($map, $layer, $imgObj, "logo", "");
+ $point->free();
+
+
+}
+
 function mktitle($map, $imgObj, $titlet) {
   $layer = $map->getLayerByName("credits");
                                                                                 
