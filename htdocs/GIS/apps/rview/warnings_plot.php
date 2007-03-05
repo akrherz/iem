@@ -37,11 +37,11 @@ if ($imgi >0) $myarchive = 1;
 
 if ($tzoff == 0)
 {
-  $d = date("d F Y H:i T" ,  $ts);
+  $d = date("d M Y H:i T" ,  $ts);
 }
 else 
 {
-  $d = date("d F Y h:i A " ,  $ts - $tzoff) . $tz;
+  $d = date("d M Y h:i A " ,  $ts - $tzoff) . $tz;
 }
 //$db_ts = strftime("%Y-%m-%d %H:%M:00+00", $ts + 5 *3600);
 $db_ts = strftime("%Y-%m-%d %H:%M:00+00", $ts );
