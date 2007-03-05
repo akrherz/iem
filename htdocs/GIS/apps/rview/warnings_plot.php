@@ -214,10 +214,12 @@ if ($lsrwindow != 0)
 $surface->draw($img);
 $airtemps->draw($img);
 
+if (! $_GET["iem"]) {
 $map->embedScalebar($img);
 mktitle($map, $img, "                 $maptitle $d");
 $map->drawLabelCache($img);
 mklogolocal($map, $img);
+}
 
 $url = $img->saveWebImage();
 
