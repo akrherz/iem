@@ -15,6 +15,10 @@
  while (list($id, $val) = each($cameras))
  {
 	$cameras[$id]["url"] = sprintf("$rooturl/data/camera/stills/%s.jpg?%s", $id, time() );
+    if ( @filemtime("/home/ldm/data/camera/stills/${id}.jpg") < (time() - 1200))
+    {      
+      $cameras[$id]["active"] = false;
+    }
 
  if ($isarchive)
  {
