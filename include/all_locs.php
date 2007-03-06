@@ -5099,7 +5099,7 @@
 "ROC" => array("city" => "ROCHESTER/MONROE CO", "id" => "ROC", "lat" => "43.12", "lon" => "-77.67", "network" => "NY_ASOS", "county" => "None", "climate_site" => "none"),
 "MN070" => array("city" => "Rochester US-63 Mile Post 32", "id" => "MN070", "lat" => "43.9023399353", "lon" => "-92.4822998047", "network" => "MN_RWIS", "county" => "Olmsted", "climate_site" => "none"),
 "DAW" => array("city" => "ROCHESTER (WAS 6B1)", "id" => "DAW", "lat" => "43.28", "lon" => "-70.92", "network" => "NH_ASOS", "county" => "None", "climate_site" => "none"),
-"SWLM5" => array("city" => "Rochester (Willow Creek)", "id" => "SWLM5", "lat" => "43.9861", "lon" => "-92.4551", "network" => "KIMT", "county" => "Olmsted", "climate_site" => "none"),
+"SWLM5" => array("city" => "Rochester (Willow Creek)", "id" => "SWLM5", "lat" => "43.9861", "lon" => "-92.4426", "network" => "KIMT", "county" => "Olmsted", "climate_site" => "none"),
 "ROCS2" => array("city" => "ROCHFORD 2 WNW", "id" => "ROCS2", "lat" => "44.13", "lon" => "-103.75", "network" => "SD_COOP", "county" => "Pennington", "climate_site" => "none"),
 "ROCK1" => array("city" => "ROCK", "id" => "ROCK1", "lat" => "37.44", "lon" => "-97.01", "network" => "KS_COOP", "county" => "Cowley", "climate_site" => "none"),
 "LECM5" => array("city" => "ROCK COUNTY SHERIFF", "id" => "LECM5", "lat" => "43.66", "lon" => "-96.21", "network" => "MN_COOP", "county" => "Rock", "climate_site" => "none"),
