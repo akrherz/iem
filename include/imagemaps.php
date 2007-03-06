@@ -185,11 +185,12 @@ include("$rootpath/include/awosLoc.php");
 
 function rwisMultiSelect($selected, $size){
 global $rootpath;
-include("$rootpath/include/rwisLoc.php");
+include_once("$rootpath/include/all_locs.php");
   echo "<select name=\"station[]\" size=\"". $size ."\" MULTIPLE>\n";
   echo "<option value=\"_ALL\">Select All</option>\n";
-  reset($Rcities);
-  while( list($key, $val) = each($Rcities) ) {
+  reset($cities);
+  while( list($key, $val) = each($cities) ) {
+    if ($val["network"] != "IA_RWIS") continue; 
     echo "<option value=\"". $key ."\"";
     if ($selected == $key){
         echo " SELECTED ";
