@@ -48,7 +48,7 @@
 if (getenv("REMOTE_ADDR") == "206.61.97.204" )
 {
  $s = "<img src=\"images/smokey_1021.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! All of this snow!  smokey likes snow and I like Smokey! hehe<br /> &nbsp; &nbsp; &nbsp; &nbsp; 77 weeks now! :) <br /> Muah! . <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 78 weeks now!  Smokey! 18 months, wow!  That is a long time and we simply took it one day at a time.  Just have to keep doing that and things will work out for the good of both of us.  I love you very much my special Smokey.  <br /> Muah! . <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 }
 
 echo $s;
