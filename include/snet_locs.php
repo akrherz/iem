@@ -150,6 +150,7 @@ $cities = Array(
 "SRRI4" => array("short" => "Rockford", "online" => "t", "city" => "Rockford", "nwn_id" => "615", "lat" => "43.05", "lon" => "-92.93", "network" => "KIMT", "county" => "Floyd", "climate_site" => "ia1402"),
 "SRSI4" => array("short" => "Rockwell", "online" => "t", "city" => "Rockwell", "nwn_id" => "616", "lat" => "42.98", "lon" => "-93.1", "network" => "KIMT", "county" => "Cerro Gordo", "climate_site" => "ia5230"),
 "SNII4" => array("short" => "Thompson", "online" => "t", "city" => "Thompson", "nwn_id" => "617", "lat" => "43.36", "lon" => "-93.7", "network" => "KIMT", "county" => "Winnebago", "climate_site" => "ia2977"),
+"STMM5" => array("short" => "West Concord", "online" => "t", "city" => "West Concord", "nwn_id" => "621", "lat" => "44.14", "lon" => "-92.9", "network" => "KIMT", "county" => "Dodge", "climate_site" => "none"),
 ),
 ); 
 $Sconv = Array(
@@ -267,6 +268,7 @@ $Sconv = Array(
 618 => 'SGMM5',
 619 => 'SFCM5',
 620 => 'SKGM5',
+621 => 'STMM5',
 622 => 'SJAM5',
 623 => 'SFMM5',
 624 => 'SWLM5',
