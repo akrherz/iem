@@ -1,5 +1,7 @@
 <p><strong>Map Extent:</strong>
 <br />View Scale: <select name="zoom">
+ <option value="5" <?php if ($zoom == 5) echo "SELECTED"; ?>>5km
+ <option value="10" <?php if ($zoom == 10) echo "SELECTED"; ?>>10km
  <option value="25" <?php if ($zoom == 25) echo "SELECTED"; ?>>25km
  <option value="50" <?php if ($zoom == 50) echo "SELECTED"; ?>>50km
  <option value="100" <?php if ($zoom == 100) echo "SELECTED"; ?>>100km
