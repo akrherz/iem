@@ -19,6 +19,7 @@ END
 WEB
   IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
+  TEMPLATE "test.html"
 END
 
 SCALEBAR
@@ -940,14 +941,127 @@ LAYER
   END
 END
 
+# Current sites
+LAYER
+  CONNECTIONTYPE postgis
+  CONNECTION "user=nobody dbname=iem host=iem20"
+  NAME "current_sites"
+  DATA "geom from (select oid as foid, geom, station, network from current 
+       WHERE valid > (now() - '70 minutes'::interval) and network !~* 'COOP' ) as foo
+       USING srid=4326 USING unique foid"
+  STATUS ON
+  TYPE POINT
+  LABELCACHE ON
+  PROJECTION
+    "init=epsg:4326"
+  END
+  CLASS
+    TEXT ([station])
+    COLOR 250 250 250
+    SYMBOL "circle"
+    SIZE 5
+    LABEL
+      SIZE SMALL
+      OFFSET 7 0
+      POSITION CR
+      COLOR 0 255 0
+      BACKGROUNDCOLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      TYPE BITMAP
+      ANTIALIAS false
+      BUFFER 3
+      PARTIALS TRUE
+    END
+  END
+END
+
+# Current sites
+LAYER
+  CONNECTIONTYPE postgis
+  CONNECTION "user=nobody dbname=iem host=iem20"
+  NAME "current_temps"
+  DATA "geom from (select oid as foid, geom, round(tmpf::numeric,0) as tmpf from current
+       WHERE valid > (now() - '70 minutes'::interval) and tmpf > -60 ) as foo
+       USING srid=4326 USING unique foid"
+  STATUS ON
+  TYPE POINT
+  LABELCACHE OFF
+  PROJECTION
+    "init=epsg:4326"
+  END
+  CLASS
+    TEXT ([tmpf])
+    COLOR -1 -1 -1
+    LABEL
+      SIZE SMALL
+      OFFSET -7 0
+      POSITION CL
+      COLOR 255 0 0
+      BACKGROUNDCOLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      TYPE BITMAP
+      ANTIALIAS false
+      BUFFER 0
+      PARTIALS TRUE
+    END
+  END
+END
+
+
+
+# Current Wind barb
+LAYER
+  CONNECTIONTYPE postgis
+  CONNECTION "user=nobody dbname=iem host=iem20"
+  NAME "current_barbs"
+  DATA "geom from (select oid as foid, geom,
+    case WHEN sknt between 0 and 4.99 THEN chr(227)
+       WHEN sknt between 5 and 9.99   THEN chr(228)
+       WHEN sknt between 10 and 14.99 THEN chr(229)
+       WHEN sknt between 15 and 19.99  THEN chr(230)
+       WHEN sknt between 20  and 24.99 THEN chr(231)
+       WHEN sknt between 25  and 29.99 THEN chr(232)
+       WHEN sknt between 30  and 34.99 THEN chr(233)
+       WHEN sknt between 35  and 39.99 THEN chr(234)
+       WHEN sknt between 40  and 44.99 THEN chr(235)
+       WHEN sknt between 45  and 49.99 THEN chr(236)
+       ELSE chr(0) END as sknt,
+    (0 - drct) as drct, oid from current 
+       WHERE sknt >= 0 and valid > (now() - '70 minutes'::interval) ) as foo
+       USING srid=4326 USING unique foid"
+  STATUS ON
+  TYPE POINT
+  LABELANGLEITEM drct
+  LABELCACHE OFF
+  PROJECTION
+    "init=epsg:4326"
+  END
+  CLASS
+    TEXT ([sknt])
+    COLOR -1 -1 -1
+    LABEL
+      SIZE 40
+      OFFSET 4 -12
+      POSITION CC
+      COLOR 255 255 255
+      BACKGROUNDCOLOR -1 -1 -1
+      OUTLINECOLOR -1 -1 -1
+      TYPE TRUETYPE
+      FONT weather
+      ANTIALIAS false
+      BUFFER 3
+    END
+  END
+END
+
 LAYER
   CONNECTIONTYPE postgis
   NAME surface
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=10.10.10.20"
+  CONNECTION "user=nobody dbname=iem host=iem20"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, round(tsf0::numeric,0) as tsf0,
-    oid from current WHERE (valid > CURRENT_TIMESTAMP - '2 hours'::interval)
+    oid from current WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
     and tsf0 > -30) as foo using unique oid using srid=4326"
   STATUS DEFAULT
   TYPE POINT
@@ -1011,21 +1125,20 @@ LAYER
   CONNECTIONTYPE postgis
   NAME airtemps
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=10.10.10.20"
+  CONNECTION "user=nobody dbname=iem host=iem20"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, round(tmpf::numeric,0) as tmpf, 
-    oid from current WHERE (valid > CURRENT_TIMESTAMP - '2 hours'::interval)
-    ) as foo using unique oid using srid=4326"
-  STATUS DEFAULT
+    oid as foid from current WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
+    ) as foo using unique foid using srid=4326"
+  STATUS ON
   TYPE POINT
   LABELCACHE ON
   PROJECTION
    "init=epsg:4326"
   END
-  CLASSITEM "tmpf"
   CLASS
     EXPRESSION ([tmpf] >= 35 && [tmpf] < 120)
-    TEXT ([ tmpf ])
+    TEXT ([tmpf])
     COLOR -1 -1 -1
     LABEL
       COLOR 30 190 20
@@ -1041,7 +1154,7 @@ LAYER
   END
   CLASS
     EXPRESSION ([tmpf] >= 34)
-    TEXT ([ tmpf ])
+    TEXT ([tmpf])
     COLOR -1 -1 -1
     LABEL
       COLOR 215 255 0
@@ -1057,7 +1170,7 @@ LAYER
   END
   CLASS
     EXPRESSION ([tmpf] >= 33)
-    TEXT ([ tmpf ])
+    TEXT ([tmpf])
     COLOR -1 -1 -1
     LABEL
       COLOR 255 164 0
@@ -1073,7 +1186,7 @@ LAYER
   END
   CLASS
     EXPRESSION ([tmpf] >= 32)
-    TEXT ([ tmpf ])
+    TEXT ([tmpf])
     COLOR -1 -1 -1
     LABEL
       COLOR 255 50 0
@@ -1088,7 +1201,7 @@ LAYER
   END
   CLASS
     EXPRESSION ([tmpf] >= 31)
-    TEXT ([ tmpf ])
+    TEXT ([tmpf])
     COLOR -1 -1 -1
     LABEL
       COLOR 255 0 144
@@ -1103,7 +1216,7 @@ LAYER
   END
   CLASS
     EXPRESSION ([tmpf] >= 30)
-    TEXT ([ tmpf ])
+    TEXT ([tmpf])
     COLOR -1 -1 -1
     LABEL
       #COLOR 232 164 226
@@ -1119,7 +1232,7 @@ LAYER
   END
   CLASS
     EXPRESSION ([tmpf] > -40)
-    TEXT ([ tmpf ])
+    TEXT ([tmpf])
     COLOR -1 -1 -1
     LABEL
       #COLOR 232 214 226
@@ -1132,6 +1245,24 @@ LAYER
       PARTIALS TRUE
       FORCE FALSE
     END
+  END
+END
+
+LAYER
+  NAME interstates
+  TYPE LINE
+  STATUS OFF
+  PROJECTION
+   "init=epsg:4326"
+  END
+  DATA /mesonet/data/gis/static/shape/4326/us/interstates.shp
+  CLASS
+    COLOR 255 0 0
+    SYMBOL 'circle'
+    SIZE 4
+    OVERLAYSYMBOL 'circle'
+    OVERLAYSIZE 2
+    OVERLAYCOLOR 0 0 0
   END
 END
 
