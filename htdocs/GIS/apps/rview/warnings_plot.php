@@ -114,7 +114,7 @@ if (in_array("goes_east04I4", $layers))
   }
 }
 
-$airtemps = $map->getlayerbyname("airtemps");
+$airtemps = $map->getlayerbyname("current_temps");
 $airtemps->set("status", (in_array("airtemps", $layers) && ! $myarchive) );
 $airtemps->set("connection", $_DATABASES["access"] );
 
@@ -124,6 +124,15 @@ $surface->set("connection", $_DATABASES["access"] );
 
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
+
+$current_barbs = $map->getlayerbyname("current_barbs");
+$current_barbs->set("status", (in_array("current_barbs", $layers) && ! $myarchive ));
+
+$current_sites = $map->getlayerbyname("current_sites");
+$current_sites->set("status", (in_array("current_sites", $layers) && ! $myarchive ));
+
+$interstates = $map->getlayerbyname("interstates");
+$interstates->set("status", in_array("interstates", $layers));
 
 $clayer = $map->getlayerbyname("uscounties");
 $clayer->set("status", in_array("uscounties", $layers) );
@@ -201,11 +210,13 @@ $goes_west04I4->draw($img);
 $clayer->draw( $img );
 $stlayer->draw( $img);
 $lakes->draw($img);
+$interstates->draw($img);
 $radar->draw($img);
 $cwas->draw( $img);
 $watches->draw($img); 
 $c0->draw($img);
-//$warnsum->draw($img);
+$current_barbs->draw($img);
+$current_sites->draw($img);
 $p0->draw($img);
 $usdm->draw($img);
 if ($lsrwindow != 0)
