@@ -108,7 +108,7 @@ if (isset($_GET["zoom"]))
 else
 {
   if ($network == "KIMT")
-    $map->setextent(420000, 4640000, 620000, 4890000);
+    $map->setextent(420000, 4740000, 600000, 4900000);
   else if ($network == "KELO")
     $map->setextent(-400000, 4600000, 320000, 5200000);
   else
