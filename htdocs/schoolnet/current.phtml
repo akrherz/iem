@@ -52,7 +52,7 @@ if (strlen($sortcol) == 0) {
 $vals = Array("ts" => "Observation Time", "sname" => "Station Name",
  "tmpf" => "Temperature", "drct" => "Wind Direction", 
  "relh" => "Relative Humidity", "alti" => "Pressure",
- "sped" => "Wind Speed", "20gu" => "20 min Gust",
+ "sknt" => "Wind Speed", "20gu" => "20 min Gust",
  "peak" => "Peak Gust Today", "peak_ts" => "Time of Peak Gust", 
  "pday" => "Today's Precipitation", "feel" => "Feels Like", 
  "max_tmpf" => "High Temperature", "min_tmpf" => "Low Temperature",
@@ -75,7 +75,7 @@ echo "<p>Sorted by: <b>". $vals[$sortcol] ."</b><br>\n";
   <th></th>
   <th></th>
   <th></th>
-  <th colspan="3" bgcolor="#EEEEEE">Wind [2] MPH</th>
+  <th colspan="3" bgcolor="#EEEEEE">Wind [2] knots</th>
   <th bgcolor="#e6e6fa" colspan=2>Precipitation</th>
 </tr>
 <tr>
@@ -87,7 +87,7 @@ echo "<p>Sorted by: <b>". $vals[$sortcol] ."</b><br>\n";
   <th><a href="current.phtml?tv=<?php echo $tv; ?>&sortcol=feel">Feels<br>Like</a></th>
   <th><a href="current.phtml?tv=<?php echo $tv; ?>&sortcol=alti">Pres</a></th>
   <th><a href="current.phtml?tv=<?php echo $tv; ?>&sortcol=drct">Drct</a></th>
-  <th><a href="current.phtml?tv=<?php echo $tv; ?>&sortcol=sped">Speed</a></th>
+  <th><a href="current.phtml?tv=<?php echo $tv; ?>&sortcol=sknt">Speed</a></th>
   <th><a href="current.phtml?tv=<?php echo $tv; ?>&sortcol=peak">Today Gust</a> 
     <a href="current.phtml?tv=<?php echo $tv; ?>&sortcol=peak_ts">@time</a> [4]</th>
   <th><a href="current.phtml?tv=<?php echo $tv; ?>&sortcol=pday">Today</a></th>
@@ -144,10 +144,10 @@ function arSortBySecondIndex($multiArray, $secondIndex) {
     }
     
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
-      $mydata[$key]["peak"] = $mydata[$key]["max_gust"] * 1.15078;
+      $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
       $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
     } else {
-      $mydata[$key]["peak"] = $mydata[$key]["max_sknt"] * 1.15078;
+      $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
       if ($mydata[$key]["max_sknt_ts"] > 0){
         $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
       } else {
@@ -199,7 +199,7 @@ while (list ($key, $val) = each ($finalA))  {
           <td>". $parts["feel"] ."</td>
           <td>". $parts["pres"] ."</td>
           <td>". drct2txt($parts["drct"]) ."</td>
-            <td>". round($parts["sped"],0) ."</td>
+            <td>". round($parts["sknt"],0) ."</td>
             <td>". round($parts["peak"],0) ." @"
            . strftime("%I:%M %p", $parts["peak_ts"]) ."</td>
           <td>". $parts["pday"] ."</td>
@@ -230,7 +230,7 @@ while (list ($key, $val) = each ($skippedStations) ) {
           <td>". $parts["feel"] ."</td>
           <td>". $parts["pres"] ."</td>
           <td>". $parts["drct"] ."</td>
-            <td>". round($parts["sped"],0) ."</td>
+            <td>". round($parts["sknt"],0) ."</td>
             <td>". round($parts["peak"],0) ." @"
            . strftime("%I:%M %p", $parts["peak_ts"] )."</td>
           <td>". $parts["pday"] ."</td>
