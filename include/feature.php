@@ -48,7 +48,7 @@
 if (getenv("REMOTE_ADDR") == "206.61.97.204" )
 {
  $s = "<img src=\"images/smokey_1021.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 80 weeks now! hehe, any number divisible by 10 is a good one :)  I'm glad to have you back in Ames to enjoy our anniversary together again! I love you very much.  <br /> Muah! . <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 81 weeks now! It'll be okay smokey.  We'll make it thru these tough times together! <br /> Muah! . <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 }
 
 echo $s;
