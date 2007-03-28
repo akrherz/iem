@@ -68,7 +68,7 @@ $cameras = Array(
         "name" => "Lamoni", "active" => true,
         "ip" => "216.139.122.154", "county" => "Decatur"),
   "SNEI4" => Array("sts" => mktime(19,0,0, 4,16,2004), "ets" => time(),
-		"name" => "Newton", "active" => false,
+		"name" => "Newton", "active" => true,
 		"iservice" => "Dynamic Broadband", 
 		"iserviceurl" => "http://www.dybb.com/",
 		"ip" => "216.203.109.40", "county" => "Jasper"),
