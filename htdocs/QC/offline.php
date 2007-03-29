@@ -84,8 +84,6 @@ function networkOffline($network)
 
 <p>
 
-<b>**</b> Note that RDES is offline due to construction.
-
 <p></div>
 
 <?php include("$rootpath/include/footer.php"); ?>
