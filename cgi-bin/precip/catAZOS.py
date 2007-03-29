@@ -103,7 +103,7 @@ table.main{
 """
 def loadstations():
   for station in st.ids:
-    stData[station] = ["M"]*25
+    stData[station] = ["M"]*24
     totp[station] = 0
 
 def Main():
@@ -132,8 +132,6 @@ def Main():
   for i in range(len(rs)):
     p01i = float(rs[i]["p01i"])
     vhour = int(rs[i]["vhour"])
-    if (vhour == 0):
-      vhour = 24
     if (p01i > 0):  # We should require this timestep
       requireHrs[ vhour ] = 1
       try:
@@ -147,18 +145,18 @@ def Main():
         continue
 
   if (ts < mx.DateTime.DateTime(2006,6,1)):
-    stData['MXO'] = ["M"]*25
-  stData['IIB'] = ["M"]*25
-  stData['VTI'] = ["M"]*25
-  stData['MPZ'] = ["M"]*25
-  stData['PEA'] = ["M"]*25
+    stData['MXO'] = ["M"]*24
+  stData['IIB'] = ["M"]*24
+  stData['VTI'] = ["M"]*24
+  stData['MPZ'] = ["M"]*24
+  stData['PEA'] = ["M"]*24
 
   for j in range(len(st.ids)):
     station = st.ids[j]
     print "<tr class=\"row"+ str(j % 5) +"\">",
     print "%s%s%s" % ("<td>", station, "</td>") ,
-    for i in range(1,25):
-      print "<td class=\"style"+ str(i % 3) +"\">",
+    for i in range(24):
+      print "<td class=\"style"+ str((i+1) % 3) +"\">",
       print "%s%s " % ( stData[station][i], "</td>") ,
       try:
         totp[station] = totp[station] + stData[station][i]
