@@ -1,12 +1,15 @@
 <?php 
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/forms.php");
 include("setup.php");
 
  $TITLE = "IEM | Sites";
  include("$rootpath/include/header.php");
 
  $prod = isset($_GET["prod"]) ? $_GET["prod"]: 0;
+ $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
+ $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
  $current = "7dayhilo"; 
  if ($prod == 1) $current = "monthhilo";
  include("sidebar.php"); 
@@ -16,6 +19,18 @@ include("setup.php");
 );
 ?>
 <div style="float: left;">
- <img src="<?php echo sprintf("%s?network=%s&station=%s", $products[$prod], $network, $station); ?>">
+<?php if ($prod == 1) { 
+  echo "<form method=\"GET\" name=\"modify\">
+ <input type=\"hidden\" name=\"station\" value=\"$station\">
+ <input type=\"hidden\" name=\"network\" value=\"$network\">
+ <input type=\"hidden\" name=\"prod\" value=\"$prod\">
+ <h3>Select month and year:</h3>
+ ". monthSelect($month) . yearSelect(2004, $year)
+ ."<input type=\"submit\" value=\"Generate Plot\">
+ </form>";
+
+}
+?>
+ <br /><img src="<?php echo sprintf("%s?month=%s&year=%s&network=%s&station=%s", $products[$prod], $month, $year, $network, $station); ?>">
 </div>
 <?php include("$rootpath/include/footer.php"); ?>
