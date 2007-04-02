@@ -2,14 +2,14 @@
 NAME iem
 STATUS ON
 SIZE 640 480
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 #  Iowa, yeah!
 # 3x2  
 #EXTENT -105 36 -86 50
 EXTENT -96.7 39.35 -90 44.12
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR 250 250 250
 IMAGETYPE PNG
 TRANSPARENT off
@@ -130,7 +130,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME surface15m
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=10.10.10.20"
+  CONNECTION "user=nobody dbname=iem host=iem20"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, alti_15m,
     oid from trend_15m WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
@@ -168,7 +168,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME surface
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=10.10.10.20"
+  CONNECTION "user=nobody dbname=iem host=iem20"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, alti_1h,
     oid from trend_1h WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
