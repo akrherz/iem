@@ -81,9 +81,13 @@ $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets) ."GIS/uscomp/n0r_". date
 if (! is_file($fp))
 {
     $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets - 300.0) ."GIS/uscomp/n0r_". date('YmdHi', $basets - 300.0) .".png";
-    
     if (! is_file($fp))
-      $ERROR .= "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
+    {
+       $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets - 600.0) ."GIS/uscomp/n0r_". date('YmdHi', $basets - 600.0) .".png";
+    
+       if (! is_file($fp))
+         $ERROR .= "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
+   }
 }
 $radfile = $fp;
 $radar = $map->getlayerbyname("nexrad_n0r");
