@@ -1,13 +1,6 @@
 <?php
 //  1 minute data plotter 
 
-$station = intval($station);
-
-if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
-  $myTime = strtotime($year."-".$month."-".$day);
-} else {
-  $myTime = strtotime(date("Y-m-d"));
-}
 
 $dirRef = strftime("%Y_%m/%d", $myTime);
 $titleDate = strftime("%b %d, %Y", $myTime);
@@ -25,14 +18,14 @@ $prev_gust = 0.0;
 while (list ($line_num, $line) = each ($fcontents)) {
 
   $parts = split (" ", $line);
-  $month = $parts[0];
-  $day = $parts[1];
-  $year = $parts[2];
+  $lmonth = $parts[0];
+  $lday = $parts[1];
+  $lyear = $parts[2];
   $hour = $parts[3];
   $min = $parts[4];
   $gust = $parts[11];
   $gust_time = $parts[12];
-  $timestamp = mktime($hour,$min,0,$month,$day,$year); 
+  $timestamp = mktime($hour,$min,0,$lmonth,$lday,$lyear); 
                                                                                 
   $shouldbe = intval( $start ) + 60 * $i;
  
