@@ -12,12 +12,7 @@ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 
-
-if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
-  $myTime = strtotime($year."-".$month."-".$day);
-} else {
-  $myTime = strtotime(date("Y-m-d"));
-}
+$myTime = mktime(0,0,0,$month, $day, $year);
 
 $dirRef = strftime("%Y_%m/%d", $myTime);
 $titleDate = strftime("%b %d, %Y", $myTime);
