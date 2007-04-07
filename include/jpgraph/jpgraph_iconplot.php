@@ -3,8 +3,7 @@
 // File:	JPGRAPH_ICONPLOT.PHP
 // Description:	PHP4 Graph Plotting library. Extension module.
 // Created: 	2004-02-18
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_iconplot.php 521 2006-02-08 21:22:09Z ljp $
+// Ver:		$Id: jpgraph_iconplot.php 838 2007-01-22 21:01:22Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -112,11 +111,11 @@ class IconPlot {
 	return true;
     }
 
-    function Stroke(&$aImg,$axscale,$ayscale) {
+    function Stroke(&$aImg,&$axscale,&$ayscale) {
 	$this->StrokeWithScale($aImg,$axscale,$ayscale);
     }
 
-    function StrokeWithScale(&$aImg,$axscale,$ayscale) {
+    function StrokeWithScale(&$aImg,&$axscale,&$ayscale) {
 	if( $this->iScalePosX === null ||
 	    $this->iScalePosY === null ) {
 	    $this->_Stroke($aImg);

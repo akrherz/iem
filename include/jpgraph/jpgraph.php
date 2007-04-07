@@ -3,18 +3,19 @@
 // File:	JPGRAPH.PHP
 // Description:	PHP Graph Plotting library. Base module.
 // Created: 	2001-01-08
-// Ver:		$Id: jpgraph.php 769 2006-09-24 20:17:51Z ljp $
+// Ver:		$Id: jpgraph.php 875 2007-03-25 10:53:39Z ljp $
 //
 // Copyright 2006 (c) Aditus Consulting. All rights reserved.
 //========================================================================
 
-require_once('jpg-config.inc');
+require_once('jpg-config.inc.php');
 require_once('jpgraph_errhandler.inc.php');
 require_once('gd_image.inc.php');
+require_once('jpgraph_ttf.inc.php');
 require_once 'jpgraph_gradient.php';
 
 // Version info
-DEFINE('JPG_VERSION','1.20.5');
+DEFINE('JPG_VERSION','1.21');
 
 // Minimum required PHP version
 DEFINE('MIN_PHPVERSION','4.3.1');
@@ -194,19 +195,14 @@ if( !CheckPHPVersion(MIN_PHPVERSION) ) {
 }
 
 //
-// Make GD sanity check
-//
-if( !function_exists("imagetypes") || !function_exists('imagecreatefromstring') ) {
-    JpGraphError::RaiseL(25001);
-//("This PHP installation is not configured with the GD library. Please recompile PHP with GD support to run JpGraph. (Neither function imagetypes() nor imagecreatefromstring() does exist)");
-}
-
-//
 // Routine to determine if GD1 or GD2 is installed
 //
 function CheckGDVersion() {
+    if( !function_exists("imagetypes") || !function_exists('imagecreatefromstring') )
+	return 0;
     $GDfuncList = get_extension_funcs('gd');
-    if( !$GDfuncList ) return 0 ;
+    if( !$GDfuncList ) 
+	return 0 ;
     else {
 	if( in_array('imagegd2',$GDfuncList) && 
 	    in_array('imagecreatetruecolor',$GDfuncList))
@@ -219,25 +215,10 @@ function CheckGDVersion() {
 //
 // Check what version of the GD library is installed.
 //
-$GLOBALS['gd2'] = false;
-if( USE_LIBRARY_GD2 === 'auto' ) {
-    $gdversion = CheckGDVersion();
-    if( $gdversion == 2 ) {
-	$GLOBALS['gd2'] = true;
-	$GLOBALS['copyfunc'] = 'imagecopyresampled';
-    }
-    elseif( $gdversion == 1 ) {
-	$GLOBALS['gd2'] = false;
-	$GLOBALS['copyfunc'] = 'imagecopyresized';
-    }
-    else {
-	JpGraphError::RaiseL(25002);
-//(" Your PHP installation does not seem to have the required GD library. Please see the PHP documentation on how to install and enable the GD library.");
-    }
-}
-else {
-    $GLOBALS['gd2'] = USE_LIBRARY_GD2;
-    $GLOBALS['copyfunc'] = USE_LIBRARY_GD2 ? 'imagecopyresampled' : 'imagecopyresized';
+$gdversion = CheckGDVersion();
+if( $gdversion != 2 ) {
+    JpGraphError::RaiseL(25002);
+//(" Your PHP installation does not seem to have the required GD 2.x library. Please see the PHP documentation on how to install and enable the GD library.");
 }
 
 //
@@ -291,95 +272,6 @@ function GenImgName() {
 	$fname = substr($fname,0,strlen($fname)-4).'.'.$img_format;
     }
     return $fname;
-}
-
-class LanguageConv {
-    var $g2312 = null ;
-
-    function Convert($aTxt,$aFF) {
-	if( LANGUAGE_GREEK ) {
-	    if( GREEK_FROM_WINDOWS ) {
-		$unistring = LanguageConv::gr_win2uni($aTxt); 
-	    } else  {
-		$unistring = LanguageConv::gr_iso2uni($aTxt);
-	    }
-	    return $unistring;
-	} elseif( LANGUAGE_CYRILLIC ) {
-	    if( CYRILLIC_FROM_WINDOWS && (!defined('LANGUAGE_CHARSET') || stristr(LANGUAGE_CHARSET, 'windows-1251')) ) {
-		$aTxt = convert_cyr_string($aTxt, "w", "k"); 
-	    }
-	    if( !defined('LANGUAGE_CHARSET') || stristr(LANGUAGE_CHARSET, 'koi8-r') || stristr(LANGUAGE_CHARSET, 'windows-1251')) {
-		$isostring = convert_cyr_string($aTxt, "k", "i");
-		$unistring = LanguageConv::iso2uni($isostring);
-	    }
-	    else {
-		$unistring = $aTxt;
-	    }
-	    return $unistring;
-	}
-	elseif( $aFF === FF_SIMSUN ) {
-	    // Do Chinese conversion
-	    if( $this->g2312 == null ) {
-		include_once 'jpgraph_gb2312.php' ;
-		$this->g2312 = new GB2312toUTF8();
-	    }
-	    return $this->g2312->gb2utf8($aTxt);
-	}
-	elseif( $aFF === FF_CHINESE ) {
-	    if( !function_exists('iconv') ) {
-		JpGraphError::RaiseL(25006);
-//('Usage of FF_CHINESE (FF_BIG5) font family requires that your PHP setup has the iconv() function. By default this is not compiled into PHP (needs the "--width-iconv" when configured).');
-	    }
-	    return iconv('BIG5','UTF-8',$aTxt);
-	}
-	elseif( ASSUME_EUCJP_ENCODING &&
-		($aFF == FF_MINCHO || $aFF == FF_GOTHIC || $aFF == FF_PMINCHO || $aFF == FF_PGOTHIC) ) {
-	    if( !function_exists('mb_convert_encoding') ) {
-		JpGraphError::RaiseL(25127);
-	    }
-	    return mb_convert_encoding($aTxt, 'UTF-8','EUC-JP');
-	}
-	else 
-	    return $aTxt;
-    }
-
-    // Translate iso encoding to unicode
-    function iso2uni ($isoline){
-	$uniline='';
-	for ($i=0; $i < strlen($isoline); $i++){
-	    $thischar=substr($isoline,$i,1);
-	    $charcode=ord($thischar);
-	    $uniline.=($charcode>175) ? "&#" . (1040+($charcode-176)). ";" : $thischar;
-	}
-	return $uniline;
-    }
-
-    // Translate greek iso encoding to unicode
-    function gr_iso2uni ($isoline) {
-	$uniline='';
-	for ($i=0; $i < strlen($isoline); $i++)	{
-	    $thischar=substr($isoline,$i,1);
-	    $charcode=ord($thischar);
-	    $uniline.=($charcode>179 && $charcode!=183 && $charcode!=187 && $charcode!=189) ? "&#" . (900+($charcode-180)). ";" : $thischar;
-	}
-	return $uniline;
-    }
-
-    // Translate greek win encoding to unicode
-    function gr_win2uni ($winline) {
-	$uniline='';
-	for ($i=0; $i < strlen($winline); $i++) {
-	    $thischar=substr($winline,$i,1);
-	    $charcode=ord($thischar);
-	    if ($charcode==161 || $charcode==162) {
-		$uniline.="&#" . (740+$charcode). ";";
-	    }
-	    else {
-		$uniline.=(($charcode>183 && $charcode!=187 && $charcode!=189) || $charcode==180) ? "&#" . (900+($charcode-180)). ";" : $thischar;
-	    }
-	}
-	return $uniline;
-    }
 }
 
 //===================================================
@@ -452,7 +344,19 @@ class DateLocale {
 	}
 
 	$pLocale = setlocale(LC_TIME, 0); // get current locale for LC_TIME
-	$res = @setlocale(LC_TIME, $aLocale);
+
+	if (is_array($aLocale)) {
+	    foreach ($aLocale as $loc) {
+		$res = @setlocale(LC_TIME, $loc);
+		if ( $res ) {
+		    $aLocale = $loc;
+		    break;
+		}
+	    }
+	}
+	else {
+	    $res = @setlocale(LC_TIME, $aLocale);
+	}
 	if ( ! $res ){
 	    JpGraphError::RaiseL(25007,$aLocale);
 //("You are trying to use the locale ($aLocale) which your PHP installation does not support. Hint: Use '' to indicate the default locale for this geographic region.");
@@ -577,15 +481,13 @@ class Graph {
     var $bands=null, $y2bands=null;
     var $text_scale_off=0, $text_scale_abscenteroff=-1; // Text scale offset in fractions and for centering bars in absolute pixels
     var $background_image="",$background_image_type=-1,$background_image_format="png";
-    var $background_image_bright=0,$background_image_contr=0,$background_image_sat=0;
-    var $image_bright=0, $image_contr=0, $image_sat=0;
     var $inline;
     var $showcsim=0,$csimcolor="red"; //debug stuff, draw the csim boundaris on the image if <>0
     var $grid_depth=DEPTH_BACK;	// Draw grid under all plots as default
     var $iAxisStyle = AXSTYLE_SIMPLE;
     var $iCSIMdisplay=false,$iHasStroked = false;
     var $footer;
-    var $csimcachename = '', $csimcachetimeout = 0;
+    var $csimcachename = '', $csimcachetimeout = 0, $iCSIMImgAlt='';
     var $iDoClipping = false;
     var $y2orderback=true;
     var $tabtitle;
@@ -932,10 +834,6 @@ class Graph {
     // Specify a background image
     function SetBackgroundImage($aFileName,$aBgType=BGIMG_FILLPLOT,$aImgFormat="auto") {
 
-	if( $GLOBALS['gd2'] && !USE_TRUECOLOR ) {
-	    JpGraphError::RaiseL(25017);//("You are using GD 2.x and are trying to use a background images on a non truecolor image. To use background images with GD 2.x you <b>must</b> enable truecolor by setting the USE_TRUECOLOR constant to TRUE. Due to a bug in GD 2.0.1 using any truetype fonts with truecolor images will result in very poor quality fonts.");
-	}
-
 	// Get extension to determine image type
 	if( $aImgFormat == "auto" ) {
 	    $e = explode('.',$aFileName);
@@ -962,20 +860,6 @@ class Graph {
 	$this->background_image_mix = $aMix ;
     }
 	
-    // Adjust brightness and constrast for background image
-    function AdjBackgroundImage($aBright,$aContr=0,$aSat=0) {
-	$this->background_image_bright=$aBright;
-	$this->background_image_contr=$aContr;
-	$this->background_image_sat=$aSat;
-    }
-	
-    // Adjust brightness and constrast for image
-    function AdjImage($aBright,$aContr=0,$aSat=0) {
-	$this->image_bright=$aBright;
-	$this->image_contr=$aContr;
-	$this->image_sat=$aSat;
-    }
-
     // Specify axis style (boxed or single)
     function SetAxisStyle($aStyle) {
         $this->iAxisStyle = $aStyle ;
@@ -1284,11 +1168,11 @@ class Graph {
 	    if( is_array($value) ) {
 		$n = count($value);
 		for( $i=0; $i < $n; ++$i ) {
-		    $urlarg .= '&'.$key.'%5B%5D='.urlencode($value[$i]);
+		    $urlarg .= '&amp;'.$key.'%5B%5D='.urlencode($value[$i]);
 		}
 	    }
 	    else {
-		$urlarg .= '&'.$key.'='.urlencode($value);
+		$urlarg .= '&amp;'.$key.'='.urlencode($value);
 	    }
 	}
 
@@ -1300,15 +1184,19 @@ class Graph {
 	    if( is_array($value) ) {
 		$n = count($value);
 		for( $i=0; $i < $n; ++$i ) {
-		    $urlarg .= '&'.$key.'%5B%5D='.urlencode($value[$i]);
+		    $urlarg .= '&amp;'.$key.'%5B%5D='.urlencode($value[$i]);
 		}
 	    }
 	    else {
-		$urlarg .= '&'.$key.'='.urlencode($value);
+		$urlarg .= '&amp;'.$key.'='.urlencode($value);
 	    }
 	}
 
 	return $urlarg;
+    }
+
+    function SetCSIMImgAlt($aAlt) {
+	$this->iCSIMImgAlt = $aAlt;
     }
 
     function StrokeCSIM($aScriptName='auto',$aCSIMName='',$aBorder=0) {
@@ -1357,7 +1245,7 @@ class Graph {
 		// to be converted to real arguments.
 		$tmp = str_replace('?','%3f',$baseimg);
 		$htmlwrap = $this->GetHTMLImageMap($aCSIMName)."\n".
-		    '<img src="'.CSIMCACHE_HTTP_DIR.$tmp.'" ismap="ismap" usemap="#'.$aCSIMName.'" border="'.$aBorder.'" width="'.$this->img->width.'" height="'.$this->img->height."\" alt=\"\" />\n";
+		    '<img src="'.CSIMCACHE_HTTP_DIR.$tmp.'" ismap="ismap" usemap="#'.$aCSIMName.'" border="'.$aBorder.'" width="'.$this->img->width.'" height="'.$this->img->height."\" alt=\"".$this->iCSIMImgAlt."\" />\n";
 
 		if($fh =  @fopen($basecsim,'w') ) {
 		    fwrite($fh,$htmlwrap);
@@ -1373,7 +1261,7 @@ class Graph {
 		    JpGraphError::RaiseL(25030);//('Missing script name in call to StrokeCSIM(). You must specify the name of the actual image script as the first parameter to StrokeCSIM().');
 		}
 		echo $this->GetHTMLImageMap($aCSIMName);
-		echo "<img src=\"".$aScriptName.'?'.$urlarg."\" ismap=\"ismap\" usemap=\"#".$aCSIMName.'" border="'.$aBorder.'" width="'.$this->img->width.'" height="'.$this->img->height."\" alt=\"\" />\n";
+		echo "<img src=\"".$aScriptName.'?'.$urlarg."\" ismap=\"ismap\" usemap=\"#".$aCSIMName.'" border="'.$aBorder.'" width="'.$this->img->width.'" height="'.$this->img->height."\" alt=\"".$this->iCSIMImgAlt."\" />\n";
 	    }
 	}
 	else {
@@ -1983,12 +1871,14 @@ class Graph {
 	if( $this->lines != null ) {
 	    for($i=0; $i < count($this->lines); ++$i) {
 		$this->lines[$i]->Stroke($this->img,$this->xscale,$this->yscale);
+		$this->lines[$i]->DoLegend($this);
 	    }
 	}
 
 	if( $this->y2lines != null && $this->y2scale != null ) {
 	    for($i=0; $i < count($this->y2lines); ++$i) {
 		$this->y2lines[$i]->Stroke($this->img,$this->xscale,$this->y2scale);
+		$this->y2lines[$i]->DoLegend($this);
 	    }
 	}
 
@@ -2027,9 +1917,6 @@ class Graph {
 		$this->DisplayClientSideaImageMapAreas();		
 	    }
 	    
-	    // Adjust the appearance of the image
-	    $this->AdjustSaturationBrightnessContrast();
-
 	    // Should we do any final image transformation
 	    if( $this->iImgTrans ) {
 		if( !class_exists('ImgTrans') ) {
@@ -2234,8 +2121,7 @@ class Graph {
 	if( $aImgStr != '' ) {
 	    return Image::CreateFromString($aImgStr);
 	}
-	if( $aFile == '' )
-	    $aFile = $this->background_image;
+
 	// Remove case sensitivity and setup appropriate function to create image
 	// Get file extension. This should be the LAST '.' separated part of the filename
 	$e = explode('.',$aFile);
@@ -2320,10 +2206,7 @@ class Graph {
 	    JpGraphError::RaiseL(25040);//('It is not possible to specify both a background image and a background country flag.');
 	}
 	if( $this->background_image != "" ) {
-	    $bkgimg = $this->LoadBkgImage($this->background_image_format);
-	    $this->img->_AdjBrightContrast($bkgimg,$this->background_image_bright,
-					   $this->background_image_contr);
-	    $this->img->_AdjSat($bkgimg,$this->background_image_sat);
+	    $bkgimg = $this->LoadBkgImage($this->background_image_format,$this->background_image);
 	}
 	elseif( $this->background_cflag != "" ) {
 	    if( ! class_exists('FlagImages') ) {
@@ -2759,14 +2642,6 @@ class Graph {
 	}
     }
 
-    function AdjustSaturationBrightnessContrast() {
-	// Adjust the brightness and contrast of the image
-	if( $this->image_contr || $this->image_bright )
-	    $this->img->AdjBrightContrast($this->image_bright,$this->image_contr);
-	if( $this->image_sat )											 
-	    $this->img->AdjSat($this->image_sat);
-    }
-
     // Text scale offset in fractions of a major scale step
     function SetTextScaleOff($aOff) {
 	$this->text_scale_off = $aOff;
@@ -2851,71 +2726,6 @@ class Graph {
 } // Class
 
 
-//===================================================
-// CLASS TTF
-// Description: Handle TTF font names
-//===================================================
-class TTF {
-    var $font_files,$style_names;
-//---------------
-// CONSTRUCTOR
-    function TTF() {
-	$this->style_names=array(FS_NORMAL=>'normal',FS_BOLD=>'bold',FS_ITALIC=>'italic',FS_BOLDITALIC=>'bolditalic');
-	// File names for available fonts
-	$this->font_files=array(
-	    FF_COURIER => array(FS_NORMAL=>'cour.ttf', FS_BOLD=>'courbd.ttf', FS_ITALIC=>'couri.ttf', FS_BOLDITALIC=>'courbi.ttf' ),
-	    FF_GEORGIA => array(FS_NORMAL=>'georgia.ttf', FS_BOLD=>'georgiab.ttf', FS_ITALIC=>'georgiai.ttf', FS_BOLDITALIC=>'' ),
-	    FF_TREBUCHE =>array(FS_NORMAL=>'trebuc.ttf', FS_BOLD=>'trebucbd.ttf',   FS_ITALIC=>'trebucit.ttf', FS_BOLDITALIC=>'trebucbi.ttf' ),
-	    FF_VERDANA => array(FS_NORMAL=>'verdana.ttf', FS_BOLD=>'verdanab.ttf',  FS_ITALIC=>'verdanai.ttf', FS_BOLDITALIC=>'' ),
-	    FF_TIMES =>   array(FS_NORMAL=>'times.ttf',   FS_BOLD=>'timesbd.ttf',   FS_ITALIC=>'timesi.ttf',   FS_BOLDITALIC=>'timesbi.ttf' ),
-	    FF_COMIC =>   array(FS_NORMAL=>'comic.ttf',   FS_BOLD=>'comicbd.ttf',   FS_ITALIC=>'',         FS_BOLDITALIC=>'' ),
-	    FF_ARIAL =>   array(FS_NORMAL=>'arial.ttf',   FS_BOLD=>'arialbd.ttf',   FS_ITALIC=>'ariali.ttf',   FS_BOLDITALIC=>'arialbi.ttf' ) ,
-	    FF_VERA =>    array(FS_NORMAL=>'Vera.ttf',   FS_BOLD=>'VeraBd.ttf',   FS_ITALIC=>'VeraIt.ttf',   FS_BOLDITALIC=>'VeraBI.ttf' ),
-	    FF_VERAMONO => array(FS_NORMAL=>'VeraMono.ttf', FS_BOLD=>'VeraMoBd.ttf', FS_ITALIC=>'VeraMoIt.ttf', FS_BOLDITALIC=>'VeraMoBI.ttf' ),
-	    FF_VERASERIF => array(FS_NORMAL=>'VeraSe.ttf', FS_BOLD=>'VeraSeBd.ttf', FS_ITALIC=>'', FS_BOLDITALIC=>'' ) ,
-	    FF_SIMSUN =>  array(FS_NORMAL=>'simsun.ttc',  FS_BOLD=>'simhei.ttf',   FS_ITALIC=>'',   FS_BOLDITALIC=>'' ),
-	    FF_CHINESE => array(FS_NORMAL=>CHINESE_TTF_FONT, FS_BOLD=>'', FS_ITALIC=>'', FS_BOLDITALIC=>'' ),
- 	    FF_MINCHO =>  array(FS_NORMAL=>MINCHO_TTF_FONT,  FS_BOLD=>'',   FS_ITALIC=>'',   FS_BOLDITALIC=>'' ),
- 	    FF_PMINCHO => array(FS_NORMAL=>PMINCHO_TTF_FONT,  FS_BOLD=>'',   FS_ITALIC=>'',   FS_BOLDITALIC=>'' ),    
- 	    FF_GOTHIC  => array(FS_NORMAL=>GOTHIC_TTF_FONT,  FS_BOLD=>'',   FS_ITALIC=>'',   FS_BOLDITALIC=>'' ),    
- 	    FF_PGOTHIC => array(FS_NORMAL=>PGOTHIC_TTF_FONT,  FS_BOLD=>'',   FS_ITALIC=>'',   FS_BOLDITALIC=>'' ),    
- 	    FF_MINCHO =>  array(FS_NORMAL=>PMINCHO_TTF_FONT,  FS_BOLD=>'',   FS_ITALIC=>'',   FS_BOLDITALIC=>'' )   
-);
-    }
-
-//---------------
-// PUBLIC METHODS	
-    // Create the TTF file from the font specification
-    function File($family,$style=FS_NORMAL) {
-	
-	if( $family == FF_HANDWRT || $family==FF_BOOK ) {
-	    JpGraphError::RaiseL(25045);//('Font families FF_HANDWRT and FF_BOOK are no longer available due to copyright problem with these fonts. Fonts can no longer be distributed with JpGraph. Please download fonts from http://corefonts.sourceforge.net/');
-	}
-
-	$fam = @$this->font_files[$family];
-	if( !$fam ) {
-	    JpGraphError::RaiseL(25046,$family);//("Specified TTF font family (id=$family) is unknown or does not exist. Please note that TTF fonts are not distributed with JpGraph for copyright reasons. You can find the MS TTF WEB-fonts (arial, courier etc) for download at http://corefonts.sourceforge.net/");
-	}
-	$f = @$fam[$style];
-
-	if( $f==='' )
-	    JpGraphError::RaiseL(25047,$this->style_names[$style],$this->font_files[$family][FS_NORMAL]);//('Style "'.$this->style_names[$style].'" is not available for font family '.$this->font_files[$family][FS_NORMAL].'.');
-	if( !$f ) {
-	    JpGraphError::RaiseL(25048,$fam);//("Unknown font style specification [$fam].");
-	}
-
-	if ($family >= FF_MINCHO && $family <= FF_PGOTHIC) {
-	    $f = MBTTF_DIR.$f;
-	} else {
-	    $f = TTF_DIR.$f;
-	}
-
-	if( file_exists($f) === false || is_readable($f) === false ) {
-	    JpGraphError::RaiseL(25049,$f);//("Font file \"$f\" is not readable or does not exist.");
-	}
-	return $f;
-    }
-} // Class
 
 //===================================================
 // CLASS LineProperty
@@ -2981,7 +2791,7 @@ class Text {
 // CONSTRUCTOR
 
     // Create new text at absolute pixel coordinates
-    function Text($aTxt="",$aXAbsPos=0,$aYAbsPos=0) {
+    function Text($aTxt='',$aXAbsPos=0,$aYAbsPos=0) {
 	if( ! is_string($aTxt) ) {
 	    JpGraphError::RaiseL(25050);//('First argument to Text::Text() must be s atring.');
 	}
@@ -3561,7 +3371,9 @@ class Grid {
 	
     // Display the grid
     function Stroke() {
-	if( $this->showMinor ) {
+
+	// We do not have minor ticks (or grids) for text scales
+	if( $this->showMinor && !$this->scale->textscale ) {
 	    $tmp = $this->grid_color;
 	    $this->grid_color = $this->grid_mincolor;
 	    $this->DoStroke($this->scale->ticks->ticks_pos);
@@ -4268,6 +4080,7 @@ class LinearTicks extends Ticks {
     var $iManualTickPos = NULL, $iManualMinTickPos = NULL, $iManualTickLabels = NULL;
     var $maj_ticks_pos = array(), $maj_ticklabels_pos = array(), 
 	$ticks_pos = array(), $maj_ticks_label = array();
+    var $iAdjustForDST = false; // If a date falls within the DST period add one hour to the diaplyed time
 
 //---------------
 // CONSTRUCTOR
@@ -4413,6 +4226,7 @@ class LinearTicks extends Ticks {
 		$this->maj_ticks_pos[$i]=$xtick;
 		$this->maj_ticklabels_pos[$i] = round($x);				
 		$x += $maj_step_abs;
+
 	    }
 	}
 	else {
@@ -4458,6 +4272,11 @@ class LinearTicks extends Ticks {
 	}	
     }
 
+    function AdjustForDST($aFlg=true) {
+	$this->iAdjustForDST = $aFlg;
+    }
+
+
     function _doLabelFormat($aVal,$aIdx,$aNbrTicks) {
 
 	// If precision hasn't been specified set it to a sensible value
@@ -4478,7 +4297,7 @@ class LinearTicks extends Ticks {
 	elseif( $this->label_formatstr != '' || $this->label_dateformatstr != '' ) {
 	    if( $this->label_usedateformat ) {
 		// Adjust the value to take daylight savings into account
-		if (date("I",$aVal)==1) // DST
+		if (date("I",$aVal)==1 && $this->iAdjustForDST ) // DST
 		    $aVal+=3600;
 		$l = date($this->label_formatstr,$aVal);
 		if( $this->label_formatstr == 'W' ) {
@@ -4490,7 +4309,7 @@ class LinearTicks extends Ticks {
 	    else {
 		if( $this->label_dateformatstr !== '' ) {
 		    // Adjust the value to take daylight savings into account
-		    if (date("I",$aVal)==1) // DST
+		    if (date("I",$aVal)==1 && $this->iAdjustForDST ) // DST
 			$aVal+=3600;
 		    $l = date($this->label_dateformatstr,$aVal);
 		    if( $this->label_formatstr == 'W' ) {
@@ -5594,7 +5413,11 @@ class Legend {
 		// Stroke a mark with the standard size
 		// (As long as it is not an image mark )
 		if( $p[2]->GetType() != MARK_IMG ) {
+
+		    // Clear any user callbacks since we ont want them called for
+		    // the legend marks
 		    $p[2]->iFormatCallback = '';
+		    $p[2]->iFormatCallback2 = '';
 
 		    // Since size for circles is specified as the radius
 		    // this means that we must half the size to make the total
@@ -5996,6 +5819,8 @@ class PlotLine {
     var $color="black";
     var $direction=-1; 
     var $scaleposition;
+    var $legend='',$hidelegend=false, $legendcsimtarget='', $legendcsimalt='';
+
 
 //---------------
 // CONSTRUCTOR
@@ -6007,7 +5832,18 @@ class PlotLine {
     }
 	
 //---------------
-// PUBLIC METHODS	
+// PUBLIC METHODS
+
+    function SetLegend($aLegend,$aCSIM="",$aCSIMAlt="") {
+	$this->legend = $aLegend;
+	$this->legendcsimtarget = $aCSIM;
+	$this->legendcsimalt = $aCSIMAlt;
+    }
+
+    function HideLegend($f=true) {
+	$this->hidelegend = $f;
+    }
+
     function SetPosition($aScalePosition) {
 	$this->scaleposition=$aScalePosition;
     }
@@ -6022,6 +5858,24 @@ class PlotLine {
 	
     function SetWeight($aWeight) {
 	$this->weight=$aWeight;
+    }
+
+//---------------
+// PRIVATE METHODS
+
+    function DoLegend(&$graph) {
+	if( !$this->hidelegend )
+	    $this->Legend($graph);
+    }
+
+    // Framework function the chance for each plot class to set a legend
+    function Legend(&$aGraph) {
+	if( $this->legend != "" ) {
+	    $dummyPlotMark = new PlotMark();
+	    $lineStyle = 1;
+	    $aGraph->legend->Add($this->legend,$this->color,$dummyPlotMark,$lineStyle,
+				 $this->legendcsimtarget,$this->legendcsimalt);    
+	}
     }
 
     function PreStrokeAdjust($aGraph) {

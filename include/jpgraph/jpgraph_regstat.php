@@ -3,8 +3,7 @@
 // File:	JPGRAPH_REGSTAT.PHP
 // Description: Regression and statistical analysis helper classes
 // Created: 	2002-12-01
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_regstat.php 613 2006-04-19 19:35:33Z ljp $
+// Ver:		$Id: jpgraph_regstat.php 782 2006-10-08 08:09:02Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================

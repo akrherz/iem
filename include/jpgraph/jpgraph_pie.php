@@ -3,8 +3,7 @@
 // File:	JPGRAPH_PIE.PHP
 // Description:	Pie plot extension for JpGraph
 // Created: 	2001-02-14
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_pie.php 768 2006-09-24 20:10:52Z ljp $
+// Ver:		$Id: jpgraph_pie.php 846 2007-03-10 10:36:47Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -271,7 +270,7 @@ class PiePlot {
    	else {
 	    $this->setslicecolors = array_slice($this->setslicecolors,0,$n);
 	    $numcolors=count($this->setslicecolors); 
-	    if( $graph->pieaa && is_a($this,'PiePlot') ) { 
+	    if( $graph->pieaa && !is_a($this,'PiePlot3D') ) { 
 		$this->setslicecolors = array_reverse($this->setslicecolors);
 	    }
 	}

@@ -3,8 +3,7 @@
 // File:	JPGRAPH_PLOTBAND.PHP
 // Description:	PHP4 Graph Plotting library. Extension module.
 // Created: 	2004-02-18
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_plotband.php 483 2006-02-04 12:19:43Z ljp $
+// Ver:		$Id: jpgraph_plotband.php 782 2006-10-08 08:09:02Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================

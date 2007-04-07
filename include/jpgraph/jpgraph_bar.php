@@ -3,8 +3,7 @@
 // File:	JPGRAPH_BAR.PHP
 // Description:	Bar plot extension for JpGraph
 // Created: 	2001-01-08
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_bar.php 757 2006-09-21 03:58:47Z ljp $
+// Ver:		$Id: jpgraph_bar.php 866 2007-03-24 11:17:27Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -193,14 +192,14 @@ class BarPlot extends Plot {
 		
     function SetFillColor($aColor) {
 	$this->fill = true ;
-	$this->fill_color=$aColor;
+	$this->fill_color = $aColor;
     }
 	
-    function SetFillGradient($from_color,$to_color,$style) {
-	$this->grad=true;
-	$this->grad_fromcolor=$from_color;
-	$this->grad_tocolor=$to_color;
-	$this->grad_style=$style;
+    function SetFillGradient($aFromColor,$aToColor=null,$aStyle=null) {
+	$this->grad = true;
+	$this->grad_fromcolor = $aFromColor;
+	$this->grad_tocolor   = $aToColor;
+	$this->grad_style     = $aStyle;
     }
 	
     function SetValuePos($aPos) {
@@ -315,7 +314,8 @@ class BarPlot extends Plot {
 	if( is_array($this->iPattern) ) {
 	    $np = count($this->iPattern);
 	}
-					
+		
+	$grad = null;
 	for($i=0; $i < $numbars; ++$i) {
 
  	    // If value is NULL, or 0 then don't draw a bar at all
@@ -345,10 +345,38 @@ class BarPlot extends Plot {
 		$x+$abswidth,$yscale->Translate($this->coords[0][$i]),
 		$x+$abswidth,$zp);
 	    if( $this->grad ) {
-		$grad = new Gradient($img);
-		$grad->FilledRectangle($pts[2],$pts[3],
-				       $pts[6],$pts[7],
-				       $this->grad_fromcolor,$this->grad_tocolor,$this->grad_style); 
+		if( $grad === null ) 
+		    $grad = new Gradient($img);
+		if( is_array($this->grad_fromcolor) ) {
+		    // The first argument (grad_fromcolor) can be either an array or a single color. If it is an array
+		    // then we have two choices. It can either a) be a single color specified as an RGB triple or it can be
+		    // an array to specify both (from, to style) for each individual bar. The way to know the difference is 
+		    // to investgate the first element. If this element is an integer [0,255] then we assume it is an RGB 
+		    // triple.
+		    $ng = count($this->grad_fromcolor);
+		    if( $ng === 3 ) {
+			if( is_numeric($this->grad_fromcolor[0]) && $this->grad_fromcolor[0] > 0 && $this->grad_fromcolor[0] < 256 ) {
+			    // RGB Triple
+			    $fromcolor = $this->grad_fromcolor;
+			    $tocolor = $this->grad_tocolor;
+			    $style = $this->grad_style;
+			}
+		    }
+		    else {
+			$fromcolor = $this->grad_fromcolor[$i % $ng][0];
+			$tocolor = $this->grad_fromcolor[$i % $ng][1];
+			$style = $this->grad_fromcolor[$i % $ng][2];
+		    }
+		    $grad->FilledRectangle($pts[2],$pts[3],
+					   $pts[6],$pts[7],
+					   $fromcolor,$tocolor,$style); 
+		}
+		else {
+		    $grad->FilledRectangle($pts[2],$pts[3],
+					   $pts[6],$pts[7],
+					   $this->grad_fromcolor,$this->grad_tocolor,$this->grad_style); 
+		}
+					       
 	    }
 	    elseif( !empty($this->fill_color) ) {
 		if(is_array($this->fill_color)) {
@@ -827,12 +855,18 @@ class AccBarPlot extends BarPlot {
 		} else {
 		    if (is_array($this->plots[$j]->fill_color) ) {
 			$numcolors = count($this->plots[$j]->fill_color);
-			$img->SetColor($this->plots[$j]->fill_color[$i % $numcolors]);
+			$fillcolor = $this->plots[$j]->fill_color[$i % $numcolors];
+			// If the bar is specified to be non filled then the fill color is false
+			if( $fillcolor !== false ) 
+			    $img->SetColor($this->plots[$j]->fill_color[$i % $numcolors]);
 		    }
 		    else {
-			$img->SetColor($this->plots[$j]->fill_color);
+			$fillcolor = $this->plots[$j]->fill_color;
+			if( $fillcolor !== false ) 
+			    $img->SetColor($this->plots[$j]->fill_color);
 		    }
-		    $img->FilledPolygon($pts);
+		    if( $fillcolor !== false )
+			$img->FilledPolygon($pts);
 		    $img->SetColor($this->plots[$j]->color);
 		}				  
 
@@ -881,7 +915,9 @@ class AccBarPlot extends BarPlot {
 
 		$pts[] = $pts[0];
 		$pts[] = $pts[1];
+		$img->SetLineWeight($this->plots[$j]->line_weight);
 		$img->Polygon($pts);
+		$img->SetLineWeight(1);
 	    }
 		
 	    // Draw labels for each acc.bar

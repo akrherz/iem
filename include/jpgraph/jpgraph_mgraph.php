@@ -3,8 +3,7 @@
 // File: 	JPGRAPH_MGRAPH.PHP
 // Description: Class to handle multiple graphs in the same image
 // Created: 	2006-01-15
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_mgraph.php 504 2006-02-04 15:51:47Z ljp $
+// Ver:		$Id: jpgraph_mgraph.php 784 2006-10-08 20:14:36Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -59,10 +58,6 @@ class MGraph {
 	$aCenter=TRUE;
 	$aX=NULL;
 
-	if( $GLOBALS['gd2'] && !USE_TRUECOLOR ) {
-	    JpGraphError::RaiseL(12001);
-//("You are using GD 2.x and are trying to use a background images on a non truecolor image. To use background images with GD 2.x you <b>must</b> enable truecolor by setting the USE_TRUECOLOR constant to TRUE. Due to a bug in GD 2.0.1 using any truetype fonts with truecolor images will result in very poor quality fonts.");
-	}
 	if( is_numeric($aCenter_aX) ) {
 	    $aX=$aCenter_aX;
 	}
@@ -169,20 +164,12 @@ class MGraph {
 	    JpGraphError::RaiseL(12006,$aWidth,$aHeight);
 //("Illegal sizes specified for width or height when creating an image, (width=$aWidth, height=$aHeight)");
 	}
-	if( @$GLOBALS['gd2']==true && USE_TRUECOLOR ) {
-	    $this->img = @imagecreatetruecolor($aWidth, $aHeight);
-	    if( $this->img < 1 ) {
-		JpGraphError::RaiseL(12011);
+	$this->img = @imagecreatetruecolor($aWidth, $aHeight);
+	if( $this->img < 1 ) {
+	    JpGraphError::RaiseL(12011);
 // die("<b>JpGraph Error:</b> Can't create truecolor image. Check that you really have GD2 library installed.");
-	    }
-	    ImageAlphaBlending($this->img,true);
-	} else {
-	    $this->img = @imagecreate($aWidth, $aHeight);	
-	    if( $this->img < 1 ) {
-		JpGraphError::RaiseL(12012);
-// die("<b>JpGraph Error:</b> Can't create image. Check that you really have the GD library installed.");
-	    }
 	}
+	ImageAlphaBlending($this->img,true);
     }
 
     function _polygon($p,$closed=FALSE) {

@@ -3,8 +3,7 @@
 // File: 	JPGRAPH_LOG.PHP
 // Description:	Log scale plot extension for JpGraph
 // Created: 	2001-01-08
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_log.php 479 2006-02-04 12:17:35Z ljp $
+// Ver:		$Id: jpgraph_log.php 820 2006-12-14 01:04:01Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -91,8 +90,24 @@ class LogScale extends LinearScale {
 	    JpGraphError::RaiseL(11004);
 //('Scale error for logarithmic scale. You have a problem with your data values. The max value must be greater than 0. It is mathematically impossible to have 0 in a logarithmic scale.');
 	}
-	$smin = floor(log10($min));
-	$smax = ceil(log10($max));
+	if( is_numeric($this->autoscale_min) ) {
+	    $smin = round($this->autoscale_min);
+	    $smax = ceil(log10($max));
+	    if( $min >= $max ) {
+		JpGraphError::RaiseL(25071);//('You have specified a min value with SetAutoMin() which is larger than the maximum value used for the scale. This is not possible.');
+	    }
+	}
+	else {
+	    $smin = floor(log10($min));
+	    if( is_numeric($this->autoscale_max) ) {
+		$smax = round($this->autoscale_max);
+		if( $smin >= $smax ) {
+		    JpGraphError::RaiseL(25072);//('You have specified a max value with SetAutoMax() which is smaller than the miminum value used for the scale. This is not possible.');
+		}
+	    }
+	    else
+		$smax = ceil(log10($max));
+	}
 	$this->Update($img,$smin,$smax);					
     }
 //---------------

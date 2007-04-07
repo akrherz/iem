@@ -3,14 +3,13 @@
 // File:	JPGRAPH_RADAR.PHP
 // Description: Radar plot extension for JpGraph
 // Created: 	2001-02-04
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_radar.php 755 2006-09-20 15:17:26Z ljp $
+// Ver:		$Id: jpgraph_radar.php 857 2007-03-23 19:03:13Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
 */
 
-require_once('jpgraph_plotmark.inc');
+require_once('jpgraph_plotmark.inc.php');
 
 class RadarLogTicks extends Ticks {
 //---------------

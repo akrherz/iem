@@ -3,8 +3,7 @@
 // File:	JPG-CONFIG.INC
 // Description:	Configuration file for JpGraph library
 // Created: 	2004-03-27
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpg-config.inc 637 2006-05-26 13:21:04Z ljp $
+// Ver:		$Id: jpg-config.inc.php 852 2007-03-18 18:18:35Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -104,7 +103,7 @@ DEFINE("CYRILLIC_FROM_WINDOWS",false);
 // where $locale_char_set is a GLOBAL (string) variable
 // from the application including JpGraph.
 // 
-DEFINE('LANGUAGE_CHARSET', null);
+DEFINE('CYRILLIC_LANGUAGE_CHARSET', null);
 
 // Japanese TrueType font used with FF_MINCHO, FF_PMINCHO, FF_GOTHIC, FF_PGOTHIC
 DEFINE('MINCHO_TTF_FONT','ipam.ttf');
@@ -131,22 +130,6 @@ DEFINE('DEFAULT_ERR_LOCALE','en');
 // choose the best available format in the order png,gif,jpeg
 // (The supported format depends on what your PHP installation supports)
 DEFINE("DEFAULT_GFORMAT","auto");
-
-// Should the image be a truecolor image? 
-// Note 1: Has only effect with GD 2.0.1 and above.
-// Note 2: GD 2.0.1 + PHP 4.0.6 on Win32 crashes when trying to use 
-// trucolor.
-// Note 3: MUST be enabled to get background images working with GD2
-DEFINE('USE_TRUECOLOR',true);
-
-// Specify what version of the GD library is installed.
-// If this is set to 'auto' the version will be automatically 
-// determined.
-// However since determining the library takes ~1ms you can also 
-// manually specify the version if you know what version you have. 
-// This means that you should 
-// set this define to true if you have GD 2.x installed to save 1ms. 
-DEFINE("USE_LIBRARY_GD2",'auto');
 
 // Should the cache be used at all? By setting this to false no
 // files will be generated in the cache directory.  
@@ -180,17 +163,6 @@ DEFINE("INSTALL_PHP_ERR_HANDLER",false);
 // in the graph not being created and just a "red-cross" image would be seen.
 // This should be turned off for a production site.
 DEFINE("CATCH_PHPERRMSG",true);
-
-// If the color palette is full should JpGraph try to allocate
-// the closest match? If you plan on using background images or
-// gradient fills it might be a good idea to enable this.
-// If not you will otherwise get an error saying that the color palette is 
-// exhausted. The drawback of using approximations is that the colors 
-// might not be exactly what you specified. 
-// Note1: This does only apply to paletted images, not truecolor 
-// images since they don't have the limitations of maximum number
-// of colors.
-DEFINE("USE_APPROX_COLORS",true);
 
 // Should usage of deprecated functions and parameters give a fatal error?
 // (Useful to check if code is future proof.)
