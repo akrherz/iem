@@ -23,47 +23,9 @@ the archive <br> begins 24 Oct 2004.</p>
 
 
   <form method="GET" action="main.phtml">
-  <?php
-
-    if (strlen($month) == 0 ){
-	$month = date("m");
-    }
-    if (strlen($day) == 0 ){
-        $day = date("d");
-    }
-    if (strlen($year) == 0 ){
-        $year = date("Y");
-    }
-
-  ?>
-  <?php yearSelect2(2003, $year, "year"); ?>
-
-  <select name="month">
-    <option value="01" <?php if ($month == "01") echo "SELECTED"; ?> >January
-    <option value="02" <?php if ($month == "02") echo "SELECTED"; ?> >February
-    <option value="03" <?php if ($month == "03") echo "SELECTED"; ?> >March
-    <option value="04" <?php if ($month == "04") echo "SELECTED"; ?> >April
-    <option value="05" <?php if ($month == "05") echo "SELECTED"; ?> >May
-    <option value="06" <?php if ($month == "06") echo "SELECTED"; ?> >June
-    <option value="07" <?php if ($month == "07") echo "SELECTED"; ?> >July
-    <option value="08" <?php if ($month == "08") echo "SELECTED"; ?> >August
-    <option value="09" <?php if ($month == "09") echo "SELECTED"; ?> >September
-    <option value="10" <?php if ($month == "10") echo "SELECTED"; ?> >October
-    <option value="11" <?php if ($month == "11") echo "SELECTED"; ?> >November
-    <option value="12" <?php if ($month == "12") echo "SELECTED"; ?> >December
-  </select>
-
-  <select name="day">
-<?php
-  for ($k=1;$k<32;$k++){
-   echo "<option value=\"".$k."\" ";
-   if ($k == (int)$day){
-     echo "SELECTED";
-   }
-   echo ">".$k."\n";
-  }
-?>
-  </select>
+  <?php echo yearSelect(2003, $year); ?>
+  <?php echo monthSelect($month); ?>
+  <?php echo daySelect($day); ?>
 
   <input type="submit" value="Make Plot"></form>
 
