@@ -3,13 +3,12 @@
 // File:	JPGRAPH_SCATTER.PHP
 // Description: Scatter (and impuls) plot extension for JpGraph
 // Created: 	2001-02-11
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_scatter.php 491 2006-02-04 12:28:43Z ljp $
+// Ver:		$Id: jpgraph_scatter.php 858 2007-03-23 19:03:33Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
 */
-require_once ('jpgraph_plotmark.inc');
+require_once ('jpgraph_plotmark.inc.php');
 
 //===================================================
 // CLASS FieldArrow
@@ -166,7 +165,7 @@ class ScatterPlot extends Plot {
 	    $yzero=$yscale->scale_abs[0];
 	    
 	$this->csimareas = '';
-	for( $i=0; $i<$this->numpoints; ++$i ) {
+	for( $i=0; $i < $this->numpoints; ++$i ) {
 
 	    // Skip null values
 	    if( $this->coords[0][$i]==="" || $this->coords[0][$i]==='-' || $this->coords[0][$i]==='x')

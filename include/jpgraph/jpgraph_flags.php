@@ -3,8 +3,7 @@
 // File:	JPGRAPH_FLAGS.PHP
 // Description:	Class Jpfile. Handles plotmarks
 // Created: 	2003-06-28
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_flags.php 471 2006-02-04 12:12:32Z ljp $
+// Ver:		$Id: jpgraph_flags.php 810 2006-12-03 23:50:31Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -196,6 +195,7 @@ class FlagImages {
     'Commonwealth of Puerto Rico' => 'purc',
     'State of Qatar' => 'qata',
     'Russian Federation' => 'russ',
+    'Romania' => 'rmna',
     'Republic of Rwanda' => 'rwan',
     'Kingdom of Saudi Arabia' => 'saar',
     'Republic of San Marino' => 'sama',

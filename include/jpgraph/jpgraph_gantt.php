@@ -3,8 +3,7 @@
 // File:	JPGRAPH_GANTT.PHP
 // Description:	JpGraph Gantt plot extension
 // Created: 	2001-11-12
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_gantt.php 586 2006-03-04 18:55:43Z ljp $
+// Ver:		$Id: jpgraph_gantt.php 857 2007-03-23 19:03:13Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -12,7 +11,7 @@
 
 require_once('jpgraph_plotband.php'); 
 require_once('jpgraph_iconplot.php'); 
-require_once('jpgraph_plotmark.inc');
+require_once('jpgraph_plotmark.inc.php');
 
 // Maximum size for Automatic Gantt chart
 DEFINE('MAX_GANTTIMG_SIZE_W',4000);
@@ -3312,15 +3311,20 @@ class GanttBar extends GanttPlotObject {
 	    $len = ($xbp-$xtp)*$this->progress->iProgress;
 
 	    $endpos = $xtp+$len;
+	    
+	    // Is the the progress bar visible after the start date?
 	    if( $endpos > $xt ) {
+
+		// Take away the length of the progress that is not visible (before the start date)
 		$len -= ($xt-$xtp); 
 
-		// Make sure that the progess bar doesn't extend over the end date
-		if( $xtp+$len-1 > $xb )
-		    $len = $xb - $xtp + 1;
-		
+		// Is the the progress bar visible after the start date?
 		if( $xtp < $xt ) 
 		    $xtp = $xt;
+		
+		// Make sure that the progess bar doesn't extend over the end date
+		if( $xtp+$len-1 > $xb )
+		    $len = $xb - $xtp  ;
 		
 		$prog = $factory->Create($this->progress->iPattern,$this->progress->iColor);
 		$prog->SetDensity($this->progress->iDensity);

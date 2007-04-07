@@ -3,8 +3,7 @@
 // File:	IMGDATA_SQUARES.INC
 // Description:	Base64 encoded images for squares
 // Created: 	2003-03-20
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: imgdata_squares.inc 21 2005-05-30 20:35:34Z ljp $
+// Ver:		$Id: imgdata_squares.inc.php 859 2007-03-23 19:12:08Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================

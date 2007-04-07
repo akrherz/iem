@@ -3,16 +3,13 @@
 // File: 	JPGRAPH_POLAR.PHP
 // Description:	Polar plot extension for JpGraph
 // Created: 	2003-02-02
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_polar.php 487 2006-02-04 12:25:38Z ljp $
+// Ver:		$Id: jpgraph_polar.php 868 2007-03-24 11:19:13Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
 */
 
-require_once ('jpgraph_plotmark.inc');
-
-
+require_once ('jpgraph_plotmark.inc.php');
 require_once "jpgraph_log.php";
 
 
@@ -822,9 +819,6 @@ class PolarGraph extends Graph {
 	    if(_JPG_DEBUG)
 		$this->DisplayClientSideaImageMapAreas();		
 	    
-	    // Adjust the appearance of the image
-	    $this->AdjustSaturationBrightnessContrast();
-
 	    // If the filename is given as the special "__handle"
 	    // then the image handler is returned and the image is NOT
 	    // streamed back

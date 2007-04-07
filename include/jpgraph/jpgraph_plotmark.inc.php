@@ -3,8 +3,7 @@
 // File:	JPGRAPH_PLOTMARK.PHP
 // Description:	Class file. Handles plotmarks
 // Created: 	2003-03-21
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_plotmark.inc 752 2006-09-19 21:20:36Z ljp $
+// Ver:		$Id: jpgraph_plotmark.inc.php 861 2007-03-23 19:18:17Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -271,7 +270,7 @@ class PlotMark {
 		case MARK_IMG_SPUSHPIN:
 		case MARK_IMG_LPUSHPIN:
 		    if( $this->imgdata_pushpins == null ) {
-			require_once 'imgdata_pushpins.inc';
+			require_once 'imgdata_pushpins.inc.php';
 			$this->imgdata_pushpins = new ImgData_PushPins();
 		    }
 		    $this->markimg = $this->imgdata_pushpins->GetImg($this->type,$filename);
@@ -280,7 +279,7 @@ class PlotMark {
 
 		case MARK_IMG_SQUARE:
 		    if( $this->imgdata_squares == null ) {
-			require_once 'imgdata_squares.inc';
+			require_once 'imgdata_squares.inc.php';
 			$this->imgdata_squares = new ImgData_Squares();
 		    }
 		    $this->markimg = $this->imgdata_squares->GetImg($this->type,$filename);
@@ -289,7 +288,7 @@ class PlotMark {
 
 		case MARK_IMG_STAR:
 		    if( $this->imgdata_stars == null ) {
-			require_once 'imgdata_stars.inc';
+			require_once 'imgdata_stars.inc.php';
 			$this->imgdata_stars = new ImgData_Stars();
 		    }
 		    $this->markimg = $this->imgdata_stars->GetImg($this->type,$filename);
@@ -298,7 +297,7 @@ class PlotMark {
 
 		case MARK_IMG_BEVEL:
 		    if( $this->imgdata_bevels == null ) {
-			require_once 'imgdata_bevels.inc';
+			require_once 'imgdata_bevels.inc.php';
 			$this->imgdata_bevels = new ImgData_Bevels();
 		    }
 		    $this->markimg = $this->imgdata_bevels->GetImg($this->type,$filename);
@@ -307,7 +306,7 @@ class PlotMark {
 
 		case MARK_IMG_DIAMOND:
 		    if( $this->imgdata_diamonds == null ) {
-			require_once 'imgdata_diamonds.inc';
+			require_once 'imgdata_diamonds.inc.php';
 			$this->imgdata_diamonds = new ImgData_Diamonds();
 		    }
 		    $this->markimg = $this->imgdata_diamonds->GetImg($this->type,$filename);
@@ -319,7 +318,7 @@ class PlotMark {
 		case MARK_IMG_MBALL:		    
 		case MARK_IMG_LBALL:		    
 		    if( $this->imgdata_balls == null ) {
-			require_once 'imgdata_balls.inc';
+			require_once 'imgdata_balls.inc.php';
 			$this->imgdata_balls = new ImgData_Balls();
 		    }
 		    $this->markimg = $this->imgdata_balls->GetImg($this->type,$filename);

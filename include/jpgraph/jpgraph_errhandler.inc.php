@@ -5,7 +5,7 @@
 //		error messages. All localized error messages are stored
 //		in a separate file under the "lang/" subdirectory.
 // Created: 	2006-09-24
-// Ver:		$Id: jpgraph_errhandler.inc.php 769 2006-09-24 20:17:51Z ljp $
+// Ver:		$Id: jpgraph_errhandler.inc.php 855 2007-03-23 07:16:37Z ljp $
 //
 // Copyright 2006 (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -31,7 +31,7 @@ class ErrMsgText {
 
 	$file = 'lang/'.$__jpg_err_locale.'.inc.php';
 	if( !file_exists(dirname(__FILE__).'/'.$file) ) {
-	    die('Internal error: Chosen locale file for error messages does not exist.');
+	    die('Chosen locale file ("'.$file.'") for error messages does not exist or is not readable for the PHP process. Please make sure that the file exists and that the file permissions are such that the PHP process is allowed to read this file.');
 	}
 	require_once($file);
 	$this->lt = $_jpg_messages;
@@ -138,7 +138,7 @@ class JpGraphErrObject {
 
     // If aHalt is true then execution can't continue. Typical used for fatal errors.
     function Raise($aMsg,$aHalt=true) {
-	$aMsg = $this->iTitle.' '.$aMsg;
+	$aMsg = $this->iTitle.' '.$aMsg."\n";
 	if ($this->iDest) {
 	    $f = @fopen($this->iDest,'a');
 	    if( $f ) {

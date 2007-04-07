@@ -3,58 +3,10 @@
 // File:	GD_IMAGE.INC.PHP
 // Description:	GD Instance of Image class
 // Created: 	2006-05-06
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: gd_image.inc.php 619 2006-05-07 01:56:14Z ljp $
+// Ver:		$Id: gd_image.inc.php 835 2007-01-15 18:57:41Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
-
-// TTF Font families
-DEFINE("FF_COURIER",10);
-DEFINE("FF_VERDANA",11);
-DEFINE("FF_TIMES",12);
-DEFINE("FF_COMIC",14);
-DEFINE("FF_ARIAL",15);
-DEFINE("FF_GEORGIA",16);
-DEFINE("FF_TREBUCHE",17);
-
-// Gnome Vera font
-// Available from http://www.gnome.org/fonts/
-DEFINE("FF_VERA",19);
-DEFINE("FF_VERAMONO",20);
-DEFINE("FF_VERASERIF",21);
-
-// Chinese font
-DEFINE("FF_SIMSUN",30);
-DEFINE("FF_CHINESE",31);
-DEFINE("FF_BIG5",31);
-
-// Japanese font
-DEFINE("FF_MINCHO",40);
-DEFINE("FF_PMINCHO",41);
-DEFINE("FF_GOTHIC",42);
-DEFINE("FF_PGOTHIC",43);
-
-// Limits for TTF fonts
-DEFINE('_FF_FIRST',10);
-DEFINE('_FF_LAST',43);
-
-// Older deprecated fonts 
-DEFINE("FF_BOOK",91);    // Deprecated fonts from 1.9
-DEFINE("FF_HANDWRT",92); // Deprecated fonts from 1.9
-
-// TTF Font styles
-DEFINE("FS_NORMAL",9001);
-DEFINE("FS_BOLD",9002);
-DEFINE("FS_ITALIC",9003);
-DEFINE("FS_BOLDIT",9004);
-DEFINE("FS_BOLDITALIC",9004);
-
-//Definitions for internal font, new style
-DEFINE("FF_FONT0",1);
-DEFINE("FF_FONT1",2);
-DEFINE("FF_FONT2",4);
-
 
 //===================================================
 // CLASS RGB
@@ -605,20 +557,10 @@ class RGB {
 	// takes precedence over the second argument
 	if( $a > 0 )
 	    $aAlpha = $a;
-	if( $GLOBALS['gd2'] ) {
-	    if( $aAlpha < 0 || $aAlpha > 1 ) {
-		JpGraphError::RaiseL(25080);//('Alpha parameter for color must be between 0.0 and 1.0');
-	    }
-	    return imagecolorresolvealpha($this->img, $r, $g, $b, round($aAlpha * 127));
-	} else {
-	    $index = imagecolorexact($this->img, $r, $g, $b);
-	    if ($index == -1) {
-      		$index = imagecolorallocate($this->img, $r, $g, $b);
-      		if( USE_APPROX_COLORS && $index == -1 )
-		    $index = imagecolorresolve($this->img, $r, $g, $b);
-	    } 
-	    return $index;
+	if( $aAlpha < 0 || $aAlpha > 1 ) {
+	    JpGraphError::RaiseL(25080);//('Alpha parameter for color must be between 0.0 and 1.0');
 	}
+	return imagecolorresolvealpha($this->img, $r, $g, $b, round($aAlpha * 127));
     }
 } // Class
 
@@ -653,9 +595,10 @@ class Image {
 
     //---------------
     // CONSTRUCTOR
-    function Image($aWidth,$aHeight,$aFormat=DEFAULT_GFORMAT) {
+    function Image($aWidth,$aHeight,$aFormat=DEFAULT_GFORMAT,$aSetAutoMargin=true) {
 	$this->CreateImgCanvas($aWidth,$aHeight);
-	$this->SetAutoMargin();		
+	if( $aSetAutoMargin ) 
+	    $this->SetAutoMargin();		
 
 	if( !$this->SetImgFormat($aFormat) ) {
 	    JpGraphError::RaiseL(25081,$aFormat);//("JpGraph: Selected graphic format is either not supported or unknown [$aFormat]");
@@ -673,20 +616,12 @@ class Image {
 	if( $aWidth <= 1 || $aHeight <= 1 ) {
 	    JpGraphError::RaiseL(25082,$aWidth,$aHeight);//("Illegal sizes specified for width or height when creating an image, (width=$aWidth, height=$aHeight)");
 	}
-	if( @$GLOBALS['gd2']==true && USE_TRUECOLOR ) {
-	    $this->img = @imagecreatetruecolor($aWidth, $aHeight);
-	    if( $this->img < 1 ) {
-		JpGraphError::RaiseL(25126);
-		//die("Can't create truecolor image. Check that you really have GD2 library installed.");
-	    }
-	    $this->SetAlphaBlending();
-	} else {
-	    $this->img = @imagecreate($aWidth, $aHeight);	
-	    if( $this->img < 1 ) {
-		JpGraphError::RaiseL(25126);
-		//die("<b>JpGraph Error:</b> Can't create image. Check that you really have the GD library installed.");
-	    }
+	$this->img = @imagecreatetruecolor($aWidth, $aHeight);
+	if( $this->img < 1 ) {
+	    JpGraphError::RaiseL(25126);
+	    //die("Can't create truecolor image. Check that you really have GD2 library installed.");
 	}
+	$this->SetAlphaBlending();
 	if( $this->rgb != null ) 
 	    $this->rgb->img = $this->img ;
 	else
@@ -737,7 +672,7 @@ class Image {
 	    $f = 'imagecopyresized';
 	}
 	else {
-	    $f = $GLOBALS['copyfunc'] ;
+	    $f = 'imagecopyresampled' ;
 	}
 	$f($aToHdl,$aFromHdl,
 	   $aToX,$aToY,$aFromX,$aFromY, $aWidth,$aHeight,$aw,$ah);
@@ -760,11 +695,7 @@ class Image {
 		if( $toWidth <= 1 || $toHeight <= 1 ) {
 		    JpGraphError::RaiseL(25083);//('Illegal image size when copying image. Size for copied to image is 1 pixel or less.');
 		}
-		if( @$GLOBALS['gd2']==true && USE_TRUECOLOR ) {
-		    $tmpimg = @imagecreatetruecolor($toWidth, $toHeight);
-		} else {
-		    $tmpimg = @imagecreate($toWidth, $toHeight);	
-		}	    
+		$tmpimg = @imagecreatetruecolor($toWidth, $toHeight);
 		if( $tmpimg < 1 ) {
 		    JpGraphError::RaiseL(25084);//('Failed to create temporary GD canvas. Out of memory ?');
 		}
@@ -789,7 +720,7 @@ class Image {
     }
     
     function CreateFromString($aStr) {
-	$img = imagecreatefromstring($aStr);
+	$img = @imagecreatefromstring($aStr);
 	if( $img === false ) {
 	    JpGraphError::RaiseL(25085);//('An image can not be created from the supplied string. It is either in a format not supported or the string is representing an corrupt image.');
 	}
@@ -806,10 +737,7 @@ class Image {
     }
 
     function SetAlphaBlending($aFlg=true) {
-	if( $GLOBALS['gd2'] )
-	    ImageAlphaBlending($this->img,$aFlg);
-	else 
-	    JpGraphError::RaiseL(25086);//('You only seem to have GD 1.x installed. To enable Alphablending requires GD 2.x or higher. Please install GD or make sure the constant USE_GD2 is specified correctly to reflect your installation. By default it tries to autodetect what version of GD you have installed. On some very rare occasions it may falsely detect GD2 where only GD1 is installed. You must then set USE_GD2 to false.');
+	ImageAlphaBlending($this->img,$aFlg);
     }
 
 	
@@ -1382,9 +1310,8 @@ class Image {
 	$this->current_color_name = $color;
 	$this->current_color=$this->rgb->allocate($color,$aAlpha);
 	if( $this->current_color == -1 ) {
-	    $tc=imagecolorstotal($this->img);
 	    JpGraphError::RaiseL(25096);
-//("Can't allocate any more colors. Image has already allocated maximum of <b>$tc colors</b>. This might happen if you have anti-aliasing turned on together with a background image or perhaps gradient fill since this requires many, many colors. Try to turn off anti-aliasing. If there is still a problem try downgrading the quality of the background image to use a smaller pallete to leave some entries for your graphs. You should try to limit the number of colors in your background image to 64. If there is still problem set the constant DEFINE(\"USE_APPROX_COLORS\",true); in jpgraph.php This will use approximative colors when the palette is full. Unfortunately there is not much JpGraph can do about this since the palette size is a limitation of current graphic format and what the underlying GD library suppports."); 
+//("Can't allocate any more colors."); 
 	}
 	return $this->current_color;
     }
@@ -1409,120 +1336,6 @@ class Image {
     }
 	
 	
-    // Why this duplication? Because this way we can call this method
-    // for any image and not only the current objsct
-    function AdjSat($sat) {	
-	if( $GLOBALS['gd2'] && USE_TRUECOLOR )
-	    return;
-	$this->_AdjSat($this->img,$sat);	
-    }	
-	
-    function _AdjSat($img,$sat) {
-	$nbr = imagecolorstotal ($img);
-	for( $i=0; $i<$nbr; ++$i ) {
-	    $colarr = imagecolorsforindex ($img,$i);
-	    $rgb[0]=$colarr["red"];
-	    $rgb[1]=$colarr["green"];
-	    $rgb[2]=$colarr["blue"];
-	    $rgb = $this->AdjRGBSat($rgb,$sat);
-	    imagecolorset ($img, $i, $rgb[0], $rgb[1], $rgb[2]);
-	}
-    }
-	
-    function AdjBrightContrast($bright,$contr=0) {
-	if( $GLOBALS['gd2'] && USE_TRUECOLOR )
-	    return;
-	$this->_AdjBrightContrast($this->img,$bright,$contr);
-    }
-
-    function _AdjBrightContrast($img,$bright,$contr=0) {
-	if( $bright < -1 || $bright > 1 || $contr < -1 || $contr > 1 )
-	    JpGraphError::RaiseL(25099);//(" Parameters for brightness and Contrast out of range [-1,1]");		
-	$nbr = imagecolorstotal ($img);
-	for( $i=0; $i<$nbr; ++$i ) {
-	    $colarr = imagecolorsforindex ($img,$i);
-	    $r = $this->AdjRGBBrightContrast($colarr["red"],$bright,$contr);
-	    $g = $this->AdjRGBBrightContrast($colarr["green"],$bright,$contr);
-	    $b = $this->AdjRGBBrightContrast($colarr["blue"],$bright,$contr);		
-	    imagecolorset ($img, $i, $r, $g, $b);
-	}
-    }
-	
-    // Private helper function for adj sat
-    // Adjust saturation for RGB array $u. $sat is a value between -1 and 1
-    // Note: Due to GD inability to handle true color the RGB values are only between
-    // 8 bit. This makes saturation quite sensitive for small increases in parameter sat.
-    // 
-    // Tip: To get a grayscale picture set sat=-100, values <-100 changes the colors
-    // to it's complement.
-    // 
-    // Implementation note: The saturation is implemented directly in the RGB space
-    // by adjusting the perpendicular distance between the RGB point and the "grey"
-    // line (1,1,1). Setting $sat>0 moves the point away from the line along the perp.
-    // distance and a negative value moves the point closer to the line.
-    // The values are truncated when the color point hits the bounding box along the
-    // RGB axis.
-    // DISCLAIMER: I'm not 100% sure this is he correct way to implement a color 
-    // saturation function in RGB space. However, it looks ok and has the expected effect.
-    function AdjRGBSat($rgb,$sat) {
-	// TODO: Should be moved to the RGB class
-	// Grey vector
-	$v=array(1,1,1);
-
-	// Dot product
-	$dot = $rgb[0]*$v[0]+$rgb[1]*$v[1]+$rgb[2]*$v[2];
-
-	// Normalize dot product
-	$normdot = $dot/3;	// dot/|v|^2
-
-	// Direction vector between $u and its projection onto $v
-	for($i=0; $i<3; ++$i)
-	    $r[$i] = $rgb[$i] - $normdot*$v[$i];
-
-	// Adjustment factor so that sat==1 sets the highest RGB value to 255
-	if( $sat > 0 ) {
-	    $m=0;
-	    for( $i=0; $i<3; ++$i) {
-		if( sign($r[$i]) == 1 && $r[$i]>0)
-		    $m=max($m,(255-$rgb[$i])/$r[$i]);
-	    }
-	    $tadj=$m;
-	}
-	else
-	    $tadj=1;
-		
-	$tadj = $tadj*$sat;	
-	for($i=0; $i<3; ++$i) {
-	    $un[$i] = round($rgb[$i] + $tadj*$r[$i]);		
-	    if( $un[$i]<0 ) $un[$i]=0;		// Truncate color when they reach 0
-	    if( $un[$i]>255 ) $un[$i]=255;// Avoid potential rounding error
-	}		
-	return $un;	
-    }	
-
-    // Private helper function for AdjBrightContrast
-    function AdjRGBBrightContrast($rgb,$bright,$contr) {
-	// TODO: Should be moved to the RGB class
-	// First handle contrast, i.e change the dynamic range around grey
-	if( $contr <= 0 ) {
-	    // Decrease contrast
-	    $adj = abs($rgb-128) * (-$contr);
-	    if( $rgb < 128 ) $rgb += $adj;
-	    else $rgb -= $adj;
-	}
-	else { // $contr > 0
-	    // Increase contrast
-	    if( $rgb < 128 ) $rgb = $rgb - ($rgb * $contr);
-	    else $rgb = $rgb + ((255-$rgb) * $contr);
-	}
-	
-	// Add (or remove) various amount of white
-	$rgb += $bright*255;	
-	$rgb=min($rgb,255);
-	$rgb=max($rgb,0);
-	return $rgb;	
-    }
-	
     function SetLineWeight($weight) {
 	$this->line_weight = $weight;
     }
@@ -1543,81 +1356,12 @@ class Image {
     
     function FilledArc($xc,$yc,$w,$h,$s,$e,$style="") {
 
-	if( $GLOBALS['gd2'] ) {
-	    while( $s < 0 ) $s += 360;
-	    while( $e < 0 ) $e += 360;
-	    if( $style=="" ) 
-		$style=IMG_ARC_PIE;
-	    imagefilledarc($this->img,round($xc),round($yc),round($w),round($h),
-			   round($s),round($e),$this->current_color,$style);
-	    return;
-	}
-
-
-	// In GD 1.x we have to do it ourself interesting enough there is surprisingly
-	// little difference in time between doing it PHP and using the optimised GD 
-	// library (roughly ~20%) I had expected it to be at least 100% slower doing it
-	// manually with a polygon approximation in PHP.....
-	$fillcolor = $this->current_color_name;
-
-	$w /= 2; // We use radius in our calculations instead
-	$h /= 2;
-
-	// Setup the angles so we have the same conventions as the builtin
-	// FilledArc() which is a little bit strange if you ask me....
-
-	$s = 360-$s;
-	$e = 360-$e;
-
-	if( $e > $s ) {
-	    $e = $e - 360;
-	    $da = $s - $e; 
-	}
-	$da = $s-$e;
-
-	// We use radians
-	$s *= M_PI/180;
-	$e *= M_PI/180;
-	$da *= M_PI/180;
-
-	// Calculate a polygon approximation
-	$p[0] = $xc;
-	$p[1] = $yc;
-
-	// Heuristic on how many polygons we need to make the
-	// arc look good
-	$numsteps = round(8 * abs($da) * ($w+$h)*($w+$h)/1500);
-
-	if( $numsteps == 0 ) return;
-	if( $numsteps < 7 ) $numsteps=7;
-	$delta = abs($da)/$numsteps;
-	
-	$pa=array();
-	$a = $s;
-	for($i=1; $i<=$numsteps; ++$i ) {
-	    $p[2*$i] = round($xc + $w*cos($a));
-	    $p[2*$i+1] = round($yc - $h*sin($a));
-	    //$a = $s + $i*$delta; 
-	    $a -= $delta; 
-	    $pa[2*($i-1)] = $p[2*$i];
-	    $pa[2*($i-1)+1] = $p[2*$i+1];
-	}
-
-	// Get the last point at the exact ending angle to avoid
-	// any rounding errors.
-	$p[2*$i] = round($xc + $w*cos($e));
-	$p[2*$i+1] = round($yc - $h*sin($e));
-	$pa[2*($i-1)] = $p[2*$i];
-	$pa[2*($i-1)+1] = $p[2*$i+1];
-	$i++;
-
-	$p[2*$i] = $xc;
-    	$p[2*$i+1] = $yc;
-	if( $fillcolor != "" ) {
-	    $this->PushColor($fillcolor);
-	    imagefilledpolygon($this->img,$p,count($p)/2,$this->current_color);
-	    $this->PopColor();
-	}
+	while( $s < 0 ) $s += 360;
+	while( $e < 0 ) $e += 360;
+	if( $style=="" ) 
+	    $style=IMG_ARC_PIE;
+	imagefilledarc($this->img,round($xc),round($yc),round($w),round($h),
+		       round($s),round($e),$this->current_color,$style);
     }
 
     function FilledCakeSlice($cx,$cy,$w,$h,$s,$e) {
@@ -1634,18 +1378,7 @@ class Image {
 	if( $arccolor != "" ) {
 	    $this->PushColor($arccolor);
 	    // We add 2 pixels to make the Arc() better aligned with the filled arc. 
-	    if( $GLOBALS['gd2'] ) {
-		imagefilledarc($this->img,$xc,$yc,2*$w,2*$h,$s,$e,$this->current_color,IMG_ARC_NOFILL | IMG_ARC_EDGED ) ;
-	    }
-	    else {
-		$this->Arc($xc,$yc,2*$w+2,2*$h+2,$s,$e);
-		$xx = $w * cos(2*M_PI - $s*M_PI/180) + $xc;
-		$yy = $yc - $h * sin(2*M_PI - $s*M_PI/180);
-		$this->Line($xc,$yc,$xx,$yy);
-		$xx = $w * cos(2*M_PI - $e*M_PI/180) + $xc;
-		$yy = $yc - $h * sin(2*M_PI - $e*M_PI/180);
-		$this->Line($xc,$yc,$xx,$yy);
-	    }
+	    imagefilledarc($this->img,$xc,$yc,2*$w,2*$h,$s,$e,$this->current_color,IMG_ARC_NOFILL | IMG_ARC_EDGED ) ;
 	    $this->PopColor();
 	}
     }
@@ -1712,19 +1445,7 @@ class Image {
     }
 	
     function FilledCircle($xc,$yc,$r) {
-	if( $GLOBALS['gd2'] ) {
-	    imagefilledellipse($this->img,round($xc),round($yc),
-	    		       2*$r,2*$r,$this->current_color);
-	}
-	else {
-	    for( $i=1; $i < 2*$r; $i += 2 ) {
-		// To avoid moire patterns we have to draw some
-		// 1 extra "skewed" filled circles
-		$this->Arc($xc,$yc,$i,$i,0,360);
-		$this->Arc($xc,$yc,$i+1,$i,0,360);
-		$this->Arc($xc,$yc,$i+1,$i+1,0,360);
-	    }
-	}	
+	imagefilledellipse($this->img,round($xc),round($yc),2*$r,2*$r,$this->current_color);
     }
 	
     // Linear Color InterPolation
@@ -1887,7 +1608,8 @@ class Image {
 	    $dx=(sin($a)*$this->line_weight/2);
 	    $dy=(cos($a)*$this->line_weight/2);
 
-	    $pnts = array($x2+$dx,$y2+$dy,$x2-$dx,$y2-$dy,$x1-$dx,$y1-$dy,$x1+$dx,$y1+$dy);
+	    $pnts = array(round($x2+$dx),round($y2+$dy),round($x2-$dx),round($y2-$dy),
+			  round($x1-$dx),round($y1-$dy),round($x1+$dx),round($y1+$dy));
 	    imagefilledpolygon($this->img,$pnts,count($pnts)/2,$this->current_color);
 	}		
 	$this->lastx=$x2; $this->lasty=$y2;		
@@ -1914,9 +1636,9 @@ class Image {
 		$oldx = $p[$i];
 		$oldy = $p[$i+1];
 	    }
+	    if( $closed )
+		$this->Line($oldx,$oldy,$p[0],$p[1]);
 	}
-	if( $closed )
-	    $this->Line($oldx,$oldy,$p[0],$p[1]);
     }
 	
     function FilledPolygon($pts) {
@@ -2232,8 +1954,8 @@ class RotImage extends Image {
     var $a=0;
     var $dx=0,$dy=0,$transx=0,$transy=0; 
 	
-    function RotImage($aWidth,$aHeight,$a=0,$aFormat=DEFAULT_GFORMAT) {
-	$this->Image($aWidth,$aHeight,$aFormat);
+    function RotImage($aWidth,$aHeight,$a=0,$aFormat=DEFAULT_GFORMAT,$aSetAutoMargin=true) {
+	$this->Image($aWidth,$aHeight,$aFormat,$aSetAutoMargin);
 	$this->dx=$this->left_margin+$this->plotwidth/2;
 	$this->dy=$this->top_margin+$this->plotheight/2;
 	$this->SetAngle($a);	
@@ -2282,12 +2004,7 @@ class RotImage extends Image {
     }
 
     function FilledCircle($xc,$yc,$r) {
-	// If we use GD1 then Image::FilledCircle will use a 
-	// call to Arc so it will get rotated through the Arc
-	// call.
-	if( $GLOBALS['gd2'] ) {
-	    list($xc,$yc) = $this->Rotate($xc,$yc);
-	}
+	list($xc,$yc) = $this->Rotate($xc,$yc);
 	parent::FilledCircle($xc,$yc,$r);
     }
 	
@@ -2358,8 +2075,13 @@ class RotImage extends Image {
     }
 	
     function Polygon($pnts,$closed=FALSE,$fast=false) {
-	//Polygon uses Line() so it will be rotated through that call
-	parent::Polygon($pnts,$closed,$fast);
+	// Polygon uses Line() so it will be rotated through that call unless
+	// fast drawing routines are used in which case a rotate is needed
+	if( $fast ) {
+	    parent::Polygon($this->ArrRotate($pnts));
+	}
+	else
+	    parent::Polygon($pnts,$closed,$fast);
     }
 	
     function FilledPolygon($pnts) {

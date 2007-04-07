@@ -3,8 +3,7 @@
 // File:	JPGRAPH_ANTISPAM.PHP
 // Description:	Genarate anti-spam challenge
 // Created: 	2004-10-07
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_antispam.php 21 2005-05-30 20:35:34Z ljp $
+// Ver:		$Id: jpgraph_antispam.php 782 2006-10-08 08:09:02Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================

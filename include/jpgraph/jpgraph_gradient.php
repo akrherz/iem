@@ -3,8 +3,7 @@
 // File:	JPGRAPH_GRADIENT.PHP
 // Description:	Create a color gradient
 // Created: 	2003-02-01
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_gradient.php 631 2006-05-26 00:09:39Z ljp $
+// Ver:		$Id: jpgraph_gradient.php 782 2006-10-08 08:09:02Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================

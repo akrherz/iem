@@ -3,8 +3,7 @@
 // File:	JPGRAPH_GB2312.PHP
 // Description:	PHP4 Graph Plotting library. Chinese font conversions
 // Created: 	2003-05-30
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_gb2312.php 21 2005-05-30 20:35:34Z ljp $
+// Ver:		$Id: jpgraph_gb2312.php 782 2006-10-08 08:09:02Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================

@@ -3,8 +3,7 @@
 // File:	JPGRAPH_DATE.PHP
 // Description:	Classes to handle Date scaling
 // Created: 	2005-05-02
-// Author:	Johan Persson (johanp@aditus.nu)
-// Ver:		$Id: jpgraph_date.php 572 2006-03-04 10:41:12Z ljp $
+// Ver:		$Id: jpgraph_date.php 782 2006-10-08 08:09:02Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -379,6 +378,11 @@ class DateScale extends LinearScale {
 	$this->date_format = $aFormat;
 	$this->ticks->SetLabelDateFormat($this->date_format);
     }
+
+    function AdjustForDST($aFlg=true) {
+	$this->ticks->AdjustForDST($aFlg);
+    }
+
 
     function SetDateAlign($aStartAlign,$aEndAlign=false) {
 	if( $aEndAlign === false ) {
