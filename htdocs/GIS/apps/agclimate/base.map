@@ -88,7 +88,7 @@ LAYER
       OUTLINECOLOR  0 0 0
       SHADOWCOLOR 0 0 0
       SHADOWSIZE 1 1
-      SIZE 16
+      SIZE 14
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
@@ -96,7 +96,7 @@ LAYER
       ANTIALIAS TRUE
       BUFFER 2
       FORCE TRUE
-      POSITION UC
+      POSITION UL
       OFFSET 0 3
     END
   END
@@ -104,10 +104,7 @@ LAYER
     COLOR -1 -1 -1
     LABEL
       COLOR 0 0 0
-#      OUTLINECOLOR 0 0 0
-#      SHADOWCOLOR 0 0 0
-#      SHADOWSIZE 1 1
-      SIZE 7
+      SIZE 8
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
@@ -115,7 +112,7 @@ LAYER
       ANTIALIAS true
       BUFFER 0
       FORCE TRUE
-      POSITION AUTO
+      POSITION CR
     END
   END
   CLASS
@@ -124,7 +121,7 @@ LAYER
       OUTLINECOLOR  0 0 0
       SHADOWCOLOR 0 0 0
       SHADOWSIZE 1 1
-      SIZE 16
+      SIZE 14
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
@@ -132,7 +129,7 @@ LAYER
       ANTIALIAS TRUE
       BUFFER 2
       FORCE TRUE
-      POSITION LC
+      POSITION LL
       OFFSET 0 5
     END
   END
