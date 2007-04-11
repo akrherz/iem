@@ -86,8 +86,9 @@ often too low."
  "desc" => "The Standard Chill Unit map is a summation of hours during 
    which the temperature was between 32 and 45 degrees <b>after</b> the first
    sub 28 degree reading after 1 September.  The value has application for 
-   fruit growers in the state.  The departure from record average is also 
-   presented."
+   fruit growers in the state.  The departure from average is also 
+   presented.  This average is computed from the observational record at
+   the site."
 ),
 );
 
