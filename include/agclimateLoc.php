@@ -19,7 +19,7 @@
   "sts" => mktime(2,0,0,6,21,1998) ),
 "A131559" => array("city" => "CHARITON", "lat" => "41.00", "lon" => "-93.32",
   "sts" => mktime(2,0,0,8,17,1988) ),
-"A131909" => array("city"=>"CRAWFORDSVILLE","lat" => "41.17","lon" => "-91.50",
+"A131909" => array("city"=>"CRAWFORDSVILLE","lat" => "41.2","lon" => "-91.50",
   "sts" => mktime(1,0,0,1,1,1990) ),
 "A135879" => array("city" => "NASHUA", "lat" => "42.75", "lon" => "-92.50",
   "sts" => mktime(2,0,0,9,1,1988) ),
@@ -31,7 +31,7 @@
   "sts" => mktime(2,0,0,5,16,1999) ),
 "A134309" => array("city" => "KANAWHA", "lat" => "42.94", "lon" => "-93.90",
   "sts" => mktime(2,0,0,6,19,1997) ),
-"A135849" => array("city" => "MUSCATINE", "lat" => "41.24", "lon" => "-91.06",
+"A135849" => array("city" => "MUSCATINE", "lat" => "41.22", "lon" => "-91.06",
   "sts" => mktime(1,0,0,3,26,2000) )
 );
 
