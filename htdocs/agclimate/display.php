@@ -99,7 +99,7 @@ often too low."
 <TR>
 <TD valign="top">
 
-<img src="<?php echo $data[$prod]["mapurl"]; ?>" ALT="ISU Ag Climate" style="border: 1px;">
+<img src="<?php echo $data[$prod]["mapurl"]; ?>" ALT="ISU Ag Climate" style="border: 1px solid #000; ">
 
 <p><strong>Plot Description:</strong><br />
 <?php echo $data[$prod]["desc"]; ?>
