@@ -3,7 +3,7 @@
 <table width="100%" cellspacing="0" cellpadding="1">
 <tr>
   <td class="heading">
-     <b>Yesterday's Totals:</b></td></tr>
+     <b>Yesterday values:</b></td></tr>
 <tr>
   <td>
   <A HREF="display.php?prod=1">Max/Min Air Temps</A><br>
@@ -20,11 +20,12 @@
 
 <tr>
   <td class="heading">
-     <b>This Month's Totals:</b></font></td></tr>
+     <b>Accumulated values:</b></td></tr>
 <tr>
   <td>
-      <A HREF="display.php?prod=10">Evapo-transpiration</A><br>
-      <A HREF="display.php?prod=11">Precipitation totals</A><br>
+      <A HREF="display.php?prod=10">This month evapotranspiration</A><br>
+      <A HREF="display.php?prod=11">This month rainfall</A><br>
+      <A HREF="display.php?prod=12">Standard Chill Units since 1 Sept</A><br>
   </td>
 </tr>
 
