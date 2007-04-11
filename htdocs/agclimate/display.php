@@ -1,20 +1,101 @@
 <?php 
  include("../../config/settings.inc.php");
-        $TITLE = "ISU Ag Climate";
-        include("$rootpath/include/header.php"); 
+ $TITLE = "ISU Ag Climate";
+ include("$rootpath/include/header.php"); 
+ $prod = isset($_GET["prod"]) ? $_GET["prod"] : 1;
 
- $src = $_GET["src"];
+$old2new = Array(
+ "/data/agclimate/air-temp-out.png" => 1,
+ "/data/agclimate/4in-temp-out.png" => 2,
+ "/data/agclimate/soil-hilo-out.png" => 3,
+ "/data/agclimate/rad-out.png" => 4,
+ "/data/agclimate/prec-out.png" => 5,
+ "/data/agclimate/et-out.png" => 6,
+ "/data/agclimate/pk-wind-out.png" => 7,
+ "/data/agclimate/avewind-out.png" => 8,
+ "/data/agclimate/dwpts.png" => 9,
+ "/data/agclimate/mon-et-out.png" => 10,
+ "/data/agclimate/mon-prec-out.png" => 11 );
+
+ // Legacy
+ if (isset($_GET["src"])){
+  $prod = $old2new[$_GET["src"]];
+ }
+
+$data = Array(
+1 => Array(
+ "mapurl" => "$rooturl/data/agclimate/air-temp-out.png",
+ "desc" => "High and low air temperature for a local day. Measurements are 
+            made at a 2 meter height.",
+),
+2 => Array(
+ "mapurl" => "$rooturl/data/agclimate/4in-temp-out.png",
+ "desc" => "Average 4 inch soil depth temperature.  Usually under a 
+            grass vegetation.",
+),
+3 => Array(
+ "mapurl" => "$rooturl/data/agclimate/soil-hilo-out.png",
+ "desc" => "High and low 4 inch soil depth temperature.  Usually under a 
+            grass vegetation.",
+),
+4 => Array(
+ "mapurl" => "$rooturl/data/agclimate/rad-out.png",
+ "desc" => "Daily total (direct + diffuse) solar radiation.",
+),
+5 => Array(
+ "mapurl" => "$rooturl/data/agclimate/prec-out.png",
+ "desc" => "Daily total precipitation.  This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
+used with extreme caution.  For various reasons, the reported values are 
+often too low.",
+),
+6 => Array(
+ "mapurl" => "$rooturl/data/agclimate/et-out.png",
+ "desc" => "Potential maximum estimated evapotranspiration.  This value uses
+            a daily Penman formulation with a crop coefficient of 1.",
+),
+7 => Array(
+ "mapurl" => "$rooturl/data/agclimate/pk-wind-out.png",
+ "desc" => "Peak 5 second sustained wind gust.  The value is presented along
+      with the time using a 24 hour clock.  For example, 18:00 would be 6 PM.
+      Values are in local time, either CDT or CST depending on the time of
+      year.",
+),
+8 => Array(
+ "mapurl" => "$rooturl/data/agclimate/avewind-out.png",
+ "desc" => "Average wind speed for the day as recorded by the data logger
+            on the station.",
+),
+9 => Array(
+ "mapurl" => "$rooturl/data/agclimate/dwpts.png",
+ "desc" => "High and low dew points for the day."
+),
+10 => Array(
+ "mapurl" => "$rooturl/data/agclimate/mon-et-out.png",
+ "desc" => "Monthly total of daily maximum potential evapotranspiration. The
+            daily value is calculated via a Penman formulation with a crop
+            coefficient of 1.  The value would be a theoretical maximum."
+),
+11 => Array(
+ "mapurl" => "$rooturl/data/agclimate/mon-prec-out.png",
+ "desc" => "Monthly total of daily reported precipitation. This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
+used with extreme caution.  For various reasons, the reported values are 
+often too low."
+),
+);
+
 ?>
 <div class="text">
-<a href="<?php echo $rooturl; ?>/agclimate/">ISU AgClimate</a>
 
 <table style="float: left;" width="100%">
 <TR>
 <TD valign="top">
 
-<img src="<?php echo $rooturl . $src; ?>" ALT="ISU Ag Climate">
+<img src="<?php echo $data[$prod]["mapurl"]; ?>" ALT="ISU Ag Climate">
 
-<p><font class="bluet">QC Flags</font>
+<p><strong>Plot Description:</strong><br />
+<?php echo $data[$prod]["desc"]; ?>
+
+<p><strong>QC Flags:</strong>
 <table>
 <tr>
   <th>M</th>

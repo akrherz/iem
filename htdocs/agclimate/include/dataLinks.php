@@ -1,33 +1,20 @@
 
 <div id="right">
-<table width="100%" cellspacing="0">
+<table width="100%" cellspacing="0" cellpadding="1">
 <tr>
   <td class="heading">
-     <b>Yesterday's Totals:</b></font></td></tr>
+     <b>Yesterday's Totals:</b></td></tr>
 <tr>
   <td>
-     <A HREF="display.php?src=/data/agclimate/air-temp-out.png">Max/Min Air Temps</A><br>
-     <A HREF="display.php?src=/data/agclimate/4in-temp-out.png">Avg 4in Soil Temps</A><br>
-     <A HREF="display.php?src=/data/agclimate/soil-hilo-out.png">Max/Min 4in Soil Temps</A><br>
-     <A HREF="display.php?src=/data/agclimate/rad-out.png">Solar Radiation Values</A><br>
-        <!--
-     <A HREF="/agclimate/hist/prec_winter.html">Precipitation</A><br>
-        -->
-     <A
-    
-HREF="display.php?src=/data/agclimate/prec-out.png">Precipitation</A><br>
-      <A HREF="display.php?src=/data/agclimate/et-out.png">Potential E-T</A><br>
-      <A HREF="display.php?src=/data/agclimate/pk-wind-out.png">Peak Wind Gust (5 sec)</A><br>
-      <A HREF="display.php?src=/data/agclimate/avewind-out.png">Average Wind Speed</A><br>
-  </td>
-</tr>
-
-<tr>
-  <td class="heading">
-     <b>Calculated Totals:</b></font></td></tr>
-<tr>
-  <td>
-     <A HREF="display.php?src=/data/agclimate/dwpts.png">Max/Min Dew Points</A><br>
+  <A HREF="display.php?prod=1">Max/Min Air Temps</A><br>
+  <A HREF="display.php?prod=2">Avg 4in Soil Temps</A><br>
+  <A HREF="display.php?prod=3">Max/Min 4in Soil Temps</A><br>
+  <A HREF="display.php?prod=4">Solar Radiation Values</A><br>
+  <A HREF="display.php?prod=5">Precipitation</A><br>
+  <A HREF="display.php?prod=6">Potential E-T</A><br>
+  <A HREF="display.php?prod=7">Peak Wind Gust (5 sec)</A><br>
+  <A HREF="display.php?prod=8">Average Wind Speed</A><br>
+  <A HREF="display.php?prod=9">Max/Min Dew Points</A><br>
   </td>
 </tr>
 
@@ -36,15 +23,8 @@ HREF="display.php?src=/data/agclimate/prec-out.png">Precipitation</A><br>
      <b>This Month's Totals:</b></font></td></tr>
 <tr>
   <td>
-      <A
-     
-HREF="display.php?src=/data/agclimate/mon-et-out.png">Evapo-transpiration</A><br>
-      <A
-     
-HREF="display.php?src=/data/agclimate/mon-prec-out.png">Precipitation totals</A><br>
-        <!--
-      <A HREF="/agclimate/hist/prec_winter.html">Precipitation</A><br>
-        -->
+      <A HREF="display.php?prod=10">Evapo-transpiration</A><br>
+      <A HREF="display.php?prod=11">Precipitation totals</A><br>
   </td>
 </tr>
 
@@ -52,9 +32,7 @@ HREF="display.php?src=/data/agclimate/mon-prec-out.png">Precipitation totals</A>
   <td class="heading">
      <b>Growing Season:</b></font></td></tr>
 <tr>
-  <td><a
- 
-href="<?php echo $rooturl; ?>/GIS/apps/agclimate/gsplot.phtml">Interactive
+  <td><a href="<?php echo $rooturl; ?>/GIS/apps/agclimate/gsplot.phtml">Interactive
 GS Plotter</a><br>
   </td>
 </tr>
@@ -64,9 +42,7 @@ GS Plotter</a><br>
 <tr>
   <td>
     <a href="/plotting/agc/">Interactive Plotting</a><br>
-    <A
-   
-HREF="<?php echo $rooturl; ?>/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a><br>
+    <A HREF="<?php echo $rooturl; ?>/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a><br>
   </td>
 </tr>
 
