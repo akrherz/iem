@@ -14,46 +14,18 @@ $ts = strtotime($date);
 
 dl($mapscript);
 include("$rootpath/include/agclimateLoc.php");
+include("lib.php");
 
-function mktitlelocal($map, $imgObj, $titlet) { 
- 
-  $layer = $map->getLayerByName("credits");
- 
-     // point feature with text for location
-  $point = ms_newpointobj();
-  $point->setXY( 0, 10);
-  $point->draw($map, $layer, $imgObj, 0,
-    $titlet ."                                                           ");
-  $point->free();
-
-     // point feature with text for location
-  $point = ms_newpointobj();
-  $point->setXY( 0, 330);
-  $point->draw($map, $layer, $imgObj, 1,
-    "  Iowa Environmental Mesonet | Iowa State Ag Climate Network ");
-  $point->free();
-}
-
-function plotNoData($map, $img){
-  $layer = $map->getLayerByName("credits");
-
-  $point = ms_newpointobj();
-  $point->setXY( 100, 200);
-  $point->draw($map, $layer, $img, 1,
-    "  No data found for this date! ");
-  $point->free();
-
-}
 
 $myStations = $ISUAGcities;
-$height = 350;
-$width = 450;
+$height = 480;
+$width = 640;
 
 $proj = "proj=tmerc,lat_0=41.5,lon_0=-93.65,x_0=0,y_0=0,k=0.9999";
 
 $map = ms_newMapObj("base.map");
 $map->setProjection($proj);
-
+$map->setsize($width,$height);
 $map->setextent(-252561, -133255, 300625, 277631);
 
 $counties = $map->getlayerbyname("counties");
@@ -134,14 +106,24 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   // City Name
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['city'] );
+  if ($key == "A131909"){
+    $pt->draw($map, $snet, $img, 3, $ISUAGcities[$key]['city'] );
+  } else {
+    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['city'] );
+  }
   $pt->free();
 }
 if ($i == 0)
    plotNoData($map, $img);
 
-mktitlelocal($map, $img, "  Standard Chill Units [ $sdate thru ". date("Y-m-d", $ts) ."  ]");
+mktitlelocal($map, $img, $height, "      Standard Chill Units [ $sdate thru ". date("Y-m-d", $ts) ." ]");
 $map->drawLabelCache($img);
+
+$layer = $map->getLayerByName("logo");
+$point = ms_newpointobj();
+$point->setXY( 35, 25);
+$point->draw($map, $layer, $img, 0, "");
+$point->free();
 
 $url = $img->saveWebImage();
 
