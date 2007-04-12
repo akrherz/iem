@@ -5,8 +5,10 @@
 # 13 Feb 2003:	Make this actually work with new Python
 
 import pg, cgi, mx.DateTime, re, sys
+from pyIEM import iemdb
+i = iemdb.iemdb()
+mydb = i['coop']
 
-mydb = pg.connect('coop', 'db1.mesonet', 5432)
 
 def mk_header():
 	print 'Content-type: text/html \n\n'
