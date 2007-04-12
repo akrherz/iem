@@ -1,7 +1,7 @@
 <?
 	$width = 87;
 	$height = 60;
-	$Font = '/mesonet/www/html/content/handgotn.TTF';
+	$Font = 'handgotn.TTF';
     $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
     $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
     $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
