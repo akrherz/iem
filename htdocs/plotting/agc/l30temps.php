@@ -19,7 +19,7 @@ $ylabel = "Temperature [F]";
 //}
 
 $query2 = "SELECT ". $queryData .", to_char(valid, 'yy/mm/dd') as valid from ". $table ." WHERE station = '$station' and 
-	(valid + '60 days'::interval) > CURRENT_TIMESTAMP  ORDER by valid ASC";
+	(valid + '30 days'::interval) > CURRENT_TIMESTAMP  ORDER by valid ASC";
 
 $result = pg_exec($connection, $query2);
 

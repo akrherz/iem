@@ -1,136 +1,53 @@
 <?php 
 include("../../../config/settings.inc.php");
 $TITLE = "IEM | ISU Ag Plotting";
-include("$rootpath/include/header.php"); ?>
+include("$rootpath/include/header.php"); 
+include("$rootpath/include/forms.php"); 
+include("$rootpath/include/imagemaps.php"); 
+$plot = isset($_GET["plot"]) ? $_GET["plot"] : "solarRad";
+$station = isset($_GET["station"]) ? $_GET["station"] : "A130209";
 
-<div class="text">
+$desc = Array(
+  "solarRad" => "This plot shows hourly observations of solar radiation (red),
+   4 inch soil temperature (green), and 2 meter air temperature (blue). This
+   plot often illustrates the difference between the soil's thermal inertia 
+   and the air with the soil temperature lagging the air temperature by a 
+   few hours.",
+  "l30temps" => "A simple plot of daily observed high and low 2 meter air
+   temperatures during the past 30 days",
+  "l60rad" => "There is a lot going on in this plot!  The bars are daily 
+   observations of solar radiation.  The red dashed line is a solar radiation
+   climatology based on observations from this site.  The blue line are 
+   daily average 4 inch soil temperature observations with the purple dashed
+   line being the climatology for the site.",
+  "l60p-et" => "An accumulated difference plot of observed precipitation minus 
+   estimated potential evapotranspiration.  This plot gives a first guess at
+   near term water supply for vegetation.  The precipitation data going into
+   this plot is not valid during the cold season and underestimated during the
+   rainy season.  So use this plot with care."
+  );
+
+?>
+
 Back to <a href="/agclimate/">ISU Ag Climate</a> Homepage.<p>
 
-<BR>
-We will be creating new interactive plotting programs for the ISU Ag Climate data.  If you 
-have a particular plot you would like to see, please let us know.
+<form name="selector" method="GET">
+<p><strong>Select Plot:</strong>
+<select name="plot">
+  <option value="solarRad" <?php if ($plot == "solarRad") echo "SELECTED"; ?>>Yesterday Solar Radiation & Air Temps</option>
+  <option value="l30temps" <?php if ($plot == "l30temps") echo "SELECTED"; ?>>High/low temps for last 30 days</option>
+  <option value="l60rad" <?php if ($plot == "l60rad") echo "SELECTED"; ?>>4 inch soil temps and radiation for last 60 days</option>
+  <option value="l60p-et" <?php if ($plot == "l60p-et") echo "SELECTED"; ?>>60 days of Precip minus PET</option>
+</select>
 
-<p><a href="/agclimate/src/stations.gif">Location</a> of AgClimate Stations.
+<strong>Select Site:</strong>
+<?php echo isuagSelect( $station); ?>
 
-<P><h3 class="subtitle">Yesterday Solar Radiation with Temps:</h3><BR>
-This program will plot a timeseries of hourly solar radiation values with 4in soil temperatures
-and air temperatures.  You will need to select a station to plot.
-<P>
-<FORM name="rad" METHOD="GET" ACTION="solarRad.php">
-<TABLE>
-<TR>
-<TD>
-<SELECT name="station">
-	<option value="A130209">Ames
-	<option value="A131069">Calmar
-	<option value="A131299">Castana
-	<option value="A131329">Cedar Rapids
-	<option value="A131559">Chariton
-	<option value="A131909">Crawfordsville
-	<option value="A135879">Nashua
-	<option value="A138019">Sutherland
-	<option value="A134759">Lewis
-	<option value="A136949">Rhodes
-	<option value="A134309">Kanawha
-	<option value="A135849">Muscatine
-</SELECT>
-</TD>
-<TD>
-	<INPUT TYPE="submit" value="Create Plot">
-</TD>
-</TR></TABLE>
-</form>
+<input type="submit" value="Make Plot"></form>
 
-<P><h3 class="subtitle">Daily High/Low for last 60 days:</h3><BR>
-This program will plot the daily high and low temperatures for the previous 60 days.
-You need to select a station below.
-<P>
-<FORM name="temps" METHOD="GET" ACTION="l30temps.php">
-<TABLE>
-<TR>
-<TD>
-<SELECT name="station">
-        <option value="A130209">Ames
-	<option value="A131069">Calmar
-        <option value="A131299">Castana
-        <option value="A131329">Cedar Rapids
-        <option value="A131559">Chariton
-        <option value="A131909">Crawfordsville
-        <option value="A135879">Nashua
-        <option value="A138019">Sutherland
-        <option value="A134759">Lewis
-        <option value="A136949">Rhodes
-        <option value="A134309">Kanawha
-        <option value="A135849">Muscatine
-</SELECT>
-</TD>
-<TD>
-        <INPUT TYPE="submit" value="Create Plot">
-</TD>
-</TR></TABLE>
-</form>
+<p><img src="<?php echo sprintf("%s.php?station=%s", $plot, $station); ?>">
 
-<P><h3 class="subtitle">Daily 4in Soil Temps & Solar Rad for last 60 days:</h3><BR>
-This program will plot the daily average 4in soil temperatures with daily solar 
-radiation values. You need to select a station below.
-<P>
-<FORM name="rad2" METHOD="GET" ACTION="l60rad.php">
-<TABLE>
-<TR>
-<TD>
-<SELECT name="station">
-        <option value="A130209">Ames
-	<option value="A131069">Calmar
-        <option value="A131299">Castana
-        <option value="A131329">Cedar Rapids
-        <option value="A131559">Chariton
-        <option value="A131909">Crawfordsville
-        <option value="A135879">Nashua
-        <option value="A138019">Sutherland
-        <option value="A134759">Lewis
-        <option value="A136949">Rhodes
-        <option value="A134309">Kanawha
-        <option value="A135849">Muscatine
-</SELECT>
-</TD>
-<TD>
-        <INPUT TYPE="submit" value="Create Plot">
-</TD>
-</TR></TABLE>
-</form>
-
-<P><h3 class="subtitle">Precipitation minus PET for last 60 days:</h3><BR>
-This program plots an accumulated difference between observed precipitation
-and potiential evapotranspiration (PET).  You will need to select a station below in 
-order to create the plot.
-<br><b>NOTE:</b> Precipitation is not recorded in the cold season, so this plot should 
-be carefully considered.
-
-<P>
-<FORM name="prec2" METHOD="GET" ACTION="l60p-et.php">
-<TABLE>
-<TR>
-<TD>
-<SELECT name="station">
-        <option value="A130209">Ames
-	<option value="A131069">Calmar
-        <option value="A131299">Castana
-        <option value="A131329">Cedar Rapids
-        <option value="A131559">Chariton
-        <option value="A131909">Crawfordsville
-        <option value="A135879">Nashua
-        <option value="A138019">Sutherland
-        <option value="A134759">Lewis
-        <option value="A136949">Rhodes
-        <option value="A134309">Kanawha
-        <option value="A135849">Muscatine
-</SELECT>
-</TD>
-<TD>
-        <INPUT TYPE="submit" value="Create Plot">
-</TD>
-</TR></TABLE>
-</form></div>
-
+<p><strong>Plot Description:</strong>
+<br /><?php echo $desc[$plot]; ?>
 
 <?php include("$rootpath/include/footer.php"); ?>
