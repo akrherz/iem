@@ -115,21 +115,21 @@ if (in_array("goes_east04I4", $layers))
 }
 
 $airtemps = $map->getlayerbyname("current_temps");
-$airtemps->set("status", (in_array("airtemps", $layers) && ! $myarchive) );
+$airtemps->set("status", (in_array("airtemps", $layers) && ! $isarchive) );
 $airtemps->set("connection", $_DATABASES["access"] );
 
 $surface = $map->getlayerbyname("surface");
-$surface->set("status", (in_array("surface", $layers) && ! $myarchive) );
+$surface->set("status", (in_array("surface", $layers) && ! $isarchive) );
 $surface->set("connection", $_DATABASES["access"] );
 
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
 
 $current_barbs = $map->getlayerbyname("current_barbs");
-$current_barbs->set("status", (in_array("current_barbs", $layers) && ! $myarchive ));
+$current_barbs->set("status", (in_array("current_barbs", $layers) && ! $isarchive ));
 
 $current_sites = $map->getlayerbyname("current_sites");
-$current_sites->set("status", (in_array("current_sites", $layers) && ! $myarchive ));
+$current_sites->set("status", (in_array("current_sites", $layers) && ! $isarchive ));
 
 $interstates = $map->getlayerbyname("interstates");
 $interstates->set("status", in_array("interstates", $layers));
