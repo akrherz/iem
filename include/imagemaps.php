@@ -20,6 +20,24 @@ function networkSelect($network, $selected)
 }
 
 
+function isuagSelect($selected)
+{
+    global $rootpath;
+    $s = "";
+    include_once("$rootpath/include/agclimateLoc.php");
+    reset($ISUAGcities);
+    $s .= '<select name="station">\n';
+    while (list($sid, $tbl) = each($ISUAGcities))
+    {
+        $s .= "<option value=\"$sid\" ";
+        if ($selected == $sid) { $s .= "SELECTED"; }
+        $s .= ">". $tbl["city"] ."</option>\n";
+   }
+   $s .= "</select>\n";
+   return $s;
+}
+
+
 function snetSelectMultiple($selected){
 global $rootpath;
 include("$rootpath/include/snet_locs.php");
