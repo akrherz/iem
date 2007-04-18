@@ -50,6 +50,7 @@ $c = iemdb("isuag");
 // Figure out when we should start counting
 $doy1 = date("j", mktime(0,0,0,9,1,$year) );
 $doy2 = date("j", $ts);
+$edate = date("Y-m-d", $ts);
 if ($month >= 9) {
   $sdate = sprintf("%s-09-01", $year);
   $dateint = "extract(doy from valid) BETWEEN $doy1 and $doy2";
@@ -57,32 +58,45 @@ if ($month >= 9) {
   $sdate = sprintf("%s-09-01", intval($year) - 1 );
   $dateint = "(extract(doy from valid) < $doy1 or extract(doy from valid) > $doy2)";
 }
-$sql = "select station, min(valid) as v from hourly WHERE valid > '${sdate}' and c100 < 29 GROUP by station";
+
+$data = Array();
+$sql = "select station, min(valid) as v from hourly WHERE valid > '${sdate}' and c100 < 29 and valid < '${edate}' GROUP by station";
+//echo $sql ."<br />";
 $rs =  pg_exec($c, $sql);
 for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $bdate = $row["v"];
   $key = $row["station"];
   if ($key == "A133259" || $key == "A130219") continue;
 
+  $data[$key]['city'] = $ISUAGcities[$key]['city'];
+  $data[$key]['lon'] = $ISUAGcities[$key]['lon'];
+  $data[$key]['lat'] = $ISUAGcities[$key]['lat'];
+
   $sql = "select count(distinct valid) as c from hourly 
-      WHERE station = '$key' and valid > '$bdate' 
+      WHERE station = '$key' and valid > '$bdate' and valid < '$edate'
       and c100 >= 32 and c100 <= 45";
+  //echo $sql ."<br />";
   $rs2 = pg_exec($c,$sql);
   if (pg_num_rows($rs2) == 0) continue;
   $r = pg_fetch_array($rs2,0);
   $val = $r["c"];
+
+  $data[$key]['var'] = $val;
 
   // Calculate average?
   $syear = intval(date("Y", $ISUAGcities[$key]["sts"]));
   $sql = "select count(distinct valid) as c 
        from hourly WHERE station = '$key' and c100 >= 32 and c100 <= 45 
        and extract(year from valid) > $syear and 
-           extract(year from valid) < $year and
+           extract(year from valid) < extract(year from now()) and
            $dateint ";
+  //echo $sql ."<br />";
   $rs2 = pg_exec($c,$sql);
   if (pg_num_rows($rs2) == 0) continue;
   $r = pg_fetch_array($rs2,0);
-  $avg = ($r["c"]) / ($year - $syear -1);
+  $avg = ($r["c"]) / (intval(date("Y")) - $syear -1);
+
+  $data[$key]['var2'] = round($avg,0);
 
 
   // Red Dot... 

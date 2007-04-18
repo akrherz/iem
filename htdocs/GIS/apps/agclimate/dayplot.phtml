@@ -2,89 +2,111 @@
 <?php 
   include("../../../../config/settings.inc.php");
   include("$rootpath/include/forms.php");
-  $var = isset($_GET["var"]) ? $_GET["var"]: "";
+  $pvar = isset($_GET["pvar"]) ? $_GET["pvar"]: "";
+  $ar = explode(",", $pvar);
+  $_GET["var"] = $pvar;
+  if (sizeof($ar) > 1){
+   $_GET["var"] = $ar[0];
+   $_GET["var2"] = $ar[1];
+  }
   $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400 - (7 * 3600) );
   $month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 86400 - (7 * 3600) );
   $day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 86400 - (7 * 3600) );
   $date = $year ."-". $month ."-". $day;
   $ts = mktime(0,0,0, $month, $day, $year);
-  $uri = "dayplot.phtml?year=".$year."&month=".$month."&day=".$day."&";
 
   $page = "isuag";
   $TITLE = "IEM | ISUAG Daily Data Plots";
   include("$rootpath/include/header.php"); 
 ?>
-<div class="text">
-<table width="700">
-<tr>
-  <td colspan=2><h3 class="heading">ISU AgClimate Daily Data Plots</h3></td></tr>
+  
+<h3 class="heading">ISU AgClimate Daily Data Plots</h3>
 
-<tr>
- <td rowspan=2 valign="TOP">
-<table width="100%">
-<tr>
-  <td><h3 class="subtitle">Dynamic Historical Data:</h3></td></tr>
-<tr>
-  <td>
-    <b>Daily Data Plots</b>
-    <br><a href="gsplot.phtml">Growing Season Plots</a>
-  </td></tr>
-<tr>
-  <td><h3 class="subtitle">Switch Parameter:</h3></td></tr>
-<tr>
-  <td><ul>
-   <li><a href="<?php echo $uri; ?>var=c11&var2=c12">High & Low Temperatures</a></li>
-   <li><a href="<?php echo $uri; ?>var=c30">Average Soil Temperatures</a></li>
-   <li><a href="<?php echo $uri; ?>var=c300">High & Low Soil Temperatures</a></li>
-   <li><a href="<?php echo $uri; ?>var=c70">Potential Evapotranspiration</a></li>
-   <li><a href="<?php echo $uri; ?>var=c40">Average Wind Velocity</a></li>
-   <li><a href="<?php echo $uri; ?>var=c529">Five Second Wind Gust</a></li>
-   <li><a href="<?php echo $uri; ?>var=c90">Precipitation</a></li>
-   <li><a href="<?php echo $uri; ?>var=c80">Total Solar Radiation</a></li>
-   <li><a href="<?php echo $uri; ?>var=dwpf">Max/Min Dew Points</a></li></ul>
-  </td></tr>
-</table>
- </td>
- <td>
+This page will plot a daily value of a variable of your choice.  If you 
+want to plot an accumulated value, check out the <a href="gsplot.phtml">Growing Season Plots</a>.
+
+<p>
   <form method="GET" action="dayplot.phtml">
-  <input type="hidden" name="var" value="<?php echo $var; ?>">
   <table>
-    <tr><th>Year:</th><th>Month:</th><th>Day:</th><td></td></tr>
+    <tr><th>Plot Variable:</th><th>Year:</th><th>Month:</th><th>Day:</th><td></td></tr>
     <tr>
-      <td><?php echo yearSelect(1998, $year); ?></td>
+  <td>
+<select name="pvar">
+  <option value="c11,c12" <?php if($pvar == "c11,c12") echo "SELECTED"; ?>>High & Low Air Temp</option>
+  <option value="c30" <?php if($pvar == "c30") echo "SELECTED"; ?>>Average 4 inch Soil Temp</option>
+  <option value="c300" <?php if($pvar == "c300") echo "SELECTED"; ?>>High & Low Soil Temp</option>
+  <option value="c70" <?php if($pvar == "c70") echo "SELECTED"; ?>>Potential Evapotranspiration</option>
+  <option value="c40" <?php if($pvar == "c40") echo "SELECTED"; ?>>Average Wind Speed</option>
+  <option value="c529,c530" <?php if($pvar == "c529,c530") echo "SELECTED"; ?>>Five Second Wind Gust</option>
+  <option value="c90" <?php if($pvar == "c90") echo "SELECTED"; ?>>Rainfall</option>
+  <option value="c80" <?php if($pvar == "c80") echo "SELECTED"; ?>>Solar Radiation</option>
+  <option value="dwpf" <?php if($pvar == "dwpf") echo "SELECTED"; ?>>High & Low Dew Points</option>
+  <option value="chill" <?php if($pvar == "chill") echo "SELECTED"; ?>>Standard Chill Units</option>
+</select>
+  </td>
+      <td><?php echo yearSelect(1986, $year); ?></td>
       <td><?php echo monthSelect($month); ?></td>
       <td><?php echo daySelect($day); ?></td>
       <td><input type="submit" value="Make Plot"></td>
     </tr>
   </table>
    </form>
- </td>
-</tr>
-<tr>
- <td>
-   <?php include('plot.php'); ?>
- </td>
-</tr>
+<p>
+<?php 
+if ($pvar == "chill") {
+  include("chill.php");
+} else {
+  include('plot.php'); 
+}
+?>
 
-<tr>
-<td colspan=2>
-<center><img src="/images/gisready.png"><h3 class="subtitle"> Data Listing</h3>
-</center>
+<h3 class="subtitle"> Data Listing</h3>
+<img src="<?php echo $rooturl; ?>/images/gisready.png">
 
-<pre>
+<p><pre>
 <?php
+$varDef = Array("c11" => "High Air Temperatures",
+  "c12" => "Low Air Temperatures [F]",
+  "c11,c12" => "High and Low Air Temperatures [F]",
+  "c30" => "Avg 4in Soil Temperatures [F]",
+  "c40" => "Avg Wind Velocity [MPH]",
+  "c509" => "Peak 1 Minute Gust [MPH]",
+  "c529,c530" => "Peak 5 Second Gust [MPH] and Time",
+  "c930" => "Total Precipitation [inch]",
+  "c90" => "Total Precipitation [inch]",
+  "c20" => "Avg Relative Humidity",
+  "c80" => "Solar Radiation [Langleys]",
+  "c70" => "Evapotranspiration [inch]",
+  "c300" => "High and Low 4in Soil Temps [F]",
+  "dwpf" => "Max and Min Dew Points [F]",
+  "chill" => "Standard Chill Unit"
+);
+
+$cols = Array("c11" => "hi_tmp_f",
+  "c12" => "lo_tmp_f",
+  "c11,c12" => "hi_tmp_f  , lo_tmp_f",
+  "c30" => "soil_t_f",
+  "c40" => "wnd_mph",
+  "c509" => "gst1_mph",
+  "c529,c530" => "gst5_mph  , gst5_tim",
+  "c930" => "rain_in",
+  "c90" => "rain_in",
+  "c20" => "relh_%",
+  "c80" => "srad_lan",
+  "c70" => "et_in",
+  "c300" => "hi_s_tmp  , lo_s_tmp",
+  "dwpf" => "hi_dwp_f  ,lo_dwp_f  ",
+  "chill" => "chill_hr  ,chill_av");
+
  $ndate = strftime("%b %d, %Y", $ts);
- $tr = "# ".$ndate." ". $varDef[$var . $var2] ."\n";
- $tr .= "#-----------------------snip------------------\n";
- if (strlen($var2) > 0 || $var == 'dwpfh'){
-   $tr .= sprintf("%20s,%10s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $var, $var2);
-  } else {
-   $tr .= sprintf("%20s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $var);
-  }
+ $tr  = "# ".$ndate." ". $varDef[$pvar] ."\n";
+ $tr .= "# Iowa Environmental Mesonet - ISU Ag Climate Network\n";
+ $tr .= "# -----------------------snip------------------\n";
+ $tr .= sprintf("%20s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $cols[$pvar]);
 
  foreach($data as $key => $value){
    if ($key == "A133259" || $key == "A130219") continue;
-   if (strlen($var2) > 0 || $var == 'dwpfh'){
+   if (isset($data[$key]['var2']) ){
      $tr .= sprintf("%20s,%10s,%10s,%10s,%10s\n", $ISUAGcities[$key]['city'],
   $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], $data[$key]['var'],
   $data[$key]['var2'] );
@@ -97,13 +119,9 @@
  echo $tr;
 ?>
 </pre>
-</td></tr>
-</table>
 <p>You should be able to 'copy & paste' this raw data listing into a simple
 text editor and save the data file on your machine.  Most GIS systems can 
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
-</div>
-
 
 <?php include("$rootpath/include/footer.php"); ?>

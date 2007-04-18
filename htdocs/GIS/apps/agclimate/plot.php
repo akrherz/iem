@@ -34,7 +34,8 @@ $varDef = Array("c11" => "High Air Temperatures",
   "c70" => "Evapotranspiration [inch]",
   "c300hc300l" => "High and Low 4in Soil Temps [F]",
   "c529c530" => "Peak 5 Sec Wind Gust [mph] and Time",
-  "dwpfhdwpfl" => "Max and Min Dew Points [F]"
+  "dwpfhdwpfl" => "Max and Min Dew Points [F]",
+  "chill" => "Standard Chill Unit"
 );
 
 $rnd = Array("c11" => 0, "c12" => 0, "c30" => 0,"c300h" => 0, "c300l" => 0,
