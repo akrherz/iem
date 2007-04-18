@@ -48,7 +48,7 @@
 if (getenv("REMOTE_ADDR") == "206.61.97.204" )
 {
  $s = "<img src=\"images/smokey_1021.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 83 weeks now! It is just one week at a time and the weeks keep adding up.  I hope you have a great day today! <br /> Muah! . <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 84 weeks now! I am excited about Smokey's big trip to Alabama this weekend.  Smokey go pedal pedal pedal, swim swim swim, and run run run!!!  Then when Smokey come back, darly muah muah muah! <br /> Muah! . <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 }
 
 echo $s;
