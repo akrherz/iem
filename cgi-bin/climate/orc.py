@@ -2,13 +2,16 @@
 
 import mx.DateTime
 from pyIEM import iemAccess, iemdb
-iemaccess = iemAccess.iemAccess()
-i = iemdb.iemdb()
-climatedb = i["coop"]
+#iemaccess = iemAccess.iemAccess()
+#i = iemdb.iemdb()
+#climatedb = i["coop"]
+import pg
+climatedb = pg.connect('coop','mesonet-db1.agron.iastate.edu', user='nobody')
+iemaccess = pg.connect('iem', 'mesonet-db1.agron.iastate.edu', user='nobody')
 
 ADJUSTMENT = 0
-s = mx.DateTime.DateTime(2005,9,19)
-e = mx.DateTime.DateTime(2005,10,18)
+s = mx.DateTime.DateTime(2006,3,17)
+e = mx.DateTime.DateTime(2006,4,18)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 def averageTemp(db, hi="high", lo="low"):
@@ -51,7 +54,15 @@ def main():
     now += interval
 
   rs = iemaccess.query("SELECT day, max_tmpf, min_tmpf from summary_%s \
-    WHERE station = 'ORC'" % (now.year, ) ).dictresult()
+    WHERE station = 'SUX'" % (now.year -1, ) ).dictresult()
+
+  for i in range(len(rs)):
+    if (db.has_key( rs[i]['day'] )):
+      db[ rs[i]['day'] ]['high'] = rs[i]['max_tmpf'] + ADJUSTMENT
+      db[ rs[i]['day'] ]['low'] = rs[i]['min_tmpf']  + ADJUSTMENT
+
+  rs = iemaccess.query("SELECT day, max_tmpf, min_tmpf from summary_%s \
+    WHERE station = 'SUX'" % (now.year, ) ).dictresult()
 
   for i in range(len(rs)):
     if (db.has_key( rs[i]['day'] )):
@@ -60,7 +71,7 @@ def main():
 
   # Lemars
   rs = climatedb.query("SELECT high, low, \
-    to_char(valid, '2004-mm-dd') as valid from climate \
+    to_char(valid, '2006-mm-dd') as valid from climate \
     WHERE station = 'ia4735'").dictresult()
 
   for i in range(len(rs)):
@@ -69,7 +80,7 @@ def main():
       db[ rs[i]['valid'] ]['avg_low'] = rs[i]['low']
 
   rs = climatedb.query("SELECT high, low, \
-    to_char(valid, '2005-mm-dd') as valid from climate \
+    to_char(valid, '2007-mm-dd') as valid from climate \
     WHERE station = 'ia4735'").dictresult()
                                                                                 
   for i in range(len(rs)):
