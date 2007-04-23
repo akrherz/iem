@@ -2,25 +2,31 @@
  include("../../../config/settings.inc.php");
  include("$rootpath/include/database.inc.php");
 
-  $ostation = isset($_GET["ostation"]) ? $_GET["ostation"] : "";
-  $station = isset($_GET['station']) ? $_GET["station"] : "";
-  $mode = isset($_GET["mode"]) ? $_GET["mode"]: "rt";
+$ostation = isset($_GET["ostation"]) ? $_GET["ostation"] : "";
+$station = isset($_GET['station']) ? $_GET["station"] : "";
+$mode = isset($_GET["mode"]) ? $_GET["mode"]: "rt";
 $syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
 $smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: date("m");
 $sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d");
 $days = isset($_GET["days"]) ? $_GET["days"]: 2;
-$subc = isset($_GET["subc"]) ? $_GET["subc"] : "";
-$dwpf = isset($_GET["dwpf"]) ? $_GET["dwpf"] : "";
-$tmpf = isset($_GET["tmpf"]) ? $_GET["tmpf"] : "";
-$s0 = isset($_GET["s0"]) ? $_GET["s0"]: "";
-$s1 = isset($_GET["s1"]) ? $_GET["s1"]: "";
-$s2 = isset($_GET["s2"]) ? $_GET["s2"]: "";
-$s3 = isset($_GET["s3"]) ? $_GET["s3"]: "";
+
+$subc = isset($_GET["subc"]) ? $_GET["subc"] : false;
+$dwpf = isset($_GET["dwpf"]) ? $_GET["dwpf"] : false;
+$tmpf = isset($_GET["tmpf"]) ? $_GET["tmpf"] : false;
+$pcpn = isset($_GET["pcpn"]) ? $_GET["pcpn"] : false;
+$s0 = isset($_GET["s0"]) ? $_GET["s0"]: false;
+$s1 = isset($_GET["s1"]) ? $_GET["s1"]: false;
+$s2 = isset($_GET["s2"]) ? $_GET["s2"]: false;
+$s3 = isset($_GET["s3"]) ? $_GET["s3"]: false;
+
+if (! $subc && ! $dwpf && ! $tmpf && ! $s0 && ! $s1 && ! $s2 && ! $s3 ){
+  $_GET["tmpf"] = "on";
+}
 
  include("$rootpath/include/selectWidget.php");
  $sw = new selectWidget("$rooturl/plotting/rwis/sf_fe.php", "$rooturl/plotting/rwis/sf_fe.php?", "IA_RWIS");
  $swf = Array("network" => "IA_RWIS", "s0" => 1, "s1" => 1, "s2" => 1, 
-              "s3" => 1, "tmpf" => 1, "dwpf" => 1, "subc" => 1);
+              "s3" => 1, "tmpf" => 1, "dwpf" => 1, "subc" => 1, "pcpn" => 1);
  $sw->setformvars($swf);
  $sw->logic($_GET);
  $swinterface = $sw->printInterface();
@@ -31,8 +37,6 @@ $s3 = isset($_GET["s3"]) ? $_GET["s3"]: "";
 <?php include("$rootpath/include/forms.php"); ?>
 <b>Nav:</b> <a href="<?php echo $rooturl; ?>/RWIS/">RWIS</a> <b> > </b>
 Pavement Temperature Time Series
-
-<br><br>
 
 <form method="GET" action="sf_fe.php" name="menu">
 <input type="hidden" name="ostation" value="<?php echo $station; ?>">
@@ -135,6 +139,13 @@ Select from list: <?php echo networkSelect("IA_RWIS",$station); ?> or
       $cgiStr .= "&subc=yes";
     }
   echo ">Sub Surface\n";
+
+  echo "<br><input type=\"checkbox\" name=\"pcpn\" ";
+  if (isset($_GET["pcpn"])) {
+     echo "CHECKED";
+      $cgiStr .= "&pcpn=yes";
+    }
+  echo ">Precipitation\n";
   echo "</td></tr></table>";
 
   if (isset($_GET["limit"]))  $cgiStr .= "&limit=yes";
