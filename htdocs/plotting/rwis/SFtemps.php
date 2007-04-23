@@ -1,15 +1,12 @@
 <?php
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-// 19 Nov 2002:  Darren requested a bigger image!
-// 27 Nov 2002:  Get rid of status indicators
-//  3 Jul 2003	We are going to support historical requests as well here
-//		lets not support reg_globals anymore
 
 /** We need these vars to make this work */
 $subc = isset($_GET["subc"]) ? $_GET["subc"] : "";
 $dwpf = isset($_GET["dwpf"]) ? $_GET["dwpf"] : "";
 $tmpf = isset($_GET["tmpf"]) ? $_GET["tmpf"] : "";
+$pcpn = isset($_GET["pcpn"]) ? $_GET["pcpn"] : "";
 $s0 = isset($_GET["s0"]) ? $_GET["s0"]: "";
 $s1 = isset($_GET["s1"]) ? $_GET["s1"]: "";
 $s2 = isset($_GET["s2"]) ? $_GET["s2"]: "";
@@ -26,7 +23,7 @@ if (strlen($days) > 0) {
   $sts = mktime(0,0,0, $smonth, $sday, $syear);
   $dbDateString = "'". strftime('%Y-%m-%d', $sts) ."'";
   $plotTitle = strftime('%a %d %b %Y', $sts) ."\n";
-  for ($i=1; $i <= intval($days); $i++){
+  for ($i=1; $i < intval($days); $i++){
     $tts = $sts + ($i * 86400);
     $dbDateString .= ",'". strftime('%Y-%m-%d', $tts) ."'";
     $plotTitle .= strftime('%a %d %b %Y', $tts) ."\n";
@@ -46,7 +43,7 @@ if ($mode == "rt"){
  $c1 = iemdb('rwis');
  $c0 = iemdb('access');
  $q0 = "SELECT
-    valid, gvalid, max(tmpf) as tmpf,
+    valid, gvalid, max(tmpf) as tmpf, max(pday) as pcpn,
     max(dwpf) as dwpf, max(tcs0) as tcs0, max(tcs1) as tcs1,
     max(tcs2) as tcs2, max(tcs3) as tcs3, max(subc) as subc
  FROM
@@ -55,7 +52,7 @@ if ($mode == "rt"){
   newd || ':' || (case
               when minute > 39 THEN '40'::text
               WHEN minute > 19 THEN '20'::text
-              ELSE '00'::text END)::text as gvalid,
+              ELSE '00'::text END)::text as gvalid, pday,
   CASE WHEN tmpf ". $val ." THEN tmpf ELSE NULL END as tmpf,
   CASE WHEN dwpf ". $val ." THEN dwpf ELSE NULL END as dwpf,
   CASE WHEN tsf0 ". $val ." THEN tsf0 ELSE NULL END as tcs0,
@@ -80,7 +77,7 @@ if ($mode == "rt"){
  $c1 = $c0;
  $tableName = "t". $syear;
  $q0 = "SELECT
-    valid, gvalid, max(tmpf) as tmpf, 
+    valid, gvalid, max(tmpf) as tmpf, max(pcpn) as pcpn,
     max(dwpf) as dwpf, max(tcs0) as tcs0, max(tcs1) as tcs1,
     max(tcs2) as tcs2, max(tcs3) as tcs3, max(subc) as subc
  FROM
@@ -89,7 +86,7 @@ if ($mode == "rt"){
   newd || ':' || (case 
               when minute > 39 THEN '40'::text
               WHEN minute > 19 THEN '20'::text 
-              ELSE '00'::text END)::text as gvalid, 
+              ELSE '00'::text END)::text as gvalid, pcpn,
   CASE WHEN tmpf ". $val ." THEN tmpf ELSE NULL END as tmpf,
   CASE WHEN dwpf ". $val ." THEN dwpf ELSE NULL END as dwpf,
   CASE WHEN tfs0 ". $val ." THEN tfs0 ELSE NULL END as tcs0,
@@ -128,100 +125,62 @@ $tcs0 = array();
 $tcs1 = array();
 $tcs2 = array();
 $tcs3 = array();
+$pcpn = array();
 $Asubc = array();
 $Atmpf = array();
 $Adwpf = array();
 $freezing = array();
-$xlabel= array();
+$times= array();
 
-
-$shouldbe = 0;
-$timestep = $minInterval * 60; # 20 minutes
-
-$ai = 0;
-$missing = 0;
+$lastp = 0;
 for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
 { 
-  $ts = strtotime( substr($row["gvalid"],0,16) );
-
-  if ($shouldbe == 0){
-    $shouldbe = $ts;
-  }
-#  echo $row["valid"] ." || ". $ts ." || ". $shouldbe ."<br>";
-  if ($shouldbe == $ts) {  // Good!!!
-    $tcs0[$ai] = $row["tcs0"];
-    $tcs1[$ai] = $row["tcs1"];
-    $tcs2[$ai] = $row["tcs2"];
-    $tcs3[$ai] = $row["tcs3"];
-    $Asubc[$ai] = $row["subc"];
-    $Atmpf[$ai] = $row["tmpf"];
-    $Adwpf[$ai] = $row["dwpf"];
-    $xlabel[$ai] = $row["valid"];
-    $freezing[$ai] = 32; 
-    $ai++;
-    $shouldbe = $shouldbe + $timestep;
- } else if ($shouldbe < $ts) { // Observation is missing
-    while ($shouldbe < $ts) {
-      $shouldbe = $shouldbe + $timestep;
-#      echo "== ". $row["valid"] ." || ". $ts ." || ". $shouldbe ."<br>";
-      $tcs0[$ai] = "";
-      $tcs1[$ai] = "";
-      $tcs2[$ai] = "";
-      $tcs3[$ai] = "";
-      $Asubc[$ai] = "";
-      $Atmpf[$ai] = "";
-      $Adwpf[$ai] = "";
-      $xlabel[$ai] = strftime("%m/%d %I %p", $shouldbe);
-      $freezing[$ai] = 32; 
-      $ai++;
-      $missing++;
-    }
-    $tcs0[$ai] = $row["tcs0"];
-    $tcs1[$ai] = $row["tcs1"];
-    $tcs2[$ai] = $row["tcs2"];
-    $tcs3[$ai] = $row["tcs3"];
-    $Asubc[$ai] = $row["subc"];
-    $Atmpf[$ai] = $row["tmpf"];
-    $Adwpf[$ai] = $row["dwpf"];
-    $xlabel[$ai] = $row["valid"];
-    $freezing[$ai] = 32; 
-    $ai++;
-    $shouldbe = $shouldbe + $timestep;
-  } else if ($shouldbe > $ts) { // Duplicate Ob!
-    $i++;
-  } 
+  $times[] = strtotime( substr($row["gvalid"],0,16) );
+  $tcs0[] = $row["tcs0"];
+  $tcs1[] = $row["tcs1"];
+  $tcs2[] = $row["tcs2"];
+  $tcs3[] = $row["tcs3"];
+  $Asubc[] = $row["subc"];
+  $Atmpf[] = $row["tmpf"];
+  $Adwpf[] = $row["dwpf"];
+  $p = floatval($row["pcpn"]);
+  $newp = 0;
+  if ($p > $lastp) { $newp = $p - $lastp; }
+  if ($p < $lastp && $p > 0) {$newp = $p; }
+  $pcpn[] = $newp;
+  $lastp = $p;
+  $freezing[] = 32; 
 }
-
 pg_close($c0);
 //pg_close($c1);
 
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_bar.php");
+include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 include ("$rootpath/include/all_locs.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(650,550,"example1");
-$graph->SetScale("textlin");
-if (isset($limit))  $graph->SetScale("textlin", 25, 35);
-$graph->img->SetMargin(40,10,105,90);
+$graph->SetScale("datlin");
+if (isset($_GET["pcpn"])) $graph->SetY2Scale("lin");
+if (isset($limit))  $graph->SetScale("datlin", 25, 35);
+$graph->img->SetMargin(40,55,105,105);
 //$graph->xaxis->SetFont(FS_FONT1,FS_BOLD);
-$graph->xaxis->SetTickLabels($xlabel);
-
-$interval = intval( sizeof($xlabel) / 48 );
-if ($interval > 1 ){
-  $graph->xaxis->SetTextLabelInterval(2);
-  $graph->xaxis->SetTextTickInterval($interval);
-}
 $graph->xaxis->SetLabelAngle(90);
 
 //$graph->title->Set("Recent Meteogram for ". $station);
 //$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 
 $graph->yaxis->SetTitle("Temperature [F]");
+if (isset($_GET["pcpn"])) {
+ $graph->y2axis->SetTitle("Precipitation [inch]");
+ $graph->y2axis->SetTitleMargin(40);
+}
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-$graph->xaxis->SetTitle("Local Valid Time");
+//$graph->xaxis->SetTitle("Local Valid Time");
 $graph->xaxis->SetTitleMargin(60);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
@@ -230,50 +189,55 @@ $graph->legend->Pos(0.01, 0.01);
 $graph->legend->SetLayout(LEGEND_VERT);
 
 // Create the linear plot
-$lineplot=new LinePlot($tcs0);
+$lineplot=new LinePlot($tcs0, $times);
 $lineplot->SetLegend("0: ".$ns0);
 $lineplot->SetColor("blue");
 $lineplot->SetWeight(3);
 
 // Create the linear plot
-$lineplot2=new LinePlot($tcs1);
+$lineplot2=new LinePlot($tcs1, $times);
 $lineplot2->SetLegend("1: ".$ns1);
 $lineplot2->SetColor("pink");
 $lineplot2->SetWeight(3);
 
 // Create the linear plot
-$lineplot3=new LinePlot($tcs2);
+$lineplot3=new LinePlot($tcs2, $times);
 $lineplot3->SetLegend("2: ".$ns2);
 $lineplot3->SetColor("gray");
 $lineplot3->SetWeight(3);
 
 // Create the linear plot
-$lineplot4=new LinePlot($tcs3);
+$lineplot4=new LinePlot($tcs3, $times);
 $lineplot4->SetLegend("3: ".$ns3);
 $lineplot4->SetColor("purple");
 $lineplot4->SetWeight(3);
 
 // Create the linear plot
-$lineplot5=new LinePlot($Asubc);
+$lineplot5=new LinePlot($Asubc, $times);
 $lineplot5->SetLegend("Sub Surface");
 $lineplot5->SetColor("black");
 $lineplot5->SetWeight(3);
 
 // Create the linear plot
-$lineplot6=new LinePlot($Atmpf);
+$lineplot6=new LinePlot($Atmpf, $times);
 $lineplot6->SetLegend("Air Temperature");
 $lineplot6->SetColor("red");
 $lineplot6->SetWeight(3);
 
 // Create the linear plot
-$lineplot7=new LinePlot($Adwpf);
+$lineplot7=new LinePlot($Adwpf, $times);
 $lineplot7->SetLegend("Dew Point");
 $lineplot7->SetColor("green");
 $lineplot7->SetWeight(3);
 
+$bp1=new BarPlot($pcpn, $times);
+$bp1->SetLegend("Precip");
+$bp1->SetFillColor("black");
+$bp1->SetAbsWidth(1.0);
+
 
 // Create the linear plot
-$fz=new LinePlot($freezing);
+$fz=new LinePlot($freezing, $times);
 $fz->SetColor("blue");
 
 // Title Box
@@ -337,6 +301,9 @@ if (max($Atmpf) != "" && isset($_GET["tmpf"]) )
   $graph->Add($lineplot6);
 if (max($Adwpf) != "" && isset($_GET["dwpf"]) )
   $graph->Add($lineplot7);
+
+if (max($pcpn) != "" && isset($_GET["pcpn"]) )
+  $graph->AddY2($bp1);
 
 
 // Display the graph
