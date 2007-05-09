@@ -45,7 +45,19 @@
   $s .= "<br /><div class='story'>". $row["story"] ."</div>";
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 
-if (getenv("REMOTE_ADDR") == "206.61.97.204" )
+/* Now, lets look for older features! */
+$s .= "<br /><b>Previous Year's Features</b><table>";
+$sql = "select *, extract(year from valid) as yr from feature WHERE extract(month from valid) = extract(month from now()) and extract(day from valid) = extract(day from now()) and extract(year from valid) != extract(year from now()) ORDER by yr DESC";
+$result = pg_exec($connection, $sql);
+for($i=0;$row=@pg_fetch_array($result,$i);$i++)
+{
+  if ($i % 2 == 0){ $s .= "<tr>"; }
+  $s .= "<td width=\"50%\">". $row["yr"] .": <a href=\"onsite/features/cat.php?day=". substr($row["valid"], 0, 10) ."\">". $row["title"] ."</a></td>";
+  if ($i % 2 != 0){ $s .= "</tr>"; }
+}
+$s .= "</table>";
+
+if (getenv("REMOTE_ADDR") == "206.61.97.215" )
 {
  $s = "<img src=\"images/smokey_1021.jpg\" style=\"float: left; margin: 5px;\">
 Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 87 weeks now! I hope that you get your internet back so that you can see these messages and it will be fun knowing that only you can see them too, hehe! I love you very much Smokey. <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
