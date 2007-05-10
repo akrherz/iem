@@ -18,9 +18,15 @@ def Main():
     print 'Invalid PIL, try again'
     sys.exit(0)
 
+  sql = "SELECT * from current WHERE pil = '"+pil+"' \
+     ORDER by entered DESC LIMIT "+LIMIT
 
-  rs = mydb.query("SELECT * from current WHERE pil = '"+pil+"' \
-     ORDER by entered DESC LIMIT "+LIMIT).dictresult()
+  if (pil[:3] == "WAR"):
+    pils = "('TOR%s', 'SVR%s', 'FFW%s', 'SVS%s', 'LSR%s')" % (pil[3:],pil[3:],pil[3:],pil[3:],pil[3:])
+    sql = "SELECT * from current WHERE pil IN "+pils+" \
+     ORDER by entered DESC LIMIT "+LIMIT
+
+  rs = mydb.query(sql).dictresult()
 	
 	
   for i in range(len(rs)):
