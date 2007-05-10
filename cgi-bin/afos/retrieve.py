@@ -26,6 +26,7 @@ def Main():
     sql = "SELECT * from current WHERE pil IN "+pils+" \
      ORDER by entered DESC LIMIT "+LIMIT
 
+  mydb.query("set enable_seqscan=no")
   rs = mydb.query(sql).dictresult()
 	
 	
