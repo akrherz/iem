@@ -46,7 +46,7 @@
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 
 /* Now, lets look for older features! */
-$s .= "<br /><b>Previous Year's Features</b><table>";
+$s .= "<br /><b>Previous Years' Features</b><table>";
 $sql = "select *, extract(year from valid) as yr from feature WHERE extract(month from valid) = extract(month from now()) and extract(day from valid) = extract(day from now()) and extract(year from valid) != extract(year from now()) ORDER by yr DESC";
 $result = pg_exec($connection, $sql);
 for($i=0;$row=@pg_fetch_array($result,$i);$i++)
