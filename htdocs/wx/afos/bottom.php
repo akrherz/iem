@@ -2,7 +2,7 @@
 <head>
 <style type="text/css">
 P { 
- width: 600px;
+ width: 800px;
  text-indent: 2em; } 
 body{
  margin-left: 5px;
@@ -24,11 +24,18 @@ the <a href="http://205.156.54.206/nwws/listings.htm">AFOS PIL</a> in order to
 get the products you want.</p>
 
 <div style="float: left; margin: 5px; padding: 5px; border: 1px dashed; background: #eeeeee;">
+<b>Aliases</b>
+<pre>
+WARxxx    Retrieve union of Tornado (TOR), Severe T'storm (SVR)
+          Flash Flood Warning (FFW), Severe Weather Statement (SVS)
+          and Local Storm Report (LSR)
+
+</pre>
 <b>MOS PILS</b>
 <pre>
 PIL       Description             Product ID for Des Moines
 MAVxxx    GFS MOS Guidance         MAVDSM
-METxxx    Eta MOS Guidance         METDSM
+METxxx    NAM MOS Guidance         METDSM
 MEXxxx    GFSX MOS Guidance        MEXDSM
 FWCxxx    NGM MOS                  FWCDSM
 
