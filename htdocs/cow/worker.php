@@ -9,7 +9,7 @@ $DEBUG = "";
 
 function printLSR($lsr)
 {
-  $lt = Array("F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg", "H" => "Hail","G" => "Wind Gust");
+  $lt = Array("F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg", "H" => "Hail","G" => "Wind Gust", "W" => "Waterspout", "M" => "Marine Tstm Wnd");
   $background = "#0f0";
   if ($lsr["warned"] == 0) $background = "#f00";
   if ($lsr["leadtime"] == "NA") { $background = "#eee"; $leadtime = "NA"; }
@@ -75,9 +75,13 @@ for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
      $sql = sprintf("SELECT * from nws_ugc WHERE ugc = '%s'", $row["ugc"]);
      $DEBUG .= "<br />". $sql;
      $crs = pg_query($conn, $sql);
-     $crow = pg_fetch_array($crs,0);
      if (! isset($warnings[$key]["counties"]) ) $warnings[$key]["counties"] = "";
-     $warnings[$key]["counties"] .= sprintf("%s,%s ", $crow["name"], $crow["state"]);
+     if (pg_num_rows($crs) > 0) {
+       $crow = pg_fetch_array($crs,0);
+       $warnings[$key]["counties"] .= sprintf("%s,%s ", $crow["name"], $crow["state"]);
+     } else {
+       $warnings[$key]["counties"] .= sprintf("%s, ", $key);
+     }
   }
 }
 
@@ -88,14 +92,15 @@ reset($ltype);
 while( list($k,$v) = each($ltype)){ 
  if ($v == "TO") $ltypeSQL .= sprintf("'%s',","T"); 
  else if ($v == "SV") $ltypeSQL .= sprintf("'%s','%s','%s',","H","G","D");
- else if ($v == "FF") $ltypeSQL .= sprintf("'%s',","F"); 
+ else if ($v == "MA") $ltypeSQL .= sprintf("'%s','%s',","M","W"); 
 }
 $ltypeSQL .= "'ZZZ'"; /* Hack */
 $sql = sprintf("SELECT distinct *, x(geom) as lon0, y(geom) as lat0, 
         astext(geom) as tgeom 
         from lsrs_%s WHERE wfo = '%s' and 
         valid >= '%s' and valid < '%s' and type in (%s) and
-        (type = 'F' or (type = 'H' and magnitude >= $hail) or
+        ((type = 'M' and magnitude >= 34) or 
+         (type = 'H' and magnitude >= $hail) or type = 'W' or
          type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D')
         ORDER by valid ASC",
         date("Y", $sts), $wfo, $stsSQL, $etsSQL, $ltypeSQL);
@@ -130,7 +135,8 @@ while (list($k,$v) = each($warnings))
          geom && SetSrid(GeometryFromText('%s'),4326) and 
          contains(SetSrid(GeometryFromText('%s'),4326), geom) 
          and type IN (%s) and wfo = '%s' and
-        (type = 'F' or (type = 'H' and magnitude >= $hail) or
+        ((type = 'M' and magnitude >= 34) or 
+         (type = 'H' and magnitude >= $hail) or type = 'W' or
          type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D')
          and valid >= '%s' and valid <= '%s' ", date("Y", $wsts),
          $geom, $geom, $ltypeSQL, $wfo, $wstsSQL, $wetsSQL);
@@ -160,6 +166,31 @@ while (list($k,$v) = each($warnings))
          $lw .= printLSR($lsrs[$key]);
        }
     }
+    else if ($v["phenomena"] == "MA")
+    {
+       if ($lType == "W") { /* Verify! */
+         $warnings[$k]["verify"] = 1;
+         $lsrs[$key]["warned"] = 1;
+         $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
+         if ($warnings[$k]["lead0"] < 0) $warnings[$k]["lead0"] = $lsrs[$key]["leadtime"];
+         $lw .= printLSR($lsrs[$key]);
+       }
+       else if ($lType == "M" && floatval($lMag) >= 34){ /* Verify! */
+         $warnings[$k]["verify"] = 1;
+         $lsrs[$key]["warned"] = 1;
+         $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
+         if ($warnings[$k]["lead0"] < 0) $warnings[$k]["lead0"] = $lsrs[$key]["leadtime"];
+         $lw .= printLSR($lsrs[$key]);
+       }
+       else if ($lType == "H" && floatval($lMag) >= $hail){ /* Verify! */
+         $warnings[$k]["verify"] = 1;
+         $lsrs[$key]["warned"] = 1;
+         $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
+         if ($warnings[$k]["lead0"] < 0) $warnings[$k]["lead0"] = $lsrs[$key]["leadtime"];
+         $lw .= printLSR($lsrs[$key]);
+       }
+
+    }
     else if ($v["phenomena"] == "SV")
     {
        if ($lType == "G" && floatval($lMag) >= 58){ /* Verify! */
@@ -183,17 +214,6 @@ while (list($k,$v) = each($warnings))
          if ($warnings[$k]["lead0"] < 0) $warnings[$k]["lead0"] = $lsrs[$key]["leadtime"];
          $lw .= printLSR($lsrs[$key]);
        }
-    }
-    else if ($v["phenomena"] == "FF")
-    {
-       if ($lType == "D") {
-         $warnings[$k]["verify"] = 1;
-         $lsrs[$key]["warned"] = 1;
-         $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
-         if ($warnings[$k]["lead0"] < 0) $warnings[$k]["lead0"] = $lsrs[$key]["leadtime"];
-         $lw .= printLSR($lsrs[$key]);
-       }
-
     }
   }
   $sw .= printWARN( $warnings[$k] );

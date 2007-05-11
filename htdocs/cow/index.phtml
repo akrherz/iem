@@ -50,6 +50,7 @@ while( list($key, $value) = each($wfos) ){
 <td>
 <input name="wtype[]" type="checkbox" value="TO" <?php if (in_array("TO", $wtype)) echo "CHECKED"; ?>>Tornado
 <input name="wtype[]" type="checkbox" value="SV" <?php if (in_array("SV", $wtype)) echo "CHECKED"; ?>>Svr T'storm
+<input name="wtype[]" type="checkbox" value="MA" <?php if (in_array("MA", $wtype)) echo "CHECKED"; ?>>Marine
 </td></tr>
 <tr>
 <th>Hail Size:</th>
@@ -61,6 +62,7 @@ while( list($key, $value) = each($wfos) ){
 <td>
 <input name="ltype[]" type="checkbox" value="TO" <?php if (in_array("TO", $ltype)) echo "CHECKED"; ?>>Tornado
 <input name="ltype[]" type="checkbox" value="SV" <?php if (in_array("SV", $ltype)) echo "CHECKED"; ?>>Svr T'storm
+<input name="ltype[]" type="checkbox" value="MA" <?php if (in_array("MA", $ltype)) echo "CHECKED"; ?>>Marine
 </td></tr>
 </table>
 <input type="submit" value="Go Cow Go"></form>
@@ -68,7 +70,7 @@ while( list($key, $value) = each($wfos) ){
 <?php if (isset($_GET["hail"])){ include("worker.php"); }
       else {
 ?>
-<h3 class="heading">IEM Cow (NWS Warning Polygon Verification)</h3>
+<h3 class="heading">IEM Cow (NWS Storm Based Warning Verification)</h3>
 
 <p><img src="cow.jpg" align="right" style="margin: 5px;">Data presented here is <b>unofficial</b> and should be used for 
 educational purposes only.  This application allows you to view warnings
