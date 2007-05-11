@@ -162,7 +162,7 @@ while( list($key, $value) = each($vtec_significance) ){
  <li><a href=\"$radar_url\">Interactive RADAR Display</a></li>
 </ul>
 </td><td><img src=\"$url\">";
-if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO"))
+if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA"))
 {
   /* Lets go dig for LSR reports */
   $sql = sprintf("SELECT distinct * from lsrs_%s WHERE
