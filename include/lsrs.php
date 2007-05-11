@@ -48,7 +48,6 @@ $lsr_types = Array(
 "F" => Array("name" => "FLASH FLOOD"),
 "D" => Array("name" => "TSTM WND DMG"),
 "O" => Array("name" => "NON-TSTM DMG"),
-"G" => Array("name" => "MARINE TSTM WND"),
 "S" => Array("name" => "SNOW"),
 "X" => Array("name" => "WALL CLOUD"),
 "O" => Array("name" => "NON TSTM WND DMG"),
