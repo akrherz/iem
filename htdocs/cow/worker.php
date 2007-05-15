@@ -295,8 +295,9 @@ else {
  $csi = round(pow((pow($pod,-1) + pow(1-$far,-1) - 1), -1), 2);
 }
 ?>
-<?php echo "Begin Date: ". date("m/d/Y H:i", $sts) ." End Date: ". date("m/d/Y H:i", $ets); ?>
 <h3 class="heading">Summary:</h3>
+<?php echo "<b>Begin Date:</b> ". date("m/d/Y H:i", $sts) ." <b>End Date:</b> ". date("m/d/Y H:i", $ets); ?>
+<br />* These numbers are not official and should be used for educational purposes only.
 
 <table cellspacing="1" cellpadding="2" border="1">
 <tr>
