@@ -244,7 +244,7 @@ function common_graph($graph)
   $graph->SetColor('wheat');
 
   $graph->legend->SetLayout(LEGEND_HOR);
-  $graph->legend->SetPos(0.01,0.91, 'left', 'top');
+  $graph->legend->SetPos(0.01,0.95, 'left', 'top');
   $graph->legend->SetLineSpacing(3);
 
   $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCEE@0.5');
