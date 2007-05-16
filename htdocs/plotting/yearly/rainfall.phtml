@@ -1,0 +1,45 @@
+<?php
+ include("../../../config/settings.inc.php");
+
+ $station = isset($_GET['station']) ? $_GET["station"]: "";
+ $network = isset($_GET["network"]) ? $_GET['network'] : "IA_ASOS";
+ $year = isset($_GET['year']) ? $_GET['year'] : date("Y");
+ include("$rootpath/include/selectWidget.php");
+ $sw = new selectWidget("rainfall.phtml", "rainfall.phtml?", $network);
+ $sw->set_networks( Array("IA_ASOS","AWOS","IA_COOP","KCCI") );
+ $sw->logic($_GET);
+?>
+
+<?php 	$TITLE = "IEM | Yearly Rainfall Traces";
+include("$rootpath/include/header.php"); ?>
+
+<h3 class="heading">Yearly Rainfall Traces</h3>
+
+<div class="text">
+
+<?php if (strlen($station) > 0 ) { ?>
+<?php include_once("$rootpath/include/forms.php"); ?>
+<form name="ds" action="rainfall.phtml" method="GET">
+<input type="hidden" value="<?php echo $station; ?>" name="station">
+<table cellspacing=2 border=1 cellpadding=2>
+<tr><th>Site ID:</th><th>Select Year:</th></tr>
+<tr><td><input type="text" name="station" value="<?php echo $station; ?>" size="6"></td>
+  <td><?php echo yearSelect(2004,$year,"year"); ?></td>
+</tr>
+</table>
+<input type="submit" value="Make Plot">
+</form>
+
+<br />
+<img src="rainfall_plot.php?<?php echo "station=$station&year=$year"; ?>" ALT="Time Series">
+
+<?php } else { ?>
+
+
+<?php
+echo $sw->printInterface();
+	}
+?>
+</div>
+
+<?php include("$rootpath/include/footer.php"); ?>
