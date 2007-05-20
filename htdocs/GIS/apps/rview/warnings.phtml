@@ -43,6 +43,7 @@ $zoom = isset($_GET["zoom"]) ? $_GET["zoom"]: 250;
 $imgsize = isset($_GET["imgsize"]) ? $_GET["imgsize"] : "640x480";
 $interval = isset($_GET["interval"]) ? $_GET["interval"] : 5;
 $frames = isset($_GET["frames"]) ? $_GET["frames"] : 10;
+$warngeo = isset($_GET["warngeo"]) ? $_GET["warngeo"] : "both";
 $ar = explode("x", $imgsize);
 $width = $ar[0];
 $height = $ar[1];
@@ -90,8 +91,8 @@ if ($isarchive && $basets < $wfo_filter_ts)
 include("$rootpath/include/wfoLocs.php");
 include("$rootpath/include/forms.php");
 include('lib.php');
-$uri = "$baseuri?frames=$frames&interval=$interval&site=$site&cu=$cu&archive=$archive&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom";
-$uri_nowfo = "$baseuri?frames=$frames&interval=$interval&archive=$archive&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom";
+$uri = "$baseuri?frames=$frames&interval=$interval&site=$site&cu=$cu&archive=$archive&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom&warngeo=$warngeo";
+$uri_nowfo = "$baseuri?frames=$frames&interval=$interval&archive=$archive&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom&warngeo=$warngeo";
 
 /*
  Okay, complicated location stuff here...
@@ -113,10 +114,6 @@ else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site)
   $uri .= "&lat0=$lat0&lon0=$lon0";
 }
 
-if (! $isarchive)
-{
-  // $REFRESH = "<meta http-equiv=\"refresh\" content=\"180; $uri\">";
-}
 $TITLE = "IEM | RADAR & NWS Warnings";
 $HEADEXTRA = "<script type=\"text/javascript\" src=\"warnings.js\"></script>
 <link rel=\"stylesheet\" type=\"text/css\" href=\"warnings.css\" />
@@ -129,7 +126,6 @@ $HEADEXTRA .= "</script>";
 if ($autopilot) $BODYEXTRA = "onLoad=\"handsOff2();\"";
 ?>
 <?php include("$rootpath/include/header.php");?>
-<div id="application" style="width: <?php echo $width +250; ?>;">&nbsp;
 <form style="display: inline;" method="GET" name="myform" action="<?php echo $baseuri; ?>">
 <input type="hidden" value="<?php echo $autopilot; ?>" name="autopilot">
 <input type="hidden" value="<?php echo $site; ?>" name="osite">
@@ -138,19 +134,22 @@ if ($autopilot) $BODYEXTRA = "onLoad=\"handsOff2();\"";
 <input type="hidden" value="<?php echo $lat0; ?>" name="lat0">
 <input type="hidden" value="<?php echo $lon0; ?>" name="lon0">
 <?php } ?>
-<div id="controls" style="width: 196px; border: 2px dashed #000; z-index: 2; position: absolute; left:5px; top: 120px;">
-  <div style="width: 92px; background: #73FA4D; float: left; text-align: center;padding: 3px;"><a href="javascript: showControl('layers-control');">Layers</a></div>
-  <div style="width: 92px; background: #F2FE5A; float: right; text-align: center; padding: 3px;"><a href="javascript: showControl('locations-control');">Locations</a></div>
-  <div style="width: 92px; background: #FF5EC4; float: left; text-align: center;padding: 3px;"><a href="javascript: showControl('time-control');">Time</a></div>
-  <div style="width: 92px; background: #2EA7F2; float: right; text-align: center; padding: 3px;"><a href="javascript: showControl('options-control');">Options</a></div>
-  <div id="layers-control" style="width: 100%; background: #73FA4D; display: block; float: left;"><?php include("inc_layers_control.php"); ?></div>
-  <div id="locations-control" style="width: 100%; background: #F2FE5A; display: none; float: left;"><?php include("inc_locations_control.php"); ?></div>
-  <div id="time-control" style="width: 100%; background: #FF5EC4; display: none; float: left;"><?php include("inc_time_control.php"); ?></div>
-  <div id="options-control" style="width: 100%; background: #2EA7F2; display: none; float: left;"><?php include("inc_options_control.php"); ?></div>
-</div>
-<div id="datawindow" style="background: #eee; position: absolute; left: 210px; top: 120px;">
-<div style="float: left;"><input type="submit" value="Update Map"><input type="submit" onClick="javascript: handsOff(); return false;" value="Auto Pilot">NWS NEXRAD & Warnings App</div>
-<?php
+
+
+<div id="datawindow" style="background: #eee; position: absolute; left: 5px; top: 120px; width: <?php echo ($width + 200); ?>px;">
+<input type="submit" value="Layers" style="background: #73FA4D;" onClick="javascript: showControl('layers-control'); return false;">
+<input type="submit" value="Locations" style="background: #F2FE5A;" onClick="javascript: showControl('locations-control'); return false;">
+<input type="submit" value="Time" style="background: #FF5EC4;" onClick="javascript: showControl('time-control'); return false;">
+<input type="submit" value="Options" style="background: #2EA7F2;" onClick="javascript: showControl('options-control'); return false;">
+<input type="submit" value="Update Map">
+<input type="submit" onClick="javascript: handsOff(); return false;" value="Auto Pilot">
+<br />
+
+<?php 
+  include("inc_layers_control.php");
+  include("inc_locations_control.php"); 
+  include("inc_time_control.php");
+  include("inc_options_control.php"); 
 
 dl($mapscript);
 $heightadd = 0;
@@ -203,8 +202,10 @@ if (intval($loop) ==  1){
 
 }
 
-?></div>
-<div>
+?>
+<!-- Warnings Key! -->
+<img src="static/warnings_legend.png">
+</div>
 
 <?php
 echo "<input type=\"hidden\" name=\"extents\" value=\"". $map->extent->minx .",". $map->extent->miny .",". $map->extent->maxx .",". $map->extent->maxy ."\">\n";
@@ -226,7 +227,7 @@ if ($isarchive)
   $tsextra = "'". strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff ) ."' and w.issue < '". strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff ) ."'";
 }
 $cuextra = "";
-if ($cu == 1) $cuextra = " and w.phenomena IN ('SV','TO') ";
+if ($cu == 1) $cuextra = " and w.phenomena IN ('SV','TO','MA') ";
 $query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire, 
   w.updated as updated, w.status as status, w.fcster as fcster, 
   w.eventid as eventid, w.significance as significance, 
@@ -293,7 +294,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
   $iA[$key] = $row["issue"];
   $uA[$key] = $row["updated"];
   $fA[$key] = $row["fcster"];
-  @$wA[$key] .= "<a href=\"warnings.phtml?archive=$archive&$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&tzoff=$tzoff&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=". $row["lon0"] ."&lat0=". $row["lat0"] ."\">". $row["cname"] ."</a>, ";
+  @$wA[$key] .= "<a href=\"warnings.phtml?archive=$archive&$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&tzoff=$tzoff&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=". $row["lon0"] ."&lat0=". $row["lat0"] ."&warngeo=$warngeo\">". $row["cname"] ."</a>, ";
 }
 
 /* Now we loop thru aggregated warnings */
@@ -336,7 +337,6 @@ if ($k == 0){
 ?>
 
 </form>
-</div>
 <div style="clear: both;">
 <?php if (! $isarchive) { ?>
 <img src="<?php echo $rooturl; ?>/images/gisready.png">Download <a href="<?php echo $rooturl; ?>/data/gis/shape/unproj/us/current_ww.zip">GIS shapefile of current warnings</a> and/or <a href="<?php echo $rooturl; ?>/GIS/data/gis/images/unproj/USCOMP/n0r_0.gtif.Z">GeoTiff of NEXRAD base reflectivity</a>.

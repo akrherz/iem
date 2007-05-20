@@ -1,3 +1,4 @@
+<div id="time-control" style="width: 450px; background: #FF5EC4; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
 <p><strong>Select Time Zone</strong><br />
 <select name="tz">
   <option value="UTC" <?php if ($tz == "UTC") echo "SELECTED"; ?>>UTC
@@ -21,4 +22,5 @@
 <tr><th>Time:</th><td><?php echo hourSelect($hour, "hour"); ?>:<?php echo local5MinuteSelect($m, "minute"); ?></td></tr>
 </table>
 
-<p>
+<p><div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('time-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+</div>

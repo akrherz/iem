@@ -1,3 +1,13 @@
+<div id="options-control" style="width: 450px; background: #2EA7F2; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
+<strong>Warning geography:</strong>
+<br />Short term warnings (SVR,TOR,SMW) have a storm based and county 
+geography associated with them.  You can pick which or both to display:
+<br /><select name="warngeo">
+ <option value="both" <?php if ($warngeo == "both") echo "SELECTED"; ?>>County + Polygon</option>
+ <option value="county" <?php if ($warngeo == "county") echo "SELECTED"; ?>>County Only</option>
+ <option value="sbw" <?php if ($warngeo == "sbw") echo "SELECTED"; ?>>Storm based warning</option>
+</select>
+
 <p><strong>Map Extent:</strong>
 <br />View Scale: <select name="zoom">
  <option value="5" <?php if ($zoom == 5) echo "SELECTED"; ?>>5km
@@ -66,13 +76,14 @@
   <option value="1" <?php if ($sortdir == 1) echo "SELECTED"; ?>>ASC
 </select>
 
-<p><strong>Local Storm Reports</strong>
-<br />Direction in time:<select name="lsrlook">
+<p><strong>Local Storm Reports (LSR)</strong>
+<br />Time window around plot valid time to plot LSRs.
+<br /><select name="lsrlook">
  <option value="+" <?php if ($lsrlook == "+") echo "SELECTED" ?>>+
  <option value="-" <?php if ($lsrlook == "-") echo "SELECTED" ?>>-
  <option value="+/-" <?php if ($lsrlook == "+/-") echo "SELECTED" ?>>+/-
 </select>
-<br />Time window to display:<select name="lsrwindow">
+<select name="lsrwindow">
  <option value="0" <?php if ($lsrwindow == 0) echo "SELECTED"; ?>>Hide
  <option value="5" <?php if ($lsrwindow == 5) echo "SELECTED"; ?>>5 minutes
  <option value="10" <?php if ($lsrwindow == 10) echo "SELECTED"; ?>>10 minutes
@@ -80,6 +91,6 @@
  <option value="30" <?php if ($lsrwindow == 30) echo "SELECTED"; ?>>30 minutes
  <option value="60" <?php if ($lsrwindow == 60) echo "SELECTED"; ?>>60 minutes
 </select>
-
-
+<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('options-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+</div>
 
