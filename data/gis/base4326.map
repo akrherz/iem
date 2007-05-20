@@ -558,7 +558,7 @@ END
 
 LAYER
   CONNECTIONTYPE postgis
-  NAME polygon_warnings
+  NAME sbw
   CONNECTION "dbname=postgis host=iem20"
   DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
   STATUS OFF
