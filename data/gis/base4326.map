@@ -575,26 +575,50 @@ LAYER
   # Tornado
   CLASS
     EXPRESSION /TO/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 0 0
-    SIZE    3
-    SYMBOL  'circle'
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 0 0
+      SIZE    1
+      SYMBOL  'circle'
+    END
   END
   # SVR
   CLASS
     EXPRESSION /SV/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 0
-    SIZE    3
-    SYMBOL  'circle'
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 0
+      SIZE    1
+      SYMBOL  'circle'
+    END
   END
   # MA
   CLASS
     EXPRESSION /MA/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 0 0 255
-    SIZE    3
-    SYMBOL  'circle'
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 255
+      SIZE    1
+      SYMBOL  'circle'
+    END
   END
 END
 
