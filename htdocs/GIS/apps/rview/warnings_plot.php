@@ -15,6 +15,7 @@ $lat0 $lon0 - where shall we center it!
 $layers - array of layers to map out
 $lsrwindow - how far do we look out
 $lsrlook - +/-/0
+$warngeo - to display polygons or not
  */
 
 
@@ -149,36 +150,52 @@ $watches->set("status", (in_array("watches", $layers)) );
 //$watches->setFilter("expired > '".$db_ts."' and issued <= '".$db_ts."'");
 $watches->set("data", "geom from (select type as wtype, geom, oid from watches where expired > '".$db_ts."' and issued <= '".$db_ts."') as foo using unique oid using srid=4326");
 
-$c0 = $map->getlayerbyname("warnings0_c");
-$c0->set("connection", $_DATABASES["postgis"] );
-$c0->set("status", in_array("warnings", $layers) );
-if ($isarchive)
-{ 
+if ($warngeo == "both" or $warngeo == "county")
+{
+  $c0 = $map->getlayerbyname("warnings0_c");
+  $c0->set("connection", $_DATABASES["postgis"] );
+  $c0->set("status", in_array("warnings", $layers) );
+  if ($isarchive)
+  { 
    $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
-}else {
+  }else {
    $sql = "geom from (select significance, phenomena, geom, oid from warnings WHERE expire > '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326";
    $c0->set("data", $sql);
+  }
+  $q = "expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'";
 }
-$q = "expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'";
 
-
-//$warnsum = $map->getlayerbyname("warnings_summary");
-//$warnsum->set("connection", $_DATABASES["postgis"] );
-//$warnsum->set("status", in_array("warnings_summary", $layers) );
-
-/* Polygon Warnings */
-$p0 = $map->getlayerbyname("warnings0_p");
-$p0->set("connection", $_DATABASES["postgis"] );
-$p0->set("status", in_array("warnings", $layers) );
-if ($isarchive)
-{ 
-  $sql = "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
-  //echo $sql;
-  $p0->set("data", $sql);
-} else {
- $p0->set("data", "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
-//$p0->setFilter("significance != 'A' and expire > '".$db_ts."' and issue < '". $db_ts."' and gtype = 'P'");
+if ($warngeo == "both")
+{
+  $p0 = $map->getlayerbyname("warnings0_p");
+  $p0->set("connection", $_DATABASES["postgis"] );
+  $p0->set("status", in_array("warnings", $layers) );
+  if ($isarchive)
+  { 
+    $sql = "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
+    $p0->set("data", $sql);
+  } else {
+   $p0->set("data", "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
+  }
 }
+
+if ($warngeo == "sbw")
+{
+  $p0 = $map->getlayerbyname("sbw");
+  $p0->set("connection", $_DATABASES["postgis"] );
+  $p0->set("status", in_array("warnings", $layers) );
+  if ($isarchive)
+  { 
+    $sql = "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
+    $p0->set("data", $sql);
+  } else {
+   $p0->set("data", "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
+  }
+
+
+}
+
+
 $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("data", $radfile);
 $radar->set("status", in_array("nexrad", $layers) );
@@ -214,10 +231,16 @@ $interstates->draw($img);
 $radar->draw($img);
 $cwas->draw( $img);
 $watches->draw($img); 
-$c0->draw($img);
+if ($warngeo == "both" or $warngeo == "county")
+{
+ $c0->draw($img);
+}
 $current_barbs->draw($img);
 $current_sites->draw($img);
-$p0->draw($img);
+if ($warngeo == "both" or $warngeo == "sbw")
+{
+  $p0->draw($img);
+}
 $usdm->draw($img);
 if ($lsrwindow != 0)
   $lsrs->draw($img);

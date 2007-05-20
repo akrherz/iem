@@ -10,12 +10,12 @@ function reverseLayer(lyr) {
        w.style.display = "block"; 
       var w = document.getElementById("datawindow");
       w.style.top = "120px";
-      w.style.left = "210px";
+      w.style.left = "5px";
     }
     else { 
       w.style.display = "none"; 
       var w = document.getElementById("datawindow");
-      w.style.top = "30px";
+      w.style.top = "5px";
       w.style.left = "5px";
     }
 
@@ -26,13 +26,11 @@ function reverseLayer(lyr) {
 function handsOff2( ) {
   reverseLayer("iem-header");
   reverseLayer("iem-footer");
-  reverseLayer("controls");
 }
 
 function handsOff( ) {
   reverseLayer("iem-header");
   reverseLayer("iem-footer");
-  reverseLayer("controls");
   if (document.myform.autopilot.value == 1){
     document.myform.autopilot.value = 0;
   } else {
@@ -50,5 +48,15 @@ function setLayerDisplay( layerName, d ) {
   if ( document.getElementById ) {
     var w = document.getElementById(layerName);
     w.style.display = d;
+  }
+}
+function flipLayerDisplay( layerName) {
+  if ( document.getElementById ) {
+    var w = document.getElementById(layerName);
+    if (w.style.display == "none") { 
+      w.style.display = "block";
+    } else {
+      w.style.display = "none";
+    }
   }
 }
