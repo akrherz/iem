@@ -91,6 +91,6 @@ geography associated with them.  You can pick which or both to display:
  <option value="30" <?php if ($lsrwindow == 30) echo "SELECTED"; ?>>30 minutes
  <option value="60" <?php if ($lsrwindow == 60) echo "SELECTED"; ?>>60 minutes
 </select>
-<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('options-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('options-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
 </div>
 

@@ -38,6 +38,7 @@ function handsOff( ) {
   }
 }
 function showControl(layerName){
+  setLayerDisplay("applet-hack", 'none');
   setLayerDisplay("layers-control", 'none');
   setLayerDisplay("locations-control", 'none');
   setLayerDisplay("time-control", 'none');

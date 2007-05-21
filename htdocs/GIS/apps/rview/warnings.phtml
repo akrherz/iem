@@ -167,7 +167,7 @@ if (intval($loop) ==  1){
    fwrite($f, "$rooturl/$url\n");
   }
   fclose($f);
-  echo "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
+  echo "<div id=\"applet-hack\"></div><a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
   include ("loop.php");
   printHTML($urls);
 } else if (intval($loop) == 2){
@@ -185,20 +185,20 @@ if (intval($loop) ==  1){
   fclose($f);
   echo "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
 ?>
-  <applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="<?php echo $width; ?>" height="<?php echo $height + 100; ?>" alt="You must enable Java in your browser to view the radar loop">
+  <div id="applet-hack"><applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="<?php echo $width; ?>" height="<?php echo $height + 100; ?>" alt="You must enable Java in your browser to view the radar loop">
         <param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
         <param name="rate" value="80">
 	<PARAM name="no_enh" value="true">
         <param name="pause_percent" value="800">
         <param name="file_of_filenames" value="/tmp/<?php echo $fts; ?>.dat">
-</applet>
+</applet></div>
 
 <?php
 } else {
   $imgi = 0;
   include("warnings_plot.php");
 
-  echo "<input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\">\n";
+  echo "<div id=\"applet-hack\"></div><input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\">\n";
 
 }
 
