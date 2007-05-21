@@ -136,7 +136,7 @@ if ($autopilot) $BODYEXTRA = "onLoad=\"handsOff2();\"";
 <?php } ?>
 
 
-<div id="datawindow" style="background: #eee; position: absolute; left: 5px; top: 120px; width: <?php echo ($width + 200); ?>px;">
+<div id="datawindow" style="background: #eee; position: absolute; left: 5px; top: 120px; width: <?php echo ($width + 250); ?>px;">
 <input type="submit" value="Layers" style="background: #73FA4D;" onClick="javascript: showControl('layers-control'); return false;">
 <input type="submit" value="Locations" style="background: #F2FE5A;" onClick="javascript: showControl('locations-control'); return false;">
 <input type="submit" value="Time" style="background: #FF5EC4;" onClick="javascript: showControl('time-control'); return false;">
@@ -144,7 +144,7 @@ if ($autopilot) $BODYEXTRA = "onLoad=\"handsOff2();\"";
 <input type="submit" value="Update Map">
 <input type="submit" onClick="javascript: handsOff(); return false;" value="Auto Pilot">
 <br />
-
+<div id="blankspace" style="width: 640px; height: 480px; position: absolute;">&nbsp;</div>
 <?php 
   include("inc_layers_control.php");
   include("inc_locations_control.php"); 
@@ -185,7 +185,7 @@ if (intval($loop) ==  1){
   fclose($f);
   echo "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
 ?>
-  <div id="applet-hack"><applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="<?php echo $width; ?>" height="<?php echo $height + 100; ?>" alt="You must enable Java in your browser to view the radar loop">
+  <div id="applet-hack"><applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="<?php echo $width; ?>" height="<?php echo $height + 100; ?>" alt="You must enable Java in your browser to view the radar loop" style="float: left;">
         <param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
         <param name="rate" value="80">
 	<PARAM name="no_enh" value="true">
