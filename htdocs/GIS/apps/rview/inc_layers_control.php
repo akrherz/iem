@@ -19,5 +19,5 @@
 <br /><input name="layers[]" type="checkbox" value="uscounties" <?php if (in_array("uscounties", $layers)) echo "checked='CHECKED'"; ?>>US Counties
 <br /><input name="layers[]" type="checkbox" value="interstates" <?php if (in_array("interstates", $layers)) echo "checked='CHECKED'"; ?>>US Interstates
 
-<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('layers-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('layers-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
 </div>

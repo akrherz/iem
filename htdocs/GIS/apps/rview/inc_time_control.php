@@ -22,5 +22,5 @@
 <tr><th>Time:</th><td><?php echo hourSelect($hour, "hour"); ?>:<?php echo local5MinuteSelect($m, "minute"); ?></td></tr>
 </table>
 
-<p><div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('time-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<p><div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('time-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
 </div>

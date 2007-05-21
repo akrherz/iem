@@ -11,5 +11,5 @@ while( list($key, $value) = each($wfos) ){
 </select>
 
 <br />Selecting a different office will move the display to that office.
-<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('locations-control', 'none'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('locations-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
 </div>
