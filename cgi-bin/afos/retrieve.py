@@ -22,7 +22,7 @@ def Main():
      ORDER by entered DESC LIMIT "+LIMIT
 
   if (pil[:3] == "WAR"):
-    pils = "('FLS%s', 'AWW%s','TOR%s', 'SVR%s', 'FFW%s', 'SVS%s', 'LSR%s')" % (pil[3:],pil[3:],pil[3:],pil[3:],pil[3:],pil[3:],pil[3:])
+    pils = "('FFS%s', 'AWW%s','TOR%s', 'SVR%s', 'FFW%s', 'SVS%s', 'LSR%s')" % (pil[3:],pil[3:],pil[3:],pil[3:],pil[3:],pil[3:],pil[3:])
     sql = "SELECT * from current WHERE pil IN "+pils+" \
      ORDER by entered DESC LIMIT "+LIMIT
 
