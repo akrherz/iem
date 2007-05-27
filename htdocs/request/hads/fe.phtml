@@ -1,0 +1,99 @@
+<?php 
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | DCP Data Download";
+include("$rootpath/include/header.php"); 
+?>
+<div class="text">
+<b>Nav:</b> <a href="/DCP/">DCP</a> <b> > </b>
+  Download Data
+
+<?php
+ include("$rootpath/include/imagemaps.php");
+ include("$rootpath/include/forms.php"); 
+?>
+
+<p>Filling out this form will provide you with whatever archive data the
+IEM has from the DCP network.  The archive has some holes in it....
+
+
+<form method="GET" action="dl.php">
+
+<table>
+<tr><td width="50%">
+
+<p><h3 class="subtitle">1. Select Station:</h3><br>
+<?php echo networkMultiSelect("DCP", ""); ?>
+
+<p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
+<i>Times are in UTC. Archive starts in 2002.</i>
+<table>
+  <tr>
+    <td></td>
+    <th>Year</th><th>Month</th><th>Day</th>
+    <th>Hour</th>
+  </tr>
+
+  <tr>
+    <th>Start:</th>
+    <td rowspan="2">
+     <?php echo yearSelect(2002, date("Y"), "year"); ?>
+    </td>
+    <td>
+     <?php echo monthSelect("", "month1"); ?>
+    </td>
+    <td>
+     <?php echo daySelect2("", "day1"); ?>
+    </td>
+    <td>
+     <?php echo gmtHourSelect("", "hour1"); ?>
+	<input type="hidden" name="minute1" value="0">
+    </td>
+  </tr>
+
+  <tr>
+    <th>End:</th>
+    <td>
+     <?php echo monthSelect("", "month2"); ?>
+    </td>
+    <td>
+     <?php echo daySelect2("", "day2"); ?>
+    </td>
+    <td>
+     <?php echo gmtHourSelect("", "hour2"); ?>
+	<input type="hidden" name="minute2" value="0">
+    </td>
+  </tr>
+</table>
+
+<p><h3 class="subtitle">3. Select Variables:</h3><br>
+<select size=5 name="vars[]" MULTIPLE>
+  <option value="tai">Air Temperature
+  <option value="pph">Hourly Precip
+  <option value="pci">Precip Counter
+</select>
+
+</td><td valign="TOP">
+
+<p><h3 class="subtitle">4. How to view?</h3><br>
+<select name="what">
+  <option value="download">Download to Disk
+  <option value="view">View on-line
+</select>
+
+<p><h3 class="subtitle">5. Data Delimitation:</h3><br>
+How shall the output values be seperated?
+<br><select name="delim">
+    <option value="comma">Comma
+    <option value="space">Space
+    <option value="tab">Tab
+   </select>
+
+</td></tr></table>
+
+<p><h3 class="subtitle">Submit Form:</h3><br>
+<input type="submit" value="Process Data Request">
+<input type="reset">
+</form></div>
+
+
+<?php include("$rootpath/include/footer.php"); ?>
