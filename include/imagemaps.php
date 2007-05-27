@@ -1,5 +1,24 @@
 <?php
 
+function networkMultiSelect($network, $selected)
+{
+    global $rootpath;
+    $network = strtoupper($network);
+    $s = "";
+    include_once("$rootpath/include/all_locs.php");
+    reset($cities);
+    $s .= '<select name="station[]" size="5" MULTIPLE >\n';
+    while (list($sid, $tbl) = each($cities))
+    {
+        if ($tbl["network"] != $network) continue;
+        $s .= "<option value=\"$sid\" ";
+        if ($selected == $sid) { $s .= "SELECTED"; }
+        $s .= ">". $tbl["city"] ."</option>\n";
+   }
+   $s .= "</select>\n";
+   return $s;
+}
+
 function networkSelect($network, $selected)
 {
     global $rootpath;
