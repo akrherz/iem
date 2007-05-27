@@ -13,7 +13,7 @@ function networkMultiSelect($network, $selected)
         if ($tbl["network"] != $network) continue;
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">[$sid]". $tbl["city"] ."</option>\n";
+        $s .= ">[$sid] ". $tbl["city"] ."</option>\n";
    }
    $s .= "</select>\n";
    return $s;
