@@ -186,10 +186,10 @@ if (intval($loop) ==  1){
   echo "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
 ?>
   <div id="applet-hack"><applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="<?php echo $width; ?>" height="<?php echo $height + 100; ?>" alt="You must enable Java in your browser to view the radar loop" style="float: left;">
-        <param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
+        <param name="bottom_controls" value="startstop, looprock, step, speed, toggle, zoom">
         <param name="rate" value="80">
 	<PARAM name="no_enh" value="true">
-        <param name="pause_percent" value="800">
+    <param name="pause_percent" value="800">
         <param name="file_of_filenames" value="/tmp/<?php echo $fts; ?>.dat">
 </applet></div>
 
