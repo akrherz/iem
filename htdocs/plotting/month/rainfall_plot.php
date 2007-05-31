@@ -61,8 +61,13 @@ include ("$rootpath/include/jpgraph/jpgraph_line.php");
 include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 
 // Create the graph. These two calls are always required
-$graph = new Graph(600,400,"example1");
+$graph = new Graph(640,400);
 $graph->SetScale("textlin");
+$graph->SetMarginColor('white');
+
+$graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCFF@0.5');
+$graph->xgrid->Show();
+
 $graph->img->SetMargin(45,10,80,30);
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->yaxis->SetTitleMargin(30);
