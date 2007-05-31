@@ -138,6 +138,7 @@ $cities = Array(
 "SKWI4" => array("short" => "Kanawha", "online" => "t", "city" => "Kanawha", "nwn_id" => "604", "lat" => "42.93682", "lon" => "-93.78675", "network" => "KIMT", "county" => "Hancock", "climate_site" => "ia4308"),
 "SLEM5" => array("short" => "LeRoy", "online" => "t", "city" => "LeRoy", "nwn_id" => "609", "lat" => "43.5131", "lon" => "-92.5095", "network" => "KIMT", "county" => "Mower", "climate_site" => "none"),
 "SMYI4" => array("short" => "Mason City", "online" => "t", "city" => "Mason City", "nwn_id" => "610", "lat" => "43.1506", "lon" => "-93.1691", "network" => "KIMT", "county" => "Cerro Gordo", "climate_site" => "ia5230"),
+"SMWI4" => array("short" => "Mason City Newman", "online" => "t", "city" => "Mason City Newman", "nwn_id" => "None", "lat" => "43.1325", "lon" => "-93.2397", "network" => "KIMT", "county" => "Cerro Gordo", "climate_site" => "ia5230"),
 "SRMI4" => array("short" => "Mason City RMS", "online" => "t", "city" => "Mason City RMS", "nwn_id" => "612", "lat" => "43.13", "lon" => "-93.1", "network" => "KIMT", "county" => "Cerro Gordo", "climate_site" => "ia5230"),
 "SNKI4" => array("short" => "Northwood", "online" => "t", "city" => "Northwood", "nwn_id" => "613", "lat" => "43.45", "lon" => "-93.2", "network" => "KIMT", "county" => "Worth", "climate_site" => "ia6103"),
 "SOAI4" => array("short" => "Osage", "online" => "t", "city" => "Osage", "nwn_id" => "605", "lat" => "43.277", "lon" => "-92.8102", "network" => "KIMT", "county" => "Mitchell", "climate_site" => "ia6305"),
@@ -150,6 +151,7 @@ $cities = Array(
 "SRRI4" => array("short" => "Rockford", "online" => "t", "city" => "Rockford", "nwn_id" => "615", "lat" => "43.05", "lon" => "-92.93", "network" => "KIMT", "county" => "Floyd", "climate_site" => "ia1402"),
 "SRSI4" => array("short" => "Rockwell", "online" => "t", "city" => "Rockwell", "nwn_id" => "616", "lat" => "42.98", "lon" => "-93.1", "network" => "KIMT", "county" => "Cerro Gordo", "climate_site" => "ia5230"),
 "SNII4" => array("short" => "Thompson", "online" => "t", "city" => "Thompson", "nwn_id" => "617", "lat" => "43.36", "lon" => "-93.7", "network" => "KIMT", "county" => "Winnebago", "climate_site" => "ia2977"),
+"STKI4" => array("short" => "Titonka", "online" => "t", "city" => "Titonka", "nwn_id" => "None", "lat" => "43.2405", "lon" => "-94.03909", "network" => "KIMT", "county" => "Kossuth", "climate_site" => "none"),
 "STMM5" => array("short" => "West Concord", "online" => "t", "city" => "West Concord", "nwn_id" => "621", "lat" => "44.14", "lon" => "-92.9", "network" => "KIMT", "county" => "Dodge", "climate_site" => "none"),
 ),
 ); 
@@ -298,5 +300,7 @@ $Sconv = Array(
 922 => 'RDPS2',
 923 => 'GETS2',
 924 => 'ESDS2',
+None => 'SMWI4',
+None => 'STKI4',
 ); 
 ?>
