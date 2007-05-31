@@ -11,11 +11,10 @@
 
 <p><h3 class="subtitle">Station Plots</h3>
 <ul>
- <li><a href="/data/snet/mesonet.gif">20 Min Mesonet [SchoolNet]</a></li>
- <li>&nbsp; &nbsp; <a href="<?php echo $rooturl; ?>/GIS/apps/mesoplot/plot.php">Rapid Update every Minute</a></li>
- <li>&nbsp; &nbsp; <a href="<?php echo $rooturl; ?>/GIS/apps/mesoplot/plot.php?zoom=1">Zoomed in on Des Moines</a></li>
- <li>&nbsp; &nbsp; <a href="<?php echo $rooturl; ?>/GIS/apps/delta/plot.php?i=15m">15min Pressure Change</a></li>
- <li>&nbsp; &nbsp; <a href="<?php echo $rooturl; ?>/GIS/apps/delta/plot.php">1 hour Pressure Change</a></li>
+ <li><a href="<?php echo $rooturl; ?>/GIS/apps/mesoplot/plot.php">Rapid Update every Minute</a></li>
+ <li><a href="<?php echo $rooturl; ?>/GIS/apps/mesoplot/plot.php?zoom=1">Zoomed in on Des Moines</a></li>
+ <li><a href="<?php echo $rooturl; ?>/GIS/apps/delta/plot.php?i=15m">15min Pressure Change</a></li>
+ <li><a href="<?php echo $rooturl; ?>/GIS/apps/delta/plot.php">1 hour Pressure Change</a></li>
  <li><a href="/data/snet/solarRad.gif">Solar Radiation</a></li>
  <li>Barometer: <a href="/data/snet/snet_altm.gif">millibar</a> or <a href="/data/snet/snet_alti.gif">inches</a></li>
 <!-- Wait until this works
