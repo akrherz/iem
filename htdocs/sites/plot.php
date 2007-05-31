@@ -12,14 +12,16 @@ include("setup.php");
  $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
  $current = "7dayhilo"; 
  if ($prod == 1) $current = "monthhilo";
+ if ($prod == 2) $current = "monthrain";
  include("sidebar.php"); 
  $products = Array(
 0 => "7day_hilo_plot.php",
 1 => "month_hilo_plot.php",
+2 => "../plotting/month/rainfall_plot.php",
 );
 ?>
 <div style="float: left;">
-<?php if ($prod == 1) { 
+<?php if ($prod == 1 or $prod == 2) { 
   echo "<form method=\"GET\" name=\"modify\">
  <input type=\"hidden\" name=\"station\" value=\"$station\">
  <input type=\"hidden\" name=\"network\" value=\"$network\">
