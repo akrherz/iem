@@ -25,7 +25,8 @@ $lows = Array();
 $xlabels = Array();
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-  $highs[] = $row["max_tmpf"];
+  if (intval($row["max_tmpf"]) < -50) {  $highs[] = ""; }
+  else { $highs[] = $row["max_tmpf"]; }
   $lows[] = $row["min_tmpf"];
 }
 
@@ -78,19 +79,22 @@ $graph->SetMarginColor('white');
 $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCFF@0.5');
 $graph->xgrid->Show();
 
-$dstr = date("M", $ts);
-$graph->title->Set("$dstr $year Hi/Lo Temps for ". $metadata["city"]);
-$graph->SetMargin(40,5,50,40);
+$graph->img->SetMargin(45,10,70,30);
+$graph->title->Set( $cities[$station]["city"] ." [$station] Hi/Lo Temps for ". date("M Y", $ts) );
+$graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["city"] ."[". $climate_site ."]");
+$graph->legend->SetLayout(LEGEND_HOR);
+$graph->legend->Pos(0.05, 0.1, "right", "top");
 
-$graph->xaxis->SetTickLabels($xlabels);
-$graph->xaxis->SetLabelAngle(90);
+//$graph->xaxis->SetTickLabels($xlabels);
+//$graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetPos("min");
+$graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
+$graph->xaxis->SetTitle("Day of Month");
 
 $graph->yscale->SetGrace(5);
 $graph->yaxis->SetTitle("Temperature [F]");
 
-$graph->legend->SetLayout(LEGEND_HOR);
-$graph->legend->Pos(0.01,0.09,"left","top");
+$graph->legend->Pos(0.25, 0.1, "right", "top");
 
 $bplot1 = new BarPlot($highs);
 $bplot1->SetFillColor('red');
