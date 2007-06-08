@@ -143,7 +143,7 @@ $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetTextTickInterval(60);
 
 $graph->xaxis->SetLabelAngle(90);
-$graph->yaxis->scale->ticks->Set(2,1);
+//$graph->yaxis->scale->ticks->Set(2,1);
 //$graph->yscale->SetGrace(10);
 $graph->title->Set("Outside Temperatures");
 $graph->subtitle->Set($titleDate );
