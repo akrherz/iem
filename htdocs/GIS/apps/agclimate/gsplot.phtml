@@ -1,5 +1,8 @@
 <?php
 include("../../../../config/settings.inc.php");
+include("$rootpath/include/forms.php");
+include("$rootpath/include/agclimateLoc.php");
+include("$rootpath/include/database.inc.php");
 
 $var = isset($_GET["var"]) ? $_GET["var"] : "gdd50";
 $year = isset($_GET["year"]) ? $_GET["year"] : 2006;
@@ -21,7 +24,6 @@ $eday = strftime("%d", $gs_end);
 $smonth = strftime("%m", $gs_start);
 $sday = strftime("%d", $gs_start);
 
-include("$rootpath/include/forms.php");
 
 ?>
 
@@ -75,7 +77,6 @@ window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,s
 
 <?php
 dl($mapscript);
-include("$rootpath/include/agclimateLoc.php");
 include("lib.php");
 
 $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
@@ -129,13 +130,42 @@ $img = $map->prepareImage();
 $counties->draw($img);
 $iards->draw($img);
 
-include("$rootpath/include/database.inc.php");
 $c = iemdb("isuag");
+$climatedb = iemdb("coop");
 
 $sstr = strftime("%Y-%m-%d", $gs_start);
 $estr = strftime("%Y-%m-%d", $gs_end);
+$cStart = "2000". strftime("-%m-%d", $gs_start);
+$cEnd = "2000". strftime("-%m-%d", $gs_end);
 $sstr_txt = strftime("%b %d", $gs_start);
 $estr_txt = strftime("%b %d", $gs_end);
+
+function gdd($high, $low, $ceiling, $floor)
+{
+  if ($low < $floor)    $low = $floor;
+  if ($high > $ceiling) $high = $ceiling;
+  if ($high < $floor) return 0;
+
+  return (($high+$low)/2.00) - $floor;
+}
+
+/* -------- Lets compute the climatology ------ */
+$climate = Array();
+reset($ISUAGcities);
+while( list($key,$val) = each($ISUAGcities) ) {
+  $csite = $ISUAGcities[$key]["climate_site"];
+  $climate[$key] = Array('gdd32'=> 0, 'gdd50' => 0,'sdd86'=>0,'prec'=>0);
+
+  $sql = sprintf("SELECT * from climate51 WHERE station = '%s' and
+    valid BETWEEN '%s' and '%s'", $csite, $cStart, $cEnd);
+  $rs =  pg_exec($climatedb, $sql);
+  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    $climate[$key]['gdd32'] += gdd($row["high"],$row["low"],86,32);
+    $climate[$key]['gdd50'] += gdd($row["high"],$row["low"],86,50);
+    $climate[$key]['prec'] += $row["precip"];
+ 
+  }
+}
 
 /* ------------------------------------------------------- */
 if ($var == 'gdd32') {
@@ -149,11 +179,7 @@ if ($var == 'gdd32') {
     $stid = $row['station'];
     $high = (float)$row['c11'];
     $low  = (float)$row['c12'];
-
-    if ($low < 32)  $low = 32.00;
-    if ($high > 86) $high = 86.00;
-    if ($high < 32) $tgdd = 0.00;
-    else $tgdd = (($high+$low)/2.00) - 32.00;
+    $tgdd = gdd($high, $low, 86, 32);
 
     if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
@@ -172,11 +198,8 @@ if ($var == 'gdd50') {
     $stid = $row['station'];
     $high = (float)$row['c11'];
     $low  = (float)$row['c12'];
+    $tgdd = gdd($high, $low, 86, 50);
 
-    if ($low < 50)  $low = 50.00;
-    if ($high > 86) $high = 86.00;
-    if ($high < 50) $tgdd = 0.00;
-    else $tgdd = (($high+$low)/2.00) - 50.00;
     if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
   }
@@ -194,10 +217,7 @@ if ($var == 'sdd86') {
     $stid = $row['station'];
     $high = (float)$row['c11'];
     $low  = (float)$row['c12'];
-
-    if ($low < 86)  $low = 86.00;
-    if ($high < 86) $tgdd = 0.00;
-    else $tgdd = (($high+$low)/2.00) - 86.00;
+    $tgdd = gdd($high, $low, 186, 86);
 
     if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
@@ -217,11 +237,7 @@ else if ($var == 'sgdd50') {
     $stid = $row['station'];
     $high = (float)$row['high'];
     $low  = (float)$row['low'];
-
-    if ($low < 50)  $low = 50.00;
-    if ($high > 86) $high = 86.00;
-    if ($high < 50) $tgdd = 0.00;
-    else $tgdd = (($high+$low)/2.00) - 50.00;
+    $tgdd = gdd($high, $low, 86, 50);
 
     if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
@@ -292,6 +308,16 @@ foreach($vals as $key => $value){
      round($value, $rnd[$var]) );
   $pt->free();
 
+  // Climate
+  if ($var == "gdd32" || $var == "gdd50" || $var == "prec")
+  {
+    $pt = ms_newPointObj();
+    $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+    $pt->draw($map, $snet, $img, 2, "(". round($value - $climate[$key][$var],$rnd[$var]) .")");
+    $pt->free();
+
+  }
+
   if (isset($_GET["var2"])) {
     // Value LL
     $pt = ms_newPointObj();
@@ -330,7 +356,6 @@ $point->free();
 $url = $img->saveWebImage();
 
 ?>
-<center><font class="bluet">Plot</font></center>
 <table>
 <tr><td valign="top">
 <h3 class="heading">Dynamic Historical Data:</h3>
@@ -345,6 +370,12 @@ parameters.
  You should precipitation obs from the <a href="<?php echo $rooturl; ?>/COOP/">COOP</a> network.
 </td>
   <td>
+<?php
+  if ($var == "gdd32" || $var == "gdd50" || $var == "prec")
+{
+  echo "Departure from climatology is shown below the accumulated value.";
+}
+?>
   <img src="<?php echo $url; ?>" border=1>
 </td></tr>
 </table>
