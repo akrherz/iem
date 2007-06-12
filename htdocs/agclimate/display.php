@@ -31,12 +31,12 @@ $data = Array(
 2 => Array(
  "mapurl" => "$rooturl/data/agclimate/4in-temp-out.png",
  "desc" => "Average 4 inch soil depth temperature.  Usually under a 
-            grass vegetation.",
+            bare soil.",
 ),
 3 => Array(
  "mapurl" => "$rooturl/data/agclimate/soil-hilo-out.png",
  "desc" => "High and low 4 inch soil depth temperature.  Usually under a 
-            grass vegetation.",
+            bare soil.",
 ),
 4 => Array(
  "mapurl" => "$rooturl/data/agclimate/rad-out.png",
