@@ -8,14 +8,14 @@ import sys, string
 #mydb = i['mesosite']
 
 import pg
-mydb = pg.connect('mesosite', 'mesonet.agron.iastate.edu')
+mydb = pg.connect('mesosite', 'mesonet-db1.agron.iastate.edu', user='nobody')
 
 def to_lower(s):
 	if s == None:	return "none"
 	return string.lower(s)
 
 rs = mydb.query("SELECT * from stations \
-  WHERE network != 'NEXRAD' ORDER by name").dictresult()
+  WHERE network != 'NEXRAD' and network != 'WFO' ORDER by name").dictresult()
 
 format = '"%s" => array("city" => "%s", "id" => "%s", "lat" => "%s", "lon" => "%s", "network" => "%s", "county" => "%s", "climate_site" => "%s"),\n'
 
