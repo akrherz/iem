@@ -1,4 +1,5 @@
 <?php $cities = Array( 
+"IFA" => array("city" => "Iowa Falls", "id" => "IFA", "lat" => "42.4707864", "lon" => "-93.2699536", "network" => "AWOS", "county" => "Hardin", "climate_site" => "ia4142"),
 "OH090" => array("city" => "100-SR225 @ Berlin Reservoir", "id" => "OH090", "lat" => "40.9879989624", "lon" => "-81.0990982056", "network" => "OH_RWIS", "county" => "Portage", "climate_site" => "none"),
 "OH091" => array("city" => "101-SR45 @ Rock Creek", "id" => "OH091", "lat" => "41.6913986206", "lon" => "-80.8548965454", "network" => "OH_RWIS", "county" => "Ashtabula", "climate_site" => "none"),
 "OH093" => array("city" => "103-US33 @ Pickerington Road", "id" => "OH093", "lat" => "39.8395996094", "lon" => "-82.7655029297", "network" => "OH_RWIS", "county" => "Franklin", "climate_site" => "none"),
