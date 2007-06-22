@@ -91,6 +91,9 @@ $lp1=new LinePlot($aobs);
 $lp1->SetLegend("Actual Accum");
 $lp1->SetColor("blue");
 $lp1->SetWeight(2);
+$lp1->value->SetFormat('%.2f');
+$lp1->value->Show();
+$lp1->value->SetMargin(14);
 
 $lp2=new LinePlot($aclimate);
 $lp2->SetLegend("Climate Accum");
