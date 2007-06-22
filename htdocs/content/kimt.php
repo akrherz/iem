@@ -46,7 +46,7 @@ $myOb = $iemdb->getSingleSite($station);
 	$white = ImageColorAllocate($gif,250,250,250);
 	$green = ImageColorAllocate($gif, 0, 255, 0);
 	$yellow = ImageColorAllocate($gif, 255, 255, 120);
-	$red = ImageColorAllocate($gif, 148, 52, 53);
+	$red = ImageColorAllocate($gif, 200, 12, 13);
 	$blue = ImageColorAllocate($gif, 0, 0, 255);
 	$grey = ImageColorAllocate($gif, 110, 110, 110);
 	
@@ -62,7 +62,7 @@ $myOb = $iemdb->getSingleSite($station);
 
 
  //imagefilledrectangle ( $gif, 120, 22, 320, 36, $white);
- ImageTTFText($gif, 12, 0, 125 , 34, $yellow, $Font, strtoupper($cities['KIMT'][$station]["short"]) );
+ ImageTTFText($gif, 12, 0, 125 , 34, $red, $Font, strtoupper($cities['KIMT'][$station]["short"]) );
 
  // Box to hold current dew Point!
 // imagerectangle ( $gif, 10, 40, 40, 60, $black);
@@ -88,10 +88,10 @@ $myOb = $iemdb->getSingleSite($station);
 // Feels Like
  $size = imagettfbbox(16, 0, $Font, $feel );
  $dx = abs($size[2] - $size[0]);
- $x0 = 140;
+ $x0 = 130;
  $width = 74;
  $x_pad = ($width - $dx) / 2 ;
- ImageTTFText($gif, 16, 0, $x0 + $x_pad, 90, $white, $Font, $feel );
+ ImageTTFText($gif, 16, 0, $x0 + $x_pad, 92, $white, $Font, $feel );
 
 
 // Altimeter
@@ -121,10 +121,10 @@ $myOb = $iemdb->getSingleSite($station);
 // Wind Speed
  $size = imagettfbbox(16, 0, $Font, $sped);
  $dx = abs($size[2] - $size[0]);
- $x0 = 110;
+ $x0 = 115;
  $width = 45;
  $x_pad = ($width - $dx) / 2 ;
- ImageTTFText($gif, 16, 0, $x0 + $x_pad , 175, $white, $Font, $sped );
+ ImageTTFText($gif, 16, 0, $x0 + $x_pad , 185, $white, $Font, $sped );
 
 
 // Time
@@ -133,10 +133,10 @@ $myOb = $iemdb->getSingleSite($station);
 // TempF
  $size = imagettfbbox(22, 0, $Font, $tmpf);
  $dx = abs($size[2] - $size[0]);
- $x0 = 120;
+ $x0 = 115;
  $width = 55;
  $x_pad = ($width - $dx) / 2 ;
- ImageTTFText($gif, 22, 0, $x0 + $x_pad, 70, $white, "./kcci.ttf", $tmpf );
+ ImageTTFText($gif, 22, 0, $x0 + $x_pad, 72, $white, "./kcci.ttf", $tmpf );
 
 // Time to do the rotation!!!
 //              x   y    x   y    x   y
@@ -160,8 +160,8 @@ $windDirs = Array(
 // imagepolygon($gif, $windDirs["E"], 3, $black);
 // imagepolygon($gif, $windDirs["NNE"], 3, $black);
 
- ImageTTFText($gif, 14, 0, 195, 68, $white, $Font, $maxTemp );
- ImageTTFText($gif, 14, 0, 195, 92, $white, $Font, $minTemp );
+ ImageTTFText($gif, 14, 0, 195, 70, $white, $Font, $maxTemp );
+ ImageTTFText($gif, 14, 0, 195, 94, $white, $Font, $minTemp );
 
 //	$size = imagettfbbox(12, 0, $Font, $Scities[$site]["city"]);
 //	$dx = abs($size[2] - $size[0]);
