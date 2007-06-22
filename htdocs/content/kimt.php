@@ -55,10 +55,10 @@ $myOb = $iemdb->getSingleSite($station);
 
   $kcci_logo = @imagecreatefromjpeg("kimt320.jpg");
   imagecopy($gif, $kcci_logo, 0, 0, 0, 0, 320, 320);
-
+  
   $wlogo = @imagecreatefromgif ("dirs/Wind_". strtolower($drct) .".gif");
   imagecolortransparent( $wlogo, $black);
-  imagecopy($gif, $wlogo, 83, 120, 0, 0, 139, 139);
+  imagecopy($gif, $wlogo, 92, 130, 0, 0, 100, 100);
 
 
  //imagefilledrectangle ( $gif, 120, 22, 320, 36, $white);
