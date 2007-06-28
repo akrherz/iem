@@ -14,10 +14,10 @@ if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
 }
 
 
-$dirRef = strftime("%Y_%m/%d", $myTime);
 $titleDate = strftime("%b %d, %Y", $myTime);
 
-$fcontents = file('/mesonet/ARCHIVE/raw/isumet/'.$dirRef.'.dat');
+$dirRef = strftime("%Y/%m/%d", $myTime);
+$fcontents = file("/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
 
 $tmpf = array();
 //[DMF]$dwpf = array();

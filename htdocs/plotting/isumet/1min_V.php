@@ -20,10 +20,11 @@ if ($wA > $myTime){
  $wLabel = "Instant Wind Speed";
 }
 
-$dirRef = strftime("%Y_%m/%d", $myTime);
 $titleDate = strftime("%b %d, %Y", $myTime);
 
-$fcontents = file('/mesonet/ARCHIVE/raw/isumet/'.$dirRef.'.dat');
+$dirRef = strftime("%Y/%m/%d", $myTime);
+$fcontents = file("/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
+
 
 $mph = array();
 $drct = array();
