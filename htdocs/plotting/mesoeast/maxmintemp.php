@@ -1,10 +1,10 @@
 <?php
 //  1 minute data plotter 
 
-$dirRef = strftime("%Y_%m/%d", $myTime);
 $titleDate = strftime("%b %d, %Y", $myTime);
 
-$fcontents = file('/mesonet/ARCHIVE/raw/ot/ot0006/'.$dirRef.'.dat');
+$dirRef = strftime("%Y/%m/%d", $myTime);
+$fcontents = file("/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
 
 $parts = array();
 $maxtmp = array();
