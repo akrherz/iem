@@ -7,9 +7,10 @@ $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 
 $myTime = mktime(0,0,0,$month,$day,$year);
 
-$dirRef = strftime("%Y_%m/%d", $myTime);
 $titleDate = strftime("%b %d, %Y", $myTime);
-$fcontents = file('/mesonet/ARCHIVE/raw/ot/ot0003/'.$dirRef.'.dat');
+
+$dirRef = strftime("%Y/%m/%d", $myTime);
+$fcontents = file("/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0003.dat");
 
 $oldformat = 1;
 if ($myTime >= mktime(0,0,0,8,12,2005))
