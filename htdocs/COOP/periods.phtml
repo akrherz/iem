@@ -1,0 +1,80 @@
+<?php
+ include("../../config/settings.inc.php");
+ $smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]): 0;
+ $emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]): 0;
+ $sday = isset($_GET["sday"]) ? intval($_GET["sday"]): 0;
+ $eday = isset($_GET["eday"]) ? intval($_GET["eday"]): 0;
+ $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "avg_high";
+
+ include("$rootpath/include/forms.php");
+ include("$rootpath/include/database.inc.php");
+?>
+
+<?php $TITLE = "IEM | Time period comparisons";
+include("$rootpath/include/header.php"); ?>
+
+<div class="text"
+<b>Nav:</b> <a href="/COOP/">NWS COOP</a> <b> > </b> Yearly time period averages
+
+<h3 class="subtitle">COOP obs time period comparison</h3>
+
+This application will compute Iowa statewide temperature averages for a time period 
+of your choice based on the observation record the IEM has. This is just 
+a simple average done without geographical weighting.  Just select the
+date period below and submit the form.
+
+<p><form name="switcher" method="GET">
+<table>
+<tr><th>Start Date:</th><td><?php echo monthSelect($smonth, "smonth"); echo daySelect2($sday, "sday"); ?></td>
+ <td rowspan="2"><input type="submit" value="Make yearly comparison"></td></tr>
+<tr><th>End Date:</th><td><?php echo monthSelect($emonth, "emonth"); echo daySelect2($eday, "eday"); ?></td></tr>
+</table>
+</form>
+
+<?php
+if ($sday > 0) { 
+  $sts = mktime(0,0,0,$smonth, $sday, 2000);
+  $ets = mktime(0,0,0,$emonth, $eday, 2000);
+  $days = round(( ($ets - $sts) / 86400.0),0) + 1;
+  $drestrict = "days = $days";
+  if ($smonth < 3 && $emonth > 2) $drestrict = "(days = $days or days = $days -1)";
+
+  $coop = iemdb("coop");
+
+  $link = "periods.phtml?sday=$sday&eday=$eday&smonth=$smonth&emonth=$emonth&sortcol=";
+  $nicedate = sprintf("%s - %s", date("d M", $sts), date("d M", $ets) );
+?>
+<p><strong>Yearly average temperatures between (<?php echo $nicedate; ?>) dates inclusive<strong><br />
+<table cellpadding="2" border="1" cellspacing="0">
+<tr>
+  <th><a href="<?php echo $link ."year"; ?>">Year:</a></th>
+  <th># stations</th>
+  <th><a href="<?php echo $link ."avg_temp"; ?>">Avg Temp:</a></th>
+  <th><a href="<?php echo $link ."avg_high"; ?>">Avg High Temp:</a></th>
+  <th><a href="<?php echo $link ."avg_low"; ?>">Avg Low Temp:</a></th>
+</tr>
+<?php
+  $sql = sprintf("select year, count(stationid) as stations, 
+    avg(avg_high) as avg_high, avg(avg_low) as avg_low,
+    avg((avg_high+avg_low)/2.0) as avg_temp from 
+        (select year, stationid, count(high) as days, 
+         avg(high) as avg_high, avg(low) as avg_low from alldata 
+         WHERE sday BETWEEN '%s' and '%s' and 
+     high > -70 and low > -70 GROUP By year, stationid) as foo 
+     WHERE $drestrict GROUP by year ORDER by %s DESC", date("md", $sts), date("md",$ets), $sortcol );
+  $rs = pg_exec($coop, $sql);
+  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    echo sprintf("<tr><th>%s</th><td>%s</td><td>%.2f</td><td>%.2f</td><td>%.2f</td></tr>", $row["year"], $row["stations"], $row["avg_temp"], $row["avg_high"], $row["avg_low"]);
+  }
+ }
+?>
+</table>
+
+<p>Theoretically, you should be able to highlight the entire table with 
+your cursor and then copy-paste it into a spreadsheet program if you 
+like.
+
+<p>Errors exist in this dataset and you should evaluate the observations
+before using...</div>
+
+<?php include("$rootpath/include/footer.php"); ?>
