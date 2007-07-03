@@ -49,30 +49,11 @@ function printtd($instr,$selected,$station){
 $filename='./pics/'.$station.'/'.$station.'.jpg';
 $filename_site = file_exists($filename);
 
-if ($filename_site){
-   $URL= 'pics/'. $station.'/'.$station.'.jpg';
-   $size=getimagesize('pics/'. $station.'/'.$station.'.jpg');
-   $tag='<a href="javascript:openWindow(\''.$URL.'\')">(Site Photo)</a>';
-  }
-  else
-  {
-  $tag='(Site Photo)';
-  }
-
 $filename='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
 $filename=filecheck($filename);
 
 ?>
 
-<script type="text/javascript" language="JavaScript">
-<!-- Begin
-
-function openWindow(link){
-var subWindow=window.open(link,"new","width=<?php echo ($size[0]);?>,height=<?php echo ($size[1]);?>,toolbar,status,resizable,scrollbars,menubar,location");
-}
-// End -->
-</script>
-<br>
 <h3>Directional Photos</h3>
 If the direction is linked, a photo is available.  Click the link to view.<br />
 <TABLE>
