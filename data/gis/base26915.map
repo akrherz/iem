@@ -4,7 +4,7 @@ NAME select
 STATUS ON
 # 4x3
 SIZE 480 360
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 #EXTENT -2223813 -1746393 2207341 1701506
 # 4 x 3  600km 450
 EXTENT 175000 4400000 775000 4850000
@@ -131,14 +131,14 @@ LAYER
   STATUS ON
   TYPE POINT
   CONNECTIONTYPE POSTGIS
-  CONNECTION "user=akrherz dbname=mesosite host=10.10.10.40"
+  CONNECTION "user=nobody dbname=mesosite host=iem20"
   DATA "geom from (select geom, id, plot_name, msoid, network, case when is_climate_site THEN 't' ELSE 'f' END as is_climate_site  from stations WHERE online = 't') as foo using unique msoid using srid=4326"
   PROJECTION
    "init=epsg:4326"
   END
   TOLERANCE 1000
   TOLERANCEUNITS pixels
-  LABELITEM "PLOT_NAME"
+  LABELITEM "plot_name"
   FILTER "network = 'IA_RWIS'"
   LABELCACHE ON
   CLASS
