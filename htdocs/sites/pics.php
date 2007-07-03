@@ -5,7 +5,7 @@ include("setup.php");
 
 $dir = isset($_GET["dir"]) ? $_GET["dir"]: "";
 
-$TITLE = "IEM | Current Data";
+$TITLE = "IEM | Site Photos";
 include("$rootpath/include/header.php"); 
 ?>
 <?php $current = "pics"; include("sidebar.php"); ?>
@@ -30,18 +30,18 @@ function printtd($instr,$selected,$station){
     {
     if ($instr == $selected)
      {
-       echo '<TD>'.$instr.'</TD>';
+       echo '<TD align="center" style="background: #ee0;">'.$instr.'</TD>';
        echo "\n";
      }
     else
      {
-      echo '<TD><a href="/sites/pics.php?station='.$station.'&dir='.$instr.'">'.$instr.'</a></TD>';
+      echo '<TD align="center"><a href="pics.php?station='.$station.'&dir='.$instr.'">'.$instr.'</a></TD>';
       echo "\n";
      }
     }
   else
     {
-     echo '<TD>'.$instr.'</TD>';
+     echo '<TD align="center">'.$instr.'</TD>';
      echo "\n";
     }
 }
@@ -50,8 +50,8 @@ $filename='./pics/'.$station.'/'.$station.'.jpg';
 $filename_site = file_exists($filename);
 
 if ($filename_site){
-   $URL='http://mesonet.agron.iastate.edu/sites/pics/'.$station.'/'.$station.'.jpg';
-   $size=getimagesize('/mesonet/www/html/sites/pics/'.$station.'/'.$station.'.jpg');
+   $URL= 'pics/'. $station.'/'.$station.'.jpg';
+   $size=getimagesize('pics/'. $station.'/'.$station.'.jpg');
    $tag='<a href="javascript:openWindow(\''.$URL.'\')">(Site Photo)</a>';
   }
   else
@@ -59,7 +59,7 @@ if ($filename_site){
   $tag='(Site Photo)';
   }
 
-$filename='./pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
+$filename='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
 $filename=filecheck($filename);
 
 ?>
@@ -73,18 +73,23 @@ var subWindow=window.open(link,"new","width=<?php echo ($size[0]);?>,height=<?ph
 // End -->
 </script>
 <br>
+<h3>Directional Photos</h3>
+If the direction is linked, a photo is available.  Click the link to view.<br />
 <TABLE>
-<TR>
-        <TD>
-          <TABLE>
             <TR><?php printtd("NW",$dir,$station);printtd("N",$dir,$station);printtd("NE",$dir,$station)?></TR>
             <TR><?php printtd("W",$dir,$station);echo '<TD class="hlink"><IMG class="pics" border="3" SRC="'.$filename.'"  
                     alt="'.$station.' , '.$dir.'" /></TD>';printtd("E",$dir,$station);?></TR>
             <TR><?php printtd("SW",$dir,$station);printtd("S",$dir,$station);printtd("SE",$dir,$station)?></TR>
           </TABLE>
-          </TD></TR>
-</TABLE>
-</TD></TR>
-</TABLE>
+<?php
+$filename='./pics/'.$station.'/'.$station.'_span.jpg';
+$lfilename='./pics/'.$station.'/'.$station.'_pan.jpg';
+if (file_exists($filename))
+{
+  echo "<h3>Panoramic Shot</h3><img src=\"$filename\"><br /><a href=\"$lfilename\">Full resolution version</a>";
+}
 
+
+
+?>
 <?php include("$rootpath/include/footer.php"); ?>
