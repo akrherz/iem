@@ -60,7 +60,7 @@ $s .= "</table>";
 if (getenv("REMOTE_ADDR") == "206.61.97.215" )
 {
  $s = "<img src=\"images/smokey_1021.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 94 weeks now!  I am very happy to have you back in Iowa with me and being able to share another Anniversary!  Lets hope for many more: one week at a time. <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 95 weeks now!  It is exciting to be spending the 4th with you Smokey!  Boom Boom Boom!  Just like smokey!  I love you very much! <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 }
 
 echo $s;
