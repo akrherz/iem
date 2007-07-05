@@ -21,29 +21,29 @@ $snet = $iem->getNetwork("KCCI");
 
 function s2icon($s)
 {
-  if ($s < 2.5) return "4,0";
-  if ($s < 5) return "1,0";
-  if ($s < 7.5) return "1,1";
-  if ($s < 10) return "1,2";
-  if ($s < 12.5) return "1,3";
-  if ($s < 15) return "1,4";
-  if ($s < 17.5) return "1,5";
-  if ($s < 20) return "1,6";
+  if ($s < 2.5) return "4,1";
+  if ($s < 5) return "1,1";
+  if ($s < 7.5) return "1,2";
+  if ($s < 10) return "1,3";
+  if ($s < 12.5) return "1,4";
+  if ($s < 15) return "1,5";
+  if ($s < 17.5) return "1,6";
+  if ($s < 20) return "1,7";
 
-  if ($s < 22.5) return "2,0";
-  if ($s < 25) return "2,1";
-  if ($s < 27.5) return "2,2";
-  if ($s < 30) return "2,3";
-  if ($s < 32.5) return "2,4";
-  if ($s < 35) return "2,5";
-  if ($s < 37.5) return "2,6";
+  if ($s < 22.5) return "2,1";
+  if ($s < 25) return "2,2";
+  if ($s < 27.5) return "2,3";
+  if ($s < 30) return "2,4";
+  if ($s < 32.5) return "2,5";
+  if ($s < 35) return "2,6";
+  if ($s < 37.5) return "2,7";
 
-  if ($s < 40) return "3,0";
-  if ($s < 42.5) return "3,1";
-  if ($s < 45) return "3,2";
-  if ($s < 47.5) return "3,3";
-  if ($s < 50) return "3,4";
-  return "3,5";
+  if ($s < 40) return "3,1";
+  if ($s < 42.5) return "3,2";
+  if ($s < 45) return "3,3";
+  if ($s < 47.5) return "3,4";
+  if ($s < 50) return "3,5";
+  return "3,6";
 
 }
 
