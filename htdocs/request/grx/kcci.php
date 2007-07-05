@@ -30,20 +30,20 @@ function s2icon($s)
   if ($s < 17.5) return "1,6";
   if ($s < 20) return "1,7";
 
-  if ($s < 22.5) return "2,1";
-  if ($s < 25) return "2,2";
-  if ($s < 27.5) return "2,3";
-  if ($s < 30) return "2,4";
-  if ($s < 32.5) return "2,5";
-  if ($s < 35) return "2,6";
-  if ($s < 37.5) return "2,7";
+  if ($s < 22.5) return "1,8";
+  if ($s < 25) return "1,9";
+  if ($s < 27.5) return "1,10";
+  if ($s < 30) return "1,11";
+  if ($s < 32.5) return "1,12";
+  if ($s < 35) return "1,13";
+  if ($s < 37.5) return "1,14";
 
-  if ($s < 40) return "3,1";
-  if ($s < 42.5) return "3,2";
-  if ($s < 45) return "3,3";
-  if ($s < 47.5) return "3,4";
-  if ($s < 50) return "3,5";
-  return "3,6";
+  if ($s < 40) return "1,15";
+  if ($s < 42.5) return "1,16";
+  if ($s < 45) return "1,17";
+  if ($s < 47.5) return "1,18";
+  if ($s < 50) return "1,19";
+  return "1,20";
 
 }
 
