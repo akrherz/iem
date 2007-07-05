@@ -21,7 +21,7 @@ $snet = $iem->getNetwork("KCCI");
 
 function s2icon($s)
 {
-  if ($s < 2.5) return "4,1";
+  if ($s < 2.5) return "1,20";
   if ($s < 5) return "1,1";
   if ($s < 7.5) return "1,2";
   if ($s < 10) return "1,3";
@@ -47,10 +47,14 @@ function s2icon($s)
 
 }
 
+$now = time();
 
 while (list($key, $iemob) = each($snet) ){
     $mydata = $iemob->db;
     $meta = $cities["KCCI"][$key];
+    $tdiff = $now - $mydata["ts"];
+    if ($tdiff > 3600) continue;
+
 
 echo "Object: ".$meta["lat"].",".$meta["lon"]."
   Threshold: 999 
