@@ -15,7 +15,6 @@ $ts = mktime($hour,$minute,0,$month,$day,$year);
 $inFile = sprintf("/mnt/a1/ARCHIVE/data/%s/GIS/uscomp/n0r_%s.png", date("Y/m/d", $ts), date("YmdHi", $ts) );
 $outFile = sprintf("n0r_%s", date("YmdHi", $ts) );
 $zipFile = sprintf("n0r_%s.zip", date("YmdHi", $ts) );
-echo $inFile;
 if (! is_file($inFile)) die("No GIS composite found for this time!");
 
 $cmd = sprintf("/mesonet/local/bin/gdalwarp -co \"WORLDFILE=ON\" -of GTIFF %s %s.tif", $inFile, $outFile);
