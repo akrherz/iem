@@ -98,14 +98,14 @@ if ($loopts > $switchts){
 $files = "";
 
 $images = Array();
-$hrefs = Array();
+$radtimes = Array();
 for ($i=0; $i < intval($frames); $i++){
   $myuri = "$rooturl/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."$prod/n0r_". gmdate('Ymd_Hi', $loopts + ($i * (intval($interval) * 60)) ) .".png";
   $myhref = "$rooturl/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."GIS/uscomp/n0r_". gmdate('YmdHi', $loopts + ($i * (intval($interval) * 60)) ) .".png";
   $gisbase = "$rooturl/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."GIS/uscomp/";
   $files .= $myuri .",";
   $images[] = $myuri;
-  $hrefs[] = $myhref;
+  $radtimes[] = $loopts + ($i * (intval($interval) * 60));
 }
 
 /* We finally start output */
@@ -305,8 +305,9 @@ into your GIS.
 <br>
 <ul>
 <?php
-foreach ($hrefs as $value ){
-  echo "<li><a href='$value'>$value</a></li>\n";
+foreach ($radtimes as $value ){
+  $myhref = "$rooturl/archive/data/". gmdate('Y/m/d/',$value ) ."GIS/uscomp/n0r_". gmdate('YmdHi', $value ) .".png";
+  echo "<li><a href='$myhref'>$myhref</a> (<a href='$rooturl/request/gis/n0r2gtiff.php?dstr=". gmdate('YmdHi', $value) ."'>GeoTiff</a>)</li>\n";
 }
 ?>
 </ul>
