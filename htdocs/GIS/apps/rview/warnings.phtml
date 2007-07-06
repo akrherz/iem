@@ -167,7 +167,7 @@ if (intval($loop) ==  1){
    fwrite($f, "$rooturl/$url\n");
   }
   fclose($f);
-  echo "<div id=\"applet-hack\"></div><a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
+  echo "<div id=\"applet-hack\"></div><a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a> (anim_gif.php?fts=$fts)<br />";
   include ("loop.php");
   printHTML($urls);
 } else if (intval($loop) == 2){
@@ -183,7 +183,7 @@ if (intval($loop) ==  1){
    fwrite($f, "$rooturl/$url\n");
   }
   fclose($f);
-  echo "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
+  echo "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a> (anim_gif.php?fts=$fts)<br />";
 ?>
   <div id="applet-hack"><applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="<?php echo $width; ?>" height="<?php echo $height + 100; ?>" alt="You must enable Java in your browser to view the radar loop" style="float: left;">
         <param name="bottom_controls" value="startstop, looprock, step, speed, toggle, zoom">
