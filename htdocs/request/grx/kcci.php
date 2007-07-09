@@ -21,7 +21,7 @@ $snet = $iem->getNetwork("KCCI");
 
 function s2icon($s)
 {
-  if ($s < 2.5) return "1,22";
+  if ($s < 2.5) return "1,21";
   if ($s < 5) return "1,1";
   if ($s < 10) return "1,2";
   if ($s < 15) return "1,3";
