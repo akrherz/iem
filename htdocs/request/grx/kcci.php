@@ -54,7 +54,7 @@ while (list($key, $iemob) = each($snet) ){
     $meta = $cities["KCCI"][$key];
     $tdiff = $now - $mydata["ts"];
     if ($tdiff > 3600) continue;
-
+    if ($mydata["sknt"] < 2.5) $mydata["drct"] = 0;
 
 echo "Object: ".$meta["lat"].",".$meta["lon"]."
   Threshold: 999 
