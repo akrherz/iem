@@ -4,15 +4,20 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 86400);
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 86400);
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 86400);
+$emonth = isset($_GET["emonth"]) ? $_GET["emonth"] : date("m", time() - 86400);
+$eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d", time() - 86400);
+$smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m", time() );
+$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d", time() );
 $all = isset($_GET["all"]);
 
+$sts = mktime(0,0,0,$smonth, $sday, $year);
+$ets = mktime(0,0,0,$emonth, $eday, $year);
 
 $pg_conn = iemdb("other");
+pg_exec($pg_conn, "SET TIME ZONE 'GMT'");
 
 if ($all) { $sql = sprintf("SELECT * from flux%s ORDER by valid ASC", $year); }
-else { $sql = sprintf("SELECT * from flux%s WHERE date(valid) = '%s-%s-%s' ORDER by valid ASC", $year, $year, $month, $day); }
+else { $sql = sprintf("SELECT * from flux%s WHERE date(valid) >= '%s' and date(valid) <= '%s' ORDER by valid ASC", $year, date("Y-m-d", $sts), date("Y-m-d", $ets) ); }
 
 $rs = pg_exec($pg_conn, $sql);
 

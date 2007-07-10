@@ -50,18 +50,29 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 </tbody>
 </table><p>
 
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>Download Data:</b></th></tr></thead>
-<tbody><tr><td align="center">
-<h3 class="subtitle">Request Date:</h3><br />
 <form method="GET" action="dl.phtml" name="single">
-<table><tr><td><b>Year:</b></td><td><?php echo yearSelect(2002, date("Y"), "year"); ?></td></tr>
-<tr><td><b>Month:</b></td><td><?php echo monthSelect(date("m"), "month"); ?></td></tr>
-<tr><td><b>Day:</b></td><td><?php echo daySelect(date("d"), "day"); ?></td></tr></table>
+<h3>Download Data:</h3><br />
+
+<p>This form will give you all variables for the day interval of your choice.
+<br />Timestamps and date periods are in UTC.
+
+<table>
+<tr><th>Year:</th>
+  <th>Month:</th>
+  <th>Day:</th></tr>
+
+<tr>  
+  <td rowspan="2"><?php echo yearSelect(2002, date("Y"), "year"); ?></td>
+  <td><?php echo monthSelect(date("m"), "smonth"); ?></td>
+  <td><?php echo daySelect2(date("d"), "sday"); ?></td></tr>
+
+<tr>
+  <td><?php echo monthSelect(date("m"), "emonth"); ?></td>
+  <td><?php echo daySelect2(date("d"), "eday"); ?></td></tr>
+
+</table>
 <input type="submit" value="Download Date">
 </form>
-</td>
-</tr></tbody></table>
 
 <br>
 
