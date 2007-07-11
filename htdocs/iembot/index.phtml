@@ -4,8 +4,10 @@ include("$rootpath/include/wfoLocs.php");
 
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:j="http://javeline.nl/j">
-<html>
 <head>
+  <title>IEMBOT monitor</title>
+  <link rel="stylesheet" type="text/css" href="<?php echo $rooturl; ?>/css/main.css?v=0.0.1" />
+
   <j:teleport url="teleport.xml" />
   <script type="text/javascript" src="teleport_xmlrpc.js"></script>
   <script type="text/javascript">
@@ -182,6 +184,38 @@ function addWFO()
   </script>
 </head>
 <body>
+<?php include("$rootpath/include/webring.html"); ?>
+<div id="iem-main">
+<div id="iem-header">
+<div id="iem-header-logo">
+<a href="<?php echo $rooturl; ?>/"><img src="<?php echo $rooturl; ?>/images/logo_small.gif" alt="IEM" /></a>
+</div>
+                                                                                
+<div id="iem-header-title">
+<h3>Iowa Environmental Mesonet</h3>
+<h4>Iowa State University Department of Agronomy</h4>
+</div>
+                                                                                
+<div id="iem-header-items">
+<i>&nbsp;</i>
+</div>
+
+<ul id="iemmenu">
+<li><a href="<?php echo $rooturl; ?>/archive/">&middot; Archive</a></li>
+<li><a href="<?php echo $rooturl; ?>/current/">&middot; Current</a></li>
+<li><a href="<?php echo $rooturl; ?>/climate/">&middot; Climatology</a></li>
+<li><a href="<?php echo $rooturl; ?>/climodat/">&middot; Climodat</a></li>
+<li><a href="<?php echo $rooturl; ?>/cool/">&middot; Cool Stuff</a></li>
+<li><a href="<?php echo $rooturl; ?>/sites/locate.php">&middot; IEM Sites</a></li>
+<li><a href="<?php echo $rooturl; ?>/GIS/">&middot; GIS</a></li>
+<li><a href="<?php echo $rooturl; ?>/info.php">&middot; Info</a></li>
+<li><a href="<?php echo $rooturl; ?>/QC/">&middot; Quality Control</a></li>
+</ul> 
+ 
+</div><!-- End of iem-header -->
+<div id="iem-content">
+
+
 <style>
 .message {
  text-indent: -4em; 
@@ -191,7 +225,12 @@ function addWFO()
 
 <form name="myForm">
 
-<h3>IEM Chat room monitor</h3> 
+<h3><a href="<?php echo $rooturl; ?>/projects/iembot/">iembot</a> monitor</h3>
+
+<p>This page monitors iembot messages in realtime.  You can selectively 
+monitor iembot for products coming from one Weather Forecast Office (WFO)
+or monitor the entire CONUS at once!  Select which room you want to monitor
+and click "Add". 
 
 <p>Select Chatroom to monitor: <select name="wfo">
 <option value="botstalk">All iembot messages</option>
@@ -222,5 +261,4 @@ function addWFO()
 
 </form>
 
-</body>
-</html>
+<?php include("$rootpath/include/footer.php"); ?>
