@@ -194,8 +194,6 @@ function addWFO()
 <h3>IEM Chat room monitor</h3> 
 
 <p>Select Chatroom to monitor: <select name="wfo">
-  <option value="peopletalk">All People Talk
-  <option value="botstalk">All Bots Talk
 <?php
   while( list($key, $val) = each($wfos) )
   {
@@ -207,7 +205,7 @@ function addWFO()
 </select>
 <input type="submit" onClick="addWFO(); return false;" value="Add!">
 <input type="submit" onClick="clearRoom(); return false;" value="Clear Room!">
-<br /><input type="checkbox" name="iembot" value="0">Please mute iembot
+<br /><input type="hidden" name="iembot" value="0">
 
 <br />
 
