@@ -7,7 +7,16 @@
 <h3 class="heading">iembot</h3>
 
 <p><i>iembot</i> is a Jabber chat bot that relays National Weather Service issued
-text products to Jabber chat rooms hosted at the <a href="http://www.iemchat.com/">IEM Chat Project.</a>  <i>iembot</i> was written to aid the dissemination and use of NWS issued warnings by their chat partners.
+text products to Jabber chat rooms primarily hosted at the <a href="http://www.iemchat.com/">IEM Chat Project.</a>  <i>iembot</i> was written to aid the dissemination and use of NWS issued warnings by their chat partners.
+
+<h3 class="subtitle">Where to access <i>iembot</i> messages?</h3>
+
+<ul>
+ <li><a href="http://www.iemchat.com/">IEM Chat Project</a>, access restricted to project participants</li>
+ <li><a href="https://iemchat.com/public.phtml">Public Chatrooms</a> hosted by <a href="http://www.appriss.com/">Appriss Inc</a> (requires Jabber client and public Jabber account)</li>
+ <li><a href="<?php echo $rooturl; ?>/iembot/">HTML web interface</a>  anybody can view and monitor online!</li>
+ <li>Coming soon, XMPP Pubsub node!</li>
+</ul>
 
 <h3 class="subtitle">How does <i>iembot</i> work?</h3>
 
@@ -69,21 +78,51 @@ issued.  The entire process takes much less than a second.</p>
   <br /><span style="background: #ccc;">EPZ ISSUES <a href="http://mesonet.agron.iastate.edu/p.php?id=16997">THIS IS A REISSUE OF THE RIVER FLOOD WARNING FOR THE RIO GRANDE  IN EL PASO</a> for  El Paso [TX] till 7:00 AM MDT</span></li>
 </ul>
 
-<h3 class="subtitle">How can I access <i>iembot?</i></h3>
-
-<p><i>iembot</i> works day and night on two chat servers.  The first one is one
-the private iemchat.com server, which is dedicated for NWS users and their chat
-partners.  The second is a public version of this server to which anybody can
-participate.  Details on this server can be found <a href="https://iemchat.com/public.phtml">here</a>.
-
-<h3 class="subtitle"><i>iembot</i> TODO list</h3>
-
+<h3 class="subtitle">Text products iembot parses: (as of 12 Jul 2007)</h3>
 <ul>
- <li>Add support to answer user requested information</li>
- <li>Release source code on this website</li>
- <li>Add support to allow private chats</li>
+ <li>Storm Prediction Center Watches (SEL)</li>
+ <li>These following PILs with any H-VTEC, VTEC processed<br />
+<ul>
+ <li>FWW - Fire Weather Warning</li>
+ <li>CFW - Coastal Hazzard Message</li>
+ <li>TCV - Hurricane Product</li>
+ <li>RFW - Red Flag Warning</li>
+ <li>FFA - Areal Flood Watch</li>
+ <li>SVR - Severe Thunderstorm Warning</li>
+ <li>TOR - Tornado Warning</li>
+ <li>SVS - Severe Weather Statement</li>
+ <li>SMW - Special Marine Warning</li>
+ <li>MWS - Marine Weather Statement</li>
+ <li>NPW - Non-Precipitating Warning</li>
+ <li>WCN - Watch by County</li>
+ <li>WSW - Winter Weather Warning</li>
+ <li>EWW - Eye Wall Warning</li>
+ <li>FLS - Flood Statement</li>
+ <li>FLW - Flood Warning</li>
 </ul>
-
+ </li>
+ <li>Local Storm reports (LSR)</li>
+ <li>Mesoscale discussions from Storm Prediction Center (SWOMCD)</li>
+ <li>These products are presented as generic alerts with links to text<br />
+<ul>
+ <li>HLS - Hurricane Local Statement</li>
+ <li>TCPAT[0-9] - Atlantic Tropical Advisory</li>
+ <li>TCDAT[0-9] - Atlantic Tropical Discussion</li>
+ <li>FFW - Flash Flood Warning</li>
+ <li>TCM - Tropical Storm Advisory/Discussion</li>
+ <li>PSH - Post Hurricane Report</li>
+ <li>FLS - Flood Statement</li>
+ <li>FLW - Flood Warning</li>
+ <li>FFS - Flood Statement</li>
+ <li>RER - Record Event Report</li>
+ <li>ESF - Hydrological Outlook</li>
+ <li>SPS - Special Weather Statement</li>
+ <li>SPENES - NESDIS Satellite Precipitation Discussion</li>
+</ul>
+</li>
+ <li>There are some other custom local products that are routed based on
+  local needs.</li>
+</ul>
 
 <?php 
  include("$rootpath/include/footer.php"); 
