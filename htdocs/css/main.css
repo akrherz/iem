@@ -116,6 +116,11 @@ html, body, h2, h3, h4, div, p, ul, li, input {
   text-decoration: none;
 }
 
+.horiz-list li {
+  list-style: none;
+  display: inline;
+  margin-right: 10px;
+}
 
 #iem-content {
 	clear: left;
