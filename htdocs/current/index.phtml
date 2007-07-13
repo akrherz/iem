@@ -5,16 +5,9 @@ include("../../config/settings.inc.php");
 	include("$rootpath/include/header.php"); 
 ?>
 
-<div id="iem-section">
-<center><table>
-<tr><th>Surface Data</th>
-<th><a href="radar.phtml">RADAR/Sat Data</a></th>
-<th><a href="misc.phtml">Advanced Met Plots</a></th>
-<th><a href="camera.phtml">Web Cameras</a></th>
-<th>&nbsp;</th>
-</tr></table></center></div>
 
-<div class="text">
+<?php $THISPAGE = "surface"; include("headerbar.phtml"); ?>
+
 <table border=0 width=780px>
 <tr><td valign="top">
 
@@ -22,7 +15,6 @@ include("../../config/settings.inc.php");
 <ul>
  <li><a href="<?php echo $rooturl; ?>/data/mesonet.gif">Iowa Mesonet Plot</a> [<a href="loop.phtml?prod=mesonet">Loop</a>]</li>
  <li><a href="<?php echo $rooturl; ?>/data/MWmesonet.gif">Upper Mid-West</a> [<a href="loop.phtml?prod=mwmesonet">Loop</a>]</li>
- <li><a href="<?php echo $rooturl; ?>/data/iem_gray.gif">Large Font</a></li>
 </ul>
 
 <h3 class="subtitle">Zoomed In Mesonet Plots</h3>
@@ -81,6 +73,6 @@ Plots</h3>
 
 <p><a href="<?php echo $rooturl; ?>/wx/afos/">NWS Text Product Finder</a>
 
-</td></tr></table></div>
+</td></tr></table>
 
 <?php include("$rootpath/include/footer.php"); ?>

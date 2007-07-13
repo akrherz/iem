@@ -49,14 +49,8 @@ if (! $isarchive)
 	include("$rootpath/include/forms.php"); 
 ?>
 
-<div id="iem-section">
-<table>
-<tr><th><a href="index.phtml">Surface Data</a></th>
-<th><a href="radar.phtml">RADAR/Sat Data</a></th>
-<th><a href="misc.phtml">Advanced Met Plots</a></th>
-<th>Web Cameras</th>
-<th>&nbsp;</th>
-</tr></table></div>
+<?php $THISPAGE = "camera"; include("headerbar.phtml"); ?>
+
 <div class="text">
 <p>Thanks to the sponsorship of <a href="http://www.cipco.net">CIPCO</a>, the 
 <a href="http://www.schoolnet8.com/">KCCI SchoolNet</a> has been 
