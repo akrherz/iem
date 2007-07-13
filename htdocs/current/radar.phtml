@@ -15,14 +15,9 @@ function changeSite(newSite, newSname) {
 	include("$rootpath/include/header.php"); 
 ?>
 
-<div id="iem-section">
-<center><table>
-<tr><th><a href="index.phtml">Surface Data</a></th>
-<th>RADAR/Sat Data</th>
-<th><a href="misc.phtml">Advanced Met Plots</a></th>
-<th><a href="camera.phtml">Web Cameras</a></th>
-<th>&nbsp;</th>
-</tr></table></center></div>
+
+<?php $THISPAGE = "radar"; include("headerbar.phtml"); ?>
+
 
 <div id="iem-radar"><div class="text">
 <p><table><tr><td class="heading" colspan="2">RADAR Data Selector</td></tr>
