@@ -59,7 +59,7 @@ while (list($key, $iemob) = each($snet) ){
 echo "Object: ".$meta["lat"].",".$meta["lon"]."
   Threshold: 999 
   Icon: 0,0,". $mydata["drct"] .",". s2icon( floatval($mydata["sknt"]) ) ."
-  Icon: 0,0,000,2,5,\"".$meta["city"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n\" 
+  Icon: 0,0,000,2,13,\"".$meta["city"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n\" 
   Threshold: 150
   Text:  -17, 13, 1, \" ".$mydata["tmpf"]." \" 
   Text:  -17, -13, 1, \" ".$mydata["dwpf"]." \" 
