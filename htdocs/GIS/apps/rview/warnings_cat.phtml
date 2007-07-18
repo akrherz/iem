@@ -38,6 +38,8 @@ $wfo = isset($_GET["wfo"]) ? $_GET["wfo"] : "MPX";
 $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? $_GET["phenomena"] : "SV";
 $significance = isset($_GET["significance"]) ? $_GET["significance"] : "W";
+$warngeo = isset($_GET["warngeo"]) ? $_GET["warngeo"] : "both";
+if ($phenomena != "SV" && $phenomena != "TO") $warngeo = "county";
 
 include("$rootpath/include/header.php");
 
@@ -79,11 +81,11 @@ $radar_url = sprintf("%s/GIS/apps/rview/warnings.phtml?archive=yes&tz=UTC&cu=0&y
 
 $next_eventid = $eventid + 1;
 $last_eventid = $eventid - 1;
-$next_link = sprintf("<a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s\">Next</a> ", $rooturl, $year, $row["wfo"], $phenomena, $next_eventid, $significance);
+$next_link = sprintf("<a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s\">Next</a> ", $rooturl, $year, $row["wfo"], $phenomena, $next_eventid, $significance, $warngeo);
 
 $last_link = "";
 if ($last_eventid > 0)
-  $last_link = sprintf(" <a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s\">Previous</a> ", $rooturl, $year, $row["wfo"], $phenomena, $last_eventid, $significance);
+  $last_link = sprintf(" <a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s\">Previous</a> ", $rooturl, $year, $row["wfo"], $phenomena, $last_eventid, $significance, $warngeo);
 
 
 $ts = determine_time_base($issue);
@@ -93,17 +95,13 @@ if (time() < ($ts + 450)) $isarchive = 0;
 $imgi = 0;
 $tzoff = 0;
 $interval = 5;
-$width = 400;
-$height = 300;
-/* $zoom = ($y1 - $y0) > ($x1 - $x0) ? ($y1 - $y0) * 140 : ($x1 - $x0) * 140; 
-$lat0 = $y1 - $y0;
-$lon0 = $x1 - $x0;
-*/
-$layers = array("uscounties", "warnings", "nexrad");
+$width = 500;
+$height = 400;
+$layers = array("uscounties_and_name", "warnings", "nexrad");
 $lsrwindow = 0;
 $lsrlook = 0;
-$warngeo = "both";
 $maptitle = "IEM NEXRAD valid:";
+$showOnlyOne = 1;
 dl($mapscript);
 include("warnings_plot.php");
 
@@ -152,17 +150,27 @@ while( list($key, $value) = each($vtec_significance) ){
 <?php echo "</td></tr>
 <tr><td>Status:</td><td>". $vtec_status[ $row["status"] ] ."</td></tr>
 <tr><td>Issued:</td><td>". substr($row["issue"],0,16) ." GMT</td></tr>
-<tr><td>Expires:</td><td>". substr($row["expire"],0,16) ." GMT</td></tr>
+<tr><td>Expires:</td><td>". substr($row["expire"],0,16) ." GMT</td></tr>"; ?>
+
+<tr><td>Warning<br />geography:</td>
+<td><select name="warngeo">
+ <option value="both" <?php if ($warngeo == "both") echo "SELECTED"; ?>>County + Polygon</option>
+ <option value="county" <?php if ($warngeo == "county") echo "SELECTED"; ?>>County Only</option>
+ <option value="sbw" <?php if ($warngeo == "sbw") echo "SELECTED"; ?>>Storm based warning</option>
+</select></td></tr>
+
 </table>
-<input type=\"submit\" value=\"Load Product\">
+<input type="submit" value="Load Product">
 </form>
 <h4>Links:</h4>
 <ul>
- $cow
- <li><a href=\"$gis_url\">Download Shapefile of Warnings</a></li>
- <li><a href=\"$radar_url\">Interactive RADAR Display</a></li>
+ <?php echo $cow; ?>
+ <li><a href="<?php echo $gis_url; ?>">Download Shapefile of Warnings</a></li>
+ <li><a href="<?php echo $radar_url; ?>">Interactive RADAR Display</a></li>
 </ul>
-</td><td><img src=\"$url\">";
+</td><td><img src="<?php echo $url; ?>">
+
+<?php
 if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA"))
 {
   /* Lets go dig for LSR reports */
