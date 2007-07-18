@@ -138,6 +138,9 @@ $interstates->set("status", in_array("interstates", $layers));
 $clayer = $map->getlayerbyname("uscounties");
 $clayer->set("status", in_array("uscounties", $layers) );
 
+$clayer2 = $map->getlayerbyname("uscounties_and_name");
+$clayer2->set("status", in_array("uscounties_and_name", $layers) );
+
 $cwas = $map->getlayerbyname("cwas");
 $cwas->set("status", in_array("cwas", $layers) );
 
@@ -150,6 +153,7 @@ $watches->set("status", (in_array("watches", $layers)) );
 //$watches->setFilter("expired > '".$db_ts."' and issued <= '".$db_ts."'");
 $watches->set("data", "geom from (select type as wtype, geom, oid from watches where expired > '".$db_ts."' and issued <= '".$db_ts."') as foo using unique oid using srid=4326");
 
+
 if ($warngeo == "both" or $warngeo == "county")
 {
   $c0 = $map->getlayerbyname("warnings0_c");
@@ -157,12 +161,16 @@ if ($warngeo == "both" or $warngeo == "county")
   $c0->set("status", in_array("warnings", $layers) );
   if ($isarchive)
   { 
-   $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+   $c0->set("data", "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
   }else {
-   $sql = "geom from (select significance, phenomena, geom, oid from warnings WHERE expire > '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326";
+   $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings WHERE expire > '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326";
    $c0->set("data", $sql);
   }
   $q = "expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'";
+  if (isset($showOnlyOne)){
+    $c0->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
+  }
+
 }
 
 if ($warngeo == "both")
@@ -172,10 +180,13 @@ if ($warngeo == "both")
   $p0->set("status", in_array("warnings", $layers) );
   if ($isarchive)
   { 
-    $sql = "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
+    $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
     $p0->set("data", $sql);
   } else {
-   $p0->set("data", "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
+   $p0->set("data", "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
+  }
+  if (isset($showOnlyOne)){
+    $p0->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
   }
 }
 
@@ -186,10 +197,13 @@ if ($warngeo == "sbw")
   $p0->set("status", in_array("warnings", $layers) );
   if ($isarchive)
   { 
-    $sql = "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
+    $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
     $p0->set("data", $sql);
   } else {
-   $p0->set("data", "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
+   $p0->set("data", "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
+  }
+  if (isset($showOnlyOne)){
+    $p0->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
   }
 
 
@@ -225,6 +239,7 @@ $goes_west1V->draw($img);
 $goes_east04I4->draw($img);
 $goes_west04I4->draw($img);
 $clayer->draw( $img );
+$clayer2->draw( $img );
 $stlayer->draw( $img);
 $lakes->draw($img);
 $interstates->draw($img);

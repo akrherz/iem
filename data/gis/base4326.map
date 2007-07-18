@@ -162,6 +162,32 @@ END
 
 # Counites
 LAYER
+  NAME uscounties_and_name
+  STATUS OFF
+  TYPE POLYGON
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  LABELITEM "NAME"
+  CLASS
+    OUTLINECOLOR 255 165 0
+    LABEL
+      MINFEATURESIZE 50
+      OUTLINECOLOR 0 0 0
+      COLOR 255 255 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION CC
+      PARTIALS FALSE
+    END
+  END
+END
+
+
+
+# Counites
+LAYER
   NAME iacounties
   STATUS OFF
   TYPE LINE
