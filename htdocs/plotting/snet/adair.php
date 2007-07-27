@@ -3,9 +3,9 @@
 // Cool.....
 include("../../../config/settings.inc.php");
 
-$fcontents = file("data/SCHI4_060622.txt");
-$sts = mktime(9,0,0,6,22,2006);
-$ets = mktime(10,0,0,6,22,2006);
+$fcontents = file("data/SADI4_070726.txt");
+$sts = mktime(23,0,0,7,26,2007);
+$ets = mktime(23,59,0,7,26,2007);
 
 $mph = array();
 $drct = array();
@@ -80,12 +80,12 @@ $graph->SetYScale(1,'lin');
 $graph->SetColor("#f0f0f0");
 $graph->img->SetMargin(55,110,55,60);
 
-$graph->title->Set("Chariton, Iowa SchoolNet Sub 1 Minute Time Series");
+$graph->title->Set("Adair, Iowa SchoolNet Sub 1 Minute Time Series");
 $graph->title->SetFont(FF_FONT1,FS_BOLD,20);
-$graph->subtitle->Set("Tama SchoolNet");
+$graph->subtitle->Set("Adair SchoolNet");
 
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
-$graph->xaxis->SetTitle("Times on the morning of 22 June 2006");
+$graph->xaxis->SetTitle("Times on the evening of 26 Jul 2007");
 $graph->xaxis->SetTitleMargin(27);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
