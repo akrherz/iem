@@ -7,6 +7,11 @@ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 
+$titleDate = strftime("%b %d, %Y", $myTime);
+
+$dirRef = strftime("%Y/%m/%d", $myTime);
+$fcontents = file("/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0007.dat");
+
 ?>
 <?php include("$rootpath/include/forms.php"); ?>
 
@@ -25,6 +30,7 @@ every minute. Note that the archive begins 17 Aug 2006.</p>
   <input type="submit" value="Make Plot">
 </form>
 
+<br /><a href="<?php echo $dataurl; ?>">View raw data file</a><br />
 <p>
 <?php include("graphs-inc.php"); ?>
 
