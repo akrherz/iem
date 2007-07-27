@@ -10,7 +10,9 @@ $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 $titleDate = strftime("%b %d, %Y", $myTime);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
-$fcontents = file("/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0007.dat");
+$dataurl = "http://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0007
+.dat";
+
 
 ?>
 <?php include("$rootpath/include/forms.php"); ?>
