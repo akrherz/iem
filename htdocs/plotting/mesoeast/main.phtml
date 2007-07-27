@@ -9,7 +9,7 @@ $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 $myTime = mktime(0,0,0,$month,$day,$year);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
-$dataurl = file("http://mesonet.agron.iastate.edu/data/$dirRef/text/ot/ot0006.dat");
+$dataurl = "http://mesonet.agron.iastate.edu/data/$dirRef/text/ot/ot0006.dat";
 
 ?>
 
