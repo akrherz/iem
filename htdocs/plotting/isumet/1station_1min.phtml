@@ -6,6 +6,10 @@ include("$rootpath/include/header.php");
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$myTime = mktime(0,0,0,$month, $day, $year);
+
+$dirRef = strftime("%Y/%m/%d", $myTime);
+$dataurl = "http://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0002.dat";
 
 ?>
 <?php include("$rootpath/include/forms.php"); ?>
@@ -70,7 +74,7 @@ the archive <br> begins 15 Jan 2003.</p>
   <input type="submit" value="Make Plot"></form>
 
 </td></tr><tr><td>
-
+<a href="<?php echo $dataurl; ?>">View raw data file</a><br />
 <BR>
 <img src="http://mesonet.agron.iastate.edu/plotting/isumet/1min.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
 <BR>
