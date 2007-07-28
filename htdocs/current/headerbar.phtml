@@ -12,11 +12,11 @@ function listItem($url, $ltext, $name, $selected)
 <ul style="background: #fff; margin: 2px; padding-left: 5px;">
  <li><strong style="color: #bdf;">Current Data:</strong></li>
 <?php
-  echo listItem("index.phtml", "Surface Data", "surface", $THISPAGE);
-  echo listItem("radar.phtml", "RADAR & Satellite", "radar", $THISPAGE);
-  echo listItem("severe.phtml", "Severe Weather", "severe", $THISPAGE);
-  echo listItem("misc.phtml", "Advanced Products", "advanced", $THISPAGE);
-  echo listItem("camera.phtml", "Web Cameras", "camera", $THISPAGE);
+  echo listItem($rooturl."/current/index.phtml", "Surface Data", "surface", $THISPAGE);
+  echo listItem($rooturl."/current/radar.phtml", "RADAR & Satellite", "radar", $THISPAGE);
+  echo listItem($rooturl."/current/severe.phtml", "Severe Weather", "severe", $THISPAGE);
+  echo listItem($rooturl."/current/misc.phtml", "Advanced Products", "advanced", $THISPAGE);
+  echo listItem($rooturl."/current/camera.phtml", "Web Cameras", "camera", $THISPAGE);
 ?>
 </ul>
 </div>
