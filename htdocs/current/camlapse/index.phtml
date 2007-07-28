@@ -1,0 +1,80 @@
+<?php 
+include("../../../config/settings.inc.php");
+	$TITLE = "IEM | Webcam Lapse Player";
+	include("$rootpath/include/header.php"); 
+$c = Array(
+  "algona" => "Algona",
+  "ames" => "Ames",
+  "zoo" => "Blank Park Zoo",
+  "rathbun" => "Lake Rathbun",
+  "chariton" => "Chariton",
+  "clarion" => "Clarion",
+  "creston" => "Creston",
+  "glidden" => "Glidden",
+  "greenfield" => "Greenfield",
+  "humboldt" => "Humboldt",
+  "iemwest" => "ISU Ag Farm",
+  "indy" => "Indianola",
+  "jeff" => "Jefferson",
+  "knoxville" => "Knoxville",
+  "lamoni" => "Lamoni",
+  "madrid" => "Madrid",
+  "newton" => "Newton",
+  "nevada" => "Nevada",
+  "panora" => "Panora",
+  "pella" => "Pella",
+  "saylor" => "Saylorville Lake",
+  "stratford" => "Stratford",
+  "rock" => "Rockwell City",
+  "tama" => "Tama",
+  "web" => "Webster City",
+  "winterset" => "Winterset");
+?>
+<?php $THISPAGE = "camera"; include("../headerbar.phtml"); ?>
+
+
+<form name="theform">
+<div style="background: #eee; border: 1px solid #000; margin: 5px; padding: 5px; width: 650px;">
+The <strong>Web Camera Movie Player</strong> is a Flash application that plays
+recent movies taken from the webcam network.  Please note the timestamps to 
+see when this movie was generated.
+<div id="myPlayer"></div>
+<br /><strong>Select Camera:</strong>
+<select name="mycam" onchange="myloader();">
+<?php
+while( list($key, $value) = each($c) )
+{
+  echo "<option value=\"$key\">$value \n";
+}
+?>
+</select>
+<strong>Select Lapse:</strong>
+<select name="mylapse" onchange="myloader()">
+ <option value="sunrise">Sunrise 
+ <option value="morning">Morning (8 AM - 11 AM) 
+ <option value="afternoon">Afternoon (1 PM - 4 PM)
+ <option value="eve">Sunset 
+</select>
+</div>
+</form>
+
+<p>Application powered by <a href="http://labs.adobe.com/wiki/index.php/Flash-Ajax_Video_Component">FAVideo</a>
+
+<script src="FAVideo.js" type="text/javascript"></script>
+<script src="AC_RunActiveContent.js" type="text/javascript"></script>
+<script>
+player = new FAVideo("myPlayer");
+player.setSize(640,480);
+myloader();
+player.setAutoPlay(true);
+
+function myloader()
+{
+  var url = "http://mesonet.agron.iastate.edu/onsite/lapses/auto/"+ document.theform.mycam.value +"_"+ document.theform.mylapse.value +".flv";
+  player.load(url);
+  player.play();
+}
+
+</script>
+
+<?php include("$rootpath/include/footer.php"); ?>
