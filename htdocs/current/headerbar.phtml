@@ -4,7 +4,7 @@ function listItem($url, $ltext, $name, $selected)
   if ($name != $selected)
     return "<li><a href=\"$url\">$ltext</a></li>\n";
 
-  return "<li><strong style=\"color: #f00;\">$ltext</strong></li>\n";
+  return "<li><a href=\"$url\"><strong style=\"color: #f00;\">$ltext</strong></a></li>\n";
 }
 
 ?>
