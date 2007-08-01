@@ -57,7 +57,7 @@ for($i=0;$row=@pg_fetch_array($result,$i);$i++)
 }
 $s .= "</table>";
 
-if (getenv("REMOTE_ADDR") == "69.5.139.240" )
+if (getenv("REMOTE_ADDR") == "205.241.141.66" )
 {
  $s = "<img src=\"images/smokey_1021.jpg\" style=\"float: left; margin: 5px;\">
 Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 98 weeks now!  Hi Smokey! Another fancy Wednesday and the last one at your apartment.  Darly have to figure out your new numbers quickly to make next Wednesday work, but lets just take one day at a time and it will work out!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
