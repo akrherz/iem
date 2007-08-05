@@ -8,6 +8,7 @@ $networks = Array(
  "DCP"  => Array("name" => "DCP (GEOS Data Collection Platforms)"),
  "ISUAG"  => Array("name" => "Iowa State AgClimate"),
  "IA_COOP"  => Array("name" => "Iowa NWS COOP Observers"),
+ "IACOCORAHS"  => Array("name" => "Iowa CoCoRaHS Observers"),
  "KCCI"  => Array("name" => "KCCI SchoolNET8 Stations"),
  "KELO"  => Array("name" => "KELO WeatherNet Stations"),
  "KIMT"  => Array("name" => "KIMT StormNet Stations"),
