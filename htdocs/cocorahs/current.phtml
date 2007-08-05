@@ -1,0 +1,161 @@
+<?php 
+include("../../config/settings.inc.php");
+$network = isset($_GET['network']) ? $_GET['network'] : 'IACOCORAHS'; 
+$sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
+?>
+
+<?php  
+$TITLE = "IEM | CoCoRaHS | Last Observation";
+$HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+	<!--//BEGIN Script
+	function new_window(url) {
+ 	link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
+	}
+	//END Script-->
+	</script>
+<script type="text/javascript" src="/js/tableruler.js"></script>
+<script type="text/javascript">
+    window.onload=function(){tableruler();}
+</script>';
+include("$rootpath/include/header.php"); ?>
+<div class="text">
+<?php
+ include("$rootpath/include/all_locs.php");
+ include("$rootpath/include/iemaccess.php");
+ include("$rootpath/include/iemaccessob.php");
+
+ $iem = new IEMAccess();
+ $net = $iem->getNetwork($network);
+
+ $db = Array();
+ while (list($site, $iemob) = each($net) ){
+  $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"");
+  $db[$site]['ts'] = $iemob->ts;
+  $db[$site]['sid'] = $site;
+  $db[$site]['sname'] = $iemob->db["sname"];
+  $db[$site]['county'] = $cities[$site]["county"];
+  if ( date("Ymd") != date("Ymd", $iemob->ts) ){
+    continue;
+  }
+  $db[$site]['pday'] = $iemob->db["pday"];
+  $db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : " ";
+  $db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : " ";
+  $db[$site]["ratio"] = -1;
+  if ($db[$site]["snow"] > 0.001 && $db[$site]["pday"] > 0.001)
+   {
+     $db[$site]["ratio"] = intval( $db[$site]["snow"] / $db[$site]["pday"] );
+   }
+ }
+
+function aSortBySecondIndex($multiArray, $secondIndex) {
+        while (list($firstIndex, ) = each($multiArray))
+                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
+        while (list($firstIndex, ) = each($indexMap))
+                if (is_numeric($firstIndex))
+                        $sortedArray[] = $multiArray[$firstIndex];
+                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+        return $sortedArray;
+}
+
+$db = aSortBySecondIndex($db, $sortcol);
+
+$cols = Array("ts" => "Valid", "county" => "County",
+  "sid" => "Site ID", "sname" => "Station Name",
+  "tmpf" => "Ob Temperature", "max_tmpf" => "24 hour High",
+  "min_tmpf" => "24 hour Low", "snow" => "24 hour Snowfall",
+  "snowd" => "Snowfall Depth", "pday" => "24 hour rainfall",
+  "phour" => "Rainfall One Hour");
+?>
+
+<?php $current_network = "CoCoRaHS"; include("$rootpath/include/current_bar.inc.php"); ?>
+
+<form method="GET" action="current.phtml" name="stctrl">
+<input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
+<b>Show State:</b><select name="network">
+  <option value="IACOCORAHS" <?php if ($network == "IACOCORAHS") echo "SELECTED"; ?>>Iowa
+</select>
+<input type="submit" value="Go!">
+</form>
+
+
+<?php
+echo "<p>Sorted by: ". $cols[$sortcol] ;
+
+
+ $baseurl = "current.phtml?network=$network&sortcol=";
+?>
+<form name="st" action="/my/current.phtml" method="GET">
+<table style="width: 100%; font-size: 10pt;" class="ruler">
+<thead>
+<tr>
+  <th rowspan=2>Add:</th>
+  <th rowspan=2><a href="<?php echo $baseurl; ?>sid">SiteID:</a></th>
+  <th rowspan=2><a href="<?php echo $baseurl; ?>sname">Station Name:</a></th>
+  <th rowspan=2><a href="<?php echo $baseurl; ?>county">County:</a></th>
+  <th rowspan=2><a href="<?php echo $baseurl; ?>ts">Valid:</a></th>
+  <th colspan=4>Hydro</th></tr>
+
+<tr>
+  <th><a href="<?php echo $baseurl; ?>pday">24hour Rain</a></th>
+  <th><a href="<?php echo $baseurl; ?>snow">Snowfall</a></th>
+  <th><a href="<?php echo $baseurl; ?>ratio">Ratio</a></th>
+  <th><a href="<?php echo $baseurl; ?>snowd">Snow Depth</a></th>
+</tr></thead>
+<tbody>
+<?php
+ $oddrow = true;
+ $now = time();
+ while (list($site, $value) = each($db) ){
+   $oddrow = ! $oddrow;
+   $tdiff = $now - $value["ts"];
+   if ( intval( date("Y", $value["ts"]) ) < 2003 ) continue;
+
+   echo "<tr ";
+   if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
+   echo "><th><input type=\"checkbox\" name=\"st[]\"
+   value=\"".$site."\"></th><td> $site </td>
+    <td>". $value["sname"] ."</td>
+    <td>". $value["county"] ."</td>";
+   echo "<td ";
+   if ($tdiff > (24*3600) || date("Ymd") != date("Ymd", $value["ts"]) ){
+     echo 'bgcolor="red">'. strftime("%d %b %I:%M %p", $value["ts"]) .'</td>';
+   } else {
+     echo ">". strftime("%I:%M %p", $value["ts"]) ."</td>";
+   }
+
+   if ( date("Ymd") != date("Ymd", $value["ts"]) ){
+     echo "<td colspan=\"6\">No report for today</td>";
+     continue;
+   }
+
+   if ($value["pday"] == 0.0001) $value["pday"] = "T";
+   if ($value["pday"] < 0) $value["pday"] = "M";
+   if ($value["snow"] == 0.0001) $value["snow"] = "T";
+   if ($value["snow"] < 0) $value["snow"] = "M";
+
+   echo "<td>". $value["pday"] ."</td>";
+    echo "<td>". $value["snow"] ."</td>";
+    if ($value["ratio"] > 0) echo "<td>". $value["ratio"] ."</td>";
+    else echo "<td></td>";
+    echo "<td>". $value["snowd"] ."</td>";
+   echo "</tr>";
+ }
+?>
+</tbody><tfoot>
+<tr>
+ <td colspan=5>&nbsp;</td>
+<?php $c = "javascript:new_window('$rooturl/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network&var="; ?>
+ <td><a href="<?php echo $c; ?>pday');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>snow');">Plot</a></td>
+ <td></td>
+ <td><a href="<?php echo $c; ?>snowd');">Plot</a></td>
+</tr></tfoot>
+
+<?php
+ echo "</table>";
+ echo "<input type=\"submit\" value=\"Add to Favorites\">\n</form>";
+?>
+</div>
+
+<?php include("$rootpath/include/footer.php");
+?>

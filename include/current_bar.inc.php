@@ -6,6 +6,7 @@
   $d = Array(
     "ASOS" => Array("url" => "$rooturl/ASOS/current.phtml"),
     "AWOS" => Array("url" => "$rooturl/AWOS/current.phtml"),
+    "CoCoRaHS" => Array("url" => "$rooturl/cocorahs/current.phtml"),
     "COOP" => Array("url" => "$rooturl/COOP/current.phtml"),
     "DCP" => Array("url" => "$rooturl/DCP/current.phtml"),
     "SchoolNet" => Array("url" => "$rooturl/schoolnet/current.phtml"),
@@ -14,7 +15,6 @@
     "RWIS_SF" => Array("url" => "$rooturl/RWIS/currentSF.phtml"),
     "SCAN" => Array("url" => "$rooturl/scan/current.phtml"),
     "My Favorites" => Array("url" => "$rooturl/my/current.phtml"),
-    "Road Conditions" => Array("url" => "$rooturl/current/rc.phtml"),
     "All" => Array("url" => "$rooturl/current/all.phtml") );
   
   $i = 0;
