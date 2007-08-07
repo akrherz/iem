@@ -23,6 +23,7 @@
  "GGI" => array("city" => "GRINNELL", "id" => "GGI", "lat" => "41.70916", "lon" => "-92.73491"),
  "HNR" => array("city" => "HARLAN", "id" => "HNR", "lat" => "41.59", "lon" => "-95.34"),
  "ICL" => array("city" => "CLARINDA", "id" => "ICL", "lat" => "40.72", "lon" => "-95.03"),
+"IFA" => array("city" => "Iowa Falls", "id" => "IFA", "lat" => "42.4707864", "lon" => "-93.2699536", "network" => "AWOS", "county" => "Hardin", "climate_site" => "ia4142"),
  "IIB" => array("city" => "INDEPENDENCE", "id" => "IIB", "lat" => "42.45", "lon" => "-91.95"),
  "IKV" => array("city" => "ANKENY", "id" => "IKV", "lat" => "41.69", "lon" => "-93.57"),
  "LRJ" => array("city" => "LE MARS", "id" => "LRJ", "lat" => "42.78", "lon" => "-96.2"),
@@ -39,6 +40,7 @@
  "SHL" => array("city" => "SHELDON", "id" => "SHL", "lat" => "43.22", "lon" => "-95.83"),
  "SLB" => array("city" => "STORM LAKE", "id" => "SLB", "lat" => "42.6", "lon" => "-95.23"),
  "TNU" => array("city" => "NEWTON MUNI", "id" => "TNU", "lat" => "41.68", "lon" => "-93.02"),
+"TVK" => array("city" => "Centerville", "id" => "TVK", "lat" => "40.6839031", "lon" => "-92.9010333", "network" => "AWOS", "county" => "Appanoose", "climate_site" => "ia1354"),
  "VTI" => array("city" => "VINTON", "id" => "VTI", "lat" => "42.22", "lon" => "-92.02")
  );
 ?>
