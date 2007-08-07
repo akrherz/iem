@@ -117,9 +117,9 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
  $oddrow = true;
  $now = time();
  while (list($site, $value) = each($db) ){
-   $oddrow = ! $oddrow;
    $tdiff = $now - $value["ts"];
    if ( intval( date("Y", $value["ts"]) ) < 2003 ) continue;
+   $oddrow = ! $oddrow;
 
    echo "<tr ";
    if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
@@ -154,6 +154,7 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
  <td colspan=5>&nbsp;</td>
 <?php $c = "javascript:new_window('$rooturl/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network&var="; ?>
  <td><a href="<?php echo $c; ?>pday');">Plot</a></td>
+ <td></td>
  <td><a href="<?php echo $c; ?>snow');">Plot</a></td>
  <td></td>
  <td><a href="<?php echo $c; ?>snowd');">Plot</a></td>
