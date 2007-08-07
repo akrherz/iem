@@ -5,11 +5,12 @@ include("$rootpath/include/database.inc.php");
 include("$rootpath/include/snet_locs.php");
 
 $db_ts = strftime("%Y-%m-%d %H:%M", $ts );
+$cam_ts = strftime("%Y-%m-%d %H:%M", $radts );
 
 $cdrct = Array();
 $sql = "SELECT * from camera_current";
 if ($isarchive)
-  $sql = "SELECT * from camera_log WHERE valid = '$db_ts'";
+  $sql = "SELECT * from camera_log WHERE valid = '$cam_ts'";
 
 $conn = iemdb("mesosite");
 $rs = pg_exec($conn, $sql);
