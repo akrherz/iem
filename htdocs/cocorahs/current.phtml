@@ -20,7 +20,9 @@ $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
 include("$rootpath/include/header.php"); ?>
 <div class="text">
 <?php
- include("$rootpath/include/all_locs.php");
+ include("$rootpath/include/network.php");
+ $nt = new NetworkTable("IACOCORAHS");
+
  include("$rootpath/include/iemaccess.php");
  include("$rootpath/include/iemaccessob.php");
 
@@ -33,7 +35,7 @@ include("$rootpath/include/header.php"); ?>
   $db[$site]['ts'] = $iemob->ts;
   $db[$site]['sid'] = $site;
   $db[$site]['sname'] = $iemob->db["sname"];
-  $db[$site]['county'] = $cities[$site]["county"];
+  $db[$site]['county'] = $nt->table[$site]["county"];
   if ( date("Ymd") != date("Ymd", $iemob->ts) ){
     continue;
   }
