@@ -29,11 +29,11 @@ include("$rootpath/include/header.php"); ?>
 
  /* Compute monthly rainfall totals! */
  $dbconn = iemdb("access");
- $sql = "SELECT station, sum(pday) as pmonth from summary WHERE network = 'IACOCORAHS' and pday >= 0 and extract(month from now()) = extract(month from day) GROUP by station";
+ $sql = "SELECT station, sum(case WHEN pday < 0 THEN 0 ELSE pday END) as pmonth, sum(case WHEN pday < 0 THEN 1 ELSE 0 END) as missing from summary WHERE network = 'IACOCORAHS' and extract(month from now()) = extract(month from day) GROUP by station";
  $rs = pg_exec($dbconn, $sql);
  $monthDict = Array();
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){ 
-   $monthDict[ $row["station"] ] = round($row["pmonth"],2);
+   $monthDict[ $row["station"] ] = Array("accum" => round($row["pmonth"],2), "missing" => $row["missing"] );
  }
 
  $iem = new IEMAccess();
@@ -41,12 +41,13 @@ include("$rootpath/include/header.php"); ?>
 
  $db = Array();
  while (list($site, $iemob) = each($net) ){
-  $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"", 'pmonth'=>"");
+  $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"", 'pmonth'=>"", 'pmiss' => "");
   $db[$site]['ts'] = $iemob->ts;
   $db[$site]['sid'] = $site;
   $db[$site]['sname'] = $iemob->db["sname"];
   $db[$site]['county'] = $nt->table[$site]["county"];
-  $db[$site]['pmonth'] = @$monthDict[$site];
+  $db[$site]['pmonth'] = @$monthDict[$site]["accum"];
+  $db[$site]['pmiss'] = @$monthDict[$site]["missing"];
   $db[$site]['pday'] = $iemob->db["ob_pday"];
   $db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : " ";
   $db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : " ";
@@ -93,7 +94,7 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
 
 
  $baseurl = "current.phtml?network=$network&sortcol=";
-?>
+?> . The number of observations missing for this month is shown in parenthesis.
 <form name="st" action="/my/current.phtml" method="GET">
 <table style="width: 100%; font-size: 10pt;" class="ruler" border="1">
 <thead>
@@ -141,7 +142,9 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
    if ($value["snow"] < 0) $value["snow"] = "M";
 
    echo "<td>". $value["pday"] ."</td>";
-   echo "<td>". $value["pmonth"] ."</td>";
+   echo "<td>". $value["pmonth"];
+   if ($value["pmiss"] > 0) echo " (". $value["pmiss"] .")";
+    echo "</td>";
     echo "<td>". $value["snow"] ."</td>";
     if ($value["ratio"] > 0) echo "<td>". $value["ratio"] ."</td>";
     else echo "<td></td>";
