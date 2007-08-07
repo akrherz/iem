@@ -6,7 +6,19 @@ include("$rootpath/include/snet_locs.php");
 
 $db_ts = strftime("%Y-%m-%d %H:%M", $ts );
 
+$cdrct = Array();
+$sql = "SELECT * from camera_current";
+if ($isarchive)
+  $sql = "SELECT * from camera_log WHERE valid = '$db_ts'";
+
+$conn = iemdb("mesosite");
+$rs = pg_exec($conn, $sql);
+for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+{  $cdrct[ $row["cam"] ] = $row["drct"]; }
+
+
 dl($mapscript);
+
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 $map->setExtent(-95.0,40.45,-92.1,43.3);
 $map->set("width", 320);
@@ -47,20 +59,34 @@ if ($isarchive)
 $cp = ms_newLayerObj($map);
 $cp->set("type", MS_SHAPE_POINT);
 $cp->set("status", MS_ON);
+$cp->set("labelcache", MS_OFF);
 $cl = ms_newClassObj($cp);
 $cl->label->set("type", MS_BITMAP);
 $cl->label->set("size", MS_MEDIUM);
-$cl->label->set("position", MS_UR);
+$cl->label->set("position", MS_CR);
 $cl->label->set("force", MS_ON);
+$cl->label->set("offsetx", 6);
+$cl->label->set("offsety", 0);
 $cl->label->outlinecolor->setRGB(255, 255, 255);
-$sl = ms_newStyleObj($cl);
-$sl->set("symbolname", "circle");
-$sl->set("size", 8);
-$sl->color->setRGB(255, 255, 255);
-$sl = ms_newStyleObj($cl);
-$sl->set("symbolname", "circle");
-$sl->set("size", 6);
-$sl->color->setRGB(0, 0, 0);
+
+$cl2 = ms_newClassObj($cp);
+$cl2->label->set("type", MS_TRUETYPE);
+$cl2->label->set("size", "10");
+$cl2->label->set("font", "esri34");
+$cl2->label->set("position", MS_CC);
+$cl2->label->set("force", MS_ON);
+$cl2->label->set("partials", MS_ON);
+$cl2->label->outlinecolor->setRGB(0, 0, 0);
+$cl2->label->color->setRGB(255, 255, 255);
+
+//$sl = ms_newStyleObj($cl);
+//$sl->set("symbolname", "arrow");
+//$sl->set("size", 8);
+//$sl->color->setRGB(255, 255, 255);
+//$sl = ms_newStyleObj($cl);
+//$sl->set("symbolname", "circle");
+//$sl->set("size", 6);
+//$sl->color->setRGB(0, 0, 0);
 
 
 $img = $map->prepareImage();
@@ -78,6 +104,12 @@ while (list($key, $val) = each($cameras))
    $pt = ms_newPointObj();
    $pt->setXY($cities["KCCI"][$key]["lon"], $cities["KCCI"][$key]["lat"], 0);
    $pt->draw($map, $cp, $img, 0, $cameras[$key]['num'] );
+   $pt->free();
+
+   $pt = ms_newPointObj();
+   $pt->setXY($cities["KCCI"][$key]["lon"], $cities["KCCI"][$key]["lat"], 0);
+   $cl2->label->set("angle",  (0 - $cdrct[$key]) + 90 );
+   $pt->draw($map, $cp, $img, 1, 'a' );
    $pt->free();
 
 }
