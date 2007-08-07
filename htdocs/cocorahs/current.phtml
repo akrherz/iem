@@ -25,21 +25,29 @@ include("$rootpath/include/header.php"); ?>
 
  include("$rootpath/include/iemaccess.php");
  include("$rootpath/include/iemaccessob.php");
+ include_once("$rootpath/include/database.inc.php");
+
+ /* Compute monthly rainfall totals! */
+ $dbconn = iemdb("access");
+ $sql = "SELECT station, sum(pday) as pmonth from summary WHERE network = 'IACOCORAHS' and pday >= 0 and extract(month from now()) = extract(month from day) GROUP by station";
+ $rs = pg_exec($dbconn, $sql);
+ $monthDict = Array();
+ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){ 
+   $monthDict[ $row["station"] ] = round($row["pmonth"],2);
+ }
 
  $iem = new IEMAccess();
  $net = $iem->getNetwork($network);
 
  $db = Array();
  while (list($site, $iemob) = each($net) ){
-  $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"");
+  $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"", 'pmonth'=>"");
   $db[$site]['ts'] = $iemob->ts;
   $db[$site]['sid'] = $site;
   $db[$site]['sname'] = $iemob->db["sname"];
   $db[$site]['county'] = $nt->table[$site]["county"];
-  if ( date("Ymd") != date("Ymd", $iemob->ts) ){
-    continue;
-  }
-  $db[$site]['pday'] = $iemob->db["pday"];
+  $db[$site]['pmonth'] = @$monthDict[$site];
+  $db[$site]['pday'] = $iemob->db["ob_pday"];
   $db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : " ";
   $db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : " ";
   $db[$site]["ratio"] = -1;
@@ -66,7 +74,7 @@ $cols = Array("ts" => "Valid", "county" => "County",
   "tmpf" => "Ob Temperature", "max_tmpf" => "24 hour High",
   "min_tmpf" => "24 hour Low", "snow" => "24 hour Snowfall",
   "snowd" => "Snowfall Depth", "pday" => "24 hour rainfall",
-  "phour" => "Rainfall One Hour");
+  "phour" => "Rainfall One Hour", "pmonth" => "Rainfall for Month");
 ?>
 
 <?php $current_network = "CoCoRaHS"; include("$rootpath/include/current_bar.inc.php"); ?>
@@ -87,7 +95,7 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
  $baseurl = "current.phtml?network=$network&sortcol=";
 ?>
 <form name="st" action="/my/current.phtml" method="GET">
-<table style="width: 100%; font-size: 10pt;" class="ruler">
+<table style="width: 100%; font-size: 10pt;" class="ruler" border="1">
 <thead>
 <tr>
   <th rowspan=2>Add:</th>
@@ -95,10 +103,11 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
   <th rowspan=2><a href="<?php echo $baseurl; ?>sname">Station Name:</a></th>
   <th rowspan=2><a href="<?php echo $baseurl; ?>county">County:</a></th>
   <th rowspan=2><a href="<?php echo $baseurl; ?>ts">Valid:</a></th>
-  <th colspan=4>Hydro</th></tr>
+  <th colspan=5>Hydro</th></tr>
 
 <tr>
   <th><a href="<?php echo $baseurl; ?>pday">24hour Rain</a></th>
+  <th><a href="<?php echo $baseurl; ?>pmonth">Month Rain</a></th>
   <th><a href="<?php echo $baseurl; ?>snow">Snowfall</a></th>
   <th><a href="<?php echo $baseurl; ?>ratio">Ratio</a></th>
   <th><a href="<?php echo $baseurl; ?>snowd">Snow Depth</a></th>
@@ -125,17 +134,14 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
      echo ">". strftime("%I:%M %p", $value["ts"]) ."</td>";
    }
 
-   if ( date("Ymd") != date("Ymd", $value["ts"]) ){
-     echo "<td colspan=\"6\">No report for today</td>";
-     continue;
-   }
-
    if ($value["pday"] == 0.0001) $value["pday"] = "T";
+   if ($value["pmonth"] == 0.0001) $value["pmonth"] = "T";
    if ($value["pday"] < 0) $value["pday"] = "M";
    if ($value["snow"] == 0.0001) $value["snow"] = "T";
    if ($value["snow"] < 0) $value["snow"] = "M";
 
    echo "<td>". $value["pday"] ."</td>";
+   echo "<td>". $value["pmonth"] ."</td>";
     echo "<td>". $value["snow"] ."</td>";
     if ($value["ratio"] > 0) echo "<td>". $value["ratio"] ."</td>";
     else echo "<td></td>";
