@@ -146,10 +146,13 @@ def Main():
 
   if (ts < mx.DateTime.DateTime(2006,6,1)):
     stData['MXO'] = ["M"]*24
-  stData['IIB'] = ["M"]*24
-  stData['VTI'] = ["M"]*24
-  stData['MPZ'] = ["M"]*24
-  stData['PEA'] = ["M"]*24
+  if (ts < mx.DateTime.DateTime(2007,6,1)):
+    stData['IIB'] = ["M"]*24
+    stData['VTI'] = ["M"]*24
+    stData['MPZ'] = ["M"]*24
+    stData['PEA'] = ["M"]*24
+    stData['IFA'] = ["M"]*24
+    stData['TVK'] = ["M"]*24
 
   for j in range(len(st.ids)):
     station = st.ids[j]
