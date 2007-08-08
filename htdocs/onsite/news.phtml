@@ -37,8 +37,8 @@
       $next = intval($row["id"]) +1;
       if ($count == 1)
       {
-        echo "<a href=\"news.phtml?id=$prev\">&lt;&lt; Previous</a> &nbsp; &nbsp; &nbsp;";
-        echo "<a href=\"news.phtml?id=$next\">Next &gt;&gt;</a>\n";
+        echo "<a rel=\"nofollow\" href=\"news.phtml?id=$prev\">&lt;&lt; Previous</a> &nbsp; &nbsp; &nbsp;";
+        echo "<a rel=\"nofollow\" href=\"news.phtml?id=$next\">Next &gt;&gt;</a>\n";
       }
        echo "<h3 style=\"border-top: 2px solid #00f;\">". $row["title"] ."</h3>\n";
        echo "<i>Posted On:</i> ". $row["webdate"] ." &nbsp; &nbsp; &nbsp;";
