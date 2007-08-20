@@ -198,7 +198,7 @@ foreach($sts as $key => $value){
        $bzz->db["relh"], $sped);
   $val = round(@$bzz->db[$var], @$rnd[$var]);
   $mynetwork = $bzz->db["network"];
-  if ( (($now - $bzz->ts) < 3900 || (substr($mynetwork,3,4) == "COOP") && ($now - $bzz->ts) < 86400) && $val > -99 & $val != 99){ 
+  if ( (($now - $bzz->ts) < 3900 || (substr($mynetwork,3,4) == "COOP" || $mynetwork == "IACOCORAHS") && ($now - $bzz->ts) < 86400) && $val > -99 & $val != 99){ 
    if ($var == "barb" && $bzz->db["sknt"] > -1) {
     //echo "HERE $key VAL ". $bzz->db["sknt"] ." VAR $var <br>";
     $pt = ms_newPointObj();
