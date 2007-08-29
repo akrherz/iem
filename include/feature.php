@@ -59,8 +59,8 @@ $s .= "</table>";
 
 if (getenv("REMOTE_ADDR") == "205.241.141.66" )
 {
- $s = "<img src=\"images/smokey_1021.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 101 weeks now!!!!  I could rattle off 101 ways I love smokey, but the feature can't be that long otherwise it gets voted bad.  Hehe, nothing bad about smokey, just somebody that is very special to me!  I love you very much. <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+ $s = "<img src=\"images/smokey_1229.jpg\" style=\"float: left; margin: 5px;\">
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 103 weeks now!!!!  Darly missed a week and missed smokey very much while a way.  I wish we could spend more time together, but its okay.  1 more week to go, but 7 days at a time first.  I love you very much. <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 }
 
 echo $s;
