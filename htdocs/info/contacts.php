@@ -16,7 +16,7 @@ Dr Raymond Arritt
 <br><i>Email:</i> <a href="mailto:rwarritt&#064;bruce&#046;agron&#046;iastate&#046;edu">rwarritt&#064;bruce&#046;agron&#046;iastate&#046;edu</a>
 </div>
 
-<p><h3 class="subtitle">IEM Program Assistant:</h3><br>
+<p><h3 class="subtitle">IEM Assistant Scientist:</h3><br>
 <div style="margin-left: 20px">
 Daryl Herzmann
 <br>3010 Agronomy Hall
