@@ -2,31 +2,40 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $day = isset($_GET["day"]) ? $_GET["day"] : die("No date specified");
+$offset = isset($_GET["offset"]) ? $_GET["offset"] : 0;
 $TITLE = "IEM | Past Feature"; 
       include("$rootpath/include/header.php"); ?>
-<b>Nav:</b> <a href="<?php echo $rooturl; ?>/">IEM Home</a> &nbsp;<b> > </b> &nbsp; Features
 
+<h3>Past IEM Features by Date</h3>
 
 <?php 
-  $day = substr($day, 0, 10);
-
   $connection = iemdb("mesosite");
-  $query1 = "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
-                to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
-                WHERE date(valid) = '". $day ."' ";
+  $fdf = "date(valid) = '$day' ";
+  if ($offset == "-1"){
+    $fdf = "valid < '$day' ORDER by valid DESC limit 1";
+  } else if ($offset == "+1") {
+    $fdf = "date(valid) > '$day' ORDER by valid ASC limit 1";
+  }
+  $query1 = "SELECT *, date(valid) as d,
+              to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
+              to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
+              WHERE $fdf ";
   $result = pg_exec($connection, $query1);
   $row = @pg_fetch_array($result,0);
-
-  $thumb = sprintf("%s/onsite/features/%s_s.gif", $rooturl, $row["imageref"]);
-  $big = sprintf("%s/onsite/features/%s.gif", $rooturl, $row["imageref"]);
+  $day = $row["d"];
+  $thumb = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s_s.gif", $row["imageref"]);
+  $big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.gif", $row["imageref"]);
 
   $fref = "/mesonet/share/features/". $row["imageref"] ."_s.gif";
   list($width, $height, $type, $attr) = @getimagesize($fref);
   $width += 20;
 
+
 ?>
+<a href="cat.php?day=<?php echo $day; ?>&offset=-1">Previous Feature</a> &nbsp; &nbsp; <a href="cat.php?day=<?php echo $day; ?>&offset=+1">Next Feature</a>
+<hr />
 <div style="width: 640px;">
-<div style="float: left; width: <?php echo $width; ?>px;">
+<div style="float: left; padding: 5px; width: <?php echo $width; ?>px;">
 <img src="<?php echo $thumb; ?>" style="margin: 5px;">
 <br /><a href="<?php echo $big; ?>">View larger image</a>
 <br /><?php echo $row["caption"]; ?>
