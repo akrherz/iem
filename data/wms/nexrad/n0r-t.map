@@ -1,0 +1,90 @@
+#
+# Start of map file
+#
+NAME "nexrad_base_reflect"
+STATUS ON
+SIZE 800 600
+#SYMBOLSET symbols/symbol.sym
+#FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+EXTENT -126 24 -66 50
+UNITS DD
+SHAPEPATH "/mesonet/data/gis/"
+#SYMBOLSET "/mesonet/www/html/GIS/data/symbols/wind.sym"
+IMAGECOLOR -1 -1 -1
+
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+   "init=epsg:4326"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+#  HEADER ia_header.html
+  TEMPLATE ia.html
+#  FOOTER ia_footer.html
+  MINSCALE 90000
+  MAXSCALE 4650000
+  IMAGEPATH "/mesonet/www/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/mesonet/www/html/tmp/w0.log"
+  METADATA
+   "wms_title" "IEM WMS Service"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?"
+   "wms_srs" "EPSG:4326"
+   "wms_abstract" "IEM generated CONUS composite of NWS WSR-88D level III base reflectivity."
+   "wms_keywords" "NEXRAD,N0R"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+  END
+END
+
+#  Tile Index
+LAYER
+  STATUS ON
+  NAME "time_idx"
+  #TYPE TILEINDEX  #No worky
+  TYPE POLYGON
+  DATA "the_geom from nexrad_n0r_tindex"
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+    "wms_timeextent" "2003-08-01/2007-12-31/P5M"
+    "wms_timeitem" "datetime"
+    "wms_timedefault" "2006-06-23T03:10:00Z"
+  END
+  CONNECTION "dbname=postgis host=10.10.10.20"
+  CONNECTIONTYPE postgis
+END
+
+# raster layer
+LAYER
+  NAME "nexrad-n0r-wmst"
+  TYPE RASTER
+  STATUS ON
+  DEBUG ON
+  DUMP TRUE
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+    "wms_timeextent" "2003-08-01/2007-12-31"
+    "wms_timeitem" "datetime"
+    "wms_timedefault" "2006-06-23T03:10:00Z"
+  END
+  OFFSITE 0 0 0
+  #TYPE POLYGON
+  TILEITEM "filepath"
+  TILEINDEX "time_idx"
+END
+
+END

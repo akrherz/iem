@@ -1,0 +1,67 @@
+#
+# Start of map file
+#
+NAME "nexrad_stormtotal_precip"
+STATUS ON
+SIZE 450 350
+#SYMBOLSET symbols/symbol.sym
+#FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+EXTENT -126 24 -66 50
+UNITS METERS
+SHAPEPATH "/mesonet/data/gis/"
+#SYMBOLSET "/mesonet/www/html/GIS/data/symbols/wind.sym"
+IMAGECOLOR -1 -1 -1
+
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+   "init=epsg:4326"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+#  HEADER ia_header.html
+  TEMPLATE ia.html
+#  FOOTER ia_footer.html
+  MINSCALE 0
+  MAXSCALE 465000000
+  IMAGEPATH "/mesonet/www/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/mesonet/www/html/tmp/w0.log"
+  METADATA
+   "wms_title" "IEM NEXRAD NTP WMS"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ntp.cgi?"
+   "wms_srs" "EPSG:4326"
+   "wms_abstract" "IEM generated CONUS composite of NWS WSR-88D level III storm total precipitation."
+   "wms_keywords" "NEXRAD,NTP"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+  NAME "nexrad-ntp"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/ntp_0.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:4326"
+  END
+  MINSCALE 0
+  MAXSCALE 465000000
+  METADATA
+    "wms_title" "NEXRAD STORM TOTAL PRECIP"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+END
