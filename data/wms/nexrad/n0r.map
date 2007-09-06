@@ -1,0 +1,292 @@
+#
+# Start of map file
+#
+NAME "nexrad_base_reflect"
+STATUS ON
+SIZE 450 350
+#SYMBOLSET symbols/symbol.sym
+#FONTSET "/mesonet/www/html/GIS/data/fonts/fonts.list"
+EXTENT -126 24 -66 50
+UNITS DD
+SHAPEPATH "/mesonet/data/gis/"
+#SYMBOLSET "/mesonet/www/html/GIS/data/symbols/wind.sym"
+IMAGECOLOR -1 -1 -1
+
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+   "init=epsg:4326"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+#  HEADER ia_header.html
+  TEMPLATE ia.html
+#  FOOTER ia_footer.html
+  MINSCALE 0
+  MAXSCALE 465000000
+  IMAGEPATH "/mesonet/www/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/mesonet/www/html/tmp/w0.log"
+  METADATA
+   "wms_title" "IEM WMS Service"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/data/wms/nexrad/n0r.map&amp;"
+   "wms_srs" "EPSG:4326 EPSG:900913"
+   "wms_abstract" "IEM generated CONUS composite of NWS WSR-88D level III base reflectivity."
+   "wms_keywords" "NEXRAD,N0R"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+  NAME "nexrad-n0r"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-900913"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_0.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT"
+    "wms_srs"   "EPSG:900913 EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+
+LAYER
+  NAME "nexrad-n0r-m05min"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_1.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M5 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-m10m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_2.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M10 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-m15m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_3.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M15 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+LAYER
+  NAME "nexrad-n0r-m20m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_4.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M20 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+LAYER
+  NAME "nexrad-n0r-m25m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_5.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M25 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+LAYER
+  NAME "nexrad-n0r-m30m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_6.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M30 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+LAYER
+  NAME "nexrad-n0r-m35m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_7.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M35 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-m40m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_8.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M40 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-m45m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_9.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M45 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+#  Tile Index
+LAYER
+  STATUS ON
+  NAME "time_idx"
+  #TYPE TILEINDEX  #No worky
+  TYPE POLYGON
+  MINSCALE 0
+  MAXSCALE 465000000
+  DATA "the_geom from nexrad_n0r_tindex"
+  METADATA
+    "wms_title" "TIME INDEX"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+    "wms_timeextent" "2003-08-01/2006-12-31/P5M"
+    "wms_timeitem" "datetime"
+    "wms_timedefault" "2005-08-29T13:00:00Z"
+  END
+  CONNECTION "dbname=postgis host=10.10.10.20"
+  CONNECTIONTYPE postgis
+END
+
+# raster layer
+LAYER
+  NAME "nexrad-n0r-wmst"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  STATUS ON
+  DEBUG ON
+  DUMP TRUE
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REF WMS-T"
+    "wms_srs"   "EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+    "wms_timeextent" "2003-08-01/2006-12-31/P5M"
+    "wms_timeitem" "datetime"
+    "wms_timedefault" "2005-08-29T13:00:00Z"
+  END
+  OFFSITE 0 0 0
+  #TYPE POLYGON
+  TILEITEM "filepath"
+  TILEINDEX "time_idx"
+END
+
+
+END
