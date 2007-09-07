@@ -36,12 +36,13 @@ $c = Array(
 <?php $THISPAGE = "camera"; include("../headerbar.phtml"); ?>
 
 
+<div id="myPlayer"></div>
+
 <form name="theform">
 <div style="background: #eee; border: 1px solid #000; margin: 5px; padding: 5px; width: 650px;">
 The <strong>Web Camera Movie Player</strong> is a Flash application that plays
 recent movies taken from the webcam network.  Please note the timestamps to 
 see when this movie was generated.
-<div id="myPlayer"></div>
 <br /><strong>Select Camera:</strong>
 <select name="mycam" onchange="myloader();">
 <?php
