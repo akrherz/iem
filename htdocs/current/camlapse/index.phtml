@@ -70,7 +70,8 @@ player.setAutoPlay(true);
 
 function myloader()
 {
-  var url = "http://mesonet.agron.iastate.edu/onsite/lapses/auto/"+ document.theform.mycam.value +"_"+ document.theform.mylapse.value +".flv";
+  ts = new Date();
+  var url = "http://mesonet.agron.iastate.edu/onsite/lapses/auto/"+ document.theform.mycam.value +"_"+ document.theform.mylapse.value +".flv?"+ ts.getTime();
   player.load(url);
   player.play();
 }
