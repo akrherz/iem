@@ -59,8 +59,8 @@ $s .= "</table>";
 
 if (getenv("REMOTE_ADDR") == "205.241.141.66" )
 {
- $s = "<img src=\"images/smokey_1229.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 104 weeks now!!!!  Hehe, any number divisible by 52 is a good number!  Looking back, sometimes periods of time seem to go by quickly, but I think our time together has gone by at a good pace. I still get as excited to see smokey as the first time I saw you with that fancy shirt one.  I love you very much, Happy Anniversary! <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+ $s = "<img src=\"images/smokey_907.jpg\" style=\"float: left; margin: 5px;\">
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 2 years now!!!!  Hehe, does anything in the picture look familiar? I am very excited to be sending the evening with you and getting to see the horseys!  I love you very much, Happy Anniversary! <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 }
 
 echo $s;
