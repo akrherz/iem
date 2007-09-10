@@ -19,6 +19,7 @@ class selectWidget
   var $netlib = Array(
    "IACLIMATE" => "Iowa Climate Sites",
    "IA_COOP" => "Iowa NWS COOP Sites",
+   "IACOCORAHS" => "Iowa CoCoRaHS",
    "COOPDB" =>"Iowa Climate Sites",
    "ISUAG" =>"ISU Ag Climate",
    "IA_ASOS" => "Iowa ASOS",
@@ -49,6 +50,7 @@ class selectWidget
    "KELO" => Array(-400833, 4626666,399166,5226666),
    "COOPDB" => Array(175000, 4400000, 775000, 4850000),
    "IACLIMATE" => Array(175000, 4400000, 775000, 4850000),
+   "IACOCORAHS" => Array(175000, 4400000, 775000, 4850000),
    "ISUAG" => Array(175000, 4400000, 775000, 4850000),
    "ISUAG" => Array(175000, 4400000, 775000, 4850000),
    "IA_RWIS" => Array(175000, 4400000, 775000, 4850000),
