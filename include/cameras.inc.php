@@ -113,7 +113,7 @@ $cameras = Array(
   "SWII4" => Array("sts" => mktime(17,30,0, 5,14,2004), "ets" => time(),
 		"name" => "Winterset", "active" => true,
 		"iservice" => "I-rule.net", "iserviceurl" => "http://www.i-rule.net/",
-		"ip" => "209.234.86.215", "county" => "Madison"),
+		"ip" => "71.38.162.157", "county" => "Madison"),
  );
 
 ?>
