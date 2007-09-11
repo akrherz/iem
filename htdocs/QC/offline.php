@@ -10,7 +10,7 @@ include("$rootpath/include/header.php"); ?>
 
 <P>Unfortunately, automated observing sites occasionally go offline due
 to a wide range of factors.  Here is a listing of sites currently offline.
-You can also view a <a href="<?php echo $rooturl; ?>/GIS/apps/stations/offline.php">Graphical</a>
+You can also view a Graphical
 display of sites that are offline.</p>
 
 
