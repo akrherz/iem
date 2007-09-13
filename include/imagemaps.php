@@ -220,6 +220,25 @@ include("$rootpath/include/awosLoc.php");
   echo "</select>\n";
 }
 
+function asosMultiSelect($selected, $size){
+global $rootpath;
+include("$rootpath/include/asosLoc.php");
+  echo "<select name=\"station[]\" size=\"". $size ."\" MULTIPLE>\n";
+  echo "<option value=\"_ALL\">Select All</option>\n";
+  for ($i = 0; $i < count($Acities); $i++) {
+    $city = current($Acities);
+    echo "<option value=\"". $city["id"] ."\"";
+    if ($selected == $city["id"]){
+        echo " SELECTED ";
+    }
+    echo " >". $city["city"] ." (". $city["id"] .")\n";
+    next($Acities);
+  }
+
+  echo "</select>\n";
+}
+
+
 function rwisMultiSelect($selected, $size){
 global $rootpath;
 include_once("$rootpath/include/all_locs.php");
