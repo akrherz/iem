@@ -103,7 +103,7 @@ if ($what != "plot"){
     if ($vars[$j] == "ca2") echo "ca2code". $d[$delim];
     if ($vars[$j] == "ca3") echo "ca3code". $d[$delim];
   }
-  echo "\n";
+  echo "\r\n";
 
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
@@ -119,7 +119,7 @@ if ($what != "plot"){
     if ($vars[$j] == "ca2") echo $skycover[$row["var".$j]] . $d[$delim];
     if ($vars[$j] == "ca3") echo $skycover[$row["var".$j]] . $d[$delim];
   }
-  echo "\n";
+  echo "\r\n";
  }
 }
 
