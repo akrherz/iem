@@ -83,7 +83,7 @@ for ($i=0; $i< $num_vars;$i++){
 
 $sqlTS1 = strftime("%Y-%m-%d %H:%M", $ts1);
 $sqlTS2 = strftime("%Y-%m-%d %H:%M", $ts2);
-$table = strftime("t%Y_%m", $ts1);
+$table = strftime("t%Y_1minute", $ts1);
 $nicedate = strftime("%Y-%m-%d", $ts1);
 
 $sampleStr = Array("1min" => "1",
