@@ -40,14 +40,16 @@ be performed on the same day.</p>
 </UL>
 
 
-<P><h3 class="subtitle">Hourly Mesonet + NEXRAD:</h3>
-<UL>
-	<li><a href="../data/DMX_radar.gif">Des Moines</a></li>
-        <li><a href="../data/OAX_radar.gif">Omaha</a></li>
-        <li><a href="../data/DVN_radar.gif">Davenport</a></li>
-	<li><a href="../data/FSD_radar.gif">Sioux Falls</a></li>
-        <li><a href="../data/ARX_radar.gif">LaCrosse</a></li>
-</UL>
+<P><h3 class="subtitle">1 Minute Archive:</h3>
+The National Climatic Data Center collects a 1 minute interval archive
+from the ASOS network.  This archive is available <a href="http://www.ncdc.noaa.gov/oa/climate/climatedata.html#asosminutedata">here</a>, but in a terrible
+format!  The IEM has done its best to process this data and will make it 
+available here for Iowa sites.
+<ul>
+ <li><a href="<?php echo $rooturl; ?>/request/asos/1min.phtml">Download</a> these observations</li>
+ <li><a href="<?php echo $rooturl; ?>/plotting/asos/1station_1min.phtml">Daily graphs</a> of temperature, wind, and pressure</li>
+</ul>
+<br />Data is available for Des Moines, Waterloo, Dubuque, and Sioux City back to 2000.  The rest of the sites since March 2005.
 
 <p><h3 class="subtitle">Quality Control:</h3>
 <ul>
