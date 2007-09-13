@@ -50,7 +50,7 @@ for( $p=0; $row = @pg_fetch_array($result,$p); $p++)  {
 
   $thisMPH = $row["sknt"] * 1.15;
   $thisDRCT = $row["drct"];
-  if ($thisMPH > 200 )  $thisMPH = " ";
+  if ($thisMPH > 200 )  $thisMPH = "";
   
   $shouldbe = intval( $start ) + 60 * $i;
  
@@ -75,7 +75,7 @@ for( $p=0; $row = @pg_fetch_array($result,$p); $p++)  {
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
       $drct[$i] = "-199";
-      $mph[$i] = " ";
+      $mph[$i] = "";
 
       $i++;
       $missing++;
