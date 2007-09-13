@@ -77,7 +77,7 @@ for( $p=0; $row = @pg_fetch_array($result,$p); $p++)  {
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
       $prec[$i] = $accumP;
-      $alti[$i] = " ";
+      $alti[$i] = "";
 
       $i++;
       $missing++;
