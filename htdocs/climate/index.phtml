@@ -151,10 +151,6 @@ include("$rootpath/include/header.php");
 <li><a href="/data/summary/mon_mean_T.gif">Current Monthly Mean Temperature</a></li>
 </ul>
  </td><td><!-- GS -->
-<ul class="iem-list">
-<li><a href="/data/summary/gdd_norm.png">May 1 GDD accum till today</a></li>
-<li><a href="/data/summary/gdd_diff.png">Difference May 1 Accum vs Normal</a></li>
-</ul>
  </td><td><!-- Year -->
 <ul class="iem-list">
 <li>Minimum temp this fall/winter<br>
@@ -218,13 +214,12 @@ include("$rootpath/include/header.php");
  </td>
 
 <tr>
- <th>Growing Degree Days</th>
+ <th>Growing Degree Days <br />(base 50)</th>
 <td><!-- Month -->
 <ul class="iem-list">
 <li><a href="/data/summary/gdd_mon.gif"><?php echo date("F"); ?> Accumulated Growing Degree Days (base=50)</a></li>
 </ul>
  </td><td><!-- GS -->
-  <b>Growing Degree Days [GDD]</b> (base 50)
 <ul class="iem-list">
 <li>All Stations: <a href="/data/summary/gdd_qc.gif">Plot</a> or  
     <a href="/data/summary/gdd_qc_contour.gif">Contour</a></li>
@@ -232,11 +227,14 @@ include("$rootpath/include/header.php");
     <a href="/data/summary/gdd_qc_rwis.gif">RWIS</a></li>
 <li><a href="/data/summary/gdd_qc_snet.gif">School Net</a></li>
 <li><A href="/data/summary/gdd_may1.gif">Seasonal (since May 1) Accumulated Growing Degree Days-(base=50)</a></li>
-<li><a href="/data/summary/gdd_diff.gif">Departure from Normal - Seasonal Accumulated Growing Degree Days (since May 1: base=50)</a></li>
-<li><a href="/data/summary/gdd_jan1.gif">Seasonal (before May 1) Accumulated Growing Degree Days-(base=50)</a></li>
+<li><a href="/data/summary/gdd_norm.gif">Normal Accumulation</a></li>
+<li><a href="/data/summary/gdd_diff.gif">Departure from Normal</a></li>
 <li><a href="/plotting/gs/fe.phtml">Growing Season Rainfall/GDD vs Climatology</a></li>
 </ul>
  </td><td><!-- Year -->
+<ul>
+<li><a href="/data/summary/gdd_jan1.gif">Seasonal (before May 1) Accumulated Growing Degree Days-(base=50)</a></li>
+</ul>
  </td>
 </tr>
 
