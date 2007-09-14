@@ -35,6 +35,7 @@
  "ORC" => array("city" => "ORANGE CITY", "id" => "ORC", "lat" => "42.98", "lon" => "-96.07"),
  "OXV" => array("city" => "KNOXVILLE", "id" => "OXV", "lat" => "41.3", "lon" => "-93.12"),
  "PEA" => array("city" => "PELLA", "id" => "PEA", "lat" => "41.4", "lon" => "-92.94"),
+ "PRO" => array("city" => "Perry", "id" => "PRO", "lat" => "41.8280131", "lon" => "-94.1599036", "network" => "AWOS", "county" => "Dallas", "climate_site" => "ia6566"),
  "RDK" => array("city" => "RED OAK", "id" => "RDK", "lat" => "41.02", "lon" => "-95.27"),
  "SDA" => array("city" => "SHENANDOAH MUNI", "id" => "SDA", "lat" => "40.75", "lon" => "-95.42"),
  "SHL" => array("city" => "SHELDON", "id" => "SHL", "lat" => "43.22", "lon" => "-95.83"),
