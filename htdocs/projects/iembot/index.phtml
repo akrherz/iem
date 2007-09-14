@@ -1,6 +1,7 @@
 <?php
  include("../../../config/settings.inc.php");
  $TITLE = "IEM Projects | iembot";
+ include("$rootpath/include/wfoLocs.php"); 
  include("$rootpath/include/header.php"); 
 ?>
 
@@ -15,8 +16,27 @@ text products to Jabber chat rooms primarily hosted at the <a href="http://www.i
  <li><a href="http://www.iemchat.com/">IEM Chat Project</a>, access restricted to project participants</li>
  <li><a href="https://iemchat.com/public.phtml">Public Chatrooms</a> hosted by <a href="http://www.appriss.com/">Appriss Inc</a> (requires Jabber client and public Jabber account)</li>
  <li><a href="<?php echo $rooturl; ?>/iembot/">HTML web interface</a>  anybody can view and monitor online!</li>
- <li>Coming soon, XMPP Pubsub node!</li>
+ <li>XMPP Pubsub node is still in the works</li>
 </ul>
+
+<script>
+function urlChanger(){
+ var myid =  document.myForm.wfo.value.toLowerCase();
+ document.getElementById("wfolink").innerHTML = "<b>URL:</b> <a href=\"http://mesonet.agron.iastate.edu/iembot-rss/wfo/k"+ myid +".xml\">http://mesonet.agron.iastate.edu/iembot-rss/wfo/k"+ myid +".xml</a>";
+}
+</script>
+<form name="myForm">
+<p><img src="<?php echo $rooturl; ?>/images/rss.gif"> Experimental RSS feed of <i>iembot</i> messages per NWS Forecast Office:
+<br /><b>WFO:</b>
+<select name="wfo" onChange="javascript: urlChanger(); return false;">
+<?php 
+while (list($key, $val) = each($wfos)){
+  echo "<option value=\"$key\">[$key] ". $val["city"] ."\n";
+}
+?>
+</select>
+<br /><div id="wfolink" style="float: left;"><b>URL: </b><a href="http://mesonet.agron.iastate.edu/iembot-rss/wfo/kabq.xml">http://mesonet.agron.iastate.edu/iembot-rss/wfo/kabq.xml</a></div>
+</form>
 
 <h3 class="subtitle">How does <i>iembot</i> work?</h3>
 
