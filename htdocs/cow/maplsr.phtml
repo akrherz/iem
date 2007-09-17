@@ -86,7 +86,6 @@ $radfile = $fp;
 $img = $map->prepareImage();
 
 $namer->draw($img);
-$clayer->draw( $img );
 $stlayer->draw( $img);
 $lakes->draw($img);
 
@@ -94,6 +93,7 @@ $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("data", $radfile);
 $radar->set("status", 1);
 $radar->draw($img);
+$clayer->draw( $img );
 $c0->draw($img);
 $p0->draw($img);
 $lsrs->draw($img);
