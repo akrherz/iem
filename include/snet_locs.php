@@ -74,6 +74,10 @@ $cities = Array(
 "SCDI4" => array("short" => "Corydon", "online" => "t", "city" => "Wayne Community / Corydon", "nwn_id" => "125", "lat" => "40.7516166667", "lon" => "-93.3213666667", "network" => "KCCI", "county" => "Wayne", "climate_site" => "ia1394"),
 "SWBI4" => array("short" => "Webster City", "online" => "t", "city" => "Webster City Community", "nwn_id" => "69", "lat" => "42.4654333333", "lon" => "-93.8221666667", "network" => "KCCI", "county" => "Hamilton", "climate_site" => "ia8806"),
 "SWII4" => array("short" => "Winterset", "online" => "t", "city" => "Winterset Community", "nwn_id" => "42", "lat" => "41.3334166667", "lon" => "-94.0148", "network" => "KCCI", "county" => "Madison", "climate_site" => "ia9132"),
+ "SWGI4" => array("short" => "Woodward", "city" => "Woodward", "lat" => 41.8568,
+ "lon" => -93.9208, "online" => true, "nwn_id" => 296, "climate_site" => "IA6566
+"),
+
 ),
 'KELO' => Array(
 "SABS2" => array("short" => "Aberdeen", "online" => "t", "city" => "Aberdeen", "nwn_id" => "4", "lat" => "45.4900016785", "lon" => "-98.4700012207", "network" => "KELO", "county" => "Brown", "climate_site" => "none"),
