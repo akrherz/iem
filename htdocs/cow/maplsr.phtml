@@ -10,7 +10,7 @@ $lon0 = isset($_GET["lon0"]) ? $_GET["lon0"] : die("Boooo");
 
 $tsSQL = date("Y-m-d H:i:00+00", $ts);
 $year = date("Y", $ts);
-$d = date("d F Y H:i" ,  $ts);
+$d = date("d M Y H:i" ,  $ts);
 
 $month = date("m", $ts);
 $day = date("d", $ts);
@@ -57,8 +57,12 @@ $stlayer->set("status", 1);
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
 
-$clayer = $map->getlayerbyname("uscounties");
+/* Set outline color black please */
+$clayer = $map->getlayerbyname("uscounties_and_name");
 $clayer->set("status", 1);
+$clc0 = $clayer->getClass(0);
+$clc0s0 = $clc0->getStyle(0);
+$clc0s0->outlinecolor->setRGB(0,0,0);
 
 $c0 = $map->getlayerbyname("warnings0_c");
 $c0->set("connection", $_DATABASES["postgis"]);
