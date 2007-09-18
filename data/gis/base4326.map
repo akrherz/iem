@@ -580,6 +580,14 @@ LAYER
         SIZE    3
         SYMBOL  'circle'
     END
+    # Freeze Warning
+    CLASS
+        NAME "Freeze Warn"
+        EXPRESSION ('[phenomena]' = 'FZ' and '[significance]' = 'W')
+        COLOR   255 0 0
+        SIZE    3
+        SYMBOL  'circle'
+    END
 END
 
 LAYER
