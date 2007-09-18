@@ -144,7 +144,7 @@ LAYER
   END
 END
 
-# Counites
+# Counties
 LAYER
   NAME uscounties
   STATUS OFF
@@ -577,6 +577,30 @@ LAYER
         NAME "Blizzard Warn"
         EXPRESSION ('[phenomena]' = 'BZ' and '[significance]' = 'W')
         COLOR   255 0 0
+        SIZE    3
+        SYMBOL  'circle'
+    END
+    # Other Advisory
+    CLASS
+        NAME "Other Advisory"
+        EXPRESSION ('[significance]' = 'Y')
+        COLOR   200 200 0
+        SIZE    3
+        SYMBOL  'circle'
+    END
+    # Other Advisory
+    CLASS
+        NAME "Other Watch"
+        EXPRESSION ('[significance]' = 'A')
+        COLOR   200 200 0
+        SIZE    3
+        SYMBOL  'circle'
+    END
+    # Other Advisory
+    CLASS
+        NAME "Other Warning"
+        EXPRESSION ('[significance]' = 'W')
+        COLOR   200 20 20
         SIZE    3
         SYMBOL  'circle'
     END
