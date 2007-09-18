@@ -63,7 +63,6 @@ else {
                 $lat0 + $lpad);
 }
 
-$map->setProjection("proj=latlong");
 
 $namer = $map->getlayerbyname("namerica");
 $namer->set("status", 1);
@@ -153,6 +152,45 @@ $watches->set("status", (in_array("watches", $layers)) );
 //$watches->setFilter("expired > '".$db_ts."' and issued <= '".$db_ts."'");
 $watches->set("data", "geom from (select type as wtype, geom, oid from watches where expired > '".$db_ts."' and issued <= '".$db_ts."') as foo using unique oid using srid=4326");
 
+/* New age custom render only 1 warning! */
+if (isset($singleWarning))
+{
+
+$wc = ms_newLayerObj($map);
+$wc->set("connectiontype", MS_POSTGIS);
+$wc->set("connection", "user=nobody dbname=postgis host=iem20");
+$wc->set("data", "geom from (select gtype, eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts'  ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+$wc->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
+$wc->set("status", MS_ON);
+$wc->set("type", MS_LAYER_LINE);
+$wc->setProjection("init=epsg:4326");
+
+$wcc0 = ms_newClassObj($wc);
+$wcc0->set("name", $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] );
+if ($warngeo == "both" or $warngeo == "county") {
+  $wcc0->setExpression("('[gtype]' = 'C')");
+} else {
+  $wcc0->setExpression("('[gtype]' = 'P')");
+}
+$wcc0s0 = ms_newStyleObj($wcc0);
+$wcc0s0->color->setRGB(255,0,0);
+$wcc0s0->set("size", 3);
+$wcc0s0->set("symbol", 1);
+
+if ($warngeo == "both")
+{
+  $wcc1 = ms_newClassObj($wc);
+  $wcc1->setExpression("('[gtype]' = 'P')");
+  $wcc1s0 = ms_newStyleObj($wcc1);
+  $wcc1s0->color->setRGB(255,255,255);
+  $wcc1s0->set("size", 2);
+  $wcc1s0->set("symbol", 1);
+}
+
+}
+else {
+
+
 
 if ($warngeo == "both" or $warngeo == "county")
 {
@@ -200,7 +238,8 @@ if ($warngeo == "sbw")
     $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
     $p0->set("data", $sql);
   } else {
-   $p0->set("data", "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
+   $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
+   $p0->set("data", $sql);
   }
   if (isset($showOnlyOne)){
     $p0->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
@@ -209,6 +248,7 @@ if ($warngeo == "sbw")
 
 }
 
+} // ENd of bigger else
 
 $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("data", $radfile);
@@ -246,22 +286,24 @@ $interstates->draw($img);
 $radar->draw($img);
 $cwas->draw( $img);
 $watches->draw($img); 
-if ($warngeo == "both" or $warngeo == "county")
-{
- $c0->draw($img);
-}
 $current_barbs->draw($img);
 $current_sites->draw($img);
-if ($warngeo == "both" or $warngeo == "sbw")
-{
-  $p0->draw($img);
-}
 $usdm->draw($img);
 if ($lsrwindow != 0)
   $lsrs->draw($img);
 
 $surface->draw($img);
 $airtemps->draw($img);
+
+if (isset($singleWarning))
+{
+  $wc->draw($img);
+  $map->embedLegend($img);
+} else
+{
+  if ($warngeo == "both" or $warngeo == "county"){ $c0->draw($img); }
+  if ($warngeo == "both" or $warngeo == "sbw") { $p0->draw($img); }
+}
 
 if (! isset($_GET["iem"])) {
  $map->embedScalebar($img);
@@ -271,6 +313,7 @@ if (! isset($_GET["iem"])) {
 } else {
  tv_logo($map,$img, "    $d");
 }
+
 
 $url = $img->saveWebImage();
 
