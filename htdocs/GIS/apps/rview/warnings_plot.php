@@ -152,15 +152,16 @@ $watches->set("status", (in_array("watches", $layers)) );
 //$watches->setFilter("expired > '".$db_ts."' and issued <= '".$db_ts."'");
 $watches->set("data", "geom from (select type as wtype, geom, oid from watches where expired > '".$db_ts."' and issued <= '".$db_ts."') as foo using unique oid using srid=4326");
 
-/* New age custom render only 1 warning! */
+/* New age custom render only 1 warning! 
+ ------------------------------------------------------
+*/
 if (isset($singleWarning))
 {
 
 $wc = ms_newLayerObj($map);
 $wc->set("connectiontype", MS_POSTGIS);
 $wc->set("connection", "user=nobody dbname=postgis host=iem20");
-$wc->set("data", "geom from (select gtype, eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts'  ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
-$wc->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
+$wc->set("data", "geom from (select gtype, eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
 $wc->set("status", MS_ON);
 $wc->set("type", MS_LAYER_LINE);
 $wc->setProjection("init=epsg:4326");
