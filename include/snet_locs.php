@@ -19,6 +19,7 @@ $cities = Array(
 "SBZI4" => array("short" => "B. P. Zoo", "online" => "t", "city" => "Blank Park Zoo, DSM", "nwn_id" => "133", "lat" => "41.5255", "lon" => "-93.6214", "network" => "KCCI", "county" => "Polk", "climate_site" => "ia0241"),
 "SBOI4" => array("short" => "Boone", "online" => "t", "city" => "Boone / United Community", "nwn_id" => "55", "lat" => "42.02555", "lon" => "-93.77575", "network" => "KCCI", "county" => "Boone", "climate_site" => "ia0200"),
 "SBRI4" => array("short" => "Brooklyn", "online" => "t", "city" => "Brooklyn / BGM", "nwn_id" => "86", "lat" => "41.73895", "lon" => "-92.4466833333", "network" => "KCCI", "county" => "Poweshiek", "climate_site" => "ia0600"),
+ "SBSI4" => array("short" => "Bussey", "city" => "Twin Cedars", "lat" => 41.20539, "lon" => -92.885, "online" => true, "nwn_id" => 297, "climate_site" => "IA0112"),
 "SCAI4" => array("short" => "Carroll", "online" => "t", "city" => "Carroll / Kuemper Catholic", "nwn_id" => "62", "lat" => "42.0749666667", "lon" => "-94.8701333333", "network" => "KCCI", "county" => "Carroll", "climate_site" => "ia1233"),
 "SCEI4" => array("short" => "Centerville", "online" => "t", "city" => "Centerville", "nwn_id" => "150", "lat" => "40.7308", "lon" => "-92.8726", "network" => "KCCI", "county" => "Appanoose", "climate_site" => "ia1354"),
 "SCHI4" => array("short" => "Chariton", "online" => "t", "city" => "Chariton / Van Allen Elem", "nwn_id" => "53", "lat" => "41.0234666667", "lon" => "-93.3117333333", "network" => "KCCI", "county" => "Lucas", "climate_site" => "ia1394"),
