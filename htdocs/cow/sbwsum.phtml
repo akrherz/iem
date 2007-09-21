@@ -1,0 +1,36 @@
+<?php
+include("../../config/settings.inc.php");
+$TITLE = "IEM | Storm Based Warning Daily Summaries";
+include("$rootpath/include/forms.php");
+include("$rootpath/include/header.php"); 
+
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time()-86400);
+$month = isset($_GET["month"]) ? $_GET["month"] : date("m", time()-86400);
+$day = isset($_GET["day"]) ? $_GET["day"] : date("d", time()-86400);
+
+$ts = mktime(0,0,0,$month, $day, $year);
+$imap = sprintf("/mnt/a1/ARCHIVE/data/%s/sbwsum-imap.txt", date("Y/m/d", $ts));
+$imgurl = sprintf("http://mesonet.agron.iastate.edu/archive/data/%s/sbwsum.png", date("Y/m/d", $ts));
+?>
+
+
+<h3 class="heading">Storm Based Warning Summaries</h3><p>
+
+<form method="GET">
+<table><caption>Time Settings:</caption>
+<thead><tr><th>Year:</th><th>Month:</th><th>Day:</th><td></td></tr></thead>
+<tbody>
+<tr>
+<td><?php echo yearSelect(2005, $year, "year"); ?></td>
+<td><?php echo monthSelect($month, "month"); ?></td>
+<td><?php echo daySelect($day, "day"); ?></td>
+<td><input type="submit" value="GO!"></td>
+</tr></tbody>
+</table>
+
+</form>
+
+<?php readfile($imap); ?>
+<img src="<?php echo $imgurl; ?>" USEMAP="#mymap">
+
+<?php include("$rootpath/include/footer.php"); ?>
