@@ -9,28 +9,53 @@ $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time()-86400);
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d", time()-86400);
 
 $ts = mktime(0,0,0,$month, $day, $year);
+
+$archivebegin = mktime(0,0,0,6,1,2005);
+if ($ts < $archivebegin) { $ts = $archivebegin; }
+
 $imap = sprintf("/mnt/a1/ARCHIVE/data/%s/sbwsum-imap.txt", date("Y/m/d", $ts));
 $imgurl = sprintf("http://mesonet.agron.iastate.edu/archive/data/%s/sbwsum.png", date("Y/m/d", $ts));
+
+$gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=0&minute1=0&month2=%s&day2=%s&hour2=0&minute2=0",  date("Y", $ts), date("m", $ts),date("d", $ts), date("m", $ts +86400), date("d", $ts + 86400) );
+
+
+
 ?>
 
 
-<h3 class="heading">Storm Based Warning Summaries</h3><p>
+<h3 class="heading">Daily Storm Based Warning Summaries</h3><p>
+
+<table><tr><td>
 
 <form method="GET">
-<table><caption>Time Settings:</caption>
+<table><caption>Select a date:</caption>
 <thead><tr><th>Year:</th><th>Month:</th><th>Day:</th><td></td></tr></thead>
 <tbody>
 <tr>
-<td><?php echo yearSelect(2005, $year, "year"); ?></td>
-<td><?php echo monthSelect($month, "month"); ?></td>
-<td><?php echo daySelect($day, "day"); ?></td>
+<td><?php echo yearSelect(2005, date("Y", $ts), "year"); ?></td>
+<td><?php echo monthSelect(date("m", $ts), "month"); ?></td>
+<td><?php echo daySelect(date("d", $ts) , "day"); ?></td>
 <td><input type="submit" value="GO!"></td>
 </tr></tbody>
 </table>
-
 </form>
 
+</td><td>
+
+<p>This application displays an image summary of NWS
+<a href="http://www.weather.gov/sbwarnings/">Storm Based Warnings</a> for a
+given date.  This date is a period between 00 UTC.  This summary is based 
+on an archive the IEM maintains and may contain errors.  Also, prior to
+1 October 2007, these warnings were not official and their shapes may or 
+may not have been considered by the issuing forecaster. This page works for
+dates between 1 June 2005 and <?php echo date("d M Y", time() - 86400 ); ?>.
+
+<p><b>Links:</b> <a href="<?php echo $gis_url; ?>">Download shapefile of these warnings</a>
+
+</td></tr></table>
+
 <?php readfile($imap); ?>
-<img src="<?php echo $imgurl; ?>" USEMAP="#mymap">
+<b>Note:</b> You can click on the polygon to get the warning text, radar, and more!
+<p><img src="<?php echo $imgurl; ?>" USEMAP="#mymap">
 
 <?php include("$rootpath/include/footer.php"); ?>
