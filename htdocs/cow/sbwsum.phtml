@@ -7,14 +7,17 @@ include("$rootpath/include/header.php");
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time()-86400);
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time()-86400);
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d", time()-86400);
+$sortby = isset($_GET["sortby"]) ? $_GET["sortby"] : "size";
+
+$d = Array("size" => "", "wfo" => "-wfo");
 
 $ts = mktime(0,0,0,$month, $day, $year);
 
 $archivebegin = mktime(0,0,0,6,1,2005);
 if ($ts < $archivebegin) { $ts = $archivebegin; }
 
-$imap = sprintf("/mnt/a1/ARCHIVE/data/%s/sbwsum-imap.txt", date("Y/m/d", $ts));
-$imgurl = sprintf("http://mesonet.agron.iastate.edu/archive/data/%s/sbwsum.png", date("Y/m/d", $ts));
+$imap = sprintf("/mnt/a1/ARCHIVE/data/%s/sbwsum-imap%s.txt", date("Y/m/d", $ts), $d[$sortby]);
+$imgurl = sprintf("http://mesonet.agron.iastate.edu/archive/data/%s/sbwsum%s.png", date("Y/m/d", $ts), $d[$sortby]);
 
 $gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=0&minute1=0&month2=%s&day2=%s&hour2=0&minute2=0",  date("Y", $ts), date("m", $ts),date("d", $ts), date("m", $ts +86400), date("d", $ts + 86400) );
 
@@ -35,8 +38,15 @@ $gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwa
 <td><?php echo yearSelect(2005, date("Y", $ts), "year"); ?></td>
 <td><?php echo monthSelect(date("m", $ts), "month"); ?></td>
 <td><?php echo daySelect(date("d", $ts) , "day"); ?></td>
-<td><input type="submit" value="GO!"></td>
-</tr></tbody>
+<td rowspan="2"><input type="submit" value="GO!"></td>
+</tr>
+<tr><td colspan="3">
+Sort by: <select name="sortby">
+ <option value="size" <?php if ($sortby == "size") echo "SELECTED"; ?>>Polygon size</option>
+ <option value="wfo" <?php if ($sortby == "wfo") echo "SELECTED"; ?>>NWS WFO Office</option>
+</select>
+</td></tr>
+</tbody>
 </table>
 </form>
 
