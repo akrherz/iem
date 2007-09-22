@@ -70,6 +70,15 @@ $issue = strtotime(substr($row["issue"],0,16)) + 240;
 $cow_issue = strtotime(substr($row["issue"],0,16)) - 21600;
 $cow_expire = strtotime(substr($row["issue"],0,16)) + 21600;
 
+$lsrwindow = 0;
+if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO")) 
+{
+  $hard_code_lsr_time = 1;
+  $lsr_sts = strtotime(substr($row["issue"],0,16));
+  $lsr_ets = strtotime(substr($row["expire"],0,16));
+  $lsrwindow = 1;
+}
+
 $cow_url = sprintf("%s/cow/?syear=%s&smonth=%s&sday=%s&shour=%s&eyear=%s&emonth=%s&eday=%s&ehour=%s&wfo=%s&wtype[]=TO&wtype[]=SV&hail=0.75&ltype[]=TO&ltype[]=SV", $rooturl, date("Y", $cow_issue), date("m", $cow_issue),date("d", $cow_issue),date("H", $cow_issue), date("Y", $cow_expire), date("m", $cow_expire), date("d", $cow_expire), date("H", $cow_expire), $row["wfo"]);
 
 $cow = "";
@@ -97,9 +106,8 @@ $tzoff = 0;
 $interval = 5;
 $width = 500;
 $height = 400;
-$layers = array("uscounties_and_name", "warnings", "nexrad");
-$lsrwindow = 0;
 $lsrlook = 0;
+$layers = array("uscounties_and_name", "warnings", "nexrad");
 $maptitle = "IEM NEXRAD valid:";
 $singleWarning = 1;
 dl($mapscript);
