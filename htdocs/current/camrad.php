@@ -21,7 +21,10 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 dl($mapscript);
 
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
-$map->setExtent(-95.0,40.45,-92.1,43.3);
+if ($network == "KCCI")
+ $map->setExtent(-95.0,40.45,-92.1,43.3);
+if ($network == "KELO")
+ $map->setExtent(-98.0,42.45,-95.1,45.3);
 $map->set("width", 320);
 $map->set("height", 240);
 
@@ -31,7 +34,7 @@ $namer->set("status", 1);
 $stlayer = $map->getlayerbyname("states");
 $stlayer->set("status", 1);
 
-$counties = $map->getlayerbyname("iacounties");
+$counties = $map->getlayerbyname("uscounties");
 $counties->set("status", 1);
 
 $c0 = $map->getlayerbyname("warnings0_c");
@@ -101,14 +104,18 @@ $c0->draw($img);
 reset($cameras);
 while (list($key, $val) = each($cameras))
 {
+   if ($val["network"] != $network) continue;
    if (! $cameras[$key]["active"]) continue;
+   $lon = isset($val["lon"]) ? $val["lon"] : $cities["KCCI"][$key]['lon'];
+   $lat = isset($val["lat"]) ? $val["lat"] : $cities["KCCI"][$key]['lat'];
+
    $pt = ms_newPointObj();
-   $pt->setXY($cities["KCCI"][$key]["lon"], $cities["KCCI"][$key]["lat"], 0);
+   $pt->setXY($lon, $lat, 0);
    $pt->draw($map, $cp, $img, 0, $cameras[$key]['num'] );
    $pt->free();
 
    $pt = ms_newPointObj();
-   $pt->setXY($cities["KCCI"][$key]["lon"], $cities["KCCI"][$key]["lat"], 0);
+   $pt->setXY($lon, $lat, 0);
    $cl2->label->set("angle",  (0 - $cdrct[$key]) + 90 );
    $pt->draw($map, $cp, $img, 1, 'a' );
    $pt->free();
