@@ -4,6 +4,7 @@ import  mx.DateTime, cgi, sys
 from pyIEM import iemdb
 i = iemdb.iemdb()
 mydb = i['snet']
+iem = i['iem']
 
 def diff(nowVal, pastVal, mulli):
   if (nowVal < 0 or pastVal < 0): return "%5s," % ("M")
@@ -27,6 +28,16 @@ def Main():
   rs = mydb.query("SELECT station, valid, pday from t%s WHERE \
     station = '%s' and date(valid) = '%s' ORDER by valid ASC" \
     % (s.strftime("%Y_%m"), station, s.strftime("%Y-%m-%d") ) ).dictresult()
+
+  if (s.strftime("%Y%m%d") == mx.DateTime.now().strftime("%Y%m%d")):
+    rs = iem.query("SELECT station, valid, pday from current_log WHERE \
+    station = '%s' and date(valid) = '%s' ORDER by valid ASC" \
+    % (s.strftime("%Y_%m"), station, s.strftime("%Y-%m-%d") ) ).dictresult()
+  else:
+    rs = mydb.query("SELECT station, valid, pday from t%s WHERE \
+    station = '%s' and date(valid) = '%s' ORDER by valid ASC" \
+    % (s.strftime("%Y_%m"), station, s.strftime("%Y-%m-%d") ) ).dictresult()
+
 
   pcpn = [-1]*(24*60)
 
