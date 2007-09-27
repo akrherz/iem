@@ -23,7 +23,7 @@ def Main():
   interval = mx.DateTime.RelativeDateTime(minutes=+1)
 
   print 'Content-type: text/plain\n\n'
-  print "SID  ,  DATE    ,TIME ,PCOUNT,60min ,30min ,20min ,15min ,10min , 5min , 1min ,"
+  print "SID  ,  DATE    ,TIME ,PCOUNT,P15MIN,60min ,30min ,20min ,15min ,10min , 5min , 1min ,"
   rs = mydb.query("SELECT station, valid, pday from t%s WHERE \
     station = '%s' and date(valid) = '%s' ORDER by valid ASC" \
     % (s.strftime("%Y_%m"), station, s.strftime("%Y-%m-%d") ) ).dictresult()
@@ -54,6 +54,11 @@ def Main():
       print "%5s," % ("M"),
     else:
       print "%5.2f," % (pcpn[i],),
+
+    if (i >= 15):
+      print diff(pcpn[i], pcpn[i-15], 1),
+    else:
+      print "%5s," % (" "),
 
     if (i >= 60):
       print diff(pcpn[i], pcpn[i-60], 1),
