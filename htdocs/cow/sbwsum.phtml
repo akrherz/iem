@@ -4,9 +4,9 @@ $TITLE = "IEM | Storm Based Warning Daily Summaries";
 include("$rootpath/include/forms.php");
 include("$rootpath/include/header.php"); 
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time()-86400);
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m", time()-86400);
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d", time()-86400);
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time()-3600);
+$month = isset($_GET["month"]) ? $_GET["month"] : date("m", time()-3600);
+$day = isset($_GET["day"]) ? $_GET["day"] : date("d", time()-3600);
 $sortby = isset($_GET["sortby"]) ? $_GET["sortby"] : "size";
 
 $d = Array("size" => "", "wfo" => "-wfo");
@@ -59,7 +59,7 @@ given UTC date (0z to 0z).  This summary is based
 on an archive the IEM maintains and may contain errors.  Also, prior to
 1 October 2007, these warnings were not official and their shapes may or 
 may not have been considered by the issuing forecaster. This page works for
-dates between 1 June 2005 and <?php echo date("d M Y", time() - 86400 ); ?>.
+dates between 1 June 2005 and <?php echo date("d M Y", time() - 3600 ); ?>.
 Areas are computed and polygons shown using a US National Atlas Equal Area 
 projection (EPSG:2163).
 
