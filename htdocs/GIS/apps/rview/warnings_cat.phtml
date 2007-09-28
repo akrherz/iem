@@ -8,6 +8,45 @@ include("$rootpath/include/lsrs.php");
 include('lib.php');
 putenv("TZ=GMT");
 
+function vtecPhenoSelect($selected)
+{
+ global $vtec_phenomena;
+ $s = "<select name=\"phenomena\" style=\"width: 195px;\">\n";
+ while( list($key, $value) = each($vtec_phenomena) ){
+  $s .= "<option value=\"$key\" ";
+  if ($selected == $key) $s .= "SELECTED";
+  $s .= ">[".$key."] ". $vtec_phenomena[$key] ."</option>";
+ }
+ $s .= "</select>\n";
+ return $s;
+}
+
+function vtecSigSelect($selected)
+{
+ global $vtec_significance;
+ $s = "<select name=\"significance\" style=\"width: 195px;\">\n";
+ while( list($key, $value) = each($vtec_significance) ){
+  $s .= "<option value=\"$key\" ";
+  if ($selected == $key) $s .= "SELECTED";
+  $s .= ">[".$key."] ". $vtec_significance[$key] ."</option>";
+ }
+ $s .= "</select>\n";
+ return $s;
+}
+
+function wfoSelect($selected)
+{
+ global $wfos;
+ $s = "<select name=\"wfo\" style=\"width: 195px;\">\n";
+ while( list($key, $value) = each($wfos) ){
+   $s .= "<option value=\"$key\" ";
+   if ($selected == $key) $s .= "SELECTED";
+   $s .= ">[".$key."] ". $wfos[$key]["city"] ."</option>";
+ }
+ $s .= "</select>";
+ return $s;
+}
+
 function determine_time_base($t)
 {
   $year = date("Y", $t);
@@ -33,7 +72,6 @@ function determine_time_base($t)
 }
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
-
 $wfo = isset($_GET["wfo"]) ? $_GET["wfo"] : "MPX";
 $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? $_GET["phenomena"] : "SV";
@@ -42,6 +80,7 @@ $warngeo = isset($_GET["warngeo"]) ? $_GET["warngeo"] : "both";
 if ($phenomena != "SV" && $phenomena != "TO") $warngeo = "county";
 
 include("$rootpath/include/header.php");
+echo "<form method=\"GET\" name=\"changero\">";
 
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'GMT'");
@@ -49,7 +88,6 @@ pg_exec($connect, "SET TIME ZONE 'GMT'");
 /* We need to fetch the extent */
 $query1 = "SELECT xmax(extent(geom)) as x1, xmin(extent(geom)) as x0, ymin(extent(geom)) as y0, ymax(extent(geom)) as y1 from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and eventid = $eventid and significance = '$significance'";
 $result = pg_exec($connect, $query1);
-if (pg_num_rows($result) == 0) die("Could not find this product in the database!");
 $row = pg_fetch_array($result, 0);
 $lpad = 0.5;
 $y1 = $row["y1"] +$lpad; $y0 = $row["y0"]-$lpad; 
@@ -62,7 +100,47 @@ if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO"))
   $query2 .= " and gtype = 'P'";
 }
 $result = pg_exec($connect, $query2);
-if (pg_num_rows($result) == 0) die("Could not find this product in the database!");
+
+
+
+/* Lets be nice and list out all warnings instead */
+if (pg_num_rows($result) == 0) 
+{
+ $sql = "select sumtxt( n.name || ' ['||n.state||'], ') as s, eventid, min(issue) as i, 
+         max(expire) as e from 
+         (select distinct ugc, eventid, issue, expire from warnings_$year 
+          WHERE wfo = '$wfo' and gtype = 'C' and 
+          significance = '$significance' and phenomena = '$phenomena') as foo, 
+         nws_ugc n WHERE n.ugc = foo.ugc GROUP by eventid ORDER by eventid ASC";
+ $result = pg_exec($connect, $sql);
+
+ echo "<h3>$year ". $vtec_phenomena[$phenomena]  ." ". $vtec_significance[$significance] ."(s) issued by ". $wfos[$wfo]["city"] ." Weather Office</h3>";
+
+ echo "<table><tr><td>NWS WFO:</td><td>". wfoSelect($wfo) ."</td><td>Year:</td><td>". yearSelect(2005,$year) ."</td><td rowspan=\"2\"><input type=\"hidden\" value=\"0\" name=\"eventid\"><input type=\"submit\" value=\"View\"></td></tr><tr><td>Phenomena:</td><td>". vtecPhenoSelect($phenomena) ."</td><td>Significance:</td><td>". vtecSigSelect($significance) ."</td></tr></table>";
+
+ echo "<br />Here is a listing of products archived by the IEM. Click on the
+  event id to get more details";
+
+ echo "<p><table class=\"ruler\" border=\"1\"><thead><tr><th>Event ID</th><th>Issued</th><th>Expired</th><th>Counties Effected:</th></tr></thead>\n";
+ for ($i=0; $row = @pg_fetch_array($result,$i); $i++)
+ {
+   $url = sprintf("warnings_cat.phtml?wfo=%s&year=%s&eventid=%s&phenomena=%s&significance=%s", $wfo, $year, $row["eventid"], $phenomena, $significance);
+   $iss = date("d M Y H:i", strtotime(substr($row["i"],0,16)));
+   $exp = date("d M Y H:i", strtotime(substr($row["e"],0,16)));
+   echo "<tr><th><a href=\"$url\">". $row["eventid"] ."</a></th><td>". $iss ." Z</td><td>". $exp ." Z</td><td>". substr($row["s"],0,-2)  ."</td></tr>\n";
+ }
+ if (pg_num_rows($result) == 0)
+ {
+  echo "<tr><td colspan=\"4\">No products found, sorry!</td></tr>";
+ }
+ echo "</table>\n";
+ include("$rootpath/include/footer.php");
+ die();
+}
+
+
+
+
 $row = pg_fetch_array($result, 0);
 
 /* Determine time base, 4 minutes from product issuance */
@@ -95,6 +173,9 @@ $next_link = sprintf("<a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo
 $last_link = "";
 if ($last_eventid > 0)
   $last_link = sprintf(" <a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s\">Previous</a> ", $rooturl, $year, $row["wfo"], $phenomena, $last_eventid, $significance, $warngeo);
+  
+
+$all_link = sprintf(" <a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=0&significance=%s&warngeo=%s\">View all events of this type</a> ", $rooturl, $year, $row["wfo"], $phenomena, $significance, $warngeo);
 
 
 $ts = determine_time_base($issue);
@@ -115,47 +196,15 @@ include("warnings_plot.php");
 
 echo "
 <h3>Valid Time Extent Code (VTEC) Product Browser</h3>
-<form method=\"GET\" name=\"changero\">
 <table border=\"2\" cellpadding=\"5\" cellspacing=\"0\">
 <tr><td valign=\"top\">
 <b>Summary:</b>
 <table>
-<tr><td>NWS WFO:</td><td>"; ?>
-<select name="wfo" style="width: 195px;">
-<?php
-while( list($key, $value) = each($wfos) ){
-  echo "<option value=\"$key\" ";
-  if ($wfo == $key) echo "SELECTED";
-  echo ">[".$key."] ". $wfos[$key]["city"] ."</option>";
-}
-?>
-</select>
-<?php echo "</td></tr>
+<tr><td>NWS WFO:</td><td>". wfoSelect($wfo) ."</td></tr>
 <tr><td>Year:</td><td>". yearSelect(2005,$year) ."</td></tr>
 <tr><td>Event ID:</td><td>$last_link <input name=\"eventid\" type=\"text\" size=\"5\" value=\"". $row["eventid"] ."\"> $next_link</td></tr>
-<tr><td>Phenomena:</td><td>";
-?>
-<select name="phenomena" style="width: 195px;">
-<?php
-while( list($key, $value) = each($vtec_phenomena) ){
-  echo "<option value=\"$key\" ";
-  if ($row["phenomena"] == $key) echo "SELECTED";
-  echo ">[".$key."] ". $vtec_phenomena[$key] ."</option>";
-}
-?>
-</select>
-<?php echo "</td></tr>
-<tr><td>Significance:</td><td>"; ?>
-<select name="significance" style="width: 195px;">
-<?php
-while( list($key, $value) = each($vtec_significance) ){
-  echo "<option value=\"$key\" ";
-  if ($row["significance"] == $key) echo "SELECTED";
-  echo ">[".$key."] ". $vtec_significance[$key] ."</option>";
-}
-?>
-</select>
-<?php echo "</td></tr>
+<tr><td>Phenomena:</td><td>". vtecPhenoSelect($phenomena) ."</td></tr>
+<tr><td>Significance:</td><td>". vtecSigSelect($significance) ."</td></tr>
 <tr><td>Status:</td><td>". $vtec_status[ $row["status"] ] ."</td></tr>
 <tr><td>Issued:</td><td>". substr($row["issue"],0,16) ." GMT</td></tr>
 <tr><td>Expires:</td><td>". substr($row["expire"],0,16) ." GMT</td></tr>"; ?>
@@ -172,6 +221,7 @@ while( list($key, $value) = each($vtec_significance) ){
 </form>
 <h4>Links:</h4>
 <ul>
+ <li><?php echo $all_link; ?></li>
  <?php echo $cow; ?>
  <li><a href="<?php echo $gis_url; ?>">Download Shapefile of Warnings</a></li>
  <li><a href="<?php echo $radar_url; ?>">Interactive RADAR Display</a></li>
