@@ -234,7 +234,7 @@ $cameras = Array(
     "sponsor" => "Marion County Community Foundation", "sponsorurl" => "http://www.mccfiowa.org",
     "ip" => "209.56.232.244", "county" => "Marion", "port" => "80"),
 "KCCI-003" => Array("sts" => mktime(0,0,0,8, 28,2003), "ets" => time(),
-    "name" => "Webster City", "removed" => False, "active" => False, "lat" => 42.47, "lon" => -93.82,
+    "name" => "Webster City", "removed" => False, "active" => True, "lat" => 42.47, "lon" => -93.82,
     "hosted" => "",
     "hostedurl" => "",
     "iservice" => "WMTEL.NET",
