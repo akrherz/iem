@@ -5,6 +5,11 @@ $cameras = Array(
           "name" => "Brookings", "active" => true,"network" => "KELO",
           "ip" => "137.216.254.38", "county" => "Brookings"),
 
+  "KCCI-030" => Array("sts" => mktime(11,0,0,9,28,2007), "ets" => time(),
+          "lat" => 41.20539, "lon" => -92.885,
+          "name" => "Bussey", "active" => true,"network" => "KCCI",
+          "ip" => "209.56.232.244", "county" => "Marion"),
+
 
   "SAGI4" => Array("sts" => mktime(14,0,0,7,11,2006), "ets" => time(),
                 "name" => "Algona", "active" => true,"network" => "KCCI",
