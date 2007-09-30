@@ -37,14 +37,14 @@ $stlayer->set("status", 1);
 $counties = $map->getlayerbyname("uscounties");
 $counties->set("status", 1);
 
-$c0 = $map->getlayerbyname("warnings0_c");
+$c0 = $map->getlayerbyname("sbw");
 $c0->set("connection", $_DATABASES["postgis"] );
 $c0->set("status", MS_ON );
 if ($isarchive)
 {
-   $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+   $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P' and significance = 'W' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
 }else {
-   $sql = "geom from (select significance, phenomena, geom, oid from warnings WHERE expire > '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326";
+   $sql = "geom from (select significance, phenomena, geom, oid from warnings WHERE expire > '$db_ts' and gtype = 'P' and significance = 'W' ORDER by phenomena ASC) as foo using unique oid using SRID=4326";
    $c0->set("data", $sql);
 }
 
