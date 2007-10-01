@@ -21,6 +21,8 @@
   "sts" => mktime(2,0,0,8,17,1988), "climate_site" => "ia1394" ),
 "A131909" => array("city"=>"CRAWFORDSVILLE","lat" => "41.2","lon" => "-91.50",
   "sts" => mktime(1,0,0,1,1,1990), "climate_site" => "ia1731" ),
+"A130219" => array("city"=>"Gilbert","lat" => "42.11109","lon" => "-93.58334",
+  "sts" => mktime(1,0,0,8,29,1986), "climate_site" => "ia0200" ),
 "A135879" => array("city" => "NASHUA", "lat" => "42.75", "lon" => "-92.50",
   "sts" => mktime(2,0,0,9,1,1988), "climate_site" => "ia8706" ),
 "A138019" => array("city" => "SUTHERLAND","lat" => "42.96", "lon" => "-95.50",
