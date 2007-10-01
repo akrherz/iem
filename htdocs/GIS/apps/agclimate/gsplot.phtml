@@ -289,7 +289,7 @@ $tr = "# ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .")\n";
 $tr .= "#-----------------------snip------------------\n";
 $tr .= sprintf("%20s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $var);
 foreach($vals as $key => $value){
-  if ($key == "A133259" || $key == "A130219") continue;
+  if ($key == "A133259") continue;
 
   $tr .= sprintf("%20s,%10s,%10s,%10s\n", $ISUAGcities[$key]['city'],
   $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], round($value, $round[$var]) );

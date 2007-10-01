@@ -105,7 +105,7 @@ $cols = Array("c11" => "hi_tmp_f",
  $tr .= sprintf("%20s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $cols[$pvar]);
 
  foreach($data as $key => $value){
-   if ($key == "A133259" || $key == "A130219") continue;
+   if ($key == "A133259") continue;
    if (isset($data[$key]['var2']) ){
      $tr .= sprintf("%20s,%10s,%10s,%10s,%10s\n", $ISUAGcities[$key]['city'],
   $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], $data[$key]['var'],
