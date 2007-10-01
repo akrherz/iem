@@ -107,7 +107,7 @@ $rs =  pg_exec($c, $q);
 $data = Array();
 for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $key = $row['station'];
-  if ($key == "A133259" || $key == "A130219") continue;
+  if ($key == "A133259") continue;
   $data[$key] = Array();
   $data[$key]['city'] = $ISUAGcities[$key]['city'];
   $data[$key]['lon'] = $ISUAGcities[$key]['lon'];

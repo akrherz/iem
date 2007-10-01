@@ -56,7 +56,7 @@ $sql = "select station, sum($dvar) as s from daily
 $rs =  pg_exec($c, $sql);
 for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $key = $row["station"];
-  if ($key == "A133259" || $key == "A130219") continue;
+  if ($key == "A133259") continue;
 
   $val = $row["s"];
 
