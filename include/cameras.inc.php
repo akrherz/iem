@@ -216,7 +216,7 @@ $cameras = Array(
     "iservice" => "",
     "iserviceurl" => "", "network" => "KCCI",
     "sponsor" => "", "sponsorurl" => "",
-    "ip" => "67.55.246.251", "county" => "Boone", "port" => "80"),
+    "ip" => "67.55.246.251", "county" => "Hamilton", "port" => "80"),
 "KCCI-017" => Array("sts" => mktime(0,0,0,5, 18,2005), "ets" => time(),
     "name" => "Tama", "removed" => False, "active" => True, "lat" => 41.99262, "lon" => -92.6465,
     "hosted" => "",
