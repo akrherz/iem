@@ -162,7 +162,7 @@ $cameras = Array(
     "sponsor" => "", "sponsorurl" => "",
     "ip" => "209.56.232.244", "county" => "Marshall", "port" => "80"),
 "KELO-002" => Array("sts" => mktime(11,0,0,10, 3,2007), "ets" => time(),
-    "name" => "Mitchell", "removed" => False, "active" => True, "lat" => 44.3236, "lon" => -96.7833,
+    "name" => "Mitchell", "removed" => False, "active" => True, "lat" => 43.6981, "lon" => -98.0317,
     "hosted" => "None",
     "hostedurl" => "None",
     "iservice" => "",
