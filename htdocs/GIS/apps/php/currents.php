@@ -98,8 +98,8 @@ $lon1 = max($lons);
 
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 
-$pad = 0.6;
-$lpad = 0.6;
+$pad = 2.6;
+$lpad = 2.6;
 
 //$map->setextent(-83760, -2587, 478797, 433934);
 $map->setextent($lon0 - $lpad, $lat0 - $pad, $lon1 + $lpad, $lat1 + $pad);
