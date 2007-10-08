@@ -1131,7 +1131,7 @@ LAYER
        USING srid=4326 USING unique foid"
   STATUS ON
   TYPE POINT
-  LABELANGLEITEM drct
+  #LABELANGLEITEM drct
   LABELCACHE OFF
   PROJECTION
     "init=epsg:4326"
@@ -1140,6 +1140,7 @@ LAYER
     TEXT ([sknt])
     COLOR -1 -1 -1
     LABEL
+      ANGLE [drct]
       SIZE 40
       OFFSET 4 -12
       POSITION CC
