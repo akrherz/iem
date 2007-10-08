@@ -9,6 +9,14 @@
 <?php
   $TITLE = "IEM | ASOS | Current Conditions";
   $REFRESH = "<meta http-equiv=\"refresh\" content=\"1200;\">";
+  $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+<!--//BEGIN Script
+function new_window(url) {
+ link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
+} 
+//END Script-->
+</script>
+';
   include("$rootpath/include/header.php"); 
   include("$rootpath/include/mlib.php"); 
   include("$rootpath/include/all_locs.php"); 
