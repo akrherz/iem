@@ -19,13 +19,13 @@ include("$rootpath/include/mlib.php");
 $height = 350;
 $width = 350;
 
-$map = ms_newMapObj("sites.map");
-$map->setProjection("proj=lcc,lat_1=42.0666,lat_2=43.2666,lat_0=41.5,lon_0=-93.5,x_0=1500000,y_0=1000000");
+$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+$map->setProjection("init=epsg:26915");
 
-$lx = 1220000;
-$ux = 1797000;
-$ly =  885000;
-$uy = 1227000;
+$lx =  200000;
+$ux =  710000;
+$ly = 4400000;
+$uy = 4900000;
 $dx = $ux - $lx;
 $dy = $uy - $ly;
 
@@ -39,33 +39,53 @@ $ex = Array(
 
 $map->setextent($ex[$area][0], $ex[$area][1], $ex[$area][2], $ex[$area][3]);
 
-$counties = $map->getlayerbyname("counties");
+$namer = $map->getlayerbyname("namerica");
+$namer->set("status", MS_ON);
+
+$counties = $map->getlayerbyname("uscounties");
 $counties->set("status", MS_ON);
-$counties->setProjection("proj=latlong");
 
 $stlayer = $map->getlayerbyname("states");
 $stlayer->set("status", 1);
-$stlayer->setProjection("proj=latlong");
 
-$dot = $map->getlayerbyname("dot");
+$dot = $map->getlayerbyname("pointonly");
 $dot->set("status", MS_ON);
-$dot->setProjection("proj=latlong");
 
-$site = $map->getlayerbyname("site");
-$site->set("status", MS_ON);
-$site->setProjection("proj=latlong");
-
-$coop = $map->getlayerbyname("coop");
-$coop->set("status", MS_OFF);
-$coop->set("data", $_DATABASES["coop"]);
-
-$datal = $map->getlayerbyname("datal");
+$datal = ms_newLayerObj($map);
+$datal->set("name", "q");
+$datal->set("connectiontype", MS_POSTGIS);
+$datal->set("connection", $_DATABASES["coop"] );
 $datal->set("status", MS_ON);
+$datal->set("type", MS_LAYER_POINT);
+$datal->setProjection("init=epsg:4326");
 
-$ttt = $map->getlayerbyname("ttt");
-$ttt->set("status", MS_ON);
+$datalc0 = ms_newClassObj($datal);
+$datalc0->setExpression("([yrs] > 80)");
+$datalc0->settext("([d])");
+$datalc0->label->color->setrgb(255,255,0);
+$datalc0->label->set("type", MS_TRUETYPE);
+$datalc0->label->set("font", "arial");
+$datalc0->label->set("size", 12);
+$datalc0->label->set("force", MS_TRUE);
+$datalc0->label->set("partials", MS_TRUE);
+$datalc0->label->set("antialias", MS_TRUE);
+$datalc0->label->set("position", MS_UR);
+$datalc0->label->set("angle", 0);
 
-$img = $map->prepareImage();
+$datalc0s0 = ms_newStyleObj($datalc0);
+$datalc0s0->color->setrgb(0,0,0);
+$datalc0s0->set("symbolname", "circle");
+$datalc0s0->set("size", 3);
+
+
+$datalc1 = ms_newClassObj($datal, $datalc0);
+$datalc1->setExpression("([yrs] < 80)");
+$datalc1s0 = $datalc1->getStyle(0);
+$datalc1s0->color->setrgb(255,0,0);
+
+//$ttt = $map->getlayerbyname("ttt");
+//$ttt->set("status", MS_ON);
+
 
 $tpos = Array(
   "all" => Array(-95.4, 40.2),
@@ -86,10 +106,10 @@ $var = Array("max_precip" => "Record Daily Precip [in]",
   "min_high" => "Record Min High Temp [F]",
   "high" => "Average High Temp [F]");
 
-$pt = ms_newPointObj();
-$pt->setXY($tpos[$area][0], $tpos[$area][1], 0);
-$pt->draw($map, $ttt, $img, 0, $plotDate ." ". $var[$plot] );
-$pt->free();
+//$pt = ms_newPointObj();
+//$pt->setXY($tpos[$area][0], $tpos[$area][1], 0);
+//$pt->draw($map, $ttt, $img, 0, $plotDate ." ". $var[$plot] );
+//$pt->free();
 
 
 
@@ -104,7 +124,7 @@ $dbarray = Array("high" => "round(data.high::numeric, 0)::int",
     "min_high" => "round(data.min_high::numeric, 0)::int ||'W'|| min_high_yr ",
     "min_low" => "round(data.min_low::numeric, 0)::int ||'W'|| min_low_yr ",
  "max_precip" => "to_char(data.max_precip, '99.99') ||'W'|| max_precip_yr ",
-    "precip" => "to_char(data.precip, '99.99')");
+    "precip" => "round(data.precip::numeric, 2)");
 
 } else {
 $dbarray = Array("high" => "round(data.high::numeric, 0)::int",
@@ -114,7 +134,7 @@ $dbarray = Array("high" => "round(data.high::numeric, 0)::int",
     "min_high" => "round(data.min_high::numeric, 0)::int",
     "min_low" => "round(data.min_low::numeric, 0)::int",
      "max_precip" => "to_char(data.max_precip, '99.99') ",
-    "precip" => "to_char(data.precip, '99.99')");
+    "precip" => "round(data.precip::numeric, 2)");
 }
 
 $sql = "geom from 
@@ -123,15 +143,12 @@ $sql = "geom from
     WHERE data.station = lower(map.id) and 
     data.valid = '". $dbdate ."') as foo using UNIQUE oid using SRID=4326";
 $datal->set('data', $sql);
-$datal->set('connection', $_DATABASES["coop"]);
 
-$st_cl = ms_newclassobj($stlayer);
-//$st_cl->set("outlinecolor", $green);
-$st_cl->set("status", MS_ON);
-
-$stlayer->draw( $img);
+$img = $map->prepareImage();
+$namer->draw($img);
 $counties->draw($img);
-$ttt->draw($img);
+$stlayer->draw( $img);
+//$ttt->draw($img);
 $datal->draw($img);
 
 $map->drawLabelCache($img);
@@ -252,7 +269,7 @@ echo "<table border=0>
 <tr>
   <td colspan=2>
     <a href="request.php?month=<?php echo $month; ?>&day=<?php echo $day;
-    ?>"><img src="/images/gisready.png" border=0> shp, dbf, shx</a><br><br>
+    ?>"><img src="<?php echo $rooturl; ?>/images/gisready.png" border=0> shp, dbf, shx</a><br><br>
   </td></tr>
 
 
