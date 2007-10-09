@@ -15,6 +15,7 @@ dl($mapscript);
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/all_locs.php");
 include("$rootpath/include/mlib.php");
+include("../rview/lib.php");
 
 $height = 350;
 $width = 350;
@@ -150,8 +151,11 @@ $counties->draw($img);
 $stlayer->draw( $img);
 //$ttt->draw($img);
 $datal->draw($img);
+mktitle($map, $img, "                 ". $plotDate ." ". $var[$plot]);
+
 
 $map->drawLabelCache($img);
+mklogolocal($map, $img);
 
 $url = $img->saveWebImage();
 
