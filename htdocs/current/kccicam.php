@@ -35,7 +35,7 @@ able to place a network of over 20 web cameras in Central Iowa.
      $misstxt .= $v["name"] ." , ";
      continue;
    }
-   echo sprintf("<div style=\"float: left; margin-left: 5px;\"><b>%s. %s</b> (%s County)<br /><img src=\"%s\"></div>", $v["num"], $v["name"], $v["county"], $v["url"]);
+   echo sprintf("<div style=\"float: left; margin-left: 5px;\"><b>%s. %s, %s</b> (%s County)<br /><img src=\"%s\"></div>", $v["num"], $v["name"], $v["state"], $v["county"], $v["url"]);
  }
 ?>
 
@@ -52,5 +52,5 @@ able to place a network of over 20 web cameras in Central Iowa.
  <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2005&month=11&day=12&hour=16&minute=38">12 Nov 2005 - 4:38 PM, Woodward tornado from Madrid</a></li>
  <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2005&month=11&day=12&hour=17&minute=00">12 Nov 2005 - 5:00 PM, Ames tornado</a></li>
  <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2006&month=07&day=17&hour=16&minute=50">17 Jul 2006 - 4:50 PM, Tama possible brief tornado</a></li>
- <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2007&month=09&day=18&hour=18&minute=58">18 Sep 2007 - 6:58 PM, Rainbows!</a></li>
+ <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2007&month=10&day=2&hour=17&minute=56">2 Oct 2007 - 5:56 PM, Twin Cedars possible tornado</a></li>
 </ul>

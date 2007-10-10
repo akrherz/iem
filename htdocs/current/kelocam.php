@@ -33,7 +33,7 @@
      $misstxt .= $v["name"] ." , ";
      continue;
    }
-   echo sprintf("<div style=\"float: left; margin-left: 5px;\"><b>%s. %s</b> (%s County)<br /><img src=\"%s\"></div>", $v["num"], $v["name"], $v["county"], $v["url"]);
+   echo sprintf("<div style=\"float: left; margin-left: 5px;\"><b>%s. %s, %s</b> (%s County)<br /><img src=\"%s\"></div>", $v["num"], $v["name"], $v["state"],$v["county"], $v["url"]);
  }
 ?>
 
