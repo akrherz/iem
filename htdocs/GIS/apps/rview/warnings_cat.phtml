@@ -78,6 +78,9 @@ $phenomena = isset($_GET["phenomena"]) ? $_GET["phenomena"] : "SV";
 $significance = isset($_GET["significance"]) ? $_GET["significance"] : "W";
 $warngeo = isset($_GET["warngeo"]) ? $_GET["warngeo"] : "both";
 if ($phenomena != "SV" && $phenomena != "TO") $warngeo = "county";
+if (($phenomena == "SV" || $pheomena == "TO") && !isset($_GET["warngeo"])) {
+ $warngeo = "sbw";
+}
 
 include("$rootpath/include/header.php");
 echo "<form method=\"GET\" name=\"changero\">";
