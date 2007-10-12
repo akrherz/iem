@@ -26,7 +26,7 @@ if (! $subc && ! $dwpf && ! $tmpf && ! $s0 && ! $s1 && ! $s2 && ! $s3 ){
  include("$rootpath/include/selectWidget.php");
  $sw = new selectWidget("$rooturl/plotting/rwis/sf_fe.php", "$rooturl/plotting/rwis/sf_fe.php?", "IA_RWIS");
  $swf = Array("network" => "IA_RWIS", "s0" => 1, "s1" => 1, "s2" => 1, 
-              "s3" => 1, "tmpf" => 1, "dwpf" => 1, "subc" => 1, "pcpn" => 1);
+              "s3" => 1, "tmpf" => 1, "dwpf" => 1, "subc" => 1);
  $sw->setformvars($swf);
  $sw->logic($_GET);
  $swinterface = $sw->printInterface();

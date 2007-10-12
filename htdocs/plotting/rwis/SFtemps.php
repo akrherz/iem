@@ -154,7 +154,6 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 pg_close($c0);
 //pg_close($c1);
 
-
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
 include ("$rootpath/include/jpgraph/jpgraph_bar.php");
@@ -165,7 +164,7 @@ include ("$rootpath/include/all_locs.php");
 // Create the graph. These two calls are always required
 $graph = new Graph(650,550,"example1");
 $graph->SetScale("datlin");
-if (isset($_GET["pcpn"])) $graph->SetY2Scale("lin");
+if (max($pcpn) != "" && isset($_GET["pcpn"])) $graph->SetY2Scale("lin");
 if (isset($limit))  $graph->SetScale("datlin", 25, 35);
 $graph->img->SetMargin(40,55,105,105);
 //$graph->xaxis->SetFont(FS_FONT1,FS_BOLD);
@@ -175,7 +174,7 @@ $graph->xaxis->SetLabelAngle(90);
 //$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 
 $graph->yaxis->SetTitle("Temperature [F]");
-if (isset($_GET["pcpn"])) {
+if (max($pcpn) != "" && isset($_GET["pcpn"])) {
  $graph->y2axis->SetTitle("Precipitation [inch]");
  $graph->y2axis->SetTitleMargin(40);
 }
