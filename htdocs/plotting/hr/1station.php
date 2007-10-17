@@ -4,10 +4,10 @@ include("../../../config/settings.inc.php");
  $network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
  $hours = isset($_GET["hours"]) ? $_GET["hours"] : 24;
 
- $sw = new selectWidget("$rooturl/plotting/hr/1station.php", "$rooturl/plotting/hr/1station.php?", $network);
- $swf = Array("network" => $network);
- $sw->setformvars($swf);
+ $sw = new selectWidget("$rooturl/plotting/hr/1station.php", "$rooturl/plotting/hr/1station.php?network=$network&", $network);
+ $sw->set_networks( Array("IA_ASOS","AWOS","IA_RWIS") );
  $sw->logic($_GET);
+ $sw->setformvars( Array("network" => $network) );
  $swinterface = $sw->printInterface();
 
 
@@ -31,16 +31,10 @@ if (strlen($station) > 0 ) {
 ?>
 
   <form method="GET" action="1station.php">
+  <input name="station" value="<?php echo $station; ?>" type="hidden">
   <?php
-  if ( strlen($station) == 4 ) {
-    echo "<b>Options:</b><a href=\"1station.php\">Switch to ASOS/AWOS</a> \n";
-    echo " <b>|</b> <a href=\"1station.php\">Select Visually</a><br> \n";
-    echo rwisSelect($station); 
-  } else {
-    echo "<b>Options:</b> <a href=\"1station.php?rwis=yes\">Switch to RWIS</a> \n";
-    echo " <b>|</b> <a href=\"1station.php\">Select Visually</a><br> \n";
-    echo asosSelect($station);
-  }
+    echo "<b>Options:</b>";
+    echo " <b>|</b> <a href=\"1station.php?network=$network\">Select Visually</a><br> \n";
   ?>
   <select name="hours">
     <option value="24" <?php if ($hours == "24") echo "SELECTED"; ?>>24 hours
@@ -71,9 +65,6 @@ missing data.
 
 <BR><BR>
 <?php } else { ?>
-<b>Switch Network:</b> <a href="1station.php?network=IA_ASOS">Iowa ASOS</a>,
-<a href="1station.php?network=AWOS">Iowa AWOS</a>,
-<a href="1station.php?network=IA_RWIS">Iowa RWIS</a>.
 
 <p><?php echo $swinterface; ?>
 <?php } ?>
