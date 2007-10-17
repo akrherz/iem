@@ -62,33 +62,101 @@ the most recent set of COOP observation in it.
  <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=650">Record Cold on 15 September 2007</a></li>
 </ul>
 
-<p><h3 class="subtitle">COOP Data Applications:</h3>
-<ul>
- <li><a href="periods.phtml">Yearly temperature averages for a time period</a>
-  <br>For a date interval of your choice, get the yearly statewide average temperatures.</li> 
- <li><a href="<?php echo $rooturl; ?>/plotting/coop/spread_fe.phtml">Daily Temperature Spread</a>
-  <br>Histogram showing daily high/low temperatures.</li> 
-  <li><a href="freezing.php">Fall freezing date normals</a></li>
-  <li><a href="<?php echo $rooturl; ?>/COOP/extremes.php">Daily Climate Extremes</a>
-    <br>Textual listing of extreme temperatures/rainfall for any day of the year.</li>
-  <li><a href="<?php echo $rooturl; ?>/GIS/apps/coop/index.php">Graphical Daily Extremes and Averages.</a>
-    <br>Plots of daily extremes and averages with a GIS Ready! download of
-    <br>the data presented.</li>
-  <li><a href="/plotting/coop/climate_fe.php">Annual Average Temperatures</a>
-    <br>Dynamically produced chart of average daily temperatures.</li>
-  <li><a href="/plotting/coop/yearly_fe.php">Yearly/Seasonal Average Temperatures</a>
-   <br>Plot average daily temperatures for a season of your choice.</li>
-  <li><a href="/plotting/coop/precip_cdf_fe.phtml">Accumulated Precipitation Probabilities</a>
-   <br />Chart of precip probabilities for a time period of your choice.</li>
-  <li><a href="/plotting/coop/extremes_fe.php">Daily Temperature Extremes</a>
-   <br>Plot average temperatures and extremes throughout a year.</li>
-  <li><a href="/plotting/coop/vyear_fe.php">Yearly Departures from Average</a>
-   <br>Plot average temperatures versus what actually occured during one year.</li>
-  <li><a href="/plotting/coop/acc.phtml">Accumulated Departures from Average</a>
-	<br>Plot an accumulated departure from average for rainfall and growing degree days for a time period of your choice!</li>
-  <li><a href="<?php echo $rooturl; ?>/GIS/apps/coop/plot.phtml">Map daily observations</a>
-    <br />Generate maps of daily observations.</li>
-</ul>
+<p><h3 class="subtitle">COOP Data Applications:</h3><br>
+
+<style>
+div.tease {
+ margin: 5px;
+ padding: 5px;
+ width: 400px;
+ height: 100px;
+ background: #e8cc84;
+ float: left;
+}
+div.tease img {
+ margin-right: 5px;
+ float: left;
+}
+div.tease a {
+ font-weight: bold;
+ padding: 5px;
+ line-height: 3em;
+}
+</style>
+<?php
+
+$dict = Array(
+Array("img" => "chart_line_h_t.png",
+      "url" => "/plotting/coop/spread_fe.phtml",
+      "title" => "Daily Temperature Spread",
+      "desc" => "Histogram showing daily high/low temperatures."),
+
+Array("img" => "data_table.png",
+      "url" => "/COOP/periods.phtml",
+      "title" => "Yearly Average Temperatures",
+      "desc" => "For a date interval of your choice, get the yearly statewide average temperatures."),
+
+Array("img" => "data_table.png",
+      "url" => "/COOP/freezing.php",
+      "title" => "Fall Freezing Dates",
+      "desc" => "Statistics of dates for significant first fall freezes."),
+
+Array("img" => "data_table.png",
+      "url" => "/COOP/extremes.php",
+      "title" => "Daily Climate in Tables",
+      "desc" => "Tables of daily temperature and precipitation climatology."),
+
+Array("img" => "thumb_map.png",
+      "url" => "/GIS/apps/coop/index.php",
+      "title" => "Daily Climate in Maps",
+      "desc" => "Plots of daily extremes and averages with a GIS Ready! download of the data presented."),
+
+Array("img" => "chart_line_t_d.png",
+      "url" => "/plotting/coop/climate_fe.php",
+      "title" => "Daily Average Temperatures",
+      "desc" => "Dynamically produced chart of average daily temperatures."),
+
+Array("img" => "chart_line_t_y.png",
+      "url" => "/plotting/coop/yearly_fe.php",
+      "title" => "Yearly Average Temperatures",
+      "desc" => "Plot average daily temperatures for a season or year of your choice."),
+
+Array("img" => "chart_line_d_a.png",
+      "url" => "/plotting/coop/precip_cdf_fe.phtml",
+      "title" => "Accumulated Precipitation Probabilities",
+      "desc" => "Chart of precip probabilities for a time period of your choice."),
+
+Array("img" => "chart_line_t_d.png",
+      "url" => "/plotting/coop/extremes_fe.php",
+      "title" => "Daily Temperatures Extremes",
+      "desc" => "Plot average temperatures and extremes throughout a year."),
+
+Array("img" => "chart_line_t_d.png",
+      "url" => "/plotting/coop/vyear_fe.php",
+      "title" => "Yearly Departures from Average",
+      "desc" => "Plot average temperatures versus what actually occured during one year."),
+
+Array("img" => "chart_line_ac_d.png",
+      "url" => "/plotting/coop/acc.phtml",
+      "title" => "Accumulated Departures from Average",
+      "desc" => "Plot an accumulated departure from average for rainfall and growing degree days for a time period of your choice!"),
+
+Array("img" => "thumb_map.png",
+      "url" => "/GIS/apps/coop/plot.phtml",
+      "title" => "Map Daily Observations",
+      "desc" => "Generate maps of daily observations."),
+
+);
+
+while (list($k,$v) = each($dict))
+{
+ echo "<div class=\"tease\"><img src=\"$rooturl/images/". $v["img"] ."\"><a href=\"$rooturl/". $v["url"] ."\">". $v["title"] ."</a><br />". $v["desc"] ."</div>\n";
+}
+
+?>
+
+
+<br clear="all" />
 
 <p><h3 class="subtitle">Download Data:</h3><br>
 <ul>
