@@ -13,7 +13,6 @@
 "MCW" => array("city" => "Mason City", "id" => "MCW"),
 "EST" => array("city" => "Estherville", "id" => "EST"),
 "SPW" => array("city" => "Spencer", "id" => "SPW"),
-"CBF" => array("city" => "Council Bluffs", "id" => "CBF"),
 "IOW" => array("city" => "Iowa City", "id" => "IOW"),
 "SUX" => array("city" => "Sioux City", "id" => "SUX")
  );
@@ -33,7 +32,6 @@
 "MCW" => array("city" => "Mason City", "id" => "mcw"),
 "EST" => array("city" => "Estherville", "id" => "est"),
 "SPW" => array("city" => "Spencer", "id" => "spw"),
-"CBF" => array("city" => "Council Bluffs", "id" => "cbf"),
 "IOW" => array("city" => "Iowa City", "id" => "iow"),
 "SUX" => array("city" => "Sioux City", "id" => "sux")
  );
