@@ -82,7 +82,7 @@ src="images/ptfmark.gif" alt="Agronomy Path to the Future" style="border:
 <h3 class="heading"><?php echo $cameras[$rancam]["name"] .", ". $cameras[$rancam]["state"]; ?> Webcam:</h3>
 <table width="100%">
 <tr><td><a href="<?php echo $rooturl; ?>/current/camera.phtml?network=<?php echo  $cameras[$rancam]["network"]; ?>"><img src="<?php echo $rooturl; ?>/data/camera/stills/<?php echo $rancam; ?>.jpg?<?php echo time(); ?>" border="0"></a>
-<ul class="iem-list"><li><a href="<?php echo $rooturl; ?>/current/camera.phtml">View other webcams</a></li></ul></td></tr>
+<ul class="iem-list"><li><a href="<?php echo $rooturl; ?>/current/camera.phtml?network=<?php echo  $cameras[$rancam]["network"]; ?>">View other webcams</a></li></ul></td></tr>
 </table>
 
 <h3 class="heading">Most Popular Links:</h3>
