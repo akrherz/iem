@@ -14,7 +14,7 @@ a listing of cool stuff as rated by IEM users.</p>
   // include the youtube class and instantiate it with the object $yt
   include('youtube.class.php');
   $yt = new youtube();
-  $yt->set('per_page', 5);
+  $yt->set('per_page', 8);
   $res = $yt->videos('akrherz');
   $video_list = $res['video_list'][0]['video'];
   
@@ -24,7 +24,9 @@ a listing of cool stuff as rated by IEM users.</p>
 <style>
 div.vid {
   float: left;
-  padding-right: 10px;
+  border: 1px solid #000;
+  margin: 2px;
+  padding: 5px;
   width: 175px;
 }
 </style>
