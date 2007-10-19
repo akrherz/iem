@@ -77,8 +77,8 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? $_GET["phenomena"] : "SV";
 $significance = isset($_GET["significance"]) ? $_GET["significance"] : "W";
 $warngeo = isset($_GET["warngeo"]) ? $_GET["warngeo"] : "both";
-if ($phenomena != "SV" && $phenomena != "TO") $warngeo = "county";
-if (($phenomena == "SV" || $pheomena == "TO") && !isset($_GET["warngeo"])) {
+if ($phenomena != "SV" && $phenomena != "TO" && $phenomena != "MA") $warngeo = "county";
+if (($phenomena == "SV" || $pheomena == "TO" || $phenomena == "MA") && !isset($_GET["warngeo"])) {
  $warngeo = "sbw";
 }
 
@@ -98,7 +98,7 @@ $x1 = $row["x1"] +$lpad; $x0 = $row["x0"]-$lpad;
 
 
 $query2 = "SELECT *, astext(geom) as t from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and eventid = $eventid and significance = '$significance'";
-if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO"))
+if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA"))
 {
   $query2 .= " and gtype = 'P'";
 }
@@ -152,7 +152,7 @@ $cow_issue = strtotime(substr($row["issue"],0,16)) - 21600;
 $cow_expire = strtotime(substr($row["issue"],0,16)) + 21600;
 
 $lsrwindow = 0;
-if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO")) 
+if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA")) 
 {
   $hard_code_lsr_time = 1;
   $lsr_sts = strtotime(substr($row["issue"],0,16));
