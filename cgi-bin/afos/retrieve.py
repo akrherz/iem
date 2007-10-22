@@ -11,20 +11,28 @@ def Main():
     sys.exit(0)
 
   myForm = cgi.FormContent()
-  pil = "%6s" %  (string.upper( myForm["pil"][0] ) + "      ",)
+  pil0 = string.upper( myForm["pil"][0] )
   LIMIT = str( myForm["limit"][0] )
 
-  if ( len(pil) < 3):
-    print 'Invalid PIL, try again'
-    sys.exit(0)
+  pils = pil0.split(",")
+  myPils = []
+  for pil in pils:
+    if ( len(pil) < 3):
+      print 'Invalid PIL, try again'
+      sys.exit(0)
+    if (pil[:3] == "WAR"):
+      for q in ['FFS','AWW','TOR','SVR','FFW','SVS','LSR']:
+        pils.append('%s%s' % (q, pil[3:]) )
+      continue
+    myPils.append("%6s" % (pil + "      ",) )
 
-  sql = "SELECT * from current WHERE pil = '"+pil+"' \
-     ORDER by entered DESC LIMIT "+LIMIT
-
-  if (pil[:3] == "WAR"):
-    pils = "('FFS%s', 'AWW%s','TOR%s', 'SVR%s', 'FFW%s', 'SVS%s', 'LSR%s')" % (pil[3:],pil[3:],pil[3:],pil[3:],pil[3:],pil[3:],pil[3:])
-    sql = "SELECT * from current WHERE pil IN "+pils+" \
-     ORDER by entered DESC LIMIT "+LIMIT
+  pilAR = "("
+  for pil in myPils:
+    pilAR += "'%s'," % (pil,)
+  pilAR = pilAR[:-1] +")"
+  
+  sql = "SELECT * from current WHERE pil IN "+ pilAR +" \
+   ORDER by entered DESC LIMIT "+LIMIT
 
   mydb.query("set enable_seqscan=no")
   rs = mydb.query(sql).dictresult()
@@ -34,13 +42,13 @@ def Main():
     print rs[i]["data"]
     print "\003\001\n"
 
-  if (len(rs) == 0 and pil[:3] != "MTR"):
+  if (len(rs) == 0 and myPils[0][:3] != "MTR"):
     print "Could not Find: "+pil
 
-  if (len(rs) == 0 and pil[:3] == "MTR"):
+  if (len(rs) == 0 and myPils[0][:3] == "MTR"):
     #print "%s doesn't exist in AFOS database, looking in IEM's archive\n" % (pil,)
-    access = pg.connect('iem', '10.10.10.20', user='nobody')
-    sql = "SELECT raw from current_log WHERE raw != '' and station = '%s' ORDER by valid DESC LIMIT %s" % (pil[3:].strip(), LIMIT)
+    access = pg.connect('iem', 'iem20', user='nobody')
+    sql = "SELECT raw from current_log WHERE raw != '' and station = '%s' ORDER by valid DESC LIMIT %s" % (myPils[0][3:].strip(), LIMIT)
     rs = access.query( sql ).dictresult()
     for i in range(len(rs)):
       print rs[i]['raw']
