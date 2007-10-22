@@ -1,12 +1,15 @@
+<?php
+ include("../../../config/settings.inc.php");
+?>
 <body bgcolor="white">
 
-<form method="GET" action="http://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py" target="display">
+<form method="GET" action="<?php echo $rootcgi; ?>/cgi-bin/afos/retrieve.py" target="display">
 
 <table border="0" width="100%">
 <tr>
   <th>Enter AFOS PIL:<br>
   ex) <i>AFDDMX</i></th> 
-  <td><input type="text" name="pil" size=8 maxlength=6></td>
+  <td><input type="text" name="pil" size=20></td>
 
   <td><SELECT name="limit">
 	<option value="1">Latest
