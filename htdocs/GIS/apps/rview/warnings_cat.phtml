@@ -78,7 +78,7 @@ $phenomena = isset($_GET["phenomena"]) ? $_GET["phenomena"] : "SV";
 $significance = isset($_GET["significance"]) ? $_GET["significance"] : "W";
 $warngeo = isset($_GET["warngeo"]) ? $_GET["warngeo"] : "both";
 if ($phenomena != "SV" && $phenomena != "TO" && $phenomena != "MA") $warngeo = "county";
-if (($phenomena == "SV" || $pheomena == "TO" || $phenomena == "MA") && !isset($_GET["warngeo"])) {
+if (($phenomena == "SV" || $phenomena == "TO" || $phenomena == "MA") && !isset($_GET["warngeo"])) {
  $warngeo = "sbw";
 }
 
