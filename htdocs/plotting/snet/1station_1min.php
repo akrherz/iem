@@ -3,7 +3,6 @@
  include('../../schoolnet/switchtv.php'); 
  include("$rootpath/include/selectWidget.php");
  include("$rootpath/include/forms.php");
- include("$rootpath/include/imagemaps.php"); 
 
 $year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
 $month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
@@ -13,6 +12,8 @@ $day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
  $sw->setformvars( Array("tv" => $tv) );
  $sw->logic($_GET);
  $station = isset($_GET['station']) ? $_GET["station"]: "";
+
+ include("$rootpath/include/imagemaps.php"); 
 ?>
 
 <?php 
