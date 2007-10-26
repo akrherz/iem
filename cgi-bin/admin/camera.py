@@ -2,8 +2,7 @@
 # Need something for a Camera Interface
 
 import cgi
-from pyIEM import cameras, stationTable
-st = stationTable.stationTable("/mesonet/TABLES/kcci.stns")
+from pyIEM import cameras
 
 def printHeader():
 	print """
@@ -22,7 +21,7 @@ def printForm(selcam):
 	for cam in k:
 		print '<option value="'+ cam +'" ',
 		if (cam == selcam): print " SELECTED ",
-		print '>[%s] %s' % (cam, st.sts[cam]['name'])
+		print '>[%s] %s' % (cam, cameras.cams[cam]['name'])
 	print '</select><input type="submit"></form>'
 
 def printInterface(cam):
