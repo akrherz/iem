@@ -1,0 +1,135 @@
+<?php
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | About NEXRAD Composites";
+include("$rootpath/include/header.php"); ?>
+
+
+<div style="width: 800px;">
+
+<h3 class="heading">Documentation on IEM generated NEXRAD composites</h3>
+
+<div style="float: left; padding: 5px; border: 2px solid #000; margin: 5px;">
+<img src="example_raster.png">
+<br />Example composite from 1 March 2007.
+</div>
+
+<div class="table" style="float: left;">
+<strong>Quick Information:</strong>
+<table>
+<tr><th>Product:</th><td>GIS-ready NEXRAD composite</td></tr>
+<tr><th>Format:</th><td>PNG image (GeoTiff available)</td></tr>
+<tr><th>Size:</th><td>6000x2600 pixels</td></tr>
+<tr><th>Time:</th><td>Every 5 minutes</td></tr>
+<tr><th>Download:</th><td><a href="http://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/">Current</a> and <a href="http://mesonet.agron.iastate.edu/archive/data/<?php echo date("Y/m/d"); ?>/GIS/uscomp/">Archive for today</a></td></tr>
+</table>
+
+<p><strong>IEM Applications using this product</strong>
+<ul>
+ <li><a href="http://mesonet.agron.iastate.edu/current/mcview.phtml">Static Maps</a></li>
+ <li><a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings.phtml">Interactive RADAR</a></li>
+ <li><a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings_cat.phtml">VTEC Product Browser</a></li>
+ <li><a href="http://mesonet.agron.iastate.edu/data/summary/max_n0r_0z0z_usrad.png">Max Reflectivity Composites</a></li>
+
+</ul>
+
+</div>
+
+
+<br clear="all"\>
+<p>Since 2003, the IEM has been generating and archiving nationwide composites 
+of NEXRAD base reflectivity every 5 minutes.  These composites are generated 
+by combining the 130+ individual RADARs that comprise the NEXRAD network. This
+page provides background information on this dataset and highlights various
+ways this dataset can be and is used.  <b>Please note:</b>  Errors can and do
+occur during the automated generation of these images, please use them with 
+care.
+
+<h3>Important changes to this product.</h3>
+<ul>
+ <li><b>1 August 2003:</b> 5 minute interval archive begins.  The initial
+  pixel resolution is roughly ~2 km.</li>
+ <li><b>14 November 2005:</b> The pixel resolution is increased to ~1 km
+  thanks to the support of a <a href="http://mesonet.agron.iastate.edu/docs/unidata2006/">Unidata Equipment grant</a>.</li>
+ <li><b>10 May 2007:</b> Implemented a clutter suppression algorithm to 
+  remove most anomalous propogation during the summertime.</li>
+</ul>
+
+<h3>Product Generation:</h3>
+<div style="float: right; padding: 5px; border: 2px solid #000; margin: 5px;">
+<a href="http://mesonet.agron.iastate.edu/archive/data/2007/10/19/usrad/max_n0r_0z0z_20071019.png"><img src="http://mesonet.agron.iastate.edu/archive/data/2007/10/19/usrad/max_n0r_0z0z_20071019.png" width="480"></a>
+<br />Composite of composites for 18 Oct 2007. Click image for regular size.
+</div>
+<p>The IEM receives a feed of NEXRAD Level III products from the <a href="http://www.unidata.ucar.edu/software/idd/">Unidata Internet Data Distribution</a>. 
+This feed includes the Base Reflectivity (N0R) and Net Echo Top (NET) products
+which are saved to disk for later processing.  Every 5 minutes, a script runs
+a <a href="http://www.unidata.ucar.edu/software/gempak/">GEMPAK</a> program 
+called <a href="http://www.unidata.ucar.edu/cgi-bin/gempak/manual/programs_index?nex2img">nex2img</a>.  nex2img searches the on-disk data for current (within
+15 minutes of runtime) products and then composites them into a large image.
+During the summertime, only RADARs in precipitation mode are considered for
+compositing.
+
+<p>The result of the nex2img process is a simple raster image with size of 6000
+pixels in width by 2600 pixels in height.  This raster image is then compared
+with a similiar raster of NET to remove any suspected false echos.  In the
+wintertime, this comparison is skipped for most of the country. The final result
+is a PNG formatted image looking much like the example image shown above.
+
+<p>The final image is shipped to the IEM webfarm for archival and use. You can
+always find the 10 most recently generated rasters <a href="http://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/">here</a> (n0r_0* is the newest). 
+You can also find current and historical images in the archive.  The format 
+for the URL is:
+<br /><code style="margin: 20px;">
+http://mesonet.agron.iastate.edu/archive/data/YYYY/mm/dd/GIS/uscomp/
+</code>
+<br />For example, here are the images generated for today:
+<code style="margin: 20px;">
+http://mesonet.agron.iastate.edu/archive/data/<?php echo date("Y/m/d"); ?>/GIS/uscomp/
+</code>
+<br />All dates in the archive are in UTC time.
+
+<h3>Product Format:</h3>
+
+<p>The images are stored in PNG format.  They have a 4-bit colormap and are
+non-interlaced.  Images for the past 50 minutes are also available in TIFF, 
+GeoTIFF, and gzipped GeoTIFF format.  Most people want to use these images
+in a GIS, so world files (.wld or .tfw) are available in the same current and
+archive folders.  The projection of these images is in EPSG:4326 (WGS84 longlat).
+
+<p>For some people, the PNG format is not readable by their GIS, so the 
+IEM provides a server-side conversion of the PNG files for delivery of a 
+GeoTIFF.  This application is called like so:
+<br /><code style="margin: 20px;">
+http://mesonet.agron.iastate.edu/request/gis/n0r2gtiff.php?dstr=200711010025
+</code>
+<br />where <i>dstr</i> specifies the {year}{month}{day}{hour}{minute} in UTC
+of the requested raster.  Rasters are only available at minutes modulo 5.
+
+<h3>Colormap Information:</h3>
+
+<img src="color_ramp.gif" style="float: left; margin: 10px; border: 1px;">
+
+<p>The raster image has a colormap associated with it. The raw pixel values 
+increase monotonically from -30 dbz to 75 dbz every 5 dbz.  All values below
+0 dbz are assigned black (rgb 0 0 0).  We have tried to match the commonly
+used NEXRAD display as what you see on <a href="http://radar.weather.gov">National Weather Service</a> page. <b>Please note:</b> We do not include a concept
+of missing data or "no-data".  So spots with beem blockage in the mountains
+or out away from the CONUS are just "black".
+
+<h3>Web Map Service (WMS)</h3>
+
+<p>A special way you can interface with this data archive is via the Web 
+Map Service that also supports time based retrieval (<a href="http://www.opengeospatial.org/standards/wms">WMS-T</a>).  Point your WMS-T aware app at:
+<br /><code style="margin: 20px;">
+http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?
+</code>
+<br />The <i>nexrad-n0r-wmst</i> layer is time aware!
+
+<h3>Example WMS-T Application</h3>
+
+<p>Here is an example interface utilizing the WMS-T NEXRAD service. The interface code is a part of the <a href="http://www.openlayers.org/">OpenLayers toolkit</a>. The default time display shows Hurricane Katrina making landfall.
+
+<iframe src="wmst.html" style="width: 550px; height: 450px;"></iframe>
+
+</div>
+
+<?php include("$rootpath/include/footer.php"); ?>

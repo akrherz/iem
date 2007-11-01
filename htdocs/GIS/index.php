@@ -1,4 +1,4 @@
-<?php
+
 include("../../config/settings.inc.php");
 $TITLE = "IEM | GIS Homepage";
 include("$rootpath/include/header.php"); ?>
@@ -74,6 +74,8 @@ back to 1951.</li>
   <br />Current and archived Iowa road conditions.</li>
  <li><a href="/cow/">IEM Cow</a>
   <br />Unofficial NWS polygon warning verification.</li>
+ <li><a href="/docs/nexrad_composites/">NEXRAD Composites on the IEM</a>
+  <br />Information about the NEXRAD composites that the IEM generates.</li>
 </ul>
 
 <p><h3 class="subtitle">GIS Shapefiles:</h3>
