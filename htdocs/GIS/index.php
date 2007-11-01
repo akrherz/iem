@@ -1,4 +1,4 @@
-
+<?php
 include("../../config/settings.inc.php");
 $TITLE = "IEM | GIS Homepage";
 include("$rootpath/include/header.php"); ?>
