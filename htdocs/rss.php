@@ -10,7 +10,7 @@
  echo "<description>
   Iowa Environmental Mesonet News and Notes
 </description>\n";
- echo "<lastBuildDate>". date('Y-m-d\Th:i:s'). substr_replace(date('O'),':',3,0) ."</lastBuildDate>\n";
+ echo "<lastBuildDate>". date('Y-m-d\Th:i:s') ." ". substr_replace(date('O'),':',3,0) ."</lastBuildDate>\n";
  $conn = iemdb("mesosite");
  $rs = pg_exec($conn, "SELECT * from news ORDER by entered DESC LIMIT 20");
  pg_close($conn);
@@ -19,6 +19,7 @@
   echo "<title>". ereg_replace("&","&amp;",$row["title"]) ."</title>\n";
   echo "<author>akrherz@iastate.edu</author>\n";
   echo "<link>http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</link>\n";
+  echo "<guid>http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</guid>\n";
   echo "<description>&lt;pre&gt;". $row["body"] ."&lt;/pre&gt;</description>\n";
   echo "</item>\n";
  }
