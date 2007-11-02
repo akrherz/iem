@@ -19,6 +19,7 @@
   echo "<title>". ereg_replace("&","&amp;",$row["title"]) ."</title>\n";
   echo "<author>". $row["author"] ."</author>\n";
   echo "<link>http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</link>\n";
+  echo "<description>&lt;pre&gt;". $row["body"] ."&lt;/pre&gt;</description>\n";
   echo "</item>\n";
  }
  echo "</channel>\n";
