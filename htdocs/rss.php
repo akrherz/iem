@@ -5,7 +5,7 @@
  echo "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
  echo "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">\n";
  echo "<channel>\n";
- echo "<atom:link href=\"http://mesonet.agron.iastate.edu/rss.xml\" rel=\"self\" type=\"application/rss+xml\" />\n";
+ echo "<atom:link href=\"http://mesonet.agron.iastate.edu/rss.php\" rel=\"self\" type=\"application/rss+xml\" />\n";
  echo "<title>Iowa Environmental Mesonet</title>\n";
  echo "<link>http://mesonet.agron.iastate.edu</link>\n";
  echo "<description>
