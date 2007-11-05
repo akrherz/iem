@@ -160,6 +160,7 @@ $cities = Array(
 "SSAI4" => array("short" => "St Ansgar", "online" => "t", "city" => "St Ansgar", "nwn_id" => "631", "lat" => "43.3749", "lon" => "-92.9167", "network" => "KIMT", "county" => "Mitchell", "climate_site" => "ia6305"),
 "SNII4" => array("short" => "Thompson", "online" => "t", "city" => "Thompson", "nwn_id" => "617", "lat" => "43.36", "lon" => "-93.7", "network" => "KIMT", "county" => "Winnebago", "climate_site" => "ia2977"),
 "STKI4" => array("short" => "Titonka", "online" => "t", "city" => "Titonka", "nwn_id" => "626", "lat" => "43.2405", "lon" => "-94.03909", "network" => "KIMT", "county" => "Kossuth", "climate_site" => "ia0923"),
+"SVTI4" => array("short" => "Ventura", "online" => "t", "city" => "Ventura", "nwn_id" => "627", "lat" => "43.1264", "lon" => "-93.4777", "network" => "KIMT", "county" => "Cerro Gordo", "climate_site" => "ia2977"),
 "STMM5" => array("short" => "West Concord", "online" => "t", "city" => "West Concord", "nwn_id" => "621", "lat" => "44.14", "lon" => "-92.9", "network" => "KIMT", "county" => "Dodge", "climate_site" => "none"),
 ),
 ); 
@@ -286,6 +287,7 @@ $Sconv = Array(
 624 => 'SWLM5',
 625 => 'SMWI4',
 626 => 'STKI4',
+627 => 'SVTI4',
 628 => 'SHPI4',
 629 => 'SNSI4',
 630 => 'SGNI4',
