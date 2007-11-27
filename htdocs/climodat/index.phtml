@@ -89,11 +89,17 @@ while( list($key, $val) = each($cities) ){
 <p>
 <?php 
 if (is_file("reports/${station}_$report.txt")){
-echo "<form name=\"dl\" action=\"index.phtml\">
+echo "<table cellpadding=\"2\"><tr><th>Download Options</th><td><form name=\"dl\" action=\"index.phtml\">
   <input type=\"hidden\" name=\"dl\" value=\"yes\">
   <input type=\"hidden\" name=\"station\" value=\"$station\"> 
   <input type=\"hidden\" name=\"report\" value=\"$report\">
-  <input type=\"submit\" value=\"Click to Download Report\"></form>"; 
+  <input type=\"submit\" value=\"Download Text Version\">
+</form></td>
+<td><form name=\"excel\" action=\"as-excel.php\">
+  <input type=\"hidden\" name=\"station\" value=\"$station\"> 
+  <input type=\"hidden\" name=\"report\" value=\"$report\">
+  <input type=\"submit\" value=\"Download Excel Version\"></form></td>
+</tr></table>"; 
 
 echo "<pre>\n";
   include("reports/${station}_$report.txt");
