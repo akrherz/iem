@@ -25,6 +25,7 @@ function genFeature()
   } elseif (isset($_GET["feature_good"]))
   {
     setcookie("foid", $foid, time()+100600);
+    $voted = 1;
 
     $isql = "UPDATE feature SET good = good + 1 WHERE oid = $foid";
     $good += 1;
@@ -32,6 +33,7 @@ function genFeature()
   } elseif (isset($_GET["feature_bad"]))
   {
     setcookie("foid", $foid, time()+100600);
+    $voted = 1;
 
     $isql = "UPDATE feature SET bad = bad + 1 WHERE oid = $foid";
     $bad += 1;
