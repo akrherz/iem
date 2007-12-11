@@ -132,17 +132,23 @@ $Adwpf = array();
 $freezing = array();
 $times= array();
 
+function checker($v){
+ if ($v == ""){ return $v;}
+ if (floatval($v) > 200){ return '';}
+ return $v;
+}
+
 $lastp = 0;
 for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
 { 
   $times[] = strtotime( substr($row["gvalid"],0,16) );
-  $tcs0[] = $row["tcs0"];
-  $tcs1[] = $row["tcs1"];
-  $tcs2[] = $row["tcs2"];
-  $tcs3[] = $row["tcs3"];
-  $Asubc[] = $row["subc"];
-  $Atmpf[] = $row["tmpf"];
-  $Adwpf[] = $row["dwpf"];
+  $tcs0[] = checker($row["tcs0"]);
+  $tcs1[] = checker($row["tcs1"]);
+  $tcs2[] = checker($row["tcs2"]);
+  $tcs3[] = checker($row["tcs3"]);
+  $Asubc[] = checker($row["subc"]);
+  $Atmpf[] = checker($row["tmpf"]);
+  $Adwpf[] = checker($row["dwpf"]);
   $p = floatval($row["pcpn"]);
   $newp = 0;
   if ($p > $lastp) { $newp = $p - $lastp; }
