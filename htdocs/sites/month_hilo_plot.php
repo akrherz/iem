@@ -11,7 +11,8 @@
  /* Call with year and month, if not, then current! */
  $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
  $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$feature = isset($_GET["feature"]);
+ $feature = isset($_GET["feature"]);
+ $rts = mktime(0,0,0,$month,1,$year);
 
  /* Get high and low temps for the past 7 days */
 $sql = "SELECT day, max_tmpf, min_tmpf from summary_$year WHERE 
@@ -80,7 +81,7 @@ $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCFF@0.5');
 $graph->xgrid->Show();
 
 $graph->img->SetMargin(45,10,70,30);
-$graph->title->Set( $cities[$station]["city"] ." [$station] Hi/Lo Temps for ". date("M Y", $ts) );
+$graph->title->Set( $cities[$station]["city"] ." [$station] Hi/Lo Temps for ". date("M Y", $rts) );
 $graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["city"] ."[". $climate_site ."]");
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");
