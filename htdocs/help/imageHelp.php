@@ -49,17 +49,6 @@
 	  } else {
 	    echo "This image was dynamically generated.";
 	  }
-	} else {
-	  echo "<BR><h3>Listing of Data Products:</h3>\n";
-	  $query = "SELECT * from image_help ORDER by title";  
-	  $result = pg_exec($connection, $query);
-	  for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
-	  {
-		$thisID = $row["iod"];
-		$thisTitle = $row["title"];
-		echo "<a href=\"imageHelp.php?iod=". $thisID ."\">". $thisTitle ."</a><BR>\n";
-	  }
-	  echo "<BR><BR>\n";
 
 
 	pg_close($connection);
