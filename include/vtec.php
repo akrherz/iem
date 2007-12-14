@@ -65,7 +65,10 @@ $vtec_significance = Array(
  'W' => 'Warning',
  'Y' => 'Advisory',
  'A' => 'Watch',
- 'S' => 'Statement');
+ 'S' => 'Statement',
+ 'F' => 'Forecast',
+ 'O' => 'Outlook',
+ 'N' => 'Synopsis');
 
 $vtec_status = Array(
  'NEW'=> 'issues',
