@@ -192,12 +192,12 @@ def respond_service_info(servicename, element, log, custom_stream=0):
                 visible = visibleByStatus[layerobj.status],
                 id      = str(i) )
             # ArcIMS scales are in dpi
-            if layerobj.minscale > 0:
-                layerinfo.attrib['minscale'] = str(layerobj.minscale \
-                    /(mapobj.resolution/inchesPerUnits[mapobj.units]))
-            if layerobj.maxscale > 0:
-                layerinfo.attrib['maxscale'] = str(layerobj.maxscale \
-                    /(mapobj.resolution/inchesPerUnits[mapobj.units]))
+            #if layerobj.minscale > 0:
+            #    layerinfo.attrib['minscale'] = str(layerobj.minscale \
+            #        /(mapobj.resolution/inchesPerUnits[mapobj.units]))
+            #if layerobj.maxscale > 0:
+            #    layerinfo.attrib['maxscale'] = str(layerobj.maxscale \
+            #        /(mapobj.resolution/inchesPerUnits[mapobj.units]))
             
             layerinfo.append(Element('ENVELOPE', 
                                       minx = str(mapobj.extent.minx),

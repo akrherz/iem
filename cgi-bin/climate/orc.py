@@ -10,8 +10,8 @@ climatedb = pg.connect('coop','mesonet-db1.agron.iastate.edu', user='nobody')
 iemaccess = pg.connect('iem', 'mesonet-db1.agron.iastate.edu', user='nobody')
 
 ADJUSTMENT = 0
-s = mx.DateTime.DateTime(2006,5,18)
-e = mx.DateTime.DateTime(2006,6,18)
+s = mx.DateTime.DateTime(2007,10,18)
+e = mx.DateTime.DateTime(2007,11,18)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 def averageTemp(db, hi="high", lo="low"):
