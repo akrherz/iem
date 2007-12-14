@@ -7,7 +7,7 @@ chdir("/var/www/htdocs/tmp");
 
 $lines = file($fts .".dat");
 
-$cmdstr = "/usr/local/bin/gifsicle --loopcount=0 --delay=100 -o ${fts}_anim.gif ";
+$cmdstr = "gifsicle --loopcount=0 --delay=100 -o ${fts}_anim.gif ";
 foreach ($lines as $line_num => $line) 
 {
   $tokens = split("/", $line);
