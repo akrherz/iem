@@ -3,6 +3,7 @@
 	$title = "IEM | Image Help";
 	include("$rootpath/include/header.php"); 
 	include("$rootpath/include/database.inc.php"); 
+ $iod = isset($_GET['iod']) ? $_GET['iod'] : 1;
 ?>
 
 <TR>
@@ -15,7 +16,6 @@
 	echo " &nbsp; <b>|</b> &nbsp; <a href=\"http://mesonet.agron.iastate.edu\">Mesonet Homepage</a>\n";
 	echo " &nbsp; <b>|</b> &nbsp; \n";
 
-	if (strlen($iod) > 0) {
 	  $query = "SELECT * from image_help WHERE iod = ". $iod ." ";
 	  $result = pg_exec($connection, $query);
           $row = @pg_fetch_array($result, 0);
@@ -61,7 +61,6 @@
 	  }
 	  echo "<BR><BR>\n";
 
-	}
 
 	pg_close($connection);
 
