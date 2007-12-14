@@ -1,6 +1,7 @@
 <?php 
         $TITLE = "IEM | AWOS 2005 Precip Report";
-include("/mesonet/php/include/header.php"); 
+include("../../../config/settings.inc.php");
+include("$rootpath/include/header.php");
 ?>
 
 <br>Based on the 1 minute AWOS data archive provided by the DOT, here is our
@@ -88,4 +89,4 @@ not have a precipitation sensor, so their totals are 0.</li>
 <li> Precipitation amounts during the cold season are not accurate.</li>
 </ul>
 </div>
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
