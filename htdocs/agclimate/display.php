@@ -2,7 +2,7 @@
  include("../../config/settings.inc.php");
  $TITLE = "ISU Ag Climate";
  include("$rootpath/include/header.php"); 
- $prod = isset($_GET["prod"]) ? $_GET["prod"] : 1;
+ $prod = isset($_GET["prod"]) ? intval($_GET["prod"]) : 1;
 
 $old2new = Array(
  "/data/agclimate/air-temp-out.png" => 1,
