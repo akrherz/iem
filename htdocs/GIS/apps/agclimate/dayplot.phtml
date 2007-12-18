@@ -2,7 +2,7 @@
 <?php 
   include("../../../../config/settings.inc.php");
   include("$rootpath/include/forms.php");
-  $pvar = isset($_GET["pvar"]) ? $_GET["pvar"]: "";
+  $pvar = isset($_GET["pvar"]) ? $_GET["pvar"]: "c11,c12";
   $ar = explode(",", $pvar);
   $_GET["var"] = $pvar;
   if (sizeof($ar) > 1){
