@@ -42,8 +42,15 @@ window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,s
         include("$rootpath/include/header.php"); 
 ?>
 
-
 <h3 class="heading">Growing Season Charts</h3><p>
+
+<div style="width: 640px;">
+This application will plot an accumulated variable for a time period of your 
+selection.  Data is based on the automated sensors from the ISU AG Climate
+network.  A <a href="<?php echo $rooturl; ?>/GIS/apps/coop/gsplot.phtml">similiar application</a> exists based on the COOP network data, which
+is of higher quality for temperature and precipitation, but it is not 
+near realtime.
+</div>
 
 <form method="GET" action="gsplot.phtml">
 <table> <tr>
