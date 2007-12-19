@@ -1,1 +1,10 @@
-<?php echo "HTTPALIVE"; ?>
+<?php 
+$f = file_get_contents("/proc/loadavg");
+$a = split(" ", $f);
+if (floatval($a[0]) > 10)
+{
+  echo $a[0];
+} else {
+  echo "HTTPALIVE";
+}
+?>
