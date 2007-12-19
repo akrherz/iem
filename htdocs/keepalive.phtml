@@ -1,7 +1,7 @@
 <?php 
 $f = file_get_contents("/proc/loadavg");
 $a = split(" ", $f);
-if (floatval($a[0]) > 10)
+if (floatval($a[1]) > 10)
 {
   echo $a[0];
 } else {
