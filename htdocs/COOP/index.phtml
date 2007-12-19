@@ -10,8 +10,7 @@ include("$rootpath/include/header.php");
 <div class="text">
 <table><tr><td style="width: 650px" valign="top">
 The National Weather Service [NWS] Cooperative Observer Program [COOP]
-is a nation-wide network of people making weather and climate observations.  According
-to their website, there are 11,700 volunteer observers. <font class="ref">[1]</font>  These
+is a nation-wide network of people making daily weather observations. These
 volunteers are invaluable in times of severe weather and heavy snowfall.  Their
 observations also provide a 'ground truth' to compare against remote sensing
 techniques.</td><td>
@@ -24,6 +23,7 @@ techniques.</td><td>
 <br><a href="/info/network.phtml?network=COOPDB">Climate Locations</a>
 </div></td></tr></table><p>
 
+<table><tr><td>
 
 <h3 class="subtitle">Observations</h3>
 
@@ -61,6 +61,25 @@ the most recent set of COOP observation in it.
  <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=419">100+ Degree Temperatures</a></li>
  <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=650">Record Cold on 15 September 2007</a></li>
 </ul>
+
+</td><td valign="top">
+
+<p><h3 class="subtitle">Download Data:</h3><br>
+<ul>
+  <li><a href="/request/coop/fe.phtml">Download Daily Oberservations</a>
+    <br>Pick your site, pick a time period, and download the data.</li>
+  <li><a href="/COOP/cat.phtml">2004-<?php echo date("Y"); ?> Observations</a>
+	<br />View all obs from 2004 to <?php echo date("Y"); ?> for one site or pick a date and view all sites!</li>
+  <li><a href="/climodat">ClimoDat Interface</a> 
+    <br>Handy application to access summary COOP data.</li>
+  <li><a href="<?php echo $rooturl; ?>/GIS/apps/coop/gsplot.phtml">Growing Season Plotter</a>
+    <br>Plot growing season totals since 1893 for a date span of your choice.
+    <br>The resulting data is also available in a GIS Ready! format.
+  <li><a href="dl/normals.phtml">Daily Climate Normals</a>
+    <br>Download daily normal high and low temperatures and average rainfall.</li>
+</ul>
+
+</td></tr></table>
 
 <p><h3 class="subtitle">COOP Data Applications:</h3><br>
 
@@ -150,7 +169,7 @@ Array("img" => "thumb_map.png",
 
 while (list($k,$v) = each($dict))
 {
- echo "<div class=\"tease\"><img src=\"$rooturl/images/". $v["img"] ."\"><a href=\"$rooturl/". $v["url"] ."\">". $v["title"] ."</a><br />". $v["desc"] ."</div>\n";
+ echo "<div class=\"tease\"><a href=\"$rooturl/". $v["url"] ."\"><img src=\"$rooturl/images/". $v["img"] ."\" border=\"0\"></a><a href=\"$rooturl/". $v["url"] ."\">". $v["title"] ."</a><br />". $v["desc"] ."</div>\n";
 }
 
 ?>
@@ -158,37 +177,5 @@ while (list($k,$v) = each($dict))
 
 <br clear="all" />
 
-<p><h3 class="subtitle">Download Data:</h3><br>
-<ul>
-  <li><a href="/request/coop/fe.phtml">Download Daily Oberservations</a>
-    <br>Pick your site, pick a time period, and download the data.</li>
-  <li><a href="/COOP/cat.phtml">2004-<?php echo date("Y"); ?> Observations</a>
-	<br />View all obs from 2004 to <?php echo date("Y"); ?> for one site or pick a date and view all sites!</li>
-  <li><a href="/climodat">ClimoDat Interface</a> 
-    <br>Handy application to access summary COOP data.</li>
-  <li><a href="<?php echo $rooturl; ?>/GIS/apps/coop/gsplot.phtml">Growing Season Plotter</a>
-    <br>Plot growing season totals since 1893 for a date span of your choice.
-    <br>The resulting data is also available in a GIS Ready! format.
-  <li><a href="dl/normals.phtml">Daily Climate Normals</a>
-    <br>Download daily normal high and low temperatures and average rainfall.</li>
-</ul>
-
-<p><h3 class="subtitle">More Information</h3><br>
-<div class="intro">The local NWS Weather Forecast Offices [WFO] maintain COOP pages for their local warning areas.  They can be accessed here: 
-<a href="http://www.crh.noaa.gov/dmx/coop/coop.html">DMX - Des Moines</a> &nbsp; 
-<a href="http://www.crh.noaa.gov/arx/coop.html">ARX - La Crosse</a> &nbsp;
-<a href="http://www.crh.noaa.gov/dvn/aboutus/CPM/index.htm">DVN - Davenport</a> &nbsp;
-<a href="http://www.crh.noaa.gov/fsd/coop.htm">FSD - Sioux Falls</a> &nbsp;
-<a href="http://www.crh.noaa.gov/oax/coop.htm">OAX - Omaha</a> &nbsp;. La Crosse's page
-has nice pictures of the equipment that the observers use.
-
-
-<br><br>
-
-<b>References:</b><br>
-<b>1</b> <a href="http://205.156.54.206/om/coop/what.htm">http://205.156.54.206/om/coop/what.htm</a>
- , viewed: 07 Feb 2002
-
-<br><br></div></div>
 
 <?php include("$rootpath/include/footer.php"); ?>
