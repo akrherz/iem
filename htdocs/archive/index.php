@@ -91,7 +91,6 @@ then, only base reflectivity was saved.</li>
 data page.  Iowa Mesonet plots, hourly precip plots, mesonet stats and 
 COOP precip plots are examples.</li>
 
-
 <li><a href="<?php echo $rooturl; ?>/archive/gempak/">IEM Data in GEMPAK Format</a>
   <br />IEM surface data in GEMPAK format.  Data files exist with different
 combinations of IEM networks.</li>
@@ -102,6 +101,8 @@ combinations of IEM networks.</li>
 <li><a href="http://www.pals.iastate.edu/archivewx/data/">PALS WX Image Archive</a><br />The PALS website generates hourly plots of US weather.  Of interest are
 archives of RUC, ETA, and AVN model plots.  National radar summaries, 
 surface plots and other plots.</li>
+
+<li><a href="ftp://ftp.wcc.nrcs.usda.gov/support/climate/wind_daily">NRCS wind climatologies (1961-1990)</a></li>
 </ul>
 
 <h3>US Daily Weather Maps</h3>
