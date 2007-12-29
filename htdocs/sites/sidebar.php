@@ -12,6 +12,7 @@ $o = Array(
   "monthhilo" => Array("name" => "Month High/Low Plot", "uri" => "plot.php?prod=1&"),
   "monthrain" => Array("name" => "Month Rainfall Plot", "uri" => "plot.php?prod=2&"),
   "windrose" => Array("name" => "Wind Roses", "uri" => "windrose.phtml?"),
+  "custom_windrose" => Array("name" => "Custom Wind Roses", "uri" => "dyn_windrose.phtml?"),
 );
 
 while (list($key,$val) = each($o))
