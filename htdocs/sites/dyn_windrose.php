@@ -26,8 +26,13 @@ include("$rootpath/include/database.inc.php");
   elseif (strpos($network, "RWIS") > 0) $pg_conn = iemdb("rwis");
   elseif ($network == "AWOS") {
     $pg_conn = iemdb("awos");
-    $table = "t". date("Y_m", $sts);
-    $ets2 = mktime($hour2,$minute2,0,$month1,$day2,$year);
+    //$table = "t". date("Y_m", $sts);
+    //$ets2 = mktime($hour2,$minute2,0,$month1,$day2,$year);
+  }
+  elseif ($network == "KCCI" or $network == "KELO" or $network == "KIMT") {
+    $pg_conn = iemdb("snet");
+    //$table = "t". date("Y_m", $sts);
+    //$ets2 = mktime($hour2,$minute2,0,$month1,$day2,$year);
   }
 
   $hourLimiter = "";
