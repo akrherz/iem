@@ -9,7 +9,7 @@ $coop = iemdb("coop");
 /* Collect normals for May 1 to TODAY */
 $mynorms = Array();
 $sql = "SELECT station, sum(precip) as rain from climate51  WHERE
-        valid >= '2000-05-01' and valid < '2000-06-14' 
+        valid >= '2000-05-01' and valid < '2000-06-24' 
         GROUP by station";
 $rs = pg_exec($coop, $sql);
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
@@ -20,7 +20,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 /* Collect normals for May 1 to Oct 1 */
 $allnorms = Array();
 $sql = "SELECT station, sum(precip) as rain from climate51  WHERE
-        valid >= '2000-05-01' and valid < '2000-08-01' 
+        valid >= '2000-05-01' and valid < '2000-10-01' 
         GROUP by station";
 $rs = pg_exec($coop, $sql);
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
@@ -33,7 +33,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 $myobs = Array();
 $sql = "SELECT stationid, year, sum(precip) as rain from alldata  WHERE
         extract(doy from day) >= extract(doy from '2000-05-01'::date) and 
-        extract(doy from day) < extract(doy from '2000-06-14'::date) and
+        extract(doy from day) < extract(doy from '2000-06-24'::date) and
         year > 1950 and year < 2006 GROUP by stationid, year";
 $rs = pg_exec($coop, $sql);
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
@@ -46,7 +46,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 $allobs = Array();
 $sql = "SELECT stationid, year, sum(precip) as rain from alldata  WHERE
         extract(doy from day) >= extract(doy from '2000-05-01'::date) and 
-        extract(doy from day) < extract(doy from '2000-08-01'::date) and
+        extract(doy from day) < extract(doy from '2000-10-01'::date) and
         year > 1950 and year < 2006 GROUP by stationid, year";
 $rs = pg_exec($coop, $sql);
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
@@ -66,7 +66,7 @@ while( list($stationid, $val) = each($mynorms) )
   {
     $i += 1;
     $d = $v - $mynorms[$stationid];
-    if ($d < -4 or $d > -2) continue;
+    if ($d < -5 or $d > -3) continue;
 
     $mydiffs[] = $d;
     $alldiffs[] = $allobs[$stationid][$i] - $allnorms[$stationid];
@@ -82,15 +82,17 @@ include ("$rootpath/include/jpgraph/jpgraph_line.php");
 include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
 
-$graph = new Graph(240,200);
-$graph->SetScale("lin");
-$graph->img->SetMargin(50,30,50,30);
-$graph->title->set("Iowa Climatological Rainfall Potential");
-$graph->subtitle->set("Assume 2-4 inch May 1 - Jun 14 deficits");
+$graph = new Graph(280,200);
+$graph->SetScale("lin",0,1);
+$graph->img->SetMargin(40,3,50,30);
+$graph->title->set("Iowa Rainfall Potential");
+$graph->subtitle->set("Assume 3-5 inch May 1 - Jun 24 departure");
 
 $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetPos("min");
-$graph->xaxis->SetTitle("Eventual 1 May - 1 Aug Rainfall Deficit");
+$graph->xaxis->SetTitle("Eventual 1 May - 1 Oct Rainfall Departure");
+
+$graph->yaxis->SetTitle("Probability");
 
 //$graph->title->Set("48 h winds for ". $station);
 
@@ -127,7 +129,8 @@ $lplot->SetColor('red');
 $bplot = new BarPlot($bweights, $bvals );
 $bplot->SetFillColor('orange');
 //$bplot->value->Show();
-$bplot->SetAbsWidth(20);
+//$bplot->SetAbsWidth(20);
+$bplot->SetWidth(1);
 $bplot->SetAlign("right"); 
 //$bplot->value->SetFont(FF_ARIAL,FS_BOLD,10);
 //$bplot->value->SetAngle(45);

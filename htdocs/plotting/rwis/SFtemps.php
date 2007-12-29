@@ -247,13 +247,13 @@ $fz->SetColor("blue");
 
 // Title Box
 $tx1 = new Text($cities[$station]['city'] ." \nMeteogram ");
-$tx1->Pos(0.01,0.01, 'left', 'top');
+$tx1->SetPos(0.01,0.01, 'left', 'top');
 $tx1->SetFont(FF_FONT1, FS_BOLD, 16);
 
 $tx2 = new Text("Time series showing temperatures
    from the pavement sensors and 
    the sub-surface sensor ");
-$tx2->Pos(0.01,0.11, 'left', 'top');
+$tx2->SetPos(0.01,0.11, 'left', 'top');
 $tx2->SetFont(FF_FONT1, FS_NORMAL, 10);
 
 include ("$rootpath/include/mlib.php");
@@ -282,7 +282,7 @@ if ($mode == "hist"){
 ");
 */
 }
-//$tx3->Pos(0.31,0.001, 'left', 'top');
+//$tx3->SetPos(0.31,0.001, 'left', 'top');
 //$tx3->SetFont(FF_FONT1, FS_NORMAL, 8);
 //$tx3->SetColor("blue");
 

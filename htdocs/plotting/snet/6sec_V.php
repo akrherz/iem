@@ -4,7 +4,7 @@
 include("../../../config/settings.inc.php");
 
 $fcontents = file("data/SCHI4_060622.txt");
-$sts = mktime(9,0,0,6,22,2006);
+$sts = mktime(8,0,0,6,22,2006);
 $ets = mktime(10,0,0,6,22,2006);
 
 $mph = array();

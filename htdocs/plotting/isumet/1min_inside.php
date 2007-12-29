@@ -170,7 +170,7 @@ $lineplot->SetColor("blue");
 
 // Box for error notations
 //[DMF]$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
-//[DMF]$t1->Pos(0.4,0.95);
+//[DMF]$t1->SetPos(0.4,0.95);
 //[DMF]$t1->SetOrientation("h");
 //[DMF]$t1->SetFont(FF_FONT1,FS_BOLD);
 //$t1->SetBox("white","black",true);
