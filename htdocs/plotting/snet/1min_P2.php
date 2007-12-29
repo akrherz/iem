@@ -154,7 +154,7 @@ $lineplot2->SetFillColor("blue");
 
 // Box for error notations
 $t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
-$t1->Pos(0.4,0.95);
+$t1->SetPos(0.4,0.95);
 $t1->SetOrientation("h");
 $t1->SetFont(FF_FONT1,FS_BOLD);
 //$t1->SetBox("white","black",true);

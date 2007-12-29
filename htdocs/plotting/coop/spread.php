@@ -181,7 +181,7 @@ $graph->legend->SetLayout(LEGEND_HOR);
 $s = sprintf("High Temperature\n  MEAN: %.1f\n  MEDIAN: %.0f\n  STDDEV: %.1f\nLow Temperature\n  MEAN: %.1f\n  MEDIAN: %.0f\n  STDDEV: %.1f\n", $h_avg, $xl[$hm], $h_std, $l_avg, $xl[$lm], $l_std);
 
 $t1 = new Text($s);
-$t1->Pos(75,75);
+$t1->SetPos(75,75);
 $t1->SetFont(FF_FONT1,FS_NORMAL);
 $t1->SetBox("white","black",true);
 $t1->ParagraphAlign("left");

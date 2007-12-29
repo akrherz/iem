@@ -10,7 +10,6 @@ $query2 = "select count(*), tvalid from (
     select station, to_char(valid, 'mmdd/HH24') as tvalid, count(*)
     from current_log WHERE network= '$network' GROUP by station, tvalid) as foo
   GROUP by tvalid ORDER by tvalid ASC";
-
 $result = pg_exec($connection, $query1);
 $result = pg_exec($connection, $query2);
 

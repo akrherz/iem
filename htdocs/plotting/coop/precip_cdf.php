@@ -108,7 +108,7 @@ $txt = new Text("Diagnostics
    5%: ". ($lowVal + ($h5 * 0.01)) ."
   Max: $hiVal ($hiYear)
 ");
-$txt->Pos(0.71,0.128);
+$txt->SetPos(0.71,0.128);
 $txt->SetFont(FF_FONT1, FS_NORMAL);
 $txt->SetColor("blue");
 
