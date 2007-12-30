@@ -1,10 +1,5 @@
 <?php
-//$iem40 = '10.10.10.40';
-//$iem20 = '10.10.10.20';
-//$iem30 = '10.10.10.30';
-$iem40 = 'mesonet.agron.iastate.edu';
-$iem20 = 'mesonet-db1.agron.iastate.edu';
-$iem30 = 'kcci.mesonet.agron.iastate.edu';
+$iem20 = 'iem20';
 global $_DATABASES;
 $_DATABASES = Array(
  'access' => "dbname=iem host=$iem20 user=nobody",
