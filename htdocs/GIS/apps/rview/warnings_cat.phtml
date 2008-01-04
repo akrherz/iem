@@ -97,7 +97,8 @@ $x1 = $row["x1"] +$lpad; $x0 = $row["x0"]-$lpad;
 
 
 $query2 = "SELECT *, astext(geom) as t from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and eventid = $eventid and significance = '$significance'";
-if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA"))
+if ($significance == "W" && 
+   ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA"))
 {
   $query2 .= " and gtype = 'P'";
 }
@@ -149,11 +150,11 @@ $row = pg_fetch_array($result, 0);
 /* BEGIN HTML output */
 $HEADEXTRA = "<script type=\"text/javascript\" src=\"${rooturl}/ext/adapter/ext/ext-base.js\"></script>
 <script type=\"text/javascript\" src=\"${rooturl}/ext/ext-all.js\"></script>
+<script type=\"text/javascript\" src=\"RowExpander.js\"></script>
 <link rel=\"stylesheet\" type=\"text/css\" href=\"warnings_cat_table.css\" />
 <link rel=\"stylesheet\" type=\"text/css\" href=\"${rooturl}/ext/resources/css/ext-all.css\" />
 ";
 include("$rootpath/include/header.php");
-echo "<form method=\"GET\" name=\"changero\">";
 
 
 /* Determine time base, 4 minutes from product issuance */
@@ -173,7 +174,7 @@ if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenom
 $cow_url = sprintf("%s/cow/?syear=%s&smonth=%s&sday=%s&shour=%s&eyear=%s&emonth=%s&eday=%s&ehour=%s&wfo=%s&wtype[]=TO&wtype[]=SV&hail=0.75&ltype[]=TO&ltype[]=SV", $rooturl, date("Y", $cow_issue), date("m", $cow_issue),date("d", $cow_issue),date("H", $cow_issue), date("Y", $cow_expire), date("m", $cow_expire), date("d", $cow_expire), date("H", $cow_expire), $row["wfo"]);
 
 $cow = "";
-if ($row["significance"] == "W") $cow = "<li><a href=\"$cow_url\">Polygon Verification</a></li>";
+if ($row["significance"] == "W") $cow = "<br /><a href=\"$cow_url\">Polygon Verification</a>";
 
 $gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=%s&minute1=0&month2=%s&day2=%s&hour2=%s&minute2=0",  date("Y", $cow_issue), date("m", $cow_issue),date("d", $cow_issue),date("H", $cow_issue), date("m", $cow_expire), date("d", $cow_expire), date("H", $cow_expire) );
 
@@ -208,10 +209,9 @@ dl($mapscript);
 include("warnings_plot.php");
 
 echo "
-<h3>Valid Time Extent Code (VTEC) Product Browser</h3>
-<table border=\"2\" cellpadding=\"5\" cellspacing=\"0\">
-<tr><td valign=\"top\">
-<b>Summary:</b>
+
+<div id='controller' style='padding: 5px;'>
+<form method=\"GET\" name=\"changero\">
 <table>
 <tr><td>NWS WFO:</td><td>". wfoSelect($wfo) ."</td></tr>
 <tr><td>Year:</td><td>". yearSelect(2005,$year) ."</td></tr>
@@ -230,18 +230,37 @@ echo "
 </select></td></tr>
 
 </table>
-<input type="submit" value="Load Product">
-</form>
-<h4>Links:</h4>
-<ul>
- <li><?php echo $all_link; ?></li>
- <?php echo $cow; ?>
- <li><a href="<?php echo $gis_url; ?>">Download Shapefile of Warnings</a></li>
- <li><a href="<?php echo $radar_url; ?>">Interactive RADAR Display</a></li>
-</ul>
-</td><td><img src="<?php echo $url; ?>">
 
+<p><br /><input type="submit" value="Load Product">
+
+<p><br /><br /><strong>Links:</strong>
+ <br /><?php echo $all_link; ?>
+ <?php echo $cow; ?>
+ <br /><a href="<?php echo $gis_url; ?>">Download Shapefile of Warnings</a>
+ <br /><a href="<?php echo $radar_url; ?>">Interactive RADAR Display</a>
+<br />
+
+</form>
+</div>
+
+<h3>Valid Time Extent Code (VTEC) Product Browser</h3>
+<table border="0">
+<tr><td valign="top">
+<div id='controller-side'></div>
+
+</td><td valign="top">
+
+
+<div id="displaytabs">
+
+<div id="radar" class="x-hide-display">
+<img src="<?php echo $url; ?>">
+</div>
+<div id="lsrs" class="x-hide-display">
+ <div id="lsr-grid"></div>
+ <div id="lsr-grid2"></div>
 <?php
+$jsdata = "";
 if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA"))
 {
   /* Lets go dig for LSR reports */
@@ -252,25 +271,165 @@ if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenom
          valid >= '%s' and valid <= '%s' ORDER by valid ASC", $year,
           $row["t"], $row["t"], $wfo, $row["issue"], $row["expire"]);
   $result = pg_exec($connect, $sql);
-  echo "<p><b>Storm Reports within this polygon valid during warning</b><br /><table border=\"1\" cellspacing=\"0\" cellpadding=\"2\"><tr><th>Time (GMT):</th><th>Type:</th><th>Magnitude:</th><th>City</th><th>County</th></tr>";
-  if (pg_numrows($result) == 0) echo "<tr><th colspan=\"5\">No storm reports found</th></tr>\n";
+
   for( $i=0; $lsr = @pg_fetch_array($result,$i); $i++)
-  { 
-     echo sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr><tr><td colspan=\"5\">%s</td></tr>", substr($lsr["valid"], 11,5), $lsr_types[$lsr["type"]]['name'], $lsr["magnitude"], $lsr["city"], $lsr["county"], $lsr["remark"]);
+  {
+     $jsdata .= sprintf(",\n[%s,'%s','%s','%s','%s','%s','%s']", $i,
+         substr($lsr["valid"], 11,5), $lsr_types[$lsr["type"]]['name'], $lsr["magnitude"], $lsr["city"], $lsr["county"], $lsr["remark"]);
   }
-  echo "</table>";
+}
+/* Go look for any LSRs between start and end! */
+$sql = sprintf("SELECT distinct * from lsrs_%s WHERE
+         wfo = '%s' and
+         valid >= '%s' and valid <= '%s' ORDER by valid ASC", $year,
+         $wfo, $row["issue"], $row["expire"]);
+$result = pg_exec($connect, $sql);
+
+$jsdata2 = "";
+for( $i=0; $lsr = @pg_fetch_array($result,$i); $i++)
+{
+   $jsdata2 .= sprintf(",\n[%s,'%s','%s','%s','%s','%s','%s']", $i,
+      substr($lsr["valid"], 11,5), $lsr_types[$lsr["type"]]['name'], 
+      $lsr["magnitude"], $lsr["city"], $lsr["county"], $lsr["remark"]);
 }
 
-
-echo "</td></tr></table>";
 ?>
+</div>
+</td></tr></table>
+<script>
+//<!--
+Ext.onReady(function(){
+    var p = new Ext.Panel({
+        title: 'Product Overview',
+        collapsible:false,
+        width:320,
+        height: 480,
+        items: [Ext.get('controller')]
+    });
+    p.render('controller-side');
+});
+
+Ext.onReady(function(){
+
+    var myData = [
+        <?php echo substr($jsdata,1,10000); ?>
+    ];
+    var myData2 = [
+        <?php echo substr($jsdata2,1,10000); ?>
+    ];
+    var expander = new Ext.grid.RowExpander({
+        tpl : new Ext.Template(
+            '<p><b>Remark:</b> {remark}<br>'
+        )
+    });
+
+    // create the data store
+    var store = new Ext.data.SimpleStore({
+        fields: [
+           {name: 'i', type: 'int'},
+           {name: 'Time'},
+           {name: 'Type'},
+           {name: 'Magnitude'},
+           {name: 'City'},
+           {name: 'County'},
+           {name: 'remark'}
+        ]
+    });
+    store.loadData(myData);
+
+    var store2 = new Ext.data.SimpleStore({
+        fields: [
+           {name: 'i', type: 'int'},
+           {name: 'Time'},
+           {name: 'Type'},
+           {name: 'Magnitude'},
+           {name: 'City'},
+           {name: 'County'},
+           {name: 'remark'}
+        ]
+    });
+    store2.loadData(myData2);
+
+
+    // create the Grid
+    var grid = new Ext.grid.GridPanel({
+        store: store,
+        cm: new Ext.grid.ColumnModel([
+            expander,
+            {id: 'i', header: "Time", sortable: true, dataIndex: 'Time'},
+            {header: "Type", sortable: true, dataIndex: 'Type'},
+            {header: "Magnitude", sortable: true, dataIndex: 'Magnitude'},
+            {header: "City", sortable: true, dataIndex: 'City'},
+            {header: "County", sortable: true, dataIndex: 'County'}
+        ]),
+        stripeRows: true,
+        width:575,
+        title:'Storm Reports within Polygon',
+        plugins: expander,
+        collapsible: false,
+        animCollapse: false,
+        iconCls: 'icon-grid'
+    });
+
+    grid.render('lsr-grid');
+
+    grid.getSelectionModel().selectFirstRow();
+
+    // create the Grid
+    var grid2 = new Ext.grid.GridPanel({
+        store: store2,
+        cm: new Ext.grid.ColumnModel([
+            expander,
+            {id: 'i', header: "Time", sortable: true, dataIndex: 'Time'},
+            {header: "Type", sortable: true, dataIndex: 'Type'},
+            {header: "Magnitude", sortable: true, dataIndex: 'Magnitude'},
+            {header: "City", sortable: true, dataIndex: 'City'},
+            {header: "County", sortable: true, dataIndex: 'County'}
+        ]),
+        stripeRows: true,
+        width:575,
+        title:'All WFO Storm Reports within Time Period',
+        plugins: expander,
+        collapsible: false,
+        animCollapse: false,
+        iconCls: 'icon-grid'
+    });
+
+    grid2.render('lsr-grid2');
+
+    grid2.getSelectionModel().selectFirstRow();
+
+
+});
+-->
+</script>
+
 
 <p>&nbsp;<br />
 <?php
 
 
 /* Generate text tabs :) */
-$js = "Ext.onReady(function(){
+$js = "
+Ext.onReady(function(){
+    // basic tabs 1, built from existing content
+    var tabs22 = new Ext.TabPanel({
+        renderTo: 'displaytabs',
+        width:600,
+        frame:true,
+        plain:true,
+        enableTabScroll:true,
+        defaults:{autoHeight: true},
+        items:[
+            {contentEl:'radar', title: 'RADAR'},
+            {contentEl:'lsrs', title: 'Storm Reports'}
+         ],
+        activeTab: 0
+    });
+});
+
+
+Ext.onReady(function(){
     // basic tabs 1, built from existing content
     var tabs = new Ext.TabPanel({
         renderTo: 'tabs1',
