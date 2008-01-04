@@ -81,6 +81,8 @@ if ($phenomena != "SV" && $phenomena != "TO" && $phenomena != "MA") $warngeo = "
 if (($phenomena == "SV" || $phenomena == "TO" || $phenomena == "MA") && !isset($_GET["warngeo"])) {
  $warngeo = "sbw";
 }
+if (($phenomena == "MA" || $significance != "W")) { $warngeo = "both"; }
+
 $HEADEXTRA = "<script type=\"text/javascript\" src=\"${rooturl}/ext/adapter/ext/ext-base.js\"></script>
 <script type=\"text/javascript\" src=\"${rooturl}/ext/ext-all.js\"></script>
 <link rel=\"stylesheet\" type=\"text/css\" href=\"${rooturl}/ext/resources/css/ext-all.css\" />
