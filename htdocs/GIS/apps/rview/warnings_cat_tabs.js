@@ -9,7 +9,7 @@ Ext.onReady(function(){
         defaults:{autoHeight: true},
         items:[
             {contentEl:'svs0', title: 'Issuance'},
-            {contentEl:'svs1', title: 'Update 1'},
+            {contentEl:'svs1', title: 'Update 1'}
         ],
         activeTab: 1,
     });
