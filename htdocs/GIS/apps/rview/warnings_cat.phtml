@@ -146,12 +146,9 @@ echo "<form method=\"GET\" name=\"changero\">";
 
 $row = pg_fetch_array($result, 0);
 
-
-
 /* BEGIN HTML output */
 $HEADEXTRA = "<script type=\"text/javascript\" src=\"${rooturl}/ext/adapter/ext/ext-base.js\"></script>
 <script type=\"text/javascript\" src=\"${rooturl}/ext/ext-all.js\"></script>
-<script type=\"text/javascript\" src=\"warnings_cat_tabs.js\"></script>
 <link rel=\"stylesheet\" type=\"text/css\" href=\"warnings_cat_table.css\" />
 <link rel=\"stylesheet\" type=\"text/css\" href=\"${rooturl}/ext/resources/css/ext-all.css\" />
 ";
@@ -271,6 +268,22 @@ echo "</td></tr></table>";
 <p>&nbsp;<br />
 <?php
 
+
+/* Generate text tabs :) */
+$js = "Ext.onReady(function(){
+    // basic tabs 1, built from existing content
+    var tabs = new Ext.TabPanel({
+        renderTo: 'tabs1',
+        width:900,
+        frame:true,
+        plain:true,
+        enableTabScroll:true,
+        defaults:{autoHeight: true},
+        items:[
+            {contentEl:'svs0', title: 'Issuance'},
+";
+
+
 echo "<div id=\"tabs1\">
 <div id=\"svs0\" class=\"x-hide-display\">
 <p><pre>". str_replace("\001", "", $row["report"]) ."</pre></p>
@@ -287,9 +300,20 @@ if (strlen($row["svs"]) > 0 )
      if ($svs == $lsvs) continue;
      $lsvs = $svs;
      echo "<div id=\"svs${q}\" class=\"x-hide-display\"><p><pre>${svs}</pre></p></div>\n";
+     $js .= "{contentEl:'svs${q}', title: 'Update ${q}'},\n";
      $q += 1;
   }
 }
+$v = $q - 1;
+$js .= "        ],
+        activeTab: ${v}
+    });
+});";
+echo "<script>
+//<!-- 
+$js 
+-->
+</script>";
 echo "</div>";
 
 include("$rootpath/include/footer.php");
