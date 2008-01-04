@@ -83,13 +83,6 @@ if (($phenomena == "SV" || $phenomena == "TO" || $phenomena == "MA") && !isset($
 }
 if (($phenomena == "MA" || $significance != "W")) { $warngeo = "both"; }
 
-$HEADEXTRA = "<script type=\"text/javascript\" src=\"${rooturl}/ext/adapter/ext/ext-base.js\"></script>
-<script type=\"text/javascript\" src=\"${rooturl}/ext/ext-all.js\"></script>
-<link rel=\"stylesheet\" type=\"text/css\" href=\"${rooturl}/ext/resources/css/ext-all.css\" />
-";
-
-include("$rootpath/include/header.php");
-echo "<form method=\"GET\" name=\"changero\">";
 
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'GMT'");
@@ -111,10 +104,13 @@ if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenom
 $result = pg_exec($connect, $query2);
 
 
-
 /* Lets be nice and list out all warnings instead */
 if (pg_num_rows($result) == 0) 
 {
+
+include("$rootpath/include/header.php");
+echo "<form method=\"GET\" name=\"changero\">";
+
  $sql = "select sumtxt( n.name || ' ['||n.state||'], ') as s, eventid, min(issue) as i, 
          max(expire) as e from 
          (select distinct ugc, eventid, issue, expire from warnings_$year 
@@ -148,9 +144,20 @@ if (pg_num_rows($result) == 0)
 }
 
 
-
-
 $row = pg_fetch_array($result, 0);
+
+
+
+/* BEGIN HTML output */
+$HEADEXTRA = "<script type=\"text/javascript\" src=\"${rooturl}/ext/adapter/ext/ext-base.js\"></script>
+<script type=\"text/javascript\" src=\"${rooturl}/ext/ext-all.js\"></script>
+<script type=\"text/javascript\" src=\"warnings_cat_tabs.js\"></script>
+<link rel=\"stylesheet\" type=\"text/css\" href=\"warnings_cat_table.css\" />
+<link rel=\"stylesheet\" type=\"text/css\" href=\"${rooturl}/ext/resources/css/ext-all.css\" />
+";
+include("$rootpath/include/header.php");
+echo "<form method=\"GET\" name=\"changero\">";
+
 
 /* Determine time base, 4 minutes from product issuance */
 $issue = strtotime(substr($row["issue"],0,16)) + 240;
@@ -260,37 +267,9 @@ if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenom
 
 echo "</td></tr></table>";
 ?>
-<style>
-.list {list-style:square;width:700px;padding-left:16px;}
-.list li{padding:2px;font-size:8pt;}
-
-pre {
-   font-size:11px; 
-}
-
-.x-tab-panel-body .x-panel-body {
-    padding:10px;
-}
-</style>
 
 <p>&nbsp;<br />
 <?php
-
-
-/* Generate text tabs :) */
-$js = "Ext.onReady(function(){
-    // basic tabs 1, built from existing content
-    var tabs = new Ext.TabPanel({
-        renderTo: 'tabs1',
-        width:900,
-        frame:true,
-        plain:true,
-        enableTabScroll:true,
-        defaults:{autoHeight: true},
-        items:[
-            {contentEl:'svs0', title: 'Issuance'},
-";
-
 
 echo "<div id=\"tabs1\">
 <div id=\"svs0\" class=\"x-hide-display\">
@@ -308,20 +287,9 @@ if (strlen($row["svs"]) > 0 )
      if ($svs == $lsvs) continue;
      $lsvs = $svs;
      echo "<div id=\"svs${q}\" class=\"x-hide-display\"><p><pre>${svs}</pre></p></div>\n";
-     $js .= "{contentEl:'svs${q}', title: 'Update ${q}'},\n";
      $q += 1;
   }
 }
-$v = $q - 1;
-$js .= "        ],
-        activeTab: ${v},
-    });
-});";
-echo "<script>
-//<!-- 
-$js 
--->
-</script>";
 echo "</div>";
 
 include("$rootpath/include/footer.php");
