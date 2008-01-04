@@ -11,6 +11,6 @@ Ext.onReady(function(){
             {contentEl:'svs0', title: 'Issuance'},
             {contentEl:'svs1', title: 'Update 1'}
         ],
-        activeTab: 1,
+        activeTab: 1
     });
 });
