@@ -295,6 +295,26 @@ for( $i=0; $lsr = @pg_fetch_array($result,$i); $i++)
 
 ?>
 </div>
+<div id="counties" class="x-hide-display">
+ <div id="counties-grid"></div>
+</div>
+<?php
+/* Now we dig for warning counties ? */
+$sql = "SELECT * from warnings_$year w, nws_ugc u WHERE w.wfo = '$wfo' and 
+        w.phenomena = '$phenomena' and w.eventid = $eventid and 
+        w.significance = '$significance' and w.gtype = 'C' and
+        w.ugc = u.ugc";
+$result = pg_exec($connect, $sql);
+$jsdata3 = "";
+for( $i=0; $warn = @pg_fetch_array($result,$i); $i++){
+   $jsdata3 .= sprintf(",\n[%s,'%s','%s','%s','%s','%s']", $i,
+      $warn["ugc"], $warn["name"], $warn["status"],
+      substr($warn["issue"], 0, 16), substr($warn["expire"], 0, 16)
+      );
+}
+
+?>
+
 </td></tr></table>
 <script>
 //<!--
@@ -303,7 +323,7 @@ Ext.onReady(function(){
         title: 'Product Overview',
         collapsible:false,
         width:320,
-        height: 480,
+        height:400,
         items: [Ext.get('controller')]
     });
     p.render('controller-side');
@@ -316,6 +336,9 @@ Ext.onReady(function(){
     ];
     var myData2 = [
         <?php echo substr($jsdata2,1,10000); ?>
+    ];
+    var myData3 = [
+        <?php echo substr($jsdata3,1,10000); ?>
     ];
     var expander = new Ext.grid.RowExpander({
         tpl : new Ext.Template(
@@ -350,6 +373,18 @@ Ext.onReady(function(){
     });
     store2.loadData(myData2);
 
+    var store3 = new Ext.data.SimpleStore({
+        fields: [
+           {name: 'i', type: 'int'},
+           {name: 'ugc'},
+           {name: 'name'},
+           {name: 'status'},
+           {name: 'issue'},
+           {name: 'expire'}
+        ]
+    });
+    store3.loadData(myData3);
+
 
     // create the Grid
     var grid = new Ext.grid.GridPanel({
@@ -363,10 +398,11 @@ Ext.onReady(function(){
             {header: "County", sortable: true, dataIndex: 'County'}
         ]),
         stripeRows: true,
-        width:575,
         title:'Storm Reports within Polygon',
         plugins: expander,
         collapsible: false,
+        autoScroll:true,
+        autoHeight:true,
         animCollapse: false,
         iconCls: 'icon-grid'
     });
@@ -387,9 +423,10 @@ Ext.onReady(function(){
             {header: "County", sortable: true, dataIndex: 'County'}
         ]),
         stripeRows: true,
-        width:575,
         title:'All WFO Storm Reports within Time Period',
         plugins: expander,
+        autoScroll:true,
+        autoHeight:true,
         collapsible: false,
         animCollapse: false,
         iconCls: 'icon-grid'
@@ -398,6 +435,30 @@ Ext.onReady(function(){
     grid2.render('lsr-grid2');
 
     grid2.getSelectionModel().selectFirstRow();
+
+
+    // create the Grid
+    var grid3 = new Ext.grid.GridPanel({
+        store: store3,
+        cm: new Ext.grid.ColumnModel([
+            {id: 'i', header: "UGC", width: 50, sortable: true, dataIndex: 'ugc'},
+            {header: "Name", width: 200, sortable: true, dataIndex: 'name'},
+            {header: "Status", width: 50, sortable: true, dataIndex: 'status'},
+            {header: "Issue", sortable: true, dataIndex: 'issue'},
+            {header: "Expire", sortable: true, dataIndex: 'expire'}
+        ]),
+        stripeRows: true,
+        autoScroll:true,
+        autoHeight:true,
+        title:'Counties / Zones Included',
+        collapsible: false,
+        animCollapse: false,
+        iconCls: 'icon-grid'
+    });
+
+    grid3.render('counties-grid');
+
+    grid3.getSelectionModel().selectFirstRow();
 
 
 });
@@ -416,13 +477,14 @@ Ext.onReady(function(){
     var tabs22 = new Ext.TabPanel({
         renderTo: 'displaytabs',
         width:600,
-        frame:true,
+        height:500,
+        autoHeight:true,
         plain:true,
         enableTabScroll:true,
-        defaults:{autoHeight: true},
         items:[
             {contentEl:'radar', title: 'RADAR'},
-            {contentEl:'lsrs', title: 'Storm Reports'}
+            {contentEl:'lsrs', title: 'Storm Reports'},
+            {contentEl:'counties', title: 'Counties/Zones Included'}
          ],
         activeTab: 0
     });
@@ -433,7 +495,7 @@ Ext.onReady(function(){
     // basic tabs 1, built from existing content
     var tabs = new Ext.TabPanel({
         renderTo: 'tabs1',
-        width:900,
+        width:800,
         frame:true,
         plain:true,
         enableTabScroll:true,
