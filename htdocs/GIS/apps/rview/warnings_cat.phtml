@@ -316,8 +316,12 @@ $v = $q - 1;
 $js .= "        ],
         activeTab: ${v},
     });
-});";
-echo "<script> $js </script>";
+});
+-->";
+echo "<script>//<!-- 
+$js 
+-->
+</script>";
 echo "</div>";
 
 include("$rootpath/include/footer.php");
