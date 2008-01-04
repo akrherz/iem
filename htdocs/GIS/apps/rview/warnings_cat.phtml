@@ -280,8 +280,7 @@ $js = "Ext.onReady(function(){
         enableTabScroll:true,
         defaults:{autoHeight: true},
         items:[
-            {contentEl:'svs0', title: 'Issuance'},
-";
+            {contentEl:'svs0', title: 'Issuance'}";
 
 
 echo "<div id=\"tabs1\">
@@ -300,7 +299,7 @@ if (strlen($row["svs"]) > 0 )
      if ($svs == $lsvs) continue;
      $lsvs = $svs;
      echo "<div id=\"svs${q}\" class=\"x-hide-display\"><p><pre>${svs}</pre></p></div>\n";
-     $js .= "{contentEl:'svs${q}', title: 'Update ${q}'},\n";
+     $js .= ",\n{contentEl:'svs${q}', title: 'Update ${q}'}";
      $q += 1;
   }
 }
