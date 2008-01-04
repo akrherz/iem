@@ -295,7 +295,7 @@ echo "<div id=\"tabs1\">
 <p><pre>". str_replace("\001", "", $row["report"]) ."</pre></p>
 </div>";
 
-$lsvs = "";
+$lsvs = str_replace("\001", "", $row["report"]);
 if (strlen($row["svs"]) > 0 ) 
 {
   $parts = explode('__', $row["svs"]);
