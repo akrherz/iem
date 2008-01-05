@@ -102,7 +102,7 @@ if ($significance == "W" &&
 {
   $query2 .= " and gtype = 'P'";
 }
-$result = pg_exec($connect, $query2);
+$result = pg_exec($connect, $query2 ." ORDER by updated DESC");
 
 
 /* Lets be nice and list out all warnings instead */
