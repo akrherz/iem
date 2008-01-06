@@ -1,0 +1,17 @@
+[{
+        id:'swomcd',
+        text: 'SPC Mesoscale Discussion',
+        leaf: true
+    },{
+        text: 'GFS MOS',
+        children: [{
+            id:'mexdsm',
+            text: 'Des Moines',
+            leaf: true
+        },{
+            id:'mexdvn',
+            text: 'Davenport',
+            leaf: true
+
+        }]
+   }]
