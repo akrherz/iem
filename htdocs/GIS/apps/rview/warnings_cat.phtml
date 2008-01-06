@@ -253,9 +253,8 @@ echo "
 
 <div id="displaytabs">
 
-<div id="radar" class="x-hide-display" style="height: 500px;">
-<img src="<?php echo $url; ?>" height="480">
-&nbsp; &nbsp;
+<div id="radar" class="x-hide-display">
+<img src="<?php echo $url; ?>">
 </div>
 <div id="lsrs" class="x-hide-display">
  <div id="lsr-grid"></div>
@@ -401,16 +400,9 @@ Ext.onReady(function(){
         stripeRows: true,
         title:'Storm Reports within Polygon',
         plugins: expander,
-        collapsible: false,
         autoScroll:true,
-        autoHeight:true,
-        animCollapse: false,
         iconCls: 'icon-grid'
     });
-
-    grid.render('lsr-grid');
-
-    grid.getSelectionModel().selectFirstRow();
 
     // create the Grid
     var grid2 = new Ext.grid.GridPanel({
@@ -427,15 +419,8 @@ Ext.onReady(function(){
         title:'All WFO Storm Reports within Time Period',
         plugins: expander,
         autoScroll:true,
-        autoHeight:true,
-        collapsible: false,
-        animCollapse: false,
         iconCls: 'icon-grid'
     });
-
-    grid2.render('lsr-grid2');
-
-    grid2.getSelectionModel().selectFirstRow();
 
 
     // create the Grid
@@ -450,17 +435,28 @@ Ext.onReady(function(){
         ]),
         stripeRows: true,
         autoScroll:true,
-        autoHeight:true,
         title:'Counties / Zones Included',
         collapsible: false,
         animCollapse: false,
-        iconCls: 'icon-grid'
+        iconCls: 'icon-grid',
+        title: 'Counties/Zones Included'
     });
 
-    grid3.render('counties-grid');
 
-    grid3.getSelectionModel().selectFirstRow();
-
+    var tabs22 = new Ext.TabPanel({
+        renderTo: 'displaytabs',
+        width:600,
+        height:500,
+        plain:true,
+        enableTabScroll:true,
+        items:[
+            {contentEl:'radar', title: 'RADAR'},
+            grid,
+            grid2,
+            grid3
+         ],
+        activeTab: 0
+    });
 
 });
 -->
@@ -473,23 +469,6 @@ Ext.onReady(function(){
 
 /* Generate text tabs :) */
 $js = "
-Ext.onReady(function(){
-    // basic tabs 1, built from existing content
-    var tabs22 = new Ext.TabPanel({
-        renderTo: 'displaytabs',
-        width:600,
-        height:500,
-        plain:true,
-        enableTabScroll:true,
-        items:[
-            {contentEl:'radar', title: 'RADAR'},
-            {contentEl:'lsrs', title: 'Storm Reports'},
-            {contentEl:'counties', title: 'Counties/Zones Included'}
-         ],
-        activeTab: 0
-    });
-});
-
 
 Ext.onReady(function(){
     // basic tabs 1, built from existing content
