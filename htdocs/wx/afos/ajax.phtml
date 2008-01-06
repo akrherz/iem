@@ -45,6 +45,19 @@ Ext.state.Manager.setProvider(cp);
              root:root
             });
 
+var refreshAction = new Ext.Action({
+  text: 'Refresh',
+  handler: function() {
+    var id = tabs.getActiveTab().getId();
+    var tokens= id.split("-");
+    tabs.getActiveTab().getUpdater().update({
+          url: 'retreive.php', 
+         params: 'pil='+ tokens[0] +'&cnt='+ tokens[1],
+         discardUrl:false
+}); 
+  },
+  iconClas:'blist'
+});
 
 var addTab = function(id, cnt) {
     var tid = id+"-"+cnt;
@@ -56,7 +69,10 @@ var addTab = function(id, cnt) {
         iconCls: 'tabs',
         closable:true,
         autoScroll:true,
-        autoLoad: {url: 'retreive.php', params: 'pil='+id+'&cnt='+cnt}
+        autoLoad: {url: 'retreive.php', 
+                   params: 'pil='+id+'&cnt='+cnt,
+                   discardUrl:false},
+        tbar: [refreshAction]
      }).show();
 
     // Update Cookie?!
