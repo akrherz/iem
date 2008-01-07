@@ -102,8 +102,7 @@ if ($significance == "W" &&
 {
   $query2 .= " and gtype = 'P'";
 }
-$result = pg_exec($connect, $query2 ." ORDER by updated DESC");
-
+$result = pg_exec($connect, $query2 ." ORDER by updated DESC, gtype ASC");
 
 /* Lets be nice and list out all warnings instead */
 if (pg_num_rows($result) == 0) 
@@ -483,6 +482,11 @@ echo "<div id=\"tabs1\">
 <div id=\"svs0\" class=\"x-hide-display\">
 <p><pre>". str_replace("\001", "", $row["report"]) ."</pre></p>
 </div>";
+
+
+$query2 = "SELECT *, astext(geom) as t from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and eventid = $eventid and significance = '$significance' and gtype = 'C' ORDER by updated DESC";
+$result = pg_exec($connect, $query2 );
+$row = pg_fetch_array($result, 0);
 
 $lsvs = str_replace("\001", "", $row["report"]);
 $q = 1;
