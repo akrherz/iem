@@ -484,10 +484,6 @@ echo "<div id=\"tabs1\">
 </div>";
 
 
-$query2 = "SELECT *, astext(geom) as t from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and eventid = $eventid and significance = '$significance' and gtype = 'C' ORDER by updated DESC";
-$result = pg_exec($connect, $query2 );
-$row = pg_fetch_array($result, 0);
-
 $lsvs = str_replace("\001", "", $row["report"]);
 $q = 1;
 if (strlen($row["svs"]) > 0 ) 
