@@ -460,25 +460,8 @@ Ext.onReady(function(){
 <p>&nbsp;<br />
 <?php
 
-
-/* Generate text tabs :) */
-$js = "
-
-Ext.onReady(function(){
-    // basic tabs 1, built from existing content
-    var tabs = new Ext.TabPanel({
-        renderTo: 'tabs1',
-        width:800,
-        frame:true,
-        plain:true,
-        enableTabScroll:true,
-        defaults:{autoHeight: true},
-        items:[
-            {contentEl:'svs0', title: 'Issuance'}";
-
-
-echo "<div id=\"tabs1\">
-<div id=\"svs0\" class=\"x-hide-display\">
+echo "<div id=\"tabs1\" style=\"height: 600px;\">
+<div class=\"x-tab\" title=\"Issuance\">
 <p><pre>". str_replace("\001", "", $row["report"]) ."</pre></p>
 </div>";
 
@@ -493,22 +476,33 @@ if (strlen($row["svs"]) > 0 )
      $svs = str_replace("\001", "", $parts[$i]);
      if ($svs == $lsvs) continue;
      $lsvs = $svs;
-     echo "<div id=\"svs${q}\" class=\"x-hide-display\"><p><pre>${svs}</pre></p></div>\n";
-     $js .= ",\n{contentEl:'svs${q}', title: 'Update ${q}'}";
+     echo "<div class=\"x-tab\" title=\"Update $q\"><p><pre>${svs}</pre></p></div>\n";
+    // $js .= ",\n{contentEl:'svs${q}', title: 'Update ${q}'}";
      $q += 1;
   }
 }
 $v = $q - 1;
-$js .= "        ],
-        activeTab: ${v}
-    });
-});";
-echo "<script>
+echo "</div>
+<script>
 //<!-- 
-$js 
+Ext.onReady(function(){
+    // basic tabs 1, built from existing content
+    var tabs = new Ext.TabPanel({
+        applyTo: 'tabs1',
+        width:800,
+        defaults:{autoHeight: true},
+        frame:true,
+        plain:true,
+        enableTabScroll:true,
+        deferredRender:false,
+        autoTabs:true,
+        resizeTabs:false,
+        autoScroll:true
+  }); 
+  tabs.activate($v);
+});
 -->
 </script>";
-echo "</div>";
 
 include("$rootpath/include/footer.php");
 ?>
