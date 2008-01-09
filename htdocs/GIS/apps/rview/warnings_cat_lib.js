@@ -100,6 +100,7 @@ Ext.onReady(function(){
 
 
     var tabs22 = new Ext.TabPanel({
+        id:'tabs22',
         width:600,
         height:500,
         plain:true,
@@ -114,8 +115,8 @@ Ext.onReady(function(){
     });
 
     var tabs = new Ext.TabPanel({
-        applyTo: 'tabs1',
         id:'text-display',
+        applyTo:'tabs1',
         width:800,
         defaults:{autoHeight: true},
         frame:true,
