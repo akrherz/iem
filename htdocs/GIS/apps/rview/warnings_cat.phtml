@@ -137,7 +137,6 @@ $HEADEXTRA = "<script type=\"text/javascript\" src=\"${rooturl}/ext/adapter/ext/
 <script type=\"text/javascript\" src=\"${rooturl}/ext/ext-all.js\"></script>
 <script type=\"text/javascript\" src=\"RowExpander.js\"></script>
 <link rel=\"stylesheet\" type=\"text/css\" href=\"${rooturl}/ext/resources/css/ext-all.css\" />
-<script type=\"text/javascript\" src=\"warnings_cat_lib.js\"></script>
 ";
 include("$rootpath/include/header.php");
 
@@ -334,6 +333,7 @@ if (strlen($row["svs"]) > 0 )
 }
 $v = $q - 1;
 echo "</div>
+<script type=\"text/javascript\" src=\"warnings_cat_lib.js\"></script>
 <script>
 //<!-- 
 Ext.onReady(function(){
@@ -363,7 +363,8 @@ Ext.onReady(function(){
   Ext.getCmp('tabs22').render('displaytabs');
 });
 -->
-</script>";
+</script>
+";
 
 include("$rootpath/include/footer.php");
 ?>
