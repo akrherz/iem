@@ -1,12 +1,12 @@
 Ext.onReady(function(){
     var p = new Ext.Panel({
+        id:'poverview',
         title: 'Product Overview',
         collapsible:false,
         width:320,
         height:500,
         items: [Ext.get('controller')]
     });
-    p.render('controller-side');
 
     var expander = new Ext.grid.RowExpander({
         tpl : new Ext.Template(
