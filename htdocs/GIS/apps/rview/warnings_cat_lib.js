@@ -1,4 +1,13 @@
 Ext.onReady(function(){
+    var p = new Ext.Panel({
+        title: 'Product Overview',
+        collapsible:false,
+        width:320,
+        height:500,
+        items: [Ext.get('controller')]
+    });
+    p.render('controller-side');
+
 
     var expander = new Ext.grid.RowExpander({
         tpl : new Ext.Template(
@@ -98,9 +107,8 @@ Ext.onReady(function(){
         animCollapse: false
     });
 
-
     var tabs22 = new Ext.TabPanel({
-        id:'tabs22',
+        renderTo: 'displaytabs',
         width:600,
         height:500,
         plain:true,
@@ -115,8 +123,8 @@ Ext.onReady(function(){
     });
 
     var tabs = new Ext.TabPanel({
+        applyTo: 'tabs1',
         id:'text-display',
-        applyTo:'tabs1',
         width:800,
         defaults:{autoHeight: true},
         frame:true,
@@ -127,6 +135,7 @@ Ext.onReady(function(){
         resizeTabs:false,
         autoScroll:true
   }); 
+
 
 });
 
