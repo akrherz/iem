@@ -2,6 +2,47 @@
 /**
  * Library for doing repetetive forms stuff
  */
+function vtecPhenoSelect($selected)
+{
+ global $vtec_phenomena;
+ $s = "<select name=\"phenomena\" style=\"width: 195px;\">\n";
+ while( list($key, $value) = each($vtec_phenomena) ){
+  $s .= "<option value=\"$key\" ";
+  if ($selected == $key) $s .= "SELECTED";
+  $s .= ">[".$key."] ". $vtec_phenomena[$key] ."</option>";
+ }
+ $s .= "</select>\n";
+ return $s;
+}
+
+function vtecSigSelect($selected)
+{
+ global $vtec_significance;
+ $s = "<select name=\"significance\" style=\"width: 195px;\">\n";
+ while( list($key, $value) = each($vtec_significance) ){
+  $s .= "<option value=\"$key\" ";
+  if ($selected == $key) $s .= "SELECTED";
+  $s .= ">[".$key."] ". $vtec_significance[$key] ."</option>";
+ }
+ $s .= "</select>\n";
+ return $s;
+}
+
+function wfoSelect($selected)
+{
+ global $wfos;
+ $s = "<select name=\"wfo\" style=\"width: 195px;\">\n";
+ while( list($key, $value) = each($wfos) ){
+   $s .= "<option value=\"$key\" ";
+   if ($selected == $key) $s .= "SELECTED";
+   $s .= ">[".$key."] ". $wfos[$key]["city"] ."</option>";
+ }
+ $s .= "</select>";
+ return $s;
+}
+
+
+
 
 function minuteSelect($selected, $name){
   echo "<select name='".$name."'>\n";
