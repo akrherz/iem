@@ -351,7 +351,15 @@ Ext.onReady(function(){
   Ext.getCmp('grid').getStore().loadData(myData);
   Ext.getCmp('grid2').getStore().loadData(myData2);
   Ext.getCmp('grid3').getStore().loadData(myData3);
-  Ext.getCmp('poverview').render('controller-side');
+      var p = new Ext.Panel({
+        id:'poverview',
+        title: 'Product Overview',
+        collapsible:false,
+        width:320,
+        height:500,
+        items: [Ext.get('controller')]
+    });
+  p.render('controller-side'); 
 });
 -->
 </script>";
