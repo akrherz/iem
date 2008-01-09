@@ -100,7 +100,6 @@ Ext.onReady(function(){
 
 
     var tabs22 = new Ext.TabPanel({
-        renderTo: 'displaytabs',
         width:600,
         height:500,
         plain:true,
