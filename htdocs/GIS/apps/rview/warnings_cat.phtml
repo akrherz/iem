@@ -193,8 +193,8 @@ if (time() < ($ts + 450)) $isarchive = 0;
 $imgi = 0;
 $tzoff = 0;
 $interval = 5;
-$width = 500;
-$height = 400;
+$width = 640;
+$height = 480;
 $lsrlook = 0;
 $layers = array("uscounties_and_name", "warnings", "nexrad");
 $maptitle = "IEM NEXRAD valid:";
@@ -240,74 +240,19 @@ echo "
 <h3>Valid Time Extent Code (VTEC) Product Browser</h3>
 <table border="0">
 <tr><td valign="top">
-<div id='controller-side'></div>
-
-</td><td valign="top">
-
 
 <div id="displaytabs">
-
 <div id="radar" class="x-hide-display">
 <h2 class="page-title"><?php echo $radarLabel; ?> NWS NEXRAD Composite + Warning</h2>
 <p><img src="<?php echo $url; ?>"></p>
 </div>
-<div id="lsrs" class="x-hide-display">
- <div id="lsr-grid"></div>
- <div id="lsr-grid2"></div>
-<?php
-$jsdata = "";
-if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA"))
-{
-  /* Lets go dig for LSR reports */
-  $sql = sprintf("SELECT distinct * from lsrs_%s WHERE
-         geom && SetSrid(GeometryFromText('%s'),4326) and
-         contains(SetSrid(GeometryFromText('%s'),4326), geom)
-         and wfo = '%s' and
-         valid >= '%s' and valid <= '%s' ORDER by valid ASC", $year,
-          $row["t"], $row["t"], $wfo, $row["issue"], $row["expire"]);
-  $result = pg_exec($connect, $sql);
-
-  for( $i=0; $lsr = @pg_fetch_array($result,$i); $i++)
-  {
-     $jsdata .= sprintf(",\n[%s,'%s','%s','%s','%s','%s','%s']", $i,
-         substr($lsr["valid"], 11,5), $lsr_types[$lsr["type"]]['name'], $lsr["magnitude"], $lsr["city"], $lsr["county"], $lsr["remark"]);
-  }
-}
-/* Go look for any LSRs between start and end! */
-$sql = sprintf("SELECT distinct * from lsrs_%s WHERE
-         wfo = '%s' and
-         valid >= '%s' and valid <= '%s' ORDER by valid ASC", $year,
-         $wfo, $row["issue"], $row["expire"]);
-$result = pg_exec($connect, $sql);
-
-$jsdata2 = "";
-for( $i=0; $lsr = @pg_fetch_array($result,$i); $i++)
-{
-   $jsdata2 .= sprintf(",\n[%s,'%s','%s','%s','%s','%s','%s']", $i,
-      substr($lsr["valid"], 11,5), $lsr_types[$lsr["type"]]['name'], 
-      $lsr["magnitude"], $lsr["city"], $lsr["county"], $lsr["remark"]);
-}
-
-?>
 </div>
-<div id="counties" class="x-hide-display">
- <div id="counties-grid"></div>
-</div>
-<?php
-/* Now we dig for warning counties ? */
-$sql = "SELECT * from warnings_$year w, nws_ugc u WHERE w.wfo = '$wfo' and 
-        w.phenomena = '$phenomena' and w.eventid = $eventid and 
-        w.significance = '$significance' and w.gtype = 'C' and
-        w.ugc = u.ugc";
-$result = pg_exec($connect, $sql);
-$jsdata3 = "";
-for( $i=0; $warn = @pg_fetch_array($result,$i); $i++){
-   $jsdata3 .= sprintf(",\n[%s,'%s','%s','%s','%s','%s']", $i,
-      $warn["ugc"], $warn["name"], $warn["status"],
-      substr($warn["issue"], 0, 16), substr($warn["expire"], 0, 16)
-      );
-}
 
+</td><td valign="top">
+
+<div id='controller-side'></div>
+
+<?php
 echo "</td></tr></table>
 <p>&nbsp;<br />
 
@@ -333,25 +278,32 @@ if (strlen($row["svs"]) > 0 )
   }
 }
 $v = $q - 1;
+$json_params = sprintf("year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s", $year, $row["wfo"], $phenomena, $eventid, $significance);
 echo "</div>
 <script>
 //<!-- 
 Ext.onReady(function(){
 
-    var myData = [
-        ". substr($jsdata,1,10000) ."
-    ];
-    var myData2 = [
-        ". substr($jsdata2,1,10000) ."
-    ];
-    var myData3 = [
-        ". substr($jsdata3,1,10000) ."
-    ];
   Ext.getCmp('text-display').activate($v);
-  Ext.getCmp('grid').getStore().loadData(myData);
-  Ext.getCmp('grid2').getStore().loadData(myData2);
-  Ext.getCmp('grid3').getStore().loadData(myData3);
-});
+
+  Ext.getCmp('lsr-grid').getStore().load({
+    params:'${json_params}&sbw=1'
+  });
+  Ext.getCmp('all-lsr-grid').getStore().load({
+    params:'${json_params}'
+  });
+  Ext.getCmp('ugc-grid').getStore().load({
+    params:'${json_params}'
+  });
+";
+if ($significance != "W" ||
+   ($phenomena != "SV" && $phenomena != "TO" && $phenomena != "MA"))
+{
+  echo "Ext.getCmp('lsr-grid').disable();\n";
+}
+
+
+echo "});
 -->
 </script>";
 
