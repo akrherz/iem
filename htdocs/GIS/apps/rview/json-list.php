@@ -31,6 +31,7 @@ for( $i=0; $z = @pg_fetch_array($result,$i); $i++)
   $z["phenomena"] = $phenomena;
   $z["significance"] = $significance;
   $z["wfo"] = $wfo;
+  $z["year"] = $year;
   $z["issued"] = substr($z["issued"],0,16);
   $z["expired"] = substr($z["expired"],0,16);
   $ar["products"][] = $z;
