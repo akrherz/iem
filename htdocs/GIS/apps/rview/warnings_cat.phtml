@@ -72,75 +72,27 @@ if ($significance == "W" &&
 }
 $result = pg_exec($connect, $query2 ." ORDER by updated DESC, gtype ASC");
 
-/*  ==========================================
-Lets be nice and list out all warnings instead
-============================================== */
-if (pg_num_rows($result) == 0) 
-{
- include("$rootpath/include/header.php");
- echo "<form method=\"GET\" name=\"changero\">
-   <input type=\"hidden\" value=\"0\" name=\"eventid\">
- ";
 
- $sql = "select sumtxt( n.name || ' ['||n.state||'], ') as s, eventid, 
-         min(issue) as i, max(expire) as e from 
-        (select distinct ugc, eventid, issue, expire from warnings_$year 
-         WHERE wfo = '$wfo' and gtype = 'C' and 
-         significance = '$significance' and phenomena = '$phenomena') as foo, 
-         nws_ugc n WHERE n.ugc = foo.ugc GROUP by eventid ORDER by eventid ASC";
- $result = pg_exec($connect, $sql);
-
- echo "<h3>$year ". $vtec_phenomena[$phenomena] 
-         ." ". $vtec_significance[$significance] ."(s) issued by ".
-         $wfos[$wfo]["city"] ." Weather Office</h3>";
-
- echo "<table>
-        <tr><td>NWS WFO:</td><td>". wfoSelect($wfo) ."</td>
-        <td>Year:</td><td>". yearSelect(2005,$year) ."</td>
-        <td rowspan=\"2\"><input type=\"submit\" value=\"View\"></td></tr>
-        <tr><td>Phenomena:</td><td>". vtecPhenoSelect($phenomena) ."</td>
-        <td>Significance:</td><td>". vtecSigSelect($significance) ."</td>
-        </tr></table>";
-
- echo "<br />Here is a listing of products archived by the IEM. Click on the
-  event id to get more details";
-
- echo "<p><table class=\"ruler\" border=\"1\">
-       <thead><tr><th>Event ID</th><th>Issued</th><th>Expired</th>
-       <th>Counties Effected:</th></tr></thead>\n";
-
- for ($i=0; $row = @pg_fetch_array($result,$i); $i++)
- {
-   $url = sprintf("warnings_cat.phtml?wfo=%s&year=%s&eventid=%s&phenomena=%s&significance=%s", $wfo, $year, $row["eventid"], $phenomena, $significance);
-   $iss = date("d M Y H:i", strtotime(substr($row["i"],0,16)));
-   $exp = date("d M Y H:i", strtotime(substr($row["e"],0,16)));
-   echo "<tr><th><a href=\"$url\">". $row["eventid"] ."</a></th>
-             <td>". $iss ." Z</td><td>". $exp ." Z</td>
-             <td>". substr($row["s"],0,-2)  ."</td></tr>\n";
- }
- if (pg_num_rows($result) == 0)
- {
-  echo "<tr><td colspan=\"4\">No products found, sorry!</td></tr>";
- }
- echo "</table>\n";
- include("$rootpath/include/footer.php");
- die();
-}
-
-/* =========================================
-   The Show must go on!
-   ========================================= */
-$row = pg_fetch_array($result, 0);
 
 /* BEGIN HTML output */
 $HEADEXTRA = "<script type=\"text/javascript\" src=\"${rooturl}/ext/adapter/ext/ext-base.js\"></script>
 <script type=\"text/javascript\" src=\"${rooturl}/ext/ext-all.js\"></script>
+<script type=\"text/javascript\" src=\"${rooturl}/ext/ux/menu/EditableItem.js\"></script>
+<script type=\"text/javascript\" src=\"${rooturl}/ext/ux/grid/GridFilters.js\"></script>
+<script type=\"text/javascript\" src=\"${rooturl}/ext/ux/grid/filter/Filter.js\"></script>
+<script type=\"text/javascript\" src=\"${rooturl}/ext/ux/grid/filter/StringFilter.js\"></script>
 <script type=\"text/javascript\" src=\"RowExpander.js\"></script>
 <link rel=\"stylesheet\" type=\"text/css\" href=\"${rooturl}/ext/resources/css/ext-all.css\" />
 <script type=\"text/javascript\" src=\"warnings_cat_lib.js\"></script>
 ";
 include("$rootpath/include/header.php");
 
+if (pg_numrows($result) > 0) {
+  $row = pg_fetch_array($result, 0);
+} else{
+  $row = Array("issue" => time(), "expire" => time() , "report" => "", 
+               "svs" => "", "status" => "NEW");
+}
 
 /* Determine time base, 4 minutes from product issuance */
 $issue = strtotime(substr($row["issue"],0,16)) + 240;
@@ -156,7 +108,7 @@ if ($significance == "W" && ($phenomena == "SV" or $phenomena == "TO" or $phenom
   $lsrwindow = 1;
 }
 
-$cow_url = sprintf("%s/cow/?syear=%s&smonth=%s&sday=%s&shour=%s&eyear=%s&emonth=%s&eday=%s&ehour=%s&wfo=%s&wtype[]=TO&wtype[]=SV&hail=0.75&ltype[]=TO&ltype[]=SV", $rooturl, date("Y", $cow_issue), date("m", $cow_issue),date("d", $cow_issue),date("H", $cow_issue), date("Y", $cow_expire), date("m", $cow_expire), date("d", $cow_expire), date("H", $cow_expire), $row["wfo"]);
+$cow_url = sprintf("%s/cow/?syear=%s&smonth=%s&sday=%s&shour=%s&eyear=%s&emonth=%s&eday=%s&ehour=%s&wfo=%s&wtype[]=TO&wtype[]=SV&hail=0.75&ltype[]=TO&ltype[]=SV", $rooturl, date("Y", $cow_issue), date("m", $cow_issue),date("d", $cow_issue),date("H", $cow_issue), date("Y", $cow_expire), date("m", $cow_expire), date("d", $cow_expire), date("H", $cow_expire), $wfo);
 $gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=%s&minute1=0&month2=%s&day2=%s&hour2=%s&minute2=0",  date("Y", $cow_issue), date("m", $cow_issue),date("d", $cow_issue),date("H", $cow_issue), date("m", $cow_expire), date("d", $cow_expire), date("H", $cow_expire) );
 $radar_url = sprintf("%s/GIS/apps/rview/warnings.phtml?archive=yes&tz=UTC&cu=0&year=%s&month=%s&day=%s&hour=%s&minute=%s&tzoff=0&sortdir=DESC&loop=0&sortcol=issue&c=yes&lon0=%s&lat0=%s", $rooturl, date("Y", $issue), date("m", $issue), date("d", $issue), date("H", $issue), date("i", $issue), ($x1+$x0)/2.0, ($y1 + $y0) / 2.0);
 
@@ -169,14 +121,13 @@ if ($significance == "W")
 
 $next_eventid = $eventid + 1;
 $last_eventid = $eventid - 1;
-$next_link = sprintf("<a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s\">Next</a> ", $rooturl, $year, $row["wfo"], $phenomena, $next_eventid, $significance, $warngeo);
+$next_link = sprintf("<a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s\">Next</a> ", $rooturl, $year, $wfo, $phenomena, $next_eventid, $significance, $warngeo);
 
 $last_link = "";
 if ($last_eventid > 0)
-  $last_link = sprintf(" <a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s\">Previous</a> ", $rooturl, $year, $row["wfo"], $phenomena, $last_eventid, $significance, $warngeo);
+  $last_link = sprintf(" <a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s\">Previous</a> ", $rooturl, $year, $wfo, $phenomena, $last_eventid, $significance, $warngeo);
   
 
-$all_link = sprintf(" <a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=0&significance=%s&warngeo=%s\">View all events of this type</a> ", $rooturl, $year, $row["wfo"], $phenomena, $significance, $warngeo);
 
 $radarTS = $issue;
 $radarLabel = "At product issuance";
@@ -186,21 +137,25 @@ if (time() < strtotime(substr($row["expire"],0,16)))
   $radarLabel = "Current";
 }
 
-$ts = determine_time_base($radarTS);
-$basets = $ts;
-$isarchive = 1;
-if (time() < ($ts + 450)) $isarchive = 0;
-$imgi = 0;
-$tzoff = 0;
-$interval = 5;
-$width = 640;
-$height = 480;
-$lsrlook = 0;
-$layers = array("uscounties_and_name", "warnings", "nexrad");
-$maptitle = "IEM NEXRAD valid:";
-$singleWarning = 1;
-dl($mapscript);
-include("warnings_plot.php");
+if (pg_numrows($result) > 0) {
+  $ts = determine_time_base($radarTS);
+  $basets = $ts;
+  $isarchive = 1;
+  if (time() < ($ts + 450)) $isarchive = 0;
+  $imgi = 0;
+  $tzoff = 0;
+  $interval = 5;
+  $width = 640;
+  $height = 480;
+  $lsrlook = 0;
+  $layers = array("uscounties_and_name", "warnings", "nexrad");
+  $maptitle = "IEM NEXRAD valid:";
+  $singleWarning = 1;
+  dl($mapscript);
+  include("warnings_plot.php");
+} else {
+ $url = "";
+}
 
 echo "
 
@@ -209,7 +164,7 @@ echo "
 <table>
 <tr><td>NWS WFO:</td><td>". wfoSelect($wfo) ."</td></tr>
 <tr><td>Year:</td><td>". yearSelect(2005,$year) ."</td></tr>
-<tr><td>Event ID:</td><td>$last_link <input name=\"eventid\" type=\"text\" size=\"5\" value=\"". $row["eventid"] ."\"> $next_link</td></tr>
+<tr><td>Event ID:</td><td>$last_link <input name=\"eventid\" type=\"text\" size=\"5\" value=\"". $eventid ."\"> $next_link</td></tr>
 <tr><td>Phenomena:</td><td>". vtecPhenoSelect($phenomena) ."</td></tr>
 <tr><td>Significance:</td><td>". vtecSigSelect($significance) ."</td></tr>
 <tr><td>Status:</td><td>". $vtec_status[ $row["status"] ] ."</td></tr>
@@ -228,7 +183,6 @@ echo "
 <p><br /><input type="submit" value="Load Product">
 
 <p><br /><br /><strong>Links:</strong>
- <br /><?php echo $all_link; ?>
  <?php echo $cow; ?>
  <br /><a href="<?php echo $gis_url; ?>">Download Shapefile of Warnings</a>
  <br /><a href="<?php echo $radar_url; ?>">Interactive RADAR Display</a>
@@ -278,7 +232,7 @@ if (strlen($row["svs"]) > 0 )
   }
 }
 $v = $q - 1;
-$json_params = sprintf("year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s", $year, $row["wfo"], $phenomena, $eventid, $significance);
+$json_params = sprintf("year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s", $year, $wfo, $phenomena, $eventid, $significance);
 echo "</div>
 <script>
 //<!-- 
@@ -286,14 +240,40 @@ Ext.onReady(function(){
 
   Ext.getCmp('text-display').activate($v);
 
-  Ext.getCmp('lsr-grid').getStore().load({
-    params:'${json_params}&sbw=1'
+  Ext.getCmp('lsr-grid').on('activate', function(q){
+      if (! this.getStore().isLoaded){
+        this.getStore().load({
+         params:'${json_params}&sbw=1'
+        });
+        this.getStore().isLoaded=true;
+      }
   });
-  Ext.getCmp('all-lsr-grid').getStore().load({
-    params:'${json_params}'
+
+  Ext.getCmp('products-grid').on('activate', function(q){
+      if (! this.getStore().isLoaded){
+        this.getStore().load({
+         params:'${json_params}'
+        });
+        this.getStore().isLoaded=true;
+      }
   });
-  Ext.getCmp('ugc-grid').getStore().load({
-    params:'${json_params}'
+
+  Ext.getCmp('all-lsr-grid').on('activate', function(q){
+      if (! this.getStore().isLoaded){
+        this.getStore().load({
+         params:'${json_params}'
+        });
+        this.getStore().isLoaded=true;
+      }
+  });
+
+  Ext.getCmp('ugc-grid').on('activate', function(q){
+      if (! this.getStore().isLoaded){
+        this.getStore().load({
+         params:'${json_params}'
+        });
+        this.getStore().isLoaded=true;
+      }
   });
 ";
 if ($significance != "W" ||
@@ -301,7 +281,17 @@ if ($significance != "W" ||
 {
   echo "Ext.getCmp('lsr-grid').disable();\n";
 }
+if (pg_numrows($result) == 0) {
+  echo "
+ Ext.getCmp('radar-display').disable();
+ Ext.getCmp('lsr-grid').disable();
+ Ext.getCmp('all-lsr-grid').disable();
+ Ext.getCmp('ugc-grid').disable();
+ Ext.getCmp('top-display').setActiveTab('products-grid');
 
+ ";
+
+}
 
 echo "});
 -->

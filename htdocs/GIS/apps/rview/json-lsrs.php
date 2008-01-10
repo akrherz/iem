@@ -39,6 +39,8 @@ $ar = Array("lsrs" => Array() );
 for( $i=0; $lsr = @pg_fetch_array($result,$i); $i++)
 {
   $lsr["id"] = $i +1;
+  $lsr["valid"] = substr($lsr["valid"],0,16);
+  $lsr["event"] = @$lsr_types[$lsr["type"]]["name"];
   $ar["lsrs"][] = $lsr;
 }
 
