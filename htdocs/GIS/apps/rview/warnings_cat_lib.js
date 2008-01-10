@@ -88,6 +88,7 @@ Ext.onReady(function(){
            {name: 'locations'},
            {name: 'wfo'},
            {name: 'year'},
+           {name: 'area', type: 'float'},
            {name: 'significance'},
            {name: 'phenomena'},
            {name: 'eventid'},
@@ -203,7 +204,8 @@ function mySplitter(val) {
           {header: "Event ID", renderer: myEventID, width: 60, sortable: true, dataIndex: 'eventid'},
           {header: "Issued", width: 140, sortable: true, dataIndex: 'issued'},
           {header: "Expired", width: 140, sortable: true, dataIndex: 'expired'},
-          {header: "Locations", renderer: mySplitter, width: 300, sortable: true, dataIndex: 'locations'}
+          {header: "Area", width: 50, sortable: true, dataIndex: 'area'},
+          {header: "Locations", renderer: mySplitter, width: 250, sortable: true, dataIndex: 'locations'}
         ]),
         plugins: filters,
         stripeRows: true,
