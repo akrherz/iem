@@ -1,4 +1,18 @@
 Ext.onReady(function(){
+
+   Ext.ux.grid.filter.StringFilter.prototype.icon = 'find.png';
+
+   var filters = new Ext.ux.grid.GridFilters({
+        filters:[
+               {type: 'string',  
+                dataIndex: 'locations'
+                }
+                ],
+        phpMode:false,
+        local:true
+        });
+
+
     var p = new Ext.Panel({
         title: 'Product Overview',
         collapsible:false,
@@ -168,6 +182,16 @@ Ext.onReady(function(){
         return "<span><a href=\"warnings_cat.phtml?wfo="+ record.get('wfo') +"&phenomena="+ record.get('phenomena') +"&significance="+ record.get('significance') +"&eventid="+ val +"\">" + val + "</a></span>";
     }
 
+function mySplitter(val) {
+    var tokens = val.split(",");
+    var s = "";
+    for(i=0; i < tokens.length; i++) {
+      s += tokens[i] +",";
+      if ((i % 3) == 0 && i > 0) s += "<br />";
+    }
+    return '<span>' + s + '</div>';
+}
+
     // create the Grid
     var grid4 = new Ext.grid.GridPanel({
         id:'products-grid',
@@ -178,8 +202,9 @@ Ext.onReady(function(){
           {header: "Event ID", renderer: myEventID, width: 60, sortable: true, dataIndex: 'eventid'},
           {header: "Issued", width: 140, sortable: true, dataIndex: 'issued'},
           {header: "Expired", width: 140, sortable: true, dataIndex: 'expired'},
-          {header: "Locations", width: 300, sortable: true, dataIndex: 'locations'}
+          {header: "Locations", renderer: mySplitter, width: 300, sortable: true, dataIndex: 'locations'}
         ]),
+        plugins: filters,
         stripeRows: true,
         autoScroll:true,
         title:'Other Events',
