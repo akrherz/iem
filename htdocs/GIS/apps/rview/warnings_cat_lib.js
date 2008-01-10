@@ -87,6 +87,7 @@ Ext.onReady(function(){
            {name: 'id'},
            {name: 'locations'},
            {name: 'wfo'},
+           {name: 'year'},
            {name: 'significance'},
            {name: 'phenomena'},
            {name: 'eventid'},
@@ -179,7 +180,7 @@ Ext.onReady(function(){
     });
 
     function myEventID(val, p, record){
-        return "<span><a href=\"warnings_cat.phtml?wfo="+ record.get('wfo') +"&phenomena="+ record.get('phenomena') +"&significance="+ record.get('significance') +"&eventid="+ val +"\">" + val + "</a></span>";
+        return "<span><a href=\"warnings_cat.phtml?year="+ record.get('year') +"&wfo="+ record.get('wfo') +"&phenomena="+ record.get('phenomena') +"&significance="+ record.get('significance') +"&eventid="+ val +"\">" + val + "</a></span>";
     }
 
 function mySplitter(val) {
