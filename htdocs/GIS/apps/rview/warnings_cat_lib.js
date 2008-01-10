@@ -41,7 +41,7 @@ Ext.onReady(function(){
           root:'lsrs',
           autoLoad:false,
           proxy: new Ext.data.HttpProxy({
-                url: 'json-sbw-lsrs.php',
+                url: 'json-lsrs.php',
                 method: 'GET'
           }),
           reader:  new Ext.data.JsonReader({
@@ -51,6 +51,7 @@ Ext.onReady(function(){
            {name: 'id'},
            {name: 'valid'},
            {name: 'type'},
+           {name: 'event'},
            {name: 'magnitude'},
            {name: 'city'},
            {name: 'county'},
@@ -58,11 +59,33 @@ Ext.onReady(function(){
           ])
         });
 
+    var pstore = new Ext.data.Store({
+          root:'products',
+          autoLoad:false,
+          proxy: new Ext.data.HttpProxy({
+                url: 'json-list.php',
+                method: 'GET'
+          }),
+          reader:  new Ext.data.JsonReader({
+            root: 'products',
+            id: 'id'
+           }, [
+           {name: 'id'},
+           {name: 'locations'},
+           {name: 'wfo'},
+           {name: 'significance'},
+           {name: 'phenomena'},
+           {name: 'eventid'},
+           {name: 'issued'},
+           {name: 'expired'}
+          ])
+        });
+
     var jstore2 = new Ext.data.Store({
           root:'lsrs',
           autoLoad:false,
           proxy: new Ext.data.HttpProxy({
-                url: 'json-sbw-lsrs.php',
+                url: 'json-lsrs.php',
                 method: 'GET'
           }),
           reader:  new Ext.data.JsonReader({
@@ -72,6 +95,7 @@ Ext.onReady(function(){
            {name: 'id'},
            {name: 'valid'},
            {name: 'type'},
+           {name: 'event'},
            {name: 'magnitude'},
            {name: 'city'},
            {name: 'county'},
@@ -85,12 +109,13 @@ Ext.onReady(function(){
     var grid = new Ext.grid.GridPanel({
         id:'lsr-grid',
         store: jstore,
+        loadMask: {msg:'Loading Data...'},
         cm: new Ext.grid.ColumnModel([
             expander,
             {header: "Time", sortable: true, dataIndex: 'valid'},
-            {header: "Type", sortable: true, dataIndex: 'type'},
+            {header: "Event", width: 100, sortable: true, dataIndex: 'event'},
             {header: "Magnitude", sortable: true, dataIndex: 'magnitude'},
-            {header: "City", sortable: true, dataIndex: 'city'},
+            {header: "City", width: 200, sortable: true, dataIndex: 'city'},
             {header: "County", sortable: true, dataIndex: 'county'}
         ]),
         stripeRows: true,
@@ -102,13 +127,15 @@ Ext.onReady(function(){
     // create the Grid
     var grid2 = new Ext.grid.GridPanel({
         id:'all-lsr-grid',
+        isLoaded:false,
         store: jstore2,
+        loadMask: {msg:'Loading Data...'},
         cm: new Ext.grid.ColumnModel([
             expander,
             {header: "Time", sortable: true, dataIndex: 'valid'},
-            {header: "Type", sortable: true, dataIndex: 'type'},
+            {header: "Event", width: 100, sortable: true, dataIndex: 'event'},
             {header: "Magnitude", sortable: true, dataIndex: 'magnitude'},
-            {header: "City", sortable: true, dataIndex: 'city'},
+            {header: "City", width: 200, sortable: true, dataIndex: 'city'},
             {header: "County", sortable: true, dataIndex: 'county'}
         ]),
         stripeRows: true,
@@ -122,6 +149,7 @@ Ext.onReady(function(){
     var grid3 = new Ext.grid.GridPanel({
         id:'ugc-grid',
         store: ustore,
+        loadMask: {msg:'Loading Data...'},
         cm: new Ext.grid.ColumnModel([
             {header: "UGC", width: 50, sortable: true, dataIndex: 'ugc'},
             {header: "Name", width: 200, sortable: true, dataIndex: 'name'},
@@ -136,17 +164,43 @@ Ext.onReady(function(){
         animCollapse: false
     });
 
+    function myEventID(val, p, record){
+        return "<span><a href=\"warnings_cat.phtml?wfo="+ record.get('wfo') +"&phenomena="+ record.get('phenomena') +"&significance="+ record.get('significance') +"&eventid="+ val +"\">" + val + "</a></span>";
+    }
+
+    // create the Grid
+    var grid4 = new Ext.grid.GridPanel({
+        id:'products-grid',
+        store: pstore,
+        width:640,
+        loadMask: {msg:'Loading Data...'},
+        cm: new Ext.grid.ColumnModel([
+          {header: "Event ID", renderer: myEventID, width: 60, sortable: true, dataIndex: 'eventid'},
+          {header: "Issued", width: 140, sortable: true, dataIndex: 'issued'},
+          {header: "Expired", width: 140, sortable: true, dataIndex: 'expired'},
+          {header: "Locations", width: 300, sortable: true, dataIndex: 'locations'}
+        ]),
+        stripeRows: true,
+        autoScroll:true,
+        title:'Other Events',
+        collapsible: false,
+        animCollapse: false
+    });
+
+
     var tabs22 = new Ext.TabPanel({
         renderTo: 'displaytabs',
+        id: 'top-display',
         width:660,
         height:520,
         plain:true,
         enableTabScroll:true,
         items:[
-            {contentEl:'radar', title: 'RADAR'},
+            {id:'radar-display', contentEl:'radar', title: 'RADAR'},
             grid,
             grid2,
-            grid3
+            grid3,
+            grid4
          ],
         activeTab: 0
     });

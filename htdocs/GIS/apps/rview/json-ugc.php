@@ -27,6 +27,8 @@ $ar = Array("ugcs" => Array() );
 for( $i=0; $z = @pg_fetch_array($result,$i); $i++)
 {
   $z["id"] = $i +1;
+  $z["issue"] = substr($z["issue"],0,16);
+  $z["expire"] = substr($z["expire"],0,16);
   $ar["ugcs"][] = $z;
 }
 
