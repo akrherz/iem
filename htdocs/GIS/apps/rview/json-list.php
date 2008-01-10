@@ -13,13 +13,27 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
 
- $sql = "select sumtxt( n.name || ' ['||n.state||'], ') as locations, eventid,
+ $sql = "select 0 as area, sumtxt( n.name || ' ['||n.state||'], ') as locations, eventid,
          min(issue) as issued, max(expire) as expired from
         (select distinct ugc, eventid, issue, expire from warnings_$year
          WHERE wfo = '$wfo' and gtype = 'C' and
          significance = '$significance' and phenomena = '$phenomena') as foo,
          nws_ugc n WHERE n.ugc = foo.ugc GROUP by eventid ORDER by eventid ASC";
+if (($phenomena == "SV" || $phenomena == "TO") && $significance == "W"){
 
+ $sql = "SELECT round(area::numeric,0) as area, locations, foo2.eventid, issued, expired FROM 
+    (select sumtxt( n.name || ' ['||n.state||'], ') as locations, eventid,
+     min(issue) as issued, max(expire) as expired from
+      (select distinct ugc, eventid, issue, expire from warnings_$year
+       WHERE wfo = '$wfo' and gtype = 'C' and
+       significance = '$significance' and phenomena = '$phenomena') as foo,
+   nws_ugc n WHERE n.ugc = foo.ugc GROUP by eventid ORDER by eventid ASC) as foo2, 
+
+(select area(transform(geom,2163)) / 1000000.0 as area, eventid 
+        from warnings_$year WHERE wfo = '$wfo' and gtype = 'P' and
+       significance = '$significance' and phenomena = '$phenomena') as foo3  WHERE foo3.eventid = foo2.eventid";
+
+}
 
 
 $result = pg_exec($connect, $sql);
