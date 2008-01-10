@@ -15,54 +15,83 @@ Ext.onReady(function(){
         )
     });
 
-    // create the data store
-    var store = new Ext.data.SimpleStore({
-        fields: [
-           {name: 'i', type: 'int'},
-           {name: 'Time'},
-           {name: 'Type'},
-           {name: 'Magnitude'},
-           {name: 'City'},
-           {name: 'County'},
-           {name: 'remark'}
-        ]
-    });
 
-    var store2 = new Ext.data.SimpleStore({
-        fields: [
-           {name: 'i', type: 'int'},
-           {name: 'Time'},
-           {name: 'Type'},
-           {name: 'Magnitude'},
-           {name: 'City'},
-           {name: 'County'},
-           {name: 'remark'}
-        ]
-    });
-
-    var store3 = new Ext.data.SimpleStore({
-        fields: [
-           {name: 'i', type: 'int'},
+    var ustore = new Ext.data.Store({
+          root:'ugcs',
+          autoLoad:false,
+          proxy: new Ext.data.HttpProxy({
+                url: 'json-ugc.php',
+                method: 'GET'
+          }),
+          reader:  new Ext.data.JsonReader({
+            root: 'ugcs',
+            id: 'id'
+           }, [
+           {name: 'id'},
            {name: 'ugc'},
            {name: 'name'},
            {name: 'status'},
            {name: 'issue'},
            {name: 'expire'}
-        ]
-    });
+          ])
+        });
+
+
+    var jstore = new Ext.data.Store({
+          root:'lsrs',
+          autoLoad:false,
+          proxy: new Ext.data.HttpProxy({
+                url: 'json-sbw-lsrs.php',
+                method: 'GET'
+          }),
+          reader:  new Ext.data.JsonReader({
+            root: 'lsrs',
+            id: 'id'
+           }, [
+           {name: 'id'},
+           {name: 'valid'},
+           {name: 'type'},
+           {name: 'magnitude'},
+           {name: 'city'},
+           {name: 'county'},
+           {name: 'remark'}
+          ])
+        });
+
+    var jstore2 = new Ext.data.Store({
+          root:'lsrs',
+          autoLoad:false,
+          proxy: new Ext.data.HttpProxy({
+                url: 'json-sbw-lsrs.php',
+                method: 'GET'
+          }),
+          reader:  new Ext.data.JsonReader({
+            root: 'lsrs',
+            id: 'id'
+           }, [
+           {name: 'id'},
+           {name: 'valid'},
+           {name: 'type'},
+           {name: 'magnitude'},
+           {name: 'city'},
+           {name: 'county'},
+           {name: 'remark'}
+          ])
+        });
+
 
 
     // create the Grid
     var grid = new Ext.grid.GridPanel({
-        id:'grid',
-        store: store,
+        id:'lsr-grid',
+        store: jstore,
         cm: new Ext.grid.ColumnModel([
             expander,
-            {id: 'i', header: "Time", sortable: true, dataIndex: 'Time'},
-            {header: "Type", sortable: true, dataIndex: 'Type'},
-            {header: "Magnitude", sortable: true, dataIndex: 'Magnitude'},
-            {header: "City", sortable: true, dataIndex: 'City'},
-            {header: "County", sortable: true, dataIndex: 'County'}
+            {header: "Time", sortable: true, dataIndex: 'valid'},
+            {header: "Type", sortable: true, dataIndex: 'type'},
+            {header: "Magnitude", sortable: true, dataIndex: 'magnitude'},
+            {header: "City", sortable: true, dataIndex: 'city'},
+            {header: "County", sortable: true, dataIndex: 'county'}
         ]),
         stripeRows: true,
         title:'Storm Reports within Polygon',
@@ -72,15 +101,15 @@ Ext.onReady(function(){
 
     // create the Grid
     var grid2 = new Ext.grid.GridPanel({
-        id:'grid2',
-        store: store2,
+        id:'all-lsr-grid',
+        store: jstore2,
         cm: new Ext.grid.ColumnModel([
             expander,
-            {id: 'i', header: "Time", sortable: true, dataIndex: 'Time'},
-            {header: "Type", sortable: true, dataIndex: 'Type'},
-            {header: "Magnitude", sortable: true, dataIndex: 'Magnitude'},
-            {header: "City", sortable: true, dataIndex: 'City'},
-            {header: "County", sortable: true, dataIndex: 'County'}
+            {header: "Time", sortable: true, dataIndex: 'valid'},
+            {header: "Type", sortable: true, dataIndex: 'type'},
+            {header: "Magnitude", sortable: true, dataIndex: 'magnitude'},
+            {header: "City", sortable: true, dataIndex: 'city'},
+            {header: "County", sortable: true, dataIndex: 'county'}
         ]),
         stripeRows: true,
         title:'All Storm Reports within Time Period',
@@ -91,10 +120,10 @@ Ext.onReady(function(){
 
     // create the Grid
     var grid3 = new Ext.grid.GridPanel({
-        id:'grid3',
-        store: store3,
+        id:'ugc-grid',
+        store: ustore,
         cm: new Ext.grid.ColumnModel([
-            {id: 'i', header: "UGC", width: 50, sortable: true, dataIndex: 'ugc'},
+            {header: "UGC", width: 50, sortable: true, dataIndex: 'ugc'},
             {header: "Name", width: 200, sortable: true, dataIndex: 'name'},
             {header: "Status", width: 50, sortable: true, dataIndex: 'status'},
             {header: "Issue", sortable: true, dataIndex: 'issue'},
@@ -109,8 +138,8 @@ Ext.onReady(function(){
 
     var tabs22 = new Ext.TabPanel({
         renderTo: 'displaytabs',
-        width:600,
-        height:500,
+        width:660,
+        height:520,
         plain:true,
         enableTabScroll:true,
         items:[
