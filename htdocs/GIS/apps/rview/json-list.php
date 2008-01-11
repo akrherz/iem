@@ -13,7 +13,7 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
 
- $sql = "select 0 as area, sumtxt( n.name || ' ['||n.state||'], ') as locations, eventid,
+ $sql = "select round(sum(area(transform(geom,2163)) / 1000000.0)::numeric,0) as area, sumtxt( n.name || ' ['||n.state||'], ') as locations, eventid,
          min(issue) as issued, max(expire) as expired from
         (select distinct ugc, eventid, issue, expire from warnings_$year
          WHERE wfo = '$wfo' and gtype = 'C' and
