@@ -148,7 +148,7 @@ Ext.onReady(function(){
         loadMask: {msg:'Loading Data...'},
         cm: new Ext.grid.ColumnModel([
             expander,
-            {header: "Time", sortable: true, dataIndex: 'valid'},
+            {header: "Time (UTC)", sortable: true, dataIndex: 'valid'},
             {header: "Event", width: 100, sortable: true, dataIndex: 'event'},
             {header: "Magnitude", sortable: true, dataIndex: 'magnitude'},
             {header: "City", width: 200, sortable: true, dataIndex: 'city'},
@@ -170,8 +170,8 @@ Ext.onReady(function(){
             {header: "UGC", width: 50, sortable: true, dataIndex: 'ugc'},
             {header: "Name", width: 200, sortable: true, dataIndex: 'name'},
             {header: "Status", width: 50, sortable: true, dataIndex: 'status'},
-            {header: "Issue", sortable: true, dataIndex: 'issue'},
-            {header: "Expire", sortable: true, dataIndex: 'expire'}
+            {header: "Issue (UTC)", sortable: true, dataIndex: 'issue'},
+            {header: "Expire (UTC)", sortable: true, dataIndex: 'expire'}
         ]),
         stripeRows: true,
         autoScroll:true,
@@ -201,10 +201,10 @@ function mySplitter(val) {
         width:640,
         loadMask: {msg:'Loading Data...'},
         cm: new Ext.grid.ColumnModel([
-          {header: "Event ID", renderer: myEventID, width: 60, sortable: true, dataIndex: 'eventid'},
-          {header: "Issued", width: 140, sortable: true, dataIndex: 'issued'},
-          {header: "Expired", width: 140, sortable: true, dataIndex: 'expired'},
-          {header: "Area", width: 50, sortable: true, dataIndex: 'area'},
+          {header: "Event", renderer: myEventID, width: 40, sortable: true, dataIndex: 'eventid'},
+          {header: "Issued (UTC)", width: 140, sortable: true, dataIndex: 'issued'},
+          {header: "Expired (UTC)", width: 140, sortable: true, dataIndex: 'expired'},
+          {header: "Area km**2", width: 70, sortable: true, dataIndex: 'area'},
           {header: "Locations", renderer: mySplitter, width: 250, sortable: true, dataIndex: 'locations'}
         ]),
         plugins: filters,
