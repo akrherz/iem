@@ -62,7 +62,9 @@ $x1 = $row["x1"] +$lpad; $x0 = $row["x0"]-$lpad;
 
 
 /* Now we fetch warning and perhaps polygon */
-$query2 = "SELECT *, astext(geom) as t from warnings_$year 
+$query2 = "SELECT *, astext(geom) as t, 
+           length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
+           from warnings_$year 
            WHERE wfo = '$wfo' and phenomena = '$phenomena' and 
            eventid = $eventid and significance = '$significance'";
 if ($significance == "W" && 
@@ -70,7 +72,7 @@ if ($significance == "W" &&
 {
   $query2 .= " and gtype = 'P'";
 }
-$result = pg_exec($connect, $query2 ." ORDER by updated DESC, gtype ASC");
+$result = pg_exec($connect, $query2 ." ORDER by sz DESC, updated DESC, gtype ASC");
 
 
 
