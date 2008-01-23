@@ -44,7 +44,7 @@ dbf.add_field("STATUS", dbflib.FTString, 3, 0)
 dbf.add_field("NWS_UGC", dbflib.FTString, 6, 0)
 
 sql = "SELECT *, astext(geom) as tgeom from warnings_%s WHERE \
-	issue >= '%s' and issue < '%s' \
+	issue >= '%s' and issue < '%s' and eventid < 10000 \
 	ORDER by issue ASC" % (sTS.year, sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M") )
 rs = mydb.query(sql).dictresult()
 
