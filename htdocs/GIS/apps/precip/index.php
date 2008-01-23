@@ -1,7 +1,8 @@
 <?php 
         $page = "gis";
         $TITLE = "IEM | Precipitation Analysis";
-include("/mesonet/php/include/header.php"); 
+include("../../config/settings.inc.php");
+include("$rootpath/include/header.php"); 
 ?>
 <b>Nav:</b> <a href="/GIS/">GIS</a> > IEM Precip Analysis
 
@@ -63,5 +64,5 @@ exceed 0.5 km, which is well within the uncertainty of NEXRAD grid itself.
 
 
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
 
