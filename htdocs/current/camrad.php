@@ -114,12 +114,13 @@ while (list($key, $val) = each($cameras))
    $pt->draw($map, $cp, $img, 0, $cameras[$key]['num'] );
    $pt->free();
 
-   $pt = ms_newPointObj();
-   $pt->setXY($lon, $lat, 0);
-   $cl2->label->set("angle",  (0 - $cdrct[$key]) + 90 );
-   $pt->draw($map, $cp, $img, 1, 'a' );
-   $pt->free();
-
+   if (array_key_exists($cdrct, $key)){ 
+     $pt = ms_newPointObj();
+     $pt->setXY($lon, $lat, 0);
+     $cl2->label->set("angle",  (0 - $cdrct[$key]) + 90 );
+     $pt->draw($map, $cp, $img, 1, 'a' );
+     $pt->free();
+   }
 }
 $d = date("m/d/Y h:i A", $radts);
 
