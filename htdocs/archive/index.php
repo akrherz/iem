@@ -43,6 +43,9 @@ then, only base reflectivity was saved.</li>
  <li><a href="/archive/data/">GIS NEXRAD Composites</a>
   <br />Composites of NEXRAD base reflectivity.  The raw files are found
    in the general IEM archive in the sub-directory called 'GIS/uscomp/'.</li>
+
+<li><a href="http://vortex.plymouth.edu/nids.html">Single Site NIDS Imagery</a>
+ <br />You can generate images from their online archive!</li>
 </ul>
 
 <h3>Satellite</h3>
