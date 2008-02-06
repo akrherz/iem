@@ -17,10 +17,10 @@ if ($id != "") {
 }
 
 $rs = pg_query($conn, $sql);
-header("Content-type: text/plain");
+//header("Content-type: text/plain");
 for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
 {
-  echo  $row["product"] ."\n";
+  echo "<pre>". $row["product"] ."</pre>\n";
 }
 
 ?>
