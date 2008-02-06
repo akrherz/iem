@@ -30,6 +30,7 @@ $vtec_phenomena = Array(
   'HU' => 'Hurricane',
   'HW' => 'High Wind',
   'HY' => 'Hydrologic',
+  'HZ' => 'Hard Freeze',
   'IS' => 'Ice Storm',
   'IP' => 'Sleet',
   'LB' => 'Lake Effect Snow and Blowing Snow',
