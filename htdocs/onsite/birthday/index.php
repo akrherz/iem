@@ -8,10 +8,7 @@ include("$rootpath/include/header.php");
 <BR>
 
 <?php
-	if (! isset($_GET["startYear"]) )
-	{
-		$startYear = "1951";
-	}
+$startYear = isset($_GET['startYear']) ? $_GET['startYear']: 1951;
 
 	include("$rootpath/include/COOPstations.php");		
 ?>
