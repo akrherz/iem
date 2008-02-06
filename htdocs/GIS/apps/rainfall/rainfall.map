@@ -52,7 +52,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME month_rainfall
 	DUMP TRUE
-  CONNECTION "user=nobody dbname=wepp host=10.10.10.20"
+  CONNECTION "user=nobody dbname=wepp host=iem20"
   DATA  "the_geom from (select d.oid as oid, d.rainfall / 25.4 as da, h.the_geom from monthly_rainfall_2004 d left join hrap_polygons h using (hrap_i) WHERE d.valid = '2004-06-01') as foo using unique oid using srid=26915"
   STATUS ON
   TYPE POLYGON

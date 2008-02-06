@@ -73,7 +73,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME sites
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=10.10.10.20"
+  CONNECTION "user=nobody dbname=iem host=iem20"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, station, 
     oid from current WHERE (valid > CURRENT_TIMESTAMP - '2 hours'::interval)
