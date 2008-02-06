@@ -101,7 +101,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME dcp
-  CONNECTION "user=akrherz dbname=mesosite host=10.10.10.20"
+  CONNECTION "user=akrherz dbname=mesosite host=iem20"
   DATA "geom from stations"
   FILTER "network ~* 'DCP'"
 #  FILTER "id ~* 'ICLI4'"
