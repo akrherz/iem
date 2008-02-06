@@ -6,7 +6,7 @@ if (strlen($loop) == "Yes") $loop = 1;
 <html>
 <head>
   <title>IEM GIS | RADAR & NWS Warnings</title>
-  <link rel="stylesheet" type="text/css" href="/css/mesonet.css">
+  <link rel="stylesheet" type="text/css" href="/css/main.css">
   <meta http-equiv="refresh" content="600; URL=iawarn.php?site=<?php echo $site; ?>&loop=<?php echo $loop; ?>">
 </head>
 <?php
