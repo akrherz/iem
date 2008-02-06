@@ -23,7 +23,7 @@
           $title = $row["title"];
           $ahref = $row["ahref"];
 
-	  $fileL = $rootpath . $ahref ;
+	  $fileL = $rootpath ."htdocs/". $ahref ;
 
 	  $fileInfo = stat( $fileL );
 	  $suffix = substr( $fileL, -3 );
