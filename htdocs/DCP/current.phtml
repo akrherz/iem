@@ -61,7 +61,8 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 $db = aSortBySecondIndex($db, $sortcol);
 
 $cols = Array("ts" => "Valid", "sid" => "Site ID", "sname" => "Station Name",
-  "tmpf" => "Air Temperature", "phour" => "Rainfall One Hour", "rstate" => "Stage");
+  "tmpf" => "Air Temperature", "phour" => "Rainfall One Hour", 
+  "rstate" => "Stage", "pday" => "Today's Precip");
 ?>
 
 <?php $current_network = "DCP"; include("$rootpath/include/current_bar.inc.php"); ?>
