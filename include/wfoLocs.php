@@ -55,6 +55,7 @@ $wfos = Array(
  "HFO" => array("city" => "HONOLULU", "lat" => 21.3, "lon" => -157.81),
  "HGX" => array("city" => "HOUSTON/GALVESTON", "lat" => 29.47, "lon" => -95.07),
  "HNX" => array("city" => "SAN_JOAQUIN_VALLEY/HANFORD", "lat" => 36.31, "lon" => -119.63),
+ "HUN" => array("city" => "Huntsville", "lat" => 34.72, "lon" => -86.65),
  "ICT" => array("city" => "WICHITA", "lat" => 37.65, "lon" => -97.44),
  "ILM" => array("city" => "WILMINGTON", "lat" => 34.27, "lon" => -77.91),
  "ILN" => array("city" => "WILMINGTON", "lat" => 39.42, "lon" => -83.82),
