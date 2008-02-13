@@ -18,7 +18,7 @@ $cameras = Array(
     "state" => "IA", "network" => "KCCI",
     "ip" => "216.203.109.40", "county" => "Carroll", "port" => "80"),
 "KCCI-022" => Array("sts" => mktime(14,0,0,6, 11,2006), "ets" => time(),
-    "name" => "Chariton", "removed" => False, "active" => True, "lat" => 41.02, "lon" => -93.31,
+    "name" => "Chariton", "removed" => False, "active" => False, "lat" => 41.02, "lon" => -93.31,
     "state" => "IA", "network" => "KCCI",
     "ip" => "69.66.60.199", "county" => "Lucas", "port" => "80"),
 "KCCI-023" => Array("sts" => mktime(13,0,0,6, 27,2006), "ets" => time(),
