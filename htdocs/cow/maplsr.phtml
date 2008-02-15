@@ -33,6 +33,7 @@ else $ma = "00";
 $m = $ma;
 $basets = mktime($hour, $m, 0, $month, $day, $year);
 
+$use_sbw = ($basets > mktime(0,0,0,10,1,2007)) ? 1 : 0;
 
 
 dl($mapscript);
@@ -68,10 +69,14 @@ $clc0s0->outlinecolor->setRGB(0,0,0);
 $c0 = $map->getlayerbyname("warnings0_c");
 $c0->set("connection", $_DATABASES["postgis"]);
 $c0->set("status", 1);
-$c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$tsSQL' and issue <= '$tsSQL' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+if ($use_sbw){
+  $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$tsSQL' and issue <= '$tsSQL' and gtype = 'C' and phenomena NOT IN ('TO','SV','MA') ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+  $p0 = $map->getlayerbyname("sbw");
+} else {
+  $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$tsSQL' and issue <= '$tsSQL' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+  $p0 = $map->getlayerbyname("warnings0_p");
+}
 
-
-$p0 = $map->getlayerbyname("warnings0_p");
 $p0->set("connection", $_DATABASES["postgis"]);
 $p0->set("status", 1);
 $p0->set("data", "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$tsSQL' and issue <= '$tsSQL' and gtype = 'P') as foo using unique oid using SRID=4326");
