@@ -1,6 +1,7 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/lsrs.php");
 /* Map warnings and a LSR */
 include("../GIS/apps/rview/lib.php");
 
@@ -39,8 +40,8 @@ dl($mapscript);
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 
 $map->setProjection("proj=latlong");
-$map->set("width", 450);
-$map->set("height", 450);
+$map->set("width", 640);
+$map->set("height", 480);
 $lpad = 0.50;
 $map->setextent($lon0 - $lpad,
                 $lat0 - $lpad,
@@ -75,15 +76,9 @@ $p0->set("connection", $_DATABASES["postgis"]);
 $p0->set("status", 1);
 $p0->set("data", "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$tsSQL' and issue <= '$tsSQL' and gtype = 'P') as foo using unique oid using SRID=4326");
 
-
-$lsrs = $map->getlayerbyname("lsrs");
-$lsrs->set("connection", $_DATABASES["postgis"]);
-$lsrs->set("status",1);
-$lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_${year} WHERE valid = '$tsSQL') as foo USING unique k USING SRID=4326");
-
 $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets) ."GIS/uscomp/n0r_". date('YmdHi', $basets) .".png";
 if (! is_file($fp))
-    echo "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
+    $errors = "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
 $radfile = $fp;
 
 
@@ -100,9 +95,73 @@ $radar->draw($img);
 $clayer->draw( $img );
 $c0->draw($img);
 $p0->draw($img);
-$lsrs->draw($img);
 
-mktitle($map, $img, "                  IEM NEXRAD Base Reflect: $d UTC");
+/* We are going to manually draw the LSRs, sigh... */
+$llayer = ms_newLayerObj($map);
+$llayer->set("status", MS_ON);
+$llayer->set("type", MS_LAYER_POINT);
+$llayer->setProjection("init=epsg:4326");
+$llayer->set("labelcache", MS_ON);
+
+$datalc0 = ms_newClassObj($llayer);
+$datalc0->label->color->setrgb(255,255,0);
+$datalc0->label->set("type", MS_TRUETYPE);
+$datalc0->label->set("font", "arial");
+$datalc0->label->set("size", 12);
+$datalc0->label->set("force", MS_TRUE);
+$datalc0->label->set("partials", MS_TRUE);
+$datalc0->label->set("antialias", MS_TRUE);
+$datalc0->label->set("position", MS_LC);
+$datalc0->label->set("angle", 0);
+
+$datalc0s1 = ms_newStyleObj($datalc0);
+$datalc0s1->color->setrgb(255,255,0);
+$datalc0s1->set("symbolname", "circle");
+$datalc0s1->set("size", 7);
+$datalc0s0 = ms_newStyleObj($datalc0);
+$datalc0s0->color->setrgb(0,0,0);
+$datalc0s0->set("symbolname", "circle");
+$datalc0s0->set("size", 4);
+
+$minx = $map->extent->minx;
+$maxx = $map->extent->maxx;
+$dx = ($maxx - $minx) / 640;
+$miny = $map->extent->miny;
+$maxy = $map->extent->maxy;
+$dy = ($maxy - $miny) / 480;
+
+$pgconn = iemdb("postgis");
+$sql = "select distinct source,typetext,remark, x(geom) as lon, y(geom) as lat, 
+        city, magnitude, valid, geom, type as ltype from lsrs_${year} 
+        WHERE valid = '$tsSQL' and
+        geom && GeometryFromText('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))')";
+$rs = pg_exec($pgconn, $sql);
+$IMAGEMAP = "";
+for ($i=0;$row = @pg_fetch_array($rs,$i); $i++)
+{
+   $pt = ms_newPointObj();
+   $pt->setXY($row["lon"], $row["lat"], 0);
+   $pt->draw($map, $llayer, $img, 0, $row["city"] );
+   $pt->free();
+   $imgx = intval(($row["lon"] - $minx) / $dx);
+   $imgy = intval(($maxy - $row["lat"]) / $dy);
+   $IMAGEMAP .= "<area onMouseover=\"ddrivetip('<b>Event:</b> ". $row['typetext'] ."<br /><b>Magnitude:</b> ". $row['magnitude'] ."<br /><b>Source:</b> ". $row['source'] ."<br /><b>Remark:</b> ". $row['remark'] ."','yellow', 200)\" onMouseout=\"hideddrivetip()\" shape=\"circle\" coords=\"$imgx,$imgy,10\">";
+}
+
+$bar640t = $map->getLayerByName("bar640t");
+$bar640t->set("status", 1);
+$bar640t->draw($img);
+
+$tlayer = $map->getLayerByName("bar640t-title");
+$point = ms_newpointobj();
+$point->setXY(80, 12);
+$point->draw($map, $tlayer, $img, 0,"NEXRAD Base Reflectivity & Storm Reports");
+$point->free();
+$point = ms_newpointobj();
+$point->setXY(80, 28);
+$point->draw($map, $tlayer, $img, 1,"$d UTC");
+$point->free();
+
 $map->drawLabelCache($img);
 mklogolocal($map, $img);
 
@@ -110,4 +169,112 @@ $url = $img->saveWebImage();
 
 
 ?>
-<img src="<?php echo $url; ?>">
+<?php 
+$TITLE = "Local Storm Reports";
+include("$rootpath/include/header.php"); 
+?>
+<style type="text/css">
+#dhtmltooltip{
+position: absolute;
+width: 150px;
+border: 2px solid black;
+padding: 2px;
+background-color: lightyellow;
+visibility: hidden;
+z-index: 100;
+}
+</style>
+<div id="dhtmltooltip"></div>
+
+<script type="text/javascript">
+
+/***********************************************
+* Cool DHTML tooltip script- 
+* © Dynamic Drive DHTML code library (www.dynamicdrive.com)
+* This notice MUST stay intact for legal use
+* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code
+***********************************************/
+
+var offsetxpoint=-60 //Customize x offset of tooltip
+var offsetypoint=20 //Customize y offset of tooltip
+var ie=document.all
+var ns6=document.getElementById && !document.all
+var enabletip=false
+if (ie||ns6)
+var tipobj=document.all? document.all["dhtmltooltip"] : document.getElementById? document.getElementById("dhtmltooltip") : ""
+
+function ietruebody(){
+return (document.compatMode && document.compatMode!="BackCompat")? document.documentElement : document.body
+}
+
+function ddrivetip(thetext, thecolor, thewidth){
+if (ns6||ie){
+if (typeof thewidth!="undefined") tipobj.style.width=thewidth+"px"
+if (typeof thecolor!="undefined" && thecolor!="") tipobj.style.backgroundColor=thecolor
+tipobj.innerHTML=thetext
+enabletip=true
+return false
+}
+}
+
+function positiontip(e){
+if (enabletip){
+var curX=(ns6)?e.pageX : event.clientX+ietruebody().scrollLeft;
+var curY=(ns6)?e.pageY : event.clientY+ietruebody().scrollTop;
+//Find out how close the mouse is to the corner of the window
+var rightedge=ie&&!window.opera? ietruebody().clientWidth-event.clientX-offsetxpoint : window.innerWidth-e.clientX-offsetxpoint-20
+var bottomedge=ie&&!window.opera? ietruebody().clientHeight-event.clientY-offsetypoint : window.innerHeight-e.clientY-offsetypoint-20
+
+var leftedge=(offsetxpoint<0)? offsetxpoint*(-1) : -1000
+
+//if the horizontal distance isn't enough to accomodate the width of the context menu
+if (rightedge<tipobj.offsetWidth)
+//move the horizontal position of the menu to the left by it's width
+tipobj.style.left=ie? ietruebody().scrollLeft+event.clientX-tipobj.offsetWidth+"px" : window.pageXOffset+e.clientX-tipobj.offsetWidth+"px"
+else if (curX<leftedge)
+tipobj.style.left="5px"
+else
+//position the horizontal position of the menu where the mouse is positioned
+tipobj.style.left=curX+offsetxpoint+"px"
+
+//same concept with the vertical position
+if (bottomedge<tipobj.offsetHeight)
+tipobj.style.top=ie? ietruebody().scrollTop+event.clientY-tipobj.offsetHeight-offsetypoint+"px" : window.pageYOffset+e.clientY-tipobj.offsetHeight-offsetypoint+"px"
+else
+tipobj.style.top=curY+offsetypoint+"px"
+tipobj.style.visibility="visible"
+}
+}
+
+function hideddrivetip(){
+if (ns6||ie){
+enabletip=false
+tipobj.style.visibility="hidden"
+tipobj.style.left="-1000px"
+tipobj.style.backgroundColor=''
+tipobj.style.width=''
+}
+}
+
+document.onmousemove=positiontip
+
+</script>
+
+<h3 class="heading">Local Storm Report Viewer</h3>
+<div id="mytabs"></div>
+
+<table cellpadding="5" cellspacing="0">
+<tr><td>
+
+<div id="map">
+<img src="<?php echo $url; ?>" usemap="#mymap" border="1">
+<map name="mymap"><?php echo $IMAGEMAP; ?></map>
+<br /><b><i>Place your mouse over the observation point for more details.</i></b>
+</div>
+
+</td><td valign="top">
+<p><strong>NWS Warning Legend:</strong><br /><br />
+<img src="<?php echo $rooturl; ?>/GIS/apps/rview/static/warnings_legend.png">
+</td></tr></table>
+
+<?php include("$rootpath/include/footer.php"); ?>
