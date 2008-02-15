@@ -588,6 +588,14 @@ LAYER
         SIZE    3
         SYMBOL  'circle'
     END
+    # Marine Statement?
+    CLASS
+        NAME "Marine Statement"
+        EXPRESSION ('[phenomena]' = 'MA' and '[significance]' = 'S')
+        COLOR   0 200 0
+        SIZE    3
+        SYMBOL  'circle'
+    END
 END
 
 LAYER
@@ -892,6 +900,55 @@ LAYER
   END
 END
 
+# Bar Header Bar!
+LAYER
+  NAME bar640t
+  TYPE POLYGON
+  TRANSFORM FALSE
+  STATUS OFF
+  FEATURE
+    POINTS 0 0 0 36 640 36 640 0 0 0 END
+  END
+  TRANSPARENCY 70
+  LABELCACHE FALSE
+  CLASS
+    COLOR 0 0 0
+  END
+END
+
+# Credits
+LAYER
+  NAME "bar640t-title"
+  TYPE ANNOTATION
+  STATUS OFF
+  TRANSFORM FALSE
+  CLASS
+    NAME 's14y'
+    LABEL
+      COLOR 255 255 0
+      TYPE TRUETYPE
+      SIZE 14
+      FONT 'arial'
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+      BUFFER 2
+    END
+  END
+  CLASS
+    NAME 's12w'
+    LABEL
+      COLOR 255 255 255
+      TYPE TRUETYPE
+      SIZE 12
+      FONT 'arial'
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+      BUFFER 2
+    END
+  END
+END
 
 # Credits
 LAYER
