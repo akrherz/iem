@@ -117,7 +117,8 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
  $baseurl = "current.phtml?network=$network&shef=$shef&sortcol=";
 ?>
 <form name="st" action="/my/current.phtml" method="GET">
-<table style="width: 100%; font-size: 10pt;" class="ruler">
+<table cellspacing="0" cellpadding="2" border="1"
+       style="width: 100%; font-size: 10pt;" class="ruler">
 <thead>
 <tr>
   <th rowspan=2>Add:</th>
@@ -162,7 +163,7 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
    }
 
    if ( date("Ymd") != date("Ymd", $value["ts"]) ){
-     echo "<td colspan=\"6\">No report for today</td>";
+     echo "<td colspan=\"7\">No report for today</td>";
      continue;
    }
 
@@ -176,6 +177,7 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
    if ($value["pday"] == 0.0001) $value["pday"] = "T";
    if ($value["pday"] < 0) $value["pday"] = "M";
    if ($value["snow"] == 0.0001) $value["snow"] = "T";
+   if ($value["snowd"] == 0.0001) $value["snowd"] = "T";
    if ($value["snow"] < 0) $value["snow"] = "M";
 
    echo "<td>". $value["pday"] ."</td>";
@@ -198,19 +200,18 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
 ?>
 </tbody><tfoot>
 <tr>
- <td colspan=5>&nbsp;</td>
+ <td colspan=6>&nbsp;</td>
 <?php $c = "javascript:new_window('$rooturl/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network&var="; ?>
  <td><a href="<?php echo $c; ?>max_tmpf');">Plot</a></td>
  <td><a href="<?php echo $c; ?>min_tmpf');">Plot</a></td>
  <td><a href="<?php echo $c; ?>pday');">Plot</a></td>
  <td><a href="<?php echo $c; ?>snow');">Plot</a></td>
+ <td></td>
  <td><a href="<?php echo $c; ?>snowd');">Plot</a></td>
 </tr></tfoot>
-
-<?php
- echo "</table>";
- echo "<input type=\"submit\" value=\"Add to Favorites\">\n</form>";
-?>
+</table>
+<input type="submit" value="Add to Favorites">
+</form>
 </div>
 
 <?php include("$rootpath/include/footer.php");
