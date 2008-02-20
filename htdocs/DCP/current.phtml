@@ -41,7 +41,9 @@
     $db[$site]['phour'] = $iemob->db["phour"];
   $db[$site]['ts'] = $iemob->ts;
   $db[$site]['sid'] = $site;
-  $db[$site]['pday'] = $iemob->db["pday"];
+  $db[$site]['pday'] = "";
+  if ($iemob->db["pday"] != -99)
+    $db[$site]['pday'] = $iemob->db["pday"];
   $db[$site]['raw'] = $iemob->db["raw"];
    $db[$site]['rstage'] = "";
   if ($iemob->db["rstage"] > 0)
@@ -82,7 +84,7 @@ $cols = Array("ts" => "Valid", "sid" => "Site ID", "sname" => "Station Name",
 echo "<p>Sorted by: ". $cols[$sortcol] ;
  $baseurl = "current.phtml?shef=$shef&sortcol=";
 ?>
-<table style="width: 100%; font-size: 10pt;" class="ruler">
+<table style="width: 100%; font-size: 10pt;" cellpadding="2" border="1" cellspacing="0">
 <thead>
 <tr>
   <th><a href="<?php echo $baseurl; ?>sid">SiteID:</a></th>
