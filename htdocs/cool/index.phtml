@@ -1,6 +1,8 @@
 <?php
+  include('youtube.class.php');
 include("../../config/settings.inc.php");
 $TITLE = "IEM | Cool Stuff";
+$THISPAGE = "webcam-cool";
 include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">IEM Cool Stuff</h3>
@@ -12,7 +14,6 @@ a listing of cool stuff as rated by IEM users.</p>
 <?php
 
   // include the youtube class and instantiate it with the object $yt
-  include('youtube.class.php');
   $yt = new youtube();
   $yt->set('per_page', 5);
   $res = $yt->videos('akrherz');
@@ -274,48 +275,6 @@ Webcamera</b></th></tr></thead>
 <td valign="top"><br />This tornado was caught by the Webster City webcamera that is a part of <a href="/schoolnet/">KCCI's SchoolNet project</a>.  The movie is taken looking
 far south and a bit west.<br /><br /><a href="../onsite/lapses/webstercity_040611_full.mpg">View MPG (3
 MB)</a></td></tr><tbody></table></div>
-
-<h3 class="subtitle">Applications and GIS Products:</h3>
-
-<br clear="left" />
-<p><div class="iem-form">
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>IEM Freeze</b></th></tr></thead>
-<tbody><tr><td><br /><img src="<?php echo $rooturl; ?>/cool/images/freeze_031215.png" width="300" height="230"></td>
-<td valign="top"><br />IEM Freeze is an application that lets you quickly evaluate air and pavement
-temperatures, along with concurrent radar observations of precipitation.<br
-/><br /><a
-href="<?php echo $rooturl; ?>/GIS/apps/iem/freeze.phtml">IEM Freeze Application</a></td></tr></tbody></table></div>
-
-<br clear="left" />
-<p><div class="iem-form">
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>RWIS Pavement Temperatures</b></th></tr></thead>
-<tbody><tr><td><br /><img src="<?php echo $rooturl; ?>/cool/images/rwispaveplot.png" width="300"
-height="270"></td>
-<td valign="top"><br />The RWIS Pavement Temperature Time Series application
-allows you to plot current or historical time series data of pavement
-temperature, bridge temperature, air temperature, etc. all in one meteogram for
-any RWIS site in Iowa.<br
-/><br /><a
-href="<?php echo $rooturl; ?>/plotting/rwis/sf_fe.php">Pavement Temperature Time Series
-Application</a></td></tr></tbody></table></div>
-
-<br clear="left" />
-<p><div class="iem-form">
-<table width="100%"><thead>
-<tr><th colspan="2" align="left"><b>1-Minute Time Series Plots</b></th></tr></thead>
-<tbody><tr><td><br /><img src="<?php echo $rooturl; ?>/cool/images/snettimeseries.png" width="250"
-height="120"></td>
-<td valign="top"><br />Here you can get current and historical temperature, wind
-speed/direction, and pressure time series plots for any Schoolnet or AWOS site
-in Iowa.<br
-/><br /><a
-href="<?php echo $rooturl; ?>/plotting/snet/1station_1min.php">Plotting for Schoolnet</a><br
-/><br />
-
-<a
-href="<?php echo $rooturl; ?>/plotting/awos/1station_1min.php">Plotting for AWOS</a></td></tr></tbody></table></div>
 
 <!-- Begin the bottom of the page -->
 
