@@ -37,9 +37,10 @@ $_pages = Array(
  ),
  "current" => Array(
     "base" => Array("title" => "Current", "url" => "/current/"),
+    "advanced" => Array("title" => "Advanced Products", "url" => "/current/misc.phtml"),
+    "sort" => Array("title" => "Sortable Currents", "url" => "/my/current.phtml"),
     "surface" => Array("title" => "Surface Data", "url" => "/current/"),
     "radar" => Array("title" => "RADAR & Satellite", "url" => "/current/radar.phtml"),
-    "advanced" => Array("title" => "Advanced Products", "url" => "/current/misc.phtml"),
  ),
  "climatology" => Array(
     "base" => Array("title" => "Climatology", "url" => "/climate/"),
