@@ -43,16 +43,15 @@ html, body, h2, h3, h4, div, p, ul, li, input {
   width: 500px;
 }
 #iem-header-title h3 {
-	margin-top: 0px;
-	margin-left: 0px;
-	margin-bottom: 0px;
+	margin: 0px;
+	padding: 0px;
     color: #f6f623;
+    font-size: 1em;
 }
 #iem-header-title h4 {
-	margin-top: 0px;
-	margin-left: 0px;
-	margin-bottom: 0px;
+	margin: 0px;
     color: #f6f623;
+    font-size: 1em;
 }
 #iem-header-logo {
 	position: absolute;
