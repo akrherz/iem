@@ -37,6 +37,7 @@ include("$rootpath/include/header.php"); ?>
   $db[$site]['ts'] = $iemob->ts;
   $db[$site]['sid'] = $site;
   $db[$site]['sname'] = $iemob->db["sname"];
+  $db[$site]['network'] = $iemob->db["network"];
   $db[$site]['raw'] = $iemob->db["raw"];
   $db[$site]['county'] = $cities[$site]["county"];
   if ( date("Ymd") != date("Ymd", $iemob->ts) ){
@@ -145,6 +146,7 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
  $oddrow = true;
  $now = time();
  while (list($site, $value) = each($db) ){
+   $network = $value["network"];
    $oddrow = ! $oddrow;
    $tdiff = $now - $value["ts"];
    if ( intval( date("Y", $value["ts"]) ) < 2003 ) continue;
@@ -152,7 +154,7 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
    echo "<tr ";
    if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
    echo "><th><input type=\"checkbox\" name=\"st[]\"
-   value=\"".$site."\"></th><td> $site </td>
+   value=\"".$site."\"></th><td><a href=\"cat.phtml?station=$site&network=$network\">$site</a> </td>
     <td>". $value["sname"] ."</td>
     <td>". $value["county"] ."</td>";
    echo "<td ";
