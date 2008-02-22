@@ -19,8 +19,7 @@ html, body, h2, h3, h4, div, p, ul, li, input {
 	width: 100%;
 }
 #iem-header {
-	/* border-bottom: 1px #000 solid;*/
-  height: 70px;
+  height: 130px;
   width: 100%;
 }
 #iem-header:after {
@@ -33,7 +32,7 @@ html, body, h2, h3, h4, div, p, ul, li, input {
     }
 
     /* Holly Hack Targets IE Win only \*/
-    * html #iem-header {height: 70px;}
+    * html #iem-header {height: 130px;}
     /* End Holly Hack */
 
 #iem-header-title{
