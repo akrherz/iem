@@ -1,6 +1,6 @@
 <?php 
     include("../../config/settings.inc.php");
-	$page = "current";
+	$THISPAGE = "current-radar";
 	$TITLE = "IEM | Current RADAR Page";
 	$HEADEXTRA = '<script language="JavaScript">
 
@@ -12,11 +12,8 @@ function changeSite(newSite, newSname) {
 } // End of changeSite
 
 </script>';
-	include("$rootpath/include/header.php"); 
+include("$rootpath/include/header.php");
 ?>
-
-
-<?php $THISPAGE = "radar"; include("headerbar.phtml"); ?>
 
 
 <div id="iem-radar"><div class="text">
