@@ -48,11 +48,11 @@ reset($cameras);
 	$TITLE = "IEM | Web Cameras";
 if (! $isarchive)
 	$REFRESH = "<meta http-equiv=\"refresh\" content=\"300;\">";
+    $THISPAGE = "webcam-still";
 	include("$rootpath/include/header.php"); 
 	include("$rootpath/include/forms.php"); 
 ?>
 
-<?php $THISPAGE = "camera"; include("headerbar.phtml"); ?>
 
 <div style="background: #bdf; padding: 3px;">
 <strong>Webcam Networks</strong> &nbsp; <a href="camera.phtml?network=KCCI">KCCI-TV Des Moines, IA</a> &nbsp; <a href="camera.phtml?network=KELO">KELO-TV Sioux Falls, SD</a>
