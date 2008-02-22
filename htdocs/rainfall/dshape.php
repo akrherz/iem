@@ -1,5 +1,6 @@
 <?php
  /* Download .zip files of rainfall estimates! */
+include("../../config/settings.inc.php");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", time() - 86400);
 $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time() - 86400);
@@ -9,11 +10,11 @@ $geometry = isset($_GET["geometry"]) ? $_GET["geometry"] : "point";
 
 $ts = mktime(0,0,0,$month, $day, $year);
 
-chdir("/mesonet/www/html/tmp");
+chdir("/var/www/htdocs/tmp");
 $dir = date("Y/m", $ts);
 $fp = sprintf("%s_rain", date("Ymd", $ts));
 
-`cp /wepp/data/rainfall/shape/daily/${dir}/${fp}.dbf .`;
+`cp /mnt/a1/wepp/rainfall/shape/daily/${dir}/${fp}.dbf .`;
 `cp /wepp/GIS/static/hrap_${geometry}_${epsg}.shp ${fp}.shp`;
 `cp /wepp/GIS/static/hrap_${geometry}_${epsg}.shx ${fp}.shx`;
 `cp /mesonet/data/gis/meta/${epsg}.prj ${fp}.prj`;
