@@ -1,6 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
-$page = "archive";
+$THISPAGE = "archive-main";
 $TITLE = "IEM | Archived Data Resources";
 include("$rootpath/include/header.php"); ?>
 
