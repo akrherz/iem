@@ -14,9 +14,9 @@
  <?php if (isset($HEADEXTRA)){ echo $HEADEXTRA;} ?>
 </head>
 <body <?php if (isset($BODYEXTRA)){ echo $BODYEXTRA;} ?>>
-<?php include("$rootpath/include/webring.html"); ?>
 <div id="iem-main">
 <div id="iem-header">
+<?php include("$rootpath/include/webring.html"); ?>
 <div id="iem_header_logo">
 <a href="<?php echo $rooturl; ?>/"><img src="<?php echo $rooturl; ?>/images/logo_small.gif" alt="IEM" /></a>
 </div>
