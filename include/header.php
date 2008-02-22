@@ -65,6 +65,7 @@ $_pages = Array(
  ),
  "gis" => Array(
     "base" => Array("title" => "GIS", "url" => "/GIS/"),
+    "ogc" => Array("title" => "OGC Webservices", "url" => "/ogc/"),
  ),
  "severe" => Array(
     "base" => Array("title" => "Severe Weather", "url" => "/current/severe.phtml"),
