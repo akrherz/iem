@@ -2,7 +2,6 @@
 <a href="http://www.schoolnet8.com/">KCCI SchoolNet</a> has been 
 able to place a network of over 20 web cameras in Central Iowa.   
 
-<br /><strong>Tools:</strong> <a href="camlapse/">View recent movies</a> &nbsp; <a href="http://www.schoolnet8.com/camera/bloop.phtml">Generate lapses from archive</a> &nbsp; <a href="http://www.schoolnet8.com/camera/viewer.phtml">View higher resolution images</a></p>
 
 <form method="GET" action="camera.phtml">
 <input type="hidden" value="<?php echo $network; ?>" name="network"> 

@@ -125,7 +125,7 @@ $HEADEXTRA .= "</script>";
 
 if ($autopilot) $BODYEXTRA = "onLoad=\"handsOff2();\"";
 ?>
-<?php include("$rootpath/include/header.php");?>
+<?php $THISPAGE = "severe-interact"; include("$rootpath/include/header.php");?>
 <form style="display: inline;" method="GET" name="myform" action="<?php echo $baseuri; ?>">
 <input type="hidden" value="<?php echo $autopilot; ?>" name="autopilot">
 <input type="hidden" value="<?php echo $site; ?>" name="osite">
@@ -137,7 +137,7 @@ if ($autopilot) $BODYEXTRA = "onLoad=\"handsOff2();\"";
 
 
 <div id="blankspace" style="width: 640px; height: 480px; position: absolute; z-index: 1;">&nbsp;</div>
-<div id="datawindow" style="background: #eee; position: absolute; left: 5px; top: 120px; width: <?php echo ($width + 250); ?>px; z-index: 2;">
+<div id="datawindow" style="background: #eee; position: absolute; left: 5px; top: 130px; width: <?php echo ($width + 250); ?>px; z-index: 2;">
 <input type="submit" value="Layers" style="background: #73FA4D;" onClick="javascript: showControl('layers-control'); return false;">
 <input type="submit" value="Locations" style="background: #F2FE5A;" onClick="javascript: showControl('locations-control'); return false;">
 <input type="submit" value="Time" style="background: #FF5EC4;" onClick="javascript: showControl('time-control'); return false;">
