@@ -1,7 +1,7 @@
 <?php 
 include("../../config/settings.inc.php");
 include('switchtv.php');
-  $page = 'snet';
+$THISPAGE = 'networks-schoolnet';
   $TITLE = "IEM | School Network";
 include("$rootpath/include/header.php"); 
 ?>
