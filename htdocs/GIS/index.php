@@ -1,6 +1,7 @@
 <?php
 include("../../config/settings.inc.php");
 $TITLE = "IEM | GIS Homepage";
+$THISPAGE = "gis";
 include("$rootpath/include/header.php"); ?>
 
 

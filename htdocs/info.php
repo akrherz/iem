@@ -1,6 +1,7 @@
 <?php
 include("../config/settings.inc.php");
 $TITLE = "IEM | Information";
+$THISPAGE = "info-";
 include("$rootpath/include/header.php"); ?>
 
 
