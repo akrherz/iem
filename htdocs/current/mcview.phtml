@@ -122,6 +122,7 @@ function switchToArchiveMode()
 </script>";
   if ($mode == "realtime") $REFRESH = "<meta http-equiv=\"refresh\" content=\"300; URL=$uri?java=$java&frames=$frames&interval=$interval&prod=$prod\">";
   $TITLE = "Current & Historical IEM NEXRAD Composite Loop";
+  $THISPAGE = "current-radar";
   include("$rootpath/include/header.php");
 ?>
 <a href="<?php echo $rooturl; ?>/current/">Current Data</a> &nbsp; <b>></b> &nbsp; <b>IEM NEXRAD Composite</b>
