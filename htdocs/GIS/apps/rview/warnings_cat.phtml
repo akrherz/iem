@@ -214,23 +214,20 @@ echo "</td></tr></table>
 <p>&nbsp;<br />
 
 <div id=\"tabs1\" style=\"height: 600px;\">
-<div class=\"x-tab\" title=\"Issuance\">
-<p><pre>". str_replace("\001", "", $row["report"]) ."</pre></p>
-</div>";
+<div class=\"x-tab\" title=\"Issuance\"><pre>". htmlspecialchars( str_replace("\001", "", $row["report"]) ) ."</pre></div>\n";
 
 
-$lsvs = str_replace("\001", "", $row["report"]);
+$lsvs = htmlspecialchars( str_replace("\001", "", $row["report"]) );
 $q = 1;
 if (strlen($row["svs"]) > 0 ) 
 {
   $parts = explode('__', $row["svs"]);
   for ($i=1;$i<(sizeof($parts) - 1);$i++)
   {
-     $svs = str_replace("\001", "", $parts[$i]);
+     $svs = htmlspecialchars( str_replace("\001", "", $parts[$i]) );
      if ($svs == $lsvs) continue;
      $lsvs = $svs;
-     echo "<div class=\"x-tab\" title=\"Update $q\"><p><pre>${svs}</pre></p></div>\n";
-    // $js .= ",\n{contentEl:'svs${q}', title: 'Update ${q}'}";
+     echo "<div class=\"x-tab\" title=\"Update $q\"><pre>${svs}</pre></div>\n";
      $q += 1;
   }
 }
@@ -299,6 +296,6 @@ if (pg_numrows($result) == 0) {
 echo "});
 -->
 </script>";
-
+echo "<form id=\"my-form-id\" action=\"d.php\" method=\"post\" target=\"_new\"></form>";
 include("$rootpath/include/footer.php");
 ?>

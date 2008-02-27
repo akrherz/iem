@@ -237,7 +237,28 @@ function mySplitter(val) {
         applyTo: 'tabs1',
         id:'text-display',
         width:800,
-        defaults:{autoHeight: true},
+        defaults:{
+          autoHeight: true
+        },
+        tbar: [{
+            id: 'print',
+            text: 'View Text in New Window & Print',
+            handler: function(e, target){
+              a = tabs.getActiveTab();
+              var myForm = new Ext.form.BasicForm("my-form-id", {
+                standardSubmit:true
+              });
+              myForm.getEl().createChild({
+                 tag: 'input', 
+                 type: 'hidden', 
+                 name: 'data',
+                 id:'data',
+                 value: a.getEl().dom.childNodes[0].innerHTML
+              });
+              myForm.submit();
+
+            }
+        }],
         frame:true,
         plain:true,
         enableTabScroll:true,
