@@ -1,6 +1,6 @@
 /*
- * Ext JS Library 2.0
- * Copyright(c) 2006-2007, Ext JS, LLC.
+ * Ext JS Library 2.0.2
+ * Copyright(c) 2006-2008, Ext JS, LLC.
  * licensing@extjs.com
  * 
  * http://extjs.com/license
@@ -14,9 +14,12 @@
 
 /* ---- text fields ---- */
 .x-form-text, textarea.x-form-field{
-    padding: 1px 3px;
+    padding:1px 3px;
     background:#fff url(../images/default/form/text-bg.gif) repeat-x 0 0;
-    border: 1px solid #B5B8C8;
+    border:1px solid #B5B8C8;
+}
+textarea.x-form-field {
+    padding:2px 3px;
 }
 .x-form-text {
     height:22px;
@@ -24,10 +27,12 @@
     vertical-align:middle;
 }
 .ext-ie .x-form-text {
-    margin-top:-1px; /* ie bogus margin bug */
-    margin-bottom:-1px;
+    margin:-1px 0; /* ie bogus margin bug */
     height:22px; /* ie quirks */
     line-height:18px;
+}
+.ext-ie textarea.x-form-field {
+    margin:-1px 0; /* ie bogus margin bug */
 }
 .ext-strict .x-form-text {
     height:18px;
@@ -36,10 +41,17 @@
     height:20px; /* safari always same size */
     padding:0 3px; /* remove extra top/bottom padding */
 }
+.ext-safari.ext-mac textarea.x-form-field {
+    margin-bottom:-2px; /* another bogus margin bug, safari/mac only */
+}
 .ext-gecko .x-form-text {
     padding-top:2px; /* FF won't center the text vertically */
     padding-bottom:0;
 }
+textarea {
+    resize: none;  /* Disable browser resizable textarea */
+}
+
 /* select boxes */
 
 .x-form-select-one {
@@ -405,7 +417,7 @@
 }
 .ext-ie .x-fieldset {
     padding-top: 0;
-    padding-bottom:5px;
+    padding-bottom:10px;
 }
 .x-fieldset legend .x-tool-toggle {
     margin-right:3px;
@@ -435,7 +447,22 @@ fieldset.x-panel-collapsed .x-fieldset-bwrap {
     position:relative;
     top:-1px;
 }
-
+.x-fieldset-noborder {
+    border:0px none transparent;
+}
+.x-fieldset-noborder legend {
+    margin-left:-3px;
+}
+/* IE legend positioing bug */
+.ext-ie .x-fieldset-noborder legend {
+    position: relative;
+    margin-bottom:23px;
+}
+.ext-ie .x-fieldset-noborder legend span {
+    position: absolute;
+    left:-5px;
+}
+        
 .ext-gecko .x-window-body .x-form-item {
     -moz-outline: none;
     overflow: auto;
@@ -450,4 +477,17 @@ fieldset.x-panel-collapsed .x-fieldset-bwrap {
 }
 .x-hide-label .x-form-element {
      padding-left: 0 !important;
+}
+
+.x-fieldset {
+    overflow:hidden;
+}
+
+.x-fieldset-bwrap {
+    overflow:hidden;
+    zoom:1;
+}
+
+.x-fieldset-body {
+    overflow:hidden;
 }
