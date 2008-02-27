@@ -1,6 +1,6 @@
 /*
- * Ext JS Library 2.0
- * Copyright(c) 2006-2007, Ext JS, LLC.
+ * Ext JS Library 2.0.2
+ * Copyright(c) 2006-2008, Ext JS, LLC.
  * licensing@extjs.com
  * 
  * http://extjs.com/license
@@ -28,6 +28,7 @@
     border-top:0 none;
     overflow:hidden;
     background:white;
+    position: relative; /* added for item scroll positioning */
 }
 
 .x-panel-bbar .x-toolbar {
@@ -36,6 +37,7 @@
     overflow:hidden;
     padding:2px;
 }
+
 
 .x-panel-tbar .x-toolbar {
     border:1px solid #99bbe8;
@@ -81,6 +83,10 @@
 .x-panel-tc {
 	background: transparent url(../images/default/panel/top-bottom.gif) repeat-x 0 0;
 	overflow:hidden;
+}
+/* fix ie7 strict mode bug */
+.ext-strict .ext-ie7 .x-panel-tc {
+    overflow: visible;
 }
 .x-panel-tl {
 	background: transparent url(../images/default/panel/corners-sprite.gif) no-repeat 0 0;
@@ -316,6 +322,12 @@
 }
 .x-tool-help-over {
     background-position:-15px -300px;
+}
+.x-tool-print {
+    background-position:0 -315px;
+}
+.x-tool-print-over {
+    background-position:-15px -315px;
 }
 
 /* Ghosting */

@@ -1,6 +1,6 @@
 /*
- * Ext JS Library 2.0
- * Copyright(c) 2006-2007, Ext JS, LLC.
+ * Ext JS Library 2.0.2
+ * Copyright(c) 2006-2008, Ext JS, LLC.
  * licensing@extjs.com
  * 
  * http://extjs.com/license
@@ -36,16 +36,15 @@
     vertical-align:middle !important;
 }
 /* some default icons for leaf/folder */
-.x-tree-node-collapsed .x-tree-node-icon{
-	background-image:url(../images/default/tree/folder.gif);
-}
 .x-tree-node-expanded .x-tree-node-icon{
 	background-image:url(../images/default/tree/folder-open.gif);
 }
 .x-tree-node-leaf .x-tree-node-icon{
 	background-image:url(../images/default/tree/leaf.gif);
 }
-
+.x-tree-node-collapsed .x-tree-node-icon{
+	background-image:url(../images/default/tree/folder.gif);
+}
 /* checkboxes */
 .ext-ie input.x-tree-node-cb {
     width:15px;
@@ -118,6 +117,45 @@ input.x-tree-node-cb {
 .x-tree-no-lines .x-tree-elbow-line{
 	background:transparent;
 }
+
+
+/* Arrows */
+.x-tree-arrows .x-tree-elbow{
+	background:transparent;
+}
+.x-tree-arrows .x-tree-elbow-plus{
+    background:transparent url(../images/default/tree/arrows.gif) no-repeat 0 0;
+}
+.x-tree-arrows .x-tree-elbow-minus{
+    background:transparent url(../images/default/tree/arrows.gif) no-repeat -16px 0;
+}
+.x-tree-arrows .x-tree-elbow-end{
+	background:transparent;
+}
+.x-tree-arrows .x-tree-elbow-end-plus{
+    background:transparent url(../images/default/tree/arrows.gif) no-repeat 0 0;
+}
+.x-tree-arrows .x-tree-elbow-end-minus{
+    background:transparent url(../images/default/tree/arrows.gif) no-repeat -16px 0;
+}
+.x-tree-arrows .x-tree-elbow-line{
+	background:transparent;
+}
+
+.x-tree-arrows .x-tree-ec-over .x-tree-elbow-plus{
+    background-position:-32px 0;
+}
+.x-tree-arrows .x-tree-ec-over .x-tree-elbow-minus{
+    background-position:-48px 0;
+}
+.x-tree-arrows .x-tree-ec-over .x-tree-elbow-end-plus{
+    background-position:-32px 0;
+}
+.x-tree-arrows .x-tree-ec-over .x-tree-elbow-end-minus{
+    background-position:-48px 0;
+}
+
+
 
 .x-tree-elbow-plus, .x-tree-elbow-minus, .x-tree-elbow-end-plus, .x-tree-elbow-end-minus{
 	cursor:pointer;
