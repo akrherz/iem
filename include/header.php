@@ -52,6 +52,7 @@ $_pages = Array(
     "sites" => Array("title" => "IEM Sites", "url" => "/sites/locate.php"),
     "info" => Array("title" => "Info", "url" => "/info.php"),
     "mailman" => Array("title" => "Mail Lists", "url" => "/mailman/listinfo/"),
+    "news" => Array("title" => "News", "url" => "/onsite/news.phtml"),
     "present" => Array("title" => "Presentations", "url" => "/present/"),
     "qc" => Array("title" => "Quality Control", "url" => "/QC/"),
  ),
