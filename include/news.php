@@ -9,6 +9,6 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
   $ts = strtotime(substr($row["entered"],0,16));
   if ($ts > $today) $sts = strftime("%I:%M %p", $ts);
   else $sts = strftime("%d %b %I:%M %p", $ts);
-  echo "<a href=\"$rootpath/onsite/news.phtml?id=".$row["id"]."\">". $row["title"] ."</a><div class=\"iem-news-descript\"><i>Posted:</i> $sts</div>\n";
+  echo "<a href=\"$rooturl/onsite/news.phtml?id=".$row["id"]."\">". $row["title"] ."</a><div class=\"iem-news-descript\"><i>Posted:</i> $sts</div>\n";
 }
 ?>
