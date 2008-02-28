@@ -1,7 +1,7 @@
 <?php
 include("../config/settings.inc.php");
 $TITLE = "IEM | Information";
-$THISPAGE = "sites-info";
+$THISPAGE = "iem-info";
 include("$rootpath/include/header.php"); ?>
 
 
@@ -31,16 +31,10 @@ include("$rootpath/include/header.php"); ?>
 
 </td><td width="50%" valign="top">
 
-<h3 class="subtitle">IEM Projects:</h3>
-<ul>
- <li><a href="/projects/iembot/">iembot</a>
-  <br />A Jabber chat bot relaying NWS warnings.</li>
-</ul>
-
 <h3 class="subtitle">IEM Server Information:</h3>
 <ul>
 	<li><a href="/info/software.php">Software Utilized</a></li>
-	<li><a href="/ml/">Mailing Lists</a></li>
+	<li><a href="/mailman/listinfo/">Mailing Lists</a></li>
 </ul>
 
 <h3 class="subtitle">Papers/Presentations</h3>
