@@ -34,6 +34,7 @@ $_pages = Array(
  "archive" => Array(
     "base" => Array("title" => "Archive", "url" => "/archive/"),
     "browse" => Array("title" => "Browse data/", "url" => "/archive/data/"),
+    "cases" => Array("title" => "Cases", "url" => "/cases/"),
  ),
  "current" => Array(
     "base" => Array("title" => "Current", "url" => "/current/"),
