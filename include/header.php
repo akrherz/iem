@@ -46,6 +46,12 @@ $_pages = Array(
     "base" => Array("title" => "Climatology", "url" => "/climate/"),
     "climodat" => Array("title" => "Climodat", "url" => "/climodat/"),
  ),
+ "iem" => Array(
+    "base" => Array("title" => "IEM Info", "url" => "/sites/locate.php"),
+    "sites" => Array("title" => "IEM Sites", "url" => "/sites/locate.php"),
+    "info" => Array("title" => "Info", "url" => "/info.php"),
+    "qc" => Array("title" => "Quality Control", "url" => "/QC/"),
+ ),
  "networks" => Array(
     "base" => Array("title" => "IEM Networks", "url" => "/"),
     "asos" => Array("title" => "ASOS", "url" => "/ASOS/"),
@@ -58,12 +64,6 @@ $_pages = Array(
     "scan" => Array("title" => "SCAN", "url" => "/scan/"),
     "schoolnet" => Array("title" => "SchoolNet", "url" => "/schoolnet/"),
     "other" => Array("title" => "Other", "url" => "/other/"),
- ),
- "sites" => Array(
-    "base" => Array("title" => "IEM Sites", "url" => "/sites/locate.php"),
-    "main" => Array("title" => "Mainpage", "url" => "/sites/locate.php"),
-    "info" => Array("title" => "Info", "url" => "/info.php"),
-    "qc" => Array("title" => "Quality Control", "url" => "/QC/"),
  ),
  "gis" => Array(
     "base" => Array("title" => "GIS", "url" => "/GIS/"),
