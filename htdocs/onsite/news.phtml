@@ -4,6 +4,7 @@
  $id = isset($_GET["id"]) ? intval($_GET["id"]): 0;
  $q = isset($_GET["q"]) ? pg_escape_string($_GET["q"]) : "";
  $TITLE = "IEM | News & Notes";
+ $THISPAGE = "iem-news";
  include("$rootpath/include/header.php");
 
  $connection = iemdb("mesosite");
@@ -25,6 +26,9 @@
     $q = "SELECT *, to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
            from news WHERE (title ~* '$q' or body ~* '$q') 
            ORDER by entered DESC";
+  } else if ($id == 0) {
+    $q = "SELECT *, to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
+           from news ORDER by entered DESC LIMIT 1";
   }
   $result = pg_exec($connection, $q);
   $count = pg_numrows($result);
