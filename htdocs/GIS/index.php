@@ -16,21 +16,29 @@ natural to integrate IEM data into GIS applications.<p>
 <tr><td width=350 valign="top">
 
 <h3 class="subtitle">Presentations & Docs:</h3>
-<i>28 Jul 2003:</i> <a href="/docs/radmapserver/">NEXRAD + Mapserver HOWTO</a>
-<br><i>11 Feb 2003:</i> <a href="/GIS/ams_030211.phtml">American Met Society</a>
-<br><i>20 Nov 2002:</i> <a href="/GIS/isu_021120.phtml">Iowa State GIS Day</a>
+<ul>
+ <li><i>28 Jul 2003:</i> <a href="/docs/radmapserver/">NEXRAD + Mapserver HOWTO</a>
+<br />A HowTo on generating NEXRAD composite images with GEMPAK and 
+serving them out with Mapserver.</li>
+ <li><a href="<?php echo $rooturl; ?>/present/">IEM Presentation Archive</a>
+<br />The IEM has given a number of GIS related talks.  You can browse an
+archive of presentations.</li>
+</ul>
 
 
 <p><h3 class="subtitle">Web Applications:</h3>
 <ul>
+<!--
   <LI><a href="/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS%2Fapps%2Fiatorn%2Fiatorn.map">Historical Iowa Tornado Database</a></LI>
   <LI><a href="/GIS/apps/precip/">Realtime Precipitation Analysis</a></LI>
   <LI><a href="<?php echo $rooturl; ?>/GIS/apps/pcs/">2002 NEXRAD vs ASOS Precip Comparison</a></LI>
+-->
   <li><a href="<?php echo $rooturl; ?>/GIS/apps/rview/warnings.phtml">NEXRAD w/ warnings</a></li>
   <li><a href="<?php echo $rooturl; ?>/GIS/apps/coop/">COOP Daily Extremes and Averages</a></li>
   <li><a href="<?php echo $rooturl; ?>/my/current.php">Dynamic Plotting</a></li>
   <li><a href="<?php echo $rooturl; ?>/sites/locate.php">IEM Site Locator</a></li>
 </ul>
+
 
 <p><h3 class="subtitle">Links:</h3>
 <ul>
@@ -53,7 +61,7 @@ natural to integrate IEM data into GIS applications.<p>
 
 </td><td width=350 valign="top">
 
-<img src="/images/gisready.png">You may have noticed this image appearing on
+<img src="<?php echo $rooturl; ?>/images/gisready.png">You may have noticed this image appearing on
 IEM webpages.  It signifies that the data link is ready for most GIS systems.
 
 <p><h3 class="subtitle">IEM GIS Projects</h3>

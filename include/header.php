@@ -67,8 +67,10 @@ $_pages = Array(
  ),
  "gis" => Array(
     "base" => Array("title" => "GIS", "url" => "/GIS/"),
+    "browse" => Array("title" => "Browse Data", "url" => "/data/gis/"),
     "ogc" => Array("title" => "OGC Webservices", "url" => "/ogc/"),
     "rainfall" => Array("title" => "Rainfall Data", "url" => "/rainfall/"),
+    "satellite" => Array("title" => "Satellite", "url" => "/GIS/goes.phtml"),
     "software" => Array("title" => "Software", "url" => "/GIS/software.php"),
  ),
  "severe" => Array(
