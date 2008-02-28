@@ -79,11 +79,11 @@ back to 1951.</li>
 	<br />Our effort to provide NEXRAD information in realtime to GIS systems.</li>
  <li><a href="<?php echo $rooturl; ?>/rainfall/">IEM Rainfall</a>
   <br />Gridded rainfall estimates in GIS formats dating back to 2002 for Iowa.</li>
- <li><a href="/roads/">IEM Iowa Road Conditions</a>
+ <li><a href="<?php echo $rooturl; ?>/roads/">IEM Iowa Road Conditions</a>
   <br />Current and archived Iowa road conditions.</li>
- <li><a href="/cow/">IEM Cow</a>
+ <li><a href="<?php echo $rooturl; ?>/cow/">IEM Cow</a>
   <br />Unofficial NWS polygon warning verification.</li>
- <li><a href="/docs/nexrad_composites/">NEXRAD Composites on the IEM</a>
+ <li><a href="<?php echo $rooturl; ?>/docs/nexrad_composites/">NEXRAD Composites on the IEM</a>
   <br />Information about the NEXRAD composites that the IEM generates.</li>
 </ul>
 
