@@ -9,6 +9,7 @@ include("../../../config/settings.inc.php");
 $TITLE = "IEM | Past Features";
 $ts = isset($_GET["ts"]) ? $_GET["ts"] : time();
 include("$rootpath/include/database.inc.php");
+$THISPAGE = "iem-feature";
 include("$rootpath/include/header.php"); ?>
 
 <div class="text">
