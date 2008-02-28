@@ -14,7 +14,7 @@
 ?>
 <?php
 $TITLE = "IEM | Site Locator";
-$THISPAGE = "sites-main";
+$THISPAGE = "iem-sites";
 include("$rootpath/include/header.php"); 
   include("$rootpath/include/imagemaps.php");
     ?>
