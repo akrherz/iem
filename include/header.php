@@ -67,8 +67,8 @@ $_pages = Array(
  ),
  "gis" => Array(
     "base" => Array("title" => "GIS", "url" => "/GIS/"),
-    "browse" => Array("title" => "Browse Data", "url" => "/docs/nexrad_composites/"),
-    "nexrad" => Array("title" => "NEXRAD Data", "url" => "/ogc/"),
+    "browse" => Array("title" => "Browse Data", "url" => "/data/gis/"),
+    "nexrad" => Array("title" => "NEXRAD Data", "url" => "/docs/nexrad_composites/"),
     "ogc" => Array("title" => "OGC Webservices", "url" => "/ogc/"),
     "rainfall" => Array("title" => "Rainfall Data", "url" => "/rainfall/"),
     "satellite" => Array("title" => "Satellite Data", "url" => "/GIS/goes.phtml"),
