@@ -1,7 +1,7 @@
 <?php 
 include("../../config/settings.inc.php");
-$page = "gis";
 $TITLE = "IEM | ASOS Data";
+$THISPAGE = "gis-software";
 include("$rootpath/include/header.php"); ?>
 
 <TR><TD>
