@@ -48,6 +48,7 @@ $_pages = Array(
  ),
  "iem" => Array(
     "base" => Array("title" => "IEM Info", "url" => "/sites/locate.php"),
+    "feature" => Array("title" => "Daily Features", "url" => "/onsite/features/past.php"),
     "sites" => Array("title" => "IEM Sites", "url" => "/sites/locate.php"),
     "info" => Array("title" => "Info", "url" => "/info.php"),
     "mailman" => Array("title" => "Mail Lists", "url" => "/mailman/listinfo/"),
