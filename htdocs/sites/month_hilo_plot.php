@@ -25,10 +25,20 @@ $highs = Array();
 $lows = Array();
 $xlabels = Array();
 
+$minVal = 100;
+$maxVal = -100;
+
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-  if (intval($row["max_tmpf"]) < -50) {  $highs[] = ""; }
-  else { $highs[] = $row["max_tmpf"]; }
-  $lows[] = $row["min_tmpf"];
+  if (intval($row["max_tmpf"]) < -50) {  $highs[] = Null; }
+  else { 
+    $highs[] = $row["max_tmpf"]; 
+    if (intval($row["max_tmpf"]) > $maxVal) $maxVal = $row["max_tmpf"];
+  }
+  if (intval($row["min_tmpf"]) > 90) {  $lows[] = Null; }
+  else { 
+    $lows[] = $row["min_tmpf"]; 
+    if (intval($row["min_tmpf"]) < $minVal) $minVal = $row["min_tmpf"];
+  }
 }
 
 pg_close($db);
@@ -51,6 +61,8 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $xlabels[] = date("m/d", $ts);
   $ahighs[] = $row["high"];
   $alows[] = $row["low"];
+  if (intval($row["high"]) > $maxVal) $maxVal = $row["high"];
+  if (intval($row["low"]) < $minVal) $minVal = $row["low"];
 }
 
 pg_close($db);
@@ -60,10 +72,6 @@ include("$rootpath/include/jpgraph/jpgraph.php");
 include("$rootpath/include/jpgraph/jpgraph_bar.php");
 include("$rootpath/include/jpgraph/jpgraph_line.php");
 
-$a0 = min($lows);
-$a1 = min($alows);
-$a2 = max($highs);
-$a3 = max($ahighs);
 
 $height = 360;
 $width = 640;
@@ -73,8 +81,7 @@ if ($feature)
   $width = 320;
 }
 $graph = new Graph($width,$height);
-
-$graph->SetScale("textlin", min($a0,$a1)-4, max($a2,$a3)+2);
+$graph->SetScale("textlin", $minVal - 4, $maxVal + 4);
 $graph->SetMarginColor('white');
 
 $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCFF@0.5');
