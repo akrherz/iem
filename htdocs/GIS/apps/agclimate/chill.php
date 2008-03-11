@@ -64,7 +64,8 @@ $sql = "select station, min(valid) as v from hourly WHERE valid > '${sdate}' and
 //echo $sql ."<br />";
 $rs =  pg_exec($c, $sql);
 for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-  $bdate = $row["v"];
+  //$bdate = $row["v"];
+  $bdate = $sdate;
   $key = $row["station"];
   if ($key == "A133259") continue;
 
