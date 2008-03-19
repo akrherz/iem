@@ -31,11 +31,11 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 $warngeo = isset($_GET["warngeo"]) ? $_GET["warngeo"] : "both";
 
-if ($phenomena != "SV" && $phenomena != "TO" && $phenomena != "MA") 
+if ($phenomena != "SV" && $phenomena != "TO" && $phenomena != "MA" && $phenomena != "FF") 
 { 
   $warngeo = "county";
 }
-if (($phenomena == "SV" || $phenomena == "TO" || $phenomena == "MA") 
+if (($phenomena == "SV" || $phenomena == "TO" || $phenomena == "MA" || $phenomena == "FF") 
      && !isset($_GET["warngeo"]))
 {
    $warngeo = "sbw";
@@ -68,7 +68,7 @@ $query2 = "SELECT *, astext(geom) as t,
            WHERE wfo = '$wfo' and phenomena = '$phenomena' and 
            eventid = $eventid and significance = '$significance'";
 if ($significance == "W" && 
-   ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA"))
+   ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA" or $phenomena == "FF"))
 {
   $query2 .= " and gtype = 'P'";
 }
