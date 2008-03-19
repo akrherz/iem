@@ -19,6 +19,13 @@
  if ($sts < $abegin){ $sts = $abegin; }
  if ($ets < $sts){ $n = $sts; $sts = $ets; $ets = $n; }
 
+ if ( in_array("FF", $wtype) && $syear < 2008){ 
+   $wtype = array_diff( $wtype, array("FF") );
+ }
+ if ( in_array("FF", $ltype) && $syear < 2008){ 
+   $ltype = array_diff( $ltype, array("FF") );
+ }
+
  $TITLE = "IEM Cow";
  $THISPAGE = "severe-cow";
  include("$rootpath/include/header.php");
@@ -26,7 +33,7 @@
  include("$rootpath/include/wfoLocs.php");
  include("$rootpath/include/database.inc.php");
 ?>
-<a href="/cow/">Reset Application</a> (All timestamps are displayed in UTC)
+<a href="<?php echo $rooturl; ?>/cow/">Reset Application</a> (All timestamps are displayed in UTC)
 <form method="GET" name="cow">
 <table>
 <tr>
@@ -52,6 +59,7 @@ while( list($key, $value) = each($wfos) ){
 <input name="wtype[]" type="checkbox" value="TO" <?php if (in_array("TO", $wtype)) echo "CHECKED"; ?>>Tornado
 <input name="wtype[]" type="checkbox" value="SV" <?php if (in_array("SV", $wtype)) echo "CHECKED"; ?>>Svr T'storm
 <input name="wtype[]" type="checkbox" value="MA" <?php if (in_array("MA", $wtype)) echo "CHECKED"; ?>>Marine
+<input name="wtype[]" type="checkbox" value="FF" <?php if (in_array("FF", $wtype)) echo "CHECKED"; ?>>Flash Flood (2008+)
 </td></tr>
 <tr>
 <th>Hail Size:</th>
@@ -64,6 +72,7 @@ while( list($key, $value) = each($wfos) ){
 <input name="ltype[]" type="checkbox" value="TO" <?php if (in_array("TO", $ltype)) echo "CHECKED"; ?>>Tornado
 <input name="ltype[]" type="checkbox" value="SV" <?php if (in_array("SV", $ltype)) echo "CHECKED"; ?>>Svr T'storm
 <input name="ltype[]" type="checkbox" value="MA" <?php if (in_array("MA", $ltype)) echo "CHECKED"; ?>>Marine
+<input name="ltype[]" type="checkbox" value="FF" <?php if (in_array("FF", $ltype)) echo "CHECKED"; ?>>Flash Flood (2008+)
 </td></tr>
 </table>
 <input type="submit" value="Go Cow Go"></form>

@@ -96,6 +96,7 @@ while( list($k,$v) = each($ltype)){
  if ($v == "TO") $ltypeSQL .= sprintf("'%s',","T"); 
  else if ($v == "SV") $ltypeSQL .= sprintf("'%s','%s','%s',","H","G","D");
  else if ($v == "MA") $ltypeSQL .= sprintf("'%s','%s',","M","W"); 
+ else if ($v == "FF") $ltypeSQL .= sprintf("'%s',","F"); 
 }
 $ltypeSQL .= "'ZZZ'"; /* Hack */
 $sql = sprintf("SELECT distinct *, x(geom) as lon0, y(geom) as lat0, 
@@ -104,7 +105,8 @@ $sql = sprintf("SELECT distinct *, x(geom) as lon0, y(geom) as lat0,
         valid >= '%s' and valid < '%s' and type in (%s) and
         ((type = 'M' and magnitude >= 34) or 
          (type = 'H' and magnitude >= $hail) or type = 'W' or
-         type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D')
+         type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
+         or type = 'F')
         ORDER by valid ASC",
         date("Y", $sts), $wfo, $stsSQL, $etsSQL, $ltypeSQL);
 $DEBUG .= "<br />". $sql;
@@ -140,7 +142,8 @@ while (list($k,$v) = each($warnings))
          and type IN (%s) and wfo = '%s' and
         ((type = 'M' and magnitude >= 34) or 
          (type = 'H' and magnitude >= $hail) or type = 'W' or
-         type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D')
+         type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
+         or type = 'F')
          and valid >= '%s' and valid <= '%s' ", date("Y", $wsts),
          $geom, $geom, $ltypeSQL, $wfo, $wstsSQL, $wetsSQL);
   $DEBUG .= "<br />". $sql;
@@ -153,7 +156,17 @@ while (list($k,$v) = each($warnings))
     $key = sprintf("%s-%s-%s-%s-%s", $row["wfo"], $row["valid"], $row["type"],
           $row["magnitude"], $row["city"]);
     /* Now we need to do some checking */
-    if ($v["phenomena"] == "TO")
+    if ($v["phenomena"] == "FF")
+    {
+       if ($lType == "F") { /* Verify! */
+         $warnings[$k]["verify"] = 1;
+         $lsrs[$key]["warned"] = 1;
+         $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
+         if ($warnings[$k]["lead0"] < 0) $warnings[$k]["lead0"] = $lsrs[$key]["leadtime"];
+         $lw .= printLSR($lsrs[$key]);
+       }
+    }
+    else if ($v["phenomena"] == "TO")
     {
        if ($lType == "T") { /* Verify! */
          $warnings[$k]["verify"] = 1;
