@@ -16,6 +16,7 @@ include("$rootpath/include/header.php"); ?>
  <li><a href="http://www.mesonet.ttu.edu/">West Texas Mesonet</a></li>
  <li><a href="http://www.met.utah.edu/jhorel/html/mesonet/">Meso West</a></li>
  <li><a href="http://www.georgiaweather.net/">Georgia Environmental Network</a></li>
+ <li><a href="http://www.kymesonet.org">Kentucky Mesonet</a></li>
 </ul>
 
 <h3 class="subtitle">Iowa Links:</h3>
