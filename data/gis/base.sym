@@ -38,7 +38,8 @@ END
 Symbol
   Name 'arrow'
   Type PIXMAP
-  Image 'symbols/arrow.png'
+  Image 'symbols/arrow.gif'
+  Transparent 2
 END
 
 Symbol
