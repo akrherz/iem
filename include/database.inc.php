@@ -1,5 +1,5 @@
 <?php
-$iem20 = 'iem20';
+$iem20 = 'iemdb';
 global $_DATABASES;
 $_DATABASES = Array(
  'access' => "dbname=iem host=$iem20 user=nobody",
