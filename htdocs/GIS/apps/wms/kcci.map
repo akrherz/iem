@@ -230,7 +230,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME tmpf
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=iem20"
+  CONNECTION "user=nobody dbname=iem host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, oid, round(tmpf::numeric, 0) as tmpf
          from current
@@ -261,7 +261,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME barbs
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=iem20"
+  CONNECTION "user=nobody dbname=iem host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, tmpf,
     case WHEN sknt between 0 and 4.99 THEN chr(227)

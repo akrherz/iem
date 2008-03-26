@@ -255,7 +255,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME twofourhour
-  CONNECTION "user=nobody dbname=iem host=iem20"
+  CONNECTION "user=nobody dbname=iem host=iemdb"
   DATA "geom from (SELECT geom from summary WHERE pday > 0 and day = 'TODAY') as foo USING unique station using SRID=4326"
   STATUS ON
   TYPE POINT
@@ -286,7 +286,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME pday
-  CONNECTION "user=nobody dbname=iem host=iem20"
+  CONNECTION "user=nobody dbname=iem host=iemdb"
   DATA "geom from (SELECT geom, pday, station from summary WHERE pday >= 0.01 and day = 'TODAY') as foo USING unique station using SRID=4326"
   STATUS ON
   TYPE POINT
@@ -317,7 +317,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME phour
-  CONNECTION "user=nobody dbname=iem host=iem20"
+  CONNECTION "user=nobody dbname=iem host=iemdb"
   DATA "geom from (SELECT geom, phour, station from current WHERE phour > 0 and valid > 'TODAY') as foo USING unique station using SRID=4326"
   STATUS ON
   TYPE POINT
