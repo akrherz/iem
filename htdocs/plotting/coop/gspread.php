@@ -2,7 +2,7 @@
 $ts = "(6)";
 $plotts = "June";
 
-$connection = pg_connect("iem20","5432","coop");
+$connection = pg_connect("iemdb","5432","coop");
 //---------------------------------------------------------------
 $total = floatval((51 * 100) + (3 * 184)) * 1.0;
 
