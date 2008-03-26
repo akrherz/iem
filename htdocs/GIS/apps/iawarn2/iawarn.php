@@ -119,7 +119,7 @@ while (list ($line_num, $line) = each ($fcontents)) {
   $lastT = $line;
 }
 
-$connection = pg_connect("host=iem20 port=5432 dbname=postgis user=mesonet");
+$connection = pg_connect("host=iemdb port=5432 dbname=postgis user=mesonet");
 
 $query = "SELECT w.type, w.oid, u.name as cname, w.expire as expire, 
   w.issue as issue, s.state_name as sname from warnings w, uscounties u, states s

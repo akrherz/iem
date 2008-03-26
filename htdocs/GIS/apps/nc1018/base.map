@@ -143,7 +143,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME highs
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=nc1018 host=iem20"
+  CONNECTION "user=nobody dbname=nc1018 host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "the_geom from (select d.fips, 
     round(((1.8 * d.high::real) + 32.0)::numeric, 0) as high, 
