@@ -160,7 +160,7 @@ if (isset($singleWarning))
 
 $wc = ms_newLayerObj($map);
 $wc->set("connectiontype", MS_POSTGIS);
-$wc->set("connection", "user=nobody dbname=postgis host=iem20");
+$wc->set("connection", "user=nobody dbname=postgis host=iemdb");
 $wc->set("data", "geom from (select gtype, eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
 $wc->set("status", MS_ON);
 $wc->set("type", MS_LAYER_LINE);
