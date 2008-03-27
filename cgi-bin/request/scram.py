@@ -2,7 +2,7 @@
 
 import pg, cgi
 
-asosdb = pg.connect('asos','iem20')
+asosdb = pg.connect('asos','iemdb')
 rwisdb = pg.connect('rwis')
 mydb2 = pg.connect('mesonet')
 

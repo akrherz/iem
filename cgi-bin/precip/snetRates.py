@@ -5,7 +5,7 @@ from pyIEM import iemdb
 i = iemdb.iemdb()
 mydb = i['snet']
 import pg
-iem = pg.connect('iem', 'iem20', user='nobody')
+iem = pg.connect('iem', 'iemdb', user='nobody')
 
 def diff(nowVal, pastVal, mulli):
   if (nowVal < 0 or pastVal < 0): return "%5s," % ("M")

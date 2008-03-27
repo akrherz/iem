@@ -6,7 +6,7 @@
 
 import pg, sys, re, cgi, string
 
-mydb = pg.connect('asos','iem20')
+mydb = pg.connect('asos','iemdb')
 rwis = pg.connect('rwis')
 ncdc = pg.connect('mesonet')
 
