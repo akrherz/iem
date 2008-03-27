@@ -32,7 +32,7 @@ def printInterface(cam):
 <param name=url		value=\"http://%(ip)s/\">\
 <param name=locale	value=\"english\">\
 </applet>\
-\
+<p><a href=\"http://%(ip)s/admin/\">Admin Interface</a>\
 </body>\
 </html>" % cameras.cams[cam]
 

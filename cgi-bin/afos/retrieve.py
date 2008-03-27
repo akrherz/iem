@@ -47,7 +47,7 @@ def Main():
 
   if (len(rs) == 0 and myPils[0][:3] == "MTR"):
     #print "%s doesn't exist in AFOS database, looking in IEM's archive\n" % (pil,)
-    access = pg.connect('iem', 'iem20', user='nobody')
+    access = pg.connect('iem', 'iemdb', user='nobody')
     sql = "SELECT raw from current_log WHERE raw != '' and station = '%s' ORDER by valid DESC LIMIT %s" % (myPils[0][3:].strip(), LIMIT)
     rs = access.query( sql ).dictresult()
     for i in range(len(rs)):

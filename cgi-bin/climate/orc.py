@@ -6,12 +6,12 @@ from pyIEM import iemAccess, iemdb
 #i = iemdb.iemdb()
 #climatedb = i["coop"]
 import pg
-climatedb = pg.connect('coop','mesonet-db1.agron.iastate.edu', user='nobody')
-iemaccess = pg.connect('iem', 'mesonet-db1.agron.iastate.edu', user='nobody')
+climatedb = pg.connect('coop','iemdb', user='nobody')
+iemaccess = pg.connect('iem', 'iemdb', user='nobody')
 
 ADJUSTMENT = 0
-s = mx.DateTime.DateTime(2007,10,18)
-e = mx.DateTime.DateTime(2007,11,18)
+s = mx.DateTime.DateTime(2007,2,18)
+e = mx.DateTime.DateTime(2007,3,18)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 def averageTemp(db, hi="high", lo="low"):
@@ -71,7 +71,7 @@ def main():
 
   # Lemars
   rs = climatedb.query("SELECT high, low, \
-    to_char(valid, '2006-mm-dd') as valid from climate \
+    to_char(valid, '2007-mm-dd') as valid from climate \
     WHERE station = 'ia4735'").dictresult()
 
   for i in range(len(rs)):
@@ -80,7 +80,7 @@ def main():
       db[ rs[i]['valid'] ]['avg_low'] = rs[i]['low']
 
   rs = climatedb.query("SELECT high, low, \
-    to_char(valid, '2007-mm-dd') as valid from climate \
+    to_char(valid, '2008-mm-dd') as valid from climate \
     WHERE station = 'ia4735'").dictresult()
                                                                                 
   for i in range(len(rs)):
