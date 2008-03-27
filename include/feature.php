@@ -19,7 +19,7 @@ function genFeature()
   if (array_key_exists('foid', $_COOKIE) && $_COOKIE["foid"] == $foid)
   { 
     $voted = 1;
-  } elseif (getenv("REMOTE_ADDR") == "129.186.142.22") 
+  } elseif (getenv("REMOTE_ADDR") == "129.186.142.22" || getenv("REMOTE_ADDR") == "129.186.142.37") 
   {
 
   } elseif (isset($_GET["feature_good"]))
