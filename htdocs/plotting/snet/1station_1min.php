@@ -18,11 +18,8 @@ $day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
 
 <?php 
 	$TITLE = "IEM | 1 Minute Time Series";
-include("$rootpath/include/header.php"); 
+$THISPAGE = "networks-schoolnet"; include("$rootpath/include/header.php"); 
 ?>
-
-<b>Nav:</b> <a href="<?php echo $rooturl; ?>/schoolnet/">School Network</a> <b> > </b> One minute time series
-
 
 <p>You can plot 1 minute data for a school net location of your
 choice.  Note that the archive begins 12 Feb 2002.</p>
