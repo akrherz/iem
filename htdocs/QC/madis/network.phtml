@@ -2,7 +2,7 @@
  include("../../../config/settings.inc.php");
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
  $network = isset($_GET["network"])? substr($_GET["network"],0,10): "IA_ASOS";
- $b = 'network.phtml?network='. $network;
+ $baa = 'network.phtml?network='. $network;
 ?>
 
 <?php $TITLE = "IEM | QC | MADIS Raw QC";
@@ -90,22 +90,22 @@ while( list($key, $val) = each($ns_networks) ){
 
 <table cellpadding=2 cellspacing=0 border=1>
 <tr>
-  <td rowspan=2><a href="<?php echo $b; ?>&sortcol=station">Site ID:</a></td>
-  <td rowspan=2><a href="<?php echo $b; ?>&sortcol=sname">Station Name:</a></td>
+  <td rowspan=2><a href="<?php echo $baa; ?>&sortcol=station">Site ID:</a></td>
+  <td rowspan=2><a href="<?php echo $baa; ?>&sortcol=sname">Station Name:</a></td>
   <td rowspan=2>Ob Valid: (UTC)</td>
   <td colspan=3 id="divider">Air Temperature [F]</td>
   <td colspan=3 id="divider">Dewpoint [F]</td>
   <td colspan=3 id="divider">Altimeter [inch]</td></tr>
 <tr>
-  <td id="divider"><a href="<?php echo $b; ?>&sortcol=tmpf">OB:</a></td>
-  <td><a href="<?php echo $b; ?>&sortcol=tmpf_qc_av">QC:</a></td>
-  <td><a href="<?php echo $b; ?>&sortcol=tmpf_qc_sc">Spatial:</a></td>
-  <td id="divider"><a href="<?php echo $b; ?>&sortcol=dwpf">OB:</a></td>
-  <td><a href="<?php echo $b; ?>&sortcol=dwpf_qc_av">QC:</a></td>
-  <td><a href="<?php echo $b; ?>&sortcol=dwpf_qc_sc">Spatial:</a></td>
-  <td id="divider"><a href="<?php echo $b; ?>&sortcol=alti">OB:</a></td>
-  <td><a href="<?php echo $b; ?>&sortcol=alti_qc_av">QC:</a></td>
-  <td><a href="<?php echo $b; ?>&sortcol=alti_qc_sc">Spatial:</a></td></tr>
+  <td id="divider"><a href="<?php echo $baa; ?>&sortcol=tmpf">OB:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=tmpf_qc_av">QC:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=tmpf_qc_sc">Spatial:</a></td>
+  <td id="divider"><a href="<?php echo $baa; ?>&sortcol=dwpf">OB:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=dwpf_qc_av">QC:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=dwpf_qc_sc">Spatial:</a></td>
+  <td id="divider"><a href="<?php echo $baa; ?>&sortcol=alti">OB:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=alti_qc_av">QC:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=alti_qc_sc">Spatial:</a></td></tr>
 
 
 <?php
