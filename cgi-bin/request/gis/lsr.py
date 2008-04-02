@@ -33,7 +33,7 @@ shp = shapelib.create(fp, shapelib.SHPT_POINT)
 
 dbf = dbflib.create(fp)
 dbf.add_field("VALID", dbflib.FTString, 12, 0)
-dbf.add_field("MAG", dbflib.FTDouble, 6, 2)
+dbf.add_field("MAG", dbflib.FTDouble, 10, 2)
 dbf.add_field("WFO", dbflib.FTString, 3, 0)
 dbf.add_field("TYPECODE", dbflib.FTString, 1, 0)
 dbf.add_field("TYPETEXT", dbflib.FTString, 40, 0)
