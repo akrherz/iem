@@ -27,7 +27,7 @@ include("$rootpath/include/header.php"); ?>
 
 <h3 class="subtitle">Other Links:</h3>
 <ul>
- <li><a href="http://www.agriculture.state.ia.us/climatology.htm">Iowa State Climatologist Office</a></li>
+ <li><a href="http://www.iowaagriculture.gov/climatology.asp">Iowa State Climatologist Office</a></li>
  <li><a href="http://205.156.54.206/om/coop/index.htm">National COOP Observer Program</a></li>
  <li><a href="http://www.weatherview.dot.state.ia.us/">Iowa DOT WeatherView</a></li>
  <li><a href="http://www.missouri.edu/~moclimat/">Missouri Climate Center</a></li>
