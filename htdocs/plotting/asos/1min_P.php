@@ -3,7 +3,7 @@
 
 include("../../../config/settings.inc.php");
 
-include ("$rootpath/include/asosLoc.php");
+include ("$rootpath/include/all_locs.php");
 include("$rootpath/include/database.inc.php");
 
 $station = isset($_GET["station"]) ? $_GET["station"] : "DSM";
@@ -119,7 +119,7 @@ $graph->xaxis->SetTickLabels($xlabel);
 //$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set($Acities[$station]['city'] ." Time Series");
+$graph->title->Set($cities[$station]['city'] ." Time Series");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
