@@ -26,7 +26,7 @@ $bogus = 0;
 <p><h3 class="subtitle">1. Select Station:</h3><br>
 <i>Select One or More or All stations in the network.</i><br>
 <div class="story">
-  <?php asosMultiSelect("", 5); ?>
+  <?php echo networkMultiSelect("IA_ASOS", "", Array("FSD","MLI","OMA") ); ?>
 </div>
 
 <p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
