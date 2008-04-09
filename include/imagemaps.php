@@ -1,6 +1,6 @@
 <?php
 
-function networkMultiSelect($network, $selected)
+function networkMultiSelect($network, $selected, $extra=Array())
 {
     global $rootpath;
     $network = strtoupper($network);
@@ -15,11 +15,18 @@ function networkMultiSelect($network, $selected)
         if ($selected == $sid) { $s .= "SELECTED"; }
         $s .= ">[$sid] ". $tbl["city"] ."</option>\n";
    }
+   while (list($idx,$sid) = each($extra))
+   {
+        $tbl = $cities[$sid];
+        $s .= "<option value=\"$sid\" ";
+        if ($selected == $sid) { $s .= "SELECTED"; }
+        $s .= ">[$sid] ". $tbl["city"] ."</option>\n";
+   }
    $s .= "</select>\n";
    return $s;
 }
 
-function networkSelect($network, $selected)
+function networkSelect($network, $selected, $extra=Array())
 {
     global $rootpath;
     $network = strtoupper($network);
@@ -30,6 +37,13 @@ function networkSelect($network, $selected)
     while (list($sid, $tbl) = each($cities))
     {
         if ($tbl["network"] != $network) continue;
+        $s .= "<option value=\"$sid\" ";
+        if ($selected == $sid) { $s .= "SELECTED"; }
+        $s .= ">". $tbl["city"] ."</option>\n";
+   }
+   while (list($idx,$sid) = each($extra))
+   {
+        $tbl = $cities[$sid];
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
         $s .= ">". $tbl["city"] ."</option>\n";
