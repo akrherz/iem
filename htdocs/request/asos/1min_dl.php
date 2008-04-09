@@ -9,7 +9,7 @@ include_once("$rootpath/include/database.inc.php");
  * 24 Mar 2004	Support AWOS sky coverage codes
  */
 
-include("$rootpath/include/asosLoc.php");
+include("$rootpath/include/all_locs.php");
 
 $skycover = Array(
  0 => "NOREPORT",
@@ -52,12 +52,6 @@ foreach ($stations as $key => $value){
 }
 
 
-if ($selectAll){
-  $stationString = "(";
-  foreach ($Acities as $key => $value){
-    $stationString .= " '". $key ."',";
-  }
-}
 
 $stationString = substr($stationString, 0, -1);
 $stationString .= ")";
@@ -152,9 +146,9 @@ if ($what != "plot"){
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
   $sid = $row["station"];
-  echo $sid . $d[$delim] . $Acities[$sid]["city"] ;
+  echo $sid . $d[$delim] . $cities[$sid]["city"] ;
   if ($gis == "yes"){
-     echo  $d[$delim] . $Acities[$sid]["lat"] . $d[$delim] .  $Acities[$sid]["lon"] ;
+     echo  $d[$delim] . $cities[$sid]["lat"] . $d[$delim] .  $cities[$sid]["lon"] ;
   } 
   echo $d[$delim] . $row["dvalid"] . $d[$delim];
   for ($j=0; $j < $num_vars;$j++){
