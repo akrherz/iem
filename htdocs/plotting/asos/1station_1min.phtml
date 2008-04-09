@@ -29,7 +29,7 @@ and Des Moines.  Other ASOS sites have data since March 2003.
   <?php
 
     echo "Make plot selections: <br>";
-    echo asosSelect($station); 
+    echo networkSelect("IA_ASOS", $station, Array("FSD","MLI","OMA") ); 
  
    echo yearSelect(2000, $year, "year"); 
   ?>
