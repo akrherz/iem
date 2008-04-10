@@ -139,7 +139,7 @@ LAYER
   NAME states
   STATUS ON
   TYPE LINE
-  DATA /mesonet/data/gis/shape/2163/usa/states.shp
+  DATA /mesonet/data/gis/static/shape/2163/usa/states.shp
   PROJECTION
    "init=epsg:2163"
   END
