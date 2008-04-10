@@ -77,7 +77,7 @@ LAYER
 END
 
 LAYER
- NAME radar
+ NAME nexrad_n0r
  STATUS ON
  TYPE RASTER
  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif"
@@ -89,14 +89,14 @@ END
 
 
 LAYER
-  NAME counties
+  NAME uscounties
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/static/shape/4326/us/nwscounties.shp
+  DATA /mesonet/data/gis/static/shape/2163/usa/nwscounties.shp
   PROJECTION
-   "init=epsg:4326"
+   "init=epsg:2163"
   END
-  MAXSCALE 100000
+  MAXSCALE 10000000
   CLASS
     OUTLINECOLOR 54 54 54
   END
@@ -204,11 +204,77 @@ LAYER
   END
 END
 
+LAYER
+  CONNECTIONTYPE postgis
+  NAME sbw
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
+  STATUS OFF
+  TYPE POLYGON
+  METADATA
+    "wms_title" "Current Polygon Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM 'phenomena'
+  # Tornado 
+  CLASS
+    EXPRESSION /TO/
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 0 0
+      SIZE    1
+      SYMBOL  'circle'
+    END
+  END
+  # SVR
+  CLASS
+    EXPRESSION /SV/
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 0
+      SIZE    1
+      SYMBOL  'circle'
+    END
+  END
+  # MA
+  CLASS
+    EXPRESSION /MA/
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 255
+      SIZE    1
+      SYMBOL  'circle'
+    END
+  END
+END
+
 
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
-  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
