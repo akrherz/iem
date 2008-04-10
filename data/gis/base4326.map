@@ -1424,5 +1424,17 @@ LAYER
   END
 END
 
+LAYER
+  NAME "n0r-ramp"
+  TYPE POINT
+  STATUS default
+  TRANSFORM FALSE
+  TRANSPARENCY 10
+  CLASS
+    SYMBOL 'n0r-ramp'
+    #SIZE 40
+        COLOR 0 0 0
+  END
+END
 
 END
