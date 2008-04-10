@@ -5,7 +5,7 @@ NAME base2163
 STATUS ON
 SIZE 640 480
 FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
-#EXTENT -100 30 -80 45
+EXTENT -2110437 -2251067 2548326 1239063
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/static/"
 SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
