@@ -80,24 +80,12 @@ LAYER
  NAME radar
  STATUS ON
  TYPE RASTER
- DATA "/mesonet/data/gis/static/images/unproj/USCOMP/n0r_0.tif"
+ DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif"
  OFFSITE 0 0 0
  PROJECTION
   "init=epsg:4326"
  END
 END
-
-LAYER
- NAME mwradar
- STATUS ON
- TYPE RASTER
- DATA "/mesonet/data/gis/static/images/unproj/USCOMP/n0r_0.tif"
- OFFSITE 0 0 0
- PROJECTION
-  "init=epsg:4326"
- END
-END
-
 
 
 LAYER
