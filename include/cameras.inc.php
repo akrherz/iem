@@ -18,7 +18,7 @@ $cameras = Array(
     "state" => "IA", "network" => "KCCI",
     "ip" => "216.203.109.40", "county" => "Carroll", "port" => "80"),
 "KCRG-001" => Array("sts" => mktime(17,0,0,4, 15,2008), "ets" => time(),
-    "name" => "CDR - Mount Mercy", "removed" => False, "active" => False, "lat" => 42.0, "lon" => -91.65,
+    "name" => "CDR - Mount Mercy", "removed" => False, "active" => True, "lat" => 42.0, "lon" => -91.65,
     "state" => "IA", "network" => "KCRG",
     "ip" => "192.251.94.203", "county" => "Linn", "port" => "80"),
 "KCCI-022" => Array("sts" => mktime(14,0,0,6, 11,2006), "ets" => time(),
