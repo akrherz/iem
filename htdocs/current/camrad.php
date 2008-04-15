@@ -23,8 +23,10 @@ dl($mapscript);
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 if ($network == "KCCI")
  $map->setExtent(-95.0,40.45,-92.1,43.3);
-if ($network == "KELO")
+elseif ($network == "KELO")
  $map->setExtent(-98.0,42.45,-95.1,45.3);
+if ($network == "KCRG")
+ $map->setExtent(-93.0,40.45,-90.1,43.3);
 $map->set("width", 320);
 $map->set("height", 240);
 

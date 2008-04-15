@@ -60,7 +60,8 @@ if (! $isarchive)
 
 <?php 
   if ($network == "KCCI") { include("kccicam.php"); }
-  if ($network == "KELO") { include("kelocam.php"); }
+  elseif ($network == "KELO") { include("kelocam.php"); }
+  elseif ($network == "KCRG") { include("kcrgcam.php"); }
 ?>
 
 <?php include("$rootpath/include/footer.php"); ?>
