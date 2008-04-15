@@ -399,5 +399,35 @@ LAYER
   END
 END
 
+###
+# Watch by County
+LAYER
+  CONNECTIONTYPE postgis
+  NAME "watch_by_county"
+  CONNECTION "dbname=postgis host=iemdb user=nobody"
+  STATUS ON
+  TYPE LINE
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM "phenomena"
+  CLASS
+    EXPRESSION 'TO'
+    STYLE
+      COLOR 255 0 0
+      SIZE 2
+      SYMBOL 1
+    END
+  END
+  CLASS
+    EXPRESSION 'SV'
+    STYLE
+      COLOR 255 255 0
+      SIZE 2
+      SYMBOL 1
+    END
+  END
+END
+
 
 END
