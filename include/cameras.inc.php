@@ -17,6 +17,10 @@ $cameras = Array(
     "name" => "Carroll", "removed" => True, "active" => False, "lat" => 42.07, "lon" => -94.87,
     "state" => "IA", "network" => "KCCI",
     "ip" => "216.203.109.40", "county" => "Carroll", "port" => "80"),
+"KCRG-001" => Array("sts" => mktime(17,0,0,4, 15,2008), "ets" => time(),
+    "name" => "CDR - Mount Mercy", "removed" => False, "active" => False, "lat" => 42.0, "lon" => -91.65,
+    "state" => "IA", "network" => "KCRG",
+    "ip" => "192.251.94.203", "county" => "Linn", "port" => "80"),
 "KCCI-022" => Array("sts" => mktime(14,0,0,6, 11,2006), "ets" => time(),
     "name" => "Chariton", "removed" => False, "active" => False, "lat" => 41.02, "lon" => -93.31,
     "state" => "IA", "network" => "KCCI",
@@ -129,6 +133,10 @@ $cameras = Array(
     "name" => "Twin Cedars", "removed" => False, "active" => True, "lat" => 41.2183, "lon" => -92.9268,
     "state" => "IA", "network" => "KCCI",
     "ip" => "209.56.232.244", "county" => "Marion", "port" => "80"),
+"KELO-004" => Array("sts" => mktime(17,0,0,4, 15,2008), "ets" => time(),
+    "name" => "Watertown", "removed" => False, "active" => False, "lat" => 44.8656, "lon" => -97.1056,
+    "state" => "SD", "network" => "KELO",
+    "ip" => "127.127.127.127", "county" => "Codington", "port" => "90"),
 "KCCI-003" => Array("sts" => mktime(0,0,0,8, 28,2003), "ets" => time(),
     "name" => "Webster City", "removed" => False, "active" => True, "lat" => 42.47, "lon" => -93.82,
     "state" => "IA", "network" => "KCCI",
@@ -136,4 +144,4 @@ $cameras = Array(
 "KCCI-013" => Array("sts" => mktime(17,0,0,5, 14,2004), "ets" => time(),
     "name" => "Winterset", "removed" => False, "active" => False, "lat" => 41.33, "lon" => -94.01,
     "state" => "IA", "network" => "KCCI",
-    "ip" => "66.6.127.190", "county" => "Madison", "port" => "80"),); ?>
+    "ip" => "12.216.174.208", "county" => "Madison", "port" => "80"),); ?>
