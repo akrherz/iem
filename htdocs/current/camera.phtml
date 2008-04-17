@@ -13,7 +13,8 @@
  $radts = mktime($hour, $minute, 0, $month, $day, $year) - (($minute % 5) * 60);
 
  $num = 1;
- include("$rootpath/include/cameras.inc.php"); 
+ include("$rootpath/include/cameras.inc.php");
+if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
  while (list($id, $val) = each($cameras))
  {
     if ($cameras[$id]["network"] != $network) continue;
