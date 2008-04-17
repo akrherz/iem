@@ -20,6 +20,8 @@ if (isset($_GET["ts"]))
                 1 + $q["tm_mon"], $q["tm_mday"], 1900 + $q["tm_year"]);
 }
 /* Now, we need to figure out if we are in realtime or archive mode */
+if (time() - $ts < 300){ $ts = 0; }
+
 if ($ts > 0)
 { /* If we are in archive mode and requesting a non 5 minute interval,
      what shall we do? Lets check for entries in the database */
