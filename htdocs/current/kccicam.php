@@ -22,8 +22,11 @@ able to place a network of over 20 web cameras in Central Iowa.
 
 <?php $t = time(); ?>
 
+<div style="float: left; margin-left: 5px;"><b>Radar View</b><br />
+<img src="camrad.php?network=<?php echo $network; ?>&ts=<?php echo date("YmdHi", $radts);?>"></div>
+
+
 <?php
- include("camrad.php");
  $misstxt = "Cameras Missing: ";
  reset($cameras);
  while (list($id, $v) = each($cameras))

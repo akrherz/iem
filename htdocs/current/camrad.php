@@ -1,32 +1,65 @@
 <?php
-/* Generate a radar image with camera locs for some time */
+/* Require PHP5 
+   Generate a radar image with camera locs for some time 
+   17 Apr 2008 - Now we are directly callable!  Yippee 
+*/
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/snet_locs.php");
-
-$db_ts = strftime("%Y-%m-%d %H:%M", $ts );
-$cam_ts = strftime("%Y-%m-%d %H:%M", $radts );
-
-$cdrct = Array();
-$sql = "SELECT * from camera_current";
-if ($isarchive)
-  $sql = "SELECT * from camera_log WHERE valid = '$cam_ts'";
-
+include("$rootpath/include/cameras.inc.php");
 $conn = iemdb("mesosite");
-$rs = pg_exec($conn, $sql);
+
+/* First, we need some GET vars */
+$network = isset($_GET["network"]) 
+           ? substr($_GET["network"],0,4) : die("No \$network Set");
+$ts = 0;
+if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
+if (isset($_GET["ts"]))
+{
+  $q = strptime($_GET["ts"],'%Y%m%d%H%M');
+  $ts = mktime( $q["tm_hour"], $q["tm_min"], 0,
+                1 + $q["tm_mon"], $q["tm_mday"], 1900 + $q["tm_year"]);
+}
+/* Now, we need to figure out if we are in realtime or archive mode */
+if ($ts > 0)
+{ /* If we are in archive mode and requesting a non 5 minute interval,
+     what shall we do? Lets check for entries in the database */
+  $sql = sprintf("SELECT * from camera_log WHERE valid = '%s'", 
+               strftime("%Y-%m-%d %H:%M", $ts ) );
+  $rs = pg_exec($conn,$sql);
+  if (pg_numrows($rs) == 0){
+    $ts = $ts - (intval(date("i",$ts)) % 5 * 60);
+    $sql = sprintf("SELECT * from camera_log WHERE valid = '%s'", 
+               strftime("%Y-%m-%d %H:%M", $ts ) );
+    $rs = pg_exec($conn,$sql);
+  }
+
+  /* Now we compute the RADAR timestamp, yippee */
+  $radts = $ts - (intval(date("i",$ts)) % 5 * 60);
+} else {
+  $sql = "SELECT * from camera_current";
+  $rs = pg_exec($conn, $sql);
+  $radts = time() - (intval(date("i",time())) % 5 * 60);
+}
+
+/* Who was online and where did they look?  Hehe */
+$cdrct = Array();
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
 {  $cdrct[ $row["cam"] ] = $row["drct"]; }
 
 
+/* Finally we get to map rendering */
 dl($mapscript);
 
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+
+/* Hard coded extents based on network */
 if ($network == "KCCI")
  $map->setExtent(-95.0,40.45,-92.1,43.3);
 elseif ($network == "KELO")
  $map->setExtent(-98.0,42.45,-95.1,45.3);
-if ($network == "KCRG")
+elseif ($network == "KCRG")
  $map->setExtent(-93.0,40.45,-90.1,43.3);
+
 $map->set("width", 320);
 $map->set("height", 240);
 
@@ -42,23 +75,23 @@ $counties->set("status", 1);
 $c0 = $map->getlayerbyname("sbw");
 $c0->set("connection", $_DATABASES["postgis"] );
 $c0->set("status", MS_ON );
-if ($isarchive)
+if ($ts > 0)
 {
+   $db_ts = strftime("%Y-%m-%d %H:%M", $ts );
+   $year = date("Y", $ts);
    $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P' and significance = 'W' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
 }else {
+   $db_ts = strftime("%Y-%m-%d %H:%M", time() );
    $sql = "geom from (select significance, phenomena, geom, oid from warnings WHERE expire > '$db_ts' and gtype = 'P' and significance = 'W' ORDER by phenomena ASC) as foo using unique oid using SRID=4326";
    $c0->set("data", $sql);
 }
 
 $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("status", MS_ON );
-if ($isarchive) 
+if ($ts > 0) 
 {
   $fp = "/mesonet/ARCHIVE/data/". gmdate('Y/m/d/', $radts) ."GIS/uscomp/n0r_". gmdate('YmdHi', $radts) .".png";
-  if (! is_file($fp))
-    echo "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
-  $radfile = $fp;
-  $radar->set("data", $radfile);
+  $radar->set("data", $fp);
 }
 
 
@@ -103,20 +136,19 @@ $radar->draw($img);
 $c0->draw($img);
 
 /* Draw Points */
-reset($cameras);
-while (list($key, $val) = each($cameras))
+while (list($key, $drct) = each($cdrct))
 {
-   if ($val["network"] != $network) continue;
-   if (! $cameras[$key]["active"]) continue;
-   $lon = isset($val["lon"]) ? $val["lon"] : $cities["KCCI"][$key]['lon'];
-   $lat = isset($val["lat"]) ? $val["lat"] : $cities["KCCI"][$key]['lat'];
+   if ($cameras[$key]["network"] != $network) continue;
+   $lon = $cameras[$key]['lon'];
+   $lat = $cameras[$key]['lat'];
 
    $pt = ms_newPointObj();
    $pt->setXY($lon, $lat, 0);
-   $pt->draw($map, $cp, $img, 0, $cameras[$key]['num'] );
+   $pt->draw($map, $cp, $img, 0, intval( substr($key,5,3) ) );
    $pt->free();
 
-   if (array_key_exists($key, $cdrct)){ 
+   if ($cdrct[$key] >= 0)
+   {
      $pt = ms_newPointObj();
      $pt->setXY($lon, $lat, 0);
      $cl2->label->set("angle",  (0 - $cdrct[$key]) + 90 );
@@ -133,7 +165,6 @@ $point->draw($map, $layer, $img, "credits",  "RADAR: $d");
 
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage();
-
-echo "<div style=\"float: left;\"><b>Radar View:</b><br /><img src=\"$url\"></div>";
+header("Content-type: image/png");
+$img->saveImage('');
 ?>
