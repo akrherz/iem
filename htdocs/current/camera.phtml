@@ -41,7 +41,8 @@ if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
     else $cameras[$id]["active"] = false;
  }
  
- if ($cameras[$id]["active"]){ $cameras[$id]["num"] = $num; $num += 1; }
+ if ($cameras[$id]["active"]){ 
+  $cameras[$id]["num"] = intval(substr($id,5,3)); }
 }/* End of while */
 
 reset($cameras);
