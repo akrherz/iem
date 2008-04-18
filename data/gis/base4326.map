@@ -155,7 +155,7 @@ LAYER
   END
   CLASS
     SYMBOL "circle"
-    COLOR 141 141 141
+    COLOR 54 54 54
     SIZE 1
   END
 END
