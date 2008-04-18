@@ -48,6 +48,11 @@ $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", MS_ON);
 $lakes->draw($img);
 
+/* Draw NEXRAD Layer */
+$radar = $map->getlayerbyname("nexrad_n0r");
+$radar->set("status", MS_ON);
+$radar->draw($img);
+
 $counties = $map->getlayerbyname("uscounties");
 $counties->set("status", MS_ON);
 $counties->draw($img);
@@ -56,10 +61,6 @@ $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
 $states->draw($img);
 
-/* Draw NEXRAD Layer */
-$radar = $map->getlayerbyname("nexrad_n0r");
-$radar->set("status", MS_ON);
-$radar->draw($img);
 
 /* Watch by County */
 $wbc = $map->getlayerbyname("watch_by_county");
