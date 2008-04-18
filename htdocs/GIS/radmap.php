@@ -7,6 +7,10 @@ $sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
 
 $sectors = Array(
  "iem" => Array("epsg" => 4326, "ext" => Array(-100.0, 38.5, -88.0, 46.5)),
+ "lot" => Array("epsg" => 4326, "ext" => Array(-94.8, 39.0, -83.5, 46.5)),
+ "ict" => Array("epsg" => 4326, "ext" => Array(-102.4, 35.45, -94.4, 40.35)),
+ "sd" => Array("epsg" => 4326, "ext" => Array(-105.5, 40.5, -95.5, 48.0)),
+ "hun" => Array("epsg" => 4326, "ext" => Array(-90.0, 32.0, -84.0, 36.0)),
  "conus" => Array("epsg" => 2163, 
          "ext" => Array(-2110437, -2251067, 2548326, 1239063)),
  "texas" => Array("epsg" => 2163, 
