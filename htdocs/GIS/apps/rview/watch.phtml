@@ -60,23 +60,24 @@ $map->setextent($row["x0"] -$margin,
                 $row["x1"]+$margin,
                 $row["y1"]+$margin);
 
+$img = $map->prepareImage();
 
 $namer = $map->getlayerbyname("namerica");
 $namer->set("status", 1);
-
-$stlayer = $map->getlayerbyname("states");
-$stlayer->set("status", 1);
+$namer->draw($img);
 
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
+$lakes->draw($img);
+
 
 $clayer = $map->getlayerbyname("uscounties");
 $clayer->set("status", 1);
+$clayer->draw( $img );
 
-$watches = $map->getlayerbyname("watches");
-$watches->set("connection", $_DATABASES["postgis"] );
-$watches->set("status", 1);
-$watches->set("data", "geom from (select type as wtype, geom, oid from watches where extract(year from issued) = $year and num = $num) as foo using unique oid using srid=4326");
+$stlayer = $map->getlayerbyname("states");
+$stlayer->set("status", 1);
+$stlayer->draw( $img);
 
 $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets) ."GIS/uscomp/n0r_". date('YmdHi', $basets) .".png";
 if (! is_file($fp))
@@ -94,16 +95,27 @@ $radfile = $fp;
 $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("data", $radfile);
 $radar->set("status", 1);
-
-
-
-$img = $map->prepareImage();
-$namer->draw($img);
-$clayer->draw( $img );
-$stlayer->draw( $img);
-$lakes->draw($img);
 $radar->draw($img);
+
+$wbc = $map->getlayerbyname("watch_by_county");
+$wbc->set("status", MS_ON);
+$wbc->set("data", "g from (select phenomena, eventid, multi(geomunion(geom)) 
+  as g from warnings_$year WHERE significance = 'A' 
+  and phenomena = '". substr($row["type"],0,2) ."'
+  and eventid = $num GROUP by phenomena, 
+  eventid ORDER by phenomena ASC) as foo 
+  using SRID=4326 using unique phenomena");
+$wbc->draw($img);
+
+
+$watches = $map->getlayerbyname("watches");
+$watches->set("connection", $_DATABASES["postgis"] );
+$watches->set("status", 1);
+$watches->set("data", "geom from (select type as wtype, geom, oid from watches where extract(year from issued) = $year and num = $num) as foo using unique oid using srid=4326");
+
 $watches->draw($img);
+
+
 
 mktitle($map, $img, "                 SPC Watch #$num: $d UTC");
 
@@ -229,9 +241,10 @@ $ourl = $img->saveWebImage();
 </td></tr></table>
 </form>
 
-<p>Watch box with NEXRAD composite at watch issuance:
+<h3>Initial watch box and Watch By County Outline</h3>
 <br /><?php echo $ERROR;?>
-<br /><img src="<?php echo $url; ?>">
-<br /><?php if (isset($lurl)){ echo "Local Storm Reports:<br /><img src=\"$lurl\">"; } ?>
+<img src="<?php echo $url; ?>">
+
+<?php if (isset($lurl)){ echo "<h3>Local Storm Reports:</h3><img src=\"$lurl\">"; } ?>
 
 <?php include("$rootpath/include/footer.php"); ?>
