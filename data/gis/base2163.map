@@ -53,7 +53,7 @@ LAYER
   PROJECTION
    "init=epsg:2163"
   END
-  CLASSITEM "FIRST_FIPS"
+  CLASSITEM "FIPS_CNTRY"
   CLASS
     EXPRESSION /US/
     COLOR  105 105 105
@@ -67,7 +67,7 @@ LAYER
   NAME lakes
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/static/shape/2163/usa/major_lakes.shp
+  DATA /mesonet/data/gis/static/shape/2163/us/major_lakes.shp
   PROJECTION
    "init=epsg:2163"
   END
@@ -92,7 +92,7 @@ LAYER
   NAME uscounties
   STATUS ON
   TYPE POLYGON
-  DATA /mesonet/data/gis/static/shape/2163/usa/nwscounties.shp
+  DATA /mesonet/data/gis/static/shape/2163/us/uscounties.shp
   PROJECTION
    "init=epsg:2163"
   END
@@ -127,7 +127,7 @@ LAYER
   NAME states
   STATUS ON
   TYPE LINE
-  DATA /mesonet/data/gis/static/shape/2163/usa/states.shp
+  DATA /mesonet/data/gis/static/shape/2163/us/states.shp
   PROJECTION
    "init=epsg:2163"
   END
