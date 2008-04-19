@@ -71,6 +71,7 @@ $wbc->draw($img);
 
 $sbw = $map->getlayerbyname("sbw");
 $sbw->set("status", MS_ON);
+$sbw->set("maxscale", 10000000);
 $sbw->draw($img);
 
 $bar640t = $map->getLayerByName("bar640t");
