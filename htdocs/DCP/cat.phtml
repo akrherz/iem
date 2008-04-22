@@ -78,9 +78,14 @@ echo sprintf($fmt, "NWSLI", "Site Name", "TAI", "PCI", "PPH", "UDI", "USI");
 // strftime("%d %b %Y %I:%M %p", strtotime($row["valid"]))
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-  echo sprintf($fmt,  
+  if ($year < 2008)
+    echo sprintf($fmt,  
      $row["station"] , substr($cities[$row["station"]]['city'], 0, 24), 
      $row["tai"], $row["pci"], $row["pph"], $row["udi"], $row["usi"] );
+  else
+    echo sprintf($fmt,  
+     $row["station"] , substr($cities[$row["station"]]['city'], 0, 24), 
+     $row["tmpf"], $row["rstage"], $row["phour"], $row["drct"], $row["sknt"] );
 }
 echo "</pre>\n";
 ?>
