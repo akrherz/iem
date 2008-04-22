@@ -65,12 +65,14 @@ $states->draw($img);
 /* Watch by County */
 $wbc = $map->getlayerbyname("watch_by_county");
 $wbc->set("status", MS_ON);
+$wbc->set("connection", "user=nobody dbname=postgis host=iemdb");
 $wbc->set("data", "g from (select phenomena, eventid, multi(geomunion(geom)) as g from warnings WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= now() and expire > now() GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena");
 $wbc->draw($img);
 
 
 $sbw = $map->getlayerbyname("sbw");
 $sbw->set("status", MS_ON);
+$sbw->set("connection", "user=nobody dbname=postgis host=iemdb");
 $sbw->set("maxscale", 10000000);
 $sbw->draw($img);
 
