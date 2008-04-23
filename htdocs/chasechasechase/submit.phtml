@@ -1,0 +1,151 @@
+<?php
+putenv("TZ=GMT");
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$dbconn = iemdb("postgis");
+$apikey = "ABQIAAAArXt77YptylBNPFEy0AgJxBTlJN_29soYq5yLAG76UMYI29UmpxS3kCDrsd3w7aO6B5Hyv1XVbOyHnw";
+
+/* Lets figure out when we are forecasting for */
+$fxts = time();
+if (date("H", $fxts) >= 16) $fxts = $fxts + 50000; /* Tomorrow UTC */
+$fxsqldate = date("Y-m-d", $fxts);
+$fxdate = date("d F", $fxts);
+
+/* Okay if CGI vars are set, lets submit things */
+if ( isset($_POST["tor5"]) && isset($_POST["username"]) &&
+     isset($_POST["password"]) )
+{
+
+}
+
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+
+<script src="http://maps.google.com/maps?file=api&v=2.x&key=<?php echo $apikey; ?>" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+//<![CDATA[
+// Thank you http://www.admaps.com/dragpoly.htm
+
+_mSvgEnabled = true;
+_mSvgForced  = true;
+
+var marker=[];
+var point=[];
+var poly=[];
+var line=[];
+var map ;
+
+function load()
+{
+ map = new GMap2(document.getElementById("map"));
+ var start = new GLatLng(35.127771,-89.967041);
+ map.setCenter(start, 4);
+
+ map.addControl(new GLargeMapControl());
+ map.addControl(new GMapTypeControl());
+ map.addControl(new GScaleControl()) ;
+ map.addControl(new GOverviewMapControl()) ;
+
+ var icon = new GIcon();
+ icon.image = "http://labs.google.com/ridefinder/images/mm_20_red.png";
+ icon.shadow = "http://labs.google.com/ridefinder/images/mm_20_shadow.png";
+ icon.iconSize = new GSize(12, 20);
+ icon.shadowSize = new GSize(22, 20);
+ icon.iconAnchor = new GPoint(6, 20);
+
+ point.push(new GLatLng(35.0,-99.0));
+ point.push(new GLatLng(42.0,-97.0));
+ point.push(new GLatLng(42.0,-89.0));
+ point.push(new GLatLng(35.0,-89.0));
+ point.push(new GLatLng(32.0,-93.0));
+ point.push(new GLatLng(32.0,-95.0));
+ 
+ for(var n = 0 ; n < point.length ; n++)
+ {
+  marker[n] = new GMarker(point[n], {icon:icon, draggable: true});
+  map.addOverlay(marker[n]);
+  marker[n].enableDragging();
+  GEvent.addListener(marker[n],'dragend',function() {draw()});
+ }
+
+ draw( ) ;
+
+}
+
+function draw()
+{
+ poly.length=0; 
+ for(var i = 0 ; i < marker.length ;i++)
+ {
+  poly.push(marker[i].getPoint());
+ }
+ poly.push(marker[0].getPoint());
+ if(line){map.removeOverlay(line)};
+ line=new GPolygon(poly,'#FF0000', 3, 1,'#0000FF',0.2);
+ map.addOverlay(line);
+
+ document.getElementById("tor5area").innerHTML = "Polygon Area: "+ 
+      (line.getArea() / 1000000) +" square km";
+};
+
+function mySubmit()
+{
+  var pts = "";
+  var p ;
+  for(var i = 0 ; i < marker.length ;i++){
+    pts = pts + marker[i].getPoint().x +" "+ marker[i].getPoint().y +",";
+  }
+  pts = pts + marker[0].getPoint().x +" "+ marker[0].getPoint().y ;
+  alert(pts);
+  document.getElementById("myform").tor5.value = pts;
+  document.getElementById("myform").submit();
+
+};
+
+//]]>
+
+</script>
+
+
+</head>
+<body onload="load()" onunload="GUnload()">
+<div style="width: 550px; height: 40px">
+<h2>IEM Chase Chase Chase for <?php echo $fxdate; ?> 16 UTC thru 12 UTC</h2>
+</div>
+<script language="javascript">
+<!--
+ if( window.innerHeight )
+ {
+  var width = window.innerWidth - 350 ;
+  var height = window.innerHeight - 90 ; 
+ } else
+ {
+  var width = document.documentElement.offsetWidth - 400 ;
+  var height = document.documentElement.offsetHeight - 110 ; 
+ }
+ document.write('<div id="map" style="float: left; width: ' + width  + 'px; height:' + height + 'px; border: thin solid black;"></div>') ;
+ // -->
+</script>
+
+<div style="float: right; width: 200px; padding-right: 5px;">
+<form method="POST" id="myform">
+<input type="hidden" name="tor5">
+<p><strong>Username:</strong>
+<br /><input type="text" name="username" size="30">
+
+<p><strong>Password:</strong>
+<br /><input type="password" name="password" size="30">
+
+<p><div id="tor5area">Polygon Area: 0 square km</div>
+
+<p><strong>Submit:</strong>
+<br /><input type="submit" onClick="mySubmit(); return false;">
+</form>
+</div>
+
+</body>
+</html>
