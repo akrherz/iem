@@ -65,7 +65,7 @@ $params = Array(
   'maplayer' => 'data', 
   'dbdate' => strftime("%Y-%m-%d", $ts),
   'sql' => "the_geom from (select d.fips,
-    d.precip / 25.4 as DA,
+    d.precip / 25.4 as da,
     the_geom from weather d, counties c
     WHERE d.valid = '". strftime("%Y-%m-%d", $ts) ."' and d.fips = c.fips) as foo
     using unique fips using srid=4326"),
@@ -77,7 +77,7 @@ $params = Array(
   'maplayer' => 'data', 
   'dbdate' => strftime("%Y-%m-%d", $ts),
   'sql' => "the_geom from (select d.fips,
-    rh as DA,
+    rh as da,
     the_geom from weather d, counties c
     WHERE d.valid = '". strftime("%Y-%m-%d", $ts) ."' and d.fips = c.fips) as foo
     using unique fips using srid=4326"),
@@ -90,7 +90,7 @@ $params = Array(
   'maplayer' => 'data', 
   'dbdate' => strftime("%Y-%m-%d", $ts),
   'sql' => "the_geom from (select d.fips,
-    round(((1.8 * d.low::real) + 32.0)::numeric, 0) as DA,
+    round(((1.8 * d.low::real) + 32.0)::numeric, 0) as da,
     the_geom from weather d, counties c
     WHERE d.valid = '". strftime("%Y-%m-%d", $ts) ."' and d.fips = c.fips) as foo
     using unique fips using srid=4326"),
@@ -103,7 +103,7 @@ $params = Array(
   'maplayer' => 'data', 
   'dbdate' => strftime("%Y-%m-%d", $ts),
   'sql' => "the_geom from (select d.fips,
-    round(((1.8 * d.high::real) + 32.0)::numeric, 0) as DA,
+    round(((1.8 * d.high::real) + 32.0)::numeric, 0) as da,
     the_geom from weather d, counties c
     WHERE d.valid = '". strftime("%Y-%m-%d", $ts) ."' and d.fips = c.fips) as foo
     using unique fips using srid=4326"),
@@ -117,7 +117,7 @@ $params = Array(
   'maplayer' => 'data', 
   'dbdate' => strftime("%Y-%m-%d", $ts),
   'sql' => "the_geom from (select d.fips,
-    evaporation / 25.4 as DA,
+    evaporation / 25.4 as da,
     the_geom from weather d, counties c
     WHERE d.valid = '". strftime("%Y-%m-%d", $ts) ."' and d.fips = c.fips) as foo
     using unique fips using srid=4326"),
@@ -129,7 +129,7 @@ $params = Array(
   'maplayer' => 'data', 
   'dbdate' => strftime("%Y-%m-%d", $ts),
   'sql' => "the_geom from (select d.fips,
-    solar as DA,
+    solar as da,
     the_geom from weather d, counties c
     WHERE d.valid = '". strftime("%Y-%m-%d", $ts) ."' and d.fips = c.fips) as foo
     using unique fips using srid=4326"),
@@ -140,8 +140,6 @@ $param = $params[$var];
 $param['ramp'] = $ramps[ $param['myramp'] ];
 $param["title"] .= strftime("%d %b %Y", $ts);
 
-
-$pgconn = pg_connect("dbname=nc1018 user=nobody");
 
 
 /* Start Mapping */
@@ -179,66 +177,66 @@ $bins = $param["ramp"];
 if ($var == "rainfall_in")
 {
   $cz = ms_newClassObj($rainfall);
-  $cz->setexpression("([DA] == 0)");
+  $cz->setexpression("([da] == 0)");
 }
 
 $c0 = ms_newClassObj($rainfall);
-$c0->setexpression("([DA] < ". $bins[0] .")");
+$c0->setexpression("([da] < ". $bins[0] .")");
 $c0s = ms_newStyleObj($c0);
 $c0s->color->setRGB($colors[0]['r'], $colors[0]['g'], $colors[0]['b']);
 
 $c1 = ms_newClassObj($rainfall);
-$c1->setexpression("([DA] < ". $bins[1] .")");
+$c1->setexpression("([da] < ". $bins[1] .")");
 $c1s = ms_newStyleObj($c1);
 $c1s->color->setRGB($colors[1]['r'], $colors[1]['g'], $colors[1]['b']);
 
 $c2 = ms_newClassObj($rainfall);
-$c2->setexpression("([DA] < ". $bins[2] .")");
+$c2->setexpression("([da] < ". $bins[2] .")");
 $c2s = ms_newStyleObj($c2);
 $c2s->color->setRGB($colors[2]['r'], $colors[2]['g'], $colors[2]['b']);
 
 $c3 = ms_newClassObj($rainfall);
-$c3->setexpression("([DA] < ". $bins[3] .")");
+$c3->setexpression("([da] < ". $bins[3] .")");
 $c3s = ms_newStyleObj($c3);
 $c3s->color->setRGB($colors[3]['r'], $colors[3]['g'], $colors[3]['b']);
 
 $c4 = ms_newClassObj($rainfall);
-$c4->setexpression("([DA] < ". $bins[4] .")");
+$c4->setexpression("([da] < ". $bins[4] .")");
 $c4s = ms_newStyleObj($c4);
 $c4s->color->setRGB($colors[4]['r'], $colors[4]['g'], $colors[4]['b']);
 
 $c5 = ms_newClassObj($rainfall);
-$c5->setexpression("([DA] < ". $bins[5] .")");
+$c5->setexpression("([da] < ". $bins[5] .")");
 $c5s = ms_newStyleObj($c5);
 $c5s->color->setRGB($colors[5]['r'], $colors[5]['g'], $colors[5]['b']);
 
 $c6 = ms_newClassObj($rainfall);
-$c6->setexpression("([DA] < ". $bins[6] .")");
+$c6->setexpression("([da] < ". $bins[6] .")");
 $c6s = ms_newStyleObj($c6);
 $c6s->color->setRGB($colors[6]['r'], $colors[6]['g'], $colors[6]['b']);
 
 $c7 = ms_newClassObj($rainfall);
-$c7->setexpression("([DA] < ". $bins[7] .")");
+$c7->setexpression("([da] < ". $bins[7] .")");
 $c7s = ms_newStyleObj($c7);
 $c7s->color->setRGB($colors[7]['r'], $colors[7]['g'], $colors[7]['b']);
 
 $c8 = ms_newClassObj($rainfall);
-$c8->setexpression("([DA] < ". $bins[8] .")");
+$c8->setexpression("([da] < ". $bins[8] .")");
 $c8s = ms_newStyleObj($c8);
 $c8s->color->setRGB($colors[8]['r'], $colors[8]['g'], $colors[8]['b']);
 
 $c9 = ms_newClassObj($rainfall);
-$c9->setexpression("([DA] < ". $bins[9] .")");
+$c9->setexpression("([da] < ". $bins[9] .")");
 $c9s = ms_newStyleObj($c9);
 $c9s->color->setRGB($colors[9]['r'], $colors[9]['g'], $colors[9]['b']);
 
 $c10 = ms_newClassObj($rainfall);
-$c10->setexpression("([DA] < ". $bins[10] .")");
+$c10->setexpression("([da] < ". $bins[10] .")");
 $c10s = ms_newStyleObj($c10);
 $c10s->color->setRGB($colors[10]['r'], $colors[10]['g'], $colors[10]['b']);
 
 $c11 = ms_newClassObj($rainfall);
-$c11->setexpression("([DA] >= ". $bins[10] .")");
+$c11->setexpression("([da] >= ". $bins[10] .")");
 $c11s = ms_newStyleObj($c11);
 $c11s->color->setRGB($colors[11]['r'], $colors[11]['g'], $colors[11]['b']);
 
