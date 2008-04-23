@@ -3,7 +3,8 @@ putenv("TZ=GMT");
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $dbconn = iemdb("postgis");
-$apikey = "ABQIAAAArXt77YptylBNPFEy0AgJxBTlJN_29soYq5yLAG76UMYI29UmpxS3kCDrsd3w7aO6B5Hyv1XVbOyHnw";
+// $apikey = "ABQIAAAArXt77YptylBNPFEy0AgJxBTlJN_29soYq5yLAG76UMYI29UmpxS3kCDrsd3w7aO6B5Hyv1XVbOyHnw";
+$apikey = "ABQIAAAArXt77YptylBNPFEy0AgJxBSIjila5CAX3xnf3LPOQ4YMwJHl5RSz0SHGhYjGmBwN8n_fvw48igMQLA";
 
 /* Lets figure out when we are forecasting for */
 $fxts = time();
@@ -114,7 +115,7 @@ function mySubmit()
 </head>
 <body onload="load()" onunload="GUnload()">
 <div style="width: 550px; height: 40px">
-<h2>IEM Chase Chase Chase for <?php echo $fxdate; ?> 16 UTC thru 12 UTC</h2>
+<h2>IEM Chase Chase Chase for <?php echo $fxdate; ?>: 16 UTC thru 12 UTC</h2>
 </div>
 <script language="javascript">
 <!--
@@ -131,7 +132,7 @@ function mySubmit()
  // -->
 </script>
 
-<div style="float: right; width: 200px; padding-right: 5px;">
+<div style="float: right; width: 200px; padding-right: 35px;">
 <form method="POST" id="myform">
 <input type="hidden" name="tor5">
 <p><strong>Username:</strong>
@@ -142,9 +143,12 @@ function mySubmit()
 
 <p><div id="tor5area">Polygon Area: 0 square km</div>
 
-<p><strong>Submit:</strong>
-<br /><input type="submit" onClick="mySubmit(); return false;">
+<p>
+<br /><input value="Submit Forecast" type="submit" onClick="mySubmit(); return false;">
 </form>
+
+<p>Scoring Criteria: Lincoln, your job
+
 </div>
 
 </body>
