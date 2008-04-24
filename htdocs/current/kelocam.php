@@ -1,7 +1,5 @@
 <p>
 
-<br /><strong>Tools:</strong> <a href="camlapse/">View recent movies</a> 
-
 <form method="GET" action="camera.phtml">
 <input type="hidden" value="<?php echo $network; ?>" name="network"> 
 <table><caption>Time Settings:</caption>

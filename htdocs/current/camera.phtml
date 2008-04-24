@@ -53,12 +53,26 @@ if (! $isarchive)
     $THISPAGE = "webcam-still";
 	include("$rootpath/include/header.php"); 
 	include("$rootpath/include/forms.php"); 
+
+$selback = Array("KELO" => "#fff", "KCCI" => "#fff", "KCRG" => "#fff");
+$selback[$network] = "#ffcc99";
 ?>
 
 
-<div style="background: #bdf; padding: 3px;">
-<strong>Webcam Networks</strong> &nbsp; <a href="camera.phtml?network=KCCI">KCCI-TV Des Moines, IA</a> &nbsp; <a href="camera.phtml?network=KELO">KELO-TV Sioux Falls, SD</a>
+<strong>Webcam Networks</strong>
+<div style="width:775px; border: 1px dashed #ccc;">
+<div style="float: left; width: 250px; text-align: center; border: 3px #eee solid; background: <?php echo $selback["KCCI"]; ?>;">
+  <a href="camera.phtml?network=KCCI">KCCI-TV<br />Des Moines, IA</a>
 </div>
+<div style="float: left; width: 250px; text-align: center; border: 3px #eee solid; background: <?php echo $selback["KCRG"]; ?>;">
+  <a href="camera.phtml?network=KCRG">KCRG-TV<br />Cedar Rapids, IA</a>
+</div>
+<div style="float: left; width: 250px; text-align: center; border: 3px #eee solid; background: <?php echo $selback["KELO"]; ?>;">
+  <a href="camera.phtml?network=KELO">KELO-TV<br />Sioux Falls, SD</a>
+</div>
+<br clear="all" />
+</div>
+
 
 <?php 
   if ($network == "KCCI") { include("kccicam.php"); }
