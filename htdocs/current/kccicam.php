@@ -1,7 +1,3 @@
-<p>Thanks to the sponsorship of <a href="http://www.cipco.net">CIPCO</a>, the 
-<a href="http://www.schoolnet8.com/">KCCI SchoolNet</a> has been 
-able to place a network of over 20 web cameras in Central Iowa.   
-
 
 <form method="GET" action="camera.phtml">
 <input type="hidden" value="<?php echo $network; ?>" name="network"> 
