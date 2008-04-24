@@ -12,7 +12,6 @@ while ($rancam == "")
   $t = array_rand($cameras);
   if ($cameras[$t]["active"]) $rancam = $t;
 }
-if (substr($rancam,0,4) == "KCRG") $rancam = "KCCI-016";
 
 $TITLE = "Iowa Environmental Mesonet";
 $HEADEXTRA = "<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS feed\" href=\"/rss.php\" />";
