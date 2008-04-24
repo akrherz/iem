@@ -38,7 +38,7 @@ if ($ts > 0)
   /* Now we compute the RADAR timestamp, yippee */
   $radts = $ts - (intval(date("i",$ts)) % 5 * 60);
 } else {
-  $sql = "SELECT * from camera_current";
+  $sql = "SELECT * from camera_current WHERE valid > (now() - '30 minutes'::interval)";
   $rs = pg_exec($conn, $sql);
   $radts = time() - (intval(date("i",time())) % 5 * 60);
 }
