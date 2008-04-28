@@ -1,4 +1,6 @@
 <?php
+include("../../../config/settings.inc.php");
+
 $month = isset($_GET['month']) ? $_GET['month'] : date("m");
 $day = isset($_GET['day']) ? $_GET['day'] : date("d");
 $ts = strtotime("2003-$month-$day");
@@ -8,8 +10,8 @@ $pts = strftime("2003-%m-%d", $ts);
 <?php
  $page = "plotting";
  $TITLE = "IEM | Monthly Temperature Spreads";
-include("/mesonet/php/include/header.php"); 
- include("../../include/forms.php"); ?>
+include("$rootpath/include/header.php"); 
+ include("$rootpath/include/forms.php"); ?>
 
 <p><h3 class="heading">Monthly Temperature Spreads</h3><p>
 
@@ -29,4 +31,4 @@ include("/mesonet/php/include/header.php");
 <p><img src="images/spread_nov.png">
 <p><img src="images/spread_dec.png">
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
