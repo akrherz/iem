@@ -10,6 +10,12 @@
     header("Location: locate.php");
     die();
  }
+ if (! array_key_exists($station, $cities))
+ {
+    header("Location: locate.php");
+    die();
+ }
+
  if (! isset($_GET["network"]) )
  {
     $network = $cities[$station]["network"];
