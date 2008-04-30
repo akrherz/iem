@@ -13,7 +13,6 @@ Copyright &copy; 2001-2008, Iowa State University of Science and Technology.
  <a href="<?php echo $rooturl; ?>/help/abbreviations.php">abbreviations</a>
  &middot; <a href="<?php echo $rooturl; ?>/info/contacts.php">contact us</a>
  &middot; <a href="<?php echo $rooturl; ?>/disclaimer.php">disclaimer</a>
- &middot; <a href="<?php echo $rooturl; ?>/siteindex/">site index</a>
 </div>
 </div> <!-- End of iem-main -->
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
