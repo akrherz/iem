@@ -29,7 +29,7 @@ include("$rootpath/include/database.inc.php");
      <td>[". $row["s_mid"] ."] ". $row["s_name"] ."</td>
      <td>". $row["subject"] ."</td>
      </tr>";
-   $ars[$row["portfolio"]] .= $s;
+   @$ars[$row["portfolio"]] .= $s;
  }
 ?>
 
