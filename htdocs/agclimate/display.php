@@ -7,6 +7,7 @@
 $old2new = Array(
  "/data/agclimate/air-temp-out.png" => 1,
  "/data/agclimate/4in-temp-out.png" => 2,
+ "/agclimate/daily_pics/4in-temp-out.png" => 2,
  "/data/agclimate/soil-hilo-out.png" => 3,
  "/data/agclimate/rad-out.png" => 4,
  "/data/agclimate/prec-out.png" => 5,
