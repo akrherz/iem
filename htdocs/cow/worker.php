@@ -2,6 +2,7 @@
 /* Fails when no polygon warning was present with the warning
    ex) CAR.SV.9.2007
 */
+if (! isset($sts) ) die(); /* Avoid direct calls.... */
 $conn = iemdb("postgis");
 pg_query($conn, "SET TIME ZONE 'GMT'");
 
