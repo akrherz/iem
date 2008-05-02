@@ -1,18 +1,15 @@
 <?php
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
- $site = isset($_GET["site"]) ? $_GET["site"]: "DMX";
+ $site = isset($_GET["site"]) ? substr($_GET["site"],0,3): "DMX";
  $loop = isset($_GET["loop"]) ? $_GET["loop"]: "";
  $fips = isset($_GET["fips"]) ? $_GET["fips"]: "";
 
  $TITLE = "IEM GIS | RADAR & NWS Warnings";
  $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=$rooturl/GIS/apps/iawarn/iawarn.php?site=${site}\">";
- include("$rootpath/include/header.php");
+ $THISPAGE = "current-radar"; include("$rootpath/include/header.php");
 ?>
 <div class="text">
-<b>Nav:</b> <a href="/current/radar.phtml">Current RADAR Data</a> <b> > </b>
-  NEXRAD & Warnings<br>
-
 <?php
 $width = "450";
 $height = "450";
