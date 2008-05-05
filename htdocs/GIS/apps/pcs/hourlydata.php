@@ -5,7 +5,7 @@
  // -----------------------------------------------------------------
 
 // Load MapScript
-dl("php_mapscript.so");
+dl("php_mapscript_5.0.0.so");
 
 function addPoint( $row ){
   GLOBAL $shpFile, $dbfFile;
@@ -41,7 +41,7 @@ $filePre = strftime('%m%d', $ts) ."_coop";
 $cgi = strftime('year=%Y&month=%m&day=%d&hour=%H', $ts);
 
 
-$pgcon = pg_connect("mesonet.agron.iastate.edu", 5432, "postgis");
+$pgcon = pg_connect("iemdb", 5432, "postgis");
 pg_exec($pgcon, "SET TIME ZONE 'GMT'");
 $rs = pg_exec($pgcon, "select s.*, c.*, 
    to_char(c.valid, 'YYYYMMDD') as cvalid from 
