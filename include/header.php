@@ -91,6 +91,7 @@ $_pages = Array(
  "webcam" => Array(
     "base" => Array("title" => "Web Cams", "url" => "/current/camera.phtml"),
     "still" => Array("title" => "Still Images", "url" => "/current/camera.phtml"),
+    "viewer" => Array("title" => "Hi-res + Live", "url" => "/current/viewer.phtml"),
     "loop" => Array("title" => "Loops", "url" => "/current/bloop.phtml"),
     "lapse" => Array("title" => "Recent Movies", "url" => "/current/camlapse/"),
     "cool" => Array("title" => "Cool Lapses", "url" => "/cool/"),
