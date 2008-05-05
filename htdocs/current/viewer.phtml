@@ -1,0 +1,150 @@
+<?php include("../../config/settings.inc.php");
+ include("$rootpath/include/cameras.inc.php"); 
+ $id = isset($_GET["id"]) ? $_GET["id"] : "KCCI-001";
+ if (isset($_COOKIE['camera']) && ! isset($_GET['id']) )
+ {
+   $id = $_COOKIE['camera']; 
+ }
+ $TITLE =  "Live Web Camera Shots";
+ $THISPAGE = "webcam-viewer";
+ include("$rootpath/include/header.php");
+
+?>
+<script language="javascript">
+// <!--
+
+timeID = null;
+imgurl = "";
+cameraID = "<?php echo $id; ?>";
+ts = null;
+aqlive = 0;
+showlogo = 1;
+
+function stop()
+{
+	clearTimeout(timeID);
+}
+function liveShot()
+{
+	if (aqlive) return;
+	aqlive = true;
+	stop();
+ //cameraID = document.main.id[ document.main.id.selectedIndex ].value;
+	for (var i=0; i < document.main.id.length; i++)
+	{
+		if (document.main.id[i].checked)
+		{
+			cameraID = document.main.id[i].value;
+		}
+	}
+	ts = new Date();
+	imgurl = "live.php?id="+ cameraID +"&"+ ts.getTime();
+	document.camera.src = imgurl;
+	aqlive = false;
+	timeID = setTimeout("refreshCamera()", 60000);
+}
+
+function refreshCamera()
+{
+	stop();
+ //cameraID = document.main.id[ document.main.id.selectedIndex ].value;
+	for (var i=0; i < document.main.id.length; i++)
+	{
+		if (document.main.id[i].checked)
+		{
+			cameraID = document.main.id[i].value;
+		}
+	}
+ ts = new Date();
+ imgurl = "http://mesonet.agron.iastate.edu/data/camera/640x480/"+ cameraID +".jpg?"+ ts.getTime();
+ document.camera.src = imgurl;
+
+ timeID = setTimeout("refreshCamera()", 60000);
+
+  set_cookie("camera", cameraID,2019,1,1);
+}
+function init()
+{
+	timeID = setTimeout("refreshCamera()", 60000);
+
+}
+function set_cookie ( name, value, exp_y, exp_m, exp_d, path, domain, secure )
+{
+  var cookie_string = name + "=" + escape ( value );
+
+  if ( exp_y )
+  {
+    var expires = new Date ( exp_y, exp_m, exp_d );
+    cookie_string += "; expires=" + expires.toGMTString();
+  }
+    
+  if ( path )
+        cookie_string += "; path=" + escape ( path );
+
+  if ( domain )
+        cookie_string += "; domain=" + escape ( domain );
+
+  if ( secure )
+        cookie_string += "; secure";
+
+  document.cookie = cookie_string;
+} 
+
+init();
+// -->
+</script>
+
+<div style="width: 660px;">
+
+<div style="float: left; z-index: 2; border: 10px #000 solid;">
+<img name="camera" src="http://mesonet.agron.iastate.edu/data/camera/640x480/<?php echo $id; ?>.jpg" />
+</div>
+
+</div>
+
+<br clear="all" />
+
+<form name="main" target="JavaScript: func()">
+<div>
+<b>Select Camera:</b>
+<table width="100%" style="text-align: left;">
+<?php
+$cnt = 0; 
+while (list($cid, $v) = each($cameras) ) {
+ if ($v["active"]){
+    if ($cnt % 5 == 0){ echo "<tr>"; }
+	echo "<td><input type=\"radio\" name=\"id\" value=\"$cid\" ";
+	if ($cid == $id) { echo "checked=\"checked\""; }
+	echo " onClick=\"refreshCamera();\">". $v["name"] ."</td>\n";
+    $cnt += 1;
+ }
+} 
+?>
+</table>
+
+<p><input type="submit" onclick="liveShot(); return false;" value="Live Shot!"></p>
+
+</form></div>
+
+
+<div style="padding: 5px;">
+
+
+<h3>JavaScript Web Camera Viewer Help</h3>
+
+<p>This page should never reload.  The refreshing of the web camera images is controlled by Javascript.  The images will automatically reload:
+<ul>
+	<li>every 5 minutes</li>
+	<li>when you select a camera site</li>
+	<li>when you click the 'Live Shot' button.</li>
+</ul></p>
+
+<p>The Live Shot images are being acquired directly from the camera!  Please
+be patient after clicking the 'Live Shot' button for it may take a few 
+seconds to contact the camera.  When the display refreshes 
+by itself, the image is coming from a cache which may be up to 5 minutes old.
+This is done since bandwidth to the cameras is limited.</p>
+</div>
+
+</body>
+</html>
