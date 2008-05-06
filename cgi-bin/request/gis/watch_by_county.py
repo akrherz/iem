@@ -43,7 +43,8 @@ dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
 dbf.add_field("STATUS", dbflib.FTString, 3, 0)
 dbf.add_field("NWS_UGC", dbflib.FTString, 6, 0)
 
-sql = "select phenomena, eventid, astext(multi(geomunion(geom))) as tgeom \
+sql = "select phenomena, eventid, astext(multi(geomunion(geom))) as tgeom, \
+       min(issue) as issued, max(expire) as expired \
        from warnings WHERE significance = 'A' and \
        phenomena IN ('TO','SV') and issue <= now() and \
        expire > now() GROUP by phenomena, eventid ORDER by phenomena ASC"
@@ -57,11 +58,11 @@ for i in range(len(rs)):
 	f = wellknowntext.convert_well_known_text(s)
 
 	t = rs[i]["phenomena"]
-	#issue = mx.DateTime.strptime(rs[i]["issue"][:16], "%Y-%m-%d %H:%M")
-	#expire = mx.DateTime.strptime(rs[i]["expire"][:16],"%Y-%m-%d %H:%M")
+	issue = mx.DateTime.strptime(rs[i]["issued"][:16], "%Y-%m-%d %H:%M")
+	expire = mx.DateTime.strptime(rs[i]["expired"][:16],"%Y-%m-%d %H:%M")
 	d = {}
-	#d["ISSUED"] = issue.strftime("%Y%m%d%H%M")
-	#d["EXPIRED"] = expire.strftime("%Y%m%d%H%M")
+	d["ISSUED"] = issue.strftime("%Y%m%d%H%M")
+	d["EXPIRED"] = expire.strftime("%Y%m%d%H%M")
 	d["PHENOM"] = t
 	#d["GTYPE"] = g
 	#d["SIG"] = rs[i]["significance"]
@@ -80,6 +81,9 @@ if (cnt == 0):
 	obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, [[(0.1, 0.1), (0.2, 0.2), (0.3, 0.1), (0.1, 0.1)]])
 	d = {}
 	d["PHENOM"] = "ZZ"
+	d["ISSUED"] = "200000000000"
+	d["EXPIRED"] = "200000000000"
+
 	d["ETN"] = 0
 	shp.write_object(-1, obj)
 	dbf.write_record(0, d)
