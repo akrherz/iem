@@ -1,7 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-$day = isset($_GET["day"]) ? $_GET["day"] : die("No date specified");
+$day = isset($_GET["day"]) ? substr($_GET["day"],0,10) : die("No date specified");
 $offset = isset($_GET["offset"]) ? $_GET["offset"] : 0;
 $TITLE = "IEM | Past Feature"; 
       include("$rootpath/include/header.php"); ?>
