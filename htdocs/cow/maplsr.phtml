@@ -209,7 +209,8 @@ function load() {
     var latlng = new GLatLng(<?php echo $lat0; ?>, <?php echo $lon0; ?>);
     var marker = new GMarker(latlng);
     GEvent.addListener(marker, "click", function() {
-            marker.openInfoWindowHtml("<?php echo $desc; ?>");
+            marker.openInfoWindowHtml("<?php echo $desc; ?>",
+              {maxWidth: 300});
           });
     map.addOverlay(marker);
   }
