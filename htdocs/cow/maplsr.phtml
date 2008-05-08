@@ -2,6 +2,7 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/lsrs.php");
+include("$rootpath/include/google_keys.php");
 /* Map warnings and a LSR */
 include("../GIS/apps/rview/lib.php");
 
@@ -151,7 +152,8 @@ for ($i=0;$row = @pg_fetch_array($rs,$i); $i++)
    $pt->free();
    $imgx = intval(($row["lon"] - $minx) / $dx);
    $imgy = intval(($maxy - $row["lat"]) / $dy);
-   $IMAGEMAP .= "<area onMouseover=\"ddrivetip('<b>Event:</b> ". $row['typetext'] ."<br /><b>Magnitude:</b> ". $row['magnitude'] ."<br /><b>Source:</b> ". $row['source'] ."<br /><b>Remark:</b> ". $row['remark'] ."','yellow', 200)\" onMouseout=\"hideddrivetip()\" shape=\"circle\" coords=\"$imgx,$imgy,10\">";
+   $desc = "<b>Event:</b> ". $row['typetext'] ."<br /><b>Magnitude:</b> ". $row['magnitude'] ."<br /><b>Source:</b> ". $row['source'] ."<br /><b>Remark:</b> ". $row['remark'] ;
+   $IMAGEMAP .= "<area onMouseover=\"ddrivetip('". $desc ."','yellow', 200)\" onMouseout=\"hideddrivetip()\" shape=\"circle\" coords=\"$imgx,$imgy,10\">";
 }
 
 $bar640t = $map->getLayerByName("bar640t");
@@ -178,8 +180,42 @@ $url = $img->saveWebImage();
 <?php 
 $TITLE = "Local Storm Reports";
 $THISPAGE = "severe-";
+$BODYEXTRA = "onload=\"load()\" onunload=\"GUnload()\"";
+$HEADEXTRA = "<script src=\"http://maps.google.com/maps?file=api&amp;v=2&amp;key=". $GOOGLEKEYS[$rooturl]["maplsr"] ."\" type=\"text/javascript\"></script>";
 include("$rootpath/include/header.php"); 
 ?>
+<script type="text/javascript">
+//<![CDATA[
+var icon = new GIcon();
+icon.image = "http://labs.google.com/ridefinder/images/mm_20_blue.png";
+icon.shadow = "http://labs.google.com/ridefinder/images/mm_20_shadow.png";
+icon.iconSize = new GSize(12, 20);
+icon.shadowSize = new GSize(22, 20);
+icon.iconAnchor = new GPoint(6, 20);
+icon.infoWindowAnchor = new GPoint(5, 1);
+
+
+function load() {
+  if (GBrowserIsCompatible()) {
+    var map = new GMap2(document.getElementById("gmap"));
+    map.setCenter(new GLatLng(<?php echo $lat0; ?>, <?php echo $lon0; ?>), 9);
+    map.addControl(new GLargeMapControl());
+ 
+    var mapControl = new GMapTypeControl();
+    map.addControl(mapControl);
+
+
+    var myicon = new GIcon(icon);
+    var latlng = new GLatLng(<?php echo $lat0; ?>, <?php echo $lon0; ?>);
+    var marker = new GMarker(latlng);
+    GEvent.addListener(marker, "click", function() {
+            marker.openInfoWindowHtml("<?php echo $desc; ?>");
+          });
+    map.addOverlay(marker);
+  }
+}
+//]]>
+</script>
 <style type="text/css">
 #dhtmltooltip{
 position: absolute;
@@ -268,11 +304,13 @@ document.onmousemove=positiontip
 </script>
 
 <h3 class="heading">Local Storm Report Viewer</h3>
-<div id="mytabs"></div>
 
 <table cellpadding="5" cellspacing="0">
 <tr><td>
+<strong>Google Maps Display</strong<br />
+<div id="gmap" style="width: 500px; height: 300px"></div>
 
+<p>
 <div id="map">
 <img src="<?php echo $url; ?>" usemap="#mymap" border="1">
 <map name="mymap"><?php echo $IMAGEMAP; ?></map>
