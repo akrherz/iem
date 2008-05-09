@@ -270,32 +270,46 @@ LAYER
   END
 END
 
-
+# watches
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+ CONNECTION "dbname=postgis host=iemdb"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
  END
  TYPE LINE
- STATUS OFF
- FILTER "expired > CURRENT_TIMESTAMP"
- CLASSITEM 'type'
+ #FILTER "expired > CURRENT_TIMESTAMP"
+ CLASSITEM 'wtype'
   CLASS
     EXPRESSION /SVR/
-    COLOR 255 255 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR 0 0 0
+      SIZE 4
+      SYMBOL 1
+    END
+    STYLE
+      COLOR 255 255 0
+      SIZE 2
+       SYMBOL 1
+    END
   END
   CLASS
     EXPRESSION /TOR/
-    COLOR 255 0 0
-    SIZE 2
-    SYMBOL 1
+    STYLE
+      COLOR 0 0 0
+      SIZE 4
+      SYMBOL 1
+    END
+    STYLE
+      COLOR 255 0 0
+      SIZE 2
+      SYMBOL 1
+    END
   END
 END
+
 
 LAYER
   NAME credits
