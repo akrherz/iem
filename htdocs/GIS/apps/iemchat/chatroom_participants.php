@@ -3,6 +3,7 @@
 include("../../../../config/settings.inc.php");
 
 require_once "$rootpath/include/Zend/XmlRpc/Client.php";
+require_once "$rootpath/include/database.inc.php";
 
 $client = new Zend_XmlRpc_Client('https://iemchat.com/iembot-xmlrpc');
 
@@ -96,6 +97,13 @@ $lakes->draw($img);
 $cwa->draw($img);
 $states->draw($img);
 $map->embedlegend($img);
+
+$watches = $map->getlayerbyname("watches");
+$watches->set("connection", $_DATABASES["postgis"] );
+$watches->set("status", 1);
+$watches->set("data", "geom from (select type as wtype, geom, oid from watches where expired > now() and issued <= now() ) as foo using unique oid using srid=4326");
+$watches->draw($img);
+
 
 $bar640t = $map->getLayerByName("bar640t");
 $bar640t->set("status", 1);
