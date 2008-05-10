@@ -4,6 +4,7 @@ include("../../../../config/settings.inc.php");
 
 require_once "$rootpath/include/Zend/XmlRpc/Client.php";
 require_once "$rootpath/include/database.inc.php";
+$mesosite = iemdb("postgis");
 
 $client = new Zend_XmlRpc_Client('https://iemchat.com/iembot-xmlrpc');
 
@@ -11,10 +12,17 @@ $ar = $client->call('getAllRoomCount');
 $cats = Array("2","6","11","16","21","200");
 $regex = Array("2"=>Array(),"6"=>Array(),"11"=>Array(),"16"=>Array(),
                "21"=>Array(), "200" => Array() );
+$d = gmdate("Y-m-d H:i:00+00" ,  time());
 while( list($idx, $tar) = each($ar))
 {
   $room = $tar[0];
   $cnt = $tar[1];
+  if (isset($_GET["logit"]))
+  {
+    $sql = "INSERT into iemchat_room_participation(room, valid, users) 
+            VALUES ('$room', '$d', '$cnt')";
+    pg_exec($mesosite, $sql);
+  }
   if (strlen($room) != 7 or substr($room,3,4) != "chat"){ continue; }
   $wfo = strtoupper(substr($room,0,3));
   reset($cats);
