@@ -130,6 +130,10 @@ $sw = "";
 reset($warnings);
 while (list($k,$v) = each($warnings))
 {
+  if (! isset($v["geom"])){ 
+    /* Okay, we must have a polygon to proceed */
+    continue;
+  }
   $wsts = strtotime($v["issue"]);
   $wstsSQL = gmdate("Y/m/d H:i", $wsts);
   $wets = strtotime($v["expire"]);
