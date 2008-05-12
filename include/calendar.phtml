@@ -1,0 +1,97 @@
+<?php 
+  // Calendar.phtml
+  //  A PHP Calendar written how I want it! :)
+  // Daryl Herzmann 12 Apr 2003
+
+function printMonth($its, $db, $thisApp, $dailyApp){
+  $s = "";
+  $ts = $its;
+  $month = strftime("%m", $ts);
+  $year = strftime("%Y", $ts);
+
+  $first = mktime(8, 0, 0, $month, 1, $year);
+  $last = mktime(10, 0, 0, $month + 1, 0, $year);  // CST concerns
+
+  $now = time();
+  if (($now - $ts) > 86400)  $ts = $last;
+  else if ($ts > $now) $ts = $now;
+
+//  echo strftime("%Y-%m-%d %H:%M", $first);
+//  echo "<br>";
+//  echo strftime("%Y-%m-%d %H:%M", $last);
+
+  $lastMonth = $first - 5*86400; // 5 days earlier
+  $nextMonth = $last + 5*86400; // 5 days later
+ 
+  $lurl = $thisApp . strftime("&year=%Y&month=%m", $lastMonth);
+  $lstr = strftime("%b %Y", $lastMonth);
+  $nurl = $thisApp . strftime("&year=%Y&month=%m", $nextMonth);
+  $nstr = strftime("%b %Y", $nextMonth);
+
+  $first_dow = strftime("%w", $first) ;
+
+
+  /* Print Header */
+  $s .= "<table border=\"1\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">
+   <tr><td><a href='". $lurl ."'>". $lstr ."</a></td>
+     <th colspan=5> ". strftime("%B %Y", $its) ."</th>
+     <td><a href='". $nurl ."'>". $nstr ."</a></td></tr>
+   <tr>
+     <th>Sunday</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th>
+     <th>Thursday</th><th>Friday</th><th>Saturday</th></tr>";
+
+  $now = $first;
+  $s .= "<tr>";
+  for($i=0;$i<$first_dow;$i++){
+    $secs = $now - 86400 * ($first_dow - $i);
+    $s .= "<td valign='TOP' bgcolor='#EEEEEE'><b>". strftime("%d", $secs) ."</b></td>";
+  }
+  for($i=$first_dow;$i<7;$i++){
+    $key = strftime("%Y%m%d", $now);
+   
+    if ($now < $ts){
+      $s .= "<td valign='TOP'>";
+    } else if ($now <= $last){
+      $s .= "<td bgcolor='#ffe4c4' valign='TOP'>";
+    } else {
+      $s .= "<td bgcolor='#EEEEEE' valign='TOP'>";
+    }
+    if (strlen($dailyApp) > 0){
+      $s .= "<b><a href=\"". $dailyApp . strftime("%d", $now) ."\">". strftime("%d", $now) ."</a></b>";
+    } else {
+      $s .= "<b>". strftime("%d", $now) ."</b>";
+    }
+    $s .= "<br />". @$db[$key] ."</td>";
+    $now = $now + 86400;
+  } // End of first week
+  $s .= "</tr>"; 
+
+  while($now <= $last){
+    $s .= "<tr>\n";
+    for($i=0;$i<7;$i++){
+      $key = strftime("%Y%m%d", $now);
+      if ($now < $ts){
+        $s .= "<td valign='TOP'>";
+      } else if ($now <= $last){
+        $s .= "<td bgcolor='#ffe4c4' valign='TOP'>";
+      } else {
+        $s .= "<td bgcolor='#EEEEEE' valign='TOP'>";
+      }
+    if (strlen($dailyApp) > 0){
+      $s .= "<b><a href=\"". $dailyApp . strftime("%d", $now) ."\">". strftime("%d", $now) ."</a></b>";
+    } else {
+      $s .= "<b>". strftime("%d", $now) ."</b>";
+    }
+      $s .= "<br />". @$db[$key] ."</td>";
+      $now = $now + 86400;
+    } // End of week
+    $s .= "</tr>\n";
+  }
+
+
+  $s .= "</table>";
+  return $s;
+} // End of printMonth
+
+?>
+
