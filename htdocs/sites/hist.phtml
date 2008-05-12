@@ -1,0 +1,160 @@
+<?php
+  /* hist.phtml */
+
+include("../../config/settings.inc.php");
+include("setup.php");
+include("$rootpath/include/calendar.phtml");
+include("$rootpath/include/imagemaps.php");
+include("$rootpath/include/all_locs.php");
+include("$rootpath/include/forms.php");
+include("$rootpath/include/mlib.php");
+
+/* Get vars */
+$year = isset($_GET['year']) ? intval($_GET['year']) : date("Y", time() - 86400);
+$month = isset($_GET['month']) ? intval($_GET['month']) : date("m", time() - 86400);
+$day = isset($_GET['day']) ? intval($_GET['day']) : 1;
+$mode = isset($_GET['mode']) ? $_GET['mode'] : 'monthly';
+$sortvar = isset($_GET['sortvar']) ? $_GET['sortvar'] : 'station';
+
+$ts = mktime(0,0,0, $month, $day, $year);
+$dateStr = strftime("%Y-%m-%d", $ts);
+$nicedate = strftime("%d %B %Y", $ts);
+
+$c = iemdb("access");
+if ($mode == "monthly"){
+ $sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid
+   from summary_". $year ." WHERE station = '". $station ."' and
+   extract(month from day) = ". $month ." and
+   extract(year from day) = ". $year ."
+   ORDER by day ASC";
+} else {
+ $sortorder = "ASC";
+ if ($sortvar == "pday" || $sortvar == "max_tmpf" || $sortvar == "max_gust"){
+   $sortorder = "DESC";
+ }
+ $sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid
+   from summary_". $year ." WHERE network = '$network' and
+   day = '". $dateStr ."'  ORDER by $sortvar $sortorder";
+}
+
+$rs = pg_exec($c, $sql);
+
+if ($mode == "monthly") {
+ $db = Array();
+ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){
+  $qc = $row["max_tmpf_qc"];
+  if ($row["max_tmpf"] == -99) $row["max_tmpf"] = "M";
+  if ($row["min_tmpf"] == 99) $row["min_tmpf"] = "M";
+  $str = "";
+  if (strstr($qc, 'H'))
+    $str .= "<strike>High: ". $row["max_tmpf"] ."</strike>" ;
+  else
+    $str .= "High: ". $row["max_tmpf"] ;
+
+  $qc = $row["min_tmpf_qc"];
+  if (strstr($qc, 'L'))
+    $str .= "<br><strike>Low: ". $row["min_tmpf"] ."</strike>";
+  else
+    $str .= "<br>Low: ". $row["min_tmpf"] ;
+  $str .= "<br>Rain: ". $row["pday"];
+
+  if (strlen($row["max_gust"]) > 0 && strlen($row["max_gust_ts"]) > 0) {
+    $gtim = strtotime(substr($row["max_gust_ts"],0,16));
+    $gs = date("h:i a", $gtim);
+    $g = round($row["max_gust"] * 1.15,0);
+    $str .= "<br>Gust:<br> ". drct2txt($row["max_drct"]) ." @ ". $g .
+         "<br>(". $gs .")";
+  }
+  $db[ $row["dvalid"] ] = $str ;
+
+ $htmlout = printMonth($ts, $db, $rooturl ."hist.phtml?network=$network&station=$station" , $rooturl ."/sites/hist.phtml?station=$station&network=$network&mode=daily&year=$year&month=$month&day=");
+ } /* End of for */
+
+ $htmlout .= sprintf('<p><img src="month_hilo_plot.php?month=%s&year=%s&network=%s&station=%s"><br /><strong>Description:</strong> This chart of the monthly temperature data.  The bars are the observations and the dots are climatology.', $month, $year, $network, $station);
+ $htmlout .= sprintf('<p><img src="%s/plotting/month/rainfall_plot.php?network=%s&station=%s&month=%s&year=%s"><br /><strong>Description:</strong> Here is a chart of the monthly precipitation data.  The red line would be an average month while the blue line and bars are observations.', $rooturl, $network, $station, $month, $year);
+
+} else {
+ $uri = "hist.phtml?year=$year&month=$month&day=$day&mode=daily&sortvar=";
+ $htmlout = "<table border=\"1\" style=\"float: left;\">\n<tr><th><a href=\"". $uri ."station\">Location:</a></th><th><a href=\"". $uri ."max_tmpf\">High:</a></th><th><a href=\"". $uri ."min_tmpf\">Low:</a></th><th><a href=\"". $uri ."pday\">Rainfall</a></th><th><a href=\"". $uri ."max_gust\">Peak Gust:</a></th><th><a href=\"". $uri ."max_gust_ts\">Time of Gust</a></th></tr>\n";
+ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){
+  $qc = $row["max_tmpf_qc"];
+  if ($row["max_tmpf"] == -99) $row["max_tmpf"] = "M";
+  if ($row["min_tmpf"] == 99) $row["min_tmpf"] = "M";
+  $htmlout .= "<tr><td><a href=\"hist.phtml?network=$network&year=$year&month=$month&mode=monthly&station=". $row["station"] ."\">". $cities[$row["station"]]["city"] ."</a></td>";
+
+  if (strstr($qc, 'H') || $row["max_tmpf"] == -99 )
+    $htmlout .= "<td><strike>". $row["max_tmpf"] ."</strike></td>" ;
+  else
+    $htmlout .= "<td>". $row["max_tmpf"] ."</td>";
+
+  $qc = $row["min_tmpf_qc"];
+  if (strstr($qc, 'L') || $row["min_tmpf"] == 99 )
+    $htmlout .= "<td><strike>". $row["min_tmpf"] ."</strike></td>";
+  else
+    $htmlout .= "<td>". $row["min_tmpf"] ."</td>";
+  if ($row["pday"] == -99)
+    $htmlout .= "<td>M</td>";
+  else
+    $htmlout .= "<td>". $row["pday"] ."</td>";
+
+  if (strlen($row["max_gust"]) > 0 && $row["max_gust_ts"] != "") {
+    $gtim = strtotime(substr($row["max_gust_ts"],0,16));
+    $gs = date("h:i a", $gtim);
+    $g = round($row["max_gust"] * 1.15,0);
+
+    $htmlout .= "<td>". drct2txt($row["max_drct"]) ." @ ". $g .
+         "</td><td>". $gs ."</td>";
+  }
+  $htmlout .= "</tr>";
+ } /* End of for loop */
+ $htmlout .= "</table>\n";
+}
+
+/* Begin Page Output */
+  $TITLE = "Weather Data Calendar";
+  $THISPAGE = "sites";
+  include("$rootpath/include/header.php"); 
+  $current="calendar"; include('sidebar.php');
+?>
+<div id="justone">
+<h2>Data Calendar for <?php echo $cities[$station]["city"]; ?></h2>
+<div class="hide">
+
+<?php
+  echo "<form method=\"GET\">";
+  echo "<input type=\"hidden\" name=\"station\" value=\"$station\">";
+  echo "<input type=\"hidden\" name=\"network\" value=\"$network\">";
+if ($mode == "monthly"){
+  echo "The calendar chart below shows the daily reported climate variables.  You can click on a date to display the values for all sites for that day.";
+  echo "<p>Year: &nbsp; ". yearSelect(2002, $year, "year");
+  echo "<br />Month: &nbsp; ". monthSelect($month, "month");
+  echo "<br /><input type='submit' value='Change'></form>";
+} else {
+  echo "The chart below lists out the reported summary values for a particular date for all SchoolNet8 sites.";
+  echo "<p>Switch date shown:<br /><input type=\"hidden\" value=\"daily\" name=\"mode\">";
+  echo yearSelect(2002, $year, "year");
+  echo monthSelect($month, "month");
+  echo daySelect($day);
+  echo "<input type=\"submit\" value=\"Switch Date\"></form>";
+echo "<p>Date show in table: $nicedate";
+}
+echo "</div>";
+echo $htmlout;
+?>
+<div class="hide">
+<br clear="all"/>
+<p><b>Notes:</b>
+<ul>
+<li>This data is <b>NOT</b> considered official and is intended for educational use only.</li>
+<li>Due to some complexities with the wind gusts, peak gusts before 12:15 AM 
+are not included.</li>
+<li>Values that are <strike>crossed out</strike> failed a crude quality control routine.</li>
+<li>Peak wind gusts are unavailable prior to 11 July 2002.</li>
+</ul>
+</div>
+
+</div>
+
+<?php
+  include("$rootpath/include/footer.php"); 
+?>
