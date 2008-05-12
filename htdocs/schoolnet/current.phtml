@@ -60,8 +60,9 @@ $vals = Array("ts" => "Observation Time", "sname" => "Station Name",
  "pmonth" => "Month's Precipitation", "prate" => "Hourly Precip Rate");
 
 if (isset($vals[$sortcol])){
-echo "<p>Sorted by: <b>". $vals[$sortcol] ."</b><br>\n";
+$sortcol = "tmpf";
 }
+echo "<p>Sorted by: <b>". $vals[$sortcol] ."</b><br>\n";
 
 ?>
 
