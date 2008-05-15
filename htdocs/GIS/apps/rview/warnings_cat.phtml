@@ -303,7 +303,7 @@ if (pg_numrows($result) == 0) {
  ";
   /* Figure out how to render $row["kml"] */
 }
-if ($warngeo == "sbwaaaa")
+if ($warngeo == "sbw" && pg_numrows($result) > 0)
 {
   echo "var gtab = Ext.getCmp('top-display').insert(1, {
               id: 'gtab',
@@ -315,7 +315,6 @@ if ($warngeo == "sbwaaaa")
 
   gxml = new GGeoXml('$kml_link');
   map.addOverlay(gxml);
-
   map.setCenter(new GLatLng($yc,$xc), 8); ";
 }
 
