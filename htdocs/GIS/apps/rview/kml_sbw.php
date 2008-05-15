@@ -13,7 +13,7 @@ $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1)
 
 /* Now we fetch warning and perhaps polygon */
 $query2 = "SELECT *, astext(geom) as t, askml(geom) as kml,
-           round(sum(area(transform(geom,2163)) / 1000000.0)) as psize,
+           round(area(transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
            WHERE wfo = '$wfo' and phenomena = '$phenomena' and 
