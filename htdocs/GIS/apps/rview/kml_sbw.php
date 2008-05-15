@@ -46,7 +46,8 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   <Placemark>
     <description>
         <![CDATA[
-          <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." km^2</p>
+  <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." km^2
+  <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_status[$row["status"]] ." km^2</p>
         ]]>
     </description>
     <name>". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance]  ."</name>\n";
