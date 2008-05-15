@@ -13,6 +13,7 @@ $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1)
 
 /* Now we fetch warning and perhaps polygon */
 $query2 = "SELECT *, astext(geom) as t, askml(geom) as kml,
+           round(sum(area(transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
            WHERE wfo = '$wfo' and phenomena = '$phenomena' and 
@@ -45,10 +46,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   <Placemark>
     <description>
         <![CDATA[
-          <h1>CDATA Tags are useful!</h1>
-          <p><font color=\"red\">Text is <i>more readable</i> and 
-          <b>easier to write</b> when you can avoid using entity 
-          references.</font></p>
+          <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." km^2</p>
         ]]>
     </description>
     <name>". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance]  ."</name>\n";
