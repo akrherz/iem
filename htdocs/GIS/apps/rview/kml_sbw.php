@@ -30,12 +30,12 @@ header("Content-Type:", "application/vnd.google-earth.kml+xml");
 // abgr
 $color = "7dff0000";
 $ca = Array("TO" => "7d0000ff", "SV" => "7dffff00", "FF" => "7d00ff00");
-if (isset($ca[$phenomena])) $color = $ca[$phenomena];
+if (isset($ca[$phenomena])) { $color = $ca[$phenomena]; }
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://earth.google.com/kml/2.2\">
  <Document>
-    <Style id=\"transBluePoly\">
+    <Style>
       <LineStyle>
         <width>1.5</width>
       </LineStyle>
@@ -47,7 +47,8 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <description>
         <![CDATA[
   <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." km^2
-  <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_status[$row["status"]] ." km^2</p>
+  <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_status[$row["status"]] ."
+   </p>
         ]]>
     </description>
     <name>". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance]  ."</name>\n";
