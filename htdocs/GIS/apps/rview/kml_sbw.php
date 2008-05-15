@@ -39,7 +39,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <Style id=\"iemstyle\">
       <LineStyle>
         <width>1.5</width>
-        <color>00000000</color>
+        <color>ff000000</color>
       </LineStyle>
       <PolyStyle>
         <color>$color</color>
