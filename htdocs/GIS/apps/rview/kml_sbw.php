@@ -35,7 +35,7 @@ if (isset($ca[$phenomena])) { $color = $ca[$phenomena]; }
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://earth.google.com/kml/2.2\">
  <Document>
-    <Style>
+    <Style id=\"iemstyle\">
       <LineStyle>
         <width>1.5</width>
       </LineStyle>
@@ -51,6 +51,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
    </p>
         ]]>
     </description>
+    <styleUrl>#iemstyle</styleUrl>
     <name>". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance]  ."</name>\n";
 echo $row["kml"];
 echo "</Placemark>
