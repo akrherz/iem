@@ -5,11 +5,11 @@ include("$rootpath/include/vtec.php");
 include("$rootpath/include/wfoLocs.php");
 include("$rootpath/include/forms.php");
 include("$rootpath/include/lsrs.php");
+include("$rootpath/include/google_keys.php");
 include('lib.php');
 putenv("TZ=GMT");
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'GMT'");
-$TITLE = "IEM | VTEC Product Browser";
 
 
 function determine_time_base($t)
@@ -59,10 +59,11 @@ $row = pg_fetch_array($result, 0);
 $lpad = 0.5;
 $y1 = $row["y1"] +$lpad; $y0 = $row["y0"]-$lpad; 
 $x1 = $row["x1"] +$lpad; $x0 = $row["x0"]-$lpad;
-
+$xc = $x0 + ($row["x1"] - $row["x0"]) / 2;
+$yc = $y0 + ($row["y1"] - $row["y0"]) / 2;
 
 /* Now we fetch warning and perhaps polygon */
-$query2 = "SELECT *, astext(geom) as t, 
+$query2 = "SELECT *, astext(geom) as t, askml(geom) as kml,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
            WHERE wfo = '$wfo' and phenomena = '$phenomena' and 
@@ -87,7 +88,12 @@ $HEADEXTRA = "<script type=\"text/javascript\" src=\"${rooturl}/ext/adapter/ext/
 <link rel=\"stylesheet\" type=\"text/css\" href=\"${rooturl}/ext/resources/css/ext-all.css\" />
 <script type=\"text/javascript\" src=\"warnings_cat_lib.js\"></script>
 ";
+if ($warngeo == "sbw")
+{
+ $HEADEXTRA .= "<script src=\"http://maps.google.com/maps?file=api&amp;v=2&amp;key=". $GOOGLEKEYS[$rooturl]["rview"] ."\" type=\"text/javascript\"></script>";
+}
 $THISPAGE = "severe-vtec";
+$TITLE = "IEM | VTEC Product Browser";
 include("$rootpath/include/header.php");
 
 if (pg_numrows($result) > 0) {
@@ -125,6 +131,7 @@ if ($significance == "W")
 $next_eventid = $eventid + 1;
 $last_eventid = $eventid - 1;
 $next_link = sprintf("<a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s\">Next</a> ", $rooturl, $year, $wfo, $phenomena, $next_eventid, $significance, $warngeo);
+$kml_link = sprintf("http://mesonet.agron.iastate.edu/GIS/apps/rview/kml_sbw.php?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s", $year, $wfo, $phenomena, $eventid, $significance, $warngeo);
 
 $last_link = "";
 if ($last_eventid > 0)
@@ -203,6 +210,8 @@ echo "
 <h2 class="page-title"><?php echo $radarLabel; ?> NWS NEXRAD Composite + Warning</h2>
 <p><img src="<?php echo $url; ?>"></p>
 </div>
+<div id="gmapper" class="x-hide-display">
+</div>
 </div>
 
 </td><td valign="top">
@@ -236,6 +245,9 @@ $json_params = sprintf("year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s",
 echo "</div>
 <script>
 //<!-- 
+var gxml;
+var map;
+
 Ext.onReady(function(){
 
   Ext.getCmp('text-display').activate($v);
@@ -288,9 +300,23 @@ if (pg_numrows($result) == 0) {
  Ext.getCmp('all-lsr-grid').disable();
  Ext.getCmp('ugc-grid').disable();
  Ext.getCmp('top-display').setActiveTab('products-grid');
-
  ";
+  /* Figure out how to render $row["kml"] */
+}
+if ($warngeo == "sbw")
+{
+  echo "var gtab = Ext.getCmp('top-display').insert(1, {
+              id: 'gtab',
+              title: 'Google Map',
+              html: 'gmapper'
+			}).show();
+  map = new GMap2(gtab.body.dom);
+  map.addControl(new GSmallMapControl());
 
+  gxml = new GGeoXml('$kml_link');
+  map.addOverlay(gxml);
+
+  map.setCenter(new GLatLng($yc,$xc), 8); ";
 }
 
 echo "});
