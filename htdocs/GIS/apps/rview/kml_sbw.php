@@ -38,7 +38,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <Document>
     <Style id=\"iemstyle\">
       <LineStyle>
-        <width>1.5</width>
+        <width>1</width>
         <color>ff000000</color>
       </LineStyle>
       <PolyStyle>
