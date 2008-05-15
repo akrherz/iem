@@ -25,6 +25,11 @@ $result = pg_exec($connect, $query2 ." ORDER by sz DESC, updated DESC, gtype ASC
 $row = pg_fetch_array($result, 0);
 
 header("Content-Type:", "application/vnd.google-earth.kml+xml");
+// abgr
+$color = "7dff0000";
+$ca = Array("TO" => "7d0000ff", "SV" => "7dffff00", "FF" = > "7d00ff00");
+if (isset($ca[$phenomena])) $color = $ca[$phenomena];
+
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://earth.google.com/kml/2.2\">
  <Document>
@@ -33,11 +38,19 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
         <width>1.5</width>
       </LineStyle>
       <PolyStyle>
-        <color>7dff0000</color>
+        <color>$color</color>
       </PolyStyle>
     </Style>
   <Placemark>
-    <name>The Pentagon</name>\n";
+    <description>
+        <![CDATA[
+          <h1>CDATA Tags are useful!</h1>
+          <p><font color=\"red\">Text is <i>more readable</i> and 
+          <b>easier to write</b> when you can avoid using entity 
+          references.</font></p>
+        ]]>
+    </description>
+    <name>The warning</name>\n";
 echo $row["kml"];
 echo "</Placemark>
  </Document>
