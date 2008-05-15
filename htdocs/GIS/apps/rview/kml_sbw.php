@@ -27,7 +27,7 @@ $row = pg_fetch_array($result, 0);
 header("Content-Type:", "application/vnd.google-earth.kml+xml");
 // abgr
 $color = "7dff0000";
-$ca = Array("TO" => "7d0000ff", "SV" => "7dffff00", "FF" = > "7d00ff00");
+$ca = Array("TO" => "7d0000ff", "SV" => "7dffff00", "FF" => "7d00ff00");
 if (isset($ca[$phenomena])) $color = $ca[$phenomena];
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
