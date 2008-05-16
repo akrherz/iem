@@ -48,7 +48,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <ScreenOverlay id=\"legend_bar\">
    <visibility>1</visibility>
    <Icon>
-       <href>http://water.usgs.gov/waterwatch/images/dots/wet_dry_bar.gif</href>
+       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=2008-05-16%2015:50</href>
    </Icon>
    <description>WaterWatch Legend</description>
    <overlayXY x=\".5\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
