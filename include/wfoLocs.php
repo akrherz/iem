@@ -65,6 +65,7 @@ $wfos = Array(
  "JAN" => array("city" => "JACKSON", "lat" => 32.31, "lon" => -90.08),
  "JAX" => array("city" => "JACKSONVILLE", "lat" => 30.48, "lon" => -81.7),
  "JKL" => array("city" => "JACKSON", "lat" => 37.59, "lon" => -83.31),
+ "JSJ" => array("city" => "San Juan", "lat" => 18.43, "lon" => -66),
  "LBF" => array("city" => "NORTH_PLATTE", "lat" => 41.13, "lon" => -100.7),
  "LCH" => array("city" => "LAKE_CHARLES", "lat" => 30.12, "lon" => -93.21),
  "LIX" => array("city" => "NEW_ORLEANS", "lat" => 30.33, "lon" => -89.82),
