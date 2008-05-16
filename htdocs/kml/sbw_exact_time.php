@@ -50,7 +50,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
    <Icon>
        <href>http://water.usgs.gov/waterwatch/images/dots/wet_dry_bar.gif</href>
    </Icon>
-   <name>WaterWatch Legend</name>
+   <description>WaterWatch Legend</description>
    <overlayXY x=\".5\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
    <screenXY x=\".5\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
    <size x=\"0\" y=\"0\" xunits=\"pixels\" yunits=\"pixels\"/>
