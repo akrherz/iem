@@ -1,7 +1,7 @@
 <?php 
         $page = "gis";
         $TITLE = "IEM | Precipitation Analysis";
-include("../../config/settings.inc.php");
+include("../../../../config/settings.inc.php");
 include("$rootpath/include/header.php"); 
 ?>
 <b>Nav:</b> <a href="/GIS/">GIS</a> > IEM Precip Analysis
