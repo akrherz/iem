@@ -34,7 +34,7 @@ $cameras = Array(
     "state" => "IA", "network" => "KCCI",
     "ip" => "69.66.29.70", "county" => "Union", "port" => "80"),
 "KCRG-005" => Array("sts" => mktime(15,0,0,5, 20,2008), "ets" => time(),
-    "name" => "Dubuque", "removed" => False, "active" => True, "lat" => 42.4, "lon" => -90.7,
+    "name" => "Dubuque", "removed" => False, "active" => True, "lat" => 42.4974, "lon" => -90.6568,
     "state" => "IA", "network" => "KCRG",
     "ip" => "63.254.136.61", "county" => "Dubuque", "port" => "80"),
 "KCCI-021" => Array("sts" => mktime(0,0,0,1, 19,2006), "ets" => time(),
