@@ -213,7 +213,7 @@ echo "<table border=1>
 
 function aSortBySecondIndex($multiArray, $secondIndex) {
         while (list($firstIndex, ) = each($multiArray))
-                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+             $indexMap[$firstIndex] = @$multiArray[$firstIndex][$secondIndex];
         arsort($indexMap);
         while (list($firstIndex, ) = each($indexMap))
                 if (is_numeric($firstIndex))
