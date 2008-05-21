@@ -47,6 +47,7 @@ class selectWidget
    "NE_COOP" => "Nebraska COOP",
    "OH_ASOS" => "Ohio ASOS",
    "SD_ASOS" => "South Dakota ASOS",
+   "SD_COOP" => "South Dakota COOP",
    "WI_ASOS" => "Wisconsin ASOS",
    "WI_COOP" => "Wisconsin_COOP",
    "KS_RWIS" => "Kansas RWIS",
@@ -91,6 +92,7 @@ class selectWidget
    "ND_COOP" => Array(-372922, 5109273,268869, 5409961),
    "OH_ASOS" => Array(1193810, 4322261, 1565503, 4739477),
    "SD_ASOS" => Array(-400833, 4626666,399166,5226666),
+   "SD_COOP" => Array(-400833, 4626666,399166,5226666),
    "WI_ASOS" => Array(575000, 4700000, 1175000, 5150000),
   );
   var $formvars = Array();
