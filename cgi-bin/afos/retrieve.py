@@ -3,7 +3,9 @@
 import pg, cgi, string, os, sys
 
 def Main():
-  print 'Content-type: text/plain\n\n'
+  print 'Content-type: text/plain; charset=""'
+  print
+  print
   try:
     mydb = pg.connect('afos', 'mtarchive.geol.iastate.edu', user='nobody')
   except:
