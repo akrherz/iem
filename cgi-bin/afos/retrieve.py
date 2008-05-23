@@ -46,7 +46,7 @@ def Main():
 	
 	
   for i in range(len(rs)):
-    print rs[i]["data"]
+    print (rs[i]["data"]).replace("\003", "").replace("\001", "")
     print "\003\001\n"
 
   if (len(rs) == 0 and myPils[0][:3] != "MTR"):
