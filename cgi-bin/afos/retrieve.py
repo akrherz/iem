@@ -3,7 +3,7 @@
 import pg, cgi, string, os, sys
 
 def Main():
-  print 'Content-type: text/plain \n\n'
+  print 'Content-type: text/plain\n\n'
   try:
     mydb = pg.connect('afos', 'mtarchive.geol.iastate.edu', user='nobody')
   except:
@@ -11,8 +11,15 @@ def Main():
     sys.exit(0)
 
   myForm = cgi.FormContent()
-  pil0 = string.upper( myForm["pil"][0] )
-  LIMIT = str( myForm["limit"][0] )
+  if (myForm.has_key("pil")):
+    pil0 = string.upper( myForm["pil"][0] )
+  else:
+    print "Bad, you must specify $pil"
+    return
+  if (myForm.has_key("limit")):
+    LIMIT = str( myForm["limit"][0] )
+  else:
+    LIMIT = "1"
 
   pils = pil0.split(",")
   myPils = []
