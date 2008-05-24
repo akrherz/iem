@@ -143,7 +143,7 @@ if (isset($_GET["vtec"]))
   $wc = ms_newLayerObj($map);
   $wc->set("connectiontype", MS_POSTGIS);
   $wc->set("connection", "user=nobody dbname=postgis host=iemdb");
-  $wc->set("status", MS_ON);
+  $wc->set("status", (! in_array("sbw", $layers)) );
   $sql = sprintf("geom from (select gtype, eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
   $wc->set("data", $sql);
   $wc->set("type", MS_LAYER_LINE);
