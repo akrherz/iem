@@ -47,7 +47,7 @@ END
 
 LAYER
   NAME namerica
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/2163/world/namerica.shp
   PROJECTION
@@ -65,7 +65,7 @@ END
 
 LAYER
   NAME lakes
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/2163/us/major_lakes.shp
   PROJECTION
@@ -78,7 +78,7 @@ END
 
 LAYER
  NAME nexrad_n0r
- STATUS ON
+ STATUS OFF
  TYPE RASTER
  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif"
  OFFSITE 0 0 0
@@ -90,7 +90,7 @@ END
 
 LAYER
   NAME uscounties
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/2163/us/uscounties.shp
   PROJECTION
@@ -125,7 +125,7 @@ END
 
 LAYER
   NAME states
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/2163/us/states.shp
   PROJECTION
@@ -145,7 +145,7 @@ LAYER
   NAME warnings0_c
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
   DATA "geom from (select phenomena, geom, oid from warnings WHERE significance = 'W' and gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo using unique oid using srid=4326"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   MAXSCALE 100000
   TEMPLATE q_template.html
@@ -183,7 +183,7 @@ LAYER
   #DATA "geom from warnings"
   MAXSCALE 100000
  DATA "geom from (select phenomena, geom, oid from warnings WHERE gtype = 'P' and significance = 'W' and expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo using unique oid using srid=4326"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   METADATA
     "wms_title" "Current Polygon Warnings"
@@ -419,7 +419,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME "watch_by_county"
   CONNECTION "dbname=postgis host=iemdb user=nobody"
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   PROJECTION
    "init=epsg:4326"
