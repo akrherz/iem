@@ -37,7 +37,7 @@ END
 #
 LAYER
   NAME counties
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA "/mesonet/data/gis/static/shape/26915/us/counties.shp"
   PROJECTION
@@ -63,7 +63,7 @@ END
 
 LAYER
 	NAME states
-	STATUS ON
+	STATUS OFF
 	TYPE LINE
 	DATA "/mesonet/data/gis/static/shape/26915/us/states.shp"
 	PROJECTION
@@ -128,7 +128,7 @@ END
 
 LAYER
   NAME sites
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   CONNECTIONTYPE POSTGIS
   CONNECTION "user=nobody dbname=mesosite host=iemdb"
