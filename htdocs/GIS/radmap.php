@@ -102,7 +102,7 @@ $lakes->draw($img);
 /* Draw NEXRAD Layer */
 $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("status", MS_ON);
-if ($ts > 0){
+if ($ts > 0 && (($ts + 300) < time()) ){
  $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts) );
 }
 $radar->draw($img);
