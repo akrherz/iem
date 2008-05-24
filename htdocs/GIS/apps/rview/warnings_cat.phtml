@@ -162,18 +162,11 @@ if (pg_numrows($result) > 0) {
   $maptitle = "IEM NEXRAD valid:";
   $singleWarning = 1;
   dl($mapscript);
-  //include("warnings_plot.php");
+  include("warnings_plot.php");
 } else {
  $url = "";
 }
 
-if ($warngeo == "sbw") {
-$url = sprintf("%s/GIS/radmap.php?layers[]=sbw&vtec=%s.K%s.%s.%s.%04d", $rooturl, $year, 
-       $wfo, $phenomena, $significance, $eventid);
-} else {
-$url = sprintf("%s/GIS/radmap.php?vtec=%s.K%s.%s.%s.%04d", $rooturl, $year, 
-       $wfo, $phenomena, $significance, $eventid);
-}
 
 echo "
 
