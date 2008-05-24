@@ -2,10 +2,8 @@
 /* Tis my job to produce pretty maps with lots of options :) */
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/vtec.php");
 $postgis = iemdb("postgis");
-
-/* Straight CGI Butter */
-$sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
 
 $sectors = Array(
  "iem" => Array("epsg" => 4326, "ext" => Array(-100.0, 38.5, -88.0, 46.5)),
@@ -18,6 +16,14 @@ $sectors = Array(
  "texas" => Array("epsg" => 2163, 
          "ext" => Array(-532031.375, -2133488,723680.125, -959689.625)),
 );
+
+/* Setup layers */
+$layers = isset($_GET["layers"])? $_GET["layers"]: 
+          Array("bogus");
+
+/* Straight CGI Butter */
+$sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
+
 /* Now, maybe we set a VTEC string, lets do all sorts of fun */
 $vtec_limiter = "";
 if (isset($_GET["vtec"]))
@@ -65,7 +71,11 @@ $ts = isset($_GET["ts"]) ? gmmktime(
  substr($_GET["ts"],8,2), substr($_GET["ts"],10,2), 0,
  substr($_GET["ts"],4,2), substr($_GET["ts"],6,2), substr($_GET["ts"],0,4)): 0;
 if ($ts == 0 && isset($dts)) { $ts = $dts; }
-
+/* Make sure we have a minute %5 */
+if ($ts > 0)
+{
+  $radts = $ts - (intval(date("i", $ts) % 5) * 60);
+}
 
 /* Lets Plot stuff already! */
 dl($mapscript);
@@ -93,7 +103,7 @@ $lakes->draw($img);
 $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("status", MS_ON);
 if ($ts > 0){
- $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $ts) );
+ $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts) );
 }
 $radar->draw($img);
 
@@ -108,7 +118,7 @@ $states->draw($img);
 
 /* Watch by County */
 $wbc = $map->getlayerbyname("watch_by_county");
-$wbc->set("status", MS_ON);
+$wbc->set("status", in_array("watch_by_county", $layers) );
 $wbc->set("connection", "user=nobody dbname=postgis host=iemdb");
 if ($ts > 0) {
   $sql = sprintf("g from (select phenomena, eventid, multi(geomunion(geom)) as g from warnings_%s WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= '%s:00+00' and expire > '%s:00+00' GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena",gmstrftime("%Y",$ts),
@@ -127,18 +137,41 @@ $watches->setFilter("expired > '2008-01-01'");
 $watches->draw($img);
 */
 
+/* Plot the warning explicitly */
+if (isset($_GET["vtec"]))
+{
+  $wc = ms_newLayerObj($map);
+  $wc->set("connectiontype", MS_POSTGIS);
+  $wc->set("connection", "user=nobody dbname=postgis host=iemdb");
+  $wc->set("status", MS_ON);
+  $sql = sprintf("geom from (select gtype, eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+  $wc->set("data", $sql);
+  $wc->set("type", MS_LAYER_LINE);
+  $wc->setProjection("init=epsg:4326");
+
+  $wcc0 = ms_newClassObj($wc);
+  $wcc0->set("name", $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] );
+  $wcc0s0 = ms_newStyleObj($wcc0);
+  $wcc0s0->color->setRGB(255,0,0);
+  $wcc0s0->set("size", 3);
+  $wcc0s0->set("symbol", 1);
+  $wc->draw($img);
+}
+
+
+/* Storm Based Warning */
 $sbw = $map->getlayerbyname("sbw");
-$sbw->set("status", MS_ON);
+$sbw->set("status", in_array("sbw", $layers) );
 $sbw->set("connection", "user=nobody dbname=postgis host=iemdb");
 $sbw->set("maxscale", 10000000);
 if ($ts > 0)
 {
   $sql = sprintf("geom from (select phenomena, geom, oid from warnings_%s 
-  WHERE significance != 'A' and issue <= '%s:00+00' and expire > '%s:00+00' and 
-  gtype = 'P' %s) as foo using unique oid using SRID=4326", 
-  gmstrftime("%Y",$ts),
-  gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
-  $vtec_limiter );
+    WHERE significance != 'A' and issue <= '%s:00+00' and expire > '%s:00+00'
+    and gtype = 'P' %s) as foo using unique oid using SRID=4326", 
+    gmstrftime("%Y",$ts),
+    gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
+    $vtec_limiter );
 } else {
   $sql = sprintf("geom from (select phenomena, geom, oid from warnings WHERE 
   significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P' %s) 
@@ -146,6 +179,23 @@ if ($ts > 0)
 }
 $sbw->set("data", $sql);
 $sbw->draw($img);
+
+/* warnings by county */
+$w0c = $map->getlayerbyname("warnings0_c");
+$w0c->set("connection", $_DATABASES["postgis"] );
+$w0c->set("status", in_array("county_warnings", $layers) );
+if ($ts > 0)
+{
+  $sql = sprintf("geom from (select *, oid from warnings_%s WHERE issue <= '%s:00+00' and expire > '%s:00+00' and gtype = 'C' %s ORDER by phenomena ASC) as foo using unique oid using SRID=4326", 
+    gmstrftime("%Y",$ts),
+    gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
+    $vtec_limiter );
+} else {
+  $sql = sprintf("geom from (select *, oid from warnings WHERE expire > CURRENT_TIMESTAMP and gtype = 'C' %s ORDER by phenomena ASC)  as foo using unique oid using SRID=4326", $vtec_limiter);
+}
+$w0c->set("data", $sql);
+$w0c->draw($img);
+
 
 $bar640t = $map->getLayerByName("bar640t");
 $bar640t->set("status", 1);
@@ -179,6 +229,8 @@ $point->setXY(560, 15);
 $point->draw($map, $layer, $img, "n0r-ramp", "");
 $point->free();
 
+$map->embedLegend($img);
+$map->drawLabelCache($img);
 
 header("Content-type: image/png");
 $img->saveImage('');
