@@ -1,6 +1,8 @@
 <?php
 /* Tis my job to produce pretty maps with lots of options :) */
 include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$postgis = iemdb("postgis");
 
 /* Straight CGI Butter */
 $sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
@@ -16,6 +18,38 @@ $sectors = Array(
  "texas" => Array("epsg" => 2163, 
          "ext" => Array(-532031.375, -2133488,723680.125, -959689.625)),
 );
+/* Now, maybe we set a VTEC string, lets do all sorts of fun */
+$vtec_limiter = "";
+if (isset($_GET["vtec"]))
+{
+  list($year, $wfo, $phenomena, $significance, $eventid) = explode(".", $_GET["vtec"]);
+  $eventid = intval($eventid);
+  $year = intval($year);
+  $wfo = substr($wfo,1,3);
+  /* First, we query for a bounding box please */
+  $query1 = "SELECT max(issue) as v, 
+             xmax(extent(geom)) as x1, xmin(extent(geom)) as x0, 
+             ymin(extent(geom)) as y0, ymax(extent(geom)) as y1 
+             from warnings_$year WHERE wfo = '$wfo' and  
+             phenomena = '$phenomena' and eventid = $eventid 
+             and significance = '$significance'";
+  $result = pg_exec($postgis, $query1);
+  $row = pg_fetch_array($result, 0); 
+  $lpad = 0.5;
+  $y1 = $row["y1"] +$lpad; $y0 = $row["y0"]-$lpad; 
+  $x1 = $row["x1"] +$lpad; $x0 = $row["x0"]-$lpad;
+  $xc = $x0 + ($row["x1"] - $row["x0"]) / 2;
+  $yc = $y0 + ($row["y1"] - $row["y0"]) / 2;
+
+  $sector = "custom";
+  $sectors["custom"] = Array("epsg"=> 4326, "ext" => Array($x0,$y0,$x1,$y1) );
+
+  $dts = strtotime( $row["v"] );
+
+  $vtec_limiter = sprintf("and phenomena = '%s' and eventid = %s and 
+    significance = '%s' and wfo = '%s'", $phenomena, $eventid, 
+    $significance, $wfo);
+}
 
 /* Could define a custom box */
 if (isset($_GET["bbox"]))
@@ -30,6 +64,7 @@ if (isset($_GET["bbox"]))
 $ts = isset($_GET["ts"]) ? gmmktime(
  substr($_GET["ts"],8,2), substr($_GET["ts"],10,2), 0,
  substr($_GET["ts"],4,2), substr($_GET["ts"],6,2), substr($_GET["ts"],0,4)): 0;
+if ($ts == 0 && isset($dts)) { $ts = $dts; }
 
 
 /* Lets Plot stuff already! */
@@ -100,10 +135,14 @@ if ($ts > 0)
 {
   $sql = sprintf("geom from (select phenomena, geom, oid from warnings_%s 
   WHERE significance != 'A' and issue <= '%s:00+00' and expire > '%s:00+00' and 
-  gtype = 'P') as foo using unique oid using SRID=4326", gmstrftime("%Y",$ts),
-  gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts) );
+  gtype = 'P' %s) as foo using unique oid using SRID=4326", 
+  gmstrftime("%Y",$ts),
+  gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
+  $vtec_limiter );
 } else {
-  $sql = "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326";
+  $sql = sprintf("geom from (select phenomena, geom, oid from warnings WHERE 
+  significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P' %s) 
+  as foo using unique oid using SRID=4326", $vtec_limiter);
 }
 $sbw->set("data", $sql);
 $sbw->draw($img);
