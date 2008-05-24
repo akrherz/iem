@@ -1011,7 +1011,7 @@ END
 # Used in php plotter
 LAYER
   NAME currents
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   LABELCACHE ON
   PROJECTION
@@ -1039,7 +1039,7 @@ END
 
 LAYER
   NAME sname
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   LABELCACHE ON
   PROJECTION
@@ -1120,7 +1120,7 @@ LAYER
   DATA "geom from (select oid as foid, geom, station, network from current 
        WHERE valid > (now() - '70 minutes'::interval) and network !~* 'COOP' ) as foo
        USING srid=4326 USING unique foid"
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   LABELCACHE ON
   PROJECTION
@@ -1154,7 +1154,7 @@ LAYER
   DATA "geom from (select oid as foid, geom, round(tmpf::numeric,0) as tmpf from current
        WHERE valid > (now() - '70 minutes'::interval) and tmpf > -60 ) as foo
        USING srid=4326 USING unique foid"
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   LABELCACHE OFF
   PROJECTION
@@ -1200,7 +1200,7 @@ LAYER
     (0 - drct) as drct, oid from current 
        WHERE sknt >= 0 and valid > (now() - '70 minutes'::interval) ) as foo
        USING srid=4326 USING unique foid"
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   #LABELANGLEITEM drct
   LABELCACHE OFF
@@ -1302,7 +1302,7 @@ LAYER
   DATA "geom from (select geom, round(tmpf::numeric,0) as tmpf, 
     oid as foid from current WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
     ) as foo using unique foid using srid=4326"
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   LABELCACHE ON
   PROJECTION
@@ -1460,7 +1460,7 @@ LAYER
   DATA "geom from (select geom, alti_15m,
     oid from trend_15m WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
     ) as foo using unique oid using srid=4326"
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   LABELCACHE OFF
   PROJECTION
@@ -1498,7 +1498,7 @@ LAYER
   DATA "geom from (select geom, alti_1h,
     oid from trend_1h WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
     ) as foo using unique oid using srid=4326"
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   LABELCACHE OFF
   PROJECTION
@@ -1533,7 +1533,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME "watch_by_county"
   CONNECTION "dbname=postgis host=iemdb user=nobody"
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   PROJECTION
    "init=epsg:4326"
