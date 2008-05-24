@@ -1083,7 +1083,7 @@ LAYER
   NAME barbs
   TYPE POINT
 #  DATA datasets/snet_current
-  STATUS DEFAULT
+  STATUS OFF
   METADATA
    LYRNAME "Winds"
   END
@@ -1235,7 +1235,7 @@ LAYER
   DATA "geom from (select geom, round(tsf0::numeric,0) as tsf0,
     oid from current WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
     and tsf0 > -30) as foo using unique oid using srid=4326"
-  STATUS DEFAULT
+  STATUS OFF
   TYPE POINT
   LABELCACHE OFF
   PROJECTION
