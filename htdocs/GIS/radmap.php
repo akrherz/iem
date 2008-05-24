@@ -26,6 +26,12 @@ if (isset($_GET["bbox"]))
 }
 
 
+/* Lets determine our timestamp.  This is rather important. */
+$ts = isset($_GET["ts"]) ? gmmktime(
+ substr($_GET["ts"],8,2), substr($_GET["ts"],10,2), 0,
+ substr($_GET["ts"],4,2), substr($_GET["ts"],6,2), substr($_GET["ts"],0,4)): 0;
+
+
 /* Lets Plot stuff already! */
 dl($mapscript);
 
@@ -51,6 +57,9 @@ $lakes->draw($img);
 /* Draw NEXRAD Layer */
 $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("status", MS_ON);
+if ($ts > 0){
+ $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $ts) );
+}
 $radar->draw($img);
 
 $counties = $map->getlayerbyname("uscounties");
@@ -66,14 +75,37 @@ $states->draw($img);
 $wbc = $map->getlayerbyname("watch_by_county");
 $wbc->set("status", MS_ON);
 $wbc->set("connection", "user=nobody dbname=postgis host=iemdb");
-$wbc->set("data", "g from (select phenomena, eventid, multi(geomunion(geom)) as g from warnings WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= now() and expire > now() GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena");
+if ($ts > 0) {
+  $sql = sprintf("g from (select phenomena, eventid, multi(geomunion(geom)) as g from warnings_%s WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= '%s:00+00' and expire > '%s:00+00' GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena",gmstrftime("%Y",$ts),
+  gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts) );
+} else {
+  $sql = "g from (select phenomena, eventid, multi(geomunion(geom)) as g from warnings WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= now() and expire > now() GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena";
+}
+$wbc->set("data", $sql);
 $wbc->draw($img);
 
+/*
+$watches = $map->getlayerbyname("watches");
+$watches->set("status", MS_ON);
+$watches->set("connection", "user=nobody dbname=postgis host=iemdb");
+$watches->setFilter("expired > '2008-01-01'");
+$watches->draw($img);
+*/
 
 $sbw = $map->getlayerbyname("sbw");
 $sbw->set("status", MS_ON);
 $sbw->set("connection", "user=nobody dbname=postgis host=iemdb");
 $sbw->set("maxscale", 10000000);
+if ($ts > 0)
+{
+  $sql = sprintf("geom from (select phenomena, geom, oid from warnings_%s 
+  WHERE significance != 'A' and issue <= '%s:00+00' and expire > '%s:00+00' and 
+  gtype = 'P') as foo using unique oid using SRID=4326", gmstrftime("%Y",$ts),
+  gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts) );
+} else {
+  $sql = "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326";
+}
+$sbw->set("data", $sql);
 $sbw->draw($img);
 
 $bar640t = $map->getLayerByName("bar640t");
@@ -84,11 +116,13 @@ $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
 $point->setXY(80, 12);
 $point->draw($map, $tlayer, $img, 0,"NEXRAD Base Reflectivity");
+//$point->draw($map, $tlayer, $img, 0,"2008 SPC Watch Boxes");
 $point->free();
 
 $point = ms_newpointobj();
 $point->setXY(80, 29);
-$d = strftime("%d %B %Y %-2I:%M %p %Z" ,  time());
+if ($ts > 0) { $d = strftime("%d %B %Y %-2I:%M %p %Z" ,  $ts); }
+else { $d = strftime("%d %B %Y %-2I:%M %p %Z" ,  time()); }
 $point->draw($map, $tlayer, $img, 1,"$d");
 $point->free();
 
