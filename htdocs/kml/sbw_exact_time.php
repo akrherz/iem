@@ -25,7 +25,10 @@ if ($significance == "W" &&
 }
 $result = pg_exec($connect, $query2 ." ORDER by sz DESC, updated DESC, gtype ASC");
 $row = pg_fetch_array($result, 0);
-$ts = strtotime( $row["issue"] );
+$radarts = strtotime( $row["issue"] );
+if (strtotime( $row["expire"] ) > time()){
+  $radarts = time();
+}
 
 header("Content-Type:", "application/vnd.google-earth.kml+xml");
 // abgr
@@ -49,7 +52,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <ScreenOverlay id=\"legend_bar\">
    <visibility>1</visibility>
    <Icon>
-       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=". strftime("%d%%20%B%%20%Y%%20%-I:%M%%20%p%%20%Z", $ts) ."</href>
+       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=". strftime("%d%%20%B%%20%Y%%20%-I:%M%%20%p%%20%Z", $radarts) ."</href>
    </Icon>
    <description>WaterWatch Legend</description>
    <overlayXY x=\".5\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
