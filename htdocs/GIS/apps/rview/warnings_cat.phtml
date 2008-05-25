@@ -141,8 +141,13 @@ if ($last_eventid > 0)
 
 $radarTS = $issue;
 $radarLabel = "At product issuance";
+$wmslayer = "nexrad-n0r-wmst";
+$ts2 = determine_time_base($radarTS);
+$wms_time_extra = "lURL+=\"&TIME=". strftime("%Y-%m-%dT%H:%M:00Z",$ts2) ."\";\n";
 if (time() < strtotime(substr($row["expire"],0,16)))
 {
+  $wmslayer = "nexrad-n0r";
+  $wms_time_extra = "";
   $radarTS = strtotime(substr($row["expire"],0,16));
   $radarLabel = "Current";
 }
@@ -306,17 +311,73 @@ if (pg_numrows($result) == 0) {
 }
 if ($warngeo == "sbw" && pg_numrows($result) > 0)
 {
-  echo "var gtab = Ext.getCmp('top-display').insert(1, {
+?>
+
+// nexrad data
+CustomGetTileUrl=function(a,b,c) {
+if (typeof(window['this.myMercZoomLevel'])=="undefined") this.myMercZoomLevel=0; 
+if (typeof(window['this.myStyles'])=="undefined") this.myStyles="default"; 
+var lULP = new GPoint(a.x*256,(a.y+1)*256);
+var lLRP = new GPoint((a.x+1)*256,a.y*256);
+var lUL = G_NORMAL_MAP.getProjection().fromPixelToLatLng(lULP,b,c);
+var lLR = G_NORMAL_MAP.getProjection().fromPixelToLatLng(lLRP,b,c);
+// switch between Mercator and DD if merczoomlevel is set
+if (this.myMercZoomLevel!=0 && map.getZoom() < this.myMercZoomLevel) {
+    var lBbox=dd2MercMetersLng(lUL.lngDegrees)+","+dd2MercMetersLat(lUL.latDegrees)+","+dd2MercMetersLng(lLR.lngDegrees)+","+dd2MercMetersLat(lLR.latDegrees);
+    var lSRS="EPSG:54004";
+} else {
+    var lBbox=lUL.x+","+lUL.y+","+lLR.x+","+lLR.y;
+    var lSRS="EPSG:4326";
+}
+var ts = new Date();
+var lURL=this.myBaseURL;
+lURL+="&REQUEST=GetMap";
+lURL+="&SERVICE=WMS";
+lURL+="&reaspect=false&VERSION=1.1.1";
+lURL+="&LAYERS="+this.myLayers;
+lURL+="&STYLES="+this.myStyles; lURL+="&FORMAT="+this.myFormat;
+lURL+="&BGCOLOR=0xFFFFFF";
+lURL+="&TRANSPARENT=TRUE";
+lURL+="&SRS="+lSRS;
+<?php echo $wms_time_extra; ?>
+lURL+="&BBOX="+lBbox;
+lURL+="&WIDTH=256";
+lURL+="&HEIGHT=256";
+lURL+="&GroupName="+this.myLayers;
+lURL+="&bogus="+ts.getTime();
+return lURL;
+}
+
+
+<?php
+ echo " var gtab = Ext.getCmp('top-display').insert(1, {
               id: 'gtab',
               title: 'Google Map',
               html: 'gmapper'
 			}).show();
   map = new GMap2(gtab.body.dom);
   map.addControl(new GSmallMapControl());
+  map.addControl(new GMapTypeControl());";
+?>
+
+<?php
+
+  echo "var tileNEX= new GTileLayer(new GCopyrightCollection(''),1,17);
+  tileNEX.myLayers='$wmslayer';
+  tileNEX.myFormat='image/png';
+  tileNEX.myBaseURL='http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?';
+  tileNEX.getTileUrl=CustomGetTileUrl;
+
+  var layer4=[G_NORMAL_MAP.getTileLayers()[0],tileNEX]; 
+  var custommap4 = new GMapType(layer4, G_SATELLITE_MAP.getProjection(), 'Nexrad', G_SATELLITE_MAP);
+  map.addMapType(custommap4);
 
   gxml = new GGeoXml('$kml_link');
   map.addOverlay(gxml);
-  map.setCenter(new GLatLng($yc,$xc), 8); ";
+  map.setCenter(new GLatLng($yc,$xc), 8); 
+  map.setMapType(custommap4);
+  ";
+
 }
 
 echo "});
