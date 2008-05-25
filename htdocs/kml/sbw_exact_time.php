@@ -55,8 +55,8 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
        <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=". strftime("%d%%20%B%%20%Y%%20%-I:%M%%20%p%%20%Z", $radarts) ."</href>
    </Icon>
    <description>WaterWatch Legend</description>
-   <overlayXY x=\".5\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
-   <screenXY x=\".5\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
+   <overlayXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
+   <screenXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
    <size x=\"0\" y=\"0\" xunits=\"pixels\" yunits=\"pixels\"/>
   </ScreenOverlay>
   <Placemark>
