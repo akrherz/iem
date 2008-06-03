@@ -20,6 +20,8 @@ having difficulty finding something, please let us know.</p>
   <br />Iowa City tornado.</li>
  <li><a href="/cases/051112/">12 November 2005</a>
   <br />Tornadoes of Woodward, Stratford, and Ames.</li>
+ <li><a href="/cases/080525/">25 May 2008</a>
+  <br />Parkersburg EF5 Tornado.</li>
  <li><a href="/cases/">... View all ...</a></li>
 </ul>
 
