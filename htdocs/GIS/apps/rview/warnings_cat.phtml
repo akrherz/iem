@@ -59,8 +59,8 @@ $row = pg_fetch_array($result, 0);
 $lpad = 0.5;
 $y1 = $row["y1"] +$lpad; $y0 = $row["y0"]-$lpad; 
 $x1 = $row["x1"] +$lpad; $x0 = $row["x0"]-$lpad;
-$xc = $x0 + ($row["x1"] - $row["x0"]) / 2;
-$yc = $y0 + ($row["y1"] - $row["y0"]) / 2;
+$xc = ($row["x1"] + $row["x0"]) / 2;
+$yc = ($row["y1"] + $row["y0"]) / 2;
 
 /* Now we fetch warning and perhaps polygon */
 $query2 = "SELECT *, astext(geom) as t, askml(geom) as kml,
