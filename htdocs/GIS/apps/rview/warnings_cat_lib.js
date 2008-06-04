@@ -191,7 +191,7 @@ function mySplitter(val) {
       s += tokens[i] +",";
       if ((i % 3) == 0 && i > 0) s += "<br />";
     }
-    return '<span>' + s + '</div>';
+    return '<span>' + s + '</span>';
 }
 
     // create the Grid
@@ -205,7 +205,7 @@ function mySplitter(val) {
           {header: "Issued (UTC)", width: 140, sortable: true, dataIndex: 'issued'},
           {header: "Expired (UTC)", width: 140, sortable: true, dataIndex: 'expired'},
           {header: "Area km**2", width: 70, sortable: true, dataIndex: 'area'},
-          {header: "Locations", renderer: mySplitter, width: 250, sortable: true, dataIndex: 'locations'}
+          {header: "Locations", id:"locations", width: 250, sortable: true, dataIndex: 'locations'}
         ]),
         plugins: filters,
         stripeRows: true,
