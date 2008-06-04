@@ -160,22 +160,27 @@ if (isset($_GET["vtec"]))
 
 
 /* Storm Based Warning */
+$ptext = "phenomena";
+if (in_array("sbw", $layers) && in_array("cbw", $layers))
+{
+  $ptext = "'ZZ' as phenomena";
+}
 $sbw = $map->getlayerbyname("sbw");
 $sbw->set("status", in_array("sbw", $layers) );
 $sbw->set("connection", "user=nobody dbname=postgis host=iemdb");
 $sbw->set("maxscale", 10000000);
 if ($ts > 0)
 {
-  $sql = sprintf("geom from (select phenomena, geom, oid from warnings_%s 
+  $sql = sprintf("geom from (select %s, geom, oid from warnings_%s 
     WHERE significance != 'A' and issue <= '%s:00+00' and expire > '%s:00+00'
     and gtype = 'P' %s) as foo using unique oid using SRID=4326", 
-    gmstrftime("%Y",$ts),
+    $ptext, gmstrftime("%Y",$ts),
     gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
     $vtec_limiter );
 } else {
-  $sql = sprintf("geom from (select phenomena, geom, oid from warnings WHERE 
+  $sql = sprintf("geom from (select %s, geom, oid from warnings WHERE 
   significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P' %s) 
-  as foo using unique oid using SRID=4326", $vtec_limiter);
+  as foo using unique oid using SRID=4326", $ptext, $vtec_limiter);
 }
 $sbw->set("data", $sql);
 $sbw->draw($img);
