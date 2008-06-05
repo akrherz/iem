@@ -192,7 +192,9 @@ foreach($data as $key => $value){
 $map->drawLabelCache($img);
 
 $radTimes = Array();
-$radTS = filemtime("/home/ldm/data/gis/images/4326/$rad/n0r_0.tif");
+$rad2 = $rad;
+if ($rad == "DMXA" || $rad == "DMXA" ||$rad == "DMXA" ) { $rad2 = "DMX"; }
+$radTS = filemtime("/home/ldm/data/gis/images/4326/$rad2/n0r_0.tif");
 $r = date("m/d h:i a", $radTS);
 
 mktitle($map, $img, " SNET 15min rain ending: ". $ts ." , NEXRAD valid: $r");
