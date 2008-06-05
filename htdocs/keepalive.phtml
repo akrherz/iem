@@ -1,7 +1,10 @@
 <?php 
+/* This program is called from Linux IPVS, we check the system's load 
+   average and return something not expected if it is too high, this 
+   will cause IPVS to drop the node from the Farm! (we want this) */
 $f = file_get_contents("/proc/loadavg");
 $a = split(" ", $f);
-if (floatval($a[1]) > 20)
+if (floatval($a[1]) > 30)
 {
   echo $a[0];
 } else {
