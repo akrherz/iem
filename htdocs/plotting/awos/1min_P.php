@@ -48,6 +48,7 @@ for( $p=0; $row = @pg_fetch_array($result,$p); $p++)  {
 
   $thisALTI = $row["alti"] * 33.8639;
   $thisPREC = $row["p01i"];
+  if ($thisALTI < 800){ $thisALTI = ""; }
 
   if ($thisPREC > $lastP){
     $accumP = $accumP + $thisPREC - $lastP;
@@ -77,7 +78,7 @@ for( $p=0; $row = @pg_fetch_array($result,$p); $p++)  {
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
       $prec[$i] = $accumP;
-      $alti[$i] = " ";
+      $alti[$i] = "";
 
       $i++;
       $missing++;

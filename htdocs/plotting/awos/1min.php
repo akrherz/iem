@@ -44,19 +44,18 @@ $max_yaxis = 0;
 for( $p=0; $row = @pg_fetch_array($result,$p); $p++)  {
   $strDate = $sqlDate ." ". $row["tvalid"]; 
   $timestamp = strtotime($strDate );
-#  echo $thisTime ."||";
   
   $thisTmpf = $row["tmpf"];
   $thisDwpf = $row["dwpf"];
   if ($thisTmpf < -50 || $thisTmpf > 150 ){
-    $thisTmpf = " ";
+    $thisTmpf = "";
   } else {
     if ($max_yaxis < $thisTmpf){
       $max_yaxis = $thisTmpf;
     }
   }
   if ($thisDwpf < -50 || $thisDwpf > 150 ){
-    $thisDwpf = " ";
+    $thisDwpf = "";
   }  else {
     if ($min_yaxis > $thisDwpf){
       $min_yaxis = $thisDwpf;
@@ -82,15 +81,14 @@ for( $p=0; $row = @pg_fetch_array($result,$p); $p++)  {
     $tester = $shouldbe + 60;
     while ($tester <= $timestamp ){
       $tester = $tester + 60 ;
-      $tmpf[$i] = " ";
-      $dwpf[$i] = " ";
+      $tmpf[$i] = "";
+      $dwpf[$i] = "";
       $xlabel[$i] ="";
       $i++;
       $missing++;
     }
     $tmpf[$i] = $thisTmpf;
     $dwpf[$i] = $thisDwpf;
-    $xlabel[$i] = $thisTime;
     $i++;
     continue;
     
