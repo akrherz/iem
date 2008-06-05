@@ -17,7 +17,7 @@ IMAGECOLOR -1 -1 -1
 # Projection definition, consult the PROJ.4 documentation for parameter discussion
 #
 PROJECTION
-   "init=epsg:4326"
+   "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 END
 
 #
@@ -54,7 +54,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
+   "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT CURRENT"
@@ -91,7 +91,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
+   "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT M5 MINS"
@@ -109,7 +109,8 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
+    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT M10 MINS"
@@ -127,7 +128,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
+    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT M15 MINS"
@@ -144,7 +145,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
+    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT M20 MINS"
@@ -161,7 +162,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
+    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT M25 MINS"
@@ -178,7 +179,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
+    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT M30 MINS"
@@ -195,7 +196,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
+    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT M35 MINS"
@@ -213,7 +214,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
+    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT M40 MINS"
@@ -231,7 +232,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:4326"
+    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT M45 MINS"
@@ -272,7 +273,7 @@ LAYER
   DEBUG ON
   DUMP TRUE
   PROJECTION
-    "init=epsg:4326"
+    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   END
   METADATA
     "wms_title" "NEXRAD BASE REF WMS-T"
