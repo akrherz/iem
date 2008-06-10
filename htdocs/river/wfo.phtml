@@ -7,6 +7,13 @@ include("$rootpath/include/forms.php");
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3): "DMX";
 
 $postgis = iemdb("postgis");
+$sevcol = Array(
+ "N" =>"#0f0",
+ "0" =>"#0f0",
+ "1" =>"#ff0",
+ "2" =>"#f00",
+ "3" =>"#f0f",
+ "U" =>"#fff");
 
 $sql = "select r.*, h.* from hvtec_nwsli h, riverpro r, 
   (select distinct hvtec_nwsli from warnings_2008 WHERE 
@@ -19,7 +26,7 @@ $rivers = Array();
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
   $river = $row["river_name"];
-  @$rivers[$river] .= sprintf("<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td></tr>", $row["name"],
+  @$rivers[$river] .= sprintf("<tr><th style='background: %s;'>%s</th><td>%s</td><td>%s</td><td>%s</td></tr>",$sevcol[$row["severity"]], $row["name"],
    $row["stage_text"], $row["flood_text"], $row["forecast_text"]);
 }
 
