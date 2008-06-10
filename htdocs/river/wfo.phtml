@@ -15,12 +15,12 @@ $sevcol = Array(
  "3" =>"#f0f",
  "U" =>"#fff");
 
-//  (select distinct hvtec_nwsli from warnings_2008 WHERE 
-//   expire > CURRENT_TIMESTAMP and phenomena = 'FL' and 
-//   significance = 'W' and wfo = '$wfo') as foo
 
-$sql = "select r.*, h.* from hvtec_nwsli h, riverpro r 
-   WHERE r.nwsli = h.nwsli";
+$sql = "select r.*, h.* from hvtec_nwsli h, riverpro r,
+  (select distinct hvtec_nwsli from warnings_2008 WHERE 
+   status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
+   significance = 'W' and wfo = '$wfo') as foo
+   WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli";
 $rs = pg_exec($postgis, $sql);
 
 $rivers = Array();
