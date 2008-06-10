@@ -124,17 +124,6 @@ for ($j=0; $j<24; $j++){
   $xlabel[$j*60] = $xpre[$j];
 }
 
-// Fix y[0] problems
-if ($tmpf[0] == ""){
-  $tmpf[0] = 0;
-  if ($min_yaxis > 0) $min_yaxis = 0;
-  if ($max_yaxis < 0) $max_yaxis = 0;
-}
-if ($dwpf[0] == ""){
-  $dwpf[0] = 0;
-  if ($min_yaxis > 0) $min_yaxis = 0;
-  if ($max_yaxis < 0) $max_yaxis = 0;
-}
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
