@@ -112,10 +112,6 @@ for ($j=0; $j<24; $j++){
 }
 
 
-// Fix y[0] problems
-if ($tmpf[0] == ""){
-  $tmpf[0] = 0;
-}
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
