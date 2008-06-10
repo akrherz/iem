@@ -7,70 +7,18 @@ $titleDate = strftime("%b %d, %Y", $myTime);
 $dirRef = strftime("%Y/%m/%d", $myTime);
 $fcontents = file("/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
 
-$parts = array();
-$start = intval( $myTime );
-$i = 0;
-
-$dups = 0;
-$missing = 0;
-$prev_gust = 0.0;
+$maxGust = 0;
+$gustTime = 0;
 
 while (list ($line_num, $line) = each ($fcontents)) {
 
   $parts = split (" ", $line);
-  $lmonth = $parts[0];
-  $lday = $parts[1];
-  $lyear = $parts[2];
-  $hour = $parts[3];
-  $min = $parts[4];
   $gust = $parts[11];
   $gust_time = $parts[12];
-  $timestamp = mktime($hour,$min,0,$lmonth,$lday,$lyear); 
-                                                                                
-  $shouldbe = intval( $start ) + 60 * $i;
- 
-#  echo  $i ." - ". $line_num ."-". $shouldbe ." - ". $timestamp ;
- 
-  // We are good, write data, increment i
-  if ( $shouldbe == $timestamp ){
-#    echo " EQUALS <br>";
-    $gust = $gust;
-    $gust_time = $gust_time;
-    $i++;
-    continue;
-  
-  // Missed an ob, leave blank numbers, inc 
-  } else if (($timestamp - $shouldbe) > 0) {
-#    echo " TROUBLE <br>";
-    $tester = $shouldbe + 60;
-    while ($tester <= $timestamp ){
-      $tester = $tester + 60 ;
-      $gust = "";
-      $gust_time = "";
-      $i++;
-      $missing++;
-    }
-    $gust = $gust;
-    $gust_time = $gust_time;
-    $i++;
-    continue;
-
-    $line_num--;
-  } else if (($timestamp - $shouldbe) < 0) {
-#     echo "DUP <br>";
-     $dups++;
-  }
-
+  if ($gust > $maxGust){ $maxGust = $gust; $gustTime = $gust_time;}
 } // End of while
 
-// Fix y[0] problems
-if ($gust == ""){
-  $gust_time = 0;
-}
-if ($gust_time == ""){
-  $gust_time = 0;
-}
 ?>
 
-<div><font>Today's Maximum Wind Gust: <?php echo $gust; ?> mph<br>
-Time of Maximum Wind Gust: <?php echo $gust_time; ?><br><br></font></div> 
+<div><font>Today's Maximum Wind Gust: <?php echo $maxGust; ?> mph<br>
+Time of Maximum Wind Gust: <?php echo $gustTime; ?><br><br></font></div> 
