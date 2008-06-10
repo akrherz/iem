@@ -52,10 +52,13 @@ echo "</form>";
 
 <?php
 echo "<p><table border='1' cellpadding='2' cellspacing='0'>";
-while (list($key, $html) = each($rivers))
+$rvs = array_keys($rivers);
+asort($rvs);
+
+while (list($idx, $key) = each($rvs))
 {
   echo "<tr><th colspan='4' style='background: #eee; text-align: left;'>$key</th></tr>";
-  echo $html;
+  echo $rivers[$key];
 
 }
 
