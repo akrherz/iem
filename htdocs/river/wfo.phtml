@@ -1,0 +1,42 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/header.php");
+include("$rootpath/include/wfoLocs.php");
+include("$rootpath/include/forms.php");
+$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3): "DMX";
+
+$postgis = iemdb("postgis");
+
+$sql = "select r.*, h.* from hvtec_nwsli h, riverpro r, 
+  (select distinct hvtec_nwsli from warnings_2008 WHERE 
+   expire > CURRENT_TIMESTAMP and phenomena = 'FL' and 
+   significance = 'W' and wfo = '$wfo') as foo  
+   WHERE r.nwsli = foo.hvtec_nwsli and r.nwsli = h.nwsli";
+$rs = pg_exec($postgis, $sql);
+
+$rivers = Array();
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+{
+  $river = $row["river_name"];
+  @$rivers[$river] .= sprintf("<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td></tr>", $row["name"],
+   $row["stage_text"], $row["flood_text"], $row["forecast_text"]);
+}
+
+echo "<form method='GET'>";
+echo 'Select NWS Forecast Office:'. wfoSelect($wfo);
+echo "<input type='submit'>";
+echo "</form>";
+
+echo "<p><table border='1' cellpadding='2' cellspacing='0'>";
+while (list($key, $html) = each($rivers))
+{
+  echo "<tr><th colspan='4' style='background: #eee; text-align: left;'>$key</th></tr>";
+  echo $html;
+
+}
+
+echo "</table>";
+
+include("$rootpath/include/footer.php");
+?>
