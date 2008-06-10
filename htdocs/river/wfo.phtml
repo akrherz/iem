@@ -9,8 +9,8 @@ $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3): "DMX";
 $postgis = iemdb("postgis");
 $sevcol = Array(
  "N" =>"#0f0",
- "0" =>"#0f0",
- "1" =>"#ff0",
+ "0" =>"#ff0",
+ "1" =>"#ff9900",
  "2" =>"#f00",
  "3" =>"#f0f",
  "U" =>"#fff");
@@ -30,12 +30,27 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   @$rivers[$river] .= sprintf("<tr><th style='background: %s;'>%s</th><td>%s</td><td>%s</td><td>%s</td></tr>",$sevcol[$row["severity"]], $row["name"],
    $row["stage_text"], $row["flood_text"], $row["forecast_text"]);
 }
+?>
 
-echo "<form method='GET'>";
+<h3>River Forecast Point Monitor by NWS WFO</h3>
+
+<?php
+echo "<p><form method='GET'>";
 echo 'Select NWS Forecast Office:'. wfoSelect($wfo);
 echo "<input type='submit'>";
 echo "</form>";
+?>
 
+<table border='1' cellpadding='2' cellspacing='0' style="margin: 5px;">
+<tr>
+ <th>Key:</th>
+ <td style="background: #ff0;">Near Flood Stage</td>
+ <td style="background: #ff9900;">Mirror Flooding</td>
+ <td style="background: #f00;">Moderate Flooding</td>
+ <td style="background: #f0f;">Major Flooding</td>
+</tr></table>
+
+<?php
 echo "<p><table border='1' cellpadding='2' cellspacing='0'>";
 while (list($key, $html) = each($rivers))
 {
