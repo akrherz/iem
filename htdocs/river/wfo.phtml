@@ -27,8 +27,9 @@ $rivers = Array();
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
   $river = $row["river_name"];
-  @$rivers[$river] .= sprintf("<tr><th style='background: %s;'>%s</th><td>%s</td><td>%s</td><td>%s</td></tr>",$sevcol[$row["severity"]], $row["name"],
-   $row["stage_text"], $row["flood_text"], $row["forecast_text"]);
+  @$rivers[$river] .= sprintf("<tr><th style='background: %s;'>%s<br />%s</th><td>%s</td><td>%s</td><td>%s</td></tr>",$sevcol[$row["severity"]], $row["name"],
+   $row["nwsli"], $row["stage_text"], $row["flood_text"], 
+   $row["forecast_text"]);
 }
 ?>
 
