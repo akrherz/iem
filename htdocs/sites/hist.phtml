@@ -67,7 +67,7 @@ if ($mode == "monthly") {
   }
   $db[ $row["dvalid"] ] = $str ;
 
- $htmlout = printMonth($ts, $db, $rooturl ."hist.phtml?network=$network&station=$station" , $rooturl ."/sites/hist.phtml?station=$station&network=$network&mode=daily&year=$year&month=$month&day=");
+ $htmlout = printMonth($ts, $db, $rooturl ."/sites/hist.phtml?network=$network&station=$station" , $rooturl ."/sites/hist.phtml?station=$station&network=$network&mode=daily&year=$year&month=$month&day=");
  } /* End of for */
 
  $htmlout .= sprintf('<p><img src="month_hilo_plot.php?month=%s&year=%s&network=%s&station=%s"><br /><strong>Description:</strong> This chart of the monthly temperature data.  The bars are the observations and the dots are climatology.', $month, $year, $network, $station);
