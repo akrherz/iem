@@ -80,7 +80,7 @@ $cameras = Array(
 "KCCI-020" => Array("sts" => mktime(17,0,0,9, 26,2005), "ets" => time(),
     "name" => "Knoxville", "removed" => False, "active" => True, "lat" => 41.32, "lon" => -93.12,
     "state" => "IA", "network" => "KCCI",
-    "ip" => "69.66.211.12", "county" => "Marion", "port" => "80"),
+    "ip" => "71.7.55.158", "county" => "Marion", "port" => "80"),
 "KCCI-015" => Array("sts" => mktime(23,0,0,6, 18,2004), "ets" => time(),
     "name" => "Lake Rathbun", "removed" => False, "active" => True, "lat" => 40.73, "lon" => -92.87,
     "state" => "IA", "network" => "KCCI",
