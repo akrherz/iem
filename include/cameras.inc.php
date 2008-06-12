@@ -130,7 +130,7 @@ $cameras = Array(
     "state" => "IA", "network" => "KCCI",
     "ip" => "69.66.29.140", "county" => "Calhoun", "port" => "80"),
 "KCCI-018" => Array("sts" => mktime(11,0,0,7, 2,2005), "ets" => time(),
-    "name" => "Saylorville Lake", "removed" => False, "active" => True, "lat" => 41.753578, "lon" => -93.703921,
+    "name" => "Saylorville Lake", "removed" => False, "active" => False, "lat" => 41.753578, "lon" => -93.703921,
     "state" => "IA", "network" => "KCCI",
     "ip" => "67.41.111.192", "county" => "Polk", "port" => "80"),
 "KCCI-029" => Array("sts" => mktime(9,0,0,6, 5,2007), "ets" => time(),
