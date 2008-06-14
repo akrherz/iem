@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<project path="" name="Ext - Resources" author="Ext JS, LLC" version="2.0.2" copyright="Ext JS Library $version&#xD;&#xA;Copyright(c) 2006-2008, $author.&#xD;&#xA;licensing@extjs.com&#xD;&#xA;&#xD;&#xA;http://extjs.com/license" output="C:\apps\www\deploy\ext-2.0.2\resources" source="true" source-dir="$output" minify="False" min-dir="$output\build" doc="False" doc-dir="$output\docs" master="true" master-file="$output\yui-ext.js" zip="true" zip-file="$output\yuo-ext.$version.zip">
+<project path="" name="Ext - Resources" author="Ext JS, LLC" version="2.1" copyright="Ext JS Library $version&#xD;&#xA;Copyright(c) 2006-2008, $author.&#xD;&#xA;licensing@extjs.com&#xD;&#xA;&#xD;&#xA;http://extjs.com/license" output="C:\apps\www\deploy\ext-2.1\resources" source="true" source-dir="$output" minify="False" min-dir="$output\build" doc="False" doc-dir="$output\docs" master="true" master-file="$output\yui-ext.js" zip="true" zip-file="$output\yuo-ext.$version.zip">
   <directory name="" />
   <target name="All css" file="$output\css\ext-all.css" debug="True" shorthand="False" shorthand-list="YAHOO.util.Dom.setStyle&#xD;&#xA;YAHOO.util.Dom.getStyle&#xD;&#xA;YAHOO.util.Dom.getRegion&#xD;&#xA;YAHOO.util.Dom.getViewportHeight&#xD;&#xA;YAHOO.util.Dom.getViewportWidth&#xD;&#xA;YAHOO.util.Dom.get&#xD;&#xA;YAHOO.util.Dom.getXY&#xD;&#xA;YAHOO.util.Dom.setXY&#xD;&#xA;YAHOO.util.CustomEvent&#xD;&#xA;YAHOO.util.Event.addListener&#xD;&#xA;YAHOO.util.Event.getEvent&#xD;&#xA;YAHOO.util.Event.getTarget&#xD;&#xA;YAHOO.util.Event.preventDefault&#xD;&#xA;YAHOO.util.Event.stopEvent&#xD;&#xA;YAHOO.util.Event.stopPropagation&#xD;&#xA;YAHOO.util.Event.stopEvent&#xD;&#xA;YAHOO.util.Anim&#xD;&#xA;YAHOO.util.Motion&#xD;&#xA;YAHOO.util.Connect.asyncRequest&#xD;&#xA;YAHOO.util.Connect.setForm&#xD;&#xA;YAHOO.util.Dom&#xD;&#xA;YAHOO.util.Event">
     <include name="css\reset.css" />
@@ -25,6 +25,7 @@
     <include name="css\layout.css" />
     <include name="css\progress.css" />
     <include name="css\dialog.css" />
+    <include name="css\slider.css" />
   </target>
   <file name="images\basic-dialog\gray\close.gif" path="images\basic-dialog\gray" />
   <file name="images\basic-dialog\gray\dlg-bg.gif" path="images\basic-dialog\gray" />
@@ -691,4 +692,9 @@
   <file name="images\default\tree\arrow-open-over.gif" path="images\default\tree" />
   <file name="images\default\tree\arrow-open.gif" path="images\default\tree" />
   <file name="images\default\tree\arrows.gif" path="images\default\tree" />
+  <file name="css\slider.css" path="css" />
+  <file name="images\default\slider\slider-bg.png" path="images\default\slider" />
+  <file name="images\default\slider\slider-thumb.png" path="images\default\slider" />
+  <file name="images\default\slider\slider-v-bg.png" path="images\default\slider" />
+  <file name="images\default\slider\slider-v-thumb.png" path="images\default\slider" />
 </project>

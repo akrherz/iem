@@ -1,5 +1,5 @@
 /*
- * Ext JS Library 2.0.2
+ * Ext JS Library 2.1
  * Copyright(c) 2006-2008, Ext JS, LLC.
  * licensing@extjs.com
  * 
@@ -338,8 +338,4 @@ ul.x-tab-strip li.x-tab-edge {
     border-top:0 none;
     overflow:hidden;
     padding:2px;
-}
-
-.x-border-layout-ct .x-tab-panel {
-	background: white;
 }
