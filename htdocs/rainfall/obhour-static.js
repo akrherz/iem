@@ -5,6 +5,8 @@ Ext.namespace('iemdata');
 iemdata.networks = [
  ['IA_ASOS','Iowa ASOS'],
  ['AWOS','Iowa AWOS'],
+ ['IL_ASOS','Illinois ASOS/AWOS'],
+ ['WI_ASOS','Wisconsin ASOS/AWOS'],
  ['AR_ASOS','Arkansas ASOS']
 ];
 
@@ -63,6 +65,7 @@ var selectform = new Ext.form.FormPanel({
             params:'network='+network+'&ts='+gmtDate.format('YmdHi')
           });
           Ext.getCmp('statusField').setText("Grid Loaded at "+ new Date() );
+          updateHeaders( localDate );
           } // End of handler
      }],
      items: [network_selector, dateselector, timeselector]
@@ -94,6 +97,17 @@ var pstore = new Ext.data.Store({
      ])
 });
 
+function updateHeaders(ts) {
+  var cm = gpanel.getColumnModel();
+  var col;
+  var ts0;
+  for (i=2; i < cm.getColumnCount(); i++)
+  {
+    col = cm.getColumnById( cm.getColumnId(i) );
+    ts0 = ts.add(Date.SECOND, 0 - (col.toffset * 3600));
+    cm.setColumnHeader(i, ts0.format('m/d hA')+"<br />"+ ts.format('m/d hA'));
+  }
+};
 
 
 var gpanel =  new Ext.grid.GridPanel({
@@ -111,14 +125,14 @@ var gpanel =  new Ext.grid.GridPanel({
         cm: new Ext.grid.ColumnModel([
             {header: "ID",  width: 40, sortable: true, dataIndex: 'id'},
             {header: "Name", id: "sitename", width: 150, sortable: true, dataIndex: 'name'},
-            {header: "1 Hour", width: 80, sortable: true, dataIndex: 'p1'},
-            {header: "2 Hour", width: 80, sortable: true, dataIndex: 'p2'},
-            {header: "3 Hour", width: 80, sortable: true, dataIndex: 'p3'},
-            {header: "6 Hour", width: 80, sortable: true, dataIndex: 'p6'},
-            {header: "12 Hour", width: 80, sortable: true, dataIndex: 'p12'},
-            {header: "24 Hour", width: 80, sortable: true, dataIndex: 'p24'},
-            {header: "48 Hour", width: 80, sortable: true, dataIndex: 'p48'},
-            {header: "96 Hour", width: 80, sortable: true, dataIndex: 'p96'}
+            {header: "1 Hour", toffset: 1, width: 80, sortable: true, dataIndex: 'p1'},
+            {header: "2 Hour", toffset: 2, width: 80, sortable: true, dataIndex: 'p2'},
+            {header: "3 Hour", toffset: 3, width: 80, sortable: true, dataIndex: 'p3'},
+            {header: "6 Hour", toffset: 6, width: 80, sortable: true, dataIndex: 'p6'},
+            {header: "12 Hour", toffset: 12, width: 80, sortable: true, dataIndex: 'p12'},
+            {header: "24 Hour", toffset: 24, width: 80, sortable: true, dataIndex: 'p24'},
+            {header: "48 Hour", toffset: 48, width: 80, sortable: true, dataIndex: 'p48'},
+            {header: "96 Hour", toffset: 96, width: 80, sortable: true, dataIndex: 'p96'}
         ]),
         stripeRows: true,
         title:'Accumulated Precipitation by Interval',
