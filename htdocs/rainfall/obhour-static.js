@@ -105,7 +105,7 @@ function updateHeaders(ts) {
   {
     col = cm.getColumnById( cm.getColumnId(i) );
     ts0 = ts.add(Date.SECOND, 0 - (col.toffset * 3600));
-    cm.setColumnHeader(i, ts0.format('m/d hA')+"<br />"+ ts.format('m/d hA'));
+    cm.setColumnHeader(i, col.toffset +" Hour<br />"+ ts0.format('m/d hA')+"<br />"+ ts.format('m/d hA'));
   }
 };
 
