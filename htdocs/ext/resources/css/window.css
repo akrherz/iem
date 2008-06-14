@@ -1,5 +1,5 @@
 /*
- * Ext JS Library 2.0.2
+ * Ext JS Library 2.1
  * Copyright(c) 2006-2008, Ext JS, LLC.
  * licensing@extjs.com
  * 
@@ -99,9 +99,6 @@
 	background: transparent url(../images/default/window/left-right.png) repeat-y right 0;
 	padding-right:6px;
     zoom:1;
-}
-.x-panel-nofooter .x-window-bc {
-	height:6px;
 }
 .x-window-body {
     overflow:hidden;

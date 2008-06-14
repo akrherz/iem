@@ -1,5 +1,5 @@
 /*
- * Ext JS Library 2.0.2
+ * Ext JS Library 2.1
  * Copyright(c) 2006-2008, Ext JS, LLC.
  * licensing@extjs.com
  * 
@@ -215,6 +215,7 @@ textarea {
     font:normal 12px tahoma, arial, helvetica, sans-serif;
     display:block;
     margin-bottom:4px;
+    zoom:1;
 }
 
 .x-form-item label {
@@ -407,6 +408,7 @@ textarea {
     border:1px solid #B5B8C8;
     padding:10px;
     margin-bottom:10px;
+    display:block; /* preserve margins in IE */
 }
 .x-fieldset legend {
     font:bold 11px tahoma, arial, helvetica, sans-serif;
