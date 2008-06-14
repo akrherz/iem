@@ -31,6 +31,8 @@ var network_selector = new Ext.form.ComboBox({
 var dateselector = new Ext.form.DateField({
     id: "df",
     hideLabel: true,
+    minValue: new Date('2008/06/12'),
+    maxValue: new Date(),
     value: new Date()
 });
 
@@ -45,19 +47,22 @@ var timeselector = new Ext.form.TimeField({
 var selectform = new Ext.form.FormPanel({
      frame: true,
      id: 'selectform',
-     title: 'Product Selector',
+     title: 'Data Chooser',
      labelWidth:0,
      buttons: [{
          text:'Load Data',
          handler: function() {
            var sff = Ext.getCmp('selectform').getForm();
            var network = sff.findField('network').getValue();
-           var dt = sff.findField('df').getValue();
+           var localDate = sff.findField('df').getValue();
            var tm = sff.findField('tm').getValue();
            var d = new Date.parseDate(tm, 'h A');
-          Ext.getCmp('precipgrid').getStore().load({
-            params:'network='+network+'&ts='+dt.format('Ymd')+d.format('Hi')
+           localDate = localDate.add(Date.HOUR, d.format('H') );
+           var gmtDate = localDate.add(Date.SECOND, 0 - localDate.format('Z'));
+          Ext.getCmp('precipgrid').setTitle("Precip Accumulation valid at "+ localDate.format('d M Y h A') ).getStore().load({
+            params:'network='+network+'&ts='+gmtDate.format('YmdHi')
           });
+          Ext.getCmp('statusField').setText("Grid Loaded at "+ new Date() );
           } // End of handler
      }],
      items: [network_selector, dateselector, timeselector]
@@ -89,14 +94,18 @@ var pstore = new Ext.data.Store({
      ])
 });
 
-var timelabel = new Ext.Toolbar.TextItem("Testing");
+
 
 var gpanel =  new Ext.grid.GridPanel({
         id:'precipgrid',
         isLoaded:false,
         store: pstore,
         region:'center',
-        tbar:[timelabel],
+        tbar:[new Ext.StatusBar({
+            defaultText: 'Please load data from the side',
+            id: 'statusField'
+        })
+        ],
         loadMask: {msg:'Loading Data...'},
         viewConfig:{forceFit:false},
         cm: new Ext.grid.ColumnModel([
@@ -116,6 +125,9 @@ var gpanel =  new Ext.grid.GridPanel({
         autoScroll:true
     });
 
+var tp = new Ext.Panel({
+  contentEl:'sidebarinfo'
+});
 
 
 var viewport = new Ext.Viewport({
@@ -139,23 +151,12 @@ var viewport = new Ext.Viewport({
              layoutConfig:{
                 animate:true
              },
-             items:[selectform]
+             items:[selectform,tp]
          },
          gpanel
          ]
 });
 
-
-//  Ext.getCmp('text-display').activate($v);
-
-//  Ext.getCmp('lsr-grid').on('activate', function(q){
-//      if (! this.getStore().isLoaded){
-//        this.getStore().load({
-//         params:'${json_params}&sbw=1'
-//        });
-//        this.getStore().isLoaded=true;
-//      }
-//  }); 
 
 // End of static.js
 });

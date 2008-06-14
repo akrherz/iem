@@ -8,7 +8,9 @@ $connect = iemdb("access");
 $mesosite = iemdb("mesosite");
 
 $network = isset($_GET["network"]) ? substr($_GET["network"],0,20) : "IA_ASOS";
-$ts = mktime(8,0,0,6,13,2008);
+$tstr = isset($_GET["ts"]) ? $_GET["ts"]: gmdate("YmdHi");
+$ts = mktime( substr($tstr, 8, 2), 0, 0 , 
+   substr($tstr, 4, 2), substr($tstr, 6, 2), substr($tstr, 0, 4) );
 
 $intervals = Array(1,2,3,6,12,24,48,96);
 

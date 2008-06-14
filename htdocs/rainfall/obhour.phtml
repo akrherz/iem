@@ -1,6 +1,6 @@
 <?php
 /* Pure IEM 2.0 App to do vtec stuff.  Shorter url please as well */
-
+include("../../config/settings.inc.php");
 
 ?>
 
@@ -16,11 +16,17 @@
  .x-grid3-cell-inner, .x-grid3-hd-inner { white-space:normal !important; }
 </style>
 
-
-<div id="header"></div>
-<div id="help">
- <h3>Help me!</h3>
+<div id="sidebarinfo" style="padding: 5px;">
+<p>This application attempts to compute accumulated precip values over
+different time intervals.  The valid time reported is the ending time, so
+the 1 Hour value at 11 AM would be for a period between 10-11 AM.</p>
 </div>
+
+<div id="header">
+ <a href="<?php echo $rooturl; ?>/"><img src="<?php echo $rooturl; ?>/images/logo_small.gif" alt="IEM" style="float:left;"/></a><div style="font:normal 16px tahoma, arial, helvetica, sans-serif; margin: 10px;">IEM 2.0 :: Hourly Precip Accumulator</div>
+</div>
+
+
 <div id="footer"></div>
 
 </body></html>
