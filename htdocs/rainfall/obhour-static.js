@@ -46,6 +46,33 @@ var timeselector = new Ext.form.TimeField({
     id: "tm"
 });
 
+var realtime = new Ext.form.Checkbox({
+  id:"realtime",
+  boxLabel:"Real Time Mode",
+  hideLabel: true
+});
+
+var task = {
+    run: function(){
+      if(! realtime.checked) return;
+      var localDate = new Date();
+      dateselector.setValue( localDate );
+      timeselector.setValue( localDate );
+      var gmtDate = localDate.add(Date.SECOND, 0 - localDate.format('Z'));
+      var sff = Ext.getCmp('selectform').getForm();
+      var network = sff.findField('network').getValue();
+      Ext.getCmp('precipgrid').setTitle("Precip Accumulation valid at "+ localDate.format('d M Y h A') ).getStore().load({
+            params:'network='+network+'&ts='+gmtDate.format('YmdHi')
+      });
+      Ext.getCmp('statusField').setText("Grid Loaded at "+ new Date() );
+      updateHeaders( localDate );
+
+    },
+    interval: 60000 
+}
+Ext.TaskMgr.start(task);
+
+
 var selectform = new Ext.form.FormPanel({
      frame: true,
      id: 'selectform',
@@ -68,7 +95,7 @@ var selectform = new Ext.form.FormPanel({
           updateHeaders( localDate );
           } // End of handler
      }],
-     items: [network_selector, dateselector, timeselector]
+     items: [network_selector, dateselector, timeselector, realtime]
 });
 
 
