@@ -68,7 +68,7 @@ var task = {
       updateHeaders( localDate );
 
     },
-    interval: 60000 
+    interval: 3600000 
 }
 Ext.TaskMgr.start(task);
 
