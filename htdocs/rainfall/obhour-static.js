@@ -33,7 +33,7 @@ var network_selector = new Ext.form.ComboBox({
 var dateselector = new Ext.form.DateField({
     id: "df",
     hideLabel: true,
-    minValue: new Date('2008/06/12'),
+    minValue: new Date('2008/01/01'),
     maxValue: new Date(),
     value: new Date()
 });
