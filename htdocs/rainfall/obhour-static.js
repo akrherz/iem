@@ -3,6 +3,7 @@ Ext.onReady(function(){
 Ext.namespace('iemdata');
 
 iemdata.networks = [
+ ['IOWA','Iowa Networks'],
  ['IA_ASOS','Iowa ASOS'],
  ['AWOS','Iowa AWOS'],
  ['KCCI','KCCI-TV SchoolNet'],
