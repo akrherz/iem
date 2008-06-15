@@ -6,7 +6,11 @@ iemdata.networks = [
  ['IA_ASOS','Iowa ASOS'],
  ['AWOS','Iowa AWOS'],
  ['IL_ASOS','Illinois ASOS/AWOS'],
+ ['MN_ASOS','Minnesota ASOS/AWOS'],
+ ['NE_ASOS','Nebraska ASOS/AWOS'],
+ ['SD_ASOS','South Dakota ASOS/AWOS'],
  ['WI_ASOS','Wisconsin ASOS/AWOS'],
+ ['TX_ASOS','Texas ASOS/AWOS'],
  ['AR_ASOS','Arkansas ASOS']
 ];
 
