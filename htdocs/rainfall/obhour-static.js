@@ -5,6 +5,9 @@ Ext.namespace('iemdata');
 iemdata.networks = [
  ['IA_ASOS','Iowa ASOS'],
  ['AWOS','Iowa AWOS'],
+ ['KCCI','KCCI-TV SchoolNet'],
+ ['KELO','KELO-TV WeatherNet'],
+ ['KIMT','KIMT-TV StormNet'],
  ['IL_ASOS','Illinois ASOS/AWOS'],
  ['MN_ASOS','Minnesota ASOS/AWOS'],
  ['NE_ASOS','Nebraska ASOS/AWOS'],
@@ -72,7 +75,7 @@ var task = {
       updateHeaders( localDate );
 
     },
-    interval: 3600000 
+    interval: 1200000 
 }
 Ext.TaskMgr.start(task);
 
