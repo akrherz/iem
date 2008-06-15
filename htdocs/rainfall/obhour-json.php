@@ -12,10 +12,16 @@ $tstr = isset($_GET["ts"]) ? $_GET["ts"]: gmdate("YmdHi");
 $ts = mktime( substr($tstr, 8, 2), 0, 0 , 
    substr($tstr, 4, 2), substr($tstr, 6, 2), substr($tstr, 0, 4) );
 
+$networks = "'$network'";
+if ($network == "IOWA")
+{
+  $networks = "'KCCI','IA_ASOS','AWOS','KIMT'";
+}
+
 $intervals = Array(1,3,6,12,24,48,72,96,"midnight");
 
 $data = Array();
-$sql = "SELECT id, name from stations WHERE network = '$network'";
+$sql = "SELECT id, name from stations WHERE network IN ($networks)";
 $rs = pg_exec($mesosite, $sql);
 for($i=0;$z = @pg_fetch_array($rs,$i); $i++)
 {
@@ -44,9 +50,9 @@ while( list($key,$interval) = each($intervals))
     $ts0 = $ts - ($interval * 3600);
   }
   $sql = sprintf("select station, sum(phour) as p1 from hourly_2008 
-          WHERE valid >= '%s+00' and valid < '%s+00' and network = '%s' 
+          WHERE valid >= '%s+00' and valid < '%s+00' and network IN (%s) 
           GROUP by station", strftime("%Y-%m-%d %H:%M", $ts0), 
-          strftime("%Y-%m-%d %H:%M", $ts), $network);
+          strftime("%Y-%m-%d %H:%M", $ts), $networks);
   $rs = pg_exec($connect, $sql);
   for( $i=0; $z = @pg_fetch_array($rs,$i); $i++)
   {
