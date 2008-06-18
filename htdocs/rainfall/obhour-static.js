@@ -169,9 +169,15 @@ var pstore = new Ext.data.Store({
          {name: 'p24'},
          {name: 'p48'},
          {name: 'p72'},
-         {name: 'p96'}
+         {name: 'p168'},
+         {name: 'p720'}
      ])
 });
+
+function offset_render(hrs) {
+  if (hrs < 24){ return hrs +" Hour"; }
+  return (hrs/24) +" Day";
+};
 
 function updateHeaders(ts) {
   var cm = gpanel.getColumnModel();
@@ -185,7 +191,7 @@ function updateHeaders(ts) {
       ts0 = ts.add(Date.HOUR, 0 - (ts.format('H'))); 
       cm.setColumnHeader(i, "Midnight<br />"+ ts0.format('m/d hA')+"<br />"+ ts.format('m/d hA'));
     } else {
-      cm.setColumnHeader(i, col.toffset +" Hour<br />"+ ts0.format('m/d hA')+"<br />"+ ts.format('m/d hA'));
+      cm.setColumnHeader(i, offset_render(col.toffset) +"<br />"+ ts0.format('m/d hA')+"<br />"+ ts.format('m/d hA'));
     }
   }
 };
@@ -214,7 +220,8 @@ var gpanel =  new Ext.grid.GridPanel({
             {header: "24 Hour", toffset: 24, width: 80, sortable: true, dataIndex: 'p24'},
             {header: "48 Hour", toffset: 48, width: 80, sortable: true, dataIndex: 'p48'},
             {header: "72 Hour", toffset: 72, width: 80, sortable: true, dataIndex: 'p72'},
-            {header: "96 Hour", toffset: 96, width: 80, sortable: true, dataIndex: 'p96'}
+            {header: "168 Hour", toffset: 168, width: 80, sortable: true, dataIndex: 'p168'},
+            {header: "720 Hour", toffset: 720, width: 80, sortable: true, dataIndex: 'p720'}
         ]),
         stripeRows: true,
         title:'Accumulated Precipitation by Interval',
