@@ -18,7 +18,7 @@ if ($network == "IOWA")
   $networks = "'KCCI','IA_ASOS','AWOS','KIMT'";
 }
 
-$intervals = Array(1,3,6,12,24,48,72,96,"midnight");
+$intervals = Array(1,3,6,12,24,48,72,168,720,"midnight");
 
 $data = Array();
 $sql = "SELECT id, name from stations WHERE network IN ($networks)";
