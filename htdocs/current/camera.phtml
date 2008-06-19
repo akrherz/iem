@@ -10,8 +10,11 @@
  $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI";
 
  $ts = time();
+ if ($isarchive){
  $radts = mktime($hour, $minute, 0, $month, $day, $year) - (($minute % 5) * 60);
-
+ } else {
+ $radts = time();
+ }
  $num = 1;
  include("$rootpath/include/cameras.inc.php");
 if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
