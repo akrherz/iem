@@ -198,14 +198,7 @@ if ($warngeo == "both" or $warngeo == "county")
   $c0 = $map->getlayerbyname("warnings0_c");
   $c0->set("connection", $_DATABASES["postgis"] );
   $c0->set("status", in_array("warnings", $layers) );
-  if ($isarchive)
-  { 
-   $c0->set("data", "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
-  }else {
-   $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings WHERE expire > '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326";
-   $c0->set("data", $sql);
-  }
-  $q = "expire > '".$db_ts."' and issue <= '".$db_ts."' and gtype = 'C'";
+  $c0->set("data", "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
   if (isset($showOnlyOne)){
     $c0->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
   }
@@ -217,13 +210,8 @@ if ($warngeo == "both")
   $p0 = $map->getlayerbyname("warnings0_p");
   $p0->set("connection", $_DATABASES["postgis"] );
   $p0->set("status", in_array("warnings", $layers) );
-  if ($isarchive)
-  { 
-    $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
-    $p0->set("data", $sql);
-  } else {
-   $p0->set("data", "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326");
-  }
+  $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
+  $p0->set("data", $sql);
   if (isset($showOnlyOne)){
     $p0->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
   }
@@ -234,14 +222,8 @@ if ($warngeo == "sbw")
   $p0 = $map->getlayerbyname("sbw");
   $p0->set("connection", $_DATABASES["postgis"] );
   $p0->set("status", in_array("warnings", $layers) );
-  if ($isarchive)
-  { 
-    $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
-    $p0->set("data", $sql);
-  } else {
-   $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
-   $p0->set("data", $sql);
-  }
+  $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
+  $p0->set("data", $sql);
   if (isset($showOnlyOne)){
     $p0->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
   }
