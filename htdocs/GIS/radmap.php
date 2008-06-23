@@ -56,6 +56,25 @@ if (isset($_GET["vtec"]))
     significance = '%s' and wfo = '%s'", $phenomena, $eventid, 
     $significance, $wfo);
 }
+if (isset($_GET['pid']))
+{
+  $pid = $_GET["pid"];
+  $dts = gmmktime(substr($_GET["pid"],8,2), substr($_GET["pid"],10,2), 0,
+ substr($_GET["pid"],4,2), substr($_GET["pid"],6,2), substr($_GET["pid"],0,4));
+  /* First, we query for a bounding box please */
+  $query1 = "SELECT xmax(extent(geom)) as x1, xmin(extent(geom)) as x0, 
+             ymin(extent(geom)) as y0, ymax(extent(geom)) as y1 
+             from text_products WHERE product_id = '$pid'";
+  $result = pg_exec($postgis, $query1);
+  $row = pg_fetch_array($result, 0);
+  $lpad = 0.5;
+  $y1 = $row["y1"] +$lpad; $y0 = $row["y0"]-$lpad;
+  $x1 = $row["x1"] +$lpad; $x0 = $row["x0"]-$lpad;
+  $xc = $x0 + ($row["x1"] - $row["x0"]) / 2; 
+  $yc = $y0 + ($row["y1"] - $row["y0"]) / 2;
+  $sector = "custom";
+  $sectors["custom"] = Array("epsg"=> 4326, "ext" => Array($x0,$y0,$x1,$y1) );
+}
 
 /* Could define a custom box */
 if (isset($_GET["bbox"]))
@@ -137,6 +156,28 @@ $watches->set("connection", "user=nobody dbname=postgis host=iemdb");
 $watches->setFilter("expired > '2008-01-01'");
 $watches->draw($img);
 */
+
+/* Plot the warning explicitly */
+if (isset($_GET["pid"]))
+{
+  $wc = ms_newLayerObj($map);
+  $wc->set("connectiontype", MS_POSTGIS);
+  $wc->set("connection", "user=nobody dbname=postgis host=iemdb");
+  $wc->set("status", MS_ON );
+  $sql = sprintf("geom from (select geom, id from text_products WHERE product_id = '$pid') as foo using unique id using SRID=4326");
+  $wc->set("data", $sql);
+  $wc->set("type", MS_LAYER_LINE);
+  $wc->setProjection("init=epsg:4326");
+
+  $wcc0 = ms_newClassObj($wc);
+  $wcc0->set("name", "Product");
+  $wcc0s0 = ms_newStyleObj($wcc0);
+  $wcc0s0->color->setRGB(255,0,0);
+  $wcc0s0->set("size", 3);
+  $wcc0s0->set("symbol", 1);
+  $wc->draw($img);
+}
+
 
 /* Plot the warning explicitly */
 if (isset($_GET["vtec"]))
