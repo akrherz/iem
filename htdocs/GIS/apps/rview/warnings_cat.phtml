@@ -373,8 +373,6 @@ return lURL;
   map = new GMap2(gtab.body.dom);
   map.addControl(new GSmallMapControl());
   map.addControl(new GMapTypeControl());";
-  if (($phenomena == "TO" || $phenomena == "SV") && $year > 2005)
-  {
     $url = sprintf("%s/GIS/sbw-history.php?vtec=%s.K%s.%s.%s.%04d", $rooturl, $year, 
        $wfo, $phenomena, $significance, $eventid);
     echo "var sbwp = new Ext.Panel({
@@ -384,7 +382,6 @@ return lURL;
          });
          var sbwtab = Ext.getCmp('top-display').insert(2, sbwp);
      ";
-  }
 ?>
 
 <?php
