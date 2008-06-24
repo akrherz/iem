@@ -373,6 +373,18 @@ return lURL;
   map = new GMap2(gtab.body.dom);
   map.addControl(new GSmallMapControl());
   map.addControl(new GMapTypeControl());";
+  if ($phenomena == "TO" || $phenomena == "SV")
+  {
+    $url = sprintf("%s/GIS/sbw-history.php?vtec=%s.K%s.%s.%s.%04d", $rooturl, $year, 
+       $wfo, $phenomena, $significance, $eventid);
+    echo "var sbwp = new Ext.Panel({
+              id: 'sbwtab',
+              title: 'SBW History',
+              html: '<html><body><p><img src=\"$url\" /><br /><span>Loading...</span></p></body></html>'
+         });
+         var sbwtab = Ext.getCmp('top-display').insert(2, sbwp);
+     ";
+  }
 ?>
 
 <?php
