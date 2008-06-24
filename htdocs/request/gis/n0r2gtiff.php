@@ -17,11 +17,10 @@ $outFile = sprintf("n0r_%s", date("YmdHi", $ts) );
 $zipFile = sprintf("n0r_%s.zip", date("YmdHi", $ts) );
 if (! is_file($inFile)) die("No GIS composite found for this time!");
 
-$cmd = sprintf("/mesonet/local/bin/gdalwarp -co \"WORLDFILE=ON\" -of GTIFF %s %s.tif", $inFile, $outFile);
+$cmd = sprintf("/mesonet/local/bin/gdalwarp -t_srs \"EPSG:4326\" -s_srs \"EPSG:4326\" -co \"WORLDFILE=ON\" -of GTIFF %s %s.tif", $inFile, $outFile);
 `$cmd`;
 
-`cp /mesonet/data/gis/meta/4326.prj ${outFile}.prj`;
-$cmd = "zip $zipFile ${outFile}.tif ${outFile}.tfw ${outFile}.prj";
+$cmd = "zip $zipFile ${outFile}.tif ${outFile}.tfw";
 `$cmd`;
 
 header("Content-type: application/octet-stream");
@@ -32,6 +31,5 @@ readfile($zipFile);
 unlink($zipFile);
 unlink("${outFile}.tif");
 unlink("${outFile}.tfw");
-unlink("${outFile}.prj");
 
 ?>
