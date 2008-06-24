@@ -51,12 +51,14 @@ Ext.ux.plugins.ContainerMask = function(opt) {
 
     var expander = new Ext.grid.RowExpander({
         id: 'testexp',
+        width: 30,
         tpl : new Ext.Template(
             '<p><b>Remark:</b> {remark}<br>'
         )
     });
     var expander2 = new Ext.grid.RowExpander({
         id: 'testexp2',
+        width: 30,
         tpl : new Ext.Template(
             '<p><b>Remark:</b> {remark}<br>'
         )
