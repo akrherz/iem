@@ -22,18 +22,68 @@ $sql = "SELECT xmax(geom), ymax(geom), xmin(geom), ymin(geom), *, oid
         ORDER by polygon_begin ASC";
 $rs = pg_query($postgis, $sql);
 
-$px = Array(160,480,160,480);
-$py = Array(120,120,360,360);
+$rows = pg_num_rows($rs);
+
+if ($rows < 2)
+{
+  $width = 640;
+  $height = 480;
+  $twidth = 636;
+  $theight = 476;
+  $px = Array(320,);
+  $py = Array(240,);
+} else if ($rows >= 2 && $rows < 5)
+{
+  $width = 640;
+  $height = 480;
+  $twidth = 316;
+  $theight = 236;
+  $px = Array(160,480,160,480);
+  $py = Array(120,120,360,360);
+} else {
+  $width = 640;
+  $height = 480;
+  $twidth = 206;
+  $theight = 154;
+  $px = Array(105,315,525,105,315,525,105,315,525);
+  $py = Array(80,80,80,240,240,240,400,400,400);
+}
 
 $map2 = ms_newMapObj($mapFile);
 $map2->imagecolor->setrgb(155,155,155);
-$map2->set("width", 640);
-$map2->set("height",480);
+$map2->set("width", $width);
+$map2->set("height",$height);
 $img2 = $map2->prepareImage();
 $buffer = 0.3;
 
+$oid0 = 0;
+$xmax = 0;
+$ymax = 0;
+$xmin = 0;
+$xmax = 0;
 for ($i=0;$row = @pg_fetch_array($rs, $i); $i++)
 {
+  if ($i == 0){
+   $oid0 = $row["oid"];
+   $xmax = $row["xmax"];
+   $ymax = $row["ymax"];
+   $xmin = $row["xmin"];
+   $ymin = $row["ymin"];
+   $xspace = $xmax - $xmin;
+   $yspace = ($ymax - $ymin) * 1.5;
+   $cross = ($xspace >= $yspace) ? $xspace : $yspace;
+   $xc = $xmin + ($xmax - $xmin) / 2;
+   $yc = $ymin + ($ymax - $ymin) / 2;
+   $xmin = $xc - ($cross / 2) - $buffer;
+   $ymin = $yc - ($cross / 2) - $buffer;
+   $ymax = $yc + ($cross / 2) + $buffer;
+   $xmax = $xc + ($cross / 2) + $buffer;
+   //echo $xmin ."<br />";
+   //echo $xmax ."<br />";
+   //echo $ymin ."<br />";
+   //echo $ymax ."<br />";
+  }
+
   $ts = strtotime($row["polygon_begin"]);
   if (time() - $ts > 300)
   { 
@@ -41,10 +91,10 @@ for ($i=0;$row = @pg_fetch_array($rs, $i); $i++)
   } 
 
   $map = ms_newMapObj($mapFile);
-  $map->set("width", 316);
-  $map->set("height",236);
-  $map->setExtent($row["xmin"] - $buffer, $row["ymin"] - $buffer, 
-                  $row["xmax"] + $buffer, $row["ymax"] + $buffer);
+  $map->set("width", $twidth);
+  $map->set("height",$theight);
+  $map->setExtent($xmin, $ymin, 
+                  $xmax, $ymax);
 
   $img = $map->prepareImage();
 
@@ -77,6 +127,23 @@ for ($i=0;$row = @pg_fetch_array($rs, $i); $i++)
   $wc->set("connectiontype", MS_POSTGIS);
   $wc->set("connection", "user=nobody dbname=postgis host=iemdb");
   $wc->set("status", MS_ON );
+  $sql = sprintf("geom from (select oid, geom from sbw_$year WHERE oid = ". $oid0 .") as foo using unique oid using SRID=4326");
+  $wc->set("data", $sql);
+  $wc->set("type", MS_LAYER_LINE);
+  $wc->setProjection("init=epsg:4326");
+
+  $wcc0 = ms_newClassObj($wc);
+  $wcc0s0 = ms_newStyleObj($wcc0);
+  $wcc0s0->color->setRGB(255,255,255);
+  $wcc0s0->set("size", 2);
+  $wcc0s0->set("symbol", 1);
+  $wc->draw($img);
+  $map->drawLabelCache($img);
+
+  $wc = ms_newLayerObj($map);
+  $wc->set("connectiontype", MS_POSTGIS);
+  $wc->set("connection", "user=nobody dbname=postgis host=iemdb");
+  $wc->set("status", MS_ON );
   $sql = sprintf("geom from (select oid, geom from sbw_$year WHERE oid = ". $row["oid"] .") as foo using unique oid using SRID=4326");
   $wc->set("data", $sql);
   $wc->set("type", MS_LAYER_LINE);
@@ -91,25 +158,29 @@ for ($i=0;$row = @pg_fetch_array($rs, $i); $i++)
   $wc->draw($img);
   $map->drawLabelCache($img);
 
+
   $bar640t = $map->getLayerByName("bar640t");
   $bar640t->set("status", 1);
   $bar640t->draw($img);
 
   $tlayer = $map->getLayerByName("bar640t-title");
   $point = ms_newpointobj();
-  $point->setXY(80, 12);
+  $point->setXY(42, 12);
   $point->draw($map, $tlayer, $img, 0,"NEXRAD Base Reflectivity");
   $point->free();
     
   $point = ms_newpointobj();
-  $point->setXY(80, 29);
+  $point->setXY(42, 29);
   $d = strftime("%d %B %Y %-2I:%M %p %Z" ,  $ts);
   $point->draw($map, $tlayer, $img, 1,"$d");
   $point->free();
 
   $layer = $map->getLayerByName("logo");
+  $lcl0 = $layer->getClass(0);
+  $lcl0s0 = $lcl0->getStyle(0);
+  $lcl0s0->set("size", 40);
   $point = ms_newpointobj();
-  $point->setXY(40, 26);
+  $point->setXY(22, 18);
   $point->draw($map, $layer, $img, "logo", "");
   $point->free();
 
