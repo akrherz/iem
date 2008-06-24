@@ -20,7 +20,7 @@ if (! is_file($inFile)) die("No GIS composite found for this time!");
 $cmd = sprintf("/mesonet/local/bin/gdalwarp -co \"WORLDFILE=ON\" -of GTIFF %s %s.tif", $inFile, $outFile);
 `$cmd`;
 
-`cp /mesonet/data/gis/static/4326.prj ${outFile}.prj`;
+`cp /mesonet/data/gis/meta/4326.prj ${outFile}.prj`;
 $cmd = "zip $zipFile ${outFile}.tif ${outFile}.tfw ${outFile}.prj";
 `$cmd`;
 
