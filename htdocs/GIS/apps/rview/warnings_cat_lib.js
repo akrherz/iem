@@ -247,7 +247,7 @@ function mySplitter(val) {
         renderTo: 'displaytabs',
         id: 'top-display',
         width:660,
-        height:540,
+        height:560,
         plain:true,
         enableTabScroll:true,
         items:[
