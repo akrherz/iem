@@ -16,10 +16,11 @@ $year = intval($year);
 $wfo = substr($wfo,1,3);
 $significance = substr($significance,0,1);
 
-$sql = "SELECT xmax(geom), ymax(geom), xmin(geom), ymin(geom), *, oid
+$sql = "SELECT xmax(geom), ymax(geom), xmin(geom), ymin(geom), *, oid,
+        round((area2d(transform(geom,2163))/1000000)::numeric,0 ) as area
         from sbw_$year WHERE phenomena = '$phenomena' and 
         eventid = $eventid and wfo = '$wfo' and significance = '$significance'
-        ORDER by polygon_begin ASC";
+        ORDER by polygon_begin ASC LIMIT 9";
 $rs = pg_query($postgis, $sql);
 
 $rows = pg_num_rows($rs);
@@ -27,26 +28,26 @@ $rows = pg_num_rows($rs);
 if ($rows < 2)
 {
   $width = 640;
-  $height = 480;
+  $height = 540;
   $twidth = 636;
   $theight = 476;
   $px = Array(320,);
-  $py = Array(240,);
+  $py = Array(290,);
 } else if ($rows >= 2 && $rows < 5)
 {
   $width = 640;
-  $height = 480;
+  $height = 540;
   $twidth = 316;
   $theight = 236;
   $px = Array(160,480,160,480);
-  $py = Array(120,120,360,360);
+  $py = Array(170,170,410,410);
 } else {
   $width = 640;
-  $height = 480;
+  $height = 540;
   $twidth = 206;
   $theight = 154;
-  $px = Array(105,315,525,105,315,525,105,315,525);
-  $py = Array(80,80,80,240,240,240,400,400,400);
+  $px = Array(110,320,530,110,320,530,110,320,530);
+  $py = Array(130,130,130,290,290,290,450,450,450);
 }
 
 $map2 = ms_newMapObj($mapFile);
@@ -54,6 +55,8 @@ $map2->imagecolor->setrgb(155,155,155);
 $map2->set("width", $width);
 $map2->set("height",$height);
 $img2 = $map2->prepareImage();
+
+
 $buffer = 0.3;
 
 $oid0 = 0;
@@ -75,13 +78,41 @@ for ($i=0;$row = @pg_fetch_array($rs, $i); $i++)
    $xc = $xmin + ($xmax - $xmin) / 2;
    $yc = $ymin + ($ymax - $ymin) / 2;
    $xmin = $xc - ($cross / 2) - $buffer;
-   $ymin = $yc - ($cross / 2) - $buffer;
-   $ymax = $yc + ($cross / 2) + $buffer;
+   $ymin = $yc - ($cross / 2) - (.5 * $buffer);
+   $ymax = $yc + ($cross / 2) + (1.5 * $buffer);
    $xmax = $xc + ($cross / 2) + $buffer;
    //echo $xmin ."<br />";
    //echo $xmax ."<br />";
    //echo $ymin ."<br />";
    //echo $ymax ."<br />";
+$bar640t = $map2->getLayerByName("bar640t");
+$bar640t->set("status", 1);
+$bar640t->draw($img2);
+
+$tlayer = $map2->getLayerByName("bar640t-title");
+$point = ms_newpointobj();
+$point->setXY(80, 12);
+$point->draw($map2, $tlayer, $img2, 0,"Storm Based Warning History");
+$point->free();
+    
+$point = ms_newpointobj();
+$point->setXY(80, 29);
+$d = strftime("%d %B %Y %-2I:%M %p %Z" ,  strtotime($row["init_expire"]) );
+$point->draw($map2, $tlayer, $img2, 1,"$wfo ". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] ." #$eventid till  $d");
+$point->free();
+
+$layer = $map2->getLayerByName("logo");
+//$lcl0 = $layer->getClass(0);
+//$lcl0s0 = $lcl0->getStyle(0);
+//$lcl0s0->set("size", 40);
+$point = ms_newpointobj();
+$point->setXY(40, 26);
+$point->draw($map2, $layer, $img2, "logo", "");
+$point->free();
+
+$map2->drawLabelCache($img2);
+
+$sz0 = $row["area"];
   }
 
   $ts = strtotime($row["polygon_begin"]);
@@ -150,7 +181,7 @@ for ($i=0;$row = @pg_fetch_array($rs, $i); $i++)
   $wc->setProjection("init=epsg:4326");
 
   $wcc0 = ms_newClassObj($wc);
-  $wcc0->set("name", $vtec_phenomena[$row["phenomena"]] ." ". $vtec_significance[$row["significance"]] );
+  $wcc0->set("name", $row["area"] ." sq km [". intval($row["area"]/$sz0 * 100) ."%]" );
   $wcc0s0 = ms_newStyleObj($wcc0);
   $wcc0s0->color->setRGB(255,0,0);
   $wcc0s0->set("size", 3);
@@ -165,24 +196,16 @@ for ($i=0;$row = @pg_fetch_array($rs, $i); $i++)
 
   $tlayer = $map->getLayerByName("bar640t-title");
   $point = ms_newpointobj();
-  $point->setXY(42, 12);
-  $point->draw($map, $tlayer, $img, 0,"NEXRAD Base Reflectivity");
+  $point->setXY(2, 12);
+  $point->draw($map, $tlayer, $img, 0, $vtec_status[$row["status"]] );
   $point->free();
     
   $point = ms_newpointobj();
-  $point->setXY(42, 29);
-  $d = strftime("%d %B %Y %-2I:%M %p %Z" ,  $ts);
+  $point->setXY(2, 29);
+  $d = strftime("%d %b %Y %-2I:%M %p %Z" ,  $ts);
   $point->draw($map, $tlayer, $img, 1,"$d");
   $point->free();
 
-  $layer = $map->getLayerByName("logo");
-  $lcl0 = $layer->getClass(0);
-  $lcl0s0 = $lcl0->getStyle(0);
-  $lcl0s0->set("size", 40);
-  $point = ms_newpointobj();
-  $point->setXY(22, 18);
-  $point->draw($map, $layer, $img, "logo", "");
-  $point->free();
 
   $map->embedLegend($img);
   $map->drawLabelCache($img);
