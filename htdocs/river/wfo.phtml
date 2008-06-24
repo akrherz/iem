@@ -19,6 +19,20 @@ $sevcol = Array(
 $nwsli_limiter = "";
 if (isset($_GET["dvn"])){
  $nwsli_limiter = "and r.nwsli IN ('FLTI2', 'CMMI4', 'LECI4', 'RCKI2', 'ILNI2', 'MUSI4', 'NBOI2', 'KHBI2', 'DEWI4', 'CNEI4', 'CJTI4', 'WAPI4','LNTI4', 'CMOI2', 'JOSI2', 'MLII2','GENI2')";
+ echo "<style>
+#iem-header {
+  display: none;
+  visibility: hidden;
+}
+#iem-footer {
+  display: none;
+  visibility: hidden;
+}
+body {
+  background: #fff;
+  font-size: smaller;
+}
+</style>";
 }
 
 $sql = "select r.*, h.* from hvtec_nwsli h, riverpro r,
