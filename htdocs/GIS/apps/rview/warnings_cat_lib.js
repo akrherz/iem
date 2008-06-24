@@ -50,10 +50,18 @@ Ext.ux.plugins.ContainerMask = function(opt) {
 
 
     var expander = new Ext.grid.RowExpander({
+        id: 'testexp',
         tpl : new Ext.Template(
             '<p><b>Remark:</b> {remark}<br>'
         )
     });
+    var expander2 = new Ext.grid.RowExpander({
+        id: 'testexp2',
+        tpl : new Ext.Template(
+            '<p><b>Remark:</b> {remark}<br>'
+        )
+    });
+
 
 
     var ustore = new Ext.data.Store({
@@ -78,7 +86,6 @@ Ext.ux.plugins.ContainerMask = function(opt) {
 
 
     var jstore = new Ext.data.Store({
-          root:'lsrs',
           autoLoad:false,
           proxy: new Ext.data.HttpProxy({
                 url: 'json-lsrs.php',
@@ -124,7 +131,6 @@ Ext.ux.plugins.ContainerMask = function(opt) {
         });
 
     var jstore2 = new Ext.data.Store({
-          root:'lsrs',
           autoLoad:false,
           proxy: new Ext.data.HttpProxy({
                 url: 'json-lsrs.php',
@@ -174,7 +180,7 @@ Ext.ux.plugins.ContainerMask = function(opt) {
         store: jstore2,
         loadMask: {msg:'Loading Data...'},
         cm: new Ext.grid.ColumnModel([
-            expander,
+            expander2,
             {header: "Time (UTC)", sortable: true, dataIndex: 'valid'},
             {header: "Event", width: 100, sortable: true, dataIndex: 'event'},
             {header: "Magnitude", sortable: true, dataIndex: 'magnitude'},
@@ -183,7 +189,7 @@ Ext.ux.plugins.ContainerMask = function(opt) {
         ]),
         stripeRows: true,
         title:'All Storm Reports within Time Period',
-        plugins: expander,
+        plugins: expander2,
         autoScroll:true
     });
 
