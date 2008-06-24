@@ -16,12 +16,16 @@ $sevcol = Array(
  "3" =>"#f0f",
  "U" =>"#fff");
 
+$nwsli_limiter = "";
+if (isset($_GET["dvn"])){
+ $nwsli_limiter = "and r.nwsli IN ('FLTI2', 'CMMI4', 'LECI4', 'RCKI2', 'ILNI2', 'MUSI4', 'NBOI2', 'KHBI2', 'DEWI4', 'CNEI4', 'CJTI4', 'WAPI4','LNTI4', 'CMOI2', 'JOSI2', 'MLII2','GENI2')";
+}
 
 $sql = "select r.*, h.* from hvtec_nwsli h, riverpro r,
   (select distinct hvtec_nwsli from warnings_2008 WHERE 
    status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
    significance = 'W' and wfo = '$wfo') as foo
-   WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli";
+   WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli $nwsli_limiter";
 $rs = pg_exec($postgis, $sql);
 
 $rivers = Array();
