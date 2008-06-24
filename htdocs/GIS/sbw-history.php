@@ -20,7 +20,7 @@ $sql = "SELECT xmax(geom), ymax(geom), xmin(geom), ymin(geom), *, oid,
         round((area2d(transform(geom,2163))/1000000)::numeric,0 ) as area
         from sbw_$year WHERE phenomena = '$phenomena' and 
         eventid = $eventid and wfo = '$wfo' and significance = '$significance'
-        ORDER by polygon_begin ASC LIMIT 9";
+        ORDER by polygon_begin ASC";
 $rs = pg_query($postgis, $sql);
 
 $rows = pg_num_rows($rs);
@@ -66,6 +66,7 @@ $xmin = 0;
 $xmax = 0;
 for ($i=0;$row = @pg_fetch_array($rs, $i); $i++)
 {
+  if ($i > 8){ continue; }
   if ($i == 0){
    $oid0 = $row["oid"];
    $xmax = $row["xmax"];
@@ -92,7 +93,11 @@ $bar640t->draw($img2);
 $tlayer = $map2->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
 $point->setXY(80, 12);
+if ($rows > 8){
+$point->draw($map2, $tlayer, $img2, 0,"Storm Based Warning History (First 9 shown)");
+} else{
 $point->draw($map2, $tlayer, $img2, 0,"Storm Based Warning History");
+}
 $point->free();
     
 $point = ms_newpointobj();
