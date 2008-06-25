@@ -38,10 +38,16 @@ $result = pg_exec($connect, $sql);
 $ar = Array("lsrs" => Array() );
 for( $i=0; $lsr = @pg_fetch_array($result,$i); $i++)
 {
-  $lsr["id"] = $i +1;
-  $lsr["valid"] = substr($lsr["valid"],0,16);
-  $lsr["event"] = @$lsr_types[$lsr["type"]]["name"];
-  $ar["lsrs"][] = $lsr;
+  $q = Array();
+  $q["id"] = $i +1;
+  $q["valid"] = substr($lsr["valid"],0,16);
+  $q["event"] = @$lsr_types[$lsr["type"]]["name"];
+  $q["type"] = $lsr["type"];
+  $q["magnitude"] = $lsr["magnitude"];
+  $q["city"] = $lsr["city"];
+  $q["county"] = $lsr["county"];
+  $q["remark"] = $lsr["remark"];
+  $ar["lsrs"][] = $q;
 }
 
 echo Zend_Json::encode($ar);
