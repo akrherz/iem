@@ -1,7 +1,7 @@
 <?php
 /* Create animated GIF! and then send it to them... */
 
-$fts = intval($_GET["fts"]);
+$fts = isset($_GET["fts"]) ? intval($_GET["fts"]): exit();
 
 chdir("/var/www/htdocs/tmp");
 
