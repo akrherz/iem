@@ -21,7 +21,7 @@ $query2 = "SELECT l.*, askml(l.geom) as kml
            and w.gtype = 'P'";
 
 $result = pg_exec($connect, $query2);
-$row = pg_fetch_array($result, 0);
+$row = @pg_fetch_array($result, 0);
 
 header("Content-Type:", "application/vnd.google-earth.kml+xml");
 // abgr
