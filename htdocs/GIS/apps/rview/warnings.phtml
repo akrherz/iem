@@ -219,7 +219,7 @@ if (! in_array($sortcol, $scols) ){
 if ($sortdir == 1) $sortdir = "ASC";
 else $sortdir = "DESC";
 
-$wtable = "warnings";
+$wtable = "warnings_$year";
 $tsextra = "CURRENT_TIMESTAMP and issue < CURRENT_TIMESTAMP ";
 if ($isarchive)
 {
