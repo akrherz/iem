@@ -3,6 +3,7 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/vtec.php");
+include("$rootpath/include/lsrs.php");
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -46,13 +47,14 @@ for ($i=0;$row=@pg_fetch_array($result,$i);$i++)
   echo "<Placemark>
     <description>
         <![CDATA[
-  <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["type"] ." km^2
-  <br /><font color=\"red\"><i>Status:</i></font> ". $row["type"] ."
+  <p><font color=\"red\"><i>Location:</i></font> ". $row["city"] ." ". $row["county"] ." ". $row["state"] 
+  <br /><font color=\"red\"><i>Source:</i></font> ". $row["source"] ." 
+  <br /><font color=\"red\"><i>Remark:</i></font> ". $row["remark"] ."
    </p>
         ]]>
     </description>
     <styleUrl>#iemstyle</styleUrl>
-    <name>". $row["type"] ."</name>\n";
+    <name>". $row["magnitude"] . $row["typetext"] ."</name>\n";
 echo $row["kml"];
 echo "</Placemark>";
 }
