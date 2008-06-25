@@ -1,5 +1,16 @@
 <?php
 
+function determine_time_base($t)
+{
+  /* Round to the nearest 5 minute! */
+  $year = date("Y", $t);
+  $month = date("m", $t);
+  $day = date("d", $t);
+  $hour = date("H", $t);
+  $m = intval(date("i", $t) / 5) * 5;
+  return mktime($hour, $m, 0, $month, $day, $year);
+}
+
 function tv_logo($map, $imgObj, $titlet) 
 {
  $layer = $map->getLayerByName("credits");
