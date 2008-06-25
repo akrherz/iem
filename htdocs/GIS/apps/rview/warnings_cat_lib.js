@@ -259,7 +259,6 @@ function mySplitter(val) {
         plain:true,
         enableTabScroll:true,
         items:[
-            {id:'radar-display', contentEl:'radar', title: 'RADAR'},
             grid,
             grid2,
             grid3,
@@ -268,41 +267,35 @@ function mySplitter(val) {
         activeTab: 0
     });
 
-    var tabs = new Ext.TabPanel({
+  var tabs = new Ext.TabPanel({
         applyTo: 'tabs1',
-        id:'text-display',
-        width:800,
-        defaults:{
-          autoHeight: true
-        },
-        tbar: [{
-            id: 'print',
-            text: 'View Text in New Window & Print',
-            handler: function(e, target){
-              a = tabs.getActiveTab();
+        id: 'text-display',
+        width:660,
+        height:560,
+        plain:true,
+        frame:true,
+        enableTabScroll:true,
+        tbar:[{
+         id:'print',
+         text: 'View Text in New Window & Print',
+         handler: function(e, target){
+              var a = tabs.getActiveTab();
               var myForm = new Ext.form.BasicForm("my-form-id", {
                 standardSubmit:true
               });
               myForm.getEl().createChild({
-                 tag: 'input', 
-                 type: 'hidden', 
+                 tag: 'input',
+                 type: 'hidden',
                  name: 'data',
                  id:'data',
-                 value: a.getEl().dom.childNodes[0].innerHTML
+                 value: a.getEl().dom.childNodes[0].childNodes[0].innerHTML
               });
               myForm.submit();
-
             }
         }],
-        frame:true,
-        plain:true,
-        enableTabScroll:true,
-        deferredRender:false,
         autoTabs:true,
-        resizeTabs:false,
-        autoScroll:true
-  }); 
+        deferredRender:false
+    });
 
 
 });
-
