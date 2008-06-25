@@ -46,25 +46,20 @@ $query1 = "SELECT xmax(geom) as x1, xmin(geom) as x0,
                   and significance = '$significance' 
                   ORDER by gtype DESC LIMIT 1";
 $result = pg_exec($connect, $query1);
-$row = pg_fetch_array($result, 0);
+if (pg_numrows($result) == 0)
+{
+  $row = Array("issue" => time(), "expire" => time() , "report" => "", 
+               "svs" => "", "status" => "NEW", "x0" => 0, "x1" => 0,
+               "y0" => 0, "y1" => 0 );
+} else {
+  $row = pg_fetch_array($result, 0);
+}
+
 $lpad = 0.5;
 $y1 = $row["y1"] +$lpad; $y0 = $row["y0"]-$lpad; 
 $x1 = $row["x1"] +$lpad; $x0 = $row["x0"]-$lpad;
 $xc = ($row["x1"] + $row["x0"]) / 2;
 $yc = ($row["y1"] + $row["y0"]) / 2;
-
-$query2 = "SELECT *, astext(geom) as t,
-           length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
-           from warnings_$year 
-           WHERE wfo = '$wfo' and phenomena = '$phenomena' and 
-           eventid = $eventid and significance = '$significance'";
-if ($significance == "W" && 
-   ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA" or $phenomena == "FF"))
-{
-  $query2 .= " and gtype = 'P'";
-}
-$result = pg_exec($connect, $query2 ." ORDER by sz DESC, updated DESC, gtype ASC");
-
 
 
 /* BEGIN HTML output */
@@ -86,12 +81,6 @@ $THISPAGE = "severe-vtec";
 $TITLE = "IEM | VTEC Product Browser";
 include("$rootpath/include/header.php");
 
-if (pg_numrows($result) > 0) {
-  $row = pg_fetch_array($result, 0);
-} else{
-  $row = Array("issue" => time(), "expire" => time() , "report" => "", 
-               "svs" => "", "status" => "NEW");
-}
 
 /* Determine time base, 4 minutes from product issuance */
 $issue = strtotime(substr($row["issue"],0,16)) + 240;
@@ -122,6 +111,7 @@ $next_eventid = $eventid + 1;
 $last_eventid = $eventid - 1;
 $next_link = sprintf("<a href=\"%s/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s\">Next</a> ", $rooturl, $year, $wfo, $phenomena, $next_eventid, $significance, $warngeo);
 $kml_link = sprintf("http://mesonet.agron.iastate.edu/kml/sbw_exact_time.php?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s", $year, $wfo, $phenomena, $eventid, $significance, $warngeo);
+$lsr_kml_link = sprintf("http://mesonet.agron.iastate.edu/kml/sbw_lsrs.php?year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s&warngeo=%s", $year, $wfo, $phenomena, $eventid, $significance, $warngeo);
 
 $last_link = "";
 if ($last_eventid > 0)
@@ -142,23 +132,6 @@ if (time() < strtotime(substr($row["expire"],0,16)))
   $radarLabel = "Current";
 }
 
-if (pg_numrows($result) > 0) {
-  $ts = determine_time_base($radarTS);
-  $basets = $ts;
-  $isarchive = 1;
-  if (time() < ($ts + 450)) $isarchive = 0;
-  $imgi = 0;
-  $tzoff = 0;
-  $interval = 5;
-  $width = 640;
-  $height = 480;
-  $lsrlook = 0;
-  $layers = array("uscounties_and_name", "warnings", "nexrad");
-  $maptitle = "IEM NEXRAD valid:";
-  $singleWarning = 1;
-  dl($mapscript);
-  //include("warnings_plot.php");
-}
 
 if ($warngeo == "sbw") {
   $url = sprintf("%s/GIS/radmap.php?layers[]=sbw&vtec=%s.K%s.%s.%s.%04d", $rooturl, $year, $wfo, $phenomena, $significance, $eventid);
@@ -213,16 +186,12 @@ td.x-grid3-td-locations div.x-grid3-cell-inner {
 </div>
 
 <h3 class="heading">Valid Time Extent Code (VTEC) Product Browser</h3>
+
 <table border="0">
 <tr><td valign="top">
 
 <div id="displaytabs">
-<div id="radar" class="x-hide-display">
-<h2 class="page-title"><?php echo $radarLabel; ?> NWS NEXRAD Composite + Warning</h2>
-<p><img src="<?php echo $url; ?>"></p>
-</div>
-<div id="gmapper" class="x-hide-display">
-</div>
+<div id="gmapper" class="x-hide-display"></div>
 </div>
 
 </td><td valign="top">
@@ -275,6 +244,13 @@ Ext.onReady(function(){
         tabs.activate(i+1);
      }
    });
+
+  var radmap = new Ext.Panel({
+      id: 'radmap',
+      title: 'RADAR',
+      html: '<h2 class=\"page-title\">$radarLabel NWS NEXRAD Composite + Warning</h2><p><img src=\"$url\" /></p>'
+      });
+  Ext.getCmp('top-display').insert(0, radmap).show();
 
 
   Ext.getCmp('lsr-grid').on('activate', function(q){
@@ -402,6 +378,8 @@ return lURL;
 
   gxml = new GGeoXml('$kml_link');
   map.addOverlay(gxml);
+  gxml2 = new GGeoXml('$lsr_kml_link');
+  map.addOverlay(gxml2);
   map.setCenter(new GLatLng($yc,$xc), 8); 
   map.setMapType(custommap4);
   ";
