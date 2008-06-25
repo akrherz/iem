@@ -18,7 +18,7 @@ $sql = "SELECT replace(report,'\001','') as report,
                replace(svs,'\001','') as svs
         from warnings_$year w WHERE w.wfo = '$wfo' and 
         w.phenomena = '$phenomena' and w.eventid = $eventid and 
-        w.significance = '$significance' and w.gtype = 'P' LIMIT 1";
+        w.significance = '$significance' ORDER by length(svs) DESC LIMIT 1";
 
 
 $result = pg_exec($connect, $sql);

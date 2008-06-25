@@ -11,18 +11,6 @@ putenv("TZ=GMT");
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'GMT'");
 
-
-function determine_time_base($t)
-{
-  /* Round to the nearest 5 minute! */
-  $year = date("Y", $t);
-  $month = date("m", $t);
-  $day = date("d", $t);
-  $hour = date("H", $t);
-  $m = intval(date("i", $t) / 5) * 5;
-  return mktime($hour, $m, 0, $month, $day, $year);
-}
-
 /* Get some stuff from our request */
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2008;
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "DMX";
@@ -47,13 +35,16 @@ if ($significance != "W")
 }
 
 
-
-/* We need to fetch the extent */
-$query1 = "SELECT xmax(extent(geom)) as x1, xmin(extent(geom)) as x0, 
-                  ymin(extent(geom)) as y0, ymax(extent(geom)) as y1 
+/*
+ * Get relevant information about this product, we need some of this
+ * to build the UI...
+ */
+$query1 = "SELECT xmax(geom) as x1, xmin(geom) as x0, 
+                  ymin(geom) as y0, ymax(geom) as y1, *
                   from warnings_$year WHERE wfo = '$wfo' and 
                   phenomena = '$phenomena' and eventid = $eventid 
-                  and significance = '$significance'";
+                  and significance = '$significance' 
+                  ORDER by gtype DESC LIMIT 1";
 $result = pg_exec($connect, $query1);
 $row = pg_fetch_array($result, 0);
 $lpad = 0.5;
@@ -62,8 +53,7 @@ $x1 = $row["x1"] +$lpad; $x0 = $row["x0"]-$lpad;
 $xc = ($row["x1"] + $row["x0"]) / 2;
 $yc = ($row["y1"] + $row["y0"]) / 2;
 
-/* Now we fetch warning and perhaps polygon */
-$query2 = "SELECT *, astext(geom) as t, askml(geom) as kml,
+$query2 = "SELECT *, astext(geom) as t,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
            WHERE wfo = '$wfo' and phenomena = '$phenomena' and 
@@ -239,29 +229,17 @@ td.x-grid3-td-locations div.x-grid3-cell-inner {
 
 <div id='controller-side'></div>
 
-<?php
-echo "</td></tr></table>
+</td></tr></table>
 <p>&nbsp;<br />
 
-<div id=\"tabs1\" style=\"height: 600px;\">
-<div class=\"x-tab\" title=\"Issuance\"><pre>". htmlspecialchars( str_replace("\001", "", $row["report"]) ) ."</pre></div>\n";
+<div id="tabs1" style="height: 600px;">
+<div class="x-tab" title="Help" style="padding: 5px;">
+<h3>VTEC Product Browser</h3>
+</div>
+</div>
 
 
-$lsvs = htmlspecialchars( str_replace("\001", "", $row["report"]) );
-$q = 1;
-if (strlen($row["svs"]) > 0 ) 
-{
-  $parts = explode('__', $row["svs"]);
-  for ($i=1;$i<(sizeof($parts) - 1);$i++)
-  {
-     $svs = htmlspecialchars( str_replace("\001", "", $parts[$i]) );
-     if ($svs == $lsvs) continue;
-     $lsvs = $svs;
-     echo "<div class=\"x-tab\" title=\"Update $q\"><pre>${svs}</pre></div>\n";
-     $q += 1;
-  }
-}
-$v = $q - 1;
+<?php
 $json_params = sprintf("year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s", $year, $wfo, $phenomena, $eventid, $significance);
 echo "</div>
 <script>
@@ -271,7 +249,33 @@ var map;
 
 Ext.onReady(function(){
 
-  Ext.getCmp('text-display').activate($v);
+  Ext.Ajax.request({
+     waitMsg: 'Loading...',
+     url : 'json-text.php' , 
+     params:'${json_params}',
+     method: 'GET',
+     scope: this,
+     success: function ( result, request) { 
+        var jsonData = Ext.util.JSON.decode(result.responseText);
+        tabs = Ext.getCmp('text-display');
+        tabs.add({
+         title: 'Issuance',
+          html: '<pre>'+ jsonData.data[0].report  +'</pre>',
+          xtype: 'panel',
+         autoScroll:true
+        });
+        for ( var i = 0; i < jsonData.data[0].svs.length; i++ ){
+            tabs.add({
+              title: 'Update '+ (i+1),
+              html: '<pre>'+ jsonData.data[0].svs[i]  +'</pre>',
+             xtype: 'panel',
+             autoScroll:true
+            });
+        }
+        tabs.activate(i+1);
+     }
+   });
+
 
   Ext.getCmp('lsr-grid').on('activate', function(q){
       if (! this.getStore().isLoaded){
