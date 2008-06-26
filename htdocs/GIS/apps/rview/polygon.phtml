@@ -18,30 +18,6 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 
 putenv("TZ=GMT");
 
-function determine_time_base($t)
-{
-  $year = date("Y", $t);
-  $month = date("m", $t);
-  $day = date("d", $t);
-  $hour = date("H", $t);
-  $m = date("i", $t);
-
-  if ($m >= 55) $ma = "55";
-  else if ($m >= 50) $ma = "50";
-  else if ($m >= 45) $ma = "45";
-  else if ($m >= 40) $ma = "40";
-  else if ($m >= 35) $ma = "35";
-  else if ($m >= 30) $ma = "30";
-  else if ($m >= 25) $ma = "25";
-  else if ($m >= 20) $ma = "20";
-  else if ($m >= 15) $ma = "15";
-  else if ($m >= 10) $ma = "10";
-  else if ($m >= 5) $ma = "05";
-  else $ma = "00";
-
-  return mktime($hour, $ma, 0, $month, $day, $year);
-}
-
 
 
 /* Fetch Event from the database */
