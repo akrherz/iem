@@ -17,7 +17,7 @@ $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1)
          min(issue) as issued, max(expire) as expired from
         (select distinct ugc, eventid, issue, expire from warnings_$year
          WHERE wfo = '$wfo' and gtype = 'C' and
-         significance = '$significance' and phenomena = '$phenomena') as foo,
+         significance = '$significance' and phenomena = '$phenomena' and eventid is not null) as foo,
          nws_ugc n WHERE n.ugc = foo.ugc GROUP by eventid ORDER by eventid ASC";
 if (($phenomena == "SV" || $phenomena == "TO") && $significance == "W"){
 
@@ -26,12 +26,12 @@ if (($phenomena == "SV" || $phenomena == "TO") && $significance == "W"){
      min(issue) as issued, max(expire) as expired from
       (select distinct ugc, eventid, issue, expire from warnings_$year
        WHERE wfo = '$wfo' and gtype = 'C' and
-       significance = '$significance' and phenomena = '$phenomena') as foo,
+       significance = '$significance' and phenomena = '$phenomena' and eventid is not null) as foo,
    nws_ugc n WHERE n.ugc = foo.ugc GROUP by eventid ORDER by eventid ASC) as foo2, 
 
 (select area(transform(geom,2163)) / 1000000.0 as area, eventid 
         from warnings_$year WHERE wfo = '$wfo' and gtype = 'P' and
-       significance = '$significance' and phenomena = '$phenomena') as foo3  WHERE foo3.eventid = foo2.eventid";
+       significance = '$significance' and phenomena = '$phenomena' and eventid is not null) as foo3  WHERE foo3.eventid = foo2.eventid";
 
 }
 
