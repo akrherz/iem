@@ -29,7 +29,9 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   if (!$overview && $cameras[$key]["network"] != $network){ continue; }
   if (!$overview)
   echo sprintf("IconFile: %s, 320, 240, 160, 240,\"http://mesonet.agron.iastate.edu/data/camera/stills/%s.jpg\"\n", $q, $key);
-  $s2 .= sprintf("Icon: %.4f,%.4f,%s,1,5,\"[%s] %s\"\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $row["drct"], $cameras[$key]["network"], $cameras[$key]["name"]);
+  if ($overview)
+  $s2 .= sprintf("Icon: %.4f,%.4f,%s,1,7,\"[%s] %s\"\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $row["drct"], $cameras[$key]["network"], $cameras[$key]["name"]);
+  if (!$overview)
   $s3 .= sprintf("Icon: %.4f,%.4f,000,%s,1\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $q);
   $q += 1;
 }
