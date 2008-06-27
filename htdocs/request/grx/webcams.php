@@ -3,6 +3,7 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/cameras.inc.php");
+include("$rootpath/include/constants.php");
 $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
 $overview = isset($_GET["overview"]);
 
@@ -10,7 +11,8 @@ $thres = 999;
 $title = "IEM Webcam Overview";
 if (!$overview){ $thres = 15; $title ="$network webcams via IEM";}
 header("Content-type: text/plain");
-echo "Refresh: 1
+$r = $camera_refresh / 60;
+echo "Refresh: $r
 Threshold: $thres
 Title: $title
 IconFile: 1, 15, 25, 8, 25, \"http://www.spotternetwork.org/icon/arrows.png\"
