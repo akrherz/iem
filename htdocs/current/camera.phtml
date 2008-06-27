@@ -1,5 +1,6 @@
 <?php 
  include("../../config/settings.inc.php");
+ include("$rootpath/include/constants.php");
 /* CGI GET Requests */
  $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
@@ -52,7 +53,7 @@ reset($cameras);
 
 	$TITLE = "IEM | Web Cameras";
 if (! $isarchive)
-	$REFRESH = "<meta http-equiv=\"refresh\" content=\"300;\">";
+	$REFRESH = "<meta http-equiv=\"refresh\" content=\"${camera_refresh};\">";
     $THISPAGE = "webcam-still";
 	include("$rootpath/include/header.php"); 
 	include("$rootpath/include/forms.php"); 
