@@ -42,6 +42,7 @@ $_pages = Array(
     "sort" => Array("title" => "Sortable Currents", "url" => "/my/current.phtml"),
     "surface" => Array("title" => "Surface Data", "url" => "/current/"),
     "radar" => Array("title" => "RADAR & Satellite", "url" => "/current/radar.phtml"),
+    "placefiles" => Array("title" => "GR Placefiles", "url" => "/request/grx/"),
  ),
  "climatology" => Array(
     "base" => Array("title" => "Climatology", "url" => "/climate/"),
