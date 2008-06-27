@@ -9,7 +9,7 @@ $overview = isset($_GET["overview"]);
 
 $thres = 999;
 $title = "IEM Webcam Overview";
-if (!$overview){ $thres = 15; $title ="$network webcams via IEM";}
+if (!$overview){ $thres = 30; $title ="$network webcams via IEM";}
 header("Content-type: text/plain");
 $r = $camera_refresh / 60;
 echo "Refresh: $r
