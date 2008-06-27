@@ -6,10 +6,10 @@ include("$rootpath/include/cameras.inc.php");
 $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
 
 header("Content-type: text/plain");
-echo " Refresh: 1
-  Threshold: 999
-  Title: IEM Delivered Webcams
-  IconFile: 1, 15, 25, 8, 25, \"http://www.spotternetwork.org/icon/arrows.png\"
+echo "Refresh: 1
+Threshold: 999
+Title: IEM Delivered Webcams
+IconFile: 1, 15, 25, 8, 25, \"http://www.spotternetwork.org/icon/arrows.png\"
 ";
 $q = 2;
 while (list($key,$val) = each($cameras)){
