@@ -1,0 +1,74 @@
+<?php 
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | Gibson Ridge Placefiles";
+include("$rootpath/include/header.php"); ?>
+
+<h3>IEM Data in Gibson Ridge Placefile format</h3>
+
+<p><a href="http://www.grlevelx.com">Gibson Ridge Software</a> develops 
+a very popular set of RADAR data visualization programs.  These placefiles
+can be freely used for educational use.  Use of the non government data 
+"on-air" by media is strictly not allowed without permission of the 
+provider.</p>
+
+<p>
+<table cellpadding="2" border="1" cellspacing="0">
+<tr>
+  <th><a href="asos.php">Iowa AWOS Data</a></th>
+  <td>http://mesonet.agron.iastate.edu/request/grx/asos.php<br />
+  <i>Notes:</i>  none at this time</td>
+</tr>
+<tr>
+  <th><a href="rwis.php">Iowa RWIS Data</a></th>
+  <td>http://mesonet.agron.iastate.edu/request/grx/rwis.php<br />
+  <i>Notes:</i>  Could use some data presentation improvements (TODO)</td>
+</tr>
+<tr>
+  <th><a href="kcci.php">KCCI-TV SchoolNet Data</a></th>
+  <td>http://mesonet.agron.iastate.edu/request/grx/kcci.php<br />
+  <i>Notes:</i>  none at this time</td>
+</tr>
+<tr>
+  <th><a href="kelo.php">KELO-TV WeatherNet Data</a></th>
+  <td>http://mesonet.agron.iastate.edu/request/grx/kelo.php<br />
+  <i>Notes:</i>  none at this time</td>
+</tr>
+<tr>
+  <th><a href="kimt.php">KIMT-TV StormNet Data</a></th>
+  <td>http://mesonet.agron.iastate.edu/request/grx/kimt.php<br />
+  <i>Notes:</i>  none at this time</td>
+</tr>
+<tr>
+  <th><a href="webcams.php?overview">IEM Webcam Overview</a></th>
+  <td>http://mesonet.agron.iastate.edu/request/grx/webcams.php?overview<br />
+  <i>Notes:</i>  This layer provides the locations and direction
+that the webcam is looking.  <b>This layer should be used along with the
+individual network layers...</b> There aren't bandwidth concerns with this 
+layer.</td>
+</tr>
+<tr>
+  <th><a href="webcams.php?network=KCCI">KCCI-TV Webcams</a></th>
+  <td>http://mesonet.agron.iastate.edu/request/grx/webcams.php?network=KCCI<br />
+  <i>Notes:</i>  You will not want to use this on a low bandwidth 
+connection as all of the webcam images are loaded every 1-5 minutes.  Please
+only use this layer when you are using the data!  Thanks...</td>
+</tr>
+<tr>
+  <th><a href="webcams.php?network=KELO">KELO-TV Webcams</a></th>
+  <td>http://mesonet.agron.iastate.edu/request/grx/webcams.php?network=KCCI<br />
+  <i>Notes:</i>  You will not want to use this on a low bandwidth
+connection as all of the webcam images are loaded every 1-5 minutes.  Please
+only use this layer when you are using the data!  Thanks...</td>
+</tr>
+<tr>
+  <th><a href="webcams.php?network=KCRG">KCRG-TV Webcams</a></th>
+  <td>http://mesonet.agron.iastate.edu/request/grx/webcams.php?network=KCCI<br />
+  <i>Notes:</i>  You will not want to use this on a low bandwidth
+connection as all of the webcam images are loaded every 1-5 minutes.  Please
+only use this layer when you are using the data!  Thanks...</td>
+</tr>
+
+
+</table>
+
+<?php include("$rootpath/include/footer.php"); ?>
