@@ -34,10 +34,10 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   $key = $row["cam"];
   if (!$overview && $cameras[$key]["network"] != $network){ continue; }
   $drct = $row["drct"];
-  if ($drct >= 315 || $drct < 45){ $v = $vectors["S"]; }
-  else if ($drct >= 45 && $drct < 135){ $v = $vectors["W"]; }
-  else if ($drct >= 135 && $drct < 225){ $v = $vectors["N"]; }
-  else{ $v = $vectors["E"]; }
+  if ($drct >= 315 || $drct < 45){ $v = $vectors["N"]; }
+  else if ($drct >= 45 && $drct < 135){ $v = $vectors["E"]; }
+  else if ($drct >= 135 && $drct < 225){ $v = $vectors["S"]; }
+  else{ $v = $vectors["W"]; }
 
   if (!$overview)
   echo sprintf("IconFile: %s, 320, 240, %.0f, %.0f,\"http://mesonet.agron.iastate.edu/data/camera/stills/%s.jpg\"\n", $q, $v["ax"], $v["ay"], $key);
