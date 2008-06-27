@@ -11,24 +11,22 @@ Threshold: 999
 Title: IEM Delivered Webcams
 IconFile: 1, 15, 25, 8, 25, \"http://www.spotternetwork.org/icon/arrows.png\"
 ";
-$q = 2;
-while (list($key,$val) = each($cameras)){
-  if ($cameras[$key]["network"] != $network){ continue; }
-  $cameras[$key]["q"] = $q;
-  echo sprintf("IconFile: %s, 320, 240, 160, 240,\"http://mesonet.agron.iastate.edu/data/camera/stills/%s.jpg\"\n", $q, $key);
-  $q += 1;
-}
 
 $conn = iemdb("mesosite");
 
 $sql = "SELECT * from camera_current WHERE valid > (now() - '30 minutes'::interval)"; 
+$s2 = "";
+$q = 2;
 $rs = pg_exec($conn, $sql);
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
   $key = $row["cam"];
   if ($cameras[$key]["network"] != $network){ continue; }
-  echo sprintf("Icon: %.4f,%.4f,%s,1,5,\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $row["drct"]);
-  echo sprintf("Icon: %.4f,%.4f,000,%s,1,\"[%s] %s\"\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $cameras[$key]["q"], $cameras[$key]["network"], $cameras[$key]["name"]);
+  echo sprintf("IconFile: %s, 320, 240, 160, 240,\"http://mesonet.agron.iastate.edu/data/camera/stills/%s.jpg\"\n", $q, $key);
+  $s2 .= sprintf("Icon: %.4f,%.4f,%s,1,5,\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $row["drct"]);
+  $s2 .= sprintf("Icon: %.4f,%.4f,000,%s,1,\"[%s] %s\"\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $q, $cameras[$key]["network"], $cameras[$key]["name"]);
+  $q += 1;
 }
+echo $s2;
 
 ?>
