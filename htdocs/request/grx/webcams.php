@@ -7,11 +7,12 @@ $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI";
 $overview = isset($_GET["overview"]);
 
 $thres = 999;
-if (!$overview) $thres = 15;
+$ov = "Overview";
+if (!$overview){ $thres = 15; $ov = "";}
 header("Content-type: text/plain");
 echo "Refresh: 1
 Threshold: $thres
-Title: $network webcams via IEM
+Title: $network webcams via IEM $ov
 IconFile: 1, 15, 25, 8, 25, \"http://www.spotternetwork.org/icon/arrows.png\"
 ";
 
