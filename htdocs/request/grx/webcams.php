@@ -7,8 +7,8 @@ $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI";
 
 header("Content-type: text/plain");
 echo "Refresh: 1
-Threshold: 10
-Title: IEM Delivered Webcams
+Threshold: 15
+Title: $network webcams via IEM
 IconFile: 1, 15, 25, 8, 25, \"http://www.spotternetwork.org/icon/arrows.png\"
 ";
 
