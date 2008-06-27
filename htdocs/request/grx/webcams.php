@@ -24,7 +24,7 @@ $rs = pg_exec($conn, $sql);
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
   $key = $row["cam"];
-  echo sprintf("Icon: %.4f,%.4f,5,2,%s,\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $row["drct"]);
+  echo sprintf("Icon: %.4f,%.4f,5,1,%s,\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $row["drct"]);
   echo sprintf("Icon: %.4f,%.4f,000,%s,1,\"[%s] %s\"\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $cameras[$key]["q"], $cameras[$key]["network"], $cameras[$key]["name"]);
 }
 
