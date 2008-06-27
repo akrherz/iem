@@ -26,7 +26,7 @@ $rs = pg_exec($conn, $sql);
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
   $key = $row["cam"];
-  if ($cameras[$key]["network"] != $network){ continue; }
+  if (!$overview && $cameras[$key]["network"] != $network){ continue; }
   if (!$overview)
   echo sprintf("IconFile: %s, 320, 240, 160, 240,\"http://mesonet.agron.iastate.edu/data/camera/stills/%s.jpg\"\n", $q, $key);
   $s2 .= sprintf("Icon: %.4f,%.4f,%s,1,5,\"[%s] %s\"\n", $cameras[$key]['lat'], $cameras[$key]['lon'], $row["drct"], $cameras[$key]["network"], $cameras[$key]["name"]);
