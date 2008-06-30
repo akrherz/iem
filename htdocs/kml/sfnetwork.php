@@ -33,7 +33,7 @@ for ($i=0;$row=@pg_fetch_array($result,$i);$i++)
   echo "<Placemark>
     <description>
         <![CDATA[
-  <p><font color=\"red\"><i>Site Name:</i></font> ". $row["name"] ."
+  <p><font color=\"red\"><i>Site Name:</i></font> ". $row["sname"] ."
    <br /><font color=\"red\"><i>Temperature:</i></font> ". $row["tmpf"] ."
    <br /><font color=\"red\"><i>Dew Point:</i></font> ". $row["dwpf"] ." 
    <br /><font color=\"red\"><i>Today Rainfall:</i></font> ". $row["pday"] ." 
