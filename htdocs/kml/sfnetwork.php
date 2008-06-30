@@ -5,7 +5,7 @@ include("$rootpath/include/database.inc.php");
 $connect = iemdb("access");
 
 /* Now we fetch warning and perhaps polygon */
-$query2 = "SELECT *, askml(c,geom) as kml
+$query2 = "SELECT *, askml(c.geom) as kml
            from current c, summary s
            WHERE c.network = s.network and c.station = s.station and 
            s.day = 'TODAY' and 
