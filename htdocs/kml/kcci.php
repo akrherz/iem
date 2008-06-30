@@ -12,6 +12,14 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
        <refreshMode>onInterval</refreshMode>
      </Link>
    </NetworkLink>
+   <NetworkLink>
+     <name>SchoolNet8 Webcams</name>
+     <Link id=\"ID\">
+       <href>http://mesonet.agron.iastate.edu/kml/webcams.php?network=KCCI</href>
+       <refreshInterval>600</refreshInterval>
+       <refreshMode>onInterval</refreshMode>
+     </Link>
+   </NetworkLink>
 </Folder>
 </kml>";
 ?>
