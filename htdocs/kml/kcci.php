@@ -15,11 +15,14 @@ header("Content-Type:", "application/vnd.google-earth.kml+xml");
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://earth.google.com/kml/2.2\">
  <Document>
-   <name>SchoolNet8 Currents</name>
-   <Link id=\"ID\">
-     <href>http://mesonet.agron.iastate.edu/kml/kcci.php</href>
-     <refreshInterval>60</refreshInterval>
-   </Link>
+   <NetworkLink>
+     <name>SchoolNet8 Currents</name>
+     <Link id=\"ID\">
+       <href>http://mesonet.agron.iastate.edu/kml/kcci.php</href>
+       <refreshInterval>60</refreshInterval>
+       <refreshMode>onInterval</refreshMode>
+     </Link>
+   </NetworkLink>
    <Style id=\"iemstyle\">
      <BalloonStyle>
       <bgColor>ffffffbb</bgColor>
