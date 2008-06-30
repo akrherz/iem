@@ -20,7 +20,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
    <Style id=\"iemstyle\">
      <IconStyle>
       <Icon>
-        <href>http://www.schoolnet8.com/favicon.ico</href>
+        <!-- <href>http://www.schoolnet8.com/favicon.ico</href> -->
       </Icon>
      </IconStyle>
      <BalloonStyle>
