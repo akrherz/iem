@@ -18,8 +18,15 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://earth.google.com/kml/2.2\">
  <Document>
    <Style id=\"iemstyle\">
+     <IconStyle>
+      <color>a1ff00ff</color>
+      <scale>1.399999976158142</scale>
+      <Icon>
+        <href>http://www.schoolnet8.com/favicon.ico</href>
+      </Icon>
+     </IconStyle>
      <BalloonStyle>
-      <bgColor>ffffffbb</bgColor>
+      <bgColor>ffffffff</bgColor>
     </BalloonStyle>
   </Style>";
 for ($i=0;$row=@pg_fetch_array($result,$i);$i++)
