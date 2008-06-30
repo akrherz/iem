@@ -15,15 +15,16 @@ header("Content-Type:", "application/vnd.google-earth.kml+xml");
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://earth.google.com/kml/2.2\">
  <Document>
-    <Style id=\"iemstyle\">
-      <LineStyle>
-        <width>1</width>
-        <color>ff000000</color>
-      </LineStyle>
-      <PointStyle>
-        <color>ff000000</color>
-      </PointStyle>
-    </Style>";
+   <name>SchoolNet8 Currents</name>
+   <Link id=\"ID\">
+     <href>http://mesonet.agron.iastate.edu/kml/kcci.php</href>
+     <refreshInterval>60</refreshInterval>
+   </Link>
+   <Style id=\"iemstyle\">
+     <BalloonStyle>
+      <bgColor>ffffffbb</bgColor>
+    </BalloonStyle>
+  </Style>";
 for ($i=0;$row=@pg_fetch_array($result,$i);$i++)
 {
   echo "<Placemark>
