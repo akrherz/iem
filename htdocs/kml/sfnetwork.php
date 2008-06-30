@@ -5,9 +5,11 @@ include("$rootpath/include/database.inc.php");
 $connect = iemdb("access");
 
 /* Now we fetch warning and perhaps polygon */
-$query2 = "SELECT *, askml(geom) as kml
-           from current
-           WHERE network = 'KCCI' and valid > (now() - '30 minutes'::interval)";
+$query2 = "SELECT *, askml(c,geom) as kml
+           from current c, summary s
+           WHERE c.network = s.network and c.station = s.station and 
+           s.day = 'TODAY' and 
+           c.network = 'KCCI' and valid > (now() - '30 minutes'::interval)";
 
 $result = pg_exec($connect, $query2);
 
@@ -25,7 +27,9 @@ for ($i=0;$row=@pg_fetch_array($result,$i);$i++)
   echo "<Placemark>
     <description>
         <![CDATA[
-  <p><font color=\"red\"><i>Location:</i></font> ". $row["tmpf"] ." ". $row["dwpf"] ." 
+  <p><font color=\"red\"><i>Temperature:</i></font> ". $row["tmpf"] ."
+   <br /><font color=\"red\"><i>Dew Point:</i></font> ". $row["dwpf"] ." 
+   <br /><font color=\"red\"><i>Today Rainfall:</i></font> ". $row["pday"] ." 
    </p>
         ]]>
     </description>
