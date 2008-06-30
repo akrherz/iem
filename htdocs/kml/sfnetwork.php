@@ -19,8 +19,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <Document>
    <Style id=\"iemstyle\">
      <IconStyle>
-      <color>a1ff00ff</color>
-      <scale>1.399999976158142</scale>
+      <color>ff000000</color>
       <Icon>
         <href>http://www.schoolnet8.com/favicon.ico</href>
       </Icon>
