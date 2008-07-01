@@ -11,6 +11,7 @@ if ($nohtml) header("Content-type: text/plain");
 
 if (! $nohtml) {
 $TITLE = "IEM Station Locations";
+$THISPAGE = "iem-networks";
 include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">Network Location Tables</h3>
