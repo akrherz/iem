@@ -55,6 +55,7 @@ $_pages = Array(
     "info" => Array("title" => "Info", "url" => "/info.php"),
     "mailman" => Array("title" => "Mail Lists", "url" => "/mailman/listinfo/"),
     "news" => Array("title" => "News", "url" => "/onsite/news.phtml"),
+    "networks" => Array("title" => "Network Tables", "url" => "/sites/networks.php"),
     "present" => Array("title" => "Presentations", "url" => "/present/"),
     "qc" => Array("title" => "Quality Control", "url" => "/QC/"),
  ),
