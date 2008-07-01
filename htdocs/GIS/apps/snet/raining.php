@@ -148,7 +148,7 @@ $precip = Array();
 
 $now = time();
 foreach($stbl as $key => $value){
-   if ($key == "S03I4") continue;
+   if ($key == "S03I4" || $key == "SDNI4" || $key == "SRUM5" || $key == "GETS2") continue;
 
    $pt = ms_newPointObj();
    $pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
