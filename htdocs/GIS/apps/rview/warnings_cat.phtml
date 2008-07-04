@@ -351,7 +351,19 @@ return lURL;
  echo " var gtab = Ext.getCmp('top-display').insert(1, {
               id: 'gtab',
               title: 'Google Map',
-              html: 'gmapper'
+              html: 'gmapper',
+              tbar: new Ext.Button({
+                text: 'Hide Storm Reports',
+                handler: function(){
+                 if (lsrkml.layer.isHidden()){
+                   lsrkml.layer.show();
+                   this.setText('Hide Storm Reports');
+                 } else {
+                   lsrkml.layer.hide();
+                   this.setText('Show Storm Reports');
+                 }
+                }
+              })
 			}).show();
   map = new GMap2(gtab.body.dom);
   map.addControl(new GSmallMapControl());
@@ -381,8 +393,9 @@ return lURL;
 
   gxml = new GGeoXml('$kml_link');
   map.addOverlay(gxml);
-  gxml2 = new GGeoXml('$lsr_kml_link');
-  map.addOverlay(gxml2);
+  Ext.namespace('lsrkml');
+  lsrkml.layer = new GGeoXml('$lsr_kml_link');
+  map.addOverlay(lsrkml.layer);
   map.setCenter(new GLatLng($yc,$xc), 8); 
   map.setMapType(custommap4);
   ";
