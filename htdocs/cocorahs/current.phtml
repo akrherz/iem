@@ -47,8 +47,15 @@ include("$rootpath/include/header.php"); ?>
   $db[$site]['sid'] = $site;
   $db[$site]['sname'] = $iemob->db["sname"];
   $db[$site]['county'] = $nt->table[$site]["county"];
-  $db[$site]['pmonth'] = @$monthDict[$site]["accum"];
-  $db[$site]['pmiss'] = @$monthDict[$site]["missing"];
+  if ( date("Ym") == date("Ym", $iemob->ts) ){
+    $db[$site]['pmonth'] = @$monthDict[$site]["accum"];
+    $db[$site]['pmiss'] = @$monthDict[$site]["missing"];
+  }
+  if ( date("Ymd") != date("Ymd", $iemob->ts) ){
+    continue;
+  }
+
+
   $db[$site]['pday'] = $iemob->db["ob_pday"];
   $db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : " ";
   $db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : " ";
