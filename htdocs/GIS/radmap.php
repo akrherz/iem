@@ -132,7 +132,7 @@ if (($ts + 300) < time()) {
 $radar->draw($img);
 
 $counties = $map->getlayerbyname("uscounties");
-$counties->set("status", MS_ON);
+$counties->set("status", in_array("uscounties", $layers) );
 $counties->draw($img);
 
 $states = $map->getlayerbyname("states");
