@@ -22,7 +22,7 @@ function printLSR($lsr)
   if ($lsr["magnitude"] == 0) $lsr["magnitude"] = "";
   //if ($lsr["ts"] < 100000) print_r($lsr);
   $uri = sprintf("maplsr.phtml?lat0=%s&lon0=%s&ts=%s", $lsr["lat0"], $lsr["lon0"], gmdate("Y-m-d%20H:i", $lsr["ts"]));
-  return sprintf("<tr style=\"background: #eee;\"><td>lsr</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td></tr>", 
+  return sprintf("<tr style=\"background: #eee;\"><td>lsr</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"></td></tr>", 
     $uri, gmdate("m/d/Y H:i", $lsr["ts"]), $background, $leadtime, $lsr["county"], $lsr["state"], $uri, $lsr["city"], $lt[$lsr["type"]], $lsr["magnitude"]);
 }
 function printWARN($warn)
@@ -32,9 +32,10 @@ function printWARN($warn)
   $uri = sprintf("/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&eventid=%s&phenomena=%s&significance=W", date("Y", $ts), $warn["wfo"], $warn["eventid"], $warn["phenomena"]);
   //$uri2 = sprintf("/GIS/apps/rview/warnings.phtml?tz=UTC&cu=1&year=%s&month=%s&day=%s&hour=%s&minute=%s&filter=1&archive=yes&tzoff=0&site=%s&lon0=%s&lat0=%s", gmdate("Y", $ts), gmdate("m", $ts), gmdate("d",$ts), gmdate("H",$ts), gmdate("i",$ts), $warn["wfo"], $warn["lon0"], $warn["lat0"]);
   if ($warn["verify"] == 0) $background = "#f00";
-  return sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f km^2</td></tr>", 
+  return sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f km^2</td><td>%.0f km^2</td><td>%.0f %%</td></tr>", 
        $background, $uri, $warn["phenomena"], gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["ets"]), 
-       $uri, $warn["counties"], $uri, $warn["status"], $warn["area"]);
+       $uri, $warn["counties"], $uri, $warn["status"], $warn["area"], 
+       $warn["carea"], ($warn["carea"]-$warn["area"])/ $warn["carea"] * 100);
 
 }
 
@@ -53,10 +54,14 @@ $sql = sprintf("select *, astext(geom) as tgeom from (SELECT distinct * from
    date("Y", $sts), $wfo, $stsSQL, $etsSQL, $wtypeSQL);
 $DEBUG .=  "<br />". $sql;
 $rs = pg_query($conn, $sql);
+$sum_parea = 0;
+$sum_carea = 0;
 for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
 {
   $key = sprintf("%s-%s-%s", $row["wfo"], $row["phenomena"], $row["eventid"]);
-  if ( ! isset($warnings[$key]) ){ $warnings[$key] = Array(); }
+  if ( ! isset($warnings[$key]) ){ 
+    $warnings[$key] = Array("counties"=> "", "carea" => 0 );
+  }
   $warnings[$key]["issue"] = $row["issue"];
   $warnings[$key]["expire"] = $row["expire"];
   $warnings[$key]["phenomena"] = $row["phenomena"];
@@ -70,19 +75,22 @@ for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
   $warnings[$key]["eventid"] = $row["eventid"];
   $warnings[$key]["lead0"] = -1;
   if ($row["gtype"] == "P"){ 
+    $sum_parea += $row["area"];
     $warnings[$key]["geom"] = $row["tgeom"]; 
     $warnings[$key]["gtype"] = $row["gtype"];
   }
   $warnings[$key]["verify"] = 0;
   if ($row["gtype"] == "C")
   {
-     $sql = sprintf("SELECT * from nws_ugc WHERE ugc = '%s'", $row["ugc"]);
+     $sql = sprintf("SELECT *, area(transform(geom,2163)) / 1000000.0 as area 
+                     from nws_ugc WHERE ugc = '%s'", $row["ugc"]);
      $DEBUG .= "<br />". $sql;
      $crs = pg_query($conn, $sql);
-     if (! isset($warnings[$key]["counties"]) ) $warnings[$key]["counties"] = "";
      if (pg_num_rows($crs) > 0) {
        $crow = pg_fetch_array($crs,0);
        $warnings[$key]["counties"] .= sprintf("%s,%s ", $crow["name"], $crow["state"]);
+       $warnings[$key]["carea"] += $crow["area"];
+       $sum_carea += $crow["area"];
      } else {
        $warnings[$key]["counties"] .= sprintf("%s, ", $key);
      }
@@ -326,10 +334,11 @@ else {
 <?php echo sprintf("<img src=\"chart.php?aw=%s&ae=%s&b=%s&c=%s&d=%s\" align=\"left\">", $wverif, $wevents, $uwevents, $wcount-$wverif, "NA"); ?>
 </td>
 <td>
- <table cellspacing="1" cellpadding="2" border="1">
+ <table cellspacing="0" cellpadding="3" border="1">
  <tr><th>Listed Warnings:</th><th><?php echo $wcount; ?></th></tr>
  <tr><th>Verified: (A<sub>w</sub>)</th><th><?php echo $wverif; ?></th></tr>
  <tr><th>% Verified</th><th><?php echo $wverifpc; ?></th></tr>
+ <tr><th>Storm Based Warning Size Reduction:</th><th><?php echo sprintf("%.0f", ($sum_carea - $sum_parea) / $sum_carea * 100); ?> %</th></tr>
  </table>
 </td>
 <td>
@@ -368,8 +377,8 @@ else {
 </table>
 <h3 class="heading">Warnings Issued & Verifying LSRs:</h3>
 <table cellspacing="1" cellpadding="2" border="1">
-<tr><td></td><th>Issued:</th><th>Expired:</th><th colspan="2">County:</th><th>Final Status:</th><th>Poly Area:</th></tr>
-<tr bgcolor="#eee"><th>lsr</th><th>Valid</th><th>Lead Time:</th><th>County</th><th>City</th><th>Type</th><th>Magnitude</th></tr>
+<tr><td></td><th>Issued:</th><th>Expired:</th><th colspan="2">County:</th><th>Final Status:</th><th>Poly Area:</th><th>County Area:</th><th>Size %<br /> (C-P)/C:</th></tr>
+<tr bgcolor="#eee"><th>lsr</th><th>Valid</th><th>Lead Time:</th><th>County</th><th>City</th><th>Type</th><th>Magnitude</th><td colspan="2"></td></tr>
 <?php echo $sw; ?>
 </table>
 <h3 class="heading">Storm Reports without warning:</h3> 
