@@ -339,6 +339,7 @@ else {
  <tr><th>Verified: (A<sub>w</sub>)</th><th><?php echo $wverif; ?></th></tr>
  <tr><th>% Verified</th><th><?php echo $wverifpc; ?></th></tr>
  <tr><th>Storm Based Warning Size Reduction:</th><th><?php echo sprintf("%.0f", ($sum_carea - $sum_parea) / $sum_carea * 100); ?> %</th></tr>
+ <tr><th>Avg SBW Size (sq km)</th><th><?php echo sprintf("%.0f",  $sum_parea / $wcount);  ?></th></tr>
  </table>
 </td>
 <td>
