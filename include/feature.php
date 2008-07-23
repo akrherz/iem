@@ -78,7 +78,7 @@ $s .= "</table>";
 if (getenv("REMOTE_ADDR") == "205.241.141.66" )
 {
  $s = "<img src=\"images/cardinals.gif\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 149 weeks now!!!! darly late with posting this, no good! Hehe, darly forgot to take his camera home to get pictures of the sheep that are on the farm!  They are big and wooly!   I love you very much. <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 150 weeks now!!!!  darly very excited and proud for smokey.  Smokey have fancy apartment for herself now and lots of room for snoopy to explore and its 150 weeks now, which is a very special number, just like smokey.  You are the bestest smokey.   I love you very much. <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 }
