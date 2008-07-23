@@ -13,7 +13,7 @@
  $ehour = isset($_GET["ehour"]) ? $_GET["ehour"] : 12;
  $ets = mktime($ehour, 0, 0, $emonth, $eday, $eyear);
  $hail = isset($_GET["hail"]) ? $_GET["hail"] : 0.75;
- $wfo = isset($_GET["wfo"]) ? $_GET["wfo"] : "MPX";
+ $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
 
  $abegin = mktime(0,0,0,6,8,2005);
  if ($sts < $abegin){ $sts = $abegin; }
