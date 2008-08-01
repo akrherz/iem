@@ -150,7 +150,7 @@ $cameras = Array(
     "state" => "IA", "network" => "KCCI",
     "ip" => "209.56.232.244", "county" => "Marion", "port" => "80"),
 "KCRG-004" => Array("sts" => mktime(15,0,0,5, 16,2008), "ets" => time(),
-    "name" => "Vinton", "removed" => False, "active" => False, "lat" => 42.17, "lon" => -92.024,
+    "name" => "Vinton", "removed" => False, "active" => True, "lat" => 42.17, "lon" => -92.024,
     "state" => "IA", "network" => "KCRG",
     "ip" => "205.221.16.23", "county" => "Vinton", "port" => "80"),
 "KCRG-003" => Array("sts" => mktime(14,0,0,4, 24,2008), "ets" => time(),
