@@ -1,5 +1,5 @@
 /*
- * Ext JS Library 2.1
+ * Ext JS Library 2.2
  * Copyright(c) 2006-2008, Ext JS, LLC.
  * licensing@extjs.com
  * 
@@ -36,6 +36,7 @@
     z-index:1;
     position:relative;
     zoom:1;
+    left:0;top:0;
 }
 .x-window-tl .x-window-header {
     color:#15428b;
