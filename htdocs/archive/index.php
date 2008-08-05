@@ -88,6 +88,9 @@ then, only base reflectivity was saved.</li>
 <li><a href="<?php echo $rooturl; ?>/browser/">Archived Data Browser</a>
   <br />Browse the archive of products via this frames based interface.</li> 
 
+<li><a href="http://www.crh.noaa.gov/unr/?n=pw">Precipitable Water Climatologies</a>
+ <br />Fascinating month-by-month plots of PWAT climatologies for the RAOB sites in the CONUS</li>
+
 <li><a href="http://locust.mmm.ucar.edu/case-selection/">UCAR plot archive</a>
   <br />Assorted RADAR, satellite, and model plots back to 1998.</li>
 
