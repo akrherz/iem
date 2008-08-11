@@ -48,6 +48,7 @@ $vtec_phenomena = Array(
   'SN' => 'Snow',
   'SR' => 'Storm',
   'SU' => 'High Surf',
+  'SW' => 'Small Craft for Hazardous Seas',
   'TI' => 'Inland Tropical Storm Wind',
   'TR' => 'Tropical Storm',
   'TS' => 'Tsunami',
