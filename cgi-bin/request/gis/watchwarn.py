@@ -1,4 +1,4 @@
-#!/mesonet/python-2.4/bin/python
+#!/mesonet/python/bin/python
 # Something to dump current warnings to a shapefile
 # 28 Aug 2004 port to iem40
 
@@ -7,8 +7,6 @@ from pyIEM import wellknowntext, iemdb
 
 i = iemdb.iemdb()
 mydb = i["postgis"]
-#import pg
-#mydb = pg.connect('postgis', 'mesonet-db1.agron.iastate.edu',user='nobody')
 
 mydb.query("SET TIME ZONE 'GMT'")
 
@@ -17,6 +15,7 @@ form = cgi.FormContent()
 year = int(form["year"][0])
 month1 = int(form["month1"][0])
 if (not form.has_key("month2")):  sys.exit()
+if (year < 2002 or year > mx.DateTime.now().year): sys.exit()
 month2 = int(form["month2"][0])
 day1 = int(form["day1"][0])
 day2 = int(form["day2"][0])
