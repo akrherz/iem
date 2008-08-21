@@ -66,6 +66,7 @@ $xlabels[0] = "May 1";
 $xlabels[30] = "Jun 1";
 $xlabels[61] = "Jul 1";
 $xlabels[91] = "Aug 1";
+$xlabels[122] = "Sep 1";
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
