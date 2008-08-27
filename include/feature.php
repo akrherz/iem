@@ -78,7 +78,7 @@ $s .= "</table>";
 if (getenv("REMOTE_ADDR") == "12.217.178.106" )
 {
  $s = "<img src=\"images/cardinals.gif\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 153 weeks now!!!!  Darly is so excited for smokey and her job.  Smokey get a big apple for teaching students lots of fun things. Smokey will do very good at her job.  I love you very much. <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 154 weeks now!!!!  Hehe, 154 is a special number as it is divisible by 22, which is smokey's favorite number.  Darly is excited about this coming weekend, muah!  I love you very much. <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 }
