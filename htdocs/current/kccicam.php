@@ -51,4 +51,5 @@
  <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2005&month=11&day=12&hour=17&minute=00">12 Nov 2005 - 5:00 PM, Ames tornado</a></li>
  <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2006&month=07&day=17&hour=16&minute=50">17 Jul 2006 - 4:50 PM, Tama possible brief tornado</a></li>
  <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2007&month=10&day=2&hour=17&minute=56">2 Oct 2007 - 5:56 PM, Twin Cedars possible tornado</a></li>
+ <li><a href="http://mesonet.agron.iastate.edu/current/camera.phtml?archive=yes&year=2008&month=8&day=30&hour=20&minute=20">30 Aug 2008 - 8:20 PM, Interesting Sunset Halos</a></li>
 </ul>
