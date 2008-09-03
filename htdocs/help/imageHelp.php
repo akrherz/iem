@@ -3,7 +3,7 @@
 	$title = "IEM | Image Help";
 	include("$rootpath/include/header.php"); 
 	include("$rootpath/include/database.inc.php"); 
- $iod = isset($_GET['iod']) ? $_GET['iod'] : 1;
+ $iod = isset($_GET['iod']) ? intval($_GET['iod']) : 1;
 ?>
 
 <TR>
@@ -12,9 +12,6 @@
 
 <?php
 	$connection = iemdb("mesosite");
-
-	echo " &nbsp; <b>|</b> &nbsp; <a href=\"http://mesonet.agron.iastate.edu\">Mesonet Homepage</a>\n";
-	echo " &nbsp; <b>|</b> &nbsp; \n";
 
 	  $query = "SELECT * from image_help WHERE iod = ". $iod ." ";
 	  $result = pg_exec($connection, $query);
@@ -28,7 +25,6 @@
 	  $fileInfo = stat( $fileL );
 	  $suffix = substr( $fileL, -3 );
 
-	  echo " <a href=\"imageHelp.php\">List All Images</a> &nbsp; <b>|</b> &nbsp; \n";
 
 	  echo "<P><B>". $title ."</B>\n";
 	  echo "<P><font class=\"info\">". $body ."</font>\n";
