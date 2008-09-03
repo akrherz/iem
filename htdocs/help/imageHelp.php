@@ -11,10 +11,10 @@
 <TD valign="top" colspan="5">
 
 <?php
-	$connection = iemdb("mesosite");
+  $connection = iemdb("mesosite");
+  $result = pg_prepare($connection, "query", "SELECT * from image_help WHERE iod = $1");
+  $result = pg_execute($connection, "query", array($iod) );
 
-	  $query = "SELECT * from image_help WHERE iod = ". $iod ." ";
-	  $result = pg_exec($connection, $query);
           $row = @pg_fetch_array($result, 0);
           $body = $row["body"];
           $title = $row["title"];
