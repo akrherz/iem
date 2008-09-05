@@ -14,7 +14,7 @@ function mkl($map, $imgObj) {
                                                                                 
  // point feature with text for location
  $point = ms_newpointobj();
- $point->setXY(50, 30);
+ $point->setXY(40, 30);
                                                                                 
  $point->draw($map, $layer, $imgObj, "logo", "");
 }
@@ -24,7 +24,7 @@ function mktitle($map, $imgObj, $titlet) {
                                                                                 
   // point feature with text for location
   $point = ms_newpointobj();
-  $point->setXY(0, 22);
+  $point->setXY(40, 24);
                                                                                 
   $point->draw($map, $layer, $imgObj, "credits",
     $titlet);
@@ -33,9 +33,11 @@ function mktitle($map, $imgObj, $titlet) {
 
 dl($mapscript);
 
-$map = ms_newMapObj("stations.map");
-$map->set("height", 1600);
-$map->set("width",  2000);
+$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+$map->set("height", 768);
+$map->set("width",  1024);
+//$map->setExtent(-98, 40, -90, 45);
+$map->setExtent(-125, 29, -65, 49);
 
 $namer = $map->getlayerbyname("namerica");
 $namer->set("status", MS_ON);
@@ -46,28 +48,16 @@ $lakes->set("status", MS_ON);
 $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
 
-$iembox = $map->getlayerbyname("iembox");
-$iembox->set("status", MS_ON);
 
-$counties = $map->getlayerbyname("counties");
+$counties = $map->getlayerbyname("uscounties");
 $counties->set("status", MS_ON);
 
-$locs = $map->getlayerbyname("locs");
-$locs->set("status", MS_OFF);
-$locs->set("connection", $_DATABASES["mesosite"]);
 
-$bars = $map->getlayerbyname("bars");
-$bars->set("status", MS_ON);
-
-$dm = $map->getlayerbyname("dm");
-$dm->set("status", MS_ON);
-
-$warnings0_c = $map->getlayerbyname("warnings0_c");
+$warnings0_c = $map->getlayerbyname("sbw");
 $warnings0_c->set("status", MS_ON);
-$warnings0_c->set("data", "g from (select phenomena, eventid, multi(geomunion(geom)) as g from warnings_2008 WHERE significance = 'A' and phenomena IN ('TO','SV') and issue < '2008-04-10 20:00' and expire > '2008-04-10 20:00' GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena");
+$warnings0_c->set("connection", $_DATABASES["postgis"]);
+$warnings0_c->set("data", "geom from (select phenomena, geom, oid from warnings_2008 WHERE significance != 'A' and phenomena in ('SV','TO') and issue > '2008-05-24' and gtype = 'P' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
 
-$cwa = $map->getlayerbyname("cwa");
-$cwa->set("status", MS_ON);
 
 /*
 $cwa->queryByAttributes("WFO", "DMX", MS_SINGLE);
@@ -88,17 +78,6 @@ $rect->project($projin, $projout);
 //$roads = $map->getlayerbyname("topo");
 //$roads->set("status", MS_ON);
 
-$cities = $map->getlayerbyname("sites");
-$cities->set("status", MS_OFF);
-
-$watches = $map->getlayerbyname("watches");
-$watches->set("status", MS_OFF);
-$watches->set("data", "geom from (select type as wtype, geom, oid from watches WHERE extract(year from expired) = 2005 and type = 'TOR' ORDER by type ASC) as foo");
-
-$iards = $map->getlayerbyname("iards");
-$iards->set("status", MS_OFF);
-$iards_label = $map->getlayerbyname("iards_label");
-$iards_label->set("status", MS_OFF);
 
 $img = $map->prepareImage();
 $namer->draw($img);
@@ -106,20 +85,15 @@ $counties->draw($img);
 //$roads->draw($img);
 //$iards->draw($img);
 //$iards_label->draw($img);
-//$dm->draw($img);
 $lakes->draw($img);
 //$watches->draw($img);
+$warnings0_c->draw($img);
 $states->draw($img);
-//$cwa->draw($img);
-//$warnings0_c->draw($img);
-$locs->draw($img);
-//$iembox->draw($img);
 
+
+mktitle($map, $img, "          May 24 - Jun 10 2008 Storm Based Warnings");
 $map->drawLabelCache($img);
-//$bars->draw($img);
-
-mktitle($map, $img, "         2005 Severe Thunderstorm Warnings (County)");
-//mkl($map, $img);
+mkl($map, $img);
 
 $url = $img->saveWebImage();
 

@@ -54,7 +54,8 @@ PROJECTION
 #  "x_0=0"
 #  "y_0=0"
 
-  "init=epsg:2163"
+  "init=epsg:4326"
+#  "init=epsg:2163"
 #    "init=epsg:26915"
 #    "init=epsg:26914"
 #   "proj=lcc"
@@ -208,8 +209,95 @@ END
 
 LAYER
  CONNECTIONTYPE postgis
+ NAME river
+ CONNECTION "user=nobody dbname=postgis host=iemdb"
+ PROJECTION
+  "init=epsg:4326"
+ END
+ DATA "geom from (select n.geom, r.severity as s, n.nwsli from hvtec_nwsli n, riverpro r WHERE n.nwsli = r.nwsli and n.nwsli IN (select distinct hvtec_nwsli from warnings_2008 WHERE phenomena = 'FL' and status NOT IN ('EXP','CAN')) ) as foo USING unique nwsli using SRID=4326"
+ TYPE POINT
+ STATUS OFF
+ CLASS
+   NAME "Major"
+   EXPRESSION ([s] = 3)
+   COLOR 255 0 255
+   SIZE 5
+   SYMBOL "circle"
+  END
+ CLASS
+   NAME "Moderate"
+   EXPRESSION ([s] = 2)
+   COLOR 255 0 0
+   SIZE 5
+   SYMBOL "circle"
+  END
+ CLASS
+   NAME "Minor"
+   EXPRESSION ([s] = 1)
+   COLOR 255 150 0
+   SIZE 5
+   SYMBOL "circle"
+  END
+END
+
+# Counties
+LAYER
+  NAME uscounties
+  STATUS OFF
+  TYPE LINE
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    SYMBOL "circle"
+    COLOR 54 54 54
+    SIZE 1
+  END
+END
+
+
+LAYER
+ CONNECTIONTYPE postgis
+ NAME watch_hours
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
+ PROJECTION
+  "init=epsg:4326"
+ END
+  DATA "geom from (select n.ugc, n.geom, extract(hours from sum(expire - issue)) as s from warnings_2008 w, nws_ugc n WHERE n.ugc = w.ugc and significance = 'A' and phenomena IN ('SV','TO') and issue > '2008-05-24' and gtype = 'C' GROUP by n.ugc, n.geom) as foo USING unique ugc using SRID=4326"
+ TYPE POLYGON
+ STATUS OFF
+ CLASS
+   NAME "60"
+   EXPRESSION ([s] > 60)
+   COLOR 255 0 0
+  END
+ CLASS
+   NAME "48"
+   EXPRESSION ([s] > 48)
+   COLOR 255 150 0
+  END
+ CLASS
+   NAME "36"
+   EXPRESSION ([s] > 36)
+   COLOR 255 255 0
+  END
+ CLASS
+   NAME "24"
+   EXPRESSION ([s] > 24)
+   COLOR 0 255 0
+  END
+ CLASS
+   NAME "1"
+   EXPRESSION ([s] > 0)
+   COLOR 5 200 0
+  END
+END
+
+LAYER
+ CONNECTIONTYPE postgis
  NAME watches
-  CONNECTION "user=nobody dbname=postgis host=mesonet-db1.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
   DATA "geom from (select type as wtype, geom, oid from watches WHERE date(expired) = '1997-04-01'  ORDER by type ASC) as foo"
  PROJECTION
   "init=epsg:4326"
@@ -235,12 +323,12 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "dbname=postgis host=mesonet-db1.agron.iastate.edu user=nobody"
+  CONNECTION "dbname=postgis host=iemdb user=nobody"
   #DATA "geom from (select phenomena, buffer(collect(geom),0) as geom from warnings WHERE gtype = 'C' and expire > now() GROUP by phenomena) as foo USING UNIQUE phenomena using SRID=4326"
   DATA "geom from (select phenomena, type as wtype, geom, oid from warnings_2005 WHERE gtype = 'C' and significance = 'W' and phenomena = 'SV' ORDER by type ASC) as foo"
 #  DATA "geom from (select expire, oid, geom, phenomena from warnings_summary) as foo USING unique oid using SRID=4326"
   STATUS ON
-  TYPE POLYGON
+  TYPE LINE
   TEMPLATE q_template.html
   PROJECTION
    "init=epsg:4326"
@@ -250,8 +338,8 @@ LAYER
     EXPRESSION 'TO'
     STYLE
       COLOR 255 0 0
-      #SIZE 3
-      #SYMBOL 1
+      SIZE 2
+      SYMBOL 1
     END
     #TEXT ([phenomena] [expire])
     #LABEL
@@ -269,8 +357,8 @@ LAYER
     EXPRESSION 'SV'
     STYLE
       COLOR 255 255 0
-      #SIZE 3
-      #SYMBOL 1
+      SIZE 2
+      SYMBOL 1
     END
    # STYLE 
    #   COLOR 220 220 220
@@ -303,8 +391,8 @@ LAYER
    "proj=latlong"
   END
   CLASS
-    #OUTLINECOLOR 205 201 165
-    OUTLINECOLOR 0 0 0
+    OUTLINECOLOR 205 201 165
+    #OUTLINECOLOR 0 0 0
     SIZE 1
     SYMBOL 1
 #    TEXT ([NAME] County)
@@ -590,7 +678,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME locs
-  CONNECTION "host=mesonet-db1.agron.iastate.edu user=nobody dbname=mesosite"
+  CONNECTION "host=iemdb user=nobody dbname=mesosite"
   DATA "geom from (select oid, geom, network from stations WHERE (network ~* 'ASOS') and contains('SRID=4326;POLYGON((-97.632 39.651, -97.632 44.319, -89.317 44.319, -89.317 39.651, -97.632 39.651))',geom) ) as foo using unique oid using srid=4326"
 #  FILTER "state = 'IA'"
 #  FILTER "network = 'IA_RWIS'"
@@ -727,7 +815,7 @@ LAYER
    #   BACKGROUNDSHADOWCOLOR 0 0 0
    #   BACKGROUNDSHADOWSIZE 1 1
       TYPE TRUETYPE
-      SIZE 14
+      SIZE 12
       FONT 'arial'
       POSITION CR
       FORCE TRUE
