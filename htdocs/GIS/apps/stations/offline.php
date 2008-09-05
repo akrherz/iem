@@ -15,7 +15,11 @@ $lons = Array();
 $height = 350;
 $width = 450;
 
-$rs = pg_query($iemaccess->dbconn, "SELECT * from offline WHERE network = '$network'");
+$rs = pg_prepare($iemaccess->dbconn, "query",
+      "SELECT * from offline WHERE network = $1");
+
+$rs = pg_execute($iemaccess->dbconn, "query", array($network));
+
 
 for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
