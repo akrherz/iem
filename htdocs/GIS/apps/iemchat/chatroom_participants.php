@@ -72,31 +72,31 @@ $cwac0 = ms_newClassObj($cwa);
 $cwac0->set("name", "1-5");
 $cwac0->setExpression("/".$regex["6"]."/");
 $cwac0s0 = ms_newStyleObj($cwac0);
-$cwac0s0->color->setRGB(50,200,0);
+$cwac0s0->color->setRGB(99,99,255);
 
 $cwac0 = ms_newClassObj($cwa);
 $cwac0->set("name", "6-10");
 $cwac0->setExpression("/".$regex["11"]."/");
 $cwac0s0 = ms_newStyleObj($cwac0);
-$cwac0s0->color->setRGB(0,255,0);
+$cwac0s0->color->setRGB(9,255,209);
 
 $cwac0 = ms_newClassObj($cwa);
 $cwac0->set("name", "11-15");
 $cwac0->setExpression("/".$regex["16"]."/");
 $cwac0s0 = ms_newStyleObj($cwac0);
-$cwac0s0->color->setRGB(255,255,0);
+$cwac0s0->color->setRGB(9,255,9);
 
 $cwac0 = ms_newClassObj($cwa);
 $cwac0->set("name", "16-20");
 $cwac0->setExpression("/".$regex["21"]."/");
 $cwac0s0 = ms_newStyleObj($cwac0);
-$cwac0s0->color->setRGB(255,150,0);
+$cwac0s0->color->setRGB(190,255,9);
 
 $cwac0 = ms_newClassObj($cwa);
 $cwac0->set("name", "21+");
 $cwac0->setExpression("/".$regex["200"]."/");
 $cwac0s0 = ms_newStyleObj($cwac0);
-$cwac0s0->color->setRGB(255,0,0);
+$cwac0s0->color->setRGB(255,255,9);
 
 
 $img = $map->prepareImage();
