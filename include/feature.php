@@ -55,7 +55,10 @@ function genFeature()
   $s .= "<br /><div class='story' style=\"text-align: justify;\">". $row["story"] ."</div>";
 
 /* Rate Feature and Past ones too! */
-if ($voted){
+if ($row["voting"] == "f"){
+  $s .= "<br clear=\"all\" />";
+}
+else if ($voted){
   $s .= "<br clear=\"all\" /><div style=\"float: left; margin-bottom: 10px;\">&nbsp; &nbsp;<strong> Rate Feature: </strong> Good ($good votes) or Bad ($bad votes) &nbsp; Thanks for voting!</div>";
 } else {
   $s .= "<br clear=\"all\" /><div style=\"float: left; margin-bottom: 10px;\">&nbsp; &nbsp;<strong> Rate Feature: </strong> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes)</div>";
