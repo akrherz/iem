@@ -4,11 +4,11 @@
 NAME raining
 STATUS ON
 SIZE 500 400
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 EXTENT 200000 4400000 710000 4900000
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/static/shape/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR 220 220 220
 IMAGETYPE PNG
 TRANSPARENT off
