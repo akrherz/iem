@@ -10,6 +10,7 @@ class selectWidget
   var $showCamera = true;
   var $showRADAR = true;
   var $map = '';
+  var $img = '';
   var $imgsz_y = 360;
   var $imgsz_x = 480;
   var $selectedSite = '';
@@ -166,11 +167,10 @@ class selectWidget
 		else 
 		{
 			$this->click2geo($f["extents"], $f["map_x"], $f["map_y"], $f["zoom"]);
-			$this->drawMap();
 		}
 	}
-	else {
-		$this->drawMap();
+	if (! array_key_exists('zoom', $f) && array_key_exists('extents', $f)) {
+		$this->extents = explode(",", $f['extents']);
 	}
   }
   function forward()
@@ -253,6 +253,17 @@ class selectWidget
   }
   function drawMap()
   {
+    $this->prepareMap();
+    $this->imgurl = $this->img->saveWebImage();
+  }
+  function directDrawMap()
+  {
+    $this->prepareMap();
+    header("Content-type: image/png");
+    $this->img->saveImage('');
+  }
+  function prepareMap()
+  {
     global $_DATABASES;
 	$this->map->setextent($this->extents[0], $this->extents[1], 
 							$this->extents[2], $this->extents[3]);
@@ -273,12 +284,11 @@ class selectWidget
     $states->set("status", MS_ON);
     
 
-    $img = $this->map->prepareImage();
-    $counties->draw($img);
-    $states->draw($img);
-    $sites->draw($img);
-    $this->map->drawLabelCache($img);
-    $this->imgurl = $img->saveWebImage();
+    $this->img = $this->map->prepareImage();
+    $counties->draw($this->img);
+    $states->draw($this->img);
+    $sites->draw($this->img);
+    $this->map->drawLabelCache($this->img);
 
     $this->extents = Array( $this->map->extent->minx, 
         $this->map->extent->miny, $this->map->extent->maxx,
@@ -300,6 +310,11 @@ class selectWidget
 	$s .= "<input type=\"hidden\" name=\"zoom\" value=\"0\">\n";
 	$s .= "<input type=\"hidden\" name=\"network\" value=\"". $this->network ."\">\n";
     $s .= "<input type=\"hidden\" name=\"extents\" value=\"". $this->extents[0] .", ". $this->extents[1] .", ".$this->extents[2] .", ".$this->extents[3] ."\">\n";
+
+   $imgurl = sprintf("%s/GIS/netselect.php?network=%s&extents=%s,%s,%s,%s",
+             $rooturl, $this->network, $this->extents[0], $this->extents[1],
+             $this->extents[2], $this->extents[3]);
+
     $s .= "<script Language=\"JavaScript\">
  function resetButtons(){
    document.panButton.src = '$rooturl/images/button_pan_off.png';
@@ -319,7 +334,7 @@ class selectWidget
 <img src=\"$rooturl/images/button_query_on.png\" name=\"queryButton\" alt=\"Select\" onClick=\"javascript: resetButtons(); document.queryButton.src = '$rooturl/images/button_query_on.png'; document.selectwidget.zoom.value = 0;\"><br />
 <img src=\"$rooturl/images/button_zoomfull_off.png\" name=\"zoomfullButton\" alt=\"Zoom Full\" onClick=\"javascript: resetButtons(); document.zoomfullButton.src = '$rooturl/images/button_zoomfull_on.png'; document.selectwidget.zoom.value = 100; document.selectwidget.submit(); \"><br />
 </div>";
-	$s .= "<div style=\"background: #cc0; float: left; padding: 3px;\"><input type=\"image\" name=\"map\" src=\"". $this->imgurl ."\" border=0></div>";
+	$s .= "<div style=\"background: #cc0; float: left; padding: 3px;\"><input type=\"image\" name=\"map\" src=\"". $imgurl ."\" border=0></div>";
     $s .= "</div></form>";
     return $s;
  }
