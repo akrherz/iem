@@ -5,6 +5,9 @@ include("../../../config/settings.inc.php");
 
 include ("$rootpath/include/all_locs.php");
 include("$rootpath/include/database.inc.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_led.php");
 
 $station = isset($_GET["station"]) ? $_GET["station"] : "DSM";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
@@ -28,6 +31,12 @@ $query = "SELECT to_char(valid, 'HH24:MI') as tvalid, precip, pres1 from
 $result = pg_exec($connection, $query);
 
 pg_close($connection);
+
+if (pg_num_rows($result) == 0){
+ $led = new DigitalLED74();
+ $led->StrokeNumber('NO DATA FOR THIS DATE',LEDC_GREEN);
+ die();
+}
 
 
 $prec = array();
@@ -106,8 +115,6 @@ for ($j=0; $j<24; $j++){
   $xlabel[$j*60] = $xpre[$j];
 }
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
