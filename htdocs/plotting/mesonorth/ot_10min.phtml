@@ -5,15 +5,11 @@ $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
 $ts = mktime(0,0,0,$month, $day, $year);
+$THISPAGE = "networks-other";
 include("$rootpath/include/header.php"); ?>
 <?php include("$rootpath/include/forms.php"); ?>
 
 <div class="text">
-<a href="<?php echo $rooturl; ?>/other/">Other Networks</a> &nbsp;<b> > </b> &nbsp; Cluster Room
-
-<?php
-  $station = "mesonorth";
-?>
 
 <p>The IEM server resides in a room that is climate controlled by a 
 dedicated heat exchanger.  This page presents daily plots of logged 
@@ -31,65 +27,35 @@ of the room to the heat exchanger.</li>
 
 <br>Note that the archive begins 24 Jul 2003.</p>
 
-<table>
-<tr class="even"><td>
-
-
   <form method="GET" action="ot_10min.phtml">
-  <?php
+  <?php 
+echo yearSelect2(2003, $year, "year");
+echo monthSelect($month, "month");
+echo daySelect($day, "day");
 
-    if (strlen($month) == 0 ){
-	$month = date("m");
-    }
-    if (strlen($day) == 0 ){
-        $day = date("d");
-    }
-    if (strlen($year) == 0 ){
-        $year = date("Y");
-    }
+$url = sprintf("1min_ot.php?year=%s&month=%s&day=%s", date("Y", $ts), 
+       date("m", $ts), date("d", $ts) );
+$n = sprintf("ot_10min.phtml?year=%s&month=%s&day=%s", date("Y", $ts +86400), 
+       date("m", $ts + 86400), date("d", $ts + 86400) );
+$p = sprintf("ot_10min.phtml?year=%s&month=%s&day=%s", date("Y", $ts - 86400), 
+       date("m", $ts - 86400), date("d", $ts - 86400) );
 
-  ?>
-  <?php echo yearSelect2(2003, $year, "year"); ?>
-
-  <select name="month">
-    <option value="01" <?php if ($month == "01") echo "SELECTED"; ?> >January
-    <option value="02" <?php if ($month == "02") echo "SELECTED"; ?> >February
-    <option value="03" <?php if ($month == "03") echo "SELECTED"; ?> >March
-    <option value="04" <?php if ($month == "04") echo "SELECTED"; ?> >April
-    <option value="05" <?php if ($month == "05") echo "SELECTED"; ?> >May
-    <option value="06" <?php if ($month == "06") echo "SELECTED"; ?> >June
-    <option value="07" <?php if ($month == "07") echo "SELECTED"; ?> >July
-    <option value="08" <?php if ($month == "08") echo "SELECTED"; ?> >August
-    <option value="09" <?php if ($month == "09") echo "SELECTED"; ?> >September
-    <option value="10" <?php if ($month == "10") echo "SELECTED"; ?> >October
-    <option value="11" <?php if ($month == "11") echo "SELECTED"; ?> >November
-    <option value="12" <?php if ($month == "12") echo "SELECTED"; ?> >December
-  </select>
-
-  <select name="day">
-<?php
-  for ($k=1;$k<32;$k++){
-   echo "<option value=\"".$k."\" ";
-   if ($k == (int)$day){
-     echo "SELECTED";
-   }
-   echo ">".$k."\n";
-  }
 ?>
-  </select>
-
   <input type="submit" value="Make Plot"></form>
-
-</td></tr><tr><td>
+<?php
+if ($ts >  mktime(0,0,0,7,24,2003)){ ?>
+<p><a href="<?php echo $p; ?>">View Previous Day</a> 
+<?php } if ($ts < time()) { ?>
+&nbsp; &nbsp; <a href="<?php echo $n; ?>">View Next Day</a> 
+<?php } ?>
 
 <BR>
-<img src="1min_ot.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
+  <img src="<?php echo $url; ?>" ALT="Time Series">
 <BR>
 <?php if ($ts < mktime(0,0,0,7,9,2006)) { ?>
-  <img src="battery.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
+  <img src="battery.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
 <?php } ?>
 <BR>
-</td></tr></table>
 
 <p>
 <strong>Interesting Data Traces</strong>
