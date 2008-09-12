@@ -1,5 +1,9 @@
 <?php
 include("../../../config/settings.inc.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("$rootpath/include/jpgraph/jpgraph_led.php");
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
@@ -10,7 +14,16 @@ $myTime = mktime(0,0,0,$month,$day,$year);
 $titleDate = strftime("%b %d, %Y", $myTime);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
-$fcontents = file("/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0003.dat");
+
+$fp = "/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0003.dat";
+if (! file_exists($fp))
+{
+ $led = new DigitalLED74();
+ $led->StrokeNumber('NO DATA FOR THIS DATE',LEDC_GREEN);
+ die();
+
+}
+$fcontents = file($fp);
 
 $oldformat = 1;
 if ($myTime >= mktime(0,0,0,8,12,2005))
@@ -53,9 +66,6 @@ while (list ($line_num, $line) = each ($new_contents)) {
 } // End of while
 
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
