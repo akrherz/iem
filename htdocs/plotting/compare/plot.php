@@ -61,7 +61,8 @@ $titles = Array(
  "dwpf" => "Dew Point [F]",
  "sknt" => "Wind Speed [knots]",
  "alti" => "Altimeter [inches]",
- "drct" => "Wind Direction"
+ "drct" => "Wind Direction",
+ "phour" => "Hourly Precip [inch]",
 );
 $graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->SetTitleMargin(70);
