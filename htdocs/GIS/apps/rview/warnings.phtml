@@ -89,6 +89,7 @@ if ($isarchive && $basets < $wfo_filter_ts)
 }
 
 include("$rootpath/include/wfoLocs.php");
+$wfos["NHC"] = Array("lat" => 25.75 , "lon" => -80.38 , "city" => "National Hurricane Center");
 include("$rootpath/include/forms.php");
 include('lib.php');
 $uri = "$baseuri?frames=$frames&interval=$interval&site=$site&cu=$cu&archive=$archive&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom&warngeo=$warngeo";
