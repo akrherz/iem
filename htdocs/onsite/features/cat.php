@@ -47,7 +47,7 @@ $big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.gif", $row["
   echo "<h3>". $row["title"] ."</h3>\n";
   echo "<font size='-1' style='color:black'>". $row["webdate"] ."</font>\n";
   echo "<br><div class='story'>". $row["story"] ;
-  if (intval($row["good"]) > 0 || intval($row["bad"]) > 0)
+  if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 0))
   {
     echo "<br /><br /><b>Voting:</b><br />Good = ". $row["good"] ." <br />Bad = ". $row["bad"] ;
   }
