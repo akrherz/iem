@@ -180,4 +180,8 @@ $cameras = Array(
 "KCCI-013" => Array("sts" => mktime(17,0,0,5, 14,2004), "ets" => time(),
     "name" => "Winterset", "removed" => False, "active" => True, "lat" => 41.33, "lon" => -94.01,
     "state" => "IA", "network" => "KCCI",
-    "ip" => "12.216.174.246", "county" => "Madison", "port" => "80"),); ?>
+    "ip" => "12.216.174.246", "county" => "Madison", "port" => "80"),
+"KCCI-032" => Array("sts" => mktime(14,0,0,9, 16,2008), "ets" => time(),
+    "name" => "Woodward", "removed" => False, "active" => True, "lat" => 41.86, "lon" => -93.92,
+    "state" => "IA", "network" => "KCCI",
+    "ip" => "216.248.110.33", "county" => "Polk", "port" => "80"),); ?>
