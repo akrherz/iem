@@ -178,7 +178,7 @@ $cameras = Array(
     "state" => "IA", "network" => "KCCI",
     "ip" => "216.51.195.93", "county" => "Hamilton", "port" => "80"),
 "KCRG-009" => Array("sts" => mktime(13,0,0,9, 17,2008), "ets" => time(),
-    "name" => "Williamsburg", "removed" => False, "active" => True, "lat" => 41.6689, "lon" => -92.70073,
+    "name" => "Williamsburg", "removed" => False, "active" => True, "lat" => 41.6689, "lon" => -92.0,
     "state" => "IA", "network" => "KCRG",
     "ip" => "71.7.47.129", "county" => "Iowa", "port" => "65312"),
 "KCCI-013" => Array("sts" => mktime(17,0,0,5, 14,2004), "ets" => time(),
