@@ -100,8 +100,7 @@ if (strlen($loop) > 0){
   $urls = Array();
 
   for ($i=0;$i<9;$i++){
-   echo $i;
-   $imgi = 8 - $i;
+   $imgi = $i;
    $radValid = $radTimes[$i];
    $urls[$i] = drawRADAR($site, $imgi, $extents, $projs, $radValid, $fips);
   }
