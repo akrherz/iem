@@ -81,13 +81,16 @@ is purely educational.  Errors can and do occur.
 echo "<p><b>NEXRAD Site:</b> ". $wfos[$site] ." (".$site.")</p>\n";
 
 $radTimes = Array();
+$r2d2= Array();
 //$fcontents = file('/mesonet/data/gis/images/unproj/'.$site.'/'.$site.'.log');
 //while (list ($line_num, $line) = each ($fcontents)) {
 //  $radTimes[$line_num] = substr($line,0,12);
 //}
 for($l=0;$l<10;$l++)
 {
-  $radTimes[] = filemtime("/home/ldm/data/gis/images/4326/$site/n0r_$l.tif");
+  $ts = filemtime("/home/ldm/data/gis/images/4326/$site/n0r_$l.tif");
+  $radTimes[] = $ts;
+  $r2d2[] = date("h:i a", $ts);
 }
 
 //$lastT = $radTimes[8];
@@ -108,7 +111,8 @@ if (strlen($loop) > 0){
   //echo "<br><b>Last Image Valid at:</b> ". $radTS;
   include ("loop.php");
   $urls = array_reverse($urls);
-  printHTML($urls, $radTimes);
+  $r2d2 = array_reverse($r2d2);
+  printHTML($urls, $r2d2);
 } else {
   $radValid = $radTimes[8];
   $imgi = 0;
