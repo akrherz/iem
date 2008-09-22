@@ -107,7 +107,7 @@ if (strlen($loop) > 0){
 
   //echo "<br><b>Last Image Valid at:</b> ". $radTS;
   include ("loop.php");
-  //array_reverse($urls);
+  $urls = array_reverse($urls);
   printHTML($urls, $radTimes);
 } else {
   $radValid = $radTimes[8];
