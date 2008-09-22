@@ -371,10 +371,9 @@ WIDTH=35 HEIGHT=35 SRC="http://www.pals.iastate.edu/icons/pls_button.gif" ALT="+
 
 </tr>
 
-<!--
 <tr>
-  <td colspan=2><form name="form">RADAR Valid @ <input size="40" type="text" name="radtime" value="-" onFocus="this.select()"></input> </form></td>
-</tr> -->
+  <td colspan=2><form name="form">RADAR Valid @ <input size="1" type="text" name="radtime" value="-" onFocus="this.select()"></input> </form></td>
+</tr>
 </table>
 
 <?php
