@@ -11,10 +11,10 @@ $tstr = isset($_GET["tstr"]) ? $_GET['tstr']: "50,45,40,35,32,28,23";
 $conn = iemdb("isuag");
 $rs = pg_prepare($conn, "spring", "SELECT extract(year from valid) as yr,
       max(extract(doy from valid)) as v from daily WHERE station = $1 and c30 < $2 and 
-      extract(month from valid) < 7 GROUP by yr");
+      extract(month from valid) < 7 and c30_f != 'e' GROUP by yr");
 $rs = pg_prepare($conn, "fall", "SELECT extract(year from valid) as yr,
       min(extract(doy from valid)) as v from daily WHERE station = $1 and c30 < $2 and
-      extract(month from valid) > 6 GROUP by yr");
+      extract(month from valid) > 6 and c30_f != 'e' GROUP by yr");
 
 $thresholds = explode(",",$tstr);
 $tblrows = Array();
