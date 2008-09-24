@@ -44,11 +44,12 @@
 </tr>
 <tr>
   <td class="heading">
-     <b>Historical Plotting:</b></td></tr>
+     <b>Climatologies:</b></td></tr>
 <tr>
   <td>
 <div style="padding: 5px;">
     <a href="/plotting/agc/">Interactive Plotting</a><br>
+    <a href="soilt-prob.php">4in Soil Temperatures</a><br>
     <A HREF="<?php echo $rooturl; ?>/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a><br>
 </div>
   </td>
