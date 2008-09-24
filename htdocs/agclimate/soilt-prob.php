@@ -2,6 +2,7 @@
 /* Create a table of soil temperature probabilities based on obs? */
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+$THISPAGE="networks-agclimate";
 include("$rootpath/include/header.php");
 include("$rootpath/include/imagemaps.php");
 
@@ -88,6 +89,7 @@ $fall .= "</table>";
 <p>This application computes soil temperature exceedance based on the
 observation record of a ISU Ag Climate site.  The average daily 4 inch
 soil temperature is used in this calculation.
+ <i>The values express the percentage of years that an observed temperature threshold was exceeded after the given date.</i>
 
 
 <form method="GET">
