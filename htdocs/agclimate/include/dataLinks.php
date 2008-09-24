@@ -6,6 +6,7 @@
      <b>Yesterday values:</b></td></tr>
 <tr>
   <td>
+<div style="padding: 5px;">
   <A HREF="display.php?prod=1">Max/Min Air Temps</A><br>
   <A HREF="display.php?prod=2">Avg 4in Soil Temps</A><br>
   <A HREF="display.php?prod=3">Max/Min 4in Soil Temps</A><br>
@@ -15,6 +16,7 @@
   <A HREF="display.php?prod=7">Peak Wind Gust (5 sec)</A><br>
   <A HREF="display.php?prod=8">Average Wind Speed</A><br>
   <A HREF="display.php?prod=9">Max/Min Dew Points</A><br>
+</div>
   </td>
 </tr>
 
@@ -23,37 +25,44 @@
      <b>Accumulated values:</b></td></tr>
 <tr>
   <td>
+<div style="padding: 5px;">
       <A HREF="display.php?prod=10">This month evapotranspiration</A><br>
       <A HREF="display.php?prod=11">This month rainfall</A><br>
       <A HREF="display.php?prod=12">Standard Chill Units since 1 Sept</A><br>
+</div>
   </td>
 </tr>
 
 <tr>
   <td class="heading">
-     <b>Growing Season:</b></font></td></tr>
-<tr>
-  <td><a href="<?php echo $rooturl; ?>/GIS/apps/agclimate/gsplot.phtml">Interactive
-GS Plotter</a><br>
+     <b>Growing Season:</b></td></tr>
+<tr><td>
+<div style="padding: 5px;">
+  <a href="<?php echo $rooturl; ?>/GIS/apps/agclimate/gsplot.phtml">Interactive GS Plotter</a><br>
+</div>
   </td>
 </tr>
 <tr>
   <td class="heading">
-     <b>Historical Plotting:</b></font></td></tr>
+     <b>Historical Plotting:</b></td></tr>
 <tr>
   <td>
+<div style="padding: 5px;">
     <a href="/plotting/agc/">Interactive Plotting</a><br>
     <A HREF="<?php echo $rooturl; ?>/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a><br>
+</div>
   </td>
 </tr>
 
 <tr>
   <td class="heading">
-     <b>Data Request:</b></font></td></tr>
+     <b>Data Request:</b></td></tr>
 <tr>
   <td>
+<div style="padding: 5px;">
    <A HREF="<?php echo $rooturl; ?>/agclimate/hist/hourlyRequest.php">Request Hourly Data</A><br>
    <A HREF="<?php echo $rooturl; ?>/agclimate/hist/dailyRequest.php">Request Daily Data</A><br>
+</div>
   </td>
 </tr>
 
