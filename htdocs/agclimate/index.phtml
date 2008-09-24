@@ -9,27 +9,30 @@
 <table width="100%">
 <TR>
 <TD valign="top">
-	<CENTER><img src="images/agclimate.jpg" ALT="ISU Ag Climate"><BR></CENTER>
 
-<p><h3 class="subtitle">Information:</h3>
-<br /><a href="<?php echo $rooturl; ?>/info/network.phtml?network=ISUAG">Location</a> of observing stations in Iowa.
-<br /><a href="<?php echo $rooturl; ?>/agclimate/info.phtml">Information</a> about network stations.
-<br /><a href="http://www.hprcc.unl.edu/awdn/et/">Information on PET</a> calculations done by the High Plains Climate Center.
+<img src="images/agclimate.jpg" ALT="ISU Ag Climate">
 
+<p>The Iowa State University "Ag Climate" network is one of the nation's 
+oldest automated weather observation networks with data dating back to 1986.
+This network of stations, located at <a href="http://www.ag.iastate.edu/farms/">ISU Research Farms</a>, is polled once per 
+day by the <a href="http://www.hprcc.unl.edu/">High Plains Climate Center</a>,
+who then sends the data to us.  Data for the previous day is available by
+7 AM of the next day.
 
-<p><h3 class="subtitle">News:</h3> 
+<p style="border: 1px #000 solid; padding: 5px;"><strong>Quick Download Links:</strong> &nbsp; &nbsp; <a href="hourlyRequest.php">Hourly Data</a> &nbsp; &nbsp; <a href="dailyRequest.php">Daily Summary Data</a></p>
 
-<p><b>9 Jan 2007:</b> You should not use the rainfall data from this 
-network.  For yet to be determined reasons, sites in this network seem
-to greatly undercatch / underreport actual rainfall.
+<h3 class="subtitle">Information:</h3>
+<ul>
+<li><a href="<?php echo $rooturl; ?>/info/network.phtml?network=ISUAG">Location</a> of observing stations in Iowa.</li>
+<li><a href="<?php echo $rooturl; ?>/agclimate/info.phtml">Information</a> about network stations.</li>
+<li><a href="http://www.hprcc.unl.edu/awdn/et/">Information on PET</a> calculations done by the High Plains Climate Center.</li>
+</ul>
 
-<BR><BR>
-
-
-<h3 class="subtitle">Disclaimer:</h3>
-<P class="intro"> Any precipation data taken during the cold season is incorrect.  
-Please read <A HREF="/agclimate/hist/prec_winter.html">this disclaimer</A>.</p>
-
+<h3 class="subtitle">Rainfall Disclaimer:</h3>
+<p>The Ag Climate network uses a non-heated tipping bucket rain gage and is
+unable to measure snowfall. If you are interested in higher quality 
+precipitation data, check out the <a href="../COOP/">NWS COOP</a> network
+of human observations.
 
 </TD>
 <TD valign="TOP" width="250">
