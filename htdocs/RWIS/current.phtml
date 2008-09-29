@@ -10,10 +10,6 @@ function new_window(url) {
  link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
 } 
 //END Script-->
-</script>
-<script type="text/javascript" src="/js/tableruler.js"></script>
-<script type="text/javascript">
-    window.onload=function(){tableruler();}
 </script>';
  $THISPAGE = "current-sort";
  include("$rootpath/include/header.php"); ?>
@@ -36,12 +32,10 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "ts" => "Observation Time [local]", "feel" => "Feels Like", "peak" =>"Wind Gust",
   "min_tmpf" => "Today's Low Temperature", "peak_ts" => "Time of Wind Gust",
   "max_tmpf" => "Today's High Temperature", "sname" => "Station Name",
-  "sid" => "Station ID", "relh" => "Relative Humidity");
+  "sid" => "Station ID", "relh" => "Relative Humidity", "vsby" => "Visibility");
 
 ?>
 
-<div class="text">
-<b>Nav:</b><a href="<?php echo $rooturl; ?>/RWIS/">RWIS</a> <b> > </b> Current Conditions
 <?php $current_network = "RWIS"; include("$rootpath/include/current_bar.inc.php"); ?>
 <form method="GET" action="current.phtml">
 <select name="network">
@@ -58,9 +52,7 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   <option value="WY_RWIS" <?php if ($network == "WY_RWIS") echo "SELECTED"; ?>>Wyoming
 </select>
 <input type="submit" value="Show State">
-</form><p>
-
-<h3 class="subtitle"><center>Current RWIS Conditions</center></h3><p>
+</form>
 
 <?php
 echo "Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
@@ -68,32 +60,34 @@ a column to sort it.<br>\n";
 ?>
 
 <form method="GET" action="/my/current.phtml">
-<table style="width: 100%; font-size: 10pt;" class="ruler">
+<table style="width: 100%; font-size: 10pt;" border="0" cellpadding="1" cellspacing="0">
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
-  <th rowspan="2"><a href="current.php?network=<?php echo $network; ?>&sortcol=sname">Station:</a></th>
-  <th rowspan="2"><a href="current.php?sortcol=ts">Ob Time</a></th>
+  <th rowspan="2"><a href="current.phtml?network=<?php echo $network; ?>&sortcol=sname">Station:</a></th>
+  <th rowspan="2"><a href="current.phtml?sortcol=ts">Ob Time</a></th>
   <th colspan="3" bgcolor="#acdcda">Temps &deg;F</th>
   <th>&nbsp;</th>
+  <th>&nbsp;</th>
   <th colspan="3" bgcolor="#EEEEEE">Wind [knots]</th>
-  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=pday">Precip</a></th>
+  <th><a href="current.phtml?network=<?php echo $network; ?>&sortcol=pday">Precip</a></th>
 </tr>
 <tr>
   
   <th>
-   <a href="current.php?network=<?php echo $network; ?>&sortcol=tmpf">Air</a>
-   (<a href="current.php?network=<?php echo $network; ?>&sortcol=max_tmpf">Hi</a> /
-   <a href="current.php?network=<?php echo $network; ?>&sortcol=min_tmpf">Lo</a>)
+   <a href="current.phtml?network=<?php echo $network; ?>&sortcol=tmpf">Air</a>
+   (<a href="current.phtml?network=<?php echo $network; ?>&sortcol=max_tmpf">Hi</a> /
+   <a href="current.phtml?network=<?php echo $network; ?>&sortcol=min_tmpf">Lo</a>)
 </th>
-  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=dwpf">DewP</a></th>
-  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=feel">Feels</a></th>
-  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=relh">RH%</a></th>
-  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=sknt">Speed</a></th>
-  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=drct">Direction</a></th>
-  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=peak">Gust</a>
-    @<a href="current.php?network=<?php echo $network; ?>&sortcol=peak_ts">Time</a></th>
-  <th><a href="current.php?network=<?php echo $network; ?>&sortcol=pday">Accum</a> [1]</th>
+  <th><a href="current.phtml?network=<?php echo $network; ?>&sortcol=dwpf">DewP</a></th>
+  <th><a href="current.phtml?network=<?php echo $network; ?>&sortcol=feel">Feels</a></th>
+  <th><a href="current.phtml?network=<?php echo $network; ?>&sortcol=relh">RH%</a></th>
+  <th><a href="current.phtml?network=<?php echo $network; ?>&sortcol=vsby">Vis</a></th>
+  <th><a href="current.phtml?network=<?php echo $network; ?>&sortcol=sknt">Speed</a></th>
+  <th><a href="current.phtml?network=<?php echo $network; ?>&sortcol=drct">Direction</a></th>
+  <th><a href="current.phtml?network=<?php echo $network; ?>&sortcol=peak">Gust</a>
+    @<a href="current.phtml?network=<?php echo $network; ?>&sortcol=peak_ts">Time</a></th>
+  <th><a href="current.phtml?network=<?php echo $network; ?>&sortcol=pday">Accum</a> [1]</th>
 </tr></thead>
 <tbody>
 <?php
@@ -113,11 +107,26 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
   while (list($key, $iemob) = each($rwis) ){
     $mydata[$key] = $iemob->db;
     $mydata[$key]["ts"] = $iemob->ts;
-    $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
        f2c($mydata[$key]["dwpf"]) );
     $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
-       $mydata[$key]["relh"], $mydata[$key]["sped"]);
+       $mydata[$key]["relh"], $mydata[$key]["sknt"] * 1.15078);
+    if ($mydata[$key]["dwpf"] > $mydata[$key]["tmpf"]){
+       $mydata[$key]["feel"] = "";
+       $mydata[$key]["dwpf"] = "";
+    }
+    if ($mydata[$key]["relh"] > 100){ 
+       $mydata[$key]["feel"] = "";
+       $mydata[$key]["dwpf"] = "";
+       $mydata[$key]["relh"] = "";
+    }
+    if ($mydata[$key]["tmpf"] > 120){ 
+       $mydata[$key]["feel"] = "";
+       $mydata[$key]["dwpf"] = "";
+       $mydata[$key]["relh"] = "";
+       $mydata[$key]["tmpf"] = "";
+    }
+    if ($mydata[$key]["vsby"] < 0){ $mydata[$key]["vsby"] = -1; }
      $mydata[$key]["peak_ts"] = 0;
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
@@ -180,6 +189,7 @@ $skippedStations = Array();
  <td>". round($parts["dwpf"],0) ."</td>
  <td>". round($parts["feel"],0) ."</td>
  <td>". $parts["relh"] ."</td>
+ <td>". round($parts["vsby"],1) ."</td>
  <td>". round($parts["sknt"],0) ;
   if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
               echo "G". round($parts["gust"],0);
@@ -206,9 +216,8 @@ while (list ($key, $val) = each ($skippedStations) ) {
                value=\"".$key."\"></td>";
   echo "<td>". $parts["sname"] . "</td><td ";
   echo 'bgcolor="red"';
-  $format = "%b-%d-%y %I:%M %p";
-  echo ">". strftime($format, $parts["ts"]) ."</td>
-  <th align='center' colspan='8'>Site Offline</th></tr>\n";
+  $format = "%b-%d-%y";
+  echo ">". strftime($format, $parts["ts"]) ."</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
 }
 
 ?>
@@ -222,6 +231,7 @@ while (list ($key, $val) = each ($skippedStations) ) {
      <a href="<?php echo $c; ?>min_tmpf');">Plot</a>)</td>
  <td><a href="<?php echo $c; ?>dwpf');">Plot</a></td>
  <td><a href="<?php echo $c; ?>feel');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>vsby');">Plot</a></td>
  <td><a href="<?php echo $c; ?>relh');">Plot</a></td>
  <td colspan=2><a href="<?php echo $c; ?>barb');">Plot</a></td>
  <td><a href="<?php echo $c; ?>max_sknt');">Plot</a></td>
@@ -234,17 +244,13 @@ while (list ($key, $val) = each ($skippedStations) ) {
 
 </form>
 
-
 <br><br>
 
 <b>Notes:</b><br>
-<b>1</b> Not all sites have the ability to measure precip (-1).  Values are in
-inches.<br>
+<b>1</b> Not all sites have the ability to measure precip nor visibility.<br>
 <b>2</b> The Iowa City (I-80) RWIS site does not have atmospheric sensors on it
 , so it is not included on this page.<br>
-<b>3</b> Stations with data over 5 days old is not included on this page.
 
 
-<br><br></div>
 
 <?php include("$rootpath/include/footer.php"); ?>
