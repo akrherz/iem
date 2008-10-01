@@ -80,8 +80,8 @@ $s .= "</table>";
 
 if (getenv("REMOTE_ADDR") == "12.217.178.106" )
 {
- $s = "<img src=\"images/cardinals.gif\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 158 weeks now!!!!  One week at a time.......... sweet smokey!  hehe.  Time keeps flying right on by.  I am very proud of smokey and how hard she works at her job.  I am excited to see you this weekend.  I love you very much. <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+ $s = "<img src=\"images/i3.jpg\" style=\"float: left; margin: 5px;\">
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 159 weeks now!!!! My goodness, another big prime number.  This is smokey birthday month, fancy!  Smokey also legal to drive now, darly look forward to seeing smokey pretty picture on her license.  I love you very much. <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 }
