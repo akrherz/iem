@@ -7,16 +7,17 @@ $s_hour = isset($_GET["s_hour"])? $_GET["s_hour"]: die("No s_hour");
 $e_hour = isset($_GET["e_hour"])? $_GET["e_hour"]: die("No e_hour");
 $s_day = isset($_GET["s_day"])? $_GET["s_day"]: die("No s_day");
 $e_day = isset($_GET["e_day"])? $_GET["e_day"]: die("No e_day");
-$month = isset($_GET["month"])? $_GET["month"]: die("No month");
+$month1 = isset($_GET["month1"])? $_GET["month1"]: die("No month1");
+$month2 = isset($_GET["month2"])? $_GET["month2"]: die("No month2");
 $year = isset($_GET["year"])? $_GET["year"]: die("No year");
 $vars = isset($_GET["vars"])? $_GET["vars"]: die("No vars");
 $sample = isset($_GET["sample"])? $_GET["sample"]: die("No Sample");
 $dl_option = isset($_GET["dl_option"])? $_GET["dl_option"]: die("No dl_option");
 $delim = isset($_GET["delim"]) ? $_GET["delim"]: die("No delim");
 
-$ts1 = mktime($s_hour, 0, 0, $month, $s_day, $year) or 
+$ts1 = mktime($s_hour, 0, 0, $month1, $s_day, $year) or 
   die("Invalid Date Format");
-$ts2 = mktime($e_hour, 0, 0, $month, $e_day, $year) or
+$ts2 = mktime($e_hour, 0, 0, $month2, $e_day, $year) or
   die("Invalid Date Format");
 
 if ($ts1 >= $ts2){
@@ -37,7 +38,7 @@ for ($i=0; $i< $num_vars;$i++){
 
 $sqlTS1 = strftime("%Y-%m-%d %H:%M", $ts1);
 $sqlTS2 = strftime("%Y-%m-%d %H:%M", $ts2);
-$table = strftime("t%Y_%m", $ts1);
+$table = strftime("t%Y", $ts1);
 $nicedate = strftime("%Y-%m-%d", $ts1);
 
 $sampleStr = Array("1min" => "1",

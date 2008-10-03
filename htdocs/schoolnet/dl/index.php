@@ -1,10 +1,10 @@
 <?php 
 include("../../../config/settings.inc.php");
 $TITLE = "IEM | School Network | Download";
-include("$rootpath/include/header.php"); ?>
-<?php include("$rootpath/include/forms.php"); ?>
-<?php include("$rootpath/include/imagemaps.php"); ?>
-
+include("$rootpath/include/header.php");
+include("$rootpath/include/forms.php");
+ include("$rootpath/include/imagemaps.php"); 
+?>
 
 <h3 class="heading">SchoolNet Data Download</h3>
 
@@ -69,21 +69,8 @@ recent data is from yesterday.</p>
       <th rowspan=2>
 <?php echo yearSelect(2002, "year"); ?>
       </th>
-      <td rowspan=2>
-<select name="month">
-  <option value="1">January
-  <option value="2">February
-  <option value="3">March
-  <option value="4">April
-  <option value="5">May
-  <option value="6">June
-  <option value="7">July
-  <option value="8">August
-  <option value="9">September
-  <option value="10">October
-  <option value="11">November
-  <option value="12">December
-</select>
+      <td>
+<?php echo monthSelect(date("m"), "month1"); ?>
       </td>
       <td>
 <select name="s_day">
@@ -126,6 +113,9 @@ recent data is from yesterday.</p>
      </tr>
      <tr>
       <th class="subtitle">End:</th>
+<td>
+<?php echo monthSelect(date("m"), "month2"); ?>
+</td>
       <td>
 <select name="e_day">
 <?php
