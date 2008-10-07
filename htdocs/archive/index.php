@@ -80,6 +80,8 @@ then, only base reflectivity was saved.</li>
 
  <li><a href="http://lead.unidata.ucar.edu:8080/thredds/catalog.html">Unidata IDD 6 month archive</a>
   <br />Archive of raw data provided by Unidata for the past 6 months!</li>
+ <li><a href="http://nomads.ncdc.noaa.gov/data/">NCDC NOMADS Big Archive!!</a>
+  <br />Lots of raw model data and other goodies, a definite must-visit.</li>
 
 </ul>
 
