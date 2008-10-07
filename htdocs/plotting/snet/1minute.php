@@ -84,7 +84,10 @@ for($i=0;$row = @pg_fetch_array($rs,$i); $i++)
  
   $tmpf[] = $thisTmpf;
   $dwpf[] = $thisDwpf;
-  $sr[] = $thisSR;
+
+  if ($thisSR >= 0) $sr[] = $thisSR;
+  else $sr[] = "";
+
   if ($i % 10 == 0){
     $drct[] = $thisDRCT;
   }else{
