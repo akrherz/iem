@@ -1,6 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
-        $TITLE = "IEM | AWOS 1 Minute Data Download";
+$THISPAGE = "networks-awos";
+$TITLE = "IEM | AWOS 1 Minute Data Download";
 include("$rootpath/include/header.php"); 
 include_once("$rootpath/include/constants.php");
 $bogus = 0;
@@ -40,7 +41,9 @@ in this archive up until that point.</i><br>
 </div>
 
 <p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
-<i>(Times are in UTC)</i>
+<strong>Time Zone:</strong><input type="radio" value="UTC" name="tz" checked="checked"> UTC  
+<input type="radio" value="local" name="tz">Local CST/CDT
+
 <table>
   <tr>
     <td></td>
@@ -60,7 +63,7 @@ in this archive up until that point.</i><br>
      <?php daySelect2($bogus, "day1"); ?>
     </td>
     <td>
-     <?php gmtHourSelect($bogus, "hour1"); ?>
+     <?php echo hour24Select($bogus, "hour1"); ?>
     </td>
     <td>
      <?php echo minuteSelect($bogus, "minute1"); ?>
@@ -75,7 +78,7 @@ in this archive up until that point.</i><br>
      <?php daySelect2($bogus, "day2"); ?>
     </td>
     <td>
-     <?php gmtHourSelect($bogus, "hour2"); ?>
+     <?php echo hour24Select($bogus, "hour2"); ?>
     </td>
     <td>
      <?php echo minuteSelect($bogus, "minute2"); ?>
