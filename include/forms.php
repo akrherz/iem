@@ -63,6 +63,17 @@ function local5MinuteSelect($selected, $name){
   }
   echo "</select>\n";
 }
+function hour24Select($selected, $name){
+  $s = "<select name='".$name."'>\n";
+  for ($i=0; $i<24;$i++) {
+    $ts = mktime($i,0,0,1,1,0);
+    $s .= "<option value='".$i."' ";
+    if ($i == intval($selected)) echo "SELECTED";
+    $s .= ">". $i ."</option>";
+  } 
+  $s .= "</select>\n";
+  return $s;
+} 
 
 function hourSelect($selected, $name){
   echo "<select name='".$name."'>\n";
