@@ -68,7 +68,7 @@ function hour24Select($selected, $name){
   for ($i=0; $i<24;$i++) {
     $ts = mktime($i,0,0,1,1,0);
     $s .= "<option value='".$i."' ";
-    if ($i == intval($selected)) echo "SELECTED";
+    if ($i == intval($selected)) $s .= "SELECTED";
     $s .= ">". $i ."</option>";
   } 
   $s .= "</select>\n";
