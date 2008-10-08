@@ -30,6 +30,7 @@ $gis = isset($_GET["gis"]) ? $_GET["gis"]: 'no';
 $delim = isset($_GET["delim"]) ? $_GET["delim"]: ",";
 $sample = isset($_GET["sample"]) ? $_GET["sample"]: "1min";
 $what = isset($_GET["what"]) ? $_GET["what"]: 'dl';
+$tz = isset($_GET["tz"]) ? $_GET["tz"]: 'UTC';
 
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
@@ -131,16 +132,21 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 if ($what != "plot"){
  $connection = iemdb("awos");
 
+$tzn = "local";
+if ($tz == "UTC")
+{
+ $tzn = "UTC";
  $query1 = "SET TIME ZONE 'GMT'";
-
  $result = pg_exec($connection, $query1);
+}
+
  $rs =  pg_exec($connection, $sqlStr);
 
  pg_close($connection);
   if ($gis == "yes"){
-    echo "station,station_name,lat,lon,valid(GMT),";
+    echo "station,station_name,lat,lon,valid($tzn),";
   } else {
-    echo "station,station_name,valid(GMT),";
+    echo "station,station_name,valid($tzn),";
   }
   for ($j=0; $j < $num_vars;$j++){
     echo $vars[$j]. $d[$delim];
