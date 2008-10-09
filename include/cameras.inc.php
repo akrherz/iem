@@ -1,6 +1,5 @@
 <?php
 $cameras = Array(
-
 "KCCI-024" => Array("sts" => mktime(14,0,0,7, 11,2006), "ets" => time(),
     "name" => "Algona", "removed" => False, "active" => True, "lat" => 43.06895, "lon" => -94.237418,
     "state" => "IA", "network" => "KCCI",
@@ -157,6 +156,10 @@ $cameras = Array(
     "name" => "Tama", "removed" => False, "active" => True, "lat" => 41.99262, "lon" => -92.6465,
     "state" => "IA", "network" => "KCCI",
     "ip" => "169.203.116.12", "county" => "Tama", "port" => "80"),
+"KCRG-010" => Array("sts" => mktime(12,0,0,10, 9,2008), "ets" => time(),
+    "name" => "Tipton", "removed" => False, "active" => True, "lat" => 41.7723, "lon" => -92.1289,
+    "state" => "IA", "network" => "KCRG",
+    "ip" => "69.66.52.3", "county" => "Cedar", "port" => "65312"),
 "KCCI-030" => Array("sts" => mktime(11,0,0,9, 28,2007), "ets" => time(),
     "name" => "Twin Cedars", "removed" => False, "active" => True, "lat" => 41.2183, "lon" => -92.9268,
     "state" => "IA", "network" => "KCCI",
@@ -188,4 +191,5 @@ $cameras = Array(
 "KCCI-032" => Array("sts" => mktime(14,0,0,9, 16,2008), "ets" => time(),
     "name" => "Woodward", "removed" => False, "active" => True, "lat" => 41.86, "lon" => -93.92,
     "state" => "IA", "network" => "KCCI",
-    "ip" => "216.248.110.33", "county" => "Polk", "port" => "80"),); ?>
+    "ip" => "216.248.110.33", "county" => "Polk", "port" => "80"),
+); ?>
