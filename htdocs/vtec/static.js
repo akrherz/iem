@@ -1,7 +1,7 @@
 Ext.onReady(function(){
 
 function getVTEC(){
-  return "year=2008&wfo=JAX&phenomena=TO&eventid=0048&significance=W";
+  return "year="+ year_selector.getValue() +"&wfo="+ wfo_selector.getValue() +"&phenomena="+ phenomena_selector.getValue() +"&eventid="+ eventid_selector.getValue() +"&significance="+ sig_selector.getValue();
 };
 
     function myEventID(val, p, record){
@@ -211,6 +211,7 @@ var year_selector = new Ext.form.NumberField({
 var metastore = new Ext.data.Store({
     root:'meta',
     autoLoad:false,
+    id:'metastore',
     recordType: Ext.grid.PropertyRecord,
     proxy: new Ext.data.HttpProxy({
            url: 'json-meta.php',
@@ -223,11 +224,21 @@ var metastore = new Ext.data.Store({
             }, [
             {name: 'x0'},
             {name: 'x1'},
+            {name: 'y0'},
+            {name: 'y1'},
             {name: 'issued'}
             ])
 });
 metastore.on('load', function(){
-  Ext.getCmp('pgrid').setSource(metastore.getAt(0).data);  
+  if (metastore.getCount() == 0){
+    Ext.MessageBox.alert('Status', 'Event not found on server');
+    return;
+  }
+
+  Ext.getCmp('pgrid').setSource(metastore.getAt(0).data);
+  if (tabs.items.length == 1){ buildTabs(); }
+  loadTextTabs();
+  resetGmap();
 });
 
 
@@ -239,24 +250,21 @@ var propertyCM = new Ext.grid.PropertyColumnModel([
 var properties = new Ext.grid.PropertyGrid({
     title: 'Product Details',
     id: 'pgrid',
-    height: 100,
-    width: 190,
+    height: 200,
+    width: 200,
     cm: propertyCM,
     source: {},
     store: metastore
 });
 
-var mygpanel = new Ext.ux.GMapPanel({
-    gmapType: 'map',
-    title: 'Google Map',
-    zoomLevel: 14,
-    setCenter: {
-       geoCodeAddr: '4 Yawkey Way, Boston, MA, 02215-3409, USA',
-       marker: {title: 'Fenway Park'}
-    },
-    mapConfOpts: ['enableScrollWheelZoom','enableDoubleClickZoom','enableDragging'],
-    mapControls: ['GSmallMapControl','GMapTypeControl','NonExistantControl']
-});
+function resetGmap(){
+   var q = metastore.getAt(0);
+   var point = new GLatLng(q.data.y1,q.data.x1);
+   // Only works if the google panel has been loaded :(
+   if (Ext.getCmp('mygpanel').gmap){
+     Ext.getCmp('mygpanel').gmap.setCenter(point, 12);
+   }
+};
 
 var selectform = new Ext.FormPanel({
      frame: true,
@@ -266,7 +274,6 @@ var selectform = new Ext.FormPanel({
          text:'View Product',
          handler: function() {
            metastore.load( {params:getVTEC()} );
-           loadTextTabs();
            //var wfo = myform2.getForm().findField('wfo').getValue();
            //var afos = myform2.getForm().findField('afos').getValue();
           } // End of handler
@@ -274,6 +281,21 @@ var selectform = new Ext.FormPanel({
      items: [wfo_selector,phenomena_selector,sig_selector,eventid_selector,year_selector]
 });
 
+function loadVTEC(){
+
+  Ext.Ajax.request({
+     waitMsg: 'Loading...',
+     url : 'json-meta.php' , 
+     params:getVTEC(),
+     method: 'GET',
+     scope: this,
+     success: function ( result, request) { 
+        var jsonData = Ext.util.JSON.decode(result.responseText);
+        vtec.significance = jsonData.data[0].meta[0].significance;
+     }
+   });
+
+};
 
 
 function loadTextTabs(){
@@ -286,23 +308,23 @@ function loadTextTabs(){
      scope: this,
      success: function ( result, request) { 
         var jsonData = Ext.util.JSON.decode(result.responseText);
-        tabs = Ext.getCmp('texttabs');
-        tabs.items.each(function(c){tabs.remove(c);});
-        tabs.add({
+        ttabs = Ext.getCmp('texttabs');
+        ttabs.items.each(function(c){ttabs.remove(c);});
+        ttabs.add({
          title: 'Issuance',
           html: '<pre>'+ jsonData.data[0].report  +'</pre>',
           xtype: 'panel',
          autoScroll:true
         });
         for ( var i = 0; i < jsonData.data[0].svs.length; i++ ){
-            tabs.add({
+            ttabs.add({
               title: 'Update '+ (i+1),
               html: '<pre>'+ jsonData.data[0].svs[i]  +'</pre>',
              xtype: 'panel',
              autoScroll:true
             });
         }
-        tabs.activate(i);
+        ttabs.activate(i);
      }
    });
 
@@ -406,17 +428,33 @@ var tabs =  new Ext.TabPanel({
          enableTabScroll:true,
          defaults:{bodyStyle:'padding:5px'},
          items:[
-            {contentEl:'help', title: 'Help'},
-            mygpanel,
-            texttabs,
-            alllsrs,
-            lsrs,
-            sbwhist,
-            geo,
-            grid4
+            {contentEl:'help', title: 'Help'}
          ],
          activeTab:0
 });
+
+function buildTabs(){
+  tabs.add( new Ext.ux.GMapPanel({
+    gmapType: 'map',
+    title: 'Google Map',
+    id:'mygpanel',
+    zoomLevel: 14,
+    setCenter: {
+       lat: metastore.getAt(0).data.y1,
+       lng: metastore.getAt(0).data.x1,
+       zoomLevel: 9
+    },
+    mapConfOpts: ['enableScrollWheelZoom','enableDoubleClickZoom','enableDragging'],
+    mapControls: ['GSmallMapControl','GMapTypeControl','NonExistantControl']
+})
+);
+  tabs.add(texttabs);
+  tabs.add(alllsrs);
+  tabs.add(lsrs);
+  tabs.add(sbwhist);
+  tabs.add(geo);
+  tabs.add(grid4);
+};
 
 
 var viewport = new Ext.Viewport({
