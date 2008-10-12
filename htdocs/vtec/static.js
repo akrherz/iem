@@ -1,5 +1,17 @@
 Ext.onReady(function(){
 
+var tabPanel;
+/* Here are my Panels that appear in tabs */
+var helpPanel;
+var googlePanel;
+var textTabPanel;
+var lsrGridPanel;
+var allLsrGridPanel;
+var sbwPanel;
+var geoPanel;
+var eventsPanel;
+
+
 function getVTEC(){
   return "year="+ year_selector.getValue() +"&wfo="+ wfo_selector.getValue() +"&phenomena="+ phenomena_selector.getValue() +"&eventid="+ eventid_selector.getValue() +"&significance="+ sig_selector.getValue();
 };
@@ -232,21 +244,21 @@ var metastore = new Ext.data.Store({
 metastore.on('load', function(){
   if (metastore.getCount() == 0){
     Ext.MessageBox.alert('Status', 'Event not found on server');
-    tabs.activate(0);
-    tabs.items.each(function(c){
+    tabPanel.activate(0);
+    tabPanel.items.each(function(c){
          if (c.saveme){}
          else{ c.disable(); }
     });
-    Ext.getCmp('pgrid').setSource({});
+    //Ext.getCmp('pgrid').setSource({});
     return;
   }
-  tabs.items.each(function(c){c.enable();});
-  if (lsrs.isLoaded){ lsrs.getStore().load({params:getVTEC()}); }
-  if (alllsrs.isLoaded){ alllsrs.getStore().load({params:getVTEC()}); }
-
-  Ext.getCmp('pgrid').setSource(metastore.getAt(0).data);
-  if (tabs.items.length == 1){ buildTabs(); }
-  loadTextTabs();
+  tabPanel.items.each(function(c){c.enable();});
+  if (lsrGridPanel.isLoaded){ lsrGridPanel.getStore().load({params:getVTEC()}); }
+  if (allLsrGridPanel.isLoaded){ allLsrGridPanel.getStore().load({params:getVTEC()}); }
+  googlePanel.enable();
+  //Ext.getCmp('pgrid').setSource(metastore.getAt(0).data);
+  //if (tabs.items.length == 1){ buildTabs(); }
+  //loadTextTabs();
   resetGmap();
 });
 
@@ -256,9 +268,9 @@ var propertyCM = new Ext.grid.PropertyColumnModel([
     {header:'x0', dataIndex: 'x0', hidden:false}
 ]);
 
-var properties = new Ext.grid.PropertyGrid({
+var propertyGrid = new Ext.grid.PropertyGrid({
     title: 'Product Details',
-    id: 'pgrid',
+    id: 'propertyGrid',
     height: 200,
     width: 200,
     cm: propertyCM,
@@ -271,7 +283,7 @@ function resetGmap(){
    var point = new GLatLng(q.data.y1,q.data.x1);
    // Only works if the google panel has been loaded :(
    if (Ext.getCmp('mygpanel').gmap){
-     Ext.getCmp('mygpanel').gmap.setCenter(point, 12);
+     Ext.getCmp('mygpanel').gmap.setCenter(point, 9);
    }
 };
 
@@ -318,66 +330,60 @@ function loadTextTabs(){
      scope: this,
      success: function ( result, request) { 
         var jsonData = Ext.util.JSON.decode(result.responseText);
-        texttabs.items.each(function(c){texttabs.remove(c);});
-        texttabs.add({
+        /* Remove whatever tabs we currently have going */
+        textTabPanel.items.each(function(c){textTabPanel.remove(c);});
+        textTabPanel.add({
          title: 'Issuance',
           html: '<pre>'+ jsonData.data[0].report  +'</pre>',
           xtype: 'panel',
          autoScroll:true
         });
         for ( var i = 0; i < jsonData.data[0].svs.length; i++ ){
-            texttabs.add({
+            textTabPanel.add({
               title: 'Update '+ (i+1),
               html: '<pre>'+ jsonData.data[0].svs[i]  +'</pre>',
              xtype: 'panel',
              autoScroll:true
             });
         }
-        texttabs.activate(i);
+        textTabPanel.activate(i);
      }
    });
 
 
 };
 
-var texttabs = new Ext.TabPanel({
+var textTabPanel = new Ext.TabPanel({
     title: 'Text Data',
     enableTabScroll:true,
-    id:'texttabs',
+    id:'textTabPanel',
+    isVisible: false,
     defaults:{bodyStyle:'padding:5px'}
 });
 
-var lsrs = new Ext.grid.GridPanel({
-        id:'lsr-grid',
-        isLoaded:false,
-        store: jstore,
-        loadMask: {msg:'Loading Data...'},
-        cm: new Ext.grid.ColumnModel([
+var lsrGridPanel = new Ext.grid.GridPanel({
+    id:'lsrGridPanel',
+    isVisible: false,
+    isLoaded:false,
+    store: jstore,
+    loadMask: {msg:'Loading Data...'},
+    cm: new Ext.grid.ColumnModel([
             expander,
             {header: "Time", sortable: true, dataIndex: 'valid'},
             {header: "Event", width: 100, sortable: true, dataIndex: 'event'},
             {header: "Magnitude", sortable: true, dataIndex: 'magnitude'},
             {header: "City", width: 200, sortable: true, dataIndex: 'city'},
             {header: "County", sortable: true, dataIndex: 'county'}
-        ]),
-        stripeRows: true,
-        title:'Storm Reports within Polygon',
-        plugins: expander,
-        autoScroll:true
-});
-lsrs.on('activate', function(q){
-      if (! this.isLoaded){
-        this.getStore().load({
-         params:getVTEC()
-        });
-        this.isLoaded=true;
-      }
+    ]),
+    stripeRows: true,
+    title:'Storm Reports within Polygon',
+    plugins: expander,
+    autoScroll:true
 });
 
 
-
-var alllsrs = new Ext.grid.GridPanel({
-    id:'all-lsr-grid',
+allLsrGridPanel = new Ext.grid.GridPanel({
+    id:'allLsrGridPanel',
     title: 'All Storm Reports',
     isLoaded:false,
     store: jstore2,
@@ -435,46 +441,98 @@ var geo = new Ext.grid.GridPanel({
     });
 
 
+
+function getX(){
+  if (metastore.getCount() == 0) return -95;
+  return metastore.getAt(0).data.x1;
+}
+function getY(){
+  if (metastore.getCount() == 0) return 42;
+  return metastore.getAt(0).data.y1;
+}
+
+CustomGetTileUrl=function(a,b,c) {
+  if (typeof(window['this.myMercZoomLevel'])=="undefined") this.myMercZoomLevel=0; 
+  if (typeof(window['this.myStyles'])=="undefined") this.myStyles="default"; 
+  var lULP = new GPoint(a.x*256,(a.y+1)*256);
+  var lLRP = new GPoint((a.x+1)*256,a.y*256);
+  var lUL = G_NORMAL_MAP.getProjection().fromPixelToLatLng(lULP,b,c);
+  var lLR = G_NORMAL_MAP.getProjection().fromPixelToLatLng(lLRP,b,c);
+  // switch between Mercator and DD if merczoomlevel is set
+  if (this.myMercZoomLevel!=0 && map.getZoom() < this.myMercZoomLevel) {
+    var lBbox=dd2MercMetersLng(lUL.lngDegrees)+","+dd2MercMetersLat(lUL.latDegrees)+","+dd2MercMetersLng(lLR.lngDegrees)+","+dd2MercMetersLat(lLR.latDegrees);
+    var lSRS="EPSG:54004";
+  } else {
+    var lBbox=lUL.x+","+lUL.y+","+lLR.x+","+lLR.y;
+    var lSRS="EPSG:4326";
+  }
+  var ts = new Date();
+  var lURL=this.myBaseURL;
+  lURL+="&REQUEST=GetMap";
+  lURL+="&SERVICE=WMS";
+  lURL+="&reaspect=false&VERSION=1.1.1";
+  lURL+="&LAYERS="+this.myLayers;
+  lURL+="&STYLES="+this.myStyles; lURL+="&FORMAT="+this.myFormat;
+  lURL+="&BGCOLOR=0xFFFFFF";
+  lURL+="&TRANSPARENT=TRUE";
+  lURL+="&SRS="+lSRS;
+  lURL+="&BBOX="+lBbox;
+  lURL+="&WIDTH=256";
+  lURL+="&HEIGHT=256";
+  lURL+="&GroupName="+this.myLayers;
+  lURL+="&bogus="+ts.getTime();
+  return lURL;
+}
+
+
+var tileNEX= new GTileLayer(new GCopyrightCollection(''),1,17);
+    tileNEX.myLayers='nexrad-n0r-wmst';
+    tileNEX.myFormat='image/png';
+    tileNEX.myBaseURL='http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?';
+    tileNEX.getTileUrl=CustomGetTileUrl;
+
+var layer4=[G_NORMAL_MAP.getTileLayers()[0],tileNEX]; 
+var custommap4 = new GMapType(layer4, G_SATELLITE_MAP.getProjection(), 'Nexrad', G_SATELLITE_MAP);
+
+
+googlePanel = new Ext.ux.GMapPanel({
+    gmapType: 'map',
+    title: 'Google Map',
+    id:'mygpanel',
+    disabled:true,
+    zoomLevel: 14,
+    mapConfOpts: ['enableScrollWheelZoom','enableDoubleClickZoom','enableDragging'],
+    mapControls: ['GSmallMapControl','GMapTypeControl','NonExistantControl']
+});
+googlePanel.on('activate', function(){
+  resetGmap();
+  googlePanel.gmap.addMapType(custommap4);
+});
+
+function sbwgenerator(){
+ return "<p><img src=\"../GIS/sbw-history.php?vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
+}
+
 var sbwhist = new Ext.Panel({
     title: 'SBW History',
     id: 'sbwhist'
 });
-
-var tabs =  new Ext.TabPanel({
-         region:'center',
-         height:.75,
-         plain:true,
-         enableTabScroll:true,
-         defaults:{bodyStyle:'padding:5px'},
-         items:[
-            {contentEl:'help', title: 'Help', saveme:true}
-         ],
-         activeTab:0
+sbwhist.on('activate', function(){
+  sbwhist.body.update( sbwgenerator() );
 });
 
-function buildTabs(){
-  tabs.add( new Ext.ux.GMapPanel({
-    gmapType: 'map',
-    title: 'Google Map',
-    id:'mygpanel',
-    zoomLevel: 14,
-    setCenter: {
-       lat: metastore.getAt(0).data.y1,
-       lng: metastore.getAt(0).data.x1,
-       zoomLevel: 9
-    },
-    mapConfOpts: ['enableScrollWheelZoom','enableDoubleClickZoom','enableDragging'],
-    mapControls: ['GSmallMapControl','GMapTypeControl','NonExistantControl']
-})
-);
-  tabs.add(texttabs);
-  tabs.add(alllsrs);
-  tabs.add(lsrs);
-  tabs.add(sbwhist);
-  tabs.add(geo);
-  tabs.add(grid4);
-};
-
+tabPanel =  new Ext.TabPanel({
+    region:'center',
+    height:.75,
+    plain:true,
+    enableTabScroll:true,
+    defaults:{bodyStyle:'padding:5px'},
+    items:[
+      {contentEl:'help', title: 'Help', saveme:true},
+      googlePanel
+    ],
+    activeTab:0
+});
 
 var viewport = new Ext.Viewport({
     layout:'border',
@@ -498,9 +556,9 @@ var viewport = new Ext.Viewport({
              layoutConfig:{
                 animate:true
              },
-             items:[selectform,properties]
+             items:[selectform, propertyGrid]
          },
-         tabs
+         tabPanel
          ]
 });
 
