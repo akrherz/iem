@@ -17,7 +17,7 @@ $eventid = intval( $tokens[6] );
 <head>
 <link rel="stylesheet" type="text/css" href="../ext/resources/css/ext-all.css"/>
 <script type="text/javascript" src="../ext/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="../ext/ext-all.js"></script>
+<script type="text/javascript" src="../ext/ext-all-debug.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
 <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAJDLv3q8BFBryRorw-851MRT2yXp_ZAY8_ufC3CFXhHIE1NvwkxTyuslsNlFqyphYqv1PCUD8WrZA2A" type="text/javascript"></script>
 <script type="text/javascript" src="Ext.ux.GMapPanel.js"></script>
@@ -47,7 +47,7 @@ Ext.onReady(function(){
   Ext.getCmp("eventid").setValue("<?php echo $eventid; ?>");
   Ext.getCmp("yearselector").setValue("<?php echo $year; ?>");
 
-  Ext.getCmp('mainform').buttons[0].fireEvent('click', {});
+//  Ext.getCmp('mainform').buttons[0].fireEvent('click', {});
 });
 </script>
 </body></html>
