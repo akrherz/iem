@@ -238,7 +238,8 @@ var metastore = new Ext.data.Store({
             {name: 'x1'},
             {name: 'y0'},
             {name: 'y1'},
-            {name: 'issued'}
+            {name: 'issue', type:'date', dateFormat: 'Y-m-d H:i'},
+            {name: 'expire', type:'date', dateFormat:'Y-m-d H:i'}
             ])
 });
 metastore.on('load', function(){
@@ -249,34 +250,29 @@ metastore.on('load', function(){
          if (c.saveme){}
          else{ c.disable(); }
     });
-    //Ext.getCmp('pgrid').setSource({});
+    Ext.getCmp('propertyGrid').setSource({});
     return;
   }
   tabPanel.items.each(function(c){c.enable();});
   if (lsrGridPanel.isLoaded){ lsrGridPanel.getStore().load({params:getVTEC()}); }
   if (allLsrGridPanel.isLoaded){ allLsrGridPanel.getStore().load({params:getVTEC()}); }
   googlePanel.enable();
-  //Ext.getCmp('pgrid').setSource(metastore.getAt(0).data);
+  Ext.getCmp('propertyGrid').setSource(metastore.getAt(0).data);
   //if (tabs.items.length == 1){ buildTabs(); }
   //loadTextTabs();
   resetGmap();
 });
 
 
-var propertyCM = new Ext.grid.PropertyColumnModel([
-    {header:'x1', dataIndex: 'x1', hidden:false},
-    {header:'x0', dataIndex: 'x0', hidden:false}
-]);
 
 var propertyGrid = new Ext.grid.PropertyGrid({
     title: 'Product Details',
     id: 'propertyGrid',
-    height: 200,
-    width: 200,
-    cm: propertyCM,
+    autoHeight: true,
     source: {},
     store: metastore
 });
+propertyGrid.on('beforeedit', function(){ return false; });
 
 function resetGmap(){
    var q = metastore.getAt(0);
@@ -451,6 +447,24 @@ function getY(){
   return metastore.getAt(0).data.y1;
 }
 
+var cachedNexradTime = false;
+
+getNexradTime=function() {
+  if (cachedNexradTime) return cachedNexradTime;
+  var ts;
+  var ts2;
+  if (metastore.getCount() == 0){
+    ts = new date();
+    ts = ts.add(Date.MINUTE, ts.format("Z"));
+  } else {
+    ts = metastore.getAt(0).data.issue;
+  }
+  roundDown = parseInt(ts.format('i')) % 5;
+  ts2 = ts.add(Date.MINUTE, 0 - roundDown);
+  cachedNexradTime = ts2;
+  return ts2;
+}
+
 CustomGetTileUrl=function(a,b,c) {
   if (typeof(window['this.myMercZoomLevel'])=="undefined") this.myMercZoomLevel=0; 
   if (typeof(window['this.myStyles'])=="undefined") this.myStyles="default"; 
@@ -476,6 +490,7 @@ CustomGetTileUrl=function(a,b,c) {
   lURL+="&BGCOLOR=0xFFFFFF";
   lURL+="&TRANSPARENT=TRUE";
   lURL+="&SRS="+lSRS;
+  lURL+="&TIME="+ getNexradTime().format('Y-m-d\\TH:i:\\0\\0\\Z');
   lURL+="&BBOX="+lBbox;
   lURL+="&WIDTH=256";
   lURL+="&HEIGHT=256";
