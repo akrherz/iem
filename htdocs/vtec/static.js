@@ -232,8 +232,17 @@ var metastore = new Ext.data.Store({
 metastore.on('load', function(){
   if (metastore.getCount() == 0){
     Ext.MessageBox.alert('Status', 'Event not found on server');
+    tabs.activate(0);
+    tabs.items.each(function(c){
+         if (c.saveme){}
+         else{ c.disable(); }
+    });
+    Ext.getCmp('pgrid').setSource({});
     return;
   }
+  tabs.items.each(function(c){c.enable();});
+  if (lsrs.isLoaded){ lsrs.getStore().load({params:getVTEC()}); }
+  if (alllsrs.isLoaded){ alllsrs.getStore().load({params:getVTEC()}); }
 
   Ext.getCmp('pgrid').setSource(metastore.getAt(0).data);
   if (tabs.items.length == 1){ buildTabs(); }
@@ -269,14 +278,15 @@ function resetGmap(){
 var selectform = new Ext.FormPanel({
      frame: true,
      title: 'Product Selector',
+     id: 'mainform',
      labelWidth:0,
      buttons: [{
          text:'View Product',
-         handler: function() {
+         listeners: {
+           click: function() {
            metastore.load( {params:getVTEC()} );
-           //var wfo = myform2.getForm().findField('wfo').getValue();
-           //var afos = myform2.getForm().findField('afos').getValue();
           } // End of handler
+        }
      }],
      items: [wfo_selector,phenomena_selector,sig_selector,eventid_selector,year_selector]
 });
@@ -308,23 +318,22 @@ function loadTextTabs(){
      scope: this,
      success: function ( result, request) { 
         var jsonData = Ext.util.JSON.decode(result.responseText);
-        ttabs = Ext.getCmp('texttabs');
-        ttabs.items.each(function(c){ttabs.remove(c);});
-        ttabs.add({
+        texttabs.items.each(function(c){texttabs.remove(c);});
+        texttabs.add({
          title: 'Issuance',
           html: '<pre>'+ jsonData.data[0].report  +'</pre>',
           xtype: 'panel',
          autoScroll:true
         });
         for ( var i = 0; i < jsonData.data[0].svs.length; i++ ){
-            ttabs.add({
+            texttabs.add({
               title: 'Update '+ (i+1),
               html: '<pre>'+ jsonData.data[0].svs[i]  +'</pre>',
              xtype: 'panel',
              autoScroll:true
             });
         }
-        ttabs.activate(i);
+        texttabs.activate(i);
      }
    });
 
@@ -355,7 +364,16 @@ var lsrs = new Ext.grid.GridPanel({
         title:'Storm Reports within Polygon',
         plugins: expander,
         autoScroll:true
-    });
+});
+lsrs.on('activate', function(q){
+      if (! this.isLoaded){
+        this.getStore().load({
+         params:getVTEC()
+        });
+        this.isLoaded=true;
+      }
+});
+
 
 
 var alllsrs = new Ext.grid.GridPanel({
@@ -376,6 +394,7 @@ var alllsrs = new Ext.grid.GridPanel({
     plugins: expander2,
     autoScroll:true
 });
+
 
 var geo = new Ext.grid.GridPanel({
         id:'ugc-grid',
@@ -428,7 +447,7 @@ var tabs =  new Ext.TabPanel({
          enableTabScroll:true,
          defaults:{bodyStyle:'padding:5px'},
          items:[
-            {contentEl:'help', title: 'Help'}
+            {contentEl:'help', title: 'Help', saveme:true}
          ],
          activeTab:0
 });
@@ -479,7 +498,7 @@ var viewport = new Ext.Viewport({
              layoutConfig:{
                 animate:true
              },
-             items:[properties,selectform]
+             items:[selectform,properties]
          },
          tabs
          ]

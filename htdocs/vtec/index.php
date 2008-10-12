@@ -33,7 +33,10 @@ $eventid = intval( $tokens[6] );
 
 <div id="header"></div>
 <div id="help">
- <h3>Help me! <?php echo $v; ?></h3>
+ <h2>IEM VTEC Product Browser 2.0</h2>
+
+ <p>This application allows easy navigation of National Weather Service
+issued products with Valid Time Extent Coding (VTEC).</p>
 </div>
 <div id="footer"></div>
 <script>
@@ -43,6 +46,8 @@ Ext.onReady(function(){
   Ext.getCmp("significanceselector").setValue("<?php echo $significance; ?>");
   Ext.getCmp("eventid").setValue("<?php echo $eventid; ?>");
   Ext.getCmp("yearselector").setValue("<?php echo $year; ?>");
+
+  Ext.getCmp('mainform').buttons[0].fireEvent('click', {});
 });
 </script>
 </body></html>
