@@ -1,5 +1,9 @@
 Ext.onReady(function(){
 
+function getVTEC(){
+  return "year=2008&wfo=JAX&phenomena=TO&eventid=0048&significance=W";
+};
+
     function myEventID(val, p, record){
         return "<span><a href=\"warnings_cat.phtml?year="+ record.get('year') +"&wfo="+ record.get('wfo') +"&phenomena="+ record.get('phenomena') +"&significance="+ record.get('significance') +"&eventid="+ val +"\">" + val + "</a></span>";
     }
@@ -32,11 +36,13 @@ var expander2 = new Ext.grid.RowExpander({
     )
 });
 
+
+
     var pstore = new Ext.data.Store({
           root:'products',
           autoLoad:false,
           proxy: new Ext.data.HttpProxy({
-                url: '../json/json-list.php',
+                url: 'json-list.php',
                 method: 'GET'
           }),
           reader:  new Ext.data.JsonReader({
@@ -61,7 +67,7 @@ var expander2 = new Ext.grid.RowExpander({
           root:'ugcs',
           autoLoad:false,
           proxy: new Ext.data.HttpProxy({
-                url: '../json/json-ugc.php',
+                url: 'json-ugc.php',
                 method: 'GET'
           }),
           reader:  new Ext.data.JsonReader({
@@ -80,7 +86,7 @@ var expander2 = new Ext.grid.RowExpander({
     var jstore = new Ext.data.Store({
           autoLoad:false,
           proxy: new Ext.data.HttpProxy({
-                url: '../json/json-lsrs.php',
+                url: 'json-lsrs.php',
                 method: 'GET'
           }),
           reader:  new Ext.data.JsonReader({
@@ -102,7 +108,7 @@ var expander2 = new Ext.grid.RowExpander({
 var jstore2 = new Ext.data.Store({
     autoLoad:false,
     proxy: new Ext.data.HttpProxy({
-           url: '../json/json-lsrs.php',
+           url: 'json-lsrs.php',
            method: 'GET'
     }),
     reader:  new Ext.data.JsonReader({
@@ -137,6 +143,7 @@ var wfo_selector = new Ext.form.ComboBox({
              emptyText:'Select a WFO...',
              selectOnFocus:true,
              lazyRender: true,
+    id: 'wfoselector',
              width:190
 });
 
@@ -155,6 +162,7 @@ var phenomena_selector = new Ext.form.ComboBox({
              emptyText:'Select a Phenomena...',
              selectOnFocus:true,
              lazyRender: true,
+    id: 'phenomenaselector',
              width:190
 });
 
@@ -173,6 +181,7 @@ var sig_selector = new Ext.form.ComboBox({
              emptyText:'Select a Significance...',
              selectOnFocus:true,
              lazyRender: true,
+    id: 'significanceselector',
              width:190
 });
 
@@ -183,6 +192,7 @@ var eventid_selector = new Ext.form.NumberField({
     maxValue:9999,
     minValue:1,
     width: 50,
+    id: 'eventid',
     name:'eventid',
     fieldLabel:'Event ID'
 });
@@ -194,20 +204,46 @@ var year_selector = new Ext.form.NumberField({
     minValue: 2005,
     width: 50,
     name:'year',
+    id:'yearselector',
     fieldLabel:'Year'
 });
 
+var metastore = new Ext.data.Store({
+    root:'meta',
+    autoLoad:false,
+    recordType: Ext.grid.PropertyRecord,
+    proxy: new Ext.data.HttpProxy({
+           url: 'json-meta.php',
+           params: getVTEC(),
+           method:'GET'
+           }),
+    reader: new Ext.data.JsonReader({
+            root: 'meta',
+            id:'id'
+            }, [
+            {name: 'x0'},
+            {name: 'x1'},
+            {name: 'issued'}
+            ])
+});
+metastore.on('load', function(){
+  Ext.getCmp('pgrid').setSource(metastore.getAt(0).data);  
+});
+
+
+var propertyCM = new Ext.grid.PropertyColumnModel([
+    {header:'x1', dataIndex: 'x1', hidden:false},
+    {header:'x0', dataIndex: 'x0', hidden:false}
+]);
+
 var properties = new Ext.grid.PropertyGrid({
     title: 'Product Details',
-    autoHeight: true,
+    id: 'pgrid',
+    height: 100,
     width: 190,
-    source: {
-        "(name)": "My Object",
-        "Created": new Date(Date.parse('10/15/2006')),
-        "Available": false,
-        "Version": .01,
-        "Description": "A test object"
-    }
+    cm: propertyCM,
+    source: {},
+    store: metastore
 });
 
 var mygpanel = new Ext.ux.GMapPanel({
@@ -229,6 +265,8 @@ var selectform = new Ext.FormPanel({
      buttons: [{
          text:'View Product',
          handler: function() {
+           metastore.load( {params:getVTEC()} );
+           loadTextTabs();
            //var wfo = myform2.getForm().findField('wfo').getValue();
            //var afos = myform2.getForm().findField('afos').getValue();
           } // End of handler
@@ -236,9 +274,45 @@ var selectform = new Ext.FormPanel({
      items: [wfo_selector,phenomena_selector,sig_selector,eventid_selector,year_selector]
 });
 
+
+
+function loadTextTabs(){
+
+  Ext.Ajax.request({
+     waitMsg: 'Loading...',
+     url : 'json-text.php' , 
+     params:getVTEC(),
+     method: 'GET',
+     scope: this,
+     success: function ( result, request) { 
+        var jsonData = Ext.util.JSON.decode(result.responseText);
+        tabs = Ext.getCmp('texttabs');
+        tabs.items.each(function(c){tabs.remove(c);});
+        tabs.add({
+         title: 'Issuance',
+          html: '<pre>'+ jsonData.data[0].report  +'</pre>',
+          xtype: 'panel',
+         autoScroll:true
+        });
+        for ( var i = 0; i < jsonData.data[0].svs.length; i++ ){
+            tabs.add({
+              title: 'Update '+ (i+1),
+              html: '<pre>'+ jsonData.data[0].svs[i]  +'</pre>',
+             xtype: 'panel',
+             autoScroll:true
+            });
+        }
+        tabs.activate(i);
+     }
+   });
+
+
+};
+
 var texttabs = new Ext.TabPanel({
     title: 'Text Data',
     enableTabScroll:true,
+    id:'texttabs',
     defaults:{bodyStyle:'padding:5px'}
 });
 
@@ -360,6 +434,7 @@ var viewport = new Ext.Viewport({
          }),
           { 
              region:'west',
+             id: 'leftside',
              width:210,
              collapsible:true,
              title: 'Settings',
