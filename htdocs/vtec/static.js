@@ -10,7 +10,8 @@ var allLsrGridPanel;
 var sbwPanel;
 var geoPanel;
 var eventsPanel;
-
+// BAH
+var cachedNexradTime = false;
 
 function getVTEC(){
   return "year="+ year_selector.getValue() +"&wfo="+ wfo_selector.getValue() +"&phenomena="+ phenomena_selector.getValue() +"&eventid="+ eventid_selector.getValue() +"&significance="+ sig_selector.getValue();
@@ -155,8 +156,7 @@ var wfo_selector = new Ext.form.ComboBox({
              emptyText:'Select a WFO...',
              selectOnFocus:true,
              lazyRender: true,
-    id: 'wfoselector',
-             width:190
+    id: 'wfoselector'
 });
 
 var phenomena_selector = new Ext.form.ComboBox({
@@ -234,15 +234,17 @@ var metastore = new Ext.data.Store({
             root: 'meta',
             id:'id'
             }, [
-            {name: 'x0'},
-            {name: 'x1'},
-            {name: 'y0'},
-            {name: 'y1'},
+            {name: 'x0', type:'float'},
+            {name: 'x1', type:'float'},
+            {name: 'y0', type:'float'},
+            {name: 'y1', type:'float'},
             {name: 'issue', type:'date', dateFormat: 'Y-m-d H:i'},
             {name: 'expire', type:'date', dateFormat:'Y-m-d H:i'}
             ])
 });
 metastore.on('load', function(){
+  cachedNexradTime = false;
+
   if (metastore.getCount() == 0){
     Ext.MessageBox.alert('Status', 'Event not found on server');
     tabPanel.activate(0);
@@ -276,27 +278,60 @@ propertyGrid.on('beforeedit', function(){ return false; });
 
 function resetGmap(){
    var q = metastore.getAt(0);
-   var point = new GLatLng(q.data.y1,q.data.x1);
+   var point = new GLatLng((q.data.y1+q.data.y0)/2,(q.data.x1+q.data.x0)/2);
    // Only works if the google panel has been loaded :(
    if (Ext.getCmp('mygpanel').gmap){
      Ext.getCmp('mygpanel').gmap.setCenter(point, 9);
+
+     Ext.getCmp('mygpanel').gmap.clearOverlays();
+     kml = "http://mesonet.agron.iastate.edu/kml/sbw_exact_time.php?"+ getVTEC();
+     gxml = new GGeoXml(kml);
+     Ext.getCmp('mygpanel').gmap.addOverlay(gxml);
+     kml = "http://mesonet.agron.iastate.edu/kml/sbw_lsrs.php?"+ getVTEC();
+     gxml2 = new GGeoXml(kml);
+     Ext.getCmp('mygpanel').gmap.addOverlay(gxml2);
    }
 };
 
 var selectform = new Ext.FormPanel({
-     frame: true,
-     title: 'Product Selector',
-     id: 'mainform',
-     labelWidth:0,
-     buttons: [{
-         text:'View Product',
-         listeners: {
-           click: function() {
-           metastore.load( {params:getVTEC()} );
-          } // End of handler
-        }
-     }],
-     items: [wfo_selector,phenomena_selector,sig_selector,eventid_selector,year_selector]
+    frame: true,
+    id: 'mainform',
+    labelAlign:'top',
+    items: [{
+        layout:'column',
+        items: [{
+          columnWidth:0.2,
+          layout:'form',
+          items:[wfo_selector]
+        },{
+          columnWidth:0.2,
+          layout:'form',
+          items:[phenomena_selector]
+        },{
+          columnWidth:0.2,
+          layout:'form',
+          items:[sig_selector]
+        },{
+          columnWidth:0.1,
+          layout:'form',
+          items:[eventid_selector]
+        },{
+          columnWidth:0.1,
+          layout:'form',
+          items:[year_selector]
+        },{
+          columnWidth:0.1,
+          layout:'form',
+          items:[new Ext.Button({
+            text:'View Product',
+            listeners: {
+              click: function() {
+                metastore.load( {params:getVTEC()} );
+              }  // End of handler
+            }
+          })]
+        }]
+    }]
 });
 
 function loadVTEC(){
@@ -447,7 +482,6 @@ function getY(){
   return metastore.getAt(0).data.y1;
 }
 
-var cachedNexradTime = false;
 
 getNexradTime=function() {
   if (cachedNexradTime) return cachedNexradTime;
@@ -553,25 +587,24 @@ var viewport = new Ext.Viewport({
     layout:'border',
     items:[
          new Ext.BoxComponent({ // raw
-             region:'north',
-             el: 'header',
-             height:60
-         }),
-         new Ext.BoxComponent({ // raw
              region:'south',
              el: 'footer',
              height:32
          }),
           { 
-             region:'west',
-             id: 'leftside',
-             width:210,
+             region:'north',
+             height:100,
              collapsible:true,
-             title: 'Settings',
+             title: 'Select your VTEC Settings',
              layoutConfig:{
                 animate:true
              },
-             items:[selectform, propertyGrid]
+             items:[selectform]
+         },{
+            region:'west',
+            width:100,
+            collapsible:true,
+            items:[propertyGrid]
          },
          tabPanel
          ]
