@@ -1,9 +1,9 @@
 <?php
 /* Giveme JSON data for LSRs inside a polygon */
 require_once 'Zend/Json.php';
-require_once '../../../../config/settings.inc.php';
-require_once 'lsrs.php';
-require_once 'database.inc.php';
+require_once '../../config/settings.inc.php';
+require_once "$rootpath/include/lsrs.php";
+require_once "$rootpath/include/database.inc.php";
 
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE GMT");

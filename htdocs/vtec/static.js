@@ -8,6 +8,7 @@ var textTabPanel;
 var lsrGridPanel;
 var allLsrGridPanel;
 var sbwPanel;
+var radarPanel;
 var geoPanel;
 var eventsPanel;
 // BAH
@@ -262,6 +263,7 @@ metastore.on('load', function(){
   if (geoPanel.isLoaded){ geoPanel.getStore().load({params:getVTEC()}); }
   if (eventsPanel.isLoaded){ eventsPanel.getStore().load({params:getVTEC()}); }
   Ext.getCmp('propertyGrid').setSource(metastore.getAt(0).data);
+  tabPanel.activate(1);
   resetGmap();
 });
 
@@ -323,6 +325,7 @@ var selectform = new Ext.FormPanel({
           layout:'form',
           items:[new Ext.Button({
             text:'View Product',
+            id:'mainbutton',
             listeners: {
               click: function() {
                 metastore.load( {params:getVTEC()} );
@@ -403,7 +406,7 @@ lsrGridPanel = new Ext.grid.GridPanel({
             {header: "County", sortable: true, dataIndex: 'county'}
     ]),
     stripeRows: true,
-    title:'Storm Reports within Polygon',
+    title:'Storm Reports within SBW',
     plugins: expander,
     autoScroll:true
 });
@@ -594,6 +597,9 @@ googlePanel.on('activate', function(){
 function sbwgenerator(){
  return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/sbw-history.php?vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
 }
+function radargenerator(){
+ return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/radmap.php?layers[]=uscounties&layers[]=sbw&vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
+}
 
 sbwPanel = new Ext.Panel({
     title: 'SBW History',
@@ -604,6 +610,16 @@ sbwPanel.on('activate', function(){
   sbwPanel.body.update( sbwgenerator() );
 });
 
+radarPanel = new Ext.Panel({
+    title: 'RADAR Map',
+    id: 'radarPabel',
+    disabled:true
+});
+radarPanel.on('activate', function(){
+  radarPanel.body.update( radargenerator() );
+});
+
+
 tabPanel =  new Ext.TabPanel({
     region:'center',
     height:.75,
@@ -612,6 +628,7 @@ tabPanel =  new Ext.TabPanel({
     defaults:{bodyStyle:'padding:5px'},
     items:[
       {contentEl:'help', title: 'Help', saveme:true},
+      radarPanel,
       textTabPanel,
       googlePanel,
       sbwPanel,
