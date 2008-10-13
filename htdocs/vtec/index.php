@@ -37,6 +37,21 @@ $eventid = intval( $tokens[6] );
 
  <p>This application allows easy navigation of National Weather Service
 issued products with Valid Time Extent Coding (VTEC).</p>
+
+<p style="margin-top: 10px;"><b>Tab Functionality:</b>
+<br /><i>Above this section, you will notice 9 selectable tabs. Click on 
+the tab to show the information.</i>
+<br /><ul>
+ <li><b>Help:</b>  This page!</li>
+ <li><b>RADAR Map:</b>  Simple map displaying the product geography.</li>
+ <li><b>Text Data:</b>  The raw text based products issued by the National Weather Service.  Any follow-up products are included as well.</li>
+ <li><b>Google Map:</b>  Product and Storm Reports over Google Maps.</li>
+ <li><b>SBW History:</b>  Displays changes in storm based warnings.</li>
+ <li><b>Storm Reports within SBW:</b>  Storm Reports inside Storm Based Warning.</li>
+ <li><b>All Storm Reports:</b>  Any Storm Reports during the time of the product for the issuing office.</li>
+ <li><b>Geography Included:</b>  Counties/Zones affected by this product.</li>
+ <li><b>List Events:</b>  List all events of the given phenomena, significance, year, and issuing office.</li>
+</ul></p>
 </div>
 <div id="footer"></div>
 <script>
@@ -47,7 +62,7 @@ Ext.onReady(function(){
   Ext.getCmp("eventid").setValue("<?php echo $eventid; ?>");
   Ext.getCmp("yearselector").setValue("<?php echo $year; ?>");
 
-//  Ext.getCmp('mainform').buttons[0].fireEvent('click', {});
+  Ext.getCmp('mainbutton').fireEvent('click', {});
 });
 </script>
 </body></html>
