@@ -20,9 +20,12 @@ function getVTEC(){
   return "year="+ year_selector.getValue() +"&wfo="+ wfo_selector.getValue() +"&phenomena="+ phenomena_selector.getValue() +"&eventid="+ eventid_selector.getValue() +"&significance="+ sig_selector.getValue();
 };
 
-    function myEventID(val, p, record){
-        return "<span><a href=\"warnings_cat.phtml?year="+ record.get('year') +"&wfo="+ record.get('wfo') +"&phenomena="+ record.get('phenomena') +"&significance="+ record.get('significance') +"&eventid="+ val +"\">" + val + "</a></span>";
-    }
+/* Generates the vtec link to this page 
+ * "2008-O-NEW-KJAX-TO-W-0048"
+ */
+function myEventID(val, p, record){
+    return "<span><a href=\""+ record.get('year') +"-O-NEW-K"+ record.get('wfo') +"-"+ record.get('phenomena') +"-"+ record.get('significance') +"-"+ String.leftPad(val,4,'0') +".html\">" + val + "</a></span>";
+}
 
    var filters = new Ext.ux.grid.GridFilters({
         filters:[
