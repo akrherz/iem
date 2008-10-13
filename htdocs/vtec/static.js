@@ -12,6 +12,8 @@ var geoPanel;
 var eventsPanel;
 // BAH
 var cachedNexradTime = false;
+// Selectors
+var wfo_selector;
 
 function getVTEC(){
   return "year="+ year_selector.getValue() +"&wfo="+ wfo_selector.getValue() +"&phenomena="+ phenomena_selector.getValue() +"&eventid="+ eventid_selector.getValue() +"&significance="+ sig_selector.getValue();
@@ -141,21 +143,21 @@ var jstore2 = new Ext.data.Store({
 
 
 
-var wfo_selector = new Ext.form.ComboBox({
-             hiddenName:'wfo',
-             store: new Ext.data.SimpleStore({
-                      fields: ['abbr', 'wfo'],
-                      data : iemdata.wfos 
-             }),
-             valueField:'abbr',
-             displayField:'wfo',
-             hideLabel: true,
-             typeAhead: true,
-             mode: 'local',
-             triggerAction: 'all',
-             emptyText:'Select a WFO...',
-             selectOnFocus:true,
-             lazyRender: true,
+wfo_selector = new Ext.form.ComboBox({
+    hiddenName:'wfo',
+    store: new Ext.data.SimpleStore({
+           fields: ['abbr', 'wfo'],
+           data : iemdata.wfos 
+    }),
+    valueField:'abbr',
+    displayField:'wfo',
+    fieldLabel: 'Issuing Office',
+    typeAhead: true,
+    mode: 'local',
+    triggerAction: 'all',
+    emptyText:'Select/or type here...',
+    selectOnFocus:true,
+    lazyRender: true,
     id: 'wfoselector'
 });
 
@@ -167,15 +169,14 @@ var phenomena_selector = new Ext.form.ComboBox({
              }),
              valueField:'abbr',
              displayField:'name',
-             hideLabel: true,
+             fieldLabel:'Phenomena',
              typeAhead: true,
              mode: 'local',
              triggerAction: 'all',
              emptyText:'Select a Phenomena...',
              selectOnFocus:true,
              lazyRender: true,
-    id: 'phenomenaselector',
-             width:190
+    id: 'phenomenaselector'
 });
 
 var sig_selector = new Ext.form.ComboBox({
@@ -186,15 +187,15 @@ var sig_selector = new Ext.form.ComboBox({
              }),
              valueField:'abbr',
              displayField:'name',
-             hideLabel: true,
+             fieldLabel:'Significance',
              typeAhead: true,
              mode: 'local',
              triggerAction: 'all',
              emptyText:'Select a Significance...',
              selectOnFocus:true,
              lazyRender: true,
-    id: 'significanceselector',
-             width:190
+    width:100,
+    id: 'significanceselector'
 });
 
 
@@ -203,10 +204,10 @@ var eventid_selector = new Ext.form.NumberField({
     allowNegative:false,
     maxValue:9999,
     minValue:1,
-    width: 50,
+    width:60,
     id: 'eventid',
     name:'eventid',
-    fieldLabel:'Event ID'
+    fieldLabel:'Event'
 });
 
 var year_selector = new Ext.form.NumberField({
@@ -258,17 +259,15 @@ metastore.on('load', function(){
   tabPanel.items.each(function(c){c.enable();});
   if (lsrGridPanel.isLoaded){ lsrGridPanel.getStore().load({params:getVTEC()}); }
   if (allLsrGridPanel.isLoaded){ allLsrGridPanel.getStore().load({params:getVTEC()}); }
-  googlePanel.enable();
+  if (geoPanel.isLoaded){ geoPanel.getStore().load({params:getVTEC()}); }
+  if (eventsPanel.isLoaded){ eventsPanel.getStore().load({params:getVTEC()}); }
   Ext.getCmp('propertyGrid').setSource(metastore.getAt(0).data);
-  //if (tabs.items.length == 1){ buildTabs(); }
-  //loadTextTabs();
   resetGmap();
 });
 
 
 
 var propertyGrid = new Ext.grid.PropertyGrid({
-    title: 'Product Details',
     id: 'propertyGrid',
     autoHeight: true,
     source: {},
@@ -300,11 +299,11 @@ var selectform = new Ext.FormPanel({
     items: [{
         layout:'column',
         items: [{
-          columnWidth:0.2,
+          columnWidth:0.27,
           layout:'form',
           items:[wfo_selector]
         },{
-          columnWidth:0.2,
+          columnWidth:0.27,
           layout:'form',
           items:[phenomena_selector]
         },{
@@ -312,11 +311,11 @@ var selectform = new Ext.FormPanel({
           layout:'form',
           items:[sig_selector]
         },{
-          columnWidth:0.1,
+          columnWidth:0.08,
           layout:'form',
           items:[eventid_selector]
         },{
-          columnWidth:0.1,
+          columnWidth:0.08,
           layout:'form',
           items:[year_selector]
         },{
@@ -351,52 +350,49 @@ function loadVTEC(){
 };
 
 
-function loadTextTabs(){
-
+textTabPanel = new Ext.TabPanel({
+    title: 'Text Data',
+    enableTabScroll:true,
+    id:'textTabPanel',
+    disabled: true,
+    defaults:{bodyStyle:'padding:5px'}
+});
+textTabPanel.on('activate', function(){
   Ext.Ajax.request({
      waitMsg: 'Loading...',
-     url : 'json-text.php' , 
+     url : 'json-text.php' ,
      params:getVTEC(),
      method: 'GET',
      scope: this,
-     success: function ( result, request) { 
+     success: function ( result, request) {
         var jsonData = Ext.util.JSON.decode(result.responseText);
         /* Remove whatever tabs we currently have going */
-        textTabPanel.items.each(function(c){textTabPanel.remove(c);});
-        textTabPanel.add({
+        this.items.each(function(c){this.remove(c);});
+        this.add({
          title: 'Issuance',
           html: '<pre>'+ jsonData.data[0].report  +'</pre>',
           xtype: 'panel',
          autoScroll:true
         });
         for ( var i = 0; i < jsonData.data[0].svs.length; i++ ){
-            textTabPanel.add({
+            this.add({
               title: 'Update '+ (i+1),
               html: '<pre>'+ jsonData.data[0].svs[i]  +'</pre>',
              xtype: 'panel',
              autoScroll:true
             });
         }
-        textTabPanel.activate(i);
+        this.activate(i);
      }
    });
-
-
-};
-
-var textTabPanel = new Ext.TabPanel({
-    title: 'Text Data',
-    enableTabScroll:true,
-    id:'textTabPanel',
-    isVisible: false,
-    defaults:{bodyStyle:'padding:5px'}
 });
 
-var lsrGridPanel = new Ext.grid.GridPanel({
+lsrGridPanel = new Ext.grid.GridPanel({
     id:'lsrGridPanel',
     isVisible: false,
     isLoaded:false,
     store: jstore,
+    disabled:true,
     loadMask: {msg:'Loading Data...'},
     cm: new Ext.grid.ColumnModel([
             expander,
@@ -411,6 +407,15 @@ var lsrGridPanel = new Ext.grid.GridPanel({
     plugins: expander,
     autoScroll:true
 });
+lsrGridPanel.on('activate', function(q){
+   if (! this.isLoaded){
+     this.getStore().load({
+        params:getVTEC()+"&sbw=1"
+     });
+     this.isLoaded=true;
+   }
+});
+
 
 
 allLsrGridPanel = new Ext.grid.GridPanel({
@@ -418,6 +423,7 @@ allLsrGridPanel = new Ext.grid.GridPanel({
     title: 'All Storm Reports',
     isLoaded:false,
     store: jstore2,
+    disabled:true,
     loadMask: {msg:'Loading Data...'},
     cm: new Ext.grid.ColumnModel([
             expander2,
@@ -431,9 +437,17 @@ allLsrGridPanel = new Ext.grid.GridPanel({
     plugins: expander2,
     autoScroll:true
 });
+allLsrGridPanel.on('activate', function(q){
+   if (! this.isLoaded){
+     this.getStore().load({
+        params:getVTEC()
+     });
+     this.isLoaded=true;
+   }
+});
 
 
-var geo = new Ext.grid.GridPanel({
+geoPanel = new Ext.grid.GridPanel({
         id:'ugc-grid',
         store: ustore,
         loadMask: {msg:'Loading Data...'},
@@ -446,15 +460,26 @@ var geo = new Ext.grid.GridPanel({
         ]),
         stripeRows: true,
         autoScroll:true,
+    disabled:true,
         title:'Geography Included',
         collapsible: false,
         animCollapse: false
     });
+geoPanel.on('activate', function(q){
+   if (! this.isLoaded){
+     this.getStore().load({
+        params:getVTEC()+"&sbw=1"
+     });
+     this.isLoaded=true;
+   }
+});
 
-    var grid4 = new Ext.grid.GridPanel({
+
+
+eventsPanel = new Ext.grid.GridPanel({
         id:'products-grid',
         store: pstore,
-        width:640,
+  disabled:true,
         loadMask: {msg:'Loading Data...'},
         cm: new Ext.grid.ColumnModel([
           {header: "Event", renderer: myEventID, width: 40, sortable: true, dataIndex: 'eventid'},
@@ -466,10 +491,18 @@ var geo = new Ext.grid.GridPanel({
         plugins: filters,
         stripeRows: true,
         autoScroll:true,
-        title:'Other Events',
+        title:'List Events',
         collapsible: false,
         animCollapse: false
     });
+eventsPanel.on('activate', function(q){
+   if (! this.isLoaded){
+     this.getStore().load({
+        params:getVTEC()
+     });
+     this.isLoaded=true;
+   }
+});
 
 
 
@@ -559,15 +592,16 @@ googlePanel.on('activate', function(){
 });
 
 function sbwgenerator(){
- return "<p><img src=\"../GIS/sbw-history.php?vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
+ return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/sbw-history.php?vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
 }
 
-var sbwhist = new Ext.Panel({
+sbwPanel = new Ext.Panel({
     title: 'SBW History',
-    id: 'sbwhist'
+    id: 'sbwhist',
+    disabled:true
 });
-sbwhist.on('activate', function(){
-  sbwhist.body.update( sbwgenerator() );
+sbwPanel.on('activate', function(){
+  sbwPanel.body.update( sbwgenerator() );
 });
 
 tabPanel =  new Ext.TabPanel({
@@ -578,7 +612,13 @@ tabPanel =  new Ext.TabPanel({
     defaults:{bodyStyle:'padding:5px'},
     items:[
       {contentEl:'help', title: 'Help', saveme:true},
-      googlePanel
+      textTabPanel,
+      googlePanel,
+      sbwPanel,
+      lsrGridPanel,
+      allLsrGridPanel,
+      geoPanel,
+      eventsPanel
     ],
     activeTab:0
 });
@@ -602,8 +642,9 @@ var viewport = new Ext.Viewport({
              items:[selectform]
          },{
             region:'west',
-            width:100,
+            width:200,
             collapsible:true,
+            title:'Product Details',
             items:[propertyGrid]
          },
          tabPanel
