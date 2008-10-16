@@ -1,0 +1,68 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/forms.php");
+include("$rootpath/include/stations.php");
+
+$day = isset($_GET['day']) ? $_GET["day"] : date("d");
+$month = isset($_GET['month']) ? $_GET["month"] : date("m");
+$year = isset($_GET['year']) ? $_GET["year"] : date("Y");
+$station = isset($_GET['station'])? $_GET['station']: 'AESI4';
+
+$ts = mktime(1, 0, 0, $month, $day, $year);
+
+$hads = iemdb("hads");
+$rs = pg_prepare($hads, "QUERY", "SELECT * from raw$year WHERE station = $1 and valid BETWEEN $2 and $3 ORDER by valid ASC");
+$rs = pg_execute($hads, "QUERY", Array($station, date("Y-m-d", $ts), date("Y-m-d", $ts+86400)));
+
+$data = Array();
+$cols = Array();
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+  $cols[ $row["key"] ] = 1;
+  $data[ strtotime(substr($row["valid"],0,16)) ][ $row["key"] ] = $row["value"];  
+}
+$mycols = array_keys($cols);
+
+$TITLE = "IEM | GEOS DCP";
+$THISPAGE="networks-dcp";
+include("$rootpath/include/header.php"); 
+?>
+<h3>DCP Site Observations by Date</h3>
+<ul>
+ <li>Timestamps are presented in central standard or daylight time</li>
+ <li>The column headings are the <a href="http://www.weather.gov/ohd/hrl/shef/indexshef.htm">SHEF</a> encoded variable names.</li>
+ <li>Archive begins on 16 Oct 2008.</li>
+</ul>
+
+<form method="GET">
+<table><tr><th>Station:</th><th>Year</th><th>Month</th><th>Day</th><th></th></tr>
+<tr>
+<td><?php echo networkSelect(iemdb("mesosite"),"DCP", $station); ?></td>
+<td><?php echo yearSelect(2008,$year); ?></td>
+<td><?php echo monthSelect($month); ?></td>
+<td><?php echo daySelect($day); ?></td>
+<td><input type="submit"></td>
+</tr></table>
+</form>
+
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+<th>Valid:</th>
+<?php
+ while(list($k,$v) = each($mycols)){ echo "<th>$v</th>"; }
+?>
+</tr>
+<?php
+$times = array_keys($data);
+while(list($k,$ts) = each($times)){
+  echo sprintf("<tr><td>%s</td>", date("Y-m-d H:i", $ts) );
+  reset($mycols);
+  while(list($k,$v) = each($mycols)){
+    echo sprintf("<td>%s</td>", @$data[$ts][$v]);
+  }
+  echo "</tr>";
+}
+
+?>
+</table>
+<?php include("$rootpath/include/footer.php"); ?>
