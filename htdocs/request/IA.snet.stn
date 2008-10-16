@@ -24,7 +24,7 @@ SCGI     999999 Clarion                          IA US  4273  -9373  377
 SCHI     999999 Chariton                         IA US  4102  -9331  332   
 SCNI     999999 Corning                          IA US  4099  -9474  390   
 SCOI     999999 Colo                             IA US  4201  -9332  315   
-SCSS     999999 Creston                          IA US  4107  -9437  417   
+SCSI     999999 Creston                          IA US  4107  -9437  417   
 SDCI       9999 DSM Christian                    IA US  4163  -9380  279   
 SDRI     999999 River Woods                      IA US  4156  -9358  304   
 SEGI      99999 Eagle Grove                      IA US  4267  -9391  339   
@@ -122,7 +122,7 @@ SWES       9999 Webster                          SD US  4533  -9752  342
 SWTS     999999 Watertown                        SD US  4491  -9710  544   
 SYAS     999999 Yankton                          SD US  4289  -9739  382   
 SHSS      99999 Winner                           SD US  4338  -9986  622   
-SMSO      99999 Worthington                      MN US  4363  -9563  483   
+SMOM      99999 Worthington                      MN US  4363  -9563  483   
 SASM       9999 Austin                           MN US  4366  -9295  365   
 SBLM       9999 Albert Lea                       MN US  4364  -9339  383   
 SCCI       9999 Charles City                     IA US  4307  -9267  304   
