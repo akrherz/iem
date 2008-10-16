@@ -24,7 +24,7 @@ SCGI     999999 Clarion                          IA US  4273  -9373  377
 SCHI     999999 Chariton                         IA US  4102  -9331  332   
 SCNI     999999 Corning                          IA US  4099  -9474  390   
 SCOI     999999 Colo                             IA US  4201  -9332  315   
-SCSI     999999 Creston                          IA US  4107  -9437  417   
+SCSS     999999 Creston                          IA US  4107  -9437  417   
 SDCI       9999 DSM Christian                    IA US  4163  -9380  279   
 SDRI     999999 River Woods                      IA US  4156  -9358  304   
 SEGI      99999 Eagle Grove                      IA US  4267  -9391  339   
@@ -106,7 +106,7 @@ SHIM       9999 Hills                            MN US  4352  -9636  342
 SHOS       9999 Howard                           SD US  4401  -9753  342   
 SHUS     999999 Huron                            SD US  4435  -9823  388   
 SLKS       9999 Clear Lake                       SD US  4475  -9668  342   
-SMAM     999999 Madison                          IA US  4501  -9619  340   
+SMAM     999999 Madison                          MN US  4501  -9619  340   
 SMIS     999999 Milbank                          SD US  4520  -9663  354   
 SMSS     999999 Mission                          SD US  4330 -10066  784   
 SPIS     999999 Pierre                           SD US  4437 -10035  493   
