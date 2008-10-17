@@ -266,6 +266,8 @@ metastore.on('load', function(){
   }
   tabPanel.items.each(function(c){c.enable();});
   if (textTabPanel.isLoaded){ textTabPanel.fireEvent('activate', {}); }
+  if (radarPanel.isLoaded){ radarPanel.fireEvent('activate', {}); }
+  if (sbwPanel.isLoaded){ sbwPanel.fireEvent('activate', {}); }
   if (lsrGridPanel.isLoaded){ lsrGridPanel.getStore().load({params:getVTEC()}); }
   if (allLsrGridPanel.isLoaded){ allLsrGridPanel.getStore().load({params:getVTEC()}); }
   if (geoPanel.isLoaded){ geoPanel.getStore().load({params:getVTEC()}); }
@@ -626,19 +628,23 @@ function radargenerator(){
 sbwPanel = new Ext.Panel({
     title: 'SBW History',
     id: 'sbwhist',
+    isLoaded:false,
     disabled:true
 });
 sbwPanel.on('activate', function(){
   sbwPanel.body.update( sbwgenerator() );
+  sbwPanel.isLoaded=true;
 });
 
 radarPanel = new Ext.Panel({
     title: 'RADAR Map',
     id: 'radarPabel',
+    isLoaded:false,
     disabled:true
 });
 radarPanel.on('activate', function(){
   radarPanel.body.update( radargenerator() );
+  radarPanel.isLoaded=true;
 });
 
 
