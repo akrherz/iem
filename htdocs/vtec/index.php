@@ -15,7 +15,7 @@ $significance = $tokens[5];
 $eventid = intval( $tokens[6] );
 
 $extjs = "ext-all.js";
-if ($rootpath == "http://localhost/iem";){
+if ($rootpath == "http://localhost/iem"){
   $extjs = "ext-all-debug.js";
 }
 
