@@ -18,7 +18,11 @@ var wfo_selector;
 
 function getVTEC(){
   return "year="+ year_selector.getValue() +"&wfo="+ wfo_selector.getValue() +"&phenomena="+ phenomena_selector.getValue() +"&eventid="+ eventid_selector.getValue() +"&significance="+ sig_selector.getValue();
-};
+}
+
+function getURL(){
+  return year_selector.getValue() +"-O-NEW-K"+ wfo_selector.getValue() +"-"+ phenomena_selector.getValue() +"-"+ sig_selector.getValue() +"-"+ String.leftPad(eventid_selector.getValue(),4,'0') +".html";
+}
 
 /* Generates the vtec link to this page 
  * "2008-O-NEW-KJAX-TO-W-0048"
@@ -332,6 +336,15 @@ var selectform = new Ext.FormPanel({
             listeners: {
               click: function() {
                 metastore.load( {params:getVTEC()} );
+              }  // End of handler
+            }
+          }),
+          new Ext.Button({
+            text:'Stable URL',
+            id:'stablebutton',
+            listeners: {
+              click: function() {
+                window.location = getURL();
               }  // End of handler
             }
           })]
