@@ -23,7 +23,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 }
 $mycols = array_keys($cols);
 
-$TITLE = "IEM | GEOS DCP";
+$TITLE = "IEM | DCP Data by Site by Day";
 $THISPAGE="networks-dcp";
 include("$rootpath/include/header.php"); 
 ?>
@@ -31,8 +31,9 @@ include("$rootpath/include/header.php");
 <ul>
  <li>Timestamps are presented in central standard or daylight time</li>
  <li>The column headings are the <a href="http://www.weather.gov/ohd/hrl/shef/indexshef.htm">SHEF</a> encoded variable names.</li>
- <li>Archive begins on 16 Oct 2008.</li>
+ <li>Archive begins on 16 Oct 2008 and is only for Iowa.</li>
 </ul>
+
 
 <form method="GET">
 <table><tr><th>Station:</th><th>Year</th><th>Month</th><th>Day</th><th></th></tr>
@@ -45,9 +46,10 @@ include("$rootpath/include/header.php");
 </tr></table>
 </form>
 
+<br /><br />
 <table border="1" cellpadding="2" cellspacing="0">
 <tr>
-<th>Valid:</th>
+<th>Site:</th><th>Valid:</th>
 <?php
  while(list($k,$v) = each($mycols)){ echo "<th>$v</th>"; }
 ?>
@@ -55,7 +57,7 @@ include("$rootpath/include/header.php");
 <?php
 $times = array_keys($data);
 while(list($k,$ts) = each($times)){
-  echo sprintf("<tr><td>%s</td>", date("Y-m-d H:i", $ts) );
+  echo sprintf("<tr><td>%s</td><td>%s</td>", $station, date("Y-m-d H:i", $ts) );
   reset($mycols);
   while(list($k,$v) = each($mycols)){
     echo sprintf("<td>%s</td>", @$data[$ts][$v]);
