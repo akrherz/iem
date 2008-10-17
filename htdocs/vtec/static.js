@@ -265,6 +265,7 @@ metastore.on('load', function(){
     return;
   }
   tabPanel.items.each(function(c){c.enable();});
+  if (textTabPanel.isLoaded){ textTabPanel.fireEvent('activate', {}); }
   if (lsrGridPanel.isLoaded){ lsrGridPanel.getStore().load({params:getVTEC()}); }
   if (allLsrGridPanel.isLoaded){ allLsrGridPanel.getStore().load({params:getVTEC()}); }
   if (geoPanel.isLoaded){ geoPanel.getStore().load({params:getVTEC()}); }
@@ -372,39 +373,44 @@ function loadVTEC(){
 textTabPanel = new Ext.TabPanel({
     title: 'Text Data',
     enableTabScroll:true,
+    isLoaded:false,
     id:'textTabPanel',
     disabled: true,
     defaults:{bodyStyle:'padding:5px'}
 });
 textTabPanel.on('activate', function(){
+  textTabsLoad();
+});
+
+textTabsLoad = function(){
   Ext.Ajax.request({
      waitMsg: 'Loading...',
-     url : 'json-text.php' ,
+     url : 'json-text.php' , 
      params:getVTEC(),
      method: 'GET',
-     scope: this,
      success: function ( result, request) {
         var jsonData = Ext.util.JSON.decode(result.responseText);
         /* Remove whatever tabs we currently have going */
-        this.items.each(function(c){this.remove(c);});
-        this.add({
+        textTabPanel.items.each(function(c){textTabPanel.remove(c);});
+        textTabPanel.add({
          title: 'Issuance',
           html: '<pre>'+ jsonData.data[0].report  +'</pre>',
           xtype: 'panel',
          autoScroll:true
         });
         for ( var i = 0; i < jsonData.data[0].svs.length; i++ ){
-            this.add({
+            textTabPanel.add({
               title: 'Update '+ (i+1),
               html: '<pre>'+ jsonData.data[0].svs[i]  +'</pre>',
              xtype: 'panel',
              autoScroll:true
             });
         }
-        this.activate(i);
+        textTabPanel.activate(i);
+        textTabPanel.isLoaded=true;
      }
-   });
 });
+}
 
 lsrGridPanel = new Ext.grid.GridPanel({
     id:'lsrGridPanel',
