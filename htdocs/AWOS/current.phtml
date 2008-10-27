@@ -10,7 +10,7 @@ function new_window(url) {
 } 
 //END Script-->
 </script>
-<script type="text/javascript" src="/js/tableruler.js"></script>
+<script type="text/javascript" src="'. $rooturl .'/js/tableruler.js"></script>
 <script type="text/javascript">
     window.onload=function(){tableruler();}
 </script>';
@@ -131,6 +131,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 	$parts = $finalA[$key];
         echo "<tr ";
         if ($shade) echo "bgcolor=\"#EEEEEE\"";
+        $shade = ! $shade;
         echo ">\n 
          <td><input type=\"checkbox\" name=\"st[]\" 
             value=\"".$key."\"></td>";
@@ -139,8 +140,9 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
          echo "<td>". $parts["sname"] . "</td>";
          echo "<td ";
          if ($tdiff > 10000){
-           echo 'bgcolor="red"';
            $format = "%d %b %I:%M %p";
+           echo 'bgcolor="red"> '. strftime($format, $parts["ts"]) .'</td><td colspan="12" align="center">Site is Offline</td></tr>';
+           continue;
          } else if ($tdiff > 7200){
            echo 'bgcolor="orange"';
            $format = "%d %b %I:%M %p";
@@ -167,7 +169,6 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
           <td>". $parts["vsby"] ."</td>
           <td>". $parts["phour"] ."</td>
           <td>". $parts["pday"] ."</td></tr>\n";
-      $shade = ! $shade;
 }
 
 
