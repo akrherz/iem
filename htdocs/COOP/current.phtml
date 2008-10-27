@@ -177,10 +177,10 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
    } else{
     echo "<td colspan=3></td>";
    }
-   if ($value["pday"] == 0.0001) $value["pday"] = "T";
+   if ($value["pday"] == 0.001) $value["pday"] = "T";
    if ($value["pday"] < 0) $value["pday"] = "M";
-   if ($value["snow"] == 0.0001) $value["snow"] = "T";
-   if ($value["snowd"] == 0.0001) $value["snowd"] = "T";
+   if ($value["snow"] == 0.001) $value["snow"] = "T";
+   if ($value["snowd"] == 0.001) $value["snowd"] = "T";
    if ($value["snow"] < 0) $value["snow"] = "M";
 
    echo "<td>". $value["pday"] ."</td>";
