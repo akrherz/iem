@@ -46,13 +46,13 @@ include("$rootpath/include/header.php"); ?>
   }
   if ($iemob->db["tmpf"] != -99) {
     $db[$site]['tmpf'] = $iemob->db["tmpf"];
-    $db[$site]['max_tmpf'] = $iemob->db["max_tmpf"];
-    $db[$site]['min_tmpf'] = $iemob->db["min_tmpf"];
-  } else {
-    $db[$site]['tmpf'] = "";
-    $db[$site]['max_tmpf'] = "";
-    $db[$site]['min_tmpf'] = "";
   }
+  if ($iemob->db["max_tmpf"] != -99) {
+    $db[$site]['max_tmpf'] = $iemob->db["max_tmpf"];
+  }
+  if ($iemob->db["min_tmpf"] != 99) {
+    $db[$site]['min_tmpf'] = $iemob->db["min_tmpf"];
+  } 
   if ($iemob->db["phour"] != -99)
     $db[$site]['phour'] = $iemob->db["phour"];
   $db[$site]['pday'] = $iemob->db["pday"];
