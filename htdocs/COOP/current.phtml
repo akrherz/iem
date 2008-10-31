@@ -103,18 +103,22 @@ $cols = Array("ts" => "Valid", "county" => "County",
   <option value="SD_COOP" <?php if ($network == "SD_COOP") echo "SELECTED"; ?>>South Dakota
   <option value="WI_COOP" <?php if ($network == "WI_COOP") echo "SELECTED"; ?>>Wisconsin
 </select>
+<!--
 <b>Show SHEF obs:</b>
 <select name="shef">
  <option value="0" <?php if (! $shef) echo "SELECTED"; ?>>No
  <option value="1" <?php if ($shef) echo "SELECTED"; ?>>Yes
 </select>
+-->
 <input type="submit" value="Go!">
 </form>
 
 
 <?php
 echo "<p>Sorted by: ". $cols[$sortcol] ;
-
+if ($shef){
+  echo " . Sorry, SHEF observations are not available at this time.";
+}
 
  $baseurl = "current.phtml?network=$network&shef=$shef&sortcol=";
 ?>
