@@ -118,6 +118,7 @@ $cols = Array("ts" => "Valid", "county" => "County",
 echo "<p>Sorted by: ". $cols[$sortcol] ;
 if ($shef){
   echo " . Sorry, SHEF observations are not available at this time.";
+  $shef = 0;
 }
 
  $baseurl = "current.phtml?network=$network&shef=$shef&sortcol=";
