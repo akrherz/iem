@@ -5,13 +5,13 @@ $connection = iemdb("access");
 
 $network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
 
-$query1 = "SET TIME ZONE 'GMT'";
-$query2 = "select count(*), tvalid from ( 
+$rs = pg_prepare($connection, "SELECT", "select count(*), tvalid from ( 
     select station, to_char(valid, 'mmdd/HH24') as tvalid, count(*)
-    from current_log WHERE network= '$network' GROUP by station, tvalid) as foo
-  GROUP by tvalid ORDER by tvalid ASC";
-$result = pg_exec($connection, $query1);
-$result = pg_exec($connection, $query2);
+    from current_log WHERE network= $1 GROUP by station, tvalid) as foo
+  GROUP by tvalid ORDER by tvalid ASC");
+
+$result = pg_exec($connection, "SET TIME ZONE 'GMT'");
+$result = pg_execute($connection, "SELECT", Array($network));
 
 $ydata = array();
 $xlabel= array();
@@ -30,11 +30,11 @@ pg_close($connection);
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
-$goal = Array("awos" => 35, "asos" => 15, "rwis" => 50);
+$goal = Array("awos" => 35, "asos" => 15, "rwis" => 70);
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,400,"example3");
-$graph->SetScale("textlin",0,50);
+$graph->SetScale("textlin");
 $graph->img->SetMargin(40,20,50,100);
 
 //$graph->xaxis->SetFont(FS_FONT1,FS_BOLD);
