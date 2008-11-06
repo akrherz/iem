@@ -1,0 +1,35 @@
+<?php include("../../config/settings.inc.php"); ?>
+<?php $THISPAGE = "gis"; 
+include("$rootpath/include/header.php"); ?>
+
+<h3>GIS Products:</h3>
+
+<p>
+The Iowa Road Conditions data is available in the following GIS formats and 
+Open-GIS based web services.  Please let us know if you would like to see a different format or have any questions about these data sources.
+</p>
+
+<h4>Shapefile:</h4>
+<p>
+Line coverage shapefile in the <i>NAD83 UTM Zone15 North</i> projection.
+</p>
+<ul>
+ <li>Current road conditions: <a href="http://mesonet.agron.iastate.edu/data/gis/shape/26915/ia/iaroad_cond.zip">Zip File</a> (~200 KB)</li>
+</ul>
+
+<h4>Open GIS Consortium Web Services:</h4>
+<p>
+Some intelligent GIS platforms are able to consume data from remove
+servers that implement <a href="http://www.opengis.org">Open GIS Consortium</a>
+web services.  If your client supports this feature, try pointing your
+application to one of these services.
+</p>
+
+<p><strong>Web Map Service:</strong>
+<br /> <code>http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi?</code></p>
+
+
+
+<?php include("$rootpath/include/footer.php"); ?>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<?
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/google_keys.php");
+
+$con = iemdb("postgis");
+$sql = "SELECT max(valid) as valid from roads_current";
+$rs = pg_query($con, $sql);
+
+$row = pg_fetch_array($rs, 0);
+$valid = substr($row["valid"],0,16);
+$ts = strtotime($valid);
+$valid = strftime("%I:%M %p on %d %b %Y", $ts);
+
+$api = $GOOGLEKEYS[$rooturl];
+$THISPAGE = "apps-roads";
+$HEADEXTRA = "
+<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
+<script src=\"http://www.openlayers.org/api/OpenLayers.js\"></script>
+<script type=\"text/javascript\">
+var map;
+function init(){
+
+  map = new OpenLayers.Map( 'map',{
+        projection: new OpenLayers.Projection('EPSG:900913'),
+        displayProjection: new OpenLayers.Projection('EPSG:4326'),
+        units: 'm',
+        numZoomLevels: 18,
+        maxResolution: 156543.0339,
+        maxExtent: new OpenLayers.Bounds(-20037508, -20037508,
+                                         20037508, 20037508.34)
+  }); 
+  var gmap = new OpenLayers.Layer.Google(
+                'Google Streets',
+                 {'sphericalMercator': true}
+            );
+
+  var road_condition = new OpenLayers.Layer.WMS( 'Road Conditions',
+    'http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi', 
+   {layers: 'roadcond-interstate,roadcond-noninterstate', format: 'image/png', transparent: 'true'});
+
+  var warnings = new OpenLayers.Layer.WMS( 'NWS Watch/Warnings',
+    'http://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?', 
+    {layers: 'warnings_c', format: 'image/png', transparent: 'true'});
+  warnings.setVisibility(false);
+
+  var pavetemps = new OpenLayers.Layer.WMS( 'Pavement Temperatures',
+    'http://mesonet.agron.iastate.edu/cgi-bin/wms/us/roadtemps.cgi?', 
+    {layers: 'roadtemps', format: 'image/png', transparent: 'true'});
+  pavetemps.setVisibility(false);
+
+  var airtemps = new OpenLayers.Layer.WMS( 'Air 2m Temperatures',
+    'http://mesonet.agron.iastate.edu/cgi-bin/wms/us/obs.cgi?', 
+    {layers: 'airtemps', format: 'image/png', transparent: 'true'});
+  airtemps.setVisibility(false);
+
+
+  var nexrad = new OpenLayers.Layer.WMS( 'NEXRAD',
+    'http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?', 
+    {layers: 'nexrad-n0r', format: 'image/png', transparent: 'true'});
+  nexrad.setVisibility(false);
+
+  map.addLayers([gmap, nexrad, road_condition, warnings, pavetemps, airtemps]);
+
+  var proj = new OpenLayers.Projection('EPSG:4326');
+  var proj2 = new OpenLayers.Projection('EPSG:900913');
+  var point = new OpenLayers.LonLat(-93.8, 42.2);
+  point.transform(proj, proj2);
+
+  map.setCenter(point, 7);
+  map.addControl( new OpenLayers.Control.LayerSwitcher({id:'ls'}) );
+  map.addControl( new OpenLayers.Control.MousePosition() );
+  map.getControl('ls').maximizeControl();
+
+};
+</script>
+";
+$BODYEXTRA = "onload=\"init()\"";
+include("$rootpath/include/header.php");
+?>
+    <style type="text/css">
+        #map {
+            width: 800px;
+            height: 600px;
+            border: 2px solid black;
+        }
+</style>
+<h3>Interactive Data Map</h3>
+<div id="map"></div>
+<img src="http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi?LAYER=roadcond-noninterstate&FORMAT=image%2Fpng&TRANSPARENT=true&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&STYLES=&EXCEPTIONS=application%2Fvnd.ogc.se_inimage&SRS=EPSG%3A4326&BBOX=-92.8125,36.5625,-90,39.375&WIDTH=256&HEIGHT=256" style="position: absolute; left: 10px; top: 310px; z-index: 777;">
+<img src="http://mesonet.agron.iastate.edu/cgi-bin/wms/us/roadtemps.cgi?LAYER=roadtemps&FORMAT=image%2Fpng&TRANSPARENT=true&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&STYLES=&EXCEPTIONS=application%2Fvnd.ogc.se_inimage&SRS=EPSG%3A4326&BBOX=-92.8125,36.5625,-90,39.375&WIDTH=256&HEIGHT=256" style="position: absolute; left: 55px; top: 180px; z-index: 777;">
+
+<?php include("$rootpath/include/footer.php"); ?>

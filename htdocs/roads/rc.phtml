@@ -1,0 +1,98 @@
+<?php
+ include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$conn = iemdb("postgis");
+
+ $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "segid";
+?>
+
+<?php $THISPAGE = "apps-roads"; 
+ $REFRESH = '<meta http-equiv="refresh" content="600">';
+include("$rootpath/include/header.php"); 
+
+
+$sql = "SELECT * from roads_current r, roads_base b, roads_conditions c WHERE
+  r.segid = b.segid and r.cond_code = c.code";
+$rs = pg_query($conn, $sql);
+
+$obs = Array();
+for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
+{
+  $seg = intval($row["segid"]);
+  $obs[$seg] = $row;
+  $t = split(" to ", $row["minor"]);
+  $obs[$seg]["minor0"] = $t[0];
+  $obs[$seg]["minor1"] = $t[1];
+  if ($row["type"] == 1){ $obs[$seg]["number"] = intval($row["int1"]); }
+  if ($row["type"] == 2){ $obs[$seg]["number"] = intval($row["us1"]); }
+  if ($row["type"] == 3){ $obs[$seg]["number"] = intval($row["st1"]); }
+  $valid = substr($row["valid"],0,16);
+}
+$ts = strtotime($valid);
+$valid = strftime("%I:%M %p on %d %b %Y", $ts); 
+
+$types = Array(1 => "Interstate", 2 => "US Highway", 3 => "State Highway");
+
+$vals = Array("number" => "Route #", "type" => "Road Classification",
+  "minor0" => "Start Point", "minor1" => "End Point", 
+  "label" => "Road Condition", "cond_code" => "Road Condition",
+  "segid" => "Travel Path");
+
+?>
+
+<div class="text">
+
+<h3 class="subtitle"><center>Iowa Road Conditions valid <?php echo $valid; ?></center></h3><p>
+
+<?php
+echo "<br>Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
+a column to sort it or sort by <a href=\"rc.phtml?sortcol=segid\">travel path</a><br>\n";
+?>
+
+
+<table style="font-size: 10pt; width: 85%;" class="ruler">
+<thead>
+<tr>
+  <?php $uri = "rc.phtml?sortcol="; ?>
+  <th><a href="<?php echo $uri; ?>type">Road Class</a></th>
+  <th><a href="<?php echo $uri; ?>number">Route #</a></th>
+  <th><a href="<?php echo $uri; ?>minor0">Start Point</a></th>
+  <th><a href="<?php echo $uri; ?>minor1">End Point</a></th>
+  <th><a href="<?php echo $uri; ?>cond_code">Condition</a></th>
+</tr></thead>
+<tbody>
+<?php
+function aSortBySecondIndex($multiArray, $secondIndex) {
+        while (list($firstIndex, ) = each($multiArray))
+                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+        asort($indexMap);
+        while (list($firstIndex, ) = each($indexMap))
+                if (is_numeric($firstIndex))
+                        $sortedArray[] = $multiArray[$firstIndex];
+                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+        return $sortedArray;
+}
+
+  $finalA = Array();
+  $finalA = aSortBySecondIndex($obs, $sortcol);
+  $now = time();
+  $i = 0;
+  while (list ($key, $val) = each ($finalA))  {
+    $i++;
+    $parts = $finalA[$key];
+
+    echo "<tr";
+    if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
+    echo "></td>";
+
+    echo "<td>". $types[$parts["type"]] ."</td>";
+    echo "<td>". $parts["number"] ."</td>";
+    echo "<td>". $parts["minor0"] ."</td>";
+    echo "<td>". $parts["minor1"] ."</td>";
+    echo "<td>". $parts["raw"] ."</td>";
+   }
+?>
+</table>
+
+
+<?php include("$rootpath/include/footer.php"); ?>

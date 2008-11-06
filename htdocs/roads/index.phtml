@@ -1,0 +1,48 @@
+<?php 
+  include("../../config/settings.inc.php");
+  $THISPAGE = "apps-roads"; 
+  $REFRESH = '<meta http-equiv="refresh" content="600">';
+  include("$rootpath/include/header.php"); 
+?>
+
+<table>
+<tr>
+<td valign="TOP">
+
+<strong>Website Features:</strong>
+<ul>
+ <li><a href="gis.phtml">GIS Products</a>
+<br />Current road conditions in GIS formats + web services.</li>
+ <li><a href="rc.phtml">Sortable Text</a>
+<br />Sortable textual report of current road conditions.</li>
+ <li><a href="maps.phtml">Web Mapping</a>
+<br />Internet mapping application with RADAR included!</li>
+</ul>
+
+<strong>Links:</strong>
+<ul>
+ <li><a href="http://www.iowaroadconditions.org/roadConditions.asp?area=IA_statewide&textOnly=False">IowaRoadConditions.org</a></li>
+ <li><a href="http://www.state.ia.us/government/dps/isp">Iowa State Patrol</a></li>
+</ul>
+
+<strong>Surrounding States:</strong>
+<pre>
+Iowa :          800-288-1047
+Illinois :      800-452-4368
+Kansas :        800-585-7623
+Minnesota :     800-542-0220
+Missouri :      800-222-6400
+Nebraska :      402-471-4533
+South Dakota :  605-367-5707
+Wisconsin :     800-762-3947
+</pre>
+
+</td><td valign="TOP">
+
+<img src="http://mesonet.agron.iastate.edu/data/iaroads.png?<?php echo time(); ?>">
+
+<br />Data shown is provisional and without warranty.
+
+</td></tr></table>
+
+<?php include("$rootpath/include/footer.php"); ?>
