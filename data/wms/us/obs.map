@@ -1,0 +1,166 @@
+# The only mapfile!
+NAME base4326
+STATUS ON
+SIZE 640 480
+#FONTSET "../fonts/fonts.list"
+EXTENT -104 37 -87 49
+UNITS DD
+SHAPEPATH "./"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+IMAGETYPE PNG
+IMAGECOLOR 0 0 255
+#TRANSPARENT ON
+#INTERLACE off
+
+PROJECTION
+  "init=epsg:4326"
+END
+
+WEB
+  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEURL "/tmp/"
+  TEMPLATE "test.html"
+  METADATA
+   "wms_title" "IEM 2 Meter Air Temperature"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/us/obs.cgi?"
+   "wms_srs" "EPSG:4326 EPSG:26915 EPSG:900913"
+   "wms_abstract" "Temps."
+   "wms_keywords" "Temps"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME airtemps
+  # Connect to a remote spatial database
+  CONNECTION "user=nobody dbname=iem host=iemdb"
+  # Get the lines from the 'geom' column of the 'roads' table
+  DATA "geom from (select geom, round(tmpf::numeric,0) as tmpf, 
+    oid as foid from current WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
+    ) as foo using unique foid using srid=4326"
+  STATUS OFF
+  METADATA
+    "wms_title" "2 Meter Air Temps"
+    "wms_srs" "EPSG:4326 EPSG:26915 EPSG:900913"
+  END
+  TYPE POINT
+  LABELCACHE ON
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    EXPRESSION ([tmpf] >= 35 && [tmpf] < 120)
+    TEXT ([tmpf])
+    COLOR -1 -1 -1
+    LABEL
+      COLOR 30 190 20
+      #OUTLINECOLOR 250 250 250
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION UL
+      OFFSET 2 2
+      BUFFER 1
+      PARTIALS TRUE
+      FORCE FALSE
+    END
+  END
+  CLASS
+    EXPRESSION ([tmpf] >= 34)
+    TEXT ([tmpf])
+    COLOR -1 -1 -1
+    LABEL
+      COLOR 215 255 0
+      #OUTLINECOLOR 250 250 250
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION UL
+      OFFSET 2 2
+      BUFFER 1
+      PARTIALS TRUE
+      FORCE FALSE
+    END
+  END
+  CLASS
+    EXPRESSION ([tmpf] >= 33)
+    TEXT ([tmpf])
+    COLOR -1 -1 -1
+    LABEL
+      COLOR 255 164 0
+      #OUTLINECOLOR 250 250 250
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION UL
+      OFFSET 2 2
+      BUFFER 1
+      PARTIALS TRUE
+      FORCE FALSE
+    END
+  END
+  CLASS
+    EXPRESSION ([tmpf] >= 32)
+    TEXT ([tmpf])
+    COLOR -1 -1 -1
+    LABEL
+      COLOR 255 50 0
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION UL
+      OFFSET 2 2
+      BUFFER 1
+      PARTIALS TRUE
+      FORCE FALSE
+    END
+  END
+  CLASS
+    EXPRESSION ([tmpf] >= 31)
+    TEXT ([tmpf])
+    COLOR -1 -1 -1
+    LABEL
+      COLOR 255 0 144
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION UL
+      OFFSET 2 2
+      BUFFER 1
+      PARTIALS TRUE
+      FORCE FALSE
+    END
+  END
+  CLASS
+    EXPRESSION ([tmpf] >= 30)
+    TEXT ([tmpf])
+    COLOR -1 -1 -1
+    LABEL
+      #COLOR 232 164 226
+      COLOR 255 0 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION UL
+      OFFSET 2 2
+      BUFFER 1
+      PARTIALS TRUE
+      FORCE FALSE
+    END
+  END
+  CLASS
+    EXPRESSION ([tmpf] > -40)
+    TEXT ([tmpf])
+    COLOR -1 -1 -1
+    LABEL
+      #COLOR 232 214 226
+      COLOR 255 255 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION UL
+      OFFSET 2 2
+      BUFFER 1
+      PARTIALS TRUE
+      FORCE FALSE
+    END
+  END
+END
+
+END
