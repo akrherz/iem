@@ -17,6 +17,7 @@ $_DATABASES = Array(
  'postgis' => "dbname=postgis host=$iem20 user=nobody",
  'portfolio' => "dbname=portfolio host=meteor.geol.iastate.edu user=mesonet",
  'scan' => "dbname=scan host=$iem20 user=nobody",
+ 'squaw' => "dbname=squaw host=$iem20 user=nobody",
 );
 
 function iemdb($DBKEY)

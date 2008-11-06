@@ -49,7 +49,7 @@ $_pages = Array(
     "climodat" => Array("title" => "Climodat", "url" => "/climodat/"),
  ),
  "iem" => Array(
-    "base" => Array("title" => "IEM Info", "url" => "/sites/locate.php"),
+    "base" => Array("title" => "Info", "url" => "/sites/locate.php"),
     "feature" => Array("title" => "Daily Features", "url" => "/onsite/features/past.php"),
     "sites" => Array("title" => "IEM Sites", "url" => "/sites/locate.php"),
     "info" => Array("title" => "Info", "url" => "/info.php"),
@@ -80,6 +80,14 @@ $_pages = Array(
     "rainfall" => Array("title" => "Rainfall Data", "url" => "/rainfall/"),
     "satellite" => Array("title" => "Satellite Data", "url" => "/GIS/goes.phtml"),
     "software" => Array("title" => "Software", "url" => "/GIS/software.php"),
+ ),
+ "roads" => Array(
+    "base" => Array("title" => "Roads", "url" => "/roads/"),
+    "main" => Array("title" => "Mainpage", "url" => "/roads/"),
+    "gis" => Array("title" => "GIS Products", "url" => "/roads/gis.phtml"),
+    "history" => Array("title" => "Historical", "url" => "/roads/history.phtml"),
+    "maps" => Array("title" => "Interactive Map", "url" => "/roads/maps.phtml"),
+    "sort" => Array("title" => "Sortable Text", "url" => "/roads/rc.phtml"),
  ),
  "severe" => Array(
     "base" => Array("title" => "Severe Weather", "url" => "/current/severe.phtml"),
