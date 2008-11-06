@@ -1,9 +1,3 @@
-<?php
-  // past.php
-  //    Prints out weekly listings of IEM features
-  //  30 Dec 2002  Daryl Herzmann
-?>
-
 <?php 
 include("../../../config/settings.inc.php");
 $TITLE = "IEM | Past Features";
@@ -13,7 +7,6 @@ $THISPAGE = "iem-feature";
 include("$rootpath/include/header.php"); ?>
 
 <div class="text">
-<b>Nav:</b> <a href="/index.php">IEM Home</a> &nbsp;<b> > </b> &nbsp; Past Features
 <br>List all <a href="titles.php">feature titles</a>.
 
 <?php 
@@ -56,15 +49,15 @@ include("$rootpath/include/header.php"); ?>
 
   for ($i = 0; $i < $num; $i++){
     $row = @pg_fetch_array($rs,$i);
-
+    $valid = strtotime( substr($row["valid"],0,16) );
 
     echo "<tr class=\"even\">
       <td colspan=\"2\" style=\"text-align: center;\">". $row["calhead"] ."</td></tr>
       <tr>
       <td valign=\"top\">
-      <a href=\"$rooturl/onsite/features/". $row["imageref"] .".gif\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.gif\" BORDER=0 ALT=\"Feature\"></a></td>";
+      <a href=\"$rooturl/onsite/features/". $row["imageref"] .".gif\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.gif\" BORDER=0 ALT=\"Feature\"></a><br />".$row["caption"] ."</td>";
 
-    echo "<td><b>". $row["title"] ."</b>\n";
+    echo "<td><b><a href='cat.php?day=".date("Y-m-d", $valid) ."'>". $row["title"] ."</a></b>\n";
     echo "<br><font size='-1' style='color:black'>". $row["webdate"] ."</font>\n";
     echo "<br>". $row["story"] ."";
     echo "<br>Voting: Good - ". $row["good"] ." Bad - ". $row["bad"] ."</div></td></tr>";
