@@ -39,7 +39,7 @@ function networkSelect($network, $selected, $extra=Array())
         if ($tbl["network"] != $network) continue;
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">". $tbl["city"] ."</option>\n";
+        $s .= ">[$sid] ". $tbl["city"] ."</option>\n";
    }
    while (list($idx,$sid) = each($extra))
    {
