@@ -173,4 +173,19 @@ function daySelect2($selected, $name){
   echo "</select>\n";
 } // End 
 
+function segmentSelect($dbconn, $selected, $name="segid")
+{ 
+  $s = "<select name=\"$name\">\n";
+  $rs = pg_query($dbconn, "SELECT segid, major, minor from roads_base ORDER by major ASC");
+  
+  for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
+  { 
+    $s .= "<option value=\"". $row["segid"] ."\" ";
+    if ($row["segid"] == $selected) $s .= "SELECTED";
+    $s .= ">". $row["major"] ." -- ". $row["minor"] ."</option>";
+  }
+  return $s;
+} // End of segmentSelect
+
+
 ?>
