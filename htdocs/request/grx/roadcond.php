@@ -39,8 +39,8 @@ for ($i=0;$row= @pg_fetch_array($rs,$i);$i++)
   echo "Color: ". $colors[$row["cond_code"]] ."\n";
   echo "Line: 4, 0, ". $row["major"] ."\n";
   $meat = str_replace("MULTILINESTRING((", "", $row["t"]);
-  $meat = str_replace(")", "", $meat);
-  $meat = str_replace("(", "", $meat);
+  $meat = str_replace("))", "", $meat);
+  $meat = str_replace("),(", ",", $meat);
   $tokens = explode(",", $meat);
   while (list($q,$s) = each($tokens)){
     $t = explode(" ", $s);
