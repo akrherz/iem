@@ -52,7 +52,6 @@
 "ia3632" => array("city" => "Harlan","id" => "ia3632","startYear" => "1951","lat" => 41.63,"lon" => -95.32),
 "ia3718" => array("city" => "Hawarden","id" => "ia3718","startYear" => "1951","lat" => 43,"lon" => -96.48),
 "ia3980" => array("city" => "Humboldt","id" => "ia3980","startYear" => "1951","lat" => 42.72,"lon" => -94.22),
-"ia4038" => array("city" => "Ida Grove","id" => "ia4038","startYear" => "1951" ,"lat" => 42.38,"lon" => -95.5),
 "ia4049" => array("city" => "Independence","id" => "ia4049","startYear" => "1951","lat" => 42.47,"lon" => -91.88),
 "ia4063" => array("city" => "Indianola","id" => "ia4063","startYear" => "1893","lat" => 41.37,"lon" => -93.55),
 "ia4101" => array("city" => "Iowa City","id" => "ia4101","startYear" => "1951","lat" => 41.63,"lon" => -91.52),
