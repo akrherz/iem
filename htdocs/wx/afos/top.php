@@ -3,7 +3,7 @@
 ?>
 <body bgcolor="white">
 
-<form method="GET" action="<?php echo $rootcgi; ?>/cgi-bin/afos/retrieve.py" target="display">
+<form method="GET" action="<?php echo $rootcgi; ?>/afos/retrieve.py" target="display">
 
 <table border="0" width="100%">
 <tr>
