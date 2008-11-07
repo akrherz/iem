@@ -36,13 +36,38 @@ function init(){
                  {'sphericalMercator': true}
             );
    styleMap = new OpenLayers.StyleMap({
+     'default': {
            strokeColor: 'black',
            strokeWidth: 5,
-           strokeOpacity: 0.5,
-           fillOpacity: 0.2
-   });
+           strokeOpacity: 1
+           },
+      'select': {
+          fillOpacity: 1
+       }
+});
+   var lookup = {
+    0: {strokeColor: '#000000'},
+    1: {strokeColor: '#00CC00'},
+    3: {strokeColor: '#F0F000'},
+    7: {strokeColor: '#F0F000'},
+    11: {strokeColor: '#F0F000'},
+    15: {strokeColor: '#FFC5C5'},
+    19: {strokeColor: '#FE3299'},
+    23: {strokeColor: '#B500B5'},
+    27: {strokeColor: '#FFC5C5'},
+    31: {strokeColor: '#FE3399'},
+    35: {strokeColor: '#B500B5'},
+    39: {strokeColor: '#DCDCDC'},
+    43: {strokeColor: '#0099FE'},
+    47: {strokeColor: '#00009E'},
+    51: {strokeColor: '#E85F01'},
+    56: {strokeColor: '#FFC5C5'},
+    60: {strokeColor: '#FE3399'},
+    86: {strokeColor: '#FF0000', strokeWidth: 7}
+   };
+   styleMap.addUniqueValueRules('default', 'cond_code', lookup);
 
-  var road_condition = new OpenLayers.Layer.WFS( 'Road Conditions',
+  var road_condition = new OpenLayers.Layer.WFS( 'Iowa Road Conditions',
     '".$rootcgi."/wfs/iowa/roadcond-900913.cgi', 
    {typename: 'roadcond-wfs-900913'
    },{
@@ -73,7 +98,7 @@ function feature_changeColor(feature){
   popup = new OpenLayers.Popup('chicken', 
               feature.geometry.getBounds().getCenterLonLat(),
               new OpenLayers.Size(200,40),
-              \"<div style='font-size:.8em'>Road Name: \" + feature.attributes.major +\"<br />Segment: \"+ feature.attributes.minor   +\"<br />Condition: \"+ feature.attributes.label + \"</div>\",
+              \"<div style='font-size:.8em'>Road Name: \" + feature.attributes.major +\"<br />Segment: \"+ feature.attributes.minor   +\"<br />Condition: \"+ feature.attributes.label + \"(\"+ feature.attributes.cond_code +\")</div>\",
               true);
   feature.popup = popup;
   map.addPopup(popup);
