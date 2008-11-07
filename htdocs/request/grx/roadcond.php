@@ -29,6 +29,7 @@ $colors = Array(
 
 echo "Threshold: 999
 Title: IEM Delivered Iowa Road Conditions
+Refresh: 5
 ";
 
 $rs = pg_query($conn, "SELECT astext(transform(simple_geom,4326)) as t, * from roads_current_test r, roads_base b, roads_conditions c WHERE r.segid = b.segid and r.cond_code = c.code");
@@ -42,7 +43,7 @@ for ($i=0;$row= @pg_fetch_array($rs,$i);$i++)
   $tokens = explode(",", $meat);
   while (list($q,$s) = each($tokens)){
     $t = explode(" ", $s);
-    echo sprintf("%.3f, %.3f", $t[1], $t[0]) ."\n";
+    echo sprintf("  %.3f,%.3f", $t[1], $t[0]) ."\n";
   }
   echo "End:\n";
 }
