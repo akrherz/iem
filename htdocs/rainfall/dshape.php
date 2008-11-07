@@ -14,11 +14,11 @@ chdir("/var/www/htdocs/tmp");
 $dir = date("Y/m", $ts);
 $fp = sprintf("%s_rain", date("Ymd", $ts));
 
-`cp /mnt/a1/wepp/rainfall/shape/daily/${dir}/${fp}.dbf .`;
-`cp /wepp/GIS/static/hrap_${geometry}_${epsg}.shp ${fp}.shp`;
-`cp /wepp/GIS/static/hrap_${geometry}_${epsg}.shx ${fp}.shx`;
-`cp /mesonet/data/gis/meta/${epsg}.prj ${fp}.prj`;
-`cp /mesonet/data/gis/avl/iemrainfall.avl ${fp}.avl`;
+`cp /mnt/a2/wepp/rainfall/shape/daily/${dir}/${fp}.dbf .`;
+`cp /mnt/mesonet/wepp/GIS/static/hrap_${geometry}_${epsg}.shp ${fp}.shp`;
+`cp /mnt/mesonet/wepp/GIS/static/hrap_${geometry}_${epsg}.shx ${fp}.shx`;
+`cp /mnt/mesonet/data/gis/meta/${epsg}.prj ${fp}.prj`;
+`cp /mnt/mesonet/data/gis/avl/iemrainfall.avl ${fp}.avl`;
 `zip ${fp}.zip ${fp}*`;
 `rm -f ${fp}.dbf ${fp}.shp ${fp}.shx`;
 
