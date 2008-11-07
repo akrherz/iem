@@ -36,17 +36,21 @@ $rs = pg_query($conn, "SELECT astext(transform(simple_geom,4326)) as t, * from r
 
 for ($i=0;$row= @pg_fetch_array($rs,$i);$i++)
 {
-  echo "Color: ". $colors[$row["cond_code"]] ."\n";
-  echo "Line: 4, 0, ". $row["major"] ."\n";
   $meat = str_replace("MULTILINESTRING((", "", $row["t"]);
   $meat = str_replace("))", "", $meat);
-  $meat = str_replace("),(", ",", $meat);
-  $tokens = explode(",", $meat);
-  while (list($q,$s) = each($tokens)){
-    $t = explode(" ", $s);
-    echo sprintf("  %.3f,%.3f", $t[1], $t[0]) ."\n";
+  $segments = explode("),(", $meat);
+  echo "Color: ". $colors[$row["cond_code"]] ."\n";
+  while(list($q,$seg) = each($segments))
+  {
+    echo "Line: 4, 0, ". $row["major"] ." :: ". $row["minor"]  ."\n";
+    $tokens = explode(",", $seg);
+    while (list($p,$s) = each($tokens)){
+      $t = explode(" ", $s);
+      echo sprintf("  %.3f,%.3f", $t[1], $t[0]) ."\n";
+    }
+    echo "End:\n";
   }
-  echo "End:\n";
+
 }
 
 ?>
