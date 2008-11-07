@@ -89,7 +89,13 @@ $fall .= "</table>";
 <p>This application computes soil temperature exceedance based on the
 observation record of a ISU Ag Climate site.  The average daily 4 inch
 soil temperature is used in this calculation.
- <i>The values express the percentage of years that an observed temperature threshold was exceeded after the given date.</i>
+<ul>
+ <li>Spring: The values represent the percentage of years that a temperature
+below the given threshold was observed <strong>after</strong> a given date.</li>
+ <li>Fall: The values represent the percentage of years that a temperature
+below the given threshold was observed <strong>before</strong> a given date.</li>
+</ul>
+
 
 
 <form method="GET">
