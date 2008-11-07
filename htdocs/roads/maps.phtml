@@ -97,7 +97,7 @@ function feature_changeColor(feature){
   selectedFeature = feature;
   popup = new OpenLayers.Popup('chicken', 
               feature.geometry.getBounds().getCenterLonLat(),
-              new OpenLayers.Size(200,40),
+              new OpenLayers.Size(200,60),
               \"<div style='font-size:.8em'>Road Name: \" + feature.attributes.major +\"<br />Segment: \"+ feature.attributes.minor   +\"<br />Condition: \"+ feature.attributes.label + \"(\"+ feature.attributes.cond_code +\")</div>\",
               true);
   feature.popup = popup;
