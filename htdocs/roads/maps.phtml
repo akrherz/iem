@@ -18,7 +18,7 @@ $HEADEXTRA = "
 <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
 <script src=\"http://www.openlayers.org/api/OpenLayers.js\"></script>
 <script type=\"text/javascript\">
-var map;
+var map, selectedFeature, control;
 function init(){
 
   map = new OpenLayers.Map( 'map',{
@@ -35,17 +35,55 @@ function init(){
                 'Google Streets',
                  {'sphericalMercator': true}
             );
-
-  var road_condition = new OpenLayers.Layer.WMS( 'Road Conditions',
-    'http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi', 
-   {layers: 'roadcond-interstate,roadcond-noninterstate', 
-    format: 'image/png', 
-    transparent: 'true'
-   },{
-    maxExtent: new OpenLayers.Bounds(-10757038,4922156.5,-10036698,5388975),
-    projection: new OpenLayers.Projection('EPSG:900913'),
-    displayOutsideMaxExtent: false
+   styleMap = new OpenLayers.StyleMap({
+           strokeColor: 'black',
+           strokeWidth: 5,
+           strokeOpacity: 0.5,
+           fillOpacity: 0.2
    });
+
+  var road_condition = new OpenLayers.Layer.WFS( 'Road Conditions',
+    '".$rootcgi."/wfs/iowa/roadcond-900913.cgi', 
+   {typename: 'roadcond-wfs-900913'
+   },{
+    typename: 'roadcond-wfs-900913',
+    extractAttributes: true,
+    styleMap: styleMap
+   });
+
+  var control = new OpenLayers.Control.SelectFeature(road_condition, {
+	hover: true,
+	clickout: false,
+	toggle: false,
+	multiple: false,
+    callbacks: {
+      'over':feature_changeColor, 'out':feature_restoreColor
+    }
+});
+  map.addControl(control);
+  control.activate();
+
+function onPopupClose(evt) {
+     control.unselect(selectedFeature);
+}
+
+
+function feature_changeColor(feature){
+  selectedFeature = feature;
+  popup = new OpenLayers.Popup('chicken', 
+              feature.geometry.getBounds().getCenterLonLat(),
+              new OpenLayers.Size(200,40),
+              \"<div style='font-size:.8em'>Road Name: \" + feature.attributes.major +\"<br />Segment: \"+ feature.attributes.minor   +\"<br />Condition: \"+ feature.attributes.label + \"</div>\",
+              true);
+  feature.popup = popup;
+  map.addPopup(popup);
+};
+function feature_restoreColor(feature){ 
+            map.removePopup(feature.popup);
+            feature.popup.destroy();
+            feature.popup = null;
+};
+
 
   var warnings = new OpenLayers.Layer.WMS( 'NWS Watch/Warnings',
     'http://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?', 
