@@ -55,51 +55,100 @@ LAYER
   CLASS
     NAME ">=35"
     EXPRESSION ([tsf0] >= 35)
-    COLOR 30 190 20
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 0 0 0
+      SYMBOL 'circle'
+      SIZE 10
+    END
+    STYLE
+      COLOR 30 190 20
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
   CLASS
     NAME "34-35"
     EXPRESSION ([tsf0] >= 34)
-    COLOR 215 255 0
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 0 0 0
+      SYMBOL 'circle'
+      SIZE 10
+    END
+    STYLE
+      COLOR 215 255 0
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
   CLASS
     NAME "33-34"
     EXPRESSION ([tsf0] >= 33)
-    COLOR 255 164 0
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 0 0 0
+      SYMBOL 'circle'
+      SIZE 10
+    END
+    STYLE
+      COLOR 255 164 0
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
   CLASS
     NAME "32-33"
     EXPRESSION ([tsf0] >= 32)
-    COLOR 255 50 0
-    SYMBOL 'circle'
-    SIZE 10
+    STYLE
+      COLOR 0 0 0
+      SYMBOL 'circle'
+      SIZE 10
+    END
+    STYLE
+      COLOR 255 50 0
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
   CLASS
     NAME "31-32"
     EXPRESSION ([tsf0] >= 31)
-    COLOR 255 0 144
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 0 0 0
+      SYMBOL 'circle'
+      SIZE 10
+    END
+    STYLE
+      COLOR 255 0 144
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
   CLASS
     NAME "30-31"
     EXPRESSION ([tsf0] >= 30)
-    COLOR 255 0 255
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 0 0 0
+      SYMBOL 'circle'
+      SIZE 10
+    END
+    STYLE
+      COLOR 255 0 255
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
   CLASS
     NAME "< 30"
     EXPRESSION ([tsf0] < 30)
-    COLOR 255 255 255
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 0 0 0
+      SYMBOL 'circle'
+      SIZE 10
+    END
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
 END
 
