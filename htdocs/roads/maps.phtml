@@ -18,9 +18,29 @@ $HEADEXTRA = "
 <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
 <script src=\"http://www.openlayers.org/api/OpenLayers.js\"></script>
 <script type=\"text/javascript\">
-var map, selectedFeature, control;
-function init(){
+/* 'Globals' */
+var map, selectedFeature, selectControl;
 
+function cb_roadOver(feature){
+  selectedFeature = feature;
+  popup = new OpenLayers.Popup('chicken', 
+              feature.geometry.getBounds().getCenterLonLat(),
+              new OpenLayers.Size(200,60),
+              \"<div style='font-size:.8em'>Road Name: \" + feature.attributes.major +\"<br />Segment: \"+ feature.attributes.minor   +\"<br />Condition: \"+ feature.attributes.label + \"(\"+ feature.attributes.cond_code +\")</div>\",
+              true);
+  feature.popup = popup;
+  map.addPopup(popup);
+};
+
+function cb_roadOut(feature){ 
+            map.removePopup(feature.popup);
+            feature.popup.destroy();
+            feature.popup = null;
+};
+
+/* run on page load, initialize stuff */
+function init(){
+  // Build Map Object
   map = new OpenLayers.Map( 'map',{
         projection: new OpenLayers.Projection('EPSG:900913'),
         displayProjection: new OpenLayers.Projection('EPSG:4326'),
@@ -31,21 +51,27 @@ function init(){
         maxExtent: new OpenLayers.Bounds(-20037508, -20037508,
                                          20037508, 20037508.34)
   }); 
-  var gmap = new OpenLayers.Layer.Google(
+
+  // Traditional Google Map Layer
+  var googleLayer = new OpenLayers.Layer.Google(
                 'Google Streets',
                  {'sphericalMercator': true}
             );
-   styleMap = new OpenLayers.StyleMap({
-     'default': {
+
+   // styleMap for the road conditions
+   var styleMap = new OpenLayers.StyleMap({
+       'default': {
            strokeColor: 'black',
            strokeWidth: 5,
            strokeOpacity: 1
-           },
-      'select': {
+       },
+       'select': {
           fillOpacity: 1
        }
-});
-   var lookup = {
+   });
+
+   // Lookup 'table' for styling of road conditions based on cond_code
+   var roadConditionLookup = {
     0: {strokeColor: '#000000'},
     1: {strokeColor: '#00CC00'},
     3: {strokeColor: '#F0F000'},
@@ -65,87 +91,87 @@ function init(){
     60: {strokeColor: '#FE3399'},
     86: {strokeColor: '#FF0000', strokeWidth: 7}
    };
-   styleMap.addUniqueValueRules('default', 'cond_code', lookup);
+   styleMap.addUniqueValueRules('default', 'cond_code', roadConditionLookup);
 
-  var road_condition = new OpenLayers.Layer.WFS( 'Iowa Road Conditions',
-    '".$rootcgi."/wfs/iowa/roadcond-900913.cgi', 
-   {typename: 'roadcond-wfs-900913'
-   },{
-    typename: 'roadcond-wfs-900913',
-    extractAttributes: true,
-    styleMap: styleMap
+   // Road Condition WFS layer
+   var road_condition = new OpenLayers.Layer.WFS( 'Iowa Road Conditions',
+     '".$rootcgi."/wfs/iowa/roadcond-900913.cgi', 
+     {typename: 'roadcond-wfs-900913'
+     },{
+       typename: 'roadcond-wfs-900913',
+       extractAttributes: true,
+       styleMap: styleMap
+     });
+
+   // Provide hover capabilities over road_condition layer
+   var selectControl = new OpenLayers.Control.SelectFeature(road_condition, {
+	   hover: true,
+	   clickout: false,
+	   toggle: false,
+	   multiple: false,
+       callbacks: {
+        'over':cb_roadOver, 'out': cb_roadOut
+       }
    });
+   map.addControl(selectControl);
+   selectControl.activate();
 
-  var control = new OpenLayers.Control.SelectFeature(road_condition, {
-	hover: true,
-	clickout: false,
-	toggle: false,
-	multiple: false,
-    callbacks: {
-      'over':feature_changeColor, 'out':feature_restoreColor
-    }
-});
-  map.addControl(control);
-  control.activate();
-
-function onPopupClose(evt) {
-     control.unselect(selectedFeature);
-}
-
-
-function feature_changeColor(feature){
-  selectedFeature = feature;
-  popup = new OpenLayers.Popup('chicken', 
-              feature.geometry.getBounds().getCenterLonLat(),
-              new OpenLayers.Size(200,60),
-              \"<div style='font-size:.8em'>Road Name: \" + feature.attributes.major +\"<br />Segment: \"+ feature.attributes.minor   +\"<br />Condition: \"+ feature.attributes.label + \"(\"+ feature.attributes.cond_code +\")</div>\",
-              true);
-  feature.popup = popup;
-  map.addPopup(popup);
-};
-function feature_restoreColor(feature){ 
-            map.removePopup(feature.popup);
-            feature.popup.destroy();
-            feature.popup = null;
-};
-
-
-  var warnings = new OpenLayers.Layer.WMS( 'NWS Watch/Warnings',
+   // Layer for NWS issued warnings, needs some help...
+   var warnings = new OpenLayers.Layer.WMS( 'NWS Watch/Warnings',
     'http://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?', 
     {layers: 'warnings_c', format: 'image/png', transparent: 'true'});
-  warnings.setVisibility(false);
+   warnings.setVisibility(false);
 
-  var pavetemps = new OpenLayers.Layer.WMS( 'Pavement Temperatures',
-    'http://mesonet.agron.iastate.edu/cgi-bin/wms/us/roadtemps.cgi?', 
+   // Pavement Temperatures, again, some help
+   var pavetemps = new OpenLayers.Layer.WMS( 'Pavement Temperatures',
+    '". $rootcgi ."/wms/us/roadtemps.cgi?', 
     {layers: 'roadtemps', format: 'image/png', transparent: 'true'});
-  pavetemps.setVisibility(false);
+   pavetemps.setVisibility(false);
 
-  var airtemps = new OpenLayers.Layer.WMS( 'Air 2m Temperatures',
-    'http://mesonet.agron.iastate.edu/cgi-bin/wms/us/obs.cgi?', 
+   // Air Temperatures, needs some help
+   var airtemps = new OpenLayers.Layer.WMS( 'Air 2m Temperatures',
+    '". $rootcgi ."/wms/us/obs.cgi?', 
     {layers: 'airtemps', format: 'image/png', transparent: 'true'});
-  airtemps.setVisibility(false);
+   airtemps.setVisibility(false);
 
+   // NEXRAD Composite Layer.
+   var nexrad = new OpenLayers.Layer.WMS( 'NEXRAD',
+     'http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?', 
+     {layers: 'nexrad-n0r', format: 'image/png', transparent: 'true'});
+   nexrad.setVisibility(false);
 
-  var nexrad = new OpenLayers.Layer.WMS( 'NEXRAD',
-    'http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?', 
-    {layers: 'nexrad-n0r', format: 'image/png', transparent: 'true'});
-  nexrad.setVisibility(false);
+   // Finally add layers to the map :)
+   map.addLayers([googleLayer, nexrad, road_condition, pavetemps, airtemps]);
 
-  map.addLayers([gmap, nexrad, road_condition, warnings, pavetemps, airtemps]);
+  
+   var proj = new OpenLayers.Projection('EPSG:4326');
+   var proj2 = new OpenLayers.Projection('EPSG:900913');
+   var point = new OpenLayers.LonLat(-93.8, 42.2);
+   point.transform(proj, proj2);
 
-  var proj = new OpenLayers.Projection('EPSG:4326');
-  var proj2 = new OpenLayers.Projection('EPSG:900913');
-  var point = new OpenLayers.LonLat(-93.8, 42.2);
-  point.transform(proj, proj2);
+   map.setCenter(point, 7);
 
-  map.setCenter(point, 7);
-  map.addControl( new OpenLayers.Control.LayerSwitcher({id:'ls'}) );
-  map.addControl( new OpenLayers.Control.MousePosition() );
-  map.getControl('ls').maximizeControl();
+   map.addControl( new OpenLayers.Control.LayerSwitcher({id:'ls'}) );
+   map.addControl( new OpenLayers.Control.MousePosition() );
+   map.getControl('ls').maximizeControl();
 
-};
+   // Refreshing every minute...
+   window.setInterval(myrefresh, 60000, airtemps);
+   window.setInterval(myrefresh, 180123,road_condition);
+   window.setInterval(myrefresh, 300123,pavetemps);
+   window.setInterval(myrefresh, 300876,nexrad);
+
+}; // End of init()
+
+function myrefresh(layer){
+  if (layer.visibility){
+   layer.moveTo(layer.map.getExtent(), true);
+  }
+}
+
 </script>
 ";
+$TITLE = "IEM Interactive Road Conditions";
 $BODYEXTRA = "onload=\"init()\"";
 include("$rootpath/include/header.php");
 ?>
