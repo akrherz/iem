@@ -47,7 +47,7 @@ for ($i=0;$row= @pg_fetch_array($rs,$i);$i++)
     $tokens = explode(",", $seg);
     while (list($p,$s) = each($tokens)){
       $t = explode(" ", $s);
-      echo sprintf("  %.3f,%.3f", $t[1], $t[0]) ."\n";
+      echo sprintf("  %.5f,%.5f", $t[1], $t[0]) ."\n";
     }
     echo "End:\n";
   }
