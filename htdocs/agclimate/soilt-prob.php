@@ -108,11 +108,11 @@ below the given threshold was observed <strong>before</strong> a given date.</li
 <table cellpadding="5" cellspacing="0" border="1">
 <tr>
 <td valign="top">
- <h3>Spring Probabilities</h3>
+ <h3>Spring Probabilities<br />January 1rst to given date</h3>
  <?php echo $spring; ?>
 </td>
 <td valign="top">
- <h3>Fall Probabilities</h3>
+ <h3>Fall Probabilities<br />July 1rst to given date</h3>
  <?php echo $fall; ?>
 </td>
 </table>
