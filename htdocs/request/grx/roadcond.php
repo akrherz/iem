@@ -39,10 +39,11 @@ for ($i=0;$row= @pg_fetch_array($rs,$i);$i++)
   $meat = str_replace("MULTILINESTRING((", "", $row["t"]);
   $meat = str_replace("))", "", $meat);
   $segments = explode("),(", $meat);
+  $valid = strtotime( substr($row["valid"],0,16) );
   echo "Color: ". $colors[$row["cond_code"]] ."\n";
   while(list($q,$seg) = each($segments))
   {
-    echo "Line: 4, 0, ". $row["major"] ." :: ". $row["minor"]  ."\n";
+    echo "Line: 4, 0, ". $row["major"] ." :: ". $row["minor"]  ."\\nReport: ". $row["raw"] ."\\nTime: ". date('j M Y g:i A', $valid) ."\n";
     $tokens = explode(",", $seg);
     while (list($p,$s) = each($tokens)){
       $t = explode(" ", $s);
