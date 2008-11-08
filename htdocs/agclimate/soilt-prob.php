@@ -102,7 +102,7 @@ below the given threshold was observed <strong>before</strong> a given date.</li
 <p><b>Select Station:</b><?php echo isuagSelect($station); ?>
 <p><b>Thresholds:</b><input type="text" value="<?php echo $tstr; ?>" name="tstr"> <i>Comma Seperated</i>
 <br />
-<input type="submit" value="Reqest">
+<input type="submit" value="Request">
 </form>
 
 <table cellpadding="5" cellspacing="0" border="1">
