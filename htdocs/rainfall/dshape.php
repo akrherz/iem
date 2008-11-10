@@ -28,7 +28,7 @@ else
 }
 
 chdir("/tmp");
-copy($dir."/".$fp.".dbf", ".");
+copy($dir."/".$fp.".dbf", $fp.".dbf");
 copy("/mnt/mesonet/wepp/GIS/static/hrap_${geometry}_${epsg}.shp", $fp.".shp");
 copy("/mnt/mesonet/wepp/GIS/static/hrap_${geometry}_${epsg}.shx", $fp.".shx");
 copy("/mnt/mesonet/data/gis/meta/${epsg}.prj", $fp.".prj");
