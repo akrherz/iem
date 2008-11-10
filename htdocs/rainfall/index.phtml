@@ -54,16 +54,18 @@ in a number of ways. <b>Caveat:</b>  Geocoding is not perfect.  Your address may
 </form>
 </div>
 
-<h3 class="subtitle">Daily GIS Shapefiles</h3>
+<h3 class="subtitle">GIS Shapefiles</h3>
 <form method="GET" action="dshape.php" name="shapefile">
 <div class="iem-form">
 <b>Instructions:</b>  Please select the date you would like to download a zip 
-file containing a shapefile of rainfall estimates.
+file containing a shapefile of rainfall estimates. The duration is the time 
+period during which the estimates are valid for.  For the current month or
+year, the estimates will be current for that period till yesterday.
 <table>
 <thead>
 <tr>
 	<th>Month:</th><th>Day:</th><th>Year:</th><th>Coverage Type:</th>
-	<th>Projection:</th>
+	<th>Duration</th><th>Projection:</th>
 </tr></thead>
 <tbody>
 <tr>
@@ -74,9 +76,16 @@ file containing a shapefile of rainfall estimates.
 	<option value="point">Point
 	<option value="polygon">Polygon
 	</select></td>
+    <td>
+<select name="duration">
+  <option value="day">One Day
+  <option value="month">Calendar Month
+  <option value="year">Calendar Year
+</select>
+    </td>
 	<td><select name="epsg">
-	<option value="4326">Geographic
-	<option value="26915">NAD83 UTM Zone15N
+	<option value="4326">Geographic (EPSG: 4326)
+	<option value="26915">NAD83 UTM Zone15N (EPSG: 26915)
 	</select></td>
 </tr>
 </tbody>
