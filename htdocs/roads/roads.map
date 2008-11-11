@@ -179,6 +179,20 @@ LAYER
  STATUS OFF
 END
 
+LAYER
+ NAME kgan
+ DATA "images/26915/kgan.tif"
+ PROJECTION
+  "init=epsg:26915"
+ END
+ METADATA
+  "show_in_legend" "0"
+ END
+ TYPE RASTER
+ STATUS OFF
+END
+
+
 
 LAYER
  NAME kcciback
