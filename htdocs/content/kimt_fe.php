@@ -2,7 +2,7 @@
 <head>
 <?php
   include("../../config/settings.inc.php");
-  $station = isset($_GET['station']) ? $_GET["station"] : 'SMYI4';
+  $station = isset($_GET['station']) ? substr($_GET["station"],0,5) : 'SMYI4';
   $min = isset($_GET["min"]) ? $_GET["min"] : 1;
   include("$rootpath/include/snet_locs.php");
   include("$rootpath/include/imagemaps.php");
