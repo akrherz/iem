@@ -81,7 +81,7 @@ $s .= "</table>";
 if (getenv("REMOTE_ADDR") == "12.217.178.106" )
 {
  $s = "<img src=\"images/i3.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 164 weeks now!!!! Darly finally post the smokey feature on time, hehe!  Darly very excited to get to see Smokey White and Snoopy White this weekend.  We will have lots of fun.  Wish we could go to the zoo again, but I think the seal tank will be froze over :(  <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 165 weeks now!!!! Hi smokey! wow, another big number divisible by 5, 15, and hmmmmm 55!  fancy!  I love you very much smokey.  Turkey, turkey, turkey soon!  We'll have lots of fun.  <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 }
