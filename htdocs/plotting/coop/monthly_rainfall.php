@@ -1,10 +1,13 @@
 <?php
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/all_locs.php");
 
 $year = isset($_GET['year']) ? intval($_GET["year"]) : 0;
 $station = isset($_GET['station']) ? intval($_GET["station"]) : "ia0200";
+
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
 
 $connection = iemdb("coop");
 
@@ -39,7 +42,6 @@ $xlabel = Array("JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/COOPstations.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480,"example1");
@@ -56,7 +58,7 @@ $graph->img->SetMargin(50,45,35,35);
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set("Monthly Rainfall Climatology for ". $cities[$station]['city']);
+$graph->title->Set("Monthly Rainfall Climatology for ". $cities[strtoupper($station)]['name']);
 $subt = sprintf("Annual precip of %.2f inches over %.0f days", array_sum($climate), array_sum($days));
 $graph->subtitle->Set($subt);
 
