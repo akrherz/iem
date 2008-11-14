@@ -2,8 +2,10 @@
  /* Make a nice simple plot of monthly  temperatures */
  include('../../config/settings.inc.php');
  include("$rootpath/include/database.inc.php");
- include("$rootpath/include/all_locs.php");
  include('setup.php');
+$st->load_station( $st->table[$station]["climate_site"]);
+$cities = $st->table;
+
  $climate_site = $cities[$station]["climate_site"];
  if ($climate_site == "none"){  die("App does not work outside of Iowa"); }
  $db = iemdb("access");
@@ -48,7 +50,7 @@ $db = iemdb("coop");
 
 $sqlDate = sprintf("2000-%s", date("m-d") );
 
-$sql = "SELECT valid, high, low from climate WHERE station = '$climate_site'
+$sql = "SELECT valid, high, low from climate WHERE station = '". strtolower($climate_site) ."'
         and extract(month from valid) = $month  ORDER by valid ASC";
 
 $rs = pg_query($db, $sql);
@@ -88,8 +90,8 @@ $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCFF@0.5');
 $graph->xgrid->Show();
 
 $graph->img->SetMargin(45,10,70,30);
-$graph->title->Set( $cities[$station]["city"] ." [$station] Hi/Lo Temps for ". date("M Y", $rts) );
-$graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["city"] ."[". $climate_site ."]");
+$graph->title->Set( $cities[$station]["name"] ." [$station] Hi/Lo Temps for ". date("M Y", $rts) );
+$graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["name"] ."[". $climate_site ."]");
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");
 

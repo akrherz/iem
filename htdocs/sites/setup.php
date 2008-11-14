@@ -1,9 +1,12 @@
 <?php
  include_once("../../config/settings.inc.php");
  include_once("$rootpath/include/database.inc.php");
- include_once("$rootpath/include/all_locs.php");
+ include_once("$rootpath/include/station.php");
  /* Make sure all is well! */
  $station = isset($_GET["station"]) ? $_GET["station"] : "";
+$st = new StationData($station);
+$cities = $st->table;
+
  $network = isset($_GET["network"]) ? $_GET["network"] : "";
  if (strlen($station) == 0)
  {

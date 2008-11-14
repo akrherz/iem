@@ -2,12 +2,10 @@
  /* Make a nice simple plot of 7 day temperatures */
  include('../../config/settings.inc.php');
  include("$rootpath/include/database.inc.php");
- include("$rootpath/include/station.php");
-$st = new StationData($station);
+ include("setup.php");
 $st->load_station( $st->table[$station]["climate_site"]);
 $cities = $st->table;
 
- include('setup.php');
  $climate_site = $cities[$station]["climate_site"];
  if ($climate_site == "none"){  die("App does not work outside of Iowa"); }
  $db = iemdb("access");
@@ -132,5 +130,5 @@ $graph->Add($gbarplot);
 $graph->Add($l2plot);
 $graph->Add($l1plot);
 
-//$graph->Stroke();
+$graph->Stroke();
 ?>
