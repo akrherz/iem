@@ -17,7 +17,6 @@ $height = "450";
 dl($mapscript);
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/currentOb.php");
-include("$rootpath/include/all_locs.php");
 include("$rootpath/include/nexlib2.php");
 ?>
 
