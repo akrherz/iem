@@ -20,7 +20,9 @@ function new_window(url) {
  $THISPAGE = "current-sort";
   include("$rootpath/include/header.php"); 
   include("$rootpath/include/mlib.php"); 
-  include("$rootpath/include/all_locs.php"); 
+  include("$rootpath/include/network.php");
+  $nt = new NetworkTable($network);
+  $cities = $nt->table;
   include("$rootpath/include/iemaccess.php");
   include("$rootpath/include/iemaccessob.php");
 
@@ -173,7 +175,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
   while (list($key, $iemob) = each($asos) ){
     $mydata[$key] = $iemob->db;
     $mydata[$key]["ts"] = $iemob->ts;
-    $mydata[$key]["sname"] = $cities[$key]["city"];
+    $mydata[$key]["sname"] = $cities[$key]["name"];
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
        f2c($mydata[$key]["dwpf"]) );
@@ -205,7 +207,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
     echo "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
 
     $tdiff = $now - $asos[$key]->ts;
-    echo "<td>". $cities[$key]["city"] . " (". $key .")</td>";
+    echo "<td>". $cities[$key]["name"] . " (". $key .")</td>";
     echo "<td ";
     if ($tdiff > 10000){
       $fmt = "%d %b %I:%M %p";
