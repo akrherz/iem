@@ -110,7 +110,9 @@ graphically as well as textually for use in a GIS.  Data is updated through a co
 
 <?php
 dl($mapscript);
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
 
 function mktitlelocal($map, $imgObj, $titlet) { 
  
@@ -261,7 +263,7 @@ $tr .= sprintf("%10s,%20s,%10s,%10s,%10s\n", 'ID', 'StationName', 'Latitude', 'L
 foreach($vals as $key => $value){
   $ukey = strtoupper($key);
   if (! isset($cities[$ukey]) ) continue;
-  $tr .= sprintf("%10s,%-20s,%10.4f,%10.4f,%10s\n", $key, $cities[$ukey]['city'],
+  $tr .= sprintf("%10s,%-20s,%10.4f,%10.4f,%10s\n", $key, $cities[$ukey]['name'],
   $cities[$ukey]['lat'], $cities[$ukey]['lon'], round($value, $round[$var]) );
 
   // Red Dot... 
@@ -273,7 +275,7 @@ foreach($vals as $key => $value){
   // City Name
   $pt = ms_newPointObj();
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-  $pt->draw($map, $snet, $img, 1, $cities[$ukey]['city'] );
+  $pt->draw($map, $snet, $img, 1, $cities[$ukey]['name'] );
   $pt->free();
 }
 
