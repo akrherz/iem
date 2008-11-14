@@ -1,0 +1,125 @@
+<?php
+ include("../../config/settings.inc.php");
+ $station = isset($_GET["station"])? $_GET["station"] : "";
+ $network = isset($_GET["network"])? $_GET["network"] : "IACOCORAHS";
+ $date = isset($_GET["date"]) ? substr($_GET["date"],0, 10) : "";
+ $sortvar = isset($_GET["sortvar"]) ? substr($_GET["sortvar"], 0, 10): "";
+ $year = isset($_GET["year"]) ? substr($_GET["year"], 0, 4): date("Y");
+
+ if ($date == "" && $station == "") $station = "IA-BN-1";
+ include("$rootpath/include/forms.php");
+ include("$rootpath/include/network.php");
+ $nt = new NetworkTable($network);
+?>
+
+<?php $TITLE = "IEM | CoCoRaHS Observations";
+include("$rootpath/include/header.php"); ?>
+
+<div class="text"
+
+<?php 
+
+if (strlen($station) > 0) {
+  $link = "obs.phtml?station=".$station."&network=". $network ."&sortvar=";
+  if ($sortvar == "") $sortvar = "day";
+ ?>
+<h3 class="subtitle">CoCoRaHS obs listed by station</h3>(<i>Click on a date to get all obs for a particular date.</i>)
+<form name="switchnwsli" action="obs.phtml" method="GET">
+<p>Enter Station Number:<input type="text" size="10" maxlength="10" name="station" value="<?php echo $station; ?>">
+Select Year: <?php echo yearSelect(2007, $year, "year"); ?>
+<input type="submit" value="View CoCoRaHS Station"></form>
+<?php } 
+ 
+if (strlen($date) > 0) { 
+  $year = substr($date,0,4);
+  $link = "obs.phtml?date=".$date."&network=". $network ."&sortvar=";
+  if ($sortvar == "") $sortvar = "station";
+?>
+<h3 class="subtitle">CoCoRaHS obs listed by date</h3>(<i>Click on the Station Number to view all obs from one station.</i>)
+<form name="switchdate" action="obs.phtml" method="GET">
+<p>Enter Date:<input type="text" size="11" maxlength="10" name="date" value="<?php echo $date; ?>">
+Select State: <select name="network">
+  <option value="IACOCORAHS" <?php if ($network == "IACOCORAHS") echo "SELECTED"; ?>>Iowa
+</select>
+
+<input type="submit" value="View Date"></form>
+<?php } ?>
+
+<p><table border="1" cellspacing=0 cellpadding=2>
+<tr>
+  <th><a href="<?php echo $link; ?>station">ID #:</a></th>
+  <th>Site Name:</th>
+  <th>County:</th>
+  <th><a href="<?php echo $link; ?>day">Date:</a></th>
+  <th><a href="<?php echo $link; ?>pday">Precip</a></th>
+  <th><a href="<?php echo $link; ?>snow">Snowfall</a></th>
+  <th><a href="<?php echo $link; ?>snowd">Snow Depth</a></th></tr>
+
+<?php 
+ include("$rootpath/include/iemaccess.php");
+ $iem = new IEMAccess();
+
+ $sortdir = "ASC";
+ if ($sortvar == "pday" || $sortvar == "snow" || $sortvar == "snowd" ||
+     $sortvar == "max_tmpf") 
+   $sortdir = "DESC";
+ if (strlen($station) > 0) {
+   $rs = $iem->query("SELECT * from summary_$year WHERE station = '$station'
+     ORDER by $sortvar $sortdir");
+ } else {
+   $sql = "SELECT * from summary_$year WHERE day = '$date' and
+     network = '$network' ORDER by $sortvar $sortdir";
+   $rs = $iem->query($sql);
+ }
+ $hirow = 1;
+ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+   $nwsli = $row["station"];
+
+   $rain = $row["pday"];
+   if ($rain == 0.0001) $rain = "T";
+   if ($rain == -99 || $rain == "") $rain = "M";
+   if ($rain > 10 || $rain < 0) $rain = "M";
+
+   $snow = $row["snow"];
+   if ($snow == 0.0001) $snow = "T";
+   if ($snow == -99 || $snow == "") $snow = "M";
+   if ($snow > 100 || $snow < 0) $snow = "M";
+
+   $snowd = $row["snowd"];
+   if ($snowd == 0.0001) $snowd = "T";
+   if ($snowd == -99 || $snowd == "") $snowd = "M";
+   if ($snowd > 1000 || $snowd < 0) $snowd = "M";
+
+   echo "<tr";
+   if ($hirow) echo " class=\"even\"";
+   $hirow = ! $hirow;
+   echo "><td>";
+   if (strlen($station) > 0){
+     echo $nwsli;
+   } else {
+     echo "<a href=\"obs.phtml?station=". $nwsli ."&network=". $network ."\">". $nwsli ."</a>";
+   }
+
+   echo "</td><td>". $nt->table[$nwsli]["name"] ."</td><td>". $nt->table[$nwsli]["county"] ."</td><td>";
+
+   if (strlen($date) > 0){
+      echo $row["day"];
+   } else {
+      echo "<a href=\"obs.phtml?date=". $row["day"] ."&network=". $network ."\">". $row["day"] ."</a>";
+   }
+
+   echo "</td><td>". $rain ."</td><td>". $snow ."</td><td>". $snowd ."</td></tr>\n";
+ }
+
+ 
+?>
+</table>
+
+<p>Theoretically, you should be able to highlight the entire table with 
+your cursor and then copy-paste it into a spreadsheet program if you 
+like.
+
+<p>Errors exist in this dataset and you should evaluate the observations
+before using...</div>
+
+<?php include("$rootpath/include/footer.php"); ?>
