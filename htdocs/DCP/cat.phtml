@@ -25,7 +25,9 @@ $page = 'DCP';
 $TITLE = "IEM | GOES DCP";
 include("$rootpath/include/header.php"); 
 include("$rootpath/include/forms.php");
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("DCP");
+$cities = $nt->table;
 ?>
 <div class=text">
 <form method="GET" action="cat.phtml">
@@ -80,11 +82,11 @@ echo sprintf($fmt, "NWSLI", "Site Name", "TAI", "PCI", "PPH", "UDI", "USI");
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   if ($year < 2008)
     echo sprintf($fmt,  
-     $row["station"] , substr($cities[$row["station"]]['city'], 0, 24), 
+     $row["station"] , substr($cities[$row["station"]]['name'], 0, 24), 
      $row["tai"], $row["pci"], $row["pph"], $row["udi"], $row["usi"] );
   else
     echo sprintf($fmt,  
-     $row["station"] , substr($cities[$row["station"]]['city'], 0, 24), 
+     $row["station"] , substr($cities[$row["station"]]['name'], 0, 24), 
      $row["tmpf"], $row["rstage"], $row["phour"], $row["drct"], $row["sknt"] );
 }
 echo "</pre>\n";
