@@ -3,7 +3,9 @@ include("../../../config/settings.inc.php");
         $TITLE = "IEM | COOP Data Download";
 include("$rootpath/include/constants.php"); 
 include("$rootpath/include/header.php"); 
-include("$rootpath/include/all_locs.php"); 
+include("$rootpath/include/network.php"); 
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
 ?>
 <div class="text">
 <b>Nav:</b> <a href="/COOP/">COOP</a> <b> > </b>
@@ -39,7 +41,7 @@ foreach ($lines as $line_num => $line) {
   $nwsli = trim($nwsli);
   $sts = trim($sts);
   if (array_key_exists(strtoupper($nwsli), $cities)){
-    echo "<option value=\"$nwsli\">[$nwsli] ". $cities[strtoupper($nwsli)]['city'] ."  $sts\n";
+    echo "<option value=\"$nwsli\">[$nwsli] ". $cities[strtoupper($nwsli)]['name'] ."  $sts\n";
   }
 }
 
