@@ -20,10 +20,11 @@
 <?php echo $sw->printInterface(); ?>
 
 <?php if (isset($station)) { 
-  include("$rootpath/include/all_locs.php");
-  $d = $cities[$station];
+  include("$rootpath/include/station.php");
+  $st = new StationData($station);
+  $d = $st->table[$station];
   echo "<h3>Selected Location</h3><div class=\"table\"><table><thead><tr><th>ID</th><th>Station Name</th><th>Lat:</th><th>Lon:</th></tr></thead>";
-  echo sprintf("<tbody><tr><td>%s</td><td>%s</td><td>%.4f</td><td>%.4f</td></tr></tbody>", $station, $d["city"], $d["lat"], $d["lon"]); 
+  echo sprintf("<tbody><tr><td>%s</td><td>%s</td><td>%.4f</td><td>%.4f</td></tr></tbody>", $station, $d["name"], $d["lat"], $d["lon"]); 
   echo "</table></div>";
 
 } ?>
