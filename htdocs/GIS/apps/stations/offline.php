@@ -2,11 +2,13 @@
 include("../../../../config/settings.inc.php");
 dl($mapscript);
 include("$rootpath/include/mlib.php");
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/network.php");
 include("$rootpath/include/iemaccess.php");
 $iemaccess = new IEMAccess();
 
 $network = isset($_GET['network']) ? $_GET['network'] : die('No Network Set.');
+$nt = new NetworkTable($network);
+$cities = $nt->table;
 
 $myStations = Array();
 
@@ -73,7 +75,7 @@ $now = time();
 foreach($myStations as $key => $value){
    $pt = ms_newPointObj();
    $pt->setXY($cities[$value]["lon"], $cities[$value]["lat"], 0);
-   $pt->draw($map, $dot, $img, 0, $cities[$value]['city'] );
+   $pt->draw($map, $dot, $img, 0, $cities[$value]['name'] );
    $pt->free();
 }
 
