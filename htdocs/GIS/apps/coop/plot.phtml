@@ -69,7 +69,10 @@ choice.
 
 <?php
 dl($mapscript);
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/network.php");
+if ($source == "qc") $nt = new NetworkTable("IACLIMATE");
+else $nt = new NetworkTable("IA_COOP");
+$cities = $nt->table;
 
 function mktitlelocal($map, $imgObj, $titlet) { 
  
@@ -183,7 +186,7 @@ foreach($vals as $key => $value){
   if (! isset($cities[$ukey]) ) continue;
   if (intval($value) == -99) continue;
 
-  $tr .= sprintf("%10s,%-20s,%10s,%10.4f,%10.4f,%10s\n", $key, $cities[$ukey]['city'], $ndate,
+  $tr .= sprintf("%10s,%-20s,%10s,%10.4f,%10.4f,%10s\n", $key, $cities[$ukey]['name'], $ndate,
   $cities[$ukey]['lat'], $cities[$ukey]['lon'], $value );
 
   if ($ukey == "IA0807") $cities["IA0807"]["lon"] -= 0.1;
