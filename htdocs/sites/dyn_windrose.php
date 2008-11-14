@@ -14,8 +14,9 @@ $station = isset($_GET["station"]) ? $_GET["station"] : die();
 $network = isset($_GET["network"]) ? $_GET["network"] : die();
 
 include("../../config/settings.inc.php");
-include("$rootpath/include/all_locs.php");
-include("$rootpath/include/database.inc.php");
+include("$rootpath/include/station.php");
+$st = new StationData($station);
+$cities = $st->table;
 
   $sts = mktime($hour1,$minute1,0,$month1,$day1,$year);
   $ets = mktime($hour2,$minute2,0,$month2,$day2,$year);
@@ -107,7 +108,7 @@ include("$rootpath/include/database.inc.php");
 
   // First create a new windrose graph with a title
   $graph = new WindroseGraph(480,480);
-  $graph->title->Set($cities[$station]['city'] ." [$station] Windrose Plot");
+  $graph->title->Set($cities[$station]['name'] ." [$station] Windrose Plot");
   $subt = sprintf("During %s - %s \n $hourLimitSubTitle", date("Y-m-d h:i a", $sts), date("Y-m-d h:i a", $ets) );
   $graph->title->SetMargin(-22);
 
