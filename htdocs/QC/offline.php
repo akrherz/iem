@@ -15,8 +15,6 @@ display of sites that are offline.</p>
 
 
 <?php
-
-include ("$rootpath/include/all_locs.php");
 include("$rootpath/include/iemaccess.php");
 $iem = new IEMAccess();
 
@@ -30,9 +28,15 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
         return $sortedArray;
 }
 
+include ("$rootpath/include/network.php");
+$nt = new NetworkTable("IA_ASOS");
 function networkOffline($network)
 {
-  global $iem, $cities;
+  global $iem, $rootpath, $nt;
+  $nt->load_network($network);
+  $cities = $nt->table;
+
+ 
   $rs = pg_query($iem->dbconn, "SELECT *, to_char(valid, 'Mon DD YYYY HH:MI AM') as v from offline WHERE network = '$network' ORDER by valid ASC");
 
   $q = 0;
@@ -42,7 +46,7 @@ function networkOffline($network)
      $tracker_id = $row["trackerid"];
      $station = $row["station"];
      if (! isset($cities[$station]))  continue;
-     $name = $cities[$station]['city'];
+     $name = $cities[$station]['name'];
      echo "<tr><td>$station</td><td>$name</td><td>$valid</td></tr>\n";
      $q = 1;
   }
