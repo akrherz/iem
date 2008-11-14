@@ -10,7 +10,8 @@
  $THISPAGE = "current-sort";
   include("$rootpath/include/header.php"); 
   include("$rootpath/include/mlib.php"); 
-  include("$rootpath/include/all_locs.php"); 
+  include("$rootpath/include/station.php");
+  $st = new StationData("AMW"); 
   include("$rootpath/include/iemaccess.php");
   include("$rootpath/include/iemaccessob.php");
 
@@ -109,6 +110,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 
   $mydata = Array();
   while (list($key, $iemob) = each($asos) ){
+    $st->load_station($key);
     $mydata[$key] = $iemob->db;
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), f2c($mydata[$key]["dwpf"]) );
@@ -177,7 +179,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
     echo "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
 
     $tdiff = $now - $parts["ts"];
-    echo "<td>". $cities[$key]["city"] . " (". $key .")</td>";
+    echo "<td>". $st->table[$key]["name"] . " (". $key .")</td>";
     echo "<td ";
     if ($tdiff > 10000){
       $fmt = "%d %b %I:%M %p";
