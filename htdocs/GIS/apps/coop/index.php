@@ -13,7 +13,6 @@ include("$rootpath/include/header.php");
 <?php
 dl($mapscript);
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/all_locs.php");
 include("$rootpath/include/mlib.php");
 include("../rview/lib.php");
 
