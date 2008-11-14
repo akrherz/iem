@@ -7,7 +7,11 @@ $feature = isset($_GET["feature"]);
 
 
 include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/station.php");
+$st = new StationData($station);
+$st->load_station( $st->table[$station]["climate_site"]);
+$cities = $st->table;
+
 $coopdb = iemdb("coop");
 $iem = new IEMAccess();
 
@@ -30,7 +34,7 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 /* Now we need the climate data */
 $q = "SELECT sum(precip) as rain, extract(month from valid) as month from climate
-		WHERE station = '$climate_site' and (extract(doy from valid) < extract(doy from now()) or $year != extract(year from now()) ) GROUP by month
+		WHERE station = '". strtolower($climate_site) ."' and (extract(doy from valid) < extract(doy from now()) or $year != extract(year from now()) ) GROUP by month
 		ORDER by month ASC";
 $rs = pg_exec($coopdb, $q);
 $climate = Array();
@@ -71,8 +75,8 @@ $graph->xaxis->SetPos("min");
 $graph->xaxis->SetTitle("Month of Year");
 
 $graph->yaxis->SetTitle("Precipitation (in)");
-$graph->title->Set( $cities[$station]["city"] ." [$station] $year Precip");
-$graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["city"] ."[". $climate_site ."]");
+$graph->title->Set( $cities[$station]["name"] ." [$station] $year Precip");
+$graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["name"] ."[". $climate_site ."]");
 $graph->legend->SetLayout(LEGEND_VERT);
 $graph->legend->Pos(0.15, 0.15, "left", "top");
 
