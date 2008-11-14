@@ -17,9 +17,11 @@ function new_window(url) {
 </script>';
  $THISPAGE = "current-sort";
  include("$rootpath/include/header.php"); ?>
-<?php include("$rootpath/include/mlib.php"); ?>
-<?php include("$rootpath/include/all_locs.php"); ?>
-<?php 
+<?php include("$rootpath/include/mlib.php"); 
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("SCAN");
+$cities = $nt->table;
+
   include("$rootpath/include/iemaccess.php");
   include("$rootpath/include/iemaccessob.php");
 
@@ -135,7 +137,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
           echo ">";
    echo "<td><input type=\"checkbox\" name=\"st[]\" 
                value=\"".$key."\"></td>";
-  echo "<td>". $cities[$key]["city"] . "</td><td ";
+  echo "<td>". $cities[$key]["name"] . "</td><td ";
   if ($tdiff > 11900){
     echo 'bgcolor="red"';
     $format = "%b-%d-%y %I:%M %p";
@@ -226,7 +228,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 	  if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
             
           echo ">";
-  echo "<td>". $cities[$key]["city"] . "</td><td ";
+  echo "<td>". $cities[$key]["name"] . "</td><td ";
   if ($tdiff > 11900){
     echo 'bgcolor="red"';
     $format = "%b-%d-%y %I:%M %p";
