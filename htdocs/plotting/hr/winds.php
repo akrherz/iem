@@ -1,7 +1,8 @@
 <?php
 include("../../../config/settings.inc.php");
-$station = $_GET['station'];
-$hours = $_GET["hours"];
+$station = isset($_GET['station']) ? $_GET["station"]: "AMW";
+$hours = isset($_GET["hours"]) ? intval($_GET["hours"]): 24;
+
 
 include("$rootpath/include/database.inc.php");
 
@@ -34,7 +35,10 @@ include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
 include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
 include ("$rootpath/include/jpgraph/jpgraph_date.php");
-include ("$rootpath/include/all_locs.php");
+include ("$rootpath/include/station.php");
+$st = new StationData($station);
+$cities = $st->table;
+
 
 
 // Create the graph. These two calls are always required
@@ -48,7 +52,7 @@ $graph->y2axis->scale->ticks->Set(30,15);
 $graph->img->SetMargin(40,40,25,90);
 //$graph->xaxis->SetFont(FONT1,FS_BOLD);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set($hours." h winds for ". $cities[$station]['city']);
+$graph->title->Set($hours." h winds for ". $cities[$station]['name']);
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 $graph->yaxis->SetTitle("Wind Speed [knots]");
