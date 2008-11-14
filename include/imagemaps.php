@@ -5,22 +5,23 @@ function networkMultiSelect($network, $selected, $extra=Array())
     global $rootpath;
     $network = strtoupper($network);
     $s = "";
-    include_once("$rootpath/include/all_locs.php");
-    reset($cities);
+    include_once("$rootpath/include/network.php");
+    $nt = new NetworkTable($network);
+    $cities = $nt->table;
     $s .= '<select name="station[]" size="5" MULTIPLE >\n';
     while (list($sid, $tbl) = each($cities))
     {
         if ($tbl["network"] != $network) continue;
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">[$sid] ". $tbl["city"] ."</option>\n";
+        $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
    }
    while (list($idx,$sid) = each($extra))
    {
         $tbl = $cities[$sid];
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">[$sid] ". $tbl["city"] ."</option>\n";
+        $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
    }
    $s .= "</select>\n";
    return $s;
@@ -31,7 +32,9 @@ function networkSelect($network, $selected, $extra=Array())
     global $rootpath;
     $network = strtoupper($network);
     $s = "";
-    include_once("$rootpath/include/all_locs.php");
+    include_once("$rootpath/include/network.php");
+    $nt = new NetworkTable($network);
+    $cities = $nt->table;
     reset($cities);
     $s .= '<select name="station">\n';
     while (list($sid, $tbl) = each($cities))
@@ -39,14 +42,14 @@ function networkSelect($network, $selected, $extra=Array())
         if ($tbl["network"] != $network) continue;
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">[$sid] ". $tbl["city"] ."</option>\n";
+        $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
    }
    while (list($idx,$sid) = each($extra))
    {
         $tbl = $cities[$sid];
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">". $tbl["city"] ."</option>\n";
+        $s .= ">". $tbl["name"] ."</option>\n";
    }
    $s .= "</select>\n";
    return $s;
@@ -255,7 +258,9 @@ include("$rootpath/include/asosLoc.php");
 
 function rwisMultiSelect($selected, $size){
 global $rootpath;
-include_once("$rootpath/include/all_locs.php");
+    include_once("$rootpath/include/network.php");
+    $nt = new NetworkTable("IA_RWIS");
+    $cities = $nt->table;
   echo "<select name=\"station[]\" size=\"". $size ."\" MULTIPLE>\n";
   echo "<option value=\"_ALL\">Select All</option>\n";
   reset($cities);
@@ -265,7 +270,7 @@ include_once("$rootpath/include/all_locs.php");
     if ($selected == $key){
         echo " SELECTED ";
     }
-    echo " >". $val["city"] ." (". $key .")\n";
+    echo " >". $val["name"] ." (". $key .")\n";
   }
 
   echo "</select>\n";
