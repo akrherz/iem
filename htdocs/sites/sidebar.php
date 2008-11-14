@@ -1,5 +1,5 @@
 <div style="float: left; width: 200px; background: #eee; margin: 10px; padding: 5px; ">
-<h3><?php echo $metadata["city"]; ?> Links:</h3>
+<h3><?php echo $metadata["name"]; ?> Links:</h3>
 <?php
 $o = Array(
   "base" => Array("name" => "Information", "uri" => "site.php?"),
