@@ -2,7 +2,11 @@
  /* Make a nice simple plot of 7 day temperatures */
  include('../../config/settings.inc.php');
  include("$rootpath/include/database.inc.php");
- include("$rootpath/include/all_locs.php");
+ include("$rootpath/include/station.php");
+$st = new StationData($station);
+$st->load_station( $st->table[$station]["climate_site"]);
+$cities = $st->table;
+
  include('setup.php');
  $climate_site = $cities[$station]["climate_site"];
  if ($climate_site == "none"){  die("App does not work outside of Iowa"); }
@@ -35,7 +39,7 @@ $db = iemdb("coop");
 
 $sqlDate = sprintf("2000-%s", date("m-d") );
 
-$sql = "SELECT valid, high, low from climate WHERE station = '$climate_site'
+$sql = "SELECT valid, high, low from climate WHERE station = '". strtolower($climate_site) ."'
         and valid < '$sqlDate' ORDER by valid DESC LIMIT 7";
 
 $rs = pg_query($db, $sql);
@@ -49,7 +53,6 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
 }
 $ahighs = array_reverse($ahighs);
 $alows = array_reverse($alows);
-
 pg_close($db);
 
 /* Time to plot */
@@ -62,14 +65,14 @@ $a1 = min($alows);
 $a2 = max($highs);
 $a3 = max($ahighs);
 
-$graph = new Graph(480,360,"auto");
+$graph = new Graph(480,360);
 $graph->SetScale("textlin", min($a0,$a1)-4, max($a2,$a3)+2);
 $graph->SetMarginColor('white');
 
 $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCFF@0.5');
 $graph->xgrid->Show();
 
-$graph->title->Set("7 Day Hi/Lo Temps for ". $metadata["city"]);
+$graph->title->Set("7 Day Hi/Lo Temps for ". $metadata["name"]);
 $graph->SetMargin(40,5,50,40);
 
 $graph->xaxis->SetTickLabels($xlabels);
@@ -129,5 +132,5 @@ $graph->Add($gbarplot);
 $graph->Add($l2plot);
 $graph->Add($l1plot);
 
-$graph->Stroke();
+//$graph->Stroke();
 ?>
