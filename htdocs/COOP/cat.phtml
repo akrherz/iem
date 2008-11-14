@@ -70,7 +70,9 @@ Select State: <select name="network">
 
 <?php 
  include("$rootpath/include/iemaccess.php");
- include("$rootpath/include/all_locs.php");
+ include("$rootpath/include/network.php");
+ $nt = new NetworkTable($network);
+ $cities = $nt->table;
  $iem = new IEMAccess();
 
  $sortdir = "ASC";
@@ -121,7 +123,7 @@ Select State: <select name="network">
      echo "<a href=\"cat.phtml?station=". $nwsli ."&network=". $network ."\">". $nwsli ."</a>";
    }
 
-   echo "</td><td>". $cities[$nwsli]["city"] ."</td><td>";
+   echo "</td><td>". $cities[$nwsli]["name"] ."</td><td>";
 
    if (strlen($date) > 0){
       echo $row["day"];
