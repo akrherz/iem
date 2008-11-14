@@ -8,7 +8,8 @@ if (isset($argv))
 
 
 include("../../../config/settings.inc.php");
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/station.php");
+
 include("$rootpath/include/iemaccess.php");
 $iem = new IEMAccess();
 
@@ -16,6 +17,9 @@ $iem = new IEMAccess();
 $station1 = isset($_GET['station1']) ? substr($_GET['station1'],0,10) : "AMW";
 $station2 = isset($_GET['station2']) ? substr($_GET['station2'],0,10) : "DSM";
 $var = isset($_GET['var']) ? substr($_GET['var'],0,10): 'tmpf';
+
+$st = new StationData(Array($station1,$station2) );
+$cities = $st->table;
 
 /* Set up data arrays */
 $datay = array($station1 => array(), $station2 => array());
@@ -86,12 +90,12 @@ $graph->tabtitle->Set('Recent Comparison');
 
 // Create the linear plot
 $lineplot=new LinePlot($datay[$station1], $datax[$station1]);
-$lineplot->SetLegend($cities[$station1]["city"] ." ($station1)");
+$lineplot->SetLegend($cities[$station1]["name"] ." ($station1)");
 $lineplot->SetColor("red");
 
 // Create the linear plot
 $lineplot2=new LinePlot($datay[$station2], $datax[$station2]);
-$lineplot2->SetLegend($cities[$station2]["city"] ." ($station2)");
+$lineplot2->SetLegend($cities[$station2]["name"] ." ($station2)");
 $lineplot2->SetColor("blue");
 
 // Add the plot to the graph
