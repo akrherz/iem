@@ -13,7 +13,7 @@ class StationData {
     if (is_string($a)) $this->load_station($a);
     else if (is_array($a)) 
     {
-      foreach($a as $network) { $this->load_station($a); }
+      foreach($a as $id) { $this->load_station($id); }
     }
 
   }

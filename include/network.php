@@ -13,7 +13,7 @@ class NetworkTable {
     if (is_string($a)) $this->load_network($a);
     else if (is_array($a)) 
     {
-      foreach($a as $network) { $this->load_network($a); }
+      foreach($a as $network) { $this->load_network($network); }
     }
 
   }
