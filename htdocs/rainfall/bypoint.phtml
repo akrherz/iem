@@ -43,8 +43,10 @@ if ($method == "geocode")
 }
 else if ($method == "id")
 {
-	include("$rootpath/include/all_locs.php");
+	include("$rootpath/include/station.php");
 	$id = strtoupper($_GET["nwsli"]);
+    $st = new StationData($id);
+    $cities = $st->table;
 	$latitude = round($cities[$id]["lat"],4);
 	$longitude = round($cities[$id]["lon"],4);
 	$data .= "# Request Method: Specified NWSLI $id \n";
