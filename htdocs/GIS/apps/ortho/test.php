@@ -19,7 +19,9 @@ $site->set("status", MS_ON);
 $rect = $map->getlayerbyname("rect");
 $rect->set("status", MS_ON);
 
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/station.php");
+$st = new StationData($station);
+$cities = $st->table;
 
 $projInObj = ms_newprojectionobj("proj=latlong");
 $projOutObj = ms_newprojectionobj( $map->getProjection() );
@@ -54,7 +56,7 @@ $ll->draw($img);
 
 $pt = ms_newPointObj();
 $pt->setXY($nPoint->x, $nPoint->y, 0);
-$pt->draw($map, $site, $img, 0, "  ". $cities[$station]['city']);
+$pt->draw($map, $site, $img, 0, "  ". $cities[$station]['name']);
 $pt->free();
 
 $rt = ms_newRectObj();

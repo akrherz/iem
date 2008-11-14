@@ -4,12 +4,12 @@
 NAME IAoverlay
 STATUS ON
 SIZE 450 350
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 #EXTENT 198759 4446551 738087 4856974
 EXTENT  450560 4653852 453260 4654552
 UNITS METERS
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
-SHAPEPATH "/mesonet/data/gis/"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SHAPEPATH "/mesonet/data/gis/static/"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off
