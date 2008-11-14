@@ -17,7 +17,9 @@ in the IEM.  <font color="#ff0000">Red numbers</font> indicate that the observed
 
 <?php 
  include("$rootpath/include/iemaccess.php"); 
- include("$rootpath/include/all_locs.php"); 
+ include("$rootpath/include/network.php");
+ $nt = new NetworkTable($network);
+ $cities = $nt->table;
  $iem = new IEMAccess();
  $rs = $iem->query("SELECT * from current_qc WHERE network = '$network'");
 
@@ -25,7 +27,7 @@ $data = Array();
 for($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
   $data[ $row["station"] ] = $row;
-  $data[ $row["station"] ]["sname"] = $cities[ $row["station"] ]["city"];
+  $data[ $row["station"] ]["sname"] = $cities[ $row["station"] ]["name"];
 }
 
 function aSortBySecondIndex($multiArray, $secondIndex) {
@@ -125,7 +127,7 @@ while (list ($key, $val) = each ($finalA))  {
   $ts = strtotime($val["valid"]);
   echo '<tr ';
   if ($i) echo 'class="even"';
-  echo '><td>'. $val["station"] .'</td><td>'. $cities[$key]["city"] .'</td>
+  echo '><td>'. $val["station"] .'</td><td>'. $cities[$key]["name"] .'</td>
   <td>'. strftime("%d %b %H:%M", $ts) .'</td>
   <td id="divider">'. pp($val["tmpf"],0) .'</td>'. 
   vp($val["tmpf_qc_av"], 1) . 
