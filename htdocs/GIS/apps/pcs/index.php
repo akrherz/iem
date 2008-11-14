@@ -1,4 +1,5 @@
 <?php
+die();
 include("../../../../config/settings.inc.php");
 
 $TITLE = "IEM | Archived Precipitation Comparison";
@@ -17,7 +18,6 @@ $plot = isset($_GET["plot"]) ? $_GET["plot"]: "";
   NEXRAD Estimates versus ASOS/AWOS observations
 <?php
 dl($mapscript);
-include("$rootpath/include/all_locs.php");
 include("$rootpath/include/mlib.php");
 
 $height = 350;
