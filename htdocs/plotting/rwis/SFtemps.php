@@ -165,7 +165,9 @@ include ("$rootpath/include/jpgraph/jpgraph_line.php");
 include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
-include ("$rootpath/include/all_locs.php");
+include ("$rootpath/include/network.php");
+$nt = new NetworkTable("IA_RWIS");
+$cities = $nt->table;
 
 // Create the graph. These two calls are always required
 $graph = new Graph(650,550,"example1");
@@ -246,7 +248,7 @@ $fz=new LinePlot($freezing, $times);
 $fz->SetColor("blue");
 
 // Title Box
-$tx1 = new Text($cities[$station]['city'] ." \nMeteogram ");
+$tx1 = new Text($cities[$station]['name'] ." \nMeteogram ");
 $tx1->SetPos(0.01,0.01, 'left', 'top');
 $tx1->SetFont(FF_FONT1, FS_BOLD, 16);
 
