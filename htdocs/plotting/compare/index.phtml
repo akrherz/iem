@@ -1,6 +1,5 @@
 <?php
  include("../../../config/settings.inc.php");
- include("$rootpath/include/all_locs.php");
 
  $TITLE = "IEM | Site Comparisons";
  include("$rootpath/include/selectWidget.php");
@@ -9,6 +8,9 @@
  $station1 = isset($_GET['station']) && $_GET['station'] != "" ? strtoupper($_GET['station']) : "";
  $station2 = isset($_GET['station1']) && $_GET['station1'] != "" ? strtoupper($_GET['station1']) : "";
  $var = isset($_GET['var']) ? $_GET['var'] : "tmpf";
+ include("$rootpath/include/station.php");
+ $st = new StationData(Array($station1, $station2));
+ $cities = $st->table;
 
 
  $uri = "$rooturl/plotting/compare/index.phtml?";
@@ -49,14 +51,14 @@ choices.
 <tr>
   <th>Station 1:</th>
   <td><input type="text" size="10" name="station" value="<?php echo $station1; ?>"></td>
-  <td><?php echo @$cities[$station1]['city']; ?></td>
+  <td><?php echo @$cities[$station1]['name']; ?></td>
   <td><?php echo @$cities[$station1]['network']; ?></td>
   <td><a href="index.phtml?station1=<?php echo $station2; ?>&network=<?php echo @$cities[$station1]['network']; ?>">Select from Map</a></td>
 </tr>
 <tr>
   <th>Station 2:</th>
   <td><input type="text" size="10" name="station1" value="<?php echo $station2; ?>"></td>
-  <td><?php echo @$cities[$station2]['city']; ?></td>
+  <td><?php echo @$cities[$station2]['name']; ?></td>
   <td><?php echo @$cities[$station2]['network']; ?></td>
   <td><a href="index.phtml?station1=<?php echo $station1; ?>&network=<?php echo @$cities[$station2]['network']; ?>">Select from Map</a></td>
 </tr>
