@@ -5,7 +5,7 @@ include("../../../config/settings.inc.php");
 
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");
-$nt = new NetworkTable("IA_ASOS");
+$nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS"));
 $cities = $nt->table;
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
