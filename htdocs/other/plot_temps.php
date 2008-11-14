@@ -1,7 +1,9 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("OT");
+$cities = $nt->table;
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
@@ -14,14 +16,14 @@ $dirRef = strftime("%Y_%m/%d", $myTime);
 $titleDate = strftime("%b %d, %Y", $myTime);
 
 $db = iemdb("other");
-$sql = sprintf("SELECT * from t%s WHERE station = '%s' and date(valid) = '%s' ORDER by valid ASC", $year, $station, strftime("%Y-%m-%d", $myTime) );
+$rs = pg_prepare($db, "SELECT",  "SELECT * from t${year} WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
+$rs = pg_execute($db, "SELECT", Array($station, strftime("%Y-%m-%d", $myTime)));
 
 $tmpf = array();
 $dwpf = array();
 $srad = array();
 $times = array();
 
-$rs = pg_exec($db, $sql);
 
 for($i=0; $row = @pg_fetch_array($rs,$i); $i++){
   $tmpf[] = $row["tmpf"];
@@ -47,7 +49,7 @@ $graph->img->SetMargin(65,55,45,60);
 $graph->xaxis->SetLabelAngle(90);
 $graph->yaxis->scale->ticks->Set(2,1);
 //$graph->yscale->SetGrace(10);
-$graph->title->Set("Temperatures & Solar Radiation for ". $cities[$station]['city']);
+$graph->title->Set("Temperatures & Solar Radiation for ". $cities[$station]['name']);
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
