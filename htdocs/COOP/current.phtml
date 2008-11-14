@@ -24,7 +24,9 @@ include("$rootpath/include/header.php"); ?>
 <div class="text">
 <a href="/COOP/">COOP Network</a> &nbsp; <b> > </b> &nbsp; Last Observation
 <?php
- include("$rootpath/include/all_locs.php");
+ include("$rootpath/include/network.php");
+ $nt = new NetworkTable($network);
+ $cities = $nt->table;
  include("$rootpath/include/iemaccess.php");
  include("$rootpath/include/iemaccessob.php");
 
