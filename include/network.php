@@ -19,7 +19,8 @@ class NetworkTable {
 
   function load_network($network)
   {
-    $rs = pg_exec($this->dbconn, "SELECT * from stations WHERE network = '$network'");
+    $rs = pg_prepare($this->dbconn, "SELECT", "SELECT * from stations WHERE network = $1");
+    $rs = pg_execute($this->dbconn, "SELECT", Array($network));
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
     {
       $this->table[ $row["id"] ] = $row;
