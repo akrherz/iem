@@ -1,7 +1,9 @@
 <?php
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("IA_RWIS");
+$cities = $nt->table;
 
 $gis = isset($_GET["gis"]) ? $_GET["gis"]: 'no';
 $delim = isset($_GET["delim"]) ? $_GET["delim"]: ",";
@@ -128,7 +130,7 @@ if ($what != "plot"){
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
   $sid = $row["station"];
-  echo $sid . $d[$delim] . $cities[$sid]["city"] ;
+  echo $sid . $d[$delim] . $cities[$sid]["name"] ;
   if ($gis == "yes"){
      echo  $d[$delim] . $cities[$sid]["lat"] . $d[$delim] .  $cities[$sid]["lon"] ;
   } 
