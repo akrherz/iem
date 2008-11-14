@@ -1,7 +1,10 @@
 <?php
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("HADS");
+$cities = $nt->table;
+
 
 $delim = isset($_GET["delim"]) ? $_GET["delim"]: ",";
 $sample = isset($_GET["sample"]) ? $_GET["sample"]: "1min";
@@ -124,7 +127,7 @@ if ($what != "plot"){
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
   $sid = $row["station"];
-  echo $sid . $d[$delim] . $cities[$sid]["city"] ;
+  echo $sid . $d[$delim] . $cities[$sid]["name"] ;
   echo $d[$delim] . $row["dvalid"] . $d[$delim];
   for ($j=0; $j < $num_vars;$j++){
     echo $row["var".$j]. $d[$delim];
