@@ -19,8 +19,8 @@ class StationData {
 
   function load_station($id)
   {
-    $rs = pg_prepare($this->dbconn, "SELECT", "SELECT *, x(geom) as lon, y(geom) as lat from stations WHERE id = $1");
-    $rs = pg_execute($this->dbconn, "SELECT", Array($id));
+    $rs = pg_prepare($this->dbconn, "SELECTST", "SELECT *, x(geom) as lon, y(geom) as lat from stations WHERE id = $1");
+    $rs = pg_execute($this->dbconn, "SELECTST", Array($id));
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
     {
       $this->table[ $row["id"] ] = $row;
