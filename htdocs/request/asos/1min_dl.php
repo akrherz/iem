@@ -9,7 +9,10 @@ include_once("$rootpath/include/database.inc.php");
  * 24 Mar 2004	Support AWOS sky coverage codes
  */
 
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS"));
+$cities = $nt->table;
+
 
 $skycover = Array(
  0 => "NOREPORT",
@@ -146,7 +149,7 @@ if ($what != "plot"){
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
   $sid = $row["station"];
-  echo $sid . $d[$delim] . $cities[$sid]["city"] ;
+  echo $sid . $d[$delim] . $cities[$sid]["name"] ;
   if ($gis == "yes"){
      echo  $d[$delim] . $cities[$sid]["lat"] . $d[$delim] .  $cities[$sid]["lon"] ;
   } 
