@@ -15,7 +15,9 @@ include("../../../config/settings.inc.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
 include("$rootpath/include/mlib.php");
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("AWOS");
+$cities = $nt->table;
 $iem = new IEMAccess();
 
 function s2icon($s)
@@ -59,7 +61,7 @@ while (list($key, $iemob) = each($snet) ){
 echo "Object: ".$meta["lat"].",".$meta["lon"]."
   Threshold: 999 
   Icon: 0,0,". $mydata["drct"] .",". s2icon( floatval($mydata["sknt"]) ) ."
-  Icon: 0,0,000,2,5,\"".$meta["city"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n\" 
+  Icon: 0,0,000,2,5,\"".$meta["name"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n\" 
   Threshold: 150
   Text:  -17, 13, 1, \" ".round($mydata["tmpf"],0)." \" 
   Text:  -17, -13, 1, \" ".round($mydata["dwpf"],0)." \" 
