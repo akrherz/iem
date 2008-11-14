@@ -14,7 +14,10 @@ $e2date = date("2000-m-d", $ets);
 $today = time();
 
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/all_locs.php");
+include("$rootpath/include/station.php");
+$st = new StationData($station);
+$st->load_station( $st->table[$station]['climate_site'] );
+$cities = $st->table;
 $coopdb = iemdb("coop");
 $iem = iemdb("access");
 
@@ -38,7 +41,7 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 /* Now we need the climate data */
 $q = "SELECT precip, valid from climate
-		WHERE station = '$climate_site' and valid between '$s2date' and
+		WHERE station = '". strtolower($climate_site) ."' and valid between '$s2date' and
 		'$e2date'
 		ORDER by valid ASC";
 $rs = pg_exec($coopdb, $q);
@@ -83,8 +86,8 @@ $graph->xaxis->SetPos("min");
 $graph->xaxis->SetTickLabels($xlabels);
 
 $graph->yaxis->SetTitle("Precipitation (in)");
-$graph->title->Set( $cities[$station]["city"] ." [$station] Precipitation for ". $year );
-$graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["city"] ."[". $climate_site ."]");
+$graph->title->Set( $cities[$station]["name"] ." [$station] Precipitation for ". $year );
+$graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["name"] ."[". $climate_site ."]");
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");
 
