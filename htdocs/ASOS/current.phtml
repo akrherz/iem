@@ -155,24 +155,24 @@ a column to sort it.<br>\n";
 </tr></thead>
 <tbody>
 <?php
-function aSortBySecondIndex($multiArray, $secondIndex) {
-  global $sorder;
-        while (list($firstIndex, ) = each($multiArray))
-                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+function aSortBySecondIndex($multiArray, $secondIndex, $sorder) {
+  while (list($firstIndex, ) = each($multiArray))
+       $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
   if ($sorder == "asc")
         asort($indexMap);
   else 
         arsort($indexMap);
-        while (list($firstIndex, ) = each($indexMap))
-                if (is_numeric($firstIndex))
-                        $sortedArray[] = $multiArray[$firstIndex];
-                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-        return $sortedArray;
+  while (list($firstIndex, ) = each($indexMap))
+      if (is_numeric($firstIndex))
+                 $sortedArray[] = $multiArray[$firstIndex];
+      else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+  return $sortedArray;
 }
 
-  $mydata = Array();
+/* Final data array */
+$mydata = Array();
 
-  while (list($key, $iemob) = each($asos) ){
+while ( list($key, $iemob) = each($asos) ){
     $mydata[$key] = $iemob->db;
     $mydata[$key]["ts"] = $iemob->ts;
     $mydata[$key]["sname"] = $cities[$key]["name"];
@@ -191,61 +191,66 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
       }
     }
 
+} // End of while
+
+
+$finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
+$now = time();
+$i = 0;
+$old = "";
+while (list ($key, $val) = each ($finalA))  {
+  $i++;
+  $parts = $finalA[$key];
+
+  $row = "<tr";
+  if ($i % 2 == 0)  $row .= " bgcolor='#eeeeee'";  
+  $row .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
+
+  $tdiff = $now - $asos[$key]->ts;
+  $row .= "<td>". $cities[$key]["name"] . " (". $key .")</td>";
+  $row .= "<td ";
+  if ($tdiff > 10000){
+    $fmt = "%d %b %I:%M %p";
+    $row .= "bgcolor=\"red\">". strftime($fmt, $asos[$key]->ts) ."</td><td colspan=\"13\">Site Offline</td></tr>";
+    $old .= $row;
+    continue;
+  } else if ($tdiff > 7200){
+    $fmt = "%I:%M %p";
+    $row .= 'bgcolor="orange"';
+  } else if ($tdiff > 3600){
+    $fmt = "%I:%M %p";
+    $row .= 'bgcolor="green"';
+  } else {
+    $fmt = "%I:%M %p";
   }
-
-  $finalA = Array();
-
-  $finalA = aSortBySecondIndex($mydata, $sortcol);
-  $now = time();
-  $i = 0;
-  while (list ($key, $val) = each ($finalA))  {
-    $i++;
-    $parts = $finalA[$key];
-
-    echo "<tr";
-    if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
-    echo "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
-
-    $tdiff = $now - $asos[$key]->ts;
-    echo "<td>". $cities[$key]["name"] . " (". $key .")</td>";
-    echo "<td ";
-    if ($tdiff > 10000){
-      $fmt = "%d %b %I:%M %p";
-      echo 'bgcolor="red"';
-    } else if ($tdiff > 7200){
-      $fmt = "%I:%M %p";
-      echo 'bgcolor="orange"';
-    } else if ($tdiff > 3600){
-      $fmt = "%I:%M %p";
-      echo 'bgcolor="green"';
-    } else {
-      $fmt = "%I:%M %p";
-    }
-    echo ">". strftime($fmt, $asos[$key]->ts) ."</td>
-     <td align='center'>". round($parts["tmpf"],0) ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
+  $row .= ">". strftime($fmt, $asos[$key]->ts) ."</td>
+   <td align='center'>". round($parts["tmpf"],0) ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
      <td>". round($parts["dwpf"],0) ."</td>
      <td>". round($parts["feel"],0) ."</td>
 	    <td>". $parts["relh"] ."</td>
 	    <td>". $parts["alti"] ."</td>
 	    <td>". $parts["vsby"] ."</td>
              <td>". round($parts["sknt"],0) ;
-            if (floatval($parts["gust"] > 0)){
-              echo "G". round($parts["gust"],0);
-            } echo "</td>";
-            echo "<td>". drct2txt( $parts["drct"] ) ."</td><td>";
-  if (isset($parts["peak_ts"])) echo  $parts["peak"] ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ;
-       echo "</td><td>". $parts["phour"] ."</td>
+
+   if (floatval($parts["gust"] > 0)){
+      $row .= "G". round($parts["gust"],0);
+   } $row .= "</td>";
+   $row .= "<td>". drct2txt( $parts["drct"] ) ."</td><td>";
+  if (isset($parts["peak_ts"])) $row .=  $parts["peak"] ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ;
+  $row .= "</td><td>". $parts["phour"] ."</td>
             <td>". $parts["pday"] ."</td>
 	    </tr>\n";
-         if ($metar == "yes") {
-            echo "<tr";
-            if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";
-            echo ">";
-            echo "<td colspan=16>
+  if ($metar == "yes") {
+    $row .= "<tr";
+    if ($i % 2 == 0)  $row .= " bgcolor='#eeeeee'";
+    $row .= ">";
+    $row .= "<td colspan=16>
              <font color=\"brown\">". $parts["raw"] ."</font></td>
              </tr>\n";
-         }
    }
+  echo $row;
+ }
+echo $old;
 
  $uri = "javascript:new_window('$rooturl/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network";
 ?>
