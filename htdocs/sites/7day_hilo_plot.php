@@ -11,10 +11,10 @@ $cities = $st->table;
  $db = iemdb("access");
 
  /* Get high and low temps for the past 7 days */
-$sql = "SELECT day, max_tmpf, min_tmpf from summary WHERE 
-         station = '$station' and day < 'TODAY' ORDER by day DESC LIMIT 7";
+$rs = pg_prepare($db, "SELECT", "SELECT day, max_tmpf, min_tmpf from summary 
+       WHERE station = $1 and day < 'TODAY' ORDER by day DESC LIMIT 7");
 
-$rs = pg_query($db, $sql);
+$rs = pg_execute($db, "SELECT", Array($station));
 
 $highs = Array();
 $lows = Array();
@@ -37,10 +37,10 @@ $db = iemdb("coop");
 
 $sqlDate = sprintf("2000-%s", date("m-d") );
 
-$sql = "SELECT valid, high, low from climate WHERE station = '". strtolower($climate_site) ."'
-        and valid < '$sqlDate' ORDER by valid DESC LIMIT 7";
+$rs = pg_prepare($db, "SELECT", "SELECT valid, high, low from climate 
+        WHERE station = $1 and valid < $2 ORDER by valid DESC LIMIT 7");
 
-$rs = pg_query($db, $sql);
+$rs = pg_execute($db, "SELECT", Array(strtolower($climate_site), $sqlDate));
 
 $ahighs = Array();
 $alows = Array();
