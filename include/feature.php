@@ -7,7 +7,7 @@ function printTags($tokens)
   $s = "<br /><strong>Tags:</strong> &nbsp; ";
   while (list($k,$v) = each($tokens))
   {
-    $s .= sprintf("<a href=\"%s/onsite/features/tags/%s\">%s</a> &nbsp; ", $rooturl, $v, $v);
+    $s .= sprintf("<a href=\"%s/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $rooturl, $v, $v);
   }
   return $s;
 }
