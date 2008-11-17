@@ -15,11 +15,11 @@ for($i=0;$i<$days;$i++)
   $tor[] = 0;
   $svr[] = 0;
 }
-$sql = sprintf("SELECT date(issue) as d, phenomena, count(*) as c 
- from warnings_%s WHERE gtype = 'P' and significance = 'W' 
- and issue > '%s' and issue < '%s' GROUP by d, phenomena", date("Y", $sts), 
- date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets) );
-$rs = pg_query($db, $sql);
+$year = date("Y", $sts);
+$rs = pg_prepare($db, "SELECT", "SELECT date(issue) as d, phenomena, 
+ count(*) as c from warnings_$year WHERE gtype = 'P' and significance = 'W' 
+ and issue > $1 and issue < $2 GROUP by d, phenomena");
+$rs = pg_execute($db, "SELECT", Array(date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets)));
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $p = $row["phenomena"];
