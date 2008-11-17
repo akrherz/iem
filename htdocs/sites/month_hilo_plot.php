@@ -17,11 +17,11 @@ $cities = $st->table;
  $rts = mktime(0,0,0,$month,1,$year);
 
  /* Get high and low temps for the past 7 days */
-$sql = "SELECT day, max_tmpf, min_tmpf from summary_$year WHERE 
-        station = '$station' and extract(month from day) = $month
-        and day < 'TODAY' ORDER by day ASC";
-
-$rs = pg_query($db, $sql);
+$rs = pg_prepare($db, "SELECT", "SELECT day, max_tmpf, min_tmpf 
+        from summary_$year WHERE 
+        station = $1 and extract(month from day) = $2
+        and day < 'TODAY' ORDER by day ASC");
+$rs = pg_execute($db, "SELECT", Array($station,$month));
 
 $highs = Array();
 $lows = Array();
@@ -50,10 +50,11 @@ $db = iemdb("coop");
 
 $sqlDate = sprintf("2000-%s", date("m-d") );
 
-$sql = "SELECT valid, high, low from climate WHERE station = '". strtolower($climate_site) ."'
-        and extract(month from valid) = $month  ORDER by valid ASC";
+$rs = pg_prepare($db, "SELECT", "SELECT valid, high, low from climate 
+        WHERE station = $1
+        and extract(month from valid) = $2  ORDER by valid ASC");
 
-$rs = pg_query($db, $sql);
+$rs = pg_execute($db, "SELECT", Array(strtolower($climate_site), $month));
 
 $ahighs = Array();
 $alows = Array();
