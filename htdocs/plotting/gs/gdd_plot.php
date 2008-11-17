@@ -31,10 +31,9 @@ function calcGDD($high,$low)
 
 $climate_site = $cities[$station]["climate_site"];
 
-$q = "SELECT max_tmpf, min_tmpf, day from summary_$year
-		WHERE station = '$station' and day between '$sdate' and '$edate'
-		ORDER by day ASC";
-$rs = pg_query($iem, $q);
+$rs = pg_prepare($iem, "SELECT", "SELECT max_tmpf, min_tmpf, day from summary_$year
+		WHERE station = $1 and day between $2 and $3 ORDER by day ASC");
+$rs = pg_execute($iem, "SELECT", Array($station, $sdate, $edate));
 $obs = Array();
 $aobs = Array();
 $atot = 0;
