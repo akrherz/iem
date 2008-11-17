@@ -26,8 +26,9 @@ if ($myTime == $today)
   $tbl = sprintf("t%s", date("Y_m", $myTime) );
   $pcol = "";
 }
-$sql = sprintf("SELECT * $pcol from %s WHERE station = '%s' and date(valid) = '%s' ORDER by valid ASC", $tbl, $station, date("Y-m-d", $myTime) );
-$rs = pg_query($dbconn, $sql);
+$rs = pg_prepare($dbconn, "SELECT", "SELECT * $pcol from $tbl 
+                 WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
+$rs = pg_execute($dbconn, "SELECT", Array($station, date("Y-m-d", $myTime)));
 if (pg_num_rows($rs) == 0) { die("ERROR: No Observations Found"); }
 
 $imgwidth = 640;
