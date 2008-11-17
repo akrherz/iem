@@ -16,12 +16,14 @@ $year = intval($year);
 $wfo = substr($wfo,1,3);
 $significance = substr($significance,0,1);
 
-$sql = "SELECT xmax(geom), ymax(geom), xmin(geom), ymin(geom), *, oid,
+$rs = pg_prepare($postgis, "SELECT", "SELECT xmax(geom), ymax(geom), 
+        xmin(geom), ymin(geom), *, oid,
         round((area2d(transform(geom,2163))/1000000)::numeric,0 ) as area
-        from sbw_$year WHERE phenomena = '$phenomena' and 
-        eventid = $eventid and wfo = '$wfo' and significance = '$significance'
-        ORDER by polygon_begin ASC";
-$rs = pg_query($postgis, $sql);
+        from sbw_$year WHERE phenomena = $1 and 
+        eventid = $2 and wfo = $3 and significance = $4
+        ORDER by polygon_begin ASC");
+
+$rs = pg_execute($postgis, "SELECT", Array($phenomena, $eventid, $wfo, $significance));
 
 $rows = pg_num_rows($rs);
 
