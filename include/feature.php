@@ -1,5 +1,17 @@
 <?php
   // Here is where we start pulling station Information
+function printTags($tokens)
+{
+  global $rooturl;
+  if (sizeof($tokens) == 0){ return "";}
+  $s = "<br /><strong>Tags:</strong> &nbsp; ";
+  while (list($k,$v) = each($tokens))
+  {
+    $s .= sprintf("<a href=\"%s/onsite/features/tags/%s\">%s</a> &nbsp; ", $rooturl, $v, $v);
+  }
+  return $s;
+}
+
 function genFeature()
 {
   global $rooturl;
@@ -14,6 +26,7 @@ function genFeature()
   $foid = $row["oid"];
   $good = intval($row["good"]);
   $bad = intval($row["bad"]);
+  $tags = explode(",", $row["tags"]);
   /* Hehe, check for a IEM vote! */
   $voted = 0;
   if (array_key_exists('foid', $_COOKIE) && $_COOKIE["foid"] == $foid)
@@ -59,9 +72,13 @@ if ($row["voting"] == "f"){
   $s .= "<br clear=\"all\" />";
 }
 else if ($voted){
-  $s .= "<br clear=\"all\" /><div style=\"float: left; margin-bottom: 10px;\">&nbsp; &nbsp;<strong> Rate Feature: </strong> Good ($good votes) or Bad ($bad votes) &nbsp; Thanks for voting!</div>";
+  $s .= "<br clear=\"all\" /><div style=\"float: left; margin-bottom: 10px;\">&nbsp; &nbsp;<strong> Rate Feature: </strong> Good ($good votes) or Bad ($bad votes) &nbsp; Thanks for voting!";
+  $s .= printTags($tags);
+  $s .= "</div>";
 } else {
-  $s .= "<br clear=\"all\" /><div style=\"float: left; margin-bottom: 10px;\">&nbsp; &nbsp;<strong> Rate Feature: </strong> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes)</div>";
+  $s .= "<br clear=\"all\" /><div style=\"float: left; margin-bottom: 10px;\">&nbsp; &nbsp;<strong> Rate Feature: </strong> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes)";
+  $s .= printTags($tags);
+  $s .= "</div>";
 }
 
 /* Now, lets look for older features! */
