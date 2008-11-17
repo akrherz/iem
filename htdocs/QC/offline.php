@@ -1,6 +1,7 @@
 <?php 
 include("../../config/settings.inc.php");
 $TITLE = "IEM | QC | Sites Offline";
+$THISPAGE = "iem-qc";
 include("$rootpath/include/header.php"); ?>
 
 <div class="text">
@@ -17,6 +18,9 @@ display of sites that are offline.</p>
 <?php
 include("$rootpath/include/iemaccess.php");
 $iem = new IEMAccess();
+$rs = pg_prepare($iem->dbconn, "SELECT", "SELECT *, 
+                 to_char(valid, 'Mon DD YYYY HH:MI AM') as v from offline 
+                 WHERE network = $1 ORDER by valid ASC");
 
 function aSortBySecondIndex($multiArray, $secondIndex) {
         while (list($firstIndex, ) = each($multiArray))
@@ -36,8 +40,7 @@ function networkOffline($network)
   $nt->load_network($network);
   $cities = $nt->table;
 
- 
-  $rs = pg_query($iem->dbconn, "SELECT *, to_char(valid, 'Mon DD YYYY HH:MI AM') as v from offline WHERE network = '$network' ORDER by valid ASC");
+  $rs = pg_execute($iem->dbconn, "SELECT", Array($network) );
 
   $q = 0;
   for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
