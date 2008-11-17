@@ -59,6 +59,10 @@ if (strlen($network) > 0){
 }
 
 $varDef = Array("tmpf" => "Temperatures",
+  "tsf0" => "Pavement Temp #1",
+  "tsf1" => "Pavement Temp #2",
+  "tsf2" => "Pavement Temp #3",
+  "tsf3" => "Pavement Temp #4",
   "dwpf" => "Dew Points",
   "vsby" => "Visibility",
   "sknt" => "Wind [knots]",
