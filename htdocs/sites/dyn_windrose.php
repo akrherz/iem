@@ -43,7 +43,7 @@ $cities = $st->table;
    $hourLimiter = " and extract(hour from valid) = ". date("H", $sts);
    $hourLimitSubTitle = "Obs restricted to obs during hour: ". strtoupper(date("h a", $sts));
   }
-  $sql = sprintf("select count(*), sum(sknt) as totsknt,
+  $rs = pg_prepare($pg_conn, "SELECT", "select count(*), sum(sknt) as totsknt,
   case 
     when drct > 349 or drct < 14 THEN 'N' 
     when drct BETWEEN 13 and 35 THEN 'NNE' 
@@ -70,13 +70,13 @@ $cities = $st->table;
     WHEN sknt BETWEEN 15 and 20 THEN 4
     WHEN sknt > 20 THEN 5
   END as s
-   from %s
+   from $table
   WHERE 
-    sknt >= 0 and drct >= 0 and station = '%s'
-    and valid BETWEEN '%s' and '%s' %s
-  GROUP by d, s", $table, $station, date("Y-m-d h:i:s", $sts), date("Y-m-d h:i:s", $ets), $hourLimiter );
-  //echo $sql;
-  $rs = pg_query($pg_conn, $sql);
+    sknt >= 0 and drct >= 0 and station = $1
+    and valid BETWEEN $2 and $3 $hourLimiter
+  GROUP by d, s");
+
+  $rs = pg_execute($pg_conn, "SELECT", Array($station, date("Y-m-d h:i:s", $sts), date("Y-m-d h:i:s", $ets) ) );
 
   $sumsknt = 0;
   $total = 0;
