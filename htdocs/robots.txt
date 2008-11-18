@@ -2,6 +2,7 @@
 
 User-agent: *
 Disallow: /tmp/
+Disallow: /cgi-bin/
 Disallow: /usage/
 Disallow: /archive/raw/
 Disallow: /archive/data/
