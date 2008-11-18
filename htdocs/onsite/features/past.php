@@ -3,6 +3,7 @@ include("../../../config/settings.inc.php");
 $TITLE = "IEM | Past Features";
 $ts = isset($_GET["ts"]) ? $_GET["ts"] : time();
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/feature.php");
 $THISPAGE = "iem-feature";
 include("$rootpath/include/header.php"); ?>
 
@@ -60,7 +61,9 @@ include("$rootpath/include/header.php"); ?>
     echo "<td><b><a href='cat.php?day=".date("Y-m-d", $valid) ."'>". $row["title"] ."</a></b>\n";
     echo "<br><font size='-1' style='color:black'>". $row["webdate"] ."</font>\n";
     echo "<br>". $row["story"] ."";
-    echo "<br>Voting: Good - ". $row["good"] ." Bad - ". $row["bad"] ."</div></td></tr>";
+    echo "<br>Voting: Good - ". $row["good"] ." Bad - ". $row["bad"] ;
+    echo "<br />". printTags( explode(",", $row["tags"]) );
+    echo "</div></td></tr>";
   }
   echo "</tr></table>\n";
 

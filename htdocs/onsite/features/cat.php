@@ -1,6 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/feature.php");
 $day = isset($_GET["day"]) ? substr($_GET["day"],0,10) : die("No date specified");
 $offset = isset($_GET["offset"]) ? $_GET["offset"] : 0;
 
@@ -51,6 +52,7 @@ $big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.gif", $row["
   {
     echo "<br /><br /><b>Voting:</b><br />Good = ". $row["good"] ." <br />Bad = ". $row["bad"] ;
   }
+  echo "<br />". printTags(explode(",", $row["tags"]));
 ?>
 </div>
 
