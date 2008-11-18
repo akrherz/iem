@@ -3,6 +3,14 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $conn = iemdb("postgis");
 
+$sql = "SELECT max(valid) as valid from roads_current";
+$rs = pg_query($conn, $sql);
+$row = pg_fetch_array($rs, 0);
+$valid = substr($row["valid"],0,16);
+$ts = strtotime($valid);
+$valid = strftime("%I:%M %p on %d %b %Y", $ts);
+
+
 $tbl = "roads_current";
 if (isset($_GET["test"])){ $tbl = "roads_current_test"; }
 
@@ -16,6 +24,16 @@ header("Content-Type:", "application/vnd.google-earth.kml+xml");
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://earth.google.com/kml/2.2\">
  <Document>
+ <ScreenOverlay id=\"legend_bar\">
+   <visibility>1</visibility>
+   <Icon>
+       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=". urlencode($valid) ."</href>
+   </Icon>
+   <description>WaterWatch Legend</description>
+   <overlayXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
+   <screenXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
+   <size x=\"0\" y=\"0\" xunits=\"pixels\" yunits=\"pixels\"/>
+  </ScreenOverlay>
 <Style id=\"code0\">
   <LineStyle><width>3</width><color>ffffffff</color></LineStyle>
 </Style>
