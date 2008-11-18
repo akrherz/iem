@@ -27,7 +27,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <ScreenOverlay id=\"legend_bar\">
    <visibility>1</visibility>
    <Icon>
-       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=". urlencode($valid) ."</href>
+       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=Roads:%20". urlencode($valid) ."</href>
    </Icon>
    <description>WaterWatch Legend</description>
    <overlayXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
