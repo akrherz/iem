@@ -44,7 +44,7 @@ $lyr_c0->label->color->setRGB(255,255,255);
 $lyr_c0->label->outlinecolor->setRGB(0,0,0);
 $logopt = ms_newpointobj();
 $logopt->setXY($lon0, $lat0);
-$logopt->draw($map, $lyr, $img, 0, $metadata["city"]);
+$logopt->draw($map, $lyr, $img, 0, $metadata["name"]);
 $logopt->free();
 
 $map->drawLabelCache($img);
