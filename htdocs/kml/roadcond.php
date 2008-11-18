@@ -3,8 +3,11 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $conn = iemdb("postgis");
 
+$tbl = "roads_current";
+if (isset($_GET["test"])){ $tbl = "roads_current_test"; }
+
 $sql = "SELECT askml(simple_geom) as kml,
-      * from roads_current_test r, roads_base b, roads_conditions c WHERE
+      * from $tbl r, roads_base b, roads_conditions c WHERE
   r.segid = b.segid and r.cond_code = c.code";
 
 $rs = pg_query($conn, $sql);
@@ -71,16 +74,20 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
+  $minor = $row["minor"];
+  $major = $row["major"];
+
+
   echo "<Placemark>
     <description>
         <![CDATA[
-  <p><font color=\"red\"><i>Polygon Size:</i></font>
-  <br /><font color=\"red\"><i>Status:</i></font> 
+  <p><font color=\"red\"><i>Road:</i> $major :: $minor</font>
+  <br /><font color=\"red\"><i>Status:</i> ". $row["raw"] ."</font> 
    </p>
         ]]>
     </description>
     <styleUrl>#code".$row["cond_code"] ."</styleUrl>
-    <name>Test</name>\n";
+    <name>$major $minor</name>\n";
   echo $row["kml"];
   echo "</Placemark>";
 }
