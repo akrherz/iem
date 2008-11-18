@@ -55,7 +55,7 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT"
     "wms_srs"   "EPSG:4326"
     "wms_extent" "-126 24 -66 50"
-    "wms_timeextent" "2003-08-01/2010-12-31/P5M"
+    "wms_timeextent" "2003-08-01/2010-12-31/PT5M"
     "wms_timeitem" "datetime"
     "wms_timedefault" "2006-06-23T03:10:00Z"
   END
@@ -77,7 +77,7 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT"
     "wms_srs"   "EPSG:4326"
     "wms_extent" "-126 24 -66 50"
-    "wms_timeextent" "2003-08-01/2010-12-31"
+    "wms_timeextent" "2003-08-01/2010-12-31/PT5M"
     "wms_timeitem" "datetime"
     "wms_timedefault" "2006-06-23T03:10:00Z"
   END
