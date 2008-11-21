@@ -1,17 +1,15 @@
 <?php 
 include("../../../config/settings.inc.php");
-        $TITLE = "IEM | COOP Data Download";
 include("$rootpath/include/constants.php"); 
+$TITLE = "IEM | COOP Data Download";
+$THISPAGE = "networks-coop";
 include("$rootpath/include/header.php"); 
 include("$rootpath/include/network.php"); 
+include("$rootpath/include/forms.php"); 
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 ?>
 <div class="text">
-<b>Nav:</b> <a href="/COOP/">COOP</a> <b> > </b>
-  Download Data
-
-<?php include("$rootpath/include/forms.php"); ?>
 
 <p>This page allows you to download daily observations for the NWS COOP network.Some items of note:
 <ul>
@@ -92,6 +90,7 @@ start and end times to the same value.</i>
   <option value="low">Low Temperature [F]
   <option value="precip">Rainfall [inch]
   <option value="snow">Snowfall [inch]
+  <option value="snowd">Snow Depth (since 1991) [inch]
 </select>
 
 </td><td valign="TOP">
