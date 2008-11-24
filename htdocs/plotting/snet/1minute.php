@@ -67,8 +67,11 @@ for($i=0;$row = @pg_fetch_array($rs,$i); $i++)
   $thisRelH = $row["relh"];
   $thisSR = $row["srad"];
   $thisMPH = $row["sknt"] * 1.15;
+  if ($thisMPH < 0) $thisMPH = 0;
   $thisDRCT = $row["drct"];
+  if ($thisDRCT < 0) $thisDRCT = 0;
   $thisGust = $row["gust"] * 1.15;
+  if ($thisGust < 0) $thisGust = 0;
   $thisALTI = $row["alti"];
   $thisPREC = $row["pday"];
   if ($thisRelH > 0){
