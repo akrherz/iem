@@ -58,6 +58,7 @@ choice.
      <option value="low" <?php if($var == "low") echo "SELECTED"; ?>>Low Temperature</option>
      <option value="precip" <?php if($var == "precip") echo "SELECTED"; ?>>Precipitation</option>
      <option value="snow" <?php if($var == "snow") echo "SELECTED"; ?>>Snow [1]</option>
+     <option value="snowd" <?php if($var == "snowd") echo "SELECTED"; ?>>Snow Depth [2]</option>
     </select></td>
   <td><?php echo yearselect(1893, $year); ?></td>
   <td><?php monthSelect2($month, 'month'); ?></td>
@@ -66,7 +67,7 @@ choice.
   </tr>
 </table>
 <br />[1] Snowfall data is not complete.  Please be careful using the data.
-
+<br />[2] Snowfall depth data only goes back to 1991 for Quality Controled source.
 <?php
 dl($mapscript);
 include("$rootpath/include/network.php");
@@ -107,6 +108,7 @@ function plotNoData($map, $img){
 $varDef = Array("low" => "Low Temperature",
   "precip" => "Precipitation",
   "snow" => "Snowfall",
+  "snowd" => "Snow Depth",
   "high" => "High Temperature"
 );
 
@@ -163,7 +165,7 @@ if ($source == "qc")
   $c = iemdb("access");
   $cutstring1 = 0;
   $cutstring2 = 5;
-  $sql = sprintf("SELECT station as stationid, day, max_tmpf as high, min_tmpf as low, pday as precip from summary_%s WHERE day = '%s' and network = 'IA_COOP' and min_tmpf < 90 and max_tmpf > -90", adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
+  $sql = sprintf("SELECT station as stationid, day, snowd, max_tmpf as high, min_tmpf as low, pday as precip from summary_%s WHERE day = '%s' and network = 'IA_COOP' and min_tmpf < 90 and max_tmpf > -90", adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
 }
 
 $rs =  pg_exec($c, $sql);
