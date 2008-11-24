@@ -5,7 +5,7 @@ $plot = isset($_GET["plot"]) ? $_GET["plot"]: "high";
 $area = isset($_GET["area"]) ? $_GET["area"]: "all";
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
-
+$THISPAGE = "networks-coop";
 $TITLE = "IEM | NWS COOP | GIS Plotting";
 include("$rootpath/include/header.php");
 ?>
