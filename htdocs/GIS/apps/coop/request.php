@@ -62,8 +62,11 @@ $rs = pg_exec($pgcon, "select s.*, c.*,
 
 pg_close($pgcon);
 
+@mkdir("/tmp/cli2shp");
+chdir("/tmp/cli2shp");
 
-$shpFname = "/var/www/htdocs/tmp/". $filePre;
+
+$shpFname =  $filePre;
 $shpFile = ms_newShapeFileObj($shpFname, MS_SHP_POINT);
 $dbfFile = dbase_create( $shpFname.".dbf", array(
    array("SITE", "C", 6),
@@ -94,12 +97,15 @@ $shpFile->free();
 dbase_close($dbfFile);
 
 // Generate zip file
-chdir("/var/www/htdocs/tmp/");
-popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf", 'r');  
+copy("/mnt//mesonet/data/gis/meta/4326.prj", $filePre.".prj");
+popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf ".$filePre.".prj", 'r');  
 
-echo "Shapefile Generation Complete.<br>";
-echo "Please download this <a href=\"/tmp/".$filePre.".zip\">zipfile</a>.";
-
+header("Content-type: application/octet-stream");
+header("Content-Disposition: attachment; filename=${filePre}.zip");
+readfile("${filePre}.zip");
+unlink("${filePre}.zip");
+unlink("${filePre}.shp");
+unlink("${filePre}.prj");
+unlink("${filePre}.dbf");
+unlink("${filePre}.shx");
 ?>
-
-<p><a href="index.php?month=<?php echo $month; ?>&day=<?php echo $day; ?>">Here</a> is a link back to where you came from.
