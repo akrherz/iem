@@ -667,7 +667,8 @@ LAYER
       SYMBOL 'circle'
     END
     STYLE
-      COLOR  152 152 152
+      #COLOR  152 152 152
+      COLOR  240 240 0
       WIDTH 5
       ANTIALIAS TRUE
     END
