@@ -17,7 +17,8 @@ $rs = pg_prepare($dbconn, "today", "SELECT *, date(valid) as d,
 $rs = pg_prepare($dbconn, "tomorrow", "SELECT *, date(valid) as d,
               to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
               to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate from feature
-              WHERE valid > $1 ORDER by valid ASC limit 1");
+              WHERE valid > ($1::date + '1 day'::interval) 
+              ORDER by valid ASC limit 1");
 
 $q = "today";
 if ($offset == "-1"){ $q = "yesterday"; }
