@@ -31,31 +31,37 @@ if (! $subc && ! $dwpf && ! $tmpf && ! $s0 && ! $s1 && ! $s2 && ! $s3 ){
  $sw->logic($_GET);
  $swinterface = $sw->printInterface();
 
-	include("$rootpath/include/header.php"); 
+$TITLE = "IEM | RWIS Timeseries Plots";
+$THISPAGE = "networks-rwis";
+include("$rootpath/include/header.php"); 
 ?>
 <?php include("$rootpath/include/imagemaps.php"); ?>
 <?php include("$rootpath/include/forms.php"); ?>
-<b>Nav:</b> <a href="<?php echo $rooturl; ?>/RWIS/">RWIS</a> <b> > </b>
-Pavement Temperature Time Series
+
+<p>This application plots a timeseries of data from an Iowa RWIS site 
+of your choice.  You can optionally select which variables to plot and
+for which time period in the archive.</p>
 
 <form method="GET" action="sf_fe.php" name="menu">
 <input type="hidden" name="ostation" value="<?php echo $station; ?>">
-<h2 class="heads">Site Selection:</h2>
-Select from list: <?php echo networkSelect("IA_RWIS",$station); ?> or 
-<a href="sf_fe.php">Select Visually</a>
 
-<?php 
-  if (strlen($station) > 0 ) { 
-?>
-<h2 class="heads">Plot time span:</h2>
-<table width="100%">
- <tr>
-   <td valign="TOP"><input type="radio" name="mode" value="rt" <?php if ($mode == "rt") echo "CHECKED"; ?>>Current</td>
-   <td><input type="radio" name="mode" value="hist" <?php if ($mode == "hist") echo "CHECKED"; ?>>Historical
-  <br>Start Year:<?php echo yearSelect2(1995, $syear, "syear"); ?>
-  Start Month:<?php echo monthSelect2($smonth, "smonth"); ?>
-  Start Day:<?php echo daySelect2($sday, "sday"); ?>
-  <br>Number of days:
+
+<?php if (strlen($station) > 0 ) {  ?>
+<table cellpadding="2" cellspacing="0" border="1">
+<tr><th>Select Station</th><th colspan="5">Timespan</th></tr>
+
+<tr><td rowspan="2">
+  <?php echo networkSelect("IA_RWIS",$station); ?>
+  <br />Or from <a href="sf_fe.php">a map</a></td>
+
+   <td rowspan="2" valign="TOP"><input type="radio" name="mode" value="rt" <?php if ($mode == "rt") echo "CHECKED"; ?>>Current</td>
+   <td colspan="4"><input type="radio" name="mode" value="hist" <?php if ($mode == "hist") echo "CHECKED"; ?>>Historical</td></tr>
+
+<tr>
+  <td>Start Year:<br /><?php echo yearSelect2(1995, $syear, "syear"); ?></td>
+  <td>Start Month:<br /><?php echo monthSelect2($smonth, "smonth"); ?></td>
+  <td>Start Day:<br /><?php echo daySelect2($sday, "sday"); ?></td>
+  <td>Number of days:<br />
    <select name="days">
      <option value="1" <?php if ($days == "1") echo "SELECTED"; ?>>1
      <option value="2" <?php if ($days == "2") echo "SELECTED"; ?>>2
@@ -66,7 +72,6 @@ Select from list: <?php echo networkSelect("IA_RWIS",$station); ?> or
  </tr>
 </table>
 
-<h2 class="heads">Modify Plot:</h2>
 <?php
 
   $c0 = iemdb('rwis');
@@ -82,7 +87,8 @@ Select from list: <?php echo networkSelect("IA_RWIS",$station); ?> or
   pg_close($c0);
 
   $cgiStr = "&mode=$mode&sday=$sday&smonth=$smonth&syear=$syear&days=$days&";
-  echo "<table width=\"100%\">
+  echo "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">
+      <tr><th colspan=\"3\">Plot Options</th></tr>
       <tr><td><b>Restrict Plot:</b>
       <br><input type=\"checkbox\" name=\"limit\" value=\"yes\" ";
   if (isset($_GET["limit"])) echo "CHECKED";
@@ -159,11 +165,14 @@ Select from list: <?php echo networkSelect("IA_RWIS",$station); ?> or
 <?php
   } else { ?>
   
+<table cellpadding="2" cellspacing="0" border="1">
+<tr><th>Select Station</th></tr>
+
+<tr><td>
+  <?php echo networkSelect("IA_RWIS",$station); ?>
+</td></tr></table>
   <input type="submit" value="Generate Plot">
   </form>
-  <p>This application will plot a time series of pavement 
-   temperatures for a RWIS station.  Please select the RWIS station from 
-   the map below.
   <?php
  echo $swinterface; 
 
