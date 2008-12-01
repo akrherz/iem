@@ -51,7 +51,7 @@ $cameras = Array(
 "KCCI-008" => Array("sts" => mktime(0,0,0,12, 4,2003), "ets" => time(),
     "name" => "Humboldt", "removed" => False, "active" => True, "lat" => 42.72, "lon" => -94.23,
     "state" => "IA", "network" => "KCCI",
-    "ip" => "64.71.77.200", "county" => "Humboldt", "port" => "80"),
+    "ip" => "208.90.15.91", "county" => "Humboldt", "port" => "80"),
 "KELO-003" => Array("sts" => mktime(16,0,0,12, 10,2007), "ets" => time(),
     "name" => "Huron", "removed" => False, "active" => True, "lat" => 44.383, "lon" => -98.217,
     "state" => "SD", "network" => "KELO",
