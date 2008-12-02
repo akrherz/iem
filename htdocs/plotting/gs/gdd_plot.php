@@ -3,8 +3,12 @@
 
 $station = isset($_GET['station']) ? $_GET['station'] : "DSM";
 $year = isset($_GET['year']) ? $_GET['year']: date("Y");
-$sts = mktime(0,0,0,  5, 1, $year);
-$ets = mktime(0,0,0, 10, 1, $year);
+$smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 5;
+$emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 10;
+$sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
+$eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
+$sts = mktime(0,0,0,  $smonth, $sday, $year);
+$ets = mktime(0,0,0, $emonth, $eday, $year);
 $sdate = date("Y-m-d", $sts);
 $edate = date("Y-m-d", $ets);
 $s2date = date("2000-m-d", $sts);
@@ -58,7 +62,7 @@ $cdiff = Array();
 $aclimate = Array();
 $atot = 0;
 $zeros = Array();
-$xlabels = Array();
+$times = Array();
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
 {
 	$gdd = (float)$row["gdd50"];
@@ -70,31 +74,27 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
     else $cdiff[$i] = "";
 	$aclimate[$i] = $atot;
 	$zeros[$i] = 0;
-	$xlabels[$i] = "";
+    $times[$i] = strtotime( $row["valid"] );
 }
 
 pg_close($coopdb);
 
-$xlabels[0] = "May 1";
-$xlabels[30] = "Jun 1";
-$xlabels[61] = "Jul 1";
-$xlabels[91] = "Aug 1";
-$xlabels[122] = "Sep 1";
-
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_date.php");
 include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 
 // Create the graph. These two calls are always required
-$graph = new Graph(600,400,"example1");
-$graph->SetScale("textlin");
-$graph->img->SetMargin(45,10,80,30);
+$graph = new Graph(640,480,"example1");
+$graph->SetScale("datlin");
+$graph->img->SetMargin(45,10,80,60);
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->yaxis->SetTitleMargin(30);
 $graph->xaxis->SetPos("min");
 //$graph->xaxis->SetTitle("Day of Month");
-$graph->xaxis->SetTickLabels($xlabels);
-$graph->xscale->ticks->SupressTickMarks();
+//$graph->xscale->ticks->SupressTickMarks();
+$graph->xaxis->SetLabelFormatString("M d", true);
+$graph->xaxis->SetLabelAngle(90);
 
 $graph->yaxis->SetTitle("Growing Degree Days");
 $graph->title->Set( $cities[$station]["name"] ." [$station] Growing Degree Days (base=50) for $year");
@@ -102,31 +102,32 @@ $graph->subtitle->Set("Climate Site: ". $cities[$climate_site]["name"] ."[". $cl
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");
 
-$graph->AddLine(new PlotLine(VERTICAL,30,"tan",1));
-$graph->AddLine(new PlotLine(VERTICAL,61,"tan",1));
-$graph->AddLine(new PlotLine(VERTICAL,91,"tan",1));
-$graph->AddLine(new PlotLine(VERTICAL,122,"tan",1));
-$graph->AddLine(new PlotLine(VERTICAL,153,"tan",1));
+reset($times);
+while (list($k,$v) = each($times))
+{
+ if (date("d", $v) == 1)
+   $graph->AddLine(new PlotLine(VERTICAL,$v,"tan",1));
+}
 
 
 // Create the linear plot
-$b1plot =new BarPlot($cdiff);
+$b1plot =new BarPlot($cdiff, $times);
 //$b1plot->SetFillColor("red");
 $b1plot->SetLegend("Accum Difference");
 
 // Create the linear plot
-$lp1=new LinePlot($aobs);
+$lp1=new LinePlot($aobs, $times);
 $lp1->SetLegend("Actual Accum");
 $lp1->SetColor("blue");
-$lp1->SetWeight(2);
+$lp1->SetWeight(3);
 
-$lp2=new LinePlot($aclimate);
+$lp2=new LinePlot($aclimate, $times);
 $lp2->SetLegend("Climate Accum");
 $lp2->SetColor("red");
-$lp2->SetWeight(2);
+$lp2->SetWeight(3);
 
-$z = new LinePlot($zeros);
-$z->SetWeight(2);
+$z = new LinePlot($zeros, $times);
+$z->SetWeight(3);
 
 // Add the plot to the graph
 $graph->Add($lp1);

@@ -2,14 +2,17 @@
  $station = isset($_GET['station']) ? $_GET['station']: "";
  $network = isset($network) ? $_GET['network'] : "IA_ASOS";
  $year = isset($_GET['year']) ? $_GET['year'] : date("Y");
- $month = isset($_GET['month']) ? $_GET['month'] : date("m");
+ $smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 5;
+ $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 10;
+ $sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
+ $eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
  include("../../../config/settings.inc.php");
  include("$rootpath/include/selectWidget.php");
  $sw = new selectWidget("fe.phtml", "fe.phtml?", $network);
  $sw->logic($_GET);
 ?>
 
-<?php 	$TITLE = "IEM | Growing Season Traces";
+<?php 	$TITLE = "IEM | Accumulated Values versus Climatology";
 include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">Growing Season Traces</h3>
@@ -32,18 +35,21 @@ can cause errors in the accumulated values.</p>
 <input type="hidden" value="<?php echo $station; ?>" name="station">
 <table cellspacing=2 border=1 cellpadding=2>
 <thead>
-<tr><th>Site ID:</th><th>Select Year:</th></tr>
+<tr><th>Site ID:</th><th>Year:</th><th>Start Date:</th><th>End Date:</th></tr>
 </thead>
 <tbody>
 <tr><td><input type="text" name="station" value="<?php echo $station; ?>" size="6"></td>
-  <td><?php echo yearSelect(2004,$year,"year"); ?></td></tr>
+  <td><?php echo yearSelect(2004,$year,"year"); ?></td>
+  <td><?php echo monthSelect($smonth,"smonth"); ?><?php echo daySelect($sday,"sday"); ?></td>
+  <td><?php echo monthSelect($emonth,"emonth"); ?><?php echo daySelect($eday,"eday"); ?></td>
+</tr>
 </tbody>
 </table>
 <input type="submit" value="Make Plot">
 </form>
 
-<p><img src="gdd_plot.php?<?php echo "station=$station&year=$year"; ?>" ALT="Time Series">
-<p><img src="rainfall_plot.php?<?php echo "station=$station&year=$year"; ?>" ALT="Time Series">
+<p><img src="gdd_plot.php?<?php echo "station=$station&year=$year&smonth=$smonth&sday=$sday&emonth=$emonth&eday=$eday"; ?>" ALT="Time Series">
+<p><img src="rainfall_plot.php?<?php echo "station=$station&year=$year&smonth=$smonth&sday=$sday&emonth=$emonth&eday=$eday"; ?>" ALT="Time Series">
 
 <?php } else { ?>
 
