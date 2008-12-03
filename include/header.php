@@ -34,6 +34,7 @@ $_pages = Array(
  "archive" => Array(
     "base" => Array("title" => "Archive", "url" => "/archive/"),
     "browse" => Array("title" => "Browse data/", "url" => "/archive/data/"),
+    "birthday" => Array("title" => "Birthday Weather", "url" => "/onsite/birthday/"),
     "cases" => Array("title" => "Cases", "url" => "/cases/"),
  ),
  "current" => Array(
@@ -46,7 +47,13 @@ $_pages = Array(
  ),
  "climatology" => Array(
     "base" => Array("title" => "Climatology", "url" => "/climate/"),
+    "main" => Array("title" => "Mainpage", "url" => "/climate/"),
     "climodat" => Array("title" => "Climodat", "url" => "/climodat/"),
+    "today" => Array("title" => "Today", "url" => "/climate/today.phtml"),
+    "yesterday" => Array("title" => "Yesterday", "url" => "/climate/yesterday.phtml"),
+    "week" => Array("title" => "Week", "url" => "/climate/week.phtml"),
+    "month" => Array("title" => "Month", "url" => "/climate/month.phtml"),
+    "year" => Array("title" => "Year", "url" => "/climate/year.phtml"),
  ),
  "iem" => Array(
     "base" => Array("title" => "Info", "url" => "/sites/locate.php"),
