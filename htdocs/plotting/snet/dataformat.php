@@ -1,7 +1,8 @@
-
 <?php
+include("../../../config/settings.inc.php");
 $TITLE = "IEM | School Net Data Format";
-include("/mesonet/php/include/header.php"); ?> 
+$THISPAGE = "networks-schoolnet";
+include("$rootpath/include/header.php"); ?> 
 
 <h3 class="heading">Data Format</h3><br /><br />
 <div class="text">
@@ -95,4 +96,4 @@ the end represents the change in pressure. 'S' == Steady.  'R' == Raising.
 </table></div>
 
 
-<?php include("/mesonet/php/include/footer.php"); ?>
+<?php include("$rootpath/include/footer.php"); ?>
