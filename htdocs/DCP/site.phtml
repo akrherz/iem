@@ -25,6 +25,16 @@ $mycols = array_keys($cols);
 
 $TITLE = "IEM | DCP Data by Site by Day";
 $THISPAGE="networks-dcp";
+if (! isset($_GET["station"])){
+  include("$rootpath/include/google_keys.php");
+  $network = "DCP";
+  $api = $GOOGLEKEYS[$rooturl]["any"];
+  $HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
+ <script src='http://www.openlayers.org/api/OpenLayers.js'></script>
+ <script src='${rooturl}/js/olselect.php?network=${network}'></script>";
+ $BODYEXTRA = "onload=\"init()\"";
+}
+
 include("$rootpath/include/header.php"); 
 ?>
 <h3>DCP Site Observations by Date</h3>
@@ -35,17 +45,29 @@ include("$rootpath/include/header.php");
 </ul>
 
 
-<form method="GET">
+<form method="GET" name="olselect">
 <table><tr><th>Station:</th><th>Year</th><th>Month</th><th>Day</th><th></th></tr>
 <tr>
-<td><?php echo networkSelect(iemdb("mesosite"),"DCP", $station); ?></td>
+<td><?php echo networkSelect(iemdb("mesosite"),"DCP", $station); ?>
+<br /><a href="site.phtml?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>">Select from map</a></td>
 <td><?php echo yearSelect(2008,$year); ?></td>
 <td><?php echo monthSelect($month); ?></td>
 <td><?php echo daySelect($day); ?></td>
-<td><input type="submit"></td>
+<td><input type="submit" value="View Data"></td>
 </tr></table>
 </form>
-
+<?php if (! isset($_GET["station"])){ ?>
+<style type="text/css">
+        #map {
+            width: 640px;
+            height: 400px;
+            border: 2px solid black;
+        }
+</style>
+<i>Click black dot to select your site:</i><br />
+<div id="map"></div>
+<div id="sname" unselectable="on">No site selected</div>
+<?php } ?>
 <br /><br />
 <table border="1" cellpadding="2" cellspacing="0">
 <tr>
