@@ -58,7 +58,7 @@ function init(){
        }
    });
 
-  var geojson = new OpenLayers.Layer.GML("The Network", 
+  var geojson = new OpenLayers.Layer.GML("<?php echo $network; ?> Network", 
     "<?php echo $rooturl; ?>/geojson/network.php?network=<?php echo $network; ?>",
             {
                 projection: new OpenLayers.Projection('EPSG:4326'),
