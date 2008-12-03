@@ -1,0 +1,63 @@
+<?php 
+include("../../config/settings.inc.php");
+$TITLE = "IEM | Climatology Plots for Today";
+$THISPAGE = "climatology-today";
+include("$rootpath/include/header.php"); 
+?>
+
+<h4>Direct Observations of Climate</h4>
+<ul>
+<li>The National Weather Service <a href="../COOP">COOP</a> network is a 
+group of human observers that take once daily observations. These 
+observations are made at roughly 7 AM for the past 24 hour period.  
+So the High Temperature reported is often from the previous day.
+ <ul>
+   <li><a href="../data/coopHighLow.gif">High + Low Temperature</a></li>
+   <li><a href="../data/coopPrecPlot.gif">Precipitation</a> Frozen precipitation is melted and included in the total.</li>
+   <li><a href="../data/coopSnowPlot.gif">Snowfall</a></li>
+   <li><a href="../data/coopSnowDepth.gif">Snow Depth</a></li>
+   <li><a href="../COOP/current.phtml">Sortable Observations</a> View observations in a table, you can also view data from other states in the MidWest!</li>
+ </ul>
+</li>
+</ul>
+
+<h4>Computed Observations of Climate</h4>
+<ul>
+<li>The automated sensors located at the airports report observations 
+roughly each hour.  The IEM collects this information and then calculates
+summary values.
+  <ul>
+  <li><a href="../data/summary/12z_low.gif">Morning Low Temperature</a> midnight to roughly 7 AM</li>
+  <li><a href="../data/summary/today_high.png">High Temperature</a> Though late afternoon</li>
+  <li><a href="../data/awos_rtp.shef">12Z AWOS RTP First Guess</a> Formatted
+product generated for the National Weather Service for comparison.</li>
+  <li><a href="../data/summary/12z_prec.gif">Precipitation Ending 7 AM</a></li>
+  <li><a href="../data/summary/today_prec.gif">Precipitation for today</a></li>
+  <li><a href="../data/summary/00z_prec.gif">Precipitation Ending 7 PM</a></li>
+  <li><a href="../data/summary/today_gust.gif">Peak Wind Gust</a></li>
+  </ul>
+</li>
+</ul>
+
+<h4>RADAR Estimates</h4>
+<ul class="iem-list">
+<li><a href="http://www.meteor.iastate.edu/pix/radp0.gif">Radar-estimate of storm total precip through 6 PM (CST)</a></li>
+<li><a href="http://www.meteor.iastate.edu/pix/radp.gif">Radar-estimate of storm total precip through 6 AM (CST)</a></li>
+<li><a href="http://www.meteor.iastate.edu/pix/radp1.gif">Radar-estimate of storm total precip through NOON (CST)</a></li>
+</ul>
+
+<h4>Climatology maps for today</h4>
+<ul>
+  <li><a href="../data/summary/coopAveTemp.gif">Average Hi/Low Temp</a></li>
+  <li><a href="../data/summary/coopRecTemp.gif">Record Hi/Low Temp</a></li>
+</ul>
+
+<h4>Climatology data applications</h4>
+<ul>
+  <li><a href="../plotting/coop/extremes_fe.php">Daily Temperature Extremes</a> Tables of daily climate values.</li>
+  <li><a href="/rainfall/obhour.phtml">Hourly Precip Accumulator</a> Generate precipitation summaries based on the interval of your choice.</li>
+</ul>
+
+
+
+<?php include("$rootpath/include/footer.php"); ?>

@@ -1,0 +1,48 @@
+<?php 
+include("../../config/settings.inc.php");
+$TITLE = "IEM | Climatology Plots for Yesterday";
+$THISPAGE="climatology-yesterday";
+include("$rootpath/include/header.php"); 
+?>
+
+<h4>Temperature</h4>
+<ul class="iem-list">
+<li><a href="/data/coopHighLow.gif">High Temps</a>[COOP]</li>
+<li><a href="/data/awos_rtp.shef">12Z AWOS RTP First Guess</a></li>
+<li><a href="/data/summary/asos_hilo.gif">High/Low Temp</a>[ASOS/AWOS/RWIS]</li>
+<ul>
+<li> &nbsp; &nbsp; <a href="/data/summary/CID_hilo.gif">Cedar Rapids</a></li>
+<li> &nbsp; &nbsp; <a href="/data/summary/CBF_hilo.gif">Council Bluffs</a></li>
+<li> &nbsp; &nbsp; <a href="/data/summary/DSM_hilo.gif">Des Moines</a></li>
+</ul>
+<li><a href="/data/text/IEMAZOSTP.txt">Tabular High/Low/Prec</a>[ASOS/AWOS]</li>
+<?php
+   echo "<li><a href=\"/archive/data/". date("Y/m/d/" , date("U") - 86400 )
+    ."coopAveTemp.gif\">Average Hi/Low Temp</a></li>";
+  echo "<li><a href=\"/archive/data/". date("Y/m/d/" , date("U") - 86400 )
+    ."coopRecTemp.gif\">Record Hi/Low Temp</a></li>";
+?>
+</ul>
+
+<h4>Precipitation</h4>
+<ul class="iem-list">
+<li><a href="/rainfall/obhour.phtml">Hourly Precip Accumulator</a></li>
+<li><a href="/data/summary/asos_prec.gif">Precip Accumulation</a></li>
+<li><a href="/data/text/IEMAZOSTP.txt">Tabular High/Low/Prec</a>[ASOS/AWOS]</li>
+<li><a href="http://www.meteor.iastate.edu/pix/radp6.gif">Radar-estimate of storm total precip through MIDNIGHT (CST)</a></li>
+</ul>
+
+<h4>Wind</h4>
+<ul class="iem-list">
+<li><a href="/data/summary/yest_gust.gif">Peak Wind Gust</a></li>
+</ul>
+
+<h4>Soil Temperatures</h4>
+<ul class="iem-list">
+<li><a href="/agclimate/daily_pics/soil-hilo-out.png">Yesterday's 4-inch</a></li>
+<li><a href="../data/soilt_day1.png">County estimate 4-inch</a></li>
+</ul>
+
+
+
+<?php include("$rootpath/include/footer.php"); ?>

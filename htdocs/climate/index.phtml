@@ -1,275 +1,35 @@
 <?php 
  include("../../config/settings.inc.php");
-	$THISPAGE = "climatology";
+	$THISPAGE = "climatology-main";
 	$TITLE = "IEM | Climatology";
 include("$rootpath/include/header.php"); 
 ?>
 
-<div class="text">
 <h3 class="subtitle">Climatological Products</h3>
 
-<p>The <a href="/climodat/">Climodat Interface</a> has many of the long term climate values you are probably looking for.
+<div style="margin-left: 20px; width: 640px;">
+<p>Climatology provides information on what you may expect for various 
+variables and durations.  The IEM Climatology section is organized by
+different periods of time (see second row of links in the banner).
 
-<br>Check out the <a href="http://www.iowaagriculture.gov/climatology.asp">Iowa State Climatologist's page</a> for more info.
+<p><img src="../images/wizard.png" style="float:left; margin: 5px;">The 
+<a href="/climodat/">Climodat</a> application provides pre-generated reports
+of Iowa's climate based on the most popular requests we get from the 
+general public.  You should check out that page first, it may have what 
+you need.
+</p></div>
 
-<h2>Near-term products:</h2>
+<h4>Other Resources</h4>
 
-<table border="1">
-<thead><tr><th>Variable</th><th>Today</th><th>Yesterday</th><th>Week</th></tr></thead>
+<p>The <a href="http://www.iowaagriculture.gov/climatology.asp">Iowa State Climatologist's page</a> has a number of products from the official source of 
+climate data in the state.
 
-<tr>
- <th>Temperature</th>
- <td><!-- Today -->
-<ul class="iem-list">
-<li><a href="/data/coopHighLow.gif">7AM Low Temps</a>[COOP]</li>
-<li><a href="/data/summary/12z_low.gif">12Z Morning Low</a>[ASOS/AWOS]</li>
-<li><a href="/data/summary/today_high.png">Today's High Temperature @ 0Z</a></li>
-<li><a href="/data/awos_rtp.shef">12Z AWOS RTP First Guess</a></li>
-<li><a href="/data/summary/coopAveTemp.gif">Average Hi/Low Temp</a></li>
-<li><a href="/data/summary/coopRecTemp.gif">Record Hi/Low Temp</a></li>
-<li><a href="/plotting/coop/extremes_fe.php">Daily Temperature Extremes</a></li>
-</ul>
+<p>The <a href="http://www.ncdc.noaa.gov">National Climatic Data Center</a>
+is <strong>the online archive</strong> for climate information from Iowa
+and the world!</p>
 
- </td><td><!-- Yesterday -->
-<ul class="iem-list">
-<li><a href="/data/coopHighLow.gif">High Temps</a>[COOP]</li>
-<li><a href="/data/awos_rtp.shef">12Z AWOS RTP First Guess</a></li>
-<li><a href="/data/summary/asos_hilo.gif">High/Low Temp</a>[ASOS/AWOS/RWIS]</li>
-<ul>
-<li> &nbsp; &nbsp; <a href="/data/summary/CID_hilo.gif">Cedar Rapids</a></li>
-<li> &nbsp; &nbsp; <a href="/data/summary/CBF_hilo.gif">Council Bluffs</a></li>
-<li> &nbsp; &nbsp; <a href="/data/summary/DSM_hilo.gif">Des Moines</a></li>
-</ul>
-<li><a href="/data/text/IEMAZOSTP.txt">Tabular High/Low/Prec</a>[ASOS/AWOS]</li>
-<?php
-   echo "<li><a href=\"/archive/data/". date("Y/m/d/" , date("U") - 86400 ) 
-    ."coopAveTemp.gif\">Average Hi/Low Temp</a></li>";
-  echo "<li><a href=\"/archive/data/". date("Y/m/d/" , date("U") - 86400 )   
-    ."coopRecTemp.gif\">Record Hi/Low Temp</a></li>";  
-?>
-</ul>
- </td><td><!-- Week -->
-<ul class="iem-list">
-<li><a href="/data/summary/7day/iaavg_max_tmpf.png">Avg High</a></li>
-<li><a href="/data/summary/7day/iaavg_min_tmpf.png">Avg Low</a></li>
-</ul>
- </td></tr>
+<p>The <a href="http://www.hprcc.unl.edu/">High Plains Climate Center</a> and
+<a href="http://mrcc.isws.illinois.edu/">Midwestern Regional Cimate Center</a>
+have a number of quality products for Iowa.
 
-
-<tr>
- <th>Precipitation</th>
- <td><!-- Today -->
-<ul class="iem-list">
-<li><a href="/rainfall/obhour.phtml">Hourly Precip Accumulator</a></li>
-<li><a href="/data/summary/12z_prec.gif">Precip Accum Ending 12Z</a></li>
-<li><a href="/data/summary/today_prec.gif">Precip Accum</a></li>
-<li><a href="/data/coopPrecPlot.gif">7AM Precip 24HR Accum</a>[COOP] </li>
-<li><a href="/data/awos_rtp.shef">12Z AWOS RTP First Guess</a></li>
-<li><a href="/data/summary/00z_prec.gif">Precip Accum Ending 00Z</a></li>
-<li><a href="http://www.meteor.iastate.edu/pix/radp0.gif">Radar-estimate of storm total precip through 6 PM (CST)</a></li>
-<li><a href="http://www.meteor.iastate.edu/pix/radp.gif">Radar-estimate of storm total precip through 6 AM (CST)</a></li>
-<li><a href="http://www.meteor.iastate.edu/pix/radp1.gif">Radar-estimate of storm total precip through NOON (CST)</a></li>
-</ul>
- </td><td><!-- Yesterday -->
-<ul class="iem-list">
-<li><a href="/rainfall/obhour.phtml">Hourly Precip Accumulator</a></li>
-<li><a href="/data/summary/asos_prec.gif">Precip Accumulation</a></li>
-<li><a href="/data/text/IEMAZOSTP.txt">Tabular High/Low/Prec</a>[ASOS/AWOS]</li>
-<li><a href="http://www.meteor.iastate.edu/pix/radp6.gif">Radar-estimate of storm total precip through MIDNIGHT (CST)</a></li>
-</ul>
- </td><td><!-- Week -->
-<ul class="iem-list">
-<li><a href="/rainfall/obhour.phtml">Hourly Precip Accumulator</a></li>
-<li><a href="/data/summary/7day/stage4.png">Precip Accumulation</a></li>
-</ul>
- </td></tr>
-
-<tr>
- <th>Snowfall</th>
- <td><!-- Today -->
-<ul class="iem-list">
-<li><a href="/data/coopSnowPlot.gif">7AM 24HR snowfall</a>[COOP]</li>
-<li><a href="/data/coopSnowDepth.gif">7AM snowfall depth</a>[COOP]</li>
-</ul>
- </td><td><!-- Yesterday -->
- </td><td><!-- Week -->
- </td>
-</tr>
-
-<tr>
- <th>Wind</th>
- <td><!-- Today -->
-<ul class="iem-list">
-<li><a href="/data/summary/today_gust.gif">Peak Wind Gust</a></li>
-</ul>
- </td><td><!-- Yesterday -->
-<ul class="iem-list">
-<li><a href="/data/summary/yest_gust.gif">Peak Wind Gust</a></li>
-</ul>
- </td><td><!-- Week -->
- </td>
-</tr>
-
-<tr>
- <th>Growing Degree Days</th>
- <td><!-- Today -->
- </td><td><!-- Yesterday -->
- </td><td><!-- Week -->
- </td>
-</tr>
-
-<tr>
- <th>Stress Degree Days</th>
- <td><!-- Today -->
- </td><td><!-- Yesterday -->
- </td><td><!-- Week -->
- </td>
-</tr>
-
-<tr>
- <th>Soil Temperatures</th>
- <td><!-- Today -->
- </td><td><!-- Yesterday -->
-<ul class="iem-list">
-<li><a href="/agclimate/daily_pics/soil-hilo-out.png">Yesterday's 4-inch</a></li>
-<li><a href="../data/soilt_day1.png">County estimate 4-inch</a></li>
-</ul>
- </td><td><!-- Week -->
- </td>
-</tr>
-
-
-</table>
-
-<h2>Long-term products:</h2>
-
-<table border="1">
-<thead><tr><th>Variable</th><th>Month</th><th>Season</th><th>Year</th></tr></thead>
-    
-
-<tr>
- <th>Temperature</th>
-<td><!-- Month -->
-<ul class="iem-list">
-</ul>
- </td><td><!-- GS -->
- </td><td><!-- Year -->
-<ul class="iem-list">
-<li>Minimum temp this fall/winter<br>
-     &nbsp; &nbsp; <a href="/data/summary/fallLow.gif">Plot</a> or
-    <a href="/data/summary/fallLowC.gif">Contour</a></li>
-<li><a href="/plotting/coop/climate_fe.php">Annual Average Temperatures</a></li>
-<li><a href="/plotting/coop/vyear_fe.php">Yearly Departures from Average</a></li>
-<li><a href="/data/text/IEMAZOMPR.txt">Tabular High/Low/Prec</a>[ASOS/AWOS]</li>
-</ul>
- </td>
-
-<tr>
- <th>Precipitation</th>
-<td><!-- Month -->
-<ul class="iem-list">
-<li><a href="/data/summary/month_prec.gif">Precip Accum</a>[ASOS/AWOS]</li>
-<li><a href="/data/coopMonthPlot.gif">Precip Accum</a>[COOP]</li>
-<li><a href="/data/text/IEMAZOMPR.txt">Tabular High/Low/Prec</a>[ASOS/AWOS]</li>
-<li><a href="/data/text/IEMNWSMPR.txt">Tabular Precip/Snow</a>[ASOS/AWOS]</li>
-<li><a href="/plotting/month/rainfall.phtml">Plots of Monthly Rainfall</a></li>
-</ul>
- </td>
-<td><!-- GS -->
-<b>Past 4 Months:</b>
-<ul class="iem-list">
- <li><a href="/data/summary/4mon_stage4obs.png">Estimated accumulation</a></li>
- <li><a href="/data/summary/4mon_normals.png">Climatology</a></li>
- <li><a href="/data/summary/4mon_diff.png">Departure from normal</a></li>
-</ul>
- </td>
-<td><!-- Year -->
-<ul class="iem-list">
-<li><a href="/data/summary/year/diff.png">Departure from normal</a></li>
-<li><a href="/data/summary/year/stage4obs.png">Stage4 estimates</a></li>
-<li><a href="/data/summary/year/normals.png">Normal accumulation</a></li>
- <li><a href="<?php echo $rooturl; ?>/plotting/yearly/rainfall.phtml">Month by Month</a></li>
-</ul>
- </td>
-
-<tr>
- <th>Snowfall</th>
-<td><!-- Month -->
-<ul class="iem-list">
-<li><a href="/data/coopMonthSPlot.gif">Snowfall this month</a>[COOP]</li>
-</ul>
- </td><td><!-- GS -->
- </td><td><!-- Year -->
- </td>
-
-<tr>
- <th>Winds</th>
-<td><!-- Month -->
-<ul class="iem-list">
-<li><a href="http://mesonet.agron.iastate.edu/sites/windrose.phtml?station=DSM&network=IA_ASOS">Wind Roses</a></li>
-</ul>
- </td><td><!-- GS -->
- </td>
-<td><!-- Year -->
-<ul class="iem-list">
-<li><a href="http://mesonet.agron.iastate.edu/sites/windrose.phtml?station=DSM&network=IA_ASOS">Wind Roses</a></li>
-</ul>
- </td>
-
-<tr>
- <th>Growing Degree Days <br />(base 50)</th>
-<td><!-- Month -->
-<ul class="iem-list">
-<li><a href="/data/summary/gdd_mon.gif"><?php echo date("F"); ?> Accumulated Growing Degree Days (base=50)</a></li>
-</ul>
- </td><td><!-- GS -->
-<ul class="iem-list">
-<li>All Stations: <a href="/data/summary/gdd_qc.gif">Plot</a> or  
-    <a href="/data/summary/gdd_qc_contour.gif">Contour</a></li>
-<li><a href="/data/summary/gdd_qc_asos.gif">ASOS / AWOS</a> |
-    <a href="/data/summary/gdd_qc_rwis.gif">RWIS</a></li>
-<li><a href="/data/summary/gdd_qc_snet.gif">School Net</a></li>
-<li><A href="/data/summary/gdd_may1.gif">Seasonal (since May 1) Accumulated Growing Degree Days-(base=50)</a></li>
-<li><a href="/data/summary/gdd_norm.gif">Normal Accumulation</a></li>
-<li><a href="/data/summary/gdd_diff.gif">Departure from Normal</a></li>
-<li><a href="/plotting/gs/fe.phtml">Growing Season Rainfall/GDD vs Climatology</a></li>
-</ul>
- </td><td><!-- Year -->
-<ul>
-<li><a href="/data/summary/gdd_jan1.gif">Seasonal (before May 1) Accumulated Growing Degree Days-(base=50)</a></li>
-</ul>
- </td>
-</tr>
-
-<tr>
- <th>Stress Degree Days</th>
-<td><!-- Month -->
-<ul class="iem-list">
-<li><a href="/data/summary/sdd_mon.gif"><?php echo date("F"); ?> Accumulated Stress Degree Days-(base=86)</a></li>
-</ul>
- </td><td><!-- GS -->
-<b>Stress Degree Days [SDD]</b> (base 86)
-<ul class="iem-list">
- <li>All Stations: <a href="/data/summary/sdd_qc.gif">Plot</a> or  
-    <a href="/data/summary/sdd_qc_contour.gif">Contour</a></li>
-<li><a href="/data/summary/sdd_qc_asos.gif">ASOS / AWOS</a> |
-    <a href="/data/summary/sdd_qc_rwis.gif">RWIS</a></li>
-<li><a href="/data/summary/sdd_qc_snet.gif">School Net</a></li> 
-<li><A href="/data/summary/sdd_may1.gif">Seasonal Accumulated Stress Degree Days-(base=86)</a></li>
-</ul>
- </td><td><!-- Year -->
- </td>
-</tr>
-</table>
-
-<br clear="all">
-<h2>Other Resources:</h2>
-<ul>
- <li><a href="<?php echo $rooturl; ?>/QC/methods/gdd.php">Quality control method for growing season plots</a></li>
- <li><a href="<?php echo $rooturl; ?>/onsite/birthday">The Weather on your birthday!</a></li>
-</ul>
-
-
-<BR><BR>
-</div>
 <?php include("$rootpath/include/footer.php"); ?>
