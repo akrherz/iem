@@ -2,7 +2,7 @@
 
 if (strlen($year) == 0) $year = 1995;
 
-$connection = pg_connect("10.10.10.20","5432","coop");
+$connection = pg_connect("iemdb","5432","coop");
 
 $q = "select to_char(valid, 'DDD') as dv, gdd50 from climate WHERE station = 'ia0200' ORDER by dv";
 

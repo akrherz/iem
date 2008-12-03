@@ -19,7 +19,6 @@ $date = "$year-$month-$day";
 
 $query2 = "SELECT ". $queryData .", to_char(valid, 'yymmdd/HH24') as tvalid from ". $table ." WHERE 
 	station = '".$station."' and date(valid) >= ('". $date ."')  ORDER by tvalid ASC LIMIT 96";
-
 $result = pg_exec($connection, $query2);
 
 $ydata1 = array();
