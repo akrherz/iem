@@ -1,0 +1,22 @@
+<?php 
+include("../../config/settings.inc.php");
+$TITLE = "IEM | Climatology Plots for Today";
+$THISPAGE = "climatology-week";
+include("$rootpath/include/header.php"); 
+?>
+
+<h4>Temperature</h4>
+<ul class="iem-list">
+<li><a href="/data/summary/7day/iaavg_max_tmpf.png">Avg High</a></li>
+<li><a href="/data/summary/7day/iaavg_min_tmpf.png">Avg Low</a></li>
+</ul>
+
+<h4>Precipitatiom</h4>
+<ul class="iem-list">
+<li><a href="/rainfall/obhour.phtml">Hourly Precip Accumulator</a></li>
+<li><a href="/data/summary/7day/stage4.png">Precip Accumulation</a></li>
+</ul>
+
+
+
+<?php include("$rootpath/include/footer.php"); ?>
