@@ -29,7 +29,11 @@ if ($myTime == $today)
 $rs = pg_prepare($dbconn, "SELECT", "SELECT * $pcol from $tbl 
                  WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
 $rs = pg_execute($dbconn, "SELECT", Array($station, date("Y-m-d", $myTime)));
-if (pg_num_rows($rs) == 0) { die("ERROR: No Observations Found"); }
+if (pg_num_rows($rs) == 0) { 
+
+  echo "<br /><p><h3>No observations found for this date, sorry</h3>";
+  return;
+}
 
 $imgwidth = 640;
 $imgheight = 480;

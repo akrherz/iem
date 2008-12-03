@@ -1,8 +1,7 @@
 <?php
 // 1 minute schoolnet data plotter
 // Cool.....
-
-include ("../../include/snet_locs.php");
+include("../../../config/settings.inc.php");
 
 $station = "68";
 
@@ -90,8 +89,8 @@ if ($sr[0] == ""){
 
 
 
-include ("../jpgraph/jpgraph.php");
-include ("../jpgraph/jpgraph_line.php");
+include ("$rootpath/jpgraph/jpgraph.php");
+include ("$rootpath/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,400,"example1");
