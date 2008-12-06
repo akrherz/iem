@@ -1,4 +1,4 @@
-</div><!-- End #iem-content -->
+<?php if (! isset($NOCONTENT)) echo "</div><!-- End #iem-content -->"; ?>
 <div id="iem-footer">
 
 <div style="float: right;">
@@ -14,7 +14,7 @@ Copyright &copy; 2001-2008, Iowa State University of Science and Technology.
  &middot; <a href="<?php echo $rooturl; ?>/info/contacts.php">contact us</a>
  &middot; <a href="<?php echo $rooturl; ?>/disclaimer.php">disclaimer</a>
 </div>
-</div> <!-- End of iem-main -->
+<?php if (! isset($NOCONTENT)) echo "</div> <!-- End of iem-main -->"; ?>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
 </script>
 <script type="text/javascript">
