@@ -14,7 +14,7 @@
  <?php if (isset($HEADEXTRA)){ echo $HEADEXTRA;} ?>
 </head>
 <body <?php if (isset($BODYEXTRA)){ echo $BODYEXTRA;} ?>>
-<div id="iem-main">
+<?php if (! isset($NOCONTENT)) echo "<div id=\"iem-main\">"; ?>
 <div id="iem-header">
 <?php include("$rootpath/include/webring.html"); ?>
 <div id="iem_header_logo">
@@ -44,6 +44,7 @@ $_pages = Array(
     "surface" => Array("title" => "Surface Data", "url" => "/current/"),
     "radar" => Array("title" => "RADAR & Satellite", "url" => "/current/radar.phtml"),
     "placefiles" => Array("title" => "GR Placefiles", "url" => "/request/grx/"),
+    "afos" => Array("title" => "NWS Text", "url" => "/wx/afos/"),
  ),
  "climatology" => Array(
     "base" => Array("title" => "Climatology", "url" => "/climate/"),
@@ -144,4 +145,4 @@ echo "<ul></div> $b";
 
  
 </div><!-- End of iem-header -->
-<div id="iem-content">
+<?php if (! isset($NOCONTENT)) echo "<div id=\"iem-content\">"; ?>
