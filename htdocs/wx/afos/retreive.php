@@ -4,12 +4,14 @@ $conn = pg_connect("dbname=afos host=mtarchive.geol.iastate.edu user=nobody");
 $pil = strtoupper($_POST["pil"]);
 $cnt = $_POST["cnt"];
 
-$sql = "SELECT * from current WHERE pil = '$pil'
-   ORDER by entered DESC LIMIT $cnt";
-$result = pg_exec($conn, $sql);
+$rs = pg_prepare($conn, "SELECT", "SELECT * from current WHERE pil = $1
+                         ORDER by entered DESC LIMIT $2");
 
-$row = pg_fetch_array($result,0);
+$rs = pg_execute($conn, "SELECT", Array($pil, $cnt));
 
-echo "<pre>". $row["data"] ."</pre>";
+for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+{ 
+  echo "<pre>". $row["data"] ."</pre><hr />";
+}
 
 ?>

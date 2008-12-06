@@ -1,16 +1,17 @@
 <?php
 /* AJAX AFOS Retreiver */
 include("../../../config/settings.inc.php");
-?>
 
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="../../ext/resources/css/ext-all.css"/>
+$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../../ext/resources/css/ext-all.css"/>
 <script type="text/javascript" src="../../ext/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="../../ext/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
-</head>
-<body>
+<script type="text/javascript" src="static.js"></script>';
+$TITLE = "IEM NWS Text Product Finder";
+$NOCONTENT = 1;
+include("$rootpath/include/header.php");
+?>
+<!--
 <style type="text/css">
     html, body {
         margin:0;
@@ -20,204 +21,10 @@ include("../../../config/settings.inc.php");
         height:100%;
     }
 </style>
-<script type="text/javascript">
-Ext.onReady(function(){
-
-var cp = new Ext.state.CookieProvider({
-       expires: new Date(new Date().getTime()+(1000*60*60*24*300))
-});
-Ext.state.Manager.setProvider(cp);
-
-
-
-            var root = new Ext.tree.AsyncTreeNode({
-                text: 'Browse',
-                draggable:false, // disable root node dragging
-                id:'source'
-            });
-
-
- var tp = new Ext.tree.TreePanel({
-             loader: new Ext.tree.TreeLoader({dataUrl:'products.txt'}),
-             containerScroll:true,
-             autoScroll:true,
-             title:'Popular Products',
-             root:root
-            });
-
-var refreshAction = new Ext.Action({
-  text: 'Refresh',
-  handler: function() {
-    var id = tabs.getActiveTab().getId();
-    var tokens= id.split("-");
-    tabs.getActiveTab().getUpdater().update({
-          url: 'retreive.php', 
-         params: 'pil='+ tokens[0] +'&cnt='+ tokens[1],
-         discardUrl:false
-}); 
-  },
-  iconClas:'blist'
-});
-
-var addTab = function(id, cnt) {
-    var tid = id+"-"+cnt;
-    var a = tabs.find("id", tid);
-    if (a.length > 0){ tabs.setActiveTab(tid); return; }
-    tabs.add({
-        id: tid,
-        title: id,
-        iconCls: 'tabs',
-        closable:true,
-        autoScroll:true,
-        autoLoad: {url: 'retreive.php', 
-                   params: 'pil='+id+'&cnt='+cnt,
-                   discardUrl:false},
-        tbar: [refreshAction]
-     }).show();
-
-    // Update Cookie?!
-    var n = "";
-    for(var i=1;i< tabs.items.length;i++){
-      var q = tabs.items.get(i);
-      n = n +","+ q.getId();
-    }
-    cp.set("afospils", n);
-}
-
-tp.addListener('click', function(node, e){
-  if(node.isLeaf()){
-     e.stopEvent();
-     addTab(node.id, 1);
-  }
-});
-
- var tabs =  new Ext.TabPanel({
-                    region:'center',
-                    height:.75,
-                    plain:true,
-                    enableTabScroll:true,
-                    defaults:{bodyStyle:'padding:5px'},
-                    items:[
-            {contentEl:'help', title: 'Help'}
-                    ],
-                    activeTab:0
-
-                });
-
-
- var myform = new Ext.FormPanel({
-                    frame:true,
-                    defaultType:'textfield',
-                    title:'Enter AFOS',
-                    items:[{
-                     fieldLabel:'PIL:',
-                     name:'pil',
-                     allowBlank:false
-                    }, new Ext.form.NumberField({
-                        allowBlank:false,
-                        maxValue:99,
-                        minValue:0,
-                        name:'sz',
-                        fieldLabel:'Entries:',
-                        value:1
-                     })
-                    ],
-                    buttons: [{
-                     text:'Add',
-                     handler: function() {
-                      var pil = myform.getForm().findField('pil').getRawValue();
-                      var cnt = myform.getForm().findField('sz').getRawValue();
-                      addTab(pil, cnt);
-                     } // End of handler
-                    }]
-                });
-
- var myform2 = new Ext.FormPanel({
-     frame: true,
-     title: 'Select by WFO',
-     labelWidth:0,
-     buttons: [{
-         text:'Add',
-         handler: function() {
-           var wfo = myform2.getForm().findField('wfo').getValue();
-           var afos = myform2.getForm().findField('afos').getValue();
-           var pil = afos+wfo;
-           addTab(pil, 1);
-          } // End of handler
-     }],
-     items: [
-       new Ext.form.ComboBox({
-             hiddenName:'wfo',
-             store: new Ext.data.SimpleStore({
-                      fields: ['abbr', 'wfo'],
-                      data : iemdata.wfos 
-             }),
-             valueField:'abbr',
-             displayField:'wfo',
-             typeAhead: true,
-             mode: 'local',
-             triggerAction: 'all',
-             emptyText:'Select a WFO...',
-             selectOnFocus:true,
-             width:180
-        }), new Ext.form.ComboBox({
-             hiddenName:'afos',
-             store: new Ext.data.SimpleStore({
-                      fields: ['id', 'product'],
-                      data : iemdata.nws_products
-             }),
-             valueField:'id',
-             displayField:'product',
-             typeAhead: true,
-             mode: 'local',
-             triggerAction: 'all',
-             emptyText:'Select Product...',
-             selectOnFocus:true,
-             width:180
-         })
-      ]
-});
-
-
- var viewport = new Ext.Viewport({
-            layout:'border',
-            items:[
-                new Ext.BoxComponent({ // raw
-                    region:'north',
-                    el: 'header',
-                    height:60
-                }),
-                new Ext.BoxComponent({ // raw
-                    region:'south',
-                    el: 'footer',
-                    height:32
-                }),
-                new Ext.Panel({ // raw
-                    region:'west',
-                    width:210,
-                    items:[myform,myform2,tp]
-                }),
-                tabs
-             ]
-        });
-
-var a = cp.get("afospils", "");
-var ar = a.split(",");
-for (var i=0; i < ar.length; i++)
-{
-  if (ar[i] == ""){ continue; }
-  var tokens= ar[i].split("-");
-  addTab( tokens[0], tokens[1]);
-}
-    });
-</script>
-
 <div id="header">
  <a href="<?php echo $rooturl; ?>/"><img src="<?php echo $rooturl; ?>/images/logo_small.gif" alt="IEM" style="float:left;"/></a><div style="font:normal 16px tahoma, arial, helvetica, sans-serif; margin: 10px;">IEM 2.0 :: NWS Text Product Finder</div>
 </div>
-
+-->
 <div id="help"><p>How can I help you?</p></div>
 
-<div id="footer">Footer</div>
-
-</body></html>
+<?php include("$rootpath/include/footer.php"); ?>
