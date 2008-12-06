@@ -1,10 +1,10 @@
-[{
-        id:'swomcd',
-        text: 'SPC Mesoscale Discussion',
-        leaf: true
-    },{
-        text: 'GFS MOS',
-        children: [{
+[{id:'swomcd', text: 'SPC Mesoscale Discussion', leaf: true},
+ {id:'swody1', text: 'SPC Day1 Outlook', leaf: true},
+ {id:'swody2', text: 'SPC Day2 Outlook', leaf: true},
+ {id:'pmdhmd', text: 'Model Diagnostic Discussion', leaf: true},
+ {
+  text: 'GFSX MOS',
+  children: [{
             id:'mexdsm',
             text: 'Des Moines',
             leaf: true
@@ -12,6 +12,42 @@
             id:'mexdvn',
             text: 'Davenport',
             leaf: true
-
         }]
-   }]
+  },
+ {
+  text: 'NAM MOS',
+  children: [{
+            id:'metdsm',
+            text: 'Des Moines',
+            leaf: true
+        },{
+            id:'metdvn',
+            text: 'Davenport',
+            leaf: true
+        }]
+  },
+ {
+  text: 'GFS MOS',
+  children: [{
+            id:'mavdsm',
+            text: 'Des Moines',
+            leaf: true
+        },{
+            id:'mavdvn',
+            text: 'Davenport',
+            leaf: true
+        }]
+  },
+ {
+  text: 'NGM MOS',
+  children: [{
+            id:'fwcdsm',
+            text: 'Des Moines',
+            leaf: true
+        },{
+            id:'fwcdvn',
+            text: 'Davenport',
+            leaf: true
+        }]
+  }
+]

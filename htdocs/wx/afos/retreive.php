@@ -9,6 +9,10 @@ $rs = pg_prepare($conn, "SELECT", "SELECT * from current WHERE pil = $1
 
 $rs = pg_execute($conn, "SELECT", Array($pil, $cnt));
 
+if (pg_numrows($rs) == 0){
+ echo "<h3>No entries found for ${pil}</h3>";
+}
+
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 { 
   echo "<pre>". $row["data"] ."</pre><hr />";

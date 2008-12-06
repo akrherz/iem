@@ -78,7 +78,7 @@ tp.addListener('click', function(node, e){
                     enableTabScroll:true,
                     defaults:{bodyStyle:'padding:5px'},
                     items:[
-            {contentEl:'help', title: 'Help'}
+     new Ext.Panel({contentEl:'help', title: 'Help',autoScroll:true})
                     ],
                     activeTab:0
 
