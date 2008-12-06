@@ -19,6 +19,7 @@ html, body, h2, h3, h4, div, p, ul, li, input {
 	width: 100%;
 }
 #iem-header {
+  background: #fff url(../images/hbar.gif) repeat-x;
   height: 130px;
   width: 100%;
 }
