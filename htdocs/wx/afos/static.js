@@ -7,20 +7,17 @@ Ext.state.Manager.setProvider(cp);
 
 
 
-            var root = new Ext.tree.AsyncTreeNode({
-                text: 'Browse',
-                draggable:false, // disable root node dragging
-                id:'source'
-            });
-
-
- var tp = new Ext.tree.TreePanel({
+var tp = new Ext.tree.TreePanel({
              loader: new Ext.tree.TreeLoader({dataUrl:'products.txt'}),
              containerScroll:true,
              autoScroll:true,
              title:'Popular Products',
-             root:root
-            });
+             root:  new Ext.tree.AsyncTreeNode({
+                text: 'Browse',
+                draggable:false, // disable root node dragging
+                id:'source'
+             })
+});
 
 var refreshAction = new Ext.Action({
   text: 'Refresh',
@@ -191,7 +188,16 @@ tp.addListener('click', function(node, e){
                 }),
                 new Ext.Panel({ // raw
                     region:'west',
+                    layout:'accordion',
+    layoutConfig: {
+        // layout-specific configs go here
+        titleCollapse: false,
+        animate: true,
+        activeOnTop: false,
+        fill:true,
+    },
                     width:210,
+                    height:500,
                     items:[myform,myform2,tp]
                 }),
                 tabs
