@@ -144,6 +144,7 @@ tp.addListener('click', function(node, e){
              emptyText:'Select a WFO...',
              hideLabel:true,
              selectOnFocus:true,
+             listWidth:180,
              width:180
         }), new Ext.form.ComboBox({
              hiddenName:'afos',
@@ -159,6 +160,7 @@ tp.addListener('click', function(node, e){
              emptyText:'Select Product...',
              hideLabel:true,
              selectOnFocus:true,
+             listWidth:180,
              width:180
          }),new Ext.form.NumberField({
                    allowBlank:false,
