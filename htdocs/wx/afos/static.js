@@ -189,12 +189,12 @@ tp.addListener('click', function(node, e){
                 new Ext.Panel({ // raw
                     region:'west',
                     layout:'accordion',
-    layoutConfig: {
+     layoutConfig: {
         // layout-specific configs go here
         titleCollapse: false,
         animate: true,
         activeOnTop: false,
-        fill:true,
+        fill:true
     },
                     width:210,
                     height:500,
