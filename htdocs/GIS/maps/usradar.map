@@ -5,11 +5,11 @@ NAME "radar"
 STATUS ON
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 EXTENT -126 26 -76 50
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE png
 
