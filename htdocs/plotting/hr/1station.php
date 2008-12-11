@@ -1,37 +1,40 @@
 <?php
 include("../../../config/settings.inc.php");
- include("$rootpath/include/selectWidget.php");
  $network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
  $hours = isset($_GET["hours"]) ? $_GET["hours"] : 24;
-
- $sw = new selectWidget("$rooturl/plotting/hr/1station.php", "$rooturl/plotting/hr/1station.php?network=$network&", $network);
- $sw->set_networks( Array("IA_ASOS","AWOS","IA_RWIS") );
- $sw->logic($_GET);
- $sw->setformvars( Array("network" => $network) );
- $swinterface = $sw->printInterface();
-
-
  $station = isset($_GET['station']) ? strtoupper( $_GET['station'] ): "";
-?>
 
-<?php 
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/google_keys.php");
+include("$rootpath/include/imagemaps.php");
+$api = $GOOGLEKEYS[$rooturl]["any"];
+$HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
+<script src='http://www.openlayers.org/api/OpenLayers.js'></script>
+<script src='${rooturl}/js/olselect.php?network=${network}'></script>";
+$BODYEXTRA = "onload=\"init()\"";
+
 	$TITLE = "IEM | Time Series";
 include("$rootpath/include/header.php"); 
 ?>
-<?php include("$rootpath/include/imagemaps.php"); ?>
-
+<style type="text/css">
+        #map {
+            width: 450px;
+            height: 450px;
+            border: 2px solid black;
+        }
+</style>
 <br><br>
 <div class="text">
 <table width="100%">
 <tr><td>
 
+  <form method="GET" action="1station.php" name="olselect">
 <?php
 if (strlen($station) > 0 ) {
 
 ?>
 
-  <form method="GET" action="1station.php">
-  <input name="station" value="<?php echo $station; ?>" type="hidden">
+  <?php echo networkSelect($network, $station); ?>
   <?php
     echo "<b>Options:</b>";
     echo " <b>|</b> <a href=\"1station.php?network=$network\">Select Visually</a><br> \n";
@@ -65,8 +68,12 @@ missing data.
 
 <BR><BR>
 <?php } else { ?>
+<div id="map"></div>
+<div id="sname" unselectable="on">No site selected</div>
+<?php echo networkSelect($network, $station); ?><input type="submit">
+</form>
 
-<p><?php echo $swinterface; ?>
+
 <?php } ?>
 
 </td></tr></table>
