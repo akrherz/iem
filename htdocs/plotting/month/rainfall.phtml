@@ -5,26 +5,41 @@
  $network = isset($_GET["network"]) ? $_GET['network'] : "IA_ASOS";
  $year = isset($_GET['year']) ? $_GET['year'] : date("Y");
  $month = isset($_GET['month']) ? $_GET['month'] : date("m");
- include("$rootpath/include/selectWidget.php");
- $sw = new selectWidget("rainfall.phtml", "rainfall.phtml?", $network);
- $sw->set_networks( Array("IA_ASOS","AWOS","IA_COOP","KCCI") );
- $sw->logic($_GET);
-?>
 
-<?php 	$TITLE = "IEM | Monthly Rainfall Traces";
+$THISPAGE = "climatology-month";
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/google_keys.php");
+include("$rootpath/include/imagemaps.php");
+include("$rootpath/include/forms.php");
+$api = $GOOGLEKEYS[$rooturl]["any"];
+$HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
+<script src='http://www.openlayers.org/api/OpenLayers.js'></script>
+<script src='${rooturl}/js/olselect.php?network=${network}'></script>";
+$BODYEXTRA = "onload=\"init()\"";
+
+$TITLE = "IEM | Monthly Rainfall Traces";
 include("$rootpath/include/header.php"); ?>
+<style type="text/css">
+        #map {
+            width: 450px;
+            height: 450px;
+            border: 2px solid black;
+        }
+</style>
 
 <h3 class="heading">Monthly Rainfall Traces</h3>
 
 <div class="text">
+<p>This application creates a plot of observed precipitation versus 
+climatology for a site of your choice in Iowa. 
 
 <?php if (strlen($station) > 0 ) { ?>
-<?php include_once("$rootpath/include/forms.php"); ?>
 <form name="ds" action="rainfall.phtml" method="GET">
-<input type="hidden" value="<?php echo $station; ?>" name="station">
+<input type="hidden" value="<?php echo $network; ?>" name="network">
 <table cellspacing=2 border=1 cellpadding=2>
 <tr><th>Site ID:</th><th>Select Year:</th><th>Select Month:</th></tr>
-<tr><td><input type="text" name="station" value="<?php echo $station; ?>" size="6"></td>
+<tr><td><?php echo networkSelect($network,$station); ?>
+<a href="rainfall.phtml?network=<?php echo $network; ?>">Select from map</a></td>
   <td><?php echo yearSelect(2004,$year,"year"); ?></td>
     <td><?php echo monthSelect($month); ?></td></tr>
 </table>
@@ -37,11 +52,21 @@ include("$rootpath/include/header.php"); ?>
 
 <?php } else { ?>
 
+<br /><a href="rainfall.phtml?network=IA_ASOS">Iowa ASOS</a> &nbsp; 
+<a href="rainfall.phtml?network=AWOS">Iowa AWOS</a> &nbsp; 
+<a href="rainfall.phtml?network=IA_COOP">Iowa NWS COOP</a> &nbsp; 
+<a href="rainfall.phtml?network=KCCI">KCCI-TV SchoolNet</a> &nbsp; 
 
-<?php
-echo $sw->printInterface();
-	}
-?>
+<form name="olselect">
+<input type="hidden" value="<?php echo $network; ?>" name="network">
+<table><tr><th>Select Station</th>
+<td><?php echo networkSelect($network, ""); ?></td>
+<td><input type="submit" value="Make Plot"></tr></table>
+<div id="map"></div>
+<div id="sname" unselectable="on">No site selected</div>
+</form>
+
+<?php } ?>
 </div>
 
 <?php include("$rootpath/include/footer.php"); ?>
