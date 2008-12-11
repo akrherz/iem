@@ -15,7 +15,10 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/header.php");
  include("$rootpath/include/forms.php");
  include("$rootpath/include/database.inc.php");
- include("$rootpath/include/COOPstations.php"); ?>
+ include("$rootpath/include/network.php"); 
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+?>
 
 <b>Nav:</b> <a href="/COOP/">COOP</a> <b> > </b> Extremes<p>
 
@@ -89,12 +92,11 @@ contains records for sites that do and don't have data before 1951.
 
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
  {
-   if ($row["station"] == "ia7842" || $row["station"] == "ia4381") continue;
    echo "<tr ";
    if ( ($i % 2) == 0) 
      echo "class='even'";
    echo ">
-     <td>". $cities[$row["station"]]["city"] ."</td>
+     <td>". $cities[strtoupper($row["station"])]["name"] ."</td>
      <td>". $row["years"] ."</td>
      <td>". $row["max_high"] ."</td>
      <td>". $row["max_high_yr"] ."</td>
