@@ -1,7 +1,7 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/networks.php");
+include("$rootpath/include/imagemaps.php");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 $format = isset($_GET['format']) ? $_GET['format'] : 'html';
@@ -25,17 +25,7 @@ table that you need, please let use know.</p>
 <table>
 <tr>
   <th>Select Observing Network:</th>
-  <td><SELECT name="network" size="1">
-<?php
-  reset($networks);
-  while (list($sid, $tbl) = each($networks))
-  {
-     echo  "<option value=\"$sid\" ";
-     if ($network == $sid) { echo "SELECTED"; }
-     echo ">". $tbl["name"] ."</option>\n";
-  }
-?>
- </SELECT>
+  <td><?php echo selectNetwork($network); ?>
   </td>
 </tr>
 <tr>
