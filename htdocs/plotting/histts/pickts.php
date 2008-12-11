@@ -11,19 +11,26 @@ $shour = isset($_GET["shour"]) ? $_GET["shour"]: 0;
 $duration = isset($_GET["duration"])? $_GET["duration"]: 12;
 
 
- include("$rootpath/include/selectWidget.php");
- $sw = new selectWidget("pickts.php", "pickts.php?", $network);
- $sw->set_networks( Array("IA_ASOS","AWOS","IA_RWIS") );
- $sw->logic($_GET);
-
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/google_keys.php");
+include("$rootpath/include/imagemaps.php");
+$api = $GOOGLEKEYS[$rooturl]["any"];
+$HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
+<script src='http://www.openlayers.org/api/OpenLayers.js'></script>
+<script src='${rooturl}/js/olselect.php?network=${network}'></script>";
+$BODYEXTRA = "onload=\"init()\"";
 $TITLE = "IEM | Historical Time Series";
 include("$rootpath/include/header.php"); 
 
 ?>
-
-
-<?php include("$rootpath/include/imagemaps.php"); ?>
-
+<style type="text/css">
+        #map {
+            width: 450px;
+            height: 450px;
+            border: 2px solid black;
+        }
+</style>
+<form name="olselect">
 <div class="text">
 <P>Back to <a href="/plotting/index.php">Interactive Plotting</a>.<p>
 
@@ -47,7 +54,7 @@ if (strlen($station) > 0 && strlen($month) > 0 ) {
 
 
 <?php
-} elseif (strlen($station) > 0 && strlen($month) == 0 ) {
+} else {
 
 ?>
 
@@ -57,10 +64,9 @@ if (strlen($station) > 0 && strlen($month) > 0 ) {
 <P>
 <BR>
 
-<FORM METHOD="GET" action="pickts.php">
-<input type="hidden" name="station" value="<?php echo $station; ?>">
 <TABLE>
 <TR>
+	<TH>Station:</TH>
 	<TH>Select Year:</TH>
 	<TH>Select Month:</TH>
 	<TH>Select Day:</TH>
@@ -69,40 +75,14 @@ if (strlen($station) > 0 && strlen($month) > 0 ) {
 </TR>
 
 <TR>
+<td><?php echo networkSelect($network, $station); ?></td>
 <TD>
 <?php yearSelect2(2001, $year, "year"); ?>
 </TD>
 
-<TD>
-<SELECT name="month">
-	<option value="1">January
-	<option value="2">Feburary
-	<option value="3">March
-	<option value="4">April
-	<option value="5">May
-        <option value="6">June 
-	<option value="7">July 
-        <option value="8">August 
-        <option value="9">September 
-	<option value="10">October
-	<option value="11">November
-	<option value="12">December
-</SELECT>
-</TD>
+<TD><?php echo monthSelect($month); ?></TD>
 
-<TD>
-<SELECT name="day">
-        <option value="1">1	<option value="2">2	<option value="3">3	<option value="4">4
-        <option value="5">5	<option value="6">6     <option value="7">7	<option value="8">8  
-        <option value="9">9	<option value="10">10 	<option value="11">11	<option value="12">12
-        <option value="13">13     <option value="14">14	<option value="15">15     <option value="16">16
-        <option value="17">17     <option value="18">18	<option value="19">19     <option value="20">20
-        <option value="21">21     <option value="22">22	<option value="23">23   <option value="24">24
-        <option value="25">25     <option value="26">26	<option value="27">27     <option value="28">28
-        <option value="29">29     <option value="30">30	<option value="31">31
- 
-</SELECT>
-</TD>
+<TD><?php echo daySelect($day); ?></td>
 
 <TD>
 <SELECT name="shour">
@@ -128,15 +108,11 @@ if (strlen($station) > 0 && strlen($month) > 0 ) {
 
 </TABLE>
 <P><INPUT type="submit" value="Generate Plot">
-</FORM>
+<div id="map"></div>
+<div id="sname" unselectable="on">No site selected</div>
+</form>
 
-
-<BR><BR>
 <?php
-} elseif ( strlen($network) > 0 ) {
-
-echo $sw->printInterface();
-
 }
 ?>
 
