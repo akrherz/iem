@@ -1,4 +1,9 @@
 <?php
+if (isset($_GET["station"]) && isset($_GET["network"]))
+{
+  header("Location: site.php?station=". $_GET["station"] ."&network=". $_GET["network"]);
+  exit();
+}
  include("../../config/settings.inc.php");
  include("$rootpath/include/database.inc.php");
  include("$rootpath/include/google_keys.php");
