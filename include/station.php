@@ -9,7 +9,7 @@ class StationData {
   {
     $this->table = Array();
     $this->dbconn = iemdb("mesosite");
-    $rs = pg_prepare($this->dbconn, "SELECTST", "SELECT *, x(geom) as lon, y(geom) as lat from stations WHERE id = $1");
+    $rs = pg_prepare($this->dbconn, "SELECT  ST", "SELECT *, x(geom) as lon, y(geom) as lat from stations WHERE id = $1");
     if (is_string($a)) $this->load_station($a);
     else if (is_array($a)) 
     {
@@ -20,7 +20,7 @@ class StationData {
 
   function load_station($id)
   {
-    $rs = pg_execute($this->dbconn, "SELECTST", Array($id));
+    $rs = pg_execute($this->dbconn, "SELECT  ST", Array($id));
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
     {
       $this->table[ $row["id"] ] = $row;
