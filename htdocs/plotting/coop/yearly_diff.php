@@ -4,8 +4,8 @@ include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
 
 
-$station1 = isset($_GET["station1"]) ? $_GET["station1"] : die("No station1");
-$station2 = isset($_GET["station2"]) ? $_GET["station2"] : die("No station2");
+$station1 = isset($_GET["station1"]) ? strtolower($_GET["station1"]) : die("No station1");
+$station2 = isset($_GET["station2"]) ? strtolower($_GET["station2"]) : die("No station2");
 $season = isset($_GET["season"]) ? $_GET["season"]: "";
 
 
@@ -19,6 +19,8 @@ $labels = Array("spring" => "Spring (MAM)",
   "fall" => "Fall (SON)",
   "winter" => "Winter (DJF)" );
 
+$sqlAddition = "";
+$sqlAddition2 = "";
 if ($season != "all"){
   $sqlAddition = " + '1 month'::timespan ";
   $sqlAddition2 = " and month IN ". $months[$season] ." ";
@@ -81,7 +83,10 @@ pg_close($connection);
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/COOPstations.php");
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+
 
 // Create the graph. These two calls are always required
 $graph = new Graph(650,450,"example1");
@@ -107,7 +112,7 @@ $graph->legend->SetLayout(LEGEND_HOR);
 
 // Create the linear plot
 $lineplot=new LinePlot($s1_hi);
-$lineplot->SetLegend($cities[$station1]["city"] ." Avg High");
+$lineplot->SetLegend($cities[strtoupper($station1)]["name"] ." Avg High");
 $lineplot->SetColor("red");
 
 // Create the linear plot
@@ -117,7 +122,7 @@ $lineplot2->SetColor("red");
 
 // Create the linear plot
 $lineplot3=new LinePlot($s2_hi);
-$lineplot3->SetLegend($cities[$station2]["city"] ." Avg High");
+$lineplot3->SetLegend($cities[strtoupper($station2)]["name"] ." Avg High");
 $lineplot3->SetColor("blue");
 
 // Create the linear plot

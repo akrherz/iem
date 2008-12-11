@@ -4,7 +4,11 @@ $TITLE = "IEM | Low Temperature Threshold Histograms";
 $station1 = isset($_GET["station1"]) ? $_GET["station1"] : "";
 $station2 = isset($_GET["station2"]) ? $_GET["station2"] : "";
 $mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
-include("$rootpath/include/header.php"); ?>
+include("$rootpath/include/header.php"); 
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+?>
 
 <B>Navigation:</B>
 <a href="http://mesonet.agron.iastate.edu/">IEM</a> &nbsp;>&nbsp;
@@ -12,7 +16,6 @@ include("$rootpath/include/header.php"); ?>
 <B>COOP Low Temperature Thresholds</B>
 
 <BR>
-<?php include("$rootpath/include/COOPstations.php"); ?>
 
 
 <form method="GET">
@@ -34,7 +37,7 @@ include("$rootpath/include/header.php"); ?>
 		print("<option value=\"" . $cities[$key]["id"] ."\"");
                 if ($cities[$key]["id"] == $station1) print(" SELECTED ");
 
-		print(">" . $cities[$key]["city"] . "\n");
+		print(">" . $cities[$key]["name"] . "\n");
 	}
 ?>
 </SELECT>
@@ -47,7 +50,7 @@ include("$rootpath/include/header.php"); ?>
                 print("<option value=\"" . $cities[$key]["id"] ."\"");
                 if ($cities[$key]["id"] == $station2) print(" SELECTED ");
 
-                print(">" . $cities[$key]["city"] . "\n");
+                print(">" . $cities[$key]["name"] . "\n");
         }
 ?>
 </SELECT>

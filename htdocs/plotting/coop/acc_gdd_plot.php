@@ -1,8 +1,11 @@
 <?php
 include("../../../config/settings.inc.php");
 include("adodb-time.inc.php");
-include("$rootpath/include/COOPstations.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+
 
 
 $station = isset($_GET['station']) ? strtolower($_GET['station']) : die("No station");
@@ -113,7 +116,7 @@ $graph->xscale->ticks->SupressTickMarks();
 $graph->xaxis->SetLabelAngle(90);
 
 $graph->yaxis->SetTitle("Growing Degree Days");
-$graph->title->Set( $cities[$station]["city"] ." [$station] Growing Degree Days (base=50)");
+$graph->title->Set( $cities[strtoupper($station)]["name"] ." [$station] Growing Degree Days (base=50)");
 $graph->subtitle->Set("Plot Duration: $sdate -- $edate");
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");

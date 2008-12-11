@@ -4,7 +4,11 @@ $TITLE = "IEM | COOP Climate Plots";
 $station1 = isset($_GET["station1"]) ? $_GET["station1"] : "iowa";
 $station2 = isset($_GET["station2"]) ? $_GET["station2"] : "";
 $mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
-include("$rootpath/include/header.php"); ?>
+include("$rootpath/include/header.php"); 
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+?>
 
 <div class="text">
 <B>Navigation:</B>
@@ -17,7 +21,6 @@ include("$rootpath/include/header.php"); ?>
 based on a climatology from the COOP stations.  You can interactively generate 
 a plot from this dataset.</p>
 
-<?php include("$rootpath/include/COOPstations.php"); ?>
 
 <div style="padding: 3px;">
      <b>Make Plot Selections:</b>
@@ -43,7 +46,7 @@ a plot from this dataset.</p>
 		print("<option value=\"" . $cities[$key]["id"] ."\"");
                 if ($cities[$key]["id"] == $station1) print(" SELECTED ");
 
-		print(">" . $cities[$key]["city"] . "\n");
+		print(">" . $cities[$key]["name"] . "\n");
 	}
 ?>
 </SELECT>
@@ -56,7 +59,7 @@ a plot from this dataset.</p>
                 print("<option value=\"" . $cities[$key]["id"] ."\"");
                 if ($cities[$key]["id"] == $station2) print(" SELECTED ");
 
-                print(">" . $cities[$key]["city"] . "\n");
+                print(">" . $cities[$key]["name"] . "\n");
         }
 ?>
 </SELECT>

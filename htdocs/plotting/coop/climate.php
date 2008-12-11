@@ -2,8 +2,8 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
-$station1 = isset($_GET["station1"]) ? $_GET["station1"] : die("At least 1 station needs to be specified");
-$station2 = isset($_GET["station2"]) ? $_GET["station2"] : false;
+$station1 = isset($_GET["station1"]) ? strtolower($_GET["station1"]) : die("At least 1 station needs to be specified");
+$station2 = isset($_GET["station2"]) ? strtolower($_GET["station2"]) : false;
 
 $st1_hi = array();
 $st1_lo = array();
@@ -55,8 +55,10 @@ pg_close($connection);
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/COOPstations.php");
-$cities["iowa"] = Array("city" => "Iowa Statewide");
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+$cities["IOWA"] = Array("name" => "Iowa Statewide");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);
@@ -81,13 +83,13 @@ $graph->legend->SetLayout(LEGEND_HOR);
 
 // Create the linear plot
 $lineplot=new LinePlot($st1_hi);
-$lineplot->SetLegend($cities[$station1]["city"] ." High");
+$lineplot->SetLegend($cities[strtoupper($station1)]["name"] ." High");
 $lineplot->SetColor("red");
 $lineplot->SetWeight(2);
 
 // Create the linear plot
 $lineplot2=new LinePlot($st1_lo);
-$lineplot2->SetLegend($cities[$station1]["city"] ." Low");
+$lineplot2->SetLegend($cities[strtoupper($station1)]["name"] ." Low");
 $lineplot2->SetColor("blue");
 $lineplot2->SetWeight(2);
 
@@ -98,13 +100,13 @@ $graph->Add($lineplot2);
 if ($station2){
   // Create the linear plot
   $lineplot3=new LinePlot($st2_hi);
-  $lineplot3->SetLegend($cities[$station2]["city"] ." High");
+  $lineplot3->SetLegend($cities[strtoupper($station2)]["name"] ." High");
   $lineplot3->SetColor("brown");
   $lineplot3->SetWeight(2);
 
   // Create the linear plot
   $lineplot4=new LinePlot($st2_lo);
-  $lineplot4->SetLegend($cities[$station2]["city"] ." Low");
+  $lineplot4->SetLegend($cities[strtoupper($station2)]["name"] ." Low");
   $lineplot4->SetColor("purple");
   $lineplot4->SetWeight(2);
 

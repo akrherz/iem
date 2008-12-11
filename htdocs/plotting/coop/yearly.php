@@ -2,7 +2,7 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
-$station = isset($_GET["station"]) ? $_GET["station"] : die("No station");
+$station = isset($_GET["station"]) ? strtolower($_GET["station"]) : die("No station");
 $season = isset($_GET["season"]) ? $_GET["season"]: "";
 
 $months = Array("spring" => "(3, 4, 5)" ,
@@ -58,7 +58,10 @@ pg_close($connection);
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/COOPstations.php");
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);
@@ -68,7 +71,7 @@ $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetTextTickInterval(5);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set($label ." Average Temps for ". $cities[$station]["city"]);
+$graph->title->Set($label ." Average Temps for ". $cities[strtoupper($station)]["name"]);
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitle("Temperature [F]");

@@ -2,7 +2,7 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
-$station = isset($_GET["station"]) ? $_GET["station"] : die();
+$station = isset($_GET["station"]) ? strtolower($_GET["station"]) : die();
 $var = isset($_GET["var"]) ? $_GET["var"]: die();
 
 
@@ -44,7 +44,10 @@ pg_close($connection);
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/COOPstations.php");
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);
@@ -53,7 +56,7 @@ $graph->img->SetMargin(40,40,65,90);
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set("Daily ".ucfirst($var)." Temp Extremes for ". $cities[$station]["city"]);
+$graph->title->Set("Daily ".ucfirst($var)." Temp Extremes for ". $cities[strtoupper($station)]["name"]);
 $graph->subtitle->Set("Climate Record: " . $years ." years");
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,16);

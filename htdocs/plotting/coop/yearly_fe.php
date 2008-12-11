@@ -19,7 +19,12 @@ $season = isset($_GET["season"]) ? $_GET["season"]: "";
 temperature averages.  You can plot averages for a single station or compare
 two stations side-by-side.</p>
 
-<?php include("$rootpath/include/COOPstations.php"); ?>
+<?php 
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+
+?>
 
 <div style="padding: 3px;">
      <b>Make Plot Selections:</b>
@@ -45,7 +50,7 @@ two stations side-by-side.</p>
 		print("<option value=\"" . $cities[$key]["id"] ."\"");
                 if ($cities[$key]["id"] == $station1) print(" SELECTED ");
 
-		print(">" . $cities[$key]["city"] . "\n");
+		print(">" . $cities[$key]["name"] . "\n");
 	}
 ?>
 </SELECT>
@@ -58,7 +63,7 @@ two stations side-by-side.</p>
                 print("<option value=\"" . $cities[$key]["id"] ."\"");
                 if ($cities[$key]["id"] == $station2) print(" SELECTED ");
 
-                print(">" . $cities[$key]["city"] . "\n");
+                print(">" . $cities[$key]["name"] . "\n");
         }
 ?>
 </SELECT>

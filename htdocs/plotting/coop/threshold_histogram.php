@@ -2,8 +2,8 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $conn = iemdb("coop");
-$station1 = isset($_GET["station1"]) ? $_GET["station1"] : 'ia0200';
-$station2 = isset($_GET["station2"]) ? $_GET["station2"] : '';
+$station1 = isset($_GET["station1"]) ? strtolower($_GET["station1"]) : 'ia0200';
+$station2 = isset($_GET["station2"]) ? strtolower($_GET["station2"]) : '';
 
 $slimiter = "and stationid = '$station1'";
 if ($station1 == "iowa"){ $slimiter = ""; }
@@ -55,7 +55,10 @@ if ($station2 != "")
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/COOPstations.php");
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+
 
 $graph = new Graph(500,400);
 $graph->SetScale("lin");
@@ -78,7 +81,7 @@ for ($i=-30; $i < 10; $i=$i+10){
 $lineplot2=new LinePlot($pct, $xdata);
 $lineplot2->SetColor("blue");
 $lineplot2->SetWeight(3);
-$lineplot2->SetLegend("$yrs years at ". $cities[$station1]["city"] );
+$lineplot2->SetLegend("$yrs years at ". $cities[strtoupper($station1)]["name"] );
 $graph->Add($lineplot2);
 
 if ($station2 != "")
@@ -86,7 +89,7 @@ if ($station2 != "")
   $lineplot3=new LinePlot($pct2, $xdata);
   $lineplot3->SetColor("red");
   $lineplot3->SetWeight(3);
-  $lineplot3->SetLegend("$yrs2 years at ". $cities[$station2]["city"] );
+  $lineplot3->SetLegend("$yrs2 years at ". $cities[strtoupper($station2)]["name"] );
   $graph->Add($lineplot3);
 }
 

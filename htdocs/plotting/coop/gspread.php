@@ -96,7 +96,7 @@ pg_close($connection);
 include ("../jpgraph/jpgraph.php");
 include ("../jpgraph/jpgraph_bar.php");
 include ("../jpgraph/jpgraph_line.php");
-include ("../../include/COOPstations.php");
+
 
 // Create the graph. These two calls are always required
 $graph = new Graph(800,480,"example1");

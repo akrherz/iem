@@ -5,6 +5,9 @@ include("$rootpath/include/header.php");
 
 $station = isset($_GET["station"]) ? $_GET["station"] : "";
 $year = isset($_GET["year"]) ? $_GET["year"]: 2004;
+include("$rootpath/include/imagemaps.php");     
+
+
 ?>
 
 <div class="text">
@@ -18,7 +21,6 @@ $year = isset($_GET["year"]) ? $_GET["year"]: 2004;
 climatology for a station.  Please note the first year of record for a 
 station before entering the year you would like to plot against.</p>
 
-<?php include("$rootpath/include/COOPstations.php"); ?>
 
 <form method="GET" action="vyear_fe.php">
 
@@ -31,17 +33,7 @@ station before entering the year you would like to plot against.</p>
 
 <tr>
 <td>
-<SELECT name="station">
-<?php
-	for(reset($cities); $key = key($cities); next($cities))
-	{
-		print("<option value=\"" . $cities[$key]["id"] ."\"");
-                if ($cities[$key]["id"] == $station) print(" SELECTED ");
-
-		print(">" . $cities[$key]["city"] . " (". $cities[$key]["startYear"] .")\n");
-	}
-?>
-</SELECT>
+<?php echo networkSelect("IACLIMATE", $station); ?>
 </td>
 <td>
 <input type="text" name="year" size=5 maxlength=4 value="<?php echo $year; ?>">
