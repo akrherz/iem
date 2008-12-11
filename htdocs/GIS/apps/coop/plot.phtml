@@ -21,6 +21,7 @@ include("$rootpath/include/forms.php");
 ?>
 
 <?php $TITLE = "IEM | NWS COOP Daily Plotter";
+$THISPAGE = "networks-coop";
 $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
@@ -32,8 +33,6 @@ function new_window(url) {
 include("$rootpath/include/header.php"); ?>
 
 <div class="text">
-<a href="http://mesonet.agron.iastate.edu/COOP/">NWS COOP</a> &nbsp;<b> > </b>
-&nbsp; Daily Data Plotter
 
 <p>With this application, you can plot COOP observations for a date of your
 choice.
@@ -232,7 +231,7 @@ parameters.
 <br />  <img src="<?php echo $url; ?>" border=1>
 
 <p>
-<img src="/images/gisready.png"><h3 class="heading"> Data Listing</h3>
+<img src="<?php echo $rooturl; ?>/images/gisready.png"><h3 class="heading"> Data Listing</h3>
 <pre><?php echo $tr; ?></pre>
 
 <p>You should be able to 'copy & paste' this raw data listing into a simple
