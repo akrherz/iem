@@ -23,28 +23,32 @@ if (! $subc && ! $dwpf && ! $tmpf && ! $s0 && ! $s1 && ! $s2 && ! $s3 ){
   $_GET["tmpf"] = "on";
 }
 
- include("$rootpath/include/selectWidget.php");
- $sw = new selectWidget("$rooturl/plotting/rwis/sf_fe.php", "$rooturl/plotting/rwis/sf_fe.php?", "IA_RWIS");
- $swf = Array("network" => "IA_RWIS", "s0" => 1, "s1" => 1, "s2" => 1, 
-              "s3" => 1, "tmpf" => 1, "dwpf" => 1, "subc" => 1);
- $sw->setformvars($swf);
- $sw->logic($_GET);
- $swinterface = $sw->printInterface();
-
+include("$rootpath/include/google_keys.php");
+include("$rootpath/include/imagemaps.php");
+include("$rootpath/include/forms.php");
+$api = $GOOGLEKEYS[$rooturl]["any"];
+$HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
+<script src='http://www.openlayers.org/api/OpenLayers.js'></script>
+<script src='${rooturl}/js/olselect.php?network=IA_RWIS'></script>";
+$BODYEXTRA = "onload=\"init()\"";
 $TITLE = "IEM | RWIS Timeseries Plots";
 $THISPAGE = "networks-rwis";
 include("$rootpath/include/header.php"); 
 ?>
-<?php include("$rootpath/include/imagemaps.php"); ?>
-<?php include("$rootpath/include/forms.php"); ?>
+<style type="text/css">
+        #map {
+            width: 450px;
+            height: 450px;
+            border: 2px solid black;
+        }
+</style>
+
 
 <p>This application plots a timeseries of data from an Iowa RWIS site 
 of your choice.  You can optionally select which variables to plot and
 for which time period in the archive.</p>
 
-<form method="GET" action="sf_fe.php" name="menu">
-<input type="hidden" name="ostation" value="<?php echo $station; ?>">
-
+<form method="GET" action="sf_fe.php" name="olselect">
 
 <?php if (strlen($station) > 0 ) {  ?>
 <table cellpadding="2" cellspacing="0" border="1">
@@ -165,17 +169,18 @@ for which time period in the archive.</p>
 <?php
   } else { ?>
   
-<table cellpadding="2" cellspacing="0" border="1">
-<tr><th>Select Station</th></tr>
+<table><tr><th>Select Station</th>
+<td><?php echo networkSelect("IA_RWIS", ""); ?></td>
+<td><input type="submit" value="Make Plot"></tr></table>
+<div id="map"></div>
+<div id="sname" unselectable="on">No site selected</div>
+</form>
 
-<tr><td>
-  <?php echo networkSelect("IA_RWIS",$station); ?>
-</td></tr></table>
-  <input type="submit" value="Generate Plot">
+
   </form>
-  <?php
- echo $swinterface; 
 
+
+  <?php
   }
 ?>
 
