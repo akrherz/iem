@@ -1,35 +1,44 @@
 <?php 
 include("../../config/settings.inc.php");
-include("$rootpath/include/selectWidget.php");
 
 $year = date("Y");
-$network = isset($_GET['network']) && $_GET['network'] != "" ? $_GET['network'] : "IA_ASOS";
-$station = isset($_GET['station']) && $_GET['station'] != "" ? strtoupper($_GET['station']) : "";
+$network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
+$station = "";
 
-
- $sw = new selectWidget("/request/download.phtml?",
-    "/request/download.phtml?network=$network&", $network );
- $sw->logic($_GET);
- $ar = Array("IA_ASOS", "ND_ASOS", "SD_ASOS", "NE_ASOS", "KS_ASOS", "MO_ASOS", "IL_ASOS", "IN_ASOS", "OH_ASOS", "MI_ASOS", "WI_ASOS", "MN_ASOS");
- $sw->set_networks($ar);
-
-
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/google_keys.php");
+include("$rootpath/include/imagemaps.php");
+include("$rootpath/include/forms.php");
+$api = $GOOGLEKEYS[$rooturl]["any"];
+$HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
+<script src='http://www.openlayers.org/api/OpenLayers.js'></script>
+<script src='${rooturl}/js/olselect.php?network=${network}'></script>";
 $TITLE = "IEM | Download Data";
-$HEADEXTRA = '<script language="JavaScript">
-
-function changeSite(newSite) {
-
-	document.myForm.station.value = newSite ;
-
-} // End of changeSite
-
-</script>';
+$THISPAGE = "networks-asos";
+$BODYEXTRA = "onload=\"init()\"";
 include("$rootpath/include/header.php");
- include("$rootpath/include/forms.php");
 ?>
-<br /><b>Navigation:</b> <a href="/ASOS/">ASOS</a> &nbsp; > &nbsp; Download
+<style type="text/css">
+        #map {
+            width: 450px;
+            height: 450px;
+            border: 2px solid black;
+        }
+</style>
 
-<P>Select your site from the map and then complete the form.
+<h3>ASOS data download</h3>
+<p>The IEM archives observations from many of the sites in the United States.
+This observation archive contains many sites from the MidWest back to 2001 and
+the rest of the country since roughly 2007.  The Iowa data for the Iowa ASOS
+network goes back to the 1970s for some sites.
+
+<form name="netselect">
+<input type="hidden" name="station1" value="<?php echo $station1; ?>">
+<table><tr><th>Select Network</th>
+<td><?php echo selectAzosNetwork($network); ?></td>
+<td><input type="submit" value="Switch to Network"></td>
+</tr></table>
+</form>
 
 
 <TABLE>
@@ -37,7 +46,10 @@ include("$rootpath/include/header.php");
 <TD valign="top">
 <h3 class="subtitle">1) Select Station/Network by clicking on location: </h3>
 
-<?php echo $sw->printInterface(); ?>
+<form method="GET" action="/cgi-bin/request/getData.py" name="olselect">
+<div id="map"></div>
+<div id="sname" unselectable="on">No site selected</div>
+
 
 <p>In general, data from the Iowa ASOS network is almost always available.
 Data from other states is more sporatic.  If you have any questions, please
@@ -46,15 +58,14 @@ don't hesitate to contact us.
 <p><b>Other download pages:</b>
 <ul>
   <li><a href="/request/awos/1min.php">1 minute interval Iowa AWOS data</a></li>
+  <li><a href="<?php echo $rooturl; ?>/request/asos/1min.phtml">1 minute interval Iowa ASOS data</a></li>
   <li><a href="/request/rwis/fe.phtml">Iowa RWIS data</a></li>
 </ul>
 
 </TD>
 
 <TD>
-<form method="GET" action="/cgi-bin/request/getData.py" name="myForm">
-<P>Selected Station: <input type="text" name="station" size="5" value="<?php echo $station; ?>">
-<br> &nbsp; &nbsp; <i>(Either enter site ID or select graphically)</i>
+<P>Selected Station: <?php echo networkSelect($network, $station); ?>
 
 <br><br>
 <h3 class="subtitle">2) Select From Available Data:</h3>
@@ -87,7 +98,13 @@ don't hesitate to contact us.
 
 <TR>
  <TD colspan="2" align="center">
-  <?php echo yearSelect(1995, $year, "year"); ?>
+  <?php 
+$y = 2001;
+if ($network == "IA_ASOS") $y = 1970;
+if ($network == "AWOS") $y = 1970;
+echo yearSelect($y, $year, "year"); 
+
+ ?>
  </TD>
 </TR>
 
