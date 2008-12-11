@@ -1,12 +1,11 @@
 <?php
  include("../../../config/settings.inc.php");
 
- $TITLE = "IEM | Site Comparisons";
- include("$rootpath/include/selectWidget.php");
 
- $network = isset($_GET['network']) && $_GET['network'] != "" ? $_GET['network'] : "IA_ASOS";
- $station1 = isset($_GET['station']) && $_GET['station'] != "" ? strtoupper($_GET['station']) : "";
- $station2 = isset($_GET['station1']) && $_GET['station1'] != "" ? strtoupper($_GET['station1']) : "";
+ $network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
+ $station1 = isset($_GET['station']) ? strtoupper($_GET['station']) : "";
+ $station2 = isset($_GET['station1']) ? strtoupper($_GET['station1']) : "";
+
  $var = isset($_GET['var']) ? $_GET['var'] : "tmpf";
  include("$rootpath/include/station.php");
  $st = new StationData(Array($station1, $station2));
@@ -27,15 +26,25 @@
    $uri = "$rooturl/plotting/compare/index.phtml?station1=$station2";
  }
 
- $sw = new selectWidget("$rooturl/plotting/compare/index.phtml?", 
-        $uri, $network );
- $sw->logic($_GET);
- $sw->setformvars($ar);
- $ar = Array("IA_ASOS", "AWOS", "IA_RWIS", "KELO", "KCCI", "KIMT", 
-"ND_ASOS", "SD_ASOS", "NE_ASOS", "KS_ASOS", "KS_RWIS", "MO_ASOS", "IL_ASOS", "IN_ASOS", "OH_ASOS", "MI_ASOS", "WI_ASOS", "WI_RWIS", "MN_ASOS", "MN_RWIS");
- $sw->set_networks($ar);
- include("$rootpath/include/header.php"); 
+include("$rootpath/include/google_keys.php");
+include("$rootpath/include/imagemaps.php");
+include("$rootpath/include/forms.php");
+$api = $GOOGLEKEYS[$rooturl]["any"];
+$HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
+<script src='http://www.openlayers.org/api/OpenLayers.js'></script>
+<script src='${rooturl}/js/olselect.php?network=${network}'></script>";
+$BODYEXTRA = "onload=\"init()\"";
+$THISPAGE = "iem-qc";
+$TITLE = "IEM | Site Comparisons";
+include("$rootpath/include/header.php"); 
 ?>
+<style type="text/css">
+        #map {
+            width: 450px;
+            height: 450px;
+            border: 2px solid black;
+        }
+</style>
 
 <h3 class="heading">IEM Site Comparisons</h3>
 
@@ -80,7 +89,29 @@ choices.
 <?php 
 if (strlen($station1) == 0 || strlen($station2) == 0)
 {
-  echo $sw->printInterface(); 
+?>
+<form name="netselect">
+<input type="hidden" name="station1" value="<?php echo $station1; ?>">
+<table><tr><th>Select Network</th>
+<td><?php echo selectNetwork($network); ?></td>
+<td><input type="submit" value="Switch to Network"></td>
+</tr></table>
+</form>
+
+<p>
+
+<form name="olselect">
+<input type="hidden" value="<?php echo $network; ?>" name="network">
+<input type="hidden" name="station1" value="<?php echo $station1; ?>">
+<table><tr><th>Select Station</th>
+<td><?php echo networkSelect($network, ""); ?></td>
+<td><input type="submit" value="Select Station"></tr></table>
+<div id="map"></div>
+<div id="sname" unselectable="on">No site selected</div>
+</form>
+
+
+<?php
 } else
 {
   echo "<img src='plot.php?var=$var&station1=$station1&station2=$station2'>\n";
