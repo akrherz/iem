@@ -7,13 +7,24 @@
  $sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
  $eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
  include("../../../config/settings.inc.php");
- include("$rootpath/include/selectWidget.php");
- $sw = new selectWidget("fe.phtml", "fe.phtml?", $network);
- $sw->logic($_GET);
-?>
-
-<?php 	$TITLE = "IEM | Accumulated Values versus Climatology";
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/google_keys.php");
+include("$rootpath/include/imagemaps.php");
+$api = $GOOGLEKEYS[$rooturl]["any"];
+$HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
+<script src='http://www.openlayers.org/api/OpenLayers.js'></script>
+<script src='${rooturl}/js/olselect.php?network=${network}'></script>";
+$BODYEXTRA = "onload=\"init()\"";
+$THISPAGE = "climatology-season";
+$TITLE = "IEM | Accumulated Values versus Climatology";
 include("$rootpath/include/header.php"); ?>
+<style type="text/css">
+        #map {
+            width: 450px;
+            height: 450px;
+            border: 2px solid black;
+        }
+</style>
 
 <h3 class="heading">Growing Season Traces</h3>
 
@@ -32,13 +43,12 @@ can cause errors in the accumulated values.</p>
 <?php if (strlen($station) > 0 ) { ?>
 <?php include_once("$rootpath/include/forms.php"); ?>
 <form name="ds" action="fe.phtml" method="GET">
-<input type="hidden" value="<?php echo $station; ?>" name="station">
 <table cellspacing=2 border=1 cellpadding=2>
 <thead>
 <tr><th>Site ID:</th><th>Year:</th><th>Start Date:</th><th>End Date:</th></tr>
 </thead>
 <tbody>
-<tr><td><input type="text" name="station" value="<?php echo $station; ?>" size="6"></td>
+<tr><td><?php echo networkSelect($network, $station); ?></td>
   <td><?php echo yearSelect(2004,$year,"year"); ?></td>
   <td><?php echo monthSelect($smonth,"smonth"); ?><?php echo daySelect($sday,"sday"); ?></td>
   <td><?php echo monthSelect($emonth,"emonth"); ?><?php echo daySelect($eday,"eday"); ?></td>
@@ -53,11 +63,17 @@ can cause errors in the accumulated values.</p>
 
 <?php } else { ?>
 
+<form name="olselect">
+<input type="hidden" value="<?php echo $network; ?>" name="network">
+<table><tr><th>Select Station</th>
+<td><?php echo networkSelect($network, $station); ?></td>
+<td><input type="submit" value="Make Plot"></tr></table>
+<div id="map"></div>
+<div id="sname" unselectable="on">No site selected</div>
+</form>
 
-<?php
-echo $sw->printInterface();
-	}
-?>
+
+<?php } ?>
 </div>
 
 <?php include("$rootpath/include/footer.php"); ?>
