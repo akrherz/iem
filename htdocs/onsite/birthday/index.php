@@ -1,7 +1,11 @@
 <?php  
 include("../../../config/settings.inc.php");
   $TITLE = "IEM | Birthday Weather";
+$THISPAGE = "archive-birthday";
 include("$rootpath/include/header.php"); 
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
 ?>
 
 <H3 class="heading">The Weather on your Birthday!!</H3>
@@ -10,7 +14,6 @@ include("$rootpath/include/header.php");
 <?php
 $startYear = isset($_GET['startYear']) ? $_GET['startYear']: 1951;
 
-	include("$rootpath/include/COOPstations.php");		
 ?>
 <div class="text">
 If you were born in Iowa between 1900 and 2005, you can fill out the form below and discover the weather
@@ -19,45 +22,20 @@ conditions at a location near to you.  Just follow the instructions below.
 
 <BR><BR>
 
-<H3 class="subtitle">1. Time period:</H3><p>
-Weather data records do not date back as far for a particular station.  By selecting which period you where
-born, you will be presented a list of stations with data for that time.<p>
-
-<TABLE>
-<TR>
-	<?php
-		if ($startYear != "1951") { 
-			echo "<TD>I was born before 1951 <b>--</b></TD>"; 
-			echo "<TD><a href='index.php?startYear=1951'>I was born after 1951</a></TD>";
-			}
-		else{
-			echo "<TD><a href='index.php?startYear=1893'>I was born
-			before 1951</a> <b>--</b></TD>";
-			echo "<TD>I was born after 1951</TD>";
-			}
-	?>
-	
-</TR></TABLE>
-
 <form method="GET" action="/cgi-bin/onsite/birthday/getweather.py">
 
-<p><H3 class="subtitle">2. Select the city nearest to you:</H3><p>
+<p><H3 class="subtitle">1. Select the city nearest to you:</H3><p>
 <SELECT name="city" size="10">
 
 <?php
 	for(reset($cities); $key = key($cities); next($cities))
 	{
-		if ($startYear == "1951"){
-			print("<option value=\"" . $cities[$key]["id"] . "__" . $cities[$key]["city"] . "\">" . $cities[$key]["city"] . "\n");
-		}
-		elseif ($cities[$key]["startYear"] == $startYear){
-			print("<option value=\"" . $cities[$key]["id"] . "__" . $cities[$key]["city"] . "\">" . $cities[$key]["city"] . "\n");
-		}
+			print("<option value=\"" . $cities[$key]["id"] . "__" . $cities[$key]["name"] . "\">" . $cities[$key]["name"] . "\n");
 	}
 ?>
 </SELECT>
 
-<p><H3 class="subtitle">3. Enter your Birthdate:</H3><p>
+<p><H3 class="subtitle">2. Enter your Birthdate:</H3><p>
 
 <table><TR><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
 <TR>
