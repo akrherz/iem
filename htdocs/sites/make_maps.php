@@ -1,6 +1,7 @@
 <?php 
 /* Draw a bunch of reference maps */
 
+dl($mapscript);
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 $map->set("width", 320);
 $map->set("height", 240);

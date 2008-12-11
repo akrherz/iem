@@ -1,4 +1,5 @@
 <?php 
+
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("setup.php");
