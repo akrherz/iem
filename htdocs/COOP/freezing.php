@@ -1,6 +1,7 @@
 <?php 
 include("../../config/settings.inc.php");
-$TITLE = "IEM | COOP | Freezing Dates";
+$TITLE = "IEM | Freezing Dates";
+$THISPAGE = "climate-year";
 include("$rootpath/include/header.php");
 include("$rootpath/include/database.inc.php"); 
 include("$rootpath/include/network.php"); 
@@ -10,8 +11,6 @@ $cities = $nt->table;
 $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
 
 ?>
-
-<b>Nav:</b> <a href="<?php echo $rooturl; ?>/COOP/">COOP</a> <b> > </b> Freezing Dates<p>
 
 <h3 class="heading">Freezing Dates</h3>
 
