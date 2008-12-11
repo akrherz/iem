@@ -1,7 +1,10 @@
 <?php 
 include("../../../config/settings.inc.php");
  $TITLE = "IEM | NWS COOP | Daily Normals";
+$THISPAGE = "networks-coop";
 include("$rootpath/include/header.php"); 
+include("$rootpath/include/imagemaps.php"); 
+include("$rootpath/include/forms.php"); 
 ?><div class="text">
 <b>Nav:</b> <a href="<?php echo $rooturl; ?>/COOP/">NWS COOP</a> <b> > </b> Download Normals
 
@@ -20,16 +23,7 @@ site or download normals for every site for a single day.</i>)<br>
 </tr>
 <tr><td bgcolor="#CCCCCC" valign="top">
 <p><b>Select Station:</b><br>
-<select name="station">
-<?php
- include("$rootpath/include/COOPstations.php");
- include("$rootpath/include/forms.php");
-
- while( list($key, $val) = each($cities) ){
-   echo "<option value=\"$key\">". $val['city'] ."</option>\n";
- }
-?>
-</select>
+<?php echo networkSelect("IACLIMATE", ""); ?>
 </td><td bgcolor="#999999">
 <p><b>Select Month & Date:</b><br>
 
