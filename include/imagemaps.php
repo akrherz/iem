@@ -58,7 +58,7 @@ function networkSelect($network, $selected, $extra=Array())
     $nt = new NetworkTable($network);
     $cities = $nt->table;
     reset($cities);
-    $s .= '<select name="station">\n';
+    $s .= "<select name=\"station\">\n";
     while (list($sid, $tbl) = each($cities))
     {
         if ($tbl["network"] != $network) continue;
