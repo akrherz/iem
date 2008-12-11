@@ -41,6 +41,7 @@ you may find useful.</p>
 </form>
 
 <form name="olselect">
+<input type="hidden" name="network" value="<?php echo $network; ?>">
 <table>
 <tr><th>Select By Station:</th>
 <td>
