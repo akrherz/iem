@@ -3,7 +3,9 @@ include("../../config/settings.inc.php");
 $TITLE = "IEM | COOP | Freezing Dates";
 include("$rootpath/include/header.php");
 include("$rootpath/include/database.inc.php"); 
-include("$rootpath/include/COOPstations.php"); 
+include("$rootpath/include/network.php"); 
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
 
 $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
 
@@ -113,7 +115,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
   </tr>";
 
  foreach($finalA as $key => $value ){
-   echo "<tr><td>". $cities[$key]["city"] ."</td>
+   echo "<tr><td>". $cities[strtoupper($key)]["name"] ."</td>
     <td>". $data[$key]["low"] ."</td>
     <td>". $data[$key]["lowyr"] ."</td>
     <td>". $data[$key]["low28"] ."</td>
