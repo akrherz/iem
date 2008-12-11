@@ -28,12 +28,10 @@ while (list($key,$val) = each($o))
 <p>Other Sites in network:
 <form method="GET">
 <input type="hidden" name="network" value="<?php echo $network; ?>">
-<?php
- include_once("$rootpath/include/selectWidget.php");
- $sw2 = new selectWidget("$rooturl/sites/site.php", "$rooturl/sites/site.php?", $network);
- echo $sw2->siteSelectInterface($station);
-
-?><br /> <a href="locate.php?network=<?php echo $network; ?>">select from map</a>
+<?php 
+include_once("$rootpath/include/imagemaps.php");
+echo networkSelect($network, $station); ?>
+<br /> <a href="locate.php?network=<?php echo $network; ?>">select from map</a>
 </form>
 
 
