@@ -2,6 +2,7 @@
 include("../../../config/settings.inc.php");
 $TITLE = "IEM | COOP Extremes Plots";
 include("$rootpath/include/header.php");
+include("$rootpath/include/imagemaps.php");
 $station = isset($_GET["station"]) ? $_GET["station"] : ""; 
 $var = isset($_GET["var"]) ? $_GET["var"]: "";
 ?>
@@ -17,7 +18,6 @@ $var = isset($_GET["var"]) ? $_GET["var"]: "";
 temperature extremes.  You can create a annual plot of this dataset for a
 station of your choice.</p> 
 
-<?php include("$rootpath/include/COOPstations.php"); ?>
 
 <form method="GET" action="extremes_fe.php">
 
@@ -29,18 +29,7 @@ station of your choice.</p>
 </tr>
 
 <tr>
-<td>
-<SELECT name="station">
-<?php
-	for(reset($cities); $key = key($cities); next($cities))
-	{
-		print("<option value=\"" . $cities[$key]["id"] ."\"");
-                if ($cities[$key]["id"] == $station) print(" SELECTED ");
-
-		print(">" . $cities[$key]["city"] . "\n");
-	}
-?>
-</SELECT>
+<td><?php echo networkSelect("IACLIMATE", $station); ?>
 </td>
 <td>
 <SELECT name="var">

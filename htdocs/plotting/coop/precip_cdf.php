@@ -19,7 +19,7 @@ function standard_deviation($std)
      return round($var,2); 
      } 
 
-$stationid = isset($_GET["stationid"]) ? $_GET['stationid']: 'ia0200';
+$station = isset($_GET["station"]) ? strtolower($_GET['station']): 'ia0200';
 /* Setup start/end dates */
 $smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 5;
 $sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
@@ -33,7 +33,7 @@ $subtitle = sprintf("Between %s and %s", date('M d', $sts), date('M d', $ets));
 
 /* Query out the average accumulations during that time */
 $coop = iemdb("coop");
-$sql = "select year, round(sum(precip)::numeric,2) as rain from alldata WHERE extract(doy from day) BETWEEN extract(doy from '$stsSQL'::date) and extract(doy from '$etsSQL'::date) and stationid = '$stationid' and year < extract(year from now()) GROUP by year ORDER by rain ASC";
+$sql = "select year, round(sum(precip)::numeric,2) as rain from alldata WHERE extract(doy from day) BETWEEN extract(doy from '$stsSQL'::date) and extract(doy from '$etsSQL'::date) and stationid = '$station' and year < extract(year from now()) GROUP by year ORDER by rain ASC";
 $rs = pg_exec($coop, $sql);
 
 /* Generate plot */
@@ -76,7 +76,10 @@ pg_close($coop);
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/COOPstations.php");
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+
 
 $graph = new Graph(600,400,"example1");
 $graph->SetScale("textlin",0,100);
@@ -90,7 +93,7 @@ $graph->xaxis->SetTitleMargin(30);
 
 $graph->yaxis->SetTitle("Cumulative Distribution (percent)");
 
-$graph->title->Set($cities[$stationid]['city'] ." Precip Accumulation Probabilities");
+$graph->title->Set($cities[strtoupper($station)]['name'] ." Precip Accumulation Probabilities");
 $graph->subtitle->Set($subtitle);
 
 $l1=new LinePlot($ydata);

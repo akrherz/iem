@@ -145,7 +145,7 @@ pg_close($connection);
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/COOPstations.php");
+
 
 // Create the graph. These two calls are always required
 $graph = new Graph(320,300,"example1");

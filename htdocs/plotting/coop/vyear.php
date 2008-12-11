@@ -2,8 +2,8 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
-$station = isset($_GET["station"]) ? $_GET["station"] : die("No station");
-$year = isset($_GET["year"]) ? $_GET["year"] : 2004;
+$station = isset($_GET["station"]) ? strtolower($_GET["station"]) : die("No station");
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 
 
 $query2 = "SELECT high, low, years, to_char(valid, 'mm dd') as valid from climate WHERE station = '". $station ."' ORDER by valid ASC";
@@ -52,7 +52,10 @@ pg_close($connection);
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/COOPstations.php");
+include("$rootpath/include/network.php");     
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);
@@ -61,7 +64,7 @@ $graph->img->SetMargin(40,40,65,90);
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set($cities[$station]["city"] ." Climatological Comparison");
+$graph->title->Set($cities[strtoupper($station)]["name"] ." Climatological Comparison");
 $graph->subtitle->Set("Climate Record: ". $years_s1 ." yrs  vs Obs for yr: " . $year );
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,16);

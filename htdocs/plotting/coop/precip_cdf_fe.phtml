@@ -1,13 +1,13 @@
 <?php
 include("../../../config/settings.inc.php");
-include ("$rootpath/include/COOPstations.php");
+include("$rootpath/include/imagemaps.php");     
 
 $smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 5;
 $sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
 $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 5;
 $eday = isset($_GET['eday']) ? $_GET['eday'] : 31;
-$stationid = isset($_GET["stationid"]) ? $_GET['stationid']: 'ia0200';
-$uri = sprintf("precip_cdf.php?stationid=%s&smonth=%s&sday=%s&emonth=%s&eday=%s", $stationid, $smonth, $sday, $emonth, $eday);
+$station = isset($_GET["station"]) ? $_GET['station']: 'IA0200';
+$uri = sprintf("precip_cdf.php?station=%s&smonth=%s&sday=%s&emonth=%s&eday=%s", $station, $smonth, $sday, $emonth, $eday);
 ?>
 
 <?php
@@ -28,18 +28,7 @@ few seconds to load, so please be patient.
 <tr>
  <th>Station</th><td></td><th>Month</th><th>Day</th><td></td></tr>
 <tr>
-<td rowspan="2">
-<SELECT name="stationid">
-<?php
-        for(reset($cities); $key = key($cities); next($cities))
-        {
-                print("<option value=\"" . $cities[$key]["id"] ."\"");
-                if ($cities[$key]["id"] == $stationid) print(" SELECTED ");
-
-                print(">" . $cities[$key]["city"] . "\n");
-        }
-?>
-</SELECT>
+<td rowspan="2"><?php echo networkSelect("IACLIMATE", $station); ?>
 </td>
 <td>Start Date:</td>
 <th><?php echo monthSelect2($smonth, "smonth"); ?></th>

@@ -1,8 +1,13 @@
 <?php
  include("../../../config/settings.inc.php");
- include("$rootpath/include/COOPstations.php");
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/google_keys.php");
+include("$rootpath/include/imagemaps.php");
+
+
  $station = isset($_GET["station"]) ? $_GET["station"]: "";
  $network = "IACLIMATE";
+ $api = $GOOGLEKEYS[$rooturl]["any"];
 
  $syear = isset($_GET['syear']) ? $_GET['syear'] : date("Y");
  $smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 1;
@@ -11,18 +16,26 @@
  $eyear = isset($_GET['eyear']) ? $_GET['eyear'] : date("Y");
  $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 6;
  $eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
-
- $dcgi = "syear=$syear&smonth=$smonth&sday=$sday&eyear=$eyear&emonth=$emonth&eday=$eday&";
-
- include("$rootpath/include/selectWidget.php");
- $sw = new selectWidget("acc.phtml", "acc.phtml?$dcgi", $network);
- $sw->logic($_GET);
+$dcgi = "syear=$syear&smonth=$smonth&sday=$sday&eyear=$eyear&emonth=$emonth&eday=$eday&";
 ?>
 
-<?php 	$TITLE = "IEM | Accumulated Traces";
+<?php 	
+$THISPAGE = "networks-coop";
+$TITLE = "IEM | Accumulated Traces";
+$HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
+<script src='http://www.openlayers.org/api/OpenLayers.js'></script>
+<script src='${rooturl}/js/olselect.php?network=${network}'></script>";
+$BODYEXTRA = "onload=\"init()\"";
 include("$rootpath/include/header.php"); ?>
 
-<a href="/COOP/">NWS COOP Network</a> 
+<style type="text/css">
+        #map {
+            width: 450px;
+            height: 450px;
+            border: 2px solid black;
+        }
+</style>
+
 
 <h3 class="heading">Accumulated Data Traces</h3>
 
@@ -33,7 +46,7 @@ data, you can download on the <a href="/request/coop/fe.phtml">COOP data downloa
 <div class="text">
 
 <?php include_once("$rootpath/include/forms.php"); ?>
-<form name="ds" action="acc.phtml" method="GET">
+<form name="olselect" action="acc.phtml" method="GET">
 
 <table style="padding: 3px; border: 0px; margin: 0px;">
 <thead>
@@ -41,15 +54,7 @@ data, you can download on the <a href="/request/coop/fe.phtml">COOP data downloa
 </thead>
 <tbody>
 <tr>
-  <td rowspan="2"><select name="station">
-<?php 
-while( list($key, $val) = each($cities) ){
-  if (isset($val["dont"])) continue;
-  echo "<option value=\"$key\"";
-  if ($key == strtolower($station)) echo " SELECTED ";
-  echo ">". $val["city"] ." [". $val["startYear"] ."]\n";
-}
-?></select>
+  <td rowspan="2"><?php echo networkSelect($network, $station); ?>
 	<br /><a href="acc.phtml?<?php echo $dcgi; ?>">Select via map.</a></td>
   <td>Start Date:</td>
   <td><?php yearSelect2(1893,$syear,"syear"); ?></td>
@@ -73,11 +78,10 @@ while( list($key, $val) = each($cities) ){
 <p><img src="acc_rain_plot.php?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
 <p><img src="acc_sdd_plot.php?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
 
-<?php } else { 
-
-echo $sw->printInterface();
-	}
-?>
+<?php } else {  ?>
+<div id="map"></div>
+<div id="sname" unselectable="on">No site selected</div>
+<?php } ?>
 </div>
 
 <?php include("$rootpath/include/footer.php"); ?>
