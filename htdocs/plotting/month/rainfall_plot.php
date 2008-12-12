@@ -14,6 +14,9 @@ $st = new StationData($station);
 $st->load_station( $st->table[$station]['climate_site'] );
 $cities = $st->table;
 
+$hasclimate = 1;
+if ($st->table[$station]['climate_site'] == ""){ $hasclimate = 0; }
+
 $coopdb = iemdb("coop");
 $iem = new IEMAccess();
 
@@ -35,6 +38,7 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 	$obs[$i] = $p;
 }
 
+if ($hasclimate){
 /* Now we need the climate data */
 $q = "SELECT precip, extract(day from valid) as day from climate
 		WHERE station = '". strtolower($climate_site) ."' and extract(month from valid) = $month
@@ -56,7 +60,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 	$aclimate[$i] = $atot;
 	$zeros[$i] = 0;
 }
-
+}
 pg_close($coopdb);
 
 
@@ -80,10 +84,13 @@ $graph->xaxis->SetTitle("Day of Month");
 
 $graph->yaxis->SetTitle("Precipitation (in)");
 $graph->title->Set( $cities[$station]["name"] ." [$station] Precipitation for ". date("M Y", $ts) );
+if ($hasclimate){
 $graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["name"] ."[". $climate_site ."]");
+}
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");
 
+if($hasclimate){
 // Create the linear plot
 $b1plot =new BarPlot($cdiff);
 $b1plot->SetFillColor("red");
@@ -93,6 +100,7 @@ $b2plot->SetFillColor("blue");
 $b2plot->SetLegend("Obs Rain");
 $g = new GroupBarPlot(array($b1plot,$b2plot));
 $g->SetAlign("left");
+}
 
 // Create the linear plot
 $lp1=new LinePlot($aobs);
@@ -100,19 +108,22 @@ $lp1->SetLegend("Actual Accum");
 $lp1->SetColor("blue");
 $lp1->SetWeight(2);
 
+if ($hasclimate){
 $lp2=new LinePlot($aclimate);
 $lp2->SetLegend("Climate Accum");
 $lp2->SetColor("red");
 $lp2->SetWeight(2);
-
 $z = new LinePlot($zeros);
 $z->SetWeight(2);
+}
 
 // Add the plot to the graph
 $graph->Add($lp1);
+if ($hasclimate){
 $graph->Add($lp2);
 $graph->Add($g);
 $graph->Add($z);
+}
 
 // Display the graph
 $graph->Stroke();
