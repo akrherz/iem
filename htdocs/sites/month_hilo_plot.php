@@ -7,7 +7,8 @@ $st->load_station( $st->table[$station]["climate_site"]);
 $cities = $st->table;
 
  $climate_site = $cities[$station]["climate_site"];
- if ($climate_site == "none"){  die("App does not work outside of Iowa"); }
+ $hasclimate = 1;
+ if ($climate_site == ""){ $hasclimate = 0; }
  $db = iemdb("access");
 
  /* Call with year and month, if not, then current! */
@@ -45,30 +46,33 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
 
 pg_close($db);
 
-/* Now, lets get averages */
-$db = iemdb("coop");
+if ($hasclimate){
+ /* Now, lets get averages */
+ $db = iemdb("coop");
 
-$sqlDate = sprintf("2000-%s", date("m-d") );
+ $sqlDate = sprintf("2000-%s", date("m-d") );
 
-$rs = pg_prepare($db, "SELECT", "SELECT valid, high, low from climate 
+ $rs = pg_prepare($db, "SELECT", "SELECT valid, high, low from climate 
         WHERE station = $1
         and extract(month from valid) = $2  ORDER by valid ASC");
 
-$rs = pg_execute($db, "SELECT", Array(strtolower($climate_site), $month));
+ $rs = pg_execute($db, "SELECT", Array(strtolower($climate_site), $month));
 
-$ahighs = Array();
-$alows = Array();
+ $ahighs = Array();
+ $alows = Array();
 
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $ts = strtotime($row["valid"]);
   $xlabels[] = date("m/d", $ts);
   $ahighs[] = $row["high"];
   $alows[] = $row["low"];
   if (intval($row["high"]) > $maxVal) $maxVal = $row["high"];
   if (intval($row["low"]) < $minVal) $minVal = $row["low"];
-}
+ }
 
-pg_close($db);
+ pg_close($db);
+} else {
+}
 
 /* Time to plot */
 include("$rootpath/include/jpgraph/jpgraph.php");
@@ -92,7 +96,9 @@ $graph->xgrid->Show();
 
 $graph->img->SetMargin(45,10,70,30);
 $graph->title->Set( $cities[$station]["name"] ." [$station] Hi/Lo Temps for ". date("M Y", $rts) );
-$graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["name"] ."[". $climate_site ."]");
+if ($hasclimate){
+  $graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["name"] ."[". $climate_site ."]");
+}
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");
 
@@ -132,6 +138,7 @@ $bplot2->SetWidth(0.7);
 $gbarplot = new GroupBarPlot(array($bplot1,$bplot2));
 $gbarplot->SetWidth(0.6);
 
+if ($hasclimate){
 $l1plot=new LinePlot($alows);
 $l1plot->SetColor("black");
 $l1plot->mark->SetType(MARK_FILLEDCIRCLE);
@@ -149,10 +156,11 @@ $l2plot->mark->SetWidth(4);
 $l2plot->SetWeight(2);
 $l2plot->SetLegend("Avg High");
 $l2plot->SetBarCenter();
-
+}
 $graph->Add($gbarplot);
+if ($hasclimate){
 $graph->Add($l2plot);
 $graph->Add($l1plot);
-
+}
 $graph->Stroke();
 ?>

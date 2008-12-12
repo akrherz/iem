@@ -3,7 +3,7 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("setup.php");
-
+$THISPAGE="iem-sites";
 $TITLE = "IEM | Site Information";
 include("$rootpath/include/header.php");
 ?>
@@ -18,6 +18,9 @@ include("$rootpath/include/header.php");
 <tr><th>Station Identifier:</th><td><?php echo $station; ?></td></tr>
 <tr><th>Network:</th><td><?php echo $network; ?></td></tr>
 <tr><th>County:</th><td><?php echo $cities[$station]["county"]; ?></td></tr>
+<tr><th>Latitude:</th><td><?php echo $cities[$station]["latitude"]; ?></td></tr>
+<tr><th>Longitude:</th><td><?php echo $cities[$station]["longitude"]; ?></td></tr>
+<tr><th>Elevation [m]:</th><td><?php echo $cities[$station]["elevation"]; ?></td></tr>
 
 </table>
 

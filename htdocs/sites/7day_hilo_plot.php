@@ -7,7 +7,8 @@ $st->load_station( $st->table[$station]["climate_site"]);
 $cities = $st->table;
 
  $climate_site = $cities[$station]["climate_site"];
- if ($climate_site == "none"){  die("App does not work outside of Iowa"); }
+ $hasclimate = 1;
+ if ($climate_site == ""){ $hasclimate = 0;}
  $db = iemdb("access");
 
  /* Get high and low temps for the past 7 days */
@@ -32,26 +33,31 @@ $lows = array_reverse($lows);
 
 pg_close($db);
 
-/* Now, lets get averages */
-$db = iemdb("coop");
 
-$sqlDate = sprintf("2000-%s", date("m-d") );
-
-$rs = pg_prepare($db, "SELECT", "SELECT valid, high, low from climate 
+if ($hasclimate){
+ $db = iemdb("coop");
+ $sqlDate = sprintf("2000-%s", date("m-d") );
+ $rs = pg_prepare($db, "SELECT", "SELECT valid, high, low from climate 
         WHERE station = $1 and valid < $2 ORDER by valid DESC LIMIT 7");
 
-$rs = pg_execute($db, "SELECT", Array(strtolower($climate_site), $sqlDate));
+ $rs = pg_execute($db, "SELECT", Array(strtolower($climate_site), $sqlDate));
 
-$ahighs = Array();
-$alows = Array();
+ $ahighs = Array();
+ $alows = Array();
 
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $ahighs[] = $row["high"];
   $alows[] = $row["low"];
+ }
+ $ahighs = array_reverse($ahighs);
+ $alows = array_reverse($alows);
+ pg_close($db);
+ $a1 = min($alows);
+ $a3 = max($ahighs);
+} else {
+ $a1 = min($lows);
+ $a3 = max($highs);
 }
-$ahighs = array_reverse($ahighs);
-$alows = array_reverse($alows);
-pg_close($db);
 
 /* Time to plot */
 include("$rootpath/include/jpgraph/jpgraph.php");
@@ -59,9 +65,7 @@ include("$rootpath/include/jpgraph/jpgraph_bar.php");
 include("$rootpath/include/jpgraph/jpgraph_line.php");
 
 $a0 = min($lows);
-$a1 = min($alows);
 $a2 = max($highs);
-$a3 = max($ahighs);
 
 $graph = new Graph(480,360);
 $graph->SetScale("textlin", min($a0,$a1)-4, max($a2,$a3)+2);
@@ -108,6 +112,7 @@ $bplot2->SetWidth(0.7);
 $gbarplot = new GroupBarPlot(array($bplot1,$bplot2));
 $gbarplot->SetWidth(0.6);
 
+if ($hasclimate){
 $l1plot=new LinePlot($alows);
 $l1plot->SetColor("black");
 $l1plot->mark->SetType(MARK_FILLEDCIRCLE);
@@ -125,10 +130,12 @@ $l2plot->mark->SetWidth(4);
 $l2plot->SetWeight(2);
 $l2plot->SetLegend("Avg High");
 $l2plot->SetBarCenter();
+}
 
 $graph->Add($gbarplot);
-$graph->Add($l2plot);
-$graph->Add($l1plot);
-
+if ($hasclimate){
+ $graph->Add($l2plot);
+ $graph->Add($l1plot);
+}
 $graph->Stroke();
 ?>
