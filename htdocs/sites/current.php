@@ -3,7 +3,7 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("setup.php");
 
-        $current="conditions";
+$THISPAGE="iem-sites";
 	$TITLE = "IEM | Current Data";
 	include("$rootpath/include/header.php"); 
 ?>
@@ -23,6 +23,8 @@ include("setup.php");
    "pmonth" => "Monthly Precipitation [inches]",
    "gust" => "Wind Gust [knots]");
 ?>
+<p>This application displays the last observation received by the IEM 
+from this site.</p>
 <table>
 <?php
   foreach ( $vardict as $key => $value ) {

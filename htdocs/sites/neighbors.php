@@ -3,20 +3,11 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("setup.php");
 
+$THISPAGE="iem-sites";
    $TITLE = "IEM | Site Neighbors";
    include("$rootpath/include/header.php");  
    $current="neighbors"; include('sidebar.php');
 
-
-   function elev_check($elevation){
-
-     if ($elevation=="341"){
-       $elevation="Unknown";
-     }
-
-     return $elevation;
-
-   }
 
    function neighbors($stations,$lat,$lon){
      $con = iemdb("mesosite");
@@ -37,7 +28,7 @@ include("setup.php");
   $lat1 = $metadata["lat"] + $interval;
   $lon0 = $metadata["lon"] - $interval;
   $lon1 = $metadata["lon"] + $interval;
-  $imgbase = "/cgi-bin/mapserv/mapserv?imgbox=-1+-1+-1+-1&imgxy=99.5+99.5&imgext=".$lon0."+".$lat0."+".$lon1."+".$lat1."&map=$rootpath/htdocs%2FGIS%2Fapps%2Fsmap0%2Fstations.map&zoom=1&layer=". $network;
+  $imgbase = $rootcgi."/mapserv/mapserv?imgbox=-1+-1+-1+-1&imgxy=99.5+99.5&imgext=".$lon0."+".$lat0."+".$lon1."+".$lat1."&map=$rootpath/htdocs%2FGIS%2Fapps%2Fsmap0%2Fstations.map&zoom=1&layer=". $network;
   $imgref = $imgbase ."&mode=map";
   $refref = $imgbase ."&mode=reference";
 

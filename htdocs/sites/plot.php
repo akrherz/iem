@@ -3,7 +3,7 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/forms.php");
 include("setup.php");
-
+$THISPAGE="iem-sites";
  $TITLE = "IEM | Sites";
  include("$rootpath/include/header.php");
 

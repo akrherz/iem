@@ -5,6 +5,7 @@ include("setup.php");
 
 $dir = isset($_GET["dir"]) ? $_GET["dir"]: "";
 
+$THISPAGE = "iem-sites";
 $TITLE = "IEM | Site Photos";
 include("$rootpath/include/header.php"); 
 ?>
@@ -55,7 +56,11 @@ $filename=filecheck($filename);
 ?>
 
 <h3>Directional Photos</h3>
-If the direction is linked, a photo is available.  Click the link to view.<br />
+
+<p>This application shows you photos of the observation site if they are
+available.  In general, the IEM only has photos for some of the sites in 
+Iowa...</p>
+
 <TABLE>
             <TR><?php printtd("NW",$dir,$station);printtd("N",$dir,$station);printtd("NE",$dir,$station)?></TR>
             <TR><?php printtd("W",$dir,$station);echo '<TD class="hlink"><IMG class="pics" border="3" SRC="'.$filename.'"  
