@@ -168,7 +168,14 @@ for which time period in the archive.</p>
 
 <?php
   } else { ?>
-  
+
+<input type="hidden" name="s0" value="yes">
+<input type="hidden" name="s1" value="yes">
+<input type="hidden" name="s2" value="yes">
+<input type="hidden" name="s3" value="yes">
+<input type="hidden" name="tmpf" value="yes">
+<input type="hidden" name="dwpf" value="yes">
+<input type="hidden" name="subc" value="yes">
 <table><tr><th>Select Station</th>
 <td><?php echo networkSelect("IA_RWIS", ""); ?></td>
 <td><input type="submit" value="Make Plot"></tr></table>
