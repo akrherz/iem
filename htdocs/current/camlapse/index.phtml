@@ -1,11 +1,5 @@
 <?php 
 include("../../../config/settings.inc.php");
-	$TITLE = "IEM | Webcam Lapse Player";
-$HEADEXTRA = '
-<script type="text/javascript" src="flowplayer-3.0.1.min.js"></script>
-';
-$THISPAGE = "webcam-lapse";
-include("$rootpath/include/header.php"); 
 $c = Array(
   "algona" => "Algona",
   "ames" => "Ames",
@@ -52,14 +46,23 @@ $c = Array(
   "williamsburg" => "Williamsburg",
   "winterset" => "Winterset",
   "woodward" => "Woodward");
+
+$TITLE = "IEM | Webcam Lapse Player";
+$HEADEXTRA = '
+<script type="text/javascript" src="flowplayer-3.0.1.min.js"></script>
+';
+$THISPAGE = "webcam-lapse";
+include("$rootpath/include/header.php"); 
 ?>
 
+<h3>Recent Web Cam Time Lapses</h3>
+
+<p>Each day, the IEM generates five time lapses from each of the web cameras.
+This page allows you to view the most recent iteration of these lapses. Please
+note the timestamp on the lapses, some of them may be old.</p>
 
 
 <div style="background: #eee; border: 1px solid #000; margin: 5px; padding: 5px; width: 650px;">
-The <strong>Web Camera Movie Player</strong> is a Flash application that plays
-recent movies taken from the webcam network.  Please note the timestamps to 
-see when this movie was generated.
 <div id="player"  style="display:block;width:640px;height:490px;"></div>
 <form name="theform">
 <br /><strong>Select Camera:</strong>
@@ -96,7 +99,6 @@ function myloader()
   var url =  document.theform.mycam.value +"_"+ document.theform.mylapse.value +".flv?"+ ts.getTime();
   $f().play(url);
 }
-
 </script>
 
 <?php include("$rootpath/include/footer.php"); ?>
