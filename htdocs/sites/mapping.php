@@ -32,7 +32,7 @@ echo '<form method="GET" action="mapping.php">
                </select>
                <input type="submit" value="Change Image"></font>
             </TD></TR>
-	    <TR><TD><h3 class="subtitle"><b><?php include($URL); ?></b></h3><br></TD></TR>
+	    <TR><TD><h3 class="subtitle"><b><img src="<?php echo $URL; ?>"></b></h3><br></TD></TR>
             <TR><TD colspan="2"><font class="subtitle"><b>Zoom
 	    Level: (near)</b></font>
 <?php
