@@ -140,7 +140,7 @@ while( list($idx, $page) = each($_pages) )
     $b .= "</ul></div>\n";
   }
 }
-echo "<ul></div> $b";
+echo "</ul></div> $b";
 ?>
 
  
