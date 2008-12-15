@@ -6,18 +6,17 @@ $HTMLEXTRA = " xmlns:j=\"http://javeline.nl/j\"";
 $THISPAGE = "severe-iembot";
 $HEADEXTRA = "<j:teleport url=\"teleport.xml\" />
   <script type=\"text/javascript\" src=\"teleport_xmlrpc.js\"></script>
-  <script type=\"text/javascript\" src=\"iembot.js\"></script>";
-include("$rootpath/include/header.php"); 
-?>
-
-<style>
+  <script type=\"text/javascript\" src=\"iembot.js\"></script>
+<style type=\"text/css\">
 .message {
- text-indent: -4em; 
+ text-indent: -4em;
  margin-left: 4em;
  margin-bottom: 3px;
 }
 </style>
-
+";
+include("$rootpath/include/header.php"); 
+?>
 <form name="myForm">
 
 <h3><a href="<?php echo $rooturl; ?>/projects/iembot/">iembot</a> monitor</h3>
