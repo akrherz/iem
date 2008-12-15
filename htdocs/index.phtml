@@ -23,7 +23,7 @@ are stored and made available on this website.
 
 <table><tr><td valign="top">
 <div id="left">
-<h3 class="heading">Daily IEM Feature: &nbsp; <a href="feature_rss.php"><img src="images/rss.gif" style="border: 0px;"></a></h3>
+<h3 class="heading">Daily IEM Feature: &nbsp; <a href="feature_rss.php"><img src="images/rss.gif" style="border: 0px;" alt="RSS" /></a></h3>
 <?php echo $feature; ?><br style="clear: left;" />
 
 <h3 class="heading">IEM Data Networks:</h3>
@@ -82,27 +82,28 @@ src="images/ptfmark.gif" alt="Agronomy Path to the Future" style="border:
 <div id="right" style="padding-left: 3px;">
 <h3 class="heading"><?php echo $cameras[$rancam]["name"] .", ". $cameras[$rancam]["state"]; ?> Webcam:</h3>
 <table width="100%">
-<tr><td><a href="<?php echo $rooturl; ?>/current/camera.phtml?network=<?php echo  $cameras[$rancam]["network"]; ?>"><img src="<?php echo $rooturl; ?>/data/camera/stills/<?php echo $rancam; ?>.jpg?<?php echo time(); ?>" border="0"></a>
+<tr><td><a href="<?php echo $rooturl; ?>/current/camera.phtml?network=<?php echo  $cameras[$rancam]["network"]; ?>"><img src="<?php echo $rooturl; ?>/data/camera/stills/<?php echo $rancam; ?>.jpg?<?php echo time(); ?>" border="0" alt="Webcam" /></a>
 <ul class="iem-list"><li><a href="<?php echo $rooturl; ?>/current/camera.phtml?network=<?php echo  $cameras[$rancam]["network"]; ?>">View other webcams</a></li></ul></td></tr>
 </table>
 
 <h3 class="heading">Most Popular Links:</h3>
 <ul class="iem-list"><li><a href="/data/mesonet.gif">Iowa Mesonet Plot</a> 
   [<a href="/current/loop.phtml?prod=mesonet">Loop</a>]</li>
-<li><a href="<?php echo $rooturl; ?>/current/mcview.phtml?prod=comprad&java=none&mode=realtime&frames=1">Current NEXRAD</a> [<a href="<?php echo $rooturl; ?>/current/mcview.phtml">Loop</a>]</li>
+<li><a href="<?php echo $rooturl; ?>/current/mcview.phtml?prod=comprad&amp;java=none&amp;mode=realtime&amp;frames=1">Current NEXRAD</a> [<a href="<?php echo $rooturl; ?>/current/mcview.phtml">Loop</a>]</li>
 <li><a href="<?php echo $rooturl; ?>/GIS/apps/iem/freeze.phtml">IEM Freeze</a></li>
 <li><a href="<?php echo $rooturl; ?>/rainfall/">IEM GIS Rainfall</a></li>
 <li><a href="<?php echo $rooturl; ?>/my/current.phtml">Sortable Currents</a></li>
 <li><a href="<?php echo $rooturl; ?>/cases/080525/">Parkersburg EF5 Info</a></li>
 </ul><p />
 
-<h3 class="heading">News &amp; Notes: &nbsp; <a href="rss.php"><img src="images/rss.gif" style="border: 0px;"></a></h3>
+<h3 class="heading">News &amp; Notes: &nbsp; <a href="rss.php"><img src="images/rss.gif" style="border: 0px;" alt="RSS" /></a></h3>
 <?php include("$rootpath/include/news.php"); 
 ?><br />
 <hr /><img src="images/script.gif" alt=""/><a 
 href="/mailman/listinfo/dailyb">Sign up</a> for the <a 
 href="/data/iemdb.txt">Daily Bulletin</a></div>
 </td></tr></table>
-<br style="clear: both;" /><p>
+<br style="clear: both;" />
+&nbsp;
 
 <?php include("$rootpath/include/footer.php"); ?>
