@@ -5,7 +5,7 @@
  <form method="get" action="http://www.google.com/search" name="search">
  <b>Search Site with Google:</b><br />
  <input value="mesonet.agron.iastate.edu" name="sitesearch" type="hidden" />
-<input type="text" size="15" name="q" /><input type="submit" value="Search" /></p></form>
+<input type="text" size="15" name="q" /><input type="submit" value="Search" /></form>
 </div>
 
 Copyright &copy; 2001-2008, Iowa State University of Science and Technology.
