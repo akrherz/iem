@@ -17,7 +17,7 @@ $HEADEXTRA = "<j:teleport url=\"teleport.xml\" />
 ";
 include("$rootpath/include/header.php"); 
 ?>
-<form name="myForm">
+<form name="myForm" action="">
 
 <h3><a href="<?php echo $rooturl; ?>/projects/iembot/">iembot</a> monitor</h3>
 
@@ -37,8 +37,8 @@ and click "Add".
   }
 ?>
 </select>
-<input type="submit" onClick="addWFO(); return false;" value="Add!">
-<input type="submit" onClick="clearRoom(); return false;" value="Clear Room!">
+<input type="submit" onClick="addWFO(); return false;" value="Add!" />
+<input type="submit" onClick="clearRoom(); return false;" value="Clear Room!" />
 <br /><input type="hidden" name="iembot" value="0">
 
 <br />
