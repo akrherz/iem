@@ -7,6 +7,7 @@ $vtec_phenomena = Array(
   'AS' => 'Air Stagnation',
   'AV' => 'Avalanche',
   'BS' => 'Blowing Snow',
+  'BW' => 'Brisk Wind',
   'BZ' => 'Blizzard',
   'CF' => 'Coastal Flood',
   'DU' => 'Blowing Dust',
