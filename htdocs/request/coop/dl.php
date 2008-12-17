@@ -17,7 +17,7 @@ $what = isset($_GET["what"]) ? $_GET["what"]: 'dl';
 
 
 include("$rootpath/include/network.php");
-$nt = new NetworkTable("IACLIMATE");
+$nt = new NetworkTable("COOPDB");
 $cities = $nt->table;
 include("adodb-time.inc.php");
 
