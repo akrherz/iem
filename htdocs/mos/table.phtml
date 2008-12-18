@@ -1,8 +1,11 @@
 <?php
+putenv("TZ=GMT");
+
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/forms.php");
 $mosdb = iemdb("mos");
+pg_exec($mosdb, "SET TIME ZONE 'GMT'");
 
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 2*86400);
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 2*86400);
@@ -43,7 +46,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 
 
 for($now=$sts+(3600*12);$now <= $ets+(2*86400); $now += (3600*3)){
- $table .= sprintf("<tr><td>%sZ</td>", gmdate('d/H', $now) );
+ $table .= sprintf("<tr><td>%sZ</td>", date('d/H', $now) );
  reset($runtimes);
  while (list($k,$s) = each($runtimes)){
    $table .= @sprintf("<td>%s</td>", $data[$s][date('Y-m-d H:i', $now)]);
