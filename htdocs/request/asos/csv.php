@@ -22,7 +22,7 @@ if (isset($_GET["lat"]) && isset($_GET["lon"]))
   }
 }
 
-$result = "id,valid,tmpf,dwpf\n";
+$result = "id,valid,tmpf,dwpf,sknt,drct,phour,alti\n";
 while(list($k,$id) = each($stations))
 {
   $rs = pg_exec($access, "SELECT * from current_log WHERE station = '$id' 
@@ -30,7 +30,7 @@ while(list($k,$id) = each($stations))
   if (pg_num_rows($rs) == 0){ continue; }
   for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   {
-    $result .= sprintf("%s,%s,%s,%s\n", $row["station"],$row["valid"], $row["tmpf"], $row["dwpf"]);
+    $result .= sprintf("%s,%s,%s,%s,%s,%s,%s,%s\n", $row["station"],$row["valid"], $row["tmpf"], $row["dwpf"], $row["sknt"], $row["drct"], $row["phour"], $row["alti"]);
   }
   break;
 }
