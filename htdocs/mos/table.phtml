@@ -9,7 +9,7 @@ $month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 2*86400);
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 2*86400);
 $hour =  0;
 $model = isset($_GET["model"]) ? $_GET["model"]: "GFS";
-$station = isset($_GET["station"]) ? $_GET["station"]: "KAMW";
+$station = isset($_GET["station"]) ? strtoupper($_GET["station"]): "KAMW";
 $vname = isset($_GET["vname"]) ? strtolower($_GET["vname"]): "tmp";
 
 $now = strtotime("${year}-${month}-${day} ${hour}:00");
@@ -20,7 +20,7 @@ $runsper = Array("GFS"=>6, "NAM"=>12);
 $sqlSelector = "(";
 $runtimes = Array();
 $data = Array();
-$table = sprintf("<h3>Table Centered On: %sZ</h3>", date('Y M d, H', $now));
+$table = sprintf("<hr><h3>[$station] $model MOS $vname Table Centered On: %sZ</h3>", date('Y M d, H', $now));
 $table .= "<table cellpadding=\"2\" cellspacing=\"0\" border=\"1\"><tr><th width=\"75\">Valid:</th>";
 for($now=$sts;$now <= $ets; $now += (3600*$runsper[$model])){
   $s = date("Y-m-d H:i", $now);
