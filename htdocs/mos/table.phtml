@@ -35,7 +35,8 @@ for($now=$sts;$now <= $ets; $now += (3600*$runsper[$model])){
 $table .= "</tr>\n";
 $sqlSelector = substr($sqlSelector,0,-1) . ")";
 
-$rs = pg_prepare($mosdb, "SELECT", "SELECT * from t${year} WHERE 
+$rs = pg_prepare($mosdb, "SELECT", "SELECT *, t06_1 ||'/'||t06_2 as t06, 
+      t12_1 ||'/'|| t12_2 as t12 from t${year} WHERE 
       runtime IN $sqlSelector
       and station = $1 and model = $2");
 $rs = pg_execute($mosdb, "SELECT", Array($station, $model));
