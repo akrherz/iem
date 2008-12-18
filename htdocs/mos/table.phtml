@@ -1,0 +1,109 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/forms.php");
+$mosdb = iemdb("mos");
+
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 2*86400);
+$month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 2*86400);
+$day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 2*86400);
+$hour =  0;
+$model = isset($_GET["model"]) ? $_GET["model"]: "GFS";
+$station = isset($_GET["station"]) ? $_GET["station"]: "KAMW";
+$vname = isset($_GET["vname"]) ? strtolower($_GET["vname"]): "tmp";
+
+$now = strtotime("${year}-${month}-${day} ${hour}:00");
+$sts = $now - (86400*3) - (3600*12);
+$ets = $now - 3600;
+
+$runsper = Array("GFS"=>6, "NAM"=>12);
+$sqlSelector = "(";
+$runtimes = Array();
+$data = Array();
+$table = sprintf("<h3>Table Centered On: %sZ</h3>", date('Y M d, H', $now));
+$table .= "<table cellpadding=\"2\" cellspacing=\"0\" border=\"1\"><tr><th width=\"75\">Valid:</th>";
+for($now=$sts;$now <= $ets; $now += (3600*$runsper[$model])){
+  $s = date("Y-m-d H:i", $now);
+  $sqlSelector .= sprintf("'%s',", $s);
+  $table .= sprintf("<td>%sZ</td>", date('d/H', $now));
+  $runtimes[] = $s;
+  $data[$s] = Array();
+}
+$table .= "</tr>\n";
+$sqlSelector = substr($sqlSelector,0,-1) . ")";
+
+$rs = pg_prepare($mosdb, "SELECT", "SELECT * from t${year} WHERE 
+      runtime IN $sqlSelector
+      and station = $1 and model = $2");
+$rs = pg_execute($mosdb, "SELECT", Array($station, $model));
+for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+{
+  $data[ substr($row["runtime"],0,16) ][ substr($row["ftime"],0,16) ] = $row[$vname];
+}
+
+
+for($now=$sts+(3600*12);$now <= $ets+(2*86400); $now += (3600*3)){
+ $table .= sprintf("<tr><td>%sZ</td>", gmdate('d/H', $now) );
+ reset($runtimes);
+ while (list($k,$s) = each($runtimes)){
+   $table .= @sprintf("<td>%s</td>", $data[$s][date('Y-m-d H:i', $now)]);
+ }
+ $table .= "</tr>\n";
+}
+$table .= "</table>";
+
+// Begin Output
+include("$rootpath/include/header.php");
+
+$vars = Array(
+ "n_x" => "Max/Min Temp [F]",
+ "tmp" => "2m Air Temperature [F]",
+ "dpt" => "2m Dew Point [F]",
+ "cld" => "",
+ "wdr" => "10m Wind Direction [deg]",
+ "wsp" => "10m Wind Speed [kts]",
+ "p06" => "",
+ "p12" => "",
+ "q06" => "",
+ "q12" => "",
+ "t06" => "",
+ "t12" => "",
+ "snw" => "Snow",
+ "cig" => "",
+ "vis" => "",
+ "obv" => "",
+ "poz" => "",
+ "pos" => "",
+ "typ" => "");
+
+echo "<form>";
+echo "<input type=\"text\" name=\"station\" value=\"$station\">";
+echo "<select name=\"vname\">";
+while (list($v,$n) = each($vars))
+{
+  echo "<option value=\"$v\"";
+  if ($vname == $v) echo " SELECTED";
+  echo ">$n [". strtoupper($v) ."]</option>\n";
+}
+echo "</select>";
+
+echo "<select name=\"model\">";
+echo "<option value=\"GFS\" ";
+if ($model == "GFS") echo " SELECTED";
+  echo ">GFS</option>\n";
+echo "<option value=\"NAM\" ";
+if ($model == "NAM") echo " SELECTED";
+  echo ">GFS</option>\n";
+echo "</select>";
+
+echo yearSelect(2008,$year);
+echo monthSelect($month);
+echo daySelect($day);
+
+echo "<input type=\"submit\">";
+echo "</form>";
+
+
+echo $table;
+include("$rootpath/include/footer.php");
+?>
