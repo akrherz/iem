@@ -226,7 +226,7 @@ icon.infoWindowAnchor = new GPoint(5, 1);
 function load() {
   if (GBrowserIsCompatible()) {
     var map = new GMap2(document.getElementById("gmap"));
-    map.setCenter(new GLatLng(<?php echo $lat0; ?>, <?php echo $lon0; ?>), 6);
+    map.setCenter(new GLatLng(<?php echo $lat0; ?>, <?php echo $lon0; ?>), 8);
     map.addControl(new GLargeMapControl());
  
     var mapControl = new GMapTypeControl();
