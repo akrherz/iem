@@ -9,6 +9,13 @@ include("../GIS/apps/rview/lib.php");
 $ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : die("Booooo");
 $lat0 = isset($_GET["lat0"]) ? $_GET["lat0"] : die("Boooo");
 $lon0 = isset($_GET["lon0"]) ? $_GET["lon0"] : die("Boooo");
+$isSummary = 0;
+if (isset($_GET["ts2"]))
+{
+  $isSummary = 1;
+  $ts2 = strtotime($_GET["ts2"]);
+  $tsSQL2 = date("Y-m-d H:i:00+00", $ts2);
+}
 
 $tsSQL = date("Y-m-d H:i:00+00", $ts);
 $year = date("Y", $ts);
@@ -142,8 +149,16 @@ $sql = "select distinct source,typetext,remark, x(geom) as lon, y(geom) as lat,
         city, magnitude, valid, geom, type as ltype from lsrs_${year} 
         WHERE valid = '$tsSQL' and
         geom && GeometryFromText('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))')";
+
+if ($isSummary){
+  $sql = "select distinct source,typetext,remark, x(geom) as lon, y(geom) as lat, 
+        city, magnitude, valid, geom, type as ltype from lsrs_${year} 
+        WHERE valid >= '$tsSQL' and valid <= '$tsSQL2' and
+        geom && GeometryFromText('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))')";
+}
 $rs = pg_exec($pgconn, $sql);
 $IMAGEMAP = "";
+$g = "";
 for ($i=0;$row = @pg_fetch_array($rs,$i); $i++)
 {
    $pt = ms_newPointObj();
@@ -154,6 +169,19 @@ for ($i=0;$row = @pg_fetch_array($rs,$i); $i++)
    $imgy = intval(($maxy - $row["lat"]) / $dy);
    $desc = "<b>Event:</b> ". $row['typetext'] ."<br /><b>Magnitude:</b> ". $row['magnitude'] ."<br /><b>Source:</b> ". $row['source'] ."<br /><b>Remark:</b> ". $row['remark'] ;
    $IMAGEMAP .= "<area onMouseover=\"ddrivetip('". $desc ."','yellow', 200)\" onMouseout=\"hideddrivetip()\" shape=\"circle\" coords=\"$imgx,$imgy,10\">";
+
+   $g .= "
+    markers[$i] = new GMarker(new GLatLng(". $row["lat"] .", ". $row["lon"] ."));
+    GEvent.addListener(markers[$i], \"click\", function() {
+            markers[$i].openInfoWindowHtml(\"$desc\",
+              {maxWidth: 300});
+          });
+    map.addOverlay(markers[$i]);
+    markers[$i].openInfoWindowHtml(\"$desc\",
+              {maxWidth: 300});
+    ";
+
+
 }
 
 $bar640t = $map->getLayerByName("bar640t");
@@ -198,21 +226,15 @@ icon.infoWindowAnchor = new GPoint(5, 1);
 function load() {
   if (GBrowserIsCompatible()) {
     var map = new GMap2(document.getElementById("gmap"));
-    map.setCenter(new GLatLng(<?php echo $lat0; ?>, <?php echo $lon0; ?>), 9);
+    map.setCenter(new GLatLng(<?php echo $lat0; ?>, <?php echo $lon0; ?>), 6);
     map.addControl(new GLargeMapControl());
  
     var mapControl = new GMapTypeControl();
     map.addControl(mapControl);
 
-
     var myicon = new GIcon(icon);
-    var latlng = new GLatLng(<?php echo $lat0; ?>, <?php echo $lon0; ?>);
-    var marker = new GMarker(latlng);
-    GEvent.addListener(marker, "click", function() {
-            marker.openInfoWindowHtml("<?php echo $desc; ?>",
-              {maxWidth: 300});
-          });
-    map.addOverlay(marker);
+    var markers = new Array();
+    <?php echo $g; ?>
   }
 }
 //]]>
@@ -309,7 +331,7 @@ document.onmousemove=positiontip
 <table cellpadding="5" cellspacing="0">
 <tr><td>
 <strong>Google Maps Display</strong<br />
-<div id="gmap" style="width: 500px; height: 300px"></div>
+<div id="gmap" style="width: 600px; height: 500px"></div>
 
 <p>
 <div id="map">
