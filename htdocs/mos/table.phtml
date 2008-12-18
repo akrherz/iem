@@ -24,12 +24,15 @@ $sqlSelector = "(";
 $runtimes = Array();
 $data = Array();
 $table = sprintf("<hr><h3>[$station] $model MOS $vname Table Centered On: %sZ</h3>", date('Y M d, H', $now));
-$table .= "<table cellpadding=\"2\" cellspacing=\"0\" border=\"1\"><tr><th width=\"75\">Valid:</th>";
+for($now=$sts;$now <= $ets; $now += (3600*$runsper[$model])){
+  $s = date("Y-m-d H:i", $now);
+  $runtimes[] = $s;
+}
+$table .= sprintf("<table cellpadding=\"2\" cellspacing=\"0\" border=\"1\"><tr><td></td><td colspan=\"%s\">Model Run Initialized at:</td></tr><tr><th width=\"75\">Valid:</th>", sizeof($runtimes) );
 for($now=$sts;$now <= $ets; $now += (3600*$runsper[$model])){
   $s = date("Y-m-d H:i", $now);
   $sqlSelector .= sprintf("'%s',", $s);
   $table .= sprintf("<td>%sZ</td>", date('d/H', $now));
-  $runtimes[] = $s;
   $data[$s] = Array();
 }
 $table .= "</tr>\n";
