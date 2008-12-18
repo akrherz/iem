@@ -9,6 +9,7 @@ include("../GIS/apps/rview/lib.php");
 $ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : die("Booooo");
 $lat0 = isset($_GET["lat0"]) ? $_GET["lat0"] : die("Boooo");
 $lon0 = isset($_GET["lon0"]) ? $_GET["lon0"] : die("Boooo");
+$wfo = isset($_GET["wfo"]) ? $_GET["wfo"] : "DMX";
 $isSummary = 0;
 if (isset($_GET["ts2"]))
 {
@@ -151,10 +152,11 @@ $sql = "select distinct source,typetext,remark, x(geom) as lon, y(geom) as lat,
         geom && GeometryFromText('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))')";
 
 if ($isSummary){
-  $sql = "select distinct source,typetext,remark, x(geom) as lon, y(geom) as lat, 
+  $sql = "select distinct source, typetext, remark, 
+        x(geom) as lon, y(geom) as lat, 
         city, magnitude, valid, geom, type as ltype from lsrs_${year} 
         WHERE valid >= '$tsSQL' and valid <= '$tsSQL2' and
-        geom && GeometryFromText('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))')";
+        wfo = '$wfo'";
 }
 $rs = pg_exec($pgconn, $sql);
 $IMAGEMAP = "";
@@ -330,15 +332,21 @@ document.onmousemove=positiontip
 
 <table cellpadding="5" cellspacing="0">
 <tr><td>
+<?php if ($isSummary) { ?>
+<strong>Local Storm Report Summary betwen <?php echo "$tsSQL and $tsSQL2"; ?></strong<br />
+<?php } else { ?>
 <strong>Google Maps Display</strong<br />
+<?php } ?>
 <div id="gmap" style="width: 600px; height: 500px"></div>
 
+<?php if (! $isSummary) { ?>
 <p>
 <div id="map">
 <img src="<?php echo $url; ?>" usemap="#mymap" border="1">
 <map name="mymap"><?php echo $IMAGEMAP; ?></map>
 <br /><b><i>Place your mouse over the observation point for more details.</i></b>
 </div>
+<?php } ?>
 
 </td><td valign="top">
 <p><strong>NWS Warning Legend:</strong><br /><br />
