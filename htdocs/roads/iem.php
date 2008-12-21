@@ -5,12 +5,18 @@ $con = iemdb("postgis");
 
 $eightbit = isset($_GET["8bit"]);
 $metroview = isset($_GET["metro"]);
+$thumbnail = isset($_GET["thumbnail"]);
 
-$sql = "SELECT max(valid) as valid from roads_current";
-$rs = pg_query($con, $sql);
+if (! isset($_GET["valid"]))
+{
+  $sql = "SELECT max(valid) as valid from roads_current";
+  $rs = pg_query($con, $sql);
 
-$row = pg_fetch_array($rs, 0);
-$valid = substr($row["valid"],0,16);
+  $row = pg_fetch_array($rs, 0);
+  $ts = strtotime(substr($row["valid"],0,16));
+} else {
+  $ts = strtotime($_GET["valid"]);
+}
 
 dl($mapscript);
 
@@ -28,8 +34,10 @@ if ($metroview)
 {
   $map->setextent(376000,4560000,535000,4680000);
 }
-$map->set("width", 640);
-$map->set("height", 496);
+$height = 496;$width = 640;
+if ($thumbnail){ $height = 240; $width = 320; }
+$map->set("width", $width);
+$map->set("height", $height);
 
 
 $img = $map->prepareImage();
@@ -42,7 +50,7 @@ if (! $eightbit)
     $background = $map->getlayerbyname("dsmback");
   }
   $background->set("status", MS_ON);
-  $background->draw($img);
+  //$background->draw($img);
 }
 
 
@@ -59,9 +67,12 @@ $visibility = $map->getlayerbyname("visibility");
 $visibility->draw($img);
 
 $roads = $map->getlayerbyname("roads");
+$dbvalid = date('Y-m-d H:i', $ts);
+if (isset($_GET['valid'])) $roads->set("data", "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_2008_log c WHERE b.segid = c.segid and b.type > 1 and c.valid = '$dbvalid' ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915");
 $roads->draw($img);
 
 $roads_int = $map->getlayerbyname("roads-inter");
+if (isset($_GET['valid'])) $roads_int->set("data", "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_2008_log c WHERE b.segid = c.segid and b.type = 1 and c.valid = '$dbvalid' ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915");
 $roads_int->draw($img);
 
 //$roads_lbl = $map->getlayerbyname("roads_label");
@@ -97,10 +108,16 @@ if (! $metroview)
   $pt->free();
 }
 
-$logokey2 = $map->getlayerbyname("colorkey");
+if ($thumbnail) {
+  $logokey2 = $map->getlayerbyname("colorkey-small");
+} else {
+  $logokey2 = $map->getlayerbyname("colorkey");
+}
 $c1 = $logokey2->getClass(0);
 $s1 = $c1->getStyle(0);
-if ($eightbit)
+if ($thumbnail) {
+  $s1->set("size", 30);
+} else if ($eightbit)
 {
   $s1->set("symbolname", "logokey-8bit");
   $s1->set("size", 60);
@@ -135,8 +152,13 @@ $logokey2->draw($img);
 $layer = $map->getLayerByName("credits");
 $c = $layer->getClass(0);
 $point = ms_newpointobj();
-$point->setXY(500, 10);
-$point->draw($map, $layer, $img, "credits", $valid);
+if ($thumbnail) {
+ $point->setXY(85, 230);
+ $c->label->set("size", MS_LARGE);
+} else {
+ $point->setXY(500, 10);
+}
+$point->draw($map, $layer, $img, "credits", date('Y-m-d h:i A', $ts));
 $point->free();
 
 $point = ms_newpointobj();
