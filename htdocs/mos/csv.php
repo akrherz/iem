@@ -11,7 +11,7 @@ $year = date("Y", $ts);
 
 $rs = pg_prepare($mos, "SELECTOR", "select *, t06_1 ||'/'||t06_2 as t06, 
                  t12_1 ||'/'|| t12_2 as t12  from t${year} WHERE station = $1
-                 and ftime >= $2 ORDER by ftime ASC");
+                 and ftime >= $2 and ftime <= ($2 + '10 days'::interval) ORDER by ftime ASC");
 
 $rs = pg_execute($mos, "SELECTOR", Array($station, date("Y-m-d H:i",$ts)));
 
