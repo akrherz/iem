@@ -1,6 +1,7 @@
 <?php
  include("../../../config/settings.inc.php");
  $TITLE = "ISU Agclimate | Data Request";
+$THISPAGE="networks-agclimate";
  include("$rootpath/include/header.php");
  include("$rootpath/include/forms.php");
 ?>
