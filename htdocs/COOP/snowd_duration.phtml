@@ -1,0 +1,68 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/imagemaps.php");
+include("$rootpath/include/forms.php");
+include("$rootpath/include/database.inc.php");
+$coopdb = iemdb('coop');
+$station = isset($_GET["station"]) ? $_GET["station"] : 'IA0200';
+$month = isset($_GET["month"]) ? $_GET["month"] : 12;
+$day = isset($_GET["day"]) ? $_GET["day"] : 25;
+
+$ts = strtotime("2000-${month}-${day}");
+$sday = date('md', $ts);
+
+$rs = pg_prepare($coopdb, "FIND", "SELECT * from alldata
+      WHERE stationid = $1 and sday = $2 and snowd > 0 ORDER
+      by year ASC");
+$rs = pg_prepare($coopdb, "FIND2", "SELECT min(day) as m from alldata
+      WHERE day > $1 and stationid = $2 and snowd = 0");
+
+$table = "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\"><tr><th>Start Day</th><th>Depth [inch]</th><th>End Date</th><th>Duration [days]</th></tr>";
+
+/* Find all snow days for this date! */
+$rs = pg_execute($coopdb, "FIND", Array(strtolower($station), $sday));
+$data = Array();
+for($i=0;$row=@pg_fetch_array($rs,$i); $i++)
+{
+  $rs2 = pg_execute($coopdb, "FIND2", Array($row["day"], strtolower($station)));
+  $row2 = pg_fetch_array($rs2,0);
+  $sts = strtotime($row["day"]);
+  $endts = strtotime($row2["m"]);
+  $days = ($endts - $sts) / 86400;
+  $data[] = $days;
+  $table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%.0f</td></tr>", 
+            date('Y M d', $sts), $row["snowd"], date('Y M d',$endts), $days);
+}
+
+$table .= sprintf("<tr><th colspan=\"3\" align=\"right\">Average</th><td>%.0f</td></tr>", (array_sum($data) / pg_num_rows($rs)));
+
+$table .= "</table>";
+
+$THISPAGE = "networks-coop";
+include("$rootpath/include/header.php");
+?>
+<h3>Snow Depth Duration</h3>
+
+<p>This application creates a table of duration of snow cover for a given 
+day.  The default example answers the question, "When there is snow on the
+ground for Christmas in Ames, how long does it stick around for?"  The IEM's 
+archive of COOP snow depth reports only goes back to 1991 for most stations.
+</p>
+
+<form method="GET" action="snowd_duration.phtml" name="Select">
+<table>
+<tr><th>Select Station</th><th>Month</th><th>Day</th><td></td></tr>
+<tr>
+  <td><?php echo networkSelect("COOPDB", $station); ?></td>
+  <td><?php echo monthSelect($month); ?></td>
+  <td><?php echo daySelect($day); ?></td>
+  <td><input type="submit" value="Generate Table"></td>
+</tr>
+</table>
+</form>
+
+<?php
+echo $table;
+
+include("$rootpath/include/footer.php");
+?>
