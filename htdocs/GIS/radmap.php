@@ -149,13 +149,14 @@ $sql = sprintf("g from (select phenomena, eventid, multi(geomunion(geom)) as g f
 $wbc->set("data", $sql);
 $wbc->draw($img);
 
-/*
 $watches = $map->getlayerbyname("watches");
-$watches->set("status", MS_ON);
+$watches->set("status", in_array("watches", $layers) );
 $watches->set("connection", "user=nobody dbname=postgis host=iemdb");
-$watches->setFilter("expired > '2008-01-01'");
+$sql = sprintf("geom from (select type as wtype, geom, num from watches 
+       WHERE issued <= '%s:00+00' and expired > '%s:00+00') as foo using SRID=4326 using unique num", 
+       gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts));
+$watches->set("data", $sql );
 $watches->draw($img);
-*/
 
 /* Plot the warning explicitly */
 if (isset($_GET["pid"]))
