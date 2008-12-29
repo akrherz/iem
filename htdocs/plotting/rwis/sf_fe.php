@@ -65,13 +65,7 @@ for which time period in the archive.</p>
   <td>Start Year:<br /><?php echo yearSelect2(1995, $syear, "syear"); ?></td>
   <td>Start Month:<br /><?php echo monthSelect2($smonth, "smonth"); ?></td>
   <td>Start Day:<br /><?php echo daySelect2($sday, "sday"); ?></td>
-  <td>Number of days:<br />
-   <select name="days">
-     <option value="1" <?php if ($days == "1") echo "SELECTED"; ?>>1
-     <option value="2" <?php if ($days == "2") echo "SELECTED"; ?>>2
-     <option value="3" <?php if ($days == "3") echo "SELECTED"; ?>>3
-     <option value="4" <?php if ($days == "4") echo "SELECTED"; ?>>4
-     <option value="5" <?php if ($days == "5") echo "SELECTED"; ?>>5
+  <td>Number of days:<br /><?php echo daySelect2($days, "days"); ?>
    </td>
  </tr>
 </table>
@@ -169,12 +163,12 @@ for which time period in the archive.</p>
 <?php
   } else { ?>
 
-<input type="hidden" name="s0" value="yes">
-<input type="hidden" name="s1" value="yes">
-<input type="hidden" name="s2" value="yes">
-<input type="hidden" name="s3" value="yes">
-<input type="hidden" name="tmpf" value="yes">
-<input type="hidden" name="dwpf" value="yes">
+<input type="hidden" name="s0" value="yes" />
+<input type="hidden" name="s1" value="yes" />
+<input type="hidden" name="s2" value="yes" />
+<input type="hidden" name="s3" value="yes" />
+<input type="hidden" name="tmpf" value="yes" />
+<input type="hidden" name="dwpf" value="yes" />
 <table><tr><th>Select Station</th>
 <td><?php echo networkSelect("IA_RWIS", ""); ?></td>
 <td><input type="submit" value="Make Plot"></tr></table>
