@@ -263,7 +263,9 @@ $point->setXY(560, 15);
 $point->draw($map, $layer, $img, "n0r-ramp", "");
 $point->free();
 
-$map->embedLegend($img);
+if (in_array("legend", $layers)){
+  $map->embedLegend($img);
+}
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
