@@ -34,6 +34,17 @@ WEB
   #LOG "/mesonet/www/html/tmp/sw.log"
 END
 
+SYMBOL
+  NAME 'fill45'
+  TYPE Ellipse
+  FILLED TRUE
+  POINTS
+   1 1
+  END
+  STYLE 1 5 END
+END
+
+
 #
 LAYER
   NAME counties
@@ -166,5 +177,570 @@ LAYER
     END
   END
 END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME "roads"
+  DUMP true
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  DATA "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
+  STATUS OFF
+  TYPE LINE
+  DUMP TRUE
+  METADATA
+    "wfs_title" "Iowa Non-Interstates Conditions"
+    "wms_title" "Iowa Non-Interstates Conditions"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913"
+  END
+  #FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
+  PROJECTION
+   "init=epsg:26915"
+  END
+  TEMPLATE "roadsq.html"
+  LABELCACHE ON
+  CLASS
+    NAME 'normal'
+    EXPRESSION ([cond_code] = 0)
+    STYLE
+      COLOR 153 153 153
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 0 0 0
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'wet'
+    EXPRESSION ([cond_code] = 1)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 0 204 0
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'frost'
+    EXPRESSION ([cond_code] >= 3 and [cond_code] <= 14)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      #COLOR  152 152 152
+      COLOR  240 240 0
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'closed'
+    EXPRESSION ([cond_code] = 86)
+    STYLE
+      COLOR 250 250 0
+      WIDTH 7
+      ANTIALIAS TRUE
+    END
+    STYLE
+      COLOR 230 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR  250 250 0
+      SIZE 3
+      SYMBOL 'fill45'
+    END
+  END
+  CLASS
+    NAME 'not advised'
+    EXPRESSION ([cond_code] = 51)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR  232 95 1
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  # MIXED!
+  CLASS
+    NAME 'pc-mixed'
+    EXPRESSION ([cond_code] = 15)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 197 197
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'mc-mixed'
+    EXPRESSION ([cond_code] = 19)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 254 51 153
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'cc-mixed'
+    EXPRESSION ([cond_code] = 23)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 181 0 181
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  # SLUSH!
+  CLASS
+    NAME 'pc-slush'
+    EXPRESSION ([cond_code] = 56)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 197 197
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'mc-slush'
+    EXPRESSION ([cond_code] = 60)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 254 51 153
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'cc-slush'
+    EXPRESSION ([cond_code] = 64)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 181 0 181
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  # ICE!
+  CLASS
+    NAME 'pc-ice'
+    EXPRESSION ([cond_code] = 27)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 197 197
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'mc-ice'
+    EXPRESSION ([cond_code] = 31)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 254 51 153
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'cc-ice'
+    EXPRESSION ([cond_code] = 35)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 181 0 181
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+ # Snow!
+  CLASS
+    NAME 'pc-snow'
+    EXPRESSION ([cond_code] = 39)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR  153 255 255
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'mc-snow'
+    EXPRESSION ([cond_code] = 43)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR  0 153 254
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'cc-snow'
+    EXPRESSION ([cond_code] = 47)
+    STYLE
+      COLOR 0 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR  0 0 158
+      WIDTH 3
+      ANTIALIAS TRUE
+    END
+  END
+
+#  CLASS
+#    NAME 'others'
+#    STYLE
+#      COLOR 255 255 0
+#      WIDTH 3
+#      ANTIALIAS TRUE
+#    END
+#  END
+  TOLERANCE 50
+END
+
+#____________________
+#  We label interstates a bit larger!
+#
+LAYER
+  CONNECTIONTYPE postgis
+  NAME "roads-inter"
+  DUMP true
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  DATA "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type = 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
+  STATUS OFF
+  TYPE LINE
+  METADATA
+    "wfs_title" "Iowa Interstates Conditions"
+    "wms_title" "Iowa Interstates Conditions"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913"
+  END
+  TRANSPARENCY ALPHA
+  #FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
+  PROJECTION
+   "init=epsg:26915"
+  END
+  TEMPLATE "roadsq.html"
+  LABELCACHE ON
+  CLASS
+    NAME 'normal'
+    EXPRESSION ([cond_code] = 0)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 0 0 0
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'wet'
+    EXPRESSION ([cond_code] = 1)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 0 204 0
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'frost'
+    EXPRESSION ([cond_code] >= 3 and [cond_code] <= 14)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      #COLOR  152 152 152
+      COLOR  240 240 0
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+
+  CLASS
+    NAME 'closed-int'
+    EXPRESSION ([cond_code] = 86)
+    STYLE
+      COLOR 250 250 0
+      WIDTH 7
+      ANTIALIAS TRUE
+    END
+    STYLE
+      COLOR 230 0 0
+      SIZE 5
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR  250 250 0
+      SIZE 3
+      SYMBOL 'fill45'
+    END
+  END
+  CLASS
+    NAME 'not advised'
+    EXPRESSION ([cond_code] = 51)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR  232 95 1
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'mixed'
+    EXPRESSION ([cond_code] = 15)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 197 197
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'mixed'
+    EXPRESSION ([cond_code] = 19)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 254 51 153
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'mixed'
+    EXPRESSION ([cond_code] = 23)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 181 0 181
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+
+  CLASS
+    NAME 'slush'
+    EXPRESSION ([cond_code] = 56)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 197 197
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'slush'
+    EXPRESSION ([cond_code] = 60)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 254 51 153
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'slush'
+    EXPRESSION ([cond_code] = 64)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 181 0 181
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'ice'
+    EXPRESSION ([cond_code] = 27)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 197 197
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'ice'
+    EXPRESSION ([cond_code] = 31)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 254 51 153
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'ice'
+    EXPRESSION ([cond_code] = 35)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 181 0 181
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+
+
+  CLASS
+    NAME 'snow'
+    EXPRESSION ([cond_code] = 39)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR  153 255 255
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'snow'
+    EXPRESSION ([cond_code] = 43)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR  0 153 254
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+  CLASS
+    NAME 'snow'
+    EXPRESSION ([cond_code] = 47)
+    STYLE
+      COLOR 220 220 220
+      SIZE 7
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR  0 0 158
+      WIDTH 5
+      ANTIALIAS TRUE
+    END
+  END
+
+
+#  CLASS
+#    NAME 'others'
+#    STYLE
+#      COLOR 220 220 220
+#      WIDTH 5
+#      ANTIALIAS TRUE
+#    END
+#  END
+  TOLERANCE 50
+END
+
 
 END
