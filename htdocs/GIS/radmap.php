@@ -23,6 +23,8 @@ $layers = isset($_GET["layers"])? $_GET["layers"]:
 
 /* Straight CGI Butter */
 $sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
+$width = isset($_GET["width"]) ? intval($_GET["width"]) : 640;
+$height = isset($_GET["height"]) ? intval($_GET["height"]) : 480;
 
 /* Now, maybe we set a VTEC string, lets do all sorts of fun */
 $vtec_limiter = "";
@@ -106,8 +108,8 @@ dl($mapscript);
 
 $mapFile = $rootpath."/data/gis/base".$sectors[$sector]['epsg'].".map";
 $map = ms_newMapObj($mapFile);
-$map->set("width", 640);
-$map->set("height",480);
+$map->set("width", $width);
+$map->set("height",$height);
 $map->setExtent($sectors[$sector]['ext'][0],
                 $sectors[$sector]['ext'][1], 
                 $sectors[$sector]['ext'][2],
