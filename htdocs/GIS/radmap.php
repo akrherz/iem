@@ -232,6 +232,17 @@ $sql = sprintf("geom from (select *, oid from warnings_%s WHERE issue <= '%s:00+
 $w0c->set("data", $sql);
 $w0c->draw($img);
 
+/* roads */
+$roads = $map->getlayerbyname("roads");
+$roads->set("connection", $_DATABASES["postgis"] );
+$roads->set("status", in_array("roads", $layers) );
+$roads->draw($img);
+
+/* roads */
+$roadsint = $map->getlayerbyname("roads-inter");
+$roadsint->set("connection", $_DATABASES["postgis"] );
+$roadsint->set("status", in_array("roads-inter", $layers) );
+$roadsint->draw($img);
 
 $bar640t = $map->getLayerByName("bar640t");
 $bar640t->set("status", 1);
