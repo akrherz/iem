@@ -349,6 +349,13 @@ tslider = new Ext.Slider({
 });
 tslider.on('changecomplete', function(){
   if (radarPanel.isLoaded){ radarPanel.fireEvent('activate', {}); }
+  if (googlePanel.gmap){
+    if (googlePanel.gmap.getCurrentMapType() == custommap4) {
+      googlePanel.gmap.setMapType(G_NORMAL_MAP);
+      googlePanel.gmap.setMapType(custommap4); 
+    }
+  }
+
 });
 
 
@@ -608,7 +615,7 @@ CustomGetTileUrl=function(a,b,c) {
   lURL+="&BGCOLOR=0xFFFFFF";
   lURL+="&TRANSPARENT=TRUE";
   lURL+="&SRS="+lSRS;
-  lURL+="&TIME="+ getNexradTime().format('Y-m-d\\TH:i:\\0\\0\\Z');
+  lURL+="&TIME="+ (new Date(tslider.getValue())).format('Y-m-d\\TH:i:\\0\\0\\Z');
   lURL+="&BBOX="+lBbox;
   lURL+="&WIDTH=256";
   lURL+="&HEIGHT=256";
