@@ -1,5 +1,32 @@
 Ext.onReady(function(){
 
+/**
+ * @class Ext.ux.SliderTip
+ * @extends Ext.Tip
+ * Simple plugin for using an Ext.Tip with a slider to show the slider value
+ */
+Ext.ux.SliderTip = Ext.extend(Ext.Tip, {
+    minWidth: 10,
+    offsets : [0, -10],
+    init : function(slider){
+        slider.on('dragstart', this.onSlide, this);
+        slider.on('drag', this.onSlide, this);
+        slider.on('dragend', this.hide, this);
+        slider.on('destroy', this.destroy, this);
+    },
+
+    onSlide : function(slider){
+        this.show();
+        this.body.update(this.getText(slider));
+        this.doAutoWidth();
+        this.el.alignTo(slider.thumb, 'b-t?', this.offsets);
+    },
+
+    getText : function(slider){
+        return slider.getValue();
+    }
+});
+
 var tabPanel;
 /* Here are my Panels that appear in tabs */
 var helpPanel;
@@ -14,6 +41,7 @@ var eventsPanel;
 // BAH
 var cachedNexradTime = false;
 var vDescription;
+var tslider;
 // Selectors
 var wfo_selector;
 
@@ -251,7 +279,9 @@ var metastore = new Ext.data.Store({
             {name: 'y0', type:'float'},
             {name: 'y1', type:'float'},
             {name: 'issue', type:'date', dateFormat: 'Y-m-d H:i'},
-            {name: 'expire', type:'date', dateFormat:'Y-m-d H:i'}
+            {name: 'expire', type:'date', dateFormat:'Y-m-d H:i'},
+            {name: 'radarstart', type:'date', dateFormat: 'Y-m-d H:i'},
+            {name: 'radarend', type:'date', dateFormat:'Y-m-d H:i'}
             ])
 });
 metastore.on('load', function(){
@@ -267,6 +297,9 @@ metastore.on('load', function(){
     eventsPanel.getStore().load({params:getVTEC()});
     return;
   }
+  tslider.minValue = metastore.getAt(0).data.radarstart.getTime();
+  tslider.maxValue = metastore.getAt(0).data.radarend.getTime();
+  tslider.setValue( tslider.minValue );
   Ext.fly(vDescription.getEl()).update(wfo_selector.getRawValue() + ' '+ phenomena_selector.getRawValue() + ' '+ sig_selector.getRawValue() + ' #'+ eventid_selector.getValue()  +' issued '+ metastore.getAt(0).data.issue.format('Y-m-d H:i\\Z') +' expires '+ metastore.getAt(0).data.expire.format('Y-m-d H:i\\Z'));
   tabPanel.items.each(function(c){c.enable();});
   if (textTabPanel.isLoaded){ textTabPanel.fireEvent('activate', {}); }
@@ -300,12 +333,31 @@ function resetGmap(){
    }
 };
 
+    var tip = new Ext.ux.SliderTip({
+        getText: function(slider){
+            return String.format('<b>{0} GMT</b>', (new Date(slider.getValue())).format('Y-m-d H:i'));
+        }
+    });
+
+
+tslider = new Ext.Slider({
+  minValue: (new Date()).getTime(),
+  maxValue: (new Date()).getTime() + 1200,
+  increment: 300000,
+  width: 180,
+  plugins: [tip]
+});
+tslider.on('changecomplete', function(){
+  if (radarPanel.isLoaded){ radarPanel.fireEvent('activate', {}); }
+});
+
+
 var selectform = new Ext.FormPanel({
     frame: true,
     id: 'mainform',
     labelAlign:'top',
     items: [wfo_selector,phenomena_selector, sig_selector, eventid_selector,
-            year_selector, 
+            year_selector, tslider,
           new Ext.Button({
             text:'View Product',
             id:'mainbutton',
@@ -616,7 +668,7 @@ function radargenerator(){
   case 'ZR': r = 'layers[]=nexrad&';break;
   default: r='layers[]=cbw&layers[]=legend&';
  }
- return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/radmap.php?"+ r +"layers[]=uscounties&vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
+ return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/radmap.php?"+ r +"layers[]=uscounties&ts="+ (new Date(tslider.getValue())).format('YmdHi') +"&vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
 }
 
 sbwPanel = new Ext.Panel({

@@ -28,7 +28,19 @@ for( $i=0; $z = @pg_fetch_array($result,$i); $i++)
 {
   $z["id"] = $i +1;
   $z["issue"] = substr($z["issue"],0,16);
+  $issue = strtotime($z["issue"]);
+  if (date('i',$issue) % 5 != 0){
+    $z["radarstart"] = date('Y-m-d H:i', $issue + ((5 - (date('i',$issue) % 5)) * 60));
+  } else {
+    $z["radarstart"] = date('Y-m-d H:i', $issue );
+  }
   $z["expire"] = substr($z["expire"],0,16);
+  $expire = strtotime($z["expire"]);
+  if (date('i',$expire) % 5 != 0){
+    $z["radarend"] = date('Y-m-d H:i', $expire - (((date('i',$expire) % 5)) * 60));
+  } else {
+    $z["radarend"] = date('Y-m-d H:i', $expire );
+  }
   $ar["meta"][] = $z;
 }
 
