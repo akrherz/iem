@@ -302,13 +302,34 @@ metastore.on('load', function(){
   tslider.setValue( tslider.minValue );
   Ext.fly(vDescription.getEl()).update(wfo_selector.getRawValue() + ' '+ phenomena_selector.getRawValue() + ' '+ sig_selector.getRawValue() + ' #'+ eventid_selector.getValue()  +' issued '+ metastore.getAt(0).data.issue.format('Y-m-d H:i\\Z') +' expires '+ metastore.getAt(0).data.expire.format('Y-m-d H:i\\Z'));
   tabPanel.items.each(function(c){c.enable();});
-  if (textTabPanel.isLoaded){ textTabPanel.fireEvent('activate', {}); }
-  if (radarPanel.isLoaded){ radarPanel.fireEvent('activate', {}); }
-  if (sbwPanel.isLoaded){ sbwPanel.fireEvent('activate', {}); }
-  if (lsrGridPanel.isLoaded){ lsrGridPanel.getStore().load({params:getVTEC()}); }
-  if (allLsrGridPanel.isLoaded){ allLsrGridPanel.getStore().load({params:getVTEC()}); }
-  if (geoPanel.isLoaded){ geoPanel.getStore().load({params:getVTEC()}); }
-  if (eventsPanel.isLoaded){ eventsPanel.getStore().load({params:getVTEC()}); }
+  if (textTabPanel.isLoaded){ 
+    textTabPanel.isLoaded = false;
+    textTabPanel.fireEvent('activate', {}); 
+  }
+  if (radarPanel.isLoaded){ 
+    radarPanel.isLoaded = false;
+    radarPanel.fireEvent('activate', {}); 
+  }
+  if (sbwPanel.isLoaded){ 
+    sbwPanel.isLoaded = false;
+    sbwPanel.fireEvent('activate', {});
+  }
+  if (lsrGridPanel.isLoaded){
+    lsrGridPanel.isLoaded = false;
+    lsrGridPanel.getStore().load({params:getVTEC()});
+  }
+  if (allLsrGridPanel.isLoaded){ 
+    allLsrGridPanel.isLoaded = false;
+    allLsrGridPanel.getStore().load({params:getVTEC()});
+  }
+  if (geoPanel.isLoaded){ 
+    geoPanel.isLoaded = false;
+    geoPanel.getStore().load({params:getVTEC()});
+  }
+  if (eventsPanel.isLoaded){
+    eventsPanel.isLoaded = false;
+    eventsPanel.getStore().load({params:getVTEC()});
+  }
   tabPanel.activate(1);
   resetGmap();
 });
@@ -348,7 +369,10 @@ tslider = new Ext.Slider({
   plugins: [tip]
 });
 tslider.on('changecomplete', function(){
-  if (radarPanel.isLoaded){ radarPanel.fireEvent('activate', {}); }
+  if (radarPanel.isLoaded){ 
+    radarPanel.isLoaded = false;
+    radarPanel.fireEvent('activate', {}); 
+  }
   if (googlePanel.gmap){
     if (googlePanel.gmap.getCurrentMapType() == custommap4) {
       googlePanel.gmap.setMapType(G_NORMAL_MAP);
@@ -411,7 +435,10 @@ textTabPanel = new Ext.TabPanel({
     defaults:{bodyStyle:'padding:5px'}
 });
 textTabPanel.on('activate', function(){
-  textTabsLoad();
+  if (! textTabPanel.isLoaded) {
+    textTabsLoad();
+    textTabPanel.isLoaded = true;
+  }
 });
 
 textTabsLoad = function(){
@@ -685,8 +712,10 @@ sbwPanel = new Ext.Panel({
     disabled:true
 });
 sbwPanel.on('activate', function(){
-  sbwPanel.body.update( sbwgenerator() );
-  sbwPanel.isLoaded=true;
+  if (! sbwPanel.isLoaded ) {
+    sbwPanel.body.update( sbwgenerator() );
+    sbwPanel.isLoaded=true;
+  }
 });
 
 radarPanel = new Ext.Panel({
@@ -696,7 +725,7 @@ radarPanel = new Ext.Panel({
     disabled:true
 });
 radarPanel.on('activate', function(){
-  radarPanel.body.update( radargenerator() );
+  if (! radarPanel.isLoaded)  radarPanel.body.update( radargenerator() );
   radarPanel.isLoaded=true;
 });
 
