@@ -702,6 +702,9 @@ function radargenerator(){
   case 'ZR': r = 'layers[]=nexrad&';break;
   default: r='layers[]=cbw&layers[]=legend&';
  }
+ if (sig_selector.getValue() != 'W'){
+   r='layers[]=cbw&layers[]=legend&';
+ }
  return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/radmap.php?"+ r +"layers[]=uscounties&ts="+ (new Date(tslider.getValue())).format('YmdHi') +"&vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
 }
 
