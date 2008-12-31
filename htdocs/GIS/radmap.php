@@ -204,6 +204,26 @@ if (isset($_GET["vtec"]))
 }
 
 
+
+/* Storm based warning history, plotted as a white outline, I think */
+$ptext = "'ZZ' as phenomena";
+$sbwh = $map->getlayerbyname("sbw");
+$sbwh->set("status", in_array("sbwh", $layers) );
+$sbwh->set("connection", "user=nobody dbname=postgis host=iemdb");
+$sbwh->set("maxscale", 10000000);
+$sql = sprintf("geom from (select %s, geom, oid from sbw_%s 
+    WHERE significance != 'A' and polygon_begin <= '%s:00+00' and 
+    polygon_end > '%s:00+00'
+    %s) as foo using unique oid using SRID=4326", 
+    $ptext, gmstrftime("%Y",$ts),
+    gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
+    $vtec_limiter );
+$sbwh->set("data", $sql);
+$sbwh->draw($img);
+
+
+
+
 /* Storm Based Warning */
 $ptext = "phenomena";
 if (in_array("sbw", $layers) && in_array("cbw", $layers))
