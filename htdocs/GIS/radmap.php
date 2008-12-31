@@ -19,7 +19,7 @@ $sectors = Array(
 
 /* Setup layers */
 $layers = isset($_GET["layers"])? $_GET["layers"]: 
-          Array("bogus");
+          Array("nexrad");
 
 /* Straight CGI Butter */
 $sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
@@ -127,7 +127,7 @@ $lakes->draw($img);
 
 /* Draw NEXRAD Layer */
 $radar = $map->getlayerbyname("nexrad_n0r");
-$radar->set("status", MS_ON);
+$radar->set("status", in_array("nexrad", $layers));
 if (($ts + 300) < time()) {
  $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts) );
 }
@@ -253,7 +253,11 @@ $bar640t->draw($img);
 $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
 $point->setXY(80, 12);
-$point->draw($map, $tlayer, $img, 0,"NEXRAD Base Reflectivity");
+if (in_array("nexrad", $layers)){
+  $point->draw($map, $tlayer, $img, 0,"NEXRAD Base Reflectivity");
+} else {
+  $point->draw($map, $tlayer, $img, 0,"IEM Plot");
+}
 $point->free();
 
 $point = ms_newpointobj();
@@ -273,7 +277,9 @@ $point->free();
 $layer = $map->getLayerByName("n0r-ramp");
 $point = ms_newpointobj();
 $point->setXY(560, 15);
-$point->draw($map, $layer, $img, "n0r-ramp", "");
+if (in_array("nexrad", $layers)){
+  $point->draw($map, $layer, $img, "n0r-ramp", "");
+}
 $point->free();
 
 if (in_array("legend", $layers)){
