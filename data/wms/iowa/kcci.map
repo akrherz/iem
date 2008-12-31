@@ -8,8 +8,6 @@ SIZE 450 350
 #FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT 200000 4400000 710000 4900000
 UNITS METERS
-SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 
 
