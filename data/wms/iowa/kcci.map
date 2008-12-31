@@ -1,0 +1,63 @@
+#
+# Start of map file
+#
+NAME "iemtest"
+STATUS ON
+SIZE 450 350
+#SYMBOLSET symbols/symbol.sym
+#FONTSET "/mesonet/data/gis/fonts/fonts.list"
+EXTENT 200000 4400000 710000 4900000
+UNITS METERS
+SHAPEPATH "/mesonet/data/gis/"
+SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+IMAGECOLOR -1 -1 -1
+
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+   "init=epsg:26915"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+#  HEADER ia_header.html
+  TEMPLATE ia.html
+#  FOOTER ia_footer.html
+  MINSCALE 0
+  MAXSCALE 465000000
+  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/var/www/htdocs/tmp/w0.log"
+  METADATA
+   "wms_title" "IEM WMS KCCI-TV Super DopplerHD"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/kcci.cgi?"
+   "wms_srs" "EPSG:26915 EPSG:4326 EPSG:900913"
+   "wms_abstract" "IEM feed of KCCI-TV SuperDopperHD RADAR"
+   "wms_keywords" "KCCI"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+  END
+END
+
+LAYER
+  NAME kccidoppler
+  DATA  "/home/ldm/data/gis/images/26915/KCCI/KCCI_N0R_0.png"
+  STATUS ON
+  TYPE RASTER
+  METADATA
+    "wms_title" "KCCI Super DopplerHD"
+   "wms_srs" "EPSG:26915 EPSG:4326 EPSG:900913"
+  END
+  PROJECTION
+    "init=epsg:26915"
+  END
+  MINSCALE 0
+  MAXSCALE 465000000
+END
+
+END
