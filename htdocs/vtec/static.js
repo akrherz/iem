@@ -686,11 +686,11 @@ function sbwgenerator(){
 }
 function radargenerator(){
  switch ( phenomena_selector.getValue() ){
-  case 'TO': r = 'layers[]=nexrad&layers[]=sbw&';break;
-  case 'SV': r = 'layers[]=nexrad&layers[]=sbw&';break;
-  case 'MA': r = 'layers[]=nexrad&layers[]=sbw&';break;
+  case 'TO': r = 'layers[]=nexrad&layers[]=sbw&layers[]=sbwh&';break;
+  case 'SV': r = 'layers[]=nexrad&layers[]=sbw&layers[]=sbwh&';break;
+  case 'MA': r = 'layers[]=nexrad&layers[]=sbw&layers[]=sbwh&';break;
   case 'BZ': r = 'layers[]=nexrad&';break;
-  case 'FF': r = 'layers[]=nexrad&layers[]=sbw&';break;
+  case 'FF': r = 'layers[]=nexrad&layers[]=sbw&layers[]=sbwh&';break;
   case 'FL': r = 'layers[]=nexrad&';break;
   case 'HS': r = 'layers[]=nexrad&';break;
   case 'HP': r = 'layers[]=nexrad&';break;
