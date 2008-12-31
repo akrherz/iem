@@ -134,12 +134,12 @@ if (time() < strtotime(substr($row["expire"],0,16)))
 
 
 if ($warngeo == "sbw") {
-  $url = sprintf("%s/GIS/radmap.php?layers[]=uscounties&layers[]=sbw&vtec=%s.K%s.%s.%s.%04d", $rooturl, $year, $wfo, $phenomena, $significance, $eventid);
+  $url = sprintf("%s/GIS/radmap.php?layers[]=nexrad&layers[]=uscounties&layers[]=sbw&vtec=%s.K%s.%s.%s.%04d", $rooturl, $year, $wfo, $phenomena, $significance, $eventid);
 }
 else if ($warngeo == "both") {
-  $url = sprintf("%s/GIS/radmap.php?layers[]=uscounties&layers[]=cbw&layers[]=sbw&vtec=%s.K%s.%s.%s.%04d", $rooturl, $year, $wfo, $phenomena, $significance, $eventid);
+  $url = sprintf("%s/GIS/radmap.php?layers[]=nexrad&layers[]=uscounties&layers[]=cbw&layers[]=sbw&vtec=%s.K%s.%s.%s.%04d", $rooturl, $year, $wfo, $phenomena, $significance, $eventid);
 } else {
-  $url = sprintf("%s/GIS/radmap.php?layers[]=uscounties&layers[]=cbw&vtec=%s.K%s.%s.%s.%04d", $rooturl, $year, 
+  $url = sprintf("%s/GIS/radmap.php?layers[]=nexrad&layers[]=uscounties&layers[]=cbw&vtec=%s.K%s.%s.%s.%04d", $rooturl, $year, 
        $wfo, $phenomena, $significance, $eventid);
 }
 
