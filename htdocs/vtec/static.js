@@ -13,6 +13,7 @@ var geoPanel;
 var eventsPanel;
 // BAH
 var cachedNexradTime = false;
+var vDescription;
 // Selectors
 var wfo_selector;
 
@@ -72,7 +73,7 @@ var expander2 = new Ext.grid.RowExpander({
             root: 'products',
             id: 'id'
            }, [
-           {name: 'id'},
+           {name: 'id', type: 'int'},
            {name: 'locations'},
            {name: 'wfo'},
            {name: 'year'},
@@ -158,6 +159,7 @@ wfo_selector = new Ext.form.ComboBox({
            data : iemdata.wfos 
     }),
     valueField:'abbr',
+    width:180,
     displayField:'wfo',
     fieldLabel: 'Issuing Office',
     typeAhead: true,
@@ -178,6 +180,7 @@ var phenomena_selector = new Ext.form.ComboBox({
              valueField:'abbr',
              displayField:'name',
              fieldLabel:'Phenomena',
+    width:180,
              typeAhead: true,
              mode: 'local',
              triggerAction: 'all',
@@ -222,7 +225,7 @@ var year_selector = new Ext.form.NumberField({
     allowDecimals:false,
     allowNegative:false,
     maxValue: new Date("Y"),
-    minValue: 2005,
+    minValue: 2002,
     width: 50,
     name:'year',
     id:'yearselector',
@@ -253,17 +256,18 @@ var metastore = new Ext.data.Store({
 });
 metastore.on('load', function(){
   cachedNexradTime = false;
-
+  Ext.fly(vDescription.getEl()).update('');
   if (metastore.getCount() == 0){
-    Ext.MessageBox.alert('Status', 'Event not found on server');
-    tabPanel.activate(0);
+    Ext.fly(vDescription.getEl()).update('Event not found on server, here is a list of other '+  phenomena_selector.getRawValue() + ' '+ sig_selector.getRawValue() +' issued by '+ wfo_selector.getRawValue() );
     tabPanel.items.each(function(c){
          if (c.saveme){}
          else{ c.disable(); }
     });
-    Ext.getCmp('propertyGrid').setSource({});
+    tabPanel.activate('products-grid');
+    eventsPanel.getStore().load({params:getVTEC()});
     return;
   }
+  Ext.fly(vDescription.getEl()).update(wfo_selector.getRawValue() + ' '+ phenomena_selector.getRawValue() + ' '+ sig_selector.getRawValue() + ' #'+ eventid_selector.getValue()  +' issued '+ metastore.getAt(0).data.issue.format('Y-m-d H:i\\Z') +' expires '+ metastore.getAt(0).data.expire.format('Y-m-d H:i\\Z'));
   tabPanel.items.each(function(c){c.enable();});
   if (textTabPanel.isLoaded){ textTabPanel.fireEvent('activate', {}); }
   if (radarPanel.isLoaded){ radarPanel.fireEvent('activate', {}); }
@@ -272,20 +276,12 @@ metastore.on('load', function(){
   if (allLsrGridPanel.isLoaded){ allLsrGridPanel.getStore().load({params:getVTEC()}); }
   if (geoPanel.isLoaded){ geoPanel.getStore().load({params:getVTEC()}); }
   if (eventsPanel.isLoaded){ eventsPanel.getStore().load({params:getVTEC()}); }
-  Ext.getCmp('propertyGrid').setSource(metastore.getAt(0).data);
   tabPanel.activate(1);
   resetGmap();
 });
 
 
 
-var propertyGrid = new Ext.grid.PropertyGrid({
-    id: 'propertyGrid',
-    autoHeight: true,
-    source: {},
-    store: metastore
-});
-propertyGrid.on('beforeedit', function(){ return false; });
 
 function resetGmap(){
    var q = metastore.getAt(0);
@@ -308,32 +304,9 @@ var selectform = new Ext.FormPanel({
     frame: true,
     id: 'mainform',
     labelAlign:'top',
-    items: [{
-        layout:'column',
-        items: [{
-          columnWidth:0.27,
-          layout:'form',
-          items:[wfo_selector]
-        },{
-          columnWidth:0.27,
-          layout:'form',
-          items:[phenomena_selector]
-        },{
-          columnWidth:0.2,
-          layout:'form',
-          items:[sig_selector]
-        },{
-          columnWidth:0.08,
-          layout:'form',
-          items:[eventid_selector]
-        },{
-          columnWidth:0.08,
-          layout:'form',
-          items:[year_selector]
-        },{
-          columnWidth:0.1,
-          layout:'form',
-          items:[new Ext.Button({
+    items: [wfo_selector,phenomena_selector, sig_selector, eventid_selector,
+            year_selector, 
+          new Ext.Button({
             text:'View Product',
             id:'mainbutton',
             listeners: {
@@ -351,8 +324,6 @@ var selectform = new Ext.FormPanel({
               }  // End of handler
             }
           })]
-        }]
-    }]
 });
 
 function loadVTEC(){
@@ -506,6 +477,7 @@ geoPanel.on('activate', function(q){
 eventsPanel = new Ext.grid.GridPanel({
         id:'products-grid',
         store: pstore,
+  saveme:true,
   disabled:true,
         loadMask: {msg:'Loading Data...'},
         cm: new Ext.grid.ColumnModel([
@@ -619,10 +591,32 @@ googlePanel.on('activate', function(){
 });
 
 function sbwgenerator(){
+ switch ( phenomena_selector.getValue() ){
+  case 'TO': break;
+  case 'SV': break;
+  default: return "<p>Storm Based Warning history unavailable</p>";
+ }
  return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/sbw-history.php?vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
 }
 function radargenerator(){
- return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/radmap.php?layers[]=uscounties&layers[]=sbw&vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
+ switch ( phenomena_selector.getValue() ){
+  case 'TO': r = 'layers[]=nexrad&layers[]=sbw&';break;
+  case 'SV': r = 'layers[]=nexrad&layers[]=sbw&';break;
+  case 'MA': r = 'layers[]=nexrad&layers[]=sbw&';break;
+  case 'BZ': r = 'layers[]=nexrad&';break;
+  case 'FF': r = 'layers[]=nexrad&layers[]=sbw&';break;
+  case 'FL': r = 'layers[]=nexrad&';break;
+  case 'HS': r = 'layers[]=nexrad&';break;
+  case 'HP': r = 'layers[]=nexrad&';break;
+  case 'IS': r = 'layers[]=nexrad&';break;
+  case 'IP': r = 'layers[]=nexrad&';break;
+  case 'SN': r = 'layers[]=nexrad&';break;
+  case 'WS': r = 'layers[]=nexrad&';break;
+  case 'WW': r = 'layers[]=nexrad&';break;
+  case 'ZR': r = 'layers[]=nexrad&';break;
+  default: r='layers[]=cbw&layers[]=legend&';
+ }
+ return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/radmap.php?"+ r +"layers[]=uscounties&vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
 }
 
 sbwPanel = new Ext.Panel({
@@ -647,6 +641,7 @@ radarPanel.on('activate', function(){
   radarPanel.isLoaded=true;
 });
 
+vDescription = new Ext.Toolbar.TextItem('');
 
 tabPanel =  new Ext.TabPanel({
     region:'center',
@@ -654,6 +649,11 @@ tabPanel =  new Ext.TabPanel({
     plain:true,
     enableTabScroll:true,
     defaults:{bodyStyle:'padding:5px'},
+    tbar: new Ext.StatusBar({
+      id: 'main-status',
+      defaultText: '',
+      items:[vDescription]
+      }),
     items:[
       {contentEl:'help', title: 'Help', saveme:true},
       radarPanel,
@@ -670,27 +670,16 @@ tabPanel =  new Ext.TabPanel({
 
 var viewport = new Ext.Viewport({
     layout:'border',
-    items:[
-         new Ext.BoxComponent({ // raw
-             region:'south',
-             el: 'footer',
-             height:32
-         }),
-          { 
+    items:[{ 
              region:'north',
-             height:100,
-             collapsible:true,
-             title: 'Select your VTEC Settings',
-             layoutConfig:{
-                animate:true
-             },
-             items:[selectform]
+             height:130,
+             contentEl: 'iem-header'
          },{
             region:'west',
             width:200,
             collapsible:true,
-            title:'Product Details',
-            items:[propertyGrid]
+            title:'VTEC Options',
+            items:[selectform]
          },
          tabPanel
          ]

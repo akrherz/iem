@@ -19,27 +19,24 @@ if ($rootpath == "http://localhost/iem"){
   $extjs = "ext-all-debug.js";
 }
 
-?>
-
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="../ext/resources/css/ext-all.css"/>
+$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../ext/resources/css/ext-all.css"/>
 <script type="text/javascript" src="../ext/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="../ext/<?php echo $extjs; ?>"></script>
+<script type="text/javascript" src="../ext/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
-<script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=<?php echo $GOOGLEKEYS[$rooturl]["vtec"]; ?>" type="text/javascript"></script>
 <script type="text/javascript" src="Ext.ux.GMapPanel.js"></script>
 <script type="text/javascript" src="RowExpander.js"></script>
 <script type="text/javascript" src="../ext/ux/menu/EditableItem.js"></script>
 <script type="text/javascript" src="../ext/ux/grid/GridFilters.js"></script>
 <script type="text/javascript" src="../ext/ux/grid/filter/Filter.js"></script>
+<script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key='. $GOOGLEKEYS[$rooturl]["vtec"] .'" type="text/javascript"></script>
 <script type="text/javascript" src="../ext/ux/grid/filter/StringFilter.js"></script>
-<script type="text/javascript" src="static.js"></script>
-</head>
-<body>
+<script type="text/javascript" src="static.js"></script>';
+$TITLE = "IEM NWS Text Product Finder";
+$NOCONTENT = 1;
+$THISPAGE ="severe-vtec";
+include("$rootpath/include/header.php");
+?>
 
-
-<div id="header"></div>
 <div id="help">
  <h2>IEM VTEC Product Browser 2.0</h2>
 
