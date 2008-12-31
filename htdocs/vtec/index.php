@@ -31,7 +31,7 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../ext/resources/css/
 <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key='. $GOOGLEKEYS[$rooturl]["vtec"] .'" type="text/javascript"></script>
 <script type="text/javascript" src="../ext/ux/grid/filter/StringFilter.js"></script>
 <script type="text/javascript" src="static.js"></script>';
-$TITLE = "IEM NWS Text Product Finder";
+$TITLE = "IEM Valid Time Extent Code (VTEC) App";
 $NOCONTENT = 1;
 $THISPAGE ="severe-vtec";
 include("$rootpath/include/header.php");
