@@ -96,7 +96,7 @@ $ts = isset($_GET["ts"]) ? gmmktime(
  substr($_GET["ts"],8,2), substr($_GET["ts"],10,2), 0,
  substr($_GET["ts"],4,2), substr($_GET["ts"],6,2), substr($_GET["ts"],0,4)): 
  time();
-if (isset($dts)) { $ts = $dts; }
+if (isset($dts) && ! isset($_GET["ts"])) { $ts = $dts; }
 /* Make sure we have a minute %5 */
 if (time() - $ts > 300)
 {
