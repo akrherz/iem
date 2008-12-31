@@ -174,7 +174,7 @@ $sz0 = $row["area"];
   $wcc0s0 = ms_newStyleObj($wcc0);
   $wcc0s0->color->setRGB(255,255,255);
   $wcc0s0->set("size", 2);
-  $wcc0s0->set("symbol", 1);
+  $wcc0s0->set("symbol", 'circle');
   $wc->draw($img);
   $map->drawLabelCache($img);
 
@@ -192,7 +192,7 @@ $sz0 = $row["area"];
   $wcc0s0 = ms_newStyleObj($wcc0);
   $wcc0s0->color->setRGB(255,0,0);
   $wcc0s0->set("size", 3);
-  $wcc0s0->set("symbol", 1);
+  $wcc0s0->set("symbol", 'circle');
   $wc->draw($img);
   $map->drawLabelCache($img);
 
