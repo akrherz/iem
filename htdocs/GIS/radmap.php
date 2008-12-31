@@ -177,7 +177,7 @@ if (isset($_GET["pid"]))
   $wcc0s0 = ms_newStyleObj($wcc0);
   $wcc0s0->color->setRGB(255,0,0);
   $wcc0s0->set("size", 3);
-  $wcc0s0->set("symbol", 1);
+  $wcc0s0->set("symbol", 'circle');
   $wc->draw($img);
 }
 
@@ -199,7 +199,7 @@ if (isset($_GET["vtec"]))
   $wcc0s0 = ms_newStyleObj($wcc0);
   $wcc0s0->color->setRGB(255,0,0);
   $wcc0s0->set("size", 3);
-  $wcc0s0->set("symbol", 1);
+  $wcc0s0->set("symbol", 'circle');
   $wc->draw($img);
 }
 
