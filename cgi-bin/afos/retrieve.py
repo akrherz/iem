@@ -7,7 +7,7 @@ def Main():
   print
   print
   try:
-    mydb = pg.connect('afos', 'mtarchive.geol.iastate.edu', user='nobody')
+    mydb = pg.connect('afos', 'iem20', user='nobody')
   except:
     print 'Error Connecting to Database, please try again!'
     sys.exit(0)
