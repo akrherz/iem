@@ -1,5 +1,5 @@
 <?php
-$conn = pg_connect("dbname=afos host=mtarchive.geol.iastate.edu user=nobody");
+$conn = pg_connect("dbname=afos host=iem20 user=nobody");
 
 $pil = strtoupper($_POST["pil"]);
 $cnt = $_POST["cnt"];
