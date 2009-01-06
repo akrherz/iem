@@ -179,24 +179,23 @@ var jstore2 = new Ext.data.Store({
 });
 
 
-
 wfo_selector = new Ext.form.ComboBox({
-    hiddenName:'wfo',
-    store: new Ext.data.SimpleStore({
+  hiddenName:'wfo',
+  store: new Ext.data.SimpleStore({
            fields: ['abbr', 'wfo'],
            data : iemdata.wfos 
-    }),
-    valueField:'abbr',
-    width:180,
-    displayField:'wfo',
-    fieldLabel: 'Issuing Office',
-    typeAhead: true,
-    mode: 'local',
-    triggerAction: 'all',
-    emptyText:'Select/or type here...',
-    selectOnFocus:true,
-    lazyRender: true,
-    id: 'wfoselector'
+  }),
+  valueField:'abbr',
+  width:180,
+  fieldLabel: 'Issuing Office',
+  tpl: '<tpl for="."><div class="x-combo-list-item">[{abbr}] {wfo}</div></tpl>',
+  typeAhead: true,
+  mode: 'local',
+  triggerAction: 'all',
+  emptyText:'Select/or type here...',
+  selectOnFocus:true,
+  lazyRender: true,
+  id: 'wfoselector'
 });
 
 var phenomena_selector = new Ext.form.ComboBox({
@@ -354,17 +353,20 @@ function resetGmap(){
    }
 };
 
-    var tip = new Ext.ux.SliderTip({
-        getText: function(slider){
-            return String.format('<b>{0} GMT</b>', (new Date(slider.getValue())).format('Y-m-d H:i'));
-        }
-    });
+var tip = new Ext.ux.SliderTip({
+  getText: function(slider){
+    return String.format('<b>{0} GMT</b>', 
+           (new Date(slider.getValue())).format('Y-m-d H:i'));
+    }
+});
 
 
 tslider = new Ext.Slider({
   minValue: (new Date()).getTime(),
   maxValue: (new Date()).getTime() + 1200,
   increment: 300000,
+  isFormField: true,
+  fieldLabel: 'Event Timeline',
   width: 180,
   plugins: [tip]
 });
@@ -390,7 +392,7 @@ var selectform = new Ext.FormPanel({
     items: [wfo_selector,phenomena_selector, sig_selector, eventid_selector,
             year_selector, tslider,
           new Ext.Button({
-            text:'View Product',
+            text:'Update Page',
             id:'mainbutton',
             listeners: {
               click: function() {
@@ -401,6 +403,8 @@ var selectform = new Ext.FormPanel({
           new Ext.Button({
             text:'Stable URL',
             id:'stablebutton',
+            isFormField:true,
+            fieldLabel: 'Create Linkable Page',
             listeners: {
               click: function() {
                 window.location = getURL();
