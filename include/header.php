@@ -104,7 +104,7 @@ $_pages = Array(
     "interact" => Array("title" => "Interact Radar", "url" => "/GIS/apps/rview/warnings.phtml"),
     "river" => Array("title" => "River Summary", "url" => "/river/wfo.phtml"),
     "watch" => Array("title" => "SPC Watches", "url" => "/GIS/apps/rview/watch.phtml"),
-    "vtec" => Array("title" => "VTEC Browser", "url" => "/GIS/apps/rview/warnings_cat.phtml"),
+    "vtec" => Array("title" => "VTEC Browser", "url" => "/vtec/"),
  ),
  "webcam" => Array(
     "base" => Array("title" => "Web Cams", "url" => "/current/camera.phtml"),
