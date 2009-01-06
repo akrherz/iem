@@ -49,9 +49,10 @@ function printtd($instr,$selected,$station){
 
 $filename='./pics/'.$station.'/'.$station.'.jpg';
 $filename_site = file_exists($filename);
-
-$filename='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
-$filename=filecheck($filename);
+if ($dir != ""){
+ $filename='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
+ $filename=filecheck($filename);
+}
 
 ?>
 
