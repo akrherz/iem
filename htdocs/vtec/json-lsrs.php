@@ -6,7 +6,7 @@ require_once "$rootpath/include/lsrs.php";
 require_once "$rootpath/include/database.inc.php";
 
 $connect = iemdb("postgis");
-pg_exec($connect, "SET TIME ZONE GMT");
+pg_exec($connect, "SET TIME ZONE 'GMT'");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
