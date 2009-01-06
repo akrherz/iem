@@ -78,6 +78,7 @@ $varDef = Array("tmpf" => "Temperatures",
   "pday" => "Today Rainfall",
   "pmonth" => "Rainfall This Month",
   "snow" => "Today Snowfall",
+  "snowd" => "Today Snow Depth",
   "max_sknt" => "Peak Gust Today [knots]",
   "max_gust" => "Peak Gust Today [knots]",
   "feel" => "Feel's Like");
