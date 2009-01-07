@@ -56,8 +56,9 @@ include("$rootpath/include/header.php");
 
 <?php
 dl($mapscript);
-include("$rootpath/include/snet_locs.php");
-$stbl = $cities[$tv];
+include("$rootpath/include/network.php");
+$nt = new NetworkTable($tv);
+$stbl = $nt->table;
 
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/nexlib2.php");
@@ -231,7 +232,7 @@ $now = time();
 foreach($finalA as $key => $value){
   $pDay = round($data[$key]["pday"], 2);
   if ( ($now - $data[$key]["ts"] < 1000) ){
-    echo "<tr><th><a href=\"raining.php?sortcol=$sortcol&tv=$tv&rad=$rad&station=$key\">". $key ."</a></th><td>". $stbl[$key]["short"] ."</td>
+    echo "<tr><th><a href=\"raining.php?sortcol=$sortcol&tv=$tv&rad=$rad&station=$key\">". $key ."</a></th><td>". $stbl[$key]["name"] ."</td>
      <td>". $data[$key]["p15m"] ."</td><td>". $data[$key]["phour"] ."</td><td>". $data[$key]["pday"] ."</td></tr>\n";
   }
 }
