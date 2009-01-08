@@ -29,7 +29,9 @@ function printWARN($warn)
 {
   $background = "#0f0";
   $ts = $warn["sts"] + 5*60;
-  $uri = sprintf("/GIS/apps/rview/warnings_cat.phtml?year=%s&wfo=%s&eventid=%s&phenomena=%s&significance=W", date("Y", $ts), $warn["wfo"], $warn["eventid"], $warn["phenomena"]);
+  $uri = sprintf("/vtec/%s-O-%s-K%s-%s-%s-%04d.html", date("Y", $ts), 
+        $warn["status"], $warn["wfo"], $warn["phenomena"], 
+        $warn["significance"], $warn["eventid"]);
   //$uri2 = sprintf("/GIS/apps/rview/warnings.phtml?tz=UTC&cu=1&year=%s&month=%s&day=%s&hour=%s&minute=%s&filter=1&archive=yes&tzoff=0&site=%s&lon0=%s&lat0=%s", gmdate("Y", $ts), gmdate("m", $ts), gmdate("d",$ts), gmdate("H",$ts), gmdate("i",$ts), $warn["wfo"], $warn["lon0"], $warn["lat0"]);
   if ($warn["verify"] == 0) $background = "#f00";
   return sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f km^2</td><td>%.0f km^2</td><td>%.0f %%</td></tr>", 
@@ -67,6 +69,7 @@ for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
   $warnings[$key]["phenomena"] = $row["phenomena"];
   $warnings[$key]["wfo"] = $row["wfo"];
   $warnings[$key]["status"] = $row["status"];
+  $warnings[$key]["significance"] = $row["significance"];
   $warnings[$key]["area"] = $row["area"];
   $warnings[$key]["lat0"] = $row["lat0"];
   $warnings[$key]["lon0"] = $row["lon0"];
