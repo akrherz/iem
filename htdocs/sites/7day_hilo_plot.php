@@ -75,7 +75,7 @@ $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCFF@0.5');
 $graph->xgrid->Show();
 
 $graph->title->Set("7 Day Hi/Lo Temps for ". $metadata["name"]);
-$graph->SetMargin(40,5,50,40);
+$graph->SetMargin(40,5,50,45);
 
 $graph->xaxis->SetTickLabels($xlabels);
 $graph->xaxis->SetLabelAngle(90);
@@ -85,7 +85,7 @@ $graph->yscale->SetGrace(5);
 $graph->yaxis->SetTitle("Temperature [F]");
 
 $graph->legend->SetLayout(LEGEND_HOR);
-$graph->legend->Pos(0.01,0.08,"left","top");
+$graph->legend->Pos(0.01,0.06,"right","top");
 
 $bplot1 = new BarPlot($highs);
 $bplot1->SetFillColor('red');
