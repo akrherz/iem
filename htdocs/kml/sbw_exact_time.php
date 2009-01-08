@@ -11,19 +11,17 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
-/* Now we fetch warning and perhaps polygon */
-$query2 = "SELECT *, astext(geom) as t, askml(geom) as kml,
+$rs = pg_prepare($connect, "SELECT", "SELECT *, astext(geom) as t, 
+           askml(geom) as kml,
            round(area(transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
-           WHERE wfo = '$wfo' and phenomena = '$phenomena' and 
-           eventid = $eventid and significance = '$significance'";
-if ($significance == "W" && 
-   ($phenomena == "SV" or $phenomena == "TO" or $phenomena == "MA" or $phenomena == "FF"))
-{
-  $query2 .= " and gtype = 'P'";
-}
-$result = pg_exec($connect, $query2 ." ORDER by sz DESC, updated DESC, gtype ASC");
+           WHERE wfo = $1 and phenomena = $2 and 
+           eventid = $3 and significance = $4
+           and gtype = 'P' ORDER by sz DESC, updated DESC, gtype ASC");
+
+$result = pg_execute($connect, "SELECT", 
+                     Array($wfo, $phenomena, $eventid, $significance) );
 $row = pg_fetch_array($result, 0);
 $radarts = strtotime( $row["issue"] );
 if (strtotime( $row["expire"] ) > time()){
