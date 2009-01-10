@@ -36,13 +36,14 @@ if (pg_num_rows($result) <= 0) {
                Array($wfo, $phenomena, $eventid, $significance) );
 }
 
-$radarts = "Not Found";
+$label = "";
 if (pg_num_rows($result) > 0) {
   $row = pg_fetch_array($result, 0);
   $radarts = strtotime( $row["issue"] );
   if (strtotime( $row["expire"] ) > time()){
     $radarts = time();
   }
+  $label = strftime("%d%%20%B%%20%Y%%20%-I:%M%%20%p%%20%Z", $radarts);
 }
 
 header("Content-Type:", "application/vnd.google-earth.kml+xml");
@@ -67,7 +68,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <ScreenOverlay id=\"legend_bar\">
    <visibility>1</visibility>
    <Icon>
-       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=". strftime("%d%%20%B%%20%Y%%20%-I:%M%%20%p%%20%Z", $radarts) ."</href>
+       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=${label}</href>
    </Icon>
    <description>WaterWatch Legend</description>
    <overlayXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
