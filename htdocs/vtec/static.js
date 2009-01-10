@@ -108,7 +108,7 @@ var expander2 = new Ext.grid.RowExpander({
            {name: 'area', type: 'float'},
            {name: 'significance'},
            {name: 'phenomena'},
-           {name: 'eventid'},
+           {name: 'eventid', type: 'int'},
            {name: 'issued'},
            {name: 'expired'}
           ])
@@ -345,7 +345,7 @@ function resetGmap(){
      Ext.getCmp('mygpanel').gmap.setCenter(point, 9);
 
      Ext.getCmp('mygpanel').gmap.clearOverlays();
-     kml = "http://mesonet.agron.iastate.edu/kml/sbw_exact_time.php?"+ getVTEC();
+     kml = "http://mesonet.agron.iastate.edu/kml/vtec.php?"+ getVTEC();
      gxml = new GGeoXml(kml);
      Ext.getCmp('mygpanel').gmap.addOverlay(gxml);
      kml = "http://mesonet.agron.iastate.edu/kml/sbw_lsrs.php?"+ getVTEC();

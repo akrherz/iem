@@ -30,7 +30,7 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../ext/resources/css/
 <script type="text/javascript" src="../ext/ux/grid/filter/Filter.js"></script>
 <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key='. $GOOGLEKEYS[$rooturl]["vtec"] .'" type="text/javascript"></script>
 <script type="text/javascript" src="../ext/ux/grid/filter/StringFilter.js"></script>
-<script type="text/javascript" src="static.js"></script>';
+<script type="text/javascript" src="static.js?v=1.0.1"></script>';
 $TITLE = "IEM Valid Time Extent Code (VTEC) App";
 $NOCONTENT = 1;
 $THISPAGE ="severe-vtec";
