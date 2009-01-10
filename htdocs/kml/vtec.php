@@ -23,7 +23,7 @@ $rs = pg_prepare($connect, "SELECT", "SELECT *, astext(geom) as t,
 $result = pg_execute($connect, "SELECT", 
                      Array($wfo, $phenomena, $eventid, $significance) );
 if (pg_num_rows($result) <= 0) {
-    $rs = pg_prepare($connect, "SELECT", "SELECT *, astext(geom) as t, 
+    $rs = pg_prepare($connect, "SELECT2", "SELECT *, astext(geom) as t, 
            askml(geom) as kml,
            round(area(transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
