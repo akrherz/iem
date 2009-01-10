@@ -32,7 +32,7 @@ if (pg_num_rows($result) <= 0) {
            eventid = $3 and significance = $4
            and gtype = 'C' ORDER by sz DESC, updated DESC, gtype ASC");
 
-    $result = pg_execute($connect, "SELECT", 
+    $result = pg_execute($connect, "SELECT2", 
                Array($wfo, $phenomena, $eventid, $significance) );
 }
 
