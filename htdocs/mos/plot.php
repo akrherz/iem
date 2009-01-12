@@ -3,7 +3,7 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/mlib.php");
 
-$ts = strtotime("2008-12-10 00:00");
+$ts = strtotime("2009-01-13 00:00");
 $runtimes = Array(); $vals = Array(); $times = Array();
 $sqlSelector = "(";
 for ($i=0;$i<6;$i++)
@@ -17,8 +17,9 @@ for ($i=0;$i<6;$i++)
 $sqlSelector = substr($sqlSelector,0,-1) . ")";
 
 $dbconn = iemdb('mos');
-$sql = "SELECT * from t2008 WHERE model = 'GFS' and 
-    station = 'KAMW' and runtime IN $sqlSelector ORDER by runtime, ftime ASC";
+pg_query($dbconn, "SET TIME ZONE 'GMT'");
+$sql = "SELECT * from t2009 WHERE model = 'GFS' and 
+    station = 'KEST' and runtime IN $sqlSelector ORDER by runtime, ftime ASC";
 //echo $sql;
 $rs = pg_query($dbconn, $sql);
 
@@ -26,8 +27,8 @@ $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $runtime = substr($row["runtime"], 0, 16);
-  $vals[$runtime][] = $row["tmp"];
-  $times[$runtime][] = strtotime($row["ftime"]);
+  $vals[$runtime][] = $row["wsp"];
+  $times[$runtime][] = strtotime(substr($row["ftime"],0,16));
 }
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
@@ -36,12 +37,12 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(640,400,"example1");
+$graph = new Graph(320,300,"example1");
 $graph->SetScale("datlin");
 $graph->img->SetMargin(40,5,50,100);
 
 $graph->xaxis->SetLabelAngle(90);
-$graph->xaxis->SetLabelFormatString("M d h A", true);
+$graph->xaxis->SetLabelFormatString("M d H \Z", true);
 //$graph->xaxis->scale->SetDateFormat("M d h A");
 $graph->xaxis->SetPos("min");
 
@@ -50,16 +51,17 @@ $graph->xaxis->SetTitleMargin(70);
 
 $graph->yaxis->title->SetFont(FF_FONT2,FS_BOLD,16);
 $graph->xaxis->title->SetFont(FF_FONT2,FS_BOLD,16);
-$graph->xaxis->SetTitle("Valid Local Time");
-$graph->yaxis->SetTitle("Temperature [F]");
+$graph->xaxis->SetTitle("GMT Time");
+$graph->yaxis->SetTitle("Wind Speed [kts]");
 //$graph->tabtitle->Set('Recent Comparison');
-$graph->title->Set('Ottumwa [KOTM] Time Series');
+$graph->title->Set('Esterville [KEST] Time Series');
 
   $graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);
   $graph->SetColor('wheat');
 
   $graph->legend->SetLayout(LEGEND_HOR);
-  $graph->legend->SetPos(0.01,0.05, 'right', 'top');
+  $graph->legend->SetPos(0.2,0.06, 'right', 'top');
+$graph-> legend-> SetColumns(2);
 //  $graph->legend->SetLineSpacing(3);
   $graph->legend->SetLineWeight(3);
 
