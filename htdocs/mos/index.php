@@ -29,7 +29,7 @@ archive updates in real-time as products are received from the NWS.
    of ten days forecast.  An example URL call would be:<br />
   <pre>
 csv.php?station=KAMW&ts=2009-01-10%2012:00                  (all data 10 days)
-csv.php?station=KAMW&modelrun=2009-01-10%2012:00&model=GFS  (explicit)
+csv.php?station=KAMW&runtime=2009-01-10%2012:00&model=GFS  (explicit)
 </pre></li>
 </ul>
 
