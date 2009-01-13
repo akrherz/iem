@@ -28,7 +28,8 @@ archive updates in real-time as products are received from the NWS.
   <br />Simple web service provides csv data for a site and for a period
    of ten days forecast.  An example URL call would be:<br />
   <pre>
-csv.php?station=KAMW&ts=2009-01-10%2012:00
+csv.php?station=KAMW&ts=2009-01-10%2012:00                  (all data 10 days)
+csv.php?station=KAMW&modelrun=2009-01-10%2012:00&model=GFS  (explicit)
 </pre></li>
 </ul>
 
