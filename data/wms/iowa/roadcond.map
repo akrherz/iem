@@ -189,53 +189,10 @@ LAYER
       ANTIALIAS TRUE
     END
   END
-  # MIXED!
-  CLASS
-    NAME 'pc-mixed'
-    EXPRESSION ([cond_code] = 15)
-    STYLE
-      COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 255 197 197
-      WIDTH 3
-      ANTIALIAS TRUE
-    END
-  END
-  CLASS
-    NAME 'mc-mixed'
-    EXPRESSION ([cond_code] = 19)
-    STYLE
-      COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 254 51 153
-      WIDTH 3
-      ANTIALIAS TRUE
-    END
-  END
-  CLASS
-    NAME 'cc-mixed'
-    EXPRESSION ([cond_code] = 23)
-    STYLE
-      COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 181 0 181
-      WIDTH 3
-      ANTIALIAS TRUE
-    END
-  END
   # SLUSH!
   CLASS
-    NAME 'pc-slush'
-    EXPRESSION ([cond_code] = 56)
+    NAME 'pc-mix'
+    EXPRESSION ([cond_code] = 56 or [cond_code] = 27 or [cond_code] = 15)
     STYLE
       COLOR 0 0 0
       SIZE 5
@@ -248,8 +205,8 @@ LAYER
     END
   END
   CLASS
-    NAME 'mc-slush'
-    EXPRESSION ([cond_code] = 60)
+    NAME 'mc-mix'
+    EXPRESSION ([cond_code] = 60 or [cond_code] = 31 or [cond_code] = 19)
     STYLE
       COLOR 0 0 0
       SIZE 5
@@ -262,51 +219,8 @@ LAYER
     END
   END
   CLASS
-    NAME 'cc-slush'
-    EXPRESSION ([cond_code] = 64)
-    STYLE
-      COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 181 0 181
-      WIDTH 3
-      ANTIALIAS TRUE
-    END
-  END
-  # ICE!
-  CLASS
-    NAME 'pc-ice'
-    EXPRESSION ([cond_code] = 27)
-    STYLE
-      COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 255 197 197
-      WIDTH 3
-      ANTIALIAS TRUE
-    END
-  END
-  CLASS
-    NAME 'mc-ice'
-    EXPRESSION ([cond_code] = 31)
-    STYLE
-      COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 254 51 153
-      WIDTH 3
-      ANTIALIAS TRUE
-    END
-  END
-  CLASS
-    NAME 'cc-ice'
-    EXPRESSION ([cond_code] = 35)
+    NAME 'cc-mix'
+    EXPRESSION ([cond_code] = 64 or [cond_code] = 35 or [cond_code] = 23)
     STYLE
       COLOR 0 0 0
       SIZE 5
@@ -472,11 +386,12 @@ LAYER
       ANTIALIAS TRUE
     END
   END
+  # SLUSH!
   CLASS
-    NAME 'mixed'
-    EXPRESSION ([cond_code] = 15)
+    NAME 'pc-mix'
+    EXPRESSION ([cond_code] = 56 or [cond_code] = 27 or [cond_code] = 15)
     STYLE
-      COLOR 220 220 220
+      COLOR 0 0 0
       SIZE 7
       SYMBOL 'circle'
     END
@@ -487,10 +402,10 @@ LAYER
     END
   END
   CLASS
-    NAME 'mixed'
-    EXPRESSION ([cond_code] = 19)
+    NAME 'mc-mix'
+    EXPRESSION ([cond_code] = 60 or [cond_code] = 31 or [cond_code] = 19)
     STYLE
-      COLOR 220 220 220
+      COLOR 0 0 0
       SIZE 7
       SYMBOL 'circle'
     END
@@ -501,10 +416,10 @@ LAYER
     END
   END
   CLASS
-    NAME 'mixed'
-    EXPRESSION ([cond_code] = 23)
+    NAME 'cc-mix'
+    EXPRESSION ([cond_code] = 64 or [cond_code] = 35 or [cond_code] = 23)
     STYLE
-      COLOR 220 220 220
+      COLOR 0 0 0
       SIZE 7
       SYMBOL 'circle'
     END
@@ -514,93 +429,6 @@ LAYER
       ANTIALIAS TRUE
     END
   END
-
-  CLASS
-    NAME 'slush'
-    EXPRESSION ([cond_code] = 56)
-    STYLE
-      COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 255 197 197
-      WIDTH 5
-      ANTIALIAS TRUE
-    END
-  END
-  CLASS
-    NAME 'slush'
-    EXPRESSION ([cond_code] = 60)
-    STYLE
-      COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 254 51 153
-      WIDTH 5
-      ANTIALIAS TRUE
-    END
-  END
-  CLASS
-    NAME 'slush'
-    EXPRESSION ([cond_code] = 64)
-    STYLE
-      COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 181 0 181
-      WIDTH 5
-      ANTIALIAS TRUE
-    END
-  END
-  CLASS
-    NAME 'ice'
-    EXPRESSION ([cond_code] = 27)
-    STYLE
-      COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 255 197 197
-      WIDTH 5
-      ANTIALIAS TRUE
-    END
-  END
-  CLASS
-    NAME 'ice'
-    EXPRESSION ([cond_code] = 31)
-    STYLE
-      COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 254 51 153
-      WIDTH 5
-      ANTIALIAS TRUE
-    END
-  END
-  CLASS
-    NAME 'ice'
-    EXPRESSION ([cond_code] = 35)
-    STYLE
-      COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 181 0 181
-      WIDTH 5
-      ANTIALIAS TRUE
-    END
-  END
-
-
   CLASS
     NAME 'snow'
     EXPRESSION ([cond_code] = 39)
