@@ -50,10 +50,16 @@ END
 
 LEGEND
   STATUS EMBED
-  OUTLINECOLOR 0 0 0
+  #OUTLINECOLOR 0 0 0
   IMAGECOLOR 0 0 0
   LABEL
     COLOR 255 255 255
+  #  SIZE 16
+  #  TYPE TRUETYPE
+  #  FONT 'arial'
+  #  FORCE TRUE
+  #  PARTIALS TRUE
+  #  BUFFER 2
   END
   POSITION LR
 END
@@ -607,6 +613,13 @@ LAYER
         SIZE    3
         SYMBOL  'circle'
     END
+    #CLASS
+    #    NAME "Other"
+    #    #EXPRESSION ('[phenomena]' = 'MA' and '[significance]' = 'S')
+    #    COLOR   200 200 200
+    #    SIZE    3
+    #    SYMBOL  'circle'
+    #END
 END
 
 LAYER
