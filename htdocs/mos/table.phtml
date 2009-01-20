@@ -16,10 +16,11 @@ $station = isset($_GET["station"]) ? strtoupper($_GET["station"]): "KAMW";
 $vname = isset($_GET["vname"]) ? strtolower($_GET["vname"]): "tmp";
 
 $now = strtotime("${year}-${month}-${day} ${hour}:00");
+if ($model == "NAM" && $now < mktime(12,0,0,12,9,2008)){ $model = "ETA"; }
 $sts = $now - (86400*3) - (3600*12);
 $ets = $now - 3600;
 
-$runsper = Array("GFS"=>6, "NAM"=>12);
+$runsper = Array("GFS"=>6, "NAM"=>12, "ETA"=>12);
 $sqlSelector = "(";
 $runtimes = Array();
 $data = Array();
@@ -101,15 +102,15 @@ echo "<option value=\"GFS\" ";
 if ($model == "GFS") echo " SELECTED";
   echo ">GFS</option>\n";
 echo "<option value=\"NAM\" ";
-if ($model == "NAM") echo " SELECTED";
-  echo ">NAM</option>\n";
+if ($model == "NAM" || $model == "ETA") echo " SELECTED";
+  echo ">Eta/NAM</option>\n";
 echo "</select>";
 
 echo yearSelect(2008,$year);
 echo monthSelect($month);
 echo daySelect($day);
 
-echo "<input type=\"submit\">";
+echo "<input type=\"submit\" value=\"Generate\">";
 echo "</form>";
 
 
