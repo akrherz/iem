@@ -36,7 +36,7 @@ include("$rootpath/include/header.php"); ?>
  $db = Array();
  while (list($site, $iemob) = each($net) ){
   $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"",
-                      'min_tmpf'=>"", 'max_tmpf'=>"", 'tmpf'=>"");
+                      'min_tmpf'=>"", 'max_tmpf'=>"", 'tmpf'=>"", 'snoww'=>"");
   $db[$site]['ts'] = $iemob->ts;
   $db[$site]['sid'] = $site;
   $db[$site]['sname'] = $iemob->db["sname"];
@@ -58,6 +58,7 @@ include("$rootpath/include/header.php"); ?>
   if ($iemob->db["phour"] != -99)
     $db[$site]['phour'] = $iemob->db["phour"];
   $db[$site]['pday'] = $iemob->db["pday"];
+  $db[$site]['snoww'] = $iemob->db["snoww"];
   $db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : " ";
   $db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : " ";
   $db[$site]["ratio"] = -1;
@@ -136,7 +137,7 @@ if ($shef){
   <th rowspan=2><a href="<?php echo $baseurl; ?>county">County:</a></th>
   <th rowspan=2><a href="<?php echo $baseurl; ?>ts">Valid:</a></th>
   <th colspan=3>Temperatures [F]</th>
-  <th colspan=4>Hydro</th></tr>
+  <th colspan="5">Hydro</th></tr>
 
 <tr>
   <th><a href="<?php echo $baseurl; ?>tmpf">At Ob</a></th>
@@ -147,6 +148,7 @@ if ($shef){
   <th><a href="<?php echo $baseurl; ?>snow">Snowfall</a></th>
   <th><a href="<?php echo $baseurl; ?>ratio">Ratio</a></th>
   <th><a href="<?php echo $baseurl; ?>snowd">Snow Depth</a></th>
+  <th><a href="<?php echo $baseurl; ?>snoww">SWE</a></th>
 <?php } ?>
 </tr></thead>
 <tbody>
@@ -189,6 +191,7 @@ if ($shef){
    if ($value["snow"] == 0.001) $value["snow"] = "T";
    if ($value["snowd"] == 0.001) $value["snowd"] = "T";
    if ($value["snow"] < 0) $value["snow"] = "M";
+   if ($value["snoww"] < 0) $value["snoww"] = "M";
 
    echo "<td>". $value["pday"] ."</td>";
    if ($winter) 
@@ -197,13 +200,14 @@ if ($shef){
     if ($value["ratio"] > 0) echo "<td>". $value["ratio"] ."</td>";
     else echo "<td></td>";
     echo "<td>". $value["snowd"] ."</td>";
+    echo "<td>". $value["snoww"] ."</td>";
    }
    echo "</tr>";
    if ($shef) 
    {
 	echo "<tr align=\"center\" ";
     if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
-    echo "><td colspan=\"9\"><font color=\"brown\">". $value["raw"]
+    echo "><td colspan=\"10\"><font color=\"brown\">". $value["raw"]
     ."</font></td></tr>";
    }
  }
@@ -218,6 +222,7 @@ if ($shef){
  <td><a href="<?php echo $c; ?>snow');">Plot</a></td>
  <td></td>
  <td><a href="<?php echo $c; ?>snowd');">Plot</a></td>
+ <td><a href="<?php echo $c; ?>snoww');">Plot</a></td>
 </tr></tfoot>
 </table>
 <input type="submit" value="Add to Favorites">
