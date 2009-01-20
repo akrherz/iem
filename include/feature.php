@@ -3,8 +3,8 @@
 function printTags($tokens)
 {
   global $rooturl;
-  if (sizeof($tokens) == 0){ return "";}
-  $s = "<br /><strong>Tags:</strong> &nbsp; ";
+  if (sizeof($tokens) == 0 || $tokens[0] == ""){ return "";}
+  $s = "<br /><strong><a href=\"${rooturl}/onsite/features/tags/\">Tags</a>:</strong> &nbsp; ";
   while (list($k,$v) = each($tokens))
   {
     $s .= sprintf("<a href=\"%s/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $rooturl, $v, $v);
@@ -60,7 +60,7 @@ function genFeature()
 
   $s = "<span style=\"font-size: larger; font-weight: bold;\">". $row["title"] ."</span><br />\n";
   $s .= "<span style=\"font-size: smaller; float: left;\">Posted: " . $row["webdate"] ."</span>";
-  $s .= "<span style=\"font-size: smaller; float: right;\"><a href=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\">Permalink</a> | <a href=\"$rooturl/onsite/features/past.php\">Past Features</a></span>";
+  $s .= "<span style=\"font-size: smaller; float: right;\"><a href=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\">Permalink</a> | <a href=\"$rooturl/onsite/features/past.php\">Past Features</a> | <a href=\"$rooturl/onsite/features/tags/\">Tags</a></span>";
 
  /* Feature Image! */
   $s .= "<div style=\"background: #eee; float: right; border: 1px solid #ee0; padding: 3px; margin-left: 10px; width: ${width}px;\"><a href=\"$rooturl/onsite/features/". $row["imageref"] .".gif\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.gif\" alt=\"Feature\" /></a><br />". $row["caption"] ."</div>";
