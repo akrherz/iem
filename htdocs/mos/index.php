@@ -16,7 +16,7 @@ produce a site specific forecast. You can find out more about
 NWS's website.  The IEM is building an interactive MOS archive to support
 local research and makes it available for others to use as well.</p>
 
-<p><strong>Archive Status:</strong> NAM and GFS MOS back to 1 Jan 2008. The
+<p><strong>Archive Status:</strong> NAM and GFS MOS back to 3 May 2007. The
 archive updates in real-time as products are received from the NWS.
 
 <h3>Current Tools:</h3>
