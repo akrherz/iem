@@ -25,7 +25,9 @@ $gs_start = Array(
   2003 => adodb_mktime(0,0,0,5,1,2003),
   2004 => adodb_mktime(0,0,0,5,1,2004),
   2005 => adodb_mktime(0,0,0,5,1,2005),
-  2006 => adodb_mktime(0,0,0,5,1,2006) );
+  2006 => adodb_mktime(0,0,0,5,1,2005),
+  2007 => adodb_mktime(0,0,0,5,1,2005),
+  2008 => adodb_mktime(0,0,0,5,1,2006) );
 $gs_end = Array(
   1998 => adodb_mktime(0,0,0,10,1,1998),
   1999 => adodb_mktime(0,0,0,10,1,1999),
@@ -35,10 +37,12 @@ $gs_end = Array(
   2003 => adodb_mktime(0,0,0,10,1,2003),
   2004 => adodb_mktime(0,0,0,10,1,2004),
   2005 => adodb_mktime(0,0,0,10,1,2005),
-  2006 => adodb_mktime(0,0,0,10,1,2006) );
+  2006 => adodb_mktime(0,0,0,10,1,2005),
+  2007 => adodb_mktime(0,0,0,10,1,2005),
+  2008 => adodb_mktime(0,0,0,10,1,2006) );
 
 if (strlen($var) == 0)  $var = "gdd50";
-if (strlen($year) == 0)  $year = 2004;
+if (strlen($year) == 0)  $year = 2008;
 //if ($year > 2003) $year = 2003;
 if (strlen($smonth) > 0 && strlen($sday) > 0)
   $gs_start[$year] = adodb_mktime(0,0,0,$smonth,$sday,$year);
