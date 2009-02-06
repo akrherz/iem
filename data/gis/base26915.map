@@ -134,6 +134,7 @@ LAYER
   END
 END
 
+INCLUDE "inc_lsrs.map"
 
 
 
