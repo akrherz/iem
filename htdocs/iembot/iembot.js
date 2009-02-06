@@ -44,7 +44,7 @@ function makeRPCCall(roomname) {
 
 function updateCB(rslt, state, extra) {
   var roomname = extra.userdata;
-  if(state != __RPC_SUCCESS__) { 
+  if(state != __RPC_SUCCESS__) {
     return; 
   }
   for (var i=0; i < rslt.length; i++)
@@ -73,7 +73,7 @@ function updateCB(rslt, state, extra) {
 function botcaller(roomname)
 {
   if (! document.getElementById(roomname +"_log")) { return; }
-  if (ccount > 100)
+  if (ccount > 1000)
   { 
     alert("Connection Error limit reached, please reload the page. Sorry!");
     return;
