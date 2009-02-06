@@ -1,0 +1,89 @@
+<?php 
+        $TITLE = "IEM | AWOS 2009 Precip Report";
+include("../../../config/settings.inc.php");
+include("$rootpath/include/header.php"); 
+?>
+
+<br>Based on the 1 minute AWOS data archive provided by the DOT, here is our
+best estimate for rainfall totals from the AWOS sites.<p>
+
+<h3 class="heading">2007 Iowa AWOS Precipitation Report</h3><p>
+<div class="text">
+<b>Download this dataset:</b> 
+  <a href="awos2009.xls">MS Excel</a>  or 
+  <a href="awos2009.txt">CDF Text</a>
+
+<TABLE border=1 cellpadding=2 cellspacing=0 width="100%">
+<TR>
+<TD ></TD>
+<TD ></TD>
+<TD ></TD>
+<TD ></TD>
+<TD ></TD>
+<TD ></TD>
+<TD ></TD>
+<TD ></TD>
+<TD ></TD>
+<TD ></TD>
+<TD ></TD>
+<TD ></TD>
+<TD ></TD>
+<TD ><B></B></TD>
+<TD ><B></B></TD>
+</TR>
+<TR>
+<TD ></TD>
+<TH  valign="bottom"  align="left" >Jan</TH>
+<TH  valign="bottom"  align="left" >Feb</TH>
+<TH  valign="bottom"  align="left" >Mar</TH>
+<TH  valign="bottom"  align="left" >Apr</TH>
+<TH  valign="bottom"  align="left" >May</TH>
+<TH  valign="bottom"  align="left" >Jun </TH>
+<TH  valign="bottom"  align="left" >Jul</TH>
+<TH  valign="bottom"  align="left" >Aug</TH>
+<TH  valign="bottom"  align="left" >Sep</TH>
+<TH  valign="bottom"  align="left" >Oct</TH>
+<TH  valign="bottom"  align="left" >Nov</TH>
+<TH  valign="bottom"  align="left" >Dec</TH>
+<TH  valign="bottom"  align="left" ><B>MJJA</B></TH>
+<TH  valign="bottom"  align="left" ><B>Year</B></TH>
+</TR>
+<?php
+ $data = Array();
+ $fc = file('awos2009.txt');
+ while (list ($line_num, $line) = each ($fc)) {
+     if (intval($line_num) > 0){
+      $tokens = split (",", $line);
+      $data[ $tokens[0] ] = $tokens;
+     }
+ }
+
+ while (list ($key, $val) = each ($data))  {
+   echo "<tr>
+    <td>". $key ."</td>
+    <td>". $data[$key][1] ."</td>
+    <td>". $data[$key][2] ."</td>
+    <td>". $data[$key][3] ."</td>
+    <td>". $data[$key][4] ."</td>
+    <td>". $data[$key][5] ."</td>
+    <td>". $data[$key][6] ."</td>
+    <td>". $data[$key][7] ."</td>
+    <td>". $data[$key][8] ."</td>
+    <td>". $data[$key][9] ."</td>
+    <td>". $data[$key][10] ."</td>
+    <td>". $data[$key][11] ."</td>
+    <td>". $data[$key][12] ."</td>
+    <th>". $data[$key][13] ."</th>
+    <th>". $data[$key][14] ."</th>
+   </tr>\n";
+ }
+?>
+</TABLE>
+
+<p><b>Known Issues:</b>
+<ul>
+<li> These numbers are not official and there is missing data in this dataset.</li>
+<li> Precipitation amounts during the cold season are not accurate.</li>
+</ul>
+</div>
+<?php include("$rootpath/include/footer.php"); ?>
