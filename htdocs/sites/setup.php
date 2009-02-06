@@ -3,7 +3,7 @@
  include_once("$rootpath/include/database.inc.php");
  include_once("$rootpath/include/station.php");
  /* Make sure all is well! */
- $station = isset($_GET["station"]) ? $_GET["station"] : "";
+ $station = isset($_GET["station"]) ? substr($_GET["station"],0,12) : "";
 $st = new StationData($station);
 $cities = $st->table;
 
