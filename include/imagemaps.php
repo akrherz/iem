@@ -85,10 +85,11 @@ function networkSelect($network, $selected, $extra=Array())
    }
    while (list($idx,$sid) = each($extra))
    {
-        $tbl = $cities[$sid];
+        $nt->load_station($sid);
+        $tbl = $nt->table[$sid];
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">". $tbl["name"] ."</option>\n";
+        $s .= ">[$sid]". $tbl["name"] ."</option>\n";
    }
    $s .= "</select>\n";
    return $s;
