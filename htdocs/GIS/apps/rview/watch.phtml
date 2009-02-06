@@ -1,224 +1,48 @@
 <?php
 /* Plot watches since SPC's site sometimes gets slow..... */
 include("../../../../config/settings.inc.php");
-$THISPAGE = "severe-watch";
-include("$rootpath/include/header.php");
 include("$rootpath/include/forms.php");
-putenv("TZ=GMT");
-$ERROR = "";
-
-/* Needed GET variables */
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$num = isset($_GET["num"]) ? $_GET["num"] : 1;
-
 include("$rootpath/include/database.inc.php");
 include("lib.php");
 $db = iemdb("postgis");
 pg_exec($db, "SET TIME ZONE 'GMT'");
+$rs = pg_prepare($db, "CHECK4WATCH", "SELECT *, xmin(geom) as x0, 
+      xmax(geom) as x1, ymin(geom) as y0, ymax(geom) as y1 from watches 
+      where extract(year from issued) = $1 and num = $2");
+putenv("TZ=GMT");
 
-$sql = "SELECT *, xmin(geom) as x0, xmax(geom) as x1, ymin(geom) as y0, ymax(geom) as y1 from watches where extract(year from issued) = $year and num = $num";
-$rs = pg_exec($db, $sql);
-if (pg_numrows($rs) == 0) die("Watch not found, sorry!");
+$THISPAGE = "severe-watch";
+include("$rootpath/include/header.php");
+$ERROR = "";
+
+/* Needed GET variables */
+$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
+$num = isset($_GET["num"]) ? intval($_GET["num"]) : 1;
+
+$rs = pg_execute($db, "CHECK4WATCH", Array($year, $num));
+if (pg_numrows($rs) == 0) {
+  echo "<h3>Sorry, watch number $num for year $year was not found</h3>";
+  include("$rootpath/include/footer.php");
+  die();
+}
 
 $row = pg_fetch_array($rs,0);
-//echo $row["report"];
 
 $ts = strtotime($row["issued"]);
 $expires = strtotime($row["expired"]);
 $d = date("d F Y H:i" ,  $ts);
 
-$month = date("m", $ts);
-$day = date("d", $ts);
-$hour = date("H", $ts);
-$m = date("i", $ts);
-
-if ($m >= 55) $ma = "55";
-else if ($m >= 50) $ma = "50";
-else if ($m >= 45) $ma = "45";
-else if ($m >= 40) $ma = "40";
-else if ($m >= 35) $ma = "35";
-else if ($m >= 30) $ma = "30";
-else if ($m >= 25) $ma = "25";
-else if ($m >= 20) $ma = "20";
-else if ($m >= 15) $ma = "15";
-else if ($m >= 10) $ma = "10";
-else if ($m >= 5) $ma = "05";
-else $ma = "00";
-$m = $ma;
-$basets = mktime($hour, $m, 0, $month, $day, $year);
-
-
-
-dl($mapscript);
-$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
-$map->set("width", 640);
-$map->set("height", 480);
-
+$maptitle = htmlentities("SPC Watch number $num during $year");
 $margin = 0.5;
-$map->setextent($row["x0"] -$margin,
-                $row["y0"]-$margin,
-                $row["x1"]+$margin,
-                $row["y1"]+$margin);
-
-$img = $map->prepareImage();
-
-$namer = $map->getlayerbyname("namerica");
-$namer->set("status", 1);
-$namer->draw($img);
-
-$lakes = $map->getlayerbyname("lakes");
-$lakes->set("status", 1);
-$lakes->draw($img);
-
-
-$clayer = $map->getlayerbyname("uscounties");
-$clayer->set("status", 1);
-$clayer->draw( $img );
-
-$stlayer = $map->getlayerbyname("states");
-$stlayer->set("status", 1);
-$stlayer->draw( $img);
-
-$fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets) ."GIS/uscomp/n0r_". date('YmdHi', $basets) .".png";
-if (! is_file($fp))
-{
-    $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets - 300.0) ."GIS/uscomp/n0r_". date('YmdHi', $basets - 300.0) .".png";
-    if (! is_file($fp))
-    {
-       $fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets - 600.0) ."GIS/uscomp/n0r_". date('YmdHi', $basets - 600.0) .".png";
-    
-       if (! is_file($fp))
-         $ERROR .= "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
-   }
-}
-$radfile = $fp;
-$radar = $map->getlayerbyname("nexrad_n0r");
-$radar->set("data", $radfile);
-$radar->set("status", 1);
-$radar->draw($img);
-
-$wbc = $map->getlayerbyname("watch_by_county");
-$wbc->set("status", MS_ON);
-$wbc->set("data", "g from (select phenomena, eventid, multi(geomunion(geom)) 
-  as g from warnings_$year WHERE significance = 'A' 
-  and phenomena = '". substr($row["type"],0,2) ."'
-  and eventid = $num GROUP by phenomena, 
-  eventid ORDER by phenomena ASC) as foo 
-  using SRID=4326 using unique phenomena");
-$wbc->draw($img);
-
-
-$watches = $map->getlayerbyname("watches");
-$watches->set("connection", $_DATABASES["postgis"] );
-$watches->set("status", 1);
-$watches->set("data", "geom from (select type as wtype, geom, oid from watches where extract(year from issued) = $year and num = $num) as foo using unique oid using srid=4326");
-
-$watches->draw($img);
-
-
-
-mktitle($map, $img, "                 SPC Watch #$num: $d UTC");
-
-$map->drawLabelCache($img);
-mklogolocal($map, $img);
-
-$url = $img->saveWebImage();
+$url = sprintf("%s/GIS/radmap.php?title=%s&layers[]=uscounties&layers[]=nexrad&ts=%s&height=480&width=640&layers[]=watches&layers[]=watch_by_county&sector=conus&bbox=%s,%s,%s,%s", $rooturl, $maptitle, date('YmdHi', $ts), $row["x0"] -$margin, $row["y0"]-$margin, $row["x1"]+$margin, $row["y1"]+$margin);
 
 /*____________________________ Plot LSRs */
 if ($expires < time() && $year > 2002)
 {
- $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
- $map->set("width", 640);
- $map->set("height", 480);
-
- $margin = 0.5;
- $map->setextent($row["x0"] -$margin,
-                $row["y0"]-$margin,
-                $row["x1"]+$margin,
-                $row["y1"]+$margin);
-
-
- $namer = $map->getlayerbyname("namerica");
- $namer->set("status", 1);
-
- $stlayer = $map->getlayerbyname("states");
- $stlayer->set("status", 1);
-
- $lakes = $map->getlayerbyname("lakes");
- $lakes->set("status", 1);
-
- $clayer = $map->getlayerbyname("uscounties");
- $clayer->set("status", 1);
-
- $watches = $map->getlayerbyname("watches");
- $watches->set("connection", $_DATABASES["postgis"] );
- $watches->set("status", 1);
- $watches->set("data", "geom from (select type as wtype, geom, oid from watches where extract(year from issued) = $year and num = $num) as foo using unique oid using srid=4326");
-
- $lsrs = $map->getlayerbyname("lsrs");
- $lsrs->set("connection", $_DATABASES["postgis"]);
- $lsrs->set("status",1);
- $lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_${year} WHERE valid > '". date("Y-m-d H:i", $ts) .":00+00' and valid < '". date("Y-m-d H:i", $expires) .":00+00') as foo USING unique k USING SRID=4326");
-
-
-
- $img = $map->prepareImage();
- $namer->draw($img);
- $clayer->draw( $img );
- $stlayer->draw( $img);
- $lakes->draw($img);
- $watches->draw($img);
- $lsrs->draw($img);
-
- mktitle($map, $img, "               Storm reports during watch #$num: ". date("Y-m-d H:i", $ts) ." - ". date("Y-m-d H:i", $expires) ." UTC");
-
- $map->drawLabelCache($img);
- mklogolocal($map, $img);
-
- $lurl = $img->saveWebImage();
-
+ $lurl = sprintf("%s/GIS/radmap.php?layers[]=lsrs&ts=%s&ts2=%s&height=480&width=640&layers[]=watches&sector=conus&bbox=%s,%s,%s,%s", $rooturl, date('YmdHi', $ts), date('YmdHi', $expires), $row["x0"] -$margin, $row["y0"]-$margin, $row["x1"]+$margin, $row["y1"]+$margin);
 }
 
-
-/*____________________________ Draw overview */
-$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
-$map->set("width", 320);
-$map->set("height", 240);
-
-$margin = 0.5;
-$map->setextent(-125,26,-65,50);
-
-$namer = $map->getlayerbyname("namerica");
-$namer->set("status", 1);
-
-$stlayer = $map->getlayerbyname("states");
-$stlayer->set("status", 1);
-
-$lakes = $map->getlayerbyname("lakes");
-$lakes->set("status", 1);
-
-$watches = $map->getlayerbyname("watches");
-$watches->set("connection", $_DATABASES["postgis"] );
-$watches->set("status", 1);
-$watches->set("data", "geom from (select type as wtype, geom, oid from watches where issued <= '". date("Y-m-d H:i", $basets) .":00+00' and expired > '". date("Y-m-d H:i", $basets)  .":00+00') as foo using unique oid using srid=4326");
-
-$radar = $map->getlayerbyname("nexrad_n0r");
-$radar->set("data", $radfile);
-$radar->set("status", 1);
-
-$img = $map->prepareImage();
-$namer->draw($img);
-$stlayer->draw( $img);
-$lakes->draw($img);
-$radar->draw($img);
-$watches->draw($img);
-
-mktitle($map, $img, "               $d UTC");
-
-$map->drawLabelCache($img);
-mklogolocal($map, $img);
-
-$ourl = $img->saveWebImage();
+$ourl = sprintf("%s/GIS/radmap.php?layers[]=nexrad&ts=%s&height=240&width=320&layers[]=watches&sector=conus", $rooturl, date('YmdHi', $ts));
 
 /*____________ web interface _________*/
 
