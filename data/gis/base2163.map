@@ -296,6 +296,8 @@ LAYER
   END
 END
 
+INCLUDE "inc_lsrs.map"
+
 # watches
 LAYER
  CONNECTIONTYPE postgis
