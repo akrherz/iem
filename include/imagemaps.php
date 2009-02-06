@@ -89,7 +89,7 @@ function networkSelect($network, $selected, $extra=Array())
         $tbl = $nt->table[$sid];
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">[$sid]". $tbl["name"] ."</option>\n";
+        $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
    }
    $s .= "</select>\n";
    return $s;
