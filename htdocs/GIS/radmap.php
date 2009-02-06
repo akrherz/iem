@@ -290,7 +290,9 @@ $bar640t->draw($img);
 $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
 $point->setXY(80, 12);
-if (in_array("nexrad", $layers)){
+if (isset($_GET["title"])){
+  $point->draw($map, $tlayer, $img, 0,substr($_GET["title"],0,50));
+} else if (in_array("nexrad", $layers)){
   $point->draw($map, $tlayer, $img, 0,"NEXRAD Base Reflectivity");
 } else {
   $point->draw($map, $tlayer, $img, 0,"IEM Plot");
