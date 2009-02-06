@@ -96,6 +96,10 @@ $ts = isset($_GET["ts"]) ? gmmktime(
  substr($_GET["ts"],8,2), substr($_GET["ts"],10,2), 0,
  substr($_GET["ts"],4,2), substr($_GET["ts"],6,2), substr($_GET["ts"],0,4)): 
  time();
+$ts2 = isset($_GET["ts2"]) ? gmmktime(
+ substr($_GET["ts2"],8,2), substr($_GET["ts2"],10,2), 0,
+ substr($_GET["ts2"],4,2), substr($_GET["ts2"],6,2), substr($_GET["ts2"],0,4)): 
+ 0;
 if (isset($dts) && ! isset($_GET["ts"])) { $ts = $dts; }
 /* Make sure we have a minute %5 */
 if (time() - $ts > 300)
@@ -145,7 +149,7 @@ $states->draw($img);
 /* Watch by County */
 $wbc = $map->getlayerbyname("watch_by_county");
 $wbc->set("status", in_array("watch_by_county", $layers) );
-$wbc->set("connection", "user=nobody dbname=postgis host=iemdb");
+$wbc->set("connection", $_DATABASES["postgis"]);
 $sql = sprintf("g from (select phenomena, eventid, multi(geomunion(geom)) as g from warnings_%s WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= '%s:00+00' and expire > '%s:00+00' GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena",gmstrftime("%Y",$ts),
   gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts) );
 $wbc->set("data", $sql);
@@ -153,7 +157,7 @@ $wbc->draw($img);
 
 $watches = $map->getlayerbyname("watches");
 $watches->set("status", in_array("watches", $layers) );
-$watches->set("connection", "user=nobody dbname=postgis host=iemdb");
+$watches->set("connection", $_DATABASES["postgis"]);
 $sql = sprintf("geom from (select type as wtype, geom, num from watches 
        WHERE issued <= '%s:00+00' and expired > '%s:00+00') as foo using SRID=4326 using unique num", 
        gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts));
@@ -165,7 +169,7 @@ if (isset($_GET["pid"]))
 {
   $wc = ms_newLayerObj($map);
   $wc->set("connectiontype", MS_POSTGIS);
-  $wc->set("connection", "user=nobody dbname=postgis host=iemdb");
+  $wc->set("connection", $_DATABASES["postgis"]);
   $wc->set("status", MS_ON );
   $sql = sprintf("geom from (select geom, id from text_products WHERE product_id = '$pid') as foo using unique id using SRID=4326");
   $wc->set("data", $sql);
@@ -187,7 +191,7 @@ if (isset($_GET["vtec"]))
 {
   $wc = ms_newLayerObj($map);
   $wc->set("connectiontype", MS_POSTGIS);
-  $wc->set("connection", "user=nobody dbname=postgis host=iemdb");
+  $wc->set("connection", $_DATABASES["postgis"]);
   $wc->set("status", in_array("cbw", $layers) );
   $sql = sprintf("geom from (select gtype, eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
   $wc->set("data", $sql);
@@ -209,7 +213,7 @@ if (isset($_GET["vtec"]))
 $ptext = "'ZZ' as phenomena";
 $sbwh = $map->getlayerbyname("sbw");
 $sbwh->set("status", in_array("sbwh", $layers) );
-$sbwh->set("connection", "user=nobody dbname=postgis host=iemdb");
+$sbwh->set("connection", $_DATABASES["postgis"]);
 $sbwh->set("maxscale", 10000000);
 $sql = sprintf("geom from (select %s, geom, oid from sbw_%s 
     WHERE significance != 'A' and polygon_begin <= '%s:00+00' and 
@@ -232,7 +236,7 @@ if (in_array("sbw", $layers) && in_array("cbw", $layers))
 }
 $sbw = $map->getlayerbyname("sbw");
 $sbw->set("status", in_array("sbw", $layers) );
-$sbw->set("connection", "user=nobody dbname=postgis host=iemdb");
+$sbw->set("connection", $_DATABASES["postgis"]);
 $sbw->set("maxscale", 10000000);
 $sql = sprintf("geom from (select %s, geom, oid from warnings_%s 
     WHERE significance != 'A' and issue <= '%s:00+00' and expire > '%s:00+00'
@@ -245,7 +249,7 @@ $sbw->draw($img);
 
 /* warnings by county */
 $w0c = $map->getlayerbyname("warnings0_c");
-$w0c->set("connection", $_DATABASES["postgis"] );
+$w0c->set("connection", $_DATABASES["postgis"]);
 $w0c->set("status", in_array("county_warnings", $layers) );
 $sql = sprintf("geom from (select *, oid from warnings_%s WHERE issue <= '%s:00+00' and expire > '%s:00+00' and gtype = 'C' %s ORDER by phenomena ASC) as foo using unique oid using SRID=4326", 
     gmstrftime("%Y",$ts),
@@ -254,15 +258,28 @@ $sql = sprintf("geom from (select *, oid from warnings_%s WHERE issue <= '%s:00+
 $w0c->set("data", $sql);
 $w0c->draw($img);
 
+/* Local Storm Reports */
+$lsrs = $map->getlayerbyname("lsrs");
+$lsrs->set("connection", $_DATABASES["postgis"]);
+$lsrs->set("status",in_array("lsrs", $layers) );
+if ($ts2 > $ts){
+ $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid >= '". date("Y-m-d H:i", $ts) .":00+00' and valid < '". date("Y-m-d H:i", $ts2) .":00+00') as foo USING unique k USING SRID=4326";
+} else {
+ $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid = '". date("Y-m-d H:i", $ts) .":00+00') as foo USING unique k USING SRID=4326";
+}
+$lsrs->set("data", $sql);
+$lsrs->draw($img);
+
+
 /* roads */
 $roads = $map->getlayerbyname("roads");
-$roads->set("connection", $_DATABASES["postgis"] );
+$roads->set("connection", $_DATABASES["postgis"]);
 $roads->set("status", in_array("roads", $layers) );
 $roads->draw($img);
 
 /* roads */
 $roadsint = $map->getlayerbyname("roads-inter");
-$roadsint->set("connection", $_DATABASES["postgis"] );
+$roadsint->set("connection", $_DATABASES["postgis"]);
 $roadsint->set("status", in_array("roads-inter", $layers) );
 $roadsint->draw($img);
 
