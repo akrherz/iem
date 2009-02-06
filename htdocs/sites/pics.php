@@ -24,7 +24,7 @@ function filecheck($file){
 
 
 function printtd($instr,$selected,$station){
-
+  global $network;
   $filename='./pics/'.$station.'/'.$station.'_'.$instr.'.jpg'; 
   $present = file_exists($filename);
   if ($present)
@@ -36,7 +36,7 @@ function printtd($instr,$selected,$station){
      }
     else
      {
-      echo '<TD align="center"><a href="pics.php?station='.$station.'&dir='.$instr.'">'.$instr.'</a></TD>';
+      echo '<TD align="center"><a href="pics.php?network='.$network.'&station='.$station.'&dir='.$instr.'">'.$instr.'</a></TD>';
       echo "\n";
      }
     }
@@ -62,6 +62,8 @@ if ($dir != ""){
 available.  In general, the IEM only has photos for some of the sites in 
 Iowa...</p>
 
+<p><a href="pics.php?network=<?php echo $network; ?>&station=<?php echo $station; ?>">Site Photo</a>
+
 <TABLE>
             <TR><?php printtd("NW",$dir,$station);printtd("N",$dir,$station);printtd("NE",$dir,$station)?></TR>
             <TR><?php printtd("W",$dir,$station);echo '<TD class="hlink"><IMG class="pics" border="3" SRC="'.$filename.'"  
@@ -75,8 +77,9 @@ if (file_exists($filename))
 {
   echo "<h3>Panoramic Shot</h3><img src=\"$filename\"><br /><a href=\"$lfilename\">Full resolution version</a>";
 }
-
-
+if (file_exists("./pics/$station/HEADER.html")){
+  echo "<p><strong>". file_get_contents("./pics/$station/HEADER.html") ."</strong>";
+}
 
 ?>
 <?php include("$rootpath/include/footer.php"); ?>
