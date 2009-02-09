@@ -61,6 +61,7 @@ $_pages = Array(
     "feature" => Array("title" => "Daily Features", "url" => "/onsite/features/past.php"),
     "sites" => Array("title" => "IEM Sites", "url" => "/sites/locate.php"),
     "info" => Array("title" => "Info", "url" => "/info.php"),
+    "links" => Array("title" => "Links", "url" => "/info/links.php"),
     "mailman" => Array("title" => "Mail Lists", "url" => "/mailman/listinfo/"),
     "news" => Array("title" => "News", "url" => "/onsite/news.phtml"),
     "networks" => Array("title" => "Network Tables", "url" => "/sites/networks.php"),
