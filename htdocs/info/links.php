@@ -1,6 +1,7 @@
 <?php
 include("../../config/settings.inc.php");
 $TITLE = "IEM | Links";
+$THISPAGE="iem-links";
 include("$rootpath/include/header.php"); ?>
 
 
