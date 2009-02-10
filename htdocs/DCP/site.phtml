@@ -80,7 +80,7 @@ include("$rootpath/include/header.php");
 <?php
 $times = array_keys($data);
 while(list($k,$ts) = each($times)){
-  echo sprintf("<tr><td>%s</td><td>%s</td>", $station, date("Y-m-d H:i", $ts) );
+  echo sprintf("<tr><td>%s</td><td><a href='cat.phtml?year=%s&month=%s&day=%s&hour=%s&minute=%s'>%s</a></td>", $station, date("Y", $ts), date("m", $ts), date("d", $ts), date("H", $ts), date("i", $ts), date("Y-m-d H:i", $ts) );
   reset($mycols);
   while(list($k,$v) = each($mycols)){
     echo sprintf("<td>%s</td>", @$data[$ts][$v]);

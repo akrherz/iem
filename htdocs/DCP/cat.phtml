@@ -87,7 +87,7 @@ while ( list($k,$v) = each($keys)){
 }
 echo "</tr>";
 while ( list($k,$v) = each($stations)){
-  echo sprintf("<tr><td>%s (%s)</td>", $cities[$v]['name'], $v);
+  echo sprintf("<tr><td>%s (<a href='site.phtml?station=%s&year=%s&month=%s&day=%s'>%s</a>)</td>", $cities[$v]['name'], $v, date("Y", $ts), date("m", $ts), date("d", $ts), $v);
   reset($keys);
   while ( list($k,$key) = each($keys)){
     echo @sprintf("<td>%s</td>", $data[$v][$key]);
