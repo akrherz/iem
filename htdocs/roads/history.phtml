@@ -33,7 +33,11 @@ if (isset($_GET["month"]) && isset($_GET["segid"]) )
    selected.  Click on the time of the report to get a listing of all road 
    conditions for that time.";
   echo "<br /><table border=1 cellpadding=2 cellspacing=0><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th><th>Condition</th></tr>";
-  $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor from roads_base b, roads_2009_log l, roads_conditions c WHERE l.segid = $1 and extract(month from l.valid) = $2 and l.cond_code = c.code and b.segid = l.segid ORDER by valid ASC");
+  if ($month > 6) {
+   $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor from roads_base b, roads_2008_log l, roads_conditions c WHERE l.segid = $1 and extract(month from l.valid) = $2 and l.cond_code = c.code and b.segid = l.segid ORDER by valid ASC");
+  } else {
+    $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor from roads_base b, roads_2009_log l, roads_conditions c WHERE l.segid = $1 and extract(month from l.valid) = $2 and l.cond_code = c.code and b.segid = l.segid ORDER by valid ASC");
+  }
   $rs = pg_execute($dbconn, "SELECT", Array($segid, $month));
 
   for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
@@ -52,7 +56,11 @@ else if ( isset($_GET["valid"]) )
   $gisurl = "http://mesonet.agron.iastate.edu/archive/data/". gmdate('Y/m/d/', $ts) ."/GIS/iaroad_cond_". gmdate('YmdHi', $ts) .".zip";
   echo "<p>You can download a <a href=\"$gisurl\">gis shapefile</a> for this reporting time.";
   echo "<br /><table border=1 cellpadding=2 cellspacing=0><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th><th>Condition</th></tr>";
-  $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor, b.segid from roads_base b, roads_2009_log l, roads_conditions c WHERE l.valid = $1 and l.cond_code = c.code and b.segid = l.segid ORDER by major ASC");
+  if ($month > 6) {
+    $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor, b.segid from roads_base b, roads_2008_log l, roads_conditions c WHERE l.valid = $1 and l.cond_code = c.code and b.segid = l.segid ORDER by major ASC");
+  } else {
+    $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor, b.segid from roads_base b, roads_2009_log l, roads_conditions c WHERE l.valid = $1 and l.cond_code = c.code and b.segid = l.segid ORDER by major ASC");
+  }
   $rs = pg_execute($dbconn, "SELECT", Array($valid));
 
   for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
