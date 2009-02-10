@@ -1,35 +1,28 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-  // cat.phtml 
-  //   Print hourly DCP obs to a HTML sortable table
+$pgconn = iemdb("hads");
+include("$rootpath/include/forms.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable( Array("DCP") );
+$cities = $nt->table;
 
 $minute = isset($_GET['minute']) ? $_GET["minute"] : 0;
-$hour = isset($_GET['hour']) ? $_GET["hour"] : date("h");
+$hour = isset($_GET['hour']) ? $_GET["hour"] : date("H");
 $day = isset($_GET['day']) ? $_GET["day"] : date("d");
 $month = isset($_GET['month']) ? $_GET["month"] : date("m");
 $year = isset($_GET['year']) ? $_GET["year"] : date("Y");
 $now = time() - 3600;
-
-if (strlen($year) == 0 || strlen($month) == 0 || strlen($minute) == 0 
- || strlen($hour) == 0 || strlen($day) == 0){
-  $month = strftime("%m", $now); 
-  $day = strftime("%d", $now); 
-  $year = strftime("%Y", $now); 
-  $hour = strftime("%H", $now);
-  $minute = 0; 
-}
 $ts = mktime($hour, $minute, 0, $month, $day, $year);
 
-$page = 'DCP';
+$THISPAGE = "networks-dcp";
 $TITLE = "IEM | GOES DCP";
 include("$rootpath/include/header.php"); 
-include("$rootpath/include/forms.php");
-include("$rootpath/include/network.php");
-$nt = new NetworkTable("DCP");
-$cities = $nt->table;
 ?>
-<div class=text">
+<h3>DCP data by time</h3>
+
+
+
 <form method="GET" action="cat.phtml">
 <table>
 <tr>
@@ -61,36 +54,47 @@ $cities = $nt->table;
 <b>Legend:</b>  TAI = Air Temp (F), PCI = Rainfall Counter, PPH = Hourly Precip, UDI = Wind Direction, USI = Wind Speed
 <?php
 
-$tbl = strftime("t%Y", $ts);
+$tbl = strftime("raw%Y_%m", $ts);
 $dstr = strftime("%Y-%m-%d %H:%M", $ts);
 $ldate = strftime("%d %b %Y %I:%M %p", $ts);
 
-$c = iemdb("hads");
-$sql = "SELECT * from $tbl WHERE valid = '$dstr' ORDER by station";
-$rs = pg_exec($c, $sql);
-pg_close($c);
+$sql = "SELECT * from $tbl WHERE valid = '$dstr' and station ~* 'I4$'";
+$rs = pg_exec($pgconn, $sql);
+pg_close($pgconn);
 
-$fmt = "%5s %-24s %7s %7s %7s %7s %7s\n";
-
-
-echo "<pre>\n";
-echo "  IEM HADS/DCP Data Report valid: $ldate \n";
-echo sprintf($fmt, "NWSLI", "Site Name", "TAI", "PCI", "PPH", "UDI", "USI");
-
-// strftime("%d %b %Y %I:%M %p", strtotime($row["valid"]))
-
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-  if ($year < 2008)
-    echo sprintf($fmt,  
-     $row["station"] , substr($cities[$row["station"]]['name'], 0, 24), 
-     $row["tai"], $row["pci"], $row["pph"], $row["udi"], $row["usi"] );
-  else
-    echo sprintf($fmt,  
-     $row["station"] , substr($cities[$row["station"]]['name'], 0, 24), 
-     $row["tmpf"], $row["rstage"], $row["phour"], $row["drct"], $row["sknt"] );
+/* Load up the data into a big fat array */
+$data = Array();
+$datakeys = Array();
+for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+{
+  $station = $row["station"];
+  if (! array_key_exists($station, $cities)){ continue; }
+  $data[ $row["station"] ][ substr($row["key"],0,3) ] = $row["value"];
+  $datakeys[ substr($row["key"],0,3) ]= 1;
 }
-echo "</pre>\n";
+$stations = array_keys( $data );
+$keys = array_keys( $datakeys );
+asort($stations);
+asort($keys);
 ?>
-</div>
+<table cellpadding="1" cellspacing="0" border="1">
+<caption><strong>DCP Data Report for time: <?php echo date("d M Y h:i a", $ts); ?></strong></caption>
+<tr>
+ <th>Station</th>
+<?php
+while ( list($k,$v) = each($keys)){
+  echo sprintf("<th>%s</th>", $v);
+}
+echo "</tr>";
+while ( list($k,$v) = each($stations)){
+  echo sprintf("<tr><td>%s (%s)</td>", $cities[$v]['name'], $v);
+  reset($keys);
+  while ( list($k,$key) = each($keys)){
+    echo @sprintf("<td>%s</td>", $data[$v][$key]);
+  }
+  echo "</tr>";
+}
+?>
+</table>
 
 <?php include("$rootpath/include/footer.php"); ?>
