@@ -10,9 +10,10 @@ $year = isset($_GET['year']) ? $_GET["year"] : date("Y");
 $station = isset($_GET['station'])? $_GET['station']: 'AESI4';
 
 $ts = mktime(1, 0, 0, $month, $day, $year);
+$table = sprintf("raw%s_%s", date("Y",$ts), date("m", $ts));
 
 $hads = iemdb("hads");
-$rs = pg_prepare($hads, "QUERY", "SELECT * from raw$year WHERE station = $1 and valid BETWEEN $2 and $3 ORDER by valid ASC");
+$rs = pg_prepare($hads, "QUERY", "SELECT * from $table WHERE station = $1 and valid BETWEEN $2 and $3 ORDER by valid ASC");
 $rs = pg_execute($hads, "QUERY", Array($station, date("Y-m-d", $ts), date("Y-m-d", $ts+86400)));
 
 $data = Array();
