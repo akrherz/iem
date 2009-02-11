@@ -22,11 +22,11 @@
  /** Acceptable interval is between 5 and 60 */
  if (intval($interval) > 60 || intval($interval) < 5) $interval = 5;
 
- $astart = Array("comprad" => mktime(19,0,0,4,31,2003),
-         "usrad" => mktime(11,0,0,11,2,2004),
-         "ictrad" => mktime(14,0,0,9,14,2005),
-         "hunrad" => mktime(11,0,0,11,2,2004),
-         "sdrad" => mktime(11,0,0,11,2,2004),
+ $astart = Array("comprad" => mktime(0,0,0,1,1,2000),
+         "usrad" => mktime(0,0,0,1,1,2000),
+         "ictrad" => mktime(0,0,0,1,1,2000),
+         "hunrad" => mktime(0,0,0,1,1,2000),
+         "sdrad" => mktime(0,0,0,1,1,2000),
          "sel0rad" => mktime(13,35,0,11,2,2004),
          "sel1rad" => mktime(13,35,0,11,2,2004),
          "sel2rad" => mktime(13,35,0,11,2,2004),
@@ -37,7 +37,7 @@
          "sel7rad" => mktime(13,35,0,11,2,2004),
          "sel8rad" => mktime(13,35,0,11,2,2004),
          "sel9rad" => mktime(13,35,0,11,2,2004),
-         "lotrad" => mktime(11,0,0,11,2,2004) );
+         "lotrad" => mktime(0,0,0,1,1,2000) );
 
  $now = mktime() - 120;
  $aend = mktime();
@@ -138,11 +138,11 @@ function switchToArchiveMode()
 <h4>Composite Product:</h4>
 <select name="prod">
   <option value="comprad" <?php if ($prod == "comprad") echo "SELECTED"; ?>>A1. Iowa (Default)</option>
-  <option value="usrad" <?php if ($prod == "usrad") echo "SELECTED"; ?>>A2. United States</option>
-  <option value="hunrad" <?php if ($prod == "hunrad") echo "SELECTED"; ?>>A3. Huntsville, AL</option>
-  <option value="lotrad" <?php if ($prod == "lotrad") echo "SELECTED"; ?>>A3. North Illinois</option>
-  <option value="sdrad" <?php if ($prod == "sdrad") echo "SELECTED"; ?>>A3. South Dakota</option>
-  <option value="ictrad" <?php if ($prod == "ictrad") echo "SELECTED"; ?>>A4. Wichita, KS</option>
+  <option value="usrad" <?php if ($prod == "usrad") echo "SELECTED"; ?>>A1. United States</option>
+  <option value="hunrad" <?php if ($prod == "hunrad") echo "SELECTED"; ?>>A1. Huntsville, AL</option>
+  <option value="lotrad" <?php if ($prod == "lotrad") echo "SELECTED"; ?>>A1. North Illinois</option>
+  <option value="sdrad" <?php if ($prod == "sdrad") echo "SELECTED"; ?>>A1. South Dakota</option>
+  <option value="ictrad" <?php if ($prod == "ictrad") echo "SELECTED"; ?>>A1. Wichita, KS</option>
 <?php for ($i=0; $i<10; $i++){
   echo "<option value=\"sel${i}rad\"";
   if ($prod == "sel${i}rad") echo " SELECTED ";
@@ -151,10 +151,8 @@ function switchToArchiveMode()
 </select>
 
 <br />(<i>Archive Begins @</i>)
-<br /><b>Al.</b> 1 May 2003
-<br /><b>A2.</b> 3 Nov 2004
-<br /><b>A3.</b> 3 Nov 2004
-<br /><b>A4.</b> 21 Sep 2005
+<br /><b>Al.</b> 1 Jan 2000
+<br /><b>A2.</b> 21 Sep 2005
 
 <h4>Display Tool:</h4>
 <select name="java">
