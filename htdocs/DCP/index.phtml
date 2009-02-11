@@ -6,36 +6,36 @@ include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">GOES DCP</h3>
 
-<div class="text">
-<table><tr><td style="width: 600px" valign="top">
-The Geostationary Operational Environmental Satellites 
+<div class="ninfo" style="float: right;">
+<strong>GOES DCP</strong>
+<br>Reports: every 15-60 min
+<br>Stations: 161
+<br><b>Locations</b>
+<br><a href="../info/network.phtml?network=DCP">Location Map</a>
+</div>
+
+<p>The Geostationary Operational Environmental Satellites 
 (GOES) Data Collection Platforms (DCPs) are a set of hydrologic and meteorologic
 data collection points.  The DCPs are a collection of networks owned and operated 
 by a host of entities. [<b>1</b>]  The IEM receives this dataset from our UNIDATA
 feed, which contains the products produced by the Office of Hydrological Development
 of the National Weather Service.<p>
 
-The NWS has a fantastic 
+<p>The NWS has a fantastic 
 <a href="http://www.nws.noaa.gov/oh/hads/">website</a> if you are curious 
 about this dataset.</td><td>
 
-<div class="ninfo">
-GOES DCP
-<br>Reports: every 15-60 min
-<br>Stations: 161
-<br><b>Locations</b>
-<br><a href="images/loc_cia.png">Central Iowa</a>
-<br><a href="images/loc_eia.png">Eastern Iowa</a>
-<br><a href="images/loc_ia.png">Iowa</a>
-<br><a href="images/loc_neia.png">NE Iowa</a>
-<br><a href="images/loc_polk.png">Polk County</a>
-</div></td></tr></table>
 
-<p><h3 class="subtitle">Data Products</h3></p>
+<h3>Available Tools:</h3>
 <ul>
-<li><a href='/DCP/current.phtml'>Sortable Current Conditions</a></li>
-<li><a href='/DCP/cat.phtml'>View Current/Past Hourly Data</a></li>
-<li><a href='site.phtml'>View Observations By Site By Day</a> (new!)</li>
+<li><a href='current.phtml'>Sortable Current Conditions</a>
+  <br />View the most recent observations from the network.</li>
+<li><a href='cat.phtml'>View Observations By Time</a>
+  <br />View a table of observations at a valid time of your choice.</li>
+<li><a href='site.phtml'>View Observations By Site By Day</a>
+  <br />View a table of observations for a site for a day.</li>
+<li><a href='../request/dcp/fe.phtml'>Download from the archive</a>
+  <br />Download the observations from the archive.</li>
 </ul>
 <p>
 
@@ -47,6 +47,5 @@ href="http://www.nws.noaa.gov/oh/hads/dcp_operators.html">http://www.nws.noaa.go
 <br><b>2</b> <a href="http://water.usgs.gov/pubs/circ/circ1123/">http://water.usgs.gov/pubs/circ/circ1123/</a>
  , viewed: 21 Jun 2003
 
-<br></div>
 
 <?php include("$rootpath/include/footer.php"); ?>
