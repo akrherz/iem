@@ -149,7 +149,7 @@ $pgconn = iemdb("postgis");
 $sql = "select distinct source,typetext,remark, x(geom) as lon, y(geom) as lat, 
         city, magnitude, valid, geom, type as ltype from lsrs_${year} 
         WHERE valid = '$tsSQL' and
-        geom && GeometryFromText('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))')";
+        geom && GeomFromEWKT('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))')";
 
 if ($isSummary){
   $sql = "select distinct source, typetext, remark, 
