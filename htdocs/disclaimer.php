@@ -13,6 +13,12 @@ errors may occur because of equipment or other failure. We therefore provide thi
 information without any warranty of accuracy. Users of this weather/climate data
 do so at their own risk, and are advised to use independent judgement as to 
 whether to verify the data presented.</p>
+
+<p>The IEM is a volunteer effort and receives no funds for facilities or
+staff from Iowa State University or the State of Iowa.  Users of the IEM
+must therefore recognize that the IEM may be discontinued at any time
+with little or no notice.
+
 </div>
 
 
