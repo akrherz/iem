@@ -42,7 +42,7 @@ include("$rootpath/include/header.php");
 <ul>
  <li>Timestamps are presented in central standard or daylight time</li>
  <li>The column headings are the <a href="http://www.weather.gov/ohd/hrl/shef/indexshef.htm">SHEF</a> encoded variable names.</li>
- <li>Archive begins on 1 Jan 2008 and is only for Iowa.</li>
+ <li>Archive begins on 1 Jan 2002 and is only for Iowa.  The archive is not complete for all the sites listed.</li>
 </ul>
 
 
@@ -51,7 +51,7 @@ include("$rootpath/include/header.php");
 <tr>
 <td><?php echo networkSelect(iemdb("mesosite"),"DCP", $station); ?>
 <br /><a href="site.phtml?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>">Select from map</a></td>
-<td><?php echo yearSelect(2008,$year); ?></td>
+<td><?php echo yearSelect(2002,$year); ?></td>
 <td><?php echo monthSelect($month); ?></td>
 <td><?php echo daySelect($day); ?></td>
 <td><input type="submit" value="View Data"></td>
