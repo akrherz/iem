@@ -49,7 +49,7 @@ $graph->xaxis->SetLabelAngle(90);
 //$graph->yaxis->scale->ticks->Set(5,1);
 //$graph->yaxis->scale->ticks->SetPrecision(0);
 
-$graph->title->Set("Dynamic ASOS Plot for ". $cities[$station]["city"]);
+$graph->title->Set("Dynamic ASOS Plot for ". $cities[$station]["name"]);
 $graph->subtitle->Set("Plot valid between: ".$sqlTS1 ." & ". $sqlTS2 );
 $graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 //$graph->yaxis->SetTitle("");
