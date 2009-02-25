@@ -19,8 +19,14 @@ $THISPAGE = "networks-dcp";
 $TITLE = "IEM | GOES DCP";
 include("$rootpath/include/header.php"); 
 ?>
-<h3>DCP data by time</h3>
+<h3>DCP Data Report for time: <?php echo date("d M Y h:i a", $ts); ?></h3>
 
+<p>This application will display a table of observations valid at a given
+time.  The SHEF encoded variable identifier is used to show which sites
+reported which variables.  All times displayed are in central 
+standard/daylight time.  If you click on the site identifier, you will
+get a listing of all observations for that site for the date of your 
+choice.
 
 
 <form method="GET" action="cat.phtml">
@@ -45,7 +51,7 @@ include("$rootpath/include/header.php");
     <option value="30" <?php if ($minute == "30") echo "SELECTED"; ?>>30
     <option value="45" <?php if ($minute == "45") echo "SELECTED"; ?>>45
    </select></td>
-  <td><input type="Submit" value="GET DATA"></td>
+  <td><input type="Submit" value="View Data"></td>
 </tr>
 
 </table>
@@ -58,8 +64,9 @@ $tbl = strftime("raw%Y_%m", $ts);
 $dstr = strftime("%Y-%m-%d %H:%M", $ts);
 $ldate = strftime("%d %b %Y %I:%M %p", $ts);
 
-$sql = "SELECT * from $tbl WHERE valid = '$dstr' and station ~* 'I4$'";
-$rs = pg_exec($pgconn, $sql);
+$rs = pg_prepare($pgconn, "SELECT", "SELECT * from $tbl WHERE valid = $1 and station ~* 'I4$'");
+
+$rs = pg_execute($pgconn, "SELECT", Array($dstr) );
 pg_close($pgconn);
 
 /* Load up the data into a big fat array */
@@ -77,17 +84,22 @@ $keys = array_keys( $datakeys );
 asort($stations);
 asort($keys);
 ?>
+
 <table cellpadding="1" cellspacing="0" border="1">
-<caption><strong>DCP Data Report for time: <?php echo date("d M Y h:i a", $ts); ?></strong></caption>
-<tr>
- <th>Station</th>
 <?php
+$header = "<tr style=\"background: #eee;\">
+ <th>NWS ID</th><th>Station</th>";
 while ( list($k,$v) = each($keys)){
-  echo sprintf("<th>%s</th>", $v);
+  $header .= sprintf("<th>%s</th>", $v);
 }
-echo "</tr>";
+$header .= "</tr>";
+
+$row = 0;
 while ( list($k,$v) = each($stations)){
-  echo sprintf("<tr><td>%s (<a href='site.phtml?station=%s&year=%s&month=%s&day=%s'>%s</a>)</td>", $cities[$v]['name'], $v, date("Y", $ts), date("m", $ts), date("d", $ts), $v);
+  if ($row % 25 == 0){ echo $header; }
+  $row += 1;
+
+  echo sprintf("<tr><td><a href='site.phtml?station=%s&year=%s&month=%s&day=%s'>%s</a></td><td>%s</td>", $v, date("Y", $ts), date("m", $ts), date("d", $ts), $v, $cities[$v]['name']);
   reset($keys);
   while ( list($k,$key) = each($keys)){
     echo @sprintf("<td>%s</td>", $data[$v][$key]);
