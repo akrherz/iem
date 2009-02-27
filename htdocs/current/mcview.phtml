@@ -9,6 +9,7 @@
  $mode = isset($_GET["mode"]) ? $_GET["mode"] : "realtime";
  $frames = isset($_GET["frames"]) ? $_GET["frames"] : 13;
  $interval = isset($_GET["interval"]) ? $_GET["interval"]: 5;
+ $autopilot = isset($_GET["autopilot"]) ? $_GET["autopilot"]: "no";
 
 /* Lets see what the form is set to */
  $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -120,6 +121,16 @@ function switchToArchiveMode()
 
 -->
 </script>";
+if ($autopilot == "yes"){
+ $HEADEXTRA .= "<style>
+#iem-header{
+ display: none;
+}
+.iembox{
+ display: none;
+}
+</style>";
+}
   if ($mode == "realtime") $REFRESH = "<meta http-equiv=\"refresh\" content=\"300; URL=$uri?java=$java&frames=$frames&interval=$interval&prod=$prod\">";
   $TITLE = "Current & Historical IEM NEXRAD Composite Loop";
   $THISPAGE = "current-radar";
@@ -131,11 +142,11 @@ function switchToArchiveMode()
 <br><form method="GET" action="<?php echo $uri; ?>" name="controls">
 
 <table cellpadding=2 cellspacing=0>
- <tr><td valign="top" style="width: 170px;">
+ <tr><td valign="top">
 
 
 <div class="iembox" style="width: 200px;">
-<h4>Composite Product:</h4>
+<p><strong>Composite Product:</strong><br />
 <select name="prod">
   <option value="comprad" <?php if ($prod == "comprad") echo "SELECTED"; ?>>A1. Iowa (Default)</option>
   <option value="usrad" <?php if ($prod == "usrad") echo "SELECTED"; ?>>A1. United States</option>
@@ -154,23 +165,23 @@ function switchToArchiveMode()
 <br /><b>Al.</b> 1 Jan 2000
 <br /><b>A2.</b> 21 Sep 2005
 
-<h4>Display Tool:</h4>
+<p><strong>Display Tool:</strong><br />
 <select name="java">
   <option value="applet" <?php if ($java == "applet") echo "SELECTED"; ?>>Java Applet</option>
   <option value="script" <?php if ($java == "script") echo "SELECTED"; ?>>Java Script</option>
   <option value="none" <?php if ($java == "none") echo "SELECTED"; ?>>List Images</option>
 </select>
 
-<h4>Mode:</h4>
+<p><strong>Mode:</strong></br />
 <select name="mode">
   <option value="realtime" <?php if ($mode == "realtime") echo "SELECTED"; ?>>RealTime
   <option value="archive" <?php if ($mode == "archive") echo "SELECTED"; ?>>Archived
 </select>
 
-<h4>Frames:</h4>
+<p><strong>Frames:</strong><br />
 <input type="text" size="3" name="frames" value="<?php echo $frames; ?>">
 
-<h4>Frame Interval:</h4>
+<p><strong>Frame Interval:</strong><br />
 <select name="interval">
   <option value="5" <?php if ($interval == 5) echo "SELECTED"; ?>>5 min (DEFAULT)
   <option value="10" <?php if ($interval == 10) echo "SELECTED"; ?>>10 min
@@ -180,7 +191,7 @@ function switchToArchiveMode()
   <option value="60" <?php if ($interval == 60) echo "SELECTED"; ?>>60 min
 </select>
 
-<h4>Date:</h4>
+<p><strong>Date:</strong><br />
 <?php 
   $start = intval(2000);
   $now = time();
@@ -213,7 +224,7 @@ function switchToArchiveMode()
   echo "</select>\n";
 
 ?>
-<h4>Time:</h4>
+<p><strong>Time:</strong><br />
 <?php
 
   echo "<select name='hour'  onChange=\"javascript: switchToArchiveMode(); \">\n";
@@ -235,9 +246,11 @@ function switchToArchiveMode()
 
 ?>
 
+<p><input type="checkbox" value="yes" name="autopilot" <?php if ($autopilot == "yes") echo "checked=\"checked\""; ?>>Hide menus + header
+
 <p><input type="submit" value="Generate Loop"> 
 
-<h4>Related Links:</h4> 
+<p><strong>Related Links:</strong><br /> 
 <a href="<?php $rooturl; ?>/GIS/apps/rview/warnings.phtml">Interactive RADAR</a>
 <br /><a href="<?php $rooturl; ?>/cow/">Warning Verification</a>
 </div>
