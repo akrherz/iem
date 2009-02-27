@@ -8,7 +8,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" <?php if (isset($GOOGLEKEYS)){echo "xmlns:v=\"urn:schemas-microsoft-com:vml\"";} if (isset($HTMLEXTRA)){ echo $HTMLEXTRA; }?>>
 <head>
  <title><?php echo isset($TITLE) ? $TITLE: "Iowa Environmental Mesonet"; ?></title>
- <link rel="stylesheet" type="text/css" href="<?php echo $rooturl; ?>/css/main.css?v=0.0.2" />
+ <link rel="stylesheet" type="text/css" media="screen" href="<?php echo $rooturl; ?>/css/main.css?v=3" />
+ <link rel="stylesheet" type="text/css" media="print" href="<?php echo $rooturl; ?>/css/print.css?v=3" />
  <?php if (isset($REFRESH)){ echo $REFRESH; } ?>
  <?php if (isset($HEADEXTRA)){ echo $HEADEXTRA;} ?>
 </head>
