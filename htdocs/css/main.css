@@ -1,9 +1,7 @@
 body{
-    background: #fff url(../images/hbar.gif) repeat-x;
-	margin: 0px;
-}
-html, body, h2, h3, h4, div, p, ul, li, input {
-        font-family: "Gill Sans MT", "Gill sans", "Trebuchet ms", sans-serif;
+  background: #fff url(../images/hbar.gif) repeat-x;
+  margin: 0px;
+  font-family: arial,sans-serif;
 }
 #iem-main {
 	min-width: 800px; 
@@ -71,7 +69,11 @@ html, body, h2, h3, h4, div, p, ul, li, input {
 	text-align: right;
 	font-size: 0.8em;
 }
-#iem-header-items a{
+#iem-header-items {
+    color: #fff;
+	font-weight: bold;
+}
+#iem-header-items a {
     color: #fff;
 	font-weight: bold;
 }
@@ -92,8 +94,6 @@ html, body, h2, h3, h4, div, p, ul, li, input {
   list-style: none;
   display: inline;
 }
-
-
 #iemmenu {
   font-size: 85%;
   position: absolute;
@@ -133,9 +133,6 @@ html, body, h2, h3, h4, div, p, ul, li, input {
 	margin-left:5px; 
 	border-left: 1px solid;
 }
-#iem-content h3 {
-	margin: 0px;
-}
 ul.iem-list {
 	margin-left: 17px;
 	margin-top: 3px;
@@ -170,9 +167,6 @@ ul.iem-list {
 .iem-news-descript {
 	padding-left: 10px;
 	font-size: smaller;
-}
-#iem-radar table {
-	width: 650px;
 }
 #iem-footer {
 	clear: both;
@@ -266,49 +260,24 @@ ul.iem-list {
 #iem_header_logo img {
   border: 0px;
 }
-table.footer {
-	font-size: 10pt;
-	width: 100%;
-}
-
-.title {
-	font-size: 16pt;
-	color: #FFFFFF;
-}
-.subtitle {
-  font-size: 12pt;
-  color: #FFFFFF;
-  border-bottom: 1px solid #00f;
-}
-.heading { 
-	font-size:120%;
+/* Stylized header with side bar */
+/* .heading { 
+	border-color: #336699;
+	background-color: #CCCCCC;
+	color: #003366;
 	font-weight:bolder;
 	border-top: 1px solid;
 	border-right: 6px solid;
 	padding: 1px;
 	padding-left: 3px;
-}
-.climo-header-left { 
-	font-size:120%;
-	font-weight:bolder;
-	padding: 1px;
-	padding-left: 3px;
-}
-.climo-header-right { 
-	font-size:120%;
-	font-weight:bolder;
-	border-right: 6px solid;
-	padding: 1px;
-	padding-left: 3px;
-}
-.text {
-	font-size: 0.9em;
-}
-.even {   
-	padding:2px;
-}
-.odd {   
-	padding:2px;
+    margin-top: 1px;
+    margin-bottom: 3px;
+} */
+.heading {
+  border-bottom: 1px solid #CCCCCC;
+  color: #336699;
+  padding: 4px 0;
+  margin: 4px 0;
 }
 thead th,tfoot td{
         background:#ddd;
@@ -331,47 +300,6 @@ th.ruler,td.ruler{
   	border: 1px solid #000;
   	background-color: #EEEEEE;
 }
-.kelo{
- background: #999999;
-}
-.tabcommands{
-        font-size: 12pt; 
-}
-.snet-precip-table {
-	padding: 3px;
-}
-
-#iem-warning-bar {
-	width: 100%;
-	float: left;
-	text-align: center;
-	border: 0px;
-	margin: 0px;
-}
-#iem-warning-bar a {
-  	background-color: #cc0000;
-  	border-bottom: 1px solid #000000;
-  	color: #CCCCCC;
-}
-#iem-warning-bar a:hover {
-	color: #EEEEEE;
-}
-.iem-form {
-	border: 1px dashed;
-	background-color: #eee;
-	margin: 15px;
-	padding: 3px;
-}
-#iem-form2 {
-	border: 1px dashed;
-	background-color: #eee;
-	margin: 15px;
-	padding: 3px;
-}
-img.pics{
-  text-align: center;
-  width: 328px;
-}
 #helpwindow {
 	width: 400px;
 	display: none;
@@ -379,68 +307,23 @@ img.pics{
 	border: 1px dashed;
 	background-color: #eee;
 }
-div.iembox {
-  padding-left: 5px;
-}
-div.iembox h4 {
-  margin: 2px;
-}
 a {
 	color: #000099;
 }
 a:hover {
 	color: #999999;
 }
-#iem-header-items {
-	color: #FFFFFF;
-}
-#iem-header-items a:hover {
-	color: #CCCCCC;
-}
-div.iem-menu{
-	background-color: #666666;
-}
 #iem-content a:hover {
 	color: #000066;
 }
-#iem-content li {
-	color: #000000;
-}
-#iem-footer {
-	background-color: #FEFEFE;
-}
-#iem-footer a:hover {
-	color: #003366;
-}
 .even {
-	background-color: #99CCFF;
+	background-color: #CDDFF9;
 }
 .odd {
-	background-color: #FEFEFE;
-}
-.heading {
-	border-color: #336699;
-	background-color: #CCCCCC;
-	color: #003366;
+	background-color: #FFFFFF;
 }
 tr.ruled {
 	background: #99CCFF;
-}
-.climo-header-left {
-	background-color: #CCCCCC;
-	color: #336699;
-}
-.climo-header-right {
-	border-color: #336699;
-	background-color: #CCCCCC;
-	color: #336699;
-}
-.subtitle {
-	color: #6699CC;
-}
-.snet-precip-table {
-	background-color: #99CCFF;
-	border-color: #99CCFF;
 }
 .kcci{
  background: #99CCFF;
@@ -454,15 +337,6 @@ tr.ruled {
 .tabcommands {
 	color: #003366;
 }
-.iem-form {
-	border-color: #003366;
-}
-#iem-form2 {
-	border-color: #003366;
-}
-#iem-form2 th {
-	background-color: #6699CC;
-}
 thead th,tfoot td{
         background:#6699CC;
 }
@@ -473,6 +347,13 @@ div.iembox {
   background: #D4F4F9;
   border: #004662 1px solid;
 }
-div.iembox h4 {
-  color: #241F51;
+/* Generic class for warning messages */
+.warning {
+ border:solid 1px #000;
+ background:#FCF9CE url(../images/warning.png) 6px 4px no-repeat;
+ color:#222222;
+ padding-left: 40px;
+ padding-top: 10px;
+ padding-bottom: 10px;
+ text-align: left;
 }
