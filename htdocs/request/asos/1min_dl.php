@@ -10,7 +10,7 @@ include_once("$rootpath/include/database.inc.php");
  */
 
 include("$rootpath/include/network.php");
-$nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS"));
+$nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS", "SD_ASOS"));
 $cities = $nt->table;
 
 
