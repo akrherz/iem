@@ -3,25 +3,25 @@
 // File:	JPGRAPH_GRADIENT.PHP
 // Description:	Create a color gradient
 // Created: 	2003-02-01
-// Ver:		$Id: jpgraph_gradient.php 947 2007-10-19 22:14:19Z ljp $
+// Ver:		$Id: jpgraph_gradient.php 1091 2009-01-18 22:57:40Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
 */
 
 // Styles for gradient color fill
-DEFINE("GRAD_VER",1);
-DEFINE("GRAD_VERT",1);
-DEFINE("GRAD_HOR",2);
-DEFINE("GRAD_MIDHOR",3);
-DEFINE("GRAD_MIDVER",4);
-DEFINE("GRAD_CENTER",5);
-DEFINE("GRAD_WIDE_MIDVER",6);
-DEFINE("GRAD_WIDE_MIDHOR",7);
-DEFINE("GRAD_LEFT_REFLECTION",8);
-DEFINE("GRAD_RIGHT_REFLECTION",9);
-DEFINE("GRAD_RAISED_PANEL",10);
-DEFINE("GRAD_DIAGONAL",11);
+define("GRAD_VER",1);
+define("GRAD_VERT",1);
+define("GRAD_HOR",2);
+define("GRAD_MIDHOR",3);
+define("GRAD_MIDVER",4);
+define("GRAD_CENTER",5);
+define("GRAD_WIDE_MIDVER",6);
+define("GRAD_WIDE_MIDHOR",7);
+define("GRAD_LEFT_REFLECTION",8);
+define("GRAD_RIGHT_REFLECTION",9);
+define("GRAD_RAISED_PANEL",10);
+define("GRAD_DIAGONAL",11);
   
 //===================================================
 // CLASS Gradient

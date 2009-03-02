@@ -3,47 +3,47 @@
 // File:	JPGRAPH_DATE.PHP
 // Description:	Classes to handle Date scaling
 // Created: 	2005-05-02
-// Ver:		$Id: jpgraph_date.php 912 2007-09-26 21:00:35Z ljp $
+// Ver:		$Id: jpgraph_date.php 1091 2009-01-18 22:57:40Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
 */
 
-DEFINE('HOURADJ_1',0+30);
-DEFINE('HOURADJ_2',1+30);
-DEFINE('HOURADJ_3',2+30);
-DEFINE('HOURADJ_4',3+30);
-DEFINE('HOURADJ_6',4+30);
-DEFINE('HOURADJ_12',5+30);
+define('HOURADJ_1',0+30);
+define('HOURADJ_2',1+30);
+define('HOURADJ_3',2+30);
+define('HOURADJ_4',3+30);
+define('HOURADJ_6',4+30);
+define('HOURADJ_12',5+30);
 
-DEFINE('MINADJ_1',0+20);
-DEFINE('MINADJ_5',1+20);
-DEFINE('MINADJ_10',2+20);
-DEFINE('MINADJ_15',3+20);
-DEFINE('MINADJ_30',4+20);
+define('MINADJ_1',0+20);
+define('MINADJ_5',1+20);
+define('MINADJ_10',2+20);
+define('MINADJ_15',3+20);
+define('MINADJ_30',4+20);
 
-DEFINE('SECADJ_1',0);
-DEFINE('SECADJ_5',1);
-DEFINE('SECADJ_10',2);
-DEFINE('SECADJ_15',3);
-DEFINE('SECADJ_30',4);
+define('SECADJ_1',0);
+define('SECADJ_5',1);
+define('SECADJ_10',2);
+define('SECADJ_15',3);
+define('SECADJ_30',4);
 
 
-DEFINE('YEARADJ_1',0+30);
-DEFINE('YEARADJ_2',1+30);
-DEFINE('YEARADJ_5',2+30);
+define('YEARADJ_1',0+30);
+define('YEARADJ_2',1+30);
+define('YEARADJ_5',2+30);
 
-DEFINE('MONTHADJ_1',0+20);
-DEFINE('MONTHADJ_6',1+20);
+define('MONTHADJ_1',0+20);
+define('MONTHADJ_6',1+20);
 
-DEFINE('DAYADJ_1',0);
-DEFINE('DAYADJ_WEEK',1);
-DEFINE('DAYADJ_7',1);
+define('DAYADJ_1',0);
+define('DAYADJ_WEEK',1);
+define('DAYADJ_7',1);
 
-DEFINE('SECPERYEAR',31536000);
-DEFINE('SECPERDAY',86400);
-DEFINE('SECPERHOUR',3600);
-DEFINE('SECPERMIN',60);
+define('SECPERYEAR',31536000);
+define('SECPERDAY',86400);
+define('SECPERHOUR',3600);
+define('SECPERMIN',60);
 
 
 class DateScale extends LinearScale {

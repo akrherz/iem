@@ -3,7 +3,7 @@
 // File: 	EN.INC.PHP
 // Description: English language file for error messages
 // Created: 	2006-01-25
-// Ver:		$Id: en.inc.php 924 2007-10-13 10:21:24Z ljp $
+// Ver:		$Id: en.inc.php 1017 2008-07-08 06:09:28Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -44,6 +44,7 @@ HTTP headers have already been sent.<br>Caused by output from file <b>%s</b> at 
 2012 => array('One of the objects submitted to AccBar is not a BarPlot. Make sure that you create the AccBar plot from an array of BarPlot objects. (Class=%s)',1),
 2013 => array('You have specified an empty array for shadow colors in the bar plot.',0),
 2014 => array('Number of datapoints for each data set in accbarplot must be the same',0),
+2015 => array('Individual bar plots in an AccBarPlot or GroupBarPlot can not have specified X-coordinates',0),
 
 
 /*
@@ -129,6 +130,7 @@ HTTP headers have already been sent.<br>Caused by output from file <b>%s</b> at 
 
 10001 => array('LinePlot::SetFilled() is deprecated. Use SetFillColor()',0),
 10002 => array('Plot too complicated for fast line Stroke. Use standard Stroke()',0),
+10003 => array('Each plot in an accumulated lineplot must have the same number of data points.',0),
 
 /*
 **  jpgraph_log
@@ -396,6 +398,8 @@ HTTP headers have already been sent.<br>Caused by output from file <b>%s</b> at 
 25126 => array('Can\'t create truecolor image. Check that the GD2 library is properly setup with PHP.',0),
 25127 => array('The library has been configured for automatic encoding conversion of Japanese fonts. This requires that PHP has the mb_convert_encoding() function. Your PHP installation lacks this function (PHP needs the "--enable-mbstring" when compiled).',0),
 25128 => array('The function imageantialias() is not available in your PHP installation. Use the GD version that comes with PHP and not the standalone version.',0),
+25129 => array('Anti-alias can not be used with dashed lines. Please disable anti-alias or use solid lines.',0),
+
 
 /*
 **---------------------------------------------------------------------------------------------

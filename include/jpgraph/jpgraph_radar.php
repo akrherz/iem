@@ -3,7 +3,7 @@
 // File:	JPGRAPH_RADAR.PHP
 // Description: Radar plot extension for JpGraph
 // Created: 	2001-02-04
-// Ver:		$Id: jpgraph_radar.php 957 2007-12-01 14:00:29Z ljp $
+// Ver:		$Id: jpgraph_radar.php 1044 2008-07-31 18:34:55Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -441,22 +441,28 @@ class RadarPlot {
 	$astep=2*M_PI/$nbrpnts;		
 	$a=$startangle;
 		
-	// Rotate each point to the correct axis-angle
-	// TODO: Update for LogScale
+	$nulls=0;
 	for($i=0; $i<$nbrpnts; ++$i) {
-	    //$c=$this->data[$i];
-	    $cs=$scale->RelTranslate($this->data[$i]);
-	    $x=round($cs*cos($a)+$scale->scale_abs[0]);
-	    $y=round($pos-$cs*sin($a));
-	    /*
-	      $c=log10($c);
-	      $x=round(($c-$scale->scale[0])*$scale->scale_factor*cos($a)+$scale->scale_abs[0]);
-	      $y=round($pos-($c-$scale->scale[0])*$scale->scale_factor*sin($a));		
-	    */
-	    $pnts[$i*2]=$x;
-	    $pnts[$i*2+1]=$y;
+	    if(!is_null($this->data[$i])) {
+		// Rotate each non null point to the correct axis-angle
+		$cs=$scale->RelTranslate($this->data[$i]);
+		$x=round($cs*cos($a)+$scale->scale_abs[0]);
+		$y=round($pos-$cs*sin($a));
+		/*
+		 // TODO: Update for proper LogScale
+	         $c=log10($c);
+	         $x=round(($c-$scale->scale[0])*$scale->scale_factor*cos($a)+$scale->scale_abs[0]);
+	         $y=round($pos-($c-$scale->scale[0])*$scale->scale_factor*sin($a));		
+		*/
+		$pnts[($i-$nulls)*2]=$x;
+		$pnts[($i-$nulls)*2+1]=$y;
+	    }
+	    else {
+		++$nulls;
+	    }
 	    $a += $astep;
 	}
+
 	if( $this->fill ) {
 	    $img->SetColor($this->fill_color);
 	    $img->FilledPolygon($pnts);
@@ -468,6 +474,7 @@ class RadarPlot {
 	$pnts[]=$pnts[1];
 	$img->Polygon($pnts);
 	$img->SetLineStyle('solid'); // Reset line style to default
+
 	// Add plotmarks on top
 	if( $this->mark->show ) {
 	    for($i=0; $i < $nbrpnts; ++$i) {

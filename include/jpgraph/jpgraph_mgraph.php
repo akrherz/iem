@@ -3,7 +3,7 @@
 // File: 	JPGRAPH_MGRAPH.PHP
 // Description: Class to handle multiple graphs in the same image
 // Created: 	2006-01-15
-// Ver:		$Id: jpgraph_mgraph.php 781 2006-10-08 08:07:47Z ljp $
+// Ver:		$Id: jpgraph_mgraph.php 1012 2008-06-23 15:02:15Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -378,8 +378,13 @@ HTTP headers have already been sent.</font></td></tr><tr><td><b>Explanation:</b>
 	    return $this->img;
 	}
 	else {
-	    $this->Headers();
-	    $this->Stream($aFileName);
+	    if( $aFileName != '' ) {
+		$this->Stream($aFileName);
+	    }
+	    else {
+		$this->Headers();
+		$this->Stream();
+	    }
 	}
     }
 }

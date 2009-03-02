@@ -3,67 +3,79 @@
 // File:	jpgraph_ttf.inc.php
 // Description:	Handling of TTF fonts
 // Created: 	2006-11-19
-// Ver:		$Id: jpgraph_ttf.inc.php 805 2006-11-28 07:45:54Z ljp $
+// Ver:		$Id: jpgraph_ttf.inc.php 1091 2009-01-18 22:57:40Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
 
 // TTF Font families
-DEFINE("FF_COURIER",10);
-DEFINE("FF_VERDANA",11);
-DEFINE("FF_TIMES",12);
-DEFINE("FF_COMIC",14);
-DEFINE("FF_ARIAL",15);
-DEFINE("FF_GEORGIA",16);
-DEFINE("FF_TREBUCHE",17);
+define("FF_COURIER",10);
+define("FF_VERDANA",11);
+define("FF_TIMES",12);
+define("FF_COMIC",14);
+define("FF_ARIAL",15);
+define("FF_GEORGIA",16);
+define("FF_TREBUCHE",17);
 
 // Gnome Vera font
 // Available from http://www.gnome.org/fonts/
-DEFINE("FF_VERA",18);
-DEFINE("FF_VERAMONO",19);
-DEFINE("FF_VERASERIF",20);
+define("FF_VERA",18);
+define("FF_VERAMONO",19);
+define("FF_VERASERIF",20);
 
 // Chinese font
-DEFINE("FF_SIMSUN",30);
-DEFINE("FF_CHINESE",31);
-DEFINE("FF_BIG5",31);
+define("FF_SIMSUN",30);
+define("FF_CHINESE",31);
+define("FF_BIG5",31);
 
 // Japanese font
-DEFINE("FF_MINCHO",40);
-DEFINE("FF_PMINCHO",41);
-DEFINE("FF_GOTHIC",42);
-DEFINE("FF_PGOTHIC",43);
+define("FF_MINCHO",40);
+define("FF_PMINCHO",41);
+define("FF_GOTHIC",42);
+define("FF_PGOTHIC",43);
 
 // Hebrew fonts
-DEFINE("FF_DAVID",44);
-DEFINE("FF_MIRIAM",45);
-DEFINE("FF_AHRON",46);
+define("FF_DAVID",44);
+define("FF_MIRIAM",45);
+define("FF_AHRON",46);
+
+// Dejavu-fonts http://sourceforge.net/projects/dejavu
+define("FF_DV_SANSSERIF",47);
+define("FF_DV_SERIF",48);
+define("FF_DV_SANSSERIFMONO",49);
+define("FF_DV_SERIFCOND",50);
+define("FF_DV_SANSSERIFCOND",51);
 
 // Extra fonts
 // Download fonts from 
 // http://www.webfontlist.com
 // http://www.webpagepublicity.com/free-fonts.html
 
-DEFINE("FF_SPEEDO",50);		// This font is also known as Bauer (Used for gauge fascia)
-DEFINE("FF_DIGITAL",51);	// Digital readout font
-DEFINE("FF_COMPUTER",52);	// The classic computer font
-DEFINE("FF_CALCULATOR",53);	// Triad font
+define("FF_SPEEDO",71);		// This font is also known as Bauer (Used for gauge fascia)
+define("FF_DIGITAL",72);	// Digital readout font
+define("FF_COMPUTER",73);	// The classic computer font
+define("FF_CALCULATOR",74);	// Triad font
+
+define("FF_USERFONT",90);
+define("FF_USERFONT1",90);
+define("FF_USERFONT2",91);
+define("FF_USERFONT3",92);
 
 // Limits for fonts
-DEFINE("_FIRST_FONT",10);
-DEFINE("_LAST_FONT",53);
+define("_FIRST_FONT",10);
+define("_LAST_FONT",99);
 
 // TTF Font styles
-DEFINE("FS_NORMAL",9001);
-DEFINE("FS_BOLD",9002);
-DEFINE("FS_ITALIC",9003);
-DEFINE("FS_BOLDIT",9004);
-DEFINE("FS_BOLDITALIC",9004);
+define("FS_NORMAL",9001);
+define("FS_BOLD",9002);
+define("FS_ITALIC",9003);
+define("FS_BOLDIT",9004);
+define("FS_BOLDITALIC",9004);
 
 //Definitions for internal font
-DEFINE("FF_FONT0",1);
-DEFINE("FF_FONT1",2);
-DEFINE("FF_FONT2",4);
+define("FF_FONT0",1);
+define("FF_FONT1",2);
+define("FF_FONT2",4);
 
 //=================================================================
 // CLASS LanguageConv
@@ -301,7 +313,51 @@ class TTF {
  	    FF_CALCULATOR => array(FS_NORMAL	=>'Triad_xs.ttf',  
 				  FS_BOLD	=>'',   
 				  FS_ITALIC	=>'',   
-				  FS_BOLDITALIC	=>'' ),   
+				  FS_BOLDITALIC	=>'' ),  
+
+	    /* Dejavu fonts */
+ 	    FF_DV_SANSSERIF => array(FS_NORMAL	=>'DejaVuSans.ttf',  
+				  FS_BOLD	=>'DejaVuSans-Bold.ttf',   
+				  FS_ITALIC	=>'DejaVuSans-Oblique.ttf',   
+				  FS_BOLDITALIC	=>'DejaVuSans-BoldOblique.ttf' ),  
+
+ 	    FF_DV_SANSSERIFMONO => array(FS_NORMAL	=>'DejaVuSansMono.ttf',  
+				  FS_BOLD	=>'DejaVuSansMono-Bold.ttf',   
+				  FS_ITALIC	=>'DejaVuSansMono-Oblique.ttf',   
+				  FS_BOLDITALIC	=>'DejaVuSansMono-BoldOblique.ttf' ),  
+
+ 	    FF_DV_SANSSERIFCOND => array(FS_NORMAL	=>'DejaVuSansCondensed.ttf',  
+				  FS_BOLD	=>'DejaVuSansCondensed-Bold.ttf',   
+				  FS_ITALIC	=>'DejaVuSansCondensed-Oblique.ttf',   
+				  FS_BOLDITALIC	=>'DejaVuSansCondensed-BoldOblique.ttf' ),  
+
+ 	    FF_DV_SERIF => array(FS_NORMAL	=>'DejaVuSerif.ttf',  
+				  FS_BOLD	=>'DejaVuSerif-Bold.ttf',   
+				  FS_ITALIC	=>'DejaVuSerif-Italic.ttf',   
+				  FS_BOLDITALIC	=>'DejaVuSerif-BoldItalic.ttf' ),  
+
+ 	    FF_DV_SERIFCOND => array(FS_NORMAL	=>'DejaVuSerifCondensed.ttf',  
+				  FS_BOLD	=>'DejaVuSerifCondensed-Bold.ttf',   
+				  FS_ITALIC	=>'DejaVuSerifCondensed-Italic.ttf',   
+				  FS_BOLDITALIC	=>'DejaVuSerifCondensed-BoldItalic.ttf' ),  
+
+
+	    /* User defined font */
+ 	    FF_USERFONT1 => array(FS_NORMAL	=>'',  
+				  FS_BOLD	=>'',   
+				  FS_ITALIC	=>'',   
+				  FS_BOLDITALIC	=>'' ),  
+
+ 	    FF_USERFONT2 => array(FS_NORMAL	=>'',  
+				  FS_BOLD	=>'',   
+				  FS_ITALIC	=>'',   
+				  FS_BOLDITALIC	=>'' ),  
+
+ 	    FF_USERFONT3 => array(FS_NORMAL	=>'',  
+				  FS_BOLD	=>'',   
+				  FS_ITALIC	=>'',   
+				  FS_BOLDITALIC	=>'' ),  
+
  	    );
     }
 
@@ -332,6 +388,39 @@ class TTF {
 	}
 	return $f;
     }
+
+    function SetUserFont($aNormal,$aBold='',$aItalic='',$aBoldIt='') {
+	$this->font_files[FF_USERFONT] = 
+	    array(FS_NORMAL     => $aNormal,  
+		  FS_BOLD	=> $aBold,   
+		  FS_ITALIC	=> $aItalic,   
+		  FS_BOLDITALIC	=> $aBoldIt ) ;
+    }
+
+    function SetUserFont1($aNormal,$aBold='',$aItalic='',$aBoldIt='') {
+	$this->font_files[FF_USERFONT1] = 
+	    array(FS_NORMAL     => $aNormal,  
+		  FS_BOLD	=> $aBold,   
+		  FS_ITALIC	=> $aItalic,   
+		  FS_BOLDITALIC	=> $aBoldIt ) ;
+    }
+
+    function SetUserFont2($aNormal,$aBold='',$aItalic='',$aBoldIt='') {
+	$this->font_files[FF_USERFONT2] = 
+	    array(FS_NORMAL     => $aNormal,  
+		  FS_BOLD	=> $aBold,   
+		  FS_ITALIC	=> $aItalic,   
+		  FS_BOLDITALIC	=> $aBoldIt ) ;
+    }
+
+    function SetUserFont3($aNormal,$aBold='',$aItalic='',$aBoldIt='') {
+	$this->font_files[FF_USERFONT3] = 
+	    array(FS_NORMAL     => $aNormal,  
+		  FS_BOLD	=> $aBold,   
+		  FS_ITALIC	=> $aItalic,   
+		  FS_BOLDITALIC	=> $aBoldIt ) ;
+    }
+
 } // Class
 
 

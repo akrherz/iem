@@ -3,7 +3,7 @@
 // File:	JPGRAPH_LED.PHP
 // Description:	Module to generate Dotted LED-like digits
 // Created: 	2006-11-26
-// Ver:		$Id: jpgraph_led.php 957 2007-12-01 14:00:29Z ljp $
+// Ver:		$Id: jpgraph_led.php 1091 2009-01-18 22:57:40Z ljp $
 //
 // Copyright 2006 (c) Aditus Consulting. All rights reserved.
 //
@@ -48,22 +48,22 @@
 //----------------------------------------------------------------------------
 
 // Constants for color schema. See definition of iColorSchema below
-DEFINE('LEDC_RED', 0);
-DEFINE('LEDC_GREEN', 1);
-DEFINE('LEDC_BLUE', 2);
-DEFINE('LEDC_YELLOW', 3);
-DEFINE('LEDC_GRAY', 4);
-DEFINE('LEDC_CHOCOLATE', 5);
-DEFINE('LEDC_PERU', 6);
-DEFINE('LEDC_GOLDENROD', 7);
-DEFINE('LEDC_KHAKI', 8);
-DEFINE('LEDC_OLIVE', 9);
-DEFINE('LEDC_LIMEGREEN', 10);
-DEFINE('LEDC_FORESTGREEN', 11);
-DEFINE('LEDC_TEAL', 12);
-DEFINE('LEDC_STEELBLUE', 13);
-DEFINE('LEDC_NAVY', 14);
-DEFINE('LEDC_INVERTGRAY', 15);
+define('LEDC_RED', 0);
+define('LEDC_GREEN', 1);
+define('LEDC_BLUE', 2);
+define('LEDC_YELLOW', 3);
+define('LEDC_GRAY', 4);
+define('LEDC_CHOCOLATE', 5);
+define('LEDC_PERU', 6);
+define('LEDC_GOLDENROD', 7);
+define('LEDC_KHAKI', 8);
+define('LEDC_OLIVE', 9);
+define('LEDC_LIMEGREEN', 10);
+define('LEDC_FORESTGREEN', 11);
+define('LEDC_TEAL', 12);
+define('LEDC_STEELBLUE', 13);
+define('LEDC_NAVY', 14);
+define('LEDC_INVERTGRAY', 15);
 // ! It correlate with two-dimensional array $iColorSchema
 
 //========================================================================
@@ -280,7 +280,7 @@ class DigitalLED74
 	return $img;
     }
 
-    function StrokeNumber($aValStr, $aColor = 0) {
+    function StrokeNumber($aValStr, $aColor = 0, $aFileName = '') {
 	if($aColor < 0 || $aColor >= sizeof($this->iColorSchema))
 	    $aColor = 0;
 
@@ -309,8 +309,12 @@ class DigitalLED74
 	    $number_img->Copy($digit_img[$i]->img, $i*$w, 0, 0, 0, $w, $h, $w, $h);
 	}
 
-	$number_img->Headers();
-	$number_img->Stream();
+	if( $aFileName != '' ) {
+	    $number_img->Stream($aFileName);
+	} else {
+	    $number_img->Headers();
+	    $number_img->Stream();
+	}
     }
 }
 ?>

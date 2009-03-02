@@ -3,7 +3,7 @@
 // File:	JPGRAPH_BAR.PHP
 // Description:	Bar plot extension for JpGraph
 // Created: 	2001-01-08
-// Ver:		$Id: jpgraph_bar.php 957 2007-12-01 14:00:29Z ljp $
+// Ver:		$Id: jpgraph_bar.php 1017 2008-07-08 06:09:28Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -143,7 +143,7 @@ class BarPlot extends Plot {
 	    if( $this->abswidth == -1 ) {
                 // Not set
 		// set width to a visuable sensible default
-		$this->abswidth = $graph->img->plotwidth/(2*count($this->coords[0]));
+		$this->abswidth = $graph->img->plotwidth/(2*$this->numpoints);
 	    }
 	}
     }
@@ -212,7 +212,7 @@ class BarPlot extends Plot {
 	    if( is_array($aColor) ) {
 		$this->iPatternColor = array();
 		if( count($aColor) != $n ) {
-		    JpGraphError::Raise('NUmber of colors is not the same as the number of patterns in BarPlot::SetPattern()');
+		    JpGraphError::RaiseL(2001);//('NUmber of colors is not the same as the number of patterns in BarPlot::SetPattern()');
 		}
 	    }
 	    else
@@ -273,7 +273,8 @@ class BarPlot extends Plot {
 		$aDensity = 75;
 		break;
 	    default:
-		JpGraphError::Raise('Unknown pattern specified in call to BarPlot::SetPattern()');
+		JpGraphError::RaiseL(2002);
+//('Unknown pattern specified in call to BarPlot::SetPattern()');
 	}
     }
 
@@ -282,7 +283,8 @@ class BarPlot extends Plot {
 	$numpoints = count($this->coords[0]);
 	if( isset($this->coords[1]) ) {
 	    if( count($this->coords[1])!=$numpoints )
-		JpGraphError::Raise("Number of X and Y points are not equal. Number of X-points:".count($this->coords[1])."Number of Y-points:$numpoints");
+		JpGraphError::RaiseL(2003,count($this->coords[1]),$numpoints);
+//"Number of X and Y points are not equal. Number of X-points:".count($this->coords[1])."Number of Y-points:$numpoints");
 	    else
 		$exist_x = true;
 	}
@@ -388,7 +390,8 @@ class BarPlot extends Plot {
 	    $val=$this->coords[0][$i];
 
 	    if( !empty($val) && !is_numeric($val) ) {
-		JpGraphError::Raise('All values for a barplot must be numeric. You have specified value['.$i.'] == \''.$val.'\'');
+		JpGraphError::RaiseL(2004,$i,$val);
+		//'All values for a barplot must be numeric. You have specified value['.$i.'] == \''.$val.'\'');
 	    }
 
 	    // Determine the shadow
@@ -416,7 +419,7 @@ class BarPlot extends Plot {
 		if( is_array($this->bar_shadow_color) ) {
 		    $numcolors = count($this->bar_shadow_color);
 		    if( $numcolors == 0 ) {
-			JpGraphError::Raise('You have specified an empty array for shadow colors in the bar plot.');
+			JpGraphError::RaiseL(2005);//('You have specified an empty array for shadow colors in the bar plot.');
 		    }
 		    $img->PushColor($this->bar_shadow_color[$i % $numcolors]);
 		}
@@ -486,6 +489,8 @@ class BarPlot extends Plot {
 			
 	    // Determine how to best position the values of the individual bars
 	    $x=$pts[2]+($pts[4]-$pts[2])/2;
+	    $this->value->SetMargin(5);
+
 	    if( $this->valuepos=='top' ) {
 		$y=$pts[3];
 		if( $img->a === 90 ) {
@@ -494,6 +499,17 @@ class BarPlot extends Plot {
 		    else
 			$this->value->SetAlign('left','center');
 			
+		}
+		else {
+		    if( $val < 0 ) { 
+			$this->value->SetMargin(-5);
+			$y=$pts[1];
+			$this->value->SetAlign('center','bottom');
+		    }
+		    else {
+			$this->value->SetAlign('center','bottom');			
+		    }
+
 		}
 		$this->value->Stroke($img,$val,$x,$y);
 	    }
@@ -506,9 +522,14 @@ class BarPlot extends Plot {
 			$this->value->SetAlign('right','center');		    
 		}
 		else {
-		    $this->value->SetAlign('center','top');
+		    if( $val < 0 ) {
+			$this->value->SetAlign('center','bottom');
+		    }
+		    else {
+			$this->value->SetAlign('center','top');
+		    }
 		}
-		$this->value->SetMargin(-3);
+		$this->value->SetMargin(-5);
 		$this->value->Stroke($img,$val,$x,$y);
 	    }
 	    elseif( $this->valuepos=='center' ) {
@@ -529,7 +550,8 @@ class BarPlot extends Plot {
 		$this->value->Stroke($img,$val,$x,$y);
 	    }
 	    else {
-		JpGraphError::Raise('Unknown position for values on bars :'.$this->valuepos);
+		JpGraphError::RaiseL(2006,$this->valuepos);
+		//'Unknown position for values on bars :'.$this->valuepos);
 	    }
 	    // Create the client side image map
 	    $rpts = $img->ArrRotate($pts);		
@@ -570,11 +592,11 @@ class GroupBarPlot extends BarPlot {
 	$this->plots = $plots;
 	$this->nbrplots = count($plots);
 	if( $this->nbrplots < 1 ) {
-	    JpGraphError::Raise('Cannot create GroupBarPlot from empty plot array.');
+	    JpGraphError::RaiseL(2007);//('Cannot create GroupBarPlot from empty plot array.');
 	}
 	for($i=0; $i < $this->nbrplots; ++$i ) {
 	    if( empty($this->plots[$i]) || !isset($this->plots[$i]) ) {
-		JpGraphError::Raise("Group bar plot element nbr $i is undefined or empty.");
+		JpGraphError::RaiseL(2008,$i);//("Group bar plot element nbr $i is undefined or empty.");
 	    }
 	}
 	$this->numpoints = $plots[0]->numpoints;
@@ -588,7 +610,8 @@ class GroupBarPlot extends BarPlot {
 	for($i=0; $i < $n; ++$i) {
 	    $c = get_class($this->plots[$i]);
 	    if( !($this->plots[$i] instanceof BarPlot) ) {
-		JpGraphError::Raise('One of the objects submitted to GroupBar is not a BarPlot. Make sure that you create the Group Bar plot from an array of BarPlot or AccBarPlot objects. (Class = '.$c.')');
+		JpGraphError::RaiseL(2009,$c);
+//('One of the objects submitted to GroupBar is not a BarPlot. Make sure that you create the Group Bar plot from an array of BarPlot or AccBarPlot objects. (Class = '.$c.')');
 	    }
 	    $this->plots[$i]->DoLegend($graph);
 	}
@@ -659,13 +682,22 @@ class AccBarPlot extends BarPlot {
 	$this->plots = $plots;
 	$this->nbrplots = count($plots);
 	if( $this->nbrplots < 1 ) {
-	    JpGraphError::Raise('Cannot create AccBarPlot from empty plot array.');
+	    JpGraphError::RaiseL(2010);//('Cannot create AccBarPlot from empty plot array.');
 	}
 	for($i=0; $i < $this->nbrplots; ++$i ) {
 	    if( empty($this->plots[$i]) || !isset($this->plots[$i]) ) {
-		JpGraphError::Raise("Acc bar plot element nbr $i is undefined or empty.");
+		JpGraphError::RaiseL(2011,$i);//("Acc bar plot element nbr $i is undefined or empty.");
 	    }
 	}
+
+// We can only allow individual plost which do not have specified X-positions
+	for($i=0; $i < $this->nbrplots; ++$i ) {
+	    if( !empty($this->plots[$i]->coords[1]) ) {
+		JpGraphError::RaiseL(2015);
+		//'Individual bar plots in an AccBarPlot or GroupBarPlot can not have specified X-positions.');
+	    }
+	}
+	
 	$this->numpoints = $plots[0]->numpoints;		
 	$this->value = new DisplayValue();
     }
@@ -677,7 +709,8 @@ class AccBarPlot extends BarPlot {
 	for( $i=$n-1; $i >= 0; --$i ) {
 	    $c = get_class($this->plots[$i]);
 	    if( !($this->plots[$i] instanceof BarPlot) ) {
-		JpGraphError::Raise('One of the objects submitted to AccBar is not a BarPlot. Make sure that you create the AccBar plot from an array of BarPlot objects.(Class='.$c.')');
+		JpGraphError::RaiseL(2012,$c);
+//('One of the objects submitted to AccBar is not a BarPlot. Make sure that you create the AccBar plot from an array of BarPlot objects.(Class='.$c.')');
 	    }	    
 	    $this->plots[$i]->DoLegend($graph);
 	}
@@ -814,7 +847,7 @@ class AccBarPlot extends BarPlot {
 			if( is_array($this->bar_shadow_color) ) {
 			    $numcolors = count($this->bar_shadow_color);
 			    if( $numcolors == 0 ) {
-				JpGraphError::Raise('You have specified an empty array for shadow colors in the bar plot.');
+				JpGraphError::RaiseL(2013);//('You have specified an empty array for shadow colors in the bar plot.');
 			    }
 			    $img->PushColor($this->bar_shadow_color[$i % $numcolors]);
 			}
