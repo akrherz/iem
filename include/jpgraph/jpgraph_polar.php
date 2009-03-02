@@ -3,7 +3,7 @@
 // File: 	JPGRAPH_POLAR.PHP
 // Description:	Polar plot extension for JpGraph
 // Created: 	2003-02-02
-// Ver:		$Id: jpgraph_polar.php 869 2007-03-24 11:19:38Z ljp $
+// Ver:		$Id: jpgraph_polar.php 1091 2009-01-18 22:57:40Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -13,8 +13,8 @@ require_once ('jpgraph_plotmark.inc.php');
 require_once "jpgraph_log.php";
 
 
-DEFINE('POLAR_360',1);
-DEFINE('POLAR_180',2);
+define('POLAR_360',1);
+define('POLAR_180',2);
 
 //
 // Note. Don't attempt to make sense of this code.

@@ -3,7 +3,7 @@
 // File: 	JPGRAPH_LINE.PHP
 // Description:	Line plot extension for JpGraph
 // Created: 	2001-01-08
-// Ver:		$Id: jpgraph_line.php 956 2007-11-17 13:19:20Z ljp $
+// Ver:		$Id: jpgraph_line.php 981 2008-03-24 11:51:12Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -236,6 +236,8 @@ class LinePlot extends Plot{
 	$img->SetLineStyle($this->line_style);
 	$pnts=$startpoint+1;
 	$firstnonumeric = false;
+
+
 	while( $pnts < $numpoints ) {
 	    
 	    if( $exist_x ) $x=$this->coords[1][$pnts];
@@ -408,7 +410,6 @@ class LinePlot extends Plot{
 		$this->mark->SetCSIMAltVal($this->coords[0][$pnts],$x);
 		$this->mark->Stroke($img,$xt,$yt);	
 		$this->csimareas .= $this->mark->GetCSIMAreas();
-		$this->StrokeDataValue($img,$this->coords[0][$pnts],$xt,$yt);
 	    }
 	}
     }
@@ -428,6 +429,13 @@ class AccLinePlot extends Plot {
         $this->plots = $plots;
 	$this->nbrplots = count($plots);
 	$this->numpoints = $plots[0]->numpoints;
+
+	// Verify that all plots have the same number of data points
+	for( $i=1; $i < $this->nbrplots; ++$i ) {
+	    if( $plots[$i]->numpoints != $this->numpoints ) {
+		JpGraphError::RaiseL(10003);//('Each plot in an accumulated lineplot must have the same number of data points',0)
+	    }
+	} 
 
 	for($i=0; $i < $this->nbrplots; ++$i ) {
 	    $this->LineInterpolate($this->plots[$i]->coords[0]);

@@ -3,16 +3,16 @@
 // File: 	JPGRAPH_CANVTOOLS.PHP
 // Description:	Some utilities for text and shape drawing on a canvas
 // Created: 	2002-08-23
-// Ver:		$Id: jpgraph_canvtools.php 781 2006-10-08 08:07:47Z ljp $
+// Ver:		$Id: jpgraph_canvtools.php 1091 2009-01-18 22:57:40Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
 */
 
-DEFINE('CORNER_TOPLEFT',0);
-DEFINE('CORNER_TOPRIGHT',1);
-DEFINE('CORNER_BOTTOMRIGHT',2);
-DEFINE('CORNER_BOTTOMLEFT',3);
+define('CORNER_TOPLEFT',0);
+define('CORNER_TOPRIGHT',1);
+define('CORNER_BOTTOMRIGHT',2);
+define('CORNER_BOTTOMLEFT',3);
 
 
 //===================================================

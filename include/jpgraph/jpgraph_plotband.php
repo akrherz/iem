@@ -3,20 +3,20 @@
 // File:	JPGRAPH_PLOTBAND.PHP
 // Description:	PHP4 Graph Plotting library. Extension module.
 // Created: 	2004-02-18
-// Ver:		$Id: jpgraph_plotband.php 781 2006-10-08 08:07:47Z ljp $
+// Ver:		$Id: jpgraph_plotband.php 1091 2009-01-18 22:57:40Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
 
 // Constants for types of static bands in plot area
-DEFINE("BAND_RDIAG",1);	// Right diagonal lines
-DEFINE("BAND_LDIAG",2); // Left diagonal lines
-DEFINE("BAND_SOLID",3); // Solid one color
-DEFINE("BAND_VLINE",4); // Vertical lines
-DEFINE("BAND_HLINE",5);  // Horizontal lines
-DEFINE("BAND_3DPLANE",6);  // "3D" Plane
-DEFINE("BAND_HVCROSS",7);  // Vertical/Hor crosses
-DEFINE("BAND_DIAGCROSS",8); // Diagonal crosses
+define("BAND_RDIAG",1);	// Right diagonal lines
+define("BAND_LDIAG",2); // Left diagonal lines
+define("BAND_SOLID",3); // Solid one color
+define("BAND_VLINE",4); // Vertical lines
+define("BAND_HLINE",5);  // Horizontal lines
+define("BAND_3DPLANE",6);  // "3D" Plane
+define("BAND_HVCROSS",7);  // Vertical/Hor crosses
+define("BAND_DIAGCROSS",8); // Diagonal crosses
 
 
 // Utility class to hold coordinates for a rectangle

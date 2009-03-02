@@ -4,7 +4,7 @@
 // Description: Special localization file with the same error messages 
 //              for all errors.
 // Created: 	2006-02-18
-// Ver:		$Id: prod.inc.php 781 2006-10-08 08:07:47Z ljp $
+// Ver:		$Id: prod.inc.php 993 2008-03-30 21:17:41Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -83,6 +83,7 @@ HTTP headers have already been sent.<br>Caused by output from file <b>%s</b> at 
 9001 => array(DEFAULT_ERROR_MESSAGE.'9001',0),
 10001 => array(DEFAULT_ERROR_MESSAGE.'10001',0),
 10002 => array(DEFAULT_ERROR_MESSAGE.'10002',0),
+10003 => array(DEFAULT_ERROR_MESSAGE.'10003',0),
 11001 => array(DEFAULT_ERROR_MESSAGE.'11001',0),
 11002 => array(DEFAULT_ERROR_MESSAGE.'11002',0),
 11003 => array(DEFAULT_ERROR_MESSAGE.'11003',0),
@@ -271,7 +272,9 @@ HTTP headers have already been sent.<br>Caused by output from file <b>%s</b> at 
 25124 => array(DEFAULT_ERROR_MESSAGE.'25124',0),
 25125 => array(DEFAULT_ERROR_MESSAGE.'25125',0),
 25126 => array(DEFAULT_ERROR_MESSAGE.'25126',0),
-25127 => array(DEFAULT_ERROR_MESSAGE.'25126',0),
+25127 => array(DEFAULT_ERROR_MESSAGE.'25127',0),
+25128 => array(DEFAULT_ERROR_MESSAGE.'25128',0),
+25129 => array(DEFAULT_ERROR_MESSAGE.'25129',0),
 24003 => array(DEFAULT_ERROR_MESSAGE.'24003',0),
 24004 => array(DEFAULT_ERROR_MESSAGE.'24004',0),
 24005 => array(DEFAULT_ERROR_MESSAGE.'24005',0),

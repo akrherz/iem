@@ -3,7 +3,7 @@
 // File:	JPGRAPH_PIE.PHP
 // Description:	Pie plot extension for JpGraph
 // Created: 	2001-02-14
-// Ver:		$Id: jpgraph_pie.php 957 2007-12-01 14:00:29Z ljp $
+// Ver:		$Id: jpgraph_pie.php 1091 2009-01-18 22:57:40Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -11,11 +11,11 @@
 
 
 // Defines for PiePlot::SetLabelType()
-DEFINE("PIE_VALUE_ABS",1);
-DEFINE("PIE_VALUE_PER",0);
-DEFINE("PIE_VALUE_PERCENTAGE",0);
-DEFINE("PIE_VALUE_ADJPERCENTAGE",2);
-DEFINE("PIE_VALUE_ADJPER",2);
+define("PIE_VALUE_ABS",1);
+define("PIE_VALUE_PER",0);
+define("PIE_VALUE_PERCENTAGE",0);
+define("PIE_VALUE_ADJPERCENTAGE",2);
+define("PIE_VALUE_ADJPER",2);
 
 //===================================================
 // CLASS PiePlot
@@ -456,6 +456,7 @@ class PiePlot {
 	    for($i=0; $i < $n; ++$i)
 		$this->explode_radius[$i]=$this->explode_r;
 
+	// If we have a shadow and not just drawing the labels
 	if( $this->ishadowcolor != "" && $aaoption !== 2) {
 	    $accsum=0;
 	    $angle2 = $this->startangle;
@@ -469,6 +470,8 @@ class PiePlot {
 		if( empty($this->explode_radius[$j]) )
 		    $this->explode_radius[$j]=0;
 
+		if( $d < 0.00001 ) continue;
+
 		$la = 2*M_PI - (abs($angle2-$angle1)/2.0+$angle1);
 
 		$xcm = $xc + $this->explode_radius[$j]*cos($la)*$expscale;
@@ -477,47 +480,121 @@ class PiePlot {
 		$xcm += $this->ishadowdrop*$expscale;
 		$ycm += $this->ishadowdrop*$expscale;
 
-		$img->CakeSlice($xcm,$ycm,$radius,$radius,
-				$angle1*180/M_PI,$angle2*180/M_PI,$this->ishadowcolor);
-		
+		$_sa = round($angle1*180/M_PI);
+		$_ea = round($angle2*180/M_PI);
+
+		// The CakeSlice method draws a full circle in case of start angle = end angle
+		// for pie slices we don't want this behaviour unless we only have one
+		// slice in the pie in case it is the wanted behaviour
+		if( $_ea-$_sa > 0.1 || $n==1 ) {
+		    $img->CakeSlice($xcm,$ycm,$radius-1,$radius-1,
+				    $angle1*180/M_PI,$angle2*180/M_PI,$this->ishadowcolor);
+		}
 	    }
 	}
 
+	//--------------------------------------------------------------------------------
+	// This is the main loop to draw each cake slice
+	//--------------------------------------------------------------------------------
+
+	// Set up the accumulated sum, start angle for first slice and border color
 	$accsum=0;
 	$angle2 = $this->startangle;
 	$img->SetColor($this->color);
+
+	// Loop though all the slices if there is a pie to draw (sum>0)
+	// There are n slices in total
 	for($i=0; $sum>0 && $i < $n; ++$i) {
+
+	    // $j is the actual index used for the slice
 	    $j = $n-$i-1;
+
+	    // Make sure we havea  valid distance to explode the slice
 	    if( empty($this->explode_radius[$j]) )
 		$this->explode_radius[$j]=0;
+
+	    // The actual numeric value for the slice
 	    $d = $this->data[$i];
+
 	    $angle1 = $angle2;
+
+	    // Accumlate the sum
 	    $accsum += $d;
-	    $angle2 = $this->startangle+2*M_PI*$accsum/$sum;
-	    $this->la[$i] = 2*M_PI - (abs($angle2-$angle1)/2.0+$angle1);
 
-	    if( $d == 0 ) continue;
+	    // The new angle when we add the "size" of this slice
+	    // angle1 is then the start and angle2 the end of this slice
+	    $angle2 = $this->NormAngle($this->startangle+2*M_PI*$accsum/$sum);
 
+	    // We avoid some trouble by not allowing end angle to be 0, in that case
+	    // we translate to 360
+
+
+	    // la is used to hold the label angle, which is centered on the slice
+	    if( $angle2 < 0.0001 && $angle1 > 0.0001 ) {
+		$this->la[$i] = 2*M_PI - (abs(2*M_PI-$angle1)/2.0+$angle1);
+	    }
+	    elseif( $angle1 > $angle2 ) {
+		// The case where the slice crosses the 3 a'clock line
+		// Remember that the slices are counted clockwise and
+		// labels are counted counter clockwise so we need to revert with 2 PI
+		$this->la[$i] = 2*M_PI-$this->NormAngle($angle1 + ((2*M_PI - $angle1)+$angle2)/2);
+	    }
+	    else {
+		$this->la[$i] = 2*M_PI - (abs($angle2-$angle1)/2.0+$angle1);
+	    }
+
+	    // Too avoid rounding problems we skip the slice if it is too small
+	    if( $d < 0.00001 ) continue;
+
+	    // If the user has specified an array of colors for each slice then use
+	    // that a color otherwise use the theme array (ta) of colors
 	    if( $this->setslicecolors==null )
 		$slicecolor=$colors[$ta[$i%$numcolors]];
 	    else
 		$slicecolor=$this->setslicecolors[$i%$numcolors];
+	    
 
+	    
+//$_sa = round($angle1*180/M_PI);
+//$_ea = round($angle2*180/M_PI);
+//$_la = round($this->la[$i]*180/M_PI);
+//echo "ang1=$_sa , ang2=$_ea, la=$_la, color=$slicecolor<br>";
+
+
+	    // If we have enabled antialias then we don't draw any border so
+	    // make the bordedr color the same as the slice color
 	    if( $this->pie_interior_border && $aaoption===0 )
 		$img->SetColor($this->color);
 	    else
-		$img->SetColor($slicecolor);
-
+		$img->SetColor($slicecolor);	    
 	    $arccolor = $this->pie_border && $aaoption===0 ? $this->color : "";
 
+	    // Calculate the x,y coordinates for the base of this slice taking
+	    // the exploded distance into account. Here we use the mid angle as the
+	    // ray of extension and we have the mid angle handy as it is also the
+	    // label angle
 	    $xcm = $xc + $this->explode_radius[$j]*cos($this->la[$i])*$expscale;
 	    $ycm = $yc - $this->explode_radius[$j]*sin($this->la[$i])*$expscale;
 
+	    // If we are not just drawing the labels then draw this cake slice
 	    if( $aaoption !== 2 ) {
-		$img->CakeSlice($xcm,$ycm,$radius-1,$radius-1,
-				$angle1*180/M_PI,$angle2*180/M_PI,$slicecolor,$arccolor);
+
+		
+		$_sa = round($angle1*180/M_PI);
+		$_ea = round($angle2*180/M_PI);
+		$_la = round($this->la[$i]*180/M_PI);
+		//echo "[$i] sa=$_sa, ea=$_ea, la[$i]=$_la, (color=$slicecolor)<br>";
+		
+
+		// The CakeSlice method draws a full circle in case of start angle = end angle
+		// for pie slices we don't want this behaviour unless we only have one
+		// slice in the pie in case it is the wanted behaviour
+		if( abs($_ea-$_sa) > 0.1 || $n==1 ) {
+		    $img->CakeSlice($xcm,$ycm,$radius-1,$radius-1,$_sa,$_ea,$slicecolor,$arccolor);
+		}
 	    }
 
+	    // If the CSIM is used then make sure we register a CSIM area for this slice as well
 	    if( $this->csimtargets && $aaoption !== 1 ) {
 		$this->AddSliceToCSIM($i,$xcm,$ycm,$radius,$angle1,$angle2);
 	    }
@@ -586,7 +663,7 @@ class PiePlot {
 	//-----------------------------------------------------------------------
 	// Step 1 of the algorithm is to construct a number of clusters
 	// a cluster is defined as all slices within the same quadrant (almost)
-	// that has an angualr distance less than the treshold
+	// that has an angular distance less than the treshold
 	//-----------------------------------------------------------------------
 	$tresh_hold=25 * M_PI/180; // 25 degrees difference to be in a cluster
 	$incluster=false;	// flag if we are currently in a cluster or not

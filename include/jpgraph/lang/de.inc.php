@@ -4,7 +4,7 @@
 // Description: German language file for error messages
 // Created: 	2006-03-06
 // Author:	Timo Leopold (timo@leopold-hh.de)
-// Ver:		$Id: de.inc.php 924 2007-10-13 10:21:24Z ljp $
+// Ver:		$Id: de.inc.php 1017 2008-07-08 06:09:28Z ljp $
 //
 // Copyright (c)
 //========================================================================
@@ -44,6 +44,7 @@ HTTP header wurden bereits gesendet.<br>Fehler in der Datei <b>%s</b> in der Zei
 2012 => array('Eins der Objekte, das an AccBar weitergegeben wurde ist kein Balkendiagramm (barplot). Versichere Dich, dass Du den AccBar-Plot aus einem Vektor von Balkendiagrammen (barplot) erzeugst. (Class=%s)',1),
 2013 => array('Du hast einen leeren Vektor für die Schattierungsfarben im Balkendiagramm (barplot) angegeben.',0),
 2014 => array('Die Anzahl der Datenpunkte jeder Datenreihe in AccBarPlot muss gleich sein.',0),
+2015 => array('Individual bar plots in an AccBarPlot or GroupBarPlot can not have specified X-coordinates',0),
 
 
 /*
@@ -129,7 +130,7 @@ HTTP header wurden bereits gesendet.<br>Fehler in der Datei <b>%s</b> in der Zei
 
 10001 => array('Die Methode LinePlot::SetFilled() sollte nicht mehr benutzt werden. Benutze lieber SetFillColor()',0),
 10002 => array('Der Plot ist zu kompliziert für FastLineStroke. Benutze lieber den StandardStroke()',0),
-
+10003 => array('Each plot in an accumulated lineplot must have the same number of data points.',0),
 /*
 **  jpgraph_log
 */
@@ -398,7 +399,7 @@ HTTP header wurden bereits gesendet.<br>Fehler in der Datei <b>%s</b> in der Zei
 25126 => array('Es kann kein TrueColor-Bild erzeugt werden. Überprüfe, ob die GD2-Bibliothek und PHP korrekt aufgesetzt wurden.',0),
 25127 => array('The library has been configured for automatic encoding conversion of Japanese fonts. This requires that PHP has the mb_convert_encoding() function. Your PHP installation lacks this function (PHP needs the "--enable-mbstring" when compiled).',0),
 25128 => array('The function imageantialias() is not available in your PHP installation. Use the GD version that comes with PHP and not the standalone version.',0),
-
+25129 => array('Anti-alias can not be used with dashed lines. Please disable anti-alias or use solid lines.',0),
 /*
 **---------------------------------------------------------------------------------------------
 ** Pro-version strings

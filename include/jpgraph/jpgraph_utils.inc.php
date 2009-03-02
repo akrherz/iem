@@ -3,7 +3,7 @@
 // File: 	JPGRAPH_UTILS.INC
 // Description: Collection of non-essential "nice to have" utilities 
 // Created: 	2005-11-20
-// Ver:		$Id: jpgraph_utils.inc.php 957 2007-12-01 14:00:29Z ljp $
+// Ver:		$Id: jpgraph_utils.inc.php 1091 2009-01-18 22:57:40Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -125,81 +125,81 @@ class  SymChar {
 // CLASS DateScaleUtils
 // Description: Help to create a manual date scale
 //=============================================================================
-DEFINE('DSUTILS_MONTH',1); // Major and minor ticks on a monthly basis
-DEFINE('DSUTILS_MONTH1',1); // Major and minor ticks on a monthly basis
-DEFINE('DSUTILS_MONTH2',2); // Major ticks on a bi-monthly basis
-DEFINE('DSUTILS_MONTH3',3); // Major icks on a tri-monthly basis
-DEFINE('DSUTILS_MONTH6',4); // Major on a six-monthly basis
-DEFINE('DSUTILS_WEEK1',5); // Major ticks on a weekly basis
-DEFINE('DSUTILS_WEEK2',6); // Major ticks on a bi-weekly basis
-DEFINE('DSUTILS_WEEK4',7); // Major ticks on a quod-weekly basis
-DEFINE('DSUTILS_DAY1',8); // Major ticks on a daily basis
-DEFINE('DSUTILS_DAY2',9); // Major ticks on a bi-daily basis
-DEFINE('DSUTILS_DAY4',10); // Major ticks on a qoud-daily basis
-DEFINE('DSUTILS_YEAR1',11); // Major ticks on a yearly basis
-DEFINE('DSUTILS_YEAR2',12); // Major ticks on a bi-yearly basis
-DEFINE('DSUTILS_YEAR5',13); // Major ticks on a five-yearly basis
+define('DSUTILS_MONTH',1); // Major and minor ticks on a monthly basis
+define('DSUTILS_MONTH1',1); // Major and minor ticks on a monthly basis
+define('DSUTILS_MONTH2',2); // Major ticks on a bi-monthly basis
+define('DSUTILS_MONTH3',3); // Major icks on a tri-monthly basis
+define('DSUTILS_MONTH6',4); // Major on a six-monthly basis
+define('DSUTILS_WEEK1',5); // Major ticks on a weekly basis
+define('DSUTILS_WEEK2',6); // Major ticks on a bi-weekly basis
+define('DSUTILS_WEEK4',7); // Major ticks on a quod-weekly basis
+define('DSUTILS_DAY1',8); // Major ticks on a daily basis
+define('DSUTILS_DAY2',9); // Major ticks on a bi-daily basis
+define('DSUTILS_DAY4',10); // Major ticks on a qoud-daily basis
+define('DSUTILS_YEAR1',11); // Major ticks on a yearly basis
+define('DSUTILS_YEAR2',12); // Major ticks on a bi-yearly basis
+define('DSUTILS_YEAR5',13); // Major ticks on a five-yearly basis
 
 
 class DateScaleUtils {
-    public $iMin=0, $iMax=0;
+    public static $iMin=0, $iMax=0;
 
-    private $starthour,$startmonth, $startday, $startyear;
-    private $endmonth, $endyear, $endday;
-    private $tickPositions=array(),$minTickPositions=array();
-    private $iUseWeeks = true;
+    private static $starthour,$startmonth, $startday, $startyear;
+    private static $endmonth, $endyear, $endday;
+    private static $tickPositions=array(),$minTickPositions=array();
+    private static $iUseWeeks = true;
 
-    function UseWeekFormat($aFlg) {
-	$this->iUseWeeks = $aFlg;
+    static function UseWeekFormat($aFlg) {
+	self::$iUseWeeks = $aFlg;
     }
 
-    function doYearly($aType,$aMinor=false) {
+    static function doYearly($aType,$aMinor=false) {
 	$i=0; $j=0;
-	$m = $this->startmonth;
-	$y = $this->startyear;
+	$m = self::$startmonth;
+	$y = self::$startyear;
 
-	if( $this->startday == 1 ) {
-	    $this->tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
+	if( self::$startday == 1 ) {
+	    self::$tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
 	}
 	++$m;
 
 
 	switch( $aType ) {
 	    case DSUTILS_YEAR1:
-		for($y=$this->startyear; $y <= $this->endyear; ++$y ) {
+		for($y=self::$startyear; $y <= self::$endyear; ++$y ) {
 		    if( $aMinor ) {
 			while( $m <= 12 ) {
-			    if( !($y == $this->endyear && $m > $this->endmonth) ) {
-				$this->minTickPositions[$j++] = mktime(0,0,0,$m,1,$y);
+			    if( !($y == self::$endyear && $m > self::$endmonth) ) {
+				self::$minTickPositions[$j++] = mktime(0,0,0,$m,1,$y);
 			    }
 			    ++$m;
 			}
 			$m=1;
 		    }
-		    $this->tickPositions[$i++] = mktime(0,0,0,1,1,$y);    
+		    self::$tickPositions[$i++] = mktime(0,0,0,1,1,$y);    
 		}
 		break;
 	    case DSUTILS_YEAR2:
-		$y=$this->startyear; 
-		while( $y <= $this->endyear ) {
-		    $this->tickPositions[$i++] = mktime(0,0,0,1,1,$y);    
+		$y=self::$startyear; 
+		while( $y <= self::$endyear ) {
+		    self::$tickPositions[$i++] = mktime(0,0,0,1,1,$y);    
 		    for($k=0; $k < 1; ++$k ) { 
 			++$y;
 			if( $aMinor ) {
-			    $this->minTickPositions[$j++] = mktime(0,0,0,1,1,$y);
+			    self::$minTickPositions[$j++] = mktime(0,0,0,1,1,$y);
 			}
 		    }
 		    ++$y;
 		}
 		break;
 	    case DSUTILS_YEAR5:
-		$y=$this->startyear; 
-		while( $y <= $this->endyear ) {
-		    $this->tickPositions[$i++] = mktime(0,0,0,1,1,$y);    
+		$y=self::$startyear; 
+		while( $y <= self::$endyear ) {
+		    self::$tickPositions[$i++] = mktime(0,0,0,1,1,$y);    
 		    for($k=0; $k < 4; ++$k ) { 
 			++$y;
 			if( $aMinor ) {
-			    $this->minTickPositions[$j++] = mktime(0,0,0,1,1,$y);
+			    self::$minTickPositions[$j++] = mktime(0,0,0,1,1,$y);
 			}
 		    }
 		    ++$y;
@@ -208,69 +208,70 @@ class DateScaleUtils {
 	}
     }
 
-    function doDaily($aType,$aMinor=false) {
-	$m = $this->startmonth;
-	$y = $this->startyear;
-	$d = $this->startday;
-	$h = $this->starthour;
+    static function doDaily($aType,$aMinor=false) {
+	$m = self::$startmonth;
+	$y = self::$startyear;
+	$d = self::$startday;
+	$h = self::$starthour;
 	$i=0;$j=0;
 
 	if( $h == 0 ) {
-	    $this->tickPositions[$i++] = mktime(0,0,0,$m,$d,$y);
-	    $t = mktime(0,0,0,$m,$d,$y);	    
+	    self::$tickPositions[$i++] = mktime(0,0,0,$m,$d,$y);
 	}
-	else {
-	    $t = mktime(0,0,0,$m,$d,$y);	    
-	}
+	$t = mktime(0,0,0,$m,$d,$y);	    
+
 	switch($aType) {
 	    case DSUTILS_DAY1:
-		while( $t <= $this->iMax ) {
-		    $t += 3600*24;
-		    $this->tickPositions[$i++] = $t;
+		while( $t <= self::$iMax ) {
+		    $t = strtotime('+1 day',$t);
+		    self::$tickPositions[$i++] = $t;
+		    if( $aMinor ) {
+			self::$minTickPositions[$j++] = strtotime('+12 hours',$t); 
+		    }
 		}
 		break;
 	    case DSUTILS_DAY2:
-		while( $t <= $this->iMax ) {
-		    $t += 3600*24;
+		while( $t <= self::$iMax ) {
+		    $t = strtotime('+1 day',$t);
 		    if( $aMinor ) {
-			$this->minTickPositions[$j++] = $t;
+			self::$minTickPositions[$j++] = $t;
 		    }
-		    $t += 3600*24;
-		    $this->tickPositions[$i++] = $t;
+		    $t = strtotime('+1 day',$t);
+		    self::$tickPositions[$i++] = $t;
 		}
 		break;
 	    case DSUTILS_DAY4:
-		while( $t <= $this->iMax ) {
+		while( $t <= self::$iMax ) {
 		    for($k=0; $k < 3; ++$k ) {
-			$t += 3600*24;
+			$t = strtotime('+1 day',$t);
 			if( $aMinor ) {
-			    $this->minTickPositions[$j++] = $t;
+			    self::$minTickPositions[$j++] = $t;
 			}
 		    }
-		    $t += 3600*24;
-		    $this->tickPositions[$i++] = $t;
+		    $t = strtotime('+1 day',$t);
+		    self::$tickPositions[$i++] = $t;
 		}
 		break;
 	}
     }
 
-    function doWeekly($aType,$aMinor=false) {
+    static function doWeekly($aType,$aMinor=false) {
 	$hpd = 3600*24;
 	$hpw = 3600*24*7;
 	// Find out week number of min date
-	$thursday = $this->iMin + $hpd * (3 - (date('w', $this->iMin) + 6) % 7);
+	$thursday = self::$iMin + $hpd * (3 - (date('w', self::$iMin) + 6) % 7);
 	$week = 1 + (date('z', $thursday) - (11 - date('w', mktime(0, 0, 0, 1, 1, date('Y', $thursday)))) % 7) / 7;
-	$daynumber = date('w',$this->iMin);
+	$daynumber = date('w',self::$iMin);
 	if( $daynumber == 0 ) $daynumber = 7;
-	$m = $this->startmonth;
-	$y = $this->startyear;
-	$d = $this->startday;
+	$m = self::$startmonth;
+	$y = self::$startyear;
+	$d = self::$startday;
 	$i=0;$j=0;
 	// The assumption is that the weeks start on Monday. If the first day
 	// is later in the week then the first week tick has to be on the following
 	// week.
 	if( $daynumber == 1 ) {
-	    $this->tickPositions[$i++] = mktime(0,0,0,$m,$d,$y);
+	    self::$tickPositions[$i++] = mktime(0,0,0,$m,$d,$y);
 	    $t = mktime(0,0,0,$m,$d,$y) + $hpw;
 	}
 	else {
@@ -288,90 +289,90 @@ class DateScaleUtils {
 		$cnt=3;
 		break;
 	}
-	while( $t <= $this->iMax ) {
-	    $this->tickPositions[$i++] = $t;
+	while( $t <= self::$iMax ) {
+	    self::$tickPositions[$i++] = $t;
 	    for($k=0; $k < $cnt; ++$k ) {
 		$t += $hpw;
 		if( $aMinor ) {
-		    $this->minTickPositions[$j++] = $t;
+		    self::$minTickPositions[$j++] = $t;
 		}
 	    }
 	    $t += $hpw;
 	}
     }
 
-    function doMonthly($aType,$aMinor=false) {
+    static function doMonthly($aType,$aMinor=false) {
 	$monthcount=0;
-	$m = $this->startmonth;
-	$y = $this->startyear;
+	$m = self::$startmonth;
+	$y = self::$startyear;
 	$i=0; $j=0;
 
 	// Skip the first month label if it is before the startdate
-	if( $this->startday == 1 ) {
-	    $this->tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
+	if( self::$startday == 1 ) {
+	    self::$tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
 	    $monthcount=1;
 	}
 	if( $aType == 1 ) {
-	    if( $this->startday < 15 ) {
-		$this->minTickPositions[$j++] = mktime(0,0,0,$m,15,$y);
+	    if( self::$startday < 15 ) {
+		self::$minTickPositions[$j++] = mktime(0,0,0,$m,15,$y);
 	    }
 	}
 	++$m;
 
 	// Loop through all the years included in the scale
-	for($y=$this->startyear; $y <= $this->endyear; ++$y ) {
+	for($y=self::$startyear; $y <= self::$endyear; ++$y ) {
 	    // Loop through all the months. There are three cases to consider:
 	    // 1. We are in the first year and must start with the startmonth
 	    // 2. We are in the end year and we must stop at last month of the scale
 	    // 3. A year in between where we run through all the 12 months
-	    $stopmonth = $y == $this->endyear ? $this->endmonth : 12;
+	    $stopmonth = $y == self::$endyear ? self::$endmonth : 12;
 	    while( $m <= $stopmonth ) {
 		switch( $aType ) {
 		    case DSUTILS_MONTH1: 
 			// Set minor tick at the middle of the month
 			if( $aMinor ) {
 			    if( $m <= $stopmonth ) {
-				if( !($y==$this->endyear && $m==$stopmonth && $this->endday < 15) ) 
-				$this->minTickPositions[$j++] = mktime(0,0,0,$m,15,$y);
+				if( !($y==self::$endyear && $m==$stopmonth && self::$endday < 15) ) 
+				self::$minTickPositions[$j++] = mktime(0,0,0,$m,15,$y);
 			    }
 			}
 			// Major at month 
 			// Get timestamp of first hour of first day in each month
-			$this->tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
+			self::$tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
 
 			break;
 		    case DSUTILS_MONTH2: 
 			if( $aMinor ) {
 			    // Set minor tick at start of each month
-			    $this->minTickPositions[$j++] = mktime(0,0,0,$m,1,$y);
+			    self::$minTickPositions[$j++] = mktime(0,0,0,$m,1,$y);
 			}
 
 			// Major at every second month 
 			// Get timestamp of first hour of first day in each month
 			if( $monthcount % 2 == 0 ) {
-			    $this->tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
+			    self::$tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
 			}
 			break;
 		    case DSUTILS_MONTH3: 
 			if( $aMinor ) {
 			    // Set minor tick at start of each month
-			    $this->minTickPositions[$j++] = mktime(0,0,0,$m,1,$y);
+			    self::$minTickPositions[$j++] = mktime(0,0,0,$m,1,$y);
 			}
 			    // Major at every third month 
 			// Get timestamp of first hour of first day in each month
 			if( $monthcount % 3 == 0 ) {
-			    $this->tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
+			    self::$tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
 			}
 			break;
 		    case DSUTILS_MONTH6: 
 			if( $aMinor ) {
 			    // Set minor tick at start of each month
-			    $this->minTickPositions[$j++] = mktime(0,0,0,$m,1,$y);
+			    self::$minTickPositions[$j++] = mktime(0,0,0,$m,1,$y);
 			}
 			// Major at every third month 
 			// Get timestamp of first hour of first day in each month
 			if( $monthcount % 6 == 0 ) {
-			    $this->tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
+			    self::$tickPositions[$i++] = mktime(0,0,0,$m,1,$y);
 			}
 			break;
 		}
@@ -384,26 +385,26 @@ class DateScaleUtils {
 	// For the case where all dates are within the same month
 	// we want to make sure we have at least two ticks on the scale
 	// since the scale want work properly otherwise
-	if($this->startmonth == $this->endmonth && $this->startyear == $this->endyear && $aType==1 ) {
-	    $this->tickPositions[$i++] = mktime(0 ,0 ,0, $this->startmonth + 1, 1, $this->startyear);
+	if(self::$startmonth == self::$endmonth && self::$startyear == self::$endyear && $aType==1 ) {
+	    self::$tickPositions[$i++] = mktime(0 ,0 ,0, self::$startmonth + 1, 1, self::$startyear);
 	} 
 
-	return array($this->tickPositions,$this->minTickPositions);
+	return array(self::$tickPositions,self::$minTickPositions);
     }
 
-    function GetTicks($aData,$aType=1,$aMinor=false,$aEndPoints=false) {
+    static function GetTicks($aData,$aType=1,$aMinor=false,$aEndPoints=false) {
 	$n = count($aData);
-	return $this->GetTicksFromMinMax($aData[0],$aData[$n-1],$aType,$aMinor,$aEndPoints);
+	return self::GetTicksFromMinMax($aData[0],$aData[$n-1],$aType,$aMinor,$aEndPoints);
     }
 
-    function GetAutoTicks($aMin,$aMax,$aMaxTicks=10,$aMinor=false) {
+    static function GetAutoTicks($aMin,$aMax,$aMaxTicks=10,$aMinor=false) {
 	$diff = $aMax - $aMin;
 	$spd = 3600*24;
 	$spw = $spd*7;
 	$spm = $spd*30;
 	$spy = $spd*352;
 
-	if( $this->iUseWeeks )
+	if( self::$iUseWeeks )
 	    $w = 'W';
 	else
 	    $w = 'd M';
@@ -431,7 +432,7 @@ class DateScaleUtils {
 		    if( $nd/$t[3*$j] <= $aMaxTicks || $j==$n-1) {
 			$type = $t[3*$j+1];
 			$fs = $t[3*$j+2];
-			list($tickPositions,$minTickPositions) = $this->GetTicksFromMinMax($aMin,$aMax,$type,$aMinor);
+			list($tickPositions,$minTickPositions) = self::GetTicksFromMinMax($aMin,$aMax,$type,$aMinor);
 			return array($fs,$tickPositions,$minTickPositions,$type);
 		    }
 		}
@@ -439,28 +440,28 @@ class DateScaleUtils {
 	}
     }
 
-    function GetTicksFromMinMax($aMin,$aMax,$aType,$aMinor=false,$aEndPoints=false) {
-	$this->starthour = date('G',$aMin);
-	$this->startmonth = date('n',$aMin);
-	$this->startday = date('j',$aMin);
-	$this->startyear = date('Y',$aMin);
-	$this->endmonth = date('n',$aMax);
-	$this->endyear = date('Y',$aMax);
-	$this->endday = date('j',$aMax);
-	$this->iMin = $aMin;
-	$this->iMax = $aMax;
+    static function GetTicksFromMinMax($aMin,$aMax,$aType,$aMinor=false,$aEndPoints=false) {
+	self::$starthour = date('G',$aMin);
+	self::$startmonth = date('n',$aMin);
+	self::$startday = date('j',$aMin);
+	self::$startyear = date('Y',$aMin);
+	self::$endmonth = date('n',$aMax);
+	self::$endyear = date('Y',$aMax);
+	self::$endday = date('j',$aMax);
+	self::$iMin = $aMin;
+	self::$iMax = $aMax;
 
 	if( $aType <= DSUTILS_MONTH6 ) {
-	    $this->doMonthly($aType,$aMinor);
+	    self::doMonthly($aType,$aMinor);
 	}
 	elseif( $aType <= DSUTILS_WEEK4 ) {
-	    $this->doWeekly($aType,$aMinor);
+	    self::doWeekly($aType,$aMinor);
 	}
 	elseif( $aType <= DSUTILS_DAY4 ) {
-	    $this->doDaily($aType,$aMinor);
+	    self::doDaily($aType,$aMinor);
 	}
 	elseif( $aType <= DSUTILS_YEAR5 ) {
-	    $this->doYearly($aType,$aMinor);
+	    self::doYearly($aType,$aMinor);
 	}
 	else {
 	    JpGraphError::RaiseL(24003);
@@ -475,7 +476,7 @@ class DateScaleUtils {
 	    $tickPositions[$i] = $aData[$n-1];
 	}
 
-	return array($this->tickPositions,$this->minTickPositions);
+	return array(self::$tickPositions,self::$minTickPositions);
     }
 
 }

@@ -3,7 +3,7 @@
 // File:	JPGRAPH_GANTT.PHP
 // Description:	JpGraph Gantt plot extension
 // Created: 	2001-11-12
-// Ver:		$Id: jpgraph_gantt.php 956 2007-11-17 13:19:20Z ljp $
+// Ver:		$Id: jpgraph_gantt.php 1091 2009-01-18 22:57:40Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -14,114 +14,114 @@ require_once('jpgraph_iconplot.php');
 require_once('jpgraph_plotmark.inc.php');
 
 // Maximum size for Automatic Gantt chart
-DEFINE('MAX_GANTTIMG_SIZE_W',4000);
-DEFINE('MAX_GANTTIMG_SIZE_H',5000);
+define('MAX_GANTTIMG_SIZE_W',4000);
+define('MAX_GANTTIMG_SIZE_H',5000);
 
 // Scale Header types
-DEFINE("GANTT_HDAY",1);
-DEFINE("GANTT_HWEEK",2);
-DEFINE("GANTT_HMONTH",4);
-DEFINE("GANTT_HYEAR",8);
-DEFINE("GANTT_HHOUR",16);
-DEFINE("GANTT_HMIN",32);
+define("GANTT_HDAY",1);
+define("GANTT_HWEEK",2);
+define("GANTT_HMONTH",4);
+define("GANTT_HYEAR",8);
+define("GANTT_HHOUR",16);
+define("GANTT_HMIN",32);
 
 // Bar patterns
-DEFINE("GANTT_RDIAG",BAND_RDIAG);	// Right diagonal lines
-DEFINE("GANTT_LDIAG",BAND_LDIAG); // Left diagonal lines
-DEFINE("GANTT_SOLID",BAND_SOLID); // Solid one color
-DEFINE("GANTT_VLINE",BAND_VLINE); // Vertical lines
-DEFINE("GANTT_HLINE",BAND_HLINE);  // Horizontal lines
-DEFINE("GANTT_3DPLANE",BAND_3DPLANE);  // "3D" Plane
-DEFINE("GANTT_HVCROSS",BAND_HVCROSS);  // Vertical/Hor crosses
-DEFINE("GANTT_DIAGCROSS",BAND_DIAGCROSS); // Diagonal crosses
+define("GANTT_RDIAG",BAND_RDIAG);	// Right diagonal lines
+define("GANTT_LDIAG",BAND_LDIAG); // Left diagonal lines
+define("GANTT_SOLID",BAND_SOLID); // Solid one color
+define("GANTT_VLINE",BAND_VLINE); // Vertical lines
+define("GANTT_HLINE",BAND_HLINE);  // Horizontal lines
+define("GANTT_3DPLANE",BAND_3DPLANE);  // "3D" Plane
+define("GANTT_HVCROSS",BAND_HVCROSS);  // Vertical/Hor crosses
+define("GANTT_DIAGCROSS",BAND_DIAGCROSS); // Diagonal crosses
 
 // Conversion constant
-DEFINE("SECPERDAY",3600*24);
+define("SECPERDAY",3600*24);
 
 // Locales. ONLY KEPT FOR BACKWARDS COMPATIBILITY
 // You should use the proper locale strings directly 
 // from now on. 
-DEFINE("LOCALE_EN","en_UK");
-DEFINE("LOCALE_SV","sv_SE");
+define("LOCALE_EN","en_UK");
+define("LOCALE_SV","sv_SE");
 
 // Layout of bars
-DEFINE("GANTT_EVEN",1);
-DEFINE("GANTT_FROMTOP",2);
+define("GANTT_EVEN",1);
+define("GANTT_FROMTOP",2);
 
 // Style for minute header
-DEFINE("MINUTESTYLE_MM",0);		// 15
-DEFINE("MINUTESTYLE_CUSTOM",2);		// Custom format
+define("MINUTESTYLE_MM",0);		// 15
+define("MINUTESTYLE_CUSTOM",2);		// Custom format
 
 
 // Style for hour header
-DEFINE("HOURSTYLE_HM24",0);		// 13:10
-DEFINE("HOURSTYLE_HMAMPM",1);		// 1:10pm
-DEFINE("HOURSTYLE_H24",2);		// 13
-DEFINE("HOURSTYLE_HAMPM",3);		// 1pm
-DEFINE("HOURSTYLE_CUSTOM",4);		// User defined
+define("HOURSTYLE_HM24",0);		// 13:10
+define("HOURSTYLE_HMAMPM",1);		// 1:10pm
+define("HOURSTYLE_H24",2);		// 13
+define("HOURSTYLE_HAMPM",3);		// 1pm
+define("HOURSTYLE_CUSTOM",4);		// User defined
 
 // Style for day header
-DEFINE("DAYSTYLE_ONELETTER",0);		// "M"
-DEFINE("DAYSTYLE_LONG",1);		// "Monday"
-DEFINE("DAYSTYLE_LONGDAYDATE1",2);	// "Monday 23 Jun"
-DEFINE("DAYSTYLE_LONGDAYDATE2",3);	// "Monday 23 Jun 2003"
-DEFINE("DAYSTYLE_SHORT",4);		// "Mon"
-DEFINE("DAYSTYLE_SHORTDAYDATE1",5);	// "Mon 23/6"
-DEFINE("DAYSTYLE_SHORTDAYDATE2",6);	// "Mon 23 Jun"
-DEFINE("DAYSTYLE_SHORTDAYDATE3",7);	// "Mon 23"
-DEFINE("DAYSTYLE_SHORTDATE1",8);	// "23/6"
-DEFINE("DAYSTYLE_SHORTDATE2",9);	// "23 Jun"
-DEFINE("DAYSTYLE_SHORTDATE3",10);	// "Mon 23"
-DEFINE("DAYSTYLE_SHORTDATE4",11);	// "23"
-DEFINE("DAYSTYLE_CUSTOM",12);		// "M"
+define("DAYSTYLE_ONELETTER",0);		// "M"
+define("DAYSTYLE_LONG",1);		// "Monday"
+define("DAYSTYLE_LONGDAYDATE1",2);	// "Monday 23 Jun"
+define("DAYSTYLE_LONGDAYDATE2",3);	// "Monday 23 Jun 2003"
+define("DAYSTYLE_SHORT",4);		// "Mon"
+define("DAYSTYLE_SHORTDAYDATE1",5);	// "Mon 23/6"
+define("DAYSTYLE_SHORTDAYDATE2",6);	// "Mon 23 Jun"
+define("DAYSTYLE_SHORTDAYDATE3",7);	// "Mon 23"
+define("DAYSTYLE_SHORTDATE1",8);	// "23/6"
+define("DAYSTYLE_SHORTDATE2",9);	// "23 Jun"
+define("DAYSTYLE_SHORTDATE3",10);	// "Mon 23"
+define("DAYSTYLE_SHORTDATE4",11);	// "23"
+define("DAYSTYLE_CUSTOM",12);		// "M"
 
 // Styles for week header
-DEFINE("WEEKSTYLE_WNBR",0);
-DEFINE("WEEKSTYLE_FIRSTDAY",1);
-DEFINE("WEEKSTYLE_FIRSTDAY2",2);
-DEFINE("WEEKSTYLE_FIRSTDAYWNBR",3);
-DEFINE("WEEKSTYLE_FIRSTDAY2WNBR",4);
+define("WEEKSTYLE_WNBR",0);
+define("WEEKSTYLE_FIRSTDAY",1);
+define("WEEKSTYLE_FIRSTDAY2",2);
+define("WEEKSTYLE_FIRSTDAYWNBR",3);
+define("WEEKSTYLE_FIRSTDAY2WNBR",4);
 
 // Styles for month header
-DEFINE("MONTHSTYLE_SHORTNAME",0);
-DEFINE("MONTHSTYLE_LONGNAME",1);
-DEFINE("MONTHSTYLE_LONGNAMEYEAR2",2);
-DEFINE("MONTHSTYLE_SHORTNAMEYEAR2",3);
-DEFINE("MONTHSTYLE_LONGNAMEYEAR4",4);
-DEFINE("MONTHSTYLE_SHORTNAMEYEAR4",5);
-DEFINE("MONTHSTYLE_FIRSTLETTER",6);
+define("MONTHSTYLE_SHORTNAME",0);
+define("MONTHSTYLE_LONGNAME",1);
+define("MONTHSTYLE_LONGNAMEYEAR2",2);
+define("MONTHSTYLE_SHORTNAMEYEAR2",3);
+define("MONTHSTYLE_LONGNAMEYEAR4",4);
+define("MONTHSTYLE_SHORTNAMEYEAR4",5);
+define("MONTHSTYLE_FIRSTLETTER",6);
 
 
 // Types of constrain links
-DEFINE('CONSTRAIN_STARTSTART',0);
-DEFINE('CONSTRAIN_STARTEND',1);
-DEFINE('CONSTRAIN_ENDSTART',2);
-DEFINE('CONSTRAIN_ENDEND',3);
+define('CONSTRAIN_STARTSTART',0);
+define('CONSTRAIN_STARTEND',1);
+define('CONSTRAIN_ENDSTART',2);
+define('CONSTRAIN_ENDEND',3);
 
 // Arrow direction for constrain links
-DEFINE('ARROW_DOWN',0);
-DEFINE('ARROW_UP',1);
-DEFINE('ARROW_LEFT',2);
-DEFINE('ARROW_RIGHT',3);
+define('ARROW_DOWN',0);
+define('ARROW_UP',1);
+define('ARROW_LEFT',2);
+define('ARROW_RIGHT',3);
 
 // Arrow type for constrain type
-DEFINE('ARROWT_SOLID',0);
-DEFINE('ARROWT_OPEN',1);
+define('ARROWT_SOLID',0);
+define('ARROWT_OPEN',1);
 
 // Arrow size for constrain lines
-DEFINE('ARROW_S1',0);
-DEFINE('ARROW_S2',1);
-DEFINE('ARROW_S3',2);
-DEFINE('ARROW_S4',3);
-DEFINE('ARROW_S5',4);
+define('ARROW_S1',0);
+define('ARROW_S2',1);
+define('ARROW_S3',2);
+define('ARROW_S4',3);
+define('ARROW_S5',4);
 
 // Activity types for use with utility method CreateSimple()
-DEFINE('ACTYPE_NORMAL',0);
-DEFINE('ACTYPE_GROUP',1);
-DEFINE('ACTYPE_MILESTONE',2);
+define('ACTYPE_NORMAL',0);
+define('ACTYPE_GROUP',1);
+define('ACTYPE_MILESTONE',2);
 
-DEFINE('ACTINFO_3D',1);
-DEFINE('ACTINFO_2D',0);
+define('ACTINFO_3D',1);
+define('ACTINFO_2D',0);
 
 
 // Check if array_fill() exists
@@ -1109,19 +1109,19 @@ class GanttGraph extends Graph {
 // CLASS PredefIcons
 // Description: Predefined icons for use with Gantt charts
 //===================================================
-DEFINE('GICON_WARNINGRED',0);
-DEFINE('GICON_TEXT',1);
-DEFINE('GICON_ENDCONS',2);
-DEFINE('GICON_MAIL',3);
-DEFINE('GICON_STARTCONS',4);
-DEFINE('GICON_CALC',5);
-DEFINE('GICON_MAGNIFIER',6);
-DEFINE('GICON_LOCK',7);
-DEFINE('GICON_STOP',8);
-DEFINE('GICON_WARNINGYELLOW',9);
-DEFINE('GICON_FOLDEROPEN',10);
-DEFINE('GICON_FOLDER',11);
-DEFINE('GICON_TEXTIMPORTANT',12);
+define('GICON_WARNINGRED',0);
+define('GICON_TEXT',1);
+define('GICON_ENDCONS',2);
+define('GICON_MAIL',3);
+define('GICON_STARTCONS',4);
+define('GICON_CALC',5);
+define('GICON_MAGNIFIER',6);
+define('GICON_LOCK',7);
+define('GICON_STOP',8);
+define('GICON_WARNINGYELLOW',9);
+define('GICON_FOLDEROPEN',10);
+define('GICON_FOLDER',11);
+define('GICON_TEXTIMPORTANT',12);
 
 class PredefIcons {
     private $iBuiltinIcon = null, $iLen = -1 ;
@@ -3056,8 +3056,8 @@ class Progress {
     }
 }
 
-DEFINE('GANTT_HGRID1',0);
-DEFINE('GANTT_HGRID2',1);
+define('GANTT_HGRID1',0);
+define('GANTT_HGRID2',1);
 
 //===================================================
 // CLASS HorizontalGridLine
