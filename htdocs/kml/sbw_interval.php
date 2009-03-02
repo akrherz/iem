@@ -59,7 +59,7 @@ for ($i=0;$row=@pg_fetch_array($result,$i);$i++){
    </p>
         ]]>
     </description>
-    <styleUrl>#iemstyle</styleUrl>
+    <styleUrl>#".$row["phenomena"]."style</styleUrl>
     <name>". $vtec_phenomena[$row["phenomena"]] ." ". $vtec_significance[$row["significance"]]  ."</name>\n";
   echo $row["kml"];
   echo "</Placemark>";
