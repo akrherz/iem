@@ -4,15 +4,15 @@ $THISPAGE = "archive-main";
 $TITLE = "IEM | Archived Data Resources";
 include("$rootpath/include/header.php"); ?>
 
-<div style="width:640px;">
+<div style="width:800px;">
 
 <h3 class="heading">Archived Data & Plots</h3>
 
 <p class="story">This page contains a listing of archive resources.  A brief
 description of each link is included to aid your search.  If you are still
-having difficulty finding something, please let us know.</p>
+having difficulty finding something, please let us know. </p>
 
-<div style="width:310px; float:left;">
+<div style="width:390px; float:left;">
 
 <h3>Storm Event Pictures</h3>
 <ul>
@@ -56,7 +56,7 @@ then, only base reflectivity was saved.</li>
  <br />A wonderful site to download historical satellite data.</li>
 </ul>
 </div>
-<div style="width:310px; float:right;">
+<div style="width:390px; float:right;">
 
 <h3>Raw Data</h3>
 <ul>
