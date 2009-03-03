@@ -52,6 +52,7 @@ $_pages = Array(
     "base" => Array("title" => "Climatology", "url" => "/climate/"),
     "main" => Array("title" => "Mainpage", "url" => "/climate/"),
     "climodat" => Array("title" => "Climodat", "url" => "/climodat/"),
+    "drought" => Array("title" => "Drought", "url" => "/dm/"),
     "today" => Array("title" => "Today", "url" => "/climate/today.phtml"),
     "yesterday" => Array("title" => "Yesterday", "url" => "/climate/yesterday.phtml"),
     "week" => Array("title" => "Week", "url" => "/climate/week.phtml"),
