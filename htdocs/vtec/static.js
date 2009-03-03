@@ -44,6 +44,8 @@ var vDescription;
 var tslider;
 // Selectors
 var wfo_selector;
+/* Misc */
+var lsrkml;
 
 function getVTEC(){
   return "year="+ year_selector.getValue() +"&wfo="+ wfo_selector.getValue() +"&phenomena="+ phenomena_selector.getValue() +"&eventid="+ eventid_selector.getValue() +"&significance="+ sig_selector.getValue();
@@ -349,8 +351,8 @@ function resetGmap(){
      gxml = new GGeoXml(kml);
      Ext.getCmp('mygpanel').gmap.addOverlay(gxml);
      kml = "http://mesonet.agron.iastate.edu/kml/sbw_lsrs.php?"+ getVTEC();
-     gxml2 = new GGeoXml(kml);
-     Ext.getCmp('mygpanel').gmap.addOverlay(gxml2);
+     lsrkml = new GGeoXml(kml);
+     Ext.getCmp('mygpanel').gmap.addOverlay(lsrkml);
    }
 };
 
@@ -673,6 +675,18 @@ googlePanel = new Ext.ux.GMapPanel({
     id:'mygpanel',
     disabled:true,
     zoomLevel: 14,
+    tbar: new Ext.Button({
+          text: 'Hide Storm Reports',
+          handler: function(){
+                 if (lsrkml.isHidden()){
+                   lsrkml.show();
+                   this.setText('Hide Storm Reports');
+                 } else {
+                   lsrkml.hide();
+                   this.setText('Show Storm Reports');
+                 } 
+           }
+    }),
     mapConfOpts: ['enableScrollWheelZoom','enableDoubleClickZoom','enableDragging'],
     mapControls: ['GSmallMapControl','GMapTypeControl','NonExistantControl']
 });
@@ -772,7 +786,7 @@ var viewport = new Ext.Viewport({
     items:[{ 
              region:'north',
              height:130,
-             contentEl: 'iem-wrapper'
+             contentEl: 'iem-header'
          },{
             region:'west',
             width:200,
