@@ -37,6 +37,7 @@ $_pages = Array(
     "birthday" => Array("title" => "Birthday Weather", "url" => "/onsite/birthday/"),
     "cases" => Array("title" => "Cases", "url" => "/cases/"),
     "mos" => Array("title" => "MOS", "url" => "/mos/"),
+    "schema" => Array("title" => "Schema", "url" => "/archive/schema.php"),
  ),
  "current" => Array(
     "base" => Array("title" => "Current", "url" => "/current/"),
