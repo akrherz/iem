@@ -108,7 +108,7 @@ var expander2 = new Ext.grid.RowExpander({
            {name: 'area', type: 'float'},
            {name: 'significance'},
            {name: 'phenomena'},
-           {name: 'eventid', type: 'int'},
+           {name: 'eventid'},
            {name: 'issued'},
            {name: 'expired'}
           ])
@@ -694,17 +694,17 @@ function radargenerator(){
   case 'TO': r = 'layers[]=nexrad&layers[]=sbw&layers[]=sbwh&';break;
   case 'SV': r = 'layers[]=nexrad&layers[]=sbw&layers[]=sbwh&';break;
   case 'MA': r = 'layers[]=nexrad&layers[]=sbw&layers[]=sbwh&';break;
-  case 'BZ': r = 'layers[]=nexrad&layers[]=cbw&';break;
+  case 'BZ': r = 'layers[]=nexrad&';break;
   case 'FF': r = 'layers[]=nexrad&layers[]=sbw&layers[]=sbwh&';break;
-  case 'FL': r = 'layers[]=nexrad&layers[]=cbw&';break;
-  case 'HS': r = 'layers[]=nexrad&layers[]=cbw&';break;
-  case 'HP': r = 'layers[]=nexrad&layers[]=cbw&';break;
-  case 'IS': r = 'layers[]=nexrad&layers[]=cbw&';break;
-  case 'IP': r = 'layers[]=nexrad&layers[]=cbw&';break;
-  case 'SN': r = 'layers[]=nexrad&layers[]=cbw&';break;
-  case 'WS': r = 'layers[]=nexrad&layers[]=cbw&';break;
-  case 'WW': r = 'layers[]=nexrad&layers[]=cbw&';break;
-  case 'ZR': r = 'layers[]=nexrad&layers[]=cbw&';break;
+  case 'FL': r = 'layers[]=nexrad&';break;
+  case 'HS': r = 'layers[]=nexrad&';break;
+  case 'HP': r = 'layers[]=nexrad&';break;
+  case 'IS': r = 'layers[]=nexrad&';break;
+  case 'IP': r = 'layers[]=nexrad&';break;
+  case 'SN': r = 'layers[]=nexrad&';break;
+  case 'WS': r = 'layers[]=nexrad&';break;
+  case 'WW': r = 'layers[]=nexrad&';break;
+  case 'ZR': r = 'layers[]=nexrad&';break;
   default: r='layers[]=cbw&layers[]=legend&';
  }
  if (sig_selector.getValue() != 'W'){
@@ -772,7 +772,7 @@ var viewport = new Ext.Viewport({
     items:[{ 
              region:'north',
              height:130,
-             contentEl: 'iem-header'
+             contentEl: 'iem-wrapper'
          },{
             region:'west',
             width:200,
