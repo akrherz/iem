@@ -20,6 +20,7 @@ if ($rootpath == "http://localhost/iem"){
 }
 
 $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../ext/resources/css/ext-all.css"/>
+<link rel="stylesheet" type="text/css" href="../ext/ux/form/Spinner.css"/>
 <script type="text/javascript" src="../ext/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="../ext/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
@@ -28,6 +29,8 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../ext/resources/css/
 <script type="text/javascript" src="../ext/ux/menu/EditableItem.js"></script>
 <script type="text/javascript" src="../ext/ux/grid/GridFilters.js"></script>
 <script type="text/javascript" src="../ext/ux/grid/filter/Filter.js"></script>
+<script type="text/javascript" src="../ext/ux/form/Spinner.js"></script>
+<script type="text/javascript" src="../ext/ux/form/SpinnerStrategy.js"></script>
 <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key='. $GOOGLEKEYS[$rooturl]["vtec"] .'" type="text/javascript"></script>
 <script type="text/javascript" src="../ext/ux/grid/filter/StringFilter.js"></script>
 <script type="text/javascript" src="static.js?v=1.0.1"></script>';
