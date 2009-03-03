@@ -46,6 +46,7 @@ var tslider;
 var wfo_selector;
 /* Misc */
 var lsrkml;
+var delayedTaskSpinner;
 
 function getVTEC(){
   return "year="+ year_selector.getValue() +"&wfo="+ wfo_selector.getValue() +"&phenomena="+ phenomena_selector.getValue() +"&eventid="+ eventid_selector.getValue() +"&significance="+ sig_selector.getValue();
@@ -240,7 +241,7 @@ var sig_selector = new Ext.form.ComboBox({
 });
 
 
-var eventid_selector = new Ext.form.NumberField({
+/* var eventid_selector = new Ext.form.NumberField({
     allowDecimals:false,
     allowNegative:false,
     maxValue:9999,
@@ -249,9 +250,47 @@ var eventid_selector = new Ext.form.NumberField({
     id: 'eventid',
     name:'eventid',
     fieldLabel:'Event'
+}); */
+var eventid_selector = new Ext.ux.form.Spinner({
+     fieldLabel: 'Event Number',
+     name: 'eventid',
+     id: 'eventid',
+     width: 60,
+     strategy: new Ext.ux.form.Spinner.NumberStrategy({minValue:'1', maxValue:'9999'})
+});
+eventid_selector.on('spin', function(){
+   if(!delayedTaskSpinner){
+	 delayedTaskSpinner = new Ext.util.DelayedTask(function()
+	 {
+       metastore.load( {params:getVTEC()} );
+	   delayedTaskSpinner = null;	
+	});
+   delayedTaskSpinner.delay(500);
+  }
+
 });
 
-var year_selector = new Ext.form.NumberField({
+var year_selector = new Ext.ux.form.Spinner({
+     fieldLabel: 'Year',
+     name: 'year',
+     id: 'yearselector',
+     width: 60,
+     strategy: new Ext.ux.form.Spinner.NumberStrategy({minValue:2002, maxValue: new Date("Y")})
+});
+year_selector.on('spin', function(){
+   if(!delayedTaskSpinner){
+     delayedTaskSpinner = new Ext.util.DelayedTask(function()
+     {
+       metastore.load( {params:getVTEC()} );
+       delayedTaskSpinner = null;
+    });
+   delayedTaskSpinner.delay(500);
+  }
+
+});
+
+
+/* var year_selector = new Ext.form.NumberField({
     allowDecimals:false,
     allowNegative:false,
     maxValue: new Date("Y"),
@@ -260,7 +299,7 @@ var year_selector = new Ext.form.NumberField({
     name:'year',
     id:'yearselector',
     fieldLabel:'Year'
-});
+});*/
 
 var metastore = new Ext.data.Store({
     root:'meta',
