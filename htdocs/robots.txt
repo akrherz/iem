@@ -14,3 +14,4 @@ Disallow: /data/NIDS/
 Disallow: /data/nexrd2/
 Disallow: /archive/nexrad/
 Disallow: /COOP/cat.phtml
+Disallow: /data/frost/
