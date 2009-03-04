@@ -54,13 +54,14 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 for ($i=0;$row=@pg_fetch_array($result,$i);$i++){
   $sts = strtotime($row["issue"]);
   $ets = strtotime($row["expire"]);
+  $uri = sprintf("<a href=\"/vtec/%s-O-NEW-K%s-%s-%s-%04d.html\">%s</a>", date('Y',$sts), $row["wfo"], $row["phenomena"], $row["significance"], $row["eventid"], $row["eventid"]);
   echo "<Placemark>
     <description>
         <![CDATA[
   <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." km^2
-  <br /><font color=\"red\"><i>Event ID:</i></font> ". $row["eventid"] ."
-  <br /><font color=\"red\"><i>Issued:</i></font> ". gmdate('d M Y h:i', $sts) ."
-  <br /><font color=\"red\"><i>Expires:</i></font> ". gmdate('d M Y h:i', $ets) ."
+  <br /><font color=\"red\"><i>Event ID:</i></font> $uri
+  <br /><font color=\"red\"><i>Issued:</i></font> ". date('d M Y h:i', $sts) ."
+  <br /><font color=\"red\"><i>Expires:</i></font> ". date('d M Y h:i', $ets) ."
   <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_status[$row["status"]] ."
    </p>
         ]]>
