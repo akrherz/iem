@@ -60,8 +60,8 @@ for ($i=0;$row=@pg_fetch_array($result,$i);$i++){
         <![CDATA[
   <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." km^2
   <br /><font color=\"red\"><i>Event ID:</i></font> $uri
-  <br /><font color=\"red\"><i>Issued:</i></font> ". date('d M Y h:i', $sts) ."
-  <br /><font color=\"red\"><i>Expires:</i></font> ". date('d M Y h:i', $ets) ."
+  <br /><font color=\"red\"><i>Issued:</i></font> ". gmdate('d M Y H:i', $sts) ." GMT
+  <br /><font color=\"red\"><i>Expires:</i></font> ". gmdate('d M Y H:i', $ets) ." GMT
   <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_status[$row["status"]] ."
    </p>
         ]]>
