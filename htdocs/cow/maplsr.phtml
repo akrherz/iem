@@ -9,7 +9,7 @@ include("$rootpath/include/wfoLocs.php");
 include("$rootpath/include/forms.php");
 
 /* Calling API */
-$ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : 0;
+$ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : time();
 $ts2 = isset($_GET["ts2"]) ? strtotime($_GET["ts2"]) : $ts;
 $wfo = isset($_GET["wfo"]) ? $_GET["wfo"] : "DMX";
 $lat0 = isset($_GET["lat0"]) ? $_GET["lat0"] : $wfos[$wfo]["lat"];
@@ -113,6 +113,7 @@ icon.iconAnchor = new GPoint(6, 20);
 icon.infoWindowAnchor = new GPoint(5, 1);
 
 var map;
+var sbwLayer;
 var markers = new Array();
 
 
@@ -163,6 +164,12 @@ var custommap4 = new GMapType(layer4, G_SATELLITE_MAP.getProjection(), 'Nexrad',
 function showMarker(i){
   GEvent.trigger(markers[i], 'click');
 }
+var showSBW = 1;
+function toggleSBW(){
+  if (! showSBW){ sbwLayer.show(); }
+  else{ sbwLayer.hide(); }
+  showSBW = ! showSBW;
+}
 
 function load() {
   if (GBrowserIsCompatible()) {
@@ -178,8 +185,8 @@ function load() {
     <?php echo $g; ?>
 
     kml = "http://mesonet.agron.iastate.edu/kml/sbw_interval.php?wfo=<?php echo $wfo; ?>&ts=<?php echo date('Y-m-d%20H:i', $ts); ?>&ts2=<?php echo date('Y-m-d%20H:i', $ts2); ?>";
-    gxml = new GGeoXml(kml);
-    map.addOverlay(gxml);
+    sbwLayer = new GGeoXml(kml);
+    map.addOverlay(sbwLayer);
 
 <?php if ($ts == $ts2) { echo "map.setMapType(custommap4);"; } ?>
 
@@ -192,9 +199,9 @@ function load() {
 </script>
 <div style="padding-left: 15px;">
 
+<form method="GET" action="maplsr.phtml" name="goo">
 <h3>Local Storm Report (LSR) Viewer</h3>
 <div style="border:1px solid #ccc; padding: 5px; margin-left: 20px; float:left;">
-<form method="GET" action="maplsr.phtml">
 <strong>Weather Office:</strong> <?php echo wfoSelect($wfo); ?>
 <table>
 <tr>
@@ -214,11 +221,10 @@ function load() {
 
 
 <input type="submit" value="Update Map">
-</form>
 </div>
 <br clear="all" />
 <strong><?php echo $wfos[$wfo]['city']; ?>'s Local Storm Reports betwen <?php echo "$d1 and $d2"; ?></strong<br />
-
+<input type="checkbox" checked="checked" name="showsbw" onClick="javascript: toggleSBW();">Show Storm Based Warnings
 <div id="gmap" style="width: 90%; height: 500px"></div>
 
 <h4>Table Listing of Events:</h4>
@@ -227,6 +233,7 @@ function load() {
 
 <?php echo $table; ?>
 
+</form>
 </div>
 
 <?php include("$rootpath/include/footer.php"); ?>
