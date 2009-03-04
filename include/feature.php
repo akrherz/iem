@@ -98,7 +98,7 @@ $s .= "</table>";
 if (getenv("REMOTE_ADDR") == "173.20.184.18" )
 {
  $s = "<img src=\"images/i3.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 180 weeks now!!!!  hehe, a number divisible by a whole lot of numbers!  Wow!  Hehe, someday the number will be larger than the big numbers that smokey bowls.  I love you very much and am very excited to see you this weekend.  We will have a big weekend of doing taxes, hehe!  All kinds of fun. <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 181 weeks now!!!!  hehe, the wednesday's keep piling up smokey! muah! Darly always so excited when wednesday comes.  Darly should have had a special feature for snoopy birthday!   I love you very much and I hope you have a great week! <br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 }
