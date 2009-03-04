@@ -73,7 +73,7 @@ for ($i=0;$row = @pg_fetch_array($rs,$i); $i++)
    $lons[] = $row["lon"];
    $wfo = $row["wfo"];
    $table .= sprintf("<tr><td><a href=\"javascript: showMarker($i);\">%s</a></td><td>%s</td><td>%s,%s</td><td>%s</td><td>%s</td></tr><tr><td></td><td colspan=\"4\">%s</td></tr>",
-    gmdate("m/d/Y H:i", $timestamp), $row["county"], $row["city"], 
+    date("m/d/Y H:i", $timestamp), $row["county"], $row["city"], 
     $row["state"], $row["typetext"], $row["magnitude"], $row["remark"]);
 
    $desc = "<b>Event:</b> ". $row['typetext'] ."<br /><b>Time:</b> ". date('d M Y H:i', $timestamp) ." GMT<br /><b>Magnitude:</b> ". $row['magnitude'] ."<br /><b>Source:</b> ". $row['source'] ."<br /><b>Remark:</b> ". $row['remark'] ;
