@@ -27,9 +27,6 @@ $result = pg_execute($connect, "SELECT",
 
 header("Content-Type:", "application/vnd.google-earth.kml+xml");
 // abgr
-$color = "7dff0000";
-$ca = Array("TO" => "7d0000ff", "SV" => "7d00ffff", "FF" => "7d00ff00",
-             "MA" => "7d00ff00");
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://earth.google.com/kml/2.2\">
@@ -46,15 +43,24 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
       <LineStyle><width>1</width><color>ff000000</color></LineStyle>
       <PolyStyle><color>7d00ffff</color></PolyStyle>
     </Style>
+    <Style id=\"FAstyle\">
+      <LineStyle><width>1</width><color>ff000000</color></LineStyle>
+      <PolyStyle><color>7d00ff00</color></PolyStyle>
+    </Style>
     <Style id=\"FFstyle\">
       <LineStyle><width>1</width><color>ff000000</color></LineStyle>
       <PolyStyle><color>7d00ff00</color></PolyStyle>
     </Style>";
 for ($i=0;$row=@pg_fetch_array($result,$i);$i++){
+  $sts = strtotime($row["issue"]);
+  $ets = strtotime($row["expire"]);
   echo "<Placemark>
     <description>
         <![CDATA[
   <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." km^2
+  <br /><font color=\"red\"><i>Event ID:</i></font> ". $row["eventid"] ."
+  <br /><font color=\"red\"><i>Issued:</i></font> ". gmdate('d M Y h:i', $sts) ."
+  <br /><font color=\"red\"><i>Expires:</i></font> ". gmdate('d M Y h:i', $ets) ."
   <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_status[$row["status"]] ."
    </p>
         ]]>
