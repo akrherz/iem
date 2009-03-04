@@ -1,179 +1,85 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+$pgconn = iemdb("postgis");
+pg_query($pgconn, "SET TIME ZONE 'GMT'");
 include("$rootpath/include/lsrs.php");
 include("$rootpath/include/google_keys.php");
-/* Map warnings and a LSR */
-include("../GIS/apps/rview/lib.php");
+include("$rootpath/include/wfoLocs.php");
+include("$rootpath/include/forms.php");
 
-$ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : die("Booooo");
-$lat0 = isset($_GET["lat0"]) ? $_GET["lat0"] : die("Boooo");
-$lon0 = isset($_GET["lon0"]) ? $_GET["lon0"] : die("Boooo");
+/* Calling API */
+$ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : 0;
+$ts2 = isset($_GET["ts2"]) ? strtotime($_GET["ts2"]) : $ts;
 $wfo = isset($_GET["wfo"]) ? $_GET["wfo"] : "DMX";
-$isSummary = 0;
-if (isset($_GET["ts2"]))
-{
-  $isSummary = 1;
-  $ts2 = strtotime($_GET["ts2"]);
-  $tsSQL2 = date("Y-m-d H:i:00+00", $ts2);
+$lat0 = isset($_GET["lat0"]) ? $_GET["lat0"] : $wfos[$wfo]["lat"];
+$lon0 = isset($_GET["lon0"]) ? $_GET["lon0"] : $wfos[$wfo]["lon"];
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y", $ts);
+if ($ts2 != $ts){
+  $lat0 = $wfos[$wfo]["lat"];
+  $lon0 = $wfos[$wfo]["lon"];
 }
+
+$smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m", $ts);
+$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d", $ts);
+$shour = isset($_GET["shour"]) ? $_GET["shour"] : date("H", $ts);
+$sminute = isset($_GET["sminute"]) ? $_GET["sminute"] : date("i", $ts);
+
+$emonth = isset($_GET["emonth"]) ? $_GET["emonth"] : date("m", $ts2);
+$eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d", $ts2);
+$ehour = isset($_GET["ehour"]) ? $_GET["ehour"] : date("H", $ts2);
+$eminute = isset($_GET["eminute"]) ? $_GET["eminute"] : date("i", $ts2);
+
+if (! isset($_GET["ts"])){ $ts = mktime($shour, $sminute, 0, $smonth, $sday, $year);}
+if (! isset($_GET["ts2"])){ $ts2 = mktime($ehour, $eminute, 0, $emonth, $eday, $year);}
 
 $tsSQL = date("Y-m-d H:i:00+00", $ts);
+$tsSQL2 = date("Y-m-d H:i:00+00", $ts2);
 $year = date("Y", $ts);
-$d = date("d M Y H:i" ,  $ts);
+$d1 = date("d M Y H:i" ,  $ts);
+$d2 = date("d M Y H:i" ,  $ts2);
 
-$month = date("m", $ts);
-$day = date("d", $ts);
-$hour = date("H", $ts);
-$m = date("i", $ts);
+$basets = $ts - (($sminute % 5) * 60);
 
-if ($m >= 55) $ma = "55";
-else if ($m >= 50) $ma = "50";
-else if ($m >= 45) $ma = "45";
-else if ($m >= 40) $ma = "40";
-else if ($m >= 35) $ma = "35";
-else if ($m >= 30) $ma = "30";
-else if ($m >= 25) $ma = "25";
-else if ($m >= 20) $ma = "20";
-else if ($m >= 15) $ma = "15";
-else if ($m >= 10) $ma = "10";
-else if ($m >= 5) $ma = "05";
-else $ma = "00";
-$m = $ma;
-$basets = mktime($hour, $m, 0, $month, $day, $year);
-
-$use_sbw = ($basets > mktime(0,0,0,10,1,2007)) ? 1 : 0;
-
-
-dl($mapscript);
-
-$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
-
-$map->setProjection("proj=latlong");
-$map->set("width", 640);
-$map->set("height", 480);
-$lpad = 0.50;
-$map->setextent($lon0 - $lpad,
-                $lat0 - $lpad,
-                $lon0 + $lpad,
-                $lat0 + $lpad);
-
-
-$namer = $map->getlayerbyname("namerica");
-$namer->set("status", 1);
-
-$stlayer = $map->getlayerbyname("states");
-$stlayer->set("status", 1);
-
-$lakes = $map->getlayerbyname("lakes");
-$lakes->set("status", 1);
-
-/* Set outline color black please */
-$clayer = $map->getlayerbyname("uscounties_and_name");
-$clayer->set("status", 1);
-$clc0 = $clayer->getClass(0);
-$clc0s0 = $clc0->getStyle(0);
-$clc0s0->outlinecolor->setRGB(0,0,0);
-
-$c0 = $map->getlayerbyname("warnings0_c");
-$c0->set("connection", $_DATABASES["postgis"]);
-$c0->set("status", 1);
-if ($use_sbw){
-  $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$tsSQL' and issue <= '$tsSQL' and gtype = 'C' and phenomena NOT IN ('TO','SV','MA') ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
-  $p0 = $map->getlayerbyname("sbw");
-} else {
-  $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$tsSQL' and issue <= '$tsSQL' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
-  $p0 = $map->getlayerbyname("warnings0_p");
-}
-
-$p0->set("connection", $_DATABASES["postgis"]);
-$p0->set("status", 1);
-$p0->set("data", "geom from (select phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$tsSQL' and issue <= '$tsSQL' and gtype = 'P') as foo using unique oid using SRID=4326");
-
-$fp = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $basets) ."GIS/uscomp/n0r_". date('YmdHi', $basets) .".png";
-if (! is_file($fp))
-    $errors = "<br /><i><b>NEXRAD composite not available: $fp</b></i>";
-$radfile = $fp;
-
-
-$img = $map->prepareImage();
-
-$namer->draw($img);
-$stlayer->draw( $img);
-$lakes->draw($img);
-
-$radar = $map->getlayerbyname("nexrad_n0r");
-$radar->set("data", $radfile);
-$radar->set("status", 1);
-$radar->draw($img);
-$clayer->draw( $img );
-$c0->draw($img);
-$p0->draw($img);
-
-/* We are going to manually draw the LSRs, sigh... */
-$llayer = ms_newLayerObj($map);
-$llayer->set("status", MS_ON);
-$llayer->set("type", MS_LAYER_POINT);
-$llayer->setProjection("init=epsg:4326");
-$llayer->set("labelcache", MS_ON);
-
-$datalc0 = ms_newClassObj($llayer);
-$datalc0->label->color->setrgb(255,255,255);
-$datalc0->label->outlinecolor->setrgb(0,0,0);
-$datalc0->label->set("type", MS_TRUETYPE);
-$datalc0->label->set("font", "arial");
-$datalc0->label->set("size", 12);
-$datalc0->label->set("force", MS_TRUE);
-$datalc0->label->set("partials", MS_TRUE);
-$datalc0->label->set("antialias", MS_TRUE);
-$datalc0->label->set("position", MS_LC);
-$datalc0->label->set("angle", 0);
-
-$datalc0s1 = ms_newStyleObj($datalc0);
-$datalc0s1->color->setrgb(0,0,0);
-$datalc0s1->set("symbolname", "circle");
-$datalc0s1->set("size", 7);
-$datalc0s0 = ms_newStyleObj($datalc0);
-$datalc0s0->color->setrgb(255,255,0);
-$datalc0s0->set("symbolname", "circle");
-$datalc0s0->set("size", 4);
-
-$minx = $map->extent->minx;
-$maxx = $map->extent->maxx;
-$dx = ($maxx - $minx) / 640;
-$miny = $map->extent->miny;
-$maxy = $map->extent->maxy;
-$dy = ($maxy - $miny) / 480;
-
-$pgconn = iemdb("postgis");
-$sql = "select distinct source,typetext,remark, x(geom) as lon, y(geom) as lat, 
-        city, magnitude, valid, geom, type as ltype from lsrs_${year} 
+if ($ts >= $ts2){
+$minx = $lon0 - 0.02;
+$maxx = $lon0 + 0.02;
+$miny = $lat0 - 0.02;
+$maxy = $lat0 + 0.02;
+$sql = "select distinct source, county, state, typetext,remark, x(geom) as lon, y(geom) as lat, 
+        city, magnitude, valid, geom, type as ltype, wfo from lsrs_${year} 
         WHERE valid = '$tsSQL' and
-        geom && GeomFromEWKT('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))')";
-
-if ($isSummary){
-  $sql = "select distinct source, typetext, remark, 
-        x(geom) as lon, y(geom) as lat, 
-        city, magnitude, valid, geom, type as ltype from lsrs_${year} 
+        geom && GeomFromEWKT('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))') ORDER by valid ASC";
+} else {
+  $sql = "select distinct source, typetext, remark, county, state,
+        x(geom) as lon, y(geom) as lat,
+        city, magnitude, valid, geom, type as ltype, wfo from lsrs_${year}
         WHERE valid >= '$tsSQL' and valid <= '$tsSQL2' and
-        wfo = '$wfo'";
+        wfo = '$wfo' ORDER by valid ASC";
 }
 $rs = pg_exec($pgconn, $sql);
-$IMAGEMAP = "";
 $g = "";
+$lats = Array();
+$lons = Array();
+$table = "<table cellspacing=\"0\" cellpadding=\"3\" border=\"1\">
+<tr style=\"background: #fafa00;\"><th>GMT Time</th><th>County</th><th>Location</th><th>Type</th><th>Magnitude</th></tr>";
+
 for ($i=0;$row = @pg_fetch_array($rs,$i); $i++)
 {
-   $pt = ms_newPointObj();
-   $pt->setXY($row["lon"], $row["lat"], 0);
-   $pt->draw($map, $llayer, $img, 0, $row["city"] );
-   $pt->free();
-   $imgx = intval(($row["lon"] - $minx) / $dx);
-   $imgy = intval(($maxy - $row["lat"]) / $dy);
-   $desc = "<b>Event:</b> ". $row['typetext'] ."<br /><b>Magnitude:</b> ". $row['magnitude'] ."<br /><b>Source:</b> ". $row['source'] ."<br /><b>Remark:</b> ". $row['remark'] ;
-   $IMAGEMAP .= "<area onMouseover=\"ddrivetip('". $desc ."','yellow', 200)\" onMouseout=\"hideddrivetip()\" shape=\"circle\" coords=\"$imgx,$imgy,10\">";
+   $timestamp = strtotime(substr($row["valid"],0,16));
+   //$imgx = intval(($row["lon"] - $minx) / $dx);
+   //$imgy = intval(($maxy - $row["lat"]) / $dy);
+   $lats[] = $row["lat"];
+   $lons[] = $row["lon"];
+   $wfo = $row["wfo"];
+   $table .= sprintf("<tr><td><a href=\"javascript: showMarker($i);\">%s</a></td><td>%s</td><td>%s,%s</td><td>%s</td><td>%s</td></tr><tr><td></td><td colspan=\"4\">%s</td></tr>",
+    gmdate("m/d/Y H:i", $timestamp), $row["county"], $row["city"], 
+    $row["state"], $row["typetext"], $row["magnitude"], $row["remark"]);
+
+   $desc = "<b>Event:</b> ". $row['typetext'] ."<br /><b>Time:</b> ". date('d M Y H:i', $timestamp) ." GMT<br /><b>Magnitude:</b> ". $row['magnitude'] ."<br /><b>Source:</b> ". $row['source'] ."<br /><b>Remark:</b> ". $row['remark'] ;
 
    $g .= "
-    markers[$i] = new GMarker(new GLatLng(". $row["lat"] .", ". $row["lon"] ."));
+ markers[$i] = new GMarker(new GLatLng(". $row["lat"] .", ". $row["lon"] ."));
     GEvent.addListener(markers[$i], \"click\", function() {
             markers[$i].openInfoWindowHtml(\"$desc\",
               {maxWidth: 300});
@@ -182,38 +88,20 @@ for ($i=0;$row = @pg_fetch_array($rs,$i); $i++)
     markers[$i].openInfoWindowHtml(\"$desc\",
               {maxWidth: 300});
     ";
+} /* End for() loop */
 
-
-}
-
-$bar640t = $map->getLayerByName("bar640t");
-$bar640t->set("status", 1);
-$bar640t->draw($img);
-
-$tlayer = $map->getLayerByName("bar640t-title");
-$point = ms_newpointobj();
-$point->setXY(80, 12);
-$point->draw($map, $tlayer, $img, 0,"NEXRAD Base Reflectivity & Storm Reports");
-$point->free();
-$point = ms_newpointobj();
-$point->setXY(80, 28);
-$point->draw($map, $tlayer, $img, 1,"$d UTC");
-$point->free();
-
-$map->drawLabelCache($img);
-mklogolocal($map, $img);
-
-$url = $img->saveWebImage();
-
+$table .= "</table>";
 
 ?>
 <?php 
 $TITLE = "Local Storm Reports";
 $THISPAGE = "severe-";
 $BODYEXTRA = "onload=\"load()\" onunload=\"GUnload()\"";
-$HEADEXTRA = "<script src=\"http://maps.google.com/maps?file=api&amp;v=2&amp;key=". $GOOGLEKEYS[$rooturl]["maplsr"] ."\" type=\"text/javascript\"></script>";
-include("$rootpath/include/header.php"); 
-?>
+$HEADEXTRA = "
+<script src=\"tooltip.js\" type=\"text/javascript\"></script>
+<script src=\"http://maps.google.com/maps?file=api&amp;v=2&amp;key=". $GOOGLEKEYS[$rooturl]["maplsr"] ."\" type=\"text/javascript\"></script>";
+
+include("$rootpath/include/header.php");?>
 <script type="text/javascript">
 //<![CDATA[
 var icon = new GIcon();
@@ -224,10 +112,61 @@ icon.shadowSize = new GSize(22, 20);
 icon.iconAnchor = new GPoint(6, 20);
 icon.infoWindowAnchor = new GPoint(5, 1);
 
+var map;
+var markers = new Array();
+
+
+CustomGetTileUrl=function(a,b,c) {
+  if (typeof(window['this.myMercZoomLevel'])=="undefined") this.myMercZoomLevel=0;
+  if (typeof(window['this.myStyles'])=="undefined") this.myStyles="default";
+  var lULP = new GPoint(a.x*256,(a.y+1)*256);
+  var lLRP = new GPoint((a.x+1)*256,a.y*256);
+  var lUL = G_NORMAL_MAP.getProjection().fromPixelToLatLng(lULP,b,c);
+  var lLR = G_NORMAL_MAP.getProjection().fromPixelToLatLng(lLRP,b,c);
+  // switch between Mercator and DD if merczoomlevel is set
+  if (this.myMercZoomLevel!=0 && map.getZoom() < this.myMercZoomLevel) {
+    var lBbox=dd2MercMetersLng(lUL.lngDegrees)+","+dd2MercMetersLat(lUL.latDegrees)+","+dd2MercMetersLng(lLR.lngDegrees)+","+dd2MercMetersLat(lLR.latDegrees);
+    var lSRS="EPSG:54004";
+  } else {
+    var lBbox=lUL.x+","+lUL.y+","+lLR.x+","+lLR.y;
+    var lSRS="EPSG:4326";
+  }
+  var ts = new Date();
+  var lURL=this.myBaseURL;
+  lURL+="&REQUEST=GetMap";
+  lURL+="&SERVICE=WMS";
+  lURL+="&reaspect=false&VERSION=1.1.1";
+  lURL+="&LAYERS="+this.myLayers;
+  lURL+="&STYLES="+this.myStyles; 
+  lURL+="&FORMAT="+this.myFormat;
+  lURL+="&BGCOLOR=0xFFFFFF";
+  lURL+="&TRANSPARENT=TRUE";
+  lURL+="&SRS="+lSRS;
+  lURL+="&TIME=<?php echo date('Y-m-d\TH:i:00\Z', $basets); ?>";
+  lURL+="&BBOX="+lBbox;
+  lURL+="&WIDTH=256";
+  lURL+="&HEIGHT=256";
+  lURL+="&GroupName="+this.myLayers;
+  lURL+="&bogus="+ts.getTime();
+  return lURL;
+}
+
+var tileNEX= new GTileLayer(new GCopyrightCollection(''),1,17);
+    tileNEX.myLayers='nexrad-n0r-wmst';
+    tileNEX.myFormat='image/png';
+    tileNEX.myBaseURL='http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?';
+    tileNEX.getTileUrl=CustomGetTileUrl;
+
+var layer4=[G_NORMAL_MAP.getTileLayers()[0],tileNEX];
+var custommap4 = new GMapType(layer4, G_SATELLITE_MAP.getProjection(), 'Nexrad', G_SATELLITE_MAP);
+
+function showMarker(i){
+  GEvent.trigger(markers[i], 'click');
+}
 
 function load() {
   if (GBrowserIsCompatible()) {
-    var map = new GMap2(document.getElementById("gmap"));
+    map = new GMap2(document.getElementById("gmap"));
     map.setCenter(new GLatLng(<?php echo $lat0; ?>, <?php echo $lon0; ?>), 8);
     map.addControl(new GLargeMapControl());
  
@@ -235,122 +174,59 @@ function load() {
     map.addControl(mapControl);
 
     var myicon = new GIcon(icon);
-    var markers = new Array();
+    map.addMapType(custommap4);
     <?php echo $g; ?>
+
+    kml = "http://mesonet.agron.iastate.edu/kml/sbw_interval.php?wfo=<?php echo $wfo; ?>&ts=<?php echo date('Y-m-d%20H:i', $ts); ?>&ts2=<?php echo date('Y-m-d%20H:i', $ts2); ?>";
+    gxml = new GGeoXml(kml);
+    map.addOverlay(gxml);
+
+<?php if ($ts == $ts2) { echo "map.setMapType(custommap4);"; } ?>
+
+
+
   }
 }
+
 //]]>
 </script>
-<style type="text/css">
-#dhtmltooltip{
-position: absolute;
-width: 150px;
-border: 2px solid black;
-padding: 2px;
-background-color: lightyellow;
-visibility: hidden;
-z-index: 100;
-}
-</style>
-<div id="dhtmltooltip"></div>
+<div style="padding-left: 15px;">
 
-<script type="text/javascript">
+<h3>Local Storm Report (LSR) Viewer</h3>
+<div style="border:1px solid #ccc; padding: 5px; margin-left: 20px; float:left;">
+<form method="GET" action="maplsr.phtml">
+<strong>Weather Office:</strong> <?php echo wfoSelect($wfo); ?>
+<table>
+<tr>
+  <th>Start Time</th>
+  <td rowspan="2"><?php echo yearSelect(2008,$year); ?></td>
+  <td><?php echo monthSelect($smonth, "smonth"); ?></td>
+  <td><?php echo daySelect2($sday, "sday"); ?></td>
+  <td><?php echo gmtHourSelect($shour, "shour"); ?></td>
+  <td><?php echo minuteSelect($sminute, "sminute"); ?></td></tr>
+<tr>
+  <th>End Time</th>
+  <td><?php echo monthSelect($emonth, "emonth"); ?></td>
+  <td><?php echo daySelect2($eday, "eday"); ?></td>
+  <td><?php echo gmtHourSelect($ehour, "ehour"); ?></td>
+  <td><?php echo minuteSelect($eminute, "eminute"); ?></td></tr>
+</table>
 
-/***********************************************
-* Cool DHTML tooltip script- 
-* © Dynamic Drive DHTML code library (www.dynamicdrive.com)
-* This notice MUST stay intact for legal use
-* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code
-***********************************************/
 
-var offsetxpoint=-60 //Customize x offset of tooltip
-var offsetypoint=20 //Customize y offset of tooltip
-var ie=document.all
-var ns6=document.getElementById && !document.all
-var enabletip=false
-if (ie||ns6)
-var tipobj=document.all? document.all["dhtmltooltip"] : document.getElementById? document.getElementById("dhtmltooltip") : ""
-
-function ietruebody(){
-return (document.compatMode && document.compatMode!="BackCompat")? document.documentElement : document.body
-}
-
-function ddrivetip(thetext, thecolor, thewidth){
-if (ns6||ie){
-if (typeof thewidth!="undefined") tipobj.style.width=thewidth+"px"
-if (typeof thecolor!="undefined" && thecolor!="") tipobj.style.backgroundColor=thecolor
-tipobj.innerHTML=thetext
-enabletip=true
-return false
-}
-}
-
-function positiontip(e){
-if (enabletip){
-var curX=(ns6)?e.pageX : event.clientX+ietruebody().scrollLeft;
-var curY=(ns6)?e.pageY : event.clientY+ietruebody().scrollTop;
-//Find out how close the mouse is to the corner of the window
-var rightedge=ie&&!window.opera? ietruebody().clientWidth-event.clientX-offsetxpoint : window.innerWidth-e.clientX-offsetxpoint-20
-var bottomedge=ie&&!window.opera? ietruebody().clientHeight-event.clientY-offsetypoint : window.innerHeight-e.clientY-offsetypoint-20
-
-var leftedge=(offsetxpoint<0)? offsetxpoint*(-1) : -1000
-
-//if the horizontal distance isn't enough to accomodate the width of the context menu
-if (rightedge<tipobj.offsetWidth)
-//move the horizontal position of the menu to the left by it's width
-tipobj.style.left=ie? ietruebody().scrollLeft+event.clientX-tipobj.offsetWidth+"px" : window.pageXOffset+e.clientX-tipobj.offsetWidth+"px"
-else if (curX<leftedge)
-tipobj.style.left="5px"
-else
-//position the horizontal position of the menu where the mouse is positioned
-tipobj.style.left=curX+offsetxpoint+"px"
-
-//same concept with the vertical position
-if (bottomedge<tipobj.offsetHeight)
-tipobj.style.top=ie? ietruebody().scrollTop+event.clientY-tipobj.offsetHeight-offsetypoint+"px" : window.pageYOffset+e.clientY-tipobj.offsetHeight-offsetypoint+"px"
-else
-tipobj.style.top=curY+offsetypoint+"px"
-tipobj.style.visibility="visible"
-}
-}
-
-function hideddrivetip(){
-if (ns6||ie){
-enabletip=false
-tipobj.style.visibility="hidden"
-tipobj.style.left="-1000px"
-tipobj.style.backgroundColor=''
-tipobj.style.width=''
-}
-}
-
-document.onmousemove=positiontip
-
-</script>
-
-<h3 class="heading">Local Storm Report Viewer</h3>
-
-<table cellpadding="5" cellspacing="0">
-<tr><td>
-<?php if ($isSummary) { ?>
-<strong>Local Storm Report Summary betwen <?php echo "$tsSQL and $tsSQL2"; ?></strong<br />
-<?php } else { ?>
-<strong>Google Maps Display</strong<br />
-<?php } ?>
-<div id="gmap" style="width: 600px; height: 500px"></div>
-
-<?php if (! $isSummary) { ?>
-<p>
-<div id="map">
-<img src="<?php echo $url; ?>" usemap="#mymap" border="1">
-<map name="mymap"><?php echo $IMAGEMAP; ?></map>
-<br /><b><i>Place your mouse over the observation point for more details.</i></b>
+<input type="submit" value="Update Map">
+</form>
 </div>
-<?php } ?>
+<br clear="all" />
+<strong><?php echo $wfos[$wfo]['city']; ?>'s Local Storm Reports betwen <?php echo "$d1 and $d2"; ?></strong<br />
 
-</td><td valign="top">
-<p><strong>NWS Warning Legend:</strong><br /><br />
-<img src="<?php echo $rooturl; ?>/GIS/apps/rview/static/warnings_legend.png">
-</td></tr></table>
+<div id="gmap" style="width: 90%; height: 500px"></div>
+
+<h4>Table Listing of Events:</h4>
+
+<i>Click event timestamp to view on map</i>
+
+<?php echo $table; ?>
+
+</div>
 
 <?php include("$rootpath/include/footer.php"); ?>
