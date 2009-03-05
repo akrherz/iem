@@ -2,16 +2,21 @@
 /* Pure IEM 2.0 App to do vtec stuff.  Shorter url please as well */
 include("../../config/settings.inc.php");
 
-?>
-
-<html>
-<head>
+$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../ext/resources/css/
+ext-all.css"/>
 <link rel="stylesheet" type="text/css" href="../ext/resources/css/ext-all.css"/>
 <script type="text/javascript" src="../ext/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="../ext/ext-all.js"></script>
 <script type="text/javascript" src="obhour-static.js"></script>
-</head>
-<body>
+';
+
+$TITLE = "IEM Hourly Precip Accumulator";
+$NOCONTENT = 1;
+$THISPAGE ="archive-hrain";
+include("$rootpath/include/header.php");
+
+?>
+
 <style type="text/css">
  .x-grid3-cell-inner, .x-grid3-hd-inner { white-space:normal !important; }
 </style>
@@ -25,11 +30,5 @@ the 1 Hour value at 11 AM would be for a period between 10-11 AM.</p>
 is updated at the top of the hour for the previous hour.</p>
 </div>
 
-<div id="header">
- <a href="<?php echo $rooturl; ?>/"><img src="<?php echo $rooturl; ?>/images/logo_small.gif" alt="IEM" style="float:left;"/></a><div style="font:normal 16px tahoma, arial, helvetica, sans-serif; margin: 10px;">IEM 2.0 :: Hourly Precip Accumulator</div>
-</div>
-
-
 <div id="footer"></div>
-
 </body></html>
