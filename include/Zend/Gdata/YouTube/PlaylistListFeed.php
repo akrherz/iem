@@ -15,7 +15,8 @@
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage YouTube
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -36,7 +37,8 @@ require_once 'Zend/Gdata/YouTube/PlaylistListEntry.php';
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage YouTube
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Gdata_YouTube_PlaylistListFeed extends Zend_Gdata_Media_Feed
@@ -58,9 +60,7 @@ class Zend_Gdata_YouTube_PlaylistListFeed extends Zend_Gdata_Media_Feed
      */
     public function __construct($element = null)
     {
-        foreach (Zend_Gdata_YouTube::$namespaces as $nsPrefix => $nsUri) {
-            $this->registerNamespace($nsPrefix, $nsUri);
-        }
+        $this->registerAllNamespaces(Zend_Gdata_YouTube::$namespaces);
         parent::__construct($element);
     }
 

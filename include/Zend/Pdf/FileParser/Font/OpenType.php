@@ -14,7 +14,7 @@
  *
  * @package    Zend_Pdf
  * @subpackage FileParser
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -47,7 +47,7 @@ require_once 'Zend/Pdf/Cmap.php';
  *
  * @package    Zend_Pdf
  * @subpackage FileParser
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Font
@@ -119,6 +119,7 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
         $this->_parseNameTable();
         $this->_parsePostTable();
         $this->_parseHheaTable();
+        $this->_parseMaxpTable();
         $this->_parseOs2Table();
         $this->_parseHmtxTable();
         $this->_parseCmapTable();
@@ -450,6 +451,32 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
 
 
     /**
+     * Parses the OpenType hhea (Horizontal Header) table.
+     *
+     * The hhea table contains information used for horizontal layout. It also
+     * contains some vertical layout information for Apple systems. The vertical
+     * layout information for the PDF file is usually taken from the OS/2 table.
+     *
+     * @throws Zend_Pdf_Exception
+     */
+    protected function _parseMaxpTable()
+    {
+        $this->_jumpToTable('maxp');
+
+        /* We don't care about table version.
+         */
+        $this->_readTableVersion(0, 1);
+
+        /* The number of glyphs in the font.
+         */
+        $this->numGlyphs = $this->readUInt(2);
+        $this->_debugLog('number of glyphs: %d', $this->numGlyphs);
+        
+        // Skip other maxp table entries (if presented with table version 1.0)...
+    }
+
+
+    /**
      * Parses the OpenType OS/2 (OS/2 and Windows Metrics) table.
      *
      * The OS/2 table contains additional metrics data that is required to use
@@ -619,6 +646,12 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
          * even any of the extended latin characters, it is considered symbolic
          * to PDF and must be described differently in the Font Descriptor.
          */
+        /** 
+         * @todo Font is recognized as Adobe Latin subset font if it only contains
+         * Basic Latin characters (only bit 0 of Unicode range bits is set).
+         * Actually, other Unicode subranges like General Punctuation (bit 31) also 
+         * fall into Adobe Latin characters. So this code has to be modified.
+         */
         $this->isAdobeLatinSubset = (($unicodeRange1 == 1) && ($unicodeRange2 == 0) &&
                                       ($unicodeRange3 == 0) && ($unicodeRange4 == 0));
         $this->_debugLog(($this->isAdobeLatinSubset ? 'Is' : 'Is not') . ' a subset of Adobe Latin');
@@ -712,6 +745,11 @@ abstract class Zend_Pdf_FileParser_Font_OpenType extends Zend_Pdf_FileParser_Fon
         for ($i = 0; $i < $this->numberHMetrics; $i++) {
             $glyphWidths[$i] = $this->readUInt(2);
             $this->skipBytes(2);
+        }
+        /* Populate last value for the rest of array
+         */
+        while (count($glyphWidths) < $this->numGlyphs) {
+            $glyphWidths[] = end($glyphWidths);
         }
         $this->glyphWidths = $glyphWidths;
 

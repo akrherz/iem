@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Zend Framework
  *
@@ -15,14 +14,14 @@
  *
  * @category   Zend
  * @package    Zend_Acl
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Exception.php 2797 2007-01-16 01:35:30Z bkarwin $
+ * @version    $Id: Exception.php 8861 2008-03-16 14:30:18Z thomas $
  */
 
 
 /**
- * Zend_Acl_Exception
+ * @see Zend_Acl_Exception
  */
 require_once 'Zend/Acl/Exception.php';
 
@@ -30,7 +29,7 @@ require_once 'Zend/Acl/Exception.php';
 /**
  * @category   Zend
  * @package    Zend_Acl
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Acl_Role_Registry_Exception extends Zend_Acl_Exception

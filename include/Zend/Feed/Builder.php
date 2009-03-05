@@ -15,9 +15,9 @@
  *
  * @category   Zend
  * @package    Zend_Feed
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Builder.php 3941 2007-03-14 21:36:13Z darby $
+ * @version    $Id: Builder.php 8064 2008-02-16 10:58:39Z thomas $
  */
 
 
@@ -26,23 +26,15 @@
  */
 require_once 'Zend/Feed/Builder/Interface.php';
 
-
 /**
  * @see Zend_Feed_Builder_Header
  */
 require_once 'Zend/Feed/Builder/Header.php';
 
-
 /**
  * @see Zend_Feed_Builder_Entry
  */
 require_once 'Zend/Feed/Builder/Entry.php';
-
-
-/**
- * @see Zend_Feed_Exception
- */
-require_once 'Zend/Feed/Exception.php';
 
 
 /**
@@ -52,7 +44,7 @@ require_once 'Zend/Feed/Exception.php';
  *
  * @category   Zend
  * @package    Zend_Feed
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
@@ -225,6 +217,10 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
         $mandatories = array('title', 'link', 'charset');
         foreach ($mandatories as $mandatory) {
             if (!isset($data[$mandatory])) {
+                /**
+                 * @see Zend_Feed_Builder_Exception
+                 */
+                require_once 'Zend/Feed/Builder/Exception.php';
                 throw new Zend_Feed_Builder_Exception("$mandatory key is missing");
             }
         }
@@ -269,6 +265,10 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
             $mandatories = array('domain', 'path', 'registerProcedure', 'protocol');
             foreach ($mandatories as $mandatory) {
                 if (!isset($data['cloud'][$mandatory])) {
+                    /**
+                     * @see Zend_Feed_Builder_Exception
+                     */
+                    require_once 'Zend/Feed/Builder/Exception.php';
                     throw new Zend_Feed_Builder_Exception("you have to define $mandatory property of your cloud");
                 }
             }
@@ -279,6 +279,10 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
             $mandatories = array('title', 'description', 'name', 'link');
             foreach ($mandatories as $mandatory) {
                 if (!isset($data['textInput'][$mandatory])) {
+                    /**
+                     * @see Zend_Feed_Builder_Exception
+                     */
+                    require_once 'Zend/Feed/Builder/Exception.php';
                     throw new Zend_Feed_Builder_Exception("you have to define $mandatory property of your textInput");
                 }
             }
@@ -342,6 +346,10 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
             $mandatories = array('title', 'link', 'description');
             foreach ($mandatories as $mandatory) {
                 if (!isset($row[$mandatory])) {
+                    /**
+                     * @see Zend_Feed_Builder_Exception
+                     */
+                    require_once 'Zend/Feed/Builder/Exception.php';
                     throw new Zend_Feed_Builder_Exception("$mandatory key is missing");
                 }
             }
@@ -365,6 +373,10 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
                 $mandatories = array('title', 'url');
                 foreach ($mandatories as $mandatory) {
                     if (!isset($row['source'][$mandatory])) {
+                        /**
+                         * @see Zend_Feed_Builder_Exception
+                         */
+                        require_once 'Zend/Feed/Builder/Exception.php';
                         throw new Zend_Feed_Builder_Exception("$mandatory key of source property is missing");
                     }
                 }

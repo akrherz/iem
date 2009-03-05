@@ -13,7 +13,7 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @package    Zend_Pdf
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -29,7 +29,7 @@ require_once 'Zend/Pdf/Element/Object.php';
  * PDF file element implementation
  *
  * @package    Zend_Pdf
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Pdf_Element
@@ -111,6 +111,49 @@ abstract class Zend_Pdf_Element
     public function cleanUp()
     {
         // Do nothing
+    }
+
+    /**
+     * Convert PDF element to PHP type.
+     *
+     * @return mixed
+     */
+    public function toPhp()
+    {
+        return $this->value;
+    }
+
+    /**
+     * Convert PHP value into PDF element.
+     *
+     * @param mixed $input
+     * @return Zend_Pdf_Element
+     */
+    public static function phpToPdf($input)
+    {
+        if (is_numeric($input)) {
+            return new Zend_Pdf_Element_Numeric($input);
+        } else if (is_bool($input)) {
+            return new Zend_Pdf_Element_Boolean($input);
+        } else if (is_array($input)) {
+            $pdfElementsArray = array();
+            $isDictionary = false;
+
+            foreach ($input as $key => $value) {
+                if (is_string($key)) {
+                    $isDictionary = true;
+                }
+                $pdfElementsArray[$key] = Zend_Pdf_Element::phpToPdf($value);
+            }
+
+            if ($isDictionary) {
+                return new Zend_Pdf_Element_Dictionary($pdfElementsArray);
+            } else {
+                return new Zend_Pdf_Element_Array($pdfElementsArray);
+            }
+        } else {
+            return new Zend_Pdf_Element_String((string)$input);
+        }
     }
 }
 

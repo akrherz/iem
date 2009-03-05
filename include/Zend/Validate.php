@@ -15,9 +15,9 @@
  *
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Validate.php 4974 2007-05-25 21:11:56Z bkarwin $
+ * @version    $Id: Validate.php 8729 2008-03-10 11:44:10Z thomas $
  */
 
 
@@ -30,7 +30,7 @@ require_once 'Zend/Validate/Interface.php';
 /**
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Validate implements Zend_Validate_Interface
@@ -50,9 +50,10 @@ class Zend_Validate implements Zend_Validate_Interface
     protected $_messages = array();
 
     /**
-     * Array of validation failure messages
+     * Array of validation failure message codes
      *
      * @var array
+     * @deprecated Since 1.5.0
      */
     protected $_errors = array();
 
@@ -68,7 +69,10 @@ class Zend_Validate implements Zend_Validate_Interface
      */
     public function addValidator(Zend_Validate_Interface $validator, $breakChainOnFailure = false)
     {
-        $this->_validators[] = array('instance' => $validator, 'breakChainOnFailure' => $breakChainOnFailure);
+        $this->_validators[] = array(
+            'instance' => $validator,
+            'breakChainOnFailure' => (boolean) $breakChainOnFailure
+            );
         return $this;
     }
 
@@ -91,8 +95,9 @@ class Zend_Validate implements Zend_Validate_Interface
                 continue;
             }
             $result = false;
-            $this->_messages = array_merge($this->_messages, $validator->getMessages());
-            $this->_errors   = array_merge($this->_errors,   $validator->getErrors());
+            $messages = $validator->getMessages();
+            $this->_messages = array_merge($this->_messages, $messages);
+            $this->_errors   = array_merge($this->_errors,   array_keys($messages));
             if ($element['breakChainOnFailure']) {
                 break;
             }
@@ -115,9 +120,10 @@ class Zend_Validate implements Zend_Validate_Interface
     /**
      * Defined by Zend_Validate_Interface
      *
-     * Returns array of validation failure messages
+     * Returns array of validation failure message codes
      *
      * @return array
+     * @deprecated Since 1.5.0
      */
     public function getErrors()
     {
@@ -125,10 +131,10 @@ class Zend_Validate implements Zend_Validate_Interface
     }
 
     /**
-     * @param mixed    $value
-     * @param string   $classBaseName
-     * @param array    $args          OPTIONAL
-     * @param mixed    $namespaces    OPTIONAL
+     * @param  mixed    $value
+     * @param  string   $classBaseName
+     * @param  array    $args          OPTIONAL
+     * @param  mixed    $namespaces    OPTIONAL
      * @return boolean
      * @throws Zend_Validate_Exception
      */
@@ -139,18 +145,23 @@ class Zend_Validate implements Zend_Validate_Interface
             $className = $namespace . '_' . ucfirst($classBaseName);
             try {
                 require_once 'Zend/Loader.php';
-                Zend_Loader::loadClass($className);
-                $class = new ReflectionClass($className);
-                if ($class->implementsInterface('Zend_Validate_Interface')) {
-                    if ($class->hasMethod('__construct')) {
-                        $object = $class->newInstanceArgs($args);
-                    } else {
-                        $object = $class->newInstance();
+                @Zend_Loader::loadClass($className);
+                if (class_exists($className, false)) {
+                    $class = new ReflectionClass($className);
+                    if ($class->implementsInterface('Zend_Validate_Interface')) {
+                        if ($class->hasMethod('__construct')) {
+                            $object = $class->newInstanceArgs($args);
+                        } else {
+                            $object = $class->newInstance();
+                        }
+                        return $object->isValid($value);
                     }
-                    return $object->isValid($value);
                 }
+            } catch (Zend_Validate_Exception $ze) {
+                // if there is an exception while validating throw it
+                throw $ze;
             } catch (Zend_Exception $ze) {
-                // fallthrough and continue
+                // fallthrough and continue for missing validation classes
             }
         }
         require_once 'Zend/Validate/Exception.php';

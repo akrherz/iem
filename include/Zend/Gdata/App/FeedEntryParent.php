@@ -15,7 +15,8 @@
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage App
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -74,18 +75,26 @@ require_once 'Zend/Version.php';
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage App
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
 {
+    /**
+     * Service instance used to make network requests.
+     *
+     * @see setService(), getService()
+     */
+    protected $_service = null;
 
     /**
-     * HTTP client object to use for retrieving feeds
+     * The HTTP ETag associated with this entry. Used for optimistic
+     * concurrency in protoco v2 or greater.
      *
-     * @var Zend_Http_Client
+     * @var string|null
      */
-    protected $_httpClient = null;
+    protected $_etag = NULL;
 
     protected $_author = array();
     protected $_category = array();
@@ -95,6 +104,26 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     protected $_rights = null;
     protected $_title = null;
     protected $_updated = null;
+
+    /**
+      * Indicates the major protocol version that should be used.
+      * At present, recognized values are either 1 or 2. However, any integer
+      * value >= 1 is considered valid.
+      *
+      * @see setMajorProtocolVersion()
+      * @see getMajorProtocolVersion()
+      */
+    protected $_majorProtocolVersion = 1;
+
+    /**
+      * Indicates the minor protocol version that should be used. Can be set
+      * to either an integer >= 0, or NULL if no minor version should be sent
+      * to the server.
+      *
+      * @see setMinorProtocolVersion()
+      * @see getMinorProtocolVersion()
+      */
+    protected $_minorProtocolVersion = null;
 
     /**
      * Constructs a Feed or Entry
@@ -129,43 +158,65 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
      *
      * Sets the HTTP client object to use for retrieving the feed.
      *
+     * @deprecated Deprecated as of Zend Framework 1.7. Use
+     *             setService() instead.
      * @param  Zend_Http_Client $httpClient
      * @return Zend_Gdata_App_Feed Provides a fluent interface
      */
     public function setHttpClient(Zend_Http_Client $httpClient)
     {
-        $this->_httpClient = $httpClient;
+        if (!$this->_service) {
+            $this->_service = new Zend_Gdata_App();
+        }
+        $this->_service->setHttpClient($httpClient);
         return $this;
     }
 
-
     /**
-     * Gets the HTTP client object. If none is set, a new Zend_Http_Client will be used.
+     * Gets the HTTP client object. If none is set, a new Zend_Http_Client
+     * will be used.
      *
+     * @deprecated Deprecated as of Zend Framework 1.7. Use
+     *             getService() instead.
      * @return Zend_Http_Client_Abstract
      */
     public function getHttpClient()
     {
-        if (!$this->_httpClient instanceof Zend_Http_Client) {
-            /**
-             * @see Zend_Http_Client
-             */
-            require_once 'Zend/Http/Client.php';
-            $this->_httpClient = new Zend_Http_Client();
-            $useragent = 'Zend_Framework_Gdata/' . Zend_Version::VERSION;
-            $this->_httpClient->setConfig(array(
-                'strictredirects' => true,
-                 'useragent' => $useragent
-                )
-            );
+        if (!$this->_service) {
+            $this->_service = new Zend_Gdata_App();
         }
-        return $this->_httpClient;
+        $client = $this->_service->getHttpClient();
+        return $client;
     }
 
-
-    public function getDOM($doc = null)
+    /**
+     * Set the active service instance for this object. This will be used to
+     * perform network requests, such as when calling save() and delete().
+     *
+     * @param Zend_Gdata_App $instance The new service instance.
+     * @return Zend_Gdata_App_FeedEntryParent Provides a fluent interface.
+     */
+    public function setService($instance)
     {
-        $element = parent::getDOM($doc);
+        $this->_service = $instance;
+        return $this;
+    }
+
+    /**
+     * Get the active service instance for this object. This will be used to
+     * perform network requests, such as when calling save() and delete().
+     *
+     * @return Zend_Gdata_App|null The current service instance, or null if
+     *         not set.
+     */
+    public function getService()
+    {
+        return $this->_service;
+    }
+
+    public function getDOM($doc = null, $majorVersion = 1, $minorVersion = null)
+    {
+        $element = parent::getDOM($doc, $majorVersion, $minorVersion);
         foreach ($this->_author as $author) {
             $element->appendChild($author->getDOM($element->ownerDocument));
         }
@@ -252,6 +303,9 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
+     * Sets the list of the authors of this feed/entry.  In an atom feed, each
+     * author is represented by an atom:author element
+     *
      * @param array $value
      * @return Zend_Gdata_App_FeedEntryParent Provides a fluent interface
      */
@@ -262,7 +316,10 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
-     * @return Zend_Gdata_App_Extension_Category
+     * Returns the array of categories that classify this feed/entry.  Each
+     * category is represented in an atom feed by an atom:category element.
+     *
+     * @return array Array of Zend_Gdata_App_Extension_Category
      */
     public function getCategory()
     {
@@ -270,7 +327,10 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
-     * @param array $value
+     * Sets the array of categories that classify this feed/entry.  Each
+     * category is represented in an atom feed by an atom:category element.
+     *
+     * @param array $value Array of Zend_Gdata_App_Extension_Category
      * @return Zend_Gdata_App_FeedEntryParent Provides a fluent interface
      */
     public function setCategory($value)
@@ -280,7 +340,10 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
-     * @return Zend_Gdata_App_Extension_Contributor
+     * Returns the array of contributors to this feed/entry.  Each contributor
+     * is represented in an atom feed by an atom:contributor XML element
+     *
+     * @return array An array of Zend_Gdata_App_Extension_Contributor
      */
     public function getContributor()
     {
@@ -288,6 +351,9 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
+     * Sets the array of contributors to this feed/entry.  Each contributor
+     * is represented in an atom feed by an atom:contributor XML element
+     *
      * @param array $value
      * @return Zend_Gdata_App_FeedEntryParent Provides a fluent interface
      */
@@ -316,8 +382,19 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
+     * Given a particular 'rel' value, this method returns a matching
+     * Zend_Gdata_App_Extension_Link element.  If the 'rel' value
+     * is not provided, the full array of Zend_Gdata_App_Extension_Link
+     * elements is returned.  In an atom feed, each link is represented
+     * by an atom:link element.  The 'rel' value passed to this function
+     * is the atom:link/@rel attribute.  Example rel values include 'self',
+     * 'edit', and 'alternate'.
+     *
      * @param string $rel The rel value of the link to be found.  If null,
-     * the array of links is returned
+     *     the array of Zend_Gdata_App_Extension_link elements is returned
+     * @return mixed Either a single Zend_Gdata_App_Extension_link element,
+     *     an array of the same or null is returned depending on the rel value
+     *     supplied as the argument to this function
      */
     public function getLink($rel = null)
     {
@@ -334,7 +411,11 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
-     * @return Zend_Gdata_App_Extension_Link
+     * Returns the Zend_Gdata_App_Extension_Link element which represents
+     * the URL used to edit this resource.  This link is in the atom feed/entry
+     * as an atom:link with a rel attribute value of 'edit'.
+     *
+     * @return Zend_Gdata_App_Extension_Link The link, or null if not found
      */
     public function getEditLink()
     {
@@ -342,11 +423,29 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
-     * @return Zend_Gdata_App_Extension_Link
+     * Returns the Zend_Gdata_App_Extension_Link element which represents
+     * the URL used to retrieve the next chunk of results when paging through
+     * a feed.  This link is in the atom feed as an atom:link with a
+     * rel attribute value of 'next'.
+     *
+     * @return Zend_Gdata_App_Extension_Link The link, or null if not found
      */
     public function getNextLink()
     {
         return $this->getLink('next');
+    }
+
+    /**
+     * Returns the Zend_Gdata_App_Extension_Link element which represents
+     * the URL used to retrieve the previous chunk of results when paging
+     * through a feed.  This link is in the atom feed as an atom:link with a
+     * rel attribute value of 'previous'.
+     *
+     * @return Zend_Gdata_App_Extension_Link The link, or null if not found
+     */
+    public function getPreviousLink()
+    {
+        return $this->getLink('previous');
     }
 
     /**
@@ -358,7 +457,12 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
-     * @return Zend_Gdata_App_Extension_Link
+     * Returns the Zend_Gdata_App_Extension_Link element which represents
+     * the URL used to retrieve the entry or feed represented by this object
+     * This link is in the atom feed/entry as an atom:link with a
+     * rel attribute value of 'self'.
+     *
+     * @return Zend_Gdata_App_Extension_Link The link, or null if not found
      */
     public function getSelfLink()
     {
@@ -366,7 +470,15 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
-     * @return Zend_Gdata_App_Extension_Link
+     * Returns the Zend_Gdata_App_Extension_Link element which represents
+     * the URL for an alternate view of the data represented by this feed or
+     * entry.  This alternate view is commonly a user-facing webpage, blog
+     * post, etc.  The MIME type for the data at the URL is available from the
+     * returned Zend_Gdata_App_Extension_Link element.
+     * This link is in the atom feed/entry as an atom:link with a
+     * rel attribute value of 'self'.
+     *
+     * @return Zend_Gdata_App_Extension_Link The link, or null if not found
      */
     public function getAlternateLink()
     {
@@ -402,6 +514,10 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
+     * Returns the title of this feed or entry.  The title is an extremely
+     * short textual representation of this resource and is found as
+     * an atom:title element in a feed or entry
+     *
      * @return Zend_Gdata_App_Extension_Title
      */
     public function getTitle()
@@ -410,6 +526,26 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     }
 
     /**
+     * Returns a string representation of the title of this feed or entry.
+     * The title is an extremely short textual representation of this
+     * resource and is found as an atom:title element in a feed or entry
+     *
+     * @return string
+     */
+    public function getTitleValue()
+    {
+        if (($titleObj = $this->getTitle()) != null) {
+            return $titleObj->getText();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the title of this feed or entry.  The title is an extremely
+     * short textual representation of this resource and is found as
+     * an atom:title element in a feed or entry
+     *
      * @param Zend_Gdata_App_Extension_Title $value
      * @return Zend_Gdata_App_Feed_Entry_Parent Provides a fluent interface
      */
@@ -435,6 +571,124 @@ abstract class Zend_Gdata_App_FeedEntryParent extends Zend_Gdata_App_Base
     {
         $this->_updated = $value;
         return $this;
+    }
+
+    /**
+     * Set the Etag for the current entry to $value. Setting $value to null
+     * unsets the Etag.
+     *
+     * @param string|null $value
+     * @return Zend_Gdata_App_Entry Provides a fluent interface
+     */
+    public function setEtag($value) {
+        $this->_etag = $value;
+        return $this;
+    }
+
+    /**
+     * Return the Etag for the current entry, or null if not set.
+     *
+     * @return string|null
+     */
+    public function getEtag() {
+        return $this->_etag;
+    }
+
+    /**
+     * Set the major protocol version that should be used. Values < 1
+     * (excluding NULL) will cause a Zend_Gdata_App_InvalidArgumentException
+     * to be thrown.
+     *
+     * @see _majorProtocolVersion
+     * @param (int|NULL) $value The major protocol version to use.
+     * @throws Zend_Gdata_App_InvalidArgumentException
+     */
+    public function setMajorProtocolVersion($value)
+    {
+        if (!($value >= 1) && !is_null($value)) {
+            require_once('Zend/Gdata/App/InvalidArgumentException.php');
+            throw new Zend_Gdata_App_InvalidArgumentException(
+                    'Major protocol version must be >= 1');
+        }
+        $this->_majorProtocolVersion = $value;
+    }
+
+    /**
+     * Get the major protocol version that is in use.
+     *
+     * @see _majorProtocolVersion
+     * @return (int|NULL) The major protocol version in use.
+     */
+    public function getMajorProtocolVersion()
+    {
+        return $this->_majorProtocolVersion;
+    }
+
+    /**
+     * Set the minor protocol version that should be used. If set to NULL, no
+     * minor protocol version will be sent to the server. Values < 0 will
+     * cause a Zend_Gdata_App_InvalidArgumentException to be thrown.
+     *
+     * @see _minorProtocolVersion
+     * @param (int|NULL) $value The minor protocol version to use.
+     * @throws Zend_Gdata_App_InvalidArgumentException
+     */
+    public function setMinorProtocolVersion($value)
+    {
+        if (!($value >= 0)) {
+            require_once('Zend/Gdata/App/InvalidArgumentException.php');
+            throw new Zend_Gdata_App_InvalidArgumentException(
+                    'Minor protocol version must be >= 0 or null');
+        }
+        $this->_minorProtocolVersion = $value;
+    }
+
+    /**
+     * Get the minor protocol version that is in use.
+     *
+     * @see _minorProtocolVersion
+     * @return (int|NULL) The major protocol version in use, or NULL if no
+     *         minor version is specified.
+     */
+    public function getMinorProtocolVersion()
+    {
+        return $this->_minorProtocolVersion;
+    }
+
+    /**
+     * Get the full version of a namespace prefix
+     *
+     * Looks up a prefix (atom:, etc.) in the list of registered
+     * namespaces and returns the full namespace URI if
+     * available. Returns the prefix, unmodified, if it's not
+     * registered.
+     * 
+     * The current entry or feed's version will be used when performing the
+     * namespace lookup unless overridden using $majorVersion and
+     * $minorVersion. If the entry/fee has a null version, then the latest
+     * protocol version will be used by default.
+     *
+     * @param string $prefix The namespace prefix to lookup.
+     * @param integer $majorVersion The major protocol version in effect.
+     *        Defaults to null (auto-select).
+     * @param integer $minorVersion The minor protocol version in effect.
+     *        Defaults to null (auto-select).
+     * @return string
+     */
+    public function lookupNamespace($prefix,
+                                    $majorVersion = null,
+                                    $minorVersion = null)
+    {
+        // Auto-select current version
+        if (is_null($majorVersion)) {
+            $majorVersion = $this->getMajorProtocolVersion();
+        }
+        if (is_null($minorVersion)) {
+            $minorVersion = $this->getMinorProtocolVersion();
+        }
+        
+        // Perform lookup
+        return parent::lookupNamespace($prefix, $majorVersion, $minorVersion);
     }
 
 }

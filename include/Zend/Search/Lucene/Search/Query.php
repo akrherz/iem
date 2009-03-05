@@ -15,19 +15,22 @@
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Search
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
 /** Zend_Search_Lucene_Document_Html */
 require_once 'Zend/Search/Lucene/Document/Html.php';
 
+/** Zend_Search_Lucene_Index_DocsFilter */
+require_once 'Zend/Search/Lucene/Index/DocsFilter.php';
+
 
 /**
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Search
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Search_Lucene_Search_Query
@@ -112,8 +115,9 @@ abstract class Zend_Search_Lucene_Search_Query
      * Query specific implementation
      *
      * @param Zend_Search_Lucene_Interface $reader
+     * @param Zend_Search_Lucene_Index_DocsFilter|null $docsFilter
      */
-    abstract public function execute(Zend_Search_Lucene_Interface $reader);
+    abstract public function execute(Zend_Search_Lucene_Interface $reader, $docsFilter = null);
 
     /**
      * Constructs an appropriate Weight implementation for this query.

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Zend Framework
  *
@@ -15,27 +14,24 @@
  *
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Int.php 4974 2007-05-25 21:11:56Z bkarwin $
+ * @version    $Id: Int.php 12336 2008-11-06 19:11:46Z thomas $
  */
-
 
 /**
  * @see Zend_Validate_Abstract
  */
 require_once 'Zend/Validate/Abstract.php';
 
-
 /**
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Validate_Int extends Zend_Validate_Abstract
 {
-
     const NOT_INT = 'notInt';
 
     /**
@@ -56,11 +52,13 @@ class Zend_Validate_Int extends Zend_Validate_Abstract
     public function isValid($value)
     {
         $valueString = (string) $value;
-
         $this->_setValue($valueString);
+        if (is_bool($value)) {
+            $this->_error();
+            return false;
+        }
 
-        $locale = localeconv();
-
+        $locale        = localeconv();
         $valueFiltered = str_replace($locale['decimal_point'], '.', $valueString);
         $valueFiltered = str_replace($locale['thousands_sep'], '', $valueFiltered);
 

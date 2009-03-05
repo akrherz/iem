@@ -14,9 +14,9 @@
  *
  * @category   Zend
  * @package    Zend_Log
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Exception.php 5764 2007-07-18 21:59:22Z thomas $
+ * @version    $Id: Exception.php 8064 2008-02-16 10:58:39Z thomas $
  */
 
 /** Zend_Exception */
@@ -25,9 +25,9 @@ require_once 'Zend/Exception.php';
 /**
  * @category   Zend
  * @package    Zend_Log
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Exception.php 5764 2007-07-18 21:59:22Z thomas $
+ * @version    $Id: Exception.php 8064 2008-02-16 10:58:39Z thomas $
  */
 class Zend_Log_Exception extends Zend_Exception
 {}

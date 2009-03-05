@@ -14,9 +14,9 @@
  *
  * @category   Zend
  * @package    Zend_Session
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Interface.php 6828 2007-11-15 15:36:22Z darby $
+ * @version    $Id: Interface.php 9133 2008-04-04 13:06:09Z darby $
  * @since      Preview Release 0.2
  */
 
@@ -25,8 +25,8 @@
  *
  * @category   Zend
  * @package    Zend_Session
- * @subpackage Validators
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Validator
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 interface Zend_Session_Validator_Interface

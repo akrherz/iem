@@ -15,19 +15,17 @@
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Adapter
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: Mysql.php 12842 2008-11-25 22:07:48Z mikaelkael $
  */
 
+
 /**
- * Zend_Db_Adapter_Pdo
+ * @see Zend_Db_Adapter_Pdo_Abstract
  */
 require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
 
-/**
- * Zend_Db_Adapter_Exception
- */
-require_once 'Zend/Db/Adapter/Exception.php';
 
 /**
  * Class for connecting to MySQL databases and performing common operations.
@@ -35,7 +33,7 @@ require_once 'Zend/Db/Adapter/Exception.php';
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Adapter
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
@@ -126,7 +124,7 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
      */
     public function describeTable($tableName, $schemaName = null)
     {
-        // @todo: use INFORMATION_SCHEMA someday when MySQL's
+        // @todo  use INFORMATION_SCHEMA someday when MySQL's
         // implementation has reasonably good performance and
         // the version with this improvement is in wide use.
 
@@ -161,6 +159,10 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
                 $length = $matches[2];
             } else if (preg_match('/^decimal\((\d+),(\d+)\)/', $row[$type], $matches)) {
                 $row[$type] = 'decimal';
+                $precision = $matches[1];
+                $scale = $matches[2];
+            } else if (preg_match('/^float\((\d+),(\d+)\)/', $row[$type], $matches)) {
+                $row[$type] = 'float';
                 $precision = $matches[1];
                 $scale = $matches[2];
             } else if (preg_match('/^((?:big|medium|small|tiny)?int)\((\d+)\)/', $row[$type], $matches)) {
@@ -202,20 +204,25 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
     /**
      * Adds an adapter-specific LIMIT clause to the SELECT statement.
      *
-     * @param string $sql
-     * @param integer $count
-     * @param integer $offset OPTIONAL
+     * @param  string $sql
+     * @param  integer $count
+     * @param  integer $offset OPTIONAL
+     * @throws Zend_Db_Adapter_Exception
      * @return string
      */
      public function limit($sql, $count, $offset = 0)
      {
         $count = intval($count);
         if ($count <= 0) {
+            /** @see Zend_Db_Adapter_Exception */
+            require_once 'Zend/Db/Adapter/Exception.php';
             throw new Zend_Db_Adapter_Exception("LIMIT argument count=$count is not valid");
         }
 
         $offset = intval($offset);
         if ($offset < 0) {
+            /** @see Zend_Db_Adapter_Exception */
+            require_once 'Zend/Db/Adapter/Exception.php';
             throw new Zend_Db_Adapter_Exception("LIMIT argument offset=$offset is not valid");
         }
 

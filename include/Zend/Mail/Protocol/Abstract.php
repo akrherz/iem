@@ -12,24 +12,24 @@
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
- *
+ * 
  * @category   Zend
  * @package    Zend_Mail
  * @subpackage Protocol
- * @version    $Id$
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: Abstract.php 12395 2008-11-07 23:58:38Z nico $
  */
 
 
 /**
- * Zend_Validate
+ * @see Zend_Validate
  */
 require_once 'Zend/Validate.php';
 
 
 /**
- * Zend_Validate_Hostname
+ * @see Zend_Validate_Hostname
  */
 require_once 'Zend/Validate/Hostname.php';
 
@@ -38,14 +38,14 @@ require_once 'Zend/Validate/Hostname.php';
  * Zend_Mail_Protocol_Abstract
  *
  * Provides low-level methods for concrete adapters to communicate with a remote mail server and track requests and responses.
- *
- * @todo Implement proxy settings
+ * 
  * @category   Zend
  * @package    Zend_Mail
  * @subpackage Protocol
- * @throws     Zend_Mail_Protocol_Exception
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: Abstract.php 12395 2008-11-07 23:58:38Z nico $
+ * @todo Implement proxy settings
  */
 abstract class Zend_Mail_Protocol_Abstract
 {
@@ -131,6 +131,9 @@ abstract class Zend_Mail_Protocol_Abstract
         $this->_validHost->addValidator(new Zend_Validate_Hostname(Zend_Validate_Hostname::ALLOW_ALL));
 
         if (!$this->_validHost->isValid($host)) {
+            /**
+             * @see Zend_Mail_Protocol_Exception
+             */
             require_once 'Zend/Mail/Protocol/Exception.php';
             throw new Zend_Mail_Protocol_Exception(join(', ', $this->_validHost->getMessages()));
         }
@@ -218,17 +221,23 @@ abstract class Zend_Mail_Protocol_Abstract
         $errorStr = '';
 
         // open connection
-        $this->_socket = stream_socket_client($remote, $errorNum, $errorStr, self::TIMEOUT_CONNECTION);
+        $this->_socket = @stream_socket_client($remote, $errorNum, $errorStr, self::TIMEOUT_CONNECTION);
 
         if ($this->_socket === false) {
             if ($errorNum == 0) {
                 $errorStr = 'Could not open socket';
             }
+            /**
+             * @see Zend_Mail_Protocol_Exception
+             */
             require_once 'Zend/Mail/Protocol/Exception.php';
             throw new Zend_Mail_Protocol_Exception($errorStr);
         }
 
         if (($result = stream_set_timeout($this->_socket, self::TIMEOUT_CONNECTION)) === false) {
+            /**
+             * @see Zend_Mail_Protocol_Exception
+             */
             require_once 'Zend/Mail/Protocol/Exception.php';
             throw new Zend_Mail_Protocol_Exception('Could not set stream timeout');
         }
@@ -260,6 +269,9 @@ abstract class Zend_Mail_Protocol_Abstract
     protected function _send($request)
     {
         if (!is_resource($this->_socket)) {
+            /**
+             * @see Zend_Mail_Protocol_Exception
+             */
             require_once 'Zend/Mail/Protocol/Exception.php';
             throw new Zend_Mail_Protocol_Exception('No connection has been established to ' . $this->_host);
         }
@@ -272,6 +284,9 @@ abstract class Zend_Mail_Protocol_Abstract
         $this->_log .= $request . self::EOL;
 
         if ($result === false) {
+            /**
+             * @see Zend_Mail_Protocol_Exception
+             */
             require_once 'Zend/Mail/Protocol/Exception.php';
             throw new Zend_Mail_Protocol_Exception('Could not send request to ' . $this->_host);
         }
@@ -290,6 +305,9 @@ abstract class Zend_Mail_Protocol_Abstract
     protected function _receive($timeout = null)
     {
         if (!is_resource($this->_socket)) {
+            /**
+             * @see Zend_Mail_Protocol_Exception
+             */
             require_once 'Zend/Mail/Protocol/Exception.php';
             throw new Zend_Mail_Protocol_Exception('No connection has been established to ' . $this->_host);
         }
@@ -309,11 +327,17 @@ abstract class Zend_Mail_Protocol_Abstract
         $info = stream_get_meta_data($this->_socket);
 
         if (!empty($info['timed_out'])) {
+            /**
+             * @see Zend_Mail_Protocol_Exception
+             */
             require_once 'Zend/Mail/Protocol/Exception.php';
             throw new Zend_Mail_Protocol_Exception($this->_host . ' has timed out');
         }
 
         if ($reponse === false) {
+            /**
+             * @see Zend_Mail_Protocol_Exception
+             */
             require_once 'Zend/Mail/Protocol/Exception.php';
             throw new Zend_Mail_Protocol_Exception('Could not read from ' . $this->_host);
         }
@@ -347,6 +371,9 @@ abstract class Zend_Mail_Protocol_Abstract
             sscanf($result, $this->_template, $cmd, $msg);
 
             if ($cmd === null || !in_array($cmd, $code)) {
+                /**
+                 * @see Zend_Mail_Protocol_Exception
+                 */
                 require_once 'Zend/Mail/Protocol/Exception.php';
                 throw new Zend_Mail_Protocol_Exception($result);
             }

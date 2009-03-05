@@ -12,13 +12,12 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
- * @category   Zend
- * @package    Zend_Measure
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: Current.php 3224 2007-02-05 22:08:48Z gavin $
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @category  Zend
+ * @package   Zend_Measure
+ * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd     New BSD License
+ * @version   $Id: Current.php 9508 2008-05-23 10:56:41Z thomas $
  */
-
 
 /**
  * Implement needed classes
@@ -27,17 +26,17 @@ require_once 'Zend/Measure/Exception.php';
 require_once 'Zend/Measure/Abstract.php';
 require_once 'Zend/Locale.php';
 
-
 /**
+ * Class for handling current conversions
+ *
  * @category   Zend
  * @package    Zend_Measure
  * @subpackage Zend_Measure_Current
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Measure_Current extends Zend_Measure_Abstract
 {
-    // Current definitions
     const STANDARD = 'AMPERE';
 
     const ABAMPERE             = 'ABAMPERE';
@@ -67,33 +66,38 @@ class Zend_Measure_Current extends Zend_Measure_Abstract
     const WATT_PER_VOLT        = 'WATT_PER_VOLT';
     const WEBER_PER_HENRY      = 'WEBER_PER_HENRY';
 
-    protected $_UNITS = array(
-        'ABAMPERE'             => array(10,           'abampere'),
-        'AMPERE'               => array(1,            'A'),
-        'BIOT'                 => array(10,           'Bi'),
-        'CENTIAMPERE'          => array(0.01,         'cA'),
-        'COULOMB_PER_SECOND'   => array(1,            'C/s'),
-        'DECIAMPERE'           => array(0.1,          'dA'),
-        'DEKAAMPERE'           => array(10,           'daA'),
-        'ELECTROMAGNATIC_UNIT' => array(10,           'current emu'),
-        'ELECTROSTATIC_UNIT'   => array(3.335641e-10, 'current esu'),
-        'FRANCLIN_PER_SECOND'  => array(3.335641e-10, 'Fr/s'),
-        'GAUSSIAN'             => array(3.335641e-10, 'G current'),
-        'GIGAAMPERE'           => array(1.0e+9,       'GA'),
-        'GILBERT'              => array(0.79577472,   'Gi'),
-        'HECTOAMPERE'          => array(100,          'hA'),
-        'KILOAMPERE'           => array(1000,         'kA'),
-        'MEGAAMPERE'           => array(1000000,      'MA') ,
-        'MICROAMPERE'          => array(0.000001,     'µA'),
-        'MILLIAMPERE'          => array(0.001,        'mA'),
-        'NANOAMPERE'           => array(1.0e-9,       'nA'),
-        'PICOAMPERE'           => array(1.0e-12,      'pA'),
-        'SIEMENS_VOLT'         => array(1,            'SV'),
-        'STATAMPERE'           => array(3.335641e-10, 'statampere'),
-        'TERAAMPERE'           => array(1.0e+12,      'TA'),
-        'VOLT_PER_OHM'         => array(1,            'V/Ohm'),
-        'WATT_PER_VOLT'        => array(1,            'W/V'),
-        'WEBER_PER_HENRY'      => array(1,            'Wb/H'),
+    /**
+     * Calculations for all current units
+     *
+     * @var array
+     */
+    protected $_units = array(
+        'ABAMPERE'             => array('10',           'abampere'),
+        'AMPERE'               => array('1',            'A'),
+        'BIOT'                 => array('10',           'Bi'),
+        'CENTIAMPERE'          => array('0.01',         'cA'),
+        'COULOMB_PER_SECOND'   => array('1',            'C/s'),
+        'DECIAMPERE'           => array('0.1',          'dA'),
+        'DEKAAMPERE'           => array('10',           'daA'),
+        'ELECTROMAGNATIC_UNIT' => array('10',           'current emu'),
+        'ELECTROSTATIC_UNIT'   => array('3.335641e-10', 'current esu'),
+        'FRANCLIN_PER_SECOND'  => array('3.335641e-10', 'Fr/s'),
+        'GAUSSIAN'             => array('3.335641e-10', 'G current'),
+        'GIGAAMPERE'           => array('1.0e+9',       'GA'),
+        'GILBERT'              => array('0.79577472',   'Gi'),
+        'HECTOAMPERE'          => array('100',          'hA'),
+        'KILOAMPERE'           => array('1000',         'kA'),
+        'MEGAAMPERE'           => array('1000000',      'MA') ,
+        'MICROAMPERE'          => array('0.000001',     'µA'),
+        'MILLIAMPERE'          => array('0.001',        'mA'),
+        'NANOAMPERE'           => array('1.0e-9',       'nA'),
+        'PICOAMPERE'           => array('1.0e-12',      'pA'),
+        'SIEMENS_VOLT'         => array('1',            'SV'),
+        'STATAMPERE'           => array('3.335641e-10', 'statampere'),
+        'TERAAMPERE'           => array('1.0e+12',      'TA'),
+        'VOLT_PER_OHM'         => array('1',            'V/Ohm'),
+        'WATT_PER_VOLT'        => array('1',            'W/V'),
+        'WEBER_PER_HENRY'      => array('1',            'Wb/H'),
         'STANDARD'             => 'AMPERE'
     );
 }

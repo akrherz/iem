@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Zend Framework
  *
@@ -15,27 +14,24 @@
  *
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Ip.php 4974 2007-05-25 21:11:56Z bkarwin $
+ * @version    $Id: Ip.php 13289 2008-12-15 23:18:58Z tjohns $
  */
-
 
 /**
  * @see Zend_Validate_Abstract
  */
 require_once 'Zend/Validate/Abstract.php';
 
-
 /**
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Validate_Ip extends Zend_Validate_Abstract
 {
-
     const NOT_IP_ADDRESS = 'notIpAddress';
 
     /**
@@ -59,9 +55,14 @@ class Zend_Validate_Ip extends Zend_Validate_Abstract
 
         $this->_setValue($valueString);
 
-        if (!ip2long($valueString)) {
-            $this->_error();
-            return false;
+        if ((ip2long($valueString) === false) || (long2ip(ip2long($valueString)) !== $valueString)) {
+            if (!function_exists('inet_pton')) {
+                $this->_error();
+                return false;
+            } else if ((@inet_pton($value) === false) ||(inet_ntop(@inet_pton($value)) !== $valueString)) {
+                $this->_error();
+                return false;
+            }
         }
 
         return true;

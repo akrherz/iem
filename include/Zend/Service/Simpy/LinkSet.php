@@ -16,9 +16,9 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Simpy
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: LinkSet.php 3794 2007-03-07 17:11:25Z darby $
+ * @version    $Id: LinkSet.php 8064 2008-02-16 10:58:39Z thomas $
  */
 
 
@@ -32,7 +32,7 @@ require_once 'Zend/Service/Simpy/Link.php';
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Simpy
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Simpy_LinkSet implements IteratorAggregate
@@ -64,12 +64,11 @@ class Zend_Service_Simpy_LinkSet implements IteratorAggregate
     /**
      * Returns an iterator for the link set
      *
-     * @return IteratorIterator
+     * @return ArrayIterator
      */
     public function getIterator()
     {
-        $array = new ArrayObject($this->_links);
-        return $array->getIterator();
+        return new ArrayIterator($this->_links);
     }
 
     /**

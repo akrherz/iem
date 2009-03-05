@@ -15,7 +15,8 @@
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Gapps
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -36,7 +37,8 @@ require_once 'Zend/Gdata/App/Base.php';
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Gapps
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Gdata_Gapps_Error extends Zend_Gdata_App_Base
@@ -121,7 +123,7 @@ class Zend_Gdata_Gapps_Error extends Zend_Gdata_App_Base
      * For more information about these codes and their meaning, please 
      * see Appendix D of the Google Apps Provisioning API Reference.
      * 
-     * @link http://code.google.com/apis/apps/gdata_provisioning_api_v2.0_reference.html#appendix_d Google Apps Provisioning API Reference: Appendix D - GData Error Codes
+     * @link http://code.google.com/apis/apps/gdata_provisioning_api_v2.0_reference.html#appendix_d Google Apps Provisioning API Reference: Appendix D - Gdata Error Codes
      * @see setErrorCode
      * @return integer The error code returned by the Google Apps server.
      */
@@ -178,9 +180,9 @@ class Zend_Gdata_Gapps_Error extends Zend_Gdata_App_Base
      * @return DOMElement The DOMElement representing this element and all
      *          child properties.
      */
-    public function getDOM($doc = null)
+    public function getDOM($doc = null, $majorVersion = 1, $minorVersion = null)
     {
-        $element = parent::getDOM($doc);
+        $element = parent::getDOM($doc, $majorVersion, $minorVersion);
         if ($this->_errorCode !== null) {
             $element->setAttribute('errorCode', $this->_errorCode);
         }

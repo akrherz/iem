@@ -14,7 +14,7 @@
  *
  * @category   Zend
  * @package    Zend_Pdf
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -28,7 +28,7 @@ require_once 'Zend/Pdf/Element.php';
  *
  * @category   Zend
  * @package    Zend_Pdf
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Pdf_Element_String extends Zend_Pdf_Element
@@ -134,12 +134,15 @@ class Zend_Pdf_Element_String extends Zend_Pdf_Element
                     break;
 
                 default:
-                    if ($nextCode >= 32 && $nextCode <= 126 ) {
-                        // Visible ASCII symbol
-                        $outStr .= $inStr[$count];
-                    } else {
-                        $outStr .= sprintf('\\%03o', $nextCode);
-                    }
+                    // Don't use non-ASCII characters escaping
+                    // if ($nextCode >= 32 && $nextCode <= 126 ) {
+                    //     // Visible ASCII symbol
+                    //     $outStr .= $inStr[$count];
+                    // } else {
+                    //     $outStr .= sprintf('\\%03o', $nextCode);
+                    // }
+                    $outStr .= $inStr[$count];
+
                     break;
             }
         }

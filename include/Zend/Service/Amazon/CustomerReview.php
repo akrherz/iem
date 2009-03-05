@@ -16,9 +16,9 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Amazon
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: CustomerReview.php 4388 2007-04-06 14:15:35Z darby $
+ * @version    $Id: CustomerReview.php 14126 2009-02-20 16:15:52Z sidhighwind $
  */
 
 
@@ -26,11 +26,46 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Amazon
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Amazon_CustomerReview
 {
+    /**
+     * @var string
+     */
+    public $Rating;
+
+    /**
+     * @var string
+     */
+    public $HelpfulVotes;
+
+    /**
+     * @var string
+     */
+    public $CustomerId;
+
+    /**
+     * @var string
+     */
+    public $TotalVotes;
+
+    /**
+     * @var string
+     */
+    public $Date;
+
+    /**
+     * @var string
+     */
+    public $Summary;
+
+    /**
+     * @var string
+     */
+    public $Content;
+
     /**
      * Assigns values to properties relevant to CustomerReview
      *

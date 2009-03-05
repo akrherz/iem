@@ -14,17 +14,14 @@
  *
  * @category   Zend
  * @package    Zend_Translate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: Date.php 2498 2006-12-23 22:13:38Z thomas $
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @version    $Id: $
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
 
 /** Zend_Locale */
 require_once 'Zend/Locale.php';
-
-/** Zend_Translate_Exception */
-require_once 'Zend/Translate/Exception.php';
 
 /** Zend_Translate_Adapter */
 require_once 'Zend/Translate/Adapter.php';
@@ -33,7 +30,7 @@ require_once 'Zend/Translate/Adapter.php';
 /**
  * @category   Zend
  * @package    Zend_Translate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Translate_Adapter_Array extends Zend_Translate_Adapter {
@@ -60,12 +57,24 @@ class Zend_Translate_Adapter_Array extends Zend_Translate_Adapter {
      */
     protected function _loadTranslationData($data, $locale, array $options = array())
     {
-        $options = array_merge($this->_options, $options);
+        if (!is_array($data)) {
+            if (file_exists($data)) {
+                ob_start();
+                $data = include($data);
+                ob_end_clean();
+            }
+        }
+        if (!is_array($data)) {
+            require_once 'Zend/Translate/Exception.php';
+            throw new Zend_Translate_Exception("Error including array or file '".$data."'");
+        }
+
+        $options = $options + $this->_options;
         if (($options['clear'] == true) ||  !isset($this->_translate[$locale])) {
             $this->_translate[$locale] = array();
         }
 
-        $this->_translate[$locale] = array_merge($this->_translate[$locale], $data);
+        $this->_translate[$locale] = $data + $this->_translate[$locale];
     }
 
     /**

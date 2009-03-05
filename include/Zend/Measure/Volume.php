@@ -12,13 +12,12 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
- * @category   Zend
- * @package    Zend_Measure
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: Volume.php 3224 2007-02-05 22:08:48Z gavin $
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @category  Zend
+ * @package   Zend_Measure
+ * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd     New BSD License
+ * @version   $Id: Volume.php 9508 2008-05-23 10:56:41Z thomas $
  */
-
 
 /**
  * Implement needed classes
@@ -27,17 +26,17 @@ require_once 'Zend/Measure/Exception.php';
 require_once 'Zend/Measure/Abstract.php';
 require_once 'Zend/Locale.php';
 
-
 /**
+ * Class for handling acceleration conversions
+ *
  * @category   Zend
  * @package    Zend_Measure
  * @subpackage Zend_Measure_Volume
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Measure_Volume extends Zend_Measure_Abstract
 {
-    // Volume definitions
     const STANDARD = 'CUBIC_METER';
 
     const ACRE_FOOT           = 'ACRE_FOOT';
@@ -122,88 +121,94 @@ class Zend_Measure_Volume extends Zend_Measure_Abstract
     const TEASPOON_US         = 'TEASPOON_US';
     const YARD                = 'YARD';
 
-    protected $_UNITS = array(
-        'ACRE_FOOT'           => array(1233.48185532, 'ac ft'),
-        'ACRE_FOOT_SURVEY'    => array(1233.489,      'ac ft'),
-        'ACRE_INCH'           => array(102.79015461,  'ac in'),
-        'BARREL_WINE'         => array(0.143201835,   'bbl'),
-        'BARREL'              => array(0.16365924,    'bbl'),
-        'BARREL_US_DRY'       => array(array('' => 26.7098656608, '/' => 231), 'bbl'),
-        'BARREL_US_FEDERAL'   => array(0.1173477658,  'bbl'),
-        'BARREL_US'           => array(0.1192404717,  'bbl'),
-        'BARREL_US_PETROLEUM' => array(0.1589872956,  'bbl'),
-        'BOARD_FOOT'          => array(array('' => 6.5411915904, '/' => 2772), 'board foot'),
-        'BUCKET'              => array(0.01818436,    'bucket'),
-        'BUCKET_US'           => array(0.018927059,   'bucket'),
-        'BUSHEL'              => array(0.03636872,    'bu'),
-        'BUSHEL_US'           => array(0.03523907,    'bu'),
-        'CENTILITER'          => array(0.00001,       'cl'),
-        'CORD'                => array(3.624556416,   'cd'),
-        'CORD_FOOT'           => array(0.453069552,   'cd ft'),
-        'CUBIC_CENTIMETER'    => array(0.000001,      'cm³'),
-        'CUBIC_CUBIT'         => array(0.144,         'cubit³'),
-        'CUBIC_DECIMETER'     => array(0.001,         'dm³'),
-        'CUBIC_DEKAMETER'     => array(1000,          'dam³'),
-        'CUBIC_FOOT'          => array(array('' => 6.54119159, '/' => 231),   'ft³'),
-        'CUBIC_INCH'          => array(array('' => 0.0037854118, '/' => 231), 'in³'),
-        'CUBIC_KILOMETER'     => array(1.0e+9,        'km³'),
-        'CUBIC_METER'         => array(1,             'm³'),
-        'CUBIC_MILE'          => array(array('' => 0.0037854118, '/' => 231, '*' => 75271680, '*' => 3379200), 'mi³'),
-        'CUBIC_MICROMETER'    => array(1.0e-18,       'µm³'),
-        'CUBIC_MILLIMETER'    => array(1.0e-9,        'mm³'),
-        'CUBIC_YARD'          => array(array('' => 0.0037854118, '/' => 231, '*' => 46656), 'yd³'),
-        'CUP_CANADA'          => array(0.0002273045,  'c'),
-        'CUP'                 => array(0.00025,       'c'),
-        'CUP_US'              => array(array('' => 0.0037854118, '/' => 16), 'c'),
-        'DECILITER'           => array(0.0001,        'dl'),
-        'DEKALITER'           => array(0.001,         'dal'),
-        'DRAM'                => array(array('' => 0.0037854118, '/' => 1024), 'dr'),
-        'DRUM_US'             => array(0.208197649,   'drum'),
-        'DRUM'                => array(0.2,           'drum'),
-        'FIFTH'               => array(0.00075708236, 'fifth'),
-        'GALLON'              => array(0.00454609,    'gal'),
-        'GALLON_US_DRY'       => array(0.0044048838,  'gal'),
-        'GALLON_US'           => array(0.0037854118,  'gal'),
-        'GILL'                => array(array('' => 0.00454609, '/' => 32),   'gi'),
-        'GILL_US'             => array(array('' => 0.0037854118, '/' => 32), 'gi'),
-        'HECTARE_METER'       => array(10000,         'ha m'),
-        'HECTOLITER'          => array(0.1,           'hl'),
-        'HOGSHEAD'            => array(0.28640367,    'hhd'),
-        'HOGSHEAD_US'         => array(0.2384809434,  'hhd'),
-        'JIGGER'              => array(array('' => 0.0037854118, '/' => 128, '*' => 1.5), 'jigger'),
-        'KILOLITER'           => array(1,             'kl'),
-        'LITER'               => array(0.001,         'l'),
-        'MEASURE'             => array(0.0077,        'measure'),
-        'MEGALITER'           => array(1000,          'Ml'),
-        'MICROLITER'          => array(1.0e-9,        'µl'),
-        'MILLILITER'          => array(0.000001,      'ml'),
-        'MINIM'               => array(array('' => 0.00454609, '/' => 76800),  'min'),
-        'MINIM_US'            => array(array('' => 0.0037854118,'/' => 61440), 'min'),
-        'OUNCE'               => array(array('' => 0.00454609, '/' => 160),    'oz'),
-        'OUNCE_US'            => array(array('' => 0.0037854118, '/' => 128),  'oz'),
-        'PECK'                => array(0.00909218,    'pk'),
-        'PECK_US'             => array(0.0088097676,  'pk'),
-        'PINT'                => array(array('' => 0.00454609, '/' => 8),   'pt'),
-        'PINT_US_DRY'         => array(array('' => 0.0044048838, '/' => 8), 'pt'),
-        'PINT_US'             => array(array('' => 0.0037854118, '/' => 8), 'pt'),
-        'PIPE'                => array(0.49097772,    'pipe'),
-        'PIPE_US'             => array(0.4769618868,  'pipe'),
-        'PONY'                => array(array('' => 0.0037854118, '/' => 128), 'pony'),
-        'QUART_GERMANY'       => array(0.00114504,    'qt'),
-        'QUART_ANCIENT'       => array(0.00108,       'qt'),
-        'QUART'               => array(array('' => 0.00454609, '/' => 4),   'qt'),
-        'QUART_US_DRY'        => array(array('' => 0.0044048838, '/' => 4), 'qt'),
-        'QUART_US'            => array(array('' => 0.0037854118, '/' => 4), 'qt'),
-        'QUART_UK'            => array(0.29094976,    'qt'),
-        'SHOT'                => array(array('' => 0.0037854118, '/' => 128), 'shot'),
-        'STERE'               => array(1,             'st'),
-        'TABLESPOON'          => array(0.000015,      'tbsp'),
-        'TABLESPOON_UK'       => array(array('' => 0.00454609, '/' => 320),   'tbsp'),
-        'TABLESPOON_US'       => array(array('' => 0.0037854118, '/' => 256), 'tbsp'),
-        'TEASPOON'            => array(0.000005,      'tsp'),
-        'TEASPOON_UK'         => array(array('' => 0.00454609, '/' => 1280),    'tsp'),
-        'TEASPOON_US'         => array(array('' => 0.0037854118, '/' => 768),   'tsp'),
-        'YARD'                => array(array('' => 176.6121729408, '/' => 231), 'yd'),
+    /**
+     * Calculations for all volume units
+     *
+     * @var array
+     */
+    protected $_units = array(
+        'ACRE_FOOT'           => array('1233.48185532', 'ac ft'),
+        'ACRE_FOOT_SURVEY'    => array('1233.489',      'ac ft'),
+        'ACRE_INCH'           => array('102.79015461',  'ac in'),
+        'BARREL_WINE'         => array('0.143201835',   'bbl'),
+        'BARREL'              => array('0.16365924',    'bbl'),
+        'BARREL_US_DRY'       => array(array('' => '26.7098656608', '/' => '231'), 'bbl'),
+        'BARREL_US_FEDERAL'   => array('0.1173477658',  'bbl'),
+        'BARREL_US'           => array('0.1192404717',  'bbl'),
+        'BARREL_US_PETROLEUM' => array('0.1589872956',  'bbl'),
+        'BOARD_FOOT'          => array(array('' => '6.5411915904', '/' => '2772'), 'board foot'),
+        'BUCKET'              => array('0.01818436',    'bucket'),
+        'BUCKET_US'           => array('0.018927059',   'bucket'),
+        'BUSHEL'              => array('0.03636872',    'bu'),
+        'BUSHEL_US'           => array('0.03523907',    'bu'),
+        'CENTILITER'          => array('0.00001',       'cl'),
+        'CORD'                => array('3.624556416',   'cd'),
+        'CORD_FOOT'           => array('0.453069552',   'cd ft'),
+        'CUBIC_CENTIMETER'    => array('0.000001',      'cm³'),
+        'CUBIC_CUBIT'         => array('0.144',         'cubit³'),
+        'CUBIC_DECIMETER'     => array('0.001',         'dm³'),
+        'CUBIC_DEKAMETER'     => array('1000',          'dam³'),
+        'CUBIC_FOOT'          => array(array('' => '6.54119159', '/' => '231'),   'ft³'),
+        'CUBIC_INCH'          => array(array('' => '0.0037854118', '/' => '231'), 'in³'),
+        'CUBIC_KILOMETER'     => array('1.0e+9',        'km³'),
+        'CUBIC_METER'         => array('1',             'm³'),
+        'CUBIC_MILE'          => array(array('' => '0.0037854118', '/' => '231', '*' => '75271680', '*' => '3379200'),
+                                       'mi³'),
+        'CUBIC_MICROMETER'    => array('1.0e-18',       'µm³'),
+        'CUBIC_MILLIMETER'    => array('1.0e-9',        'mm³'),
+        'CUBIC_YARD'          => array(array('' => '0.0037854118', '/' => '231', '*' => '46656'), 'yd³'),
+        'CUP_CANADA'          => array('0.0002273045',  'c'),
+        'CUP'                 => array('0.00025',       'c'),
+        'CUP_US'              => array(array('' => '0.0037854118', '/' => '16'), 'c'),
+        'DECILITER'           => array('0.0001',        'dl'),
+        'DEKALITER'           => array('0.001',         'dal'),
+        'DRAM'                => array(array('' => '0.0037854118', '/' => '1024'), 'dr'),
+        'DRUM_US'             => array('0.208197649',   'drum'),
+        'DRUM'                => array('0.2',           'drum'),
+        'FIFTH'               => array('0.00075708236', 'fifth'),
+        'GALLON'              => array('0.00454609',    'gal'),
+        'GALLON_US_DRY'       => array('0.0044048838',  'gal'),
+        'GALLON_US'           => array('0.0037854118',  'gal'),
+        'GILL'                => array(array('' => '0.00454609', '/' => '32'),   'gi'),
+        'GILL_US'             => array(array('' => '0.0037854118', '/' => '32'), 'gi'),
+        'HECTARE_METER'       => array('10000',         'ha m'),
+        'HECTOLITER'          => array('0.1',           'hl'),
+        'HOGSHEAD'            => array('0.28640367',    'hhd'),
+        'HOGSHEAD_US'         => array('0.2384809434',  'hhd'),
+        'JIGGER'              => array(array('' => '0.0037854118', '/' => '128', '*' => '1.5'), 'jigger'),
+        'KILOLITER'           => array('1',             'kl'),
+        'LITER'               => array('0.001',         'l'),
+        'MEASURE'             => array('0.0077',        'measure'),
+        'MEGALITER'           => array('1000',          'Ml'),
+        'MICROLITER'          => array('1.0e-9',        'µl'),
+        'MILLILITER'          => array('0.000001',      'ml'),
+        'MINIM'               => array(array('' => '0.00454609', '/' => '76800'),  'min'),
+        'MINIM_US'            => array(array('' => '0.0037854118','/' => '61440'), 'min'),
+        'OUNCE'               => array(array('' => '0.00454609', '/' => '160'),    'oz'),
+        'OUNCE_US'            => array(array('' => '0.0037854118', '/' => '128'),  'oz'),
+        'PECK'                => array('0.00909218',    'pk'),
+        'PECK_US'             => array('0.0088097676',  'pk'),
+        'PINT'                => array(array('' => '0.00454609', '/' => '8'),   'pt'),
+        'PINT_US_DRY'         => array(array('' => '0.0044048838', '/' => '8'), 'pt'),
+        'PINT_US'             => array(array('' => '0.0037854118', '/' => '8'), 'pt'),
+        'PIPE'                => array('0.49097772',    'pipe'),
+        'PIPE_US'             => array('0.4769618868',  'pipe'),
+        'PONY'                => array(array('' => '0.0037854118', '/' => '128'), 'pony'),
+        'QUART_GERMANY'       => array('0.00114504',    'qt'),
+        'QUART_ANCIENT'       => array('0.00108',       'qt'),
+        'QUART'               => array(array('' => '0.00454609', '/' => '4'),   'qt'),
+        'QUART_US_DRY'        => array(array('' => '0.0044048838', '/' => '4'), 'qt'),
+        'QUART_US'            => array(array('' => '0.0037854118', '/' => '4'), 'qt'),
+        'QUART_UK'            => array('0.29094976',    'qt'),
+        'SHOT'                => array(array('' => '0.0037854118', '/' => '128'), 'shot'),
+        'STERE'               => array('1',             'st'),
+        'TABLESPOON'          => array('0.000015',      'tbsp'),
+        'TABLESPOON_UK'       => array(array('' => '0.00454609', '/' => '320'),   'tbsp'),
+        'TABLESPOON_US'       => array(array('' => '0.0037854118', '/' => '256'), 'tbsp'),
+        'TEASPOON'            => array('0.000005',      'tsp'),
+        'TEASPOON_UK'         => array(array('' => '0.00454609', '/' => '1280'),    'tsp'),
+        'TEASPOON_US'         => array(array('' => '0.0037854118', '/' => '768'),   'tsp'),
+        'YARD'                => array(array('' => '176.6121729408', '/' => '231'), 'yd'),
         'STANDARD'            => 'CUBIC_METER'
     );
 }

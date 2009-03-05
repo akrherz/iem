@@ -15,7 +15,7 @@
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -32,7 +32,7 @@ require_once 'Zend/View/Helper/FormElement.php';
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_View_Helper_HtmlList extends Zend_View_Helper_FormElement
@@ -46,7 +46,7 @@ class Zend_View_Helper_HtmlList extends Zend_View_Helper_FormElement
      * @param array   $attribs Attributes for the ol/ul tag.
      * @return string The list XHTML.
      */
-    public function htmlList(array $items, $ordered = false, $attribs = false)
+    public function htmlList(array $items, $ordered = false, $attribs = false, $escape = true)
     {
         if (!is_array($items)) {
             require_once 'Zend/View/Exception.php';
@@ -57,12 +57,16 @@ class Zend_View_Helper_HtmlList extends Zend_View_Helper_FormElement
 
         foreach ($items as $item) {
             if (!is_array($item)) {
-                $list .= '<li>' . $item . '</li>';
+                if ($escape) {
+                    $item = $this->view->escape($item);
+                }
+                $list .= '<li>' . $item . '</li>' . self::EOL;
             } else {
                 if (5 < strlen($list)) {
-                    $list = substr($list, 0, strlen($list) - 5) . $this->htmlList($item, $ordered) . '</li>';
+                    $list = substr($list, 0, strlen($list) - 5)
+                     . $this->htmlList($item, $ordered, $attribs, $escape) . '</li>' . self::EOL;
                 } else {
-                    $list .= '<li>' . $this->htmlList($item, $ordered) . '</li>';
+                    $list .= '<li>' . $this->htmlList($item, $ordered, $attribs, $escape) . '</li>' . self::EOL;
                 }
             }
         }
@@ -78,6 +82,6 @@ class Zend_View_Helper_HtmlList extends Zend_View_Helper_FormElement
             $tag = 'ol';
         }
 
-        return '<' . $tag . $attribs . '>' . $list . '</' . $tag . '>';
+        return '<' . $tag . $attribs . '>' . self::EOL . $list . '</' . $tag . '>' . self::EOL;
     }
 }

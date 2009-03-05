@@ -14,17 +14,17 @@
  *
  * @category   Zend
  * @package    Zend_Json
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
 /**
- * Zend_Json
+ * @see Zend_Json
  */
 require_once 'Zend/Json.php';
 
 /**
- * Zend_Json_Exception
+ * @see Zend_Json_Exception
  */
 require_once 'Zend/Json/Exception.php';
 
@@ -34,7 +34,7 @@ require_once 'Zend/Json/Exception.php';
  *
  * @category   Zend
  * @package    Zend_Json
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Json_Decoder
@@ -189,8 +189,8 @@ class Zend_Json_Decoder
      * Decodes an object of the form:
      *  { "attribute: value, "attribute2" : value,...}
      *
-     * If ZJsonEnoder or ZJAjax was used to encode the original object
-     * then a special attribute called __className which specifies a class
+     * If Zend_Json_Encoder was used to encode the original object then 
+     * a special attribute called __className which specifies a class
      * name that should wrap the data contained within the encoded source.
      *
      * Decodes to either an array or StdClass object, based on the value of

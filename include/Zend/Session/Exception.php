@@ -14,9 +14,9 @@
  *
  * @category   Zend
  * @package    Zend_Session
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Exception.php 4773 2007-05-09 19:33:10Z darby $
+ * @version    $Id: Exception.php 10735 2008-08-06 21:52:47Z ralph $
  * @since      Preview Release 0.2
  */
 
@@ -32,7 +32,7 @@ require_once 'Zend/Exception.php';
  *
  * @category   Zend
  * @package    Zend_Session
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Session_Exception extends Zend_Exception
@@ -53,9 +53,9 @@ class Zend_Session_Exception extends Zend_Exception
      * @param  string $errstr
      * @return void
      */
-    static public function handleSessionStartError($errno, $errstr)
+    static public function handleSessionStartError($errno, $errstr, $errfile, $errline, $errcontext)
     {
-        self::$sessionStartError = $errstr;
+        self::$sessionStartError = $errfile . '(Line:' . $errline . '): Error #' . $errno . ' ' . $errstr . ' ' . $errcontext;
     }
 
     /**
@@ -66,7 +66,9 @@ class Zend_Session_Exception extends Zend_Exception
      * @param  string $errstr
      * @return void
      */
-    static public function handleSilentWriteClose($errno, $errstr)
+    static public function handleSilentWriteClose($errno, $errstr, $errfile, $errline, $errcontext)
     {
+        self::$sessionStartError .= PHP_EOL . $errfile . '(Line:' . $errline . '): Error #' . $errno . ' ' . $errstr . ' ' . $errcontext;
     }
 }
+

@@ -15,7 +15,7 @@
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Search
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -31,7 +31,7 @@ require_once 'Zend/Search/Lucene/Search/Weight/Term.php';
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Search
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Search_Lucene_Search_Query_Term extends Zend_Search_Lucene_Search_Query
@@ -65,7 +65,7 @@ class Zend_Search_Lucene_Search_Query_Term extends Zend_Search_Lucene_Search_Que
      * @param Zend_Search_Lucene_Index_Term $term
      * @param boolean $sign
      */
-    public function __construct($term)
+    public function __construct(Zend_Search_Lucene_Index_Term $term)
     {
         $this->_term = $term;
     }
@@ -128,11 +128,12 @@ class Zend_Search_Lucene_Search_Query_Term extends Zend_Search_Lucene_Search_Que
      * It also initializes necessary internal structures
      *
      * @param Zend_Search_Lucene_Interface $reader
+     * @param Zend_Search_Lucene_Index_DocsFilter|null $docsFilter
      */
-    public function execute(Zend_Search_Lucene_Interface $reader)
+    public function execute(Zend_Search_Lucene_Interface $reader, $docsFilter = null)
     {
-        $this->_docVector = array_flip($reader->termDocs($this->_term));
-        $this->_termFreqs = $reader->termFreqs($this->_term);
+        $this->_docVector = array_flip($reader->termDocs($this->_term, $docsFilter));
+        $this->_termFreqs = $reader->termFreqs($this->_term, $docsFilter);
 
         // Initialize weight if it's not done yet
         $this->_initWeight($reader);

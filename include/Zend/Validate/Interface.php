@@ -15,16 +15,16 @@
  *
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Interface.php 4974 2007-05-25 21:11:56Z bkarwin $
+ * @version    $Id: Interface.php 8064 2008-02-16 10:58:39Z thomas $
  */
 
 
 /**
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 interface Zend_Validate_Interface
@@ -33,7 +33,7 @@ interface Zend_Validate_Interface
      * Returns true if and only if $value meets the validation requirements
      *
      * If $value fails validation, then this method returns false, and
-     * $messages will contain an array of messages that explain why the
+     * getMessages() will return an array of messages that explain why the
      * validation failed.
      *
      * @param  mixed $value
@@ -43,8 +43,9 @@ interface Zend_Validate_Interface
     public function isValid($value);
 
     /**
-     * Returns an array of messages that explain why a previous isValid()
-     * call returned false.
+     * Returns an array of messages that explain why the most recent isValid()
+     * call returned false. The array keys are validation failure message identifiers,
+     * and the array values are the corresponding human-readable message strings.
      *
      * If isValid() was never called or if the most recent isValid() call
      * returned true, then this method returns an empty array.
@@ -54,13 +55,16 @@ interface Zend_Validate_Interface
     public function getMessages();
 
     /**
-     * Returns an array of errors that explain why a previous isValid() call
+     * Returns an array of message codes that explain why a previous isValid() call
      * returned false.
      *
      * If isValid() was never called or if the most recent isValid() call
      * returned true, then this method returns an empty array.
      *
+     * This is now the same as calling array_keys() on the return value from getMessages().
+     *
      * @return array
+     * @deprecated Since 1.5.0
      */
     public function getErrors();
 

@@ -15,23 +15,13 @@
  * @category   Zend
  * @package    Zend_Controller
  * @subpackage Router
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
 
 /** Zend_Controller_Router_Interface */
 require_once 'Zend/Controller/Router/Interface.php';
-
-/** Zend_Controller_Front */
-require_once 'Zend/Controller/Front.php';
-
-/** Zend_Controller_Request_Abstract */
-require_once 'Zend/Controller/Request/Abstract.php';
-
-/** Zend_Controller_Request_Http */
-require_once 'Zend/Controller/Request/Http.php';
-
 
 /**
  * Simple first implementation of a router, to be replaced
@@ -40,7 +30,7 @@ require_once 'Zend/Controller/Request/Http.php';
  * @category   Zend
  * @package    Zend_Controller
  * @subpackage Router
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Controller_Router_Abstract implements Zend_Controller_Router_Interface
@@ -159,26 +149,21 @@ abstract class Zend_Controller_Router_Abstract implements Zend_Controller_Router
             return $this->_frontController;
         }
 
-        // Grab singleton instance, if class has been loaded
-        if (class_exists('Zend_Controller_Front')) {
-            $this->_frontController = Zend_Controller_Front::getInstance();
-            return $this->_frontController;
-        }
-
-        // Throw exception in all other cases
-        require_once 'Zend/Controller/Router/Exception.php';
-        throw new Zend_Controller_Router_Exception('Front controller class has not been loaded');
+        require_once 'Zend/Controller/Front.php';
+        $this->_frontController = Zend_Controller_Front::getInstance();
+        return $this->_frontController;
     }
 
     /**
      * Set Front Controller
      *
      * @param Zend_Controller_Front $controller
-     * @return Zend_Controller_Router_Abstract
+     * @return Zend_Controller_Router_Interface
      */
     public function setFrontController(Zend_Controller_Front $controller)
     {
         $this->_frontController = $controller;
         return $this;
     }
+
 }

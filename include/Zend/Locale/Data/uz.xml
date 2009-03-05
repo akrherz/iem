@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.5/ldml.dtd">
+<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.6/ldml.dtd">
 <ldml>
 	<identity>
-		<version number="$Revision: 1.42 $"/>
-		<generation date="$Date: 2007/07/19 22:31:40 $"/>
+		<version number="$Revision: 1.45 $"/>
+		<generation date="$Date: 2008/06/09 02:17:48 $"/>
 		<language type="uz"/>
 	</identity>
 	<localeDisplayNames>
 		<languages>
-			<language type="ar" draft="unconfirmed">Арабча</language>
-			<language type="de" draft="unconfirmed">Олмонча</language>
-			<language type="en" draft="unconfirmed">Инглизча</language>
-			<language type="es" draft="unconfirmed">Испанча</language>
-			<language type="fr" draft="unconfirmed">Французча</language>
-			<language type="hi" draft="unconfirmed">Ҳиндча</language>
-			<language type="it" draft="unconfirmed">Италянча</language>
-			<language type="ja" draft="unconfirmed">Японча</language>
-			<language type="pt" draft="unconfirmed">Португалча</language>
-			<language type="ru" draft="unconfirmed">Русча</language>
+			<language type="ar">Арабча</language>
+			<language type="de">Олмонча</language>
+			<language type="en">Инглизча</language>
+			<language type="es">Испанча</language>
+			<language type="fr">Французча</language>
+			<language type="hi">Ҳиндча</language>
+			<language type="it">Италянча</language>
+			<language type="ja">Японча</language>
+			<language type="pt">Португалча</language>
+			<language type="ru">Русча</language>
 			<language type="uz">Ўзбек</language>
-			<language type="zh" draft="unconfirmed">Хитойча</language>
+			<language type="zh">Хитойча</language>
 		</languages>
 		<scripts>
-			<script type="Arab" draft="unconfirmed">Араб</script>
-			<script type="Cyrl" draft="unconfirmed">Кирил</script>
-			<script type="Latn" draft="unconfirmed">Лотин</script>
+			<script type="Arab">Араб</script>
+			<script type="Cyrl">Кирил</script>
+			<script type="Latn">Лотин</script>
 		</scripts>
 		<territories>
-			<territory type="AF" draft="unconfirmed">Афғонистон</territory>
-			<territory type="BR" draft="unconfirmed">Бразилия</territory>
-			<territory type="CN" draft="unconfirmed">Хитой</territory>
-			<territory type="DE" draft="unconfirmed">Олмония</territory>
-			<territory type="FR" draft="unconfirmed">Франция</territory>
-			<territory type="GB" draft="unconfirmed">Бирлашган Қироллик</territory>
-			<territory type="IN" draft="unconfirmed">Ҳиндистон</territory>
-			<territory type="IT" draft="unconfirmed">Италия</territory>
-			<territory type="JP" draft="unconfirmed">Япония</territory>
-			<territory type="RU" draft="unconfirmed">Россия</territory>
-			<territory type="US" draft="unconfirmed">Қўшма Штатлар</territory>
+			<territory type="AF">Афғонистон</territory>
+			<territory type="BR">Бразилия</territory>
+			<territory type="CN">Хитой</territory>
+			<territory type="DE">Олмония</territory>
+			<territory type="FR">Франция</territory>
+			<territory type="GB">Бирлашган Қироллик</territory>
+			<territory type="IN">Ҳиндистон</territory>
+			<territory type="IT">Италия</territory>
+			<territory type="JP">Япония</territory>
+			<territory type="RU">Россия</territory>
+			<territory type="US">Қўшма Штатлар</territory>
 			<territory type="UZ">Ўзбекистон</territory>
 		</territories>
 	</localeDisplayNames>
@@ -51,218 +51,214 @@
 				<months>
 					<monthContext type="format">
 						<monthWidth type="abbreviated">
-							<month type="1" draft="unconfirmed">Янв</month>
-							<month type="2" draft="unconfirmed">Фев</month>
-							<month type="3" draft="unconfirmed">Мар</month>
-							<month type="4" draft="unconfirmed">Апр</month>
-							<month type="5" draft="unconfirmed">Май</month>
-							<month type="6" draft="unconfirmed">Июн</month>
-							<month type="7" draft="unconfirmed">Июл</month>
-							<month type="8" draft="unconfirmed">Авг</month>
-							<month type="9" draft="unconfirmed">Сен</month>
-							<month type="10" draft="unconfirmed">Окт</month>
-							<month type="11" draft="unconfirmed">Ноя</month>
-							<month type="12" draft="unconfirmed">Дек</month>
+							<month type="1">Янв</month>
+							<month type="2">Фев</month>
+							<month type="3">Мар</month>
+							<month type="4">Апр</month>
+							<month type="5">Май</month>
+							<month type="6">Июн</month>
+							<month type="7">Июл</month>
+							<month type="8">Авг</month>
+							<month type="9">Сен</month>
+							<month type="10">Окт</month>
+							<month type="11">Ноя</month>
+							<month type="12">Дек</month>
 						</monthWidth>
 						<monthWidth type="wide">
-							<month type="1" draft="unconfirmed">Муҳаррам</month>
-							<month type="2" draft="unconfirmed">Сафар</month>
-							<month type="3" draft="unconfirmed">Рабиул-аввал</month>
-							<month type="4" draft="unconfirmed">Рабиул-охир</month>
-							<month type="5" draft="unconfirmed">Жумодиул-уло</month>
-							<month type="6" draft="unconfirmed">Жумодиул-ухро</month>
-							<month type="7" draft="unconfirmed">Ражаб</month>
-							<month type="8" draft="unconfirmed">Шаъбон</month>
-							<month type="9" draft="unconfirmed">Рамазон</month>
-							<month type="10" draft="unconfirmed">Шаввол</month>
-							<month type="11" draft="unconfirmed">Зил-қаъда</month>
-							<month type="12" draft="unconfirmed">Зил-ҳижжа</month>
+							<month type="1">Муҳаррам</month>
+							<month type="2">Сафар</month>
+							<month type="3">Рабиул-аввал</month>
+							<month type="4">Рабиул-охир</month>
+							<month type="5">Жумодиул-уло</month>
+							<month type="6">Жумодиул-ухро</month>
+							<month type="7">Ражаб</month>
+							<month type="8">Шаъбон</month>
+							<month type="9">Рамазон</month>
+							<month type="10">Шаввол</month>
+							<month type="11">Зил-қаъда</month>
+							<month type="12">Зил-ҳижжа</month>
 						</monthWidth>
 					</monthContext>
 					<monthContext type="stand-alone">
 						<monthWidth type="narrow">
-							<month type="1" draft="unconfirmed">Я</month>
-							<month type="2" draft="unconfirmed">Ф</month>
-							<month type="3" draft="unconfirmed">М</month>
-							<month type="4" draft="unconfirmed">А</month>
-							<month type="5" draft="unconfirmed">М</month>
-							<month type="6" draft="unconfirmed">И</month>
-							<month type="7" draft="unconfirmed">И</month>
-							<month type="8" draft="unconfirmed">А</month>
-							<month type="9" draft="unconfirmed">С</month>
-							<month type="10" draft="unconfirmed">О</month>
-							<month type="11" draft="unconfirmed">Н</month>
-							<month type="12" draft="unconfirmed">Д</month>
+							<month type="1">Я</month>
+							<month type="2">Ф</month>
+							<month type="3">М</month>
+							<month type="4">А</month>
+							<month type="5">М</month>
+							<month type="6">И</month>
+							<month type="7">И</month>
+							<month type="8">А</month>
+							<month type="9">С</month>
+							<month type="10">О</month>
+							<month type="11">Н</month>
+							<month type="12">Д</month>
 						</monthWidth>
 					</monthContext>
 				</months>
 				<days>
 					<dayContext type="format">
 						<dayWidth type="abbreviated">
-							<day type="sun" draft="unconfirmed">Якш</day>
-							<day type="mon" draft="unconfirmed">Душ</day>
-							<day type="tue" draft="unconfirmed">Сеш</day>
-							<day type="wed" draft="unconfirmed">Чор</day>
-							<day type="thu" draft="unconfirmed">Пай</day>
-							<day type="fri" draft="unconfirmed">Жум</day>
-							<day type="sat" draft="unconfirmed">Шан</day>
+							<day type="sun">Якш</day>
+							<day type="mon">Душ</day>
+							<day type="tue">Сеш</day>
+							<day type="wed">Чор</day>
+							<day type="thu">Пай</day>
+							<day type="fri">Жум</day>
+							<day type="sat">Шан</day>
 						</dayWidth>
 						<dayWidth type="wide">
-							<day type="sun" draft="unconfirmed">якшанба</day>
-							<day type="mon" draft="unconfirmed">душанба</day>
-							<day type="tue" draft="unconfirmed">сешанба</day>
-							<day type="wed" draft="unconfirmed">чоршанба</day>
-							<day type="thu" draft="unconfirmed">пайшанба</day>
-							<day type="fri" draft="unconfirmed">жума</day>
-							<day type="sat" draft="unconfirmed">шанба</day>
+							<day type="sun">якшанба</day>
+							<day type="mon">душанба</day>
+							<day type="tue">сешанба</day>
+							<day type="wed">чоршанба</day>
+							<day type="thu">пайшанба</day>
+							<day type="fri">жума</day>
+							<day type="sat">шанба</day>
 						</dayWidth>
 					</dayContext>
 					<dayContext type="stand-alone">
 						<dayWidth type="narrow">
-							<day type="sun" draft="unconfirmed">Я</day>
-							<day type="mon" draft="unconfirmed">Д</day>
-							<day type="tue" draft="unconfirmed">С</day>
-							<day type="wed" draft="unconfirmed">Ч</day>
-							<day type="thu" draft="unconfirmed">П</day>
-							<day type="fri" draft="unconfirmed">Ж</day>
-							<day type="sat" draft="unconfirmed">Ш</day>
+							<day type="sun">Я</day>
+							<day type="mon">Д</day>
+							<day type="tue">С</day>
+							<day type="wed">Ч</day>
+							<day type="thu">П</day>
+							<day type="fri">Ж</day>
+							<day type="sat">Ш</day>
 						</dayWidth>
 					</dayContext>
 				</days>
 				<quarters>
 					<quarterContext type="format">
 						<quarterWidth type="abbreviated">
-							<quarter type="1" draft="unconfirmed">Q1</quarter>
-							<quarter type="2" draft="unconfirmed">Q2</quarter>
-							<quarter type="3" draft="unconfirmed">Q3</quarter>
-							<quarter type="4" draft="unconfirmed">Q4</quarter>
+							<quarter type="1">Q1</quarter>
+							<quarter type="2">Q2</quarter>
+							<quarter type="3">Q3</quarter>
+							<quarter type="4">Q4</quarter>
 						</quarterWidth>
 						<quarterWidth type="wide">
-							<quarter type="1" draft="unconfirmed">Q1</quarter>
-							<quarter type="2" draft="unconfirmed">Q2</quarter>
-							<quarter type="3" draft="unconfirmed">Q3</quarter>
-							<quarter type="4" draft="unconfirmed">Q4</quarter>
+							<quarter type="1">Q1</quarter>
+							<quarter type="2">Q2</quarter>
+							<quarter type="3">Q3</quarter>
+							<quarter type="4">Q4</quarter>
 						</quarterWidth>
 					</quarterContext>
 				</quarters>
-				<am draft="unconfirmed">AM</am>
-				<pm draft="unconfirmed">PM</pm>
+				<am>AM</am>
+				<pm>PM</pm>
 				<eras>
 					<eraAbbr>
-						<era type="0" draft="unconfirmed">BCE</era>
-						<era type="1" draft="unconfirmed">CE</era>
+						<era type="0">BCE</era>
+						<era type="1">CE</era>
 					</eraAbbr>
 				</eras>
 				<dateFormats>
 					<dateFormatLength type="full">
 						<dateFormat>
-							<pattern draft="unconfirmed">EEEE, yyyy MMMM dd</pattern>
+							<pattern>EEEE, yyyy MMMM dd</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="long">
 						<dateFormat>
-							<pattern draft="unconfirmed">yyyy MMMM d</pattern>
+							<pattern>yyyy MMMM d</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="medium">
 						<dateFormat>
-							<pattern draft="unconfirmed">yyyy MMM d</pattern>
+							<pattern>yyyy MMM d</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="short">
 						<dateFormat>
-							<pattern draft="unconfirmed">yy/MM/dd</pattern>
+							<pattern>yy/MM/dd</pattern>
 						</dateFormat>
 					</dateFormatLength>
 				</dateFormats>
 				<timeFormats>
 					<timeFormatLength type="full">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm:ss v</pattern>
+							<pattern>HH:mm:ss v</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="long">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm:ss z</pattern>
+							<pattern>HH:mm:ss z</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="medium">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm:ss</pattern>
+							<pattern>HH:mm:ss</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="short">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm</pattern>
+							<pattern>HH:mm</pattern>
 						</timeFormat>
 					</timeFormatLength>
 				</timeFormats>
 				<dateTimeFormats>
 					<dateTimeFormatLength>
 						<dateTimeFormat>
-							<pattern draft="unconfirmed">{1} {0}</pattern>
+							<pattern>{1} {0}</pattern>
 						</dateTimeFormat>
 					</dateTimeFormatLength>
 					<availableFormats>
-						<dateFormatItem id="yyQ" draft="unconfirmed">Q yy</dateFormatItem>
-						<dateFormatItem id="yyyyM" draft="unconfirmed">yyyy/M</dateFormatItem>
-						<dateFormatItem id="yyyyMMMM" draft="unconfirmed">MMMM yyyy</dateFormatItem>
+						<dateFormatItem id="yyQ">Q yy</dateFormatItem>
+						<dateFormatItem id="yyyyM">yyyy/M</dateFormatItem>
+						<dateFormatItem id="yyyyMMMM">MMMM yyyy</dateFormatItem>
 					</availableFormats>
 				</dateTimeFormats>
 			</calendar>
 		</calendars>
 		<timeZoneNames>
-			<hourFormat draft="unconfirmed">+HH:mm;-HH:mm</hourFormat>
-			<gmtFormat draft="unconfirmed">GMT{0}</gmtFormat>
-			<regionFormat draft="unconfirmed">{0}</regionFormat>
+			<hourFormat>+HH:mm;-HH:mm</hourFormat>
+			<gmtFormat>GMT{0}</gmtFormat>
+			<regionFormat>{0}</regionFormat>
 			<zone type="Asia/Kabul">
 				<exemplarCity>کابل</exemplarCity>
 			</zone>
 			<metazone type="Afghanistan">
 				<long>
-					<standard draft="unconfirmed">افغانستان وقتی</standard>
+					<standard>افغانستان وقتی</standard>
 				</long>
-				<short>
-					<standard draft="unconfirmed">AFT</standard>
-				</short>
 			</metazone>
 		</timeZoneNames>
 	</dates>
 	<numbers>
 		<symbols>
-			<decimal draft="unconfirmed">,</decimal>
-			<group draft="unconfirmed"> </group>
+			<decimal>,</decimal>
+			<group> </group>
 		</symbols>
 		<currencies>
 			<currency type="BRL">
-				<displayName draft="unconfirmed">Бразил реали</displayName>
+				<displayName>Бразил реали</displayName>
 			</currency>
 			<currency type="CNY">
-				<displayName draft="unconfirmed">Хитой юани</displayName>
+				<displayName>Хитой юани</displayName>
 			</currency>
 			<currency type="EUR">
-				<displayName draft="unconfirmed">Евро</displayName>
+				<displayName>Евро</displayName>
 			</currency>
 			<currency type="GBP">
-				<displayName draft="unconfirmed">Инглиз фунт стерлинги</displayName>
+				<displayName>Инглиз фунт стерлинги</displayName>
 			</currency>
 			<currency type="INR">
-				<displayName draft="unconfirmed">Ҳинд рупияси</displayName>
+				<displayName>Ҳинд рупияси</displayName>
 			</currency>
 			<currency type="JPY">
-				<displayName draft="unconfirmed">Япон йенаси</displayName>
+				<displayName>Япон йенаси</displayName>
 			</currency>
 			<currency type="RUB">
-				<displayName draft="unconfirmed">Рус рубли</displayName>
+				<displayName>Рус рубли</displayName>
 			</currency>
 			<currency type="USD">
-				<displayName draft="unconfirmed">АҚШ доллари</displayName>
+				<displayName>АҚШ доллари</displayName>
 			</currency>
 			<currency type="UZS">
-				<displayName draft="unconfirmed">Ўзбекистон сўм</displayName>
-				<symbol draft="unconfirmed">сўм</symbol>
+				<displayName>Ўзбекистон сўм</displayName>
+				<symbol>сўм</symbol>
 			</currency>
 		</currencies>
 	</numbers>
 </ldml>
-

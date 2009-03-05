@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Zend Framework
  *
@@ -15,9 +14,10 @@
  *
  * @category   Zend
  * @package    Zend_Auth
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Zend_Auth_Storage
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Session.php 3428 2007-02-15 14:02:05Z darby $
+ * @version    $Id: Session.php 8862 2008-03-16 15:36:00Z thomas $
  */
 
 
@@ -36,7 +36,8 @@ require_once 'Zend/Session.php';
 /**
  * @category   Zend
  * @package    Zend_Auth
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Zend_Auth_Storage
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Auth_Storage_Session implements Zend_Auth_Storage_Interface
@@ -75,8 +76,9 @@ class Zend_Auth_Storage_Session implements Zend_Auth_Storage_Interface
     /**
      * Sets session storage options and initializes session namespace object
      *
-     * @param mixed $namespace
-     * @param mixed $member
+     * @param  mixed $namespace
+     * @param  mixed $member
+     * @return void
      */
     public function __construct($namespace = self::NAMESPACE_DEFAULT, $member = self::MEMBER_DEFAULT)
     {

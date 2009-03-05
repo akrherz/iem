@@ -14,7 +14,7 @@
  *
  * @package    Zend_Pdf
  * @subpackage Fonts
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -60,7 +60,7 @@ require_once 'Zend/Pdf/Cmap/TrimmedTable.php';
  *
  * @package    Zend_Pdf
  * @subpackage Fonts
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Pdf_Cmap
@@ -241,6 +241,18 @@ abstract class Zend_Pdf_Cmap
      */
     abstract public function getCoveredCharacters();
 
+    /**
+     * Returns an array containing the glyphs numbers that have entries in this character map.
+     * Keys are Unicode character codes (integers)
+     * 
+     * This functionality is partially covered by glyphNumbersForCharacters(getCoveredCharacters())
+     * call, but this method do it in more effective way (prepare complete list instead of searching 
+     * glyph for each character code).
+     *
+     * @internal
+     * @return array Array representing <Unicode character code> => <glyph number> pairs.
+     */
+    abstract public function getCoveredCharactersGlyphs();
 
 
   /**** Internal Methods ****/

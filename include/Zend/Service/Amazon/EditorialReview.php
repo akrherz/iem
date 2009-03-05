@@ -16,9 +16,9 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Amazon
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: EditorialReview.php 4357 2007-04-04 22:32:40Z darby $
+ * @version    $Id: EditorialReview.php 14126 2009-02-20 16:15:52Z sidhighwind $
  */
 
 
@@ -26,11 +26,21 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Amazon
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Amazon_EditorialReview
 {
+    /**
+     * @var string
+     */
+    public $Source;
+
+    /**
+     * @var string
+     */
+    public $Content;
+
     /**
      * Assigns values to properties relevant to EditorialReview
      *

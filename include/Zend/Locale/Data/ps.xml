@@ -1,143 +1,127 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.5/ldml.dtd">
+<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.6/ldml.dtd">
 <ldml>
 	<identity>
-		<version number="$Revision: 1.50 $"/>
-		<generation date="$Date: 2007/07/21 15:33:36 $"/>
+		<version number="$Revision: 1.53 $"/>
+		<generation date="$Date: 2008/06/15 08:09:47 $"/>
 		<language type="ps"/>
 	</identity>
+	<fallback>fa_AF</fallback>
 	<localeDisplayNames>
 		<languages>
-			<language type="af" draft="unconfirmed">افريکاني</language>
-			<language type="am" draft="unconfirmed">امهاري</language>
+			<language type="af">افريکاني</language>
+			<language type="am">امهاري</language>
 			<language type="ar">عربي</language>
-			<language type="as" draft="unconfirmed">اسمائى ژبه</language>
-			<language type="az" draft="unconfirmed">أذربائجاني</language>
+			<language type="as">اسمائى ژبه</language>
+			<language type="az">أذربائجاني</language>
 			<language type="bal">بلوڅي</language>
-			<language type="be" draft="unconfirmed">بېلاروسي</language>
-			<language type="bg" draft="unconfirmed">بلغاري</language>
-			<language type="bh" draft="unconfirmed">بيهاري</language>
-			<language type="bn" draft="unconfirmed">بنګالي</language>
-			<language type="br" draft="unconfirmed">برېتون</language>
-			<language type="bs" draft="unconfirmed">بوسني</language>
-			<language type="ca" draft="unconfirmed">کټلاني</language>
-			<language type="cs" draft="unconfirmed">چېک</language>
-			<language type="cy" draft="unconfirmed">ويلشي</language>
-			<language type="da" draft="unconfirmed">ډېنش</language>
+			<language type="be">بېلاروسي</language>
+			<language type="bg">بلغاري</language>
+			<language type="bh">بيهاري</language>
+			<language type="bn">بنګالي</language>
+			<language type="br">برېتون</language>
+			<language type="bs">بوسني</language>
+			<language type="ca">کټلاني</language>
+			<language type="cs">چېک</language>
+			<language type="cy">ويلشي</language>
+			<language type="da">ډېنش</language>
 			<language type="de">الماني</language>
-			<language type="de" alt="proposed-x1001" draft="unconfirmed">ألماني</language>
 			<language type="el">یوناني</language>
-			<language type="el" alt="proposed-x1001" draft="unconfirmed">يوناني</language>
 			<language type="en">انګلیسي</language>
-			<language type="en" alt="proposed-x1001" draft="unconfirmed">انګليسي</language>
-			<language type="eo" draft="unconfirmed">اسپرانتو</language>
-			<language type="es" draft="unconfirmed">هسپانوي</language>
+			<language type="eo">اسپرانتو</language>
+			<language type="es">هسپانوي</language>
 			<language type="et">حبشي</language>
-			<language type="et" alt="proposed-x1001" draft="unconfirmed">اسټوني</language>
-			<language type="eu" draft="unconfirmed">باسکي</language>
+			<language type="eu">باسکي</language>
 			<language type="fa">فارسي</language>
-			<language type="fa" alt="proposed-x1001" draft="unconfirmed">پاړسۍ</language>
 			<language type="fi">فینلنډي</language>
-			<language type="fi" alt="proposed-x1001" draft="unconfirmed">فنلېندي</language>
-			<language type="fil" draft="unconfirmed">تګالوګ</language>
-			<language type="fo" draft="unconfirmed">فاروئې</language>
+			<language type="fil">تګالوګ</language>
+			<language type="fo">فاروئې</language>
 			<language type="fr">فرانسوي</language>
-			<language type="fr" alt="proposed-x1001" draft="unconfirmed">فرانسيسي</language>
-			<language type="fy" draft="unconfirmed">فريزي</language>
-			<language type="ga" draft="unconfirmed">ائيرلېنډي</language>
-			<language type="gd" draft="unconfirmed">سکاټلېنډي ګېلک</language>
-			<language type="gl" draft="unconfirmed">ګلېشيايي</language>
-			<language type="gn" draft="unconfirmed">ګوراني</language>
-			<language type="gu" draft="unconfirmed">ګجراتي</language>
+			<language type="fy">فريزي</language>
+			<language type="ga">ائيرلېنډي</language>
+			<language type="gd">سکاټلېنډي ګېلک</language>
+			<language type="gl">ګلېشيايي</language>
+			<language type="gn">ګوراني</language>
+			<language type="gu">ګجراتي</language>
 			<language type="he">عبري</language>
-			<language type="he" alt="proposed-x1001" draft="unconfirmed">عبراني</language>
 			<language type="hi">هندي</language>
-			<language type="hr" draft="unconfirmed">کروواتي</language>
-			<language type="hu" draft="unconfirmed">هنګري</language>
+			<language type="hr">کروواتي</language>
+			<language type="hu">هنګري</language>
 			<language type="hy">ارمني</language>
-			<language type="hy" alt="proposed-x1001" draft="unconfirmed">ارمنيايي</language>
-			<language type="ia" draft="unconfirmed">انټرلنګوا</language>
-			<language type="id" draft="unconfirmed">انډونېشيايي</language>
-			<language type="ie" draft="unconfirmed">آسا نا جبة</language>
+			<language type="ia">انټرلنګوا</language>
+			<language type="id">انډونېشيايي</language>
+			<language type="ie">آسا نا جبة</language>
 			<language type="ine">هند و اروپایي</language>
-			<language type="is" draft="unconfirmed">أيسلېنډي</language>
+			<language type="is">أيسلېنډي</language>
 			<language type="it">ایټالوي</language>
-			<language type="it" alt="proposed-x1001" draft="unconfirmed">اتالوي</language>
 			<language type="ja">جاپانی</language>
-			<language type="ja" alt="proposed-x1001" draft="unconfirmed">جاپاني</language>
-			<language type="jv" draft="unconfirmed">جاوايې</language>
-			<language type="ka" draft="unconfirmed">جورجيائي</language>
-			<language type="km" draft="unconfirmed">کمبوډيايې يا د کمبوډيا</language>
-			<language type="kn" draft="unconfirmed">کنأډه</language>
-			<language type="ko" draft="unconfirmed">کوريائي</language>
+			<language type="jv">جاوايې</language>
+			<language type="ka">جورجيائي</language>
+			<language type="km">کمبوډيايې يا د کمبوډيا</language>
+			<language type="kn">کنأډه</language>
+			<language type="ko">کوريائي</language>
 			<language type="ku">کردي</language>
-			<language type="ky" draft="unconfirmed">کرګيز</language>
+			<language type="ky">کرګيز</language>
 			<language type="la">لاتیني</language>
-			<language type="la" alt="proposed-x1001" draft="unconfirmed">لاطيني</language>
-			<language type="lo" draft="unconfirmed">لويتين</language>
-			<language type="lt" draft="unconfirmed">ليتواني</language>
-			<language type="lv" draft="unconfirmed">لېټواني</language>
+			<language type="lo">لويتين</language>
+			<language type="lt">ليتواني</language>
+			<language type="lv">لېټواني</language>
 			<language type="mg">ملغاسي</language>
 			<language type="mk">مقدوني</language>
-			<language type="ml" draft="unconfirmed">مالايالم</language>
+			<language type="ml">مالايالم</language>
 			<language type="mn">مغولي</language>
-			<language type="mr" draft="unconfirmed">مراټهي</language>
+			<language type="mr">مراټهي</language>
 			<language type="ms">ملایا</language>
-			<language type="ms" alt="proposed-x1001" draft="unconfirmed">مالايي</language>
-			<language type="mt" draft="unconfirmed">مالټايي</language>
-			<language type="ne" draft="unconfirmed">نېپالي</language>
-			<language type="nl" draft="unconfirmed">هالېنډي</language>
-			<language type="nn" draft="unconfirmed">ناروېئي (نائنورسک)</language>
-			<language type="no" draft="unconfirmed">ناروېئې</language>
-			<language type="oc" draft="unconfirmed">اوکسيټاني</language>
-			<language type="or" draft="unconfirmed">اوريا</language>
-			<language type="pa" draft="unconfirmed">پنجابي</language>
+			<language type="mt">مالټايي</language>
+			<language type="ne">نېپالي</language>
+			<language type="nl">هالېنډي</language>
+			<language type="nn">ناروېئي (نائنورسک)</language>
+			<language type="no">ناروېئې</language>
+			<language type="oc">اوکسيټاني</language>
+			<language type="or">اوريا</language>
+			<language type="pa">پنجابي</language>
 			<language type="pl">پولنډي</language>
-			<language type="pl" alt="proposed-x1001" draft="unconfirmed">پولېنډي</language>
 			<language type="ps">پښتو</language>
 			<language type="pt">پورتګالي</language>
-			<language type="pt_BR" draft="unconfirmed">پرتگال (برازيل)</language>
-			<language type="pt_PT" draft="unconfirmed">پرتګالي (پرتګال)</language>
-			<language type="ro" draft="unconfirmed">روماني</language>
+			<language type="pt_BR">پرتگال (برازيل)</language>
+			<language type="pt_PT">پرتګالي (پرتګال)</language>
+			<language type="ro">روماني</language>
 			<language type="ru">روسي</language>
 			<language type="sa">سنسکریټ</language>
-			<language type="sa" alt="proposed-x1001" draft="unconfirmed">سانسيکريت</language>
-			<language type="sd" draft="unconfirmed">سندهي</language>
-			<language type="sh" draft="unconfirmed">سرب-کروشيايي</language>
-			<language type="si" draft="unconfirmed">سينهالي</language>
-			<language type="sk" draft="unconfirmed">سلوواکي</language>
-			<language type="sl" draft="unconfirmed">سلوواني</language>
-			<language type="so" draft="unconfirmed">سومالي</language>
-			<language type="sq" draft="unconfirmed">الباني</language>
-			<language type="sr" draft="unconfirmed">سربيائي</language>
-			<language type="st" draft="unconfirmed">سيسوتو</language>
-			<language type="su" draft="unconfirmed">سوډاني</language>
+			<language type="sd">سندهي</language>
+			<language type="sh">سرب-کروشيايي</language>
+			<language type="si">سينهالي</language>
+			<language type="sk">سلوواکي</language>
+			<language type="sl">سلوواني</language>
+			<language type="so">سومالي</language>
+			<language type="sq">الباني</language>
+			<language type="sr">سربيائي</language>
+			<language type="st">سيسوتو</language>
+			<language type="su">سوډاني</language>
 			<language type="sv">سویډنی</language>
-			<language type="sv" alt="proposed-x1001" draft="unconfirmed">سوېدي</language>
-			<language type="sw" draft="unconfirmed">سواهېلي</language>
-			<language type="ta" draft="unconfirmed">تامل</language>
-			<language type="te" draft="unconfirmed">تېليګو</language>
+			<language type="sw">سواهېلي</language>
+			<language type="ta">تامل</language>
+			<language type="te">تېليګو</language>
 			<language type="tg">تاجک</language>
-			<language type="th" draft="unconfirmed">تايلېنډي</language>
-			<language type="ti" draft="unconfirmed">تيګريني</language>
+			<language type="th">تايلېنډي</language>
+			<language type="ti">تيګريني</language>
 			<language type="tk">ترکمني</language>
-			<language type="tk" alt="proposed-x1001" draft="unconfirmed">ترکمن</language>
-			<language type="tlh" draft="unconfirmed">کلينګاني</language>
-			<language type="tr" draft="unconfirmed">ترکي</language>
+			<language type="tlh">کلينګاني</language>
+			<language type="tr">ترکي</language>
 			<language type="tt">تاتار</language>
-			<language type="tw" draft="unconfirmed">توی</language>
-			<language type="ug" draft="unconfirmed">اويگور</language>
-			<language type="uk" draft="unconfirmed">اوکرانايي</language>
-			<language type="ur" draft="unconfirmed">اردو</language>
+			<language type="tw">توی</language>
+			<language type="ug">اويگور</language>
+			<language type="uk">اوکرانايي</language>
+			<language type="ur">اردو</language>
 			<language type="uz">ازبکي</language>
-			<language type="vi" draft="unconfirmed">وېتنامي</language>
-			<language type="xh" draft="unconfirmed">خوسا</language>
-			<language type="yi" draft="unconfirmed">يديش</language>
+			<language type="vi">وېتنامي</language>
+			<language type="xh">خوسا</language>
+			<language type="yi">يديش</language>
 			<language type="zh">چیني</language>
-			<language type="zu" draft="unconfirmed">زولو</language>
+			<language type="zu">زولو</language>
 		</languages>
 		<scripts>
-			<script type="Arab" references="R212">عربي</script>
+			<script type="Arab">عربي</script>
 		</scripts>
 		<territories>
 			<territory type="AF">افغانستان</territory>
@@ -218,18 +202,18 @@
 				<months>
 					<monthContext type="format">
 						<monthWidth type="abbreviated">
-							<month type="1" draft="unconfirmed">1</month>
-							<month type="2" draft="unconfirmed">2</month>
-							<month type="3" draft="unconfirmed">3</month>
-							<month type="4" draft="unconfirmed">4</month>
-							<month type="5" draft="unconfirmed">مـی</month>
-							<month type="6" draft="unconfirmed">جون</month>
-							<month type="7" draft="unconfirmed">7</month>
-							<month type="8" draft="unconfirmed">8</month>
-							<month type="9" draft="unconfirmed">9</month>
-							<month type="10" draft="unconfirmed">10</month>
-							<month type="11" draft="unconfirmed">11</month>
-							<month type="12" draft="unconfirmed">12</month>
+							<month type="1">1</month>
+							<month type="2">2</month>
+							<month type="3">3</month>
+							<month type="4">4</month>
+							<month type="5">مـی</month>
+							<month type="6">جون</month>
+							<month type="7">7</month>
+							<month type="8">8</month>
+							<month type="9">9</month>
+							<month type="10">10</month>
+							<month type="11">11</month>
+							<month type="12">12</month>
 						</monthWidth>
 						<monthWidth type="wide">
 							<month type="1">جنوري</month>
@@ -248,31 +232,31 @@
 					</monthContext>
 					<monthContext type="stand-alone">
 						<monthWidth type="narrow">
-							<month type="1" draft="unconfirmed">1</month>
-							<month type="2" draft="unconfirmed">2</month>
-							<month type="3" draft="unconfirmed">3</month>
-							<month type="4" draft="unconfirmed">4</month>
-							<month type="5" draft="unconfirmed">5</month>
-							<month type="6" draft="unconfirmed">6</month>
-							<month type="7" draft="unconfirmed">7</month>
-							<month type="8" draft="unconfirmed">8</month>
-							<month type="9" draft="unconfirmed">9</month>
-							<month type="10" draft="unconfirmed">10</month>
-							<month type="11" draft="unconfirmed">11</month>
-							<month type="12" draft="unconfirmed">12</month>
+							<month type="1">1</month>
+							<month type="2">2</month>
+							<month type="3">3</month>
+							<month type="4">4</month>
+							<month type="5">5</month>
+							<month type="6">6</month>
+							<month type="7">7</month>
+							<month type="8">8</month>
+							<month type="9">9</month>
+							<month type="10">10</month>
+							<month type="11">11</month>
+							<month type="12">12</month>
 						</monthWidth>
 					</monthContext>
 				</months>
 				<days>
 					<dayContext type="format">
 						<dayWidth type="abbreviated">
-							<day type="sun" draft="unconfirmed">1</day>
-							<day type="mon" draft="unconfirmed">2</day>
-							<day type="tue" draft="unconfirmed">3</day>
-							<day type="wed" draft="unconfirmed">4</day>
-							<day type="thu" draft="unconfirmed">5</day>
-							<day type="fri" draft="unconfirmed">6</day>
-							<day type="sat" draft="unconfirmed">7</day>
+							<day type="sun">1</day>
+							<day type="mon">2</day>
+							<day type="tue">3</day>
+							<day type="wed">4</day>
+							<day type="thu">5</day>
+							<day type="fri">6</day>
+							<day type="sat">7</day>
 						</dayWidth>
 						<dayWidth type="wide">
 							<day type="sun">یکشنبه</day>
@@ -286,29 +270,29 @@
 					</dayContext>
 					<dayContext type="stand-alone">
 						<dayWidth type="narrow">
-							<day type="sun" draft="unconfirmed">1</day>
-							<day type="mon" draft="unconfirmed">2</day>
-							<day type="tue" draft="unconfirmed">3</day>
-							<day type="wed" draft="unconfirmed">4</day>
-							<day type="thu" draft="unconfirmed">5</day>
-							<day type="fri" draft="unconfirmed">6</day>
-							<day type="sat" draft="unconfirmed">7</day>
+							<day type="sun">1</day>
+							<day type="mon">2</day>
+							<day type="tue">3</day>
+							<day type="wed">4</day>
+							<day type="thu">5</day>
+							<day type="fri">6</day>
+							<day type="sat">7</day>
 						</dayWidth>
 					</dayContext>
 				</days>
 				<quarters>
 					<quarterContext type="format">
 						<quarterWidth type="abbreviated">
-							<quarter type="1" draft="unconfirmed">Q1</quarter>
-							<quarter type="2" draft="unconfirmed">Q2</quarter>
-							<quarter type="3" draft="unconfirmed">Q3</quarter>
-							<quarter type="4" draft="unconfirmed">Q4</quarter>
+							<quarter type="1">Q1</quarter>
+							<quarter type="2">Q2</quarter>
+							<quarter type="3">Q3</quarter>
+							<quarter type="4">Q4</quarter>
 						</quarterWidth>
 						<quarterWidth type="wide">
-							<quarter type="1" draft="unconfirmed">Q1</quarter>
-							<quarter type="2" draft="unconfirmed">Q2</quarter>
-							<quarter type="3" draft="unconfirmed">Q3</quarter>
-							<quarter type="4" draft="unconfirmed">Q4</quarter>
+							<quarter type="1">Q1</quarter>
+							<quarter type="2">Q2</quarter>
+							<quarter type="3">Q3</quarter>
+							<quarter type="4">Q4</quarter>
 						</quarterWidth>
 					</quarterContext>
 				</quarters>
@@ -367,16 +351,16 @@
 				<dateTimeFormats>
 					<dateTimeFormatLength>
 						<dateTimeFormat>
-							<pattern draft="unconfirmed">{1} {0}</pattern>
+							<pattern>{1} {0}</pattern>
 						</dateTimeFormat>
 					</dateTimeFormatLength>
 					<availableFormats>
-						<dateFormatItem id="MMMMd" draft="unconfirmed">d MMMM</dateFormatItem>
-						<dateFormatItem id="Md" draft="unconfirmed">M/d</dateFormatItem>
-						<dateFormatItem id="mmss" draft="unconfirmed">mm:ss</dateFormatItem>
-						<dateFormatItem id="yyQ" draft="unconfirmed">Q yy</dateFormatItem>
-						<dateFormatItem id="yyyyM" draft="unconfirmed">yyyy/M</dateFormatItem>
-						<dateFormatItem id="yyyyMMMM" draft="unconfirmed">د yyyy د MMMM</dateFormatItem>
+						<dateFormatItem id="MMMMd">d MMMM</dateFormatItem>
+						<dateFormatItem id="Md">M/d</dateFormatItem>
+						<dateFormatItem id="mmss">mm:ss</dateFormatItem>
+						<dateFormatItem id="yyQ">Q yy</dateFormatItem>
+						<dateFormatItem id="yyyyM">yyyy/M</dateFormatItem>
+						<dateFormatItem id="yyyyMMMM">د yyyy د MMMM</dateFormatItem>
 					</availableFormats>
 				</dateTimeFormats>
 			</calendar>
@@ -384,41 +368,41 @@
 				<months>
 					<monthContext type="format">
 						<monthWidth type="abbreviated">
-							<month type="1" references="R212">وری</month>
-							<month type="2" references="R212">غویی</month>
-							<month type="3" references="R212">غبرګولی</month>
-							<month type="4" references="R212">چنګاښ</month>
-							<month type="5" references="R212">زمری</month>
-							<month type="6" references="R212">وږی</month>
-							<month type="7" references="R212">تله</month>
-							<month type="8" references="R212">لړم</month>
-							<month type="9" references="R212">لیندۍ</month>
-							<month type="10" references="R212">مرغومی</month>
-							<month type="11" references="R212">سلواغه</month>
-							<month type="12" references="R212">کب</month>
+							<month type="1">وری</month>
+							<month type="2">غویی</month>
+							<month type="3">غبرګولی</month>
+							<month type="4">چنګاښ</month>
+							<month type="5">زمری</month>
+							<month type="6">وږی</month>
+							<month type="7">تله</month>
+							<month type="8">لړم</month>
+							<month type="9">لیندۍ</month>
+							<month type="10">مرغومی</month>
+							<month type="11">سلواغه</month>
+							<month type="12">کب</month>
 						</monthWidth>
 						<monthWidth type="wide">
-							<month type="1" references="R212">وری</month>
-							<month type="2" references="R212">غویی</month>
-							<month type="3" references="R212">غبرګولی</month>
-							<month type="4" references="R212">چنګاښ</month>
-							<month type="5" references="R212">زمری</month>
-							<month type="6" references="R212">وږی</month>
-							<month type="7" references="R212">تله</month>
-							<month type="8" references="R212">لړم</month>
-							<month type="9" references="R212">لیندۍ</month>
-							<month type="10" references="R212">مرغومی</month>
-							<month type="11" references="R212">سلواغه</month>
-							<month type="12" references="R212">کب</month>
+							<month type="1">وری</month>
+							<month type="2">غویی</month>
+							<month type="3">غبرګولی</month>
+							<month type="4">چنګاښ</month>
+							<month type="5">زمری</month>
+							<month type="6">وږی</month>
+							<month type="7">تله</month>
+							<month type="8">لړم</month>
+							<month type="9">لیندۍ</month>
+							<month type="10">مرغومی</month>
+							<month type="11">سلواغه</month>
+							<month type="12">کب</month>
 						</monthWidth>
 					</monthContext>
 				</months>
 			</calendar>
 		</calendars>
 		<timeZoneNames>
-			<hourFormat draft="unconfirmed">+HH:mm;-HH:mm</hourFormat>
-			<gmtFormat draft="unconfirmed">GMT{0}</gmtFormat>
-			<regionFormat references="R212">د {0} په وخت</regionFormat>
+			<hourFormat>+HH:mm;-HH:mm</hourFormat>
+			<gmtFormat>GMT{0}</gmtFormat>
+			<regionFormat>د {0} په وخت</regionFormat>
 			<zone type="Asia/Kabul">
 				<exemplarCity>کابل</exemplarCity>
 			</zone>
@@ -436,14 +420,14 @@
 		<currencyFormats>
 			<currencyFormatLength>
 				<currencyFormat>
-					<pattern>#,##0.00 ¤</pattern>
+					<pattern>#,##0.00 ¤</pattern>
 				</currencyFormat>
 			</currencyFormatLength>
 		</currencyFormats>
 		<currencies>
 			<currency type="AFN">
 				<displayName>افغانۍ</displayName>
-				<symbol references="R212">؋</symbol>
+				<symbol>؋</symbol>
 			</currency>
 		</currencies>
 	</numbers>

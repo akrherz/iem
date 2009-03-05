@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.5/ldml.dtd">
+<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.6/ldml.dtd">
 <ldml>
 	<identity>
-		<version number="$Revision: 1.58 $"/>
-		<generation date="$Date: 2007/07/19 22:31:39 $"/>
+		<version number="$Revision: 1.63 $"/>
+		<generation date="$Date: 2008/06/15 08:09:45 $"/>
 		<language type="km"/>
 	</identity>
 	<localeDisplayNames>
@@ -11,200 +11,124 @@
 			<language type="aa">ភាសាអាហ្វារ</language>
 			<language type="ae">ភាសាអាវែស្តង់</language>
 			<language type="af">ភាសាអាហ្វ្រីកាអាន</language>
-			<language type="af" alt="proposed-x1001" draft="unconfirmed">អាហ្រិច</language>
-			<language type="am" draft="unconfirmed">អំហារិក</language>
+			<language type="am">អំហារិក</language>
 			<language type="an">ភាសាអារ៉ាហ្គោន</language>
 			<language type="ar">ភាសាអារ៉ាប់</language>
-			<language type="ar" alt="proposed-x1001" draft="unconfirmed">អារាប់</language>
 			<language type="ay">ភាសាអីម៉ារ៉ា</language>
 			<language type="az">ភាសាអាហ៊្សែរបែហ្សង់</language>
-			<language type="az" alt="proposed-x1001" draft="unconfirmed">អាសើបាចានី</language>
 			<language type="be">ភាសាបេឡារុស្ស</language>
-			<language type="be" alt="proposed-x1001" draft="unconfirmed">បិឡារូសៀន</language>
 			<language type="bg">ភាសាប៊ុលហ្ការី</language>
-			<language type="bg" alt="proposed-x1001" draft="unconfirmed">ប៊ុលហ្គារី</language>
 			<language type="bh">ភាសាបិហារ</language>
-			<language type="bh" alt="proposed-x1001" draft="unconfirmed">បិហារិ</language>
 			<language type="bm">ភាសាបាម្បារា</language>
 			<language type="bn">ភាសាបេន្កាលី</language>
-			<language type="bn" alt="proposed-x1001" draft="unconfirmed">បង់កាលី</language>
 			<language type="bo">ភាសាទីបេ</language>
-			<language type="br" draft="unconfirmed">ប្រីស្តុន</language>
-			<language type="bs" draft="unconfirmed">ប៊ូស្នៀរ</language>
+			<language type="br">ប្រីស្តុន</language>
+			<language type="bs">ប៊ូស្នៀរ</language>
 			<language type="ca">ភាសាកាតាឡាន</language>
-			<language type="ca" alt="proposed-x1001" draft="unconfirmed">កាតាឡង់</language>
 			<language type="cs">ភាសាឆេក</language>
-			<language type="cs" alt="proposed-x1001" draft="unconfirmed">ឆេក</language>
-			<language type="cy" draft="unconfirmed">វេល</language>
+			<language type="cy">វេល</language>
 			<language type="da">ភាសាដាណឺម៉ាក</language>
-			<language type="da" alt="proposed-x1001" draft="unconfirmed">ដានីស</language>
 			<language type="de">ភាសាអាល្លឺម៉ង់</language>
-			<language type="de" alt="proposed-x1001" draft="unconfirmed">អាល្លឺម៉ង់</language>
 			<language type="dz">ភាសាប៊ូតាន</language>
 			<language type="el">ភាសាក្រិច</language>
-			<language type="el" alt="proposed-x1001" draft="unconfirmed">ក្រិច</language>
 			<language type="en">ភាសាអង់គ្លេស</language>
-			<language type="en" alt="proposed-x1001" draft="unconfirmed">អង់គ្លេស</language>
 			<language type="eo">ភាសាអេស្ពេរ៉ាន្ទោ</language>
-			<language type="eo" alt="proposed-x1001" draft="unconfirmed">អេស្បេរិនតូ</language>
 			<language type="es">ភាសាអេស្ប៉ាញ</language>
-			<language type="es" alt="proposed-x1001" draft="unconfirmed">អេស្ប៉ាញ</language>
 			<language type="et">ភាសាអេស្តូនី</language>
-			<language type="et" alt="proposed-x1001" draft="unconfirmed">អ៊ីស្តូ</language>
 			<language type="eu">ភាសាបាស្កេ</language>
-			<language type="eu" alt="proposed-x1001" draft="unconfirmed">បាស</language>
-			<language type="fa" draft="unconfirmed">ភឺសៀន</language>
+			<language type="fa">ភឺសៀន</language>
 			<language type="fi">ភាសាហ្វាំងឡង់</language>
-			<language type="fi" alt="proposed-x1001" draft="unconfirmed">ហ្វីននីស</language>
-			<language type="fil" draft="unconfirmed">ពីលីពីន</language>
+			<language type="fil">ពីលីពីន</language>
 			<language type="fj">ហ្វ៉ីហ្ស៉ី</language>
-			<language type="fo" draft="unconfirmed">ហ្វារូស</language>
+			<language type="fo">ហ្វារូស</language>
 			<language type="fr">ភាសាបារាំង</language>
-			<language type="fr" alt="proposed-x1001" draft="unconfirmed">បារាំង</language>
-			<language type="fy" draft="unconfirmed">ហ្រីសង់</language>
+			<language type="fy">ហ្រីសង់</language>
 			<language type="ga">ភាសាហ្កែលិគ</language>
-			<language type="ga" alt="proposed-x1001" draft="unconfirmed">អៀឡង់</language>
 			<language type="gd">ភាសាហ្កែលិគ [gd]</language>
-			<language type="gd" alt="proposed-x1001" draft="unconfirmed">ស្កុត</language>
 			<language type="gl">ភាសាហ្កាលីស៉ី</language>
-			<language type="gl" alt="proposed-x1001" draft="unconfirmed">កាលីក</language>
 			<language type="gn">ភាសាហ្កួរ៉ានី</language>
-			<language type="gn" alt="proposed-x1001" draft="unconfirmed">ហ្គារានី</language>
 			<language type="gu">ភាសាហ្កុយ៉ារាទី</language>
-			<language type="gu" alt="proposed-x1001" draft="unconfirmed">គូចារាទី</language>
 			<language type="he">ភាសាហេប្រិ</language>
-			<language type="he" alt="proposed-x1001" draft="unconfirmed">ហឹប្រូ</language>
 			<language type="hi">ភាសាហ៉ិនឌី</language>
-			<language type="hi" alt="proposed-x1001" draft="unconfirmed">ហិឌូ</language>
-			<language type="hr" draft="unconfirmed">ក្រូអាទៀន</language>
+			<language type="hr">ក្រូអាទៀន</language>
 			<language type="hu">ភាសាហុងគ្រី</language>
-			<language type="hu" alt="proposed-x1001" draft="unconfirmed">ហុងការី</language>
 			<language type="hy">ភាសាអារមេនី</language>
-			<language type="hy" alt="proposed-x1001" draft="unconfirmed">ភាសាអាមេនៀន</language>
-			<language type="ia" draft="unconfirmed">អីនធើលីង</language>
+			<language type="ia">អីនធើលីង</language>
 			<language type="id">ភាសាឥណ្ឌូនេស៊ី</language>
-			<language type="id" alt="proposed-x1001" draft="unconfirmed">ឥណ្ឌូណេស៊ី</language>
 			<language type="is">ភាសាអ៉ីស្លង់</language>
-			<language type="is" alt="proposed-x1001" draft="unconfirmed">អៃស៍ឡង់</language>
 			<language type="it">ភាសាអ៊ីតាលី</language>
-			<language type="it" alt="proposed-x1001" draft="unconfirmed">អ៊ីតាលី</language>
 			<language type="ja">ភាសាជប៉ុន</language>
-			<language type="ja" alt="proposed-x1001" draft="unconfirmed">ជប៉ុន</language>
 			<language type="jv">ភាសាយ៉ាវា</language>
-			<language type="jv" alt="proposed-x1001" draft="unconfirmed">ចាវា</language>
 			<language type="ka">ភាសាហ្សកហ្ស៉ី</language>
-			<language type="ka" alt="proposed-x1001" draft="unconfirmed">ចរជៀន</language>
 			<language type="kk">ភាសាកាហ្សាក់ស្តង់់</language>
 			<language type="km">ភាសាខ្មែរ</language>
 			<language type="kn">ភាសាកិណាដា</language>
-			<language type="kn" alt="proposed-x1001" draft="unconfirmed">កាន់ណាដា</language>
 			<language type="ko">ភាសាកូរ៉េ</language>
-			<language type="ko" alt="proposed-x1001" draft="unconfirmed">កូរ៉េ</language>
 			<language type="ku">ភាសាឃឺដ</language>
-			<language type="ku" alt="proposed-x1001" draft="unconfirmed">ឃើឌីស</language>
 			<language type="ky">ភាសាគៀរហ្គីស្តង់</language>
-			<language type="ky" alt="proposed-x1001" draft="unconfirmed">គីស៊ី</language>
 			<language type="la">ភាសាឡាតំាង</language>
-			<language type="la" alt="proposed-x1001" draft="unconfirmed">ឡាតាំង</language>
-			<language type="ln" draft="unconfirmed">លីនកាឡា</language>
+			<language type="ln">លីនកាឡា</language>
 			<language type="lo">ភាសាឡាវ</language>
-			<language type="lo" alt="proposed-x1001" draft="unconfirmed">ឡាវ</language>
 			<language type="lt">ភាសាលីទុយអានី</language>
-			<language type="lt" alt="proposed-x1001" draft="unconfirmed">លីហូនាន</language>
 			<language type="lv">ភាសាឡាតវីយ៉ា</language>
-			<language type="lv" alt="proposed-x1001" draft="unconfirmed">ឡាវាន</language>
 			<language type="mg">ភាសាម៉ាដាហ្កាសការ</language>
 			<language type="mi">ភាសាម៉ោរី</language>
 			<language type="mk">ភាសាម៉ាសេដូនី</language>
-			<language type="mk" alt="proposed-x1001" draft="unconfirmed">មាសឺដូនាន</language>
 			<language type="ml">ភាសាម៉ាឡាឡាយ៉ាន</language>
-			<language type="ml" alt="proposed-x1001" draft="unconfirmed">មាឡេស៊ី</language>
 			<language type="mn">ភាសាម៉ុងហ្គោលី</language>
-			<language type="mn" alt="proposed-x1001" draft="unconfirmed">មុងហ្គោល</language>
 			<language type="mo">ភាសាម៉ុលដាវី</language>
 			<language type="mr">ភាសាម៉ារាធី</language>
-			<language type="mr" alt="proposed-x1001" draft="unconfirmed">មារីទី</language>
 			<language type="ms">ភាសាម៉ាលេស៉ី</language>
-			<language type="ms" alt="proposed-x1001" draft="unconfirmed">មាឡេស៊ី</language>
 			<language type="mt">ភាសាម៉ាល់តា</language>
-			<language type="mt" alt="proposed-x1001" draft="unconfirmed">មាលទេស</language>
 			<language type="ne">ភាសានេប៉ាល់</language>
-			<language type="ne" alt="proposed-x1001" draft="unconfirmed">នេប៉ាល់</language>
 			<language type="nl">ភាសាហុល្លង់</language>
-			<language type="nl" alt="proposed-x1001" draft="unconfirmed">ហូឡង់</language>
-			<language type="nn" draft="unconfirmed">ន័រវេ</language>
+			<language type="nn">ន័រវេ</language>
 			<language type="no">ភាសាន័រវែស</language>
-			<language type="no" alt="proposed-x1001" draft="unconfirmed">ណ័រវេស</language>
-			<language type="oc" draft="unconfirmed">អូសីតាន់</language>
+			<language type="oc">អូសីតាន់</language>
 			<language type="or">ភាសាអូរីយ៉ា</language>
-			<language type="or" alt="proposed-x1001" draft="unconfirmed">អូរីយា</language>
 			<language type="pa">ភាសាពូនយ៉ាប៊ី</language>
-			<language type="pa" alt="proposed-x1001" draft="unconfirmed">ពុនចាបី</language>
 			<language type="pl">ភាសាប៉ូឡូញ</language>
-			<language type="pl" alt="proposed-x1001" draft="unconfirmed">ប៉ូឡូញ</language>
-			<language type="ps" draft="unconfirmed">បាស្តូ</language>
+			<language type="ps">បាស្តូ</language>
 			<language type="pt">ភាសាព័រទុយហ្កាល់</language>
-			<language type="pt" alt="proposed-x1001" draft="unconfirmed">ប៉ទុយកាល់</language>
 			<language type="qu">ភាសាកេទ្ជូអា</language>
 			<language type="rn">ភាសារូន្ឌី</language>
 			<language type="ro">ភាសារូម៉ានី</language>
-			<language type="ro" alt="proposed-x1001" draft="unconfirmed">រួម៉ង់</language>
 			<language type="ru">ភាសាรัរូស្ស៉ី</language>
-			<language type="ru" alt="proposed-x1001" draft="unconfirmed">រុស៊្សី</language>
 			<language type="sa">ភាសាសំស្ក្រឹត</language>
 			<language type="sd">ភាសាស៉ីន្ដី</language>
-			<language type="sh" draft="unconfirmed">សើបូក្រូទៀន</language>
-			<language type="si" draft="unconfirmed">សីនហាលិស</language>
+			<language type="sh">សើបូក្រូទៀន</language>
+			<language type="si">សីនហាលិស</language>
 			<language type="sk">ភាសាស្លូវ៉ាគី</language>
-			<language type="sk" alt="proposed-x1001" draft="unconfirmed">ស្លូវាក់</language>
 			<language type="sl">ភាសាស្លូវ៉ានី</language>
-			<language type="sl" alt="proposed-x1001" draft="unconfirmed">ស្លូវាក់</language>
 			<language type="sm">ភាសាសាមូអា</language>
 			<language type="so">ភាសាសូម៉ាលី</language>
-			<language type="so" alt="proposed-x1001" draft="unconfirmed">សូមាលី</language>
 			<language type="sq">ភាសាអាល់បានី</language>
-			<language type="sq" alt="proposed-x1001" draft="unconfirmed">អាល់បានៀន</language>
-			<language type="sr" draft="unconfirmed">សើបៀន</language>
-			<language type="st" draft="unconfirmed">សេសូដូ</language>
+			<language type="sr">សើបៀន</language>
+			<language type="st">សេសូដូ</language>
 			<language type="su">ភាំសាស៊ូដង់</language>
-			<language type="su" alt="proposed-x1001" draft="unconfirmed">សាន់ដាន់</language>
 			<language type="sv">ភាសាស៊ុយអែដ</language>
-			<language type="sv" alt="proposed-x1001" draft="unconfirmed">ស្វីតឌីស</language>
 			<language type="sw">ភាសាស្វាហ៉ីលី</language>
-			<language type="sw" alt="proposed-x1001" draft="unconfirmed">សាហីលី</language>
 			<language type="ta">ភាសាតាមីល</language>
-			<language type="ta" alt="proposed-x1001" draft="unconfirmed">តាមិល</language>
 			<language type="te">ភាសាតេលូហ្គូ</language>
-			<language type="te" alt="proposed-x1001" draft="unconfirmed">តេឡេគូ</language>
 			<language type="tg">ភាសាតាដហ្ស៉ីគីស្តង់</language>
 			<language type="th">ភាសាថៃ</language>
-			<language type="th" alt="proposed-x1001" draft="unconfirmed">ថៃ</language>
-			<language type="ti" draft="unconfirmed">ទីរិនយា</language>
+			<language type="ti">ទីរិនយា</language>
 			<language type="tk">ភាសាទួគមេនីស្តង់</language>
-			<language type="tk" alt="proposed-x1001" draft="unconfirmed">ធុកមែន</language>
-			<language type="tlh" draft="unconfirmed">ខ្លិងសុន</language>
+			<language type="tlh">ខ្លិងសុន</language>
 			<language type="to">ភាសាតុងហ្គោ</language>
 			<language type="tr">ភាសាទួរគី</language>
-			<language type="tr" alt="proposed-x1001" draft="unconfirmed">តួគី</language>
 			<language type="tt">ភាសាតាតារ</language>
-			<language type="tw" draft="unconfirmed">ទ្វី</language>
+			<language type="tw">ទ្វី</language>
 			<language type="uk">ភាសាអ៊ុយក្រែន</language>
-			<language type="uk" alt="proposed-x1001" draft="unconfirmed">អុយក្រែន</language>
 			<language type="ur">ភាសាអ៊ូរ្ឌូ</language>
-			<language type="ur" alt="proposed-x1001" draft="unconfirmed">អួរដួ</language>
 			<language type="uz">ភាសាអ៊ូហ្សបេគីស្តង់</language>
-			<language type="uz" alt="proposed-x1001" draft="unconfirmed">អូបេក</language>
 			<language type="vi">ភាសាវៀតណាម</language>
-			<language type="vi" alt="proposed-x1001" draft="unconfirmed">យួន</language>
 			<language type="xh">ភាសាឃសា</language>
-			<language type="xh" alt="proposed-x1001" draft="unconfirmed">អិចហូស្សា</language>
 			<language type="yi">ភាសាយីឌីហ្ស</language>
-			<language type="yi" alt="proposed-x1001" draft="unconfirmed">យីឌីស</language>
 			<language type="yo">ភាសាយរូបា</language>
 			<language type="za">ភាសាចួង</language>
 			<language type="zh">ភាសាចិន</language>
 			<language type="zu">ភាសាហ្ស៉ូលូ</language>
-			<language type="zu" alt="proposed-x1001" draft="unconfirmed">សូលូ</language>
 		</languages>
 		<territories>
 			<territory type="AD">អានដូរ៉ា</territory>
@@ -369,7 +293,6 @@
 			<territory type="TM">ទួគមេនីស្តង់</territory>
 			<territory type="TN">ទុយនេស៊ី</territory>
 			<territory type="TO">តុងហ្គា</territory>
-			<territory type="TO" alt="proposed-x1001" draft="unconfirmed">ថុងហ្គា</territory>
 			<territory type="TR">ទួរគី</territory>
 			<territory type="TT">ទ្រីនីដាដនឹងតូបាហ្គោ</territory>
 			<territory type="TW">តៃវ៉ាន់</territory>
@@ -390,14 +313,14 @@
 		</territories>
 	</localeDisplayNames>
 	<characters>
-		<exemplarCharacters>[ំ-៑ ក-វ ស-អ {អា} ឥ-ឧ {ឧក} ឩ-ឳ ា-ៅ ្]</exemplarCharacters>
-		<exemplarCharacters type="auxiliary">[\u200B ឝ ឞ \u17B4 \u17B5]</exemplarCharacters>
+		<exemplarCharacters>[៎ ៏ ៑ ័ ៈ ់ ៉ ៊ ៍ ៌ ក-រ ឫ ឬ ល ឭ ឮ វ ស-អ {អា} ឥ-ឧ {ឧក} ឪ ឩ ឯ-ឳ ា-ះ ្]</exemplarCharacters>
+		<exemplarCharacters type="auxiliary">[\u17B4 \u17B5\u200B ឝ ឞ]</exemplarCharacters>
 	</characters>
 	<delimiters>
-		<quotationStart draft="unconfirmed">'</quotationStart>
-		<quotationEnd draft="unconfirmed">'</quotationEnd>
-		<alternateQuotationStart draft="unconfirmed">&quot;</alternateQuotationStart>
-		<alternateQuotationEnd draft="unconfirmed">&quot;</alternateQuotationEnd>
+		<quotationStart>'</quotationStart>
+		<quotationEnd>'</quotationEnd>
+		<alternateQuotationStart>&quot;</alternateQuotationStart>
+		<alternateQuotationEnd>&quot;</alternateQuotationEnd>
 	</delimiters>
 	<dates>
 		<localizedPatternChars>GyMdkHmsSEDFwWahKzYeugXZvcL</localizedPatternChars>
@@ -405,58 +328,58 @@
 			<calendar type="buddhist">
 				<eras>
 					<eraAbbr>
-						<era type="0" draft="unconfirmed">ព.ស.</era>
+						<era type="0">ព.ស.</era>
 					</eraAbbr>
 				</eras>
 				<dateFormats>
-					<default choice="long" draft="unconfirmed"/>
+					<default choice="long"/>
 					<dateFormatLength type="full">
 						<dateFormat>
-							<pattern draft="unconfirmed">EEEE ថ្ងៃ d ខែ MMMM ឆ្នាំ  yyyy</pattern>
+							<pattern>EEEE ថ្ងៃ d ខែ MMMM ឆ្នាំ  yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="long">
 						<dateFormat>
-							<pattern draft="unconfirmed">EEEE ថ្ងៃ d ខែ MMMM ឆ្នាំ  yyyy</pattern>
+							<pattern>EEEE ថ្ងៃ d ខែ MMMM ឆ្នាំ  yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="medium">
 						<dateFormat>
-							<pattern draft="unconfirmed">d MMMM yyyy</pattern>
+							<pattern>d MMMM yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="short">
 						<dateFormat>
-							<pattern draft="unconfirmed">d/M/yyyy</pattern>
+							<pattern>d/M/yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 				</dateFormats>
 				<timeFormats>
 					<timeFormatLength type="full">
 						<timeFormat>
-							<pattern draft="unconfirmed">H ម៉ោង m នាទី ss វិនាទី​</pattern>
+							<pattern>H ម៉ោង m នាទី ss វិនាទី​</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="long">
 						<timeFormat>
-							<pattern draft="unconfirmed">H ម៉ោង m នាទី</pattern>
+							<pattern>H ម៉ោង m នាទី</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="medium">
 						<timeFormat>
-							<pattern draft="unconfirmed">H:mm:ss</pattern>
+							<pattern>H:mm:ss</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="short">
 						<timeFormat>
-							<pattern draft="unconfirmed">H:mm</pattern>
+							<pattern>H:mm</pattern>
 						</timeFormat>
 					</timeFormatLength>
 				</timeFormats>
 				<dateTimeFormats>
 					<dateTimeFormatLength>
 						<dateTimeFormat>
-							<pattern draft="unconfirmed">{1}, {0}</pattern>
+							<pattern>{1}, {0}</pattern>
 						</dateTimeFormat>
 					</dateTimeFormatLength>
 				</dateTimeFormats>
@@ -495,18 +418,18 @@
 					</monthContext>
 					<monthContext type="stand-alone">
 						<monthWidth type="narrow">
-							<month type="1" draft="unconfirmed">1</month>
-							<month type="2" draft="unconfirmed">2</month>
-							<month type="3" draft="unconfirmed">3</month>
-							<month type="4" draft="unconfirmed">4</month>
-							<month type="5" draft="unconfirmed">5</month>
-							<month type="6" draft="unconfirmed">6</month>
-							<month type="7" draft="unconfirmed">7</month>
-							<month type="8" draft="unconfirmed">8</month>
-							<month type="9" draft="unconfirmed">9</month>
-							<month type="10" draft="unconfirmed">10</month>
-							<month type="11" draft="unconfirmed">11</month>
-							<month type="12" draft="unconfirmed">12</month>
+							<month type="1">1</month>
+							<month type="2">2</month>
+							<month type="3">3</month>
+							<month type="4">4</month>
+							<month type="5">5</month>
+							<month type="6">6</month>
+							<month type="7">7</month>
+							<month type="8">8</month>
+							<month type="9">9</month>
+							<month type="10">10</month>
+							<month type="11">11</month>
+							<month type="12">12</month>
 						</monthWidth>
 					</monthContext>
 				</months>
@@ -522,24 +445,24 @@
 							<day type="sat">ស</day>
 						</dayWidth>
 						<dayWidth type="wide">
-							<day type="sun" draft="unconfirmed">ថ្ងៃអាទិត្យ</day>
-							<day type="mon" draft="unconfirmed">​ថ្ងៃច័ន្ទ</day>
-							<day type="tue" draft="unconfirmed">ថ្ងៃអង្គារ</day>
-							<day type="wed" draft="unconfirmed">ថ្ងៃពុធ</day>
-							<day type="thu" draft="unconfirmed">ថ្ងៃព្រហស្បតិ៍</day>
-							<day type="fri" draft="unconfirmed">ថ្ងៃសុក្រ</day>
-							<day type="sat" draft="unconfirmed">ថ្ងៃសៅរ៍</day>
+							<day type="sun">ថ្ងៃអាទិត្យ</day>
+							<day type="mon">​ថ្ងៃច័ន្ទ</day>
+							<day type="tue">ថ្ងៃអង្គារ</day>
+							<day type="wed">ថ្ងៃពុធ</day>
+							<day type="thu">ថ្ងៃព្រហស្បតិ៍</day>
+							<day type="fri">ថ្ងៃសុក្រ</day>
+							<day type="sat">ថ្ងៃសៅរ៍</day>
 						</dayWidth>
 					</dayContext>
 					<dayContext type="stand-alone">
 						<dayWidth type="narrow">
-							<day type="sun" draft="unconfirmed">1</day>
-							<day type="mon" draft="unconfirmed">2</day>
-							<day type="tue" draft="unconfirmed">3</day>
-							<day type="wed" draft="unconfirmed">4</day>
-							<day type="thu" draft="unconfirmed">5</day>
-							<day type="fri" draft="unconfirmed">6</day>
-							<day type="sat" draft="unconfirmed">7</day>
+							<day type="sun">1</day>
+							<day type="mon">2</day>
+							<day type="tue">3</day>
+							<day type="wed">4</day>
+							<day type="thu">5</day>
+							<day type="fri">6</day>
+							<day type="sat">7</day>
 						</dayWidth>
 					</dayContext>
 				</days>
@@ -574,12 +497,12 @@
 				<dateFormats>
 					<dateFormatLength type="full">
 						<dateFormat>
-							<pattern draft="unconfirmed">EEEE ថ្ងៃ d ខែ MMMM ឆ្នាំ  yyyy</pattern>
+							<pattern>EEEE ថ្ងៃ d ខែ MMMM ឆ្នាំ  yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="long">
 						<dateFormat>
-							<pattern draft="unconfirmed">d ខែ MMMM ឆ្នាំ  yyyy</pattern>
+							<pattern>d ខែ MMMM ឆ្នាំ  yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="medium">
@@ -622,23 +545,96 @@
 						</dateTimeFormat>
 					</dateTimeFormatLength>
 					<availableFormats>
-						<dateFormatItem id="MMMMd" draft="unconfirmed">d MMMM</dateFormatItem>
-						<dateFormatItem id="Md" draft="unconfirmed">d/M</dateFormatItem>
-						<dateFormatItem id="hhmm" draft="unconfirmed">hh:mm a</dateFormatItem>
-						<dateFormatItem id="hhmmss" draft="unconfirmed">hh:mm:ss a</dateFormatItem>
-						<dateFormatItem id="mmss" draft="unconfirmed">mm:ss</dateFormatItem>
-						<dateFormatItem id="yyQ" draft="unconfirmed">Q yy</dateFormatItem>
-						<dateFormatItem id="yyQQQQ" draft="unconfirmed">QQQQ yy</dateFormatItem>
-						<dateFormatItem id="yyyyM" draft="unconfirmed">M/yyyy</dateFormatItem>
-						<dateFormatItem id="yyyyMMMM" draft="unconfirmed">MMMM yyyy</dateFormatItem>
+						<dateFormatItem id="MMMMd">d MMMM</dateFormatItem>
+						<dateFormatItem id="Md">d/M</dateFormatItem>
+						<dateFormatItem id="hhmm">hh:mm a</dateFormatItem>
+						<dateFormatItem id="hhmmss">hh:mm:ss a</dateFormatItem>
+						<dateFormatItem id="mmss">mm:ss</dateFormatItem>
+						<dateFormatItem id="yyQ">Q yy</dateFormatItem>
+						<dateFormatItem id="yyQQQQ">QQQQ yy</dateFormatItem>
+						<dateFormatItem id="yyyyM">M/yyyy</dateFormatItem>
+						<dateFormatItem id="yyyyMMMM">MMMM yyyy</dateFormatItem>
 					</availableFormats>
+					<intervalFormats>
+						<intervalFormatFallback>{0} - {1}</intervalFormatFallback>
+						<intervalFormatItem id="M">
+							<greatestDifference id="M">M-M</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MEd">
+							<greatestDifference id="M">E, d/M - E, d/M</greatestDifference>
+							<greatestDifference id="d">E, d/M - E, d/M</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMM">
+							<greatestDifference id="M">MMM-MMM</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMMEd">
+							<greatestDifference id="M">E, MMM d - E, MMM d</greatestDifference>
+							<greatestDifference id="d">E, MMM d - E, MMM d</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMMd">
+							<greatestDifference id="M">MMM d - MMM d</greatestDifference>
+							<greatestDifference id="d">MMM d-d</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="Md">
+							<greatestDifference id="M">d/M - d/M</greatestDifference>
+							<greatestDifference id="d">d/M - d/M</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="d">
+							<greatestDifference id="d">d-d</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="h">
+							<greatestDifference id="h">H-H</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hm">
+							<greatestDifference id="h">H:mm-H:mm</greatestDifference>
+							<greatestDifference id="m">H:mm-H:mm</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hmv">
+							<greatestDifference id="h">H:mm-H:mm v</greatestDifference>
+							<greatestDifference id="m">H:mm-H:mm v</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hv">
+							<greatestDifference id="h">H-H v</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="y">
+							<greatestDifference id="y">y-y</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yM">
+							<greatestDifference id="M">M/yyyy - M/yyyy</greatestDifference>
+							<greatestDifference id="y">M/yyyy - M/yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMEd">
+							<greatestDifference id="M">E, d/M/yyyy - E, d/M/yyyy</greatestDifference>
+							<greatestDifference id="d">E, d/M/yyyy - E, d/M/yyyy</greatestDifference>
+							<greatestDifference id="y">E, d/M/yyyy - E, d/M/yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMM">
+							<greatestDifference id="M">yyyy MMM-MMM</greatestDifference>
+							<greatestDifference id="y">yyyy MMM - yyyy MMM</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMMEd">
+							<greatestDifference id="M">E, yyyy MMM dd - E, yyyy MMM dd</greatestDifference>
+							<greatestDifference id="d">E, yyyy MMM dd - E, yyyy MMM dd</greatestDifference>
+							<greatestDifference id="y">E, yyyy MMM dd - E, yyyy MMM dd</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMMd">
+							<greatestDifference id="M">yyyy MMM d - MMM d</greatestDifference>
+							<greatestDifference id="d">yyyy MMM d-d</greatestDifference>
+							<greatestDifference id="y">yyyy MMM d - yyyy MMM d</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMd">
+							<greatestDifference id="M">d/M/yyyy - d/M/yyyy</greatestDifference>
+							<greatestDifference id="d">d/M/yyyy - d/M/yyyy</greatestDifference>
+							<greatestDifference id="y">d/M/yyyy - d/M/yyyy</greatestDifference>
+						</intervalFormatItem>
+					</intervalFormats>
 				</dateTimeFormats>
 			</calendar>
 		</calendars>
 		<timeZoneNames>
-			<hourFormat draft="unconfirmed">+HH:mm;-HH:mm</hourFormat>
-			<gmtFormat draft="unconfirmed">GMT{0}</gmtFormat>
-			<regionFormat draft="unconfirmed">{0}</regionFormat>
+			<hourFormat>+HH:mm;-HH:mm</hourFormat>
+			<gmtFormat>GMT{0}</gmtFormat>
+			<regionFormat>{0}</regionFormat>
 		</timeZoneNames>
 	</dates>
 	<numbers>

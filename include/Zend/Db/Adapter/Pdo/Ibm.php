@@ -4,50 +4,43 @@
  *
  * LICENSE
  *
- * This source file is subject to version 1.0 of the Zend Framework
- * license, that is bundled with this package in the file LICENSE.txt, and
- * is available through the world-wide-web at the following URL:
- * http://framework.zend.com/license/new-bsd. If you did not receive
- * a copy of the Zend Framework license and are unable to obtain it
- * through the world-wide-web, please send a note to license@zend.com
- * so we can mail you a copy immediately.
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://framework.zend.com/license/new-bsd
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
  *
+ * @category   Zend
  * @package    Zend_Db
  * @subpackage Adapter
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc.
- * (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * Zend Framework License version 1.0
- *
+ * @version    $Id: Ibm.php 13280 2008-12-15 20:48:08Z mikaelkael $
  */
 
-/** Zend_Db_Adapter_Pdo_Abstract */
+
+/** @see Zend_Db_Adapter_Pdo_Abstract */
 require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
 
-/** Zend_Db_Abstract_Pdo_Ibm_Db2 */
+/** @see Zend_Db_Abstract_Pdo_Ibm_Db2 */
 require_once 'Zend/Db/Adapter/Pdo/Ibm/Db2.php';
 
-/** Zend_Db_Abstract_Pdo_Ibm_Ids */
+/** @see Zend_Db_Abstract_Pdo_Ibm_Ids */
 require_once 'Zend/Db/Adapter/Pdo/Ibm/Ids.php';
 
-/** Zend_Db_Statement_Pdo_Ibm */
+/** @see Zend_Db_Statement_Pdo_Ibm */
 require_once 'Zend/Db/Statement/Pdo/Ibm.php';
 
-/**
- * Zend_Db_Adapter_Exception
- */
-require_once 'Zend/Db/Adapter/Exception.php';
-
 
 /**
+ * @category   Zend
  * @package    Zend_Db
- * @copyright  Copyright (c) 2005-2007 Zend Technologies Inc. (http://www.zend.com)
+ * @subpackage Adapter
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @author     Manas Dadarkar <manas@us.ibm.com>
- * @author     Kellen Bombardier <kfbombar@us.ibm.com>
- * @author     Salvador Ledezma <ledezma@us.ibm.com>
  */
-
 class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
 {
     /**
@@ -96,7 +89,6 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
      * The IBM data server is set.
      * Current options are DB2 or IDS
      * @todo also differentiate between z/OS and i/5
-
      *
      * @return void
      * @throws Zend_Db_Adapter_Exception
@@ -138,6 +130,7 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
                     }
             }
         } catch (PDOException $e) {
+            /** @see Zend_Db_Adapter_Exception */
             require_once 'Zend/Db/Adapter/Exception.php';
             $error = strpos($e->getMessage(), 'driver does not support that attribute');
             if ($error) {
@@ -171,12 +164,21 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
         return $this->_pdoType . ': ' . $dsn;
     }
 
+    /**
+     * Checks required options
+     *
+     * @param  array $config
+     * @throws Zend_Db_Adapter_Exception
+     * @return void
+     */
     protected function _checkRequiredOptions(array $config)
     {
         parent::_checkRequiredOptions($config);
 
         if (array_key_exists('host', $this->_config) &&
         !array_key_exists('port', $config)) {
+            /** @see Zend_Db_Adapter_Exception */
+            require_once 'Zend/Db/Adapter/Exception.php';
             throw new Zend_Db_Adapter_Exception("Configuration must have a key for 'port' when 'host' is specified");
         }
     }
@@ -191,7 +193,8 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
     public function prepare($sql)
     {
         $this->_connect();
-        $stmt = new Zend_Db_Statement_Pdo_Ibm($this, $sql);
+        $stmtClass = $this->_defaultStmtClass;
+        $stmt = new $stmtClass($this, $sql);
         $stmt->setFetchMode($this->_fetchMode);
         return $stmt;
     }
@@ -329,5 +332,29 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
     {
         $this->_connect();
         return $this->_serverType->nextSequenceId($sequenceName);
+    }
+
+    /**
+     * Retrieve server version in PHP style
+     * Pdo_Idm doesn't support getAttribute(PDO::ATTR_SERVER_VERSION)
+     * @return string
+     */
+    public function getServerVersion()
+    {
+        try {
+            $stmt = $this->query('SELECT service_level, fixpack_num FROM TABLE (sysproc.env_get_inst_info()) as INSTANCEINFO');
+            $result = $stmt->fetchAll(Zend_Db::FETCH_NUM);
+            if (count($result)) {
+                $matches = null;
+                if (preg_match('/((?:[0-9]{1,2}\.){1,3}[0-9]{1,2})/', $result[0][0], $matches)) {
+                    return $matches[1];
+                } else {
+                    return null;
+                }
+            }
+            return null;
+        } catch (PDOException $e) {
+            return null;
+        }
     }
 }

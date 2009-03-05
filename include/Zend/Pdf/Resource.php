@@ -13,7 +13,7 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @package    Zend_Pdf
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -32,7 +32,7 @@ require_once 'Zend/Pdf/Element/Dictionary.php';
  * PDF file Resource abstraction
  *
  * @package    Zend_Pdf
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Pdf_Resource
@@ -74,7 +74,6 @@ abstract class Zend_Pdf_Resource
      */
     public function __construct($resource)
     {
-        $this->_processedFacories = array();
         $this->_objectFactory     = Zend_Pdf_ElementFactory::createFactory(1);
         if ($resource instanceof Zend_Pdf_Element) {
             $this->_resource      = $this->_objectFactory->newObject($resource);
@@ -87,6 +86,7 @@ abstract class Zend_Pdf_Resource
      * Get resource.
      * Used to reference resource in an internal PDF data structures (resource dictionaries)
      *
+     * @internal
      * @return Zend_Pdf_Element_Object
      */
     public function getResource()
@@ -97,6 +97,7 @@ abstract class Zend_Pdf_Resource
     /**
      * Get factory.
      *
+     * @internal
      * @return Zend_Pdf_ElementFactory_Interface
      */
     public function getFactory()

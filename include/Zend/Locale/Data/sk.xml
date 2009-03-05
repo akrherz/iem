@@ -1,173 +1,204 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.5/ldml.dtd">
+<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.6/ldml.dtd">
 <ldml>
 	<identity>
-		<version number="$Revision: 1.76 $"/>
-		<generation date="$Date: 2007/07/19 22:31:40 $"/>
+		<version number="$Revision: 1.84 $"/>
+		<generation date="$Date: 2008/06/17 14:12:15 $"/>
 		<language type="sk"/>
 	</identity>
 	<localeDisplayNames>
 		<languages>
-			<language type="af" draft="provisional">afrikánsky</language>
-			<language type="am" draft="provisional">amharsky</language>
+			<language type="ab">abcházsky</language>
+			<language type="af">africký</language>
+			<language type="ain">ainský</language>
+			<language type="akk">akadský</language>
+			<language type="am">amharský</language>
 			<language type="ar">arabský</language>
-			<language type="ar" alt="proposed-x1001" draft="unconfirmed">arabčina</language>
-			<language type="as" draft="provisional">asámsky</language>
-			<language type="az" draft="provisional">azerbajdžansky</language>
-			<language type="be" draft="provisional">bielorusky</language>
+			<language type="art">umelý jazyk</language>
+			<language type="as">asámsky</language>
+			<language type="aus">austrálsky jazyk</language>
+			<language type="av">avarský</language>
+			<language type="az">azerbajdžanský</language>
+			<language type="ba">baškírsky</language>
+			<language type="ban">balijský</language>
+			<language type="bat">baltský jazyk</language>
+			<language type="be">bieloruský</language>
+			<language type="ber">berberský</language>
 			<language type="bg">bulharský</language>
-			<language type="bg" alt="proposed-x1001" draft="unconfirmed">bulharčina</language>
-			<language type="bh" draft="provisional">biharsky</language>
-			<language type="bn" draft="provisional">bengálsky</language>
-			<language type="br" draft="provisional">bretónsky</language>
-			<language type="bs" draft="provisional">bosniansky</language>
-			<language type="ca" draft="provisional">katalánčina</language>
+			<language type="bh">biharský</language>
+			<language type="bn">bengálsky</language>
+			<language type="bo">tibetský</language>
+			<language type="br">bretónsky</language>
+			<language type="bs">bosniansky</language>
+			<language type="ca">katalánsky</language>
+			<language type="cai">jazyk stredoamerických indiánov</language>
+			<language type="car">karibský</language>
+			<language type="cau">kaukazský jazyk</language>
+			<language type="ce">čečenský</language>
+			<language type="cel">keltský jazyk</language>
 			<language type="cs">český</language>
-			<language type="cs" alt="proposed-x1001" draft="unconfirmed">čeština</language>
-			<language type="cy" draft="provisional">walesky</language>
+			<language type="cy">walesky</language>
 			<language type="da">dánsky</language>
-			<language type="da" alt="proposed-x1001" draft="unconfirmed">dánčina</language>
+			<language type="dak">dakotský</language>
 			<language type="de">nemecký</language>
-			<language type="de" alt="proposed-x1001" draft="unconfirmed">nemčina</language>
+			<language type="egy">staroegyptský</language>
 			<language type="el">grécky</language>
-			<language type="el" alt="proposed-x1001" draft="unconfirmed">gréčtina</language>
 			<language type="en">anglický</language>
-			<language type="en" alt="proposed-x1001" draft="unconfirmed">angličtina</language>
-			<language type="en_AU" draft="provisional">angličtina (austrália)</language>
-			<language type="en_GB" draft="provisional">angličtina (britská)</language>
-			<language type="en_US" draft="provisional">angličtina (americká)</language>
-			<language type="eo" draft="provisional">esperantsky</language>
+			<language type="en_GB">anglický (Veľká Británia)</language>
+			<language type="en_US">anglický (USA)</language>
+			<language type="eo">esperantsky</language>
 			<language type="es">španielsky</language>
-			<language type="es" alt="proposed-x1001" draft="unconfirmed">španielčina</language>
 			<language type="et">estónsky</language>
-			<language type="et" alt="proposed-x1001" draft="unconfirmed">estónčina</language>
-			<language type="eu" draft="provisional">baskicky</language>
-			<language type="fa" draft="provisional">perzština</language>
+			<language type="eu">baskický</language>
+			<language type="fa">perzský</language>
 			<language type="fi">fínsky</language>
-			<language type="fi" alt="proposed-x1001" draft="unconfirmed">fínčina</language>
-			<language type="fil" draft="provisional">filipínsky</language>
-			<language type="fo" draft="provisional">faersky</language>
+			<language type="fil">filipínsky</language>
+			<language type="fiu">ugrofínsky jazyk</language>
+			<language type="fo">faersky</language>
 			<language type="fr">francúzsky</language>
-			<language type="fr" alt="proposed-x1001" draft="unconfirmed">francúzština</language>
-			<language type="fy" draft="provisional">frizijsky</language>
-			<language type="ga" draft="provisional">írsky</language>
-			<language type="gd" draft="provisional">škótskou gaelštinou</language>
-			<language type="gl" draft="provisional">galicijsky</language>
-			<language type="gn" draft="provisional">guaransky</language>
-			<language type="gu" draft="provisional">gudžaratsky</language>
+			<language type="fy">frizijsky</language>
+			<language type="ga">írsky</language>
+			<language type="gd">škótskou gaelštinou</language>
+			<language type="gem">germánsky jazyk</language>
+			<language type="gl">galicijsky</language>
+			<language type="gn">guaransky</language>
+			<language type="got">gotický</language>
+			<language type="grc">starogrécky</language>
+			<language type="gsw">nemecký (Švajčiarsko)</language>
+			<language type="gu">gudžaratsky</language>
+			<language type="haw">havajský</language>
 			<language type="he">hebrejský</language>
-			<language type="he" alt="proposed-x1001" draft="unconfirmed">hebrejčina</language>
-			<language type="hi" draft="provisional">hindština</language>
+			<language type="hi">hindština</language>
 			<language type="hr">chorvátsky</language>
-			<language type="hr" alt="proposed-x1001" draft="unconfirmed">chorvátčina</language>
+			<language type="ht">haitský</language>
 			<language type="hu">maďarský</language>
-			<language type="hu" alt="proposed-x1001" draft="unconfirmed">maďarčina</language>
-			<language type="hu" alt="proposed-x1002" draft="unconfirmed">maďarština</language>
-			<language type="hy" draft="provisional">arménsky</language>
-			<language type="ia" draft="provisional">interlingua</language>
-			<language type="id" draft="provisional">indonézština</language>
-			<language type="ie" draft="provisional">interlingue</language>
-			<language type="is" draft="provisional">islandčina</language>
+			<language type="hy">arménsky</language>
+			<language type="ia">interlingua</language>
+			<language type="id">indonézsky</language>
+			<language type="ie">interlingue</language>
+			<language type="ine">indoeurópsky jazyk</language>
+			<language type="ira">iránsky jazyk</language>
+			<language type="is">islandský</language>
 			<language type="it">taliansky</language>
-			<language type="it" alt="proposed-x1001" draft="unconfirmed">taliančina</language>
 			<language type="ja">japonský</language>
-			<language type="ja" alt="proposed-x1001" draft="unconfirmed">japončina</language>
-			<language type="jv" draft="provisional">javansky</language>
-			<language type="ka" draft="provisional">gruzínsky</language>
-			<language type="km" draft="provisional">kambodžsky</language>
-			<language type="kn" draft="provisional">kannadsky</language>
+			<language type="jv">javanský</language>
+			<language type="ka">gruzínsky</language>
+			<language type="kg">konžský</language>
+			<language type="km">kambodžský</language>
+			<language type="kn">kanadský</language>
 			<language type="ko">kórejský</language>
-			<language type="ko" alt="proposed-x1001" draft="unconfirmed">kórejčina</language>
-			<language type="ku" draft="provisional">kurdsky</language>
-			<language type="ky" draft="provisional">kyrgyzsky</language>
-			<language type="la" draft="provisional">latinsky</language>
-			<language type="ln" draft="provisional">lingalsky</language>
-			<language type="lo" draft="provisional">laosky</language>
+			<language type="ku">kurdský</language>
+			<language type="ky">kyrgyzský</language>
+			<language type="la">latinský</language>
+			<language type="lb">luxemburgský</language>
+			<language type="ln">lingalsky</language>
+			<language type="lo">laoský</language>
 			<language type="lt">litovský</language>
-			<language type="lt" alt="proposed-x1001" draft="unconfirmed">litovština</language>
-			<language type="lt" alt="proposed-x1002" draft="unconfirmed">litovčina</language>
 			<language type="lv">lotyšský</language>
-			<language type="lv" alt="proposed-x1001" draft="unconfirmed">lotyština</language>
-			<language type="mk" draft="provisional">macedónsky</language>
-			<language type="ml" draft="provisional">malajalamsky</language>
-			<language type="mn" draft="provisional">mongolsky</language>
-			<language type="mr" draft="provisional">marathsky</language>
-			<language type="ms" draft="provisional">malajsky</language>
-			<language type="mt" draft="provisional">maltsky</language>
-			<language type="mt" alt="proposed-x1001" draft="unconfirmed">maltčina</language>
-			<language type="ne" draft="provisional">nepálsky</language>
+			<language type="mk">macedónsky</language>
+			<language type="ml">malajalamsky</language>
+			<language type="mn">mongolský</language>
+			<language type="mr">marathsky</language>
+			<language type="ms">malajský</language>
+			<language type="mt">maltský</language>
+			<language type="my">burmský</language>
+			<language type="myn">jazyk mayov</language>
+			<language type="nai">jazyk severoamerických indiánov</language>
+			<language type="ne">nepálsky</language>
 			<language type="nl">holandský</language>
-			<language type="nl" alt="proposed-x1001" draft="unconfirmed">holandčina</language>
-			<language type="nn" draft="provisional">nórsky (nynorsk)</language>
+			<language type="nn">nórsky (nynorsk)</language>
 			<language type="no">nórsky</language>
-			<language type="no" alt="proposed-x1001" draft="unconfirmed">nórčina</language>
-			<language type="oc" draft="provisional">okcitánsky</language>
-			<language type="or" draft="provisional">urijsky</language>
-			<language type="pa" draft="provisional">pandžábsky</language>
+			<language type="nv">jazyk navajov</language>
+			<language type="oc">okcitánsky</language>
+			<language type="or">urijský</language>
+			<language type="pa">pandžábsky</language>
+			<language type="paa">papuánsky</language>
 			<language type="pl">poľský</language>
-			<language type="pl" alt="proposed-x1001" draft="unconfirmed">poľština</language>
-			<language type="ps" draft="provisional">paštúnsky</language>
+			<language type="ps">paštúnsky</language>
 			<language type="pt">portugalský</language>
-			<language type="pt" alt="proposed-x1001" draft="unconfirmed">portugalčina</language>
-			<language type="pt_BR" draft="provisional">portugalsky (brazília)</language>
-			<language type="pt_PT" draft="provisional">portugalsky (portugalsko)</language>
-			<language type="rm" draft="provisional">rétorománština</language>
+			<language type="rm">rétorománsky</language>
 			<language type="ro">rumunský</language>
-			<language type="ro" alt="proposed-x1001" draft="unconfirmed">rumunčina</language>
 			<language type="ru">ruský</language>
-			<language type="ru" alt="proposed-x1001" draft="unconfirmed">ruština</language>
-			<language type="sa" draft="provisional">sanskrtom</language>
-			<language type="sd" draft="provisional">sindhsky</language>
-			<language type="sh" draft="provisional">srbochorvátčina</language>
-			<language type="si" draft="provisional">sinhalézsky</language>
+			<language type="sa">sanskrtom</language>
+			<language type="sai">jazyk juhoamerických indiánov</language>
+			<language type="scn">sicílsky</language>
+			<language type="sd">sindhsky</language>
+			<language type="sgn">znaková reč</language>
+			<language type="sh">srbochorvátsky</language>
+			<language type="si">sinhalézsky</language>
 			<language type="sk">slovenský</language>
-			<language type="sk" alt="proposed-x1001" draft="unconfirmed">slovenčina</language>
 			<language type="sl">slovinský</language>
-			<language type="sl" alt="proposed-x1001" draft="unconfirmed">slovinčina</language>
-			<language type="so" draft="provisional">somálsky</language>
-			<language type="sq" draft="provisional">albánsky</language>
-			<language type="sr" draft="provisional">srbština</language>
-			<language type="st" draft="provisional">sesothsky</language>
-			<language type="su" draft="provisional">sundsky</language>
+			<language type="sla">slovanský jazyk</language>
+			<language type="so">somálsky</language>
+			<language type="sq">albánsky</language>
+			<language type="sr">srbský</language>
+			<language type="st">sesothsky</language>
+			<language type="su">sundsky</language>
+			<language type="sux">sumerský</language>
 			<language type="sv">švédsky</language>
-			<language type="sv" alt="proposed-x1001" draft="unconfirmed">švédčina</language>
-			<language type="sw" draft="provisional">swahilsky</language>
-			<language type="ta" draft="provisional">tamilsky</language>
-			<language type="te" draft="provisional">telugsky</language>
-			<language type="th" draft="provisional">thajsky</language>
-			<language type="ti" draft="provisional">tigrinyjský</language>
-			<language type="tk" draft="provisional">turkménsky</language>
-			<language type="tl" draft="provisional">tagalogčina</language>
-			<language type="tlh" draft="provisional">klingonsky</language>
+			<language type="sw">swahilsky</language>
+			<language type="syr">sýrsky</language>
+			<language type="ta">tamilský</language>
+			<language type="te">telugsky</language>
+			<language type="tg">tadžidský</language>
+			<language type="th">thajský</language>
+			<language type="ti">tigrinyjský</language>
+			<language type="tk">turkménsky</language>
+			<language type="tl">tagalogčina</language>
+			<language type="tlh">klingonský</language>
 			<language type="tr">turecký</language>
-			<language type="tr" alt="proposed-x1001" draft="unconfirmed">turecky</language>
-			<language type="tr" alt="proposed-x1002" draft="unconfirmed">turečtina</language>
-			<language type="tw" draft="provisional">twisky</language>
-			<language type="ug" draft="provisional">uighursky</language>
-			<language type="uk" draft="provisional">ukrajinčina</language>
-			<language type="ur" draft="provisional">urdština</language>
-			<language type="uz" draft="provisional">uzbecky</language>
-			<language type="vi" draft="provisional">vietnamčina</language>
-			<language type="wo" draft="provisional">wolof</language>
-			<language type="xh" draft="provisional">xhosky</language>
-			<language type="yi" draft="provisional">jidišsky</language>
+			<language type="tt">tatársky</language>
+			<language type="tw">twisky</language>
+			<language type="ty">tahitský</language>
+			<language type="ug">uighursky</language>
+			<language type="uk">ukrajinský</language>
+			<language type="und">neznámy alebo neplatný jazyk</language>
+			<language type="ur">urdština</language>
+			<language type="uz">uzbecký</language>
+			<language type="vi">vietnamský</language>
+			<language type="wa">valónsky</language>
+			<language type="wo">wolof</language>
+			<language type="xh">xhosky</language>
+			<language type="yi">jidišsky</language>
 			<language type="zh">čínsky</language>
-			<language type="zh" alt="proposed-x1001" draft="unconfirmed">čínština</language>
-			<language type="zh_Hans" draft="provisional">čínština (zjednodušená)</language>
-			<language type="zh_Hant" draft="provisional">čínština (tradičná)</language>
-			<language type="zu" draft="provisional">zulu</language>
+			<language type="zh_Hans">čínština (zjednodušená)</language>
+			<language type="zh_Hant">čínština (tradičná)</language>
+			<language type="zu">zulu</language>
+			<language type="zxx">bez jazykového obsahu</language>
 		</languages>
 		<scripts>
 			<script type="Arab">Arabský</script>
 			<script type="Armn">Arménsky</script>
+			<script type="Bali">balijský</script>
+			<script type="Beng">bengálsky</script>
+			<script type="Brai">Braillovo písmo</script>
 			<script type="Cyrl">Cyrilika</script>
+			<script type="Cyrs">cyrilika</script>
+			<script type="Egyp">egyptské hieroglyfy</script>
+			<script type="Ethi">etiópsky</script>
+			<script type="Glag">hlaholika</script>
+			<script type="Goth">gotický</script>
 			<script type="Grek">Grécky</script>
+			<script type="Hebr">hebrejský</script>
+			<script type="Jpan">japonský</script>
+			<script type="Khmr">kmérsky</script>
+			<script type="Kore">kórejský</script>
+			<script type="Latn">latinka</script>
+			<script type="Lina">lineárna A</script>
+			<script type="Linb">lineárna B</script>
+			<script type="Maya">mayské hieroglyfy</script>
+			<script type="Mong">mongolský</script>
+			<script type="Osma">osmanský</script>
+			<script type="Runr">Runové písmo</script>
+			<script type="Tibt">tibetský</script>
 			<script type="Zyyy">Obecný</script>
 		</scripts>
 		<territories>
 			<territory type="001">Svet</territory>
 			<territory type="002">Afrika</territory>
+			<territory type="003">Severná Amerika (003)</territory>
 			<territory type="005">Južná Amerika</territory>
+			<territory type="009">Oceánia</territory>
 			<territory type="011">Západná Afrika</territory>
 			<territory type="013">Stredná Amerika</territory>
 			<territory type="014">Východná Afrika</territory>
@@ -178,40 +209,41 @@
 			<territory type="021">Severná Amerika</territory>
 			<territory type="029">Karibik</territory>
 			<territory type="030">Východná Ázia</territory>
+			<territory type="034">Južná Ázia</territory>
 			<territory type="035">Juhovýchodná Ázia</territory>
 			<territory type="039">Južná Európa</territory>
 			<territory type="053">Austrália a Nový Zéland</territory>
 			<territory type="054">Melanézia</territory>
 			<territory type="057">Mikronésia</territory>
 			<territory type="061">Polynézia</territory>
-			<territory type="062">Južná Ázia</territory>
+			<territory type="062">Stredná a južná Ázia</territory>
 			<territory type="142">Ázia</territory>
+			<territory type="143">Stredná Ázia</territory>
 			<territory type="145">Západná Ázia</territory>
 			<territory type="150">Európa</territory>
 			<territory type="151">Východná Európa</territory>
 			<territory type="154">Severná Európa</territory>
 			<territory type="155">Západná Európa</territory>
+			<territory type="172">Spoločenstvo nezávislých štátov</territory>
 			<territory type="200">Československo</territory>
+			<territory type="419">Latinská Amerika a Karibik</territory>
 			<territory type="830">Kanál La Manche</territory>
 			<territory type="AD">Andorra</territory>
 			<territory type="AE">Spojené arabské emiráty</territory>
 			<territory type="AF">Afganistan</territory>
 			<territory type="AG">Antigua a Barbados</territory>
-			<territory type="AG" alt="proposed-x1001" draft="unconfirmed">Antigua a Barbuda</territory>
 			<territory type="AI">Anguilla</territory>
 			<territory type="AL">Albánsko</territory>
 			<territory type="AM">Arménsko</territory>
 			<territory type="AN">Holandské Antily</territory>
 			<territory type="AO">Angola</territory>
 			<territory type="AQ">Antarctica</territory>
-			<territory type="AQ" alt="proposed-x1001" draft="unconfirmed">Antarktída</territory>
 			<territory type="AR">Argentína</territory>
 			<territory type="AS">Americká Samoa</territory>
 			<territory type="AT">Rakúsko</territory>
 			<territory type="AU">Austrália</territory>
 			<territory type="AW">Aruba</territory>
 			<territory type="AX">Alandské ostrovy</territory>
-			<territory type="AX" alt="proposed-x1001" draft="unconfirmed">Alandy</territory>
 			<territory type="AZ">Azerbajdžan</territory>
 			<territory type="BA">Bosna a Hercegovina</territory>
 			<territory type="BB">Barbados</territory>
@@ -222,22 +254,20 @@
 			<territory type="BH">Bahrajn</territory>
 			<territory type="BI">Burundi</territory>
 			<territory type="BJ">Benin</territory>
+			<territory type="BL">Svätý Bartolomej</territory>
 			<territory type="BM">Bermudy</territory>
 			<territory type="BN">Brunej</territory>
 			<territory type="BO">Bolívia</territory>
 			<territory type="BR">Brazília</territory>
 			<territory type="BS">Bahamy</territory>
 			<territory type="BT">Bután</territory>
-			<territory type="BT" alt="proposed-x1001" draft="unconfirmed">Bhután</territory>
 			<territory type="BV">Bouvetov ostrov</territory>
 			<territory type="BW">Botswana</territory>
 			<territory type="BY">Bielorusko</territory>
 			<territory type="BZ">Belize</territory>
 			<territory type="CA">Kanada</territory>
 			<territory type="CC">Kokosové (Keelingove) ostrovy</territory>
-			<territory type="CC" alt="proposed-x1001" draft="unconfirmed">Kokosové ostrovy</territory>
 			<territory type="CD">Konžská demokratická republika</territory>
-			<territory type="CD" alt="proposed-x1001" draft="unconfirmed">Kongo, demokratická republika</territory>
 			<territory type="CF">Stredoafrická republika</territory>
 			<territory type="CG">Kongo</territory>
 			<territory type="CH">Švajčiarsko</territory>
@@ -271,7 +301,6 @@
 			<territory type="FJ">Fidži</territory>
 			<territory type="FK">Falklandské ostrovy</territory>
 			<territory type="FM">Mikronézia, Federatívne štáty</territory>
-			<territory type="FM" alt="proposed-x1001" draft="unconfirmed">Mikronézia</territory>
 			<territory type="FO">Faerské ostrovy</territory>
 			<territory type="FR">Francúzsko</territory>
 			<territory type="GA">Gabon</territory>
@@ -279,8 +308,7 @@
 			<territory type="GD">Grenada</territory>
 			<territory type="GE">Gruzínsko</territory>
 			<territory type="GF">Francúzska Guayana</territory>
-			<territory type="GF" alt="proposed-x1001" draft="unconfirmed">Francúzska Guyana</territory>
-			<territory type="GG" draft="provisional">Guernsey</territory>
+			<territory type="GG">Guernsey</territory>
 			<territory type="GH">Ghana</territory>
 			<territory type="GI">Gibraltár</territory>
 			<territory type="GL">Grónsko</territory>
@@ -294,9 +322,8 @@
 			<territory type="GU">Guam</territory>
 			<territory type="GW">Guinea-Bissau</territory>
 			<territory type="GY">Guayana</territory>
-			<territory type="HK">Hong Kong S.A.R. Číny</territory>
+			<territory type="HK">Hong Kong</territory>
 			<territory type="HM">Heardove ostrovy a McDonaldove ostrovy</territory>
-			<territory type="HM" alt="proposed-x1001" draft="unconfirmed">Heard a McDonaldské ostrovy</territory>
 			<territory type="HN">Honduras</territory>
 			<territory type="HR">Chorvátsko</territory>
 			<territory type="HT">Haiti</territory>
@@ -305,15 +332,13 @@
 			<territory type="IE">Írsko</territory>
 			<territory type="IL">Izrael</territory>
 			<territory type="IM">Ostrov Man</territory>
-			<territory type="IM" alt="proposed-x1001" draft="unconfirmed">Isle of Man</territory>
 			<territory type="IN">India</territory>
 			<territory type="IO">Britské územie v Indickom oceáne</territory>
-			<territory type="IO" alt="proposed-x1001" draft="unconfirmed">Oceánské teritórium Britskej Indie</territory>
 			<territory type="IQ">Irak</territory>
 			<territory type="IR">Irán</territory>
 			<territory type="IS">Island</territory>
 			<territory type="IT">Taliansko</territory>
-			<territory type="JE" draft="provisional">Jersey</territory>
+			<territory type="JE">Jersey</territory>
 			<territory type="JM">Jamajka</territory>
 			<territory type="JO">Jordánsko</territory>
 			<territory type="JP">Japonsko</territory>
@@ -323,16 +348,12 @@
 			<territory type="KI">Kiribati</territory>
 			<territory type="KM">Komory</territory>
 			<territory type="KN">Saint Kitts a Nevis</territory>
-			<territory type="KN" alt="proposed-x1001" draft="unconfirmed">Sv. Kitts a Nevis</territory>
 			<territory type="KP">Kórea, Severná</territory>
-			<territory type="KP" alt="proposed-x1001" draft="unconfirmed">Severná Kórea</territory>
 			<territory type="KR">Kórea, Južná</territory>
-			<territory type="KR" alt="proposed-x1001" draft="unconfirmed">Južná Kórea</territory>
 			<territory type="KW">Kuvajt</territory>
 			<territory type="KY">Kajmanské ostrovy</territory>
 			<territory type="KZ">Kazachstan</territory>
 			<territory type="LA">Laoská ľudovodemokratická republika</territory>
-			<territory type="LA" alt="proposed-x1001" draft="unconfirmed">Laos</territory>
 			<territory type="LB">Libanon</territory>
 			<territory type="LC">Svätá Lucia</territory>
 			<territory type="LI">Lichtenštajnsko</territory>
@@ -343,22 +364,18 @@
 			<territory type="LU">Luxembursko</territory>
 			<territory type="LV">Lotyšsko</territory>
 			<territory type="LY">Lýbijská arabská džamahírija</territory>
-			<territory type="LY" alt="proposed-x1001" draft="unconfirmed">Líbya</territory>
 			<territory type="MA">Maroko</territory>
 			<territory type="MC">Monako</territory>
 			<territory type="MD">Moldavsko, republika</territory>
-			<territory type="MD" alt="proposed-x1001" draft="unconfirmed">Moldavsko</territory>
-			<territory type="ME" draft="provisional">Čierna Hora</territory>
+			<territory type="ME">Čierna Hora</territory>
+			<territory type="MF">Svätý Martin</territory>
 			<territory type="MG">Madagaskar</territory>
 			<territory type="MH">Marshallove ostrovy</territory>
 			<territory type="MK">Macedónsko, republika</territory>
-			<territory type="MK" alt="proposed-x1001" draft="unconfirmed">Macedónsko</territory>
 			<territory type="ML">Mali</territory>
 			<territory type="MM">Mjanmarsko</territory>
-			<territory type="MM" alt="proposed-x1001" draft="unconfirmed">Myanmar</territory>
 			<territory type="MN">Mongolsko</territory>
-			<territory type="MO">Makao S.A.R. Číny</territory>
-			<territory type="MO" alt="proposed-x1001" draft="unconfirmed">Makao</territory>
+			<territory type="MO">Macao</territory>
 			<territory type="MP">Severné Mariány</territory>
 			<territory type="MQ">Martinik</territory>
 			<territory type="MR">Mauritánia</territory>
@@ -368,14 +385,12 @@
 			<territory type="MV">Maldivy</territory>
 			<territory type="MW">Malawi</territory>
 			<territory type="MX">Mexiko</territory>
-			<territory type="MX" alt="proposed-x1001" draft="unconfirmed">Maxiko</territory>
 			<territory type="MY">Malajzia</territory>
 			<territory type="MZ">Mozambik</territory>
 			<territory type="NA">Namíbia</territory>
 			<territory type="NC">Nová Kaledónia</territory>
 			<territory type="NE">Niger</territory>
 			<territory type="NF">Norfolkov ostrov</territory>
-			<territory type="NF" alt="proposed-x1001" draft="unconfirmed">Ostrov Norfolk</territory>
 			<territory type="NG">Nigéria</territory>
 			<territory type="NI">Nikaragua</territory>
 			<territory type="NL">Holandsko</territory>
@@ -396,44 +411,37 @@
 			<territory type="PN">Pitcairnove ostrovy</territory>
 			<territory type="PR">Portoriko</territory>
 			<territory type="PS">Palestínske územie</territory>
-			<territory type="PS" alt="proposed-x1001" draft="unconfirmed">Palestína</territory>
 			<territory type="PT">Portugalsko</territory>
 			<territory type="PW">Palau</territory>
 			<territory type="PY">Paraguaj</territory>
 			<territory type="QA">Katar</territory>
 			<territory type="QO">Tichomorie - ostatné</territory>
+			<territory type="QU">Európska únia</territory>
 			<territory type="RE">Reunion</territory>
 			<territory type="RO">Rumunsko</territory>
-			<territory type="RS" draft="provisional">Srbsko</territory>
+			<territory type="RS">Srbsko</territory>
 			<territory type="RU">Ruská federácia</territory>
-			<territory type="RU" alt="proposed-x1001" draft="unconfirmed">Rusko</territory>
 			<territory type="RW">Rwanda</territory>
 			<territory type="SA">Saudská Arábia</territory>
 			<territory type="SB">Šalamúnove ostrovy</territory>
 			<territory type="SC">Seychelské ostrovy</territory>
-			<territory type="SC" alt="proposed-x1001" draft="unconfirmed">Seychely</territory>
 			<territory type="SD">Sudán</territory>
 			<territory type="SE">Švédsko</territory>
 			<territory type="SG">Singapur</territory>
 			<territory type="SH">Svätá Helena</territory>
 			<territory type="SI">Slovinsko</territory>
 			<territory type="SJ">Špicbergy a Jan Mayen</territory>
-			<territory type="SJ" alt="proposed-x1001" draft="unconfirmed">Svalbard a Jan Mayern</territory>
 			<territory type="SK">Slovenská republika</territory>
-			<territory type="SK" alt="proposed-x1001" draft="unconfirmed">SLOVENSKO</territory>
 			<territory type="SL">Sierra Leone</territory>
 			<territory type="SM">San Maríno</territory>
 			<territory type="SN">Senegal</territory>
 			<territory type="SO">Somálsko</territory>
 			<territory type="SR">Surinam</territory>
 			<territory type="ST">Svätý Tomáš a Princove ostrovy</territory>
-			<territory type="ST" alt="proposed-x1001" draft="unconfirmed">Svätý Tom a Principe</territory>
 			<territory type="SV">Salvador</territory>
 			<territory type="SY">Sýrska arabská republika</territory>
-			<territory type="SY" alt="proposed-x1001" draft="unconfirmed">Sýria</territory>
 			<territory type="SZ">Svazijsko</territory>
 			<territory type="TC">Turks a Caicos</territory>
-			<territory type="TC" alt="proposed-x1001" draft="unconfirmed">Ostrovy Turks a Caicos</territory>
 			<territory type="TD">Čad</territory>
 			<territory type="TF">Francúzske južné územia</territory>
 			<territory type="TG">Togo</territory>
@@ -448,24 +456,18 @@
 			<territory type="TT">Trinidad a Tobago</territory>
 			<territory type="TV">Tuvalu</territory>
 			<territory type="TW">Tajwan</territory>
-			<territory type="TW" alt="proposed-x1001" draft="unconfirmed">Taiwan</territory>
 			<territory type="TZ">Tanzánia</territory>
 			<territory type="UA">Ukrajina</territory>
 			<territory type="UG">Uganda</territory>
 			<territory type="UM">Menšie odľahlé ostrovy USA</territory>
-			<territory type="UM" alt="proposed-x1001" draft="unconfirmed">Americké Tichooceánske ostrovy</territory>
 			<territory type="US">Spojené štáty</territory>
-			<territory type="US" alt="proposed-x1001" draft="unconfirmed">Spojené štáty americké</territory>
 			<territory type="UY">Uruguaj</territory>
 			<territory type="UZ">Uzbekistan</territory>
 			<territory type="VA">Svätá stolica (Vatikánsky mestský štát)</territory>
-			<territory type="VA" alt="proposed-x1001" draft="unconfirmed">Vatikán</territory>
 			<territory type="VC">Svätý Vincent a Grenadíny</territory>
 			<territory type="VE">Venezuela</territory>
 			<territory type="VG">Britské panenské ostrovy</territory>
-			<territory type="VG" alt="proposed-x1001" draft="unconfirmed">Panenské ostrovy, Britské</territory>
 			<territory type="VI">Panenské ostrovy - USA</territory>
-			<territory type="VI" alt="proposed-x1001" draft="unconfirmed">Panenské ostrovy, US</territory>
 			<territory type="VN">Vietnam</territory>
 			<territory type="VU">Vanuatu</territory>
 			<territory type="WF">Wallis a Futuna</territory>
@@ -475,6 +477,7 @@
 			<territory type="ZA">Južná Afrika</territory>
 			<territory type="ZM">Zambia</territory>
 			<territory type="ZW">Zimbabwe</territory>
+			<territory type="ZZ">Neznámy alebo neplatný región</territory>
 		</territories>
 		<keys>
 			<key type="calendar">Kalendár</key>
@@ -482,22 +485,36 @@
 			<key type="currency">Mena</key>
 		</keys>
 		<types>
+			<type type="big5han" key="collation">Tradičný čínsky Big5</type>
 			<type type="buddhist" key="calendar">Buddhistický kalendár</type>
 			<type type="chinese" key="calendar">Čínsky kalendár</type>
 			<type type="direct" key="collation">Priame triedenie</type>
+			<type type="gb2312han" key="collation">Zjednodušený čínsky GB2312</type>
 			<type type="gregorian" key="calendar">Gregoriánsky kalendár</type>
 			<type type="hebrew" key="calendar">Židovský kalendár</type>
+			<type type="indian" key="calendar">Indický národný kalendár</type>
 			<type type="islamic" key="calendar">Islamský kalendár</type>
 			<type type="islamic-civil" key="calendar">Islamský občiansky kalendár</type>
 			<type type="japanese" key="calendar">Japonský kalendár</type>
 			<type type="phonebook" key="collation">Lexikografické triedenie</type>
 			<type type="pinyin" key="collation">Triedenie pinyin</type>
+			<type type="roc" key="calendar">Kalendár Čínskej republiky</type>
 			<type type="stroke" key="collation">Tiedenie podľa ťahov</type>
 			<type type="traditional" key="collation">Tradičné</type>
 		</types>
+		<measurementSystemNames>
+			<measurementSystemName type="US">Americký</measurementSystemName>
+			<measurementSystemName type="metric">Metrický</measurementSystemName>
+		</measurementSystemNames>
+		<codePatterns>
+			<codePattern type="language">Jazyk: {0}</codePattern>
+			<codePattern type="script">Skript: {0}</codePattern>
+			<codePattern type="territory">Región: {0}</codePattern>
+		</codePatterns>
 	</localeDisplayNames>
 	<characters>
 		<exemplarCharacters>[a á ä b c č d ď e é f-h {ch} i í j-l ĺ ľ m n ň o ó ô p-r ŕ s š t ť u ú v-y ý z ž]</exemplarCharacters>
+		<exemplarCharacters type="auxiliary">[á à ă â å ā æ ä ç é è ĕ ê ë ē í ì ĭ î ï ī ñ ó ò ŏ ö ø ō œ ô ß ú ù ŭ û ü ū ÿ]</exemplarCharacters>
 	</characters>
 	<delimiters>
 		<quotationStart>‚</quotationStart>
@@ -593,10 +610,10 @@
 				<quarters>
 					<quarterContext type="format">
 						<quarterWidth type="abbreviated">
-							<quarter type="1" draft="unconfirmed">Q1</quarter>
-							<quarter type="2" draft="unconfirmed">Q2</quarter>
-							<quarter type="3" draft="unconfirmed">Q3</quarter>
-							<quarter type="4" draft="unconfirmed">Q4</quarter>
+							<quarter type="1">Q1</quarter>
+							<quarter type="2">Q2</quarter>
+							<quarter type="3">Q3</quarter>
+							<quarter type="4">Q4</quarter>
 						</quarterWidth>
 						<quarterWidth type="wide">
 							<quarter type="1">1. štvrťrok</quarter>
@@ -606,8 +623,8 @@
 						</quarterWidth>
 					</quarterContext>
 				</quarters>
-				<am draft="unconfirmed">AM</am>
-				<pm draft="unconfirmed">PM</pm>
+				<am>AM</am>
+				<pm>PM</pm>
 				<eras>
 					<eraAbbr>
 						<era type="0">pred n.l.</era>
@@ -661,124 +678,239 @@
 				<dateTimeFormats>
 					<dateTimeFormatLength>
 						<dateTimeFormat>
-							<pattern draft="unconfirmed">{1} {0}</pattern>
+							<pattern>{1} {0}</pattern>
 						</dateTimeFormat>
 					</dateTimeFormatLength>
 					<availableFormats>
-						<dateFormatItem id="MMMMd" draft="unconfirmed">d. MMMM</dateFormatItem>
-						<dateFormatItem id="Md" draft="unconfirmed">d.M</dateFormatItem>
-						<dateFormatItem id="mmss" draft="unconfirmed">mm:ss</dateFormatItem>
-						<dateFormatItem id="yyQ" draft="unconfirmed">Q yy</dateFormatItem>
-						<dateFormatItem id="yyQQQQ" draft="unconfirmed">QQQQ yy</dateFormatItem>
-						<dateFormatItem id="yyyyM" draft="unconfirmed">M.yyyy</dateFormatItem>
-						<dateFormatItem id="yyyyMMMM" draft="unconfirmed">MMMM yyyy</dateFormatItem>
+						<dateFormatItem id="MMMMd">d. MMMM</dateFormatItem>
+						<dateFormatItem id="Md">d.M</dateFormatItem>
+						<dateFormatItem id="mmss">mm:ss</dateFormatItem>
+						<dateFormatItem id="yyQ">Q yy</dateFormatItem>
+						<dateFormatItem id="yyQQQQ">QQQQ yy</dateFormatItem>
+						<dateFormatItem id="yyyyM">M.yyyy</dateFormatItem>
+						<dateFormatItem id="yyyyMMMM">MMMM yyyy</dateFormatItem>
 					</availableFormats>
+					<intervalFormats>
+						<intervalFormatFallback>{0} - {1}</intervalFormatFallback>
+						<intervalFormatItem id="M">
+							<greatestDifference id="M">M.-M.</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MEd">
+							<greatestDifference id="M">E, d.M. - E, d.M.</greatestDifference>
+							<greatestDifference id="d">E, d.M. - E, d.M.</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMM">
+							<greatestDifference id="M">MMM-MMM</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMMEd">
+							<greatestDifference id="M">E, d. MMM - E, d. MMM</greatestDifference>
+							<greatestDifference id="d">E, d. - E, d. MMM</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMMM">
+							<greatestDifference id="M">LLLL-LLLL</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMMd">
+							<greatestDifference id="M">d. MMM - d. MMM</greatestDifference>
+							<greatestDifference id="d">d.-d. MMM</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="Md">
+							<greatestDifference id="M">d.M. - d.M.</greatestDifference>
+							<greatestDifference id="d">d.M. - d.M.</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="d">
+							<greatestDifference id="d">d.-d.</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="h">
+							<greatestDifference id="a">HH-HH</greatestDifference>
+							<greatestDifference id="h">H-H</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hm">
+							<greatestDifference id="a">HH:mm-HH:mm</greatestDifference>
+							<greatestDifference id="h">H:mm-H:mm</greatestDifference>
+							<greatestDifference id="m">H:mm-H:mm</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hmv">
+							<greatestDifference id="a">HH:mm-HH:mm v</greatestDifference>
+							<greatestDifference id="h">H:mm-H:mm v</greatestDifference>
+							<greatestDifference id="m">H:mm-H:mm v</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hv">
+							<greatestDifference id="a">HH-HH v</greatestDifference>
+							<greatestDifference id="h">H-H v</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="y">
+							<greatestDifference id="y">y-y</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yM">
+							<greatestDifference id="M">M.yyyy - M.yyyy</greatestDifference>
+							<greatestDifference id="y">M.yyyy - M.yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMEd">
+							<greatestDifference id="M">E, d.M.yyyy - E, d.M.yyyy</greatestDifference>
+							<greatestDifference id="d">E, d.M.yyyy - E, d.M.yyyy</greatestDifference>
+							<greatestDifference id="y">E, d.M.yyyy - E, d.M.yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMM">
+							<greatestDifference id="M">MMM-MMM yyyy</greatestDifference>
+							<greatestDifference id="y">MMM yyyy - MMM yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMMEd">
+							<greatestDifference id="M">E, d. MMM - E, d. MMM yyyy</greatestDifference>
+							<greatestDifference id="d">E, d. - E, d. MMM yyyy</greatestDifference>
+							<greatestDifference id="y">E, d. MMM yyyy - E, d. MMM yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMMd">
+							<greatestDifference id="M">d. MMM - d. MMM yyyy</greatestDifference>
+							<greatestDifference id="d">d.-d. MMM yyyy</greatestDifference>
+							<greatestDifference id="y">d. MMM yyyy - d. MMM yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMd">
+							<greatestDifference id="M">d.M.yyyy - d.M.yyyy</greatestDifference>
+							<greatestDifference id="d">d.M.yyyy - d.M.yyyy</greatestDifference>
+							<greatestDifference id="y">d.M.yyyy - d.M.yyyy</greatestDifference>
+						</intervalFormatItem>
+					</intervalFormats>
 				</dateTimeFormats>
+				<fields>
+					<field type="era">
+						<displayName>éra</displayName>
+					</field>
+					<field type="year">
+						<displayName>rok</displayName>
+					</field>
+					<field type="month">
+						<displayName>mesiac</displayName>
+					</field>
+					<field type="week">
+						<displayName>týždeň</displayName>
+					</field>
+					<field type="day">
+						<displayName>deň</displayName>
+						<relative type="0">dnes</relative>
+						<relative type="1">zajtra</relative>
+						<relative type="2">pozajtra</relative>
+						<relative type="3">o tri dni</relative>
+						<relative type="-1">včera</relative>
+						<relative type="-2">predvčerom</relative>
+						<relative type="-3">pred tromi dňami</relative>
+					</field>
+					<field type="weekday">
+						<displayName>deň v týždni</displayName>
+					</field>
+					<field type="hour">
+						<displayName>hodina</displayName>
+					</field>
+					<field type="minute">
+						<displayName>minúta</displayName>
+					</field>
+					<field type="second">
+						<displayName>sekunda</displayName>
+					</field>
+					<field type="zone">
+						<displayName>zóna</displayName>
+					</field>
+				</fields>
 			</calendar>
 		</calendars>
 		<timeZoneNames>
 			<hourFormat>+HHmm;-HHmm</hourFormat>
-			<gmtFormat draft="unconfirmed">GMT{0}</gmtFormat>
-			<regionFormat draft="unconfirmed">{0}</regionFormat>
+			<gmtFormat>GMT{0}</gmtFormat>
+			<regionFormat>{0}</regionFormat>
+			<zone type="Etc/Unknown">
+				<exemplarCity>Neznáme časové pásmo</exemplarCity>
+			</zone>
 			<zone type="Antarctica/South_Pole">
 				<exemplarCity>Južný pól</exemplarCity>
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">South Pole</exemplarCity>
 			</zone>
 			<zone type="Antarctica/DumontDUrville">
-				<exemplarCity draft="provisional">Dumont D'Urville</exemplarCity>
+				<exemplarCity>Dumont D'Urville</exemplarCity>
 			</zone>
 			<zone type="Atlantic/Bermuda">
-				<exemplarCity draft="provisional">Bermudy</exemplarCity>
+				<exemplarCity>Bermudy</exemplarCity>
 			</zone>
 			<zone type="Pacific/Easter">
-				<exemplarCity draft="provisional">Easter Island</exemplarCity>
+				<exemplarCity>Veľkonočné ostrovy</exemplarCity>
 			</zone>
 			<zone type="Asia/Shanghai">
 				<exemplarCity>Šanghaj</exemplarCity>
 			</zone>
 			<zone type="America/Costa_Rica">
-				<exemplarCity draft="provisional">Kostarika</exemplarCity>
+				<exemplarCity>Kostarika</exemplarCity>
 			</zone>
 			<zone type="Atlantic/Cape_Verde">
-				<exemplarCity draft="provisional">Kapverdy</exemplarCity>
+				<exemplarCity>Kapverdy</exemplarCity>
 			</zone>
 			<zone type="Africa/Djibouti">
-				<exemplarCity draft="provisional">Džibutsko</exemplarCity>
+				<exemplarCity>Džibutsko</exemplarCity>
 			</zone>
 			<zone type="America/Dominica">
-				<exemplarCity draft="provisional">Dominika</exemplarCity>
+				<exemplarCity>Dominika</exemplarCity>
 			</zone>
 			<zone type="Pacific/Galapagos">
 				<exemplarCity>Galapágy</exemplarCity>
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Galapagos</exemplarCity>
 			</zone>
 			<zone type="Atlantic/Canary">
 				<exemplarCity>Kanárske ostrovy</exemplarCity>
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Canary Islands</exemplarCity>
 			</zone>
 			<zone type="Pacific/Fiji">
-				<exemplarCity draft="provisional">Fidži</exemplarCity>
+				<exemplarCity>Fidži</exemplarCity>
 			</zone>
 			<zone type="Europe/London">
 				<exemplarCity>Londýn</exemplarCity>
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">London</exemplarCity>
 			</zone>
 			<zone type="Europe/Gibraltar">
-				<exemplarCity draft="provisional">Gibraltár</exemplarCity>
+				<exemplarCity>Gibraltár</exemplarCity>
 			</zone>
 			<zone type="Asia/Hong_Kong">
-				<exemplarCity draft="provisional">Hongkong</exemplarCity>
+				<exemplarCity>Hongkong</exemplarCity>
 			</zone>
 			<zone type="America/Jamaica">
-				<exemplarCity draft="provisional">Jamajka</exemplarCity>
+				<exemplarCity>Jamajka</exemplarCity>
 			</zone>
 			<zone type="America/St_Kitts">
-				<exemplarCity draft="provisional">St. Kitts</exemplarCity>
+				<exemplarCity>St. Kitts</exemplarCity>
 			</zone>
 			<zone type="Asia/Kuwait">
-				<exemplarCity draft="provisional">Kuvajt</exemplarCity>
+				<exemplarCity>Kuvajt</exemplarCity>
 			</zone>
 			<zone type="America/St_Lucia">
-				<exemplarCity draft="provisional">St. Lucia</exemplarCity>
+				<exemplarCity>St. Lucia</exemplarCity>
 			</zone>
 			<zone type="Europe/Luxembourg">
-				<exemplarCity draft="provisional">Luxembursko</exemplarCity>
+				<exemplarCity>Luxembursko</exemplarCity>
 			</zone>
 			<zone type="Europe/Monaco">
-				<exemplarCity draft="provisional">Monako</exemplarCity>
+				<exemplarCity>Monako</exemplarCity>
 			</zone>
 			<zone type="Asia/Ulaanbaatar">
 				<exemplarCity>Ulanbátar</exemplarCity>
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Ulaanbaatar</exemplarCity>
 			</zone>
 			<zone type="Asia/Macau">
-				<exemplarCity draft="provisional">Macao</exemplarCity>
+				<exemplarCity>Macao</exemplarCity>
 			</zone>
 			<zone type="America/Martinique">
-				<exemplarCity draft="provisional">Martinik</exemplarCity>
+				<exemplarCity>Martinik</exemplarCity>
 			</zone>
 			<zone type="Indian/Mauritius">
-				<exemplarCity draft="provisional">Maurícius</exemplarCity>
+				<exemplarCity>Maurícius</exemplarCity>
 			</zone>
 			<zone type="Indian/Maldives">
-				<exemplarCity draft="provisional">Maledivy</exemplarCity>
+				<exemplarCity>Maledivy</exemplarCity>
 			</zone>
 			<zone type="Pacific/Pitcairn">
-				<exemplarCity draft="provisional">Pitcairnove ostrovy</exemplarCity>
+				<exemplarCity>Pitcairnove ostrovy</exemplarCity>
 			</zone>
 			<zone type="America/Puerto_Rico">
-				<exemplarCity draft="provisional">Portoriko</exemplarCity>
+				<exemplarCity>Portoriko</exemplarCity>
 			</zone>
 			<zone type="Atlantic/Azores">
 				<exemplarCity>Azorské ostrovy</exemplarCity>
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Azores</exemplarCity>
 			</zone>
 			<zone type="Europe/Lisbon">
 				<exemplarCity>Lisabon</exemplarCity>
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Lisbon</exemplarCity>
 			</zone>
 			<zone type="Asia/Qatar">
-				<exemplarCity draft="provisional">Katar</exemplarCity>
+				<exemplarCity>Katar</exemplarCity>
 			</zone>
 			<zone type="Europe/Moscow">
 				<exemplarCity>Moskva</exemplarCity>
@@ -802,33 +934,34 @@
 				<exemplarCity>Kamčatka</exemplarCity>
 			</zone>
 			<zone type="Asia/Singapore">
-				<exemplarCity draft="provisional">Singapur</exemplarCity>
+				<exemplarCity>Singapur</exemplarCity>
 			</zone>
 			<zone type="America/El_Salvador">
-				<exemplarCity draft="provisional">Salvádor</exemplarCity>
+				<exemplarCity>Salvádor</exemplarCity>
 			</zone>
 			<zone type="Europe/Uzhgorod">
 				<exemplarCity>Užhorod</exemplarCity>
 			</zone>
 			<zone type="Europe/Kiev">
 				<exemplarCity>Kyjev</exemplarCity>
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Kiev</exemplarCity>
 			</zone>
 			<zone type="Europe/Zaporozhye">
 				<exemplarCity>Záporožie</exemplarCity>
 			</zone>
 			<zone type="America/Anchorage">
-				<exemplarCity draft="provisional">Aljašský čas</exemplarCity>
+				<exemplarCity>Aljaška</exemplarCity>
+			</zone>
+			<zone type="America/North_Dakota/New_Salem">
+				<exemplarCity>New Salem, Severná Dakota</exemplarCity>
 			</zone>
 			<zone type="Asia/Tashkent">
 				<exemplarCity>Taškent</exemplarCity>
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Tashkent</exemplarCity>
 			</zone>
 			<zone type="America/St_Vincent">
-				<exemplarCity draft="provisional">St. Vincent</exemplarCity>
+				<exemplarCity>St. Vincent</exemplarCity>
 			</zone>
 			<zone type="America/St_Thomas">
-				<exemplarCity draft="provisional">St. Thomas</exemplarCity>
+				<exemplarCity>St. Thomas</exemplarCity>
 			</zone>
 		</timeZoneNames>
 	</dates>
@@ -840,7 +973,7 @@
 		<currencyFormats>
 			<currencyFormatLength>
 				<currencyFormat>
-					<pattern>#,##0.00 ¤</pattern>
+					<pattern>#,##0.00 ¤</pattern>
 				</currencyFormat>
 			</currencyFormatLength>
 		</currencyFormats>
@@ -850,7 +983,6 @@
 			</currency>
 			<currency type="AED">
 				<displayName>UAE dirham</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Dirham Spojených arabských emirátov</displayName>
 			</currency>
 			<currency type="ALL">
 				<displayName>Albánsky lek</displayName>
@@ -884,7 +1016,6 @@
 			</currency>
 			<currency type="ARS">
 				<displayName>Argentinské peso</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Argentínske Peso</displayName>
 				<symbol>Arg$</symbol>
 			</currency>
 			<currency type="ATS">
@@ -892,7 +1023,6 @@
 			</currency>
 			<currency type="AUD">
 				<displayName>Austrálsky dolár</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Austrálske Dolár</displayName>
 				<symbol>$A</symbol>
 			</currency>
 			<currency type="AWG">
@@ -932,7 +1062,6 @@
 			</currency>
 			<currency type="BGN">
 				<displayName>Bulharský leva nový</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Bulharský Lev</displayName>
 			</currency>
 			<currency type="BHD">
 				<displayName>Bahraiský dinár</displayName>
@@ -948,10 +1077,9 @@
 			</currency>
 			<currency type="BND">
 				<displayName>Bruneiský dolár</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Brunejský dolár</displayName>
 			</currency>
 			<currency type="BOB">
-				<displayName draft="provisional">Bolívijské Boliviano</displayName>
+				<displayName>Bolívijské Boliviano</displayName>
 			</currency>
 			<currency type="BOP">
 				<displayName>Bolivíjske peso</displayName>
@@ -970,7 +1098,6 @@
 			</currency>
 			<currency type="BRL">
 				<displayName>Bolivíjsky real</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Brazilský real</displayName>
 			</currency>
 			<currency type="BRN">
 				<displayName>Brazílske Cruzado Novo</displayName>
@@ -1011,7 +1138,6 @@
 			</currency>
 			<currency type="CHF">
 				<displayName>Švajčiarský frank</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Švajčiarsky Frank</displayName>
 				<symbol>SwF</symbol>
 			</currency>
 			<currency type="CLF">
@@ -1019,17 +1145,14 @@
 			</currency>
 			<currency type="CLP">
 				<displayName>Čílske peso</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Čilské Peso</displayName>
 				<symbol>Ch$</symbol>
 			</currency>
 			<currency type="CNY">
 				<displayName>Čínsky Yuan Renminbi</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Čínský yuan</displayName>
 				<symbol>Y</symbol>
 			</currency>
 			<currency type="COP">
 				<displayName>Colombijské peso</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Kolumbijské peso</displayName>
 				<symbol>Col$</symbol>
 			</currency>
 			<currency type="CRC">
@@ -1058,7 +1181,6 @@
 			</currency>
 			<currency type="DEM">
 				<displayName>Nemecká marka</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Nemecké marky</displayName>
 			</currency>
 			<currency type="DJF">
 				<displayName>Džibutský frank</displayName>
@@ -1066,7 +1188,6 @@
 			</currency>
 			<currency type="DKK">
 				<displayName>Dánska krone</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Dánská Koruna</displayName>
 				<symbol>DKr</symbol>
 			</currency>
 			<currency type="DOP">
@@ -1085,7 +1206,6 @@
 			</currency>
 			<currency type="EEK">
 				<displayName>Estónska kroon</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Estónska Koruna</displayName>
 			</currency>
 			<currency type="EGP">
 				<displayName>Egyptská libra</displayName>
@@ -1108,7 +1228,6 @@
 			</currency>
 			<currency type="FJD">
 				<displayName>Fiji dolár</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Fidžijský dolár</displayName>
 				<symbol>F$</symbol>
 			</currency>
 			<currency type="FKP">
@@ -1116,7 +1235,6 @@
 			</currency>
 			<currency type="FRF">
 				<displayName>Francúzsky frank</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Francúzske Franky</displayName>
 			</currency>
 			<currency type="GBP">
 				<displayName>Britská libra</displayName>
@@ -1166,7 +1284,6 @@
 			</currency>
 			<currency type="HKD">
 				<displayName>Hong Kongský dolár</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Hongkongské Doláre</displayName>
 				<symbol>HK$</symbol>
 			</currency>
 			<currency type="HNL">
@@ -1202,7 +1319,6 @@
 			</currency>
 			<currency type="INR">
 				<displayName>Indijská rupia</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Indická rupia</displayName>
 				<symbol>INR</symbol>
 			</currency>
 			<currency type="IQD">
@@ -1283,7 +1399,6 @@
 			</currency>
 			<currency type="LTL">
 				<displayName>Litevská lita</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Litovský litas</displayName>
 			</currency>
 			<currency type="LTT">
 				<displayName>Litevský talonas</displayName>
@@ -1339,7 +1454,6 @@
 			</currency>
 			<currency type="MTL">
 				<displayName>Maltská lira</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Maltská líra</displayName>
 				<symbol>Lm</symbol>
 			</currency>
 			<currency type="MTP">
@@ -1367,7 +1481,6 @@
 			</currency>
 			<currency type="MYR">
 				<displayName>Malajský ringgit</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Malajzský ringgit</displayName>
 				<symbol>RM</symbol>
 			</currency>
 			<currency type="MZE">
@@ -1395,7 +1508,6 @@
 			</currency>
 			<currency type="NOK">
 				<displayName>Nórksy krone</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Nórska Koruna</displayName>
 				<symbol>NKr</symbol>
 			</currency>
 			<currency type="NPR">
@@ -1404,7 +1516,6 @@
 			</currency>
 			<currency type="NZD">
 				<displayName>Novozélandský dolár</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Novozélandské Doláre</displayName>
 				<symbol>$NZ</symbol>
 			</currency>
 			<currency type="OMR">
@@ -1419,7 +1530,6 @@
 			</currency>
 			<currency type="PEN">
 				<displayName>Peruvský sol Nuevo</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Peruánsky nový sol</displayName>
 			</currency>
 			<currency type="PES">
 				<displayName>Peruvský sol</displayName>
@@ -1432,12 +1542,10 @@
 			</currency>
 			<currency type="PKR">
 				<displayName>Pakistanská rupia</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Pakistánska rupia</displayName>
 				<symbol>Pra</symbol>
 			</currency>
 			<currency type="PLN">
 				<displayName>Polský zloty</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Poľský zlotý</displayName>
 				<symbol>Zl</symbol>
 			</currency>
 			<currency type="PLZ">
@@ -1458,10 +1566,10 @@
 				<symbol>leu</symbol>
 			</currency>
 			<currency type="RON">
-				<displayName draft="provisional">Rumunský Lei</displayName>
+				<displayName>Rumunský Lei</displayName>
 			</currency>
 			<currency type="RSD">
-				<displayName draft="provisional">Srbský dinár</displayName>
+				<displayName>Srbský dinár</displayName>
 			</currency>
 			<currency type="RUB">
 				<displayName>Ruský rubeľ</displayName>
@@ -1474,7 +1582,6 @@
 			</currency>
 			<currency type="SAR">
 				<displayName>Saudský riyal</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Saudský riál</displayName>
 				<symbol>SRl</symbol>
 			</currency>
 			<currency type="SBD">
@@ -1493,12 +1600,10 @@
 			</currency>
 			<currency type="SEK">
 				<displayName>Švédska krona</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Švédská Koruna</displayName>
 				<symbol>SKr</symbol>
 			</currency>
 			<currency type="SGD">
 				<displayName>Singapúrsky dolár</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Singapurské Doláre</displayName>
 				<symbol>S$</symbol>
 			</currency>
 			<currency type="SHP">
@@ -1506,7 +1611,6 @@
 			</currency>
 			<currency type="SIT">
 				<displayName>Slovinský Tolar</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Slovinský Toliar</displayName>
 			</currency>
 			<currency type="SKK">
 				<displayName>Slovenská koruna</displayName>
@@ -1517,7 +1621,7 @@
 			</currency>
 			<currency type="SOS">
 				<displayName>Somálsky šiling</displayName>
-				<symbol>So. Sh.</symbol>
+				<symbol>Sh.</symbol>
 			</currency>
 			<currency type="SRG">
 				<displayName>Surinamský guilder</displayName>
@@ -1543,7 +1647,6 @@
 			</currency>
 			<currency type="THB">
 				<displayName>Thajský bát</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Thaiský baht</displayName>
 			</currency>
 			<currency type="TJR">
 				<displayName>Tadžikistanský rubeľ</displayName>
@@ -1566,11 +1669,10 @@
 			</currency>
 			<currency type="TRL">
 				<displayName>Turecká lira</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Turecká líra</displayName>
 				<symbol>TL</symbol>
 			</currency>
 			<currency type="TRY">
-				<displayName draft="provisional">Nová turecká líra</displayName>
+				<displayName>Nová turecká líra</displayName>
 			</currency>
 			<currency type="TTD">
 				<displayName>Trinidad a Tobago dolár</displayName>
@@ -1578,7 +1680,6 @@
 			</currency>
 			<currency type="TWD">
 				<displayName>Taiwanský nový dolár</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Nový Taiwanský Dolár</displayName>
 				<symbol>NT$</symbol>
 			</currency>
 			<currency type="TZS">
@@ -1587,7 +1688,6 @@
 			</currency>
 			<currency type="UAH">
 				<displayName>Ukrainská hrivna</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Ukrajinská hrivna</displayName>
 			</currency>
 			<currency type="UAK">
 				<displayName>Ukrainský karbovanetz</displayName>
@@ -1601,7 +1701,6 @@
 			</currency>
 			<currency type="USD">
 				<displayName>US dolár</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Americký dolár (USD)</displayName>
 			</currency>
 			<currency type="USN">
 				<displayName>US dolár (Next day)</displayName>

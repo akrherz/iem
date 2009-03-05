@@ -15,7 +15,8 @@
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage YouTube
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -29,7 +30,8 @@ require_once 'Zend/Gdata/Extension.php';
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage YouTube
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Gdata_YouTube_Extension_Position extends Zend_Gdata_Extension
@@ -39,93 +41,49 @@ class Zend_Gdata_YouTube_Extension_Position extends Zend_Gdata_Extension
     protected $_rootNamespace = 'yt';
 
     /**
-     * Represents the 1-based position in the playlist
-     *
-     * @var int
-     */
-    protected $_value = null;
-
-    /**
      * Constructs a new Zend_Gdata_YouTube_Extension_Position object.
-     * 
+     *
      * @param string $value (optional) The 1-based position in the playlist
      */
-    public function __construct($value = null) 
+    public function __construct($value = null)
     {
-        foreach (Zend_Gdata_YouTube::$namespaces as $nsPrefix => $nsUri) {
-            $this->registerNamespace($nsPrefix, $nsUri);
-        }
+        $this->registerAllNamespaces(Zend_Gdata_YouTube::$namespaces);
         parent::__construct();
-        $this->_value = $value;
+        $this->_text = $value;
     }
 
     /**
-     * Retrieves a DOMElement which corresponds to this element and all 
-     * child properties.  This is used to build an entry back into a DOM
-     * and eventually XML text for sending to the server upon updates, or
-     * for application storage/persistence.  
+     * Get the value for the position in the playlist
      *
-     * @param DOMDocument $doc The DOMDocument used to construct DOMElements
-     * @return DOMElement The DOMElement representing this element and all 
-     * child properties.
-     */
-    public function getDOM($doc = null)
-    {
-        $element = parent::getDOM($doc);
-        if ($this->_value != null) {
-            $element->setAttribute('value', $this->_value);
-        }
-        return $element;
-    }
-
-    /**
-     * Given a DOMNode representing an attribute, tries to map the data into
-     * instance members.  If no mapping is defined, the name and value are 
-     * stored in an array.
-     *
-     * @param DOMNode $attribute The DOMNode attribute needed to be handled
-     */
-    protected function takeAttributeFromDOM($attribute)
-    {
-        switch ($attribute->localName) {
-        case 'value':
-            $this->_value = $attribute->nodeValue;
-            break;
-        default:
-            parent::takeAttributeFromDOM($attribute);
-        }
-    }
-
-    /**
-     * Get the value for this element's Value attribute.
-     *
-     * @return var The 1-based position in the playlist
+     * @return int The 1-based position in the playlist
      */
     public function getValue()
     {
-        return $this->_value;
+        return $this->_text;
     }
 
     /**
-     * Set the value for this element's Value attribute.
+     * Set the value for the position in the playlist
      *
      * @param int $value The 1-based position in the playlist
      * @return Zend_Gdata_Extension_Visibility The element being modified
      */
     public function setValue($value)
     {
-        $this->_value = $value;
+        $this->_text = $value;
         return $this;
     }
 
     /**
      * Magic toString method allows using this directly via echo
      * Works best in PHP >= 4.2.0
+     *
+     * @return string
      */
     public function __toString()
     {
         return $this->getValue();
     }
-    
+
 }
 

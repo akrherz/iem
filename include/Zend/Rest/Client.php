@@ -15,7 +15,7 @@
  * @category   Zend
  * @package    Zend_Rest
  * @subpackage Client
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -33,7 +33,7 @@ require_once 'Zend/Uri.php';
  * @category   Zend
  * @package    Zend_Rest
  * @subpackage Client
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Rest_Client extends Zend_Service_Abstract
@@ -117,7 +117,7 @@ class Zend_Rest_Client extends Zend_Service_Abstract
          * Get the HTTP client and configure it for the endpoint URI.  Do this each time
          * because the Zend_Http_Client instance is shared among all Zend_Service_Abstract subclasses.
          */
-        self::getHttpClient()->setUri($this->_uri);
+        self::getHttpClient()->resetParameters()->setUri($this->_uri);
     }
 
     /**
@@ -205,12 +205,6 @@ class Zend_Rest_Client extends Zend_Service_Abstract
      * $response = $rest->sayHello('Foo', 'Manchu')->get();
      * </code>
      *
-     * You can also use an HTTP request method as a calling method, using the
-     * path as the first argument:
-     * <code>
-     * $rest->get('/sayHello', 'Foo', 'Manchu');
-     * </code>
-     *
      * Or use them together, but in sequential calls:
      * <code>
      * $rest->sayHello('Foo', 'Manchu');
@@ -233,12 +227,17 @@ class Zend_Rest_Client extends Zend_Service_Abstract
             $this->_data['rest'] = 1;
             $data = array_slice($args, 1) + $this->_data;
             $response = $this->{'rest' . $method}($args[0], $data);
+            $this->_data = array();//Initializes for next Rest method.
             return new Zend_Rest_Client_Result($response->getBody());
         } else {
             // More than one arg means it's definitely a Zend_Rest_Server
             if (sizeof($args) == 1) {
-                $this->_data[$method] = $args[0];
-                $this->_data['arg1']  = $args[0];
+                // Uses first called function name as method name
+                if (!isset($this->_data['method'])) {
+                    $this->_data['method'] = $method;
+                    $this->_data['arg1']  = $args[0];
+                }
+                $this->_data[$method]  = $args[0];
             } else {
                 $this->_data['method'] = $method;
                 if (sizeof($args) > 0) {
