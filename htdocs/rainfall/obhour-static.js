@@ -238,8 +238,8 @@ var viewport = new Ext.Viewport({
     items:[
          new Ext.BoxComponent({ // raw
              region:'north',
-             el: 'header',
-             height:60
+             el: 'iem-header',
+             height:130
          }),
          new Ext.BoxComponent({ // raw
              region:'south',
