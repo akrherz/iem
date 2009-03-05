@@ -24,12 +24,12 @@ include("adodb-time.inc.php");
 $station = $_GET["station"];
 $stations = $_GET["station"];
 $stationString = "(";
-$selectAll = false;
+$selectAll = 0;
 $multipleSelected = false;
 $i = 0;
 foreach ($stations as $key => $value){
   if ($value == "_ALL"){
-    $selectAll = true;
+    $selectAll = 1;
   }
   $stationString .= " '". $value ."',";
   $i++;
@@ -40,7 +40,7 @@ if ($i > 1) $multipleSelected = true;
 if ($selectAll){
   $stationString = "(";
   foreach ($cities as $key => $value){
-    $stationString .= " '". $key ."',";
+    $stationString .= " '". strtolower($key) ."',";
   }
 }
 
@@ -90,7 +90,6 @@ if ($what == "download"){
 
 if ($what != "plot"){
  $connection =iemdb("coop");
-
  $rs =  pg_exec($connection, $sqlStr);
 
  pg_close($connection);
