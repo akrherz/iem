@@ -14,7 +14,7 @@
  *
  * @category   Zend
  * @package    Zend_Mime
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -24,16 +24,11 @@
 require_once 'Zend/Mime.php';
 
 /**
- * Zend_Mime_Exception
- */
-require_once 'Zend/Mime/Exception.php';
-
-/**
  * Class representing a MIME part.
  *
  * @category   Zend
  * @package    Zend_Mime
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Mime_Part {
@@ -46,6 +41,8 @@ class Zend_Mime_Part {
     public $description;
     public $charset;
     public $boundary;
+    public $location;
+    public $language;
     protected $_content;
     protected $_isStream = false;
 
@@ -94,6 +91,7 @@ class Zend_Mime_Part {
     public function getEncodedStream()
     {
         if (!$this->_isStream) {
+            require_once 'Zend/Mime/Exception.php';
             throw new Zend_Mime_Exception('Attempt to get a stream from a string part');
         }
 
@@ -110,6 +108,7 @@ class Zend_Mime_Part {
                     )
                 );
                 if (!is_resource($filter)) {
+                    require_once 'Zend/Mime/Exception.php';
                     throw new Zend_Mime_Exception('Failed to append quoted-printable filter');
                 }
                 break;
@@ -124,6 +123,7 @@ class Zend_Mime_Part {
                     )
                 );
                 if (!is_resource($filter)) {
+                    require_once 'Zend/Mime/Exception.php';
                     throw new Zend_Mime_Exception('Failed to append base64 filter');
                 }
                 break;
@@ -186,6 +186,14 @@ class Zend_Mime_Part {
 
         if ($this->description) {
             $headers[] = array('Content-Description', $this->description);
+        }
+
+        if ($this->location) {
+            $headers[] = array('Content-Location', $this->location);
+        }
+
+        if ($this->language){
+            $headers[] = array('Content-Language', $this->language);
         }
 
         return $headers;

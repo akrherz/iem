@@ -14,7 +14,7 @@
  *
  * @category   Zend
  * @package    Zend_Controller
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -25,7 +25,7 @@
  *
  * @package Zend_Controller
  * @subpackage Response
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Controller_Response_Abstract
@@ -83,6 +83,22 @@ abstract class Zend_Controller_Response_Abstract
     public $headersSentThrowsException = true;
 
     /**
+     * Normalize a header name
+     *
+     * Normalizes a header name to X-Capitalized-Names
+     * 
+     * @param  string $name 
+     * @return string
+     */
+    protected function _normalizeHeader($name)
+    {
+        $filtered = str_replace(array('-', '_'), ' ', (string) $name);
+        $filtered = ucwords(strtolower($filtered));
+        $filtered = str_replace(' ', '-', $filtered);
+        return $filtered;
+    }
+
+    /**
      * Set a header
      *
      * If $replace is true, replaces any headers already defined with that
@@ -96,7 +112,7 @@ abstract class Zend_Controller_Response_Abstract
     public function setHeader($name, $value, $replace = false)
     {
         $this->canSendHeaders(true);
-        $name  = (string) $name;
+        $name  = $this->_normalizeHeader($name);
         $value = (string) $value;
 
         if ($replace) {

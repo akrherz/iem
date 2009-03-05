@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Zend Framework
  *
@@ -15,34 +14,31 @@
  *
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: NotEmpty.php 5134 2007-06-06 17:54:16Z darby $
+ * @version    $Id: NotEmpty.php 13249 2008-12-14 19:29:40Z thomas $
  */
-
 
 /**
  * @see Zend_Validate_Abstract
  */
 require_once 'Zend/Validate/Abstract.php';
 
-
 /**
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Validate_NotEmpty extends Zend_Validate_Abstract
 {
-
     const IS_EMPTY = 'isEmpty';
 
     /**
      * @var array
      */
     protected $_messageTemplates = array(
-        self::IS_EMPTY => "Value is empty, but a non-empty value is required"
+        self::IS_EMPTY => "Value is required and can't be empty"
     );
 
     /**
@@ -55,11 +51,15 @@ class Zend_Validate_NotEmpty extends Zend_Validate_Abstract
      */
     public function isValid($value)
     {
-        $valueString = (string) $value;
+        $this->_setValue((string) $value);
 
-        $this->_setValue($valueString);
-
-        if (empty($value)) {
+        if (is_string($value)
+            && (('' === $value)
+                || preg_match('/^\s+$/s', $value))
+        ) {
+            $this->_error();
+            return false;
+        } elseif (!is_string($value) && empty($value)) {
             $this->_error();
             return false;
         }

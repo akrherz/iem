@@ -15,7 +15,8 @@
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Gapps
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -38,7 +39,8 @@ require_once('Zend/Gdata/Gapps.php');
   * 
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Gapps
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Gdata_Gapps_Query extends Zend_Gdata_Query
@@ -72,7 +74,7 @@ abstract class Zend_Gdata_Gapps_Query extends Zend_Gdata_Query
      * constructed prior to using any methods which interact with the Google 
      * Apps provisioning service.
      * 
-     * @param value The domain to be used for this session.
+     * @param string $value The domain to be used for this session.
      */
     public function setDomain($value)
     {

@@ -15,7 +15,7 @@
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -32,7 +32,7 @@ require_once 'Zend/View/Helper/FormElement.php';
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_View_Helper_FormTextarea extends Zend_View_Helper_FormElement
@@ -75,34 +75,28 @@ class Zend_View_Helper_FormTextarea extends Zend_View_Helper_FormElement
         $info = $this->_getInfo($name, $value, $attribs);
         extract($info); // name, value, attribs, options, listsep, disable
 
-        // build the element
+        // is it disabled?
+        $disabled = '';
         if ($disable) {
-
             // disabled.
-            $xhtml = $this->_hidden($name, $value)
-                   . nl2br($this->view->escape($value));
-
-        } else {
-
-            // enabled.
-
-            // first, make sure that there are 'rows' and 'cols' values
-            // as required by the spec.  noted by Orjan Persson.
-            if (empty($attribs['rows'])) {
-                $attribs['rows'] = (int) $this->rows;
-            }
-
-            if (empty($attribs['cols'])) {
-                $attribs['cols'] = (int) $this->cols;
-            }
-
-            // now build the element.
-            $xhtml = '<textarea name="' . $this->view->escape($name) . '"'
-                   . ' id="' . $this->view->escape($id) . '"'
-                   . $this->_htmlAttribs($attribs) . '>'
-                   . $this->view->escape($value) . '</textarea>';
-
+            $disabled = ' disabled="disabled"';
         }
+
+        // Make sure that there are 'rows' and 'cols' values
+        // as required by the spec.  noted by Orjan Persson.
+        if (empty($attribs['rows'])) {
+            $attribs['rows'] = (int) $this->rows;
+        }
+        if (empty($attribs['cols'])) {
+            $attribs['cols'] = (int) $this->cols;
+        }
+
+        // build the element
+        $xhtml = '<textarea name="' . $this->view->escape($name) . '"'
+                . ' id="' . $this->view->escape($id) . '"'
+                . $disabled
+                . $this->_htmlAttribs($attribs) . '>'
+                . $this->view->escape($value) . '</textarea>';
 
         return $xhtml;
     }

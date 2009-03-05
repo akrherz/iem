@@ -16,9 +16,9 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Amazon
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: SimilarProduct.php 4357 2007-04-04 22:32:40Z darby $
+ * @version    $Id: SimilarProduct.php 14126 2009-02-20 16:15:52Z sidhighwind $
  */
 
 
@@ -26,11 +26,21 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Amazon
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Amazon_SimilarProduct
 {
+    /**
+     * @var string
+     */
+    public $ASIN;
+
+    /**
+     * @var string
+     */
+    public $Title;
+
     /**
      * Assigns values to properties relevant to SimilarProduct
      *

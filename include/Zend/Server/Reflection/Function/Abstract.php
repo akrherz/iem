@@ -13,8 +13,8 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Controller
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @package    Zend_Server
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -51,9 +51,9 @@ require_once 'Zend/Server/Reflection/Prototype.php';
  * @category   Zend
  * @package    Zend_Server
  * @subpackage Reflection
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version $Id: Abstract.php 5756 2007-07-18 21:07:42Z thomas $
+ * @version $Id: Abstract.php 12619 2008-11-13 15:24:29Z alexander $
  */
 abstract class Zend_Server_Reflection_Function_Abstract
 {
@@ -339,6 +339,11 @@ abstract class Zend_Server_Reflection_Function_Abstract
             }
         }
 
+        if (count($paramTypesTmp) != $paramCount) {
+            throw new Zend_Server_Reflection_Exception(
+               'Variable number of arguments is not supported for services (except optional parameters). '
+             . 'Number of function arguments must currespond to actual number of arguments described in a docblock.');
+        }
 
         $paramTypes = array();
         foreach ($paramTypesTmp as $i => $param) {

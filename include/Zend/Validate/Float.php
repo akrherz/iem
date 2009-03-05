@@ -15,9 +15,9 @@
  *
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Float.php 5229 2007-06-11 20:19:01Z darby $
+ * @version    $Id: Float.php 8714 2008-03-09 20:03:45Z thomas $
  */
 
 
@@ -30,7 +30,7 @@ require_once 'Zend/Validate/Abstract.php';
 /**
  * @category   Zend
  * @package    Zend_Validate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Validate_Float extends Zend_Validate_Abstract
@@ -61,8 +61,8 @@ class Zend_Validate_Float extends Zend_Validate_Abstract
 
         $locale = localeconv();
 
-        $valueFiltered = str_replace($locale['decimal_point'], '.', $valueString);
-        $valueFiltered = str_replace($locale['thousands_sep'], '', $valueFiltered);
+        $valueFiltered = str_replace($locale['thousands_sep'], '', $valueString);
+        $valueFiltered = str_replace($locale['decimal_point'], '.', $valueFiltered);
 
         if (strval(floatval($valueFiltered)) != $valueFiltered) {
             $this->_error();

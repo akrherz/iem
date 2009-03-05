@@ -4,18 +4,20 @@
  *
  * LICENSE
  *
- * This source file is subject to version 1.0 of the Zend Framework
- * license, that is bundled with this package in the file LICENSE.txt, and
- * is available through the world-wide-web at the following URL:
- * http://framework.zend.com/license/new-bsd. If you did not receive
- * a copy of the Zend Framework license and are unable to obtain it
- * through the world-wide-web, please send a note to license@zend.com
- * so we can mail you a copy immediately.
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://framework.zend.com/license/new-bsd
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
  *
+ * @category   Zend
  * @package    Zend_XmlRpc
  * @subpackage Value
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: Value.php 12721 2008-11-20 18:21:58Z matthew $
  */
 
 
@@ -43,6 +45,9 @@ require_once 'Zend/XmlRpc/Value/Integer.php';
 /** Zend_XmlRpc_Value_String */
 require_once 'Zend/XmlRpc/Value/String.php';
 
+/** Zend_XmlRpc_Value_Nil */
+require_once 'Zend/XmlRpc/Value/Nil.php';
+
 /** Zend_XmlRpc_Value_Collection */
 require_once 'Zend/XmlRpc/Value/Collection.php';
 
@@ -64,7 +69,7 @@ require_once 'Zend/XmlRpc/Value/Struct.php';
  * from PHP variables, XML string or by specifing the exact XML-RPC natvie type
  *
  * @package    Zend_XmlRpc
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_XmlRpc_Value
@@ -115,6 +120,7 @@ abstract class Zend_XmlRpc_Value
     const XMLRPC_TYPE_BASE64   = 'base64';
     const XMLRPC_TYPE_ARRAY    = 'array';
     const XMLRPC_TYPE_STRUCT   = 'struct';
+    const XMLRPC_TYPE_NIL      = 'nil';
 
 
     /**
@@ -208,6 +214,9 @@ abstract class Zend_XmlRpc_Value
             case self::XMLRPC_TYPE_BASE64:
                 return new Zend_XmlRpc_Value_Base64($value);
 
+            case self::XMLRPC_TYPE_NIL:
+                return new Zend_XmlRpc_Value_Nil();
+
             case self::XMLRPC_TYPE_DATETIME:
                 return new Zend_XmlRpc_Value_DateTime($value);
 
@@ -224,18 +233,6 @@ abstract class Zend_XmlRpc_Value
 
 
     /**
-     * Callback used when determining if an array is associative
-     * 
-     * @param  int|string $a 
-     * @param  int|string $b 
-     * @return int
-     */
-    protected static function _isAssocCallback($a, $b)
-    {
-        return $a === $b ? $a + 1 : 0;
-    }
-
-    /**
      * Transform a PHP native variable into a XML-RPC native value
      *
      * @param mixed $value The PHP variable for convertion
@@ -247,7 +244,12 @@ abstract class Zend_XmlRpc_Value
     {
         switch (gettype($value)) {
             case 'object':
-                // We convert the object into a struct
+                // Check to see if it's an XmlRpc value
+                if ($value instanceof Zend_XmlRpc_Value) {
+                    return $value;
+                }
+                
+                // Otherwise, we convert the object into a struct
                 $value = get_object_vars($value);
                 // Break intentionally omitted
             case 'array':
@@ -255,14 +257,8 @@ abstract class Zend_XmlRpc_Value
                 $obj = 'Zend_XmlRpc_Value_Array';
 
                 // Determine if this is an associative array
-                if (is_array($value)) { // If the value is not array, it can't be an associated array
-                    if (count($value) 
-                        && (count($value) !== array_reduce(array_keys($value), array(__CLASS__, '_isAssocCallback'), 0))) 
-                    {
-                        // If the PHP array is an assosiative array the native 
-                        // type will be 'struct'
-                        $obj = 'Zend_XmlRpc_Value_Struct';
-                    }
+                if (!empty($value) && is_array($value) && (array_keys($value) !== range(0, count($value) - 1))) {
+                    $obj = 'Zend_XmlRpc_Value_Struct';
                 }
                 return new $obj($value);
 
@@ -274,6 +270,10 @@ abstract class Zend_XmlRpc_Value
 
             case 'boolean':
                 return new Zend_XmlRpc_Value_Boolean($value);
+
+            case 'NULL':
+            case 'null':
+                return new Zend_XmlRpc_Value_Nil();
 
             case 'string':
                 // Fall through to the next case
@@ -332,6 +332,9 @@ abstract class Zend_XmlRpc_Value
             case self::XMLRPC_TYPE_BASE64:    // The value should already be base64 encoded
                 $xmlrpc_val = new Zend_XmlRpc_Value_Base64($value ,true);
                 break;
+            case self::XMLRPC_TYPE_NIL:    // The value should always be NULL
+                $xmlrpc_val = new Zend_XmlRpc_Value_Nil();
+                break;
             case self::XMLRPC_TYPE_ARRAY:
                 // If the XML is valid, $value must be an SimpleXML element and contain the <data> tag
                 if (!$value instanceof SimpleXMLElement) {
@@ -370,7 +373,7 @@ abstract class Zend_XmlRpc_Value
                 foreach ($value->member as $member) {
                     // @todo? If a member doesn't have a <value> tag, we don't add it to the struct
                     // Maybe we want to throw an exception here ?
-                    if ((!$member->value instanceof SimpleXMLElement) || empty($member->value)) {
+                    if ((!$member->value instanceof SimpleXMLElement)) {
                         continue;
                         //throw new Zend_XmlRpc_Value_Exception('Member of the '. self::XMLRPC_TYPE_STRUCT .' XML-RPC native type must contain a VALUE tag');
                     }

@@ -1,70 +1,64 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.5/ldml.dtd">
+<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.6/ldml.dtd">
 <ldml>
 	<identity>
-		<version number="$Revision: 1.62 $"/>
-		<generation date="$Date: 2007/07/21 17:25:02 $"/>
+		<version number="$Revision: 1.65 $"/>
+		<generation date="$Date: 2008/06/15 08:09:47 $"/>
 		<language type="te"/>
 	</identity>
 	<localeDisplayNames>
 		<languages>
 			<language type="ar">అరబిక్</language>
-			<language type="ar" alt="proposed-x1001" draft="unconfirmed">అరబ్బీ</language>
-			<language type="bh" draft="unconfirmed">బీహారి</language>
-			<language type="bn" draft="unconfirmed">బెంగాలి</language>
-			<language type="cs" draft="unconfirmed">చెక్</language>
-			<language type="da" draft="unconfirmed">డానిష్</language>
+			<language type="bh">బీహారి</language>
+			<language type="bn">బెంగాలి</language>
+			<language type="cs">చెక్</language>
+			<language type="da">డానిష్</language>
 			<language type="de">ఙర్మన్</language>
-			<language type="de" alt="proposed-x1001" draft="unconfirmed">జర్మన్</language>
-			<language type="el" draft="unconfirmed">గ్రీకు</language>
+			<language type="el">గ్రీకు</language>
 			<language type="en">ఆంగ్లం</language>
-			<language type="en" alt="proposed-x1001" draft="unconfirmed">ఆంగ్లము</language>
 			<language type="es">స్పానిష్</language>
-			<language type="et" draft="unconfirmed">ఈస్టోనియను</language>
-			<language type="fa" draft="unconfirmed">పార్శీ</language>
-			<language type="fi" draft="unconfirmed">ఫిన్నిష్</language>
+			<language type="et">ఈస్టోనియను</language>
+			<language type="fa">పార్శీ</language>
+			<language type="fi">ఫిన్నిష్</language>
 			<language type="fr">ఫ్రెంచ్</language>
-			<language type="ga" draft="unconfirmed">ఐరిష్</language>
-			<language type="gu" draft="unconfirmed">గుజరాతి</language>
-			<language type="he" draft="unconfirmed">హీబ్రూ</language>
+			<language type="ga">ఐరిష్</language>
+			<language type="gu">గుజరాతి</language>
+			<language type="he">హీబ్రూ</language>
 			<language type="hi">హిందీ</language>
-			<language type="hi" alt="proposed-x1001" draft="unconfirmed">హింది</language>
-			<language type="hu" draft="unconfirmed">హంగేరియను</language>
-			<language type="id" draft="unconfirmed">ఇండొనేసియన్</language>
-			<language type="is" draft="unconfirmed">ఐస్ లాండు</language>
+			<language type="hu">హంగేరియను</language>
+			<language type="id">ఇండొనేసియన్</language>
+			<language type="is">ఐస్ లాండు</language>
 			<language type="it">ఇటాలియన్ భాష</language>
-			<language type="it" alt="proposed-x1001" draft="unconfirmed">ఇటాలియన్</language>
 			<language type="ja">జపాను భాష</language>
-			<language type="ja" alt="proposed-x1001" draft="unconfirmed">జపనీస్</language>
-			<language type="kn" draft="unconfirmed">కన్నడ</language>
-			<language type="la" draft="unconfirmed">లాటిన్</language>
-			<language type="lt" draft="unconfirmed">లిథువేనియను</language>
-			<language type="lv" draft="unconfirmed">లాత్వియను</language>
-			<language type="ml" draft="unconfirmed">మలయాళం</language>
-			<language type="mn" draft="unconfirmed">మంగోలియన్</language>
-			<language type="mr" draft="unconfirmed">మరాఠి</language>
-			<language type="ne" draft="unconfirmed">నేపాలి</language>
-			<language type="nl" draft="unconfirmed">డచ్</language>
-			<language type="no" draft="unconfirmed">నార్వేజియన్</language>
-			<language type="pa" draft="unconfirmed">పంజాబి</language>
-			<language type="pl" draft="unconfirmed">పోలిష్</language>
+			<language type="kn">కన్నడ</language>
+			<language type="la">లాటిన్</language>
+			<language type="lt">లిథువేనియను</language>
+			<language type="lv">లాత్వియను</language>
+			<language type="ml">మలయాళం</language>
+			<language type="mn">మంగోలియన్</language>
+			<language type="mr">మరాఠి</language>
+			<language type="ne">నేపాలి</language>
+			<language type="nl">డచ్</language>
+			<language type="no">నార్వేజియన్</language>
+			<language type="pa">పంజాబి</language>
+			<language type="pl">పోలిష్</language>
 			<language type="pt">పొర్చుగల్ భాష</language>
-			<language type="ro" draft="unconfirmed">రొమేనియను</language>
+			<language type="ro">రొమేనియను</language>
 			<language type="ru">రష్యన్ భాష</language>
-			<language type="ru" alt="proposed-x1001" draft="unconfirmed">రష్యను</language>
-			<language type="si" draft="unconfirmed">సింహళీ</language>
-			<language type="sv" draft="unconfirmed">స్వీడిష్</language>
-			<language type="sw" draft="unconfirmed">స్వాహిలి</language>
-			<language type="ta" draft="unconfirmed">తమిళం</language>
+			<language type="si">సింహళీ</language>
+			<language type="sv">స్వీడిష్</language>
+			<language type="sw">స్వాహిలి</language>
+			<language type="ta">తమిళం</language>
 			<language type="te">తెలుగు</language>
-			<language type="th" draft="unconfirmed">థాయి</language>
-			<language type="ur" draft="unconfirmed">ఉర్దు</language>
-			<language type="xh" draft="unconfirmed">ఖోస</language>
+			<language type="th">థాయి</language>
+			<language type="ur">ఉర్దు</language>
+			<language type="xh">ఖోస</language>
 			<language type="zh">చైనా భాష</language>
-			<language type="zu" draft="unconfirmed">జూలూ</language>
+			<language type="zu">జూలూ</language>
 		</languages>
 		<scripts>
 			<script type="Arab">అరబ్బి లిపి</script>
+			<script type="Beng">Beng</script>
 			<script type="Cyrl">సిరిలిక్ లిపి</script>
 			<script type="Hans">సరళమైన చైనా లిపి</script>
 			<script type="Hant">ప్రాచీన చైనా లిపి</script>
@@ -81,7 +75,7 @@
 			<territory type="IT">ఇటలి</territory>
 			<territory type="JP">జపాసు</territory>
 			<territory type="RU">రష్య</territory>
-			<territory type="TO" draft="unconfirmed">ఠాఙ్గ</territory>
+			<territory type="TO">ఠాఙ్గ</territory>
 			<territory type="US">ఐక్య రాష్ట్ర అమెరిక</territory>
 		</territories>
 		<variants>
@@ -92,13 +86,13 @@
 	</localeDisplayNames>
 	<characters>
 		<exemplarCharacters>[అ-ఋ ౠ ఌ ౡ ఎ-ఐ ఒ-న ప-ళ వ-హ ఁ-ః ్ ా-ౄ ె-ై ొ-ౌ ౕ ౖ]</exemplarCharacters>
-		<exemplarCharacters type="auxiliary">[\u200C \u200D ౦-౯]</exemplarCharacters>
+		<exemplarCharacters type="auxiliary">[\u200C \u200D ౦-౯ b c e g m q t]</exemplarCharacters>
 	</characters>
 	<delimiters>
-		<quotationStart draft="unconfirmed">'</quotationStart>
-		<quotationEnd draft="unconfirmed">'</quotationEnd>
-		<alternateQuotationStart draft="unconfirmed">&quot;</alternateQuotationStart>
-		<alternateQuotationEnd draft="unconfirmed">&quot;</alternateQuotationEnd>
+		<quotationStart>'</quotationStart>
+		<quotationEnd>'</quotationEnd>
+		<alternateQuotationStart>&quot;</alternateQuotationStart>
+		<alternateQuotationEnd>&quot;</alternateQuotationEnd>
 	</delimiters>
 	<dates>
 		<calendars>
@@ -136,18 +130,18 @@
 					</monthContext>
 					<monthContext type="stand-alone">
 						<monthWidth type="narrow">
-							<month type="1" draft="unconfirmed">జ</month>
-							<month type="2" draft="unconfirmed">ఫి</month>
-							<month type="3" draft="unconfirmed">మ</month>
-							<month type="4" draft="unconfirmed">ఎ</month>
-							<month type="5" draft="unconfirmed">మె</month>
-							<month type="6" draft="unconfirmed">జు</month>
-							<month type="7" draft="unconfirmed">జు</month>
-							<month type="8" draft="unconfirmed">ఆ</month>
-							<month type="9" draft="unconfirmed">సె</month>
-							<month type="10" draft="unconfirmed">అ</month>
-							<month type="11" draft="unconfirmed">న</month>
-							<month type="12" draft="unconfirmed">డి</month>
+							<month type="1">జ</month>
+							<month type="2">ఫి</month>
+							<month type="3">మ</month>
+							<month type="4">ఎ</month>
+							<month type="5">మె</month>
+							<month type="6">జు</month>
+							<month type="7">జు</month>
+							<month type="8">ఆ</month>
+							<month type="9">సె</month>
+							<month type="10">అ</month>
+							<month type="11">న</month>
+							<month type="12">డి</month>
 						</monthWidth>
 					</monthContext>
 				</months>
@@ -174,23 +168,23 @@
 					</dayContext>
 					<dayContext type="stand-alone">
 						<dayWidth type="narrow">
-							<day type="sun" draft="unconfirmed">ఆ</day>
-							<day type="mon" draft="unconfirmed">2</day>
-							<day type="tue" draft="unconfirmed">సొ</day>
-							<day type="wed" draft="unconfirmed">భు</day>
-							<day type="thu" draft="unconfirmed">గు</day>
-							<day type="fri" draft="unconfirmed">శు</day>
-							<day type="sat" draft="unconfirmed">శ</day>
+							<day type="sun">ఆ</day>
+							<day type="mon">2</day>
+							<day type="tue">సొ</day>
+							<day type="wed">భు</day>
+							<day type="thu">గు</day>
+							<day type="fri">శు</day>
+							<day type="sat">శ</day>
 						</dayWidth>
 					</dayContext>
 				</days>
 				<quarters>
 					<quarterContext type="format">
 						<quarterWidth type="abbreviated">
-							<quarter type="1" draft="unconfirmed">Q1</quarter>
-							<quarter type="2" draft="unconfirmed">Q2</quarter>
-							<quarter type="3" draft="unconfirmed">Q3</quarter>
-							<quarter type="4" draft="unconfirmed">Q4</quarter>
+							<quarter type="1">Q1</quarter>
+							<quarter type="2">Q2</quarter>
+							<quarter type="3">Q3</quarter>
+							<quarter type="4">Q4</quarter>
 						</quarterWidth>
 						<quarterWidth type="wide">
 							<quarter type="1">ఒకటి  1</quarter>
@@ -204,86 +198,78 @@
 				<pm>అపరాహ్నం</pm>
 				<eras>
 					<eraNames>
-						<era type="0" draft="unconfirmed">ఈసాపూర్వ.</era>
-						<era type="1" draft="unconfirmed">సన్.</era>
+						<era type="0">ఈసాపూర్వ.</era>
+						<era type="1">సన్.</era>
 					</eraNames>
 					<eraAbbr>
-						<era type="0" draft="unconfirmed">BCE</era>
-						<era type="1" draft="unconfirmed">CE</era>
+						<era type="0">BCE</era>
+						<era type="1">CE</era>
 					</eraAbbr>
 				</eras>
 				<dateFormats>
 					<dateFormatLength type="full">
 						<dateFormat>
-							<pattern draft="unconfirmed">EEEE d MMMM yyyy</pattern>
-							<pattern alt="proposed-x1001" draft="unconfirmed">EEEE, yyyy MMMM dd</pattern>
+							<pattern>EEEE d MMMM yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="long">
 						<dateFormat>
-							<pattern draft="unconfirmed">d MMMM yyyy</pattern>
-							<pattern alt="proposed-x1001" draft="unconfirmed">yyyy MMMM d</pattern>
+							<pattern>d MMMM yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="medium">
 						<dateFormat>
-							<pattern draft="unconfirmed">dd-MM-yyyy</pattern>
-							<pattern alt="proposed-x1001" draft="unconfirmed">yyyy MMM d</pattern>
+							<pattern>dd-MM-yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="short">
 						<dateFormat>
-							<pattern draft="unconfirmed">dd-MM-yy</pattern>
-							<pattern alt="proposed-x1001" draft="unconfirmed">yy/MM/dd</pattern>
+							<pattern>dd-MM-yy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 				</dateFormats>
 				<timeFormats>
 					<timeFormatLength type="full">
 						<timeFormat>
-							<pattern draft="unconfirmed">h:mm:ss a v</pattern>
-							<pattern alt="proposed-x1001" draft="unconfirmed">HH:mm:ss v</pattern>
+							<pattern>h:mm:ss a v</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="long">
 						<timeFormat>
-							<pattern draft="unconfirmed">h:mm:ss a z</pattern>
-							<pattern alt="proposed-x1001" draft="unconfirmed">HH:mm:ss z</pattern>
+							<pattern>h:mm:ss a z</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="medium">
 						<timeFormat>
-							<pattern draft="unconfirmed">h:mm:ss a</pattern>
-							<pattern alt="proposed-x1001" draft="unconfirmed">HH:mm:ss</pattern>
+							<pattern>h:mm:ss a</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="short">
 						<timeFormat>
-							<pattern draft="unconfirmed">h:mm a</pattern>
-							<pattern alt="proposed-x1001" draft="unconfirmed">HH:mm</pattern>
+							<pattern>h:mm a</pattern>
 						</timeFormat>
 					</timeFormatLength>
 				</timeFormats>
 				<dateTimeFormats>
 					<dateTimeFormatLength>
 						<dateTimeFormat>
-							<pattern draft="unconfirmed">{1} {0}</pattern>
+							<pattern>{1} {0}</pattern>
 						</dateTimeFormat>
 					</dateTimeFormatLength>
 					<availableFormats>
-						<dateFormatItem id="MMMMd" draft="unconfirmed">d MMMM</dateFormatItem>
-						<dateFormatItem id="MMdd" draft="unconfirmed">dd-MM</dateFormatItem>
-						<dateFormatItem id="yyQ" draft="unconfirmed">Q yy</dateFormatItem>
-						<dateFormatItem id="yyyyMM" draft="unconfirmed">MM-yyyy</dateFormatItem>
-						<dateFormatItem id="yyyyMMMM" draft="unconfirmed">MMMM yyyy</dateFormatItem>
+						<dateFormatItem id="MMMMd">d MMMM</dateFormatItem>
+						<dateFormatItem id="MMdd">dd-MM</dateFormatItem>
+						<dateFormatItem id="yyQ">Q yy</dateFormatItem>
+						<dateFormatItem id="yyyyMM">MM-yyyy</dateFormatItem>
+						<dateFormatItem id="yyyyMMMM">MMMM yyyy</dateFormatItem>
 					</availableFormats>
 				</dateTimeFormats>
 			</calendar>
 		</calendars>
 		<timeZoneNames>
-			<hourFormat draft="unconfirmed">+HH:mm;-HH:mm</hourFormat>
-			<gmtFormat draft="unconfirmed">GMT{0}</gmtFormat>
-			<regionFormat draft="unconfirmed">{0}</regionFormat>
+			<hourFormat>+HH:mm;-HH:mm</hourFormat>
+			<gmtFormat>GMT{0}</gmtFormat>
+			<regionFormat>{0}</regionFormat>
 		</timeZoneNames>
 	</dates>
 	<numbers>
@@ -307,7 +293,7 @@
 		<currencyFormats>
 			<currencyFormatLength>
 				<currencyFormat>
-					<pattern>¤ #,##,##0.00</pattern>
+					<pattern>¤ #,##,##0.00</pattern>
 				</currencyFormat>
 			</currencyFormatLength>
 		</currencyFormats>
@@ -344,8 +330,8 @@
 	</numbers>
 	<posix>
 		<messages>
-			<yesstr draft="unconfirmed">అవను</yesstr>
-			<nostr draft="unconfirmed">కాదు</nostr>
+			<yesstr>అవను</yesstr>
+			<nostr>కాదు</nostr>
 		</messages>
 	</posix>
 </ldml>

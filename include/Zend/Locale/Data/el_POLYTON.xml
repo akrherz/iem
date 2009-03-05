@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.5/ldml.dtd">
+<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.6/ldml.dtd">
 <ldml>
 	<identity>
-		<version number="$Revision: 1.4 $"/>
-		<generation date="$Date: 2007/07/19 22:31:39 $"/>
+		<version number="$Revision: 1.6 $"/>
+		<generation date="$Date: 2008/05/28 15:49:29 $"/>
 		<language type="el"/>
 		<variant type="POLYTON"/>
 	</identity>
@@ -19,7 +19,7 @@
 			<language type="et">Ἐσθονικά</language>
 			<language type="ga">Ἰρλανδικά</language>
 			<language type="gd">Σκωτικὰ κελτικά</language>
-			<language type="grc" draft="contributed">Ἀρχαῖα Ἑλληνικά</language>
+			<language type="grc">Ἀρχαῖα Ἑλληνικά</language>
 			<language type="he">Ἑβραϊκά</language>
 			<language type="hu">Οὑγγρικά</language>
 			<language type="hy">Ἀρμενικά</language>
@@ -72,9 +72,9 @@
 			<territory type="CD">Κονγκό, Λαϊκὴ Δημοκρατία τοῦ</territory>
 			<territory type="CF">Κεντροαφρικανικὴ Δημοκρατία</territory>
 			<territory type="CH">Ἑλβετία</territory>
-			<territory type="CI" draft="unconfirmed">Ἀκτὴ Ἐλεφαντοστού</territory>
+			<territory type="CI">Ἀκτὴ Ἐλεφαντοστού</territory>
 			<territory type="CK">Νῆσοι Κούκ</territory>
-			<territory type="CV" draft="unconfirmed">Πράσινο Ἀκρωτήριο</territory>
+			<territory type="CV">Πράσινο Ἀκρωτήριο</territory>
 			<territory type="CX">Νῆσος Χριστουγέννων</territory>
 			<territory type="DO">Δομινικανὴ Δημοκρατία</territory>
 			<territory type="DZ">Ἀλγερία</territory>
@@ -91,7 +91,7 @@
 			<territory type="GF">Γαλλικὴ Γουιάνα</territory>
 			<territory type="GQ">Ἰσημερινὴ Γουινέα</territory>
 			<territory type="GR">Ἑλλάδα</territory>
-			<territory type="GS" draft="unconfirmed">Νότια Γεωργία καὶ Νότιες Νήσοι Σάντουιτς</territory>
+			<territory type="GS">Νότια Γεωργία καὶ Νότιες Νήσοι Σάντουιτς</territory>
 			<territory type="HK">Χὸνγκ Κόνγκ, Εἰδικὴ Διοικητικὴ Περιφέρεια τῆς Κίνας</territory>
 			<territory type="HM">Νῆσοι Χὲρντ καὶ Μακντόναλντ</territory>
 			<territory type="HN">Ὁνδούρα</territory>

@@ -13,13 +13,10 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @package    Zend_Pdf
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-
-/** Zend_Pdf_Trailer */
-require_once 'Zend/Pdf/Const.php';
 
 /** Zend_Pdf_Trailer */
 require_once 'Zend/Pdf/Trailer.php';
@@ -29,7 +26,7 @@ require_once 'Zend/Pdf/Trailer.php';
  * PDF file trailer generator (used for just created PDF)
  *
  * @package    Zend_Pdf
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Pdf_Trailer_Generator extends Zend_Pdf_Trailer

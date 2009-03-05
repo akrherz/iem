@@ -15,7 +15,7 @@
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -32,7 +32,7 @@ require_once 'Zend/View/Helper/FormElement.php';
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_View_Helper_FormImage extends Zend_View_Helper_FormElement
@@ -57,31 +57,43 @@ class Zend_View_Helper_FormImage extends Zend_View_Helper_FormElement
         $info = $this->_getInfo($name, $value, $attribs);
         extract($info); // name, value, attribs, options, listsep, disable
 
-        // unset any 'src' attrib
+        // Determine if we should use the value or the src attribute
         if (isset($attribs['src'])) {
+            $src = ' src="' . $this->view->escape($attribs['src']) . '"';
             unset($attribs['src']);
+        } else {
+            $src = ' src="' . $this->view->escape($value) . '"';
+            unset($value);
         }
 
-        // unset any 'alt' attrib
-        if (isset($attribs['alt'])) {
-            unset($attribs['alt']);
+        // Do we have a value?
+        if (isset($value) && !empty($value)) {
+            $value = ' value="' . $this->view->escape($value) . '"';
+        } else {
+            $value = '';
+        }
+
+        // Disabled?
+        $disabled = '';
+        if ($disable) {
+            $disabled = ' disabled="disabled"';
+        }
+        
+        // XHTML or HTML end tag?
+        $endTag = ' />';
+        if (($this->view instanceof Zend_View_Abstract) && !$this->view->doctype()->isXhtml()) {
+            $endTag= '>';
         }
 
         // build the element
-        if ($disable) {
-            // disabled, just an image tag
-            $xhtml = '<image'
-                   . ' alt="' . $this->view->escape($name) . '"'
-                   . ' src="' . $this->view->escape($value) . '"'
-                   . $this->_htmlAttribs($attribs) . ' />';
-        } else {
-            // enabled
-            $xhtml = '<input type="image"'
-                   . ' name="' . $this->view->escape($name) . '"'
-                   . ' id="' . $this->view->escape($id) . '"'
-                   . ' src="' . $this->view->escape($value) . '"'
-                   . $this->_htmlAttribs($attribs) . ' />';
-        }
+        $xhtml = '<input type="image"'
+                . ' name="' . $this->view->escape($name) . '"'
+                . ' id="' . $this->view->escape($id) . '"'
+                . $src
+                . $value
+                . $disabled
+                . $this->_htmlAttribs($attribs) 
+                . $endTag;
 
         return $xhtml;
     }

@@ -15,7 +15,8 @@
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Exif
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -34,7 +35,8 @@ require_once 'Zend/Gdata/Exif.php';
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Exif
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Gdata_Exif_Extension_Distance extends Zend_Gdata_Extension
@@ -42,17 +44,15 @@ class Zend_Gdata_Exif_Extension_Distance extends Zend_Gdata_Extension
 
     protected $_rootNamespace = 'exif';
     protected $_rootElement = 'distance';
-    
+
     /**
      * Constructs a new Zend_Gdata_Exif_Extension_Distance object.
-     * 
+     *
      * @param string $text (optional) The value to use for this element.
      */
-    public function __construct($text = null) 
+    public function __construct($text = null)
     {
-        foreach (Zend_Gdata_Exif::$namespaces as $nsPrefix => $nsUri) {
-            $this->registerNamespace($nsPrefix, $nsUri);
-        }
+        $this->registerAllNamespaces(Zend_Gdata_Exif::$namespaces);
         parent::__construct();
         $this->setText($text);
     }

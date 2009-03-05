@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.5/ldml.dtd">
+<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.6/ldml.dtd">
 <ldml>
 	<identity>
-		<version number="$Revision: 1.76 $"/>
-		<generation date="$Date: 2007/07/24 16:25:40 $"/>
+		<version number="$Revision: 1.88 $"/>
+		<generation date="$Date: 2008/06/26 03:47:57 $"/>
 		<language type="is"/>
 	</identity>
 	<localeDisplayNames>
+		<localeDisplayPattern>
+			<localePattern>{0} ({1})</localePattern>
+			<localeSeparator>, </localeSeparator>
+		</localeDisplayPattern>
 		<languages>
-			<language type="aa" draft="unconfirmed">afár</language>
-			<language type="aa" alt="proposed-x1001" draft="unconfirmed">Afar</language>
+			<language type="aa">afár</language>
 			<language type="ab">abkasíska</language>
 			<language type="ace">akkíska</language>
 			<language type="ach">akólí</language>
@@ -17,38 +20,28 @@
 			<language type="ady">adýge</language>
 			<language type="ae">avestíska</language>
 			<language type="af">afríkanska</language>
-			<language type="af" alt="proposed-x1001" draft="unconfirmed">afríkaans</language>
 			<language type="afa">afróasísk mál (önnur)</language>
-			<language type="afa" alt="proposed-x1001" draft="unconfirmed">afróasísk mál</language>
-			<language type="afa" alt="proposed-x1002" draft="unconfirmed">önnur afróasísk mál</language>
 			<language type="afh">afríhílí</language>
-			<language type="ain" draft="unconfirmed">aínu</language>
-			<language type="ain" alt="proposed-x1001" draft="unconfirmed">Ainú</language>
+			<language type="ain">aínu</language>
 			<language type="ak">akan</language>
 			<language type="akk">akkadíska</language>
 			<language type="ale">aleúska</language>
 			<language type="alg">algonkvínsk mál</language>
-			<language type="alt" draft="unconfirmed">suðuraltaíska</language>
-			<language type="alt" alt="proposed-x1001" draft="unconfirmed">Altaí</language>
+			<language type="alt">suðuraltaíska</language>
 			<language type="am">amharíska</language>
 			<language type="an">aragonska</language>
 			<language type="ang">fornenska (um 450-1100)</language>
-			<language type="ang" alt="proposed-x1001" draft="unconfirmed">fornenska</language>
-			<language type="anp" draft="unconfirmed">angíka</language>
+			<language type="anp">angíka</language>
 			<language type="apa">apatsjamál</language>
 			<language type="ar">arabíska</language>
 			<language type="arc">arameíska</language>
 			<language type="arn">arákaníska</language>
 			<language type="arp">arapahó</language>
 			<language type="art">alþjóðamál (önnur)</language>
-			<language type="art" alt="proposed-x1001" draft="unconfirmed">önnur alþjóðamál</language>
-			<language type="art" alt="proposed-x1002" draft="unconfirmed">alþjóðamál</language>
 			<language type="arw">aravakska</language>
 			<language type="as">assamska</language>
-			<language type="as" alt="proposed-x1001" draft="unconfirmed">assameska</language>
 			<language type="ast">astúríska</language>
 			<language type="ath">atapaskísk mál</language>
-			<language type="ath" alt="proposed-x1001" draft="unconfirmed">önnur atapaskísk mál</language>
 			<language type="aus">áströlsk mál</language>
 			<language type="av">avaríska</language>
 			<language type="awa">avadí</language>
@@ -61,17 +54,12 @@
 			<language type="ban">balíska</language>
 			<language type="bas">basa</language>
 			<language type="bat">baltnesk mál (önnur)</language>
-			<language type="bat" alt="proposed-x1001" draft="unconfirmed">önnur baltnesk mál</language>
-			<language type="bat" alt="proposed-x1002" draft="unconfirmed">baltnesk mál</language>
 			<language type="be">hvítrússneska</language>
 			<language type="bej">beja</language>
 			<language type="bem">bemba</language>
 			<language type="ber">berbamál</language>
 			<language type="bg">búlgarska</language>
-			<language type="bg" alt="proposed-x1001" draft="unconfirmed">búlgversku</language>
 			<language type="bh">bíharí</language>
-			<language type="bh" alt="proposed-x1001" draft="unconfirmed">bíharísk mál</language>
-			<language type="bh" alt="proposed-x1002" draft="unconfirmed">bíharísk</language>
 			<language type="bho">bojpúrí</language>
 			<language type="bi">bíslama</language>
 			<language type="bik">bíkol</language>
@@ -79,11 +67,9 @@
 			<language type="bla">siksika</language>
 			<language type="bm">bambara</language>
 			<language type="bn">bengalska</language>
-			<language type="bn" alt="proposed-x1001" draft="unconfirmed">bengalí</language>
 			<language type="bnt">bantúmál</language>
 			<language type="bo">tíbeska</language>
 			<language type="br">bretónska</language>
-			<language type="br" alt="proposed-x1001" draft="unconfirmed">breton</language>
 			<language type="bra">braí</language>
 			<language type="bs">bosníska</language>
 			<language type="btk">batak</language>
@@ -93,18 +79,12 @@
 			<language type="ca">katalónska</language>
 			<language type="cad">kaddó</language>
 			<language type="cai">Indíánamál Mið-Ameríku (önnur)</language>
-			<language type="cai" alt="proposed-x1001" draft="unconfirmed">Mið-Ameríku indíánamál</language>
-			<language type="cai" alt="proposed-x1002" draft="unconfirmed">önnur Mið-Ameríku indíánamál</language>
 			<language type="car">karíbamál</language>
 			<language type="cau">kákasusmál (önnur)</language>
-			<language type="cau" alt="proposed-x1001" draft="unconfirmed">önnur kákasusmál</language>
-			<language type="cau" alt="proposed-x1002" draft="unconfirmed">kákasusmál</language>
-			<language type="cch" draft="unconfirmed">atsam</language>
+			<language type="cch">atsam</language>
 			<language type="ce">tsjetsjenska</language>
 			<language type="ceb">kebúanó</language>
 			<language type="cel">keltnesk (önnur)</language>
-			<language type="cel" alt="proposed-x1001" draft="unconfirmed">keltnesk mál</language>
-			<language type="cel" alt="proposed-x1002" draft="unconfirmed">önnur keltnesk</language>
 			<language type="ch">kamorró</language>
 			<language type="chb">síbsja</language>
 			<language type="chg">sjagataí</language>
@@ -124,35 +104,28 @@
 			<language type="cr">krí</language>
 			<language type="crh">krímtyrkneska</language>
 			<language type="crp">kreól- og pidginmál (önnur)</language>
-			<language type="crp" alt="proposed-x1001" draft="unconfirmed">önnur kreól-/pidginmál</language>
-			<language type="crp" alt="proposed-x1002" draft="unconfirmed">kreól-/pidginmál</language>
 			<language type="cs">tékkneska</language>
 			<language type="csb">kasúbíska</language>
 			<language type="cu">kirkjuslavneska</language>
 			<language type="cus">kúsitísk mál (önnur)</language>
-			<language type="cus" alt="proposed-x1001" draft="unconfirmed">önnur kúsitísk mál</language>
-			<language type="cus" alt="proposed-x1002" draft="unconfirmed">kúsitísk mál</language>
 			<language type="cv">sjúvas</language>
 			<language type="cy">velska</language>
 			<language type="da">danska</language>
-			<language type="da" alt="proposed-x1001" draft="unconfirmed">dönsku</language>
 			<language type="dak">dakóta</language>
 			<language type="dar">dargva</language>
 			<language type="day">dajak</language>
 			<language type="de">þýska</language>
-			<language type="de" alt="proposed-x1001" draft="unconfirmed">þýsku</language>
+			<language type="de_AT">austurrísk þýska</language>
+			<language type="de_CH">svissnesk háþýska</language>
 			<language type="del">delaver</language>
 			<language type="den">slav</language>
 			<language type="dgr">dogríb</language>
 			<language type="din">dinka</language>
 			<language type="doi">dogrí</language>
 			<language type="dra">dravidísk mál (önnur)</language>
-			<language type="dra" alt="proposed-x1001" draft="unconfirmed">önnur dravidísk mál</language>
-			<language type="dra" alt="proposed-x1002" draft="unconfirmed">dravidísk mál</language>
 			<language type="dsb">lágsorbneska</language>
 			<language type="dua">dúala</language>
 			<language type="dum">miðhollenska (um 1050-1350)</language>
-			<language type="dum" alt="proposed-x1001" draft="unconfirmed">miðhollenska</language>
 			<language type="dv">dívehí</language>
 			<language type="dyu">djúla</language>
 			<language type="dz">dsongka</language>
@@ -161,72 +134,57 @@
 			<language type="egy">fornegypska</language>
 			<language type="eka">ekajúk</language>
 			<language type="el">nýgríska (1453-)</language>
-			<language type="el" alt="proposed-x1001" draft="unconfirmed">gríska</language>
 			<language type="elx">elamít</language>
 			<language type="en">enska</language>
-			<language type="en" alt="proposed-x1001" draft="unconfirmed">ensku</language>
-			<language type="en_AU" alt="proposed-x1001" draft="unconfirmed">enska (ástralía)</language>
-			<language type="en_GB" alt="proposed-x1001" draft="unconfirmed">enska (breska)</language>
-			<language type="en_US" draft="contributed">enska (BNA)</language>
+			<language type="en_AU">áströlsk enska</language>
+			<language type="en_CA">kanadísk enska</language>
+			<language type="en_GB">bresk enska</language>
+			<language type="en_US">bandarísk enska</language>
 			<language type="enm">miðenska (1100-1500)</language>
-			<language type="enm" alt="proposed-x1001" draft="unconfirmed">miðenska</language>
 			<language type="eo">esperantó</language>
 			<language type="es">spænska</language>
-			<language type="es" alt="proposed-x1001" draft="unconfirmed">spænsku</language>
+			<language type="es_419">latnesk-amerísk spænska</language>
+			<language type="es_ES">spænsk spænska</language>
 			<language type="et">eistneska</language>
 			<language type="eu">baskneska</language>
-			<language type="eu" alt="proposed-x1001" draft="unconfirmed">baskamál</language>
 			<language type="ewo">evondó</language>
 			<language type="fa">persneska</language>
 			<language type="fan">fang</language>
 			<language type="fat">fantí</language>
 			<language type="ff">fúla</language>
 			<language type="fi">finnska</language>
-			<language type="fi" alt="proposed-x1001" draft="unconfirmed">finnsku</language>
-			<language type="fil" draft="unconfirmed">filipino</language>
-			<language type="fil" alt="proposed-x1001" draft="unconfirmed">tagalog</language>
+			<language type="fil">filipínska</language>
 			<language type="fiu">finnskúgrísk mál (önnur)</language>
-			<language type="fiu" alt="proposed-x1001" draft="unconfirmed">finnskúgrísk mál</language>
-			<language type="fiu" alt="proposed-x1002" draft="unconfirmed">önnur finnskúgrísk mál</language>
 			<language type="fj">fídjeyska</language>
 			<language type="fo">færeyska</language>
 			<language type="fon">fón</language>
 			<language type="fr">franska</language>
-			<language type="fr" alt="proposed-x1001" draft="unconfirmed">frönsku</language>
+			<language type="fr_CA">kanadísk franska</language>
+			<language type="fr_CH">svissnesk franska</language>
 			<language type="frm">miðfranska (um 1400-1600)</language>
-			<language type="frm" alt="proposed-x1001" draft="unconfirmed">miðfranska</language>
 			<language type="fro">fornfranska (842 - um 1400)</language>
-			<language type="fro" alt="proposed-x1001" draft="unconfirmed">fornfranska</language>
-			<language type="frr" draft="unconfirmed">norðurfrísneska</language>
-			<language type="frs" draft="unconfirmed">austurfrísneska</language>
+			<language type="frr">norðurfrísneska</language>
+			<language type="frs">austurfrísneska</language>
 			<language type="fur">fríúlska</language>
 			<language type="fy">frísneska</language>
-			<language type="fy" alt="proposed-x1001" draft="unconfirmed">vesturfrísneska</language>
 			<language type="ga">írska</language>
 			<language type="gaa">ga</language>
 			<language type="gay">gajó</language>
 			<language type="gba">gbaja</language>
 			<language type="gd">skosk gelíska</language>
-			<language type="gd" alt="proposed-x1001" draft="unconfirmed">skosk mállýska</language>
 			<language type="gem">germönsk mál (önnur)</language>
-			<language type="gem" alt="proposed-x1001" draft="unconfirmed">germönsk mál</language>
-			<language type="gem" alt="proposed-x1002" draft="unconfirmed">önnur germönsk mál</language>
 			<language type="gez">gís</language>
 			<language type="gil">gilberska</language>
 			<language type="gl">gallegska</language>
-			<language type="gl" alt="proposed-x1001" draft="unconfirmed">spænsk mállýska</language>
 			<language type="gmh">miðháþýska (um 1050-1500</language>
-			<language type="gmh" alt="proposed-x1001" draft="unconfirmed">miðháþýska</language>
 			<language type="gn">gvaraní</language>
-			<language type="gn" alt="proposed-x1001" draft="unconfirmed">guarani</language>
 			<language type="goh">fornháþýska (um 750-1050)</language>
-			<language type="goh" alt="proposed-x1001" draft="unconfirmed">fornháþýska</language>
 			<language type="gon">gondí</language>
 			<language type="gor">gorontaló</language>
 			<language type="got">gotneska</language>
 			<language type="grb">gerbó</language>
 			<language type="grc">forngríska (til 1453)</language>
-			<language type="grc" alt="proposed-x1001" draft="unconfirmed">forngríska</language>
+			<language type="gsw">svissnesk þýska</language>
 			<language type="gu">gújaratí</language>
 			<language type="gv">manx</language>
 			<language type="gwi">gvísín</language>
@@ -241,7 +199,6 @@
 			<language type="hmn">hmong</language>
 			<language type="ho">hírímótú</language>
 			<language type="hr">króatíska</language>
-			<language type="hr" alt="proposed-x1001" draft="unconfirmed">króatísku</language>
 			<language type="hsb">hásorbneska</language>
 			<language type="ht">haítíska</language>
 			<language type="hu">ungverska</language>
@@ -249,81 +206,66 @@
 			<language type="hy">armenska</language>
 			<language type="hz">hereró</language>
 			<language type="ia">interlingva</language>
-			<language type="ia" alt="proposed-x1001" draft="unconfirmed">alþjóðatunga</language>
 			<language type="iba">íban</language>
 			<language type="id">indónesíska</language>
-			<language type="id" alt="proposed-x1001" draft="unconfirmed">indónesísku</language>
 			<language type="ie">interlingve</language>
-			<language type="ie" alt="proposed-x1001" draft="unconfirmed">alþjóðamál</language>
 			<language type="ig">ígbó</language>
 			<language type="ii">sísúanjí</language>
 			<language type="ijo">íjó</language>
 			<language type="ik">ínúpíak</language>
 			<language type="ilo">ílokó</language>
 			<language type="inc">indversk mál (önnur)</language>
-			<language type="inc" alt="proposed-x1001" draft="unconfirmed">indversk mál</language>
-			<language type="inc" alt="proposed-x1002" draft="unconfirmed">önnur indversk mál</language>
 			<language type="ine">indóevrópsk mál (önnur)</language>
-			<language type="ine" alt="proposed-x1001" draft="unconfirmed">indóevrópsk mál</language>
-			<language type="ine" alt="proposed-x1002" draft="unconfirmed">önnur indóevrópsk mál</language>
 			<language type="inh">ingús</language>
 			<language type="io">ídó</language>
 			<language type="ira">íranska</language>
 			<language type="iro">írókesk mál</language>
 			<language type="is">íslenska</language>
 			<language type="it">ítalska</language>
-			<language type="it" alt="proposed-x1001" draft="unconfirmed">ítölsku</language>
 			<language type="iu">inúktitút</language>
 			<language type="ja">japanska</language>
-			<language type="ja" alt="proposed-x1001" draft="unconfirmed">japönsku</language>
 			<language type="jbo">lojban</language>
 			<language type="jpr">gyðingapersneska</language>
 			<language type="jrb">gyðingaarabíska</language>
 			<language type="jv">javanska</language>
-			<language type="jv" alt="proposed-x1001" draft="unconfirmed">javíska</language>
 			<language type="ka">georgíska</language>
 			<language type="kaa">karakalpak</language>
 			<language type="kab">kabíle</language>
 			<language type="kac">kasín</language>
-			<language type="kaj" draft="unconfirmed">jju</language>
+			<language type="kaj">jju</language>
 			<language type="kam">kamba</language>
 			<language type="kar">karen</language>
 			<language type="kaw">kaví</language>
 			<language type="kbd">kabardíska</language>
-			<language type="kcg" draft="unconfirmed">tyap</language>
-			<language type="kfo" draft="unconfirmed">koro</language>
+			<language type="kcg">tyap</language>
+			<language type="kfo">koro</language>
 			<language type="kg">kongó</language>
 			<language type="kha">kasí</language>
 			<language type="khi">koímál (önnur)</language>
-			<language type="khi" alt="proposed-x1001" draft="unconfirmed">koímál</language>
 			<language type="kho">kotaska</language>
 			<language type="ki">kíkújú</language>
 			<language type="kj">kúanjama</language>
 			<language type="kk">kasakska</language>
 			<language type="kl">grænlenska</language>
 			<language type="km">kmer</language>
-			<language type="km" alt="proposed-x1001" draft="unconfirmed">kambódíska</language>
 			<language type="kmb">kimbúndú</language>
 			<language type="kn">kannada</language>
 			<language type="ko">kóreska</language>
-			<language type="ko" alt="proposed-x1001" draft="unconfirmed">kóresku</language>
 			<language type="kok">konkaní</language>
 			<language type="kos">kosraska</language>
 			<language type="kpe">kpelle</language>
 			<language type="kr">kanúrí</language>
 			<language type="krc">karasaíbalkar</language>
-			<language type="krl" draft="unconfirmed">karélska</language>
+			<language type="krl">karélska</language>
 			<language type="kro">krú</language>
 			<language type="kru">kúrúk</language>
 			<language type="ks">kasmírska</language>
 			<language type="ku">kúrdneska</language>
-			<language type="ku" alt="proposed-x1001" draft="unconfirmed">kúrdíska</language>
 			<language type="kum">kúmík</language>
 			<language type="kut">kútenaí</language>
 			<language type="kv">komíska</language>
 			<language type="kw">korníska</language>
 			<language type="ky">kirgiska</language>
-			<language type="ky" alt="proposed-x1001" draft="unconfirmed">kirgistanska</language>
 			<language type="la">latína</language>
 			<language type="lad">ladínska</language>
 			<language type="lah">landa</language>
@@ -334,7 +276,6 @@
 			<language type="li">limbúrgíska</language>
 			<language type="ln">lingala</language>
 			<language type="lo">laó</language>
-			<language type="lo" alt="proposed-x1001" draft="unconfirmed">laótíska</language>
 			<language type="lol">mongó</language>
 			<language type="loz">losí</language>
 			<language type="lt">litháíska</language>
@@ -357,7 +298,6 @@
 			<language type="men">mende</language>
 			<language type="mg">malagasíska</language>
 			<language type="mga">miðírska (900-1200)</language>
-			<language type="mga" alt="proposed-x1001" draft="unconfirmed">miðírska</language>
 			<language type="mh">marshallska</language>
 			<language type="mi">maórí</language>
 			<language type="mic">mikmak</language>
@@ -365,8 +305,6 @@
 			<language type="mis">ýmis mál</language>
 			<language type="mk">makedónska</language>
 			<language type="mkh">monkmermál (önnur)</language>
-			<language type="mkh" alt="proposed-x1001" draft="unconfirmed">monkmermál</language>
-			<language type="mkh" alt="proposed-x1002" draft="unconfirmed">önnur monkmermál</language>
 			<language type="ml">malajalam</language>
 			<language type="mn">mongólska</language>
 			<language type="mnc">mansjú</language>
@@ -376,14 +314,12 @@
 			<language type="moh">móhíska</language>
 			<language type="mos">mossí</language>
 			<language type="mr">maratí</language>
-			<language type="mr" alt="proposed-x1001" draft="unconfirmed">marathi</language>
 			<language type="ms">malaíska</language>
-			<language type="ms" alt="proposed-x1001" draft="unconfirmed">malajíska</language>
 			<language type="mt">maltneska</language>
 			<language type="mul">margvísleg mál</language>
 			<language type="mun">múndamál</language>
 			<language type="mus">krík</language>
-			<language type="mwl" draft="unconfirmed">mirandesíska</language>
+			<language type="mwl">mirandesíska</language>
 			<language type="mwr">marvarí</language>
 			<language type="my">burmneska</language>
 			<language type="myn">majamál</language>
@@ -391,58 +327,43 @@
 			<language type="na">nárúska</language>
 			<language type="nah">nahúatl</language>
 			<language type="nai">Indíánamál Norður-Ameríku (önnur)</language>
-			<language type="nai" alt="proposed-x1001" draft="unconfirmed">önnur Norður-Ameríku indíánamál</language>
-			<language type="nai" alt="proposed-x1002" draft="unconfirmed">Norður-Ameríku indíánamál</language>
 			<language type="nap">napólíska</language>
 			<language type="nb">norskt bókmál</language>
 			<language type="nd">norðurndebele</language>
 			<language type="nds">Lágþýska; Lágsaxneska</language>
-			<language type="nds" alt="proposed-x1001" draft="unconfirmed">lágþýska</language>
 			<language type="ne">nepalska</language>
 			<language type="new">nevarí</language>
 			<language type="ng">ndonga</language>
 			<language type="nia">nías</language>
 			<language type="nic">nígerkordófanmál (önnur)</language>
-			<language type="nic" alt="proposed-x1001" draft="unconfirmed">önnur nígerkordófanmál</language>
-			<language type="nic" alt="proposed-x1002" draft="unconfirmed">nígerkordófanmál</language>
 			<language type="niu">níveska</language>
 			<language type="nl">hollenska</language>
-			<language type="nl" alt="proposed-x1001" draft="unconfirmed">hollensku</language>
+			<language type="nl_BE">flæmska</language>
 			<language type="nn">nýnorska</language>
-			<language type="nn" alt="proposed-x1001" draft="unconfirmed">norska (nýnorska)</language>
 			<language type="no">norska</language>
-			<language type="no" alt="proposed-x1001" draft="unconfirmed">norsku</language>
 			<language type="nog">nógaí</language>
 			<language type="non">norræna</language>
-			<language type="nqo" draft="unconfirmed">nkå</language>
+			<language type="nqo">nkå</language>
 			<language type="nr">suðurndebele</language>
 			<language type="nso">norðursótó</language>
 			<language type="nub">núbísk mál</language>
 			<language type="nv">navahó</language>
-			<language type="nwc" draft="unconfirmed">klassisk nevarí</language>
+			<language type="nwc">klassisk nevarí</language>
 			<language type="ny">Njanja; Sísjeva; Sjeva</language>
-			<language type="ny" alt="proposed-x1001" draft="unconfirmed">njanja</language>
-			<language type="ny" alt="proposed-x1002" draft="unconfirmed">njanja; sísjeva; sjeva</language>
 			<language type="nym">njamvesí</language>
 			<language type="nyn">njankóle</language>
 			<language type="nyo">njóró</language>
 			<language type="nzi">nsíma</language>
 			<language type="oc">Okkitíska (eftir 1500); Próvensalska</language>
-			<language type="oc" alt="proposed-x1001" draft="unconfirmed">oksítaníska</language>
-			<language type="oc" alt="proposed-x1002" draft="unconfirmed">okkitíska</language>
 			<language type="oj">ojibva</language>
 			<language type="om">órómó</language>
 			<language type="or">óría</language>
-			<language type="or" alt="proposed-x1001" draft="unconfirmed">oriya</language>
 			<language type="os">ossetíska</language>
 			<language type="osa">ósage</language>
 			<language type="ota">tyrkneska, ottóman (1500-1928)</language>
-			<language type="ota" alt="proposed-x1001" draft="unconfirmed">ottómantyrkneska</language>
 			<language type="oto">ótommál</language>
 			<language type="pa">púnjabí</language>
 			<language type="paa">papúsk mál (önnur)</language>
-			<language type="paa" alt="proposed-x1001" draft="unconfirmed">papúsk mál</language>
-			<language type="paa" alt="proposed-x1002" draft="unconfirmed">önnur papúsk mál</language>
 			<language type="pag">pangasínmál</language>
 			<language type="pal">palaví</language>
 			<language type="pam">pampanga</language>
@@ -450,20 +371,16 @@
 			<language type="pau">paláska</language>
 			<language type="peo">fornpersneska</language>
 			<language type="phi">filippseysk mál (önnur)</language>
-			<language type="phi" alt="proposed-x1001" draft="unconfirmed">filippseysk mál</language>
-			<language type="phi" alt="proposed-x1002" draft="unconfirmed">önnur filippseysk mál</language>
 			<language type="phn">fönikíska</language>
 			<language type="pi">palí</language>
 			<language type="pl">pólska</language>
 			<language type="pon">ponpeiska</language>
 			<language type="pra">prakrítmál</language>
 			<language type="pro">fornpróvensalska (til 1500)</language>
-			<language type="pro" alt="proposed-x1001" draft="unconfirmed">fornpróvensalska</language>
 			<language type="ps">pastú</language>
-			<language type="ps" alt="proposed-x1001" draft="unconfirmed">pashto</language>
 			<language type="pt">portúgalska</language>
-			<language type="pt" alt="proposed-x1001" draft="unconfirmed">portúgölsku</language>
-			<language type="pt_BR" alt="proposed-x1001" draft="unconfirmed">portúgölsku (brasilía)</language>
+			<language type="pt_BR">brasílísk portúgalska</language>
+			<language type="pt_PT">íberísk portúgalska</language>
 			<language type="qu">kvesjúa</language>
 			<language type="raj">rajastaní</language>
 			<language type="rap">rapanúí</language>
@@ -472,118 +389,84 @@
 			<language type="rn">rúndí</language>
 			<language type="ro">rúmenska</language>
 			<language type="roa">rómönsk mál (önnur)</language>
-			<language type="roa" alt="proposed-x1001" draft="unconfirmed">önnur rómönsk mál</language>
-			<language type="roa" alt="proposed-x1002" draft="unconfirmed">rómönsk mál</language>
 			<language type="rom">romaní</language>
-			<language type="root" draft="unconfirmed">rót</language>
+			<language type="root">rót</language>
 			<language type="ru">rússneska</language>
-			<language type="rup" draft="unconfirmed">arúmenska</language>
+			<language type="rup">arúmenska</language>
 			<language type="rw">kínjarvanda</language>
 			<language type="sa">sanskrít</language>
 			<language type="sad">sandave</language>
 			<language type="sah">jakút</language>
 			<language type="sai">Indíánamál Suður-Ameríku (önnur)</language>
-			<language type="sai" alt="proposed-x1001" draft="unconfirmed">önnur Suður-Ameríku indíánamál</language>
-			<language type="sai" alt="proposed-x1002" draft="unconfirmed">Suður-Ameríku indíánamál</language>
 			<language type="sal">salísmál</language>
 			<language type="sam">samversk arameíska</language>
 			<language type="sas">sasak</language>
 			<language type="sat">santalí</language>
 			<language type="sc">sardínska</language>
-			<language type="scn" draft="unconfirmed">siciliánska</language>
+			<language type="scn">sikileyska</language>
 			<language type="sco">skoska</language>
 			<language type="sd">sindí</language>
-			<language type="sd" alt="proposed-x1001" draft="unconfirmed">sindhi</language>
 			<language type="se">norðursamíska</language>
 			<language type="sel">selkúp</language>
 			<language type="sem">semísk mál (önnur)</language>
-			<language type="sem" alt="proposed-x1001" draft="unconfirmed">semísk mál</language>
-			<language type="sem" alt="proposed-x1002" draft="unconfirmed">önnur semísk mál</language>
 			<language type="sg">sangó</language>
 			<language type="sga">fornírska (til 900)</language>
-			<language type="sga" alt="proposed-x1001" draft="unconfirmed">fornírska</language>
 			<language type="sgn">táknmál</language>
 			<language type="sh">serbókróatíska</language>
-			<language type="sh" alt="proposed-x1001" draft="unconfirmed">serbó-króatíska</language>
 			<language type="shn">sjan</language>
 			<language type="si">singalesíska</language>
-			<language type="si" alt="proposed-x1001" draft="unconfirmed">sinhaleska</language>
 			<language type="sid">sídamó</language>
 			<language type="sio">síúmál</language>
-			<language type="sit" draft="unconfirmed">sínótíbesk mál</language>
-			<language type="sit" alt="proposed-x1001" draft="unconfirmed">önnur sínótíbesk mál</language>
-			<language type="sit" alt="proposed-x1002" draft="unconfirmed">sínótíbesk mál (önnur)</language>
-			<language type="sit" alt="proposed-x1003" draft="unconfirmed">Sínótíbeska (önnur)</language>
+			<language type="sit">sínótíbesk mál</language>
 			<language type="sk">slóvakíska</language>
-			<language type="sk" alt="proposed-x1001" draft="unconfirmed">slóvösku</language>
 			<language type="sl">slóvenska</language>
-			<language type="sl" alt="proposed-x1001" draft="unconfirmed">slóvensku</language>
 			<language type="sla">slavnesk mál (önnur)</language>
 			<language type="sm">samóska</language>
 			<language type="sma">suðursamíska</language>
 			<language type="smi">samísk mál (önnur)</language>
-			<language type="smi" alt="proposed-x1001" draft="unconfirmed">önnur samísk mál</language>
-			<language type="smi" alt="proposed-x1002" draft="unconfirmed">samísk mál</language>
 			<language type="smj">lúlesamíska</language>
 			<language type="smn">enaresamíska</language>
 			<language type="sms">skoltesamíska</language>
-			<language type="sn" draft="unconfirmed">Shóna</language>
-			<language type="sn" alt="proposed-x1001" draft="unconfirmed">shóna</language>
-			<language type="sn" alt="proposed-x1002" draft="unconfirmed">shona</language>
+			<language type="sn">shóna</language>
 			<language type="snk">sóninke</language>
 			<language type="so">sómalska</language>
 			<language type="sog">sogdíen</language>
 			<language type="son">songhaí</language>
 			<language type="sq">albanska</language>
 			<language type="sr">serbneska</language>
-			<language type="sr" alt="proposed-x1001" draft="unconfirmed">serbnesku</language>
-			<language type="srn" draft="unconfirmed">sranan tongo</language>
+			<language type="srn">sranan tongo</language>
 			<language type="srr">serer</language>
 			<language type="ss">svatí</language>
 			<language type="ssa">nílósaharamál (önnur)</language>
-			<language type="ssa" alt="proposed-x1001" draft="unconfirmed">önnur nílósaharamál</language>
-			<language type="ssa" alt="proposed-x1002" draft="unconfirmed">nílósaharamál</language>
 			<language type="st">suðursótó</language>
-			<language type="st" alt="proposed-x1001" draft="unconfirmed">sesoþó</language>
 			<language type="su">súndanska</language>
-			<language type="su" alt="proposed-x1001" draft="unconfirmed">súndíska</language>
 			<language type="suk">súkúma</language>
 			<language type="sus">súsú</language>
 			<language type="sux">súmerska</language>
 			<language type="sv">sænska</language>
-			<language type="sv" alt="proposed-x1001" draft="unconfirmed">sænsku</language>
 			<language type="sw">svahílí</language>
-			<language type="sw" alt="proposed-x1001" draft="unconfirmed">swahili</language>
+			<language type="syc">klassisk sýrlenska</language>
 			<language type="syr">sýrlenska</language>
 			<language type="ta">tamílska</language>
-			<language type="ta" alt="proposed-x1001" draft="unconfirmed">tamíl</language>
 			<language type="tai">taímál (önnur)</language>
-			<language type="tai" alt="proposed-x1001" draft="unconfirmed">önnur taímál</language>
-			<language type="tai" alt="proposed-x1002" draft="unconfirmed">taímál</language>
 			<language type="te">telúgú</language>
 			<language type="tem">tímne</language>
 			<language type="ter">terenó</language>
 			<language type="tet">tetúm</language>
 			<language type="tg">tadsjikska</language>
 			<language type="th">taílenska</language>
-			<language type="th" alt="proposed-x1001" draft="unconfirmed">tælenska</language>
 			<language type="ti">tígrinja</language>
-			<language type="ti" alt="proposed-x1001" draft="unconfirmed">tigriníska</language>
 			<language type="tig">tígre</language>
 			<language type="tiv">tív</language>
 			<language type="tk">túrkmenska</language>
-			<language type="tk" alt="proposed-x1001" draft="unconfirmed">túrkmen</language>
 			<language type="tkl">tókeláska</language>
 			<language type="tl">tagalog</language>
-			<language type="tlh" draft="unconfirmed">klingonska</language>
-			<language type="tlh" alt="proposed-x1001" draft="unconfirmed">klingónska</language>
+			<language type="tlh">klingónska</language>
 			<language type="tli">tlingit</language>
 			<language type="tmh">tamasjek</language>
 			<language type="tn">tsúana</language>
 			<language type="to">Tongverska (Tongaeyjar)</language>
-			<language type="to" alt="proposed-x1001" draft="unconfirmed">tongverska (Tongaeyjar)</language>
 			<language type="tog">Tongverska (Nyasa)</language>
-			<language type="tog" alt="proposed-x1001" draft="unconfirmed">tongverska (Nyasa)</language>
 			<language type="tpi">tokpisin</language>
 			<language type="tr">tyrkneska</language>
 			<language type="ts">tsonga</language>
@@ -592,31 +475,22 @@
 			<language type="tum">túmbúka</language>
 			<language type="tup">túpímál</language>
 			<language type="tut">altaísk mál (önnur)</language>
-			<language type="tut" alt="proposed-x1001" draft="unconfirmed">önnur altaísk mál</language>
-			<language type="tut" alt="proposed-x1002" draft="unconfirmed">altaísk mál</language>
 			<language type="tvl">túvalúska</language>
 			<language type="tw">tví</language>
-			<language type="tw" alt="proposed-x1001" draft="unconfirmed">twi</language>
 			<language type="ty">tahítíska</language>
 			<language type="tyv">túvínska</language>
 			<language type="udm">údmúrt</language>
 			<language type="ug">úígúr</language>
-			<language type="ug" alt="proposed-x1001" draft="unconfirmed">uighur</language>
 			<language type="uga">úgarítíska</language>
 			<language type="uk">úkraínska</language>
-			<language type="uk" alt="proposed-x1001" draft="unconfirmed">úkraníska</language>
 			<language type="umb">úmbúndú</language>
 			<language type="und">óljóst</language>
 			<language type="ur">úrdú</language>
-			<language type="ur" alt="proposed-x1001" draft="unconfirmed">urdu</language>
 			<language type="uz">úsbekska</language>
-			<language type="uz" alt="proposed-x1001" draft="unconfirmed">úzbek</language>
 			<language type="vai">vaí</language>
 			<language type="ve">venda</language>
 			<language type="vi">víetnamska</language>
-			<language type="vo" draft="unconfirmed">volapyk</language>
-			<language type="vo" alt="proposed-x1001" draft="unconfirmed">Volapuk</language>
-			<language type="vo" alt="proposed-x1002" draft="unconfirmed">volapük</language>
+			<language type="vo">volapyk</language>
 			<language type="vot">votíska</language>
 			<language type="wa">vallónska</language>
 			<language type="wak">vakasmál</language>
@@ -627,7 +501,6 @@
 			<language type="wo">volof</language>
 			<language type="xal">kalmúkska</language>
 			<language type="xh">sósa</language>
-			<language type="xh" alt="proposed-x1001" draft="unconfirmed">xhosa</language>
 			<language type="yao">jaó</language>
 			<language type="yap">japíska</language>
 			<language type="yi">jiddíska</language>
@@ -635,71 +508,73 @@
 			<language type="ypk">júpísk mál</language>
 			<language type="za">súang</language>
 			<language type="zap">sapótek</language>
+			<language type="zbl">blisstákn</language>
 			<language type="zen">senaga</language>
 			<language type="zh">kínverska</language>
-			<language type="zh_Hans" draft="contributed">kínverska (einfölduð)</language>
-			<language type="zh_Hant" draft="contributed">kínverska (hefðbundin)</language>
+			<language type="zh_Hans">kínverska (einfölduð)</language>
+			<language type="zh_Hant">kínverska (hefðbundin)</language>
 			<language type="znd">sande</language>
 			<language type="zu">súlú</language>
 			<language type="zun">súní</language>
-			<language type="zza" draft="unconfirmed">zázá</language>
+			<language type="zxx">ekkert tungutengt efni</language>
+			<language type="zza">zázá</language>
 		</languages>
 		<scripts>
-			<script type="Arab" draft="unconfirmed">arabíske</script>
-			<script type="Arab" alt="proposed-x1001" draft="unconfirmed">Arabískt</script>
-			<script type="Cyrl" draft="unconfirmed">kyrillíske</script>
-			<script type="Cyrl" alt="proposed-x1001" draft="unconfirmed">Kyrillískt</script>
-			<script type="Ethi" draft="unconfirmed">eþíópíske</script>
-			<script type="Ethi" alt="proposed-x1001" draft="unconfirmed">Eþíópískt</script>
-			<script type="Geor" draft="unconfirmed">georgíske</script>
-			<script type="Grek" draft="unconfirmed">greske</script>
-			<script type="Hang" draft="unconfirmed">hangul</script>
-			<script type="Hani" draft="unconfirmed">kinesíske</script>
-			<script type="Hans" draft="unconfirmed">einföldað kinesíske</script>
-			<script type="Hans" alt="proposed-x1001" draft="unconfirmed">Einföldað Han</script>
-			<script type="Hant" draft="unconfirmed">hefðbundið kinesíske</script>
-			<script type="Hant" alt="proposed-x1001" draft="unconfirmed">Hefðbundið Han</script>
-			<script type="Hira" draft="unconfirmed">hiragana</script>
-			<script type="Hrkt" draft="unconfirmed">katakana/hiragana</script>
-			<script type="Jpan" draft="unconfirmed">japanske</script>
-			<script type="Kana" draft="unconfirmed">katakana</script>
-			<script type="Latn" draft="unconfirmed">latneske</script>
-			<script type="Latn" alt="proposed-x1001" draft="unconfirmed">Latneskt</script>
+			<script type="Arab">arabísk</script>
+			<script type="Cans">Cans</script>
+			<script type="Cyrl">kyrillísk</script>
+			<script type="Ethi">eþíópísk</script>
+			<script type="Geor">georgrísk</script>
+			<script type="Grek">grísk</script>
+			<script type="Hang">hangul</script>
+			<script type="Hani">kínversk</script>
+			<script type="Hans">einfaldað han</script>
+			<script type="Hant">hefðbundið han</script>
+			<script type="Hebr">hebresk</script>
+			<script type="Hira">hiragana</script>
+			<script type="Hrkt">katakana eða hiragana</script>
+			<script type="Jpan">japönsk</script>
+			<script type="Kana">katakana</script>
+			<script type="Kore">kórönsk</script>
+			<script type="Latn">latnesk</script>
+			<script type="Qaai">erfðir</script>
+			<script type="Zxxx">Óskrifað</script>
+			<script type="Zzzz">Óþekkt eða ógilt letur</script>
 		</scripts>
 		<territories>
-			<territory type="001" draft="unconfirmed">heimur</territory>
-			<territory type="001" alt="proposed-x1001" draft="unconfirmed">Heimur</territory>
-			<territory type="002" draft="unconfirmed">Afríka</territory>
-			<territory type="003" draft="unconfirmed">norður-Ameríka og mið-Ameríka</territory>
-			<territory type="005" draft="unconfirmed">suður-Ameríka</territory>
-			<territory type="009" draft="unconfirmed">Eyjaálfa</territory>
-			<territory type="011" draft="unconfirmed">vestur-Afríka</territory>
-			<territory type="013" draft="unconfirmed">mið-Ameríka</territory>
-			<territory type="014" draft="unconfirmed">austur-Afríka</territory>
-			<territory type="015" draft="unconfirmed">norður-Afríka</territory>
-			<territory type="017" draft="unconfirmed">mið-Afríka</territory>
-			<territory type="018" draft="unconfirmed">suður-Afríka</territory>
-			<territory type="018" alt="proposed-x1001" draft="unconfirmed">Syðri-Afríka</territory>
-			<territory type="019" draft="unconfirmed">Ameríka</territory>
-			<territory type="021" draft="unconfirmed">norður-Ameríka</territory>
-			<territory type="029" draft="unconfirmed">Karíbahaf</territory>
-			<territory type="030" draft="unconfirmed">austur-Asía</territory>
-			<territory type="035" draft="unconfirmed">suðaustur-Asía</territory>
-			<territory type="039" draft="unconfirmed">suður-Evrópa</territory>
-			<territory type="053" draft="unconfirmed">Ástralía og Nýja-Sjáland</territory>
-			<territory type="054" draft="unconfirmed">Melanesía</territory>
-			<territory type="057" draft="unconfirmed">Míkrónesía</territory>
-			<territory type="061" draft="unconfirmed">Pólýnesía</territory>
-			<territory type="062" draft="unconfirmed">syðri mið-Asía</territory>
-			<territory type="142" draft="unconfirmed">Asía</territory>
-			<territory type="143" draft="unconfirmed">mið-Asía</territory>
-			<territory type="145" draft="unconfirmed">vestur-Asía</territory>
-			<territory type="150" draft="unconfirmed">Evrópa</territory>
-			<territory type="151" draft="unconfirmed">austur-Evrópa</territory>
-			<territory type="154" draft="unconfirmed">norður-Evrópa</territory>
-			<territory type="155" draft="unconfirmed">vestur-Evrópa</territory>
-			<territory type="419" draft="unconfirmed">latin-Ameríka og Karíbahaf</territory>
-			<territory type="830" draft="unconfirmed">Ermasundseyjar</territory>
+			<territory type="001">heimur</territory>
+			<territory type="002">Afríka</territory>
+			<territory type="003">Norður-Ameríka</territory>
+			<territory type="005">Suður-Ameríka</territory>
+			<territory type="009">Eyjaálfa</territory>
+			<territory type="011">Vestur-Afríka</territory>
+			<territory type="013">Mið-Ameríka</territory>
+			<territory type="014">Austur-Afríka</territory>
+			<territory type="015">Norður-Afríka</territory>
+			<territory type="017">Mið-Afríka</territory>
+			<territory type="018">Suðurhluti Afríku</territory>
+			<territory type="019">Ameríka</territory>
+			<territory type="021">Ameríka norðan Mexikó</territory>
+			<territory type="029">Karíbahaf</territory>
+			<territory type="030">Austur-Asía</territory>
+			<territory type="034">suðurhluti Asíu</territory>
+			<territory type="035">Suðaustur-Asía</territory>
+			<territory type="039">Suður-Evrópa</territory>
+			<territory type="053">Ástralía og Nýja-Sjáland</territory>
+			<territory type="054">Melanesía</territory>
+			<territory type="057">Míkrónesía</territory>
+			<territory type="061">Pólýnesía</territory>
+			<territory type="062">Syðri-Mið-Asía</territory>
+			<territory type="142">Asía</territory>
+			<territory type="143">Mið-Asía</territory>
+			<territory type="145">vestur-Asía</territory>
+			<territory type="150">Evrópa</territory>
+			<territory type="151">Austur-Evrópa</territory>
+			<territory type="154">Norður-Evrópa</territory>
+			<territory type="155">vestur-Evrópa</territory>
+			<territory type="172">Samveldi sjálfstæðra ríkja</territory>
+			<territory type="419">Latín-Ameríka og Karíbahaf</territory>
+			<territory type="830">Ermasundseyjar</territory>
 			<territory type="AD">Andorra</territory>
 			<territory type="AE">Sameinuðu arabísku furstadæmin</territory>
 			<territory type="AF">Afganistan</territory>
@@ -710,27 +585,23 @@
 			<territory type="AN">Hollensku Antillur</territory>
 			<territory type="AO">Angóla</territory>
 			<territory type="AQ">Suðurskautslandið</territory>
-			<territory type="AQ" alt="proposed-x1001" draft="unconfirmed">Suðurheimskautslandið</territory>
 			<territory type="AR">Argentína</territory>
 			<territory type="AS">Bandaríska Samóa</territory>
-			<territory type="AS" alt="proposed-x1001" draft="unconfirmed">Amerísku Samóaeyjar</territory>
 			<territory type="AT">Austurríki</territory>
 			<territory type="AU">Ástralía</territory>
 			<territory type="AW">Arúba</territory>
-			<territory type="AX" draft="unconfirmed">Álandseyjar</territory>
-			<territory type="AX" alt="proposed-x1001" draft="unconfirmed">Áland</territory>
+			<territory type="AX">Álandseyjar</territory>
 			<territory type="AZ">Aserbaídsjan</territory>
-			<territory type="AZ" alt="proposed-x1001" draft="unconfirmed">Aserbaíjan</territory>
 			<territory type="BA">Bosnía og Hersegóvína</territory>
 			<territory type="BB">Barbados</territory>
 			<territory type="BD">Bangladess</territory>
 			<territory type="BE">Belgía</territory>
 			<territory type="BF">Búrkína Fasó</territory>
-			<territory type="BF" alt="proposed-x1001" draft="unconfirmed">Burkína Fasó</territory>
 			<territory type="BG">Búlgaría</territory>
 			<territory type="BH">Barein</territory>
 			<territory type="BI">Búrúndí</territory>
 			<territory type="BJ">Benín</territory>
+			<territory type="BL">Saint Barthélemy</territory>
 			<territory type="BM">Bermúdaeyjar</territory>
 			<territory type="BN">Brúnei</territory>
 			<territory type="BO">Bólivía</territory>
@@ -738,35 +609,26 @@
 			<territory type="BS">Bahamaeyjar</territory>
 			<territory type="BT">Bútan</territory>
 			<territory type="BV">Bouveteyja</territory>
-			<territory type="BV" alt="proposed-x1001" draft="unconfirmed">Bouvet-eyja</territory>
 			<territory type="BW">Botsvana</territory>
 			<territory type="BY">Hvíta-Rússland</territory>
 			<territory type="BZ">Belís</territory>
 			<territory type="CA">Kanada</territory>
 			<territory type="CC">Kókoseyjar</territory>
-			<territory type="CC" alt="proposed-x1001" draft="unconfirmed">Cocos-eyjar</territory>
 			<territory type="CD">Austur-Kongó</territory>
-			<territory type="CD" alt="proposed-x1001" draft="unconfirmed">Kongó, lýðveldið</territory>
 			<territory type="CF">Mið-Afríkulýðveldið</territory>
 			<territory type="CG">Vestur-Kongó</territory>
-			<territory type="CG" alt="proposed-x1001" draft="unconfirmed">Kongó</territory>
 			<territory type="CH">Sviss</territory>
 			<territory type="CI">Fílabeinsströndin</territory>
 			<territory type="CK">Cookseyjar</territory>
-			<territory type="CK" alt="proposed-x1001" draft="unconfirmed">Cookeyjar</territory>
-			<territory type="CL" draft="unconfirmed">Síle</territory>
-			<territory type="CL" alt="proposed-x1001" draft="unconfirmed">Chile</territory>
+			<territory type="CL">Chíle</territory>
 			<territory type="CM">Kamerún</territory>
 			<territory type="CN">Kína</territory>
 			<territory type="CO">Kólumbía</territory>
 			<territory type="CR">Kostaríka</territory>
-			<territory type="CS" draft="unconfirmed">Serbía og Svartfjallaland</territory>
-			<territory type="CS" alt="proposed-x1001" draft="unconfirmed">Serbía</territory>
-			<territory type="CS" alt="proposed-x1002" draft="unconfirmed">Serbía og Montenegro</territory>
+			<territory type="CS">Serbía og Svartfjallaland</territory>
 			<territory type="CU">Kúba</territory>
 			<territory type="CV">Grænhöfðaeyjar</territory>
 			<territory type="CX">Jólaey</territory>
-			<territory type="CX" alt="proposed-x1001" draft="unconfirmed">Jólaeyja</territory>
 			<territory type="CY">Kýpur</territory>
 			<territory type="CZ">Tékkland</territory>
 			<territory type="DE">Þýskaland</territory>
@@ -786,16 +648,14 @@
 			<territory type="FJ">Fídjieyjar</territory>
 			<territory type="FK">Falklandseyjar</territory>
 			<territory type="FM">Mikrónesía</territory>
-			<territory type="FM" alt="proposed-x1001" draft="unconfirmed">Míkrónesía</territory>
 			<territory type="FO">Færeyjar</territory>
 			<territory type="FR">Frakkland</territory>
 			<territory type="GA">Gabon</territory>
 			<territory type="GB">Bretland</territory>
-			<territory type="GB" alt="proposed-x1001" draft="unconfirmed">Stóra-Bretland</territory>
 			<territory type="GD">Grenada</territory>
 			<territory type="GE">Georgía</territory>
 			<territory type="GF">Franska Gvæjana</territory>
-			<territory type="GG" draft="contributed">Guernsey</territory>
+			<territory type="GG">Guernsey</territory>
 			<territory type="GH">Gana</territory>
 			<territory type="GI">Gíbraltar</territory>
 			<territory type="GL">Grænland</territory>
@@ -805,16 +665,12 @@
 			<territory type="GQ">Miðbaugs-Gínea</territory>
 			<territory type="GR">Grikkland</territory>
 			<territory type="GS">Suður-Georgía og Suður-Sandvíkureyjar</territory>
-			<territory type="GS" alt="proposed-x1001" draft="unconfirmed">Suður-Georgía og Suður-Sandwicheyjar</territory>
 			<territory type="GT">Gvatemala</territory>
 			<territory type="GU">Gvam</territory>
 			<territory type="GW">Gínea-Bissá</territory>
 			<territory type="GY">Gvæjana</territory>
 			<territory type="HK">Hong Kong</territory>
-			<territory type="HK" alt="proposed-x1001" draft="unconfirmed">Hong Kong, sérstjórnarsvæði Kína</territory>
-			<territory type="HK" alt="short" draft="unconfirmed">Hongkong</territory>
 			<territory type="HM">Heard og McDonaldseyjar</territory>
-			<territory type="HM" alt="proposed-x1001" draft="unconfirmed">Heard-eyjar og McDonald-eyjur</territory>
 			<territory type="HN">Hondúras</territory>
 			<territory type="HR">Króatía</territory>
 			<territory type="HT">Haítí</territory>
@@ -822,27 +678,23 @@
 			<territory type="ID">Indónesía</territory>
 			<territory type="IE">Írland</territory>
 			<territory type="IL">Ísrael</territory>
-			<territory type="IM" draft="unconfirmed">Mön</territory>
+			<territory type="IM">Mön</territory>
 			<territory type="IN">Indland</territory>
 			<territory type="IO">Bresku Indlandshafseyjar</territory>
-			<territory type="IO" alt="proposed-x1001" draft="unconfirmed">Breska yfirráðasvæðið í Indlandshafi</territory>
 			<territory type="IQ">Írak</territory>
 			<territory type="IR">Íran</territory>
 			<territory type="IS">Ísland</territory>
 			<territory type="IT">Ítalía</territory>
-			<territory type="JE" draft="contributed">Jersey</territory>
+			<territory type="JE">Jersey</territory>
 			<territory type="JM">Jamaíka</territory>
 			<territory type="JO">Jórdanía</territory>
 			<territory type="JP">Japan</territory>
 			<territory type="KE">Kenía</territory>
 			<territory type="KG">Kirgisistan</territory>
-			<territory type="KG" alt="proposed-x1001" draft="unconfirmed">Kirgistan</territory>
 			<territory type="KH">Kambódía</territory>
 			<territory type="KI">Kíribatí</territory>
 			<territory type="KM">Kómoreyjar</territory>
-			<territory type="KM" alt="proposed-x1001" draft="unconfirmed">Comoros</territory>
 			<territory type="KN">Sankti Kristófer og Nevis</territory>
-			<territory type="KN" alt="proposed-x1001" draft="unconfirmed">Saint Kitts og Nevis</territory>
 			<territory type="KP">Norður-Kórea</territory>
 			<territory type="KR">Suður-Kórea</territory>
 			<territory type="KW">Kúveit</territory>
@@ -851,7 +703,6 @@
 			<territory type="LA">Laos</territory>
 			<territory type="LB">Líbanon</territory>
 			<territory type="LC">Sankti Lúsía</territory>
-			<territory type="LC" alt="proposed-x1001" draft="unconfirmed">Saint Lúsía</territory>
 			<territory type="LI">Liechtenstein</territory>
 			<territory type="LK">Srí Lanka</territory>
 			<territory type="LR">Líbería</territory>
@@ -860,23 +711,18 @@
 			<territory type="LU">Lúxemborg</territory>
 			<territory type="LV">Lettland</territory>
 			<territory type="LY">Líbía</territory>
-			<territory type="LY" alt="proposed-x1001" draft="unconfirmed">Líbýa</territory>
 			<territory type="MA">Marokkó</territory>
 			<territory type="MC">Mónakó</territory>
 			<territory type="MD">Moldóva</territory>
-			<territory type="MD" alt="proposed-x1001" draft="unconfirmed">Moldova</territory>
-			<territory type="ME" draft="unconfirmed">Svartfjallaland</territory>
-			<territory type="ME" alt="proposed-x1001" draft="unconfirmed">Montenegro</territory>
+			<territory type="ME">Svartfjallaland</territory>
+			<territory type="MF">Saint Martin</territory>
 			<territory type="MG">Madagaskar</territory>
 			<territory type="MH">Marshalleyjar</territory>
 			<territory type="MK">Makedónía</territory>
 			<territory type="ML">Malí</territory>
 			<territory type="MM">Mjanmar</territory>
 			<territory type="MN">Mongólía</territory>
-			<territory type="MO">Makaó</territory>
-			<territory type="MO" alt="proposed-x1001" draft="unconfirmed">Makaó, sérstjórnarsvæði Kína</territory>
-			<territory type="MO" alt="proposed-x1002" draft="unconfirmed">Makáo</territory>
-			<territory type="MO" alt="short" draft="unconfirmed">Makáo</territory>
+			<territory type="MO">Makáo</territory>
 			<territory type="MP">Norður-Maríanaeyjar</territory>
 			<territory type="MQ">Martiník</territory>
 			<territory type="MR">Máritanía</territory>
@@ -892,18 +738,16 @@
 			<territory type="NC">Nýja-Kaledónía</territory>
 			<territory type="NE">Níger</territory>
 			<territory type="NF">Norfolkeyja</territory>
-			<territory type="NF" alt="proposed-x1001" draft="unconfirmed">Norfolkey</territory>
 			<territory type="NG">Nígería</territory>
 			<territory type="NI">Níkaragva</territory>
 			<territory type="NL">Niðurlönd</territory>
-			<territory type="NL" alt="proposed-x1001" draft="unconfirmed">Holland</territory>
 			<territory type="NO">Noregur</territory>
 			<territory type="NP">Nepal</territory>
 			<territory type="NR">Nárú</territory>
 			<territory type="NU">Niue</territory>
 			<territory type="NZ">Nýja-Sjáland</territory>
 			<territory type="OM">Óman</territory>
-			<territory type="PA" draft="unconfirmed">Panama</territory>
+			<territory type="PA">Panama</territory>
 			<territory type="PE">Perú</territory>
 			<territory type="PF">Franska Pólýnesía</territory>
 			<territory type="PG">Papúa Nýja-Gínea</territory>
@@ -918,12 +762,11 @@
 			<territory type="PW">Palá</territory>
 			<territory type="PY">Paragvæ</territory>
 			<territory type="QA">Katar</territory>
-			<territory type="QO" draft="unconfirmed">ytri Eyjaálfa</territory>
-			<territory type="QU" draft="unconfirmed">EU</territory>
+			<territory type="QO">Ytri Eyjaálfa</territory>
+			<territory type="QU">Evrópusambandið</territory>
 			<territory type="RE">Réunion</territory>
 			<territory type="RO">Rúmenía</territory>
-			<territory type="RS" draft="contributed">Serbía</territory>
-			<territory type="RS" alt="proposed-x1001" draft="unconfirmed">Serbia</territory>
+			<territory type="RS">Serbía</territory>
 			<territory type="RU">Rússland</territory>
 			<territory type="RW">Rúanda</territory>
 			<territory type="SA">Sádi-Arabía</territory>
@@ -942,100 +785,79 @@
 			<territory type="SO">Sómalía</territory>
 			<territory type="SR">Súrínam</territory>
 			<territory type="ST">Saó Tóme og Prinsípe</territory>
-			<territory type="ST" alt="proposed-x1001" draft="unconfirmed">São Tomé og Príncipe</territory>
 			<territory type="SV">El Salvador</territory>
 			<territory type="SY">Sýrland</territory>
 			<territory type="SZ">Svasíland</territory>
 			<territory type="TC">Turks- og Caicoseyjar</territory>
-			<territory type="TC" alt="proposed-x1001" draft="unconfirmed">Turks og Caicoseyjar</territory>
 			<territory type="TD">Tsjad</territory>
 			<territory type="TF">Frönsku suðlægu landsvæðin</territory>
 			<territory type="TG">Tógó</territory>
 			<territory type="TH">Taíland</territory>
 			<territory type="TJ">Tadsjikistan</territory>
-			<territory type="TJ" alt="proposed-x1001" draft="unconfirmed">Tadjíkistan</territory>
 			<territory type="TK">Tókelá</territory>
-			<territory type="TK" alt="proposed-x1001" draft="unconfirmed">Tokelá</territory>
 			<territory type="TL">Austur-Tímor</territory>
 			<territory type="TM">Túrkmenistan</territory>
 			<territory type="TN">Túnis</territory>
 			<territory type="TO">Tonga</territory>
 			<territory type="TR">Tyrkland</territory>
 			<territory type="TT">Trínidad og Tóbagó</territory>
-			<territory type="TT" alt="proposed-x1001" draft="unconfirmed">Trínídad og Tóbagó</territory>
 			<territory type="TV">Túvalú</territory>
 			<territory type="TW">Taívan</territory>
-			<territory type="TW" alt="proposed-x1001" draft="unconfirmed">Tævan</territory>
 			<territory type="TZ">Tansanía</territory>
 			<territory type="UA">Úkraína</territory>
 			<territory type="UG">Úganda</territory>
 			<territory type="UM">Smáeyjar Bandaríkjanna</territory>
 			<territory type="US">Bandaríkin</territory>
-			<territory type="US" alt="proposed-x1001" draft="unconfirmed">Bandaríki Norður-Ameríku</territory>
 			<territory type="UY">Úrúgvæ</territory>
 			<territory type="UZ">Úsbekistan</territory>
 			<territory type="VA">Páfagarður</territory>
-			<territory type="VA" alt="proposed-x1001" draft="unconfirmed">Vatíkanið</territory>
 			<territory type="VC">Sankti Vinsent og Grenadíneyjar</territory>
-			<territory type="VC" alt="proposed-x1001" draft="unconfirmed">Saint Vinsent og Grenadíneyjar</territory>
 			<territory type="VE">Venesúela</territory>
 			<territory type="VG">Jómfrúaeyjar (bresku)</territory>
-			<territory type="VG" alt="proposed-x1001" draft="unconfirmed">Bresku jómfrúaeyjar</territory>
 			<territory type="VI">Jómfrúaeyjar (bandarísku)</territory>
-			<territory type="VI" alt="proposed-x1001" draft="unconfirmed">Bandarísku jómfrúaeyjar</territory>
 			<territory type="VN">Víetnam</territory>
 			<territory type="VU">Vanúatú</territory>
-			<territory type="VU" alt="proposed-x1001" draft="unconfirmed">Vanatú</territory>
 			<territory type="WF">Wallis- og Fútúnaeyjar</territory>
-			<territory type="WF" alt="proposed-x1001" draft="unconfirmed">Wallis og Futuna</territory>
 			<territory type="WS">Samóa</territory>
 			<territory type="YE">Jemen</territory>
 			<territory type="YT">Mayotte</territory>
 			<territory type="ZA">Suður-Afríka</territory>
 			<territory type="ZM">Sambía</territory>
-			<territory type="ZW" draft="unconfirmed">Simbabve</territory>
+			<territory type="ZW">Simbabve</territory>
+			<territory type="ZZ">Óþekkt eða ógilt svæði</territory>
 		</territories>
 		<keys>
 			<key type="calendar">Dagatal</key>
-			<key type="calendar" alt="proposed-x1001" draft="unconfirmed">dagatal</key>
 			<key type="collation">Röðun</key>
-			<key type="collation" alt="proposed-x1001" draft="unconfirmed">röðun</key>
 			<key type="currency">Gjaldmiðill</key>
-			<key type="currency" alt="proposed-x1001" draft="unconfirmed">gjaldmiðill</key>
 		</keys>
 		<types>
-			<type type="big5han" key="collation" draft="unconfirmed">hefðbundin röðun, BIG5</type>
+			<type type="big5han" key="collation">hefðbundin kínversk röðun - Big5</type>
 			<type type="buddhist" key="calendar">Búddískt dagatal</type>
-			<type type="buddhist" key="calendar" alt="proposed-x1001" draft="unconfirmed">búddískt dagatal</type>
 			<type type="chinese" key="calendar">Kínverskt dagatal</type>
-			<type type="chinese" key="calendar" alt="proposed-x1001" draft="unconfirmed">kínverskt dagatal</type>
 			<type type="direct" key="collation">Bein röðun</type>
-			<type type="direct" key="collation" alt="proposed-x1001" draft="unconfirmed">bein röðun</type>
+			<type type="gb2312han" key="collation">einfölduð kínversk röðun - GB2312</type>
 			<type type="gregorian" key="calendar">Gregorískt dagatal</type>
-			<type type="gregorian" key="calendar" alt="proposed-x1001" draft="unconfirmed">gregorískt dagatal</type>
 			<type type="hebrew" key="calendar">Hebreskt  dagatal</type>
-			<type type="hebrew" key="calendar" alt="proposed-x1001" draft="unconfirmed">hebreskt dagatal</type>
+			<type type="indian" key="calendar">indverskt dagatal</type>
 			<type type="islamic" key="calendar">Íslamskt dagatal</type>
-			<type type="islamic" key="calendar" alt="proposed-x1001" draft="unconfirmed">íslamskt dagatal</type>
 			<type type="islamic-civil" key="calendar">Íslamskt borgaradagatal</type>
-			<type type="islamic-civil" key="calendar" alt="proposed-x1001" draft="unconfirmed">íslamskt borgaradagatal</type>
 			<type type="japanese" key="calendar">Japanskt dagatal</type>
-			<type type="japanese" key="calendar" alt="proposed-x1001" draft="unconfirmed">japanskt dagatal</type>
 			<type type="phonebook" key="collation">Símaskráarröðun</type>
-			<type type="phonebook" key="collation" alt="proposed-x1001" draft="unconfirmed">símaskráarröðun</type>
 			<type type="pinyin" key="collation">Pinyin-röðun</type>
-			<type type="pinyin" key="collation" alt="proposed-x1001" draft="unconfirmed">pinyin-röðun</type>
+			<type type="roc" key="calendar">kínverskt dagatal</type>
 			<type type="stroke" key="collation">Strikaröðun</type>
-			<type type="stroke" key="collation" alt="proposed-x1001" draft="unconfirmed">strikaröðun</type>
 			<type type="traditional" key="collation">Hefðbundin</type>
-			<type type="traditional" key="collation" alt="proposed-x1001" draft="unconfirmed">hefðbundin röðun</type>
 		</types>
 		<measurementSystemNames>
-			<measurementSystemName type="US" draft="unconfirmed">bandarískt</measurementSystemName>
-			<measurementSystemName type="US" alt="proposed-x1001" draft="unconfirmed">Bandarískt</measurementSystemName>
-			<measurementSystemName type="metric" draft="unconfirmed">metrakerfi</measurementSystemName>
-			<measurementSystemName type="metric" alt="proposed-x1001" draft="unconfirmed">Metrakerfi</measurementSystemName>
+			<measurementSystemName type="US">bandarískt</measurementSystemName>
+			<measurementSystemName type="metric">metrakerfi</measurementSystemName>
 		</measurementSystemNames>
+		<codePatterns>
+			<codePattern type="language">tungumál: {0}</codePattern>
+			<codePattern type="script">leturgerð: {0}</codePattern>
+			<codePattern type="territory">svæði: {0}</codePattern>
+		</codePatterns>
 	</localeDisplayNames>
 	<layout>
 		<inText type="languages">lowercase-words</inText>
@@ -1043,14 +865,13 @@
 	<characters>
 		<exemplarCharacters>[a á b d ð e é f-i í j-o ó p r-u ú v y ý þ æ ö]</exemplarCharacters>
 		<exemplarCharacters type="auxiliary">[c q w z]</exemplarCharacters>
+		<exemplarCharacters type="currencySymbol">[a-z]</exemplarCharacters>
 	</characters>
 	<delimiters>
-		<quotationStart draft="contributed">„</quotationStart>
-		<quotationStart alt="proposed-x1001" draft="unconfirmed">”</quotationStart>
-		<quotationEnd draft="contributed">“</quotationEnd>
-		<alternateQuotationStart draft="contributed">‚</alternateQuotationStart>
-		<alternateQuotationStart alt="proposed-x1001" draft="unconfirmed">’</alternateQuotationStart>
-		<alternateQuotationEnd draft="contributed">‘</alternateQuotationEnd>
+		<quotationStart>„</quotationStart>
+		<quotationEnd>“</quotationEnd>
+		<alternateQuotationStart>‚</alternateQuotationStart>
+		<alternateQuotationEnd>‘</alternateQuotationEnd>
 	</delimiters>
 	<dates>
 		<calendars>
@@ -1107,18 +928,12 @@
 					<dayContext type="format">
 						<dayWidth type="abbreviated">
 							<day type="sun">sun</day>
-							<day type="sun" alt="proposed-x1001" draft="unconfirmed">sun.</day>
 							<day type="mon">mán</day>
-							<day type="mon" alt="proposed-x1001" draft="unconfirmed">mán.</day>
 							<day type="tue">þri</day>
 							<day type="wed">mið</day>
-							<day type="wed" alt="proposed-x1001" draft="unconfirmed">mið.</day>
 							<day type="thu">fim</day>
-							<day type="thu" alt="proposed-x1001" draft="unconfirmed">fim.</day>
 							<day type="fri">fös</day>
-							<day type="fri" alt="proposed-x1001" draft="unconfirmed">fös.</day>
 							<day type="sat">lau</day>
-							<day type="sat" alt="proposed-x1001" draft="unconfirmed">lau.</day>
 						</dayWidth>
 						<dayWidth type="wide">
 							<day type="sun">sunnudagur</day>
@@ -1157,14 +972,38 @@
 							<quarter type="4">4th fjórðungur</quarter>
 						</quarterWidth>
 					</quarterContext>
+					<quarterContext type="stand-alone">
+						<quarterWidth type="abbreviated">
+							<quarter type="1">1F</quarter>
+							<quarter type="2">2F</quarter>
+							<quarter type="3">3F</quarter>
+							<quarter type="4">4F</quarter>
+						</quarterWidth>
+						<quarterWidth type="narrow">
+							<quarter type="1">1</quarter>
+							<quarter type="2">2</quarter>
+							<quarter type="3">3</quarter>
+							<quarter type="4">4</quarter>
+						</quarterWidth>
+						<quarterWidth type="wide">
+							<quarter type="1">1. fjórðungur</quarter>
+							<quarter type="2">2. fjórðungur</quarter>
+							<quarter type="3">3. fjórðungur</quarter>
+							<quarter type="4">4. fjórðungur</quarter>
+						</quarterWidth>
+					</quarterContext>
 				</quarters>
-				<am draft="unconfirmed">AM</am>
-				<pm draft="unconfirmed">PM</pm>
+				<am>f.h.</am>
+				<pm>e.h.</pm>
 				<eras>
 					<eraAbbr>
-						<era type="0" draft="unconfirmed">BCE</era>
-						<era type="1" draft="unconfirmed">CE</era>
+						<era type="0">fyrir Krist</era>
+						<era type="1">eftir Krist</era>
 					</eraAbbr>
+					<eraNarrow>
+						<era type="0">f.k.</era>
+						<era type="1">e.k.</era>
+					</eraNarrow>
 				</eras>
 				<dateFormats>
 					<dateFormatLength type="full">
@@ -1191,337 +1030,470 @@
 				<timeFormats>
 					<timeFormatLength type="full">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm:ss v</pattern>
+							<pattern>HH:mm:ss v</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="long">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm:ss z</pattern>
+							<pattern>HH:mm:ss z</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="medium">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm:ss</pattern>
+							<pattern>HH:mm:ss</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="short">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm</pattern>
+							<pattern>HH:mm</pattern>
 						</timeFormat>
 					</timeFormatLength>
 				</timeFormats>
 				<dateTimeFormats>
 					<dateTimeFormatLength>
 						<dateTimeFormat>
-							<pattern draft="unconfirmed">{1} {0}</pattern>
+							<pattern>{1} {0}</pattern>
 						</dateTimeFormat>
 					</dateTimeFormatLength>
 					<availableFormats>
-						<dateFormatItem id="HHmm" draft="unconfirmed">HH:mm</dateFormatItem>
-						<dateFormatItem id="HHmmss" draft="unconfirmed">HH:mm:ss</dateFormatItem>
-						<dateFormatItem id="MMMMd" draft="unconfirmed">d. MMMM</dateFormatItem>
-						<dateFormatItem id="Md" draft="unconfirmed">d.M</dateFormatItem>
-						<dateFormatItem id="yyQ" draft="unconfirmed">Q yy</dateFormatItem>
-						<dateFormatItem id="yyyyM" draft="unconfirmed">M.yyyy</dateFormatItem>
-						<dateFormatItem id="yyyyMMMM" draft="unconfirmed">MMMM yyyy</dateFormatItem>
+						<dateFormatItem id="HHmm">HH:mm</dateFormatItem>
+						<dateFormatItem id="HHmmss">HH:mm:ss</dateFormatItem>
+						<dateFormatItem id="Hm">H:mm</dateFormatItem>
+						<dateFormatItem id="M">L.</dateFormatItem>
+						<dateFormatItem id="MEd">E d.M.</dateFormatItem>
+						<dateFormatItem id="MMM">LLL</dateFormatItem>
+						<dateFormatItem id="MMMEd">E d. MMM</dateFormatItem>
+						<dateFormatItem id="MMMMEd">E d. MMMM</dateFormatItem>
+						<dateFormatItem id="MMMMd">d. MMMM</dateFormatItem>
+						<dateFormatItem id="MMMd">d. MMM</dateFormatItem>
+						<dateFormatItem id="Md">d.M</dateFormatItem>
+						<dateFormatItem id="d">d</dateFormatItem>
+						<dateFormatItem id="ms">mm:ss</dateFormatItem>
+						<dateFormatItem id="y">yyyy</dateFormatItem>
+						<dateFormatItem id="yM">M. yyyy</dateFormatItem>
+						<dateFormatItem id="yMEd">EEE d.M.yyyy</dateFormatItem>
+						<dateFormatItem id="yMMM">MMM yyyy</dateFormatItem>
+						<dateFormatItem id="yMMMEd">EEE d. MMM yyyy</dateFormatItem>
+						<dateFormatItem id="yMMMM">MMMM yyyy</dateFormatItem>
+						<dateFormatItem id="yQ">Q. yyyy</dateFormatItem>
+						<dateFormatItem id="yQQQ">QQQ yyyy</dateFormatItem>
+						<dateFormatItem id="yyQ">Q yy</dateFormatItem>
+						<dateFormatItem id="yyyyM">M.yyyy</dateFormatItem>
+						<dateFormatItem id="yyyyMMMM">MMMM yyyy</dateFormatItem>
 					</availableFormats>
+					<intervalFormats>
+						<intervalFormatFallback>{0} - {1}</intervalFormatFallback>
+						<intervalFormatItem id="M">
+							<greatestDifference id="M">M-M</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MEd">
+							<greatestDifference id="M">E, d.M - E, d.M</greatestDifference>
+							<greatestDifference id="d">E, d.M - E, d.M</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMM">
+							<greatestDifference id="M">MMM-MMM</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMMEd">
+							<greatestDifference id="M">E, d. MMM - E, d. MMM</greatestDifference>
+							<greatestDifference id="d">E, d. - E, d. MMM</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMMd">
+							<greatestDifference id="M">d. MMM - d. MMM</greatestDifference>
+							<greatestDifference id="d">d.-d. MMM</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="Md">
+							<greatestDifference id="M">d.M - d.M</greatestDifference>
+							<greatestDifference id="d">d.M - d.M</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="d">
+							<greatestDifference id="d">d-d</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="h">
+							<greatestDifference id="h">HH-HH</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hm">
+							<greatestDifference id="h">HH:mm-HH:mm</greatestDifference>
+							<greatestDifference id="m">HH:mm-HH:mm</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hmv">
+							<greatestDifference id="h">HH:mm-HH:mm v</greatestDifference>
+							<greatestDifference id="m">HH:mm-HH:mm v</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hv">
+							<greatestDifference id="h">HH-HH v</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="y">
+							<greatestDifference id="y">y-y</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yM">
+							<greatestDifference id="M">M.yyyy - M.yyyy</greatestDifference>
+							<greatestDifference id="y">M.yyyy - M.yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMEd">
+							<greatestDifference id="M">E, d.M.yyyy - E, d.M.yyyy</greatestDifference>
+							<greatestDifference id="d">E, d.M.yyyy - E, d.M.yyyy</greatestDifference>
+							<greatestDifference id="y">E, d.M.yyyy - E, d.M.yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMM">
+							<greatestDifference id="M">MMM-MMM yyyy</greatestDifference>
+							<greatestDifference id="y">MMM yyyy - MMM yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMMEd">
+							<greatestDifference id="M">E, d. MMM - E, d. MMM yyyy</greatestDifference>
+							<greatestDifference id="d">E, d. - E, d. MMM yyyy</greatestDifference>
+							<greatestDifference id="y">E, d. MMM yyyy - E, d. MMM yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMMd">
+							<greatestDifference id="M">d. MMM - d. MMM yyyy</greatestDifference>
+							<greatestDifference id="d">d.-d. MMM yyyy</greatestDifference>
+							<greatestDifference id="y">d. MMM yyyy - d. MMM yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMd">
+							<greatestDifference id="M">d.M.yyyy - d.M.yyyy</greatestDifference>
+							<greatestDifference id="d">d.M.yyyy - d.M.yyyy</greatestDifference>
+							<greatestDifference id="y">d.M.yyyy - d.M.yyyy</greatestDifference>
+						</intervalFormatItem>
+					</intervalFormats>
 				</dateTimeFormats>
 				<fields>
+					<field type="era">
+						<displayName>tímabil</displayName>
+					</field>
+					<field type="year">
+						<displayName>ár</displayName>
+					</field>
+					<field type="month">
+						<displayName>mánuður</displayName>
+					</field>
+					<field type="week">
+						<displayName>vika</displayName>
+					</field>
 					<field type="day">
-						<displayName draft="unconfirmed">dagur</displayName>
+						<displayName>dagur</displayName>
+						<relative type="0">í dag</relative>
+						<relative type="1">á morgun</relative>
+						<relative type="2">eftir tvo daga</relative>
+						<relative type="3">eftir þrjá daga</relative>
+						<relative type="-1">í gær</relative>
+						<relative type="-2">fyrir tveimur dögum</relative>
+						<relative type="-3">fyrir þremur dögum</relative>
+					</field>
+					<field type="weekday">
+						<displayName>vikudagur</displayName>
+					</field>
+					<field type="dayperiod">
+						<displayName>f.h./e.h.</displayName>
+					</field>
+					<field type="hour">
+						<displayName>klukkustund</displayName>
+					</field>
+					<field type="minute">
+						<displayName>mínúta</displayName>
+					</field>
+					<field type="second">
+						<displayName>sekúnda</displayName>
+					</field>
+					<field type="zone">
+						<displayName>svæði</displayName>
 					</field>
 				</fields>
 			</calendar>
 		</calendars>
 		<timeZoneNames>
-			<hourFormat draft="unconfirmed">+HH:mm;−HH:mm</hourFormat>
-			<hourFormat alt="proposed-x1001" draft="unconfirmed">+HH:mm;-HH:mm</hourFormat>
-			<gmtFormat draft="unconfirmed">GMT{0}</gmtFormat>
-			<regionFormat draft="unconfirmed">{0}</regionFormat>
+			<hourFormat>+HH:mm;−HH:mm</hourFormat>
+			<gmtFormat>GMT{0}</gmtFormat>
+			<regionFormat>{0}</regionFormat>
+			<zone type="Etc/Unknown">
+				<exemplarCity>óþekkt</exemplarCity>
+			</zone>
 			<zone type="Asia/Kabul">
-				<exemplarCity draft="unconfirmed">Kabúl</exemplarCity>
+				<exemplarCity>Kabúl</exemplarCity>
 			</zone>
 			<zone type="America/Anguilla">
-				<exemplarCity draft="unconfirmed">Angúilla</exemplarCity>
+				<exemplarCity>Angúilla</exemplarCity>
 			</zone>
 			<zone type="Antarctica/South_Pole">
-				<exemplarCity draft="unconfirmed">Suðurpóllinn</exemplarCity>
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Suðurpóll</exemplarCity>
+				<exemplarCity>Suðurpóllinn</exemplarCity>
 			</zone>
 			<zone type="Antarctica/DumontDUrville">
-				<exemplarCity draft="unconfirmed">Dumont D'Urville</exemplarCity>
-			</zone>
-			<zone type="America/Buenos_Aires">
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Búenos Aíres</exemplarCity>
+				<exemplarCity>Dumont D'Urville</exemplarCity>
 			</zone>
 			<zone type="Europe/Vienna">
-				<exemplarCity draft="unconfirmed">Vínarborg</exemplarCity>
+				<exemplarCity>Vínarborg</exemplarCity>
 			</zone>
 			<zone type="America/Aruba">
-				<exemplarCity draft="unconfirmed">Arúba</exemplarCity>
+				<exemplarCity>Arúba</exemplarCity>
 			</zone>
 			<zone type="America/Barbados">
-				<exemplarCity draft="unconfirmed">Barbadoseyjar</exemplarCity>
+				<exemplarCity>Barbadoseyjar</exemplarCity>
 			</zone>
 			<zone type="Europe/Brussels">
-				<exemplarCity draft="unconfirmed">Brussel</exemplarCity>
+				<exemplarCity>Brussel</exemplarCity>
 			</zone>
 			<zone type="Europe/Sofia">
-				<exemplarCity draft="unconfirmed">Sofía</exemplarCity>
+				<exemplarCity>Sofía</exemplarCity>
 			</zone>
 			<zone type="Asia/Bahrain">
-				<exemplarCity draft="unconfirmed">Barein</exemplarCity>
+				<exemplarCity>Barein</exemplarCity>
 			</zone>
 			<zone type="Atlantic/Bermuda">
-				<exemplarCity draft="unconfirmed">Bermúdaeyjar</exemplarCity>
+				<exemplarCity>Bermúdaeyjar</exemplarCity>
 			</zone>
 			<zone type="Asia/Brunei">
-				<exemplarCity draft="unconfirmed">Brúnei</exemplarCity>
+				<exemplarCity>Brúnei</exemplarCity>
+			</zone>
+			<zone type="America/Rio_Branco">
+				<exemplarCity>Rio Branco</exemplarCity>
 			</zone>
 			<zone type="America/Belize">
-				<exemplarCity draft="unconfirmed">Belís</exemplarCity>
+				<exemplarCity>Belís</exemplarCity>
 			</zone>
 			<zone type="America/Regina">
-				<exemplarCity draft="unconfirmed">Regína</exemplarCity>
+				<exemplarCity>Regína</exemplarCity>
 			</zone>
 			<zone type="Europe/Zurich">
-				<exemplarCity draft="unconfirmed">Zürich</exemplarCity>
+				<exemplarCity>Zürich</exemplarCity>
 			</zone>
 			<zone type="Pacific/Easter">
-				<exemplarCity draft="unconfirmed">Páskaeyja</exemplarCity>
-			</zone>
-			<zone type="America/Santiago">
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Santíagó</exemplarCity>
+				<exemplarCity>Páskaeyja</exemplarCity>
 			</zone>
 			<zone type="America/Costa_Rica">
-				<exemplarCity draft="unconfirmed">Kostaríka</exemplarCity>
+				<exemplarCity>Kostaríka</exemplarCity>
 			</zone>
 			<zone type="Atlantic/Cape_Verde">
-				<exemplarCity draft="unconfirmed">Grænhöfðaeyjar</exemplarCity>
+				<exemplarCity>Grænhöfðaeyjar</exemplarCity>
 			</zone>
 			<zone type="Europe/Berlin">
-				<exemplarCity draft="unconfirmed">Berlín</exemplarCity>
+				<exemplarCity>Berlín</exemplarCity>
 			</zone>
 			<zone type="Africa/Djibouti">
-				<exemplarCity draft="unconfirmed">Djíbútí</exemplarCity>
+				<exemplarCity>Djíbútí</exemplarCity>
 			</zone>
 			<zone type="Europe/Copenhagen">
-				<exemplarCity draft="unconfirmed">Kaupmannahöfn</exemplarCity>
+				<exemplarCity>Kaupmannahöfn</exemplarCity>
 			</zone>
 			<zone type="America/Dominica">
-				<exemplarCity draft="unconfirmed">Dóminíka</exemplarCity>
+				<exemplarCity>Dóminíka</exemplarCity>
 			</zone>
 			<zone type="Africa/Algiers">
-				<exemplarCity draft="unconfirmed">Alsír</exemplarCity>
+				<exemplarCity>Alsír</exemplarCity>
 			</zone>
 			<zone type="Africa/Cairo">
-				<exemplarCity draft="unconfirmed">Kaíró</exemplarCity>
+				<exemplarCity>Kaíró</exemplarCity>
 			</zone>
 			<zone type="Atlantic/Canary">
-				<exemplarCity draft="unconfirmed">Kanaríeyjar</exemplarCity>
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Kanarí</exemplarCity>
+				<exemplarCity>Kanaríeyjar</exemplarCity>
 			</zone>
 			<zone type="Europe/Madrid">
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Madríd</exemplarCity>
+				<exemplarCity>Madríd</exemplarCity>
 			</zone>
 			<zone type="Pacific/Fiji">
-				<exemplarCity draft="unconfirmed">Fidjieyjar</exemplarCity>
+				<exemplarCity>Fidjieyjar</exemplarCity>
 			</zone>
 			<zone type="Atlantic/Faeroe">
-				<exemplarCity draft="unconfirmed">Færeyjar</exemplarCity>
+				<exemplarCity>Færeyjar</exemplarCity>
 			</zone>
 			<zone type="Europe/Paris">
-				<exemplarCity draft="unconfirmed">París</exemplarCity>
+				<exemplarCity>París</exemplarCity>
 			</zone>
 			<zone type="Europe/Gibraltar">
-				<exemplarCity draft="unconfirmed">Gíbraltar</exemplarCity>
+				<exemplarCity>Gíbraltar</exemplarCity>
 			</zone>
 			<zone type="America/Godthab">
-				<exemplarCity draft="unconfirmed">Nuuk</exemplarCity>
+				<exemplarCity>Nuuk</exemplarCity>
 			</zone>
 			<zone type="America/Guadeloupe">
-				<exemplarCity draft="unconfirmed">Gvadelúp</exemplarCity>
+				<exemplarCity>Gvadelúp</exemplarCity>
 			</zone>
 			<zone type="Europe/Athens">
-				<exemplarCity draft="unconfirmed">Aþena</exemplarCity>
+				<exemplarCity>Aþena</exemplarCity>
 			</zone>
 			<zone type="Atlantic/South_Georgia">
-				<exemplarCity draft="unconfirmed">Suður-Georgía</exemplarCity>
+				<exemplarCity>Suður-Georgía</exemplarCity>
 			</zone>
 			<zone type="America/Guatemala">
-				<exemplarCity draft="unconfirmed">Gvatemala</exemplarCity>
+				<exemplarCity>Gvatemala</exemplarCity>
 			</zone>
 			<zone type="Pacific/Guam">
-				<exemplarCity draft="unconfirmed">Gúam</exemplarCity>
+				<exemplarCity>Gúam</exemplarCity>
 			</zone>
 			<zone type="Africa/Bissau">
-				<exemplarCity draft="unconfirmed">Bissá</exemplarCity>
+				<exemplarCity>Bissá</exemplarCity>
 			</zone>
 			<zone type="America/Guyana">
-				<exemplarCity draft="unconfirmed">Gvæjana</exemplarCity>
+				<exemplarCity>Gvæjana</exemplarCity>
 			</zone>
 			<zone type="Europe/Budapest">
-				<exemplarCity draft="unconfirmed">Búdapest</exemplarCity>
+				<exemplarCity>Búdapest</exemplarCity>
 			</zone>
 			<zone type="Asia/Jakarta">
-				<exemplarCity draft="unconfirmed">Djakarta</exemplarCity>
+				<exemplarCity>Djakarta</exemplarCity>
 			</zone>
 			<zone type="Asia/Baghdad">
-				<exemplarCity draft="unconfirmed">Bagdad</exemplarCity>
+				<exemplarCity>Bagdad</exemplarCity>
 			</zone>
 			<zone type="Asia/Tehran">
-				<exemplarCity draft="unconfirmed">Teheran</exemplarCity>
+				<exemplarCity>Teheran</exemplarCity>
 			</zone>
 			<zone type="Atlantic/Reykjavik">
-				<exemplarCity draft="unconfirmed">Reykjavík</exemplarCity>
+				<exemplarCity>Reykjavík</exemplarCity>
 			</zone>
 			<zone type="Europe/Rome">
-				<exemplarCity draft="unconfirmed">Róm</exemplarCity>
+				<exemplarCity>Róm</exemplarCity>
 			</zone>
 			<zone type="America/Jamaica">
-				<exemplarCity draft="unconfirmed">Jamaíka</exemplarCity>
+				<exemplarCity>Jamaíka</exemplarCity>
 			</zone>
 			<zone type="Asia/Tokyo">
-				<exemplarCity draft="unconfirmed">Tókýó</exemplarCity>
+				<exemplarCity>Tókýó</exemplarCity>
 			</zone>
 			<zone type="America/St_Kitts">
-				<exemplarCity draft="unconfirmed">St. Kitts</exemplarCity>
+				<exemplarCity>St. Kitts</exemplarCity>
 			</zone>
 			<zone type="Asia/Pyongyang">
-				<exemplarCity draft="unconfirmed">Pjongjang</exemplarCity>
+				<exemplarCity>Pjongjang</exemplarCity>
 			</zone>
 			<zone type="Asia/Seoul">
-				<exemplarCity draft="unconfirmed">Seúl</exemplarCity>
+				<exemplarCity>Seúl</exemplarCity>
 			</zone>
 			<zone type="Asia/Kuwait">
-				<exemplarCity draft="unconfirmed">Kúveit</exemplarCity>
+				<exemplarCity>Kúveit</exemplarCity>
 			</zone>
 			<zone type="Asia/Beirut">
-				<exemplarCity draft="unconfirmed">Beirút</exemplarCity>
+				<exemplarCity>Beirút</exemplarCity>
 			</zone>
 			<zone type="America/St_Lucia">
-				<exemplarCity draft="unconfirmed">St. Lucia</exemplarCity>
+				<exemplarCity>St. Lucia</exemplarCity>
 			</zone>
 			<zone type="Africa/Monrovia">
-				<exemplarCity draft="unconfirmed">Monróvía</exemplarCity>
+				<exemplarCity>Monróvía</exemplarCity>
 			</zone>
 			<zone type="Europe/Vilnius">
-				<exemplarCity draft="unconfirmed">Vilníus</exemplarCity>
+				<exemplarCity>Vilníus</exemplarCity>
 			</zone>
 			<zone type="Europe/Luxembourg">
-				<exemplarCity draft="unconfirmed">Lúxemborg</exemplarCity>
+				<exemplarCity>Lúxemborg</exemplarCity>
 			</zone>
 			<zone type="Europe/Monaco">
-				<exemplarCity draft="unconfirmed">Mónakó</exemplarCity>
+				<exemplarCity>Mónakó</exemplarCity>
 			</zone>
 			<zone type="Asia/Ulaanbaatar">
-				<exemplarCity draft="unconfirmed">Úlan Bator</exemplarCity>
+				<exemplarCity>Úlan Bator</exemplarCity>
 			</zone>
 			<zone type="Asia/Macau">
-				<exemplarCity draft="unconfirmed">Makaó</exemplarCity>
+				<exemplarCity>Makaó</exemplarCity>
 			</zone>
 			<zone type="America/Martinique">
-				<exemplarCity draft="unconfirmed">Martínik</exemplarCity>
+				<exemplarCity>Martínik</exemplarCity>
 			</zone>
 			<zone type="Indian/Mauritius">
-				<exemplarCity draft="unconfirmed">Máritíus</exemplarCity>
+				<exemplarCity>Máritíus</exemplarCity>
 			</zone>
 			<zone type="Indian/Maldives">
-				<exemplarCity draft="unconfirmed">Maldíveyjar</exemplarCity>
+				<exemplarCity>Maldíveyjar</exemplarCity>
 			</zone>
 			<zone type="America/Mexico_City">
-				<exemplarCity draft="unconfirmed">Mexíkóborg</exemplarCity>
+				<exemplarCity>Mexíkóborg</exemplarCity>
 			</zone>
 			<zone type="America/Cancun">
-				<exemplarCity draft="unconfirmed">Kankún</exemplarCity>
-			</zone>
-			<zone type="Asia/Kuala_Lumpur">
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Kúala Lúmpúr</exemplarCity>
+				<exemplarCity>Kankún</exemplarCity>
 			</zone>
 			<zone type="Europe/Oslo">
-				<exemplarCity draft="unconfirmed">Osló</exemplarCity>
+				<exemplarCity>Osló</exemplarCity>
 			</zone>
 			<zone type="Pacific/Nauru">
-				<exemplarCity draft="unconfirmed">Nárú</exemplarCity>
+				<exemplarCity>Nárú</exemplarCity>
 			</zone>
 			<zone type="Pacific/Niue">
-				<exemplarCity draft="unconfirmed">Níúe</exemplarCity>
-			</zone>
-			<zone type="Pacific/Tahiti">
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Tahítí</exemplarCity>
+				<exemplarCity>Níúe</exemplarCity>
 			</zone>
 			<zone type="Pacific/Marquesas">
-				<exemplarCity draft="unconfirmed">Marquesas-eyjar</exemplarCity>
+				<exemplarCity>Marquesas-eyjar</exemplarCity>
 			</zone>
 			<zone type="Europe/Warsaw">
-				<exemplarCity draft="unconfirmed">Varsjá</exemplarCity>
+				<exemplarCity>Varsjá</exemplarCity>
 			</zone>
 			<zone type="America/Puerto_Rico">
-				<exemplarCity draft="unconfirmed">Púertó Ríkó</exemplarCity>
+				<exemplarCity>Púertó Ríkó</exemplarCity>
 			</zone>
 			<zone type="Atlantic/Azores">
-				<exemplarCity alt="proposed-x1001" draft="unconfirmed">Asoreyjar</exemplarCity>
+				<exemplarCity>Azoreyjar</exemplarCity>
 			</zone>
 			<zone type="Europe/Lisbon">
-				<exemplarCity draft="unconfirmed">Lissabon</exemplarCity>
+				<exemplarCity>Lissabon</exemplarCity>
 			</zone>
 			<zone type="Pacific/Palau">
-				<exemplarCity draft="unconfirmed">Palaú</exemplarCity>
+				<exemplarCity>Palaú</exemplarCity>
 			</zone>
 			<zone type="Asia/Qatar">
-				<exemplarCity draft="unconfirmed">Kvatar</exemplarCity>
+				<exemplarCity>Kvatar</exemplarCity>
 			</zone>
 			<zone type="Europe/Bucharest">
-				<exemplarCity draft="unconfirmed">Búkarest</exemplarCity>
+				<exemplarCity>Búkarest</exemplarCity>
 			</zone>
 			<zone type="Europe/Moscow">
-				<exemplarCity draft="unconfirmed">Moskva</exemplarCity>
+				<exemplarCity>Moskva</exemplarCity>
 			</zone>
 			<zone type="Europe/Stockholm">
-				<exemplarCity draft="unconfirmed">Stokkhólmur</exemplarCity>
+				<exemplarCity>Stokkhólmur</exemplarCity>
 			</zone>
 			<zone type="Asia/Singapore">
-				<exemplarCity draft="unconfirmed">Singapúr</exemplarCity>
+				<exemplarCity>Singapúr</exemplarCity>
 			</zone>
 			<zone type="Atlantic/St_Helena">
-				<exemplarCity draft="unconfirmed">St. Helena</exemplarCity>
+				<exemplarCity>St. Helena</exemplarCity>
 			</zone>
 			<zone type="America/El_Salvador">
-				<exemplarCity draft="unconfirmed">Salvador</exemplarCity>
+				<exemplarCity>Salvador</exemplarCity>
 			</zone>
 			<zone type="Asia/Damascus">
-				<exemplarCity draft="unconfirmed">Damaskus</exemplarCity>
+				<exemplarCity>Damaskus</exemplarCity>
 			</zone>
 			<zone type="Africa/Tunis">
-				<exemplarCity draft="unconfirmed">Túnis</exemplarCity>
+				<exemplarCity>Túnis</exemplarCity>
 			</zone>
 			<zone type="Europe/Istanbul">
-				<exemplarCity draft="unconfirmed">Istanbúl</exemplarCity>
+				<exemplarCity>Istanbúl</exemplarCity>
+			</zone>
+			<zone type="Pacific/Honolulu">
+				<exemplarCity>Honolulu</exemplarCity>
 			</zone>
 			<zone type="America/Anchorage">
-				<exemplarCity draft="unconfirmed">Alaska-tími</exemplarCity>
+				<exemplarCity>Anchorage</exemplarCity>
+			</zone>
+			<zone type="America/Denver">
+				<exemplarCity>Denver</exemplarCity>
+			</zone>
+			<zone type="America/Indianapolis">
+				<exemplarCity>Indianapolis</exemplarCity>
 			</zone>
 			<zone type="America/St_Vincent">
-				<exemplarCity draft="unconfirmed">St. Vincent</exemplarCity>
+				<exemplarCity>St. Vincent</exemplarCity>
 			</zone>
 			<zone type="America/St_Thomas">
-				<exemplarCity draft="unconfirmed">St. Thomas</exemplarCity>
+				<exemplarCity>St. Thomas</exemplarCity>
 			</zone>
 			<zone type="Africa/Johannesburg">
-				<exemplarCity draft="unconfirmed">Jóhannesarborg</exemplarCity>
+				<exemplarCity>Jóhannesarborg</exemplarCity>
 			</zone>
 			<metazone type="Europe_Central">
+				<long>
+					<standard>Mið-Evróputími</standard>
+					<daylight>sumartími Mið-Evrópu</daylight>
+				</long>
 				<short>
-					<generic draft="unconfirmed">CET</generic>
-					<standard draft="unconfirmed">CET</standard>
-					<daylight draft="unconfirmed">CEST</daylight>
+					<standard>MET</standard>
+					<daylight>STME</daylight>
 				</short>
 			</metazone>
-			<metazone type="Europe_Western">
+			<metazone type="Europe_Eastern">
+				<long>
+					<standard>Austur-Evróputími</standard>
+					<daylight>sumartími Austur-Evrópu</daylight>
+				</long>
 				<short>
-					<generic draft="unconfirmed">WET</generic>
-					<standard draft="unconfirmed">WET</standard>
-					<daylight draft="unconfirmed">WEST</daylight>
+					<standard>AET</standard>
+					<daylight>STAE</daylight>
 				</short>
 			</metazone>
 		</timeZoneNames>
@@ -1530,13 +1502,41 @@
 		<symbols>
 			<decimal>,</decimal>
 			<group>.</group>
-			<minusSign draft="unconfirmed">−</minusSign>
-			<exponential draft="unconfirmed">×10^</exponential>
+			<list>;</list>
+			<percentSign>%</percentSign>
+			<nativeZeroDigit>0</nativeZeroDigit>
+			<plusSign>+</plusSign>
+			<minusSign>−</minusSign>
+			<exponential>×10^</exponential>
+			<perMille>‰</perMille>
+			<infinity>∞</infinity>
+			<nan>EiTa</nan>
 		</symbols>
+		<decimalFormats>
+			<decimalFormatLength>
+				<decimalFormat>
+					<pattern>#,##0.###</pattern>
+				</decimalFormat>
+			</decimalFormatLength>
+		</decimalFormats>
+		<scientificFormats>
+			<scientificFormatLength>
+				<scientificFormat>
+					<pattern>#E0</pattern>
+				</scientificFormat>
+			</scientificFormatLength>
+		</scientificFormats>
+		<percentFormats>
+			<percentFormatLength>
+				<percentFormat>
+					<pattern>#,##0%</pattern>
+				</percentFormat>
+			</percentFormatLength>
+		</percentFormats>
 		<currencyFormats>
 			<currencyFormatLength>
 				<currencyFormat>
-					<pattern>#,##0.00 ¤</pattern>
+					<pattern>#,##0.00 ¤</pattern>
 				</currencyFormat>
 			</currencyFormatLength>
 		</currencyFormats>
@@ -1546,7 +1546,6 @@
 			</currency>
 			<currency type="AED">
 				<displayName>Arabískt dírham</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Sameinuðu arabísku furstadæmin dirham</displayName>
 			</currency>
 			<currency type="ALL">
 				<displayName>Lek</displayName>
@@ -1568,7 +1567,6 @@
 			</currency>
 			<currency type="ARS">
 				<displayName>Argentískur pesi</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Argentínskir Pesóar</displayName>
 				<symbol>Arg$</symbol>
 			</currency>
 			<currency type="ATS">
@@ -1576,7 +1574,6 @@
 			</currency>
 			<currency type="AUD">
 				<displayName>Ástralskur dalur</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Ástralíudalir</displayName>
 				<symbol>$A</symbol>
 			</currency>
 			<currency type="BBD">
@@ -1593,7 +1590,6 @@
 			</currency>
 			<currency type="BGN">
 				<displayName>Lef, nýtt</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Búlgarskt Lev</displayName>
 			</currency>
 			<currency type="BMD">
 				<displayName>Bermúdeyskur dalur</displayName>
@@ -1601,10 +1597,9 @@
 			</currency>
 			<currency type="BND">
 				<displayName>Brúneiskur dalur</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Brunei-dalur</displayName>
 			</currency>
 			<currency type="BOB">
-				<displayName draft="unconfirmed">Bólivískt bólívíanó</displayName>
+				<displayName>bólivískt bólívíanó</displayName>
 			</currency>
 			<currency type="BOP">
 				<displayName>Bólivískur pesi</displayName>
@@ -1614,7 +1609,6 @@
 			</currency>
 			<currency type="BRL">
 				<displayName>Brasilískt ríal</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Brasilískt real</displayName>
 			</currency>
 			<currency type="BSD">
 				<displayName>Bahameyskur dalur</displayName>
@@ -1628,12 +1622,10 @@
 			</currency>
 			<currency type="CAD">
 				<displayName>Kanadískur dalur</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Kanadadalir</displayName>
 				<symbol>Can$</symbol>
 			</currency>
 			<currency type="CHF">
 				<displayName>Svissneskur franki</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Svissneskir frankar</displayName>
 				<symbol>SwF</symbol>
 			</currency>
 			<currency type="CLF">
@@ -1641,17 +1633,14 @@
 			</currency>
 			<currency type="CLP">
 				<displayName>Chileskur pesi</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Chíleískir Pesóar</displayName>
 				<symbol>Ch$</symbol>
 			</currency>
 			<currency type="CNY">
 				<displayName>Júan</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Yuan Renminbi</displayName>
 				<symbol>Y</symbol>
 			</currency>
 			<currency type="COP">
 				<displayName>Kólumbískur pesi</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Kólumbískir Pesóar</displayName>
 				<symbol>Col$</symbol>
 			</currency>
 			<currency type="CSK">
@@ -1670,14 +1659,12 @@
 			</currency>
 			<currency type="CZK">
 				<displayName>Tékknesk króna</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Tékkneskar Kórúnur</displayName>
 			</currency>
 			<currency type="DDM">
 				<displayName>Austurþýskt mark</displayName>
 			</currency>
 			<currency type="DEM">
 				<displayName>Þýskt mark</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Þýsk mörk</displayName>
 			</currency>
 			<currency type="DJF">
 				<displayName>Djibouti Franc</displayName>
@@ -1685,7 +1672,6 @@
 			</currency>
 			<currency type="DKK">
 				<displayName>Dönsk króna</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Danskar krónur</displayName>
 				<symbol>DKr</symbol>
 			</currency>
 			<currency type="DOP">
@@ -1697,7 +1683,6 @@
 			</currency>
 			<currency type="EEK">
 				<displayName>Eistnesk króna</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Eistneskt Kroon</displayName>
 			</currency>
 			<currency type="EGP">
 				<displayName>Egypskt pund</displayName>
@@ -1707,14 +1692,12 @@
 			</currency>
 			<currency type="EUR">
 				<displayName>Euro</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Evrur</displayName>
 			</currency>
 			<currency type="FIM">
 				<displayName>Finnskt mark</displayName>
 			</currency>
 			<currency type="FJD">
 				<displayName>Fídjeyskur dalur</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Fiji-dalur</displayName>
 				<symbol>F$</symbol>
 			</currency>
 			<currency type="FKP">
@@ -1722,11 +1705,9 @@
 			</currency>
 			<currency type="FRF">
 				<displayName>Franskur franki</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Franskir frankar</displayName>
 			</currency>
 			<currency type="GBP">
 				<displayName>Sterlingspund</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Bresk sterlingspund</displayName>
 			</currency>
 			<currency type="GIP">
 				<displayName>Gíbraltarspund</displayName>
@@ -1751,7 +1732,6 @@
 			</currency>
 			<currency type="HKD">
 				<displayName>Hong Kong-dalur</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Hong Kong dalir</displayName>
 				<symbol>HK$</symbol>
 			</currency>
 			<currency type="HNL">
@@ -1760,16 +1740,13 @@
 			</currency>
 			<currency type="HRK">
 				<displayName>Kúna</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Króatískar Kúnur</displayName>
 			</currency>
 			<currency type="HUF">
 				<displayName>Fórinta</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Ungverskt Forint</displayName>
 				<symbol>Ft</symbol>
 			</currency>
 			<currency type="IDR">
 				<displayName>Indónesísk rúpía</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Indónesískar Rúpíur</displayName>
 				<symbol>Rp</symbol>
 			</currency>
 			<currency type="IEP">
@@ -1781,11 +1758,9 @@
 			</currency>
 			<currency type="ILS">
 				<displayName>Sikill</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Ísraelskur Shekel</displayName>
 			</currency>
 			<currency type="INR">
 				<displayName>Indversk rúpía</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Indverskar Rúpíur</displayName>
 				<symbol>INR</symbol>
 			</currency>
 			<currency type="IQD">
@@ -1809,10 +1784,9 @@
 			</currency>
 			<currency type="JPY">
 				<displayName>Jen</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Japönsk jen</displayName>
 			</currency>
 			<currency type="KES">
-				<displayName draft="unconfirmed">Kenískur skildingur</displayName>
+				<displayName>kenískur skildingur</displayName>
 			</currency>
 			<currency type="KMF">
 				<displayName>Kómoreyskur franki</displayName>
@@ -1823,7 +1797,6 @@
 			</currency>
 			<currency type="KRW">
 				<displayName>Suðurkóreskt vonn</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Suður-Kóreskt won</displayName>
 			</currency>
 			<currency type="KWD">
 				<displayName>Kúveiskur denari</displayName>
@@ -1853,7 +1826,6 @@
 			</currency>
 			<currency type="LTL">
 				<displayName>Lít</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Litháískir Litas</displayName>
 			</currency>
 			<currency type="LTT">
 				<displayName>Lithuanian Talonas</displayName>
@@ -1873,7 +1845,6 @@
 			</currency>
 			<currency type="MAD">
 				<displayName>Marokkóskt dírham</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Marokkóskir Dirham</displayName>
 			</currency>
 			<currency type="MAF">
 				<displayName>Marokkóskur franki</displayName>
@@ -1907,7 +1878,6 @@
 			</currency>
 			<currency type="MTL">
 				<displayName>Meltnesk líra</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Maltnesk líra</displayName>
 				<symbol>Lm</symbol>
 			</currency>
 			<currency type="MTP">
@@ -1915,7 +1885,6 @@
 			</currency>
 			<currency type="MXN">
 				<displayName>Mexíkóskur pesi</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Mexíkanskir Pesóar</displayName>
 				<symbol>MEX$</symbol>
 			</currency>
 			<currency type="MXP">
@@ -1926,7 +1895,6 @@
 			</currency>
 			<currency type="MYR">
 				<displayName>Malaysian Ringgit</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Malasískt Ringgit</displayName>
 				<symbol>RM</symbol>
 			</currency>
 			<currency type="MZE">
@@ -1944,12 +1912,10 @@
 			</currency>
 			<currency type="NOK">
 				<displayName>Norsk króna</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Norskar krónur</displayName>
 				<symbol>NKr</symbol>
 			</currency>
 			<currency type="NZD">
 				<displayName>Nýsjálenskur dalur</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Nýja-Sjálandsdalir</displayName>
 				<symbol>$NZ</symbol>
 			</currency>
 			<currency type="OMR">
@@ -1960,18 +1926,17 @@
 				<displayName>Balbói</displayName>
 			</currency>
 			<currency type="PEN">
-				<displayName draft="unconfirmed">Perúskar Nuevo Sol</displayName>
+				<displayName>perúskar sol nuevo</displayName>
 			</currency>
 			<currency type="PHP">
-				<displayName draft="unconfirmed">Filippeyskir Pesóar</displayName>
+				<displayName>filippeyskir pesóar</displayName>
 			</currency>
 			<currency type="PKR">
 				<displayName>Pakistönsk rúpía</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Pakistanskar Rúpíur</displayName>
 				<symbol>Pra</symbol>
 			</currency>
 			<currency type="PLN">
-				<displayName draft="unconfirmed">Pólskt nýtt zlotý</displayName>
+				<displayName>pólskt zlotý</displayName>
 			</currency>
 			<currency type="PLZ">
 				<displayName>Slot</displayName>
@@ -1984,14 +1949,13 @@
 				<symbol>leu</symbol>
 			</currency>
 			<currency type="RON">
-				<displayName draft="unconfirmed">Rúmensk Leu</displayName>
+				<displayName>rúmensk leu</displayName>
 			</currency>
 			<currency type="RSD">
-				<displayName draft="unconfirmed">Serbneskur Dínar</displayName>
+				<displayName>serbneskur dínar</displayName>
 			</currency>
 			<currency type="RUB">
-				<displayName draft="unconfirmed">Rússneskar Rúblur</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Rússnesk rúbla</displayName>
+				<displayName>rússnesk rúbla</displayName>
 			</currency>
 			<currency type="RUR">
 				<displayName>Rússnesk rúbla (1991-1998)</displayName>
@@ -2001,7 +1965,6 @@
 			</currency>
 			<currency type="SAR">
 				<displayName>Sádiarabískt ríal</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Sádi-Arabískir Riyal</displayName>
 				<symbol>SRl</symbol>
 			</currency>
 			<currency type="SBD">
@@ -2020,12 +1983,10 @@
 			</currency>
 			<currency type="SEK">
 				<displayName>Sænsk króna</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Sænskar krónur</displayName>
 				<symbol>SKr</symbol>
 			</currency>
 			<currency type="SGD">
 				<displayName>Singapúrskur dalur</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Singaporedalir</displayName>
 				<symbol>S$</symbol>
 			</currency>
 			<currency type="SHP">
@@ -2033,11 +1994,9 @@
 			</currency>
 			<currency type="SIT">
 				<displayName>Slóvenskur dalur</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Slóvenskir Tolar</displayName>
 			</currency>
 			<currency type="SKK">
 				<displayName>Slóvakísk króna</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Slóvakskar Koruna</displayName>
 				<symbol>Sk</symbol>
 			</currency>
 			<currency type="SRG">
@@ -2060,7 +2019,6 @@
 			</currency>
 			<currency type="THB">
 				<displayName>Bat</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Taílenskir Baht</displayName>
 			</currency>
 			<currency type="TJR">
 				<displayName>Tadsjiksk rúbla</displayName>
@@ -2076,12 +2034,10 @@
 			</currency>
 			<currency type="TRL">
 				<displayName>Tyrknesk líra</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Tyrkneskar Lírur</displayName>
 				<symbol>TL</symbol>
 			</currency>
 			<currency type="TRY">
-				<displayName draft="unconfirmed">Ný tyrknesk líra</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Ný, tyrknesk líra</displayName>
+				<displayName>Ný tyrknesk líra</displayName>
 			</currency>
 			<currency type="TTD">
 				<displayName>Trínidad og Tóbagó-dalur</displayName>
@@ -2089,7 +2045,6 @@
 			</currency>
 			<currency type="TWD">
 				<displayName>Taívanskur dalur</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Nýjir tævanskir dalir</displayName>
 				<symbol>NT$</symbol>
 			</currency>
 			<currency type="TZS">
@@ -2098,14 +2053,12 @@
 			</currency>
 			<currency type="UAH">
 				<displayName>Hrinja</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Úkraínsk hrinja</displayName>
 			</currency>
 			<currency type="UAK">
 				<displayName>Ukrainian Karbovanetz</displayName>
 			</currency>
 			<currency type="USD">
 				<displayName>Bandaríkjadalur</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Bandaríkjadalir</displayName>
 			</currency>
 			<currency type="USN">
 				<displayName>Bandaríkjadalur (næsta dag)</displayName>
@@ -2115,11 +2068,10 @@
 			</currency>
 			<currency type="VEB">
 				<displayName>Venezuelan Bolivar</displayName>
-				<displayName alt="proposed-x1001" draft="unconfirmed">Venesúelskir Bólívar</displayName>
 				<symbol>Be</symbol>
 			</currency>
 			<currency type="VND">
-				<displayName draft="unconfirmed">Víetnamskt dong</displayName>
+				<displayName>víetnamskt dong</displayName>
 			</currency>
 			<currency type="VUV">
 				<displayName>Vanuatu Vatu</displayName>
@@ -2148,6 +2100,11 @@
 				<displayName>Pólinesískur franki</displayName>
 				<symbol>CFPF</symbol>
 			</currency>
+			<currency type="XXX">
+				<displayName>Óþekktur eða ógildur gjaldeyrir</displayName>
+				<displayName count="one">óþekktur eða ógildur gjaldeyrir</displayName>
+				<displayName count="other">óþekktur eða ógildur gjaldeyrir</displayName>
+			</currency>
 			<currency type="YDD">
 				<displayName>Jemenskur denari</displayName>
 			</currency>
@@ -2162,7 +2119,7 @@
 				<displayName>Rand (viðskipta)</displayName>
 			</currency>
 			<currency type="ZAR">
-				<displayName draft="unconfirmed">Suður-Afríkskt rand</displayName>
+				<displayName>suðurafríkskt rand</displayName>
 			</currency>
 			<currency type="ZMK">
 				<displayName>Zambian Kwacha</displayName>
@@ -2173,11 +2130,40 @@
 			</currency>
 		</currencies>
 	</numbers>
+	<units>
+		<unit type="day">
+			<unitPattern count="one">{0} dagur</unitPattern>
+			<unitPattern count="other">{0} dagar</unitPattern>
+		</unit>
+		<unit type="hour">
+			<unitPattern count="one">{0} klukkustund</unitPattern>
+			<unitPattern count="other">{0} klukkustundir</unitPattern>
+		</unit>
+		<unit type="minute">
+			<unitPattern count="one">{0} mínúta</unitPattern>
+			<unitPattern count="other">{0} mínútur</unitPattern>
+		</unit>
+		<unit type="month">
+			<unitPattern count="one">{0} mánuður</unitPattern>
+			<unitPattern count="other">{0} mánuðir</unitPattern>
+		</unit>
+		<unit type="second">
+			<unitPattern count="one">{0} sekúnda</unitPattern>
+			<unitPattern count="other">{0} sekúndur</unitPattern>
+		</unit>
+		<unit type="week">
+			<unitPattern count="one">{0} vika</unitPattern>
+			<unitPattern count="other">{0} vikur</unitPattern>
+		</unit>
+		<unit type="year">
+			<unitPattern count="one">{0} ár</unitPattern>
+			<unitPattern count="other">{0} ár</unitPattern>
+		</unit>
+	</units>
 	<posix>
 		<messages>
-			<yesstr draft="provisional">já:j</yesstr>
-			<yesstr alt="proposed-x1001" draft="unconfirmed">já:ja:j</yesstr>
-			<nostr draft="contributed">nei:n</nostr>
+			<yesstr>já:j</yesstr>
+			<nostr>nei:n</nostr>
 		</messages>
 	</posix>
 </ldml>

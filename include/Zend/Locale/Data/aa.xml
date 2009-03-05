@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.5/ldml.dtd">
+<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.6/ldml.dtd">
 <ldml>
 	<identity>
-		<version number="$Revision: 1.39 $"/>
-		<generation date="$Date: 2007/07/19 22:31:38 $"/>
+		<version number="$Revision: 1.44 $"/>
+		<generation date="$Date: 2008/05/28 15:49:27 $"/>
 		<language type="aa"/>
 	</identity>
 	<localeDisplayNames>
 		<languages>
-			<language type="aa" draft="unconfirmed">Qafar</language>
-			<language type="ar" draft="unconfirmed">Arabic</language>
-			<language type="de" draft="unconfirmed">German</language>
-			<language type="en" draft="unconfirmed">English</language>
-			<language type="es" draft="unconfirmed">Spanish</language>
-			<language type="fr" draft="unconfirmed">French</language>
-			<language type="hi" draft="unconfirmed">Hindi</language>
-			<language type="it" draft="unconfirmed">Italian</language>
-			<language type="ja" draft="unconfirmed">Japanese</language>
-			<language type="pt" draft="unconfirmed">Portuguese</language>
-			<language type="ru" draft="unconfirmed">Russian</language>
-			<language type="zh" draft="unconfirmed">Chinese</language>
+			<language type="aa">Qafar</language>
+			<language type="ar">Arabic</language>
+			<language type="de">German</language>
+			<language type="en">English</language>
+			<language type="es">Spanish</language>
+			<language type="fr">French</language>
+			<language type="hi">Hindi</language>
+			<language type="it">Italian</language>
+			<language type="ja">Japanese</language>
+			<language type="pt">Portuguese</language>
+			<language type="ru">Russian</language>
+			<language type="zh">Chinese</language>
 		</languages>
 		<scripts>
-			<script type="Latn" draft="unconfirmed">Latin</script>
+			<script type="Latn">Latin</script>
 		</scripts>
 		<territories>
-			<territory type="BR" draft="unconfirmed">Brazil</territory>
-			<territory type="CN" draft="unconfirmed">China</territory>
-			<territory type="DE" draft="unconfirmed">Germany</territory>
-			<territory type="DJ" draft="unconfirmed">Yabuuti</territory>
-			<territory type="ER" draft="unconfirmed">Eretria</territory>
-			<territory type="ET" draft="unconfirmed">Otobbia</territory>
-			<territory type="FR" draft="unconfirmed">France</territory>
-			<territory type="GB" draft="unconfirmed">United Kingdom</territory>
-			<territory type="IN" draft="unconfirmed">India</territory>
-			<territory type="IT" draft="unconfirmed">Italy</territory>
-			<territory type="JP" draft="unconfirmed">Japan</territory>
-			<territory type="RU" draft="unconfirmed">Russia</territory>
-			<territory type="US" draft="unconfirmed">United States</territory>
+			<territory type="BR">Brazil</territory>
+			<territory type="CN">China</territory>
+			<territory type="DE">Germany</territory>
+			<territory type="DJ">Yabuuti</territory>
+			<territory type="ER">Eretria</territory>
+			<territory type="ET">Otobbia</territory>
+			<territory type="FR">France</territory>
+			<territory type="GB">United Kingdom</territory>
+			<territory type="IN">India</territory>
+			<territory type="IT">Italy</territory>
+			<territory type="JP">Japan</territory>
+			<territory type="RU">Russia</territory>
+			<territory type="US">United States</territory>
 		</territories>
 	</localeDisplayNames>
 	<characters>
-		<exemplarCharacters draft="unconfirmed">[a-z]</exemplarCharacters>
+		<exemplarCharacters>[a-z]</exemplarCharacters>
 	</characters>
 	<dates>
 		<calendars>
@@ -49,130 +49,127 @@
 				<months>
 					<monthContext type="format">
 						<monthWidth type="abbreviated">
-							<month type="1" draft="unconfirmed">Qun</month>
-							<month type="2" draft="unconfirmed">Nah</month>
-							<month type="3" draft="unconfirmed">Cig</month>
-							<month type="4" draft="unconfirmed">Agd</month>
-							<month type="5" draft="unconfirmed">Cax</month>
-							<month type="6" draft="unconfirmed">Qas</month>
-							<month type="7" draft="unconfirmed">Qad</month>
-							<month type="8" draft="unconfirmed">Leq</month>
-							<month type="9" draft="unconfirmed">Way</month>
-							<month type="10" draft="unconfirmed">Dit</month>
-							<month type="11" draft="unconfirmed">Xim</month>
-							<month type="12" draft="unconfirmed">Kax</month>
+							<month type="1">Qun</month>
+							<month type="2">Nah</month>
+							<month type="3">Cig</month>
+							<month type="4">Agd</month>
+							<month type="5">Cax</month>
+							<month type="6">Qas</month>
+							<month type="7">Qad</month>
+							<month type="8">Leq</month>
+							<month type="9">Way</month>
+							<month type="10">Dit</month>
+							<month type="11">Xim</month>
+							<month type="12">Kax</month>
 						</monthWidth>
 						<monthWidth type="wide">
-							<month type="1" draft="unconfirmed">Qunxa Garablu</month>
-							<month type="2" draft="unconfirmed">Kudo</month>
-							<month type="2" alt="proposed-x1001" draft="unconfirmed">Naharsi Kudo</month>
-							<month type="3" draft="unconfirmed">Ciggilta Kudo</month>
-							<month type="4" draft="unconfirmed">Agda Baxis</month>
-							<month type="4" alt="proposed-x1001" draft="unconfirmed">Agda Baxisso</month>
-							<month type="5" draft="unconfirmed">Caxah Alsa</month>
-							<month type="6" draft="unconfirmed">Qasa Dirri</month>
-							<month type="7" draft="unconfirmed">Qado Dirri</month>
-							<month type="8" draft="unconfirmed">Liiqen</month>
-							<month type="8" alt="proposed-x1001" draft="unconfirmed">Leqeeni</month>
-							<month type="9" draft="unconfirmed">Waysu</month>
-							<month type="10" draft="unconfirmed">Diteli</month>
-							<month type="11" draft="unconfirmed">Ximoli</month>
-							<month type="12" draft="unconfirmed">Kaxxa Garablu</month>
+							<month type="1">Qunxa Garablu</month>
+							<month type="2">Kudo</month>
+							<month type="3">Ciggilta Kudo</month>
+							<month type="4">Agda Baxis</month>
+							<month type="5">Caxah Alsa</month>
+							<month type="6">Qasa Dirri</month>
+							<month type="7">Qado Dirri</month>
+							<month type="8">Liiqen</month>
+							<month type="9">Waysu</month>
+							<month type="10">Diteli</month>
+							<month type="11">Ximoli</month>
+							<month type="12">Kaxxa Garablu</month>
 						</monthWidth>
 					</monthContext>
 					<monthContext type="stand-alone">
 						<monthWidth type="narrow">
-							<month type="1" draft="unconfirmed">Q</month>
-							<month type="2" draft="unconfirmed">N</month>
-							<month type="3" draft="unconfirmed">C</month>
-							<month type="4" draft="unconfirmed">A</month>
-							<month type="5" draft="unconfirmed">C</month>
-							<month type="6" draft="unconfirmed">Q</month>
-							<month type="7" draft="unconfirmed">Q</month>
-							<month type="8" draft="unconfirmed">L</month>
-							<month type="9" draft="unconfirmed">W</month>
-							<month type="10" draft="unconfirmed">D</month>
-							<month type="11" draft="unconfirmed">X</month>
-							<month type="12" draft="unconfirmed">K</month>
+							<month type="1">Q</month>
+							<month type="2">N</month>
+							<month type="3">C</month>
+							<month type="4">A</month>
+							<month type="5">C</month>
+							<month type="6">Q</month>
+							<month type="7">Q</month>
+							<month type="8">L</month>
+							<month type="9">W</month>
+							<month type="10">D</month>
+							<month type="11">X</month>
+							<month type="12">K</month>
 						</monthWidth>
 					</monthContext>
 				</months>
 				<days>
 					<dayContext type="format">
 						<dayWidth type="abbreviated">
-							<day type="sun" draft="unconfirmed">Aca</day>
-							<day type="mon" draft="unconfirmed">Etl</day>
-							<day type="tue" draft="unconfirmed">Tal</day>
-							<day type="wed" draft="unconfirmed">Arb</day>
-							<day type="thu" draft="unconfirmed">Kam</day>
-							<day type="fri" draft="unconfirmed">Gum</day>
-							<day type="sat" draft="unconfirmed">Sab</day>
+							<day type="sun">Aca</day>
+							<day type="mon">Etl</day>
+							<day type="tue">Tal</day>
+							<day type="wed">Arb</day>
+							<day type="thu">Kam</day>
+							<day type="fri">Gum</day>
+							<day type="sat">Sab</day>
 						</dayWidth>
 						<dayWidth type="wide">
-							<day type="sun" draft="unconfirmed">Acaada</day>
-							<day type="mon" draft="unconfirmed">Etleeni</day>
-							<day type="tue" draft="unconfirmed">Talaata</day>
-							<day type="wed" draft="unconfirmed">Arbaqa</day>
-							<day type="thu" draft="unconfirmed">Kamiisi</day>
-							<day type="fri" draft="unconfirmed">Gumqata</day>
-							<day type="sat" draft="unconfirmed">Sabti</day>
+							<day type="sun">Acaada</day>
+							<day type="mon">Etleeni</day>
+							<day type="tue">Talaata</day>
+							<day type="wed">Arbaqa</day>
+							<day type="thu">Kamiisi</day>
+							<day type="fri">Gumqata</day>
+							<day type="sat">Sabti</day>
 						</dayWidth>
 					</dayContext>
 					<dayContext type="stand-alone">
 						<dayWidth type="narrow">
-							<day type="sun" draft="unconfirmed">A</day>
-							<day type="mon" draft="unconfirmed">E</day>
-							<day type="tue" draft="unconfirmed">T</day>
-							<day type="wed" draft="unconfirmed">A</day>
-							<day type="thu" draft="unconfirmed">K</day>
-							<day type="fri" draft="unconfirmed">G</day>
-							<day type="sat" draft="unconfirmed">S</day>
+							<day type="sun">A</day>
+							<day type="mon">E</day>
+							<day type="tue">T</day>
+							<day type="wed">A</day>
+							<day type="thu">K</day>
+							<day type="fri">G</day>
+							<day type="sat">S</day>
 						</dayWidth>
 					</dayContext>
 				</days>
 				<quarters>
 					<quarterContext type="format">
 						<quarterWidth type="abbreviated">
-							<quarter type="1" draft="unconfirmed">Q1</quarter>
-							<quarter type="2" draft="unconfirmed">Q2</quarter>
-							<quarter type="3" draft="unconfirmed">Q3</quarter>
-							<quarter type="4" draft="unconfirmed">Q4</quarter>
+							<quarter type="1">Q1</quarter>
+							<quarter type="2">Q2</quarter>
+							<quarter type="3">Q3</quarter>
+							<quarter type="4">Q4</quarter>
 						</quarterWidth>
 						<quarterWidth type="wide">
-							<quarter type="1" draft="unconfirmed">Q1</quarter>
-							<quarter type="2" draft="unconfirmed">Q2</quarter>
-							<quarter type="3" draft="unconfirmed">Q3</quarter>
-							<quarter type="4" draft="unconfirmed">Q4</quarter>
+							<quarter type="1">Q1</quarter>
+							<quarter type="2">Q2</quarter>
+							<quarter type="3">Q3</quarter>
+							<quarter type="4">Q4</quarter>
 						</quarterWidth>
 					</quarterContext>
 				</quarters>
-				<am draft="unconfirmed">saaku</am>
-				<pm draft="unconfirmed">carra</pm>
+				<am>saaku</am>
+				<pm>carra</pm>
 				<eras>
 					<eraAbbr>
-						<era type="0" draft="unconfirmed">Yaasuusuk Duma</era>
-						<era type="1" draft="unconfirmed">Yaasuusuk Wadir</era>
+						<era type="0">Yaasuusuk Duma</era>
+						<era type="1">Yaasuusuk Wadir</era>
 					</eraAbbr>
 				</eras>
 				<dateFormats>
 					<dateFormatLength type="full">
 						<dateFormat>
-							<pattern draft="unconfirmed">EEEE, MMMM dd, yyyy</pattern>
+							<pattern>EEEE, MMMM dd, yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="long">
 						<dateFormat>
-							<pattern draft="unconfirmed">dd MMMM yyyy</pattern>
+							<pattern>dd MMMM yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="medium">
 						<dateFormat>
-							<pattern draft="unconfirmed">dd-MMM-yyyy</pattern>
+							<pattern>dd-MMM-yyyy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 					<dateFormatLength type="short">
 						<dateFormat>
-							<pattern draft="unconfirmed">dd/MM/yy</pattern>
+							<pattern>dd/MM/yy</pattern>
 						</dateFormat>
 					</dateFormatLength>
 				</dateFormats>
@@ -180,87 +177,84 @@
 					<timeFormatLength type="full">
 						<timeFormat>
 							<pattern>h:mm:ss a v</pattern>
-							<pattern alt="proposed-x1001" draft="unconfirmed">h:mm:ss a</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="long">
 						<timeFormat>
 							<pattern>h:mm:ss a z</pattern>
-							<pattern alt="proposed-x1001" draft="unconfirmed">h:mm:ss a</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="medium">
 						<timeFormat>
-							<pattern draft="unconfirmed">h:mm:ss a</pattern>
+							<pattern>h:mm:ss a</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="short">
 						<timeFormat>
-							<pattern draft="unconfirmed">h:mm a</pattern>
+							<pattern>h:mm a</pattern>
 						</timeFormat>
 					</timeFormatLength>
 				</timeFormats>
 				<dateTimeFormats>
 					<dateTimeFormatLength>
 						<dateTimeFormat>
-							<pattern draft="unconfirmed">{1} {0}</pattern>
+							<pattern>{1} {0}</pattern>
 						</dateTimeFormat>
 					</dateTimeFormatLength>
 					<availableFormats>
-						<dateFormatItem id="yyQ" draft="unconfirmed">Q yy</dateFormatItem>
+						<dateFormatItem id="yyQ">Q yy</dateFormatItem>
 					</availableFormats>
 				</dateTimeFormats>
 			</calendar>
 		</calendars>
 		<timeZoneNames>
-			<hourFormat draft="unconfirmed">+HH:mm;-HH:mm</hourFormat>
-			<gmtFormat draft="unconfirmed">GMT{0}</gmtFormat>
-			<regionFormat draft="unconfirmed">{0}</regionFormat>
+			<hourFormat>+HH:mm;-HH:mm</hourFormat>
+			<gmtFormat>GMT{0}</gmtFormat>
+			<regionFormat>{0}</regionFormat>
 		</timeZoneNames>
 	</dates>
 	<numbers>
 		<currencyFormats>
 			<currencyFormatLength>
 				<currencyFormat>
-					<pattern draft="unconfirmed">¤#,##0.00</pattern>
+					<pattern>¤#,##0.00</pattern>
 				</currencyFormat>
 			</currencyFormatLength>
 		</currencyFormats>
 		<currencies>
 			<currency type="BRL">
-				<displayName draft="unconfirmed">Brazilian Real</displayName>
+				<displayName>Brazilian Real</displayName>
 			</currency>
 			<currency type="CNY">
-				<displayName draft="unconfirmed">Chinese Yuan Renminbi</displayName>
+				<displayName>Chinese Yuan Renminbi</displayName>
 			</currency>
 			<currency type="DJF">
-				<symbol draft="unconfirmed">FD</symbol>
+				<symbol>FD</symbol>
 			</currency>
 			<currency type="ERN">
-				<symbol alt="proposed-x1001" draft="unconfirmed">$</symbol>
+				<symbol>Nfk</symbol>
 			</currency>
 			<currency type="ETB">
-				<symbol draft="unconfirmed">$</symbol>
+				<symbol>Br</symbol>
 			</currency>
 			<currency type="EUR">
-				<displayName draft="unconfirmed">Euro</displayName>
+				<displayName>Euro</displayName>
 			</currency>
 			<currency type="GBP">
-				<displayName draft="unconfirmed">British Pound Sterling</displayName>
+				<displayName>British Pound Sterling</displayName>
 			</currency>
 			<currency type="INR">
-				<displayName draft="unconfirmed">Indian Rupee</displayName>
+				<displayName>Indian Rupee</displayName>
 			</currency>
 			<currency type="JPY">
-				<displayName draft="unconfirmed">Japanese Yen</displayName>
+				<displayName>Japanese Yen</displayName>
 			</currency>
 			<currency type="RUB">
-				<displayName draft="unconfirmed">Russian Ruble</displayName>
+				<displayName>Russian Ruble</displayName>
 			</currency>
 			<currency type="USD">
-				<displayName draft="unconfirmed">US Dollar</displayName>
+				<displayName>US Dollar</displayName>
 			</currency>
 		</currencies>
 	</numbers>
 </ldml>
-

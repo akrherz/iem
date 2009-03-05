@@ -15,7 +15,7 @@
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -32,11 +32,20 @@ require_once 'Zend/View/Helper/FormElement.php';
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_View_Helper_FormCheckbox extends Zend_View_Helper_FormElement
 {
+    /**
+     * Default checked/unchecked options
+     * @var array
+     */
+    protected static $_defaultCheckedOptions = array(
+        'checked'   => '1',
+        'unChecked' => '0'
+    );
+
     /**
      * Generates a 'checkbox' element.
      *
@@ -47,60 +56,107 @@ class Zend_View_Helper_FormCheckbox extends Zend_View_Helper_FormElement
      * are extracted in place of added parameters.
      * @param mixed $value The element value.
      * @param array $attribs Attributes for the element tag.
-     * @param mixed $options If a scalar (single value), the value of the
-     * checkbox when checked; if an array, element 0 is the value when
-     * checked, and element 1 is the value when not-checked.
      * @return string The element XHTML.
      */
-    public function formCheckbox($name, $value = null, $attribs = null,
-        $options = array(1,0))
+    public function formCheckbox($name, $value = null, $attribs = null, array $checkedOptions = null)
     {
-        $info = $this->_getInfo($name, $value, $attribs, $options);
+        $info = $this->_getInfo($name, $value, $attribs);
         extract($info); // name, id, value, attribs, options, listsep, disable
 
-        // make sure attribs don't overwrite name and value
-        unset($attribs['name']);
-        unset($attribs['value']);
+        $checked = false;
+        if (isset($attribs['checked']) && $attribs['checked']) {
+            $checked = true;
+            unset($attribs['checked']);
+        } elseif (isset($attribs['checked'])) {
+            $checked = false;
+            unset($attribs['checked']);
+        }
 
-        // set up checked/unchecked options
-        if (empty($options)) {
-            $options = array(1, 0);
-        } else {
-            settype($options, 'array');
-            if (! isset($options[1])) {
-                $options[1] = null;
-            }
+        $checkedOptions = self::determineCheckboxInfo($value, $checked, $checkedOptions);
+
+        // is the element disabled?
+        $disabled = '';
+        if ($disable) {
+            $disabled = ' disabled="disabled"';
+        }
+
+        // XHTML or HTML end tag?
+        $endTag = ' />';
+        if (($this->view instanceof Zend_View_Abstract) && !$this->view->doctype()->isXhtml()) {
+            $endTag= '>';
         }
 
         // build the element
-        if ($disable) {
-            // disabled.
-            if ($value == $options[0]) {
-                // checked
-                $xhtml = $this->_hidden($name, $options[0]) . '[x]';
-            } else {
-                // not checked
-                $xhtml = $this->_hidden($name, $options[1]) . '[&nbsp;]';
-            }
-        } else {
-            // enabled. add the hidden "unchecked" option first, then
-            // the the checkbox itself) next. this way, if not-checked,
-            // the "unchecked" option is returned to the server instead.
-            $xhtml = $this->_hidden($name, $options[1])
-                   . '<input type="checkbox"'
-                   . ' name="' . $this->view->escape($name) . '"'
-                   . ' id="' . $this->view->escape($id) . '"'
-                   . ' value="' . $this->view->escape($options[0]) . '"';
-
-            // is it checked already?
-            if ($value == $options[0]) {
-                $xhtml .= ' checked="checked"';
-            }
-
-            // add attributes and close.
-            $xhtml .= ' ' . $this->_htmlAttribs($attribs) . ' />';
+        $xhtml = '';
+        if (!strstr($name, '[]')) {
+            $xhtml = $this->_hidden($name, $checkedOptions['unCheckedValue']);
         }
+        $xhtml .= '<input type="checkbox"'
+                . ' name="' . $this->view->escape($name) . '"'
+                . ' id="' . $this->view->escape($id) . '"'
+                . ' value="' . $this->view->escape($checkedOptions['checkedValue']) . '"'
+                . $checkedOptions['checkedString']
+                . $disabled
+                . $this->_htmlAttribs($attribs)
+                . $endTag;
 
         return $xhtml;
+    }
+
+    /**
+     * Determine checkbox information
+     * 
+     * @param  string $value 
+     * @param  bool $checked 
+     * @param  array|null $checkedOptions 
+     * @return array
+     */
+    public static function determineCheckboxInfo($value, $checked, array $checkedOptions = null)
+    {
+        // Checked/unchecked values
+        $checkedValue   = null;
+        $unCheckedValue = null;
+        if (is_array($checkedOptions)) {
+            if (array_key_exists('checked', $checkedOptions)) {
+                $checkedValue = (string) $checkedOptions['checked'];
+                unset($checkedOptions['checked']);
+            }
+            if (array_key_exists('unChecked', $checkedOptions)) {
+                $unCheckedValue = (string) $checkedOptions['unChecked'];
+                unset($checkedOptions['unChecked']);
+            }
+            if (null === $checkedValue) {
+                $checkedValue = array_shift($checkedOptions);
+            }
+            if (null === $unCheckedValue) {
+                $unCheckedValue = array_shift($checkedOptions);
+            }
+        } elseif ($value !== null) {
+            $unCheckedValue = self::$_defaultCheckedOptions['unChecked'];
+        } else {
+            $checkedValue   = self::$_defaultCheckedOptions['checked'];
+            $unCheckedValue = self::$_defaultCheckedOptions['unChecked'];
+        }
+
+        // is the element checked?
+        $checkedString = '';
+        if ($checked || ($value === $checkedValue)) {
+            $checkedString = ' checked="checked"';
+            $checked = true;
+        } else {
+            $checked = false;
+        }
+
+        // Checked value should be value if no checked options provided
+        if ($checkedValue == null) {
+            $checkedValue = $value;
+        }
+
+        return array(
+            'checked'        => $checked,
+            'checkedString'  => $checkedString,
+            'checkedValue'   => $checkedValue,
+            'unCheckedValue' => $unCheckedValue,
+        );
     }
 }

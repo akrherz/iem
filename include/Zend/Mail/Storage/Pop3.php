@@ -4,43 +4,44 @@
  *
  * LICENSE
  *
- * This source file is subject to version 1.0 of the Zend Framework
- * license, that is bundled with this package in the file LICENSE.txt, and
- * is available through the world-wide-web at the following URL:
- * http://framework.zend.com/license/new-bsd. If you did not receive
- * a copy of the Zend Framework license and are unable to obtain it
- * through the world-wide-web, please send a note to license@zend.com
- * so we can mail you a copy immediately.
- *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://framework.zend.com/license/new-bsd
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ * 
+ * @category   Zend
  * @package    Zend_Mail
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Storage
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: Pop3.php 9099 2008-03-30 19:35:47Z thomas $
  */
 
 
 /**
- * Zend_Mail_Storage_Abstract
+ * @see Zend_Mail_Storage_Abstract
  */
 require_once 'Zend/Mail/Storage/Abstract.php';
 
 /**
- * Zend_Mail_Protocol_Pop3
+ * @see Zend_Mail_Protocol_Pop3
  */
 require_once 'Zend/Mail/Protocol/Pop3.php';
 
 /**
- * Zend_Mail_Message
+ * @see Zend_Mail_Message
  */
 require_once 'Zend/Mail/Message.php';
 
-/**
- * Zend_Mail_Storage_Exception
- */
-require_once 'Zend/Mail/Storage/Exception.php';
 
 /**
+ * @category   Zend
  * @package    Zend_Mail
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Storage
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Mail_Storage_Pop3 extends Zend_Mail_Storage_Abstract
@@ -102,11 +103,16 @@ class Zend_Mail_Storage_Pop3 extends Zend_Mail_Storage_Abstract
      * @param  int               $topLines include this many lines with header (after an empty line)
      * @return string raw header
      * @throws Zend_Mail_Protocol_Exception
+     * @throws Zend_Mail_Storage_Exception
      */
     public function getRawHeader($id, $part = null, $topLines = 0)
     {
         if ($part !== null) {
             // TODO: implement
+            /**
+             * @see Zend_Mail_Storage_Exception
+             */
+            require_once 'Zend/Mail/Storage/Exception.php';
             throw new Zend_Mail_Storage_Exception('not implemented');
         }
 
@@ -120,11 +126,16 @@ class Zend_Mail_Storage_Pop3 extends Zend_Mail_Storage_Abstract
      * @param  null|array|string $part path to part or null for messsage content
      * @return string raw content
      * @throws Zend_Mail_Protocol_Exception
+     * @throws Zend_Mail_Storage_Exception
      */
     public function getRawContent($id, $part = null)
     {
         if ($part !== null) {
             // TODO: implement
+            /**
+             * @see Zend_Mail_Storage_Exception
+             */
+            require_once 'Zend/Mail/Storage/Exception.php';
             throw new Zend_Mail_Storage_Exception('not implemented');
         }
 
@@ -149,6 +160,10 @@ class Zend_Mail_Storage_Pop3 extends Zend_Mail_Storage_Abstract
      */
     public function __construct($params)
     {
+        if (is_array($params)) {
+            $params = (object)$params;
+        }
+
         $this->_has['fetchPart'] = false;
         $this->_has['top']       = null;
         $this->_has['uniqueid']  = null;
@@ -158,18 +173,22 @@ class Zend_Mail_Storage_Pop3 extends Zend_Mail_Storage_Abstract
             return;
         }
 
-        if (!isset($params['user'])) {
+        if (!isset($params->user)) {
+            /**
+             * @see Zend_Mail_Storage_Exception
+             */
+            require_once 'Zend/Mail/Storage/Exception.php';
             throw new Zend_Mail_Storage_Exception('need at least user in params');
         }
 
-        $params['host']     = isset($params['host'])     ? $params['host']     : 'localhost';
-        $params['password'] = isset($params['password']) ? $params['password'] : '';
-        $params['port']     = isset($params['port'])     ? $params['port']     : null;
-        $params['ssl']      = isset($params['ssl']) ? $params['ssl'] : false;
+        $host     = isset($params->host)     ? $params->host     : 'localhost';
+        $password = isset($params->password) ? $params->password : '';
+        $port     = isset($params->port)     ? $params->port     : null;
+        $ssl      = isset($params->ssl)      ? $params->ssl      : false;
 
         $this->_protocol = new Zend_Mail_Protocol_Pop3();
-        $this->_protocol->connect($params['host'], $params['port'], $params['ssl']);
-        $this->_protocol->login($params['user'], $params['password']);
+        $this->_protocol->connect($host, $port, $ssl);
+        $this->_protocol->login($params->user, $password);
     }
 
     /**
@@ -223,7 +242,11 @@ class Zend_Mail_Storage_Pop3 extends Zend_Mail_Storage_Abstract
             if ($id) {
                 return $id;
             }
-            $range = range(1, $this->countMessages());
+            $count = $this->countMessages();
+            if ($count < 1) {
+                return array(); 
+            }
+            $range = range(1, $count);
             return array_combine($range, $range);
         }
 
@@ -253,6 +276,10 @@ class Zend_Mail_Storage_Pop3 extends Zend_Mail_Storage_Abstract
             }
         }
 
+        /**
+         * @see Zend_Mail_Storage_Exception
+         */
+        require_once 'Zend/Mail/Storage/Exception.php';
         throw new Zend_Mail_Storage_Exception('unique id not found');
     }
 

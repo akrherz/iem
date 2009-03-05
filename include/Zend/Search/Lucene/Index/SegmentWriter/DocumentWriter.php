@@ -15,13 +15,9 @@
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Index
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-
-
-/** Zend_Search_Lucene_Exception */
-require_once 'Zend/Search/Lucene/Exception.php';
 
 /** Zend_Search_Lucene_Analysis_Analyzer */
 require_once 'Zend/Search/Lucene/Analysis/Analyzer.php';
@@ -29,12 +25,11 @@ require_once 'Zend/Search/Lucene/Analysis/Analyzer.php';
 /** Zend_Search_Lucene_Index_SegmentWriter */
 require_once 'Zend/Search/Lucene/Index/SegmentWriter.php';
 
-
 /**
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Index
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Search_Lucene_Index_SegmentWriter_DocumentWriter extends Zend_Search_Lucene_Index_SegmentWriter
@@ -90,6 +85,7 @@ class Zend_Search_Lucene_Index_SegmentWriter_DocumentWriter extends Zend_Search_
                 /**
                  * @todo term vector storing support
                  */
+                require_once 'Zend/Search/Lucene/Exception.php';
                 throw new Zend_Search_Lucene_Exception('Store term vector functionality is not supported yet.');
             }
 
@@ -204,9 +200,13 @@ class Zend_Search_Lucene_Index_SegmentWriter_DocumentWriter extends Zend_Search_
 
         $this->_generateCFS();
 
-        return new Zend_Search_Lucene_Index_SegmentInfo($this->_name,
+        return new Zend_Search_Lucene_Index_SegmentInfo($this->_directory,
+                                                        $this->_name,
                                                         $this->_docCount,
-                                                        $this->_directory);
+                                                        -1,
+                                                        null,
+                                                        true,
+                                                        true);
     }
 
 }

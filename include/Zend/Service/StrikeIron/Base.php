@@ -15,21 +15,23 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage StrikeIron
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: Base.php 8064 2008-02-16 10:58:39Z thomas $
  */
 
-/** Zend_Service_StrikeIron_Exception */
-require_once 'Zend/Service/StrikeIron/Exception.php';
 
-/** Zend_Service_StrikeIron_Decorator */
+/**
+ * @see Zend_Service_StrikeIron_Decorator
+ */
 require_once 'Zend/Service/StrikeIron/Decorator.php';
+
 
 /**
  * @category   Zend
  * @package    Zend_Service
  * @subpackage StrikeIron
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_StrikeIron_Base
@@ -54,7 +56,8 @@ class Zend_Service_StrikeIron_Base
     /**
      * Class constructor
      *
-     * @param array  $options  Key/value pair options
+     * @param  array  $options  Key/value pair options
+     * @throws Zend_Service_StrikeIron_Exception
      */
     public function __construct($options = array())
     {
@@ -79,6 +82,7 @@ class Zend_Service_StrikeIron_Base
      * @param  string  $method  Method name
      * @param  array   $params  Parameters for method
      * @return mixed            Result
+     * @throws Zend_Service_StrikeIron_Exception
      */
     public function __call($method, $params)
     {
@@ -95,6 +99,10 @@ class Zend_Service_StrikeIron_Base
                                                             $this->_outputHeaders);
         } catch (Exception $e) {
             $message = get_class($e) . ': ' . $e->getMessage();
+            /**
+             * @see Zend_Service_StrikeIron_Exception
+             */
+            require_once 'Zend/Service/StrikeIron/Exception.php';
             throw new Zend_Service_StrikeIron_Exception($message, $e->getCode());
         }
 
@@ -124,6 +132,7 @@ class Zend_Service_StrikeIron_Base
      * Initialize the headers to pass to SOAPClient->__soapCall()
      *
      * @return void
+     * @throws Zend_Service_StrikeIron_Exception
      */
     protected function _initSoapHeaders()
     {
@@ -136,6 +145,10 @@ class Zend_Service_StrikeIron_Base
 
             foreach ($this->_options['headers'] as $header) {
                 if (! $header instanceof SoapHeader) {
+                    /**
+                     * @see Zend_Service_StrikeIron_Exception
+                     */
+                    require_once 'Zend/Service/StrikeIron/Exception.php';
                     throw new Zend_Service_StrikeIron_Exception('Header must be instance of SoapHeader');
                 } else if ($header->name == 'LicenseInfo') {
                     $foundLicenseInfo = true;
@@ -235,6 +248,7 @@ class Zend_Service_StrikeIron_Base
      * @param  boolean  $now          Force a call to getRemainingHits instead of cache?
      * @param  string   $queryMethod  Method that will cause SubscriptionInfo header to be sent
      * @return Zend_Service_StrikeIron_Decorator  Decorated subscription info
+     * @throws Zend_Service_StrikeIron_Exception
      */
     public function getSubscriptionInfo($now = false, $queryMethod = 'GetRemainingHits')
     {
@@ -248,6 +262,10 @@ class Zend_Service_StrikeIron_Base
             $subscriptionInfo = new Zend_Service_StrikeIron_Decorator($info, 'SubscriptionInfo');
         } else {
             $msg = 'No SubscriptionInfo header found in last output headers';
+            /**
+             * @see Zend_Service_StrikeIron_Exception
+             */
+            require_once 'Zend/Service/StrikeIron/Exception.php';
             throw new Zend_Service_StrikeIron_Exception($msg);
         }
 

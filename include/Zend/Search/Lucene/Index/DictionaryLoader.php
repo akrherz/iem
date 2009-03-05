@@ -15,14 +15,9 @@
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Index
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-
-
-/** Zend_Search_Lucene_Exception */
-require_once 'Zend/Search/Lucene/Exception.php';
-
 
 /**
  * Dictionary loader
@@ -35,7 +30,7 @@ require_once 'Zend/Search/Lucene/Exception.php';
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Index
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Search_Lucene_Index_DictionaryLoader
@@ -61,11 +56,13 @@ class Zend_Search_Lucene_Index_DictionaryLoader
         // $tiVersion = $tiiFile->readInt();
         $tiVersion = ord($data[0]) << 24 | ord($data[1]) << 16 | ord($data[2]) << 8  | ord($data[3]);
         $pos += 4;
-        if ($tiVersion != (int)0xFFFFFFFE) {
-            throw new Zend_Search_Lucene_Exception('Wrong TermInfoIndexFile file format');
+        if ($tiVersion != (int)0xFFFFFFFE /* pre-2.1 format */ &&
+            $tiVersion != (int)0xFFFFFFFD /* 2.1+ format    */) {
+                require_once 'Zend/Search/Lucene/Exception.php';
+                throw new Zend_Search_Lucene_Exception('Wrong TermInfoIndexFile file format');
         }
 
-        // $indexTermCount = = $tiiFile->readLong();
+        // $indexTermCount = $tiiFile->readLong();
         if (PHP_INT_SIZE > 4) {
             $indexTermCount = ord($data[$pos]) << 56  |
                               ord($data[$pos+1]) << 48  |
@@ -81,7 +78,8 @@ class Zend_Search_Lucene_Index_DictionaryLoader
                 (ord($data[$pos+2])          != 0) ||
                 (ord($data[$pos+3])          != 0) ||
                 ((ord($data[$pos+4]) & 0x80) != 0)) {
-                     throw new Zend_Search_Lucene_Exception('Largest supported segment size (for 32-bit mode) is 2Gb');
+                    require_once 'Zend/Search/Lucene/Exception.php';
+                    throw new Zend_Search_Lucene_Exception('Largest supported segment size (for 32-bit mode) is 2Gb');
                  }
 
             $indexTermCount = ord($data[$pos+4]) << 24  |
@@ -98,7 +96,13 @@ class Zend_Search_Lucene_Index_DictionaryLoader
         $skipInterval = ord($data[$pos]) << 24 | ord($data[$pos+1]) << 16 | ord($data[$pos+2]) << 8  | ord($data[$pos+3]);
         $pos += 4;
         if ($indexTermCount < 1) {
+            require_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('Wrong number of terms in a term dictionary index');
+        }
+
+        if ($tiVersion == (int)0xFFFFFFFD /* 2.1+ format */) {
+            /* Skip MaxSkipLevels value */
+            $pos += 4;
         }
 
         $prevTerm     = '';
@@ -131,6 +135,12 @@ class Zend_Search_Lucene_Index_DictionaryLoader
                         $addBytes = 1;
                         if (ord($termSuffix[$count1]) & 0x20 ) {
                             $addBytes++;
+
+                            // Never used for Java Lucene created index.
+                            // Java2 doesn't encode strings in four bytes
+                            if (ord($termSuffix[$count1]) & 0x10 ) {
+                                $addBytes++;
+                            }
                         }
                         $termSuffix .= substr($data, $pos, $addBytes);
                         $pos += $addBytes;
@@ -242,6 +252,7 @@ class Zend_Search_Lucene_Index_DictionaryLoader
 
         // Check special index entry mark
         if ($termDictionary[0][0] != (int)0xFFFFFFFF) {
+            require_once 'Zend/Search/Lucene/Exception.php';
             throw new Zend_Search_Lucene_Exception('Wrong TermInfoIndexFile file format');
         } else if (PHP_INT_SIZE > 4){
             // Treat 64-bit 0xFFFFFFFF as -1

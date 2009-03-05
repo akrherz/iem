@@ -15,7 +15,7 @@
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Document
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -30,7 +30,7 @@ require_once 'Zend/Search/Lucene/Field.php';
  * @category   Zend
  * @package    Zend_Search_Lucene
  * @subpackage Document
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Search_Lucene_Document
@@ -44,8 +44,13 @@ class Zend_Search_Lucene_Document
      */
     protected $_fields = array();
 
+    /**
+     * Field boost factor
+     * It's not stored directly in the index, but affects on normalization factor
+     *
+     * @var float
+     */
     public $boost = 1.0;
-
 
     /**
      * Proxy method for getFieldValue(), provides more convenient access to
@@ -64,10 +69,13 @@ class Zend_Search_Lucene_Document
      * Add a field object to this document.
      *
      * @param Zend_Search_Lucene_Field $field
+     * @return Zend_Search_Lucene_Document
      */
     public function addField(Zend_Search_Lucene_Field $field)
     {
         $this->_fields[$field->name] = $field;
+
+        return $this;
     }
 
 

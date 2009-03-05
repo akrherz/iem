@@ -15,9 +15,9 @@
  *
  * @category   Zend
  * @package    Zend_Feed
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Feed.php 4729 2007-05-06 14:01:06Z thomas $
+ * @version    $Id: Feed.php 13891 2009-01-31 11:41:00Z yoshida@zend.co.jp $
  */
 
 
@@ -29,7 +29,7 @@
  *
  * @category   Zend
  * @package    Zend_Feed
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Feed
@@ -192,11 +192,20 @@ class Zend_Feed
     {
         // Load the feed as an XML DOMDocument object
         @ini_set('track_errors', 1);
-        $doc = new DOMDocument();
-        $success = @$doc->loadXML($string);
+        $doc = new DOMDocument;
+        $status = @$doc->loadXML($string);
         @ini_restore('track_errors');
 
-        if (!$success) {
+        if (!$status) {
+            // prevent the class to generate an undefined variable notice (ZF-2590)
+            if (!isset($php_errormsg)) {
+                if (function_exists('xdebug_is_enabled')) {
+                    $php_errormsg = '(error message not available, when XDebug is running)';
+                } else {
+                    $php_errormsg = '(error message not available)';
+                }
+            }
+
             /**
              * @see Zend_Feed_Exception
              */
@@ -369,8 +378,10 @@ class Zend_Feed
          */
         require_once 'Zend/Loader.php';
         Zend_Loader::loadClass($obj);
-        Zend_Loader::loadClass('Zend_Feed_Builder');
-
+        /**
+         * @see Zend_Feed_Builder
+         */
+        require_once 'Zend/Feed/Builder.php';
         return new $obj(null, null, new Zend_Feed_Builder($data));
     }
 

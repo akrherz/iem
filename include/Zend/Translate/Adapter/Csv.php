@@ -14,7 +14,7 @@
  *
  * @category   Zend
  * @package    Zend_Translate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @version    $Id: Date.php 2498 2006-12-23 22:13:38Z thomas $
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
@@ -23,9 +23,6 @@
 /** Zend_Locale */
 require_once 'Zend/Locale.php';
 
-/** Zend_Translate_Exception */
-require_once 'Zend/Translate/Exception.php';
-
 /** Zend_Translate_Adapter */
 require_once 'Zend/Translate/Adapter.php';
 
@@ -33,7 +30,7 @@ require_once 'Zend/Translate/Adapter.php';
 /**
  * @category   Zend
  * @package    Zend_Translate
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Translate_Adapter_Csv extends Zend_Translate_Adapter {
@@ -48,7 +45,9 @@ class Zend_Translate_Adapter_Csv extends Zend_Translate_Adapter {
      */
     public function __construct($data, $locale = null, array $options = array())
     {
-        $this->_options['separator'] = ";";
+        $this->_options['delimiter'] = ";";
+        $this->_options['length']    = 0;
+        $this->_options['enclosure'] = '"';
         parent::__construct($data, $locale, $options);
     }
 
@@ -62,7 +61,7 @@ class Zend_Translate_Adapter_Csv extends Zend_Translate_Adapter {
      */
     protected function _loadTranslationData($filename, $locale, array $options = array())
     {
-        $options = array_merge($this->_options, $options);
+        $options = $options + $this->_options;
 
         if ($options['clear']  ||  !isset($this->_translate[$locale])) {
             $this->_translate[$locale] = array();
@@ -70,39 +69,20 @@ class Zend_Translate_Adapter_Csv extends Zend_Translate_Adapter {
 
         $this->_file = @fopen($filename, 'rb');
         if (!$this->_file) {
+            require_once 'Zend/Translate/Exception.php';
             throw new Zend_Translate_Exception('Error opening translation file \'' . $filename . '\'.');
         }
 
-        while(!feof($this->_file)) {
-            $content = fgets($this->_file);
-            $content = explode($options['separator'], $content);
-            for ($x = 0; $x < count($content); ++$x) {
-                if (isset($content[$x+1]) and (empty($content[$x+1]))) {
-                    $content[$x] .= $options['separator'];
-                    $length = 1;
-                    if (isset($content[$x+2])) {
-                        $content[$x] .= $content[$x+2];
-                        $length = 2;
-                    }
-                    array_splice($content, $x + 1, $length);
-                }
-            }
-            // # marks a comment in the translation source
-            if ((!is_array($content) and (substr(trim($content), 0, 1) == "#")) or
-                 (is_array($content) and (substr(trim($content[0]), 0, 1) == "#"))) {
+        while(($data = fgetcsv($this->_file, $options['length'], $options['delimiter'], $options['enclosure'])) !== false) {
+            if (substr($data[0], 0, 1) === '#') {
                 continue;
             }
-            if (!empty($content[1])) {
-                if (feof($this->_file)) {
-                    $this->_translate[$locale][$content[0]] = $content[1];
-                } else {
-                    if (substr($content[1], -2, 2) == "\r\n") {
-                        $this->_translate[$locale][$content[0]] = substr($content[1], 0, -2);
-                    } else {
-                        $this->_translate[$locale][$content[0]] = substr($content[1], 0, -1);
-                    }
-                }
+
+            if (isset($data[1]) !== true) {
+                continue;
             }
+
+            $this->_translate[$locale][$data[0]] = $data[1];
         }
     }
 

@@ -15,7 +15,8 @@
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Calendar
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -34,7 +35,8 @@ require_once 'Zend/Gdata/Calendar.php';
  *
  * @category   Zend
  * @package    Zend_Gdata
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Calendar
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Gdata_Calendar_Extension_AccessLevel extends Zend_Gdata_Extension
@@ -50,9 +52,7 @@ class Zend_Gdata_Calendar_Extension_AccessLevel extends Zend_Gdata_Extension
      */
     public function __construct($value = null)
     {
-        foreach (Zend_Gdata_Calendar::$namespaces as $nsPrefix => $nsUri) {
-            $this->registerNamespace($nsPrefix, $nsUri);
-        }
+        $this->registerAllNamespaces(Zend_Gdata_Calendar::$namespaces);
         parent::__construct();
         $this->_value = $value;
     }
@@ -67,9 +67,9 @@ class Zend_Gdata_Calendar_Extension_AccessLevel extends Zend_Gdata_Extension
      * @return DOMElement The DOMElement representing this element and all
      * child properties.
      */
-    public function getDOM($doc = null)
+    public function getDOM($doc = null, $majorVersion = 1, $minorVersion = null)
     {
-        $element = parent::getDOM($doc);
+        $element = parent::getDOM($doc, $majorVersion, $minorVersion);
         if ($this->_value != null) {
             $element->setAttribute('value', $this->_value);
         }
@@ -97,7 +97,6 @@ class Zend_Gdata_Calendar_Extension_AccessLevel extends Zend_Gdata_Extension
     /**
      * Get the value for this element's value attribute.
      *
-     * @param string The desired value for this attribute
      * @return string The attribute being modified.
      */
     public function getValue()
@@ -109,7 +108,7 @@ class Zend_Gdata_Calendar_Extension_AccessLevel extends Zend_Gdata_Extension
     /**
      * Set the value for this element's value attribute.
      *
-     * @param bool $value The desired value for this attribute.
+     * @param string $value The desired value for this attribute.
      * @return Zend_Gdata_Calendar_Extension_Selected The element being modified.
      */
     public function setValue($value)

@@ -1,115 +1,115 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.5/ldml.dtd">
+<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.6/ldml.dtd">
 <ldml>
 	<identity>
-		<version number="$Revision: 1.69 $"/>
-		<generation date="$Date: 2007/07/19 22:31:39 $"/>
+		<version number="$Revision: 1.74 $"/>
+		<generation date="$Date: 2008/06/05 01:32:22 $"/>
 		<language type="mk"/>
 	</identity>
 	<localeDisplayNames>
 		<languages>
-			<language type="af" draft="unconfirmed">африкански</language>
-			<language type="am" draft="unconfirmed">амхариски</language>
-			<language type="ar" draft="unconfirmed">арапски</language>
-			<language type="as" draft="unconfirmed">асамски</language>
-			<language type="az" draft="unconfirmed">азербејџански</language>
-			<language type="be" draft="unconfirmed">белоруски</language>
-			<language type="bg" draft="unconfirmed">бугарски</language>
-			<language type="bh" draft="unconfirmed">бихари</language>
-			<language type="bn" draft="unconfirmed">бенгалски</language>
-			<language type="br" draft="unconfirmed">бретонски</language>
-			<language type="bs" draft="unconfirmed">босански</language>
-			<language type="ca" draft="unconfirmed">каталонски</language>
-			<language type="cs" draft="unconfirmed">чешки</language>
-			<language type="cy" draft="unconfirmed">велшки</language>
-			<language type="da" draft="unconfirmed">дански</language>
+			<language type="af">африкански</language>
+			<language type="am">амхариски</language>
+			<language type="ar">арапски</language>
+			<language type="as">асамски</language>
+			<language type="az">азербејџански</language>
+			<language type="be">белоруски</language>
+			<language type="bg">бугарски</language>
+			<language type="bh">бихари</language>
+			<language type="bn">бенгалски</language>
+			<language type="br">бретонски</language>
+			<language type="bs">босански</language>
+			<language type="ca">каталонски</language>
+			<language type="cs">чешки</language>
+			<language type="cy">велшки</language>
+			<language type="da">дански</language>
 			<language type="de">германски</language>
-			<language type="el" draft="unconfirmed">грчки</language>
+			<language type="el">грчки</language>
 			<language type="en">англиски</language>
-			<language type="eo" draft="unconfirmed">есперанто</language>
+			<language type="eo">есперанто</language>
 			<language type="es">шпански</language>
-			<language type="et" draft="unconfirmed">естонски</language>
-			<language type="eu" draft="unconfirmed">баскиски</language>
-			<language type="fa" draft="unconfirmed">персиски</language>
-			<language type="fi" draft="unconfirmed">фински</language>
-			<language type="fil" draft="unconfirmed">тагалог (филипински)</language>
-			<language type="fo" draft="unconfirmed">фарски</language>
+			<language type="et">естонски</language>
+			<language type="eu">баскиски</language>
+			<language type="fa">персиски</language>
+			<language type="fi">фински</language>
+			<language type="fil">тагалог (филипински)</language>
+			<language type="fo">фарски</language>
 			<language type="fr">француски</language>
-			<language type="fy" draft="unconfirmed">фризиски</language>
-			<language type="ga" draft="unconfirmed">ирски</language>
-			<language type="gd" draft="unconfirmed">шкотско галски</language>
-			<language type="gl" draft="unconfirmed">галициски</language>
-			<language type="gn" draft="unconfirmed">гуарани</language>
-			<language type="gu" draft="unconfirmed">гуџарати</language>
-			<language type="he" draft="unconfirmed">хебрејски</language>
-			<language type="hi" draft="unconfirmed">хинди</language>
-			<language type="hr" draft="unconfirmed">хрватски</language>
-			<language type="hu" draft="unconfirmed">унгарски</language>
-			<language type="hy" draft="unconfirmed">ерменски</language>
-			<language type="ia" draft="unconfirmed">интерлингва</language>
-			<language type="id" draft="unconfirmed">индонезиски</language>
-			<language type="is" draft="unconfirmed">исландски</language>
+			<language type="fy">фризиски</language>
+			<language type="ga">ирски</language>
+			<language type="gd">шкотско галски</language>
+			<language type="gl">галициски</language>
+			<language type="gn">гуарани</language>
+			<language type="gu">гуџарати</language>
+			<language type="he">хебрејски</language>
+			<language type="hi">хинди</language>
+			<language type="hr">хрватски</language>
+			<language type="hu">унгарски</language>
+			<language type="hy">ерменски</language>
+			<language type="ia">интерлингва</language>
+			<language type="id">индонезиски</language>
+			<language type="is">исландски</language>
 			<language type="it">италијански</language>
 			<language type="ja">јапонски</language>
-			<language type="jv" draft="unconfirmed">јавански</language>
-			<language type="ka" draft="unconfirmed">грузиски</language>
-			<language type="km" draft="unconfirmed">камбоџански</language>
-			<language type="kn" draft="unconfirmed">каннада</language>
-			<language type="ko" draft="unconfirmed">корејски</language>
-			<language type="ku" draft="unconfirmed">курдски</language>
-			<language type="ky" draft="unconfirmed">киргистански</language>
-			<language type="la" draft="unconfirmed">латински</language>
-			<language type="lt" draft="unconfirmed">литвански</language>
-			<language type="lv" draft="unconfirmed">латвиски</language>
+			<language type="jv">јавански</language>
+			<language type="ka">грузиски</language>
+			<language type="km">камбоџански</language>
+			<language type="kn">каннада</language>
+			<language type="ko">корејски</language>
+			<language type="ku">курдски</language>
+			<language type="ky">киргистански</language>
+			<language type="la">латински</language>
+			<language type="lt">литвански</language>
+			<language type="lv">латвиски</language>
 			<language type="mk">македонски</language>
-			<language type="ml" draft="unconfirmed">малајалам</language>
-			<language type="mn" draft="unconfirmed">монголски</language>
-			<language type="mr" draft="unconfirmed">марати</language>
-			<language type="ms" draft="unconfirmed">малезиски</language>
-			<language type="mt" draft="unconfirmed">малтешки</language>
-			<language type="ne" draft="unconfirmed">непалски</language>
-			<language type="nl" draft="unconfirmed">холандски</language>
-			<language type="nn" draft="unconfirmed">норвешки (Ниноршк)</language>
-			<language type="no" draft="unconfirmed">норвешки</language>
-			<language type="oc" draft="unconfirmed">окситански</language>
-			<language type="or" draft="unconfirmed">орија</language>
-			<language type="pa" draft="unconfirmed">пунџаби</language>
-			<language type="pl" draft="unconfirmed">полски</language>
-			<language type="ps" draft="unconfirmed">пашто</language>
+			<language type="ml">малајалам</language>
+			<language type="mn">монголски</language>
+			<language type="mr">марати</language>
+			<language type="ms">малезиски</language>
+			<language type="mt">малтешки</language>
+			<language type="ne">непалски</language>
+			<language type="nl">холандски</language>
+			<language type="nn">норвешки (Ниноршк)</language>
+			<language type="no">норвешки</language>
+			<language type="oc">окситански</language>
+			<language type="or">орија</language>
+			<language type="pa">пунџаби</language>
+			<language type="pl">полски</language>
+			<language type="ps">пашто</language>
 			<language type="pt">португалски</language>
-			<language type="pt_BR" draft="unconfirmed">португалски (во Бразил)</language>
-			<language type="pt_PT" draft="unconfirmed">португалски (во Португалија)</language>
-			<language type="ro" draft="unconfirmed">романски</language>
+			<language type="pt_BR">португалски (во Бразил)</language>
+			<language type="pt_PT">португалски (во Португалија)</language>
+			<language type="ro">романски</language>
 			<language type="ru">руски</language>
-			<language type="sa" draft="unconfirmed">санскрит</language>
-			<language type="sd" draft="unconfirmed">синди</language>
-			<language type="sh" draft="unconfirmed">српско-хрватски</language>
-			<language type="si" draft="unconfirmed">синхалиски</language>
-			<language type="sk" draft="unconfirmed">словачки</language>
-			<language type="sl" draft="unconfirmed">словенечки јазик</language>
-			<language type="so" draft="unconfirmed">сомалиски</language>
-			<language type="sq" draft="unconfirmed">албански</language>
-			<language type="sr" draft="unconfirmed">српски</language>
-			<language type="st" draft="unconfirmed">сесото</language>
-			<language type="sv" draft="unconfirmed">шведски</language>
-			<language type="sw" draft="unconfirmed">свахили</language>
-			<language type="ta" draft="unconfirmed">тамилски</language>
-			<language type="te" draft="unconfirmed">телугу</language>
-			<language type="th" draft="unconfirmed">тајландски</language>
-			<language type="ti" draft="unconfirmed">тигрејски</language>
-			<language type="tk" draft="unconfirmed">туркменистански</language>
-			<language type="tlh" draft="unconfirmed">клингонски</language>
-			<language type="tr" draft="unconfirmed">турски</language>
-			<language type="tw" draft="unconfirmed">тви (диалект на аканскиот јазик)</language>
-			<language type="ug" draft="unconfirmed">ујгурски</language>
-			<language type="uk" draft="unconfirmed">украински</language>
-			<language type="ur" draft="unconfirmed">урду</language>
-			<language type="uz" draft="unconfirmed">узбечки</language>
-			<language type="vi" draft="unconfirmed">виетнамски</language>
-			<language type="xh" draft="unconfirmed">хауса</language>
-			<language type="yi" draft="unconfirmed">јидски</language>
+			<language type="sa">санскрит</language>
+			<language type="sd">синди</language>
+			<language type="sh">српско-хрватски</language>
+			<language type="si">синхалиски</language>
+			<language type="sk">словачки</language>
+			<language type="sl">словенечки јазик</language>
+			<language type="so">сомалиски</language>
+			<language type="sq">албански</language>
+			<language type="sr">српски</language>
+			<language type="st">сесото</language>
+			<language type="sv">шведски</language>
+			<language type="sw">свахили</language>
+			<language type="ta">тамилски</language>
+			<language type="te">телугу</language>
+			<language type="th">тајландски</language>
+			<language type="ti">тигрејски</language>
+			<language type="tk">туркменистански</language>
+			<language type="tlh">клингонски</language>
+			<language type="tr">турски</language>
+			<language type="tw">тви (диалект на аканскиот јазик)</language>
+			<language type="ug">ујгурски</language>
+			<language type="uk">украински</language>
+			<language type="ur">урду</language>
+			<language type="uz">узбечки</language>
+			<language type="vi">виетнамски</language>
+			<language type="xh">хауса</language>
+			<language type="yi">јидски</language>
 			<language type="zh">кинески</language>
-			<language type="zu" draft="unconfirmed">зулу</language>
+			<language type="zu">зулу</language>
 		</languages>
 		<territories>
 			<territory type="AD">Андора</territory>
@@ -326,7 +326,6 @@
 			<territory type="TM">Туркменистан</territory>
 			<territory type="TN">Тунис</territory>
 			<territory type="TO">Тонга</territory>
-			<territory type="TO" alt="proposed-x1001" draft="unconfirmed">Тонгански</territory>
 			<territory type="TR">Турција</territory>
 			<territory type="TT">Тринидад и Тобаго</territory>
 			<territory type="TV">Тувалу</territory>
@@ -387,7 +386,7 @@
 							<month type="2">фев.</month>
 							<month type="3">мар.</month>
 							<month type="4">апр.</month>
-							<month type="5">мај.</month>
+							<month type="5">мај</month>
 							<month type="6">јун.</month>
 							<month type="7">јул.</month>
 							<month type="8">авг.</month>
@@ -397,8 +396,8 @@
 							<month type="12">декем.</month>
 						</monthWidth>
 						<monthWidth type="narrow">
-							<month type="9" draft="provisional">с</month>
-							<month type="11" draft="provisional">н</month>
+							<month type="9">с</month>
+							<month type="11">н</month>
 						</monthWidth>
 						<monthWidth type="wide">
 							<month type="1">јануари</month>
@@ -468,21 +467,21 @@
 				<quarters>
 					<quarterContext type="format">
 						<quarterWidth type="abbreviated">
-							<quarter type="1" draft="unconfirmed">Q1</quarter>
-							<quarter type="2" draft="unconfirmed">Q2</quarter>
-							<quarter type="3" draft="unconfirmed">Q3</quarter>
-							<quarter type="4" draft="unconfirmed">Q4</quarter>
+							<quarter type="1">Q1</quarter>
+							<quarter type="2">Q2</quarter>
+							<quarter type="3">Q3</quarter>
+							<quarter type="4">Q4</quarter>
 						</quarterWidth>
 						<quarterWidth type="wide">
-							<quarter type="1" draft="unconfirmed">Q1</quarter>
-							<quarter type="2" draft="unconfirmed">Q2</quarter>
-							<quarter type="3" draft="unconfirmed">Q3</quarter>
-							<quarter type="4" draft="unconfirmed">Q4</quarter>
+							<quarter type="1">Q1</quarter>
+							<quarter type="2">Q2</quarter>
+							<quarter type="3">Q3</quarter>
+							<quarter type="4">Q4</quarter>
 						</quarterWidth>
 					</quarterContext>
 				</quarters>
-				<am draft="unconfirmed">AM</am>
-				<pm draft="unconfirmed">PM</pm>
+				<am>AM</am>
+				<pm>PM</pm>
 				<eras>
 					<eraAbbr>
 						<era type="0">пр.н.е.</era>
@@ -514,45 +513,118 @@
 				<timeFormats>
 					<timeFormatLength type="full">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm:ss v</pattern>
+							<pattern>HH:mm:ss v</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="long">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm:ss z</pattern>
+							<pattern>HH:mm:ss z</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="medium">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm:ss</pattern>
+							<pattern>HH:mm:ss</pattern>
 						</timeFormat>
 					</timeFormatLength>
 					<timeFormatLength type="short">
 						<timeFormat>
-							<pattern draft="unconfirmed">HH:mm</pattern>
+							<pattern>HH:mm</pattern>
 						</timeFormat>
 					</timeFormatLength>
 				</timeFormats>
 				<dateTimeFormats>
 					<dateTimeFormatLength>
 						<dateTimeFormat>
-							<pattern draft="unconfirmed">{1} {0}</pattern>
+							<pattern>{1} {0}</pattern>
 						</dateTimeFormat>
 					</dateTimeFormatLength>
 					<availableFormats>
-						<dateFormatItem id="MMMMdd" draft="unconfirmed">dd MMMM</dateFormatItem>
-						<dateFormatItem id="Mdd" draft="unconfirmed">dd.M</dateFormatItem>
-						<dateFormatItem id="yyQ" draft="unconfirmed">Q yy</dateFormatItem>
-						<dateFormatItem id="yyyyM" draft="unconfirmed">M.yyyy</dateFormatItem>
-						<dateFormatItem id="yyyyMMMM" draft="unconfirmed">MMMM yyyy</dateFormatItem>
+						<dateFormatItem id="MMMMdd">dd MMMM</dateFormatItem>
+						<dateFormatItem id="Mdd">dd.M</dateFormatItem>
+						<dateFormatItem id="yyQ">Q yy</dateFormatItem>
+						<dateFormatItem id="yyyyM">M.yyyy</dateFormatItem>
+						<dateFormatItem id="yyyyMMMM">MMMM yyyy</dateFormatItem>
 					</availableFormats>
+					<intervalFormats>
+						<intervalFormatFallback>{0} - {1}</intervalFormatFallback>
+						<intervalFormatItem id="M">
+							<greatestDifference id="M">M-M</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MEd">
+							<greatestDifference id="M">E, dd.M - E, dd.M</greatestDifference>
+							<greatestDifference id="d">E, dd.M - E, dd.M</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMM">
+							<greatestDifference id="M">MMM-MMM</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMMEd">
+							<greatestDifference id="M">E, dd MMM - E, dd MMM</greatestDifference>
+							<greatestDifference id="d">E, dd - E, dd MMM</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="MMMd">
+							<greatestDifference id="M">dd MMM - dd MMM</greatestDifference>
+							<greatestDifference id="d">dd-dd MMM</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="Md">
+							<greatestDifference id="M">dd.M - dd.M</greatestDifference>
+							<greatestDifference id="d">dd.M - dd.M</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="d">
+							<greatestDifference id="d">d-d</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="h">
+							<greatestDifference id="h">HH-HH</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hm">
+							<greatestDifference id="h">HH:mm-HH:mm</greatestDifference>
+							<greatestDifference id="m">HH:mm-HH:mm</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hmv">
+							<greatestDifference id="h">HH:mm-HH:mm v</greatestDifference>
+							<greatestDifference id="m">HH:mm-HH:mm v</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="hv">
+							<greatestDifference id="h">HH-HH v</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="y">
+							<greatestDifference id="y">y-y</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yM">
+							<greatestDifference id="M">M.yy - M.yy</greatestDifference>
+							<greatestDifference id="y">M.yy - M.yy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMEd">
+							<greatestDifference id="M">E, dd.M.yy - E, dd.M.yy</greatestDifference>
+							<greatestDifference id="d">E, dd.M.yy - E, dd.M.yy</greatestDifference>
+							<greatestDifference id="y">E, dd.M.yy - E, dd.M.yy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMM">
+							<greatestDifference id="M">MMM-MMM yyyy</greatestDifference>
+							<greatestDifference id="y">MMM yyyy - MMM yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMMEd">
+							<greatestDifference id="M">E, dd MMM - E, dd MMM yyyy</greatestDifference>
+							<greatestDifference id="d">E, dd - E, dd MMM yyyy</greatestDifference>
+							<greatestDifference id="y">E, dd MMM yyyy - E, dd MMM yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMMMd">
+							<greatestDifference id="M">dd MMM - dd MMM yyyy</greatestDifference>
+							<greatestDifference id="d">dd-dd MMM yyyy</greatestDifference>
+							<greatestDifference id="y">dd MMM yyyy - dd MMM yyyy</greatestDifference>
+						</intervalFormatItem>
+						<intervalFormatItem id="yMd">
+							<greatestDifference id="M">dd.M.yy - dd.M.yy</greatestDifference>
+							<greatestDifference id="d">dd.M.yy - dd.M.yy</greatestDifference>
+							<greatestDifference id="y">dd.M.yy - dd.M.yy</greatestDifference>
+						</intervalFormatItem>
+					</intervalFormats>
 				</dateTimeFormats>
 			</calendar>
 		</calendars>
 		<timeZoneNames>
-			<hourFormat draft="unconfirmed">+HH:mm;-HH:mm</hourFormat>
-			<gmtFormat draft="unconfirmed">GMT{0}</gmtFormat>
-			<regionFormat draft="unconfirmed">{0}</regionFormat>
+			<hourFormat>+HH:mm;-HH:mm</hourFormat>
+			<gmtFormat>GMT{0}</gmtFormat>
+			<regionFormat>{0}</regionFormat>
 		</timeZoneNames>
 	</dates>
 	<numbers>
@@ -1063,7 +1135,7 @@
 			</currency>
 			<currency type="SOS">
 				<displayName>Сомалијски шилинг</displayName>
-				<symbol>So. Sh.</symbol>
+				<symbol>Sh.</symbol>
 			</currency>
 			<currency type="SRG">
 				<displayName>Суринамски гилдер</displayName>

@@ -14,7 +14,7 @@
  *
  * @package    Zend_Pdf
  * @subpackage Fonts
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -23,9 +23,6 @@ require_once 'Zend/Pdf/Resource.php';
 
 /** Zend_Pdf_Exception */
 require_once 'Zend/Pdf/Exception.php';
-
-/** Zend_Pdf_Cmap */
-require_once 'Zend/Pdf/Cmap.php';
 
 
 /**
@@ -41,19 +38,13 @@ require_once 'Zend/Pdf/Cmap.php';
  *
  * @package    Zend_Pdf
  * @subpackage Fonts
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Pdf_Resource_Font extends Zend_Pdf_Resource
 {
   /**** Instance Variables ****/
 
-
-    /**
-     * Object representing the font's cmap (character to glyph map).
-     * @var Zend_Pdf_Cmap
-     */
-    public $cmap = null;
 
     /**
      * The type of font. Use TYPE_ constants defined in {@link Zend_Pdf_Font}.
@@ -133,24 +124,6 @@ abstract class Zend_Pdf_Resource_Font extends Zend_Pdf_Resource
      */
     protected $_lineGap = 0;
 
-    /**
-     * Array containing the widths of each of the glyphs contained in the font.
-     * @var array
-     */
-    protected $_glyphWidths = null;
-
-    /**
-     * The highest integer index in the glyph widths array.
-     * @var integer
-     */
-    protected $_glyphMaxIndex = 0;
-
-    /**
-     * Font embedding options. See discussion in {@link __construct()}.
-     * @var integer
-     */
-    private $_embeddingOptions = 0;
-
 
 
   /**** Public Interface ****/
@@ -161,19 +134,11 @@ abstract class Zend_Pdf_Resource_Font extends Zend_Pdf_Resource
     /**
      * Object constructor.
      *
-     * The $embeddingOptions parameter allows you to set certain flags related
-     * to font embedding. You may combine options by OR-ing them together. See
-     * the EMBED_ constants defined in {@link Zend_Pdf_Font} for the list of
-     * available options and their descriptions.
-     *
-     * @param integer $embeddingOptions (optional) Options for font embedding.
-     *   Only used for certain font types.
      */
-    public function __construct($embeddingOptions = 0)
+    public function __construct()
     {
         parent::__construct(new Zend_Pdf_Element_Dictionary());
         $this->_resource->Type = new Zend_Pdf_Element_Name('Font');
-        $this->_embeddingOptions = $embeddingOptions;
     }
 
 
@@ -271,14 +236,55 @@ abstract class Zend_Pdf_Resource_Font extends Zend_Pdf_Resource
         /* If the preferred language could not be found, use whatever is first.
          */
         if (is_null($name)) {
-            $name = reset($this->_fontNames[$nameType]);
+            $names = $this->_fontNames[$nameType];
+            $name  = reset($names);
         }
         /* Convert the character set if requested.
          */
-        if ((! is_null($characterSet)) && ($characterSet != 'UTF-16BE')) {
+        if ((! is_null($characterSet)) && ($characterSet != 'UTF-16BE') && PHP_OS != 'AIX') { // AIX knows not this charset
             $name = iconv('UTF-16BE', $characterSet, $name);
         }
         return $name;
+    }
+
+    /**
+     * Returns whole set of font names.
+     * 
+     * @return array
+     */
+    public function getFontNames()
+    {
+        return $this->_fontNames;
+    }
+    
+    /**
+     * Returns true if font is bold.
+     *
+     * @return boolean
+     */
+    public function isBold()
+    {
+        return $this->_isBold;
+    }
+
+    /**
+     * Returns true if font is italic.
+     *
+     * @return boolean
+     */
+    public function isItalic()
+    {
+        return $this->_isItalic;
+    }
+    
+    /**
+     * Returns true if font is monospace.
+     *
+     * @return boolean
+     */
+    public function isMonospace()
+    {
+        return $this->_isMonospace;
     }
 
     /**
@@ -402,6 +408,33 @@ abstract class Zend_Pdf_Resource_Font extends Zend_Pdf_Resource
   /* Information and Conversion Methods */
 
     /**
+     * Returns an array of glyph numbers corresponding to the Unicode characters.
+     *
+     * If a particular character doesn't exist in this font, the special 'missing
+     * character glyph' will be substituted.
+     *
+     * See also {@link glyphNumberForCharacter()}.
+     *
+     * @param array $characterCodes Array of Unicode character codes (code points).
+     * @return array Array of glyph numbers.
+     */
+    abstract public function glyphNumbersForCharacters($characterCodes);
+
+    /**
+     * Returns the glyph number corresponding to the Unicode character.
+     *
+     * If a particular character doesn't exist in this font, the special 'missing
+     * character glyph' will be substituted.
+     *
+     * See also {@link glyphNumbersForCharacters()} which is optimized for bulk
+     * operations.
+     *
+     * @param integer $characterCode Unicode character code (code point).
+     * @return integer Glyph number.
+     */
+    abstract public function glyphNumberForCharacter($characterCode);
+
+    /**
      * Returns a number between 0 and 1 inclusive that indicates the percentage
      * of characters in the string which are covered by glyphs in this font.
      *
@@ -419,41 +452,7 @@ abstract class Zend_Pdf_Resource_Font extends Zend_Pdf_Resource
      *   If omitted, uses 'current locale'.
      * @return float
      */
-    public function getCoveredPercentage($string, $charEncoding = '')
-    {
-        /* Convert the string to UTF-16BE encoding so we can match the string's
-         * character codes to those found in the cmap.
-         */
-        if ($charEncoding != 'UTF-16BE') {
-            $string = iconv($charEncoding, 'UTF-16BE', $string);
-        }
-
-        $charCount = iconv_strlen($string, 'UTF-16BE');
-        if ($charCount == 0) {
-            return 0;
-        }
-
-        /* Fetch the covered character code list from the font's cmap.
-         */
-        $coveredCharacters = $this->cmap->getCoveredCharacters();
-
-        /* Calculate the score by doing a lookup for each character.
-         */
-        $score = 0;
-        $maxIndex = strlen($string);
-        for ($i = 0; $i < $maxIndex; $i++) {
-            /**
-             * @todo Properly handle characters encoded as surrogate pairs.
-             */
-            $charCode = (ord($string[$i]) << 8) | ord($string[++$i]);
-            /* This could probably be optimized a bit with a binary search...
-             */
-            if (in_array($charCode, $coveredCharacters)) {
-                $score++;
-            }
-        }
-        return $score / $charCount;
-    }
+    abstract public function getCoveredPercentage($string, $charEncoding = '');
 
     /**
      * Returns the widths of the glyphs.
@@ -461,26 +460,13 @@ abstract class Zend_Pdf_Resource_Font extends Zend_Pdf_Resource
      * The widths are expressed in the font's glyph space. You are responsible
      * for converting to user space as necessary. See {@link unitsPerEm()}.
      *
-     * Throws an exception if the glyph number is out of range.
-     *
      * See also {@link widthForGlyph()}.
      *
-     * @param array &$glyphNumbers Array of glyph numbers.
+     * @param array $glyphNumbers Array of glyph numbers.
      * @return array Array of glyph widths (integers).
      * @throws Zend_Pdf_Exception
      */
-    public function widthsForGlyphs(&$glyphNumbers)
-    {
-        $widths = array();
-        foreach ($glyphNumbers as $key => $glyphNumber) {
-            if (($glyphNumber < 0) || ($glyphNumber > $this->_glyphMaxIndex)) {
-                throw new Zend_Pdf_Exception("Glyph number is out of range: $glyphNumber",
-                                             Zend_Pdf_Exception::GLYPH_OUT_OF_RANGE);
-            }
-            $widths[$key] = $this->_glyphWidths[$glyphNumber];
-        }
-        return $widths;
-    }
+    abstract public function widthsForGlyphs($glyphNumbers);
 
     /**
      * Returns the width of the glyph.
@@ -491,54 +477,29 @@ abstract class Zend_Pdf_Resource_Font extends Zend_Pdf_Resource
      * @return integer
      * @throws Zend_Pdf_Exception
      */
-    public function widthForGlyph($glyphNumber)
-    {
-        if (($glyphNumber < 0) || ($glyphNumber > $this->_glyphMaxIndex)) {
-            throw new Zend_Pdf_Exception("Glyph number is out of range: $glyphNumber",
-                                             Zend_Pdf_Exception::GLYPH_OUT_OF_RANGE);
-        }
-        return $this->_glyphWidths[$glyphNumber];
-    }
+    abstract public function widthForGlyph($glyphNumber);
 
     /**
-     * Convert string from local encoding to Windows ANSI encoding.
-     *
-     * NOTE: This method may disappear in a future revision of the framework
-     * once the font subsetting and Unicode support code is complete. At that
-     * point, there may be multiple ways of encoding strings depending on
-     * intended usage. You should treat this method as framework internal
-     * use only.
+     * Convert string to the font encoding.
+     * 
+     * The method is used to prepare string for text drawing operators 
      *
      * @param string $string
      * @param string $charEncoding Character encoding of source text.
      * @return string
      */
-    public function encodeString($string, $charEncoding)
-    {
-        /* The $charEncoding paramater will go away once the remainder of the
-         * layout code is completed. At that point, all strings will be handled
-         * internally as UTF-16BE-encoded...
-         */
-        return iconv($charEncoding, 'CP1252//IGNORE', $string);
-    }
+    abstract public function encodeString($string, $charEncoding);
 
     /**
-     * Convert string from Windows ANSI encoding to local encoding.
+     * Convert string from the font encoding.
      *
-     * NOTE: This method may disappear in a future revision of the framework
-     * once the font subsetting and Unicode support code is complete. At that
-     * point, there may be multiple ways of encoding strings depending on
-     * intended usage. You should treat this method as framework internal
-     * use only.
+     * The method is used to convert strings retrieved from existing content streams
      *
      * @param string $string
      * @param string $charEncoding Character encoding of resulting text.
      * @return string
      */
-    public function decodeString($string, $charEncoding)
-    {
-        return iconv('CP1252', $charEncoding, $string);
-    }
+    abstract public function decodeString($string, $charEncoding);
 
 
 
@@ -548,33 +509,16 @@ abstract class Zend_Pdf_Resource_Font extends Zend_Pdf_Resource
     /**
      * If the font's glyph space is not 1000 units per em, converts the value.
      *
+     * @internal
      * @param integer $value
      * @return integer
      */
-    protected function _toEmSpace($value)
+    public function toEmSpace($value)
     {
         if ($this->_unitsPerEm == 1000) {
             return $value;
         }
         return ceil(($value / $this->_unitsPerEm) * 1000);    // always round up
     }
-
-    /**
-     * Returns true if the embedding option has been set for this font.
-     *
-     * The embedding options are stored as a bitfield. Multiple options may be
-     * set at the same time.
-     *
-     * This is only used by certain subclasses.
-     *
-     * @param integer $embeddingOption
-     * @return boolean
-     */
-    protected function _isEmbeddingOptionSet($embeddingOption)
-    {
-        $isSet = (($this->_embeddingOptions & $embeddingOption) == $embeddingOption);
-        return $isSet;
-    }
-
 }
 

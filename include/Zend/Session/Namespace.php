@@ -14,9 +14,9 @@
  *
  * @category   Zend
  * @package    Zend_Session
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Namespace.php 4666 2007-05-02 17:12:28Z darby $
+ * @version    $Id: Namespace.php 13338 2008-12-17 11:13:16Z sidhighwind $
  * @since      Preview Release 0.2
  */
 
@@ -38,7 +38,7 @@ require_once 'Zend/Session/Abstract.php';
  *
  * @category   Zend
  * @package    Zend_Session
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Session_Namespace extends Zend_Session_Abstract implements IteratorAggregate
@@ -96,6 +96,14 @@ class Zend_Session_Namespace extends Zend_Session_Abstract implements IteratorAg
              */
             require_once 'Zend/Session/Exception.php';
             throw new Zend_Session_Exception('Session namespace must not start with an underscore.');
+        }
+
+        if (preg_match('#(^[0-9])#i', $namespace[0])) {
+            /**
+             * @see Zend_Session_Exception
+             */
+            require_once 'Zend/Session/Exception.php';
+            throw new Zend_Session_Exception('Session namespace must not start with a number.');
         }
 
         if (isset(self::$_singleInstances[$namespace])) {
@@ -244,7 +252,7 @@ class Zend_Session_Namespace extends Zend_Session_Abstract implements IteratorAg
      * @param string $name - programmatic name of a key, in a <key,value> pair in the current namespace
      * @return mixed
      */
-    protected function & __get($name)
+    public function & __get($name)
     {
         if ($name === '') {
             /**
@@ -266,7 +274,7 @@ class Zend_Session_Namespace extends Zend_Session_Abstract implements IteratorAg
      * @throws Zend_Session_Exception
      * @return true
      */
-    protected function __set($name, $value)
+    public function __set($name, $value)
     {
         if (isset(self::$_namespaceLocks[$this->_namespace])) {
             /**
@@ -300,14 +308,14 @@ class Zend_Session_Namespace extends Zend_Session_Abstract implements IteratorAg
 
     /**
      * apply() - enables applying user-selected function, such as array_merge() to the namespace
+     * Parameters following the $callback argument are passed to the callback function.
      * Caveat: ignores members expiring now.
      *
      * Example:
      *   $namespace->apply('array_merge', array('tree' => 'apple', 'fruit' => 'peach'), array('flower' => 'rose'));
      *   $namespace->apply('count');
      *
-     * @param string $callback - callback function
-     * @param mixed  OPTIONAL arguments passed to the callback function
+     * @param string|array $callback - callback function
      */
     public function apply($callback)
     {
@@ -319,13 +327,14 @@ class Zend_Session_Namespace extends Zend_Session_Abstract implements IteratorAg
 
     /**
      * applySet() - enables applying user-selected function, and sets entire namespace to the result
-     * Result of $callback must be an array. Caveat: ignores members expiring now.
+     * Result of $callback must be an array.
+     * Parameters following the $callback argument are passed to the callback function.
+     * Caveat: ignores members expiring now.
      *
      * Example:
      *   $namespace->applySet('array_merge', array('tree' => 'apple', 'fruit' => 'peach'), array('flower' => 'rose'));
      *
-     * @param string $callback - callback function
-     * @param mixed  OPTIONAL arguments passed to the callback function
+     * @param string|array $callback - callback function
      */
     public function applySet($callback)
     {
@@ -337,7 +346,7 @@ class Zend_Session_Namespace extends Zend_Session_Abstract implements IteratorAg
              * @see Zend_Session_Exception
              */
             require_once 'Zend/Session/Exception.php';
-            throw new Zend_Session_Exception("Result must be an array. Got: " . gettype($result));
+            throw new Zend_Session_Exception('Result must be an array. Got: ' . gettype($result));
         }
         $_SESSION[$this->_namespace] = $result;
         return $result;
@@ -350,7 +359,7 @@ class Zend_Session_Namespace extends Zend_Session_Abstract implements IteratorAg
      * @param string $name - programmatic name of a key, in a <key,value> pair in the current namespace
      * @return bool
      */
-    protected function __isset($name)
+    public function __isset($name)
     {
         if ($name === '') {
             /**
@@ -370,7 +379,7 @@ class Zend_Session_Namespace extends Zend_Session_Abstract implements IteratorAg
      * @param string $name - programmatic name of a key, in a <key,value> pair in the current namespace
      * @return true
      */
-    protected function __unset($name)
+    public function __unset($name)
     {
         if ($name === '') {
             /**

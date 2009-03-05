@@ -1,38 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.5/ldml.dtd">
+<!DOCTYPE ldml SYSTEM "http://www.unicode.org/cldr/dtd/1.6/ldml.dtd">
 <ldml>
 	<identity>
-		<version number="$Revision: 1.17 $"/>
-		<generation date="$Date: 2007/07/14 23:02:17 $"/>
+		<version number="$Revision: 1.19 $"/>
+		<generation date="$Date: 2008/05/28 15:49:37 $"/>
 		<language type="uz"/>
 		<script type="Latn"/>
 	</identity>
 	<localeDisplayNames>
 		<languages>
 			<language type="ar">arabcha</language>
-			<language type="ar" alt="proposed-x1001" draft="unconfirmed">Arabcha</language>
 			<language type="de">olmoncha</language>
-			<language type="de" alt="proposed-x1001" draft="unconfirmed">Olmoncha</language>
 			<language type="en">inglizcha</language>
-			<language type="en" alt="proposed-x1001" draft="unconfirmed">Inglizcha</language>
 			<language type="es">ispancha</language>
-			<language type="es" alt="proposed-x1001" draft="unconfirmed">Ispancha</language>
 			<language type="fr">fransuzcha</language>
-			<language type="fr" alt="proposed-x1001" draft="unconfirmed">Frantsuzcha</language>
 			<language type="hi">hindcha</language>
-			<language type="hi" alt="proposed-x1001" draft="unconfirmed">Hindcha</language>
 			<language type="it">italyancha</language>
-			<language type="it" alt="proposed-x1001" draft="unconfirmed">Italyancha</language>
 			<language type="ja">yaponcha</language>
-			<language type="ja" alt="proposed-x1001" draft="unconfirmed">Yaponcha</language>
 			<language type="pt">portugalcha</language>
-			<language type="pt" alt="proposed-x1001" draft="unconfirmed">Portugalcha</language>
 			<language type="ru">ruscha</language>
-			<language type="ru" alt="proposed-x1001" draft="unconfirmed">Ruscha</language>
 			<language type="uz">o'zbekcha</language>
-			<language type="uz" alt="proposed-x1001" draft="unconfirmed">oʿzbek</language>
 			<language type="zh">xitoycha</language>
-			<language type="zh" alt="proposed-x1001" draft="unconfirmed">Xitoycha</language>
 		</languages>
 		<scripts>
 			<script type="Cyrl">Kiril</script>
@@ -44,7 +32,6 @@
 			<territory type="CN">Xitoy</territory>
 			<territory type="DE">Olmoniya</territory>
 			<territory type="FR">Fransiya</territory>
-			<territory type="FR" alt="proposed-x1001" draft="unconfirmed">Frantsiya</territory>
 			<territory type="GB">Birlashgan Qirollik</territory>
 			<territory type="IN">Hindiston</territory>
 			<territory type="IT">Italiya</territory>
@@ -55,7 +42,7 @@
 		</territories>
 	</localeDisplayNames>
 	<characters>
-		<exemplarCharacters draft="unconfirmed">[a-v x-z ʿ]</exemplarCharacters>
+		<exemplarCharacters>[a-v x-z ʿ]</exemplarCharacters>
 	</characters>
 	<dates>
 		<calendars>
@@ -63,48 +50,48 @@
 				<months>
 					<monthContext type="format">
 						<monthWidth type="abbreviated">
-							<month type="1" draft="unconfirmed">Yanv</month>
-							<month type="2" draft="unconfirmed">Fev</month>
-							<month type="3" draft="unconfirmed">Mar</month>
-							<month type="4" draft="unconfirmed">Apr</month>
-							<month type="5" draft="unconfirmed">May</month>
-							<month type="6" draft="unconfirmed">Iyun</month>
-							<month type="7" draft="unconfirmed">Iyul</month>
-							<month type="8" draft="unconfirmed">Avg</month>
-							<month type="9" draft="unconfirmed">Sen</month>
-							<month type="10" draft="unconfirmed">Okt</month>
-							<month type="11" draft="unconfirmed">Noya</month>
-							<month type="12" draft="unconfirmed">Dek</month>
+							<month type="1">Yanv</month>
+							<month type="2">Fev</month>
+							<month type="3">Mar</month>
+							<month type="4">Apr</month>
+							<month type="5">May</month>
+							<month type="6">Iyun</month>
+							<month type="7">Iyul</month>
+							<month type="8">Avg</month>
+							<month type="9">Sen</month>
+							<month type="10">Okt</month>
+							<month type="11">Noya</month>
+							<month type="12">Dek</month>
 						</monthWidth>
 						<monthWidth type="wide">
-							<month type="1" draft="unconfirmed">Muharram</month>
-							<month type="2" draft="unconfirmed">Safar</month>
-							<month type="3" draft="unconfirmed">Rabiul-avval</month>
-							<month type="4" draft="unconfirmed">Rabiul-oxir</month>
-							<month type="5" draft="unconfirmed">Jumodiul-ulo</month>
-							<month type="6" draft="unconfirmed">Jumodiul-uxro</month>
-							<month type="7" draft="unconfirmed">Rajab</month>
-							<month type="8" draft="unconfirmed">Shaʿbon</month>
-							<month type="9" draft="unconfirmed">Ramazon</month>
-							<month type="10" draft="unconfirmed">Shavvol</month>
-							<month type="11" draft="unconfirmed">Zil-qaʿda</month>
-							<month type="12" draft="unconfirmed">Zil-hijja</month>
+							<month type="1">Muharram</month>
+							<month type="2">Safar</month>
+							<month type="3">Rabiul-avval</month>
+							<month type="4">Rabiul-oxir</month>
+							<month type="5">Jumodiul-ulo</month>
+							<month type="6">Jumodiul-uxro</month>
+							<month type="7">Rajab</month>
+							<month type="8">Shaʿbon</month>
+							<month type="9">Ramazon</month>
+							<month type="10">Shavvol</month>
+							<month type="11">Zil-qaʿda</month>
+							<month type="12">Zil-hijja</month>
 						</monthWidth>
 					</monthContext>
 					<monthContext type="stand-alone">
 						<monthWidth type="narrow">
-							<month type="1" draft="unconfirmed">Y</month>
-							<month type="2" draft="unconfirmed">F</month>
-							<month type="3" draft="unconfirmed">M</month>
-							<month type="4" draft="unconfirmed">A</month>
-							<month type="5" draft="unconfirmed">M</month>
-							<month type="6" draft="unconfirmed">I</month>
-							<month type="7" draft="unconfirmed">I</month>
-							<month type="8" draft="unconfirmed">A</month>
-							<month type="9" draft="unconfirmed">S</month>
-							<month type="10" draft="unconfirmed">O</month>
-							<month type="11" draft="unconfirmed">N</month>
-							<month type="12" draft="unconfirmed">D</month>
+							<month type="1">Y</month>
+							<month type="2">F</month>
+							<month type="3">M</month>
+							<month type="4">A</month>
+							<month type="5">M</month>
+							<month type="6">I</month>
+							<month type="7">I</month>
+							<month type="8">A</month>
+							<month type="9">S</month>
+							<month type="10">O</month>
+							<month type="11">N</month>
+							<month type="12">D</month>
 						</monthWidth>
 						<monthWidth type="wide">
 							<month type="1">Yanvar</month>
@@ -114,34 +101,33 @@
 				<days>
 					<dayContext type="format">
 						<dayWidth type="abbreviated">
-							<day type="sun" draft="unconfirmed">Yaksh</day>
-							<day type="mon" draft="unconfirmed">Dush</day>
-							<day type="tue" draft="unconfirmed">Sesh</day>
-							<day type="wed" draft="unconfirmed">Chor</day>
-							<day type="thu" draft="unconfirmed">Pay</day>
-							<day type="fri" draft="unconfirmed">Jum</day>
-							<day type="sat" draft="unconfirmed">Shan</day>
+							<day type="sun">Yaksh</day>
+							<day type="mon">Dush</day>
+							<day type="tue">Sesh</day>
+							<day type="wed">Chor</day>
+							<day type="thu">Pay</day>
+							<day type="fri">Jum</day>
+							<day type="sat">Shan</day>
 						</dayWidth>
 						<dayWidth type="wide">
-							<day type="sun" draft="unconfirmed">yakshanba</day>
-							<day type="mon" draft="unconfirmed">dushanba</day>
-							<day type="tue" draft="unconfirmed">seshanba</day>
-							<day type="wed" draft="unconfirmed">chorshanba</day>
-							<day type="thu" draft="unconfirmed">payshanba</day>
-							<day type="fri" draft="unconfirmed">juma</day>
-							<day type="sat" draft="unconfirmed">shanba</day>
+							<day type="sun">yakshanba</day>
+							<day type="mon">dushanba</day>
+							<day type="tue">seshanba</day>
+							<day type="wed">chorshanba</day>
+							<day type="thu">payshanba</day>
+							<day type="fri">juma</day>
+							<day type="sat">shanba</day>
 						</dayWidth>
 					</dayContext>
 					<dayContext type="stand-alone">
 						<dayWidth type="narrow">
-							<day type="sun" draft="unconfirmed">Y</day>
-							<day type="mon" draft="unconfirmed">D</day>
-							<day type="tue" draft="unconfirmed">S</day>
-							<day type="wed" draft="unconfirmed">C</day>
-							<day type="thu" draft="unconfirmed">P</day>
-							<day type="fri" draft="unconfirmed">J</day>
+							<day type="sun">Y</day>
+							<day type="mon">D</day>
+							<day type="tue">S</day>
+							<day type="wed">C</day>
+							<day type="thu">P</day>
+							<day type="fri">J</day>
 							<day type="sat">S</day>
-							<day type="sat" alt="proposed-x1001" draft="unconfirmed">Sh</day>
 						</dayWidth>
 					</dayContext>
 				</days>
@@ -151,32 +137,32 @@
 	<numbers>
 		<currencies>
 			<currency type="BRL">
-				<displayName draft="unconfirmed">Brazil reali</displayName>
+				<displayName>Brazil reali</displayName>
 			</currency>
 			<currency type="CNY">
-				<displayName draft="unconfirmed">Xitoy yuani</displayName>
+				<displayName>Xitoy yuani</displayName>
 			</currency>
 			<currency type="EUR">
-				<displayName draft="unconfirmed">Evro</displayName>
+				<displayName>Evro</displayName>
 			</currency>
 			<currency type="GBP">
-				<displayName draft="unconfirmed">Ingliz funt sterlingi</displayName>
+				<displayName>Ingliz funt sterlingi</displayName>
 			</currency>
 			<currency type="INR">
-				<displayName draft="unconfirmed">Hind rupiyasi</displayName>
+				<displayName>Hind rupiyasi</displayName>
 			</currency>
 			<currency type="JPY">
-				<displayName draft="unconfirmed">Yapon yenasi</displayName>
+				<displayName>Yapon yenasi</displayName>
 			</currency>
 			<currency type="RUB">
-				<displayName draft="unconfirmed">Rus rubli</displayName>
+				<displayName>Rus rubli</displayName>
 			</currency>
 			<currency type="USD">
-				<displayName draft="unconfirmed">AQSH dollari</displayName>
+				<displayName>AQSH dollari</displayName>
 			</currency>
 			<currency type="UZS">
-				<displayName draft="unconfirmed">Oʿzbekiston soʿm</displayName>
-				<symbol draft="unconfirmed">soʿm</symbol>
+				<displayName>Oʿzbekiston soʿm</displayName>
+				<symbol>soʿm</symbol>
 			</currency>
 		</currencies>
 	</numbers>
