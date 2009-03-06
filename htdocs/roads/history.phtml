@@ -9,6 +9,8 @@ $season = isset($_GET["season"]) ? intval($_GET["season"]) : date("Y");
 $segid = isset($_GET["segid"]) ? intval($_GET["segid"]) : "";
 $valid = isset($_GET["valid"]) ? substr($_GET["valid"],0,16) : "";
 
+$basetable = "roads_base";
+
 $THISPAGE = "roads-history";
 $TITLE = "Historical Iowa Winter Road Conditions";
 include("$rootpath/include/header.php"); 
@@ -27,7 +29,7 @@ include("$rootpath/include/header.php");
 
 <tr>
  <td><?php echo segmentSelect($dbconn, $segid); ?></td>
- <td><?php echo yearSelect2(2004, $season, "season"); ?></td>
+ <td><?php echo yearSelect2(2006, $season, "season"); ?></td>
  <td><?php echo monthSelect($month); ?></td>
  <td><input type="submit" value="View History"></td>
 </tr>
