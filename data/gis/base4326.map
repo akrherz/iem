@@ -1423,7 +1423,7 @@ LAYER
     STYLE
       COLOR 255 0 0
       SIZE 2
-      SYMBOL 1
+      SYMBOL 'circle'
     END
   END
   CLASS
@@ -1431,7 +1431,7 @@ LAYER
     STYLE
       COLOR 255 255 0
       SIZE 2
-      SYMBOL 1
+      SYMBOL 'circle'
     END
   END
 END
