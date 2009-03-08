@@ -36,7 +36,7 @@ body {
 }
 
 $sql = "select r.*, h.* from hvtec_nwsli h, riverpro r,
-  (select distinct hvtec_nwsli from warnings_2008 WHERE 
+  (select distinct hvtec_nwsli from warnings_2009 WHERE 
    status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
    significance = 'W' and wfo = '$wfo') as foo
    WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli $nwsli_limiter";
