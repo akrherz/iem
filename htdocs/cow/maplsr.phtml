@@ -62,7 +62,7 @@ $g = "";
 $lats = Array();
 $lons = Array();
 $table = "<table cellspacing=\"0\" cellpadding=\"3\" border=\"1\">
-<tr style=\"background: #fafa00;\"><th>GMT Time</th><th>County</th><th>Location</th><th>Type</th><th>Magnitude</th></tr>";
+<tr style=\"background: #fafa00;\"><th>GMT Time</th><th>County</th><th>Location</th><th>Type</th><th>Magnitude</th><th>Comment</th></tr>";
 
 for ($i=0;$row = @pg_fetch_array($rs,$i); $i++)
 {
@@ -72,7 +72,7 @@ for ($i=0;$row = @pg_fetch_array($rs,$i); $i++)
    $lats[] = $row["lat"];
    $lons[] = $row["lon"];
    $wfo = $row["wfo"];
-   $table .= sprintf("<tr><td><a href=\"javascript: showMarker($i);\">%s</a></td><td>%s</td><td>%s,%s</td><td>%s</td><td>%s</td></tr><tr><td></td><td colspan=\"4\">%s</td></tr>",
+   $table .= sprintf("<tr><td><a href=\"javascript: showMarker($i);\">%s</a></td><td>%s</td><td>%s,%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
     date("m/d/Y H:i", $timestamp), $row["county"], $row["city"], 
     $row["state"], $row["typetext"], $row["magnitude"], $row["remark"]);
 
