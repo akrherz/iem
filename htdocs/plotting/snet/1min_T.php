@@ -1,5 +1,5 @@
 <?php
-/* Generate a 1 minute plot of wind, and peak gust */
+/* Generate a 1 minute plot of temperature, dew point, and solar rad */
 include_once("../../../config/settings.inc.php");
 include_once("$rootpath/include/network.php");
 include_once("$rootpath/include/mlib.php");
@@ -44,35 +44,30 @@ if (pg_num_rows($rs) == 0) {
 
 $titleDate = strftime("%b %d, %Y", $myTime);
 $cityname = $cities[$station]['name'];
-$wA = mktime(0,0,0, 8, 4, 2002);
-$wLabel = "1min avg Wind Speed";
-if ($wA > $myTime){
- $wLabel = "Instant Wind Speed";
-}
 
 /* BEGIN GOOD WORK HERE */
 $times = Array();
-$drct = Array();
-$smph = Array();
-$gust  = Array();
+$temps = Array();
+$dewps = Array();
+$srad  = Array();
 
 for($i=0;$row = @pg_fetch_array($rs,$i); $i++)
 {
   $ts = strtotime( substr($row["valid"],0,16) );
   $times[] = $ts;
-  $drct[] = ($row["drct"] > 0 && $row["drct"] <= 360 && $i % 10 == 0) ? $row["drct"] : -199;
-  $smph[] = ($row["sknt"] >= 0) ? $row["sknt"] * 1.15 : "";
-  $gust[] = ($row["gust"] >= 0) ? $row["gust"] * 1.15 : "";
+  $srad[] = ($row["srad"] >= 0) ? $row["srad"] : "";
+  $temps[] = ($row["tmpf"] > -50 && $row["tmpf"] < 120) ? $row["tmpf"]: "";
+  $dewps[] = ($row["dwpf"] > -50 && $row["dwpf"] < 120) ? $row["dwpf"]: "";
 }
 
-// Create the graph. These two calls are always required
-$graph = new Graph(640,480);
 
-$graph->SetScale("datelin",0, 360);
-$graph->SetY2Scale("lin");
-$graph->y2axis->SetColor("red");
-$graph->y2axis->SetTitle("Wind Speed [MPH]");
+/* Generate Graph Please */
+$graph = new Graph(640,480);
+$graph->SetScale("datelin", min($dewps)-5, max($temps)+5);
+$graph->SetY2Scale("lin", 0, 1200);
 $graph->xaxis->SetTitle("Valid Local Time");
+$graph->yaxis->SetTitle("Temperature [F]");
+$graph->y2axis->SetTitle("Solar Radiation [W m**-2]", "low");
 $graph->tabtitle->Set(' '. $cityname ." on ". $titleDate .' ');
 
   $tcolor = array(230,230,0);
@@ -116,31 +111,35 @@ $graph->tabtitle->Set(' '. $cityname ." on ". $titleDate .' ');
   $graph->xgrid->Show();
 
 $graph->yaxis->scale->ticks->SetLabelFormat("%5.1f");
-$graph->yaxis->scale->ticks->Set(90,15);
 $graph->yaxis->scale->ticks->SetLabelFormat("%5.0f");
-$graph->yaxis->scale->ticks->SetLabelFormat("%5.0f");
-$graph->yaxis->SetColor("blue");
-$graph->yaxis->SetTitle("Wind Direction [N=0, E=90, S=180, W=270]");
+
+
+
+$graph->y2axis->scale->ticks->Set(100,25);
+$graph->y2axis->scale->ticks->SetLabelFormat("%-4.0f");
+
 
 // Create the linear plot
-$lineplot=new LinePlot($smph, $times);
-$lineplot->SetLegend($wLabel);
+$lineplot=new LinePlot($temps, $times);
+$lineplot->SetLegend("Temperature");
 $lineplot->SetColor("red");
+//$lineplot->SetWeight(2);
+// Create the linear plot
 
-$lp1=new LinePlot($gust, $times);
-$lp1->SetLegend("Peak Wind Gust");
-$lp1->SetColor("black");
+$lineplot2=new LinePlot($dewps, $times);
+$lineplot2->SetLegend("Dew Point");
+$lineplot2->SetColor("blue");
+//$lineplot2->SetWeight(2);
 
 // Create the linear plot
-$sp1=new ScatterPlot($drct, $times);
-$sp1->mark->SetType(MARK_FILLEDCIRCLE);
-$sp1->mark->SetFillColor("blue");
-$sp1->mark->SetWidth(3);
-$sp1->SetLegend("Wind Direction");
+$lineplot3=new LinePlot($srad, $times);
+$lineplot3->SetLegend("Solar Rad");
+$lineplot3->SetColor("black");
+//$lineplot3->SetWeight(2);
 
-$graph->Add($sp1);
-$graph->AddY2($lineplot);
-$graph->AddY2($lp1);
+$graph->Add($lineplot2);
+$graph->Add($lineplot);
+$graph->AddY2($lineplot3);
 
 $graph->Stroke();
 

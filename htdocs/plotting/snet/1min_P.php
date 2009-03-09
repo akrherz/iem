@@ -1,178 +1,153 @@
 <?php
-// 1 minute schoolnet data plotter
-// Cool.....
+/* Generate a 1 minute plot of precip and pressure */
+include_once("../../../config/settings.inc.php");
+include_once("$rootpath/include/network.php");
+include_once("$rootpath/include/mlib.php");
+include_once("$rootpath/include/database.inc.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
+include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("$rootpath/include/jpgraph/jpgraph_led.php");
 
+$nt = new NetworkTable( Array("KCCI","KIMT","KELO") );
+$cities = $nt->table;
 
-include ("../../include/snet_locs.php");
-include("fillholes.inc.php");
+$station = isset($_GET["station"]) ? $_GET["station"]: "SKCI4";
+$year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
+$month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
+$day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
+$myTime = mktime(0,0,0,$month,$day,$year);
+$today = mktime(0,0,0,date("m"), date("d"), date("Y"));
 
-if (strlen($station) > 3){
-    $station = $SconvBack[$station];
-} 
-
-$station = intval($station);
-
-
-if (strlen($year) == 4 && strlen($month) > 0 && strlen(day) > 0 ){
-  $myTime = strtotime($year."-".$month."-".$day);
-} else {
-  $myTime = strtotime( date("Y-m-d") );
+if ($myTime == $today)
+{
+  /* Look in IEM Access! */
+  $dbconn = iemdb("access");
+  $tbl = "current_log";
+  $pcol = ", pres as alti";
+} else 
+{
+/* Dig in the archive for our data! */
+  $dbconn = iemdb("snet");
+  $tbl = sprintf("t%s", date("Y_m", $myTime) );
+  $pcol = "";
+}
+$rs = pg_prepare($dbconn, "SELECT", "SELECT * $pcol from $tbl 
+                 WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
+$rs = pg_execute($dbconn, "SELECT", Array($station, date("Y-m-d", $myTime)));
+if (pg_num_rows($rs) == 0) { 
+ $led = new DigitalLED74();
+ $led->StrokeNumber('NO DATA FOR THIS DATE',LEDC_GREEN);
+ die();
 }
 
-$dirRef = strftime("%Y_%m/%d", $myTime);
 $titleDate = strftime("%b %d, %Y", $myTime);
+$cityname = $cities[$station]['name'];
 
-$fcontents = file('/mesonet/ARCHIVE/raw/snet/'.$dirRef.'/'.$station.'.dat');
+/* BEGIN GOOD WORK HERE */
+$times = Array();
+$pcpn = Array();
+$pres = Array();
 
-$prec = array();
-$alti = array();
-$xlabel = array();
-
-$start = intval( $myTime );
-$i = 0;
-
-$dups = 0;
-$missing = 0;
-
-
-while (list ($line_num, $line) = each ($fcontents)) {
-  $parts = split (",", $line);
-  $thisTime = $parts[0];
-  $thisDate = $parts[1];
-  $dateTokens = split("/", $thisDate);
-  $strDate = "20". $dateTokens[2] ."-". $dateTokens[0] ."-". $dateTokens[1]; 
-  $timestamp = strtotime($strDate ." ". $thisTime );
-#  echo $thisTime ."||";
-
-  $thisALTI = substr($parts[8],0,-1);
-  $thisPREC = substr($parts[9],0,-2);
-
-//  if ($start == 0) {
-//    $start = intval($timestamp);
-//  } 
-  
-  $shouldbe = intval( $start ) + 60 * $i;
- 
-#  echo  $i ." - ". $line_num ."-". $shouldbe ." - ". $timestamp ;
-  
-  // We are good, write data, increment i
-  if ( $shouldbe == $timestamp ){
-#    echo " EQUALS <br>";
-    $prec[$i] = $thisPREC;
-    $alti[$i] = $thisALTI * 33.8639;
-    if ($alti[$i] < 900)   $alti[$i] = " ";
-    $i++;
-    continue;
-  
-  // Missed an ob, leave blank numbers, inc i
-  } else if (($timestamp - $shouldbe) > 0) {
-#    echo " TROUBLE <br>";
-    $tester = $shouldbe + 60;
-    while ($tester <= $timestamp ){
-      $tester = $tester + 60 ;
-      $prec[$i] = " ";
-      $alti[$i] = " ";
-
-      $i++;
-      $missing++;
-    }
-    $prec[$i] = $thisPREC;
-    $alti[$i] = $thisALTI * 33.8639;
-    if ($alti[$i] < 900)   $alti[$i] = " ";
-    $i++;
-    continue;
-    
-    $line_num--;
-  } else if (($timestamp - $shouldbe) < 0) {
-#    echo "DUP <br>";
-     $dups++;
-    
-  }
-
-} // End of while
-
-$alti = fillholes($alti);
-$prec = fillholes($prec);
-
-$xpre = array(0 => '12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM',
-	'6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', 'Noon',
-	'1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM',
-	'8 PM', '9 PM', '10 PM', '11 PM', 'Midnight');
-
-
-for ($j=0; $j<25; $j++){
-  $xlabel[$j*60] = $xpre[$j];
+for($i=0;$row = @pg_fetch_array($rs,$i); $i++)
+{
+  $ts = strtotime( substr($row["valid"],0,16) );
+  $times[] = $ts;
+  $pcpn[] = ($row["pday"] >= 0) ? $row["pday"] : "";
+  $pres[] = ($row["alti"] > 20) ? $row["alti"] * 33.8639 : "";
 }
 
-include ("../dev17/jpgraph.php");
-include ("../dev17/jpgraph_line.php");
+$graph = new Graph(640, 480);
+$graph->SetScale("datelin");
+$graph->SetY2Scale("lin",0, intval((max($pcpn)+1)));
 
-// Create the graph. These two calls are always required
-$graph = new Graph(600,300,"example1");
-$graph->SetScale("textlin");
-$maxPrec = max($prec);
-if ($maxPrec > 1.5)
-$graph->SetY2Scale("lin", 0, $maxPrec + 1);
-else 
-$graph->SetY2Scale("lin", 0, 2.00);
-$graph->img->SetMargin(55,40,55,60);
-//$graph->xaxis->SetFont(FONT1,FS_BOLD);
-$graph->xaxis->SetTickLabels($xlabel);
-//$graph->xaxis->SetTextLabelInterval(60);
-$graph->xaxis->SetTextTickInterval(60);
-$graph->xaxis->SetLabelAngle(90);
-//$graph->yaxis->scale->ticks->SetPrecision(0.01);
-$graph->title->Set($Scities[$Sconv[$station]]['city'] ." Time Series");
-$graph->subtitle->Set($titleDate );
+$graph->tabtitle->Set(' '. $cityname ." on ". $titleDate .' ');
+$graph->xaxis->SetTitle("Valid Local Time");
+$graph->y2axis->SetTitle("Accumulated Precipitation [inches]");
+$graph->yaxis->SetTitle("Pressure [millibars]");
 
-$graph->legend->SetLayout(LEGEND_HOR);
-$graph->legend->Pos(0.01,0.08);
+  $tcolor = array(230,230,0);
+  /* Common for all our plots */
+  $graph->img->SetMargin(80,60,40,80);
+  //$graph->img->SetAntiAliasing();
+  $graph->xaxis->SetTextTickInterval(120);
+  $graph->xaxis->SetPos("min");
 
-$graph->y2axis->scale->ticks->Set(1,0.25);
-$graph->yaxis->scale->ticks->SetPrecision(1);
-$graph->yaxis->scale->ticks->Set(2,0.1);
-$graph->y2axis->scale->ticks->SetPrecision(1);
+  $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,14);
+  $graph->xaxis->SetFont(FF_FONT1,FS_BOLD,12);
+  //$graph->xaxis->title->SetBox( array(150,150,150), $tcolor, true);
+  //$graph->xaxis->title->SetColor( $tcolor );
+  $graph->xaxis->SetTitleMargin(15);
+  $graph->xaxis->SetLabelFormatString("h A", true);
+  $graph->xaxis->SetLabelAngle(90);
+  $graph->xaxis->SetTitleMargin(50);
 
-$graph->yaxis->SetColor("black");
-$graph->yscale->SetGrace(10);
+  $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,14);
+  $graph->yaxis->SetFont(FF_FONT1,FS_BOLD,12);
+  //$graph->yaxis->title->SetBox( array(150,150,150), $tcolor, true);
+  //$graph->yaxis->title->SetColor( $tcolor );
+  $graph->yaxis->SetTitleMargin(50);
+  $graph->yscale->SetGrace(10);
+
+  $graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,14);
+  $graph->y2axis->SetFont(FF_FONT1,FS_BOLD,12);
+  //$graph->y2axis->title->SetBox( array(150,150,150), $tcolor, true);
+  //$graph->y2axis->title->SetColor( $tcolor );
+  $graph->y2axis->SetTitleMargin(40);
+
+  $graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);
+  $graph->SetColor('wheat');
+
+  $graph->legend->SetLayout(LEGEND_HOR);
+  $graph->legend->SetPos(0.01,0.94, 'left', 'top');
+  $graph->legend->SetLineSpacing(3);
+
+  $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCEE@0.5');
+  $graph->ygrid->Show();
+  $graph->xgrid->Show();
+
+
+
+$graph->yaxis->SetTitleMargin(60);
+
+$graph->y2axis->scale->ticks->Set(0.5,0.25);
+$graph->y2axis->scale->ticks->SetLabelFormat("%4.2f");
 $graph->y2axis->SetColor("blue");
 
-$graph->title->SetFont(FF_FONT1,FS_BOLD,14);
-
-$graph->yaxis->SetTitle("Pressure [millibars]");
-$graph->y2axis->SetTitle("Accumulated Precipitation [inches]");
-
-//$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-$graph->xaxis->SetTitle("Valid Local Time  ");
-$graph->xaxis->SetTitleMargin(30);
-$graph->yaxis->SetTitleMargin(43);
-//$graph->y2axis->SetTitleMargin(28);
-$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-$graph->xaxis->SetPos("min");
+$graph->yaxis->scale->ticks->SetLabelFormat("%4.1f");
+$graph->yaxis->scale->ticks->Set(1,0.1);
+$graph->yaxis->SetColor("black");
+$graph->yscale->SetGrace(10);
+//$graph->yscale->SetAutoTicks();
 
 // Create the linear plot
-$lineplot=new LinePlot($alti);
+$lineplot=new LinePlot($pres, $times);
 $lineplot->SetLegend("Pressure");
 $lineplot->SetColor("black");
+//$lineplot->SetWeight(2);
 
 // Create the linear plot
-$lineplot2=new LinePlot($prec);
+$lineplot2=new LinePlot($pcpn, $times);
 $lineplot2->SetLegend("Precipitation");
+$lineplot2->SetFillColor("blue@0.1");
 $lineplot2->SetColor("blue");
 $lineplot2->SetWeight(2);
 //$lineplot2->SetFilled();
 //$lineplot2->SetFillColor("blue");
 
 // Box for error notations
-$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
-$t1->SetPos(0.4,0.95);
-$t1->SetOrientation("h");
-$t1->SetFont(FF_FONT1,FS_BOLD);
+//$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
+//$t1->SetPos(0.4,0.95);
+//$t1->SetOrientation("h");
+//$t1->SetFont(FF_FONT1,FS_BOLD);
 //$t1->SetBox("white","black",true);
-$t1->SetColor("black");
-$graph->AddText($t1);
+//$t1->SetColor("black");
+//$graph->AddText($t1);
 
 $graph->AddY2($lineplot2);
 $graph->Add($lineplot);
+
 $graph->Stroke();
+
 ?>

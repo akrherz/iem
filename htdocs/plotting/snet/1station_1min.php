@@ -50,7 +50,10 @@ every site.</p>
 
 <?php
 if (strlen($station) > 0 ) {
-  include("1minute.php"); 
+
+echo sprintf("<p><img src=\"1min_T.php?station=%s&year=%s&month=%s&day=%s\" />", $station, $year, $month, $day); 
+echo sprintf("<p><img src=\"1min_V.php?station=%s&year=%s&month=%s&day=%s\" />", $station, $year, $month, $day); 
+echo sprintf("<p><img src=\"1min_P.php?station=%s&year=%s&month=%s&day=%s\" />", $station, $year, $month, $day); 
 
 echo "<p><b>Note:</b> The wind speeds are indicated every minute by the red line.  The blue dots represent wind direction and are shown every 10 minutes.</p>";
 

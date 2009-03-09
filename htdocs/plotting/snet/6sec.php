@@ -3,26 +3,10 @@
 // Cool.....
 include("../../../config/settings.inc.php");
 
-$station = "68";
-
-if (strlen($station) > 3){
-    $station = $SconvBack[$station];
-}
-
-$station = intval($station);
-
-
-if (strlen($year) == 4 && strlen($month) > 0 && strlen(day) > 0 ){
-  $myTime = strtotime($year."-".$month."-".$day);
-} else {
-  $myTime = strtotime(date("Y-m-d"));
-}
-
-
-$dirRef = strftime("%Y_%m/%d", $myTime);
+$myTime
 $titleDate = strftime("%b %d, %Y", $myTime);
 
-$fcontents = file('data/030911_68.dat');
+$fcontents = file('data/SWAI4_090226.txt');
 
 $tmpf = array();
 $dwpf = array();
@@ -76,19 +60,6 @@ while (list ($line_num, $line) = each ($fcontents)) {
 } // End of while
 
 
-// Fix y[0] problems
-if ($tmpf[0] == ""){
-  $tmpf[0] = 0;
-}
-if ($dwpf[0] == ""){
-  $dwpf[0] = 0;
-}
-if ($sr[0] == ""){
-  $sr[0] = 0;
-}
-
-
-
 include ("$rootpath/jpgraph/jpgraph.php");
 include ("$rootpath/jpgraph/jpgraph_line.php");
 
@@ -99,9 +70,9 @@ $graph->SetScale("textlin", 55, 85);
 $graph->SetY2Scale("lin", 0, 2000);
 $graph->SetColor("#f0f0f0");
 
-$graph->title->Set($Scities[$Sconv[$station]]['city'] ." Time Series");
+$graph->title->Set(" Time Series");
 $graph->title->SetFont(FF_FONT1,FS_BOLD,20);
-$graph->subtitle->Set($titleDate );
+$graph->subtitle->Set("AAA");
 
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
