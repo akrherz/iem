@@ -1,5 +1,6 @@
 <?php
-dl("php_mapscript_440.so");
+include("../../../../config/settings.inc.php");
+dl($mapscript);
 
 $map = ms_newMapObj("robins.map");
 
