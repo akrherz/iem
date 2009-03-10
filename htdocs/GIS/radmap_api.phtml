@@ -1,0 +1,127 @@
+<?php 
+include("../../config/settings.inc.php");
+$THISPAGE = "gis-radmap";
+$TITLE = "IEM | RadMap API";
+include("$rootpath/include/header.php"); ?>
+<style>
+div.item h4 {
+ color: #f00;
+ border-bottom: 1px solid #ccc;
+ margin-bottom: 1px;
+}
+div.desc {
+ margin-left: 20px;
+}
+</style>
+
+<div style="max-width:800px;">
+
+<h3 class="heading">IEM RadMap API</h3>
+
+<div class="warning"><strong>Please note:</strong>  This mapping service is
+provided without warranty.  Please do not use this on a high traffic website.
+If necessary, this application may be disabled to keep the IEM web farm from
+melting!  This API is intended to support local scripts to generate timelapse
+movies.
+</div>
+
+<p>The "radmap" application dynamically generates a PNG image based on a set
+of HTTP provided parameters.  This page documents these parameters. Please note
+that the API presented here may change in the future.
+
+<h3>Basic HTML example:</h3>
+<pre>
+&lt;img src="http://mesonet.agron.iastate.edu/GIS/radmap.php?layers[]=nexrad&sector=conus&ts=200806071000" /&gt;
+</pre>
+<img src="http://mesonet.agron.iastate.edu/GIS/radmap.php?layers[]=nexrad&sector=conus&ts=200806071000" />
+
+<h3>HTTP GET Parameters</h3>
+<div class="item">
+ <h4>&layers[]=...&layers[]=...&...</h4>
+<div class="desc">
+ Layer(s) to draw in the map. Here is a list of available layers:
+<ul>
+ <li><i>uscountines</i> - CONUS Counties </li>
+ <li><i>nexrad</i> - CONUS Nexrad Base Reflectivity Composite</li>
+ <li><i>watch_by_county</i> - Convective Watch-by-County</li>
+ <li><i>watches</i> - Polygon SPC Watch boundaries</li>
+ <li><i>cbw</i> - County/Zone based Watch/Warning/Advisories</li>
+ <li><i>sbw</i> - Storm based Watch/Warning/Advisories</li>
+ <li><i>county_warnings</i> - County based Warnings</li>
+ <li><i>lsrs</i> - Local Storm Reports</li>
+ <li><i>roads</i> - Iowa Winter Road Conditions</li>
+ <li><i>legend</i> - Include Legend on the Map</li>
+</ul>
+</div>
+</div>
+
+
+<div class="item">
+ <h4>&sector=...</h4>
+<div class="desc">
+ Predefined areal extent to use for the map. Current sectors are:
+<ul>
+ <li><i>iem</i> - Iowa</li>
+ <li><i>lot</i> - Chicago</li>
+ <li><i>ict</i> - Wichita, Kansas</li>
+ <li><i>sd</i> - South Dakota</li>
+ <li><i>hun</i> - Northern Alabama</li>
+ <li><i>conus</i> - CONUS</li>
+ <li><i>texas</i> - Texas</li>
+</div>
+</div>
+
+<div class="item">
+ <h4>&width=640&height=480</h4>
+<div class="desc">
+ Width and height of the map in pixels.
+</div>
+</div>
+
+<div class="item">
+ <h4>&vtec=...</h4>
+<div class="desc">
+ VTEC identification string of a specific product.  The result is a map 
+ centered on this product with a timestamp set to product issuance. An
+ example VTEC string is: "2008.DMX.TO.W.0048".
+</div>
+</div>
+
+<div class="item">
+ <h4>&pid=...</h4>
+<div class="desc">
+  This is for the specific example of offices who issue geometries with 
+  their SPS statements.  An example string is: "200903082123-KGRR-WWUS83-SPSGRR"
+</div>
+</div>
+
+<div class="item">
+ <h4>&bbox=xmin,ymin,xmax,ymax</h4>
+<div class="desc">
+  Bounding box of the map (typically a latitude and longitude box). An example
+  would be "-95.4,40.1,-89.4,44.5".
+</div>
+</div>
+
+<div class="item">
+ <h4>&ts=YYYYMMDDHHII</h4>
+<div class="desc">
+  Timestamp in GMT for which the map is valid for.  For example, 6:45 GMT on 
+5 Jun 2005 would be "200506050645".
+</div>
+</div>
+
+<div class="item">
+ <h4>&title=....</h4>
+<div class="desc">
+  A customized title to place on the map.
+</div>
+</div>
+
+<h3>Change Log</h3>
+<ul>
+ <li><strong>10 Mar 2009:</strong> Initial release</li>
+</ul>
+
+</div>
+<?php include("$rootpath/include/footer.php"); ?>

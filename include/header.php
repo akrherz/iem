@@ -91,6 +91,7 @@ $_pages = Array(
     "nexrad" => Array("title" => "NEXRAD Data", "url" => "/docs/nexrad_composites/"),
     "ogc" => Array("title" => "OGC Webservices", "url" => "/ogc/"),
     "rainfall" => Array("title" => "Rainfall Data", "url" => "/rainfall/"),
+    "radmap" => Array("title" => "RadMap API", "url" => "/GIS/radmap_api.phtml"),
     "satellite" => Array("title" => "Satellite Data", "url" => "/GIS/goes.phtml"),
     "software" => Array("title" => "Software", "url" => "/GIS/software.php"),
  ),
