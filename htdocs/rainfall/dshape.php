@@ -29,8 +29,8 @@ else
 
 chdir("/tmp");
 copy($dir."/".$fp.".dbf", $fp.".dbf");
-copy("/mnt/mesonet/wepp/GIS/static/hrap_${geometry}_${epsg}.shp", $fp.".shp");
-copy("/mnt/mesonet/wepp/GIS/static/hrap_${geometry}_${epsg}.shx", $fp.".shx");
+copy("/mnt/a2/wepp/GIS/static/hrap_${geometry}_${epsg}.shp", $fp.".shp");
+copy("/mnt/a2/wepp/GIS/static/hrap_${geometry}_${epsg}.shx", $fp.".shx");
 copy("/mnt/mesonet/data/gis/meta/${epsg}.prj", $fp.".prj");
 copy("/mnt/mesonet/data/gis/avl/iemrainfall.avl", $fp.".avl");
 `zip ${fp}.zip ${fp}*`;
