@@ -118,6 +118,39 @@ that the API presented here may change in the future.
 </div>
 </div>
 
+<h3>Example Python client script</h3>
+
+<p>Here is an example python script that will call this service and locally
+generate a folder of images that can then be converted into a movie.
+<br />
+<pre>
+#!/usr/bin/env python
+
+import datetime, os
+
+# Generate series of images between 0z and 12z on the 3rd of August
+now = datetime.datetime(2008,8,3,0,0)
+ets = datetime.datetime(2008,8,3,12,0)
+interval = datetime.timedelta(minutes=5)
+
+baseuri = "http://mesonet.agron.iastate.edu/GIS/radmap.php?"
+baseuri += "width=800&height=600&bbox=-95,42.5,-89,45.5"
+baseuri += "&layers[]=uscounties&layers[]=nexrad&layers[]=sbw"
+baseuri += "&layers[]=watch_by_county"
+
+# Change into a frames folder
+os.chdir("frames")
+stepi = 0
+while (now < ets):
+  url = "%s&ts=%s" % (baseuri, now.strftime("%Y%m%d%H%M"))
+  cmd = "wget -q -O %05i.png '%s'" % (stepi, url )
+  os.system(cmd)
+  stepi += 1
+  now += interval
+
+os.system("ffmpeg -y -i %05d.png -b 2000k out.mp4")
+</pre>
+
 <h3>Change Log</h3>
 <ul>
  <li><strong>10 Mar 2009:</strong> Initial release</li>
