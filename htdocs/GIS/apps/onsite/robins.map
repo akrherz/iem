@@ -5,11 +5,11 @@ NAME robins
 STATUS ON
 SIZE 450 400
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 EXTENT 200000 4400000 710000 4900000
 UNITS METERS
-SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SHAPEPATH "/mesonet/data/gis/static/"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off
