@@ -10,7 +10,7 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "select askml(a) as kml
+$rs = pg_prepare($connect, "SELECT", "select askml(setsrid(a,4326)) as kml
       from (select astext(intersection(exteriorring(geometryn(w.geom,1)), exteriorring(geometryn(n.geom,1)))) as a
             from warnings_$year w, nws_ugc n WHERe gtype = 'P' 
             and w.wfo = $1 and n.wfo = w.wfo and phenomena = $2
