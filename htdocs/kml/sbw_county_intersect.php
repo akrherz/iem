@@ -35,19 +35,19 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <Style id=\"iemstyle0\">
       <LineStyle>
         <width>7</width>
-        <color>ffffff00</color>
+        <color>ff0000ff</color>
       </LineStyle>
     </Style>
     <Style id=\"iemstyle1\">
       <LineStyle>
         <width>7</width>
-        <color>ffffffff</color>
+        <color>ff00ff00</color>
       </LineStyle>
     </Style>
     <Style id=\"iemstyle2\">
       <LineStyle>
         <width>7</width>
-        <color>ff00ffff</color>
+        <color>ffff0000</color>
       </LineStyle>
     </Style>
 ";
@@ -55,7 +55,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 for($i=0;$row=@pg_fetch_array($result, $i);$i++){
   echo sprintf("<Placemark>
     <styleUrl>#iemstyle%s</styleUrl>
-    <name>Intersect size: %.1f m</name>", $i%3, $row["sz"]);
+    <name>Intersect size: %.1f m ID: %s</name>", $i%3, $row["sz"], $i);
   echo $row["kml"];
   echo "</Placemark>";
 }
