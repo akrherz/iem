@@ -38,11 +38,27 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
         <color>ffffff00</color>
       </LineStyle>
     </Style>
+    <Style id=\"highstyle\">
+      <LineStyle>
+        <width>4</width>
+        <color>fff00ff</color>
+      </LineStyle>
+    </Style>
+  <StyleMap id=\"styleMapExample\">
+    <Pair>
+      <key>normal</key>
+      <styleUrl>#iemstyle</styleUrl>
+    </Pair>
+    <Pair>
+      <key>highlight</key>
+      <styleUrl>#highstyle</styleUrl>
+    </Pair>
+  </StyleMap>
 ";
 
 for($i=0;$row=@pg_fetch_array($result, $i);$i++){
   echo sprintf("<Placemark>
-    <styleUrl>#iemstyle</styleUrl>
+    <styleUrl>#styleMapExample</styleUrl>
     <name>Intersect size: %.1f m</name>", $row["sz"]);
   echo $row["kml"];
   echo "</Placemark>";
