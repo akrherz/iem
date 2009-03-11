@@ -13,8 +13,8 @@ $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1)
 $rs = pg_prepare($connect, "SELECT", "select askml(setsrid(a,4326)) as kml
       from (select (intersection(exteriorring(geometryn(n.geom,1)),buffer(exteriorring(geometryn(w.geom,1)),0.01))) as a
             from warnings_$year w, nws_ugc n WHERe gtype = 'P' 
-            and w.wfo = $1 and w.wfo = n.wfo and phenomena = $2
-            and eventid = $3 and significance = $4) as foo 
+            and w.wfo = $1 and phenomena = $2 and eventid = $3 
+            and significance = $4 and n.polygon_class = 'C') as foo 
       WHERE not isempty(a)");
 
 $result = pg_execute($connect, "SELECT", 
