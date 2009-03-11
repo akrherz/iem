@@ -34,19 +34,19 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <Document>
     <Style id=\"iemstyle0\">
       <LineStyle>
-        <width>4</width>
+        <width>7</width>
         <color>ffffff00</color>
       </LineStyle>
     </Style>
     <Style id=\"iemstyle1\">
       <LineStyle>
-        <width>4</width>
+        <width>7</width>
         <color>ffffffff</color>
       </LineStyle>
     </Style>
     <Style id=\"iemstyle2\">
       <LineStyle>
-        <width>4</width>
+        <width>7</width>
         <color>ff00ffff</color>
       </LineStyle>
     </Style>
