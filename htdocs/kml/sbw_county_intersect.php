@@ -10,7 +10,8 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "select askml(setsrid(a,4326)) as kml
+$rs = pg_prepare($connect, "SELECT", "select askml(setsrid(a,4326)) as kml,
+      length(transform(a,2163)) as sz
       from (
 select 
    intersection(
@@ -40,9 +41,9 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 ";
 
 for($i=0;$row=@pg_fetch_array($result, $i);$i++){
-  echo "<Placemark>
+  echo sprintf("<Placemark>
     <styleUrl>#iemstyle</styleUrl>
-    <name>Intersection</name>";
+    <name>Intersect size: %.1f m</name>", $row["sz"]);
   echo $row["kml"];
   echo "</Placemark>";
 }
