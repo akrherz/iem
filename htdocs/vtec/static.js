@@ -392,6 +392,9 @@ function resetGmap(){
      kml = "http://mesonet.agron.iastate.edu/kml/sbw_lsrs.php?"+ getVTEC();
      lsrkml = new GGeoXml(kml);
      Ext.getCmp('mygpanel').gmap.addOverlay(lsrkml);
+     kml = "http://mesonet.agron.iastate.edu/kml/sbw_county_intersect.php?"+ getVTEC();
+     gxml = new GGeoXml(kml);
+     Ext.getCmp('mygpanel').gmap.addOverlay(gxml);
    }
 };
 
