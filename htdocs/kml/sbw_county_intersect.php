@@ -15,9 +15,9 @@ $rs = pg_prepare($connect, "SELECT", "select askml(setsrid(a,4326)) as kml,
       from (
 select 
    intersection(
-      buffer(exteriorring(simplify(geometryn(n.geom,1),0.01)),0.01),
-      exteriorring(geometryn(w.geom,1))
-   ) as a, w.geom as w2
+      buffer(exteriorring(geometryn(multi(geomunion(n.geom)),1)),0.01),
+      exteriorring(geometryn(multi(geomunion(w.geom)),1))
+   ) as a
    from warnings_$year w, nws_ugc n WHERE gtype = 'P' and w.wfo = $1 
    and phenomena = $2 and eventid = $3 and significance = $4
    and n.polygon_class = 'C' and ST_OverLaps(n.geom, w.geom)
