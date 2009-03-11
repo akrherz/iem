@@ -9,10 +9,9 @@ $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
 $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
-//      from (select (intersection(exteriorring(geometryn(n.geom,1)),buffer(exteriorring(geometryn(w.geom,1)),0.01))) as a
 
 $rs = pg_prepare($connect, "SELECT", "select askml(setsrid(a,4326)) as kml
-      from (select (intersection(buffer(exteriorring(geometryn(w.geom,1)),0.01),exteriorring(geometryn(n.geom,1)))) as a
+      from (select (intersection(exteriorring(geometryn(n.geom,1)),buffer(exteriorring(geometryn(w.geom,1)),0.01))) as a
             from warnings_$year w, nws_ugc n WHERe gtype = 'P' 
             and w.wfo = $1 and phenomena = $2
             and eventid = $3 and significance = $4) as foo 
