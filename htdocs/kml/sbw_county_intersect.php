@@ -21,6 +21,11 @@ select
    from warnings_$year w, nws_ugc n WHERE gtype = 'P' and w.wfo = $1 
    and phenomena = $2 and eventid = $3 and significance = $4
    and n.polygon_class = 'C' and ST_OverLaps(n.geom, w.geom)
+   and n.ugc IN (
+          SELECT ugc from warnings_$year WHERE
+          gtype = 'C' and wfo = $1 
+          and phenomena = $2 and eventid = $3 and significance = $4
+       )
 ) as foo 
       WHERE not isempty(a)");
 
