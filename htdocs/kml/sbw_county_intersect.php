@@ -14,7 +14,7 @@ $rs = pg_prepare($connect, "SELECT", "select askml(setsrid(a,4326)) as kml
       from (
 select 
    intersection(
-      buffer(exteriorring(simplify(geometryn(n.geom,1),0.01)),0.001),
+      buffer(exteriorring(simplify(geometryn(n.geom,1),0.01)),0.01),
       exteriorring(geometryn(w.geom,1))
    ) as a, w.geom as w2
    from warnings_$year w, nws_ugc n WHERE gtype = 'P' and w.wfo = $1 
