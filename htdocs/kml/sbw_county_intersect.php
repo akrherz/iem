@@ -32,34 +32,30 @@ header("Content-Type:", "application/vnd.google-earth.kml+xml");
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://earth.google.com/kml/2.2\">
  <Document>
-    <Style id=\"iemstyle\">
+    <Style id=\"iemstyle0\">
       <LineStyle>
         <width>4</width>
         <color>ffffff00</color>
       </LineStyle>
     </Style>
-    <Style id=\"highstyle\">
+    <Style id=\"iemstyle1\">
       <LineStyle>
         <width>4</width>
-        <color>fff00ff</color>
+        <color>ffffffff</color>
       </LineStyle>
     </Style>
-  <StyleMap id=\"styleMapExample\">
-    <Pair>
-      <key>normal</key>
-      <styleUrl>#iemstyle</styleUrl>
-    </Pair>
-    <Pair>
-      <key>highlight</key>
-      <styleUrl>#highstyle</styleUrl>
-    </Pair>
-  </StyleMap>
+    <Style id=\"iemstyle2\">
+      <LineStyle>
+        <width>4</width>
+        <color>ff00ffff</color>
+      </LineStyle>
+    </Style>
 ";
 
 for($i=0;$row=@pg_fetch_array($result, $i);$i++){
   echo sprintf("<Placemark>
-    <styleUrl>#styleMapExample</styleUrl>
-    <name>Intersect size: %.1f m</name>", $row["sz"]);
+    <styleUrl>#iemstyle%s</styleUrl>
+    <name>Intersect size: %.1f m</name>", $i%3, $row["sz"]);
   echo $row["kml"];
   echo "</Placemark>";
 }
