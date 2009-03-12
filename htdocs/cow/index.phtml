@@ -80,6 +80,7 @@ while( list($key, $value) = each($wfos) ){
 <?php if (isset($_GET["hail"])){ include("worker.php"); }
       else {
 ?>
+
 <h3 class="heading">IEM Cow (NWS Storm Based Warning Verification)</h3>
 
 <p><img src="cow.jpg" align="right" style="margin: 5px;">Data presented here is <b>unofficial</b> and should be used for 
@@ -90,27 +91,13 @@ verification numbers for the warnings issued.
 
 <p>This application works for dates after 8 June 2005.
 
-<h3>Polygon Warnings?</h3>
-<p><img src="polyexample.png" align="left" style="margin: 5px;">Most of you 
-are certainly familiar with traditional warnings issued on a per county 
-basis.  The National Weather Service has been experimenting with a new 
-technology that generates warnings on a polygon basis.  A polygon is simply
-a region much like a county.  Storms don't follow county borders nicely, so
-many times warnings are issued for a county when only a small portion is
-affected.
+<h3>Storm Based Warnings</h3>
+<p><img src="http://www.weather.gov/sbwarnings/images/SBW-main.jpg" align="left" style="margin:5px;"><img src="http://www.weather.gov/sbwarnings/images/SBW-main2.jpg" align="left" style="margin: 5px;"> On the first of October 2007, the National Weather
+Service began issuing warnings for tornados, severe weather, floods, and 
+marine hazards on a storm by storm basis.  Previously, the warnings
+were issued for an entire county. This application attempts to provide 
+verification statistics for these storm based warnings.
 
-<p>The image shown here demonstrates the two types of warnings.  You can
-see the traditional outline around the county which the warning is for.  The
-white box is actually the polygon warning which often highlights the area
-of concern for a particular storm.
-
-<p>County based warnings will be around for a while.  The polygon warnings
-highlight a latitude+longitude box which is hard for the public to understand.
-At some point, the polygon is translated into counties.
-
-<p>This application attempts to provide verification statistics for these
-polygon warnings.  One of the motivations for polygons is to provide more
-accurate warnings to the public.  This accuracy should be reflected in
-higher verification numbers.
+<p>The images shown are taken from the <a href="http://www.weather.gov/sbwarnings/">NWS Storm Based Warnings</a> website.
 
 <?php } include("$rootpath/include/footer.php"); ?>

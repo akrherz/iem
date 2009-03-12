@@ -22,22 +22,24 @@ function printLSR($lsr)
   if ($lsr["magnitude"] == 0) $lsr["magnitude"] = "";
   //if ($lsr["ts"] < 100000) print_r($lsr);
   $uri = sprintf("maplsr.phtml?lat0=%s&lon0=%s&ts=%s", $lsr["lat0"], $lsr["lon0"], gmdate("Y-m-d%20H:i", $lsr["ts"]));
-  return sprintf("<tr style=\"background: #eee;\"><td>lsr</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"></td></tr>", 
-    $uri, gmdate("m/d/Y H:i", $lsr["ts"]), $background, $leadtime, $lsr["county"], $lsr["state"], $uri, $lsr["city"], $lt[$lsr["type"]], $lsr["magnitude"]);
+  return sprintf("<tr style=\"background: #eee;\"><td>lsr</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"3\">%s</td></tr>", 
+    $uri, gmdate("m/d/Y H:i", $lsr["ts"]), $background, $leadtime, $lsr["county"], $lsr["state"], $uri, $lsr["city"], $lt[$lsr["type"]], $lsr["magnitude"], $lsr["remark"]);
 }
 function printWARN($warn)
 {
-  $background = "#0f0";
   $ts = $warn["sts"] + 5*60;
   $uri = sprintf("/vtec/%s-O-%s-K%s-%s-%s-%04d.html", date("Y", $ts), 
         $warn["status"], $warn["wfo"], $warn["phenomena"], 
         $warn["significance"], $warn["eventid"]);
-  //$uri2 = sprintf("/GIS/apps/rview/warnings.phtml?tz=UTC&cu=1&year=%s&month=%s&day=%s&hour=%s&minute=%s&filter=1&archive=yes&tzoff=0&site=%s&lon0=%s&lat0=%s", gmdate("Y", $ts), gmdate("m", $ts), gmdate("d",$ts), gmdate("H",$ts), gmdate("i",$ts), $warn["wfo"], $warn["lon0"], $warn["lat0"]);
-  if ($warn["verify"] == 0) $background = "#f00";
-  return sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f km^2</td><td>%.0f km^2</td><td>%.0f %%</td></tr>", 
-       $background, $uri, $warn["phenomena"], gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["ets"]), 
-       $uri, $warn["counties"], $uri, $warn["status"], $warn["area"], 
-       $warn["carea"], ($warn["carea"]-$warn["area"])/ $warn["carea"] * 100);
+  $background = "#0f0";
+  if ($warn["verify"] == 0){ $background = "#f00"; }
+
+  return sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f km^2</td><td>%.0f km^2</td><td>%.0f %%</td><td>%.0f%%</td></tr>\n", 
+    $background, $uri, $warn["phenomena"], $warn["eventid"],
+    gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["ets"]), 
+    $uri, $warn["counties"], $uri, $warn["status"], $warn["area"], 
+    $warn["carea"], ($warn["carea"]-$warn["area"])/ $warn["carea"] * 100,
+    $warn["sharedborder"] / $warn["perimeter"] * 100.0);
 
 }
 
@@ -50,6 +52,7 @@ while( list($k,$v) = each($wtype)){ $wtypeSQL .= sprintf("'%s',",$v); }
 $wtypeSQL .= "'ZZ'"; /* Hack */
 $sql = sprintf("select *, astext(geom) as tgeom from (SELECT distinct * from 
    (select *, area(transform(geom,2163)) / 1000000.0 as area,
+    perimeter(transform(geom,2163)) as perimeter,
     xmax(geom) as lon0, ymax(geom) as lat0 from 
     warnings_%s WHERE wfo = '%s' and issue >= '%s' and expire < '%s' 
     and phenomena IN (%s) and significance != 'A' ORDER by issue ASC) as foo) as foo",
@@ -81,6 +84,36 @@ for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
     $sum_parea += $row["area"];
     $warnings[$key]["geom"] = $row["tgeom"]; 
     $warnings[$key]["gtype"] = $row["gtype"];
+    $warnings[$key]["perimeter"] = $row["perimeter"];
+    /* Now, lets compute the shared border! */
+    $sql = sprintf("SELECT sum(sz) as s from (
+     SELECT length(transform(a,2163)) as sz from (
+        select 
+           intersection(
+      buffer(exteriorring(geometryn(multi(geomunion(n.geom)),1)),0.02),
+      exteriorring(geometryn(multi(geomunion(w.geom)),1))
+            )  as a
+            from warnings_%s w, nws_ugc n WHERE gtype = 'P' 
+            and w.wfo = '%s' and phenomena = '%s' and eventid = '%s' 
+            and significance = '%s' and n.polygon_class = 'C'
+            and st_overlaps(n.geom, w.geom) 
+            and n.ugc IN (
+                SELECT ugc from warnings_%s WHERE
+                gtype = 'C' and wfo = '%s' 
+          and phenomena = '%s' and eventid = '%s' and significance = '%s'
+       )
+         ) as foo
+            WHERE not isempty(a) ) as foo
+       ", date("Y", $sts), $wfo, $row["phenomena"],
+            $row["eventid"], $row["significance"],
+          date("Y", $sts), $wfo, $row["phenomena"],
+            $row["eventid"], $row["significance"] );
+    $DEBUG .= "<br />". $sql;
+    $brs = pg_query($conn, $sql);
+    if (pg_num_rows($brs) > 0) {
+       $brow = pg_fetch_array($brs,0);
+       $warnings[$key]["sharedborder"] = $brow["s"];
+    }
   }
   $warnings[$key]["verify"] = 0;
   if ($row["gtype"] == "C")
@@ -135,6 +168,7 @@ for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
    $lsrs[$key]["warned"] = 0;
    $lsrs[$key]["tdq"] = 0; /* Tornado DQ */
    $lsrs[$key]["leadtime"] = "NA";
+   $lsrs[$key]["remark"] = $row["remark"];
 }
 /* Now we verify warnings!! */
 $sw = "";
@@ -381,11 +415,22 @@ else {
 </td></tr>
 </table>
 <h3 class="heading">Warnings Issued & Verifying LSRs:</h3>
-<table cellspacing="1" cellpadding="2" border="1">
-<tr><td></td><th>Issued:</th><th>Expired:</th><th colspan="2">County:</th><th>Final Status:</th><th>Poly Area:</th><th>County Area:</th><th>Size %<br /> (C-P)/C:</th></tr>
-<tr bgcolor="#eee"><th>lsr</th><th>Valid</th><th>Lead Time:</th><th>County</th><th>City</th><th>Type</th><th>Magnitude</th><td colspan="2"></td></tr>
+<strong>Column Headings:</strong> 
+<i>Issued:</i> GMT timestamp of when the product was issued, 
+<i>Expired:</i> GMT timestamp of when the product expired,
+<i>Final Status:</i> VTEC action of the last statement issued for the product,
+<i>SBW Area:</i> Size of the storm based warning in square km,
+<i>County Area:</i> Total size of the counties included in the product in square km,
+<i>Size % (C-P)/C:</i> Size reduction gained by the storm based warning,
+<i>Perimeter Ratio:</i> Estimated percentage of the storm based warning polygon border that was influenced by political boundaries (0% is ideal).
+<br />The second line is for details on any local storm reports.
+<br />
+<table cellspacing="0" cellpadding="2" border="1">
+<tr><td></td><th>Issued:</th><th>Expired:</th><th colspan="2">County:</th><th>Final Status:</th><th>SBW Area: (P)</th><th>County Area: (C)</th><th>Size %<br /> (C-P)/C:</th><th>Perimeter Ratio:</th></tr>
+<tr bgcolor="#eee"><th>lsr</th><th>Valid</th><th>Lead Time:</th><th>County</th><th>City</th><th>Type</th><th>Magnitude</th><th colspan="3">Remarks</th></tr>
 <?php echo $sw; ?>
 </table>
+
 <h3 class="heading">Storm Reports without warning:</h3> 
 <table cellspacing="1" cellpadding="2" border="1">
 <tr><th>lsr</th><th>Valid</th><th>Lead Time:</th><th>County</th><th>City</th><th>Type</th><th>Magnitude</th></tr>
