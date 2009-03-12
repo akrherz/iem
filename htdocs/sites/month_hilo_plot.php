@@ -110,6 +110,7 @@ $graph->xaxis->SetTitle("Day of Month");
 
 $graph->yscale->SetGrace(5);
 $graph->yaxis->SetTitle("Temperature [F]");
+$graph->yaxis->SetLabelFormat('%.0d');
 
 $graph->legend->Pos(0.25, 0.1, "right", "top");
 
