@@ -46,6 +46,7 @@ var tslider;
 var wfo_selector;
 /* Misc */
 var lsrkml;
+var borderkml;
 var delayedTaskSpinner;
 
 function getVTEC(){
@@ -392,9 +393,10 @@ function resetGmap(){
      kml = "http://mesonet.agron.iastate.edu/kml/sbw_lsrs.php?"+ getVTEC();
      lsrkml = new GGeoXml(kml);
      Ext.getCmp('mygpanel').gmap.addOverlay(lsrkml);
-     //kml = "http://mesonet.agron.iastate.edu/kml/sbw_county_intersect.php?"+ getVTEC();
-     //gxml = new GGeoXml(kml);
-     //Ext.getCmp('mygpanel').gmap.addOverlay(gxml);
+
+     kml = "http://mesonet.agron.iastate.edu/kml/sbw_county_intersect.php?"+ getVTEC();
+     borderkml = new GGeoXml(kml);
+     borderkml.initial = 1;
    }
 };
 
@@ -717,7 +719,7 @@ googlePanel = new Ext.ux.GMapPanel({
     id:'mygpanel',
     disabled:true,
     zoomLevel: 14,
-    tbar: new Ext.Button({
+    tbar: [new Ext.Button({
           text: 'Hide Storm Reports',
           handler: function(){
                  if (lsrkml.isHidden()){
@@ -728,7 +730,25 @@ googlePanel = new Ext.ux.GMapPanel({
                    this.setText('Show Storm Reports');
                  } 
            }
-    }),
+    }), new Ext.Button({
+          text: 'Show County Intersection',
+          handler: function(){
+                 if (borderkml.initial == 1){
+                   Ext.getCmp('mygpanel').gmap.addOverlay(borderkml);
+                   this.setText('Hide County Intersection');
+                 }
+                 else if (borderkml.isHidden()){
+                   this.setText('Hide County Intersection');
+                   borderkml.show();
+                 } else {
+                   borderkml.hide();
+                   this.setText('Show County Intersection');
+                   borderkml.hide();
+                 }
+                 borderkml.initial = 0;
+           }
+    })
+    ],
     mapConfOpts: ['enableScrollWheelZoom','enableDoubleClickZoom','enableDragging'],
     mapControls: ['GSmallMapControl','GMapTypeControl','NonExistantControl']
 });
