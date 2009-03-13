@@ -44,7 +44,7 @@ every site.</p>
   ?>
    <?php yearSelect2(2002, $year, "year"); ?>
  <?php echo monthSelect($month); ?>
- <?php daySelect($day); ?>
+ <?php echo daySelect($day); ?>
 
   <input type="submit" value="Make Plot"></form>
 
