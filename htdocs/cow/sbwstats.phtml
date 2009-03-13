@@ -49,9 +49,9 @@ $table = "
 .fa { background: #C8F526;}
 .ff { background: #FFEC8B;}
 </style>
-<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" class=\"ruler\">
+<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">
 <tr>
-  <th rowspan='2'>WFO</th>
+  <th colspan='2'>Weather Forecast Office</th>
   <th colspan='3'>Summary</th>
   <th colspan='3' class='to'>Tornado</th>
   <th colspan='3' class='sv'>Severe Thunderstorm</th>
@@ -59,6 +59,7 @@ $table = "
   <th colspan='3' class='ff'>Flash Flood</th>
   <th colspan='3' class='fa'>Areal Flood</th></tr>
 <tr>
+ <th>ID</th><th>Name</th>
  <th>Cnt</th><th>Permin</th><th>Area</th>
  <th class='to'>Cnt</th><th class='to'>Permin</th><th class='to'>Area</th>
  <th class='sv'>Cnt</th><th class='sv'>Permin</th><th class='sv'>Area</th>
@@ -79,14 +80,14 @@ while( list($v,$wfo) = each($sorted) )
            @$data[$wfo]["SV_sum_polysize"] +
            @$data[$wfo]["FA_sum_polysize"] +
            @$data[$wfo]["FF_sum_polysize"] ;
-  $table .= @sprintf("<tr><th>%s</th>
+  $table .= @sprintf("<tr><td>%s</td><td>%s</td>
          <td>%s</td><td>%.1f</td><td>%.1f</td>
          <td class='to'>%s</td><td class='to'>%.1f</td><td class='to'>%.1f</td>
          <td class='sv'>%s</td><td class='sv'>%.1f</td><td class='sv'>%.1f</td>
          <td class='ma'>%s</td><td class='ma'>%.1f</td><td class='ma'>%.1f</td>
          <td class='ff'>%s</td><td class='ff'>%.1f</td><td class='ff'>%.1f</td>
          <td class='fa'>%s</td><td class='fa'>%.1f</td><td class='fa'>%.1f</td>
-          </tr>", $wfos[$wfo]['city'], 
+          </tr>", $wfo, $wfos[$wfo]['city'], 
           $cnt, $perim/$cnt/1000.0, $poly/$cnt/1000000.0,
 $data[$wfo]["TO_cnt"], 
 $data[$wfo]["TO_sum_perimsize"]/$data[$wfo]["TO_cnt"]/1000.0,
@@ -108,26 +109,30 @@ $data[$wfo]["FA_sum_polysize"]/$data[$wfo]["FA_cnt"]/1000000.0
 $table .= "</table>";
 
 /* BEGIN OUTPUT! */
-$HEADEXTRA = "<script type=\"text/javascript\" src=\"${rooturl}/js/tableruler.js\"></script>
-
-<script type=\"text/javascript\">
-    window.onload=function(){tableruler();}
-</script>";
 include("$rootpath/include/header.php"); 
+?>
+<h3 class="heading">Storm Based Warning Geometry Statistics</h3>
 
+<p>Pick a time period of your choice and get back a summary table of
+storm based warning polygon statistics. You should be able to highlight 
+this table and paste it into Excel, if you wish.
+<br /><strong>Perimeter values are in kilometers and area values in square kilometers.</strong></p>
+
+<?php
 echo "<form method=\"GET\">
 <table border=\"1\" cellpadding=\"3\" cellspacing='0'>
- <tr><td></td><th>Year</th><th>Month</th><th>Day</th></tr>
+ <tr><td></td><th>Year</th><th>Month</th><th>Day</th><td></td></tr>
  <tr><td>Start:</td>
   <td rowspan=\"2\">". yearSelect($year, 2005, "year") ."</td>
   <td>". monthSelect($smonth, "smonth") ."</td>
-  <td>". daySelect2($sday, "sday") ."</td></tr>
+  <td>". daySelect2($sday, "sday") ."</td>
+  <td rowspan='2'><input type='submit' value='Generate Stats'></td>
  <tr><td>End:</td>
   <td>". monthSelect($emonth, "emonth") ."</td>
   <td>". daySelect2($eday, "eday") ."</td></tr>
 </table>
-<input type='submit' value='Generate Stats'>
 </form>";
+
 
 echo $table;
 
