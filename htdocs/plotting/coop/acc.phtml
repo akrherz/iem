@@ -57,15 +57,15 @@ data, you can download on the <a href="/request/coop/fe.phtml">COOP data downloa
   <td rowspan="2"><?php echo networkSelect($network, $station); ?>
 	<br /><a href="acc.phtml?<?php echo $dcgi; ?>">Select via map.</a></td>
   <td>Start Date:</td>
-  <td><?php yearSelect2(1893,$syear,"syear"); ?></td>
-  <td><?php monthSelect2($smonth,"smonth"); ?></td>
-  <td><?php daySelect2($sday,"sday"); ?></td>
+  <td><?php echo yearSelect2(1893,$syear,"syear"); ?></td>
+  <td><?php echo monthSelect2($smonth,"smonth"); ?></td>
+  <td><?php echo daySelect2($sday,"sday"); ?></td>
 </tr>
 <tr>
   <td>End Date:</td>
-  <td><?php yearSelect2(1893,$eyear,"eyear"); ?></td>
-  <td><?php monthSelect2($emonth,"emonth"); ?></td>
-  <td><?php daySelect2($eday,"eday"); ?></td>
+  <td><?php echo yearSelect2(1893,$eyear,"eyear"); ?></td>
+  <td><?php echo monthSelect2($emonth,"emonth"); ?></td>
+  <td><?php echo daySelect2($eday,"eday"); ?></td>
 </tr>
 </tbody>
 </table>

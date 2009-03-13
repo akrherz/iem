@@ -101,13 +101,13 @@ graphically as well as textually for use in a GIS.  Data is updated through a co
      <option value="sdd86" <?php if($var == "sdd86") echo "SELECTED"; ?>>Stress Degree Days (base=86)</option>
     </select></td>
   <td rowspan=2><?php echo yearselect(1893, $year); ?></td>
-  <td><?php monthSelect2($smonth, 'smonth'); ?></td>
-  <td><?php daySelect2($sday, 'sday'); ?></td>
+  <td><?php echo monthSelect2($smonth, 'smonth'); ?></td>
+  <td><?php echo daySelect2($sday, 'sday'); ?></td>
   <td rowspan=2><input type="submit" value="Make Plot"></td>
   </tr>
  <tr>
-  <td><?php monthSelect2($emonth, 'emonth'); ?></td>
-  <td><?php daySelect2($eday, 'eday'); ?></td>
+  <td><?php echo monthSelect2($emonth, 'emonth'); ?></td>
+  <td><?php echo daySelect2($eday, 'eday'); ?></td>
   </tr>
 </table>
  
