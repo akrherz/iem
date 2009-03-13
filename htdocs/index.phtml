@@ -6,12 +6,18 @@ include("$rootpath/include/feature.php");
 $feature = genFeature();
 
 $rancam = "";
-while ($rancam == "")
+$loop = 0;
+while ($rancam == "" && $loop < 20)
 {
   srand ((float) microtime() * 10000000);
   $t = array_rand($cameras);
-  if ($cameras[$t]["active"]) $rancam = $t;
+  if (@filemtime("/home/ldm/data/camera/stills/${t}.jpg") > (time() - 1200))
+  {
+    $rancam = $t;
+  }
+  $loop += 1;
 }
+if ($rancam == ""){ $rancam = "KCCI-001";}
 
 $TITLE = "Iowa Environmental Mesonet";
 $HEADEXTRA = "<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS feed\" href=\"/rss.php\" />";
