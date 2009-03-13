@@ -151,26 +151,28 @@ function monthSelect2($selected, $name){
 
 
 function daySelect($selected){
-  echo "<select name='day'>\n";
+  $s = "<select name='day'>\n";
   for ($k=1;$k<32;$k++){
-    echo "<option value=\"".$k."\" ";
+    $s .= "<option value=\"".$k."\" ";
     if ($k == (int)$selected){
-      echo "SELECTED";
+      $s .= "SELECTED";
     }
-    echo ">".$k."</option>";
+    $s .= ">".$k."</option>";
   }
-  echo "</select>\n";
+  $s .= "</select>\n";
+  return $s;
 } // End of daySelect
 function daySelect2($selected, $name){
-  echo "<select name='$name'>\n";
+  $s = "<select name='$name'>\n";
   for ($k=1;$k<32;$k++){
-    echo "<option value=\"".$k."\" ";
+    $s .= "<option value=\"".$k."\" ";
     if ($k == (int)$selected){
-      echo "SELECTED";
+      $s .= "SELECTED";
     }
-    echo ">".$k."</option>";
+    $s .= ">".$k."</option>";
   }
-  echo "</select>\n";
+  $s .= "</select>\n";
+  return $s;
 } // End 
 
 function segmentSelect($dbconn, $selected, $name="segid")
