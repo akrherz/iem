@@ -60,8 +60,8 @@ choice.
      <option value="snowd" <?php if($var == "snowd") echo "SELECTED"; ?>>Snow Depth [2]</option>
     </select></td>
   <td><?php echo yearselect(1893, $year); ?></td>
-  <td><?php monthSelect2($month, 'month'); ?></td>
-  <td><?php daySelect2($day, 'day'); ?></td>
+  <td><?php echo monthSelect2($month, 'month'); ?></td>
+  <td><?php echo daySelect2($day, 'day'); ?></td>
   <td><input type="submit" value="Make Plot"></td>
   </tr>
 </table>
