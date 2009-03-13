@@ -60,7 +60,7 @@ in this archive up until that point.</i><br>
      <?php echo monthSelect($bogus, "month1"); ?>
     </td>
     <td>
-     <?php daySelect2($bogus, "day1"); ?>
+     <?php echo daySelect2($bogus, "day1"); ?>
     </td>
     <td>
      <?php echo hour24Select($bogus, "hour1"); ?>
@@ -75,7 +75,7 @@ in this archive up until that point.</i><br>
     <td>
      <?php echo monthSelect($bogus, "month2"); ?>
     <td>
-     <?php daySelect2($bogus, "day2"); ?>
+     <?php echo daySelect2($bogus, "day2"); ?>
     </td>
     <td>
      <?php echo hour24Select($bogus, "hour2"); ?>
