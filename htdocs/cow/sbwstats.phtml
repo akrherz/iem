@@ -15,6 +15,7 @@ $eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d");
 $sortby = isset($_GET["sortby"]) ? $_GET["sortby"] : "wfo";
 $sts = mktime(0,0,0,$smonth, $sday, $year);
 $ets = mktime(0,0,0,$emonth, $eday, $year);
+$gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=0&minute1=0&month2=%s&day2=%s&hour2=0&minute2=0",  date("Y", $sts), date("m", $sts),date("d", $sts), date("m", $ets), date("d", $ets) );
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT wfo, phenomena, count(*),
   sum( st_area2d( transform(geom,2163) ) ) as sum_polysize,
@@ -117,7 +118,8 @@ include("$rootpath/include/header.php");
 <p>Pick a time period of your choice and get back a summary table of
 storm based warning polygon statistics. You should be able to highlight 
 this table and paste it into Excel, if you wish.
-<br /><strong>Perimeter values are in kilometers and area values in square kilometers.</strong></p>
+<br /><strong>Perimeter values are in kilometers and area values in square kilometers.</strong>
+<br /><b>Links:</b> <a href="<?php echo $gis_url; ?>">Download shapefile of these warnings</a> - <a href="sbwsum.phtml">View visual summaries</a></p>
 
 <?php
 echo "<form method=\"GET\">
