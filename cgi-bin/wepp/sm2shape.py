@@ -62,7 +62,7 @@ if month is not None:
       WHERE valid BETWEEN '%s-01' and ('%s-01'::date + '1 month'::interval) \
       GROUP by model_twp" % (ts.strftime("%Y-%m"), ts.strftime("%Y-%m") )
     day1 = (ts + mx.DateTime.RelativeDateTime(day=1)).strftime("%Y%m%d")
-    day2 = (ts + mx.DateTime.RelativeDateTime(day=1,months=1)).strftime("%Y%m%d")
+    day2 = (ts + mx.DateTime.RelativeDateTime(day=1,months=1) - mx.DateTime.RelativeDateTime(days=1) ).strftime("%Y%m%d")
 
 rs = mydb.query(sql).dictresult()
 
