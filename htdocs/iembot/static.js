@@ -6,45 +6,66 @@ var addTab = function(tabid, tabname) {
     var a = tabPanel.find("id", tabid);
     if (a.length > 0){ tabPanel.setActiveTab(tabid); return; }
 
-    tabPanel.add({
-        id: tabid,
-        title: tabname,
-        closable: true,
-        autoscroll: true,
-        items: [
-            new Ext.grid.GridPanel({
-                store: new Ext.data.Store({
-                    root:'messages',
-                    autoLoad:true,
+    st = new Ext.data.Store({
+
+                    autoLoad:false,
+                    seqnum: 0,
                     proxy: new Ext.data.HttpProxy({
-                        url: '/iembot-json',
-                        method: 'GET'
+                        url: '/nwsbot-json/channel/'+ tabid +'chat',
+                        method: 'GET',
+                        params:{seqnum:0}
                     }),
                     reader: new Ext.data.JsonReader({
                         root: 'messages',
-                        id:'ts'
+                        id:'seqnum'
                         }, [
+                            {name: 'seqnum', type: 'int'},
                             {name: 'ts'},
                             {name: 'author'},
                             {name: 'message'}
                     ])
-                }),
+    });
+    st.on('load', function(self, records, idx){
+        for (i=0;i<records.length;i++){
+          if (records[i].get("seqnum") > self.seqnum){ 
+             self.seqnum = records[i].get("seqnum");
+          }
+        }
+    });
+    task = {
+      run: function() {
+        st.load({add:true, params:{seqnum: st.seqnum}});
+      },
+      interval:7000
+    };
+
+    gp = new Ext.grid.GridPanel({
+        id: tabid,
+        title: tabname,
+                closable: true,
+                store: st,
                 columns: [
-                  {id:'ts', header:'Timestamp', width: 75, sortable:true,
-                   dataIndex: 'ts'},
+                  {header:'Timestamp', width: 75, sortable:true,
+                   dataIndex: 'ts', type: 'date', dateFormat: 'Y-m-d H:i:s'},
                   {header:'Author', width: 75, sortable:true,
                    dataIndex: 'author'},
-                  {header:'Message', width:'auto', sortable:true,
-                   dataIndex: 'message'}
+                  {header:'Message', sortable:true, width: 500,
+                   dataIndex: 'message', id: 'message' }
                 ],
+                autoExpandColumn: 'message',
                 stripeRows: true,
-                height: 'auto',
-                width: 'auto'
-            })
-        ]
+                autoScroll:true
     });
-
+    gp.on('activate', function() {
+      Ext.TaskMgr.start(task);
+    });
+    gp.on('destroy', function() {
+      Ext.TaskMgr.stop(task);
+    });
+    tabPanel.add(gp);
+    tabPanel.setActiveTab(tabid);
 }
+
 
 var channelSelector = new Ext.form.ComboBox({
           hiddenName:'wfo',
@@ -75,8 +96,10 @@ var configPanel = new Ext.FormPanel({
 });
 
 tabPanel = new Ext.TabPanel({
+    region:'center',
     plain:true,
     enableTabScroll:true,
+    height:.75,
     defaults:{bodyStyle:'padding:5px'},
     items:[
       {contentEl:'help', title: 'Help', saveme:true}
@@ -93,16 +116,14 @@ var viewport = new Ext.Viewport({
              contentEl: 'iem-header'
          },{
             region:'south',
-            width:130,
+            height:50,
             contentEl: 'iem-footer'
-         },{
-            region:'center',
-            items:[tabPanel]
          },{
             region:'west',
             width: 200,
+            collapsible:true,
             items:[configPanel]
-         }
+         }, tabPanel
          ]
 });
 
