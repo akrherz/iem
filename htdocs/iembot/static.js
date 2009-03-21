@@ -1,5 +1,12 @@
 Ext.onReady(function(){
 
+Ext.override(Ext.Panel, {
+    setIconCls: function(i) {
+        Ext.fly(this.ownerCt.getTabEl(this)).child('.x-tab-strip-text').replaceClass(this.iconCls, i);
+        this.setIconClass(i);
+    }
+});
+
 var tabPanel;
 
 var addTab = function(tabid, tabname) {
@@ -25,18 +32,21 @@ var addTab = function(tabid, tabname) {
                     ])
     });
     st.setDefaultSort('ts', 'DESC');
-    st.on('beforeload', function(){
-        st.baseParams = {'seqnum': st.seqnum};
+    st.on('beforeload', function(self, options){
+        self.baseParams = {'seqnum': self.seqnum};
     });
     st.on('load', function(self, records, idx){
         for (i=0;i<records.length;i++){
-          if (records[i].get("seqnum") > st.seqnum){ 
-             st.seqnum = records[i].get("seqnum");
+          if (records[i].get("seqnum") > self.seqnum){ 
+             self.seqnum = records[i].get("seqnum");
           }
         }
         if (records.length > 0){ 
            self.applySort(); 
            self.fireEvent("datachanged", self);
+           if (tabPanel.getActiveTab() != Ext.getCmp(tabid)){
+               Ext.getCmp(tabid).setIconCls('new-tab');
+           }
         }
      });
 
@@ -56,6 +66,7 @@ var addTab = function(tabid, tabname) {
         },
         id: tabid,
         title: tabname,
+        iconCls:'tabno',
                 closable: true,
                 store: st,
                 columns: [
@@ -70,7 +81,9 @@ var addTab = function(tabid, tabname) {
                 stripeRows: true,
                 autoScroll:true
     });
-
+    gp.on('activate', function(self){
+        self.setIconCls('tabno');
+    });
     tabPanel.add(gp);
     tabPanel.setActiveTab(tabid);
 }
@@ -88,13 +101,12 @@ var task = {
 Ext.TaskMgr.start(task);
 
 var channelSelector = new Ext.form.ComboBox({
-          hiddenName:'wfo',
           store: new Ext.data.SimpleStore({
-                    fields: ['abbr', 'wfo'],
-                    data : iemdata.wfos 
+                    fields: ['channelid', 'channelname'],
+                    data : iemdata.channels
           }),
-          valueField:'abbr',
-          displayField:'wfo',
+          valueField:'channelid',
+          displayField:'channelname',
           typeAhead: true,
           mode: 'local',
           triggerAction: 'all',
@@ -105,7 +117,7 @@ var channelSelector = new Ext.form.ComboBox({
           width:180
 });
 channelSelector.on("select", function(self, record, idx){
-  addTab( record.get("abbr"), record.get("wfo") );
+  addTab( record.get("channelid"), record.get("channelname") );
 });
 
 
@@ -116,6 +128,7 @@ var configPanel = new Ext.FormPanel({
 });
 
 tabPanel = new Ext.TabPanel({
+    id:'tabs',
     region:'center',
     plain:true,
     enableTabScroll:true,
