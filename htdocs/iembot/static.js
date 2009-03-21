@@ -9,16 +9,55 @@ Ext.override(Ext.Panel, {
 
 var tabPanel;
 
+Ext.override(Date, {
+    toUTC : function() {
+                        // Convert the date to the UTC date
+        return this.add(Date.MINUTE, this.getTimezoneOffset());
+    },
+    
+    fromUTC : function() {
+                        // Convert the date from the UTC date
+        return this.add(Date.MINUTE, -this.getTimezoneOffset());
+    }    
+}); 
+
+var LinkInterceptor = {
+    render: function(p){
+        p.body.on({
+            'mousedown': function(e, t){ // try to intercept the easy way
+                t.target = '_blank';
+            },
+            'click': function(e, t){ // if they tab + enter a link, need to do it old fashioned way
+                if(String(t.target).toLowerCase() != '_blank'){
+                    e.stopEvent();
+                    window.open(t.href);
+                }
+            },
+            delegate:'a'
+        });
+    }
+};
+
+
+
+function UTCStringToDate(dtStr, format){
+    var dt = Date.parseDate(dtStr, format);
+    if (dt == undefined) return ''; // or whatever you want to do
+    return dt.fromUTC();
+} 
+
+
 var addTab = function(tabid, tabname) {
     var a = tabPanel.find("id", tabid);
     if (a.length > 0){ tabPanel.setActiveTab(tabid); return; }
 
     st = new Ext.data.Store({
+        roomname:tabid,
         baseParams:{seqnum:0},
         seqnum:0,
                     autoLoad:true,
                     proxy: new Ext.data.HttpProxy({
-                        url: '/nwsbot-json/channel/'+ tabid +'chat',
+                        url: '/iembot-json/room/'+ tabid ,
                         method: 'GET'
                     }),
                     reader: new Ext.data.JsonReader({
@@ -26,7 +65,8 @@ var addTab = function(tabid, tabname) {
                         id:'seqnum'
                         }, [
                             {name: 'seqnum', type: 'int'},
-                            {name: 'ts'},
+                       {name: 'ts', type: 'date', dateFormat: 'Y-m-d h:i:s',
+convert: function(v){ return UTCStringToDate(v, "Y-m-d h:i:s");} },
                             {name: 'author'},
                             {name: 'message'}
                     ])
@@ -34,6 +74,7 @@ var addTab = function(tabid, tabname) {
     st.setDefaultSort('ts', 'DESC');
     st.on('beforeload', function(self, options){
         self.baseParams = {'seqnum': self.seqnum};
+        Ext.getCmp(self.roomname +"-status").showBusy();
     });
     st.on('load', function(self, records, idx){
         for (i=0;i<records.length;i++){
@@ -48,6 +89,7 @@ var addTab = function(tabid, tabname) {
                Ext.getCmp(tabid).setIconCls('new-tab');
            }
         }
+        Ext.getCmp(self.roomname +"-status").clearStatus();
      });
 
     gp = new Ext.grid.GridPanel({
@@ -66,13 +108,28 @@ var addTab = function(tabid, tabname) {
         },
         id: tabid,
         title: tabname,
+        listeners: LinkInterceptor,
         iconCls:'tabno',
+        tbar:[
+          new Ext.Button({
+            text:'Clear Room Log',
+            listeners: {
+              click: function() {
+                tabPanel.getActiveTab().getStore().removeAll();
+              }  // End of handler
+            }
+          }),
+         new Ext.StatusBar({
+           id: tabid+'-status',
+           defaultText: ''
+         })
+        ],
                 closable: true,
                 store: st,
                 columns: [
-                  {header:'Timestamp', width: 75, sortable:false,
-                   dataIndex: 'ts', type: 'date', dateFormat: 'Y-m-d H:i:s'},
-                  {header:'Author', width: 75, sortable:false,
+                  {header:'Timestamp', width: 100, sortable:false,
+                   dataIndex: 'ts', renderer: Ext.util.Format.dateRenderer('m/d g:i A')},
+                  {header:'Author', width: 100, sortable:false,
                    dataIndex: 'author'},
                   {header:'Message', sortable:false, width: 500,
                    dataIndex: 'message', id: 'message' }
@@ -100,31 +157,32 @@ var task = {
 }
 Ext.TaskMgr.start(task);
 
-var channelSelector = new Ext.form.ComboBox({
+var roomSelector = new Ext.form.ComboBox({
           store: new Ext.data.SimpleStore({
-                    fields: ['channelid', 'channelname'],
-                    data : iemdata.channels
+                    fields: ['roomid', 'roomname'],
+                    data : chatdata.rooms
           }),
-          valueField:'channelid',
-          displayField:'channelname',
+          valueField:'roomid',
+          displayField:'roomname',
+  fieldLabel: 'Available Rooms',
+  tpl: '<tpl for="."><div class="x-combo-list-item">[{roomid}] {roomname}</div></tpl>',
           typeAhead: true,
           mode: 'local',
           triggerAction: 'all',
-          emptyText:'Select a Channel...',
-          hideLabel:true,
+          emptyText:'Select a Room...',
           selectOnFocus:true,
           listWidth:180,
           width:180
 });
-channelSelector.on("select", function(self, record, idx){
-  addTab( record.get("channelid"), record.get("channelname") );
+roomSelector.on("select", function(self, record, idx){
+  addTab( record.get("roomid"), record.get("roomname") );
 });
 
 
 var configPanel = new Ext.FormPanel({
   frame: true,
-  title: 'Configuration',
-  items: [ channelSelector ]
+  labelAlign:'top',
+  items: [ roomSelector ]
 });
 
 tabPanel = new Ext.TabPanel({
@@ -133,7 +191,6 @@ tabPanel = new Ext.TabPanel({
     plain:true,
     enableTabScroll:true,
     height:.75,
-    defaults:{bodyStyle:'padding:5px'},
     items:[
       {contentEl:'help', title: 'Help', id: 'helppanel'}
     ],
@@ -148,14 +205,15 @@ var viewport = new Ext.Viewport({
              height:130,
              contentEl: 'iem-header'
          },{
-            region:'south',
-            height:50,
-            contentEl: 'iem-footer'
-         },{
             region:'west',
             width: 200,
             collapsible:true,
+            title:'Options',
             items:[configPanel]
+         },{
+             region:'south',
+             height:50,
+             contentEl: 'iem-footer'
          }, tabPanel
          ]
 });

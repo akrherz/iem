@@ -4,7 +4,7 @@ include("../../config/settings.inc.php");
 $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../ext/resources/css/ext-all.css"/>
 <script type="text/javascript" src="../ext/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="../ext/ext-all-debug.js"></script>
-<script type="text/javascript" src="channels.js"></script>
+<script type="text/javascript" src="rooms.js"></script>
 <script type="text/javascript" src="static.js?v=1.0.1"></script>';
 $TITLE = "iembot web based monitor";
 $NOCONTENT = 1;
@@ -28,6 +28,9 @@ boom
 <script>
 Ext.onReady(function(){
 
+Ext.namespace('cfg');
+cfg.jid = 'akrherz@localhost';
+cfg.apikey = '<?php echo md5('akrherz@localhost'); ?>';
 });
 </script>
 <?php include("$rootpath/include/footer.php"); ?>
