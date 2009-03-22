@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<Datasources>
-        <RPC id="iembot" protocol="XMLRPC" url="http://mesonet.agron.iastate.edu/iembot-xmlrpc" multicall="false" autoroute="true">
-                <method name="getUpdate" receive="updateCB" async="yes" />
-        </RPC>
-</Datasources>
