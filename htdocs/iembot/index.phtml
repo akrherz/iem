@@ -39,6 +39,28 @@ display the various products.  These apps include:
 </ul>
 </p>
 <p>&nbsp;</p>
+<h3>JSON web service</h3>
+<p>&nbsp;</p>
+<p>Data is provided to this application in a web 2.0 fashion by a JSON service.
+You can directly call this JSON service to get the same information. The URI 
+template is like:
+<pre>
+http://mesonet.agron.iastate.edu/iembot-json/room/roomname?seqnum=#
+</pre>
+<br />The seqnum is simple a message counter.  You would want to start with 0
+to get the most recent history.  Then use the largest value you get back each
+call to only fetch the most recent content.  The JSON payload is an array of
+messages with index values of:
+<ul>
+ <li><i>seqnum</i>: The sequence number of the message</li>
+ <li><i>ts</i>: The timestamp of the message in GMT</li>
+ <li><i>author</i>: The author of the message</li>
+ <li><i>log</i>: The message usually in HTML format</li>
+</ul>
+<p>&nbsp;</p>
+<p>If you plan on developing a large application against this service, please
+let <a href="../info/contacts.php">us know</a>.
+<p>&nbsp;</p>
 <p>As always, this information is provided without warranty and the possibility of removal in the future.</p>
 
 </div>
