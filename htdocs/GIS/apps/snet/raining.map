@@ -247,21 +247,19 @@ LAYER
   TYPE POINT
   NAME dot
   STATUS ON
+  LABELCACHE ON
   CLASS 
-   SYMBOL 1
-   COLOR 0 0 0
-   SIZE 8
+    COLOR -1 -1 -1
     LABEL
       COLOR  255 255 255
       OUTLINECOLOR 0 0 0 
-      SHADOWCOLOR 0 0 0
-      SHADOWSIZE 1 2
+      #SHADOWCOLOR 0 0 0
+      #SHADOWSIZE 1 2
       SIZE 8
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
       FONT arialblk
-      ANTIALIAS false
       BUFFER 1
       FORCE true
       POSITION AUTO
