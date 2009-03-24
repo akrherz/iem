@@ -1,24 +1,28 @@
 <?php
  include("../../../../config/settings.inc.php");
+include("$rootpath/include/mlib.php");
+include("$rootpath/include/network.php");
+include("$rootpath/include/nexlib2.php");
+include("$rootpath/include/iemaccess.php");
+include("$rootpath/include/iemaccessob.php");
+ $pgconn = iemdb("access");
  $rad = isset($_GET['rad']) ? $_GET['rad'] : 'DMX';
  $tv = isset($_GET['rad']) ? strtoupper(substr($_GET['tv'],0,4)) : 'KCCI';
  $station = isset($_GET['station']) ? $_GET['station'] : '';
  $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'p15m';
-?>
 
-<?php
+$rs = pg_prepare($pgconn, "SELECT", "SELECT * from events WHERE network = $1
+and valid > (now() - '15 minutes'::interval)");
+
 $REFRESH = "<meta http-equiv=\"refresh\" content=\"60\">";
-
 $TITLE = "IEM | SchoolNet | Where's it raining?";
+$THISPAGE = "networks-schoolnet";
 include("$rootpath/include/header.php");
 ?>
 
-<div class="text">
-<b>Nav:</b><a href="/schoolnet/">SchoolNet</a> &nbsp; <b> > </b> Where's it raining?
+<h3 class="heading">SchoolNet 'Where is it raining?'</h3>
 
-
-
-<form method="GET" action="raining.php">
+<form method="GET" action="raining.php" name="former">
 <table>
 <tr>
  <td>Select Network:</td>
@@ -56,14 +60,8 @@ include("$rootpath/include/header.php");
 
 <?php
 dl($mapscript);
-include("$rootpath/include/network.php");
 $nt = new NetworkTable($tv);
 $stbl = $nt->table;
-
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/nexlib2.php");
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
 
 $iemdb = new IEMAccess();
 $iemdata = $iemdb->getNetwork($tv);
@@ -73,19 +71,11 @@ while (list($key, $iemob) = each($iemdata) ){
   $data[$key]["p15m"] = 0;
 }
 
-$now = time();
-$dir = "/mesonet/share/${tv}_events/";
-$handle = opendir($dir);
-while (false !== ($file = readdir($handle))) { 
-  if ($file != "." && $file != "..") {
-    if ( $now - filemtime( $dir . $file ) < 15*60){
-      $nwsli = substr($file,0,5);
-      $a = split("\n", implode('', file($dir . $file) ) );
-      $data[$nwsli]["p15m"] = $a[0];
-    }
-  } // End of if
-} // End of while
-closedir($handle);
+$rs = pg_execute($pgconn, "SELECT", Array($tv));
+for($i=0; $row = @pg_fetch_array($rs,$i); $i++)
+{
+  $data[ $row["station"] ]["p15m"] = $row["magnitude"];
+}
 
 function mktitle($map, $imgObj, $titlet) {
   $layer = $map->getLayerByName("credits");
@@ -124,11 +114,11 @@ $stlayer->set("status", 1);
 
 $dot = $map->getlayerbyname("dot");
 $dot->set("status", MS_ON);
-$dot->setProjection("proj=latlong");
+$dot->setProjection("init=epsg:4326");
 
 $site = $map->getlayerbyname("site");
 $site->set("status", MS_ON);
-$site->setProjection("proj=latlong");
+$site->setProjection("init=epsg:4326");
 
 $radar = $map->getlayerbyname( substr($rad,0,3) );
 $radar->set("status", MS_ON);
@@ -157,10 +147,11 @@ foreach($stbl as $key => $value){
    if ($now - $data[$key]["ts"] > 1800){
        $pt->draw($map, $site, $img, 0, "" );
    } else {
-     if (floatval($data[$key]["tmpf"]) < 32.1)
+     if (floatval($data[$key]["tmpf"]) < 32.1) {
        $pt->draw($map, $site, $img, 2, "" );
-     else
+     } else {
        $pt->draw($map, $site, $img, 1, "" );
+     }
    }
    $pt->free();
 
