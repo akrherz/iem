@@ -39,7 +39,12 @@ if os.path.isfile(fp+".zip"):
 
 # Load up the township GIS stuff
 twp = {}
-rs = mydb.query("SELECT astext(transform(the_geom,4326)) as tg, model_twp from iatwp").dictresult()
+
+sql = "SELECT astext(transform(the_geom,4326)) as tg, model_twp from iatwp"
+if form.has_key("point"):
+  sql = "SELECT astext(transform(centroid(the_geom),4326)) as tg, model_twp from iatwp"
+
+rs = mydb.query(sql).dictresult()
 for i in range(len(rs)):
   twp[ rs[i]["model_twp"] ] = rs[i]["tg"]
 
@@ -84,7 +89,10 @@ for i in range(len(rs)):
   s20 = float(rs[i]["s20cm"])
 
   f = wellknowntext.convert_well_known_text( twp[m] )
-  obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
+  if form.has_key("point"):
+    obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
+  else:
+    obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, f )
   shp.write_object(-1, obj)
   dbf.write_record(i, (day1,day2,m,vsm,vsms,s10,s20) )
 
