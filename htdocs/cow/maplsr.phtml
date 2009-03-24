@@ -12,6 +12,10 @@ include("$rootpath/include/forms.php");
 $ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : time();
 $ts2 = isset($_GET["ts2"]) ? strtotime($_GET["ts2"]) : $ts;
 $wfo = isset($_GET["wfo"]) ? $_GET["wfo"] : "DMX";
+$mywfos = isset($_GET["wfos"]) ? $_GET["wfos"] : Array();
+if (sizeof($mywfos) == 0){ $mywfos[] = $wfo; }
+$wfo = $mywfos[0];
+
 $lat0 = isset($_GET["lat0"]) ? $_GET["lat0"] : $wfos[$wfo]["lat"];
 $lon0 = isset($_GET["lon0"]) ? $_GET["lon0"] : $wfos[$wfo]["lon"];
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", $ts);
@@ -51,11 +55,12 @@ $sql = "select distinct source, county, state, typetext,remark, x(geom) as lon, 
         WHERE valid = '$tsSQL' and
         geom && GeomFromEWKT('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))') ORDER by valid ASC";
 } else {
+  $wfoList = implode("','", $mywfos);
   $sql = "select distinct source, typetext, remark, county, state,
         x(geom) as lon, y(geom) as lat,
         city, magnitude, valid, geom, type as ltype, wfo from lsrs_${year}
         WHERE valid >= '$tsSQL' and valid <= '$tsSQL2' and
-        wfo = '$wfo' ORDER by valid ASC";
+        wfo IN ('$wfoList') ORDER by valid ASC";
 }
 $rs = pg_exec($pgconn, $sql);
 $g = "";
@@ -183,7 +188,7 @@ function load() {
     map.addMapType(custommap4);
     <?php echo $g; ?>
 
-    kml = "http://mesonet.agron.iastate.edu/kml/sbw_interval.php?wfo=<?php echo $wfo; ?>&ts=<?php echo date('Y-m-d%20H:i', $ts); ?>&ts2=<?php echo date('Y-m-d%20H:i', $ts2); ?>";
+    kml = "http://mesonet.agron.iastate.edu/kml/sbw_interval.php?wfos[]=<?php echo implode("&wfos[]=", $mywfos); ?>&ts=<?php echo date('Y-m-d%20H:i', $ts); ?>&ts2=<?php echo date('Y-m-d%20H:i', $ts2); ?>";
     sbwLayer = new GGeoXml(kml);
     map.addOverlay(sbwLayer);
 
@@ -201,9 +206,23 @@ function load() {
 <form method="GET" action="maplsr.phtml" name="goo">
 <h3>Local Storm Report (LSR) Viewer</h3>
 <div style="border:1px solid #ccc; padding: 5px; margin-left: 20px; float:left;">
-<strong>Weather Office:</strong> <?php echo wfoSelect($wfo); ?>
 <table>
 <tr>
+  <td rowspan="2">
+<strong>Weather Office</strong><br />
+<select name="wfos[]" size="5" MULTIPLE>
+<?php
+reset($wfos);
+while( list($k,$v) = each($wfos) )
+{
+ echo "<option value=\"$k\" ";
+ if (in_array($k, $mywfos)){ echo "SELECTED=\"SELECTED\""; }
+ echo ">[$k] ". $v["city"] ."</option>\n";
+}
+
+?>
+</select>
+  </td>
   <th>Start Time</th>
   <td rowspan="2"><?php echo yearSelect(2003,$year); ?></td>
   <td><?php echo monthSelect($smonth, "smonth"); ?></td>
@@ -222,7 +241,12 @@ function load() {
 <input type="submit" value="Update Map">
 </div>
 <br clear="all" />
-<strong><?php echo $wfos[$wfo]['city']; ?>'s Local Storm Reports between <?php echo "$d1 and $d2"; ?></strong<br />
+<strong>
+<?php
+reset($mywfos);
+while (list($k,$v) = each($mywfos)){ echo $wfos[$v]['city'] .", "; }
+?>
+Local Storm Reports between <?php echo "$d1 and $d2"; ?></strong<br />
 <input type="checkbox" checked="checked" name="showsbw" onClick="javascript: toggleSBW();">Show Storm Based Warnings
 <div id="gmap" style="width: 90%; height: 500px"></div>
 
