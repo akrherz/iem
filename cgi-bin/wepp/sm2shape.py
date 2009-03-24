@@ -71,7 +71,10 @@ if month is not None:
 
 rs = mydb.query(sql).dictresult()
 
-shp = shapelib.create(fp, shapelib.SHPT_POLYGON)
+if form.has_key("point"):
+  shp = shapelib.create(fp, shapelib.SHPT_POINT)
+else:
+  shp = shapelib.create(fp, shapelib.SHPT_POLYGON)
 dbf = dbflib.create(fp)
 dbf.add_field("DAY_STA", dbflib.FTString, 8, 0)
 dbf.add_field("DAY_END", dbflib.FTString, 8, 0)
