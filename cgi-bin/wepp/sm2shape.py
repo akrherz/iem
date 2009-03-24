@@ -90,9 +90,9 @@ for i in range(len(rs)):
 
   f = wellknowntext.convert_well_known_text( twp[m] )
   if form.has_key("point"):
-    obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
-  else:
     obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, f )
+  else:
+    obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
   shp.write_object(-1, obj)
   dbf.write_record(i, (day1,day2,m,vsm,vsms,s10,s20) )
 
