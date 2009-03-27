@@ -1,4 +1,4 @@
-#!/mesonet/python-2.4/bin/python
+#!/mesonet/python/bin/python
 # Need something for a Camera Interface
 
 import cgi
