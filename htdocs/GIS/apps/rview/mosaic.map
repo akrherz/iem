@@ -4,13 +4,13 @@
 NAME mosaic
 STATUS ON
 SIZE 900 600
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 # 3 x 2  1200 x 800 km
 EXTENT -200000 4300000 1000000 5100000
 #EXTENT -104 37 -87 49
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR 0 0 250
 IMAGETYPE PNG
 TRANSPARENT OFF
@@ -25,7 +25,6 @@ END
 #
 WEB
   HEADER q_header.html
-  TEMPLATE warning0.html
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 40000000

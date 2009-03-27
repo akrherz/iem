@@ -25,7 +25,6 @@ END
 #
 WEB
   HEADER q_header.html
-  TEMPLATE warning0.html
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 40000000
