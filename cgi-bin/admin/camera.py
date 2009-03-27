@@ -29,7 +29,7 @@ def printInterface(cam):
  code=\"LiveApplet.class\" width=450 height=380>\
 <param name=cabbase	value=\"LiveApplet.cab\">\
 <param name=video_width	value=\"320\">\
-<param name=url		value=\"http://%(ip)s/\">\
+<param name=url		value=\"http://%(ip)s:%(port)s/\">\
 <param name=locale	value=\"english\">\
 </applet>\
 <p><a href=\"http://%(ip)s/admin/\">Admin Interface</a>\
