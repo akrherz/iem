@@ -25,7 +25,7 @@ def printForm(selcam):
 	print '</select><input type="submit"></form>'
 
 def printInterface(cam):
-	print "<applet archive=\"LiveApplet.zip\" codebase=\"http://%(ip)s/-wvdoc-01-/LiveApplet/\" \
+	print "<applet archive=\"LiveApplet.zip\" codebase=\"http://%(ip)s:%(port)s/-wvdoc-01-/LiveApplet/\" \
  code=\"LiveApplet.class\" width=450 height=380>\
 <param name=cabbase	value=\"LiveApplet.cab\">\
 <param name=video_width	value=\"320\">\
