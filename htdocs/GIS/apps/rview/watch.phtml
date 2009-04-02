@@ -7,7 +7,8 @@ include("lib.php");
 $db = iemdb("postgis");
 pg_exec($db, "SET TIME ZONE 'GMT'");
 $rs = pg_prepare($db, "CHECK4WATCH", "SELECT *, xmin(geom) as x0, 
-      xmax(geom) as x1, ymin(geom) as y0, ymax(geom) as y1 from watches 
+      xmax(geom) as x1, ymin(geom) as y0, ymax(geom) as y1,
+      askml(geom) as kml from watches 
       where extract(year from issued) = $1 and num = $2");
 putenv("TZ=GMT");
 
@@ -47,28 +48,55 @@ $ourl = sprintf("%s/GIS/radmap.php?layers[]=nexrad&ts=%s&height=240&width=320&la
 /*____________ web interface _________*/
 
 ?>
-<a href="<?php echo $rooturl;?>/current/radar.phtml">Current Products</a> &gt; <b>SPC Watch Quick View</b>
 
+<h3 class="heading">Storm Prediction Center Convective Watch Archive</h3>
+
+<p>This application presents a browsable archive of <a href="http://www.spc.noaa.gov">SPC</a> issued tornado and severe thunderstorm watches. Each sequential
+watch is assigned a numeric ID, which uniquely identifies a watch for each year.
+Up until 2006, the polygon was the valid area of the watch.  Since then, the 
+valid area is issued by county and marine zone.
+</p>
 
 <form method="GET" action="watch.phtml">
 <table style="width: 750px;">
-<tr><td><img src="<?php echo $ourl; ?>"></td>
+<tr><td>
+<strong>All active watches at issuance:</strong>
+<img src="<?php echo $ourl; ?>">
+</td>
 <td valign="top">
-<p><a href="watch.phtml?year=<?php echo $year; ?>&num=<?php echo $num -1; ?>">Previous Watch</a> ....  <a href="watch.phtml?year=<?php echo $year; ?>&num=<?php echo $num +1; ?>">Next Watch</a> 
+<p>
+<?php
+if ($num > 1){
+  echo "<a href=\"watch.phtml?year=$year&num=". ($num -1) ."\">Previous Watch</a>";
+}
+echo " &nbsp; -- &nbsp; ";
+echo "<a href=\"watch.phtml?year=$year&num=". ($num +1) ."\">Next Watch</a>";
+?> 
 <table>
 <tr><th>Type:</th><td><?php echo $row["type"]; ?></td></tr>
 <tr><th>Watch #:</th><td><?php echo yearSelect(1997,$year); ?><input name="num" type="text" size="5" value="<?php echo $row["num"]; ?>"> <input type="submit" value="GO!"></td></tr>
 <tr><th>Issue:</th><td><?php echo substr($row["issued"],0,16); ?> GMT</td></tr>
 <tr><th>Expired/Cancelled:</th><td><?php echo substr($row["expired"],0,16); ?> GMT</td></tr>
 </table>
-<br />* Watch archive should be complete back to 1997.
+<strong>Archive Status:</strong>
+<ul>
+  <li>Watch archive should be complete back to 1997.</li>
+  <li>RADAR composite is mostly complete back to 1997.</li>
+  <li>Local Storm Reports are available after 2002.</li>
+</ul>
 </td></tr></table>
 </form>
 
-<h3>Initial watch box and Watch By County Outline</h3>
+<h3>Initial Watch Box and Watch By County Outline</h3>
 <br /><?php echo $ERROR;?>
 <img src="<?php echo $url; ?>">
 
 <?php if (isset($lurl)){ echo "<h3>Local Storm Reports:</h3><img src=\"$lurl\">"; } ?>
+
+<p><strong>Watch Polygon Geometry:</strong><br />
+<pre>
+ <?php echo $row["kml"]; ?>
+</pre>
+</p>
 
 <?php include("$rootpath/include/footer.php"); ?>
