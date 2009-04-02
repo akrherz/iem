@@ -5,7 +5,21 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../ext/resources/css/
 <script type="text/javascript" src="../ext/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="../ext/ext-all.js"></script>
 <script type="text/javascript" src="rooms.js"></script>
-<script type="text/javascript" src="static.js?v=1.0.1"></script>';
+<script type="text/javascript" src="soundmanager2.js"></script>
+<script>
+Ext.namespace("soundManager");
+soundManager = new SoundManager();
+soundManager.url = "swf/";
+soundManager.consoleOnly = true;
+soundManager.onload = function() {
+ soundManager.createSound("message_new","sounds/message_new.mp3");
+}
+
+Ext.namespace("cfg");
+cfg.server = "iem";
+cfg.banner = "iem-header";
+</script>
+<script type="text/javascript" src="static.js?v=1.0.2"></script>';
 $TITLE = "iembot web based monitor";
 $NOCONTENT = 1;
 $THISPAGE ="severe-iembot";
