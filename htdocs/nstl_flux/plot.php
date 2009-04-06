@@ -19,17 +19,22 @@ for( $i=0; $row = @pg_fetch_array($rows,$i); $i++)
   $vars[ $row["name"] ] = Array("units" => $row["units"], "details" => $row["details"]);
 }
 
+$rs = pg_prepare($pgconn, "SELECT", "SELECT * from flux${year} WHERE
+      date(valid) = $1 and $pvar IS NOT NULL ORDER by valid ASC");
+$rs = pg_prepare($pgconn, "METADATA", "SELECT * from flux_meta WHERE 
+      sts < $1 and ets > $1");
 
-$sql = sprintf("SELECT * from flux%s WHERE date(valid) = '%s-%s-%s' and $pvar IS NOT NULL ORDER by valid ASC", $year, $year, $month, $day);
-$rs = pg_exec($pgconn, $sql);
+$rs = pg_execute($pgconn, "SELECT", Array(date('Y-m-d', $sts)));
 
 $data = Array("nstl11" => Array(),
    "nstl10" => Array(),
    "nstl30ft" => Array(),
+   "nstl110" => Array(),
    "nstlnsp" => Array() );
 $times = Array("nstl11" => Array(),
    "nstl10" => Array(),
    "nstl30ft" => Array(),
+   "nstl110" => Array(),
    "nstlnsp" => Array() );
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
@@ -41,9 +46,8 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 }
 
 $labels = Array("nstlnsp" => "Unknown", "nstl11" => "Unknown", 
-        "nstl10" => "Unknown", "nstl30ft" => "Unknown");
-$sql = sprintf("SELECT * from flux_meta WHERE sts < '%s-%s-%s' and ets > '%s-%s-%s'", $year, $month, $day, $year, $month, $day);
-$rs = pg_exec($pgconn, $sql);
+        "nstl10" => "Unknown", "nstl30ft" => "Unknown", "nstl110" => "Unknown");
+$rs = pg_execute($pgconn, "METADATA", Array(date('Y-m-d', $sts)));
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
   $st = $row["station"];
@@ -127,7 +131,16 @@ if (sizeof($data["nstl30ft"]) > 1) {
  $graph->Add($lineplot4);
 }
 
+// Create the linear plot
+if (sizeof($data["nstl110"]) > 1) {
+ $lineplot5=new LinePlot($data["nstl110"], $times["nstl110"]);
+ $lineplot5->SetColor("yellow");
+ $lineplot5->SetLegend( $labels["nstl110"] );
+ $lineplot5->SetWeight(2);
+ $graph->Add($lineplot5);
+}
+
+
 // Display the graph
 $graph->Stroke();
 ?>
-
