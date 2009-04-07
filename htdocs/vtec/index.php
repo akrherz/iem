@@ -33,7 +33,12 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../ext/resources/css/
 <script type="text/javascript" src="../ext/ux/form/SpinnerStrategy.js"></script>
 <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key='. $GOOGLEKEYS[$rooturl]["vtec"] .'" type="text/javascript"></script>
 <script type="text/javascript" src="../ext/ux/grid/filter/StringFilter.js"></script>
-<script type="text/javascript" src="static.js?v=1.0.1"></script>';
+<script>
+Ext.namespace("cfg");
+cfg.startYear = 2002;
+cfg.header = "iem-header";
+</script>
+<script type="text/javascript" src="static.js?v=1.0.2"></script>';
 $TITLE = "IEM Valid Time Extent Code (VTEC) App";
 $NOCONTENT = 1;
 $THISPAGE ="severe-vtec";
@@ -64,12 +69,27 @@ the tab to show the information.</i>
 <div id="footer"></div>
 <script>
 Ext.onReady(function(){
-  Ext.getCmp("wfoselector").setValue("<?php echo $wfo; ?>");
-  Ext.getCmp("phenomenaselector").setValue("<?php echo $phenomena; ?>");
-  Ext.getCmp("significanceselector").setValue("<?php echo $significance; ?>");
-  Ext.getCmp("eventid").setValue("<?php echo $eventid; ?>");
-  Ext.getCmp("yearselector").setValue("<?php echo $year; ?>");
-
+  var tokens = window.location.href.split('#');
+  cgiWfo = "<?php echo $wfo; ?>";
+  cgiPhenomena = "<?php echo $phenomena; ?>";
+  cgiSignificance = "<?php echo $significance; ?>";
+  cgiEventId = "<?php echo $eventid; ?>";
+  cgiYear = "<?php echo $year; ?>";
+  if (tokens.length == 2){
+    var subtokens = tokens[1].split("-");
+    if (subtokens.length == 7){
+      cgiWfo = subtokens[3].substr(1,3);
+      cgiPhenomena = subtokens[4];
+      cgiSignificance = subtokens[5];
+      cgiEventId = subtokens[6];
+      cgiYear = subtokens[0];
+    }
+  } 
+  Ext.getCmp("wfoselector").setValue(cgiWfo);
+  Ext.getCmp("phenomenaselector").setValue(cgiPhenomena);
+  Ext.getCmp("significanceselector").setValue(cgiSignificance);
+  Ext.getCmp("eventid").setValue(cgiEventId);
+  Ext.getCmp("yearselector").setValue(cgiYear);
   Ext.getCmp('mainbutton').fireEvent('click', {});
 });
 </script>
