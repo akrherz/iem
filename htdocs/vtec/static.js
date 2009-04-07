@@ -1,3 +1,4 @@
+Ext.BLANK_IMAGE_URL = '../ext/resources/images/default/s.gif';
 Ext.onReady(function(){
 
 /**
@@ -54,15 +55,9 @@ function getVTEC(){
 }
 
 function getURL(){
-  return year_selector.getValue() +"-O-NEW-K"+ wfo_selector.getValue() +"-"+ phenomena_selector.getValue() +"-"+ sig_selector.getValue() +"-"+ String.leftPad(eventid_selector.getValue(),4,'0') +".html";
+  return '#'+ year_selector.getValue() +"-O-NEW-K"+ wfo_selector.getValue() +"-"+ phenomena_selector.getValue() +"-"+ sig_selector.getValue() +"-"+ String.leftPad(eventid_selector.getValue(),4,'0');
 }
 
-/* Generates the vtec link to this page 
- * "2008-O-NEW-KJAX-TO-W-0048"
- */
-function myEventID(val, p, record){
-    return "<span><a href=\""+ record.get('year') +"-O-NEW-K"+ record.get('wfo') +"-"+ record.get('phenomena') +"-"+ record.get('significance') +"-"+ String.leftPad(val,4,'0') +".html\">" + val + "</a></span>";
-}
 
    var filters = new Ext.ux.grid.GridFilters({
         filters:[
@@ -276,7 +271,7 @@ var year_selector = new Ext.ux.form.Spinner({
      name: 'year',
      id: 'yearselector',
      width: 60,
-     strategy: new Ext.ux.form.Spinner.NumberStrategy({minValue:2002, maxValue: new Date("Y")})
+     strategy: new Ext.ux.form.Spinner.NumberStrategy({minValue:cfg.startYear, maxValue: new Date("Y")})
 });
 year_selector.on('spin', function(){
    if(!delayedTaskSpinner){
@@ -290,17 +285,6 @@ year_selector.on('spin', function(){
 
 });
 
-
-/* var year_selector = new Ext.form.NumberField({
-    allowDecimals:false,
-    allowNegative:false,
-    maxValue: new Date("Y"),
-    minValue: 2002,
-    width: 50,
-    name:'year',
-    id:'yearselector',
-    fieldLabel:'Year'
-});*/
 
 var metastore = new Ext.data.Store({
     root:'meta',
@@ -329,6 +313,8 @@ var metastore = new Ext.data.Store({
 metastore.on('load', function(){
   cachedNexradTime = false;
   Ext.fly(vDescription.getEl()).update('');
+
+  /* If we got no results from the server, show the events tab */
   if (metastore.getCount() == 0){
     Ext.fly(vDescription.getEl()).update('Event not found on server, here is a list of other '+  phenomena_selector.getRawValue() + ' '+ sig_selector.getRawValue() +' issued by '+ wfo_selector.getRawValue() );
     tabPanel.items.each(function(c){
@@ -339,11 +325,20 @@ metastore.on('load', function(){
     eventsPanel.getStore().load({params:getVTEC()});
     return;
   }
+
+  /* Set the window's location internal a name target */
+  window.location.href = getURL();
+
+  /* Update the Tslider */
   tslider.minValue = metastore.getAt(0).data.radarstart.getTime();
   tslider.maxValue = metastore.getAt(0).data.radarend.getTime();
   tslider.setValue( tslider.minValue );
+
+  /* Update the toolbar */
   Ext.fly(vDescription.getEl()).update(wfo_selector.getRawValue() + ' '+ phenomena_selector.getRawValue() + ' '+ sig_selector.getRawValue() + ' #'+ eventid_selector.getValue()  +' issued '+ metastore.getAt(0).data.issue.format('Y-m-d H:i\\Z') +' expires '+ metastore.getAt(0).data.expire.format('Y-m-d H:i\\Z'));
   tabPanel.items.each(function(c){c.enable();});
+
+  /* Now we check the various panels to see if they should be reloaded */
   if (textTabPanel.isLoaded){ 
     textTabPanel.isLoaded = false;
     textTabPanel.fireEvent('activate', {}); 
@@ -372,7 +367,9 @@ metastore.on('load', function(){
     eventsPanel.isLoaded = false;
     eventsPanel.getStore().load({params:getVTEC()});
   }
-  tabPanel.activate(1);
+
+  /* Activate the Google Panel by default :) */
+  tabPanel.activate(3);
   resetGmap();
 });
 
@@ -446,18 +443,8 @@ var selectform = new Ext.FormPanel({
                 metastore.load( {params:getVTEC()} );
               }  // End of handler
             }
-          }),
-          new Ext.Button({
-            text:'Stable URL',
-            id:'stablebutton',
-            isFormField:true,
-            fieldLabel: 'Create Linkable Page',
-            listeners: {
-              click: function() {
-                window.location = getURL();
-              }  // End of handler
-            }
-          })]
+          })
+          ]
 });
 
 function loadVTEC(){
@@ -609,35 +596,47 @@ geoPanel.on('activate', function(q){
    }
 });
 
-
-
+/* 
+ * GridPanel that displays the events for a WFO,Phenomena,Signifcance
+ */
 eventsPanel = new Ext.grid.GridPanel({
-        id:'products-grid',
-        store: pstore,
-  saveme:true,
-  disabled:true,
-        loadMask: {msg:'Loading Data...'},
-        cm: new Ext.grid.ColumnModel([
-          {header: "Event", renderer: myEventID, width: 40, sortable: true, dataIndex: 'eventid'},
-          {header: "Issued (UTC)", width: 140, sortable: true, dataIndex: 'issued'},
-          {header: "Expired (UTC)", width: 140, sortable: true, dataIndex: 'expired'},
-          {header: "Area km**2", width: 70, sortable: true, dataIndex: 'area'},
-          {header: "Locations", id:"locations", width: 250, sortable: true, dataIndex: 'locations'}
-        ]),
-        plugins: filters,
-        stripeRows: true,
-        autoScroll:true,
-        title:'List Events',
-        collapsible: false,
-        animCollapse: false
-    });
-eventsPanel.on('activate', function(q){
-   if (! this.isLoaded){
-     this.getStore().load({
-        params:getVTEC()
-     });
-     this.isLoaded=true;
-   }
+    id       : 'products-grid',
+    store    : pstore,
+    saveme   : true,
+    disabled : true,
+    loadMask : {msg:'Loading Data...'},
+    cm       : new Ext.grid.ColumnModel([
+        {header: "Event", width: 40, sortable: true, dataIndex: 'eventid'},
+        {header: "Issued (UTC)", width: 140, sortable: true, 
+         dataIndex: 'issued'},
+        {header: "Expired (UTC)", width: 140, sortable: true, 
+         dataIndex: 'expired'},
+        {header: "Area km**2", width: 70, sortable: true, 
+         dataIndex: 'area'},
+        {header: "Locations", id:"locations", width: 250, sortable: true, 
+         dataIndex: 'locations'}
+    ]),
+    plugins      : filters,
+    stripeRows   : true,
+    autoScroll   : true,
+    title        : 'List Events',
+    collapsible  : false,
+    animCollapse : false,
+    listeners    : {
+        rowclick: function(self, rowIndex){
+            record = self.getStore().getAt(rowIndex);
+            Ext.getCmp("eventid").setValue( record.get("eventid") );
+            Ext.getCmp('mainbutton').fireEvent('click', {});
+        },
+        activate: function(q){
+            if (! this.isLoaded){
+                this.getStore().load({
+                    params:getVTEC()
+                 });
+                 this.isLoaded=true;
+            }
+        }
+    }
 });
 
 
@@ -848,7 +847,7 @@ var viewport = new Ext.Viewport({
     items:[{ 
              region:'north',
              height:130,
-             contentEl: 'iem-header'
+             contentEl: cfg.header
          },{
             region:'west',
             width:200,
