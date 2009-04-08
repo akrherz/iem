@@ -13,17 +13,17 @@ $ts = mktime(0,0,0,$month, $day, $year);
 
 if ($duration == 'year')
 {
-  $dir = sprintf("/mnt/a2/wepp/rainfall/shape/yearly");
+  $dir = sprintf("/mnt/a2/wepp/data/rainfall/shape/yearly");
   $fp = sprintf("%s_rain",  date("Y", $ts) );
 }
 else if ($duration == 'month')
 {
-  $dir = sprintf("/mnt/a2/wepp/rainfall/shape/monthly/%s", date("Y", $ts) );
+  $dir = sprintf("/mnt/a2/wepp/data/rainfall/shape/monthly/%s", date("Y", $ts) );
   $fp = sprintf("%s_rain",  date("Ym", $ts) );
 }
 else
 {
-  $dir = sprintf("/mnt/a2/wepp/rainfall/shape/daily/%s", date("Y/m", $ts));
+  $dir = sprintf("/mnt/a2/wepp/data/rainfall/shape/daily/%s", date("Y/m", $ts));
   $fp = sprintf("%s_rain",  date("Ymd", $ts) );
 }
 
