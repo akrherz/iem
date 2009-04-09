@@ -31,12 +31,14 @@ Font: 1, 11, 1, \"Courier New\"
 
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
+  $d = intval( $row["drct"] ) - 180;
+  if ($d < 0){ $d = 360 - $d; }
   $ts = strtotime($row["valid"]);
   $q = sprintf("ID: %s NEXRAD: K%s Time: %s Z\n", $row["storm_id"], $row["nexrad"], date("h:i", $ts) );
   echo sprintf("Object: %.4f,%.4f
   Threshold: 999
   Icon: 0,0,%s,1,1,\" %s \"
-END:\n", $row['lat'], $row['lon'], $row["drct"], $q);
+END:\n", $row['lat'], $row['lon'], $d, $q);
 }
 
 ?>
