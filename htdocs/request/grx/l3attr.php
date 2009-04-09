@@ -3,6 +3,7 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $conn = iemdb("postgis");
+pg_exec($conn, "SET TIME ZONE 'GMT'");
 $nexrad = isset($_GET["nexrad"]) ? substr($_GET["nexrad"],1,3) : False; 
 if ($nexrad){
  $rs = pg_prepare($conn, "SELECT", "SELECT *, x(geom) as lon, y(geom) as lat from nexrad_attributes WHERE nexrad = $1");
@@ -30,7 +31,8 @@ Font: 1, 11, 1, \"Courier New\"
 
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
-  $q = sprintf("WFO: K%s", $row["nexrad"]);
+  $ts = strtotime($row["valid"]);
+  $q = sprintf("ID: %s NEXRAD: K%s Time: %s Z\n", $row["storm_id"], $row["nexrad"], date("h:i", $ts) );
   echo sprintf("Object: %.4f,%.4f
   Threshold: 999
   Icon: 0,0,%s,1,1,\" %s \"
