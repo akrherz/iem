@@ -30,7 +30,11 @@ IconFile: 1, 15, 25, 8, 25, \"http://www.spotternetwork.org/icon/arrows.png\"
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
   $q = sprintf("WFO: K%s", $row["nexrad"]);
-  echo sprintf("Icon: %.4f,%.4f,%s,%s,1\n", $row['lat'], $row['lon'], $row["drct"], $q);
+  echo sprintf("Object: %.4f,%.4f
+  Threshold: 999
+  Icon: 0,0,%s,1,1
+  Text: -17, 13, 1, \" %s \"
+END:\n", $row['lat'], $row['lon'], $row["drct"], $q);
 }
 
 ?>
