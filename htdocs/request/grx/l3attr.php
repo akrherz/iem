@@ -39,13 +39,14 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   $q .= sprintf("Drct: %s Speed: %s kts\\n", $row["drct"], $row["sknt"]);
   $icon = 1;
   if ($row["tvs"] != "NONE" || $row["meso"] != "NONE"){
-    $icon = 5;
     $q .= sprintf("TVS: %s MESO: %s\\n", $row["tvs"], $row["meso"]);
   }
   if ($row["poh"] != "0" || $row["posh"] != "0"){
     $icon = 2;
     $q .= sprintf("POH: %s POSH: %s MaxSize: %s\\n", $row["poh"], $row["posh"], $row["max_size"]);
   }
+  if ($row["meso"] != "NONE"){ $icon = 6; }
+  if ($row["tvs"] != "NONE"){ $icon = 5; }
   $q .= sprintf("VIL: %s Max DBZ: %s Hght: %s Top: %s", $row["vil"], $row["max_dbz"], $row["max_dbz_height"] *1000, $row["top"] * 1000);
   echo sprintf("Object: %.4f,%.4f
   Threshold: 999
