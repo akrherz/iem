@@ -1,0 +1,19 @@
+<?php
+include("../../config/settings.inc.php");
+
+$TITLE = "Chase Chase Chase - Submit Forecast";
+$NOCONTENT = 1;
+$HEADEXTRA = "
+<link rel='stylesheet' type='text/css' href='../ext/resources/css/ext-all.css'/>
+<link rel='stylesheet' type='text/css' href='../ext/ux/form/Spinner.css'/>
+<script type='text/javascript' src='../ext/adapter/ext/ext-base.js'></script>
+<script type='text/javascript' src='../ext/ext-all.js'></script>
+  <script src='http://dev.openlayers.org/nightly/OpenLayers.js'></script>
+  <script src='ModifyFeature_mod.js'></script>
+  <script src='GeoExt.js'></script>
+  <script src='static.js'></script>
+";
+include("$rootpath/include/header.php");
+?>
+
+<?php include("$rootpath/include/footer.php");
