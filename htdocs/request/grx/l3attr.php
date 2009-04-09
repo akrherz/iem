@@ -24,7 +24,7 @@ header("Content-type: text/plain");
 echo "Refresh: 3
 Threshold: $thres
 Title: $title
-IconFile: 1, 15, 25, 8, 25, \"http://www.spotternetwork.org/icon/arrows.png\"
+IconFile: 1, 32, 32, 4, 32, \"http://mesonet.agron.iastate.edu/request/grx/storm_attribute.png\"
 Font: 1, 11, 1, \"Courier New\"
 ";
 
@@ -34,7 +34,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   $d = intval( $row["drct"] ) - 180;
   if ($d < 0){ $d = 360 - $d; }
   $ts = strtotime($row["valid"]);
-  $q = sprintf(" K%s [%s] %s Z\\n", $row["nexrad"], $row["storm_id"], gmdate("H:i", $ts) );
+  $q = sprintf("K%s [%s] %s Z\\n", $row["nexrad"], $row["storm_id"], gmdate("H:i", $ts) );
   $q .= sprintf("Drct: %s Speed: %s kts\\n", $row["drct"], $row["sknt"]);
   if ($row["tvs"] != "NONE" || $row["meso"] != "NONE"){
     $q .= sprintf("TVS: %s MESO: %s\\n", $row["tvs"], $row["meso"]);
@@ -42,10 +42,10 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   if ($row["poh"] != "0" || $row["posh"] != "0"){
     $q .= sprintf("POH: %s POSH: %s MaxSize: %s\\n", $row["poh"], $row["posh"], $row["max_size"]);
   }
-  $q .= sprintf("VIL: %s Max DBZ: %s Hght: %s Top: %s\\n", $row["vil"], $row["max_dbz"], $row["max_dbz_height"] *1000, $row["top"] * 1000);
+  $q .= sprintf("VIL: %s Max DBZ: %s Hght: %s Top: %s", $row["vil"], $row["max_dbz"], $row["max_dbz_height"] *1000, $row["top"] * 1000);
   echo sprintf("Object: %.4f,%.4f
   Threshold: 999
-  Icon: 0,0,%s,1,1,\" %s \"
+  Icon: 0,0,%s,1,1,\"%s\"
 END:\n", $row['lat'], $row['lon'], $d, $q);
 }
 
