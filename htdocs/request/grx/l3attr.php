@@ -24,7 +24,7 @@ header("Content-type: text/plain");
 echo "Refresh: 3
 Threshold: $thres
 Title: $title
-IconFile: 1, 32, 32, 0, 0, \"http://mesonet.agron.iastate.edu/request/grx/storm_attribute.png\"
+IconFile: 1, 32, 32, 16, 16, \"http://mesonet.agron.iastate.edu/request/grx/storm_attribute.png\"
 Font: 1, 11, 1, \"Courier New\"
 ";
 
@@ -33,6 +33,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
   $d = intval( $row["drct"] ) - 180;
   if ($d < 0){ $d = 360 - $d; }
+  $d = 0;
   $ts = strtotime($row["valid"]);
   $q = sprintf("K%s [%s] %s Z\\n", $row["nexrad"], $row["storm_id"], gmdate("H:i", $ts) );
   $q .= sprintf("Drct: %s Speed: %s kts\\n", $row["drct"], $row["sknt"]);
