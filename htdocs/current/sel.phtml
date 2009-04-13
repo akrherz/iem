@@ -1,26 +1,30 @@
 <?php
  include("../../config/settings.inc.php");
  include("$rootpath/include/database.inc.php");
+ $conn = iemdb("postgis");
  $width = isset($_GET["width"])? $_GET["width"] : "320";
+ $sel = isset($_GET["sel"]) ? intval($_GET["sel"]) : -1;
+$rs = pg_prepare($conn, "SELECT", "SELECT * from watches_current 
+      WHERE sel = $1");
+
  $REFRESH = "<meta http-equiv=\"refresh\" content=\"300;\">";
- $TITLE = "Current Watches";
+ $TITLE = "IEM | SPC Watches Overview";
+ $THISPAGE = "current-radar";
  include("$rootpath/include/header.php");
 ?>
-<b>Nav:</b> <a href="/current/radar.phtml">Current RADAR Products</a> > Watches Overview
 
-<?php if (isset($_GET["sel"])) { ?>
+<?php if ($sel != -1) { 
+ $rs = pg_execute($conn, "SELECT", Array("SEL". $sel));
+?>
 
 <a href="sel.phtml">View All Watches</a>
 
-<p><img src="/data/sel<?php echo intval($_GET["sel"]); ?>comp.png" />
+<p><img src="/data/sel<?php $sel; ?>comp.png" />
 <?php
 
- $conn = iemdb("postgis");
- $sql = "SELECT * from watches_current WHERE sel = 'SEL". intval($_GET["sel"])."'";
- $rs = pg_exec($conn, $sql);
  $row = @pg_fetch_array($rs);
 
- echo $row["report"] ;
+ echo "<br /><pre>". $row["report"] ."</pre>";
 
 ?>
 <?php } else { ?>
@@ -44,6 +48,7 @@
  <td><b>SEL8:</b><br /><a href="sel.phtml?sel=8"><img src="/data/sel8comp.png" width="<?php echo $width; ?>"></a></td>
  <td><b>SEL9:</b><br /><a href="sel.phtml?sel=9"><img src="/data/sel9comp.png" width="<?php echo $width; ?>"></a></td><tr>
 </table>
-<?php } ?>
-
-<?php include("$rootpath/include/footer.php"); ?>
+<?php
+ } 
+include("$rootpath/include/footer.php"); 
+?>
