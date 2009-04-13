@@ -19,7 +19,7 @@ $rs = pg_prepare($conn, "SELECT", "SELECT * from watches_current
 
 <a href="sel.phtml">View All Watches</a>
 
-<p><img src="/data/sel<?php $sel; ?>comp.png" />
+<p><img src="/data/sel<?php echo $sel; ?>comp.png" />
 <?php
 
  $row = @pg_fetch_array($rs);
