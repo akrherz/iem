@@ -60,7 +60,6 @@ include("$rootpath/include/header.php"); ?>
 <p><h3 class="subtitle">Misc</h3>
 
 <br>Cool picture of <a href="http://www.ocs.ou.edu/whatsnew/ice_tower.jpg">ice deposition</a> on an Oklahoma Mesonet site.
-<br>Another cool picture of <a href="week0235_med.jpg">ice on a plane</a>.
 
 <p></p>
 <p></p>
