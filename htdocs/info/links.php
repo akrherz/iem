@@ -10,14 +10,15 @@ include("$rootpath/include/header.php"); ?>
 <div class="text">
 <h3 class="subtitle">Other State Mesonets:</h3>
 <ul>
- <li><a href="http://mesonet.tamu.edu/">Texas Mesonet</a></li>
- <li><a href="http://www.mesonet.ou.edu">Oklahoma Mesonet</a></li>
  <li><a href="http://www.awis.com/mesonet/index.html">Alabama Mesonet</a></li>
- <li><a href="http://pasc.met.psu.edu/PA_Climatologist/index.php">Pennsylvania Mesonet</a></li>
- <li><a href="http://www.mesonet.ttu.edu/">West Texas Mesonet</a></li>
- <li><a href="http://www.met.utah.edu/jhorel/html/mesonet/">Meso West</a></li>
  <li><a href="http://www.georgiaweather.net/">Georgia Environmental Network</a></li>
  <li><a href="http://www.kymesonet.org">Kentucky Mesonet</a></li>
+ <li><a href="http://www.met.utah.edu/jhorel/html/mesonet/">Meso West</a></li>
+ <li><a href="http://agebb.missouri.edu/weather/">Missouri</a></li>
+ <li><a href="http://www.mesonet.ou.edu">Oklahoma Mesonet</a></li>
+ <li><a href="http://pasc.met.psu.edu/PA_Climatologist/index.php">Pennsylvania Mesonet</a></li>
+ <li><a href="http://mesonet.tamu.edu/">Texas Mesonet</a></li>
+ <li><a href="http://www.mesonet.ttu.edu/">West Texas Mesonet</a></li>
 </ul>
 
 <h3 class="subtitle">Iowa Links:</h3>
