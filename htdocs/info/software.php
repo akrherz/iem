@@ -11,12 +11,12 @@ of some of the software utilized to make the IEM work.<p>
 <h3 class="subtitle"><a class="noul" href="http://www.redhat.com">RedHat Linux</a></h3>
 A very robust distribution of the GNU/Linux operating system.<p>
 
-<h3 class="subtitle"><a class="noul" href="http://oss.sgi.com/projects/xfs">SGI XFS for Linux</a></h3>
-The Linux core (the kernel).  A XFS enabled kernel supports the high performance
-and scalable XFS journaled file-system.<p>
-
 <h3 class="subtitle"><a class="noul" href="http://www.postgresql.org">PostgreSQL Database</a></h3>
 Open-Source database software that stores IEM data.<p>
+
+<h3 class="subtitle"><a class="noul" href="http://postgis.refractions.net">PostGIS</a></h3>
+Spatial datablade for PostgreSQL.<p>
+
 
 <h3 class="subtitle"><a class="noul" href="http://www.apache.org">Apache Web-Server</a></h3>
 Open-Source web server.<p>
