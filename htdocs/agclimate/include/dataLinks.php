@@ -10,6 +10,7 @@
   <A HREF="display.php?prod=1">Max/Min Air Temps</A><br>
   <A HREF="display.php?prod=2">Avg 4in Soil Temps</A><br>
   <A HREF="display.php?prod=3">Max/Min 4in Soil Temps</A><br>
+  <a href="../data/soilt_day1.png">County-based Soil Temps</a><br />
   <A HREF="display.php?prod=4">Solar Radiation Values</A><br>
   <A HREF="display.php?prod=5">Precipitation</A><br>
   <A HREF="display.php?prod=6">Potential E-T</A><br>
