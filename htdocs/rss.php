@@ -21,7 +21,11 @@
   echo "<author>akrherz@iastate.edu (Daryl Herzmann)</author>\n";
   echo "<link>http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</link>\n";
   echo "<guid>http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</guid>\n";
-  echo "<description>&lt;pre&gt;". $row["body"] ."&lt;/pre&gt;</description>\n";
+  if ( intval($row["id"]) < 830){
+    echo "<description>&lt;pre&gt;". $row["body"] ."&lt;/pre&gt;</description>\n";
+  } else {
+    echo "<description>". htmlentities($row["body"]) ."</description>\n";
+  }
   echo "</item>\n";
  }
  echo "</channel>\n";
