@@ -9,9 +9,9 @@ $url = isset($_POST["url"]) ? $_POST["url"]: "";
 
 if (strlen($title) > 0) {
  $conn = iemdb("mesosite");
- pg_exec($conn, "INSERT into news(body, author, title, url) VALUES 
-  ('$body', '$author', '$title', '$url')");
- pg_close($conn);
+ $rs = pg_prepare($conn, "INJECTOR", "INSERT into 
+       news(body, author, title, url) VALUES ($1,$2,$3,$4)");
+ pg_execute($conn, "INJECTOR", Array($body, $author, $title, $url));
  echo "<p>Story entered!";
 }
 ?>
@@ -21,8 +21,6 @@ if (strlen($title) > 0) {
 </head>
 <body>
 
-<a href="/admin/">Back to admin home</a>
-
 <p>
 <form method="POST" action="add_news.phtml">
 
@@ -31,7 +29,7 @@ if (strlen($title) > 0) {
 <p>Reference URL?:
 <input type="text" name="url" size="50">
 
-<p>Enter Story:
+<p>Enter Story (HTML please :) ):
 <textarea NAME='body' wrap="hard" ROWS="20" COLS="70"></textarea>
 
 <p>Enter Author:
