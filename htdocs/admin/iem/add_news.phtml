@@ -2,8 +2,8 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 
-$title = isset($_POST["title"]) ? addslashes($_POST["title"]) : "";
-$body = isset($_POST["body"]) ? addslashes($_POST["body"]): "";
+$title = isset($_POST["title"]) ? $_POST["title"] : "";
+$body = isset($_POST["body"]) ? $_POST["body"]: "";
 $author = isset($_POST["author"]) ? $_POST["author"]: "";
 $url = isset($_POST["url"]) ? $_POST["url"]: "";
 
