@@ -59,7 +59,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
   if ($id < 830) {
     echo "<br /><blockquote><pre>". $row["body"] ."</pre></blockquote>";
   } else {
-    echo "<br />". $row["body"] ."<br />";
+    echo "<br /><div style=\"width: 800px;\">". $row["body"] ."</div><br />";
   }
 
 } // End of for
