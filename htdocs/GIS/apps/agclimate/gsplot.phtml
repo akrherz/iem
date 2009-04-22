@@ -5,8 +5,8 @@ include("$rootpath/include/agclimateLoc.php");
 include("$rootpath/include/database.inc.php");
 
 $var = isset($_GET["var"]) ? $_GET["var"] : "gdd50";
-$year = isset($_GET["year"]) ? $_GET["year"] : 2007;
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]:  5;
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]:  3;
 $emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: 10;
 $sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
 $eday = isset($_GET["eday"]) ? $_GET["eday"]: 1;
