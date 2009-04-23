@@ -1,3 +1,4 @@
+MAP
 # Start of map file
 #
 # Sample map file for a chameleon app.
@@ -295,6 +296,72 @@ LAYER
   END
 END
 
+#
+LAYER
+  CONNECTIONTYPE postgis
+  NAME "cnttime"
+  DUMP true
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  DATA "geom from (select b.geom, b.oid as boid, b.tempval / 24 / 60 as t from roads_base b) as foo using UNIQUE boid using SRID=26915"
+  STATUS OFF
+  TYPE LINE
+  DUMP TRUE
+  METADATA
+    "wfs_title" "Iowa Limited Visibility"
+    "wms_title" "Iowa Limited Visibility"
+  END
+  PROJECTION
+   "init=epsg:26915"
+  END
+  TEMPLATE "roadsq.html"
+  LABELCACHE OFF
+  CLASS
+    NAME '0-4'
+    EXPRESSION ([t] < 4)
+    STYLE
+      COLOR 0 0 255
+      SIZE 4
+      SYMBOL 'circle'
+    END
+  END
+  CLASS
+    NAME '4-7'
+    EXPRESSION ([t] >= 4 and [t] < 7)
+    STYLE
+      COLOR 51 255 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
+  END
+  CLASS
+    NAME '7-10'
+    EXPRESSION ([t] >= 7 and [t] < 10)
+    STYLE
+      COLOR 255 255 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
+  END
+  CLASS
+    NAME '10-13'
+    EXPRESSION ([t] >= 10 and [t] < 13)
+    STYLE
+      COLOR 255 204 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
+  END
+  CLASS
+    NAME '13+'
+    EXPRESSION ([t] >= 13)
+    STYLE
+      COLOR 255 102 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
+  END
+END
+
 
 #
 LAYER
@@ -303,7 +370,7 @@ LAYER
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
   DATA "geom from (select b.oid as boid, (CASE WHEN c.limited_vis THEN 1 ELSE 0 END) as lv, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DUMP TRUE
   METADATA
@@ -333,7 +400,7 @@ LAYER
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
   DATA "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DUMP TRUE
   METADATA
@@ -616,7 +683,7 @@ LAYER
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
   DATA "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type = 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   METADATA
     "wfs_title" "Iowa Interstates Conditions"
@@ -894,7 +961,7 @@ END
 
 LAYER
   NAME states
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/26915/us/states.shp
   METADATA
@@ -915,11 +982,27 @@ LAYER
   TRANSPARENCY ALPHA
 END
 
+LAYER
+  NAME colorkey-small
+  TYPE POINT
+  STATUS OFF
+  TRANSFORM FALSE
+  FEATURE
+    #POINTS 320 425 END
+    POINTS 160 30 END
+  END
+  LABELCACHE ON
+  CLASS
+    STYLE
+      SYMBOL 'logokey'
+    END
+  END
+END
 
 LAYER
   NAME colorkey
   TYPE POINT
-  STATUS ON
+  STATUS OFF
   TRANSFORM FALSE
   FEATURE
     #POINTS 320 425 END
@@ -936,7 +1019,7 @@ END
 LAYER
   NAME iemlogo
   TYPE POINT
-  STATUS ON
+  STATUS OFF
   TRANSFORM FALSE
   FEATURE
     #POINTS 320 425 END
@@ -954,7 +1037,7 @@ END
 LAYER
   NAME ia511
   TYPE POINT
-  STATUS ON
+  STATUS OFF
   TRANSFORM FALSE
   FEATURE
     #POINTS 320 425 END
@@ -982,7 +1065,8 @@ LAYER
   CLASS
     NAME 'credits'
     LABEL
-      COLOR 250 250 0
+      BACKGROUNDCOLOR 0 0 0
+      COLOR 255 255 255
       TYPE BITMAP
       SIZE medium
       POSITION CR
