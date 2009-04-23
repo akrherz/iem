@@ -4,9 +4,7 @@ $network = isset($_GET['network']) ? $_GET['network'] : 'IA_COOP';
   $winter = 1;
   $shef = isset($_GET['shef']) ? $_GET['shef'] : 0;
   $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
-?>
 
-<?php  
 $TITLE = "IEM | COOP | Last Observation";
 $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
 	<!--//BEGIN Script
@@ -85,7 +83,7 @@ $cols = Array("ts" => "Valid", "county" => "County",
   "tmpf" => "Ob Temperature", "max_tmpf" => "24 hour High",
   "min_tmpf" => "24 hour Low", "snow" => "24 hour Snowfall",
   "snowd" => "Snowfall Depth", "pday" => "24 hour rainfall",
-  "phour" => "Rainfall One Hour");
+  "phour" => "Rainfall One Hour", "snoww" => "Snow Water Equivalent");
 ?>
 
 <?php $current_network = "COOP"; include("$rootpath/include/current_bar.inc.php"); ?>
