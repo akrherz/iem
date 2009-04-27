@@ -5,15 +5,10 @@ include ("../../../include/jpgraph/jpgraph_bar.php");
 // 16 Oct 2007 select extract(year from day) as year, count(*) from (select day, count(*) from alldata WHERE precip >= 4 and year > 1950 and stationid IN (select stationid from alldata WHERE day = '1971-01-01') GROUP by day) as foo WHERE count > 1 GROUP by year ORDER by count ASC;
 
 
-$d=array(92,100,104,106,108,109,207);
-$datax=array("1945 (Least)\nJun 23 - Sep 23", 
-             "2008\nMay 26 - Sep 03",
-             "1935\nJun 12 - Sep 24",
-             "1913\nMay 27 - Sep 10",
-             "1957\nJun 03 - Sep 19",
-             "1993\nMay 27 - Sep 13",
-             "1910 (Most)\nMar 23 - Oct 16",
-);
+$d2008=array(45.94, 48.33, 47.95, 49.42, 52.42);
+$d1993=array(53.07, 63.19, 60.12, 58.88, 58.58);
+$davg=array(33.15, 37.27, 33.41, 34.72, 39.34);
+$datax=array("Waterloo", "Iowa City", "Cedar Rapids", "Des Moines", "Lamoni");
 
 // Size of graph
 $width=300; 
@@ -29,7 +24,7 @@ $graph->img->SetAntiAliasing();
 $graph->SetFrame(false);
 
 // Rotate graph 90 degrees and set margin
-$graph->Set90AndMargin(110,5,40,28);
+$graph->Set90AndMargin(90,20,20,28);
 
 // Set white margin color
 $graph->SetMarginColor('white');
@@ -41,8 +36,8 @@ $graph->SetBox();
 $graph->SetBackgroundGradient('blue','lightblue',GRAD_HOR,BGRAD_PLOT);
 
 // Setup title
-$graph->title->Set("Days between first and last 90°F");
-$graph->subtitle->Set("Based on Iowa data 1893-2008");
+$graph->title->Set("Yearly Rainfall Totals");
+//$graph->subtitle->Set("Ames Climate Site AMSI4 since 1951");
 $graph->title->SetFont(FF_VERDANA,FS_BOLD,11);
 
 // Setup X-axis
@@ -67,24 +62,48 @@ $graph->legend->SetLayout(LEGEND_HOR);
 
 
 // Now create a bar pot
-$bplot = new BarPlot($d);
+$bplot = new BarPlot($d2008);
 $bplot->SetShadow();
-$bplot->SetFillGradient('orange','red',GRAD_HOR);
+$bplot->SetFillGradient('purple','lightblue',GRAD_HOR);
 $bplot->value->Show();
 $bplot->value->SetFont(FF_ARIAL,FS_BOLD,10);
 //$bplot->value->SetAlign('left','center');
-$bplot->value->SetColor("black");
-$bplot->value->SetFormat('%.0f');
-//$bplot->SetLegend("2008");
+$bplot->value->SetColor("white");
+$bplot->value->SetFormat('%.2f');
+$bplot->SetLegend("2008");
 $bplot->SetValuePos('max');
 
-$graph->Add($bplot);
+$bplot2 = new BarPlot($d1993);
+$bplot2->SetShadow();
+$bplot2->SetFillGradient('red','orange',GRAD_HOR);
+$bplot2->value->Show();
+$bplot2->value->SetFont(FF_ARIAL,FS_BOLD,10);
+//$bplot->value->SetAlign('left','center');
+$bplot2->value->SetColor("white");
+$bplot2->value->SetFormat('%.2f');
+$bplot2->SetLegend("1993");
+$bplot2->SetValuePos('max');
+
+$bplot3 = new BarPlot($davg);
+$bplot3->SetShadow();
+$bplot3->SetFillGradient('green','darkblue',GRAD_HOR);
+$bplot3->value->Show();
+$bplot3->value->SetFont(FF_ARIAL,FS_BOLD,10);
+//$bplot->value->SetAlign('left','center');
+$bplot3->value->SetColor("white");
+$bplot3->value->SetFormat('%.2f');
+$bplot3->SetLegend("Climate");
+$bplot3->SetValuePos('max');
+
+// Add the bar to the graph
+$gp = new GroupBarPlot( Array($bplot3,$bplot,$bplot2) );
+$graph->Add($gp);
 
 // Add some explanation text
-$txt = new Text("* 148 days is the climate mean");
+$txt = new Text("* 2008 data unofficial, Sep 2008 very close");
 $txt->SetPos(280,240);
 $txt->SetFont(FF_COMIC,FS_NORMAL,8);
-$graph->Add($txt);
+//$graph->Add($txt);
 
 // .. and stroke the graph
 $graph->Stroke();
