@@ -1,30 +1,42 @@
 <?php
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+$dbconn = iemdb('access');
 include("$rootpath/include/mlib.php");
 
+$radtimes = Array();
+$n0r = Array();
+$fc = file('ames.txt');
+while (list ($line_num, $line) = each ($fc)) {
+  $tokens = split (" ", $line);
+  $radtimes[] = strtotime( $tokens[0] ." ". $tokens[1] ) - (5*3600);
+  $v = floatval($tokens[3]);
+  if ($v > 0){
+   $n0r[] = $v;
+  } else {
+   $n0r[] = "";
+  }
+}
 
-$times = Array();
-$tmpf = Array();
-$sknt = Array();
-$vsby = Array();
-
-$dbconn = iemdb('access');
-$sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, vsby
-  from current_log WHERE station = 'SDA' and valid > '2009-02-09' and dwpf > -99 ORDER by valid ASC";
+$sql = "SELECT valid, tmpf, dwpf, sknt, vsby, pday
+  from current_log WHERE station = 'SAMI4' and valid > '2009-04-13 06:00' 
+  and valid < '2009-04-13 13:00' and dwpf > -99 ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
-
+$times = Array();
+$dwpf = Array();
+$tmpf = Array();
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
-  $times[] = $row["epoch"];
-  $tmpf[] = $row["tmpf"];
-  $sknt[] = $row["sknt"] * 1.15;
-  $vsby[] = $row["vsby"];
+  $times[] = strtotime( $row["valid"] );
+  $dwpf[] = $row["dwpf"];
+  $tmpf[] = $row["tmpf"]  ;
 }
+
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
 include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 
 
 // Create the graph. These two calls are always required
@@ -39,18 +51,20 @@ $graph->xaxis->SetLabelFormatString("Md h A", true);
 $graph->xaxis->SetPos("min");
 
 $graph->y2axis->SetTitleMargin(20);
-$graph->y2axis->SetColor("blue");
-$graph->y2axis->title->SetColor("blue");
+//$graph->yaxis->SetColor("blue");
+//$graph->yaxis->title->SetColor("blue");
+$graph->y2axis->SetColor("red");
+$graph->y2axis->title->SetColor("red");
 $graph->xaxis->SetTitleMargin(70);
 
 $graph->yaxis->title->SetFont(FF_FONT2,FS_BOLD,16);
 $graph->y2axis->title->SetFont(FF_FONT2,FS_BOLD,16);
 $graph->xaxis->title->SetFont(FF_FONT2,FS_BOLD,16);
 //$graph->xaxis->SetTitle("Valid Local Time");
-$graph->yaxis->SetTitle("Temp [F] or Wind [MPH]");
-$graph->y2axis->SetTitle("Visibility [mile]");
+$graph->yaxis->SetTitle("Temperature [F]");
+$graph->y2axis->SetTitle("Reflectivity [dBZ]");
 //$graph->tabtitle->Set('Recent Comparison');
-$graph->title->Set('Spencer [KSPW] Time Series');
+$graph->title->Set('Ames SchoolNet + NEXRAD');
 
   $graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);
   $graph->SetColor('wheat');
@@ -65,23 +79,25 @@ $graph->title->Set('Spencer [KSPW] Time Series');
 
 
 // Create the linear plot
-$lineplot=new LinePlot($vsby, $times);
-$lineplot->SetLegend("Visibility");
-$lineplot->SetColor("blue");
-$graph->AddY2($lineplot);
+$lineplot=new LinePlot($dwpf, $times);
+$lineplot->SetLegend("Dew Point");
+$lineplot->SetColor("green");
+$lineplot->SetWeight(3);
+$graph->Add($lineplot);
 
-// Create the linear plot
-$lineplot2=new LinePlot($tmpf,$times);
-$lineplot2->SetLegend("Air Temp");
-$lineplot2->SetColor("red");
-$graph->Add($lineplot2);
-
-$lineplot3=new LinePlot($sknt,$times);
-$lineplot3->SetLegend("Wind Speed");
+$lineplot3=new LinePlot($tmpf, $times);
+$lineplot3->SetLegend("Air Temp");
 $lineplot3->SetColor("black");
+$lineplot3->SetWeight(3);
 $graph->Add($lineplot3);
 
-// Add the plot to the graph
+
+// Create the linear plot
+$lineplot2=new BarPlot($n0r,$radtimes);
+$lineplot2->SetLegend("NEXRAD");
+$lineplot2->SetFillColor("red");
+$lineplot2->SetWidth(5);
+$graph->AddY2($lineplot2);
 
 // Display the graph
 $graph->Stroke();

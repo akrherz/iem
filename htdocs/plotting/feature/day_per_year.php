@@ -62,7 +62,7 @@ $colors = Array(
 for($year=2000;$year<2009;$year++)
 {
   $sql = "SELECT extract(EPOCH from (valid + '". (2008-$year) ." years'::interval)) as epoch, tmpf, dwpf, sknt
-  from t$year WHERE station = 'DSM' and date(valid) = '${year}-12-01' and dwpf > -99 ORDER by valid ASC";
+  from t$year WHERE station = 'DSM' and date(valid) = '${year}-02-15' and dwpf > -99 ORDER by valid ASC";
   $rs = pg_query($dbconn, $sql);
 
   $times = Array();
