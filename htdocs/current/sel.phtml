@@ -31,24 +31,11 @@ $rs = pg_prepare($conn, "SELECT", "SELECT * from watches_current
 
 <p>Click on an image to get an enlarged view as well as the text for the watch. These images are for the last 10 areas in which watches have been valid for.  If the watch is currently valid, it will appear on the plot.
 
-<table>
-<tr>
- <td><b>SEL0:</b><br /><a href="sel.phtml?sel=0"><img src="/data/sel0comp.png" width="<?php echo $width; ?>"></a></td>
- <td><b>SEL1:</b><br /><a href="sel.phtml?sel=1"><img src="/data/sel1comp.png" width="<?php echo $width; ?>"></a></td><tr>
-<tr>
- <td><b>SEL2:</b><br /><a href="sel.phtml?sel=2"><img src="/data/sel2comp.png" width="<?php echo $width; ?>"></a></td>
- <td><b>SEL3:</b><br /><a href="sel.phtml?sel=3"><img src="/data/sel3comp.png" width="<?php echo $width; ?>"></a></td><tr>
-<tr>
- <td><b>SEL4:</b><br /><a href="sel.phtml?sel=4"><img src="/data/sel4comp.png" width="<?php echo $width; ?>"></a></td>
- <td><b>SEL5:</b><br /><a href="sel.phtml?sel=5"><img src="/data/sel5comp.png" width="<?php echo $width; ?>"></a></td><tr>
-<tr>
- <td><b>SEL6:</b><br /><a href="sel.phtml?sel=6"><img src="/data/sel6comp.png" width="<?php echo $width; ?>"></a></td>
- <td><b>SEL7:</b><br /><a href="sel.phtml?sel=7"><img src="/data/sel7comp.png" width="<?php echo $width; ?>"></a></td><tr>
-<tr>
- <td><b>SEL8:</b><br /><a href="sel.phtml?sel=8"><img src="/data/sel8comp.png" width="<?php echo $width; ?>"></a></td>
- <td><b>SEL9:</b><br /><a href="sel.phtml?sel=9"><img src="/data/sel9comp.png" width="<?php echo $width; ?>"></a></td><tr>
-</table>
 <?php
- } 
+  for ($i=0;$i<10;$i++){
+    echo "<div style=\"float: left;\"><b>SEL${i}:</b><br /><a href=\"sel.phtml?sel=${i}\"><img src=\"$rooturl/data/sel${i}comp.png\" width=\"$width\"></a></div>";
+  }
+
+} 
 include("$rootpath/include/footer.php"); 
 ?>
