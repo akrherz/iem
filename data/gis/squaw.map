@@ -1,0 +1,100 @@
+MAP
+NAME squaw
+STATUS ON
+EXTENT 410000 4635000 470000 4690000
+SIZE 200 200
+UNITS METERS
+#SHAPEPATH "/mesonet/www/apps/squaw/data/gis"
+IMAGECOLOR 255 255 255
+IMAGETYPE PNG
+TRANSPARENT off
+INTERLACE off
+
+SYMBOL
+   NAME 'circle'
+   TYPE ELLIPSE
+   Filled TRUE
+   POINTS 1 1 END
+END
+
+PROJECTION
+  "init=epsg:26915"
+END
+
+WEB
+  TEMPLATE bogus.html
+  MINSCALE 90000
+  MAXSCALE 40000000
+  IMAGEPATH "/mesonet/www/html/tmp/"
+  IMAGEURL "/tmp/"
+END
+
+LAYER
+  NAME squaw_basin
+  DATA "shape/basins.shp"
+  TYPE LINE
+  PROJECTION
+   "init=epsg:26915"
+  END
+  STATUS ON
+  CLASS
+    STYLE
+      COLOR 0 0 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 250 250 250
+      SYMBOL 'circle'
+      SIZE 2
+    END
+  END
+END
+
+LAYER
+	NAME basins
+	TYPE ANNOTATION
+	PROJECTION
+		"init=epsg:26915"
+	END
+	STATUS ON
+	LABELCACHE ON
+  CLASS
+    LABEL
+      COLOR 250 250 0
+      TYPE BITMAP
+      SIZE LARGE
+      FORCE TRUE
+      POSITION CC
+      OUTLINECOLOR 0 0 0
+    END
+  END
+END
+
+LAYER
+  NAME iacounties
+  DATA "/mesonet/data/gis/static/shape/26915/iacounties.shp"
+  TYPE LINE
+  PROJECTION
+    "init=epsg:26915"
+  END
+  STATUS ON
+  LABELCACHE OFF
+  CLASS
+    COLOR 190 190 190
+    SYMBOL 'circle'
+    SIZE 1
+  END
+END
+
+LAYER
+  NAME background
+  DATA "/mesonet/data/gis/static/images/26915/iatopo.png"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:26915"
+  END
+  STATUS ON
+END
+
+END
