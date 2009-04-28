@@ -9,8 +9,6 @@ $season = isset($_GET["season"]) ? intval($_GET["season"]) : date("Y");
 $segid = isset($_GET["segid"]) ? intval($_GET["segid"]) : "";
 $valid = isset($_GET["valid"]) ? substr($_GET["valid"],0,16) : "";
 
-$basetable = "roads_base";
-
 $THISPAGE = "roads-history";
 $TITLE = "Historical Iowa Winter Road Conditions";
 include("$rootpath/include/header.php"); 

@@ -39,15 +39,16 @@ $big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.gif", $row["
 ?>
 <a href="cat.php?day=<?php echo $day; ?>&offset=-1">Previous Feature</a> &nbsp; &nbsp; <a href="cat.php?day=<?php echo $day; ?>&offset=+1">Next Feature</a>
 <hr />
+<!-- Begin Feature Display -->
 <div style="width: 640px;">
 <div style="float: left; padding: 5px; ">
 <img src="<?php echo $thumb; ?>" style="margin: 5px;">
 <br /><a href="<?php echo $big; ?>">View larger image</a>
-<br /><?php echo $row["caption"]; ?>
+<br /><?php echo wordwrap($row["caption"],40,"<br />"); ?>
 </div>
+<h3><?php echo $row["title"]; ?></h3>
+<font size="-1"><?php echo $row["webdate"]; ?></font>
 <?php
-  echo "<h3>". $row["title"] ."</h3>\n";
-  echo "<font size='-1' style='color:black'>". $row["webdate"] ."</font>\n";
   echo "<br><div class='story'>". $row["story"] ;
   if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 0))
   {

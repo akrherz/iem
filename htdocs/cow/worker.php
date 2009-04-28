@@ -113,7 +113,7 @@ for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
     if (pg_num_rows($brs) > 0) {
        $brow = pg_fetch_array($brs,0);
        $warnings[$key]["sharedborder"] = $brow["s"];
-    }
+    } 
   }
   $warnings[$key]["verify"] = 0;
   if ($row["gtype"] == "C")
