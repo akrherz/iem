@@ -1,4 +1,4 @@
-#!/mesonet/python-2.4/bin/python
+#!/mesonet/python/bin/python
 # Dump LSRs to a shapefile
 
 import dbflib, mx.DateTime, zipfile, os, sys, shutil, cgi

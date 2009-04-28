@@ -1,4 +1,4 @@
-#!/mesonet/python-2.4/bin/python
+#!/mesonet/python/bin/python
 # Something to dump current warnings to a shapefile
 # 28 Aug 2004 port to iem40
 
