@@ -1,0 +1,122 @@
+<?php 
+ /* model.phtml */
+ include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$pg = iemdb("squaw");
+ include("$rootpath/include/squaw/constants.inc.php");
+ include("$rootpath/include/squaw/model.inc.php");
+ include("$rootpath/include/squaw/forms.inc.php");
+ $ts = mktime($_GET["hour"],0,0, $_GET["month"], $_GET["day"], $_GET["year"]);
+ $ts1 = mktime($_GET["rhour1"],0,0, $_GET["month"], $_GET["day"], $_GET["year"]);
+ $ts2 = mktime($_GET["rhour2"],0,0, $_GET["month"], $_GET["day"], $_GET["year"]);
+
+ $mymodel = new flood_model($ts);
+ $mymodel->loglevel = $mymodel->INFO;
+ $mymodel->addRecessionInfo($ts1, $_GET["rflow1"], $ts2, $_GET["rflow2"]);
+ $mymodel->setSelectStorms($_GET);
+ $mymodel->setSelectScenarios($_GET);
+ $mymodel->run();
+
+ $fref24 = $mymodel->plot24HCurve();
+ $fref = $mymodel->plotRecessionCurve();
+ $rmap = $mymodel->rainfallMap();
+
+?>
+<?php $THISPAGE = "model"; include("$rootpath/include/squaw/header.inc.php"); ?>
+
+<div id="content">
+
+<?php if ( isset($mymodel->message) )
+{ ?>
+<div style="background: #ff0; border: 1px #000 solid;"><b>Message:</b><?php echo $mymodel->message; ?></div>
+<?php } ?>
+
+<h3>Squaw Model Results:</h3>
+
+<h4>36 Hour Model Prediction</h4> 
+<img src="<?php echo $fref24; ?>">
+
+<h4>60 Hour Model Prediction</h4>
+<img src="<?php echo $fref; ?>">
+
+<div style="float: right;">
+<h4>Rainfall Map</h4>
+<img src="<?php echo $rmap; ?>">
+</div>
+
+<?php echo $mymodel->printInfo(); ?>
+
+<h4>Download Model results:</h4>
+<a href="<?php echo $mymodel->basinlogname; ?>">Comma Delimited</a>
+
+<h4>Model Settings:</h4>
+<form method="GET" action="model.phtml" name="mod">
+<input type="hidden" name="day" value="<?php echo $_GET["day"]; ?>">
+<input type="hidden" name="month" value="<?php echo $_GET["month"]; ?>">
+<input type="hidden" name="year" value="<?php echo $_GET["year"]; ?>">
+<input type="hidden" name="hour" value="<?php echo $_GET["hour"]; ?>">
+
+<table>
+<caption>Select Rainfall Events:</caption>
+<tbody>
+<?php
+ reset($mymodel->storms);
+ while (list($key,$value) = each($mymodel->storms) )
+ {
+   echo "<tr><td><input type=\"checkbox\" name=\"storms[]\" value=\"$key\" ";
+   if ($mymodel->selectedstorms == "" || 
+       in_array($key, $mymodel->selectedstorms)) 
+   {  echo "CHECKED=\"CHECKED\""; }
+   echo "><a href=\"$rootpath/squaw/storm/edit.phtml?id=$key\" target=\"_new\">$value</a></td></tr>";
+ }
+
+ if (sizeof($mymodel->storms) == 0) {
+  echo "<tr><th>No real storms found in database.</th></tr>\n";
+ }
+?>
+</tr></tbody></table>
+
+<p><table>
+<caption>Select Scenario Events:</caption>
+<tbody>
+<?php
+ reset($mymodel->scenarios);
+ while (list($key,$value) = each($mymodel->scenarios) )
+ {
+   echo "<tr><td><input type=\"checkbox\" name=\"scenarios[]\" value=\"$key\" ";
+   if ($mymodel->selectedscenarios != "" && 
+       in_array($key, $mymodel->selectedscenarios)) 
+   {  echo "CHECKED=\"CHECKED\""; }
+   echo "><a href=\"$rootpath/squaw/scenario/edit.phtml?id=$key\" target=\"_new\">$value</a></td></tr>";
+ }
+
+ if (sizeof($mymodel->scenarios) == 0) {
+  echo "<tr><th>No scenarios found in database.</th></tr>\n";
+ }
+?>
+</tr></tbody></table>
+
+
+<p><table>
+<caption>Set Baseflow Parameters:</caption>
+<thead>
+<tr>
+        <th>Time Index:</th><th>Hour:</th><th>Flow:</th></tr>
+</thead>
+                                                                                
+<tbody>
+<tr>
+        <td>1.</td><td><?php echo localHourSelect($_GET["rhour1"], "rhour1"); ?></td>
+                <td><input type="text" name="rflow1" size="6" value="<?php echo $_GET["rflow1"]; ?>"></td></tr>
+<tr>
+        <td>2.</td><td><?php echo localHourSelect($_GET["rhour2"], "rhour2"); ?></td>
+                <td><input type="text" name="rflow2" size="6" value="<?php echo $_GET["rflow2"]; ?>"></td></tr>
+</tbody>
+</table>
+
+<input type="submit" value="Re-Run Model">
+</form>
+
+</div>
+
+<?php include("$rootpath/include/footer.php"); ?>

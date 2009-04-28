@@ -1,0 +1,53 @@
+<?php 
+include_once("../../../config/settings.inc.php"); 
+$THISPAGE = "storm"; 
+include("$rootpath/include/squaw/header.inc.php"); 
+include("$rootpath/include/database.inc.php");
+$pg = iemdb("squaw");
+?>
+
+<div id="content">
+
+<h3>Storm Database:</h3>
+
+<div class="help">The Storm Editor allows you to create/delete/edit storm 
+events that are later used in the flood prediction model.  There are currently
+two options available within the Storm Editor.</div>
+
+<ul>
+	<li><a href="edit.phtml">Create a New Storm</a></li>
+</ul>
+
+<h4>Edit Recent Storms:</h4>
+<form name="f1" method="GET" action="edit.phtml">
+<select name="id">
+<?php
+ $sql = "SELECT id, name from storms WHERE created > (CURRENT_TIMESTAMP - '7 days'::interval) ORDER by name ASC";
+ $rs = pg_query($pg, $sql);
+
+while ($row = pg_fetch_array($rs))
+{
+	echo "<option value=\"". $row["id"] ."\">". $row["name"] ."\n";
+}
+?>
+</select>
+<input type="submit" value="Edit"></form>
+
+<h4>Edit Past Storms:</h4> 
+<form name="f2" method="GET" action="edit.phtml">
+<select name="id">
+<?php
+ $sql = "SELECT id, name from storms WHERE created < (CURRENT_TIMESTAMP - '7 days'::interval) ORDER by name ASC";
+ $rs = pg_query($pg, $sql);
+
+while ($row = pg_fetch_array($rs))
+{
+    echo "<option value=\"". $row["id"] ."\">". $row["name"] ."\n";
+}
+?>
+</select>
+<input type="submit" value="Edit"></form>
+
+
+</div>
+<?php include("$rootpath/include/footer.php");?>

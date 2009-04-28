@@ -1,0 +1,35 @@
+<?php include_once("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$pg = iemdb("squaw");
+$THISPAGE = "storm"; include("$rootpath/include/squaw/header.inc.php"); ?>
+
+<div id="content">
+
+<h3>Storm Scenario Database:</h3>
+
+<div class="help">
+This application allows you to edit the Storm Scenarios that are available
+for the model to use.  These scenarios have a relative sense of time.
+</div>
+
+<ul>
+	<li><a href="edit.phtml">Create a New Scenario</a></li>
+	<li><form method="GET" action="edit.phtml">Edit Scenario:
+<select name="id">
+<?php
+ $sql = "SELECT id, name from scenarios ORDER by id ASC";
+ $rs = pg_query($pg, $sql);
+
+while ($row = pg_fetch_array($rs))
+{
+	echo "<option value=\"". $row["id"] ."\">". $row["name"] ."\n";
+}
+?>
+</select>
+
+<input type="submit" value="Edit"></form></li>
+</ul>
+
+</div>
+
+<?php include("$rootpath/include/footer.php"); ?>
