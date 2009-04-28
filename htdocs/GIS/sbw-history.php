@@ -179,7 +179,7 @@ $sz0 = $row["area"];
   $map->drawLabelCache($img);
 
   $wc = ms_newLayerObj($map);
-  $wc->set("connectiontype", MS_POSTGIS);
+  $wc->setConnectionType( MS_POSTGIS );
   $wc->set("connection", $_DATABASES["postgis"] );
   $wc->set("status", MS_ON );
   $sql = sprintf("geom from (select oid, geom from sbw_$year WHERE oid = ". $row["oid"] .") as foo using unique oid using SRID=4326");
