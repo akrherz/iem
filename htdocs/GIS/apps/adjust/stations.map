@@ -1,3 +1,4 @@
+MAP
 #
 # Start of map file
 #
@@ -20,10 +21,10 @@ FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 #EXTENT 50000 4250000 890000 5080000
 #EXTENT 50000 4250000 890000 5080000
 #EXTENT 340000 4650000 640000 5110000
-#EXTENT -125 30 -60 45
+EXTENT -100 39 -94 43
 ##US
-EXTENT -2110437 -2251067 2548326 1239063
-UNITS METERS
+#EXTENT -2110437 -2251067 2548326 1239063
+#UNITS METERS
 
 # IEM Box
 #EXTENT -27018.228515625 4217628 939122.4375 5111577
@@ -214,7 +215,7 @@ LAYER
  PROJECTION
   "init=epsg:4326"
  END
- DATA "geom from (select n.geom, r.severity as s, n.nwsli from hvtec_nwsli n, riverpro r WHERE n.nwsli = r.nwsli and n.nwsli IN (select distinct hvtec_nwsli from warnings_2008 WHERE phenomena = 'FL' and status NOT IN ('EXP','CAN')) ) as foo USING unique nwsli using SRID=4326"
+ DATA "geom from (select n.geom, r.severity as s, n.nwsli from hvtec_nwsli n, riverpro r WHERE n.nwsli = r.nwsli and n.nwsli IN (select distinct hvtec_nwsli from warnings_2009 WHERE phenomena = 'FL' and status NOT IN ('EXP','CAN')) ) as foo USING unique nwsli using SRID=4326"
  TYPE POINT
  STATUS OFF
  CLASS
@@ -250,6 +251,7 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
+    TEXT ([name])
     SYMBOL "circle"
     COLOR 54 54 54
     SIZE 1
@@ -395,13 +397,14 @@ LAYER
     #OUTLINECOLOR 0 0 0
     SIZE 1
     SYMBOL 1
-#    TEXT ([NAME] County)
-#    LABEL
-#     TYPE BITMAP
-#     SIZE MEDIUM
-#     POSITION CC
-#     PARTIALS FALSE
-#    END
+    TEXT ([NAME])
+    LABEL
+     TYPE BITMAP
+     SIZE SMALL
+     POSITION CC
+     PARTIALS FALSE
+     FORCE TRUE
+    END
   END
 END
 
@@ -678,8 +681,9 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME locs
-  CONNECTION "host=iemdb user=nobody dbname=mesosite"
-  DATA "geom from (select oid, geom, network from stations WHERE (network ~* 'ASOS') and contains('SRID=4326;POLYGON((-97.632 39.651, -97.632 44.319, -89.317 44.319, -89.317 39.651, -97.632 39.651))',geom) ) as foo using unique oid using srid=4326"
+  CONNECTION "host=iemdb user=nobody dbname=iem"
+  DATA "geom from (select oid, geom,  round(max_tmpf::numeric,0) as mint from summary WHERE network IN ('IA_ASOS','AWOS') and day = '2009-04-06' and min_tmpf < 50) as foo using unique oid using srid=4326"
+  #DATA "geom from (select oid, geom, snowd as mint from summary WHERE network IN ('IA_COOP') and day = '2009-04-06' and snowd >= 0) as foo using unique oid using srid=4326"
 #  FILTER "state = 'IA'"
 #  FILTER "network = 'IA_RWIS'"
   STATUS ON
@@ -689,83 +693,27 @@ LAYER
   PROJECTION
    "init=epsg:4326"
   END
-  CLASSITEM 'network'
   CLASS
+    TEXT ([mint])
     SYMBOL 'circle'
     SIZE 3
     COLOR 255 255 255
-  END
-  CLASS
-    EXPRESSION 'ASOS'
-    SYMBOL 'airplane'
-  END
-  CLASS
-    EXPRESSION 'AWOS'
-    SYMBOL 'airplane_yellow'
-  END
-  CLASS
-    EXPRESSION 'IA_RWIS'
-    SYMBOL 'interstate_shield'
-  
-  END
-  CLASS
-    EXPRESSION 'DCP'
-    SYMBOL 'water'
-  END
-  CLASS
-    EXPRESSION 'KCCI'
-    SYMBOL 'schoolhouse'
-  END
-  CLASS
-    EXPRESSION 'KELO'
-    SYMBOL 'schoolhouse'
-  END
-  CLASS
-    EXPRESSION 'COOP'
-    SYMBOL 'nws'
-  END
-  CLASS
-    EXPRESSION 'ISUAG'
-    SYMBOL 'cyclone'
-  END
-  CLASS
-    EXPRESSION 'SCAN'
-    SYMBOL 'nrcs'
-  END
-  CLASS
-    EXPRESSION 'AWS'
-#    TEMPLATE q_template.html
-#    COLOR 255 228 181
-    BACKGROUNDCOLOR -1 -1 -1
-#    OUTLINECOLOR 0 0 0
-    SYMBOL 'airplane_yellow'
-#    SIZE 25
-#    TEXT ([ plot_name ])
-#    LABEL
-#      COLOR 132 31 31
-#      BACKGROUNDCOLOR 255 255 255
-#      BACKGROUNDSHADOWCOLOR  0 0 0
-#      TYPE TRUETYPE
-#      SIZE 8
-#      FORCE true
-#      PARTIALS false
-#      MINSIZE 6
-#      MAXSIZE 18
-#      FONT VeraBd
-#      ANTIALIAS true
-#      POSITION AUTO
-#      BUFFER 1
-#    END
+    LABEL
+      OUTLINECOLOR 0 0 0
+      COLOR 255 255 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION AUTO
+      PARTIALS FALSE
+    END
   END
 END
 
 LAYER
-  NAME radar
-  DATA /mesonet/data/gis/images/4326/USCOMP/n0r_0.tif
+  NAME aeronet
+  DATA "GoesEast1V0962015.tif"
   TYPE RASTER
   STATUS OFF
-  OFFSITE 0 0 0
-  TRANSPARENCY 100
   PROJECTION
    "init=epsg:4326"
   END

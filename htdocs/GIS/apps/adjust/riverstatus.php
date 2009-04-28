@@ -34,9 +34,9 @@ function mktitle($map, $imgObj, $titlet) {
 dl($mapscript);
 
 $map = ms_newMapObj("stations.map");
-$map->set("height", 280);
+$map->set("height", 240);
 $map->set("width",  320);
-$map->setExtent(-97, 39.5, -88, 44.5);
+$map->setExtent(-97, 37.5, -86, 44.5);
 //$map->setExtent(-125, 29, -65, 49);
 
 $namer = $map->getlayerbyname("namerica");
@@ -70,7 +70,7 @@ $states->draw($img);
 $warnings0_c->draw($img);
 
 
-mktitle($map, $img, "           20 Jun 2008: Flood Status");
+mktitle($map, $img, "           10 Mar 2009: Flood Status");
 $map->embedLegend($img);
 $map->drawLabelCache($img);
 //mkl($map, $img);

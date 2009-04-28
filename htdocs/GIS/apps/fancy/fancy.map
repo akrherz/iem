@@ -1,3 +1,4 @@
+MAP
 #
 # Start of map file
 #
@@ -5,11 +6,11 @@ NAME fancy
 STATUS ON
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/data/gis/fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 EXTENT -2223813 -1746393 2207341 1701506
 UNITS METERS
-SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SHAPEPATH "/mesonet/data/gis/static/"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off

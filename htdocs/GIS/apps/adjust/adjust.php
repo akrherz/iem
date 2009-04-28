@@ -24,7 +24,7 @@ function mktitle($map, $imgObj, $titlet) {
                                                                                 
   // point feature with text for location
   $point = ms_newpointobj();
-  $point->setXY(0, 22);
+  $point->setXY(0, 12);
                                                                                 
   $point->draw($map, $layer, $imgObj, "credits",
     $titlet);
@@ -34,8 +34,10 @@ function mktitle($map, $imgObj, $titlet) {
 dl($mapscript);
 
 $map = ms_newMapObj("stations.map");
-$map->set("height", 1600);
-$map->set("width",  2000);
+$map->setExtent(-98,40.5,-89,43.5);
+$map->set("height", 768);
+$map->set("width",  1024);
+$map->selectOutputFormat("PNG24");
 
 $namer = $map->getlayerbyname("namerica");
 $namer->set("status", MS_ON);
@@ -52,9 +54,8 @@ $iembox->set("status", MS_ON);
 $counties = $map->getlayerbyname("counties");
 $counties->set("status", MS_ON);
 
-$locs = $map->getlayerbyname("locs");
-$locs->set("status", MS_OFF);
-$locs->set("connection", $_DATABASES["mesosite"]);
+$aeronet = $map->getlayerbyname("aeronet");
+$aeronet->set("status", MS_ON);
 
 $bars = $map->getlayerbyname("bars");
 $bars->set("status", MS_ON);
@@ -85,8 +86,8 @@ $rect->project($projin, $projout);
 //$map->setextent($rect->minx, $rect->miny, 
 //  $rect->maxx + 50000, $rect->maxy + 50000);
 
-//$roads = $map->getlayerbyname("topo");
-//$roads->set("status", MS_ON);
+$locs = $map->getlayerbyname("locs");
+$locs->set("status", MS_ON);
 
 $cities = $map->getlayerbyname("sites");
 $cities->set("status", MS_OFF);
@@ -102,23 +103,22 @@ $iards_label->set("status", MS_OFF);
 
 $img = $map->prepareImage();
 $namer->draw($img);
-$counties->draw($img);
 //$roads->draw($img);
 //$iards->draw($img);
 //$iards_label->draw($img);
 //$dm->draw($img);
 $lakes->draw($img);
 //$watches->draw($img);
+$aeronet->draw($img);
+$counties->draw($img);
 $states->draw($img);
-//$cwa->draw($img);
-//$warnings0_c->draw($img);
 $locs->draw($img);
 //$iembox->draw($img);
 
 $map->drawLabelCache($img);
 //$bars->draw($img);
 
-mktitle($map, $img, "         2005 Severe Thunderstorm Warnings (County)");
+mktitle($map, $img, " 6 Apr 2009 - GOES East Visible + High Temps");
 //mkl($map, $img);
 
 $url = $img->saveWebImage();
