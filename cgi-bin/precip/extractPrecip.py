@@ -1,4 +1,4 @@
-#!/mesonet/python-2.3/bin/python
+#!/mesonet/python/bin/python
 # Wiz bang to extract precip for a given hrap_i and year
 # Daryl Herzmann 22 Jun 2004
 # 9 Feb 2004  We need to finish this bad boy!

@@ -1,4 +1,4 @@
-#!/mesonet/python-2.4/bin/python
+#!/mesonet/python/bin/python
 #		toSAMSON.py
 # Test program to convert data into SAMSON format
 # Daryl Herzmann 20 Aug 2001
