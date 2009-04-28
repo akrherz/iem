@@ -120,10 +120,10 @@ Ext.onReady(function(){
         zoom: 4
     });
 
-   var slightCB = new Ext.form.Radio({
+   var slightRadio = new Ext.form.Radio({
        name       : 'editor',
        checked    : true,
-       fieldLabel : 'Modify Slight Risk',
+       boxLabel : 'Modify Slight Risk',
        listeners  : {
            check : function(cb, checked){
                if (checked){ 
@@ -134,9 +134,9 @@ Ext.onReady(function(){
            }
        }
    });
-   var modCB = new Ext.form.Radio({
+   var modRadio = new Ext.form.Radio({
        name       : 'editor',
-       fieldLabel : 'Modify Moderate Risk',
+       boxLabel : 'Modify Moderate Risk',
        listeners  : {
            check : function(cb, checked){
                if (checked){ 
@@ -147,9 +147,9 @@ Ext.onReady(function(){
            }
        }
    });
-   var highCB = new Ext.form.Radio({
+   var highRadio = new Ext.form.Radio({
        name       : 'editor',
-       fieldLabel : 'Modify High Risk',
+       boxLabel   : 'Modify High Risk',
        listeners  : {
            check : function(cb, checked){
                if (checked){
@@ -161,12 +161,27 @@ Ext.onReady(function(){
        }
    });
 
+   var slightOn = new Ext.form.Checkbox({
+       checked   : true,
+       boxLabel  : 'Forecast Slight Risk',
+       listeners : {
+           check  : function(cb, checked){
+               if (checked){
+                   map.removeLayer(slight_layer);
+               } else {
+                   map.addLayer(slight_layer);
+               }
+           }
+       }
+   });
+  
 
    var formPanel = new Ext.form.FormPanel({
        region    : 'west',
        height    : 500,
        width     : 200,
-       items     : [slightCB, modCB, highCB]
+       items     : [slightRadio, modRadio, highRadio,
+                    slightOn]
    });
 
    new Ext.Viewport({

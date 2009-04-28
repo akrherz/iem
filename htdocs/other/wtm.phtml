@@ -3,7 +3,7 @@
 
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "station";
 
- $TITLE = "IEM | Other | Currents";
+ $TITLE = "IEM | West Texas Mesonet";
  $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=wtm.phtml?sortcol=$sortcol\">";
  $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
@@ -11,10 +11,6 @@ function new_window(url) {
  link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
 } 
 //END Script-->
-</script>
-<script type="text/javascript" src="/js/tableruler.js"></script>
-<script type="text/javascript">
-    window.onload=function(){tableruler();}
 </script>';
  include("$rootpath/include/header.php"); ?>
 <?php include("$rootpath/include/mlib.php"); ?>
