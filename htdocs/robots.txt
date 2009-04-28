@@ -1,6 +1,7 @@
 # Robots file for IEM 
 
 User-agent: *
+Crawl-delay: 120
 Disallow: /tmp/
 Disallow: /cgi-bin/
 Disallow: /usage/
