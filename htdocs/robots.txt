@@ -16,3 +16,4 @@ Disallow: /data/model/
 Disallow: /archive/nexrad/
 Disallow: /COOP/cat.phtml
 Disallow: /data/frost/
+Disallow: /GIS/apps/rview/
