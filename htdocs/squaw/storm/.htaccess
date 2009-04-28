@@ -1,0 +1,10 @@
+AuthUserFile /mesonet/www/apps/squaw/security/htpasswd
+AuthGroupFile /dev/null
+AuthName Administrative
+AuthType Basic
+
+<LIMIT GET>
+order deny,allow
+require user ames
+</LIMIT>
+

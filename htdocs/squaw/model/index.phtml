@@ -1,0 +1,79 @@
+<?php include_once("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$pg = iemdb("squaw");
+$THISPAGE = "model"; include("$rootpath/include/squaw/header.inc.php"); ?>
+<?php include("$rootpath/include/squaw/forms.inc.php"); ?>
+
+<div id="content">
+
+<h3>Run the Model!</h3>
+
+<div class="help">This form allows you to set up the model with the necessary
+parameters to run.  Any relevant storms are pulled into the run based on your
+specification for time. Please fill out the following items and then click
+the <i>Run Model</i> button at the bottom of the page.</div>
+
+<form method="GET" action="model.phtml">
+<input type="hidden" value="" name="storms">
+
+<p><b>1. Model Initialization Time:</b></p>
+
+<p>The model will start running from this time out to 60 hours.</p>
+
+<table>
+<thead>
+<tr>
+	<th>Month:</th><th>Day:</th><th>Year:</th><th>Hour:</th></tr>
+</thead>
+<tbody>
+<tr>
+	<td><?php echo monthSelect( date("m") , "month"); ?></td>
+	<td><?php echo daySelect( date("d") ); ?></td>
+	<td><?php echo yearSelect(1990, date("Y") ); ?></td>
+	<td><?php echo localHourSelect( date("I"), "hour" ); ?></td></tr>
+</tbody>
+</table>
+
+<p><b>2.  Configure Recession Curve:</b></p>
+
+<p>The model needs to have two points along the recession curve of the Squaw
+Creek.  These two points must be after the <i>Model Initialization Time</i> chosen in #1 and the flow must be receeding.</p>
+
+<table>
+<thead>
+<tr>
+	<th>Time Index:</th><th>Hour:</th><th>Flow:</th></tr>
+</thead>
+
+<tbody>
+<tr>
+	<td>1.</td><td><?php echo localHourSelect(3, "rhour1"); ?></td>
+		<td><input type="text" name="rflow1" size="6"></td></tr>
+<tr>
+	<td>2.</td><td><?php echo localHourSelect(4, "rhour2"); ?></td>
+		<td><input type="text" name="rflow2" size="6"></td></tr>
+</tbody>
+</table>
+
+<p><b>3.  Select optional scenarios to run with:</b></p>
+
+<p>You can select from these scenarios to run with as well.</p>
+<?php
+$sql = "SELECT * from scenarios";
+$rs = pg_query($pg, $sql);
+while($row = pg_fetch_array($rs))
+{
+  $name = $row["name"];
+  $id = $row["id"];
+  echo "<br /><input type=\"checkbox\" name=\"scenarios[]\" value=\"$id\">$name";
+}
+?>
+
+<p><b>4. Run The Model:</b></p>
+
+<input type="submit" value="Run Model"><input type="reset" value="Reset Form">
+</form>
+
+</div>
+
+<?php include("$rootpath/include/footer.php"); ?>
