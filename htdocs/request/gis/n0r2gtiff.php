@@ -34,10 +34,10 @@ if ($ts > ($now - 360.0)){
 if (! is_file($inFile)) die("No GIS composite found for this time!");
 
 
-$cmd = sprintf("/mesonet/local/bin/gdalwarp -t_srs \"EPSG:4326\" -s_srs \"EPSG:4326\" -co \"WORLDFILE=ON\" -of GTIFF %s %s.tif", $inFile, $outFile);
+$cmd = sprintf("/mesonet/local/bin/gdalwarp -t_srs \"EPSG:4326\" -s_srs \"EPSG:4326\" -of GTIFF %s %s.tif", $inFile, $outFile);
 `$cmd`;
 
-$cmd = "zip $zipFile ${outFile}.tif ${outFile}.tfw";
+$cmd = "zip $zipFile ${outFile}.tif";
 `$cmd`;
 
 header("Content-type: application/octet-stream");
@@ -46,6 +46,4 @@ readfile($zipFile);
 
 unlink($zipFile);
 unlink("${outFile}.tif");
-unlink("${outFile}.tfw");
-
 ?>
