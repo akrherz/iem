@@ -172,28 +172,32 @@ $cities = $nt->table;
 // Create the graph. These two calls are always required
 $graph = new Graph(650,550,"example1");
 $graph->SetScale("datlin");
+$graph->SetMarginColor("white");
+$graph->SetColor("lightyellow");
 if (max($pcpn) != "" && isset($_GET["pcpn"])) $graph->SetY2Scale("lin");
 if (isset($limit))  $graph->SetScale("datlin", 25, 35);
 $graph->img->SetMargin(40,55,105,105);
 //$graph->xaxis->SetFont(FS_FONT1,FS_BOLD);
-$graph->xaxis->SetLabelAngle(90);
 
-//$graph->title->Set("Recent Meteogram for ". $station);
-//$graph->title->SetFont(FF_FONT1,FS_BOLD,16);
-
-$graph->yaxis->SetTitle("Temperature [F]");
 if (max($pcpn) != "" && isset($_GET["pcpn"])) {
  $graph->y2axis->SetTitle("Precipitation [inch]");
  $graph->y2axis->SetTitleMargin(40);
 }
+
+$graph->yaxis->SetTitle("Temperature [F]");
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-//$graph->xaxis->SetTitle("Local Valid Time");
-$graph->xaxis->SetTitleMargin(60);
-$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
+
+$graph->xaxis->SetTitle("Time Period: ". date('Y-m-d h:i A', $times[0]) ." thru ". date('Y-m-d h:i A', max($times)) );
+$graph->xaxis->SetTitleMargin(67);
+$graph->xaxis->title->SetFont(FF_VERA,FS_BOLD,12);
+$graph->xaxis->title->SetColor("brown");
 $graph->xaxis->SetPos("min");
+$graph->xaxis->SetLabelAngle(90);
+$graph->xaxis->SetLabelFormatString("M-j h A", true);
 
 $graph->legend->Pos(0.01, 0.01);
 $graph->legend->SetLayout(LEGEND_VERT);
+
 
 // Create the linear plot
 $lineplot=new LinePlot($tcs0, $times);
@@ -313,7 +317,6 @@ if (max($pcpn) != "" && isset($_GET["pcpn"]) )
   $graph->AddY2($bp1);
 
 
-// Display the graph
 $graph->Stroke();
 ?>
 

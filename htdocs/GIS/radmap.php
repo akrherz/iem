@@ -263,7 +263,7 @@ $lsrs = $map->getlayerbyname("lsrs");
 $lsrs->set("connection", $_DATABASES["postgis"]);
 $lsrs->set("status",in_array("lsrs", $layers) );
 if ($ts2 > $ts){
- $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid >= '". date("Y-m-d H:i", $ts) .":00+00' and valid < '". date("Y-m-d H:i", $ts2) .":00+00') as foo USING unique k USING SRID=4326";
+ $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid >= '". date("Y-m-d H:i", $ts) .":00+00' and valid < '". date("Y-m-d H:i", $ts2) .":00+00' ORDER by valid DESC) as foo USING unique k USING SRID=4326";
 } else {
  $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid = '". date("Y-m-d H:i", $ts) .":00+00') as foo USING unique k USING SRID=4326";
 }
