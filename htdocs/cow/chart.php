@@ -37,7 +37,7 @@ function imagettftextalign($image, $size, $angle, $x, $y, $color, $font, $text, 
 /* Make fancy chart! */
 $width = 130;
 $height = 122;
-$font = "/mesonet/data/gis/static/fonts/Vera.ttf";
+$font = "../../data/fonts/arial.ttf";
 
 $png = ImageCreate($width,$height);
 
