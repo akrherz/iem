@@ -168,7 +168,7 @@ $watches->draw($img);
 if (isset($_GET["pid"]))
 {
   $wc = ms_newLayerObj($map);
-  $wc->set("connectiontype", MS_POSTGIS);
+  $wc->setConnectionType( MS_POSTGIS );
   $wc->set("connection", $_DATABASES["postgis"]);
   $wc->set("status", MS_ON );
   $sql = sprintf("geom from (select geom, id from text_products WHERE product_id = '$pid') as foo using unique id using SRID=4326");
