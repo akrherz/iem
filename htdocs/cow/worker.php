@@ -28,7 +28,7 @@ function printLSR($lsr)
 function printWARN($warn)
 {
   $ts = $warn["sts"] + 5*60;
-  $uri = sprintf("/vtec/%s-O-%s-K%s-%s-%s-%04d.html", date("Y", $ts), 
+  $uri = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", date("Y", $ts), 
         $warn["status"], $warn["wfo"], $warn["phenomena"], 
         $warn["significance"], $warn["eventid"]);
   $background = "#0f0";
