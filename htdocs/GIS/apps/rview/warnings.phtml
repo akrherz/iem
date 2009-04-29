@@ -1,4 +1,6 @@
 <?php
+if (substr($_SERVER["REMOTE_ADDR"], 0, 5) == "65.55"){ die("Go Away"); }
+
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/vtec.php");
