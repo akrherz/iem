@@ -53,7 +53,7 @@ $dot->set("status", MS_ON);
 
 $datal = ms_newLayerObj($map);
 $datal->set("name", "q");
-$datal->set("connectiontype", MS_POSTGIS);
+$datal->setConnectionType( MS_POSTGIS );
 $datal->set("connection", $_DATABASES["coop"] );
 $datal->set("status", MS_ON);
 $datal->set("type", MS_LAYER_POINT);
