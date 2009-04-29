@@ -54,9 +54,10 @@ $sql = sprintf("select *, astext(geom) as tgeom from (SELECT distinct * from
    (select *, area(transform(geom,2163)) / 1000000.0 as area,
     perimeter(transform(geom,2163)) as perimeter,
     xmax(geom) as lon0, ymax(geom) as lat0 from 
-    warnings_%s WHERE wfo = '%s' and issue >= '%s' and expire < '%s' 
-    and phenomena IN (%s) and significance != 'A' ORDER by issue ASC) as foo) as foo",
-   date("Y", $sts), $wfo, $stsSQL, $etsSQL, $wtypeSQL);
+    warnings_%s WHERE wfo = '%s' and issue >= '%s' and issue < '%s' and
+    expire < '%s' and phenomena IN (%s) and significance != 'A' 
+    ORDER by issue ASC) as foo) as foo",
+   date("Y", $sts), $wfo, $stsSQL, $etsSQL, $etsSQL, $wtypeSQL);
 $DEBUG .=  "<br />". $sql;
 $rs = pg_query($conn, $sql);
 $sum_parea = 0;
