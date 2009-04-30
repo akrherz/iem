@@ -1,29 +1,17 @@
 <?php 
 include("../../config/settings.inc.php");
-	$page = "current";
-	$TITLE = "IEM | Current RADAR Data";
-	$HEADEXTRA = '<BASE HREF="http://mesonet.agron.iastate.edu/data/nexrad/"><script language="JavaScript">
-
-function changeSite(newSite, newSname) {
-
-	document.myForm.sname.value = newSname ;
-	document.myForm.site.value = newSite ;
-
-} // End of changeSite
-
-</script>';
-	include("$rootpath/include/header.php"); 
-?>
-<div class="text">
-<b>Nav:</b>  <a href="http://mesonet.agron.iastate.edu/current/radar.phtml">Current RADAR Data</a><br>
-
-<?php
-
 $prod = isset($_GET['prod']) ? $_GET["prod"]: "";
-$site = $_GET['site'];
 $product = substr($prod,0,3);
+$site = isset($_GET['site']) ? substr($_GET['site'],0,3): "DMX";
 
-if (strlen($site) == 0) $site = 'DMX';
+$TITLE = "IEM | Current RADAR Data";
+$THISPAGE = "current-radar";
+$HEADEXTRA = "<BASE HREF=\"http://mesonet.agron.iastate.edu/data/nexrad/\">";
+if ($prod == 'N0R_loop_nj' || $prod == 'N0V_loop_nj'){
+  $BODYEXTRA = "onload=\"launch()\"";
+}
+include("$rootpath/include/header.php"); 
+
 
 if ($prod == 'N0R' || $prod == 'N0V'){
   echo "<img src=\"/data/nexrad/${site}_${prod}_0.gif\">";
@@ -32,30 +20,17 @@ else if ($prod == 'N0R_loop_nj' || $prod == 'N0V_loop_nj'){
   include ('NIDSloop.php');
 }else if ($prod == 'N0R_loop' || $prod == 'N0V_loop'){
     $rprod = substr($prod,0, 3);
-//  include ('../data/nexrad/NIDSloop.php');
 ?>
-<applet codebase="/current/class/" code="AniS.class" width=650 height=600 alt="You must enable Java in your browser to view the radar loop">
+<applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width=650 height=600 alt="You must enable Java in your browser to view the radar loop">
         <param name="controls" value="startstop, looprock, step, speed, toggle, 
 zoom">
         <param name="rate" value="80">
 		<param name="no_enh" value="true">
         <param name="pause_percent" value="800">
-        <param name="file_of_filenames" value="/current/text/K<?php echo $site ."_". $rprod; ?>.txt">
-        <br><br><br><br><span class="red"><b>Java must be enabled for radar loop
-s to display.
-        <br><br>In Netscape:<br>Select: Edit -> Preferences -> Advanced<br>Check
- "Enable Java" and "Enable Javascript"
-        <br><br>In Internet Explorer<br>Select: Tools -> Internet Options -> Security tab<br>Select the Internet zone and set the Security level for the zone to
- "Medium"
-        <br><br><br>You may need to restart your browser after making these changes.</b></span>
+        <param name="file_of_filenames" value="<?php echo $rooturl; ?>/current/text/K<?php echo $site ."_". $rprod; ?>.txt">
         </applet>
 <?php
 }
-else if ($prod == "wiem") {
-  echo "<img src=\"/data/${site}_radar.gif\">";
-}
-
 
 ?></div>
-
 <?php include("$rootpath/include/footer.php"); ?>
