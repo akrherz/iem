@@ -57,21 +57,26 @@ if (! $eightbit)
 $counties = $map->getlayerbyname("counties");
 if ($metroview)
 {
+  $counties->set("status", MS_ON);
   $counties->draw($img);
 }
 
 $states = $map->getlayerbyname("states");
+$states->set("status", MS_ON);
 $states->draw($img);
 
 $visibility = $map->getlayerbyname("visibility");
+$visibility->set("status", MS_ON);
 $visibility->draw($img);
 
 $roads = $map->getlayerbyname("roads");
+$roads->set("status", MS_ON);
 $dbvalid = date('Y-m-d H:i', $ts);
 if (isset($_GET['valid'])) $roads->set("data", "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_2008_log c WHERE b.segid = c.segid and b.type > 1 and c.valid = '$dbvalid' ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915");
 $roads->draw($img);
 
 $roads_int = $map->getlayerbyname("roads-inter");
+$roads_int->set("status", MS_ON);
 if (isset($_GET['valid'])) $roads_int->set("data", "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_2008_log c WHERE b.segid = c.segid and b.type = 1 and c.valid = '$dbvalid' ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915");
 $roads_int->draw($img);
 
@@ -80,6 +85,7 @@ $roads_int->draw($img);
 //$roads_lbl->set("connection", $_DATABASE);
 
 $iemlogo = $map->getlayerbyname("iemlogo");
+$iemlogo->set("status", MS_ON);
 if ($eightbit)
 {
   $c2 = $iemlogo->getClass(0);
@@ -92,6 +98,7 @@ if (! $metroview)
 }
 
 $ia511 = $map->getlayerbyname("ia511");
+$ia511->set("status", MS_ON);
 if ($eightbit)
 {
   $c0 = $ia511->getClass(0);
@@ -113,6 +120,7 @@ if ($thumbnail) {
 } else {
   $logokey2 = $map->getlayerbyname("colorkey");
 }
+$logokey2->set("status", MS_ON);
 $c1 = $logokey2->getClass(0);
 $s1 = $c1->getStyle(0);
 if ($thumbnail) {
@@ -131,6 +139,7 @@ $logokey->set("type", MS_SHP_POINT);
 $logokey->set("transform", MS_FALSE);
 $logokey->set("status", MS_ON);
 $logokey->set("labelcache", MS_ON);
+$logokey->set("status", MS_ON);
 
 
 $logokey_c3 = ms_newClassObj($logokey);
