@@ -54,7 +54,7 @@ for ($i=0;$row=@pg_fetch_array($result,$i);$i++)
         ]]>
     </description>
     <styleUrl>#iemstyle</styleUrl>
-    <name>". $row["magnitude"] . $row["typetext"] ."</name>\n";
+    <name>". $row["magnitude"] ." ". $row["typetext"] ."</name>\n";
 echo $row["kml"];
 echo "</Placemark>";
 }
