@@ -17,6 +17,7 @@ include("$rootpath/include/header.php"); ?>
  <li><a href="http://agebb.missouri.edu/weather/">Missouri</a></li>
  <li><a href="http://www.mesonet.ou.edu">Oklahoma Mesonet</a></li>
  <li><a href="http://pasc.met.psu.edu/PA_Climatologist/index.php">Pennsylvania Mesonet</a></li>
+ <li><a href="http://chiliweb.southalabama.edu/">South Alabama Mesonet</a></li>
  <li><a href="http://mesonet.tamu.edu/">Texas Mesonet</a></li>
  <li><a href="http://www.mesonet.ttu.edu/">West Texas Mesonet</a></li>
 </ul>
