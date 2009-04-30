@@ -1,9 +1,3 @@
-<HTML><HEAD></HEAD>
-
-<HTML>
-        <HEAD>
-                <TITLE>IEM | Radar Loop</TITLE>
-
 <SCRIPT LANGUAGE="JavaScript">
 
 // <!--
@@ -308,9 +302,7 @@ function animation()
         
 
 </SCRIPT>
-</HEAD>
 
-<BODY BGCOLOR="#FFFFFF" onLoad="launch()">
 
 <P>If you think these images are old, hold down the shift key and click reload<BR>
 
@@ -369,8 +361,3 @@ WIDTH=35 HEIGHT=35 SRC="http://www.pals.iastate.edu/icons/pls_button.gif" ALT="+
                    </TD>
                </TR>
              </TABLE>
-
-</BODY>
-</HTML>
-
-
