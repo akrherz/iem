@@ -88,13 +88,8 @@ $minute = $ma;
 
 /* Our actual loop start time! */
 $loopts = $ts - ($diff * 60);
-$switchts = mktime(0,0,0, 8,22,2004);
-$lwidth = 900;
-$lheight = 700;
-if ($loopts > $switchts){
-  $lwidth = 650;
-  $lheight =550;
-}
+$lwidth = 650;
+$lheight =550;
 
 $files = "";
 
