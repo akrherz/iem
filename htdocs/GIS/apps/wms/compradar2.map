@@ -10,7 +10,7 @@ FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT -126 24 -66 50
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 
 
@@ -51,7 +51,7 @@ END
 LAYER
   NAME nexrad
   STATUS ON
-  DATA "/mesonet/data/gis/images/unproj/USCOMP/n0r_0.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif"
   TYPE RASTER
   PROJECTION
     "init=epsg:4326"
@@ -67,7 +67,7 @@ END
 LAYER
   NAME uscomp_n1p
   STATUS ON
-  DATA "/mesonet/data/gis/images/unproj/USCOMP/n1p_0.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n1p_0.tif"
   TYPE RASTER
   PROJECTION
     "init=epsg:4326"
@@ -83,7 +83,7 @@ END
 LAYER
   NAME uscomp_ntp
   STATUS ON
-  DATA "/mesonet/data/gis/images/unproj/USCOMP/ntp_0.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/ntp_0.tif"
   TYPE RASTER
   PROJECTION
     "init=epsg:4326"
