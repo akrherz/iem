@@ -9,8 +9,8 @@ $endYear = intval( date("Y") );
 $yearsPerRow = 4;
 
 
-$twidth = 160 - 2;
-$theight = 120 - 2;
+$twidth = 80 - 2;
+$theight = 60 - 2;
 $header = 40;
 
 $ts = time();
@@ -39,16 +39,16 @@ $bar640t->draw($img2);
 /* Draw the title */
 $tlayer = $map2->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
-$point->setXY(80, 12);
+$point->setXY(2, 12);
 $d = date("d M h:i A", $ts);
-$point->draw($map2, $tlayer, $img2, 0,"NEXRAD by Year for Time: $d");
+$point->draw($map2, $tlayer, $img2, 0,"NEXRAD by Year: $d");
 $point->free();
 
 /* Draw the subtitle */
 $point = ms_newpointobj();
-$point->setXY(80, 29);
+$point->setXY(2, 29);
 $d = date("d M Y h:i A T");
-$point->draw($map2, $tlayer, $img2, 1," map generated $d");
+//$point->draw($map2, $tlayer, $img2, 1," map generated $d");
 $point->free();
 
 /* Draw the logo! */
@@ -58,8 +58,8 @@ $c0s0 = $c0->getStyle(0);
 $c0s0->set("size", 40);
 $point = ms_newpointobj();
 $point->setXY(40, 20);
-$point->draw($map2, $layer, $img2, "logo", "");
-$point->free();
+//$point->draw($map2, $layer, $img2, "logo", "");
+//$point->free();
 
 $layer = $map2->getLayerByName("n0r-ramp");
 $point = ms_newpointobj();
@@ -78,8 +78,8 @@ for ($year=$beginYear; $year <= $endYear; $year++)
   $map = ms_newMapObj($mapFile);
   $map->set("width", $twidth);
   $map->set("height",$theight);
-  $map->setExtent(-96.0, 42.0, 
-                  -92.0, 44.0);
+  $map->setExtent(-97.0, 40.0, 
+                  -91.0, 44.0);
 
   $img = $map->prepareImage();
 
