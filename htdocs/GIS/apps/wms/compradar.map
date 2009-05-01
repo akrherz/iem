@@ -10,7 +10,7 @@ FONTSET "/mesonet/data/gis/fonts/fonts.list"
 EXTENT -126 24 -66 50
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/symbols/stations.sym"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 
 
