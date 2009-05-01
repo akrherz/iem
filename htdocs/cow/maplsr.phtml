@@ -46,23 +46,26 @@ $d2 = date("d M Y H:i" ,  $ts2);
 $basets = $ts - (($sminute % 5) * 60);
 
 if ($ts >= $ts2){
-$minx = $lon0 - 0.02;
-$maxx = $lon0 + 0.02;
-$miny = $lat0 - 0.02;
-$maxy = $lat0 + 0.02;
-$sql = "select distinct source, county, state, typetext,remark, x(geom) as lon, y(geom) as lat, 
-        city, magnitude, valid, geom, type as ltype, wfo from lsrs_${year} 
-        WHERE valid = '$tsSQL' and
-        geom && GeomFromEWKT('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))') ORDER by valid ASC";
+  $minx = $lon0 - 0.02;
+  $maxx = $lon0 + 0.02;
+  $miny = $lat0 - 0.02;
+  $maxy = $lat0 + 0.02;
+  $wkt = "GeomFromEWKT('SRID=4326;MULTIPOLYGON((($minx $miny,$minx $maxy,$maxx $maxy,$maxx $miny,$minx $miny)))')";
+  $rs = pg_prepare($pgconn, "SELECT", "select distinct source, county, 
+        state, typetext,remark, x(geom) as lon, y(geom) as lat, 
+        city, magnitude, valid, geom, type as ltype, wfo from lsrs_$year 
+        WHERE valid = $1 and
+        geom && $wkt ORDER by valid ASC");
+  $rs = pg_execute($pgconn, "SELECT", Array($tsSQL) );
 } else {
   $wfoList = implode("','", $mywfos);
-  $sql = "select distinct source, typetext, remark, county, state,
-        x(geom) as lon, y(geom) as lat,
-        city, magnitude, valid, geom, type as ltype, wfo from lsrs_${year}
-        WHERE valid >= '$tsSQL' and valid <= '$tsSQL2' and
-        wfo IN ('$wfoList') ORDER by valid ASC";
+  $rs = pg_prepare($pgconn, "SELECT", "select distinct source, typetext, 
+        remark, county, state, x(geom) as lon, y(geom) as lat,
+        city, magnitude, valid, geom, type as ltype, wfo from lsrs_$year
+        WHERE valid >= $1 and valid <= $2 and
+        wfo IN ('$wfoList') ORDER by valid ASC");
+  $rs = pg_execute($pgconn, "SELECT", Array($tsSQL, $tsSQL2));
 }
-$rs = pg_exec($pgconn, $sql);
 $g = "";
 $lats = Array();
 $lons = Array();
