@@ -42,6 +42,7 @@ if ($ts > 0)
   $rs = pg_exec($conn, $sql);
   $radts = time() - (intval(date("i",time())) % 5 * 60);
 }
+if ($ts == 0){ $ts = time(); }
 
 /* Who was online and where did they look?  Hehe */
 $cdrct = Array();
