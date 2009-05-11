@@ -1,5 +1,4 @@
 <?php
-die();
 /* Sucks to render a KML */
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
@@ -19,19 +18,22 @@ select
       buffer(exteriorring(geometryn(multi(geomunion(n.geom)),1)),0.02),
       exteriorring(geometryn(multi(geomunion(w.geom)),1))
    ) as a
-   from warnings_$year w, nws_ugc n WHERE gtype = 'P' and w.wfo = $1 
-   and phenomena = $2 and eventid = $3 and significance = $4
+   from warnings_$year w, nws_ugc n WHERE gtype = 'P' and w.wfo = '$wfo'
+   and phenomena = '$phenomena' and eventid = $eventid 
+   and significance = '$significance'
    and n.polygon_class = 'C' and ST_OverLaps(n.geom, w.geom)
    and n.ugc IN (
           SELECT ugc from warnings_$year WHERE
-          gtype = 'C' and wfo = $1 
-          and phenomena = $2 and eventid = $3 and significance = $4
+          gtype = 'C' and wfo = '$wfo' 
+          and phenomena = '$phenomena' and eventid = $eventid 
+          and significance = '$significance'
        )
+   and isvalid(w.geom)
 ) as foo 
       WHERE not isempty(a)");
 
 $result = pg_execute($connect, "SELECT", 
-                     Array($wfo, $phenomena, $eventid, $significance) );
+                     Array() );
 
 header("Content-Type:", "application/vnd.google-earth.kml+xml");
 
