@@ -40,7 +40,7 @@ if ($ts > 0)
 } else {
   $sql = "SELECT * from camera_current WHERE valid > (now() - '30 minutes'::interval)";
   $rs = pg_exec($conn, $sql);
-  $radts = time() - (intval(date("i",time())) % 5 * 60);
+  $radts = time() - 60 - (intval(date("i",time() - 60)) % 5 * 60);
 }
 if ($ts == 0){ $ts = time(); }
 
