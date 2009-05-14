@@ -20,7 +20,7 @@ include("$rootpath/include/header.php"); ?>
 <tr><th>Product:</th><td>GIS-ready NEXRAD composite</td></tr>
 <tr><th>Format:</th><td>PNG image (GeoTiff available)</td></tr>
 <tr><th>Size:</th><td>6000x2600 pixels</td></tr>
-<tr><th>Time:</th><td>Every 5 minutes</td></tr>
+<tr><th>Time:</th><td>Every 5 minutes since 1 Jan 1995</td></tr>
 <tr><th>Download:</th><td><a href="http://mesonet.agron.iastate.edu/data/gis/images/4326/USCOMP/">Current</a> and <a href="http://mesonet.agron.iastate.edu/archive/data/<?php echo date("Y/m/d"); ?>/GIS/uscomp/">Archive for today</a></td></tr>
 </table>
 
@@ -28,7 +28,7 @@ include("$rootpath/include/header.php"); ?>
 <ul>
  <li><a href="http://mesonet.agron.iastate.edu/current/mcview.phtml">Static Maps</a></li>
  <li><a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings.phtml">Interactive RADAR</a></li>
- <li><a href="http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings_cat.phtml">VTEC Product Browser</a></li>
+ <li><a href="http://mesonet.agron.iastate.edu/vtec/">VTEC Product Browser</a></li>
  <li><a href="http://mesonet.agron.iastate.edu/data/summary/max_n0r_0z0z_usrad.png">Max Reflectivity Composites</a></li>
 
 </ul>
@@ -56,6 +56,10 @@ care.
  <li><b>11 Nov 2008:</b> Implemented a crude check against RUC model
 surface temperature analysis for near freezing areas to stop the clutter
 suppression algorithm from removing areas of winter precipitation.</li>
+ <li><b>14 May 2009:</b> Completed a 7 month process of backfilling the
+composites back to 1 Jan 1995. Also regenerated composites prior to 2006 to
+produce them on a ~1 km grid as well.  Big thanks to Steve Ansari at NCDC 
+for providing the level3 archive.</li>
 </ul>
 
 <h3>Product Generation:</h3>
