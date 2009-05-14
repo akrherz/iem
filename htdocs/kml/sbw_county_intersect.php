@@ -1,4 +1,5 @@
 <?php
+die();
 /* Sucks to render a KML */
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
