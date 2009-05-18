@@ -33,7 +33,7 @@ include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);
 $graph->SetScale("lin");
-$graph->img->SetMargin(45,10,5,45);
+$graph->img->SetMargin(45,10,40,45);
 
 $graph->xaxis->SetLabelAngle(90);
 //$graph->xaxis->SetLabelFormatString("M d h A", true);
@@ -46,7 +46,8 @@ $graph->xaxis->SetTitleMargin(10);
 
 $graph->yaxis->SetTitle("High Temperature [F]");
 $graph->xaxis->SetTitle("Low Temperature [F]");
-//$graph->tabtitle->Set('Recent Comparison');
+$lgnd = sprintf("High/Low Observations %s [%s] on %s", $cities[strtoupper($station)]["name"], $station, date("M d", $ts));
+$graph->tabtitle->Set($lgnd);
 
   $graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);
   $graph->SetColor('wheat');
@@ -62,8 +63,6 @@ $graph->xaxis->SetTitle("Low Temperature [F]");
 
 // Create the linear plot
 $sc1=new ScatterPlot($highs, $lows);
-$lgnd = sprintf("%s %s", $cities[strtoupper($station)]["name"], date("M d", $ts));
-$sc1->SetLegend($lgnd);
 $sc1->mark->SetType(MARK_FILLEDCIRCLE);
 $sc1->mark->SetFillColor("blue");
 $graph->Add($sc1);
