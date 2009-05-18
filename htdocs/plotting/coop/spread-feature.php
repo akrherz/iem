@@ -237,13 +237,13 @@ $lp2->SetWeight(2);
 // Add the plot to the graph
 //$graph->Add($gbplot);
 
-//$graph->AddY2($nl1);
-$graph->AddY2($nl2);
-//$graph->AddY2($l1);
-$graph->AddY2($l2);
+$graph->AddY2($nl1);
+//$graph->AddY2($nl2);
+$graph->AddY2($l1);
+//$graph->AddY2($l2);
 
-//$graph->Add($lp1);
-$graph->Add($lp2);
+$graph->Add($lp1);
+//$graph->Add($lp2);
 
 
 // Display the graph
