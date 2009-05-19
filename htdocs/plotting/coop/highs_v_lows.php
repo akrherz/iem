@@ -26,6 +26,11 @@ for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
   $lows[] = $row["low"];
 }
 
+$ahigh = Array();
+$ahigh[] = array_sum($highs) / floatval( sizeof($highs) );
+$alow = Array();
+$alow[] = array_sum($lows) / floatval( sizeof($lows) );
+
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
 
@@ -53,7 +58,7 @@ $graph->tabtitle->Set($lgnd);
   $graph->SetColor('wheat');
 
   $graph->legend->SetLayout(LEGEND_VERT);
-  $graph->legend->SetPos(0.5,0.01, 'right', 'top');
+  $graph->legend->SetPos(0.7,0.1, 'right', 'top');
 //  $graph->legend->SetLineSpacing(3);
 
   $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCEE@0.5');
@@ -66,6 +71,12 @@ $sc1=new ScatterPlot($highs, $lows);
 $sc1->mark->SetType(MARK_FILLEDCIRCLE);
 $sc1->mark->SetFillColor("blue");
 $graph->Add($sc1);
+
+$sc2=new ScatterPlot($ahigh, $alow);
+$sc2->mark->SetType(MARK_FILLEDCIRCLE);
+$sc2->SetLegend("Average");
+$sc2->mark->SetFillColor("red");
+$graph->Add($sc2);
 
 
 // Display the graph
