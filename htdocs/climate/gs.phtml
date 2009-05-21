@@ -1,0 +1,44 @@
+<?php 
+include("../../config/settings.inc.php");
+$TITLE = "IEM | Growing Season Data";
+$THISPAGE = "climatology-gs";
+include("$rootpath/include/header.php"); 
+?>
+
+<h3 class="heading">Growing Season Plots</h3>
+
+<h4>Growing Degree Days</h4>
+
+<ul class="iem-list">
+<li><a href="/data/summary/year/diff.png">Departure from normal</a></li>
+<li><a href="/data/summary/year/stage4obs.png">Stage4 estimates</a></li>
+<li><a href="/data/summary/year/normals.png">Normal accumulation</a></li>
+ <li><a href="<?php echo $rooturl; ?>/plotting/yearly/rainfall.phtml">Month by Month</a></li>
+</ul>
+
+<ul class="iem-list">
+<li>All Stations: <a href="/data/summary/gdd_qc.gif">Plot</a> or
+    <a href="/data/summary/gdd_qc_contour.gif">Contour</a></li>
+<li><a href="/data/summary/gdd_qc_asos.gif">ASOS / AWOS</a> |
+    <a href="/data/summary/gdd_qc_rwis.gif">RWIS</a></li>
+<li><a href="/data/summary/gdd_qc_snet.gif">School Net</a></li>
+<li><A href="/data/summary/gdd_may1.gif">Seasonal (since May 1) Accumulated Growing Degree Days-(base=50)</a></li>
+<li><a href="/data/summary/gdd_norm.gif">Normal Accumulation</a></li>
+<li><a href="/data/summary/gdd_diff.gif">Departure from Normal</a></li>
+<li><a href="/plotting/gs/fe.phtml">Growing Season Rainfall/GDD vs Climatology</a></li>
+<li><a href="/data/summary/gdd_jan1.gif">Seasonal (before May 1) Accumulated Growing Degree Days-(base=50)</a></li>
+</ul>
+
+<h4>Stress Degree Days</h4>
+
+<ul class="iem-list">
+ <li>All Stations: <a href="/data/summary/sdd_qc.gif">Plot</a> or
+    <a href="/data/summary/sdd_qc_contour.gif">Contour</a></li>
+<li><a href="/data/summary/sdd_qc_asos.gif">ASOS / AWOS</a> |
+    <a href="/data/summary/sdd_qc_rwis.gif">RWIS</a></li>
+<li><a href="/data/summary/sdd_qc_snet.gif">School Net</a></li>
+<li><A href="/data/summary/sdd_may1.gif">Seasonal Accumulated Stress Degree Days-(base=86)</a></li>
+</ul>
+
+
+<?php include("$rootpath/include/footer.php"); ?>
