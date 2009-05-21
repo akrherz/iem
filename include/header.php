@@ -58,6 +58,7 @@ $_pages = Array(
     "yesterday" => Array("title" => "Yesterday", "url" => "/climate/yesterday.phtml"),
     "week" => Array("title" => "Week", "url" => "/climate/week.phtml"),
     "month" => Array("title" => "Month", "url" => "/climate/month.phtml"),
+    "gs" => Array("title" => "Growing Season", "url" => "/climate/gs.phtml"),
     "year" => Array("title" => "Year", "url" => "/climate/year.phtml"),
  ),
  "iem" => Array(
