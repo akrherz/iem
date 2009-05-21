@@ -121,11 +121,9 @@ if ($view == "download")
 	die();
 }
 
+$THISPAGE = "gis-rainfall";
 include("$rootpath/include/header.php"); ?>
-<h3 class="heading"><a href="/rainfall/">IEM Rainfall</a></h3>
 <pre>
 <?php echo $data; ?>
 </pre>
-
-
 <?php include("$rootpath/include/footer.php"); ?>
