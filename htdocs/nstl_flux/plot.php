@@ -41,8 +41,11 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 { 
   $ts = strtotime( substr($row["valid"],0,16) );
   $stid = $row["station"];
-  $data[$stid][] = floatval($row[$pvar]);
-  $times[$stid][] = $ts;
+  $val = floatval($row[$pvar]);
+  if ($val > -90000){
+    $data[$stid][] = floatval($row[$pvar]);
+    $times[$stid][] = $ts;
+  }
 }
 
 $labels = Array("nstlnsp" => "Unknown", "nstl11" => "Unknown", 
