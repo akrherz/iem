@@ -3,7 +3,7 @@ header("Content-type: text/plain");
  // Generate placefiles, whatever
  // Inspiration: http://grlevel3.tornadocentral.com/metars.php?state=IA
 
-echo 'Title: Iowa ASOS/AWOS
+echo 'Title: Iowa AWOS Only
 Refresh: 5
 Color: 200 200 255
 IconFile: 1, 18, 32, 2, 31, "http://www.tornadocentral.com/grlevel3/windbarbs.png" 
