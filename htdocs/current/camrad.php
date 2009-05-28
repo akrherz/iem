@@ -61,7 +61,7 @@ if ($network == "KCCI")
 elseif ($network == "KELO")
  $map->setExtent(-98.0,42.45,-95.1,45.3);
 elseif ($network == "KCRG")
- $map->setExtent(-93.0,40.45,-90.1,43.3);
+ $map->setExtent(-93.0,40.8,-90.1,43.6);
 
 $map->set("width", 320);
 $map->set("height", 240);
