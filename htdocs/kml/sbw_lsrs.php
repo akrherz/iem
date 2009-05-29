@@ -44,10 +44,12 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     </Style>";
 for ($i=0;$row=@pg_fetch_array($result,$i);$i++)
 {
+  $ts = strtotime( $row["valid"] );
   echo "<Placemark>
     <description>
         <![CDATA[
   <p><font color=\"red\"><i>Location:</i></font> ". $row["city"] ." ". $row["county"] ." ". $row["state"] ."
+  <br /><font color=\"red\"><i>Time:</i></font> ". gmdate('d M Y H:i', $ts) ." GMT 
   <br /><font color=\"red\"><i>Source:</i></font> ". $row["source"] ." 
   <br /><font color=\"red\"><i>Remark:</i></font> ". $row["remark"] ."
    </p>
