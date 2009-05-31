@@ -65,16 +65,6 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
         <color>$color</color>
       </PolyStyle>
     </Style>
- <ScreenOverlay id=\"legend_bar\">
-   <visibility>1</visibility>
-   <Icon>
-       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=${label}</href>
-   </Icon>
-   <description>WaterWatch Legend</description>
-   <overlayXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
-   <screenXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
-   <size x=\"0\" y=\"0\" xunits=\"pixels\" yunits=\"pixels\"/>
-  </ScreenOverlay>
 ";
 
 for($i=0;$row=@pg_fetch_array($result, $i);$i++){
