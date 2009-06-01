@@ -30,9 +30,9 @@ WEB
 #  FOOTER ia_footer.html
   MINSCALE 0
   MAXSCALE 465000000
-  IMAGEPATH "/mesonet/www/html/tmp/"
+  IMAGEPATH "/var/www/htdocs/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/mesonet/www/html/tmp/w0.log"
+  LOG "/tmp/ntp.log"
   METADATA
    "wms_title" "IEM NEXRAD NTP WMS"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ntp.cgi?"
