@@ -11,7 +11,7 @@
   <Name>GetMap</Name> <!-- WMT defined -->
   <Title>IEM Rainfall WFS Service</Title>
   <Abstract>IEM WFS Rainfall Service</Abstract>
-  <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.radar?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/>
+  <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/>
   <ContactInformation>
     <ContactPersonPrimary>
       <ContactPerson>Daryl Herzmann</ContactPerson>
@@ -27,8 +27,8 @@
       <Format>application/vnd.ogc.wms_xml</Format>
       <DCPType>
         <HTTP>
-          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.radar?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Get>
-          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.radar?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Post>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Post>
         </HTTP>
       </DCPType>
     </GetCapabilities>
@@ -38,8 +38,8 @@
       <Format>image/wbmp</Format>
       <DCPType>
         <HTTP>
-          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.radar?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Get>
-          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.radar?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Post>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Post>
         </HTTP>
       </DCPType>
     </GetMap>
@@ -49,8 +49,8 @@
       <Format>application/vnd.ogc.gml</Format>
       <DCPType>
         <HTTP>
-          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.radar?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Get>
-          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.radar?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Post>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS/apps/rainfall/wms.map&amp;"/></Post>
         </HTTP>
       </DCPType>
     </GetFeatureInfo>
