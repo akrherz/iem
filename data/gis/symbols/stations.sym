@@ -1,0 +1,160 @@
+SYMBOLSET
+ SYMBOL
+   NAME 'circle'
+   TYPE ELLIPSE
+   Filled TRUE
+   POINTS 1 1 END
+ END
+
+
+ SYMBOL
+   TYPE vector
+   POINTS
+    0 0
+    6 6
+   END
+ END
+
+SYMBOL
+  NAME "triangle"
+  TYPE vector
+  Filled TRUE
+  POINTS
+    0 4
+    2 0
+    4 4
+    0 4
+  END
+END
+
+SYMBOL
+  NAME "tornado"
+  TYPE vector
+  FILLED TRUE
+  POINTS
+   0 0
+   2 4
+   4 0
+   0 0
+  END
+END			
+
+Symbol
+  Name 'airplane'
+  Type PIXMAP
+  Image 'images/airplane.png'
+  Transparent 0
+END
+
+Symbol
+  Name 'precip'
+  Type PIXMAP
+  Image 'bars/rainbow2.png'
+  #Transparent 0
+END
+
+
+Symbol
+  Name 'airplane_yellow'
+  Type PIXMAP
+  Image 'images/airplane_yellow.png'
+  Transparent 0
+END
+
+Symbol
+  Name 'water'
+  Type PIXMAP
+  Image 'images/water.png'
+  Transparent 0
+END
+Symbol
+  Name 'schoolhouse'
+  Type PIXMAP
+  Image 'images/schoolhouse.png'
+  Transparent 1
+END
+Symbol
+  Name 'nws'
+  Type PIXMAP
+  Image 'images/nws.png'
+  Transparent 0
+END
+Symbol
+  Name 'cyclone'
+  Type PIXMAP
+  Image 'images/cyclone.png'
+  Transparent 18
+END
+Symbol
+  Name 'nrcs'
+  Type PIXMAP
+  Image 'images/nrcs.png'
+  Transparent 0
+END
+
+
+
+    Symbol
+      Name 'interstate_shield'
+      Type PIXMAP
+      Image 'interstate-2.png'
+      Transparent 0
+    END
+
+    Symbol
+      Name 'us_highway_shield'
+      Type PIXMAP
+      Image 'images/ushwy.png'
+      Transparent 1
+    END
+
+    Symbol
+      Name 'state_highway_shield'
+      Type PIXMAP
+      Image 'images/sthwy.png'
+    END 
+
+    Symbol
+      Name 'county_highway_shield'
+      Type PIXMAP
+      Image 'images/ctyhwy.png'
+      Transparent 0	
+    END
+
+    Symbol
+      Name 'x'
+      Type PIXMAP
+      Image 'images/x.png'
+      Transparent 1	
+    END
+
+    Symbol
+      Name 'kcci8'
+      Type PIXMAP
+      Image 'images/kcci8.png'
+#      Transparent 1
+    END
+
+    Symbol
+      Name 'iem_logo'
+      Type PIXMAP
+      Image 'images/iem_logo.png'
+      Transparent 0
+    END
+
+
+
+    Symbol
+      Name 'doppler8'
+      Type PIXMAP
+      Image 'images/doppler8.png'
+      Transparent 253
+    END
+
+Symbol
+  Name 'clrbar'
+  Type PIXMAP
+  Image 'images/clrbar.png'
+  Transparent 17
+END
+END
