@@ -256,7 +256,7 @@ LAYER
     "wms_title" "TIME INDEX"
     "wms_srs"   "EPSG:4326"
     "wms_extent" "-126 24 -66 50"
-    "wms_timeextent" "2003-08-01/2010-12-31/PT5M"
+    "wms_timeextent" "1995-01-01/2010-12-31/PT5M"
     "wms_timeitem" "datetime"
     "wms_timedefault" "2005-08-29T13:00:00Z"
   END
@@ -280,7 +280,7 @@ LAYER
     "wms_title" "NEXRAD BASE REF WMS-T"
     "wms_srs"   "EPSG:4326"
     "wms_extent" "-126 24 -66 50"
-    "wms_timeextent" "2003-08-01/2010-12-31/PT5M"
+    "wms_timeextent" "1995-01-01/2010-12-31/PT5M"
     "wms_timeitem" "datetime"
     "wms_timedefault" "2005-08-29T13:00:00Z"
   END
