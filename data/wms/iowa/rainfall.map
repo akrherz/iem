@@ -126,27 +126,27 @@ LAYER
 	END
 END
 
-LAYER
-	NAME sevendays_rainfall_legend
-	GROUP sevendays_rainfall
-	TYPE POINT
-  MINSCALE 0
-  MAXSCALE 465000000
-    METADATA
-      "wms_group_title" "RAIN7"
-    "wms_title" "rain7 legend"
-   "wms_srs" "EPSG:26915 EPSG:4326"
-    END
-	FEATURE
-		POINTS 240 20 END
-	END
-	TRANSFORM FALSE
-	CLASS
-		SYMBOL 'precip'
-		#SIZE 40
-		COLOR -1 -1 -1
-	END
-END
+#LAYER
+#	NAME sevendays_rainfall_legend
+#	GROUP sevendays_rainfall
+#	TYPE POINT
+#  MINSCALE 0
+#  MAXSCALE 465000000
+#    METADATA
+#      "wms_group_title" "RAIN7"
+#    "wms_title" "rain7 legend"
+#   "wms_srs" "EPSG:26915 EPSG:4326"
+#    END
+#	FEATURE
+#		POINTS 240 20 END
+#	END
+#	TRANSFORM FALSE
+#	CLASS
+#		SYMBOL 'precip'
+#		#SIZE 40
+#		COLOR -1 -1 -1
+#	END
+#END
 
 
 
@@ -231,27 +231,27 @@ LAYER
 	END
 END
 
-LAYER
-	NAME yesterday_rainfall_legend
-	GROUP yesterday_rainfall
-	TYPE POINT
-  MINSCALE 0
-  MAXSCALE 465000000
-	FEATURE
-		POINTS 240 20 END
-	END
-	TRANSFORM FALSE
-  METADATA
-    "wms_group_title" "YESTRAIN"
-    "wms_title" "yestrain legend"
-   "wms_srs" "EPSG:26915 EPSG:4326"
-   END
-	CLASS
-		SYMBOL 'precip'
-		#SIZE 40
-		COLOR -1 -1 -1
-	END
-END
+#LAYER
+#	NAME yesterday_rainfall_legend
+#	GROUP yesterday_rainfall
+#	TYPE POINT
+#  MINSCALE 0
+#  MAXSCALE 465000000
+#	FEATURE
+#		POINTS 240 20 END
+#	END
+#	TRANSFORM FALSE
+#  METADATA
+#    "wms_group_title" "YESTRAIN"
+#    "wms_title" "yestrain legend"
+#   "wms_srs" "EPSG:26915 EPSG:4326"
+#   END
+#	CLASS
+#		SYMBOL 'precip'
+#		#SIZE 40
+#		COLOR -1 -1 -1
+#	END
+#END
 
 
 LAYER
@@ -335,26 +335,26 @@ LAYER
 	END
 END
 
-LAYER
-	NAME month_rainfall_legend
-	GROUP month_rainfall
-	TYPE POINT
-	FEATURE
-		POINTS 240 20 END
-	END
-  MINSCALE 0
-  MAXSCALE 465000000
-	TRANSFORM FALSE
-  METADATA
-    "wms_group_title" "MONTHRAIN"
-    "wms_title" "monthrain legend"
-   "wms_srs" "EPSG:26915 EPSG:4326"
-  END
-	CLASS
-		SYMBOL 'precip'
-		#SIZE 40
-		COLOR -1 -1 -1
-	END
-END
+#LAYER
+#	NAME month_rainfall_legend
+#	GROUP month_rainfall
+#	TYPE POINT
+#	FEATURE
+#		POINTS 240 20 END
+#	END
+#  MINSCALE 0
+#  MAXSCALE 465000000
+#	TRANSFORM FALSE
+#  METADATA
+#    "wms_group_title" "MONTHRAIN"
+#    "wms_title" "monthrain legend"
+#   "wms_srs" "EPSG:26915 EPSG:4326"
+#  END
+#	CLASS
+#		SYMBOL 'precip'
+#		#SIZE 40
+#		COLOR -1 -1 -1
+#	END
+#END
 
 END
