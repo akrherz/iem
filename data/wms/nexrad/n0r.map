@@ -42,7 +42,6 @@ WEB
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
 END
 
@@ -62,7 +61,6 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT CURRENT"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
   OFFSITE 0 0 0
 END
@@ -81,7 +79,6 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE)"
     "wms_srs"   "EPSG:900913 EPSG:4326"
     "wms_extent" "-126 24 -66 50"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
   OFFSITE 0 0 0
 END
@@ -101,7 +98,6 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M5 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
   OFFSITE 0 0 0
 END
@@ -121,7 +117,6 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M10 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
   OFFSITE 0 0 0
 END
@@ -140,7 +135,6 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M15 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
   OFFSITE 0 0 0
 END
@@ -158,7 +152,6 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M20 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
   OFFSITE 0 0 0
 END
@@ -176,7 +169,6 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M25 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
   OFFSITE 0 0 0
 END
@@ -194,7 +186,6 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M30 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
   OFFSITE 0 0 0
 END
@@ -212,7 +203,6 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M35 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
   OFFSITE 0 0 0
 END
@@ -231,7 +221,6 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M40 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
   OFFSITE 0 0 0
 END
@@ -250,59 +239,8 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT M45 MINS"
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
   END
   OFFSITE 0 0 0
 END
-
-#  Tile Index
-LAYER
-  STATUS ON
-  NAME "time_idx"
-  #TYPE TILEINDEX  #No worky
-  TYPE POLYGON
-  MINSCALE 0
-  MAXSCALE 465000000
-  DATA "the_geom from nexrad_n0r_tindex"
-  METADATA
-    "wms_title" "TIME INDEX"
-    "wms_srs"   "EPSG:4326"
-    "wms_extent" "-126 24 -66 50"
-    "wms_timeextent" "1995-01-01/2010-12-31/PT5M"
-    "wms_timeitem" "datetime"
-    "wms_timedefault" "2005-08-29T13:00:00Z"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
-  END
-  CONNECTION "dbname=postgis host=iemdb"
-  CONNECTIONTYPE postgis
-END
-
-# raster layer
-LAYER
-  NAME "nexrad-n0r-wmst"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
-  STATUS ON
-  DEBUG ON
-  DUMP TRUE
-  PROJECTION
-    "init=epsg:4326"
-  END
-  METADATA
-    "wms_title" "NEXRAD BASE REF WMS-T"
-    "wms_srs"   "EPSG:4326"
-    "wms_extent" "-126 24 -66 50"
-    "wms_timeextent" "1995-01-01/2010-12-31/PT5M"
-    "wms_timeitem" "datetime"
-    "wms_timedefault" "2005-08-29T13:00:00Z"
-    "wms_exceptions_format" "application/vnd.ogc.se_xml"
-  END
-  OFFSITE 0 0 0
-  #TYPE POLYGON
-  TILEITEM "filepath"
-  TILEINDEX "time_idx"
-END
-
 
 END
