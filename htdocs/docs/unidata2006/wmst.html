@@ -24,7 +24,7 @@ var timeout_state=null;
                 "http://wms.jpl.nasa.gov/wms.cgi", 
                 {layers: "modis,global_mosaic"});
 
-	        ia_wms = new OpenLayers.Layer.WMS.Untiled("Nexrad","http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?",{layers:"nexrad-n0r-wmst",transparent:true,format:'image/png',time:document.getElementById('time').value});
+	        ia_wms = new OpenLayers.Layer.WMS.Untiled("Nexrad","http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?",{layers:"nexrad-n0r-wmst",transparent:true,format:'image/png',time:document.getElementById('time').value});
 
             jpl_wms.setVisibility(false);
 
