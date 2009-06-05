@@ -705,7 +705,7 @@ CustomGetTileUrl=function(a,b,c) {
 var tileNEX= new GTileLayer(new GCopyrightCollection(''),1,17);
     tileNEX.myLayers='nexrad-n0r-wmst';
     tileNEX.myFormat='image/png';
-    tileNEX.myBaseURL='http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?';
+    tileNEX.myBaseURL='http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?';
     tileNEX.getTileUrl=CustomGetTileUrl;
 
 var layer4=[G_NORMAL_MAP.getTileLayers()[0],tileNEX]; 
