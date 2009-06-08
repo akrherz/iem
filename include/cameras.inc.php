@@ -125,7 +125,7 @@ $cameras = Array(
     "state" => "IA", "network" => "KCCI",
     "ip" => "69.66.56.19", "county" => "Story", "port" => "80"),
 "KCCI-011" => Array("sts" => mktime(19,0,0,4, 16,2004), "ets" => time(),
-    "name" => "Newton", "removed" => False, "active" => True, "lat" => 41.7, "lon" => -93.03,
+    "name" => "Newton", "removed" => False, "active" => True, "lat" => 41.6778, "lon" => -93.0145,
     "state" => "IA", "network" => "KCCI",
     "ip" => "69.66.104.40", "county" => "Jasper", "port" => "80"),
 "KCCI-031" => Array("sts" => mktime(9,0,0,11, 9,2007), "ets" => time(),
