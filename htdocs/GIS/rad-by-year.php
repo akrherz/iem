@@ -22,6 +22,7 @@ $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", $ts);
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", $ts);
 $hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : date("H", $ts);
 $minute = isset($_GET["minute"]) ? intval($_GET["minute"]) : date("i", $ts);
+$extents = isset($_GET["BBOX"]) ? explode(",", $_GET["BBOX"]) : Array(-105,40,-97,47);
 $ts = mktime($hour, $minute, 0, $month, $day, $year);
 
 /* This is our final image!  */
@@ -78,8 +79,7 @@ for ($year=$beginYear; $year <= $endYear; $year++)
   $map = ms_newMapObj($mapFile);
   $map->set("width", $twidth);
   $map->set("height",$theight);
-  $map->setExtent(-97.0, 40.0, 
-                  -91.0, 44.0);
+  $map->setExtent($extents[0], $extents[1], $extents[2], $extents[3]); 
 
   $img = $map->prepareImage();
 
@@ -98,7 +98,11 @@ for ($year=$beginYear; $year <= $endYear; $year++)
   $radar->draw($img);
 
   $counties = $map->getlayerbyname("uscounties");
-  $counties->set("status", MS_ON);
+  if (($extents[2] - $extents[0]) > 5) {
+    $counties->set("status", MS_OFF);
+  } else {
+    $counties->set("status", MS_ON);
+  }
   $counties->draw($img);
 
   $states = $map->getlayerbyname("states");
