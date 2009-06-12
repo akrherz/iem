@@ -44,7 +44,6 @@ cfg = {
  'pmLabelBarWidthF'   : 0.1,
  'lbLabelFontHeightF' : 0.025
 }
-
 # Generates tmp.ps
 iemplot.simple_contour(lons, lats, gdd50, cfg)
 
@@ -52,3 +51,24 @@ os.system("convert -rotate -90 tmp.ps gdd_norm_may1.png")
 os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/gdd_norm_may1.png bogus png' gdd_norm_may1.png")
 os.remove("gdd_norm_may1.png")
 os.remove("tmp.ps")
+
+#---------- Plot the points
+
+cfg = {
+ 'wkColorMap': 'BlAqGrYeOrRe',
+ '_format': '%.0f',
+ 'tiMainString'       : "1 May - %s Average GDD Accumulation" % (
+                        now.strftime("%d %b"), ),
+}
+
+
+iemplot.simple_valplot(lons, lats, gdd50, cfg)
+
+os.system("convert -rotate -90 tmp.ps gdd_norm_may1_pt.png")
+os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/gdd_norm_may1_pt.png bogus png' gdd_norm_may1_pt.png")
+os.remove("gdd_norm_may1_pt.png")
+os.remove("tmp.ps")
+
+
+
+
