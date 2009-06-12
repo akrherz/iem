@@ -8,7 +8,7 @@ import sys, string
 #mydb = i['mesosite']
 
 import pg
-mydb = pg.connect('mesosite', 'mesonet-db1.agron.iastate.edu', user='nobody')
+mydb = pg.connect('mesosite', 'iemdb', user='nobody')
 
 def to_lower(s):
 	if s == None:	return "none"
