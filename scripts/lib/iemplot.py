@@ -84,7 +84,7 @@ def watermark(wks):
     lstring = "Iowa Environmental Mesonet"
     Ngl.text_ndc(wks, lstring,.01,.21,txres)
 
-    lstring = "Map Generated %s" % (mx.DateTime.now().strftime("%d %b %Y %H:%M %p"),)
+    lstring = "Map Generated %s" % (mx.DateTime.now().strftime("%d %b %Y %-I:%M %p"),)
     txres.txFontHeightF = 0.012
     Ngl.text_ndc(wks, lstring,.01,.18,txres)
 
