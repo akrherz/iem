@@ -207,7 +207,9 @@ while (list ($key, $val) = each ($finalA))  {
   $row .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
 
   $tdiff = $now - $asos[$key]->ts;
-  $row .= "<td>". $cities[$key]["name"] . " (". $key .")</td>";
+  $url = sprintf("%s/sites/site.php?station=%s&network=%s", $rooturl,
+         $key, $network);
+  $row .= "<td>". $cities[$key]["name"] . " (<a href=\"$url\">${key}</a>)</td>";
   $row .= "<td ";
   if ($tdiff > 10000){
     $fmt = "%d %b %I:%M %p";
