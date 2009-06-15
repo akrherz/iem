@@ -2,4 +2,4 @@
 # Run this only a couple of times per day, probably
 
 cd gdd
-python normal_may1.py
+/mesonet/python/bin/python normal_may1.py

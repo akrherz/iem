@@ -32,13 +32,18 @@ def simple_valplot(lons, lats, vals, cfg):
         setattr(res, key, cfg[key])
 
     plot = Ngl.map(wks, res)
-
-    txres              = Ngl.Resources()
-    txres.txFontHeightF = 0.016
-    for i in range(len(lons)):
-        Ngl.add_text(wks, plot, cfg["_format"] % vals[i], 
+    if cfg.has_key("_stationplot"):
+        Ngl.wmsetp("col", 1)
+        Ngl.wmsetp("ezf",1)
+        Ngl.wmstnm(wks, lats, lons, vals)
+    else:
+        txres              = Ngl.Resources()
+        txres.txFontHeightF = 0.016
+        for i in range(len(lons)):
+            Ngl.add_text(wks, plot, cfg["_format"] % vals[i], 
                      lons[i], lats[i],txres)
     watermark(wks)
+    manual_title(wks, cfg)
     Ngl.draw(plot)
     Ngl.frame(wks)
     del wks
@@ -60,33 +65,57 @@ def simple_contour(lons, lats, vals, cfg):
     analysis = numpy.transpose(analysis)
 
     for key in cfg.keys():
-        if key == 'wkColorMap':
+        if key == 'wkColorMap' or key[0] == "_":
             continue
         setattr(res, key, cfg[key])
     
     # Generate Contour
     contour = Ngl.contour_map(wks,analysis,res)
 
+    if cfg.has_key("_showvalues") and cfg['_showvalues']:
+        txres              = Ngl.Resources()
+        txres.txFontHeightF = 0.012
+        for i in range(len(lons)):
+            if cfg.has_key("_valuemask") and cfg['_valuemask'][i] is False:
+                continue
+            Ngl.add_text(wks, contour, cfg["_format"] % vals[i], 
+                     lons[i], lats[i],txres)
+
+
     pres = Ngl.Resources()
     pres.nglFrame = False
     Ngl.panel(wks,[contour],[1,1], pres)
 
     watermark(wks)
+    manual_title(wks, cfg)
     Ngl.frame(wks)
-    #Ngl.end()
     del wks
 
+def manual_title(wks, cfg):
+    """ Manually place a title """
+    if cfg.has_key("_title"):
+        txres = Ngl.Resources()
+        txres.txFontHeightF = 0.02
+        txres.txJust        = "CenterLeft"
+        Ngl.text_ndc(wks, cfg["_title"], .05, .80, txres)
+        del txres
+    if cfg.has_key("_valid"):
+        txres = Ngl.Resources()
+        txres.txFontHeightF = 0.013
+        txres.txJust        = "CenterLeft"
+        Ngl.text_ndc(wks, "Map Valid: "+ cfg["_valid"], .05, .78, txres)
+        del txres
 
 def watermark(wks):
     txres              = Ngl.Resources()
     txres.txFontHeightF = 0.016
     txres.txJust = "CenterLeft"
     lstring = "Iowa Environmental Mesonet"
-    Ngl.text_ndc(wks, lstring,.01,.21,txres)
+    Ngl.text_ndc(wks, lstring,.05,.23,txres)
 
     lstring = "Map Generated %s" % (mx.DateTime.now().strftime("%d %b %Y %-I:%M %p"),)
-    txres.txFontHeightF = 0.012
-    Ngl.text_ndc(wks, lstring,.01,.18,txres)
+    txres.txFontHeightF = 0.010
+    Ngl.text_ndc(wks, lstring,.05,.21,txres)
 
 def grid_iowa(lons, lats, vals):
     """
@@ -153,9 +182,16 @@ def iowa():
     res.nglFrame              = False        # and this
     res.nglDraw               = False        # Defaults this
 
-    res.nglPaperOrientation   = "landscape"  # Page Orientation
     res.pmTickMarkDisplayMode = "Never"      # Turn off annoying ticks
- 
+
+    # Setup the view
+    res.nglMaximize         = False      # Prevent funky things
+    res.vpWidthF            = 0.8       # Default width of map?
+    res.vpHeightF           = 1.0        # Go vertical
+    res.nglPaperOrientation = "portrait" # smile
+    res.vpXF                = 0.0        # Make Math easier
+    res.vpYF                = 1.0        # 
+
     #____________ MAP STUFF ______________________
     res.mpProjection = "LambertEqualArea"   # Display projection
     res.mpCenterLonF = -93.5                # Central Longitude
@@ -175,8 +211,5 @@ def iowa():
     res.mpOutlineBoundarySets   = "NoBoundaries" # What not to draw
     res.mpOutlineSpecifiers     = ["Conterminous US : Iowa : Counties",]
 
-    #______________ Page title _____________________________
-    res.tiMainString       = "tiMainString"  # Title
-    res.tiDeltaF           = 0
 
     return res
