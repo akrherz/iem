@@ -37,7 +37,7 @@ cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- 'tiMainString'       : "1 May - %s Average GDD Accumulation" % (
+ '_title'       : "1 May - %s Average GDD Accumulation" % (
                         now.strftime("%d %b"), ),
  'lbTitleString'      : "[base 50]",
  'pmLabelBarHeightF'  : 0.6,
@@ -47,7 +47,7 @@ cfg = {
 # Generates tmp.ps
 iemplot.simple_contour(lons, lats, gdd50, cfg)
 
-os.system("convert -rotate -90 tmp.ps gdd_norm_may1.png")
+os.system("convert -rotate -90 -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 tmp.ps gdd_norm_may1.png")
 os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/gdd_norm_may1.png bogus png' gdd_norm_may1.png")
 os.remove("gdd_norm_may1.png")
 os.remove("tmp.ps")
@@ -57,18 +57,14 @@ os.remove("tmp.ps")
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  '_format': '%.0f',
- 'tiMainString'       : "1 May - %s Average GDD Accumulation" % (
+ '_title'       : "1 May - %s Average GDD Accumulation" % (
                         now.strftime("%d %b"), ),
 }
 
 
 iemplot.simple_valplot(lons, lats, gdd50, cfg)
 
-os.system("convert -rotate -90 tmp.ps gdd_norm_may1_pt.png")
+os.system("convert -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 tmp.ps gdd_norm_may1_pt.png")
 os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/gdd_norm_may1_pt.png bogus png' gdd_norm_may1_pt.png")
 os.remove("gdd_norm_may1_pt.png")
 os.remove("tmp.ps")
-
-
-
-
