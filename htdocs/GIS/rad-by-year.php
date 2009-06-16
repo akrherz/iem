@@ -74,6 +74,7 @@ $i = 0;
 for ($year=$beginYear; $year <= $endYear; $year++)
 {
   $radts = mktime($hour,$minute,0,$month,$day,$year);
+  if ($radts > time()){ continue; }
 
   /* Render the little maps */
   $map = ms_newMapObj($mapFile);
