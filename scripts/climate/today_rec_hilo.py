@@ -1,4 +1,4 @@
-# Generate a map of today's average high and low temperature
+# Generate a map of today's record high and low temperature
 
 import sys, os
 sys.path.append("../lib/")
@@ -15,7 +15,7 @@ i = iemdb.iemdb()
 coop = i['coop']
 
 # Compute normal from the climate database
-sql = """SELECT station, high, low from climate WHERE valid = '2000-%s'""" % (
+sql = """SELECT station, max_high, min_low from climate WHERE valid = '2000-%s'""" % (
   now.strftime("%m-%d"),)
 
 lats = []
@@ -29,8 +29,8 @@ for i in range(len(rs)):
   labels.append( id[2:] )
   lats.append( st.sts[id]['lat'] )
   lons.append( st.sts[id]['lon'] )
-  highs.append( rs[i]['high'] )
-  lows.append( rs[i]['low'] )
+  highs.append( rs[i]['max_high'] )
+  lows.append( rs[i]['min_low'] )
 
 
 #---------- Plot the points
@@ -39,7 +39,7 @@ cfg = {
  'wkColorMap': 'gsltod',
  '_format': '%.0f',
 # '_labels': labels,
- '_title'       : "Average High + Low Temperature [F] (1893-2008)",
+ '_title'       : "Record High + Low Temperature [F] (1893-2008)",
  '_valid'       : now.strftime("%d %b"),
 }
 
@@ -47,7 +47,7 @@ cfg = {
 iemplot.hilo_valplot(lons, lats, highs, lows, cfg)
 
 os.system("convert -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 tmp.ps tmp.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 climate/iowa_today_avg_hilo_pt.png bogus png' tmp.png")
+os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 climate/iowa_today_rec_hilo_pt.png bogus png' tmp.png")
 if os.environ["USER"] == "akrherz":
   os.system("xv tmp.png")
 os.remove("tmp.png")
