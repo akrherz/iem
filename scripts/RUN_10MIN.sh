@@ -1,3 +1,3 @@
 # Run every 10 minutes please
 cd current
-python iowa_tmpf.py
+/mesonet/python/bin/python iowa_tmpf.py

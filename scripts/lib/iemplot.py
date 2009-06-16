@@ -12,6 +12,49 @@ IA_SOUTH = 40.37
 IA_NX    = 30
 IA_NY    = 20
 
+def hilo_valplot(lons, lats, highs, lows, cfg):
+    """
+    Special case of having a value plot with a high and low value to 
+    plot, which is common for some climate applications
+    """
+    cmap = numpy.array([[1., 1., 1.], [0., 0., 0.], [1., 0., 0.], \
+                    [0., 0., 1.], [0., 1., 0.]], 'f')
+
+    rlist = Ngl.Resources()
+    rlist.wkColorMap = cmap
+    wks = Ngl.open_wks("ps", "tmp", rlist)
+
+    res = iowa()
+    res.mpOutlineDrawOrder = "PreDraw"
+    plot = Ngl.map(wks, res)
+    for key in cfg.keys():
+        if key == 'wkColorMap' or key[0] == "_":
+            continue
+        setattr(res, key, cfg[key])
+
+    txres              = Ngl.Resources()
+    txres.txFontHeightF = 0.014
+    txres.txFontColor   = "red"
+    txres.txJust        = "BottomRight"
+    for i in range(len(lons)):
+        Ngl.add_text(wks, plot, cfg["_format"] % highs[i], 
+                      lons[i], lats[i],txres)
+
+    txres              = Ngl.Resources()
+    txres.txFontHeightF = 0.014
+    txres.txFontColor   = "blue"
+    txres.txJust        = "TopRight"
+    for i in range(len(lons)):
+        Ngl.add_text(wks, plot, cfg["_format"] % lows[i], 
+                      lons[i], lats[i],txres)
+
+
+    watermark(wks)
+    manual_title(wks, cfg)
+    Ngl.draw(plot)
+    Ngl.frame(wks)
+    del wks
+
 def simple_valplot(lons, lats, vals, cfg):
     """
     Generate a simple plot of values on a map!
@@ -24,7 +67,9 @@ def simple_valplot(lons, lats, vals, cfg):
     wks = Ngl.open_wks( "ps","tmp",rlist)
 
     res = iowa()
-    
+    res.mpOutlineDrawOrder = "PreDraw"
+    res.mpUSStateLineColor = 10
+    res.mpNationalLineColor = 10
 
     for key in cfg.keys():
         if key == 'wkColorMap' or key[0] == "_":
@@ -38,10 +83,20 @@ def simple_valplot(lons, lats, vals, cfg):
         Ngl.wmstnm(wks, lats, lons, vals)
     else:
         txres              = Ngl.Resources()
-        txres.txFontHeightF = 0.016
+        txres.txFontHeightF = 0.014
+        txres.txJust        = "BottomCenter"
         for i in range(len(lons)):
             Ngl.add_text(wks, plot, cfg["_format"] % vals[i], 
+                      lons[i], lats[i],txres)
+    if cfg.has_key("_labels"):
+        txres               = Ngl.Resources()
+        txres.txFontHeightF = 0.008
+        txres.txJust        = "TopCenter"
+        txres.txFontColor   = 14
+        for i in range(len(lons)):
+            Ngl.add_text(wks, plot, cfg["_labels"][i], 
                      lons[i], lats[i],txres)
+
     watermark(wks)
     manual_title(wks, cfg)
     Ngl.draw(plot)
