@@ -81,7 +81,7 @@ Select State: <select name="network">
    $sortdir = "DESC";
  if (strlen($station) > 0) {
    $rs = $iem->query("SELECT * from summary_$year WHERE station = '$station'
-     ORDER by $sortvar $sortdir");
+     and network ~* 'COOP' ORDER by $sortvar $sortdir");
  } else {
    $rs = $iem->query("SELECT * from summary_$year WHERE day = '$date' and
      network = '$network' ORDER by $sortvar $sortdir");
