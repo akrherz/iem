@@ -7,3 +7,7 @@ cd gdd
 cd ../climate
 /mesonet/python/bin/python today_hilo.py
 /mesonet/python/bin/python today_rec_hilo.py
+
+cd ../week
+/mesonet/python/bin/python avg_high.py
+/mesonet/python/bin/python avg_low.py
