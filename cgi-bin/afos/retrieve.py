@@ -43,7 +43,8 @@ def Main():
   sql = "SELECT * from current WHERE pil IN "+ pilAR +" \
    ORDER by entered DESC LIMIT "+LIMIT
 
-  mydb.query("set enable_seqscan=no")
+  #mydb.query("set enable_seqscan=no")
+  print sql
   rs = mydb.query(sql).dictresult()
 	
 	
