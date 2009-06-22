@@ -6,11 +6,11 @@ def Main():
   print 'Content-type: text/plain; charset=""'
   print
   print
-  try:
-    mydb = pg.connect('afos', 'iem20', user='nobody')
-  except:
-    print 'Error Connecting to Database, please try again!'
-    sys.exit(0)
+  #try:
+  mydb = pg.connect('afos', 'iem20', user='nobody')
+  #except:
+  #  print 'Error Connecting to Database, please try again!'
+  #  sys.exit(0)
   print "HERE!"
   myForm = cgi.FormContent()
   if (myForm.has_key("pil")):
