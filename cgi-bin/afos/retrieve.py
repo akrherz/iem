@@ -6,12 +6,11 @@ def Main():
   print 'Content-type: text/plain; charset=""'
   print
   print
-  #try:
-  mydb = pg.connect('afos', 'iem20', user='nobody')
-  #except:
-  #  print 'Error Connecting to Database, please try again!'
-  #  sys.exit(0)
-  print "HERE!"
+  try:
+    mydb = pg.connect('afos', 'iem20', user='nobody')
+  except:
+    print 'Error Connecting to Database, please try again!'
+    sys.exit(0)
   myForm = cgi.FormContent()
   if (myForm.has_key("pil")):
     pil0 = string.upper( myForm["pil"][0] )
@@ -44,7 +43,7 @@ def Main():
    ORDER by entered DESC LIMIT "+LIMIT
 
   #mydb.query("set enable_seqscan=no")
-  print sql
+  #print sql
   rs = mydb.query(sql).dictresult()
 	
 	
