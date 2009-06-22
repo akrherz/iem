@@ -11,7 +11,7 @@ def Main():
   except:
     print 'Error Connecting to Database, please try again!'
     sys.exit(0)
-  print 'HERE!"
+  print "HERE!"
   myForm = cgi.FormContent()
   if (myForm.has_key("pil")):
     pil0 = string.upper( myForm["pil"][0] )
