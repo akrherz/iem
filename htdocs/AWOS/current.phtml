@@ -137,7 +137,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
             value=\"".$key."\"></td>";
 
          $tdiff = $now - $parts["ts"];
-         echo "<td>". $parts["sname"] . "</td>";
+         echo sprintf("<td>%s (<a href=\"%s/sites/site.php?station=%s&network=AWOS\">%s</a>)</td>", $parts["sname"], $rooturl, $key, $key );
          echo "<td ";
          if ($tdiff > 10000){
            $format = "%d %b %I:%M %p";
