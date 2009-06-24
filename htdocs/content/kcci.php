@@ -76,7 +76,9 @@ $myOb = $iemdb->getSingleSite($station);
  $x0 = 206;
  $width = 74;
  $x_pad = ($width - $dx) / 2 ;
+if ($relh > 0){
  ImageTTFText($gif, 20, 0, $x0 + $x_pad, 125, $white, $Font, $relh ." %");
+}
 
 // Dew Point
  $size = imagettfbbox(22, 0, $Font, $dwpf);
@@ -84,7 +86,9 @@ $myOb = $iemdb->getSingleSite($station);
  $x0 = 204;
  $width = 74;
  $x_pad = ($width - $dx) / 2 ;
+if ($dwpf > -99){
  ImageTTFText($gif, 22, 0, $x0 + $x_pad, 165, $white, $Font, $dwpf );
+}
 
 // Feels Like
  $size = imagettfbbox(22, 0, $Font, $feel );
@@ -92,8 +96,9 @@ $myOb = $iemdb->getSingleSite($station);
  $x0 = 204;
  $width = 74;
  $x_pad = ($width - $dx) / 2 ;
+if ($feel > -99){
  ImageTTFText($gif, 22, 0, $x0 + $x_pad, 205, $white, "./kcci.ttf", $feel );
-
+}
 // Precip
  $size = imagettfbbox(22, 0, $Font, $pday );
  $dx = abs($size[2] - $size[0]);
@@ -128,7 +133,9 @@ $myOb = $iemdb->getSingleSite($station);
  $x0 = 32;
  $width = 55;
  $x_pad = ($width - $dx) / 2 ;
+if ($tmpf > -99){
  ImageTTFText($gif, 22, 0, $x0 + $x_pad, 205, $white, "./kcci.ttf", $tmpf );
+}
 
 // Time to do the rotation!!!
 //              x   y    x   y    x   y
@@ -167,13 +174,14 @@ $windDirs = Array(
  $minLineHeight = $pixels * (($minTemp + 20)/ ($maxT - $minT) ) ;
 
 
+if ($tmpf > -99){
  imagefilledrectangle ( $gif, $leftside, $minT_y - $height, $rightside, $minT_y, $red);
 
+}
  imagefilledrectangle( $gif, $leftside -50, $minT_y - $maxLineHeight -1, 
                   $rightside +2, $minT_y - $maxLineHeight, $black);
  imagefilledrectangle( $gif, $leftside -50, $minT_y - $minLineHeight -1, 
                   $rightside +2, $minT_y - $minLineHeight, $black);
-
 // MAX
  imagefilledrectangle($gif, $leftside - 50, $minT_y - $maxLineHeight - 1 - 20,
                   $leftside - 30, $minT_y - $maxLineHeight - 1, $red);
