@@ -43,9 +43,15 @@ dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
 dbf.add_field("STATUS", dbflib.FTString, 3, 0)
 dbf.add_field("NWS_UGC", dbflib.FTString, 6, 0)
 
+limiter = ""
+if form.has_key("limit0"):
+  limiter += " and phenomena IN ('TO','SV','FF','MA') and significance = 'W' "
+if form.has_key("limit1"):
+  limiter += " and gtype = 'P' "
+
 sql = "SELECT *, astext(geom) as tgeom from warnings_%s WHERE \
 	issue >= '%s' and issue < '%s' and eventid < 10000 \
-	ORDER by issue ASC" % (sTS.year, sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M") )
+	%s ORDER by issue ASC" % (sTS.year, sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter )
 rs = mydb.query(sql).dictresult()
 
 cnt = 0

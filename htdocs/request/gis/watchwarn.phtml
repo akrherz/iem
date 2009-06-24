@@ -11,6 +11,9 @@ include("$rootpath/include/header.php"); ?>
 and warnings for a time period of your choice.  Please be sure to read the
 archive status and dbf schema below. The IEM's archive is certainly not complete or official.  If you are looking for a real-time source of warning shapefiles, you can find that <a href="http://mesonet.agron.iastate.edu/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
 
+<div class="warning"> Due to transient server load or other issues, this application sometimes fails to generate output.  You may wish to try shorting the duration of your request or email <a href="../../info/contacts.php">us</a> for help.
+</div>
+
 <form method="GET" action="/cgi-bin/request/gis/watchwarn.py">
 <h4>Select time interval</h4>
 <i>(Times are in UTC.  Watches/Warnings <b>issued</b> between these times
@@ -57,6 +60,9 @@ will be included in the output GIS file...)</i>
     </td>
   </tr>
 </table>
+
+<br /><input type="checkbox" name="limit0" value="yes">Limit Output to Tornado, Severe Thunderstorm, Marine, and Flash Flood Warnings
+<br /><input type="checkbox" name="limit1" value="yes">Limit Output to only Storm Based Warnings
 
 <p><input type="submit" value="Giveme shapefile now!">
 </form>
