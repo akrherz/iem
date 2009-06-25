@@ -17,17 +17,27 @@ $mywfos = isset($_GET["wfos"]) ? $_GET["wfos"] : Array();
 if (sizeof($mywfos) == 0){ $mywfos[] = $wfo; }
 $wfo = $mywfos[0];
 $wfoList = implode("','", $mywfos);
-$rs = pg_prepare($connect, "SELECT", "SELECT *, astext(geom) as t, 
+$rs = pg_prepare($connect, "SELECT-INT", "SELECT *, astext(geom) as t, 
            askml(geom) as kml,
            round(area(transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
            WHERE wfo IN ('$wfoList') and issue >= $1 and issue <= $2
            and gtype = 'P' ORDER by sz DESC, updated DESC, gtype ASC");
+$rs = pg_prepare($connect, "SELECT", "SELECT *, astext(geom) as t, 
+           askml(geom) as kml,
+           round(area(transform(geom,2163)) / 1000000.0) as psize,
+           length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
+           from warnings_$year 
+           WHERE wfo IN ('$wfoList') and issue <= $1 and expire > $2
+           and gtype = 'P' ORDER by sz DESC, updated DESC, gtype ASC");
 
-$result = pg_execute($connect, "SELECT", 
-                     Array($tsSQL, $tsSQL2) );
-
+if ($tsSQL != $tsSQL2)
+{
+  $result = pg_execute($connect, "SELECT-INT",  Array($tsSQL, $tsSQL2) );
+} else {
+  $result = pg_execute($connect, "SELECT",  Array($tsSQL, $tsSQL) );
+}
 header("Content-Type:", "application/vnd.google-earth.kml+xml");
 // abgr
 
