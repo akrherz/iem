@@ -20,7 +20,7 @@ if ($ts < $archivebegin) { $ts = $archivebegin; }
 $imap = sprintf("/mnt/a1/ARCHIVE/data/%s/sbwsum-imap%s.txt", date("Y/m/d", $ts), $d[$sortby]);
 $imgurl = sprintf("http://mesonet.agron.iastate.edu/archive/data/%s/sbwsum%s.png", date("Y/m/d", $ts), $d[$sortby]);
 
-$gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=0&minute1=0&month2=%s&day2=%s&hour2=0&minute2=0",  date("Y", $ts), date("m", $ts),date("d", $ts), date("m", $ts +86400), date("d", $ts + 86400) );
+$gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=0&minute1=0&month2=%s&day2=%s&hour2=0&minute2=0&limit1=yes",  date("Y", $ts), date("m", $ts),date("d", $ts), date("m", $ts +86400), date("d", $ts + 86400) );
 
 
 
