@@ -59,7 +59,7 @@ $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 if ($network == "KCCI")
  $map->setExtent(-95.0,40.45,-92.1,43.3);
 elseif ($network == "KELO")
- $map->setExtent(-98.5,42.45,-95.6,45.3);
+ $map->setExtent(-98.8,42.75,-95.9,45.6);
 elseif ($network == "KCRG")
  $map->setExtent(-93.0,40.9,-90.1,43.7);
 
