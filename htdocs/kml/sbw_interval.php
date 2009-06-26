@@ -23,14 +23,16 @@ $rs = pg_prepare($connect, "SELECT-INT", "SELECT *, astext(geom) as t,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
            WHERE wfo IN ('$wfoList') and issue >= $1 and issue <= $2
-           and gtype = 'P' ORDER by sz DESC, updated DESC, gtype ASC");
+           and gtype = 'P' and eventid > 0
+           ORDER by sz DESC, updated DESC, gtype ASC");
 $rs = pg_prepare($connect, "SELECT", "SELECT *, astext(geom) as t, 
            askml(geom) as kml,
            round(area(transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
            WHERE wfo IN ('$wfoList') and issue <= $1 and expire > $2
-           and gtype = 'P' ORDER by sz DESC, updated DESC, gtype ASC");
+           and gtype = 'P' and eventid > 0
+           ORDER by sz DESC, updated DESC, gtype ASC");
 
 if ($tsSQL != $tsSQL2)
 {
