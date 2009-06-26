@@ -301,6 +301,7 @@ $point->free();
 
 $point = ms_newpointobj();
 $point->setXY(80, 29);
+if (isset($_REQUEST["tz"])) { putenv("TZ=". substr($_REQUEST["tz"],0,10)); }
 $d = strftime("%d %B %Y %-2I:%M %p %Z" ,  $ts); 
 $point->draw($map, $tlayer, $img, 1,"$d");
 $point->free();
