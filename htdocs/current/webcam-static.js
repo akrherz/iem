@@ -274,7 +274,7 @@ var task = {
       imagestore.fireEvent('datachanged');
     }
   },
-  interval: cfg.refresh
+  interval: cfg.refreshint
 }
 Ext.TaskMgr.start(task);
 
