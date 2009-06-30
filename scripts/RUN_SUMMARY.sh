@@ -11,3 +11,6 @@ cd ../climate
 cd ../week
 /mesonet/python/bin/python avg_high.py
 /mesonet/python/bin/python avg_low.py
+
+cd ../month
+/mesonet/python/bin/python obs_precip.py
