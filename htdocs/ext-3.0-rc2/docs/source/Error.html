@@ -1,0 +1,72 @@
+<html>
+<head>
+  <title>The source code</title>
+    <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+</head>
+<body  onload="prettyPrint();">
+    <pre class="prettyprint lang-js"><div id="method-Ext.CompositeElementLite-handleError"></div>/**
+ * Framework-wide error-handler.  Developers can override this method to provide custom exception-handling.  Framework
+ * errors will often extend from the base Ext.Error class.
+ * @param {Object/Error} e The thrown exception object.
+ */
+Ext.handleError = function(e) {
+    throw e;
+};
+
+<div id="cls-Ext.Error"></div>/**
+ * @class Ext.Error
+ * @extends Error
+ *
+<code><pre>
+try {
+    generateError({
+        foo: 'bar'
+    });
+}
+catch (e) {
+    console.error(e);
+}
+function generateError(data) {
+    throw new Ext.Error('foo-error', data);
+}
+
+</pre></code>
+ * @param {String} message
+ */
+Ext.Error = function(message) {
+    // Try to read the message from Ext.Error.lang
+    this.message = (this.lang[message]) ? this.lang[message] : message;
+}
+Ext.Error.prototype = new Error();
+Ext.apply(Ext.Error.prototype, {
+    // protected.  Extensions place their error-strings here.
+    lang: {},
+
+    name: 'Ext.Error',
+    <div id="method-Ext.Error-getName"></div>/**
+     * getName
+     * @return {String}
+     */
+    getName : function() {
+        return this.name;
+    },
+    <div id="method-Ext.Error-getMessage"></div>/**
+     * getMessage
+     * @return {String}
+     */
+    getMessage : function() {
+        return this.message;
+    },
+    <div id="method-Ext.Error-toJson"></div>/**
+     * toJson
+     * @return {String}
+     */
+    toJson : function() {
+        return Ext.encode(this);
+    }
+});
+
+</pre>    
+</body>
+</html>

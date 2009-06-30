@@ -1,0 +1,438 @@
+<html>
+<head>
+    <title>VBox Layout</title>
+    <link rel="stylesheet" type="text/css" href="../../resources/css/ext-all.css"/>
+
+    <!-- GC -->
+    <!-- LIBS -->
+    <script type="text/javascript" src="../../adapter/ext/ext-base.js"></script>
+    <!-- ENDLIBS -->
+
+    <script type="text/javascript" src="../../ext-all.js"></script>
+
+    <style type="text/css">
+        html, body {
+            font: normal 12px verdana;
+            margin: 0;
+            padding: 0;
+            border: 0 none;
+        }
+    </style>
+    <script type="text/javascript">
+
+        Ext.onReady(function() {
+
+            var replace = function(config){
+                var btns = Ext.getCmp('btns');
+                btns.remove(0);
+                btns.add(config);
+
+                btns.doLayout();
+            }
+
+
+            var viewport = new Ext.Viewport({
+                layout:'border',
+
+                items: [{
+                    id:'btns',
+                    region:'west',
+                    baseCls:'x-plain',
+                    split:true,
+                    width:150,
+                    minWidth: 100,
+                    maxWidth: 250,
+                    layout:'fit',
+                    margins: '5 0 5 5',
+                    items: {
+                        baseCls: 'x-plain',
+                        html: '<p style="padding:10px;color:#556677;font-size:11px;">Select a configuration to the right &raquo;</p>'
+                    }
+               }, {
+                    region:'center',
+                    margins: '5 5 5 0',
+                    layout:{
+                        type:'vbox',
+                        align:'stretch'
+                    },
+                    items:[{
+                        baseCls:'x-plain',
+                        layout: {
+                            type:'hbox',
+                            padding: 10
+                        },
+                        defaults:{
+                            margins:'0 5 0 0',
+                            pressed: false,
+                            toggleGroup:'btns',
+                            allowDepress: false
+                        },
+                        items: [{
+                            xtype:'button',
+                            text: 'Spaced',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        align:'left'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1'
+                                    },{
+                                        xtype:'spacer',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4',
+                                        margins:'0'
+                                    }]
+                                });
+                            }
+                        },{
+                            xtype:'button',
+                            text: 'Multi-Spaced',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        align:'left'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1'
+                                    },{
+                                        xtype:'spacer',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2'
+                                    },{
+                                        xtype:'spacer',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3'
+                                    },{
+                                        xtype:'spacer',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4',
+                                        margins:'0'
+                                    }]
+                                });
+                            }
+                        },{
+                            xtype:'button',
+                            text: 'Align: top',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        align:'left'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4'
+                                    }]
+                                });
+                            }
+                        },{
+                            xtype:'button',
+                            text: 'Align: middle',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        align:'center'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4'
+                                    }]
+                                });
+                            }
+                        },{
+                            xtype:'button',
+                            text: 'Align: stretch',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        align:'stretch'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4'
+                                    }]
+                                });
+                            }
+                        },{
+                            xtype:'button',
+                            text: 'Align: stretchmax',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        align:'stretchmax'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4'
+                                    }]
+                                });
+                            }
+                        }]
+                    },{
+                        baseCls:'x-plain',
+                        layout: {
+                            type:'hbox',
+                            padding: '0 10 10'
+                        },
+                        defaults:{
+                            margins:'0 5 0 0',
+                            pressed: false,
+                            toggleGroup:'btns',
+                            allowDepress: false
+                        },
+                        items: [{
+                            xtype:'button',
+                            text: 'Flex: All even',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        align:'center'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4',
+                                        flex:1,
+                                        margins:'0'
+                                    }]
+                                });
+                            }
+                        },{
+                            xtype:'button',
+                            text: 'Flex: Ratio',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        align:'center'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4',
+                                        flex:3,
+                                        margins:'0'
+                                    }]
+                                });
+                            }
+                        },{
+                            xtype:'button',
+                            text: 'Flex + Stretch',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        align:'stretch'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3',
+                                        flex:1
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4',
+                                        flex:3,
+                                        margins:'0'
+                                    }]
+                                });
+                            }
+                        },{
+                            xtype:'button',
+                            text: 'Pack: start',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        pack:'start',
+                                        align:'center'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4'
+                                    }]
+                                });
+                            }
+                        },{
+                            xtype:'button',
+                            text: 'Pack: center',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        pack:'center',
+                                        align:'center'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4',
+                                        margins:'0'
+                                    }]
+                                });
+                            }
+                        },{
+                            xtype:'button',
+                            text: 'Pack: end',
+                            handler: function(){
+                                replace({
+                                    layout: {
+                                        type:'vbox',
+                                        padding:'5',
+                                        pack:'end',
+                                        align:'center'
+                                    },
+                                    defaults:{margins:'0 0 5 0'},
+                                    items:[{
+                                        xtype:'button',
+                                        text: 'Button 1'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 2'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 3'
+                                    },{
+                                        xtype:'button',
+                                        text: 'Button 4',
+                                        margins:'0'
+                                    }]
+                                });
+                            }
+                        }]
+                    }]
+                }]
+            });
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>

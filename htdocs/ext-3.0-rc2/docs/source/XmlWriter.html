@@ -1,0 +1,48 @@
+<html>
+<head>
+  <title>The source code</title>
+    <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+</head>
+<body  onload="prettyPrint();">
+    <pre class="prettyprint lang-js"><div id="cls-Ext.data.XmlWriter"></div>/**
+ * @class Ext.data.XmlWriter
+ * @extends Ext.data.DataWriter
+ * DataWriter extension for writing an array or single {@link Ext.data.Record} object(s) in preparation for executing a remote CRUD action via XML.
+ */
+Ext.data.XmlWriter = Ext.extend(Ext.data.DataWriter, {
+    <div id="method-Ext.data.XmlWriter-render"></div>/**
+     * Final action of a write event.  Apply the written data-object to params.
+     * @param {String} action [Ext.data.Api.create|read|update|destroy]
+     * @param {Record[]} rs
+     * @param {Object} http params
+     * @param {Object} data object populated according to DataReader meta-data "root" and "idProperty"
+     */
+    render : function(action, rs, params, data) {
+        // no impl.
+    },
+    <div id="method-Ext.data.XmlWriter-createRecord"></div>/**
+     * createRecord
+     * @param {Ext.data.Record} rec
+     */
+    createRecord : function(rec) {
+        // no impl
+    },
+    <div id="method-Ext.data.XmlWriter-updateRecord"></div>/**
+     * updateRecord
+     * @param {Ext.data.Record} rec
+     */
+    updateRecord : function(rec) {
+        // no impl.
+
+    },
+    <div id="method-Ext.data.XmlWriter-destroyRecord"></div>/**
+     * destroyRecord
+     * @param {Ext.data.Record} rec
+     */
+    destroyRecord : function(rec) {
+        // no impl
+    }
+});</pre>    
+</body>
+</html>
