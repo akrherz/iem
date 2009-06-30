@@ -1,0 +1,96 @@
+<html>
+<head>
+  <title>The source code</title>
+    <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+</head>
+<body  onload="prettyPrint();">
+    <pre class="prettyprint lang-js">
+<div id="cls-Ext.data.SortTypes"></div>/**
+ * @class Ext.data.SortTypes
+ * @singleton
+ * Defines the default sorting (casting?) comparison functions used when sorting data.
+ */
+Ext.data.SortTypes = {
+    <div id="method-Ext.data.SortTypes-none"></div>/**
+     * Default sort that does nothing
+     * @param {Mixed} s The value being converted
+     * @return {Mixed} The comparison value
+     */
+    none : function(s){
+        return s;
+    },
+    
+    <div id="prop-Ext.data.SortTypes-stripTagsRE"></div>/**
+     * The regular expression used to strip tags
+     * @type {RegExp}
+     * @property
+     */
+    stripTagsRE : /<\/?[^>]+>/gi,
+    
+    <div id="method-Ext.data.SortTypes-asText"></div>/**
+     * Strips all HTML tags to sort on text only
+     * @param {Mixed} s The value being converted
+     * @return {String} The comparison value
+     */
+    asText : function(s){
+        return String(s).replace(this.stripTagsRE, "");
+    },
+    
+    <div id="method-Ext.data.SortTypes-asUCText"></div>/**
+     * Strips all HTML tags to sort on text only - Case insensitive
+     * @param {Mixed} s The value being converted
+     * @return {String} The comparison value
+     */
+    asUCText : function(s){
+        return String(s).toUpperCase().replace(this.stripTagsRE, "");
+    },
+    
+    <div id="method-Ext.data.SortTypes-asUCString"></div>/**
+     * Case insensitive string
+     * @param {Mixed} s The value being converted
+     * @return {String} The comparison value
+     */
+    asUCString : function(s) {
+    	return String(s).toUpperCase();
+    },
+    
+    <div id="method-Ext.data.SortTypes-asDate"></div>/**
+     * Date sorting
+     * @param {Mixed} s The value being converted
+     * @return {Number} The comparison value
+     */
+    asDate : function(s) {
+        if(!s){
+            return 0;
+        }
+        if(Ext.isDate(s)){
+            return s.getTime();
+        }
+    	return Date.parse(String(s));
+    },
+    
+    <div id="method-Ext.data.SortTypes-asFloat"></div>/**
+     * Float sorting
+     * @param {Mixed} s The value being converted
+     * @return {Float} The comparison value
+     */
+    asFloat : function(s) {
+    	var val = parseFloat(String(s).replace(/,/g, ""));
+        if(isNaN(val)) val = 0;
+    	return val;
+    },
+    
+    <div id="method-Ext.data.SortTypes-asInt"></div>/**
+     * Integer sorting
+     * @param {Mixed} s The value being converted
+     * @return {Number} The comparison value
+     */
+    asInt : function(s) {
+        var val = parseInt(String(s).replace(/,/g, ""));
+        if(isNaN(val)) val = 0;
+    	return val;
+    }
+};</pre>    
+</body>
+</html>

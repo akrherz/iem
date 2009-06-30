@@ -1,0 +1,50 @@
+<html>
+<head>
+  <title>The source code</title>
+    <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+</head>
+<body  onload="prettyPrint();">
+    <pre class="prettyprint lang-js"><div id="cls-Ext.menu.ColorMenu"></div>/**
+ * @class Ext.menu.ColorMenu
+ * @extends Ext.menu.Menu
+ * A menu containing a {@link Ext.ColorPalette} Component.
+ * @xtype colormenu
+ */
+ Ext.menu.ColorMenu = Ext.extend(Ext.menu.Menu, {
+    <div id="cfg-Ext.menu.ColorMenu-enableScrolling"></div>/** 
+     * @cfg {Boolean} enableScrolling
+     * @hide 
+     */
+    enableScrolling: false,
+    <div id="cfg-Ext.menu.ColorMenu-maxHeight"></div>/** 
+     * @cfg {Number} maxHeight
+     * @hide 
+     */
+    <div id="cfg-Ext.menu.ColorMenu-scrollIncrement"></div>/** 
+     * @cfg {Number} scrollIncrement
+     * @hide 
+     */
+    <div id="prop-Ext.menu.ColorMenu-palette"></div>/**
+     * @property palette
+     * @type ColorPalette
+     * The {@link Ext.ColorPalette} instance for this ColorMenu
+     */
+    initComponent: function(){
+        Ext.apply(this, {
+            plain: true,
+            showSeparator: false,
+            items: this.palette = new Ext.ColorPalette(this.initialConfig)
+        });
+        this.palette.purgeListeners();
+        Ext.menu.ColorMenu.superclass.initComponent.call(this);
+        this.relayEvents(this.palette, ['select']);
+    },
+
+    onClick: function() {
+        this.hide(true);
+    }
+});
+Ext.reg('colormenu', Ext.menu.ColorMenu);</pre>    
+</body>
+</html>

@@ -116,8 +116,8 @@ $_pages = Array(
     "vtec" => Array("title" => "VTEC Browser", "url" => "/vtec/"),
  ),
  "webcam" => Array(
-    "base" => Array("title" => "Web Cams", "url" => "/current/camera.phtml"),
-    "still" => Array("title" => "Still Images", "url" => "/current/camera.phtml"),
+    "base" => Array("title" => "Web Cams", "url" => "/current/webcam.php"),
+    "still" => Array("title" => "Still Images", "url" => "/current/webcam.php"),
     "viewer" => Array("title" => "Hi-res + Live", "url" => "/current/viewer.phtml"),
     "loop" => Array("title" => "Loops", "url" => "/current/bloop.phtml"),
     "lapse" => Array("title" => "Recent Movies", "url" => "/current/camlapse/"),
