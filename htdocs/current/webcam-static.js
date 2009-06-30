@@ -219,7 +219,7 @@ new Ext.Viewport({
           id        : 'datepicker',
           maxValue  : new Date(),
           emptyText : 'Select Date',
-          minValue  : '05/01/2003',
+          minValue  : '07/23/2003',
           value     : new Date(),
           disabled  : true,
           listeners : {
