@@ -1,27 +1,18 @@
+/*
+ * Javascript that drives the still image display of webcams.
+ * 
+ * Feel free to use this for whatever! 
+ */
 var imagestore;
 
 Ext.onReady(function(){
 
+/* Hack needed for Ext 3.0-rc2 to keep timefield working */
 Ext.override(Ext.form.ComboBox, {
     beforeBlur: Ext.emptyFn
 });
 
-var listSelect = new Ext.form.FormPanel({
-  region      : 'west',
-  width       : 150,
-  collapsible : true,
-  autoScroll  : true,
-  title       : "Select Webcams",
-  items       : [{
-      xtype   : 'button',
-      text    : 'Turn Off All',
-      handler : function(){
-         Ext.getCmp("camselector").items.each(function(i){
-           i.setValue(false);
-         });
-      }
-  }]
-});
+
 
 var dataFields = [
  'cid',
@@ -38,7 +29,7 @@ var disableStore = new Ext.data.Store({
 
 imagestore = new Ext.data.JsonStore({
     isLoaded    : false,
-    url         : '../json/webcams.php',
+    url         : cfg.jsonSource,
     root        : 'images',
     idProperty  : 'cid',
     fields      : dataFields
@@ -47,7 +38,7 @@ imagestore.on('load', function(store, records){
   data = Array();
   Ext.each(records, function(record){
     data.push({
-      boxLabel : record.get("name"), 
+      boxLabel : (record.get("cid").substr(5,3) * 1)+" "+record.get("name"), 
       name     : record.get("cid"), 
       checked  : true,
       listeners  : {
@@ -74,14 +65,14 @@ imagestore.on('load', function(store, records){
       Ext.getCmp("camselector").destroy();
   }
   if (records.length > 0){
-     listSelect.add({
+     Ext.getCmp("cameralist").add({
         xtype      : 'checkboxgroup',
         columns    : 1,
         id         : 'camselector',
         hideLabel  : true,
         items      : data
      });
-     listSelect.doLayout();
+     Ext.getCmp("cameralist").doLayout();
   } else {
      Ext.Msg.alert('Status', 'Sorry, no images found for this time. Try selecting a time divisible by 5.');
   }
@@ -119,12 +110,12 @@ new Ext.Viewport({
   layout    : 'border',
   items     : [{
       region      :'north',
-      height      : 150,
+      height      : cfg.headerHeight,
       collapsible : true,
       title       : 'IEM Webcams',
       contentEl   : cfg.header
-    },
-    new Ext.Panel({
+    },{
+      xtype       : 'panel',
        region: 'center',
        autoScroll : true,
        items: [dv],
@@ -261,9 +252,32 @@ new Ext.Viewport({
           }
        }
        ]
-    }),
-    listSelect
-  ]
+    },{
+        xtype       : 'form',
+        id          : 'cameralist',
+        region      : 'west',
+        width       : 160,
+        collapsible : true,
+        autoScroll  : true,
+        title       : "Select Webcams",
+        tbar        : [{
+            xtype   : 'button',
+            text    : 'Turn All Off',
+            handler : function(){
+                Ext.getCmp("camselector").items.each(function(i){
+                     i.setValue(false);
+                });
+            }
+        },{
+            xtype   : 'button',
+            text    : 'Turn All On',
+            handler : function(){
+                Ext.getCmp("camselector").items.each(function(i){
+                     i.setValue(true);
+                });
+            }
+        }]
+   }]
 });
 
 
