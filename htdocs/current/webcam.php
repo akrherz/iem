@@ -10,8 +10,10 @@ $HEADEXTRA = "
 Ext.namespace('cfg');
 cfg.refreshint = ${camera_refresh}000;
 cfg.header = 'iem-header';
+cfg.headerHeight = 150;
+cfg.jsonSource = '../json/webcams.php';
 </script>
-  <script type='text/javascript' src='webcam-static.js'></script>
+  <script type='text/javascript' src='webcam-static.js?v=1'></script>
 <style>
 .thumb-wrap{
     float: left;
