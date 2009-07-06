@@ -50,8 +50,10 @@ can cause errors in the accumulated values.</p>
 <tbody>
 <tr><td><?php echo networkSelect($network, $station); ?></td>
   <td><?php echo yearSelect(2004,$year,"year"); ?></td>
-  <td><?php echo monthSelect($smonth,"smonth"); ?><?php echo daySelect($sday,"sday"); ?></td>
-  <td><?php echo monthSelect($emonth,"emonth"); ?><?php echo daySelect($eday,"eday"); ?></td>
+  <td><?php echo monthSelect($smonth,"smonth"); ?>
+      <?php echo daySelect2($sday,"sday"); ?></td>
+  <td><?php echo monthSelect($emonth,"emonth"); ?>
+      <?php echo daySelect2($eday,"eday"); ?></td>
 </tr>
 </tbody>
 </table>
