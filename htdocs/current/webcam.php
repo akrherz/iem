@@ -3,9 +3,9 @@
 include("../../config/settings.inc.php");
  include("$rootpath/include/constants.php");
 $HEADEXTRA = "
-  <link rel='stylesheet' type='text/css' href='../ext-3.0-rc2/resources/css/ext-all.css'/>
-  <script type='text/javascript' src='../ext-3.0-rc2/adapter/ext/ext-base.js'></script>
-  <script type='text/javascript' src='../ext-3.0-rc2/ext-all.js'></script>
+  <link rel='stylesheet' type='text/css' href='http://extjs.cachefly.net/ext-3.0.0/resources/css/ext-all.css'/>
+  <script type='text/javascript' src='http://extjs.cachefly.net/ext-3.0.0/adapter/ext/ext-base.js'></script>
+  <script type='text/javascript' src='http://extjs.cachefly.net/ext-3.0.0/ext-all.js'></script>
 <script>
 Ext.namespace('cfg');
 cfg.refreshint = ${camera_refresh}000;
@@ -15,6 +15,10 @@ cfg.jsonSource = '../json/webcams.php';
 </script>
   <script type='text/javascript' src='webcam-static.js?v=1'></script>
 <style>
+.webimage {
+  height: 240px;
+  width : 320px;
+}
 .thumb-wrap{
     float: left;
     margin: 1px;

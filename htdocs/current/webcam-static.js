@@ -83,20 +83,11 @@ imagestore.on('load', function(store, records){
 var tpl = new Ext.XTemplate(
     '<tpl for=".">',
         '<div class="thumb-wrap" id="{cid}">',
-        '<div class="thumb"><img src="{url}?{[ (new Date()).getTime() ]}" title="{name}"></div>',
+        '<div class="thumb"><img class="webimage" src="{url}?{[ (new Date()).getTime() ]}" title="{name}"></div>',
         '<span>[{cid}] {name}, {state} ({county} County)</span></div>',
     '</tpl>',
     '<div class="x-clear"></div>'
 );
-
-var dv = new Ext.DataView({
-  store     : imagestore,
-  itemSelector:'div.thumb-wrap',
-  autoHeight:true,
-  overClass:'x-view-over',
-  emptyText : "No Images Loaded or Selected for Display",
-  tpl       : tpl
-});
 
 var helpWin = new Ext.Window({
     contentEl  : 'help',
@@ -118,7 +109,15 @@ new Ext.Viewport({
       xtype       : 'panel',
        region: 'center',
        autoScroll : true,
-       items: [dv],
+       items: [{
+           xtype       : 'dataview',
+          store        : imagestore,
+          itemSelector : 'div.thumb-wrap',
+          autoHeight   : true,
+          overClass    : 'x-view-over',
+          emptyText    : "No Images Loaded or Selected for Display",
+          tpl          : tpl
+       }],
        tbar : [{
            xtype         : 'button',
            text          : 'Help',
@@ -126,6 +125,7 @@ new Ext.Viewport({
                helpWin.show();
            }        
        },{
+           xtype         : 'tbtext',
            text          : 'Sort By:'
        },{
            xtype         : 'combo',
