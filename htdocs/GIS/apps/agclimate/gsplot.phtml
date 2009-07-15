@@ -1,8 +1,10 @@
 <?php
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/forms.php");
-include("$rootpath/include/agclimateLoc.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("ISUAG");
+$ISUAGcities = $nt->table;
 
 $var = isset($_GET["var"]) ? $_GET["var"] : "gdd50";
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -28,7 +30,7 @@ $sday = strftime("%d", $gs_start);
 ?>
 
 <?php 
-        $page = "isuag";
+$THISPAGE = "networks-agclimate";
 	$TITLE = "IEM | ISUAG Growing Season Data";
 	$HEADEXTRA = '<script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
@@ -159,7 +161,7 @@ function gdd($high, $low, $ceiling, $floor)
 $climate = Array();
 reset($ISUAGcities);
 while( list($key,$val) = each($ISUAGcities) ) {
-  $csite = $ISUAGcities[$key]["climate_site"];
+  $csite = strtolower($ISUAGcities[$key]["climate_site"]);
   $climate[$key] = Array('gdd32'=> 0, 'gdd50' => 0,'sdd86'=>0,'prec'=>0);
 
   $sql = sprintf("SELECT * from climate51 WHERE station = '%s' and
@@ -296,9 +298,9 @@ $tr = "# ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .")\n";
 $tr .= "#-----------------------snip------------------\n";
 $tr .= sprintf("%20s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $var);
 foreach($vals as $key => $value){
-  if ($key == "A133259") continue;
+  if ($key == "A133259" or $key == "A130219") continue;
 
-  $tr .= sprintf("%20s,%10s,%10s,%10s\n", $ISUAGcities[$key]['city'],
+  $tr .= sprintf("%20s,%.4f,%.4f,%10s\n", $ISUAGcities[$key]['name'],
   $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], round($value, $round[$var]) );
 
   // Red Dot... 
@@ -342,9 +344,9 @@ foreach($vals as $key => $value){
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   if ($key == "A131909" || $key == "A130209"){
-    $pt->draw($map, $snet, $img, 3, $ISUAGcities[$key]['city'] );
+    $pt->draw($map, $snet, $img, 3, $ISUAGcities[$key]['name'] );
   } else {
-    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['city'] );
+    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['name'] );
   }
   $pt->free();
 }
