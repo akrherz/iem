@@ -1,4 +1,3 @@
-
 <?php 
   include("../../../../config/settings.inc.php");
   include("$rootpath/include/forms.php");
@@ -15,7 +14,7 @@
   $date = $year ."-". $month ."-". $day;
   $ts = mktime(0,0,0, $month, $day, $year);
 
-  $page = "isuag";
+  $THISPAGE = "networks-agclimate";
   $TITLE = "IEM | ISUAG Daily Data Plots";
   include("$rootpath/include/header.php"); 
 ?>
@@ -107,11 +106,11 @@ $cols = Array("c11" => "hi_tmp_f",
  foreach($data as $key => $value){
    if ($key == "A133259") continue;
    if (isset($data[$key]['var2']) ){
-     $tr .= sprintf("%20s,%10s,%10s,%10s,%10s\n", $ISUAGcities[$key]['city'],
+     $tr .= sprintf("%20s,%.4f,%.4f,%10s,%10s\n", $ISUAGcities[$key]['name'],
   $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], $data[$key]['var'],
   $data[$key]['var2'] );
    } else {
-     $tr .= sprintf("%20s,%10s,%10s,%10s\n", $ISUAGcities[$key]['city'],
+     $tr .= sprintf("%20s,%.4f,%.4f,%10s\n", $ISUAGcities[$key]['name'],
   $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], $data[$key]['var'] );
    }
 
