@@ -1,6 +1,9 @@
 <?php
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("ISUAG");
+$ISUAGcities = $nt->table;
 
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400 - (7 * 3600) );
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 86400 - (7 * 3600) );
@@ -15,7 +18,6 @@ $direct = isset($_GET["direct"]) ? $_GET['direct']: "";
 $ts = strtotime($date);
 
 dl($mapscript);
-include("$rootpath/include/agclimateLoc.php");
 include("lib.php");
 
 
@@ -107,9 +109,9 @@ $rs =  pg_exec($c, $q);
 $data = Array();
 for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $key = $row['station'];
-  if ($key == "A133259") continue;
+  if ($key == "A133259" or $key == "A130219") continue;
   $data[$key] = Array();
-  $data[$key]['city'] = $ISUAGcities[$key]['city'];
+  $data[$key]['name'] = $ISUAGcities[$key]['name'];
   $data[$key]['lon'] = $ISUAGcities[$key]['lon'];
   $data[$key]['lat'] = $ISUAGcities[$key]['lat'];
   //print_r($row);
@@ -148,9 +150,9 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   if ($key == "A131909" || $key == "A130209"){
-    $pt->draw($map, $snet, $img, 3, $ISUAGcities[$key]['city'] );
+    $pt->draw($map, $snet, $img, 3, $ISUAGcities[$key]['name'] );
   } else {
-    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['city'] );
+    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['name'] );
   }
 
   $pt->free();
