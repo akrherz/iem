@@ -4,7 +4,10 @@ include("$rootpath/include/database.inc.php");
  // worker.php
 header("Content-type: text/plain");
 
-include("$rootpath/include/agclimateLoc.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("ISUAG");
+$ISUAGcities = $nt->table;
+
 
 $d = Array("comma" => "," , "tab" => "\t", "space" => " ");
 
@@ -104,7 +107,7 @@ $sql = "SELECT station, to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid,
   $rs = pg_exec($c, $sql);
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-  echo $row["station"] . $d[$delim] . $ISUAGcities[$row["station"]]['city'] 
+  echo $row["station"] . $d[$delim] . $ISUAGcities[$row["station"]]['name'] 
     . $d[$delim] . $row["dvalid"] . $d[$delim];
   for ($j=0; $j < $num_vars;$j++){
     echo $row[$fvars[$j]]. $d[$delim];

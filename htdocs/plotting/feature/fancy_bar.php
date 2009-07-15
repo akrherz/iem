@@ -5,14 +5,10 @@ include ("../../../include/jpgraph/jpgraph_bar.php");
 // 16 Oct 2007 select extract(year from day) as year, count(*) from (select day, count(*) from alldata WHERE precip >= 4 and year > 1950 and stationid IN (select stationid from alldata WHERE day = '1971-01-01') GROUP by day) as foo WHERE count > 1 GROUP by year ORDER by count ASC;
 
 
-$d=array(92,100,104,106,108,109,207);
-$datax=array("1945 (Least)\nJun 23 - Sep 23", 
-             "2008\nMay 26 - Sep 03",
-             "1935\nJun 12 - Sep 24",
-             "1913\nMay 27 - Sep 10",
-             "1957\nJun 03 - Sep 19",
-             "1993\nMay 27 - Sep 13",
-             "1910 (Most)\nMar 23 - Oct 16",
+$d=array(83, 85, 86);
+$datax=array("1903, 1951\n1993", 
+             "1904, 1907\n1908, 1910",
+             "1935, 1950\n1984, 1995\n2008, 2009",
 );
 
 // Size of graph
@@ -41,8 +37,8 @@ $graph->SetBox();
 $graph->SetBackgroundGradient('blue','lightblue',GRAD_HOR,BGRAD_PLOT);
 
 // Setup title
-$graph->title->Set("Days between first and last 90°F");
-$graph->subtitle->Set("Based on Iowa data 1893-2008");
+$graph->title->Set("May 1 - Jun 15 Lowest High Temp");
+$graph->subtitle->Set("Based on Ames data 1893-2009");
 $graph->title->SetFont(FF_VERDANA,FS_BOLD,11);
 
 // Setup X-axis
@@ -84,7 +80,7 @@ $graph->Add($bplot);
 $txt = new Text("* 148 days is the climate mean");
 $txt->SetPos(280,240);
 $txt->SetFont(FF_COMIC,FS_NORMAL,8);
-$graph->Add($txt);
+//$graph->Add($txt);
 
 // .. and stroke the graph
 $graph->Stroke();

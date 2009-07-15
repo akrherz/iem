@@ -2,6 +2,10 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connection = iemdb("isuag");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("ISUAG");
+$ISUAGcities = $nt->table;
+
 
 $station = $_GET['station'];
 $ts = time() - 86400 - 7*3600;
@@ -45,7 +49,6 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 
 pg_close($connection);
 
-include ("$rootpath/include/agclimateLoc.php");
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph//jpgraph_line.php");
 include ("$rootpath/include/jpgraph//jpgraph_bar.php");
@@ -59,7 +62,7 @@ $graph->img->SetMargin(50,10,45,80);
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set("Last 60 days accumulated (Obs Prec - PET) for  ". $ISUAGcities[ $station]["city"] );
+$graph->title->Set("Last 60 days accumulated (Obs Prec - PET) for  ". $ISUAGcities[ $station]["name"] );
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitle("inches");

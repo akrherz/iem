@@ -5,48 +5,69 @@ include ("../../../include/database.inc.php");
 
 $db = iemdb("postgis");
 
-$svr = Array();
-$tor = Array();
+$svr08 = Array();
+$tor08 = Array();
+$svr09 = Array();
+$tor09 = Array();
 $sql = sprintf("SELECT extract(month from issue) as m, phenomena, count(*) as c 
- from warnings_2008 WHERE gtype = 'P' and significance = 'W' 
+ from warnings_2008 WHERE gtype = 'P' and significance = 'W' and issue < '2008-06-03'
  GROUP by m, phenomena ORDER by m ASC");
 $rs = pg_query($db, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $p = $row["phenomena"];
-  if ($p == "TO") $tor[] = $row["c"];
-  if ($p == "SV") $svr[] = $row["c"];
+  if ($p == "TO") $tor08[] = $row["c"];
+  if ($p == "SV") $svr08[] = $row["c"];
+}
+
+$sql = sprintf("SELECT extract(month from issue) as m, phenomena, count(*) as c 
+ from warnings_2009 WHERE gtype = 'P' and significance = 'W' and issue < '2009-06-03'
+ GROUP by m, phenomena ORDER by m ASC");
+$rs = pg_query($db, $sql);
+for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
+{
+  $p = $row["phenomena"];
+  if ($p == "TO") $tor09[] = $row["c"];
+  if ($p == "SV") $svr09[] = $row["c"];
 }
 
 
 // Create the graph. These two calls are always required
 $graph = new Graph(310,300,"auto");    
 $graph->SetScale("textlin");
-$graph->legend->Pos(0.05,0.08);
+$graph->legend->Pos(0.05,0.07);
 $graph->legend->SetLayout(LEGEND_HOR);
 
 $graph->SetShadow();
-$graph->img->SetMargin(50,10,40,40);
+$graph->img->SetMargin(50,10,49,40);
 
-$graph->xaxis->SetTickLabels( Array("JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT") );
+$graph->xaxis->SetTickLabels( Array("JAN","FEB","MAR","APR","MAY","JUN") );
 
 // Create the bar plots
-$b1plot = new BarPlot($svr);
+$b1plot = new BarPlot($svr08);
 $b1plot->SetFillColor("yellow");
-$b1plot->SetLegend('Severe Thunderstorm');
+$b1plot->SetLegend('08 SVR');
 
-$b2plot = new BarPlot($tor);
+$b2plot = new BarPlot($tor08);
 $b2plot->SetFillColor("red");
-$b2plot->SetLegend('Tornado');
+$b2plot->SetLegend('08 TOR');
 
-// Create the grouped bar plot
-$gbplot = new AccBarPlot(array($b1plot,$b2plot));
+// Create the bar plots
+$b3plot = new BarPlot($svr09);
+$b3plot->SetFillColor("lightyellow");
+$b3plot->SetLegend('09 SVR');
 
-// ...and add it to the graPH
-$graph->Add($gbplot);
+$b4plot = new BarPlot($tor09);
+$b4plot->SetFillColor("lightred");
+$b4plot->SetLegend('09 TOR');
+
+$gbarplot = new GroupBarPlot(array($b1plot,$b2plot,$b3plot,$b4plot));
+$gbarplot->SetWidth(0.8);
+$graph->Add($gbarplot);
+
 
 $graph->title->Set("NWS Issued Warnings by Month");
-$graph->xaxis->title->Set("Thru 20 Oct 2008");
+$graph->xaxis->title->Set("Thru 3 June");
 $graph->yaxis->title->Set("Total Warnings");
 $graph->yaxis->SetTitleMargin(38);
 
