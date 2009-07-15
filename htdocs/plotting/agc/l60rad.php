@@ -1,6 +1,10 @@
 <?php
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("ISUAG");
+$ISUAGcities = $nt->table;
+
 $connection = iemdb("isuag");
 
 $station = isset($_GET['station']) ? $_GET["station"]: "A130209";
@@ -43,7 +47,6 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 
 pg_close($connection);
 
-include ("$rootpath/include/agclimateLoc.php");
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
 include ("$rootpath/include/jpgraph/jpgraph_date.php");
@@ -56,7 +59,7 @@ $graph->SetY2Scale("lin",0,1000);
 $graph->img->SetMargin(40,40,45,100);
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set("Last 60 daily 4in Soil Temp & Solar Raditaion values for  ". $ISUAGcities[ $station]["city"] );
+$graph->title->Set("Last 60 daily 4in Soil Temp & Solar Raditaion values for  ". $ISUAGcities[ $station]["name"] );
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,10);
 $graph->yaxis->SetTitle("Temperature [F]");

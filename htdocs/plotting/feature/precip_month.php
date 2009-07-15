@@ -4,23 +4,29 @@ include ("../../../include/database.inc.php");
 $wepp = iemdb("wepp");
 $coop = iemdb("coop");
 
+$labels = Array();
 $times = Array();
 $climate = Array();
 $d2009 = Array();
 $d2008 = Array();
 
 /* Load up climatology and times arrays */
-$rs = pg_query($coop, "SELECT valid, precip from climate51 WHERE station = 'ia0000' and extract(month from valid) = 4 ORDER by valid ASC");
+$rs = pg_query($coop, "SELECT valid, precip from climate51 WHERE 
+  station = 'ia0000' and extract(month from valid) IN (4,5) 
+  ORDER by valid ASC");
 $r = 0;
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
  $times[] = strtotime( $row["valid"] );
  $r += $row["precip"];
  $climate[] = $r;
+ $labels[] = date("d M", strtotime( $row["valid"] ) );
 }
 
 /* Load up 2008 from coop */
-$rs = pg_query($coop, "SELECT day, precip from alldata WHERE stationid = 'ia0000' and year = 2008 and month = 4 ORDER by day ASC");
+$rs = pg_query($coop, "SELECT day, precip from alldata WHERE 
+  stationid = 'ia0000' and year = 2008 and 
+  month IN (4,5) ORDER by day ASC");
 $r = 0;
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
@@ -53,12 +59,15 @@ $graph->legend->SetLayout(LEGEND_HOR);
 
 $graph->xaxis->SetPos("min");
 $graph->xaxis->SetLabelAngle(90);
+$graph->xaxis->SetTickLabels( $labels );
+$graph->xaxis->SetTextTickInterval( 5 );
+
 $graph->yaxis->title->Set("Accumulated Precip [inch]");
-$graph->title->Set("Iowa Precipitation in April");
+$graph->title->Set("Iowa Precipitation in Apr/May");
 $graph->subtitle->Set("For April");
 
 $graph->SetShadow();
-$graph->img->SetMargin(40,10,40,40);
+$graph->img->SetMargin(40,10,40,60);
 
 
 // Create the error plot

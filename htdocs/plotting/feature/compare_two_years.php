@@ -1,6 +1,5 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/all_locs.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/mlib.php");
 
@@ -12,7 +11,8 @@ $pmsl2 = Array();
 
 $dbconn = iemdb('asos');
 $sql = "SELECT dwpf, extract(EPOCH from valid) as epoch, alti, tmpf, p01m / 24.5 as phour
-  from t2008 WHERE station = 'DSM' and valid > '2008-05-15' and dwpf > 0 ORDER by valid ASC";
+  from t2009 WHERE station = 'DSM' and valid > '2009-05-15' and 
+  valid < '2009-06-15' and dwpf > 0 ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
@@ -23,7 +23,8 @@ for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 }
 
 $sql = "SELECT dwpf, extract(EPOCH from (valid + '1 year'::interval)) as epoch, alti, tmpf, p01m / 24.5 as phour
-  from t2007 WHERE alti > 25 and station = 'DSM' and valid > '2007-05-15' and dwpf > 0 and valid < '2007-07-09' ORDER by valid ASC";
+  from t2008 WHERE alti > 25 and station = 'DSM' and valid > '2008-05-15' 
+  and valid < '2008-06-15' and dwpf > 0 ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)

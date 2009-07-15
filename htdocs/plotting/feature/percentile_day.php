@@ -6,7 +6,7 @@ $coop = iemdb("coop");
 $iem = iemdb("access");
 
 $rs = pg_query($iem, "SELECT day, max_tmpf, min_tmpf from summary WHERE 
-                      station = 'DSM' and day >= '2009-03-01' ORDER by day ASC");
+                      station = 'DSM' and day >= '2009-06-01' and day < '2009-06-29' ORDER by day ASC");
 
 $hpc = Array();
 $lpc = Array();
