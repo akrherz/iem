@@ -44,7 +44,7 @@ archive of presentations.</li>
 <ul>
  <li><a href="http://drought.unl.edu/dm/dmshps_archive.htm">US Drought Monitor GIS data</a>
   <br />Download current and historical drought monitor products in GIS formats</li>
- <li><a href="http://www.crh.noaa.gov/ind/?n=svrgis">GIS Severe Weather reports</a>
+ <li><a href="http://www.spc.noaa.gov/gis/svrgis/">GIS Severe Weather reports</a>
  <br />Archive of NCDC provided storm reports!</li>
  <li><a href="http://gis.ncdc.noaa.gov/aimstools/gis.jsp">NCDC GIS Portal</a><br />National Climate Data Center GIS goodies</li>
  <li><a href="http://wdssii.nssl.noaa.gov/geotiff/">NSSL Google Earth Data</a>
