@@ -100,10 +100,12 @@ function isuagSelect($selected)
 {
     global $rootpath;
     $s = "";
-    include_once("$rootpath/include/agclimateLoc.php");
-    reset($ISUAGcities);
+    include_once("$rootpath/include/network.php");
+    $nt = new NetworkTable("ISUAG");
+    $cities = $nt->table;
+    reset($cities);
     $s .= '<select name="station">\n';
-    while (list($sid, $tbl) = each($ISUAGcities))
+    while (list($sid, $tbl) = each($cities))
     {
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
