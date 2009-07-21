@@ -93,6 +93,9 @@ then, only base reflectivity was saved.</li>
 <li><a href="<?php echo $rooturl; ?>/browser/">Archived Data Browser</a>
   <br />Browse the archive of products via this frames based interface.</li> 
 
+<li><a href="http://archive.atmos.colostate.edu/">NWS DIFAX Archive (2000-)</a>
+ <br />Excellent archive of the NWS DIFAX products.</li>
+
 <li><a href="http://www.crh.noaa.gov/unr/?n=pw">Precipitable Water Climatologies</a>
  <br />Fascinating month-by-month plots of PWAT climatologies for the RAOB sites in the CONUS</li>
 
