@@ -29,7 +29,7 @@ select the appropiate stations and weather variables desired below.
   <input type="checkbox" name="sts[]" value="A131329">Cedar Rapids<BR>
   <input type="checkbox" name="sts[]" value="A131559">Chariton<BR>	
   <input type="checkbox" name="sts[]" value="A131909">Crawfordsville<BR>
-  <input type="checkbox" name="sts[]" value="A130219">Gilbert<BR>
+ <!--  <input type="checkbox" name="sts[]" value="A130219">Gilbert<BR> -->
   <input type="checkbox" name="sts[]" value="A134309">Kanawha<BR>
   <input type="checkbox" name="sts[]" value="A134759">Lewis<BR>
   <input type="checkbox" name="sts[]" value="A135849">Muscatine<BR>
