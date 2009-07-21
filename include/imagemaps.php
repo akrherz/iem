@@ -109,7 +109,7 @@ function isuagSelect($selected)
     {
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">". $tbl["city"] ."</option>\n";
+        $s .= ">". $tbl["name"] ."</option>\n";
    }
    $s .= "</select>\n";
    return $s;
