@@ -1,3 +1,5 @@
+SYMBOLSET
+
 SYMBOL
   NAME 'circle'
   TYPE ELLIPSE
@@ -48,4 +50,4 @@ Symbol
  Image 'symbols/interstate-2.png'
  Transparent 0
 END
-
+END
