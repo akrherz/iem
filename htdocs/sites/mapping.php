@@ -32,7 +32,61 @@ echo '<form method="GET" action="mapping.php">
                </select>
                <input type="submit" value="Change Image"></font>
             </TD></TR>
-	    <TR><TD><h3 class="subtitle"><b><img src="<?php echo $URL; ?>"></b></h3><br></TD></TR>
+	    <TR><TD>
+<?php
+dl($mapscript);
+
+$map = ms_newMapObj("../../data/gis/base26915.map");
+$ll = $map->getlayerbyname("wmsback");
+$ll->set("connection", "http://cairo.gis.iastate.edu/cgi-bin/server.cgi?format=jpeg&wmtver=1.0.0&request=map&servicename=GetMap&layers=".$type );
+//$ll->set('connection', 'http://komodo.gis.iastate.edu/server.cgi?format=jpeg&wmtver=1.0.0&request=map&servicename=GetMap&layers='.$type);
+$ll->set("status", MS_ON);
+
+$site = $map->getlayerbyname("dot");
+$site->set("status", MS_ON);
+
+$rect = $map->getlayerbyname("rect");
+$rect->set("status", MS_ON);
+
+include("$rootpath/include/dbloc.php");
+$loc = dbloc26915(iemdb("mesosite"), $station);
+
+
+$incr = 500;
+$ll_x = $loc["x"] - (100+($zoom*$incr));
+$ll_y = $loc["y"] - (100+($zoom*$incr));
+$ur_x = $loc["x"] + (100+($zoom*$incr));
+$ur_y = $loc["y"] + (100+($zoom*$incr));
+
+$map->setextent($ll_x, $ll_y, $ur_x, $ur_y);
+$img = $map->prepareImage();
+
+$ll->draw($img);
+
+$pt = ms_newPointObj();
+$pt->setXY($loc["x"], $loc["y"], 0);
+$pt->draw($map, $site, $img, 0, "  ");
+$pt->free();
+
+/**
+$rt = ms_newRectObj();
+$rt->setextent($r0->x, $r0->y, $r1->x, $r1->y);
+$rt->draw($map, $rect, $img, 0, " ");
+$rt->free();
+*/
+
+//$counties->draw($img);
+//$site->draw($img);
+
+$img2 = $map->drawScaleBar();
+$map->drawLabelCache($img);
+
+$url = $img->saveWebImage();
+$url2 = $img2->saveWebImage();
+?>
+<img src="<?php echo $url; ?>" border="1">
+<img src="<?php echo $url2; ?>" border="1">
+</TD></TR>
             <TR><TD colspan="2"><font class="subtitle"><b>Zoom
 	    Level: (near)</b></font>
 <?php

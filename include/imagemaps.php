@@ -95,6 +95,35 @@ function networkSelect($network, $selected, $extra=Array())
    return $s;
 }
 
+function networkSelectAuto($network, $selected, $extra=Array())
+{
+    global $rootpath;
+    $network = strtoupper($network);
+    $s = "";
+    include_once("$rootpath/include/network.php");
+    $nt = new NetworkTable($network);
+    $cities = $nt->table;
+    reset($cities);
+    $s .= "<select name=\"station\" onChange=\"this.form.submit()\">\n";
+    while (list($sid, $tbl) = each($cities))
+    {
+        if ($tbl["network"] != $network) continue;
+        $s .= "<option value=\"$sid\" ";
+        if ($selected == $sid) { $s .= "SELECTED"; }
+        $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
+   }
+   while (list($idx,$sid) = each($extra))
+   {
+        $nt->load_station($sid);
+        $tbl = $nt->table[$sid];
+        $s .= "<option value=\"$sid\" ";
+        if ($selected == $sid) { $s .= "SELECTED"; }
+        $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
+   }
+   $s .= "</select>\n";
+   return $s;
+}
+
 
 function isuagSelect($selected)
 {
