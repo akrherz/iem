@@ -9,18 +9,19 @@ $THISPAGE="iem-sites";
    $current="neighbors"; include('sidebar.php');
 
 
-   function neighbors($stations,$lat,$lon){
-     $con = iemdb("mesosite");
-     $sqlStr = "SELECT * from stations WHERE point_inside_circle(geom, ".$lon.", ".$lat.", 0.25) and id != '$stations'";
-     $result = pg_exec($con, $sqlStr);
-     pg_close($con);
+function neighbors($station,$lat,$lon){
+   $con = iemdb("mesosite");
+   $rs = pg_prepare($con, "_SELECT", "SELECT * from stations 
+         WHERE point_inside_circle(geom, ".$lon.", ".$lat.", 0.25) 
+         and id != $1");
+   $result = pg_execute($con, "_SELECT", Array($station) );
  
-     for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
-        if ($stations!=$row["id"]){
-          echo '<a class="llink" href="site.php?station='.$row["id"].'&network='.$row["network"].'">'
-                .$row["name"].'</a> ('.$row["network"].' )<br />';
-        }
+   echo "<table cellpadding=\"3\" cellspacing=\"0\"><thead><tr><th>Network</th><th>Station Name</th></tr></thead>";
+   for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
+      echo sprintf("<tr><td>%s</td><td><a href=\"site.php?station=%s&network=%s\">%s</a></td></tr>", 
+      $row["network"], $row["id"], $row["network"], $row["name"]);
      }
+   echo "</table>";
    }
 
   $interval = 0.25;
@@ -28,24 +29,11 @@ $THISPAGE="iem-sites";
   $lat1 = $metadata["lat"] + $interval;
   $lon0 = $metadata["lon"] - $interval;
   $lon1 = $metadata["lon"] + $interval;
-  $imgbase = $rootcgi."/mapserv/mapserv?imgbox=-1+-1+-1+-1&imgxy=99.5+99.5&imgext=".$lon0."+".$lat0."+".$lon1."+".$lat1."&map=$rootpath/htdocs%2FGIS%2Fapps%2Fsmap0%2Fstations.map&zoom=1&layer=". $network;
-  $imgref = $imgbase ."&mode=map";
-  $refref = $imgbase ."&mode=reference";
 
-?><div class="text">
-<TABLE>
-<TR>
-       <TD><img border="2" src="<?php echo $imgref; ?>" 
-           ALT="County Map">
-           <br /></TD>
-       <TD valign="top" width="600px">
-         <TABLE width="100%">
-           <TR><TD>
-           <h3 class="subtitle">Neighboring Stations</h3><br>
-           <?php neighbors($station,$metadata["lat"],$metadata["lon"]); ?></TD></TR>
-         </TABLE>
-       </TD>
-</TR>
-</TABLE>
-</div>
+?>
+<h3 class="subtitle">Neighboring Stations</h3><br>
+<p>The following is a list of IEM tracked stations within roughly 25 kilometers
+from the site.</p>
+
+<?php neighbors($station,$metadata["lat"],$metadata["lon"]); ?>
 <?php include("$rootpath/include/footer.php"); ?>

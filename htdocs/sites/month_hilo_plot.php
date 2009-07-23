@@ -100,7 +100,6 @@ if ($hasclimate){
   $graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["name"] ."[". $climate_site ."]");
 }
 $graph->legend->SetLayout(LEGEND_HOR);
-$graph->legend->Pos(0.05, 0.1, "right", "top");
 
 //$graph->xaxis->SetTickLabels($xlabels);
 //$graph->xaxis->SetLabelAngle(90);
@@ -112,7 +111,7 @@ $graph->yscale->SetGrace(5);
 $graph->yaxis->SetTitle("Temperature [F]");
 $graph->yaxis->SetLabelFormat('%.0d');
 
-$graph->legend->Pos(0.25, 0.1, "right", "top");
+$graph->legend->Pos(0.25, 0.11, "right", "top");
 
 $bplot1 = new BarPlot($highs);
 $bplot1->SetFillColor('red');
