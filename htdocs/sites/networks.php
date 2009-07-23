@@ -171,6 +171,7 @@ if (! $nohtml) {
 
 <p><h3 class="subtitle">Notes</h3><br>
 <b>1</b>:  Latitude and Longitude values are in decimal degrees.
+<br />Elevation is expressed in meters above sea level.
 
 <br><br></div>
 
