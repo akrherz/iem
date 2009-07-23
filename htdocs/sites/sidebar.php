@@ -26,11 +26,12 @@ while (list($key,$val) = each($o))
 ?>
 
 <p>Other Sites in network:
-<form method="GET">
+<form method="GET" name="automatic">
 <input type="hidden" name="network" value="<?php echo $network; ?>">
 <?php 
 include_once("$rootpath/include/imagemaps.php");
-echo networkSelect($network, $station); ?>
+echo networkSelectAuto($network, $station); 
+?>
 <br /> <a href="locate.php?network=<?php echo $network; ?>">select from map</a>
 </form>
 
