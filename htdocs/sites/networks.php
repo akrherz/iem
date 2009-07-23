@@ -1,6 +1,10 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+$pgconn = iemdb("mesosite");
+$rs = pg_prepare($pgconn, "SELECT", "SELECT * from stations 
+            WHERE online = 'y' and 
+			network = $1 ORDER by name");
 include("$rootpath/include/imagemaps.php");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
@@ -55,15 +59,12 @@ table that you need, please let use know.</p>
 }
 
 	if (strlen($network) > 0){
-		$connection = iemdb("mesosite");
-		$query = "SELECT * from stations WHERE online = 'y' and 
-			network = '". $network ."' ORDER by name ";
-		$result = pg_exec($connection, $query);
+		$result = pg_execute($pgconn, "SELECT", Array($network) );
 		if ($format == "html"){
-		echo "<p><table>\n";
+		echo "<p><table cellspacing='0' cellpadding='2' border='1'>\n";
 		echo "<caption><b>". $network ." Network</b></caption>\n";
-		echo "<tr><th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
-			<th>Longitude<sup>1</sup></th><th>Elevation [m]</th></tr>\n";
+		echo "<thead><tr><th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
+			<th>Longitude<sup>1</sup></th><th>Elevation [m]</th></tr></thead>\n";
 		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
 			echo "<tr>\n
 			  <td>". $row["id"] ."</td>\n
@@ -162,7 +163,6 @@ table that you need, please let use know.</p>
                   }
 		  if (! $nohtml) echo "</pre>\n";
 		}
-		pg_close($connection);
 	}
 
 if (! $nohtml) {
