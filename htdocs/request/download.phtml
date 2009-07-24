@@ -45,7 +45,7 @@ network goes back to the 1970s for some sites.
 <TD valign="top">
 <h3 class="subtitle">1) Select Station/Network by clicking on location: </h3>
 
-<form method="GET" action="/cgi-bin/request/getData.py" name="olselect">
+<form method="GET" action="<?php echo $rootcgi; ?>/request/getData.py" name="olselect">
 <div id="map"></div>
 <div id="sname" unselectable="on">No site selected</div>
 
@@ -194,6 +194,12 @@ echo yearSelect($y, $year, "year");
 	<option value="space">Space Delimited
 	<option value="comma">Comma Delimited
 </SELECT>
+
+<p><h3>8) Include Lat/Lons?:</h3>
+<select name="latlon">
+  <option value="no">No
+  <option value="yes">Yes
+</select>
 
 <br><br>
 <h3 class="subtitle">8) Finally, get Data:</h3>
