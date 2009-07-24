@@ -437,7 +437,7 @@ function addTab(tabid, tabname) {
             icon: 'icons/text.png',
             cls: 'x-btn-text-icon'
           },
-          new Ext.StatusBar({
+          new Ext.ux.StatusBar({
             id: tabid+'-status',
             defaultText: ''
           })
