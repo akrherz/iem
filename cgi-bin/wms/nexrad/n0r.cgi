@@ -1,8 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
-echo -e "Content-type: text/plain\n\n"
-echo -e "\n"
-exit 0
+
+if [ ${REFERER:-aaaa} == "http://www.whnt.com/weather/" ]; then
+  echo -e "Content-type: text/plain\n\n"
+  echo -e "\n"
+  exit 0
+fi
 
 MS_MAPFILE=/var/www/data/wms/nexrad/n0r.map
 export MS_MAPFILE
