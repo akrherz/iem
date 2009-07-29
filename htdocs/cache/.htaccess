@@ -2,3 +2,6 @@
   PythonPath "sys.path + ['/var/www/include/python/']"
   PythonHandler TileCache.Service
   PythonOption TileCacheConfig /var/www/data/tilecache.cfg
+
+  AddHandler cgi-script .cgi
+  Options +ExecCGI
