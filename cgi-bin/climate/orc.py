@@ -10,8 +10,8 @@ climatedb = pg.connect('coop','iemdb', user='nobody')
 iemaccess = pg.connect('iem', 'iemdb', user='nobody')
 
 ADJUSTMENT = 0
-s = mx.DateTime.DateTime(2008,3,18)
-e = mx.DateTime.DateTime(2008,4,17)
+s = mx.DateTime.DateTime(2009,6,18)
+e = mx.DateTime.DateTime(2009,7,17)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 def averageTemp(db, hi="high", lo="low"):
