@@ -9,6 +9,27 @@ include("$rootpath/include/header.php"); ?>
 
 <p>The <a href="http://www.opengeospatial.org">Open Geospatial Consortium, Inc</a> (OGC) is a standards organization leading the development of geospatial and location based services.  The OGC has adopted a number of specifications, some of which are used by the IEM.  This page lists these services.</p>
 
+<h4>Tile Map Service (TMS)</h4>
+
+<p>This service makes for easy integration with web mapping applications like 
+OpenLayers and Google Maps.  Here is an example for Google Maps:</p>
+
+<pre style="border-top: 1px solid #ccc; background: #EEFFCC; border-bottom: 1px solid #ccc; padding-left: 5px;">
+var tileNEX = new GTileLayer(null,null,null); 
+tileNEX.getTileUrl = function(tile,zoom) {
+   /* Include date at the end as a cachebuster */
+   return "http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0r-900913/"
+   + zoom + "/" + tile.x + "/" + tile.y +".png?"+ (new Date()).getTime(); 
+};
+tileNEX.isPng = function() { return true;};
+tileNEX.getOpacity = function() { return 0.5; }
+
+
+var layer4=[G_NORMAL_MAP.getTileLayers()[0],tileNEX]; 
+var custommap4 = new GMapType(layer4, G_SATELLITE_MAP.getProjection(), "Nexrad", G_SATELLITE_MAP);
+map.addMapType(custommap4);
+</pre>
+
 <h4>Web Map Service (WMS)</h4>
 
 <p>A WMS defines a protocol for web based retrieval of geodata in raster map format. If you are interested in the capabilities XML file, simply add "VERSION=1.1.1&REQUEST=GetCapabilities&SERVICE=WMS&" to the URI string.</p>
