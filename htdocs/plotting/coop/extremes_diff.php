@@ -39,6 +39,7 @@ pg_close($connection);
 
 include ("../dev15/jpgraph.php");
 include ("../dev15/jpgraph_line.php");
+include ("../dev15/jpgraph_plotline.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(500,450,"example1");
