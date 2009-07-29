@@ -55,6 +55,7 @@ pg_close($connection);
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_plotline.php");
 include("$rootpath/include/network.php");     
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
