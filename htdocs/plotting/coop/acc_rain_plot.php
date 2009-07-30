@@ -1,9 +1,9 @@
 <?php
 include("../../../config/settings.inc.php");
 include("$rootpath/include/network.php");     
+include("$rootpath/include/adodb-time.inc.php");
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
-include("adodb-time.inc.php");
 
 $station = isset($_GET['station']) ? strtolower($_GET['station']) : die("No station");
 
