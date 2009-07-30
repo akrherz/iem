@@ -1,6 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
-include("adodb-time.inc.php");
+include("$rootpath/include/adodb-time.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");     
 $nt = new NetworkTable("IACLIMATE");
