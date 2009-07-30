@@ -94,7 +94,7 @@ def runYear(year):
     labels.append( id[2:] )
     lats.append( st.sts[id]['lat'] )
     lons.append( st.sts[id]['lon'] )
-    vals.append( rs[i]['avg_temp'] )
+    vals.append( rs[i]['avg_tmp'] )
 
     #---------- Plot the points
 
