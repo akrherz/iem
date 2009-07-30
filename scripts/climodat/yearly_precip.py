@@ -17,7 +17,8 @@ coop = i['coop']
 def runYear(year):
   # Grab the data
   sql = """SELECT stationid, sum(precip) as total
-           from alldata WHERE year = %s GROUP by stationid""" % (year,)
+           from alldata WHERE year = %s and
+           stationid != 'ia0000' GROUP by stationid""" % (year,)
 
   lats = []
   lons = []

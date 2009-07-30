@@ -18,7 +18,7 @@ def runYear(year):
   # Grab the data
   sql = """SELECT stationid, count(*) as days
            from alldata WHERE year = %s and precip >= 0.01 
-           GROUP by stationid""" % (year,)
+           and stationid != 'ia0000' GROUP by stationid""" % (year,)
 
   lats = []
   lons = []
