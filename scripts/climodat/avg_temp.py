@@ -18,7 +18,7 @@ def runYear(year):
   # Grab the data
   sql = """SELECT stationid, avg(high) as avg_high, avg(low) as avg_low,
            avg( (high+low)/2 ) as avg_tmp
-           from alldata WHERE year = %s and 
+           from alldata WHERE year = %s and stationid != 'ia0000' and 
            high is not Null and low is not Null GROUP by stationid""" % (year,)
   rs = coop.query(sql).dictresult()
 
