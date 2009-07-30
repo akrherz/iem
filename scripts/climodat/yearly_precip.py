@@ -51,5 +51,5 @@ def runYear(year):
   os.remove("temp.png")
   os.remove("tmp.ps")
 
-for i in range(1893,2009):
-  runYear(i)
+if __name__ == '__main__':
+  runYear( sys.argv[1] )
