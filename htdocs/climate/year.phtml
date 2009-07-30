@@ -8,7 +8,6 @@ include("$rootpath/include/adodb-time.inc.php");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2008;
 $prod = isset($_GET["prod"]) ? intval($_GET["prod"]) : 1;
-$ts = adodb_mktime(1,1,1,1,1,$year);
 
 $products = Array(
  1 => Array("name" => "Total Precipitation", 
@@ -23,7 +22,15 @@ $products = Array(
             "tpl" => "archive/data/%Y/summary/avg_temp.png"),
 
 );
+
+if ($year == 2009)
+{
+  echo "<div class=\"warning\">Sorry, data for 2009 is not yet available.</div>";
+  $year = 2008;
+}
+$ts = adodb_mktime(1,1,1,1,1,$year);
 $imgurl = sprintf("%s/%s", "http://mesonet.agron.iastate.edu", strftime($products[$prod]["tpl"],$ts));
+
 ?>
 
 <h3 class="heading">Yearly Summaries</h3>
