@@ -2,7 +2,7 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $access = iemdb('access');
-$conn = pg_connect("dbname=afos host=iem20 user=nobody");
+$conn = iemdb('afos');
 
 $pil = strtoupper($_REQUEST["pil"]);
 $cnt = $_REQUEST["cnt"];
