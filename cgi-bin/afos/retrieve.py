@@ -7,7 +7,7 @@ def Main():
   print
   print
   try:
-    mydb = pg.connect('afos', 'iem20', user='nobody')
+    mydb = pg.connect('afos', 'iemdb', user='nobody')
   except:
     print 'Error Connecting to Database, please try again!'
     sys.exit(0)
