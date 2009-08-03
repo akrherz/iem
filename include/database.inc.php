@@ -3,6 +3,7 @@ $iem20 = 'iemdb';
 global $_DATABASES;
 $_DATABASES = Array(
  'access' => "dbname=iem host=$iem20 user=nobody",
+ 'afos' => "dbname=afos host=$iem20 user=nobody",
  'hads' => "dbname=hads host=$iem20 user=nobody",
  'asos' => "dbname=asos host=$iem20 user=nobody",
  'coop' => "dbname=coop host=$iem20 user=nobody",
