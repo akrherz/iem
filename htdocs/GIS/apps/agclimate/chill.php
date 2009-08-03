@@ -70,7 +70,7 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   //$bdate = $row["v"];
   $bdate = $sdate;
   $key = $row["station"];
-  if ($key == "A133259" or $key == "A130219") continue;
+  if ($key == "A133259") continue;
 
   $data[$key]['name'] = $ISUAGcities[$key]['name'];
   $data[$key]['lon'] = $ISUAGcities[$key]['lon'];
