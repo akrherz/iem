@@ -104,8 +104,8 @@ def Main():
         print rs[i]["valid"] + rD , 
         print rD.join( gisextra ),
         for data1 in outCols:
-            if (rs[i][ data1 ] == None):
-                print "M,",
+            if rs[i][ data1 ] is None or rs[i][ data1 ] <= -99.0:
+                print "M%s" % (rD,),
             else:  
                 print "%2.2f%s" % (rs[i][ data1 ], rD),
         print
