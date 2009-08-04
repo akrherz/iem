@@ -39,7 +39,7 @@ def Main():
     pilAR += "'%s'," % (pil,)
   pilAR = pilAR[:-1] +")"
   
-  sql = "SELECT * from current WHERE pil IN "+ pilAR +" \
+  sql = "SELECT * from products WHERE pil IN "+ pilAR +" \
    ORDER by entered DESC LIMIT "+LIMIT
 
   #mydb.query("set enable_seqscan=no")
