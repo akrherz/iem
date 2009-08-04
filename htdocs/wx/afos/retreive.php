@@ -7,7 +7,7 @@ $conn = iemdb('afos');
 $pil = strtoupper($_REQUEST["pil"]);
 $cnt = $_REQUEST["cnt"];
 
-$rs = pg_prepare($conn, "SELECT", "SELECT * from current WHERE pil = $1
+$rs = pg_prepare($conn, "SELECT", "SELECT * from products WHERE pil = $1
                          ORDER by entered DESC LIMIT $2");
 
 $rs = pg_execute($conn, "SELECT", Array($pil, $cnt));
