@@ -125,6 +125,49 @@ z.write("current_nexattr.shp")
 z.write("current_nexattr.shx")
 z.write("current_nexattr.dbf")
 z.write("current_nexattr.prj")
+information = """
+   Iowa Environmental Mesonet 
+   National Weather Service NEXRAD Storm Attributes Shapefile
+
+*** Warning: This information is provided without warranty and its future
+    availability is not gaurenteed by Iowa State University ***
+
+This file contains a current snapshot of NEXRAD storm attributes from the 
+last received volume scan from each NWS WSR-88D RADAR.  Any storm 
+attribute from a volume scan 20+ minutes old is not included.
+
+The DBF Columns are as follows.
+  - VALID    Timestamp of the NEXRAD Volume Scan YearMonthDayHourMinute
+  - NEXRAD   3 character identifier of the WSR-88D
+  - STORM_ID Local WSR-88D assigned storm attribute ID
+  - AZIMUTH  Direction from north of the attribute in relation to the
+             NEXRAD [degree] 90 == East, 180 == South
+  - RANGE    Distance away from RADAR in miles
+  - TVS      Tornado Vortex Signature, available values below
+             NONE - No TVS detected
+             TVS  - Low Level TVS detected
+             ETVS - Elevated TVS deteched
+  - MESO     Mesocyclone, available values below
+             NONE - No MESO Detected
+             3DCO - 3 Dimensional Correlated Shear Detected
+             MESO - Mesocyclone Indentified
+             UNCO - Uncorrelated 2-D Shear Detected
+             1-25 - A number between 1 and 25, not sure what this means yet
+  - POSH     Probability of Severe Hail (+0.75" or larger)
+  - POH      Probability of Hail 
+  - MAX_SIZE Maximum Hail Size in inches
+  - VIL      Vertically Integrated Liquid [inches]
+  - MAX_DBZ  Maximum dBZ value
+  - MAX_DBZ_ Height of Maxium dBZ in thousands of feet
+  - TOP      Storm Top in thousands of feet
+  - DRCT     Storm movement direction [degrees from north]
+  - SKNT     Storm movement velocity [knots]
+
+Contact Info:
+  Daryl Herzmann akrherz@iastate.edu 515-294-5978
+
+"""
+z.writestr("current_nexattr.txt", information)
 z.close()
 
 cmd = "/home/ldm/bin/pqinsert -p \"zip c %s gis/shape/4326/us/current_nexattr.zip bogus zip\" current_nexattr.zip" % (now.strftime("%Y%m%d%H%M"),)
