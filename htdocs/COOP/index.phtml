@@ -5,35 +5,86 @@ include("../../config/settings.inc.php");
 $THISPAGE = "networks-coop";
 include("$rootpath/include/header.php"); 
 ?>
+<style>
+.dashboard{
+  border: 2px solid #ddd;
+  background: #eee;
+}
+.dashboard ul {
 
-<h3 class="heading">NWS COOP</h3><p>
+}
+.dashboard li {
+  list-style: none;
+  display: inline;
+  float: left;
+  margin-left: 20px;
+}
+.dashboard a {
+  text-decoration: none;
+}
+.dashboard img {
+  border: 0px;
+  padding-left: 15px;
+  padding-bottom: 5px;
+}
+.dashboard:after {
+    content: ".";
+    display: block;
+    height: 0;
+    overflow: hidden;
+    clear: both;
+    visibility: hidden;
+    }
 
-<div class="text">
-<table><tr><td style="width: 650px" valign="top">
-The National Weather Service [NWS] Cooperative Observer Program [COOP]
+</style>
+
+
+<div class="dashboard">
+<ul>
+ <li><span style="font-size: 1.3em;">NWS COOP<br />Quick Links</span></li>
+ <li><a href="../climodat/"><img src="../images/fileprint.png" /><br />Climodat</a></li>
+ <li><a href="current.phtml"><img src="../images/view_text.png" /><br />Currents</a></li>
+ <li><a href="../request/coop/fe.phtml"><img src="../images/down.png" /><br />Download</a></li>
+ <li><a href="../sites/locate.php?network=IA_COOP"><img src="../images/find.png" /><br />Locate Site</a></li>
+ <li><a href="cat.phtml"><img src="../images/misc.png" /><br />2004-<?php echo date("Y"); ?></a></li>
+ <li><a href="../GIS/apps/coop/gsplot.phtml"><img src="../images/view_icon.png" /><br />Growing Season</a></li>
+</ul>
+</div>
+
+<p>The National Weather Service [NWS] Cooperative Observer Program [COOP]
 is a nation-wide network of people making daily weather observations. These
 volunteers are invaluable in times of severe weather and heavy snowfall.  Their
 observations also provide a 'ground truth' to compare against remote sensing
-techniques.</td><td>
+techniques.
 
-<div class="ninfo">
-  <b>NWS COOP</b>
-<br>Reports: Daily
-<br>Observers: 167
-<br><a href="/info/network.phtml?network=IA_COOP">Locations</a>
-<br><a href="/info/network.phtml?network=IACLIMATE">Climate Locations</a>
-</div></td></tr></table><p>
-
-<table><tr><td>
-
-<h3 class="subtitle">Observations</h3>
-
-<p>A <a href="/data/gis/shape/4326/iem/coopobs.zip">GIS shapefile</a> is generated daily with 
-the most recent set of COOP observation in it.
-
-
-<p><b>Text Data:</b>
+<table>
+<tr>
+<td valign="top">
+<h3 class="subtitle">IEM News Items</h3>
 <ul>
+ <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=261">Record Cold between 9-15 August, 2004</a></li>
+ <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=327">Snowfall reports 5-6 Jan, 2005</a></li>
+ <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=375">April 2005 Warmth</a></li>
+ <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=419">100+ Degree Temperatures</a></li>
+ <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=650">Record Cold on 15 September 2007</a></li>
+</ul>
+
+<h3 class="subtitle">Current Plots</h3>
+<ul>
+	<li><a href="/data/coopPrecPlot.gif">Rainfall reports this morning</a></li>
+	<li><a href="/data/coopMonthPlot.gif">Rainfall totals for this month</a></li>
+	<li><a href="/data/coopSnowPlot.gif">Snowfall totals this morning</a></li>
+	<li><a href="/data/coopMonthSPlot.gif">Snowfall totals this month</a></li>
+	<li><a href="/data/coopSnowDepth.gif">Snow depth this morning</a></li>
+    <li><a href="/data/coopHighLow.gif">High + Low Temperatures this morning</a></li>
+</ul>
+</td><td valign="top">
+
+<h3 class="subtitle">Data + Summaries</h3>
+
+
+<ul>
+ <li>A <a href="/data/gis/shape/4326/iem/coopobs.zip">GIS shapefile</a> is generated daily with the most recent set of COOP observation in it.</li>
  <li><a href="/data/text/IEMNWSDPR.txt">Today's Rainfall Reports</a>
 	<br />Rainfall reports valid for today along with today's climatology.</li>
  <li><a href="/data/text/IEMNWSMPR.txt">This Month's Totals</a>
@@ -44,24 +95,7 @@ the most recent set of COOP observation in it.
 	<br />For all COOP sites in the Upper Midwest.</li>
 </ul>
 
-<b>Plots:</b>
-<ul>
-	<li><a href="/data/coopPrecPlot.gif">Rainfall reports this morning</a></li>
-	<li><a href="/data/coopMonthPlot.gif">Rainfall totals for this month</a></li>
-	<li><a href="/data/coopSnowPlot.gif">Snowfall totals this morning</a></li>
-	<li><a href="/data/coopMonthSPlot.gif">Snowfall totals this month</a></li>
-	<li><a href="/data/coopSnowDepth.gif">Snow depth this morning</a></li>
-    <li><a href="/data/coopHighLow.gif">High + Low Temperatures this morning</a></li>
-</ul>
 
-<p><h3>News items and reports:</h3>
-<ul>
- <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=261">Record Cold between 9-15 August, 2004</a></li>
- <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=327">Snowfall reports 5-6 Jan, 2005</a></li>
- <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=375">April 2005 Warmth</a></li>
- <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=419">100+ Degree Temperatures</a></li>
- <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=650">Record Cold on 15 September 2007</a></li>
-</ul>
 
 </td><td valign="top">
 
