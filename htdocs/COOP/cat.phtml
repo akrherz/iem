@@ -99,17 +99,17 @@ Select State: <select name="network">
    if ($low > 130 || $low < -50) $low = "M";
 
    $rain = $row["pday"];
-   if ($rain == 0.0001) $rain = "T";
+   if ($rain == 0.0001 || $rain == 0.001) $rain = "T";
    if ($rain == -99 || $rain == "") $rain = "M";
    if ($rain > 10 || $rain < 0) $rain = "M";
 
    $snow = $row["snow"];
-   if ($snow == 0.0001) $snow = "T";
+   if ($snow == 0.0001 || $snow == 0.001) $snow = "T";
    if ($snow == -99 || $snow == "") $snow = "M";
    if ($snow > 100 || $snow < 0) $snow = "M";
 
    $snowd = $row["snowd"];
-   if ($snowd == 0.0001) $snowd = "T";
+   if ($snowd == 0.0001 || $snowd == 0.001) $snowd = "T";
    if ($snowd == -99 || $snowd == "") $snowd = "M";
    if ($snowd > 1000 || $snowd < 0) $snowd = "M";
 
