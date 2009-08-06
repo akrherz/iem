@@ -54,11 +54,14 @@ dbf.add_field("MAX_DBZ_H", dbflib.FTDouble, 5, 2)
 dbf.add_field("TOP", dbflib.FTDouble, 5, 2)
 dbf.add_field("DRCT", dbflib.FTDouble, 3, 0)
 dbf.add_field("SKNT", dbflib.FTDouble, 3, 0)
+dbf.add_field("LAT", dbflib.FTDouble, 10, 4)
+dbf.add_field("LON", dbflib.FTDouble, 10, 4)
 
 sql = "DELETE from nexrad_attributes WHERE valid < '%s'" % \
 	(eTS.strftime("%Y-%m-%d %H:%M"), )
 mydb.query(sql)
-sql = "SELECT *, astext(geom) as tgeom from nexrad_attributes "
+sql = "SELECT *, astext(geom) as tgeom, x(geom) as lon, \
+       y(geom) as lat from nexrad_attributes "
 rs = mydb.query(sql).dictresult()
 
 cnt = 0
@@ -87,6 +90,8 @@ for i in range(len(rs)):
     d["TOP"] = float(rs[i]['top'])
     d["DRCT"] = float(rs[i]['drct'])
     d["SKNT"] = float(rs[i]['sknt'])
+    d["LAT"] = float(rs[i]['lat'])
+    d["LON"] = float(rs[i]['lon'])
     #print d
     obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[f,]] )
     shp.write_object(-1, obj)
@@ -113,6 +118,8 @@ if (cnt == 0):
     d["TOP"] = 0
     d["DRCT"] = 0
     d["SKNT"] = 0
+    d["LAT"] = 0
+    d["LON"] = 0
 
     shp.write_object(-1, obj)
     dbf.write_record(0, d)
@@ -162,6 +169,8 @@ The DBF Columns are as follows.
   - TOP      Storm Top in thousands of feet
   - DRCT     Storm movement direction [degrees from north]
   - SKNT     Storm movement velocity [knots]
+  - LAT      Convience replication of the data in the SHP file [deg North]
+  - LON      Convience replication of the data in the SHP file [deg East]
 
 Contact Info:
   Daryl Herzmann akrherz@iastate.edu 515-294-5978
