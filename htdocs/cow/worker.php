@@ -22,7 +22,7 @@ function printLSR($lsr)
   if ($lsr["magnitude"] == 0) $lsr["magnitude"] = "";
   //if ($lsr["ts"] < 100000) print_r($lsr);
   $uri = sprintf("maplsr.phtml?lat0=%s&lon0=%s&ts=%s", $lsr["lat0"], $lsr["lon0"], gmdate("Y-m-d%20H:i", $lsr["ts"]));
-  return sprintf("<tr style=\"background: #eee;\"><td>lsr</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"3\">%s</td></tr>", 
+  return sprintf("<tr style=\"background: #eee;\"><td>lsr</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"4\">%s</td></tr>", 
     $uri, gmdate("m/d/Y H:i", $lsr["ts"]), $background, $leadtime, $lsr["county"], $lsr["state"], $uri, $lsr["city"], $lt[$lsr["type"]], $lsr["magnitude"], $lsr["remark"]);
 }
 function printWARN($warn)
@@ -34,12 +34,13 @@ function printWARN($warn)
   $background = "#0f0";
   if ($warn["verify"] == 0){ $background = "#f00"; }
 
-  return sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f km^2</td><td>%.0f km^2</td><td>%.0f %%</td><td>%.0f%%</td></tr>\n", 
+  return sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f km^2</td><td>%.0f km^2</td><td>%.0f %%</td><td>%.0f%%</td><td>%.0f%%</td></tr>\n", 
     $background, $uri, $warn["phenomena"], $warn["eventid"],
     gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["ets"]), 
     $uri, $warn["counties"], $uri, $warn["status"], $warn["area"], 
     $warn["carea"], ($warn["carea"]-$warn["area"])/ $warn["carea"] * 100,
-    $warn["sharedborder"] / $warn["perimeter"] * 100.0);
+    $warn["sharedborder"] / $warn["perimeter"] * 100.0,
+    $warn["buffered"] / $warn["area"] * 100.0);
 
 }
 
@@ -81,6 +82,7 @@ for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
   $warnings[$key]["ets"] = strtotime($row["expire"]);
   $warnings[$key]["eventid"] = $row["eventid"];
   $warnings[$key]["lead0"] = -1;
+  $warnings[$key]["buffered"] = 0;
   if ($row["gtype"] == "P"){ 
     $sum_parea += $row["area"];
     $warnings[$key]["geom"] = $row["tgeom"]; 
@@ -186,8 +188,11 @@ while (list($k,$v) = each($warnings))
   $wetsSQL = gmdate("Y/m/d H:i", $wets);
   $geom = $v["geom"];
   $lw = "";
+  $bufferedLSRS = Array();
   /* Now we query LSRS! */  
-  $sql = sprintf("SELECT distinct * from lsrs_%s WHERE 
+  $sql = sprintf("SELECT distinct *,
+         astext(buffer( transform(geom,2163), %s000)) as buffered
+         from lsrs_%s WHERE 
          geom && SetSrid(GeometryFromText('%s'),4326) and 
          contains(SetSrid(GeometryFromText('%s'),4326), geom) 
          and type IN (%s) and wfo = '%s' and
@@ -195,7 +200,7 @@ while (list($k,$v) = each($warnings))
          (type = 'H' and magnitude >= $hail) or type = 'W' or
          type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
          or type = 'F')
-         and valid >= '%s' and valid <= '%s' ", date("Y", $wsts),
+         and valid >= '%s' and valid <= '%s' ", $lsrbuffer, date("Y", $wsts),
          $geom, $geom, $ltypeSQL, $wfo, $wstsSQL, $wetsSQL);
   $DEBUG .= "<br />". $sql;
   $rs = pg_query($conn, $sql);
@@ -210,6 +215,7 @@ while (list($k,$v) = each($warnings))
     if ($v["phenomena"] == "FF")
     {
        if ($lType == "F") { /* Verify! */
+         $bufferedLSRS[] = $row["buffered"];
          $warnings[$k]["verify"] = 1;
          $lsrs[$key]["warned"] = 1;
          $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
@@ -220,6 +226,7 @@ while (list($k,$v) = each($warnings))
     else if ($v["phenomena"] == "TO")
     {
        if ($lType == "T") { /* Verify! */
+         $bufferedLSRS[] = $row["buffered"];
          $warnings[$k]["verify"] = 1;
          $lsrs[$key]["warned"] = 1;
          $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
@@ -236,6 +243,7 @@ while (list($k,$v) = each($warnings))
     else if ($v["phenomena"] == "MA")
     {
        if ($lType == "W") { /* Verify! */
+         $bufferedLSRS[] = $row["buffered"];
          $warnings[$k]["verify"] = 1;
          $lsrs[$key]["warned"] = 1;
          $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
@@ -243,6 +251,7 @@ while (list($k,$v) = each($warnings))
          $lw .= printLSR($lsrs[$key]);
        }
        else if ($lType == "M" && floatval($lMag) >= 34){ /* Verify! */
+         $bufferedLSRS[] = $row["buffered"];
          $warnings[$k]["verify"] = 1;
          $lsrs[$key]["warned"] = 1;
          $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
@@ -250,6 +259,7 @@ while (list($k,$v) = each($warnings))
          $lw .= printLSR($lsrs[$key]);
        }
        else if ($lType == "H" && floatval($lMag) >= $hail){ /* Verify! */
+         $bufferedLSRS[] = $row["buffered"];
          $warnings[$k]["verify"] = 1;
          $lsrs[$key]["warned"] = 1;
          $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
@@ -261,6 +271,7 @@ while (list($k,$v) = each($warnings))
     else if ($v["phenomena"] == "SV")
     {
        if ($lType == "G" && floatval($lMag) >= 58){ /* Verify! */
+         $bufferedLSRS[] = $row["buffered"];
          $warnings[$k]["verify"] = 1;
          $lsrs[$key]["warned"] = 1;
          $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
@@ -268,6 +279,7 @@ while (list($k,$v) = each($warnings))
          $lw .= printLSR($lsrs[$key]);
        }
        else if ($lType == "H" && floatval($lMag) >= $hail){ /* Verify! */
+         $bufferedLSRS[] = $row["buffered"];
          $warnings[$k]["verify"] = 1;
          $lsrs[$key]["warned"] = 1;
          $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
@@ -275,6 +287,7 @@ while (list($k,$v) = each($warnings))
          $lw .= printLSR($lsrs[$key]);
        }
        else if ($lType == "D") {
+         $bufferedLSRS[] = $row["buffered"];
          $warnings[$k]["verify"] = 1;
          $lsrs[$key]["warned"] = 1;
          $lsrs[$key]["leadtime"] = ($lsrs[$key]['ts'] - $warnings[$k]['sts']) / 60;
@@ -283,13 +296,30 @@ while (list($k,$v) = each($warnings))
        }
     }
   }
+  /* Now, we have an array of buffered LSRs, we need to compute the 
+   * amount of area that these buffered LSRs coincide with the warning
+   */
+  if (sizeof($bufferedLSRS) > 0){
+    $bufferedArray = Array();
+    while ( list($key,$v) = each($bufferedLSRS) )
+    {
+      $bufferedArray[] = sprintf("SetSRID(GeomFromText('%s'),2163)", $v);
+    }
+    $sql = sprintf("SELECT ST_Area(
+         ST_Intersection( ST_Union(ARRAY[%s]), 
+                          ST_Transform(ST_GeomFromEWKT('SRID=4326;%s'),2163) ) 
+         ) / 1000000.0 as area", 
+         implode(",", $bufferedArray), $geom );
+    $DEBUG .= "<br />". $sql;
+    $rs = pg_query($conn, $sql);
+    $row = pg_fetch_array($rs,0);
+    $warnings[$k]["buffered"] = $row["area"];
+  }
   $sw .= printWARN( $warnings[$k] );
   $sw .= $lw;
 }
 
-?>
-
-<?php /* Now we worry about those LSRs that did not verify */
+/* Now we worry about those LSRs that did not verify */
 $ls = "";
 reset($lsrs);
 while( list($k,$v) = each($lsrs))
@@ -305,8 +335,11 @@ $wverif = 0;
 reset($warnings);
 $leadcnt = 0;
 $leadtotal = 0;
+$sum_bufferedlsr = 0;
 while (list($k,$v) = each($warnings))
 {
+  $sum_bufferedlsr += $v["buffered"];
+
   if ($v["verify"] == 1){ $wverif += 1; }
   if ($v["lead0"] >= 0)
   {
@@ -379,6 +412,12 @@ else {
  <tr><th>Storm Based Warning Size Reduction:</th>
 <th><?php if ($sum_carea > 0) { echo sprintf("%.0f", ($sum_carea - $sum_parea) / $sum_carea * 100);}else{ echo "0";} ?> %</th></tr>
  <tr><th>Avg SBW Size (sq km)</th><th><?php if ($wcount > 0) { echo sprintf("%.0f",  $sum_parea / $wcount); } else { echo "0"; }  ?></th></tr>
+ <tr><th>Warned Area Verified</th><th><?php
+if ($wcount == 0){ echo "0";}
+else {
+  echo sprintf("%.0f", $sum_bufferedlsr / $sum_parea * 100.0);
+}
+?> %</th></tr>
  </table>
 </td>
 <td>
@@ -424,11 +463,12 @@ else {
 <i>County Area:</i> Total size of the counties included in the product in square km,
 <i>Size % (C-P)/C:</i> Size reduction gained by the storm based warning,
 <i>Perimeter Ratio:</i> Estimated percentage of the storm based warning polygon border that was influenced by political boundaries (0% is ideal).
+<i>Verif Area %:</i> Percentage of the polygon warning that received a verifying report (report is buffered <?php echo $lsrbuffer; ?> km).
 <br />The second line is for details on any local storm reports.
 <br />
 <table cellspacing="0" cellpadding="2" border="1">
-<tr><td></td><th>Issued:</th><th>Expired:</th><th colspan="2">County:</th><th>Final Status:</th><th>SBW Area: (P)</th><th>County Area: (C)</th><th>Size %<br /> (C-P)/C:</th><th>Perimeter Ratio:</th></tr>
-<tr bgcolor="#eee"><th>lsr</th><th>Valid</th><th>Lead Time:</th><th>County</th><th>City</th><th>Type</th><th>Magnitude</th><th colspan="3">Remarks</th></tr>
+<tr><td></td><th>Issued:</th><th>Expired:</th><th colspan="2">County:</th><th>Final Status:</th><th>SBW Area: (P)</th><th>County Area: (C)</th><th>Size %<br /> (C-P)/C:</th><th>Perimeter Ratio:</th><th>Verif Area %:</th></tr>
+<tr bgcolor="#eee"><th>lsr</th><th>Valid</th><th>Lead Time:</th><th>County</th><th>City</th><th>Type</th><th>Magnitude</th><th colspan="4">Remarks</th></tr>
 <?php echo $sw; ?>
 </table>
 

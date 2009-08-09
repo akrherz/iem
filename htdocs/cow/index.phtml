@@ -14,6 +14,7 @@
  $ets = mktime($ehour, 0, 0, $emonth, $eday, $eyear);
  $hail = isset($_GET["hail"]) ? $_GET["hail"] : 0.75;
  $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
+ $lsrbuffer = isset($_GET["lsrbuffer"]) ? intval($_GET["lsrbuffer"]) : 15;
 
  $abegin = mktime(0,0,0,6,8,2005);
  if ($sts < $abegin){ $sts = $abegin; }
@@ -43,7 +44,7 @@
 </table>
 <table>
 <tr><th>WFO:</th>
-<td>
+<td colspan="3">
 <select name="wfo">
 <?php
 while( list($key, $value) = each($wfos) ){
@@ -67,6 +68,12 @@ while( list($key, $value) = each($wfos) ){
   <option value="0.75" <?php if ($hail == 0.75) echo "SELECTED"; ?>>0.75
   <option value="1.00" <?php if ($hail == 1.00) echo "SELECTED"; ?>>1.00
 </select></td>
+<th>LSR Buffer:</th>
+<td><select name="lsrbuffer">
+ <option value="5" <?php if ($lsrbuffer == 5) echo "SELECTED"; ?>>5
+ <option value="15" <?php if ($lsrbuffer == 15) echo "SELECTED"; ?>>15
+ <option value="30" <?php if ($lsrbuffer == 30) echo "SELECTED"; ?>>30
+</select> km</td>
 <th>LSR Type:</th>
 <td>
 <input name="ltype[]" type="checkbox" value="TO" <?php if (in_array("TO", $ltype)) echo "CHECKED"; ?>>Tornado
