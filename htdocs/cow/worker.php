@@ -46,7 +46,7 @@ function printWARN($cow, $warn)
   return $s;
 }
 
-include("cow.php");
+include("$rootpath/include/cow.php");
 $cow = new Cow( iemdb("postgis") );
 $cow->setLimitWFO( Array($wfo) );
 $cow->setLimitTime( $sts, $ets );
