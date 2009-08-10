@@ -126,7 +126,7 @@ echo "<form method=\"GET\">
 <table border=\"1\" cellpadding=\"3\" cellspacing='0'>
  <tr><td></td><th>Year</th><th>Month</th><th>Day</th><td></td></tr>
  <tr><td>Start:</td>
-  <td rowspan=\"2\">". yearSelect($year, 2005, "year") ."</td>
+  <td rowspan=\"2\">". yearSelect(2005, $year) ."</td>
   <td>". monthSelect($smonth, "smonth") ."</td>
   <td>". daySelect2($sday, "sday") ."</td>
   <td rowspan='2'><input type='submit' value='Generate Stats'></td>
