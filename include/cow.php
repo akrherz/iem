@@ -203,9 +203,10 @@ function computeFAR(){
 }
 
 function computeAreaVerify(){
-    reset($this->warnings);
     $polysz = 0;
     $lsrsz = 0;
+    if (sizeof($this->warnings) == 0){ return 0; }
+    reset($this->warnings);
     while (list($k,$v) = each($this->warnings)){
         $polysz += $v["parea"];
         $lsrsz += $v["buffered"];
@@ -282,9 +283,11 @@ function computeSharedBorder(){
             $v["eventid"], $v["significance"] );
 
         $rs = $this->callDB($sql);
-        if (pg_num_rows($rs) > 0){
+        if ($rs && pg_num_rows($rs) > 0){
             $row = pg_fetch_array($rs,0);
             $this->warnings[$k]["sharedborder"] = $row["s"];
+        } else {
+            $this->warnings[$k]["sharedborder"] = 0;
         }
     }
 }
