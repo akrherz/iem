@@ -114,6 +114,11 @@ function computeSizeReduction(){
     return ($countysz - $polysz) / $countysz * 100.0;
 }
 
+function computeUnwarnedEvents(){
+    return sizeof($this->lsrs) - $this->computeWarnedEvents();
+}
+
+
 function computeWarnedEvents(){
     reset($this->lsrs);
     $counter = 0;
@@ -121,6 +126,69 @@ function computeWarnedEvents(){
         if ($v["warned"]){ $counter += 1; }
     }
     return $counter;
+}
+
+function computeTDQEvents(){
+    reset($this->lsrs);
+    $counter = 0;
+    while (list($k,$v) = each($this->lsrs)){
+        if ($v["tdq"]){ $counter += 1; }
+    }
+    return $counter;
+}
+
+function computeMaxLeadTime(){
+   $large = 0;
+   reset($this->lsrs);
+   while (list($k,$v) = each($this->lsrs)){
+       if ($v["leadtime"] > $large){ $large = $v["leadtime"]; }
+   }
+   return $large;
+}
+function computeMinLeadTime(){
+   $smallest = 99;
+   reset($this->lsrs);
+   while (list($k,$v) = each($this->lsrs)){
+       if ($v["leadtime"] < $smallest){ $smallest = $v["leadtime"]; }
+   }
+   return $smallest;
+}
+
+
+function computeAllLeadTime(){
+   $ar = Array();
+   reset($this->lsrs);
+   while (list($k,$v) = each($this->lsrs)){
+       if ($v["leadtime"] != "NA"){ $ar[] = $v["leadtime"]; }
+   }
+   return array_sum($ar) / floatval( sizeof($ar) );
+}
+
+function computeAverageLeadTime(){
+   $ar = Array();
+   reset($this->warnings);
+   while (list($k,$v) = each($this->warnings)){
+       if ($v["lead0"] > -1){ $ar[] = $v["lead0"]; }
+   }
+   return array_sum($ar) / floatval( sizeof($ar) );
+}
+
+function computeCSI(){
+   $pod = $this->computePOD();
+   $far = $this->computeFAR();
+   return pow((pow($pod,-1) + pow(1-$far,-1) - 1), -1);
+}
+
+function computePOD(){
+   $a_e = $this->computeWarnedEvents();
+   $b = sizeof($this->lsrs) - $a_e;
+   return floatval($a_e) / floatval( $a_e + $b );
+}
+
+function computeFAR(){
+    $a_w = $this->computeWarningsVerified();
+    $c = sizeof($this->warnings) - $a_w;
+    return floatval($c) / floatval( $a_w + $c );
 }
 
 function computeAreaVerify(){
@@ -135,6 +203,10 @@ function computeAreaVerify(){
 
 }
 
+function computeWarningsVerifiedPercent(){
+    return $this->computeWarningsVerified() / floatval(sizeof($this->warnings)) * 100.0;
+}
+
 function computeWarningsVerified(){
     reset($this->warnings);
     $counter = 0;
@@ -142,6 +214,10 @@ function computeWarningsVerified(){
         if ($v["verify"]){ $counter += 1; }
     }
     return $counter;
+}
+
+function computeWarningsUnverified(){
+    return sizeof($this->warnings) - $this->computeWarningsVerified();
 }
 
 function computeUGC(){
@@ -314,7 +390,8 @@ function sbwVerify() {
          (type = 'H' and magnitude >= %s) or type = 'W' or
          type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
          or type = 'F')
-         and valid >= '%s' and valid <= '%s' ", date("Y", $this->sts),
+         and valid >= '%s' and valid <= '%s' 
+         ORDER by valid ASC", date("Y", $this->sts),
          $v["geom"], $v["geom"], $this->sqlLSRTypeBuilder(), 
          $this->sqlWFOBuilder(), $this->hailsize,
          date("Y/m/d H:i", strtotime($v["issue"])),
@@ -350,7 +427,7 @@ function sbwVerify() {
                 $this->lsrs[$key]["warned"] = True;
                 $this->lsrs[$key]["leadtime"] = ($this->lsrs[$key]["ts"] - 
                        $v["sts"]) / 60;
-                if ($v["lead0"] < 0){
+                if ($this->warnings[$k]["lead0"] < 0){
                $this->warnings[$k]["lead0"] = $this->lsrs[$key]["leadtime"];
                 }
             }
