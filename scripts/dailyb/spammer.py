@@ -6,6 +6,14 @@ from email.mime.multipart import MIMEMultipart
 
 import wwa
 
+def cowreport():
+    """ Generate something from the Cow, moooo! """
+    si, so = os.popen4('php cowreport.php')
+    data = so.read()
+    html = "<h3>IEM Cow Report</h3><pre>"+ data +"</pre>"
+    txt  = '> IEM Cow Report\n'+ data +'\n'
+    return txt, html
+
 def feature():
     """ Print the feature for yesterday """
     mesosite = pg.connect('mesosite', 'iemdb', user='nobody')
@@ -114,6 +122,9 @@ t,h = feature()
 text += t
 html += h
 t,h = wwa.run()
+text += t
+html += h
+t,h = cowreport()
 text += t
 html += h
 
