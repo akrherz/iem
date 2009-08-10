@@ -8,7 +8,7 @@ function printLSR($lsr)
 {
   $lt = Array("F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg", "H" => "Hail","G" => "Wind Gust", "W" => "Waterspout", "M" => "Marine Tstm Wnd");
   $background = "#0f0";
-  if ($lsr["warned"] == True) $background = "#f00";
+  if ($lsr["warned"] == False) $background = "#f00";
   if ($lsr["leadtime"] == "NA") { $background = "#eee"; $leadtime = "NA"; }
   else {$leadtime = $lsr["leadtime"] ." minutes"; }
   if ($lsr["tdq"]) $background = "#aaa";
