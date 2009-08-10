@@ -35,7 +35,7 @@ function milk(){
 
 function callDB($sql){
     $rs = @pg_query($this->dbconn, $sql);
-    if (! $rs ){ echo $sql; }
+    //if (! $rs ){ echo $sql; }
     return $rs;
 }
 
@@ -173,6 +173,17 @@ function computeAverageLeadTime(){
    return array_sum($ar) / floatval( sizeof($ar) );
 }
 
+function computeAveragePerimeterRatio(){
+   $shared = 0;
+   $total = 0;
+   reset($this->warnings);
+   while (list($k,$v) = each($this->warnings)){
+       $shared += $v["sharedborder"];
+       $total += $v["perimeter"];
+   }
+   return ($shared / $total * 100.0);
+}
+
 function computeCSI(){
    $pod = $this->computePOD();
    $far = $this->computeFAR();
@@ -255,19 +266,19 @@ function computeSharedBorder(){
       exteriorring(geometryn(multi(geomunion(w.geom)),1))
             )  as a
             from warnings_%s w, nws_ugc n WHERE gtype = 'P' 
-            and %s and phenomena = '%s' and eventid = '%s' 
+            and w.wfo = '%s' and phenomena = '%s' and eventid = '%s' 
             and significance = '%s' and n.polygon_class = 'C'
             and st_overlaps(n.geom, w.geom) 
             and n.ugc IN (
                 SELECT ugc from warnings_%s w WHERE
-                gtype = 'C' and %s 
+                gtype = 'C' and wfo = '%s'
           and phenomena = '%s' and eventid = '%s' and significance = '%s'
        )
          ) as foo
             WHERE not isempty(a) ) as foo
-       ", date("Y", $this->sts), $this->sqlWFOBuilder(), $v["phenomena"],
+       ", date("Y", $this->sts), $v["wfo"], $v["phenomena"],
             $v["eventid"], $v["significance"],
-          date("Y", $this->sts), $this->sqlWFOBuilder(), $v["phenomena"],
+          date("Y", $this->sts), $v["wfo"], $v["phenomena"],
             $v["eventid"], $v["significance"] );
 
         $rs = $this->callDB($sql);
@@ -372,7 +383,11 @@ function areaVerify() {
          ) / 1000000.0 as area",
          implode(",", $bufferedArray), $v["geom"] );
         $rs = $this->callDB($sql);
-        $row = pg_fetch_array($rs,0);
+        if ($rs){
+            $row = pg_fetch_array($rs,0);
+        } else {
+            $row = Array("area" => 0);
+        }
         $this->warnings[$k]["buffered"] = $row["area"];
     }
 }
@@ -385,7 +400,7 @@ function sbwVerify() {
          from lsrs_%s w WHERE 
          geom && SetSrid(GeometryFromText('%s'),4326) and 
          contains(SetSrid(GeometryFromText('%s'),4326), geom) 
-         and %s and %s and
+         and %s and wfo = '%s' and
         ((type = 'M' and magnitude >= 34) or 
          (type = 'H' and magnitude >= %s) or type = 'W' or
          type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
@@ -393,7 +408,7 @@ function sbwVerify() {
          and valid >= '%s' and valid <= '%s' 
          ORDER by valid ASC", date("Y", $this->sts),
          $v["geom"], $v["geom"], $this->sqlLSRTypeBuilder(), 
-         $this->sqlWFOBuilder(), $this->hailsize,
+         $v["wfo"], $this->hailsize,
          date("Y/m/d H:i", strtotime($v["issue"])),
          date("Y/m/d H:i", strtotime($v["expire"])) );
         $rs = $this->callDB($sql);
