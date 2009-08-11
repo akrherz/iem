@@ -689,6 +689,7 @@ LAYER
   END
   CLASS
     EXPRESSION /ZZ/
+    NAME "Storm Based Warning"
     STYLE
       COLOR -1 -1 -1 
       OUTLINECOLOR 255 255 255

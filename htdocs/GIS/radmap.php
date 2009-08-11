@@ -35,7 +35,7 @@ if (isset($_GET["vtec"]))
   $year = intval($year);
   $wfo = substr($wfo,1,3);
   /* First, we query for a bounding box please */
-  $query1 = "SELECT max(issue) as v, 
+  $query1 = "SELECT max(issue) as v, max(expire) as e,
              xmax(extent(geom)) as x1, xmin(extent(geom)) as x0, 
              ymin(extent(geom)) as y0, ymax(extent(geom)) as y1 
              from warnings_$year WHERE wfo = '$wfo' and  
@@ -53,6 +53,7 @@ if (isset($_GET["vtec"]))
   $sectors["custom"] = Array("epsg"=> 4326, "ext" => Array($x0,$y0,$x1,$y1) );
 
   $dts = strtotime( $row["v"] );
+  $dts2 = strtotime( $row["e"] );
 
   $vtec_limiter = sprintf("and phenomena = '%s' and eventid = %s and 
     significance = '%s' and wfo = '%s'", $phenomena, $eventid, 
@@ -101,6 +102,7 @@ $ts2 = isset($_GET["ts2"]) ? gmmktime(
  substr($_GET["ts2"],4,2), substr($_GET["ts2"],6,2), substr($_GET["ts2"],0,4)): 
  0;
 if (isset($dts) && ! isset($_GET["ts"])) { $ts = $dts; }
+if (isset($dts2) && ! isset($_GET["ts2"])) { $ts2 = $dts2; }
 /* Make sure we have a minute %5 */
 if (time() - $ts > 300)
 {
@@ -145,6 +147,37 @@ $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
 $states->draw($img);
 
+/* Buffered LSRs */
+$blsr = ms_newLayerObj($map);
+$blsr->setConnectionType( MS_POSTGIS);
+$blsr->set("connection", $_DATABASES["postgis"]);
+$blsr->set("status", in_array("bufferedlsr", $layers) );
+$sql = "geo from (select distinct city, magnitude, valid, 
+  ST_Transform(ST_Buffer(ST_Transform(geom,2163),15000),4326) as geo, 
+  type as ltype, city || magnitude || x(geom) || y(geom) as k 
+  from lsrs_". date("Y", $ts) ." WHERE
+  geom && (select geom from warnings_". date("Y", $ts) ." WHERE 
+           wfo = '$wfo' and phenomena = '$phenomena' and 
+           significance = '$significance' and eventid = $eventid 
+           and gtype = 'P' LIMIT 1) and
+  valid >= '". date("Y-m-d H:i", $ts) ."' and 
+  valid < '". date("Y-m-d H:i", $ts2) ."' and
+  ((type = 'M' and magnitude >= 34) or 
+         (type = 'H' and magnitude >= 0.75) or type = 'W' or
+         type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
+         or type = 'F') ORDER by valid DESC) as foo 
+  USING unique k USING SRID=4326";
+$blsr->set("data", $sql);
+$blsr->set("type", MS_LAYER_POLYGON);
+$blsr->setProjection("init=epsg:4326");
+$blc0 = ms_newClassObj($blsr);
+$blc0->set("name", "Buffered LSRs (15km)");
+$blc0s0 = ms_newStyleObj($blc0);
+$blc0s0->set("symbolname", 'circle');
+$blc0s0->color->setRGB(0,0,0);
+$blc0s0->backgroundcolor->setRGB(0,180,120);
+$blc0s0->outlinecolor->setRGB(50,50,50);
+$blsr->draw($img);
 
 /* Watch by County */
 $wbc = $map->getlayerbyname("watch_by_county");
@@ -181,7 +214,7 @@ if (isset($_GET["pid"]))
   $wcc0s0 = ms_newStyleObj($wcc0);
   $wcc0s0->color->setRGB(255,0,0);
   $wcc0s0->set("size", 3);
-  $wcc0s0->set("symbol", 'circle');
+  $wcc0s0->set("symbolname", 'circle');
   $wc->draw($img);
 }
 
@@ -258,6 +291,9 @@ $sql = sprintf("geom from (select *, oid from warnings_%s WHERE issue <= '%s:00+
 $w0c->set("data", $sql);
 $w0c->draw($img);
 
+
+
+
 /* Local Storm Reports */
 $lsrs = $map->getlayerbyname("lsrs");
 $lsrs->set("connection", $_DATABASES["postgis"]);
@@ -268,8 +304,46 @@ if ($ts2 > $ts){
  $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid = '". date("Y-m-d H:i", $ts) .":00+00') as foo USING unique k USING SRID=4326";
 }
 $lsrs->set("data", $sql);
+//echo $sql; die();
 $lsrs->draw($img);
 
+/* County Intersection */
+$ci = ms_newLayerObj($map);
+$ci->setConnectionType( MS_POSTGIS);
+$ci->set("connection", $_DATABASES["postgis"]);
+$ci->set("status", in_array("ci", $layers) );
+$sql = "geo from (select setsrid(a,4326) as geo, random() as k
+      from (
+select 
+   intersection(
+      buffer(exteriorring(geometryn(multi(geomunion(n.geom)),1)),0.02),
+      exteriorring(geometryn(multi(geomunion(w.geom)),1))
+   ) as a
+   from warnings_". date("Y", $ts) ." w, nws_ugc n WHERE gtype = 'P' and w.wfo = '$wfo'
+   and phenomena = '$phenomena' and eventid = $eventid 
+   and significance = '$significance'
+   and n.polygon_class = 'C' and ST_OverLaps(n.geom, w.geom)
+   and n.ugc IN (
+          SELECT ugc from warnings_". date("Y", $ts) ." WHERE
+          gtype = 'C' and wfo = '$wfo' 
+          and phenomena = '$phenomena' and eventid = $eventid 
+          and significance = '$significance'
+       )
+   and isvalid(w.geom)
+) as foo 
+      WHERE not isempty(a)
+         ) as foo2 
+  USING unique k USING SRID=4326";
+$ci->set("data", $sql);
+$ci->set("type", MS_LAYER_LINE);
+$ci->setProjection("init=epsg:4326");
+$cic0 = ms_newClassObj($ci);
+$cic0->set("name", "County Intersection");
+$cic0s0 = ms_newStyleObj($cic0);
+$cic0s0->set("symbolname", 'circle');
+$cic0s0->color->setRGB(250,0,250);
+$cic0s0->set("size", 5);
+$ci->draw($img);
 
 /* roads */
 $roads = $map->getlayerbyname("roads");
@@ -291,12 +365,15 @@ $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
 $point->setXY(80, 12);
 if (isset($_GET["title"])){
-  $point->draw($map, $tlayer, $img, 0,substr($_GET["title"],0,50));
+  $title = substr($_GET["title"],0,50);
+} else if ( isset($_GET["vtec"]) ){
+  $title = "VTEC ID: ". $_GET["vtec"];
 } else if (in_array("nexrad", $layers)){
-  $point->draw($map, $tlayer, $img, 0,"NEXRAD Base Reflectivity");
+  $title = "NEXRAD Base Reflectivity";
 } else {
-  $point->draw($map, $tlayer, $img, 0,"IEM Plot");
+  $title = "IEM Plot";
 }
+$point->draw($map, $tlayer, $img, 0, $title);
 $point->free();
 
 $point = ms_newpointobj();
@@ -326,6 +403,7 @@ if (in_array("legend", $layers)){
   $map->embedLegend($img);
 }
 $map->drawLabelCache($img);
+$map->save("/tmp/test.map");
 
 header("Content-type: image/png");
 $img->saveImage('');
