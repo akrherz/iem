@@ -149,6 +149,7 @@ $states->set("status", MS_ON);
 $states->draw($img);
 
 /* Buffered LSRs */
+if (in_array("bufferedlsr", $layers)){
 $blsr = ms_newLayerObj($map);
 $blsr->setConnectionType( MS_POSTGIS);
 $blsr->set("connection", $_DATABASES["postgis"]);
@@ -183,6 +184,7 @@ $blc0s0->color->setRGB(0,0,0);
 $blc0s0->backgroundcolor->setRGB(0,180,120);
 $blc0s0->outlinecolor->setRGB(50,50,50);
 $blsr->draw($img);
+}
 
 /* Watch by County */
 $wbc = $map->getlayerbyname("watch_by_county");
@@ -313,6 +315,7 @@ $lsrs->set("data", $sql);
 $lsrs->draw($img);
 
 /* County Intersection */
+if (in_array("ci", $layers) ){
 $ci = ms_newLayerObj($map);
 $ci->setConnectionType( MS_POSTGIS);
 $ci->set("connection", $_DATABASES["postgis"]);
@@ -349,6 +352,7 @@ $cic0s0->set("symbolname", 'circle');
 $cic0s0->color->setRGB(250,0,250);
 $cic0s0->set("size", 5);
 $ci->draw($img);
+}
 
 /* roads */
 $roads = $map->getlayerbyname("roads");
