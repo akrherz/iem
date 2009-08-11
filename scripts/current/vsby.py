@@ -2,7 +2,7 @@
 
 import sys, os
 sys.path.append("../lib/")
-import iemplot
+import iemplot, random
 
 import mx.DateTime
 now = mx.DateTime.now()
@@ -32,7 +32,7 @@ rs = iem.query(sql).dictresult()
 for i in range(len(rs)):
   lats.append( rs[i]['lat'] )
   lons.append( rs[i]['lon'] )
-  vals.append( rs[i]['vsby'] )
+  vals.append( rs[i]['vsby'] + (random.random() * 0.001) )
   valmask.append(  (rs[i]['network'] in ['AWOS','IA_AWOS']) )
 
 cfg = {
