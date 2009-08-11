@@ -14,7 +14,7 @@ function printLSR($lsr)
   if ($lsr["tdq"]) $background = "#aaa";
   if ($lsr["magnitude"] == 0) $lsr["magnitude"] = "";
   $uri = sprintf("maplsr.phtml?lat0=%s&lon0=%s&ts=%s", $lsr["lat0"], $lsr["lon0"], gmdate("Y-m-d%20H:i", $lsr["ts"]));
-  return sprintf("<tr style=\"background: #eee;\"><td>lsr</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"4\">%s</td></tr>", 
+  return sprintf("<tr style=\"background: #eee;\"><td></td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"4\">%s</td></tr>", 
     $uri, gmdate("m/d/Y H:i", $lsr["ts"]), $background, $leadtime, $lsr["county"], $lsr["state"], $uri, $lsr["city"], $lt[$lsr["type"]], $lsr["magnitude"], $lsr["remark"]);
 }
 function printWARN($cow, $warn)
@@ -33,12 +33,14 @@ function printWARN($cow, $warn)
     $carea += $cow->ugcCache[$v]["area"];
   }
 
-  $s = sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f km^2</td><td>%.0f km^2</td><td>%.0f %%</td><td>%.0f%%</td><td>%.0f%%</td></tr>\n", 
+  $s = sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f sq km</td><td>%.0f sq km</td><td>%.0f %%</td><td>%.0f%% <a href=\"../GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d\">Visual</a></td><td>%.0f%%</td></tr>\n", 
     $background, $uri, $warn["phenomena"], $warn["eventid"],
     gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["ets"]), 
     $uri, implode(", ",$counties), $uri, $warn["status"], $warn["area"], 
     $carea, ($carea - $warn["parea"])/ $carea  * 100,
     $warn["sharedborder"] / $warn["perimeter"] * 100.0,
+    date("Y", $ts), $warn["wfo"], $warn["phenomena"], $warn["significance"],
+    $warn["eventid"],
     $warn["buffered"] / $warn["area"] * 100.0);
 
   reset($warn["lsrs"]);
