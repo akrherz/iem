@@ -19,6 +19,7 @@ function printLSR($lsr)
 }
 function printWARN($cow, $warn)
 {
+  global $lsrbuffer;
   $ts = $warn["sts"] + 5*60;
   $uri = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", date("Y", $ts), 
         $warn["status"], $warn["wfo"], $warn["phenomena"], 
@@ -33,14 +34,14 @@ function printWARN($cow, $warn)
     $carea += $cow->ugcCache[$v]["area"];
   }
 
-  $s = sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f sq km</td><td>%.0f sq km</td><td>%.0f %%</td><td>%.0f%% <a href=\"../GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d\">Visual</a></td><td>%.0f%%</td></tr>\n", 
+  $s = sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f sq km</td><td>%.0f sq km</td><td>%.0f %%</td><td>%.0f%% <a href=\"../GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td><td>%.0f%%</td></tr>\n", 
     $background, $uri, $warn["phenomena"], $warn["eventid"],
     gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["ets"]), 
     $uri, implode(", ",$counties), $uri, $warn["status"], $warn["area"], 
     $carea, ($carea - $warn["parea"])/ $carea  * 100,
     $warn["sharedborder"] / $warn["perimeter"] * 100.0,
     date("Y", $ts), $warn["wfo"], $warn["phenomena"], $warn["significance"],
-    $warn["eventid"],
+    $warn["eventid"], $lsrbuffer,
     $warn["buffered"] / $warn["area"] * 100.0);
 
   reset($warn["lsrs"]);
@@ -55,6 +56,7 @@ $cow->setLimitTime( $sts, $ets );
 $cow->setHailSize( $hail );
 $cow->setLimitType( $wtype );
 $cow->setLimitLSRType( $ltype );
+$cow->setLSRBuffer( $lsrbuffer );
 $cow->milk();
 
 $charturl = sprintf("chart.php?aw=%s&ae=%s&b=%s&c=%s&d=%s",

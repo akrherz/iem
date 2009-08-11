@@ -25,6 +25,7 @@ $layers = isset($_GET["layers"])? $_GET["layers"]:
 $sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
 $width = isset($_GET["width"]) ? intval($_GET["width"]) : 640;
 $height = isset($_GET["height"]) ? intval($_GET["height"]) : 480;
+$lsrbuffer = isset($_GET["lsrbuffer"]) ? intval($_GET["lsrbuffer"]): 15;
 
 /* Now, maybe we set a VTEC string, lets do all sorts of fun */
 $vtec_limiter = "";
@@ -153,7 +154,7 @@ $blsr->setConnectionType( MS_POSTGIS);
 $blsr->set("connection", $_DATABASES["postgis"]);
 $blsr->set("status", in_array("bufferedlsr", $layers) );
 $sql = "geo from (select distinct city, magnitude, valid, 
-  ST_Transform(ST_Buffer(ST_Transform(geom,2163),15000),4326) as geo, 
+  ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326) as geo, 
   type as ltype, city || magnitude || x(geom) || y(geom) as k 
   from lsrs_". date("Y", $ts) ." WHERE
   geom && (select geom from warnings_". date("Y", $ts) ." WHERE 

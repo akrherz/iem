@@ -39,6 +39,10 @@ function callDB($sql){
     return $rs;
 }
 
+function setLSRBuffer($buffer){
+    $this->lsrbuffer = $buffer;
+}
+
 function setLimitWFO($arWFO){
     $this->wfo = $arWFO;
 }
