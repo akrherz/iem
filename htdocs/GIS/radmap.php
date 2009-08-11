@@ -160,6 +160,10 @@ $sql = "geo from (select distinct city, magnitude, valid,
            wfo = '$wfo' and phenomena = '$phenomena' and 
            significance = '$significance' and eventid = $eventid 
            and gtype = 'P' LIMIT 1) and
+  ST_Contains((select geom from warnings_". date("Y", $ts) ." WHERE 
+           wfo = '$wfo' and phenomena = '$phenomena' and 
+           significance = '$significance' and eventid = $eventid 
+           and gtype = 'P' LIMIT 1), geom) and
   valid >= '". date("Y-m-d H:i", $ts) ."' and 
   valid < '". date("Y-m-d H:i", $ts2) ."' and
   ((type = 'M' and magnitude >= 34) or 
