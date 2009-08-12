@@ -98,8 +98,8 @@ if ($var == 'c300') {
   $var2 = 'dwpfl';
 } else if ($var == "c529") {
   $q = "SELECT station, c529, c529_f, 
-    substring(c530,length(c530) - 3,2) || ':' || 
-    substring(c530, length(c530) - 1,2) as c530 , 
+    substring(text(c530),length(text(c530)) - 3,2) || ':' || 
+    substring(text(c530), length(text(c530)) - 1,2) as c530 , 
     c530_f from daily WHERE valid = '${dstamp}' ";
   $var2 = 'c530';
 } else {
