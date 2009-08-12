@@ -1,6 +1,7 @@
 <?php 
  include("../../config/settings.inc.php");
  $TITLE = "ISU Ag Climate";
+ $THISPAGE = "networks-agclimate";
  include("$rootpath/include/header.php"); 
  $prod = isset($_GET["prod"]) ? intval($_GET["prod"]) : 1;
 
