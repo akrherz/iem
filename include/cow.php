@@ -125,6 +125,8 @@ function computeUnwarnedEvents(){
 
 
 function computeWarnedEvents(){
+    if (sizeof($this->lsrs) == 0){ return 0; }
+
     reset($this->lsrs);
     $counter = 0;
     while (list($k,$v) = each($this->lsrs)){
@@ -134,6 +136,8 @@ function computeWarnedEvents(){
 }
 
 function computeTDQEvents(){
+    if (sizeof($this->lsrs) == 0){ return 0; }
+
     reset($this->lsrs);
     $counter = 0;
     while (list($k,$v) = each($this->lsrs)){
@@ -178,6 +182,7 @@ function computeAverageLeadTime(){
    while (list($k,$v) = each($this->warnings)){
        if ($v["lead0"] > -1){ $ar[] = $v["lead0"]; }
    }
+   if (sizeof($ar) == 0){ return 0; }
    return array_sum($ar) / floatval( sizeof($ar) );
 }
 
@@ -201,12 +206,14 @@ function computeCSI(){
 function computePOD(){
    $a_e = $this->computeWarnedEvents();
    $b = sizeof($this->lsrs) - $a_e;
+   if ($b + $a_e == 0){ return 0; }
    return floatval($a_e) / floatval( $a_e + $b );
 }
 
 function computeFAR(){
     $a_w = $this->computeWarningsVerified();
     $c = sizeof($this->warnings) - $a_w;
+    if ($c + $a_w == 0){ return 0; }
     return floatval($c) / floatval( $a_w + $c );
 }
 
