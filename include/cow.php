@@ -14,6 +14,7 @@ function cow($dbconn){
 
     $this->wfo = Array();        /* Array of WFOs to potentially limit */
     $this->warnings = Array();   /* Array of warnings */
+    $this->lsrs = Array();       /* Array of LSRs */
     $this->sts = 0;              /* Verification window start UTC */
     $this->ets = 0;              /* Vertification window end UTC */
     $this->wtype = Array();      /* VTEC Phenomena types to verify */
@@ -97,6 +98,7 @@ function sqlTypeBuilder(){
 }
 
 function computeAverageSize(){
+    if (sizeof($this->warnings) == 0){ return 0; }
     reset($this->warnings);
     $polysz = 0;
     while (list($k,$v) = each($this->warnings)){
@@ -231,6 +233,7 @@ function computeAreaVerify(){
 }
 
 function computeWarningsVerifiedPercent(){
+    if (sizeof($this->warnings) == 0){ return 0; }
     return $this->computeWarningsVerified() / floatval(sizeof($this->warnings)) * 100.0;
 }
 
