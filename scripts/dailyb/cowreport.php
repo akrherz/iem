@@ -28,7 +28,7 @@ echo sprintf("Average Storm Based Warning Size          [%.0f sq km]\n",
      $cow->computeAverageSize() );
 echo sprintf("Probability of Detection(higher is better)[%.2f]\n",
      $cow->computePOD() );
-echo sprintf("False Alarm Ration (lower is better)      [%.2f]\n",
+echo sprintf("False Alarm Ratio (lower is better)       [%.2f]\n",
      $cow->computeFAR() );
 echo sprintf("Critical Success Index (higher is better) [%.2f]\n",
      $cow->computeCSI() );
