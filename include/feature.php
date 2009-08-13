@@ -95,10 +95,10 @@ $s .= "</table>";
 
 
 
-if (getenv("REMOTE_ADDR") == "173.20.184.18" )
+if (getenv("REMOTE_ADDR") == "173.30.53.40" )
 {
  $s = "<img src=\"images/i3.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 202 weeks now!!!! Hmmmmm, this will be the last feature for smokey apartment! darly will have to figure out a different way to get this feature to smokey while she is in verginya.  darly is very excited about smokey trip.  She'll get to swim swim swim and see so many of her friends while there! I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 204 weeks now!!!!  My goodness, darly no sure if this number is right.  Darly does know that smokey is right for darly, hehe.  Smokey back home and so is snoopy.  Smokey makes darly very proud.  I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 }
