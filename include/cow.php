@@ -115,6 +115,7 @@ function computeSizeReduction(){
             $countysz += $this->ugcCache[$v2]["area"];
         }
     }
+    if ($countysz == 0){ return 0; }
     return ($countysz - $polysz) / $countysz * 100.0;
 }
 
@@ -142,6 +143,8 @@ function computeTDQEvents(){
 }
 
 function computeMaxLeadTime(){
+   if (sizeof($this->lsrs) == 0){ return 0; }
+
    $large = 0;
    reset($this->lsrs);
    while (list($k,$v) = each($this->lsrs)){
@@ -150,6 +153,7 @@ function computeMaxLeadTime(){
    return $large;
 }
 function computeMinLeadTime(){
+   if (sizeof($this->lsrs) == 0){ return 0; }
    $smallest = 99;
    reset($this->lsrs);
    while (list($k,$v) = each($this->lsrs)){
