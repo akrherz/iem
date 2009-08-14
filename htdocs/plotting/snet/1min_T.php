@@ -60,10 +60,9 @@ for($i=0;$row = @pg_fetch_array($rs,$i); $i++)
   $dewps[] = ($row["dwpf"] > -50 && $row["dwpf"] < 120) ? $row["dwpf"]: "";
 }
 
-
 /* Generate Graph Please */
 $graph = new Graph(640,480);
-$graph->SetScale("datelin", min($dewps)-5, max($temps)+5);
+$graph->SetScale("datelin");
 $graph->SetY2Scale("lin", 0, 1200);
 $graph->xaxis->SetTitle("Valid Local Time");
 $graph->yaxis->SetTitle("Temperature [F]");
