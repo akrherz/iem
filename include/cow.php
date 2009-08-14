@@ -175,6 +175,7 @@ function computeAllLeadTime(){
    while (list($k,$v) = each($this->lsrs)){
        if ($v["leadtime"] != "NA"){ $ar[] = $v["leadtime"]; }
    }
+   if (sizeof($ar) == 0){ return 0; }
    return array_sum($ar) / floatval( sizeof($ar) );
 }
 
