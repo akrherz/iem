@@ -331,7 +331,8 @@ function loadWarnings(){
                        $row["phenomena"], $row["eventid"]);
         if ( ! isset($this->warnings[$key]) ){
             $this->warnings[$key] = Array("ugc"=> Array(), "geom" => "",
-                                          "lsrs" => Array() );
+                                          "lsrs" => Array(), "perimeter" => 0,
+                                          "parea" => 0 );
         }
         $this->warnings[$key]["issue"] = $row["issue"];
         $this->warnings[$key]["expire"] = $row["expire"];
