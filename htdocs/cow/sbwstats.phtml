@@ -10,12 +10,14 @@ $postgis = iemdb("postgis");
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time()-86400);
 $smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m", time()-86400);
 $sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d", time()-86400);
+$shour = isset($_GET["shour"]) ? $_GET["shour"] : 0;
 $emonth = isset($_GET["emonth"]) ? $_GET["emonth"] : date("m");
 $eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d");
+$ehour = isset($_GET["ehour"]) ? $_GET["ehour"] : 0;
 $sortby = isset($_GET["sortby"]) ? $_GET["sortby"] : "wfo";
-$sts = mktime(0,0,0,$smonth, $sday, $year);
-$ets = mktime(0,0,0,$emonth, $eday, $year);
-$gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=0&minute1=0&month2=%s&day2=%s&hour2=0&minute2=0",  date("Y", $sts), date("m", $sts),date("d", $sts), date("m", $ets), date("d", $ets) );
+$sts = mktime($shour,0,0,$smonth, $sday, $year);
+$ets = mktime($ehour,0,0,$emonth, $eday, $year);
+$gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=%s&minute1=0&month2=%s&day2=%s&hour2=%s&minute2=0",  date("Y", $sts), date("m", $sts),date("d", $sts), date("H", $sts), date("m", $ets), date("d", $ets), date("H", $ets) );
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT wfo, phenomena, count(*),
   sum( st_area2d( transform(geom,2163) ) ) as sum_polysize,
@@ -28,7 +30,7 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT wfo, phenomena, count(*),
 
 pg_query($postgis, "SET TIME ZONE 'GMT'");
 $rs = pg_execute($postgis, "SELECT", 
-    Array( date('Y-m-d', $sts), date('Y-m-d', $ets) ) );
+    Array( date('Y-m-d H:i', $sts), date('Y-m-d H:i', $ets) ) );
 
 $data = Array();
 $sorted = Array();
@@ -51,7 +53,7 @@ $table = "
 .ff { background: #FFEC8B;}
 </style>
 <table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">
-<caption>Data valid between ". date('d M Y', $sts) ." and ". date('d M Y', $ets) ." GMT</caption>
+<caption>Data valid for warnings issued between ". date('d M Y H:i', $sts) ." and ". date('d M Y H:i', $ets) ." GMT</caption>
 <tr>
   <th colspan='2'>Weather Forecast Office</th>
   <th colspan='3'>Summary</th>
@@ -124,15 +126,18 @@ this table and paste it into Excel, if you wish.
 <?php
 echo "<form method=\"GET\">
 <table border=\"1\" cellpadding=\"3\" cellspacing='0'>
- <tr><td></td><th>Year</th><th>Month</th><th>Day</th><td></td></tr>
+ <tr><td></td><th>Year</th><th>Month</th><th>Day</th><th>Hour</th><td></td></tr>
  <tr><td>Start:</td>
   <td rowspan=\"2\">". yearSelect(2005, $year) ."</td>
   <td>". monthSelect($smonth, "smonth") ."</td>
   <td>". daySelect2($sday, "sday") ."</td>
+  <td>". hour24Select($shour, "shour") ."</td>
   <td rowspan='2'><input type='submit' value='Generate Stats'></td>
  <tr><td>End:</td>
   <td>". monthSelect($emonth, "emonth") ."</td>
-  <td>". daySelect2($eday, "eday") ."</td></tr>
+  <td>". daySelect2($eday, "eday") ."</td>
+  <td>". hour24Select($ehour, "ehour") ."</td>
+ </tr>
 </table>
 </form>";
 
