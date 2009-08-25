@@ -22,7 +22,7 @@ include("$rootpath/include/header.php"); ?>
 <div class="text">
 <?php
  include("$rootpath/include/network.php");
- $nt = new NetworkTable("IACOCORAHS");
+ $nt = new NetworkTable($network);
 
  include("$rootpath/include/iemaccess.php");
  include("$rootpath/include/iemaccessob.php");
@@ -30,7 +30,7 @@ include("$rootpath/include/header.php"); ?>
 
  /* Compute monthly rainfall totals! */
  $dbconn = iemdb("access");
- $sql = "SELECT station, sum(case WHEN pday < 0 THEN 0 ELSE pday END) as pmonth, sum(case WHEN pday < 0 THEN 1 ELSE 0 END) as missing from summary WHERE network = 'IACOCORAHS' and extract(month from now()) = extract(month from day) GROUP by station";
+ $sql = "SELECT station, sum(case WHEN pday < 0 THEN 0 ELSE pday END) as pmonth, sum(case WHEN pday < 0 THEN 1 ELSE 0 END) as missing from summary WHERE network = '$network' and extract(month from now()) = extract(month from day) GROUP by station";
  $rs = pg_exec($dbconn, $sql);
  $monthDict = Array();
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){ 
@@ -92,6 +92,7 @@ $cols = Array("ts" => "Valid", "county" => "County",
 <input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
 <b>Show State:</b><select name="network">
   <option value="IACOCORAHS" <?php if ($network == "IACOCORAHS") echo "SELECTED"; ?>>Iowa
+  <option value="ILCOCORAHS" <?php if ($network == "ILCOCORAHS") echo "SELECTED"; ?>>Illinois
 </select>
 <input type="submit" value="Go!">
 </form>
