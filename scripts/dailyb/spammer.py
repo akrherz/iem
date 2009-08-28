@@ -133,7 +133,11 @@ part2 = MIMEText(html, 'html')
 msg.attach(part1)
 msg.attach(part2)
 
-s = smtplib.SMTP('mailhub.iastate.edu')
+try:
+  s = smtplib.SMTP('mailhub.iastate.edu')
+except:
+  time.sleep(57)
+  s = smtplib.SMTP('mailhub.iastate.edu')
 s.sendmail(msg['From'], [msg['To']], msg.as_string())
 s.quit()
 
