@@ -9,10 +9,8 @@ include("$rootpath/include/header.php");
 <p>The following images are an interpolated analysis of county-by-county
 average soil temperature at a four inch depth.</p>
 
-<p>
-<img src="../data/soilt_day1.png">
-<img src="../data/soilt_day2.png">
-<img src="../data/soilt_day3.png">
-</p>
+<p><img src="../data/soilt_day1.png"></p>
+<p><img src="../data/soilt_day2.png"></p>
+<p><img src="../data/soilt_day3.png"></p>
 
 <?php include("$rootpath/include/footer.php"); ?>
