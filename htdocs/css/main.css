@@ -260,6 +260,35 @@ ul.iem-list {
 #iem_header_logo img {
   border: 0px;
 }
+.dashboard{
+  border: 2px solid #ddd;
+  background: #eee;
+}
+.dashboard ul {
+ 
+}
+.dashboard li {
+  list-style: none;
+  display: inline;
+  float: left;
+  margin-left: 20px;
+}
+.dashboard a {
+  text-decoration: none;
+}
+.dashboard img {
+  border: 0px;
+  padding-left: 15px;
+  padding-bottom: 5px;
+}
+.dashboard:after {
+    content: ".";
+    display: block;
+    height: 0;
+    overflow: hidden;
+    clear: both;
+    visibility: hidden;
+    }
 /* Stylized header with side bar */
 /* .heading { 
 	border-color: #336699;
