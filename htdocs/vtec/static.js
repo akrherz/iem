@@ -1,5 +1,106 @@
-Ext.BLANK_IMAGE_URL = '../ext/resources/images/default/s.gif';
+Ext.BLANK_IMAGE_URL = '../ext-3.0.0/resources/images/default/s.gif';
 Ext.onReady(function(){
+
+/**
+ * @version 0.4
+ * @author nerdydude81
+ */Ext.override(Ext.Element, {
+    /**
+     * @cfg {string} printCSS The file path of a CSS file for printout.
+     */
+    printCSS: null,
+    /**
+     * @cfg {Boolean} printStyle Copy the style attribute of this element to the print iframe.
+     */
+    printStyle: false,
+    /**
+     * @property {string} printTitle Page Title for printout. 
+     */
+    printTitle: document.title,
+    /**
+     * Prints this element.
+     * 
+     * @param config {object} (optional)
+     */
+    print: function(config) {
+        Ext.apply(this, config);
+        
+        var el = Ext.get(this.id).dom;
+        if (this.isGrid) 
+            el = el.parentNode;
+        
+        var c = document.getElementById('printcontainer');
+        var iFrame = document.getElementById('printframe');
+        
+        var strTemplate = '<HTML><HEAD>{0}<TITLE>{1}</TITLE></HEAD><BODY onload="{2}"><DIV {3}>{4}</DIV></BODY></HTML>';
+        var strLinkTpl = '<link rel="stylesheet" type="text/css" href="{0}"/>'
+        var strAttr = '';
+        var strFormat;
+        var strHTML;
+    
+        if (c) {
+            if (iFrame)
+                c.removeChild(iFrame);
+            el.removeChild(c);
+        }
+        
+        for (var i = 0; i < el.attributes.length; i++) {
+            if (Ext.isEmpty(el.attributes[i].value) || el.attributes[i].value.toLowerCase() != 'null') {
+                strFormat = Ext.isEmpty(el.attributes[i].value)? '{0}="true" ': '{0}="{1}" ';
+                if (this.printStyle? this.printStyle: el.attributes[i].name.toLowerCase() != 'style')
+                    strAttr += String.format(strFormat, el.attributes[i].name, el.attributes[i].value);
+            }
+        }
+        
+        var strLink ='';
+        if(this.printCSS){
+            if(!Ext.isArray(this.printCSS))
+                this.printCSS = [this.printCSS];
+            
+            for(var i=0; i<this.printCSS.length; i++) {
+                strLink += String.format(strLinkTpl, this.printCSS[i]);
+            }
+        }
+        
+        strHTML = String.format(
+            strTemplate,
+            strLink,
+            this.printTitle,
+            '',
+            strAttr,
+            el.innerHTML
+        );
+        
+        c = document.createElement('div');
+        c.setAttribute('style','width:0px;height:0px;' + (Ext.isSafari? 'display:none;': 'visibility:hidden;'));
+        c.setAttribute('id', 'printcontainer');
+        el.appendChild(c);
+        if (Ext.isIE)
+            c.style.display = 'none';
+        
+        iFrame = document.createElement('iframe');
+        iFrame.setAttribute('id', 'printframe');
+        iFrame.setAttribute('name', 'printframe');
+        c.appendChild(iFrame);
+        
+        iFrame.contentWindow.document.open();        
+        iFrame.contentWindow.document.write(strHTML);
+        iFrame.contentWindow.document.close();
+        
+        if (this.isGrid) {
+            var iframeBody = Ext.get(iFrame.contentWindow.document.body);
+            var cc = Ext.get(iframeBody.first().dom.parentNode);
+            cc.child('div.x-panel-body').setStyle('height', '');
+            cc.child('div.x-grid3').setStyle('height', '');
+            cc.child('div.x-grid3-scroller').setStyle('height', '');
+        }
+        if (Ext.isIE)
+            iFrame.contentWindow.document.execCommand('print');
+        else
+            iFrame.contentWindow.print();
+    }
+});
+
 
 /**
  * @class Ext.ux.SliderTip
@@ -43,6 +144,7 @@ var eventsPanel;
 var cachedNexradTime = false;
 var vDescription;
 var tslider;
+var nexradOpacity;
 // Selectors
 var wfo_selector;
 /* Misc */
@@ -51,7 +153,13 @@ var borderkml;
 var delayedTaskSpinner;
 
 function getVTEC(){
-  return "year="+ year_selector.getValue() +"&wfo="+ wfo_selector.getValue() +"&phenomena="+ phenomena_selector.getValue() +"&eventid="+ eventid_selector.getValue() +"&significance="+ sig_selector.getValue();
+  return {
+      year         : year_selector.getValue(),
+      wfo          :  wfo_selector.getValue(),
+      phenomena    : phenomena_selector.getValue(), 
+      eventid      : eventid_selector.getValue(),
+      significance : sig_selector.getValue()
+   }
 }
 
 function getURL(){
@@ -107,7 +215,7 @@ var expander2 = new Ext.grid.RowExpander({
            {name: 'area', type: 'float'},
            {name: 'significance'},
            {name: 'phenomena'},
-           {name: 'eventid'},
+           {name: 'eventid', type: 'int'},
            {name: 'issued'},
            {name: 'expired'}
           ])
@@ -204,6 +312,7 @@ var phenomena_selector = new Ext.form.ComboBox({
                       fields: ['abbr', 'name'],
                       data : iemdata.vtec_phenomena_dict
              }),
+  tpl: '<tpl for="."><div class="x-combo-list-item">[{abbr}] {name}</div></tpl>',
              valueField:'abbr',
              displayField:'name',
              fieldLabel:'Phenomena',
@@ -267,11 +376,14 @@ eventid_selector.on('spin', function(){
 });
 
 var year_selector = new Ext.ux.form.Spinner({
-     fieldLabel: 'Year',
-     name: 'year',
-     id: 'yearselector',
-     width: 60,
-     strategy: new Ext.ux.form.Spinner.NumberStrategy({minValue:cfg.startYear, maxValue: new Date("Y")})
+     fieldLabel : 'Year',
+     name       : 'year',
+     id         : 'yearselector',
+     width      : 60,
+     strategy   : new Ext.ux.form.Spinner.NumberStrategy({
+       minValue : cfg.startYear, 
+       maxValue : new Date("Y")
+     })
 });
 year_selector.on('spin', function(){
    if(!delayedTaskSpinner){
@@ -287,16 +399,15 @@ year_selector.on('spin', function(){
 
 
 var metastore = new Ext.data.Store({
-    root:'meta',
-    autoLoad:false,
-    id:'metastore',
+    root      : 'meta',
+    autoLoad  : false,
+    id        : 'metastore',
     recordType: Ext.grid.PropertyRecord,
-    proxy: new Ext.data.HttpProxy({
-           url: 'json-meta.php',
-           params: getVTEC(),
-           method:'GET'
-           }),
-    reader: new Ext.data.JsonReader({
+    proxy     : new Ext.data.HttpProxy({
+       url    : 'json-meta.php',
+       method :'GET'
+       }),
+    reader    : new Ext.data.JsonReader({
             root: 'meta',
             id:'id'
             }, [
@@ -310,13 +421,16 @@ var metastore = new Ext.data.Store({
             {name: 'radarend', type:'date', dateFormat:'Y-m-d H:i'}
             ])
 });
-metastore.on('load', function(){
+/*
+ * Need to adjust various things when data is loaded into the metastore
+ */
+metastore.on('load', function(mystore, records, options){
   cachedNexradTime = false;
-  Ext.fly(vDescription.getEl()).update('');
+  //Ext.fly(vDescription.getEl()).update('');
 
   /* If we got no results from the server, show the events tab */
   if (metastore.getCount() == 0){
-    Ext.fly(vDescription.getEl()).update('Event not found on server, here is a list of other '+  phenomena_selector.getRawValue() + ' '+ sig_selector.getRawValue() +' issued by '+ wfo_selector.getRawValue() );
+    //Ext.fly(vDescription.getEl()).update('Event not found on server, here is a list of other '+  phenomena_selector.getRawValue() + ' '+ sig_selector.getRawValue() +' issued by '+ wfo_selector.getRawValue() );
     tabPanel.items.each(function(c){
          if (c.saveme){}
          else{ c.disable(); }
@@ -384,15 +498,16 @@ function resetGmap(){
      Ext.getCmp('mygpanel').gmap.setCenter(point, 9);
 
      Ext.getCmp('mygpanel').gmap.clearOverlays();
-     kml = "http://mesonet.agron.iastate.edu/kml/vtec.php?"+ getVTEC();
-     gxml = new GGeoXml(kml);
+     cfg.vteckml = "http://mesonet.agron.iastate.edu/kml/vtec.php?"+ Ext.urlEncode(getVTEC());
+     gxml = new GGeoXml(cfg.vteckml);
      Ext.getCmp('mygpanel').gmap.addOverlay(gxml);
-     kml = "http://mesonet.agron.iastate.edu/kml/sbw_lsrs.php?"+ getVTEC();
-     lsrkml = new GGeoXml(kml);
+
+     cfg.lsrkml = "http://mesonet.agron.iastate.edu/kml/sbw_lsrs.php?"+ Ext.urlEncode(getVTEC());
+     lsrkml = new GGeoXml(cfg.lsrkml);
      Ext.getCmp('mygpanel').gmap.addOverlay(lsrkml);
 
-     kml = "http://mesonet.agron.iastate.edu/kml/sbw_county_intersect.php?"+ getVTEC();
-     borderkml = new GGeoXml(kml);
+     cfg.countykml = "http://mesonet.agron.iastate.edu/kml/sbw_county_intersect.php?"+ Ext.urlEncode(getVTEC());
+     borderkml = new GGeoXml(cfg.countykml);
      borderkml.initial = 1;
    }
 };
@@ -430,21 +545,60 @@ tslider.on('changecomplete', function(){
 
 
 var selectform = new Ext.FormPanel({
-    frame: true,
-    id: 'mainform',
-    labelAlign:'top',
-    items: [wfo_selector,phenomena_selector, sig_selector, eventid_selector,
-            year_selector, tslider,
-          new Ext.Button({
-            text:'Update Page',
-            id:'mainbutton',
-            listeners: {
-              click: function() {
-                metastore.load( {params:getVTEC()} );
-              }  // End of handler
+    frame      : true,
+    id         : 'mainform',
+    labelAlign : 'top',
+    items      : [
+         wfo_selector,
+         phenomena_selector,
+         sig_selector,
+         eventid_selector,
+         year_selector, 
+         tslider,
+         {
+            xtype     : 'button',
+            text      : 'Update Page',
+            id        : 'mainbutton',
+            style     : {marginBottom:'10px'},
+            listeners : {
+               click  : function() {
+                  metastore.load( {params:getVTEC()} );
+               }  // End of handler
             }
-          })
-          ]
+          },{
+            xtype     : 'button',
+            text      : 'LSR KML Source',
+            icon      : 'icons/kml.jpg',
+            cls       : 'x-btn-text-icon',
+            style     : {marginBottom:'10px'},
+            listeners : {
+               click  : function() {
+                  window.location.href = cfg.lsrkml;
+               }  // End of handler
+            }
+          },{
+            xtype     : 'button',
+            text      : 'Warning KML Source',
+            icon      : 'icons/kml.jpg',
+            cls       : 'x-btn-text-icon',
+            style     : {marginBottom:'10px'},
+            listeners : {
+               click  : function() {
+                  window.location.href = cfg.vteckml;
+               }  // End of handler
+            }
+          },{
+            xtype     : 'button',
+            text      : 'County Intersection KML',
+            icon      : 'icons/kml.jpg',
+            cls       : 'x-btn-text-icon',
+            listeners : {
+               click  : function() {
+                  window.location.href = cfg.countykml;
+               }  // End of handler
+            }
+          }
+    ]
 });
 
 function loadVTEC(){
@@ -490,18 +644,38 @@ textTabsLoad = function(){
         /* Remove whatever tabs we currently have going */
         textTabPanel.items.each(function(c){textTabPanel.remove(c);});
         textTabPanel.add({
-         title: 'Issuance',
-          html: '<pre>'+ jsonData.data[0].report  +'</pre>',
-          xtype: 'panel',
-         autoScroll:true
+          title      : 'Issuance',
+          html       : '<pre>'+ jsonData.data[0].report  +'</pre>',
+          xtype      : 'panel',
+          autoScroll : true,
+          tbar       : [
+          {
+            text    : 'Print Text',
+            icon    : 'icons/print.png',
+            cls     : 'x-btn-text-icon',
+            handler : function(){
+                Ext.getCmp("textTabPanel").getActiveTab().getEl().print();
+            }
+          }
+          ]
         });
         for ( var i = 0; i < jsonData.data[0].svs.length; i++ ){
             textTabPanel.add({
               title: 'Update '+ (i+1),
               html: '<pre>'+ jsonData.data[0].svs[i]  +'</pre>',
              xtype: 'panel',
-             autoScroll:true
-            });
+             autoScroll:true,
+             tbar       : [
+             {
+            text    : 'Print Text',
+            icon    : 'icons/print.png',
+            cls     : 'x-btn-text-icon',
+            handler : function(){
+                Ext.getCmp("textTabPanel").getActiveTab().getEl().print();
+              }
+            } 
+           ]  
+          });
         }
         textTabPanel.activate(i);
         textTabPanel.isLoaded=true;
@@ -511,7 +685,6 @@ textTabsLoad = function(){
 
 lsrGridPanel = new Ext.grid.GridPanel({
     id:'lsrGridPanel',
-    isVisible: false,
     isLoaded:false,
     store: jstore,
     disabled:true,
@@ -603,7 +776,7 @@ eventsPanel = new Ext.grid.GridPanel({
     id       : 'products-grid',
     store    : pstore,
     saveme   : true,
-    disabled : true,
+    disabled : false,
     loadMask : {msg:'Loading Data...'},
     cm       : new Ext.grid.ColumnModel([
         {header: "Event", width: 40, sortable: true, dataIndex: 'eventid'},
@@ -702,14 +875,24 @@ CustomGetTileUrl=function(a,b,c) {
 }
 
 
-var tileNEX= new GTileLayer(new GCopyrightCollection(''),1,17);
-    tileNEX.myLayers='nexrad-n0r-wmst';
-    tileNEX.myFormat='image/png';
-    tileNEX.myBaseURL='http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?';
-    tileNEX.getTileUrl=CustomGetTileUrl;
+tileNEX= new GTileLayer(new GCopyrightCollection(''),1,17);
+tileNEX.myLayers='nexrad-n0r-wmst';
+tileNEX.myFormat='image/png';
+tileNEX.myBaseURL='http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?';
+tileNEX.getTileUrl=CustomGetTileUrl;
+tileNEX.getOpacity = function(){ return nexradOpacity; }
 
 var layer4=[G_NORMAL_MAP.getTileLayers()[0],tileNEX]; 
 var custommap4 = new GMapType(layer4, G_SATELLITE_MAP.getProjection(), 'Nexrad', G_SATELLITE_MAP);
+
+function setNEXRADOpacity(val)
+{
+  nexradOpacity = val;
+  Ext.getCmp('mygpanel').gmap.removeMapType( custommap4 );
+  Ext.getCmp('mygpanel').gmap.addMapType( custommap4 );
+  Ext.getCmp('mygpanel').gmap.setMapType( custommap4 );
+}
+
 
 
 googlePanel = new Ext.ux.GMapPanel({
@@ -746,6 +929,25 @@ googlePanel = new Ext.ux.GMapPanel({
                  }
                  borderkml.initial = 0;
            }
+    }), new Ext.Toolbar.TextItem({
+        text: 'NEXRAD Opacity'
+    }), new Ext.ux.form.Spinner({
+        name: 'opacity',
+        id: 'opacity',
+        width: 60,
+        value: 1,
+        strategy: new Ext.ux.form.Spinner.NumberStrategy({minValue:'0', maxValue:'1', incrementValue: 0.1}),
+        listeners: {
+           spin: function( spn ) { if(!delayedTaskSpinner){
+	            delayedTaskSpinner = new Ext.util.DelayedTask(function()
+	           {
+               setNEXRADOpacity( spn.getValue() );
+	           delayedTaskSpinner = null;	
+	           });
+             delayedTaskSpinner.delay(500);
+             }
+           } 
+       }
     })
     ],
     mapConfOpts: ['enableScrollWheelZoom','enableDoubleClickZoom','enableDragging'],
@@ -760,6 +962,8 @@ function sbwgenerator(){
  switch ( phenomena_selector.getValue() ){
   case 'TO': break;
   case 'SV': break;
+  case 'MA': break;
+  case 'FF': break;
   default: return "<p>Storm Based Warning history unavailable</p>";
  }
  return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/sbw-history.php?vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
@@ -822,8 +1026,8 @@ tabPanel =  new Ext.TabPanel({
     height:.75,
     plain:true,
     enableTabScroll:true,
-    defaults:{bodyStyle:'padding:5px'},
-    tbar: new Ext.StatusBar({
+    defaults:{bodyStyle:'padding-left:5px'},
+    tbar: new Ext.Toolbar({
       id: 'main-status',
       defaultText: '',
       items:[vDescription]
@@ -849,11 +1053,17 @@ var viewport = new Ext.Viewport({
              height:130,
              contentEl: cfg.header
          },{
-            region:'west',
-            width:200,
-            collapsible:true,
+            region      : 'west',
+            width       : 210,
+            collapsible : true,
+            autoScroll  : true,
             title:'VTEC Options',
-            items:[selectform]
+            items:[
+                selectform,
+                {
+                  contentEl  : 'boilerplate'
+                }
+            ]
          },
          tabPanel
          ]
