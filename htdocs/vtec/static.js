@@ -1,4 +1,4 @@
-Ext.BLANK_IMAGE_URL = '../ext-3.0.0/resources/images/default/s.gif';
+Ext.BLANK_IMAGE_URL = '../ext/resources/images/default/s.gif';
 Ext.onReady(function(){
 
 /**
