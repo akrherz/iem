@@ -1,7 +1,7 @@
 # Generate a Weather Central Formatted file of Growing Degree Days
 # for our beloved ASOS/AWOS network
 
-import mx.DateTime, os, Ngl, numpy
+import mx.DateTime, os, Ngl, numpy, shutil
 from pyIEM import iemdb, stationTable
 st = stationTable.stationTable("/mesonet/TABLES/campbellDB.stns")
 i = iemdb.iemdb()
@@ -116,6 +116,7 @@ def main():
         data[id]['lat'], data[id]['lon'] ))
     output.close()
     os.system("/home/ldm/bin/pqinsert -p \"wxc_iem_agdata.txt\" wxc_iem_agdata.txt")
+    shutil.copyfile("wxc_iem_agdata.txt", "/mesonet/share/pickup/wxc/")
     os.remove("wxc_iem_agdata.txt")
 
 if __name__ == '__main__':
