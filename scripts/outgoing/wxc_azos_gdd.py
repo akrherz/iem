@@ -1,12 +1,52 @@
 # Generate a Weather Central Formatted file of Growing Degree Days
 # for our beloved ASOS/AWOS network
 
-import mx.DateTime, os
-from pyIEM import iemdb
+import mx.DateTime, os, Ngl, numpy
+from pyIEM import iemdb, stationTable
+st = stationTable.stationTable("/mesonet/TABLES/campbellDB.stns")
 i = iemdb.iemdb()
 access = i['iem']
 coop = i['coop']
 mesosite = i['mesosite']
+isuag = i['isuag']
+
+def sampler(xaxis, yaxis, vals, x, y):
+    i = 0
+    while (xaxis[i] < x):
+        i += 1
+    j = 0
+    while (yaxis[j] < y):
+        j += 1
+    return vals[i,j]
+
+
+def load_soilt(data):
+    soil_obs = []
+    lats = [] 
+    lons = []
+    rs = isuag.query("SELECT station, c30 from daily WHERE \
+         valid = 'YESTERDAY'").dictresult()
+    for i in range(len(rs)):
+        stid = rs[i]['station']
+        soil_obs.append( rs[i]['c30'] )
+        lats.append( st.sts[stid]['lat'] )
+        lons.append( st.sts[stid]['lon'] )
+    numxout = 40
+    numyout = 40
+    xmin    = min(lons) - 1.
+    ymin    = min(lats) - 1.
+    xmax    = max(lons) + 1.
+    ymax    = max(lats) + 1.
+    xc      = (xmax-xmin)/(numxout-1)
+    yc      = (ymax-ymin)/(numyout-1)
+
+    xo = xmin + xc* numpy.arange(0,numxout)
+    yo = ymin + yc* numpy.arange(0,numyout)
+
+    analysis = Ngl.natgrid(lons, lats, soil_obs, list(xo), list(yo))
+    for id in data.keys():
+        data[id]['soilt'] = sampler(xo,yo,analysis, data[id]['lon'], data[id]['lat'])
+
 
 def build_xref():
     rs = mesosite.query("SELECT id, climate_site from stations WHERE network in ('IA_ASOS','AWOS')").dictresult()
@@ -55,6 +95,7 @@ def main():
    4 GDD_MAY1_NORM
    5 PRECIP_MAY1
    5 PRECIP_MAY1_NORM
+   5 SOIL_4INCH
    6 Lat
    8 Lon
 """)
@@ -62,15 +103,16 @@ def main():
     ets = mx.DateTime.now()
     days = (ets - sts).days
     data = compute_obs( sts, ets )
+    load_soilt(data)
     cdata = compute_climate( sts, ets )
     xref = build_xref()
     for id in data.keys():
         if data[id]['missing'] > (days * 0.1):
             continue
         csite = xref[id].lower()
-        output.write("K%s %4.0f %4.0f %5.2f %5.2f %6.3f %8.3f\n" % (id, 
+        output.write("K%s %4.0f %4.0f %5.2f %5.2f %5.1f %6.3f %8.3f\n" % (id, 
         data[id]['gdd'], cdata[ csite ]['cgdd'],
-        data[id]['precip'], cdata[ csite ]['crain'],
+        data[id]['precip'], cdata[ csite ]['crain'], data[id]['soilt'],
         data[id]['lat'], data[id]['lon'] ))
     output.close()
     os.system("/home/ldm/bin/pqinsert -p \"wxc_iem_agdata.txt\" wxc_iem_agdata.txt")
