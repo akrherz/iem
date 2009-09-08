@@ -89,7 +89,7 @@ GROUP by station, lon, lat
 def main():
     output = open('wxc_iem_agdata.txt', 'w')
     output.write("""Weather Central 001d0300 Surface Data
-   7
+   8
    4 Station
    4 GDD_MAY1
    4 GDD_MAY1_NORM
