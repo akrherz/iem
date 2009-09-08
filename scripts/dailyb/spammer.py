@@ -1,6 +1,6 @@
 # Generate the dailyb spam
 
-import smtplib, os, pg, mx.DateTime
+import smtplib, os, pg, mx.DateTime, time
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
