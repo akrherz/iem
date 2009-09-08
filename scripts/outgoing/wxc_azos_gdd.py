@@ -116,7 +116,7 @@ def main():
         data[id]['lat'], data[id]['lon'] ))
     output.close()
     os.system("/home/ldm/bin/pqinsert -p \"wxc_iem_agdata.txt\" wxc_iem_agdata.txt")
-    shutil.copyfile("wxc_iem_agdata.txt", "/mesonet/share/pickup/wxc/")
+    shutil.copyfile("wxc_iem_agdata.txt", "/mesonet/share/pickup/wxc/wxc_iem_agdata.txt")
     os.remove("wxc_iem_agdata.txt")
 
 if __name__ == '__main__':
