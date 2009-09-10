@@ -85,7 +85,190 @@ END
 
 
 LAYER
-  NAME "nexrad-n0r-m05min"
+  NAME "nexrad-n0r-900913-m05m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_1.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M5 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+
+LAYER
+  NAME "nexrad-n0r-900913-m10m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_2.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M10 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-900913-m15m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_3.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M15 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-900913-m20m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_4.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M20 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-900913-m25m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_5.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M25 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+
+LAYER
+  NAME "nexrad-n0r-900913-m30m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_6.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M30 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-900913-m35m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_7.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M35 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-900913-m40m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_8.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M40 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-900913-m45m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_9.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M45 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0r-900913-m50m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_10.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M50 MINS"
+    "wms_srs"   "EPSG:900913 EPSG:4326"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+
+LAYER
+  NAME "nexrad-n0r-m05m"
   STATUS ON
   DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_1.tif"
   TYPE RASTER
@@ -242,5 +425,24 @@ LAYER
   END
   OFFSITE 0 0 0
 END
+
+LAYER
+  NAME "nexrad-n0r-m50m"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_10.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT M50 MINS"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
 
 END
