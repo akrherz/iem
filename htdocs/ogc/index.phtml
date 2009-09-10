@@ -30,6 +30,20 @@ var custommap4 = new GMapType(layer4, G_SATELLITE_MAP.getProjection(), "Nexrad",
 map.addMapType(custommap4);
 </pre>
 
+<p>The <i>nexrad-n0r-900913</i> is the layer name and represents the "current" composite base reflectivity.  There are also these other layers available from the TMS:
+<ul>
+ <li><i>nexrad-n0r-900913-m05m</i>: Composite 5 minutes old</li>
+ <li><i>nexrad-n0r-900913-m10m</i>: Composite 10 minutes old</li>
+ <li><i>nexrad-n0r-900913-m15m</i>: Composite 15 minutes old</li>
+ <li><i>nexrad-n0r-900913-m20m</i>: Composite 20 minutes old</li>
+ <li><i>nexrad-n0r-900913-m25m</i>: Composite 25 minutes old</li>
+ <li><i>nexrad-n0r-900913-m30m</i>: Composite 30 minutes old</li>
+ <li><i>nexrad-n0r-900913-m35m</i>: Composite 35 minutes old</li>
+ <li><i>nexrad-n0r-900913-m40m</i>: Composite 40 minutes old</li>
+ <li><i>nexrad-n0r-900913-m45m</i>: Composite 45 minutes old</li>
+ <li><i>nexrad-n0r-900913-m50m</i>: Composite 50 minutes old</li>
+</ul>
+
 <h4>Web Map Service (WMS)</h4>
 
 <p>A WMS defines a protocol for web based retrieval of geodata in raster map format. If you are interested in the capabilities XML file, simply add "VERSION=1.1.1&REQUEST=GetCapabilities&SERVICE=WMS&" to the URI string.</p>
