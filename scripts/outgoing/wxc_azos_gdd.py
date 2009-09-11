@@ -24,8 +24,11 @@ def load_soilt(data):
     soil_obs = []
     lats = [] 
     lons = []
+    valid = 'YESTERDAY'
+    if mx.DateTime.now().hour < 7:
+        valid = '%s' % ((mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)).strftime("%Y-%m-%d"), )
     rs = isuag.query("SELECT station, c30 from daily WHERE \
-         valid = 'YESTERDAY'").dictresult()
+         valid = '%s'" % (valid,) ).dictresult()
     for i in range(len(rs)):
         stid = rs[i]['station']
         soil_obs.append( rs[i]['c30'] )
