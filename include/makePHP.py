@@ -21,11 +21,11 @@ for i in range(len(rs)):
 
   o.write(""""%s" => Array("sts" => mktime(%s,0,0,%s, %s,%s), "ets" => %s,
     "name" => "%s", "removed" => %s, "active" => %s, "lat" => %s, "lon" => %s,
-    "state" => "%s", "network" => "%s",
+    "state" => "%s", "network" => "%s", "moviebase" => "%s",
     "ip" => "%s", "county" => "%s", "port" => "%s"),\n""" \
    % (rs[i]['id'], sts.hour, sts.month, sts.day, sts.year, estr, \
       rs[i]['name'], rs[i]['r'], rs[i]['c'], rs[i]['y'], rs[i]['x'], \
-      rs[i]['state'], rs[i]['network'], \
+      rs[i]['state'], rs[i]['network'], rs[i]['moviebase'], \
       rs[i]['ip'], rs[i]['county'], \
       rs[i]['port']) )
 
