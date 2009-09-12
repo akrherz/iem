@@ -1,55 +1,6 @@
 <?php 
 include("../../../config/settings.inc.php");
-$c = Array(
-  "algona" => "Algona",
-  "ames" => "Ames",
-  "zoo" => "Blank Park Zoo",
-  "bigcreek" => "Big Creek Marina",
-  "brookings" => "Brookings, SD",
-  "rathbun" => "Lake Rathbun",
-  "uni" => "Cedar Falls / UNI",
-  "cedarrapids-mm" => "Cedar Rapids - Mount Mercy",
-  "chariton" => "Chariton",
-  "clarion" => "Clarion",
-  "creston" => "Creston",
-  "decorah" => "Decorah",
-  "dubuque" => "Dubuque",
-  "glidden" => "Glidden",
-  "greenfield" => "Greenfield",
-  "humboldt" => "Humboldt",
-  "huron" => "Huron, SD",
-  "independence" => "Independence",
-  "indy" => "Indianola",
-  "iowacity" => "Iowa City",
-  "iemwest" => "ISU Ag Farm",
-  "jeff" => "Jefferson",
-  "knoxville" => "Knoxville",
-  "lamoni" => "Lamoni",
-  "madrid" => "Madrid",
-  "mitchell" => "Mitchell, SD",
-  "monticello" => "Monticello",
-  "newton" => "Newton",
-  "nevada" => "Nevada",
-  "osceola" => "Osceola",
-  "panora" => "Panora",
-  "parkersburg" => "Parkersburg",
-  "pella" => "Pella",
-  "saylor" => "Saylorville Lake",
-  "sigourney" => "Sigourney",
-  "stratford" => "Stratford",
-  "stuart" => "Stuart",
-  "rock" => "Rockwell City",
-  "tama" => "Tama",
-  "tipton" => "Tipton",
-  "twincedars" => "Twin Cedars",
-  "vinton" => "Vinton",
-  "washington" => "Washington",
-  "watertown" => "Watertown, SD",
-  "web" => "Webster City",
-  "williamsburg" => "Williamsburg",
-  "winterset" => "Winterset",
-  "woodward" => "Woodward");
-
+include("$rootpath/include/cameras.inc.php");
 $TITLE = "IEM | Webcam Lapse Player";
 $HEADEXTRA = '
 <script type="text/javascript" src="flowplayer-3.0.1.min.js"></script>
@@ -71,9 +22,11 @@ note the timestamp on the lapses, some of them may be old.</p>
 <br /><strong>Select Camera:</strong>
 <select name="mycam" onchange="myloader();">
 <?php
-while( list($key, $value) = each($c) )
+reset($cameras);
+while( list($key, $dict) = each($cameras) )
 {
-  echo "<option value=\"$key\">$value \n";
+  if ($dict["removed"]){ continue; }
+  echo "<option value=\"". $dict["moviebase"] ."\">". $dict["name"] ." \n";
 }
 ?>
 </select>
