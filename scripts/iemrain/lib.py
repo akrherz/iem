@@ -18,6 +18,14 @@ def load_stations():
     mesosite.close()
     return meta
 
+def nc_lalo2pt(nc, lat, lon):
+    """
+    Figure out the index values for a given lat and lon
+    """
+    y = int( (lat - nc.variables['lat'][0]) * 100)
+    x = int( (lon - nc.variables['lon'][0]) * 100)
+    return x,y
+
 def composite_lalo2pt(lat, lon):
     """
     Compute the raster x,y point for a given lat and lon
@@ -33,7 +41,9 @@ def load_netcdf(ts):
     """
     fp = "%s/%s/%s.nc" % (basedir, ts.year, ts.strftime("%Y%m"))
     if not os.path.isfile(fp):
+        print "NETCDF File %s does not exist, creating..." % (fp,)
         create_grid(ts)
+        print "... done"
     return netCDF3.Dataset(fp, 'a')
 
 
@@ -96,7 +106,7 @@ def create_grid(ts):
     precip.standard_name = 'precipitation_flux'
     precip.long_name = 'Accumulated Precipitation'
     precip.cell_methods = 'time: sum (interval: 15 minutes)'
-    precip._FillValue = 1.e20
+    #precip._FillValue = 1.e20
 
     nc.close()
     del nc
