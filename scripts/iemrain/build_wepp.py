@@ -49,6 +49,8 @@ def doBreakPoint(lat, lon, day):
     t1 = day * 96       + 24  # 6 hours tz offset
     if t1 > numpy.shape(nc.variables['precipitation'])[0]:
         t1 = numpy.shape(nc.variables['precipitation'])[0]
+    if y > numpy.shape(nc.variables['latitude'])[0]:
+        y = numpy.shape(nc.variables['latitude'])[0]
     try:
         data15 = nc.variables['precipitation'][t0:t1,y,x]
     except:
