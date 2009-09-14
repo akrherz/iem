@@ -49,7 +49,11 @@ def doBreakPoint(lat, lon, day):
     t1 = day * 96       + 24  # 6 hours tz offset
     if t1 > numpy.shape(nc.variables['precipitation'])[0]:
         t1 = numpy.shape(nc.variables['precipitation'])[0]
-    data15 = nc.variables['precipitation'][t0:t1,y,x]
+    try:
+        data15 = nc.variables['precipitation'][t0:t1,y,x]
+    except:
+        print "Index ERROR t0: %s t1: %s y: %s x: %s" % (t0,t1,y,x)
+        sys.exit()
     threshold = 0.1 * 25.4  # Threshold is 2/10 of an inch
     accum = 0.00
     writeAccum = 0.00
