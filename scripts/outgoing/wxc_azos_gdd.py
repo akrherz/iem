@@ -26,7 +26,7 @@ def load_soilt(data):
     lons = []
     valid = 'YESTERDAY'
     if mx.DateTime.now().hour < 7:
-        valid = '%s' % ((mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)).strftime("%Y-%m-%d"), )
+        valid = '%s' % ((mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=2)).strftime("%Y-%m-%d"), )
     rs = isuag.query("SELECT station, c30 from daily WHERE \
          valid = '%s'" % (valid,) ).dictresult()
     for i in range(len(rs)):
