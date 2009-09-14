@@ -51,7 +51,7 @@ def create_grid(ts):
     """
     Create the NetCDF grid file that is used for all our work
     """
-    fp = "%s/%s/%s.nc" % (basedir, ts.year, ts.strftime("%Y%m"))
+    fp = "/tmp/%s.nc" % (ts.strftime("%Y%m"),)
     # Create netCDF3 object
     nc = netCDF3.Dataset(fp, 'w')
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -110,3 +110,5 @@ def create_grid(ts):
 
     nc.close()
     del nc
+    newfp = "%s/%s/%s.nc" % (basedir, ts.year, ts.strftime("%Y%m"))
+    os.rename(fp, newfp)
