@@ -1,6 +1,6 @@
 # Support library for IEMRAIN
 
-import netCDF3, sys, os, mx.DateTime, numpy, pg
+import netCDF3, sys, os, mx.DateTime, numpy, pg, shutil
 
 basedir = "/mesonet/share/iemrain"
 
@@ -111,4 +111,4 @@ def create_grid(ts):
     nc.close()
     del nc
     newfp = "%s/%s/%s.nc" % (basedir, ts.year, ts.strftime("%Y%m"))
-    os.rename(fp, newfp)
+    shutil.move(fp, newfp)
