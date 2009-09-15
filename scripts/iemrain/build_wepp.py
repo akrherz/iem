@@ -12,6 +12,7 @@ monthts = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]), 1)
 
 # Open up our NetCDF datafile!
 nc = lib.load_netcdf( monthts )
+precipitation = nc.variables['precipitation']
 
 # Load up our climate observations
 climatedata = [0]*32
@@ -47,12 +48,12 @@ def doBreakPoint(lat, lon, day):
     x,y = lib.nc_lalo2pt(nc, lat, lon)
     t0 = (day - 1) * 96 + 24  # 6 hours tz offset
     t1 = day * 96       + 24  # 6 hours tz offset
-    if t1 > numpy.shape(nc.variables['precipitation'])[0]:
-        t1 = numpy.shape(nc.variables['precipitation'])[0]
+    if t1 > numpy.shape(precipitation)[0]:
+        t1 = numpy.shape(precipitation)[0]
     if y > (numpy.shape(nc.variables['lat'])[0] -1):
         y = numpy.shape(nc.variables['lat'])[0] - 1
     try:
-        data15 = nc.variables['precipitation'][t0:t1,y,x]
+        data15 = precipitation[t0:t1,y,x]
     except:
         print "Index ERROR t0: %s t1: %s y: %s x: %s" % (t0,t1,y,x)
         sys.exit()
@@ -77,7 +78,7 @@ def doBreakPoint(lat, lon, day):
     if rAccum > 0:
         bkTxt += cliFrmt % (times[cnt-1], tAccum)
 
-    if tAccum < (0.05 * 25.4): # Minimum Threshold
+    if tAccum < (0.01 * 25.4): # Minimum Threshold
         bkTxt = ""
     return bkTxt
 
