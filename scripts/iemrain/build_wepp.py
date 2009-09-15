@@ -41,22 +41,15 @@ times[95] = "23.90"
 
 
 
-def doBreakPoint(lat, lon, day):
+def doBreakPoint(data15, day):
     """
     Actually compute the breakpoint data, hmmm
     """
-    x,y = lib.nc_lalo2pt(nc, lat, lon)
     t0 = (day - 1) * 96 + 24  # 6 hours tz offset
     t1 = day * 96       + 24  # 6 hours tz offset
     if t1 > numpy.shape(precipitation)[0]:
         t1 = numpy.shape(precipitation)[0]
-    if y > (numpy.shape(nc.variables['lat'])[0] -1):
-        y = numpy.shape(nc.variables['lat'])[0] - 1
-    try:
-        data15 = precipitation[t0:t1,y,x]
-    except:
-        print "Index ERROR t0: %s t1: %s y: %s x: %s" % (t0,t1,y,x)
-        sys.exit()
+    data15 = data15[t0:t1]
     threshold = 0.1 * 25.4  # Threshold is 2/10 of an inch
     accum = 0.00
     writeAccum = 0.00
@@ -88,7 +81,7 @@ rs = mydb.query("""
 SELECT mgtzone, hrap_i, 
  x(transform(centroid(the_geom),4326)) as lon, 
  y(transform(centroid(the_geom),4326)) as lat
-from hrap_polygons WHERE used = 't'
+from hrap_polygons WHERE used = 't' and hrap_i = 10053
 """).dictresult()
 for i in range(len(rs)):
     if i % 100 == 0:
@@ -97,6 +90,10 @@ for i in range(len(rs)):
     mgtzone = rs[i]['mgtzone']
     lat = rs[i]['lat']
     lon = rs[i]['lon']
+    x,y = lib.nc_lalo2pt(nc, lat, lon)
+    if y > (numpy.shape(nc.variables['lat'])[0] -1):
+        y = numpy.shape(nc.variables['lat'])[0] - 1
+    data15 = precipitation[:,y,x]
 
     cf = editclifile.editclifile('clifiles/%s.dat' % (hrap_i,) )
     sts = monthts
@@ -104,7 +101,7 @@ for i in range(len(rs)):
     now = sts
     while now < ets:
         cr = cliRecord.cliRecord(now)
-        bktxt = doBreakPoint(lat, lon, now.day)
+        bktxt = doBreakPoint(data15, now.day)
         cr.BPset(bktxt)
         cr.CLset(climatedata[now.day][mgtzone][0])
         cf.editDay(now, cr)
