@@ -28,7 +28,6 @@ def download( ts ):
         cmd = "/home/ldm/bin/pqinsert -p 'data a %s blah stage4/ST4.%s.%02ih.grib grib' tmp.grib" % (ts.strftime("%Y%m%d%H%M"), ts.strftime("%Y%m%d%H%M"), hr)
         os.system( cmd )
         os.remove('tmp.grib')
-        os.remove('tmp.grib.Z')
 
 if __name__ == "__main__":
     # We want this hour GMT
