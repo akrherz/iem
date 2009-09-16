@@ -32,5 +32,5 @@ def download( ts ):
 if __name__ == "__main__":
     # We want this hour GMT
     now = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(minute=0,second=0)
-    for offset in [0,6,12,36]:
+    for offset in [33,9,3,0]:
         download( now - mx.DateTime.RelativeDateTime(hours=offset) )
