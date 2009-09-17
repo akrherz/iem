@@ -25,7 +25,7 @@ def download( ts ):
         o.close()
         os.system("gunzip -f tmp.grib.Z")
         # Inject into LDM
-        cmd = "/home/ldm/bin/pqinsert -p 'data a %s blah stage4/ST4.%s.%02ih.grib grib' tmp.grib" % (ts.strftime("%Y%m%d%H%M"), ts.strftime("%Y%m%d%H%M"), hr)
+        cmd = "/home/ldm/bin/pqinsert -p 'data a %s blah stage4/ST4.%s.%02ih.grib grib' tmp.grib" % (ts.strftime("%Y%m%d%H%M"), ts.strftime("%Y%m%d%H"), hr)
         os.system( cmd )
         os.remove('tmp.grib')
 
