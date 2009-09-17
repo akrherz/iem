@@ -52,6 +52,8 @@ ROOT=<?php echo sprintf("<a href=\"%s\">%s</a>\n", $url, $url);?>
       |- raw datafiles for some of the sites in the Other Network
 |- usrad
    |- Pre-generated NEXRAD imagery w/ warnings and watches United States
+|- stage4
+   |- Archive of the NCEP Stage4 Precipitation product in Grib format
 </pre>
 
 </div>
