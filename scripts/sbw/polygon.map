@@ -1,0 +1,49 @@
+MAP
+NAME "polygon"
+STATUS ON
+UNITS METERS
+IMAGETYPE PNG
+IMAGECOLOR 0 0 0
+SIZE 100 100
+
+PROJECTION
+ "init=epsg:2163"
+END
+
+OUTPUTFORMAT
+  NAME png
+  DRIVER "GD/PNG"
+  MIMETYPE "image/png"
+  IMAGEMODE RGB
+  EXTENSION "png"
+  FORMATOPTION "INTERLACE=OFF"
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME "sbw"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  PROJECTION
+   "init=epsg:4326"
+  END
+  TYPE LINE
+  STATUS ON
+  CLASS
+    NAME "tornado"
+    EXPRESSION (('[phenomena]' = 'TO'))
+    STYLE
+      COLOR 255 0 0
+      SIZE 2
+    END
+  END
+  CLASS
+    NAME "svr"
+    EXPRESSION (('[phenomena]' = 'SV'))
+    STYLE
+      COLOR 255 255 0
+      SIZE 2
+    END
+  END
+END
+
+END
