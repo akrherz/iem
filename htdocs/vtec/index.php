@@ -38,7 +38,7 @@ Ext.namespace("cfg");
 cfg.startYear = 2002;
 cfg.header = "iem-header";
 </script>
-<script type="text/javascript" src="static.js?v=1.0.2"></script>';
+<script type="text/javascript" src="static.js?v=1.0.3"></script>';
 $TITLE = "IEM Valid Time Extent Code (VTEC) App";
 $NOCONTENT = 1;
 $THISPAGE ="severe-vtec";
