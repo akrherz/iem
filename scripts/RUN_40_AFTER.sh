@@ -9,3 +9,6 @@ cd ../sbw
 
 cd ../qc
 /mesonet/python/bin/python checkWebcam.py
+
+cd ../ingestors/squaw
+./ingest.sh
