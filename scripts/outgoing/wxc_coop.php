@@ -22,9 +22,9 @@ fwrite($coop, "Weather Central 001d0300 Surface Data
    2 Hour
    4 24hr High Temp
    4 24hr Low Temp
-   4 Precipitation
-   4 Snowfall
-   4 Snowfall Depth
+   6 Precipitation
+   6 Snowfall
+   6 Snowfall Depth
 ");
 
 include('../../include/iemaccess.php');
@@ -44,7 +44,7 @@ while (list($key, $iemob) = each($net) ){
     if ((float)$iemob->db["snowd"] < 0) $iemob->db["snowd"] = " ";
     if ((float)$iemob->db["pday"] < 0) $iemob->db["pday"] = " ";
     if ($now - $iemob->db["ts"] > 3600*10) continue;   
-    $s = sprintf("%5s %-52s %2s %7s %8s %2s %2s %4s %4s %4s %4s %4s\n",
+    $s = sprintf("%5s %-52s %2s %7.4f %8.4f %2s %2s %4s %4s %6s %6s %6s\n",
       $key, $cities[$key]['name'], "IA",
       $cities[$key]['lat'], 
       $cities[$key]['lon'],
