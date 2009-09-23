@@ -12,3 +12,6 @@ cd ../qc
 
 cd ../ingestors/squaw
 ./ingest.sh
+
+cd ../scan
+/mesonet/python/bin/python parse.py
