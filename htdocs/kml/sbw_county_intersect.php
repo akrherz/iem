@@ -28,7 +28,7 @@ select
           and phenomena = '$phenomena' and eventid = $eventid 
           and significance = '$significance'
        )
-   and isvalid(w.geom)
+   and isvalid(w.geom) and isvalid(n.geom)
 ) as foo 
       WHERE not isempty(a)");
 
