@@ -5,3 +5,4 @@ cd current
 
 cd ../outgoing
 /mesonet/python/bin/python wxc_azos_gdd.py
+php wxc_coop.php
