@@ -1,7 +1,6 @@
 
-from pyIEM import iemAccessDatabase
-import os
-iemdb = iemAccessDatabase.iemAccessDatabase()
+import os, mx.DateTime, pg
+iemdb = pg.connect('iem', 'iemdb', user='nobody')
 
 rs = iemdb.query("SELECT station from summary WHERE network = 'KCCI' and \
   day = 'TODAY' and station != 'SAEI4' ORDER by max_tmpf DESC").dictresult()
@@ -11,12 +10,13 @@ dict['sid2'] = rs[1]['station']
 dict['sid3'] = rs[2]['station']
 dict['sid4'] = rs[3]['station']
 dict['sid5'] = rs[4]['station']
+dict['timestamp'] = mx.DateTime.now()
 dict['q'] = "%Q"
 
 out = open('top5highs.scn', 'w')
 
 out.write("""<?xml version="1.0" ?>
-<scene_file magic="Weather Central :LIVE Scene File" version="1.0" name="Unnamed" >
+<scene_file magic="Weather Central :LIVE Scene File" version="1.0" name="Unnamed- %(timestamp)s" >
 <scene type="BasicScene" name="Top 5 Highs" autoadvance="0" audio_file="" use_audio="0" Skip="0" GpiTrigger="0" EnableForegroundKeyer="0" useVideoInputAudio="0" Updateable="0" crosspoint="0" SegmentStart="-1" SegmentPassThru="0" RouterAdvance="0" JumpTarget="0" >
 <Gpi GpiAdvance="0" />
 <Gpi GpiAdvance="0" />
@@ -168,3 +168,4 @@ out.write("""<?xml version="1.0" ?>
 out.close()
 
 os.system("/home/ldm/bin/pqinsert top5highs.scn")
+os.remove("top5highs.scn")
