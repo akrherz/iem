@@ -6,3 +6,6 @@ cd ../current
 
 cd ../delta
 /mesonet/python/bin/python gen_15min.py
+
+cd ../outgoing
+php wxc_rwis.php
