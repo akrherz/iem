@@ -1,12 +1,13 @@
 
-from pyIEM import iemAccessDatabase
-import os, mx.DateTime
-iemdb = iemAccessDatabase.iemAccessDatabase()
+
+import os, mx.DateTime, pg
+iemdb = pg.connect('iem', 'iemdb', user='nobody')
 
 rs = iemdb.query("SELECT station from summary WHERE network = 'KCCI' and \
   day = 'TODAY' and station != 'SCEI4' ORDER by pmonth DESC").dictresult()
 dict = {}
 dict['dy'] = 31
+dict['timestamp'] = mx.DateTime.now()
 dict['sid1'] = rs[0]['station']
 dict['sid2'] = rs[1]['station']
 dict['sid3'] = rs[2]['station']
