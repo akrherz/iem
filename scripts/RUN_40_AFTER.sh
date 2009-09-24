@@ -10,8 +10,12 @@ cd ../sbw
 cd ../qc
 /mesonet/python/bin/python checkWebcam.py
 
+cd ../outgoing
+/mesonet/python/bin/python wxc_iemrivers.py
+
 cd ../ingestors/squaw
 ./ingest.sh
 
 cd ../scan
 /mesonet/python/bin/python parser.py
+

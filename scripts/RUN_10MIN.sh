@@ -9,3 +9,15 @@ cd ../delta
 
 cd ../outgoing
 php wxc_rwis.php
+
+cd kcci
+/mesonet/python/bin/python wxc_top5.py
+/mesonet/python/bin/python wxc_top5month.py
+/mesonet/python/bin/python wxc_top5gusts.py
+/mesonet/python/bin/python wxc_top5highs.py
+/mesonet/python/bin/python wxc_top5lows.py
+
+/mesonet/python/bin/python wxc_top5myrain.py 2
+/mesonet/python/bin/python wxc_top5myrain.py 3
+/mesonet/python/bin/python wxc_top5myrain.py 7
+/mesonet/python/bin/python wxc_top5myrain.py 14
