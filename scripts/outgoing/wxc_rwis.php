@@ -100,7 +100,7 @@ while ( list($key, $val) = each($mydata) ) {
 fclose($rwis);
 
 `/home/ldm/bin/pqinsert wxc_iadot.txt >& /dev/null`;
-`cp wxc_iadot.txt /mesonet/share/pickup/wxc/`;
+`mv wxc_iadot.txt /mesonet/share/pickup/wxc/`;
 
 $nt->table = Array();
 $nt->load_network("IL_RWIS");
@@ -190,5 +190,5 @@ while ( list($key, $val) = each($mydata) ) {
 fclose($rwis);
 
 `/home/ldm/bin/pqinsert wxc_ildot.txt >& /dev/null`;
-`cp wxc_ildot.txt /mesonet/share/pickup/wxc/`;
+`mv wxc_ildot.txt /mesonet/share/pickup/wxc/`;
 ?>
