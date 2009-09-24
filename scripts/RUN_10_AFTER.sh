@@ -1,0 +1,3 @@
+
+cd delta
+./RUN.sh
