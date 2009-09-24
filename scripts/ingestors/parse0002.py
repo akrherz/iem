@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 # Quick and Dirty to get the ISUMET station data into the DB
 # Daryl Herzmann 19 Jun 2003
 # 18 Aug 2003	Add in iemAccess support
