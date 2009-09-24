@@ -4,6 +4,9 @@ cd alerts
 cd ../current
 /mesonet/python/bin/python vsby.py
 
+cd ../summary
+/mesonet/python/bin/python updateRain.py
+
 cd ../delta
 /mesonet/python/bin/python gen_15min.py
 
