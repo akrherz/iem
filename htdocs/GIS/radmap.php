@@ -134,9 +134,13 @@ $lakes->draw($img);
 
 /* Draw NEXRAD Layer */
 $radar = $map->getlayerbyname("nexrad_n0r");
-$radar->set("status", in_array("nexrad", $layers));
+$radar->set("status", in_array("nexrad", $layers) || 
+                      in_array("nexrad_tc", $layers) );
 if (($ts + 300) < time()) {
  $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts) );
+}
+if (in_array("nexrad_tc", $layers)){
+ $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d.png", $ts) );
 }
 $radar->draw($img);
 
@@ -373,12 +377,16 @@ $bar640t->draw($img);
 $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
 $point->setXY(80, 12);
+$d = strftime("%d %B %Y %-2I:%M %p %Z" ,  $ts); 
 if (isset($_GET["title"])){
   $title = substr($_GET["title"],0,50);
 } else if ( isset($_GET["vtec"]) ){
   $title = "VTEC ID: ". $_GET["vtec"];
 } else if (in_array("nexrad", $layers)){
   $title = "NEXRAD Base Reflectivity";
+} else if (in_array("nexrad_tc", $layers)){
+  $title = "IEM NEXRAD Daily Max Composite Reflectivity";
+  $d = gmdate("d M Y", $ts) ." UTC";
 } else {
   $title = "IEM Plot";
 }
@@ -388,7 +396,6 @@ $point->free();
 $point = ms_newpointobj();
 $point->setXY(80, 29);
 if (isset($_REQUEST["tz"])) { putenv("TZ=". substr($_REQUEST["tz"],0,10)); }
-$d = strftime("%d %B %Y %-2I:%M %p %Z" ,  $ts); 
 $point->draw($map, $tlayer, $img, 1,"$d");
 $point->free();
 
@@ -403,7 +410,7 @@ $point->free();
 $layer = $map->getLayerByName("n0r-ramp");
 $point = ms_newpointobj();
 $point->setXY(560, 15);
-if (in_array("nexrad", $layers)){
+if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers) ){
   $point->draw($map, $layer, $img, "n0r-ramp", "");
 }
 $point->free();
@@ -412,7 +419,7 @@ if (in_array("legend", $layers)){
   $map->embedLegend($img);
 }
 $map->drawLabelCache($img);
-$map->save("/tmp/test.map");
+//$map->save("/tmp/test.map");
 
 header("Content-type: image/png");
 $img->saveImage('');
