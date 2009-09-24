@@ -1,7 +1,6 @@
 
-from pyIEM import iemAccessDatabase
-import os
-iemdb = iemAccessDatabase.iemAccessDatabase()
+import os, mx.DateTime, pg
+iemdb = pg.connect("iem", "iemdb", user="nobody")
 
 rs = iemdb.query("SELECT station from current WHERE network = 'KCCI' and \
   valid > 'TODAY' and station != 'SLOI4' ORDER by gust DESC").dictresult()
@@ -11,6 +10,7 @@ dict['sid2'] = rs[1]['station']
 dict['sid3'] = rs[2]['station']
 dict['sid4'] = rs[3]['station']
 dict['sid5'] = rs[4]['station']
+dict['timestamp'] = mx.DateTime.now()
 
 out = open('top5gusts.scn', 'w')
 
