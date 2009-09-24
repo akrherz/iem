@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<scene_file magic="Weather Central :LIVE Scene File" version="1.0" name="Unnamed" >
+<scene_file magic="Weather Central :LIVE Scene File" version="1.0" name="Unnamed- %(timestamp)s" >
 <scene type="BasicScene" name="Top 5 Rain %(dy)s Day" autoadvance="0" audio_file="" use_audio="0" Skip="0" GpiTrigger="0" EnableForegroundKeyer="0" useVideoInputAudio="0" Updateable="0" crosspoint="0" SegmentStart="-1" SegmentPassThru="0" RouterAdvance="0" ForegroundKeyerAdvance="0" JumpTarget="0" TrafficScene="0" LocalScene="0" NationalScene="0" WebImageOutputFile="" WebImagePostProcessScript="" WebImageScriptOutputFile="" SceneGUID="{35C6AFA9-1EF6-457B-B589-64B42F5A2AF3}" >
 <Gpi GpiAdvance="0" />
 <Gpi GpiAdvance="0" />
