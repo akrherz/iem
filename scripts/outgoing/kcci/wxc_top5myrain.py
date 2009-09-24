@@ -1,7 +1,6 @@
 
-from pyIEM import iemAccessDatabase
-import os, sys, mx.DateTime
-iemdb = iemAccessDatabase.iemAccessDatabase()
+import os, sys, mx.DateTime, pg
+iemdb = pg.connect('iem', 'iemdb', user='nobody')
 
 dy = int(sys.argv[1])
 now = mx.DateTime.now()
@@ -19,6 +18,7 @@ dict['sid2'] = rs[1]['station']
 dict['sid3'] = rs[2]['station']
 dict['sid4'] = rs[3]['station']
 dict['sid5'] = rs[4]['station']
+dict['timestamp'] = mx.DateTime.now()
 dict['q'] = "%Q"
 dict['fn'] = "Last %s Day Precip" % (dy,)
 if dy == 2:
