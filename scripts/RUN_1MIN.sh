@@ -5,3 +5,6 @@ cd GIS
 cd ../ingestors
 /mesonet/python/bin/python parse0006.py
 /mesonet/python/bin/python parse0002.py
+
+cd ../outgoing
+/mesonet/python/bin/python snet_collect.py
