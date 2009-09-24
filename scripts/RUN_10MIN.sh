@@ -9,6 +9,7 @@ cd ../delta
 
 cd ../outgoing
 php wxc_rwis.php
+/mesonet/python/bin/python madis2csv.py
 
 cd kcci
 /mesonet/python/bin/python wxc_top5.py
