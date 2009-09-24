@@ -1,6 +1,6 @@
 
 cd delta
-./RUN.sh
+./RUN.csh
 
 cd ../summary
 /mesonet/python/bin/python snet_hourly_precip.py
