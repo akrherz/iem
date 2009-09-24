@@ -58,7 +58,7 @@ ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(hour=0,minute=0)
 run( ts )
 
 # Iowa
-png = urllib2.urlopen("http://iemvs105.local/iem/GIS/radmap.php?layers[]=uscounties&layers[]=nexrad_tc&ts=%s" % (ts.strftime("%Y%m%d%H%M"),))
+png = urllib2.urlopen("http://iemvs105.local/GIS/radmap.php?layers[]=uscounties&layers[]=nexrad_tc&ts=%s" % (ts.strftime("%Y%m%d%H%M"),))
 o = open('tmp.png', 'wb')
 o.write( png )
 o.close()
@@ -66,7 +66,7 @@ cmd = "/home/ldm/bin/pqinsert -p 'plot ac %s0000 summary/max_n0r_0z0z_comprad.pn
 os.system(cmd)
 
 # US
-png = urllib2.urlopen("http://iemvs105.local/iem/GIS/radmap.php?sector=conus&layers[]=uscounties&layers[]=nexrad_tc&ts=%s" % (ts.strftime("%Y%m%d%H%M"),))
+png = urllib2.urlopen("http://iemvs105.local/GIS/radmap.php?sector=conus&layers[]=uscounties&layers[]=nexrad_tc&ts=%s" % (ts.strftime("%Y%m%d%H%M"),))
 o = open('tmp.png', 'wb')
 o.write( png )
 o.close()
