@@ -33,7 +33,7 @@ def hilo_valplot(lons, lats, highs, lows, cfg):
         setattr(res, key, cfg[key])
 
     txres              = Ngl.Resources()
-    txres.txFontHeightF = 0.014
+    txres.txFontHeightF = 0.016
     txres.txFontColor   = "red"
     txres.txJust        = "BottomRight"
     for i in range(len(lons)):
@@ -41,7 +41,7 @@ def hilo_valplot(lons, lats, highs, lows, cfg):
                       lons[i], lats[i],txres)
 
     txres              = Ngl.Resources()
-    txres.txFontHeightF = 0.014
+    txres.txFontHeightF = 0.016
     txres.txFontColor   = "blue"
     txres.txJust        = "TopRight"
     for i in range(len(lons)):
@@ -103,6 +103,45 @@ def simple_valplot(lons, lats, vals, cfg):
     Ngl.frame(wks)
     del wks
 
+def simple_grid_fill(xaxis, yaxis, grid, cfg):
+    """
+    Generate a simple plot, but we already have the data!
+    """
+    rlist = Ngl.Resources()
+    if cfg.has_key("wkColorMap"):
+        rlist.wkColorMap = cfg['wkColorMap']
+
+    # Create Workstation
+    wks = Ngl.open_wks( "ps","tmp",rlist)
+    res = iowa2()
+ 
+    for key in cfg.keys():
+        if key == 'wkColorMap' or key[0] == "_":
+            continue
+        setattr(res, key, cfg[key])
+    res.sfXArray = xaxis
+    res.sfYArray = yaxis
+    # Generate Contour
+    contour = Ngl.contour_map(wks,grid,res)
+
+    if cfg.has_key("_showvalues") and cfg['_showvalues']:
+        txres              = Ngl.Resources()
+        txres.txFontHeightF = 0.012
+        for i in range(len(lons)):
+            if cfg.has_key("_valuemask") and cfg['_valuemask'][i] is False:
+                continue
+            Ngl.add_text(wks, contour, cfg["_format"] % vals[i], 
+                     lons[i], lats[i],txres)
+
+
+    pres = Ngl.Resources()
+    pres.nglFrame = False
+    Ngl.panel(wks,[contour],[1,1], pres)
+
+    watermark(wks)
+    manual_title(wks, cfg)
+    Ngl.frame(wks)
+    del wks
 
 def simple_contour(lons, lats, vals, cfg):
     """
@@ -186,13 +225,17 @@ def grid_iowa(lons, lats, vals):
     analysis = Ngl.natgrid(lons, lats, vals, xaxis, yaxis)
 
     # Setup res
-    res = iowa()
+    res = iowa2()
 
     res.sfXCStartV = min(xaxis)
     res.sfXCEndV   = max(xaxis)
     res.sfYCStartV = min(yaxis)
     res.sfYCEndV   = max(yaxis)
 
+    return analysis, res
+
+def iowa2():
+    res = iowa()
     #_____________ LABEL BAR STUFF __________________________
     res.lbAutoManage       = False           # Let me drive!
     res.lbOrientation      = "Vertical"      # Draw it vertically
@@ -228,7 +271,7 @@ def grid_iowa(lons, lats, vals):
     res.mpAreaMaskingOn         = True            # Mask by Iowa
     res.mpMaskAreaSpecifiers    = ["Conterminous US : Iowa",]
 
-    return analysis, res
+    return res
 
 def iowa():
     """ Return Ngl resources for a standard Iowa plot """
