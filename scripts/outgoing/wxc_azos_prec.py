@@ -53,7 +53,7 @@ GROUP by station, lon, lat
 
 def main():
     output = open('wxc_airport_precip.txt', 'w')
-    output.write("""Weather Central 001d0300 Surface Data
+    output.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
    5
    4 Station
    6 TODAY RAIN
@@ -61,7 +61,7 @@ def main():
    6 DAY3 RAIN
    6 Lat
    8 Lon
-""")
+""" % (mx.DateTime.gmt().strftime("%Y.%m.%d.%H%M"),))
     data = compute_obs()
     for id in data.keys():
         output.write("K%s %6.2f %6.2f %6.2f %6.3f, %8.3f\n" % (id, 
