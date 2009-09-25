@@ -2,6 +2,9 @@
 cd delta
 ./RUN.csh
 
+cd ../outgoing
+php wxc_cocorahs.php
+
 cd ../current
 /mesonet/python/bin/python plot_hilo.py 0
 
