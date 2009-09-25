@@ -3,7 +3,7 @@
 # 26 May 2005	Port over the 
 
 from pyIEM import iemAccess, iemAccessNetwork, mesonet, iemAccessDatabase
-import sys, time, pickle, os, mx.DateTime
+import sys, time, pickle, os, mx.DateTime, pg
 from pyIEM import stationTable
 
 gmt = mx.DateTime.gmt()
@@ -11,12 +11,7 @@ tstr = gmt.strftime("%Y%m%d%H%M")
 
 now = mx.DateTime.now()
 
-try:
-  iemdb = iemAccessDatabase.iemAccessDatabase()
-except:
-  if (mx.DateTime.now().minute == 20):
-    print "DATABASE FAIL"
-  sys.exit(0)
+iemdb = pg.connect('iem', 'iemdb', user='nobody')
 
 st = stationTable.stationTable("/mesonet/TABLES/snet.stns")
 st.sts["SMAI4"]["name"] = "M-town"
@@ -190,6 +185,7 @@ def main():
       print kcci.data[sid]
       print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
       sys.exc_traceback = None
+  of.close()
   si, se = os.popen4("/home/ldm/bin/pqinsert wxc_snet8.txt")
   os.remove("wxc_snet8.txt")
 
