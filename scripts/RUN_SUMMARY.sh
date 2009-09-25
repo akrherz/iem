@@ -23,3 +23,4 @@ cd ../season
 
 cd ../year
 /mesonet/python/bin/python precip.py
+/mesonet/python/bin/python plot_gdd.py

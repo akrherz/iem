@@ -25,7 +25,7 @@ $products = Array(
 
 if ($year == 2009)
 {
-  echo "<div class=\"warning\">Sorry, data for 2009 is not yet available.</div>";
+  echo "<div class=\"warning\">Sorry, data for 2009 is not yet available.  Please see the preliminary data links found at the bottom of this page.</div>";
   $year = 2008;
 }
 $ts = adodb_mktime(1,1,1,1,1,$year);
@@ -78,7 +78,7 @@ while( list($key,$ar) = each($products)) {
 <li><a href="/plotting/coop/vyear_fe.php">Yearly Departures from Average</a></li>
 <li><a href="/data/text/IEMAZOMPR.txt">Tabular High/Low/Prec</a>[ASOS/AWOS]</li>
 <li><a href="/COOP/freezing.php">Freezing Statistics</a></li>
-<li><a href="/data/summary/gdd_jan1.gif">Seasonal (before May 1) Accumulated Growing Degree Days-(base=50)</a></li>
+<li><a href="/data/summary/gdd_jan1.png">Accumulated Growing Degree Days-(base=50)</a></li>
 </ul>
 
 <h4>Past 4 Months</h4>
