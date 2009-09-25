@@ -2,9 +2,6 @@
 cd dl
 /mesonet/python/bin/python ncep_stage4.py
 
-cd ../week
-/mesonet/python/bin/python plot_stage4.py
-
 cd ../sbw
 /mesonet/python/bin/python polygonMosaic.py S
 /mesonet/python/bin/python polygonMosaic.py T
@@ -22,3 +19,6 @@ cd ../ingestors/squaw
 cd ../scan
 /mesonet/python/bin/python parser.py
 
+# This is intensive...
+cd ../../week
+/mesonet/python/bin/python plot_stage4.py
