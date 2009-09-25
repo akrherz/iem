@@ -4,6 +4,9 @@
 cd gdd
 /mesonet/python/bin/python normal_may1.py
 
+cd ../current
+/mesonet/python/bin/python plot_hilo.py 1
+
 cd ../climate
 /mesonet/python/bin/python today_hilo.py
 /mesonet/python/bin/python today_rec_hilo.py
