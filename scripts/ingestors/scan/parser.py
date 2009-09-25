@@ -151,7 +151,11 @@ def Main():
     db = {}
     fp = "ftp://ftp.wcc.nrcs.usda.gov/data/scan/%s/%s/%s_%s.txt" %(
          state, sid, sid, now.strftime("%Y%m%d"))
-    lines = urllib2.urlopen( fp ).readlines()
+    try:
+      lines = urllib2.urlopen( fp ).readlines()
+    except IOError:
+      print 'Download FAIL: %s' % (fp,)
+      continue
     for line in lines:
       if (len(line) < 10): continue
       if (line[:4] == "Date"):
