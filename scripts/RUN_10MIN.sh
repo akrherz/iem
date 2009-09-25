@@ -15,6 +15,7 @@ cd ../delta
 cd ../outgoing
 php wxc_rwis.php
 /mesonet/python/bin/python madis2csv.py
+/mesonet/python/bin/python wxc_azos_prec.py
 php spider.php
 
 cd kcci
