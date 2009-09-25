@@ -28,13 +28,22 @@ def compute_obs():
     """
     sql = """
 SELECT
-  station, x(geom) as lon, y(geom) as lat, 
-  (CASE WHEN pday < 0 THEN 0 ELSE pday END) as rain
+  station, x(geom) as lon, y(geom) as lat,
+  sum(CASE WHEN
+   day = 'TODAY'::date and pday > 0 
+   THEN pday ELSE 0 END) as p01,
+  sum(CASE WHEN
+   day IN ('TODAY'::date,'YESTERDAY'::date) and pday > 0 
+   THEN pday ELSE 0 END) as p02,
+  sum(CASE WHEN
+    pday > 0 
+   THEN pday ELSE 0 END) as p03
 FROM 
   summary
 WHERE
   network in ('IA_ASOS','AWOS') and
-  day = 'TODAY'
+  day IN ('TODAY'::date,'YESTERDAY'::date, 'TODAY'::date - '2 days'::interval)
+GROUP by station, lon, lat
     """
     rs = access.query(sql).dictresult()
     data = {}
@@ -45,16 +54,18 @@ WHERE
 def main():
     output = open('wxc_airport_precip.txt', 'w')
     output.write("""Weather Central 001d0300 Surface Data
-   4
+   5
    4 Station
    6 TODAY RAIN
+   6 DAY2 RAIN
+   6 DAY3 RAIN
    6 Lat
    8 Lon
 """)
     data = compute_obs()
     for id in data.keys():
-        output.write("K%s %6.2f %6.3f %8.3f\n" % (id, 
-        data[id]['rain'], 
+        output.write("K%s %6.2f %6.2f %6.2f %6.3f, %8.3f\n" % (id, 
+        data[id]['p01'], data[id]['p02'], data[id]['p03'],
         data[id]['lat'], data[id]['lon'] ))
     output.close()
     os.system("/home/ldm/bin/pqinsert -p \"wxc_airport_precip.txt\" wxc_airport_precip.txt")
