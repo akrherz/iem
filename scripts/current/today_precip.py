@@ -34,6 +34,9 @@ for i in range(len(rs)):
   vals.append( rs[i]['rainfall'] )
   valmask.append(  (rs[i]['network'] in ['AWOS','IA_ASOS']) )
 
+if len(lats) < 3:
+  sys.exit(0)
+
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': -1,
