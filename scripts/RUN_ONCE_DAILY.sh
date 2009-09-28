@@ -6,3 +6,6 @@ cd qc
 
 cd ../outgoing
 /mesonet/python/bin/python wxc_moon.py
+
+cd ../dbutil 
+/mesonet/python/bin/python ot2archive.py
