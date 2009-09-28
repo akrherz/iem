@@ -4,3 +4,4 @@ cd dl
 
 cd ../GIS
 /mesonet/python/bin/python 24h_lsr.py
+/mesonet/python/bin/python wwShapefile.py
