@@ -11,7 +11,7 @@ $source = isset($_GET["source"]) ? $_GET["source"]: "qc";
 /** Need to use external date lib *
   * http://php.weblogs.com/adodb_date_time_library
   */
-include("adodb-time.inc.php");
+include("$rootpath/include/adodb-time.inc.php");
 
 $ts = adodb_mktime(0,0,0,$month,$day,$year);
 $ndate = adodb_date("Y-m-d", $ts);
