@@ -8,16 +8,19 @@ include("../../../../config/settings.inc.php");
 // Load MapScript
 dl($mapscript);
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
 $month = isset($_GET["month"]) ? $_GET["month"] : die();
 $day = isset($_GET["day"]) ? $_GET["day"] : die();
 
-function addPoint( $row ){
+function addPoint( $row, $lon, $lat , $name){
   GLOBAL $shpFile, $dbfFile;
 
   // Create the shape
   $shp = ms_newShapeObj(MS_SHAPE_POINT);
   $pt = ms_newPointobj();
-  $pt->setXY( $row["longitude"], $row["latitude"], 0);
+  $pt->setXY( $lon, $lat, 0);
   $line = ms_newLineObj();
   $line->add( $pt );
   $shp->add($line);
@@ -25,7 +28,7 @@ function addPoint( $row ){
 
   dbase_add_record($dbfFile, array(
    $row["station"], 
-   $row["name"],
+   $name,
    $row["years"],
    $row["cvalid"],
    $row["high"],
@@ -55,10 +58,9 @@ $filePre = strftime('%m%d', $ts) ."_coop";
 
 
 $pgcon = iemdb("coop");
-$rs = pg_exec($pgcon, "select s.*, c.*, 
+$rs = pg_exec($pgcon, "select c.*, 
    to_char(c.valid, 'YYYYMMDD') as cvalid from 
-   stations s, climate c WHERE c.station = lower(s.id) 
-   and c.valid = '". $sqlDate ."' ");
+   climate c WHERE c.valid = '". $sqlDate ."' ");
 
 pg_close($pgcon);
 
@@ -90,7 +92,9 @@ $dbfFile = dbase_create( $shpFname.".dbf", array(
 
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){
-  addPoint($row);
+  addPoint($row, $cities[strtoupper($row["station"])]["lon"], 
+                 $cities[strtoupper($row["station"])]["lat"],
+                 $cities[strtoupper($row["station"])]["name"]);
 } // End of for
 
 $shpFile->free();
