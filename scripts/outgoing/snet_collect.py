@@ -105,19 +105,19 @@ def main():
   os.system("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci2.dat bogus dat' kcci2.dat"%(tstr,))
   os.remove("kcci2.dat")
 
-  of = open('kelo.dat', 'w')
-  of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,srad,max_srad,\n")
-  for sid in kelo.data.keys():
-    try:
-      of.write("%(station)s,%(ticks).0f,%(tmpf).0f,%(dwpf).0f,%(relh).0f,%(feel).0f,%(pres).2f,%(altiTend)s,%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f,%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f,%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f,%(max_sknt).0f,%(max_drct).0f,%(max_sped).0f,%(max_drctTxt)s,%(srad).0f,%(max_srad).0f,\n" % kelo.data[sid] )
-    except:
-      print kelo.data[sid]
-      print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
-      sys.exc_traceback = None
+  #of = open('kelo.dat', 'w')
+  #of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,srad,max_srad,\n")
+  #for sid in kelo.data.keys():
+  #  try:
+  #    of.write("%(station)s,%(ticks).0f,%(tmpf).0f,%(dwpf).0f,%(relh).0f,%(feel).0f,%(pres).2f,%(altiTend)s,%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f,%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f,%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f,%(max_sknt).0f,%(max_drct).0f,%(max_sped).0f,%(max_drctTxt)s,%(srad).0f,%(max_srad).0f,\n" % kelo.data[sid] )
+  #  except:
+  #    print kelo.data[sid]
+  #    print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
+  #    sys.exc_traceback = None
 
-  of.close()
-  os.system("/home/ldm/bin/pqinsert -p 'data c %s csv/kelo.dat bogus dat' kelo.dat"%(tstr,) )
-  os.remove("kelo.dat")
+  #of.close()
+  #os.system("/home/ldm/bin/pqinsert -p 'data c %s csv/kelo.dat bogus dat' kelo.dat"%(tstr,) )
+  #os.remove("kelo.dat")
 
   of = open('kimt.dat', 'w')
   of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,srad,max_srad,\n")
