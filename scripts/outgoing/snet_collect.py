@@ -106,7 +106,7 @@ def main():
       sys.exc_traceback = None
 
   of.close()
-  si, se = os.popen4("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci2.dat bogus dat' kcci2.dat"%(tstr,))
+  os.system("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci2.dat bogus dat' kcci2.dat"%(tstr,))
   os.remove("kcci2.dat")
 
   of = open('kelo.dat', 'w')
