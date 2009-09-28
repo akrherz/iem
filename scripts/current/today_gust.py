@@ -13,12 +13,12 @@ iem = i['iem']
 
 # Compute normal from the climate database
 sql = """
-select station, network,
-  x(geom) as lon, y(geom) as lat, 
-  case when max_sknt > max_gust then max_sknt else max_gust END  as wind
-from summary 
-WHERE day = 'TODAY' 
-and (network ~* 'ASOS' or network = 'AWOS')
+select s.station, s.network,
+  x(s.geom) as lon, y(s.geom) as lat, 
+  case when s.max_sknt > s.max_gust then s.max_sknt else s.max_gust END  as wind
+from summary s, current c
+WHERE s.station = c.station and c.valid > 'TODAY' and s.day = 'TODAY'
+and (s.network ~* 'ASOS' or s.network = 'AWOS')
 """
 
 lats = []
