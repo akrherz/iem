@@ -138,7 +138,7 @@ def c(v):
 cnt = 0
 for file in fp.keys():
 
-  for row in csv.reader( open('/home/mesonet/ot/ot0005/incoming/Fluxdata/%s' % (file,), 'rb') ):
+  for row in csv.reader( open('/mnt/home/mesonet/ot/ot0005/incoming/Fluxdata/%s' % (file,), 'rb') ):
     d = {}
     if (len(row) < 25):
       continue
