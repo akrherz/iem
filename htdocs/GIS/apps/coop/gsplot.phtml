@@ -14,7 +14,7 @@ $eday = isset($_GET["eday"]) ? $_GET["eday"]: 1;
 /** Need to use external date lib *
   * http://php.weblogs.com/adodb_date_time_library
   */
-include("adodb-time.inc.php");
+include("$rootpath/include/adodb-time.inc.php");
 
 $gs_start = Array(
   1998 => adodb_mktime(0,0,0,5,1,1998),
