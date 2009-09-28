@@ -85,11 +85,7 @@ def main():
       sys.exc_traceback = None
 
   of.close()
-  #si, se = os.popen4("/home/ldm/bin/pqinsert kcci.dat")
-  si, se = os.popen4("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci.dat bogus dat' kcci.dat"%(tstr,) )
-  e = se.read()
-  if (se != None and len(e) > 0):
-    print "pqinsert ERROR: %s" % (e,)
+  os.system("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci.dat bogus dat' kcci.dat"%(tstr,) )
   os.remove("kcci.dat")
 
   of = open('kcci2.dat', 'w')
@@ -120,8 +116,7 @@ def main():
       sys.exc_traceback = None
 
   of.close()
-  #si, se = os.popen4("/home/ldm/bin/pqinsert kelo.dat")
-  si, se = os.popen4("/home/ldm/bin/pqinsert -p 'data c %s csv/kelo.dat bogus dat' kelo.dat"%(tstr,) )
+  os.system("/home/ldm/bin/pqinsert -p 'data c %s csv/kelo.dat bogus dat' kelo.dat"%(tstr,) )
   os.remove("kelo.dat")
 
   of = open('kimt.dat', 'w')
@@ -135,8 +130,7 @@ def main():
       sys.exc_traceback = None
 
   of.close()
-  #si, se = os.popen4("/home/ldm/bin/pqinsert kimt.dat")
-  si, se = os.popen4("/home/ldm/bin/pqinsert -p 'data c %s csv/kimt.dat bogus dat' kimt.dat"%(tstr,) )
+  os.system("/home/ldm/bin/pqinsert -p 'data c %s csv/kimt.dat bogus dat' kimt.dat"%(tstr,) )
   os.remove("kimt.dat")
 
   # Do KCCI stuff in WXC format
@@ -186,7 +180,7 @@ def main():
       print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
       sys.exc_traceback = None
   of.close()
-  si, se = os.popen4("/home/ldm/bin/pqinsert wxc_snet8.txt")
+  os.system("/home/ldm/bin/pqinsert wxc_snet8.txt")
   os.remove("wxc_snet8.txt")
 
 main()
