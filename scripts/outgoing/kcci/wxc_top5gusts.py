@@ -1,10 +1,12 @@
 
-import os, mx.DateTime, pg
+import os, mx.DateTime, pg, sys
 iemdb = pg.connect("iem", "iemdb", user="nobody")
 
 rs = iemdb.query("SELECT station from current WHERE network = 'KCCI' and \
   valid > 'TODAY' and station != 'SLOI4' ORDER by gust DESC").dictresult()
 dict = {}
+if len(rs) < 5:
+  sys.exit(0)
 dict['sid1'] = rs[0]['station']
 dict['sid2'] = rs[1]['station']
 dict['sid3'] = rs[2]['station']
