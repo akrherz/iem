@@ -32,6 +32,9 @@ for i in range(len(rs)):
   vals.append( rs[i]['wind'] * 1.16 )
   valmask.append(  (rs[i]['network'] in ['AWOS','IA_ASOS']) )
 
+if len(rs) < 5:
+  sys.exit(0)
+
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
@@ -53,5 +56,5 @@ os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x7
 os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/today_gust.png bogus png' tmp.png")
 if os.environ["USER"] == "akrherz":
   os.system("xv tmp.png")
-os.remove("tmp.png")
-os.remove("tmp.ps")
+#os.remove("tmp.png")
+#os.remove("tmp.ps")
