@@ -90,7 +90,7 @@ $cameras = Array(
     "ip" => "69.5.129.46", "county" => "Boone", "port" => "80"),
 "KCCI-016" => Array("sts" => mktime(16,0,0,4, 14,2005), "ets" => time(),
     "name" => "ISU Ames", "removed" => False, "active" => True, "lat" => 42.028627, "lon" => -93.643367,
-    "state" => "IA", "network" => "KCCI", "moviebase" => "isu ames",
+    "state" => "IA", "network" => "KCCI", "moviebase" => "ames",
     "ip" => "129.186.185.31", "county" => "Story", "port" => "80"),
 "KCCI-001" => Array("sts" => mktime(0,0,0,7, 23,2003), "ets" => time(),
     "name" => "Jefferson", "removed" => False, "active" => True, "lat" => 42.015504, "lon" => -94.378223,
