@@ -5,7 +5,7 @@
 
 function dbloc($c, $sid){
   $sid = substr($sid, 0, 6);
-  $q = "SELECT * from stations WHERE id = '".$sid."'";
+  $q = "SELECT *, x(geom) as longitude, y(geom) as latitude from stations WHERE id = '".$sid."'";
   $rs = pg_exec($c, $q);
   pg_close($c);
 
