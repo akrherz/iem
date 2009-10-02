@@ -42,8 +42,8 @@ while ( list($key, $val) = each($mydata) ) {
   if ($val->db['snow'] < 0) $val->db["snow"] = " ";
 
   $s = sprintf("%-12s %-52s %2s %7s %8s %2s %4s %6s %6s %6s\n", $key, 
-    $nt->table[$key]['name'], $state, round($nt->table[$key]['latitude'],2), 
-     round($nt->table[$key]['longitude'],2),
+    $nt->table[$key]['name'], $state, round($nt->table[$key]['lat'],2), 
+     round($nt->table[$key]['lon'],2),
      date('d', $val->db['ts'] + (6*3600) ), date('H', $val->db['ts'] + (6*3600)),
      $val->db['pday'], $val->db['snow'],
      $val->db['snowd']);
