@@ -10,6 +10,7 @@ cd ../current
 cd ../climate
 /mesonet/python/bin/python today_hilo.py
 /mesonet/python/bin/python today_rec_hilo.py
+/mesonet/python/bin/python today_rec_minhi.py
 
 cd ../week
 /mesonet/python/bin/python avg_high.py
