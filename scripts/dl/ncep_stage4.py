@@ -19,7 +19,11 @@ def download(now, offset ):
         hours.append( 24 )
     for hr in hours:
         url = "%s.%02ih.Z" % ( ts.strftime("ftp://ftpprd.ncep.noaa.gov/pub/data/nccf/com/hourly/prod/nam_pcpn_anal.%Y%m%d/ST4.%Y%m%d%H"), hr)
-        data = urllib2.urlopen( url ).read()
+        try:
+            data = urllib2.urlopen( url ).read()
+        except:
+            print "Download FAIL %s" % (url,)
+            continue
         # Same temp file
         o = open("tmp.grib.Z", 'wb')
         o.write( data )
