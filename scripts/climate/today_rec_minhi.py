@@ -5,7 +5,7 @@ sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime
-now = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=1)
+now = mx.DateTime.now()
 
 from pyIEM import iemdb, stationTable
 st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
