@@ -2,7 +2,8 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $pgconn = iemdb("mesosite");
-$rs = pg_prepare($pgconn, "SELECT", "SELECT * from stations 
+$rs = pg_prepare($pgconn, "SELECT", "SELECT *, 
+            x(geom) as longitude, y(geom) as latitude from stations 
             WHERE online = 'y' and 
 			network = $1 ORDER by name");
 include("$rootpath/include/imagemaps.php");
