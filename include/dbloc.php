@@ -20,7 +20,7 @@ function dbloc($c, $sid){
 
 function dbloc26915($c,$sid){
   $sid = substr($sid, 0, 6);
-  $q = "select Y(transform(geometryfromtext(ba, 4326), 26915)), X(transform(geometryfromtext(ba, 4326), 26915)) from (select 'POINT('||longitude||' '||latitude||')' as ba from stations WHERE id = '$sid') as foo";
+  $q = "select Y(transform(geometryfromtext(ba, 4326), 26915)), X(transform(geometryfromtext(ba, 4326), 26915)) from (select 'POINT('||x(geom)||' '||y(geom)||')' as ba from stations WHERE id = '$sid') as foo";
   $rs = pg_exec($c, $q);
   pg_close($c);
 
