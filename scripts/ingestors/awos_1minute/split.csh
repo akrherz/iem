@@ -14,6 +14,6 @@ foreach station (SHL SDA SLB AWG EBS)
  grep ${station} ${1} > station/${station}.dat
 end
 
-foreach station (MPZ PEA VTI IIB CKP OOA GGI TVK IFA PRO FXY)
+foreach station (MPZ PEA VTI IIB CKP OOA GGI TVK IFA PRO FXY I75)
   grep ${station} ${1} > station/${station}.dat
 end
