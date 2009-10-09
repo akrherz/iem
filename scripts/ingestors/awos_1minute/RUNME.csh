@@ -20,7 +20,7 @@ rm -f X716/P0001/AWOS/* station/* DB/* >& /dev/null
 
 # Then we split the results
 #set datafile=`ls -1 X716/P0001/AWOS/*`
-set datafile="ALLAWOS"
+set datafile="SEP09"
 
 ./split.csh ${datafile}
 

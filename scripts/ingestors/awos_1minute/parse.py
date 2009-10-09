@@ -11,7 +11,7 @@ month = str(sys.argv[2])
 stations = ["AXA","IKV","AIO","ADU","BNW","CIN","CNC","CCY","ICL","CAV",
  "CWI","CBF","CSQ","DEH","DNS","FFL","FOD","FSW","HNR","EOK","OXV","LRJ",
   "MXO","MUT","TNU","OLZ","ORC","RDK","SHL","SDA","SLB","AWG","EBS",
-  "PEA","MPZ","VTI","IIB","CKP","OOA","GGI","TVK","IFA","PRO","FXY"]
+  "PEA","MPZ","VTI","IIB","CKP","OOA","GGI","TVK","IFA","PRO","FXY","I75"]
 
 
 for station in stations:
