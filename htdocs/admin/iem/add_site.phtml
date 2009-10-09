@@ -20,7 +20,7 @@ if (strlen($station) > 0 && strlen($sname) > 0)
    $sql = sprintf("INSERT into stations (id, network) values ('%s','%s')", $station, $network);
    echo $sql;
   pg_exec($pg_conn, $sql);
-   $sql = sprintf("UPDATE stations SET synop = 9999, country = 'US', plot_name = '%s', name = '%s', state = '%s', elevation = '%s', online = '%s', geom = 'SRID=4326;POINT(%s %s)', latitude = %s, longitude = %s WHERE id = '%s' and network = '%s'", $sname, $sname, $state, $elevation, $online, $longitude, $latitude, $latitude, $longitude, $station, $network);
+   $sql = sprintf("UPDATE stations SET synop = 9999, country = 'US', plot_name = '%s', name = '%s', state = '%s', elevation = '%s', online = '%s', geom = 'SRID=4326;POINT(%s %s)' WHERE id = '%s' and network = '%s'", $sname, $sname, $state, $elevation, $online, $longitude, $latitude,  $station, $network);
   echo $sql;
   pg_exec($pg_conn, $sql);
 }
