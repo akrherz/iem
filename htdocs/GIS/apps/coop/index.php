@@ -1,18 +1,22 @@
 <?php
 include("../../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$coopdb = iemdb("coop");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
 
 $plot = isset($_GET["plot"]) ? $_GET["plot"]: "high";
 $area = isset($_GET["area"]) ? $_GET["area"]: "all";
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
 $THISPAGE = "networks-coop";
-$TITLE = "IEM | NWS COOP | GIS Plotting";
+$TITLE = "IEM | NWS COOP Plotting";
 include("$rootpath/include/header.php");
 ?>
 
 <?php
 dl($mapscript);
-include("$rootpath/include/database.inc.php");
 include("$rootpath/include/mlib.php");
 include("../rview/lib.php");
 
@@ -53,15 +57,11 @@ $dot->set("status", MS_ON);
 
 $datal = ms_newLayerObj($map);
 $datal->set("name", "q");
-$datal->setConnectionType( MS_POSTGIS );
-$datal->set("connection", $_DATABASES["coop"] );
 $datal->set("status", MS_ON);
 $datal->set("type", MS_LAYER_POINT);
 $datal->setProjection("init=epsg:4326");
 
 $datalc0 = ms_newClassObj($datal);
-$datalc0->setExpression("([yrs] > 80)");
-$datalc0->settext("([d])");
 $datalc0->label->color->setrgb(255,255,0);
 $datalc0->label->set("type", MS_TRUETYPE);
 $datalc0->label->set("font", "arial");
@@ -71,6 +71,7 @@ $datalc0->label->set("partials", MS_TRUE);
 $datalc0->label->set("antialias", MS_TRUE);
 $datalc0->label->set("position", MS_UR);
 $datalc0->label->set("angle", 0);
+$datalc0->label->set("wrap", 0x57);
 
 $datalc0s0 = ms_newStyleObj($datalc0);
 $datalc0s0->color->setrgb(0,0,0);
@@ -83,9 +84,7 @@ $datalc1->setExpression("([yrs] < 80)");
 $datalc1s0 = $datalc1->getStyle(0);
 $datalc1s0->color->setrgb(255,0,0);
 
-//$ttt = $map->getlayerbyname("ttt");
-//$ttt->set("status", MS_ON);
-
+$img = $map->prepareImage();
 
 $tpos = Array(
   "all" => Array(-95.4, 40.2),
@@ -106,10 +105,6 @@ $var = Array("max_precip" => "Record Daily Precip [in]",
   "min_high" => "Record Min High Temp [F]",
   "high" => "Average High Temp [F]");
 
-//$pt = ms_newPointObj();
-//$pt->setXY($tpos[$area][0], $tpos[$area][1], 0);
-//$pt->draw($map, $ttt, $img, 0, $plotDate ." ". $var[$plot] );
-//$pt->free();
 
 
 
@@ -117,34 +112,38 @@ $dbdate = "2000-". $month ."-". $day;
 
 if (strcmp($area, 'all') != 0){
 
-$dbarray = Array("high" => "round(data.high::numeric, 0)::int",
-    "low" => "round(data.low::numeric, 0)::int",
-    "max_low" => "round(data.max_low::numeric, 0)::int ||'W'|| max_low_yr ",
-    "max_high" => "round(data.max_high::numeric, 0)::int ||'W'|| max_high_yr ",
-    "min_high" => "round(data.min_high::numeric, 0)::int ||'W'|| min_high_yr ",
-    "min_low" => "round(data.min_low::numeric, 0)::int ||'W'|| min_low_yr ",
- "max_precip" => "to_char(data.max_precip, '99.99') ||'W'|| max_precip_yr ",
-    "precip" => "round(data.precip::numeric, 2)");
+$dbarray = Array("high" => "round(high::numeric, 0)::int",
+    "low" => "round(low::numeric, 0)::int",
+    "max_low" => "round(max_low::numeric, 0)::int ||'W'|| max_low_yr ",
+    "max_high" => "round(max_high::numeric, 0)::int ||'W'|| max_high_yr ",
+    "min_high" => "round(min_high::numeric, 0)::int ||'W'|| min_high_yr ",
+    "min_low" => "round(min_low::numeric, 0)::int ||'W'|| min_low_yr ",
+ "max_precip" => "to_char(max_precip, '99.99') ||'W'|| max_precip_yr ",
+    "precip" => "round(precip::numeric, 2)");
 
 } else {
-$dbarray = Array("high" => "round(data.high::numeric, 0)::int",
-    "low" => "round(data.low::numeric, 0)::int",
-    "max_low" => "round(data.max_low::numeric, 0)::int",
-    "max_high" => "round(data.max_high::numeric, 0)::int",
-    "min_high" => "round(data.min_high::numeric, 0)::int",
-    "min_low" => "round(data.min_low::numeric, 0)::int",
-     "max_precip" => "to_char(data.max_precip, '99.99') ",
-    "precip" => "round(data.precip::numeric, 2)");
+$dbarray = Array("high" => "round(high::numeric, 0)::int",
+    "low" => "round(low::numeric, 0)::int",
+    "max_low" => "round(max_low::numeric, 0)::int",
+    "max_high" => "round(max_high::numeric, 0)::int",
+    "min_high" => "round(min_high::numeric, 0)::int",
+    "min_low" => "round(min_low::numeric, 0)::int",
+     "max_precip" => "to_char(max_precip, '99.99') ",
+    "precip" => "round(precip::numeric, 2)");
 }
 
-$sql = "geom from 
-    (SELECT data.years as yrs, map.OID, map.geom, ". $dbarray[$plot] ." as d 
-    from stations map, climate data
-    WHERE data.station = lower(map.id) and 
-    data.valid = '". $dbdate ."') as foo using UNIQUE oid using SRID=4326";
-$datal->set('data', $sql);
+$sql = "SELECT station, years as yrs, ". $dbarray[$plot] ." as d 
+    from climate WHERE valid = '". $dbdate ."'";
 
-$img = $map->prepareImage();
+$rs = pg_query($coopdb, $sql);
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+  $station = strtoupper($row["station"]);
+  $pt = ms_newPointObj();
+  $pt->setXY($cities[$station]['lon'], $cities[$station]['lat'], 0);
+  $pt->draw($map, $datal, $img, 0, $row["d"] );
+  $pt->free();
+}
+
 $namer->draw($img);
 $counties->draw($img);
 $stlayer->draw( $img);
