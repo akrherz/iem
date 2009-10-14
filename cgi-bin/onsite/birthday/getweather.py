@@ -159,7 +159,7 @@ def Main():
 		print "Please use this URL <a href='http://mesonet.agron.iastate.edu/onsite/birthday/'>http://mesonet.agron.iastate.edu/onsite/birthday/</a>"
 		sys.exit(0)	
 
-	city = cityParts[0]
+	city = cityParts[0].lower()
 	cityName = cityParts[1]
 	now = mx.DateTime.DateTime( int(year), int(month), int(day) )
 	nowM2 = now + mx.DateTime.RelativeDateTime(days=-2)
