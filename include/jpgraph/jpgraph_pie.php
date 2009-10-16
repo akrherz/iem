@@ -3,7 +3,7 @@
  // File:        JPGRAPH_PIE.PHP
  // Description: Pie plot extension for JpGraph
  // Created:     2001-02-14
- // Ver:         $Id: jpgraph_pie.php 1398 2009-06-27 21:35:18Z ljp $
+ // Ver:         $Id: jpgraph_pie.php 1790 2009-09-03 18:16:18Z ljp $
  //
  // Copyright (c) Aditus Consulting. All rights reserved.
  //========================================================================
@@ -206,8 +206,13 @@ class PiePlot {
         if( $aStart < 0 || $aStart > 360 ) {
             JpGraphError::RaiseL(15004);//('Slice start angle must be between 0 and 360 degrees.');
         }
-        $this->startangle = 360-$aStart;
-        $this->startangle *= M_PI/180;
+        if( $aStart == 0 ) {
+            $this->startangle = 0;
+        }
+        else {
+            $this->startangle = 360-$aStart;
+            $this->startangle *= M_PI/180;
+        }
     }
 
     // Size in percentage
@@ -276,7 +281,7 @@ class PiePlot {
 
         $sum=0;
         for($i=0; $i < $n; ++$i)
-        $sum += $this->data[$i];
+            $sum += $this->data[$i];
 
         // Bail out with error if the sum is 0
         if( $sum==0 )
@@ -384,7 +389,7 @@ class PiePlot {
         // aaoption == 1 just the body
         // aaoption == 2 just the values
 
-        // Explode scaling. If anti anti alias we scale the image
+        // Explode scaling. If anti alias we scale the image
         // twice and we also need to scale the exploding distance
         $expscale = $aaoption === 1 ? 2 : 1;
 
@@ -418,34 +423,42 @@ class PiePlot {
         // Draw the slices
         $sum=0;
         for($i=0; $i < $n; ++$i)
-        $sum += $this->data[$i];
+            $sum += $this->data[$i];
 
         // Bail out with error if the sum is 0
-        if( $sum==0 )
-        JpGraphError::RaiseL(15009);//("Sum of all data is 0 for Pie.");
+        if( $sum==0 ) {
+            JpGraphError::RaiseL(15009);//("Sum of all data is 0 for Pie.");
+        }
 
         // Set up the pie-circle
-        if( $this->radius <= 1 )
-        $radius = floor($this->radius*min($img->width,$img->height));
+        if( $this->radius <= 1 ) {
+            $radius = floor($this->radius*min($img->width,$img->height));
+        }
         else {
             $radius = $aaoption === 1 ? $this->radius*2 : $this->radius;
         }
 
-        if( $this->posx <= 1 && $this->posx > 0 )
-        $xc = round($this->posx*$img->width);
-        else
-        $xc = $this->posx ;
+        if( $this->posx <= 1 && $this->posx > 0 ) {
+            $xc = round($this->posx*$img->width);
+        }
+        else {
+            $xc = $this->posx ;
+        }
 
-        if( $this->posy <= 1 && $this->posy > 0 )
-        $yc = round($this->posy*$img->height);
-        else
-        $yc = $this->posy ;
+        if( $this->posy <= 1 && $this->posy > 0 ) {
+            $yc = round($this->posy*$img->height);
+        }
+        else {
+            $yc = $this->posy ;
+        }
 
         $n = count($this->data);
 
-        if( $this->explode_all )
-        for($i=0; $i < $n; ++$i)
-        $this->explode_radius[$i]=$this->explode_r;
+        if( $this->explode_all ) {
+            for($i=0; $i < $n; ++$i) {
+                $this->explode_radius[$i]=$this->explode_r;
+            }
+        }
 
         // If we have a shadow and not just drawing the labels
         if( $this->ishadowcolor != "" && $aaoption !== 2) {
@@ -458,8 +471,9 @@ class PiePlot {
                 $angle1 = $angle2;
                 $accsum += $d;
                 $angle2 = $this->startangle+2*M_PI*$accsum/$sum;
-                if( empty($this->explode_radius[$j]) )
-                $this->explode_radius[$j]=0;
+                if( empty($this->explode_radius[$j]) ) {
+                    $this->explode_radius[$j]=0;
+                }
 
                 if( $d < 0.00001 ) continue;
 
@@ -501,8 +515,9 @@ class PiePlot {
             $j = $n-$i-1;
 
             // Make sure we havea  valid distance to explode the slice
-            if( empty($this->explode_radius[$j]) )
-            $this->explode_radius[$j]=0;
+            if( empty($this->explode_radius[$j]) ) {
+                $this->explode_radius[$j]=0;
+            }
 
             // The actual numeric value for the slice
             $d = $this->data[$i];
@@ -518,7 +533,6 @@ class PiePlot {
 
             // We avoid some trouble by not allowing end angle to be 0, in that case
             // we translate to 360
-
 
             // la is used to hold the label angle, which is centered on the slice
             if( $angle2 < 0.0001 && $angle1 > 0.0001 ) {
@@ -539,25 +553,27 @@ class PiePlot {
 
             // If the user has specified an array of colors for each slice then use
             // that a color otherwise use the theme array (ta) of colors
-            if( $this->setslicecolors==null )
-            $slicecolor=$colors[$ta[$i%$numcolors]];
-            else
-            $slicecolor=$this->setslicecolors[$i%$numcolors];
+            if( $this->setslicecolors==null ) {
+                $slicecolor=$colors[$ta[$i%$numcolors]];
+            }
+            else {
+                $slicecolor=$this->setslicecolors[$i%$numcolors];
+            }
 
-
-
-            //$_sa = round($angle1*180/M_PI);
-            //$_ea = round($angle2*180/M_PI);
-            //$_la = round($this->la[$i]*180/M_PI);
-            //echo "ang1=$_sa , ang2=$_ea, la=$_la, color=$slicecolor<br>";
+//            $_sa = round($angle1*180/M_PI);
+//            $_ea = round($angle2*180/M_PI);
+//            $_la = round($this->la[$i]*180/M_PI);
+//            echo "Slice#$i: ang1=$_sa , ang2=$_ea, la=$_la, color=$slicecolor<br>";
 
 
             // If we have enabled antialias then we don't draw any border so
             // make the bordedr color the same as the slice color
-            if( $this->pie_interior_border && $aaoption===0 )
-            $img->SetColor($this->color);
-            else
-            $img->SetColor($slicecolor);
+            if( $this->pie_interior_border && $aaoption===0 ) {
+                $img->SetColor($this->color);
+            }
+            else {
+                $img->SetColor($slicecolor);
+            }
             $arccolor = $this->pie_border && $aaoption===0 ? $this->color : "";
 
             // Calculate the x,y coordinates for the base of this slice taking
@@ -570,17 +586,15 @@ class PiePlot {
             // If we are not just drawing the labels then draw this cake slice
             if( $aaoption !== 2 ) {
 
-
                 $_sa = round($angle1*180/M_PI);
                 $_ea = round($angle2*180/M_PI);
                 $_la = round($this->la[$i]*180/M_PI);
                 //echo "[$i] sa=$_sa, ea=$_ea, la[$i]=$_la, (color=$slicecolor)<br>";
 
-
                 // The CakeSlice method draws a full circle in case of start angle = end angle
-                // for pie slices we don't want this behaviour unless we only have one
-                // slice in the pie in case it is the wanted behaviour
-                if( abs($_ea-$_sa) > 0.1 || $n==1 ) {
+                // for pie slices we want this in case the slice have a value larger than 99% of the
+                // total sum
+                if( abs($_ea-$_sa) > 0.1 || $d > 0 ) {
                     $img->CakeSlice($xcm,$ycm,$radius-1,$radius-1,$_sa,$_ea,$slicecolor,$arccolor);
                 }
             }
@@ -1296,6 +1310,12 @@ class PieGraph extends Graph {
         // a best we can. Therefor you will see a lot of tests !$_csim in the
         // code below.
         $_csim = ($aStrokeFileName===_CSIM_SPECIALFILE);
+
+        // If we are called the second time (perhaps the user has called GetHTMLImageMap()
+        // himself then the legends have alsready been populated once in order to get the
+        // CSIM coordinats. Since we do not want the legends to be populated a second time
+        // we clear the legends
+        $this->legend->Clear();
 
         // We need to know if we have stroked the plot in the
         // GetCSIMareas. Otherwise the CSIM hasn't been generated

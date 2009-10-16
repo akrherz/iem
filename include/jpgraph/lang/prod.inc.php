@@ -4,7 +4,7 @@
 // Description: Special localization file with the same error messages
 //              for all errors.
 // Created: 	2006-02-18
-// Ver:		$Id: prod.inc.php 1578 2009-07-13 11:05:48Z ljp $
+// Ver:		$Id: prod.inc.php 1886 2009-10-01 23:30:16Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -75,6 +75,7 @@ HTTP headers have already been sent.<br>Caused by output from file <b>%s</b> at 
 6030 => array(DEFAULT_ERROR_MESSAGE.'6030',0),
 6031 => array(DEFAULT_ERROR_MESSAGE.'6031',0),
 6032 => array(DEFAULT_ERROR_MESSAGE.'6032',0),
+6033 => array(DEFAULT_ERROR_MESSAGE.'6033',0),
 7001 => array(DEFAULT_ERROR_MESSAGE.'7001',0),
 8001 => array(DEFAULT_ERROR_MESSAGE.'8001',0),
 8002 => array(DEFAULT_ERROR_MESSAGE.'8002',0),
@@ -147,6 +148,7 @@ HTTP headers have already been sent.<br>Caused by output from file <b>%s</b> at 
 24001 => array(DEFAULT_ERROR_MESSAGE.'24001',0),
 24002 => array(DEFAULT_ERROR_MESSAGE.'24002',0),
 24003 => array(DEFAULT_ERROR_MESSAGE.'24003',0),
+24004 => array(DEFAULT_ERROR_MESSAGE.'24004',0),
 25001 => array(DEFAULT_ERROR_MESSAGE.'25001',0),
 25002 => array(DEFAULT_ERROR_MESSAGE.'25002',0),
 25003 => array(DEFAULT_ERROR_MESSAGE.'25003',0),
@@ -276,6 +278,8 @@ HTTP headers have already been sent.<br>Caused by output from file <b>%s</b> at 
 25128 => array(DEFAULT_ERROR_MESSAGE.'25128',0),
 25129 => array(DEFAULT_ERROR_MESSAGE.'25129',0),
 25130 => array(DEFAULT_ERROR_MESSAGE.'25130',0),
+25131 => array(DEFAULT_ERROR_MESSAGE.'25131',0),
+25500 => array(DEFAULT_ERROR_MESSAGE.'25500',0),
 24003 => array(DEFAULT_ERROR_MESSAGE.'24003',0),
 24004 => array(DEFAULT_ERROR_MESSAGE.'24004',0),
 24005 => array(DEFAULT_ERROR_MESSAGE.'24005',0),
@@ -321,6 +325,7 @@ HTTP headers have already been sent.<br>Caused by output from file <b>%s</b> at 
 1009 => array(DEFAULT_ERROR_MESSAGE.'1009',0),
 1010 => array(DEFAULT_ERROR_MESSAGE.'1010',0),
 1011 => array(DEFAULT_ERROR_MESSAGE.'1011',0),
+26000 => array(DEFAULT_ERROR_MESSAGE.'26000',0),
 26001 => array(DEFAULT_ERROR_MESSAGE.'26001',0),
 26002 => array(DEFAULT_ERROR_MESSAGE.'26002',0),
 26003 => array(DEFAULT_ERROR_MESSAGE.'26003',0),
@@ -362,13 +367,16 @@ HTTP headers have already been sent.<br>Caused by output from file <b>%s</b> at 
 28006 => array(DEFAULT_ERROR_MESSAGE.'28006',0),
 28007 => array(DEFAULT_ERROR_MESSAGE.'28007',0),
 
-29201 => array(DEFAULT_ERROR_MESSAGE.'28007',0),
-29202 => array(DEFAULT_ERROR_MESSAGE.'28007',0),
-29203 => array(DEFAULT_ERROR_MESSAGE.'28007',0),
-29204 => array(DEFAULT_ERROR_MESSAGE.'28007',0),
-29205 => array(DEFAULT_ERROR_MESSAGE.'28007',0),
-29206 => array(DEFAULT_ERROR_MESSAGE.'28007',0),
+29201 => array(DEFAULT_ERROR_MESSAGE.'28001',0),
+29202 => array(DEFAULT_ERROR_MESSAGE.'28002',0),
+29203 => array(DEFAULT_ERROR_MESSAGE.'28003',0),
+29204 => array(DEFAULT_ERROR_MESSAGE.'28004',0),
+29205 => array(DEFAULT_ERROR_MESSAGE.'28005',0),
+29206 => array(DEFAULT_ERROR_MESSAGE.'28006',0),
 29207 => array(DEFAULT_ERROR_MESSAGE.'28007',0),
+29208 => array(DEFAULT_ERROR_MESSAGE.'28008',0),
+29209 => array(DEFAULT_ERROR_MESSAGE.'28009',0),
+29210 => array(DEFAULT_ERROR_MESSAGE.'28010',0),
 
 );
 

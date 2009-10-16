@@ -3,7 +3,7 @@
 // File:        JPG-CONFIG.INC
 // Description: Configuration file for JpGraph library
 // Created:     2004-03-27
-// Ver:         $Id: jpg-config.inc.php 1546 2009-07-10 22:18:57Z ljp $
+// Ver:         $Id: jpg-config.inc.php 1871 2009-09-29 05:56:39Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -88,7 +88,7 @@ define('READ_CACHE',true);
 // always return an image even in case of errors.
 define('USE_IMAGE_ERROR_HANDLER',true);
 
-// Should the library examin the global php_errmsg string and convert
+// Should the library examine the global php_errmsg string and convert
 // any error in it to a graphical representation. This is handy for the
 // occasions when, for example, header files cannot be found and this results
 // in the graph not being created and just a 'red-cross' image would be seen.
@@ -105,6 +105,15 @@ define('INSTALL_PHP_ERR_HANDLER',false);
 // (Useful to check if code is future proof.)
 define('ERR_DEPRECATED',true);
 
+// The builtin GD function imagettfbbox() fuction which calculates the bounding box for
+// text using TTF fonts is buggy. By setting this define to true the library
+// uses its own compensation for this bug. However this will give a
+// slightly different visual apparance than not using this compensation.
+// Enabling this compensation will in general give text a bit more space to more
+// truly reflect the actual bounding box which is a bit larger than what the
+// GD function thinks.
+define('USE_LIBRARY_IMAGETTFBBOX',true);
+
 //------------------------------------------------------------------------
 // The following constants should rarely have to be changed !
 //------------------------------------------------------------------------
@@ -114,17 +123,10 @@ define('ERR_DEPRECATED',true);
 // Please note that the Apache user must be a member of the
 // specified group since otherwise it is impossible for Apache
 // to set the specified group.
-define('CACHE_FILE_GROUP','wwwadmin');
+define('CACHE_FILE_GROUP','www');
 
 // What permissions should the cached file have
 // (Set to '' will give the default persmissions for the 'PHP-user')
 define('CACHE_FILE_MOD',0664);
-
-// Decide if we should use the bresenham circle algorithm or the
-// built in Arc(). Bresenham gives better visual apperance of circles
-// but is more CPU intensive and slower then the built in Arc() function
-// in GD. Turned off by default for speed
-define('USE_BRESENHAM',false);
-
 
 ?>

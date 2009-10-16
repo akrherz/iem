@@ -4,7 +4,7 @@
 // Description: Class to handle RGb color space specification and
 //              named colors
 // Created:     2001-01-08 (Refactored to separate file 2008-08-01)
-// Ver:         $Id: jpgraph_rgb.inc.php 1563 2009-07-12 13:13:43Z ljp $
+// Ver:         $Id: jpgraph_rgb.inc.php 1893 2009-10-02 23:15:25Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -59,11 +59,11 @@ class RGB {
             'lightgray'=>array(211,211,211),
             'midnightblue'=>array(25,25,112),
             'navy'=>array(0,0,128),
-        	'indigo'=>array(75,0,130),
-        	'electricindigo'=>array(102,0,255),
-        	'deepindigo'=>array(138,43,226),
-        	'pigmentindigo'=>array(75,0,130),
-        	'indigodye'=>array(0,65,106),
+            'indigo'=>array(75,0,130),
+            'electricindigo'=>array(102,0,255),
+            'deepindigo'=>array(138,43,226),
+            'pigmentindigo'=>array(75,0,130),
+            'indigodye'=>array(0,65,106),
             'cornflowerblue'=>array(100,149,237),
             'darkslateblue'=>array(72,61,139),
             'slateblue'=>array(106,90,205),
@@ -467,6 +467,8 @@ class RGB {
             'eggplant'=>array(144,176,168),
             'lightgreen'=>array(144,238,144));
     }
+
+
     //----------------
     // PUBLIC METHODS
     // Colors can be specified as either
@@ -475,58 +477,52 @@ class RGB {
     // 3. array(r,g,b) RGB triple
     // This function translates this to a native RGB format and returns an
     // RGB triple.
+
     function Color($aColor) {
         if (is_string($aColor)) {
-            // Strip of any alpha factor
-            $pos = strpos($aColor,'@');
-            if( $pos === false ) {
-                $alpha = 0;
+            $matches = array();
+            // this regex will parse a color string and fill the $matches array as such:
+            // 0: the full match if any
+            // 1: a hex string preceded by a hash, can be 3 characters (#fff) or 6 (#ffffff) (4 or 5 also accepted but...)
+            // 2,3,4: r,g,b values in hex if the first character of the string is #
+            // 5: all alpha-numeric characters at the beginning of the string if string does not start with #
+            // 6: alpha value prefixed by @ if supplied
+            // 7: alpha value with @ stripped
+            // 8: adjust value prefixed with : if supplied
+            // 9: adjust value with : stripped
+            $regex = '/(#([0-9a-fA-F]{1,2})([0-9a-fA-F]{1,2})([0-9a-fA-F]{1,2}))?([\w]+)?(@([\d\.,]+))?(:([\d\.,]+))?/';
+            if(!preg_match($regex, $aColor, $matches)) {
+                JpGraphError::RaiseL(25078,$aColor);//(" Unknown color: $aColor");
             }
-            else {
-                $pos2 = strpos($aColor,':');
-                if( $pos2===false )
-                    $pos2 = $pos-1; // Sentinel
-                if( $pos > $pos2 ) {
-                    $alpha = str_replace(',','.',substr($aColor,$pos+1));
-                    $aColor = substr($aColor,0,$pos);
+            if(empty($matches[5])) {
+                $r = strlen($matches[2]) == 1 ? $matches[2].$matches[2] : $matches[2];
+                $g = strlen($matches[3]) == 1 ? $matches[3].$matches[3] : $matches[3];
+                $b = strlen($matches[4]) == 1 ? $matches[4].$matches[4] : $matches[4];
+                $r = hexdec($r);
+                $g = hexdec($g);
+                $b = hexdec($b);
+            }else {
+                if(!isset($this->rgb_table[$matches[5]]) ) {
+                    JpGraphError::RaiseL(25078,$aColor);//(" Unknown color: $aColor");
                 }
-                else {
-                    $alpha = substr($aColor,$pos+1,$pos2-$pos-1);
-                    $aColor = substr($aColor,0,$pos).substr($aColor,$pos2);
-                }
+                $r = $this->rgb_table[$matches[5]][0];
+                $g = $this->rgb_table[$matches[5]][1];
+                $b = $this->rgb_table[$matches[5]][2];
             }
+            $alpha	= isset($matches[7]) ? str_replace(',','.',$matches[7]) : 0;
+            $adj	= isset($matches[9]) ? str_replace(',','.',$matches[9]) : 1.0;
 
-            // Extract potential adjustment figure at end of color
-            // specification
-            $pos = strpos($aColor,":");
-            if( $pos === false ) {
-                $adj = 1.0;
-            }
-            else {
-                $adj = 0.0 + str_replace(',','.',substr($aColor,$pos+1));
-                $aColor = substr($aColor,0,$pos);
-            }
             if( $adj < 0 ) {
                 JpGraphError::RaiseL(25077);//('Adjustment factor for color must be > 0');
             }
 
-            if (substr($aColor, 0, 1) == "#") {
-                $r = hexdec(substr($aColor, 1, 2));
-                $g = hexdec(substr($aColor, 3, 2));
-                $b = hexdec(substr($aColor, 5, 2));
-            } else {
-                if(!isset($this->rgb_table[$aColor]) ) {
-                    JpGraphError::RaiseL(25078,$aColor);//(" Unknown color: $aColor");
-                }
-                $tmp=$this->rgb_table[$aColor];
-                $r = $tmp[0];
-                $g = $tmp[1];
-                $b = $tmp[2];
-            }
             // Scale adj so that an adj=2 always
             // makes the color 100% white (i.e. 255,255,255.
             // and adj=1 neutral and adj=0 black.
-            if( $adj > 1 ) {
+            if( $adj == 1) {
+                return array($r,$g,$b,$alpha);
+            }
+            elseif( $adj > 1 ) {
                 $m = ($adj-1.0)*(255-min(255,min($r,min($g,$b))));
                 return array(min(255,$r+$m), min(255,$g+$m), min(255,$b+$m),$alpha);
             }
@@ -534,17 +530,9 @@ class RGB {
                 $m = ($adj-1.0)*max(255,max($r,max($g,$b)));
                 return array(max(0,$r+$m), max(0,$g+$m), max(0,$b+$m),$alpha);
             }
-            else {
-                return array($r,$g,$b,$alpha);
-            }
-
         } elseif( is_array($aColor) ) {
-            if( count($aColor)==3 ) {
-                $aColor[3]=0;
-                return $aColor;
-            }
-            else
-                return $aColor;
+            if(!isset($aColor[3])) $aColor[3] = 0;
+            return $aColor;
         }
         else {
             JpGraphError::RaiseL(25079,$aColor,count($aColor));//(" Unknown color specification: $aColor , size=".count($aColor));
@@ -556,12 +544,7 @@ class RGB {
     function Equal($aCol1,$aCol2) {
         $c1 = $this->Color($aCol1);
         $c2 = $this->Color($aCol2);
-        if( $c1[0]==$c2[0] && $c1[1]==$c2[1] && $c1[2]==$c2[2] ) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return $c1[0]==$c2[0] && $c1[1]==$c2[1] && $c1[2]==$c2[2] ;
     }
 
     // Allocate a new color in the current image
@@ -579,6 +562,25 @@ class RGB {
         return imagecolorresolvealpha($this->img, $r, $g, $b, round($aAlpha * 127));
     }
 
+    // Try to convert an array with three valid numbers to the corresponding hex array
+    // This is currenly only used in processing the colors for barplots in order to be able
+    // to handle the case where the color might be specified as an array of colros as well.
+    // In that case we must be able to find out if an array of values should be interpretated as
+    // a single color (specifeid as an RGB triple)
+    static function tryHexConversion($aColor) {
+        if( is_array( $aColor ) ) {
+            if( count( $aColor ) == 3 ) {
+                if( is_numeric($aColor[0]) && is_numeric($aColor[1]) && is_numeric($aColor[2]) ) {
+                    if( ($aColor[0] >= 0 && $aColor[0] <= 255) &&
+                        ($aColor[1] >= 0 && $aColor[1] <= 255) &&
+                        ($aColor[2] >= 0 && $aColor[2] <= 255) ) {
+                        return sprintf('#%02x%02x%02x',$aColor[0],$aColor[1],$aColor[2]);
+                    }
+                }
+            }
+        }
+        return $aColor;
+    }
 
     // Return a RGB tripple corresponding to a position in the normal light spectrum
     // The argumen values is in the range [0, 1] where a value of 0 correponds to blue and
@@ -606,9 +608,8 @@ class RGB {
         else {
             return array($sat, round($sat-$sat*($aVal-0.75)/$a), 0);
         }
-
     }
 
-  } // Class
+} // Class
 
 ?>

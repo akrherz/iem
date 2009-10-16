@@ -6,9 +6,9 @@
 //=======================================================================
 
 // Basic library classes
-include "jpgraph/jpgraph.php";
-include "jpgraph/jpgraph_bar.php";
-include "jpgraph/jpgraph_canvas.php";
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
+require_once ('jpgraph/jpgraph_canvas.php');
   
 
 // Must have a global comparison method for usort()

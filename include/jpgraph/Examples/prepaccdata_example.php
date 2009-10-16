@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
-include('../jpgraph.php');
-include("../jpgraph_line.php");
-include("../jpgraph_date.php");
+require_once ('../jpgraph.php');
+require_once ('../jpgraph_line.php');
+require_once ('../jpgraph_date.php');
 
 //Create some test data
 $xdata = array();

@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_radar.php");
-require_once ("jpgraph/jpgraph_iconplot.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_radar.php');
+require_once ('jpgraph/jpgraph_iconplot.php');
 
 // Some data to plot
 $data = array(55,80,46,71,95);

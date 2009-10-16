@@ -1,6 +1,6 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_pie.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_pie.php');
 
 $data = array(19,12,4,3,3,12,3,3,5,6,7,8,8,1,7,2,2,4,6,8,21,23,2,2,12);
 

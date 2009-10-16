@@ -1,6 +1,6 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_line.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_line.php');
 
 $labels = array("Oct 2000","Nov 2000","Dec 2000","Jan 2001","Feb 2001","Mar 2001","Apr 2001","May 2001");
 $datay = array(1.23,1.9,1.6,3.1,3.4,2.8,2.1,1.9);

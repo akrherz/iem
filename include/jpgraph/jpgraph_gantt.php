@@ -3,7 +3,7 @@
  // File:        JPGRAPH_GANTT.PHP
  // Description: JpGraph Gantt plot extension
  // Created:     2001-11-12
- // Ver:         $Id: jpgraph_gantt.php 1613 2009-07-16 08:41:32Z ljp $
+ // Ver:         $Id: jpgraph_gantt.php 1809 2009-09-09 13:07:33Z ljp $
  //
  // Copyright (c) Aditus Consulting. All rights reserved.
  //========================================================================
@@ -279,8 +279,7 @@ class GanttActivityInfo {
         if( $this->iStyle == 1 ) {
             // Make a 3D effect
             $aImg->SetColor('white');
-            $aImg->Line($aXLeft,$yTop+1,
-            $aXRight,$yTop+1);
+            $aImg->Line($aXLeft,$yTop+1,$aXRight,$yTop+1);
         }
 
         for($i=0; $i < $n; ++$i ) {
@@ -764,8 +763,7 @@ class GanttGraph extends Graph {
                         $txt =  "88";
                         break;
                     case DAYSTYLE_CUSTOM :
-                        $txt = date($this->scale->day->iLabelFormStr,
-                        strtotime('2003-12-20 18:00'));
+                        $txt = date($this->scale->day->iLabelFormStr,strtotime('2003-12-20 18:00'));
                         break;
                     case DAYSTYLE_ONELETTER :
                     default:
@@ -1548,6 +1546,7 @@ class TextProperty {
     public $iShow=true;
     public $csimtarget='',$csimwintarget='',$csimalt='';
     private $iFFamily=FF_FONT1,$iFStyle=FS_NORMAL,$iFSize=10;
+    private $iFontArray=array();
     private $iColor="black";
     private $iText="";
     private $iHAlign="left",$iVAlign="bottom";
@@ -1628,6 +1627,15 @@ class TextProperty {
         $this->iFSize  = $aFSize;
     }
 
+    function SetColumnFonts($aFontArray) {
+        if( !is_array($aFontArray) || count($aFontArray[0]) != 3 ) {
+            JpGraphError::RaiseL(6033);
+            // 'Array of fonts must contain arrays with 3 elements, i.e. (Family, Style, Size)'
+        }
+        $this->iFontArray = $aFontArray;
+    }
+
+
     function IsColumns() {
         return is_array($this->iText) ;
     }
@@ -1663,7 +1671,14 @@ class TextProperty {
             // Must be an array of texts. In this case we return the sum of the
             // length + a fixed margin of 4 pixels on each text string
             $n = count($this->iText);
+            $nf = count($this->iFontArray);
             for( $i=0, $w=0; $i < $n; ++$i ) {
+                if( $i < $nf ) {
+                    $aImg->SetFont($this->iFontArray[$i][0],$this->iFontArray[$i][1],$this->iFontArray[$i][2]);
+                }
+                else {
+                    $aImg->SetFont($this->iFFamily,$this->iFStyle,$this->iFSize);
+                }
                 $tmp = $this->iText[$i];
                 if( is_string($tmp) ) {
                     $w += $aImg->GetTextWidth($tmp)+$extra_margin;
@@ -1689,10 +1704,17 @@ class TextProperty {
         $aImg->SetFont($this->iFFamily,$this->iFStyle,$this->iFSize);
         if( is_array($this->iText) ) {
             $n = count($this->iText);
+            $nf = count($this->iFontArray);
             for( $i=0, $w=array(); $i < $n; ++$i ) {
                 $tmp = $this->iText[$i];
                 if( is_string($tmp) ) {
-                    $w[$i] = $aImg->GetTextWidth($this->iText[$i])+$aMargin;
+                    if( $i < $nf ) {
+                        $aImg->SetFont($this->iFontArray[$i][0],$this->iFontArray[$i][1],$this->iFontArray[$i][2]);
+                    }
+                    else {
+                        $aImg->SetFont($this->iFFamily,$this->iFStyle,$this->iFSize);
+                    }
+                    $w[$i] = $aImg->GetTextWidth($tmp)+$aMargin;
                 }
                 else {
                     if( is_object($tmp) === false ) {
@@ -1710,8 +1732,23 @@ class TextProperty {
 
     // Get total height of text
     function GetHeight($aImg) {
+        $nf = count($this->iFontArray);
+        $maxheight = -1;
+
+        if( $nf > 0 ) {
+            // We have to find out the largest font and take that one as the
+            // height of the row
+            for($i=0; $i < $nf; ++$i ) {
+                $aImg->SetFont($this->iFontArray[$i][0],$this->iFontArray[$i][1],$this->iFontArray[$i][2]);
+                $height = $aImg->GetFontHeight();
+                $maxheight = max($height,$maxheight);
+            }
+        }
+
         $aImg->SetFont($this->iFFamily,$this->iFStyle,$this->iFSize);
-        return $aImg->GetFontHeight();
+        $height = $aImg->GetFontHeight();
+        $maxheight = max($height,$maxheight);
+        return $maxheight;
     }
 
     // Unhide/hide the text
@@ -1757,6 +1794,13 @@ class TextProperty {
                             $tmp->Stroke($aImg,$aX[$i],$aY[$i]);
                         }
                         else {
+                            if( $i < count($this->iFontArray) ) {
+                                $font = $this->iFontArray[$i];
+                                $aImg->SetFont($font[0],$font[1],$font[2]);
+                            }
+                            else {
+                                $aImg->SetFont($this->iFFamily,$this->iFStyle,$this->iFSize);
+                            }
                         	$aImg->StrokeText($aX[$i],$aY[$i],str_replace("\t"," ",$tmp));
                         }
                     }
@@ -1766,6 +1810,13 @@ class TextProperty {
                 $tmp = preg_split('/\t/',$this->iText);
                 $n = min(count($tmp),count($aX));
                 for($i=0; $i < $n; ++$i) {
+                    if( $i < count($this->iFontArray) ) {
+                        $font = $this->iFontArray[$i];
+                        $aImg->SetFont($font[0],$font[1],$font[2]);
+                    }
+                    else {
+                        $aImg->SetFont($this->iFFamily,$this->iFStyle,$this->iFSize);
+                    }
                     $aImg->StrokeText($aX[$i],$aY,$tmp[$i]);
                 }
             }
@@ -2267,19 +2318,24 @@ class GanttScale {
     }
 
     // Get screen coordinatesz for the vertical position for a bar
-    function TranslateVertPos($aPos) {
+    function TranslateVertPos($aPos,$atTop=false) {
         $img=$this->iImg;
         if( $aPos > $this->iVertLines )
         	JpGraphError::RaiseL(6015,$aPos);
         // 'Illegal vertical position %d'
         if( $this->iVertLayout == GANTT_EVEN ) {
             // Position the top bar at 1 vert spacing from the scale
-            return round($img->top_margin + $this->iVertHeaderSize +  ($aPos+1)*$this->iVertSpacing);
+            $pos =  round($img->top_margin + $this->iVertHeaderSize +  ($aPos+1)*$this->iVertSpacing);
         }
         else {
             // position the top bar at 1/2 a vert spacing from the scale
-            return round($img->top_margin + $this->iVertHeaderSize  + $this->iTopPlotMargin + ($aPos+1)*$this->iVertSpacing);
+            $pos = round($img->top_margin + $this->iVertHeaderSize  + $this->iTopPlotMargin + ($aPos+1)*$this->iVertSpacing);
         }
+
+        if( $atTop )
+            $pos -= $this->iVertSpacing;
+
+        return $pos;
     }
 
     // What is the vertical spacing?
@@ -2299,9 +2355,9 @@ class GanttScale {
             return $t;
         }
         elseif( is_int($aDate) || is_float($aDate) )
-        return $aDate;
+            return $aDate;
         else
-        JpGraphError::RaiseL(6017,$aDate);
+            JpGraphError::RaiseL(6017,$aDate);
         //Unknown date format in GanttScale ($aDate).");
     }
 
@@ -2536,16 +2592,16 @@ class GanttScale {
                 if( $day==6 || $day==0 ) {
                     $img->SetColor($this->day->iWeekendBackgroundColor);
                     if( $this->iUsePlotWeekendBackground && $doback)
-                    $img->FilledRectangle($x,$yt+$this->day->iFrameWeight,
-                    $x+$daywidth,$img->height-$img->bottom_margin);
+                        $img->FilledRectangle($x,$yt+$this->day->iFrameWeight,
+                                              $x+$daywidth,$img->height-$img->bottom_margin);
                     else
-                    $img->FilledRectangle($x,$yt+$this->day->iFrameWeight,
+                        $img->FilledRectangle($x,$yt+$this->day->iFrameWeight,
                     $x+$daywidth,$yb-$this->day->iFrameWeight);
                 }
 
                 $mn = strftime('%m',$datestamp);
                 if( $mn[0]=='0' )
-                $mn = $mn[1];
+                    $mn = $mn[1];
 
                 switch( $this->day->iStyle ) {
                     case DAYSTYLE_LONG:
@@ -2605,9 +2661,9 @@ class GanttScale {
                 }
 
                 if( $day==0 )
-                $img->SetColor($this->day->iSundayTextColor);
+                    $img->SetColor($this->day->iSundayTextColor);
                 else
-                $img->SetColor($this->day->iTextColor);
+                    $img->SetColor($this->day->iTextColor);
                 $img->StrokeText(round($x+$daywidth/2+1),
                 round($yb-$this->day->iTitleVertMargin),$txt);
                 $img->SetColor($this->day->grid->iColor);
@@ -2653,26 +2709,27 @@ class GanttScale {
                 $txtOffset = $weekwidth/2+1;
             }
             elseif( $this->week->iStyle==WEEKSTYLE_FIRSTDAY  ||
-            $this->week->iStyle==WEEKSTYLE_FIRSTDAY2 ||
-            $this->week->iStyle==WEEKSTYLE_FIRSTDAYWNBR ||
-            $this->week->iStyle==WEEKSTYLE_FIRSTDAY2WNBR ) {
+                    $this->week->iStyle==WEEKSTYLE_FIRSTDAY2 ||
+                    $this->week->iStyle==WEEKSTYLE_FIRSTDAYWNBR ||
+                    $this->week->iStyle==WEEKSTYLE_FIRSTDAY2WNBR ) {
                 $img->SetTextAlign("left");
                 $txtOffset = 3;
             }
-            else
-            JpGraphError::RaiseL(6021);
-            //("Unknown formatting style for week.");
+            else {
+                JpGraphError::RaiseL(6021);
+                //("Unknown formatting style for week.");
+            }
 
             for($i=0; $i<$this->GetNumberOfDays()/7; ++$i, $x+=$weekwidth) {
                 $img->PushColor($this->week->iTextColor);
 
                 if( $this->week->iStyle==WEEKSTYLE_WNBR )
-                $txt = sprintf($this->week->iLabelFormStr,$weeknbr);
+                    $txt = sprintf($this->week->iLabelFormStr,$weeknbr);
                 elseif( $this->week->iStyle==WEEKSTYLE_FIRSTDAY ||
-                $this->week->iStyle==WEEKSTYLE_FIRSTDAYWNBR )
-                $txt = date("j/n",$week);
+                        $this->week->iStyle==WEEKSTYLE_FIRSTDAYWNBR )
+                    $txt = date("j/n",$week);
                 elseif( $this->week->iStyle==WEEKSTYLE_FIRSTDAY2 ||
-                $this->week->iStyle==WEEKSTYLE_FIRSTDAY2WNBR ) {
+                        $this->week->iStyle==WEEKSTYLE_FIRSTDAY2WNBR ) {
                     $monthnbr = date("n",$week)-1;
                     $shortmonth = $this->iDateLocale->GetShortMonthName($monthnbr);
                     $txt = Date("j",$week)." ".$shortmonth;
@@ -2754,7 +2811,7 @@ class GanttScale {
             $year = 0+strftime("%Y",$this->iStartDate);
             $img->SetTextAlign("center");
             if( $this->GetMonthNbr($this->iStartDate) == $this->GetMonthNbr($this->iEndDate)
-            && $this->GetYear($this->iStartDate)==$this->GetYear($this->iEndDate) ) {
+                && $this->GetYear($this->iStartDate)==$this->GetYear($this->iEndDate) ) {
                 $monthwidth=$this->GetDayWidth()*($this->GetMonthDayNbr($this->iEndDate) - $this->GetMonthDayNbr($this->iStartDate) + 1);
             }
             else {
@@ -2781,9 +2838,9 @@ class GanttScale {
                 $monthName = $this->GetMonthLabel($monthnbr,$year);
                 $monthwidth=$this->GetDayWidth()*$this->GetNumDaysInMonth($monthnbr,$year);
                 if( $x + $monthwidth < $xb )
-                $w = $monthwidth;
+                    $w = $monthwidth;
                 else
-                $w = $xb-$x;
+                    $w = $xb-$x;
                 if( $w >= 1.2*$img->GetTextWidth($monthName) ) {
                     $img->SetColor($this->month->iTextColor);
                     $img->StrokeText(round($x+$w/2+1),
@@ -2819,17 +2876,17 @@ class GanttScale {
             $img->SetLineWeight($this->year->grid->iWeight);
             $img->SetTextAlign("center");
             if( $year == $this->GetYear($this->iEndDate) )
-            $yearwidth=$this->GetDayWidth()*($this->GetYearDayNbr($this->iEndDate)-$this->GetYearDayNbr($this->iStartDate)+1);
+                $yearwidth=$this->GetDayWidth()*($this->GetYearDayNbr($this->iEndDate)-$this->GetYearDayNbr($this->iStartDate)+1);
             else
-            $yearwidth=$this->GetDayWidth()*($this->GetNumDaysInYear($year)-$this->GetYearDayNbr($this->iStartDate)+1);
+                $yearwidth=$this->GetDayWidth()*($this->GetNumDaysInYear($year)-$this->GetYearDayNbr($this->iStartDate)+1);
 
             // The space for a year must be at least 20% bigger than the actual text
             // so we allow 10% margin on each side
             if( $yearwidth >= 1.20*$img->GetTextWidth("".$year) ) {
                 $img->SetColor($this->year->iTextColor);
                 $img->StrokeText(round($xt+$yearwidth/2+1),
-                round($yb-$this->year->iTitleVertMargin),
-                $year);
+                                 round($yb-$this->year->iTitleVertMargin),
+                                 $year);
             }
             $x = $xt + $yearwidth;
             while( $x < $xb ) {
@@ -2839,14 +2896,14 @@ class GanttScale {
                 $year += 1;
                 $yearwidth=$this->GetDayWidth()*$this->GetNumDaysInYear($year);
                 if( $x + $yearwidth < $xb )
-                $w = $yearwidth;
+                    $w = $yearwidth;
                 else
-                $w = $xb-$x;
+                    $w = $xb-$x;
                 if( $w >= 1.2*$img->GetTextWidth("".$year) ) {
                     $img->SetColor($this->year->iTextColor);
                     $img->StrokeText(round($x+$w/2+1),
-                    round($yb-$this->year->iTitleVertMargin),
-                    $year);
+                                     round($yb-$this->year->iTitleVertMargin),
+                                     $year);
                 }
                 $x += $yearwidth;
             }
@@ -3567,6 +3624,7 @@ class TextPropertyBelow extends TextProperty {
 class GanttVLine extends GanttPlotObject {
 
     private $iLine,$title_margin=3, $iDayOffset=0.5;
+    private $iStartRow = -1, $iEndRow = -1;
 
     //---------------
     // CONSTRUCTOR
@@ -3583,6 +3641,13 @@ class GanttVLine extends GanttPlotObject {
 
     //---------------
     // PUBLIC METHODS
+
+    // Set start and end rows for the VLine. By default the entire heigh of the
+    // Gantt chart is used
+    function SetRowSpan($aStart, $aEnd=-1) {
+        $this->iStartRow = $aStart;
+        $this->iEndRow = $aEnd;
+    }
 
     function SetDayOffset($aOff=0.5) {
         if( $aOff < 0.0 || $aOff > 1.0 ) {
@@ -3607,8 +3672,20 @@ class GanttVLine extends GanttPlotObject {
         if($this->iDayOffset != 0.0)
             $d += 24*60*60*$this->iDayOffset;
         $x = $aScale->TranslateDate($d);//d=1006858800,
-        $y1 = $aScale->iVertHeaderSize+$aImg->top_margin;
-        $y2 = $aImg->height - $aImg->bottom_margin;
+
+        if( $this->iStartRow > -1 ) {
+            $y1 = $aScale->TranslateVertPos($this->iStartRow,true) ;
+        }
+        else {
+            $y1 = $aScale->iVertHeaderSize+$aImg->top_margin;
+        }
+
+        if( $this->iEndRow > -1 ) {
+            $y2 = $aScale->TranslateVertPos($this->iEndRow);
+        }
+        else {
+            $y2 = $aImg->height - $aImg->bottom_margin;
+        }
 
         $this->iLine->Stroke($aImg,$x,$y1,$x,$y2);
         $this->title->Align("center","top");

@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
 // Example of a stock chart
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_stock.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_stock.php');
 
 // Data must be in the format : open,close,min,max
 $datay = array(

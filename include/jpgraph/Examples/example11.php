@@ -1,6 +1,6 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_line.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_line.php');
 
 $ydata = array(11,3,8,12,5,1,9,13,5,7);
 $ydata2 = array(1,19,15,7,22,14,5,9,21,13);

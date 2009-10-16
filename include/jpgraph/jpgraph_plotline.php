@@ -3,7 +3,7 @@
  // File:  		 JPGRAPH_PLOTLINE.PHP
  // Description: PlotLine extension for JpGraph
  // Created:  	 2009-03-24
- // Ver:  		 $Id: jpgraph_plotline.php 1148 2009-03-24 21:55:44Z ljp $
+ // Ver:  		 $Id: jpgraph_plotline.php 1881 2009-10-01 10:28:12Z ljp $
  //
  // CLASS PlotLine
  // Data container class to hold properties for a static
@@ -20,6 +20,7 @@ class PlotLine {
     protected $color = 'black';
     private $legend='',$hidelegend=false, $legendcsimtarget='', $legendcsimalt='',$legendcsimwintarget='';
     private $iLineStyle='solid';
+    public $numpoints=0; // Needed since the framework expects this property
 
     function __construct($aDir=HORIZONTAL,$aPos=0,$aColor='black',$aWeight=1) {
         $this->direction = $aDir;
@@ -62,12 +63,12 @@ class PlotLine {
     //---------------
     // PRIVATE METHODS
 
-    function DoLegend(&$graph) {
+    function DoLegend($graph) {
         if( !$this->hidelegend ) $this->Legend($graph);
     }
 
     // Framework function the chance for each plot class to set a legend
-    function Legend(&$aGraph) {
+    function Legend($aGraph) {
         if( $this->legend != '' ) {
             $dummyPlotMark = new PlotMark();
             $lineStyle = 1;
@@ -80,26 +81,56 @@ class PlotLine {
         // Nothing to do
     }
 
-    function Stroke($aImg,$aXScale,$aYScale) {
+    // Called by framework to allow the object to draw
+    // optional information in the margin area
+    function StrokeMargin($aImg) {
+        // Nothing to do
+    }
+
+    // Framework function to allow the object to adjust the scale
+    function PrescaleSetup($aGraph) {
+        // Nothing to do
+    }
+
+    function Min() {
+        return array(null,null);
+    }
+
+    function Max() {
+        return array(null,null);
+    }
+
+    function _Stroke($aImg,$aMinX,$aMinY,$aMaxX,$aMaxY,$aXPos,$aYPos) {
         $aImg->SetColor($this->color);
         $aImg->SetLineWeight($this->weight);
         $oldStyle = $aImg->SetLineStyle($this->iLineStyle);
         if( $this->direction == VERTICAL ) {
-            $ymin_abs=$aYScale->Translate($aYScale->GetMinVal());
-            $ymax_abs=$aYScale->Translate($aYScale->GetMaxVal());
-            $xpos_abs=$aXScale->Translate($this->scaleposition);
+            $ymin_abs = $aMinY;
+            $ymax_abs = $aMaxY;
+            $xpos_abs = $aXPos;
             $aImg->StyleLine($xpos_abs, $ymin_abs, $xpos_abs, $ymax_abs);
         }
         elseif( $this->direction == HORIZONTAL ) {
-            $xmin_abs=$aXScale->Translate($aXScale->GetMinVal());
-            $xmax_abs=$aXScale->Translate($aXScale->GetMaxVal());
-            $ypos_abs=$aYScale->Translate($this->scaleposition);
+            $xmin_abs = $aMinX;
+            $xmax_abs = $aMaxX;
+            $ypos_abs = $aYPos;
             $aImg->StyleLine($xmin_abs, $ypos_abs, $xmax_abs, $ypos_abs);
         }
         else {
             JpGraphError::RaiseL(25125);//(" Illegal direction for static line");
         }
         $aImg->SetLineStyle($oldStyle);
+    }
+
+    function Stroke($aImg,$aXScale,$aYScale) {
+        $this->_Stroke($aImg,
+            $aImg->left_margin,
+            $aYScale->Translate($aYScale->GetMinVal()),
+            $aImg->width-$aImg->right_margin,
+            $aYScale->Translate($aYScale->GetMaxVal()),
+            $aXScale->Translate($this->scaleposition),
+            $aYScale->Translate($this->scaleposition)
+        );
     }
 }
 

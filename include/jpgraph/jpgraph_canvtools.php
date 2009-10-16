@@ -3,7 +3,7 @@
  // File:        JPGRAPH_CANVTOOLS.PHP
  // Description: Some utilities for text and shape drawing on a canvas
  // Created:     2002-08-23
- // Ver:         $Id: jpgraph_canvtools.php 1106 2009-02-22 20:16:35Z ljp $
+ // Ver:         $Id: jpgraph_canvtools.php 1857 2009-09-28 14:38:14Z ljp $
  //
  // Copyright (c) Aditus Consulting. All rights reserved.
  //========================================================================
@@ -41,6 +41,10 @@ class CanvasScale {
         $this->ixmax = $xmax;
         $this->iymin = $ymin;
         $this->iymax = $ymax;
+    }
+
+    function Get() {
+        return array($this->ixmin,$this->ixmax,$this->iymin,$this->iymax);
     }
 
     function Translate($x,$y) {
@@ -83,6 +87,10 @@ class Shape {
         list($x1,$y1) = $this->scale->Translate($x1,$y1);
         list($x2,$y2) = $this->scale->Translate($x2,$y2);
         $this->img->Line($x1,$y1,$x2,$y2);
+    }
+
+    function SetLineWeight($aWeight) {
+        $this->img->SetLineWeight($aWeight);
     }
 
     function Polygon($p,$aClosed=false) {

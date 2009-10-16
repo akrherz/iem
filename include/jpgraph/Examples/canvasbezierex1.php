@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
 // $Id: canvasbezierex1.php,v 1.1 2002/10/05 21:04:28 aditus Exp $
-include "jpgraph/jpgraph.php";
-include "jpgraph/jpgraph_canvas.php";
-include "jpgraph/jpgraph_canvtools.php";
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_canvas.php');
+require_once ('jpgraph/jpgraph_canvtools.php');
 
 // Setup canvas graph
 $g = new CanvasGraph(400,300);

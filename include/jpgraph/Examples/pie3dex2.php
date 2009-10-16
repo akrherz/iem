@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_pie.php");
-require_once ("jpgraph/jpgraph_pie3d.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_pie.php');
+require_once ('jpgraph/jpgraph_pie3d.php');
 
 // Some data
 $data = array(20,27,45,75,90);

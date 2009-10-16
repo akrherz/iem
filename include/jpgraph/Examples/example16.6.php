@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_scatter.php");
-require_once ("jpgraph/jpgraph_line.php");
-require_once ("jpgraph/jpgraph_utils.inc.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_scatter.php');
+require_once ('jpgraph/jpgraph_line.php');
+require_once ('jpgraph/jpgraph_utils.inc.php');
 
 // Create some "fake" regression data
 $datay = array();

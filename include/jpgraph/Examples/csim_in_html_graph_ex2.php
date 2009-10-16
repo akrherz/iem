@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
 // Example of pie with center circle
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_pie.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_pie.php');
 
 // Some data
 $data = array(50,28,25,27,31,20);

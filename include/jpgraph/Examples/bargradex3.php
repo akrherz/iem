@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
 // Example for use of JpGraph, 
 // ljp, 01/03/01 20:32
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_bar.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
 
 // We need some data
 $datay=array(-0.13,0.25,-0.21,0.35,0.31,0.04);

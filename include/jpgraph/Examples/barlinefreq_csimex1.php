@@ -2,9 +2,9 @@
 //
 // Example of CSIM frequence bar that uses the cache
 //
-include_once ("jpgraph/jpgraph.php");
-include_once ("jpgraph/jpgraph_bar.php");
-include_once ("jpgraph/jpgraph_line.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
+require_once ('jpgraph/jpgraph_line.php');
 
 
 // Utility function to calculate the accumulated frequence

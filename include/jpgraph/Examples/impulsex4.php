@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_scatter.php");
-require_once ("jpgraph/jpgraph_line.php");
-require_once ("jpgraph/jpgraph_plotline.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_scatter.php');
+require_once ('jpgraph/jpgraph_line.php');
+require_once ('jpgraph/jpgraph_plotline.php');
 
 $numpoints=50;
 $k=0.05;

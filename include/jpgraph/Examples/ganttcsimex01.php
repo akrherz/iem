@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
 // Gantt example to create CSIM
 
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_gantt.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_gantt.php');
 
 $bar1 = new GanttBar(0,"Activity 1","2001-12-21","2002-01-20");
 $bar1->SetCSIMTarget('#','Go back 1');

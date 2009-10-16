@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
 // Illustration of the different patterns for bands
 // $Id: smallstaticbandsex1.php,v 1.1 2002/09/01 21:51:08 aditus Exp $
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_bar.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
 
 $datay=array(10,29,3,6);
 

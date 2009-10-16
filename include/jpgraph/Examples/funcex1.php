@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_line.php");
-require_once ("jpgraph/jpgraph_utils.inc.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_line.php');
+require_once ('jpgraph/jpgraph_utils.inc.php');
 
 $f = new FuncGenerator('cos($x)*$x');
 list($xdata,$ydata) = $f->E(-1.2*M_PI,1.2*M_PI);

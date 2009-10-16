@@ -3,7 +3,7 @@
  // File:        JPGRAPH_MGRAPH.PHP
  // Description: Class to handle multiple graphs in the same image
  // Created:     2006-01-15
- // Ver:         $Id: jpgraph_mgraph.php 1144 2009-03-23 21:18:35Z ljp $
+ // Ver:         $Id: jpgraph_mgraph.php 1770 2009-08-17 06:10:22Z ljp $
  //
  // Copyright (c) Aditus Consulting. All rights reserved.
  //========================================================================
@@ -16,11 +16,11 @@
 class MGraph {
 
     public $title = null, $subtitle = null, $subsubtitle = null;
-    
+
     protected $img=NULL;
     protected $iCnt=0,$iGraphs = array(); // image_handle, x, y, fx, fy, sizex, sizey
     protected $iFillColor='white', $iCurrentColor=0;
-    protected $lm=0,$rm=0,$tm=0,$bm=0;
+    protected $lm=4,$rm=4,$tm=4,$bm=4;
     protected $iDoFrame = FALSE, $iFrameColor = 'black', $iFrameWeight = 1;
     protected $iLineWeight = 1;
     protected $expired=false;
@@ -30,44 +30,48 @@ class MGraph {
     protected $background_image='',$background_image_center=true,
     $backround_image_format='',$background_image_mix=100,
     $background_image_y=NULL, $background_image_x=NULL;
-    
+    private $doshadow=false, $shadow_width=4, $shadow_color='gray@0.5';
+    public $footer;
+
 
     // Create a new instane of the combined graph
     function __construct($aWidth=NULL,$aHeight=NULL,$aCachedName='',$aTimeOut=0,$aInline=true) {
         $this->iWidth = $aWidth;
         $this->iHeight = $aHeight;
-        
+
         // If the cached version exist just read it directly from the
         // cache, stream it back to browser and exit
         if( $aCachedName!='' && READ_CACHE && $aInline ) {
             $this->cache = new ImgStreamCache();
             $this->cache->SetTimeOut($aTimeOut);
-            $image = new Image();                            
+            $image = new Image();
             if( $this->cache->GetAndStream($image,$aCachedName) ) {
                 exit();
             }
         }
         $this->inline = $aInline;
-        $this->cache_name = $aCachedName;        
-        
+        $this->cache_name = $aCachedName;
+
         $this->title = new Text();
         $this->title->ParagraphAlign('center');
         $this->title->SetFont(FF_FONT2,FS_BOLD);
         $this->title->SetMargin(3);
         $this->title->SetAlign('center');
-        
+
         $this->subtitle = new Text();
         $this->subtitle->ParagraphAlign('center');
         $this->subtitle->SetFont(FF_FONT1,FS_BOLD);
         $this->subtitle->SetMargin(3);
         $this->subtitle->SetAlign('center');
-        
+
         $this->subsubtitle = new Text();
         $this->subsubtitle->ParagraphAlign('center');
         $this->subsubtitle->SetFont(FF_FONT1,FS_NORMAL);
         $this->subsubtitle->SetMargin(3);
         $this->subsubtitle->SetAlign('center');
-       
+
+        $this->footer = new Footer();
+
     }
 
     // Specify background fill color for the combined graph
@@ -125,15 +129,20 @@ class MGraph {
     function _strokeBackgroundImage() {
         if( $this->background_image == '' ) return;
 
-        $bkgimg = Graph::LoadBkgImage('',$this->background_image); 
-        
+        $bkgimg = Graph::LoadBkgImage('',$this->background_image);
+
         // Background width & Heoght
         $bw = imagesx($bkgimg);
         $bh = imagesy($bkgimg);
-        
+
         // Canvas width and height
         $cw = imagesx($this->img);
         $ch = imagesy($this->img);
+
+        if( $this->doshadow ) {
+            $cw -= $this->shadow_width;
+            $ch -= $this->shadow_width;
+        }
 
         if( $this->background_image_x === NULL || $this->background_image_y === NULL ) {
             if( $this->background_image_center ) {
@@ -187,58 +196,25 @@ class MGraph {
     }
 
     function SetImgFormat($aFormat,$aQuality=75) {
-        $this->image_format = $aFormat;      
+        $this->image_format = $aFormat;
         $this->image_quality = $aQuality;
     }
 
-    function Stroke($aFileName='') {
-        // Find out the necessary size for the container image
-        $w=0; $h=0;
-        for($i=0; $i < $this->iCnt; ++$i ) {
-            $maxw = $this->iGraphs[$i][1]+$this->iGraphs[$i][5];
-            $maxh = $this->iGraphs[$i][2]+$this->iGraphs[$i][6];
-            $w = max( $w, $maxw );
-            $h = max( $h, $maxh );
-        }
-        $w += $this->lm+$this->rm;
-        $h += $this->tm+$this->bm;
+    // Set the shadow around the whole image
+    function SetShadow($aShowShadow=true,$aShadowWidth=4,$aShadowColor='gray@0.3') {
+        $this->doshadow = $aShowShadow;
+        $this->shadow_color = $aShadowColor;
+        $this->shadow_width = $aShadowWidth;
+        $this->footer->iBottomMargin += $aShadowWidth;
+        $this->footer->iRightMargin += $aShadowWidth;
+    }
 
-        // User specified width,height overrides
-        if( $this->iWidth !== NULL && $this->iWidth !== 0 ) $w = $this->iWidth;
-        if( $this->iHeight!== NULL && $this->iHeight !== 0) $h = $this->iHeight;
-        
-        $image = new Image($w,$h);
-        $image->SetImgFormat( $this->image_format,$this->image_quality);
-        $image->SetColor($this->iFillColor);
-        $image->FilledRectangle(0,0,$w-1,$h-1);  
-        $image->SetExpired($this->expired);
-
-        $this->img = $image->img;     
-        $this->_strokeBackgroundImage();
-
-        if( $this->iDoFrame ) {
-           $image->SetColor($this->iFrameColor);
-           $image->SetLineWeight($this->iFrameWeight);
-           $image->Rectangle(0,0,$w-1,$h-1);
-        }
-
-        // Copy all sub graphs to the container
-        for($i=0; $i < $this->iCnt; ++$i ) {
-            $image->CopyMerge($this->iGraphs[$i][0],
-                            $this->iGraphs[$i][1]+$this->lm,$this->iGraphs[$i][2]+$this->tm,
-                            $this->iGraphs[$i][3],$this->iGraphs[$i][4],
-                            $this->iGraphs[$i][5],$this->iGraphs[$i][6],
-                            -1,-1, /* Full from width and height */
-                            $this->iGraphs[$i][7]);
-            
-            
-        }
-
+    function StrokeTitle($image,$w,$h) {
         // Stroke title
-        if( $this->title->t !== '' ) {    
+        if( $this->title->t !== '' ) {
 
             $margin = 3;
-            
+
             $y = $this->title->margin;
             if( $this->title->halign == 'center' ) {
                 $this->title->Center(0,$w,$y);
@@ -271,7 +247,7 @@ class MGraph {
                 $this->subtitle->SetPos($this->img->width-$this->subtitle->margin-$indent,$y,'right');
             }
             $this->subtitle->Stroke($image);
-    
+
             // ... and subsubtitle
             $y += $this->subtitle->GetTextHeight($image) + $margin + $this->subsubtitle->margin;
             if( $this->subsubtitle->halign == 'center' ) {
@@ -288,8 +264,69 @@ class MGraph {
                 $this->subsubtitle->SetPos($w-$this->subsubtitle->margin-$indent,$y,'right');
             }
             $this->subsubtitle->Stroke($image);
-                        
+
         }
+    }
+
+    function Stroke($aFileName='') {
+        // Find out the necessary size for the container image
+        $w=0; $h=0;
+        for($i=0; $i < $this->iCnt; ++$i ) {
+            $maxw = $this->iGraphs[$i][1]+$this->iGraphs[$i][5];
+            $maxh = $this->iGraphs[$i][2]+$this->iGraphs[$i][6];
+            $w = max( $w, $maxw );
+            $h = max( $h, $maxh );
+        }
+        $w += $this->lm+$this->rm;
+        $h += $this->tm+$this->bm;
+
+        // User specified width,height overrides
+        if( $this->iWidth !== NULL && $this->iWidth !== 0 ) $w = $this->iWidth;
+        if( $this->iHeight!== NULL && $this->iHeight !== 0) $h = $this->iHeight;
+
+        if( $this->doshadow ) {
+            $w += $this->shadow_width;
+            $h += $this->shadow_width;
+        }
+
+        $image = new Image($w,$h);
+        $image->SetImgFormat( $this->image_format,$this->image_quality);
+
+        if( $this->doshadow ) {
+            $image->SetColor($this->iFrameColor);
+            $image->ShadowRectangle(0,0,$w-1,$h-1,$this->iFillColor,$this->shadow_width,$this->shadow_color);
+            $w -= $this->shadow_width;
+            $h -= $this->shadow_width;
+        }
+        else {
+            $image->SetColor($this->iFillColor);
+            $image->FilledRectangle(0,0,$w-1,$h-1);
+        }
+        $image->SetExpired($this->expired);
+
+        $this->img = $image->img;
+        $this->_strokeBackgroundImage();
+
+        if( $this->iDoFrame && ! $this->doshadow ) {
+           $image->SetColor($this->iFrameColor);
+           $image->SetLineWeight($this->iFrameWeight);
+           $image->Rectangle(0,0,$w-1,$h-1);
+        }
+
+        // Copy all sub graphs to the container
+        for($i=0; $i < $this->iCnt; ++$i ) {
+            $image->CopyMerge($this->iGraphs[$i][0],
+                            $this->iGraphs[$i][1]+$this->lm,$this->iGraphs[$i][2]+$this->tm,
+                            $this->iGraphs[$i][3],$this->iGraphs[$i][4],
+                            $this->iGraphs[$i][5],$this->iGraphs[$i][6],
+                            -1,-1, /* Full from width and height */
+                            $this->iGraphs[$i][7]);
+
+
+        }
+
+        $this->StrokeTitle($image,$w,$h);
+        $this->footer->Stroke($image);
 
         // Output image
         if( $aFileName == _IMG_HANDLER ) {
@@ -297,7 +334,7 @@ class MGraph {
         }
         else {
             //Finally stream the generated picture
-            $this->cache = new ImgStreamCache();            
+            $this->cache = new ImgStreamCache();
             $this->cache->PutAndStream($image,$this->cache_name,$this->inline,$aFileName);
         }
     }
