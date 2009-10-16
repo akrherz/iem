@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
 
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_bar.php");
-require_once ("jpgraph/jpgraph_flags.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
+require_once ('jpgraph/jpgraph_flags.php');
 
 // Some data
 $datay1=array(140,110,50);

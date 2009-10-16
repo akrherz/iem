@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_line.php");
-require_once ("jpgraph/jpgraph_error.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_line.php');
+require_once ('jpgraph/jpgraph_error.php');
 
 $errdatay = array(11,9,2,4,19,26,13,19,7,12);
 

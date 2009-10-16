@@ -1,6 +1,6 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_radar.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_radar.php');
 
 // Create the basic rtadar graph
 $graph = new RadarGraph(300,200);

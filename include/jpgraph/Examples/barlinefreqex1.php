@@ -2,9 +2,9 @@
 //
 // Example of frequence bar 
 //
-include_once ("jpgraph/jpgraph.php");
-include_once ("jpgraph/jpgraph_bar.php");
-include_once ("jpgraph/jpgraph_line.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
+require_once ('jpgraph/jpgraph_line.php');
 
 // Utility function to calculate the accumulated frequence
 // for a set of values and ocurrences

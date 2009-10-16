@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
 
-include("jpgraph/jpgraph.php");
-include("jpgraph/jpgraph_line.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_line.php');
 
 // create the graph
 $graph= new Graph(400,250);

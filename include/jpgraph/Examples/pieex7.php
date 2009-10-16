@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
 //$Id: pieex7.php,v 1.1 2002/06/17 13:53:43 aditus Exp $
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_pie.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_pie.php');
 
 // Some data
 $data = array(27,23,0,17);

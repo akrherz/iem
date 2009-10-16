@@ -1,6 +1,6 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_canvas.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_canvas.php');
 
 // Create the graph. 
 $graph = new CanvasGraph(350,200);	

@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
 // $Id: bar_csimex3.php,v 1.3 2002/08/31 20:03:46 aditus Exp $
 // Horiontal bar graph with image maps
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_bar.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
 
 $data1y=array(5,8,19,3,10,5);
 $data2y=array(12,2,12,7,14,4);

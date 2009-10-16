@@ -1,6 +1,6 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_line.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_line.php');
 
 $n = 8;
 for($i=0; $i < $n; ++$i ) {

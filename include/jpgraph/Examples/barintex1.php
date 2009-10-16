@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
 // $Id: barintex1.php,v 1.3 2002/07/11 23:27:28 aditus Exp $
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_bar.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
 
 // Some data
 $datay=array(1,1,0.5);

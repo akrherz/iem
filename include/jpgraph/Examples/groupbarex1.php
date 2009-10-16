@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
 // $Id: groupbarex1.php,v 1.2 2002/07/11 23:27:28 aditus Exp $
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_bar.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
 
 $datay1=array(35,160,0,0,0,0);
 $datay2=array(35,190,190,190,190,190);

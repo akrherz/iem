@@ -1,6 +1,6 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_line.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_line.php');
 
 // The callback that converts timestamp to minutes and seconds
 function TimeCallback($aVal) {

@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
 // Gantt hour + minute example
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_gantt.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_gantt.php');
 
 // Some sample Gantt data
 $data = array(

@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
 // $Id: logbarex1.php,v 1.4 2003/05/30 20:12:43 aditus Exp $
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_log.php");
-require_once ("jpgraph/jpgraph_bar.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_log.php');
+require_once ('jpgraph/jpgraph_bar.php');
 
 $datay=array(4,13,30,28,12,45,30,12,55,3,0.5);
 $datax=array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov");

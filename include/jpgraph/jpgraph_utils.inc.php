@@ -3,7 +3,7 @@
  // File:        JPGRAPH_UTILS.INC
  // Description: Collection of non-essential "nice to have" utilities
  // Created:     2005-11-20
- // Ver:         $Id: jpgraph_utils.inc.php 1581 2009-07-13 19:01:05Z ljp $
+ // Ver:         $Id: jpgraph_utils.inc.php 1777 2009-08-23 17:34:36Z ljp $
  //
  // Copyright (c) Aditus Consulting. All rights reserved.
  //========================================================================
@@ -338,14 +338,10 @@ class DateScaleUtils {
         // First value: Main decision point
         // Second value: Array of formatting depending on divisor for wanted max number of ticks. <divisor><formatting><format-string>,..
         $tt = array(
-        array($spw, array(1,DSUTILS_DAY1,'d M',2,DSUTILS_DAY2,'d M',-1,DSUTILS_DAY4,'d M')),
-        array($spm, array(1,DSUTILS_DAY1,'d M',2,DSUTILS_DAY2,'d M',4,DSUTILS_DAY4,'d M',
-        7,DSUTILS_WEEK1,$w,-1,DSUTILS_WEEK2,$w)),
-        array($spy, array(1,DSUTILS_DAY1,'d M',2,DSUTILS_DAY2,'d M',4,DSUTILS_DAY4,'d M',
-        7,DSUTILS_WEEK1,$w,14,DSUTILS_WEEK2,$w,
-        30,DSUTILS_MONTH1,'M',60,DSUTILS_MONTH2,'M',-1,DSUTILS_MONTH3,'M')),
-        array(-1, array(30,DSUTILS_MONTH1,'M-Y',60,DSUTILS_MONTH2,'M-Y',90,DSUTILS_MONTH3,'M-Y',
-        180,DSUTILS_MONTH6,'M-Y',352,DSUTILS_YEAR1,'Y',704,DSUTILS_YEAR2,'Y',-1,DSUTILS_YEAR5,'Y')));
+            array($spw, array(1,DSUTILS_DAY1,'d M',2,DSUTILS_DAY2,'d M',-1,DSUTILS_DAY4,'d M')),
+            array($spm, array(1,DSUTILS_DAY1,'d M',2,DSUTILS_DAY2,'d M',4,DSUTILS_DAY4,'d M',7,DSUTILS_WEEK1,$w,-1,DSUTILS_WEEK2,$w)),
+            array($spy, array(1,DSUTILS_DAY1,'d M',2,DSUTILS_DAY2,'d M',4,DSUTILS_DAY4,'d M',7,DSUTILS_WEEK1,$w,14,DSUTILS_WEEK2,$w,30,DSUTILS_MONTH1,'M',60,DSUTILS_MONTH2,'M',-1,DSUTILS_MONTH3,'M')),
+            array(-1, array(30,DSUTILS_MONTH1,'M-Y',60,DSUTILS_MONTH2,'M-Y',90,DSUTILS_MONTH3,'M-Y',180,DSUTILS_MONTH6,'M-Y',352,DSUTILS_YEAR1,'Y',704,DSUTILS_YEAR2,'Y',-1,DSUTILS_YEAR5,'Y')));
 
         $ntt = count($tt);
         $nd = floor($diff/$spd);
@@ -424,7 +420,7 @@ Class ReadFileData {
     static function FromCSV($aFile,&$aData,$aSepChar=',',$aMaxLineLength=1024) {
         $rh = @fopen($aFile,'r');
         if( $rh === false ) {
-        	return false;
+                return false;
         }
         $tmp = array();
         $lineofdata = fgetcsv($rh, 1000, ',');
@@ -447,55 +443,151 @@ Class ReadFileData {
         return $cnt;
     }
 
+    //----------------------------------------------------------------------------
+    // Desciption:
+    // Read numeric data from a file.
+    // Each value should be separated by either a new line or by a specified
+    // separator character (default is ',').
+    // Before returning the data each value is converted to a proper float
+    // value. The routine is robust in the sense that non numeric data in the
+    // file will be discarded.
+    //
+    // Options:
+    // 'separator'     => ',',
+    // 'enclosure'     => '"',
+    // 'readlength'    => 1024,
+    // 'ignore_first'  => false,
+    // 'first_as_key'  => false
+    // 'escape'        => '\',   # PHP >= 5.3 only
+    //
+    // Returns:
+    // The number of lines read on success, FALSE on failure
+    //----------------------------------------------------------------------------
+    static function FromCSV2($aFile, &$aData, $aOptions = array()) {
+        $aDefaults = array(
+            'separator'     => ',',
+            'enclosure'     => chr(34),
+            'escape'        => chr(92),
+            'readlength'    => 1024,
+            'ignore_first'  => false,
+            'first_as_key'  => false
+            );
+
+        $aOptions = array_merge(
+            $aDefaults, is_array($aOptions) ? $aOptions : array());
+
+        if( $aOptions['first_as_key'] ) {
+            $aOptions['ignore_first'] =  true;
+        }
+
+        $rh = @fopen($aFile, 'r');
+
+        if( $rh === false ) {
+            return false;
+        }
+
+        $aData  = array();
+        $aLine  = fgetcsv($rh,
+                          $aOptions['readlength'],
+                          $aOptions['separator'],
+                          $aOptions['enclosure']
+                          /*, $aOptions['escape']     # PHP >= 5.3 only */
+                          );
+
+        // Use numeric array keys for the columns by default
+        // If specified use first lines values as assoc keys instead
+        $keys = array_keys($aLine);
+        if( $aOptions['first_as_key'] ) {
+            $keys = array_values($aLine);
+        }
+
+        $num_lines = 0;
+        $num_cols  = count($aLine);
+
+        while ($aLine !== false) {
+            if( is_array($aLine) && count($aLine) != $num_cols ) {
+                JpGraphError::RaiseL(24004);
+                // 'ReadCSV2: Column count mismatch in %s line %d'
+            }
+
+            // fgetcsv returns NULL for empty lines
+            if( !is_null($aLine) ) {
+                $num_lines++;
+
+                if( !($aOptions['ignore_first'] && $num_lines == 1) && is_numeric($aLine[0]) ) {
+                    for( $i = 0; $i < $num_cols; $i++ ) {
+                        $aData[ $keys[$i] ][] = floatval($aLine[$i]);
+                    }
+                }
+            }
+
+            $aLine = fgetcsv($rh,
+                             $aOptions['readlength'],
+                             $aOptions['separator'],
+                             $aOptions['enclosure']
+                             /*, $aOptions['escape']     # PHP >= 5.3 only*/
+                );
+        }
+
+        fclose($rh);
+
+        if( $aOptions['ignore_first'] ) {
+            $num_lines--;
+        }
+
+        return $num_lines;
+    }
+
+    // Read data from two columns in a plain text file
     static function From2Col($aFile, $aCol1, $aCol2, $aSepChar=' ') {
         $lines = @file($aFile,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
-    	if( $lines === false ) {
-    		return false;
-    	}
-    	$s = '/[\s]+/';
-    	if( $aSepChar == ',' ) {
-			$s = '/[\s]*,[\s]*/';
-    	}
-    	elseif( $aSepChar == ';' ) {
-			$s = '/[\s]*;[\s]*/';
-    	}
-    	foreach( $lines as $line => $datarow ) {
-        	$split = preg_split($s,$datarow);
-        	$aCol1[] = floatval(trim($split[0]));
-        	$aCol2[] = floatval(trim($split[1]));
-    	}
+        if( $lines === false ) {
+                return false;
+        }
+        $s = '/[\s]+/';
+        if( $aSepChar == ',' ) {
+                        $s = '/[\s]*,[\s]*/';
+        }
+        elseif( $aSepChar == ';' ) {
+                        $s = '/[\s]*;[\s]*/';
+        }
+        foreach( $lines as $line => $datarow ) {
+                $split = preg_split($s,$datarow);
+                $aCol1[] = floatval(trim($split[0]));
+                $aCol2[] = floatval(trim($split[1]));
+        }
 
-    	return count($lines);
+        return count($lines);
     }
 
-
+    // Read data from one columns in a plain text file
     static function From1Col($aFile, $aCol1) {
         $lines = @file($aFile,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
-    	if( $lines === false ) {
-    		return false;
-    	}
-    	foreach( $lines as $line => $datarow ) {
-        	$aCol1[] = floatval(trim($datarow));
-    	}
+        if( $lines === false ) {
+                return false;
+        }
+        foreach( $lines as $line => $datarow ) {
+                $aCol1[] = floatval(trim($datarow));
+        }
 
-    	return count($lines);
+        return count($lines);
     }
-    
+
     static function FromMatrix($aFile,$aSepChar=' ') {
         $lines = @file($aFile,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
-    	if( $lines === false ) {
-    		return false;
-    	}
-    	$mat = array();
-    	$reg = '/'.$aSepChar.'/';
-    	foreach( $lines as $line => $datarow ) {
-        	$row = preg_split($reg,trim($datarow));
-        	foreach ($row as $key => $cell ) {
-        		$row[$key] = floatval(trim($cell));
-        	}
-        	$mat[] = $row;        	
-    	}
-    	return $mat;    	
+        if( $lines === false ) {
+                return false;
+        }
+        $mat = array();
+        $reg = '/'.$aSepChar.'/';
+        foreach( $lines as $line => $datarow ) {
+                $row = preg_split($reg,trim($datarow));
+                foreach ($row as $key => $cell ) {
+                        $row[$key] = floatval(trim($cell));
+                }
+                $mat[] = $row;
+        }
+        return $mat;
     }
 
 
@@ -506,87 +598,87 @@ define('__LR_EPSILON', 1.0e-8);
 // Class LinearRegression
 //=============================================================================
 class LinearRegression {
-	private $ix=array(),$iy=array();
-	private $ib=0, $ia=0;
-	private $icalculated=false;
-	public $iDet=0, $iCorr=0, $iStdErr=0;
+        private $ix=array(),$iy=array();
+        private $ib=0, $ia=0;
+        private $icalculated=false;
+        public $iDet=0, $iCorr=0, $iStdErr=0;
 
-	public function __construct($aDataX,$aDataY) {
-		if( count($aDataX) !== count($aDataY) ) {
-			JpGraph::Raise('LinearRegression: X and Y data array must be of equal length.');
-		}
-		$this->ix = $aDataX;
-		$this->iy = $aDataY;
-	}
+        public function __construct($aDataX,$aDataY) {
+                if( count($aDataX) !== count($aDataY) ) {
+                        JpGraph::Raise('LinearRegression: X and Y data array must be of equal length.');
+                }
+                $this->ix = $aDataX;
+                $this->iy = $aDataY;
+        }
 
-	public function Calc() {
+        public function Calc() {
 
-		$this->icalculated = true;
+                $this->icalculated = true;
 
-		$n = count($this->ix);
-		$sx2 = 0 ;
-		$sy2 = 0 ;
-		$sxy = 0 ;
-		$sx = 0 ;
-		$sy = 0 ;
+                $n = count($this->ix);
+                $sx2 = 0 ;
+                $sy2 = 0 ;
+                $sxy = 0 ;
+                $sx = 0 ;
+                $sy = 0 ;
 
-		for( $i=0; $i < $n; ++$i ) {
-			$sx2 += $this->ix[$i] * $this->ix[$i];
-			$sy2 += $this->iy[$i] * $this->iy[$i];
-			$sxy += $this->ix[$i] * $this->iy[$i];
-			$sx += $this->ix[$i];
-			$sy += $this->iy[$i];
-		}
+                for( $i=0; $i < $n; ++$i ) {
+                        $sx2 += $this->ix[$i] * $this->ix[$i];
+                        $sy2 += $this->iy[$i] * $this->iy[$i];
+                        $sxy += $this->ix[$i] * $this->iy[$i];
+                        $sx += $this->ix[$i];
+                        $sy += $this->iy[$i];
+                }
 
-		if( $n*$sx2 - $sx*$sx > __LR_EPSILON ) {
-			$this->ib = ($n*$sxy - $sx*$sy) / ( $n*$sx2 - $sx*$sx );
-			$this->ia = ( $sy - $this->ib*$sx ) / $n;
+                if( $n*$sx2 - $sx*$sx > __LR_EPSILON ) {
+                        $this->ib = ($n*$sxy - $sx*$sy) / ( $n*$sx2 - $sx*$sx );
+                        $this->ia = ( $sy - $this->ib*$sx ) / $n;
 
-			$sx = $this->ib * ( $sxy - $sx*$sy/$n );
-			$sy2 = $sy2 - $sy*$sy/$n;
-			$sy = $sy2 - $sx;
+                        $sx = $this->ib * ( $sxy - $sx*$sy/$n );
+                        $sy2 = $sy2 - $sy*$sy/$n;
+                        $sy = $sy2 - $sx;
 
-			$this->iDet = $sx / $sy2;
-			$this->iCorr = sqrt($this->iDet);
-			if( $n > 2 ) {
-				$this->iStdErr = sqrt( $sy / ($n-2) );
-			}
-			else {
-				$this->iStdErr = NAN ;
-			}
-		}
-		else {
-			$this->ib = 0;
-			$this->ia = 0;
-		}
+                        $this->iDet = $sx / $sy2;
+                        $this->iCorr = sqrt($this->iDet);
+                        if( $n > 2 ) {
+                                $this->iStdErr = sqrt( $sy / ($n-2) );
+                        }
+                        else {
+                                $this->iStdErr = NAN ;
+                        }
+                }
+                else {
+                        $this->ib = 0;
+                        $this->ia = 0;
+                }
 
-	}
+        }
 
-	public function GetAB() {
-		if( $this->icalculated == false )
-			$this->Calc();
-		return array($this->ia, $this->ib);
-	}
+        public function GetAB() {
+                if( $this->icalculated == false )
+                        $this->Calc();
+                return array($this->ia, $this->ib);
+        }
 
-	public function GetStat() {
-		if( $this->icalculated == false )
-			$this->Calc();
-		return array($this->iStdErr, $this->iCorr, $this->iDet);
-	}
+        public function GetStat() {
+                if( $this->icalculated == false )
+                        $this->Calc();
+                return array($this->iStdErr, $this->iCorr, $this->iDet);
+        }
 
-	public function GetY($aMinX, $aMaxX, $aStep=1) {
-		if( $this->icalculated == false )
-			$this->Calc();
+        public function GetY($aMinX, $aMaxX, $aStep=1) {
+                if( $this->icalculated == false )
+                        $this->Calc();
 
-		$yy = array();
-		$i = 0;
-		for( $x=$aMinX; $x <= $aMaxX; $x += $aStep ) {
-			$xx[$i  ] = $x;
-			$yy[$i++] = $this->ia + $this->ib * $x;
-		}
+                $yy = array();
+                $i = 0;
+                for( $x=$aMinX; $x <= $aMaxX; $x += $aStep ) {
+                        $xx[$i  ] = $x;
+                        $yy[$i++] = $this->ia + $this->ib * $x;
+                }
 
-		return array($xx,$yy);
-	}
+                return array($xx,$yy);
+        }
 
 }
 

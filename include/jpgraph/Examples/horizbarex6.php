@@ -1,6 +1,6 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_bar.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
 
 $datay=array(2,3,5,8,12,6,3);
 $datax=array("320x240","640x480","600x800","1024x768","1280x1024(16)","1280x1024(32)",

@@ -3,7 +3,7 @@
  // File:        JPGRAPH_RADAR.PHP
  // Description: Radar plot extension for JpGraph
  // Created:     2001-02-04
- // Ver:         $Id: jpgraph_radar.php 1613 2009-07-16 08:41:32Z ljp $
+ // Ver:         $Id: jpgraph_radar.php 1783 2009-08-25 11:41:01Z ljp $
  //
  // Copyright (c) Aditus Consulting. All rights reserved.
  //========================================================================
@@ -799,7 +799,12 @@ class RadarGraph extends Graph {
 	            for( $i=0,$a=M_PI/2; $i < $nbrpnts; ++$i, $a += $astep ) {
 	                $this->axis->Stroke($this->posy,$a,$grid[$i],$this->axis_title[$i],$i==0);
 	            }
+                $this->grid->Stroke($this->img,$grid);
 	        }
+            if( $this->iIconDepth == DEPTH_BACK ) {
+                $this->StrokeIcons();
+            }
+
 		}
 
         // Plot points
@@ -808,19 +813,17 @@ class RadarGraph extends Graph {
             $this->plots[$i]->Stroke($this->img, $this->posy, $this->yscale, $a);
         }
 
-        if( $this->grid_depth != DEPTH_BACK ) {
-            // Draw axis and grid
-            for( $i=0,$a=M_PI/2; $i < $nbrpnts; ++$i, $a += $astep ) {
-                $this->axis->Stroke($this->posy,$a,$grid[$i],$this->axis_title[$i],$i==0);
+        if( !$_csim ) {
+            if( $this->grid_depth != DEPTH_BACK ) {
+                // Draw axis and grid
+                for( $i=0,$a=M_PI/2; $i < $nbrpnts; ++$i, $a += $astep ) {
+                   $this->axis->Stroke($this->posy,$a,$grid[$i],$this->axis_title[$i],$i==0);
+                }
+                $this->grid->Stroke($this->img,$grid);
             }
-        }
 
-		if( !$_csim ) {
-
-        	$this->grid->Stroke($this->img,$grid);
         	$this->StrokeTitles();
        		$this->StrokeTexts();
-
        		if( $this->iIconDepth == DEPTH_FRONT ) {
         		$this->StrokeIcons();
         	}

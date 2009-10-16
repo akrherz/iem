@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_bar.php");
-require_once ("jpgraph/jpgraph_line.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
+require_once ('jpgraph/jpgraph_line.php');
 
 // Some "random" data
 $ydata  = array(10,120,80,190,260,170,60,40,20,230);

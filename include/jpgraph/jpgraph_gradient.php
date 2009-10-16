@@ -3,7 +3,7 @@
  // File:        JPGRAPH_GRADIENT.PHP
  // Description: Create a color gradient
  // Created:     2003-02-01
- // Ver:         $Id: jpgraph_gradient.php 1301 2009-06-15 07:03:27Z ljp $
+ // Ver:         $Id: jpgraph_gradient.php 1761 2009-08-01 08:31:28Z ljp $
  //
  // Copyright (c) Aditus Consulting. All rights reserved.
  //========================================================================
@@ -50,7 +50,7 @@ class Gradient {
     // $to_color End color in the gradient
     // $style  Which way is the gradient oriented?
     function FilledRectangle($xl,$yt,$xr,$yb,$from_color,$to_color,$style=1) {
-
+        $this->img->SetLineWeight(1);
         switch( $style ) {
             case GRAD_VER:
                 $steps = ceil(abs($xr-$xl)+1);
@@ -65,7 +65,7 @@ class Gradient {
 
             case GRAD_HOR:
                 $steps = ceil(abs($yb-$yt)+1);
-                $delta = $yb>=$yt ? 1 : -1;
+                $delta = $yb >= $yt ? 1 : -1;
                 $this->GetColArray($from_color,$to_color,$steps,$colors,$this->numcolors);
                 for($i=0,$y=$yt; $i < $steps; ++$i) {
                     $this->img->current_color = $colors[$i];

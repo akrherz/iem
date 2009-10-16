@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
 
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_log.php");
-require_once ("jpgraph/jpgraph_error.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_log.php');
+require_once ('jpgraph/jpgraph_error.php');
 
 $xdata = array( 2.0,  2.5,  3.0,  4.0,  5.0,  6.0,  8.0, 10.0,
                12.0, 15.0, 20.0, 25.0, 30.0, 40.0, 50.0, 60.0,

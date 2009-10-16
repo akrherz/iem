@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
 // $Id: canvas_jpgarchex.php,v 1.3 2002/08/29 10:14:19 aditus Exp $
-include "jpgraph/jpgraph.php";
-include "jpgraph/jpgraph_canvas.php";
-include "jpgraph/jpgraph_canvtools.php";
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_canvas.php');
+require_once ('jpgraph/jpgraph_canvtools.php');
 
 // Scale we are using
 $ymax=24;

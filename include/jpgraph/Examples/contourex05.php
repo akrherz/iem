@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
 // Contour example 05
 
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_contour.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_contour.php');
 
 $data = array(
     array(0.000,0.001,0.002,0.005,-0.003,-0.053,-0.156,-0.245,-0.235,-0.143,-0.056,-0.014,-0.002,0.000,0.000),

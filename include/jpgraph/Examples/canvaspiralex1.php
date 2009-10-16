@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
 // $Id: canvaspiralex1.php,v 1.1 2002/10/26 11:35:42 aditus Exp $
-include "jpgraph/jpgraph.php";
-include "jpgraph/jpgraph_canvas.php";
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_canvas.php');
 
 
 if( empty($_GET['r']) ) 

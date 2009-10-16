@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
-require_once('../jpgraph.php');
-require_once('../jpgraph_canvas.php');
-require_once('../jpgraph_colormap.inc.php');
+require_once ('../jpgraph.php');
+require_once ('../jpgraph_canvas.php');
+require_once ('../jpgraph_colormap.inc.php');
 
 class ColorMapDriver {
 	const WIDTH = 600; // Image width

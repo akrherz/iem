@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_gantt.php");
-require_once ("jpgraph/jpgraph_flags.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_gantt.php');
+require_once ('jpgraph/jpgraph_flags.php');
 
 $graph = new GanttGraph();
 $graph->SetBox();

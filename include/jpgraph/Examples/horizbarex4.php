@@ -1,7 +1,7 @@
 <?php // content="text/plain; charset=utf-8"
 // $Id: horizbarex4.php,v 1.4 2002/11/17 23:59:27 aditus Exp $
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_bar.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_bar.php');
 
 $datay=array(1992,1993,1995,1996,1997,1998,2001);
 

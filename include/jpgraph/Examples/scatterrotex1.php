@@ -1,6 +1,6 @@
 <?php // content="text/plain; charset=utf-8"
-require_once ("jpgraph/jpgraph.php");
-require_once ("jpgraph/jpgraph_scatter.php");
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_scatter.php');
 
 $datax = array(3.5,3.7,3,4,6.2,6,3.5,8,14,8,11.1,13.7);
 $datay = array(20,22,12,13,17,20,16,19,30,31,40,43);

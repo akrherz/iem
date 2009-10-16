@@ -3,7 +3,7 @@
 // File:        jpgraph_ttf.inc.php
 // Description: Handling of TTF fonts
 // Created:     2006-11-19
-// Ver:         $Id: jpgraph_ttf.inc.php 1545 2009-07-10 22:15:38Z ljp $
+// Ver:         $Id: jpgraph_ttf.inc.php 1858 2009-09-28 14:39:51Z ljp $
 //
 // Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -587,7 +587,9 @@ class  SymChar {
         array('para','00A7'),
         array('tm','2122'),   /* Trademark symbol */
         array('rtm','00AE'),   /* Registered trademark */
-        array('degree','00b0')
+        array('degree','00b0'),
+        array('lte','2264'), /* Less than or equal */
+        array('gte','2265'), /* Greater than or equal */
 
         );
 
@@ -601,13 +603,13 @@ class  SymChar {
         if( $found ) {
             $ca = $iSymbols[--$i];
             if( $aCapital && count($ca)==3 )
-            $s = $ca[2];
+                $s = $ca[2];
             else
-            $s = $ca[1];
+                $s = $ca[1];
             return sprintf('&#%04d;',hexdec($s));
         }
         else
-        return '';
+            return '';
     }
 }
 

@@ -1,8 +1,8 @@
 <?php // content="text/plain; charset=utf-8"
 
-include "jpgraph/jpgraph.php";
-include "jpgraph/jpgraph_canvas.php";
-include "jpgraph/jpgraph_canvtools.php";
+require_once ('jpgraph/jpgraph.php');
+require_once ('jpgraph/jpgraph_canvas.php');
+require_once ('jpgraph/jpgraph_canvtools.php');
 
 $width = 700;
 $height = 800;
