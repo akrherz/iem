@@ -9,10 +9,6 @@ $HEADEXTRA = '
 ';
 include("$rootpath/include/header.php"); 
 ?>
-<div id="yearslider"></div>
-<div id="dayslider"></div>
-<div id="timeslider"></div>
-<div id="displaydt"></div>
+<div id="theform"></div>
 <img id="imagedisplay" src="../data/mesonet.gif" />
-
 <?php include("$rootpath/include/footer.php"); ?>
