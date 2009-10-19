@@ -36,7 +36,7 @@ $myOb = $iemdb->getSingleSite($station);
 
 	$width = 320;
 	$height = 240;
-	$Font = './kcci.ttf';
+	$Font = '/mesonet/data/gis/static/fonts/kcci.ttf';
 
 	$gif = ImageCreate($width,$height);
 
@@ -63,7 +63,7 @@ $myOb = $iemdb->getSingleSite($station);
 //imagettftext ( resource image, int size, int angle, int x, int y, int col, string fontfile, string text)
 
 // imagefilledrectangle ( $gif, 167, 25, 264, 36, $black);
- ImageTTFText($gif, 10, 0, 169 , 34, $white, "./kcci.ttf", strtoupper(substr($cities['KCCI'][$station]["short"], 0, 16)) );
+ ImageTTFText($gif, 10, 0, 169 , 34, $white, $Font, strtoupper(substr($cities['KCCI'][$station]["short"], 0, 16)) );
 
  // Box to hold current dew Point!
 // imagerectangle ( $gif, 10, 40, 40, 60, $black);
@@ -97,7 +97,7 @@ if ($dwpf > -99){
  $width = 74;
  $x_pad = ($width - $dx) / 2 ;
 if ($feel > -99){
- ImageTTFText($gif, 22, 0, $x0 + $x_pad, 205, $white, "./kcci.ttf", $feel );
+ ImageTTFText($gif, 22, 0, $x0 + $x_pad, 205, $white, $Font, $feel );
 }
 // Precip
  $size = imagettfbbox(22, 0, $Font, $pday );
@@ -105,7 +105,7 @@ if ($feel > -99){
  $x0 = 106;
  $width = 76;
  $x_pad = ($width - $dx) / 2 ;
- ImageTTFText($gif, 22, 0, $x0 + $x_pad , 205, $white, "./kcci.ttf", $pday );
+ ImageTTFText($gif, 22, 0, $x0 + $x_pad , 205, $white, $Font, $pday );
 
 // Gust
  $size = imagettfbbox(22, 0, $Font, $gustDir ."-".$gust);
@@ -125,7 +125,7 @@ if ($feel > -99){
 
 
 // Time
- ImageTTFText($gif, 12, 0, 150 , 235, $white, "./kcci.ttf", $time );
+ ImageTTFText($gif, 12, 0, 150 , 235, $white, $Font, $time );
 
 // TempF
  $size = imagettfbbox(22, 0, $Font, $tmpf);
@@ -134,7 +134,7 @@ if ($feel > -99){
  $width = 55;
  $x_pad = ($width - $dx) / 2 ;
 if ($tmpf > -99){
- ImageTTFText($gif, 22, 0, $x0 + $x_pad, 205, $white, "./kcci.ttf", $tmpf );
+ ImageTTFText($gif, 22, 0, $x0 + $x_pad, 205, $white, $Font, $tmpf );
 }
 
 // Time to do the rotation!!!
@@ -186,17 +186,17 @@ if ($tmpf > -99){
  imagefilledrectangle($gif, $leftside - 50, $minT_y - $maxLineHeight - 1 - 20,
                   $leftside - 30, $minT_y - $maxLineHeight - 1, $red);
  ImageTTFText($gif, 16, 0, $leftside - 50 + 2 , $minT_y - $maxLineHeight -1 -2, 
-     $white, "./kcci.ttf", $maxTemp );
+     $white, $Font, $maxTemp );
  ImageTTFText($gif, 10, 0, $leftside - 50 + 1 , $minT_y - $maxLineHeight -1 -20 -2, 
-     $white, "./kcci.ttf", "MAX");
+     $white, $Font, "MAX");
 
 // MIN
  imagefilledrectangle($gif, $leftside - 50, $minT_y - $minLineHeight - 1 ,
                   $leftside - 30, $minT_y - $minLineHeight - 1 + 20, $blue);
  ImageTTFText($gif, 16, 0, $leftside - 50 + 2 , $minT_y - $minLineHeight - 1 +20 -2, 
-     $white, "./kcci.ttf", $minTemp );
+     $white, $Font, $minTemp );
  ImageTTFText($gif, 10, 0, $leftside - 50 + 1 , $minT_y - $minLineHeight -1 +20 +10, 
-     $white, "./kcci.ttf", "MIN");
+     $white, $Font, "MIN");
 
 //	$size = imagettfbbox(12, 0, $Font, $Scities[$site]["city"]);
 //	$dx = abs($size[2] - $size[0]);
