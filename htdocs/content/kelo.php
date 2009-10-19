@@ -35,7 +35,7 @@ $myOb = $iemdb->getSingleSite($station);
 
 	$width = 320;
 	$height = 240;
-	$Font = './kcci.ttf';
+	$Font = '/mesonet/data/gis/static/fonts/kcci.ttf';
 
 	$gif = ImageCreate($width,$height);
 
@@ -62,7 +62,7 @@ $myOb = $iemdb->getSingleSite($station);
 //imagettftext ( resource image, int size, int angle, int x, int y, int col, string fontfile, string text)
 
 // imagefilledrectangle ( $gif, 167, 25, 264, 36, $black);
- ImageTTFText($gif, 12, 0, 67, 32, $white, "./kcci.ttf", $myOb->db["sname"] );
+ ImageTTFText($gif, 12, 0, 67, 32, $white, $Font, $myOb->db["sname"] );
 
 // RelHumidity
 if ($relh == 0) $relh = "--";
@@ -89,7 +89,7 @@ if ($dwpf == "") $dwpf = "--";
  $x0 = 215;
  $width = 74;
  $x_pad = ($width - $dx) / 2 ;
- ImageTTFText($gif, 22, 0, $x0 + $x_pad, 208, $white, "./kcci.ttf", $feel );
+ ImageTTFText($gif, 22, 0, $x0 + $x_pad, 208, $white, $Font, $feel );
 
 // Precip
  $size = imagettfbbox(22, 0, $Font, $pday );
@@ -97,7 +97,7 @@ if ($dwpf == "") $dwpf = "--";
  $x0 = 109;
  $width = 76;
  $x_pad = ($width - $dx) / 2 ;
- ImageTTFText($gif, 22, 0, $x0 + $x_pad , 210, $white, "./kcci.ttf", $pday );
+ ImageTTFText($gif, 22, 0, $x0 + $x_pad , 210, $white, $Font, $pday );
 
 // Gust
  $size = imagettfbbox(22, 0, $Font, $gustDir ."-".$gust);
@@ -117,7 +117,7 @@ if ($dwpf == "") $dwpf = "--";
 
 
 // Time
- ImageTTFText($gif, 13, 0, 150 , 237, $black, "./kcci.ttf", $time );
+ ImageTTFText($gif, 13, 0, 150 , 237, $black, $Font, $time );
 
 // TempF
  $size = imagettfbbox(22, 0, $Font, $tmpf);
@@ -125,7 +125,7 @@ if ($dwpf == "") $dwpf = "--";
  $x0 = 28;
  $width = 55;
  $x_pad = ($width - $dx) / 2 ;
- ImageTTFText($gif, 22, 0, $x0 + $x_pad, 205, $white, "./kcci.ttf", $tmpf );
+ ImageTTFText($gif, 22, 0, $x0 + $x_pad, 205, $white, $Font, $tmpf );
 
 // Max Tmpf
  $size = imagettfbbox(22, 0, $Font, $maxTemp);
@@ -133,7 +133,7 @@ if ($dwpf == "") $dwpf = "--";
  $x0 = 28;
  $width = 55;
  $x_pad = ($width - $dx) / 2 ;
- ImageTTFText($gif, 22, 0, $x0 + $x_pad, 95, $white, "./kcci.ttf", $maxTemp );
+ ImageTTFText($gif, 22, 0, $x0 + $x_pad, 95, $white, $Font, $maxTemp );
 
 // Min Tmpf
  $size = imagettfbbox(22, 0, $Font, $minTemp);
@@ -141,7 +141,7 @@ if ($dwpf == "") $dwpf = "--";
  $x0 = 28;
  $width = 55;
  $x_pad = ($width - $dx) / 2 ;
- ImageTTFText($gif, 22, 0, $x0 + $x_pad, 145, $white, "./kcci.ttf", $minTemp );
+ ImageTTFText($gif, 22, 0, $x0 + $x_pad, 145, $white, $Font, $minTemp );
 
 
 header("content-type: image/png");

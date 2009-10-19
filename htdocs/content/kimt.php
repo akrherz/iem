@@ -36,7 +36,7 @@ $myOb = $iemdb->getSingleSite($station);
 
 	$width = 320;
 	$height = 240;
-	$Font = './kimt.ttf';
+	$Font = '/mesonet/data/gis/static/fonts/kimt.ttf';
 
 	$gif = ImageCreateTrueColor($width,$height);
 
@@ -128,7 +128,7 @@ $myOb = $iemdb->getSingleSite($station);
 
 
 // Time
- ImageTTFText($gif, 12, 0, 150 , 235, $white, "./kcci.ttf", $time );
+ ImageTTFText($gif, 12, 0, 150 , 235, $white, $Font, $time );
 
 // TempF
  $size = imagettfbbox(22, 0, $Font, $tmpf);
@@ -136,7 +136,7 @@ $myOb = $iemdb->getSingleSite($station);
  $x0 = 115;
  $width = 55;
  $x_pad = ($width - $dx) / 2 ;
- ImageTTFText($gif, 22, 0, $x0 + $x_pad, 72, $white, "./kcci.ttf", $tmpf );
+ ImageTTFText($gif, 22, 0, $x0 + $x_pad, 72, $white, $Font, $tmpf );
 
 // Time to do the rotation!!!
 //              x   y    x   y    x   y
