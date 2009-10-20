@@ -14,6 +14,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
   $z = Array("id" => $row["id"],
         "template" => $row["template"], 
         "name" => $row["name"], 
+        "interval" => $row["interval"],
         "sts" => $row["sts"]);
   $ar["products"][] = $z;
 }

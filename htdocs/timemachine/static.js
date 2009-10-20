@@ -1,6 +1,8 @@
 /* Static Javascript stuff to support the Time Machine :) */
 Ext.onReady( function(){
 
+var currentURI = "";
+
 // http://www.extjs.com/forum/showthread.php?t=52585
 Ext.override(Ext.form.ComboBox, {
     // private
@@ -42,20 +44,33 @@ ys.on('change', function(){ updateDT() });
 
 var ds = new Ext.Slider({
     id       : 'DaySlider',
-    width    : 366,
+    width    : 732,
     minValue : 0,
-    maxValue : 365
+    maxValue : 365,
+    colspan  : 7
 });
 ds.on('change', function(){ updateDT() });
 
-var tm = new Ext.Slider({
-    id       : 'TimeSlider',
-    width    : 366,
-    minValue : 0,
-    maxValue : 276,
-    increment: 12
-});
-tm.on('change', function(){ updateDT() });
+var ms = new Ext.Slider({
+        id       : 'MinuteSlider',
+        width    : 120,
+        minValue : 0,
+        maxValue : 59,
+        increment: 60,
+        listeners: {
+          'change': function(){ updateDT(); }
+        }
+      });
+var hs = new Ext.Slider({
+        id       : 'HourSlider',
+        width    : 120,
+        minValue : 0,
+        maxValue : 23,
+        increment: 1,
+        listeners: {
+          'change': function(){ updateDT(); }
+        }
+       });
 
 var store = new Ext.data.JsonStore({
     autoLoad: true,
@@ -63,7 +78,8 @@ var store = new Ext.data.JsonStore({
             {name: 'id', type: 'int'},
             'name',
             'template',
-            'sts'
+            'sts',
+            {name: 'interval', type: 'int'}
         ],
         idProperty: 'id',
         root: 'products',
@@ -89,41 +105,67 @@ combo.store.on('load', function(){
   if (tokens.length == 2){
     var tokens2 = tokens[1].split(".");
     combo.setValue( tokens2[0] );
-    gts = Date.parseDate( tokens2[1], "YmdHi" );
-    lts = gts.fromUTC();
-    ys.setValue( lts.format('Y') );
-    ds.setValue( lts.format('z') );
-    tm.setValue( (lts.format('G') * 12) + (lts.format('i') / 5) );
+    if (tokens2[1] != "0"){
+      gts = Date.parseDate( tokens2[1], "YmdHi" );
+      lts = gts.fromUTC();
+      ys.setValue( lts.format('Y') );
+      ds.setValue( lts.format('z') );
+      hs.setValue( lts.format('G') );
+      if (lts.format('i') != "00"){
+        ms.setValue( lts.format('i') );
+      }
+    } else {
+      lts = new Date();
+      ys.setValue( lts.format('Y') );
+      ds.setValue( lts.format('z') );
+      hs.setValue( lts.format('G') );
+      if (lts.format('i') != "00"){
+        ms.setValue( lts.format('i') );
+      }
+    }
   } else {
+    /* We are going to default to the IEM Plot */
     combo.setValue( 1 );
     lts = new Date();
     ys.setValue( lts.format('Y') );
     ds.setValue( lts.format('z') );
-    tm.setValue( (lts.format('G') * 12) + (lts.format('i') / 5) );
+    hs.setValue( lts.format('G') );
+    ms.setValue( 0 );
+    ms.disable();
   }
+});
+combo.on('select', function(cb, record, idx){
+  if (record.data.interval >= 60){  ms.disable(); }
+  else { ms.enable(); }
+  ms.interval = record.data.interval;
+  updateDT();
 });
 
 
-var displayDT = new Ext.form.TextField({
-    width    :  600,
-    editable : false,
-    colspan  : 4
+var displayDT = new Ext.Toolbar.TextItem({
+    text  : 'Application Loading.....',
+    width : 220,
+    style:{'font-weight': 'bold'}
 });
 
 function updateDT(){
   y = ys.getValue();
   d = ds.getValue();
-  t = tm.getValue();
+  h = Ext.getCmp('HourSlider').getValue();
+  i = Ext.getCmp('MinuteSlider').getValue();
 
-  dt = new Date('01/01/'+y).add(Date.DAY, d).add(Date.MINUTE, t*5);
-  displayDT.setValue( dt.format('l M d Y g:i A T') );
+  dt = new Date('01/01/'+y).add(Date.DAY, d).add(Date.HOUR, h).add(Date.MINUTE,i);
+  displayDT.setText( dt.format('l M d Y g:i A T') );
   gdt = dt.toUTC();
 
   meta = combo.getStore().getById( combo.getValue() );
-  tpl = meta.data.template.replace('%Y', '{0}').replace('%m', '{1}').replace('%d', '{2}').replace('%H','{3}').replace('%i','{4}');
+  tpl = meta.data.template.replace(/%Y/g, '{0}').replace(/%m/g, '{1}').replace(/%d/g, '{2}').replace(/%H/g,'{3}').replace(/%i/g,'{4}');
 
-  Ext.get("imagedisplay").dom.src = String.format("http://mesonet.agron.iastate.edu/archive/data/"+tpl, gdt.format("Y"), gdt.format("m"), gdt.format("d"), gdt.format("H"), gdt.format("i") );
-
+  uri = String.format("http://mesonet.agron.iastate.edu/archive/data/"+tpl, gdt.format("Y"), gdt.format("m"), gdt.format("d"), gdt.format("H"), gdt.format("i") );
+  if (uri != currentURI){
+    Ext.get("imagedisplay").dom.src = uri;
+    currentURI = uri;
+  }
   window.location.href = String.format("#{0}.{1}", combo.getValue(), gdt.format('YmdHi')); 
 
 }
@@ -132,10 +174,56 @@ new Ext.form.FormPanel({
     renderTo: 'theform',
     layout  : 'table',
     layoutConfig: {
-        columns: 4
+        columns: 8
     },
-    items: [{html: 'Year'}, ys, {html: 'Day:'},ds,
-            {html: 'Time:'}, tm, {html: 'Product'}, combo, displayDT]
+    buttonAlign: 'left',
+    fbar: [
+      new Ext.Button({
+        text: '<< One Year',
+        handler: function(){
+            ys.setValue( ys.getValue() - 1);
+        }
+      }),
+      new Ext.Button({
+        text: '<< One Day',
+        handler: function(){
+            ds.setValue( ds.getValue() - 1);
+        }
+      }),
+      new Ext.Button({
+        text: '<< One Hour',
+        handler: function(){
+            hs.setValue( hs.getValue() - 1);
+        }
+      }),
+      displayDT,
+      new Ext.Button({
+        text: 'One Hour >>',
+        handler: function(){
+            hs.setValue( hs.getValue() + 1);
+        }
+      }),
+      new Ext.Button({
+        text: 'One Day >>',
+        handler: function(){
+            ds.setValue( ds.getValue() + 1);
+        }
+      }),
+      new Ext.Button({
+        text: 'One Year >>',
+        handler: function(){
+            ys.setValue( ys.getValue() + 1);
+        }
+      }),
+      '->'],
+    defaults : {
+      bodyStyle: 'border:0px;padding-left:5px;'
+    },
+    items: [
+      {html: 'Product: '}, combo, {html: 'Year: '}, ys,
+      {html: 'Hour: '}, hs,       {html: 'Minute: '}, ms,
+      {html: 'Day of Year: '}, ds
+    ]
 });
 
 });

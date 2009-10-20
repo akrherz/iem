@@ -39,6 +39,7 @@ $_pages = Array(
     "hrain" => Array("title" => "Hourly Precip", "url" => "/rainfall/obhour.phtml"),
     "mos" => Array("title" => "MOS", "url" => "/mos/"),
     "schema" => Array("title" => "Schema", "url" => "/archive/schema.php"),
+    "tm" => Array("title" => "Time Machine", "url" => "/timemachine/"),
  ),
  "current" => Array(
     "base" => Array("title" => "Current", "url" => "/current/"),
