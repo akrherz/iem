@@ -138,7 +138,7 @@ $cameras = Array(
     "ip" => "69.66.104.40", "county" => "Jasper", "port" => "80"),
 "KCRG-015" => Array("sts" => mktime(9,0,0,10, 19,2009), "ets" => time(),
     "name" => "Olin", "removed" => False, "active" => True, "lat" => 41.998, "lon" => -91.142,
-    "state" => "IA", "network" => "KCRG", "moviebase" => "None",
+    "state" => "IA", "network" => "KCRG", "moviebase" => "olin",
     "ip" => "207.177.36.11", "county" => "Jones", "port" => "1999"),
 "KCCI-031" => Array("sts" => mktime(9,0,0,11, 9,2007), "ets" => time(),
     "name" => "Osceola", "removed" => False, "active" => True, "lat" => 41.0313, "lon" => -93.7277,
