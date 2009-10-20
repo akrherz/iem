@@ -105,6 +105,7 @@ combo.store.on('load', function(){
   if (tokens.length == 2){
     var tokens2 = tokens[1].split(".");
     combo.setValue( tokens2[0] );
+    ms.increment = combo.store.getById( tokens2[0] ).data.interval;
     if (tokens2[1] != "0"){
       gts = Date.parseDate( tokens2[1], "YmdHi" );
       lts = gts.fromUTC();
@@ -137,7 +138,8 @@ combo.store.on('load', function(){
 combo.on('select', function(cb, record, idx){
   if (record.data.interval >= 60){  ms.disable(); }
   else { ms.enable(); }
-  ms.interval = record.data.interval;
+  ms.increment = record.data.interval;
+  ms.setValue( ms.getValue() );
   updateDT();
 });
 
