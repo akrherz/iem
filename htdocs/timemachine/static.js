@@ -75,7 +75,7 @@ var hs = new Ext.Slider({
 var store = new Ext.data.JsonStore({
     autoLoad: true,
         fields: [
-            {name: 'id', type: 'int'},
+            'id',
             'name',
             'template',
             'sts',
