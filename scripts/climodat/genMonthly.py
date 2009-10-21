@@ -207,8 +207,4 @@ YEAR   JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC   A
     out.write("%6.2f" % (moAvg,) )
 
   out.write("%6.2f\n" % (yrAvg / float(YEARS -1) ,) )
-  out.write(""" PRECIPITATION MEANS AND TOTALS ARE BASED ON DATA AVAILABLE
- NO ATTEMPT WAS MADE TO ESTIMATE MISSING PRECIPITATION DATA
- *****************************************************************************************
- *****************************************************************************************\n""")
   out.close()
