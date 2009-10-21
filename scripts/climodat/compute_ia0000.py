@@ -51,8 +51,8 @@ for var in ['high','low','precip','snow']:
   data[var] = do(now, var)
 print now, data
 sql = "INSERT into alldata \
-(stationid, day, high, low, precip, snow, snowd, estimated, year, month, sday)\
- VALUES ('ia0000', '%s', %.0f, %.0f, %.2f, %.1f, 0, true, %s, %s, '%s')" \
+(stationid, day, high, low, precip, snow, snowd, estimated, year, month, sday, climoweek)\
+ VALUES ('ia0000', '%s', %.0f, %.0f, %.2f, %.1f, 0, true, %s, %s, '%s', (select climoweek from climoweek where sday = '%s'))" \
 % (now.strftime("%Y-%m-%d"), data['high'], data['low'], data['precip'], \
-data['snow'], now.year, now.month, now.strftime("%m%d"))
+data['snow'], now.year, now.month, now.strftime("%m%d"), now.strftime("%m%d"))
 coop.query(sql)
