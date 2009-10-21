@@ -5,7 +5,7 @@ _THISYEAR = 2009
 _ENDYEAR = 2010
 #_ENDYEAR = 1951
 _QCENDTS = mx.DateTime.DateTime(2009,6,1)
-_ARCHIVEENDTS = mx.DateTime.DateTime() - mx.DateTime.RelativeDateTime(days=1)
+_ARCHIVEENDTS = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
 _ENDTS = mx.DateTime.DateTime(2010,1,1)
 #_YEARS = 58
 #_YRCNT = [0,58,58,58,57,57,57,57,57,57,57,57,57]
