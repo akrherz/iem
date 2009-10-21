@@ -1,11 +1,13 @@
 <?php
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-  /** gsplot.phtml
-   * - Make Growing Season Plots
-   */
-$var = isset($_GET["var"]) ? $_GET["var"]: "";
-$year = isset($_GET["year"]) ? $_GET["year"]: "";
+include("$rootpath/include/forms.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("IACLIMATE");
+$cities = $nt->table;
+
+$var = isset($_GET["var"]) ? $_GET["var"]: "gdd50";
+$year = isset($_GET["year"]) ? $_GET["year"]: 2008;
 $smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: 5;
 $sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
 $emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: 10;
@@ -25,9 +27,10 @@ $gs_start = Array(
   2003 => adodb_mktime(0,0,0,5,1,2003),
   2004 => adodb_mktime(0,0,0,5,1,2004),
   2005 => adodb_mktime(0,0,0,5,1,2005),
-  2006 => adodb_mktime(0,0,0,5,1,2005),
-  2007 => adodb_mktime(0,0,0,5,1,2005),
-  2008 => adodb_mktime(0,0,0,5,1,2006) );
+  2006 => adodb_mktime(0,0,0,5,1,2006),
+  2007 => adodb_mktime(0,0,0,5,1,2007),
+  2008 => adodb_mktime(0,0,0,5,1,2008),
+  2008 => adodb_mktime(0,0,0,5,1,2009) );
 $gs_end = Array(
   1998 => adodb_mktime(0,0,0,10,1,1998),
   1999 => adodb_mktime(0,0,0,10,1,1999),
@@ -37,13 +40,11 @@ $gs_end = Array(
   2003 => adodb_mktime(0,0,0,10,1,2003),
   2004 => adodb_mktime(0,0,0,10,1,2004),
   2005 => adodb_mktime(0,0,0,10,1,2005),
-  2006 => adodb_mktime(0,0,0,10,1,2005),
-  2007 => adodb_mktime(0,0,0,10,1,2005),
-  2008 => adodb_mktime(0,0,0,10,1,2006) );
+  2006 => adodb_mktime(0,0,0,10,1,2006),
+  2007 => adodb_mktime(0,0,0,10,1,2007),
+  2008 => adodb_mktime(0,0,0,10,1,2008),
+  2008 => adodb_mktime(0,0,0,10,1,2009) );
 
-if (strlen($var) == 0)  $var = "gdd50";
-if (strlen($year) == 0)  $year = 2008;
-//if ($year > 2003) $year = 2003;
 if (strlen($smonth) > 0 && strlen($sday) > 0)
   $gs_start[$year] = adodb_mktime(0,0,0,$smonth,$sday,$year);
 if (strlen($emonth) > 0 && strlen($eday) > 0)
@@ -60,11 +61,8 @@ $eday = strftime("%d", $gs_end[$year]);
 $smonth = strftime("%m", $gs_start[$year]);
 $sday = strftime("%d", $gs_start[$year]);
 
-include("$rootpath/include/forms.php");
 
-?>
-
-<?php $TITLE = "IEM | NWS COOP Growing Season Data";
+$TITLE = "IEM | NWS COOP Growing Season Data";
 $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
@@ -73,17 +71,16 @@ function new_window(url) {
 } 
 //END Script-->
 </script>';
+$THISPAGE="networks-coop";
 include("$rootpath/include/header.php"); ?>
 
 <div class="text">
-<a href="http://mesonet.agron.iastate.edu/COOP/">NWS COOP</a> &nbsp;<b> > </b>
-&nbsp; Growing Season Data
 
 <p>With this application, you can total a parameter of your
 choice over a duration of your choice.  The resulting data is presented 
-graphically as well as textually for use in a GIS.  Data is updated through a couple of months ago.
+graphically as well as textually for use in a GIS. 
 
-<form method="GET" action="gsplot.phtml">
+<form method="GET" action="gsplot.phtml" name="theform">
 <table>
  <tr>
   <th colspan=5><h3 class="subtitle">Growing Season Charts</h3></th></tr>
@@ -114,9 +111,6 @@ graphically as well as textually for use in a GIS.  Data is updated through a co
 
 <?php
 dl($mapscript);
-include("$rootpath/include/network.php");
-$nt = new NetworkTable("IACLIMATE");
-$cities = $nt->table;
 
 function mktitlelocal($map, $imgObj, $titlet) { 
  
@@ -294,8 +288,6 @@ foreach($vals as $key => $value){
      round($value, $rnd[$var]) );
   $pt->free();
 }
-$map->drawLabelCache($img);
-
 
 if ($i == 0)
    plotNoData($map, $img);
@@ -322,10 +314,10 @@ space restrictions.</td>
 </table>
 
 <p>
-<img src="/images/gisready.png"><h3 class="heading"> Data Listing</h3>
+<img src="<?php echo $rooturl; ?>/images/gisready.png"><h3 class="heading"> Data Listing</h3>
 <pre><?php echo $tr; ?></pre>
 
-<p>You should be able to 'copy & paste' this raw data listing into a simple
+<p>You should be able to 'copy &amp; paste' this raw data listing into a simple
 text editor and save the data file on your machine.  Most GIS systems can 
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.</div>
