@@ -167,7 +167,10 @@ def commit( ts ):
 
 
 if __name__ == '__main__':
-    ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
+    if len(sys.argv) == 4:
+        ts = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+    else:
+        ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
     estimate_hilo( ts )
     estimate_precip( ts )
     estimate_snow( ts )
