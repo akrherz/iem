@@ -1,6 +1,6 @@
 # Compute the stats for the ia0000 site, Iowa's Average Site
 
-import numpy, Ngl
+import numpy, Ngl, sys
 import mx.DateTime
 from pyIEM import iemdb, stationTable
 i = iemdb.iemdb()
@@ -42,7 +42,10 @@ def do(now, var):
   return numpy.average(g)
 
 
-now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
+if len(sys.argv) == 4:
+  now = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+else:
+  now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
 data = {}
 for var in ['high','low','precip','snow']:
   data[var] = do(now, var)
