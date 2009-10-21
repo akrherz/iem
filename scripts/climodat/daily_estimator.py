@@ -114,10 +114,14 @@ def estimate_snow( ts ):
         snowdepth = snowdA[stations[id]['gridx'], stations[id]['gridy']]
         if snowfall > 0 and snowfall < 0.1:
           stations[id]['snow'] = 0.0001
+        elif snowfall < 0:
+          stations[id]['snow'] = 0
         else:
           stations[id]['snow'] = snowfall
         if snowdepth > 0 and snowdepth < 0.1:
           stations[id]['snowd'] = 0.0001
+        elif snowdepth < 0:
+          stations[id]['snowd'] = 0
         else:
           stations[id]['snowd'] = snowdepth
 
