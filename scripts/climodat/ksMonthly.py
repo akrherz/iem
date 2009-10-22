@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Need something to generate a kitchen sink report of Climate Data
 # Daryl Herzmann 13 Dec 2004
 

@@ -1,9 +1,9 @@
 #!/bin/sh
 
-./drive.py
-./ksYearly.py 
-./ksMonthly.py 2009
-./dump.py
+/mesonet/python/bin/python drive.py
+/mesonet/python/bin/python ksYearly.py 
+/mesonet/python/bin/python ksMonthly.py 2009
+/mesonet/python/bin/python dump.py
 
 mv reports/* /mesonet/share/climodat/reports/
 mv ks/* /mesonet/share/climodat/ks/

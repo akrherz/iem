@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 # This will drive the modules
 
 import pg, string, mx.DateTime
