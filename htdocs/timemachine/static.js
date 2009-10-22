@@ -180,9 +180,9 @@ function updateDT(){
   displayDT.setText( appTime.format('l M d Y g:i A T') );
   gdt = appTime.toUTC();
 
-  tpl = meta.data.template.replace(/%Y/g, '{0}').replace(/%m/g, '{1}').replace(/%d/g, '{2}').replace(/%H/g,'{3}').replace(/%i/g,'{4}');
+  tpl = meta.data.template.replace(/%Y/g, '{0}').replace(/%m/g, '{1}').replace(/%d/g, '{2}').replace(/%H/g,'{3}').replace(/%i/g,'{4}').replace(/%y/g, '{5}');
 
-  uri = String.format(tpl, gdt.format("Y"), gdt.format("m"), gdt.format("d"), gdt.format("H"), gdt.format("i") );
+  uri = String.format(tpl, gdt.format("Y"), gdt.format("m"), gdt.format("d"), gdt.format("H"), gdt.format("i"), gdt.format("y") );
   if (uri != currentURI){
     Ext.get("imagedisplay").dom.src = uri;
     currentURI = uri;
