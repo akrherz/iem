@@ -65,6 +65,7 @@ var store = new Ext.data.JsonStore({
     fields    : [
             {name: 'id', type: 'int'},
             'name',
+            'groupname',
             'template',
             {name: 'sts', type: 'date', dateFormat: 'Y-m-d'},
             {name: 'interval', type: 'int'}
@@ -85,6 +86,15 @@ var combo = new Ext.form.ComboBox({
     forceSelection: true,
     store         : store,
     valueField    : 'id',
+    tpl           : new Ext.XTemplate(
+		'<tpl for=".">',
+		'<tpl if="this.groupname != values.groupname">',
+		'<tpl exec="this.groupname = values.groupname"></tpl>',
+		'<h1>{groupname}</h1>',
+		'</tpl>',
+		'<div class="x-combo-list-item">{name}</div>',
+		'</tpl>'
+	),
     displayField  : 'name',
     listeners     : {
       select      : function(cb, record, idx){
