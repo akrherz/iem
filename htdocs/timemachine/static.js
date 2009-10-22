@@ -98,7 +98,7 @@ var combo = new Ext.form.ComboBox({
       ms.increment = record.data.interval;
       ys.minValue = record.data.sts.format("Y");
       ys.setValue( ys.getValue()-1 );
-      ys.setValue( ys.getValue() );
+      ys.setValue( ys.getValue()+1 );
       updateDT();
       }
    }
@@ -120,9 +120,9 @@ store.on('load', function(){
     idx = 1;
   }
   /* Make sure that our form gets reset based on settings for record */
+  setTime();
   combo.setValue( idx );
   combo.fireEvent('select', combo, store.getById(idx), idx);
-  setTime();
 });
 
 
@@ -135,7 +135,7 @@ var displayDT = new Ext.Toolbar.TextItem({
 
 /* Helper function to set the sliders to a given time! */
 function setTime(){
-  console.log("Calling setTime(), appTime is "+ appTime);
+  //console.log("setTime() appTime is "+ appTime );
   /* Our new values */
   g = parseInt( appTime.format('G') );
   z = parseInt( appTime.format('z') );
@@ -150,8 +150,7 @@ function setTime(){
 
 /* Called whenever either the sliders update, the combobox */
 function updateDT(){
-  console.log("Calling updateDT(), appTime is "+ appTime);
-
+  //console.log("updateDT() appTime is "+ appTime );
   y = ys.getValue();
   d = ds.getValue();
   h = hs.getValue();
@@ -217,9 +216,7 @@ new Ext.form.FormPanel({
       new Ext.Button({
         text: 'One Hour >>',
         handler: function(){
-            console.log("appTime before "+ appTime );
             appTime = appTime.add(Date.HOUR, 1);
-            console.log("appTime after "+ appTime );
             setTime();
             updateDT();
         }
