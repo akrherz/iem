@@ -30,7 +30,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
          $row["id"]);
   $z = Array("id" => $row["id"],
         "template" => $tpl,
-        "groupname" => $row["groupname"] ." Webcams",
+        "groupname" => $row["network"] ." Webcams",
         "name" => $row["name"], 
         "interval" => 5,
         "sts" => $row["sts"]);
