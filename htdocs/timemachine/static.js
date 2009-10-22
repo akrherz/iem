@@ -172,7 +172,7 @@ function updateDT(){
 
   tpl = meta.data.template.replace(/%Y/g, '{0}').replace(/%m/g, '{1}').replace(/%d/g, '{2}').replace(/%H/g,'{3}').replace(/%i/g,'{4}');
 
-  uri = String.format("http://mesonet.agron.iastate.edu/archive/data/"+tpl, gdt.format("Y"), gdt.format("m"), gdt.format("d"), gdt.format("H"), gdt.format("i") );
+  uri = String.format(tpl, gdt.format("Y"), gdt.format("m"), gdt.format("d"), gdt.format("H"), gdt.format("i") );
   if (uri != currentURI){
     Ext.get("imagedisplay").dom.src = uri;
     currentURI = uri;
