@@ -17,6 +17,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
         "name" => $row["name"], 
         "groupname" => $row["groupname"], 
         "interval" => $row["interval"],
+        "time_offset" => $row["time_offset"],
         "sts" => substr($row["sts"],0,10));
   $ar["products"][] = $z;
 }
@@ -26,14 +27,15 @@ $result = pg_exec($connect, sprintf("SELECT * from webcams ORDER by network, nam
 
 for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 {
-  $tpl = sprintf("%%Y/%%m/%%d/camera/%s/%s_%%Y%%m%%d%%H%%i.jpg", $row["id"],
+  $tpl = sprintf("http://mesonet.agron.iastate.edu/archive/data/%%Y/%%m/%%d/camera/%s/%s_%%Y%%m%%d%%H%%i.jpg", $row["id"],
          $row["id"]);
   $z = Array("id" => $row["id"],
         "template" => $tpl,
         "groupname" => $row["network"] ." Webcams",
         "name" => $row["name"], 
         "interval" => 5,
-        "sts" => $row["sts"]);
+        "time_offset" => 0,
+        "sts" => substr($row["sts"],0,10));
   $ar["products"][] = $z;
 }
 

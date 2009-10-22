@@ -6,6 +6,7 @@ Ext.onReady( function(){
 
 var currentURI = "";
 var appTime = new Date();
+var appDT   = 60;
 
 /* Provides handy way to convert from local browser time to UTC */
 Ext.override(Date, {
@@ -63,7 +64,8 @@ var hs = new Ext.Slider({
 var store = new Ext.data.JsonStore({
     autoLoad  : true,
     fields    : [
-            {name: 'id', type: 'int'},
+            'id',
+            {name: 'time_offset', type: 'int'},
             'name',
             'groupname',
             'template',
@@ -98,13 +100,25 @@ var combo = new Ext.form.ComboBox({
     displayField  : 'name',
     listeners     : {
       select      : function(cb, record, idx){
+        appDT = record.data.interval ;
+
       /* If we don't have sub hourly data, disable the minute selector */
       if (record.data.interval >= 60){ ms.disable(); }
       else { ms.enable(); }
       /* If we don't have sub daily data, disable the hour selector */
       if (record.data.interval >= (60*24)){  hs.disable(); }
       else { hs.enable(); }
- 
+
+      /* If we don't have hourly data */
+      if (record.data.interval > 60){  
+         Ext.getCmp('plushour').disable();
+         Ext.getCmp('minushour').disable();
+      }
+      else {
+         Ext.getCmp('plushour').enable();
+         Ext.getCmp('minushour').enable();
+      }
+
       ms.increment = record.data.interval;
       ys.minValue = record.data.sts.format("Y");
       ys.setValue( ys.getValue()-1 );
@@ -177,8 +191,20 @@ function updateDT(){
   /* Make sure we aren't in the past! */
   if (appTime < meta.data.sts){ appTime = meta.data.sts; setTime(); return; }
 
-  displayDT.setText( appTime.format('l M d Y g:i A T') );
+  /* 
+   * We need to make sure that we are lined up with where we have data...
+   */
   gdt = appTime.toUTC();
+  min_from_0z = parseInt( gdt.format('G') ) * 60 + parseInt(gdt.format('i')) - meta.data.time_offset;
+  offset = min_from_0z % meta.data.interval;
+  console.log("TmCheck gdt= "+ gdt +" offset= "+ offset +", min_from_0z= "+ min_from_0z);
+  if (offset != 0){
+    gdt = gdt.add(Date.MINUTE, 0 - offset); 
+    appTime = gdt.fromUTC();
+    setTime();
+  }
+
+  displayDT.setText( appTime.format('l M d Y g:i A T') );
 
   tpl = meta.data.template.replace(/%Y/g, '{0}').replace(/%m/g, '{1}').replace(/%d/g, '{2}').replace(/%H/g,'{3}').replace(/%i/g,'{4}').replace(/%y/g, '{5}');
 
@@ -199,7 +225,7 @@ new Ext.form.FormPanel({
     buttonAlign: 'left',
     fbar: [
       new Ext.Button({
-        text: '<< One Year',
+        text: '<< Year',
         handler: function(){
             appTime = appTime.add(Date.YEAR, -1);
             setTime();
@@ -207,7 +233,7 @@ new Ext.form.FormPanel({
         }
       }),
       new Ext.Button({
-        text: '<< One Day',
+        text: '<< Day',
         handler: function(){
             appTime = appTime.add(Date.DAY, -1);
             setTime();
@@ -215,16 +241,34 @@ new Ext.form.FormPanel({
         }
       }),
       new Ext.Button({
-        text: '<< One Hour',
-        handler: function(){
+        id      : 'minushour',
+        text    : '<< Hour',
+        handler : function(){
             appTime = appTime.add(Date.HOUR, -1);
+            setTime();
+            updateDT();
+        }
+      }),
+      new Ext.Button({
+        text    : '<< Prev',
+        handler : function(){
+            appTime = appTime.add(Date.MINUTE, - appDT );
             setTime();
             updateDT();
         }
       }),
       displayDT,
       new Ext.Button({
-        text: 'One Hour >>',
+        text    : 'Next >>',
+        handler : function(){
+            appTime = appTime.add(Date.MINUTE, appDT );
+            setTime();
+            updateDT();
+        }
+      }),
+      new Ext.Button({
+        id      : 'plushour',
+        text: 'Hour >>',
         handler: function(){
             appTime = appTime.add(Date.HOUR, 1);
             setTime();
@@ -232,7 +276,7 @@ new Ext.form.FormPanel({
         }
       }),
       new Ext.Button({
-        text: 'One Day >>',
+        text: 'Day >>',
         handler: function(){
             appTime = appTime.add(Date.DAY, 1);
             setTime();
@@ -240,7 +284,7 @@ new Ext.form.FormPanel({
         }
       }),
       new Ext.Button({
-        text: 'One Year >>',
+        text: 'Year >>',
         handler: function(){
             appTime = appTime.add(Date.YEAR, 1);
             setTime();
