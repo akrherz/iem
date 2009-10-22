@@ -16,7 +16,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
         "template" => $row["template"], 
         "name" => $row["name"], 
         "interval" => $row["interval"],
-        "sts" => $row["sts"]);
+        "sts" => substr($row["sts"],0,10));
   $ar["products"][] = $z;
 }
 
