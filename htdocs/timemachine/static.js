@@ -1,147 +1,130 @@
-/* Static Javascript stuff to support the Time Machine :) */
+/*
+ * Static Javascript stuff to support the Time Machine :) 
+ * daryl herzmann akrherz@iastate.edu
+ */
 Ext.onReady( function(){
 
 var currentURI = "";
+var appTime = new Date();
 
-// http://www.extjs.com/forum/showthread.php?t=52585
-Ext.override(Ext.form.ComboBox, {
-    // private
-    initValue: Ext.form.ComboBox.prototype.initValue.createSequence(function() {
-        /**  
-         * @cfg displayValue
-         * A display value to initialise this {@link Ext.form.ComboBox}
-         * (only useful for ComboBoxes with remote Stores, and having valueField != displayField).
-         */
-        if (this.mode == 'local' && !!this.valueField && this.valueField != this.displayField && this.displayValue) {
-            if (this.forceSelection) {
-                this.lastSelectionText = this.displayValue;
-            }    
-            this.setRawValue(this.displayValue);
-        }    
-    })
-});
-
+/* Provides handy way to convert from local browser time to UTC */
 Ext.override(Date, {
     toUTC : function() {
-                        // Convert the date to the UTC date
         return this.add(Date.MINUTE, this.getTimezoneOffset());
     },
-    
     fromUTC : function() {
-                        // Convert the date from the UTC date
         return this.add(Date.MINUTE, -this.getTimezoneOffset());
-    }    
+    }
 }); 
-var appDT = new Date();
 
 var ys = new Ext.Slider({
     id       : 'YearSlider',
     width    : 214,
     minValue : 2001,
-    maxValue : 2009
+    maxValue : (new Date()).format("Y"),
+    listeners: {
+          'drag': function(){ updateDT(); }
+    }
 });
-ys.on('change', function(){ updateDT() });
 
 var ds = new Ext.Slider({
     id       : 'DaySlider',
     width    : 732,
     minValue : 0,
     maxValue : 365,
-    colspan  : 7
+    colspan  : 7,
+    listeners: {
+          'drag': function(){ updateDT(); }
+    }
 });
-ds.on('change', function(){ updateDT() });
 
 var ms = new Ext.Slider({
-        id       : 'MinuteSlider',
-        width    : 120,
-        minValue : 0,
-        maxValue : 59,
-        increment: 60,
-        listeners: {
-          'change': function(){ updateDT(); }
-        }
-      });
+    id       : 'MinuteSlider',
+    width    : 120,
+    minValue : 0,
+    maxValue : 59,
+    increment: 60,
+    listeners: {
+          'drag': function(){ updateDT(); }
+    }
+});
+
 var hs = new Ext.Slider({
-        id       : 'HourSlider',
-        width    : 120,
-        minValue : 0,
-        maxValue : 23,
-        increment: 1,
-        listeners: {
-          'change': function(){ updateDT(); }
-        }
-       });
+    id       : 'HourSlider',
+    width    : 120,
+    minValue : 0,
+    maxValue : 23,
+    increment: 1,
+    listeners: {
+        'drag': function(){ updateDT(); }
+    }
+ });
 
 var store = new Ext.data.JsonStore({
-    autoLoad: true,
-        fields: [
-            'id',
+    autoLoad  : true,
+    fields    : [
+            {name: 'id', type: 'int'},
             'name',
             'template',
-            'sts',
+            {name: 'sts', type: 'date', dateFormat: 'Y-m-d'},
             {name: 'interval', type: 'int'}
-        ],
-        idProperty: 'id',
-        root: 'products',
-        url: '../json/products.php'
+    ],
+    idProperty : 'id',
+    root       : 'products',
+    url        : '../json/products.php'
     });
 
 var combo = new Ext.form.ComboBox({
-    id : 'cb',
-    typeAhead: true,
-    triggerAction: 'all',
-    lazyRender:false,
-    mode: 'local',
-    editable : false,
-    allowBlank : false,
+    id            : 'cb',
+    triggerAction : 'all',
+    lazyRender    : false,
+    autoLoad      : true,
+    mode          : 'local',
+    editable      : false,
+    allowBlank    : false,
     forceSelection: true,
-    store: store,
-    valueField: 'id',
-    displayField: 'name'
+    store         : store,
+    valueField    : 'id',
+    displayField  : 'name',
+    listeners     : {
+      select      : function(cb, record, idx){
+      /* If we don't have sub hourly data, disable the minute selector */
+      if (record.data.interval >= 60){ ms.disable(); }
+      else { ms.enable(); }
+      /* If we don't have sub daily data, disable the hour selector */
+      if (record.data.interval >= (60*24)){  hs.disable(); }
+      else { hs.enable(); }
+ 
+      ms.increment = record.data.interval;
+      ys.minValue = record.data.sts.format("Y");
+      ys.setValue( ys.getValue()-1 );
+      ys.setValue( ys.getValue() );
+      updateDT();
+      }
+   }
 });
+
+
 /* This will be our hacky initializer */
-combo.store.on('load', function(){ 
+store.on('load', function(){ 
   var tokens = window.location.href.split('#');
   if (tokens.length == 2){
     var tokens2 = tokens[1].split(".");
-    combo.setValue( tokens2[0] );
-    ms.increment = combo.store.getById( tokens2[0] ).data.interval;
+    idx = tokens2[0];
     if (tokens2[1] != "0"){
       gts = Date.parseDate( tokens2[1], "YmdHi" );
-      lts = gts.fromUTC();
-      ys.setValue( lts.format('Y') );
-      ds.setValue( lts.format('z') );
-      hs.setValue( lts.format('G') );
-      if (lts.format('i') != "00"){
-        ms.setValue( lts.format('i') );
-      }
-    } else {
-      lts = new Date();
-      ys.setValue( lts.format('Y') );
-      ds.setValue( lts.format('z') );
-      hs.setValue( lts.format('G') );
-      if (lts.format('i') != "00"){
-        ms.setValue( lts.format('i') );
-      }
+      appTime = gts.fromUTC();
     }
   } else {
     /* We are going to default to the IEM Plot */
-    combo.setValue( 1 );
-    lts = new Date();
-    ys.setValue( lts.format('Y') );
-    ds.setValue( lts.format('z') );
-    hs.setValue( lts.format('G') );
-    ms.setValue( 0 );
-    ms.disable();
+    idx = 1;
   }
+  /* Make sure that our form gets reset based on settings for record */
+  combo.setValue( idx );
+  combo.fireEvent('select', combo, store.getById(idx), idx);
+  setTime();
 });
-combo.on('select', function(cb, record, idx){
-  if (record.data.interval >= 60){  ms.disable(); }
-  else { ms.enable(); }
-  ms.increment = record.data.interval;
-  ms.setValue( ms.getValue() );
-  updateDT();
-});
+
 
 
 var displayDT = new Ext.Toolbar.TextItem({
@@ -150,17 +133,44 @@ var displayDT = new Ext.Toolbar.TextItem({
     style:{'font-weight': 'bold'}
 });
 
+/* Helper function to set the sliders to a given time! */
+function setTime(){
+  console.log("Calling setTime(), appTime is "+ appTime);
+  /* Our new values */
+  g = parseInt( appTime.format('G') );
+  z = parseInt( appTime.format('z') );
+  y = parseInt( appTime.format('Y') );
+  i = parseInt( appTime.format('i') );
+
+  hs.setValue( g );
+  ds.setValue( z ); 
+  ys.setValue( y );
+  ms.setValue( i );
+}
+
+/* Called whenever either the sliders update, the combobox */
 function updateDT(){
+  console.log("Calling updateDT(), appTime is "+ appTime);
+
   y = ys.getValue();
   d = ds.getValue();
-  h = Ext.getCmp('HourSlider').getValue();
-  i = Ext.getCmp('MinuteSlider').getValue();
+  h = hs.getValue();
+  i = ms.getValue();
 
-  dt = new Date('01/01/'+y).add(Date.DAY, d).add(Date.HOUR, h).add(Date.MINUTE,i);
-  displayDT.setText( dt.format('l M d Y g:i A T') );
-  gdt = dt.toUTC();
+  newTime = new Date('01/01/'+y).add(Date.DAY, d).add(Date.HOUR, h).add(Date.MINUTE,i);
+  if (newTime == appTime){ return; }
+  appTime = newTime;
+  meta = store.getById( combo.getValue() );
+  if (! meta ){ return; }
+  /* Make sure we aren't in the future! */
+  if (appTime > (new Date())){ appTime = new Date(); setTime(); return; }
 
-  meta = combo.getStore().getById( combo.getValue() );
+  /* Make sure we aren't in the past! */
+  if (appTime < meta.data.sts){ appTime = meta.data.sts; setTime(); return; }
+
+  displayDT.setText( appTime.format('l M d Y g:i A T') );
+  gdt = appTime.toUTC();
+
   tpl = meta.data.template.replace(/%Y/g, '{0}').replace(/%m/g, '{1}').replace(/%d/g, '{2}').replace(/%H/g,'{3}').replace(/%i/g,'{4}');
 
   uri = String.format("http://mesonet.agron.iastate.edu/archive/data/"+tpl, gdt.format("Y"), gdt.format("m"), gdt.format("d"), gdt.format("H"), gdt.format("i") );
@@ -169,7 +179,6 @@ function updateDT(){
     currentURI = uri;
   }
   window.location.href = String.format("#{0}.{1}", combo.getValue(), gdt.format('YmdHi')); 
-
 }
 
 new Ext.form.FormPanel({
@@ -183,38 +192,52 @@ new Ext.form.FormPanel({
       new Ext.Button({
         text: '<< One Year',
         handler: function(){
-            ys.setValue( ys.getValue() - 1);
+            appTime = appTime.add(Date.YEAR, -1);
+            setTime();
+            updateDT();
         }
       }),
       new Ext.Button({
         text: '<< One Day',
         handler: function(){
-            ds.setValue( ds.getValue() - 1);
+            appTime = appTime.add(Date.DAY, -1);
+            setTime();
+            updateDT();
         }
       }),
       new Ext.Button({
         text: '<< One Hour',
         handler: function(){
-            hs.setValue( hs.getValue() - 1);
+            appTime = appTime.add(Date.HOUR, -1);
+            setTime();
+            updateDT();
         }
       }),
       displayDT,
       new Ext.Button({
         text: 'One Hour >>',
         handler: function(){
-            hs.setValue( hs.getValue() + 1);
+            console.log("appTime before "+ appTime );
+            appTime = appTime.add(Date.HOUR, 1);
+            console.log("appTime after "+ appTime );
+            setTime();
+            updateDT();
         }
       }),
       new Ext.Button({
         text: 'One Day >>',
         handler: function(){
-            ds.setValue( ds.getValue() + 1);
+            appTime = appTime.add(Date.DAY, 1);
+            setTime();
+            updateDT();
         }
       }),
       new Ext.Button({
         text: 'One Year >>',
         handler: function(){
-            ys.setValue( ys.getValue() + 1);
+            appTime = appTime.add(Date.YEAR, 1);
+            setTime();
+            updateDT();
         }
       }),
       '->'],
@@ -227,5 +250,6 @@ new Ext.form.FormPanel({
       {html: 'Day of Year: '}, ds
     ]
 });
+
 
 });
