@@ -102,35 +102,38 @@ var combo = new Ext.form.ComboBox({
       select      : function(cb, record, idx){
         appDT = record.data.interval ;
 
-      /* If we don't have sub hourly data, disable the minute selector */
-      if (record.data.interval >= 60){ ms.disable(); }
-      else { ms.enable(); }
-      /* If we don't have sub daily data, disable the hour selector */
-      if (record.data.interval >= (60*24)){  hs.disable(); }
-      else { hs.enable(); }
+        /* If we don't have sub hourly data, disable the minute selector */
+        if (record.data.interval >= 60){ ms.disable(); }
+        else { ms.enable(); }
 
-      /* If we don't have hourly data */
-      if (record.data.interval > 60){  
-         Ext.getCmp('plushour').disable();
-         Ext.getCmp('minushour').disable();
-      }
-      else {
-         Ext.getCmp('plushour').enable();
-         Ext.getCmp('minushour').enable();
-      }
+        /* If we don't have sub daily data, disable the hour selector */
+        if (record.data.interval >= (60*24)){  hs.disable(); }
+        else { hs.enable(); }
 
-      ms.increment = record.data.interval;
-      ys.minValue = record.data.sts.format("Y");
-      ys.setValue( ys.getValue()-1 );
-      ys.setValue( ys.getValue()+1 );
-      updateDT();
+        /* If we don't have hourly data */
+        if (record.data.interval > 60){  
+           Ext.getCmp('plushour').disable();
+           Ext.getCmp('minushour').disable();
+        }
+        else {
+           Ext.getCmp('plushour').enable();
+           Ext.getCmp('minushour').enable();
+        }
+
+        ms.increment = record.data.interval;
+        ys.minValue = record.data.sts.format("Y");
+        ys.setValue( ys.getValue()-1 );
+        ys.setValue( ys.getValue()+1 );
+        updateDT();
       }
    }
 });
 
-
-/* This will be our hacky initializer */
+/*
+ * This will be our hacky initializer 
+ */
 store.on('load', function(){ 
+  /* Figure out if the desired product is specified in the URL */
   var tokens = window.location.href.split('#');
   if (tokens.length == 2){
     var tokens2 = tokens[1].split(".");
@@ -152,9 +155,10 @@ store.on('load', function(){
 
 
 var displayDT = new Ext.Toolbar.TextItem({
-    text  : 'Application Loading.....',
-    width : 220,
-    style:{'font-weight': 'bold'}
+    text      : 'Application Loading.....',
+    width     : 220,
+    isInitial : true, 
+    style     : {'font-weight': 'bold'}
 });
 
 /* Helper function to set the sliders to a given time! */
@@ -181,7 +185,8 @@ function updateDT(){
   i = ms.getValue();
 
   newTime = new Date('01/01/'+y).add(Date.DAY, d).add(Date.HOUR, h).add(Date.MINUTE,i);
-  if (newTime == appTime){ return; }
+  if (newTime == appTime && ! displayDT.isInitial){ return; }
+  displayDT.isInitial = false;
   appTime = newTime;
   meta = store.getById( combo.getValue() );
   if (! meta ){ return; }
@@ -197,7 +202,7 @@ function updateDT(){
   gdt = appTime.toUTC();
   min_from_0z = parseInt( gdt.format('G') ) * 60 + parseInt(gdt.format('i')) - meta.data.time_offset;
   offset = min_from_0z % meta.data.interval;
-  console.log("TmCheck gdt= "+ gdt +" offset= "+ offset +", min_from_0z= "+ min_from_0z);
+  //console.log("TmCheck gdt= "+ gdt +" offset= "+ offset +", min_from_0z= "+ min_from_0z);
   if (offset != 0){
     gdt = gdt.add(Date.MINUTE, 0 - offset); 
     appTime = gdt.fromUTC();
