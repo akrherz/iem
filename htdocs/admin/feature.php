@@ -45,7 +45,7 @@ $action_links = array(
 
 if ( isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes"){
   $facebook->api_client->stream_publish($_REQUEST["story"],$attachment,
-             $action_links,157789644737,$user_id);
+             $action_links,null, 157789644737);
 }
 
 
