@@ -58,6 +58,30 @@ for i in range(len(rs)):
         x += 1
     stations[ rs[i]['id'].lower() ]['gridx'] = x
 
+def hardcode_asos_precip( ts ):
+    """
+    Hard set the ASOS DSM precip 
+    """
+    # Figure out the sites we care about
+    asos2climate = {}
+    rs = mesosite.query("""SELECT id, climate_site from stations
+         where network = 'IA_ASOS'""").dictresult()
+    for i in range(len(rs)):
+        asos2climate[ rs[i]['id'] ] = rs[i]['climate_site'].lower()
+
+    # Get the ASOS precip
+    rs = iem.query("""
+       SELECT station, pday
+       from summary_%s WHERE day = '%s' and network in ('IA_ASOS')
+       and pday >= 0 ORDER by station ASC""" % (
+       ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
+    for i in range(len(rs)):
+        cid = asos2climate[rs[i]['station']]
+        print '%s - Estimated: %.2f  DSM: %.2f' % (rs[i]['station'],
+               stations[cid]['precip'], rs[i]['pday'])
+        stations[cid]['precip'] = rs[i]['pday']
+
+
 def estimate_precip( ts ):
     """
     Estimate precipitation based on IEM Rainfall 
@@ -181,4 +205,5 @@ if __name__ == '__main__':
     estimate_hilo( ts )
     estimate_precip( ts )
     estimate_snow( ts )
+    hardcode_asos_precip( ts )
     commit( ts )
