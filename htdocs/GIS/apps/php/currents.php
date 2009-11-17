@@ -207,8 +207,17 @@ foreach($sts as $key => $value){
   $val = round(@$bzz->db[$var], @$rnd[$var]);
   $mynetwork = $bzz->db["network"];
   if ( (($now - $bzz->ts) < 3900 || (substr($mynetwork,3,4) == "COOP" || $mynetwork == "IACOCORAHS") && ($now - $bzz->ts) < 86400) && $val > -99 & $val != 99){ 
+
+  if ( in_array('barbs', $layers) ){
+    $pt = ms_newPointObj();
+    $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
+    $rotate =  0 - intval($bzz->db["drct"]);
+    $bclass->label->set("angle", doubleval($rotate));
+    $pt->draw($map, $barbs, $img, 0, skntChar($bzz->db["sknt"]) );
+    $pt->free();
+  }
+
    if ($var == "barb" && $bzz->db["sknt"] > -1) {
-    //echo "HERE $key VAL ". $bzz->db["sknt"] ." VAR $var <br>";
     $pt = ms_newPointObj();
     $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
     $rotate =  0 - intval($bzz->db["drct"]);
@@ -254,12 +263,12 @@ if (in_array('radar', $layers))
 if (in_array('cwa', $layers))
   $cwa->draw($img);
 
-mktitle($map, $img, $ts ." ". $network ." ". $varDef[$var] );
+$title = $ts ." ". $network ." ". $varDef[$var] ;
+if (in_array('barbs', $layers)){ $title .= " and Wind Barbs"; }
+mktitle($map, $img, $title);
 
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
 $img->saveImage('');
-
-//echo "<img src=\"$url\">";
 ?>
