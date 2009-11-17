@@ -33,6 +33,7 @@ IEM Dynamic Plotter
 <br><input type="checkbox" name="layers[]" <?php if (in_array('radar', $layers)) echo "CHECKED"; ?> value="radar">Current RADAR
 <br><input type="checkbox" name="layers[]" <?php if (in_array('cwa', $layers)) echo "CHECKED"; ?> value="cwa">NWS CWAs
 <br><input type="checkbox" name="layers[]" <?php if (in_array('labels', $layers)) echo "CHECKED"; ?> value="labels">Site Labels
+<br><input type="checkbox" name="layers[]" <?php if (in_array('barbs', $layers)) echo "CHECKED"; ?> value="barbs">Wind Barbs
 <br /><input name="layers[]" type="checkbox" value="goes_east1V" <?php if (in_array("goes_east1V", $layers)) echo "checked='CHECKED'"; ?>>GOES East Visible
 <br /><input name="layers[]" type="checkbox" value="goes_west1V" <?php if (in_array("goes_west1V", $layers)) echo "checked='CHECKED'"; ?>>GOES West Visible
 <br /><input name="layers[]" type="checkbox" value="goes_east04I4" <?php if (in_array("goes_east04I4", $layers)) echo "checked='CHECKED'"; ?>>GOES East IR
@@ -46,6 +47,7 @@ IEM Dynamic Plotter
           sel($var, "dwpf", "Dew Point");
           sel($var, "vsby", "Visibility");
           sel($var, "feel", "Feels Like");
+          sel($var, "relh", "Relative Humidity");
           sel($var, "alti", "Altimeter");
           sel($var, "pres", "Pressure");
           sel($var, "barb", "Wind Barb");
