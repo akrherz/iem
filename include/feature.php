@@ -98,7 +98,7 @@ $s .= "</table>";
 if (getenv("REMOTE_ADDR") == "173.30.53.40" )
 {
  $s = "<img src=\"images/i3.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 217 weeks now!!!! Darly had a great time with smokey this past weekend, smokey work, work, work, hehe.  I think 217 is a prime number, so it is special just like smokey.  We'll get to spend lots of time together at thanksgiving and christmas, yea yea! I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 218 weeks now!!!! Smokey ring should be in the mail soon, hehe, I had it delivered to smokey's address with a note asking you to marry me, hehe.  No!  Darly save it for a special occasion, like when the Cubs win the world series, then darly ask smokey to take the ring.  In the meantime, darly can wear the ring, yea yea.  No!  Smokey is the only one that can wear the ring and I would be so excitied if she wanted to wear it for a long time. I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 }
