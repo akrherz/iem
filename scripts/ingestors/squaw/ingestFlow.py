@@ -4,7 +4,7 @@ mydb = pg.connect("squaw", "iemdb")
 
 data = open("/tmp/squaw.txt", 'r').read()
 
-tokens = re.findall("USGS\t([0-9]*)\t(....-..-.. ..:..)\t([0-9]*)", data)
+tokens = re.findall("USGS\t([0-9]*)\t(....-..-.. ..:..)\t([CSDT]+)\t([0-9]*)", data)
 
 for ob in tokens:
 	sql = "SELECT * from real_flow WHERE valid = '%s'" % (ob[1],)
@@ -12,5 +12,5 @@ for ob in tokens:
 	if len(rs) > 0:
 		continue
 	sql = "INSERT into real_flow(gauge_id, valid, cfs) VALUES (%s, '%s', %s)" \
-		% (ob[0], ob[1], ob[2])
+		% (ob[0], ob[1], ob[3])
 	mydb.query(sql)
