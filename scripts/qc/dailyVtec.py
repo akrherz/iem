@@ -12,7 +12,8 @@ tests = [
  'BOU.TO.2', 'PUB.TO.4', 'IWX.TO.7', 'GID.TO.4', 'LOT.TO.4', 'LOT.TO.3',
  'LCH.SV.151',  'LCH.SV.152', 'LCH.SV.153', 'LCH.SV.154', 'LCH.SV.155',
  'LCH.SV.156',  'LCH.SV.157',  'LCH.MA.68', 'LCH.MA.69', 'LCH.MA.70',
- 'IWX.MA.9', 'TAE.MA.31', 'BMX.FF.39', 'LCH.MA.27',
+ 'IWX.MA.9', 'TAE.MA.31', 'BMX.FF.39', 'LCH.MA.27', 'LCH.FF.24',
+ 'KEY.MA.382'
 ]
 
 sql = "SELECT wfo, min(eventid), max(eventid), phenomena from warnings_%s \
