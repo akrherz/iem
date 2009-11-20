@@ -154,7 +154,7 @@ def Main():
     try:
       lines = urllib2.urlopen( fp ).readlines()
     except IOError:
-      print 'Download FAIL: %s' % (fp,)
+      #print 'Download FAIL: %s' % (fp,)
       continue
     for line in lines:
       if (len(line) < 10): continue
