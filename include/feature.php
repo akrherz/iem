@@ -98,7 +98,7 @@ $s .= "</table>";
 if (getenv("REMOTE_ADDR") == "173.30.53.40" )
 {
  $s = "<img src=\"images/i3.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 218 weeks now!!!! Smokey ring should be in the mail soon, hehe, I had it delivered to smokey's address with a note asking you to marry me, hehe.  No!  Darly save it for a special occasion, like when the Cubs win the world series, then darly ask smokey to take the ring.  In the meantime, darly can wear the ring, yea yea.  No!  Smokey is the only one that can wear the ring and I would be so excitied if she wanted to wear it for a long time. I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 219 weeks now!!!! This will be a big weekend smokey, our family could get bigger, yea yea! Smokey could get 7 kitties and then we could have a show called smokey and darly plus 8.  Then when darly is a bumm, smokey could throw a kitty at darly like in the simpsons.  Anyway, I'll see you later today. I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 }
