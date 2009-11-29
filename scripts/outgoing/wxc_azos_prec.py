@@ -64,7 +64,7 @@ def main():
 """ % (mx.DateTime.gmt().strftime("%Y.%m.%d.%H%M"),))
     data = compute_obs()
     for id in data.keys():
-        output.write("K%s %6.2f %6.2f %6.2f %6.3f, %8.3f\n" % (id, 
+        output.write("K%s %6.2f %6.2f %6.2f %6.3f %8.3f\n" % (id, 
         data[id]['p01'], data[id]['p02'], data[id]['p03'],
         data[id]['lat'], data[id]['lon'] ))
     output.close()
