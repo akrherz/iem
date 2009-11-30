@@ -23,7 +23,7 @@ $query2 = "SELECT l.*, askml(l.geom) as kml
 $result = pg_exec($connect, $query2);
 $row = @pg_fetch_array($result, 0);
 
-header("Content-Type:", "application/vnd.google-earth.kml+xml");
+header("Content-Type: application/vnd.google-earth.kml+xml");
 // abgr
 $color = "7dff0000";
 $ca = Array("TO" => "7d0000ff", "SV" => "7d00ffff", "FF" => "7d00ff00",

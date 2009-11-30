@@ -40,7 +40,7 @@ if ($tsSQL != $tsSQL2)
 } else {
   $result = pg_execute($connect, "SELECT",  Array($tsSQL, $tsSQL) );
 }
-header("Content-Type:", "application/vnd.google-earth.kml+xml");
+header("Content-Type: application/vnd.google-earth.kml+xml");
 // abgr
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>

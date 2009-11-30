@@ -20,7 +20,7 @@ $sql = "SELECT askml(simple_geom) as kml,
 
 $rs = pg_query($conn, $sql);
 
-header("Content-Type:", "application/vnd.google-earth.kml+xml");
+header("Content-Type: application/vnd.google-earth.kml+xml");
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://earth.google.com/kml/2.2\">
  <Document>
