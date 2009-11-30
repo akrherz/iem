@@ -28,7 +28,7 @@ if (strtotime( $row["expire"] ) > time()){
   $radarts = time();
 }
 
-header("Content-Type:", "application/vnd.google-earth.kml+xml");
+header("Content-Type: application/vnd.google-earth.kml+xml");
 // abgr
 $color = "7dff0000";
 $ca = Array("TO" => "7d0000ff", "SV" => "7d00ffff", "FF" => "7d00ff00",

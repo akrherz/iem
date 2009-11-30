@@ -6,7 +6,7 @@ include("$rootpath/include/cameras.inc.php");
 include("$rootpath/include/constants.php");
 $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
 
-header("Content-Type:", "application/vnd.google-earth.kml+xml");
+header("Content-Type: application/vnd.google-earth.kml+xml");
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://earth.google.com/kml/2.2\">
  <Document>
