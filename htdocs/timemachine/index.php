@@ -3,9 +3,9 @@ include("../../config/settings.inc.php");
 $TITLE = "IEM | Time Machine";
 $THISPAGE="archive-tm";
 $HEADEXTRA = '
-<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.0.0/resources/css/ext-all.css"/>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/ext-all.js"></script>
+<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.0.3/resources/css/ext-all.css"/>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.3/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.3/ext-all.js"></script>
 <script type="text/javascript" src="static.js?v=6"></script>
 ';
 include("$rootpath/include/header.php"); 
