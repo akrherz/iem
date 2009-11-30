@@ -73,7 +73,7 @@ for ($i=0;$row=@pg_fetch_array($result,$i);$i++){
   echo "<Placemark>
     <description>
         <![CDATA[
-  <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." km^2
+  <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." sq km
   <br /><font color=\"red\"><i>Event ID:</i></font> $uri
   <br /><font color=\"red\"><i>Issued:</i></font> ". gmdate('d M Y H:i', $sts) ." GMT
   <br /><font color=\"red\"><i>Expires:</i></font> ". gmdate('d M Y H:i', $ets) ." GMT
