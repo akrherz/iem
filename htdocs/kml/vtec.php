@@ -46,7 +46,7 @@ if (pg_num_rows($result) > 0) {
   $label = strftime("%d%%20%B%%20%Y%%20%-I:%M%%20%p%%20%Z", $radarts);
 }
 
-header("Content-Type:", "application/vnd.google-earth.kml+xml");
+header("Content-Type: application/vnd.google-earth.kml+xml");
 // abgr
 $color = "7dff0000";
 $ca = Array("TO" => "7d0000ff", "SV" => "7d00ffff", "FF" => "7d00ff00",
@@ -71,7 +71,7 @@ for($i=0;$row=@pg_fetch_array($result, $i);$i++){
   echo "<Placemark>
     <description>
         <![CDATA[
-  <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." km^2
+  <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." sq km
   <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_status[$row["status"]] ."
    </p>
         ]]>
