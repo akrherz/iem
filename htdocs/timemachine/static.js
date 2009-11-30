@@ -77,6 +77,13 @@ var store = new Ext.data.JsonStore({
     url        : '../json/products.php'
     });
 
+var displayDT = new Ext.Toolbar.TextItem({
+    text      : 'Application Loading.....',
+    width     : 220,
+    isInitial : true, 
+    style     : {'font-weight': 'bold'}
+});
+
 var combo = new Ext.form.ComboBox({
     id            : 'cb',
     triggerAction : 'all',
@@ -153,24 +160,26 @@ store.on('load', function(){
 });
 
 
-
-var displayDT = new Ext.Toolbar.TextItem({
-    text      : 'Application Loading.....',
-    width     : 220,
-    isInitial : true, 
-    style     : {'font-weight': 'bold'}
-});
+function dayofyear(d) {   // d is a Date object
+var yn = d.getFullYear();
+var mn = d.getMonth();
+var dn = d.getDate();
+var d1 = new Date(yn,0,1,12,0,0); // noon on Jan. 1
+var d2 = new Date(yn,mn,dn,12,0,0); // noon on input date
+var ddiff = Math.round((d2-d1)/864e5);
+return ddiff+1; }
 
 /* Helper function to set the sliders to a given time! */
 function setTime(){
   //console.log("setTime() appTime is "+ appTime );
   /* Our new values */
   g = parseInt( appTime.format('G') );
-  z = parseInt( appTime.format('z') );
+  z = dayofyear( appTime ) - 1;
   y = parseInt( appTime.format('Y') );
   i = parseInt( appTime.format('i') );
 
   hs.setValue( g );
+  //console.log("Setting ds to "+ z );
   ds.setValue( z ); 
   ys.setValue( y );
   ms.setValue( i );
@@ -183,18 +192,36 @@ function updateDT(){
   d = ds.getValue();
   h = hs.getValue();
   i = ms.getValue();
+  //console.log("y ["+ y +"] d ["+ d +"] h ["+ h +"] i ["+ i +"]");
 
   newTime = new Date('01/01/'+y).add(Date.DAY, d).add(Date.HOUR, h).add(Date.MINUTE,i);
-  if (newTime == appTime && ! displayDT.isInitial){ return; }
+  //console.log("updateDT() newTime is "+ newTime );
+  if (newTime == appTime && ! displayDT.isInitial){ 
+    //console.log("Shortcircut!");
+    return; 
+  }
   displayDT.isInitial = false;
   appTime = newTime;
   meta = store.getById( combo.getValue() );
-  if (! meta ){ return; }
+  if (! meta ){ 
+    //console.log("Couldn't find metadata!");
+    return; 
+  }
   /* Make sure we aren't in the future! */
-  if (appTime > (new Date())){ appTime = new Date(); setTime(); return; }
+  if (appTime.add(Date.MINUTES,-10) > (new Date())){ 
+    //console.log("Future timestamp!");
+    appTime = new Date(); 
+    setTime(); 
+    return; 
+  }
 
   /* Make sure we aren't in the past! */
-  if (appTime < meta.data.sts){ appTime = meta.data.sts; setTime(); return; }
+  if (appTime < meta.data.sts){ 
+    //console.log("Timestamp too early...");
+    appTime = meta.data.sts; 
+    setTime(); 
+    return; 
+  }
 
   /* 
    * We need to make sure that we are lined up with where we have data...
