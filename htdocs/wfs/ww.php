@@ -5,7 +5,7 @@
  $year = substr($year, 0, 4);
  $sts = "$d%2000:00";
  $ets = "$d%2023:59";
- $uri = "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/data/wfs/ww.map&amp;year=$year&amp;startts=$sts&amp;endts=$ets&amp;";
+ $uri = "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/data/wfs/ww.map&amp;year=$year&amp;startts=$sts&amp;endts=$ets&amp;";
  ?>
 <WFS_Capabilities
    version="1.0.0"
