@@ -70,7 +70,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME archwarn_county
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, geom, oid from warnings_%year% WHERE gtype = 'C' and expire < '%endts%' and issue > '%startts%' and issue < '%endts%' ORDER by expire, type ASC) as foo"
+  DATA "geom from (select phenomena, geom, oid from warnings_%YEAR% WHERE gtype = 'C' and expire < '%ENDTS%' and issue > '%STARTTS%' and issue < '%ENDTS%' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
@@ -110,7 +110,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME archwarn_polygon
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, geom, oid from warnings_%year% WHERE gtype = 'P' and expire < '%endts%' and issue > '%startts%' and issue < '%endts%' ORDER by expire, type ASC) as foo"
+  DATA "geom from (select phenomena, geom, oid from warnings_%YEAR% WHERE gtype = 'P' and expire < '%ENDTS%' and issue > '%STARTTS%' and issue < '%ENDTS%' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
@@ -136,7 +136,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warn_polygon
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, geom, oid from warnings WHERE gtype = 'P' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo"
+  DATA "geom from (select phenomena, geom, oid from warnings WHERE gtype = 'P' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
@@ -161,7 +161,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warn_county
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, geom, oid from warnings WHERE gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo"
+  DATA "geom from (select phenomena, geom, oid from warnings WHERE gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
