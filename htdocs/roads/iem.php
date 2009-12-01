@@ -171,7 +171,7 @@ $point->draw($map, $layer, $img, "credits", date('Y-m-d h:i A', $ts));
 $point->free();
 
 $point = ms_newpointobj();
-$point->setXY(500, 20);
+$point->setXY(500, 22);
 $point->draw($map, $layer, $img, 1, "Limited Visibility");
 $point->free();
 
