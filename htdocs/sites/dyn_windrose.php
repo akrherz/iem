@@ -5,7 +5,8 @@ $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die();
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : die();
 $month1 = isset($_GET["month1"]) ? $_GET["month1"]: die();
 $month2 = isset($_GET["month2"]) ? $_GET["month2"]: die();
-$year = isset($_GET["year"]) ? $_GET["year"] : die();
+$year1 = isset($_GET["year1"]) ? $_GET["year1"] : die();
+$year2 = isset($_GET["year2"]) ? $_GET["year2"] : die();
 $hour1 = isset($_GET["hour1"]) ? $_GET["hour1"]: die();
 $hour2 = isset($_GET["hour2"]) ? $_GET["hour2"]: die();
 $minute1 = isset($_GET["minute1"]) ? $_GET["minute1"]: die();
@@ -18,11 +19,12 @@ include("$rootpath/include/station.php");
 $st = new StationData($station);
 $cities = $st->table;
 
-  $sts = mktime($hour1,$minute1,0,$month1,$day1,$year);
-  $ets = mktime($hour2,$minute2,0,$month2,$day2,$year);
+  $sts = mktime($hour1,$minute1,0,$month1,$day1,$year1);
+  $ets = mktime($hour2,$minute2,0,$month2,$day2,$year2);
 
   $wp_data = Array();
-  $table = "t". date("Y", $sts); 
+  //$table = "t". date("Y", $sts); 
+  $table = "alldata";
   if (strpos($network, "ASOS") > 0) $pg_conn = iemdb("asos");
   elseif (strpos($network, "RWIS") > 0) $pg_conn = iemdb("rwis");
   elseif ($network == "AWOS") {
@@ -75,8 +77,7 @@ $cities = $st->table;
     sknt >= 0 and drct >= 0 and station = $1
     and valid BETWEEN $2 and $3 $hourLimiter
   GROUP by d, s");
-
-  $rs = pg_execute($pg_conn, "SELECT", Array($station, date("Y-m-d h:i:s", $sts), date("Y-m-d h:i:s", $ets) ) );
+  $rs = pg_execute($pg_conn, "SELECT", Array($station, date("Y-m-d H:i:s", $sts), date("Y-m-d H:i:s", $ets) ) );
 
   $sumsknt = 0;
   $total = 0;
@@ -109,7 +110,7 @@ $cities = $st->table;
   // First create a new windrose graph with a title
   $graph = new WindroseGraph(480,480);
   $graph->title->Set($cities[$station]['name'] ." [$station] Windrose Plot");
-  $subt = sprintf("During %s - %s \n $hourLimitSubTitle", date("Y-m-d h:i a", $sts), date("Y-m-d h:i a", $ets) );
+  $subt = sprintf("During %s - %s \n $hourLimitSubTitle", date("Y-m-d H:i a", $sts), date("Y-m-d H:i a", $ets) );
   $graph->title->SetMargin(-22);
 
   $graph->subtitle->Set( $subt );
