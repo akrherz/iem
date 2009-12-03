@@ -7,47 +7,43 @@ from pyIEM import wellknowntext, iemdb
 
 i = iemdb.iemdb()
 mydb = i["postgis"]
-#import pg
-#mydb = pg.connect('postgis', 'mesonet-db1.agron.iastate.edu',user='nobody')
 
 mydb.query("SET TIME ZONE 'GMT'")
 
 # Get CGI vars
-#form = cgi.FormContent()
-#year = int(form["year"][0])
-#month1 = int(form["month1"][0])
-#month2 = int(form["month2"][0])
-#day1 = int(form["day1"][0])
-#day2 = int(form["day2"][0])
-#hour1 = int(form["hour1"][0])
-#hour2 = int(form["hour2"][0])
-#minute1 = int(form["minute1"][0])
-#minute2 = int(form["minute2"][0])
+form = cgi.FormContent()
+if form.has_key("year"):
+  year = int(form["year"][0])
+  month = int(form["month"][0])
+  day = int(form["day"][0])
+  hour = int(form["hour"][0])
+  minute = int(form["minute"][0])
+  ts = mx.DateTime.DateTime(year, month, day, hour, minute)
+  fp = "watch_by_county_%s" % (ts.strftime("%Y%m%d%H%M"),)
+else:
+  ts = mx.DateTime.gmt()
+  fp = "watch_by_county"
 
-#sTS = mx.DateTime.DateTime(year, month1, day1, hour1, minute1)
-#eTS = mx.DateTime.DateTime(year, month2, day2, hour2, minute2)
 
 os.chdir("/tmp/")
-fp = "watch_by_county"
 
 shp = shapelib.create(fp, shapelib.SHPT_POLYGON)
 
 dbf = dbflib.create(fp)
-dbf.add_field("WFO", dbflib.FTString, 3, 0)
 dbf.add_field("ISSUED", dbflib.FTString, 12, 0)
 dbf.add_field("EXPIRED", dbflib.FTString, 12, 0)
 dbf.add_field("PHENOM", dbflib.FTString, 2, 0)
-dbf.add_field("GTYPE", dbflib.FTString, 1, 0)
 dbf.add_field("SIG", dbflib.FTString, 1, 0)
 dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
-dbf.add_field("STATUS", dbflib.FTString, 3, 0)
-dbf.add_field("NWS_UGC", dbflib.FTString, 6, 0)
 
-sql = "select phenomena, eventid, astext(multi(geomunion(geom))) as tgeom, \
-       min(issue) as issued, max(expire) as expired \
-       from warnings WHERE significance = 'A' and \
-       phenomena IN ('TO','SV') and issue <= now() and \
-       expire > now() GROUP by phenomena, eventid ORDER by phenomena ASC"
+sql = """select phenomena, eventid, astext(multi(geomunion(geom))) as tgeom, 
+       min(issue) as issued, max(expire) as expired 
+       from warnings WHERE significance = 'A' and 
+       phenomena IN ('TO','SV') and issue > '%s'::timestamp -'3 days':: interval 
+       and issue <= '%s' and 
+       expire > '%s' GROUP by phenomena, eventid ORDER by phenomena ASC
+       """ % (ts.strftime("%Y-%m-%d %H:%I"), ts.strftime("%Y-%m-%d %H:%I"),
+              ts.strftime("%Y-%m-%d %H:%I") )
 rs = mydb.query(sql).dictresult()
 
 cnt = 0
@@ -64,12 +60,8 @@ for i in range(len(rs)):
 	d["ISSUED"] = issue.strftime("%Y%m%d%H%M")
 	d["EXPIRED"] = expire.strftime("%Y%m%d%H%M")
 	d["PHENOM"] = t
-	#d["GTYPE"] = g
-	#d["SIG"] = rs[i]["significance"]
-	#d["WFO"] = rs[i]["wfo"]
+	d["SIG"] = 'A'
 	d["ETN"] = rs[i]["eventid"]
-	#d["STATUS"] = rs[i]["status"]
-	#d["NWS_UGC"] = rs[i]["ugc"]
 
 	obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
 	shp.write_object(-1, obj)
