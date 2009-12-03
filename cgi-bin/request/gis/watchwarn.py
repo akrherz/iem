@@ -1,6 +1,5 @@
 #!/mesonet/python/bin/python
 # Something to dump current warnings to a shapefile
-# 28 Aug 2004 port to iem40
 
 import shapelib, dbflib, mx.DateTime, zipfile, os, sys, shutil, cgi
 from pyIEM import wellknowntext, iemdb
@@ -42,6 +41,7 @@ dbf.add_field("SIG", dbflib.FTString, 1, 0)
 dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
 dbf.add_field("STATUS", dbflib.FTString, 3, 0)
 dbf.add_field("NWS_UGC", dbflib.FTString, 6, 0)
+dbf.add_field("AREA_KM2", dbflib.FTDouble, 10, 2)
 
 limiter = ""
 if form.has_key("limit0"):
@@ -49,9 +49,11 @@ if form.has_key("limit0"):
 if form.has_key("limit1"):
   limiter += " and gtype = 'P' "
 
-sql = "SELECT *, astext(geom) as tgeom from warnings_%s WHERE \
-	issue >= '%s' and issue < '%s' and eventid < 10000 \
-	%s ORDER by issue ASC" % (sTS.year, sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter )
+sql = """SELECT *, astext(geom) as tgeom,
+    area( transform(geom,2163) ) / 1000000.0 as area2d
+    from warnings_%s WHERE 
+	issue >= '%s' and issue < '%s' and eventid < 10000 
+	%s ORDER by issue ASC""" % (sTS.year, sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter )
 rs = mydb.query(sql).dictresult()
 
 cnt = 0
@@ -75,6 +77,7 @@ for i in range(len(rs)):
 	d["ETN"] = rs[i]["eventid"]
 	d["STATUS"] = rs[i]["status"]
 	d["NWS_UGC"] = rs[i]["ugc"]
+	d["AREA_KM2"] = rs[i]["area2d"]
 	if ((d["SIG"] is None or d["SIG"] == "") and d["PHENOM"] == 'FF'):
 		d["SIG"] = "W"
 		d["ETN"] = -1
@@ -96,6 +99,7 @@ if (cnt == 0):
 	d["WFO"] = "ZZZ"
 	d["SIG"] = "Z"
 	d["ETN"] = 0
+	d["AREA_KM2"] = 0
 	d["STATUS"] = "ZZZ"
 	d["NWS_UGC"] = "ZZZZZZ"
 	shp.write_object(-1, obj)
