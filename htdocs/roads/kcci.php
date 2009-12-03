@@ -71,6 +71,7 @@ if ($eightbit)
   $states->draw($img);
 }
 $roads = $map->getlayerbyname("roads");
+$roads->set("status", MS_ON);
 if (! $metroview && ! $eightbit)
 {
   $roads->set("data", "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and (b.type = 1 or b.us1 IN (18, 20, 30, 34, 71, 63) ) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915");
@@ -91,6 +92,7 @@ for ($k=0;$k<17;$k++)
 $roads->draw($img);
 
 $roads_int = $map->getlayerbyname("roads-inter");
+$roads_int->set("status", MS_ON);
 for ($k=0;$k<17;$k++)
 {
   $r_c1 = $roads_int->getClass($k);
