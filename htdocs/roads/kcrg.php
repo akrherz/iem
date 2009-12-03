@@ -44,6 +44,7 @@ $background->draw($img);
 
 
 $roads = $map->getlayerbyname("roads");
+$roads->set("status", MS_ON);
 $roads->set("transparency", MS_GD_ALPHA);
 for ($k=0;$k<17;$k++)
 {
@@ -57,6 +58,7 @@ for ($k=0;$k<17;$k++)
 $roads->draw($img);
 
 $roads_int = $map->getlayerbyname("roads-inter");
+$roads_int->set("status", MS_ON);
 for ($k=0;$k<17;$k++)
 {
   $r_c1 = $roads_int->getClass($k);
