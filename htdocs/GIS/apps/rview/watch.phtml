@@ -72,11 +72,24 @@ if ($num > 1){
 echo " &nbsp; -- &nbsp; ";
 echo "<a href=\"watch.phtml?year=$year&num=". ($num +1) ."\">Next Watch</a>";
 ?> 
-<table>
+<table cellpadding="2" cellspacing="0" border="1">
 <tr><th>Type:</th><td><?php echo $row["type"]; ?></td></tr>
 <tr><th>Watch #:</th><td><?php echo yearSelect(1997,$year); ?><input name="num" type="text" size="5" value="<?php echo $row["num"]; ?>"> <input type="submit" value="GO!"></td></tr>
 <tr><th>Issue:</th><td><?php echo substr($row["issued"],0,16); ?> GMT</td></tr>
 <tr><th>Expired/Cancelled:</th><td><?php echo substr($row["expired"],0,16); ?> GMT</td></tr>
+<?php
+/* Include a link to download WOU outlines... */
+if (date("Y", $ts) > 2005){
+  echo "<tr><th>WOU Outline Shapefiles</th><td>";
+  $begints = $ts + ((60 - intval(date("i", $ts))) * 60);
+  $endts = $expires - (intval(date("i", $expires)) * 60);
+  while ($begints <= $endts){
+    echo sprintf("<a href=\"/cgi-bin/request/gis/watch_by_county.py?year=%s&month=%s&day=%s&hour=%s&minute=00\">%sZ</a>, ", date("Y", $begints), date("m", $begints), date("d", $begints), date("H", $begints) , date("H", $begints));
+    $begints += 3600;
+  }
+  echo "</td>";
+}
+?>
 </table>
 <strong>Archive Status:</strong>
 <ul>
