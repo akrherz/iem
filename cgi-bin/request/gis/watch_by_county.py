@@ -24,6 +24,12 @@ else:
   ts = mx.DateTime.gmt()
   fp = "watch_by_county"
 
+if form.has_key("etn"):
+  etnLimiter = "and eventid = %s" % ( int(form["etn"][0]), )
+  fp = "watch_by_county_%s_%s" % (ts.strftime("%Y%m%d%H%M"), 
+                                  int(form["etn"][0]))
+else:
+  etnLimiter = ""
 
 os.chdir("/tmp/")
 
@@ -41,10 +47,10 @@ sql = """select phenomena, eventid, astext(multi(geomunion(geom))) as tgeom,
        from warnings_%s WHERE significance = 'A' and 
        phenomena IN ('TO','SV') and issue > '%s'::timestamp -'3 days':: interval 
        and issue <= '%s' and 
-       expire > '%s' GROUP by phenomena, eventid ORDER by phenomena ASC
+       expire > '%s' %s GROUP by phenomena, eventid ORDER by phenomena ASC
        """ % (ts.year, ts.strftime("%Y-%m-%d %H:%I"), 
               ts.strftime("%Y-%m-%d %H:%I"),
-              ts.strftime("%Y-%m-%d %H:%I") )
+              ts.strftime("%Y-%m-%d %H:%I"), etnLimiter)
 rs = mydb.query(sql).dictresult()
 
 cnt = 0
