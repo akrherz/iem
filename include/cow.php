@@ -318,10 +318,10 @@ function loadWarnings(){
         (select *, area(transform(geom,2163)) / 1000000.0 as area,
          perimeter(transform(geom,2163)) as perimeter,
          xmax(geom) as lon0, ymax(geom) as lat0 from 
-         warnings_%s w WHERE %s and issue >= '%s' and issue < '%s' and
+         warnings w WHERE %s and issue >= '%s' and issue < '%s' and
          expire < '%s' and %s and significance = 'W' 
          ORDER by issue ASC) as foo) 
-      as foo2", date("Y", $this->sts), $this->sqlWFOBuilder(), 
+      as foo2", $this->sqlWFOBuilder(), 
    date("Y/m/d H:i", $this->sts), date("Y/m/d H:i", $this->ets), 
    date("Y/m/d H:i", $this->ets), $this->sqlTypeBuilder() );
 
@@ -365,14 +365,14 @@ function loadLSRs() {
     $sql = sprintf("SELECT distinct *, x(geom) as lon0, y(geom) as lat0, 
         astext(geom) as tgeom,
         astext(buffer( transform(geom,2163), %s000)) as buffered
-        from lsrs_%s w WHERE %s and 
+        from lsrs w WHERE %s and 
         valid >= '%s' and valid < '%s' and %s and
         ((type = 'M' and magnitude >= 34) or 
          (type = 'H' and magnitude >= %s) or type = 'W' or
          type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
          or type = 'F')
         ORDER by valid ASC", $this->lsrbuffer, 
-        date("Y", $this->sts), $this->sqlWFOBuilder(), 
+        $this->sqlWFOBuilder(), 
         date("Y/m/d H:i", $this->sts), date("Y/m/d H:i", $this->ets), 
         $this->sqlLSRTypeBuilder(), $this->hailsize);
     $rs = $this->callDB($sql);
@@ -420,7 +420,7 @@ function sbwVerify() {
     while (list($k,$v) = each($this->warnings)) {
         /* Look for LSRs! */
         $sql = sprintf("SELECT distinct *
-         from lsrs_%s w WHERE 
+         from lsrs w WHERE 
          geom && SetSrid(GeometryFromText('%s'),4326) and 
          contains(SetSrid(GeometryFromText('%s'),4326), geom) 
          and %s and wfo = '%s' and
@@ -429,7 +429,7 @@ function sbwVerify() {
          type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
          or type = 'F')
          and valid >= '%s' and valid <= '%s' 
-         ORDER by valid ASC", date("Y", $this->sts),
+         ORDER by valid ASC", 
          $v["geom"], $v["geom"], $this->sqlLSRTypeBuilder(), 
          $v["wfo"], $this->hailsize,
          date("Y/m/d H:i", strtotime($v["issue"])),
