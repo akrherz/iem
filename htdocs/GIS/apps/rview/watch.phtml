@@ -84,7 +84,8 @@ if (date("Y", $ts) > 2005){
   $begints = $ts + ((60 - intval(date("i", $ts))) * 60);
   $endts = $expires - (intval(date("i", $expires)) * 60);
   while ($begints <= $endts){
-    echo sprintf("<a href=\"/cgi-bin/request/gis/watch_by_county.py?year=%s&month=%s&day=%s&hour=%s&minute=00\">%sZ</a>, ", date("Y", $begints), date("m", $begints), date("d", $begints), date("H", $begints) , date("H", $begints));
+    echo sprintf("<a href=\"/cgi-bin/request/gis/watch_by_county.py?year=%s&month=%s&day=%s&hour=%s&minute=00&etn=%s\">%sZ</a>, ", date("Y", $begints), date("m", $begints), date("d", $begints), date("H", $begints) , $num,
+    date("H", $begints));
     $begints += 3600;
   }
   echo "</td>";
