@@ -38,11 +38,12 @@ dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
 
 sql = """select phenomena, eventid, astext(multi(geomunion(geom))) as tgeom, 
        min(issue) as issued, max(expire) as expired 
-       from warnings WHERE significance = 'A' and 
+       from warnings_%s WHERE significance = 'A' and 
        phenomena IN ('TO','SV') and issue > '%s'::timestamp -'3 days':: interval 
        and issue <= '%s' and 
        expire > '%s' GROUP by phenomena, eventid ORDER by phenomena ASC
-       """ % (ts.strftime("%Y-%m-%d %H:%I"), ts.strftime("%Y-%m-%d %H:%I"),
+       """ % (ts.year, ts.strftime("%Y-%m-%d %H:%I"), 
+              ts.strftime("%Y-%m-%d %H:%I"),
               ts.strftime("%Y-%m-%d %H:%I") )
 rs = mydb.query(sql).dictresult()
 
