@@ -6,6 +6,7 @@ Ext.onReady( function(){
 
 var currentURI = "";
 var appTime = new Date();
+var pageLoadTime = new Date();
 var appDT   = 60;
 
 /* Provides handy way to convert from local browser time to UTC */
@@ -191,7 +192,7 @@ function updateDT(){
   y = ys.getValue();
   d = ds.getValue();
   h = hs.getValue();
-  i = ms.getValue();
+  i = ms.disabled ? 0:  ms.getValue();
   //console.log("y ["+ y +"] d ["+ d +"] h ["+ h +"] i ["+ i +"]");
 
   newTime = new Date('01/01/'+y).add(Date.DAY, d).add(Date.HOUR, h).add(Date.MINUTE,i);
@@ -208,8 +209,10 @@ function updateDT(){
     return; 
   }
   /* Make sure we aren't in the future! */
-  if (appTime.add(Date.MINUTES,-10) > (new Date())){ 
-    //console.log("Future timestamp!");
+  if (appTime.add(Date.MINUTES,-1) > (new Date())){
+    //console.log("Date is: "+ (new Date()));
+    //console.log("appTime is: "+ appTime);
+    //console.log("Future timestamp: "+ (appTime.add(Date.MINUTES,-1) - (new Date())) +" diff");
     appTime = new Date(); 
     setTime(); 
     return; 
@@ -247,6 +250,24 @@ function updateDT(){
   }
   window.location.href = String.format("#{0}.{1}", combo.getValue(), gdt.format('YmdHi')); 
 }
+
+/* I'm called every 5 minutes to make sure our app is as fresh as can be */
+var task = {
+  run: function(){
+      nextTime = appTime.add(Date.MINUTE, appDT );
+      if (nextTime > pageLoadTime && nextTime < (new Date())){
+        //console.log("ADVANCE!");
+        appTime = nextTime;
+        setTime();
+        updateDT();
+      } else {
+        //console.log("NO ADVANCE");
+      }
+  },
+  interval: 300000
+}
+Ext.TaskMgr.start(task);
+
 
 new Ext.form.FormPanel({
     renderTo: 'theform',
