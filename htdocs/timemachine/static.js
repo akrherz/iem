@@ -19,6 +19,22 @@ Ext.override(Date, {
     }
 }); 
 
+/*
+ * Logic to make the application auto refresh if it believes we are in 
+ * auto refreshing mode. 
+ */
+var task = {
+  run: function(){
+      if (Ext.getCmp("appMode").realtime){
+        //console.log("Refreshing");
+        appTime = new Date();
+        setTime();
+        updateDT();
+      } 
+  },
+  interval: 300000
+}
+
 var ys = new Ext.Slider({
     id       : 'YearSlider',
     width    : 214,
@@ -45,7 +61,7 @@ var ms = new Ext.Slider({
     width    : 120,
     minValue : 0,
     maxValue : 59,
-    increment: 60,
+    increment: 1,
     listeners: {
           'drag': function(){ updateDT(); }
     }
@@ -80,7 +96,7 @@ var store = new Ext.data.JsonStore({
 
 var displayDT = new Ext.Toolbar.TextItem({
     text      : 'Application Loading.....',
-    width     : 220,
+    width     : 180,
     isInitial : true, 
     style     : {'font-weight': 'bold'}
 });
@@ -111,8 +127,10 @@ var combo = new Ext.form.ComboBox({
         appDT = record.data.interval ;
 
         /* If we don't have sub hourly data, disable the minute selector */
-        if (record.data.interval >= 60){ ms.disable(); }
-        else { ms.enable(); }
+        if (record.data.interval >= 60){ 
+          //console.log("Disabling MS"); 
+          ms.disable(); 
+        } else { ms.enable(); }
 
         /* If we don't have sub daily data, disable the hour selector */
         if (record.data.interval >= (60*24)){  hs.disable(); }
@@ -129,6 +147,7 @@ var combo = new Ext.form.ComboBox({
         }
 
         ms.increment = record.data.interval;
+        //console.log("Setting MS Increment to "+ ms.increment );
         ys.minValue = record.data.sts.format("Y");
         ys.setValue( ys.getValue()-1 );
         ys.setValue( ys.getValue()+1 );
@@ -149,7 +168,7 @@ store.on('load', function(){
     if (tokens2[1] != "0"){
       gts = Date.parseDate( tokens2[1], "YmdHi" );
       appTime = gts.fromUTC();
-    }
+    } 
   } else {
     /* We are going to default to the IEM Plot */
     idx = 1;
@@ -158,6 +177,7 @@ store.on('load', function(){
   setTime();
   combo.setValue( idx );
   combo.fireEvent('select', combo, store.getById(idx), idx);
+  Ext.TaskMgr.start(task);
 });
 
 
@@ -172,7 +192,18 @@ return ddiff+1; }
 
 /* Helper function to set the sliders to a given time! */
 function setTime(){
-  //console.log("setTime() appTime is "+ appTime );
+  now = new Date();
+  if (Ext.getCmp("appMode").realtime &&
+      now.add(Date.MINUTE, -3.0 * appDT) > appTime ){
+    Ext.getCmp("appMode").setText("Archive");
+    Ext.getCmp("appMode").realtime = false;
+  } 
+  if (! Ext.getCmp("appMode").realtime &&
+      now.add(Date.MINUTE, -3.0 * appDT) < appTime ){
+    Ext.getCmp("appMode").setText("Realtime");
+    Ext.getCmp("appMode").realtime = true;
+  }
+  //console.log("setTime() appTime: "+ appTime +" delta3x: "+ now.add(Date.MINUTE, -3.0 * appDT) );
   /* Our new values */
   g = parseInt( appTime.format('G') );
   z = dayofyear( appTime ) - 1;
@@ -180,10 +211,10 @@ function setTime(){
   i = parseInt( appTime.format('i') );
 
   hs.setValue( g );
-  //console.log("Setting ds to "+ z );
   ds.setValue( z ); 
   ys.setValue( y );
   ms.setValue( i );
+  //console.log("Setting ms to "+ i );
 }
 
 /* Called whenever either the sliders update, the combobox */
@@ -209,10 +240,10 @@ function updateDT(){
     return; 
   }
   /* Make sure we aren't in the future! */
-  if (appTime.add(Date.MINUTES,-1) > (new Date())){
+  if (appTime.add(Date.MINUTE,-1) > (new Date())){
     //console.log("Date is: "+ (new Date()));
     //console.log("appTime is: "+ appTime);
-    //console.log("Future timestamp: "+ (appTime.add(Date.MINUTES,-1) - (new Date())) +" diff");
+    //console.log("Future timestamp: "+ (appTime.add(Date.MINUTE,-1) - (new Date())) +" diff");
     appTime = new Date(); 
     setTime(); 
     return; 
@@ -251,22 +282,7 @@ function updateDT(){
   window.location.href = String.format("#{0}.{1}", combo.getValue(), gdt.format('YmdHi')); 
 }
 
-/* I'm called every 5 minutes to make sure our app is as fresh as can be */
-var task = {
-  run: function(){
-      nextTime = appTime.add(Date.MINUTE, appDT );
-      if (nextTime > pageLoadTime && nextTime < (new Date())){
-        //console.log("ADVANCE!");
-        appTime = nextTime;
-        setTime();
-        updateDT();
-      } else {
-        //console.log("NO ADVANCE");
-      }
-  },
-  interval: 300000
-}
-Ext.TaskMgr.start(task);
+
 
 
 new Ext.form.FormPanel({
@@ -277,6 +293,23 @@ new Ext.form.FormPanel({
     },
     buttonAlign: 'left',
     fbar: [
+      new Ext.Button({
+        id       : 'appMode',
+        realtime : true,
+        text     : 'RealTime',
+        handler  : function(btn){
+          if (btn.realtime){
+            btn.realtime = false;
+            btn.setText("Archive");
+          } else {
+            btn.realtime = true;
+            btn.setText("RealTime");
+            appTime = new Date();
+            setTime();
+            updateDT();
+          }
+        }
+      }),
       new Ext.Button({
         text: '<< Year',
         handler: function(){
