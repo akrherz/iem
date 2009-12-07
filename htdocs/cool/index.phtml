@@ -1,5 +1,4 @@
 <?php
-  include('youtube.class.php');
 include("../../config/settings.inc.php");
 $TITLE = "IEM | Cool Stuff";
 $THISPAGE = "webcam-cool";
@@ -9,83 +8,9 @@ include("$rootpath/include/header.php"); ?>
 <p>Every now and then, the IEM produces something cool. This page contains
 a listing of cool stuff as rated by IEM users.</p>
 
-<h3 class="subtitle">Web Camera Videos:</h3>
+<h3 class="subtitle">Past 50 Web Camera Videos:</h3>
 
-<?php
-
-  // include the youtube class and instantiate it with the object $yt
-  $yt = new youtube();
-  $yt->set('per_page', 5);
-  $res = $yt->videos('akrherz');
-  $video_list = $res['video_list'][0]['video'];
-  
-?>
-
-
-<style>
-div.vid {
-  float: left;
-  border: 1px solid #000;
-  margin: 2px;
-  padding: 5px;
-  width: 150px;
-}
-</style>
-<p><div class="iem-form">
-Special lapses captured from the web camera networks are uploaded to YouTube
-for easy viewing.  You can page thru a listing of these YouTube views and play
-one of them by clicking on the thumbnail.
-
-<br /><a href="?page=<?=YOUTUBE_PREV_PAGE ?>"><img src="prev.gif" border=0></a> Page <?=YOUTUBE_PAGE ?> of <?=YOUTUBE_TOTAL_PAGES ?> <a href="?page=<?=YOUTUBE_NEXT_PAGE ?>"><img src="next.gif" border=0></a>
-           </p>
-  
-           <p> 
-             <?php
-             // loop through each video in the list and display it for design purposes
-             $i = 0;
-             foreach ($video_list as $k => $v) {
-
-             // limit the title's length so it doesn't break the design
-             echo "<div class=\"vid\"><a href='?video_id=".$v['id'];
-              if(isset($_GET['page']))
-              {
-             echo '&page='.(int)$_GET['page'];
-              }
-              if(isset($_POST['tag']))
-              {
-              $tags = str_replace(" ","+",$_POST['tag']);
-              $tags = str_replace("%20","+",$tags); 
-             echo '&tag='.$tags;
-              } else 
-              {
-              if(isset($_GET['tag']))
-              {
-              $tags = str_replace(" ","+",$_GET['tag']);
-              $tags = str_replace("%20","+",$tags); 
-             echo '&tag='.$tags;
-              }
-              }
-             echo "'><img src='{$v['thumbnail_url']}' border=0 style=\"margin: 5px;\"></a><br /><strong>Title:</strong> {$v['title']}<br /><strong>Views:</strong> {$v['view_count']}<br /><strong>Added:</strong> ". date("d M Y", $v["upload_time"]) ."</div>";
-              $i++;
-              }
-              ?>
-           </p>
-<br clear="both"/>
-    <h2><?=$video_list[YOUTUBE_VIDEO_INDEX]['title'] ?></h2>
-    <object width="425" height="350">
-    <param name="movie" value="http://www.youtube.com/v/<?=YOUTUBE_VIDEO_ID ?>"></param>
-    <param name="wmode" value="transparent"></param>
-    <embed src="http://www.youtube.com/v/<?=YOUTUBE_VIDEO_ID ?>" type="application/x-shockwave-flash" wmode="transparent" width="425" height="350"></embed>
-    </object>
-
-    <p>
-    <?=$video_list[YOUTUBE_VIDEO_INDEX]['description'] ?>
-    </p>
-
-    <p>
-    Views: <?=$video_list[YOUTUBE_VIDEO_INDEX]['view_count'] ?><br />
-    </p>
-</div>
+<object width="746" height="413"><param name="movie" value="http://www.youtube.com/cp/vjVQa1PpcFNY2yxmlYfUYVBukg_bxvwEgSuchrt7RMs="></param><embed src="http://www.youtube.com/cp/vjVQa1PpcFNY2yxmlYfUYVBukg_bxvwEgSuchrt7RMs=" type="application/x-shockwave-flash" width="746" height="413"></embed></object>
 
 
 
