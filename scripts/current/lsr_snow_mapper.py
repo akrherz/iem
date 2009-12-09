@@ -45,7 +45,7 @@ iemplot.simple_contour(lons, lats, vals, cfg)
 
 os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage tmp.ps tmp.png")
 os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall.png bogus png' tmp.png")
-os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 150x120 -density 120 +repage tmp.ps tmp.png")
+os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 320x210 -density 120 +repage tmp.ps tmp.png")
 os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall_thumb.png bogus png' tmp.png")
 os.remove("tmp.png")
 os.remove("tmp.ps")
