@@ -24,8 +24,8 @@ for i in range(len(rs)):
   vals.append( rs[i]['val'] )
   lats.append( rs[i]['lat'] )
   lons.append( rs[i]['lon'] )
-  #valmask.append( rs[i]['state'] in ['IA',] )
-  valmask.append( False )
+  valmask.append( rs[i]['state'] in ['IA',] )
+  #valmask.append( False )
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
@@ -48,7 +48,6 @@ os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x7
 os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall.png bogus png' tmp.png")
 if os.environ['USER'] == 'akrherz':
   os.system("xv tmp.png")
-  sys.exit()
 os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 320x210 -density 120 +repage tmp.ps tmp.png")
 os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall_thumb.png bogus png' tmp.png")
 os.remove("tmp.png")
