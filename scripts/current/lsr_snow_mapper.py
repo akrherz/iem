@@ -30,7 +30,7 @@ cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_valmask'           : valmask,
+ '_valuemask'         : valmask,
  '_title'             : "Local Storm Report Snowfall Total Analysis",
  '_valid'             : "Reports past 4 hours: "+ now.strftime("%d %b %Y %I:%M %p"),
  '_showvalues'        : True,
