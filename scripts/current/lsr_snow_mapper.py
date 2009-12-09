@@ -18,7 +18,7 @@ lons = []
 rs = postgis.query("""SELECT state, 
       max(magnitude) as val, x(geom) as lon, y(geom) as lat
       from lsrs_2009 WHERE type = 'S' and 
-      valid > now() - '4 hours'::interval and state = 'IA'
+      valid > now() - '4 hours'::interval
       GROUP by state, lon, lat""").dictresult()
 for i in range(len(rs)):
   vals.append( rs[i]['val'] )
@@ -45,6 +45,8 @@ iemplot.simple_contour(lons, lats, vals, cfg)
 
 os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage tmp.ps tmp.png")
 os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall.png bogus png' tmp.png")
+if os.environ['USER'] == 'akrherz':
+  os.system("xv tmp.png")
 os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 320x210 -density 120 +repage tmp.ps tmp.png")
 os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall_thumb.png bogus png' tmp.png")
 os.remove("tmp.png")
