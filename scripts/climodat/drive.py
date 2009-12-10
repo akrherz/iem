@@ -9,7 +9,7 @@ import genPrecipEvents, genTwelveRains, genGDD, genDailyRecords
 import genDailyRecordsRain, genDailyRange, genDailyMeans, genCountLows32
 import genSpringFall, genMonthly, genHDD, genCDD, genHeatStress
 import genCountRain, genFrostProbabilities, genSpringProbabilities
-import genCycles, genCountSnow
+import genCycles, genCountSnow, genTempThresholds
 
 import constants
 
@@ -85,3 +85,6 @@ for id in st.ids:
 
   if DEBUG: print "genCycles", mx.DateTime.now()
   genCycles.write(mydb, rs, dbid, 24)
+
+  if DEBUG: print "genTempThresholds", mx.DateTime.now()
+  genTempThresholds.write(mydb, rs)
