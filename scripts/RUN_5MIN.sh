@@ -9,5 +9,5 @@ cd ../GIS
 #cd ../current
 #/mesonet/python/bin/python lsr_snow_mapper.py
 
-cd ../ingestors/dotcam
+cd ../ingestors/dotcams
 /mesonet/python/bin/python process.py
