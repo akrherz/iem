@@ -9,7 +9,7 @@ FTP_PASS = "----"
 
 import os, mx.DateTime, glob, re
 from PIL import Image, ImageDraw, ImageFont
-font = ImageFont.truetype('../veramono.ttf', 10)
+font = ImageFont.truetype('veramono.ttf', 10)
 from pyIEM import iemdb, mesonet
 i = iemdb.iemdb()
 mesosite = i['mesosite']
