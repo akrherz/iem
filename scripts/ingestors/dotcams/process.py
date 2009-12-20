@@ -51,8 +51,13 @@ for line in lines:
 
   # Create 320x240 variant
   fp = "165.206.203.34/rwis_images/Vid-000512%s.jpg" % ("-".join(t),)
-  i0 = Image.open( fp )
-  i320 = i0.resize((320, 240), Image.ANTIALIAS)
+  try:
+    i0 = Image.open( fp )
+    i320 = i0.resize((320, 240), Image.ANTIALIAS)
+  except:
+    print "ERROR: ", fp
+    os.unlink( fp )
+    continue
 
   draw = ImageDraw.Draw(i0)
   str = "(%s) %s %s" % (drctTxt, d['name'], now.strftime("%-2I:%M:%S %p - %d %b %Y") )
