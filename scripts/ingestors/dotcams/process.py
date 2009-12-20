@@ -15,6 +15,10 @@ i = iemdb.iemdb()
 mesosite = i['mesosite']
 gmt = mx.DateTime.gmt()
 
+# Every three hours, clean up after ourselves :)
+if gmt.hour % 3 == 0 and gmt.minute < 5:
+  os.system("/usr/sbin/tmpwatch 6 165.206.203.34/rwis_images")
+
 # Make dictionary of webcams we are interested in
 cameras = {}
 rs = mesosite.query("SELECT * from webcams WHERE network = 'IDOT'").dictresult()
@@ -55,7 +59,7 @@ for line in lines:
     i0 = Image.open( fp )
     i320 = i0.resize((320, 240), Image.ANTIALIAS)
   except:
-    print "ERROR: ", fp
+    #print "ERROR: ", fp
     os.unlink( fp )
     continue
 
