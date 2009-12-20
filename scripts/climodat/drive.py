@@ -87,4 +87,4 @@ for id in st.ids:
   genCycles.write(mydb, rs, dbid, 24)
 
   if DEBUG: print "genTempThresholds", mx.DateTime.now()
-  genTempThresholds.write(mydb, rs)
+  genTempThresholds.write(mydb, dbid)
