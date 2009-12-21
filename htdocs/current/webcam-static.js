@@ -160,7 +160,8 @@ new Ext.Viewport({
            value         : 'name',
            store         : new Ext.data.ArrayStore({
                 fields: ['name', 'desc'],
-                data : [['KCCI', 'KCCI-TV Des Moines'],
+                data : [['IDOT', 'Iowa DOT RWIS'],
+                        ['KCCI', 'KCCI-TV Des Moines'],
                         ['KCRG', 'KCRG-TV Cedar Rapids'],
                         ['KELO', 'KELO-TV Sioux Falls']]
             }),
