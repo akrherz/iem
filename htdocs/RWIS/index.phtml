@@ -1,7 +1,26 @@
 <?php 
 include("../../config/settings.inc.php");
-  $THISPAGE = 'networks-rwis';
-  $TITLE = "IEM | IaDOT RWIS Data";
+include("$rootpath/include/cameras.inc.php");
+$camid = isset($_GET["camid"]) ? $_GET["camid"] : "IDOT-000";
+
+$cdict = Array();
+$selectform = "<select name=\"camid\">\n";
+while( list($id,$cam) = each($cameras)){
+  if ($cam["network"] != "IDOT"){ continue; }
+  $base = substr($id,0,8);
+  if (! array_key_exists($base, $cdict)){ $cdict[$base] = 0; }
+  $cdict[$base] += 1;
+
+  if (substr($id,9,2) == "00"){
+    $selectform .= "<option value=\"$base\"";
+    if ($base == $camid){  $selectform .= " selected=\"selected\" "; }
+    $selectform .= ">". $cam["name"] ."</option>";
+  }
+}
+$selectform .= "</select>\n";
+
+$THISPAGE = 'networks-rwis';
+$TITLE = "IEM | IaDOT RWIS Data";
 include("$rootpath/include/header.php"); 
 ?>
 
@@ -12,7 +31,7 @@ include("$rootpath/include/header.php");
 The Iowa Department of Transportation maintains a set 
 of observing stations located along major roads in the state.  These stations
 measure pavement temperatures as well as atmospherics.  The DOT has a good
-website called <a href="http://www.weatherview.dot.state.ia.us/">WeatherView</a>, which contains recent obs and a 
+website called <a href="http://weatherview.iowadot.gov">WeatherView</a>, which contains recent obs and a 
 wealth of other information.  The products on this page are intended to 
 supplement their site.</td><td>
 
@@ -22,6 +41,21 @@ supplement their site.</td><td>
 <br>Stations: 53
 <br><a href="/info/network.phtml?network=IA_RWIS">Locations</a>
 </div></td></tr></table>
+
+<h4>Roadside Webcams</h4>
+<div>
+<form method="" action="" name="widget">
+Available sites: <?php echo $selectform; ?>
+<input type="submit" value="View Webcam">
+</form>
+<?php 
+for($i=0;$i<$cdict[$camid];$i++){
+  echo sprintf("<img src=\"%s/data/camera/stills/%s-%02d.jpg?%s\" style=\"margin: 2px;\">", $rooturl,
+       $camid, $i, time() );
+}
+?>
+</div>
+
 
 <table width="100%">
 <tr>
