@@ -15,6 +15,9 @@ i = iemdb.iemdb()
 mesosite = i['mesosite']
 gmt = mx.DateTime.gmt()
 
+# we work from here
+os.chdir("work")
+
 # Every three hours, clean up after ourselves :)
 if gmt.hour % 3 == 0 and gmt.minute < 5:
   os.system("/usr/sbin/tmpwatch 6 165.206.203.34/rwis_images")
@@ -26,7 +29,6 @@ for i in range(len(rs)):
   cameras[ rs[i]['id'] ] = rs[i]
 
 
-os.chdir("work")
 si, so = os.popen4("wget  -m --ftp-user=rwis --ftp-password=%s \
            ftp://165.206.203.34/rwis_images/*%s-??.jpg" % (FTP_PASS,
            gmt.strftime("%H")))
