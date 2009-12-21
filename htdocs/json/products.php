@@ -23,7 +23,8 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 }
 
 /* Now, lets get webcam stuff */
-$result = pg_exec($connect, sprintf("SELECT * from webcams ORDER by network, name"));
+$result = pg_exec($connect, sprintf("SELECT * from webcams WHERE 
+          network != 'IDOT' ORDER by network, name"));
 
 for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 {
