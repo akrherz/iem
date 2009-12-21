@@ -3,7 +3,7 @@ include("../../../config/settings.inc.php");
 include("$rootpath/include/cameras.inc.php");
 $TITLE = "IEM | Webcam Lapse Player";
 $HEADEXTRA = '
-<script type="text/javascript" src="flowplayer-3.0.1.min.js"></script>
+<script type="text/javascript" src="flowplayer-3.1.5.min.js"></script>
 ';
 $THISPAGE = "webcam-lapse";
 include("$rootpath/include/header.php"); 
@@ -25,7 +25,7 @@ note the timestamp on the lapses, some of them may be old.</p>
 reset($cameras);
 while( list($key, $dict) = each($cameras) )
 {
-  if ($dict["removed"]){ continue; }
+  if ($dict["removed"] || $dict["network"] == "IDOT"){ continue; }
   echo "<option value=\"". $dict["moviebase"] ."\">". $dict["name"] ." \n";
 }
 ?>
@@ -43,7 +43,7 @@ while( list($key, $dict) = each($cameras) )
 
 
 <script>
-flowplayer("player", "flowplayer-3.0.1.swf", {
+flowplayer("player", "flowplayer-3.1.5.swf", {
    clip:{
     baseUrl:"http://mesonet.agron.iastate.edu/onsite/lapses/auto/",
     url:"algona_sunrise.flv"}
