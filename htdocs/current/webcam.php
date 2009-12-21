@@ -13,7 +13,7 @@ cfg.header = 'iem-header';
 cfg.headerHeight = 150;
 cfg.jsonSource = '../json/webcams.php';
 </script>
-  <script type='text/javascript' src='webcam-static.js?v=1'></script>
+  <script type='text/javascript' src='webcam-static.js?v=3'></script>
 <style>
 .webimage {
   height: 240px;
