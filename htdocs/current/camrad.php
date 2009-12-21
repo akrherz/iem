@@ -58,6 +58,8 @@ $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 /* Hard coded extents based on network */
 if ($network == "KCCI")
  $map->setExtent(-95.0,40.45,-92.1,43.3);
+elseif ($network == "IDOT")
+ $map->setExtent(-95.5,39.7,-91.2,44.6);
 elseif ($network == "KELO")
  $map->setExtent(-98.8,42.75,-95.9,45.6);
 elseif ($network == "KCRG")
@@ -143,7 +145,7 @@ while (list($key, $drct) = each($cdrct))
    $pt->draw($map, $cp, $img, 0, intval( substr($key,5,3) ) );
    $pt->free();
 
-   if ($cdrct[$key] >= 0)
+   if ($cdrct[$key] >= 0 && $network != 'IDOT')
    {
      $pt = ms_newPointObj();
      $pt->setXY($lon, $lat, 0);
