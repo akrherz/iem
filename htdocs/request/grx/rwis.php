@@ -8,6 +8,7 @@ Refresh: 5
 Color: 200 200 255
 IconFile: 1, 18, 32, 2, 31, "http://www.tornadocentral.com/grlevel3/windbarbs.png" 
 IconFile: 2, 15, 15, 8, 8, "http://www.tornadocentral.com/grlevel3/cloudcover.png" 
+IconFile: 3, 25, 25, 12, 12, "http://mesonet.agron.iastate.edu/request/grx/rwis_cr.png" 
 Font: 1, 11, 1, "Courier New"
 
 ';
@@ -82,12 +83,12 @@ while (list($key, $iemob) = each($snet) ){
 
     echo "Object: ".$meta["lat"].",".$meta["lon"]."
   Threshold: 999 
+  Icon: 0,0,000,3,3
   Icon: 0,0,". $mydata["drct"] .",". s2icon( floatval($mydata["sknt"]) ) ."
   Icon: 0,0,000,2,13,\"".$meta["name"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n${condTxt}\" 
   Threshold: 150
   Text:  -17, 13, 1, \" ".round($mydata["tmpf"],0)." \" 
   Text:  -17, -13, 1, \" ".round($mydata["dwpf"],0)." \" 
-  Text:  0, 0, 1, \" ".$mydata["pave_avg"]." \" 
  End: 
 
 ";
