@@ -72,18 +72,16 @@ while (list($key, $iemob) = each($snet) ){
     if ($mydata["sknt"] < 2.5) $mydata["drct"] = 0;
 
     /* Compute average pavement temperature */
-    $t = Array($mydata['tsf0'], $mydata['tsf1'],
-               $mydata['tsf2'], $mydata['tsf3']);
-    asort($t);
-    if (sizeof($t) > 0){
-      while ((max($t) - min($t)) > 20){ $ba = array_pop($t); }
-      $mydata['pave_avg'] = round(array_sum($t) / sizeof($t),1);
-      if ($mydata['pave_avg'] < -30){
-        $mydata['pave_avg'] = 'M';
+    $total = 0;
+    $cnt = 0;
+    for($i=0;$i<4;$i++){
+      if ($mydata["tsf$i"] > -30 && $mydata["tsf$i"] < 150){
+         $cnt += 1;
+         $total += $mydata["tsf$i"];
       }
-    } else {
-      $mydata['pave_avg'] = 'M';
     }
+    if ($cnt == 0){ $mydata["pave_avg"] = "M"; }
+    else{ $mydata["pave_avg"] = $total / floatval($cnt);}
 
     /* Condition Text */
     $condTxt = sprintf("Sensor 1: [%.1f F] %s\\nSensor 2: [%.1f F] %s\\nSensor 3: [%.1f F] %s\\nSensor 4: [%.1f F] %s\\nAvg: [%s F]", 
