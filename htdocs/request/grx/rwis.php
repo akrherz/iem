@@ -72,10 +72,18 @@ while (list($key, $iemob) = each($snet) ){
       $mydata['pave_avg'] = 'M';
     }
 
+    /* Condition Text */
+    $condTxt = sprintf("Sensor 1: [%.0f F] %s\\nSensor 2: [%.0f F] %s\\nSensor 3: [%.0f F] %s\\nSensor 4: [%.0f F] %s\\n", 
+       $mydata["tsf0"], $mydata["scond0"],
+       $mydata["tsf1"], $mydata["scond1"],
+       $mydata["tsf2"], $mydata["scond2"],
+       $mydata["tsf3"], $mydata["scond3"]
+    );
+
     echo "Object: ".$meta["lat"].",".$meta["lon"]."
   Threshold: 999 
   Icon: 0,0,". $mydata["drct"] .",". s2icon( floatval($mydata["sknt"]) ) ."
-  Icon: 0,0,000,2,13,\"".$meta["name"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n\" 
+  Icon: 0,0,000,2,13,\"".$meta["name"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n${condTxt}\" 
   Threshold: 150
   Text:  -17, 13, 1, \" ".round($mydata["tmpf"],0)." \" 
   Text:  -17, -13, 1, \" ".round($mydata["dwpf"],0)." \" 
