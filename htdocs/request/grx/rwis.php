@@ -58,13 +58,28 @@ while (list($key, $iemob) = each($snet) ){
     if ($tdiff > 3600) continue;
     if ($mydata["sknt"] < 2.5) $mydata["drct"] = 0;
 
-echo "Object: ".$meta["lat"].",".$meta["lon"]."
+    /* Compute average pavement temperature */
+    $t = Array($mydata['tsf0'], $mydata['tsf1'],
+               $mydata['tsf2'], $mydata['tsf3']);
+    asort($t);
+    if (sizeof($t) > 0){
+      while ((max($t) - min($t)) > 20){ $ba = array_pop($t); }
+      $mydata['pave_avg'] = round(array_sum($t) / sizeof($t),0);
+      if ($mydata['pave_avg'] < -30){
+        $mydata['pave_avg'] = 'M';
+      }
+    } else {
+      $mydata['pave_avg'] = 'M';
+    }
+
+    echo "Object: ".$meta["lat"].",".$meta["lon"]."
   Threshold: 999 
   Icon: 0,0,". $mydata["drct"] .",". s2icon( floatval($mydata["sknt"]) ) ."
   Icon: 0,0,000,2,13,\"".$meta["name"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n\" 
   Threshold: 150
   Text:  -17, 13, 1, \" ".round($mydata["tmpf"],0)." \" 
   Text:  -17, -13, 1, \" ".round($mydata["dwpf"],0)." \" 
+  Text:  0, 0, 1, \" ".$mydata["pave_avg"]." \" 
  End: 
 
 ";
