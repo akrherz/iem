@@ -20,7 +20,7 @@ IconFile: 1, 15, 25, 8, 25, \"http://www.spotternetwork.org/icon/arrows.png\"
 
 $conn = iemdb("mesosite");
 
-$sql = "SELECT * from camera_current WHERE valid > (now() - '30 minutes'::interval) and cam != 'KCRG-014' and network != 'IDOT'"; 
+$sql = "SELECT * from camera_current WHERE valid > (now() - '30 minutes'::interval) and cam != 'KCRG-014' and cam !~* 'IDOT'"; 
 $s2 = "";
 $s3 = "";
 $q = 2;
