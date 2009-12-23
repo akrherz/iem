@@ -22,6 +22,18 @@ $cities = $nt->table;
 $iem = new IEMAccess();
 $snet = $iem->getNetwork("IA_RWIS");
 
+function pcolor($tmpf)
+{
+  if ($tmpf >= 35) return "1";
+  if ($tmpf >= 34) return "2";
+  if ($tmpf >= 33) return "3";
+  if ($tmpf >= 32) return "4";
+  if ($tmpf >= 31) return "5";
+  if ($tmpf >= 30) return "6";
+  return "7";
+
+}
+
 function s2icon($s)
 {
   if ($s < 2.5) return "1,21";
@@ -65,7 +77,7 @@ while (list($key, $iemob) = each($snet) ){
     asort($t);
     if (sizeof($t) > 0){
       while ((max($t) - min($t)) > 20){ $ba = array_pop($t); }
-      $mydata['pave_avg'] = round(array_sum($t) / sizeof($t),0);
+      $mydata['pave_avg'] = round(array_sum($t) / sizeof($t),1);
       if ($mydata['pave_avg'] < -30){
         $mydata['pave_avg'] = 'M';
       }
@@ -74,16 +86,16 @@ while (list($key, $iemob) = each($snet) ){
     }
 
     /* Condition Text */
-    $condTxt = sprintf("Sensor 1: [%.0f F] %s\\nSensor 2: [%.0f F] %s\\nSensor 3: [%.0f F] %s\\nSensor 4: [%.0f F] %s\\n", 
+    $condTxt = sprintf("Sensor 1: [%.1f F] %s\\nSensor 2: [%.1f F] %s\\nSensor 3: [%.1f F] %s\\nSensor 4: [%.1f F] %s\\nAvg: [%s F]", 
        $mydata["tsf0"], $mydata["scond0"],
        $mydata["tsf1"], $mydata["scond1"],
        $mydata["tsf2"], $mydata["scond2"],
-       $mydata["tsf3"], $mydata["scond3"]
+       $mydata["tsf3"], $mydata["scond3"], $mydata["pave_avg"]
     );
 
     echo "Object: ".$meta["lat"].",".$meta["lon"]."
   Threshold: 999 
-  Icon: 0,0,000,3,3
+  Icon: 0,0,000,3,". pcolor($mydata["pave_avg"]) ."
   Icon: 0,0,". $mydata["drct"] .",". s2icon( floatval($mydata["sknt"]) ) ."
   Icon: 0,0,000,2,13,\"".$meta["name"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n${condTxt}\" 
   Threshold: 150
