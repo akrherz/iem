@@ -24,13 +24,14 @@ $snet = $iem->getNetwork("IA_RWIS");
 
 function pcolor($tmpf)
 {
-  if ($tmpf >= 35) return "1";
-  if ($tmpf >= 34) return "2";
-  if ($tmpf >= 33) return "3";
-  if ($tmpf >= 32) return "4";
-  if ($tmpf >= 31) return "5";
-  if ($tmpf >= 30) return "6";
-  return "7";
+  if ($tmpf >= 35) return "2";
+  if ($tmpf >= 34) return "3";
+  if ($tmpf >= 33) return "4";
+  if ($tmpf >= 32) return "5";
+  if ($tmpf >= 31) return "6";
+  if ($tmpf >= 30) return "7";
+  if ($tmpf < 30) return "8";
+  return "1";
 
 }
 
