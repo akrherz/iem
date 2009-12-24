@@ -109,9 +109,9 @@ init();
 <b>Select Camera:</b>
 <table width="100%" style="text-align: left;">
 <?php
-$cnt = 0; 
+$cnt = 0;
 while (list($cid, $v) = each($cameras) ) {
- if ($v["active"]){
+ if ($v["active"] && $v["network"] != "IDOT"){
     if ($cnt % 5 == 0){ echo "<tr>"; }
 	echo "<td><input type=\"radio\" name=\"id\" value=\"$cid\" ";
 	if ($cid == $id) { echo "checked=\"checked\""; }
