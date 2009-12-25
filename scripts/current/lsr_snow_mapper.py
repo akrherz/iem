@@ -1,6 +1,6 @@
 # Generate current plot of air temperature
 
-import sys, os
+import sys, os, numpy
 sys.path.append("../lib/")
 import iemplot
 
@@ -26,6 +26,21 @@ for i in range(len(rs)):
   lons.append( rs[i]['lon'] )
   valmask.append( rs[i]['state'] in ['IA',] )
   #valmask.append( False )
+
+# Now, we need to add in zeros, lets say we are looking at a .25 degree box
+buffer = 0.25
+for lat in numpy.arange(iemplot.IA_SOUTH, iemplot.IA_NORTH, buffer):
+  for lon in numpy.arange(iemplot.IA_WEST, iemplot.IA_EAST, buffer):
+    found = False
+    for j in range(len(lats)):
+      if (lats[j] > lat and lats[j] < (lat+buffer) and
+         lons[j] > lon and lons[j] < (lon+buffer) ):
+        found = True
+    if not found:
+      lats.append( lat )
+      lons.append( lon )
+      valmask.append( False )
+      vals.append( 0 )
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
