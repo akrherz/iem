@@ -11,6 +11,13 @@ IA_NORTH = 43.51
 IA_SOUTH = 40.37
 IA_NX    = 30
 IA_NY    = 20
+# Define grid bounds, midwest
+MW_WEST  = -105.7
+MW_EAST  = -80.1
+MW_NORTH = 53.51
+MW_SOUTH = 30.37
+MW_NX    = 100
+MW_NY    = 100
 
 def hilo_valplot(lons, lats, highs, lows, cfg):
     """
@@ -48,6 +55,14 @@ def hilo_valplot(lons, lats, highs, lows, cfg):
         Ngl.add_text(wks, plot, cfg["_format"] % lows[i], 
                       lons[i], lats[i],txres)
 
+    if cfg.has_key("_labels"):
+        txres               = Ngl.Resources()
+        txres.txFontHeightF = 0.008
+        txres.txJust        = "CenterLeft"
+        txres.txFontColor   = 1
+        for i in range(len(lons)):
+            Ngl.add_text(wks, plot, cfg["_labels"][i], 
+                     lons[i], lats[i],txres)
 
     watermark(wks)
     manual_title(wks, cfg)
@@ -155,14 +170,19 @@ def simple_contour(lons, lats, vals, cfg):
     wks = Ngl.open_wks( "ps","tmp",rlist)
  
     # Create Analysis
-    analysis, res = grid_iowa(lons, lats, vals)
+    if cfg.has_key("_midwest"):
+        analysis, res = grid_midwest(lons, lats, vals)
+    else:
+        analysis, res = grid_iowa(lons, lats, vals)
     analysis = numpy.transpose(analysis)
 
     for key in cfg.keys():
         if key == 'wkColorMap' or key[0] == "_":
             continue
         setattr(res, key, cfg[key])
-    
+    if cfg.has_key("_FillValue"):
+        analysis._FillValue = cfg['_FillValue']
+
     # Generate Contour
     contour = Ngl.contour_map(wks,analysis,res)
 
@@ -210,6 +230,29 @@ def watermark(wks):
     lstring = "Map Generated %s" % (mx.DateTime.now().strftime("%d %b %Y %-I:%M %p"),)
     txres.txFontHeightF = 0.010
     Ngl.text_ndc(wks, lstring,.05,.21,txres)
+
+def grid_midwest(lons, lats, vals):
+    """
+    Convience routine to do a simple grid for MidWest
+    @return numpy grid of values and plot res
+    """
+    delx = (MW_EAST - MW_WEST) / (MW_NX - 1)
+    dely = (MW_NORTH - MW_SOUTH) / (MW_NY - 1)
+    # Create axis
+    xaxis = MW_WEST + delx * numpy.arange(0, MW_NX)
+    yaxis = MW_SOUTH + dely * numpy.arange(0, MW_NY)
+    # Create the analysis
+    analysis = Ngl.natgrid(lons, lats, vals, xaxis, yaxis)
+
+    # Setup res
+    res = midwest()
+
+    res.sfXCStartV = min(xaxis)
+    res.sfXCEndV   = max(xaxis)
+    res.sfYCStartV = min(yaxis)
+    res.sfYCEndV   = max(yaxis)
+
+    return analysis, res
 
 def grid_iowa(lons, lats, vals):
     """
@@ -273,6 +316,7 @@ def iowa2():
 
     return res
 
+
 def iowa():
     """ Return Ngl resources for a standard Iowa plot """
 
@@ -311,3 +355,99 @@ def iowa():
 
 
     return res
+
+def midwest():
+    """ Return Ngl resources for a standard MidWest plot """
+
+    res = Ngl.Resources()
+    res.nglFrame              = False        # and this
+    res.nglDraw               = False        # Defaults this
+
+    res.pmTickMarkDisplayMode = "Never"      # Turn off annoying ticks
+
+    # Setup the view
+    res.nglMaximize         = False      # Prevent funky things
+    res.vpWidthF            = 0.8       # Default width of map?
+    res.vpHeightF           = 1.0        # Go vertical
+    res.nglPaperOrientation = "portrait" # smile
+    res.vpXF                = 0.0        # Make Math easier
+    res.vpYF                = 1.0        # 
+
+    #____________ MAP STUFF ______________________
+    res.mpProjection = "LambertEqualArea"   # Display projection
+    res.mpCenterLonF = -93.5                # Central Longitude
+    res.mpCenterLatF = 42.0                 # Central Latitude
+    res.mpLimitMode  = "LatLon"             # Display bounds  
+    res.mpMinLonF    = -108.0                # West
+    res.mpMaxLonF    = -83.1                # East
+    res.mpMinLatF    = 35.5                 # South
+    res.mpMaxLatF    = 49.9                 # North
+    res.mpPerimOn    = False                # Draw Border around Map
+    res.mpDataBaseVersion       = "MediumRes"     # Don't need hires coast
+    res.mpDataSetName           = "Earth..2"      # includes counties
+    res.mpGridAndLimbOn         = False           # Annoying
+    res.mpUSStateLineThicknessF = 3               # Outline States
+
+    res.mpOutlineOn             = True           # Draw map for sure
+    res.mpOutlineBoundarySets   = "NoBoundaries" # What not to draw
+    res.mpOutlineSpecifiers     = ["Conterminous US : Iowa",
+                               "Conterminous US : Illinois",
+                               "Conterminous US : Wisconsin",
+                               "Conterminous US : Michigan",
+                               "Conterminous US : Minnesota",
+                               "Conterminous US : South Dakota",
+                               "Conterminous US : North Dakota",
+                               "Conterminous US : Nebraska",
+                               "Conterminous US : Kansas",
+                               "Conterminous US : Missouri",
+                               ]
+
+    #_____________ LABEL BAR STUFF __________________________
+    res.lbAutoManage       = False           # Let me drive!
+    res.lbOrientation      = "Vertical"      # Draw it vertically
+    res.lbTitleString      = "lbTitleString" # Default legend
+    res.lbTitlePosition    = "Bottom"          # Place title on the left
+    res.lbTitleOn          = True            # We want a title, please
+    #res.lbTitleAngleF      = 90.0            # Rotate the title?
+    #res.lbTitleDirection   = "Across"        # Make it appear rotated?
+    res.lbPerimOn          = False            # Include a box aroundit
+    res.lbPerimThicknessF  = 1.0             # Thicker line?
+    res.lbBoxMinorExtentF  = 0.2             # Narrower boxes
+    res.lbTitleFontHeightF = 0.016
+    res.lbLabelFontHeightF = 0.016
+    #res.lbRightMarginF    = -0.3
+    #res.lbLeftMarginF       = -0.3
+    res.lbTitleExtentF     = 0.1
+
+    #______________ Contour Defaults _______________________
+    res.cnFillOn         = True    # filled contours
+    res.cnInfoLabelOn    = False   # No information label
+    res.cnLineLabelsOn   = False   # No line labels
+    res.cnLinesOn        = False   # No contour lines
+    res.cnFillDrawOrder  = "Predraw"       # Draw contour first!
+
+    res.pmLabelBarHeightF = 0.4
+    res.pmLabelBarWidthF = 0.06
+    res.pmLabelBarKeepAspect = True
+    res.pmLabelBarSide = "Right"
+
+    res.mpFillOn                = True            # Draw map for sure
+    res.mpFillAreaSpecifiers    = ["land","water"]  # Draw the US
+    res.mpFillBoundarySets   = "NoBoundaries" # What not to draw
+    res.mpSpecifiedFillColors   = [0,0]            # Draw in white
+    res.mpAreaMaskingOn         = True            # Mask by Iowa
+    res.mpMaskAreaSpecifiers    = ["Conterminous US : Iowa",
+                                   "Conterminous US : Illinois",
+                                   "Conterminous US : Wisconsin",
+                                   "Conterminous US : Minnesota",
+                                   "Conterminous US : Missouri",
+                                   "Conterminous US : Nebraska",
+                                   "Conterminous US : Kansas",
+                                   "Conterminous US : Michigan",
+                                   "Conterminous US : South Dakota",
+                                   "Conterminous US : North Dakota",
+                                   ]
+
+
+    return res
+
