@@ -33,8 +33,8 @@ for lat in numpy.arange(iemplot.IA_SOUTH, iemplot.IA_NORTH, buffer):
   for lon in numpy.arange(iemplot.IA_WEST, iemplot.IA_EAST, buffer):
     found = False
     for j in range(len(lats)):
-      if (lats[j] > lat and lats[j] < (lat+buffer) and
-         lons[j] > lon and lons[j] < (lon+buffer) ):
+      if (lats[j] > (lat-(buffer/2.)) and lats[j] < (lat+(buffer/2.)) and
+         lons[j] > (lon-(buffer/2.)) and lons[j] < (lon+(buffer/2.)) ):
         found = True
     if not found:
       lats.append( lat )
