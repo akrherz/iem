@@ -51,7 +51,7 @@ cfg = {
  '_valid'             : "Reports past 6 hours: "+ now.strftime("%d %b %Y %I:%M %p"),
  '_showvalues'        : True,
  '_format'            : '%.0f',
- '_FillValue'         : 0,
+ '_MaskZero'          : True,
  'lbTitleString'      : "[in]",
  'pmLabelBarHeightF'  : 0.6,
  'pmLabelBarWidthF'   : 0.1,

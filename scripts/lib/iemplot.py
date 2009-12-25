@@ -180,8 +180,9 @@ def simple_contour(lons, lats, vals, cfg):
         if key == 'wkColorMap' or key[0] == "_":
             continue
         setattr(res, key, cfg[key])
-    #if cfg.has_key("_FillValue"):
-    #    analysis._FillValue = cfg['_FillValue']
+    if cfg.has_key("_MaskZero"):
+        mask = numpy.where( analysis <= 0.02, True, False)
+        analysis = numpy.ma.array(analysis, mask=mask)
 
     # Generate Contour
     contour = Ngl.contour_map(wks,analysis,res)
