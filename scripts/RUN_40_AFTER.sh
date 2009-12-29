@@ -19,6 +19,9 @@ cd ../ingestors/squaw
 cd ../scan
 /mesonet/python/bin/python parser.py
 
+cd ../raws
+./download.csh
+
 # This is intensive...
 cd ../../week
 /mesonet/python/bin/python plot_stage4.py
