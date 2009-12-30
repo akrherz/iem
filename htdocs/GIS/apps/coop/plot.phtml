@@ -157,6 +157,9 @@ $snet->set("status", MS_ON);
 $ponly = $map->getlayerbyname("pointonly");
 $ponly->set("status", MS_ON);
 
+$cityname = $map->getlayerbyname("cityname");
+$cityname->set("status", MS_ON);
+
 $img = $map->prepareImage();
 $counties->draw($img);
 $states->draw($img);
