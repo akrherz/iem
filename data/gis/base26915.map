@@ -45,6 +45,53 @@ SYMBOL
   STYLE 1 5 END
 END
 
+# North America!!!
+LAYER
+  NAME namerica
+  STATUS OFF
+  TYPE POLYGON
+  DATA /mesonet/data/gis/static/shape/4326/world/world_borders.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM "FIPS_CNTRY"
+  CLASS
+    EXPRESSION /US/
+    COLOR  105 105 105
+  END
+  CLASS
+    COLOR 191 191 191
+  END
+END
+
+
+#
+LAYER
+  NAME iacounties
+  STATUS OFF
+  TYPE POLYGON
+  DATA "/mesonet/data/gis/static/shape/26915/iowa/iacounties.shp"
+  PROJECTION
+    "init=epsg:26915"
+  END
+  LABELCACHE ON
+  LABELITEM 'CO_NAME'
+  LABELMAXSCALE 400000
+  CLASS
+    OUTLINECOLOR 210 210 210
+#    COLOR 140 144 90
+    LABEL 
+      SIZE TINY
+      TYPE BITMAP
+      POSITION LC
+#      COLOR 90 90 90
+      COLOR 0 0 0
+      PARTIALS FALSE
+      FORCE FALSE
+    END
+  END
+END
+
 
 #
 LAYER
@@ -83,6 +130,125 @@ LAYER
     "init=epsg:26915"
   END
 END
+
+LAYER
+  TYPE POINT
+  NAME pointonly
+  STATUS OFF
+  PROJECTION
+   "proj=latlong"
+  END
+  LABELCACHE ON
+  CLASS
+   SYMBOL 1
+   COLOR 255 0 0
+   SIZE 5
+  END
+END
+
+LAYER
+  NAME credits
+  TYPE ANNOTATION
+  STATUS default
+  TRANSFORM FALSE
+  CLASS
+    LABEL
+      COLOR 255 255 255
+      BACKGROUNDCOLOR 0 0 200
+      SHADOWSIZE 1 1
+      SHADOWCOLOR 0 0 0
+      BACKGROUNDSHADOWCOLOR 0 0 0
+      BACKGROUNDSHADOWSIZE 1 1
+      TYPE TRUETYPE
+      SIZE 14
+      FONT 'kcci'
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+    END
+  END
+  CLASS
+    LABEL
+      COLOR 0 0 200
+#      BACKGROUNDCOLOR 0 0 200
+#      SHADOWSIZE 1 1
+#      SHADOWCOLOR 0 0 0
+#      BACKGROUNDSHADOWCOLOR 0 0 0
+#      BACKGROUNDSHADOWSIZE 1 1
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+      WRAP '|'
+    END
+  END
+END
+
+LAYER
+  NAME datapoint
+  STATUS ON
+  TYPE POINT
+  LABELCACHE ON
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    COLOR -1 -1 -1
+    LABEL
+      COLOR  255 255 0
+      OUTLINECOLOR  0 0 0
+      #SHADOWCOLOR 0 0 0
+      #SHADOWSIZE 1 1
+      SIZE 14
+      MINSIZE 4
+      MAXSIZE 18
+      TYPE TRUETYPE
+      FONT kcci
+      ANTIALIAS TRUE
+      BUFFER 2
+      FORCE TRUE
+      POSITION UC
+      OFFSET 0 3
+    END
+  END
+  CLASS
+    COLOR -1 -1 -1
+    LABEL
+      COLOR 0 0 0
+#      OUTLINECOLOR 0 0 0
+#      SHADOWCOLOR 0 0 0
+#      SHADOWSIZE 1 1
+      SIZE 7
+      MINSIZE 4
+      MAXSIZE 18
+      TYPE TRUETYPE
+      FONT arial
+      ANTIALIAS true
+      BUFFER 0
+      FORCE FALSE
+      POSITION AUTO
+    END
+  END
+  CLASS
+    COLOR -1 -1 -1
+    LABEL
+      COLOR  0 0 0
+      SIZE 14
+      MINSIZE 4
+      MAXSIZE 18
+      TYPE TRUETYPE
+      FONT arial
+      #TYPE BITMAP
+      #SIZE LARGE
+      ANTIALIAS TRUE
+      BUFFER 2
+      FORCE TRUE
+      POSITION UC
+    END
+  END
+END
+
 
 LAYER
   TYPE POINT
