@@ -14,18 +14,14 @@ $phenomena = $tokens[4];
 $significance = $tokens[5];
 $eventid = intval( $tokens[6] );
 
-$extjs = "ext-all.js";
-if ($rootpath == "http://localhost/iem"){
-  $extjs = "ext-all-debug.js";
-}
-
-$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.0.0/resources/css/ext-all.css"/>
+$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.1.0/resources/css/ext-all.css"/>
 <link rel="stylesheet" type="text/css" href="../ext/ux/form/Spinner.css"/>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/ext-all.js"></script>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.0/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.0/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="Ext.ux.GMapPanel.js"></script>
 <script type="text/javascript" src="RowExpander.js"></script>
+<script type="text/javascript" src="Printer-all.js"></script>
 <script type="text/javascript" src="../ext/ux/menu/EditableItem.js"></script>
 <script type="text/javascript" src="../ext/ux/grid/GridFilters.js"></script>
 <script type="text/javascript" src="../ext/ux/grid/filter/Filter.js"></script>
@@ -38,7 +34,7 @@ Ext.namespace("cfg");
 cfg.startYear = 2002;
 cfg.header = "iem-header";
 </script>
-<script type="text/javascript" src="static.js?v=1.0.3"></script>';
+<script type="text/javascript" src="static.js?v=1.0.4"></script>';
 $TITLE = "IEM Valid Time Extent Code (VTEC) App";
 $NOCONTENT = 1;
 $THISPAGE ="severe-vtec";
@@ -66,6 +62,7 @@ the tab to show the information.</i>
  <li><b>List Events:</b>  List all events of the given phenomena, significance, year, and issuing office.</li>
 </ul></p>
 </div>
+<div id="boilerplate"></div>
 <div id="footer"></div>
 <script>
 Ext.onReady(function(){
