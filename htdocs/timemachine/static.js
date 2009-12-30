@@ -270,7 +270,7 @@ function updateDT(){
     setTime();
   }
 
-  displayDT.setText( appTime.format('l M d Y g:i A T') );
+  displayDT.setText( appTime.format('D M d Y g:i A T') );
 
   tpl = meta.data.template.replace(/%Y/g, '{0}').replace(/%m/g, '{1}').replace(/%d/g, '{2}').replace(/%H/g,'{3}').replace(/%i/g,'{4}').replace(/%y/g, '{5}');
 
