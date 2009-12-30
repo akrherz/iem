@@ -12,6 +12,19 @@
  <link rel="stylesheet" type="text/css" media="print" href="<?php echo $rooturl; ?>/css/print.css?v=3" />
  <?php if (isset($REFRESH)){ echo $REFRESH; } ?>
  <?php if (isset($HEADEXTRA)){ echo $HEADEXTRA;} ?>
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-784549-2']);
+_gaq.push(['_trackPageview']);
+(function() {
+var ga = document.createElement('script');
+ga.src = ('https:' == document.location.protocol ?
+    'https://ssl' : 'http://www') +
+    '.google-analytics.com/ga.js';
+ga.setAttribute('async', 'true');
+document.documentElement.firstChild.appendChild(ga);
+})();
+</script>
 </head>
 <body <?php if (isset($BODYEXTRA)){ echo $BODYEXTRA;} ?>>
 <?php if (! isset($NOCONTENT)) echo "<div id=\"iem-main\">"; ?>
