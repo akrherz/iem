@@ -7,6 +7,10 @@ $year = isset($_GET["year"]) ? $_GET["year"]: 2006;
 $month = isset($_GET["month"]) ? $_GET["month"]: 2;
 $day = isset($_GET["day"]) ? $_GET["day"]: 1;
 $source = isset($_GET["source"]) ? $_GET["source"]: "qc";
+$size = isset($_GET["size"]) ? $_GET["size"] : "640x480";
+$showlabels = isset($_GET["labels"]);
+$tokens = explode("x", $size);
+$width = $tokens[0]; $height = $tokens[1];
 
 /** Need to use external date lib *
   * http://php.weblogs.com/adodb_date_time_library
@@ -37,20 +41,21 @@ include("$rootpath/include/header.php"); ?>
 <p>With this application, you can plot COOP observations for a date of your
 choice.
 
-<form method="GET">
-<table>
+<form method="GET" name="myform">
+<table cellpadding="2" border="1" cellspacing="0">
  <tr>
    <th>Select Datasource:</th>
    <th>Select Parameter:</th>
    <th>Year</th>
    <th>Month</th>
    <th>Day</th>
+   <th>Image Size</th>
    <td></td>
   </tr>
  <tr>
   <td><select name="source">
-  <option value="qc" <?php if($source == "qc") echo "SELECTED"; ?>>Quality Controlled (1893-few months ago)
-  <option value="prelim" <?php if($source == "prelim") echo "SELECTED"; ?>>Preliminary Reports (2004-today)
+  <option value="qc" <?php if($source == "qc") echo "SELECTED"; ?>>QC'd (1893-)
+  <option value="prelim" <?php if($source == "prelim") echo "SELECTED"; ?>>Preliminary (2004-)
   </select></td>
   <td><select name="var">
      <option value="high" <?php if($var == "high") echo "SELECTED"; ?>>High Temperature</option>
@@ -62,9 +67,18 @@ choice.
   <td><?php echo yearselect(1893, $year); ?></td>
   <td><?php echo monthSelect2($month, 'month'); ?></td>
   <td><?php echo daySelect2($day, 'day'); ?></td>
+  <td>
+<select name="size">
+  <option value="640x480" <?php if($size == "640x480") echo "SELECTED"; ?>>640x480</option>
+  <option value="1024x768" <?php if($size == "1024x768") echo "SELECTED"; ?>>1024x768</option>
+  <option value="1280x1024" <?php if($size == "1280x1024") echo "SELECTED"; ?>>1280x1024</option>
+</select>
+  </td>
   <td><input type="submit" value="Make Plot"></td>
   </tr>
 </table>
+<input type="checkbox" name="labels" <?php if ($showlabels){ echo "CHECKED=\"CHECKED\""; }?>>Show point labels
+</form>
 <br />[1] Snowfall data is not complete.  Please be careful using the data.
 <br />[2] Snowfall depth data only goes back to 1991 for Quality Controled source.
 <?php
@@ -74,7 +88,7 @@ if ($source == "qc") $nt = new NetworkTable("IACLIMATE");
 else $nt = new NetworkTable("IA_COOP");
 $cities = $nt->table;
 
-function mktitlelocal($map, $imgObj, $titlet) { 
+function mktitlelocal($map, $imgObj, $titlet, $height) { 
  
   $layer = $map->getLayerByName("credits");
  
@@ -87,7 +101,7 @@ function mktitlelocal($map, $imgObj, $titlet) {
 
      // point feature with text for location
   $point = ms_newpointobj();
-  $point->setXY( 0, 740);
+  $point->setXY( 0, $height - 15);
   $point->draw($map, $layer, $imgObj, 1,
     "  Iowa Environmental Mesonet | NWS COOP ");
   $point->free();
@@ -122,36 +136,30 @@ $rnd = Array("gdd50" => 0,
 
 
 $myStations = $cities;
-$height = 480;
-$width = 640;
 
-$proj = "init=epsg:26915";
-
-$map = ms_newMapObj("base.map");
-$map->set("width",1024);
-$map->set("height",768);
-$map->setProjection($proj);
+$map = ms_newMapObj("$rootpath/data/gis/base26915.map");
+$map->selectOutputFormat("PNG24");
+$map->set("width", $width);
+$map->set("height",$height);
+$map->setProjection("init=epsg:26915");
 
 $map->setextent(250000, 4450000, 690000, 4880000);
 
-$counties = $map->getlayerbyname("counties");
+$states = $map->getlayerbyname("states");
+$states->set("status", MS_ON);
+
+$counties = $map->getlayerbyname("iacounties");
 $counties->set("status", MS_ON);
 
-$snet = $map->getlayerbyname("snet");
+$snet = $map->getlayerbyname("datapoint");
 $snet->set("status", MS_ON);
-
-$cityname = $map->getlayerbyname("cityname");
-$cityname->set("status", MS_ON);
-
-$iards = $map->getlayerbyname("iards");
-$iards->set("status", 1);
 
 $ponly = $map->getlayerbyname("pointonly");
 $ponly->set("status", MS_ON);
 
 $img = $map->prepareImage();
 $counties->draw($img);
-$iards->draw($img);
+$states->draw($img);
 
 $c = iemdb("coop");
 
@@ -192,17 +200,17 @@ foreach($vals as $key => $value){
 
   if ($ukey == "IA0807") $cities["IA0807"]["lon"] -= 0.1;
 
-  // Red Dot... 
-  $pt = ms_newPointObj();
-  $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-  $pt->draw($map, $ponly, $img, 0, '' );
-  $pt->free();
+  if ($showlabels){
+    $pt = ms_newPointObj();
+    $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+    $pt->draw($map, $ponly, $img, 0, '' );
+    $pt->free();
 
-  // ID
-  $pt = ms_newPointObj();
-  $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-  $pt->draw($map, $cityname, $img, 0, substr($key,$cutstring1,$cutstring2) );
-  $pt->free();
+    $pt = ms_newPointObj();
+    $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+    $pt->draw($map, $cityname, $img, 0, substr($key,$cutstring1,$cutstring2) );
+    $pt->free();
+  }
 
   // Value UL
   $pt = ms_newPointObj();
@@ -217,7 +225,7 @@ $map->drawLabelCache($img);
 if ($i == 0)
    plotNoData($map, $img);
 
-mktitlelocal($map, $img, " $ndate ". $varDef[$var] ."  ");
+mktitlelocal($map, $img, " $ndate ". $varDef[$var] ."  ", $height);
 $map->drawLabelCache($img);
 
 $url = $img->saveWebImage();
