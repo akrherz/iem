@@ -15,6 +15,7 @@ Ext.ux.Printer.PanelRenderer = Ext.extend(Ext.ux.Printer.BaseRenderer, {
 });
 
 Ext.ux.Printer.registerRenderer("panel", Ext.ux.Printer.PanelRenderer);
+Ext.ux.Printer.BaseRenderer.prototype.stylesheetPath = 'print.css';
 
 
 var cp = new Ext.state.CookieProvider({
