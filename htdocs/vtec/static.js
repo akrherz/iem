@@ -2,104 +2,20 @@ Ext.BLANK_IMAGE_URL = '../ext/resources/images/default/s.gif';
 Ext.onReady(function(){
 
 /**
- * @version 0.4
- * @author nerdydude81
- */Ext.override(Ext.Element, {
-    /**
-     * @cfg {string} printCSS The file path of a CSS file for printout.
-     */
-    printCSS: null,
-    /**
-     * @cfg {Boolean} printStyle Copy the style attribute of this element to the print iframe.
-     */
-    printStyle: false,
-    /**
-     * @property {string} printTitle Page Title for printout. 
-     */
-    printTitle: document.title,
-    /**
-     * Prints this element.
-     * 
-     * @param config {object} (optional)
-     */
-    print: function(config) {
-        Ext.apply(this, config);
-        
-        var el = Ext.get(this.id).dom;
-        if (this.isGrid) 
-            el = el.parentNode;
-        
-        var c = document.getElementById('printcontainer');
-        var iFrame = document.getElementById('printframe');
-        
-        var strTemplate = '<HTML><HEAD>{0}<TITLE>{1}</TITLE></HEAD><BODY onload="{2}"><DIV {3}>{4}</DIV></BODY></HTML>';
-        var strLinkTpl = '<link rel="stylesheet" type="text/css" href="{0}"/>'
-        var strAttr = '';
-        var strFormat;
-        var strHTML;
-    
-        if (c) {
-            if (iFrame)
-                c.removeChild(iFrame);
-            el.removeChild(c);
-        }
-        
-        for (var i = 0; i < el.attributes.length; i++) {
-            if (Ext.isEmpty(el.attributes[i].value) || el.attributes[i].value.toLowerCase() != 'null') {
-                strFormat = Ext.isEmpty(el.attributes[i].value)? '{0}="true" ': '{0}="{1}" ';
-                if (this.printStyle? this.printStyle: el.attributes[i].name.toLowerCase() != 'style')
-                    strAttr += String.format(strFormat, el.attributes[i].name, el.attributes[i].value);
-            }
-        }
-        
-        var strLink ='';
-        if(this.printCSS){
-            if(!Ext.isArray(this.printCSS))
-                this.printCSS = [this.printCSS];
-            
-            for(var i=0; i<this.printCSS.length; i++) {
-                strLink += String.format(strLinkTpl, this.printCSS[i]);
-            }
-        }
-        
-        strHTML = String.format(
-            strTemplate,
-            strLink,
-            this.printTitle,
-            '',
-            strAttr,
-            el.innerHTML
-        );
-        
-        c = document.createElement('div');
-        c.setAttribute('style','width:0px;height:0px;' + (Ext.isSafari? 'display:none;': 'visibility:hidden;'));
-        c.setAttribute('id', 'printcontainer');
-        el.appendChild(c);
-        if (Ext.isIE)
-            c.style.display = 'none';
-        
-        iFrame = document.createElement('iframe');
-        iFrame.setAttribute('id', 'printframe');
-        iFrame.setAttribute('name', 'printframe');
-        c.appendChild(iFrame);
-        
-        iFrame.contentWindow.document.open();        
-        iFrame.contentWindow.document.write(strHTML);
-        iFrame.contentWindow.document.close();
-        
-        if (this.isGrid) {
-            var iframeBody = Ext.get(iFrame.contentWindow.document.body);
-            var cc = Ext.get(iframeBody.first().dom.parentNode);
-            cc.child('div.x-panel-body').setStyle('height', '');
-            cc.child('div.x-grid3').setStyle('height', '');
-            cc.child('div.x-grid3-scroller').setStyle('height', '');
-        }
-        if (Ext.isIE)
-            iFrame.contentWindow.document.execCommand('print');
-        else
-            iFrame.contentWindow.print();
-    }
+ * Prints the contents of an Ext.Panel
+ */
+Ext.ux.Printer.PanelRenderer = Ext.extend(Ext.ux.Printer.BaseRenderer, {
+
+ /**
+  * Generates the HTML fragment that will be rendered inside the <html> element of the printing window
+  */
+ generateBody: function(panel) {
+   return String.format("<div class='x-panel-print'>{0}</div>", panel.body.dom.innerHTML);
+ }
 });
+
+Ext.ux.Printer.registerRenderer("panel", Ext.ux.Printer.PanelRenderer);
+Ext.ux.Printer.BaseRenderer.prototype.stylesheetPath = 'print.css';
 
 
 /**
@@ -129,7 +45,6 @@ Ext.ux.SliderTip = Ext.extend(Ext.Tip, {
     }
 });
 
-var tabPanel;
 /* Here are my Panels that appear in tabs */
 var helpPanel;
 var googlePanel;
@@ -431,11 +346,11 @@ metastore.on('load', function(mystore, records, options){
   /* If we got no results from the server, show the events tab */
   if (metastore.getCount() == 0){
     //Ext.fly(vDescription.getEl()).update('Event not found on server, here is a list of other '+  phenomena_selector.getRawValue() + ' '+ sig_selector.getRawValue() +' issued by '+ wfo_selector.getRawValue() );
-    tabPanel.items.each(function(c){
+    Ext.getCmp("mainPanel").items.each(function(c){
          if (c.saveme){}
          else{ c.disable(); }
     });
-    tabPanel.activate('products-grid');
+    Ext.getCmp("mainPanel").activate('products-grid');
     eventsPanel.getStore().load({params:getVTEC()});
     return;
   }
@@ -450,7 +365,7 @@ metastore.on('load', function(mystore, records, options){
 
   /* Update the toolbar */
   Ext.fly(vDescription.getEl()).update(wfo_selector.getRawValue() + ' '+ phenomena_selector.getRawValue() + ' '+ sig_selector.getRawValue() + ' #'+ eventid_selector.getValue()  +' issued '+ metastore.getAt(0).data.issue.format('Y-m-d H:i\\Z') +' expires '+ metastore.getAt(0).data.expire.format('Y-m-d H:i\\Z'));
-  tabPanel.items.each(function(c){c.enable();});
+  Ext.getCmp("mainPanel").items.each(function(c){c.enable();});
 
   /* Now we check the various panels to see if they should be reloaded */
   if (textTabPanel.isLoaded){ 
@@ -483,7 +398,7 @@ metastore.on('load', function(mystore, records, options){
   }
 
   /* Activate the Google Panel by default :) */
-  tabPanel.activate(3);
+  Ext.getCmp("mainPanel").activate(3);
   resetGmap();
 });
 
@@ -654,7 +569,7 @@ textTabsLoad = function(){
             icon    : 'icons/print.png',
             cls     : 'x-btn-text-icon',
             handler : function(){
-                Ext.getCmp("textTabPanel").getActiveTab().getEl().print();
+              Ext.ux.Printer.print(Ext.getCmp("textTabPanel").getActiveTab());
             }
           }
           ]
@@ -671,7 +586,7 @@ textTabsLoad = function(){
             icon    : 'icons/print.png',
             cls     : 'x-btn-text-icon',
             handler : function(){
-                Ext.getCmp("textTabPanel").getActiveTab().getEl().print();
+              Ext.ux.Printer.print(Ext.getCmp("textTabPanel").getActiveTab());
               }
             } 
            ]  
@@ -776,6 +691,16 @@ geoPanel.on('activate', function(q){
  */
 eventsPanel = new Ext.grid.GridPanel({
     id       : 'products-grid',
+    tbar     : [
+          {
+            text    : 'Print Grid',
+            icon    : 'icons/print.png',
+            cls     : 'x-btn-text-icon',
+            handler : function(){
+              Ext.ux.Printer.print(Ext.getCmp("products-grid"));
+            }
+          }
+    ],
     store    : pstore,
     saveme   : true,
     disabled : false,
@@ -1023,30 +948,7 @@ radarPanel.on('activate', function(){
 
 vDescription = new Ext.Toolbar.TextItem('');
 
-tabPanel =  new Ext.TabPanel({
-    region:'center',
-    height:.75,
-    plain:true,
-    enableTabScroll:true,
-    defaults:{bodyStyle:'padding-left:5px'},
-    tbar: new Ext.Toolbar({
-      id: 'main-status',
-      defaultText: '',
-      items:[vDescription]
-      }),
-    items:[
-      {contentEl:'help', title: 'Help', saveme:true},
-      radarPanel,
-      textTabPanel,
-      googlePanel,
-      sbwPanel,
-      lsrGridPanel,
-      allLsrGridPanel,
-      geoPanel,
-      eventsPanel
-    ],
-    activeTab:0
-});
+
 
 var viewport = new Ext.Viewport({
     layout:'border',
@@ -1067,7 +969,30 @@ var viewport = new Ext.Viewport({
                 }
             ]
          },
-         tabPanel
+         new Ext.TabPanel({
+           id              : 'mainPanel',
+           region          : 'center',
+           plain           : true,
+           enableTabScroll : true,
+           defaults        : {bodyStyle:'padding-left:5px'},
+           tbar            : new Ext.Toolbar({
+                id          : 'main-status',
+                defaultText : '',
+                items       : [vDescription]
+           }),
+           items           : [
+              {contentEl:'help', title: 'Help', saveme:true},
+              radarPanel,
+              textTabPanel,
+              googlePanel,
+              sbwPanel,
+              lsrGridPanel,
+              allLsrGridPanel,
+              geoPanel,
+              eventsPanel
+           ],
+           activeTab       : 0
+         })
          ]
 });
 
