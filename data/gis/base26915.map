@@ -249,6 +249,26 @@ LAYER
   END
 END
 
+LAYER
+  NAME cityname
+  STATUS ON
+  TYPE POINT
+  LABELCACHE OFF
+  PROJECTION
+    "init=epsg:4326"
+  END
+  CLASS
+    COLOR -1 -1 -1
+    LABEL
+      COLOR 0 0 0
+      SIZE MEDIUM
+      TYPE BITMAP
+      POSITION LC
+      FORCE TRUE
+    END
+  END
+END
+
 
 LAYER
   TYPE POINT
