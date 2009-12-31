@@ -69,6 +69,7 @@ If your browser does not support java, please try the 'Java Script' loop tool.
   <td><select name="cid">
 <?php
  while (list($k,$v) = each($cameras)) {
+  if ($v["network"] == "IDOT"){ continue; }
   $lbl = sprintf("%s (%s)", $v["name"], date("d M Y", $v["sts"]) );
   echo "<option value=\"$k\"";
   if ($cid == $k) echo "selected=\"selected\""; 
