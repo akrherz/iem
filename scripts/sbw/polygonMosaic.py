@@ -71,7 +71,7 @@ font2 = ImageFont.truetype('../../data/fonts/veramono.ttf', 18)
 draw = ImageDraw.Draw(mosaic)
 
 imagemap = open('imap.txt', 'w')
-imagemap.write("<!-- %s -->\n" % (mx.DateTime.gmt().strftime("%Y-%m-%d %H:%M:%S"),) )
+imagemap.write("<!-- %s %s -->\n" % (mx.DateTime.gmt().strftime("%Y-%m-%d %H:%M:%S"), sortOpt) )
 imagemap.write("<MAP NAME='mymap'>\n")
 
 # Find my polygons
