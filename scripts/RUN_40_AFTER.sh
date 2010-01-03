@@ -4,7 +4,9 @@ cd dl
 
 cd ../sbw
 /mesonet/python/bin/python polygonMosaic.py S
+sleep 4
 /mesonet/python/bin/python polygonMosaic.py T
+sleep 4
 /mesonet/python/bin/python polygonMosaic.py W
 
 cd ../qc
