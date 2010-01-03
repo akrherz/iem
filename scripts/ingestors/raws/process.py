@@ -18,7 +18,7 @@ now = mx.DateTime.gmt()
 
 f = open(sys.argv[1], 'r').readlines()
 
-if (len(f) == 0):
+if len(f) < 2:
   sys.exit(0)
 
 dl = f[1]
