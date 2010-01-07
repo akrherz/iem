@@ -28,7 +28,7 @@ for i in range(len(rs)):
   #valmask.append( False )
 
 # Now, we need to add in zeros, lets say we are looking at a .25 degree box
-buffer = 0.5
+buffer = 1.0
 for lat in numpy.arange(iemplot.IA_SOUTH, iemplot.IA_NORTH, buffer):
   for lon in numpy.arange(iemplot.IA_WEST, iemplot.IA_EAST, buffer):
     found = False
