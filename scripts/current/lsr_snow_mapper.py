@@ -18,7 +18,7 @@ lons = []
 rs = postgis.query("""SELECT state, 
       max(magnitude) as val, x(geom) as lon, y(geom) as lat
       from lsrs_2010 WHERE type = 'S' and 
-      valid > now() - '6 hours'::interval
+      valid > now() - '12 hours'::interval
       GROUP by state, lon, lat""").dictresult()
 for i in range(len(rs)):
   vals.append( rs[i]['val'] )
@@ -48,7 +48,7 @@ cfg = {
  'nglSpreadColorEnd'  : -1,
  '_valuemask'         : valmask,
  '_title'             : "Local Storm Report Snowfall Total Analysis",
- '_valid'             : "Reports past 6 hours: "+ now.strftime("%d %b %Y %I:%M %p"),
+ '_valid'             : "Reports past 12 hours: "+ now.strftime("%d %b %Y %I:%M %p"),
  '_showvalues'        : True,
  '_format'            : '%.0f',
  '_MaskZero'          : True,
