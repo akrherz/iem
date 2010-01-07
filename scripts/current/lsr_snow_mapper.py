@@ -17,7 +17,7 @@ lats = []
 lons = []
 rs = postgis.query("""SELECT state, 
       max(magnitude) as val, x(geom) as lon, y(geom) as lat
-      from lsrs_2009 WHERE type = 'S' and 
+      from lsrs_2010 WHERE type = 'S' and 
       valid > now() - '6 hours'::interval
       GROUP by state, lon, lat""").dictresult()
 for i in range(len(rs)):
