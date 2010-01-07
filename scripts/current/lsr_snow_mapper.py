@@ -22,7 +22,7 @@ rs = postgis.query("""SELECT state,
       GROUP by state, lon, lat""").dictresult()
 for i in range(len(rs)):
   vals.append( rs[i]['val'] )
-  lats.append( rs[i]['lat'] )
+  lats.append( rs[i]['lat'] + (random.random() * 0.001) )
   lons.append( rs[i]['lon'] )
   valmask.append( rs[i]['state'] in ['IA',] )
   #valmask.append( False )
@@ -37,7 +37,7 @@ for lat in numpy.arange(iemplot.IA_SOUTH, iemplot.IA_NORTH, buffer):
          lons[j] > (lon-(buffer/2.)) and lons[j] < (lon+(buffer/2.)) ):
         found = True
     if not found:
-      lats.append( lat + (random.random() * 0.001) )
+      lats.append( lat )
       lons.append( lon )
       valmask.append( False )
       vals.append( 0 )
