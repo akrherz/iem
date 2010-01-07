@@ -4,7 +4,7 @@ import sys, os, numpy
 sys.path.append("../lib/")
 import iemplot
 
-import mx.DateTime
+import mx.DateTime, random
 now = mx.DateTime.now()
 
 from pyIEM import iemdb
@@ -37,7 +37,7 @@ for lat in numpy.arange(iemplot.IA_SOUTH, iemplot.IA_NORTH, buffer):
          lons[j] > (lon-(buffer/2.)) and lons[j] < (lon+(buffer/2.)) ):
         found = True
     if not found:
-      lats.append( lat )
+      lats.append( lat + (random.random() * 0.001) )
       lons.append( lon )
       valmask.append( False )
       vals.append( 0 )
