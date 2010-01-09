@@ -90,6 +90,11 @@ GROUP by station, lon, lat
     return data
 
 def main():
+    sts =  mx.DateTime.now() + mx.DateTime.RelativeDateTime(month=5,day=1)
+    ets = mx.DateTime.now()
+    if sts > ets:
+        return
+
     output = open('wxc_iem_agdata.txt', 'w')
     output.write("""Weather Central 001d0300 Surface Data
    8
@@ -102,8 +107,6 @@ def main():
    6 Lat
    8 Lon
 """)
-    sts =  mx.DateTime.DateTime(2009,5,1)
-    ets = mx.DateTime.now()
     days = (ets - sts).days
     data = compute_obs( sts, ets )
     load_soilt(data)
