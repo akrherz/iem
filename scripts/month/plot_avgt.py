@@ -15,11 +15,11 @@ iem = i['iem']
 sql = """
 SELECT station, network, x(geom) as lon, y(geom) as lat, 
 avg( (max_tmpf + min_tmpf)/2.0 ) as avgt 
-from summary
+from summary_%s
 WHERE (network ~* 'ASOS' or network = 'AWOS') and 
 extract(month from day) = extract(month from now()) 
 and max_tmpf > -30 and min_tmpf < 90 GROUP by station, network, lon, lat
-"""
+""" % (now.year,)
 
 lats = []
 lons = []
