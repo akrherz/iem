@@ -15,8 +15,8 @@ iem = i['iem']
 sql = """SELECT station, x(geom) as lon, y(geom) as lat,
    sum(gdd50(max_tmpf, min_tmpf)) as gdd, 
    sum(sdd86(max_tmpf, min_tmpf)) as sdd 
-   from summary WHERE network in ('IA_ASOS','AWOS')
-   GROUP by station, lon, lat"""
+   from summary_%s WHERE network in ('IA_ASOS','AWOS')
+   GROUP by station, lon, lat""" % (now.year,)
 
 lats = []
 lons = []
