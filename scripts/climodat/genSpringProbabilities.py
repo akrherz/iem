@@ -19,7 +19,7 @@ def write(mydb, stationID):
         # Query Last doy for each year in archive
         sql = "select year, max(extract(doy from day)) as doy from alldata \
            WHERE month < 7 and low <= %s and low > -40 and stationID = '%s' \
-           and year >= %s and year < %s \
+           and year >= %s and year < %s and month > 1 \
          GROUP by year ORDER by doy ASC" % (base, stationID, constants.startyear(stationID), constants._ENDYEAR)
         rs = mydb.query(sql).dictresult()
         cnt_years[base] = len(rs)
