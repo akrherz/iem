@@ -51,7 +51,7 @@ if form.has_key("limit1"):
 
 sql = """SELECT *, astext(geom) as tgeom,
     area( transform(geom,2163) ) / 1000000.0 as area2d
-    from warnings_%s WHERE 
+    from warnings_%s WHERE isValid(geom) and 
 	issue >= '%s' and issue < '%s' and eventid < 10000 
 	%s ORDER by issue ASC""" % (sTS.year, sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter )
 rs = mydb.query(sql).dictresult()
