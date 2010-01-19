@@ -11,7 +11,7 @@ $data = Array($station1 => Array(), $station2 => Array() );
 
 $dbconn = iemdb('access');
 $sql = "SELECT station, valid, tmpf, dwpf, sknt, vsby
-  from current_log WHERE station IN ('$station1','$station2') and valid > '2009-04-07' and valid < '2009-04-07 21:00' and dwpf > -99 and extract(minute from valid) NOT IN (15, 35, 55) ORDER by valid ASC";
+  from current_log WHERE station IN ('$station1','$station2') and valid > '2009-04-07' and valid < '2010-04-07 21:00' and dwpf > -99 and extract(minute from valid) NOT IN (15, 35, 55) ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)

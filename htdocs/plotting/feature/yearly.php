@@ -7,10 +7,10 @@ $cnt = Array();
 
 $ts0 = mktime(0,0,0,1,1,1893);
 
-$fc = file('lows_year.txt');
+$fc = file('yearly.txt');
 while (list ($line_num, $line) = each ($fc)) {
       $tokens = split (",", $line);
-   $cnt[] = intval($tokens[1]);
+   $cnt[] = floatval($tokens[1]);
    $years[] = $tokens[0];
  }
 
@@ -19,9 +19,9 @@ include ("$rootpath/include/jpgraph/jpgraph_bar.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(320,280,"example1");
-$graph->SetScale("textlin",-150,150);
-$graph->img->SetMargin(50,10,45,65);
+$graph = new Graph(300,280,"example1");
+$graph->SetScale("textlin");
+$graph->img->SetMargin(40,5,65,50);
 
 $graph->xaxis->SetLabelAngle(90);
 //$graph->xaxis->SetLabelFormatString("M d", true);
@@ -29,21 +29,19 @@ $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetPos("min");
 $graph->xaxis->SetTickLabels($years);
 $graph->xaxis->SetTextTickInterval(10);
-$graph->xaxis->SetTitleMargin(30);
-$graph->yaxis->SetTitleMargin(33);
+//$graph->xaxis->HideTicks();
+$graph->xaxis->SetTitleMargin(20);
+$graph->yaxis->SetTitleMargin(20);
 
-//$graph->xaxis->SetTitle("Valid Local Time");
-$graph->yaxis->SetTitle("Number of Days");
-$graph->xaxis->SetTitle("*2009 Data thru 15 Oct");
-$graph->tabtitle->Set('Ames Low Temperature');
-$graph->title->Set('Yearly net days above average');
+$graph->yaxis->title->SetFont(FF_ARIAL,FS_NORMAL,12);
+$graph->xaxis->title->SetFont(FF_ARIAL,FS_NORMAL,12);
+$graph->xaxis->SetTitle("Year");
+$graph->yaxis->SetTitle("Minimum Temperature [F]");
+//$graph->tabtitle->Set('Ames (1893-2009)');
+$graph->title->Set('Iowa Minimum November Temperature');
+$graph->subtitle->Set('coldest -26 (1898) --- warmest 17 (2009)');
 
-$graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
-$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
-//$graph->xaxis->SetFont(FF_ARIAL,FS_BOLD,12);
-//$graph->yaxis->SetFont(FF_ARIAL,FS_BOLD,12);
-$graph->title->SetFont(FF_ARIAL,FS_BOLD,12);
-$graph->tabtitle->SetFont(FF_ARIAL,FS_BOLD,12);
+  $graph->tabtitle->SetFont(FF_ARIAL,FS_NORMAL,12);
   $graph->SetColor('wheat');
 
 //  $graph->legend->SetLayout(LEGEND_HOR);
@@ -58,7 +56,11 @@ $graph->tabtitle->SetFont(FF_ARIAL,FS_BOLD,12);
 // Create the linear plot
 $lineplot=new BarPlot($cnt);
 //$lineplot->SetLegend("When Previous Day < 32");
+//$lineplot->SetFillGradient('white','darkgreen');
+//$lineplot->SetStepStyle();
 $lineplot->SetColor("blue");
+$lineplot->SetAlign("left");
+$lineplot->SetFillColor("blue");
 $graph->Add($lineplot);
 
 

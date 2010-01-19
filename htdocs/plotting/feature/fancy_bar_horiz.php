@@ -5,9 +5,9 @@ include ("../../../include/jpgraph/jpgraph_bar.php");
 // 16 Oct 2007 select extract(year from day) as year, count(*) from (select day, count(*) from alldata WHERE precip >= 4 and year > 1950 and stationid IN (select stationid from alldata WHERE day = '1971-01-01') GROUP by day) as foo WHERE count > 1 GROUP by year ORDER by count ASC;
 
 
-$datay1=array(325,597,717,601,352);
-$datay2=array(392,586,715,660,400);
-$datax=array("May", "Jun", "Jul", "Aug", "Sep");
+$datay1=array(19,10,30,31,106,33,35,15,11,29,25,22);
+$datay2=array(31,37,53,49,31,41,24,25,28,23,17,7);
+$datax=array("90s", "00s", "10s", "20s", "30s", "40s", "50s","60s","70s","80s","90s","00s");
 
 // Size of graph
 $width=330; 
@@ -35,8 +35,8 @@ $graph->SetBox();
 $graph->SetBackgroundGradient('white','tan',GRAD_HOR,BGRAD_PLOT);
 
 // Setup title
-$graph->title->Set("Monthly Growing Degree Days");
-$graph->subtitle->Set("May-Sep 2008 and Climatology for Ames");
+$graph->title->Set("Iowa Daily Temperature Records");
+$graph->subtitle->Set("currently by decade, ties not considered");
 $graph->title->SetFont(FF_VERDANA,FS_BOLD,11);
 
 // Setup X-axis
@@ -55,7 +55,8 @@ $graph->yaxis->scale->SetGrace(20);
 
 // We don't want to display Y-axis
 //$graph->yaxis->Hide();
-$graph->yaxis->SetTitle("GDD base=50           ");
+$graph->yaxis->SetTitle("Days");
+$graph->xaxis->SetTitle("1800s                 1900s                2000s");
 
 // Now create a bar pot
 $bplot1 = new BarPlot($datay1);
@@ -63,12 +64,13 @@ $bplot1 = new BarPlot($datay1);
 // Now create a bar pot
 $bplot2 = new BarPlot($datay2);
 
-$bplot1->SetFillColor('blue@0.3');
-$bplot2->SetFillColor('red@0.3');
+$bplot1->SetFillColor('red@0.3');
+//$bplot1->value->Show();
+$bplot2->SetFillColor('blue@0.3');
 //$bplot1->SetShadow('black@0.4');
 //$bplot2->SetShadow('black@0.4');
-$bplot1->SetLegend('Obs = '. round(array_sum($datay1),0) );
-$bplot2->SetLegend('Climate = '. round(array_sum($datay2),0) );
+$bplot1->SetLegend('Maximum High');
+$bplot2->SetLegend('Minimum Low');
 
 $gbarplot = new GroupBarPlot(array($bplot1,$bplot2));
 $gbarplot->SetWidth(0.7);
