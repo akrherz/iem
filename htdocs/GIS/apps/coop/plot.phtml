@@ -3,10 +3,10 @@ include("../../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 
 $var = isset($_GET["var"]) ? $_GET["var"]: "high";
-$year = isset($_GET["year"]) ? $_GET["year"]: 2006;
-$month = isset($_GET["month"]) ? $_GET["month"]: 2;
-$day = isset($_GET["day"]) ? $_GET["day"]: 1;
-$source = isset($_GET["source"]) ? $_GET["source"]: "qc";
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
+$day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+$source = isset($_GET["source"]) ? $_GET["source"]: "prelim";
 $size = isset($_GET["size"]) ? $_GET["size"] : "640x480";
 $showlabels = isset($_GET["labels"]);
 $tokens = explode("x", $size);
@@ -79,8 +79,13 @@ choice.
 </table>
 <input type="checkbox" name="labels" <?php if ($showlabels){ echo "CHECKED=\"CHECKED\""; }?>>Show point labels
 </form>
-<br />[1] Snowfall data is not complete.  Please be careful using the data.
-<br />[2] Snowfall depth data only goes back to 1991 for Quality Controled source.
+<ul>
+<li>Snowfall data is not complete.  Please be careful using the data.</li>
+<li>Snowfall depth data only goes back to 1991 for Quality Controled source.</li>
+<li>The preliminary data is for the date the observation was reported and not
+necessarily for the local date.  The reports are around 7 AM, so the high
+temperature (for example) was most likely for the previous date.</li>
+</ul>
 <?php
 dl($mapscript);
 include("$rootpath/include/network.php");
