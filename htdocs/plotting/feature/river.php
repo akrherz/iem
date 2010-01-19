@@ -3,7 +3,7 @@ include("../../../include/database.inc.php");
 
 $db = iemdb('squaw');
 
-$rs = pg_exec($db, "SELECT * from real_flow WHERE valid > '2008-05-27' ORDER by valid ASC");
+$rs = pg_exec($db, "SELECT * from real_flow WHERE valid > '2009-01-01' ORDER by valid ASC");
 
 $bankfull = Array();
 $flood = Array();
@@ -22,7 +22,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
         include_once ("../../../include/jpgraph/jpgraph_line.php");
         include_once ("../../../include/jpgraph/jpgraph_date.php");
  
-        $graph = new Graph(320,300,"example1");
+        $graph = new Graph(1024,480,"example1");
         $graph->SetScale("datlin");
         $graph->setmargin(60,20,50,50);
 

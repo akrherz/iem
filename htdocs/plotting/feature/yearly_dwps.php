@@ -11,7 +11,7 @@ $d2009 = Array();
 $dbconn = iemdb('asos');
 $sql = "SELECT extract(doy from valid) as d, avg(dwpf) as dew
   from t2008 WHERE station = 'DSM' and dwpf > -99 and
-  valid BETWEEN '2008-03-01' and '2008-05-01'
+  valid BETWEEN '2008-06-01' and '2008-09-01'
   GROUP by d ORDER by d ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
@@ -21,7 +21,7 @@ for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 }
 $sql = "SELECT extract(doy from valid) as d, avg(dwpf) as dew
   from t2009 WHERE station = 'DSM' and dwpf > -99 
-  and valid BETWEEN '2009-03-01' and '2009-05-01'
+  and valid BETWEEN '2009-06-01' and '2009-09-01'
   GROUP by d ORDER by d ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
@@ -32,6 +32,7 @@ for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_plotline.php");
 include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 

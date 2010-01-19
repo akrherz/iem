@@ -1,6 +1,5 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/all_locs.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/mlib.php");
 
@@ -11,7 +10,7 @@ $phour = Array();
 
 $dbconn = iemdb('asos');
 $sql = "SELECT extract(EPOCH from valid) as epoch, dwpf, p01m / 24.5 as phour
-  from t2008 WHERE station = 'DSM' and valid > '2008-08-01' and dwpf > 0 ORDER by valid ASC";
+  from t2009 WHERE station = 'AMW' and valid > '2009-10-01' and dwpf > 0 ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)

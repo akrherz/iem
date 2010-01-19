@@ -1,6 +1,7 @@
 <?php
 include ("../../../include/jpgraph/jpgraph.php");
 include ("../../../include/jpgraph/jpgraph_error.php");
+include ("../../../include/jpgraph/jpgraph_plotline.php");
 include ("../../../include/database.inc.php");
 
 $db = iemdb("coop");

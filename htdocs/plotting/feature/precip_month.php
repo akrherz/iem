@@ -12,7 +12,7 @@ $d2008 = Array();
 
 /* Load up climatology and times arrays */
 $rs = pg_query($coop, "SELECT valid, precip from climate51 WHERE 
-  station = 'ia0000' and extract(month from valid) IN (4,5) 
+  station = 'ia0000' and extract(month from valid) IN (4,5,6,7,8,9,10) 
   ORDER by valid ASC");
 $r = 0;
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
@@ -26,7 +26,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 /* Load up 2008 from coop */
 $rs = pg_query($coop, "SELECT day, precip from alldata WHERE 
   stationid = 'ia0000' and year = 2008 and 
-  month IN (4,5) ORDER by day ASC");
+  month IN (4,5,6,7,8,9,10) ORDER by day ASC");
 $r = 0;
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
@@ -37,7 +37,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 /* Load up 2009 estimates from wepp */
 $rs = pg_query($wepp, "SELECT valid, sum(rainfall)/8012/25.4 as r from 
       daily_rainfall_2009 d, hrap_polygons h WHERE d.hrap_i = h.hrap_i 
-      and valid >= '2009-04-01' GROUP by valid ORDER by valid ASC");
+      and valid >= '2009-04-01' and valid < '2009-11-01' GROUP by valid ORDER by valid ASC");
 $r = 0;
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
@@ -46,25 +46,24 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 }
 
 
-
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_date.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
-$graph = new Graph(320,300,"auto");    
+$graph = new Graph(320,280,"auto");    
 $graph->SetScale("textlin");
-$graph->legend->Pos(0.05,0.08);
+$graph->legend->Pos(0.05,0.09);
 $graph->legend->SetLayout(LEGEND_HOR);
 
 $graph->xaxis->SetPos("min");
 $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetTickLabels( $labels );
-$graph->xaxis->SetTextTickInterval( 5 );
+$graph->xaxis->SetTextTickInterval( 10 );
 
 $graph->yaxis->title->Set("Accumulated Precip [inch]");
-$graph->title->Set("Iowa Precipitation in Apr/May");
-$graph->subtitle->Set("For April");
+$graph->title->Set("Iowa Precipitation in Apr-Oct");
+//$graph->subtitle->Set("For April");
 
 $graph->SetShadow();
 $graph->img->SetMargin(40,10,40,60);

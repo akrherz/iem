@@ -11,7 +11,7 @@ $pres = Array();
 
 $dbconn = iemdb('access');
 $sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, pres, vsby
-  from current_log WHERE station = 'SBOI4' and valid BETWEEN '2009-07-14 2:00' and '2009-07-14 6:00' ORDER by valid ASC";
+  from current_log WHERE station = 'SPEI4' and valid BETWEEN '2009-12-28 2:00' and '2009-12-31 6:00' ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
@@ -66,7 +66,7 @@ $graph->title->Set('Boone SchoolNet Time Series');
 
 
 // Create the linear plot
-$lineplot=new LinePlot($pres, $times);
+$lineplot=new LinePlot($tmpf, $times);
 $lineplot->SetLegend("Pressure");
 $lineplot->SetColor("blue");
 $graph->AddY2($lineplot);

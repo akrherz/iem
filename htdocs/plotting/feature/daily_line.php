@@ -8,30 +8,13 @@ $dbconn = iemdb('coop');
 $times = Array();
 $data = Array();
 
-$sql = "SELECT sday, 
-  sum(CASE WHEN high >= 32 and low < 32 THEN 1 ELSE 0 END) as all
-  from alldata WHERE stationid = 'ia0200' and sday != '0229' 
-  and month >= 9 GROUP by sday ORDER by sday ASC";
+$sql = "select sday, count(*), avg(count) from (select day, sday, count(*) from alldata WHERE precip > 0.99 and sday != '0229' GROUP by day, sday) as foo GROUP by sday ORDER by sday ASC";
 $rs = pg_query($dbconn, $sql);
-
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $times[] = mktime(6,0,0, substr($row["sday"],0,2), substr($row["sday"],2,2),2009);
-  $data[] = $row["all"] / 117 * 100;
+  $data[] = $row["avg"];
 }
-
-$sql = "SELECT sday, 
-  sum(CASE WHEN high >= 32 and low < 32 THEN 1 ELSE 0 END) as all
-  from alldata WHERE stationid = 'ia0200' and sday != '0229' 
-  and month < 5 GROUP by sday ORDER by sday ASC";
-$rs = pg_query($dbconn, $sql);
-
-for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
-{
-  $times[] = mktime(6,0,0, substr($row["sday"],0,2), substr($row["sday"],2,2),2010);
-  $data[] = $row["all"] / 117 * 100;
-}
-
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
@@ -40,7 +23,7 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480,"example1");
-$graph->SetScale("datlin",0,100);
+$graph->SetScale("datlin");
 $graph->img->SetMargin(60,5,45,70);
 $graph->SetMarginColor('white');
 $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCFF@0.5');
