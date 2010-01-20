@@ -17,7 +17,7 @@ lats = []
 lons = []
 rs = postgis.query("""SELECT state, 
       max(magnitude) as val, x(geom) as lon, y(geom) as lat
-      from lsrs_2010 WHERE type = 'S' and 
+      from lsrs_2010 WHERE type in ('5') and magnitude > 0 and 
       valid > now() - '12 hours'::interval
       GROUP by state, lon, lat""").dictresult()
 for i in range(len(rs)):
@@ -47,10 +47,10 @@ cfg = {
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
  '_valuemask'         : valmask,
- '_title'             : "Local Storm Report Snowfall Total Analysis",
+ '_title'             : "Local Storm Report Freezing Rain Total Analysis",
  '_valid'             : "Reports past 12 hours: "+ now.strftime("%d %b %Y %I:%M %p"),
  '_showvalues'        : True,
- '_format'            : '%.0f',
+ '_format'            : '%.2f',
  '_MaskZero'          : True,
  'lbTitleString'      : "[in]",
  'pmLabelBarHeightF'  : 0.6,
