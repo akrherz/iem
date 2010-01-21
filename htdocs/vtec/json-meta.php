@@ -17,9 +17,8 @@ $query1 = "SELECT xmax(geom) as x1, xmin(geom) as x0,
                   ymin(geom) as y0, ymax(geom) as y1, *
                   from warnings_$year WHERE wfo = '$wfo' and 
                   phenomena = '$phenomena' and eventid = $eventid 
-                  and significance = '$significance' 
+                  and significance = '$significance' and geom is not null 
                   ORDER by gtype DESC LIMIT 1";
-
 $result = pg_exec($connect, "SET TIME ZONE 'GMT'");
 $result = pg_exec($connect, $query1);
 
