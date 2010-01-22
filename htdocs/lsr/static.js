@@ -1,3 +1,16 @@
+Ext.override(Date, {
+    toUTC : function() {
+                        // Convert the date to the UTC date
+        return this.add(Date.MINUTE, this.getTimezoneOffset());
+    },
+
+    fromUTC : function() {
+                        // Convert the date from the UTC date
+        return this.add(Date.MINUTE, -this.getTimezoneOffset());
+    }
+});
+
+
 Ext.onReady(function(){
 
 var options, layer, store, gridPanel;
@@ -14,8 +27,29 @@ var expander = new Ext.grid.RowExpander({
 
 /* URL format #DMX,DVN,FSD/201001010101/201001010201 */
 function reloadData(){
-  console.log( Ext.getCmp("wfoselector").getValue() );
+  s = Ext.getCmp("wfoselector").getValue();
 
+  sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
+                     +" "+ Ext.getCmp("timepicker1").getValue();
+  sdt = new Date(sts);
+  start_utc = sdt.toUTC();
+
+  ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
+                     +" "+ Ext.getCmp("timepicker2").getValue();
+  edt = new Date(ets);
+  end_utc = edt.toUTC();
+
+
+  store.reload({
+      add    : false,
+      params : {
+         'sts': start_utc.format('YmdHi'),
+         'ets': end_utc.format('YmdHi'),
+         'wfos': s
+       }
+   });
+   window.location.href = "#"+ s +"/"+ start_utc.format('YmdHi') +
+                                  "/"+ end_utc.format('YmdHi');
 }
 
 
@@ -135,6 +169,7 @@ styleMap.addUniqueValueRules('default', 'type', lsrLookup);
 gridPanel = new Ext.grid.GridPanel({
    title    : "Local Storm Report Information",
    region   : "west",
+   viewConfig : {forceFit: true},
    tbar     : [{
          id              : 'wfoselector',
          xtype           : 'multiselect',
@@ -246,8 +281,9 @@ gridPanel = new Ext.grid.GridPanel({
         store: store,
         plugins: [expander],
         columns: [expander,{
-            header: "Office",
-            dataIndex: "wfo"
+            header    : "Office",
+            width     : 50,
+            dataIndex : "wfo"
         }, {
             header: "Report Time",
             dataIndex: "valid"
