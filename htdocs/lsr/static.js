@@ -14,7 +14,7 @@ Ext.override(Date, {
 Ext.onReady(function(){
 
 var options, layer, store, gridPanel;
-var extent = new OpenLayers.Bounds(-5, 35, 15, 55);
+var extent = new OpenLayers.Bounds(-120, 28, -60, 55);
 
 var expander = new Ext.grid.RowExpander({
         id: 'testexp',
@@ -64,8 +64,8 @@ function reloadData(){
         };
 
         layer = new OpenLayers.Layer.Google(
-            "Google Satellite",
-            {type: G_SATELLITE_MAP, sphericalMercator: true}
+            "Google Maps",
+            {type: G_NORMAL_MAP, sphericalMercator: true}
         );
 
         extent.transform(
@@ -160,7 +160,7 @@ styleMap.addUniqueValueRules('default', 'type', lsrLookup);
                 })
             })
         }),
-        autoLoad: true
+        autoLoad: false
     });
     store.on("load", function(mystore, records, options){
        map.zoomToExtent( vecLayer.getDataExtent() );
@@ -179,7 +179,7 @@ gridPanel = new Ext.grid.GridPanel({
          }),
          valueField      : 'abbr',
          displayField    : 'wfo',
-         height          : 200,
+         width           : 200,
          mode            : 'local'
        },{
           xtype     : 'datefield',
@@ -191,37 +191,21 @@ gridPanel = new Ext.grid.GridPanel({
           disabled  : false,
           listeners : {
               select : function(field, value){
-                  ts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
-                     +" "+ Ext.getCmp("timepicker1").getValue();
-                  var dt = new Date(ts);
-                  store.reload({
-                      add    : false,
-                      params : {'ts': dt.format('YmdHi')
-                      }
-                  });
-                  window.location.href = "#"+ dt.format('YmdHi');
+                  reloadData();
               }
           }
        },{
           xtype     : 'timefield',
           allowBlank: false,
           increment : 1,
-          width     : 100,
+          width     : 60,
           emptyText : 'Select Time',
           id        : 'timepicker1',
           value     : new Date(),
           disabled  : false,
           listeners : {
               select : function(field, value){
-                  ts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
-                     +" "+ Ext.getCmp("timepicker1").getValue();
-                  var dt = new Date(ts);
-                  store.reload({
-                      add    : false,
-                      params : {'ts': dt.format('YmdHi')
-                  }
-                  });
-                   window.location.href = "#"+ dt.format('YmdHi');
+                  reloadData();
               }
           }
        }," to ",{
@@ -234,41 +218,26 @@ gridPanel = new Ext.grid.GridPanel({
           disabled  : false,
           listeners : {
               select : function(field, value){
-                  ts = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
-                     +" "+ Ext.getCmp("timepicker2").getValue();
-                  var dt = new Date(ts);
-                  store.reload({
-                      add    : false,
-                      params : {'ts': dt.format('YmdHi')
-                      }
-                  });
-                  window.location.href = "#"+ dt.format('YmdHi');
+                  reloadData();
               }
           }
        },{
           xtype     : 'timefield',
           allowBlank: false,
           increment : 1,
-          width     : 100,
+          width     : 60,
           emptyText : 'Select Time',
           id        : 'timepicker2',
           value     : new Date(),
           disabled  : false,
           listeners : {
               select : function(field, value){
-                  ts = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
-                     +" "+ Ext.getCmp("timepicker2").getValue();
-                  var dt = new Date(ts);
-                  store.reload({
-                      add    : false,
-                      params : {'ts': dt.format('YmdHi')
-                  }
-                  });
-                   window.location.href = "#"+ dt.format('YmdHi');
+                   reloadData();
               }
           }
        }, {
          xtype           : 'button',
+         id              : 'refresh',
          text            : 'Refresh',
          listeners       : {
            click: function(){
@@ -283,21 +252,27 @@ gridPanel = new Ext.grid.GridPanel({
         columns: [expander,{
             header    : "Office",
             width     : 50,
+            sortable  : true,
             dataIndex : "wfo"
         }, {
             header: "Report Time",
+            sortable  : true,
             dataIndex: "valid"
         }, {
             header: "County",
+            sortable  : true,
             dataIndex: "county"
         }, {
             header: "Location",
+            sortable  : true,
             dataIndex: "city"
         }, {
             header: "Event Type",
+            sortable  : true,
             dataIndex: "typetext"
         }, {
             header: "Magnitude",
+            sortable  : true,
             dataIndex: "magnitude"
         }],
         sm: new GeoExt.grid.FeatureSelectionModel() 

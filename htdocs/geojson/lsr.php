@@ -28,7 +28,7 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT *,
       x(geom) as lon, y(geom) as lat 
       FROM lsrs WHERE
       valid BETWEEN $1 and $2 and wfo in ('$wfoList')
-      LIMIT 50");
+      LIMIT 500");
 
 $rs = pg_execute($postgis, "SELECT", Array(date("Y-m-d H:i", $sts), 
                                            date("Y-m-d H:i", $ets) ) );
