@@ -13,6 +13,8 @@ Ext.override(Date, {
 
 Ext.onReady(function(){
 
+Ext.QuickTips.init();
+
 var options, layer, store, gridPanel;
 var extent = new OpenLayers.Bounds(-120, 28, -60, 55);
 
@@ -142,7 +144,7 @@ styleMap.addUniqueValueRules('default', 'type', lsrLookup);
         layer: vecLayer,
         fields: [
             {name: 'wfo', type: 'string'},
-            {name: 'valid'},
+            {name: 'valid', type: 'date', dateFormat: 'Y-m-d H:i'},
             {name: 'county'},
             {name: 'city'},
             {name: 'typetext'},
@@ -167,20 +169,27 @@ styleMap.addUniqueValueRules('default', 'type', lsrLookup);
     });
 
 gridPanel = new Ext.grid.GridPanel({
-   title    : "Local Storm Report Information",
-   region   : "west",
+   title      : "Local Storm Report Information",
+   region     : "west",
+   loadMask   : {msg:'Loading Data...'},
    viewConfig : {forceFit: true},
-   tbar     : [{
-         id              : 'wfoselector',
-         xtype           : 'multiselect',
+   tbar       : [{
          store           : new Ext.data.SimpleStore({
            fields: ['abbr', 'wfo'],
            data : iemdata.wfos
          }),
-         valueField      : 'abbr',
-         displayField    : 'wfo',
+         allowBlank      : false,
          width           : 200,
-         mode            : 'local'
+         id              : 'wfoselector',
+         xtype           : 'superboxselect',
+         emptyText       : 'Select Weather Office',
+         resizable       : true,
+         name            : 'wfo',
+         mode            : 'local',
+                displayFieldTpl: '{abbr}',
+  tpl: '<tpl for="."><div class="x-combo-list-item">[{abbr}] {wfo}</div></tpl>',
+                valueField: 'abbr',
+				forceSelection : true
        },{
           xtype     : 'datefield',
           id        : 'datepicker1',
@@ -189,6 +198,7 @@ gridPanel = new Ext.grid.GridPanel({
           minValue  : '07/23/2003',
           value     : new Date(),
           disabled  : false,
+          width     : 85,
           listeners : {
               select : function(field, value){
                   reloadData();
@@ -198,7 +208,7 @@ gridPanel = new Ext.grid.GridPanel({
           xtype     : 'timefield',
           allowBlank: false,
           increment : 1,
-          width     : 60,
+          width     : 80,
           emptyText : 'Select Time',
           id        : 'timepicker1',
           value     : new Date(),
@@ -216,6 +226,7 @@ gridPanel = new Ext.grid.GridPanel({
           minValue  : '07/23/2003',
           value     : new Date(),
           disabled  : false,
+          width     : 85,
           listeners : {
               select : function(field, value){
                   reloadData();
@@ -225,7 +236,7 @@ gridPanel = new Ext.grid.GridPanel({
           xtype     : 'timefield',
           allowBlank: false,
           increment : 1,
-          width     : 60,
+          width     : 80,
           emptyText : 'Select Time',
           id        : 'timepicker2',
           value     : new Date(),
@@ -255,9 +266,12 @@ gridPanel = new Ext.grid.GridPanel({
             sortable  : true,
             dataIndex : "wfo"
         }, {
-            header: "Report Time",
+            header    : "Report Time",
             sortable  : true,
-            dataIndex: "valid"
+            dataIndex : "valid",
+            renderer  : function(value){
+                return value.fromUTC().format('Y-m-d g:i A');
+            }
         }, {
             header: "County",
             sortable  : true,
@@ -271,9 +285,10 @@ gridPanel = new Ext.grid.GridPanel({
             sortable  : true,
             dataIndex: "typetext"
         }, {
-            header: "Magnitude",
+            header    : "Mag.",
             sortable  : true,
-            dataIndex: "magnitude"
+            dataIndex : "magnitude",
+            width     : 50
         }],
         sm: new GeoExt.grid.FeatureSelectionModel() 
     });
