@@ -70,6 +70,12 @@ iemdata.vtec_phenomena_dict = [
 ['ZR','Freezing Rain']
 ];
 
+iemdata.vtecPhenomenaStore = new Ext.data.SimpleStore({
+  fields : ['abbr', 'name'],
+  idIndex: 0,
+  data   : iemdata.vtec_phenomena_dict
+});
+
 iemdata.vtec_sig_dict = [
 ['W','Warning'],
 ['Y','Advisory'],
@@ -79,6 +85,13 @@ iemdata.vtec_sig_dict = [
 ['O','Outlook'],
 ['N','Synopsis']
 ];
+
+iemdata.vtecSignificanceStore = new Ext.data.SimpleStore({
+  fields : ['abbr', 'name'],
+  idIndex: 0,
+  data   : iemdata.vtec_sig_dict
+});
+
 
 iemdata.wfos = [
  ['ABQ','ALBUQUERQUE'],

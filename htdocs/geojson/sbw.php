@@ -52,13 +52,21 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   $wfo = $row["wfo"];
   $reps[] = "\"REPLACEME$i\"";
   $subs[] = $row["geojson"];
+  $vtecurl = sprintf("%s/vtec/#%s-O-NEW-K%s-%s-%s-%04d", $rooturl, 
+      substr($row["issue"],0,4),
+      $wfo, $row["phenomena"], $row["significance"], $row["eventid"] );
 
   $z = Array("type"=>"Feature", "id"=>$i, 
              "properties"=>Array(
                 "phenomena" => $row["phenomena"],
+                "significance" => $row["significance"],
                 "wfo"       => $row["wfo"],
+                "eventid"   => $row["eventid"],
                 "issue"     => substr($row["issue"],0,16),
                 "expire"     => substr($row["expire"],0,16),
+                "link"         => sprintf("<a href='%s'>%s %s %s</a> &nbsp; ",
+         $vtecurl, $vtec_phenomena[$row["phenomena"]],
+         $vtec_significance[$row["significance"]], $row["eventid"]),
               ),
              "geometry"=> "REPLACEME$i");
                          
