@@ -165,98 +165,17 @@ styleMap.addUniqueValueRules('default', 'type', lsrLookup);
         autoLoad: false
     });
     store.on("load", function(mystore, records, options){
+       //TODO need to be more careful than this
        map.zoomToExtent( vecLayer.getDataExtent() );
     });
 
 gridPanel = new Ext.grid.GridPanel({
+   autoHeight : true,
+   layout     : 'fit',
+   autoScroll : true,
    title      : "Local Storm Report Information",
-   region     : "west",
    loadMask   : {msg:'Loading Data...'},
    viewConfig : {forceFit: true},
-   tbar       : [{
-         store           : new Ext.data.SimpleStore({
-           fields: ['abbr', 'wfo'],
-           data : iemdata.wfos
-         }),
-         allowBlank      : false,
-         width           : 200,
-         id              : 'wfoselector',
-         xtype           : 'superboxselect',
-         emptyText       : 'Select Weather Office',
-         resizable       : true,
-         name            : 'wfo',
-         mode            : 'local',
-                displayFieldTpl: '{abbr}',
-  tpl: '<tpl for="."><div class="x-combo-list-item">[{abbr}] {wfo}</div></tpl>',
-                valueField: 'abbr',
-				forceSelection : true
-       },{
-          xtype     : 'datefield',
-          id        : 'datepicker1',
-          maxValue  : new Date(),
-          emptyText : 'Select Date',
-          minValue  : '07/23/2003',
-          value     : new Date(),
-          disabled  : false,
-          width     : 85,
-          listeners : {
-              select : function(field, value){
-                  reloadData();
-              }
-          }
-       },{
-          xtype     : 'timefield',
-          allowBlank: false,
-          increment : 1,
-          width     : 80,
-          emptyText : 'Select Time',
-          id        : 'timepicker1',
-          value     : new Date(),
-          disabled  : false,
-          listeners : {
-              select : function(field, value){
-                  reloadData();
-              }
-          }
-       }," to ",{
-          xtype     : 'datefield',
-          id        : 'datepicker2',
-          maxValue  : new Date(),
-          emptyText : 'Select Date',
-          minValue  : '07/23/2003',
-          value     : new Date(),
-          disabled  : false,
-          width     : 85,
-          listeners : {
-              select : function(field, value){
-                  reloadData();
-              }
-          }
-       },{
-          xtype     : 'timefield',
-          allowBlank: false,
-          increment : 1,
-          width     : 80,
-          emptyText : 'Select Time',
-          id        : 'timepicker2',
-          value     : new Date(),
-          disabled  : false,
-          listeners : {
-              select : function(field, value){
-                   reloadData();
-              }
-          }
-       }, {
-         xtype           : 'button',
-         id              : 'refresh',
-         text            : 'Refresh',
-         listeners       : {
-           click: function(){
-               reloadData();
-           }
-         }
-       }
-   ],
         width: 600,
         store: store,
         plugins: [expander],
@@ -293,6 +212,124 @@ gridPanel = new Ext.grid.GridPanel({
         sm: new GeoExt.grid.FeatureSelectionModel() 
     });
 
+/* SuperBoxSelector to do a multi pick */
+wfoSelector = {
+    store           : new Ext.data.SimpleStore({
+       fields : ['abbr', 'wfo'],
+       data   : iemdata.wfos
+    }),
+    rowspan         : 2,
+    allowBlank      : false,
+    width           : 200,
+    id              : 'wfoselector',
+    xtype           : 'superboxselect',
+    emptyText       : 'Select Weather Office',
+    resizable       : true,
+    name            : 'wfo',
+    mode            : 'local',
+    displayFieldTpl : '{abbr}',
+    tpl             : '<tpl for="."><div class="x-combo-list-item">[{abbr}] {wfo}</div></tpl>',
+    valueField      : 'abbr',
+    forceSelection  : true
+};
+
+startDateSelector = {
+    xtype     : 'datefield',
+    id        : 'datepicker1',
+    maxValue  : new Date(),
+    minValue  : '07/23/2003',
+    value     : new Date(),
+    disabled  : false,
+    width     : 105,
+    listeners : {
+       select : function(field, value){
+          reloadData();
+       }
+    }
+}
+
+startTimeSelector = {
+    xtype     : 'timefield',
+    allowBlank: false,
+    increment : 1,
+    width     : 100,
+    emptyText : 'Select Time',
+    id        : 'timepicker1',
+    value     : new Date(),
+    disabled  : false,
+    listeners : {
+       select : function(field, value){
+          reloadData();
+       }
+    }
+}
+
+loadButton = {
+    xtype           : 'button',
+    id              : 'refresh',
+    text            : 'Load',
+    rowspan         : 2,
+    listeners       : {
+        click: function(){
+           reloadData();
+        }
+    }
+}
+
+endDateSelector = {
+    xtype     : 'datefield',
+    id        : 'datepicker2',
+    maxValue  : new Date(),
+    emptyText : 'Select Date',
+    minValue  : '07/23/2003',
+    value     : new Date(),
+    disabled  : false,
+    width     : 105,
+    listeners : {
+       select : function(field, value){
+         reloadData();
+       }
+    }
+}
+
+endTimeSelector = {
+    xtype     : 'timefield',
+    allowBlank: false,
+    increment : 1,
+    width     : 100,
+    emptyText : 'Select Time',
+    id        : 'timepicker2',
+    value     : new Date(),
+    disabled  : false,
+    listeners : {
+       select : function(field, value){
+          reloadData();
+       }
+    }
+}
+
+myForm = {
+              xtype       : 'form',
+              labelAlign  : 'top',
+              layout      : 'table',
+              height      : '15%',
+              bodyStyle   : 'padding: 3px;',
+              defaults    : {
+                bodyStyle : 'padding: 3px;'
+              },
+              layoutConfig: {
+                  columns  : 5
+              },
+              items       : [
+                wfoSelector,
+                {html: 'Start Datetime', border: false},
+                startDateSelector,
+                startTimeSelector,
+                loadButton,
+                {html: 'Ending Datetime', border: false},
+                endDateSelector,
+                endTimeSelector]
+}
 
 /* Construct the viewport */
 var viewport = new Ext.Viewport({
@@ -303,7 +340,28 @@ var viewport = new Ext.Viewport({
         collapsible : true,
         collapsed   : true,
         contentEl   :'iem-header'
-    },gridPanel,{
+    },{
+        xtype       : 'panel',
+        region      : 'west',
+        width       : 600,
+        items       : [
+           myForm
+           ,{
+              layout      : 'fit',
+              height      : '85%',
+              forceFit    : true,
+              xtype       : 'panel',
+              items       : [{
+                xtype       : 'tabpanel',
+                activeTab   : 0,
+             
+                items       : [
+                   {title: 'Help', contentEl: 'help'}, 
+                   gridPanel
+                ]
+              }]
+          }]
+    },{
         region   : "center",
         id       : "mappanel",
         title    : "Map",

@@ -41,4 +41,17 @@ Ext.onReady(function(){
   }
 });
 </script>
+<div id="help">
+<h3>Help Me!</h3>
+<h3>Help Me!</h3>
+<h3>Help Me!</h3>
+<h3>Help Me!</h3>
+<h3>Help Me!</h3>
+<br />
+<br />
+<br />
+<br />
+a
+
+</div>
 </body></html>
