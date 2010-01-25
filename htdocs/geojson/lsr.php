@@ -65,7 +65,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
       $vtecurl = sprintf("%s/vtec/#%s-O-NEW-K%s-%s-%s-%04d", $rooturl, 
       substr($row["valid"],0,4),
       $wfo, $row2["phenomena"], $row2["significance"], $row2["eventid"] );
-      $products .= sprintf("<a href='%s'>%s %s %s</a><br />",
+      $products .= sprintf("<a href='%s'>%s %s %s</a> &nbsp; ",
          $vtecurl, $vtec_phenomena[$row2["phenomena"]],
          $vtec_significance[$row2["significance"]], $row2["eventid"]);
      }

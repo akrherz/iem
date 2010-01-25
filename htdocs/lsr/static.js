@@ -15,7 +15,7 @@ Ext.onReady(function(){
 
 Ext.QuickTips.init();
 
-var options, layer, store, gridPanel;
+var options, layer, lsrGridPanel, sbwGridPanel;
 var extent = new OpenLayers.Bounds(-120, 28, -60, 55);
 
 var expander = new Ext.grid.RowExpander({
@@ -42,7 +42,15 @@ function reloadData(){
   end_utc = edt.toUTC();
 
 
-  store.reload({
+  lsrGridPanel.getStore().reload({
+      add    : false,
+      params : {
+         'sts': start_utc.format('YmdHi'),
+         'ets': end_utc.format('YmdHi'),
+         'wfos': s
+       }
+   });
+  sbwGridPanel.getStore().reload({
       add    : false,
       params : {
          'sts': start_utc.format('YmdHi'),
@@ -77,7 +85,20 @@ function reloadData(){
 var map = new OpenLayers.Map(options);
 
 /* Create LSR styler */
-var styleMap = new OpenLayers.StyleMap({
+var sbwStyleMap = new OpenLayers.StyleMap({
+       'default': {
+           strokeColor: 'black',
+           strokeWidth: 5,
+           strokeOpacity: 1
+       },
+       'select': {
+           fillOpacity: 1,
+           strokeColor: 'yellow',
+           strokeWidth: 7
+       }
+});
+/* Create SBW styler */
+var lsrStyleMap = new OpenLayers.StyleMap({
        'default': {
            externalGraphic: 'icons/other.png',
            fillOpacity: 1,
@@ -88,8 +109,12 @@ var styleMap = new OpenLayers.StyleMap({
            pointRadius: 15
        }
 });
-// Lookup 'table' for styling
 
+var sbwLookup = {
+ "TO": {strokeColor: 'red'}
+}
+
+// Lookup 'table' for styling
 var lsrLookup = {
  "0": {externalGraphic: "icons/tropicalstorm.gif"},
  "1": {externalGraphic: "icons/tropicalstorm.gif"},
@@ -129,57 +154,103 @@ var lsrLookup = {
  "X": {externalGraphic: "icons/funnelcloud.png"},
  "Z": {externalGraphic: "icons/blizzard.png"}
 };
-styleMap.addUniqueValueRules('default', 'type', lsrLookup);
+lsrStyleMap.addUniqueValueRules('default', 'type', lsrLookup);
+sbwStyleMap.addUniqueValueRules('default', 'phenomena', sbwLookup);
 
 
+// create vector layer
+var lsrLayer = new OpenLayers.Layer.Vector("Local Storm Reports",{
+      styleMap: lsrStyleMap
+});
+var sbwLayer = new OpenLayers.Layer.Vector("Storm Based Warnings",{
+      styleMap: sbwStyleMap
+});
 
-    // create vector layer
-    var vecLayer = new OpenLayers.Layer.Vector("vector",{
-          styleMap: styleMap
-        });
-    map.addLayers([vecLayer])
+map.addLayers([lsrLayer, sbwLayer])
 
-    // create feature store, binding it to the vector layer
-    store = new GeoExt.data.FeatureStore({
-        layer: vecLayer,
-        fields: [
-            {name: 'wfo', type: 'string'},
-            {name: 'valid', type: 'date', dateFormat: 'Y-m-d H:i'},
-            {name: 'county'},
-            {name: 'city'},
-            {name: 'typetext'},
-            {name: 'remark'},
-            {name: 'prodlinks'},
-            {name: 'wfo'},
-            {name: 'magnitude', type: 'float'}
-        ],
-        proxy: new GeoExt.data.ProtocolProxy({
-            protocol: new OpenLayers.Protocol.HTTP({
-                url: "../geojson/lsr.php?inc_ap=yes",
-                format: new OpenLayers.Format.GeoJSON({
+// create feature store, binding it to the vector layer
+;
+
+sbwGridPanel = new Ext.grid.GridPanel({
+   autoScroll : true,
+   title      : "Storm Based Warnings",
+   loadMask   : {msg:'Loading Data...'},
+   viewConfig : {forceFit: true},
+   store      : new GeoExt.data.FeatureStore({
+      layer     : sbwLayer,
+      fields    : [
+         {name: 'wfo', type: 'string'},
+         {name: 'issue', type: 'date', dateFormat: 'Y-m-d H:i'},
+         {name: 'expire', type: 'date', dateFormat: 'Y-m-d H:i'},
+         {name: 'phenomena'}
+      ],
+      proxy: new GeoExt.data.ProtocolProxy({
+            protocol : new OpenLayers.Protocol.HTTP({
+              url      : "../geojson/sbw.php",
+              format   : new OpenLayers.Format.GeoJSON({
                    externalProjection: new OpenLayers.Projection("EPSG:4326"),
                    internalProjection: new OpenLayers.Projection("EPSG:900913")
-                })
-            })
-        }),
-        autoLoad: false
-    });
-    store.on("load", function(mystore, records, options){
-       //TODO need to be more careful than this
-       map.zoomToExtent( vecLayer.getDataExtent() );
-    });
+               })
+             })
+      }),
+      autoLoad  : false
+   }), 
+   plugins: [expander],
+   columns: [expander,{
+            header    : "Office",
+            width     : 50,
+            sortable  : true,
+            dataIndex : "wfo"
+        }, {
+            header    : "Issued",
+            sortable  : true,
+            dataIndex : "issue",
+            renderer  : function(value){
+                return value.fromUTC().format('Y-m-d g:i A');
+            }
+        }, {
+            header    : "Expired",
+            sortable  : true,
+            dataIndex : "expire",
+            renderer  : function(value){
+                return value.fromUTC().format('Y-m-d g:i A');
+        }
+   }],
+   sm: new GeoExt.grid.FeatureSelectionModel() 
+});
 
-gridPanel = new Ext.grid.GridPanel({
-   autoHeight : true,
-   layout     : 'fit',
+
+lsrGridPanel = new Ext.grid.GridPanel({
    autoScroll : true,
    title      : "Local Storm Report Information",
    loadMask   : {msg:'Loading Data...'},
    viewConfig : {forceFit: true},
-        width: 600,
-        store: store,
-        plugins: [expander],
-        columns: [expander,{
+   store      : new GeoExt.data.FeatureStore({
+      layer     : lsrLayer,
+      fields    : [
+         {name: 'wfo', type: 'string'},
+         {name: 'valid', type: 'date', dateFormat: 'Y-m-d H:i'},
+         {name: 'county'},
+         {name: 'city'},
+         {name: 'typetext'},
+         {name: 'remark'},
+         {name: 'prodlinks'},
+         {name: 'wfo'},
+         {name: 'magnitude', type: 'float'}
+      ],
+      proxy: new GeoExt.data.ProtocolProxy({
+            protocol : new OpenLayers.Protocol.HTTP({
+              url      : "../geojson/lsr.php?inc_ap=yes",
+              format   : new OpenLayers.Format.GeoJSON({
+                   externalProjection: new OpenLayers.Projection("EPSG:4326"),
+                   internalProjection: new OpenLayers.Projection("EPSG:900913")
+               })
+             })
+      }),
+      autoLoad  : false
+   }), 
+   plugins: [expander],
+   columns: [expander,{
             header    : "Office",
             width     : 50,
             sortable  : true,
@@ -208,9 +279,16 @@ gridPanel = new Ext.grid.GridPanel({
             sortable  : true,
             dataIndex : "magnitude",
             width     : 50
-        }],
-        sm: new GeoExt.grid.FeatureSelectionModel() 
-    });
+   }],
+   sm: new GeoExt.grid.FeatureSelectionModel() 
+});
+
+lsrGridPanel.getStore().on("load", function(mystore, records, options){
+              if (records.length > 0){ 
+                map.zoomToExtent( lsrLayer.getDataExtent() );
+              }
+        });
+
 
 /* SuperBoxSelector to do a multi pick */
 wfoSelector = {
@@ -309,26 +387,26 @@ endTimeSelector = {
 }
 
 myForm = {
-              xtype       : 'form',
-              labelAlign  : 'top',
-              layout      : 'table',
-              height      : '15%',
-              bodyStyle   : 'padding: 3px;',
-              defaults    : {
-                bodyStyle : 'padding: 3px;'
-              },
-              layoutConfig: {
-                  columns  : 5
-              },
-              items       : [
-                wfoSelector,
-                {html: 'Start Datetime', border: false},
-                startDateSelector,
-                startTimeSelector,
-                loadButton,
-                {html: 'Ending Datetime', border: false},
-                endDateSelector,
-                endTimeSelector]
+   xtype       : 'form',
+   labelAlign  : 'top',
+   layout      : 'table',
+   bodyStyle   : 'padding: 3px;',
+   defaults    : {
+      bodyStyle : 'padding: 3px;'
+   },
+   layoutConfig: {
+       columns  : 5
+   },
+   items       : [
+       wfoSelector,
+       {html: 'Start Datetime', border: false},
+       startDateSelector,
+       startTimeSelector,
+       loadButton,
+       {html: 'Ending Datetime', border: false},
+       endDateSelector,
+       endTimeSelector
+   ]
 }
 
 /* Construct the viewport */
@@ -344,20 +422,24 @@ var viewport = new Ext.Viewport({
         xtype       : 'panel',
         region      : 'west',
         width       : 600,
-        items       : [
-           myForm
-           ,{
-              layout      : 'fit',
-              height      : '85%',
-              forceFit    : true,
+        layout      : 'border',
+        items       : [{
               xtype       : 'panel',
+              layout      : 'fit',
+              height      : 70,
+              region      : 'north',
+              items       : myForm
+           },{
+              layout      : 'fit',
+              xtype       : 'panel',
+              region      : 'center',
               items       : [{
                 xtype       : 'tabpanel',
                 activeTab   : 0,
-             
                 items       : [
                    {title: 'Help', contentEl: 'help'}, 
-                   gridPanel
+                   lsrGridPanel,
+                   sbwGridPanel
                 ]
               }]
           }]

@@ -2,12 +2,9 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/google_keys.php");
 
-$HEADEXTRA = '<script type="text/javascript" 
-  src="http://extjs.cachefly.net/builds/ext-cdn-771.js"></script>
-<link rel="stylesheet" type="text/css" 
-   href="http://extjs.cachefly.net/ext-2.2.1/resources/css/ext-all.css" />
-<link rel="stylesheet" type="text/css" 
-  href="http://extjs.cachefly.net/ext-2.2.1/examples/shared/examples.css" />
+$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.1.0/resources/css/ext-all.css"/>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.0/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.0/ext-all.js"></script>
 <link rel="stylesheet" type="text/css" 
   href="superboxselect.css" />
 <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key='. $GOOGLEKEYS[$rooturl]["any"] .'" type="text/javascript"></script>
