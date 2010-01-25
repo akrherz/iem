@@ -19,10 +19,16 @@ var options, layer, lsrGridPanel, sbwGridPanel;
 var extent = new OpenLayers.Bounds(-120, 28, -60, 55);
 
 var expander = new Ext.grid.RowExpander({
-        id: 'testexp',
-        width: 30,
+        width: 20,
         tpl : new Ext.Template(
             '<p><b>Remark:</b> {remark}<br><b>Active Products:</b> {prodlinks}'
+        )
+});
+
+var sbw_expander = new Ext.grid.RowExpander({
+        width: 20,
+        tpl : new Ext.Template(
+            '<p><b>Link:</b> {link}'
         )
 });
 
@@ -88,13 +94,12 @@ var map = new OpenLayers.Map(options);
 var sbwStyleMap = new OpenLayers.StyleMap({
        'default': {
            strokeColor: 'black',
-           strokeWidth: 5,
+           strokeWidth: 3,
+           fillOpacity  : 0,
            strokeOpacity: 1
        },
        'select': {
-           fillOpacity: 1,
-           strokeColor: 'yellow',
-           strokeWidth: 7
+           strokeWidth: 5
        }
 });
 /* Create SBW styler */
@@ -111,7 +116,14 @@ var lsrStyleMap = new OpenLayers.StyleMap({
 });
 
 var sbwLookup = {
- "TO": {strokeColor: 'red'}
+ "TO": {strokeColor: 'red'},
+ "MA": {strokeColor: 'purple'},
+ "FF": {strokeColor: 'green'},
+ "EW": {strokeColor: 'green'},
+ "FA": {strokeColor: 'green'},
+ "FL": {strokeColor: 'green'},
+ "FF": {strokeColor: 'green'},
+ "SV": {strokeColor: 'yellow'}
 }
 
 // Lookup 'table' for styling
@@ -179,10 +191,13 @@ sbwGridPanel = new Ext.grid.GridPanel({
    store      : new GeoExt.data.FeatureStore({
       layer     : sbwLayer,
       fields    : [
-         {name: 'wfo', type: 'string'},
+         {name: 'wfo'},
          {name: 'issue', type: 'date', dateFormat: 'Y-m-d H:i'},
          {name: 'expire', type: 'date', dateFormat: 'Y-m-d H:i'},
-         {name: 'phenomena'}
+         {name: 'phenomena'},
+         {name: 'significance'},
+         {name: 'eventid', type:'int'},
+         {name: 'link'}
       ],
       proxy: new GeoExt.data.ProtocolProxy({
             protocol : new OpenLayers.Protocol.HTTP({
@@ -195,12 +210,31 @@ sbwGridPanel = new Ext.grid.GridPanel({
       }),
       autoLoad  : false
    }), 
-   plugins: [expander],
-   columns: [expander,{
+   plugins: [sbw_expander],
+   columns: [sbw_expander,{
             header    : "Office",
             width     : 50,
             sortable  : true,
-            dataIndex : "wfo"
+            dataIndex : "wfo" 
+         }, {
+            header    : "Event",
+            sortable  : true,
+            dataIndex : "phenomena",
+            renderer  : function(value){
+                return iemdata.vtecPhenomenaStore.getById(value).data.name;
+            }
+         }, {
+            header    : "Significance",
+            sortable  : true,
+            dataIndex : "significance",
+            renderer  : function(value){
+                return iemdata.vtecSignificanceStore.getById(value).data.name;
+            }
+         }, {
+            header    : "Event ID",
+            sortable  : true,
+            dataIndex : "eventid",
+            width     : 50
         }, {
             header    : "Issued",
             sortable  : true,
