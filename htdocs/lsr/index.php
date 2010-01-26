@@ -39,16 +39,9 @@ Ext.onReady(function(){
 });
 </script>
 <div id="help">
-<h3>Help Me!</h3>
-<h3>Help Me!</h3>
-<h3>Help Me!</h3>
-<h3>Help Me!</h3>
-<h3>Help Me!</h3>
-<br />
-<br />
-<br />
-<br />
-a
+<h3>Local Storm Report App Help</h3>
+
+<p><i>...to be written...</i>
 
 </div>
 </body></html>
