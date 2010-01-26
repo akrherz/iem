@@ -10,12 +10,38 @@ Ext.override(Date, {
     }
 });
 
+/**
+ * @class Ext.ux.SliderTip
+ * @extends Ext.Tip
+ * Simple plugin for using an Ext.Tip with a slider to show the slider value
+ */
+Ext.ux.SliderTip = Ext.extend(Ext.Tip, {
+    minWidth: 10,
+    offsets : [0, -10],
+    init : function(slider){
+        slider.on('dragstart', this.onSlide, this);
+        slider.on('drag', this.onSlide, this);
+        slider.on('dragend', this.hide, this);
+        slider.on('destroy', this.destroy, this);
+    },
+
+    onSlide : function(slider){
+        this.show();
+        this.body.update(this.getText(slider));
+        this.doAutoWidth();
+        this.el.alignTo(slider.thumb, 'b-t?', this.offsets);
+    },
+
+    getText : function(slider){
+        return slider.getValue();
+    }
+});
 
 Ext.onReady(function(){
 
 Ext.QuickTips.init();
 
-var options, layer, lsrGridPanel, sbwGridPanel;
+var options, layer, lsrGridPanel, sbwGridPanel, nexradSlider;
 var extent = new OpenLayers.Bounds(-120, 28, -60, 55);
 
 var expander = new Ext.grid.RowExpander({
@@ -41,11 +67,18 @@ function reloadData(){
                      +" "+ Ext.getCmp("timepicker1").getValue();
   sdt = new Date(sts);
   start_utc = sdt.toUTC();
+  /* Set the nexradSlider to the top of the hour */
+  nexradSlider.minValue = (start_utc.fromUTC()).add(Date.MINUTE, 
+                          0 - parseInt(start_utc.format('i')) );
 
   ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker2").getValue();
   edt = new Date(ets);
   end_utc = edt.toUTC();
+  /* Set the nexradSlider to the top of the next hour */
+  nexradSlider.maxValue = (end_utc.fromUTC()).add(Date.MINUTE, 
+                          60 - parseInt(start_utc.format('i')) );
+  nexradSlider.setValue( 0 );
 
 
   lsrGridPanel.getStore().reload({
@@ -70,23 +103,61 @@ function reloadData(){
 
 
 
-        options = {
-            projection: new OpenLayers.Projection("EPSG:900913"),
-            units: "m",
-            numZoomLevels: 18,
-            maxResolution: 156543.0339,
-            maxExtent: new OpenLayers.Bounds(-20037508, -20037508,
+options = {
+    projection    : new OpenLayers.Projection("EPSG:900913"),
+    units         : "m",
+    numZoomLevels : 18,
+    maxResolution : 156543.0339,
+    maxExtent     : new OpenLayers.Bounds(-20037508, -20037508,
                                              20037508, 20037508.34)
-        };
+}
 
-        layer = new OpenLayers.Layer.Google(
-            "Google Maps",
-            {type: G_NORMAL_MAP, sphericalMercator: true}
-        );
+var tip = new Ext.ux.SliderTip({
+  getText: function(slider){
+    return String.format('<b>{0} Local Time</b>',
+           (new Date(slider.getValue())).format('Y-m-d g:i a'));
+    }
+});
 
-        extent.transform(
-            new OpenLayers.Projection("EPSG:4326"), options.projection
-        );
+
+nexradSlider = new Ext.Slider({
+  id          : 'nexradslider',
+  minValue    : (new Date()).getTime(),
+  value       : (new Date()).getTime(),
+  maxValue    : (new Date()).getTime() + 1200,
+  increment   : 300000,
+  isFormField : true,
+  width       : 380,
+  colspan     : 4,
+  plugins     : [tip]
+});
+
+nexradSlider.on('changecomplete', function(){
+   nexradWMS.mergeNewParams({
+     time: (new Date(nexradSlider.getValue())).toUTC().format('Y-m-d\\TH:i')
+   });
+});
+
+var nexradWMS = new OpenLayers.Layer.WMS("Nexrad",
+   "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?",
+   {
+     layers      : "nexrad-n0r-wmst",
+     transparent : true,
+     format      : 'image/png',
+     time        : (new Date(nexradSlider.getValue())).toUTC().format('Y-m-d\\TH:i')
+   },{
+     singleTile  : true,
+     visibility  : false
+});
+
+layer = new OpenLayers.Layer.Google(
+     "Google Maps",
+     {type: G_NORMAL_MAP, sphericalMercator: true}
+);
+
+extent.transform(
+     new OpenLayers.Projection("EPSG:4326"), options.projection
+);
 
 var map = new OpenLayers.Map(options);
 
@@ -178,17 +249,40 @@ var sbwLayer = new OpenLayers.Layer.Vector("Storm Based Warnings",{
       styleMap: sbwStyleMap
 });
 
-map.addLayers([lsrLayer, sbwLayer])
+map.addLayers([nexradWMS, lsrLayer, sbwLayer])
 
 // create feature store, binding it to the vector layer
 ;
 
 sbwGridPanel = new Ext.grid.GridPanel({
    autoScroll : true,
+   id         : 'sbwGridPanel',
    title      : "Storm Based Warnings",
    loadMask   : {msg:'Loading Data...'},
    viewConfig : {forceFit: true},
-   store      : new GeoExt.data.FeatureStore({
+   tbar       : [{
+            text    : 'Print Data Grid',
+            icon    : 'icons/print.png',
+            cls     : 'x-btn-text-icon',
+            handler : function(){
+              Ext.ux.Printer.print(Ext.getCmp("sbwGridPanel"));
+            }
+    },{
+       xtype : 'button',
+       shown : true,
+       text  : 'Hide on Map',
+       scope : this,
+       handler: function(mybutton){
+         if (mybutton.shown){
+            mybutton.setText("Show on Map");
+            mybutton.shown = false;
+         } else {
+            mybutton.setText("Hide on Map");
+            mybutton.shown = true;
+         }
+       }
+    }],
+     store      : new GeoExt.data.FeatureStore({
       layer     : sbwLayer,
       fields    : [
          {name: 'wfo'},
@@ -420,6 +514,12 @@ endTimeSelector = {
     }
 }
 
+
+
+
+
+
+
 myForm = {
    xtype       : 'form',
    labelAlign  : 'top',
@@ -439,12 +539,14 @@ myForm = {
        loadButton,
        {html: 'Ending Datetime', border: false},
        endDateSelector,
-       endTimeSelector
+       endTimeSelector,
+       {html: 'Event Time Slider', border: false},
+       nexradSlider
    ]
 }
 
 /* Construct the viewport */
-var viewport = new Ext.Viewport({
+new Ext.Viewport({
     layout:'border',
     items:[{
         region      : 'north',
@@ -456,6 +558,7 @@ var viewport = new Ext.Viewport({
         xtype       : 'panel',
         region      : 'west',
         width       : 600,
+        split       : true,
         layout      : 'border',
         items       : [{
               xtype       : 'panel',
@@ -481,6 +584,55 @@ var viewport = new Ext.Viewport({
         region   : "center",
         id       : "mappanel",
         title    : "Map",
+        tbar     : [{
+          xtype  : 'button',
+          text   : 'Show NEXRAD',
+          shown  : false,
+          scope  : this,
+          handler : function(btn){
+             if (btn.shown) {
+                nexradWMS.setVisibility( false );
+                btn.setText("Show NEXRAD");
+                btn.shown = false;
+             } else {
+                nexradWMS.setVisibility( true );
+                btn.setText("Hide NEXRAD");
+                btn.shown = true;
+             }
+          }
+        },{
+          xtype  : 'button',
+          text   : 'Hide LSRs',
+          shown  : true,
+          scope  : this,
+          handler : function(btn){
+             if (btn.shown) {
+                lsrLayer.setVisibility( false );
+                btn.setText("Show LSRs");
+                btn.shown = false;
+             } else {
+                lsrLayer.setVisibility( true );
+                btn.setText("Hide LSRs");
+                btn.shown = true;
+             }
+          }
+        },{
+          xtype  : 'button',
+          text   : 'Show Warnings',
+          shown  : false,
+          scope  : this,
+          handler : function(btn){
+             if (btn.shown) {
+                sbwLayer.setVisibility( false );
+                btn.setText("Show Warnings");
+                btn.shown = false;
+             } else {
+                sbwLayer.setVisibility( true );
+                btn.setText("Hide Warnings");
+                btn.shown = true;
+             }
+          }
+        }],
         xtype    : "gx_mappanel",
         map      : map,
         layers   : [layer],
