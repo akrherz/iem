@@ -5,12 +5,12 @@ include("$rootpath/include/google_keys.php");
 $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.1.0/resources/css/ext-all.css"/>
 <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.0/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.0/ext-all.js"></script>
-<link rel="stylesheet" type="text/css" 
-  href="superboxselect.css" />
+<link rel="stylesheet" type="text/css" href="superboxselect.css" />
 <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key='. $GOOGLEKEYS[$rooturl]["any"] .'" type="text/javascript"></script>
 <script src="http://openlayers.org/api/2.8/OpenLayers.js"></script>
 <script type="text/javascript" src="GeoExt.js"></script>
 <script type="text/javascript" src="RowExpander.js"></script>
+<script type="text/javascript" src="Printer-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="SuperBoxSelect.js"></script>
 <script type="text/javascript" src="static.js"></script>
