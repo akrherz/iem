@@ -180,7 +180,7 @@ if ($source == "qc")
   $c = iemdb("access");
   $cutstring1 = 0;
   $cutstring2 = 5;
-  $sql = sprintf("SELECT station as stationid, day, snowd, max_tmpf as high, min_tmpf as low, pday as precip from summary_%s WHERE day = '%s' and network = 'IA_COOP' and min_tmpf < 90 and max_tmpf > -90", adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
+  $sql = sprintf("SELECT station as stationid, day, snowd, max_tmpf as high, min_tmpf as low, pday as precip, snow, snowd from summary_%s WHERE day = '%s' and network = 'IA_COOP' and min_tmpf < 90 and max_tmpf > -90", adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
 }
 
 $rs =  pg_exec($c, $sql);
