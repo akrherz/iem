@@ -112,7 +112,9 @@ def estimate_snow( ts ):
     lons = []
     rs = iem.query("""
        SELECT x(geom) as lon, y(geom) as lat, snow, snowd
-       from summary_%s WHERE day = '%s' and network in ('IA_COOP')
+       from summary_%s WHERE day = '%s' and 
+       network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
+        'KS_COOP', 'NE_COOP', 'SD_COOP')
        and snowd >= 0""" % (ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
         lats.append( rs[i]['lat'] )
