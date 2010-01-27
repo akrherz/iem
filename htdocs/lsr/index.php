@@ -41,7 +41,26 @@ Ext.onReady(function(){
 <div id="help">
 <h3>Local Storm Report App Help</h3>
 
-<p><i>...to be written...</i>
+<p>This application allows the quick viewing of National Weather Service (NWS)
+issued Local Storm Reports (LSR).  These LSRs are issued by local NWS forecast
+offices for their area of responsibility.
+
+<p>To use this application, select the NWS forecast office(s) of choice and
+then a time duration you are interested in.  Times presented on this 
+application are in the timezone of your local computer.
+
+<p>After selecting a time period and office(s), this application will 
+automatically generate a listing of any available LSR reports and also
+generate a listing of Storm Based Warnings (SBW)s valid for some portion
+of the period of interest.  You can switch between these data listings
+by click on the tabs found just above this text.
+
+<p>The map interface on the right hand side visually presents these LSRs
+and SBWSs.  Clicking on the icon or polygon, highlights the corresponding
+data in the two tables.
+
+<p>You also have the ability to overlay NEXRAD base reflectivity information
+for any 5 minute interval during the time period of your choice.
 
 </div>
 </body></html>
