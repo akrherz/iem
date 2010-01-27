@@ -49,7 +49,7 @@ archive of presentations.</li>
  <li><a href="http://www.spc.noaa.gov/gis/svrgis/">GIS Severe Weather reports</a>
  <br />Archive of NCDC provided storm reports (1950-)!</li>
  <li><a href="http://gis.ncdc.noaa.gov/aimstools/gis.jsp">NCDC GIS Portal</a><br />National Climate Data Center GIS goodies</li>
- <li><a href="http://wdssii.nssl.noaa.gov/geotiff/">NSSL Google Earth Data</a>
+ <li><a href="http://wdssii.nssl.noaa.gov/?r=products">NSSL Google Earth Data</a>
   <br />Weather data integrated into Google Earth!</li>
  <li><a href="http://www.ocs.orst.edu/prism/products/matrix.phtml">Oregon State PRISM</a>
 	<br />These folks provide nationwide GIS ready datasets of climate data.  Their site is outstanding!</li>
