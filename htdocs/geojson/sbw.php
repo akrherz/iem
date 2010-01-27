@@ -18,17 +18,20 @@ function toTime($s){
 }
 
 /* Look for calling values */
-$wfos = isset($_REQUEST["wfos"]) ? explode(",", $_REQUEST["wfos"]) : die("wfos not defined");
+$wfos = isset($_REQUEST["wfos"]) ? explode(",", $_REQUEST["wfos"]) : Array();
 $sts = isset($_REQUEST["sts"]) ? toTime($_REQUEST["sts"]) : die("sts not defined");
 $ets = isset($_REQUEST["ets"]) ? toTime($_REQUEST["ets"]) : die("ets not defined");
 $wfoList = implode("','", $wfos);
+$str_wfo_list = "and wfo in ('$wfoList')";
+if ($wfoList == ""){  $str_wfo_list = ""; }
+
 
 $rs = pg_query("SET TIME ZONE 'GMT'");
 $rs = pg_prepare($postgis, "SELECT", "SELECT *, 
       ST_asGeoJson(geom) as geojson
       FROM warnings WHERE
       issue < $2 and
-      expire > $1 and expire < $3 and wfo in ('$wfoList')
+      expire > $1 and expire < $3 $str_wfo_list
       and gtype = 'P'
       LIMIT 500");
 

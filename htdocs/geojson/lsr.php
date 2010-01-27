@@ -18,16 +18,18 @@ function toTime($s){
 }
 
 /* Look for calling values */
-$wfos = isset($_REQUEST["wfos"]) ? explode(",", $_REQUEST["wfos"]) : die("wfos not defined");
+$wfos = isset($_REQUEST["wfos"]) ? explode(",", $_REQUEST["wfos"]) : Array();
 $sts = isset($_REQUEST["sts"]) ? toTime($_REQUEST["sts"]) : die("sts not defined");
 $ets = isset($_REQUEST["ets"]) ? toTime($_REQUEST["ets"]) : die("ets not defined");
 $wfoList = implode("','", $wfos);
+$str_wfo_list = "and wfo in ('$wfoList')";
+if ($wfoList == ""){  $str_wfo_list = ""; }
 
 $rs = pg_query("SET TIME ZONE 'GMT'");
 $rs = pg_prepare($postgis, "SELECT", "SELECT *, 
       x(geom) as lon, y(geom) as lat 
       FROM lsrs WHERE
-      valid BETWEEN $1 and $2 and wfo in ('$wfoList')
+      valid BETWEEN $1 and $2 $str_wfo_list
       LIMIT 500");
 
 $rs = pg_execute($postgis, "SELECT", Array(date("Y-m-d H:i", $sts), 
@@ -80,6 +82,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
                 "type"      => $row["type"],
                 "county"    => $row["county"],
                 "typetext"  => $row["typetext"],
+                "st"        => $row["state"],
                 "remark"    => $row["remark"],
                 "city"      => $row["city"],
                 "prodlinks" => $products,

@@ -79,7 +79,8 @@ function reloadData(){
   nexradSlider.maxValue = (end_utc.fromUTC()).add(Date.MINUTE, 
                           60 - parseInt(start_utc.format('i')) );
   nexradSlider.setValue( 0 );
-
+  nexradSlider.enable();
+  Ext.getCmp("showNEXRAD").enable();
 
   lsrGridPanel.getStore().reload({
       add    : false,
@@ -127,6 +128,7 @@ nexradSlider = new Ext.Slider({
   maxValue    : (new Date()).getTime() + 1200,
   increment   : 300000,
   isFormField : true,
+  disabled    : true,
   width       : 380,
   colspan     : 4,
   plugins     : [tip]
@@ -136,6 +138,7 @@ nexradSlider.on('changecomplete', function(){
    nexradWMS.mergeNewParams({
      time: (new Date(nexradSlider.getValue())).toUTC().format('Y-m-d\\TH:i')
    });
+   Ext.getCmp("appTime").setText("NEXRAD Valid: "+ (new Date(nexradSlider.getValue())).format('Y-m-d g:i A'));
 });
 
 var nexradWMS = new OpenLayers.Layer.WMS("Nexrad",
@@ -246,7 +249,8 @@ var lsrLayer = new OpenLayers.Layer.Vector("Local Storm Reports",{
       styleMap: lsrStyleMap
 });
 var sbwLayer = new OpenLayers.Layer.Vector("Storm Based Warnings",{
-      styleMap: sbwStyleMap
+      styleMap: sbwStyleMap,
+      visibility: false
 });
 
 map.addLayers([nexradWMS, lsrLayer, sbwLayer])
@@ -267,20 +271,6 @@ sbwGridPanel = new Ext.grid.GridPanel({
             handler : function(){
               Ext.ux.Printer.print(Ext.getCmp("sbwGridPanel"));
             }
-    },{
-       xtype : 'button',
-       shown : true,
-       text  : 'Hide on Map',
-       scope : this,
-       handler: function(mybutton){
-         if (mybutton.shown){
-            mybutton.setText("Show on Map");
-            mybutton.shown = false;
-         } else {
-            mybutton.setText("Hide on Map");
-            mybutton.shown = true;
-         }
-       }
     }],
      store      : new GeoExt.data.FeatureStore({
       layer     : sbwLayer,
@@ -350,9 +340,18 @@ sbwGridPanel = new Ext.grid.GridPanel({
 
 lsrGridPanel = new Ext.grid.GridPanel({
    autoScroll : true,
+   id         : 'lsrGridPanel',
    title      : "Local Storm Report Information",
    loadMask   : {msg:'Loading Data...'},
    viewConfig : {forceFit: true},
+   tbar       : [{
+            text    : 'Print Data Grid',
+            icon    : 'icons/print.png',
+            cls     : 'x-btn-text-icon',
+            handler : function(){
+              Ext.ux.Printer.print(Ext.getCmp("lsrGridPanel"));
+            }
+    }],
    store      : new GeoExt.data.FeatureStore({
       layer     : lsrLayer,
       fields    : [
@@ -360,7 +359,8 @@ lsrGridPanel = new Ext.grid.GridPanel({
          {name: 'valid', type: 'date', dateFormat: 'Y-m-d H:i'},
          {name: 'county'},
          {name: 'city'},
-         {name: 'typetext'},
+         {name: 'st', type: 'string'},
+         {name: 'typetext', type: 'string'},
          {name: 'remark'},
          {name: 'prodlinks'},
          {name: 'wfo'},
@@ -399,6 +399,11 @@ lsrGridPanel = new Ext.grid.GridPanel({
             sortable  : true,
             dataIndex: "city"
         }, {
+            header: "ST",
+            width: 30,
+            sortable  : true,
+            dataIndex: "st"
+        }, {
             header: "Event Type",
             sortable  : true,
             dataIndex: "typetext"
@@ -412,10 +417,11 @@ lsrGridPanel = new Ext.grid.GridPanel({
 });
 
 lsrGridPanel.getStore().on("load", function(mystore, records, options){
-              if (records.length > 0){ 
-                map.zoomToExtent( lsrLayer.getDataExtent() );
-              }
-        });
+    if (records.length > 0){ 
+        map.zoomToExtent( lsrLayer.getDataExtent() );
+        Ext.getCmp("tabs").setActiveTab(1);
+    }
+});
 
 
 /* SuperBoxSelector to do a multi pick */
@@ -429,15 +435,19 @@ wfoSelector = {
     width           : 200,
     id              : 'wfoselector',
     xtype           : 'superboxselect',
-    emptyText       : 'Select Weather Office',
+    emptyText       : 'NWS Office(s), default all',
     resizable       : true,
     name            : 'wfo',
     mode            : 'local',
     displayFieldTpl : '{abbr}',
     tpl             : '<tpl for="."><div class="x-combo-list-item">[{abbr}] {wfo}</div></tpl>',
     valueField      : 'abbr',
-    forceSelection  : true
+    forceSelection  : true,
+    listeners       : {
+      collapse : function(){ reloadData(); }
+    }
 };
+
 
 startDateSelector = {
     xtype     : 'datefield',
@@ -461,7 +471,7 @@ startTimeSelector = {
     width     : 100,
     emptyText : 'Select Time',
     id        : 'timepicker1',
-    value     : new Date(),
+    value     : "12:00 AM",
     disabled  : false,
     listeners : {
        select : function(field, value){
@@ -505,7 +515,7 @@ endTimeSelector = {
     width     : 100,
     emptyText : 'Select Time',
     id        : 'timepicker2',
-    value     : new Date(),
+    value     : "12:00 PM",
     disabled  : false,
     listeners : {
        select : function(field, value){
@@ -572,9 +582,11 @@ new Ext.Viewport({
               region      : 'center',
               items       : [{
                 xtype       : 'tabpanel',
+                id          : 'tabs',
                 activeTab   : 0,
                 items       : [
-                   {title: 'Help', contentEl: 'help'}, 
+                   {title: 'Help', contentEl: 'help', unstyled: true,
+                    padding: 5}, 
                    lsrGridPanel,
                    sbwGridPanel
                 ]
@@ -585,8 +597,10 @@ new Ext.Viewport({
         id       : "mappanel",
         title    : "Map",
         tbar     : [{
+          id     : 'showNEXRAD',
           xtype  : 'button',
           text   : 'Show NEXRAD',
+          disabled: true,
           shown  : false,
           scope  : this,
           handler : function(btn){
@@ -632,6 +646,10 @@ new Ext.Viewport({
                 btn.shown = true;
              }
           }
+        },{
+          xtype  : 'tbtext',
+          text   : 'NEXRAD Time:',
+          id     : 'appTime'
         }],
         xtype    : "gx_mappanel",
         map      : map,
