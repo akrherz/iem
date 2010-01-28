@@ -27,8 +27,9 @@ dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
 sql = """select astext(multi(geomunion(geom))) as tgeom 
        from warnings_%s WHERE significance = 'A' and 
        phenomena IN ('TO','SV') and eventid = %s and
+       isvalid(geom) and 
        issue < ((select issued from watches WHERE num = %s
-                and extract(year from issued) = %s) + '30 minutes'::interval)
+                and extract(year from issued) = %s) + '60 minutes'::interval)
        """ % (year, etn, etn, year) 
 rs = mydb.query(sql).dictresult()
 
