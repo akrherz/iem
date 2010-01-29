@@ -4,6 +4,8 @@ $THISPAGE = "networks-awos";
 $TITLE = "IEM | AWOS 1 Minute Data Download";
 include("$rootpath/include/header.php"); 
 include_once("$rootpath/include/constants.php");
+include("$rootpath/include/imagemaps.php");
+include("$rootpath/include/forms.php");
 $bogus = 0;
 ?>
 
@@ -19,10 +21,11 @@ month's archive of one minute data.  We process this data into our database
 and make the observations available here for download.  Please don't make
 giant data requests through this interface, instead feel free to email Daryl (akrherz@iastate.edu) and make your request.</p>
 
-<p><b>Archive complete till:</b> <?php echo date('d M Y', $awos_archive_end); ?></p>
+<ul>
+ <li><b>Archive Begins:</b> 1 Jan 1995 (for some sites, not all)</li>
+ <li><b>Last Date in Archive:</b> <?php echo date('d M Y', $awos_archive_end); ?></li>
+</ul>
 
-<?php include("$rootpath/include/imagemaps.php"); ?>
-<?php include("$rootpath/include/forms.php"); ?>
 
 <p>
 
@@ -53,8 +56,8 @@ in this archive up until that point.</i><br>
 
   <tr>
     <th>Start:</th>
-    <td rowspan="2">
-     <?php echo yearSelect(1995, date("Y"), "year"); ?>
+    <td>
+     <?php echo yearSelect2(1995, date("Y"), "year1"); ?>
     </td>
     <td>
      <?php echo monthSelect($bogus, "month1"); ?>
@@ -72,6 +75,8 @@ in this archive up until that point.</i><br>
 
   <tr>
     <th>End:</th>
+    <td>
+     <?php echo yearSelect2(1995, date("Y"), "year2"); ?>
     <td>
      <?php echo monthSelect($bogus, "month2"); ?>
     <td>
