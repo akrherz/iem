@@ -50,7 +50,7 @@ cfg = {
  '_title'             : "Local Storm Report Snowfall Total Analysis",
  '_valid'             : "Reports past 12 hours: "+ now.strftime("%d %b %Y %I:%M %p"),
  '_showvalues'        : True,
- '_format'            : '%.2f',
+ '_format'            : '%.1f',
  '_MaskZero'          : True,
  'lbTitleString'      : "[in]",
  'pmLabelBarHeightF'  : 0.6,
