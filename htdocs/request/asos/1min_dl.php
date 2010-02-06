@@ -10,7 +10,7 @@ include_once("$rootpath/include/database.inc.php");
  */
 
 include("$rootpath/include/network.php");
-$nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS", "SD_ASOS"));
+$nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS", "SD_ASOS","KS_ASOS"));
 $cities = $nt->table;
 
 
@@ -37,7 +37,8 @@ $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
 $month1 = isset($_GET["month1"]) ? $_GET["month1"]: die("No month specified");
 $month2 = isset($_GET["month2"]) ? $_GET["month2"]: die("No month specified");
-$year = isset($_GET["year"]) ? $_GET["year"] : die("No year specified");
+$year1 = isset($_GET["year1"]) ? $_GET["year1"] : die("No year1 specified");
+$year2 = isset($_GET["year2"]) ? $_GET["year2"] : die("No year2 specified");
 $hour1 = isset($_GET["hour1"]) ? $_GET["hour1"]: die("No hour1 specified");
 $hour2 = isset($_GET["hour2"]) ? $_GET["hour2"]: die("No hour2 specified");
 $minute1 = isset($_GET["minute1"]) ? $_GET["minute1"]: die("No minute1 specified");
@@ -62,9 +63,9 @@ $stationString .= ")";
 if (isset($_GET["day"]))
   die("Incorrect CGI param, use day1, day2");
 
-$ts1 = mktime($hour1, $minute1, 0, $month1, $day1, $year) or 
+$ts1 = mktime($hour1, $minute1, 0, $month1, $day1, $year1) or 
   die("Invalid Date Format");
-$ts2 = mktime($hour2, $minute2, 0, $month2, $day2, $year) or
+$ts2 = mktime($hour2, $minute2, 0, $month2, $day2, $year2) or
   die("Invalid Date Format");
 
 if ($selectAll && $day1 != $day2)
@@ -80,7 +81,7 @@ for ($i=0; $i< $num_vars;$i++){
 
 $sqlTS1 = strftime("%Y-%m-%d %H:%M", $ts1);
 $sqlTS2 = strftime("%Y-%m-%d %H:%M", $ts2);
-$table = strftime("t%Y_1minute", $ts1);
+$table = strftime("alldata_1minute");
 $nicedate = strftime("%Y-%m-%d", $ts1);
 
 $sampleStr = Array("1min" => "1",
