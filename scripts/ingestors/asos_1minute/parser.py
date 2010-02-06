@@ -1,9 +1,8 @@
 # Something to parse the mess we get from NCDC each month
 # Better than nothing, though....
 
-import re
+import re, os, sys
 import mx.DateTime
-import os
 
 DBHOST = "iemdb"
 if os.environ["USER"] == "akrherz":
