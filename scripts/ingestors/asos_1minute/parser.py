@@ -15,8 +15,8 @@ P1_RE = re.compile(r"""
 (?P<year>[0-9]{4})(?P<month>[0-9]{2})(?P<day>[0-9]{2})
 (?P<hr>[0-9]{2})(?P<mi>[0-9]{2})
 (?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s+
-((?P<vis1_coef>\d+\.\d*)|(?P<vis1_coef_miss>M))\s+(?P<vis1_nd>[NMD ])\s+
-((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+(?P<vis2_nd>[NMD ])\s+
+((?P<vis1_coef>\d+\.\d*)|(?P<vis1_coef_miss>M))\s+(?P<vis1_nd>[NMDS ])\s+
+((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+(?P<vis2_nd>[NMDS ])\s+
 ...............\s+
 ((?P<drct>\d+)|(?P<drct_miss>M))\s+
 ((?P<sknt>\d+)|(?P<sknt_miss>M))\s+
@@ -27,6 +27,7 @@ P1_RE = re.compile(r"""
 """, re.VERBOSE)
 
 p1_examples = [
+"14931KBRL BRL2010012023010501   2.819 S                              M     M     89   11                        ",
 "14943KSUX SUX2010010100000600   0.104 N                             318     2   318    3      M                 ",
 "14943KSUX SUX2010013123590559   0.115 N                              96     8   102   10      M                 ",
 "94989KAMW AMW2010010106261226   0.087 N                             318     9   321   11                        ",
@@ -49,7 +50,7 @@ P2_RE = re.compile(r"""
 (?P<ptype>[A-Z0-9\?\-\+]{1,2})\s+
 \[?((?P<unk>\d+)|\s+(?P<unk_miss>M))\s+\]?\s+
 (?P<precip>\d+\.\d*)............\s+
-(?P<unk2>\d*)\s+
+((?P<unk2>\d*)|(?P<unk2_miss>M))\s+
 ((?P<pres1>\d+\.\d*)|(?P<pres1_miss>[M ]))\s+
 ((?P<pres2>\d+\.\d*)|(?P<pres2_miss>[M ]))\s+
 ((?P<pres3>\d+\.\d*)|(?P<pres3_miss>[M ]))\s+
@@ -59,6 +60,7 @@ P2_RE = re.compile(r"""
 
 
 p2_examples = [
+"14940KMCW MCW2010010916182218  NP  0000     0.00               M     29.192  29.196  29.197    M    M           ",
 "14943KSUX SUX2010010100000600  NP  0000     0.00             39981   29.200  29.200  29.205    -2   -7          ",
 "14933KDSM DSM2010010101380738  NP [0000  ]  0.00             39991   29.336  29.331  29.330     3   -5          ",
 "94982KDVN DVN2010010101350735  NP  0000     0.00             39942   29.508  29.500            -1   -6          ",
@@ -161,6 +163,8 @@ def runner(station, monthts):
 
     for ln in page1:
       d = p1_parser( ln )
+      if d is None:
+        continue
       data[ d['ts'] ] = d
     for ln in page2:
       d = p2_parser( ln )
@@ -197,10 +201,13 @@ def runner(station, monthts):
     print "Station: %s processed %s entries" % (station, len(data.keys()))
  
 
-for station in ['MCW','BRL','AMW','MIW','SPW','OTM','CID','EST','IOW',
+if len(sys.argv) == 3:
+    for station in ['MCW','BRL','AMW','MIW','SPW','OTM','CID','EST','IOW',
                 'SUX','DBQ','ALO','DSM','DVN','LWD','MLI','OMA','FSD']:
-    runner(station, mx.DateTime.DateTime(int(sys.argv[1]),int(sys.argv[2]),1))
-#test()
+        runner(station, 
+               mx.DateTime.DateTime(int(sys.argv[1]),int(sys.argv[2]),1))
+else:
+    test()
 """
            Table "public.t2010_1minute"
    Column   |           Type           | Modifiers 
