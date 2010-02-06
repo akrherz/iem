@@ -15,8 +15,8 @@ P1_RE = re.compile(r"""
 (?P<year>[0-9]{4})(?P<month>[0-9]{2})(?P<day>[0-9]{2})
 (?P<hr>[0-9]{2})(?P<mi>[0-9]{2})
 (?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s+
-((?P<vis1_coef>\d+\.\d*)|(?P<vis1_coef_miss>M))\s+(?P<vis1_nd>[NMDS ])\s+
-((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+(?P<vis2_nd>[NMDS ])\s+
+((?P<vis1_coef>\d+\.\d*)|(?P<vis1_coef_miss>M))\s+(?P<vis1_nd>[NMDSV ])\s+
+((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+(?P<vis2_nd>[NMDSV ])\s+
 ...............\s+
 ((?P<drct>\d+)|(?P<drct_miss>M))\s+
 ((?P<sknt>\d+)|(?P<sknt_miss>M))\s+
@@ -27,6 +27,7 @@ P1_RE = re.compile(r"""
 """, re.VERBOSE)
 
 p1_examples = [
+"14931KBRL BRL2010012103370937   3.657 V                              M     M     92   13                        ",
 "14931KBRL BRL2010012023010501   2.819 S                              M     M     89   11                        ",
 "14943KSUX SUX2010010100000600   0.104 N                             318     2   318    3      M                 ",
 "14943KSUX SUX2010013123590559   0.115 N                              96     8   102   10      M                 ",
@@ -49,7 +50,8 @@ P2_RE = re.compile(r"""
 (?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s\s
 (?P<ptype>[A-Z0-9\?\-\+]{1,2})\s+
 \[?((?P<unk>\d+)|\s+(?P<unk_miss>M))\s+\]?\s+
-(?P<precip>\d+\.\d*)............\s+
+((?P<precip>\d+\.\d*)|(?P<precip_miss>M))
+............\s+
 ((?P<unk2>\d*)|(?P<unk2_miss>M))\s+
 ((?P<pres1>\d+\.\d*)|(?P<pres1_miss>[M ]))\s+
 ((?P<pres2>\d+\.\d*)|(?P<pres2_miss>[M ]))\s+
@@ -60,6 +62,8 @@ P2_RE = re.compile(r"""
 
 
 p2_examples = [
+"94988KMIW MIW2010012110331633  M     M       M                 M     28.736  28.733            M    M           ",
+"14931KBRL BRL2010012105471147  NP    M       M               40000   28.945  28.944  28.950    34   33          ",
 "14940KMCW MCW2010010916182218  NP  0000     0.00               M     29.192  29.196  29.197    M    M           ",
 "14943KSUX SUX2010010100000600  NP  0000     0.00             39981   29.200  29.200  29.205    -2   -7          ",
 "14933KDSM DSM2010010101380738  NP [0000  ]  0.00             39991   29.336  29.331  29.330     3   -5          ",
