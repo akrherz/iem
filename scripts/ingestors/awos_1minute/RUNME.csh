@@ -30,7 +30,7 @@ set datafile="SEP09"
 
 # Lets make sure the table is created and deleted and what not
 psql -h iemdb awos << EOF
- create table ${tablename} inherit alldata;
+ create table ${tablename}() inherits (alldata);
  delete from ${tablename};
  drop index ${tablename}_valid_idx;
  drop index ${tablename}_stn_idx;
