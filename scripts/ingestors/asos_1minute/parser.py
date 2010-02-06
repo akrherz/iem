@@ -21,12 +21,15 @@ P1_RE = re.compile(r"""
 ((?P<drct>\d+)|(?P<drct_miss>M))\s+
 ((?P<sknt>\d+)|(?P<sknt_miss>M))\s+
 ((?P<gust_drct>\d+)|(?P<gust_drct_miss>M))\s+
-((?P<gust_sknt>\d+)|(?P<gust_sknt_miss>M))\s+
+\[?((?P<gust_sknt>\d+)R?\d*\+?|(?P<gust_sknt_miss>M))\s*\]?\s+
 (....)\s
 (...)
 """, re.VERBOSE)
 
 p1_examples = [
+"14942KOMA OMA2010011316472247   0.143 D                             183    13   179   16   [14R60+]             ",
+"14942KOMA OMA2010011521400340   0.989 N                             168    12   164   14    14R60+              ",
+"14942KOMA OMA2010011708051405   5.278 D                             245     3   257    4    14R24               ",
 "14931KBRL BRL2010012103370937   3.657 V                              M     M     92   13                        ",
 "14931KBRL BRL2010012023010501   2.819 S                              M     M     89   11                        ",
 "14943KSUX SUX2010010100000600   0.104 N                             318     2   318    3      M                 ",
@@ -47,21 +50,28 @@ P2_RE = re.compile(r"""
 (?P<id3>[0-9A-Z]{3})
 (?P<year>[0-9]{4})(?P<month>[0-9]{2})(?P<day>[0-9]{2})
 (?P<hr>[0-9]{2})(?P<mi>[0-9]{2})
-(?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s\s
-(?P<ptype>[A-Z0-9\?\-\+]{1,2})\s+
-\[?((?P<unk>\d+)|\s+(?P<unk_miss>M))\s+\]?\s+
+(?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s+
+\[?(?P<ptype>[a-zA-Z0-9\?\-\+\.]{1,2})\s?\]?\s?\s?
+\[?((?P<unk>\d+)V?|\s+(?P<unk_miss>M))\s+\]?\s+
 ((?P<precip>\d+\.\d*)|(?P<precip_miss>M))
 ............\s+
-((?P<unk2>\d*)|(?P<unk2_miss>M))\s+
-((?P<pres1>\d+\.\d*)|(?P<pres1_miss>[M ]))\s+
-((?P<pres2>\d+\.\d*)|(?P<pres2_miss>[M ]))\s+
-((?P<pres3>\d+\.\d*)|(?P<pres3_miss>[M ]))\s+
+\[?((?P<unk2>\d*)|(?P<unk2_miss>M))\]?\s+
+\[?((?P<pres1>\d+\.\d*)|(?P<pres1_miss>[M ]))\]?\s?\s?
+\[?((?P<pres2>\d+\.\d*)|(?P<pres2_miss>[M ]))\]?\s?\s?
+\[?((?P<pres3>\d+\.\d*)|(?P<pres3_miss>[M ]))\]?\s+
 ((?P<tmpf>\-?\d+)|(?P<tmpf_miss>M))\s+
 ((?P<dwpf>\-?\d+)|(?P<dwpf_miss>M))\s+
 """, re.VERBOSE)
 
 
 p2_examples = [
+"14937KIOW IOW2010010212131813  M   0000      M                 M    [29.841][29.840]           M    M          ",
+"14990KCID CID2010012705561156  NP [0000  ]  0.00            [39967]  29.193  29.188  29.195    11    5         ",
+"14990KCID CID2010012708381438 [S-][0000  ]  0.00             39967   29.205  29.199  29.207    15    9         ",
+"14972KSPW SPW2010012507461346 [M ] 0000     0.00             39994   28.021  28.035            20   17         ",
+"14931KBRL BRL2010012016222222  Yb  0000     0.00             39840   28.974  28.974  28.980    33   31         ",
+"14931KBRL BRL2010012012041804  P   0001V    0.00             39547   29.014  29.013  29.019    32   30         ",
+"14931KBRL BRL2010012016332233  0.    M      0.00             39831     M       M       M       33   31         ",
 "94988KMIW MIW2010012110331633  M     M       M                 M     28.736  28.733            M    M           ",
 "14931KBRL BRL2010012105471147  NP    M       M               40000   28.945  28.944  28.950    34   33          ",
 "14940KMCW MCW2010010916182218  NP  0000     0.00               M     29.192  29.196  29.197    M    M           ",
@@ -206,8 +216,8 @@ def runner(station, monthts):
  
 
 if len(sys.argv) == 3:
-    for station in ['MCW','BRL','AMW','MIW','SPW','OTM','CID','EST','IOW',
-                'SUX','DBQ','ALO','DSM','DVN','LWD','MLI','OMA','FSD']:
+    for station in ['OMA', 'MCW','BRL','AMW','MIW','SPW','OTM','CID','EST',
+                'IOW','SUX','DBQ','ALO','DSM','DVN','LWD','MLI','FSD']:
         runner(station, 
                mx.DateTime.DateTime(int(sys.argv[1]),int(sys.argv[2]),1))
 else:
