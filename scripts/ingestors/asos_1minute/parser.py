@@ -172,7 +172,7 @@ def runner(station, monthts):
       for k in d.keys():
         data[ d['ts'] ][ k ] = d[k]
 
-    out = open('dbinsert.sql', 'w')
+    out = open('/tmp/dbinsert.sql', 'w')
     out.write("""DELETE from t%s_1minute WHERE station = '%s' and 
                valid BETWEEN '%s 00:00-0600' and '%s 00:00-0600';\n""" % (
          monthts.year, station, monthts.strftime("%Y-%m-%d"),
@@ -194,7 +194,7 @@ def runner(station, monthts):
     out.write("\.\n")
     out.close()
 
-    os.system("psql -f dbinsert.sql -h %s asos" % (DBHOST,))
+    os.system("psql -f /tmp/dbinsert.sql -h %s asos" % (DBHOST,))
     print "Station: %s processed %s entries" % (station, len(data.keys()))
  
 
