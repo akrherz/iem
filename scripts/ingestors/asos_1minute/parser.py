@@ -15,18 +15,23 @@ P1_RE = re.compile(r"""
 (?P<year>[0-9]{4})(?P<month>[0-9]{2})(?P<day>[0-9]{2})
 (?P<hr>[0-9]{2})(?P<mi>[0-9]{2})
 (?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s+
-((?P<vis1_coef>\d+\.\d*)|(?P<vis1_coef_miss>M))\s+(?P<vis1_nd>[NMDSV ])\s+
-((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+(?P<vis2_nd>[NMDSV ])\s+
+\[?\s*((?P<vis1_coef>\-?\d+\.\d*)|(?P<vis1_coef_miss>M))\s+
+(?P<vis1_nd>[0-9A-Za-z\?\$/ ])\]?\s+
+((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+(?P<vis2_nd>[A-Za-z\?\$ ])\s+
 ...............\s+
-((?P<drct>\d+)|(?P<drct_miss>M))\s+
+\[?\s*((?P<drct>\d+)|(?P<drct_miss>M))\s+
 ((?P<sknt>\d+)|(?P<sknt_miss>M))\s+
-((?P<gust_drct>\d+)|(?P<gust_drct_miss>M))\s+
+((?P<gust_drct>\d+)\+?|(?P<gust_drct_miss>M))\s*\]?\s+
 \[?((?P<gust_sknt>\d+)R?\d*\+?|(?P<gust_sknt_miss>M))\s*\]?\s+
 (....)\s
 (...)
 """, re.VERBOSE)
 
 p1_examples = [
+"14923KMLI MLI2010010206581258   0.109 b                              M     M     M     0    09 60+              ",
+"14923KMLI MLI2010010309121512  -0.126 D                              M     M    276    6    09 60+              ",
+"14923KMLI MLI2010011107091309 [ 0.219 N]                          [ 296     6   294    9 ] [09 60+]             ",
+"14931KBRL BRL2010012100100610   1.774 B                              M     M     85   10                        ",
 "14942KOMA OMA2010011316472247   0.143 D                             183    13   179   16   [14R60+]             ",
 "14942KOMA OMA2010011521400340   0.989 N                             168    12   164   14    14R60+              ",
 "14942KOMA OMA2010011708051405   5.278 D                             245     3   257    4    14R24               ",
@@ -52,7 +57,7 @@ P2_RE = re.compile(r"""
 (?P<hr>[0-9]{2})(?P<mi>[0-9]{2})
 (?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s+
 \[?(?P<ptype>[a-zA-Z0-9\?\-\+\.]{1,2})\s?\]?\s?\s?
-\[?((?P<unk>\d+)V?|\s+(?P<unk_miss>M))\s+\]?\s+
+\[?((?P<unk>\d+)V?|\s+(?P<unk_miss>[M ]))\s+\]?\s+
 ((?P<precip>\d+\.\d*)|(?P<precip_miss>M))
 ............\s+
 \[?((?P<unk2>\d*)|(?P<unk2_miss>M))\]?\s+
@@ -65,6 +70,7 @@ P2_RE = re.compile(r"""
 
 
 p2_examples = [
+"14944KFSD FSD2010013123590559  NP           0.00             39985   28.686  28.681  28.684     7    2         ",
 "14937KIOW IOW2010010212131813  M   0000      M                 M    [29.841][29.840]           M    M          ",
 "14990KCID CID2010012705561156  NP [0000  ]  0.00            [39967]  29.193  29.188  29.195    11    5         ",
 "14990KCID CID2010012708381438 [S-][0000  ]  0.00             39967   29.205  29.199  29.207    15    9         ",
@@ -216,8 +222,9 @@ def runner(station, monthts):
  
 
 if len(sys.argv) == 3:
-    for station in ['OMA', 'MCW','BRL','AMW','MIW','SPW','OTM','CID','EST',
-                'IOW','SUX','DBQ','ALO','DSM','DVN','LWD','MLI','FSD']:
+    for station in ["FSD", "MLI", 'OMA', 'MCW','BRL','AMW','MIW','SPW','OTM',
+                'CID','EST',
+                'IOW','SUX','DBQ','ALO','DSM','DVN','LWD']:
         runner(station, 
                mx.DateTime.DateTime(int(sys.argv[1]),int(sys.argv[2]),1))
 else:
