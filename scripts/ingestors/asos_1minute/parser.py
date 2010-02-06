@@ -198,7 +198,9 @@ def runner(station, monthts):
     print "Station: %s processed %s entries" % (station, len(data.keys()))
  
 
-runner("AMW", mx.DateTime.DateTime(2010,1,1))
+for station in ['MCW','BRL','AMW','MIW','SPW','OTM','CID','EST','IOW',
+                'SUX','DBQ','ALO','DSM','DVN','LWD','MLI','OMA','FSD']:
+    runner(station, mx.DateTime.DateTime(int(sys.argv[1]),int(sys.argv[2]),1))
 #test()
 """
            Table "public.t2010_1minute"
