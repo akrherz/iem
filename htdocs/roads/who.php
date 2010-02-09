@@ -123,7 +123,7 @@ $map->drawLabelCache($img);
 $layer = $map->getLayerByName("credits");
 $c = $layer->getClass(0);
 $point = ms_newpointobj();
-$point->setXY(500, 10);
+$point->setXY(1150, 10);
 $point->draw($map, $layer, $img, "credits", $valid);
 
 header("Content-type: image/jpeg");
