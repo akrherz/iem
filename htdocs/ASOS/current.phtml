@@ -38,6 +38,9 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "ts" => "Observation Time", "phour" => "Last Hour Rainfall [inch]",
   "min_tmpf" => "Today's Low Temperature", "sname" => "Station Name",
   "max_tmpf" => "Today's High Temperature",
+  "skyl1" => "Cloud Level 1",
+  "skyl2" => "Cloud Level 2",
+  "skyl3" => "Cloud Level 3",
   "pday" => "Today Rainfall [inch]", );
 
 ?>
@@ -137,6 +140,7 @@ a column to sort it.<br>\n";
   <th colspan="3">&nbsp;</th>
   <th colspan="3">Wind [knots]</th>
   <th colspan="2">Precip</font></th>
+  <th colspan="3">Clouds</font></th>
 <tr>
   <th><a href="<?php echo $uri; ?>tmpf">Air</a></th>
   <th><a href="<?php echo $uri; ?>max_tmpf">Hi</a></th>
@@ -152,6 +156,9 @@ a column to sort it.<br>\n";
     @ <a href="<?php echo $uri; ?>peak_ts">Time</a></th>
   <th><a href="<?php echo $uri; ?>phour">1 Hour</a></th>
   <th><a href="<?php echo $uri; ?>pday">Today</a></th>
+  <th><a href="<?php echo $uri; ?>skyl1">Level 1</a></th>
+  <th><a href="<?php echo $uri; ?>skyl2">Level 2</a></th>
+  <th><a href="<?php echo $uri; ?>skyl3">Level 3</a></th>
 </tr></thead>
 <tbody>
 <?php
@@ -213,7 +220,7 @@ while (list ($key, $val) = each ($finalA))  {
   $row .= "<td ";
   if ($tdiff > 10000){
     $fmt = "%d %b %I:%M %p";
-    $row .= "bgcolor=\"red\">". strftime($fmt, $asos[$key]->ts) ."</td><td colspan=\"13\">Site Offline</td></tr>";
+    $row .= "bgcolor=\"red\">". strftime($fmt, $asos[$key]->ts) ."</td><td colspan=\"16\">Site Offline</td></tr>";
     $old .= $row;
     continue;
   } else if ($tdiff > 7200){
@@ -241,6 +248,9 @@ while (list ($key, $val) = each ($finalA))  {
   if (isset($parts["peak_ts"])) $row .=  $parts["peak"] ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ;
   $row .= "</td><td>". $parts["phour"] ."</td>
             <td>". $parts["pday"] ."</td>
+<td>". $parts["skyc1"] ." ". $parts["skyl1"] ."</td>
+<td>". $parts["skyc2"] ." ". $parts["skyl2"] ."</td>
+<td>". $parts["skyc3"] ." ". $parts["skyl3"] ."</td>
 	    </tr>\n";
   if ($metar == "yes") {
     $row .= "<tr";
@@ -273,6 +283,9 @@ echo $old;
  <td><a href="<?php echo $uri; ?>&var=max_gust');">Plot</a></td>
  <td><a href="<?php echo $uri; ?>&var=phour');">Plot</a></td>
  <td><a href="<?php echo $uri; ?>&var=pday');">Plot</a></td>
+ <td></td>
+ <td></td>
+ <td></td>
 </tr></tfoot>
 </table>
 
