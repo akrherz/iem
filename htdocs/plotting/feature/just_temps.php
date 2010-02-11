@@ -11,8 +11,9 @@ $tmpf = Array();
 
 $dbconn = iemdb('asos');
 $sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, vsby
-  , wind_chill(tmpf, sknt) as wcht, drct from t2009 WHERE station = 'DSM' 
-  and dwpf > -99 and drct >= 0 and valid > '2009-10-01' ORDER by valid ASC";
+  , wind_chill(tmpf, sknt) as wcht, drct from t2010 WHERE station = 'ADU' 
+  and dwpf > -99 and drct >= 0 and valid > '2010-02-09' and 
+  valid < '2010-02-09 14:00' ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
