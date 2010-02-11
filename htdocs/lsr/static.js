@@ -573,7 +573,7 @@ new Ext.Viewport({
         items       : [{
               xtype       : 'panel',
               layout      : 'fit',
-              height      : 70,
+              height      : 100,
               region      : 'north',
               items       : myForm
            },{
