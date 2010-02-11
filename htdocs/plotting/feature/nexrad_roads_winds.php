@@ -9,8 +9,8 @@ include("$rootpath/include/mlib.php");
 /* Road is either closed 86 or travel not advised 51 */
 $rs = pg_query($postgis, "select valid, 
   sum(case when cond_code in (86,51) then 1 else 0 end) as total 
-  from roads_2009_log WHERE 
-  valid BETWEEN '2009-12-08' and '2009-12-11' 
+  from roads_2010_log WHERE 
+  valid BETWEEN '2010-01-25' and '2010-01-27' 
   GROUP by valid ORDER by valid ASC");
 $roads = Array();
 $rtimes = Array();
@@ -32,7 +32,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 
 /* Average winds, via schoolnet? */
 $rs = pg_query($access, "select valid, avg(sknt) as wind from current_log
-  WHERE valid BETWEEN '2009-12-08' and '2009-12-11' and 
+  WHERE valid BETWEEN '2010-01-25' and '2010-01-27' and 
   network in ('IA_ASOS','AWOS') GROUP by valid ORDER by valid ASC");
 $wind = Array();
 $wtimes = Array();
@@ -64,10 +64,10 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(640,480,"example1");
+$graph = new Graph(320,300,"example1");
 $graph->SetScale("datlin");
 $graph->SetY2Scale("lin");
-$graph->img->SetMargin(47,45,40,60);
+$graph->img->SetMargin(47,45,60,60);
 $graph->SetColor("white");
 $graph->SetMarginColor("white");
 
@@ -75,9 +75,9 @@ $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetLabelFormatString("h A", true);
 //$graph->xaxis->scale->SetDateFormat("M d h A");
 $graph->xaxis->SetPos("min");
-//$graph->xaxis->SetTitleMargin(35);
-//$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
-//$graph->xaxis->SetTitle("8 ");
+$graph->xaxis->SetTitleMargin(30);
+$graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,14);
+$graph->xaxis->SetTitle("25 JAN                         26 JAN");
 
 //$graph->yaxis->SetColor("red");
 //$graph->yaxis->title->SetColor("red");
@@ -85,7 +85,7 @@ $graph->yaxis->SetTitleMargin(24);
 $graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
 $graph->yaxis->SetTitle("Areal Coverage Estimate [%]");
 
-$graph->title->Set("Iowa's Blizzard 8-10 Dec 2009");
+$graph->title->Set("Iowa's Blizzard 25-26 Jan 2010");
 $graph->title->SetFont(FF_ARIAL,FS_BOLD,14);
 
 $graph->y2axis->title->SetFont(FF_ARIAL,FS_BOLD,12);
@@ -96,7 +96,7 @@ $graph->y2axis->SetTitle("Mean Wind Speed [mph]");
 
 
   $graph->legend->SetLayout(LEGEND_VERT);
-  $graph->legend->SetPos(0.1,0.1, 'right', 'top');
+  $graph->legend->SetPos(0.2,0.08, 'right', 'top');
 //  $graph->legend->SetLineSpacing(10);
 
   $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCEE@0.5');

@@ -28,18 +28,18 @@ $graph->xaxis->SetLabelAngle(90);
 //$graph->xaxis->scale->SetDateFormat("M d h A");
 $graph->xaxis->SetPos("min");
 $graph->xaxis->SetTickLabels($years);
-$graph->xaxis->SetTextTickInterval(10);
+$graph->xaxis->SetTextTickInterval(5);
 //$graph->xaxis->HideTicks();
-$graph->xaxis->SetTitleMargin(20);
-$graph->yaxis->SetTitleMargin(20);
+$graph->xaxis->SetTitleMargin(22);
+$graph->yaxis->SetTitleMargin(22);
 
 $graph->yaxis->title->SetFont(FF_ARIAL,FS_NORMAL,12);
 $graph->xaxis->title->SetFont(FF_ARIAL,FS_NORMAL,12);
-$graph->xaxis->SetTitle("Year");
-$graph->yaxis->SetTitle("Minimum Temperature [F]");
+$graph->xaxis->SetTitle("Year (2010 day thru Jan 25)");
+$graph->yaxis->SetTitle("Daily Points");
 //$graph->tabtitle->Set('Ames (1893-2009)');
-$graph->title->Set('Iowa Minimum November Temperature');
-$graph->subtitle->Set('coldest -26 (1898) --- warmest 17 (2009)');
+$graph->title->Set('Quantifying Ames Winters');
+$graph->subtitle->Set("point for a day below freezing\npoint for a day with 1+inch snow depth");
 
   $graph->tabtitle->SetFont(FF_ARIAL,FS_NORMAL,12);
   $graph->SetColor('wheat');
