@@ -543,11 +543,11 @@ myForm = {
    },
    items       : [
        wfoSelector,
-       {html: 'Start Datetime', border: false},
+       {html: 'Start', border: false},
        startDateSelector,
        startTimeSelector,
        loadButton,
-       {html: 'Ending Datetime', border: false},
+       {html: 'End', border: false},
        endDateSelector,
        endTimeSelector,
        {html: 'Event Time Slider', border: false},
