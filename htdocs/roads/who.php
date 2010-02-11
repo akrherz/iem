@@ -53,7 +53,7 @@ for ($k=0;$k<17;$k++)
 
   $r_s1 = $r_c1->getStyle(1);
   $r_s1->set("size", 5);
-  if ($k == 0){ $r_s1->color->setRGB(128,128,128); }
+  if ($k == 0){ $r_s1->color->setRGB(0,0,0); }
 }
 $roads->draw($img);
 
@@ -68,7 +68,7 @@ for ($k=0;$k<17;$k++)
   $r_s1->set("size", 0);
   $r_s1 = $r_c1->getStyle(1);
   $r_s1->set("size", 7);
-  if ($k == 0){ $r_s1->color->setRGB(128,128,128); }
+  if ($k == 0){ $r_s1->color->setRGB(0,0,0); }
 }
 $roads_int->draw($img);
 
