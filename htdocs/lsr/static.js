@@ -42,7 +42,7 @@ Ext.onReady(function(){
 Ext.QuickTips.init();
 
 var options, lsrGridPanel, sbwGridPanel, nexradSlider;
-var extent = new OpenLayers.Bounds(-120, 28, -60, 55);
+//var extent = new OpenLayers.Bounds(-120, 28, -60, 55);
 
 var expander = new Ext.grid.RowExpander({
         width: 20,
@@ -156,19 +156,27 @@ var nexradWMS = new OpenLayers.Layer.WMS("Nexrad",
 
             var gphy = new OpenLayers.Layer.Google(
                 "Google Physical",
-                {type: G_PHYSICAL_MAP, sphericalMercator: true}
+                {type: G_PHYSICAL_MAP, sphericalMercator: true,
+     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+}
             );
             var gmap = new OpenLayers.Layer.Google(
                 "Google Streets", // the default
-                {numZoomLevels: 20, sphericalMercator: true}
+                {numZoomLevels: 20, sphericalMercator: true,
+     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+}
             );
             var ghyb = new OpenLayers.Layer.Google(
                 "Google Hybrid",
-                {type: G_HYBRID_MAP, numZoomLevels: 20, sphericalMercator: true}
+                {type: G_HYBRID_MAP, numZoomLevels: 20, sphericalMercator: true,
+     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+}
             );
             var gsat = new OpenLayers.Layer.Google(
                 "Google Satellite",
-                {type: G_SATELLITE_MAP, numZoomLevels: 20, sphericalMercator: true}
+                {type: G_SATELLITE_MAP, numZoomLevels: 20, sphericalMercator: true,
+     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+}
             );
 
 
@@ -661,7 +669,8 @@ new Ext.Viewport({
         xtype    : "gx_mappanel",
         map      : map,
         layers   : [gphy, gmap, ghyb, gsat, nexradWMS, lsrLayer, sbwLayer],
-        extent   : extent,
+        extent   : new OpenLayers.Bounds(-20037508, -20037508,
+                                             20037508, 20037508.34),
         split    : true
     }]
 });
