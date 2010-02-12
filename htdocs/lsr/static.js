@@ -350,6 +350,21 @@ sbwGridPanel = new Ext.grid.GridPanel({
    sm: new GeoExt.grid.FeatureSelectionModel() 
 });
 
+function post_to_url(path, params, method) {
+     method = method || "post"; 
+     var form = document.createElement("form");
+     form.setAttribute("method", method);
+     form.setAttribute("action", path);
+     for(var i=0; i<params.length; i++) {
+         var hiddenField = document.createElement("input");
+         hiddenField.setAttribute("type", "hidden");
+         hiddenField.setAttribute("name", params[i].name);
+         hiddenField.setAttribute("value", params[i].value);            
+         form.appendChild(hiddenField);
+     }   
+     document.body.appendChild(form);   
+     form.submit();
+}
 
 lsrGridPanel = new Ext.grid.GridPanel({
    autoScroll : true,
@@ -365,13 +380,22 @@ lsrGridPanel = new Ext.grid.GridPanel({
               Ext.ux.Printer.print(Ext.getCmp("lsrGridPanel"));
             }
     },{
-       id: 'grid-excel-button',
-       icon: 'icons/excel.png',
-    text: 'Export to Excel...',
-		handler: function(){
-		document.location='data:application/vnd.ms-excel;base64,' + Base64.encode(lsrGridPanel.getExcelXml(true));
-		}
-
+     id      : 'grid-excel-button',
+     icon    : 'icons/excel.png',
+     text    : 'Export to Excel...',
+     handler : function(){
+        var xd = lsrGridPanel.getExcelXml(true);
+        if (Ext.isIE6 || Ext.isIE7 || Ext.isIE8 || Ext.isSafari || Ext.isSafari2 || Ext.isSafari3) {
+              var dataURL = 'exportexcel.php';
+              params =[{
+                   name: 'ex',
+                   value: xd
+              }];
+              post_to_url(dataURL, params, 'post');
+         } else {
+              document.location = 'data:application/vnd.ms-excel;base64,' + Base64.encode(xd);
+         }
+     }
    }],
    store      : new GeoExt.data.FeatureStore({
       layer     : lsrLayer,
