@@ -41,7 +41,7 @@ Ext.onReady(function(){
 
 Ext.QuickTips.init();
 
-var options, layer, lsrGridPanel, sbwGridPanel, nexradSlider;
+var options, lsrGridPanel, sbwGridPanel, nexradSlider;
 var extent = new OpenLayers.Bounds(-120, 28, -60, 55);
 
 var expander = new Ext.grid.RowExpander({
@@ -80,7 +80,6 @@ function reloadData(){
                           60 - parseInt(start_utc.format('i')) );
   nexradSlider.setValue( 0 );
   nexradSlider.enable();
-  Ext.getCmp("showNEXRAD").enable();
 
   lsrGridPanel.getStore().reload({
       add    : false,
@@ -153,16 +152,31 @@ var nexradWMS = new OpenLayers.Layer.WMS("Nexrad",
      visibility  : false
 });
 
-layer = new OpenLayers.Layer.Google(
-     "Google Maps",
-     {type: G_NORMAL_MAP, sphericalMercator: true}
-);
+
+            var gphy = new OpenLayers.Layer.Google(
+                "Google Physical",
+                {type: G_PHYSICAL_MAP, sphericalMercator: true}
+            );
+            var gmap = new OpenLayers.Layer.Google(
+                "Google Streets", // the default
+                {numZoomLevels: 20, sphericalMercator: true}
+            );
+            var ghyb = new OpenLayers.Layer.Google(
+                "Google Hybrid",
+                {type: G_HYBRID_MAP, numZoomLevels: 20, sphericalMercator: true}
+            );
+            var gsat = new OpenLayers.Layer.Google(
+                "Google Satellite",
+                {type: G_SATELLITE_MAP, numZoomLevels: 20, sphericalMercator: true}
+            );
+
+
 
 extent.transform(
      new OpenLayers.Projection("EPSG:4326"), options.projection
 );
-
 var map = new OpenLayers.Map(options);
+map.addControl(new OpenLayers.Control.LayerSwitcher());
 
 /* Create LSR styler */
 var sbwStyleMap = new OpenLayers.StyleMap({
@@ -253,7 +267,6 @@ var sbwLayer = new OpenLayers.Layer.Vector("Storm Based Warnings",{
       visibility: false
 });
 
-map.addLayers([nexradWMS, lsrLayer, sbwLayer])
 
 // create feature store, binding it to the vector layer
 ;
@@ -351,7 +364,15 @@ lsrGridPanel = new Ext.grid.GridPanel({
             handler : function(){
               Ext.ux.Printer.print(Ext.getCmp("lsrGridPanel"));
             }
-    }],
+    },{
+       id: 'grid-excel-button',
+       icon: 'icons/excel.png',
+    text: 'Export to Excel...',
+		handler: function(){
+		document.location='data:application/vnd.ms-excel;base64,' + Base64.encode(lsrGridPanel.getExcelXml(true));
+		}
+
+   }],
    store      : new GeoExt.data.FeatureStore({
       layer     : lsrLayer,
       fields    : [
@@ -364,7 +385,9 @@ lsrGridPanel = new Ext.grid.GridPanel({
          {name: 'remark'},
          {name: 'prodlinks'},
          {name: 'wfo'},
-         {name: 'magnitude', type: 'float'}
+         {name: 'magnitude', type: 'float'},
+         {name: 'lat', type: 'float'},
+         {name: 'lon', type: 'float'}
       ],
       proxy: new GeoExt.data.ProtocolProxy({
             protocol : new OpenLayers.Protocol.HTTP({
@@ -412,6 +435,16 @@ lsrGridPanel = new Ext.grid.GridPanel({
             sortable  : true,
             dataIndex : "magnitude",
             width     : 50
+        }, {
+            header    : "Lat",
+            sortable  : true,
+            dataIndex : "lat",
+            hidden    : true
+        }, {
+            header    : "Lon",
+            sortable  : true,
+            dataIndex : "lon",
+            hidden    : true
    }],
    sm: new GeoExt.grid.FeatureSelectionModel() 
 });
@@ -597,63 +630,13 @@ new Ext.Viewport({
         id       : "mappanel",
         title    : "Map",
         tbar     : [{
-          id     : 'showNEXRAD',
-          xtype  : 'button',
-          text   : 'Show NEXRAD',
-          disabled: true,
-          shown  : false,
-          scope  : this,
-          handler : function(btn){
-             if (btn.shown) {
-                nexradWMS.setVisibility( false );
-                btn.setText("Show NEXRAD");
-                btn.shown = false;
-             } else {
-                nexradWMS.setVisibility( true );
-                btn.setText("Hide NEXRAD");
-                btn.shown = true;
-             }
-          }
-        },{
-          xtype  : 'button',
-          text   : 'Hide LSRs',
-          shown  : true,
-          scope  : this,
-          handler : function(btn){
-             if (btn.shown) {
-                lsrLayer.setVisibility( false );
-                btn.setText("Show LSRs");
-                btn.shown = false;
-             } else {
-                lsrLayer.setVisibility( true );
-                btn.setText("Hide LSRs");
-                btn.shown = true;
-             }
-          }
-        },{
-          xtype  : 'button',
-          text   : 'Show Warnings',
-          shown  : false,
-          scope  : this,
-          handler : function(btn){
-             if (btn.shown) {
-                sbwLayer.setVisibility( false );
-                btn.setText("Show Warnings");
-                btn.shown = false;
-             } else {
-                sbwLayer.setVisibility( true );
-                btn.setText("Hide Warnings");
-                btn.shown = true;
-             }
-          }
-        },{
           xtype  : 'tbtext',
           text   : 'NEXRAD Time:',
           id     : 'appTime'
         }],
         xtype    : "gx_mappanel",
         map      : map,
-        layers   : [layer],
+        layers   : [gphy, gmap, ghyb, gsat, nexradWMS, lsrLayer, sbwLayer],
         extent   : extent,
         split    : true
     }]

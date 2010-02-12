@@ -85,6 +85,8 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
                 "st"        => $row["state"],
                 "remark"    => $row["remark"],
                 "city"      => $row["city"],
+                "lat"      => $lat,
+                "lon"      => $lon,
                 "prodlinks" => $products,
               ),
              "geometry"=>Array("type"=>"Point",
