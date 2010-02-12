@@ -13,7 +13,8 @@ function printLSR($lsr)
   else {$leadtime = $lsr["leadtime"] ." minutes"; }
   if ($lsr["tdq"]) $background = "#aaa";
   if ($lsr["magnitude"] == 0) $lsr["magnitude"] = "";
-  $uri = sprintf("maplsr.phtml?lat0=%s&lon0=%s&ts=%s", $lsr["lat0"], $lsr["lon0"], gmdate("Y-m-d%20H:i", $lsr["ts"]));
+  $uri = sprintf("../lsr/#%s/%s/%s", $lsr["wfo"], gmdate("YmdHi", $lsr["ts"]),
+         gmdate("YmdHi", $lsr["ts"]) );
   return sprintf("<tr style=\"background: #eee;\"><td></td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"4\">%s</td></tr>", 
     $uri, gmdate("m/d/Y H:i", $lsr["ts"]), $background, $leadtime, $lsr["county"], $lsr["state"], $uri, $lsr["city"], $lt[$lsr["type"]], $lsr["magnitude"], $lsr["remark"]);
 }
