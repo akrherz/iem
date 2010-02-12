@@ -146,6 +146,7 @@ var nexradWMS = new OpenLayers.Layer.WMS("Nexrad",
      layers      : "nexrad-n0r-wmst",
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
      transparent : true,
+     sphericalMercator: true,
      format      : 'image/png',
      time        : (new Date(nexradSlider.getValue())).toUTC().format('Y-m-d\\TH:i')
    },{
@@ -267,10 +268,12 @@ sbwStyleMap.addUniqueValueRules('default', 'phenomena', sbwLookup);
 // create vector layer
 var lsrLayer = new OpenLayers.Layer.Vector("Local Storm Reports",{
      styleMap  : lsrStyleMap,
+     sphericalMercator: true,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 });
 var sbwLayer = new OpenLayers.Layer.Vector("Storm Based Warnings",{
       styleMap: sbwStyleMap,
+     sphericalMercator: true,
       visibility: false,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 });
