@@ -14,7 +14,7 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="SuperBoxSelect.js"></script>
 <script type="text/javascript" src="Exporter-all.js"></script>
-<script type="text/javascript" src="static.js?v=2"></script>
+<script type="text/javascript" src="static.js?v=3"></script>
 ';
 $TITLE = "IEM Local Storm Report App";
 $NOCONTENT = 1;
