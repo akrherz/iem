@@ -47,7 +47,7 @@ var options, lsrGridPanel, sbwGridPanel, nexradSlider;
 var expander = new Ext.grid.RowExpander({
         width: 20,
         tpl : new Ext.Template(
-            '<p><b>Remark:</b> {remark}<br><b>Active Products:</b> {prodlinks}'
+            '<p><b>Source:</b> {source} <b>Remark:</b> {remark}<br><b>Active Products:</b> {prodlinks}'
         )
 });
 
