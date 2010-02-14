@@ -420,6 +420,7 @@ lsrGridPanel = new Ext.grid.GridPanel({
          {name: 'remark'},
          {name: 'prodlinks'},
          {name: 'wfo'},
+         {name: 'source'},
          {name: 'magnitude', type: 'float'},
          {name: 'lat', type: 'float'},
          {name: 'lon', type: 'float'}
@@ -470,6 +471,11 @@ lsrGridPanel = new Ext.grid.GridPanel({
             sortable  : true,
             dataIndex : "magnitude",
             width     : 50
+        }, {
+            header    : "Source",
+            sortable  : true,
+            dataIndex : "source",
+            hidden    : true
         }, {
             header    : "Lat",
             sortable  : true,
