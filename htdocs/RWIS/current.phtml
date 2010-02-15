@@ -21,11 +21,6 @@ function new_window(url) {
 $iem = new IEMAccess();
 $rwis = $iem->getNetwork($network);
 
-
-?>
-
-<?php
-
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
   "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
@@ -117,18 +112,24 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
        $mydata[$key]["feel"] = "";
        $mydata[$key]["dwpf"] = "";
     }
-    if ($mydata[$key]["relh"] > 100){ 
+    if ($mydata[$key]["relh"] > 100 || $mydata[$key]["relh"] < -98 ){ 
        $mydata[$key]["feel"] = "";
        $mydata[$key]["dwpf"] = "";
        $mydata[$key]["relh"] = "";
     }
-    if ($mydata[$key]["tmpf"] > 120){ 
+    if ($mydata[$key]["tmpf"] > 120 || $mydata[$key]["tmpf"] < -40){ 
        $mydata[$key]["feel"] = "";
        $mydata[$key]["dwpf"] = "";
        $mydata[$key]["relh"] = "";
        $mydata[$key]["tmpf"] = "";
+       $mydata[$key]["min_tmpf"] = "";
+       $mydata[$key]["max_tmpf"] = "";
     }
-    if ($mydata[$key]["vsby"] < 0){ $mydata[$key]["vsby"] = -1; }
+    if ($mydata[$key]["vsby"] < 0){ 
+        $mydata[$key]["vsby"] = ""; 
+    }else{
+        $mydata[$key]["vsby"] = round( $mydata[$key]["vsby"], 1); 
+    }
      $mydata[$key]["peak_ts"] = 0;
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
@@ -140,7 +141,12 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
     }
   }
 
-  }
+ if ($mydata[$key]["sknt"] < 0){ 
+   $mydata[$key]["sknt"] = ""; 
+   $mydata[$key]["drct"] = ""; 
+ }
+
+}
 
 
 $finalA = Array();
@@ -185,14 +191,14 @@ $skippedStations = Array();
     $format = "%I:%M %p";
   }
   echo ">". strftime($format, $parts["ts"]) ."</td>
-  <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
-  round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
-  round($parts["min_tmpf"],0) ."</font>)</td>
- <td>". round($parts["dwpf"],0) ."</td>
- <td>". round($parts["feel"],0) ."</td>
+  <td align='center'>". $parts["tmpf"] ."(<font color=\"#ff0000\">".
+  $parts["max_tmpf"] ."</font>/<font color=\"#0000ff\">".
+  $parts["min_tmpf"] ."</font>)</td>
+ <td>". $parts["dwpf"] ."</td>
+ <td>". $parts["feel"] ."</td>
  <td>". $parts["relh"] ."</td>
- <td>". round($parts["vsby"],1) ."</td>
- <td>". round($parts["sknt"],0) ;
+ <td>". $parts["vsby"] ."</td>
+ <td>". $parts["sknt"] ;
   if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
               echo "G". round($parts["gust"],0);
   } 
