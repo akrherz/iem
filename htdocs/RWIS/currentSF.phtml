@@ -15,7 +15,7 @@ function new_window(url) {
 } 
 //END Script-->
 </script>
-<script type="text/javascript" src="/js/tableruler.js"></script>
+<script type="text/javascript" src="../js/tableruler.js"></script>
 <script type="text/javascript">
     window.onload=function(){tableruler();}
 </script>';
@@ -126,6 +126,11 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 
     $mydata[$key] = $iemob->db;
     $mydata[$key]["ts"] = $iemob->ts;
+
+  if ($mydata[$key]['tmpf'] < -60){
+    $mydata[$key]['tmpf'] = "M";
+    $mydata[$key]['dwpf'] = "M";
+  }
 
     $t = Array($mydata[$key]['tsf0'], $mydata[$key]['tsf1'], 
       $mydata[$key]['tsf2'], $mydata[$key]['tsf3']);
