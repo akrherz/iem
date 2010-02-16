@@ -36,12 +36,12 @@ Ext.ux.SliderTip = Ext.extend(Ext.Tip, {
         return slider.getValue();
     }
 });
+var options, lsrGridPanel, sbwGridPanel, nexradSlider, map;
 
 Ext.onReady(function(){
 
 Ext.QuickTips.init();
 
-var options, lsrGridPanel, sbwGridPanel, nexradSlider;
 //var extent = new OpenLayers.Bounds(-120, 28, -60, 55);
 
 var expander = new Ext.grid.RowExpander({
@@ -79,7 +79,7 @@ function reloadData(){
   nexradSlider.maxValue = (end_utc.fromUTC()).add(Date.MINUTE, 
                           60 - parseInt(start_utc.format('i')) );
   nexradSlider.setValue( 0 );
-  nexradSlider.enable();
+  nexradSlider.fireEvent('changecomplete');
 
   lsrGridPanel.getStore().reload({
       add    : false,
@@ -128,7 +128,7 @@ nexradSlider = new Ext.Slider({
   increment   : 300000,
   isFormField : true,
   disabled    : true,
-  width       : 380,
+  width       : 360,
   colspan     : 4,
   plugins     : [tip]
 });
@@ -155,13 +155,14 @@ var nexradWMS = new OpenLayers.Layer.WMS("Nexrad",
 });
 
 
-            var gphy = new OpenLayers.Layer.Google(
-                "Google Physical",
-                {type: G_PHYSICAL_MAP, sphericalMercator: true,
+var gphy = new OpenLayers.Layer.Google(
+    "Google Physical",
+    {type      : G_PHYSICAL_MAP, 
+     sphericalMercator: true,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-}
-            );
-            var gmap = new OpenLayers.Layer.Google(
+});
+
+var gmap = new OpenLayers.Layer.Google(
                 "Google Streets", // the default
                 {numZoomLevels: 20, sphericalMercator: true,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
@@ -182,8 +183,9 @@ var nexradWMS = new OpenLayers.Layer.WMS("Nexrad",
 
 
 
-var map = new OpenLayers.Map(options);
-map.addControl(new OpenLayers.Control.LayerSwitcher());
+map = new OpenLayers.Map(options);
+ls = new OpenLayers.Control.LayerSwitcher();
+map.addControl(ls);
 
 /* Create LSR styler */
 var sbwStyleMap = new OpenLayers.StyleMap({
@@ -491,6 +493,9 @@ lsrGridPanel = new Ext.grid.GridPanel({
 });
 
 lsrGridPanel.getStore().on("load", function(mystore, records, options){
+    if (records.length > 499){
+        Ext.Msg.alert('Warning', 'Request exceeds 500 size limit, sorry.');
+    }
     if (records.length > 0){ 
         map.zoomToExtent( lsrLayer.getDataExtent() );
         Ext.getCmp("tabs").setActiveTab(1);
@@ -605,6 +610,7 @@ endTimeSelector = {
 
 
 myForm = {
+   autoScroll  : true,
    xtype       : 'form',
    labelAlign  : 'top',
    layout      : 'table',
@@ -683,5 +689,7 @@ new Ext.Viewport({
         split    : true
     }]
 });
+
+ls.maximizeControl();
 
 }); /* End of onReady */
