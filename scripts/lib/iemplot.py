@@ -393,6 +393,7 @@ def midwest():
     res.mpOutlineBoundarySets   = "NoBoundaries" # What not to draw
     res.mpOutlineSpecifiers     = ["Conterminous US : Iowa",
                                "Conterminous US : Illinois",
+                               "Conterminous US : Indiana",
                                "Conterminous US : Wisconsin",
                                "Conterminous US : Michigan",
                                "Conterminous US : Minnesota",
@@ -439,6 +440,7 @@ def midwest():
     res.mpAreaMaskingOn         = True            # Mask by Iowa
     res.mpMaskAreaSpecifiers    = ["Conterminous US : Iowa",
                                    "Conterminous US : Illinois",
+                                   "Conterminous US : Indiana",
                                    "Conterminous US : Wisconsin",
                                    "Conterminous US : Minnesota",
                                    "Conterminous US : Missouri",
