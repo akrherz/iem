@@ -622,6 +622,8 @@ myForm = {
        columns  : 5
    },
    items       : [
+       {html: 'Event Time Slider', border: false},
+       nexradSlider,
        wfoSelector,
        {html: 'Start', border: false},
        startDateSelector,
@@ -629,9 +631,7 @@ myForm = {
        loadButton,
        {html: 'End', border: false},
        endDateSelector,
-       endTimeSelector,
-       {html: 'Event Time Slider', border: false},
-       nexradSlider
+       endTimeSelector
    ]
 }
 
@@ -677,8 +677,23 @@ new Ext.Viewport({
         id       : "mappanel",
         title    : "Map",
         tbar     : [{
+          xtype      : 'checkbox',
+          boxLabel : 'Real Time Mode',
+          id         : 'rtcheckbox',
+          handler    : function(box, checked){
+            if (checked){
+              Ext.getCmp("datepicker2").setValue( new Date() );
+              Ext.getCmp("timepicker2").setValue( new Date() );
+              Ext.getCmp("datepicker2").disable();
+              Ext.getCmp("timepicker2").disable();
+            } else {
+              Ext.getCmp("datepicker2").enable();
+              Ext.getCmp("timepicker2").enable();
+            }
+          }
+        },{xtype: 'tbseparator'},{
           xtype  : 'tbtext',
-          text   : 'NEXRAD Time:',
+          text   : 'NEXRAD Valid:',
           id     : 'appTime'
         }],
         xtype    : "gx_mappanel",
@@ -691,5 +706,18 @@ new Ext.Viewport({
 });
 
 ls.maximizeControl();
+
+var task = {
+  run: function(){
+    if (Ext.getCmp('rtcheckbox').checked) {
+      Ext.getCmp("datepicker2").setValue( new Date() );
+      Ext.getCmp("timepicker2").setValue( new Date() );
+      reloadData();
+    }
+  },
+  interval: 300000
+}
+Ext.TaskMgr.start(task);
+
 
 }); /* End of onReady */

@@ -14,7 +14,7 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="SuperBoxSelect.js"></script>
 <script type="text/javascript" src="Exporter-all.js"></script>
-<script type="text/javascript" src="static.js?v=7"></script>
+<script type="text/javascript" src="static.js?v=8"></script>
 ';
 $TITLE = "IEM Local Storm Report App";
 $NOCONTENT = 1;
@@ -26,6 +26,16 @@ Ext.onReady(function(){
   var tokens = window.location.href.split('#');
   if (tokens.length == 2){
     var tokens2 = tokens[1].split("/");
+    if (tokens2.length == 2){
+      Ext.getCmp("wfoselector").setValue( tokens2[0].split(",") );
+      d = (new Date()).add(Date.SECOND, parseInt(tokens2[1]) );
+      Ext.getCmp("datepicker1").setValue( d );
+      Ext.getCmp("timepicker1").setValue( d );
+      Ext.getCmp("datepicker2").setValue( new Date() );
+      Ext.getCmp("timepicker2").setValue( new Date() );
+      Ext.getCmp('refresh').fireEvent('click', {});
+      Ext.getCmp('rtcheckbox').setValue(true);
+    }
     if (tokens2.length == 3){
       Ext.getCmp("wfoselector").setValue( tokens2[0].split(",") );
       utc_start  = Date.parseDate(tokens2[1], 'YmdHi');
