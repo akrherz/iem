@@ -16,7 +16,7 @@ sql = """SELECT station,
       sum(CASE WHEN pday < 0 THEN 0 ELSE pday END) as precip,
       x(geom) as lon, y(geom) as lat from summary 
      WHERE network in ('IA_ASOS', 'AWOS') and
-      extract(month from day) = %s 
+      extract(month from day) = %s and extract(year from day) = extract(year from now())
      and station != 'TVK' GROUP by station, lat, lon""" % (
   now.strftime("%m"),)
 
@@ -44,11 +44,7 @@ cfg = {
 }
 
 
-iemplot.simple_valplot(lons, lats, precip, cfg)
+tmpfp = iemplot.simple_valplot(lons, lats, precip, cfg)
 
-os.system("convert -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 tmp.ps tmp.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/month_prec.png bogus png' tmp.png")
-if os.environ["USER"] == "akrherz":
-  os.system("xv tmp.png")
-os.remove("tmp.png")
-os.remove("tmp.ps")
+pqstr = "plot c 000000000000 summary/month_prec.png bogus png"
+iemplot.postprocess(tmpfp, pqstr)

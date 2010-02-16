@@ -50,14 +50,11 @@ cfg = {
  'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
-iemplot.hilo_valplot(lons, lats, highs, lows, cfg)
+tmpfp = iemplot.hilo_valplot(lons, lats, highs, lows, cfg)
 
-os.system("convert -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage tmp.ps tmp.png")
 if sys.argv[1] == "0":
-  os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/asos_hilo.png bogus png' tmp.png")
+  pqstr = "plot c 000000000000 summary/asos_hilo.png bogus png"
 else:
-  os.system("/home/ldm/bin/pqinsert -p 'plot a %s0000 bogus hilow.gif png' tmp.png" % (now.strftime("%Y%m%d"),))
-if os.environ['USER'] == 'akrherz':
-  os.system("xv tmp.png")
-os.remove("tmp.png")
-os.remove("tmp.ps")
+  pqstr = "plot a %s0000 bogus hilow.gif png" % (now.strftime("%Y%m%d"), )
+
+iemplot.postprocess(tmpfp, pqstr)

@@ -49,11 +49,6 @@ cfg = {
 }
 
 
-iemplot.simple_contour(lons, lats, highs, cfg)
-
-os.system("convert -rotate -90 -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 tmp.ps tmp.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 climate/iowa_today_rec_minhi.png bogus png' tmp.png")
-if os.environ["USER"] == "akrherz":
-  os.system("xv tmp.png")
-os.remove("tmp.png")
-os.remove("tmp.ps")
+tmpfp = iemplot.simple_contour(lons, lats, highs, cfg)
+pqstr = "plot c 000000000000 climate/iowa_today_rec_minhi.png bogus png"
+iemplot.postprocess(tmpfp, pqstr, "-rotate -90")

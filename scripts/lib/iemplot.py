@@ -3,6 +3,8 @@
 import Ngl
 import numpy
 import mx.DateTime
+import tempfile
+import os
 
 # Define grid bounds 
 IA_WEST  = -96.7
@@ -24,12 +26,14 @@ def hilo_valplot(lons, lats, highs, lows, cfg):
     Special case of having a value plot with a high and low value to 
     plot, which is common for some climate applications
     """
+    tmpfp = tempfile.mktemp()
+
     cmap = numpy.array([[1., 1., 1.], [0., 0., 0.], [1., 0., 0.], \
                     [0., 0., 1.], [0., 1., 0.]], 'f')
 
     rlist = Ngl.Resources()
     rlist.wkColorMap = cmap
-    wks = Ngl.open_wks("ps", "tmp", rlist)
+    wks = Ngl.open_wks("ps", tmpfp, rlist)
 
     res = iowa()
     res.mpOutlineDrawOrder = "PreDraw"
@@ -70,16 +74,20 @@ def hilo_valplot(lons, lats, highs, lows, cfg):
     Ngl.frame(wks)
     del wks
 
+    return tmpfp
+
 def simple_valplot(lons, lats, vals, cfg):
     """
     Generate a simple plot of values on a map!
     """
+    tmpfp = tempfile.mktemp()
+
     rlist = Ngl.Resources()
     if cfg.has_key("wkColorMap"):
         rlist.wkColorMap = cfg['wkColorMap']
 
     # Create Workstation
-    wks = Ngl.open_wks( "ps","tmp",rlist)
+    wks = Ngl.open_wks( "ps",tmpfp,rlist)
 
     res = iowa()
     res.mpOutlineDrawOrder = "PreDraw"
@@ -118,16 +126,19 @@ def simple_valplot(lons, lats, vals, cfg):
     Ngl.frame(wks)
     del wks
 
+    return tmpfp
+
 def simple_grid_fill(xaxis, yaxis, grid, cfg):
     """
     Generate a simple plot, but we already have the data!
     """
+    tmpfp = tempfile.mktemp()
     rlist = Ngl.Resources()
     if cfg.has_key("wkColorMap"):
         rlist.wkColorMap = cfg['wkColorMap']
 
     # Create Workstation
-    wks = Ngl.open_wks( "ps","tmp",rlist)
+    wks = Ngl.open_wks( "ps",tmpfp,rlist)
     res = iowa2()
  
     for key in cfg.keys():
@@ -158,16 +169,19 @@ def simple_grid_fill(xaxis, yaxis, grid, cfg):
     Ngl.frame(wks)
     del wks
 
+    return tmpfp
+
 def simple_contour(lons, lats, vals, cfg):
     """
     Generate a simple contour plot, okay 
     """
+    tmpfp = tempfile.mktemp()
     rlist = Ngl.Resources()
     if cfg.has_key("wkColorMap"):
         rlist.wkColorMap = cfg['wkColorMap']
 
     # Create Workstation
-    wks = Ngl.open_wks( "ps","tmp",rlist)
+    wks = Ngl.open_wks( "ps",tmpfp,rlist)
  
     # Create Analysis
     if cfg.has_key("_midwest"):
@@ -205,6 +219,7 @@ def simple_contour(lons, lats, vals, cfg):
     manual_title(wks, cfg)
     Ngl.frame(wks)
     del wks
+    return tmpfp
 
 def manual_title(wks, cfg):
     """ Manually place a title """
@@ -453,4 +468,24 @@ def midwest():
 
 
     return res
+
+def postprocess(tmpfp, pqstr, rotate=""):
+    """
+    Helper to postprocess the plot
+    """
+    if not os.path.isfile("%s.ps" % (tmpfp,)):
+        print "File %s.ps is missing!" % (tmpfp,)
+        return
+    # Step 1. Convert to PNG
+    cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage %s.ps %s.png" % (rotate, tmpfp, tmpfp)
+    os.system( cmd )
+    # Step 2: Send to LDM
+    cmd = "/home/ldm/bin/pqinsert -p '%s' %s.png" % (pqstr, tmpfp)
+    os.system( cmd )
+    # Step 3: Show darly, if he is watching
+    if os.environ['USER'] == 'akrherz':
+        os.system("xv %s.png" % (tmpfp,))
+    # Step 4: Cleanup
+    os.remove("%s.png" % (tmpfp,) )
+    os.remove("%s.ps" % (tmpfp,) )
 

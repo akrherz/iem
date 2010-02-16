@@ -58,14 +58,13 @@ cfg = {
  'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
-iemplot.simple_contour(lons, lats, vals, cfg)
+tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
-os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage tmp.ps tmp.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall.png bogus png' tmp.png")
+os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage %s.ps %s.png" % (tmpfp, tmpfp) )
+os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall.png bogus png' %s.png" % (tmpfp,) )
 if os.environ['USER'] == 'akrherz':
-  os.system("xv tmp.png")
-  sys.exit()
-os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 320x210 -density 120 +repage tmp.ps tmp.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall_thumb.png bogus png' tmp.png")
-os.remove("tmp.png")
-os.remove("tmp.ps")
+  os.system("xv %s.png" % (tmpfp,))
+os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 320x210 -density 120 +repage %s.ps %s.png" % (tmpfp, tmpfp) )
+os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall_thumb.png bogus png' %s.png" % (tmpfp,))
+os.remove("%s.png" % (tmpfp,) )
+os.remove("%s.ps" % (tmpfp,) )
