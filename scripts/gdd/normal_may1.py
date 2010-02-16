@@ -45,12 +45,10 @@ cfg = {
  'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
-iemplot.simple_contour(lons, lats, gdd50, cfg)
+tmpfp = iemplot.simple_contour(lons, lats, gdd50, cfg)
 
-os.system("convert -rotate -90 -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 tmp.ps gdd_norm_may1.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/gdd_norm_may1.png bogus png' gdd_norm_may1.png")
-os.remove("gdd_norm_may1.png")
-os.remove("tmp.ps")
+pqstr = "plot c 000000000000 summary/gdd_norm_may1.png bogus png"
+iemplot.postprocess(tmpfp, pqstr)
 
 #---------- Plot the points
 
@@ -62,9 +60,7 @@ cfg = {
 }
 
 
-iemplot.simple_valplot(lons, lats, gdd50, cfg)
+tmpfp = iemplot.simple_valplot(lons, lats, gdd50, cfg)
 
-os.system("convert -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 tmp.ps gdd_norm_may1_pt.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/gdd_norm_may1_pt.png bogus png' gdd_norm_may1_pt.png")
-os.remove("gdd_norm_may1_pt.png")
-os.remove("tmp.ps")
+pqstr = "plot c 000000000000 summary/gdd_norm_may1_pt.png bogus png"
+iemplot.postprocess(tmpfp, pqstr)

@@ -50,11 +50,7 @@ cfg = {
  'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
-iemplot.simple_contour(lons, lats, vals, cfg)
+tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
-os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x700 +repage -density 120 tmp.ps iowa_vsby.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 iowa_vsby.png bogus png' iowa_vsby.png")
-if os.environ['USER'] == 'akrherz':
-  os.system("xv iowa_vsby.png")
-os.remove("iowa_vsby.png")
-os.remove("tmp.ps")
+pqstr = "plot c 000000000000 iowa_vsby.png bogus png"
+iemplot.postprocess(tmpfp, pqstr, "-rotate -90")

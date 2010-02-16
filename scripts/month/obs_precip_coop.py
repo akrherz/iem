@@ -17,7 +17,7 @@ sql = """SELECT station,
       sum(CASE when pday < 0 THEN 1 ELSE 0 END) as missing,
       x(geom) as lon, y(geom) as lat from summary 
      WHERE network in ('IA_COOP') and
-      extract(month from day) = %s 
+      extract(month from day) = %s and extract(year from day) = extract(year from now())
      GROUP by station, lat, lon""" % (
   now.strftime("%m"),)
 
@@ -47,11 +47,7 @@ cfg = {
 }
 
 
-iemplot.simple_valplot(lons, lats, precip, cfg)
+tmpfp = iemplot.simple_valplot(lons, lats, precip, cfg)
 
-os.system("convert -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 tmp.ps tmp.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 coopMonthPlot.png bogus png' tmp.png")
-if os.environ["USER"] == "akrherz":
-  os.system("xv tmp.png")
-os.remove("tmp.png")
-os.remove("tmp.ps")
+pqstr = "plot c 000000000000 coopMonthPlot.png bogus png"
+iemplot.postprocess(tmpfp, pqstr)
