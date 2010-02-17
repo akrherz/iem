@@ -36,7 +36,7 @@ WEB
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?"
-   "wms_srs" "EPSG:4326 EPSG:900913"
+   "wms_srs" "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
    "wms_abstract" "IEM generated CONUS composite of NWS WSR-88D level III base reflectivity."
    "wms_keywords" "NEXRAD,N0R"
    "wms_accessconstraints" "None"
@@ -54,7 +54,7 @@ LAYER
   DATA "the_geom from nexrad_n0r_tindex"
   METADATA
     "wms_title" "NEXRAD BASE REFLECT"
-    "wms_srs"   "EPSG:4326 EPSG:900913"
+    "wms_srs"   "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
     "wms_timeextent" "1995-01-01/2010-12-31/PT5M"
     "wms_timeitem" "datetime"
@@ -76,7 +76,7 @@ LAYER
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT"
-    "wms_srs"   "EPSG:4326 EPSG:900913"
+    "wms_srs"   "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
     "wms_timeextent" "1995-01-01/2010-12-31/PT5M"
     "wms_timeitem" "datetime"
