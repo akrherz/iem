@@ -34,7 +34,7 @@ include("$rootpath/include/header.php");
 $row = pg_fetch_array($result,0);
 $valid = strtotime( $row["valid"] );
 $fmt = "gif";
-if ($valid > strtotime("2010-02-19"){ $fmt = "png"; }
+if ($valid > strtotime("2010-02-19")){ $fmt = "png"; }
 
 
 $day = $row["d"];

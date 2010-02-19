@@ -53,7 +53,7 @@ include("$rootpath/include/header.php"); ?>
     $valid = strtotime( substr($row["valid"],0,16) );
 
     $fmt = "gif";
-    if ($valid > strtotime("2010-02-19"){ $fmt = "png"; }
+    if ($valid > strtotime("2010-02-19")){ $fmt = "png"; }
 
     echo "<tr class=\"even\">
       <td colspan=\"2\" style=\"text-align: center;\">". $row["calhead"] ."</td></tr>
