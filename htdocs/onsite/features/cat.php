@@ -33,8 +33,8 @@ include("$rootpath/include/header.php");
 
 $row = pg_fetch_array($result,0);
 $day = $row["d"];
-$thumb = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s_s.gif", $row["imageref"]);
-$big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.gif", $row["imageref"]);
+$thumb = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s_s.png", $row["imageref"]);
+$big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.png", $row["imageref"]);
 
 ?>
 <a href="cat.php?day=<?php echo $day; ?>&offset=-1">Previous Feature</a> &nbsp; &nbsp; <a href="cat.php?day=<?php echo $day; ?>&offset=+1">Next Feature</a>
