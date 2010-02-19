@@ -32,9 +32,14 @@ $THISPAGE = "iem-feature";
 include("$rootpath/include/header.php"); 
 
 $row = pg_fetch_array($result,0);
+$valid = strtotime( $row["valid"] );
+$fmt = "gif";
+if ($valid > strtotime("2010-02-19"){ $fmt = "png"; }
+
+
 $day = $row["d"];
-$thumb = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s_s.png", $row["imageref"]);
-$big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.png", $row["imageref"]);
+$thumb = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s_s.%s", $row["imageref"], $fmt);
+$big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.%s", $row["imageref"], $fmt);
 
 ?>
 <a href="cat.php?day=<?php echo $day; ?>&offset=-1">Previous Feature</a> &nbsp; &nbsp; <a href="cat.php?day=<?php echo $day; ?>&offset=+1">Next Feature</a>
