@@ -61,7 +61,7 @@ if interval is not None:
       interval)
     day2 = (ts + mx.DateTime.RelativeDateTime(days=interval)).strftime("%Y%m%d")
 
-if month is not None:
+if monthly is not None:
     sql = "SELECT model_twp, avg(vsm) as vsm, -1 as vsm_stddev, \
       avg(s10cm) as s10cm, avg(s20cm) as s20cm from waterbalance_by_twp \
       WHERE valid BETWEEN '%s-01' and ('%s-01'::date + '1 month'::interval) \
