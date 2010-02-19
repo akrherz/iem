@@ -52,11 +52,14 @@ include("$rootpath/include/header.php"); ?>
     $row = @pg_fetch_array($rs,$i);
     $valid = strtotime( substr($row["valid"],0,16) );
 
+    $fmt = "gif";
+    if ($valid > strtotime("2010-02-19"){ $fmt = "png"; }
+
     echo "<tr class=\"even\">
       <td colspan=\"2\" style=\"text-align: center;\">". $row["calhead"] ."</td></tr>
       <tr>
       <td valign=\"top\">
-      <a href=\"$rooturl/onsite/features/". $row["imageref"] .".png\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.png\" BORDER=0 ALT=\"Feature\"></a><br />".$row["caption"] ."</td>";
+      <a href=\"$rooturl/onsite/features/". $row["imageref"] .".$fmt\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.$fmt\" BORDER=0 ALT=\"Feature\"></a><br />".$row["caption"] ."</td>";
 
     echo "<td><b><a href='cat.php?day=".date("Y-m-d", $valid) ."'>". $row["title"] ."</a></b>\n";
     echo "<br><font size='-1' style='color:black'>". $row["webdate"] ."</font>\n";
