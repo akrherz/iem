@@ -16,7 +16,7 @@
  $rs = pg_exec($conn, "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref from feature ORDER by valid DESC LIMIT 20");
  pg_close($conn);
  for ($i=0; $row = @pg_fetch_array($rs, $i); $i++) {
-  $cbody = "<img src=\"http://mesonet.agron.iastate.edu/onsite/features/". $row["imageref"] ."_s.gif\" alt=\"Feature\" style=\"float: left; padding: 5px;\"/>". $row["story"];
+  $cbody = "<img src=\"http://mesonet.agron.iastate.edu/onsite/features/". $row["imageref"] ."_s.png\" alt=\"Feature\" style=\"float: left; padding: 5px;\"/>". $row["story"];
   $cbody = ereg_replace("&","&amp;", $cbody);
   $cbody = ereg_replace(">","&gt;", $cbody);
   $cbody = ereg_replace("<","&lt;", $cbody);

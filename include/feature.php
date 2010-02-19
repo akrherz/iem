@@ -54,7 +54,7 @@ function genFeature()
   }
 
 
-  $fref = "/mesonet/share/features/". $row["imageref"] ."_s.gif";
+  $fref = "/mesonet/share/features/". $row["imageref"] ."_s.png";
   list($width, $height, $type, $attr) = @getimagesize($fref);
   $width += 6;
 
@@ -63,7 +63,7 @@ function genFeature()
   $s .= "<span style=\"font-size: smaller; float: right;\"><a href=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\">Permalink</a> | <a href=\"$rooturl/onsite/features/past.php\">Past Features</a> | <a href=\"$rooturl/onsite/features/tags/\">Tags</a></span>";
 
  /* Feature Image! */
-  $s .= "<div style=\"background: #eee; float: right; border: 1px solid #ee0; padding: 3px; margin-left: 10px; width: ${width}px;\"><a href=\"$rooturl/onsite/features/". $row["imageref"] .".gif\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.gif\" alt=\"Feature\" /></a><br />". $row["caption"] ."</div>";
+  $s .= "<div style=\"background: #eee; float: right; border: 1px solid #ee0; padding: 3px; margin-left: 10px; width: ${width}px;\"><a href=\"$rooturl/onsite/features/". $row["imageref"] .".png\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.png\" alt=\"Feature\" /></a><br />". $row["caption"] ."</div>";
 
   $s .= "<br /><div class='story' style=\"text-align: justify;\">". $row["story"] ."</div>";
 

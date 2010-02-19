@@ -56,7 +56,7 @@ include("$rootpath/include/header.php"); ?>
       <td colspan=\"2\" style=\"text-align: center;\">". $row["calhead"] ."</td></tr>
       <tr>
       <td valign=\"top\">
-      <a href=\"$rooturl/onsite/features/". $row["imageref"] .".gif\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.gif\" BORDER=0 ALT=\"Feature\"></a><br />".$row["caption"] ."</td>";
+      <a href=\"$rooturl/onsite/features/". $row["imageref"] .".png\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.png\" BORDER=0 ALT=\"Feature\"></a><br />".$row["caption"] ."</td>";
 
     echo "<td><b><a href='cat.php?day=".date("Y-m-d", $valid) ."'>". $row["title"] ."</a></b>\n";
     echo "<br><font size='-1' style='color:black'>". $row["webdate"] ."</font>\n";
