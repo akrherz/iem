@@ -58,6 +58,17 @@ var sbw_expander = new Ext.grid.RowExpander({
         )
 });
 
+/* 
+ * Figure out the last valid time for the slider
+ */
+function setLastNEXRAD(){
+  now = new Date();
+  gmt = now.toUTC();
+  gmtl5 = gmt.add(Date.MINUTE, 0 - (parseInt(gmt.format('i')) % 5));
+  Ext.getCmp('nexradslider').maxValue = gmtl5.fromUTC() ;
+  Ext.getCmp('nexradslider').setValue( gmtl5.fromUTC() );
+  //console.log("Setting last NEXRAD slider to:"+ gmtl5 );
+}
 
 /* URL format #DMX,DVN,FSD/201001010101/201001010201 */
 function reloadData(){
@@ -80,7 +91,11 @@ function reloadData(){
   /* Set the nexradSlider to the top of the next hour */
   nexradSlider.maxValue = (end_utc.fromUTC()).add(Date.MINUTE, 
                           60 - parseInt(start_utc.format('i')) );
-  nexradSlider.setValue( 0 );
+  if (Ext.getCmp('rtcheckbox').checked) {
+    setLastNEXRAD();
+  } else {
+    nexradSlider.setValue( 0 );
+  }
   nexradSlider.fireEvent('changecomplete');
 
   lsrGridPanel.getStore().reload({
@@ -129,7 +144,6 @@ nexradSlider = new Ext.Slider({
   maxValue    : (new Date()).getTime() + 1200,
   increment   : 300000,
   isFormField : true,
-  disabled    : true,
   width       : 360,
   colspan     : 4,
   plugins     : [tip]
@@ -660,7 +674,7 @@ new Ext.Viewport({
         title       : 'Local Storm Report Application',
         collapsible : true,
         collapsed   : true,
-        contentEl   :'iem-header'
+        contentEl   : cfg.header
     },{
         xtype       : 'panel',
         region      : 'west',
@@ -697,11 +711,12 @@ new Ext.Viewport({
         id       : "mappanel",
         title    : "Map",
         tbar     : [{
-          xtype      : 'checkbox',
+          xtype    : 'checkbox',
           boxLabel : 'Real Time Mode',
-          id         : 'rtcheckbox',
-          handler    : function(box, checked){
+          id       : 'rtcheckbox',
+          handler  : function(box, checked){
             if (checked){
+              setLastNEXRAD();
               Ext.getCmp("datepicker2").setValue( new Date() );
               Ext.getCmp("timepicker2").setValue( new Date() );
               Ext.getCmp("datepicker2").disable();
