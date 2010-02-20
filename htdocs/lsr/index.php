@@ -14,7 +14,7 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="SuperBoxSelect.js"></script>
 <script type="text/javascript" src="Exporter-all.js"></script>
-<script type="text/javascript" src="static.js?v=8"></script>
+<script type="text/javascript" src="static.js?v=9"></script>
 ';
 $TITLE = "IEM Local Storm Report App";
 $NOCONTENT = 1;
@@ -49,29 +49,31 @@ Ext.onReady(function(){
   }
 });
 </script>
-<div id="help">
+<div id="help" style="padding:5px;">
 <h3>Local Storm Report App Help</h3>
-
+<br />
 <p>This application allows the quick viewing of National Weather Service (NWS)
 issued Local Storm Reports (LSR).  These LSRs are issued by local NWS forecast
-offices for their area of responsibility.
-
+offices for their area of responsibility.</p>
+<br />
 <p>To use this application, select the NWS forecast office(s) of choice and
 then a time duration you are interested in.  Times presented on this 
-application are in the timezone of your local computer.
-
+application are in the timezone of your local computer.</p>
+<br />
 <p>After selecting a time period and office(s), this application will 
 automatically generate a listing of any available LSR reports and also
 generate a listing of Storm Based Warnings (SBW)s valid for some portion
 of the period of interest.  You can switch between these data listings
-by click on the tabs found just above this text.
-
+by click on the tabs found just above this text.</p>
+<br />
 <p>The map interface on the right hand side visually presents these LSRs
 and SBWSs.  Clicking on the icon or polygon, highlights the corresponding
-data in the two tables.
-
+data in the two tables.</p>
+<br />
 <p>You also have the ability to overlay NEXRAD base reflectivity information
-for any 5 minute interval during the time period of your choice.
+for any 5 minute interval during the time period of your choice.</p>
+<br />
+
 
 </div>
 </body></html>

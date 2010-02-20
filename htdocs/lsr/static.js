@@ -61,6 +61,8 @@ var sbw_expander = new Ext.grid.RowExpander({
 
 /* URL format #DMX,DVN,FSD/201001010101/201001010201 */
 function reloadData(){
+  /* Switch display to LSR tab */
+  Ext.getCmp("tabs").setActiveTab(1);
   s = Ext.getCmp("wfoselector").getValue();
 
   sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
@@ -159,24 +161,28 @@ var gphy = new OpenLayers.Layer.Google(
     "Google Physical",
     {type      : G_PHYSICAL_MAP, 
      sphericalMercator: true,
+     maxZoomLevel: 15,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 });
 
 var gmap = new OpenLayers.Layer.Google(
                 "Google Streets", // the default
                 {numZoomLevels: 20, sphericalMercator: true,
+     maxZoomLevel: 15,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 }
             );
             var ghyb = new OpenLayers.Layer.Google(
                 "Google Hybrid",
                 {type: G_HYBRID_MAP, numZoomLevels: 20, sphericalMercator: true,
+     maxZoomLevel: 15,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 }
             );
             var gsat = new OpenLayers.Layer.Google(
                 "Google Satellite",
                 {type: G_SATELLITE_MAP, numZoomLevels: 20, sphericalMercator: true,
+     maxZoomLevel: 15,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 }
             );
@@ -498,7 +504,8 @@ lsrGridPanel.getStore().on("load", function(mystore, records, options){
     }
     if (records.length > 0){ 
         map.zoomToExtent( lsrLayer.getDataExtent() );
-        Ext.getCmp("tabs").setActiveTab(1);
+    } else {
+        Ext.Msg.alert('Alert', 'No LSRs found, sorry.');
     }
 });
 
@@ -533,11 +540,16 @@ startDateSelector = {
     id        : 'datepicker1',
     maxValue  : new Date(),
     minValue  : '07/23/2003',
+    format    : 'j M Y',
     value     : new Date(),
     disabled  : false,
     width     : 105,
     listeners : {
        select : function(field, value){
+          Ext.getCmp("datepicker2").minValue = value;
+          if (value > Ext.getCmp("datepicker2").getValue()){
+            Ext.getCmp("datepicker2").setValue( value );
+          }
           reloadData();
        }
     }
@@ -580,8 +592,13 @@ endDateSelector = {
     value     : new Date(),
     disabled  : false,
     width     : 105,
+    format    : 'j M Y',
     listeners : {
        select : function(field, value){
+         Ext.getCmp("datepicker1").maxValue = value;
+         if (value < Ext.getCmp("datepicker1").getValue()){
+           Ext.getCmp("datepicker1").setValue( value );
+         }
          reloadData();
        }
     }
@@ -664,9 +681,12 @@ new Ext.Viewport({
                 xtype       : 'tabpanel',
                 id          : 'tabs',
                 activeTab   : 0,
-                items       : [
-                   {title: 'Help', contentEl: 'help', unstyled: true,
-                    padding: 5}, 
+                items       : [{
+                    title     : 'Help', 
+                    contentEl : 'help', 
+                    unstyled  : true,
+                    autoScroll: true,
+                    padding   : 5}, 
                    lsrGridPanel,
                    sbwGridPanel
                 ]
