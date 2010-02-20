@@ -14,6 +14,10 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="SuperBoxSelect.js"></script>
 <script type="text/javascript" src="Exporter-all.js"></script>
+<script>
+Ext.namespace("cfg");
+cfg.header = "iem-header";
+</script>
 <script type="text/javascript" src="static.js?v=9"></script>
 ';
 $TITLE = "IEM Local Storm Report App";
@@ -72,6 +76,19 @@ data in the two tables.</p>
 <br />
 <p>You also have the ability to overlay NEXRAD base reflectivity information
 for any 5 minute interval during the time period of your choice.</p>
+<br />
+<h3>Linking to this Application</h3>
+<p>This application uses stable URLs allowing you to bookmark and easily
+generate links to it.  Currently, there are two calling modes:</p>
+<br />
+<p><i>/lsr/#WFO,WFO2/YYYYMMDDHHII/YYYYMMDDHHII</i> : where you can list
+  none or any number of Weather Forecast Office IDs.  Then there are two
+  timestamps in UTC time zone (beginning and end time).</p>
+<br />
+<p><i>/lsr/#WFO,WFO2/-SECONDS</i> : again, you can list none or multiple
+  WFO IDs.  You can then specify a number of seconds from now into the
+  past.  For example, <i>/lsr/#LWX/-86400</i> would produce LSRs from
+  LWX for the past day (86400 seconds).</p>
 <br />
 
 
