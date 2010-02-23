@@ -317,7 +317,43 @@ sbwGridPanel = new Ext.grid.GridPanel({
             handler : function(){
               Ext.ux.Printer.print(Ext.getCmp("sbwGridPanel"));
             }
-    }],
+    },{
+            xtype     : 'button',
+            text      : 'Save Shapefile',
+            icon      : 'icons/shapefile.gif',
+            cls       : 'x-btn-text-icon',
+            listeners : {
+               click  : function() {
+                  uri = "http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?";
+                  s = Ext.getCmp("wfoselector").getValue();
+                  sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
+                     +" "+ Ext.getCmp("timepicker1").getValue();
+                  sdt = new Date(sts);
+                  start_utc = sdt.toUTC();
+                  ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
+                     +" "+ Ext.getCmp("timepicker2").getValue();
+                  edt = new Date(ets);
+                  end_utc = edt.toUTC();
+                  if (s != ""){
+                    tokens = s.split(",");
+                    for (i=0;i<tokens.length;i++){
+                      uri += "&wfo[]="+ tokens[i];
+                    }
+                  }
+                  uri += "&year1="+ start_utc.format('Y');
+                  uri += "&month1="+ start_utc.format('m');
+                  uri += "&day1="+ start_utc.format('d');
+                  uri += "&hour1="+ start_utc.format('H');
+                  uri += "&minute1="+ start_utc.format('i');
+                  uri += "&year2="+ end_utc.format('Y');
+                  uri += "&month2="+ end_utc.format('m');
+                  uri += "&day2="+ end_utc.format('d');
+                  uri += "&hour2="+ end_utc.format('H');
+                  uri += "&minute2="+ end_utc.format('i');
+                  window.location.href = uri;
+               }  // End of handler
+            }
+   }],
      store      : new GeoExt.data.FeatureStore({
       layer     : sbwLayer,
       fields    : [
@@ -429,6 +465,42 @@ lsrGridPanel = new Ext.grid.GridPanel({
               document.location = 'data:application/vnd.ms-excel;base64,' + Base64.encode(xd);
          }
      }
+   },{
+            xtype     : 'button',
+            text      : 'Save Shapefile',
+            icon      : 'icons/shapefile.gif',
+            cls       : 'x-btn-text-icon',
+            listeners : {
+               click  : function() {
+                  uri = "http://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?";
+                  s = Ext.getCmp("wfoselector").getValue();
+                  sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
+                     +" "+ Ext.getCmp("timepicker1").getValue();
+                  sdt = new Date(sts);
+                  start_utc = sdt.toUTC();
+                  ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
+                     +" "+ Ext.getCmp("timepicker2").getValue();
+                  edt = new Date(ets);
+                  end_utc = edt.toUTC();
+                  if (s != ""){
+                    tokens = s.split(",");
+                    for (i=0;i<tokens.length;i++){
+                      uri += "&wfo[]="+ tokens[i];
+                    }
+                  }
+                  uri += "&year1="+ start_utc.format('Y');
+                  uri += "&month1="+ start_utc.format('m');
+                  uri += "&day1="+ start_utc.format('d');
+                  uri += "&hour1="+ start_utc.format('H');
+                  uri += "&minute1="+ start_utc.format('i');
+                  uri += "&year2="+ end_utc.format('Y');
+                  uri += "&month2="+ end_utc.format('m');
+                  uri += "&day2="+ end_utc.format('d');
+                  uri += "&hour2="+ end_utc.format('H');
+                  uri += "&minute2="+ end_utc.format('i');
+                  window.location.href = uri;
+               }  // End of handler
+            }
    }],
    store      : new GeoExt.data.FeatureStore({
       layer     : lsrLayer,
