@@ -33,6 +33,7 @@ minute2 = int(form["minute2"][0])
 wfoLimiter = ""
 if form.has_key('wfo[]'):
   aWFO = form['wfo[]']
+  aWFO.append('XXX') # Hack to make next section work
   wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
 
 sTS = mx.DateTime.DateTime(year1, month1, day1, hour1, minute1)
