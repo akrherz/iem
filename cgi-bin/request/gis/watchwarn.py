@@ -19,7 +19,7 @@ else:
   year2 = int(form["year2"][0])
 month1 = int(form["month1"][0])
 if (not form.has_key("month2")):  sys.exit()
-if (year < 2002 or year > mx.DateTime.now().year): sys.exit()
+if (year1 < 2002 or year1 > mx.DateTime.now().year): sys.exit()
 month2 = int(form["month2"][0])
 day1 = int(form["day1"][0])
 day2 = int(form["day2"][0])
