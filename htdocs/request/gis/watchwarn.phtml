@@ -27,8 +27,8 @@ will be included in the output GIS file...)</i>
 
   <tr>
     <th>Start:</th>
-    <td rowspan="2">
-     <?php echo yearSelect(2002, date("Y"), "year"); ?>
+    <td>
+     <?php echo yearSelect2(2002, date("Y"), "year1"); ?>
     </td>
     <td>
      <?php echo monthSelect2(0,"month1"); ?>
@@ -46,6 +46,9 @@ will be included in the output GIS file...)</i>
 
   <tr>
     <th>End:</th>
+    <td>
+     <?php echo yearSelect2(2002, date("Y"), "year2"); ?>
+    </td>
     <td>
      <?php echo monthSelect2(0,"month2"); ?>
     </td>

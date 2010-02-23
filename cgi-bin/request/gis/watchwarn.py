@@ -11,7 +11,12 @@ mydb.query("SET TIME ZONE 'GMT'")
 
 # Get CGI vars
 form = cgi.FormContent()
-year = int(form["year"][0])
+if form.has_key('year'):
+  year1 = int(form["year"][0])
+  year2 = int(form["year"][0])
+else:
+  year1 = int(form["year1"][0])
+  year2 = int(form["year2"][0])
 month1 = int(form["month1"][0])
 if (not form.has_key("month2")):  sys.exit()
 if (year < 2002 or year > mx.DateTime.now().year): sys.exit()
@@ -23,8 +28,15 @@ hour2 = int(form["hour2"][0])
 minute1 = int(form["minute1"][0])
 minute2 = int(form["minute2"][0])
 
-sTS = mx.DateTime.DateTime(year, month1, day1, hour1, minute1)
-eTS = mx.DateTime.DateTime(year, month2, day2, hour2, minute2)
+sTS = mx.DateTime.DateTime(year1, month1, day1, hour1, minute1)
+eTS = mx.DateTime.DateTime(year2, month2, day2, hour2, minute2)
+
+wfoLimiter = ""
+if form.has_key('wfo[]'):
+  aWFO = form['wfo[]']
+  aWFO.append('XXX') # Hack to make next section work
+  wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
+
 
 os.chdir("/tmp/")
 fp = "wwa_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M") )
@@ -51,9 +63,9 @@ if form.has_key("limit1"):
 
 sql = """SELECT *, astext(geom) as tgeom,
     area( transform(geom,2163) ) / 1000000.0 as area2d
-    from warnings_%s WHERE isValid(geom) and 
+    from warnings WHERE isValid(geom) and 
 	issue >= '%s' and issue < '%s' and eventid < 10000 
-	%s ORDER by issue ASC""" % (sTS.year, sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter )
+	%s %s ORDER by issue ASC""" % ( sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
 rs = mydb.query(sql).dictresult()
 
 cnt = 0
