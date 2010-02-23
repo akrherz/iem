@@ -12,7 +12,7 @@ def write(mydb, rs, stationID):
   import constants, mx.DateTime
   out = open("reports/%s_%s.txt" % (stationID, _REPORTID), 'w')
   constants.writeheader(out, stationID)
-  out.write("""# First occurance of record consecuative number of days 
+  out.write("""# First occurance of record consecutive number of days 
 # above or below a temperature threshold
 """)
   out.write("#   %-27s %-27s  %-27s %-27s\n" % (" Low Cooler Than", 
