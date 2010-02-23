@@ -27,7 +27,7 @@ if ($story != null && $title != null){
 
 $rooturl = "http://mesonet.agron.iastate.edu";
 $permalink = sprintf('%s/onsite/features/cat.php?day=%s', $rooturl, date("Y-m-d") );
-$thumbnail = sprintf('%s/onsite/features/%s_s.gif', $rooturl, 
+$thumbnail = sprintf('%s/onsite/features/%s_s.png', $rooturl, 
              date("Y/m/ymd") );
 
 $attachment = Array(
