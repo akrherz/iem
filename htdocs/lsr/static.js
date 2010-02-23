@@ -802,6 +802,12 @@ new Ext.Viewport({
           xtype  : 'tbtext',
           text   : 'NEXRAD Valid:',
           id     : 'appTime'
+        },{
+         xtype: "gx_opacityslider",
+         layer: nexradWMS,
+         aggressive: true,
+         vertical: false,
+         width: 100
         }],
         xtype    : "gx_mappanel",
         map      : map,
