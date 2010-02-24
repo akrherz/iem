@@ -202,6 +202,17 @@ var gmap = new OpenLayers.Layer.Google(
             );
 
 
+var tc_url = ["http://radarcache.srh.noaa.gov/tilecache/tilecache.py"]; 
+var counties = new OpenLayers.Layer.WMS("Counties", tc_url,
+    {layers      : 'county',
+     format      : 'image/png',
+     transparent : 'true'},{
+     opacity     : 1.0,
+     singleTile  : false,
+     isBaseLayer : false,
+     visibility  : false,
+     buffer      : 0 });
+
 
 map = new OpenLayers.Map(options);
 ls = new OpenLayers.Control.LayerSwitcher();
@@ -811,7 +822,7 @@ new Ext.Viewport({
         }],
         xtype    : "gx_mappanel",
         map      : map,
-        layers   : [gphy, gmap, ghyb, gsat, nexradWMS, lsrLayer, sbwLayer],
+        layers   : [gphy, gmap, ghyb, gsat, nexradWMS, lsrLayer, sbwLayer, counties],
         extent   : new OpenLayers.Bounds(-20037508, -20037508,
                                              20037508, 20037508.34),
         split    : true
