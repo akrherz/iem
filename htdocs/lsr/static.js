@@ -627,7 +627,7 @@ wfoSelector = {
     valueField      : 'abbr',
     forceSelection  : true,
     listeners       : {
-      collapse : function(){ reloadData(); }
+      collapse : function(){  }
     }
 };
 
@@ -647,7 +647,6 @@ startDateSelector = {
           if (value > Ext.getCmp("datepicker2").getValue()){
             Ext.getCmp("datepicker2").setValue( value );
           }
-          reloadData();
        }
     }
 }
@@ -663,7 +662,6 @@ startTimeSelector = {
     disabled  : false,
     listeners : {
        select : function(field, value){
-          reloadData();
        }
     }
 }
@@ -696,7 +694,6 @@ endDateSelector = {
          if (value < Ext.getCmp("datepicker1").getValue()){
            Ext.getCmp("datepicker1").setValue( value );
          }
-         reloadData();
        }
     }
 }
@@ -712,7 +709,6 @@ endTimeSelector = {
     disabled  : false,
     listeners : {
        select : function(field, value){
-          reloadData();
        }
     }
 }
