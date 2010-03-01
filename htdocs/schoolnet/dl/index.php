@@ -66,93 +66,32 @@ recent data is from yesterday.</p>
      </tr>
      <tr>
       <th class="subtitle">Start:</th>
-      <th rowspan=2>
-<?php echo yearSelect(2002, "year"); ?>
+      <th>
+<?php echo yearSelect2(2002, date("Y"), "year1"); ?>
       </th>
       <td>
 <?php echo monthSelect(date("m"), "month1"); ?>
       </td>
       <td>
-<select name="s_day">
-<?php
-  for ($i=1; $i<32; $i++){
-    echo "<option value=\"".$i."\">".$i ."\n";
-  }
-?>
-</select>
+<?php echo daySelect2(date("d"), "day1"); ?>
 </td>
       <td>
-<select name="s_hour">
-  <option value="0">12 AM
-  <option value="1">1 AM
-  <option value="2">2 AM
-  <option value="3">3 AM
-  <option value="4">4 AM
-  <option value="5">5 AM
-  <option value="6">6 AM
-  <option value="7">7 AM
-  <option value="8">8 AM
-  <option value="9">9 AM
-  <option value="10">10 AM
-  <option value="11">11 AM
-  <option value="12">Noon
-  <option value="13">1 PM
-  <option value="14">2 PM
-  <option value="15">3 PM
-  <option value="16">4 PM
-  <option value="17">5 PM
-  <option value="18">6 Pm
-  <option value="19">7 PM
-  <option value="20">8 PM
-  <option value="21">9 PM
-  <option value="22">10 PM
-  <option value="23">11 PM
-  <option value="24">Midnight
-</select>
+<?php echo hourSelect(0, "hour1"); ?>
 </td>
      </tr>
      <tr>
       <th class="subtitle">End:</th>
-<td>
-<?php echo monthSelect(date("m"), "month2"); ?>
-</td>
+      <th>
+<?php echo yearSelect2(2002, date("Y"), "year2"); ?>
+      </th>
       <td>
-<select name="e_day">
-<?php
-  for ($i=1; $i<32; $i++){
-    echo "<option value=\"".$i."\">".$i ."\n";
-  }
-?>
-</select>
+<?php echo monthSelect(date("m"), "month2"); ?>
       </td>
       <td>
-<select name="e_hour">
-  <option value="0">12 AM
-  <option value="1">1 AM
-  <option value="2">2 AM
-  <option value="3">3 AM
-  <option value="4">4 AM
-  <option value="5">5 AM
-  <option value="6">6 AM
-  <option value="7">7 AM
-  <option value="8">8 AM
-  <option value="9">9 AM
-  <option value="10">10 AM
-  <option value="11">11 AM
-  <option value="12">Noon
-  <option value="13">1 PM
-  <option value="14">2 PM
-  <option value="15">3 PM
-  <option value="16">4 PM
-  <option value="17">5 PM
-  <option value="18">6 PM
-  <option value="19">7 PM
-  <option value="20">8 PM
-  <option value="21">9 PM
-  <option value="22">10 PM
-  <option value="23">11 PM
-  <option value="24">Midnight
-</select>
+<?php echo daySelect2(date("d"), "day2"); ?>
+</td>
+      <td>
+<?php echo hourSelect(0, "hour2"); ?>
 </td>
      </tr>
     </table>
