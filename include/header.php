@@ -94,7 +94,7 @@ $_pages = Array(
     "coop" => Array("title" => "NWS COOP", "url" => "/COOP/"),
     "dcp" => Array("title" => "DCP", "url" => "/DCP/"),
     "agclimate" => Array("title" => "ISU AG", "url" => "/agclimate/"),
-    "flux" => Array("title" => "NSTL Flux", "url" => "/nstl_flux/"),
+    "flux" => Array("title" => "NLAE Flux", "url" => "/nstl_flux/"),
     "rwis" => Array("title" => "RWIS", "url" => "/RWIS/"),
     "scan" => Array("title" => "SCAN", "url" => "/scan/"),
     "schoolnet" => Array("title" => "SchoolNet", "url" => "/schoolnet/"),
