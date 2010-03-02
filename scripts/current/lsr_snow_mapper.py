@@ -27,6 +27,9 @@ for i in range(len(rs)):
   valmask.append( rs[i]['state'] in ['IA',] )
   #valmask.append( False )
 
+if len(rs) < 2:
+  sys.exit(0)
+
 # Now, we need to add in zeros, lets say we are looking at a .25 degree box
 buffer = 1.0
 for lat in numpy.arange(iemplot.IA_SOUTH, iemplot.IA_NORTH, buffer):
