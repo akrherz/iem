@@ -24,6 +24,8 @@ archive updates in real-time as products are received from the NWS.
  <li><a href="table.phtml">Interactive MOS Tables</a>
   <br />Generates a simple table of how a variable changes over time
    and by model run.</li>
+ <li><a href="http://www.meteor.iastate.edu/~ckarsten/bufkit/image_loader.phtml">Meteogram Generator</a>
+  <br />Fancy application to generate graphs of current MOS data.</li>
  <li><a href="csv.php">Comma Delimited output</a>
   <br />Simple web service provides csv data for a site and for a period
    of ten days forecast.  An example URL call would be:<br />
