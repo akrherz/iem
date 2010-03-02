@@ -73,7 +73,7 @@ if ($mode == "monthly") {
  $htmlout .= sprintf('<p><img src="%s/plotting/month/rainfall_plot.php?network=%s&station=%s&month=%s&year=%s"><br /><strong>Description:</strong> Here is a chart of the monthly precipitation data.  The red line would be an average month while the blue line and bars are observations.', $rooturl, $network, $station, $month, $year);
 
 } else {
- $uri = "hist.phtml?year=$year&month=$month&day=$day&mode=daily&sortvar=";
+ $uri = "hist.phtml?year=$year&month=$month&day=$day&mode=daily&station=$station&network=$network&sortvar=";
  $htmlout = "<table border=\"1\" style=\"float: left;\">\n<tr><th><a href=\"". $uri ."station\">Location:</a></th><th><a href=\"". $uri ."max_tmpf\">High:</a></th><th><a href=\"". $uri ."min_tmpf\">Low:</a></th><th><a href=\"". $uri ."pday\">Rainfall</a></th><th><a href=\"". $uri ."max_gust\">Peak Gust:</a></th><th><a href=\"". $uri ."max_gust_ts\">Time of Gust</a></th></tr>\n";
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){
   $qc = $row["max_tmpf_qc"];
