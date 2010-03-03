@@ -19,7 +19,7 @@ select station,
 from summary 
 WHERE day > ('TODAY'::date - '7 days'::interval) 
 and network in ('AWOS', 'IA_ASOS')
-and pday > 0 and pday < 30
+and pday >= 0 and pday < 30
 GROUP by station, lon, lat
 """
 
