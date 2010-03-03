@@ -8,7 +8,7 @@
 <input type="text" size="15" name="q" /><input type="submit" value="Search" /></form>
 </div>
 
-Copyright &copy; 2001-2009, Iowa State University of Science and Technology.
+Copyright &copy; 2001-<?php echo date("Y"); ?>, Iowa State University of Science and Technology.
 <br />All rights reserved.
  <a href="<?php echo $rooturl; ?>/help/abbreviations.php">abbreviations</a>
  &middot; <a href="<?php echo $rooturl; ?>/info/contacts.php">contact us</a>
