@@ -159,7 +159,7 @@ $graph->xaxis->SetTickLabels($xl);
 $graph->xaxis->SetLabelAngle(90);
 //$graph->xaxis->scale->SetAutoMax(85);
 //$graph->title->Set("Iowa Daily High and Low Temperatures for $plotts");
-$graph->title->Set("Iowa Low Temperatures for $plotts");
+$graph->title->Set("Iowa High Temperatures for $plotts");
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 
