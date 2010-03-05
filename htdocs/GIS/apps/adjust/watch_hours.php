@@ -9,7 +9,7 @@ function mkl($map, $imgObj) {
                                                                                 
  // point feature with text for location
  $point = ms_newpointobj();
- $point->setXY(50, 30);
+ $point->setXY(90, 30);
                                                                                 
  $point->draw($map, $layer, $imgObj, "logo", "");
 }
@@ -19,6 +19,7 @@ function mktitle($map, $imgObj, $titlet) {
                                                                                 
   // point feature with text for location
   $point = ms_newpointobj();
+  //$point->setXY(100, 22);
   $point->setXY(6, 22);
                                                                                 
   $point->draw($map, $layer, $imgObj, "credits",
@@ -29,9 +30,10 @@ function mktitle($map, $imgObj, $titlet) {
 dl($mapscript);
 
 $map = ms_newMapObj("stations.map");
-$map->set("height", 300);
+$map->set("height", 280);
 $map->set("width",  320);
-$map->setExtent(-100.0, 37.5, -88.0, 45.5);
+//$map->setExtent(-100.0, 37.5, -88.0, 45.5);
+$map->setExtent(-115.0, 32.5, -85.0, 45.5);
 
 $namer = $map->getlayerbyname("namerica");
 $namer->set("status", MS_ON);
@@ -46,7 +48,10 @@ $iembox = $map->getlayerbyname("iembox");
 $iembox->set("status", MS_ON);
 
 $counties = $map->getlayerbyname("counties");
-$counties->set("status", MS_ON);
+$counties->set("status", MS_OFF);
+
+//$cwa = $map->getlayerbyname("cwa");
+//$cwa->set("status", MS_ON);
 
 
 $bars = $map->getlayerbyname("bars");
@@ -62,13 +67,14 @@ $lakes->draw($img);
 $counties->draw($img);
 //$watches->draw($img);
 $states->draw($img);
+//$cwa->draw($img);
 $map->embedlegend($img);
 
 
 $map->drawLabelCache($img);
 //$bars->draw($img);
 
-mktitle($map, $img, "         SVR/TOR Watch Hours 5/24-6/8 2008");
+mktitle($map, $img, "          Blizzard Warn. Hrs 10/1/09 - 2/1/10");
 //mkl($map, $img);
 
 $url = $img->saveWebImage();
