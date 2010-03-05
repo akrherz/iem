@@ -5,23 +5,19 @@ include ("../../../include/jpgraph/jpgraph_bar.php");
 // 16 Oct 2007 select extract(year from day) as year, count(*) from (select day, count(*) from alldata WHERE precip >= 4 and year > 1950 and stationid IN (select stationid from alldata WHERE day = '1971-01-01') GROUP by day) as foo WHERE count > 1 GROUP by year ORDER by count ASC;
 
 
-$d=array(-7, -2, -1, 0, 20, 20, 37);
-$datax=array("1912", 
-             "1942",
-             "1979",
-             "2010",
+$d=array(-26, -9, -6);
+$datax=array("#1. 1996,1905", 
+             "#38. 2010",
              "Average",
-             "2009",
-             "1939",
 );
 
 // Size of graph
 $width=320; 
-$height=280;
+$height=110;
 
 // Set the basic parameters of the graph 
 $graph = new Graph($width,$height,'auto');
-$graph->SetScale("textlin",-14,44);
+$graph->SetScale("textlin",-34,0);
 $graph->img->SetAntiAliasing();
 
 
@@ -29,7 +25,7 @@ $graph->img->SetAntiAliasing();
 $graph->SetFrame(false);
 
 // Rotate graph 90 degrees and set margin
-$graph->Set90AndMargin(110,5,60,28);
+$graph->Set90AndMargin(130,5,22,25);
 
 // Set white margin color
 $graph->SetMarginColor('white');
@@ -41,8 +37,8 @@ $graph->SetBox();
 $graph->SetBackgroundGradient('blue','lightblue',GRAD_HOR,BGRAD_PLOT);
 
 // Setup title
-$graph->title->Set("Jan 1 - Jan 7 Average Temp [°F]");
-$graph->subtitle->Set("IEM computed for Iowa 1893-2010");
+$graph->title->Set("February Minimum Temperature");
+$graph->subtitle->Set("\n\n\n\nIEM computed 1893-2010 (thru 25 Feb)");
 $graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
 $graph->subtitle->SetFont(FF_VERDANA,FS_BOLD,10);
 
@@ -83,8 +79,8 @@ $bplot->value->SetFormat('%.0f');
 $graph->Add($bplot);
 
 // Add some explanation text
-$txt = new Text("");
-$txt->SetPos(280,300);
+$txt = new Text("* IEM Computed [1893-2010]");
+$txt->SetPos(1,-5);
 $txt->SetFont(FF_COMIC,FS_NORMAL,10);
 $graph->Add($txt);
 

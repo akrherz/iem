@@ -11,9 +11,9 @@ $tmpf = Array();
 
 $dbconn = iemdb('asos');
 $sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, vsby
-  , wind_chill(tmpf, sknt) as wcht, drct from t2010 WHERE station = 'ADU' 
-  and dwpf > -99 and drct >= 0 and valid > '2010-02-09' and 
-  valid < '2010-02-09 14:00' ORDER by valid ASC";
+  , wind_chill(tmpf, sknt) as wcht, drct from t2010 WHERE station = 'AMW' 
+  and dwpf > -99 and drct >= 0 and valid > '2010-02-18' and 
+  valid < '2010-03-09 14:00' ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
@@ -46,34 +46,34 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(620,600,"example1");
-$graph->SetScale("datlin",0,360);
-$graph->SetY2Scale("lin");
-$graph->img->SetMargin(45,40,50,50);
+$graph = new Graph(620,480,"example1");
+$graph->SetScale("datlin");
+//$graph->SetY2Scale("lin");
+$graph->img->SetMargin(45,10,30,50);
 $graph->SetMarginColor('white');
 $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetLabelFormatString("M d", true);
 //$graph->xaxis->scale->SetDateFormat("M d h A");
 $graph->xaxis->SetPos("min");
 
-$graph->y2axis->SetTitleMargin(20);
-$graph->y2axis->SetColor("blue");
-$graph->y2axis->title->SetColor("blue");
-$graph->y2axis->title->SetFont(FF_FONT2,FS_BOLD,16);
-$graph->y2axis->SetTitle("Dew Point [F]");
+//$graph->y2axis->SetTitleMargin(20);
+//$graph->y2axis->SetColor("blue");
+//$graph->y2axis->title->SetColor("blue");
+//$graph->y2axis->title->SetFont(FF_FONT2,FS_BOLD,16);
+//$graph->y2axis->SetTitle("Dew Point [F]");
 
-$graph->yaxis->SetTitleMargin(30);
+//$graph->yaxis->SetTitleMargin(30);
 
 $graph->xaxis->title->SetFont(FF_FONT2,FS_BOLD,16);
 //$graph->xaxis->SetTitle("Valid Local Time");
-//$graph->yaxis->SetTitle("Temp [F] or Wind [MPH]");
-$graph->yaxis->SetTitle("Wind Direction [N=0, E=90, S=180, W=270]");
+$graph->yaxis->SetTitle("Temperature [F]");
+//$graph->yaxis->SetTitle("Wind Direction [N=0, E=90, S=180, W=270]");
 //$graph->tabtitle->Set('Recent Comparison');
 $graph->yaxis->scale->ticks->Set(90,15);
 $graph->yaxis->scale->ticks->SetLabelFormat("%5.0f");
-$graph->title->Set('Esterville [KEST] Time Series');
+$graph->title->Set('Ames [KAMW] Time Series');
 
-  $graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);
+  $graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
   $graph->SetColor('wheat');
 
   $graph->legend->SetLayout(LEGEND_HOR);
@@ -86,10 +86,10 @@ $graph->title->Set('Esterville [KEST] Time Series');
 
 
 // Create the linear plot
-$lineplot=new ScatterPlot($drct, $times);
+$lineplot=new ScatterPlot($tmpf, $times);
 $lineplot->SetLegend("Wind Dir");
 $lineplot->SetColor("blue");
-$graph->Add($lineplot);
+//$graph->Add($lineplot);
 
 // Create the linear plot
 $lineplot4=new ScatterPlot($mwdr,$mtimes);
@@ -99,9 +99,10 @@ $lineplot4->mark->SetFillColor("green");
 //$graph->Add($lineplot4);
 
 $lineplot2=new LinePlot($tmpf, $times);
-$lineplot2->SetLegend("Dew Point");
-$lineplot2->SetColor("blue");
-$graph->AddY2($lineplot2);
+//$lineplot2->SetLegend("nt");
+$lineplot2->SetColor("red");
+$lineplot2->SetWeight(3);
+$graph->Add($lineplot2);
 
 $lineplot3=new LinePlot($mdwpf, $mtimes);
 $lineplot3->SetColor("green");
