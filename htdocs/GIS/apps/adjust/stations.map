@@ -253,7 +253,7 @@ LAYER
   CLASS
     TEXT ([name])
     SYMBOL "circle"
-    COLOR 54 54 54
+    COLOR 255 255 255
     SIZE 1
   END
 END
@@ -266,31 +266,31 @@ LAYER
  PROJECTION
   "init=epsg:4326"
  END
-  DATA "geom from (select n.ugc, n.geom, extract(hours from sum(expire - issue)) as s from warnings_2008 w, nws_ugc n WHERE n.ugc = w.ugc and significance = 'A' and phenomena IN ('SV','TO') and issue > '2008-05-24' and gtype = 'C' GROUP by n.ugc, n.geom) as foo USING unique ugc using SRID=4326"
+  DATA "geom from (select n.ugc, n.geom, extract(hours from sum(expire - issue)) as s from warnings w, nws_ugc n WHERE n.ugc = w.ugc and significance = 'W' and  phenomena IN ('BZ') and gtype = 'C' and issue between '2009-10-01' and '2010-02-02' GROUP by n.ugc, n.geom) as foo USING unique ugc using SRID=4326"
  TYPE POLYGON
  STATUS OFF
  CLASS
-   NAME "60"
-   EXPRESSION ([s] > 60)
+   NAME "30"
+   EXPRESSION ([s] > 30)
    COLOR 255 0 0
-  END
- CLASS
-   NAME "48"
-   EXPRESSION ([s] > 48)
-   COLOR 255 150 0
-  END
- CLASS
-   NAME "36"
-   EXPRESSION ([s] > 36)
-   COLOR 255 255 0
   END
  CLASS
    NAME "24"
    EXPRESSION ([s] > 24)
+   COLOR 255 150 0
+  END
+ CLASS
+   NAME "16"
+   EXPRESSION ([s] > 16)
+   COLOR 255 255 0
+  END
+ CLASS
+   NAME "8"
+   EXPRESSION ([s] > 8)
    COLOR 0 255 0
   END
  CLASS
-   NAME "1"
+   NAME "1+"
    EXPRESSION ([s] > 0)
    COLOR 5 200 0
   END
@@ -399,6 +399,7 @@ LAYER
     SYMBOL 1
     TEXT ([NAME])
     LABEL
+     COLOR 255 255 255
      TYPE BITMAP
      SIZE SMALL
      POSITION CC
@@ -644,8 +645,8 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME sites
-  CONNECTION "host=iemdb user=mesonet dbname=iem"
-  DATA "geom from (select station, oid, snoww, geom from summary WHERE snoww > 0 and day >= '2004-02-16') as foo using unique oid srid=4326"
+  CONNECTION "host=iemdb user=nobody dbname=iem"
+  DATA "geom from (select station, oid, round(CASE WHEN max_gust > max_sknt THEN max_gust else max_sknt END::numeric * 1.15,0) as val, geom from summary_2010 WHERE network in ('IA_ASOS','AWOS') and day = '2010-01-25' and (max_gust > 0 or max_sknt > 0)) as foo using unique oid using srid=4326"
   #FILTER "network = 'IA_RWIS'"
   STATUS ON
   TYPE POINT
@@ -656,18 +657,17 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    SYMBOL 'triangle'
+    #SYMBOL 'triangle'
     COLOR 0 0 0
-    SIZE 5
-     #TEXT ([snoww]_[station])
-     TEXT ([snoww])
+    #SIZE 5
+    TEXT ([val])
     LABEL
-     COLOR 0 0 250 
-      OUTLINECOLOR 250 250 250
+     COLOR 250 250 0 
+      OUTLINECOLOR 0 0 0
       TYPE TRUETYPE
       FONT 'vera'
       ANTIALIAS TRUE
-      SIZE 8
+      SIZE 12
       POSITION AUTO
       PARTIALS TRUE
       FORCE FALSE
@@ -710,14 +710,25 @@ LAYER
 END
 
 LAYER
-  NAME aeronet
-  DATA "GoesEast1V0962015.tif"
+  NAME terra
+  DATA "terra_usa3.jpg"
   TYPE RASTER
   STATUS OFF
   PROJECTION
    "init=epsg:4326"
   END
 END
+
+LAYER
+  NAME maxdbz
+  DATA "max_n0r_0z0z_20090809.png"
+  TYPE RASTER
+  STATUS OFF
+  PROJECTION
+   "init=epsg:4326"
+  END
+END
+
 
 LAYER
   NAME topo
@@ -756,8 +767,8 @@ LAYER
   CLASS
     LABEL
       WRAP "_"
-      COLOR 0 0 0
-      OUTLINECOLOR 255 255 255
+      COLOR 255 255 0
+      OUTLINECOLOR 0 0 0
    #   SHADOWSIZE 1 1
    #   SHADOWCOLOR 0 0 0
    #   BACKGROUNDSHADOWCOLOR 0 0 0
