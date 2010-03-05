@@ -526,7 +526,7 @@ elif params.has_key('servicename'):
 
     except KeyError:
         # No custom stream
-        config_file = '/mesonet/www/html/GIS/maps/pyims.xml'
+        config_file = '/var/www/htdocs/GIS/maps/pyims.xml'
         config_tree = ElementTree.parse(config_file)
         config_root = config_tree.getroot()
         services = config_root.find('SERVICES')
