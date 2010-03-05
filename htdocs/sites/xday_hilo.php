@@ -57,7 +57,7 @@ include("$rootpath/include/jpgraph/jpgraph_line.php");
 $a0 = min($lows);
 $a2 = max($highs);
 
-$graph = new Graph(335,330);
+$graph = new Graph(480,430);
 $graph->SetScale("textlin");
 $graph->SetMarginColor('white');
 
