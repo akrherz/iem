@@ -95,7 +95,7 @@ $s .= "</table>";
 
 
 
-if (getenv("REMOTE_ADDR") == "173.30.53.40" )
+if (getenv("REMOTE_ADDR") == "173.30.223.157" )
 {
  $s = "<img src=\"images/i3.jpg\" style=\"float: left; margin: 5px;\">
 Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 233 weeks now!!!! smokey coming to see darly this weekend, yea yea yea!  Hopefully well have pictures so that we can get the invites done, so that people come to our wedding.  Well, I guess if nobody came, there would be more food and bread for darly.  Darly gonna steal some plates of food and put in our room for later, hehe! I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
