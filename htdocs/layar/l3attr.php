@@ -9,11 +9,15 @@ $postgis = iemdb("postgis");
 /* Figure out what was requested */
 $center_lat = isset($_GET["lat"]) ? $_GET["lat"]: 58.1;
 $center_lng = isset($_GET["lon"]) ? $_GET["lon"]: -97.0;
-$radius = isset($_GET["radius"]) ? ($_GET["radius"]/1000.0): 2000.0; # in meters
+$radius = isset($_GET["radius"]) ? floatval($_GET["radius"]): 2000.0; # in meters
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT x(geom) as lon, y(geom) as lat,
-      * from nexrad_attributes WHERE distance(geom, 
-       GeomFromEWKT('SRID=4326;POINT($center_lng $center_lat)')) < 2");
+     distance(transform(geom,2163), 
+       transform(
+        GeomFromEWKT('SRID=4326;POINT($center_lng $center_lat)'),2163)) as dist,
+      * from nexrad_attributes WHERE distance(transform(geom,2163), 
+       transform(
+        GeomFromEWKT('SRID=4326;POINT($center_lng $center_lat)'),2163)) < $radius");
 
 header('Content-type: application/json');
 $rs = pg_execute($postgis, "SELECT", Array());
@@ -53,7 +57,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   $json["hotspots"][] = array(
     "actions" => array(),
     "attribution" => "NWS ". $row["nexrad"] ." NEXRAD",
-    "distance" => 1000, // km back to meter!
+    "distance" => intval($row["dist"]), // km back to meter!
     "id" => $i,
     "imageURL" => null,
     "lat" => (int) str_replace(".", "", $lat),
