@@ -23,10 +23,11 @@ o.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
 
 rs = postgis.query("select r.*, h.*, x(h.geom) as lon, y(h.geom) as lat \
    from hvtec_nwsli h, riverpro r,\
-  (select distinct hvtec_nwsli from warnings_2008 WHERE \
+  (select distinct hvtec_nwsli from warnings_%s WHERE \
    status NOT IN ('EXP','CAN') and phenomena = 'FL' and \
    significance = 'W') as foo\
-   WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli").dictresult()
+   WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli" % (
+   mx.DateTime.now().year,) ).dictresult()
 
 for i in range(len(rs)):
   nwsli = rs[i]['nwsli']
