@@ -22,7 +22,7 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT x(geom) as lon, y(geom) as lat,
 header('Content-type: application/json');
 $rs = pg_execute($postgis, "SELECT", Array());
 if (pg_num_rows($rs) == 0){
-  $json = array("hotspots"=> "", "layer"=>"nexradl3attr", "errorString"=>"Sorry, no attributes close to you right now!", "morePages"=>false, "errorCode"=>21, "nextPageKey"=>null);
+  $json = array("hotspots"=> Array(), "layer"=>"nexradl3attr", "errorString"=>"Sorry, no attributes close to you right now!", "morePages"=>false, "errorCode"=>21, "nextPageKey"=>null);
   echo  Zend_Json::encode($json);
   exit; // 
 
