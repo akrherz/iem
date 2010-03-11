@@ -7,7 +7,7 @@ include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">Archived NWS Watch/Warning GIS Shapefiles</h3>
 
-<p>This page allows you to generate a GIS shapefile of NWS issues watches
+<p>This page allows you to generate a GIS shapefile of NWS issued watches
 and warnings for a time period of your choice.  Please be sure to read the
 archive status and dbf schema below. The IEM's archive is certainly not complete or official.  If you are looking for a real-time source of warning shapefiles, you can find that <a href="http://mesonet.agron.iastate.edu/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
 
@@ -28,7 +28,7 @@ will be included in the output GIS file...)</i>
   <tr>
     <th>Start:</th>
     <td>
-     <?php echo yearSelect2(2002, date("Y"), "year1"); ?>
+     <?php echo yearSelect2(1986, date("Y"), "year1"); ?>
     </td>
     <td>
      <?php echo monthSelect2(0,"month1"); ?>
@@ -47,7 +47,7 @@ will be included in the output GIS file...)</i>
   <tr>
     <th>End:</th>
     <td>
-     <?php echo yearSelect2(2002, date("Y"), "year2"); ?>
+     <?php echo yearSelect2(1986, date("Y"), "year2"); ?>
     </td>
     <td>
      <?php echo monthSelect2(0,"month2"); ?>
@@ -91,9 +91,9 @@ AREA_KM2 Area of the geometry in sq kilometers (Projection: EPSG 2163)
 <table border="1" cellpadding="3">
 <tr><th>Dataset component</th><th>Start Time</th><th>Notes</th></tr>
 <tr>
- <td>TOR / SVR Warnings</td>
+ <td>Tornado<br />Severe T'storm<br /> Flash Flood<br />Special Marine</td>
  <td>1 Jan 2002 (Polygons)
-     <br />1 Jan 2002 (Counties)</td>
+     <br />1 Jan 1986 (Counties)</td>
  <td>Only the initial polygon is used.  Polygon updates in the SVS
   statements are ignored.  The VTEC attributes didn't appear until
   they became operational.</td>
