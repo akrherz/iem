@@ -2,10 +2,10 @@
 <IMSFACADE>
   <SERVICES>
     <SERVICE name="KCCI SuperDoppler (26915)">
-      <PROPERTIES imagetype="PNG8" mapfile="/mesonet/www/html/GIS/maps/kcciradar.map"/>
+      <PROPERTIES imagetype="PNG8" mapfile="/var/www/htdocs/GIS/maps/kcciradar.map"/>
     </SERVICE>
     <SERVICE name="US RADAR (4326)">
-      <PROPERTIES imagetype="PNG8" mapfile="/mesonet/www/html/GIS/maps/usradar.map"/>
+      <PROPERTIES imagetype="PNG8" mapfile="/var/www/htdocs/GIS/maps/usradar.map"/>
     </SERVICE>
   </SERVICES>
 </IMSFACADE>
