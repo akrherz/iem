@@ -19,7 +19,7 @@ $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1)
          WHERE wfo = '$wfo' and gtype = 'C' and
          significance = '$significance' and phenomena = '$phenomena' and eventid is not null) as foo,
          nws_ugc n WHERE n.ugc = foo.ugc GROUP by eventid ORDER by eventid ASC";
-if (($phenomena == "SV" || $phenomena == "TO" || $phenomena == "FF" || $phenomena == "MA") && $significance == "W"){
+if (($phenomena == "SV" || $phenomena == "TO" || $phenomena == "FF" || $phenomena == "MA") && $significance == "W" && $year > 2003){
 
  $sql = "SELECT round(area::numeric,0) as area, locations, foo2.eventid, issued, expired FROM 
     (select sumtxt( n.name || ' ['||n.state||'], ') as locations, eventid,
