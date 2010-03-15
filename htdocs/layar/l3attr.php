@@ -19,7 +19,7 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT x(geom) as lon, y(geom) as lat,
        transform(
         GeomFromEWKT('SRID=4326;POINT($center_lng $center_lat)'),2163)) < $radius");
 
-header('Content-type: application/json');
+//header('Content-type: application/json');
 $rs = pg_execute($postgis, "SELECT", Array());
 if (pg_num_rows($rs) == 0){
   $json = array("hotspots"=> Array(), "layer"=>"nexradl3attr", "errorString"=>"Sorry, no attributes close to you right now!", "morePages"=>false, "errorCode"=>21, "nextPageKey"=>null);
@@ -62,9 +62,9 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
     "imageURL" => null,
     "lat" => (int) str_replace(".", "", $lat),
     "lon" => (int) str_replace(".", "", $lon), 
-    "line2" => null,
-    "line3" => null,
-    "line4" => null,
+    "line2" => sprintf("Azimuth: %.1f Range: %.1f", $row["azimuth"], $row["range"]),
+    "line3" => sprintf("POSH: %.0f", $row["posh"]),
+    "line4" => sprintf("VIL: %.1f", $row["vil"]),
     "title" => sprintf("%s %s %s", $row['storm_id'], $row["azimuth"], $row["range"]),
     "type" => 0);
 }
