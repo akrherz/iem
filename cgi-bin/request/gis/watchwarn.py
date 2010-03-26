@@ -2,12 +2,13 @@
 # Something to dump current warnings to a shapefile
 
 import shapelib, dbflib, mx.DateTime, zipfile, os, sys, shutil, cgi
-from pyIEM import wellknowntext, iemdb
+os.environ['TZ'] = 'UTC'
+from pyIEM import wellknowntext
+import psycopg2
+import psycopg2.extras
 
-i = iemdb.iemdb()
-mydb = i["postgis"]
+mydb = psycopg2.connect("dbname='postgis' host='iemdb' user='nobody'")
 
-mydb.query("SET TIME ZONE 'GMT'")
 
 # Get CGI vars
 form = cgi.FormContent()
@@ -65,31 +66,37 @@ sql = """SELECT *, astext(geom) as tgeom,
     area( transform(geom,2163) ) / 1000000.0 as area2d
     from warnings WHERE isValid(geom) and 
 	issue >= '%s' and issue < '%s' and eventid < 10000 
-	%s %s ORDER by issue ASC""" % ( sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
-rs = mydb.query(sql).dictresult()
+	%s %s""" % ( sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
+cursor = mydb.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor)
+cursor.execute(sql)
 
 cnt = 0
-for i in range(len(rs)):
-	s = rs[i]["tgeom"]
+for row in cursor:
+	s = row["tgeom"]
 	if (s == None or s == ""):
 		continue
 	f = wellknowntext.convert_well_known_text(s)
 
-	g = rs[i]["gtype"]
-	t = rs[i]["phenomena"]
-	issue = mx.DateTime.strptime(rs[i]["issue"][:16], "%Y-%m-%d %H:%M")
-	expire = mx.DateTime.strptime(rs[i]["expire"][:16],"%Y-%m-%d %H:%M")
+	g = row["gtype"]
+	t = row["phenomena"]
+	#issue = mx.DateTime.strptime(row["issue"][:16], "%Y-%m-%d %H:%M")
+	#expire = mx.DateTime.strptime(row["expire"][:16],"%Y-%m-%d %H:%M")
+	issue = row["issue"]
+	expire = row["expire"]
+	u = issue.utcoffset() or ZERO
+	issue -= u
+	expire -= u
 	d = {}
 	d["ISSUED"] = issue.strftime("%Y%m%d%H%M")
 	d["EXPIRED"] = expire.strftime("%Y%m%d%H%M")
 	d["PHENOM"] = t
 	d["GTYPE"] = g
-	d["SIG"] = rs[i]["significance"]
-	d["WFO"] = rs[i]["wfo"]
-	d["ETN"] = rs[i]["eventid"]
-	d["STATUS"] = rs[i]["status"]
-	d["NWS_UGC"] = rs[i]["ugc"]
-	d["AREA_KM2"] = rs[i]["area2d"]
+	d["SIG"] = row["significance"]
+	d["WFO"] = row["wfo"]
+	d["ETN"] = row["eventid"]
+	d["STATUS"] = row["status"]
+	d["NWS_UGC"] = row["ugc"]
+	d["AREA_KM2"] = row["area2d"]
 	if ((d["SIG"] is None or d["SIG"] == "") and d["PHENOM"] == 'FF'):
 		d["SIG"] = "W"
 		d["ETN"] = -1
