@@ -14,6 +14,8 @@ archive status and dbf schema below. The IEM's archive is certainly not complete
 <div class="warning"> Due to transient server load or other issues, this application sometimes fails to generate output.  You may wish to try shorting the duration of your request or email <a href="../../info/contacts.php">us</a> for help.
 </div>
 
+<table><tr><td width="50%" valign="top">
+
 <form method="GET" action="/cgi-bin/request/gis/watchwarn.py">
 <h4>Select time interval</h4>
 <i>(Times are in UTC.  Watches/Warnings <b>issued</b> between these times
@@ -71,21 +73,45 @@ will be included in the output GIS file...)</i>
 </form>
 
 <h4>Shapefile DBF schema:</h4>
-<pre>
-WFO      Three letter ID for issuing Weather Forecast Office
-ISSUED   String representing product initial valid GMT timestamp YYYYMMDDHHMM
-EXPIRED  String representing product expiration, this is not the original 
+<table>
+<tr><th>WFO</th><td>Three letter ID for issuing Weather Forecast Office</td></tr>
+<tr><th>ISSUED   </th><td>String representing product initial valid GMT timestamp YYYYMMDDHHMM</td></tr>
+<tr><th>EXPIRED  </th><td>String representing product expiration, this is not the original 
          product expiration, but the actual time the product was no longer
          valid.  For example, the product could have been extended in time
-         or cancelled.
-PHENOM   VTEC phenomena code.  Ex)  SV == Severe Thunderstorm , TO == Tornado
-GTYPE    Geographical type of polygon.  C == County, P == Polygon
-SIG      VTEC significance. Ex) A == Watch, W == Warning
-ETN      VTEC Event Tracking Number
-STATUS   VTEC last value of status for the product.  Often EXP == Expire
-NWS_UGC  NWS code used for a zone of a county
-AREA_KM2 Area of the geometry in sq kilometers (Projection: EPSG 2163)
-</pre>
+         or cancelled.</td></tr>
+<tr><th>PHENOM   </th><td>VTEC phenomena code.  Ex)  SV == Severe Thunderstorm , TO == Tornado</td></tr>
+<tr><th>GTYPE    </th><td>Geographical type of polygon.  C == County, P == Polygon</td></tr>
+<tr><th>SIG      </th><td>VTEC significance. Ex) A == Watch, W == Warning</td></tr>
+<tr><th>ETN      </th><td>VTEC Event Tracking Number</td></tr>
+<tr><th>STATUS   </th><td>VTEC last value of status for the product.  Often EXP == Expire</td></tr>
+<tr><th>NWS_UGC  </th><td>NWS code used for a zone of a county</td></tr>
+<tr><th>AREA_KM2 </th><td>Area of the geometry in sq kilometers (Projection: EPSG 2163)</td></tr>
+</table>
+
+</td><td width="50%" valign="top">
+<h4>Pre-generated zip files</h4>
+
+<p>These files are same as you could download from the form on the left, just
+you don't have to wait so long!</p>
+
+<table cellpadding="2" cellspacing="0" border="1">
+<tr><th>Year</th><th>All</th><th>Limit Tor,Svr,Mar,FF</th><th>Limit Storm Based</th></tr>
+<?php 
+for($year=1986;$year<date("Y");$year++){
+  $allurl = sprintf("<a href=\"%s/pickup/wwa/%s_all.zip\">Zip</a>", $rooturl, $year);
+  $tsmfurl = sprintf("<a href=\"%s/pickup/wwa/%s_tsmf.zip\">Zip</a>", $rooturl, $year);
+  $sbwurl = "N/A";
+  if ($year > 2001){
+    $sbwurl = sprintf("<a href=\"%s/pickup/wwa/%s_tsmf_sbw.zip\">Zip</a>", $rooturl, $year);
+  }
+  echo sprintf("<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td></tr>", $year,
+   $allurl, $tsmfurl, $sbwurl);
+}
+?>
+</table>
+
+</td></tr></table>
 
 <h4>Archive status:</h4>
 <table border="1" cellpadding="3">
