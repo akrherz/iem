@@ -35,6 +35,7 @@ $size = round($size, $precision);
 
 $TITLE = "IEM | Watch/Warn shapefiles";
 include("$rootpath/include/forms.php");
+$THISPAGE = "gis-";
 include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">Archived NWS Watch/Warning GIS Shapefiles</h3>
@@ -125,12 +126,13 @@ will be included in the output GIS file...)</i>
 <h4>Pre-generated zip files</h4>
 
 <p>These files are same as you could download from the form on the left, just
-you don't have to wait so long!</p>
+you don't have to wait so long! The <?php echo date("Y"); ?> data is current up until
+roughly 2 AM this morning.</p>
 
 <table cellpadding="2" cellspacing="0" border="1">
 <tr><th>Year</th><th>All</th><th>Limit Tor,Svr,Mar,FF</th><th>Limit Storm Based</th></tr>
 <?php 
-for($year=1986;$year<date("Y");$year++){
+for($year=1986;$year<=date("Y");$year++){
   $allurl = sprintf("<a href=\"%s/pickup/wwa/%s_all.zip\">Zip</a>", $rooturl, $year);
   $allfp = "/mesonet/share/pickup/wwa/${year}_all.zip";
   $tsmfurl = sprintf("<a href=\"%s/pickup/wwa/%s_tsmf.zip\">Zip</a>", $rooturl, $year);
