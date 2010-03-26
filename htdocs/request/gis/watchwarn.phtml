@@ -1,6 +1,38 @@
 <?php 
 include("../../../config/settings.inc.php");
 
+function get_file_size($filename, $size_in = 'MB')
+{
+$size_in_bytes = filesize($filename);
+ 
+// Precision: decimals at the end for each type of size
+ 
+if($size_in == 'B')
+{
+$size = $size_in_bytes;
+$precision = 0;
+}
+elseif($size_in == 'KB')
+{
+$size = (($size_in_bytes / 1024));
+$precision = 2;
+}
+elseif($size_in == 'MB')
+{
+$size = (($size_in_bytes / 1024) / 1024);
+$precision = 2;
+}
+elseif($size_in == 'GB')
+{
+$size = (($size_in_bytes / 1024) / 1024) / 1024;
+$precision = 2;
+}
+ 
+$size = round($size, $precision);
+ 
+    return $size.' '.$size_in;
+}
+
 $TITLE = "IEM | Watch/Warn shapefiles";
 include("$rootpath/include/forms.php");
 include("$rootpath/include/header.php"); ?>
@@ -100,13 +132,18 @@ you don't have to wait so long!</p>
 <?php 
 for($year=1986;$year<date("Y");$year++){
   $allurl = sprintf("<a href=\"%s/pickup/wwa/%s_all.zip\">Zip</a>", $rooturl, $year);
+  $allfp = "/mesonet/share/pickup/wwa/${year}_all.zip";
   $tsmfurl = sprintf("<a href=\"%s/pickup/wwa/%s_tsmf.zip\">Zip</a>", $rooturl, $year);
+  $tsmffp = "/mesonet/share/pickup/wwa/${year}_tsmf.zip";
   $sbwurl = "N/A";
+  $sbwfp = "/dev/zero";
   if ($year > 2001){
     $sbwurl = sprintf("<a href=\"%s/pickup/wwa/%s_tsmf_sbw.zip\">Zip</a>", $rooturl, $year);
+    $sbwfp = "/mesonet/share/pickup/wwa/${year}_tsmf_sbw.zip";
   }
-  echo sprintf("<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td></tr>", $year,
-   $allurl, $tsmfurl, $sbwurl);
+  echo sprintf("<tr><th>%s</th><td>%s (%s)</td><td>%s (%s)</td><td>%s (%s)</td></tr>", $year,
+   $allurl, get_file_size($allfp), $tsmfurl, get_file_size($tsmffp),
+   $sbwurl, get_file_size($sbwfp) );
 }
 ?>
 </table>
