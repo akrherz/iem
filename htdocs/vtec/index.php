@@ -31,7 +31,7 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly
 <script type="text/javascript" src="../ext/ux/grid/filter/StringFilter.js"></script>
 <script>
 Ext.namespace("cfg");
-cfg.startYear = 2002;
+cfg.startYear = 1986;
 cfg.header = "iem-header";
 </script>
 <script type="text/javascript" src="static.js?v=1.0.4"></script>';
