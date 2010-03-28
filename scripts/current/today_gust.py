@@ -52,5 +52,6 @@ cfg = {
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
-pqstr = "plot c 000000000000 summary/today_gust.png bogus png"
+pqstr = "plot ac %s summary/today_gust.png iowa_wind_gust.png png" % (
+        now.strftime("%Y%m%d%H%M"), )
 iemplot.postprocess(tmpfp, pqstr, "-rotate -90")
