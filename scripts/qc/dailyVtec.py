@@ -5,15 +5,7 @@ i = iemdb.iemdb()
 postgis = i['postgis']
 
 tests = [
- 'LMK.TO.9', 'LMK.TO.13', 'LMK.TO.14', 'ICT.TO.7', 'PAH.TO.10', 'PAH.TO.11',
- 'PAH.TO.12','SGF.TO.13', 'JKL.TO.8', 'IND.TO.5', 'IND.TO.6', 'DDC.TO.2',
- 'DMX.TO.2', 'FSD.TO.2', 'FSD.TO.3', 'FSD.TO.4', 'FSD.TO.5', 'FSD.TO.6',
- 'OAX.TO.10', 'OAX.TO.11', 'LSX.TO.10', 'LBF.TO.3', 'UNR.TO.3', 'UNR.TO.2',
- 'BOU.TO.2', 'PUB.TO.4', 'IWX.TO.7', 'GID.TO.4', 'LOT.TO.4', 'LOT.TO.3',
- 'LCH.SV.151',  'LCH.SV.152', 'LCH.SV.153', 'LCH.SV.154', 'LCH.SV.155',
- 'LCH.SV.156',  'LCH.SV.157',  'LCH.MA.68', 'LCH.MA.69', 'LCH.MA.70',
- 'IWX.MA.9', 'TAE.MA.31', 'BMX.FF.39', 'LCH.MA.27', 'LCH.FF.24',
- 'KEY.MA.382'
+ 'GSP.TO.6'
 ]
 
 sql = "SELECT wfo, min(eventid), max(eventid), phenomena from warnings_%s \
