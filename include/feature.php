@@ -98,7 +98,7 @@ $s .= "</table>";
 if (getenv("REMOTE_ADDR") == "173.30.223.157" )
 {
  $s = "<img src=\"images/i3.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 236 weeks now!!!! My goodness, we skipped 235, no no no!  This weeks feature will be a double feature for darly loving smokey twice the amount he did before our trip.  Smokey is the bestest and I am very proud of her.  I look forward to seeing you again this weekend, hehe.  Darly almost put smokey name on the census form, since she is here so much, hehe! I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 237 weeks now!!!!  My goodness, it is Wedneday already again.  Hehe, just imagine if darly wrote smokey a feature every day, that would be 1600 some features!   The only way darly would do that is if he had 1600 pictures of snoopy and could post one per day, hehe, that would be very fancy.  Darly run very hard for smokey on the treadmill this morning, hehe. I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 }
