@@ -5,7 +5,7 @@ i = iemdb.iemdb()
 postgis = i['postgis']
 
 tests = [
- 'GSP.TO.6'
+ 'GSP.TO.6','LSX.TO.4',
 ]
 
 sql = "SELECT wfo, min(eventid), max(eventid), phenomena from warnings_%s \
