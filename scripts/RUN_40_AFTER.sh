@@ -15,6 +15,9 @@ cd ../qc
 cd ../outgoing
 /mesonet/python/bin/python wxc_iemrivers.py
 
+cd ../iemplot
+./RUN.csh
+
 cd ../ingestors/squaw
 ./ingest.sh
 
@@ -24,8 +27,6 @@ cd ../scan
 cd ../raws
 ./download.csh
 
-cd ../iemplot
-./RUN.csh
 
 # This is intensive...
 cd ../../week
