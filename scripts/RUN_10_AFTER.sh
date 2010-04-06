@@ -14,3 +14,6 @@ cd ../summary
 
 cd ../week
 /mesonet/python/bin/python plot_obs.py
+
+cd ../iemplot
+./RUN.csh
