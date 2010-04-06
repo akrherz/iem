@@ -11,4 +11,4 @@ cd ../outgoing
 /mesonet/python/bin/python snet_collect.py
 
 cd ../ingestors/sn
-/mesonet/python/bin/python parse.py
+/mesonet/python/bin/python parser.py
