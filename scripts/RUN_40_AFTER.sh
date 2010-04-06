@@ -24,6 +24,9 @@ cd ../scan
 cd ../raws
 ./download.csh
 
+cd ../iemplot
+./RUN.csh
+
 # This is intensive...
 cd ../../week
 /mesonet/python/bin/python plot_stage4.py
