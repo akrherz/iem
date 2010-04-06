@@ -6,11 +6,11 @@ source /mesonet/nawips/Gemenviron
 setenv GEMCOLTBL coltbl.xwp
 setenv DISPLAY localhost:1
 
-set yy=$1
-set mm=$2
-set dd=$3
+set yy=`date -u --date '1 minute' +'%y'`
+set mm=`date -u --date '1 minute' +'%m'`
+set dd=`date -u --date '1 minute' +'%d'`
+set hh=`date -u --date '1 minute' +'%H'`
 set date=${yy}${mm}${dd}
-set hh=$4
 set timestamp=`date -u --date '1 minute' +'%Y%m%d%H00'`
 
 set nicetime=`date -d "20${1}-${2}-${3} ${4}:00" +"%b %d %I %p"`

@@ -7,8 +7,11 @@
 source /mesonet/nawips/Gemenviron
 
 
-set yymmdd="$1$2$3"
-set hh="$4"
+set yy=`date -u --date '1 minute' +'%y'`
+set mm=`date -u --date '1 minute' +'%m'`
+set dd=`date -u --date '1 minute' +'%d'`
+set hh=`date -u --date '1 minute' +'%H'`
+set yymmdd="$yy$mm$dd"
 set yyyymmddhh_1h="`date -u --date '1 hour ago' +'%Y%m%d%H'`"
 set gtime="`date -u --date '1 hour ago' +'%y%m%d/%H00'`"
 
