@@ -9,6 +9,13 @@ var appTime = new Date();
 var pageLoadTime = new Date();
 var appDT   = 60;
 
+/*
+ * Need a way to prevent missing images from messing up the page!
+ */
+Ext.get("imagedisplay").dom.onerror = function(){
+   Ext.get("imagedisplay").dom.src = "../images/missing-320x240.jpg";
+};
+
 /* Provides handy way to convert from local browser time to UTC */
 Ext.override(Date, {
     toUTC : function() {
@@ -38,7 +45,7 @@ var task = {
 var ys = new Ext.Slider({
     id       : 'YearSlider',
     width    : 214,
-    minValue : 2001,
+    minValue : 1893,
     maxValue : (new Date()).format("Y"),
     listeners: {
           'drag': function(){ updateDT(); }
