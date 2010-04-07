@@ -29,7 +29,7 @@ sql = """select astext(multi(geomunion(geom))) as tgeom
        phenomena IN ('TO','SV') and eventid = %s and
        isvalid(geom) and 
        issue < ((select issued from watches WHERE num = %s
-                and extract(year from issued) = %s) + '60 minutes'::interval)
+                and extract(year from issued) = %s LIMIT 1) + '60 minutes'::interval)
        """ % (year, etn, etn, year) 
 rs = mydb.query(sql).dictresult()
 
