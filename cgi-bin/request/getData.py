@@ -61,8 +61,8 @@ def Main():
         timeStr = "date(valid) >= '%s' and date(valid) <= '%s' " % (sTS.strftime("%Y-%m-%d"), eTS.strftime("%Y-%m-%d") )
 
     if (dataVars[0] == "all" and len(station) == 3):
-        queryCols = "tmpf, dwpf, drct, sknt, skyc, p01m,alti,vsby"
-        outCols = ['tmpf','dwpf','drct','sknt','skyc','p01m','alti','vsby']
+        queryCols = "tmpf, dwpf, drct, sknt, p01m,alti,vsby"
+        outCols = ['tmpf','dwpf','drct','sknt','p01m','alti','vsby']
     elif (dataVars[0] == "all"):
         queryCols = "tmpf, dwpf, drct, sknt"
         outCols = ['tmpf','dwpf','drct','sknt']
