@@ -919,7 +919,7 @@ function radargenerator(){
     r = 'layers[]=nexrad&layers[]=cbw&layers[]=legend&';
    }
  }
- return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/radmap.php?"+ r +"layers[]=uscounties&ts="+ (new Date(tslider.getValue())).format('YmdHi') +"&vtec="+ year_selector.getValue() +".K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
+ return "<p><img style=\"width:640px;height:480px;\" src=\"../GIS/radmap.php?"+ r +"layers[]=uscounties&ts="+ (new Date(tslider.getValue())).format('YmdHi') +"&vtec="+ year_selector.getValue() +".O.NEW.K"+ wfo_selector.getValue()  +"."+ phenomena_selector.getValue() +"."+ sig_selector.getValue() +"."+ String.leftPad(eventid_selector.getValue(),4,"0") +"\" /></p>";
 }
 
 sbwPanel = new Ext.Panel({
