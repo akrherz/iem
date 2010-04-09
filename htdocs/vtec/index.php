@@ -1,6 +1,19 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/google_keys.php");
+include("$rootpath/include/mobile_device_detect.php");
+
+/* Mobile business logic */
+$imobile = mobile_device_detect(true,true,true,true,true,true,false,false);
+if ($imobile){
+  echo "<html><head><script>
+  var tokens = window.location.href.split('#');
+  if (tokens.length == 2){
+    window.location = 'mobile.php?vtec='+ tokens[1];
+  } 
+  </script></head><body>";
+  exit;
+}
 
 /* Pure IEM 2.0 App to do vtec stuff.  Shorter url please as well */
 $v = isset($_GET["vtec"]) ? $_GET["vtec"] : "2008-O-NEW-KJAX-TO-W-0048";
