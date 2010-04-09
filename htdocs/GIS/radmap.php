@@ -31,7 +31,12 @@ $lsrbuffer = isset($_GET["lsrbuffer"]) ? intval($_GET["lsrbuffer"]): 15;
 $vtec_limiter = "";
 if (isset($_GET["vtec"]))
 {
-  list($year, $pclass, $status, $wfo, $phenomena, $significance, $eventid) = explode(".", $_GET["vtec"]);
+  $tokens = explode(".", $_GET["vtec"]);
+  if (sizeof($tokens) == 7){
+    list($year, $pclass, $status, $wfo, $phenomena, $significance, $eventid) = explode(".", $_GET["vtec"]);
+  } else {
+    list($year, $wfo, $phenomena, $significance, $eventid) = explode(".", $_GET["vtec"]);
+  }
   $eventid = intval($eventid);
   $year = intval($year);
   $wfo = substr($wfo,1,3);
