@@ -10,7 +10,9 @@ if ($imobile){
   var tokens = window.location.href.split('#');
   if (tokens.length == 2){
     window.location = 'mobile.php?vtec='+ tokens[1];
-  } 
+  } else {
+    window.location = 'mobile.php?vtec=2008-O-NEW-KJAX-TO-W-0048';
+  }
   </script></head><body>";
   exit;
 }
