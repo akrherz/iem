@@ -24,7 +24,7 @@ dbf = dbflib.create(fp)
 dbf.add_field("SIG", dbflib.FTString, 1, 0)
 dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
 
-sql = """select astext(multi(geomunion(geom))) as tgeom 
+sql = """select astext(multi(ST_union(geom))) as tgeom 
        from warnings_%s WHERE significance = 'A' and 
        phenomena IN ('TO','SV') and eventid = %s and
        isvalid(geom) and 
