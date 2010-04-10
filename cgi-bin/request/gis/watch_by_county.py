@@ -42,7 +42,7 @@ dbf.add_field("PHENOM", dbflib.FTString, 2, 0)
 dbf.add_field("SIG", dbflib.FTString, 1, 0)
 dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
 
-sql = """select phenomena, eventid, astext(multi(geomunion(geom))) as tgeom, 
+sql = """select phenomena, eventid, astext(multi(ST_union(geom))) as tgeom, 
        min(issue) as issued, max(expire) as expired 
        from warnings_%s WHERE significance = 'A' and 
        phenomena IN ('TO','SV') and issue > '%s'::timestamp -'3 days':: interval 

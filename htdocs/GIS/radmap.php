@@ -199,7 +199,7 @@ $blsr->draw($img);
 $wbc = $map->getlayerbyname("watch_by_county");
 $wbc->set("status", in_array("watch_by_county", $layers) );
 $wbc->set("connection", $_DATABASES["postgis"]);
-$sql = sprintf("g from (select phenomena, eventid, multi(geomunion(geom)) as g from warnings_%s WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= '%s:00+00' and expire > '%s:00+00' GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena",gmstrftime("%Y",$ts),
+$sql = sprintf("g from (select phenomena, eventid, multi(ST_union(geom)) as g from warnings_%s WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= '%s:00+00' and expire > '%s:00+00' GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena",gmstrftime("%Y",$ts),
   gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts) );
 $wbc->set("data", $sql);
 $wbc->draw($img);
@@ -333,8 +333,8 @@ $sql = "geo from (select setsrid(a,4326) as geo, random() as k
       from (
 select 
    intersection(
-      buffer(exteriorring(geometryn(multi(geomunion(n.geom)),1)),0.02),
-      exteriorring(geometryn(multi(geomunion(w.geom)),1))
+      buffer(exteriorring(geometryn(multi(ST_union(n.geom)),1)),0.02),
+      exteriorring(geometryn(multi(ST_union(w.geom)),1))
    ) as a
    from warnings_". date("Y", $ts) ." w, nws_ugc n WHERE gtype = 'P' and w.wfo = '$wfo'
    and phenomena = '$phenomena' and eventid = $eventid 
