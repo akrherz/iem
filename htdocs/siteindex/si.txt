@@ -304,7 +304,6 @@
 ..|ASOS
 ...|Hourly|http://mesonet.agron.iastate.edu/cgi-bin/precip/catAZOS.py|||bodyframe
 ...|Yesterday|http://mesonet.agron.iastate.edu/data/text/IEMAZOSTP.txt|||bodyframe
-...|Monthly|http://mesonet.agron.iastate.edu/data/text/IEMAZOMPR.txt|||bodyframe
 ...|2003|http://mesonet.agron.iastate.edu/ASOS/reports/2003precip.phtml|||bodyframe
 ..|AWOS
 ...|Hourly|http://mesonet.agron.iastate.edu/cgi-bin/precip/catAZOS.py|||bodyframe
