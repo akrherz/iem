@@ -5,9 +5,9 @@ include("$rootpath/include/database.inc.php");
 $coop = iemdb("coop");
 $iem = iemdb("access");
 
-$rs = pg_query($iem, "SELECT day, max_tmpf, min_tmpf from summary WHERE 
-                      station = 'AMW' and day >= '2009-10-01' 
-                      and day < '2009-12-01' ORDER by day ASC");
+$rs = pg_query($iem, "SELECT day, max_tmpf, min_tmpf from summary_2010 WHERE 
+                      station = 'AMW' and day >= '2010-03-01' 
+                      and day < '2010-04-01' ORDER by day ASC");
 
 $hpc = Array();
 $lpc = Array();
@@ -52,7 +52,7 @@ include ("$rootpath/include/jpgraph/jpgraph_mgraph.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(320,150,"example1");
+$graph = new Graph(640,300,"example1");
 $graph->SetScale("textlin",0,100);
 $graph->img->SetMargin(30,5,20,20);
 $graph->SetMarginColor('white');
@@ -72,7 +72,7 @@ $graph->yaxis->scale->ticks->Set(25,5);
 $graph->xaxis->SetTickLabels($dates);
 $graph->xaxis->SetTextTickInterval( 2 );
 
-$graph->title->Set('Ames [KAMW] 2009 Oct 1 - Nov 12');
+$graph->title->Set('Ames [KAMW] 2010 March');
 $graph->title->SetFont(FF_ARIAL,FS_NORMAL,14);
 $graph->subtitle->Set('High Temperature Percentile');
 $graph->subtitle->SetFont(FF_ARIAL,FS_NORMAL,12);
@@ -90,7 +90,7 @@ $lineplot->SetWidth(5);
 $graph->Add($lineplot);
 
 
-$graph2 = new Graph(320,130);
+$graph2 = new Graph(640,260);
 $graph2->SetScale("textlin",0,100);
 $graph2->img->SetMargin(30,5,20,22);
 $graph2->SetMarginColor('white');
@@ -124,7 +124,7 @@ $mgraph = new MGraph();
 $mgraph->SetMargin(2,2,2,2);
 $mgraph->SetFrame(true,'darkgray',2);
 $mgraph->AddMix($graph,0,0);
-$mgraph->AddMix($graph2,0,150);
+$mgraph->AddMix($graph2,0,300);
 $mgraph->Stroke();
 
 ?>

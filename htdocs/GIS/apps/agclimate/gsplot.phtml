@@ -5,6 +5,7 @@ include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");
 $nt = new NetworkTable("ISUAG");
 $ISUAGcities = $nt->table;
+$ISUAGcities["A130219"]["lon"] += 0.2;
 
 $var = isset($_GET["var"]) ? $_GET["var"] : "gdd50";
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -12,6 +13,10 @@ $smonth = isset($_GET["smonth"]) ? $_GET["smonth"]:  5;
 $emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: 10;
 $sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
 $eday = isset($_GET["eday"]) ? $_GET["eday"]: 1;
+$imgsz = isset($_GET["imgsz"]) ? $_GET["imgsz"] : "640x480";
+$ar = explode("x", $imgsz);
+$width = $ar[0];
+$height = $ar[1];
 
 $gs_start = mktime(0,0,0,$smonth,$sday,$year);
 $gs_end = mktime(0,0,0,$emonth,$eday,$year);
@@ -55,13 +60,17 @@ near realtime.
 </div>
 
 <form method="GET" action="gsplot.phtml">
-<table> <tr>
-   <th class="subtitle">Plot Parameter</th>
-   <th class="subtitle">Year</th>
-   <th class="subtitle">Month</th>
-   <th class="subtitle">Day</th>
+<table cellspacing="0" cellpadding="2" border="1"> 
+<thead>
+<tr>
+   <th>Plot Parameter</th>
+   <th>Year</th>
+   <th>Month</th>
+   <th>Day</th>
+   <th>Image Size</th>
    <td></td>
   </tr>
+</thead>
  <tr>
   <td rowspan=2><select name="var">
      <option value="gdd50" <?php if($var == "gdd50") echo "SELECTED"; ?>>Growing Degree Days (base=50,cap=86)</option>
@@ -74,6 +83,13 @@ near realtime.
   <td rowspan=2><?php echo yearSelect(1986, $year, "year"); ?></td>
   <td><?php echo monthSelect2($smonth, 'smonth'); ?></td>
   <td><?php echo daySelect2($sday, 'sday'); ?></td>
+<td rowspan=2>
+<select name="imgsz">
+     <option value="640x480" <?php if($imgsz == "640x480") echo "SELECTED"; ?>>640x480</option>
+     <option value="720x496" <?php if($imgsz == "720x496") echo "SELECTED"; ?>>720x496</option>
+     <option value="1024x768" <?php if($imgsz == "1024x768") echo "SELECTED"; ?>>1024x768</option>
+</select> 
+</td>
   <td rowspan=2><input type="submit" value="Make Plot"></td>
   </tr>
  <tr>
@@ -108,16 +124,16 @@ $rnd = Array("gdd50" => 0,
 
 
 $myStations = $ISUAGcities;
-$height = 480;
-$width = 640;
+$height = $height;
+$width = $width;
 
-$proj = "proj=tmerc,lat_0=41.5,lon_0=-93.65,x_0=0,y_0=0,k=0.9999";
+$proj = "init=epsg:26915";
 
 $map = ms_newMapObj("base.map");
 $map->setsize($width,$height);
 $map->setProjection($proj);
 
-$map->setextent(-252561, -133255, 300625, 277631);
+$map->setextent(175000, 4440000, 775000, 4890000);
 
 
 $counties = $map->getlayerbyname("counties");
@@ -128,7 +144,7 @@ $snet->set("status", MS_ON);
 $sclass = $snet->getClass(0);
 
 $iards = $map->getlayerbyname("iards");
-$iards->set("status", 1);
+$iards->set("status", MS_ON);
 
 
 $ponly = $map->getlayerbyname("pointonly");
@@ -357,7 +373,7 @@ mktitlelocal($map, $img, $height, "      ".$year." ". $varDef[$var] ." (". $sstr
 $map->drawLabelCache($img);
 $layer = $map->getLayerByName("logo");
 $point = ms_newpointobj();
-$point->setXY( 35, 25);
+$point->setXY( 37, 27);
 $point->draw($map, $layer, $img, 0, "");
 $point->free();
 
@@ -389,7 +405,7 @@ parameters.
 </table>
 
 <p>
-<center><img src="/images/gisready.png"><h3 class="subtitle"> Data Listing</h3></center>
+<center><img src="<?php echo $rooturl; ?>/images/gisready.png"><h3 class="subtitle"> Data Listing</h3></center>
 <pre><?php echo $tr; ?></pre>
 
 <p>You should be able to 'copy & paste' this raw data listing into a simple

@@ -13,7 +13,7 @@ $cities = $st->table;
 
  /* Get high and low temps for the past 7 days */
 $rs = pg_prepare($db, "SELECT", "SELECT day, max_tmpf, min_tmpf from summary 
-       WHERE station = $1 and day < 'TODAY' ORDER by day DESC LIMIT 7");
+       WHERE station = $1 and day <= 'TODAY' ORDER by day DESC LIMIT 7");
 
 $rs = pg_execute($db, "SELECT", Array($station));
 
@@ -38,7 +38,7 @@ if ($hasclimate){
  $db = iemdb("coop");
  $sqlDate = sprintf("2000-%s", date("m-d") );
  $rs = pg_prepare($db, "SELECT", "SELECT valid, high, low from climate 
-        WHERE station = $1 and valid < $2 ORDER by valid DESC LIMIT 7");
+        WHERE station = $1 and valid <= $2 ORDER by valid DESC LIMIT 7");
 
  $rs = pg_execute($db, "SELECT", Array(strtolower($climate_site), $sqlDate));
 
@@ -67,7 +67,7 @@ include("$rootpath/include/jpgraph/jpgraph_line.php");
 $a0 = min($lows);
 $a2 = max($highs);
 
-$graph = new Graph(480,360);
+$graph = new Graph(640,480);
 $graph->SetScale("textlin", min($a0,$a1)-4, max($a2,$a3)+2);
 $graph->SetMarginColor('white');
 
@@ -85,11 +85,11 @@ $graph->yscale->SetGrace(5);
 $graph->yaxis->SetTitle("Temperature [F]");
 
 $graph->legend->SetLayout(LEGEND_HOR);
-$graph->legend->Pos(0.01,0.06,"right","top");
+$graph->legend->Pos(0.01,0.07,"right","top");
 
 $bplot1 = new BarPlot($highs);
 $bplot1->SetFillColor('red');
-$bplot1->SetLegend("High Temp");
+$bplot1->SetLegend("High");
 $bplot1->value->Show();
 $bplot1->value->SetFormat('%d');
 $bplot1->value->SetColor('white');
@@ -100,7 +100,7 @@ $bplot1->SetWidth(0.7);
 
 $bplot2 = new BarPlot($lows);
 $bplot2->SetFillColor('blue');
-$bplot2->SetLegend("Low Temp");
+$bplot2->SetLegend("Low");
 $bplot2->value->Show();
 $bplot2->value->SetFormat('%d');
 $bplot2->value->SetColor('white');

@@ -9,11 +9,12 @@ $drct = Array();
 $dwpf = Array();
 $tmpf = Array();
 
-$dbconn = iemdb('asos');
+$dbconn = iemdb('access');
 $sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, vsby
-  , wind_chill(tmpf, sknt) as wcht, drct from t2010 WHERE station = 'AMW' 
-  and dwpf > -99 and drct >= 0 and valid > '2010-02-18' and 
-  valid < '2010-03-09 14:00' ORDER by valid ASC";
+  , wind_chill(tmpf, sknt) as wcht, drct from current_log WHERE 
+  station = 'SBDI4' 
+  and dwpf > -99 and drct >= 0 and valid > '2010-04-05' and 
+  valid < '2010-04-09 14:00' ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
@@ -24,20 +25,6 @@ for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 }
 
 
-$mtimes = Array();
-$mwdr = Array();
-$mdwpf = Array();
-$dbconn = iemdb('mos');
-$sql = "SELECT extract(epoch from ftime) as epoch, wdr, dpt, tmp, wsp from t2009 
-        WHERE station = 'KEST' and model = 'GFS' and 
-        runtime = '2009-06-16 12:00+00' ORDER by ftime ASC";
-$rs = pg_query($dbconn, $sql);
-for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
-{
-  $mtimes[] = $row["epoch"];
-  $mwdr[] = $row["wdr"];
-  $mdwpf[] = $row["dpt"];
-}
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
@@ -46,14 +33,14 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(620,480,"example1");
+$graph = new Graph(320,280,"example1");
 $graph->SetScale("datlin");
 //$graph->SetY2Scale("lin");
 $graph->img->SetMargin(45,10,30,50);
 $graph->SetMarginColor('white');
 $graph->xaxis->SetLabelAngle(90);
-$graph->xaxis->SetLabelFormatString("M d", true);
-//$graph->xaxis->scale->SetDateFormat("M d h A");
+//$graph->xaxis->SetLabelFormatString("M d", true);
+$graph->xaxis->scale->SetDateFormat("h A");
 $graph->xaxis->SetPos("min");
 
 //$graph->y2axis->SetTitleMargin(20);
@@ -71,13 +58,13 @@ $graph->yaxis->SetTitle("Temperature [F]");
 //$graph->tabtitle->Set('Recent Comparison');
 $graph->yaxis->scale->ticks->Set(90,15);
 $graph->yaxis->scale->ticks->SetLabelFormat("%5.0f");
-$graph->title->Set('Ames [KAMW] Time Series');
+$graph->title->Set("Bedford SchoolNet \n5 April 2010 Time Series");
 
   $graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
   $graph->SetColor('wheat');
 
   $graph->legend->SetLayout(LEGEND_HOR);
-  $graph->legend->SetPos(0.01,0.04, 'right', 'top');
+  $graph->legend->SetPos(0.25,0.15, 'right', 'top');
 //  $graph->legend->SetLineSpacing(3);
 
   $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCEE@0.5');
@@ -85,28 +72,19 @@ $graph->title->Set('Ames [KAMW] Time Series');
   $graph->xgrid->Show();
 
 
-// Create the linear plot
-$lineplot=new ScatterPlot($tmpf, $times);
-$lineplot->SetLegend("Wind Dir");
-$lineplot->SetColor("blue");
-//$graph->Add($lineplot);
 
-// Create the linear plot
-$lineplot4=new ScatterPlot($mwdr,$mtimes);
-$lineplot4->SetLegend("GFS Forecast");
-$lineplot4->mark->SetFillColor("green");
-//$lineplot4->SetStyle("dashed");
-//$graph->Add($lineplot4);
 
 $lineplot2=new LinePlot($tmpf, $times);
-//$lineplot2->SetLegend("nt");
+$lineplot2->SetLegend("Air Temp");
 $lineplot2->SetColor("red");
 $lineplot2->SetWeight(3);
 $graph->Add($lineplot2);
 
-$lineplot3=new LinePlot($mdwpf, $mtimes);
+$lineplot3=new LinePlot($dwpf, $times);
+$lineplot3->SetLegend("Dew Point");
 $lineplot3->SetColor("green");
-//$graph->AddY2($lineplot3);
+$lineplot3->SetWeight(3);
+$graph->Add($lineplot3);
 
 
 //$graph->AddLine(new PlotLine(HORIZONTAL,32,"blue",2));

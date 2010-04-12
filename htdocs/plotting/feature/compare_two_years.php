@@ -11,26 +11,26 @@ $pmsl2 = Array();
 
 $dbconn = iemdb('asos');
 $sql = "SELECT dwpf, extract(EPOCH from valid) as epoch, alti, tmpf, p01m / 24.5 as phour
-  from t2009 WHERE station = 'DSM' and valid > '2009-05-15' and 
-  valid < '2009-06-15' and dwpf > 0 ORDER by valid ASC";
+  from t2010 WHERE station = 'DSM' and valid > '2010-01-15' and 
+  valid < '2010-04-15' and dwpf > 0 ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $times[] = $row["epoch"];
-  $pmsl[] = $row["dwpf"];
+  $pmsl[] = $row["tmpf"];
   //$feel[] = wcht_idx($row['tmpf'], $row["sknt"] * 1.15);
 }
 
-$sql = "SELECT dwpf, extract(EPOCH from (valid + '1 year'::interval)) as epoch, alti, tmpf, p01m / 24.5 as phour
-  from t2008 WHERE alti > 25 and station = 'DSM' and valid > '2008-05-15' 
-  and valid < '2008-06-15' and dwpf > 0 ORDER by valid ASC";
+$sql = "SELECT dwpf, extract(EPOCH from (valid + '9 year'::interval)) as epoch, alti, tmpf, p01m / 24.5 as phour
+  from t2001 WHERE alti > 25 and station = 'DSM' and valid > '2001-01-15' 
+  and valid < '2001-04-15' and dwpf > 0 ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $times2[] = $row["epoch"];
-  $pmsl2[] = $row["dwpf"];
+  $pmsl2[] = $row["tmpf"];
   //$feel[] = wcht_idx($row['tmpf'], $row["sknt"] * 1.15);
 }
 

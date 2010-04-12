@@ -302,7 +302,7 @@ LAYER
   NAME "cnttime"
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select b.geom, b.oid as boid, b.tempval / 24 / 60 as t from roads_base b) as foo using UNIQUE boid using SRID=26915"
+  DATA "geom from (select b.geom, b.oid as boid, b.tempval / 1440.0 / 70.0 * 100.0 as t from roads_base b) as foo using UNIQUE boid using SRID=26915"
   STATUS OFF
   TYPE LINE
   DUMP TRUE
@@ -316,8 +316,8 @@ LAYER
   TEMPLATE "roadsq.html"
   LABELCACHE OFF
   CLASS
-    NAME '0-4'
-    EXPRESSION ([t] < 4)
+    NAME '10-15'
+    EXPRESSION ([t] < 15)
     STYLE
       COLOR 0 0 255
       SIZE 4
@@ -325,8 +325,8 @@ LAYER
     END
   END
   CLASS
-    NAME '4-7'
-    EXPRESSION ([t] >= 4 and [t] < 7)
+    NAME '15-25'
+    EXPRESSION ([t] >= 15 and [t] < 25)
     STYLE
       COLOR 51 255 0
       SIZE 4
@@ -334,8 +334,8 @@ LAYER
     END
   END
   CLASS
-    NAME '7-10'
-    EXPRESSION ([t] >= 7 and [t] < 10)
+    NAME '25-35'
+    EXPRESSION ([t] >= 25 and [t] < 35)
     STYLE
       COLOR 255 255 0
       SIZE 4
@@ -343,8 +343,8 @@ LAYER
     END
   END
   CLASS
-    NAME '10-13'
-    EXPRESSION ([t] >= 10 and [t] < 13)
+    NAME '35-40'
+    EXPRESSION ([t] >= 35 and [t] < 40)
     STYLE
       COLOR 255 204 0
       SIZE 4
@@ -352,8 +352,8 @@ LAYER
     END
   END
   CLASS
-    NAME '13+'
-    EXPRESSION ([t] >= 13)
+    NAME '40-50'
+    EXPRESSION ([t] >= 40)
     STYLE
       COLOR 255 102 0
       SIZE 4
@@ -424,8 +424,9 @@ LAYER
     END
     STYLE
       COLOR 0 0 0
-      WIDTH 3
-      ANTIALIAS TRUE
+      SIZE 3
+      SYMBOL 'circle'
+      #ANTIALIAS TRUE
     END
   END
   CLASS
