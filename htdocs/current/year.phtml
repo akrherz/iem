@@ -1,11 +1,43 @@
 <?php 
 include("../../config/settings.inc.php");
-	$THISPAGE = "current-year";
-	$TITLE = "IEM | Current | Yearly Data";
-	include("$rootpath/include/header.php"); 
+include("$rootpath/include/forms.php"); 
+$TITLE = "IEM | Current | Yearly Plots";
+$THISPAGE = "current-year";
+include("$rootpath/include/header.php"); 
 ?>
+<h4>Precipitation</h4>
 
-<b>In progress...</b>
+<ul class="iem-list">
+ <li><a href="../data/summary/year/diff.png">Departure from normal</a></li>
+ <li><a href="../data/summary/year/stage4obs.png">Stage4 estimates</a></li>
+ <li><a href="../data/summary/year/normals.png">Normal accumulation</a></li>
+</ul>
+
+
+<h4>Temperature</h4>
+<ul class="iem-list">
+<li>Minimum temp this fall/winter<br>
+     &nbsp; &nbsp; <a href="/data/summary/fallLow.gif">Plot</a> or
+    <a href="/data/summary/fallLowC.gif">Contour</a></li>
+<li><a href="/plotting/coop/climate_fe.php">Annual Average Temperatures</a></li>
+<li><a href="/plotting/coop/vyear_fe.php">Yearly Departures from Average</a></li>
+<li><a href="/COOP/freezing.php">Freezing Statistics</a></li>
+<li><a href="/data/summary/gdd_jan1.png">Accumulated Growing Degree Days-(base=50)</a></li>
+</ul>
+
+<h4>Past 4 Months</h4>
+<ul class="iem-list">
+ <li><a href="/data/summary/4mon_stage4obs.png">Estimated accumulation</a></li>
+ <li><a href="/data/summary/4mon_normals.png">Climatology</a></li>
+ <li><a href="/data/summary/4mon_diff.png">Departure from normal</a></li>
+</ul>
+
+
+<h4>Winds</h4>
+<ul class="iem-list">
+<li><a href="http://mesonet.agron.iastate.edu/sites/windrose.phtml?station=DSM&network=IA_ASOS">Wind Roses</a></li>
+</ul>
+
 
 
 <?php include("$rootpath/include/footer.php"); ?>
