@@ -1,11 +1,7 @@
 <?php
 function mktitlelocal($map, $imgObj, $height, $titlet) { 
  
-
-
   $layer = $map->getLayerByName("credits");
- 
-     // point feature with text for location
   $point = ms_newpointobj();
   $point->setXY( 40, 16);
   $point->draw($map, $layer, $imgObj, 0,

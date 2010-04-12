@@ -37,7 +37,8 @@ $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 $map->set("height", 768);
 $map->set("width",  1024);
 //$map->setExtent(-98, 40, -90, 45);
-$map->setExtent(-125, 29, -65, 49);
+//US $map->setExtent(-125, 29, -65, 49);
+$map->setExtent(-95, 34, -75, 44);
 
 $namer = $map->getlayerbyname("namerica");
 $namer->set("status", MS_ON);
@@ -56,7 +57,7 @@ $counties->set("status", MS_ON);
 $warnings0_c = $map->getlayerbyname("sbw");
 $warnings0_c->set("status", MS_ON);
 $warnings0_c->set("connection", $_DATABASES["postgis"]);
-$warnings0_c->set("data", "geom from (select phenomena, geom, oid from warnings_2008 WHERE significance != 'A' and phenomena in ('SV','TO') and issue > '2008-05-24' and gtype = 'P' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+$warnings0_c->set("data", "geom from (select phenomena, geom, oid from warnings_2009 WHERE significance != 'A' and phenomena in ('SV','TO') and issue > '2009-02-11 12:00' and issue < '2009-02-12 06:00' and gtype = 'P' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
 
 
 /*
@@ -91,7 +92,7 @@ $warnings0_c->draw($img);
 $states->draw($img);
 
 
-mktitle($map, $img, "          May 24 - Jun 10 2008 Storm Based Warnings");
+mktitle($map, $img, "          Feb 11 12z - Feb 12 6z 2009 Storm Based Warnings");
 $map->drawLabelCache($img);
 mkl($map, $img);
 

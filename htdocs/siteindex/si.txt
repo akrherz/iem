@@ -272,34 +272,6 @@
 .|Ag Climate|http://mesonet.agron.iastate.edu/agclimate/index.php|||bodyframe
 ..|Station Information|http://mesonet.agron.iastate.edu/agclimate/info.txt|||bodyframe
 ..|Cold Season Disclaimer|http://mesonet.agron.iastate.edu/agclimate/hist/prec_winter.html|||bodyframe
-.|Growing Season
-..|Quality Control|http://mesonet.agron.iastate.edu/QC/methods/gdd.php|||bodyframe
-...|Growing Degree Days
-....|GDD Plot|http://mesonet.agron.iastate.edu/data/summary/gdd_qc.gif|||bodyframe
-....|GDD Contour Map|http://mesonet.agron.iastate.edu/data/summary/gdd_qc_contour.gif|||bodyframe
-....|ASOS/AWOS|http://mesonet.agron.iastate.edu/data/summary/gdd_qc_asos.gif|||bodyframe
-....|RWIS|http://mesonet.agron.iastate.edu/data/summary/gdd_qc_rwis.gif|||bodyframe
-....|Schoolnet|http://mesonet.agron.iastate.edu/data/summary/gdd_qc_snet.gif|||bodyframe
-....|ISU Ag|http://mesonet.agron.iastate.edu/agclimate/daily_pics/gs-gdd-out.png|||bodyframe
-...|Stress Degree Days
-....|SDD Plot|http://mesonet.agron.iastate.edu/data/summary/sdd_qc.gif|||bodyframe
-....|SDD Contour Map|http://mesonet.agron.iastate.edu/data/summary/sdd_qc_contour.gif|||bodyframe
-....|ASOS/AWOS|http://mesonet.agron.iastate.edu/data/summary/sdd_qc_asos.gif|||bodyframe
-....|RWIS|http://mesonet.agron.iastate.edu/data/summary/sdd_qc_rwis.gif|||bodyframe
-....|Schoolnet|http://mesonet.agron.iastate.edu/data/summary/sdd_qc_snet.gif|||bodyframe
-..|Non Quality Control
-...|Growing Degree Days
-....|GDD Plot|http://mesonet.agron.iastate.edu/data/summary/gdd.gif|||bodyframe
-....|GDD Contour Map|http://mesonet.agron.iastate.edu/data/summary/gdd_contour.gif|||bodyframe
-....|ASOS/AWOS|http://mesonet.agron.iastate.edu/data/summary/gdd_asos.gif|||bodyframe
-....|RWIS|http://mesonet.agron.iastate.edu/data/summary/gdd_rwis.gif|||bodyframe
-....|Schoolnet|http://mesonet.agron.iastate.edu/data/summary/gdd_snet.gif|||bodyframe
-...|Stress Degree Days
-....|SDD Plot|http://mesonet.agron.iastate.edu/data/summary/sdd.gif|||bodyframe
-....|SDD Contour Map|http://mesonet.agron.iastate.edu/data/summary/sdd_contour.gif|||bodyframe
-....|ASOS/AWOS|http://mesonet.agron.iastate.edu/data/summary/sdd_asos.gif|||bodyframe
-....|RWIS|http://mesonet.agron.iastate.edu/data/summary/sdd_rwis.gif|||bodyframe
-....|Schoolnet|http://mesonet.agron.iastate.edu/data/summary/sdd_snet.gif|||bodyframe
 ..|COOP|http://db1.mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.phtml|||bodyframe
 .|Network Mainpages
 ..|ASOS|http://mesonet.agron.iastate.edu/ASOS/|||bodyframe

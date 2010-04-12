@@ -12,7 +12,7 @@ UNITS METERS
 SHAPEPATH "/mesonet/data/gis/"
 SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR 255 255 255
-IMAGETYPE PNG
+IMAGETYPE PNG24
 TRANSPARENT off
 INTERLACE off
 
@@ -81,7 +81,7 @@ LAYER
   TYPE POINT
   LABELCACHE OFF
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     LABEL
@@ -89,7 +89,7 @@ LAYER
       OUTLINECOLOR  0 0 0
       SHADOWCOLOR 0 0 0
       SHADOWSIZE 1 1
-      SIZE 14
+      SIZE 20
       #MINSIZE 4
       #MAXSIZE 18
       TYPE TRUETYPE
@@ -104,7 +104,7 @@ LAYER
   CLASS
     LABEL
       COLOR 0 0 0
-      SIZE 8
+      SIZE 14
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
@@ -122,7 +122,7 @@ LAYER
       OUTLINECOLOR  0 0 0
       SHADOWCOLOR 0 0 0
       SHADOWSIZE 1 1
-      SIZE 14
+      SIZE 20
       #MINSIZE 4
       #MAXSIZE 18
       TYPE TRUETYPE
@@ -137,7 +137,7 @@ LAYER
   CLASS
     LABEL
       COLOR 0 0 0
-      SIZE 8
+      SIZE 14
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
@@ -156,12 +156,12 @@ LAYER
   TYPE LINE
   STATUS ON
   PROJECTION
-   "proj=latlong"
+   "init=epsg:26915"
   END
-  DATA static/shape/4326/us/interstates.shp
-#  CLASSITEM "FCC"
+  DATA static/shape/26915/iowa/iaroads.shp
+  #CLASSITEM "STATE"
   CLASS
-#    EXPRESSION /A1[0-9]/
+    EXPRESSION "[NAME] = 'Interstate Route 35'"
     COLOR 119 136 153
     SYMBOL 1
     SIZE 2
