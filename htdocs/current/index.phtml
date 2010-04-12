@@ -1,9 +1,18 @@
 <?php 
 include("../../config/settings.inc.php");
-	$THISPAGE = "current-surface";
+	$THISPAGE = "current-products";
 	$TITLE = "IEM | Current Data";
 	include("$rootpath/include/header.php"); 
 ?>
+
+<table width="800px">
+<tr><th>IEM Station Plot</th><th>Current Temperatures</th><th>Rainfall Today</th></tr>
+<tr>
+<td><a href="<?php echo $rooturl; ?>/timemachine/#1.0"><img src="../data/mesonet.gif" border="0" width="275"/></a></td>
+<td><a href="<?php echo $rooturl; ?>/data/iowa_tmpf.png"><img src="../data/iowa_tmpf.png" border="0" width="275"/></a></td>
+<td><a href="<?php echo $rooturl; ?>/data/summary/today_prec.png"><img src="../data/summary/today_prec.png" border="0" width="275"/></a></td>
+</tr>
+</table>
 
 
 
@@ -16,12 +25,6 @@ include("../../config/settings.inc.php");
  <li><a href="<?php echo $rooturl; ?>/timemachine/#4.0">Upper Mid-West</a> [<a href="loop.phtml?prod=mwmesonet">Loop</a>]</li>
 </ul>
 
-<h3 class="subtitle">Zoomed In Mesonet Plots</h3>
-<ul>
-  <li><a href="<?php echo $rooturl; ?>/data/CBF_mesonet.gif">Council Bluffs</a></li>
-  <li><a href="<?php echo $rooturl; ?>/data/CID_mesonet.gif">Cedar Rapids</a></li>
-  <li><a href="<?php echo $rooturl; ?>/data/DSM_mesonet.gif">Des Moines</a></li>
-</ul>
 
 <h3 class="subtitle">Precipitation</h3>
 <ul>
@@ -31,18 +34,12 @@ include("../../config/settings.inc.php");
   <li><a href="<?php echo $rooturl; ?>/data/nexradPrecipNTP.gif">NEXRAD Storm Total Composite</a></li>
 </ul>
 
+<h3 class="subtitle">External Website Resources:</h3>
+<a href="http://www.rap.ucar.edu/weather/surface/">RAP Surface Page</a>
+
 </td><td valign="top">
 
-<h3 class="subtitle">Individual Network Plots</h3>
-<ul>
-  <li><a href="<?php echo $rooturl; ?>/data/asos.gif">ASOS + AWOS</a></li>
-  <li><a href="<?php echo $rooturl; ?>/data/awos.gif">AWOS</a></li>
-  <li><a href="<?php echo $rooturl; ?>/data/rwis.gif">RWIS</a></li>
-  <li><a href="<?php echo $rooturl; ?>/GIS/apps/mesoplot/plot.php">SchoolNets</a></li>
-</ul>
-
-<h3 class="subtitle">Parameter 
-Plots</h3>
+<h3 class="subtitle">Single Variable Plots</h3>
 <ul>  <li><a href="<?php echo $rooturl; ?>/data/mesonet_altm.gif">Altimeter</a></li>
   <li><a href="<?php echo $rooturl; ?>/data/ceil.gif">Ceiling</a></li>
   <li><a href="<?php echo $rooturl; ?>/data/heat.gif">Heat Index</a></li>
@@ -52,7 +49,6 @@ Plots</h3>
   <li><a href="<?php echo $rooturl; ?>/timemachine/#16.<?php echo date('Ymd');?>0000">Wind Gust Today</a></li>
 </ul>
 
-</td><td valign="top">
 
 <h3 class="subtitle">Temporal Change Plots</h3>
 <ul>
@@ -60,20 +56,44 @@ Plots</h3>
   <li><a href="<?php echo $rooturl; ?>/GIS/apps/delta/plot.php">1 hour Pressure Change</a></li>
 </ul>
 
+</td><td valign="top">
 
-<h3 class="subtitle">Sortable Current Conditions</h3>
-<ul>
- <li><a href="<?php echo $rooturl; ?>/ASOS/current.phtml">ASOS</a></li>
- <li><a href="<?php echo $rooturl; ?>/AWOS/current.phtml">AWOS</a></li>
- <li><a href="<?php echo $rooturl; ?>/COOP/current.phtml">COOP</a></li>
- <li><a href="<?php echo $rooturl; ?>/DCP/current.phtml">DCP</a></li>
- <li><a href="<?php echo $rooturl; ?>/schoolnet/current.phtml">SchoolNet</a></li>
- <li><a href="<?php echo $rooturl; ?>/RWIS/current.phtml">RWIS</a></li>
- <li><a href="<?php echo $rooturl; ?>/current/all.phtml">All of Iowa</a></li>
-</ul>
 
-<p><a href="<?php echo $rooturl; ?>/wx/afos/">NWS Text Product Finder</a>
+<h3 class="subtitle">Gridded Surface Plots:</h3>
+<table>
+<tr><td>
+  <br><a href="/data/surfaceTW0.gif">Temps & Winds</a></td><td>
+         <br><a href="SFloop.php?product=TW">Loop</a></td></tr>
+<tr><td>
+  <a href="/data/surfaceDW0.gif">Dew Points & Winds</a></td><td>
+         <a href="SFloop.php?product=DW">Loop</a></td></tr>
+<tr><td>
+  <a href="/data/surfaceTE0.gif">Theta E & Winds</a></td><td>
+         <a href="SFloop.php?product=TE">Loop</a></td></tr>
+<tr><td>
+  <a href="/data/surfaceMD0.gif">Moisture Divergence</a></td><td>
+         <a href="SFloop.php?product=MD">Loop</a></td></tr>
+<tr><td>
+  <a href="/data/surfaceFRNT0.gif">Frontogensis</a></td><td>
+         <a href="SFloop.php?product=FRNT">Loop</a></td></tr>
+<tr><td>
+  <a href="/data/surfaceDIV0.gif">Divergence</a></td><td>
+         <a href="SFloop.php?product=DIV">Loop</a></td></tr>
+</table>
 
-</td></tr></table>
+
+
+<p><h3 class="subtitle">Soundings:</h3>
+<a href="http://www.rap.ucar.edu/weather/upper/sla_wp.gif">Slater Profiler</a>
+<br /><a href="http://www.rap.ucar.edu/weather/upper/dvn.gif">Davenport</a>
+<br><a href="http://www.rap.ucar.edu/weather/upper/oax.gif">Omaha</a>
+<br><a href="http://www.rap.ucar.edu/weather/upper/mpx.gif">Minneapolis</a>
+<br><a href="http://www.rap.ucar.edu/weather/upper/top.gif">Topeka</a>
+
+</td></tr>
+</table>
+
+</div>
+
 
 <?php include("$rootpath/include/footer.php"); ?>
