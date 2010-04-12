@@ -5,6 +5,7 @@ cd ../current
 /mesonet/python/bin/python vsby.py
 /mesonet/python/bin/python today_precip.py >& /dev/null
 /mesonet/python/bin/python today_gust.py
+/mesonet/python/bin/python temperature.py
 
 cd ../summary
 /mesonet/python/bin/python updateRain.py
