@@ -28,3 +28,6 @@ cd ../season
 cd ../year
 /mesonet/python/bin/python precip.py
 /mesonet/python/bin/python plot_gdd.py
+
+cd ../summary
+/mesonet/python/bin/python rwis_daily_summary.py
