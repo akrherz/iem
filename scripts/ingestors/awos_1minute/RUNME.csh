@@ -48,3 +48,6 @@ psql -h iemdb awos << EOF
  create index ${tablename}_stn_idx on ${tablename}(station);
  \q
 EOF
+
+# Adjust summary data
+/mesonet/python/bin/python update_summary.py ${YEAR} ${MONTH}
