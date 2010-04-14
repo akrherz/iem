@@ -25,11 +25,11 @@ def compare_with_summary(ts, row):
         rs = [{'pday': None, 'max_tmpf': None, 'min_tmpf': None}]
 
     if (rs[0]['pday'] != rainfall or 
-       rs[0]['high'] != high or 
-       rs[0]['low'] != low):
+       rs[0]['max_tmpf'] != high or 
+       rs[0]['min_tmpf'] != low):
        sql = """UPDATE summary_%s SET max_tmpf = %s, min_tmpf = %s,
               pday = %s WHERE network = 'AWOS' and station = '%s' and
-              day = '%s'""" % (ts.year, rs[0]['high'], rs[0]['low'],
+              day = '%s'""" % (ts.year, rs[0]['max_tmpf'], rs[0]['min_tmpf'],
               rs[0]['pday'], station, date)
        iem.query(sql)
 
