@@ -41,9 +41,12 @@ def run_month(ts):
        from (SELECT station, date(valid) as d, 
        extract(hour from valid) as hr,
        max(p01i) as rainfall, max(tmpf) as high, min(tmpf) as low
-       from alldata WHERE valid >= '%s' GROUP by station, d, hr) as foo
+       from alldata WHERE valid >= '%s' and valid < '%s' 
+       GROUP by station, d, hr) as foo
        GROUP by station, d""" % (
-       ts.strftime("%Y-%m-%d") )).dictresult()
+       ts.strftime("%Y-%m-%d"),
+       (ts + mx.DateTime.RelativeDateTime(months=1)).strftime("%Y-%m-%d") )
+       ).dictresult()
     for i in range(len(rs)):
         compare_with_summary(ts, rs[i] )
 
