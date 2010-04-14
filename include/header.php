@@ -56,9 +56,11 @@ $_pages = Array(
  ),
  "current" => Array(
     "base" => Array("title" => "Current", "url" => "/current/"),
-    "advanced" => Array("title" => "Advanced Products", "url" => "/current/misc.phtml"),
+    "products" => Array("title" => "Products", "url" => "/current/"),
     "sort" => Array("title" => "Sortable Currents", "url" => "/my/current.phtml"),
-    "surface" => Array("title" => "Surface Data", "url" => "/current/"),
+    "month" => Array("title" => "Month", "url" => "/current/month.phtml"),
+    "gs" => Array("title" => "Growing Season", "url" => "/current/gs.phtml"),
+    "year" => Array("title" => "Year", "url" => "/current/year.phtml"),
     "radar" => Array("title" => "RADAR & Satellite", "url" => "/current/radar.phtml"),
     "placefiles" => Array("title" => "GR Placefiles", "url" => "/request/grx/"),
     "afos" => Array("title" => "NWS Text", "url" => "/wx/afos/"),
