@@ -29,8 +29,10 @@ def compare_with_summary(ts, row):
        rs[0]['min_tmpf'] != low):
        sql = """UPDATE summary_%s SET max_tmpf = %s, min_tmpf = %s,
               pday = %s WHERE network = 'AWOS' and station = '%s' and
-              day = '%s'""" % (ts.year, rs[0]['max_tmpf'], rs[0]['min_tmpf'],
-              rs[0]['pday'], station, date)
+              day = '%s'""" % (ts.year, 
+              (rs[0]['max_tmpf'] or 'Null'), 
+              (rs[0]['min_tmpf'] or 'Null'), 
+              (rs[0]['pday'] or 'Null'), station, date)
        iem.query(sql)
 
 def run_month(ts):
