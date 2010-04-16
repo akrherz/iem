@@ -77,7 +77,7 @@ def hardcode_asos( ts ):
        ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
         cid = asos2climate[rs[i]['station']]
-        print '%s - Precip: %.2f  DSM: %.2f High: %s DSM: %s Low: %s DSM: %s' % (rs[i]['station'],
+        print '%s - Precip: %.2f  DSM: %.2f High: %.1f DSM: %s Low: %.1f DSM: %s' % (rs[i]['station'],
                stations[cid]['precip'], rs[i]['pday'],
                stations[cid]['high'], rs[i]['max_tmpf'],
                stations[cid]['low'], rs[i]['min_tmpf']
