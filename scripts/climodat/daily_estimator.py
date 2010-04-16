@@ -58,9 +58,9 @@ for i in range(len(rs)):
         x += 1
     stations[ rs[i]['id'].lower() ]['gridx'] = x
 
-def hardcode_asos_precip( ts ):
+def hardcode_asos( ts ):
     """
-    Hard set the ASOS DSM precip 
+    Hard set the ASOS DSM 
     """
     # Figure out the sites we care about
     asos2climate = {}
@@ -69,17 +69,22 @@ def hardcode_asos_precip( ts ):
     for i in range(len(rs)):
         asos2climate[ rs[i]['id'] ] = rs[i]['climate_site'].lower()
 
-    # Get the ASOS precip
+    # Get the ASOS data
     rs = iem.query("""
-       SELECT station, pday
+       SELECT station, pday, max_tmpf, min_tmpf
        from summary_%s WHERE day = '%s' and network in ('IA_ASOS')
        and pday >= 0 ORDER by station ASC""" % (
        ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
         cid = asos2climate[rs[i]['station']]
-        print '%s - Estimated: %.2f  DSM: %.2f' % (rs[i]['station'],
-               stations[cid]['precip'], rs[i]['pday'])
+        print '%s - Precip: %.2f  DSM: %.2f High: %s DSM: %s Low: %s DSM: %s' % (rs[i]['station'],
+               stations[cid]['precip'], rs[i]['pday'],
+               stations[cid]['high'], rs[i]['max_tmpf'],
+               stations[cid]['low'], rs[i]['min_tmpf']
+        )
         stations[cid]['precip'] = rs[i]['pday']
+        stations[cid]['high'] = rs[i]['max_tmpf']
+        stations[cid]['low'] = rs[i]['min_tmpf']
 
 
 def estimate_precip( ts ):
@@ -207,5 +212,5 @@ if __name__ == '__main__':
     estimate_hilo( ts )
     estimate_precip( ts )
     estimate_snow( ts )
-    hardcode_asos_precip( ts )
+    hardcode_asos( ts )
     commit( ts )
