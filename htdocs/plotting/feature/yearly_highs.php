@@ -5,11 +5,11 @@ include("../../../config/settings.inc.php");
 $years = Array();
 $vals = Array();
 
-$ts0 = mktime(0,0,0,1,1,1893);
+//$ts0 = mktime(0,0,0,1,1,1893);
 
 $fc = file('yearly.txt');
 while (list ($line_num, $line) = each ($fc)) {
-      $tokens = split ("\|", $line);
+      $tokens = split ("   ", $line);
    $vals[] = floatval($tokens[1]);
    $years[] = $tokens[0];
  }
@@ -20,7 +20,7 @@ include ("$rootpath/include/jpgraph/jpgraph_plotline.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(600,480,"example1");
+$graph = new Graph(320,280,"example1");
 $graph->SetScale("textlin");
 $graph->img->SetMargin(45,10,35,65);
 
@@ -29,14 +29,14 @@ $graph->xaxis->SetLabelAngle(90);
 //$graph->xaxis->scale->SetDateFormat("M d h A");
 $graph->xaxis->SetPos("min");
 $graph->xaxis->SetTickLabels($years);
-//$graph->xaxis->SetTextTickInterval(3);
+$graph->xaxis->SetTextTickInterval(10);
 $graph->xaxis->SetTitleMargin(30);
 //$graph->yaxis->SetTitleMargin(33);
 
 //$graph->xaxis->SetTitle("Valid Local Time");
-$graph->yaxis->SetTitle("Avg Wind Speed [mph]");
-$graph->xaxis->SetTitle("*2010 data thru 24 March, climatology 11.6 mph");
-$graph->tabtitle->Set('Des Moines March Wind Speed');
+$graph->yaxis->SetTitle("Number of Events");
+$graph->xaxis->SetTitle("*2010 data thru 16 April, climatology 17 events");
+$graph->tabtitle->Set('Ames Temperature Cycles 26F-38F');
 //$graph->title->Set('Yearly net days above average');
 
 $graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
@@ -62,7 +62,7 @@ $lineplot=new BarPlot($vals);
 $lineplot->SetColor("blue");
 $graph->Add($lineplot);
 
-$graph->AddLine(new PlotLine(HORIZONTAL,11.6,"red",2));
+$graph->AddLine(new PlotLine(HORIZONTAL,17,"red",2));
 
 // Display the graph
 $graph->Stroke();

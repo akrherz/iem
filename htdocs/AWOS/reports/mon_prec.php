@@ -49,7 +49,7 @@ Ext.onReady(function(){
 });
 </script>
 ';
-$THISPAGE = "networks-asos";
+$THISPAGE = "networks-awos";
 $TITLE = "IEM Iowa AWOS Monthly Precipitation";
 include("$rootpath/include/header.php"); 
 ?>

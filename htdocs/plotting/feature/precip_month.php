@@ -8,12 +8,12 @@ $labels = Array();
 $times = Array();
 $climate = Array();
 $d2009 = Array();
-$d2008 = Array();
+$d2010 = Array();
 
 /* Load up climatology and times arrays */
 $rs = pg_query($coop, "SELECT valid, precip from climate51 WHERE 
-  station = 'ia0000' and extract(month from valid) IN (4,5,6,7,8,9,10) 
-  ORDER by valid ASC");
+  station = 'ia0000' and extract(month from valid) IN (1,2,3,4) 
+  and valid < '2000-04-14' ORDER by valid ASC");
 $r = 0;
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
@@ -25,25 +25,26 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 
 /* Load up 2008 from coop */
 $rs = pg_query($coop, "SELECT day, precip from alldata WHERE 
-  stationid = 'ia0000' and year = 2008 and 
-  month IN (4,5,6,7,8,9,10) ORDER by day ASC");
+  stationid = 'ia0000' and year = 2009 and 
+  month IN (1,2,3,4) and day < '2009-04-14' ORDER by day ASC");
 $r = 0;
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
  $r += $row["precip"];
- $d2008[] = $r;
+ $d2009[] = $r;
 }
 
-/* Load up 2009 estimates from wepp */
-$rs = pg_query($wepp, "SELECT valid, sum(rainfall)/8012/25.4 as r from 
-      daily_rainfall_2009 d, hrap_polygons h WHERE d.hrap_i = h.hrap_i 
-      and valid >= '2009-04-01' and valid < '2009-11-01' GROUP by valid ORDER by valid ASC");
+/* Load up 2008 from coop */
+$rs = pg_query($coop, "SELECT day, precip from alldata WHERE 
+  stationid = 'ia0000' and year = 2010 and 
+  month IN (1,2,3,4) and day < '2010-04-14' ORDER by day ASC");
 $r = 0;
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
- $r += $row["r"];
- $d2009[] = $r;
+ $r += $row["precip"];
+ $d2010[] = $r;
 }
+
 
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
@@ -51,7 +52,7 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
-$graph = new Graph(320,280,"auto");    
+$graph = new Graph(600,480,"auto");    
 $graph->SetScale("textlin");
 $graph->legend->Pos(0.05,0.09);
 $graph->legend->SetLayout(LEGEND_HOR);
@@ -62,7 +63,7 @@ $graph->xaxis->SetTickLabels( $labels );
 $graph->xaxis->SetTextTickInterval( 10 );
 
 $graph->yaxis->title->Set("Accumulated Precip [inch]");
-$graph->title->Set("Iowa Precipitation in Apr-Oct");
+$graph->title->Set("Iowa Precipitation Estimate");
 //$graph->subtitle->Set("For April");
 
 $graph->SetShadow();
@@ -76,10 +77,10 @@ $lp1->SetWeight(2);
 $lp1->SetLegend("Climatology");
 $graph->Add($lp1);
 
-$lp2=new LinePlot($d2008);
+$lp2=new LinePlot($d2010);
 $lp2->SetColor("blue");
 $lp2->SetWeight(2);
-$lp2->SetLegend("2008");
+$lp2->SetLegend("2010");
 $graph->Add($lp2);
 
 $lp3=new LinePlot($d2009);
