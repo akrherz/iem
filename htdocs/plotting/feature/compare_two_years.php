@@ -10,8 +10,9 @@ $pmsl = Array();
 $pmsl2 = Array();
 
 $dbconn = iemdb('asos');
-$sql = "SELECT dwpf, extract(EPOCH from valid) as epoch, alti, tmpf, p01m / 24.5 as phour
-  from t2010 WHERE station = 'DSM' and valid > '2010-01-15' and 
+$sql = "SELECT dwpf, extract(EPOCH from valid) as epoch, alti, tmpf, 
+  p01m / 24.5 as phour
+  from t2010 WHERE station = 'PEA' and valid > '2010-04-01' and 
   valid < '2010-04-15' and dwpf > 0 ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 
@@ -22,9 +23,10 @@ for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
   //$feel[] = wcht_idx($row['tmpf'], $row["sknt"] * 1.15);
 }
 
-$sql = "SELECT dwpf, extract(EPOCH from (valid + '9 year'::interval)) as epoch, alti, tmpf, p01m / 24.5 as phour
-  from t2001 WHERE alti > 25 and station = 'DSM' and valid > '2001-01-15' 
-  and valid < '2001-04-15' and dwpf > 0 ORDER by valid ASC";
+$sql = "SELECT dwpf, extract(EPOCH from (valid + '0 year'::interval)) as epoch,
+  alti, tmpf, p01m / 24.5 as phour
+  from t2010 WHERE alti > 25 and station = 'IFA' and valid > '2010-04-01' 
+  and valid < '2010-04-15' and dwpf > 0 ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
@@ -41,10 +43,12 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(320,300,"example1");
+$graph = new Graph(640,480,"example1");
 $graph->SetScale("datlin");
 //$graph->SetY2Scale("lin");
-$graph->img->SetMargin(50,5,5,70);
+$graph->img->SetMargin(50,5,5,60);
+
+$graph->yaxis->scale->SetGrace(20);
 
 $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetLabelFormatString("M d", true);
@@ -52,12 +56,12 @@ $graph->xaxis->SetLabelFormatString("M d", true);
 $graph->xaxis->SetPos("min");
 
 $graph->yaxis->SetTitleMargin(35);
-$graph->xaxis->SetTitleMargin(40);
+$graph->xaxis->SetTitleMargin(30);
 
 
-$graph->xaxis->SetTitle("Valid Local Time");
+$graph->xaxis->SetTitle("Valid Local Time (April 2010)");
 //$graph->yaxis->SetTitle("Des Moines Altimeter [inch Hg]");
-$graph->yaxis->SetTitle("Des Moines Dew Point [F]");
+$graph->yaxis->SetTitle("Air Temperature [F]");
 //$graph->y2axis->SetTitle("Des Moines Precip [inch]");
 //$graph->tabtitle->Set('Recent Comparison');
 
@@ -65,7 +69,7 @@ $graph->yaxis->SetTitle("Des Moines Dew Point [F]");
   $graph->SetColor('wheat');
 
   $graph->legend->SetLayout(LEGEND_HOR);
-  $graph->legend->SetPos(0.15,0.01, 'right', 'top');
+  $graph->legend->SetPos(0.01,0.01, 'right', 'top');
 //  $graph->legend->SetLineSpacing(3);
 
   $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCEE@0.5');
@@ -75,11 +79,11 @@ $graph->yaxis->SetTitle("Des Moines Dew Point [F]");
 
 // Create the linear plot
 $lineplot=new LinePlot($pmsl, $times);
-$lineplot->SetLegend("2008");
+$lineplot->SetLegend("Pella (KPEA)");
 $lineplot->SetColor("red");
 
 $lineplot2=new LinePlot($pmsl2, $times2);
-$lineplot2->SetLegend("2007");
+$lineplot2->SetLegend("Iowa Falls (KIFA)");
 $lineplot2->SetColor("blue");
 
 // Create the linear plot
