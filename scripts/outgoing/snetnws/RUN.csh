@@ -18,7 +18,7 @@
 set TS=`date -u +%d%H%M`
 set mm=`date +'%M'`
 
-./snet_fe.py
+/mesonet/python/bin/python snet_fe.py
 
 mv snet.sao IA.snet${TS}.sao
 #mv snet2.sao IA.snet${TS}.sao
