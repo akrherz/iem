@@ -9,7 +9,7 @@
 import mx.DateTime, cgi
 from pyIEM import iemdb, stationTable
 i = iemdb.iemdb()
-mydb = i["asos"]
+mydb = i["iem"]
 st = stationTable.stationTable("/mesonet/TABLES/iowa.stns")
 
 requireHrs = [0]*25
@@ -118,19 +118,20 @@ def Main():
    ##
    #  Hack, since postgres won't index date(valid)
 
-  sqlStr = "SELECT station, max(p01m/25.4) as p01i,\
-    extract(hour from valid) as vhour from t%s \
-    WHERE valid BETWEEN '%s' and '%s' GROUP by station, vhour" % \
-    (ts.year, td, tm)
+  sqlStr = """SELECT extract('hour' from valid) as vhour, 
+    station, valid, phour from hourly_%s WHERE 
+    valid > '%s 00:00' and valid <= '%s 00:00'
+    and network in ('AWOS','IA_ASOS')""" % (ts.year, td, tm)
+
 
   rs = ""
-  try:
-    rs = mydb.query(sqlStr).dictresult()
-  except:
-    print "<p>Error: No data for that year"
+  #try:
+  rs = mydb.query(sqlStr).dictresult()
+  #except:
+  #  print "<p>Error: No data for that year"
 
   for i in range(len(rs)):
-    p01i = float(rs[i]["p01i"])
+    p01i = float(rs[i]["phour"])
     vhour = int(rs[i]["vhour"])
     if (p01i > 0):  # We should require this timestep
       requireHrs[ vhour ] = 1
