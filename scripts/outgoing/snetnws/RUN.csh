@@ -43,14 +43,14 @@ endif
 
 #rm snet.csv
 
-if ($mm == 16) then
+if ($mm == 15) then
     /home/ldm/bin/pqinsert -p "SUADSMRR5DMX.dat" LOCDSMRR5DMX.dat
 endif
-if ($mm == 36) then
+if ($mm == 35) then
     /home/ldm/bin/pqinsert -p "SUADSMRR5DMX.dat" LOCDSMRR5DMX.dat
 endif
 
-if ($mm == 56) then
+if ($mm == 55) then
   set len=`wc -l SUADSMRR5DMX.dat | awk '{print $1}'`
   if (${len} > 6 ) then
     /home/ldm/bin/pqinsert SUADSMRR5DMX.dat
@@ -60,7 +60,7 @@ if ($mm == 56) then
 endif
 
 
-if ($mm > 55 ) then
+if ($mm == 55 ) then
   set len=`wc -l SUAFSDRR5FSD.dat | awk '{print $1}'`
   if (${len} > 6 ) then
     /home/ldm/bin/pqinsert SUAFSDRR5FSD.dat
