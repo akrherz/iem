@@ -116,21 +116,11 @@ def Main():
 
    ##
    #  Hack, since postgres won't index date(valid)
+  sqlStr = """SELECT extract('hour' from valid) as vhour, 
+    station, valid, phour from hourly_%s WHERE 
+    valid > '%s 00:00' and valid <= '%s 00:00'
+    and network in ('KCCI','KIMT','KELO')""" % (ts.year, td, tm)
 
-  sqlStr = "SELECT extract('hour' from valid) as vhour, \
-    station, valid, phour from hourly_"+ sqlDate[:4] +" WHERE \
-    valid = '"+td+" 01:00' or valid = '"+td+" 02:00' or \
-    valid = '"+td+" 03:00' or valid = '"+td+" 04:00' or \
-    valid = '"+td+" 05:00' or valid = '"+td+" 06:00' or \
-    valid = '"+td+" 07:00' or valid = '"+td+" 08:00' or \
-    valid = '"+td+" 09:00' or valid = '"+td+" 10:00' or \
-    valid = '"+td+" 11:00' or valid = '"+td+" 12:00' or \
-    valid = '"+td+" 13:00' or valid = '"+td+" 14:00' or \
-    valid = '"+td+" 15:00' or valid = '"+td+" 16:00' or \
-    valid = '"+td+" 17:00' or valid = '"+td+" 18:00' or \
-    valid = '"+td+" 19:00' or valid = '"+td+" 20:00' or \
-    valid = '"+td+" 21:00' or valid = '"+td+" 22:00' or \
-    valid = '"+td+" 23:00' or valid = '"+td+" 00:00'  "
 
   rs = ""
   try:
