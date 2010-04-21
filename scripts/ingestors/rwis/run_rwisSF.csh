@@ -22,7 +22,7 @@ if (! -e /mesonet/data/gempak/pavement/${date}_rsf.gem) then
 	cp /mesonet/data/gempak/pavement/template.gem /mesonet/data/gempak/pavement/${date}_rsf.gem
 endif
 
-sfedit << EOF > surface_load.out
+sfedit << EOF > /tmp/rwis_surface_load.out
  SFFILE	= /mesonet/data/gempak/pavement/${date}_rsf.gem
  SFEFIL	= /tmp/rwis_surface.list
  list
