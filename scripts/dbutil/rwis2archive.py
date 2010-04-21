@@ -34,7 +34,7 @@ for i in range(len(rs)):
    rs[i]['tsf1'],
    rs[i]['tsf2'],
    rs[i]['tsf3'],
-   rs[i]['subf'],
+   rs[i]['rwis_subf'],
    rs[i]['gust'],
   (rs[i]['scond0'] or "Null"), 
   (rs[i]['scond1'] or "Null"), 
