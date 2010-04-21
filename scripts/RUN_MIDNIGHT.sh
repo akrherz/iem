@@ -6,3 +6,4 @@ cd qc
 
 cd ../dbutil
 /mesonet/python/bin/python rwis2archive.py
+/mesonet/python/bin/python snet2archive.py
