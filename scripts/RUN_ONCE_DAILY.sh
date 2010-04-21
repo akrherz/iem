@@ -9,3 +9,4 @@ cd ../outgoing
 cd ../dbutil 
 /mesonet/python/bin/python ot2archive.py
 /mesonet/python/bin/python hads_delete_dups.py
+./save_snet_raw.csh
