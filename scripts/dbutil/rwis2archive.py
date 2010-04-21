@@ -19,7 +19,7 @@ rwis.query(sql)
 # Get obs from Access
 sql = """SELECT * from current_log WHERE date(valid) = '%s' 
       and network = 'IA_RWIS'""" % (
-      ts.strftime("%Y-%m-%d"), networks)
+      ts.strftime("%Y-%m-%d"), )
 rs = iemdb.query(sql).dictresult()
 
 for i in range(len(rs)):
