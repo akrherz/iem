@@ -44,9 +44,6 @@ cfg = {
  '_title'             : "Iowa ASOS/AWOS Peak Wind Speed Reports",
  '_valid'             : "%s" % (now.strftime("%d %b %Y"), ),
  'lbTitleString'      : "[mph]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025,
  '_valuemask'         : valmask
 }
 # Generates tmp.ps
@@ -54,4 +51,4 @@ tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
 pqstr = "plot ac %s summary/today_gust.png iowa_wind_gust.png png" % (
         now.strftime("%Y%m%d%H%M"), )
-iemplot.postprocess(tmpfp, pqstr, "-rotate -90")
+iemplot.postprocess(tmpfp, pqstr)

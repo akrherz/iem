@@ -46,13 +46,10 @@ cfg = {
  '_title'             : "Iowa ASOS/AWOS Rainfall Reports",
  '_valid'             : "%s" % (now.strftime("%d %b %Y"), ),
  'lbTitleString'      : "[inch]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025,
  '_valuemask'         : valmask
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
 pqstr = "plot c 000000000000 summary/today_prec.png bogus png"
-iemplot.postprocess(tmpfp, pqstr, "-rotate -90")
+iemplot.postprocess(tmpfp, pqstr)

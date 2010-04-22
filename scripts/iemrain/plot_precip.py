@@ -27,15 +27,9 @@ cfg = {
  '_title'             : "Iowa Rainfall",
  '_valid'             : "1 Sep 2009  - 5 Sep 2009",
  'lbTitleString'      : "[inch]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
-iemplot.simple_grid_fill(nc.variables['lon'][:], nc.variables['lat'][:], grid, cfg)
+tmpfp = iemplot.simple_grid_fill(nc.variables['lon'][:], nc.variables['lat'][:], grid, cfg)
 
-os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage tmp.ps tmp.png")
-if os.environ["USER"] == "akrherz":
-  os.system("xv tmp.png")
-#os.remove("tmp.png")
-#os.remove("tmp.ps")
+pqstr = "plot c 000000000000 summary/gdd_mon.png bogus png"
+iemplot.postprocess(tmpfp, pqstr)

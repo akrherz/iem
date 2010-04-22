@@ -25,6 +25,8 @@ sdd86 = []
 valmask = []
 rs = iem.query(sql).dictresult()
 for i in range(len(rs)):
+  if rs[i]['lat'] is None:
+    print rs[i]
   lats.append( rs[i]['lat'] )
   lons.append( rs[i]['lon'] )
   gdd50.append( rs[i]['gdd'] )
@@ -41,12 +43,9 @@ cfg = {
  '_title'             : "Iowa %s GDD Accumulation" % (
                         now.strftime("%Y"), ),
  'lbTitleString'      : "[base 50]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, gdd50, cfg)
 
 pqstr = "plot c 000000000000 summary/gdd_jan1.png bogus png"
-iemplot.postprocess(tmpfp, pqstr, "-rotate -90")
+iemplot.postprocess(tmpfp, pqstr)

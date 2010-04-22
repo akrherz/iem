@@ -33,6 +33,7 @@ def hilo_valplot(lons, lats, highs, lows, cfg):
 
     rlist = Ngl.Resources()
     rlist.wkColorMap = cmap
+    #rlist.wkOrientation = "landscape"
     wks = Ngl.open_wks("ps", tmpfp, rlist)
 
     res = iowa()
@@ -81,13 +82,12 @@ def fit43(xmin, ymin, xmax, ymax, buffer=0):
     """
     Fit the bounds into an approximate 4x3 frame
     """
-    desired = 4.45/3.  # Slightly over, due to Lambert Projection
-    deltax = xmax - xmin + (buffer * 2.)
+    desired = 6.1/3.  # Slightly over, due to Lambert Projection
+    deltax = xmax - xmin 
     xavg = (xmax+xmin)/2.0
-    deltay = ymax - ymin + (buffer * 2. )
+    deltay = ymax - ymin
     yavg = (ymax+ymin)/2.0
     aspect = deltax / deltay
-    print "Aspect ratio: %s" % (aspect,)
     if aspect > desired:  # Need to vertically stretch!
         ymin = yavg - (deltax / desired * .5)
         ymax = yavg + (deltax / desired * .5)
@@ -107,18 +107,19 @@ def simple_valplot(lons, lats, vals, cfg):
     rlist = Ngl.Resources()
     if cfg.has_key("wkColorMap"):
         rlist.wkColorMap = cfg['wkColorMap']
+    #rlist.wkOrientation = "landscape"
 
     # Create Workstation
     wks = Ngl.open_wks( "ps",tmpfp,rlist)
 
     res = iowa()
     if cfg.has_key("_spatialDataLimiter"):
-        xmin, ymin, xmax, ymax = fit43( min(lons), min(lats), 
-                                        max(lons), max(lats), 0.25)
-        res.mpMinLonF    = xmin
-        res.mpMaxLonF    = xmax
-        res.mpMinLatF    = ymin
-        res.mpMaxLatF    = ymax
+        xmin, ymin, xmax, ymax = [ min(lons), min(lats), 
+                                        max(lons), max(lats) ]
+        res.mpMinLonF    = xmin - 0.25
+        res.mpMaxLonF    = xmax + 0.25
+        res.mpMinLatF    = ymin - 0.25
+        res.mpMaxLatF    = ymax + 0.25
         res.mpCenterLonF = (xmax + xmin)/2.0  # Central Longitude
         res.mpCenterLatF = (ymax + ymin)/2.0  # Central Latitude
     res.mpOutlineDrawOrder = "PreDraw"
@@ -175,6 +176,7 @@ def simple_grid_fill(xaxis, yaxis, grid, cfg):
     rlist = Ngl.Resources()
     if cfg.has_key("wkColorMap"):
         rlist.wkColorMap = cfg['wkColorMap']
+    #rlist.wkOrientation = "landscape"
 
     # Create Workstation
     wks = Ngl.open_wks( "ps",tmpfp,rlist)
@@ -199,9 +201,7 @@ def simple_grid_fill(xaxis, yaxis, grid, cfg):
                      lons[i], lats[i],txres)
 
 
-    pres = Ngl.Resources()
-    pres.nglFrame = False
-    Ngl.panel(wks,[contour],[1,1], pres)
+    Ngl.draw(contour)
 
     watermark(wks)
     manual_title(wks, cfg)
@@ -218,6 +218,7 @@ def simple_contour(lons, lats, vals, cfg):
     rlist = Ngl.Resources()
     if cfg.has_key("wkColorMap"):
         rlist.wkColorMap = cfg['wkColorMap']
+    #rlist.wkOrientation = "landscape"
 
     # Create Workstation
     wks = Ngl.open_wks( "ps",tmpfp,rlist)
@@ -249,10 +250,7 @@ def simple_contour(lons, lats, vals, cfg):
             Ngl.add_text(wks, contour, cfg["_format"] % vals[i], 
                      lons[i], lats[i],txres)
 
-
-    pres = Ngl.Resources()
-    pres.nglFrame = False
-    Ngl.panel(wks,[contour],[1,1], pres)
+    Ngl.draw( contour )
 
     watermark(wks)
     manual_title(wks, cfg)
@@ -291,7 +289,7 @@ def watermark(wks):
     txres.txFontHeightF = 0.016
     txres.txJust = "CenterLeft"
     lstring = "Iowa Environmental Mesonet"
-    Ngl.text_ndc(wks, lstring,.11,.19,txres)
+    Ngl.text_ndc(wks, lstring,.11,.186,txres)
 
     lstring = "Map Generated %s" % (mx.DateTime.now().strftime("%d %b %Y %-I:%M %p"),)
     txres.txFontHeightF = 0.010
@@ -355,11 +353,11 @@ def iowa2():
     #res.lbTitleDirection   = "Across"        # Make it appear rotated?
     res.lbPerimOn          = False            # Include a box aroundit
     res.lbPerimThicknessF  = 1.0             # Thicker line?
-    res.lbBoxMinorExtentF  = 0.2             # Narrower boxes
-    res.lbTitleFontHeightF = 0.016
-    res.lbLabelFontHeightF = 0.016
-    #res.lbRightMarginF    = -0.3
-    #res.lbLeftMarginF       = -0.3
+    #res.lbBoxMinorExtentF  = 0.15             # Narrower boxes
+    res.lbTitleFontHeightF = 0.012
+    res.lbLabelFontHeightF = 0.012
+    res.lbRightMarginF    = 0.01
+    res.lbLeftMarginF       = -0.02
     res.lbTitleExtentF     = 0.1
 
     #______________ Contour Defaults _______________________
@@ -369,9 +367,9 @@ def iowa2():
     res.cnLinesOn        = False   # No contour lines
     res.cnFillDrawOrder  = "Predraw"       # Draw contour first!
 
-    res.pmLabelBarHeightF = 0.4
-    res.pmLabelBarWidthF = 0.06
-    res.pmLabelBarKeepAspect = True
+    res.pmLabelBarHeightF = 0.5
+    res.pmLabelBarWidthF = 0.05
+    res.pmLabelBarKeepAspect = False
     res.pmLabelBarSide = "Right"
 
     res.mpFillOn                = True            # Draw map for sure
@@ -412,12 +410,13 @@ def iowa():
     res.mpProjection = "LambertEqualArea"   # Display projection
     res.mpCenterLonF = -93.5                # Central Longitude
     res.mpCenterLatF = 42.0                 # Central Latitude
-    res.mpLimitMode  = "LatLon"             # Display bounds  
-    res.mpMinLonF    = -96.7                # West
-    res.mpMaxLonF    = -90.1                # East
-    res.mpMinLatF    = 40.3                 # South
-    res.mpMaxLatF    = 43.7                 # North
-    res.mpPerimOn    = False                # Draw Border around Map
+    res.mpLimitMode  = "LatLon"             # Display bounds
+    xmin, ymin, xmax, ymax = [-96.7, 40.3, -90.1, 43.6]
+    res.mpMinLonF    = xmin
+    res.mpMaxLonF    = xmax
+    res.mpMinLatF    = ymin
+    res.mpMaxLatF    = ymax
+    res.mpPerimOn    = False               # Draw Border around Map
     res.mpDataBaseVersion       = "MediumRes"     # Don't need hires coast
     res.mpDataSetName           = "Earth..2"      # includes counties
     res.mpGridAndLimbOn         = False           # Annoying
@@ -425,6 +424,7 @@ def iowa():
     res.mpOutlineOn             = True           # Draw map for sure
     res.mpOutlineBoundarySets   = "NoBoundaries" # What not to draw
     res.mpOutlineSpecifiers     = ["Conterminous US : Iowa : Counties",]
+    res.mpShapeMode = "FreeAspect"
 
     return res
 
@@ -440,20 +440,21 @@ def midwest():
     # Setup the view
     res.nglMaximize         = False      # Prevent funky things
     res.vpWidthF            = 0.8       # Default width of map?
-    res.vpHeightF           = 1.0        # Go vertical
-    res.nglPaperOrientation = "portrait" # smile
-    res.vpXF                = 0.0        # Make Math easier
-    res.vpYF                = 1.0        # 
+    res.vpHeightF           = 0.6        # Go vertical
+    res.nglPaperOrientation = "landscape"
+    res.vpXF                = 0.1        # Make Math easier
+    res.vpYF                = 0.8        # 
 
     #____________ MAP STUFF ______________________
     res.mpProjection = "LambertEqualArea"   # Display projection
     res.mpCenterLonF = -93.5                # Central Longitude
     res.mpCenterLatF = 42.0                 # Central Latitude
-    res.mpLimitMode  = "LatLon"             # Display bounds  
-    res.mpMinLonF    = -108.0                # West
-    res.mpMaxLonF    = -83.1                # East
-    res.mpMinLatF    = 35.5                 # South
-    res.mpMaxLatF    = 49.9                 # North
+    res.mpLimitMode  = "LatLon"             # Display bounds 
+    xmin, ymin, xmax, ymax = [-104., 35.9, -82.4, 49.0]
+    res.mpMinLonF    = xmin                # West
+    res.mpMaxLonF    = xmax                # East
+    res.mpMinLatF    = ymin                 # South
+    res.mpMaxLatF    = ymax                 # North
     res.mpPerimOn    = False                # Draw Border around Map
     res.mpDataBaseVersion       = "MediumRes"     # Don't need hires coast
     res.mpDataSetName           = "Earth..2"      # includes counties
@@ -474,6 +475,7 @@ def midwest():
                                "Conterminous US : Kansas",
                                "Conterminous US : Missouri",
                                ]
+    res.mpShapeMode = "FreeAspect"
 
     #_____________ LABEL BAR STUFF __________________________
     res.lbAutoManage       = False           # Let me drive!

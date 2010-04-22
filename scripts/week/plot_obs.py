@@ -44,12 +44,9 @@ cfg = {
  '_title'             : "Iowa Past 7 Days Rainfall",
  '_valid'             : "%s - %s inclusive" % ((now - mx.DateTime.RelativeDateTime(days=6)).strftime("%d %b %Y"), now.strftime("%d %b %Y") ),
  'lbTitleString'      : "[inch]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
 pqstr = "plot c 000000000000 summary/7day/ia_precip.png bogus png"
-iemplot.postprocess(tmpfp, pqstr, "-rotate -90")
+iemplot.postprocess(tmpfp, pqstr)

@@ -43,12 +43,9 @@ cfg = {
  '_title'       : "Record Minimum High Temperature [F] (1893-2008)",
  '_valid'       : now.strftime("%d %b"),
  'lbTitleString' : '[F]',
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025,
 }
 
 
 tmpfp = iemplot.simple_contour(lons, lats, highs, cfg)
 pqstr = "plot c 000000000000 climate/iowa_today_rec_minhi.png bogus png"
-iemplot.postprocess(tmpfp, pqstr, "-rotate -90")
+iemplot.postprocess(tmpfp, pqstr)
