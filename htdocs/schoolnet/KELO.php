@@ -38,24 +38,13 @@
   <p><div class="snet-precip-table">
      <b>Precipitation Totals</b>
   <div style="background: white; padding: 3px;">
-    <a href="/data/kelo/precToday.gif">Today</a> &nbsp;
-    <?php
-  echo "<a href=\"/archive/data/". date("Y/m/d/", (date("U") - 86400 ) )
-    ."keloPrec.gif\">Yesterday</a> &nbsp; \n";
-  for ($i=2;$i<8;$i++){
-    echo "<a href=\"/archive/data/". date("Y/m/d/", (date("U") - $i*86400 ) )
-    ."keloPrec.gif\">". date("M d", (date("U") - $i*86400 ) )  ."</a> &nbsp; \n";
-  }
-  ?>
+    <a href="/data/kelo/precToday.gif">Today</a>
    <br><a href="/data/kelo/precMonth.gif">This Month</a>
 
   </div>
   </div>
 
 
-
-
-    <a href="/schoolnet/kelo/totals/0210_pmon.gif">October 2002</a> &nbsp;
   </div>
   </div><br>
 
