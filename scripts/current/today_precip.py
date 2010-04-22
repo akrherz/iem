@@ -43,6 +43,7 @@ cfg = {
  'nglSpreadColorEnd'  : 2,
  '_showvalues'        : True,
  '_format'            : '%.2f',
+ '_MaskZero'          : True,
  '_title'             : "Iowa ASOS/AWOS Rainfall Reports",
  '_valid'             : "%s" % (now.strftime("%d %b %Y"), ),
  'lbTitleString'      : "[inch]",
