@@ -2,6 +2,11 @@
  include("../../config/settings.inc.php");
  $uri = 'mcview.phtml';
  include("$rootpath/include/forms.php");
+ include("$rootpath/include/database.inc.php");
+ $postgis = iemdb("postgis");
+
+ $rs = pg_prepare($postgis, "SELECT", "select * from watches 
+       WHERE issued < $1 and expired > $1 ORDER by sel ASC");
 
  /** Import our variables */
  $prod = isset($_GET["prod"]) ? $_GET["prod"] : "comprad";
@@ -58,6 +63,18 @@ if ($mode == "realtime"){
   else 
     $ts = $ots;
 }
+
+$rs = pg_execute($postgis, "SELECT", Array( date("Y-m-d H:i", $ts)));
+$watches = "<div style=\"border: 1px solid #000; padding-left: 10px; background: #eee; width: 100%;\"><strong>Valid Watches:</strong> ";
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+  $watches .= sprintf("<a href=\"mcview.phtml?prod=%srad&java=none&mode=realtime&frames=1&interval=5&year=2010&month=4&day=22&hour=13&minute=45\">%s (%s %s)</a> &nbsp; ", 
+   strtolower($row["sel"]), $row["sel"], $row["type"], $row["num"]);
+}
+if (pg_num_rows($rs) == 0){
+  $watches .= " <i>None valid for the selected time</i> ";
+}
+$watches .= "</div>";
+
 
 // This is what we set the form time to
 $formts = $ts;
@@ -254,7 +271,7 @@ body{
 </div>
 </form>
 </td><td>
-
+<?php echo $watches; ?>
 <?php if ($mode == "realtime") echo " &nbsp; <b>REAL-TIME mode:</b> Will refresh in 5 minutes"; ?> 
 
 <?php if ($java == "applet") { ?>
