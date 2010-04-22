@@ -68,9 +68,9 @@ $rs = pg_execute($postgis, "SELECT", Array( date("Y-m-d H:i", $ts)));
 $watches = "<div style=\"border: 1px solid #000; padding-left: 10px; background: #eee; width: 100%;\"><strong>Valid Watches:</strong> ";
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
   $issued = strtotime( $row["issued"] );
-  $watches .= sprintf("<a href=\"mcview.phtml?prod=%srad&java=none&mode=archive&frames=1&interval=5&year=%s&month=%s&day=%s&hour=%s&minute=%s\">%s (%s %s)</a> &nbsp; ", 
-   trim(strtolower($row["sel"])), date("Y", $issued), date("m", $issued), 
-   date("d", $issued), date("H", $issued), date("i", $issued),
+  $watches .= sprintf("<a href=\"mcview.phtml?prod=%srad&java=none&mode=%s&frames=1&interval=5&year=%s&month=%s&day=%s&hour=%s&minute=%s\">%s (%s %s)</a> &nbsp; ", 
+   trim(strtolower($row["sel"])), $mode, $year, $month, 
+   $day, $hour, $minute,
    $row["sel"], $row["type"], $row["num"]);
 }
 if (pg_num_rows($rs) == 0){
