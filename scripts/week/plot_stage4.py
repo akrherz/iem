@@ -43,12 +43,9 @@ cfg = {
  '_title'             : "Iowa NCEP Stage4 7 Day Rainfall Estimate",
  '_valid'             : "%s 12 AM - %s" % (sts.strftime("%d %B %Y"), ets.strftime("%d %B %Y %-I %p")),
  'lbTitleString'      : "[inch]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_grid_fill(lons, lats, total, cfg)
 
 pqstr = "plot c 000000000000 summary/7day/stage4.png bogus png"
-iemplot.postprocess(tmpfp, pqstr, "-rotate -90")
+iemplot.postprocess(tmpfp, pqstr)

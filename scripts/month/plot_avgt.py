@@ -42,12 +42,9 @@ cfg = {
  '_format'            : '%.0f',
  '_valuemask'         : valmask,
  'lbTitleString'      : "[F]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
 pqstr = "plot c 000000000000 summary/mon_mean_T.png bogus png"
-iemplot.postprocess(tmpfp, pqstr, "-rotate -90")
+iemplot.postprocess(tmpfp, pqstr)

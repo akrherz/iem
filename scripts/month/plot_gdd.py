@@ -42,12 +42,9 @@ cfg = {
  '_title'             : "Iowa %s GDD Accumulation" % (
                         now.strftime("%B %Y"), ),
  'lbTitleString'      : "[base 50]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, gdd50, cfg)
 
 pqstr = "plot c 000000000000 summary/gdd_mon.png bogus png"
-iemplot.postprocess(tmpfp, pqstr, "-rotate -90")
+iemplot.postprocess(tmpfp, pqstr)
