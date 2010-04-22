@@ -67,7 +67,10 @@ if ($mode == "realtime"){
 $rs = pg_execute($postgis, "SELECT", Array( date("Y-m-d H:i", $ts)));
 $watches = "<div style=\"border: 1px solid #000; padding-left: 10px; background: #eee; width: 100%;\"><strong>Valid Watches:</strong> ";
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
-  $watches .= sprintf("<a href=\"mcview.phtml?prod=%srad&java=none&mode=realtime&frames=1&interval=5&year=2010&month=4&day=22&hour=13&minute=45\">%s (%s %s)</a> &nbsp; ", 
+  $issued = strtotime( $row["issued"] );
+  $watches .= sprintf("<a href=\"mcview.phtml?prod=%srad&java=none&mode=realtime&frames=1&interval=5&year=%s&month=%s&day=%s&hour=%s&minute=%s\">%s (%s %s)</a> &nbsp; ", 
+   date("Y", $issued), date("m", $issued), date("d", $issued),
+   date("H", $issued), date("i", $issued),
    strtolower($row["sel"]), $row["sel"], $row["type"], $row["num"]);
 }
 if (pg_num_rows($rs) == 0){
