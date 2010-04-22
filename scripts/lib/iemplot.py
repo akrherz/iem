@@ -70,11 +70,33 @@ def hilo_valplot(lons, lats, highs, lows, cfg):
 
     watermark(wks)
     manual_title(wks, cfg)
+    vpbox(wks)
     Ngl.draw(plot)
     Ngl.frame(wks)
     del wks
 
     return tmpfp
+
+def fit43(xmin, ymin, xmax, ymax, buffer=0):
+    """
+    Fit the bounds into an approximate 4x3 frame
+    """
+    desired = 4.45/3.  # Slightly over, due to Lambert Projection
+    deltax = xmax - xmin + (buffer * 2.)
+    xavg = (xmax+xmin)/2.0
+    deltay = ymax - ymin + (buffer * 2. )
+    yavg = (ymax+ymin)/2.0
+    aspect = deltax / deltay
+    print "Aspect ratio: %s" % (aspect,)
+    if aspect > desired:  # Need to vertically stretch!
+        ymin = yavg - (deltax / desired * .5)
+        ymax = yavg + (deltax / desired * .5)
+    if aspect <= desired:  # Need to horizontally stretch!
+        xmin = xavg - (deltay * desired * .5)
+        xmax = xavg + (deltay * desired * .5)
+
+    return [xmin - (buffer * desired), ymin - buffer,
+           xmax + (buffer * desired), ymax + buffer]
 
 def simple_valplot(lons, lats, vals, cfg):
     """
@@ -90,6 +112,15 @@ def simple_valplot(lons, lats, vals, cfg):
     wks = Ngl.open_wks( "ps",tmpfp,rlist)
 
     res = iowa()
+    if cfg.has_key("_spatialDataLimiter"):
+        xmin, ymin, xmax, ymax = fit43( min(lons), min(lats), 
+                                        max(lons), max(lats), 0.25)
+        res.mpMinLonF    = xmin
+        res.mpMaxLonF    = xmax
+        res.mpMinLatF    = ymin
+        res.mpMaxLatF    = ymax
+        res.mpCenterLonF = (xmax + xmin)/2.0  # Central Longitude
+        res.mpCenterLatF = (ymax + ymin)/2.0  # Central Latitude
     res.mpOutlineDrawOrder = "PreDraw"
     res.mpUSStateLineColor = 10
     res.mpNationalLineColor = 10
@@ -103,6 +134,12 @@ def simple_valplot(lons, lats, vals, cfg):
     if cfg.has_key("_stationplot"):
         Ngl.wmsetp("col", 1)
         Ngl.wmsetp("ezf",1)
+        if cfg.has_key("_removeskyc"):
+            Ngl.wmsetp("WBC", 0.001) # Get rid of sky coverage
+            Ngl.wmsetp("WBF", 0) # Put barb at center, no sky coverage
+            Ngl.wmsetp("WBR", 0.001) # Size of calm circle
+        #Ngl.wmsetp("WBL", 0.18) # Size of labels
+        #Ngl.wmsetp("WBS", 0.029) # Size of wind barb shaft
         Ngl.wmstnm(wks, lats, lons, vals)
     else:
         txres              = Ngl.Resources()
@@ -123,11 +160,13 @@ def simple_valplot(lons, lats, vals, cfg):
     watermark(wks)
     manual_title(wks, cfg)
     Ngl.draw(plot)
+    vpbox(wks)
     Ngl.frame(wks)
     del wks
 
     return tmpfp
 
+    vpbox(wks)
 def simple_grid_fill(xaxis, yaxis, grid, cfg):
     """
     Generate a simple plot, but we already have the data!
@@ -217,9 +256,20 @@ def simple_contour(lons, lats, vals, cfg):
 
     watermark(wks)
     manual_title(wks, cfg)
+    vpbox(wks)
     Ngl.frame(wks)
     del wks
     return tmpfp
+
+def vpbox(wks):
+    """ Draw a box around the viewport! """
+    xbox = [0.1,0.9,0.9,0.1,0.1]
+    ybox = [0.8,0.8,0.2,0.2,0.8]
+    res = Ngl.Resources()
+    res.gsLineColor = "NavyBlue" 
+    res.gsLineThicknessF = 1.5
+    Ngl.polyline_ndc(wks,xbox,ybox,res)
+
 
 def manual_title(wks, cfg):
     """ Manually place a title """
@@ -227,13 +277,13 @@ def manual_title(wks, cfg):
         txres = Ngl.Resources()
         txres.txFontHeightF = 0.02
         txres.txJust        = "CenterLeft"
-        Ngl.text_ndc(wks, cfg["_title"], .05, .80, txres)
+        Ngl.text_ndc(wks, cfg["_title"], .11, .834, txres)
         del txres
     if cfg.has_key("_valid"):
         txres = Ngl.Resources()
         txres.txFontHeightF = 0.013
         txres.txJust        = "CenterLeft"
-        Ngl.text_ndc(wks, "Map Valid: "+ cfg["_valid"], .05, .78, txres)
+        Ngl.text_ndc(wks, "Map Valid: "+ cfg["_valid"], .11, .815, txres)
         del txres
 
 def watermark(wks):
@@ -241,11 +291,11 @@ def watermark(wks):
     txres.txFontHeightF = 0.016
     txres.txJust = "CenterLeft"
     lstring = "Iowa Environmental Mesonet"
-    Ngl.text_ndc(wks, lstring,.05,.23,txres)
+    Ngl.text_ndc(wks, lstring,.11,.19,txres)
 
     lstring = "Map Generated %s" % (mx.DateTime.now().strftime("%d %b %Y %-I:%M %p"),)
     txres.txFontHeightF = 0.010
-    Ngl.text_ndc(wks, lstring,.05,.21,txres)
+    Ngl.text_ndc(wks, lstring,.11,.17,txres)
 
 def grid_midwest(lons, lats, vals):
     """
@@ -342,13 +392,21 @@ def iowa():
 
     res.pmTickMarkDisplayMode = "Never"      # Turn off annoying ticks
 
-    # Setup the view
+    # Setup the viewport
+    """
+ 0.1,0.8               0.9,0.8
+    x                     x
+        width : 0.8
+        height: 0.6
+ 0.1,0.2               0.9,0.2
+    x                     x
+    """
     res.nglMaximize         = False      # Prevent funky things
     res.vpWidthF            = 0.8       # Default width of map?
-    res.vpHeightF           = 1.0        # Go vertical
-    res.nglPaperOrientation = "portrait" # smile
-    res.vpXF                = 0.0        # Make Math easier
-    res.vpYF                = 1.0        # 
+    res.vpHeightF           = 0.6        # Go vertical
+    res.nglPaperOrientation = "landscape" # smile
+    res.vpXF                = 0.1        # Make Math easier
+    res.vpYF                = 0.8        # 
 
     #____________ MAP STUFF ______________________
     res.mpProjection = "LambertEqualArea"   # Display projection
@@ -364,11 +422,9 @@ def iowa():
     res.mpDataSetName           = "Earth..2"      # includes counties
     res.mpGridAndLimbOn         = False           # Annoying
     res.mpUSStateLineThicknessF = 3               # Outline States
-
     res.mpOutlineOn             = True           # Draw map for sure
     res.mpOutlineBoundarySets   = "NoBoundaries" # What not to draw
     res.mpOutlineSpecifiers     = ["Conterminous US : Iowa : Counties",]
-
 
     return res
 
