@@ -120,7 +120,7 @@ def Main():
 
   sqlStr = """SELECT extract('hour' from valid) as vhour, 
     station, valid, phour from hourly_%s WHERE 
-    valid > '%s 00:00' and valid <= '%s 00:00'
+    valid >= '%s 00:00' and valid < '%s 00:00'
     and network in ('AWOS','IA_ASOS')""" % (ts.year, td, tm)
 
 
