@@ -6,7 +6,7 @@
  $postgis = iemdb("postgis");
 
  $rs = pg_prepare($postgis, "SELECT", "select * from watches 
-       WHERE issued < $1 and expired > $1 ORDER by sel ASC");
+       WHERE issued <= $1 and expired >= $1 ORDER by sel ASC");
 
  /** Import our variables */
  $prod = isset($_GET["prod"]) ? $_GET["prod"] : "comprad";
