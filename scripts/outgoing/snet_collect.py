@@ -135,9 +135,9 @@ def main():
   os.remove("kimt.dat")
 
   # Do KCCI stuff in WXC format
-  of = open('wxc_snet8.txt', 'w')
+  of = open('/tmp/wxc_snet8.txt', 'w')
   of.write("""Weather Central 001d0300 Surface Data
-  24
+  25
    5 Station
   52 CityName
   20 CityShort
@@ -155,6 +155,7 @@ def main():
    4 Today Max Temp
    4 Today Min Temp
    4 Today Max Wind Gust MPH
+   3 Today Max Wind Direction Text
    6 Today Precip
    6 Month Precip
    8 Time of Today Gust
@@ -166,22 +167,25 @@ def main():
 
   for sid in kcci.data.keys():
     try:
-      of.write("%5s %-52s %-20.20s %2s %7.2f %8.2f %2s %4s %4.0f %4.0f %4.0f %4.0f %4s %4.0f %4.0f %4.0f %4.0f %6.2f %6.2f %8s %6.2f %6.2f %6.2f %6.2f\n" % \
-      (sid, st.sts[sid]['name'], st.sts[sid]['name'], 'IA', \
-       st.sts[sid]['lat'], st.sts[sid]['lon'], \
-   kcci.data[sid]['ts'].day, kcci.data[sid]['gts'].hour, \
-   kcci.data[sid]['tmpf'], kcci.data[sid]['dwpf'], kcci.data[sid]['feel'],\
-   kcci.data[sid]['drct'], kcci.data[sid]['drctTxt'], kcci.data[sid]['sknt'], kcci.data[sid]['max_tmpf'],\
-   kcci.data[sid]['min_tmpf'], kcci.data[sid]['max_sped'],\
-   kcci.data[sid]['pday'], kcci.data[sid]['pmonth'], kcci.data[sid]['gtim2'],\
-   kcci.data[sid]['p2day'], kcci.data[sid]['p3day'], kcci.data[sid]['p7day'], kcci.data[sid]['p14day']) )
+      of.write("%5s %-52s %-20.20s %2s %7.2f %8.2f %2s %4s %4.0f %4.0f %4.0f %4.0f %4s %4.0f %4.0f %4.0f %4.0f %3s %6.2f %6.2f %8s %6.2f %6.2f %6.2f %6.2f\n" % \
+      (sid, st.sts[sid]['name'], st.sts[sid]['name'], 'IA', 
+       st.sts[sid]['lat'], st.sts[sid]['lon'], 
+   kcci.data[sid]['ts'].day, kcci.data[sid]['gts'].hour, 
+   kcci.data[sid]['tmpf'], kcci.data[sid]['dwpf'], kcci.data[sid]['feel'],
+   kcci.data[sid]['drct'], kcci.data[sid]['drctTxt'], kcci.data[sid]['sknt'], 
+   kcci.data[sid]['max_tmpf'],
+   kcci.data[sid]['min_tmpf'], kcci.data[sid]['max_sped'],
+   kcci.data[sid]['max_drctTxt'],
+   kcci.data[sid]['pday'], kcci.data[sid]['pmonth'], kcci.data[sid]['gtim2'],
+   kcci.data[sid]['p2day'], kcci.data[sid]['p3day'], kcci.data[sid]['p7day'], 
+   kcci.data[sid]['p14day']) )
 
     except:
       print kcci.data[sid]
       print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
       sys.exc_traceback = None
   of.close()
-  os.system("/home/ldm/bin/pqinsert wxc_snet8.txt")
-  os.remove("wxc_snet8.txt")
+  os.system("/home/ldm/bin/pqinsert /tmp/wxc_snet8.txt")
+  os.remove("/tmp/wxc_snet8.txt")
 
 main()
