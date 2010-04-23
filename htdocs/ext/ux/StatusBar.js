@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.0
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -10,9 +10,6 @@
  * supporting the standard {@link Ext.Toolbar} interface for adding buttons, menus and other items, the StatusBar
  * provides a greedy status element that can be aligned to either side and has convenient methods for setting the
  * status text and icon.  You can also indicate that something is processing using the {@link #showBusy} method.</p>
- * <p><b>Note:</b> Although StatusBar supports xtype:'statusbar', at this time Ext.Toolbar (the base class) does
- * not support xtype.  For this reason, if you are adding Toolbar items into the StatusBar you must declare it
- * using the "new StatusBar()" syntax for the items to render correctly.</p>
  * <pre><code>
 new Ext.Panel({
     title: 'StatusBar',
@@ -107,26 +104,28 @@ new Ext.Panel({
      */
     /**
      * @cfg {String} text
-     * A string that will be rendered into the status element as the status message (defaults to '');
+     * A string that will be <b>initially</b> set as the status message.  This string
+     * will be set as innerHTML (html tags are accepted) for the toolbar item.
+     * If not specified, the value set for <code>{@link #defaultText}</code>
+     * will be used.
      */
     /**
      * @cfg {String} iconCls
-     * A CSS class that will be applied to the status element and is expected to provide a background image that will
-     * serve as the status bar icon (defaults to '').  The class is applied directly to the div that also contains the
-     * status text, so the rule should provide the appropriate padding on the div to make room for the image.
+     * A CSS class that will be <b>initially</b> set as the status bar icon and is
+     * expected to provide a background image (defaults to '').
      * Example usage:<pre><code>
 // Example CSS rule:
 .x-statusbar .x-status-custom {
     padding-left: 25px;
-    background: transparent url(images/custom-icon.gif) no-repeat 3px 3px;
+    background: transparent url(images/custom-icon.gif) no-repeat 3px 2px;
 }
 
-// Initializing the status bar:
+// Setting a default icon:
 var sb = new Ext.ux.StatusBar({
     defaultIconCls: 'x-status-custom'
 });
 
-// Setting it in code:
+// Changing the icon:
 sb.setStatus({
     text: 'New status',
     iconCls: 'x-status-custom'
@@ -141,26 +140,44 @@ sb.setStatus({
     cls : 'x-statusbar',
     /**
      * @cfg {String} busyIconCls
-     * The default {@link #iconCls} applied when calling {@link #showBusy} (defaults to 'x-status-busy'). It can be
-     * overridden at any time by passing the <tt>iconCls</tt> argument into <tt>showBusy</tt>. See the
-     * iconCls docs for additional details about customizing the icon.
+     * The default <code>{@link #iconCls}</code> applied when calling
+     * <code>{@link #showBusy}</code> (defaults to <tt>'x-status-busy'</tt>).
+     * It can be overridden at any time by passing the <code>iconCls</code>
+     * argument into <code>{@link #showBusy}</code>.
      */
     busyIconCls : 'x-status-busy',
     /**
      * @cfg {String} busyText
-     * The default {@link #text} applied when calling {@link #showBusy} (defaults to 'Loading...'). It can be
-     * overridden at any time by passing the <tt>text</tt> argument into <tt>showBusy</tt>.
+     * The default <code>{@link #text}</code> applied when calling
+     * <code>{@link #showBusy}</code> (defaults to <tt>'Loading...'</tt>).
+     * It can be overridden at any time by passing the <code>text</code>
+     * argument into <code>{@link #showBusy}</code>.
      */
     busyText : 'Loading...',
     /**
      * @cfg {Number} autoClear
-     * The number of milliseconds to wait after setting the status via {@link #setStatus} before automatically
-     * clearing the status text and icon (defaults to 5000).  Note that this only applies when passing the
-     * <tt>clear</tt> argument to setStatus since that is the only way to defer clearing the status.  This can
-     * be overridden by specifying a different <tt>wait</tt> value in setStatus. Calls to {@link #clearStatus}
+     * The number of milliseconds to wait after setting the status via
+     * <code>{@link #setStatus}</code> before automatically clearing the status
+     * text and icon (defaults to <tt>5000</tt>).  Note that this only applies
+     * when passing the <tt>clear</tt> argument to <code>{@link #setStatus}</code>
+     * since that is the only way to defer clearing the status.  This can
+     * be overridden by specifying a different <tt>wait</tt> value in
+     * <code>{@link #setStatus}</code>. Calls to <code>{@link #clearStatus}</code>
      * always clear the status bar immediately and ignore this value.
      */
     autoClear : 5000,
+
+    /**
+     * @cfg {String} emptyText
+     * The text string to use if no text has been set.  Defaults to
+     * <tt>'&nbsp;'</tt>).  If there are no other items in the toolbar using
+     * an empty string (<tt>''</tt>) for this value would end up in the toolbar
+     * height collapsing since the empty string will not maintain the toolbar
+     * height.  Use <tt>''</tt> if the toolbar should collapse in height
+     * vertically when no text is specified and there are no other items in
+     * the toolbar.
+     */
+    emptyText : '&nbsp;',
 
     // private
     activeThreadId : 0,
@@ -178,8 +195,9 @@ sb.setStatus({
         Ext.ux.StatusBar.superclass.afterRender.call(this);
 
         var right = this.statusAlign == 'right';
+        this.currIconCls = this.iconCls || this.defaultIconCls;
         this.statusEl = new Ext.Toolbar.TextItem({
-            cls: 'x-status-text ' + (this.iconCls || this.defaultIconCls || ''),
+            cls: 'x-status-text ' + (this.currIconCls || ''),
             text: this.text || this.defaultText || ''
         });
 
@@ -190,18 +208,7 @@ sb.setStatus({
             this.insert(0, this.statusEl);
             this.insert(1, '->');
         }
-
-//         this.statusEl = td.createChild({
-//             cls: 'x-status-text ' + (this.iconCls || this.defaultIconCls || ''),
-//             html: this.text || this.defaultText || ''
-//         });
-//         this.statusEl.unselectable();
-
-//         this.spacerEl = td.insertSibling({
-//             tag: 'td',
-//             style: 'width:100%',
-//             cn: [{cls:'ytb-spacer'}]
-//         }, right ? 'before' : 'after');
+        this.doLayout();
     },
 
     /**
@@ -310,11 +317,12 @@ statusBar.setStatus({
             return this;
         }
 
-        var text = o.useDefaults ? this.defaultText : '',
+        var text = o.useDefaults ? this.defaultText : this.emptyText,
             iconCls = o.useDefaults ? (this.defaultIconCls ? this.defaultIconCls : '') : '';
 
         if(o.anim){
-            this.statusEl.fadeOut({
+            // animate the statusEl Ext.Element
+            this.statusEl.el.fadeOut({
                 remove: false,
                 useDisplay: true,
                 scope: this,
@@ -323,7 +331,8 @@ statusBar.setStatus({
 	                    text: text,
 	                    iconCls: iconCls
 	                });
-                    this.statusEl.show();
+
+                    this.statusEl.el.show();
                 }
             });
         }else{

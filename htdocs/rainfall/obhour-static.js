@@ -202,7 +202,7 @@ var gpanel =  new Ext.grid.GridPanel({
         isLoaded:false,
         store: pstore,
         region:'center',
-        tbar:[new Ext.StatusBar({
+        tbar:[new Ext.ux.StatusBar({
             defaultText: 'Please load data from the side',
             id: 'statusField'
         })
