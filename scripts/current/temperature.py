@@ -62,4 +62,4 @@ cfg = {
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
 pqstr = "plot c 000000000000 iowa_tmpf.png bogus png"
-iemplot.postprocess(tmpfp, pqstr, "-rotate -90")
+iemplot.postprocess(tmpfp, pqstr)
