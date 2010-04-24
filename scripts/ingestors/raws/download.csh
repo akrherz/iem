@@ -1,14 +1,8 @@
 #!/bin/csh
-# Download RAWS data
-# Daryl Herzmann 13 Jun 2003
 
-wget -q -O IA_NEAL_SMITH.txt 'http://raws.wrh.noaa.gov/cgi-bin/roman/raws_flat.cgi?stn=NSWI4'
-wget -q -O IA_DESOTO.txt 'http://raws.wrh.noaa.gov/cgi-bin/roman/raws_flat.cgi?stn=TR808'
+set BASE="http://raws.wrh.noaa.gov/cgi-bin/roman/raws_flat.cgi?stn="
 
-grep "^IA DESOTO" IA_DESOTO.txt > desoto.dat
-grep "^IA NEAL SMITH" IA_NEAL_SMITH.txt > ns.dat
-
-./process.py desoto.dat RAWDES
-./process.py ns.dat RAWNSM
-
-rm -f ns.dat desoto.dat IA_DESOTO.txt IA_NEAL_SMITH.txt
+foreach ID (NWSI4 YSPI4 TR808 LSHI4 TS568 TS657 FRMI4)
+  wget -q -O ${ID}.txt "${BASE}${ID}"
+ ./process.py ${ID}
+end
