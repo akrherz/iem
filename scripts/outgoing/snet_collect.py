@@ -185,7 +185,7 @@ def main():
       print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
       sys.exc_traceback = None
   of.close()
-  os.system("/home/ldm/bin/pqinsert /tmp/wxc_snet8.txt")
+  os.system("/home/ldm/bin/pqinsert -p wxc_snet8.txt /tmp/wxc_snet8.txt")
   os.remove("/tmp/wxc_snet8.txt")
 
 main()
