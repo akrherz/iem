@@ -16,7 +16,7 @@ mydb.query("SET TIME ZONE 'GMT'")
 
 now = mx.DateTime.gmt()
 
-f = open(sys.argv[1], 'r').readlines()[11:]
+f = open("%s.txt" % (sys.argv[1],), 'r').readlines()[11:]
 
 if len(f) < 2:
   sys.exit(0)
@@ -62,7 +62,7 @@ if (peak[4:] == "MM"):
 else:
   gust = peak[4:]
 
-sid = sys.argv[2]
+sid = sys.argv[1]
 
 iemob = iemAccessOb.iemAccessOb(sid)
 iemob.data['tmpf'] = tmpf
