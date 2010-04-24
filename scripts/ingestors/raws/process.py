@@ -16,12 +16,12 @@ mydb.query("SET TIME ZONE 'GMT'")
 
 now = mx.DateTime.gmt()
 
-f = open(sys.argv[1], 'r').readlines()
+f = open(sys.argv[1], 'r').readlines()[11:]
 
 if len(f) < 2:
   sys.exit(0)
 
-dl = f[1]
+dl = f[0]
 
 day = int(dl[25:27])
 hr  = int(dl[28:30])
