@@ -12,7 +12,8 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
         return $sortedArray;
 }
 
- $TITLE = "IEM | School Network | History";
+$TITLE = "IEM | School Network | History";
+$THISPAGE="networks-schoolnet";
 include("$rootpath/include/header.php"); 
 ?>
 
