@@ -8,17 +8,15 @@
 
 <p><h3 class="subtitle">Current Data</h3>
 <ul>
- <li><a href="current.php">Current Conditions</a> (sortable)</li>
+ <li><a href="current.phtml">Current Conditions</a> (sortable)</li>
  <li><a href="<?php echo $rooturl; ?>/GIS/apps/snet/raining.php">Where's it raining?</a></li>
 </ul>
 
 <p><h3 class="subtitle">Station Plots</h3>
 <ul>
- <li><a href="/data/kelo/mesonet.gif">20 Min Mesonet [SchoolNet]</a></li>
  <li><a href="<?php echo $rooturl; ?>/GIS/apps/mesoplot/plot.php?network=KELO">Rapid Update</a></li>
- <li><a href="/data/kelo/solarRad.gif">Solar Radiation</a></li>
- <li><a href="/data/kelo/snet_altm.gif">Barometer</a></li>
- <li><a href="/data/kelo/precToday.gif">Today's Precip Accum</a></li>
+ <li><a href="<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?layers[]=map&network=KELO&layers[]=labels&var=pres">Barometer</a></li>
+ <li><a href="http://localhost/iem/GIS/apps/php/currents.phtml?layers[]=map&network=KELO&layers[]=labels&var=pday">Today's Precip Accum</a></li>
 </ul>
 
 <p><h3 class="subtitle">Historical Data</h3><br><ul>
@@ -34,19 +32,6 @@
 
 
 </td><td valign="top" width="350">
-
-  <p><div class="snet-precip-table">
-     <b>Precipitation Totals</b>
-  <div style="background: white; padding: 3px;">
-    <a href="/data/kelo/precToday.gif">Today</a>
-   <br><a href="/data/kelo/precMonth.gif">This Month</a>
-
-  </div>
-  </div>
-
-
-  </div>
-  </div><br>
 
 <p><h3 class="subtitle">Plotting Time Series</h3>
 <ul>
