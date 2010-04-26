@@ -5,7 +5,7 @@
 
 <p><h3 class="subtitle">Current Data</h3>
 <ul>
- <li><a href="current.php">Current Conditions</a> (sortable)</li>
+ <li><a href="current.phtml">Current Conditions</a> (sortable)</li>
  <li><a href="<?php echo $rooturl; ?>/GIS/apps/snet/raining.php">Where's it raining?</a></li>
 </ul>
 
