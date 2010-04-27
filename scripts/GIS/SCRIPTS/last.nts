@@ -1,0 +1,32 @@
+GDATTIM LAST                                                                                                                            
+GLEVEL  0                                                                                                                               
+GVCORD  none                                                                                                                            
+GFUNC   N0R                                                                                                                             
+GDFILE  /mesonet/data/gempak/radar.gem                                                                                                  
+CINT                                                                                                                                    
+LINE                                                                                                                                    
+MAP     0                                                                                                                               
+MSCALE                                                                                                                                  
+TITLE   0                                                                                                                               
+DEVICE  GF|compRADAR.gif|600;450                                                                                                        
+SATFIL                                                                                                                                  
+RADFIL                                                                                                                                  
+IMCBAR                                                                                                                                  
+PROJ    lcc                                                                                                                             
+GAREA   40.25;-97;43.75;-90                                                                                                             
+IJSKIP                                                                                                                                  
+CLEAR   yes                                                                                                                             
+PANEL   0                                                                                                                               
+TEXT    1/1/1                                                                                                                           
+SCALE   0                                                                                                                               
+LATLON  0                                                                                                                               
+HILO                                                                                                                                    
+HLSYM                                                                                                                                   
+CLRBAR  0                                                                                                                               
+CONTUR  0                                                                                                                               
+SKIP    0                                                                                                                               
+FINT    10;15;20;25;30;35;40;45;50;55;60;65;70;75;85                                                                                    
+FLINE   0;26;24;21;22;23;20;18-16;14-10;0                                                                                               
+CTYPE   F                                                                                                                               
+LUTFIL                                                                                                                                  
+STNPLT                                                                                                                                  
