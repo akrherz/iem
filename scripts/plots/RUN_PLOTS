@@ -1,0 +1,15 @@
+#!/bin/csh -f
+#	RUN_PLOTS
+# These plots are run every 20 minutes
+
+./meteorgrams.csh
+./RWIS_plot.csh
+./AWOS_plot.csh
+./20m_radar.csh
+#./IAMESONET_plot.csh
+#./GRAY.csh
+#./metro_mesonet.csh
+./MW_overlay.csh
+./RWIS_SF_plot.csh
+
+# ./DCP.csh

@@ -20,3 +20,6 @@ cd ../iemplot
 
 cd ../dbutil
 /mesonet/python/bin/python asos2archive.py iowa
+
+cd ../plots
+./RUN_PLOTS
