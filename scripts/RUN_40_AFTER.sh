@@ -30,6 +30,8 @@ cd ../raws
 cd ../cocorahs
 /mesonet/python/bin/python stations.py IA
 /mesonet/python/bin/python stations.py IL
+/mesonet/python/bin/python process.py IL
+/mesonet/python/bin/python process.py IA
 
 # This is intensive...
 cd ../../week
