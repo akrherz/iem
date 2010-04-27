@@ -17,3 +17,6 @@ cd ../../ingestors/rwis
 
 cd ../dotcams
 /mesonet/python/bin/python process.py
+
+cd ../awos
+/mesonet/python/bin/python parse_idot.py
