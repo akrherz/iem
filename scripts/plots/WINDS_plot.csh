@@ -22,7 +22,7 @@ set DEVICE="GIF|winds.gif|650;500"
 
 # setenv DISPLAY localhost:1
 
-$GEMEXE/sfmap << EOF > TMP/WINDS_plot_sfmap.out
+$GEMEXE/sfmap << EOF > /tmp/WINDS_plot_sfmap.out
 	AREA    = 40.25;-97;43.75;-90
 	GAREA    = 40.25;-97;43.75;-90
  	SATFIL   =  
@@ -48,7 +48,7 @@ $GEMEXE/sfmap << EOF > TMP/WINDS_plot_sfmap.out
 
 EOF
 
-$GEMEXE/sfmap << EOF > TMP/WINDS_plot_sfmap2.out
+$GEMEXE/sfmap << EOF > /tmp/WINDS_plot_sfmap2.out
 	COLORS  =  4
 	SFFILE	= /mesonet/data/gempak/rwis/${date}_rwis.gem
 	TITLE	= 0

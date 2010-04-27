@@ -25,7 +25,7 @@ set DEVICE="GIF|wcht.gif|650;500"
 
 setenv DISPLAY localhost:1
 
-$GEMEXE/sfmap << EOF > TMP/WCHT_plot_sfmap.out
+$GEMEXE/sfmap << EOF > /tmp/WCHT_plot_sfmap.out
 	AREA	= 40.25;-97;43.75;-90
 	GAREA	= 40.25;-97;43.75;-90
  	SATFIL   =  

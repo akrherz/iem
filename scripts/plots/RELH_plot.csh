@@ -19,7 +19,7 @@ set DEVICE="GF|relh.gif"
 
 setenv DISPLAY localhost:1
 
-$GEMEXE/sfmap_gf << EOF > TMP/RELH_plot_sfmap.out
+$GEMEXE/sfmap_gf << EOF > /tmp/RELH_plot_sfmap.out
 	AREA	= 40.25;-97;43.75;-90
 	GAREA	= 40.25;-97;43.75;-90
  	SATFIL   =  

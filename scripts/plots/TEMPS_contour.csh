@@ -18,7 +18,7 @@ set hh=`date -u +%H`
 
 rm temps_contour.gif* dewps_contour.gif* >& /dev/null
 
-gddelt << EOF > TMP/TEMPS_contour_gddelt.out
+gddelt << EOF > /tmp/TEMPS_contour_gddelt.out
         GDFILE = /mesonet/data/gempak/asos.grd
         GDATTIM = ALL
         GDNUM   = ALL
@@ -36,7 +36,7 @@ EOF
 
 gpend
 
-oabsfc << EOF > TMP/TEMPS_contour_oabsfc.out
+oabsfc << EOF > /tmp/TEMPS_contour_oabsfc.out
 	DATTIM	= ${date}/${hh}00
         DTAAREA  =
         GUESS    =
@@ -68,7 +68,7 @@ set DEVICE1="GIF|temps_contour.gif"
 set DEVICE2="GIF|dewps_contour.gif"
 
 
-$GEMEXE/gdplot_gf << EOF > TMP/TEMPS_contour_gdcntr.out
+$GEMEXE/gdplot_gf << EOF > /tmp/TEMPS_contour_gdcntr.out
 	GAREA    = 40.25;-97;43.75;-90
 	GDATTIM  = ${date}/${hh}
 	GLEVEL   = 0
