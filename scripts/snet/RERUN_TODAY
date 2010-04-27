@@ -1,0 +1,48 @@
+#!/bin/csh
+#  Script to populate database with values from snet gempak file
+# Daryl Herzmann 12 Feb 2002
+#  2 Jan 2003	Probably does not support 2003
+#
+#################################################################
+
+source /mesonet/nawips/Gemenviron
+
+set date=`date -u +%y%m%d`
+set year=`date -u +%Y`
+
+
+setenv DATA_DIR /mesonet/data/gempak/snet
+set grid=${DATA_DIR}/${date}_snet.gem
+
+
+$GEMEXE/sflist << EOF > ../TMP/RWIS_sflist.out
+	SFFILE = $grid
+	AREA   = DSET
+	DATTIM = ALL
+	SFPARM = TMPF>-90;DWPF>-90;DRCT;SKNT;P24I;SRAD
+	OUTPUT = f/today.fil
+	IDNTYP = STID
+	list
+	run
+
+	exit
+EOF
+
+
+if (-e today.fil) then
+	sflist_2_db.py today.fil today.db D stransfer
+	sflist_2_db.py today.fil today2.db D t${year}
+
+	/usr/local/pgsql/bin/psql compare << EOF > ../TMP/yest.out
+	SET TIME ZONE 'GMT';
+	DELETE from stransfer WHERE date(valid) = 'TODAY';
+	\c snet
+	SET TIME ZONE 'GMT';
+	DELETE from t${year} WHERE date(valid) = 'TODAY';
+	\q
+EOF
+
+	/usr/local/pgsql/bin/psql compare < today.db 
+	/usr/local/pgsql/bin/psql snet < today2.db
+
+endif
