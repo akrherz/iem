@@ -7,3 +7,7 @@ cd climodat
 
 cd ../cache
 /mesonet/python/bin/python warn_cache.py
+
+cd ../ingestors/cocorahs
+/mesonet/python/bin/python redo_day.py IA
+/mesonet/python/bin/python redo_day.py IL
