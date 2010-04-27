@@ -8,3 +8,6 @@ cd ../dbutil
 
 cd ../00z
 /mesonet/python/bin/python awos_rtp.py
+
+cd ../qc
+/mesonet/python/bin/python check5day.py
