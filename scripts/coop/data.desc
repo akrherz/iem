@@ -1,0 +1,16 @@
+IEM PROCESSED NWS COOP DATA
+  Email akrherz@iastate.edu if you have any questions...
+
+Attributes:
+  SID        National Weather Service Station Identifier
+  SITE_NAME  Location name
+  YYYYMMDD   Date of the observation
+  HHMM       Time of the observation
+  HI_T_F     24 hour High Temperature [F]
+  LO_T_F     24 hour Low Temperature [F]
+  PREC       Liquid Precipitation (snow melted) [inches]
+  SNOW       Snowfall [inches]
+  SDEPTH     Snow Depth [inches]
+  PMONTH     IEM Calculated liquid precip for the month [inches]
+  SMONTH     IEM Calculated snowfall for the month [inches]
+
