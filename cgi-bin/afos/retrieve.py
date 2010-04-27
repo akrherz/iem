@@ -29,7 +29,7 @@ def Main():
       print 'Invalid PIL, try again'
       sys.exit(0)
     if (pil[:3] == "WAR"):
-      for q in ['FFS','AWW','TOR','SVR','FFW','SVS','LSR']:
+      for q in ['FFS','AWW','TOR','SVR','FFW','SVS','LSR','SPS']:
         pils.append('%s%s' % (q, pil[3:]) )
       continue
     myPils.append("%6s" % (pil + "      ",) )
