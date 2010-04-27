@@ -27,7 +27,7 @@ set hh=`date -u +%H`
 
 
 # First we need to delete anything out of the current Surface grid
-gddelt << EOF > TMP/createGrids_gddelt.out
+gddelt << EOF > /tmp/createGrids_gddelt.out
 	GDFILE	= /mesonet/data/gempak/surface50x50.grd
         GDATTIM = ALL
         GDNUM   = ALL
@@ -46,7 +46,7 @@ EOF
 
 
 # Then we ob analyze the data
-oabsfc << EOF > TMP/createGrids_oabsfc.out
+oabsfc << EOF > /tmp/createGrids_oabsfc.out
         SFFILE   = /mesonet/data/gempak/sao/${date}_sao.gem
         GDFILE   = /mesonet/data/gempak/surface50x50.grd
         SFPARM   = TMPF;DWPF;PMSL;UWND;VWND;VSBY;ALTM

@@ -69,7 +69,7 @@ set TITLE="Mesonet with Aberdeen NEXRAD"
 #	set TITLE="Mesonet with NEXRAD missing"
 #endif
 
-$GEMEXE/sfmap_gf << EOF > TMP/RADAR_overlay_sfmap.out
+$GEMEXE/sfmap_gf << EOF > /tmp/RADAR_overlay_sfmap.out
 #	GAREA	= 40.25;-97;43.75;-90
 #	AREA	= 40.25;-97;43.75;-90
 	AREA	= abr+

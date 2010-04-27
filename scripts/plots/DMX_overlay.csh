@@ -75,7 +75,7 @@ if (! -e ${grid} ) then
 endif
 
 
-$GEMEXE/sfmap << EOF > TMP/DMX_overlay_sfmap.out
+$GEMEXE/sfmap << EOF > /tmp/DMX_overlay_sfmap.out
 	GAREA	= 40.25;-97;43.75;-90
 	AREA	= 40.25;-97;43.75;-90
 	DATTIM  = ${date}/${hh}00

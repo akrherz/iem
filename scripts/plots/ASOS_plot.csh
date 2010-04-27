@@ -33,7 +33,7 @@ rm asos.gif* >& /dev/null
 set DEVICE="GF|asos.gif"
 
 
-$GEMEXE/sfmap_gf << EOF > TMP/sfmap.out
+$GEMEXE/sfmap_gf << EOF > /tmp/sfmap.out
 	AREA    = 40.25;-97;43.75;-90
 	GAREA    = 40.25;-97;43.75;-90
  	SATFIL   =  
@@ -60,21 +60,6 @@ $GEMEXE/sfmap_gf << EOF > TMP/sfmap.out
 	exit
 EOF
 
-
-#####
-# Lets count how many we have reporting
-#sfchck << EOF > TMP/sfchck.out
-#        SFFILE   = /mesonet/data/gempak/sao/${date}_sao.gem
-#        AREA     = @IA
-#        DATTIM   = ${date}/${hh}${mm}
-#        OUTPUT   = f/asos.good
-#        IDNTYP   = STID
-#        STNTYP   = R
-##        list
-#        run
-#
-#        exit
-#EOF
 
 #@ GOOD_ASOS = `wc -l asos.good | cut -d ' ' -f 1` - 2
 #set TOTAL_ASOS=`wc -l /mesonet/TABLES/iowa.stns | cut -c 6-7`

@@ -19,7 +19,7 @@ rm 1hprecip.gif >& /dev/null
 set DEVICE="GIF|1hprecip.gif"
 
 
-$GEMEXE/sfmap << EOF > TMP/1h_precip_sfmap.out
+$GEMEXE/sfmap << EOF > /tmp/1h_precip_sfmap.out
 	AREA	= 40.25;-97;43.75;-90
 	GAREA	= 40.25;-97;43.75;-90
  	SATFIL   =  
