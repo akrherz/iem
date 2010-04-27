@@ -1,3 +1,4 @@
+# Only EDIT on SVN!
 #
 0 19 * * * cd /var/www/scripts; sh RUN_0Z.sh
 0 0 * * * cd /var/www/scripts; sh RUN_MIDNIGHT.sh
