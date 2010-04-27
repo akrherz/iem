@@ -16,7 +16,7 @@ endif
 #cat ~/snet/gempak/header.txt ~/snet/gempak/20${yymmdd}.fil > /tmp/snet.fil
 cat /mesonet/scripts/snet/gempak/header.txt sfedit.fil > /tmp/snet.fil
 
-sfedit << EOF > ../TMP/RUN_sfedit.out
+sfedit << EOF > /tmp/RUN_sfedit.out
   SFFILE = /mesonet/data/gempak/snet/${yymmdd}_snet.gem
   SFEFIL = /tmp/snet.fil
   list

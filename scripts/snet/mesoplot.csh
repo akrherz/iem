@@ -49,7 +49,7 @@ set GUSTFILE="snetGust.gif"
 
 rm -f *.gif >& /dev/null
 
-sfmap_gf << EOF > ../TMP/mesoplot_sfmap.out
+sfmap_gf << EOF > /tmp/mesoplot_sfmap.out
  AREA     = ${AREA}
  GAREA    = ${AREA}
  SATFIL   =  
@@ -121,7 +121,7 @@ sfmap_gf << EOF > ../TMP/mesoplot_sfmap.out
  exit
 EOF
 
-sfcntr_gf << EOF > ../TMP/sfcntr.out
+sfcntr_gf << EOF > /tmp/sfcntr.out
  AREA     = ${AREA}
  GAREA    = ${AREA}
  SATFIL   =  
