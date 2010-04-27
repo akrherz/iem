@@ -17,3 +17,6 @@ cd ../week
 
 cd ../iemplot
 ./RUN.csh
+
+cd ../dbutil
+/mesonet/python/bin/python asos2archive.py iowa
