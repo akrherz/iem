@@ -12,3 +12,5 @@ cd ../outgoing
 
 cd ../ingestors/sn
 /mesonet/python/bin/python parser.py
+
+/mesonet/www/apps/nwnwebsite/scripts/GEN.csh
