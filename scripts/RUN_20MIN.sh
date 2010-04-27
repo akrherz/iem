@@ -4,3 +4,6 @@
 sleep 120
 cd ingestors/rwis
 /mesonet/python/bin/python acquireClarus.py
+
+cd ../madis
+/mesonet/python/bin/python to_iemaccess.py
