@@ -43,3 +43,4 @@ cd ../../week
 
 cd ../plots
 ./ruc2.csh
+./RUN_PLOTS
