@@ -71,7 +71,7 @@ set TITLE="Mesonet with Minneapolis NEXRAD"
 #	set TITLE="Mesonet with NEXRAD missing"
 #endif
 
-$GEMEXE/sfmap_gf << EOF > TMP/MPX_overlay_sfmap.out
+$GEMEXE/sfmap_gf << EOF > /tmp/MPX_overlay_sfmap.out
 #	GAREA	= 40.25;-97;43.75;-90
 #	AREA	= 40.25;-97;43.75;-90
 	AREA	= msp+

@@ -23,7 +23,7 @@ set DEVICE="GIF|mesonet.gif|700;500"
 set AREA="42.6;-104.5;46;-96"
 
 # Now we plot
-sfmap << EOF > TMP/SDMESONET_sfmap.out
+sfmap << EOF > /tmp/SDMESONET_sfmap.out
 	AREA    = ${AREA}
 	GAREA    = ${AREA}
  	SATFIL   =  
@@ -51,7 +51,7 @@ sfmap << EOF > TMP/SDMESONET_sfmap.out
 EOF
 
 
-gdcntr << EOF > TMP/SDMESONET_gdcntr.out
+gdcntr << EOF > /tmp/SDMESONET_gdcntr.out
 	GAREA    = ${AREA}
 #	GDATTIM  = ${date}/${hh}
 	GDATTIM  = F000

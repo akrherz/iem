@@ -20,7 +20,7 @@ set hh=`date -u +%H`
 
 set DEVICE="GIF|dewps.gif"
 
-$GEMEXE/sfmap << EOF > TMP/DEWPS_plot_sfmap.out
+$GEMEXE/sfmap << EOF > /tmp/DEWPS_plot_sfmap.out
 	AREA    = 40.25;-97;43.75;-90
 	GAREA    = 40.25;-97;43.75;-90
  	SATFIL   =  
@@ -46,7 +46,7 @@ $GEMEXE/sfmap << EOF > TMP/DEWPS_plot_sfmap.out
 
 EOF
 
-$GEMEXE/sfmap << EOF > TMP/DEWPS_plot_sfmap2.out
+$GEMEXE/sfmap << EOF > /tmp/DEWPS_plot_sfmap2.out
 	COLORS  =  4
 	SFFILE	= /mesonet/data/gempak/rwis/${date}_rwis.gem
 	TITLE	= 0
