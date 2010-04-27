@@ -7,8 +7,9 @@ TS2="`date --date 'last tuesday' +'%Y%m%d'`"
 TS3="`date --date 'last tuesday' +'%m%d%y'`"
 #DATAFILE="usdm${TS3}.zip"
 DATAFILE="USDM${TS3}.zip"
+PASSWORD=`cat passwd`
 
-lftp -u drought,beta2004 -e "get /dm/shapefiles/$DATADIR/$DATAFILE; quit" http://drought.unl.edu
+lftp -u drought,${PASSWORD} -e "get /dm/shapefiles/$DATADIR/$DATAFILE; quit" http://drought.unl.edu
 
 unzip $DATAFILE
 
