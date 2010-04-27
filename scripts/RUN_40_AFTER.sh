@@ -40,3 +40,6 @@ cd ../cocorahs
 # This is intensive...
 cd ../../week
 /mesonet/python/bin/python plot_stage4.py
+
+cd ../plots
+./ruc2.csh
