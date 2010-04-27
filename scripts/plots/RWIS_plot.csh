@@ -33,7 +33,7 @@ rm -f rwis.gif >& /dev/null
 set DEVICE="GF|rwis.gif|650;500"
 
 
-$GEMEXE/sfmap_gf << EOF > TMP/RWIS_plot_sfmap.out
+$GEMEXE/sfmap_gf << EOF > /tmp/RWIS_plot_sfmap.out
 	AREA	 = 40.25;-97;43.75;-90
 	GAREA    = 40.25;-97;43.75;-90
  	SATFIL   =  

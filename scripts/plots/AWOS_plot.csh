@@ -42,7 +42,7 @@ set DEVICE="GF|awos.gif|650;500"
 set DEVICE2="GF|ceil.gif|650;500"
 
 
-$GEMEXE/sfmap_gf << EOF > TMP/awos_plot_sfmap.out
+$GEMEXE/sfmap_gf << EOF > /tmp/awos_plot_sfmap.out
  \$RESPOND = YES
 	AREA    = 40.25;-97;43.75;-90
 	GAREA    = 40.25;-97;43.75;-90

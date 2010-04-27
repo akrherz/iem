@@ -19,7 +19,7 @@ rm tst.gif dsm.gif cbf.gif cid.gif >& /dev/null
 #setenv DISPLAY localhost:1
 mv coltbl.xwp coltbl.xwp.ORIG
 
-$GEMEXE/sfgram_gf << EOF > TMP/meteorgrams_sfgram.out
+$GEMEXE/sfgram_gf << EOF > /tmp/meteorgrams_sfgram.out
 	SFFILE   = /mesonet/data/gempak/24hour.gem
 	DATTIM   = ALL
 	STATION  = DSM;RDES;DSM;RDES
