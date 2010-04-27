@@ -12,3 +12,6 @@ cd ../12z
 
 cd ../qc
 /mesonet/python/bin/python check5day.py
+
+cd ../util
+./BACKUP.csh
