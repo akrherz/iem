@@ -17,7 +17,7 @@ gmt_now = mx.DateTime.gmt()
 sDate = gmt_now.strftime("%d%H%M")
 
 collectfp = "awos%s.dat" % (sDate,)
-collect = open(fp, "w")
+collect = open(collectfp, "w")
 
 collect.write("\001\015\015\012001\n")
 collect.write("SAUS70 KISU "+sDate+"\015\015\012")
