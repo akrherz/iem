@@ -1,0 +1,45 @@
+#!/bin/csh -f
+
+
+set ftime="`date -u +'%Y%m%d%H'`00"
+
+./createGrids2.csh
+./createGrids.csh
+#./IAMESONET_plot.csh
+# hack hack
+#./IAMESONET_plot.csh
+./SDMESONET_plot.csh
+./MW_mesonet.csh
+./TEMPS_plot.csh
+./DEWPS_plot.csh
+./WINDS_plot.csh
+./TEMPS_contour.csh
+./DMX_overlay.csh
+./OAX_overlay.csh
+./DVN_overlay.csh
+./FSD_overlay.csh
+./ARX_overlay.csh
+./EAX_overlay.csh
+./MPX_overlay.csh
+./ABR_overlay.csh
+./UDX_overlay.csh
+#./textReport.py
+./HEAT_plot.csh
+./WCHT_plot.csh
+./VSBY_plot.csh
+./vsby.py
+./RELH_plot.csh
+# ./meteorgrams.csh
+# ./RWIS_plot.csh
+./ASOS_plot.csh
+# ./20m_radar.csh
+./1h_precip.csh
+
+#set h="`date -u +%H`"
+#/home/ldm/bin/pqinsert -p "plot ac $ftime report.txt report_${h}.txt txt" report.txt
+
+cd black
+./surfaceContours.csh
+
+# cd ~/compare/SCRIPTS
+# ./RUN_COMPARE
