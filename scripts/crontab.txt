@@ -1,0 +1,55 @@
+#
+0 19 * * * cd /var/www/scripts; sh RUN_0Z.sh
+0 0 * * * cd /var/www/scripts; sh RUN_MIDNIGHT.sh
+5 2 * * * cd /var/www/scripts; sh RUN_2AM.sh
+0 11 * * * cd /var/www/scripts; sh RUN_11AM.sh
+0 7 * * * cd /var/www/scripts; sh RUN_12Z.sh
+
+10 * * * * cd /var/www/scripts; sh RUN_10_AFTER.sh 
+40 * * * * cd /var/www/scripts; sh RUN_40_AFTER.sh 
+59 * * * * cd /var/www/scripts; sh RUN_59_AFTER.sh 
+
+12 0 * * * cd /var/www/scripts; sh RUN_ONCE_DAILY.sh
+1 1,7 * * * cd /var/www/scripts; sh RUN_SUMMARY.sh
+10 6,7,8,9,10 * * * cd /var/www/scripts; sh RUN_COOP.sh
+
+*/20 * * * * cd /var/www/scripts; sh RUN_20MIN.sh
+1,11,21,31,41,51 * * * * cd /var/www/scripts; sh RUN_10MIN.sh
+*/5 * * * * cd /var/www/scripts; sh RUN_5MIN.sh 
+* * * * * cd /var/www/scripts; sh RUN_1MIN.sh
+
+# Drought Monitor
+0 8 * * 4 cd /var/www/scripts/cache/dm; ./download.sh
+
+# Archive Bufkit!
+# Eta
+05 0 * * *   cd /var/www/scripts/cache; ./downloadNAM.csh 00
+05 6 * * *   cd /var/www/scripts/cache; ./downloadNAM.csh 06
+05 12 * * *  cd /var/www/scripts/cache; ./downloadNAM.csh 12
+05 18 * * *  cd /var/www/scripts/cache; ./downloadNAM.csh 18
+# GFS
+00 0 * * *   cd /var/www/scripts/cache; ./downloadGFS.csh 00
+00 6 * * *   cd /var/www/scripts/cache; ./downloadGFS.csh 06
+00 12 * * *  cd /var/www/scripts/cache; ./downloadGFS.csh 12
+00 18 * * *  cd /var/www/scripts/cache; ./downloadGFS.csh 18
+# RUC
+50 20 * * *  cd /var/www/scripts/cache; ./downloadRUC.csh 00
+50 23  * * * cd /var/www/scripts/cache; ./downloadRUC.csh 03
+50 2  * * *  cd /var/www/scripts/cache; ./downloadRUC.csh 06
+50 5  * * *  cd /var/www/scripts/cache; ./downloadRUC.csh 09
+50 8  * * *  cd /var/www/scripts/cache; ./downloadRUC.csh 12
+50 11  * * * cd /var/www/scripts/cache; ./downloadRUC.csh 15
+50 14  * * * cd /var/www/scripts/cache; ./downloadRUC.csh 18
+50 17  * * * cd /var/www/scripts/cache; ./downloadRUC.csh 21
+
+# Get GIS Sat Data!
+18 * * * * cd /var/www/scripts/cache; ./get.csh 45
+48 * * * * cd /var/www/scripts/cache; ./get.csh 15
+
+00,15,30,45 * * * * cd /var/www/scripts/GIS/SCRIPTS; ./RUN_RADAR
+03,13,24 * * * * cd /var/www/scripts/plots; ./HOURLY_PLOTS
+
+15 0,4,9,12,17,20 * * * cd /mesonet/www/apps/nwnwebsite/scripts; php -q driveFX.php
+
+#-- GEMPAK
+6,21,36,51 * * * * cd /var/www/scripts/gempak; ./gridPrecip.csh
