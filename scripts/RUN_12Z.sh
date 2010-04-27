@@ -9,3 +9,6 @@ cd ../dbutil
 
 cd ../12z
 /mesonet/python/bin/python awos_rtp.py
+
+cd ../qc
+/mesonet/python/bin/python check5day.py
