@@ -1,0 +1,14 @@
+#!/bin/csh
+# 	RUN_RADAR
+# Frontend SCRIPT to generate RADAR images for GIS apps
+
+
+./compPlot.csh
+
+exit
+
+set OBTIME=`./currentObs.py`
+
+cd /mesonet/www/html/GIS/apps/IAoverlay/
+echo "<TR><TD>Surface Obs valid at:</TD><TD> ${OBTIME} </TD></TR></TABLE>" >> ia_top.html
+cat ia_top.html ia.edit > ia.html 
