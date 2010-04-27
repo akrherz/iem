@@ -61,21 +61,6 @@ $GEMEXE/sfmap_gf << EOF > /tmp/RWIS_plot_sfmap.out
 EOF
 
 
-#####
-# Lets count how many we have reporting
-#sfchck << EOF > TMP/RWIS_plot_sfchck.out
-#        SFFILE   = /mesonet/data/gempak/rwis/${date}_rwis.gem
-#        AREA     = @IA
-#        DATTIM   = ${date}/${hh}${MM}
-#        OUTPUT   = f/rwis.good
-#        IDNTYP   = STID
-#        STNTYP   = R
-#        list
-#        run
-#
-#        exit
-#EOF
-
 ###
 # If RWIS data is not there
 #if (! -e rwis.good ) then

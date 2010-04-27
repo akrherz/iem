@@ -32,7 +32,7 @@ set DEVICE="GF|MWmesonet.gif|900;700"
 set AREA="37;-104;48.5;-86"
 
 # Now we plot
-sfmap << EOF > TMP/MWmesonet_sfmap.out
+sfmap << EOF > /tmp/MWmesonet_sfmap.out
 	AREA    = ${AREA}
 	GAREA	= ${AREA}
  	SATFIL   =  
@@ -61,7 +61,7 @@ sfmap << EOF > TMP/MWmesonet_sfmap.out
 EOF
 
 
-gdcntr << EOF > TMP/MW_MESONET_gdcntr.out
+gdcntr << EOF > /tmp/MW_MESONET_gdcntr.out
 	AREA	= ${AREA}
 	GAREA    = ${AREA}
 	GDATTIM  = F001

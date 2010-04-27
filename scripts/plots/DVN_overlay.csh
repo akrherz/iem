@@ -90,7 +90,7 @@ set PROJ=RAD
 #	set PROJ=LCC
 #endif
 
-$GEMEXE/sfmap << EOF > TMP/RADAR_overlay_sfmap.out
+$GEMEXE/sfmap << EOF > /tmp/RADAR_overlay_sfmap.out
 #	GAREA	= 40.25;-97;43.75;-90
 #	AREA	= 40.25;-97;43.75;-90
 	GAREA	= dvn+

@@ -80,21 +80,6 @@ EOF
 
 #gpend
 
-#####
-# Lets count how many we have reporting
-#sfchck << EOF > TMP/sfchck.out
-#        SFFILE   = /mesonet/data/gempak/awos/${date}_awos.gem
-#        AREA     = @IA
-#        DATTIM   = ${date}/${hh}${mm}
-#        OUTPUT   = f/awos.good
-#        IDNTYP   = STID
-#        STNTYP   = R
-#        list
-#        run
-#
-#        exit
-#EOF
-
 #@ GOOD_AWOS=`wc -l awos.good | cut -d ' ' -f 1` - 3
 #set TOTAL_AWOS=`wc -l /mesonet/TABLES/awos.stns | cut -c 6-7`
 

@@ -27,7 +27,7 @@ rm heat.gif >& /dev/null
 
 set DEVICE="GIF|heat.gif"
 
-$GEMEXE/sfmap_gf << EOF > TMP/HEAT_plot_sfmap.out
+$GEMEXE/sfmap_gf << EOF > /tmp/HEAT_plot_sfmap.out
 	AREA	= 40.25;-97;43.75;-90
 	GAREA	= 40.25;-97;43.75;-90
  	SATFIL   =  
