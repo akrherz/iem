@@ -27,6 +27,9 @@ cd ../scan
 cd ../raws
 ./download.csh
 
+cd ../cocorahs
+/mesonet/python/bin/python stations.py IA
+/mesonet/python/bin/python stations.py IL
 
 # This is intensive...
 cd ../../week
