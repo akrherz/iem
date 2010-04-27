@@ -35,7 +35,7 @@ set GFFILE4="P2compare.gif"
 
 rm -f ${GFFILE} ${GFFILE2} ${GFFILE3} ${GFFILE4} >& /dev/null
 
-sfmap << EOF > ../TMP/compare_sfmap.out
+sfmap << EOF > /tmp/compare_sfmap.out
  AREA     = ${AREA}
  GAREA    = ${AREA}
  SATFIL   =  
