@@ -40,7 +40,7 @@ set DEVICE="GF|MWoverlay.gif"
 set AREA="39.25;-98.0;44.75;-89.0"
 set SFCTIME=${date}/${hh}${mm}
 
-gdplot << EOF > TMP/MW_overlay_gdplot.out
+gdplot << EOF > /tmp/MW_overlay_gdplot.out
 	GAREA    = ${AREA}
         PROJ     = MER
 	GDATTIM  = LAST
@@ -84,7 +84,7 @@ gdplot << EOF > TMP/MW_overlay_gdplot.out
 	exit
 EOF
 # Now we plot
-sfmap << EOF > TMP/MW_overlay_sfmap.out
+sfmap << EOF > /tmp/MW_overlay_sfmap.out
 	AREA    = ${AREA}
 	GAREA    = ${AREA}
  	SATFIL   =  

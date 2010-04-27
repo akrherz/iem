@@ -12,11 +12,9 @@ source /mesonet/nawips/Gemenviron
 setenv DISPLAY localhost:1
 set OUTGIF="ruc2_iem_T.gif"
 
-cd /tmp
-
 rm -f $OUTGIF >& /dev/null
 
-gdplot2 << EOF > ruc2.gdplot2.out
+gdplot2 << EOF > /tmp/ruc2.gdplot2.out
  GDFILE   = RUC2
  GDATTIM  = F000
  GLEVEL   = 2
@@ -63,7 +61,7 @@ EOF
 set date=`date -u +%y%m%d`
 set hh=`date -u +%H`
 
-sfmap << EOF > ruc2.sfmap.out
+sfmap << EOF > /tmp/ruc2.sfmap.out
  AREA     = IA+
  GAREA    = IA+
  SATFIL   =  
@@ -102,11 +100,10 @@ endif
 
 set OUTGIF="ruc2_iem_Td.gif"
 
-cd /tmp
 
 rm -f $OUTGIF >& /dev/null
 
-gdplot2 << EOF > ruc2.gdplot2.out
+gdplot2 << EOF > /tmp/ruc2.gdplot2.out
  GDFILE   = RUC2
  GDATTIM  = F000
  GLEVEL   = 2
@@ -153,7 +150,7 @@ EOF
 set date=`date -u +%y%m%d`
 set hh=`date -u +%H`
 
-sfmap << EOF > ruc2.sfmap.out
+sfmap << EOF > /tmp/ruc2.sfmap.out
  AREA     = IA+
  GAREA    = IA+
  SATFIL   =  
@@ -197,7 +194,7 @@ set OUTGIF="ruc2_iem_Rh.gif"
 
 rm -f ${OUTGIF}* >& /dev/null
 
-gdplot2 << EOF > ruc2.gdplot2.out
+gdplot2 << EOF > /tmp/ruc2.gdplot2.out
  GDFILE   = RUC2
  GDATTIM  = F000
  GLEVEL   = 2
@@ -244,7 +241,7 @@ EOF
 set date=`date -u +%y%m%d`
 set hh=`date -u +%H`
 
-sfmap << EOF > ruc2.sfmap.out
+sfmap << EOF > /tmp/ruc2.sfmap.out
  AREA     = IA+
  GAREA    = IA+
  SATFIL   =  
@@ -285,7 +282,7 @@ set OUTGIF="ruc2_iem_V.gif"
 
 rm -f ${OUTGIF}* >& /dev/null
 
-gdplot2 << EOF > ruc2.gdplot2.out
+gdplot2 << EOF > /tmp/ruc2.gdplot2.out
  GDFILE   = RUC2
  GDATTIM  = F000
  GLEVEL   = 10
@@ -332,7 +329,7 @@ EOF
 set date=`date -u +%y%m%d`
 set hh=`date -u +%H`
 
-sfmap << EOF > ruc2.sfmap.out
+sfmap << EOF > /tmp/ruc2.sfmap.out
  AREA     = IA+
  GAREA    = IA+
  SATFIL   =  
