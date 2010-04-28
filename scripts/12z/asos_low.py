@@ -44,7 +44,6 @@ cfg = {
  '_format'            : '%.0f',
  '_title'             : "Iowa ASOS/AWOS 12Z Morning Low Temperature",
  '_valid'             : "%s" % (now.strftime("%d %b %Y"), ),
- 'lbTitleString'      : "[F]",
  '_labels'            : labels
 }
 # Generates tmp.ps
