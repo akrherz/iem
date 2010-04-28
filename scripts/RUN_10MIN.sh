@@ -3,9 +3,10 @@ cd alerts
 /mesonet/python/bin/python check_db.py
 cd ../current
 /mesonet/python/bin/python vsby.py
-/mesonet/python/bin/python today_precip.py >& /dev/null
+/mesonet/python/bin/python today_precip.py
 /mesonet/python/bin/python today_gust.py
 /mesonet/python/bin/python temperature.py
+/mesonet/python/bin/python today_high.py
 
 cd ../summary
 /mesonet/python/bin/python updateRain.py
