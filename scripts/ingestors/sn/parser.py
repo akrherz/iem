@@ -10,7 +10,7 @@ except IOError:
   sys.exit()
 
 o = open("/tmp/sn.txt", 'w')
-o.write( data )
+o.write( data.replace("Title: ", "Title: %s " % (gmt.strftime("%Y%m%d%H%M"),) ))
 o.close()
 
 cmd = "/home/ldm/bin/pqinsert -p 'data a %s bogus text/sn/gr_%s.txt txt' /tmp/sn.txt" % (gmt.strftime("%Y%m%d%H%M"), gmt.strftime("%Y%m%d%H%M"))
