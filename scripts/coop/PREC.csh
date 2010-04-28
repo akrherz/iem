@@ -10,6 +10,7 @@ set ftime="`date +'%Y%m%d'`0000"
 
 
 /mesonet/python/bin/python extractPrecip.py
+/mesonet/python/bin/python today_precip.py
 
 cp /mesonet/data/gis/meta/4326.prj coop_${Date}.prj
 cp data.desc coop_${Date}.txt
