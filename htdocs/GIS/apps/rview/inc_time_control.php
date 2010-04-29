@@ -19,7 +19,7 @@
 <tr><th>Year:</th><td><?php echo yearSelect(2003, $year, "year"); ?></td></tr>
 <tr><th>Month:</th><td><?php echo monthSelect($month, "month"); ?></td></tr>
 <tr><th>Day:</th><td><?php echo daySelect($day, "day"); ?></td></tr>
-<tr><th>Time:</th><td><?php echo hourSelect($hour, "hour"); ?>:<?php echo local5MinuteSelect($m, "minute"); ?></td></tr>
+<tr><th>Time:</th><td><?php echo hourSelect($hour, "hour"); ?>:<?php echo minuteSelect($m, "minute",5); ?></td></tr>
 </table>
 
 <p><div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('time-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
