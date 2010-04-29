@@ -73,7 +73,7 @@ include("$rootpath/include/header.php");
 <td>Month:</td><td><?php echo monthSelect($month, "month"); ?></td></tr>
 <tr><td>Day:</td><td><?php echo daySelect($day, "day"); ?></td></tr>
 <tr><td>Hour:</td><td><?php echo hourSelect($hour, "hour"); ?></td></tr>
-<tr><td>Minute:</td><td><?php echo local5MinuteSelect($minute, "minute"); ?></td></tr>
+<tr><td>Minute:</td><td><?php echo minuteSelect($minute, "minute", 5); ?></td></tr>
 <tr><td colspan="2"><input type="submit" value="Generate Image"></td></tr>
 </table>
 </form>
