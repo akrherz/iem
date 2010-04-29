@@ -27,6 +27,8 @@ vals = []
 valmask = []
 rs = iem.query(sql).dictresult()
 for i in range(len(rs)):
+  if rs[i]['wind'] == 0:
+    continue
   lats.append( rs[i]['lat'] )
   lons.append( rs[i]['lon'] + (random.random() * 0.01))
   vals.append( rs[i]['wind'] * 1.16 )
