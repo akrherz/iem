@@ -7,6 +7,7 @@ cd ../current
 /mesonet/python/bin/python today_gust.py
 /mesonet/python/bin/python temperature.py
 /mesonet/python/bin/python today_high.py
+/mesonet/python/bin/python rwis_station.py
 
 cd ../summary
 /mesonet/python/bin/python updateRain.py

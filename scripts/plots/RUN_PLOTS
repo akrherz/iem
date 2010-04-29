@@ -3,7 +3,7 @@
 # These plots are run every 20 minutes
 
 ./meteorgrams.csh
-./RWIS_plot.csh
+#./RWIS_plot.csh
 ./AWOS_plot.csh
 ./20m_radar.csh
 #./IAMESONET_plot.csh
