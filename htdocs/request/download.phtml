@@ -81,15 +81,24 @@ don't hesitate to contact us.
 	<option value="skyc">Cloud Coverage
 	<option value="p01m">1 hour Precipitation [mm]
 	<option value="vsby">Visibility [miles]
+	<option value="gust">Wind Gust [mph]
+	<option value="skyc1">Cloud Coverage Level 1
+	<option value="skyc2">Cloud Coverage Level 2
+	<option value="skyc3">Cloud Coverage Level 3
+	<option value="skyl1">Cloud Height Level 1 [ft]
+	<option value="skyl2">Cloud Height Level 2 [ft]
+	<option value="skyl3">Cloud Height Level 3 [ft]
+	<option value="metar">Raw METAR</option>
 </SELECT>
+<br />
+<strong>Note:</strong> Cloud information and raw METAR data is not available 
+for all observations, the IEM continues to backfill this information.
 
 <br><br>
 <h3 class="subtitle">3) Select Date Range:</h3>
 <SELECT name="timeRange"> 
 	<Option value="allYear">Entire Year
 	<option value="allMonth">Entire Month
-	<option value="rangeMonth">Range of Months
-	<option value="allDay">Entire Day
 	<option value="rangeDays">Range of Days
 </SELECT>
 
@@ -98,107 +107,38 @@ don't hesitate to contact us.
 <TABLE>
 <TR><TH>Start:</TH><TH>Stop:</TH></TR>
 
-<TR>
- <TD colspan="2" align="center">
-  <?php 
-$y = 2001;
-if ($network == "IA_ASOS") $y = 1970;
-if ($network == "AWOS") $y = 1970;
-echo yearSelect($y, $year, "year"); 
+<tr>
+ <td><?php echo yearSelect2(1941, date("Y"), "year1"); ?></td>
+ <td><?php echo yearSelect2(1941, date("Y"), "year2"); ?></td>
+</tr>
 
- ?>
- </TD>
-</TR>
-
-<TR>
- <TD>
-   <SELECT name="month1">
-   	<option value="1">January
-	<option value="2">Febuary
-	<option value="3">March
-	<option value="4">April
-	<option value="5">May
-	<option value="6">June
-	<option value="7">July
-	<option value="8">August
-	<option value="9">September
-	<option value="10">October
-	<option value="11">November
-	<option value="12">December
-   </SELECT>
- </TD>
- <TD>
-    <SELECT name="month2">
-   	<option value="1">January
-	<option value="2">Febuary
-	<option value="3">March
-	<option value="4">April
-	<option value="5">May
-	<option value="6">June
-	<option value="7">July
-	<option value="8">August
-	<option value="9">September
-	<option value="10">October
-	<option value="11">November
-	<option value="12">December
-   </SELECT>
- </TD>
+<tr>
+ <td><?php echo monthSelect2(date("m"), "month1"); ?></td>
+ <td><?php echo monthSelect2(date("m"), "month2"); ?></td>
 </TR>
 
 <tr>
- <td>
-  <SELECT name="day1">
-   <option value="1">1	 <option value="2">2	 <option value="3">3	 <option value="4">4
-   <option value="5">5	 <option value="6">6	 <option value="7">7	 <option value="8">8
-   <option value="9">9	 <option value="10">10   <option value="11">11   <option value="12">12
-   <option value="13">13   <option value="14">14   <option value="15">15   <option value="16">16
-   <option value="17">17   <option value="18">18   <option value="19">19   <option value="20">20
-   <option value="21">21   <option value="22">22   <option value="23">23   <option value="24">24
-   <option value="25">25   <option value="26">26   <option value="27">27   <option value="28">28
-   <option value="29">29   <option value="30">30   <option value="31">31
-  </SELECT>
- </td>
- <td>
-  <SELECT name="day2">
-   <option value="1">1	 <option value="2">2	 <option value="3">3	 <option value="4">4
-   <option value="5">5	 <option value="6">6	 <option value="7">7	 <option value="8">8
-   <option value="9">9	 <option value="10">10   <option value="11">11   <option value="12">12
-   <option value="13">13   <option value="14">14   <option value="15">15   <option value="16">16
-   <option value="17">17   <option value="18">18   <option value="19">19   <option value="20">20
-   <option value="21">21   <option value="22">22   <option value="23">23   <option value="24">24
-   <option value="25">25   <option value="26">26   <option value="27">27   <option value="28">28
-   <option value="29">29   <option value="30">30   <option value="31">31
-  </SELECT>
- </td>
-
+ <td><?php echo daySelect2(date("d"), "day1"); ?></td>
+ <td><?php echo daySelect2(date("d"), "day2"); ?></td>
 </tr>
 
 </TABLE>
 
 <br><br>
-<h3 class="subtitle">5) Include possible 20min observations?</h3>
-<i> &nbsp; &nbsp; (Leave yes if unsure)</i>
-<SELECT name="include20s">
-	<option value="yes">Yes
-	<option value="no">No
-</SELECT>
-
-<br><br>
-<h3 class="subtitle">6) Format of time output:</h3>
+<h3 class="subtitle">5) Format of time output:</h3>
 <SELECT name="tz">
 	<option value="GMT">GMT (UTC) timestamps
 	<option value="local">Central Standard/Daylight Time
 </SELECT>
 
 <br><br>
-<h3 class="subtitle">7) Data Format:</h3>
+<h3 class="subtitle">6) Data Format:</h3>
 <SELECT name="format">
 	<option value="tdf">Tab Delimited
-	<option value="space">Space Delimited
 	<option value="comma">Comma Delimited
 </SELECT>
 
-<p><h3>8) Include Lat/Lons?:</h3>
+<p><h3>7) Include Lat/Lons?:</h3>
 <select name="latlon">
   <option value="no">No
   <option value="yes">Yes
