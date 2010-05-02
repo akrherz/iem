@@ -31,12 +31,10 @@ dmx.close()
 cmd = "/home/ldm/bin/pqinsert -p 'data c %s iaawos.txt bogus bogus' metar.dat" % (archivets.strftime("%Y%m%d%H%M"),)
 os.system(cmd)
 
-# Archive it
-dir = "/mesonet/ARCHIVE/raw/awos/adas/%s" % (archivets.strftime("%Y/%m/%d/"), )
-if (not os.path.isdir(dir)):
-  os.makedirs(dir)
-
-fp = "%s/%s_raw.txt" % (dir, archivets.strftime("%H%M"), )
-o = open(fp, 'w')
+o = open("/tmp/awos_adas.txt", 'w')
 o.write("\n".join(data) )
 o.close()
+
+os.system("/home/ldm/bin/pqinsert -p 'data a %s bogus text/adas/%s.txt bogus' /tmp/awos_adas.txt" % (archivets.strftime("%Y%m%d%H%M"), archivets.strftime("%Y%m%d%H%M") ) )
+
+os.unlink("/tmp/awos_adas.txt")
