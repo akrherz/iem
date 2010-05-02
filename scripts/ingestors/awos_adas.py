@@ -35,6 +35,6 @@ o = open("/tmp/awos_adas.txt", 'w')
 o.write("\n".join(data) )
 o.close()
 
-os.system("/home/ldm/bin/pqinsert -p 'data a %s bogus text/adas/%s.txt bogus' /tmp/awos_adas.txt" % (archivets.strftime("%Y%m%d%H%M"), archivets.strftime("%Y%m%d%H%M") ) )
+si, so = os.popen4("/home/ldm/bin/pqinsert -p 'data a %s bogus text/adas/%s.txt bogus' /tmp/awos_adas.txt" % (archivets.strftime("%Y%m%d%H%M"), archivets.strftime("%Y%m%d%H%M") ) )
 
 os.unlink("/tmp/awos_adas.txt")
