@@ -27,7 +27,7 @@ set ftime="`date -u +'%Y%m%d%H'`00"
 ./HEAT_plot.csh
 ./WCHT_plot.csh
 ./VSBY_plot.csh
-./vsby.py
+/mesonet/python/bin/python vsby.py
 ./RELH_plot.csh
 # ./meteorgrams.csh
 # ./RWIS_plot.csh

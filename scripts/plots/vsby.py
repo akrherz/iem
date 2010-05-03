@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 
 import Ngl
 import numpy
@@ -26,7 +25,9 @@ vsby = []
 lats = []
 lons = []
 
-sql = "select station, x(geom), y(geom), vsby from current WHERE vsby >= 0 and valid + '2 hours'::interval > now() and network !~* 'RWIS'" 
+sql = """select station, x(geom), y(geom), vsby from current 
+  WHERE vsby >= 0 and valid + '2 hours'::interval > now() 
+  and network !~* 'RWIS' and network != 'IQ_ASOS'""" 
 rs = iemdb.query(sql).dictresult()
 
 for i in range(len(rs)):
