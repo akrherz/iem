@@ -45,9 +45,6 @@ cfg = {
  '_format'            : '%.1f',
  '_valuemask'         : valmask,
  'lbTitleString'      : "[miles]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
