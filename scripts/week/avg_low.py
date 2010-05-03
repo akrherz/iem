@@ -20,7 +20,7 @@ from summary
 WHERE max_tmpf > -50 
 and day >= ('TODAY'::date - '7 days'::interval)
 and day < 'TODAY' 
-and network ~* 'ASOS' 
+and network ~* 'ASOS' and network != 'IQ_ASOS'
 GROUP by station, lon, lat
 """
 
