@@ -542,7 +542,10 @@ def postprocess(tmpfp, pqstr, rotate=""):
     os.system( cmd )
     # Step 3: Show darly, if he is watching
     if os.environ['USER'] == 'akrherz':
-        os.system("xv %s.png" % (tmpfp,))
+        try:
+            os.system("xv %s.png" % (tmpfp,))
+        except:
+            pass
     # Step 4: Cleanup
     os.remove("%s.png" % (tmpfp,) )
     os.remove("%s.ps" % (tmpfp,) )
