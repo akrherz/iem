@@ -13,12 +13,12 @@ setenv DISPLAY localhost:1
 
 setenv GEMCOLTBL coltbl.xwp
 
-set yy=`date -u +%y`
-set MM=`date -u +%m`
-set dd=`date -u +%d`
+set yy=`date -u --date '1 minute' +%y`
+set MM=`date -u --date '1 minute' +%m`
+set dd=`date -u --date '1 minute' +%d`
 set date=${yy}${MM}${dd}
-set hh=`date -u +%H`
-set mm=`date -u +%M`
+set hh=`date -u --date '1 minute' +%H`
+set mm=`date -u --date '1 minute' +%M`
 
 
 if (${mm} > 40 ) then
