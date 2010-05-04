@@ -16,10 +16,10 @@ sql = """
 select s.station, s.network,
   x(s.geom) as lon, y(s.geom) as lat, 
   case when s.max_sknt > s.max_gust then s.max_sknt else s.max_gust END  as wind
-from summary s, current c
+from summary_%s s, current c
 WHERE s.station = c.station and c.valid > 'TODAY' and s.day = 'TODAY'
-and (s.network ~* 'ASOS' or s.network = 'AWOS')
-"""
+and (s.network ~* 'ASOS' or s.network = 'AWOS') and s.network != 'IQ_ASOS'
+""" % (now.year,)
 
 lats = []
 lons = []
