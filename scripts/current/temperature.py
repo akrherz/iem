@@ -27,7 +27,7 @@ SELECT
 FROM 
   current
 WHERE
-  (network ~* 'ASOS' or network = 'IA_AWOS') and
+  (network ~* 'ASOS' or network = 'IA_AWOS') and network != 'IQ_ASOS' and
   (valid + '30 minutes'::interval) > now() and
   tmpf >= -50 and tmpf < 120
 """
