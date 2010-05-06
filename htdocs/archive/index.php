@@ -126,7 +126,11 @@ archives of RUC, ETA, and AVN model plots.  National radar summaries,
 surface plots and other plots.</li>
 
 <li><a href="ftp://ftp.wcc.nrcs.usda.gov/support/climate/wind_daily">NRCS wind climatologies (1961-1990)</a></li>
+
 <li><a href="http://climate.engin.umich.edu/tornadopaths/">Historical Tornado Tracks</a></li>
+
+<li><a href="http://ida.water.usgs.gov/ida/">USGS Instantaneous Data Archive</a>
+<br />Goldmine of historical USGS river gage data.</li>
 </ul>
 
 <h3>US Daily Weather Maps</h3>
