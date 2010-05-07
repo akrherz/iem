@@ -144,14 +144,14 @@ network = sys.argv[1]
 rs = mesosite.query("SELECT * from stations WHERE network = '%s'" % (
      network,)).dictresult()
 for i in range(len(rs)):
-  sid = rs[i]['station']
+  sid = rs[i]['id']
   # 2. Look in the database for earliest ob with METAR
   rs2 = asos.query("""SELECT min(valid) from alldata WHERE station = '%s'
      and metar is not null""" % (sid,)).dictresult()
   if len(rs2) == 0:
     tend = mx.DateTime.now()
   else:
-    tend = mx.DateTime.strptime(rs2[0]['min'], '%Y-%m-%d')
+    tend = mx.DateTime.strptime(rs2[0]['min'][:16], '%Y-%m-%d %H:%M')
 
   # 3. Move old data to old table
   asos.query("""INSERT into alldata_save SELECT * from alldata WHERE 
