@@ -1,11 +1,58 @@
 <?php 
 include("../../config/settings.inc.php");
-	$THISPAGE = "current-gs";
-	$TITLE = "IEM | Current | Growing Season Data";
-	include("$rootpath/include/header.php"); 
+include("$rootpath/include/database.inc.php");
+$coopdb = iemdb("coop");
+
+$THISPAGE = "current-gs";
+$TITLE = "IEM | Current | Growing Season Data";
+include("$rootpath/include/header.php"); 
 ?>
 
-<b>In progress...</b>
+<h3>Selected Location Summary: 01 May thru <?php echo date("d M Y", time() - 86400); ?></h3>
+
+<p>These values are estimates based on the IEM's collection of various datasets.
+Climatology is based on observations back to 1951.
+
+<table cellpadding="2" cellspacing="0" border="1">
+ <tr><th rowspan="2">Location</th><th colspan="2">Growing Degree Days</th>
+  <th colspan="2">Precipitation</th>
+  <th colspan="3">Temperature</th>
+ </tr>
+ <tr>
+ <th>Observed</th><th>Climate</th>
+ <th>Observed</th><th>Climate</th>
+ <th>Highest</th><th>Lowest</th><th>Average</th>
+ </tr>
+<?php
+$lkp = Array("ia0200" => "Ames", "ia2203" => "Des Moines",
+      "ia8706" => "Waterloo", "ia1319" => "Cedar Rapids",
+      "ia2364" => "Dubuque", "ia2110" => "Decorah",
+      "ia5230" => "Mason City", "ia7708" => "Sioux City", 
+      "ia7613" => "Shenandoah", "ia4585" => "Lamoni", "ia4705" => "Davenport");
+$rs = pg_query($coopdb, "select stationid, 
+   sum(gdd50(o.high, o.low)) as ogdd50, sum(o.precip) as oprecip, 
+   sum(gdd50) as cgdd50, sum(c.precip) as cprecip,
+   max(o.high) as maxtmpf, min(o.low) as mintmpf,
+   avg( (o.high + o.low) / 2.0 ) as avgtmpf
+  from alldata o, climate51 c WHERE 
+   stationid in ('ia0200', 'ia1319', 'ia2203','ia8706', 'ia2364', 'ia2110',
+    'ia5230', 'ia7708', 'ia7613', 'ia4585', 'ia4705') 
+   and stationid = station 
+   and day >= '2010-05-01' and day < '2010-10-01' 
+   and extract(doy from day) = extract(doy from valid)  GROUP by stationid
+   ORDER by stationid ASC");
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+  echo sprintf("<tr style=\"background: %s;\"><th>%s</th><td>%.0f</td><td>%.0f</td><td>%.2f</td><td>%.2f</td><td>%.0f</td><td>%.0f</td><td>%.0f</td></tr>", 
+  ($i % 2 == 0) ? "#eee": "#fff;", $lkp[$row["stationid"]], $row["ogdd50"], $row["cgdd50"], $row["oprecip"], $row["cprecip"], 
+  $row["maxtmpf"], $row["mintmpf"], $row["avgtmpf"]);
+}
+?>
+</table>
+
+<h3>Growing Degree Days</h3>
+<ul>
+ <li>May 1 - Today Climatology: <a href="<?php echo $rooturl; ?>data/summary/gdd_norm_may1.png">contour plot</a> or <a href="<?php echo $rooturl; ?>data/summary/gdd_norm_may1_pt.png">value plot</a></li>
+</ul>
 
 
 <?php include("$rootpath/include/footer.php"); ?>
