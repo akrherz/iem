@@ -88,6 +88,7 @@ $_pages = Array(
     "networks" => Array("title" => "Network Tables", "url" => "/sites/networks.php"),
     "present" => Array("title" => "Presentations", "url" => "/present/"),
     "qc" => Array("title" => "Quality Control", "url" => "/QC/"),
+    "variables" => Array("title" => "Variables", "url" => "/info/variables.phtml"),
  ),
  "networks" => Array(
     "base" => Array("title" => "IEM Networks", "url" => "/"),
