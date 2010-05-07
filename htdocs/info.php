@@ -15,7 +15,6 @@ include("$rootpath/include/header.php"); ?>
 <li><a href="/info/iem.php">IEM Info/Background</a></li>
 <li><a href="/info/members.php">IEM Partners</a></li>
 <li><a href="/info/links.php">Links</a></li>
-<li><a href="/sites/networks.php">Network Tables</a></li>
 <li><a href="/info/variables.phtml">Variables Collected</a></li></ul>
 
 <p>Information about requesting a <a href="/request/ldm.php">real-time data feed</a>

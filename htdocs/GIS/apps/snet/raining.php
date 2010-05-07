@@ -232,7 +232,7 @@ echo "</table>\n";
 echo "</td><td valign=\"top\">\n";
 
 echo "<p><b>". $obcount ."</b> sites currently reporting precip.\n";
-echo "<br>Map of <a href=\"http://mesonet.agron.iastate.edu/info/network.phtml?network=KCCI\" target=\"_new\">KCCI sites</a> or <a href=\"http://mesonet.agron.iastate.edu/info/network.phtml?network=KELO\" target=\"_new\">KELO sites</a> or <a href=\"http://mesonet.agron.iastate.edu/info/network.phtml?network=KIMT\" target=\"_new\">KIMT sites</a> .\n";
+echo "<br>Map of <a href=\"$rooturl/sites/locate.php?network=KCCI\" target=\"_new\">KCCI sites</a> or <a href=\"$rooturl/sites/locate.php?network=KELO\" target=\"_new\">KELO sites</a> or <a href=\"$rooturl/sites/locate.php?network=KIMT\" target=\"_new\">KIMT sites</a> .\n";
 
 echo "<p><img src=\"$url\" border=1>";
 ?>

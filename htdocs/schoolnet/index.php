@@ -23,9 +23,9 @@ the IEM with the ability to process data from their observing networks.
 <br>Stations: 72 (KCCI)
 <br>Stations: 39 (KELO)
 <br />Stations: 15 (KIMT)
-<br><a href="<?php echo $rooturl; ?>/info/network.phtml?network=KCCI">KCCI Locations</a>
-<br><a href="<?php echo $rooturl; ?>/info/network.phtml?network=KELO">KELO Locations</a>
-<br><a href="<?php echo $rooturl; ?>/info/network.phtml?network=KIMT">KIMT Locations</a>
+<br><a href="<?php echo $rooturl; ?>/sites/locate.php?network=KCCI">KCCI Locations</a>
+<br><a href="<?php echo $rooturl; ?>/sites/locate.php?network=KELO">KELO Locations</a>
+<br><a href="<?php echo $rooturl; ?>/sites/locate.php?network=KIMT">KIMT Locations</a>
 </div></td></tr></table>
 
 <!-- Begin TV tabs -->
