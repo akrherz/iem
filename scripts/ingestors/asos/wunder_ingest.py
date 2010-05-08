@@ -90,12 +90,19 @@ def doit(stid, now):
     else:
       metarFail += 1
       tmpf = tokens[ headers['TemperatureF'] ]
+      addon = 0
       if headers.has_key('TimeCST'):
         tstr = tokens[ headers['TimeCST'] ]
-      else:
+      elif headers.has_key('TimeCDT'):
         tstr = tokens[ headers['TimeCDT'] ]
+      elif headers.has_key('TimeEDT'):
+        tstr = tokens[ headers['TimeEDT'] ]
+        addon = mx.DateTime.RelativeDateTime(hours=-1)
+      elif headers.has_key('TimeEST'):
+        tstr = tokens[ headers['TimeEST'] ]
+        addon = mx.DateTime.RelativeDateTime(hours=-1)
       ts = mx.DateTime.strptime( '%s %s' % (now.strftime('%Y-%m-%d'), 
-           tstr), '%Y-%m-%d %I:%M %p' ) #+ mx.DateTime.RelativeDateTime(hours=1)
+           tstr), '%Y-%m-%d %I:%M %p' ) + addon
       gts = ts.gmtime()
       dwpf = tokens[ headers['Dew PointF'] ]
       alti = tokens[ headers['Sea Level PressureIn'] ]
