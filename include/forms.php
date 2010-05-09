@@ -46,7 +46,7 @@ function minuteSelect($selected, $name, $skip=1){
   $s = "<select name='".$name."'>\n";
   for ($i=0; $i<60;$i=$i+$skip) {
     $s .= "<option value='".$i."' ";
-    if ($i == intval($selected)) echo "SELECTED";
+    if ($i == intval($selected)) $s .= "SELECTED";
     $s .= ">". $i ."</option>";
   }
   $s .= "</select>\n";
