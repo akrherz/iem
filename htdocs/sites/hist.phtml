@@ -18,6 +18,7 @@ $sortvar = isset($_GET['sortvar']) ? $_GET['sortvar'] : 'station';
 $ts = mktime(0,0,0, $month, $day, $year);
 $dateStr = strftime("%Y-%m-%d", $ts);
 $nicedate = strftime("%d %B %Y", $ts);
+$htmlout = "";
 
 $c = iemdb("access");
 if ($mode == "monthly"){
