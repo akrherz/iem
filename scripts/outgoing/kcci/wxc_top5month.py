@@ -4,7 +4,7 @@ import os, mx.DateTime, pg
 iemdb = pg.connect('iem', 'iemdb', user='nobody')
 
 rs = iemdb.query("SELECT station from summary WHERE network = 'KCCI' and \
-  day = 'TODAY' and station != 'SCEI4' ORDER by pmonth DESC").dictresult()
+  day = 'TODAY' and station not in ('SCEI4','SWII4') ORDER by pmonth DESC").dictresult()
 dict = {}
 dict['dy'] = 31
 dict['timestamp'] = mx.DateTime.now()
