@@ -38,16 +38,14 @@ def init_year(ts):
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
-    lat[:] = numpy.arange(constants.SOUTH,constants.NORTH + constants.DY-0.01, 
-                          constants.DY)
+    lat[:] = constants.YAXIS
 
     lon = nc.createVariable('lon', numpy.float, ('lon',) )
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
-    lon[:] = numpy.arange(constants.WEST,constants.EAST + constants.DX, 
-                          constants.DX)
+    lon[:] = constants.XAXIS
 
     tm = nc.createVariable('time', numpy.float, ('time',) )
     tm.units = "Hours since %s-01-01 00:00:0.0" % (ts.year,)

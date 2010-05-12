@@ -1,4 +1,5 @@
 # Something to store constants of our effort
+import numpy
 
 # Iowa Extents in EPSG:26915
 # 202,054 4,470,570 736,852 4,822,687
@@ -14,3 +15,6 @@ NY = 16
 
 DX = (EAST-WEST)/float(NX-1)
 DY = (NORTH-SOUTH)/float(NY-1)
+
+XAXIS = numpy.arange(WEST, EAST + DX, NX)
+YAXIS = numpy.arange(SOUTH, NORTH + DY -0.01, NY)
