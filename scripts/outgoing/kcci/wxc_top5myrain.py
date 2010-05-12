@@ -7,7 +7,7 @@ now = mx.DateTime.now()
 
 sql = "SELECT station, sum(pday) as rain from summary \
   WHERE network = 'KCCI' and \
-  day > '%s' and station != 'SCEI4' GROUP by station ORDER by rain DESC" % \
+  day > '%s' and station not in ('SCEI4','SWII4') GROUP by station ORDER by rain DESC" % \
  ( (now - mx.DateTime.RelativeDateTime(days= int(dy) )).strftime("%Y-%m-%d"), )
 
 rs = iemdb.query(sql).dictresult()
