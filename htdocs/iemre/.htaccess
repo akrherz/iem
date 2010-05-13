@@ -1,0 +1,6 @@
+
+AddHandler cgi-script .py
+Options +ExecCGI
+
+RewriteEngine On
+RewriteRule ^daily/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4
