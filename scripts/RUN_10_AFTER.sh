@@ -23,3 +23,7 @@ cd ../dbutil
 
 cd ../plots
 ./RUN_PLOTS
+
+cd ../iemre
+/mesonet/python/bin/python grid_asos.py
+/mesonet/python/bin/python grid_asos.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
