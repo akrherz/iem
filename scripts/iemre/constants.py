@@ -16,5 +16,12 @@ NY = 16
 DX = (EAST-WEST)/float(NX-1)
 DY = (NORTH-SOUTH)/float(NY-1)
 
-XAXIS = numpy.arange(WEST, EAST + DX, NX)
-YAXIS = numpy.arange(SOUTH, NORTH + DY -0.01, NY)
+XAXIS = numpy.arange(WEST, EAST + DX, DX)
+YAXIS = numpy.arange(SOUTH, NORTH + DY -0.01, DY)
+
+def f2k(ar):
+    """
+    Convert numpy array ar from Fahrenhit to Kelvin
+    """
+    return (5.0/9.0 * (ar - 32.00 )) + 273.15
+

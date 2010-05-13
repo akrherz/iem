@@ -1,19 +1,15 @@
-# Grid hourly ASOS data please
-# Temperature (K),
-# Wind speed (mps),
-# % Sun shine, 
-# Precipitation, 
-# Relative humidity.
-
 import sys
 import netCDF3
 import numpy
 import mx.DateTime
 from pyIEM import iemdb, mesonet
 import Ngl
+import constants
+
 i = iemdb.iemdb()
 mesosite = i['mesosite']
 asos = i['asos']
+iem = i['iem']
 locs = {}
 
 def load_stationtable():
@@ -60,7 +56,8 @@ def generic_gridder(rs, idx):
             lons.append(  locs[rs[i]['station']]['lon'] )
             vals.append( rs[i][idx]  )
     if len(vals) < 4:
-        print "No TMPF data at all for time: %s" % (ts,)   
+        print "Only %s observations found for %s, won't grid" % (len(vals),
+               idx)
         return None
     grid = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
     if grid is not None:
@@ -70,43 +67,65 @@ def generic_gridder(rs, idx):
 
 
 def grid_hour(nc, ts):
+    """
+    I proctor the gridding of data on an hourly basis
+    @param ts Timestamp of the analysis, we'll consider a 20 minute window
+    """
     ids = `locs.keys()`
     ids = "(%s)" % (ids[1:-1],)
+    ts0 = ts - mx.DateTime.RelativeDateTime(minutes=10)
+    ts1 = ts + mx.DateTime.RelativeDateTime(minutes=10)
+
+    offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=1))).hours)
+
+    # If we are near realtime, look in IEMAccess instead of ASOS database
+    if (mx.DateTime.gmt() - ts).hours < 36:
+        dbconn = iem
+        table = "current_log"
+        pcolumn = "(phour * 25.4)"
+    else:
+        dbconn = asos
+        table = "t%s" % (ts.localtime().year,)
+        pcolumn = "p01m"
+
     sql = """SELECT station,
          max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
          max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
          max(getskyc(skyc1)) as max_skyc1,
          max(getskyc(skyc2)) as max_skyc2,
          max(getskyc(skyc3)) as max_skyc3,
-         max(case when p01m > 0 and p01m < 1000 then p01m else 0 end) as max_p01m,
-         max(case when dwpf > -60 and dwpf < 100 THEN dwpf else null end) as max_dwpf from t%s  
+         max(case when %s > 0 and %s < 1000 then %s else 0 end) as max_p01m,
+         max(case when dwpf > -60 and dwpf < 100 THEN dwpf else null end) as max_dwpf from %s  
          WHERE station in %s and 
-         valid >= '%s' and valid < '%s' GROUP by station""" % (
-         ts.gmtime().year, ids, 
-         ts.strftime("%Y-%m-%d %H:%M"),
-     (ts + mx.DateTime.RelativeDateTime(hours=1)).strftime("%Y-%m-%d %H:%M") )
-    rs = asos.query( sql ).dictresult()
+         valid >= '%s+00' and valid < '%s+00' GROUP by station""" % (
+         pcolumn, pcolumn, pcolumn, table, ids, 
+         ts0.strftime("%Y-%m-%d %H:%M"), ts1.strftime("%Y-%m-%d %H:%M") )
+    rs = dbconn.query( sql ).dictresult()
     if len(rs) > 4:
-        grid_tmpf(nc, ts, rs)
-        grid_relh(nc, ts, rs)
-        grid_wind(nc, ts, rs)
-        grid_skyc(nc, ts, rs)
-        grid_p01m(nc, ts, rs)
+        res = generic_gridder(rs, 'max_tmpf')
+        if res is not None:
+            nc.variables['tmpk'][offset] = constants.f2k(res)
+        res = grid_skyc(rs)
+        if res is not None:
+            nc.variables['skyc'][offset] = res
     else:
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d %H:%M"), 
             len(rs))
 
-#
-#create_netcdf()
-#sys.exit()
-load_stationtable()
-nc = netCDF3.Dataset("data/asosgrid.nc", 'a')
-now = sts
-#now = mx.DateTime.DateTime(1980,1,1)
-while now < ets:
-  #print now
-  #if now not in badtimes:
-  grid_hour(nc , now)
-  now += mx.DateTime.RelativeDateTime(hours=1)
+def main(ts):
+    # Load up a station table we are interested in
+    load_stationtable()
 
-nc.close()
+    # Load up our netcdf file!
+    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_hourly.nc" % (ts.year,), 'a')
+    grid_hour(nc , ts)
+
+    nc.close()
+
+if __name__ == "__main__":
+    if len(sys.argv) == 5:
+        ts = mx.DateTime.DateTime( int(sys.argv[1]),int(sys.argv[2]),
+                           int(sys.argv[3]), int(sys.argv[4]) )
+    else:
+        ts = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(minute=0,second=0)
+    main(ts)
