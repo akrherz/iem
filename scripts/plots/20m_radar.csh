@@ -11,14 +11,14 @@
 
 source /mesonet/nawips/Gemenviron
 
-set yy=`date -u +%y`
-set YYYY=`date -u +%Y`
-set mm=`date -u +%m`
-set dd=`date -u +%d`
+set yy=`date --date '1 minute' -u +%y`
+set YYYY=`date --date '1 minute' -u +%Y`
+set mm=`date --date '1 minute' -u +%m`
+set dd=`date --date '1 minute' -u +%d`
 set date=${yy}${mm}${dd}
 set dateY=${YYYY}${mm}${dd}
-set hh=`date -u +%H`
-set mm=`date -u +%M`
+set hh=`date --date '1 minute' -u +%H`
+set mm=`date --date '1 minute' -u +%M`
 
 if (${mm} > 40 ) then
 	set mm = "40"
