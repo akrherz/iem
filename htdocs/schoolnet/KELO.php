@@ -28,6 +28,12 @@
 <ul>
  <li><a href="/QC/offline.php">Stations Offline</a> [<a href="<?php echo $rooturl; ?>/GIS/apps/stations/offline.php?network=snet">Graphical View</a>]</li>
  <li><a href="/QC/madis/network.phtml?network=KELO">MADIS QC Values</a></li>
+  <li>MADIS QC Messages:
+  <br /><a href="http://madis-data.noaa.gov/qcms_data/qc20/qchour.txt">Last Hour</a>
+  <br /><a href="http://madis-data.noaa.gov/qcms_data/qc20/qcday.txt">Today</a>
+  <br /><a href="http://madis-data.noaa.gov/qcms_data/qc20/qcweek.txt">Weekly</a>
+  <br /><a href="http://madis-data.noaa.gov/qcms_data/qc20/qcmonth.txt">Monthly</a>
+  </li>
 </ul>
 
 
