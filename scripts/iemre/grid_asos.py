@@ -117,7 +117,7 @@ def main(ts):
     load_stationtable()
 
     # Load up our netcdf file!
-    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_hourly.nc" % (ts.year,), 'a')
+    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_hourly.nc" % (ts.year,), 'a')
     grid_hour(nc , ts)
 
     nc.close()
