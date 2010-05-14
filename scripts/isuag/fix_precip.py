@@ -47,7 +47,7 @@ def fix_hourly(ts):
     """
     nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'r')
     p01m = nc.variables['p01m']
-    offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1))).hours)
+    offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours)
     # Find ISUAG Data
     rs = isuag.query("SELECT * from hourly WHERE valid = '%s+00' and station not in ('A133259')" % (ts.strftime("%Y-%m-%d"),)).dictresult()
     for i in range(len(rs)):
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         ts = mx.DateTime.DateTime( int(sys.argv[1]),int(sys.argv[2]),
                            int(sys.argv[3]) )
     else:
-        ts = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(days=-1,hour=0,minute=0)
+        ts = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(days=-1,hour=0,minute=0,second=0)
     fix_daily(ts)
     for hr in range(24):
         ts += mx.DateTime.RelativeDateTime(hours=1)
