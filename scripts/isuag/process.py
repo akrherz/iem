@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python 
 
 import re, string, mx.DateTime, string, sys, traceback
 from pyIEM import iemdb, stationTable
