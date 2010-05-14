@@ -25,7 +25,7 @@ def merge(ts):
     res = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
 
     # Open up our RE file
-    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'a')
+    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'a')
 
     offset = int(( ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours)
     nc.variables["p01m"][offset,:,:] = res.transpose()
