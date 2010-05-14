@@ -50,6 +50,7 @@ $_pages = Array(
     "birthday" => Array("title" => "Birthday Weather", "url" => "/onsite/birthday/"),
     "cases" => Array("title" => "Cases", "url" => "/cases/"),
     "hrain" => Array("title" => "Hourly Precip", "url" => "/rainfall/obhour.phtml"),
+    "iemre" => Array("title" => "IEM Reanalysis", "url" => "/iemre/"),
     "mos" => Array("title" => "MOS", "url" => "/mos/"),
     "schema" => Array("title" => "Schema", "url" => "/archive/schema.php"),
     "tm" => Array("title" => "Time Machine", "url" => "/timemachine/"),
