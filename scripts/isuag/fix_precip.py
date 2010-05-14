@@ -31,6 +31,8 @@ def fix_daily(ts):
         # Lookup IEMRE data
         ix,jy = constants.find_ij(lon, lat)
         estimate = p01d[offset,jy,ix] / 25.4
+        if estimate > 100:
+            estimate = 0
         print "%s %-20.20s %5.2f %s %5.2f" % (stid, sts[stid]['name'],
          rs[i]['c90'], rs[i]['c90_f'], estimate)
         # Fix it
