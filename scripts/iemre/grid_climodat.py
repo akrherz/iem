@@ -46,7 +46,7 @@ def grid_day(nc, ts):
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
-    offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=1))).days)
+    offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).days)
 
 
     sql = """SELECT * from alldata WHERE day = '%s' and
@@ -82,5 +82,5 @@ if __name__ == "__main__":
         ts = mx.DateTime.DateTime( int(sys.argv[1]),int(sys.argv[2]),
                            int(sys.argv[3]) )
     else:
-        ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
+        ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1,hour=0,minute=0, second=0)
     main(ts)
