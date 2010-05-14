@@ -6,6 +6,8 @@ export PATH=$PATH:/mesonet/local/bin
 /mesonet/python/bin/python process.py /mesonet/data/agclimate/`date +'D%d%b%y.TXT'`
 cat report.txt | mail -s "ISU AgClimate Data Report" -c krberns@iastate.edu akrherz@iastate.edu
 
+/mesonet/python/bin/python fix_precip.py
+
 fp="air-temp-out"
 wget -q http://${WEBHOST}/GIS/apps/agclimate/plot.php\?direct=yes\&var=c11\&var2=c12\&date=${dstr} -O air-temp-out.png
 convert air-temp-out.png air-temp-out.jpg
