@@ -3,7 +3,7 @@ import os
 import shutil
 import mx.DateTime
 
-storePath = '/mesonet/data/agclimate/'
+storePath = '/mnt/mesonet/data/agclimate/'
 incomingPath = '/home/agclimo/incoming/campbell/'
 
 now = mx.DateTime.now()
