@@ -170,10 +170,11 @@ for i in range(len(rs)):
   sts = mx.DateTime.DateTime(1970,1,1)
   ets = tend
   now = sts
+  tbegin = None
   processed = 0
   while now < ets:
     interval = mx.DateTime.RelativeDateTime(days=1)
-    time.sleep(0.3)
+    time.sleep(1.3)
     obs = doit(sid, now)
     if obs == 0 and processed == 0:
       interval = mx.DateTime.RelativeDateTime(months=1)
@@ -181,6 +182,6 @@ for i in range(len(rs)):
       tbegin = now
     processed += obs
     now += interval
-
-  print "Station %s Begin: %s Obs: %s" % (sid, tbegin.strftime("%Y-%m-%d"),
-    processed)
+  if tbegin is not None:
+    print "Station %s Begin: %s Obs: %s" % (sid, tbegin.strftime("%Y-%m-%d"),
+      processed)
