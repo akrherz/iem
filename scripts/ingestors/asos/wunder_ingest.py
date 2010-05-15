@@ -122,7 +122,7 @@ def doit(stid, now):
       else:
         sknt = float( s ) / 1.15
       g = tokens[ headers['Gust SpeedMPH'] ]
-      if g == "-":
+      if g == "-" or g.strip() == "":
         gust = "Null"
       else:
         gust = float(g) * 1.15
