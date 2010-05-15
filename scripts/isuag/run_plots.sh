@@ -1,9 +1,8 @@
 dstr=`date --date '1 day ago' +'%Y-%m-%d'`
-IMGROOT="/mesonet/data/website/agclimate/"
 WEBHOST="iemvs101.local"
 export PATH=$PATH:/mesonet/local/bin
 
-/mesonet/python/bin/python process.py /mesonet/data/agclimate/`date +'D%d%b%y.TXT'`
+/mesonet/python/bin/python process.py /mnt/mesonet/data/agclimate/`date +'D%d%b%y.TXT'`
 cat report.txt | mail -s "ISU AgClimate Data Report" -c krberns@iastate.edu akrherz@iastate.edu
 
 /mesonet/python/bin/python fix_precip.py
