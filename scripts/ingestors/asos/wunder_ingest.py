@@ -22,7 +22,11 @@ def doit(stid, now):
   processed = 0
   sqlFail = 0
   url = "http://www.wunderground.com/history/airport/K%s/%s/%-i/%-i/DailyHistory.html?req_city=NA&req_state=NA&req_statename=NA&format=1" % (stid, now.year, now.month, now.day)
-  data = opener.open(url).read()
+  try:
+    data = opener.open(url).read()
+  except:
+    print "Fail STID: %s NOW: %s" % (stid, now)
+    return
   lines = data.split("\n")
   headers = {}
   for line in lines: # Skip header
