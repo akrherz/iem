@@ -26,7 +26,7 @@ def doit(stid, now):
     data = opener.open(url).read()
   except:
     print "Fail STID: %s NOW: %s" % (stid, now)
-    return
+    return 0
   lines = data.split("\n")
   headers = {}
   for line in lines: # Skip header
