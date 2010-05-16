@@ -112,7 +112,7 @@ def doit(stid, now):
       alti = tokens[ headers['Sea Level PressureIn'] ]
       vsby = tokens[ headers['VisibilityMPH'] ]
       d = tokens[ headers['Wind Direction'] ]
-      if d == "Calm" or d == "N/A":
+      if d in ["Calm","N/A","Variable"]:
         drct = "Null"
       else:
         drct = mesonet.txt2drct[ tokens[ headers['Wind Direction'] ] ]
