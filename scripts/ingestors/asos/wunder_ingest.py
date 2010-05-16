@@ -127,7 +127,7 @@ def doit(stid, now):
       else:
         gust = float(g) * 1.15
       p = tokens[ headers['PrecipitationIn'] ]
-      if p == "N/A":
+      if p == "N/A" or p.strip() == "":
         p01m = "Null"
       else:
         p01m = float(p) * 25.4
