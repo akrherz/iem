@@ -40,7 +40,7 @@ def doit(stid, now):
       for i in range(len(tokens)):
         headers[ tokens[i] ] = i
       continue
-    if not headers.has_key("FullMetar"]:
+    if not headers.has_key("FullMetar"):
       continue
     mstr = (tokens[headers["FullMetar"]]).strip().replace("'","")
     if mstr[:5] != "METAR":
