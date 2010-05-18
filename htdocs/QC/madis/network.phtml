@@ -1,16 +1,19 @@
 <?php
  include("../../../config/settings.inc.php");
+ include("$rootpath/include/database.inc.php");
+ $dbconn = iemdb("access");
+ $rs = pg_prepare($dbconn, "SELECTIOC", "SELECT * from current_qc_ioc WHERE 
+       network = $1");
+ $rs = pg_prepare($dbconn, "SELECT", "SELECT * from current_qc WHERE 
+       network = $1");
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
  $network = isset($_GET["network"])? substr($_GET["network"],0,10): "IA_ASOS";
  $baa = 'network.phtml?network='. $network;
+ $TITLE = "IEM | Quality Control | MADIS Raw QC";
+ include("$rootpath/include/header.php"); 
 ?>
 
-<?php $TITLE = "IEM | QC | MADIS Raw QC";
-include("$rootpath/include/header.php"); ?>
-<b>Nav:</b> <a href="/QC/">QC</a> &nbsp; <b> > </b> MADIS QC
-
 <h3 class="heading">MADIS QC Values</h3>
-<div class="text">
 <p>Here are the MADIS QC values for some of the networks
 in the IEM.  <font color="#ff0000">Red numbers</font> indicate that the observed value is too high.  <font color="#0000ff">Blue numbers</font> indicate that the observed value is too low.  The 'QC' value is an average of all of the QC routines MADIS runs.  The 'Spatial' column is a result of the <i>Spatial Consistency Check</i>.</p>
 
@@ -20,14 +23,31 @@ in the IEM.  <font color="#ff0000">Red numbers</font> indicate that the observed
  include("$rootpath/include/network.php");
  $nt = new NetworkTable($network);
  $cities = $nt->table;
- $iem = new IEMAccess();
- $rs = $iem->query("SELECT * from current_qc WHERE network = '$network'");
+
+ $rs = pg_execute($dbconn, "SELECT", Array($network));
 
 $data = Array();
 for($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
   $data[ $row["station"] ] = $row;
   $data[ $row["station"] ]["sname"] = $cities[ $row["station"] ]["name"];
+}
+
+$rs = pg_execute($dbconn, "SELECTIOC", Array($network));
+for($i=0; $row = @pg_fetch_array($rs,$i); $i++)
+{
+  $data[ $row["station"] ]["valid_ioc"] = $row["valid"];
+  $data[ $row["station"] ]["tmpf_ioc"] = $row["tmpf"];
+  $data[ $row["station"] ]["tmpf_qc_av_ioc"] = $row["tmpf_qc_av"];
+  $data[ $row["station"] ]["tmpf_qc_sc_ioc"] = $row["tmpf_qc_sc"];
+
+  $data[ $row["station"] ]["dwpf_ioc"] = $row["dwpf"];
+  $data[ $row["station"] ]["dwpf_qc_av_ioc"] = $row["dwpf_qc_av"];
+  $data[ $row["station"] ]["dwpf_qc_sc_ioc"] = $row["dwpf_qc_sc"];
+
+  $data[ $row["station"] ]["alti_ioc"] = $row["alti"];
+  $data[ $row["station"] ]["alti_qc_av_ioc"] = $row["alti_qc_av"];
+  $data[ $row["station"] ]["alti_qc_sc_ioc"] = $row["alti_qc_sc"];
 }
 
 function aSortBySecondIndex($multiArray, $secondIndex) {
@@ -92,12 +112,22 @@ while( list($key, $val) = each($ns_networks) ){
 
 <table cellpadding=2 cellspacing=0 border=1>
 <tr>
+ <th colspan="2"></th>
+ <th colspan="10">GSD MADIS</th>
+ <th colspan="10">NWS/NOAA MADIS IOC</th>
+</tr>
+<tr>
   <td rowspan=2><a href="<?php echo $baa; ?>&sortcol=station">Site ID:</a></td>
   <td rowspan=2><a href="<?php echo $baa; ?>&sortcol=sname">Station Name:</a></td>
   <td rowspan=2>Ob Valid: (UTC)</td>
   <td colspan=3 id="divider">Air Temperature [F]</td>
   <td colspan=3 id="divider">Dewpoint [F]</td>
-  <td colspan=3 id="divider">Altimeter [inch]</td></tr>
+  <td colspan=3 id="divider">Altimeter [inch]</td>
+  <td rowspan=2>Ob Valid: (UTC)</td>
+  <td colspan=3 id="divider">Air Temperature [F]</td>
+  <td colspan=3 id="divider">Dewpoint [F]</td>
+  <td colspan=3 id="divider">Altimeter [inch]</td>
+</tr>
 <tr>
   <td id="divider"><a href="<?php echo $baa; ?>&sortcol=tmpf">OB:</a></td>
   <td><a href="<?php echo $baa; ?>&sortcol=tmpf_qc_av">QC:</a></td>
@@ -107,7 +137,18 @@ while( list($key, $val) = each($ns_networks) ){
   <td><a href="<?php echo $baa; ?>&sortcol=dwpf_qc_sc">Spatial:</a></td>
   <td id="divider"><a href="<?php echo $baa; ?>&sortcol=alti">OB:</a></td>
   <td><a href="<?php echo $baa; ?>&sortcol=alti_qc_av">QC:</a></td>
-  <td><a href="<?php echo $baa; ?>&sortcol=alti_qc_sc">Spatial:</a></td></tr>
+  <td><a href="<?php echo $baa; ?>&sortcol=alti_qc_sc">Spatial:</a></td>
+
+  <td id="divider"><a href="<?php echo $baa; ?>&sortcol=tmpf_ioc">OB:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=tmpf_qc_av_ioc">QC:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=tmpf_qc_sc_ioc">Spatial:</a></td>
+  <td id="divider"><a href="<?php echo $baa; ?>&sortcol=dwpf_ioc">OB:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=dwpf_qc_av_ioc">QC:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=dwpf_qc_sc_ioc">Spatial:</a></td>
+  <td id="divider"><a href="<?php echo $baa; ?>&sortcol=alti_ioc">OB:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=alti_qc_av_ioc">QC:</a></td>
+  <td><a href="<?php echo $baa; ?>&sortcol=alti_qc_sc_ioc">Spatial:</a></td>
+</tr>
 
 
 <?php
@@ -138,12 +179,22 @@ while (list ($key, $val) = each ($finalA))  {
   '<td id="divider">'. pp($val["alti"],2) .'</td>'.
   vp($val["alti_qc_av"], 2) . 
   vp($val["alti_qc_sc"], 2) . 
+  '<td>'. strftime("%d %b %H:%M", strtotime($val["valid_ioc"])) .'</td>
+  <td id="divider">'. pp($val["tmpf_ioc"],0) .'</td>'. 
+  vp($val["tmpf_qc_av_ioc"], 1) . 
+  vp($val["tmpf_qc_sc_ioc"], 1) . 
+  '<td id="divider">'. pp($val["dwpf_ioc"],0) .'</td>'.
+  vp($val["dwpf_qc_av_ioc"], 1) . 
+  vp($val["dwpf_qc_sc_ioc"], 1) . 
+  '<td id="divider">'. pp($val["alti_ioc"],2) .'</td>'.
+  vp($val["alti_qc_av_ioc"], 2) . 
+  vp($val["alti_qc_sc_ioc"], 2) . 
   '</tr>';
 
  $i = ! $i;
 }
 
-?></table><p></div>
+?></table>
 
 
 <?php include("$rootpath/include/footer.php"); ?>
