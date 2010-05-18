@@ -71,9 +71,10 @@ for sid in ids:
      dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s, 
      alti_qc_sc = %s, valid = '%s' WHERE 
      station = '%s' """ % (table, tmpf, 
-     tmpf_qc_av, tmpf_qc_sc, dwpf, dwpf_qc_av, \
-     dwpf_qc_sc, alti, alti_qc_av, alti_qc_sc, \
+     tmpf_qc_av, tmpf_qc_sc, dwpf, dwpf_qc_av, 
+     dwpf_qc_sc, alti, alti_qc_av, alti_qc_sc, 
      ts.strftime("%Y-%m-%d %H:%M"), id[1:])
+    print sql
     iemaccess.query(sql)
   i += 1
 
