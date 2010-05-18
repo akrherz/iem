@@ -53,7 +53,8 @@ def check(val):
 
 i = 0
 found =0
-for sid in ids:
+for j in range(len(ids)):
+  sid = ids[j]
   id = re.sub('\x00', '', sid.tostring())
   if (id[0] == "K"):
     ts = mx.DateTime.gmtime( nc.variables["timeObs"][i] )
