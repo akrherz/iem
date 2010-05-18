@@ -47,7 +47,7 @@ def runner(runts):
         stid = ("".join(ioc_nc.variables["stationName"][idx])).strip()
         if stid not in obs.keys():
           continue
-        ts = mx.DateTime.gmtime( ioc_nc.variables["timeObs"][i] )
+        ts = mx.DateTime.gmtime( ioc_nc.variables["timeObs"][idx] )
         obs[stid][ts] = {
            "ioc_tmpk": ioc_nc.variables["temperature"][idx],
            "ioc_tmpkqcd": ioc_nc.variables["temperatureQCD"][idx],
@@ -62,7 +62,7 @@ def runner(runts):
         stid = ("".join(gsd_nc.variables["stationName"][idx])).strip()
         if stid not in obs.keys():
           continue
-        ts = mx.DateTime.gmtime( gsd_nc.variables["timeObs"][i] )
+        ts = mx.DateTime.gmtime( gsd_nc.variables["timeObs"][idx] )
         if not obs[stid].has_key( ts ):
           print "GSD Missed Time: %s %s" % (ts, stid)
           continue
