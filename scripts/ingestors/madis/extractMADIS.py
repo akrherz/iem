@@ -59,12 +59,12 @@ for p in range(len(providers)):
     tmpf = check( mesonet.k2f( nc_tmpk[i] ) )
     dwpf = check( mesonet.k2f( nc_dwpk[i] ) )
     alti = check( (nc_alti[i][0] / 100.0 ) * 0.0295298)
-    tmpf_qc_av = figure(nc_tmpk[i,0], tmpkQCD[i,0])
-    tmpf_qc_sc = figure(nc_tmpk[i,0], tmpkQCD[i,0])
-    dwpf_qc_av = figure(nc_dwpk[i,0], dwpkQCD[i,0])
-    dwpf_qc_sc = figure(nc_dwpk[i,0], dwpkQCD[i,0])
-    alti_qc_av = figureAlti(alti, altiQCD[i,0,0] * 0.0295298 )
-    alti_qc_sc = figureAlti(alti, altiQCD[i,6,0] * 0.0295298 )
+    tmpf_qc_av = figure(nc_tmpk[i], tmpkQCD[i])
+    tmpf_qc_sc = figure(nc_tmpk[i], tmpkQCD[i])
+    dwpf_qc_av = figure(nc_dwpk[i], dwpkQCD[i])
+    dwpf_qc_sc = figure(nc_dwpk[i], dwpkQCD[i])
+    alti_qc_av = figureAlti(alti, altiQCD[i,0] * 0.0295298 )
+    alti_qc_sc = figureAlti(alti, altiQCD[i,6] * 0.0295298 )
     #print id, tmpf, tmpkQCD[i]
     sql = """UPDATE %s SET tmpf = %s, tmpf_qc_av = %s, 
      tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s, 
