@@ -16,10 +16,10 @@ now = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=-1)
 
 # IOC Test
 if len(sys.argv) == 2:
-  fp = "/mnt/mesonet/data/madis/mesonet/%s.nc" % (now.strftime("%Y%m%d_%H00"), )
+  fp = "/mnt/mesonet/data/madis/metar/%s.nc" % (now.strftime("%Y%m%d_%H00"), )
   table = "current_qc_ioc"
 else:
-  fp = "/mesonet/data/madis/mesonet/%s.nc" % (now.strftime("%Y%m%d_%H00"), )
+  fp = "/mesonet/data/madis/metar/%s.nc" % (now.strftime("%Y%m%d_%H00"), )
   table = "current_qc"
 
 
