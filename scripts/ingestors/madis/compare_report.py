@@ -49,7 +49,7 @@ def runner(runts):
           continue
         ts = mx.DateTime.gmtime( ioc_nc.variables["timeObs"][idx] )
         obs[stid][ts] = {
-           "ioc_tmpk": ioc_nc.variables["temperature"][idx],
+           "ioc_tmpk": ioc_nc.variables["temperature"][idx][0],
            "ioc_tmpkqcd": ioc_nc.variables["temperatureQCD"][idx],
            "ioc_dwpkqcd": ioc_nc.variables["dewpointQCD"][idx],
            "ioc_altiqcd": ioc_nc.variables["altimeterQCD"][idx],
@@ -66,7 +66,7 @@ def runner(runts):
         if not obs[stid].has_key( ts ):
           print "GSD Missed Time: %s %s" % (ts, stid)
           continue
-        obs[stid][ts]["gsd_tmpk"] = gsd_nc.variables["temperature"][idx]
+        obs[stid][ts]["gsd_tmpk"] = gsd_nc.variables["temperature"][idx][0]
         obs[stid][ts]["gsd_tmpkqcd"] = gsd_nc.variables["temperatureQCD"][idx]
         obs[stid][ts]["gsd_dwpkqcd"] = gsd_nc.variables["dewpointQCD"][idx]
         obs[stid][ts]["gsd_altiqcd"] = gsd_nc.variables["altimeterQCD"][idx]
