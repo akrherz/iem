@@ -48,7 +48,7 @@ def print_summary( obs ):
           ioc.append( obs[stid][ts]["ioc_dwpk"] )
           gsd.append( obs[stid][ts]["gsd_dwpk"] )
           if obs[stid][ts].has_key("gsd_dwpk") != obs[stid][ts].has_key("ioc_dwpk"):
-            s += "DWPK %s %s GSD: %.5f IOC: %.5f\n" % (stid, ts, obs[stid][ts].has_key("gsd_dwpk"), obs[stid][ts].has_key("ioc_dwpk"))
+            print "DWPK %s %s GSD: %.5f IOC: %.5f\n" % (stid, ts, obs[stid][ts].has_key("gsd_dwpk"), obs[stid][ts].has_key("ioc_dwpk"))
       (a_s,b_s,r,tt,stderr)=stats.linregress(gsd,ioc)
       print "%4.2f" % ( r**2,),
 
