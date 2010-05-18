@@ -3,6 +3,7 @@
 import netCDF3
 import sys
 import mx.DateTime
+import numpy
 from scipy import stats
 
 def init_obs():
@@ -18,8 +19,10 @@ def print_summary( obs ):
       ioc = []
       gsd = []
       for ts in obs[stid].keys():
-        ioc.append( obs[stid][ts]["ioc_tmpk"] )
-        gsd.append( obs[stid][ts]["gsd_tmpk"] )
+        if (obs[stid][ts].has_key("gsd_tmpk") and 
+            obs[stid][ts].has_key("ioc_tmpk")):
+          ioc.append( obs[stid][ts]["ioc_tmpk"] )
+          gsd.append( obs[stid][ts]["gsd_tmpk"] )
       (a_s,b_s,r,tt,stderr)=stats.linregress(gsd,ioc)
       print "%s %2i %4.2f" % (stid, cnt, r**2),
 
@@ -27,8 +30,10 @@ def print_summary( obs ):
         ioc = []
         gsd = []
         for ts in obs[stid].keys():
-          ioc.append( obs[stid][ts]["ioc_tmpkqcd"][k] )
-          gsd.append( obs[stid][ts]["gsd_tmpkqcd"][k] )
+          if (obs[stid][ts].has_key("gsd_tmpkqcd") and 
+            obs[stid][ts].has_key("ioc_tmpkqcd")):
+            ioc.append( obs[stid][ts]["ioc_tmpkqcd"][k] )
+            gsd.append( obs[stid][ts]["gsd_tmpkqcd"][k] )
         (a_s,b_s,r,tt,stderr)=stats.linregress(gsd,ioc)
         print "%4.2f" % (r**2),
       print
