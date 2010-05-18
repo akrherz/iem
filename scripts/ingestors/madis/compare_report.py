@@ -14,6 +14,7 @@ def init_obs():
     return d
 
 def print_summary( obs ):
+    s = ""
     for stid in obs.keys():
       cnt = len(obs[stid].keys())
       ioc = []
@@ -23,6 +24,8 @@ def print_summary( obs ):
             obs[stid][ts].has_key("ioc_tmpk")):
           ioc.append( obs[stid][ts]["ioc_tmpk"] )
           gsd.append( obs[stid][ts]["gsd_tmpk"] )
+          if obs[stid][ts].has_key("gsd_tmpk") != obs[stid][ts].has_key("ioc_tmpk"):
+            s += "TMPK %s %s GSD: %.5f IOC: %.5f\n" % (stid, ts, obs[stid][ts].has_key("gsd_dwpk"), obs[stid][ts].has_key("ioc_dwpk"))
       (a_s,b_s,r,tt,stderr)=stats.linregress(gsd,ioc)
       print "%s %2i %4.2f" % (stid, cnt, r**2),
 
@@ -44,8 +47,10 @@ def print_summary( obs ):
             obs[stid][ts].has_key("ioc_dwpk")):
           ioc.append( obs[stid][ts]["ioc_dwpk"] )
           gsd.append( obs[stid][ts]["gsd_dwpk"] )
+          if obs[stid][ts].has_key("gsd_dwpk") != obs[stid][ts].has_key("ioc_dwpk"):
+            s += "DWPK %s %s GSD: %.5f IOC: %.5f\n" % (stid, ts, obs[stid][ts].has_key("gsd_dwpk"), obs[stid][ts].has_key("ioc_dwpk"))
       (a_s,b_s,r,tt,stderr)=stats.linregress(gsd,ioc)
-      print "%s %2i %4.2f" % (stid, cnt, r**2),
+      print "%4.2f" % ( r**2,),
 
       for k in [0,4,6]:
         ioc = []
@@ -60,6 +65,7 @@ def print_summary( obs ):
 
 
       print
+      print s
 
 def runner(runts):
     """
