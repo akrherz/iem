@@ -30,6 +30,8 @@ cd ../raws
 cd ../madis
 /mesonet/python/bin/python extractMADIS.py
 /mesonet/python/bin/python extractMetarQC.py
+/mesonet/python/bin/python extractMADIS.py ioc
+/mesonet/python/bin/python extractMetarQC.py ioc
 
 cd ../cocorahs
 /mesonet/python/bin/python stations.py IA
