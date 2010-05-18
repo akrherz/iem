@@ -59,7 +59,7 @@ for sid in ids:
     ts = mx.DateTime.gmtime( nc.variables["timeObs"][i] )
     tmpf = check( mesonet.k2f( nc_tmpk[i] ) )
     dwpf = check( mesonet.k2f( nc_dwpk[i] ) )
-    alti = check( (nc_alti[i] / 100.0 ) * 0.0295298) 
+    alti = check( (nc_alti[i,0] / 100.0 ) * 0.0295298) 
     tmpf_qc_av = figure(nc_tmpk[i], tmpkQCD[i,0])
     tmpf_qc_sc = figure(nc_tmpk[i], tmpkQCD[i,6])
     dwpf_qc_av = figure(nc_dwpk[i], dwpkQCD[i,0])
@@ -74,7 +74,6 @@ for sid in ids:
      tmpf_qc_av, tmpf_qc_sc, dwpf, dwpf_qc_av, 
      dwpf_qc_sc, alti, alti_qc_av, alti_qc_sc, 
      ts.strftime("%Y-%m-%d %H:%M"), id[1:])
-    print sql
     iemaccess.query(sql)
   i += 1
 
