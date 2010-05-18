@@ -65,7 +65,7 @@ def print_summary( obs ):
 
 
       print
-      print s
+    print s
 
 def runner(runts):
     """
