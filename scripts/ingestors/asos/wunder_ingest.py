@@ -154,14 +154,14 @@ def doit(stid, now):
 
 network = sys.argv[1]
 # 1. Query for a list of stations to iterate over
-rs = mesosite.query("SELECT * from stations WHERE network = '%s'" % (
+rs = mesosite.query("SELECT * from stations WHERE network = '%s' ORDER by id DESC" % (
      network,)).dictresult()
 for i in range(len(rs)):
   sid = rs[i]['id']
   # 2. Look in the database for earliest ob with METAR
   rs2 = asos.query("""SELECT min(valid) from alldata WHERE station = '%s'
      and metar is not null""" % (sid,)).dictresult()
-  if len(rs2) == 0:
+  if len(rs2) == 0 or rs2[0]['min'] is None:
     tend = mx.DateTime.now()
   else:
     tend = mx.DateTime.strptime(rs2[0]['min'][:16], '%Y-%m-%d %H:%M')
