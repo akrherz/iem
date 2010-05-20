@@ -1,7 +1,7 @@
 # Combine DM layers into one shapefile!
 # Daryl Herzmann 4 Nov 2005
 
-import mapscript, dbflib, sys
+import mapscript, dbflib, sys, os
 ts = sys.argv[1]
 
 outshp = mapscript.shapefileObj('dm_%s.shp'%ts, mapscript.MS_SHAPEFILE_POLYGON )
@@ -11,6 +11,9 @@ dbf.add_field("DCAT", dbflib.FTInteger, 1, 0)
 
 counter = 0
 for d in range(5):
+  if not os.path.isfile("Drought_Areas_US_D%s.shp" %d):
+    print "No Shapefile for D %s" % (d,)
+    continue
   shp = mapscript.shapefileObj('Drought_Areas_US_D%s.shp' %d)
 
   for i in range( shp.numshapes ):
@@ -22,4 +25,3 @@ for d in range(5):
 
 del outshp
 del dbf
-
