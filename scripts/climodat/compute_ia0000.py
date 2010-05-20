@@ -51,6 +51,7 @@ def doday(now):
   print "%s HIGH: %.1f LOW: %.1f PRECIP: %.2f SNOW: %.2f" % (
     now.strftime("%Y-%m-%d"), data["high"], data["low"], data["precip"],
     data["snow"])
+  coop.query("DELETE from alldata WHERE stationid = 'ia0000' and day = '%s'" % ( now.strftime("%Y-%m-%d"),))
   sql = """INSERT into alldata 
     (stationid, day, high, low, precip, snow, snowd, estimated, year, month, 
     sday, climoweek)
