@@ -41,18 +41,37 @@ def do(now, var):
   # Return mean of grid
   return numpy.average(g)
 
+def doday(now):
+  """
+  Do the estimation for a given date!
+  """
+  data = {}
+  for var in ['high','low','precip','snow']:
+    data[var] = do(now, var)
+  print "%s HIGH: %.1f LOW: %.1f PRECIP: %.2f SNOW: %.2f" % (
+    now.strftime("%Y-%m-%d"), data["high"], data["low"], data["precip"],
+    data["snow"])
+  sql = """INSERT into alldata 
+    (stationid, day, high, low, precip, snow, snowd, estimated, year, month, 
+    sday, climoweek)
+    VALUES ('ia0000', '%s', %.0f, %.0f, %.2f, %.1f, 0, true, %s, %s, '%s', 
+    (select climoweek from climoweek where sday = '%s'))""" % (
+    now.strftime("%Y-%m-%d"), data['high'], data['low'], data['precip'], 
+    data['snow'], now.year, now.month, now.strftime("%m%d"), 
+     now.strftime("%m%d"))
+  coop.query(sql)
 
 if len(sys.argv) == 4:
-  now = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+  now = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]), 
+     int(sys.argv[3]))
+  doday(now)
+elif len(sys.argv) == 3:
+  sts = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]), 1 )
+  ets = sts + mx.DateTime.RelativeDateTime(months=1)
+  now = sts
+  while now < ets:
+    doday(now)
+    now += interval
 else:
   now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
-data = {}
-for var in ['high','low','precip','snow']:
-  data[var] = do(now, var)
-print now, data
-sql = "INSERT into alldata \
-(stationid, day, high, low, precip, snow, snowd, estimated, year, month, sday, climoweek)\
- VALUES ('ia0000', '%s', %.0f, %.0f, %.2f, %.1f, 0, true, %s, %s, '%s', (select climoweek from climoweek where sday = '%s'))" \
-% (now.strftime("%Y-%m-%d"), data['high'], data['low'], data['precip'], \
-data['snow'], now.year, now.month, now.strftime("%m%d"), now.strftime("%m%d"))
-coop.query(sql)
+  doday(now)
