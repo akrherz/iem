@@ -73,7 +73,7 @@ def hardcode_asos( ts ):
     rs = iem.query("""
        SELECT station, pday, max_tmpf, min_tmpf
        from summary_%s WHERE day = '%s' and network in ('IA_ASOS')
-       and pday >= 0 ORDER by station ASC""" % (
+       and pday >= 0 and min_tmpf < 99 and max_tmpf > -99 ORDER by station ASC""" % (
        ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
         cid = asos2climate[rs[i]['station']]
@@ -168,7 +168,7 @@ def estimate_hilo( ts ):
     rs = iem.query("""
        SELECT x(geom) as lon, y(geom) as lat, max_tmpf, min_tmpf
        from summary_%s WHERE day = '%s' and network in ('IA_ASOS', 'AWOS')
-       and max_tmpf > -90""" % (ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
+       and max_tmpf > -90 and min_tmpf < 90""" % (ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
         lats.append( rs[i]['lat'] )
         lons.append( rs[i]['lon'] )
