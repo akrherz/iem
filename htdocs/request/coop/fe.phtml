@@ -14,12 +14,14 @@ $cities = $nt->table;
 <p>This page allows you to download daily observations for the NWS COOP network.Some items of note:
 <ul>
 	<li>In general, the snowfall data is mostly there.  Some years are missing data.</li>
-	<li>Please don't run nasty web scrappers against this download application. Please just <a href="/info/contacts.php">contact us</a> for your very large data requests.</li>
 	<li>If you are looking to download the entire dataset, please check out <a href="http://mesonet.agron.iastate.edu/pickup/coop_data/">This Directory!</a></li>
-	<li>If you find errors in the dataset, please let us know!  There are numerous folks working on the data quality of this important dataset and we are always interested in feedback.</li>
+	<li>If you find errors in the dataset, please let us know!  There are 
+numerous folks working on the data quality of this important dataset 
+and we are always interested in feedback.</li>
 </ul></p>
 
-<p>Data is currently updated to <?php echo date('d M Y', $coop_archive_end); ?>.</p>
+<p>The quality controlled data is currently updated to <?php echo date('d M Y', $coop_archive_end); ?>.  While data is available for dates up until 
+yesterday, the values are estimated by the IEM.</p>
 
 <form method="GET" action="dl.php">
 
