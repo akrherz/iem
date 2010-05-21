@@ -25,7 +25,6 @@ $station = $_GET["station"];
 $stations = $_GET["station"];
 $stationString = "(";
 $selectAll = 0;
-$multipleSelected = false;
 $i = 0;
 foreach ($stations as $key => $value){
   if ($value == "_ALL"){
@@ -34,7 +33,6 @@ foreach ($stations as $key => $value){
   $stationString .= " '". $value ."',";
   $i++;
 }
-if ($i > 1) $multipleSelected = true;
 
 
 if ($selectAll){
@@ -55,8 +53,6 @@ $ts1 = adodb_mktime(0, 0, 0, $month1, $day1, $year1) or
 $ts2 = adodb_mktime(0, 0, 0, $month2, $day2, $year2) or
   die("Invalid Date Format");
 
-if ($multipleSelected)
-	$ts2 = adodb_mktime(0, 0, 0, $month2, $day2, $year1);
 
 $num_vars = count($vars);
 if ( $num_vars == 0 )  die("You did not specify data");
