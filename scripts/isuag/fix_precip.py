@@ -10,6 +10,9 @@ i = iemdb.iemdb()
 isuag = i['isuag']
 mesosite = i['mesosite']
 
+SKIP = ['A134759', # Lewis
+        'A133259']
+
 sts = {}
 rs = mesosite.query("SELECT id, x(geom) as lon, y(geom) as lat, name from stations WHERE network = 'ISUAG'").dictresult()
 for i in range(len(rs)):
@@ -23,9 +26,11 @@ def fix_daily(ts):
     p01d = nc.variables['p01d']
     offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
     # Find ISUAG Data
-    rs = isuag.query("SELECT * from daily WHERE valid = '%s' and station not in ('A133259')" % (ts.strftime("%Y-%m-%d"),)).dictresult()
+    rs = isuag.query("SELECT * from daily WHERE valid = '%s'" % (ts.strftime("%Y-%m-%d"),)).dictresult()
     for i in range(len(rs)):
         stid = rs[i]['station']
+        if stid in SKIP:
+          continue
         lat = sts[ stid ]['lat']
         lon = sts[ stid ]['lon']
         # Lookup IEMRE data
@@ -51,9 +56,11 @@ def fix_hourly(ts):
     p01m = nc.variables['p01m']
     offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours)
     # Find ISUAG Data
-    rs = isuag.query("SELECT * from hourly WHERE valid = '%s+00' and station not in ('A133259')" % (ts.strftime("%Y-%m-%d"),)).dictresult()
+    rs = isuag.query("SELECT * from hourly WHERE valid = '%s+00'" % (ts.strftime("%Y-%m-%d"),)).dictresult()
     for i in range(len(rs)):
         stid = rs[i]['station']
+        if stid in SKIP:
+          continue
         lat = sts[ stid ]['lat']
         lon = sts[ stid ]['lon']
         # Lookup IEMRE data
