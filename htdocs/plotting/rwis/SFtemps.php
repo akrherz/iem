@@ -34,7 +34,6 @@ $tableName = "rwis_sf";
 $dbName = "iowa";
 //$station = 'RAME';
 
-//$c1 = iemdb('rwis2');
 
 $val = "> -50";
 if (isset($_GET["limit"])) $val = "between 25 and 35";

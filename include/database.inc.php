@@ -10,7 +10,6 @@ $_DATABASES = Array(
  'awos' => "dbname=awos host=$iem20 user=nobody",
  'mos' => "dbname=mos host=$iem20 user=nobody",
  'rwis' => "dbname=rwis host=$iem20 user=nobody",
- 'rwis2' => "dbname=rwis2 host=$iem20 user=nobody",
  'wepp' => "dbname=wepp host=$iem20 user=nobody",
  'snet' => "dbname=snet host=$iem20 user=nobody",
  'mesosite' => "dbname=mesosite host=$iem20 user=nobody",
