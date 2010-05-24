@@ -3,7 +3,7 @@
 # Daryl Herzmann 19 Nov 2001
 
 import cgi, re, string, sys, mx.DateTime
-from pyIEM import iemdb
+from pyIEM import iemdb, mesonet
 i = iemdb.iemdb()
 asosdb = i['asos']
 mesositedb = i['mesosite']
@@ -56,8 +56,8 @@ def Main():
         ets = eTS
 
     if dataVars[0] == "all":
-        queryCols = "tmpf, dwpf, drct, sknt, p01m, alti, vsby, gust, skyc1, skyc2, skyc3, skyl1, skyl2, skyl3, metar"
-        outCols = ['tmpf','dwpf','drct','sknt','p01m','alti','vsby', 'gust',
+        queryCols = "tmpf, dwpf, relh, drct, sknt, p01m, alti, vsby, gust, skyc1, skyc2, skyc3, skyl1, skyl2, skyl3, metar"
+        outCols = ['tmpf','dwpf','relh', 'drct','sknt','p01m','alti','vsby', 'gust',
           'skyc1', 'skyc2', 'skyc3', 'skyl1', 'skyl2', 'skyl3', 'metar']
     else:
         dataVars = tuple(dataVars)
@@ -65,9 +65,9 @@ def Main():
         dataVars =  str(dataVars)[1:-2]
         queryCols = re.sub("'", " ", dataVars)
 
-    queryStr = """SELECT station, valid, %s from alldata 
+    queryStr = """SELECT * from alldata 
       WHERE valid >= '%s' and valid < '%s' and station = '%s' 
-      ORDER by valid ASC""" % (queryCols, sts.strftime("%Y-%m-%d"),
+      ORDER by valid ASC""" % (sts.strftime("%Y-%m-%d"),
       ets.strftime("%Y-%m-%d"), station)
 
     if delim == "tab":
@@ -96,6 +96,8 @@ def Main():
         sys.stdout.write( rs[i]["valid"] + rD )
         sys.stdout.write( rD.join( gisextra ) )
         for data1 in outCols:
+            if data1 == 'relh':
+               rs[i]['relh'] = mesonet.relh( rs[i]['tmpf'], rs[i]['dwpf'] )
             if data1 in ["metar","skyc1","skyc2","skyc3"]:
                 sys.stdout.write("%s%s" % (rs[i][data1], rD))
             elif rs[i][ data1 ] is None or rs[i][ data1 ] <= -99.0:
