@@ -98,6 +98,10 @@ def Main():
         for data1 in outCols:
             if data1 == 'relh':
                rs[i]['relh'] = mesonet.relh( rs[i]['tmpf'], rs[i]['dwpf'] )
+            if data1 == 'tmpc':
+               rs[i]['tmpc'] = mesonet.f2c( rs[i]['tmpf'] )
+            if data1 == 'dwpc':
+               rs[i]['dwpc'] = mesonet.f2c( rs[i]['dwpf'] )
             if data1 in ["metar","skyc1","skyc2","skyc3"]:
                 sys.stdout.write("%s%s" % (rs[i][data1], rD))
             elif rs[i][ data1 ] is None or rs[i][ data1 ] <= -99.0:
