@@ -1,4 +1,4 @@
-# Generate the IEMRE daily analysis file for a year
+# Generate the IEMRE climatology file, hmmm
 
 import constants
 import netCDF3
@@ -11,10 +11,10 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
 
-    fp = "/mesonet/data/iemre/%s_daily.nc" % (ts.year, )
+    fp = "/mesonet/data/iemre/dailyc.nc"
     nc = netCDF3.Dataset(fp, 'w')
-    nc.title         = "IEM Daily Reanalysis %s" % (ts.year,)
-    nc.platform      = "Grided Observations"
+    nc.title         = "IEM Daily Reanalysis Climatology %s" % (ts.year,)
+    nc.platform      = "Grided Climatology"
     nc.description   = "IEM daily analysis on a ~25 km grid"
     nc.institution   = "Iowa State University, Ames, IA, USA"
     nc.source        = "Iowa Environmental Mesonet"
@@ -81,4 +81,4 @@ def init_year(ts):
 
     nc.close()
 
-init_year(mx.DateTime.DateTime(int(sys.argv[1]),1,1))
+init_year(mx.DateTime.DateTime(2000,1,1))
