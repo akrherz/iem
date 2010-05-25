@@ -36,7 +36,7 @@ Ext.ux.SliderTip = Ext.extend(Ext.Tip, {
         return slider.getValue();
     }
 });
-var options, lsrGridPanel, sbwGridPanel, nexradSlider, map;
+var options, lsrGridPanel, sbwGridPanel, nexradSlider, map, lsrLayer;
 
 Ext.onReady(function(){
 
@@ -257,7 +257,7 @@ var sbwLookup = {
 // Lookup 'table' for styling
 var lsrLookup = {
  "0": {externalGraphic: "icons/tropicalstorm.gif"},
- "1": {externalGraphic: "icons/tropicalstorm.gif"},
+ "1": {externalGraphic: "icons/flood.png"},
  "2": {externalGraphic: "icons/other.png"},
  "3": {externalGraphic: "icons/other.png"},
  "4": {externalGraphic: "icons/other.png"},
@@ -299,11 +299,38 @@ sbwStyleMap.addUniqueValueRules('default', 'phenomena', sbwLookup);
 
 
 // create vector layer
-var lsrLayer = new OpenLayers.Layer.Vector("Local Storm Reports",{
+lsrLayer = new OpenLayers.Layer.Vector("Local Storm Reports",{
      styleMap  : lsrStyleMap,
      sphericalMercator: true,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 });
+
+function createPopup(feature) {
+      // Can't get valid as an object :(
+      html = "Time: "+ feature.data.valid +" UTC"
+           +"<br />Event: "+ feature.data.magnitude +" "+ feature.data.typetext
+           +"<br />Source: "+ feature.data.source
+           +"<br />Remark: "+ feature.data.remark ;
+      popup = new GeoExt.Popup({
+            title: feature.data.wfo +": "+ feature.data.city,
+            feature: feature,
+            width:200,
+            html: html,
+            maximizable: true,
+            collapsible: true
+        });
+        // unselect feature when the popup
+        // is closed
+        popup.show();
+}
+
+lsrLayer.events.on({
+        featureselected: function(e) {
+            createPopup(e.feature);
+        }
+});
+
+
 var sbwLayer = new OpenLayers.Layer.Vector("Storm Based Warnings",{
       styleMap: sbwStyleMap,
      sphericalMercator: true,
