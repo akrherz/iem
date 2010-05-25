@@ -2,12 +2,12 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/google_keys.php");
 
-$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.1.1/resources/css/ext-all.css"/>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.1/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.1/ext-all.js"></script>
+$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.2.1/resources/css/ext-all.css"/>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.2.1/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.2.1/ext-all.js"></script>
 <link rel="stylesheet" type="text/css" href="superboxselect.css" />
 <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key='. $GOOGLEKEYS[$rooturl]["any"] .'" type="text/javascript"></script>
-<script src="http://openlayers.org/dev/OpenLayers.js"></script>
+<script src="http://www.openlayers.org/api/2.9/OpenLayers.js"></script>
 <script type="text/javascript" src="GeoExt.js"></script>
 <script type="text/javascript" src="RowExpander.js"></script>
 <script type="text/javascript" src="Printer-all.js"></script>
