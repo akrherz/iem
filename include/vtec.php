@@ -44,6 +44,7 @@ $vtec_phenomena = Array(
   'MH' => 'Marine Ashfall',
   'RB' => 'Small Craft for Rough Bar',
   'RH' => 'Radiological Hazard',
+  'RP' => 'Rip Currents',
   'SB' => 'Snow and Blowing Snow',
   'SC' => 'Small Craft',
   'SE' => 'Hazardous Seas',
