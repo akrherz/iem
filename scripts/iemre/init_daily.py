@@ -4,6 +4,7 @@ import constants
 import netCDF3
 import mx.DateTime
 import numpy
+import sys
 
 def init_year(ts):
     """
@@ -80,4 +81,4 @@ def init_year(ts):
 
     nc.close()
 
-init_year(mx.DateTime.DateTime(2010,1,1))
+init_year(mx.DateTime.DateTime(int(sys.argv[1]),1,1))
