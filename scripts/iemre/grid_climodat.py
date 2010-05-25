@@ -26,7 +26,7 @@ def generic_gridder(rs, idx):
     lons = []
     vals = []
     for i in range(len(rs)):
-        if rs[i][idx] is not None:
+        if rs[i][idx] is not None and locs.has_key(rs[i]['stationid']):
             lats.append(  locs[rs[i]['stationid']]['lat'] )
             lons.append(  locs[rs[i]['stationid']]['lon'] )
             vals.append( rs[i][idx]  )
