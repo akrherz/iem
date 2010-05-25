@@ -104,7 +104,7 @@ def Main():
                rs[i]['dwpc'] = mesonet.f2c( rs[i]['dwpf'] )
             if data1 in ["metar","skyc1","skyc2","skyc3"]:
                 sys.stdout.write("%s%s" % (rs[i][data1], rD))
-            elif rs[i][ data1 ] is None or rs[i][ data1 ] <= -99.0:
+            elif rs[i][ data1 ] is None or rs[i][ data1 ] <= -99.0 or rs[i][ data1 ] == "M":
                 sys.stdout.write("M%s" % (rD,))
             else:  
                 sys.stdout.write("%2.2f%s" % (rs[i][ data1 ], rD))
