@@ -4,6 +4,7 @@ import constants
 import netCDF3
 import mx.DateTime
 import numpy
+import sys
 
 def init_year(ts):
     """
