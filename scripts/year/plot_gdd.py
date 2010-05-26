@@ -5,7 +5,7 @@ sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime
-now = mx.DateTime.now()
+now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
 
 from pyIEM import iemdb
 i = iemdb.iemdb()
@@ -46,6 +46,8 @@ cfg = {
  '_format'            : '%.0f',
  '_title'             : "Iowa %s GDD (base=%s) Accumulation" % (
                         now.strftime("%Y"), gbase),
+ '_valid'          : "1 Jan - %s" % (
+                        now.strftime("%d %b %Y"), ),
  'lbTitleString'      : "[base 50]",
 }
 # Generates tmp.ps
