@@ -9,7 +9,8 @@ now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
 
 from pyIEM import iemdb
 i = iemdb.iemdb()
-iem = i['iem']
+coop = i['coop']
+mesosite = i['mesosite']
 
 gfunc = "gdd50"
 gbase = 50
@@ -17,23 +18,28 @@ if len(sys.argv) == 2 and sys.argv[1] == "gdd52":
   gfunc = "gdd52"
   gbase = 52
 
+# Now we load climatology
+sts = {}
+rs = mesosite.query("SELECT id, x(geom) as lon, y(geom) as lat from stations WHERE \
+    network = 'IACLIMATE'").dictresult()
+for i in range(len(rs)):
+    sts[ rs[i]["id"].lower() ] = rs[i]
+
+
 # Compute normal from the climate database
-sql = """SELECT station, x(geom) as lon, y(geom) as lat,
-   sum(%s(max_tmpf, min_tmpf)) as gdd
-   from summary_%s WHERE network in ('IA_ASOS','AWOS')
-   and station not in ('ADU','AXA','DNS','CWI','TVK')
-   GROUP by station, lon, lat""" % (gfunc, now.year)
+sql = """SELECT stationid,
+   sum(%s(high, low)) as gdd
+   from alldata WHERE stationid != 'ia0000' and year = %s
+   GROUP by stationid""" % (gfunc, now.year)
 
 lats = []
 lons = []
 gdd50 = []
 valmask = []
-rs = iem.query(sql).dictresult()
+rs = coop.query(sql).dictresult()
 for i in range(len(rs)):
-  if rs[i]['lat'] is None:
-    print rs[i]
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] )
+  lats.append( sts[rs[i]['stationid']]['lat'] )
+  lons.append( sts[rs[i]['stationid']]['lon'] )
   gdd50.append( rs[i]['gdd'] )
   valmask.append( True )
 
@@ -48,7 +54,7 @@ cfg = {
                         now.strftime("%Y"), gbase),
  '_valid'          : "1 Jan - %s" % (
                         now.strftime("%d %b %Y"), ),
- 'lbTitleString'      : "[base 50]",
+ 'lbTitleString'      : "[base %s] " % (gbase,),
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, gdd50, cfg)
