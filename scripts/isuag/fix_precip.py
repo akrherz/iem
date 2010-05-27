@@ -11,7 +11,9 @@ isuag = i['isuag']
 mesosite = i['mesosite']
 
 SKIP = ['A134759', # Lewis
-        'A133259']
+        'A133259',
+        'A135849', #Muscatine
+]
 
 sts = {}
 rs = mesosite.query("SELECT id, x(geom) as lon, y(geom) as lat, name from stations WHERE network = 'ISUAG'").dictresult()
