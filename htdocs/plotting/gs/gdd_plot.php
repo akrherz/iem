@@ -9,6 +9,9 @@ $sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
 $eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
 $sts = mktime(0,0,0,  $smonth, $sday, $year);
 $ets = mktime(0,0,0, $emonth, $eday, $year);
+if ($ets > time()){
+  $ets = time();
+}
 $sdate = date("Y-m-d", $sts);
 $edate = date("Y-m-d", $ets);
 $s2date = date("2000-m-d", $sts);
@@ -76,6 +79,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 	$zeros[$i] = 0;
     $times[$i] = strtotime( $row["valid"] );
 }
+
 
 pg_close($coopdb);
 
