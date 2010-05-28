@@ -24,7 +24,7 @@ COPY alldata_tmp from STDIN with null as 'Null';
 
 for line in lines:
   tokens = re.split(",", line)
-  if len(tokens[0]) == 23:
+  if len(tokens) == 23 and len(tokens[0]) > 0:
     stid = tokens[0]
     dbid = "%s%04.0f" % ("ia", int(stid))
     if stconv.has_key(dbid):
