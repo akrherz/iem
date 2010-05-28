@@ -69,6 +69,7 @@ if len(sys.argv) == 4:
 elif len(sys.argv) == 3:
   sts = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]), 1 )
   ets = sts + mx.DateTime.RelativeDateTime(months=1)
+  interval = mx.DateTime.RelativeDateTime(days=1)
   now = sts
   while now < ets:
     doday(now)

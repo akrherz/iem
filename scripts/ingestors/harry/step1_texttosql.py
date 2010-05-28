@@ -60,7 +60,7 @@ for line in lines:
     day = ts.strftime("%Y-%m-%d")
     sday = ts.strftime("%m%d")
     # Compute the climate week
-    jday = int( now.strftime("%j") )
+    jday = int( ts.strftime("%j") )
     if jday < 61:
       jday += 366
     jday -= 54
