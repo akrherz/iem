@@ -1,9 +1,7 @@
 # Ingest Beloit Data
 
 import mx.DateTime
-from pyIEM import mesonet, iemAccessOb, iemAccess, iemdb
-i = iemdb.iemdb()
-ot = i['ot']
+from pyIEM import mesonet, iemAccessOb, iemAccess, iemAccessDatabase
 iemdb = iemAccessDatabase.iemAccessDatabase()
 
 hrfile = open('/mnt/home/mesonet/ot/ot0005/incoming/Beloit/BeloitHourly.dat','r').readlines()

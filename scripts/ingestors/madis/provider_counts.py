@@ -29,7 +29,7 @@ gsd_nc.close()
 
 ps = data.keys()
 ps.sort()
-print "Provider Report for: %s GMT" % (runts.strftime("%d %M %Y %H"),)
+print "Provider Report for: %s GMT" % (runts.strftime("%d %b %Y %H"),)
 print "%-12s %10s %10s" % ("Provider", "IOC_COUNT", "GSD_COUNT")
 for p in ps:
   print "%-12s %10i %10i" % (p, data[p]['ioc'], data[p]['gsd'])
