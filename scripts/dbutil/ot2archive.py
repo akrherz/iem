@@ -24,11 +24,11 @@ for i in range(len(rs)):
   if alti is None and rs[i]['mslp'] is not None:
     alti = rs[i]['mslp'] * .03 
   sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt,  alti, 
-         pday, gust, c1tmpf) values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s)""" % \
+         pday, gust, c1tmpf,srad) values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,%s)""" % \
   (ts.year,rs[i]['station'], rs[i]['valid'], (rs[i]['tmpf'] or "Null"), \
   (rs[i]['dwpf'] or "Null"), (rs[i]['drct'] or "Null"), (rs[i]['sknt'] or "Null"),\
   (alti or "Null"), pday, (rs[i]['gust'] or "Null") , 
-   (rs[i]['c1tmpf'] or "Null"))
+   (rs[i]['c1tmpf'] or "Null"), (rs[i]['srad'] or "Null"))
   try:
     other.query(sql)
   except:
