@@ -8,6 +8,7 @@ $year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
 $month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
 $day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
 
+include ("$rootpath/include/forms.php");
 include ("$rootpath/include/iemaccess.php");
 include ("$rootpath/include/iemaccessob.php");
 $iem = new IEMAccess();
@@ -38,6 +39,17 @@ $rs = $iemob->db;
   }
 ?>
 </table>
+
+<p><strong>Time Series Graph</strong><br />
+Select Date after 14 May 2010:
+<form method="GET" name="formerr">
+<?php echo yearSelect2(2010, $year, "year"); ?>
+<?php echo monthSelect($month, "month"); ?>
+<?php echo daySelect($day, "day"); ?>
+<input type="submit" value="Create Chart">
+</form>
+<br />
+
 
 <img src="t_rad.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" />
 
