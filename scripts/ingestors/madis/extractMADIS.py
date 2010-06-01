@@ -7,7 +7,7 @@ i = iemdb.iemdb()
 iemaccess = i['iem']
 import netCDF3
 
-now = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=-1)
+now = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=-3)
 
 # IOC Test
 if len(sys.argv) == 2:
