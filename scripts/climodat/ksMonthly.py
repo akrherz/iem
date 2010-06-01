@@ -3,6 +3,7 @@
 
 from constants import *
 import sys
+import mx.DateTime
 from pyIEM import stationTable
 st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
 
@@ -81,7 +82,10 @@ def main(yr):
 
 if __name__ == "__main__":
   # For what year are we running!
-  yr = int(sys.argv[1])
+  if len(sys.argv) == 2:
+    yr = int(sys.argv[1])
+  else:
+    yr = mx.DateTime.now().year
   main(yr)
   #for yr in range(1893,1951):
   #  main(yr)
