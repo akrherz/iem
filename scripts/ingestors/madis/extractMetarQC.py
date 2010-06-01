@@ -12,7 +12,7 @@ iemaccess.query("SET TIME ZONE 'GMT'")
 
 #st = stationTable.stationTable("/mesonet/TABLES/iowa.stns")
 
-now = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=-1)
+now = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=-3)
 
 # IOC Test
 if len(sys.argv) == 2:
