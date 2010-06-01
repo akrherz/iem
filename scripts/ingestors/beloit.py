@@ -27,8 +27,8 @@ ts = mx.DateTime.strptime(stamp, '%Y-%m-%d %H:%M:%S')
 
 iemob = iemAccessOb.iemAccessOb("OT0009")
 iemob.setObTime(ts)
-iemdb.data['tmpf'] = tmpf
-iemdb.data['dwpf'] = mesonet.dwpf(tmpf, relh)
+iemob.data['tmpf'] = tmpf
+iemob.data['dwpf'] = mesonet.dwpf(tmpf, relh)
 iemob.data['sknt'] = sknt
 iemob.data['drct'] = drct
 iemob.data['phour'] = phour
