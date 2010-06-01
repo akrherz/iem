@@ -23,10 +23,10 @@ mslp = tokens[10]
 reftemp = tokens[11]
 voltage = tokens[12]
 
-ts = mx.DateTime.strptime(stamp, '%Y-%m-%d %H:%M:%S')
+ts = mx.DateTime.strptime(stamp, '%Y-%m-%d %H:%M:%S') + mx.DateTime.RelativeDateTime(hours=6)
 
 iemob = iemAccessOb.iemAccessOb("OT0009")
-iemob.setObTime(ts)
+iemob.setObTimeGMT(ts)
 iemob.data['tmpf'] = tmpf
 iemob.data['dwpf'] = mesonet.dwpf(tmpf, relh)
 iemob.data['relh'] = relh
