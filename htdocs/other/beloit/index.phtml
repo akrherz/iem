@@ -1,0 +1,45 @@
+<?php 
+include("../../../config/settings.inc.php");
+$TITLE = "IEM | Beloit Weather Station";
+$THISPAGE = "networks-other";
+include("$rootpath/include/header.php");  
+
+$year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
+$month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
+$day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
+
+include ("$rootpath/include/iemaccess.php");
+include ("$rootpath/include/iemaccessob.php");
+$iem = new IEMAccess();
+$iemob = $iem->getSingleSite("OT0009");
+$rs = $iemob->db;
+
+ $vardict = Array("valid" => "Observation Time", "tmpf" => "Air Temperature [F]",
+   "dwpf" => "Dew Point [F]", "relh" => "Relative Humidity [%]",
+   "drct" => "Wind Direction", "sknt" => "Wind Speed [knots]",
+   "srad" => "Solar Radiation [W m{-2}]",
+   "mslp" => "Pressure [mb]", "phour" => "Hourly Precipitation [inches]",
+   "c1tmpf" => "Soil Temperature [F]");
+?>
+
+<h3 class="heading">Beloit Weather Station</h3>
+<strong>Current Observation</strong><br />
+<table cellpadding="3" cellspacing="0" border="1">
+<?php
+  foreach ( $vardict as $key => $value ) {
+    if ($rs[$key] != "") {
+      if ($key == "valid") {
+        $t = date("d M Y, g A", strtotime($rs[$key]));
+        echo '<tr><td><b>'. $value .'</b></td><td>'. $t .'</td></tr>';
+      } else {
+        echo '<tr><td><b>'. $value .'</b></td><td>'. $rs[$key] .'</td></tr>';
+      } // End if
+    } // End if
+  }
+?>
+</table>
+
+<img src="t_rad.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" />
+
+
+<?php include("$rootpath/include/footer.php"); ?>
