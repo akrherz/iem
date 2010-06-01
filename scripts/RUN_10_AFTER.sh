@@ -2,6 +2,9 @@
 cd delta
 ./RUN.csh
 
+cd ../ingestors
+/mesonet/python/bin/python beloit.py
+
 cd ../outgoing
 php wxc_cocorahs.php
 
