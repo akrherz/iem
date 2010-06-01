@@ -29,6 +29,7 @@ iemob = iemAccessOb.iemAccessOb("OT0009")
 iemob.setObTime(ts)
 iemob.data['tmpf'] = tmpf
 iemob.data['dwpf'] = mesonet.dwpf(tmpf, relh)
+iemob.data['relh'] = relh
 iemob.data['sknt'] = sknt
 iemob.data['drct'] = drct
 iemob.data['phour'] = phour
