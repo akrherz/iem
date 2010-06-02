@@ -98,7 +98,7 @@ $s .= "</table>";
 if (getenv("REMOTE_ADDR") == "173.30.223.157" )
 {
  $s = "<img src=\"images/i3.jpg\" style=\"float: left; margin: 5px;\">
-Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 245 weeks now!!!! Wow, a number divisible by 5! Hehe, not many more of these anniversaries before we get married, then darly only need to write a feature once per year.  Imagine if we get 245 of those! Haha.  I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
+Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 246 weeks now!!!!  My goodness, only one more week apart! Smokey and snoopy be with darly lots more in just more than a week, wow!  We'll be the bestest family ever and smokey will make lots more money than darly, hehe.  Smokey have to make darly an allowance.  No!  Darly have to figure out how to post smokey feature when she is in the UV.  I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 
   $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 }
