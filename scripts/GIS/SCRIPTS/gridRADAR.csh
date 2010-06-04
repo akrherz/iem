@@ -1,7 +1,4 @@
 #!/bin/csh
-#		gridRADAR.csh
-# Program that will grid the radar every hour
-# Daryl Herzmann 24 Aug 2001
 
 set tstamp="`date -u +'%y%m%d/%H%M'`"
 

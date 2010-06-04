@@ -1,22 +1,9 @@
 #! /bin/csh 
-#		compRADAR.csh
-#  Makes the Composite RADAR image for our GIS Apps
-#  Daryl Herzmann 24 Aug 2001
-# 1 Sep 2001	Also write a temp file that other programs can see
-# 07 Mar 2002:	Cleanup and do the right file this time
-#  8 Aug 2002:	Place files in new location...
-#  4 Jan 2003:	Hush on the errors
-# 17 Feb 2003:	Use GIF driver
-# 19 Jun 2003	Back to GF driver, make this standard proj, png format
-#####################################################
 
 source /mesonet/nawips/Gemenviron
 
 # Go and create the grid file
-cd /var/www/scripts/gempak/SCRIPTS
 ./gridRADAR.csh
-
-cd /var/www/scripts/GIS/SCRIPTS
 
 setenv DISPLAY localhost:1
 
@@ -30,7 +17,7 @@ rm compRADAR.gif* compRADAR.png* >& /dev/null
 
 set MYDATE=`date +"%d %b %I:%M %p"`
 
-$GEMEXE/gdcntr_gf << EOF > ../TMP/compRADAR_gdcntr.out
+$GEMEXE/gdcntr_gf << EOF > /tmp/compRADAR_gdcntr.out
 	GDFILE	= $grid
 	GDATTIM	= LAST
 	GFUNC	= N0R
@@ -79,17 +66,3 @@ if (-e compRADAR.gif) then
   mv compRADAR.png /mesonet/data/gis/images/26915/IOWA_N0R.png
 
 endif
-
-exit
-
-rm *.gif compRADAR.tif >& /dev/null
-
-set TMPVAR=`grep "NONE N0R" ../TMP/compRADAR_gdcntr.out`
-set RADTIME=`echo ${TMPVAR} | cut -d " " -f 1`
-
-cd /mesonet/www/html/GIS/apps/IAoverlay
-
-cat ia_top.edit > ia_top.html
-echo "<P><TABLE><TR><TD>RADAR valid at:</TD><TD> ${RADTIME} </TD></TR>" >> ia_top.html
-
-echo ${RADTIME} > /tmp/compRADAR.time
