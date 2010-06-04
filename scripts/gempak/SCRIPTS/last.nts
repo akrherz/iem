@@ -1,0 +1,13 @@
+GRDAREA 38.25;-99;45.75;-88                                                                                                             
+PROJ    MER                                                                                                                             
+KXKY    720;500                                                                                                                         
+GDPFUN  N0R                                                                                                                             
+GDFILE  /mesonet/data/gempak/radar.gem                                                                                                  
+RADTIM  100604/1315                                                                                                                     
+RADDUR  30                                                                                                                              
+RADFRQ                                                                                                                                  
+CPYFIL                                                                                                                                  
+STNFIL  nexrad.tbl                                                                                                                      
+MAXGRD  2                                                                                                                               
+RADMODE PC                                                                                                                              
+NDVAL                                                                                                                                   

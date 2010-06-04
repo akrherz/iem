@@ -13,10 +13,10 @@
 source /mesonet/nawips/Gemenviron
 
 # Go and create the grid file
-cd /mesonet/scripts/gempak/SCRIPTS
+cd /var/www/scripts/gempak/SCRIPTS
 ./gridRADAR.csh
 
-cd /mesonet/scripts/GIS/SCRIPTS
+cd /var/www/scripts/GIS/SCRIPTS
 
 setenv DISPLAY localhost:1
 
