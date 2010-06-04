@@ -14,7 +14,7 @@ if (! -e /mesonet/data/gempak/snet/${yymmdd}_snet.gem ) then
 endif
 
 #cat ~/snet/gempak/header.txt ~/snet/gempak/20${yymmdd}.fil > /tmp/snet.fil
-cat /mesonet/scripts/snet/gempak/header.txt sfedit.fil > /tmp/snet.fil
+cat header.txt sfedit.fil > /tmp/snet.fil
 
 sfedit << EOF > /tmp/RUN_sfedit.out
   SFFILE = /mesonet/data/gempak/snet/${yymmdd}_snet.gem
