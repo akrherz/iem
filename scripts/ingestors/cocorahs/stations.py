@@ -46,5 +46,5 @@ for row in  data[1:]:
          state, state, lon, lat, cnty, name)
   mesosite.query(sql)
 
-  cmd = "/mesonet/scripts/iemaccess/addSiteMesosite.py %sCOCORAHS %s" % (state, id)
+  cmd = "/mesonet/python/bin/python /var/www/scripts/util/addSiteMesosite.py %sCOCORAHS %s" % (state, id)
   os.system(cmd)
