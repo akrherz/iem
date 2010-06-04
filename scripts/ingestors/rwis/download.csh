@@ -49,5 +49,5 @@ rm IArwis${TS}.sao IA.rwis${TS}.sao
 # Do mini and portable stuff
 cd /mesonet/data/incoming/rwis
 wget -nd -m -q "ftp://rwis:${FTPPASS}@165.206.203.34/*.csv"
-cd /mesonet/scripts/rwis
+cd /var/www/scripts/ingestors/rwis
 python mini_portable.py
