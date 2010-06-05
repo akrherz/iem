@@ -10,7 +10,7 @@ source /mesonet/nawips/Gemenviron
 ./buildSF.py
 
 if (! -e /mesonet/data/gempak/snet/${yymmdd}_snet.gem ) then
-  cp /mesonet/scripts/snet/gempak/template.gem /mesonet/data/gempak/snet/${yymmdd}_snet.gem
+  cp template.gem /mesonet/data/gempak/snet/${yymmdd}_snet.gem
 endif
 
 #cat ~/snet/gempak/header.txt ~/snet/gempak/20${yymmdd}.fil > /tmp/snet.fil
