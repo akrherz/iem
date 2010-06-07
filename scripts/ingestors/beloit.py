@@ -7,7 +7,6 @@ iemdb = iemAccessDatabase.iemAccessDatabase()
 dyfile = open('/mnt/home/mesonet/ot/ot0005/incoming/Beloit/BeloitDaily.dat', 'r').readlines()
 lastline = dyfile[-1]
 tokens = lastline.split(",")
-"2010-06-07 00:00:00",24,27.21,12.47,0
 stamp = tokens[0].replace('"', '')
 ts = mx.DateTime.strptime(stamp, '%Y-%m-%d %H:%M:%S')
 high = mesonet.c2f( float(tokens[2]) )
