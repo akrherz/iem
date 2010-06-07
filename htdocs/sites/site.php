@@ -18,6 +18,7 @@ include("$rootpath/include/header.php");
 <tr><th>Station Identifier:</th><td><?php echo $station; ?></td></tr>
 <tr><th>Network:</th><td><?php echo $network; ?></td></tr>
 <tr><th>County:</th><td><?php echo $cities[$station]["county"]; ?></td></tr>
+<tr><th>State:</th><td><?php echo $cities[$station]["state"]; ?></td></tr>
 <tr><th>Latitude:</th><td><?php echo sprintf("%.5f", $cities[$station]["lat"]); ?></td></tr>
 <tr><th>Longitude:</th><td><?php echo sprintf("%.5f", $cities[$station]["lon"]); ?></td></tr>
 <tr><th>Elevation [m]:</th><td><?php echo $cities[$station]["elevation"]; ?></td></tr>
