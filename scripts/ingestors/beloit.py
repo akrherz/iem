@@ -4,6 +4,17 @@ import mx.DateTime
 from pyIEM import mesonet, iemAccessOb, iemAccess, iemAccessDatabase
 iemdb = iemAccessDatabase.iemAccessDatabase()
 
+dyfile = open('/mnt/home/mesonet/ot/ot0005/incoming/Beloit/BeloitDaily.dat', 'r').readlines()
+lastline = dyfile[-1]
+tokens = lastline.split(",")
+"2010-06-07 00:00:00",24,27.21,12.47,0
+stamp = tokens[0].replace('"', '')
+ts = mx.DateTime.strptime(stamp, '%Y-%m-%d %H:%M:%S')
+high = mesonet.c2f( float(tokens[2]) )
+low = mesonet.c2f( float(tokens[3]) )
+pday = float(tokens[4]) / 25.4
+iemdb.query("UPDATE summary_%s SET max_tmpf = %s, min_tmpf = %s, pday = %s WHERE station = 'OT0009' and day = '%s'" % (ts.year, high, low, pday, ts.strftime("%Y-%m-%d")))
+
 hrfile = open('/mnt/home/mesonet/ot/ot0005/incoming/Beloit/BeloitHourly.dat','r').readlines()
 
 lastline = hrfile[-1]
