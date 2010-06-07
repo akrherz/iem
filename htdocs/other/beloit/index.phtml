@@ -15,12 +15,13 @@ $iem = new IEMAccess();
 $iemob = $iem->getSingleSite("OT0009");
 $rs = $iemob->db;
 
+
  $vardict = Array("valid" => "Observation Time", "tmpf" => "Air Temperature [F]",
    "dwpf" => "Dew Point [F]", "relh" => "Relative Humidity [%]",
    "drct" => "Wind Direction", "sknt" => "Wind Speed [knots]",
    "srad" => "Solar Radiation [W m{-2}]",
    "mslp" => "Pressure [mb]", "phour" => "Hourly Precipitation [inches]",
-   "c1tmpf" => "Soil Temperature [F]");
+   "c1tmpf" => "Soil Temperature [F]", "pday" => "Daily Precipitation [inches]");
 ?>
 
 <h3 class="heading">Beloit Weather Station</h3>
@@ -59,5 +60,16 @@ Select Date after 14 May 2010:
 
 <img src="t_rad.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" />
 
+<p><strong>Daily Totals</strong><br />
+<table cellpadding="2" cellspacing="0" border="1">
+<tr><th>Day</th><th>High Temperature</th><th>Low Temperature</th><th>Rainfall [inch]</th></tr>
+<?php
+$rs2 = pg_query($iem->dbconn, "SELECT day, max_tmpf, min_tmpf, pday from summary_2010 WHERE station = 'OT0009' ORDER by day ASC");
+for($i=0;$row=@pg_fetch_array($rs2,$i);$i++){
+  echo sprintf("<tr><th>%s</th><td>%.1f</td><td>%.1f</td><td>%.2f</td></tr>", 
+   $row["day"], $row["max_tmpf"], $row["min_tmpf"], $row["pday"]);
+}
+?>
+</table>
 
 <?php include("$rootpath/include/footer.php"); ?>
