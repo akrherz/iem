@@ -24,15 +24,16 @@ $THISPAGE="iem-sites";
    "gust" => "Wind Gust [knots]");
 ?>
 <p>This application displays the last observation received by the IEM 
-from this site.</p>
+from this site. The time stamp is in the US Central Time Zone.</p>
 <table>
 <?php
   foreach ( $vardict as $key => $value ) {
     if ($rs[$key] != "") {
-      if ($key == "gmt_ts" || $key == "gtim") {
-        $time = strftime("%c", $rs[$key]);
-        echo '<tr><td><b>'. $value .'</b></td><td>'. $time .' GMT</td></tr>';
-      } else {
+      if ($key == "valid") {
+        $t = date("d M Y, g A", strtotime($rs[$key]));
+        echo '<tr><td><b>'. $value .'</b></td><td>'. $t .'</td></tr>';
+      }
+      else {
         echo '<tr><td><b>'. $value .'</b></td><td>'. $rs[$key] .'</td></tr>';
       } // End if
     } // End if

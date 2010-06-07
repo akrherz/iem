@@ -21,7 +21,7 @@ $cities = $st->table;
 $rs = pg_prepare($db, "SELECT", "SELECT day, max_tmpf, min_tmpf 
         from summary_$year WHERE 
         station = $1 and extract(month from day) = $2
-        and day < 'TODAY' ORDER by day ASC");
+        and day <= 'TODAY' ORDER by day ASC");
 $rs = pg_execute($db, "SELECT", Array($station,$month));
 
 $highs = Array();
@@ -45,6 +45,11 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
 }
 
 pg_close($db);
+
+//$highs[] = 57;
+//$highs[] = 55;
+//$lows[] = 44;
+//$lows[] = 41;
 
 if ($hasclimate){
  /* Now, lets get averages */

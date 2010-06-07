@@ -2,13 +2,14 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("setup.php");
-
-   $TITLE = "IEM | Site Wind Roses";
-   include("$rootpath/include/header.php");  
-   $current="windrose"; include('sidebar.php');
+$THISPAGE="iem-sites";
+$TITLE = "IEM | Site Wind Roses";
+include("$rootpath/include/header.php");  
+$current="windrose"; include('sidebar.php');
 ?>
-
 <h3>Wind Roses</h4>
+
+<div class="warning">Scroll down this page for monthly climatologies!</div>
 
 <p>Wind roses are an information packed plot providing frequencies of 
 wind direction and wind speed.  A wind rose can quickly indicate the dominant
