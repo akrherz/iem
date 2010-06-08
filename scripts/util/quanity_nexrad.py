@@ -4,12 +4,14 @@
 import mx.DateTime
 import sys, os
 
-sts = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]), 1)
-ets = sts + mx.DateTime.RelativeDateTime(months=1)
+sts = mx.DateTime.DateTime( int(sys.argv[1]), 1, 1)
+ets = sts + mx.DateTime.RelativeDateTime(years=1)
 now = sts
 interval = mx.DateTime.RelativeDateTime(minutes=5)
 cnt = 0
 while (now < ets):
+  if now > mx.DateTime.gmt():
+    sys.exit()
   fp = "/mnt/a1/ARCHIVE/data/%s/%02i/%02i/comprad/n0r_%s.png" % (now.year, now.month, now.day, now.strftime("%Y%m%d_%H%M") ) 
   if (not os.path.isfile(fp)):
     print 'MISS', fp
