@@ -1,6 +1,6 @@
 # Cache NEXRAD composites for the website
 
-import urllib2, os, mx.DateTime, time, random
+import urllib2, os, mx.DateTime, time, random, sys
 from pyIEM import iemdb
 i = iemdb.iemdb()
 postgis = i['postgis']
@@ -29,6 +29,9 @@ def save(sectorName, file_name, dir_name, tstamp,bbox=None):
 
 ts = mx.DateTime.gmt()
 sts = ts.strftime("%Y%m%d%H%M")
+if len(sys.argv) == 6:
+  sts = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]),
+        int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]) )
 
 save('conus', 'uscomp.png', 'usrad', sts)
 save('iem', 'mwcomp.png', 'comprad', sts)
