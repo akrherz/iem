@@ -28,10 +28,10 @@ def save(sectorName, file_name, dir_name, tstamp,bbox=None):
   os.system(cmd)
 
 ts = mx.DateTime.gmt()
-sts = ts.strftime("%Y%m%d%H%M")
 if len(sys.argv) == 6:
-  sts = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]),
+  ts = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]),
         int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]) )
+sts = ts.strftime("%Y%m%d%H%M")
 
 save('conus', 'uscomp.png', 'usrad', sts)
 save('iem', 'mwcomp.png', 'comprad', sts)
