@@ -1,4 +1,4 @@
-# Generate a plot of GDD for the ASOS/AWOS network
+# Generate a plot of GDD 
 
 import sys, os
 sys.path.append("../lib/")
@@ -9,27 +9,32 @@ now = mx.DateTime.now()
 
 from pyIEM import iemdb
 i = iemdb.iemdb()
-iem = i['iem']
+coop = i['coop']
+mesosite = i['mesosite']
+
+# Now we load climatology
+sts = {}
+rs = mesosite.query("SELECT id, x(geom) as lon, y(geom) as lat from stations WHERE \
+    network = 'IACLIMATE'").dictresult()
+for i in range(len(rs)):
+    sts[ rs[i]["id"].lower() ] = rs[i]
+
 
 # Compute normal from the climate database
-sql = """SELECT station, x(geom) as lon, y(geom) as lat,
-   sum(gdd50(max_tmpf, min_tmpf)) as gdd, 
-   sum(sdd86(max_tmpf, min_tmpf)) as sdd 
-   from summary_%s WHERE network in ('IA_ASOS','AWOS') and
-   extract(month from day) = extract(month from now())
-   GROUP by station, lon, lat""" % (now.year,)
+sql = """SELECT stationid,
+   sum(gdd50(high, low)) as gdd
+   from alldata WHERE year = %s and month = %s
+   GROUP by stationid""" % (now.year, now.month)
 
 lats = []
 lons = []
 gdd50 = []
-sdd86 = []
 valmask = []
-rs = iem.query(sql).dictresult()
+rs = coop.query(sql).dictresult()
 for i in range(len(rs)):
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] )
+  lats.append( sts[rs[i]['stationid']]['lat'] )
+  lons.append( sts[rs[i]['stationid']]['lon'] )
   gdd50.append( rs[i]['gdd'] )
-  sdd86.append( rs[i]['sdd'] )
   valmask.append( True )
 
 cfg = {

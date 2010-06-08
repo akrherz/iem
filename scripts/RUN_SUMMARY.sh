@@ -22,6 +22,7 @@ cd ../month
 /mesonet/python/bin/python obs_precip_coop.py
 /mesonet/python/bin/python plot_avgt.py
 /mesonet/python/bin/python plot_gdd.py
+/mesonet/python/bin/python plot_sdd.py
 
 cd ../season
 /mesonet/python/bin/python plot_4month_stage4.py
