@@ -40,6 +40,8 @@ fwrite($rwis, "Weather Central 001d0300 Surface Data
 $now = time();
 while ( list($key, $val) = each($mydata) ) {
   $tdiff = $now - $val->db["ts"];
+  if ($tdiff > 3600){ continue; }
+  if ($val->db['pday'] < 0){ $val->db['pday'] = 0; }
 
   $s = sprintf("%5s %52s %2s %7s %8s %2s %4s %5s %5s %4s %4s %4s %5s\n", $key, 
     $cities[$key]['name'], 'IA', round($cities[$key]['lat'],2), 
