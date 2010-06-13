@@ -49,7 +49,6 @@ while ( list($key, $val) = each($mydata) ) {
      $val->db['drct'], drct2txt($val->db['drct']), $val->db['sknt'], 
      $val->db['pday']); 
   fwrite($rwis, $s);
-  }
 } // End of while
 
 fclose($rwis);
