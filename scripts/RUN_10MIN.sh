@@ -20,7 +20,7 @@ cd ../delta
 
 cd ../outgoing
 php wxc_rwis.php
-php wxc_ia_awos.php
+php wxc_awos.php
 /mesonet/python/bin/python madis2csv.py
 /mesonet/python/bin/python wxc_azos_prec.py
 php spider.php
