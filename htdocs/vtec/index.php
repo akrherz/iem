@@ -4,7 +4,7 @@ include("$rootpath/include/google_keys.php");
 include("$rootpath/include/mobile_device_detect.php");
 
 /* Mobile business logic */
-$imobile = mobile_device_detect(true,true,true,true,true,true,false,false);
+$imobile = mobile_device_detect(true,true,true,true,true,true,true,false,false);
 if ($imobile){
   echo "<html><head><script>
   var tokens = window.location.href.split('#');
