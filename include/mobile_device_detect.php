@@ -2,15 +2,15 @@
 
 /*
 
-  This code is from http://detectmobilebrowsers.mobi/ - please do not republish it without due credit and hyperlink to http://detectmobilebrowsers.mobi
+  This code is from http://detectmobilebrowsers.mobi/ - please do not republish it without due credit and hyperlink to http://detectmobilebrowsers.mobi/ really, i'd prefer it if it wasn't republished in full as that way it's main source is it's homepage and it's always kept up to date
   
-  For help generating the function call visit http://detectmobilebrowsers.mobi/ and use the function generator.
+  For help generating the function call visit http://detectmobilebrowsers.mobi/ and use the function generator. If you need serious help with this please drop me an email to andy@andymoore.info with the subject 'DETECTION CODE PAID SUPPORT REUQEST' with a detailed outline of what you need and how I can help and I will get back to you with a proposal for integration.
   
   Published by Andy Moore - .mobi certified mobile web developer - http://andymoore.info/
 
   This code is free to download and use on non-profit websites, if your website makes a profit or you require support using this code please upgrade.
 
-  Please pgrade for use on commercial websites http://detectmobilebrowsers.mobi/#upgrade1064282
+  Please upgrade for use on commercial websites http://detectmobilebrowsers.mobi/?volume=49999
 
   To submit a support request please forward your PayPal receipt with your questions to the email address you sent the money to and I will endeavour to get back to you. It might take me a few days but I reply to all support issues with as much helpful info as I can provide. Though really everything is published on the site.
 
@@ -25,43 +25,47 @@
     * Mobile Redirect URL - This should be full web address (including http://) of the site (or page) you want to send mobile visitors to. Leaving this blank will make the script return true when it detects a mobile.
     * Desktop Redirect URL - This should be full web address (including http://) of the site (or page) you want to send non-mobile visitors to. Leaving this blank will make the script return false when it fails to detect a mobile.
 
-  Change Log
+Change Log:
 
     * 25.11.08 - Added Amazon's Kindle to the pipe seperated array
     * 27.11.08 - Added support for Blackberry options
-    * 27.01.09 - Added usage samples & help with PHP in HTML
+    * 27.01.09 - Added usage samples & help with PHP in HTML - .zip
     * 09.03.09 - Added support for Windows Mobile options
     * 09.03.09 - Removed 'ppc;'=>'ppc;', from array to reduce false positives
     * 09.03.09 - Added support for Palm OS options
     * 09.03.09 - Added sample .htaccess html.html and help.html files to download
-    * 16.03.09 - Edited sample .htaccess file - now work with GoDaddy
+    * 16.03.09 - Edited sample .htaccess file - now works with GoDaddy
+    * 14.08.09 - Reduced false positives
+    * 14.08.09 - Added Palm Pre
+    * 14.08.09 - Added answer about search engine spiders
+    * 14.08.09 - Added status variable to report back it's findings for debugging
+    * 14.08.09 - Added Torch Mobile Iris Browser to Windows Mobile section
+    * 14.08.09 - Added HTC Touch 3G to Windows Mobile section
+    * 14.08.09 - Added help links to PHP header and setup PHP in HTML
+    * 14.08.09 - Added six usage examples
+    * 15.08.09 - Checked against the list of agents in the WURFL - 99.27% detected!
+          o 11,489 mobile user agent strings checked
+          o 99.27% detection rate after a number of small changes
+          o Those user agent strings listed that are not detected are either robots or too generic for user agent detection
+          o Any mobiles not detected by their user agent would most likely return true as they'd be detected by the headers they add.
+    * 20.11.09 - Removed PDA from the piped array to stop false positives
+    * 22.12.09 - Moved the site to a server hosted at Rackspace
+    * 23.12.09 - Added support for Mozilla Fennec
+    * 23.04.10 - Added support for the Apple iPad
+          o Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B367 Safari/531.21.10
+          o Mozilla/5.0 (iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Mobile/7D11
+          o Mozilla/5.0 (iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B317 Safari/531.21.10
+    * 23.04.10 - Changed all eregi function calls to preg_match
+    * 23.04.10 - Added two more examples
+          o Added example-7.php which allows switching between desktop and mobile versions
+          o Added example-8.php which shows why the script made the decision it did
+    * No longer using include, using require_once instead
 
-1. Mac OS X Safari Version 4.0 (5530.17) matches on "tosh" due to:
-Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_7; en-us) AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0 Safari/530.17
-
-1b. Must add "hiba" to be inclusive of "Toshiba"
-
-2. IE 8.0 Matches on "comp" due to:
-Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)
-
-2b. Must add "mpal" to support "Compal"
-
-2. Palm Pre is not supported. You need to add "pre/" to your list:
-Mozilla/5.0 (webOS/1.0; U; en-US) AppleWebKit/525.27.1 (KHTML, like Gecko) Version/1.0 Safari/525.27.1 Pre/1.0
-
-FYI: "Pre" matches to "Presto", so make sure you use "Pre/":
-Opera/9.64 (Macintosh; Intel Mac OS X; U; en) Presto/2.1.1
-
-3. LG Voyager is not supoorted. You need to add "lge " and/or "vx10" to your list:
-Mozilla/4.1 (compatible; MSIE 6.0; ) 400x240 LGE VX10000
-
-^^^^^^^^^^^^^^^^^^^^ MUCH credit to http://www.punchkickinteractive.com/ - thanks Ryan!
-
-EI 8 bug fixed - removed pda from pipe array
+bug fixes with many thanks and much credit to http://www.punchkickinteractive.com/ - thanks Ryan!
 
 */
 
-function mobile_device_detect($iphone=true,$android=true,$opera=true,$blackberry=true,$palm=true,$windows=true,$mobileredirect=false,$desktopredirect=false){
+function mobile_device_detect($iphone=true,$ipad=true,$android=true,$opera=true,$blackberry=true,$palm=true,$windows=true,$mobileredirect=false,$desktopredirect=false){
 
   $mobile_browser   = false; // set mobile browser as false till we can prove otherwise
   $user_agent       = $_SERVER['HTTP_USER_AGENT']; // get the user agent value - this should be cleaned to ensure no nefarious input gets executed
@@ -69,7 +73,15 @@ function mobile_device_detect($iphone=true,$android=true,$opera=true,$blackberry
 
   switch(true){ // using a switch against the following statements which could return true is more efficient than the previous method of using if statements
 
-    case (eregi('ipod',$user_agent)||eregi('iphone',$user_agent)); // we find the words iphone or ipod in the user agent
+    case (preg_match('/ipad/i',$user_agent)); // we find the word ipad in the user agent
+      $mobile_browser = $ipad; // mobile browser is either true or false depending on the setting of ipad when calling the function
+      $status = 'Apple iPad';
+      if(substr($ipad,0,4)=='http'){ // does the value of ipad resemble a url
+        $mobileredirect = $ipad; // set the mobile redirect url to the url value stored in the ipad value
+      } // ends the if for ipad being a url
+    break; // break out and skip the rest if we've had a match on the ipad // this goes before the iphone to catch it else it would return on the iphone instead
+
+    case (preg_match('/ipod/i',$user_agent)||preg_match('/iphone/i',$user_agent)); // we find the words iphone or ipod in the user agent
       $mobile_browser = $iphone; // mobile browser is either true or false depending on the setting of iphone when calling the function
       $status = 'Apple';
       if(substr($iphone,0,4)=='http'){ // does the value of iphone resemble a url
@@ -77,7 +89,7 @@ function mobile_device_detect($iphone=true,$android=true,$opera=true,$blackberry
       } // ends the if for iphone being a url
     break; // break out and skip the rest if we've had a match on the iphone or ipod
 
-    case (eregi('android',$user_agent));  // we find android in the user agent
+    case (preg_match('/android/i',$user_agent));  // we find android in the user agent
       $mobile_browser = $android; // mobile browser is either true or false depending on the setting of android when calling the function
       $status = 'Android';
       if(substr($android,0,4)=='http'){ // does the value of android resemble a url
@@ -85,7 +97,7 @@ function mobile_device_detect($iphone=true,$android=true,$opera=true,$blackberry
       } // ends the if for android being a url
     break; // break out and skip the rest if we've had a match on android
 
-    case (eregi('opera mini',$user_agent)); // we find opera mini in the user agent
+    case (preg_match('/opera mini/i',$user_agent)); // we find opera mini in the user agent
       $mobile_browser = $opera; // mobile browser is either true or false depending on the setting of opera when calling the function
       $status = 'Opera';
       if(substr($opera,0,4)=='http'){ // does the value of opera resemble a rul
@@ -93,7 +105,7 @@ function mobile_device_detect($iphone=true,$android=true,$opera=true,$blackberry
       } // ends the if for opera being a url 
     break; // break out and skip the rest if we've had a match on opera
 
-    case (eregi('blackberry',$user_agent)); // we find blackberry in the user agent
+    case (preg_match('/blackberry/i',$user_agent)); // we find blackberry in the user agent
       $mobile_browser = $blackberry; // mobile browser is either true or false depending on the setting of blackberry when calling the function
       $status = 'Blackberry';
       if(substr($blackberry,0,4)=='http'){ // does the value of blackberry resemble a rul
@@ -101,7 +113,7 @@ function mobile_device_detect($iphone=true,$android=true,$opera=true,$blackberry
       } // ends the if for blackberry being a url 
     break; // break out and skip the rest if we've had a match on blackberry
 
-    case (preg_match('/(pre\/|palm os|palm|hiptop|avantgo|fennec|plucker|xiino|blazer|elaine)/i',$user_agent)); // we find palm os in the user agent - the i at the end makes it case insensitive
+    case (preg_match('/(pre\/|palm os|palm|hiptop|avantgo|plucker|xiino|blazer|elaine)/i',$user_agent)); // we find palm os in the user agent - the i at the end makes it case insensitive
       $mobile_browser = $palm; // mobile browser is either true or false depending on the setting of palm when calling the function
       $status = 'Palm';
       if(substr($palm,0,4)=='http'){ // does the value of palm resemble a rul
@@ -117,7 +129,7 @@ function mobile_device_detect($iphone=true,$android=true,$opera=true,$blackberry
       } // ends the if for windows being a url 
     break; // break out and skip the rest if we've had a match on windows
 
-    case (preg_match('/(mini 9.5|vx1000|lge |m800|e860|u940|ux840|compal|wireless| mobi|ahong|lg380|lgku|lgu900|lg210|lg47|lg920|lg840|lg370|sam-r|mg50|s55|g83|t66|vx400|mk99|d615|d763|el370|sl900|mp500|samu3|samu4|vx10|xda_|samu5|samu6|samu7|samu9|a615|b832|m881|s920|n210|s700|c-810|_h797|mob-x|sk16d|848b|mowser|s580|r800|471x|v120|rim8|c500foma:|160x|x160|480x|x640|t503|w839|i250|sprint|w398samr810|m5252|c7100|mt126|x225|s5330|s820|htil-g1|fly v71|s302|-x113|novarra|k610i|-three|8325rc|8352rc|sanyo|vx54|c888|nx250|n120|mtk |c5588|s710|t880|c5005|i;458x|p404i|s210|c5100|teleca|s940|c500|s590|foma|samsu|vx8|vx9|a1000|_mms|myx|a700|gu1100|bc831|e300|ems100|me701|me702m-three|sd588|s800|8325rc|ac831|mw200|brew |d88|htc\/|htc_touch|355x|m50|km100|d736|p-9521|telco|sl74|ktouch|m4u\/|me702|8325rc|kddi|phone|lg |sonyericsson|samsung|240x|x320vx10|nokia|sony cmd|motorola|up.browser|up.link|mmp|symbian|smartphone|midp|wap|vodafone|o2|pocket|kindle|mobile|psp|treo)/i',$user_agent)); // check if any of the values listed create a match on the user agent - these are some of the most common terms used in agents to identify them as being mobile devices - the i at the end makes it case insensitive
+    case (preg_match('/(mini 9.5|vx1000|lge |m800|e860|u940|ux840|compal|wireless| mobi|ahong|lg380|lgku|lgu900|lg210|lg47|lg920|lg840|lg370|sam-r|mg50|s55|g83|t66|vx400|mk99|d615|d763|el370|sl900|mp500|samu3|samu4|vx10|xda_|samu5|samu6|samu7|samu9|a615|b832|m881|s920|n210|s700|c-810|_h797|mob-x|sk16d|848b|mowser|s580|r800|471x|v120|rim8|c500foma:|160x|x160|480x|x640|t503|w839|i250|sprint|w398samr810|m5252|c7100|mt126|x225|s5330|s820|htil-g1|fly v71|s302|-x113|novarra|k610i|-three|8325rc|8352rc|sanyo|vx54|c888|nx250|n120|mtk |c5588|s710|t880|c5005|i;458x|p404i|s210|c5100|teleca|s940|c500|s590|foma|samsu|vx8|vx9|a1000|_mms|myx|a700|gu1100|bc831|e300|ems100|me701|me702m-three|sd588|s800|8325rc|ac831|mw200|brew |d88|htc\/|htc_touch|355x|m50|km100|d736|p-9521|telco|sl74|ktouch|m4u\/|me702|8325rc|kddi|phone|lg |sonyericsson|samsung|240x|x320|vx10|nokia|sony cmd|motorola|up.browser|up.link|mmp|symbian|smartphone|midp|wap|vodafone|o2|pocket|kindle|mobile|psp|treo)/i',$user_agent)); // check if any of the values listed create a match on the user agent - these are some of the most common terms used in agents to identify them as being mobile devices - the i at the end makes it case insensitive
       $mobile_browser = true; // set mobile browser to true
       $status = 'Mobile matched on piped preg_match';
     break; // break out and skip the rest if we've preg_match on the user agent returned true 
@@ -144,17 +156,22 @@ function mobile_device_detect($iphone=true,$android=true,$opera=true,$blackberry
 
   } // ends the switch 
 
-  // tell adaptation services (transcoders and proxies) to not alter the content based on user agent as it's already being managed by this script
-//  header('Cache-Control: no-transform'); // http://mobiforge.com/developing/story/setting-http-headers-advise-transcoding-proxies
-//  header('Vary: User-Agent, Accept'); // http://mobiforge.com/developing/story/setting-http-headers-advise-transcoding-proxies
+  // tell adaptation services (transcoders and proxies) to not alter the content based on user agent as it's already being managed by this script, some of them suck though and will disregard this....
+	// header('Cache-Control: no-transform'); // http://mobiforge.com/developing/story/setting-http-headers-advise-transcoding-proxies
+	// header('Vary: User-Agent, Accept'); // http://mobiforge.com/developing/story/setting-http-headers-advise-transcoding-proxies
 
   // if redirect (either the value of the mobile or desktop redirect depending on the value of $mobile_browser) is true redirect else we return the status of $mobile_browser
   if($redirect = ($mobile_browser==true) ? $mobileredirect : $desktopredirect){
     header('Location: '.$redirect); // redirect to the right url for this device
     exit;
   }else{ 
-    return $mobile_browser; // will return either true or false 
-  }
+		// a couple of folkas have asked about the status - that's there to help you debug and understand what the script is doing
+		if($mobile_browser==''){
+			return $mobile_browser; // will return either true or false 
+		}else{
+			return array($mobile_browser,$status); // is a mobile so we are returning an array ['0'] is true ['1'] is the $status value
+		}
+	}
 
 } // ends function mobile_device_detect
 
