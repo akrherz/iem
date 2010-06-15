@@ -46,9 +46,6 @@ def todb(data):
          d['name'].replace("'", "''"), d['tstamp'], d['lon'], d['lat'])
       postgis.query( sql )
 
-    if obs != 0:
-      print "Failure!"
-
 gmt = mx.DateTime.gmt()
 fp = "http://www.spotternetwork.org/feeds/grlevelx.txt"
 try:
