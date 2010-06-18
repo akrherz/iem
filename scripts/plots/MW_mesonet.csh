@@ -18,12 +18,12 @@ source /mesonet/nawips/Gemenviron
 setenv GEMCOLTBL coltbl.xwp
 setenv DISPLAY localhost:1
 
-set yy=`date -u +%y`
-set mm=`date -u +%m`
-set dd=`date -u +%d`
+set yy=`date -u --date '1 minute' +%y`
+set mm=`date -u --date '1 minute' +%m`
+set dd=`date -u --date '1 minute' +%d`
 set date=${yy}${mm}${dd}
-set hh=`date -u +%H`
-set timestamp="`date -u +'%Y%m%d%H00'`"
+set hh=`date -u --date '1 minute' +%H`
+set timestamp="`date -u --date '1 minute' +'%Y%m%d%H00'`"
 
 rm MWmesonet.gif* >& /dev/null
 
