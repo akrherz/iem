@@ -2,9 +2,7 @@ cd delta
 ./RUN.csh
 
 cd ../qc
-if [`date +%H` -eq "00"]; then
-  /mesonet/python/bin/python correctGusts.py
-fi
+/mesonet/python/bin/python correctGusts.py
 
 cd ../ingestors
 /mesonet/python/bin/python beloit.py
