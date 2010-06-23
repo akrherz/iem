@@ -69,7 +69,7 @@ function mobile_device_detect($iphone=true,$ipad=true,$android=true,$opera=true,
 
   $mobile_browser   = false; // set mobile browser as false till we can prove otherwise
   $user_agent       = $_SERVER['HTTP_USER_AGENT']; // get the user agent value - this should be cleaned to ensure no nefarious input gets executed
-  $accept           = $_SERVER['HTTP_ACCEPT']; // get the content accept value - this should be cleaned to ensure no nefarious input gets executed
+  $accept           = @$_SERVER['HTTP_ACCEPT']; // get the content accept value - this should be cleaned to ensure no nefarious input gets executed
 
   switch(true){ // using a switch against the following statements which could return true is more efficient than the previous method of using if statements
 
