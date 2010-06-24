@@ -198,7 +198,7 @@ $skippedStations = Array();
  <td>". $parts["feel"] ."</td>
  <td>". $parts["relh"] ."</td>
  <td>". $parts["vsby"] ."</td>
- <td>". $parts["sknt"] ;
+ <td>". round($parts["sknt"],0) ;
   if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
               echo "G". round($parts["gust"],0);
   } 
