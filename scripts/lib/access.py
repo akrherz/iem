@@ -96,11 +96,11 @@ class Ob(object):
      max_tmpf =
       (CASE WHEN max_tmpf < %(tmpf)s THEN %(tmpf)s ELSE max_tmpf END),
      min_tmpf =
-      (CASE WHEN (min_tmpf > %(tmpf)s and %(tmpf)s > None) THEN %(tmpf)s ELSE min_tmpf END), 
+      (CASE WHEN min_tmpf > %(tmpf)s THEN %(tmpf)s ELSE min_tmpf END), 
      max_dwpf =
       (CASE WHEN max_dwpf < %(dwpf)s THEN %(dwpf)s ELSE max_dwpf END),
      min_dwpf =
-      (CASE WHEN (min_dwpf > %(dwpf)s and %(dwpf)s > None) THEN %(dwpf)s ELSE min_dwpf END), 
+      (CASE WHEN min_dwpf > %(dwpf)s THEN %(dwpf)s ELSE min_dwpf END), 
      max_sknt =
       (CASE WHEN max_sknt < %(sknt)s THEN %(sknt)s ELSE max_sknt END), 
      max_sknt_ts =
