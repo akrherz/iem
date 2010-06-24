@@ -71,7 +71,7 @@ class rnetwork:
       thres = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=3)
       track = tracker.Engine( st )
       for id in self.obs.keys():
-          stid = self.obs[id].stationID
+          sid = self.obs[id].stationID
           if self.obs[id].gmt_ts > thres:
               track.checkStation(sid, self.obs[sid], "IA_RWIS", 
                                    "iarwis", dontmail)
