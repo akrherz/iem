@@ -128,7 +128,7 @@ def ob2synop(ob):
     #If character 10 = "1", then
     #    character 11 	=	sn 	- sign of temperature
     #   characters 12-14 	= 	TTT 	- current air temperature
-    if ob.has_key("tmpf"):
+    if ob.has_key("tmpf") and ob['tmpf'] is not None:
         ar[10] = "1"
         tmpc = mesonet.f2c( ob["tmpf"] )
         if tmpc < 0:
@@ -140,7 +140,7 @@ def ob2synop(ob):
     #
     # character 16 	= 	sn 	- sign of temperature
     # characters 17-19 	= 	Td 	- dew point
-    if ob.has_key("dwpf"):
+    if ob.has_key("dwpf") and ob['dwpf'] is not None:
         ar[15] = "2"
         dwpc = mesonet.f2c( ob["dwpf"] )
         if dwpc < 0:
