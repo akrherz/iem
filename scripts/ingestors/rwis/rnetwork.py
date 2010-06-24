@@ -73,10 +73,10 @@ class rnetwork:
       for id in self.obs.keys():
           sid = self.obs[id].stationID
           if self.obs[id].gmt_ts > thres:
-              track.checkStation(sid, self.obs[sid], "IA_RWIS", 
+              track.checkStation(sid, self.obs[id], "IA_RWIS", 
                                    "iarwis", dontmail)
           else: # Observation is old!
-              track.doAlert(sid, self.obs[sid], "IA_RWIS", 
+              track.doAlert(sid, self.obs[id], "IA_RWIS", 
                               "iarwis", dontmail)
       track.send()
 
