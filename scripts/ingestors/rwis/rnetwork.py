@@ -68,6 +68,7 @@ class rnetwork:
           print "Could not connect to Portfolio Database, continuing"
           return  
       dontmail = self.checkOffline('IA_RWIS', 300)
+      thres = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=3)
       track = tracker.Engine( st )
       for sid in self.obs.keys():
           if self.obs[sid].gmt_ts > self.thres:
