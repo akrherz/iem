@@ -70,12 +70,13 @@ class rnetwork:
       dontmail = self.checkOffline('IA_RWIS', 300)
       thres = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=3)
       track = tracker.Engine( st )
-      for sid in self.obs.keys():
-          if self.obs[sid].gmt_ts > thres:
+      for id in self.obs.keys():
+          stid = self.obs[id].stationID
+          if self.obs[id].gmt_ts > thres:
               track.checkStation(sid, self.obs[sid], "IA_RWIS", 
                                    "iarwis", dontmail)
           else: # Observation is old!
-              track.doAlert(ssid, self.obs[sid], "IA_RWIS", 
+              track.doAlert(sid, self.obs[sid], "IA_RWIS", 
                               "iarwis", dontmail)
       track.send()
 
