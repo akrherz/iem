@@ -129,7 +129,7 @@ class rnetwork:
         Commit the parsed data to the database, finally!
         """
         from pyIEM import iemdb
-        i = iemdb.iemdb("localhost")
+        i = iemdb.iemdb()
         accessdb = i['iem']
 
         thres = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=2)
