@@ -7,7 +7,7 @@ iemdb = iemAccessDatabase.iemAccessDatabase()
 # First, we get a dict going of our current obs
 rs = iemdb.query("SELECT *, x(geom) as lon, y(geom) as lat \
 	from current WHERE \
-	(valid + '1 hour'::interval) > CURRENT_TIMESTAMP").dictresult()
+	(valid + '1 hour'::interval) > CURRENT_TIMESTAMP and alti is not Null").dictresult()
 c = {}
 for i in range(len(rs)):
 	id = rs[i]["station"]
