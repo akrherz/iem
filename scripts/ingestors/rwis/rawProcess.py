@@ -8,7 +8,7 @@ def Main():
   rn = rnetwork.rnetwork("/mesonet/data/incoming/rwis/rwis.txt", \
     "/mesonet/data/incoming/rwis/rwis_sf.txt")
 
-  #rn.doSF()
+  rn.iemtracker()
 
   f = open("/mesonet/data/metar/rwis.sao",'w')
   rn.genMETAR(f)
@@ -20,10 +20,10 @@ def Main():
 
   #rn.currentWriteCDF()
 
-  g = open("rwis.csv",'w')
+  g = open("/tmp/rwis.csv",'w')
   rn.currentWriteCDFNWS(g)
   g.close()
-  os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 csv/rwis.csv bogus csv' rwis.csv")
+  os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 csv/rwis.csv bogus csv' /tmp/rwis.csv")
 
 #  rn.writeNWS()
 
