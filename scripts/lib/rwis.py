@@ -156,24 +156,27 @@ class RWISOb(object):
       t_temp = "0"+str( "%03i" % (f1_temp) )
       
     return m_temp, t_temp
+
+  def metar_wind(self):
+    """
+    Return a string for METAR wind information
+    """
+    if self.sknt is None or self.drct is None:
+      return ""
+    s = ""
+    d5 = self.drct
+    if str(d5)[-1] == "5":
+      d5 -= 5
+    s += "%03i%02i" % (d5, self.sknt)
+    if self.gust is not None:
+      s += "G%02i" % (self.gust,)
+    s += "KT"
+    return s
     
+
   def printMETAR(self, out):
 
-    windTxt = ""
- #   print self.gust, self.sknt, self.drct
-    if (self.gust != None and self.sknt != None and self.drct != None):
-      drct5 = int(self.drct)
-      if ( int(self.sknt) == 0):
-        drct5 = 0
-      if (str(self.drct)[-1] == "5"):
-        drct5 = int(self.drct) - 5
-      elif (int(self.drct) == 0):
-        drct5 = 360
-      gustTxt = ""
-      if (int(self.gust) > 0):
-        gustTxt = "%s%02i" % ("G", int(self.gust) )
-      windTxt = "%03i%02i%s%s" % (drct5, int(self.sknt), gustTxt, "KT")
-#    print windTxt
+    windTxt = self.metar_wind()
 
     tempTxt = ""
     t_tempTxt = ""
@@ -193,21 +196,7 @@ class RWISOb(object):
 
   def printMETAR2(self, out):
 
-    windTxt = ""
- #   print self.gust, self.sknt, self.drct
-    if (self.gust != None and self.sknt != None and self.drct != None):
-      drct5 = int(self.drct)
-      if ( int(self.sknt) == 0):
-        drct5 = 0
-      if (str(self.drct)[-1] == "5"):
-        drct5 = int(self.drct) - 5
-      elif (int(self.drct) == 0):
-        drct5 = 360
-      gustTxt = ""
-      if (int(self.gust) > 0):
-        gustTxt = "%s%02i" % ("G", int(self.gust) )
-      windTxt = "%03i%02i%s%s" % (drct5, int(self.sknt), gustTxt, "KT")
-#    print windTxt
+    windTxt = self.metar_wind()
 
     tempTxt = ""
     t_tempTxt = ""
