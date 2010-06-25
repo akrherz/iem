@@ -4,8 +4,8 @@ cd delta
 cd ../qc
 /mesonet/python/bin/python correctGusts.py
 
-cd ../ingestors
-/mesonet/python/bin/python beloit.py
+#cd ../ingestors
+#/mesonet/python/bin/python beloit.py
 
 cd ../outgoing
 php wxc_cocorahs.php

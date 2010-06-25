@@ -118,7 +118,7 @@ def ob2synop(ob):
  
 
     #characters 6-7 	= 	dd 	- 	direction from which wind is blowing
-    if ob.has_key("drct"):
+    if ob.has_key("drct") and ob['drct'] is not None:
         ar[6:8] = "%02i" % (ob['drct'] / 10.0,)
 
     #characters 8-9 	= 	ff 	- 	wind speed in knots
