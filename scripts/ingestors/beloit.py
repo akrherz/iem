@@ -7,33 +7,38 @@ iemdb = iemAccessDatabase.iemAccessDatabase()
 dyfile = open('/mnt/home/mesonet/ot/ot0005/incoming/Beloit/BeloitDaily.dat', 'r').readlines()
 lastline = dyfile[-1]
 tokens = lastline.split(",")
-stamp = tokens[0].replace('"', '')
-ts = mx.DateTime.strptime(stamp, '%Y-%m-%d %H:%M:%S')
-high = mesonet.c2f( float(tokens[2]) )
-low = mesonet.c2f( float(tokens[3]) )
-pday = float(tokens[4]) / 25.4
+year = int(tokens[1])
+doy = int(tokens[2])
+ts = mx.DateTime.DateTime(year,1,1) + mx.DateTime.RelativeDateTime(days=(doy-1))
+high = mesonet.c2f( float(tokens[3]) )
+low = mesonet.c2f( float(tokens[4]) )
+pday = float(tokens[5]) / 25.4
 iemdb.query("UPDATE summary_%s SET max_tmpf = %s, min_tmpf = %s, pday = %s WHERE station = 'OT0009' and day = '%s'" % (ts.year, high, low, pday, ts.strftime("%Y-%m-%d")))
 
 hrfile = open('/mnt/home/mesonet/ot/ot0005/incoming/Beloit/BeloitHourly.dat','r').readlines()
 
 lastline = hrfile[-1]
 tokens = lastline.split(",")
-stamp = tokens[0].replace('"', '')
-tmpf = mesonet.c2f( float(tokens[3]) )
-relh = float(tokens[4])
+year = int(tokens[1])
+doy = int(tokens[2])
+hour = int(tokens[3]) / 100
+ts = mx.DateTime.DateTime(year,1,1) + mx.DateTime.RelativeDateTime(days=(doy-1),hour=hour)
+
+tmpf = mesonet.c2f( float(tokens[4]) )
+relh = float(tokens[5])
 if relh > 100: relh = 100
 if relh < 0: relh = 0
-srad = float(tokens[5])
+srad = float(tokens[6])
 if srad < 0: srad = 0
-sknt = float(tokens[6]) * 2.0
-drct = tokens[7]
-phour = float(tokens[8]) / 25.4
-c1tmpf = mesonet.c2f( float(tokens[9]) )
-mslp = tokens[10]
-reftemp = tokens[11]
-voltage = tokens[12]
+sknt = float(tokens[7]) * 2.0
+drct = tokens[8]
+phour = float(tokens[9]) / 25.4
+c1tmpf = mesonet.c2f( float(tokens[10]) )
+mslp = tokens[11]
+reftemp = tokens[12]
+voltage = tokens[13]
 
-ts = mx.DateTime.strptime(stamp, '%Y-%m-%d %H:%M:%S') + mx.DateTime.RelativeDateTime(hours=6)
+ts = ts + mx.DateTime.RelativeDateTime(hours=6)
 
 iemob = iemAccessOb.iemAccessOb("OT0009")
 iemob.setObTimeGMT(ts)
