@@ -85,7 +85,7 @@ class rnetwork:
         """
         Write METAR information out to a file pointer
         """
-        metarTime = mx.DateTime.now().strftime("%d%H%M")
+        metarTime = mx.DateTime.gmt().strftime("%d%H%M")
         thres = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=1)
         fp.write("\001\015\015\012001\n")
         fp.write("SAUS43 KDMX "+metarTime+"\015\015\012METAR\015\015\012")
@@ -103,7 +103,7 @@ class rnetwork:
         """
         Write METAR information out to a file pointer
         """
-        metarTime = mx.DateTime.now().strftime("%d%H%M")
+        metarTime = mx.DateTime.gmt().strftime("%d%H%M")
         thres = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=1)
         fp.write("\001\015\015\012001\n")
         fp.write("SAUS43 KDMX "+metarTime+"\015\015\012METAR\015\015\012")
