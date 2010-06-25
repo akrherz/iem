@@ -93,7 +93,7 @@ class rnetwork:
             sid =  self.obs[id].stationID
             if self.obs[id].gmt_ts < thres:
                 continue
-            if sid in ["RIOI4","ROSI4"]:
+            if sid in ["RIOI4","ROSI4","RSMI4"]:
                 continue
             self.obs[id].printMETAR(fp) 
 
@@ -111,7 +111,7 @@ class rnetwork:
             sid =  self.obs[id].stationID
             if self.obs[id].gmt_ts < thres:
                 continue
-            if sid in ["RIOI4","ROSI4"]:
+            if sid in ["RIOI4","ROSI4","RSMI4"]:
                 continue
             self.obs[id].printMETAR2(fp) 
 
