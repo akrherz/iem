@@ -24,19 +24,19 @@ doy = int(tokens[2])
 hour = int(tokens[3]) / 100
 ts = mx.DateTime.DateTime(year,1,1) + mx.DateTime.RelativeDateTime(days=(doy-1),hour=hour)
 
-tmpf = mesonet.c2f( float(tokens[4]) )
-relh = float(tokens[5])
+tmpf = mesonet.c2f( float(tokens[5]) )
+relh = float(tokens[6])
 if relh > 100: relh = 100
 if relh < 0: relh = 0
-srad = float(tokens[6])
+srad = float(tokens[7])
 if srad < 0: srad = 0
-sknt = float(tokens[7]) * 2.0
-drct = tokens[8]
-phour = float(tokens[9]) / 25.4
-c1tmpf = mesonet.c2f( float(tokens[10]) )
-mslp = tokens[11]
-reftemp = tokens[12]
-voltage = tokens[13]
+sknt = float(tokens[8]) * 2.0
+drct = tokens[9]
+phour = float(tokens[10]) / 25.4
+c1tmpf = mesonet.c2f( float(tokens[11]) )
+mslp = tokens[12]
+reftemp = tokens[13]
+voltage = tokens[14]
 
 ts = ts + mx.DateTime.RelativeDateTime(hours=6)
 
