@@ -187,12 +187,8 @@ class RWISOb(object):
       t_tempTxt = "T%s%s " % (t_tmpc, t_dwpc)
   #  print tempTxt, t_tempTxt
     
-    out.write("%s" % (self.stationID[:4]) + \
-     " %s" % (self.gmt_ts.strftime("%d%H%MZ")) + \
-     " %s" % (windTxt) + \
-     " %s" % (tempTxt) + \
-     " RMK %s%s\015\015\012" % (t_tempTxt, "=") ) 
-    
+    out.write("%s %s %s %s RMK AO2 %s%s\015\015\012" % (self.stationID[:4],
+      self.gmt_ts.strftime("%d%H%MZ"), windTxt, tempTxt, t_tempTxt, "=") ) 
 
   def printMETAR2(self, out):
 
@@ -207,11 +203,8 @@ class RWISOb(object):
       t_tempTxt = "T%s%s " % (t_tmpc, t_dwpc)
   #  print tempTxt, t_tempTxt
 
-    out.write("%s" % (self.metarID) + \
-     " %s" % (self.gmt_ts.strftime("%d%H%MZ")) + \
-     " %s" % (windTxt) + \
-     " %s" % (tempTxt) + \
-     " RMK %s%s\015\015\012" % (t_tempTxt, "=") )
+    out.write("%s %s %s %s RMK AO2 %s%s\015\015\012" % (self.metarID,
+      self.gmt_ts.strftime("%d%H%MZ"), windTxt, tempTxt, t_tempTxt, "=") ) 
 
   def printCDF(self, out):
     tmpf = self.tmpf
