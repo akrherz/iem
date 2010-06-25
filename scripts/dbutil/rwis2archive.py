@@ -28,20 +28,23 @@ for i in range(len(rs)):
     pcpn, vsby)
     values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s',%s,%s
     )""" % (
-   ts.year,rs[i]['station'], rs[i]['valid'], (rs[i]['tmpf']), 
-  (rs[i]['dwpf']), (rs[i]['drct']), (rs[i]['sknt']),
-   rs[i]['tsf0'],
-   rs[i]['tsf1'],
-   rs[i]['tsf2'],
-   rs[i]['tsf3'],
-   rs[i]['rwis_subf'],
-   rs[i]['gust'],
+   ts.year,rs[i]['station'], rs[i]['valid'], 
+  (rs[i]['tmpf'] or "Null"), 
+  (rs[i]['dwpf'] or "Null"), 
+  (rs[i]['drct'] or "Null"), 
+  (rs[i]['sknt'] or "Null"),
+   rs[i]['tsf0'] or "Null",
+   rs[i]['tsf1'] or "Null",
+   rs[i]['tsf2'] or "Null",
+   rs[i]['tsf3'] or "Null",
+   rs[i]['rwis_subf'] or "Null",
+   rs[i]['gust'] or "Null",
   (rs[i]['scond0'] or "Null"), 
   (rs[i]['scond1'] or "Null"), 
   (rs[i]['scond2'] or "Null"), 
   (rs[i]['scond3'] or "Null"), 
-   rs[i]['pday'],
-   rs[i]['vsby']
+   rs[i]['pday'] or "Null",
+   rs[i]['vsby'] or "Null"
    )
   try:
     rwis.query(sql)
