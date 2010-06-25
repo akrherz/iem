@@ -95,7 +95,7 @@ class RWISOb(object):
       self.gust = float(dict['SpdGust']) * 0.53995
     # Wind Direction
     if dict["DirMin"] not in ['', ERROR_VAL]:
-      self.drct = float(dict['DirMin'])
+      self.drct = int(dict['DirMin'])
     # Today precipitation
     if dict["PcAccum"] not in ['', ERROR_VAL, '-1']:
       self.pday = float(dict['PcAccum']) * 0.00098425  # Convert to inches
