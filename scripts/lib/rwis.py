@@ -114,7 +114,7 @@ class RWISOb(object):
     st = stationTable.stationTable("/mesonet/TABLES/RWIS.stns")
     gmtNow = mx.DateTime.gmt()
     stname = st.sts[self.stationID]["name"]
-    mf = """At %s, a wind gust of %s knots was recorded at the %s RWIS station"""
+    mf = """At %s, a wind gust of %.1f knots was recorded at the %s RWIS station"""
     mailStr = mf % (self.ts.strftime("%d %b %Y - %I:%M %p"), self.gust, stname)
 
     fp = "/tmp/%s.%s" % (self.ts.strftime("%Y%m%d%H%M"), self.stationID)
