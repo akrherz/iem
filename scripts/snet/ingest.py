@@ -17,7 +17,7 @@ from pyIEM import iemdb
 i = iemdb.iemdb()
 mesosite = i['mesosite']
 
-logging.basicConfig(filename='nwn.log',filemode='a')
+logging.basicConfig(filename='/mesonet/data/logs/nwn.log',filemode='a')
 logger=logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
@@ -36,7 +36,7 @@ for i in range(len(rs)):
     }
 
 
-rejects = open("rejects.log", 'w')
+rejects = open("/mesonet/data/logs/rejects.log", 'w')
 
 db = {}
 _WIND_THRESHOLD = 58
