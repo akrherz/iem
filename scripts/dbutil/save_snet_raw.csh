@@ -7,7 +7,7 @@
 set ts=`date +'%Y%m%d_%H'`
 set dir="/mesonet/ARCHIVE/raw/snet_feed/`date +'%Y_%m'`" 
 
-cd /mesonet/scripts/snetNWN
+cd /mesonet/data/logs
 
 if (-e snet.log) then
   cp snet.log /tmp/snet_${ts}.raw
