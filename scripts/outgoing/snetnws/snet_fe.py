@@ -11,7 +11,6 @@ badPrecip = [
   "SCOI4", # 70140
   "SBSI4", # 70139
   "SGRI4", # 70127
-  "SCEI4", # 47002
   "SLUI4", # 56996
   "SOSI4", # 62514
   "SFCI4", "SNII4",
