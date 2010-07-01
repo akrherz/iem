@@ -6,7 +6,7 @@ $THISPAGE = "climatology-year";
 include("$rootpath/include/header.php"); 
 include("$rootpath/include/adodb-time.inc.php"); 
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : 2008;
+$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y") - 1;
 $prod = isset($_GET["prod"]) ? intval($_GET["prod"]) : 1;
 
 $products = Array(
@@ -23,11 +23,6 @@ $products = Array(
 
 );
 
-if ($year == 2009)
-{
-  echo "<div class=\"warning\">Sorry, data for 2009 is not yet available.  Please see the preliminary data links found at the bottom of this page.</div>";
-  $year = 2008;
-}
 $ts = adodb_mktime(1,1,1,1,1,$year);
 $imgurl = sprintf("%s/%s", "http://mesonet.agron.iastate.edu", strftime($products[$prod]["tpl"],$ts));
 
@@ -56,39 +51,6 @@ while( list($key,$ar) = each($products)) {
 <img src="<?php echo $imgurl; ?>" alt="plot" />
 </form>
 </div>
-
-<h3 class="heading">Preliminary data for <?php echo date("Y"); ?></h3>
-
-<h4>Precipitation</h4>
-
-<ul class="iem-list">
- <li><a href="../data/summary/year/diff.png">Departure from normal</a></li>
- <li><a href="../data/summary/year/stage4obs.png">Stage4 estimates</a></li>
- <li><a href="../data/summary/year/normals.png">Normal accumulation</a></li>
- <li><a href="../plotting/yearly/rainfall.phtml">Month by Month</a></li>
-</ul>
-
-
-<h4>Temperature</h4>
-<ul class="iem-list">
-<li><a href="/plotting/coop/climate_fe.php">Annual Average Temperatures</a></li>
-<li><a href="/plotting/coop/vyear_fe.php">Yearly Departures from Average</a></li>
-<li><a href="/COOP/freezing.php">Freezing Statistics</a></li>
-<li><a href="/data/summary/gdd_jan1.png">Accumulated Growing Degree Days-(base=50)</a></li>
-</ul>
-
-<h4>Past 4 Months</h4>
-<ul class="iem-list">
- <li><a href="/data/summary/4mon_stage4obs.png">Estimated accumulation</a></li>
- <li><a href="/data/summary/4mon_normals.png">Climatology</a></li>
- <li><a href="/data/summary/4mon_diff.png">Departure from normal</a></li>
-</ul>
-
-
-<h4>Winds</h4>
-<ul class="iem-list">
-<li><a href="http://mesonet.agron.iastate.edu/sites/windrose.phtml?station=DSM&network=IA_ASOS">Wind Roses</a></li>
-</ul>
 
 
 
