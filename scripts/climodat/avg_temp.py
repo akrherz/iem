@@ -47,7 +47,7 @@ def runYear(year):
   }
 
   tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
-  pqstr = "plot m %s/summary/avg_high.png' temp.png" % (year,)
+  pqstr = "plot m %s/summary/avg_high.png" % (year,)
   iemplot.postprocess(tmpfp, pqstr)
   iemplot.simple_valplot(lons, lats, vals, cfg)
 
@@ -77,7 +77,7 @@ def runYear(year):
   }
 
   tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
-  pqstr = "plot m %s/summary/avg_low.png temp.png" % (year,)
+  pqstr = "plot m %s/summary/avg_low.png" % (year,)
   iemplot.postprocess(tmpfp, pqstr)
   iemplot.simple_valplot(lons, lats, vals, cfg)
 
@@ -106,7 +106,7 @@ def runYear(year):
   }
 
   tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
-  pqstr = "plot m %s/summary/avg_temp.png' temp.png" % (year,)
+  pqstr = "plot m %s/summary/avg_temp.png" % (year,)
   iemplot.postprocess(tmpfp, pqstr)
   iemplot.simple_valplot(lons, lats, vals, cfg)
 
