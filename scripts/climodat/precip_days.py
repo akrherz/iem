@@ -47,7 +47,7 @@ def runYear(year):
   }
 
   tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
-  pqstr = "plot m %s/summary/precip_days.png' temp.png" % (year,)
+  pqstr = "plot m %s/summary/precip_days.png temp.png" % (year,)
   iemplot.postprocess(tmpfp, pqstr)
   iemplot.simple_valplot(lons, lats, vals, cfg)
 
