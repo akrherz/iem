@@ -42,15 +42,15 @@ def runYear(year):
      'wkColorMap': 'gsltod',
      '_format'   : '%.1f',
      '_labels'   : labels,
+     '_valid'    : '1 Jan - %s' % (now.strftime("%d %B"),),
      '_title'    : "Average Daily High Temperature [F] (%s)" % (year,),
   }
 
+  tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
+  pqstr = "plot m %s/summary/avg_high.png' temp.png" % (year,)
+  iemplot.postprocess(tmpfp, pqstr)
   iemplot.simple_valplot(lons, lats, vals, cfg)
 
-  os.system("convert -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 +repage -density 120 tmp.ps temp.png")
-  os.system("/home/ldm/bin/pqinsert -p 'plot m %s/summary/avg_high.png' temp.png" % (year,))
-  os.remove("temp.png")
-  os.remove("tmp.ps")
 
   # Plot Average Lows
   lats = []
@@ -72,15 +72,14 @@ def runYear(year):
      'wkColorMap': 'gsltod',
      '_format'   : '%.1f',
      '_labels'   : labels,
+     '_valid'    : '1 Jan - %s' % (now.strftime("%d %B"),),
      '_title'    : "Average Daily Low Temperature [F] (%s)" % (year,),
   }
 
+  tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
+  pqstr = "plot m %s/summary/avg_low.png' temp.png" % (year,)
+  iemplot.postprocess(tmpfp, pqstr)
   iemplot.simple_valplot(lons, lats, vals, cfg)
-
-  os.system("convert -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 +repage -density 120 tmp.ps temp.png")
-  os.system("/home/ldm/bin/pqinsert -p 'plot m %s/summary/avg_low.png' temp.png" % (year,))
-  os.remove("temp.png")
-  os.remove("tmp.ps")
 
   # Plot Average Highs
   lats = []
@@ -102,15 +101,14 @@ def runYear(year):
      'wkColorMap': 'gsltod',
      '_format'   : '%.1f',
      '_labels'   : labels,
+     '_valid'    : '1 Jan - %s' % (now.strftime("%d %B"),),
      '_title'    : "Average Daily Temperature (mean high+low) [F] (%s)" % (year,),
   }
 
+  tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
+  pqstr = "plot m %s/summary/avg_temp.png' temp.png" % (year,)
+  iemplot.postprocess(tmpfp, pqstr)
   iemplot.simple_valplot(lons, lats, vals, cfg)
-
-  os.system("convert -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 +repage -density 120 tmp.ps temp.png")
-  os.system("/home/ldm/bin/pqinsert -p 'plot m %s/summary/avg_temp.png' temp.png" % (year,))
-  os.remove("temp.png")
-  os.remove("tmp.ps")
 
 
 if __name__ == '__main__':

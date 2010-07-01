@@ -42,15 +42,14 @@ def runYear(year):
      'wkColorMap': 'gsltod',
      '_format'   : '%.2f',
      '_labels'   : labels,
+     '_valid'    : '1 Jan - %s' % (now.strftime("%d %B"),),
      '_title'    : "Total Precipitation [inch] (%s)" % (year,),
   }
 
-  iemplot.simple_valplot(lons, lats, vals, cfg)
+  tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
+  pqstr = "plot m %s/summary/total_precip.png' temp.png" % (year,)
+  iemplot.postprocess(tmpfp, pqstr)
 
-  os.system("convert -depth 8 -colors 128 -trim -border 5 -bordercolor '#fff' -resize 900x700 +repage -density 120 tmp.ps temp.png")
-  os.system("/home/ldm/bin/pqinsert -p 'plot m %s/summary/total_precip.png' temp.png" % (year,))
-  os.remove("temp.png")
-  os.remove("tmp.ps")
 
 if __name__ == '__main__':
   runYear( sys.argv[1] )
