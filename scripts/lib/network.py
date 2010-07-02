@@ -10,7 +10,10 @@ class Table(object):
         """
         self.sts = {}
         dbconn = pg.connect("mesosite", "iemdb", user="nobody")
-        rs = dbconn.query("""SELECT *, x(geom) as lon, y(geom) as lat
-            from stations WHERE network = '%s'""" % (network,)).dictresult()
-        for i in range(len(rs)):
-            self.sts[ rs[i]['id'] ] = rs[i]
+        if type(network) == type("A"):
+            network = [network,]
+        for n in network:
+            rs = dbconn.query("""SELECT *, x(geom) as lon, y(geom) as lat
+                from stations WHERE network = '%s'""" % (n,)).dictresult()
+            for i in range(len(rs)):
+                self.sts[ rs[i]['id'] ] = rs[i]
