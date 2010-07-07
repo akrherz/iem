@@ -180,7 +180,14 @@ def simple_grid_fill(xaxis, yaxis, grid, cfg):
 
     # Create Workstation
     wks = Ngl.open_wks( "ps",tmpfp,rlist)
-    res = iowa2()
+    if cfg.has_key("_midwest"):
+        res = midwest()
+    else:
+        res = iowa2()
+
+    if cfg.has_key("_MaskZero"):
+        mask = numpy.where( grid <= 0.01, True, False)
+        grid = numpy.ma.array(grid, mask=mask)
  
     for key in cfg.keys():
         if key == 'wkColorMap' or key[0] == "_":
