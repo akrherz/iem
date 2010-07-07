@@ -30,7 +30,7 @@ def doit(ts):
      'nglSpreadColorEnd'  : 2,
      '_MaskZero'          : True,
      'lbTitleString'      : "[inch]",
-     '_valid'    : 'Hour Ending %s' % (ts.localtime().strftime("%d %B %Y %I %p"),),
+     '_valid'    : 'Hour Ending %s' % (ts.localtime().strftime("%d %B %Y %I %p %Z"),),
      '_title'    : "StageIV 1 Hour Precipitation [inch]",
   }
 
@@ -47,7 +47,7 @@ def doit(ts):
      '_MaskZero'          : True,
      '_midwest'           : True,
      'lbTitleString'      : "[inch]",
-     '_valid'    : 'Hour Ending %s' % (ts.localtime().strftime("%d %B %Y %I %p"),),
+     '_valid'    : 'Hour Ending %s' % (ts.localtime().strftime("%d %B %Y %I %p %Z"),),
      '_title'    : "StageIV 1 Hour Precipitation [inch]",
   }
 
