@@ -29,6 +29,8 @@ rs = mesosite.query("""SELECT *, x(geom) as lon, y(geom) as lat from
 for i in range(len(rs)):
     locs[ int(rs[i]['nwn_id']) ] = {
         'nwsli': rs[i]['id'],
+        'lat': rs[i]['lat'],
+        'lon': rs[i]['lon'],
         'name': rs[i]['name'],
         'tv' : rs[i]['network'],
         'routes': [rs[i]['network'], rs[i]['wfo'], 'EMAIL'],
