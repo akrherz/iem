@@ -12,7 +12,7 @@ def doit(ts):
   Generate hourly plot of stage4 data
   """
   gmtnow = mx.DateTime.gmt()
-  routs = "a"
+  routes = "a"
   if (gmtnow - ts).hours < 2:
     routes = "ac"
 
