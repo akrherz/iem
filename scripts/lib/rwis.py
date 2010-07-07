@@ -98,7 +98,7 @@ class RWISOb(object):
       self.drct = int(dict['DirMin'])
     # Today precipitation
     if dict["PcAccum"] not in ['', ERROR_VAL, '-1']:
-      self.pday = float(dict['PcAccum']) * 0.00098425  # Convert to inches
+      self.pDay = float(dict['PcAccum']) * 0.00098425  # Convert to inches
     # Visibility
     if dict["Visibility"] not in ['', ERROR_VAL, '-1']:
       self.vsby = float(dict['Visibility']) / 1609.344  # meters to miles
