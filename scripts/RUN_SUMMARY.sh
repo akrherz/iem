@@ -24,6 +24,10 @@ cd ../month
 /mesonet/python/bin/python plot_gdd.py
 /mesonet/python/bin/python plot_sdd.py
 
+cd ../gs
+/mesonet/python/bin/python plot_gdd.py
+
+
 cd ../season
 /mesonet/python/bin/python plot_4month_stage4.py
 
