@@ -23,6 +23,10 @@ dbf.add_field("EXPIRED", dbflib.FTString, 12, 0)
 dbf.add_field("TYPE", dbflib.FTString, 2, 0)
 dbf.add_field("GTYPE", dbflib.FTString, 1, 0)
 dbf.add_field("SIG", dbflib.FTString, 1, 0)
+dbf.add_field("WFO", dbflib.FTString, 3, 0)
+dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
+dbf.add_field("STATUS", dbflib.FTString, 3, 0)
+
 
 sql = "SELECT *, astext(geom) as tgeom from warnings_%s WHERE \
 	expire > '%s' ORDER by type ASC" % (eTS.year, \
@@ -47,6 +51,9 @@ for i in range(len(rs)):
 	d["TYPE"] = t
 	d["GTYPE"] = g
 	d["SIG"] = rs[i]["significance"]
+	d["WFO"] = rs[i]["wfo"]
+	d["STATUS"] = rs[i]["status"]
+	d["ETN"] = rs[i]["eventid"]
 
 	obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
 	shp.write_object(-1, obj)
