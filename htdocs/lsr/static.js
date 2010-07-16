@@ -143,6 +143,7 @@ function reloadData(){
 }
 
 function updateURL(){
+   s = Ext.getCmp("wfoselector").getValue();
    sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker1").getValue();
    sdt = new Date(sts);
