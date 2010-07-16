@@ -70,6 +70,31 @@ function setLastNEXRAD(){
   //console.log("Setting last NEXRAD slider to:"+ gmtl5 );
 }
 
+function genSettings(){ 
+  /* Generate URL options set on this page */
+  s = "";
+  s += (nexradWMS.visibility ? "1" : "0");
+  s += (lsrLayer.visibility ? "1" : "0");
+  s += (sbwLayer.visibility ? "1" : "0");
+  s += (counties.visibility ? "1" : "0");
+  return s;
+}
+
+function applySettings(opts){
+  if (opts[0] == "1"){ /* Enable Warnings */
+    nexradWMS.setVisibility(true);
+  }
+  if (opts[1] == "1"){ /* Enable Warnings */
+    lsrLayer.setVisibility(true);
+  }
+  if (opts[2] == "1"){ /* Enable Warnings */
+    sbwLayer.setVisibility(true);
+  }
+  if (opts[3] == "1"){ /* Enable Warnings */
+    counties.setVisibility(true);
+  }
+}
+
 /* URL format #DMX,DVN,FSD/201001010101/201001010201 */
 function reloadData(){
   /* Switch display to LSR tab */
@@ -114,11 +139,25 @@ function reloadData(){
          'wfos': s
        }
    });
-   window.location.href = "#"+ s +"/"+ start_utc.format('YmdHi') +
-                                  "/"+ end_utc.format('YmdHi');
+   updateURL();
 }
 
+function updateURL(){
+   sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
+                     +" "+ Ext.getCmp("timepicker1").getValue();
+   sdt = new Date(sts);
+   start_utc = sdt.toUTC();
 
+   ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
+                     +" "+ Ext.getCmp("timepicker2").getValue();
+   edt = new Date(ets);
+   end_utc = edt.toUTC();
+
+   window.location.href = "#"+ s +"/"+ start_utc.format('YmdHi') +
+                                  "/"+ end_utc.format('YmdHi') +
+                                  "/"+ genSettings();
+
+}
 
 options = {
     projection    : new OpenLayers.Projection("EPSG:900913"),
@@ -156,7 +195,7 @@ nexradSlider.on('changecomplete', function(){
    Ext.getCmp("appTime").setText("NEXRAD Valid: "+ (new Date(nexradSlider.getValue())).format('Y-m-d g:i A'));
 });
 
-var nexradWMS = new OpenLayers.Layer.WMS("Nexrad",
+var nexradWMS = new OpenLayers.Layer.WMS("NEXRAD",
    "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?",
    {
      layers      : "nexrad-n0r-wmst",
@@ -167,7 +206,12 @@ var nexradWMS = new OpenLayers.Layer.WMS("Nexrad",
      time        : (new Date(nexradSlider.getValue())).toUTC().format('Y-m-d\\TH:i')
    },{
      singleTile  : true,
-     visibility  : false
+     visibility  : false,
+     eventListeners: {
+      'visibilitychanged': function(){
+         updateURL();
+      }
+     }
 });
 
 
@@ -211,7 +255,13 @@ var counties = new OpenLayers.Layer.WMS("Counties", tc_url,
      singleTile  : false,
      isBaseLayer : false,
      visibility  : false,
-     buffer      : 0 });
+     buffer      : 0,
+     eventListeners: {
+      'visibilitychanged': function(){
+         updateURL();
+      }
+     }
+});
 
 
 map = new OpenLayers.Map(options);
@@ -302,7 +352,12 @@ sbwStyleMap.addUniqueValueRules('default', 'phenomena', sbwLookup);
 lsrLayer = new OpenLayers.Layer.Vector("Local Storm Reports",{
      styleMap  : lsrStyleMap,
      sphericalMercator: true,
-     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+     eventListeners: {
+      'visibilitychanged': function(){
+         updateURL();
+      }
+     }
 });
 
 function createPopup(feature) {
@@ -335,7 +390,12 @@ var sbwLayer = new OpenLayers.Layer.Vector("Storm Based Warnings",{
       styleMap: sbwStyleMap,
      sphericalMercator: true,
       visibility: false,
-     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+     eventListeners: {
+      'visibilitychanged': function(){
+         updateURL();
+      }
+     }
 });
 
 
@@ -701,6 +761,9 @@ loadButton = {
     listeners       : {
         click: function(){
            reloadData();
+        },
+        boilerup: function(opts){
+           applySettings(opts);
         }
     }
 }
