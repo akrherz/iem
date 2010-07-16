@@ -18,7 +18,7 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly
 Ext.namespace("cfg");
 cfg.header = "iem-header";
 </script>
-<script type="text/javascript" src="static.js?v=9"></script>
+<script type="text/javascript" src="static.js?v=10"></script>
 ';
 $TITLE = "IEM Local Storm Report App";
 $NOCONTENT = 1;
@@ -40,7 +40,7 @@ Ext.onReady(function(){
       Ext.getCmp('refresh').fireEvent('click', {});
       Ext.getCmp('rtcheckbox').setValue(true);
     }
-    if (tokens2.length == 3){
+    if (tokens2.length > 2){
       Ext.getCmp("wfoselector").setValue( tokens2[0].split(",") );
       utc_start  = Date.parseDate(tokens2[1], 'YmdHi');
       Ext.getCmp("datepicker1").setValue( utc_start.fromUTC() );
@@ -49,6 +49,9 @@ Ext.onReady(function(){
       Ext.getCmp("datepicker2").setValue( utc_end.fromUTC() );
       Ext.getCmp("timepicker2").setValue( utc_end.fromUTC() );
       Ext.getCmp('refresh').fireEvent('click', {});
+    }
+    if (tokens2.length == 4){ /* Extra options were specified */
+      Ext.getCmp('refresh').fireEvent('boilerup', tokens2[3]);
     }
   }
 });
