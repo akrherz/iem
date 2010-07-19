@@ -255,7 +255,7 @@ def fireLDM(report, route, id):
         logger.exception("Trouble inserting Alert!")
 
     # Save a copy of this alert!
-    shutil.copy(fname, "alerts/%s_%s_%s" \
+    shutil.copy("/tmp/"+fname, "alerts/%s_%s_%s" \
                 % (mx.DateTime.now().strftime("%Y%m%d%H%M%S"), id, fname) )
 
 #==================================================
@@ -275,15 +275,15 @@ def windGustAlert():
             # We also need this maxGust to be greater than previously warned
             if (db[id].windGustAlert != None and \
             db[id].maxSPED > db[id].windGustAlert):
-                sendWindAlert(id, db[id].maxSPED, db[id].maxDrctTxt, myThreshold)
                 # Set the value for the last alert generated!
                 db[id].windGustAlert = db[id].maxSPED
+                sendWindAlert(id, db[id].maxSPED, db[id].maxDrctTxt, myThreshold)
                 continue
             # If the windGustAlert is None, then we should alert too
             if (db[id].windGustAlert == None):
-                sendWindAlert(id, db[id].maxSPED, db[id].maxDrctTxt, myThreshold)
                 # Set the value for the last alert generated!
                 db[id].windGustAlert = db[id].maxSPED
+                sendWindAlert(id, db[id].maxSPED, db[id].maxDrctTxt, myThreshold)
                 continue
 
         # We will always alert in this situation
