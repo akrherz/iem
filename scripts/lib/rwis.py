@@ -108,7 +108,7 @@ class RWISOb(object):
 
 
   def windAlert(self):
-    if self.stationID in ('RBFI4','RTMI4','RWII4','RDNI4'):
+    if self.stationID in ('RBFI4','RTMI4','RWII4','RDNI4','RCDI4'):
       return
     from pyIEM import stationTable, iemdb
     st = stationTable.stationTable("/mesonet/TABLES/RWIS.stns")
