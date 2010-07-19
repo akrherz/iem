@@ -36,11 +36,11 @@ year 2000 and 2001, but it mostly in tack outside of those dates.</p>
 
   <tr>
     <th>Start:</th>
-    <td rowspan="2">
-     <?php echo yearSelect(1995, date("Y"), "year"); ?>
+    <td>
+     <?php echo yearSelect2(1995, date("Y"), "year1"); ?>
     </td>
-    <td rowspan="2">
-     <?php echo monthSelect(""); ?>
+    <td>
+     <?php echo monthSelect("", "month1"); ?>
     </td>
     <td>
      <?php echo daySelect2("", "day1"); ?>
@@ -53,6 +53,12 @@ year 2000 and 2001, but it mostly in tack outside of those dates.</p>
 
   <tr>
     <th>End:</th>
+    <td>
+     <?php echo yearSelect2(1995, date("Y"), "year2"); ?>
+    </td>
+    <td>
+     <?php echo monthSelect("", "month2"); ?>
+    </td>
     <td>
      <?php echo daySelect2("", "day2"); ?>
     </td>
