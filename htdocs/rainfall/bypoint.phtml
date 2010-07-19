@@ -91,7 +91,12 @@ $row = pg_fetch_array($rs);
 
 $hrap_i = $row["hrap_i"];
 $data .= "# Latitude: $latitude Longitude: $longitude HRAP_I: $hrap_i
-Day Valid  Estimate   Observation\n";
+Date  Estimate";
+if ($method == 'id'){
+  $data .= "  Observation\n";
+} else {
+  $data .= "\n";
+}
 
 $sql = "select rainfall / 25.4 as inch, valid from daily_rainfall_$year
 	WHERE hrap_i = $hrap_i ORDER by valid ASC";
@@ -108,8 +113,12 @@ while ($row = pg_fetch_array($rs))
 
 while (list($k,$v) = each($d))
 {
+  if ($method == "id") {
 	$data .=  sprintf("%s%5.2f%9s\n", $k, $d[$k]["rain"],
 			$d[$k]["ob"]);
+  } else {
+	$data .=  sprintf("%s%5.2f\n", $k, $d[$k]["rain"]);
+  }
 }
 $data .= sprintf("%s %s%4.2f%9s\n", $year, "Total:", $tot, $otot);
 
