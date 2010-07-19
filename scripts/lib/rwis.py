@@ -119,7 +119,6 @@ class RWISOb(object):
 
     fp = "/tmp/%s.%s" % (self.ts.strftime("%Y%m%d%H%M"), self.stationID)
     if (os.path.isfile(fp)):
-      print "SKIP", self.stationID
       return
     o = open(fp, 'w')
     o.write(" ")
