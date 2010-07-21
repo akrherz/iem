@@ -6,7 +6,9 @@ CREATE TABLE model_gridpoint(
   sbcape  real,
   sbcin   real,
   lhflux  real,
-  pwater  real
+  pwater  real,
+  precipcon  real,
+  precip  real
 );
 
 GRANT SELECT on model_gridpoint to nobody,apache;
