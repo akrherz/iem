@@ -26,7 +26,19 @@ VLOOKUP = {
            'RUC': 'Convective_inhibition_surface'},
  'pwater': {'NAM': 'Precipitable_water',
             'GFS': 'Precipitable_water',
-            'RUC': 'Precipitable_water'}
+            'RUC': 'Precipitable_water'},
+ 'precipcon': {'RUC': 'Convective_precipitation',
+            'NAM': 'Convective_precipitation',
+            'GFS': 'Convective_precipitation',
+           },
+ 'precipnon': {'RUC': 'Large_scale_precipitation_non-convective',
+            'NAM': None,
+            'GFS': None
+           },
+ 'precip': {'RUC': None,
+            'NAM': 'Total_precipitation',
+            'GFS': 'Total_precipitation',
+           },
 }
 
 def run(model, station, lon, lat, ts):
@@ -58,12 +70,18 @@ def run(model, station, lon, lat, ts):
         sbcape = row[ VLOOKUP['sbcape'][model] ]
         sbcin = row[ VLOOKUP['sbcin'][model] ]
         pwater = row[ VLOOKUP['pwater'][model] ]
+        precipcon = row[ VLOOKUP['precipcon'][model] ]
+        if model == "RUC":
+            precip = float(row[ VLOOKUP['precipcon'][model] ]) + float(row[ VLOOKUP['precipnon'][model] ])
+        else:
+            precip = row[ VLOOKUP['precip'][model] ]
         fts = mx.DateTime.strptime(row['date'], '%Y-%m-%dT%H:%M:%SZ')
         sql = """INSERT into model_gridpoint_%s(station, model, runtime, 
-              ftime, sbcape, sbcin, pwater) VALUES ('%s','%s', '%s+00',
-              '%s+00', %s, %s, %s)""" % ( ts.year, station, model,
+              ftime, sbcape, sbcin, pwater, precipcon, precip) 
+              VALUES ('%s','%s', '%s+00',
+              '%s+00', %s, %s, %s, %s, %s)""" % ( ts.year, station, model,
               ts.strftime("%Y-%m-%d %H:%M"), fts.strftime("%Y-%m-%d %H:%M"),
-              sbcape, sbcin, pwater)
+              sbcape, sbcin, pwater, precipcon, precip)
         dbconn.query( sql )
 
 if __name__ == '__main__':
