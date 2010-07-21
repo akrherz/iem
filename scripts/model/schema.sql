@@ -17,3 +17,8 @@ CREATE TABLE model_gridpoint_2010() INHERITS (model_gridpoint);
 CREATE INDEX model_gridpoint_2010_idx on 
   model_gridpoint_2010(station, model, runtime);
 GRANT SELECT on model_gridpoint_2010 to nobody,apache;
+
+CREATE TABLE model_gridpoint_2005() INHERITS (model_gridpoint);
+CREATE INDEX model_gridpoint_2005_idx on 
+  model_gridpoint_2005(station, model, runtime);
+GRANT SELECT on model_gridpoint_2005 to nobody,apache;
