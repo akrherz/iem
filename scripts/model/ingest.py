@@ -74,7 +74,11 @@ def run(model, station, lon, lat, ts):
         if model == "RUC":
             precip = float(row[ VLOOKUP['precipcon'][model] ]) + float(row[ VLOOKUP['precipnon'][model] ])
         else:
-            precip = row[ VLOOKUP['precip'][model] ]
+            precip = float(row[ VLOOKUP['precip'][model] ])
+        if precip < 0:
+            precip = "Null"
+        if precipcon < 0:
+            precipcon = "Null"
         fts = mx.DateTime.strptime(row['date'], '%Y-%m-%dT%H:%M:%SZ')
         sql = """INSERT into model_gridpoint_%s(station, model, runtime, 
               ftime, sbcape, sbcin, pwater, precipcon, precip) 
