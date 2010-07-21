@@ -1,6 +1,5 @@
 <?php
 include("../../../../config/settings.inc.php");
-include("$rootpath/include/forms.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");
 $nt = new NetworkTable("ISUAG");
@@ -18,8 +17,6 @@ $ar = explode("x", $imgsz);
 $width = $ar[0];
 $height = $ar[1];
 
-$imgurl = sprintf("gsplot.php?var=%s&year=%s&smonth=%s&emonth=%s&eday=%s&sday=%s&imgsz=%s", $var, $year, $smonth, $emonth, $eday, $sday, $imgsz);
-
 $gs_start = mktime(0,0,0,$smonth,$sday,$year);
 $gs_end = mktime(0,0,0,$emonth,$eday,$year);
 
@@ -33,13 +30,8 @@ $eday = strftime("%d", $gs_end);
 $smonth = strftime("%m", $gs_start);
 $sday = strftime("%d", $gs_start);
 
-
-$sstr = strftime("%Y-%m-%d", $gs_start);
-$estr = strftime("%Y-%m-%d", $gs_end);
-$cStart = "2000". strftime("-%m-%d", $gs_start);
-$cEnd = "2000". strftime("-%m-%d", $gs_end);
-$sstr_txt = strftime("%b %d", $gs_start);
-$estr_txt = strftime("%b %d", $gs_end);
+dl($mapscript);
+include("lib.php");
 
 $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
   "gdd32" => "Growing Degree Days (base=32)",
@@ -61,6 +53,47 @@ $rnd = Array("gdd50" => 0,
   "sdd86" => 0);
 
 
+$myStations = $ISUAGcities;
+$height = $height;
+$width = $width;
+
+$proj = "init=epsg:26915";
+
+$map = ms_newMapObj("base.map");
+$map->setsize($width,$height);
+$map->setProjection($proj);
+
+$map->setextent(175000, 4440000, 775000, 4890000);
+
+
+$counties = $map->getlayerbyname("counties");
+$counties->set("status", MS_ON);
+
+$snet = $map->getlayerbyname("snet");
+$snet->set("status", MS_ON);
+$sclass = $snet->getClass(0);
+
+$iards = $map->getlayerbyname("iards");
+$iards->set("status", MS_ON);
+
+
+$ponly = $map->getlayerbyname("pointonly");
+$ponly->set("status", MS_ON);
+
+$img = $map->prepareImage();
+$counties->draw($img);
+$iards->draw($img);
+
+$c = iemdb("isuag");
+$climatedb = iemdb("coop");
+
+$sstr = strftime("%Y-%m-%d", $gs_start);
+$estr = strftime("%Y-%m-%d", $gs_end);
+$cStart = "2000". strftime("-%m-%d", $gs_start);
+$cEnd = "2000". strftime("-%m-%d", $gs_end);
+$sstr_txt = strftime("%b %d", $gs_start);
+$estr_txt = strftime("%b %d", $gs_end);
+
 function gdd($high, $low, $ceiling, $floor)
 {
   if ($low < $floor)    $low = $floor;
@@ -71,8 +104,6 @@ function gdd($high, $low, $ceiling, $floor)
 }
 
 /* -------- Lets compute the climatology ------ */
-$c = iemdb("isuag");
-$climatedb = iemdb("coop");
 $climate = Array();
 reset($ISUAGcities);
 while( list($key,$val) = each($ISUAGcities) ) {
@@ -218,130 +249,65 @@ foreach($vals as $key => $value){
   $tr .= sprintf("%20s,%.4f,%.4f,%10s\n", $ISUAGcities[$key]['name'],
   $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], round($value, $round[$var]) );
 
-}
+  // Red Dot... 
+  $pt = ms_newPointObj();
+  $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+  $pt->draw($map, $ponly, $img, 0, ' ' );
+  $pt->free();
 
+  // Value UL
+  $pt = ms_newPointObj();
+  $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+  $pt->draw($map, $snet, $img, 0, 
+     round($value, $rnd[$var]) );
+  $pt->free();
 
-?>
-
-<?php 
-$THISPAGE = "networks-agclimate";
-	$TITLE = "IEM | ISUAG Growing Season Data";
-	$HEADEXTRA = '<script language="JavaScript" type="text/javascript">
-<!--//BEGIN Script
-function new_window(url) {
-        link = 
-       
-window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=450,height=400");
-} 
-//END Script-->
-</script>';
-        include("$rootpath/include/header.php"); 
-?>
-
-<h3 class="heading">Growing Season Maps</h3><p>
-
-<div style="width: 640px;">
-This application will plot an accumulated variable for a time period of your 
-selection.  Data is based on the automated sensors from the ISU AG Climate
-network.  A <a href="<?php echo $rooturl; ?>/GIS/apps/coop/gsplot.phtml">similiar application</a> exists based on the COOP network data, which
-is of higher quality for temperature and precipitation.
-</div>
-
-<form method="GET" action="gsplot.phtml">
-<table cellspacing="0" cellpadding="2" border="1"> 
-<thead>
-<tr>
-   <th>Plot Parameter</th>
-   <th>Year</th>
-   <th>Month</th>
-   <th>Day</th>
-   <th>Image Size</th>
-   <td></td>
-  </tr>
-</thead>
- <tr>
-  <td rowspan=2><select name="var">
-     <option value="gdd50" <?php if($var == "gdd50") echo "SELECTED"; ?>>Growing Degree Days (base=50,cap=86)</option>
-     <option value="gdd32" <?php if($var == "gdd32") echo "SELECTED"; ?>>Growing Degree Days (base=32,cap=86)</option>
-     <option value="et" <?php if($var == "et") echo "SELECTED"; ?>>Potential Evapotranspiration</option>
-     <option value="sgdd50" <?php if($var == "sgdd50") echo "SELECTED"; ?>>Soil Growing Degree Days (base=50)</option>
-     <option value="srad" <?php if($var == "srad") echo "SELECTED"; ?>>Solar Radiation (langleys)</option>
-     <option value="sdd86" <?php if($var == "sdd86") echo "SELECTED"; ?>>Stress Degree Days (base=86)</option>
-    </select></td>
-  <td rowspan=2><?php echo yearSelect(1986, $year, "year"); ?></td>
-  <td><?php echo monthSelect2($smonth, 'smonth'); ?></td>
-  <td><?php echo daySelect2($sday, 'sday'); ?></td>
-<td rowspan=2>
-<select name="imgsz">
-     <option value="640x480" <?php if($imgsz == "640x480") echo "SELECTED"; ?>>640x480</option>
-     <option value="720x496" <?php if($imgsz == "720x496") echo "SELECTED"; ?>>720x496</option>
-     <option value="1024x768" <?php if($imgsz == "1024x768") echo "SELECTED"; ?>>1024x768</option>
-</select> 
-</td>
-  <td rowspan=2><input type="submit" value="Make Plot"></td>
-  </tr>
- <tr>
-  <td><?php echo monthSelect2($emonth, 'emonth'); ?></td>
-  <td><?php echo daySelect2($eday, 'eday'); ?></td>
-  </tr>
-</table>
- 
-
-<?php
-
-$varDef = Array("gdd50" => "Growing Degree Days (base=50)",
-  "gdd32" => "Growing Degree Days (base=32)",
-  "et" => "Potential Evapotranspiration",
-  "prec" => "Precipitation",
-  "srad" => "Solar Radiation (langleys)",
-  "sgdd50" => "Soil Growing Degree Days (base=50)",
-  "sdd86" => "Stress Degree Days (base=86)"
-);
-
-
-$rnd = Array("gdd50" => 0,
-  "gdd32" => 0,
-  "et" => 2, "c11" => 2,
-  "prec" => 2,
-  "srad" => 0,
-  "sgdd50" => 0,
-  "sdd86" => 0);
-
-
-?>
-<table>
-<tr><td valign="top">
-<h3 class="heading">Dynamic Historical Data:</h3>
-<a href="dayplot.phtml">Daily Data Plots</a>
-<br /><b>Growing Season Plots</b>
-
-<p>Open this plot in a <a href="javascript:new_window('image.phtml?f=<?php echo $url; ?>');">new window</a> for comparison with other plots. Once the
-image is loaded up in another window, you can modify this plots 
-parameters.
-
-<p><b>*Note:</b> Precipitation recorded from this network is not reliable.
- You should use precipitation obs from the <a href="<?php echo $rooturl; ?>/COOP/">COOP</a> network.
-</td>
-  <td>
-<?php
+  // Climate
   if ($var == "gdd32" || $var == "gdd50" || $var == "prec")
-{
-  echo "Departure from climatology is shown below the accumulated value.";
+  {
+    $pt = ms_newPointObj();
+    $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+    $pt->draw($map, $snet, $img, 2, "(". round($value - $climate[$key][$var],$rnd[$var]) .")");
+    $pt->free();
+
+  }
+
+  if (isset($_GET["var2"])) {
+    // Value LL
+    $pt = ms_newPointObj();
+    $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+    if ($var2 == 'c530'){
+      $pt->draw($map, $snet, $img, 2, 
+        $row[$var2] ." ". $row[$var2 .'_f'] );
+    } else {
+      $pt->draw($map, $snet, $img, 2, 
+        round($row[$var2], $rnd[$var2]) ." ". $row[$var2 .'_f'] );
+    }
+    $pt->free();
+  }
+
+  // City Name
+  $pt = ms_newPointObj();
+  $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
+  if ($key == "A131909" || $key == "A130209"){
+    $pt->draw($map, $snet, $img, 3, $ISUAGcities[$key]['name'] );
+  } else {
+    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['name'] );
+  }
+  $pt->free();
 }
-?>
-  <img src="<?php echo $imgurl; ?>" border=1>
-</td></tr>
-</table>
+if ($i == 0)
+   plotNoData($map, $img);
 
-<p>
-<center><img src="<?php echo $rooturl; ?>/images/gisready.png"><h3 class="subtitle"> Data Listing</h3></center>
-<pre><?php echo $tr; ?></pre>
+mktitlelocal($map, $img, $height, "      ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .") ");
+$map->drawLabelCache($img);
+$layer = $map->getLayerByName("logo");
+$point = ms_newpointobj();
+$point->setXY( 37, 27);
+$point->draw($map, $layer, $img, 0, "");
+$point->free();
 
-<p>You should be able to 'copy & paste' this raw data listing into a simple
-text editor and save the data file on your machine.  Most GIS systems can 
-then import this dataset as a layer.  You may have to omit the commented lines
-(#) if your GIS has trouble importing the data.
+header("Content-type: image/png");
+$img->saveImage('');
 
-<?php 
-  include("$rootpath/include/footer.php");
 ?>

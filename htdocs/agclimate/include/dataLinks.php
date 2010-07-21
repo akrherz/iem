@@ -36,22 +36,13 @@
 
 <tr>
   <td class="heading">
-     <b>Growing Season:</b></td></tr>
+     <b>Data Applications:</b></td></tr>
 <tr><td>
 <div style="padding: 5px;">
-  <a href="<?php echo $rooturl; ?>/GIS/apps/agclimate/gsplot.phtml">Interactive GS Plotter</a><br>
-</div>
-  </td>
-</tr>
-<tr>
-  <td class="heading">
-     <b>Climatologies:</b></td></tr>
-<tr>
-  <td>
-<div style="padding: 5px;">
-    <a href="/plotting/agc/">Interactive Plotting</a><br>
-    <a href="soilt-prob.php">4in Soil Temperatures</a><br>
-    <A HREF="<?php echo $rooturl; ?>/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a><br>
+  <a href="<?php echo $rooturl; ?>/GIS/apps/agclimate/gsplot.phtml">Growing Season Maps</a><br>
+  <a href="<?php echo $rooturl; ?>/plotting/agc/">Time Series Charts</a><br>
+  <a href="soilt-prob.php">4in Soil Temperatures</a><br>
+  <A HREF="<?php echo $rooturl; ?>/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a><br>
 </div>
   </td>
 </tr>
