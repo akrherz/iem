@@ -62,31 +62,33 @@ table that you need, please let use know.</p>
 	if (strlen($network) > 0){
 		$result = pg_execute($pgconn, "SELECT", Array($network) );
 		if ($format == "html"){
-		echo "<p><table cellspacing='0' cellpadding='2' border='1'>\n";
-		echo "<caption><b>". $network ." Network</b></caption>\n";
-		echo "<thead><tr><th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
-			<th>Longitude<sup>1</sup></th><th>Elevation [m]</th></tr></thead>\n";
-		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+		  echo "<p><table cellspacing='0' cellpadding='2' border='1'>\n";
+		  echo "<caption><b>". $network ." Network</b></caption>\n";
+		  echo "<thead><tr><th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
+			<th>Longitude<sup>1</sup></th><th>Elevation [m]</th><th>Archive Begins</th></tr></thead>\n";
+		  for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
 			echo "<tr>\n
 			  <td>". $row["id"] ."</td>\n
 			  <td>". $row["name"] ."</td>\n
 			  <td>". round($row["latitude"],5) . "</td>\n
 			  <td>". round($row["longitude"],5) . "</td>\n
 			  <td>". $row["elevation"]. "</td>\n
+			  <td>". $row["archive_begin"]. "</td>\n
 			  </tr>";
-		}
-		echo "</table>\n";
+		  }
+		  echo "</table>\n";
 
 		} else if ($format == "csv") {
 		   if (! $nohtml) echo "<p><b>". $network ." Network</b></p>\n";
 		   if (! $nohtml) echo "<pre>\n";
-		  echo "stid,station_name,lat,lon,elev\n";
+		  echo "stid,station_name,lat,lon,elev,begints\n";
 		  for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
                         echo $row["id"] .","
                           . $row["name"] .","
                           . round($row["latitude"],5). ","
                           . round($row["longitude"],5). ","
-                          . $row["elevation"]. "\n";
+                          . $row["elevation"]. ","
+                          . $row["archive_begin"]. "\n";
                   }
 		  if (! $nohtml)  echo "</pre>\n";
 		}
@@ -104,6 +106,7 @@ table that you need, please let use know.</p>
       array("ID", "C", 6),
       array("NAME", "C", 50),
       array("NETWORK","C",10),
+      array("BEGINTS","C",16),
      ));
 
     for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
@@ -118,6 +121,7 @@ table that you need, please let use know.</p>
          $row["id"],
          $row["name"],
          $row["network"],
+         substr($row["archive_begin"],0,16),
       ));
     }   
 
