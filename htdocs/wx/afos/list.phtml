@@ -1,0 +1,66 @@
+<?php
+include("../../../config/settings.inc.php");
+include("$rootpath/include/wfoLocs.php");
+include("$rootpath/include/forms.php");
+include("$rootpath/include/database.inc.php");
+$afos = iemdb("afos");
+
+$wfo = isset($_GET["wfo"])? $_GET["wfo"] : 'DMX';
+$year = isset($_GET["year"])? intval($_GET["year"]) : date("Y");
+$month = isset($_GET["month"])? intval($_GET["month"]) : date("m");
+$day = isset($_GET["day"])? intval($_GET["day"]) : date("d");
+$ts = mktime(0,0,0, $month, $day, $year);
+
+$table = sprintf("products_%s_0106", $year);
+if ($month > 6){
+  $table = sprintf("products_%s_0712", $year);
+}
+
+pg_query($afos, "SET TIME ZONE 'GMT'");
+$rs = pg_prepare($afos, "SELECT", "SELECT pil, entered from $table
+      WHERE pil ~* $1 and entered BETWEEN $2 and $3 ORDER by entered ASC");
+
+$TITLE = "NWS Text Product by WFO by Date";
+$THISPAGE ="current-afos";
+include("$rootpath/include/header.php");
+?>
+<h3>NWS Text Products by WFO by Date</h3>
+<p>This application prints out a listing of IEM archived text products
+by issuing NWS Weather Forecast Office (WFO) and by date.  After about
+seven days, the IEM purges a lot of the frequently issued products like
+SHEF and METAR data. This archive exists back to 1 January 2009.</p>
+
+<form name="selector" method="GET">
+<table>
+<thead>
+<tr><th>Select WFO:</th><th colspan="3">Select UTC Date:</th><th></th></tr>
+</head>
+
+<tbody>
+<tr>
+ <td><?php echo wfoSelect($wfo); ?></td>
+ <td><?php echo yearSelect(2009, $year); ?></td>
+ <td><?php echo monthSelect($month); ?></td>
+ <td><?php echo daySelect($day); ?></td>
+ <td><input type="submit" value="Giveme Giveme!"></td>
+</table>
+</form>
+<?php
+
+$rs = pg_execute($afos, "SELECT", Array($wfo."$", date("Y-m-d H:i", $ts)."+00",
+      date("Y-m-d H:i", $ts+86400)."+00"));
+$l = "";
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+  $ts = strtotime($row["entered"]);
+  $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
+  if (gmdate("H", $ts) != $l){
+    echo sprintf("<hr /><strong>%s UTC</strong>", gmdate("H", $ts));
+    $l = gmdate("H", $ts);
+  }
+  echo sprintf("<br /><a href=\"%s\">%s</a> (%s UTC)", $url, $row["pil"],
+       gmdate("H:i", $ts));
+}
+
+?>
+
+<?php include("$rootpath/include/footer.php"); ?>
