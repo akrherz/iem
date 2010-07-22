@@ -32,6 +32,12 @@ VLOOKUP = {
            },
 }
 
+def clean(v):
+    if str(v) == "NaN":
+        return "Null"
+    return float(v)
+
+
 def run(model, station, lon, lat, ts):
     """
     Ingest the model data for a given Model, stationid and timestamp
@@ -57,8 +63,8 @@ def run(model, station, lon, lat, ts):
     for row in r:
         for k in row.keys():
             row[ k[:k.find("[")] ] = row[k]
-        sbcape = row[ VLOOKUP['sbcape'][model] ]
-        sbcin = row[ VLOOKUP['sbcin'][model] ]
+        sbcape = clean(row[ VLOOKUP['sbcape'][model] ] )
+        sbcin = clean( row[ VLOOKUP['sbcin'][model] ] )
         if row[ VLOOKUP['pwater'][model]] == "NaN":
             pwater = "Null"
         else:
