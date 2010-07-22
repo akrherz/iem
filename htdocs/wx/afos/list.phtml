@@ -63,7 +63,7 @@ if ($view == "grid"){
   for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
     $ts = strtotime($row["entered"]);
     $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
-    @$columns[$row["pil"]] .= sprintf("<br /><a href=\"%s\">%s</a> (%s UTC)", 
+    @$columns[$row["pil"]] .= sprintf("<br /><a href=\"%s\">%s</a> (%s)", 
        $url, $row["pil"], gmdate("H:i", $ts));
   }
   echo "<table><tr>";
@@ -82,7 +82,7 @@ if ($view == "grid"){
       echo sprintf("<hr /><strong>%s UTC</strong>", gmdate("H", $ts));
     }
       $l = gmdate("H", $ts);
-   echo sprintf("<br /><a href=\"%s\">%s</a> (%s UTC)", $url, $row["pil"],
+   echo sprintf("<br /><a href=\"%s\">%s</a> (%s)", $url, $row["pil"],
        gmdate("H:i", $ts));
  }
 }
