@@ -79,7 +79,7 @@ def run(model, station, lon, lat, ts):
         if model == "RUC":
             precip = float(row[ VLOOKUP['precipcon'][model] ]) + float(row[ VLOOKUP['precipnon'][model] ])
         else:
-            precip = float(row[ VLOOKUP['precip'][model] ])
+            precip = clean( row[ VLOOKUP['precip'][model] ] )
         if precip < 0:
             precip = "Null"
         if precipcon < 0:
