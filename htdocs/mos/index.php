@@ -33,6 +33,9 @@ archive updates in real-time as products are received from the NWS.
 csv.php?station=KAMW&ts=2009-01-10%2012:00                  (all data 10 days)
 csv.php?station=KAMW&runtime=2009-01-10%2012:00&model=GFS  (explicit)
 </pre></li>
+ <li><a href="fe.phtml">Download the raw data!</a>
+  <br />This application returns the raw MOS data for a location and time
+  period of your choice.</li>
 </ul>
 
 <p><strong>Note:</strong> MOS variables are stored as their raw encodings 
