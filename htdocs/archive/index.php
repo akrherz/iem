@@ -61,6 +61,23 @@ then, only base reflectivity was saved.</li>
 </div>
 <div style="width:390px; float:right;">
 
+<h3>NWS Text Products</h3>
+<br />The IEM archives all NWS issued text products.  Unfortunately, the we 
+don't have this full archive online yet.  NCDC has a <a href="http://has.ncdc.noaa.gov/pls/plhas/HAS.FileAppSelect?datasetname=9957ANX">big archive</a> of
+this data back to 2001.  The IEM's archives can be found:
+<ul>
+ <li><a href="<?php echo $rooturl; ?>/wx/afos/">AFOS Product Finder</a>
+  <br />If you know what you are looking for, this app works great!</li>
+ <li><a href="<?php echo $rooturl; ?>/archive/data/<?php echo date("Y/m/d"); ?>/text/noaaport/">Simple directory listing</a>
+  <br />Certain warning type products can be found in the main IEM data archive
+  directory structure.</li>
+ <li><a href="<?php echo $rooturl; ?>/wx/afos/list.phtml">List Products by WFO by Date</a>
+  <br />View quick listings of issued products by forecast office and by date.</li>
+  <li><a href="/archive/rer/">NWS Record Event Reports</a>
+  <br />Daily reports of record temperatures and precipitation for
+   Iowa since November 2001</li>
+</ul>
+
 <h3>Raw Data</h3>
 <ul>
  <li><a href="/archive/data/">Bufkit archive</a>
@@ -77,9 +94,6 @@ then, only base reflectivity was saved.</li>
    RWIS comma-deliminated data, schoolnet csv data, SCAN site format and COOP
    observations</li>
 
- <li><a href="/archive/rer/">NWS Record Event Reports</a>
-  <br />Daily reports of record temperatures and precipitation for 
-   Iowa since November 2001</li>
 
  <li><a href="http://lead.unidata.ucar.edu:8080/thredds/catalog.html">Unidata IDD 6 month archive</a>
   <br />Archive of raw data provided by Unidata for the past 6 months!</li>
