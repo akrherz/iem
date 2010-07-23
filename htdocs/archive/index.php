@@ -128,6 +128,9 @@ combinations of IEM networks.</li>
 <li><a href="http://www.mdl.nws.noaa.gov/~mos/archives/">Model MOS Archive</a>
 <br>NWS archive of model output statistics (MOS)</li>
 
+<li><a href="<?php echo $rooturl; ?>/mos/">IEM's Model MOS Archive</a>
+<br>IEM's archive of model output statistics (MOS)</li>
+
 <li><a href="http://www.ncdc.noaa.gov/swdi">NCDC Severe Weather Data Inventory</a>
 <br />Extremely fancy archive of various datasets dealing with severe
 weather.</li>

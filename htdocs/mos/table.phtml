@@ -4,6 +4,7 @@ putenv("TZ=GMT");
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/forms.php");
+include("lib.php");
 $mosdb = iemdb("mos");
 pg_exec($mosdb, "SET TIME ZONE 'GMT'");
 
@@ -65,31 +66,10 @@ $THISPAGE = "archive-mos";
 $TITLE = "IEM MOS Tables";
 include("$rootpath/include/header.php");
 
-$vars = Array(
- "n_x" => "Max/Min Temp [F]",
- "tmp" => "2m Air Temperature [F]",
- "dpt" => "2m Dew Point [F]",
- "cld" => "",
- "wdr" => "10m Wind Direction [deg]",
- "wsp" => "10m Wind Speed [kts]",
- "p06" => "",
- "p12" => "",
- "q06" => "",
- "q12" => "",
- "t06" => "",
- "t12" => "",
- "snw" => "Snow",
- "cig" => "",
- "vis" => "",
- "obv" => "",
- "poz" => "",
- "pos" => "",
- "typ" => "");
-
 echo "<form>";
 echo "<input type=\"text\" name=\"station\" value=\"$station\">";
 echo "<select name=\"vname\">";
-while (list($v,$n) = each($vars))
+while (list($v,$n) = each($mosvars))
 {
   echo "<option value=\"$v\"";
   if ($vname == $v) echo " SELECTED";
