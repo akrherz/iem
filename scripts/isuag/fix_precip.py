@@ -14,6 +14,7 @@ SKIP = ['A134759', # Lewis
         'A133259',
         'A135849', #Muscatine
         'A135879', #Nashua
+        'A134309', #Kanawha
 ]
 
 sts = {}
