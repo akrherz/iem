@@ -52,7 +52,7 @@ def doit(stid, now):
       pass
     sky = {'skyc1': "", 'skyc2': "", 'skyc3': "",
            'skyl1': "Null", 'skyl2': "Null", 'skyl3': "Null"}
-    if mtr is not None:
+    if mtr is not None and mtr.time is not None:
       metarPass += 1
       gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
                 mtr.time.day, mtr.time.hour, mtr.time.minute)
