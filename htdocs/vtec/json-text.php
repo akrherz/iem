@@ -12,7 +12,7 @@ $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
 $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
-
+$lastsvs = isset($_GET["lastsvs"]) ? $_GET["lastsvs"] : 'n';
 
 $sql = "SELECT replace(report,'\001','') as report, 
                replace(svs,'\001','') as svs
@@ -31,10 +31,15 @@ for( $i=0; $row  = @pg_fetch_array($result,$i); $i++)
   $z["report"] = $row["report"];
   $z["svs"] = Array();
   $tokens = @explode('__', $row["svs"]);
+  $lsvs = "";
   while (list($key,$val) = each($tokens))
   { 
     if ($val == "") continue;
-    $z["svs"][] = htmlspecialchars( $val );
+    $lsvs = htmlspecialchars( $val );
+    $z["svs"][] = $lsvs;
+  }
+  if ($lastsvs == "y"){
+    $z["svs"] = $lsvs;
   }
   $ar["data"][] = $z;
 }
