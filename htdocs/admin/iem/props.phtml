@@ -1,0 +1,37 @@
+<?php
+include("../../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$dbconn = iemdb("mesosite");
+ /* Edit IEM Properties */
+$rs = pg_prepare($dbconn, "DELETE", "DELETE from properties WHERE
+      propname = $1");
+$rs = pg_prepare($dbconn, "INSERT", "INSERT into properties
+      (propname, propvalue) VALUES ($1, $2)");
+
+if ( isset($_GET["propname"]) && isset($_GET["propvalue"])){
+  $propname = $_GET["propname"];
+  $propvalue = $_GET["propvalue"];
+
+  $rs = pg_execute($dbconn, "DELETE", Array($propname));
+  $rs = pg_execute($dbconn, "INSERT", Array($propname, $propvalue));
+}
+
+$rs = pg_query($dbconn, "SELECT * from properties ORDER by propname ASC");
+
+echo "<h3>IEM Properties Editor</h3>
+<table>
+<tr><th>Name</th><th>Value</th></tr>";
+
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+ echo sprintf("<tr><th>%s</th><td>%s</td></tr>\n", $row["propname"],
+      $row["propvalue"]);
+}
+echo "</table>";
+?>
+
+
+<form method="GET" name="editor">
+<p>Name:<input type="text" name="propname">
+Value:<input type="text" name="propvalue">
+<br /><input type="submit" value="go">
+</form>
