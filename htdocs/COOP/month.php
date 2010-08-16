@@ -2,8 +2,9 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/forms.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/constants.php");
 include("$rootpath/include/network.php");
+include("$rootpath/include/iemprop.php");
+$coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
 $nt = new NetworkTable("COOPDB");
 $cities = $nt->table;
 

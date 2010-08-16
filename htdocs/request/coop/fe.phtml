@@ -1,6 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
-include("$rootpath/include/constants.php"); 
+include("$rootpath/include/iemprop.php");
+$coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
 $TITLE = "IEM | COOP Data Download";
 $THISPAGE = "networks-coop";
 include("$rootpath/include/header.php"); 

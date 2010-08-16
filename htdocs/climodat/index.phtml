@@ -1,6 +1,7 @@
 <?php
  include("../../config/settings.inc.php");
- include("$rootpath/include/constants.php");
+include("$rootpath/include/iemprop.php");
+$coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
  include("$rootpath/include/google_keys.php");
  include("$rootpath/include/imagemaps.php");
  $report = isset($_GET["report"])? substr($_GET["report"],0,2): "01";

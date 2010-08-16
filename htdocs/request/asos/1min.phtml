@@ -3,7 +3,8 @@ include("../../../config/settings.inc.php");
 $TITLE = "IEM | ASOS 1 Minute Data Download";
 $THISPAGE = "networks-asos";
 include("$rootpath/include/header.php"); 
-include_once("$rootpath/include/constants.php");
+include("$rootpath/include/iemprop.php");
+$asos_archive_end = strtotime( get_iemprop("asos.1min.end") );
 $bogus = 0;
 ?>
 
@@ -80,8 +81,8 @@ $bogus = 0;
 
 <p><h3 class="subtitle">3. Select Variables:</h3><br>
 <select size=5 name="vars[]" MULTIPLE>
-  <option value="tmpf">Air Temperature
-  <option value="dwpf">Dew Point Temperature
+  <option value="tmpf">Air Temperature [F]
+  <option value="dwpf">Dew Point Temperature [F]
   <option value="sknt">Wind Speed [knots]
   <option value="drct">Wind Direction
   <option value="gust_drct">5 sec gust Wind Direction

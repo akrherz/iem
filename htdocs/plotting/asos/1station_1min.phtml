@@ -1,6 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
-include("$rootpath/include/constants.php");
+include("$rootpath/include/iemprop.php");
+$asos_archive_end = strtotime( get_iemprop("asos.1min.end") );
 include("$rootpath/include/imagemaps.php");
 include("$rootpath/include/forms.php"); 
 
