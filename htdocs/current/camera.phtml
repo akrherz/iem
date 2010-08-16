@@ -1,6 +1,7 @@
 <?php 
  include("../../config/settings.inc.php");
- include("$rootpath/include/constants.php");
+include("$rootpath/include/iemprop.php");
+$camera_refresh = get_iemprop("webcam.interval");
 /* CGI GET Requests */
  $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m");

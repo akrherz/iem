@@ -3,7 +3,8 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/cameras.inc.php");
-include("$rootpath/include/constants.php");
+include("$rootpath/include/iemprop.php");
+$camera_refresh = get_iemprop("webcam.interval");
 $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
 $overview = isset($_GET["overview"]);
 
@@ -11,7 +12,7 @@ $thres = 999;
 $title = "IEM Webcam Overview";
 if (!$overview){ $thres = 45; $title ="$network webcams via IEM";}
 header("Content-type: text/plain");
-$r = $camera_refresh / 60;
+$r = floatval($camera_refresh) / 60;
 echo "Refresh: $r
 Threshold: $thres
 Title: $title
