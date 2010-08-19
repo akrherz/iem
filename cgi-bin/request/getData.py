@@ -91,10 +91,14 @@ def Main():
         print "lon"+rD+"lat"+rD,
     print queryCols
 
+    gtxt = ""
+    if len(gisextra) > 0:
+        gtxt = rD.join( gisextra ) + rD
+
     for i in range(len(rs)):
         sys.stdout.write( rs[i]["station"] + rD )
         sys.stdout.write( rs[i]["valid"] + rD )
-        sys.stdout.write( rD.join( gisextra ) )
+        sys.stdout.write( gtxt )
         for data1 in outCols:
             if data1 == 'relh':
                rs[i]['relh'] = mesonet.relh( rs[i]['tmpf'], rs[i]['dwpf'] )
