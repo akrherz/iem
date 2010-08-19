@@ -1,94 +1,36 @@
 <?php 
-    include("../../config/settings.inc.php");
-	$THISPAGE = "current-radar";
-	$TITLE = "IEM | Current RADAR Page";
-	$HEADEXTRA = '<script language="JavaScript">
-
-function changeSite(newSite, newSname) {
-
-	document.myForm.sname.value = newSname ;
-	document.myForm.site.value = newSite ;
-
-} // End of changeSite
-
-</script>';
+include("../../config/settings.inc.php");
+$THISPAGE = "current-radar";
+$TITLE = "IEM | RADAR + Satellite Data";
 include("$rootpath/include/header.php");
 ?>
+<h3>RADAR + Satellite Data</h3>
 
-
-<div id="iem-radar"><div class="text">
-<p><table><tr><td class="heading" colspan="2">RADAR Data Selector</td></tr>
-
-<tr><td valign="top">
-<br><img src="<?php echo $rooturl; ?>/GIS/apps/radar/mwmosaic.php" USEMAP="#mymap">
-
-<MAP NAME="mymap">
-<AREA SHAPE="POLY" COORDS="109,216,187,214,184,331,74,290" 
-  HREF="javascript:changeSite('EAX', 'Pleasant Hill, MO');">
-<AREA SHAPE="POLY" COORDS="40,145,115,165,115,215,104,215,98,233,61,232" 
-  HREF="javascript:changeSite('OAX', 'Omaha, NE');">
-<AREA SHAPE="POLY" COORDS="35,90,101,93,117,112,116,160,13,140" 
-  HREF="javascript:changeSite('FSD', 'Sioux Falls, SD');">
-<AREA SHAPE="POLY" COORDS="117,128,116,213,178,212,178,125" 
-  HREF="javascript:changeSite('DMX', 'Des Moines, IA');">
-<AREA SHAPE="POLY" COORDS="88,39,214,48,150,127,121,127,101,92,81,90" 
-  HREF="javascript:changeSite('MPX', 'Minneapolis, MN');">
-<AREA SHAPE="POLY" COORDS="215,54,155,121,178,122,182,150,248,149" 
- HREF="javascript:changeSite('ARX', 'LaCrosse, WI');">
-<AREA SHAPE="POLY" COORDS="180,152,180,213,190,212,191,223,249,222,249,150" 
- HREF="javascript:changeSite('DVN', 'Davenport, IA');">
-</MAP>
-
-<p><a href="javascript:changeSite('UDX', 'Rapid City, SD');">Rapid City</a> and
-<a href="javascript:changeSite('ABR', 'Aberdeen, SD');">Aberdeen</a> are also available.
-
-<p><b>Time composites:</b>
+<p><b>Composite Products:</b>
+ <br />The IEM generates <a href="<?php echo $rooturl; ?>/docs/nexrad_composites/">composites</a> of NWS NEXRAD data.  These composites are used to generate
+various products on the IEM website.
 <ul>
- <li><a href="<?php echo $rooturl; ?>/timemachine/#27.<?php echo gmdate("Ymd", time() - 86400); ?>0000">Yesterday (GMT) CONUS</a></li>
- <li><a href="<?php echo $rooturl; ?>/timemachine/#26.<?php echo gmdate("Ymd", time() - 86400); ?>0000">Yesterday (GMT) Iowa</a></li>
+ <li><a href="mcview.phtml?prod=comprad&java=none&mode=realtime&frames=1">MidWest Composite w/ warnings</a></li>
+ <li><a href="mcview.phtml?prod=usrad&java=none&mode=realtime&frames=1">US Composite w/ warnings</a></li>
+ <li><a href="sel.phtml">Convective Watches Overview</a></li>
+ <li><a href="<?php echo $rooturl; ?>/timemachine/#27.<?php echo gmdate("Ymd", time() - 86400); ?>0000">Yesterday (GMT) CONUS</a> Max dBZ Composite</li>
+ <li><a href="<?php echo $rooturl; ?>/timemachine/#26.<?php echo gmdate("Ymd", time() - 86400); ?>0000">Yesterday (GMT) Iowa</a> Max dBZ Composite</li>
 </ul>
 
-</td><td valign="top">
-
-<form name="myForm" action="raddisplay.phtml">
-
-<br><i>Enter or select NEXRAD<br>
- by clicking on the map:</i><br>
-<input type="text" name="site" size=3 maxsize=3>
-<input type="text" name="sname">
-
-<p>Select Product:<br>
-<select name="prod">
-  <option value="N0R">Base Reflectivity</option>
-  <option value="N0R_loop">Base Reflectivity Loop (Java Applet)</option>
-  <option value="N0R_loop_nj">Base Reflectivity Loop (JavaScript)</option>
-  <option value="N0V">Base Velocity</option>
-  <option value="N0V_loop">Base Velocity Loop (Java Applet)</option>
-  <option value="N0V_loop_nj">Base Velocity Loop (JavaScript)</option>
-  <option value="wiem">Hourly Mesonet Overlay</option>
-</select>
-
-<p><input type="submit" value="Show"><input type="reset">
-
-<hr>
-<b>Raw Data:</b>
+<p><b>Raw Level II Data:</b>
+ <br />The NWS operated WSR-88D RADARs produce data and products in different
+formats.  Once of these formats is called "Level II" and is high resolution
+information without much of the processing "Level III" products have.
 <ul
-<li><a href="/data/nexrd2/raw/">Level2 NEXRAD data</a></li>
-<ul>
+ <li>IEM's <a href="/data/nexrd2/raw/">directory</a> of raw data</li>
  <li><a href="http://weather.noaa.gov/monitor/radar2/">NWS Feed Monitor</a></li>
- <li><a href="http://mesonet.tamu.edu/products/RADAR/nexrad/CRAFT/">Texas Mesonet level2 data cache</a></li>
- <li><a href="http://lead.unidata.ucar.edu:8080/thredds/idd/radars.html">Unidata 6 month data cache</a></li>
-</ul>
-</ul>
-
-<b>Static Composite Maps:</b>
-<ul>
-<li><a href="mwcomp.phtml">MidWest Composite w/ warnings</a></li>
-<li><a href="uscomp.phtml">US Composite w/ warnings</a></li>
-<li><a href="sel.phtml">Convective Watches Overview</a></li>
+ <li><a href="http://motherlode.ucar.edu/thredds/catalog/nexrad/level2/catalog.html">Unidata Thredd's service</a></li>
+ <li><a href="http://has.ncdc.noaa.gov/">NCDC Complete Archive</a>!</li>
 </ul>
 
-<b>GIS Web-Mapping Apps:</b>
+
+<p><b>GIS Web-Mapping Apps:</b>
+ <br />These applications utilize the NEXRAD composites generated by the IEM.
 <ul>
 <li><a href="<?php echo $rooturl; ?>/GIS/apps/rview/compare.phtml">Iowa RADAR comparisons</a></li>
 <li><a href="<?php echo $rooturl; ?>/current/mcview.phtml">Current/Archived Composite Loop</a></li>
@@ -98,13 +40,9 @@ include("$rootpath/include/header.php");
 <li><a href="<?php echo $rooturl; ?>/GIS/apps/rview/watch.phtml">Storm Prediction Center (SPC) Watches since 1997.</a></li>
 <li><a href="<?php echo $rooturl; ?>/GIS/apps/rview/warnings_cat.phtml">VTEC product browser</a></li>
 </ul>
-</td></tr>
-</table><p>
 
+<p><b>Miscellaneous Products</b>
 <TABLE>
-<tr>
- <td class="heading" colspan=2>Misc Plots</td>
-</tr>
 <TR class="odd">
 	<TD>Precipitation [NEXRAD]</TD>
 	<td> <a href="/data/nexradPrecip1h.gif">1 hour Estimate</a> [<a href="loop.phtml?prod=nexradprecip">Loop</a>] </td>
