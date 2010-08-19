@@ -43,7 +43,7 @@ def figureAlti(val, qcval):
   return qcval / 100.0 
 
 def check(val):
-  if (val >  1000000.):
+  if val >  1000000.:
     return 'Null'
   return val
 
@@ -73,7 +73,11 @@ for p in range(len(providers)):
      tmpf_qc_av, tmpf_qc_sc, dwpf, dwpf_qc_av, 
      dwpf_qc_sc, alti, alti_qc_av, alti_qc_sc, 
      ts.strftime("%Y-%m-%d %H:%M"), (nc.variables["stationId"][i]).tostring()[:5] )
-    iemaccess.query(sql)
+    sql = sql.replace("--", "Null").replace("nan", "Null")
+    try:
+      iemaccess.query(sql)
+    except:
+      print sql
 
   i += 1
 
