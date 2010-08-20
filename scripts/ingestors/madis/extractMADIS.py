@@ -50,7 +50,7 @@ def check(val):
 
 i = 0
 found =0
-for p in range(len(providers)):
+for p in range(providers.shape[0]):
   provider = providers[p]
   if (provider.tostring()[:3] == 'IEM' or provider.tostring()[:5] == 'IADOT' ):
     found = 1
@@ -58,7 +58,7 @@ for p in range(len(providers)):
 
     tmpf = check( mesonet.k2f( nc_tmpk[i] ) )
     dwpf = check( mesonet.k2f( nc_dwpk[i] ) )
-    alti = check( (nc_alti[i][0] / 100.0 ) * 0.0295298)
+    alti = check( (nc_alti[i] / 100.0 ) * 0.0295298)
     tmpf_qc_av = figure(nc_tmpk[i], tmpkQCD[i,0])
     tmpf_qc_sc = figure(nc_tmpk[i], tmpkQCD[i,6])
     dwpf_qc_av = figure(nc_dwpk[i], dwpkQCD[i,0])

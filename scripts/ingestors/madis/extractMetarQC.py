@@ -52,14 +52,14 @@ def check(val):
   return val
 
 found =0
-for j in range(len(ids)):
+for j in range(ids.shape[0]):
   sid = ids[j]
   id = re.sub('\x00', '', sid.tostring())
   if (id[0] == "K"):
     ts = mx.DateTime.gmtime( nc.variables["timeObs"][j] )
     tmpf = check( mesonet.k2f( nc_tmpk[j] ) )
     dwpf = check( mesonet.k2f( nc_dwpk[j] ) )
-    alti = check( (nc_alti[j][0] / 100.0 ) * 0.0295298) 
+    alti = check( (nc_alti[j] / 100.0 ) * 0.0295298) 
     tmpf_qc_av = figure(nc_tmpk[j], tmpkQCD[j,0])
     tmpf_qc_sc = figure(nc_tmpk[j], tmpkQCD[j,6])
     dwpf_qc_av = figure(nc_dwpk[j], dwpkQCD[j,0])
