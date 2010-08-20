@@ -58,7 +58,7 @@ for p in range(providers.shape[0]):
 
     tmpf = check( mesonet.k2f( nc_tmpk[i] ) )
     dwpf = check( mesonet.k2f( nc_dwpk[i] ) )
-    alti = check( (nc_alti[i] / 100.0 ) * 0.0295298)
+    alti = check( (nc_alti[i][0] / 100.0 ) * 0.0295298)
     tmpf_qc_av = figure(nc_tmpk[i], tmpkQCD[i,0])
     tmpf_qc_sc = figure(nc_tmpk[i], tmpkQCD[i,6])
     dwpf_qc_av = figure(nc_dwpk[i], dwpkQCD[i,0])
