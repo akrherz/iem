@@ -74,7 +74,10 @@ for j in range(len(ids)):
      tmpf_qc_av, tmpf_qc_sc, dwpf, dwpf_qc_av, 
      dwpf_qc_sc, alti, alti_qc_av, alti_qc_sc, 
      ts.strftime("%Y-%m-%d %H:%M"), id[1:])
-    
-    iemaccess.query(sql)
+    sql = sql.replace("--", "Null").replace("nan", "Null")
+    try:
+      iemaccess.query(sql)
+    except:
+      print sql
 
 nc.close()
