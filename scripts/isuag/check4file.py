@@ -4,7 +4,7 @@ import shutil
 import mx.DateTime
 
 storePath = '/mnt/mesonet/data/agclimate/'
-incomingPath = '/home/agclimo/incoming/campbell/'
+incomingPath = '/mnt/home/agclimo/incoming/campbell/'
 
 now = mx.DateTime.now()
 todayFile = now.strftime("D%d%b%y.TXT")
