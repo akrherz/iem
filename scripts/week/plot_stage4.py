@@ -25,7 +25,9 @@ while now <= ets:
     lons = grib.variables["g5_lon_1"][:]
   else:
     total = total + data
-
+  grib.close()
+  del data
+  del grib
   now += interval
 
 mask = numpy.where( total < 0.02, True, False)
