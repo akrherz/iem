@@ -48,8 +48,8 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
   }
 }
 
-$labels = Array("nstlnsp" => "Unknown", "nstl11" => "Unknown", 
-        "nstl10" => "Unknown", "nstl30ft" => "Unknown", "nstl110" => "Unknown");
+$labels = Array("nstlnsp" => "nstlnsp", "nstl11" => "nstl11", 
+        "nstl10" => "nstl10", "nstl30ft" => "nstl30ft", "nstl110" => "nstl110");
 $rs = pg_execute($pgconn, "METADATA", Array(date('Y-m-d', $sts)));
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
