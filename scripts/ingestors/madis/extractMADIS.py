@@ -6,6 +6,7 @@ from pyIEM import iemdb, mesonet
 i = iemdb.iemdb()
 iemaccess = i['iem']
 import netCDF3
+import numpy
 
 now = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=-3)
 
@@ -56,15 +57,22 @@ for p in range(providers.shape[0]):
     found = 1
     ts = mx.DateTime.gmtime( nc.variables["observationTime"][i] )
 
-    tmpf = check( mesonet.k2f( nc_tmpk[i] ) )
-    dwpf = check( mesonet.k2f( nc_dwpk[i] ) )
-    alti = check( (nc_alti[i][0] / 100.0 ) * 0.0295298)
-    tmpf_qc_av = figure(nc_tmpk[i], tmpkQCD[i,0])
-    tmpf_qc_sc = figure(nc_tmpk[i], tmpkQCD[i,6])
-    dwpf_qc_av = figure(nc_dwpk[i], dwpkQCD[i,0])
-    dwpf_qc_sc = figure(nc_dwpk[i], dwpkQCD[i,6])
-    alti_qc_av = figureAlti(alti, altiQCD[i,0] * 0.0295298 )
-    alti_qc_sc = figureAlti(alti, altiQCD[i,6] * 0.0295298 )
+    (tmpf, tmpf_qc_av, tmpf_qc_sc) = ('Null', 'Null', 'Null')
+    (dwpf, dwpf_qc_av, dwpf_qc_sc) = ('Null', 'Null', 'Null')
+    (alti, alti_qc_av, alti_qc_sc) = ('Null', 'Null', 'Null')
+
+    if not numpy.ma.is_masked( nc_tmpk[i] ):
+      tmpf = mesonet.k2f( nc_tmpk[i] )
+      tmpf_qc_av = figure(nc_tmpk[i], tmpkQCD[i,0])
+      tmpf_qc_sc = figure(nc_tmpk[i], tmpkQCD[i,6])
+    if not numpy.ma.is_masked( nc_dwpk[i] ):
+      dwpf = mesonet.k2f( nc_dwpk[i] )
+      dwpf_qc_av = figure(nc_dwpk[i], dwpkQCD[i,0])
+      dwpf_qc_sc = figure(nc_dwpk[i], dwpkQCD[i,6])
+    if not numpy.ma.is_masked( nc_alti[i] ):
+      alti = check( (nc_alti[i][0] / 100.0 ) * 0.0295298)
+      alti_qc_av = figureAlti(alti, altiQCD[i,0] * 0.0295298 )
+      alti_qc_sc = figureAlti(alti, altiQCD[i,6] * 0.0295298 )
     #print id, tmpf, tmpkQCD[i]
     sql = """UPDATE %s SET tmpf = %s, tmpf_qc_av = %s, 
      tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s, 

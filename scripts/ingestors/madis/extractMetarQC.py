@@ -57,15 +57,18 @@ for j in range(ids.shape[0]):
   id = re.sub('\x00', '', sid.tostring())
   if (id[0] == "K"):
     ts = mx.DateTime.gmtime( nc.variables["timeObs"][j] )
-    tmpf = check( mesonet.k2f( nc_tmpk[j] ) )
-    dwpf = check( mesonet.k2f( nc_dwpk[j] ) )
-    alti = check( (nc_alti[j][0] / 100.0 ) * 0.0295298) 
-    tmpf_qc_av = figure(nc_tmpk[j], tmpkQCD[j,0])
-    tmpf_qc_sc = figure(nc_tmpk[j], tmpkQCD[j,6])
-    dwpf_qc_av = figure(nc_dwpk[j], dwpkQCD[j,0])
-    dwpf_qc_sc = figure(nc_dwpk[j], dwpkQCD[j,6])
-    alti_qc_av = figureAlti(alti, altiQCD[j,0] * 0.0295298 )
-    alti_qc_sc = figureAlti(alti, altiQCD[j,6] * 0.0295298 )
+    if not numpy.ma.is_masked( nc_tmpk[i] ):
+      tmpf = mesonet.k2f( nc_tmpk[i] )
+      tmpf_qc_av = figure(nc_tmpk[i], tmpkQCD[i,0])
+      tmpf_qc_sc = figure(nc_tmpk[i], tmpkQCD[i,6])
+    if not numpy.ma.is_masked( nc_dwpk[i] ):
+      dwpf = mesonet.k2f( nc_dwpk[i] )
+      dwpf_qc_av = figure(nc_dwpk[i], dwpkQCD[i,0])
+      dwpf_qc_sc = figure(nc_dwpk[i], dwpkQCD[i,6])
+    if not numpy.ma.is_masked( nc_alti[i] ):
+      alti = check( (nc_alti[i][0] / 100.0 ) * 0.0295298)
+      alti_qc_av = figureAlti(alti, altiQCD[i,0] * 0.0295298 )
+      alti_qc_sc = figureAlti(alti, altiQCD[i,6] * 0.0295298 )
     sql = """UPDATE %s SET tmpf = %s, tmpf_qc_av = %s, 
      tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s, 
      dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s, 
