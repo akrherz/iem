@@ -7,6 +7,7 @@ from pyIEM import iemdb, mesonet, stationTable
 i = iemdb.iemdb()
 iemaccess = i['iem']
 import netCDF3
+import numpy
 
 iemaccess.query("SET TIME ZONE 'GMT'")
 
