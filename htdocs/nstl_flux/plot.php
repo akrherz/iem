@@ -137,7 +137,7 @@ if (sizeof($data["nstl30ft"]) > 1) {
 // Create the linear plot
 if (sizeof($data["nstl110"]) > 1) {
  $lineplot5=new LinePlot($data["nstl110"], $times["nstl110"]);
- $lineplot5->SetColor("yellow");
+ $lineplot5->SetColor("brown");
  $lineplot5->SetLegend( $labels["nstl110"] );
  $lineplot5->SetWeight(2);
  $graph->Add($lineplot5);
