@@ -47,11 +47,6 @@ def figureAlti(val, qcval):
     return 'Null'
   return qcval / 100.0 
 
-def check(val):
-  if (val >  1000000.):
-    return 'Null'
-  return val
-
 found =0
 for j in range(ids.shape[0]):
   sid = ids[j]
@@ -70,7 +65,7 @@ for j in range(ids.shape[0]):
       dwpf_qc_av = figure(nc_dwpk[j], dwpkQCD[j,0])
       dwpf_qc_sc = figure(nc_dwpk[j], dwpkQCD[j,6])
     if not numpy.ma.is_masked( nc_alti[j] ):
-      alti = check( (nc_alti[j][0] / 100.0 ) * 0.0295298)
+      alti =  nc_alti[j] / 100.0  * 0.0295298
       alti_qc_av = figureAlti(alti, altiQCD[j,0] * 0.0295298 )
       alti_qc_sc = figureAlti(alti, altiQCD[j,6] * 0.0295298 )
     sql = """UPDATE %s SET tmpf = %s, tmpf_qc_av = %s, 
