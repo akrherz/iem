@@ -63,12 +63,12 @@ for j in range(ids.shape[0]):
     (alti, alti_qc_av, alti_qc_sc) = ('Null', 'Null', 'Null')
     if not numpy.ma.is_masked( nc_tmpk[j] ):
       tmpf = mesonet.k2f( nc_tmpk[j] )
-      tmpf_qc_av = figure(nc_tmpk[j], tmpkQCD[i,0])
-      tmpf_qc_sc = figure(nc_tmpk[j], tmpkQCD[i,6])
+      tmpf_qc_av = figure(nc_tmpk[j], tmpkQCD[j,0])
+      tmpf_qc_sc = figure(nc_tmpk[j], tmpkQCD[j,6])
     if not numpy.ma.is_masked( nc_dwpk[j] ):
       dwpf = mesonet.k2f( nc_dwpk[j] )
-      dwpf_qc_av = figure(nc_dwpk[j], dwpkQCD[i,0])
-      dwpf_qc_sc = figure(nc_dwpk[j], dwpkQCD[i,6])
+      dwpf_qc_av = figure(nc_dwpk[j], dwpkQCD[j,0])
+      dwpf_qc_sc = figure(nc_dwpk[j], dwpkQCD[j,6])
     if not numpy.ma.is_masked( nc_alti[j] ):
       alti = check( (nc_alti[j][0] / 100.0 ) * 0.0295298)
       alti_qc_av = figureAlti(alti, altiQCD[j,0] * 0.0295298 )
