@@ -5,6 +5,7 @@ sys.path.insert(0, "../iemre")
 import constants
 import mx.DateTime
 import netCDF3
+import numpy
 from pyIEM import iemdb
 i = iemdb.iemdb()
 isuag = i['isuag']
@@ -71,14 +72,17 @@ def fix_hourly(ts):
         lon = sts[ stid ]['lon']
         # Lookup IEMRE data
         ix,jy = constants.find_ij(lon, lat)
-        estimate = p01m[offset,jy,ix] / 25.4
+        estimate = 0.
+        if not numpy.ma.is_masked( p01m[offset,jy,ix] ):
+            estimate = p01m[offset,jy,ix] / 25.4
         if estimate > 100:
             estimate = 0
             print "Missing Estimate", ts
         print "%s %-20.20s %5.2f %s %5.2f" % (stid, sts[stid]['name'],
          rs[i]['c900'], rs[i]['c900_f'], estimate)
         # Fix it
-        sql = """UPDATE hourly SET c900 = %.2f, c900_f = 'e' WHERE valid = '%s+00'
+        sql = """UPDATE hourly SET c900 = %.2f, c900_f = 'e' 
+              WHERE valid = '%s+00'
               and station = '%s'""" % (estimate, ts.strftime("%Y-%m-%d %H:%M"),
               stid)
         isuag.query(sql)
