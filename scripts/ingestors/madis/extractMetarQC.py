@@ -61,18 +61,18 @@ for j in range(ids.shape[0]):
     (tmpf, tmpf_qc_av, tmpf_qc_sc) = ('Null', 'Null', 'Null')
     (dwpf, dwpf_qc_av, dwpf_qc_sc) = ('Null', 'Null', 'Null')
     (alti, alti_qc_av, alti_qc_sc) = ('Null', 'Null', 'Null')
-    if not numpy.ma.is_masked( nc_tmpk[i] ):
-      tmpf = mesonet.k2f( nc_tmpk[i] )
-      tmpf_qc_av = figure(nc_tmpk[i], tmpkQCD[i,0])
-      tmpf_qc_sc = figure(nc_tmpk[i], tmpkQCD[i,6])
-    if not numpy.ma.is_masked( nc_dwpk[i] ):
-      dwpf = mesonet.k2f( nc_dwpk[i] )
-      dwpf_qc_av = figure(nc_dwpk[i], dwpkQCD[i,0])
-      dwpf_qc_sc = figure(nc_dwpk[i], dwpkQCD[i,6])
-    if not numpy.ma.is_masked( nc_alti[i] ):
-      alti = check( (nc_alti[i][0] / 100.0 ) * 0.0295298)
-      alti_qc_av = figureAlti(alti, altiQCD[i,0] * 0.0295298 )
-      alti_qc_sc = figureAlti(alti, altiQCD[i,6] * 0.0295298 )
+    if not numpy.ma.is_masked( nc_tmpk[j] ):
+      tmpf = mesonet.k2f( nc_tmpk[j] )
+      tmpf_qc_av = figure(nc_tmpk[j], tmpkQCD[i,0])
+      tmpf_qc_sc = figure(nc_tmpk[j], tmpkQCD[i,6])
+    if not numpy.ma.is_masked( nc_dwpk[j] ):
+      dwpf = mesonet.k2f( nc_dwpk[j] )
+      dwpf_qc_av = figure(nc_dwpk[j], dwpkQCD[i,0])
+      dwpf_qc_sc = figure(nc_dwpk[j], dwpkQCD[i,6])
+    if not numpy.ma.is_masked( nc_alti[j] ):
+      alti = check( (nc_alti[j][0] / 100.0 ) * 0.0295298)
+      alti_qc_av = figureAlti(alti, altiQCD[j,0] * 0.0295298 )
+      alti_qc_sc = figureAlti(alti, altiQCD[j,6] * 0.0295298 )
     sql = """UPDATE %s SET tmpf = %s, tmpf_qc_av = %s, 
      tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s, 
      dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s, 
