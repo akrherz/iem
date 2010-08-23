@@ -58,6 +58,9 @@ for j in range(ids.shape[0]):
   id = re.sub('\x00', '', sid.tostring())
   if (id[0] == "K"):
     ts = mx.DateTime.gmtime( nc.variables["timeObs"][j] )
+    (tmpf, tmpf_qc_av, tmpf_qc_sc) = ('Null', 'Null', 'Null')
+    (dwpf, dwpf_qc_av, dwpf_qc_sc) = ('Null', 'Null', 'Null')
+    (alti, alti_qc_av, alti_qc_sc) = ('Null', 'Null', 'Null')
     if not numpy.ma.is_masked( nc_tmpk[i] ):
       tmpf = mesonet.k2f( nc_tmpk[i] )
       tmpf_qc_av = figure(nc_tmpk[i], tmpkQCD[i,0])
