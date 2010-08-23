@@ -42,8 +42,10 @@ def fix_daily(ts):
         estimate = p01d[offset,jy,ix] / 25.4
         if estimate > 100:
             estimate = 0
-        print "%s %-20.20s %5.2f %s %5.2f" % (stid, sts[stid]['name'],
-         rs[i]['c90'], rs[i]['c90_f'], estimate)
+        # Only print non-zero values please
+        if rs[i]['c90'] > 0 or estimate > 0:
+            print "%s %-20.20s %5.2f %s %5.2f" % (stid, sts[stid]['name'],
+                   rs[i]['c90'], rs[i]['c90_f'], estimate)
         # Fix it
         sql = """UPDATE daily SET c90 = %.2f, c90_f = 'e' WHERE valid = '%s'
               and station = '%s'""" % (estimate, ts.strftime("%Y-%m-%d"),
