@@ -45,7 +45,7 @@ def fix_daily(ts):
             estimate = 0
         # Only print non-zero values please
         if rs[i]['c90'] > 0 or estimate > 0:
-            print "%s %-20.20s %5.2f %s %5.2f" % (stid, sts[stid]['name'],
+            print "DY %s %-20.20s %5.2f %s %5.2f" % (stid, sts[stid]['name'],
                    rs[i]['c90'], rs[i]['c90_f'], estimate)
         # Fix it
         sql = """UPDATE daily SET c90 = %.2f, c90_f = 'e' WHERE valid = '%s'
@@ -78,8 +78,9 @@ def fix_hourly(ts):
         if estimate > 100:
             estimate = 0
             print "Missing Estimate", ts
-        print "%s %-20.20s %5.2f %s %5.2f" % (stid, sts[stid]['name'],
-         rs[i]['c900'], rs[i]['c900_f'], estimate)
+        if rs[i]['c90'] > 0 or estimate > 0:
+            print "HR %s %-20.20s %5.2f %s %5.2f" % (stid, sts[stid]['name'],
+                  rs[i]['c900'], rs[i]['c900_f'], estimate)
         # Fix it
         sql = """UPDATE hourly SET c900 = %.2f, c900_f = 'e' 
               WHERE valid = '%s+00'
