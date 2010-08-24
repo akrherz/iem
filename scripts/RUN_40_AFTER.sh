@@ -46,8 +46,10 @@ cd ../../week
 cd ../plots
 ./ruc2.csh
 ./RUN_PLOTS
+cd black
+./surfaceContours.csh
 
-cd ../iemre
+cd ../../iemre
 /mesonet/python/bin/python stage4_hourlyre.py
 /mesonet/python/bin/python stage4_hourlyre.py `date -u --date '1 day ago' +'%Y %m %d %H'`
 
