@@ -45,9 +45,14 @@ cfg = {
  '_format'            : '%.1f',
  '_valuemask'         : valmask,
  'lbTitleString'      : "[miles]",
+ 'cnLevelSelectionMode': "ExplicitLevels",
+ 'cnLevels' : [0.01,0.1,0.25,0.5,1,2,3,5,8,9.9],
+ 'lbLabelStrings' : [0.01,0.1,0.25,0.5,1,2,3,5,8,10],
+ 'cnExplicitLabelBarLabelsOn': True,
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
-pqstr = "plot c 000000000000 iowa_vsby.png bogus png"
-iemplot.postprocess(tmpfp, pqstr, "-rotate -90")
+pqstr = "plot ac %s vsby_contour.png vsby_contour_%s00.png png" % ( 
+   mx.DateTime.gmt().strftime("%Y%m%d%H"), mx.DateTime.gmt().strftime("%H") )
+iemplot.postprocess(tmpfp, pqstr)
