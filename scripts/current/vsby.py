@@ -53,6 +53,6 @@ cfg = {
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
-pqstr = "plot ac %s vsby_contour.png vsby_contour_%s00.png png" % ( 
+pqstr = "plot ac %s00 vsby_contour.png vsby_contour_%s00.png png" % ( 
    mx.DateTime.gmt().strftime("%Y%m%d%H"), mx.DateTime.gmt().strftime("%H") )
 iemplot.postprocess(tmpfp, pqstr)
