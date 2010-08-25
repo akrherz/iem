@@ -21,7 +21,7 @@ WHERE
   network IN ('AWOS', 'IA_ASOS','IL_ASOS','MN_ASOS','WI_ASOS','SD_ASOS',
               'NE_ASOS','MO_ASOS') and
   valid + '15 minutes'::interval > now() and
-  vsby >= 0 and vsby < 20
+  vsby >= 0 and vsby <= 10
 """
 
 lats = []
@@ -32,7 +32,7 @@ rs = iem.query(sql).dictresult()
 for i in range(len(rs)):
   lats.append( rs[i]['lat'] )
   lons.append( rs[i]['lon'] )
-  vals.append( rs[i]['vsby'] + (random.random() * 0.001) )
+  vals.append( rs[i]['vsby'] )
   valmask.append(  (rs[i]['network'] in ['AWOS','IA_AWOS']) )
 
 cfg = {
@@ -51,6 +51,7 @@ cfg = {
  'cnExplicitLabelBarLabelsOn': True,
 }
 # Generates tmp.ps
+#print "Max visibility %.3f Min Visibility: %.3f" % (max(vals), min(vals))
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
 pqstr = "plot ac %s00 vsby_contour.png vsby_contour_%s00.png png" % ( 
