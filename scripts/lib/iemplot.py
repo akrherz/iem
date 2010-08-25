@@ -20,6 +20,13 @@ MW_NORTH = 53.51
 MW_SOUTH = 30.37
 MW_NX    = 100
 MW_NY    = 100
+# Define grid bounds, CONUS
+CONUS_WEST  = -126.0
+CONUS_EAST  = -66.1
+CONUS_NORTH = 50.51
+CONUS_SOUTH = 24.0
+CONUS_NX    = 140
+CONUS_NY    = 140
 
 def hilo_valplot(lons, lats, highs, lows, cfg):
     """
@@ -180,7 +187,9 @@ def simple_grid_fill(xaxis, yaxis, grid, cfg):
 
     # Create Workstation
     wks = Ngl.open_wks( "ps",tmpfp,rlist)
-    if cfg.has_key("_midwest"):
+    if cfg.has_key("_conus"):
+        res = conus()
+    elif cfg.has_key("_midwest"):
         res = midwest()
     else:
         res = iowa2()
@@ -231,7 +240,9 @@ def simple_contour(lons, lats, vals, cfg):
     wks = Ngl.open_wks( "ps",tmpfp,rlist)
  
     # Create Analysis
-    if cfg.has_key("_midwest"):
+    if cfg.has_key("_conus"):
+        analysis, res = grid_conus(lons, lats, vals)
+    elif cfg.has_key("_midwest"):
         analysis, res = grid_midwest(lons, lats, vals)
     else:
         analysis, res = grid_iowa(lons, lats, vals)
@@ -324,6 +335,30 @@ def grid_midwest(lons, lats, vals):
     res.sfYCEndV   = max(yaxis)
 
     return analysis, res
+
+def grid_conus(lons, lats, vals):
+    """
+    Convience routine to do a simple grid for CONUS
+    @return numpy grid of values and plot res
+    """
+    delx = (CONUS_EAST - CONUS_WEST) / (CONUS_NX - 1)
+    dely = (CONUS_NORTH - CONUS_SOUTH) / (CONUS_NY - 1)
+    # Create axis
+    xaxis = CONUS_WEST + delx * numpy.arange(0, CONUS_NX)
+    yaxis = CONUS_SOUTH + dely * numpy.arange(0, CONUS_NY)
+    # Create the analysis
+    analysis = Ngl.natgrid(lons, lats, vals, xaxis, yaxis)
+
+    # Setup res
+    res = conus()
+
+    res.sfXCStartV = min(xaxis)
+    res.sfXCEndV   = max(xaxis)
+    res.sfYCStartV = min(yaxis)
+    res.sfYCEndV   = max(yaxis)
+    
+    return analysis, res
+
 
 def grid_iowa(lons, lats, vals):
     """
@@ -434,6 +469,87 @@ def iowa():
     res.mpShapeMode = "FreeAspect"
 
     return res
+
+def conus():
+    """ Return Ngl resources for a standard MidWest plot """
+
+    res = Ngl.Resources()
+    res.nglFrame              = False        # and this
+    res.nglDraw               = False        # Defaults this
+
+    res.pmTickMarkDisplayMode = "Never"      # Turn off annoying ticks
+
+    # Setup the view
+    res.nglMaximize         = False      # Prevent funky things
+    res.vpWidthF            = 0.8       # Default width of map?
+    res.vpHeightF           = 0.6        # Go vertical
+    res.nglPaperOrientation = "landscape"
+    res.vpXF                = 0.1        # Make Math easier
+    res.vpYF                = 0.8        # 
+
+    #____________ MAP STUFF ______________________
+    res.mpProjection = "LambertEqualArea"   # Display projection
+    res.mpCenterLonF = -93.5                # Central Longitude
+    res.mpCenterLatF = 42.0                 # Central Latitude
+    res.mpLimitMode  = "LatLon"             # Display bounds 
+    xmin, ymin, xmax, ymax = [-126., 26.1, -66.4, 52.0]
+    res.mpMinLonF    = xmin                # West
+    res.mpMaxLonF    = xmax                # East
+    res.mpMinLatF    = ymin                 # South
+    res.mpMaxLatF    = ymax                 # North
+    res.mpPerimOn    = False                # Draw Border around Map
+    res.mpDataBaseVersion       = "MediumRes"     # Don't need hires coast
+    res.mpDataSetName           = "Earth..2"      # includes counties
+    res.mpGridAndLimbOn         = False           # Annoying
+    res.mpUSStateLineThicknessF = 3               # Outline States
+
+    res.mpOutlineOn             = True           # Draw map for sure
+    res.mpOutlineBoundarySets   = "NoBoundaries" # What not to draw
+    res.mpOutlineSpecifiers     = ["Conterminous US",
+                               ]
+    res.mpShapeMode = "FreeAspect"
+
+    #_____________ LABEL BAR STUFF __________________________
+    res.lbAutoManage       = False           # Let me drive!
+    res.lbOrientation      = "Vertical"      # Draw it vertically
+    res.lbTitleString      = "lbTitleString" # Default legend
+    res.lbTitlePosition    = "Bottom"          # Place title on the left
+    res.lbTitleOn          = True            # We want a title, please
+    #res.lbTitleAngleF      = 90.0            # Rotate the title?
+    #res.lbTitleDirection   = "Across"        # Make it appear rotated?
+    res.lbPerimOn          = False            # Include a box aroundit
+    res.lbPerimThicknessF  = 1.0             # Thicker line?
+    res.lbBoxMinorExtentF  = 0.2             # Narrower boxes
+    res.lbTitleFontHeightF = 0.016
+    res.lbLabelFontHeightF = 0.016
+    #res.lbRightMarginF    = -0.3
+    #res.lbLeftMarginF       = -0.3
+    res.lbTitleExtentF     = 0.1
+
+    #______________ Contour Defaults _______________________
+    res.cnFillOn         = True    # filled contours
+    res.cnInfoLabelOn    = False   # No information label
+    res.cnLineLabelsOn   = False   # No line labels
+    res.cnLinesOn        = False   # No contour lines
+    res.cnFillDrawOrder  = "Predraw"       # Draw contour first!
+
+    res.pmLabelBarHeightF = 0.4
+    res.pmLabelBarWidthF = 0.06
+    res.pmLabelBarKeepAspect = True
+    res.pmLabelBarSide = "Right"
+
+    res.mpFillOn                = True            # Draw map for sure
+    res.mpFillAreaSpecifiers    = ["land","water"]  # Draw the US
+    res.mpFillBoundarySets   = "NoBoundaries" # What not to draw
+    res.mpSpecifiedFillColors   = [0,0]            # Draw in white
+    res.mpAreaMaskingOn         = True            # Mask by Iowa
+    res.mpMaskAreaSpecifiers    = ["Conterminous US",
+                                   ]
+
+
+    return res
+
+
 
 def midwest():
     """ Return Ngl resources for a standard MidWest plot """
