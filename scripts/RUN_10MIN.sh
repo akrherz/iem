@@ -4,8 +4,7 @@
 cd alerts
 /mesonet/python/bin/python check_db.py
 cd ../current
-/mesonet/python/bin/python vsby.py
-# Can't avoid plots of all zeros producing an error :(
+/mesonet/python/bin/python vsby.py >& /dev/null
 /mesonet/python/bin/python today_precip.py >& /dev/null
 /mesonet/python/bin/python today_gust.py
 /mesonet/python/bin/python temperature.py
