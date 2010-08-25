@@ -10,6 +10,7 @@ st = stationTable.stationTable("/mesonet/TABLES/RWIS.stns")
 lkp = {
 'miniExportM1.csv': 'RAII4',
 'miniExportM2.csv': 'RMYI4',
+'portableExportP2.csv': 'RAGI4',
 'portableExportP3.csv': 'RLMI4',
 'portableExportPT.csv': 'ROCI4',
 }
