@@ -4,6 +4,44 @@ CREATE TABLE rwis_locations(
 );
 
 --
+-- RWIS Deep Soil Probe Data
+--
+CREATE TABLE rwis_soil_data(
+  location_id smallint references rwis_locations(id),
+  sensor_id smallint,
+  valid timestamp with time zone,
+  temp real,
+  moisture real
+);
+CREATE TABLE rwis_soil_data_log(
+  location_id smallint references rwis_locations(id),
+  sensor_id smallint,
+  valid timestamp with time zone,
+  temp real,
+  moisture real
+);
+
+GRANT select on rwis_soil_data to apache,nobody;
+
+CREATE FUNCTION rwis_soil_update_log() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+   IF (NEW.valid != OLD.valid) THEN
+     INSERT into rwis_soil_data_log 
+        SELECT * from rwis_soil_data WHERE sensor_id = NEW.sensor_id
+        and location_id = NEW.location_id;
+   END IF;
+   RETURN NEW;
+  END
+ $$;
+
+CREATE TRIGGER rwis_soil_update_tigger
+    AFTER UPDATE ON rwis_soil_data
+    FOR EACH ROW
+    EXECUTE PROCEDURE rwis_soil_update_log();
+
+--
 -- RWIS Traffic Data Storage
 -- 
 CREATE TABLE rwis_traffic_sensors(
