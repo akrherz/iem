@@ -50,7 +50,7 @@ $vals = Array("tsf0" => "Sensor 1 - Temp [F]",
 
 <div class="text">
 <b>Nav:</b><a href="/RWIS/">RWIS</a> <b> > </b> Current Conditions
-<?php $current_network = "RWIS_SF"; include("$rootpath/include/current_bar.inc.php"); ?>
+<?php $current_network = "RWIS Surface"; include("$rootpath/include/current_bar.inc.php"); ?>
 <form method="GET" action="currentSF.phtml">
 <select name="network">
   <option value="IN_RWIS" <?php if ($network == "IN_RWIS") echo "SELECTED"; ?>>Indiana

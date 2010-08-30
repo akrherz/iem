@@ -1,0 +1,67 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$dbconn = iemdb("iem");
+$sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
+
+/* Query out the data */
+$rs = pg_query($dbconn, "select t.*, s.name as sname from rwis_traffic t, 
+      stations s
+      where s.remote_id = t.location_id");
+
+ $TITLE = "IEM | RWIS | Current Traffic Data";
+ $REFRESH = "<meta http-equiv=\"refresh\" content=\"600;
+ URL=traffic.phtml?sortcol=$sortcol\">";
+ $THISPAGE = "current-sort";
+ include("$rootpath/include/header.php"); 
+
+ $current_network = "RWIS Traffic"; 
+ include("$rootpath/include/current_bar.inc.php"); 
+?>
+<h3 class="subtitle">Iowa RWIS Traffic Data</h3>
+
+<p>** This page will automatically refresh every 10 minutes.
+<br>Click on a column to sort it.</p>
+
+<?php
+function fancytime($strtime){
+  $now = time();
+  $ts = strtotime($strtime);
+  if (($now - $ts) < 600){ return date("h:i A", $ts); }
+  else { return date("M d h:i A", $ts); }
+}
+$vals = Array(
+ "sname" => "Station Name",
+);
+
+echo "<p>Sorted by: <b>". $vals[$sortcol] ."</b><br>\n";
+?>
+<table style="width: 100%; font-size: 10pt;">
+<thead>
+<tr>
+  <th><a href="traffic.phtml?sortcol=sname">Station:</a></th>
+  <th>Lane ID:</th>
+  <th><a href="traffic.phtml?sortcol=ts">Ob Time</a></th>
+  <th><a href="traffic.phtml?sortcol=avg_speed">Average Speed</a></th>
+  <th><a href="traffic.phtml?sortcol=normal_vol">2 axel volume</a></th>
+  <th><a href="traffic.phtml?sortcol=long_vol">3+ axel volume</a></th>
+  <th><a href="traffic.phtml?sortcol=occupancy">Occupancy</a></th>
+</tr>
+</thead>
+<tbody>
+<?php
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+   echo sprintf("<tr><th>%s</th><th>%s</th><td>%s</td><td>%.1f</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", 
+   $row["sname"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
+   $row["normal_vol"], $row["long_vol"], $row["occupancy"]);
+}
+?>
+</tbody>
+</table>
+
+</form>
+
+<br><br>
+
+
+<?php include("$rootpath/include/footer.php"); ?>

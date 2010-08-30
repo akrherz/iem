@@ -1,0 +1,98 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/database.inc.php");
+$dbconn = iemdb("iem");
+$sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
+
+/* Query out the data */
+$rs = pg_query($dbconn, "select t.*, s.name as sname from rwis_soil_data t, 
+      stations s
+      where s.remote_id = t.location_id");
+
+ $TITLE = "IEM | RWIS | Current Soil Probe Data";
+ $REFRESH = "<meta http-equiv=\"refresh\" content=\"600;
+ URL=soil.phtml?sortcol=$sortcol\">";
+ $THISPAGE = "current-sort";
+ include("$rootpath/include/header.php"); 
+
+ $current_network = "RWIS Soil"; 
+ include("$rootpath/include/current_bar.inc.php"); 
+?>
+<h3 class="subtitle">Iowa RWIS Soil Probe Data</h3>
+
+<p>** This page will automatically refresh every 10 minutes.
+<br>Click on a column to sort it.</p>
+
+<?php
+function fancytime($strtime){
+  $now = time();
+  $ts = strtotime($strtime);
+  if (($now - $ts) < 600){ return date("h:i A", $ts); }
+  else { return date("M d h:i A", $ts); }
+}
+$vals = Array(
+ "sname" => "Station Name",
+);
+
+echo "<p>Sorted by: <b>". $vals[$sortcol] ."</b><br>\n";
+?>
+<table style="width: 100%; font-size: 10pt;">
+<thead>
+<tr>
+  <th><a href="traffic.phtml?sortcol=sname">Station:</a></th>
+  <th><a href="traffic.phtml?sortcol=ts">Ob Time</a></th>
+  <th><a href="traffic.phtml?sortcol=t0">1</a></th>
+  <th><a href="traffic.phtml?sortcol=t1">3</a></th>
+  <th><a href="traffic.phtml?sortcol=t2">6</a></th>
+  <th><a href="traffic.phtml?sortcol=t3">9</a></th>
+  <th><a href="traffic.phtml?sortcol=t4">12</a></th>
+  <th><a href="traffic.phtml?sortcol=t5">18</a></th>
+  <th><a href="traffic.phtml?sortcol=t6">24</a></th>
+  <th><a href="traffic.phtml?sortcol=t7">30</a></th>
+  <th><a href="traffic.phtml?sortcol=t8">36</a></th>
+  <th><a href="traffic.phtml?sortcol=t9">42</a></th>
+  <th><a href="traffic.phtml?sortcol=t10">48</a></th>
+  <th><a href="traffic.phtml?sortcol=t11">54</a></th>
+  <th><a href="traffic.phtml?sortcol=t12">60</a></th>
+  <th><a href="traffic.phtml?sortcol=t13">66</a></th>
+  <th><a href="traffic.phtml?sortcol=t14">72</a></th>
+</tr>
+</thead>
+<tbody>
+<?php
+$data = Array();
+
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+  if (! array_key_exists($row["location_id"], $data)){
+    $data[ $row["location_id"] ] = Array("t0"=>0,"t1"=>0,"t2"=>0,"t3"=>0,
+     "t4"=>0,"t5"=>0,"t6"=>0,"t7"=>0,"t8"=>0,"t9"=>0,"t10"=>0,"t11"=>0,
+      "t12"=>0,"t13"=>0,"t14"=>0, "valid" => 0, "sname" => "");
+  }
+  $data[ $row["location_id"] ]["t". $row["sensor_id"] ] = $row["temp"];
+  $data[ $row["location_id"] ]["sname"] = $row["sname"];
+  $data[ $row["location_id"] ]["valid"] = $row["valid"];
+
+}
+
+reset($data);
+while (list($key,$val) = each($data)){
+   echo sprintf("<tr><th>%s</th><th>%s</th>
+   <td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td>
+   <td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td>
+   <td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td>
+   <td>%.1f</td></tr>\n", 
+   $val["sname"], fancytime($val["valid"]),
+   $val["t0"], $val["t1"],$val["t2"],$val["t3"],$val["t4"],$val["t5"],
+   $val["t6"],$val["t7"],$val["t8"],$val["t9"],$val["t10"],$val["t11"],
+   $val["t12"],$val["t13"], $val["t14"]);
+}
+?>
+</tbody>
+</table>
+
+</form>
+
+<br><br>
+
+
+<?php include("$rootpath/include/footer.php"); ?>
