@@ -24,10 +24,10 @@ def sync(dbname):
     # insert queried stations
     dbcursor.executemany("""INSERT into stations(id, synop, name, state,
      elevation, network, online, geom, params, county, plot_name, climate_site,
-     nwn_id, wfo, archive_begin, archive_end, remote_id) values (%(id)s,
+     wfo, archive_begin, archive_end, remote_id) values (%(id)s,
      %(synop)s, %(name)s, %(state)s, %(elevation)s, %(network)s, %(online)s,
      %(geom)s, %(params)s, %(county)s, %(plot_name)s, %(climate_site)s,
-     %(nwn_id)s, %(wfo)s, %(archive_begin)s, %(archive_end)s, %(remote_id)s)""",
+     %(wfo)s, %(archive_begin)s, %(archive_end)s, %(remote_id)s)""",
      rows)
     # close connection
     dbcursor.close()
