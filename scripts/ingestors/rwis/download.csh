@@ -51,3 +51,4 @@ cd /mesonet/data/incoming/rwis
 wget -nd -m -q "ftp://rwis:${FTPPASS}@165.206.203.34/*.csv"
 cd /var/www/scripts/ingestors/rwis
 /mesonet/python/bin/python mini_portable.py
+/mesonet/python/bin/python process_traffic.py
