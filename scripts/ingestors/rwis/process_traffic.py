@@ -63,6 +63,7 @@ def processfile( fp ):
     o.close()
 
     cursor = DBCONN.cursor()
+    cursor.execute("SET TIME ZONE 'GMT'")
     cursor.executemany("""UPDATE rwis_traffic_data SET 
       valid = %(obs_date_time)s, avg_speed = %(avg_speed)s,
       avg_headway = %(avg_headway)s, normal_vol = %(normal_vol)s,
