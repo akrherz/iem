@@ -14,7 +14,7 @@
     "SCAN" => Array("url" => "$rooturl/scan/current.phtml"),
     "My Favorites" => Array("url" => "$rooturl/my/current.phtml"),
     "All" => Array("url" => "$rooturl/current/all.phtml") );
-  $rwis = Array(
+  $rwis22 = Array(
     "RWIS" => Array("url" => "$rooturl/RWIS/current.phtml"),
     "RWIS Surface" => Array("url" => "$rooturl/RWIS/currentSF.phtml"),
     "RWIS Traffic" => Array("url" => "$rooturl/RWIS/traffic.phtml"),
@@ -31,7 +31,7 @@
     $i++;
   }
   echo "</tr><tr><th>RWIS</th>";
-  while ( list($key, $value) = each($rwis) ){
+  while ( list($key, $value) = each($rwis22) ){
     echo "<th ";
     if ($current_network == $key)
        echo "bgcolor=\"#666666\"><font color=\"white\">$key</font></th>";
