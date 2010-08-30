@@ -2,8 +2,8 @@
 import csv, psycopg2
 import psycopg2.extras
 
-#DBCONN = psycopg2.connect(database="iem", host="iemdb")
-DBCONN = psycopg2.connect(database="iem")
+DBCONN = psycopg2.connect(database="iem", host="iemdb")
+#DBCONN = psycopg2.connect(database="iem")
 
 def load_metadata():
     """
