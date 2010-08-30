@@ -15,7 +15,9 @@ include("../../../config/settings.inc.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
 include("$rootpath/include/mlib.php");
-include("$rootpath/include/snet_locs.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("KIMT");
+$cities = $nt->table;
 $iem = new IEMAccess();
 $snet = $iem->getNetwork("KIMT");
 
@@ -51,7 +53,7 @@ $now = time();
 
 while (list($key, $iemob) = each($snet) ){
     $mydata = $iemob->db;
-    $meta = $cities["KIMT"][$key];
+    $meta = $cities[$key];
     $tdiff = $now - $mydata["ts"];
     if ($tdiff > 3600) continue;
     if ($mydata["sknt"] < 2.5) $mydata["drct"] = 0;
@@ -59,7 +61,7 @@ while (list($key, $iemob) = each($snet) ){
 echo "Object: ".$meta["lat"].",".$meta["lon"]."
   Threshold: 999 
   Icon: 0,0,". $mydata["drct"] .",". s2icon( floatval($mydata["sknt"]) ) ."
-  Icon: 0,0,000,2,13,\"".$meta["city"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n\" 
+  Icon: 0,0,000,2,13,\"".$meta["name"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n\" 
   Threshold: 150
   Text:  -17, 13, 1, \" ".$mydata["tmpf"]." \" 
   Text:  -17, -13, 1, \" ".$mydata["dwpf"]." \" 
