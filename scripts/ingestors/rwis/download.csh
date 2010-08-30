@@ -49,6 +49,8 @@ rm IArwis${TS}.sao IA.rwis${TS}.sao
 # Do mini and portable stuff
 cd /mesonet/data/incoming/rwis
 wget -nd -m -q "ftp://rwis:${FTPPASS}@165.206.203.34/*.csv"
+/home/ldm/bin/pqinsert -p "plot ac $GTS rwis_traffic.txt raw/rwis/${GTS}traffic.txt txt" TrafficFile.csv >& /dev/null
+/home/ldm/bin/pqinsert -p "plot ac $GTS rwis_probe.txt raw/rwis/${GTS}probe.txt txt" DeepTempProbeFile.csv >& /dev/null
 cd /var/www/scripts/ingestors/rwis
 /mesonet/python/bin/python mini_portable.py
 /mesonet/python/bin/python process_traffic.py
