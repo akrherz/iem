@@ -27,7 +27,7 @@ rcursor.close()
 
 # Get traffic obs from access
 icursor = IEMDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
-icursor.execute(""" SELECT l.nwsli, s.lane_id, d.* from 
+icursor.execute(""" SELECT l.nwsli as station, s.lane_id, d.* from 
    rwis_traffic_data_log d, rwis_locations l, rwis_traffic_sensors s
    WHERE s.id = d.sensor_id and date(valid) = '%s' and s.location_id = l.id""" % ( ts.strftime("%Y-%m-%d"), ))
 rows = icursor.fetchall()
