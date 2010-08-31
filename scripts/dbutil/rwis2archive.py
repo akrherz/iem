@@ -114,5 +114,6 @@ rcursor.close()
 
 
 RWISDB.commit()
+IEMDB.commit()
 RWISDB.close()
 IEMDB.close()
