@@ -99,9 +99,9 @@ rcursor = RWISDB.cursor()
 rcursor.executemany("""INSERT into t"""+ `ts.year` +""" (station, valid, tmpf, 
     dwpf, drct, sknt, tfs0, tfs1, tfs2, tfs3, subf, gust, tfs0_text, 
     tfs1_text, tfs2_text, tfs3_text, pcpn, vsby) VALUES (%(station)s,
-    %(valid)s,%(tmpf)s,%(dwpf)s,%(drct)s,%(sknt)s,%(tfs0)s,
-    %(tfs1)s,%(tfs2)s,%(tfs3)s,%(subf)s,%(gust)s,%(tfs0_text)s,
-    %(tfs1_text)s,%(tfs2_text)s,%(tfs3_text)s,%(pcpn)s,%(vsby)s)""", rows )
+    %(valid)s,%(tmpf)s,%(dwpf)s,%(drct)s,%(sknt)s,%(tsf0)s,
+    %(tsf1)s,%(tsf2)s,%(tsf3)s,%(subf)s,%(gust)s,%(scond0)s,
+    %(scond1)s,%(scond2)s,%(scond3)s,%(pday)s,%(vsby)s)""", rows )
 rcursor.close()
 
 
