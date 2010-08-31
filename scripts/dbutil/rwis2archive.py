@@ -25,6 +25,14 @@ rcursor.execute("""DELETE from t%s_traffic WHERE date(valid) = '%s'""" % (
        ts.year, ts.strftime("%Y-%m-%d") ))
 rcursor.close()
 
+# Always delete stuff 3 or more days old from iemaccess
+icursor = IEMDB.cursor()
+icursor.execute("""DELETE from rwis_traffic_data_log WHERE 
+  valid < ('TODAY'::date - '3 days'::interval)""")
+icursor.execute("""DELETE from rwis_soil_data_log WHERE 
+  valid < ('TODAY'::date - '3 days'::interval)""")
+icursor.close()
+
 # Get traffic obs from access
 icursor = IEMDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
 icursor.execute(""" SELECT l.nwsli as station, s.lane_id, d.* from 
