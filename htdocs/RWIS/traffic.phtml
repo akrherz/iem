@@ -2,12 +2,12 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $dbconn = iemdb("iem");
-$sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
+$sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'valid';
 
 /* Query out the data */
-$rs = pg_query($dbconn, "select t.*, s.name as sname from rwis_traffic t, 
-      stations s
-      where s.remote_id = t.location_id");
+$rs = pg_prepare($dbconn, "SELECT", "select t.*, s.name as sname from rwis_traffic t, stations s
+      where s.remote_id = t.location_id ORDER by $sortcol DESC");
+$rs = pg_execute($dbconn, "SELECT", Array() );
 
  $TITLE = "IEM | RWIS | Current Traffic Data";
  $REFRESH = "<meta http-equiv=\"refresh\" content=\"600;
@@ -32,16 +32,21 @@ function fancytime($strtime){
 }
 $vals = Array(
  "sname" => "Station Name",
+ "valid" => "Observation Time",
+ "avg_speed" => "Average Speed [mph]",
+ "normal_vol" => "2 Axel Volume",
+ "long_vol" => "3+ Axel Volume",
+ "occupancy" => "Occupancy",
 );
 
 echo "<p>Sorted by: <b>". $vals[$sortcol] ."</b><br>\n";
 ?>
-<table style="width: 100%; font-size: 10pt;">
+<table style="width: 100%; font-size: 10pt;" cellspacing="0" cellpadding="1" border="1">
 <thead>
 <tr>
   <th><a href="traffic.phtml?sortcol=sname">Station:</a></th>
   <th>Lane ID:</th>
-  <th><a href="traffic.phtml?sortcol=ts">Ob Time</a></th>
+  <th><a href="traffic.phtml?sortcol=valid">Ob Time</a></th>
   <th><a href="traffic.phtml?sortcol=avg_speed">Average Speed</a></th>
   <th><a href="traffic.phtml?sortcol=normal_vol">2 axel volume</a></th>
   <th><a href="traffic.phtml?sortcol=long_vol">3+ axel volume</a></th>
