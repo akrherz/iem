@@ -173,14 +173,14 @@ for i in range(len(rs)):
    station = '%s' and valid < '%s'""" % (sid, tend.strftime("%Y-%m-%d %H:%M")))
 
 # 4. Figure out when wunder archive starts and then process till end
-  sts = mx.DateTime.DateTime(1970,1,1)
+  sts = mx.DateTime.DateTime(1948,1,1)
   ets = tend
   now = sts
   tbegin = None
   processed = 0
   while now < ets:
     interval = mx.DateTime.RelativeDateTime(days=1)
-    time.sleep(1.3)
+    time.sleep(0.5)
     obs = doit(sid, now)
     if obs == 0 and processed == 0:
       interval = mx.DateTime.RelativeDateTime(months=1)
