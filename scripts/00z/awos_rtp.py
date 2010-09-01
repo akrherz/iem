@@ -22,13 +22,13 @@ out.write("""
 
 .BR DSM %s Z DH00/TAIRZY/TAIRZI/PPDRZZ/SFDRZZ/SDIRZZ
 : IOWA AWOS RTP FIRST GUESS PROCESSED BY THE IEM
-:   12Z TO 00Z HIGH TEMPERATURE FOR %s
+:   06Z TO 00Z HIGH TEMPERATURE FOR %s
 :   06Z TO 00Z TODAY LOW TEMPERATURE
 :   00Z YESTERDAY TO 00Z TODAY RAINFALL
 :   ...BASED ON REPORTED OBS...
 """ % ( ets.strftime("%m%d"), string.upper(sts12z.strftime("%d %b %Y")) ) )
 
-# We get 12 hour highs
+# We get 18 hour highs
 highs = {}
 sql = "SELECT station, \
 	round(max(tmpf)::numeric,0) as max_tmpf, \
@@ -36,7 +36,7 @@ sql = "SELECT station, \
 	WHERE network = 'AWOS' and valid > '%s' \
         and valid < '%s' \
 	and tmpf > -99 GROUP by station " % \
-	(sts12z.strftime("%Y-%m-%d %H:%M"),
+	(sts6z.strftime("%Y-%m-%d %H:%M"),
          ets.strftime("%Y-%m-%d %H:%M") )
 rs = iemaccess.query(sql).dictresult()
 for i in range(len(rs)):
