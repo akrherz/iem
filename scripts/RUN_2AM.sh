@@ -14,6 +14,9 @@ cd ../cache
 cd ../dbutil
 /mesonet/python/bin/python asos2archive.py
 
+cd ../qc
+/mesonet/python/bin/python check_iem_precip.py
+
 cd ../ingestors/cocorahs
 /mesonet/python/bin/python redo_day.py IA
 /mesonet/python/bin/python redo_day.py IL
