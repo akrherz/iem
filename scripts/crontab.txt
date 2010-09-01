@@ -1,5 +1,6 @@
 # Only EDIT on SVN!
 #
+PYTHONPATH=/var/www/scripts/lib
 0 19 * * * cd /var/www/scripts; sh RUN_0Z.sh
 0 0 * * * cd /var/www/scripts; sh RUN_MIDNIGHT.sh
 5 2 * * * cd /var/www/scripts; sh RUN_2AM.sh
