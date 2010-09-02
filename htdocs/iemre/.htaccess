@@ -4,3 +4,4 @@ Options +ExecCGI
 
 RewriteEngine On
 RewriteRule ^daily/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4
+RewriteRule ^cum/([0-9\-]+)/([0-9\-]+)/(shp) cum.py?date0=$1&date1=$2&format=$3
