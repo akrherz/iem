@@ -11,3 +11,6 @@ cd ../00z
 
 cd ../qc
 /mesonet/python/bin/python check5day.py
+
+cd ../iemre
+/mesonet/python/bin/python stage4_12z_adjust.py
