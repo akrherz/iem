@@ -1,9 +1,10 @@
 # This will drive the modules
 
 import pg, string, mx.DateTime
-from pyIEM import stationTable
+from pyIEM import stationTable, iemdb
 st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
-mydb = pg.connect("coop", 'iemdb')
+i = iemdb.iemdb()
+mydb = i['coop']
 
 import genPrecipEvents, genTwelveRains, genGDD, genDailyRecords
 import genDailyRecordsRain, genDailyRange, genDailyMeans, genCountLows32
