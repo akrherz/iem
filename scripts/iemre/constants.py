@@ -20,6 +20,7 @@ DY = (NORTH-SOUTH)/float(NY-1)
 XAXIS = numpy.arange(WEST, EAST + DX, DX)
 YAXIS = numpy.arange(SOUTH, NORTH + DY -0.01, DY)
 
+
 def k2f(ar):
     """
     Convert numpy array ar from Kelvin to Fahrenhit

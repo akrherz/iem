@@ -27,7 +27,7 @@ def merge(ts):
     # Open up our RE file
     nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'a')
 
-    offset = int(( ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours)
+    offset = int(( ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours) - 1
     nc.variables["p01m"][offset,:,:] = res.transpose()
 
     nc.close()
