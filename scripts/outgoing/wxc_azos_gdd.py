@@ -96,7 +96,7 @@ def main():
         return
 
     output = open('wxc_iem_agdata.txt', 'w')
-    output.write("""Weather Central 001d0300 Surface Data
+    output.write("""Weather Central 001d%s00 Surface Data
    8
    4 Station
    4 GDD_MAY1
@@ -106,7 +106,7 @@ def main():
    5 SOIL_4INCH
    6 Lat
    8 Lon
-""")
+""" % (mx.DateTime.now().strftime("%H"),))
     days = (ets - sts).days
     data = compute_obs( sts, ets )
     load_soilt(data)
