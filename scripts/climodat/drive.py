@@ -6,7 +6,7 @@ st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
 i = iemdb.iemdb()
 mydb = i['coop']
 
-import genPrecipEvents, genTwelveRains, genGDD, genDailyRecords
+import genPrecipEvents, gen30rains, genGDD, genDailyRecords
 import genDailyRecordsRain, genDailyRange, genDailyMeans, genCountLows32
 import genSpringFall, genMonthly, genHDD, genCDD, genHeatStress
 import genCountRain, genFrostProbabilities, genSpringProbabilities
@@ -30,8 +30,8 @@ for id in st.ids:
   genPrecipEvents.go(mydb, rs, dbid)
   genPrecipEvents.write(mydb, dbid)
 
-  if DEBUG: print "genTwelveRains", mx.DateTime.now()
-  genTwelveRains.write(mydb, dbid)
+  if DEBUG: print "gen30rains", mx.DateTime.now()
+  gen30rains.write(mydb, dbid)
 
   if DEBUG: print "genGDD", mx.DateTime.now()
   genGDD.go(mydb, rs, dbid)

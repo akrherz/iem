@@ -1,6 +1,4 @@
-# Generate 12 most significant rainfalls
-# Daryl Herzmann 3 Mar 2004
-# 30 Mar 2004	Does not need updating for incrememental updates
+# Generate 30 largest rainfalls
 
 _REPORTID = "02"
 
@@ -8,11 +6,11 @@ def write(mydb, stationID):
   import constants, mx.DateTime
   out = open("reports/%s_%s.txt" % (stationID, _REPORTID), 'w')
   constants.writeheader(out, stationID)
-  out.write("""# TWELVE SIGNIFICANT RAINFALL EVENTS  
+  out.write("""# Top 30 single day rainfalls
  MONTH  DAY  YEAR   AMOUNT\n""")
 
   rs = mydb.query("SELECT precip, day from alldata WHERE stationid = '%s' \
-   and day >= '%s-01-01' ORDER by precip DESC LIMIT 12" \
+   and day >= '%s-01-01' ORDER by precip DESC LIMIT 30" \
    % (stationID, constants.startyear(stationID) ) ).dictresult()
 
   for i in range(len(rs)):
