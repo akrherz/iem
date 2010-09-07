@@ -18,7 +18,7 @@ st.sts["SMAI4"]["name"] = "M-town"
 st.sts["SBZI4"]["name"] = "Zoo"
 st.sts["SMSI4"]["name"] = "Barnum"
 st.sts["STQI4"]["name"] = "Tama"
-st.sts["SBOI4"]["name"] = "United"
+st.sts["SBOI4"]["name"] = "Boone"
 
 
 def altiTxt(d):
