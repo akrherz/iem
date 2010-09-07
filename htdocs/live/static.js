@@ -15,6 +15,53 @@ function osm_getTileURL(bounds) {
 
 Ext.onReady(function(){
 
+/*
+ * Webcams JSON data source 
+ */
+cameraLayer =  new OpenLayers.Layer.Vector("IEM WebCams",{
+     sphericalMercator: true,
+     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+     eventListeners: {
+      'visibilitychanged': function(){
+         //updateURL();
+      },
+      'featureselected': function(feature){
+         popup = new GeoExt.Popup({
+            title: feature.feature.data.name + ' Webcam',
+            feature: feature.feature,
+            width:200,
+            html: "<p>Hello There <br /><img src=\""+ feature.feature.data.url +"\" />",
+            maximizable: true,
+            collapsible: true
+        });
+        // unselect feature when the popup
+        // is closed
+        popup.show();
+      }
+     }
+});
+
+
+cameraStore = new GeoExt.data.FeatureStore({
+      layer     : cameraLayer,
+      fields    : [
+         {name: 'cid', type: 'string'},
+         {name: 'name'},
+         {name: 'county'},
+         {name: 'url'}
+      ],
+      proxy: new GeoExt.data.ProtocolProxy({
+            protocol : new OpenLayers.Protocol.HTTP({
+              url      : "../geojson/webcam.php",
+              format   : new OpenLayers.Format.GeoJSON({
+                   externalProjection: new OpenLayers.Projection("EPSG:4326"),
+                   internalProjection: new OpenLayers.Projection("EPSG:900913")
+               })
+             })
+      }),
+      autoLoad  : true
+});
+
 
 /* Live NEXRAD TMS */
 var nexrad = new OpenLayers.Layer.TMS("NEXRAD Composite",
@@ -48,6 +95,10 @@ mapObj = new OpenLayers.Map(options);
 ls = new OpenLayers.Control.LayerSwitcher();
 mapObj.addControl(ls);
 
+var selectCtrl = new OpenLayers.Control.SelectFeature(cameraLayer);
+mapObj.addControl(selectCtrl);
+selectCtrl.activate();
+
 
 new Ext.Viewport({
   layout: 'border',
@@ -55,7 +106,7 @@ new Ext.Viewport({
     region: 'center',
     xtype: 'gx_mappanel',
     map:  mapObj,
-    layers: [gphy, nexrad],
+    layers: [gphy, nexrad, cameraLayer],
    sphericalMercator: true,
     extent   : new OpenLayers.Bounds(-10757882, 4920650,-10034345, 5388572),
     split    : true
