@@ -4,8 +4,8 @@ Generate a windrose for each site in the ASOS network, me thinks...
 import network
 import iemplot
 import datetime
-
-nt = network.Table("IA_ASOS")
+import sys
+nt = network.Table(sys.argv[1])
 for id in nt.sts.keys():
     fp = "/mesonet/share/windrose/climate/yearly/%s_yearly.png" % (id,)
     print "All Year %s" % (id,)
