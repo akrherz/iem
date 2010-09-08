@@ -16,9 +16,12 @@ $minute2 = isset($_GET["minute2"]) ? $_GET["minute2"]: 0;
 
 if (isset($_GET["hour1"])){
 
-$rose_uri = "dyn_windrose.php?station=$station&network=$network&day1=$day1&day2=$day2&month1=$month1&month2=$month2&year1=$year1&year2=$year2&hour1=$hour1&hour2=$hour2&minute1=$minute1&minute2=$minute2";
+$rose_uri = "$rootcgi/windrose.py?station=$station&network=$network&day1=$day1&day2=$day2&month1=$month1&month2=$month2&year1=$year1&year2=$year2&hour1=$hour1&hour2=$hour2&minute1=$minute1&minute2=$minute2";
 if (isset($_GET["hourlimit"])){
   $rose_uri .= "&hourlimit=1";
+}
+if (isset($_GET["monthlimit"])){
+  $rose_uri .= "&monthlimit=1";
 }
 }
 $THISPAGE ="iem-sites";
@@ -49,6 +52,7 @@ hour.
     <th>Hour</th><th>Minute</th>
 <td rowspan="3">
 <input type="checkbox" name="hourlimit" value="1" <?php if (isset($_GET["hourlimit"])) echo "checked=\"checked\" "; ?>>Limit to Hour of Start Time
+<br /><input type="checkbox" name="monthlimit" value="1" <?php if (isset($_GET["monthlimit"])) echo "checked=\"checked\" "; ?>>Limit to Month of Start Time
 <br /><input type="submit"></td>
   </tr>
 
@@ -93,7 +97,8 @@ hour.
 <p>
 <?php
  if (isset($rose_uri)){
-  echo "<img src=\"$rose_uri\">";
+  echo "<p>Image is being generated, please be patient...<br />";
+  echo "<img src=\"$rose_uri\" border=\"1\" width=\"600\" height=\"700\">";
  } else {
   echo "Nothing selected";
  }
