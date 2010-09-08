@@ -14,4 +14,4 @@ for id in nt.sts.keys():
         fp = "/mesonet/share/windrose/climate/monthly/%02i/%s_%s.png" % (
             m, id, datetime.datetime(2000,m,1).strftime("%b").lower() )
         print "Month %s %s" % (m, id)
-        iemplot.windrose("AMW", fp=fp, months=(m,))
+        iemplot.windrose(id, fp=fp, months=(m,))
