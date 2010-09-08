@@ -19,6 +19,8 @@ thres = mx.DateTime.now() - mx.DateTime.RelativeDateTime(minutes=180)
 
 def processfile( fp ):
     o = open("/mesonet/data/incoming/rwis/%s" % (fp,), 'r').readlines()
+    if len(o) < 1:
+        return
     heading = o[0].split(",")
     cols = o[1].split(",")
     data = {}
