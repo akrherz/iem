@@ -113,6 +113,12 @@ def doit(stid, now):
       elif headers.has_key('TimeMDT'):
         tstr = tokens[ headers['TimeMDT'] ]
         addon = mx.DateTime.RelativeDateTime(hours=1)
+      elif headers.has_key('TimePST'):
+        tstr = tokens[ headers['TimePST'] ]
+        addon = mx.DateTime.RelativeDateTime(hours=2)
+      elif headers.has_key('TimePDT'):
+        tstr = tokens[ headers['TimePDT'] ]
+        addon = mx.DateTime.RelativeDateTime(hours=2)
       ts = mx.DateTime.strptime( '%s %s' % (now.strftime('%Y-%m-%d'), 
            tstr), '%Y-%m-%d %I:%M %p' ) + addon
       gts = ts.gmtime()
