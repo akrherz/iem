@@ -7,6 +7,12 @@ import datetime
 import tempfile
 import os
 import sys
+from windrose.windrose import WindroseAxes
+import matplotlib
+import matplotlib.image as image
+from matplotlib import pyplot as plt
+from matplotlib.patches import Rectangle
+import iemdb
 
 # Define grid bounds 
 IA_WEST  = -96.7
@@ -698,20 +704,15 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     """
     Create a standard windrose plot that we can all happily use
     """
-    from windrose.windrose import WindroseAxes
-
-    import matplotlib
-    import matplotlib.image as image
-    from matplotlib import pyplot as plt
-    from matplotlib.patches import Rectangle
-
-    import iemdb
     # Query metadata
     db = iemdb.connect('mesosite', bypass=True)
     mcursor = db.cursor()
     mcursor.execute("""SELECT name from stations where id = %s""" ,(station,))
     row = mcursor.fetchall()
     sname = row[0][0]
+    mcursor.close()
+    db.close()
+
     # Query observations
     db = iemdb.connect(database, bypass=True)
     acursor = db.cursor()
@@ -782,6 +783,5 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     else:
         print "Content-Type: image/png\n"
         plt.savefig( sys.stdout, format='png' )
-
-    #del fig, ax, plt
-
+   
+    del sknt, drct, im
