@@ -34,15 +34,9 @@ yesterday, the values are estimated by the IEM.</p>
 <select name="station[]" size="5" MULTIPLE>
 	<option value="_ALL">--Select ALL--
 <?php
-/* Load file of station start tiles */
-$lines = file('stations.txt');
-foreach ($lines as $line_num => $line) {
-  list( $nwsli, $sts ) = split("\|", $line);
-  $nwsli = trim($nwsli);
-  $sts = trim($sts);
-  if (array_key_exists(strtoupper($nwsli), $cities)){
-    echo "<option value=\"$nwsli\">[$nwsli] ". $cities[strtoupper($nwsli)]['name'] ."  $sts\n";
-  }
+while (list($key,$val) = each($cities)){
+    echo "<option value=\"$key\">[$key] ". $cities[$key]['name'] ." -- ". 
+      substr($cities[$key]["archive_begin"],0,10) ."\n";
 }
 
 ?>
