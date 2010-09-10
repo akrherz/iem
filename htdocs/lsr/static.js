@@ -452,6 +452,16 @@ sbwGridPanel = new Ext.grid.GridPanel({
                   window.location.href = uri;
                }  // End of handler
             }
+   },{
+       xtype     : 'button',
+       text      : 'Expand All',
+       listeners : {
+           click : function() {
+                nRows=sbwGridPanel.getStore().getCount();
+                for(i=0;i< nRows;i++)
+                   sbw_expander.expandRow(sbwGridPanel.view.getRow(i));
+           }
+       }
    }],
      store      : new GeoExt.data.FeatureStore({
       layer     : sbwLayer,
@@ -600,6 +610,16 @@ lsrGridPanel = new Ext.grid.GridPanel({
                   window.location.href = uri;
                }  // End of handler
             }
+   },{
+       xtype     : 'button',
+       text      : 'Expand All',
+       listeners : {
+           click : function() {
+                nRows=lsrGridPanel.getStore().getCount();
+                for(i=0;i< nRows;i++)
+                   expander.expandRow(lsrGridPanel.view.getRow(i));
+           }
+       }
    }],
    store      : new GeoExt.data.FeatureStore({
       layer     : lsrLayer,
