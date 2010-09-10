@@ -2,10 +2,15 @@
 /* Web based feature publisher */
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/facebook-platform/php/facebook.php");
-include("$rootpath/include/facebook-platform/php/facebook_desktop.php");
-$facebook = new Facebook($fb_feature_key, $fb_feature_secret);
-$user_id = $facebook->require_login();
+include("$rootpath/include/facebook.php");
+
+$facebook = new Facebook(Array(
+  'appId' => '148705700931',
+  'secret' => $fb_feature_secret,
+  'cookie' => true,
+));
+$session = $facebook->getSession();
+$facebook->getLoginUrl();
 
 $story = isset($_REQUEST["story"]) ? $_REQUEST["story"] : null;
 $title = isset($_REQUEST["title"]) ? $_REQUEST["title"] : null;
@@ -44,8 +49,12 @@ $action_links = array(
         'href' => $permalink));
 
 if ( isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes"){
-  $facebook->api_client->stream_publish($_REQUEST["story"],$attachment,
-             $action_links,null,157789644737);
+  $facebook->api(Array("method"=>'stream.publish', 
+       "message" => $_REQUEST["story"],
+       "attachment" => $attachment,
+       "action_links" => $action_links,
+       "target_id" => null,
+       "uid" => 157789644737));
 }
 
 
