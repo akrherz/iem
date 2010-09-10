@@ -30,7 +30,7 @@ foreach ($stations as $key => $value){
   if ($value == "_ALL"){
     $selectAll = 1;
   }
-  $stationString .= " '". $value ."',";
+  $stationString .= " '". strtolower($value) ."',";
   $i++;
 }
 
