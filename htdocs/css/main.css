@@ -3,6 +3,37 @@ body{
   margin: 0px;
   font-family: arial,sans-serif;
 }
+a.button{
+background:url(../images/button.gif) no-repeat 0px 0px;
+display:block;
+color:#555555;
+font-weight:bold;
+height:33px;
+line-height:32px;
+margin-bottom:14px;
+text-decoration:none;
+width:141px;
+float:left;
+margin-right:5px;
+}
+a:hover.button{
+color:#0066CC;
+}
+.agweather{
+background:url(../images/tractor.png) no-repeat 0px 0px;
+text-indent:40px;
+display:block;
+}
+.nws{
+background:url(../images/nws.png) no-repeat 0px 0px;
+text-indent:40px;
+display:block;
+}
+.book{
+background:url(../images/book.png) no-repeat 0px 0px;
+text-indent:40px;
+display:block;
+}
 #iem-main {
 	min-width: 800px; 
 	/* border: #000 solid; */
