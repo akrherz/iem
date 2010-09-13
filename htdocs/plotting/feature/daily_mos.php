@@ -6,7 +6,7 @@ $pgconn = iemdb('mos');
 $times = Array();
 $pop = Array();
 
-$rs = pg_query($pgconn, "select ftime, p12 from t2009 WHERE station = 'KAMW' and ftime - runtime = '36 hours'::interval and runtime > '2009-09-01' and model = 'GFS' and p12 is not null ORDER by runtime ASC");
+$rs = pg_query($pgconn, "select ftime, p12 from t2010 WHERE station = 'KAMW' and ftime - runtime = '36 hours'::interval and runtime > '2010-08-01' and model = 'NAM' and p12 is not null ORDER by runtime ASC");
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
   $pop[] = $row["p12"];
   $times[] = strtotime($row["ftime"]);

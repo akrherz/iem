@@ -5,19 +5,20 @@ include ("../../../include/jpgraph/jpgraph_bar.php");
 // 16 Oct 2007 select extract(year from day) as year, count(*) from (select day, count(*) from alldata WHERE precip >= 4 and year > 1950 and stationid IN (select stationid from alldata WHERE day = '1971-01-01') GROUP by day) as foo WHERE count > 1 GROUP by year ORDER by count ASC;
 
 
-$d=array(-26, -9, -6);
-$datax=array("#1. 1996,1905", 
-             "#38. 2010",
-             "Average",
+$d=array(12.26, 10.35, 10.32, 10.19);
+$datax=array("1993\n28 Jun - 29 Jul", 
+             "2008\n23 May - 23 Jun",
+             "2010\n24 May - 24 Jun",
+             "1926\n29 Aug - 29 Sep",
 );
 
 // Size of graph
-$width=320; 
-$height=110;
+$width=640; 
+$height=480;
 
 // Set the basic parameters of the graph 
 $graph = new Graph($width,$height,'auto');
-$graph->SetScale("textlin",-34,0);
+$graph->SetScale("textlin");
 $graph->img->SetAntiAliasing();
 
 
@@ -25,7 +26,7 @@ $graph->img->SetAntiAliasing();
 $graph->SetFrame(false);
 
 // Rotate graph 90 degrees and set margin
-$graph->Set90AndMargin(130,5,22,25);
+$graph->Set90AndMargin(190,5,32,40);
 
 // Set white margin color
 $graph->SetMarginColor('white');
@@ -37,14 +38,14 @@ $graph->SetBox();
 $graph->SetBackgroundGradient('blue','lightblue',GRAD_HOR,BGRAD_PLOT);
 
 // Setup title
-$graph->title->Set("February Minimum Temperature");
-$graph->subtitle->Set("\n\n\n\nIEM computed 1893-2010 (thru 25 Feb)");
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
-$graph->subtitle->SetFont(FF_VERDANA,FS_BOLD,10);
+$graph->title->Set("Wettest 31 days in Iowa");
+$graph->subtitle->Set("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nIEM Estimated statewide average [inch]");
+$graph->title->SetFont(FF_VERDANA,FS_BOLD,20);
+$graph->subtitle->SetFont(FF_VERDANA,FS_BOLD,20);
 
 // Setup X-axis
 $graph->xaxis->SetTickLabels($datax);
-$graph->xaxis->SetFont(FF_VERDANA,FS_NORMAL,12);
+$graph->xaxis->SetFont(FF_VERDANA,FS_NORMAL,16);
 
 // Some extra margin looks nicer
 $graph->xaxis->SetLabelMargin(10);
@@ -69,12 +70,12 @@ $bplot = new BarPlot($d);
 $bplot->SetShadow();
 $bplot->SetFillGradient('orange','red',GRAD_HOR);
 $bplot->value->Show();
-$bplot->value->SetFont(FF_ARIAL,FS_BOLD,10);
+$bplot->value->SetFont(FF_ARIAL,FS_BOLD,14);
 //$bplot->value->SetAlign('left','center');
-$bplot->value->SetColor("white");
-$bplot->value->SetFormat('%.0f');
+$bplot->value->SetColor("black");
+$bplot->value->SetFormat('%.2f');
 //$bplot->SetLegend("2008");
-//$bplot->SetValuePos('max');
+$bplot->SetValuePos('max');
 
 $graph->Add($bplot);
 

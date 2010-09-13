@@ -12,7 +12,7 @@ $tmpf = Array();
 $dbconn = iemdb('access');
 $sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, vsby
   , wind_chill(tmpf, sknt) as wcht, drct, srad from current_log WHERE 
-  station = 'SAKI4' ORDER by valid ASC";
+  station = 'SAMI4' ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {

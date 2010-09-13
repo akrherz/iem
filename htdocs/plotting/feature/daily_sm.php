@@ -6,7 +6,7 @@ $pgconn = iemdb('wepp');
 $times = Array();
 $s01m = Array();
 
-$rs = pg_query($pgconn, "SELECT valid, avg(s10cm) from waterbalance_by_twp where valid >= '2009-10-01' GROUP by valid ORDER by valid ASC");
+$rs = pg_query($pgconn, "SELECT valid, avg(vsm) from waterbalance_by_twp where valid >= '2010-06-01' GROUP by valid ORDER by valid ASC");
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
   $times[] = strtotime($row["valid"]);
   $s01m[] = $row["avg"];

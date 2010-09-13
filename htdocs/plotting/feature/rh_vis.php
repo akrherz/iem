@@ -14,8 +14,8 @@ $vsby = Array();
 
 $dbconn = iemdb('asos');
 $sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, vsby
-  , wind_chill(tmpf, sknt) as wcht from t2010 WHERE station = 'AMW' 
-  and dwpf > -99 and sknt >= 0 and valid > '2010-01-16' ORDER by valid ASC";
+  , wind_chill(tmpf, sknt) as wcht from t2010 WHERE station = 'DSM' 
+  and dwpf > -99 and sknt >= 0 and valid > '2010-08-01' ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
@@ -31,16 +31,18 @@ for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 
 $mtimes = Array();
 $mtmpf = Array();
+$mdwpf = Array();
 $mwsp = Array();
 $dbconn = iemdb('mos');
-$sql = "SELECT extract(epoch from ftime) as epoch, dpt, tmp, wsp from t2009 
+$sql = "SELECT extract(epoch from ftime) as epoch, dpt, tmp, wsp from t2010
         WHERE station = 'KDSM' and model = 'GFS' and 
-        runtime = '2009-05-19 00:00+00' ORDER by ftime ASC";
+        runtime = '2010-08-13 00:00+00' ORDER by ftime ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $mtimes[] = $row["epoch"];
   $mtmpf[] = $row["tmp"];
+  $mdwpf[] = $row["dpt"];
   $mwsp[] = $row["wsp"];
 }
 
@@ -51,9 +53,9 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(320,280,"example1");
-$graph->SetScale("datlin",0,100);
-$graph->SetY2Scale("lin",0,10);
+$graph = new Graph(640,480,"example1");
+$graph->SetScale("datlin");
+//$graph->SetY2Scale("lin",0,10);
 $graph->img->SetMargin(40,40,50,70);
 $graph->SetMarginColor('white');
 $graph->xaxis->SetLabelAngle(90);
@@ -61,11 +63,11 @@ $graph->xaxis->SetLabelFormatString("m/d hA", true);
 //$graph->xaxis->scale->SetDateFormat("M d h A");
 $graph->xaxis->SetPos("min");
 
-$graph->y2axis->SetTitleMargin(20);
-$graph->y2axis->SetColor("blue");
-$graph->y2axis->title->SetColor("blue");
-$graph->y2axis->title->SetFont(FF_FONT2,FS_BOLD,16);
-$graph->y2axis->SetTitle("Visibility [mile]");
+//$graph->y2axis->SetTitleMargin(20);
+//$graph->y2axis->SetColor("blue");
+//$graph->y2axis->title->SetColor("blue");
+//$graph->y2axis->title->SetFont(FF_FONT2,FS_BOLD,16);
+//$graph->y2axis->SetTitle("Visibility [mile]");
 
 $graph->xaxis->SetTitleMargin(70);
 
@@ -73,11 +75,11 @@ $graph->yaxis->title->SetFont(FF_FONT2,FS_BOLD,16);
 $graph->xaxis->title->SetFont(FF_FONT2,FS_BOLD,16);
 //$graph->xaxis->SetTitle("Valid Local Time");
 //$graph->yaxis->SetTitle("Temp [F] or Wind [MPH]");
-$graph->yaxis->SetTitle("Relative Humidity [%]");
-$graph->yaxis->SetColor("red");
-$graph->yaxis->title->SetColor("red");
+$graph->yaxis->SetTitle("Dew Point [F]");
+$graph->yaxis->SetColor("blue");
+$graph->yaxis->title->SetColor("blue");
 //$graph->tabtitle->Set('Recent Comparison');
-$graph->title->Set('Ames [KAMW] Jan 2009 Time Series');
+$graph->title->Set('Des Moines [KDSM] Time Series');
 
   $graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);
   $graph->SetColor('wheat');
@@ -97,7 +99,7 @@ $lineplot->SetLegend("Visibility");
 $lineplot->SetFillGradient('blue','darkgreen');
 $lineplot->SetStepStyle();
 //$lineplot->SetColor("blue");
-$graph->AddY2($lineplot);
+//$graph->AddY2($lineplot);
 
 // Create the linear plot
 $lineplot2=new LinePlot($tmpf,$times);
@@ -110,7 +112,7 @@ $lineplot2->SetWeight(3);
 $lineplot20=new LinePlot($dwpf,$times);
 $lineplot20->SetLegend("Dew Point");
 $lineplot20->SetColor("blue");
-//$graph->Add($lineplot20);
+$graph->Add($lineplot20);
 
 
 $lineplot5=new LinePlot($relh,$times);
@@ -118,7 +120,7 @@ $lineplot5->SetLegend("Relative Humidity");
 $lineplot5->SetColor("red");
 $lineplot5->SetWeight(3);
 //$lineplot5->SetStyle("dashed");
-$graph->Add($lineplot5);
+//$graph->Add($lineplot5);
 
 $lineplot3=new LinePlot($sknt,$times);
 $lineplot3->SetLegend("Ob");
@@ -126,11 +128,11 @@ $lineplot3->SetColor("blue");
 //$graph->AddY2($lineplot3);
 
 // Create the linear plot
-$lineplot4=new LinePlot($mwsp,$mtimes);
-$lineplot4->SetLegend("GFS Frcst");
+$lineplot4=new LinePlot($mdwpf,$mtimes);
+$lineplot4->SetLegend("GFS Forecast");
 $lineplot4->SetColor("blue");
 $lineplot4->SetStyle("dashed");
-//$graph->AddY2($lineplot4);
+$graph->Add($lineplot4);
 
 
 //$graph->AddLine(new PlotLine(HORIZONTAL,32,"blue",2));
