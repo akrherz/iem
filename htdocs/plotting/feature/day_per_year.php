@@ -48,8 +48,8 @@ $graph->yaxis->title->SetFont(FF_FONT2,FS_BOLD,32);
   $graph->xgrid->Show();
 
 $colors = Array(
- 2000 => "tan",
- 2001 => "yellow",
+ 2009 => "tan",
+ 2010 => "yellow",
  2002 => "sienna1",
  2003 => "steelblue1",
  2004 => "tomato4",
@@ -59,10 +59,12 @@ $colors = Array(
  2008 => "black"
 );
 
-for($year=2000;$year<2009;$year++)
+for($year=2002;$year<2011;$year++)
 {
-  $sql = "SELECT extract(EPOCH from (valid + '". (2008-$year) ." years'::interval)) as epoch, tmpf, dwpf, sknt
-  from t$year WHERE station = 'DSM' and date(valid) = '${year}-02-15' and dwpf > -99 ORDER by valid ASC";
+  $table = "t$year";
+  //if ($year < 2010){ $table = "t".$year."_1minute"; }
+  $sql = "SELECT extract(EPOCH from (valid + '". (2010-$year) ." years'::interval)) as epoch, tmpf, dwpf, sknt
+  from $table WHERE station = 'DSM' and date(valid) = '${year}-09-02' and dwpf > -99 ORDER by valid ASC";
   $rs = pg_query($dbconn, $sql);
 
   $times = Array();

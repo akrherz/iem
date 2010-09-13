@@ -9,7 +9,7 @@ $vals = Array();
 
 $fc = file('yearly.txt');
 while (list ($line_num, $line) = each ($fc)) {
-      $tokens = split ("   ", $line);
+      $tokens = split ("\|", $line);
    $vals[] = floatval($tokens[1]);
    $years[] = $tokens[0];
  }
@@ -20,7 +20,7 @@ include ("$rootpath/include/jpgraph/jpgraph_plotline.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(320,280,"example1");
+$graph = new Graph(640,480,"example1");
 $graph->SetScale("textlin");
 $graph->img->SetMargin(45,10,35,65);
 
@@ -34,10 +34,10 @@ $graph->xaxis->SetTitleMargin(30);
 //$graph->yaxis->SetTitleMargin(33);
 
 //$graph->xaxis->SetTitle("Valid Local Time");
-$graph->yaxis->SetTitle("Number of Events");
-$graph->xaxis->SetTitle("*2010 data thru 16 April, climatology 17 events");
-$graph->tabtitle->Set('Ames Temperature Cycles 26F-38F');
-//$graph->title->Set('Yearly net days above average');
+$graph->yaxis->SetTitle("Number of Days");
+$graph->xaxis->SetTitle("*2010 total (8) thru 19 April, climatology 4 days");
+//$graph->tabtitle->Set('Ames April Days ');
+$graph->title->Set("April Ames days with low\ntemperature 10+ °F warmer than average");
 
 $graph->yaxis->title->SetFont(FF_ARIAL,FS_BOLD,12);
 $graph->xaxis->title->SetFont(FF_ARIAL,FS_BOLD,10);
@@ -62,7 +62,7 @@ $lineplot=new BarPlot($vals);
 $lineplot->SetColor("blue");
 $graph->Add($lineplot);
 
-$graph->AddLine(new PlotLine(HORIZONTAL,17,"red",2));
+$graph->AddLine(new PlotLine(HORIZONTAL,4,"red",2));
 
 // Display the graph
 $graph->Stroke();
