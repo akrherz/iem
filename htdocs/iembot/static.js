@@ -643,6 +643,16 @@ for (var i=0; i < ar.length; i++)
   if (ar[i] == ""){ continue; }
   addTab( ar[i], roomSelector.getStore().getAt( roomSelector.getStore().find('roomid', ar[i]) ).get("roomname") );
 }
+/* Load up tables from URL! */
+var tokens = window.location.href.split('#');
+if (tokens.length == 2){
+   var subtokens = tokens[1].split(",");
+   for (i=0; i < subtokens.length; i++)
+   {
+       addTab( subtokens[i], roomSelector.getStore().getAt( roomSelector.getStore().find('roomid', subtokens[i]) ).get("roomname") );
+
+   }
+} 
 
 
 var task = {
