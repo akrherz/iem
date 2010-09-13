@@ -460,7 +460,8 @@ function sbwVerify() {
             if ($verify){
                 $this->warnings[$k]["verify"] = True;
             }
-            if ($verify || $this->lsrs[$key]["tdq"]){ 
+            if (($verify || $this->lsrs[$key]["tdq"]) &&
+                 ! $this->lsrs[$key]['warned'] ){
                 $this->warnings[$k]["lsrs"][] = $key;
                 $this->lsrs[$key]["warned"] = True;
                 $this->lsrs[$key]["leadtime"] = ($this->lsrs[$key]["ts"] - 
