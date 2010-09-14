@@ -1,0 +1,109 @@
+<?php 
+include("../../../config/settings.inc.php");
+include("$rootpath/include/imagemaps.php");
+include("$rootpath/include/forms.php");
+
+$TITLE = "IEM | RWIS Soil Probe Data Download";
+$THISPAGE = "networks-rwis";
+include("$rootpath/include/header.php"); 
+?>
+<div class="text">
+
+<p>This page provides access to the Iowa RWIS Soil Probe sensor data. The
+data columns are 15 temperature values at these depths (1,3,6,9,12,18,24,
+30,36,42,48,54,60,66,72 inches).  They are labelled s0temp thru s14temp.
+Values are in Fahrenhit.
+
+<form method="GET" action="soil_dl.php">
+
+<table>
+<tr><td width="50%">
+
+<p><h3 class="subtitle">1. Select Station:</h3><br>
+<i>Select One or More or All stations in the network.</i><br />
+<select name="station[]" size="5" MULTIPLE>
+  <option value="RCRI4">Anamosa
+  <option value="RCTI4">Cantril
+  <option value="RDNI4">Denison
+  <option value="RPFI4">Plainfield
+  <option value="RSCI4">Sioux City
+  <option value="RTPI4">Tipton
+</select>
+
+
+<p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
+<i>Times are in UTC.</i>
+<table>
+  <tr>
+    <td></td>
+    <th>Year</th><th>Month</th><th>Day</th>
+    <th>Hour</th>
+  </tr>
+
+  <tr>
+    <th>Start:</th>
+    <td>
+     <?php echo yearSelect2(2010, date("Y"), "year1"); ?>
+    </td>
+    <td>
+     <?php echo monthSelect("", "month1"); ?>
+    </td>
+    <td>
+     <?php echo daySelect2("", "day1"); ?>
+    </td>
+    <td>
+     <?php echo gmtHourSelect("", "hour1"); ?>
+	<input type="hidden" name="minute1" value="0">
+    </td>
+  </tr>
+
+  <tr>
+    <th>End:</th>
+    <td>
+     <?php echo yearSelect2(2010, date("Y"), "year2"); ?>
+    </td>
+    <td>
+     <?php echo monthSelect("", "month2"); ?>
+    </td>
+    <td>
+     <?php echo daySelect2("", "day2"); ?>
+    </td>
+    <td>
+     <?php echo gmtHourSelect("", "hour2"); ?>
+	<input type="hidden" name="minute2" value="0">
+    </td>
+  </tr>
+</table>
+
+</td><td valign="TOP">
+
+<p><h3 class="subtitle">3. How to view?</h3><br>
+<select name="what">
+  <option value="download">Download to Disk
+  <option value="view">View on-line
+</select>
+
+<p><h3 class="subtitle">4. Data Delimitation:</h3><br>
+How shall the output values be seperated?
+<br><select name="delim">
+    <option value="comma">Comma
+    <option value="space">Space
+    <option value="tab">Tab
+   </select>
+
+<p>
+<h3 class="subtitle">5. Include Lat / Lons?</h3><img src="/images/gisready.png"><br>
+ <select name="gis">
+   <option value="no">No
+   <option value="yes">Yes
+ </select>
+
+</td></tr></table>
+
+<p><h3 class="subtitle">Submit Form:</h3><br>
+<input type="submit" value="Process Data Request">
+<input type="reset">
+</form></div>
+
+
+<?php include("$rootpath/include/footer.php"); ?>
