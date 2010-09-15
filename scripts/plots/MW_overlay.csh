@@ -104,7 +104,6 @@ sfmap << EOF > /tmp/MW_overlay_sfmap.out
         LUTFIL   =
         STNPLT   =
 	MAP	= 0
-	\$MAPFIL = 0
   CLEAR = no
 	list
 	run
