@@ -421,8 +421,8 @@ function sbwVerify() {
         /* Look for LSRs! */
         $sql = sprintf("SELECT distinct *
          from lsrs w WHERE 
-         geom && SetSrid(GeometryFromText('%s'),4326) and 
-         contains(SetSrid(GeometryFromText('%s'),4326), geom) 
+         geom && ST_Buffer(SetSrid(GeometryFromText('%s'),4326),0.01) and 
+         contains(ST_Buffer(SetSrid(GeometryFromText('%s'),4326),0.01), geom) 
          and %s and wfo = '%s' and
         ((type = 'M' and magnitude >= 34) or 
          (type = 'H' and magnitude >= %s) or type = 'W' or
