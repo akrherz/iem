@@ -64,24 +64,24 @@ include("$rootpath/include/header.php");
 <form method="POST">
 
 <p>Feature Title:
-<br /><input type="text" name="title" size="80" />
+<br /><input type="text" name="title" size="80" /></p>
 
 <p>Enter Story:
-<br /><textarea NAME='story' wrap="hard" ROWS="20" COLS="70"></textarea>
+<br /><textarea NAME='story' wrap="hard" ROWS="20" COLS="70"></textarea></p>
 
 <p>Caption:
-<br /><input type="text" name="caption" size="80" />
+<br /><input type="text" name="caption" size="80" /></p>
 
 <p>Tags:
-<br /><input type="text" name="tags" size="80" />
+<br /><input type="text" name="tags" size="80" /></p>
 
 <p>Publish Facebook?
-<br /><input type="checkbox" name="facebook" value="yes" />Yes
+<br /><input type="checkbox" name="facebook" value="yes" />Yes</p>
 
 <p>Allow Voting:
-<br /><input type="checkbox" name="voting" value="yes" checked="checked" />Yes
+<br /><input type="checkbox" name="voting" value="yes" checked="checked" />Yes</p>
 
-<p><input type="submit" value="Go!" />
+<p><input type="submit" value="Go!" /></p>
 </form>
 
 <?php include("$rootpath/include/footer.php"); ?>
