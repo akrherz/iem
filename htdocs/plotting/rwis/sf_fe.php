@@ -158,8 +158,9 @@ for which time period in the archive.</p>
   <input type="submit" value="Generate Plot">
   </form>
 
-  <br><img src="SFtemps.php?station=<?php echo $station . $cgiStr; ?>" ALT="Time Series">
-
+ <br><img src="SFtemps.php?station=<?php echo $station . $cgiStr; ?>" ALT="Time Series">
+<br><img src="plot_traffic.php?station=<?php echo $station . $cgiStr; ?>" ALT="Time Series">
+<br><img src="plot_soil.php?station=<?php echo $station . $cgiStr; ?>" ALT="Time Series">
 <?php
   } else { ?>
 
