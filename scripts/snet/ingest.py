@@ -22,6 +22,11 @@ logger=logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
+# Write a PID File
+o = open("ingest.pid",'w')
+o.write( os.getpid() )
+o.close()
+
 # Load up locs
 locs = {}
 rs = mesosite.query("""SELECT *, x(geom) as lon, y(geom) as lat from 
