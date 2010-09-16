@@ -1,65 +1,29 @@
 <?php
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+$coopdb = iemdb("coop");
 include("$rootpath/include/forms.php");
 include("$rootpath/include/network.php");
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
 $var = isset($_GET["var"]) ? $_GET["var"]: "gdd50";
-$year = isset($_GET["year"]) ? $_GET["year"]: 2008;
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
 $smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: 5;
 $sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
-$emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: 10;
-$eday = isset($_GET["eday"]) ? $_GET["eday"]: 1;
+$emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: date("m");
+$eday = isset($_GET["eday"]) ? $_GET["eday"]: date("d");
 
-/** Need to use external date lib *
+/** Need to use external date lib 
   * http://php.weblogs.com/adodb_date_time_library
   */
 include("$rootpath/include/adodb-time.inc.php");
 
-$gs_start = Array(
-  1998 => adodb_mktime(0,0,0,5,1,1998),
-  1999 => adodb_mktime(0,0,0,5,1,1999),
-  2000 => adodb_mktime(0,0,0,5,1,2000),
-  2001 => adodb_mktime(0,0,0,5,1,2001),
-  2002 => adodb_mktime(0,0,0,5,1,2002),
-  2003 => adodb_mktime(0,0,0,5,1,2003),
-  2004 => adodb_mktime(0,0,0,5,1,2004),
-  2005 => adodb_mktime(0,0,0,5,1,2005),
-  2006 => adodb_mktime(0,0,0,5,1,2006),
-  2007 => adodb_mktime(0,0,0,5,1,2007),
-  2008 => adodb_mktime(0,0,0,5,1,2008),
-  2008 => adodb_mktime(0,0,0,5,1,2009) );
-$gs_end = Array(
-  1998 => adodb_mktime(0,0,0,10,1,1998),
-  1999 => adodb_mktime(0,0,0,10,1,1999),
-  2000 => adodb_mktime(0,0,0,10,1,2000),
-  2001 => adodb_mktime(0,0,0,10,16,2001),
-  2002 => adodb_mktime(0,0,0,10,7,2002),
-  2003 => adodb_mktime(0,0,0,10,1,2003),
-  2004 => adodb_mktime(0,0,0,10,1,2004),
-  2005 => adodb_mktime(0,0,0,10,1,2005),
-  2006 => adodb_mktime(0,0,0,10,1,2006),
-  2007 => adodb_mktime(0,0,0,10,1,2007),
-  2008 => adodb_mktime(0,0,0,10,1,2008),
-  2008 => adodb_mktime(0,0,0,10,1,2009) );
+$sts = adodb_mktime(0,0,0,$smonth, $sday, $year);
+$ets = adodb_mktime(0,0,0,$emonth, $eday, $year);
 
-if (strlen($smonth) > 0 && strlen($sday) > 0)
-  $gs_start[$year] = adodb_mktime(0,0,0,$smonth,$sday,$year);
-if (strlen($emonth) > 0 && strlen($eday) > 0)
-  $gs_end[$year] = adodb_mktime(0,0,0,$emonth,$eday,$year);
-
-
-$round = Array("prec" => 2, "gdd50" => 0);
-
-$today = time();
-if ($gs_end[$year] >= $today)  $gs_end[$year] = $today;
-
-$emonth = strftime("%m", $gs_end[$year]);
-$eday = strftime("%d", $gs_end[$year]);
-$smonth = strftime("%m", $gs_start[$year]);
-$sday = strftime("%d", $gs_start[$year]);
+$imgurl = sprintf("gsplot.php?smonth=%s&sday=%s&var=%s&emonth=%s&eday=%s&year=%s",
+  $smonth, $sday, $var, $emonth, $eday, $year);
 
 
 $TITLE = "IEM | NWS COOP Growing Season Data";
@@ -71,7 +35,7 @@ function new_window(url) {
 } 
 //END Script-->
 </script>';
-$THISPAGE="networks-coop";
+$THISPAGE="current-gs";
 include("$rootpath/include/header.php"); ?>
 
 <div class="text">
@@ -107,211 +71,57 @@ graphically as well as textually for use in a GIS.
   <td><?php echo daySelect2($eday, 'eday'); ?></td>
   </tr>
 </table>
- 
+</form>
 
 <?php
-dl($mapscript);
 
-function mktitlelocal($map, $imgObj, $titlet) { 
- 
-  $layer = $map->getLayerByName("credits");
- 
-     // point feature with text for location
-  $point = ms_newpointobj();
-  $point->setXY( 0, 10);
-  $point->draw($map, $layer, $imgObj, 0,
-    $titlet ."                                                                                ");
-  $point->free();
-
-     // point feature with text for location
-  $point = ms_newpointobj();
-  $point->setXY( 0, 460);
-  $point->draw($map, $layer, $imgObj, 1,
-    "  Iowa Environmental Mesonet | NWS COOP ");
-  $point->free();
-}
-
-function plotNoData($map, $img){
-  $layer = $map->getLayerByName("credits");
-
-  $point = ms_newpointobj();
-  $point->setXY( 100, 200);
-  $point->draw($map, $layer, $img, 1,
-    "  No data found for this date! ");
-  $point->free();
-
-}
-
-$varDef = Array("gdd50" => "Growing Degree Days (base=50)",
-  "et" => "Potential Evapotranspiration",
-  "prec" => "Precipitation",
-  "sgdd50" => "Soil Growing Degree Days (base=50)",
-  "sdd86" => "Stress Degree Days (base=86)"
-);
-
-
-
-$rnd = Array("gdd50" => 0,
-  "et" => 2,
-  "prec" => 2,
-  "sgdd50" => 0,
-  "sdd86" => 0);
-
-
-$myStations = $cities;
-$height = 480;
-$width = 640;
-
-$proj = "init=epsg:26915";
-
-$map = ms_newMapObj("base.map");
-$map->setProjection($proj);
-
-$map->setextent(250000, 4450000, 690000, 4880000);
-
-$counties = $map->getlayerbyname("counties");
-$counties->set("status", MS_ON);
-
-$snet = $map->getlayerbyname("snet");
-$snet->set("status", MS_ON);
-
-$iards = $map->getlayerbyname("iards");
-$iards->set("status", 1);
-
-$ponly = $map->getlayerbyname("pointonly");
-$ponly->set("status", MS_ON);
-
-$img = $map->prepareImage();
-$counties->draw($img);
-$iards->draw($img);
-
-$c = iemdb("coop");
-
-$sstr     = adodb_date("Y-m-d", $gs_start[$year]);
-$estr     = adodb_date("Y-m-d", $gs_end[$year]);
-$sstr_txt = adodb_date("M d", $gs_start[$year]);
-$estr_txt = adodb_date("M d", $gs_end[$year]);
-
-/* ------------------------------------------------------- */
-if ($var == 'gdd50') {
-  $q = "SELECT stationid, high, low
-     from alldata WHERE year = ". $year ." and 
-     day >= '". $sstr ."'  and day < '". $estr ."' and high > low ";
-
-  $gdds = Array();
-  $rs =  pg_exec($c, $q);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-    $stid = $row['stationid'];
-    $high = (float)$row['high'];
-    $low  = (float)$row['low'];
-
-    if ($low < 50)  $low = 50.00;
-    if ($high > 86) $high = 86.00;
-    if ($high < 50) $tgdd = 0.00;
-    else $tgdd = (($high+$low)/2.00) - 50.00;
-    if (! isset($gdds[$stid])) $gdds[$stid] = 0;
-    $gdds[$stid] = $gdds[$stid] + $tgdd;
-  }
-  $vals = $gdds;
-}  
-/* ------------------------------------------------------- */
-if ($var == 'sdd86') {
-  $q = "SELECT stationid, high, low
-     from alldata WHERE year = $year and
-     day >= '". $sstr ."' and day < '". $estr ."'";
-
-  $gdds = Array();
-  $rs =  pg_exec($c, $q);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-    $stid = $row['stationid'];
-    $high = (float)$row['high'];
-    $low  = (float)$row['low'];
-
-    if ($low < 86)  $low = 86.00;
-    if ($high < 86) $tgdd = 0.00;
-    else $tgdd = (($high+$low)/2.00) - 86.00;
-
-    if (! isset($gdds[$stid])) $gdds[$stid] = 0;
-    $gdds[$stid] = $gdds[$stid] + $tgdd;
-  }
-  $vals = $gdds;
-}  
-/* ------------------------------------------------------- */
-else if ($var == 'prec') {
-  $q = "SELECT stationid, sum(precip) as prec
-     from alldata WHERE year = $year and 
-     day >= '". $sstr ."' and day < '". $estr ."' GROUP by stationid";
-
-  $vals = Array();
-  $rs =  pg_exec($c, $q);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-    $stid = $row['stationid'];
-    $vals[$stid] = $row['prec'];
-  }
-}  
-/* ------------------------------------------------------- */
-
-
-$tr = "# ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .")
-# Download From: http://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.phtml
+$tr = sprintf("# Iowa COOP Accumulations (%s - %s)\n", adodb_date("Y-m-d", $sts),
+	adodb_date("Y-m-d", $ets) );
+$tr .= "# Download From: http://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.phtml
 # Download Date: ". strftime("%d %b %Y") ."
+# CLIM_ values are based on climatology 1951-today
 # Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 #-----------------------snip------------------\n";
-$tr .= sprintf("%10s,%20s,%10s,%10s,%10s\n", 'ID', 'StationName', 'Latitude', 'Longitude', $var);
-foreach($vals as $key => $value){
-  $ukey = strtoupper($key);
+
+
+
+/* Query the obs */
+$rs = pg_prepare($coopdb, "SELECT", "SELECT stationid, s_rainfall,
+    s_gdd50, s_sdd86, c_rainfall, c_gdd50, c_sdd86 from (
+      SELECT stationid, 
+	  sum(precip) as s_rainfall, sum(gdd50(high,low)) as s_gdd50,
+	  sum(sdd86(high,low)) as s_sdd86 from alldata 
+	  WHERE day >= $1 and day < $2 GROUP by stationid) as foo,
+	 (SELECT station, 
+      sum(precip) as c_rainfall, sum(gdd50) as c_gdd50,
+      sum(sdd86) as c_sdd86 from climate51 
+      WHERE valid >= $3 and valid < $4 GROUP by station) as foo2
+	WHERE foo2.station = foo.stationid ORDER by stationid ASC");
+$rs = pg_execute($coopdb, "SELECT", Array(adodb_date("Y-m-d", $sts),
+	adodb_date("Y-m-d", $ets), "2000-". adodb_date('m-d', $sts), 
+	"2000-". adodb_date('m-d', $ets)));
+
+
+$tr .= sprintf("%6s,%21s,%10s,%10s,%10s,%10s,%10s,%10s,%10s\n", 'ID', 
+ 'StationName', 'Latitude', 'Longitude', 'GDD50', 'SDD86', 'PRECIP',
+ 'CLIM_GDD50', 'CLIM_PRECIP');
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+
+  $ukey = strtoupper($row["stationid"]);
   if (! isset($cities[$ukey]) ) continue;
-  $tr .= sprintf("%10s,%-20s,%10.4f,%10.4f,%10s\n", $key, $cities[$ukey]['name'],
-  $cities[$ukey]['lat'], $cities[$ukey]['lon'], round($value, $round[$var]) );
-
-  // Red Dot... 
-  $pt = ms_newPointObj();
-  $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-  $pt->draw($map, $ponly, $img, 0, '' );
-  $pt->free();
-
-  // City Name
-  $pt = ms_newPointObj();
-  $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-  $pt->draw($map, $snet, $img, 1, $cities[$ukey]['name'] );
-  $pt->free();
+  $tr .= sprintf("%6s,%-21s,%10.4f,%10.4f,%10.0f,%10.0f,%10.2f,%10.0f,%10.2f\n", $ukey, 
+  $cities[$ukey]['name'],
+  $cities[$ukey]['lat'], $cities[$ukey]['lon'], 
+  $row["s_gdd50"], $row["s_sdd86"], $row["s_rainfall"],
+  $row["c_gdd50"], $row["c_rainfall"] );
 }
-
-reset($vals);
-foreach($vals as $key => $value){
-  $ukey = strtoupper($key);
-  if (! isset($cities[$ukey]) ) continue;
-  // Value UL
-  $pt = ms_newPointObj();
-  $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-  $pt->draw($map, $snet, $img, 0, 
-     round($value, $rnd[$var]) );
-  $pt->free();
-}
-
-if ($i == 0)
-   plotNoData($map, $img);
-
-mktitlelocal($map, $img, " ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .") ");
-$map->drawLabelCache($img);
-
-$url = $img->saveWebImage();
-
 ?>
-<p><h3 class="heading">Plot</h3>
-<table>
-<tr><td valign="TOP">
-
-  <p>Open this plot in a <a href="javascript:new_window('image.phtml?f=<?php echo $url; ?>');">new window</a> for comparison with other plots. Once the
-image is loaded up in another window, you can modify this plots 
-parameters.
 
 <p>*Note: Only a sub-sample of stations are plotted on the map due to 
-space restrictions.</td>
-  <td>
-  <img src="<?php echo $url; ?>" border=1>
-</td></tr>
-</table>
+space restrictions.
+<br />
+  <img src="<?php echo $imgurl; ?>" border=1 />
+  </p>
 
 <p>
 <img src="<?php echo $rooturl; ?>/images/gisready.png"><h3 class="heading"> Data Listing</h3>
