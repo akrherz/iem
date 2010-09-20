@@ -5,7 +5,7 @@ import psycopg2
 import psycopg2.extras
 
 mesosite = psycopg2.connect(database="mesosite", host="iemdb")
-subscribers = ["iem",]
+subscribers = ["iem","coop"]
 
 def sync(dbname):
     """
