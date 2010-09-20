@@ -57,7 +57,8 @@ if ($hasclimate){
 
  $sqlDate = sprintf("2000-%s", date("m-d") );
 
- $rs = pg_prepare($db, "SELECT", "SELECT valid, high, low from climate 
+ $rs = pg_prepare($db, "SELECT", "SELECT valid, high, low from 
+ 		ncdc_climate71 
         WHERE station = $1
         and extract(month from valid) = $2  ORDER by valid ASC");
 
@@ -74,7 +75,9 @@ if ($hasclimate){
   if (intval($row["high"]) > $maxVal) $maxVal = $row["high"];
   if (intval($row["low"]) < $minVal) $minVal = $row["low"];
  }
-
+ if (pg_num_rows($rs) < 1){
+ 	$hasclimate = false;
+ }
  pg_close($db);
 } else {
 }
