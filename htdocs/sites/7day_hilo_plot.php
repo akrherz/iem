@@ -37,7 +37,8 @@ pg_close($db);
 if ($hasclimate){
  $db = iemdb("coop");
  $sqlDate = sprintf("2000-%s", date("m-d") );
- $rs = pg_prepare($db, "SELECT", "SELECT valid, high, low from climate 
+ $rs = pg_prepare($db, "SELECT", "SELECT valid, high, low from 
+ 		ncdc_climate71 
         WHERE station = $1 and valid <= $2 ORDER by valid DESC LIMIT 7");
 
  $rs = pg_execute($db, "SELECT", Array(strtolower($climate_site), $sqlDate));
@@ -49,12 +50,18 @@ if ($hasclimate){
   $ahighs[] = $row["high"];
   $alows[] = $row["low"];
  }
+ if (pg_num_rows($rs) < 1){
+ 	$hasclimate = false;
+ } else {
  $ahighs = array_reverse($ahighs);
  $alows = array_reverse($alows);
  pg_close($db);
  $a1 = min($alows);
  $a3 = max($ahighs);
-} else {
+ }
+}
+
+if (!$hasclimate){
  $a1 = min($lows);
  $a3 = max($highs);
 }
