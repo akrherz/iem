@@ -13,7 +13,7 @@ def doday(ts):
     Create a plot of precipitation stage4 estimates for some day
     """
     sts = ts + mx.DateTime.RelativeDateTime(hour=1)
-    ets = ts + mx.DateTime.RelativeDateTime(hour=0, days=1)
+    ets = ts + mx.DateTime.RelativeDateTime(hour=1, days=1)
     interval = mx.DateTime.RelativeDateTime(hours=1)
     now = sts
     total = None
