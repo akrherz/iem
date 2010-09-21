@@ -42,7 +42,8 @@ def doday(ts):
      'nglSpreadColorEnd'  : 2,
      '_MaskZero'          : True,
      'lbTitleString'      : "[inch]",
-     '_valid'    : 'Total up to %s' % (lts.strftime("%d %B %Y %I %p %Z"),),
+     '_valid'    : 'Total up to %s' % (
+        (lts - mx.DateTime.RelativeDateTime(minutes=1)).strftime("%d %B %Y %I:%M %p %Z"),),
      '_title'    : "NCEP StageIV Today's Precipitation [inch]",
     }
 
