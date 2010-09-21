@@ -13,35 +13,47 @@ $mode = isset($_GET["mode"]) ? $_GET["mode"]: "rt";
 $sts = time() - (3.*86400.);
 $ets = time();
 
-/** Lets assemble a time period if this plot is historical */
-if ($mode != 'rt') {
-  $sts = mktime(0,0,0, $smonth, $sday, $syear);
-  $ets = $sts + ($days * 86400.0);
-}
-
-
-
 $data = Array();
 $times = Array();
 for ($i=0;$i<15;$i++){
 	$data["s${i}temp"] = Array();
 }
 
-$dbconn = iemdb('rwis');
-$rs = pg_prepare($dbconn, "SELECT", "SELECT * from alldata_soil
+/** Lets assemble a time period if this plot is historical */
+if ($mode != 'rt') {
+  $sts = mktime(0,0,0, $smonth, $sday, $syear);
+  $ets = $sts + ($days * 86400.0);
+
+	$dbconn = iemdb('rwis');
+	$rs = pg_prepare($dbconn, "SELECT", "SELECT * from alldata_soil
   WHERE station = $1 and valid > $2 and valid < $3 ORDER by valid ASC");
-$rs = pg_execute($dbconn, "SELECT", Array($station,
+	$rs = pg_execute($dbconn, "SELECT", Array($station,
        date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets)) );
 
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
-{ 
-    $times[] = strtotime(substr($row["valid"],0,16));
-	for($j=0;$j<15;$j++){
-		$data["s${j}temp"][] = $row["s${j}temp"];
+	for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+	{ 
+    	$times[] = strtotime(substr($row["valid"],0,16));
+		for($j=0;$j<15;$j++){
+			$data["s${j}temp"][] = $row["s${j}temp"];
+		}
 	}
+	pg_close($dbconn);
+} else {
+	$dbconn = iemdb('iem');
+	$rs = pg_prepare($dbconn, "SELECT", "SELECT d.* from 
+		rwis_soil_data_log d, rwis_locations l
+		WHERE l.id = d.location_id and l.nwsli = $1
+		ORDER by valid ASC");
+	$rs = pg_execute($dbconn, "SELECT", Array($station));
+	$lts = 0;
+	for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+	{
+		$ts = strtotime(substr($row["valid"],0,16));
+		if ($lts != $ts){ $times[] = $ts; $lts = $ts;}
+		$data["s". $row["sensor_id"]."temp"][] = $row["temp"];
+	}
+	pg_close($dbconn);
 }
-pg_close($dbconn);
-
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
