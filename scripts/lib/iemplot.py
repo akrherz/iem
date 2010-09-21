@@ -215,14 +215,14 @@ def simple_grid_fill(xaxis, yaxis, grid, cfg):
     # Generate Contour
     contour = Ngl.contour_map(wks,grid,res)
 
-    if cfg.has_key("_showvalues") and cfg['_showvalues']:
-        txres              = Ngl.Resources()
-        txres.txFontHeightF = 0.012
-        for i in range(len(lons)):
-            if cfg.has_key("_valuemask") and cfg['_valuemask'][i] is False:
-                continue
-            Ngl.add_text(wks, contour, cfg["_format"] % vals[i], 
-                     lons[i], lats[i],txres)
+#    if cfg.has_key("_showvalues") and cfg['_showvalues']:
+#        txres              = Ngl.Resources()
+#        txres.txFontHeightF = 0.012
+#        for i in range(len(xaxis)):
+#            if cfg.has_key("_valuemask") and cfg['_valuemask'][i] is False:
+#                continue
+#            Ngl.add_text(wks, contour, cfg["_format"] % vals[i], 
+#                     lons[i], lats[i],txres)
 
 
     Ngl.draw(contour)
@@ -490,32 +490,33 @@ def conus():
     # Setup the view
     res.nglMaximize         = False      # Prevent funky things
     res.vpWidthF            = 0.8       # Default width of map?
-    res.vpHeightF           = 0.6        # Go vertical
+    res.vpHeightF           = 0.8        # Go vertical
     res.nglPaperOrientation = "landscape"
     res.vpXF                = 0.1        # Make Math easier
-    res.vpYF                = 0.8        # 
+    res.vpYF                = 0.9        # 
 
     #____________ MAP STUFF ______________________
-    res.mpProjection = "LambertEqualArea"   # Display projection
-    res.mpCenterLonF = -93.5                # Central Longitude
-    res.mpCenterLatF = 42.0                 # Central Latitude
-    res.mpLimitMode  = "LatLon"             # Display bounds 
-    xmin, ymin, xmax, ymax = [-126., 26.1, -66.4, 52.0]
-    res.mpMinLonF    = xmin                # West
-    res.mpMaxLonF    = xmax                # East
-    res.mpMinLatF    = ymin                 # South
-    res.mpMaxLatF    = ymax                 # North
+    res.mpProjection = "LambertConformal"   # Display projection
+    res.mpLambertParallel1F    = 33.0               
+    res.mpLambertParallel2F    = 45.0
+    res.mpLambertMeridianF     = -95.0            
+    res.mpLimitMode            = "LatLon"
+    res.mpMinLatF              = 24.0                
+    res.mpMaxLatF              = 50.0              
+    res.mpMinLonF              = -119.0          
+    res.mpMaxLonF              = -74.0  
+    
     res.mpPerimOn    = False                # Draw Border around Map
     res.mpDataBaseVersion       = "MediumRes"     # Don't need hires coast
     res.mpDataSetName           = "Earth..2"      # includes counties
     res.mpGridAndLimbOn         = False           # Annoying
-    res.mpUSStateLineThicknessF = 3               # Outline States
+    res.mpUSStateLineThicknessF = 1               # Outline States
 
     res.mpOutlineOn             = True           # Draw map for sure
-    res.mpOutlineBoundarySets   = "NoBoundaries" # What not to draw
-    res.mpOutlineSpecifiers     = ["Conterminous US",
-                               ]
-    res.mpShapeMode = "FreeAspect"
+    res.mpOutlineBoundarySets   = "USStates" # What not to draw
+    #res.mpOutlineSpecifiers     = ["Conterminous US",
+    #                           ]
+    #res.mpShapeMode = "FreeAspect"
 
     #_____________ LABEL BAR STUFF __________________________
     res.lbAutoManage       = False           # Let me drive!
@@ -668,9 +669,9 @@ def makefeature(tmpfp):
         return
     tomorrow = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=1)
     # Step 1. Convert to Big PNG
-    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 +repage %s.ps %s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
+    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors 100 +repage %s.ps %s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
     os.system( cmd )
-    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 320x290 -density 80 -depth 8 +repage %s.ps %s_s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
+    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 320x290 -density 80 -depth 8 -colors 100 +repage %s.ps %s_s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
     os.system( cmd )
     # Step 4: Cleanup
     os.remove("%s.ps" % (tmpfp,) )
@@ -683,7 +684,7 @@ def postprocess(tmpfp, pqstr, rotate=""):
         print "File %s.ps is missing!" % (tmpfp,)
         return
     # Step 1. Convert to PNG
-    cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 +repage %s.ps %s.png" % (rotate, tmpfp, tmpfp)
+    cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors 100 +repage %s.ps %s.png" % (rotate, tmpfp, tmpfp)
     os.system( cmd )
     # Step 2: Send to LDM
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s.png" % (pqstr, tmpfp)
