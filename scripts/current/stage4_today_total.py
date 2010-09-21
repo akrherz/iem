@@ -69,6 +69,6 @@ def doday(ts):
     
 if __name__ == "__main__":
     if len(sys.argv) == 4:
-        doday(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+        doday(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
     else:
         doday(mx.DateTime.now())
