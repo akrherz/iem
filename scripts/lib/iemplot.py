@@ -684,7 +684,7 @@ def postprocess(tmpfp, pqstr, rotate=""):
         print "File %s.ps is missing!" % (tmpfp,)
         return
     # Step 1. Convert to PNG
-    cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors 100 +repage %s.ps %s.png" % (rotate, tmpfp, tmpfp)
+    cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120  +repage %s.ps %s.png" % (rotate, tmpfp, tmpfp)
     os.system( cmd )
     # Step 2: Send to LDM
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s.png" % (pqstr, tmpfp)
