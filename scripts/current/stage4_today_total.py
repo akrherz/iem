@@ -6,7 +6,7 @@ import pygrib
 import mx.DateTime
 import iemplot
 import numpy
-import os
+import os, sys
 
 def doday(ts):
     """
@@ -68,4 +68,7 @@ def doday(ts):
     del(cfg['_conus'])
     
 if __name__ == "__main__":
-    doday(mx.DateTime.now())
+    if len(sys.argv) == 4:
+        doday(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+    else:
+        doday(mx.DateTime.now())
