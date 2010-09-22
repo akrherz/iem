@@ -1,12 +1,14 @@
 
-import mapscript
-import mx.DateTime, sys, os
-from PIL import Image, ImageDraw, ImageFont
 import psycopg2.extras
 import iemdb
 POSTGIS = iemdb.connect('postgis', bypass=True)
 pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 pcursor.execute("SET TIME ZONE 'GMT'")
+
+import mapscript
+import mx.DateTime, sys, os
+from PIL import Image, ImageDraw, ImageFont
+
 
 # Preparation
 sortOpt = sys.argv[1]
@@ -105,7 +107,7 @@ if (torCount > 0):
   s = "%3i TOR: Avg Size %5.0f km^2 CAR: %.0f%%" % (torCount, (torSize/float(torCount)) / 1000000, totalTorCar )
   draw.text((54+w+10,22), s, font=font10, fill="#ff0000")
 
-if (len(rs) == 0):
+if pcursor.rowcount == 0:
   s = "No warnings in database for this date"
   draw.text((100,78), s, font=font2, fill="#ffffff")
 
@@ -119,7 +121,7 @@ for row in pcursor:
   map.setSize(thumbpx,thumbpx)
   map.setExtent(x0,y0,x1,y1)
   sbw = map.getLayerByName("sbw")
-  sbw.data = "geom from (select phenomena, significance, geom, oid from warnings_%s WHERE gtype = 'P' and phenomena = '%s' and significance = '%s' and eventid = %s and wfo = '%s') as foo using unique oid using SRID=4326" % (ts.year, rs[i]['phenomena'], rs[i]['significance'], rs[i]['eventid'], rs[i]['wfo'])
+  sbw.data = "geom from (select phenomena, significance, geom, oid from warnings_%s WHERE gtype = 'P' and phenomena = '%s' and significance = '%s' and eventid = %s and wfo = '%s') as foo using unique oid using SRID=4326" % (ts.year, row['phenomena'], row['significance'], row['eventid'], row['wfo'])
   img = map.prepareImage()
   sbw.draw(map, img)
   my = int(i / cols) * thumbpx + header
@@ -136,7 +138,7 @@ for row in pcursor:
   sql = "SELECT sum( area2d(transform(geom,2163))) as csize from \
    (select distinct geom from warnings_%s WHERE gtype = 'C' and \
    phenomena = '%s' and significance = '%s' and eventid = %s and wfo = '%s') \
-   as foo" % (ts.year, rs[i]['phenomena'], rs[i]['significance'], rs[i]['eventid'], rs[i]['wfo'])
+   as foo" % (ts.year, row['phenomena'], row['significance'], row['eventid'], row['wfo'])
   pcursor2 = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
   pcursor2.execute( sql )
   row2 = pcursor2.fetchone()
@@ -153,8 +155,9 @@ for row in pcursor:
   pcursor2.close()
 
   # Draw Text!
-  issue = mx.DateTime.strptime( row['issue'][:16], "%Y-%m-%d %H:%M" )
-  s = "%s.%s.%s.%s" % (row['wfo'], row['phenomena'], row['eventid'], issue.strftime("%H%M") )
+  issue = row['issue']
+  s = "%s.%s.%s.%s" % (row['wfo'], row['phenomena'], 
+                       row['eventid'], issue.strftime("%H%M") )
   (w, h) = font10.getsize(s)
   draw.text((mx0+2,my+thumbpx-h), s, font=font10)
   s = "%.0f sq km %s%%" % (row['size']/1000000.0, car)
@@ -165,7 +168,7 @@ for row in pcursor:
   altxt = "Click for text/image"
   imagemap.write("<AREA HREF=\"%s\" ALT=\"%s\" TITLE=\"%s\" SHAPE=RECT COORDS=\"%s,%s,%s,%s\">\n" % (url, altxt, altxt, mx0, my, mx0+thumbpx, my+thumbpx) )
 
-for i in range(len(rs)):
+for i in range(pcursor.rowcount):
   my = int(i / cols) * thumbpx + header
   mx0 = (i % cols) * thumbpx 
   if (mx0 == 0):
