@@ -12,6 +12,7 @@ php wxc_cocorahs.php
 
 cd ../current
 /mesonet/python/bin/python plot_hilo.py 0
+/mesonet/python/bin/python q2_today_total.py
 
 cd ../summary
 /mesonet/python/bin/python hourly_precip.py
