@@ -22,7 +22,7 @@ def doday(ts):
     lats = numpy.arange(55.0, 39.99, -0.01)
 
     while now < ets:
-        fp = "/mesonet/ARCHIVE/data/%s/q2/tile2/q2rad_hsr_nc/short_qpe/%s0000.nc" % (
+        fp = "/mnt/a1/ARCHIVE/data/%s/q2/tile2/q2rad_hsr_nc/short_qpe/%s0000.nc" % (
             now.gmtime().strftime("%Y/%m/%d"), 
             now.gmtime().strftime("%Y%m%d%H") )
         if os.path.isfile(fp):
