@@ -62,11 +62,11 @@ for p in range(providers.shape[0]):
     (alti, alti_qc_av, alti_qc_sc) = ('Null', 'Null', 'Null')
 
     if not numpy.ma.is_masked( nc_tmpk[i] ):
-      tmpf = mesonet.k2f( nc_tmpk[i] )
+      tmpf = check( mesonet.k2f( nc_tmpk[i] ) )
       tmpf_qc_av = figure(nc_tmpk[i], tmpkQCD[i,0])
       tmpf_qc_sc = figure(nc_tmpk[i], tmpkQCD[i,6])
     if not numpy.ma.is_masked( nc_dwpk[i] ):
-      dwpf = mesonet.k2f( nc_dwpk[i] )
+      dwpf = check( mesonet.k2f( nc_dwpk[i] ) )
       dwpf_qc_av = figure(nc_dwpk[i], dwpkQCD[i,0])
       dwpf_qc_sc = figure(nc_dwpk[i], dwpkQCD[i,6])
     if not numpy.ma.is_masked( nc_alti[i] ):
