@@ -10,6 +10,10 @@ from pyIEM import stationTable, iemAccess, sob
 import os, time, sys, pg
 st = stationTable.stationTable("/mesonet/TABLES/snet.stns")
 
+o = open('data_monitor.pid', 'w')
+o.write("%s" % (os.getpid(),))
+o.close()
+
 db = {}
 for station in st.ids:
   db[station] = {"pday": [0]*60 }
