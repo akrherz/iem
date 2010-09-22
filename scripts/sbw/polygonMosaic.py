@@ -2,10 +2,11 @@
 import mapscript
 import mx.DateTime, sys, os
 from PIL import Image, ImageDraw, ImageFont
-from pyIEM import iemdb
-i = iemdb.iemdb()
-postgis = i['postgis']
-postgis.query("SET TIME ZONE 'GMT'")
+import psycopg2.extras
+import iemdb
+POSTGIS = iemdb.connect('postgis', bypass=True)
+pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+pcursor.execute("SET TIME ZONE 'GMT'")
 
 # Preparation
 sortOpt = sys.argv[1]
@@ -29,7 +30,8 @@ sql = "SELECT *, area2d(transform(geom,2163)) as size, \
   (ymax(transform(geom,2163)) - ymin(transform(geom,2163))) as height \
   from warnings_%s WHERE gtype = 'P' and date(issue) = '%s' and \
   phenomena IN ('TO','SV') " % (ts.year, ts.strftime("%Y-%m-%d") )
-rs = postgis.query(sql).dictresult()
+pcursor.execute( sql )
+
 maxDimension = 0
 buffer = 10000
 i = 0
@@ -37,30 +39,31 @@ torCount = 0
 torSize = 0
 svrCount = 0
 svrSize = 0
-for i in range(len(rs)):
-  w = float(rs[i]['width'])
-  h = float(rs[i]['height'])
+for row in pcursor:
+  w = float(row['width'])
+  h = float(row['height'])
   if (w > maxDimension): maxDimension = w
   if (h > maxDimension): maxDimension = h
 
-  if (rs[i]['phenomena'] == "SV"):
+  if (row['phenomena'] == "SV"):
     svrCount += 1
-    svrSize += float(rs[i]['size'])
-  if (rs[i]['phenomena'] == "TO"):
+    svrSize += float(row['size'])
+  if (row['phenomena'] == "TO"):
     torCount += 1
-    torSize += float(rs[i]['size'])
+    torSize += float(row['size'])
 
 #print "Largest Dimension %s m" % (maxDimension,)
 
 sql = "SELECT phenomena, sum( area2d(transform(geom,2163)) ) as size \
    from warnings_%s WHERE gtype = 'C' and date(issue) = '%s' and significance = 'W' and \
   phenomena IN ('TO','SV') GROUP by phenomena" % (ts.year, ts.strftime("%Y-%m-%d") )
-rs = postgis.query(sql).dictresult()
-for q in range(len(rs)):
-  if (rs[q]['phenomena'] == "TO"):
-    totalTorCar = 100.0* (1.0 - (torSize / float(rs[q]['size'])))
-  if (rs[q]['phenomena'] == "SV"):
-    totalSvrCar = 100.0* (1.0 - (svrSize / float(rs[q]['size'])))
+
+pcursor.execute( sql )
+for row in pcursor:
+  if (row['phenomena'] == "TO"):
+    totalTorCar = 100.0* (1.0 - (torSize / float(row['size'])))
+  if (row['phenomena'] == "SV"):
+    totalSvrCar = 100.0* (1.0 - (svrSize / float(row['size'])))
 
 # Make mosaic image
 header = 35
@@ -81,7 +84,7 @@ sql = "SELECT *, area2d(transform(geom,2163)) as size, \
   from warnings_%s WHERE gtype = 'P' and date(issue) = '%s' and \
   phenomena IN ('TO','SV') and eventid is not null ORDER by %s" % \
   (ts.year, ts.strftime("%Y-%m-%d"), opts[sortOpt]['sortby'] )
-rs = postgis.query(sql).dictresult()
+pcursor.execute( sql )
 
 # Write metadata to image
 tmp = Image.open("logo_small.png")
@@ -106,12 +109,12 @@ if (len(rs) == 0):
   s = "No warnings in database for this date"
   draw.text((100,78), s, font=font2, fill="#ffffff")
 
-for i in range(len(rs)):
+for row in pcursor:
   # - Map each polygon
-  x0 = float(rs[i]['xc']) - (maxDimension/2.0) - buffer
-  x1 = float(rs[i]['xc']) + (maxDimension/2.0) + buffer
-  y0 = float(rs[i]['yc']) - (maxDimension/2.0) - 2 * buffer
-  y1 = float(rs[i]['yc']) + (maxDimension/2.0)
+  x0 = float(row['xc']) - (maxDimension/2.0) - buffer
+  x1 = float(row['xc']) + (maxDimension/2.0) + buffer
+  y0 = float(row['yc']) - (maxDimension/2.0) - 2 * buffer
+  y1 = float(row['yc']) + (maxDimension/2.0)
   map = mapscript.mapObj("polygon.map")
   map.setSize(thumbpx,thumbpx)
   map.setExtent(x0,y0,x1,y1)
@@ -134,28 +137,31 @@ for i in range(len(rs)):
    (select distinct geom from warnings_%s WHERE gtype = 'C' and \
    phenomena = '%s' and significance = '%s' and eventid = %s and wfo = '%s') \
    as foo" % (ts.year, rs[i]['phenomena'], rs[i]['significance'], rs[i]['eventid'], rs[i]['wfo'])
-  rs2 = postgis.query(sql).dictresult()
+  pcursor2 = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+  pcursor2.execute( sql )
+  row2 = pcursor2.fetchone()
   car = "NA"
   carColor = (255,255,255)
-  if (len(rs2) > 0 and rs2[0]['csize'] is not None):
-    csize = float( rs2[0]['csize'] )
-    carF = 100.0* (1.0 - (rs[i]['size'] / csize))
+  if row2 and row2['csize'] is not None:
+    csize = float( row2['csize'] )
+    carF = 100.0* (1.0 - (row['size'] / csize))
     car = "%.0f" % (carF,)
     if (carF > 75):
       carColor = (0,255,0)
     if (carF < 25):
       carColor = (255,0,0)
+  pcursor2.close()
 
   # Draw Text!
-  issue = mx.DateTime.strptime( rs[i]['issue'][:16], "%Y-%m-%d %H:%M" )
-  s = "%s.%s.%s.%s" % (rs[i]['wfo'], rs[i]['phenomena'], rs[i]['eventid'], issue.strftime("%H%M") )
+  issue = mx.DateTime.strptime( row['issue'][:16], "%Y-%m-%d %H:%M" )
+  s = "%s.%s.%s.%s" % (row['wfo'], row['phenomena'], row['eventid'], issue.strftime("%H%M") )
   (w, h) = font10.getsize(s)
   draw.text((mx0+2,my+thumbpx-h), s, font=font10)
-  s = "%.0f sq km %s%%" % (rs[i]['size']/1000000.0, car)
+  s = "%.0f sq km %s%%" % (row['size']/1000000.0, car)
   draw.text((mx0+2,my+thumbpx-(2*h)), s, font=font10, fill=carColor)
 
   # Image map
-  url = "http://mesonet.agron.iastate.edu/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (ts.year, rs[i]['wfo'], rs[i]['phenomena'], rs[i]['significance'], rs[i]['eventid'] )
+  url = "http://mesonet.agron.iastate.edu/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (ts.year, row['wfo'], row['phenomena'], row['significance'], row['eventid'] )
   altxt = "Click for text/image"
   imagemap.write("<AREA HREF=\"%s\" ALT=\"%s\" TITLE=\"%s\" SHAPE=RECT COORDS=\"%s,%s,%s,%s\">\n" % (url, altxt, altxt, mx0, my, mx0+thumbpx, my+thumbpx) )
 
