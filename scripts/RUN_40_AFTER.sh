@@ -55,7 +55,7 @@ cd ../../iemre
 
 cd ../current
 /mesonet/python/bin/python stage4_hourly.py
-/mesonet/python/bin/python stage4_today.py
+/mesonet/python/bin/python stage4_today_total.py
 
 cd ../model
 /mesonet/python/bin/python ingest.py
