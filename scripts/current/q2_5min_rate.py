@@ -41,7 +41,7 @@ def doit(ts):
      '_MaskZero'          : True,
      'lbTitleString'      : "[inch/hr]",
      '_valid'    : 'Valid %s' % (
-        ts.strftime("%d %B %Y %I:%M %p %Z"),),
+        ts.localtime().strftime("%d %B %Y %I:%M %p %Z"),),
      '_title'    : "NMQ Q2 Precipitation Rate [inch/hr]",
     }
 
