@@ -11,9 +11,15 @@ include("$rootpath/include/google_keys.php");
 <script src="http://www.openlayers.org/api/2.9/OpenLayers.js"></script>
 <script type="text/javascript" src="GeoExt.js"></script>
 <script type="text/javascript" src="static.js?v=2"></script>
+<script type="text/javascript">
+Ext.onReady(function(){
+
+});
+</script>
 <title>IEM Live</title>
 </head>
 <body>
+
 <div id="themap"></div>
 </body>
 </html>
