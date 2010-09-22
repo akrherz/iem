@@ -20,3 +20,6 @@ cd ../dotcams
 
 cd ../awos
 /mesonet/python/bin/python parse_idot.py
+
+cd ../../current
+/mesonet/python/bin/python q2_5min_rate.py
