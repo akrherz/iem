@@ -119,6 +119,9 @@ def doit(stid, now):
       elif headers.has_key('TimePDT'):
         tstr = tokens[ headers['TimePDT'] ]
         addon = mx.DateTime.RelativeDateTime(hours=2)
+      else:
+        print 'Unknown TimeZone!', headers.keys()
+        continue
       ts = mx.DateTime.strptime( '%s %s' % (now.strftime('%Y-%m-%d'), 
            tstr), '%Y-%m-%d %I:%M %p' ) + addon
       gts = ts.gmtime()
