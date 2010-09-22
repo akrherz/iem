@@ -103,7 +103,7 @@ while ( list($key, $val) = each($mydata) ) {
   if (round($val->db['pave_avg'],0) == -100) $val->db['pave_avg'] = 'M';
   else $val->db['pave_avg'] = round($val->db['pave_avg'],0);
 
-  $s = sprintf("%5s %52s %2s %7s %8s %2s %4s %5s %5s %4s %4s %4s %4s %4s %4s %4s %4s %4s %3s %3s %3s %3s\n", $key, 
+  $s = sprintf("%5s %52s %2s %7s %8s %2s %4s %5s %5s %4s %4s %4.1d %4s %4s %4s %4s %4s %4s %3s %3s %3s %3s\n", $key, 
     $cities[$key]['name'], 'IA', round($cities[$key]['lat'],2), 
      round($cities[$key]['lon'],2),
      date('d', $val->db['ts'] + (6*3600) ), date('H', $val->db['ts'] + (6*3600)),
