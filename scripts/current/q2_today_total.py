@@ -51,7 +51,8 @@ def doday(ts):
      '_title'    : "NMQ Q2 Today's Precipitation [inch]",
     }
 
-    tmpfp = iemplot.simple_grid_fill(lons, lats, total / 25.4, cfg)
+    # Scale factor is 10
+    tmpfp = iemplot.simple_grid_fill(lons, lats, total / 2.54, cfg)
     pqstr = "plot ac %s00 iowa_q2_1d.png iowa_q2_1d.png png" % (
             ts.strftime("%Y%m%d%H"), )
     iemplot.postprocess(tmpfp, pqstr)
