@@ -8,6 +8,14 @@ import iemplot
 import numpy
 import os, sys
 
+def make_fp(ts):
+    """
+    Return a string for the filename expected for this timestamp
+    """
+    return "/mnt/a1/ARCHIVE/data/%s/q2/tile2/q2rad_hsr_nc/short_qpe/%s00.nc" % (
+        ts.strftime("%Y/%m/%d"), 
+        ts.strftime("%Y%m%d%H%M") )
+
 def doit(ts):
     """
     Create a plot of precipitation stage4 estimates for some day
@@ -19,14 +27,14 @@ def doit(ts):
     lons = numpy.arange(-110., -89.99, 0.01) 
     lats = numpy.arange(55.0, 39.99, -0.01)
 
-
-    fp = "/mnt/a1/ARCHIVE/data/%s/q2/tile2/q2rad_hsr_nc/short_qpe/%s00.nc" % (
-        ts.strftime("%Y/%m/%d"), 
-        ts.strftime("%Y%m%d%H%M") )
-    if not os.path.isfile(fp):
-        return
-           
-    nc = netCDF3.Dataset(fp)
+    limit = 20
+    while not os.path.isfile(make_fp(ts)):
+        ts -= mx.DateTime.RelativeDateTime(minutes=5)
+        if limit == 0:
+            print "NO Q2 Files Found!"
+            return
+        limit -= 1
+    nc = netCDF3.Dataset(make_fp(ts))
     val = nc.variables["preciprate_hsr"][:]
     nc.close()
         
@@ -58,4 +66,4 @@ if __name__ == "__main__":
         doit(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
                                    int(sys.argv[4]), int(sys.argv[5])))
     else:
-        doit(mx.DateTime.gmtime() - mx.DateTime.RelativeDateTime(minutes=5))
+        doit( mx.DateTime.gmtime() )
