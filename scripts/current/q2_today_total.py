@@ -52,7 +52,7 @@ def doday(ts):
     }
 
     # Scale factor is 10
-    tmpfp = iemplot.simple_grid_fill(lons, lats, total / 2.54, cfg)
+    tmpfp = iemplot.simple_grid_fill(lons, lats, total / 254.0, cfg)
     pqstr = "plot ac %s00 iowa_q2_1d.png iowa_q2_1d.png png" % (
             ts.strftime("%Y%m%d%H"), )
     iemplot.postprocess(tmpfp, pqstr)
