@@ -15,11 +15,23 @@ include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
 $iem = new IEMAccess();
 
+/* Lets also get the traffic data, please */
+$rs = pg_query($iem->dbconn, "select l.nwsli, t.* from rwis_traffic t, 
+	rwis_locations l where l.id = t.sensor_id and lane_id < 4");
+$traffic = Array();
+for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+	if (! array_key_exists($row["nwsli"], $traffic)){
+		$traffic[$row["nwsli"]] = Array("avgspeed0" => "M", 
+		"avgspeed1" => "M", "avgspeed2" => "M", "avgspeed3" => "M");
+	}
+	$traffic[$row["nwsli"]]["avgspeed"+ $row["lane_id"]] = $row["avg_speed"];
+}
+
 $mydata = $iem->getNetwork("IA_RWIS");
 
 $rwis = fopen('wxc_iadot.txt', 'w');
 fwrite($rwis, "Weather Central 001d0300 Surface Data
-  18
+  22
    5 Station
   52 CityName
    2 State
@@ -38,12 +50,20 @@ fwrite($rwis, "Weather Central 001d0300 Surface Data
    4 P3 Temp
    4 P4 Temp
    4 Pave Ave Temp
+   3 Sensor 0 Average Speed
+   3 Sensor 1 Average Speed
+   3 Sensor 2 Average Speed
+   3 Sensor 3 Average Speed
 ");
  
 
 
 $now = time();
 while ( list($key, $val) = each($mydata) ) {
+	if (! array_key_exists($key,$traffic)){
+		$traffic[$key] = Array("avgspeed0" => "M", 
+		"avgspeed1" => "M", "avgspeed2" => "M", "avgspeed3" => "M");
+	}
   $tdiff = $now - $val->db["ts"];
 
   if ($val->db['tsf0'] == "") $val->db['tsf0'] = -99.99;
@@ -83,7 +103,7 @@ while ( list($key, $val) = each($mydata) ) {
   if (round($val->db['pave_avg'],0) == -100) $val->db['pave_avg'] = 'M';
   else $val->db['pave_avg'] = round($val->db['pave_avg'],0);
 
-  $s = sprintf("%5s %52s %2s %7s %8s %2s %4s %5s %5s %4s %4s %4s %4s %4s %4s %4s %4s %4s\n", $key, 
+  $s = sprintf("%5s %52s %2s %7s %8s %2s %4s %5s %5s %4s %4s %4s %4s %4s %4s %4s %4s %4s %3s %3s %3s %3s\n", $key, 
     $cities[$key]['name'], 'IA', round($cities[$key]['lat'],2), 
      round($cities[$key]['lon'],2),
      date('d', $val->db['ts'] + (6*3600) ), date('H', $val->db['ts'] + (6*3600)),
@@ -92,7 +112,9 @@ while ( list($key, $val) = each($mydata) ) {
      $val->db['rwis_subf'],
      $val->db['tsf0'], $val->db['tsf1'], 
      $val->db['tsf2'], $val->db['tsf3'],
-     $val->db['pave_avg'] ); 
+     $val->db['pave_avg'], $traffic[$key]["avgspeed0"],
+     $traffic[$key]["avgspeed1"], $traffic[$key]["avgspeed2"],
+      $traffic[$key]["avgspeed3"]); 
   fwrite($rwis, $s);
   }
 } // End of while
