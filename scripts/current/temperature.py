@@ -7,9 +7,11 @@ import iemplot, random
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb, mesonet
-i = iemdb.iemdb()
-iem = i['iem']
+import iemdb
+import psycopg2.extras
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
 
 def uv(sped, drct2):
   #print "SPED:", sped, type(sped), "DRCT2:", drct2, type(drct2)
@@ -27,7 +29,7 @@ SELECT
 FROM 
   current
 WHERE
-  (network ~* 'ASOS' or network = 'IA_AWOS') and network != 'IQ_ASOS' and
+  (network ~* 'ASOS' or network = 'AWOS') and network != 'IQ_ASOS' and
   (valid + '30 minutes'::interval) > now() and
   tmpf >= -50 and tmpf < 120
 """
@@ -36,13 +38,14 @@ lats = []
 lons = []
 vals = []
 valmask = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-  lats.append( rs[i]['lat'] + (random.random() * 0.01))
-  lons.append( rs[i]['lon'] )
-  vals.append( rs[i]['tmpf']  )
-  valmask.append(  (rs[i]['network'] in ['AWOS','IA_AWOS']) )
+icursor.execute( sql )
+for row in icursor:
+  lats.append( row['lat'] )
+  lons.append( row['lon'] )
+  vals.append( row['tmpf']  )
+  valmask.append(  (row['network'] in ['AWOS','IA_ASOS']) )
   #valmask.append(  False )
+print valmask
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
@@ -58,5 +61,7 @@ cfg = {
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
-pqstr = "plot c 000000000000 iowa_tmpf.png bogus png"
+pqstr = "plot ac %s00 iowa_tmpf.png iowa_tmpf_%s.png png" % (
+                mx.DateTime.gmt().strftime("%Y%m%d%H"),
+                mx.DateTime.gmt().strftime("%H"))
 iemplot.postprocess(tmpfp, pqstr)
