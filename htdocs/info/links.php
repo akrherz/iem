@@ -31,19 +31,13 @@ Health Dep- artment, and the Linn County Health Department. You can
 access this data in the following locations:</p>
 
 <ul>
-<li><A href="http://www.linncleanair.org/Content/Air-Quality/Current-Air-Quality-Conditions-and-Forecast.aspx">Linn County Health Department</A> (monitors in Linn County, Waterloo, Waverly) 
-<br /><A href="http://www.linncleanair.org/Default.aspx">http://www.linncleanair.org/Default.aspx</A>
-<br /></li>
+<li><A href="http://www.linncleanair.org/Default.aspx">Linn County Health Department</A> (monitors in Linn County, Waterloo, Waverly) </li>
 
-<li><A href="http://www.airquality.co.polk.ia.us/PollutantGraphDisplay.aspx"><FONT color=#800080>Polk County Air Pollution Control</FONT></A> (monitors in Polk County)
-<br /><A href="http://www.polkcountyiowa.gov/airquality/">http://www.polkcountyiowa.gov/airquality/</A></li>
+<li><A href="http://www.polkcountyiowa.gov/airquality/">Polk County Air Pollution Control</A> (monitors in Polk County)</li>
 
-<LI><A href="http://www.uhl.uiowa.edu/services/ambient/"><FONT color=#800080>University of Iowa Hygienic Laboratory Air Monitoring Data</FONT></A> (monitors throughout Iowa)<BR>Click ‘Real-time Continuous Data’ in left tan column for current air quality monitor readings. 
-<br /><A href="http://www.uhl.uiowa.edu/services/ambient/">http://www.uhl.uiowa.edu/services/ambient/</A></li>
+<LI><A href="http://www.uhl.uiowa.edu/services/ambient/">University of Iowa Hygienic Laboratory Air Monitoring Data</A> (monitors throughout Iowa)<BR>Click ‘Real-time Continuous Data’ in left tan column for current air quality monitor readings.</li>
 
-<li><A href="http://www.epa.gov/airnow/">EPA AIRNOW (national maps)</A>
- <br /><A href="http://airnow.gov/">http://airnow.gov/</A>
-</li>
+<li><A href="http://airnow.gov/">EPA AIRNOW</A>(national maps)</li>
 </ul>
 
 <h3 class="subtitle">Iowa Links:</h3>
