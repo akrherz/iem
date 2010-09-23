@@ -42,18 +42,18 @@ def Main():
 
     delim = form["format"][0]
     tz = form["tz"][0]
-    timeRange = form["timeRange"][0]
+    #timeRange = form["timeRange"][0]
     mydb = asosdb
 
-    if timeRange == "allYear":
-        sts = sTS + mx.DateTime.RelativeDateTime(month=1,day=1)
-        ets = sTS + mx.DateTime.RelativeDateTime(month=1,day=1,years=1)
-    elif timeRange == "allMonth":
-        sts = sTS + mx.DateTime.RelativeDateTime(day=1)
-        ets = sTS + mx.DateTime.RelativeDateTime(months=1,day=1)
-    elif timeRange == "rangeDays":
-        sts = sTS
-        ets = eTS
+    #if timeRange == "allYear":
+    #    sts = sTS + mx.DateTime.RelativeDateTime(month=1,day=1)
+    #    ets = sTS + mx.DateTime.RelativeDateTime(month=1,day=1,years=1)
+    #elif timeRange == "allMonth":
+    #    sts = sTS + mx.DateTime.RelativeDateTime(day=1)
+    #    ets = sTS + mx.DateTime.RelativeDateTime(months=1,day=1)
+    #elif timeRange == "rangeDays":
+    #    sts = sTS
+    #    ets = eTS
 
     if dataVars[0] == "all":
         queryCols = "tmpf, dwpf, relh, drct, sknt, p01m, alti, vsby, gust, skyc1, skyc2, skyc3, skyl1, skyl2, skyl3, metar"
