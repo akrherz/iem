@@ -29,12 +29,12 @@ MW_SOUTH = 30.37
 MW_NX    = 100
 MW_NY    = 100
 # Define grid bounds, CONUS
-CONUS_WEST  = -126.0
-CONUS_EAST  = -66.1
-CONUS_NORTH = 50.51
-CONUS_SOUTH = 24.0
+CONUS_WEST  = -126.2
+CONUS_EAST  = -65.9
+CONUS_NORTH = 53.7
+CONUS_SOUTH = 20.8
 CONUS_NX    = 140
-CONUS_NY    = 140
+CONUS_NY    = 150
 
 def hilo_valplot(lons, lats, highs, lows, cfg):
     """
@@ -307,7 +307,7 @@ def manual_title(wks, cfg):
         txres = Ngl.Resources()
         txres.txFontHeightF = 0.013
         txres.txJust        = "CenterLeft"
-        Ngl.text_ndc(wks, "Map Valid: "+ cfg["_valid"], .11, .815, txres)
+        Ngl.text_ndc(wks, "Map Valid: "+ cfg["_valid"], .11, .811, txres)
         del txres
 
 def watermark(wks):
@@ -501,12 +501,12 @@ def conus():
     res.mpLambertParallel2F    = 45.0
     res.mpLambertMeridianF     = -95.0            
     res.mpLimitMode            = "LatLon"
-    res.mpMinLatF              = 24.0                
-    res.mpMaxLatF              = 50.0              
+    res.mpMinLatF              = 22.0                
+    res.mpMaxLatF              = 52.0              
     res.mpMinLonF              = -119.0          
     res.mpMaxLonF              = -74.0  
-    
-    res.mpPerimOn    = False                # Draw Border around Map
+   
+    res.mpPerimOn    = False
     res.mpDataBaseVersion       = "MediumRes"     # Don't need hires coast
     res.mpDataSetName           = "Earth..2"      # includes counties
     res.mpGridAndLimbOn         = False           # Annoying
