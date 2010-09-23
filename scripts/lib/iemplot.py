@@ -669,9 +669,9 @@ def makefeature(tmpfp):
         return
     tomorrow = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=1)
     # Step 1. Convert to Big PNG
-    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage %s.ps %s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
+    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors 256 +repage %s.ps %s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
     os.system( cmd )
-    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 320x290 -density 80  +repage %s.ps %s_s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
+    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 320x290 -density 80  +repage -depth 8 -colors 256 %s.ps %s_s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
     os.system( cmd )
     # Step 4: Cleanup
     os.remove("%s.ps" % (tmpfp,) )
