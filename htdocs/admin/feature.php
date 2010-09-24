@@ -51,12 +51,14 @@ if ( isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes"){
        "action_links" => $action_links,
        "target_id" => null,
        "uid" => 157789644737));
+  $story_fbid = explode("_", $fbid);
+  $story_fbid = $story_fbid[1];
   
 }
 if ($story != null && $title != null){
   pg_query($mesosite, "DELETE from feature WHERE date(valid) = 'TODAY'");
   pg_execute($mesosite, "INJECTOR", Array($title, $story, $caption,
-             $voting, $tags, $fbid) );
+             $voting, $tags, $story_fbid) );
 }
 
 include("$rootpath/include/header.php");
