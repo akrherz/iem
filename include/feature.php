@@ -4,7 +4,7 @@ function printTags($tokens)
 {
   global $rooturl;
   if (sizeof($tokens) == 0 || $tokens[0] == ""){ return "";}
-  $s = "<span style=\"font-size: smaller; float: left;\">Tags: &nbsp; ";
+  $s = "<br /><span style=\"font-size: smaller; float: left;\">Tags: &nbsp; ";
   while (list($k,$v) = each($tokens))
   {
     $s .= sprintf("<a href=\"%s/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $rooturl, $v, $v);
