@@ -4,11 +4,12 @@ function printTags($tokens)
 {
   global $rooturl;
   if (sizeof($tokens) == 0 || $tokens[0] == ""){ return "";}
-  $s = "<br /><strong><a href=\"${rooturl}/onsite/features/tags/\">Tags</a>:</strong> &nbsp; ";
+  $s = "<br /><span style=\"font-size: smaller; float: left;\">Tags: &nbsp; ";
   while (list($k,$v) = each($tokens))
   {
     $s .= sprintf("<a href=\"%s/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $rooturl, $v, $v);
   }
+  $s .= "</span>";
   return $s;
 }
 
@@ -27,6 +28,8 @@ function genFeature()
   $good = intval($row["good"]);
   $bad = intval($row["bad"]);
   $tags = explode(",", $row["tags"]);
+  $fbid = $row["fbid"];
+  $fburl = "http://www.facebook.com/pages/IEM/157789644737?v=wall&story_fbid=".$fbid;
   /* Hehe, check for a IEM vote! */
   $voted = 0;
   if (array_key_exists('foid', $_COOKIE) && $_COOKIE["foid"] == $foid)
@@ -60,7 +63,12 @@ function genFeature()
 
   $s = "<span style=\"font-size: larger; font-weight: bold;\">". $row["title"] ."</span><br />\n";
   $s .= "<span style=\"font-size: smaller; float: left;\">Posted: " . $row["webdate"] ."</span>";
-  $s .= "<span style=\"font-size: smaller; float: right;\"><a href=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\">Permalink</a> | <a href=\"$rooturl/onsite/features/past.php\">Past Features</a> | <a href=\"$rooturl/onsite/features/tags/\">Tags</a></span>";
+  $s .= printTags($tags);
+  $s .= "<span style=\"font-size: smaller; float: right;\">
+  <a href=\"$fburl\"><img src=\"http://facebook.com/favicon.ico\" border=\"0\" />Facebook</a> | 
+  <a href=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\">Permalink</a> | 
+  <a href=\"$rooturl/onsite/features/past.php\">Past Features</a> | 
+  <a href=\"$rooturl/onsite/features/tags/\">Tags</a></span>";
 
  /* Feature Image! */
   $s .= "<div style=\"background: #eee; float: right; border: 1px solid #ee0; padding: 3px; margin-left: 10px; width: ${width}px;\"><a href=\"$rooturl/onsite/features/". $row["imageref"] .".png\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.png\" alt=\"Feature\" /></a><br />". $row["caption"] ."</div>";
@@ -68,18 +76,17 @@ function genFeature()
   $s .= "<br /><div class='story' style=\"text-align: justify;\">". $row["story"] ."</div>";
 
 /* Rate Feature and Past ones too! */
+$s .= "<br clear=\"all\" />";
+$s .= "<div style=\"float: left; margin-bottom: 10px; margin-left: 15px; \">";
 if ($row["voting"] == "f"){
-  $s .= "<br clear=\"all\" />";
-}
-else if ($voted){
-  $s .= "<br clear=\"all\" /><div style=\"float: left; margin-bottom: 10px;\">&nbsp; &nbsp;<strong> Rate Feature: </strong> Good ($good votes) or Bad ($bad votes) &nbsp; Thanks for voting!";
-  $s .= printTags($tags);
-  $s .= "</div>";
+  
+} else if ($voted){
+  $s .= "<strong> Rate Feature: </strong> Good ($good votes) or Bad ($bad votes) &nbsp; Thanks for voting!";
+
 } else {
-  $s .= "<br clear=\"all\" /><div style=\"float: left; margin-bottom: 10px;\">&nbsp; &nbsp;<strong> Rate Feature: </strong> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes)";
-  $s .= printTags($tags);
-  $s .= "</div>";
+  $s .= "<strong> Rate Feature: </strong> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes)";
 }
+$s .= "</div>";
 
 /* Now, lets look for older features! */
 $s .= "<br clear=\"all\" /><strong>Previous Years' Features</strong><table width=\"100%\">";
