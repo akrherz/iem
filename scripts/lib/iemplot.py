@@ -676,7 +676,7 @@ def makefeature(tmpfp):
     # Step 4: Cleanup
     os.remove("%s.ps" % (tmpfp,) )
 
-def postprocess(tmpfp, pqstr, rotate=""):
+def postprocess(tmpfp, pqstr, rotate="", thumb=False, thumbpqstr=""):
     """
     Helper to postprocess the plot
     """
@@ -686,6 +686,7 @@ def postprocess(tmpfp, pqstr, rotate=""):
     # Step 1. Convert to PNG
     cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors 256 +repage %s.ps %s.png" % (rotate, tmpfp, tmpfp)
     os.system( cmd )
+
     # Step 2: Send to LDM
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s.png" % (pqstr, tmpfp)
     os.system( cmd )
@@ -695,6 +696,10 @@ def postprocess(tmpfp, pqstr, rotate=""):
             os.system("xv %s.png" % (tmpfp,))
         except:
             pass
+    if thumb:
+        cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 320x270 -depth 8 -colors 90 +repage %s.ps %s.png" % (rotate, tmpfp, tmpfp)
+        os.system( cmd )
+        os.system( thumbpqstr )
     # Step 4: Cleanup
     os.remove("%s.png" % (tmpfp,) )
     os.remove("%s.ps" % (tmpfp,) )
