@@ -699,7 +699,8 @@ def postprocess(tmpfp, pqstr, rotate="", thumb=False, thumbpqstr=""):
     if thumb:
         cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 320x270 -depth 8 -colors 90 +repage %s.ps %s.png" % (rotate, tmpfp, tmpfp)
         os.system( cmd )
-        os.system( thumbpqstr )
+        cmd = "/home/ldm/bin/pqinsert -p '%s' %s.png" % (thumbpqstr, tmpfp)
+        os.system( cmd )
     # Step 4: Cleanup
     os.remove("%s.png" % (tmpfp,) )
     os.remove("%s.ps" % (tmpfp,) )
