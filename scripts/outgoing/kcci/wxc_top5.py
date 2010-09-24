@@ -4,7 +4,7 @@ import os, mx.DateTime, pg, sys
 iemdb = pg.connect("iem", "iemdb", user="nobody")
 
 rs = iemdb.query("SELECT station from current WHERE network = 'KCCI' and \
-  valid > 'TODAY' and station not in ('SCEI4','SWII4') ORDER by pday DESC").dictresult()
+  valid > 'TODAY' and station not in ('SCEI4','SWII4', 'SKCI4') ORDER by pday DESC").dictresult()
 dict = {}
 if len(rs) < 5:
   sys.exit(0)
