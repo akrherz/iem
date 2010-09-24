@@ -94,7 +94,8 @@ var store = new Ext.data.JsonStore({
             'groupname',
             'template',
             {name: 'sts', type: 'date', dateFormat: 'Y-m-d'},
-            {name: 'interval', type: 'int'}
+            {name: 'interval', type: 'int'},
+            {name: 'avail_lag', type: 'int'}
     ],
     idProperty : 'id',
     root       : 'products',
@@ -175,7 +176,10 @@ store.on('load', function(){
     if (tokens2[1] != "0"){
       gts = Date.parseDate( tokens2[1], "YmdHi" );
       appTime = gts.fromUTC();
-    } 
+    } else {
+    	lag = store.getById(idx).data.avail_lag;
+    	appTime = appTime.add(Date.MINUTE, 0 - lag);
+    }
   } else {
     /* We are going to default to the IEM Plot */
     idx = 1;
@@ -189,13 +193,14 @@ store.on('load', function(){
 
 
 function dayofyear(d) {   // d is a Date object
-var yn = d.getFullYear();
-var mn = d.getMonth();
-var dn = d.getDate();
-var d1 = new Date(yn,0,1,12,0,0); // noon on Jan. 1
-var d2 = new Date(yn,mn,dn,12,0,0); // noon on input date
-var ddiff = Math.round((d2-d1)/864e5);
-return ddiff+1; }
+	var yn = d.getFullYear();
+	var mn = d.getMonth();
+	var dn = d.getDate();
+	var d1 = new Date(yn,0,1,12,0,0); // noon on Jan. 1
+	var d2 = new Date(yn,mn,dn,12,0,0); // noon on input date
+	var ddiff = Math.round((d2-d1)/864e5);
+	return ddiff+1;
+};
 
 /* Helper function to set the sliders to a given time! */
 function setTime(){
@@ -232,7 +237,7 @@ function updateDT(){
   h = hs.getValue();
   i = ms.disabled ? 0:  ms.getValue();
   //console.log("y ["+ y +"] d ["+ d +"] h ["+ h +"] i ["+ i +"]");
-
+  
   newTime = new Date('01/01/'+y).add(Date.DAY, d).add(Date.HOUR, h).add(Date.MINUTE,i);
   //console.log("updateDT() newTime is "+ newTime );
   if (newTime == appTime && ! displayDT.isInitial){ 
@@ -246,12 +251,13 @@ function updateDT(){
     //console.log("Couldn't find metadata!");
     return; 
   }
+  ceiling = (new Date()).add(Date.MINUTE, 0 - meta.data.avail_lag);
   /* Make sure we aren't in the future! */
-  if (appTime.add(Date.MINUTE,-1) > (new Date())){
+  if (appTime.add(Date.MINUTE,-1) > ceiling){
     //console.log("Date is: "+ (new Date()));
     //console.log("appTime is: "+ appTime);
     //console.log("Future timestamp: "+ (appTime.add(Date.MINUTE,-1) - (new Date())) +" diff");
-    appTime = new Date(); 
+    appTime = ceiling; 
     setTime(); 
     return; 
   }
