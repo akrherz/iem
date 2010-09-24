@@ -1,9 +1,6 @@
 cd delta
 ./RUN.csh
 
-cd ../qc
-/mesonet/python/bin/python correctGusts.py
-
 cd ../ingestors
 /mesonet/python/bin/python beloit.py
 
