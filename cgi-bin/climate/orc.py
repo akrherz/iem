@@ -10,8 +10,8 @@ climatedb = pg.connect('coop','iemdb', user='nobody')
 iemaccess = pg.connect('iem', 'iemdb', user='nobody')
 
 ADJUSTMENT = 0
-s = mx.DateTime.DateTime(2009,6,18)
-e = mx.DateTime.DateTime(2009,7,17)
+s = mx.DateTime.DateTime(2010,8,18)
+e = mx.DateTime.DateTime(2010,9,17)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 def averageTemp(db, hi="high", lo="low"):
@@ -71,7 +71,7 @@ def main():
 
   # Lemars
   rs = climatedb.query("SELECT high, low, \
-    to_char(valid, '2008-mm-dd') as valid from climate \
+    to_char(valid, '2009-mm-dd') as valid from climate \
     WHERE station = 'ia4735'").dictresult()
 
   for i in range(len(rs)):
@@ -80,7 +80,7 @@ def main():
       db[ rs[i]['valid'] ]['avg_low'] = rs[i]['low']
 
   rs = climatedb.query("SELECT high, low, \
-    to_char(valid, '2009-mm-dd') as valid from climate \
+    to_char(valid, '2010-mm-dd') as valid from climate \
     WHERE station = 'ia4735'").dictresult()
                                                                                 
   for i in range(len(rs)):
