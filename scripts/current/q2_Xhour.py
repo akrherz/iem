@@ -63,7 +63,7 @@ def doit(ts, hours):
     routes = "c"
     if ts.minute == 0:
         routes = "ac"
-    tmpfp = iemplot.simple_grid_fill(lons, lats, val / 254.0, cfg)
+    tmpfp = iemplot.simple_grid_fill(lons, lats, total / 254.0, cfg)
     pqstr = "plot %s %s iowa_q2_%sh.png q2/iowa_q2_%sh_%s00.png png" % (
             routes, ts.strftime("%Y%m%d%H%M"), hours, hours, 
             ts.strftime("%H"))
