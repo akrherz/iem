@@ -26,3 +26,4 @@ sleep 60
 
 cd ../../current
 /mesonet/python/bin/python q2_5min_rate.py
+/mesonet/python/bin/python q2_today_total.py
