@@ -3,7 +3,7 @@ MAP
 NAME base4326
 STATUS ON
 SIZE 640 480
-FONTSET "../fonts/fonts.list"
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 EXTENT -104 37 -87 49
 UNITS DD
 SHAPEPATH "./"
@@ -900,6 +900,24 @@ LAYER
     COLOR -1 -1 -1
     LABEL
       COLOR  255 255 0
+      OUTLINECOLOR  0 0 0
+      SHADOWCOLOR 0 0 0
+      SHADOWSIZE 1 1
+      SIZE 12
+      MINSIZE 4
+      MAXSIZE 18
+      TYPE TRUETYPE
+      FONT arial
+      ANTIALIAS false
+      BUFFER 0
+      FORCE true
+      POSITION UC
+    END
+  END
+  CLASS
+    COLOR -1 -1 -1
+    LABEL
+      COLOR  0 255 0
       OUTLINECOLOR  0 0 0
       SHADOWCOLOR 0 0 0
       SHADOWSIZE 1 1
