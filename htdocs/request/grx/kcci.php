@@ -56,7 +56,7 @@ while (list($key, $iemob) = each($snet) ){
     if ($tdiff > 3600) continue;
     if ($mydata["sknt"] < 2.5) $mydata["drct"] = 0;
 
-echo "Object: ".$meta["lat"].",".$meta["lon"]."
+echo "Object: ".$meta["lon"].",".$meta["lat"]."
   Threshold: 999 
   Icon: 0,0,". $mydata["drct"] .",". s2icon( floatval($mydata["sknt"]) ) ."
   Icon: 0,0,000,2,13,\"".$meta["city"]." @ ". strftime("%d %b %I:%M %p", $mydata['ts']) ."\\nTemp: ".$mydata["tmpf"]."F (Dew: ".$mydata["dwpf"]."F)\\nWind: ". drct2txt($mydata["drct"]) ." @ ". intval($mydata["sknt"]) ."kt\\n\" 
