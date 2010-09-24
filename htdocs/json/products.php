@@ -18,6 +18,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
         "groupname" => $row["groupname"], 
         "interval" => $row["interval"],
         "time_offset" => $row["time_offset"],
+  		"avail_lag"	=> $row["avail_lag"],
         "sts" => substr($row["sts"],0,10));
   $ar["products"][] = $z;
 }
@@ -36,6 +37,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
         "name" => $row["name"], 
         "interval" => 5,
         "time_offset" => 0,
+  		"avail_lag"	=> 0,
         "sts" => substr($row["sts"],0,10));
   $ar["products"][] = $z;
 }
