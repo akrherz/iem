@@ -79,4 +79,4 @@ if __name__ == "__main__":
                                    int(sys.argv[4]), int(sys.argv[5])),
                                    int(sys.argv[6]))
     else:
-        doit( mx.DateTime.gmtime(), int(sys.argv[1])
+        doit( mx.DateTime.gmtime(), int(sys.argv[1]) )
