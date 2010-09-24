@@ -28,7 +28,7 @@ def doday(ts):
             now.gmtime().strftime("%Y/%m/%d"), 
             now.gmtime().strftime("%Y%m%d%H%M") )
         if os.path.isfile(fp):
-            print "USING %s NCVAR %s DIVISOR %s" % (fp, ncvar, divisor)
+            #print "USING %s NCVAR %s DIVISOR %s" % (fp, ncvar, divisor)
             lts = now
             nc = netCDF3.Dataset(fp)
             val = nc.variables[ncvar][:] / divisor
