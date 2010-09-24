@@ -67,7 +67,9 @@ def doit(ts, hours):
     pqstr = "plot %s %s iowa_q2_%sh.png q2/iowa_q2_%sh_%s00.png png" % (
             routes, ts.strftime("%Y%m%d%H%M"), hours, hours, 
             ts.strftime("%H"))
-    iemplot.postprocess(tmpfp, pqstr)
+    thumbpqstr = "plot c 000000000000 iowa_q2_%sh_thumb.png bogus png" % (
+                hours,)
+    iemplot.postprocess(tmpfp, pqstr, thumb=True, thumbpqstr=thumbpqstr)
     
     
     
