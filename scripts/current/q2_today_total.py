@@ -24,9 +24,9 @@ def doday(ts):
     divisor = 1.0
 
     while now < ets:
-        fp = "/mnt/a1/ARCHIVE/data/%s/q2/tile2/q2rad_hsr_nc/short_qpe/%s0000.nc" % (
+        fp = "/mnt/a1/ARCHIVE/data/%s/q2/tile2/q2rad_hsr_nc/short_qpe/%s00.nc" % (
             now.gmtime().strftime("%Y/%m/%d"), 
-            now.gmtime().strftime("%Y%m%d%H") )
+            now.gmtime().strftime("%Y%m%d%H%M") )
         if os.path.isfile(fp):
             print "USING %s NCVAR %s DIVISOR %s" % (fp, ncvar, divisor)
             lts = now
@@ -39,7 +39,7 @@ def doday(ts):
             
             nc.close()
         # Now we need to go start looking at the 5 minute files
-        if now.hour == ts.hour:
+        if now.hour == ts.hour and now.minute == 0:
             interval = mx.DateTime.RelativeDateTime(minutes=5)
             ets = now + mx.DateTime.RelativeDateTime(hours=1)
             ncvar = "preciprate_hsr"
