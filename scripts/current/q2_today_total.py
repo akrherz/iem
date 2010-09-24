@@ -20,21 +20,30 @@ def doday(ts):
     lts = None
     lons = numpy.arange(-110., -89.99, 0.01) 
     lats = numpy.arange(55.0, 39.99, -0.01)
+    ncvar = "rad_hsr_1h"
+    divisor = 1.0
 
     while now < ets:
         fp = "/mnt/a1/ARCHIVE/data/%s/q2/tile2/q2rad_hsr_nc/short_qpe/%s0000.nc" % (
             now.gmtime().strftime("%Y/%m/%d"), 
             now.gmtime().strftime("%Y%m%d%H") )
         if os.path.isfile(fp):
+            print "USING %s NCVAR %s DIVISOR %s" % (fp, ncvar, divisor)
             lts = now
             nc = netCDF3.Dataset(fp)
-            val = nc.variables["rad_hsr_1h"][:]
+            val = nc.variables[ncvar][:] / divisor
             if total is None:
                 total = numpy.where(val > 0, val, 0) 
             else:
                 total += numpy.where( val > 0, val, 0)
             
             nc.close()
+        # Now we need to go start looking at the 5 minute files
+        if now.hour == ts.hour:
+            interval = mx.DateTime.RelativeDateTime(minutes=5)
+            ets = now + mx.DateTime.RelativeDateTime(hours=1)
+            ncvar = "preciprate_hsr"
+            divisor = 12.0
         now += interval
         
     # Now we dance
