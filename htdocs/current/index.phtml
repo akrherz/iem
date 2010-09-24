@@ -17,7 +17,7 @@ include("../../config/settings.inc.php");
 
 
 <table border=0 width=780px>
-<tr><td valign="top">
+<tr><td valign="top" width="33%">
 
 <h3 class="subtitle">Mesonet Plots</h3>
 <ul>
@@ -31,25 +31,24 @@ include("../../config/settings.inc.php");
  <li><a href="<?php echo $rooturl; ?>/data/summary/iowa_asos_12z_low.png">12Z Low Temperature</a></li>
  <li><a href="<?php echo $rooturl; ?>/data/summary/iowa_asos_high.png">Today High Temperature</a></li>
 </ul>
-<h3 class="subtitle">Precipitation</h3>
+
+<h3 class="subtitle">NMQ Q2 Precipitation Plots</h3>
+<p>These plots are from the <a href="http://nmq.ou.edu">National Mosaic QPE</a>
+project providing precipitation estimates at a 5 minute and 1 km interval.
 <ul>
-  <li><a href="<?php echo $rooturl; ?>/timemachine/#37.0">Iowa Precipitation Contour [COOP]</a></li>
-  <li><a href="<?php echo $rooturl; ?>/timemachine/#38.0">Midwest Precipitation Contour [COOP]</a></li>
-  <li><a href="<?php echo $rooturl; ?>/timemachine/#39.<?php echo gmdate("YmdH", time() -3600); ?>00">Iowa StageIV Hourly Estimate</a></li>
-  <li><a href="<?php echo $rooturl; ?>/timemachine/#40.<?php echo gmdate("YmdH", time() -3600); ?>00">Midwest StageIV Hourly Estimate</a></li>
-  <li><a href="<?php echo $rooturl; ?>/timemachine/#41.<?php echo date("Ymd"); ?>0000">Iowa StageIV Daily Estimate</a></li>
-  <li><a href="<?php echo $rooturl; ?>/timemachine/#42.<?php echo date("Ymd"); ?>0000">Midwest Daily Estimate</a></li>
-  <li><a href="<?php echo $rooturl; ?>/timemachine/#43.<?php echo date("Ymd"); ?>0000">US StageIV Daily Estimate</a></li>
-  <li><a href="<?php echo $rooturl; ?>/timemachine/#44.<?php echo gmdate("YmdH", time() -360); ?>00">Q2 5 Minute Interval Rainfall Intensity</a></li>
-  <li><a href="<?php echo $rooturl; ?>/timemachine/#45.<?php echo gmdate("YmdH", time() -360); ?>00">Q2 Today's Rainfall</a></li>
-  <li><a href="<?php echo $rooturl; ?>/data/1hprecip.gif">ASOS + AWOS (Last Hour)</a></li>
-  <li><a href="<?php echo $rooturl; ?>/data/summary/today_prec.png">ASOS + AWOS (Today)</a></li>
+  <li><a href="<?php echo $rooturl; ?>/timemachine/#44.<?php echo gmdate("YmdH", time() -360); ?>00">Current Precip Intensity</a></li>
+  <li><a href="<?php echo $rooturl; ?>/timemachine/#45.<?php echo gmdate("YmdH", time() -360); ?>00">Today's Precip</a></li>
+  <li>1 Hour Total (<a href="../data/iowa_q2_1h.png">Current</a> or <a href="../timemachine/#46.0">Archive</a> )</li>
+  <li>3 Hour Total (<a href="../data/iowa_q2_3h.png">Current</a> or <a href="../timemachine/#47.0">Archive</a> )</li>
+  <li>6 Hour Total (<a href="../data/iowa_q2_6h.png">Current</a> or <a href="../timemachine/#48.0">Archive</a> )</li>
 </ul>
+
+
 
 <h3 class="subtitle">External Website Resources:</h3>
 <a href="http://www.rap.ucar.edu/weather/surface/">RAP Surface Page</a>
 
-</td><td valign="top">
+</td><td valign="top" width="33%">
 
 <h3 class="subtitle">Single Variable Plots</h3>
 <ul>  <li><a href="<?php echo $rooturl; ?>/data/mesonet_altm.gif">Altimeter</a></li>
@@ -61,6 +60,19 @@ include("../../config/settings.inc.php");
   <li><a href="<?php echo $rooturl; ?>/timemachine/#16.<?php echo date('Ymd');?>0000">Wind Gust Today</a></li>
 </ul>
 
+<h3 class="subtitle">Precipitation</h3>
+<ul>
+  <li><a href="<?php echo $rooturl; ?>/timemachine/#37.0">Iowa Precipitation Contour [COOP]</a></li>
+  <li><a href="<?php echo $rooturl; ?>/timemachine/#38.0">Midwest Precipitation Contour [COOP]</a></li>
+  <li><a href="<?php echo $rooturl; ?>/timemachine/#39.<?php echo gmdate("YmdH", time() -3600); ?>00">Iowa StageIV Hourly Estimate</a></li>
+  <li><a href="<?php echo $rooturl; ?>/timemachine/#40.<?php echo gmdate("YmdH", time() -3600); ?>00">Midwest StageIV Hourly Estimate</a></li>
+  <li><a href="<?php echo $rooturl; ?>/timemachine/#41.<?php echo date("Ymd"); ?>0000">Iowa StageIV Daily Estimate</a></li>
+  <li><a href="<?php echo $rooturl; ?>/timemachine/#42.<?php echo date("Ymd"); ?>0000">Midwest Daily Estimate</a></li>
+  <li><a href="<?php echo $rooturl; ?>/timemachine/#43.<?php echo date("Ymd"); ?>0000">US StageIV Daily Estimate</a></li>
+
+  <li><a href="<?php echo $rooturl; ?>/data/1hprecip.gif">ASOS + AWOS (Last Hour)</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/summary/today_prec.png">ASOS + AWOS (Today)</a></li>
+</ul>
 
 <h3 class="subtitle">Temporal Change Plots</h3>
 <ul>
@@ -68,7 +80,7 @@ include("../../config/settings.inc.php");
   <li><a href="<?php echo $rooturl; ?>/GIS/apps/delta/plot.php">1 hour Pressure Change</a></li>
 </ul>
 
-</td><td valign="top">
+</td><td valign="top" width="33%">
 
 
 <h3 class="subtitle">Gridded Surface Plots:</h3>
