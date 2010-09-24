@@ -20,13 +20,15 @@ out = open("/tmp/awos_rtp.shef", 'w')
 out.write("""
 
 
-.BR DSM %s Z DH00/TAIRZY/TAIRZI/PPDRZZ/SFDRZZ/SDIRZZ
+.BR DSM %s Z DH00/TAIRZS/TAIRZI/PPDRZZ/SFDRZZ/SDIRZZ
 : IOWA AWOS RTP FIRST GUESS PROCESSED BY THE IEM
 :   06Z TO 00Z HIGH TEMPERATURE FOR %s
-:   06Z TO 00Z TODAY LOW TEMPERATURE
+:   06Z TO 00Z LOW TEMPERATURE FOR %s
 :   00Z YESTERDAY TO 00Z TODAY RAINFALL
 :   ...BASED ON REPORTED OBS...
-""" % ( ets.strftime("%m%d"), string.upper(sts12z.strftime("%d %b %Y")) ) )
+""" % ( ets.strftime("%m%d"), 
+	string.upper(sts12z.strftime("%d %b %Y")),
+	string.upper(sts12z.strftime("%d %b %Y")) ) )
 
 # We get 18 hour highs
 highs = {}
@@ -55,12 +57,7 @@ rs = iemaccess.query("select station, sum(precip) from \
 for i in range(len(rs)):
 	pcpn[ rs[i]["station"] ] = "%5.2f" % (float(rs[i]["sum"]),)
 
-pcpn["DEH"] = "M"
-pcpn["VTI"] = "M"
-pcpn["IIB"] = "M"
-pcpn["PEA"] = "M"
 pcpn["MXO"] = "M"
-pcpn["MPZ"] = "M"
 
 lows = {}
 rs = iemaccess.query("SELECT station, \
