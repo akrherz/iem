@@ -42,8 +42,8 @@ def doday(ts):
             else:
                 ncvar = "preciprate_hsr"
                 divisor = 12.0
-            print "USING %s NCVAR %s DIVISOR %s" % (makefp(now), 
-                                                    ncvar, divisor)
+            #print "USING %s NCVAR %s DIVISOR %s" % (makefp(now), 
+            #                                        ncvar, divisor)
             nc = netCDF3.Dataset(makefp(now))
             val = nc.variables[ncvar][:] / divisor
             if total is None:
@@ -56,6 +56,8 @@ def doday(ts):
     
     if total is None:
         return
+    # Set some bogus values to keep from complaining about all zeros?
+    total[10:20,10:20] = 20.
     # Now we dance
     cfg = { 
     'cnLevelSelectionMode': "ExplicitLevels",
