@@ -44,7 +44,7 @@ def doday(ts):
                 divisor = 12.0
             print "USING %s NCVAR %s DIVISOR %s" % (makefp(now), 
                                                     ncvar, divisor)
-            nc = netCDF3.Dataset(fp)
+            nc = netCDF3.Dataset(makefp(now))
             val = nc.variables[ncvar][:] / divisor
             if total is None:
                 total = numpy.where(val > 0, val, 0)
