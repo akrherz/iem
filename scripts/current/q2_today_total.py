@@ -8,44 +8,54 @@ import iemplot
 import numpy
 import os, sys
 
+def makefp(ts):
+    return "/mnt/a1/ARCHIVE/data/%s/q2/tile2/q2rad_hsr_nc/short_qpe/%s00.nc" % (
+            ts.gmtime().strftime("%Y/%m/%d"), 
+            ts.gmtime().strftime("%Y%m%d%H%M") )
+
 def doday(ts):
     """
     Create a plot of precipitation stage4 estimates for some day
     """
+    # First possible file we are interested in....
     sts = ts + mx.DateTime.RelativeDateTime(hour=1, minute=0)
-    ets = ts + mx.DateTime.RelativeDateTime(hour=1, days=1, minute=0)
-    interval = mx.DateTime.RelativeDateTime(hours=1)
-    now = sts
+    # Last possible file, base 5
+    ets = ts - mx.DateTime.RelativeDateTime(minutes= (ts.minute%5))
+    
+    now = ets
     total = None
     lts = None
     lons = numpy.arange(-110., -89.99, 0.01) 
     lats = numpy.arange(55.0, 39.99, -0.01)
     ncvar = "rad_hsr_1h"
     divisor = 1.0
+    interval = mx.DateTime.RelativeDateTime(minutes=5)
 
-    while now < ets:
-        fp = "/mnt/a1/ARCHIVE/data/%s/q2/tile2/q2rad_hsr_nc/short_qpe/%s00.nc" % (
-            now.gmtime().strftime("%Y/%m/%d"), 
-            now.gmtime().strftime("%Y%m%d%H%M") )
-        if os.path.isfile(fp):
-            #print "USING %s NCVAR %s DIVISOR %s" % (fp, ncvar, divisor)
-            lts = now
+    while now > sts:
+        if os.path.isfile(makefp(now)):
+            if lts is None:
+                lts = now
+            if now.minute == 0:
+                ncvar = "rad_hsr_1h"
+                divisor = 1.0
+                interval = mx.DateTime.RelativeDateTime(hours=1)
+            else:
+                ncvar = "preciprate_hsr"
+                divisor = 12.0
+            print "USING %s NCVAR %s DIVISOR %s" % (makefp(now), 
+                                                    ncvar, divisor)
             nc = netCDF3.Dataset(fp)
             val = nc.variables[ncvar][:] / divisor
             if total is None:
-                total = numpy.where(val > 0, val, 0) 
+                total = numpy.where(val > 0, val, 0)
             else:
                 total += numpy.where( val > 0, val, 0)
             
             nc.close()
-        # Now we need to go start looking at the 5 minute files
-        if now.hour == ts.hour and now.minute == 0:
-            interval = mx.DateTime.RelativeDateTime(minutes=5)
-            ets = now + mx.DateTime.RelativeDateTime(hours=1)
-            ncvar = "preciprate_hsr"
-            divisor = 12.0
-        now += interval
-        
+        now -= interval
+    
+    if total is None:
+        return
     # Now we dance
     cfg = { 
     'cnLevelSelectionMode': "ExplicitLevels",
