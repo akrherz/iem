@@ -38,7 +38,8 @@ def doit(ts):
     val = nc.variables["preciprate_hsr"][:]
     nc.close()
         
-        
+    # Put some bad values in just to make the plot happy
+    val[10:20,10:20] = 100.0
     # Now we dance
     cfg = { 
     'cnLevelSelectionMode': "ExplicitLevels",

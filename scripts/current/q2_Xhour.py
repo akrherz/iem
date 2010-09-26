@@ -43,7 +43,9 @@ def doit(ts, hours):
         else:
             total += nc.variables["rad_hsr_1h"][:]
         nc.close()
-        
+    
+    # Put in some bogus values
+    total[10:20,10:20] = 10.0
         
     # Now we dance
     cfg = { 
