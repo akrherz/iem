@@ -36,7 +36,7 @@ def doday(ts):
     interval = mx.DateTime.RelativeDateTime(minutes=5)
 
     while now > sts:
-        if os.path.isfile(makefp(now)):
+        if os.path.isfile(make_fp(now)):
             if lts is None:
                 lts = now
             if now.minute == 0:
@@ -46,9 +46,9 @@ def doday(ts):
             else:
                 ncvar = "preciprate_hsr"
                 divisor = 12.0
-            #print "USING %s NCVAR %s DIVISOR %s" % (makefp(now), 
+            #print "USING %s NCVAR %s DIVISOR %s" % (make_fp(now), 
             #                                        ncvar, divisor)
-            nc = netCDF3.Dataset(makefp(now))
+            nc = netCDF3.Dataset(make_fp(now))
             val = nc.variables[ncvar][:] / divisor
             if total is None:
                 total = numpy.where(val > 0, val, 0)
