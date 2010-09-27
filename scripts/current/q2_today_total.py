@@ -8,10 +8,14 @@ import iemplot
 import numpy
 import os, sys
 
-def makefp(ts):
-    return "/mnt/a1/ARCHIVE/data/%s/q2/tile2/q2rad_hsr_nc/short_qpe/%s00.nc" % (
-            ts.gmtime().strftime("%Y/%m/%d"), 
-            ts.gmtime().strftime("%Y%m%d%H%M") )
+
+def make_fp(ts):
+    """
+    Return a string for the filename expected for this timestamp
+    """
+    return "/mnt/a4/data/%s/nmq/tile2/data/QPESUMS/grid/q2rad_hsr_nc/short_qpe/%s00.nc" % (
+        ts.strftime("%Y/%m/%d"), 
+        ts.strftime("%Y%m%d-%H%M") )
 
 def doday(ts):
     """
