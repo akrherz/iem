@@ -21,8 +21,8 @@ $voting = (isset($_REQUEST["voting"]) && $_REQUEST["voting"] == "yes") ?
 
 $mesosite = iemdb("mesosite");
 pg_prepare($mesosite, "INJECTOR", "INSERT into feature 
-  (title, story, caption, voting, tags) VALUES 
-  ($1   , $2   , $3   , $4     , $5  )");
+  (title, story, caption, voting, tags, fbid) VALUES 
+  ($1   , $2   , $3   , $4     , $5  , $6)");
 
 
 
@@ -52,12 +52,12 @@ if ( isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes"){
        "target_id" => null,
        "uid" => 157789644737));
   $story_fbid = explode("_", $fbid);
-  $story_fbid = $story_fbid[1];
+  $story_fbid = str_replace('"', '', $story_fbid[1]);
 }
 if ($story != null && $title != null){
   pg_query($mesosite, "DELETE from feature WHERE date(valid) = 'TODAY'");
   pg_execute($mesosite, "INJECTOR", Array($title, $story, $caption,
-             $voting, $tags) );
+             $voting, $tags, $story_fbid) );
 }
 
 include("$rootpath/include/header.php");
