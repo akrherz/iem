@@ -43,9 +43,9 @@ def doit(ts, hours):
         else:
             total += nc.variables["rad_hsr_1h"][:]
         nc.close()
-    
-    # Put in some bogus values
-    total[10:20,10:20] = 10.0
+    # Put some bad values in just to make the plot happy
+    total[1350,1610] = 100.0
+    total[1410,1675] = 15.
         
     # Now we dance
     cfg = { 
