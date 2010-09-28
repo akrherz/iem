@@ -4,11 +4,16 @@
   include("../../config/settings.inc.php");
   $station = isset($_GET['station']) ? substr($_GET["station"],0,5) : 'SMYI4';
   $min = isset($_GET["min"]) ? $_GET["min"] : 1;
-  include("$rootpath/include/snet_locs.php");
+  include("$rootpath/include/network.php");
+  $nt = new NetworkTable("KIMT");
+  $Scities = $nt->table;
+  if (!array_key_exists($station, $Scities)){
+  	$station = "SMYI4";
+  }
   include("$rootpath/include/imagemaps.php");
  $secs = intval($min) * 60;
 ?>
-  <title>IEM | KIMT SchoolNet | <?php echo $cities["KIMT"][$station]["short"]; ?></title>
+  <title>IEM | KIMT SchoolNet | <?php echo $Scities[$station]["short"]; ?></title>
   <meta http-equiv="refresh" content="<?php echo $secs; ?>; URL=kimt_fe.php?min=<?php echo $min; ?>&station=<?php echo $station; ?>">
 
 </head>
@@ -21,13 +26,13 @@
   echo "SchoolNet Site: ";
 echo "<select  onChange=\"location=this.form.station.options[this.form.station.selectedIndex].value\" name=\"station\">\n";
 
-$Scities = $cities["KIMT"];
+
 while( list($key, $val) = each($Scities) ){
   echo "<option value=\"$rooturl/content/kimt_fe.php?min=".$min."&station=". $key ."\"";
   if ($station == $key){
         echo " SELECTED ";
   }
-  echo " >". $val["city"] ."\n";
+  echo " >". $val["name"] ."\n";
 }
 
 echo "</select>\n";
