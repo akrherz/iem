@@ -39,7 +39,7 @@ def doit(ts):
     nc.close()
         
     # Put some bad values in just to make the plot happy
-    val[1450,1910] = 100.0
+    val[1350,1610] = 100.0
     # Now we dance
     cfg = { 
     'cnLevelSelectionMode': "ExplicitLevels",
