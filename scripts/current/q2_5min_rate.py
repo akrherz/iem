@@ -32,6 +32,7 @@ def doit(ts):
         ts -= mx.DateTime.RelativeDateTime(minutes=5)
         if limit == 0:
             print "NO Q2 Files Found!"
+            print make_fp(ts)
             return
         limit -= 1
     nc = netCDF3.Dataset(make_fp(ts))
@@ -40,6 +41,7 @@ def doit(ts):
         
     # Put some bad values in just to make the plot happy
     val[1350,1610] = 100.0
+    val[1410,1675] = 15.
     # Now we dance
     cfg = { 
     'cnLevelSelectionMode': "ExplicitLevels",
