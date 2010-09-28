@@ -56,7 +56,10 @@ def doit(ts):
 
     # Scale factor is 10
     tmpfp = iemplot.simple_grid_fill(lons, lats, val / 254.0, cfg)
-    pqstr = "plot ac %s iowa_q2_5m.png q2/iowa_q2_5m_%s.png png" % (
+    routes = "a"
+    if mx.DateTime.gmt() < (ts + mx.DateTime.RelativeDateTime(hours=1)):
+        routes = "ac"
+    pqstr = "plot %s %s iowa_q2_5m.png q2/iowa_q2_5m_%s.png png" % (routes,
             ts.strftime("%Y%m%d%H%M"), ts.strftime("%H%M"))
     iemplot.postprocess(tmpfp, pqstr)
     
