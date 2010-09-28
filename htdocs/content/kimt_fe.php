@@ -13,7 +13,7 @@
   include("$rootpath/include/imagemaps.php");
  $secs = intval($min) * 60;
 ?>
-  <title>IEM | KIMT SchoolNet | <?php echo $Scities[$station]["short"]; ?></title>
+  <title>IEM | KIMT SchoolNet | <?php echo $Scities[$station]["name"]; ?></title>
   <meta http-equiv="refresh" content="<?php echo $secs; ?>; URL=kimt_fe.php?min=<?php echo $min; ?>&station=<?php echo $station; ?>">
 
 </head>
