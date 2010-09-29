@@ -1,5 +1,6 @@
 cd mos
-/mesonet/python/bin/python current_bias.py
+/mesonet/python/bin/python current_bias.py NAM
+/mesonet/python/bin/python current_bias.py GFS
 
 cd ../delta
 ./RUN.csh
