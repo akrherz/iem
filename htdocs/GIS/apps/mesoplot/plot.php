@@ -8,10 +8,11 @@ dl($mapscript);
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
-include("$rootpath/include/snet_locs.php");
+include("$rootpath/include/network.php");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'KCCI';
-$Scities = $cities[$network];
+$nt = new NetworkTable($network);
+$Scities = $nt->table;
 $titles = Array("KCCI" => "KCCI SchoolNet8",
  "KELO" => "KELO WeatherNet",
  "KIMT" => "KIMT StormNet");
