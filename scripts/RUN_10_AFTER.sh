@@ -1,4 +1,7 @@
-cd delta
+cd mos
+/mesonet/python/bin/python current_bias.py
+
+cd ../delta
 ./RUN.csh
 
 cd ../ingestors
