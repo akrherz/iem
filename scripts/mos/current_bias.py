@@ -82,6 +82,14 @@ WHERE
                 model.lower(), now.gmtime().strftime("%H"))
     iemplot.postprocess(fp,pqstr)
     
+    del(cfg['_midwest'])
+    cfg['_conus'] = True
+    fp = iemplot.simple_contour(lons, lats, vals, cfg)
+    pqstr = "plot ac %s00 conus_%s_mos_T_bias.png conus_%s_mos_T_bias_%s.png png" % (
+                now.gmtime().strftime("%Y%m%d%H"), model.lower(),
+                model.lower(), now.gmtime().strftime("%H"))
+    iemplot.postprocess(fp,pqstr)
+    
 if __name__ == "__main__":
     if len(sys.argv) == 6:
         doit(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
