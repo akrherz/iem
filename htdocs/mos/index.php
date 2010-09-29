@@ -42,6 +42,17 @@ csv.php?station=KAMW&runtime=2009-01-10%2012:00&model=GFS  (explicit)
 in the text product, except <strong>wdr</strong> (wind direction) which is
 multiplied by 10 for its true value.
 
+<h3>Current Plots</h3>
+ <div style="float:left; margin:5px;">
+<a href="../timemachine/#49.0"><img src="../data/nam_mos_T_bias.png" 
+ width="320" border="1"/></a>
+ </div>
+ 
+ <div style="float:left; margin:5px;">
+<a href="../timemachine/#50.0"><img src="../data/gfs_mos_T_bias.png" 
+ width="320" border="1"/></a>
+ </div>
+ 
 <p>We will probably back fill the archive based on how much interest this
 application generates, so please <a href="../info/contacts.php">let us</a>
 know if you find this page useful. 
