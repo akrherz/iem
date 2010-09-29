@@ -11,12 +11,12 @@ IEM = iemdb.connect('iem', bypass=True)
 mcursor = MOS.cursor()
 icursor = IEM.cursor()
 
-def doit(now):
+def doit(now, model):
     # Figure out the model runtime we care about
     mcursor.execute("""
     SELECT max(runtime) from alldata where station = 'KDSM'
-    and ftime = %s and model = 'NAM'
-    """, (now.strftime("%Y-%m-%d %H:00"),))
+    and ftime = %s and model = %s
+    """, (now.strftime("%Y-%m-%d %H:00"), model))
     row = mcursor.fetchone()
     runtime = row[0]
     if runtime is None:
@@ -26,8 +26,8 @@ def doit(now):
     # Load up the mos forecast for our given 
     mcursor.execute("""
       SELECT station, tmp FROM alldata
-    WHERE model = 'NAM' and runtime = %s and ftime = %s
-    """, (runtime, now.strftime("%Y-%m-%d %H:00") ))
+    WHERE model = %s and runtime = %s and ftime = %s
+    """, (model, runtime, now.strftime("%Y-%m-%d %H:00") ))
     forecast = {}
     for row in mcursor:
         if row[0][0] == 'K':
@@ -65,7 +65,7 @@ WHERE
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "NAM MOS Temperature Bias ",
+ '_title'             : "%s MOS Temperature Bias " % (model,),
  '_midwest'     : True,
  '_valid'             : 'Model Run: %s Forecast Time: %s' % (
                                 runtime.strftime("%d %b %Y %-I %p"), 
@@ -77,13 +77,14 @@ WHERE
 }
     # Generates tmp.ps
     fp = iemplot.simple_contour(lons, lats, vals, cfg)
-    pqstr = "plot ac %s00 nam_mos_T_bias.png nam_mos_T_bias_%s.png png" % (
-                now.gmtime().strftime("%Y%m%d%H"), now.gmtime().strftime("%H"))
+    pqstr = "plot ac %s00 %s_mos_T_bias.png %s_mos_T_bias_%s.png png" % (
+                now.gmtime().strftime("%Y%m%d%H"), model.lower(),
+                model.lower(), now.gmtime().strftime("%H"))
     iemplot.postprocess(fp,pqstr)
     
 if __name__ == "__main__":
-    if len(sys.argv) == 5:
+    if len(sys.argv) == 6:
         doit(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
-                                   int(sys.argv[4])) )
+                                   int(sys.argv[4])), sys.argv[5] )
     else:
-        doit( mx.DateTime.now() )
+        doit( mx.DateTime.now(), sys.argv[1] )
