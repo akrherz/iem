@@ -34,7 +34,11 @@ def doday(ts):
                 total += grbs[1]["values"]
             grbs.close()
         now += interval
-        
+    
+    if lts is None and ts.hour > 1:
+        print 'Missing StageIV data!'
+    if lts is None:
+        return
     # Now we dance
     cfg = {
      'wkColorMap': 'BlAqGrYeOrRe',
