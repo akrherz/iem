@@ -1,7 +1,6 @@
 # Generate current plot of air temperature
 
 import sys, os, numpy
-sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime, random
@@ -27,8 +26,11 @@ for i in range(len(rs)):
   valmask.append( rs[i]['state'] in ['IA',] )
   #valmask.append( False )
 
-if len(rs) < 2:
-  sys.exit(0)
+if len(vals) < 2:
+  vals = [1., .02, .03]
+  valmask = [False, False, False]
+  lons = [-90.1,-90.,-85.]
+  lats = [41.,41.1,50.]
 
 # Now, we need to add in zeros, lets say we are looking at a .25 degree box
 buffer = 1.0
@@ -56,18 +58,10 @@ cfg = {
  '_format'            : '%.1f',
  '_MaskZero'          : True,
  'lbTitleString'      : "[in]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
+pqstr = "plot c 000000000000 lsr_snowfall.png bogus png"
+thumbpqstr = "plot c 000000000000 lsr_snowfall_thumb.png bogus png"
+iemplot.postprocess(tmpfp,pqstr, thumb=True, thumbpqstr=thumbpqstr)
 
-os.system("convert -depth 8 -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage %s.ps %s.png" % (tmpfp, tmpfp) )
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall.png bogus png' %s.png" % (tmpfp,) )
-if os.environ['USER'] == 'akrherz':
-  os.system("xv %s.png" % (tmpfp,))
-os.system("convert -depth 8 -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 320x210 -density 120 +repage %s.ps %s.png" % (tmpfp, tmpfp) )
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall_thumb.png bogus png' %s.png" % (tmpfp,))
-os.remove("%s.png" % (tmpfp,) )
-os.remove("%s.ps" % (tmpfp,) )
