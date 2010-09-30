@@ -26,7 +26,7 @@ def doit(now, model):
     # Load up the mos forecast for our given 
     mcursor.execute("""
       SELECT station, tmp FROM alldata
-    WHERE model = %s and runtime = %s and ftime = %s
+    WHERE model = %s and runtime = %s and ftime = %s and tmp < 999
     """, (model, runtime, now.strftime("%Y-%m-%d %H:00") ))
     forecast = {}
     for row in mcursor:
