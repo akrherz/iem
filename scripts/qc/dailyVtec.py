@@ -8,10 +8,9 @@ tests = [
  'GSP.TO.6','LSX.TO.4','LMK.TO.2','LMK.TO.3','LMK.TO.4','GLD.TO.5',
  'MEG.TO.3','SGF.TO.6','TBW.MA.43','DMX.TO.3', 'DVN.TO.5', 'AMA.FF.17',
 
- 'CAE.SV.174', 'DLH.MA.15', 'LIX.TO.27'
+ 'CAE.SV.174', 'DLH.MA.15', 'LIX.TO.27', 'FGZ.SV.43', 'FGZ.SV.38', 'FGZ.SV.45',
+ 'FGZ.SV.51'
 ]
-
-
 
 sql = "SELECT wfo, min(eventid), max(eventid), phenomena from warnings_%s \
        WHERE phenomena IN ('MA','FF','SV','TO') and significance = 'W' \
