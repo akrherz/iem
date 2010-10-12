@@ -8,6 +8,7 @@ import mx.DateTime
 
 form = cgi.FormContent()
 sts = mx.DateTime.strptime( form["date"][0], "%Y-%m-%d")
+sts += mx.DateTime.RelativeDateTime(minutes=5)
 ets = sts + mx.DateTime.RelativeDateTime(days=1)
 interval = mx.DateTime.RelativeDateTime(minutes=5)
 # -110 , 55
@@ -31,17 +32,17 @@ print 'Content-type: text/plain\n'
 print 'DATE,TIME,PRECIP_IN'
 
 now = sts
-while now < ets:
+while now <= ets:
     # Open NETCDF File
     fp = make_fp(now)
     if not os.path.isfile(fp):
-        val = 0
+        val = "M"
     else:
         nc = netCDF3.Dataset(fp)
-        val = nc.variables["preciprate_hsr"][y,x] / 12.0 / 25.4
+        val = "%.3f" % (nc.variables["preciprate_hsr"][y,x] / 12.0 / 25.4,)
         nc.close()
     # Lat, Lon
-    print "%s,%s,%.3f" % (now.strftime("%Y-%m-%d"),
+    print "%s,%s,%s" % (now.strftime("%Y-%m-%d"),
                           now.strftime("%H:%M"),
                           val)
     
