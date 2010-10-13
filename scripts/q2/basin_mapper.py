@@ -59,7 +59,7 @@ def doit(gts, i):
     iemplot.postprocess(tmpfp, '', fname=fn)
     nc.close()
 
-if len(sys.argv) == 6:
+if len(sys.argv) == 7:
     doit(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), 
                               int(sys.argv[3]),
-                              int(sys.argv[4]), int(sys.argv[5])), 0)
+                              int(sys.argv[4]), int(sys.argv[5])), int(sys.argv[6]))
