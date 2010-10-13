@@ -4,7 +4,7 @@ require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");
-$network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
+$network = isset($_REQUEST["network"]) ? $_REQUEST["network"] : "KCCI"; 
 $nt = new NetworkTable($network);
 
 $ar = Array("type"=>"FeatureCollection",
