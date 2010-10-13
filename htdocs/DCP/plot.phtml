@@ -1,0 +1,22 @@
+<?php 
+include("../../config/settings.inc.php");
+
+$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.2.1/resources/css/ext-all.css"/>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.2.1/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.2.1/ext-all.js"></script>
+<script type="text/javascript" src="plot.js" />
+';
+$THISPAGE ="networks-dcp";
+include("$rootpath/include/header.php");
+?>
+<h3>Historical Iowa DCP Plotting</h3>
+
+<blockquote>This application allows you to plot historical DCP data for 
+a station, time period, and variable of your choice.  Select a station first
+to reveal available variables for that station.</blockquote>
+
+<div id="myform" style="float: left;"></div>
+
+<div style="float: right;"><img src="" id="imagedisplay" /></div>
+
+<?php include("$rootpath/include/footer.php"); ?>
