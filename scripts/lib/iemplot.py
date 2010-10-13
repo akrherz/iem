@@ -224,6 +224,14 @@ def simple_grid_fill(xaxis, yaxis, grid, cfg):
 #            Ngl.add_text(wks, contour, cfg["_format"] % vals[i], 
 #                     lons[i], lats[i],txres)
 
+    if cfg.has_key('_drawx'):
+        for lo, la in zip(cfg['_drawx'], cfg['_drawy']):
+            #print 'Adding Polygon!'
+            plres  = Ngl.Resources() 
+            plres.gsEdgesOn   = True      
+            plres.gsEdgeColor = "black"
+            plres.gsFillColor = -1
+            Ngl.add_polygon(wks, contour, lo, la, plres)
 
     Ngl.draw(contour)
 
@@ -266,6 +274,8 @@ def simple_contour(lons, lats, vals, cfg):
 
     # Generate Contour
     contour = Ngl.contour_map(wks,analysis,res)
+
+
 
     if cfg.has_key("_showvalues") and cfg['_showvalues']:
         txres              = Ngl.Resources()
@@ -671,12 +681,12 @@ def makefeature(tmpfp):
     # Step 1. Convert to Big PNG
     cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors 256 +repage %s.ps %s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
     os.system( cmd )
-    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 320x290 -density 80  +repage -depth 8 -colors 256 %s.ps %s_s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
+    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 320x320 -density 80  +repage -depth 8 -colors 256 %s.ps %s_s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
     os.system( cmd )
     # Step 4: Cleanup
     os.remove("%s.ps" % (tmpfp,) )
 
-def postprocess(tmpfp, pqstr, rotate="", thumb=False, thumbpqstr=""):
+def postprocess(tmpfp, pqstr, rotate="", thumb=False, thumbpqstr="", fname=None):
     """
     Helper to postprocess the plot
     """
@@ -687,6 +697,11 @@ def postprocess(tmpfp, pqstr, rotate="", thumb=False, thumbpqstr=""):
     cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors 256 +repage %s.ps %s.png" % (rotate, tmpfp, tmpfp)
     os.system( cmd )
 
+    if fname is not None:
+        cmd = "mv %s.png %s" % (tmpfp, fname)
+        os.system( cmd )
+        os.remove("%s.ps" % (tmpfp,) )
+        return
     # Step 2: Send to LDM
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s.png" % (pqstr, tmpfp)
     os.system( cmd )
@@ -730,10 +745,10 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     drct = []
     for row in acursor:
         if row[2].month not in months or row[2].hour not in hours:
-           continue
+            continue
         if len(sknt) == 0:
-           minvalid = row[2]
-           maxvalid = row[2]
+            minvalid = row[2]
+            maxvalid = row[2]
         sknt.append( row[0] * 1.15 ) 
         drct.append( row[1] )
         if row[2] < minvalid:
