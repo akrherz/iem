@@ -11,13 +11,14 @@ mcursor.execute("""SELECT sts, template, interval from archive_products
 row = mcursor.fetchone()
 
 tpl = row[1].replace("http://mesonet.agron.iastate.edu/archive/data/", 
-                     "/mnt/a1/ARCHIVE/data/")
+                     "/mnt/a1/ARCHIVE/data/").replace("%i",'%M')
 now = row[0]
 interval = datetime.timedelta(minutes=row[2])
 ets = datetime.datetime.now().replace(tzinfo= now.tzinfo)
 
 while now < ets:
     fp = now.strftime(tpl)
+    print fp
     if not os.path.isfile(fp):
         cmd = "/mesonet/python/bin/python q2_5min_rate.py %s" % (
                 now.strftime("%Y %m %d %H %M"))
