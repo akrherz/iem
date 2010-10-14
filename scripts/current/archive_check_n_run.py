@@ -18,7 +18,6 @@ ets = datetime.datetime.now().replace(tzinfo= now.tzinfo)
 
 while now < ets:
     fp = now.strftime(tpl)
-    print fp
     if not os.path.isfile(fp):
         cmd = "/mesonet/python/bin/python q2_5min_rate.py %s" % (
                 now.strftime("%Y %m %d %H %M"))
