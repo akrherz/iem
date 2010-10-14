@@ -20,5 +20,6 @@ while now < ets:
     if not os.path.isfile(fp):
         cmd = "/mesonet/python/bin/python q2_5min_rate.py %s" % (
                 now.strftime("%Y %m %d %H %M"))
+        os.system( cmd )
         print 'Missing', now
     now += interval
