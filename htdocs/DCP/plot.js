@@ -53,6 +53,7 @@ Ext.onReady(function(){
 		valueField		: 'id',
 		width			: 300,
 		mode			: 'local',
+		triggerAction	: 'all',
 		fieldLabel		: 'Station',
 		emptyText		: 'Select Station...',
 		tpl				: new Ext.XTemplate(
@@ -85,24 +86,47 @@ Ext.onReady(function(){
 		fieldLabel	: 'Number of Days'
 	});
 	
+	function updateImage(){
+		ds = datepicker.getValue();
+		ds2 = ds.add(Date.DAY, dayInterval.getValue());
+		url = String.format('plot.php?station={0}&sday={1}&eday={2}&var={3}',
+				stationCB.getValue(), ds.format('Y-m-d'), 
+				ds2.format('Y-m-d'), varCB.getValue());
+		Ext.get("imagedisplay").dom.src = url;
+		/* Now adjust the URL */
+		uri = String.format('#{0}.{1}.{2}.{3}', stationCB.getValue(),
+				varCB.getValue(), ds.format('Y-m-d'), 
+				dayInterval.getValue() );
+		window.location.href = uri;
+		
+	}
+	
 	var form = new Ext.form.FormPanel({
 		applyTo		: 'myform',
 		labelAlign	: 'top',
 		width		: 320,
+		style		: 'padding-left: 5px;',
 		title		: 'Make Plot Selections Below...',
 		items		: [stationCB, varCB, datepicker, dayInterval],
 		buttons		: [{
 			text	: 'Create Graph',
 			handler	: function(){
-				ds = datepicker.getValue();
-				ds2 = ds.add(Date.DAY, dayInterval.getValue());
-				url = String.format('plot.php?station={0}&sday={1}&eday={2}&var={3}',
-						stationCB.getValue(), ds.format('Y-m-d'), 
-						ds2.format('Y-m-d'), varCB.getValue());
-				Ext.get("imagedisplay").dom.src = url;
+				updateImage();
 				
 			}
 		}]
 	
 	});
+	/* Check to see if we had something specified on the URL! */
+	var tokens = window.location.href.split('#');
+	if (tokens.length == 2){
+		var tokens2 = tokens[1].split('.');
+		if (tokens2.length == 4){
+			stationCB.setValue( tokens2[0] );
+			varCB.setValue( tokens2[1] );
+			datepicker.setValue( tokens2[2] );
+			dayInterval.setValue( tokens2[3] );
+			updateImage();
+		}
+	}
 });
