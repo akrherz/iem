@@ -33,19 +33,26 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 $graph = new Graph(640,480);
 $graph->SetScale("datelin");
+
+$graph->SetMarginColor('white');
+
+
 $graph->img->SetMargin(40,40,45,100);
 
-$title = sprintf("%s [%s] Plot of SHEF Variable [%s]", $nt->table[$station]['name'],
+$title = sprintf("%s [%s] \nPlot of SHEF Variable [%s]", $nt->table[$station]['name'],
 	$station, $varname);
 $graph->title->Set($title);
 
-$graph->title->SetFont(FF_FONT1,FS_BOLD,10);
-$graph->xaxis->scale->SetDateFormat("M d h A");
-$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-//$graph->xaxis->SetTitle("Month/Day");
+$graph->title->SetFont(FF_VERDANA,FS_BOLD,11);
+$graph->subtitle->SetFont(FF_VERDANA,FS_BOLD,20);
+$graph->xaxis->title->SetFont(FF_VERDANA,FS_BOLD,11);
 
-$graph->xaxis->SetTitleMargin(48);
-$graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
+$graph->xaxis->scale->SetDateFormat("M d h A");
+
+$graph->xaxis->SetTitle( sprintf("Time Interval: %s - %s", date('d M Y', $sday),
+		date('d M Y', $eday)) );
+
+$graph->xaxis->SetTitleMargin(70);
 $graph->xaxis->SetLabelAngle(90);
 
 
