@@ -10,7 +10,8 @@ mcursor.execute("""SELECT sts, template, interval from archive_products
     WHERE id = 44""")
 row = mcursor.fetchone()
 
-tpl = row[1]
+tpl = row[1].replace("http://mesonet.agron.iastate.edu/archive/data/", 
+                     "/mnt/a1/ARCHIVE/data/")
 now = row[0]
 interval = datetime.timedelta(minutes=row[2])
 ets = datetime.datetime.now().replace(tzinfo= now.tzinfo)
