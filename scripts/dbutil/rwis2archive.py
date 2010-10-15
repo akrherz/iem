@@ -96,7 +96,7 @@ rcursor.close()
 # Get regular obs from Access
 icursor = IEMDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
 sql = """SELECT * from current_log WHERE date(valid) = '%s' 
-      and network = 'IA_RWIS'""" % (
+      and network ~* 'RWIS'""" % (
       ts.strftime("%Y-%m-%d"), )
 icursor.execute( sql )
 rows = icursor.fetchall()
