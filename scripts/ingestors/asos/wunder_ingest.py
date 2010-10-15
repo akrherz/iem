@@ -202,8 +202,6 @@ def recover():
         ets = mx.DateTime.DateTime(2010,3,1)
         interval = mx.DateTime.RelativeDateTime(months=1)
         while now < ets:
-            obs = doit(sid, now)
-            print sid, now, obs
             ts = now - mx.DateTime.RelativeDateTime(days=1)
             obs = doit(sid, ts)
             print sid, ts, obs
