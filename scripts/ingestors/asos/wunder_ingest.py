@@ -56,6 +56,9 @@ def doit(stid, now):
       metarPass += 1
       gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
                 mtr.time.day, mtr.time.hour, mtr.time.minute)
+      # Need to account for obs at the begging of the month
+      if gts.day > 10 and now.day == 1:
+          gts -= mx.DateTime.RelativeDateTime(months=1)
       tmpf = "Null"
       if (mtr.temp):
         tmpf = mtr.temp.value("F")
@@ -167,42 +170,81 @@ def doit(stid, now):
   #      metarFail, sqlFail)
   return processed
 
-network = sys.argv[1]
-# 1. Query for a list of stations to iterate over
-rs = mesosite.query("SELECT * from stations WHERE network = '%s' ORDER by id DESC" % (
-     network,)).dictresult()
-for i in range(len(rs)):
-  sid = rs[i]['id']
+def recover():
+    """
+    Account for a stupid processing error I did with not accounting for obs
+    at the end of the month
+    """
+    network = sys.argv[1]
+    rs = mesosite.query("SELECT * from stations WHERE network = '%s' ORDER by id DESC" % (
+                                                                                          network,)).dictresult()
+    for i in range(len(rs)):
+        sid = rs[i]['id']
+        # Delete all obs from the last day of the month, sigh
+        asos.query("""DELETE from alldata where station = '%s' and
+        ((extract(month from valid) = 1 and extract(day from valid) = 31) or
+        (extract(month from valid) = 2 and extract(day from valid) = 28) or
+        (extract(month from valid) = 2 and extract(day from valid) = 29) or
+        (extract(month from valid) = 3 and extract(day from valid) = 31) or
+        (extract(month from valid) = 4 and extract(day from valid) = 30) or
+        (extract(month from valid) = 5 and extract(day from valid) = 31) or
+        (extract(month from valid) = 6 and extract(day from valid) = 30) or
+        (extract(month from valid) = 7 and extract(day from valid) = 31) or
+        (extract(month from valid) = 8 and extract(day from valid) = 31) or
+        (extract(month from valid) = 9 and extract(day from valid) = 30) or
+        (extract(month from valid) = 10 and extract(day from valid) = 31) or
+        (extract(month from valid) = 11 and extract(day from valid) = 30) or
+        (extract(month from valid) = 12 and extract(day from valid) = 31) or
+        )
+        """ % (sid,))
+        now = mx.DateTime.DateTime(1948,1,1)
+        ets = mx.DateTime.DateTime(2010,3,1)
+        interval = mx.DateTime.RelativeDateTime(months=1)
+        while now < ets:
+            ts = now - mx.DateTime.RelativeDateTime(days=1)
+            obs = doit(sid, ts)
+            print sid, ts, obs
+            now += interval
+        
+def normal():
+    network = sys.argv[1]
+    # 1. Query for a list of stations to iterate over
+    rs = mesosite.query("SELECT * from stations WHERE network = '%s' ORDER by id DESC" % (
+                                                                                          network,)).dictresult()
+    for i in range(len(rs)):
+        sid = rs[i]['id']
   # 2. Look in the database for earliest ob with METAR
-  rs2 = asos.query("""SELECT min(valid) from alldata WHERE station = '%s'
+        rs2 = asos.query("""SELECT min(valid) from alldata WHERE station = '%s'
      and metar is not null""" % (sid,)).dictresult()
-  if len(rs2) == 0 or rs2[0]['min'] is None:
-    tend = mx.DateTime.now()
-  else:
-    tend = mx.DateTime.strptime(rs2[0]['min'][:16], '%Y-%m-%d %H:%M')
+        if len(rs2) == 0 or rs2[0]['min'] is None:
+            tend = mx.DateTime.now()
+        else:
+            tend = mx.DateTime.strptime(rs2[0]['min'][:16], '%Y-%m-%d %H:%M')
 
-  # 3. Move old data to old table
-  asos.query("""INSERT into alldata_save SELECT * from alldata WHERE 
+        # 3. Move old data to old table
+        asos.query("""INSERT into alldata_save SELECT * from alldata WHERE 
    station = '%s' and valid < '%s'""" % (sid, tend.strftime("%Y-%m-%d %H:%M")))
-  asos.query("""DELETE from alldata WHERE 
+        asos.query("""DELETE from alldata WHERE 
    station = '%s' and valid < '%s'""" % (sid, tend.strftime("%Y-%m-%d %H:%M")))
 
-# 4. Figure out when wunder archive starts and then process till end
-  sts = mx.DateTime.DateTime(1948,1,1)
-  ets = tend
-  now = sts
-  tbegin = None
-  processed = 0
-  while now < ets:
-    interval = mx.DateTime.RelativeDateTime(days=1)
-    time.sleep(0.5)
-    obs = doit(sid, now)
-    if obs == 0 and processed == 0:
-      interval = mx.DateTime.RelativeDateTime(months=1)
-    elif obs > 0 and processed == 0:
-      tbegin = now
-    processed += obs
-    now += interval
-  if tbegin is not None:
-    print "Station %s Begin: %s Obs: %s" % (sid, tbegin.strftime("%Y-%m-%d"),
+#     4. Figure out when wunder archive starts and then process till end
+        sts = mx.DateTime.DateTime(1948,1,1)
+        ets = tend
+        now = sts
+        tbegin = None
+        processed = 0
+        while now < ets:
+            interval = mx.DateTime.RelativeDateTime(days=1)
+            time.sleep(0.5)
+            obs = doit(sid, now)
+            if obs == 0 and processed == 0:
+                interval = mx.DateTime.RelativeDateTime(months=1)
+            elif obs > 0 and processed == 0:
+                tbegin = now
+            processed += obs
+            now += interval
+            if tbegin is not None:
+                print "Station %s Begin: %s Obs: %s" % (sid, tbegin.strftime("%Y-%m-%d"),
       processed)
+
+recover()
