@@ -200,7 +200,7 @@ def recover():
         (extract(month from valid) = 11 and extract(day from valid) = 30) or
         (extract(month from valid) = 12 and extract(day from valid) = 31) or
         extract(day from valid) = 1
-        )
+        ) and valid < '2010-02-15'
         """ % (sid,))
         now = mx.DateTime.DateTime(1948,1,1)
         ets = mx.DateTime.DateTime(2010,3,1)
