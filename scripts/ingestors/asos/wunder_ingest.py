@@ -61,7 +61,7 @@ def doit(stid, now):
           gts -= mx.DateTime.RelativeDateTime(months=1)
       if gts.day == 1 and now.day > 10:
           gts += mx.DateTime.RelativeDateTime(months=1)
-      print now, gts
+      #print now, gts
       tmpf = "Null"
       if (mtr.temp):
         tmpf = mtr.temp.value("F")
@@ -207,10 +207,10 @@ def recover():
         interval = mx.DateTime.RelativeDateTime(months=1)
         while now < ets:
             obs = doit(sid, now)
-            print sid, now, obs
+            #print sid, now, obs
             ts = now - mx.DateTime.RelativeDateTime(days=1)
             obs = doit(sid, ts)
-            print sid, ts, obs
+            #print sid, ts, obs
             now += interval
         
 def normal():
