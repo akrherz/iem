@@ -9,7 +9,9 @@ function dwp($tmpf, $relh){
 
 }
 include("../../config/settings.inc.php");
-include("$rootpath/include/snet_locs.php");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable('KIMT');
+$cities = $nt->table;
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
@@ -62,7 +64,7 @@ $myOb = $iemdb->getSingleSite($station);
 
 
  //imagefilledrectangle ( $gif, 120, 22, 320, 36, $white);
- ImageTTFText($gif, 12, 0, 125 , 34, $red, $Font, strtoupper($cities['KIMT'][$station]["short"]) );
+ ImageTTFText($gif, 12, 0, 125 , 34, $red, $Font, strtoupper($cities[$station]["name"]) );
 
  // Box to hold current dew Point!
 // imagerectangle ( $gif, 10, 40, 40, 60, $black);
