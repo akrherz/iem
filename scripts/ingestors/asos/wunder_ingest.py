@@ -182,7 +182,8 @@ def recover():
         sid = rs[i]['id']
         # Delete all obs from the last day of the month, sigh
         asos.query("""DELETE from alldata where station = '%s' and
-        ((extract(month from valid) = 1 and extract(day from valid) = 31) or
+        (
+        (extract(month from valid) = 1 and extract(day from valid) = 31) or
         (extract(month from valid) = 2 and extract(day from valid) = 28) or
         (extract(month from valid) = 2 and extract(day from valid) = 29) or
         (extract(month from valid) = 3 and extract(day from valid) = 31) or
@@ -194,13 +195,15 @@ def recover():
         (extract(month from valid) = 9 and extract(day from valid) = 30) or
         (extract(month from valid) = 10 and extract(day from valid) = 31) or
         (extract(month from valid) = 11 and extract(day from valid) = 30) or
-        (extract(month from valid) = 12 and extract(day from valid) = 31) or
+        (extract(month from valid) = 12 and extract(day from valid) = 31) 
         )
         """ % (sid,))
         now = mx.DateTime.DateTime(1948,1,1)
         ets = mx.DateTime.DateTime(2010,3,1)
         interval = mx.DateTime.RelativeDateTime(months=1)
         while now < ets:
+            obs = doit(sid, now)
+            print sid, now, obs
             ts = now - mx.DateTime.RelativeDateTime(days=1)
             obs = doit(sid, ts)
             print sid, ts, obs
