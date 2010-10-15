@@ -56,9 +56,8 @@ def doit(stid, now):
       metarPass += 1
       gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
                 mtr.time.day, mtr.time.hour, mtr.time.minute)
-      # Need to account for obs at the begging of the month
-      if gts.day > 10 and now.day == 1:
-          gts -= mx.DateTime.RelativeDateTime(months=1)
+      # When processing data on the last day of the month, we get GMT times
+      # for the next month, need to account for that
       if gts.day == 1 and now.day > 10:
           gts += mx.DateTime.RelativeDateTime(months=1)
       #print now, gts
@@ -198,16 +197,13 @@ def recover():
         (extract(month from valid) = 9 and extract(day from valid) = 30) or
         (extract(month from valid) = 10 and extract(day from valid) = 31) or
         (extract(month from valid) = 11 and extract(day from valid) = 30) or
-        (extract(month from valid) = 12 and extract(day from valid) = 31) or
-        extract(day from valid) = 1
+        (extract(month from valid) = 12 and extract(day from valid) = 31)
         ) and valid < '2010-02-15'
         """ % (sid,))
         now = mx.DateTime.DateTime(1948,1,1)
         ets = mx.DateTime.DateTime(2010,3,1)
         interval = mx.DateTime.RelativeDateTime(months=1)
         while now < ets:
-            obs = doit(sid, now)
-            #print sid, now, obs
             ts = now - mx.DateTime.RelativeDateTime(days=1)
             obs = doit(sid, ts)
             #print sid, ts, obs
