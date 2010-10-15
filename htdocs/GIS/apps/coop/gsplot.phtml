@@ -60,6 +60,8 @@ graphically as well as textually for use in a GIS.
      <option value="gdd50" <?php if($var == "gdd50") echo "SELECTED"; ?>>Growing Degree Days (base=50)</option>
      <option value="prec" <?php if($var == "prec") echo "SELECTED"; ?>>Precipitation</option>
      <option value="sdd86" <?php if($var == "sdd86") echo "SELECTED"; ?>>Stress Degree Days (base=86)</option>
+     <option value="mintemp" <?php if($var == "mintemp") echo "SELECTED"; ?>>Minimum Temperature</option>
+	 <option value="maxtemp" <?php if($var == "maxtemp") echo "SELECTED"; ?>>Maximum Temperature</option>
     </select></td>
   <td rowspan=2><?php echo yearselect(1893, $year); ?></td>
   <td><?php echo monthSelect2($smonth, 'smonth'); ?></td>
@@ -87,10 +89,12 @@ $tr .= "# Download From: http://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.p
 
 /* Query the obs */
 $rs = pg_prepare($coopdb, "SELECT", "SELECT stationid, s_rainfall,
-    s_gdd50, s_sdd86, c_rainfall, c_gdd50, c_sdd86 from (
+    s_gdd50, s_sdd86, c_rainfall, c_gdd50, s_sdd86, s_mintemp,
+      s_maxtemp from (
       SELECT stationid, 
 	  sum(precip) as s_rainfall, sum(gdd50(high,low)) as s_gdd50,
-	  sum(sdd86(high,low)) as s_sdd86 from alldata 
+	  sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
+	  max(high) as s_maxtemp from alldata 
 	  WHERE day >= $1 and day < $2 GROUP by stationid) as foo,
 	 (SELECT station, 
       sum(precip) as c_rainfall, sum(gdd50) as c_gdd50,
@@ -102,18 +106,19 @@ $rs = pg_execute($coopdb, "SELECT", Array(adodb_date("Y-m-d", $sts),
 	"2000-". adodb_date('m-d', $ets)));
 
 
-$tr .= sprintf("%6s,%21s,%10s,%10s,%10s,%10s,%10s,%10s,%10s\n", 'ID', 
+$tr .= sprintf("%6s,%21s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s\n", 'ID', 
  'StationName', 'Latitude', 'Longitude', 'GDD50', 'SDD86', 'PRECIP',
- 'CLIM_GDD50', 'CLIM_PRECIP');
+ 'CLIM_GDD50', 'CLIM_PRECIP', 'MAX_TEMP', 'MIN_TEMP');
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 
   $ukey = strtoupper($row["stationid"]);
   if (! isset($cities[$ukey]) ) continue;
-  $tr .= sprintf("%6s,%-21s,%10.4f,%10.4f,%10.0f,%10.0f,%10.2f,%10.0f,%10.2f\n", $ukey, 
+  $tr .= sprintf("%6s,%-21s,%10.4f,%10.4f,%10.0f,%10.0f,%10.2f,%10.0f,%10.2f,%10.0f,%10.0f\n", $ukey, 
   $cities[$ukey]['name'],
   $cities[$ukey]['lat'], $cities[$ukey]['lon'], 
   $row["s_gdd50"], $row["s_sdd86"], $row["s_rainfall"],
-  $row["c_gdd50"], $row["c_rainfall"] );
+  $row["c_gdd50"], $row["c_rainfall"], $row["s_maxtemp"],
+  $row["s_mintemp"] );
 }
 ?>
 

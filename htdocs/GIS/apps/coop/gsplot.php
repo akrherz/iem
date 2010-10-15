@@ -62,7 +62,9 @@ $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
   "et" => "Potential Evapotranspiration",
   "prec" => "Precipitation",
   "sgdd50" => "Soil Growing Degree Days (base=50)",
-  "sdd86" => "Stress Degree Days (base=86)"
+  "sdd86" => "Stress Degree Days (base=86)",
+  "mintemp" => "Minimum Temperature [F]",
+  "maxtemp" => "Maximum Temperature [F]",
 );
 
 
@@ -71,7 +73,9 @@ $rnd = Array("gdd50" => 0,
   "et" => 2,
   "prec" => 2,
   "sgdd50" => 0,
-  "sdd86" => 0);
+  "sdd86" => 0,
+  "mintemp" => 0,
+  "maxtemp" => 0);
 $myStations = $cities;
 $height = 480;
 $width = 640;
@@ -101,7 +105,8 @@ $iards->draw($img);
 
 $rs = pg_prepare($coopdb, "SELECT", "SELECT stationid, 
 	sum(precip) as s_prec, sum(gdd50(high,low)) as s_gdd50,
-	sum(sdd86(high,low)) as s_sdd86 from alldata 
+	sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
+	max(high) as s_maxtemp from alldata 
 	WHERE day >= $1 and day < $2 GROUP by stationid 
 	ORDER by stationid ASC");
 $rs = pg_execute($coopdb, "SELECT", Array(adodb_date("Y-m-d", $sts),
