@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 #  RWIS_yest.py
 #   - Generates HI/LOW table from the RWIS data
 # 21 May 2002:	Daryl Herzmann
@@ -12,10 +11,11 @@
 ####################################################
 
 import mx.DateTime,  shutil, sys, os
-from pyIEM import iemdb, stationTable
+from pyIEM import iemdb
 i = iemdb.iemdb()
 mydb = i["rwis"]
-st = stationTable.stationTable("/mesonet/TABLES/RWIS.stns")
+import network
+st = network.Table('IA_RWIS')
 
 o = open('IEMRWISTP.txt','w')
 o.write("IEMRWISTP\n")
@@ -44,6 +44,8 @@ rs = mydb.query(sql).dictresult()
 
 for i in range(len(rs)):
   thisStation = rs[i]["station"]
+  if not st.sts.has_key(thisStation):
+    continue
   thisHigh = rs[i]["maxtmpf"]
   thisLow = rs[i]["mintmpf"]
   cnt = rs[i]["obs"]
@@ -54,3 +56,4 @@ o.write(".END\n")
 o.close()
 cmd = "/home/ldm/bin/pqinsert -p 'plot ac %s0000 text/IEMRWISTP.txt IEMRWISTP.txt txt' IEMRWISTP.txt" % (now.strftime("%Y%m%d"), )
 os.system(cmd)
+os.unlink('IEMRWISTP.txt')
