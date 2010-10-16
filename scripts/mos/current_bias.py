@@ -52,12 +52,14 @@ WHERE
     for row in icursor:
         if not forecast.has_key( row[0] ):
             continue
-        lats.append( row[4] )
-        lons.append( row[3] )
+
         diff = forecast[row[0]] - row[2]
         if diff > 20 or diff < -20:
             print "Major Diff ID: %s OB: %s MOS: %s" % (row[0], row[2], 
                                                   forecast[row[0]])
+            continue
+        lats.append( row[4] )
+        lons.append( row[3] )
         vals.append( diff )
         valmask.append(  (row[1] in ['AWOS','IA_AWOS']) )
 
