@@ -10,7 +10,7 @@ $facebook = new Facebook(Array(
   'cookie' => true,
 ));
 $session = $facebook->getSession();
-$facebook->getLoginUrl();
+$loginurl = $facebook->getLoginUrl();
 
 $story = isset($_REQUEST["story"]) ? $_REQUEST["story"] : null;
 $title = isset($_REQUEST["title"]) ? $_REQUEST["title"] : null;
@@ -61,6 +61,12 @@ if ($story != null && $title != null){
 }
 
 include("$rootpath/include/header.php");
+
+if ($loginurl){
+	?>
+	<a href="<?php echo $loginurl; ?>">Login</a>
+<?php
+}
 ?>
 <h3>IEM Feature Publisher</h3>
 <form method="POST">
