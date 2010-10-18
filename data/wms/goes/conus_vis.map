@@ -58,7 +58,7 @@ END
 LAYER
   NAME "conus_vis_1km_900913"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/sat/conus_goes_wv1km.tif"
+  DATA "/home/ldm/data/gis/images/900913/sat/conus_goes_vis1km.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
