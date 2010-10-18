@@ -70,9 +70,9 @@ for row in pcursor:
 # Make mosaic image
 header = 35
 mosaic = Image.new('RGB', (thumbpx*cols, ((int(i/cols)+1)*thumbpx )+header ))
-font = ImageFont.truetype('../../data/fonts/veramono.ttf', 12)
-font10 = ImageFont.truetype('../../data/fonts/veramono.ttf', 10)
-font2 = ImageFont.truetype('../../data/fonts/veramono.ttf', 18)
+font = ImageFont.truetype('/mesonet/data/gis/static/fonts/veramono.ttf', 12)
+font10 = ImageFont.truetype('/mesonet/data/gis/static/fonts/veramono.ttf', 10)
+font2 = ImageFont.truetype('/mesonet/data/gis/static/fonts/veramono.ttf', 18)
 draw = ImageDraw.Draw(mosaic)
 
 imagemap = open('imap.txt', 'w')
