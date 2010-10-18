@@ -14,6 +14,9 @@ IEM provided archives/applications of NWS data.</div>
 <h4>IEM Apps</h4>
 <ul>
  <li><a href="../ASOS/current.phtml">Sortable Currents</a></li>
+ <li><a href="../DCP/plot.phtml">Archived DCP Data Plotter</a>
+ <br />Simple app to plot out current/historical DCP (river gauges) data for a site
+ of your choice.</li>
 </ul>
 
 <h4>Iowa AWOS RTP First Guess</h4>
