@@ -34,7 +34,7 @@ for i in range(len(rs)):
   vals.append( rs[i]['wind'] * 1.16 )
   valmask.append(  (rs[i]['network'] in ['AWOS','IA_ASOS']) )
 
-if len(rs) < 5:
+if len(vals) < 5:
   sys.exit(0)
 
 cfg = {
