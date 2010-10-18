@@ -505,10 +505,17 @@ class Facebook
     $params['api_key'] = $this->getAppId();
     $params['format'] = 'json-strings';
 
-    $result = json_decode($this->_oauthRequest(
-      $this->getApiUrl($params['method']),
-      $params
-    ), true);
+    //$result = json_decode($this->_oauthRequest(
+    //  $this->getApiUrl($params['method']),
+    //  $params
+    //), true);
+    // http://github.com/facebook/php-sdk/issues/issue/78 
+    $curlData   =   $this->_oauthRequest( 
+ 	                    $this->getApiUrl($params['method']), $params); 
+    $result     =   (($tmpResult = json_decode($curlData, true)) == NULL 
+	 	                    || is_string($tmpResult)) 
+	             ?   $curlData 
+	 	            :   $tmpResult; 
 
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error_code'])) {

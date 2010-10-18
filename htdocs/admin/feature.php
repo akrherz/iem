@@ -60,9 +60,8 @@ if ( isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes"){
        "message" => $_REQUEST["story"],
        "attachment" => $attachment,
        "action_links" => $action_links,
-       "target_id" => null,
+    //   "target_id" => null,
        "uid" => 157789644737));
-  echo $fbid; print_r($fbid); die();
   $story_fbid = explode("_", $fbid);
   $story_fbid = str_replace('"', '', $story_fbid[1]);
 }
