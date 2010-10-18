@@ -10,6 +10,17 @@ $facebook = new Facebook(Array(
   'cookie' => true,
 ));
 $session = $facebook->getSession();
+$me = null;
+// Session based API call.
+if ($session) {
+  try {
+    $uid = $facebook->getUser();
+    $me = $facebook->api('/me');
+  } catch (FacebookApiException $e) {
+    error_log($e);
+  } 
+} 
+
 $loginurl = $facebook->getLoginUrl();
 
 $story = isset($_REQUEST["story"]) ? $_REQUEST["story"] : null;
@@ -51,10 +62,12 @@ if ( isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes"){
        "action_links" => $action_links,
        "target_id" => null,
        "uid" => 157789644737));
+  echo $fbid; print_r($fbid); die();
   $story_fbid = explode("_", $fbid);
   $story_fbid = str_replace('"', '', $story_fbid[1]);
 }
-if ($story != null && $title != null){
+if ($story != null && $title != null &&
+    isset($_REQUEST['iemdb']) && $_REQUEST['iemdb'] == 'yes'){
   pg_query($mesosite, "DELETE from feature WHERE date(valid) = 'TODAY'");
   pg_execute($mesosite, "INJECTOR", Array($title, $story, $caption,
              $voting, $tags, $story_fbid) );
@@ -62,7 +75,7 @@ if ($story != null && $title != null){
 
 include("$rootpath/include/header.php");
 
-if ($loginurl){
+if (! $me){
 	?>
 	<a href="<?php echo $loginurl; ?>">Login</a>
 <?php
@@ -88,6 +101,9 @@ if ($loginurl){
 
 <p>Allow Voting:
 <br /><input type="checkbox" name="voting" value="yes" checked="checked" />Yes</p>
+
+<p>Publish to iemdb?:
+<br /><input type="checkbox" name="iemdb" value="yes" checked="checked" />Yes</p>
 
 <p><input type="submit" value="Go!" /></p>
 </form>
