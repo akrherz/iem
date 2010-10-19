@@ -20,8 +20,10 @@ can view/download this dataset.</p>
 for a particular year and for a particular point.  This point can be specified 
 in a number of ways. <b>Caveat:</b>  Geocoding is not perfect.  Your address may not be found in the database.  If you first attempt fails, try using a popular building address for a location near you.
 
-<p><b>Select Year:</b>
-<?php echo yearSelect(1997, date("Y"), "year"); ?>
+<p><b>Start Year:</b>
+<?php echo yearSelect2(1997, date("Y"), "syear"); ?>
+ &nbsp; <b>End Year (inclusive):</b>
+<?php echo yearSelect2(1997, date("Y"), "eyear"); ?>
 <br /><b>View Options:</b>
 <select name="view">
 	<option value="online">Online
