@@ -79,5 +79,5 @@ csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RSAI4',
 
 csv.close()
 
-cmd = "pqinsert -p 'data c 000000000000 csv/ctre.txt bogus txt' /tmp/ctre.txt"
+cmd = "/home/ldm/bin/pqinsert -p 'data c 000000000000 csv/ctre.txt bogus txt' /tmp/ctre.txt"
 os.system( cmd )
