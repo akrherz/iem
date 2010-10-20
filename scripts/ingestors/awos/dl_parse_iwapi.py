@@ -27,6 +27,10 @@ def dosite(id):
     iem.load_and_compare(iemaccess)
     
     iem.data['raw'] = data
+    if mtr.temp:
+        iem.data['tmpf'] = mtr.temp.value("F")
+    if mtr.dewpt:
+        iem.data['dwpf'] = mtr.dewpt.value("F")
     if mtr.wind_speed:
         iem.data['sknt'] = mtr.wind_speed.value("KT")
     if mtr.wind_gust:
