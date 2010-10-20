@@ -1,0 +1,62 @@
+# Need something to ingest the CTRE provided bridge data
+# RSAI4
+# RLRI4
+
+import mx.DateTime
+import sys
+# Run every 3 minutes
+if mx.DateTime.now().minute % 3 != 0:
+    sys.exit(0)
+
+import urllib2
+import csv
+import access
+import pg
+import secret
+accessdb = pg.connect('iem', 'iemdb')
+
+
+
+# Get Saylorville
+req = urllib2.Request("ftp://%s:%s@129.186.224.167/Saylorville_Table3Min_current.dat" % (secret.CTRE_FTPUSER,
+                                                        secret.CTRE_FTPPASS))
+#try:
+data = urllib2.urlopen(req).readlines()
+#except:
+#  pass
+keys = data[0].strip().replace('"', '').split(',')
+vals = data[1].strip().replace('"', '').split(',')
+d = {}
+for i in range(len(vals)):
+    d[ keys[i] ] = vals[i]
+
+ts = mx.DateTime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
+
+iem = access.Ob( 'RSAI4', "OT")
+iem.setObTime( ts )
+iem.data['drct'] = d['WindDir']
+iem.data['sknt'] = float(d['WS_mph_S_WVT']) / 1.15
+iem.data['gust'] = float(d['WS_mph_Max']) / 1.15
+iem.updateDatabase( accessdb )
+
+# Get Saylorville
+req = urllib2.Request("ftp://%s:%s@129.186.224.167/Red Rock_Table3Min_current.dat" % (secret.CTRE_FTPUSER,
+                                                        secret.CTRE_FTPPASS))
+#try:
+data = urllib2.urlopen(req).readlines()
+#except:
+#  pass
+keys = data[0].strip().replace('"', '').split(',')
+vals = data[1].strip().replace('"', '').split(',')
+d = {}
+for i in range(len(vals)):
+    d[ keys[i] ] = vals[i]
+
+ts = mx.DateTime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
+
+iem = access.Ob( 'RLRI4', "OT")
+iem.setObTime( ts )
+iem.data['drct'] = d['WindDir']
+iem.data['sknt'] = float(d['WS_mph_S_WVT']) / 1.15
+iem.data['gust'] = float(d['WS_mph_Max']) / 1.15
+iem.updateDatabase( accessdb )
