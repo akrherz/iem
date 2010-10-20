@@ -13,9 +13,10 @@ import csv
 import access
 import pg
 import secret
+import os
 accessdb = pg.connect('iem', 'iemdb')
 
-
+csv = open('/tmp/ctre.txt', 'w')
 
 # Get Saylorville
 req = urllib2.Request("ftp://%s:%s@129.186.224.167/Saylorville_Table3Min_current.dat" % (secret.CTRE_FTPUSER,
@@ -34,10 +35,18 @@ ts = mx.DateTime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
 
 iem = access.Ob( 'RSAI4', "OT")
 iem.setObTime( ts )
-iem.data['drct'] = d['WindDir']
-iem.data['sknt'] = float(d['WS_mph_S_WVT']) / 1.15
-iem.data['gust'] = float(d['WS_mph_Max']) / 1.15
+drct = d['WindDir']
+iem.data['drct'] = drct
+sknt = float(d['WS_mph_S_WVT']) / 1.15
+iem.data['sknt'] = sknt
+gust = float(d['WS_mph_Max']) / 1.15
+iem.data['gust'] = gust
 iem.updateDatabase( accessdb )
+
+csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RSAI4', 
+            ts.gmtime().strftime("%Y/%m/%d %H:%M:%S"),
+      drct, sknt, gust) )
+
 
 # Get Saylorville
 req = urllib2.Request("ftp://%s:%s@129.186.224.167/Red Rock_Table3Min_current.dat" % (secret.CTRE_FTPUSER,
@@ -56,7 +65,19 @@ ts = mx.DateTime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
 
 iem = access.Ob( 'RLRI4', "OT")
 iem.setObTime( ts )
-iem.data['drct'] = d['WindDir']
-iem.data['sknt'] = float(d['WS_mph_S_WVT']) / 1.15
-iem.data['gust'] = float(d['WS_mph_Max']) / 1.15
+drct = d['WindDir']
+iem.data['drct'] = drct
+sknt = float(d['WS_mph_S_WVT']) / 1.15
+iem.data['sknt'] = sknt
+gust = float(d['WS_mph_Max']) / 1.15
+iem.data['gust'] = gust
 iem.updateDatabase( accessdb )
+
+csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RSAI4', 
+            ts.gmtime().strftime("%Y/%m/%d %H:%M:%S"),
+      drct, sknt, gust) )
+
+csv.close()
+
+cmd = "pqinsert -p 'data c 000000000000 csv/ctre.txt bogus txt' /tmp/ctre.txt"
+os.system( cmd )
