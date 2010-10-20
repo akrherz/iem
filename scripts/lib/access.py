@@ -169,7 +169,7 @@ class Ob(object):
          %(rstage)s, %(ozone)s,%(co2)s, 
          '%(ts)s', '%(skyc1)s', '%(skyc2)s', '%(skyc3)s', 
                    %(skyl1)s, %(skyl2)s, %(skyl3)s)  """ % self.data
-        sql = sql + self.networkcheck()
+        sql = sql 
         sql = sql.replace("None", "Null").replace("'Null'", "Null")
         self.execQuery(sql, db, dbpool)
 
