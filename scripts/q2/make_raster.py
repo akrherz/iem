@@ -104,8 +104,8 @@ def doit(gts):
    0.00000
    0.00000
   -0.010000000000000000
-%s.000000
-  %s.0000""" % (gts.strftime("%Y%m%d%H%M"), west, north))
+%s
+  %s""" % (gts.strftime("%Y%m%d%H%M"), west, north))
     o.close()
     # Inject WLD file
     pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/n1p_%s.wld wld' /tmp/q2.wld" % (
