@@ -11,10 +11,6 @@ function new_window(url) {
  link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
 } 
 //END Script-->
-</script>
-<script type="text/javascript" src="/js/tableruler.js"></script>
-<script type="text/javascript">
-    window.onload=function(){tableruler();}
 </script>';
  $THISPAGE = "current-sort";
  include("$rootpath/include/header.php"); ?>
@@ -158,7 +154,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
  <td>". $parts["relh"] ."</td>
  <td>". round($parts["sknt"],0) ;
   if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
-              echo "G". $parts["gust"];
+              echo "G". round($parts["gust"],1);
   } 
   echo "</td>
             <td>". round($parts["drct"],0) ."</td>
