@@ -52,7 +52,7 @@ LAYER
     "wms_srs"   "EPSG:4326 EPSG:26915"
     "wms_extent" "-126 24 -66 50"
   END
-  #OFFSITE 0 0 0
+  OFFSITE 0 0 0
 END
 
 LAYER
