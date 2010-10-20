@@ -72,7 +72,7 @@ def doit(gts):
     west = -130.
     north = 55.
     # Create the image data
-    imgdata = numpy.zeros( (szy, szx), numpy.int8)
+    imgdata = numpy.zeros( (szy, szx), 'u1')
     # Loop over tiles
     for tile in range(1,9):
         fp = make_fp(tile, gts)
