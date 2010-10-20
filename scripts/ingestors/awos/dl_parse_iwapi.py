@@ -27,22 +27,22 @@ def dosite(id):
     iem.load_and_compare(iemaccess)
     
     iem.data['raw'] = data
-    if mtr.temp:
+    if mtr.temp is not None:
         iem.data['tmpf'] = mtr.temp.value("F")
-    if mtr.dewpt:
+    if mtr.dewpt is not None:
         iem.data['dwpf'] = mtr.dewpt.value("F")
-    if mtr.wind_speed:
+    if mtr.wind_speed is not None:
         iem.data['sknt'] = mtr.wind_speed.value("KT")
-    if mtr.wind_gust:
+    if mtr.wind_gust is not None:
         iem.data['gust'] = mtr.wind_gust.value("KT")
-    if mtr.wind_dir:
+    if mtr.wind_dir is not None:
         iem.data['drct'] = mtr.wind_dir.value()
-    if mtr.vis:
+    if mtr.vis is not None:
         iem.data['vsby'] = mtr.vis.value("SM")
-    if mtr.press:
+    if mtr.press is not None:
         iem.data['alti'] = mtr.press.value("IN")
     iem.data['phour'] = 0
-    if mtr.precip_1hr:
+    if mtr.precip_1hr is not None:
         iem.data['phour'] = mtr.precip_1hr.value("IN")
     # Do something with sky coverage
     for i in range(len(mtr.sky)):
