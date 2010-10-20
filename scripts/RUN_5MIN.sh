@@ -21,10 +21,13 @@ cd ../dotcams
 cd ../awos
 /mesonet/python/bin/python parse_idot.py
 
+cd ../../q2
+/mesonet/python/bin/python make_raster.py
+
 # Lets wait a bit now
 sleep 60
 
-cd ../../current
+cd ../current
 /mesonet/python/bin/python q2_5min_rate.py
 /mesonet/python/bin/python q2_today_total.py
 /mesonet/python/bin/python q2_Xhour.py 1
