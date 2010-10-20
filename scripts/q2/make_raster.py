@@ -118,10 +118,8 @@ def doit(gts):
     # Create 900913 image
     cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 q2.png q2.tif"
     os.system( cmd )
-    cmd = "convert q2.tif q2.png"
-    os.system( cmd )
     # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/n1p.png GIS/q2/n1p_%s.png png' q2.png" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/n1p.tif GIS/q2/n1p_%s.tif tif' q2.tif" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
     os.system(pqstr)
     
