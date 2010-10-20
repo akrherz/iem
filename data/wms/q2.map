@@ -1,0 +1,76 @@
+MAP
+#
+# Start of map file
+#
+NAME "q2"
+STATUS ON
+SIZE 450 350
+EXTENT -126 24 -66 50
+UNITS DD
+SHAPEPATH "/mesonet/data/gis/"
+IMAGECOLOR -1 -1 -1
+
+#
+PROJECTION
+   "init=epsg:4326"
+END
+
+#
+WEB
+  TEMPLATE ia.html
+  MINSCALE 0
+  MAXSCALE 465000000
+  IMAGEPATH "/mesonet/www/html/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/mesonet/www/html/tmp/w0.log"
+  METADATA
+   "wms_title" "IEM Q2 WMS Service"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/data/wms/q2.map&SERVICE=WMS&"
+   "wms_srs" "EPSG:4326 EPSG:900913"
+   "wms_abstract" "IEM generated Q2 Precipitation Products."
+   "wms_keywords" "Q2"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+  NAME "q2_n1p"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/q2/n1p.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "Q2 1 Hour Precip"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  #OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "q2_n1p_900913"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/q2/n1p.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "Q2 1 Hour Precip"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+END
