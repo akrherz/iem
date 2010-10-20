@@ -48,7 +48,7 @@ class Ob(object):
         rs = db.query("""SELECT c.*, s.* from current c, summary_%s s WHERE 
           c.station = '%s' and s.day = 'TODAY' and 
           c.station = s.station and c.network = s.network %s""" % (
-          self.stationID, self.networkcheck() ) ).dictresult()
+          self.data['ts'].year, self.stationID, self.networkcheck() ) ).dictresult()
         if len(rs) == 0:
             print "No rows found for stationID: %s network: %s" % (
               self.stationID, self.data['network'])

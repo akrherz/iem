@@ -14,4 +14,7 @@ cd ../outgoing
 cd ../ingestors/sn
 /mesonet/python/bin/python parser.py
 
+cd ../awos
+/mesonet/python/bin/python dl_parse_iwapi.py
+
 /mesonet/www/apps/nwnwebsite/scripts/GEN.csh
