@@ -63,7 +63,7 @@ def make_fp(tile, gts):
         gts.strftime("%Y/%m/%d"), tile, 
         gts.strftime("%Y%m%d-%H%M") )
     
-def doit(gts):
+def doit(gts, hr):
     """
     Actually generate a PNG file from the 8 NMQ tiles
     """
@@ -81,7 +81,7 @@ def doit(gts):
             continue
         nc = netCDF3.Dataset( fp )
         # Our 24h rasters will support ~24 inch rainfalls
-        val = nc.variables["rad_hsr_24h"][:] / 10.0 / 2.0 # convert to mm
+        val = nc.variables["rad_hsr_%sh" % (hr,)][:] / 10.0 / 2.0 # convert to mm
         # Bump up by one, so that we can set missing to color index 0
         val += 1.0
         val = numpy.where(val < 1.0, 0., val)
@@ -109,29 +109,31 @@ def doit(gts):
   %s""" % (gts.strftime("%Y%m%d%H%M"), west, north))
     o.close()
     # Inject WLD file
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/p24h_%s.wld wld' /tmp/q2.wld" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/p%sh_%s.wld wld' /tmp/q2.wld" % (
+                    gts.strftime("%Y%m%d%H%M"),hr, gts.strftime("%Y%m%d%H%M") )
     os.system(pqstr)
     # Now we inject into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/p24h.png GIS/q2/p24h_%s.png png' q2.png" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/p%sh.png GIS/q2/p%sh_%s.png png' q2.png" % (
+                    gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M") )
     os.system(pqstr)
     # Create 900913 image
     cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 q2.png q2.tif"
     os.system( cmd )
     # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/p24h.tif GIS/q2/p24h_%s.tif tif' q2.tif" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/p%sh.tif GIS/q2/p%sh_%s.tif tif' q2.tif" % (
+                    gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M") )
     os.system(pqstr)
     
     os.unlink('q2.tif')
 
 if __name__ == "__main__":
     if len(sys.argv) == 5:
-        doit(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
-                                   int(sys.argv[4]), 0))
+        for hr in [24,48,72]:
+            doit(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
+                                   int(sys.argv[4]), 0), hr)
     else:
         gts = mx.DateTime.gmtime() + mx.DateTime.RelativeDateTime(minute=0)
-        doit( gts )
-
+        for hr in [24,48,72]:
+            doit( gts , hr)
+        
     
