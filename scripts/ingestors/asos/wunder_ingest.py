@@ -246,8 +246,9 @@ def normal():
                 tbegin = now
             processed += obs
             now += interval
-            if tbegin is not None:
-                print "Station %s Begin: %s Obs: %s" % (sid, tbegin.strftime("%Y-%m-%d"),
-      processed)
+        if tbegin is not None:
+            print "Station %s Begin: %s Obs: %s" % (sid, 
+                                tbegin.strftime("%Y-%m-%d"), processed)
 
-recover()
+#recover()
+normal()
