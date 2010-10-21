@@ -1,7 +1,13 @@
 <?php 
 include("../../config/settings.inc.php");
+include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
+$iem = new iemaccess();
+$rsai4 = $iem->getSingleSite('RSAI4');
+$rlri4 = $iem->getSingleSite('RLRI4');
+
+
 $TITLE = "IEM | Other Data Networks";
 $THISPAGE = "networks-other";
 include("$rootpath/include/header.php");  ?>
@@ -10,6 +16,26 @@ include("$rootpath/include/header.php");  ?>
 
 <p>The IEM collects data from a number of stand alone sensors.  This page
 contains links to data from these sites.
+
+<h3><a href="http://www.ctre.iastate.edu">CTRE</a> Provided Iowa DOT Bridge Sensors</h3>
+
+<p>These two sensors sit on the bridges over top their respective lakes.  Their
+purpose is to monitor for high winds impacting traffic.
+
+<p><table cellpadding='3' border='1' cellspacing='0'>
+<tr><th>Station</th><th>Observation Time</th><th>Wind Speed [mph]</th>
+	<th>Today's Gust [mph]</th><th>Wind Direction</th></tr>
+<?php echo sprintf("<tr><td>Saylorville Lake</td><td>%s</td><td>%.1f Gusts: %.1f</td>
+	<td>%.1f @ %s</td><td>%s</td></tr>", $rsai4->db['obtime'], $rsai4->db['sknt'] * 1.15,
+	$rsai4->db['gust'] * 1.15, $rsai4->db['max_gust'] * 1.15, 
+	strftime('%I:%M %p', $rsai4->db['gust_ts']),
+	drct2txt($rsai4->db['drct']) );?>
+<?php echo sprintf("<tr><td>Lake Red Rock</td><td>%s</td><td>%.1f Gusts: %.1f</td>
+	<td>%.1f @ %s</td><td>%s</td></tr>", $rlri4->db['obtime'], $rlri4->db['sknt'] * 1.15,
+	$rlri4->db['gust'] * 1.15, $rlri4->db['max_gust'] * 1.15, 
+	strftime('%I:%M %p', $rlri4->db['gust_ts']),
+	drct2txt($rlri4->db['drct']) );?>
+</table>
 
 <h3>Agronomy Hall, ISU:</h3>
 
