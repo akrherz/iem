@@ -34,3 +34,6 @@ cd ../plots
 cd ../iemre
 /mesonet/python/bin/python grid_asos.py
 /mesonet/python/bin/python grid_asos.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
+
+cd ../q2
+/mesonet/python/bin/python make_raster_24h.py
