@@ -106,7 +106,7 @@ def doit(gts, hr):
    0.00000
   -0.010000000000000000
 %s
-  %s""" % (gts.strftime("%Y%m%d%H%M"), west, north))
+  %s""" % (gts.strftime("%Y%m%d%H%M%S"), west, north))
     o.close()
     # Inject WLD file
     pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/p%sh_%s.wld wld' /tmp/q2.wld" % (
@@ -128,12 +128,11 @@ def doit(gts, hr):
 
 if __name__ == "__main__":
     if len(sys.argv) == 5:
-        for hr in [24,48,72]:
-            doit(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
-                                   int(sys.argv[4]), 0), hr)
+        gts = mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
+                                   int(sys.argv[4]), 0)
     else:
         gts = mx.DateTime.gmtime() + mx.DateTime.RelativeDateTime(minute=0)
-        for hr in [24,48,72]:
-            doit( gts , hr)
+    for hr in [24,48,72]:
+        doit( gts , hr)
         
     
