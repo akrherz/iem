@@ -101,12 +101,13 @@ def doit(gts, hr):
     png.save('q2.png')
     # Now we need to generate the world file
     o = open('/tmp/q2.wld', 'w')
-    o.write("""   0.0100000000000%s
+    o.write("""   0.0100000000000%s%s
    0.00000
    0.00000
   -0.010000000000000000
 %s
-  %s""" % (gts.strftime("%Y%m%d%H%M%S"), west, north))
+  %s""" % (gts.strftime("%Y%m%d%H%M"), mx.DateTime.now().second,
+           west, north))
     o.close()
     # Inject WLD file
     pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/p%sh_%s.wld wld' /tmp/q2.wld" % (
