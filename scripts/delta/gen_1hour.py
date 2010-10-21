@@ -35,7 +35,7 @@ for i in range(len(rs)):
 for id in c.keys():
 	if (not lh.has_key(id)): continue
 	d = c[id]["alti"] - lh[id]["alti"]
-	if (d == 0):
+	if d == 0 and c[id]['pres'] is not None and lh[id]['pres'] is not None:
 		d = c[id]["pres"] - lh[id]["pres"]
 
 	if (d < 1 and d > -1):
