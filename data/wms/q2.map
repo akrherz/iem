@@ -73,4 +73,112 @@ LAYER
   OFFSITE 0 0 0
 END
 
+LAYER
+  NAME "q2_p24h"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/q2/p24h.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "Q2 24 Hour Precipitation"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "q2_p24h_900913"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/q2/p24h.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "Q2 24 Hour Precipitation"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "q2_p48h"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/q2/p48h.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "Q2 48 Hour Precipitation"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "q2_p48h_900913"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/q2/p48h.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "Q2 48 Hour Precipitation"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "q2_p72h"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/q2/p72h.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "Q2 72 Hour Precipitation"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "q2_p72h_900913"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/q2/p72h.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "Q2 72 Hour Precipitation"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
 END
