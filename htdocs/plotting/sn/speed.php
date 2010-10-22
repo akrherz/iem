@@ -91,7 +91,7 @@ $graph->img->SetAntiAliasing();
 $graph->SetFrame(false);
 
 // Rotate graph 90 degrees and set margin
-//$graph->Set90AndMargin(130,5,22,25);
+$graph->SetMargin(50,5,50,100);
 
 // Set white margin color
 $graph->SetMarginColor('white');
@@ -123,6 +123,10 @@ $graph->xaxis->SetLabelMargin(30);
 // Label align for X-axis
 $graph->xaxis->SetLabelAlign('right','center');
 $graph->xaxis->SetPos("min");
+
+$graph->yaxis->SetTitle("Speed [mph");
+$graph->yaxis->title->SetFont(FF_VERDANA,FS_NORMAL,12);
+$graph->yaxis->SetTitleMargin(30);
 
 // Add some grace to y-axis so the bars doesn't go
 // all the way to the end of the plot area
