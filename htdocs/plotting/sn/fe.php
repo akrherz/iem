@@ -57,7 +57,6 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
     $mph = 0;
   }
   if ($mph > 120){
-    $spderr += 1;
     $mph = 0;
   } 
     $distance = $distkm * 0.621371192;
