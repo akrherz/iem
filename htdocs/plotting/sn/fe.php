@@ -112,11 +112,11 @@ well if the GPS data is good! This archive begins
 </form>
 
 <p>
-<img src="<?php if ($spotter != "") { 
+<?php if ($spotter != "") { 
     echo "<strong>Please be patient, the page may take a bit to load...</strong>
 <br /><a href=\"#data\">View Raw Data</a><br />";	
-	echo $imgurl;
-} ?>" />
+	echo "<img src=\"$imgurl\" />";
+} ?>
 
 <p><strong>Spotters with data valid for selected time [num obs]...</strong>
 <?php
