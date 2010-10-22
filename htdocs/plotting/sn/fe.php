@@ -134,7 +134,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 <h4>Raw Data Report:</h4>
 <a name="data"></a>
 <table cellpadding="3" cellspacing="0" border="1">
-<tr><th>Spotter</th><td>Valid UTC</td><td>Longitude</td><td>Latitude</td><td>Distance</td><td>Speed</td></tr>
+<tr><th>Spotter</th><td>Valid UTC</td><td>Longitude</td><td>Latitude</td><td>Distance [mile]</td><td>Speed [mph]</td></tr>
 <?php echo $data; ?>
 </table>
 
