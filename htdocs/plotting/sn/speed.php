@@ -124,7 +124,7 @@ $graph->xaxis->SetLabelMargin(30);
 $graph->xaxis->SetLabelAlign('right','center');
 $graph->xaxis->SetPos("min");
 
-$graph->yaxis->SetTitle("Speed [mph");
+$graph->yaxis->SetTitle("Speed [mph]");
 $graph->yaxis->title->SetFont(FF_VERDANA,FS_NORMAL,12);
 $graph->yaxis->SetTitleMargin(30);
 
