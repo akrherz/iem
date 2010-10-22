@@ -104,7 +104,8 @@ $graph->SetBox();
 
 // Setup title
 $graph->title->Set("SpotterNetwork Report for [$spotter]");
-$subt = sprintf("QC Errors: %s Distance: %.1f miles\nPlot Between Dates %s and %s UTC", $spderr, $distance, date("Y-m-d H:i", $sts),date("Y-m-d H:i", $ets) );
+$subt = sprintf("Observations: %s QC Errors: %s Distance: %.1f miles\nPlot Between Dates %s and %s UTC", 
+	pg_num_rows($rs), $spderr, $distance, date("Y-m-d H:i", $sts),date("Y-m-d H:i", $ets) );
 $graph->subtitle->Set( $subt );
 $graph->title->SetFont(FF_VERDANA,FS_BOLD,12);
 $graph->subtitle->SetFont(FF_VERDANA,FS_BOLD,10);
