@@ -44,7 +44,7 @@ iem.data['gust'] = gust
 iem.updateDatabase( accessdb )
 
 csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RSAI4', 
-            ts.gmtime().strftime("%Y/%m/%d %H:%M:%S"),
+            ts1.gmtime().strftime("%Y/%m/%d %H:%M:%S"),
       drct, sknt, gust) )
 
 
@@ -74,7 +74,7 @@ iem.data['gust'] = gust
 iem.updateDatabase( accessdb )
 
 csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RLRI4', 
-            ts.gmtime().strftime("%Y/%m/%d %H:%M:%S"),
+            ts2.gmtime().strftime("%Y/%m/%d %H:%M:%S"),
       drct, sknt, gust) )
 
 csv.close()
