@@ -82,4 +82,5 @@ csv.close()
 cmd = "/home/ldm/bin/pqinsert -p 'data c 000000000000 csv/ctre.txt bogus txt' /tmp/ctre.txt"
 if ((mx.DateTime.now() - ts1).seconds > 3600. and
    (mx.DateTime.now() - ts2).seconds > 3600.):
-    os.system( cmd )
+    sys.exit()
+os.system( cmd )
