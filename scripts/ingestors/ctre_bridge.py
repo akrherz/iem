@@ -31,10 +31,10 @@ d = {}
 for i in range(len(vals)):
     d[ keys[i] ] = vals[i]
 
-ts = mx.DateTime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
+ts1 = mx.DateTime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
 
 iem = access.Ob( 'RSAI4', "OT")
-iem.setObTime( ts )
+iem.setObTime( ts1 )
 drct = d['WindDir']
 iem.data['drct'] = drct
 sknt = float(d['WS_mph_S_WVT']) / 1.15
@@ -61,10 +61,10 @@ d = {}
 for i in range(len(vals)):
     d[ keys[i] ] = vals[i]
 
-ts = mx.DateTime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
+ts2 = mx.DateTime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
 
 iem = access.Ob( 'RLRI4', "OT")
-iem.setObTime( ts )
+iem.setObTime( ts2 )
 drct = d['WindDir']
 iem.data['drct'] = drct
 sknt = float(d['WS_mph_S_WVT']) / 1.15
@@ -80,4 +80,6 @@ csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RLRI4',
 csv.close()
 
 cmd = "/home/ldm/bin/pqinsert -p 'data c 000000000000 csv/ctre.txt bogus txt' /tmp/ctre.txt"
-os.system( cmd )
+if ((mx.DateTime.now() - ts1).seconds > 3600. and
+   (mx.DateTime.now() - ts2).seconds > 3600.):
+    os.system( cmd )
