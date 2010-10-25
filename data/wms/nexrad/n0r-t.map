@@ -52,6 +52,7 @@ LAYER
   #TYPE TILEINDEX  #No worky
   TYPE POLYGON
   DATA "the_geom from nexrad_n0r_tindex"
+  FILTER "datetime = '2006-06-23 03:10+00'
   METADATA
     "wms_title" "NEXRAD BASE REFLECT"
     "wms_srs"   "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
