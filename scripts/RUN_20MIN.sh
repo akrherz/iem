@@ -3,7 +3,7 @@
 # Wait two minutes please
 sleep 120
 cd current
-/mesonet/python/bin/python 24h_change.py
+#/mesonet/python/bin/python 24h_change.py
 
 cd ../ingestors/rwis
 /mesonet/python/bin/python acquireClarus.py
