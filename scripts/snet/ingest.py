@@ -255,7 +255,7 @@ def fireLDM(report, route, id):
     logger.info( report )
     try:
         #if (route != "KELO" and route != "KCCI"):
-        os.system("/home/ldm/bin/pqinsert -p '%s' /tmp/%s" %(fname,fname) )
+        os.system("/home/ldm/bin/pqinsert -p '%s' /tmp/%s" %(fname.replace('DMX','DSM'),fname) )
     except:
         logger.exception("Trouble inserting Alert!")
 
