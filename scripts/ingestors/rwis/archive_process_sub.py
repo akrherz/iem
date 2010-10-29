@@ -34,8 +34,11 @@ def dofiles(files):
                 continue
             nwsli = mesonet.RWISconvert['%02i' % (id,)]
             sensor_id = tokens[1]
-        
-            ts = mx.DateTime.strptime(tokens[2], '%m/%d/%Y %H:%M')
+            try:
+                ts = mx.DateTime.strptime(tokens[2], '%m/%d/%Y %H:%M')
+            except:
+                print line
+                continue
             if ts0 is None:
                 ts0 = ts
             tmpf = clean( tokens[3] )
