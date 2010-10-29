@@ -32,7 +32,10 @@ def processfile( fp ):
     #print data
     nwsli = lkp[ fp ]
     iem = iemAccessOb.iemAccessOb(nwsli, 'IA_RWIS')
-    ts = mx.DateTime.strptime(data['date_time'][:-6], '%Y-%m-%d %H:%M')
+    if fp == 'portableExportP1.csv':
+        ts = mx.DateTime.strptime(data['date_time'], '%Y-%m-%d %H:%M:%S')
+    else:
+        ts = mx.DateTime.strptime(data['date_time'][:-6], '%Y-%m-%d %H:%M')
     if ts.year < 2010:
       print "BAD! timestamp", ts
       return
