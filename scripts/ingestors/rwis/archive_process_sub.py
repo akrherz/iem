@@ -30,6 +30,8 @@ def dofiles(files):
                 continue
             tokens = line.split(",")
             id = int(tokens[0]) - 512000
+            if id < 0:
+                continue
             nwsli = mesonet.RWISconvert['%02i' % (id,)]
             sensor_id = tokens[1]
         
