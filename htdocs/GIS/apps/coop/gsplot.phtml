@@ -8,11 +8,11 @@ $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
 $var = isset($_GET["var"]) ? $_GET["var"]: "gdd50";
-$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400);
 $smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: 5;
 $sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
-$emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: date("m");
-$eday = isset($_GET["eday"]) ? $_GET["eday"]: date("d");
+$emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: date("m", time() - 86400);
+$eday = isset($_GET["eday"]) ? $_GET["eday"]: date("d", time() - 86400);
 
 /** Need to use external date lib 
   * http://php.weblogs.com/adodb_date_time_library
@@ -21,7 +21,10 @@ include("$rootpath/include/adodb-time.inc.php");
 
 $sts = adodb_mktime(0,0,0,$smonth, $sday, $year);
 $ets = adodb_mktime(0,0,0,$emonth, $eday, $year);
-
+$aend = adodb_mktime(0,0,0,date("m", time() - 86400), date('d', time() - 86400),
+						date('Y', time() - 86400));
+if ($ets >= $aend){ $ets = $aend; }
+						
 $imgurl = sprintf("gsplot.php?smonth=%s&sday=%s&var=%s&emonth=%s&eday=%s&year=%s",
   $smonth, $sday, $var, $emonth, $eday, $year);
 
@@ -40,14 +43,16 @@ include("$rootpath/include/header.php"); ?>
 
 <div class="text">
 
+<h3>Custom Date Duration Charts</h3>
+
 <p>With this application, you can total a parameter of your
 choice over a duration of your choice.  The resulting data is presented 
-graphically as well as textually for use in a GIS. 
+graphically as well as textually for use in a GIS. The end date is inclusive to
+the data presented. The raw daily data used for this application can be downloaded
+from <a href="../../../request/coop/fe.phtml">here</a>.
 
 <form method="GET" action="gsplot.phtml" name="theform">
 <table>
- <tr>
-  <th colspan=5><h3 class="subtitle">Growing Season Charts</h3></th></tr>
  <tr>
    <th>Select Parameter:</th>
    <th>Year</th>
