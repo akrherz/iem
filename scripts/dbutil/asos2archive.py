@@ -30,12 +30,12 @@ for i in range(len(rs)):
   p01m = 0
   if (rs[i]['phour'] is not None and float(rs[i]['phour']) > 0):
     p01m = float(rs[i]['phour']) * 25.4
-  sql = "INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt,  alti, \
-    p01m, gust, vsby, skyc1, skyc2, skyc3, skyl1, skyl2, skyl3, metar) \
-    values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s',%s,%s,%s,'%s')" % \
-  (ts.year,rs[i]['station'], rs[i]['valid'], (rs[i]['tmpf']), \
-  (rs[i]['dwpf']), (rs[i]['drct']), (rs[i]['sknt']),\
-  (rs[i]['alti'] or "Null"), p01m, (rs[i]['gust'] or "Null"), \
+  sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt,  alti, 
+    p01m, gust, vsby, skyc1, skyc2, skyc3, skyl1, skyl2, skyl3, metar) 
+    values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s',%s,%s,%s,'%s')""" % (
+  ts.year,rs[i]['station'], rs[i]['valid'], (rs[i]['tmpf'] or "Null"), 
+  (rs[i]['dwpf'] or "Null"), (rs[i]['drct'] or "Null"), (rs[i]['sknt'] or "Null"),
+  (rs[i]['alti'] or "Null"), p01m, (rs[i]['gust'] or "Null"), 
   (rs[i]['vsby'] or "Null"),
   (rs[i]['skyc1'] or ""),
   (rs[i]['skyc2'] or ""),
