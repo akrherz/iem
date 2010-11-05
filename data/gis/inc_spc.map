@@ -1,3 +1,4 @@
+
 LAYER
   CONNECTIONTYPE postgis
   NAME "spc_categorical_outlook"
