@@ -37,7 +37,10 @@ def doit(ts, hours):
     total = None
     for hr in range(hours):
         lts = ts - mx.DateTime.RelativeDateTime(hours=hr)
-        nc = netCDF3.Dataset(make_fp(lts))
+        fp = make_fp(lts)
+        if not os.path.isfile(fp):
+            continue
+        nc = netCDF3.Dataset( fp )
         if hr == 0:
             total = nc.variables["rad_hsr_1h"][:]
         else:
