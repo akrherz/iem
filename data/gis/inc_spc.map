@@ -1,0 +1,38 @@
+LAYER
+  CONNECTIONTYPE postgis
+  NAME "spc_categorical_outlook"
+  CONNECTION "dbname=postgis host=iemdb"
+  DATA "geom from (select geom, threshold, random() as k from spc_outlooks where valid = '2009-04-26 20:00' and outlook_type = 'C' and category = 'CATEGORICAL') as foo USING unique k USING SRID=4326 "
+  STATUS OFF
+  TYPE POLYGON
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM "threshold"
+  TRANSPARENCY 50
+  CLASS
+    EXPRESSION /HIGH/
+    COLOR 255 0 255
+    NAME "High"
+    
+  END
+  CLASS
+    EXPRESSION /MDT/
+    COLOR 255 0 0
+    SIZE 10
+    NAME "Moderate"
+  END
+  CLASS
+    EXPRESSION /SLGT/
+    COLOR 255 255 0
+    SIZE 10
+    NAME "Slight"
+  END
+  CLASS
+  	EXPRESSION /TSTM/
+  	COLOR -1 -1 -1
+  	OUTLINECOLOR 255 255 255
+  	SIZE 3
+  	NAME "Thunderstorm"
+  END
+END
