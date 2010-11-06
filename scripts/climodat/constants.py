@@ -4,12 +4,20 @@ import pg, mx.DateTime
 _THISYEAR = 2010
 _ENDYEAR = 2011
 #_ENDYEAR = 1951
-_QCENDTS = mx.DateTime.DateTime(2010,1,1)
+
 _ARCHIVEENDTS = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
 _ENDTS = mx.DateTime.DateTime(2011,1,1)
 #_YEARS = 58
 #_YRCNT = [0,58,58,58,57,57,57,57,57,57,57,57,57]
 mydb = pg.connect('coop', 'iemdb',user='nobody')
+import iemdb
+mesosite = iemdb.connect('mesosite', bypass=True)
+mcursor = mesosite.cursor()
+mcursor.execute("""SELECT propvalue from properties 
+    where propname = 'iaclimate.end'""")
+row = mcursor.fetchone()
+_QCENDTS = mx.DateTime.strptime(row[0], '%Y-%m-%d')
+mcursor.close()
 
 longterm = ['ia1635','ia4063','ia3509','ia3473','ia4389','ia5769','ia1319',
 'ia7147','ia2171','ia1533','ia5952','ia2110','ia6243','ia5131','ia3290',
