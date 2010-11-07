@@ -1,11 +1,11 @@
 # Only EDIT on SVN!
 #
 PYTHONPATH=/var/www/scripts/lib
-0 19 * * * cd /var/www/scripts; sh RUN_0Z.sh
+0 18 * * * cd /var/www/scripts; sh RUN_0Z.sh
 0 0 * * * cd /var/www/scripts; sh RUN_MIDNIGHT.sh
 5 2 * * * cd /var/www/scripts; sh RUN_2AM.sh
 0 11 * * * cd /var/www/scripts; sh RUN_11AM.sh
-0 7 * * * cd /var/www/scripts; sh RUN_12Z.sh
+0 6 * * * cd /var/www/scripts; sh RUN_12Z.sh
 
 10 * * * * cd /var/www/scripts; sh RUN_10_AFTER.sh 
 20 * * * * cd /var/www/scripts; sh RUN_20_AFTER.sh 
