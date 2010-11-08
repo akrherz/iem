@@ -16,13 +16,16 @@ def merge(ts):
 
     fp = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib" % (
       ts.strftime("%Y/%m/%d"), ts.strftime("%Y%m%d%H") )
-
-    grib = Nio.open_file(fp, 'r')
-    # Rough subsample, since the whole enchillata is too much
-    lats = numpy.ravel( grib.variables["g5_lat_0"][400:-300,500:700] )
-    lons = numpy.ravel( grib.variables["g5_lon_1"][400:-300,500:700] )
-    vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc1h"][400:-300,500:700] )
-    res = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
+    if os.path.isfile(fp):
+        grib = Nio.open_file(fp, 'r')
+        # Rough subsample, since the whole enchillata is too much
+        lats = numpy.ravel( grib.variables["g5_lat_0"][400:-300,500:700] )
+        lons = numpy.ravel( grib.variables["g5_lon_1"][400:-300,500:700] )
+        vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc1h"][400:-300,500:700] )
+        res = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
+    else:
+        print 'Missing stage4 %s' % (fp,)
+        res = numpy.zeros( (constants.NX, constants.NY))
 
     # Open up our RE file
     nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'a')
