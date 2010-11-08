@@ -18,6 +18,9 @@ def doit(ts):
 
   fp = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib" % (
       ts.strftime("%Y/%m/%d"), ts.strftime("%Y%m%d%H") )
+  if not os.path.isfile(fp):
+    print 'Missing stage4 %s' % (fp,)
+    return
 
   grib = Nio.open_file(fp)
   lats = grib.variables["g5_lat_0"][:]
