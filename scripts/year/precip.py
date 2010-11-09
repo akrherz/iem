@@ -1,5 +1,4 @@
 import sys
-sys.path.insert(0,'../lib')
 import iemplot
 
 import Ngl
@@ -8,10 +7,10 @@ import re, os
 import math
 import mx.DateTime
 import netCDF3
-from pyIEM import stationTable, iemdb
-st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
-i = iemdb.iemdb()
-coop = i['coop']
+import iemdb, network
+st = network.Table('IACLIMATE')
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor()
 
 ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
 
@@ -20,14 +19,14 @@ lats = []
 lons = []
 
 # Get normals!
-rs = coop.query("""SELECT station, sum(precip) as acc from climate51 
+ccursor.execute("""SELECT station, sum(precip) as acc from climate51 
     WHERE valid <= '2000-%s' and station NOT IN ('ia7842','ia4381') 
     GROUP by station ORDER by acc ASC""" % (ts.strftime("%m-%d"),
-    ) ).dictresult()
-for i in range(len(rs)):
-    station = rs[i]['station'].upper()
+    ) )
+for row in ccursor:
+    station = row[0].upper()
     #print station, rs[i]['acc']
-    nrain.append(float(rs[i]['acc']))
+    nrain.append( row[1] )
     lats.append(st.sts[station]['lat'])
     lons.append(st.sts[station]['lon'])
 
@@ -51,17 +50,17 @@ iemplot.postprocess(tmpfp, pqstr)
 drain = []
 lats = []
 lons = []
-rs = coop.query("""select station, norm, obs from 
+ccursor.execute("""select station, norm, obs from 
     (select c.station, sum(c.precip) as norm from climate51 c 
      where c.valid < '2000-%s' GROUP by c.station) as climate, 
     (select a.stationid, sum(a.precip) as obs from alldata a 
      WHERE a.year = %s GROUP by stationid) as obs 
   WHERE obs.stationid = climate.station""" % (ts.strftime("%m-%d"),
-    ts.year) ).dictresult()
-for i in range(len(rs)):
-    station = rs[i]['station'].upper()
+    ts.year) )
+for row in ccursor:
+    station = row[0].upper()
     #print station, rs[i]['acc']
-    drain.append( rs[i]['obs'] - rs[i]['norm'] )
+    drain.append( row[2] - row[1] )
     lats.append(st.sts[station]['lat'])
     lons.append(st.sts[station]['lon'])
 
