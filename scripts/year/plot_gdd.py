@@ -7,10 +7,12 @@ import iemplot
 import mx.DateTime
 now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-coop = i['coop']
-mesosite = i['mesosite']
+import network
+st = network.Table('IACLIMATE')
+import iemdb
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor()
+
 
 gfunc = "gdd50"
 gbase = 50
@@ -18,32 +20,26 @@ if len(sys.argv) == 2 and sys.argv[1] == "gdd52":
   gfunc = "gdd52"
   gbase = 52
 
-# Now we load climatology
-sts = {}
-rs = mesosite.query("SELECT id, x(geom) as lon, y(geom) as lat from stations WHERE \
-    network = 'IACLIMATE'").dictresult()
-for i in range(len(rs)):
-    sts[ rs[i]["id"].lower() ] = rs[i]
-
 
 # Compute normal from the climate database
-sql = """SELECT stationid,
+ccursor.execute("""SELECT stationid,
    sum(%s(high, low)) as gdd
    from alldata WHERE stationid != 'ia0000' and year = %s
-   GROUP by stationid""" % (gfunc, now.year)
+   GROUP by stationid""" % (gfunc, now.year))
 
 lats = []
 lons = []
 gdd50 = []
 valmask = []
-rs = coop.query(sql).dictresult()
-for i in range(len(rs)):
-  if not sts.has_key(rs[i]['stationid']):
-    continue
-  lats.append( sts[rs[i]['stationid']]['lat'] )
-  lons.append( sts[rs[i]['stationid']]['lon'] )
-  gdd50.append( rs[i]['gdd'] )
-  valmask.append( True )
+
+for row in ccursor:
+    station = row[0].upper()
+    if not st.sts.has_key(station):
+        continue
+    lats.append( st.sts[station]['lat'] )
+    lons.append( st.sts[station]['lon'] )
+    gdd50.append( row[1] )
+    valmask.append( True )
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
