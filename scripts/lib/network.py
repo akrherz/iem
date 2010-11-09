@@ -1,6 +1,7 @@
 # Class to hold metadata about a network
 
-import pg
+import iemdb
+import psycopg2.extras
 
 class Table(object):
 
@@ -9,11 +10,16 @@ class Table(object):
         Construct with either a single network, or list of networks
         """
         self.sts = {}
-        dbconn = pg.connect("mesosite", "iemdb", user="nobody")
+        
+        dbconn = iemdb.connect('mesosite', bypass=True)
+        cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         if type(network) == type("A"):
             network = [network,]
         for n in network:
-            rs = dbconn.query("""SELECT *, x(geom) as lon, y(geom) as lat
-                from stations WHERE network = '%s'""" % (n,)).dictresult()
-            for i in range(len(rs)):
-                self.sts[ rs[i]['id'] ] = rs[i]
+            cursor.execute("""SELECT *, x(geom) as lon, y(geom) as lat
+                from stations WHERE network = %s""", (n,))
+            for row in cursor:
+             
+                self.sts[ row['id'] ] = row
+        cursor.close()
+        dbconn.close()
