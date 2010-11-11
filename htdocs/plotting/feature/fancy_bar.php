@@ -5,16 +5,18 @@ include ("../../../include/jpgraph/jpgraph_bar.php");
 // 16 Oct 2007 select extract(year from day) as year, count(*) from (select day, count(*) from alldata WHERE precip >= 4 and year > 1950 and stationid IN (select stationid from alldata WHERE day = '1971-01-01') GROUP by day) as foo WHERE count > 1 GROUP by year ORDER by count ASC;
 
 
-$d=array(12.26, 10.35, 10.32, 10.19);
-$datax=array("1993\n28 Jun - 29 Jul", 
-             "2008\n23 May - 23 Jun",
-             "2010\n24 May - 24 Jun",
-             "1926\n29 Aug - 29 Sep",
+$d=array(139, 136, 127, 126, 122, 118);
+$datax=array("#1 1977\n 1 May - 16 Sep", 
+             "#2 1988\n11 May - 23 Sep",
+             "#3 2005\n27 May - 22 Sep",
+             "#4 1978\n19 May - 21 Sep",
+             "#5 1933\n15 May - 13 Sep",
+             "#9 2010\n21 May - 15 Sep",
 );
 
 // Size of graph
-$width=640; 
-$height=480;
+$width=300; 
+$height=300;
 
 // Set the basic parameters of the graph 
 $graph = new Graph($width,$height,'auto');
@@ -26,7 +28,7 @@ $graph->img->SetAntiAliasing();
 $graph->SetFrame(false);
 
 // Rotate graph 90 degrees and set margin
-$graph->Set90AndMargin(190,5,32,40);
+$graph->Set90AndMargin(130,5,40,40);
 
 // Set white margin color
 $graph->SetMarginColor('white');
@@ -38,14 +40,14 @@ $graph->SetBox();
 $graph->SetBackgroundGradient('blue','lightblue',GRAD_HOR,BGRAD_PLOT);
 
 // Setup title
-$graph->title->Set("Wettest 31 days in Iowa");
-$graph->subtitle->Set("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nIEM Estimated statewide average [inch]");
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,20);
+$graph->title->Set("Consec. Days with High Above 70°F\nAmes [1893-2010]");
+//$graph->subtitle->Set("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nIEM Estimated statewide average [inch]");
+$graph->title->SetFont(FF_VERDANA,FS_BOLD,11);
 $graph->subtitle->SetFont(FF_VERDANA,FS_BOLD,20);
 
 // Setup X-axis
 $graph->xaxis->SetTickLabels($datax);
-$graph->xaxis->SetFont(FF_VERDANA,FS_NORMAL,16);
+$graph->xaxis->SetFont(FF_VERDANA,FS_NORMAL,11);
 
 // Some extra margin looks nicer
 $graph->xaxis->SetLabelMargin(10);
@@ -70,10 +72,10 @@ $bplot = new BarPlot($d);
 $bplot->SetShadow();
 $bplot->SetFillGradient('orange','red',GRAD_HOR);
 $bplot->value->Show();
-$bplot->value->SetFont(FF_ARIAL,FS_BOLD,14);
+$bplot->value->SetFont(FF_ARIAL,FS_BOLD,10);
 //$bplot->value->SetAlign('left','center');
 $bplot->value->SetColor("black");
-$bplot->value->SetFormat('%.2f');
+$bplot->value->SetFormat('%.0f');
 //$bplot->SetLegend("2008");
 $bplot->SetValuePos('max');
 
