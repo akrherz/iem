@@ -3,8 +3,6 @@ include("../config/settings.inc.php");
 $TITLE = "IEM | Disclaimer";
 include("$rootpath/include/header.php"); ?>
 
-<!-- End beginning include -->
-
 <div class="text">
 <h3 class="subtitle">Disclaimer</h3></p>
 
