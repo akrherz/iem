@@ -18,7 +18,7 @@ $map = ms_newMapObj('roads.map');
 $map->setProjection("init=epsg:26915");
 $map->selectOutputFormat("jpeg");
 $d = 70000;
-$map->setextent(304000 + $d, 4535000 + $d, 948000 - $d, 4880000 - $d);
+$map->setextent(304000 + $d, 4540000 + $d, 948000 - $d, 4887000 - $d);
 $map->set("width", 1280);
 $map->set("height",720);
 
