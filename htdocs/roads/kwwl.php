@@ -19,8 +19,8 @@ $map->setProjection("init=epsg:26915");
 $map->selectOutputFormat("jpeg");
 
 $map->setextent(286000, 4477000, 908000, 4940000);
-$map->set("width", 720);
-$map->set("height", 496);
+$map->set("width", 1280);
+$map->set("height",720);
 
 
 $img = $map->prepareImage();
