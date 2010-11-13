@@ -11,14 +11,14 @@ $row = pg_fetch_array($rs, 0);
 $valid = substr($row["valid"],0,16);
 
 //$mapscript = "php_mapscript_cvs.so";
-dl($mapscript);
+//dl($mapscript);
 
 $map = ms_newMapObj('roads.map');
 //$map->setProjection("init=epsg:4326");
 $map->setProjection("init=epsg:26915");
 $map->selectOutputFormat("jpeg");
-
-$map->setextent(284000, 4515000, 968000, 4900000);
+$d = 70000;
+$map->setextent(304000 + $d, 4535000 + $d, 948000 - $d, 4880000 - $d);
 $map->set("width", 1280);
 $map->set("height",720);
 
