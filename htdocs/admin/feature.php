@@ -21,7 +21,11 @@ if ($session) {
   } 
 } 
 
-$loginurl = $facebook->getLoginUrl();
+  $logouturl = $facebook->getLogoutUrl();
+  $loginurl = $facebook->getLoginUrl(Array(
+    'req_perms' => 'publish_stream,offline_access,manage_pages'
+  ));
+
 
 $story = isset($_REQUEST["story"]) ? $_REQUEST["story"] : null;
 $title = isset($_REQUEST["title"]) ? $_REQUEST["title"] : null;
@@ -73,7 +77,7 @@ if ($story != null && $title != null &&
 }
 
 include("$rootpath/include/header.php");
-
+	echo "<a href=\"$logouturl\">Logout</a>";
 if (! $me){
 	?>
 	<a href="<?php echo $loginurl; ?>">Login</a>
