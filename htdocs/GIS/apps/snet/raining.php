@@ -59,7 +59,7 @@ include("$rootpath/include/header.php");
 </form>
 
 <?php
-dl($mapscript);
+
 $nt = new NetworkTable($tv);
 $stbl = $nt->table;
 
