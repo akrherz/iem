@@ -18,7 +18,7 @@ if (! isset($_GET["valid"]))
   $ts = strtotime($_GET["valid"]);
 }
 
-dl($mapscript);
+
 
 $map = ms_newMapObj("roads.map");
 if ($eightbit)
