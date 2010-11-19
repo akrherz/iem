@@ -102,7 +102,6 @@ $lat1 = max($lats);
 $lon0 = min($lons);
 $lon1 = max($lons);
 
-
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 
 $pad = 0.6;

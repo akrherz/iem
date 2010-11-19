@@ -116,7 +116,7 @@ if (time() - $ts > 300)
 }
 
 /* Lets Plot stuff already! */
-dl($mapscript);
+
 
 $mapFile = $rootpath."/data/gis/base".$sectors[$sector]['epsg'].".map";
 $map = ms_newMapObj($mapFile);

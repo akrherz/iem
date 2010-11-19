@@ -24,7 +24,7 @@ function mktitle($map, $imgObj, $titlet) {
                                                                                 
   // point feature with text for location
   $point = ms_newpointobj();
-  $point->setXY(0, 12);
+  $point->setXY(38, 12);
                                                                                 
   $point->draw($map, $layer, $imgObj, "credits",
     $titlet);
@@ -35,12 +35,15 @@ dl($mapscript);
 
 $map = ms_newMapObj("stations.map");
 //iowa 
-$map->setExtent(-97.5,40.5,-89.5,43.5);
+//$map->setExtent(-97.5,40.5,-89.5,43.5);
+$map->setExtent(-96.0,40.5,-90.0,43.5);
+// E CONUS
 //$map->setExtent(-110,26,-72,50);
+//$map->setExtent(-90,29,-72,33);
 //CLAYTON $map->setExtent(-92,42.5,-91.1,43.3);
 //$map->setExtent(-93.5,42.0,-92.8,42.6);
-$map->set("height", 520);
-$map->set("width",  640);
+$map->set("height", 150);
+$map->set("width",  320);
 $map->selectOutputFormat("PNG24");
 
 $namer = $map->getlayerbyname("namerica");
@@ -127,7 +130,7 @@ $states->draw($img);
 $map->drawLabelCache($img);
 //$bars->draw($img);
 
-mktitle($map, $img, " 4 March 2009 - Aqua MODIS Satellite");
+mktitle($map, $img, " 6 Oct 2010 - Afternoon");
 //mkl($map, $img);
 
 $url = $img->saveWebImage();
