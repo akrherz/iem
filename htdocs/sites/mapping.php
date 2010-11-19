@@ -34,7 +34,7 @@ echo '<form method="GET" action="mapping.php">
             </TD></TR>
 	    <TR><TD>
 <?php
-dl($mapscript);
+
 
 $map = ms_newMapObj("../../data/gis/base26915.map");
 $ll = $map->getlayerbyname("wmsback");
