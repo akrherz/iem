@@ -10,8 +10,7 @@ $rs = pg_query($con, $sql);
 $row = pg_fetch_array($rs, 0);
 $valid = substr($row["valid"],0,16);
 
-//$mapscript = "php_mapscript_cvs.so";
-dl($mapscript);
+
 
 $map = ms_newMapObj('roads.map');
 //$map->setProjection("init=epsg:4326");
