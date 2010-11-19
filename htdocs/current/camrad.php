@@ -51,8 +51,6 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 
 /* Finally we get to map rendering */
-dl($mapscript);
-
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 
 /* Hard coded extents based on network */
