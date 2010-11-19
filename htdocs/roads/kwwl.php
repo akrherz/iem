@@ -10,8 +10,7 @@ $rs = pg_query($con, $sql);
 $row = pg_fetch_array($rs, 0);
 $valid = substr($row["valid"],0,16);
 
-//$mapscript = "php_mapscript_cvs.so";
-dl($mapscript);
+
 
 $map = ms_newMapObj('roads.map');
 //$map->setProjection("init=epsg:4326");
@@ -123,7 +122,7 @@ $layer = $map->getLayerByName("credits");
 $c = $layer->getClass(0);
 $point = ms_newpointobj();
 $point->setXY(500, 10);
-$point->draw($map, $layer, $img, "credits", $valid);
+$point->draw($map, $layer, $img, "credits", $valid  );
 
 header("Content-type: image/jpeg");
 $img->saveImage('');
