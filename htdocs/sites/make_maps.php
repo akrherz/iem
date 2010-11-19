@@ -1,10 +1,9 @@
 <?php 
 /* Draw a bunch of reference maps */
 
-dl($mapscript);
+
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
-$map->set("width", 320);
-$map->set("height", 240);
+$map->setSize(320, 240);
 $lat0 = $metadata["lat"];
 $lon0 = $metadata["lon"];
 $map->setextent($lon0 - 5,$lat0 - 5,$lon0 + 5,$lat0 + 5);
