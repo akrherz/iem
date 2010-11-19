@@ -169,7 +169,7 @@ END
 
 LAYER
  NAME kwwlback
- DATA "images/26915/kwwl.tif"
+ DATA "images/26915/kwwl.jpg"
  PROJECTION
   "init=epsg:26915"
  END
