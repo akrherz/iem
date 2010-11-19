@@ -3,7 +3,7 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/vtec.php");
-dl($mapscript);
+
 $mapFile = $rootpath."/data/gis/base4326.map";
 $postgis = iemdb("postgis");
 
