@@ -26,7 +26,7 @@ $sts = adodb_mktime(0,0,0,$smonth, $sday, $year);
 $ets = adodb_mktime(0,0,0,$emonth, $eday, $year);
 
 
-dl($mapscript);
+
 
 function mktitlelocal($map, $imgObj, $titlet) { 
  

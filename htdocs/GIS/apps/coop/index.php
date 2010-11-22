@@ -16,7 +16,7 @@ include("$rootpath/include/header.php");
 ?>
 
 <?php
-dl($mapscript);
+
 include("$rootpath/include/mlib.php");
 include("../rview/lib.php");
 
