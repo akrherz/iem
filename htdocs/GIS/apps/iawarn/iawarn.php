@@ -14,7 +14,7 @@ include("$rootpath/include/database.inc.php");
 $width = "450";
 $height = "450";
 
-dl($mapscript);
+
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/currentOb.php");
 include("$rootpath/include/nexlib2.php");
