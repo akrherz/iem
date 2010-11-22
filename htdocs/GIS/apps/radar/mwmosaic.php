@@ -12,13 +12,8 @@ function mktitle($map, $imgObj, $titlet) {
     $titlet);
 }
 
-
-
-dl($mapscript);
-
 $map = ms_newMapObj("mosaic.map");
-$map->set("width", 300);
-$map->set("height", 350);
+$map->setSize(300,350);
 
 $map->setextent(-320000, -300000, 720000, 700000);
 
