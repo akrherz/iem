@@ -21,9 +21,8 @@ function drawRADAR($site, $imgi, $extents, $projs, $radValid, $fips){
     $site = "DMX";
   }
   $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
-
-  $map->set("width", $width);
-  $map->set("height", $height);
+  $map->setSize($width, $height);
+ 
 
   $map->setextent($extents[$site][0],$extents[$site][1], $extents[$site][2],$extents[$site][3] );
 
