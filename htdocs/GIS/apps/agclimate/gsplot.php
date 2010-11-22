@@ -30,7 +30,7 @@ $eday = strftime("%d", $gs_end);
 $smonth = strftime("%m", $gs_start);
 $sday = strftime("%d", $gs_start);
 
-dl($mapscript);
+
 include("lib.php");
 
 $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
