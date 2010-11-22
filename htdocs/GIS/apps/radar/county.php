@@ -12,7 +12,7 @@
 // county.php  - County based NEXRAD!!!
 //               I know, I know
 
-dl("php_mapscript.so");
+
 $extents = Array("DMX" => Array(1270178, 863000, 1755341, 1276783),
   "FSD" => Array(540178, -34000, 800341, 450783),
   "ARX" => Array(760178, -30000, 900341, 450783),
