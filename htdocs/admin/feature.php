@@ -20,11 +20,13 @@ if ($session) {
     error_log($e);
   } 
 } 
-
+if ($me){
   $logouturl = $facebook->getLogoutUrl();
+}else {
   $loginurl = $facebook->getLoginUrl(Array(
     'req_perms' => 'publish_stream,offline_access,manage_pages'
   ));
+}
 
 
 $story = isset($_REQUEST["story"]) ? $_REQUEST["story"] : null;
@@ -77,11 +79,10 @@ if ($story != null && $title != null &&
 }
 
 include("$rootpath/include/header.php");
+if ($me){ 
 	echo "<a href=\"$logouturl\">Logout</a>";
-if (! $me){
-	?>
-	<a href="<?php echo $loginurl; ?>">Login</a>
-<?php
+} else {
+	echo "<a href=\"$loginurl\">Login</a>";
 }
 ?>
 <h3>IEM Feature Publisher</h3>
