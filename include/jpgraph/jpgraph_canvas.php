@@ -3,9 +3,9 @@
  // File:        JPGRAPH_CANVAS.PHP
  // Description: Canvas drawing extension for JpGraph
  // Created:     2001-01-08
- // Ver:         $Id: jpgraph_canvas.php 1106 2009-02-22 20:16:35Z ljp $
+ // Ver:         $Id: jpgraph_canvas.php 1923 2010-01-11 13:48:49Z ljp $
  //
- // Copyright (c) Aditus Consulting. All rights reserved.
+ // Copyright (c) Asial Corporation. All rights reserved.
  //========================================================================
  */
 
@@ -64,7 +64,7 @@ class CanvasGraph extends Graph {
 
             // Should we do any final image transformation
             if( $this->iImgTrans ) {
-                if( !class_exists('ImgTrans') ) {
+                if( !class_exists('ImgTrans',false) ) {
                     require_once('jpgraph_imgtrans.php');
                 }
 

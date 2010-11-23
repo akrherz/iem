@@ -5,9 +5,9 @@
 //              names on the data series. The number of rows and columns
 //              in the legend are user specifyable.
 // Created:     2001-01-08 (Refactored to separate file 2008-08-01)
-// Ver:         $Id: jpgraph_legend.inc.php 1911 2009-10-09 17:33:14Z ljp $
+// Ver:         $Id: jpgraph_legend.inc.php 1926 2010-01-11 16:33:07Z ljp $
 //
-// Copyright (c) Aditus Consulting. All rights reserved.
+// Copyright (c) Asial Corporation. All rights reserved.
 //========================================================================
 
 DEFINE('_DEFAULT_LPM_SIZE',8); // Default Legend Plot Mark size
@@ -21,15 +21,15 @@ DEFINE('_DEFAULT_LPM_SIZE',8); // Default Legend Plot Mark size
 
 class Legend {
     public $txtcol=array();
-    public $font_family=FF_FONT1,$font_style=FS_NORMAL,$font_size=12;
-    private $color=array(0,0,0); // Default fram color
-    private $fill_color=array(235,235,235); // Default fill color
-    private $shadow=true; // Shadow around legend "box"
+    public $font_family=FF_DEFAULT,$font_style=FS_NORMAL,$font_size=8; // old. 12
+    private $color=array(120,120,120); // Default frame color
+    private $fill_color=array(245,245,245); // Default fill color
+    private $shadow=false; // Shadow around legend "box"
     private $shadow_color='darkgray';
     private $mark_abs_hsize=_DEFAULT_LPM_SIZE,$mark_abs_vsize=_DEFAULT_LPM_SIZE;
     private $xmargin=10,$ymargin=0,$shadow_width=2;
     private $xlmargin=4;
-    private $ylinespacing=2;
+    private $ylinespacing=5;
     
      // We need a separate margin since the baseline of the last text would coincide with the bottom otherwise
     private $ybottom_margin = 8;
@@ -170,6 +170,10 @@ class Legend {
         $this->bkg_gradto = $aTo;
     }
 
+    function HasItems() {
+        return (boolean)(count($this->txtcol));
+    }
+
     function Stroke($aImg) {
         // Constant
         $fillBoxFrameWeight=1;
@@ -198,8 +202,8 @@ class Legend {
         // Find our maximum height in each row
         $rows = 0 ; $rowheight[0] = 0;
         for( $i=0; $i < $n; ++$i ) {
-            $h = max($this->mark_abs_vsize,
-                     $aImg->GetTextHeight($this->txtcol[$i][0]))+$this->ylinespacing;
+            $h = max($this->mark_abs_vsize,$aImg->GetTextHeight($this->txtcol[$i][0]))+$this->ylinespacing;
+
             // Makes sure we always have a minimum of 1/4 (1/2 on each side) of the mark as space
             // between two vertical legend entries
             //$h = round(max($h,$this->mark_abs_vsize+$this->ymargin));
@@ -209,7 +213,7 @@ class Legend {
                 $rows++;
                 $rowheight[$rows-1] = 0;
             }
-            $rowheight[$rows-1] = max($rowheight[$rows-1],$h);
+            $rowheight[$rows-1] = max($rowheight[$rows-1],$h)+1;
         }
 
         $abs_height = 0;
@@ -224,8 +228,8 @@ class Legend {
         // Find out the maximum width in each column
         for( $i=$numcolumns; $i < $n; ++$i ) {
             $colwidth[$i % $numcolumns] = max(
-            $aImg->GetTextWidth($this->txtcol[$i][0])+2*$this->xmargin+2*$this->mark_abs_hsize,
-            $colwidth[$i % $numcolumns]);
+                $aImg->GetTextWidth($this->txtcol[$i][0])+2*$this->xmargin+2*$this->mark_abs_hsize,
+                $colwidth[$i % $numcolumns]);
         }
 
         // Get the total width
@@ -233,6 +237,10 @@ class Legend {
         for( $i=0; $i < $numcolumns; ++$i ) {
             $mtw += $colwidth[$i] ;
         }
+
+        // remove the last rows interpace margin (since there is no next row)
+        $abs_height -= $this->ylinespacing;
+
 
         // Find out maximum width we need for legend box
         $abs_width = $mtw+$this->xlmargin+($numcolumns-1)*$this->mark_abs_hsize;
@@ -290,8 +298,14 @@ class Legend {
         // x1,y1 is the position for the legend marker + text
         // The vertical position is the baseline position for the text
         // and every marker is adjusted acording to that.
+
+        // For multiline texts this get more complicated.
+
         $x1 = $xp + $this->xlmargin;
-        $y1 = $yp + $rowheight[0]; // The ymargin is included in rowheight
+        $y1 = $yp + $rowheight[0] - $this->ylinespacing + 2 ; // The ymargin is included in rowheight
+
+        // Now, y1 is the bottom vertical position of the first legend, i.e if
+        // the legend has multiple lines it is the bottom line.
 
         $grad = new Gradient($aImg);
         $patternFactory = null;
@@ -312,7 +326,6 @@ class Legend {
                 $aImg->SetLineWeight(1);
                 $aImg->SetColor('red');
                 $aImg->SetLineStyle('solid');
-                //$aImg->Rectangle($x1,$y1,$xp+$abs_width,$y1+$rowheight[$row]);
                 $aImg->Rectangle($x1,$y1,$xp+$abs_width-1,$y1-$rowheight[$row]);
             }
 
@@ -333,7 +346,11 @@ class Legend {
             } else {
                 // Paragraph
                 $marky = $y1 - $aImg->GetTextHeight($p[0])/2;
+
+              //  echo "y1=$y1, p[o]={$p[0]}, marky=$marky<br>";
             }
+
+            //echo "<br>Mark #$i: marky=$marky<br>";
 
             $x1 += $this->mark_abs_hsize;
     
@@ -349,6 +366,11 @@ class Legend {
                 if( is_string($p[3]) || $p[3]>0 ) {
                     $aImg->SetLineStyle($p[3]);
                     $aImg->StyleLine($x1-$this->mark_abs_hsize,$marky,$x1+$this->mark_abs_hsize,$marky);
+                }
+
+                // Stroke a mark using image
+                if( $p[2]->GetType() == MARK_IMG ) {
+                    $p[2]->Stroke($aImg,$x1,$marky);
                 }
 
                 // Stroke a mark with the standard size
@@ -413,9 +435,10 @@ class Legend {
                     }
                     else {
                         $aImg->SetColor($p[1]);
-                        $aImg->FilledRectangle($x1-$boxsize/2,$ym,
-                                               $x1+$boxsize/2,$ym+$boxsize);
+                        $aImg->FilledRectangle($x1-$boxsize/2,$ym, $x1+$boxsize/2,$ym+$boxsize);
                     }
+
+                    // Draw a plot frame line
                     $aImg->SetColor($this->color);
                     $aImg->SetLineWeight($fillBoxFrameWeight);
                     $aImg->Rectangle($x1-$boxsize/2,$ym,
@@ -426,16 +449,18 @@ class Legend {
             $aImg->SetFont($this->font_family,$this->font_style,$this->font_size);
             $aImg->SetTextAlign('left','baseline');
 
-            $aImg->StrokeText($x1+$this->mark_abs_hsize+$this->xmargin,$y1,$p[0]);
+            $debug=false;
+            $aImg->StrokeText($x1+$this->mark_abs_hsize+$this->xmargin,$y1,$p[0],
+                0,'left',$debug);
 
             // Add CSIM for Legend if defined
             if( !empty($p[4]) ) {
 
-                $xs = $x1 - $this->mark_abs_hsize;
+                $xs = $x1 - $this->mark_abs_hsize ;
                 $ys = $y1 + 1 ;
-                $xe = $x1 + $aImg->GetTextWidth($p[0]) ;
-                $ye = $y1-$rowheight[$row];
-                $coords = "$xs,$ys,$xe,$y1,$xe,$ye,$x1,$ye";
+                $xe = $x1 + $aImg->GetTextWidth($p[0]) + $this->mark_abs_hsize + $this->xmargin ;
+                $ye = $y1-$rowheight[$row]+1;
+                $coords = "$xs,$ys,$xe,$y1,$xe,$ye,$xs,$ye";
                 if( ! empty($p[4]) ) {
                     $this->csimareas .= "<area shape=\"poly\" coords=\"$coords\" href=\"".htmlentities($p[4])."\"";
 
@@ -453,7 +478,9 @@ class Legend {
 
             if( $i >= $this->layout_n ) {
                 $x1 = $xp+$this->xlmargin;
-                $y1 += $rowheight[$row++];
+                $row++;
+                if( !empty($rowheight[$row]) )
+                    $y1 += $rowheight[$row];
                 $i = 1;
             }
             else {

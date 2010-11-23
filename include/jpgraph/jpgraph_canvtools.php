@@ -5,7 +5,7 @@
  // Created:     2002-08-23
  // Ver:         $Id: jpgraph_canvtools.php 1857 2009-09-28 14:38:14Z ljp $
  //
- // Copyright (c) Aditus Consulting. All rights reserved.
+ // Copyright (c) Asial Corporation. All rights reserved.
  //========================================================================
  */
 

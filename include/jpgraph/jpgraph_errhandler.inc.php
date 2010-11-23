@@ -5,7 +5,7 @@
 //              error messages. All localized error messages are stored
 //              in a separate file under the "lang/" subdirectory.
 // Created:     2006-09-24
-// Ver:         $Id: jpgraph_errhandler.inc.php 1801 2009-09-08 10:51:24Z ljp $
+// Ver:         $Id: jpgraph_errhandler.inc.php 1920 2009-12-08 10:02:26Z ljp $
 //
 // Copyright 2006 (c) Aditus Consulting. All rights reserved.
 //========================================================================
@@ -132,10 +132,6 @@ class JpGraphError {
     }    
 }
 
-// Setup the default handler
-global $__jpg_OldHandler;
-$__jpg_OldHandler = set_exception_handler(array('JpGraphException','defaultHandler'));
-
 class JpGraphException extends Exception {
     // Redefine the exception so message isn't optional
     public function __construct($message, $code = 0) {
@@ -183,6 +179,10 @@ class JpGraphExceptionL extends JpGraphException {
         parent::__construct($errtxt->Get($errcode,$a1,$a2,$a3,$a4,$a5), 0);
     }
 }
+
+// Setup the default handler
+global $__jpg_OldHandler;
+$__jpg_OldHandler = set_exception_handler(array('JpGraphException','defaultHandler'));
 
 //
 // First of all set up a default error handler
@@ -347,6 +347,7 @@ class JpGraphErrObjectImg extends JpGraphErrObject {
         $img->SetColor("black");
         $img->SetFont(FF_FONT1,FS_NORMAL);
         $txt = new Text($aMsg,52,25);
+        $txt->SetFont(FF_FONT1);
         $txt->Align("left","top");
         $txt->Stroke($img);
         if ($this->iDest) {

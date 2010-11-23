@@ -5,7 +5,7 @@
  // Created:     2003-02-01
  // Ver:         $Id: jpgraph_gradient.php 1761 2009-08-01 08:31:28Z ljp $
  //
- // Copyright (c) Aditus Consulting. All rights reserved.
+ // Copyright (c) Asial Corporation. All rights reserved.
  //========================================================================
  */
 
