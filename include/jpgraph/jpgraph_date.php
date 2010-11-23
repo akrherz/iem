@@ -5,7 +5,7 @@
  // Created:     2005-05-02
  // Ver:         $Id: jpgraph_date.php 1106 2009-02-22 20:16:35Z ljp $
  //
- // Copyright (c) Aditus Consulting. All rights reserved.
+ // Copyright (c) Asial Corporation. All rights reserved.
  //========================================================================
  */
 

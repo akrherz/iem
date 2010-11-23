@@ -5,7 +5,7 @@
  // Created:     2001-02-11
  // Ver:         $Id: jpgraph_scatter.php 1397 2009-06-27 21:34:14Z ljp $
  //
- // Copyright (c) Aditus Consulting. All rights reserved.
+ // Copyright (c) Asial Corporation. All rights reserved.
  //========================================================================
  */
 require_once ('jpgraph_plotmark.inc.php');

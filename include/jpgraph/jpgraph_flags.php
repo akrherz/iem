@@ -5,7 +5,7 @@
 // Created:     2003-06-28
 // Ver:         $Id: jpgraph_flags.php 1106 2009-02-22 20:16:35Z ljp $
 //
-// Copyright (c) Aditus Consulting. All rights reserved.
+// Copyright (c) Asial Corporation. All rights reserved.
 //========================================================================
 
 //------------------------------------------------------------
