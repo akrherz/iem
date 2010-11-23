@@ -31,7 +31,7 @@ for i in range(len(rs)):
   if (rs[i]['phour'] is not None and float(rs[i]['phour']) > 0):
     p01m = float(rs[i]['phour']) * 25.4
   sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt,  alti, 
-    p01m, gust, vsby, skyc1, skyc2, skyc3, skyl1, skyl2, skyl3, metar) 
+    p01m, gust, vsby, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar) 
     values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s',%s,%s,%s,'%s')""" % (
   ts.year,rs[i]['station'], rs[i]['valid'], (rs[i]['tmpf'] or "Null"), 
   (rs[i]['dwpf'] or "Null"), (rs[i]['drct'] or "Null"), (rs[i]['sknt'] or "Null"),
@@ -40,9 +40,12 @@ for i in range(len(rs)):
   (rs[i]['skyc1'] or ""),
   (rs[i]['skyc2'] or ""),
   (rs[i]['skyc3'] or ""),
+  (rs[i]['skyc4'] or ""),
   (rs[i]['skyl1'] or 'Null'),
   (rs[i]['skyl2'] or 'Null'),
-  (rs[i]['skyl3'] or 'Null'), rs[i]['raw']
+  (rs[i]['skyl3'] or 'Null'), 
+  (rs[i]['skyl4'] or 'Null'),
+  rs[i]['raw']
    )
   try:
     asos.query(sql)
