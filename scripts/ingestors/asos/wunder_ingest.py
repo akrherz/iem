@@ -54,8 +54,8 @@ def doit(stid, now):
       mtr = Metar.Metar(mstr, now.month, now.year)
     except:
       pass
-    sky = {'skyc1': "", 'skyc2': "", 'skyc3': "",
-           'skyl1': "Null", 'skyl2': "Null", 'skyl3': "Null"}
+    sky = {'skyc1': "", 'skyc2': "", 'skyc3': "", 'skyc4': "",
+           'skyl1': "Null", 'skyl2': "Null", 'skyl3': "Null", 'skyl4': "Null"}
     if mtr is not None and mtr.time is not None:
       metarPass += 1
       gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
@@ -180,13 +180,13 @@ def doit(stid, now):
         p01m = float(p) * 25.4
 
     sql = """INSERT into t%s (station, valid, tmpf, dwpf, vsby, 
-        drct, sknt, gust, p01m, alti, skyc1, skyc2, skyc3, 
-        skyl1, skyl2, skyl3, metar) values ('%s','%s+00', %s, %s, %s, 
-        %s, %s, %s, %s, %s, '%s', '%s', '%s', %s, %s, %s,'%s')""" % (now.year, 
+        drct, sknt, gust, p01m, alti, skyc1, skyc2, skyc3, skyc4,
+        skyl1, skyl2, skyl3, skyl4, metar) values ('%s','%s+00', %s, %s, %s, 
+        %s, %s, %s, %s, %s, '%s', '%s', '%s','%s', %s, %s, %s,%s,'%s')""" % (now.year, 
         stid, gts.strftime("%Y-%m-%d %H:%M"), tmpf, dwpf, vsby, drct, 
         sknt, gust, p01m, alti, 
-        sky['skyc1'], sky['skyc2'], sky['skyc3'],
-        sky['skyl1'], sky['skyl2'], sky['skyl3'], mstr)
+        sky['skyc1'], sky['skyc2'], sky['skyc3'], sky['skyc4'],
+        sky['skyl1'], sky['skyl2'], sky['skyl3'], sky['skyl4'], mstr)
     try:
       asos.query(sql)
       processed += 1
