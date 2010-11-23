@@ -128,6 +128,12 @@ def doit(stid, now):
       elif headers.has_key('TimePDT'):
         tstr = tokens[ headers['TimePDT'] ]
         addon = mx.DateTime.RelativeDateTime(hours=2)
+      elif headers.has_key('TimeAKST'):
+        tstr = tokens[ headers['TimeAKST'] ]
+        addon = mx.DateTime.RelativeDateTime(hours=3)
+      elif headers.has_key('TimeAKDT'):
+        tstr = tokens[ headers['TimeAKDT'] ]
+        addon = mx.DateTime.RelativeDateTime(hours=3)
       else:
         print 'Unknown TimeZone!', headers.keys()
         continue
