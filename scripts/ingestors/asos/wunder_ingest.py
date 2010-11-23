@@ -21,7 +21,11 @@ def doit(stid, now):
   metarFail = 0
   processed = 0
   sqlFail = 0
-  url = "http://www.wunderground.com/history/airport/K%s/%s/%-i/%-i/DailyHistory.html?req_city=NA&req_state=NA&req_statename=NA&format=1" % (stid, now.year, now.month, now.day)
+  if len(stid) == 3:
+    faa = "K%s" % (stid,)
+  else:
+    faa = stid
+  url = "http://www.wunderground.com/history/airport/%s/%s/%-i/%-i/DailyHistory.html?req_city=NA&req_state=NA&req_statename=NA&format=1" % (faa, now.year, now.month, now.day)
   try:
     data = opener.open(url).read()
   except:
