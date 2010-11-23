@@ -682,8 +682,8 @@ LAYER
   CONNECTIONTYPE postgis
   NAME locs
   CONNECTION "host=iemdb user=nobody dbname=iem"
-  DATA "geom from (select oid, geom,  round(max_tmpf::numeric,0) as mint from summary WHERE network IN ('IA_ASOS','AWOS') and day = '2009-04-06' and min_tmpf < 50) as foo using unique oid using srid=4326"
-  #DATA "geom from (select oid, geom, snowd as mint from summary WHERE network IN ('IA_COOP') and day = '2009-04-06' and snowd >= 0) as foo using unique oid using srid=4326"
+  #DATA "geom from (select oid, geom,  round(max_tmpf::numeric,0) as mint from summary WHERE network IN ('IA_ASOS','AWOS') and day = '2009-04-06' and min_tmpf < 50) as foo using unique oid using srid=4326"
+  DATA "geom from (select distinct station, geom  from summary_2010 WHERE network ~* 'COOP' and day > '2010-09-01' and day < '2010-11-22' and snow >= 1) as foo using unique station using srid=4326"
 #  FILTER "state = 'IA'"
 #  FILTER "network = 'IA_RWIS'"
   STATUS ON
@@ -694,9 +694,9 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    TEXT ([mint])
+    #TEXT ([mint])
     SYMBOL 'circle'
-    SIZE 3
+    SIZE 4
     COLOR 255 255 255
     LABEL
       OUTLINECOLOR 0 0 0
@@ -767,11 +767,11 @@ LAYER
   CLASS
     LABEL
       WRAP "_"
-      OUTLINECOLOR 255 255 0
-      COLOR 0 0 0
+  #    OUTLINECOLOR 255 255 0
+      COLOR 255 255 0
    #   SHADOWSIZE 1 1
    #   SHADOWCOLOR 0 0 0
-   #   BACKGROUNDSHADOWCOLOR 0 0 0
+      BACKGROUNDCOLOR 0 0 0
    #   BACKGROUNDSHADOWSIZE 1 1
       TYPE TRUETYPE
       SIZE 12

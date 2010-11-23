@@ -4,8 +4,7 @@
  //   Give the user the climate data in the format they want...
  // -----------------------------------------------------------------
 
-// Load MapScript
-dl("php_mapscript.so");
+
 
 function addPoint( $row ){
   GLOBAL $shpFile, $dbfFile;

@@ -1,7 +1,7 @@
 <?php
 /* Generate a plot of a locations RADAR by year */
 include("../../config/settings.inc.php");
-dl($mapscript);
+
 $mapFile = $rootpath."/data/gis/base4326.map";
 
 $beginYear = 1995;
@@ -27,8 +27,7 @@ $ts = mktime($hour, $minute, 0, $month, $day, $year);
 /* This is our final image!  */
 $map2 = ms_newMapObj($mapFile);
 $map2->imagecolor->setrgb(155,155,155);
-$map2->set("width", $twidth * 4 + 11);
-$map2->set("height",$theight * 4 + $header + 13);
+$map2->setSize $twidth * 4 + 11,$theight * 4 + $header + 13);
 $img2 = $map2->prepareImage();
 
 /* Title Bar */
