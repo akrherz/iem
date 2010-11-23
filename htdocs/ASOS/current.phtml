@@ -41,6 +41,7 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "skyl1" => "Cloud Level 1",
   "skyl2" => "Cloud Level 2",
   "skyl3" => "Cloud Level 3",
+  "skyl4" => "Cloud Level 4",
   "pday" => "Today Rainfall [inch]", );
 
 ?>
@@ -144,7 +145,7 @@ a column to sort it.<br>\n";
   <th colspan="3">&nbsp;</th>
   <th colspan="3">Wind [knots]</th>
   <th colspan="2">Precip</font></th>
-  <th colspan="3">Clouds</font></th>
+  <th colspan="4">Clouds</font></th>
 <tr>
   <th><a href="<?php echo $uri; ?>tmpf">Air</a></th>
   <th><a href="<?php echo $uri; ?>max_tmpf">Hi</a></th>
@@ -163,6 +164,7 @@ a column to sort it.<br>\n";
   <th><a href="<?php echo $uri; ?>skyl1">Level 1</a></th>
   <th><a href="<?php echo $uri; ?>skyl2">Level 2</a></th>
   <th><a href="<?php echo $uri; ?>skyl3">Level 3</a></th>
+  <th><a href="<?php echo $uri; ?>skyl4">Level 4</a></th>
 </tr></thead>
 <tbody>
 <?php
@@ -255,12 +257,13 @@ while (list ($key, $val) = each ($finalA))  {
 <td>". $parts["skyc1"] ." ". $parts["skyl1"] ."</td>
 <td>". $parts["skyc2"] ." ". $parts["skyl2"] ."</td>
 <td>". $parts["skyc3"] ." ". $parts["skyl3"] ."</td>
+<td>". $parts["skyc4"] ." ". $parts["skyl4"] ."</td>
 	    </tr>\n";
   if ($metar == "yes") {
     $row .= "<tr";
     if ($i % 2 == 0)  $row .= " bgcolor='#eeeeee'";
     $row .= ">";
-    $row .= "<td colspan=\"19\">
+    $row .= "<td colspan=\"20\">
              <font color=\"brown\">". $parts["raw"] ."</font></td>
              </tr>\n";
    }
@@ -287,6 +290,7 @@ echo $old;
  <td><a href="<?php echo $uri; ?>&var=max_gust');">Plot</a></td>
  <td><a href="<?php echo $uri; ?>&var=phour');">Plot</a></td>
  <td><a href="<?php echo $uri; ?>&var=pday');">Plot</a></td>
+ <td></td>
  <td></td>
  <td></td>
  <td></td>
