@@ -36,7 +36,7 @@
 //
 //------------------------------------------------------------------------
 // define('CACHE_DIR','/tmp/jpgraph_cache/');
-// define('TTF_DIR','/usr/share/fonts/TrueType/');
+define('TTF_DIR','/mesonet/data/gis/static/fonts/');
 // define('MBTTF_DIR','/usr/share/fonts/TrueType/');
 
 //-------------------------------------------------------------------------
