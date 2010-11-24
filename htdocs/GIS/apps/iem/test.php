@@ -2,8 +2,7 @@
   // index.php
   //   Prototype for building nice looking station plots.
 
-/** Load mapscript so */
-dl("php_mapscript.so");
+
 
 // add copyright
 function copyright($map, $imgObj, $titlet) { 

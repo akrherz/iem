@@ -31,11 +31,10 @@ function mktitle($map, $imgObj, $titlet) {
 }
 
 
-dl($mapscript);
+
 
 $map = ms_newMapObj("stations.map");
-$map->set("height", 240);
-$map->set("width",  320);
+$map-setSize(240,320);
 $map->setExtent(-97, 37.5, -86, 44.5);
 //$map->setExtent(-125, 29, -65, 49);
 

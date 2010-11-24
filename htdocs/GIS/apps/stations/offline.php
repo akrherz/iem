@@ -1,6 +1,6 @@
 <?php
 include("../../../../config/settings.inc.php");
-dl($mapscript);
+
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/network.php");
 include("$rootpath/include/iemaccess.php");

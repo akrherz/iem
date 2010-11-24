@@ -5,7 +5,7 @@
  // -----------------------------------------------------------------
 
 // Load MapScript
-dl("php_mapscript_5.0.0.so");
+
 
 function addPoint( $row ){
   GLOBAL $shpFile, $dbfFile;

@@ -2,7 +2,7 @@
 /* Something to generate the plots! */
 
 include_once("../../../../config/settings.inc.php");
-dl($mapscript);
+
 
 if (isset($argv))
    for ($i=1;$i<count($argv);$i++)
@@ -144,8 +144,7 @@ $param["title"] .= strftime("%d %b %Y", $ts);
 
 /* Start Mapping */
 $map = ms_newMapObj("base.map");
-$map->set("width", $map_width);
-$map->set("height", $map_height);
+$map->setSize($map_width, $map_height);
 
 /* Set Extents */
 $arExtents = explode(",", $extents);

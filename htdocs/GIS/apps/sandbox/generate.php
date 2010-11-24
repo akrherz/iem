@@ -1,13 +1,12 @@
 <?php
 
-dl("php_mapscript_401.so");
+
 
 include("lib.php");
 
 $map = ms_newMapObj("radar.map");
 $map->setExtent(-89671, -713811, 1034764, 183473);
-$map->set("width", 640);
-$map->set("height",480);
+$map->setSize(640,480);
 
 $radar = $map->getlayerbyname("radar");
 $radar->set("status", MS_ON);

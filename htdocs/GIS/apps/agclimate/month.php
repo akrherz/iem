@@ -18,7 +18,7 @@ $sts = mktime(0,0,0,$month,1,$year);
 $sdate = date("d M", $sts);
 $edate = date("d M Y", $ets);
 
-dl($mapscript);
+
 include("lib.php");
 
 

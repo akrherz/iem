@@ -16,7 +16,7 @@ $direct = isset($_GET["direct"]) ? $_GET['direct']: "";
 
 $ts = strtotime($date);
 
-dl($mapscript);
+
 include("lib.php");
 
 

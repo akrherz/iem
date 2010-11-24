@@ -3,7 +3,7 @@ include("../../../../config/settings.inc.php");
 //  mesoplot/plot.php
 //  - Replace GEMPAK mesoplots!!!
 
-dl($mapscript);
+
 
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");

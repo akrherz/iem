@@ -16,8 +16,7 @@ if (strlen($site) == 0){
 }
 
 $map = ms_newMapObj("iawarn.map");
-$map->set("width", $width);
-$map->set("height", $height);
+$map->setSize($width, $height);
 
 $pad = 1;
 $lpad = 0.4;

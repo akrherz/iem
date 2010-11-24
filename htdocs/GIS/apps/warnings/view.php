@@ -1,6 +1,6 @@
 <?php
 
-dl("php_mapscript_401.so");
+
 
 include("lib.php");
 

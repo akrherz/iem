@@ -6,7 +6,7 @@ include("../../../../config/settings.inc.php");
  // -----------------------------------------------------------------
 
 // Load MapScript
-dl($mapscript);
+
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");
 $nt = new NetworkTable("IACLIMATE");
