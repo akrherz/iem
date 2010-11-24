@@ -14,7 +14,7 @@ if ($i == "1h")
 	}
 }
 
-dl($mapscript);
+
 
 function mktitle($map, $imgObj, $titlet) { 
  
