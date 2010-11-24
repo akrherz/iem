@@ -49,9 +49,7 @@ $db_ts = strftime("%Y-%m-%d %H:%M:00+00", $ts );
 
 
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
-$map->set("width", $width);
-$map->set("height", $height);
-
+$map->setSize($width,$height);
 
 if (isset($x0))
   $map->setextent($x0,$y0,$x1,$y1);
