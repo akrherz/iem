@@ -31,7 +31,7 @@ function mktitle($map, $imgObj, $titlet) {
 }
 
 
-dl($mapscript);
+
 
 $map = ms_newMapObj("stations.map");
 //iowa 
@@ -42,8 +42,7 @@ $map->setExtent(-96.0,40.5,-90.0,43.5);
 //$map->setExtent(-90,29,-72,33);
 //CLAYTON $map->setExtent(-92,42.5,-91.1,43.3);
 //$map->setExtent(-93.5,42.0,-92.8,42.6);
-$map->set("height", 150);
-$map->set("width",  320);
+$map->setSize(150,320);
 $map->selectOutputFormat("PNG24");
 
 $namer = $map->getlayerbyname("namerica");

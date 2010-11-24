@@ -15,8 +15,6 @@ function mktitle($map, $imgObj, $titlet) {
 
 
 
-dl("php_mapscript.so");
-
 $map = ms_newMapObj("stations.map");
 
 $counties = $map->getlayerbyname("counties");

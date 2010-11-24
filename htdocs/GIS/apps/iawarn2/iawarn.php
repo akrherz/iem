@@ -19,7 +19,7 @@ if (strlen($loop) == "Yes") $loop = 1;
 $width = "640";
 $height = "480";
 
-dl("php_mapscript.so");
+
 include('../../../include/mlib.php');
 include('../../../include/currentOb.php');
 include('../../../include/allLoc.php');

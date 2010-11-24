@@ -17,7 +17,7 @@ $plot = isset($_GET["plot"]) ? $_GET["plot"]: "";
 <b>Nav:</b> <a href="/QC/">Quality Control</a> &nbsp; > &nbsp; 
   NEXRAD Estimates versus ASOS/AWOS observations
 <?php
-dl($mapscript);
+
 include("$rootpath/include/mlib.php");
 
 $height = 350;

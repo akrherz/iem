@@ -35,12 +35,11 @@ while( list($key,$ar) = each($regex) ){
 }
 
 
-dl($mapscript);
+
 
 $map = ms_newMapObj("$rootpath/data/gis/base2163.map");
 $map->setExtent(-2110437, -2253038.125, 2548326, 1241034.125);
-$map->set("height", 480);
-$map->set("width",  640);
+$map->setSize(480,640);
 
 $namer = $map->getlayerbyname("namerica");
 $namer->set("status", MS_ON);

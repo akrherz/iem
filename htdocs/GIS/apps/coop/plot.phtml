@@ -87,7 +87,7 @@ necessarily for the local date.  The reports are around 7 AM, so the high
 temperature (for example) was most likely for the previous date.</li>
 </ul>
 <?php
-dl($mapscript);
+
 include("$rootpath/include/network.php");
 if ($source == "qc") $nt = new NetworkTable("IACLIMATE");
 else $nt = new NetworkTable("IA_COOP");
@@ -144,8 +144,7 @@ $myStations = $cities;
 
 $map = ms_newMapObj("$rootpath/data/gis/base26915.map");
 $map->selectOutputFormat("PNG24");
-$map->set("width", $width);
-$map->set("height",$height);
+$map->setSize($width, $height);
 $map->setProjection("init=epsg:26915");
 
 $map->setextent(250000, 4450000, 690000, 4880000);
