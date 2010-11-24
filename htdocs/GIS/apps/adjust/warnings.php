@@ -31,11 +31,10 @@ function mktitle($map, $imgObj, $titlet) {
 }
 
 
-dl($mapscript);
+
 
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
-$map->set("height", 768);
-$map->set("width",  1024);
+$map->setSize(768,1024);
 //$map->setExtent(-98, 40, -90, 45);
 //US $map->setExtent(-125, 29, -65, 49);
 $map->setExtent(-95, 34, -75, 44);
