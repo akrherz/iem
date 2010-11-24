@@ -18,18 +18,14 @@ include("$rootpath/include/header.php");
  include("$rootpath/include/network.php"); 
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
-?>
 
-<b>Nav:</b> <a href="/COOP/">COOP</a> <b> > </b> Extremes<p>
-
-<?
  $connection = iemdb("coop");
 
  $td = date("Y-m-d", $valid); 
-
- $query = "SELECT * from $tblname WHERE 
-     valid = '".$td."' ORDER by ". $sortcol ." DESC";
- $rs = pg_exec($connection, $query);
+ $rs = pg_prepare($connection, "SELECT", "SELECT * " .
+ 		"from $tblname WHERE valid = $1 " .
+ 		"ORDER by ". $sortcol ." DESC");
+ $rs = pg_execute($connection, "SELECT", Array($td));
 
 ?> 
 
@@ -66,7 +62,7 @@ contains records for sites that do and don't have data before 1951.
 
 </td></tr></table>
 
-<?
+<?php
  echo "<table cellpadding=2 rowspacing=0 cellspacing=0 width='700px'>
   <tr>
    <th rowspan='2' class='subtitle' valign='top'><a href='extremes.php?sortcol=station&day=".$day."&month=".$month."'>Station</a></th>
