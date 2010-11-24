@@ -2,6 +2,8 @@
  * Static Javascript stuff to support the Time Machine :) 
  * daryl herzmann akrherz@iastate.edu
  */
+Ext.BLANK_IMAGE_URL = '../ext/resources/images/default/s.gif';
+
 Ext.onReady( function(){
 
 var currentURI = "";
@@ -247,6 +249,8 @@ function updateDT(){
   displayDT.isInitial = false;
   appTime = newTime;
   meta = store.getById( combo.getValue() );
+  //console.log( meta);
+  //console.log( combo.getValue() );
   if (! meta ){ 
     //console.log("Couldn't find metadata!");
     return; 
