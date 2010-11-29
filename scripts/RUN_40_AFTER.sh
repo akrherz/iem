@@ -22,7 +22,7 @@ cd ../ingestors/squaw
 ./ingest.sh
 
 cd ../scan
-/mesonet/python/bin/python parser.py
+/mesonet/python/bin/python processor.py
 
 cd ../raws
 ./download.csh
