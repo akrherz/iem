@@ -7,16 +7,16 @@ st = network.Table(["IA_COOP",'MO_COOP','KS_COOP','NE_COOP','SD_COOP',
      'ND_ASOS', 'MN_COOP', 'WI_COOP', 'IL_COOP','IN_COOP','OH_COOP','MI_COOP'])
 
 import mx.DateTime
-from pyIEM import iemdb
-i = iemdb.iemdb()
-dbconn = i['iem']
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor()
 
 def doit(now):
   """
   Generate some plots for the COOP data!
   """
   # We'll assume all COOP data is 12z, sigh for now
-  sql = """SELECT station, pday
+  sql = """SELECT station, pday, network
            from summary_%s WHERE day = '%s' and
            network ~* 'COOP' and pday >= 0""" % (now.year,
            now.strftime("%Y-%m-%d") )
@@ -25,15 +25,19 @@ def doit(now):
   lons = []
   vals = []
   #labels = []
-  rs = dbconn.query(sql).dictresult()
-  for i in range(len(rs)):
-    id = rs[i]['station']
+  icursor.execute( sql )
+  iamax = 0.
+  for row in icursor:
+    id = row[0]
     if not st.sts.has_key(id):
       continue
     #labels.append( id[2:] )
     lats.append( st.sts[id]['lat'] + (random.random() * 0.001))
     lons.append( st.sts[id]['lon'] )
-    vals.append( rs[i]['pday'] )
+    vals.append( row[1] )
+    if row[2] == 'IA_COOP' and row[1] > iamax:
+        iamax = row[1]
+
 
     
   # Plot Iowa
