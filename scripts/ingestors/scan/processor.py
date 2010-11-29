@@ -135,7 +135,7 @@ def savedata( data , maxts ):
          '%(c2smv)s', 
         '%(c3smv)s', '%(c4smv)s', '%(c5smv)s', '%(phour)s')
         """ % iem.data
-    mydb.query(sql)
+    scandb.query(sql)
 
 def load_times():
     """
