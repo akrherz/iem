@@ -7,9 +7,9 @@ import iemplot
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor()
 
 # Compute normal from the climate database
 sql = """
@@ -25,13 +25,13 @@ WHERE
 lats = []
 lons = []
 vals = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] )
-  val = rs[i]['pday']
+icursor.execute( sql )
+for row in icursor:
+  lats.append( row[4] )
+  lons.append( row[3] )
+  val = row[2]
   if val > 0:
-    vals.append("%.2f" % (rs[i]['pday'],) )
+    vals.append("%.2f" % (val,) )
   else:
     vals.append("0")
 
