@@ -6,7 +6,7 @@ import mx.DateTime
 import mesonet
 import access
 import pg
-iemdb = pg.connect("iem", "iemdb", user='nobody')
+iemdb = pg.connect("iem", "iemdb")
 
 mapping = {
     'Site Id': {'iemvar': '', 'multiplier': 1},
