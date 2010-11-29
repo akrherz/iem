@@ -7,9 +7,10 @@ import mesonet
 import access
 import pg
 iemdb = pg.connect("iem", "iemdb")
+scandb = pg.connect("scan", "iemdb")
 
 mapping = {
-    'Site Id': {'iemvar': '', 'multiplier': 1},
+    'Site Id': {'iemvar': 'station', 'multiplier': 1},
     'Date': {'iemvar': '', 'multiplier': 1},
     'Time (CST)': {'iemvar': '', 'multiplier': 1},
     'Time (CDT)': {'iemvar': '', 'multiplier': 1},
@@ -109,7 +110,7 @@ def savedata( data , maxts ):
         if mapping.has_key(key) and mapping[key]['iemvar'] != "":
             iem.data[ mapping[key]['iemvar'] ] = data[key]
 
-    
+    iem.data['valid'] = ts.strftime("%Y-%m-%d %H:%M")
     iem.data['tmpf'] = mesonet.c2f(iem.data['tmpc'])
     iem.data['dwpf'] = mesonet.c2f(iem.data['dwpc'])
     iem.data['c1tmpf'] = mesonet.c2f(iem.data['c1tmpc'])
@@ -119,6 +120,22 @@ def savedata( data , maxts ):
     iem.data['c5tmpf'] = mesonet.c2f(iem.data['c5tmpc'])     
 
     iem.updateDatabase(iemdb)
+
+    sql = """INSERT into t%(year)s_hourly (station, valid, tmpf, 
+        dwpf, srad, 
+         sknt, drct, relh, pres, c1tmpf, c2tmpf, c3tmpf, c4tmpf, 
+         c5tmpf, 
+         c1smv, c2smv, c3smv, c4smv, c5smv, phour) 
+        VALUES 
+        ('%(station)s', '%(valid)s', '%(tmpf)s', '%(dwpf)s',
+         '%(srad)s','%(sknt)s',
+        '%(drct)s', '%(relh)s', '%(pres)s', '%(c1tmpf)s', 
+        '%(c2tmpf)s', 
+        '%(c3tmpf)s', '%(c4tmpf)s', '%(c5tmpf)s', '%(c1smv)s',
+         '%(c2smv)s', 
+        '%(c3smv)s', '%(c4smv)s', '%(c5smv)s', '%(phour)s')
+        """ % iem.data
+    mydb.query(sql)
 
 def load_times():
     """
