@@ -120,8 +120,7 @@ if (time() - $ts > 300)
 
 $mapFile = $rootpath."/data/gis/base".$sectors[$sector]['epsg'].".map";
 $map = ms_newMapObj($mapFile);
-$map->set("width", $width);
-$map->set("height",$height);
+$map->setSize($width, $height);
 $map->setExtent($sectors[$sector]['ext'][0],
                 $sectors[$sector]['ext'][1], 
                 $sectors[$sector]['ext'][2],
@@ -199,7 +198,7 @@ $blsr->draw($img);
 $wbc = $map->getlayerbyname("watch_by_county");
 $wbc->set("status", in_array("watch_by_county", $layers) );
 $wbc->set("connection", $_DATABASES["postgis"]);
-$sql = sprintf("g from (select phenomena, eventid, ST_multi(ST_union(ST_snaptogrid(geom,0.00001))) as g from warnings_%s WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= '%s:00+00' and expire > '%s:00+00' GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena",gmstrftime("%Y",$ts),
+$sql = sprintf("g from (select phenomena, eventid, ST_multi(ST_union(geom)) as g from warnings_%s WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= '%s:00+00' and expire > '%s:00+00' GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena",gmstrftime("%Y",$ts),
   gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts) );
 $wbc->set("data", $sql);
 $wbc->draw($img);
