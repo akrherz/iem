@@ -9,10 +9,10 @@ opener = urllib2.build_opener()
 
 def save(sectorName, file_name, dir_name, tstamp,bbox=None):
   layers = "layers[]=nexrad&layers[]=watch_by_county&layers[]=sbw&layers[]=uscounties"
-  uri = "http://iem50.local/GIS/radmap.php?sector=%s&ts=%s&%s" % \
+  uri = "http://iemvs101.local/GIS/radmap.php?sector=%s&ts=%s&%s" % \
         (sectorName,tstamp, layers)
   if (bbox is not None):
-    uri = "http://iem50.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % \
+    uri = "http://iemvs101.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % \
         (bbox,tstamp, layers)
 
   try:
