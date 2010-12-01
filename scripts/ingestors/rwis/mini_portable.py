@@ -33,7 +33,7 @@ def processfile( fp ):
     nwsli = lkp[ fp ]
     iem = iemAccessOb.iemAccessOb(nwsli, 'IA_RWIS')
     if fp == 'portableExportP1.csv':
-        ts = mx.DateTime.strptime(data['date_time'], '%Y-%m-%d %H:%M:%S')
+        ts = mx.DateTime.strptime(data['date_time'][:16], '%Y-%m-%d %H:%M')
     else:
         ts = mx.DateTime.strptime(data['date_time'][:-6], '%Y-%m-%d %H:%M')
     if ts.year < 2010:
