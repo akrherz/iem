@@ -14,7 +14,7 @@ for id in st.sts.keys():
     l = 0
     for row in ccursor:
         if l == 0 and row[2] == 0:
-            print 'Deleting', stationid, row[0], row[1]
+            print 'Deleting', id, row[0], row[1]
             ccursor2.execute("""UPDATE alldata SET precip = null
             where stationid = %s and month = %s and year = %s""",
             (id.lower(), row[1], row[0]))
