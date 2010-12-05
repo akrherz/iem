@@ -1,2 +1,2 @@
 RewriteEngine On
-RewriteRule ^iowa/([0-9]+)/$ map.php?id=$1
+RewriteRule ^([0-9]+)/$ map.php?id=$1
