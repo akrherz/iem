@@ -17,7 +17,8 @@ include("$rootpath/include/header.php");
 
 echo sprintf("<h3>%s</h3>", $row["title"]);
 
-echo sprintf("<p><img src=\"img/%s\"/>", $row["ref"]);
+echo sprintf("<p><img src=\"%s/m/img/%s\"/>", $rooturl,
+	$row["ref"]);
 
 echo sprintf("<p>%s", $row["description"]);
 
