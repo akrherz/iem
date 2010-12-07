@@ -34,13 +34,17 @@ function printWARN($cow, $warn)
     $counties[] = $cow->ugcCache[$v]["name"];
     $carea += $cow->ugcCache[$v]["area"];
   }
+  $bratio = "0";
+  if ($warn["perimeter"] == 0){
+  	$bratio = $warn["sharedborder"] / $warn["perimeter"] * 100.0;
+  }
 
   $s = sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f sq km</td><td>%.0f sq km</td><td>%.0f %%</td><td>%.0f%% <a href=\"../GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td><td>%.0f%%</td></tr>\n", 
     $background, $uri, $warn["phenomena"], $warn["eventid"],
     gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["ets"]), 
     $uri, implode(", ",$counties), $uri, $warn["status"], $warn["area"], 
     $carea, ($carea - $warn["parea"])/ $carea  * 100,
-    $warn["sharedborder"] / $warn["perimeter"] * 100.0,
+    $bratio,
     date("Y", $ts), $warn["wfo"], $warn["phenomena"], $warn["significance"],
     $warn["eventid"], $lsrbuffer,
     $warn["buffered"] / $warn["area"] * 100.0);
