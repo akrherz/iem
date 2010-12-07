@@ -35,7 +35,7 @@ function printWARN($cow, $warn)
     $carea += $cow->ugcCache[$v]["area"];
   }
   $bratio = "0";
-  if ($warn["perimeter"] == 0){
+  if ($warn["perimeter"] > 0){
   	$bratio = $warn["sharedborder"] / $warn["perimeter"] * 100.0;
   }
 
