@@ -1,4 +1,4 @@
-<?
+<?php
 include("../../config/settings.inc.php");
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 header("Content-type: text/plain");
