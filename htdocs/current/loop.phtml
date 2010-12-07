@@ -1,4 +1,5 @@
 <?php
+include("../../config/settings.inc.php");
  /* Script to generate a loop of whatever */
  $prod = isset($_GET['prod']) ? $_GET['prod'] : 'mesonet';
  $java = isset($_GET['java']) ? $_GET['java'] : 'applet';
@@ -36,7 +37,7 @@ for($i=$q; $i >= 0; $i--)
 /* ========================================================= */
 ?>
 <?php 
- include("../../config/settings.inc.php");
+ 
  $TITLE = "IEM Product Looper"; 
  include("$rootpath/include/header.php"); 
 ?>
