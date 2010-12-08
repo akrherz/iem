@@ -1,4 +1,5 @@
 <?php
+include("../../config/settings.inc.php");
   header("Content-type: application/vnd.ogc.gml");
  $d = isset($_GET["date"]) ? $_GET["date"] : date("Y-m-d");
  $d = isset($_GET["DATE"]) ? $_GET["DATE"] : $d;
