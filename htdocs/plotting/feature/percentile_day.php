@@ -6,8 +6,8 @@ $coop = iemdb("coop");
 $iem = iemdb("access");
 
 $rs = pg_query($iem, "SELECT day, max_tmpf, min_tmpf from summary_2010 WHERE 
-                      station = 'AMW' and day >= '2010-10-01' 
-                      and day < '2010-10-11' ORDER by day ASC");
+                      station = 'AMW' and day >= '2010-11-01' 
+                      and day < '2010-11-19' ORDER by day ASC");
 
 $hpc = Array();
 $lpc = Array();
@@ -71,10 +71,10 @@ $graph->yaxis->scale->ticks->Set(25,5);
 $graph->xaxis->SetTickLabels($dates);
 $graph->xaxis->SetTextTickInterval( 2 );
 
-$graph->title->Set('Ames [KAMW] 2010 October');
-$graph->title->SetFont(FF_ARIAL,FS_NORMAL,14);
+$graph->title->Set('Ames [KAMW] 2010 November');
+//$graph->title->SetFont(FF_FFONT1,FS_NORMAL,14);
 $graph->subtitle->Set('High Temperature Percentile');
-$graph->subtitle->SetFont(FF_ARIAL,FS_NORMAL,12);
+//$graph->subtitle->SetFont(FF_FFONT,FS_NORMAL,12);
 //$graph->AddLine(new PlotLine(VERTICAL,31,"black",2));
 
 $band=new PlotBand(VERTICAL,BAND_SOLID,31,43,"green");
@@ -102,7 +102,7 @@ $graph2->xgrid->Show();
 $graph2->xgrid->SetLineStyle('dashed');
 $graph2->xgrid->SetColor('gray');
 $graph2->title->Set('Low Temperature Percentile');
-$graph2->title->SetFont(FF_ARIAL,FS_NORMAL,12);
+//$graph2->title->SetFont(FFONT1,FS_NORMAL,12);
 $graph2->yaxis->scale->ticks->Set(25,5);
 $graph2->xaxis->SetTextTickInterval( 2 );
 $graph2->xaxis->SetTickLabels($dates);
