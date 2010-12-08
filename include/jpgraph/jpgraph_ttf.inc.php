@@ -5,7 +5,7 @@
 // Created:     2006-11-19
 // Ver:         $Id: jpgraph_ttf.inc.php 1858 2009-09-28 14:39:51Z ljp $
 //
-// Copyright (c) Asial Corporation. All rights reserved.
+// Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
 //========================================================================
 
 // TTF Font families

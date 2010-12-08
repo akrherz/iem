@@ -7,7 +7,7 @@
 // Created:     2001-01-08 (Refactored to separate file 2008-08-01)
 // Ver:         $Id: jpgraph_legend.inc.php 1926 2010-01-11 16:33:07Z ljp $
 //
-// Copyright (c) Asial Corporation. All rights reserved.
+// Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
 //========================================================================
 
 DEFINE('_DEFAULT_LPM_SIZE',8); // Default Legend Plot Mark size

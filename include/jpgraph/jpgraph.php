@@ -5,7 +5,7 @@
 // Created:     2001-01-08
 // Ver:         $Id: jpgraph.php 1924 2010-01-11 14:03:26Z ljp $
 //
-// Copyright (c) Asial Corporation. All rights reserved.
+// Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
 //========================================================================
 
 require_once('jpg-config.inc.php');

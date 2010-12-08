@@ -5,7 +5,7 @@
  // Created:  	 2001-01-08
  // Ver:  		 $Id: jpgraph_line.php 1921 2009-12-11 11:46:39Z ljp $
  //
- // Copyright (c) Asial Corporation. All rights reserved.
+ // Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
  //========================================================================
  */
 

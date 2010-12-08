@@ -1,11 +1,12 @@
 <?php
+date_default_timezone_set('America/Chicago');
 //=======================================================================
 // File:        JPG-CONFIG.INC
 // Description: Configuration file for JpGraph library
 // Created:     2004-03-27
 // Ver:         $Id: jpg-config.inc.php 1871 2009-09-29 05:56:39Z ljp $
 //
-// Copyright (c) Asial Corporation. All rights reserved.
+// Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
 //========================================================================
 
 
@@ -36,7 +37,7 @@
 //
 //------------------------------------------------------------------------
 // define('CACHE_DIR','/tmp/jpgraph_cache/');
-define('TTF_DIR','/mesonet/data/gis/static/fonts/');
+ define('TTF_DIR','/mesonet/data/gis/static/fonts/');
 // define('MBTTF_DIR','/usr/share/fonts/TrueType/');
 
 //-------------------------------------------------------------------------

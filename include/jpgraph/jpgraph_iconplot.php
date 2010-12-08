@@ -5,7 +5,7 @@
 // Created:     2004-02-18
 // Ver:         $Id: jpgraph_iconplot.php 1404 2009-06-28 15:25:41Z ljp $
 //
-// Copyright (c) Asial Corporation. All rights reserved.
+// Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
 //========================================================================
 
 

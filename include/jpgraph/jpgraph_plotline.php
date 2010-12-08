@@ -10,7 +10,7 @@
  // line that is drawn directly in the plot area.
  // Useful to add static borders inside a plot to show for example set-values
  //
- // Copyright (c) Asial Corporation. All rights reserved.
+ // Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
  //========================================================================
  */
 
