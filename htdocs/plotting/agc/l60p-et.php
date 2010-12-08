@@ -6,20 +6,15 @@ include("$rootpath/include/network.php");
 $nt = new NetworkTable("ISUAG");
 $ISUAGcities = $nt->table;
 
-
 $station = $_GET['station'];
-$ts = time() - 86400 - 7*3600;
-$table = "daily";
-$date = date("Y-m-d", $ts);
-
-$queryData = "c900 - c70 as dater, c900 as dater2";
-$ylabel = "Temperature [F]";
 
 
-$query2 = "SELECT ". $queryData .", to_char(valid, 'yy/mm/dd') as valid from ". $table ." WHERE station = '$station' and 
-	(valid + '60 days'::interval) > CURRENT_TIMESTAMP  ORDER by valid ASC";
-
-$result = pg_exec($connection, $query2);
+$rs = pg_prepare($connection, "SELECT", "SELECT c900 - c70 as dater, " .
+		"c900 as dater2, to_char(valid, 'yy/mm/dd') as valid " .
+		"from daily WHERE station = $1 and " .
+		"(valid + '60 days'::interval) > CURRENT_TIMESTAMP  " .
+		"ORDER by valid ASC");
+$result = pg_execute($connection, "SELECT", Array($station));
 
 $ydata = array();
 $ydata2 = array();
@@ -80,6 +75,7 @@ $graph->xaxis->SetPos("min");
 
 // Create the linear plot
 $lineplot=new LinePlot($ydata);
+$graph->Add($lineplot);
 $lineplot->SetColor("black");
 
 // Create the linear plot
@@ -88,6 +84,7 @@ $lineplot->SetColor("black");
 //$lineplot2->SetLegend("Solar Rad");
 
 $bplot = new BarPlot($ydata2);
+$graph->Add($bplot);
 $bplot->SetFillColor("blue");
 $bplot->SetLegend("Ob Prec [in]");
 
@@ -95,12 +92,6 @@ $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.10, 0.06, "right", "top");
 
 
-// Add the plot to the graph
-$graph->Add($lineplot);
-$graph->Add($bplot);
-//$graph->AddY2($lineplot2);
-
-// Display the graph
 $graph->Stroke();
 ?>
 

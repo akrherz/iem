@@ -1,6 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
 $TITLE = "IEM | ISU Ag Plotting";
+$THISPAGE="networks-agclimate";
 include("$rootpath/include/header.php"); 
 include("$rootpath/include/forms.php"); 
 include("$rootpath/include/imagemaps.php"); 
