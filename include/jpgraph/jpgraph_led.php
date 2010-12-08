@@ -281,7 +281,7 @@ class DigitalLED74
         }
 
         for($i = 0; $i < $n; ++$i) {
-            $d = substr($aValStr, $i, 1, 'utf8');
+            $d = substr($aValStr, $i, 1);
             if(  ctype_digit($d) ) {
                 $d = (int)$d;
             }
