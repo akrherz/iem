@@ -81,7 +81,7 @@ iemplot.postprocess(tmpfp, pqstr)
 
 # -----------------------------------
 # - Stage4 Observations
-nc = netCDF3.Dataset("/mnt/a2/wepp/data/rainfall/netcdf/yearly/%srain.nc" % (ts.year,) )
+nc = netCDF3.Dataset("/mesonet/wepp/data/rainfall/netcdf/yearly/%srain.nc" % (ts.year,) )
 ncrain = nc.variables["yrrain"][:] 
 lats = nc.variables["latitude"][:]
 lons = nc.variables["longitude"][:]
