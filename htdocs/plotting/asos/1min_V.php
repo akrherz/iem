@@ -40,13 +40,13 @@ $dups = 0;
 $missing = 0;
 
 
-/** Time to get data from database **/
 $connection = iemdb("asos");
-$query = "SELECT to_char(valid, 'HH24:MI') as tvalid, sknt, drct from 
-  ". $tableName ." WHERE station = '". $station ."' and 
-  date(valid) = '". $sqlDate ."' ORDER by tvalid";
+$rs = pg_prepare($connection, "SELECT", "SELECT " .
+		"to_char(valid, 'HH24:MI') as tvalid, sknt, drct from " .
+		 $tableName ." WHERE station = $1 and " .
+		"date(valid) = $2 ORDER by tvalid");
 
-$result = pg_exec($connection, $query);
+$result = pg_execute($connection, "SELECT", Array($station, $sqlDate));
 
 pg_close($connection);
 if (pg_num_rows($result) == 0){
@@ -158,11 +158,13 @@ $graph->xaxis->SetPos("min");
 
 // Create the linear plot
 $lineplot=new LinePlot($mph);
+$graph->AddY2($lineplot);
 $lineplot->SetLegend("5 second Wind Speed");
 $lineplot->SetColor("red");
 
 // Create the linear plot
 $sp1=new ScatterPlot($drct);
+$graph->Add($sp1);
 $sp1->mark->SetType(MARK_FILLEDCIRCLE);
 $sp1->mark->SetFillColor("blue");
 $sp1->mark->SetWidth(3);
@@ -177,7 +179,7 @@ $t1->SetColor("black");
 $graph->AddText($t1);
 
 
-$graph->Add($sp1);
-$graph->AddY2($lineplot);
+
+
 $graph->Stroke();
 ?>

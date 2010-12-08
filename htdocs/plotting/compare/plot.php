@@ -90,17 +90,19 @@ $graph->tabtitle->Set('Recent Comparison');
 
 // Create the linear plot
 $lineplot=new LinePlot($datay[$station1], $datax[$station1]);
+$graph->Add($lineplot);
 $lineplot->SetLegend($cities[$station1]["name"] ." ($station1)");
 $lineplot->SetColor("red");
 
 // Create the linear plot
 $lineplot2=new LinePlot($datay[$station2], $datax[$station2]);
+$graph->Add($lineplot2);
 $lineplot2->SetLegend($cities[$station2]["name"] ." ($station2)");
 $lineplot2->SetColor("blue");
 
 // Add the plot to the graph
-$graph->Add($lineplot);
-$graph->Add($lineplot2);
+
+
 
 // Display the graph
 $graph->Stroke();

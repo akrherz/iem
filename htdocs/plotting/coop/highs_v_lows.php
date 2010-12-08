@@ -68,15 +68,17 @@ $graph->tabtitle->Set($lgnd);
 
 // Create the linear plot
 $sc1=new ScatterPlot($highs, $lows);
+$graph->Add($sc1);
 $sc1->mark->SetType(MARK_FILLEDCIRCLE);
 $sc1->mark->SetFillColor("blue");
-$graph->Add($sc1);
+
 
 $sc2=new ScatterPlot($ahigh, $alow);
+$graph->Add($sc2);
 $sc2->mark->SetType(MARK_FILLEDCIRCLE);
 $sc2->SetLegend("Average");
 $sc2->mark->SetFillColor("red");
-$graph->Add($sc2);
+
 
 
 // Display the graph

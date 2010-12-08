@@ -5,11 +5,12 @@ $connection = iemdb("coop");
 $station = isset($_GET["station"]) ? strtolower($_GET["station"]) : die();
 $var = isset($_GET["var"]) ? $_GET["var"]: die();
 
+$rs = pg_prepare($connection, "SELECT", "SELECT max_".$var." as max, " .
+		"min_".$var." as min, ".$var." as avg, years, " .
+		"to_char(valid, 'mm dd') as valid from climate " .
+		"WHERE station = $1 ORDER by valid ASC");
+$result = pg_execute($connection, "SELECT", Array($station));
 
-
-$query2 = "SELECT max_".$var." as max, min_".$var." as min, ".$var." as avg, years, to_char(valid, 'mm dd') as valid from climate WHERE station = '". $station ."' ORDER by valid ASC";
-
-$result = pg_exec($connection, $query2);
 
 $ydata = array();
 $ydata2 = array();
@@ -73,16 +74,19 @@ $graph->legend->SetLayout(LEGEND_HOR);
 
 // Create the linear plot
 $lineplot=new LinePlot($ydata);
+$graph->Add($lineplot);
 $lineplot->SetLegend("Max ".$var." (F)");
 $lineplot->SetColor("red");
 
 // Create the linear plot
 $lineplot2=new LinePlot($ydata2);
+$graph->Add($lineplot2);
 $lineplot2->SetLegend("Min ".$var." (F)");
 $lineplot2->SetColor("blue");
 
 // Create the linear plot
 $lineplot3=new LinePlot($ydata3);
+$graph->Add($lineplot3);
 $lineplot3->SetLegend("Average (F)");
 $lineplot3->SetColor("brown");
 
@@ -102,9 +106,9 @@ $graph->AddLine(new PlotLine(HORIZONTAL,32,"blue",2));
 
 
 // Add the plot to the graph
-$graph->Add($lineplot);
-$graph->Add($lineplot3);
-$graph->Add($lineplot2);
+
+
+
 
 
 // Display the graph
