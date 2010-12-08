@@ -2,7 +2,7 @@
 # for WEPP from my fancy pant data...
 
 import sys
-sys.path.append("/mnt/a2/wepp/iemcligen/")
+sys.path.append("/mesonet/wepp/iemcligen/")
 import pg, mx.DateTime, netCDF3, lib, editclifile, cliRecord, numpy
 # Connect to the WEPP database
 mydb = pg.connect('wepp', 'iemdb', user='nobody')

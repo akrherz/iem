@@ -77,7 +77,7 @@ lons = None
 interval = mx.DateTime.RelativeDateTime(days=1)
 now = t0
 while (now <= ts):
-  fp = "/mnt/a2/wepp/data/rainfall/netcdf/daily/%s_rain.nc" % (now.strftime("%Y/%m/%Y%m%d") ,) 
+  fp = "/mesonet/wepp/data/rainfall/netcdf/daily/%s_rain.nc" % (now.strftime("%Y/%m/%Y%m%d") ,) 
   if not os.path.isfile(fp):
     print fp
   nc = NetCDFFile(fp)
