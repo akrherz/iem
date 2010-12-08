@@ -102,7 +102,7 @@ $graph->SetMarginColor('white');
 $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCFF@0.5');
 $graph->xgrid->Show();
 
-$graph->img->SetMargin(45,10,70,30);
+$graph->img->SetMargin(50,10,70,30);
 $graph->title->Set( $cities[$station]["name"] ." [$station] Hi/Lo Temps for ". date("M Y", $rts) );
 if ($hasclimate){
   $graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["name"] ."[". $climate_site ."]");
@@ -117,14 +117,19 @@ $graph->xaxis->SetTitle("Day of Month");
 
 $graph->yscale->SetGrace(5);
 $graph->yaxis->SetTitle("Temperature [F]");
+$graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD);
 $graph->yaxis->SetLabelFormat('%.0d');
 
 $graph->legend->Pos(0.25, 0.11, "right", "top");
 
 $bplot1 = new BarPlot($highs);
+$bplot2 = new BarPlot($lows);
+$gbarplot = new GroupBarPlot(array($bplot1,$bplot2));
+$graph->Add($gbarplot);
+
 $bplot1->SetFillColor('red');
 $bplot1->SetLegend("High");
-$bplot1->value->Show(! $feature);
+
 $bplot1->value->SetFormat('%d');
 $bplot1->value->SetColor('black');
 $bplot1->value->SetAngle(0);
@@ -132,7 +137,8 @@ $bplot1->value->SetFont(FF_FONT1,FS_BOLD);
 $bplot1->SetValuePos('top');
 $bplot1->SetWidth(0.7);
 
-$bplot2 = new BarPlot($lows);
+
+
 $bplot2->SetFillColor('blue');
 $bplot2->SetLegend("Low");
 $bplot2->value->Show(! $feature);
@@ -142,12 +148,18 @@ $bplot2->value->SetAngle(0);
 $bplot2->value->SetFont(FF_FONT1,FS_BOLD);
 $bplot2->SetValuePos('top');
 $bplot2->SetWidth(0.7);
+$bplot1->value->Show(! $feature);
+$bplot2->value->Show(! $feature);
 
-$gbarplot = new GroupBarPlot(array($bplot1,$bplot2));
+
 $gbarplot->SetWidth(0.6);
 
 if ($hasclimate){
 $l1plot=new LinePlot($alows);
+$l2plot=new LinePlot($ahighs);
+$graph->Add($l2plot);
+$graph->Add($l1plot);
+
 $l1plot->SetColor("black");
 $l1plot->mark->SetType(MARK_FILLEDCIRCLE);
 $l1plot->mark->SetFillColor("lightblue");
@@ -156,7 +168,7 @@ $l1plot->SetWeight(2);
 $l1plot->SetLegend("Avg Low");
 $l1plot->SetBarCenter();
 
-$l2plot=new LinePlot($ahighs);
+
 $l2plot->SetColor("black");
 $l2plot->mark->SetType(MARK_FILLEDCIRCLE);
 $l2plot->mark->SetFillColor("lightred");
@@ -165,10 +177,9 @@ $l2plot->SetWeight(2);
 $l2plot->SetLegend("Avg High");
 $l2plot->SetBarCenter();
 }
-$graph->Add($gbarplot);
-if ($hasclimate){
-$graph->Add($l2plot);
-$graph->Add($l1plot);
-}
+
+
+
+
 $graph->Stroke();
 ?>
