@@ -30,7 +30,7 @@ DEFINE('LEDC_INVERTGRAY', 15);
 
 // Check that mb_strlen() is available
 if( ! function_exists('mb_strlen') ) {
-    JpGraphError::RaiseL(25500);
+    //JpGraphError::RaiseL(25500);
     //'Multibyte strings must be enabled in the PHP installation in order to run the LED module
     // so that the function mb_strlen() is available. See PHP documentation for more information.'
 }
@@ -275,7 +275,7 @@ class DigitalLED74
             $aColor = 0;
         }
 
-        if(($n = mb_strlen($aValStr,'utf8')) == 0) {
+        if(($n = strlen($aValStr)) == 0) {
             $aValStr = ' ';
             $n = 1;
         }
