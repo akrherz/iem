@@ -3,7 +3,10 @@
 // Cool.....
 
 include("../../../config/settings.inc.php");
-
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
+include ("$rootpath/include/jpgraph/jpgraph_led.php");
 include ("$rootpath/include/awosLoc.php");
 include("$rootpath/include/database.inc.php");
 
@@ -35,13 +38,20 @@ $missing = 0;
 
 /** Time to get data from database **/
 $connection = iemdb("awos");
-$query = "SELECT to_char(valid, 'HH24:MI') as tvalid, sknt, drct from 
-  ". $tableName ." WHERE station = '". $station ."' and 
-  date(valid) = '". $sqlDate ."' ORDER by tvalid";
+$rs = pg_prepare($connection, "SELECT", "SELECT " .
+		"to_char(valid, 'HH24:MI') as tvalid, sknt, drct from " .
+		"". $tableName ." WHERE station = $1 and " .
+		"  date(valid) = $2 ORDER by tvalid");
 
-$result = pg_exec($connection, $query);
+$result = pg_execute($connection, "SELECT", Array($station, $sqlDate));
 
 pg_close($connection);
+
+if (pg_num_rows($result) == 0){
+ $led = new DigitalLED74();
+ $led->StrokeNumber('NO DATA FOR THIS DATE',LEDC_GREEN);
+ die();
+}
 
 for( $p=0; $row = @pg_fetch_array($result,$p); $p++)  {
   $strDate = $sqlDate ." ". $row["tvalid"];
@@ -109,9 +119,7 @@ for ($j=0; $j<24; $j++){
 }
 
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
+
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -149,11 +157,13 @@ $graph->xaxis->SetPos("min");
 
 // Create the linear plot
 $lineplot=new LinePlot($mph);
+$graph->AddY2($lineplot);
 $lineplot->SetLegend("5 second Wind Speed");
 $lineplot->SetColor("red");
 
 // Create the linear plot
 $sp1=new ScatterPlot($drct);
+$graph->Add($sp1);
 $sp1->mark->SetType(MARK_FILLEDCIRCLE);
 $sp1->mark->SetFillColor("blue");
 $sp1->mark->SetWidth(3);
@@ -167,8 +177,5 @@ $t1->SetFont(FF_FONT1,FS_BOLD);
 $t1->SetColor("black");
 $graph->AddText($t1);
 
-
-$graph->Add($sp1);
-$graph->AddY2($lineplot);
 $graph->Stroke();
 ?>

@@ -19,19 +19,17 @@ $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
 
   $myTime = strtotime($year."-".$month."-".$day);
 
-
-
 $titleDate = strftime("%b %d, %Y", $myTime);
 $tableName = strftime("t%Y_1minute", $myTime);
 $sqlDate = strftime("%Y-%m-%d", $myTime);
 
-
 $connection = iemdb("asos");
-$query = "SELECT to_char(valid, 'HH24:MI') as tvalid, precip, pres1 from 
-  ". $tableName ." WHERE station = '". $station ."' and 
-  date(valid) = '". $sqlDate ."' ORDER by tvalid";
+$rs = pg_prepare($connection, "SELECT", "SELECT " .
+		"to_char(valid, 'HH24:MI') as tvalid, precip, pres1 from " .
+		 $tableName ." WHERE station = $1 and " .
+		"date(valid) = $2 ORDER by tvalid");
 
-$result = pg_exec($connection, $query);
+$result = pg_execute($connection, "SELECT", Array($station, $sqlDate));
 
 pg_close($connection);
 
@@ -157,11 +155,13 @@ $graph->xaxis->SetPos("min");
 
 // Create the linear plot
 $lineplot=new LinePlot($alti);
+$graph->Add($lineplot);
 $lineplot->SetLegend("Altimeter");
 $lineplot->SetColor("black");
 
 // Create the linear plot
 $lineplot2=new LinePlot($prec);
+$graph->AddY2($lineplot2);
 $lineplot2->SetLegend("Precipitation");
 $lineplot2->SetColor("blue");
 //$lineplot2->SetFilled();
@@ -176,7 +176,7 @@ $t1->SetFont(FF_FONT1,FS_BOLD);
 $t1->SetColor("black");
 $graph->AddText($t1);
 
-$graph->Add($lineplot);
-$graph->AddY2($lineplot2);
+
+
 $graph->Stroke();
 ?>

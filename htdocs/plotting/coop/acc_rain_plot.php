@@ -37,21 +37,22 @@ $coopdb = iemdb("coop");
 
 /* First we load climate normals */
 $crain = Array();
-$q = "SELECT precip, valid from climate
-		WHERE station = '$station' ";
-$rs = pg_exec($coopdb, $q);
+
+$rs = pg_prepare($coopdb, "SELECT", "SELECT precip, valid from climate " .
+		"WHERE station = $1");
+$rs = pg_execute($coopdb, "SELECT", Array($station));
+
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
 {
 	$crain[$row["valid"]] = $row["precip"];
 }
 
+$rs = pg_prepare($coopdb, "SELECT2", "SELECT precip, day, " .
+		"extract(year from day) as y, extract(month from day) as m, " .
+		"extract(day from day) as d from alldata WHERE stationid = $1 " .
+		"and day between $2 and $3 ORDER by day ASC");
+$rs = pg_execute($coopdb, "SELECT2", Array($station, $sdate, $edate));
 
-
-$q = "SELECT precip, day, extract(year from day) as y, 
-		extract(month from day) as m,extract(day from day) as d from alldata 
-		WHERE stationid = '$station' and day between '$sdate' and '$edate'
-		ORDER by day ASC";
-$rs = pg_exec($coopdb, $q);
 $aobs = Array();
 $xlabels = Array();
 $zeroes = Array();
@@ -117,33 +118,34 @@ while (list($k,$v) = each($xlabels) ){
 
 // Create the linear plot
 $lp0 =new LinePlot($cdiff);
+$graph->Add($lp0);
 $lp0->SetFillColor("red");
 $lp0->SetLegend("Accum Difference");
 
 $b2plot = new BarPlot($obs);
+$graph->Add($b2plot);
 $b2plot->SetFillColor("blue");
 $b2plot->SetLegend("Obs Rain");
 
 // Create the linear plot
 $lp1=new LinePlot($aobs);
+$graph->Add($lp1);
 $lp1->SetLegend("Actual Accum");
 $lp1->SetColor("blue");
 $lp1->SetWeight(2);
 
 $lp2=new LinePlot($aclimate);
+$graph->Add($lp2);
 $lp2->SetLegend("Climate Accum");
 $lp2->SetColor("red");
 $lp2->SetWeight(2);
 
 $z = new LinePlot($zeros);
+$graph->Add($z);
 $z->SetWeight(2);
 
 // Add the plot to the graph
-$graph->Add($lp0);
-$graph->Add($lp1);
-$graph->Add($lp2);
-$graph->Add($b2plot);
-$graph->Add($z);
+
 
 // Display the graph
 $graph->Stroke();

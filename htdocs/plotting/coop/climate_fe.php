@@ -4,6 +4,7 @@ $TITLE = "IEM | COOP Climate Plots";
 $station1 = isset($_GET["station1"]) ? $_GET["station1"] : "iowa";
 $station2 = isset($_GET["station2"]) ? $_GET["station2"] : "";
 $mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
+$THISPAGE="networks-coop";
 include("$rootpath/include/header.php"); 
 include("$rootpath/include/network.php");     
 $nt = new NetworkTable("IACLIMATE");
@@ -39,7 +40,6 @@ a plot from this dataset.</p>
 <tr>
 <td>
 <SELECT name="station1">
-  <option value="iowa" <?php if ($station1 == "iowa") echo "SELECTED"; ?>>Iowa Average
 <?php
 	for(reset($cities); $key = key($cities); next($cities))
 	{

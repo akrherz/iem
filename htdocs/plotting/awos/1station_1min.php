@@ -6,8 +6,8 @@ $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
 
-
-	$TITLE = "IEM | 1 Minute Time Series";
+$THISPAGE="networks-awos";
+$TITLE = "IEM | 1 Minute Time Series";
 include("$rootpath/include/header.php"); 
 ?>
 <?php include("$rootpath/include/imagemaps.php"); ?>

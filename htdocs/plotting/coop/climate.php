@@ -12,12 +12,11 @@ $st2_lo = array();
 $xlabel= array();
 $years = 51;
 
-if ($station1 == "iowa") {
-  $query1 = "SELECT avg(high) as high, avg(low) as low, to_char(valid, 'mm dd') as valid from climate51 GROUP by valid ORDER by valid ASC";
-} else {
-  $query1 = "SELECT high, low, years, to_char(valid, 'mm dd') as valid from climate51 WHERE station = '". $station1 ."' ORDER by valid ASC";
-}
-$result1 = pg_exec($connection, $query1);
+
+$rs = pg_prepare($connection, "SELECT", "SELECT high, low, years, " .
+		"to_char(valid, 'mm dd') as valid from climate51 " .
+		"WHERE station = $1 ORDER by valid ASC");
+$result1 = pg_execute($connection, "SELECT", Array( $station1 ));
 for( $i=0; $row = @pg_fetch_array($result1,$i); $i++) 
 { 
   $st1_hi[$i]  = $row["high"];
@@ -27,8 +26,12 @@ for( $i=0; $row = @pg_fetch_array($result1,$i); $i++)
 
 
 if ($station2) {
-  $query2 = "SELECT high, low, years, to_char(valid, 'mm dd') as valid from climate51 WHERE station = '". $station2 ."' ORDER by valid ASC";
-  $result2 = pg_exec($connection, $query2);
+	$rs = pg_prepare($connection, "SELECT2", "SELECT high, low, years, " .
+		"to_char(valid, 'mm dd') as valid from climate51 " .
+		"WHERE station = $1 ORDER by valid ASC");
+    $result2 = pg_execute($connection, "SELECT2", Array( $station2 ));
+	
+
   for( $i=0; $row = @pg_fetch_array($result2,$i); $i++) 
   { 
     $st2_hi[$i]  = $row["high"];
@@ -84,36 +87,40 @@ $graph->legend->SetLayout(LEGEND_HOR);
 
 // Create the linear plot
 $lineplot=new LinePlot($st1_hi);
+$graph->Add($lineplot);
 $lineplot->SetLegend($cities[strtoupper($station1)]["name"] ." High");
 $lineplot->SetColor("red");
 $lineplot->SetWeight(2);
 
 // Create the linear plot
 $lineplot2=new LinePlot($st1_lo);
+$graph->Add($lineplot2);
 $lineplot2->SetLegend($cities[strtoupper($station1)]["name"] ." Low");
 $lineplot2->SetColor("blue");
 $lineplot2->SetWeight(2);
 
 // Add the plot to the graph
-$graph->Add($lineplot);
-$graph->Add($lineplot2);
+
+
 
 if ($station2){
   // Create the linear plot
   $lineplot3=new LinePlot($st2_hi);
+  $graph->Add($lineplot3);
   $lineplot3->SetLegend($cities[strtoupper($station2)]["name"] ." High");
   $lineplot3->SetColor("brown");
   $lineplot3->SetWeight(2);
 
   // Create the linear plot
   $lineplot4=new LinePlot($st2_lo);
+  $graph->Add($lineplot4);
   $lineplot4->SetLegend($cities[strtoupper($station2)]["name"] ." Low");
   $lineplot4->SetColor("purple");
   $lineplot4->SetWeight(2);
 
   // Add the plot to the graph
-  $graph->Add($lineplot3);
-  $graph->Add($lineplot4);
+  
+  
  
 }
 

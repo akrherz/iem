@@ -26,11 +26,12 @@ $sqlDate = strftime("%Y-%m-%d", $myTime);
 
 /** Time to get data from database **/
 $connection = iemdb("asos");
-$query = "SELECT to_char(valid, 'HH24:MI') as tvalid, tmpf, dwpf from 
-  ". $tableName ." WHERE station = '". $station ."' and 
-  date(valid) = '". $sqlDate ."' ORDER by tvalid";
+$rs = pg_prepare($connection, "SELECT", "SELECT " .
+		"to_char(valid, 'HH24:MI') as tvalid, tmpf, dwpf from " .
+		 $tableName ." WHERE station = $1 and " .
+		"date(valid) = $2 ORDER by tvalid");
 
-$result = pg_exec($connection, $query);
+$result = pg_execute($connection, "SELECT", Array($station, $sqlDate));
 
 pg_close($connection);
 
@@ -167,11 +168,13 @@ $graph->xaxis->SetPos("min");
 
 // Create the linear plot
 $lineplot=new LinePlot($tmpf);
+$graph->Add($lineplot);
 $lineplot->SetLegend("Temperature");
 $lineplot->SetColor("red");
 
 // Create the linear plot
 $lineplot2=new LinePlot($dwpf);
+$graph->Add($lineplot2);
 $lineplot2->SetLegend("Dew Point");
 $lineplot2->SetColor("blue");
 
@@ -184,8 +187,8 @@ $t1->SetFont(FF_FONT1,FS_BOLD);
 $t1->SetColor("black");
 $graph->AddText($t1);
 
-$graph->Add($lineplot2);
-$graph->Add($lineplot);
+
+
 
 $graph->Stroke();
 

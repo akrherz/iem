@@ -5,6 +5,9 @@ include("../../../config/settings.inc.php");
 
 include ("$rootpath/include/awosLoc.php");
 include("$rootpath/include/database.inc.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_led.php");
 
 $station = isset($_GET["station"]) ? $_GET["station"] : "ADU";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
@@ -21,14 +24,20 @@ $sqlDate = strftime("%Y-%m-%d", $myTime);
 
 
 $connection = iemdb("awos");
-$query = "SELECT to_char(valid, 'HH24:MI') as tvalid, p01i, alti from 
-  ". $tableName ." WHERE station = '". $station ."' and 
-  date(valid) = '". $sqlDate ."' ORDER by tvalid";
+$rs = pg_prepare($connection, "SELECT", "SELECT " .
+		"to_char(valid, 'HH24:MI') as tvalid, p01i, alti from " .
+		"". $tableName ." WHERE station = $1 and " .
+		"  date(valid) = $2 ORDER by tvalid");
 
-$result = pg_exec($connection, $query);
+$result = pg_execute($connection, "SELECT", Array($station, $sqlDate));
 
 pg_close($connection);
 
+if (pg_num_rows($result) == 0){
+ $led = new DigitalLED74();
+ $led->StrokeNumber('NO DATA FOR THIS DATE',LEDC_GREEN);
+ die();
+}
 
 $prec = array();
 $alti = array();
@@ -107,8 +116,7 @@ for ($j=0; $j<24; $j++){
   $xlabel[$j*60] = $xpre[$j];
 }
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
+
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -148,11 +156,13 @@ $graph->xaxis->SetPos("min");
 
 // Create the linear plot
 $lineplot=new LinePlot($alti);
+$graph->Add($lineplot);
 $lineplot->SetLegend("Altimeter");
 $lineplot->SetColor("black");
 
 // Create the linear plot
 $lineplot2=new LinePlot($prec);
+$graph->AddY2($lineplot2);
 $lineplot2->SetLegend("Precipitation");
 $lineplot2->SetColor("blue");
 //$lineplot2->SetFilled();
@@ -167,7 +177,7 @@ $t1->SetFont(FF_FONT1,FS_BOLD);
 $t1->SetColor("black");
 $graph->AddText($t1);
 
-$graph->Add($lineplot);
-$graph->AddY2($lineplot2);
+
+
 $graph->Stroke();
 ?>

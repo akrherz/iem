@@ -1,6 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
 $TITLE = "IEM | COOP Extremes Plots";
+$THISPAGE="networks-coop";
 include("$rootpath/include/header.php");
 include("$rootpath/include/imagemaps.php");
 $station = isset($_GET["station"]) ? $_GET["station"] : ""; 

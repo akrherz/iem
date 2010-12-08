@@ -4,11 +4,10 @@ $month = isset($_GET['month']) ? $_GET['month'] : date("m");
 $day = isset($_GET['day']) ? $_GET['day'] : date("d");
 $ts = strtotime("2003-$month-$day");
 $pts = strftime("2003-%m-%d", $ts);
-?>
 
-<?php
  $page = "plotting";
  $TITLE = "IEM | Monthly Temperature Spreads";
+ $THISPAGE="networks-coop";
 include("$rootpath/include/header.php"); 
  include("$rootpath/include/forms.php"); ?>
 

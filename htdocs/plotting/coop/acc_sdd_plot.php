@@ -44,21 +44,23 @@ function calcSDD($high,$low)
 }
 /* First we load climate normals */
 $cgdd = Array();
-$q = "SELECT sdd86, valid from climate
-		WHERE station = '$station' ";
-$rs = pg_exec($coopdb, $q);
+
+$rs = pg_prepare($coopdb, "SELECT", "SELECT sdd86, valid from climate " .
+		"WHERE station = $1");
+$rs = pg_execute($coopdb, "SELECT", Array($station));
+
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
 {
 	$gdd = (float)$row["sdd86"];
 	$cgdd[$row["valid"]] = $gdd;
 }
 
+$rs = pg_prepare($coopdb, "SELECT high, low, day, extract(year from day) as y, " .
+		"extract(month from day) as m,extract(day from day) as d from alldata " .
+		"WHERE stationid = $1 and day between $2 and $3 ORDER by day ASC");
+$rs = pg_execute($coopdb, "SELECT2", Array($station, $sdate, $edate));
 
-
-$q = "SELECT high, low, day, extract(year from day) as y,
-        extract(month from day) as m,extract(day from day) as d from alldata 
-		WHERE stationid = '$station' and day between '$sdate' and '$edate'
-		ORDER by day ASC";
+$q = "";
 $rs = pg_exec($coopdb, $q);
 $aobs = Array();
 $xlabels = Array();
@@ -128,30 +130,28 @@ while (list($k,$v) = each($xlabels) ){
 
 // Create the linear plot
 $b1plot =new BarPlot($obs);
+$graph->Add($b1plot);
 $b1plot->SetColor("red");
 $b1plot->SetFillColor("red");
 $b1plot->SetLegend("Daily Accumulation");
 
 // Create the linear plot
 $lp1=new LinePlot($aobs);
+$graph->Add($lp1);
 $lp1->SetLegend("Actual Accum");
 $lp1->SetColor("blue");
 $lp1->SetWeight(2);
 
 $lp2=new LinePlot($aclimate);
+$graph->Add($lp2);
 $lp2->SetLegend("Climate Accum");
 $lp2->SetColor("red");
 $lp2->SetWeight(2);
 
 $z = new LinePlot($zeros);
+$graph->Add($z);
 $z->SetWeight(2);
 
-// Add the plot to the graph
-$graph->Add($lp1);
-$graph->Add($lp2);
-$graph->Add($b1plot);
-$graph->Add($z);
 
-// Display the graph
 $graph->Stroke();
 ?>
