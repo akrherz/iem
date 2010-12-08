@@ -5,7 +5,7 @@
  // Created:     2001-01-08
  // Ver:         $Id: jpgraph_canvas.php 1923 2010-01-11 13:48:49Z ljp $
  //
- // Copyright (c) Asial Corporation. All rights reserved.
+ // Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
  //========================================================================
  */
 

@@ -5,7 +5,7 @@
 // Created:     2003-03-20
 // Ver:         $Id: imgdata_stars.inc.php 1106 2009-02-22 20:16:35Z ljp $
 //
-// Copyright (c) Asial Corporation. All rights reserved.
+// Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
 //========================================================================
 
 

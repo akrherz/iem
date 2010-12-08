@@ -5,7 +5,7 @@
  // Created:     2001-02-14
  // Ver:         $Id: jpgraph_pie.php 1926 2010-01-11 16:33:07Z ljp $
  //
- // Copyright (c) Asial Corporation. All rights reserved.
+ // Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
  //========================================================================
  */
 

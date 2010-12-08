@@ -5,7 +5,7 @@
 // Created:     2001-01-08, refactored 2008-03-29
 // Ver:         $Id: gd_image.inc.php 1922 2010-01-11 11:42:50Z ljp $
 //
-// Copyright (c) Asial Corporation. All rights reserved.
+// Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
 //========================================================================
 
 require_once 'jpgraph_rgb.inc.php';

@@ -5,7 +5,7 @@
 // Created:     2004-10-07
 // Ver:         $Id: jpgraph_antispam.php 1106 2009-02-22 20:16:35Z ljp $
 //
-// Copyright (c) Asial Corporation. All rights reserved.
+// Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
 //========================================================================
 
 class HandDigits {
