@@ -9,23 +9,20 @@ $ISUAGcities = $nt->table;
 
 $station = $_GET["station"];
 $ts = time() - 86400 - 7*3600;
-$table = "daily";
+
 $date = date("Y-m-d", $ts);
 
 
-$queryData = "c11 as dater, c12 as dater2";
-$ylabel = "Temperature [F]";
 
 
-//if ($plot == "soil"){
-//	$queryData = "c300 as dater, c800";
-//	$y2label = "4in Soil Temp [F]";
-//}
+$rs = pg_prepare($connection, "SELECT", "SELECT c11 as dater, c12 as dater2, " .
+		"to_char(valid, 'yy/mm/dd') as valid from daily WHERE " .
+		"station = $1 and (valid + '30 days'::interval) > CURRENT_TIMESTAMP  " .
+		"ORDER by valid ASC ");
 
-$query2 = "SELECT ". $queryData .", to_char(valid, 'yy/mm/dd') as valid from ". $table ." WHERE station = '$station' and 
-	(valid + '30 days'::interval) > CURRENT_TIMESTAMP  ORDER by valid ASC";
 
-$result = pg_exec($connection, $query2);
+
+$result = pg_execute($connection, "SELECT", Array($station));
 
 $ydata = array();
 $ydata2 = array();
@@ -69,11 +66,13 @@ $graph->xaxis->SetPos("min");
 
 // Create the linear plot
 $lineplot=new LinePlot($ydata);
+$graph->Add($lineplot);
 $lineplot->SetColor("red");
 $lineplot->SetLegend("High");
 
 // Create the linear plot
 $lineplot2=new LinePlot($ydata2);
+$graph->Add($lineplot2);
 $lineplot2->SetColor("blue");
 $lineplot2->SetLegend("Low");
 
@@ -82,8 +81,8 @@ $graph->legend->Pos(0.10, 0.06, "right", "top");
 
 
 // Add the plot to the graph
-$graph->Add($lineplot);
-$graph->Add($lineplot2);
+
+
 
 // Display the graph
 $graph->Stroke();

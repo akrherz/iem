@@ -9,24 +9,23 @@ $connection = iemdb("isuag");
 
 $station = isset($_GET['station']) ? $_GET["station"]: "A130209";
 
-// select to_char(valid, 'mm-dd') as d, avg(c30) as soil, count(*) as years from daily WHERE station = 'A130209' GROUP by d ORDER by d ASC
-
 
 // Load up climatology
-$sql = "select to_char(valid, 'mmdd') as d, avg(c30) as soil, 
-    avg(c80) as srad, count(*) as years from daily 
-    WHERE station = '$station' GROUP by d";
-$rs = pg_exec($connection, $sql);
+$rs = pg_prepare($connection, "SELECT1", "select to_char(valid, 'mmdd') as d, " .
+		"avg(c30) as soil, avg(c80) as srad, count(*) as years from daily " .
+		"WHERE station = $1 GROUP by d");
+$rs = pg_execute($connection, "SELECT1", Array($station));
 $climate = Array();
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $climate[ $row["d"] ] = $row;
 }
 
 // Fetch Obs
-$query2 = "SELECT c30 as soil, c80 as srad, valid from daily 
-    WHERE station = '$station' and  
-	(valid + '60 days'::interval) > CURRENT_TIMESTAMP  ORDER by valid ASC";
-$result = pg_exec($connection, $query2);
+$rs = pg_prepare($connection, "SELECT", "SELECT c30 as soil, c80 as srad, " .
+		"valid from daily WHERE station = $1 and  " .
+		"(valid + '60 days'::interval) > CURRENT_TIMESTAMP  " .
+		"ORDER by valid ASC");
+$result = pg_execute($connection, "SELECT", Array($station));
 
 $soil = array();
 $c_soil = array();
@@ -77,34 +76,38 @@ $graph->legend->Pos(0.10, 0.06, "right", "top");
 
 // Create the linear plot
 $lineplot=new LinePlot($soil,$times);
+$graph->Add($lineplot);
 $lineplot->SetColor("blue");
 $lineplot->SetWeight(3);
 $lineplot->SetLegend("4in Soil Temp");
-$graph->Add($lineplot);
+
 
 // Create the linear plot
 $lineplot4=new LinePlot($c_soil,$times);
+$graph->Add($lineplot4);
 $lineplot4->SetColor("purple");
 $lineplot4->SetStyle("dashed");
 $lineplot4->SetWeight(2);
 $lineplot4->SetLegend("4in Soil Temp Climate");
-$graph->Add($lineplot4);
+
 
 
 $bp2=new BarPlot($srad,$times);
+$graph->AddY2($bp2);
 $bp2->SetFillColor("pink");
 $bp2->SetWidth(4.0);
 $bp2->SetLegend("Solar Rad");
-$graph->AddY2($bp2);
+
 
 
 // Create the linear plot
 $lineplot3=new LinePlot($c_srad,$times);
+$graph->AddY2($lineplot3);
 $lineplot3->SetColor("red");
 $lineplot3->SetWeight(2);
 $lineplot3->SetStyle("dashed");
 $lineplot3->SetLegend("Solar Rad Climate");
-$graph->AddY2($lineplot3);
+
 
 
 
