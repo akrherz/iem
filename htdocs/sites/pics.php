@@ -5,30 +5,27 @@ include("setup.php");
 
 $dir = isset($_GET["dir"]) ? $_GET["dir"]: "";
 
+$filename='./pics/'.$station.'/'.$station.'.jpg';
+
+if ($dir != ""){
+ $filename='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
+}
+if (! file_exists($filename)){
+	$filename = sprintf('%s/images/nophoto.png', $rooturl);
+}
+
 $THISPAGE = "iem-sites";
 $TITLE = "IEM | Site Photos";
 include("$rootpath/include/header.php"); 
-?>
-<?php $current = "pics"; include("sidebar.php"); ?>
-<?php
-function filecheck($file){
-  global $rooturl;
-  $test=file_exists($file);
-  if ($test!="TRUE")
-   {
-     $file="$rooturl/images/nophoto.png";
-   }
 
-  return $file;
-}
+ $current = "pics"; 
+ include("sidebar.php"); 
 
 
 function printtd($instr,$selected,$station){
   global $network;
   $filename='./pics/'.$station.'/'.$station.'_'.$instr.'.jpg'; 
-  $present = file_exists($filename);
-  if ($present)
-    {
+  if (file_exists($filename)){ 
     if ($instr == $selected)
      {
        echo '<TD align="center" style="background: #ee0;">'.$instr.'</TD>';
@@ -47,12 +44,7 @@ function printtd($instr,$selected,$station){
     }
 }
 
-$filename='./pics/'.$station.'/'.$station.'.jpg';
-$filename_site = file_exists($filename);
-if ($dir != ""){
- $filename='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
- $filename=filecheck($filename);
-}
+
 
 ?>
 
@@ -64,12 +56,20 @@ Iowa...</p>
 
 <p><a href="pics.php?network=<?php echo $network; ?>&station=<?php echo $station; ?>">Site Photo</a>
 
-<TABLE>
-            <TR><?php printtd("NW",$dir,$station);printtd("N",$dir,$station);printtd("NE",$dir,$station)?></TR>
-            <TR><?php printtd("W",$dir,$station);echo '<TD class="hlink"><IMG class="pics" border="3" SRC="'.$filename.'"  
-                    alt="'.$station.' , '.$dir.'" /></TD>';printtd("E",$dir,$station);?></TR>
-            <TR><?php printtd("SW",$dir,$station);printtd("S",$dir,$station);printtd("SE",$dir,$station)?></TR>
-          </TABLE>
+<table>
+ <tr><?php 
+ 	printtd("NW",$dir,$station);
+ 	printtd("N",$dir,$station);
+ 	printtd("NE",$dir,$station)?></tr>
+ <tr><?php 
+ 	printtd("W",$dir,$station);
+ 	echo '<TD class="hlink"><IMG class="pics" border="3" SRC="'.$filename.'"  
+                    alt="'.$station.' , '.$dir.'" /></td>';
+    printtd("E",$dir,$station);?></tr>
+  <tr><?php printtd("SW",$dir,$station);
+  	printtd("S",$dir,$station);
+  	printtd("SE",$dir,$station)?></tr>
+</table>
 <?php
 $filename='./pics/'.$station.'/'.$station.'_span.jpg';
 $lfilename='./pics/'.$station.'/'.$station.'_pan.jpg';
