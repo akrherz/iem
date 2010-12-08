@@ -70,6 +70,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 	$xlabels[$i] = "";
     $times[$i] = strtotime( $row["valid"] );
 }
+print_r($aobs);print_r($aclimate);die();
 
 pg_close($coopdb);
 

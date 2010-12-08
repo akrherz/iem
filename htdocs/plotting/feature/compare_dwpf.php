@@ -11,30 +11,30 @@ $t3 = Array(); $d3 = Array();
 $dbconn = iemdb('access');
 $sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, vsby
   , wind_chill(tmpf, sknt) as wcht, drct from current_log WHERE 
-  station = 'TNU' and dwpf > -99 and valid > '2010-07-14' and 
-  valid < '2010-07-15 00:00' ORDER by valid ASC";
+  station = 'DSM' and dwpf > -99 and valid > '2010-07-14' and 
+  valid < '2011-07-15 00:00' ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $t1[] = $row["epoch"];
-  $d1[] = $row["dwpf"];
+  $d1[] = $row["tmpf"];
 }
 
 $sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, vsby
   , wind_chill(tmpf, sknt) as wcht, drct from current_log WHERE 
-  station = 'DSM' and dwpf > -99 and valid > '2010-07-14' and 
-  valid < '2010-07-15 00:00' ORDER by valid ASC";
+  station = 'PABR' and dwpf > -99 and valid > '2010-07-14' and 
+  valid < '2011-07-15 00:00' ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $t2[] = $row["epoch"];
-  $d2[] = $row["dwpf"];
+  $d2[] = $row["tmpf"];
 }
 
 $sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, vsby
   , wind_chill(tmpf, sknt) as wcht, drct from current_log WHERE 
   station = 'PEA' and dwpf > -99 and valid > '2010-07-14' and 
-  valid < '2010-07-15 00:00' ORDER by valid ASC";
+  valid < '2011-07-15 00:00' ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
@@ -105,7 +105,7 @@ $lineplot3=new LinePlot($d3, $t3);
 $lineplot3->SetLegend("PEA");
 $lineplot3->SetColor("green");
 $lineplot3->SetWeight(3);
-$graph->Add($lineplot3);
+//$graph->Add($lineplot3);
 
 
 //$graph->AddLine(new PlotLine(HORIZONTAL,32,"blue",2));

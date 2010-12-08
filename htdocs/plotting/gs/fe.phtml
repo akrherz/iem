@@ -1,4 +1,6 @@
 <?php
+include("../../../config/settings.inc.php");
+
  $station = isset($_GET['station']) ? $_GET['station']: "";
  $network = isset($network) ? $_GET['network'] : "IA_ASOS";
  $year = isset($_GET['year']) ? $_GET['year'] : date("Y");
@@ -6,7 +8,7 @@
  $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 10;
  $sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
  $eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
- include("../../../config/settings.inc.php");
+ 
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/google_keys.php");
 include("$rootpath/include/imagemaps.php");
