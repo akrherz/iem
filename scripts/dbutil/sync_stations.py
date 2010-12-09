@@ -22,10 +22,10 @@ def sync(dbname):
     # delete current stations in dest
     dbcursor.execute("""DELETE from stations""")
     # insert queried stations
-    dbcursor.executemany("""INSERT into stations(id, synop, name, state,
+    dbcursor.executemany("""INSERT into stations(id, name, state,
      elevation, network, online, geom, params, county, plot_name, climate_site,
      wfo, archive_begin, archive_end, remote_id) values (%(id)s,
-     %(synop)s, %(name)s, %(state)s, %(elevation)s, %(network)s, %(online)s,
+      %(name)s, %(state)s, %(elevation)s, %(network)s, %(online)s,
      %(geom)s, %(params)s, %(county)s, %(plot_name)s, %(climate_site)s,
      %(wfo)s, %(archive_begin)s, %(archive_end)s, %(remote_id)s)""",
      rows)
