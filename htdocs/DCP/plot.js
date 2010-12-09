@@ -1,12 +1,65 @@
 Ext.BLANK_IMAGE_URL = '../ext/resources/images/default/s.gif';
 
 Ext.onReady(function(){
+
+states = [
+ ["AL","Alabama"],
+ ["AK","Alaska"],
+ ["AZ","Arizona"],
+ ["AR","Arkansas"],
+ ["CA","California"],
+ ["CO","Colorado"],
+ ["CT","Connecticut"],
+ ["DE","Delaware"],
+ ["FL","Florida"],
+ ["GA","Georgia"],
+ ["HI","Hawaii"],
+ ["ID","Idaho"],
+ ["IL","Illinois"],
+ ["IN","Indiana"],
+ ["IA","Iowa"],
+ ["KS","Kansas"],
+ ["KY","Kentucky"],
+ ["LA","Louisiana"],
+ ["ME","Maine"],
+ ["MD","Maryland"],
+ ["MA","Massachusetts"],
+ ["MI","Michigan"],
+ ["MN","Minnesota"],
+ ["MS","Mississippi"],
+ ["MO","Missouri"],
+ ["MT","Montana"],
+ ["NE","Nebraska"],
+ ["NV","Nevada"],
+ ["NH","New Hampshire"],
+ ["NJ","New Jersey"],
+ ["NM","New Mexico"],
+ ["NY","New York"],
+ ["NC","North Carolina"],
+ ["ND","North Dakota"],
+ ["OH","Ohio"],
+ ["OK","Oklahoma"],
+ ["OR","Oregon"],
+ ["PA","Pennsylvania"],
+ ["RI","Rhode Island"],
+ ["SC","South Carolina"],
+ ["SD","South Dakota"],
+ ["TN","Tennessee"],
+ ["TX","Texas"],
+ ["UT","Utah"],
+ ["VT","Vermont"],
+ ["VA","Virginia"],
+ ["WA","Washington"],
+ ["WV","West Virginia"],
+ ["WI","Wisconsin"],
+ ["WY","Wyoming"],
+]
+
 	var varStore = new Ext.data.Store({
 		autoLoad	: false,
         proxy	: new Ext.data.HttpProxy({
             url     : '../json/dcp_vars.php'
         }),
-        baseParams  : {'network': 'DCP'},
         reader: new Ext.data.JsonReader({
             root: 'vars',
             id: 'id'
@@ -33,11 +86,11 @@ Ext.onReady(function(){
 		hideTrigger		: false
 	});
 	var stationStore = new Ext.data.Store({
-		autoLoad	: true,
+		autoLoad	: false,
         proxy	: new Ext.data.HttpProxy({
             url     : '../json/network.php'
         }),
-        baseParams  : {'network': 'DCP'},
+        baseParams  : {'network': 'IA_DCP'},
         reader: new Ext.data.JsonReader({
             root: 'stations',
             id: 'id'
@@ -46,6 +99,33 @@ Ext.onReady(function(){
             {name: 'name', mapping: 'name'}
         ])
     });
+	
+	var stateCB = new Ext.form.ComboBox({
+  		hiddenName:'state',
+  		store: new Ext.data.SimpleStore({
+           fields: ['abbr', 'name'],
+           data : states
+  		}),
+  	valueField:'abbr',
+  	width:180,
+  	fieldLabel: 'Select State',
+  	displayField: 'name',
+  	typeAhead: true,
+  	tpl: '<tpl for="."><div class="x-combo-list-item">[{abbr}] {name}</div></tpl>',
+  	mode: 'local',
+  	triggerAction: 'all',
+  	emptyText:'Select/or type here...',
+  	selectOnFocus:true,
+  	lazyRender: true,
+  	id: 'stateselector',
+  		    listeners		: {
+				select: function(cb, record, idx){
+					stationStore.load({add: false, params: {network: record.data.abbr +"_DCP"}});
+					return false;
+      		}
+		}
+	});
+	
 	
 	var stationCB = new Ext.form.ComboBox({
 		store			: stationStore,
@@ -94,7 +174,7 @@ Ext.onReady(function(){
 				ds2.format('Y-m-d'), varCB.getValue());
 		Ext.get("imagedisplay").dom.src = url;
 		/* Now adjust the URL */
-		uri = String.format('#{0}.{1}.{2}.{3}', stationCB.getValue(),
+		uri = String.format('#{0}.{1}.{2}.{3}.{4}', stateCB.getValue(), stationCB.getValue(),
 				varCB.getValue(), ds.format('Y-m-d'), 
 				dayInterval.getValue() );
 		window.location.href = uri;
@@ -107,7 +187,7 @@ Ext.onReady(function(){
 		width		: 320,
 		style		: 'padding-left: 5px;',
 		title		: 'Make Plot Selections Below...',
-		items		: [stationCB, varCB, datepicker, dayInterval],
+		items		: [stateCB, stationCB, varCB, datepicker, dayInterval],
 		buttons		: [{
 			text	: 'Create Graph',
 			handler	: function(){
@@ -121,11 +201,12 @@ Ext.onReady(function(){
 	var tokens = window.location.href.split('#');
 	if (tokens.length == 2){
 		var tokens2 = tokens[1].split('.');
-		if (tokens2.length == 4){
-			stationCB.setValue( tokens2[0] );
-			varCB.setValue( tokens2[1] );
-			datepicker.setValue( tokens2[2] );
-			dayInterval.setValue( tokens2[3] );
+		if (tokens2.length == 5){
+			stateCB.setValue( tokens2[0] );
+			stationCB.setValue( tokens2[1] );
+			varCB.setValue( tokens2[2] );
+			datepicker.setValue( tokens2[3] );
+			dayInterval.setValue( tokens2[4] );
 			updateImage();
 		}
 	}
