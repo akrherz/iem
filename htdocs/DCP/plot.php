@@ -5,7 +5,7 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");
-$nt = new NetworkTable('DCP');
+$nt = new NetworkTable('IA_DCP');
 $pgconn = iemdb("hads");
 
 $station = isset($_REQUEST['station']) ? $_REQUEST["station"] : die("No station");
