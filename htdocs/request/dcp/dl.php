@@ -1,9 +1,10 @@
 <?php
 include("../../../config/settings.inc.php");
+$network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
 include("$rootpath/include/database.inc.php");
  $connection = iemdb("hads");
 include("$rootpath/include/network.php");
-$nt = new NetworkTable("DCP");
+$nt = new NetworkTable($network);
 $cities = $nt->table;
 
 
