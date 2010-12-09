@@ -4,8 +4,9 @@ require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $hads = iemdb('hads');
-$rs = pg_prepare($hads, "SELECT", "SELECT distinct key from raw2010_10
-	WHERE station = $1");
+$table = sprintf("raw%s_%s", date("Y"), date("m"));
+$rs = pg_prepare($hads, "SELECT", "SELECT distinct key from $table " .
+		"WHERE station = $1");
 
 $station = isset($_REQUEST["station"]) ? $_REQUEST["station"] : die('No Station'); 
 
