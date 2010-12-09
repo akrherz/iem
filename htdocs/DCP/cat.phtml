@@ -4,7 +4,7 @@ include("$rootpath/include/database.inc.php");
 $pgconn = iemdb("hads");
 include("$rootpath/include/forms.php");
 include("$rootpath/include/network.php");
-$nt = new NetworkTable( Array("DCP") );
+$nt = new NetworkTable( Array("IA_DCP") );
 $cities = $nt->table;
 
 $minute = isset($_GET['minute']) ? $_GET["minute"] : 0;
