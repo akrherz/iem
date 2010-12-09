@@ -8,6 +8,7 @@ $day = isset($_GET['day']) ? $_GET["day"] : date("d");
 $month = isset($_GET['month']) ? $_GET["month"] : date("m");
 $year = isset($_GET['year']) ? $_GET["year"] : date("Y");
 $station = isset($_GET['station'])? $_GET['station']: 'AESI4';
+$network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
 
 $ts = mktime(1, 0, 0, $month, $day, $year);
 $table = sprintf("raw%s_%s", date("Y",$ts), date("m", $ts));
@@ -28,7 +29,7 @@ $TITLE = "IEM | DCP Data by Site by Day";
 $THISPAGE="networks-dcp";
 if (! isset($_GET["station"])){
   include("$rootpath/include/google_keys.php");
-  $network = "DCP";
+
   $api = $GOOGLEKEYS[$rooturl]["any"];
   $HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
  <script src='http://www.openlayers.org/api/OpenLayers.js'></script>
@@ -42,14 +43,70 @@ include("$rootpath/include/header.php");
 <ul>
  <li>Timestamps are presented in central standard or daylight time</li>
  <li>The column headings are the <a href="http://www.weather.gov/ohd/hrl/shef/indexshef.htm">SHEF</a> encoded variable names.</li>
- <li>Archive begins on 1 Jan 2002 and is only for Iowa.  The archive is not complete for all the sites listed.</li>
+ <li>Archive begins on 1 Jan 2002 for Iowa, 9 Dec 2010 for other states.  The archive is not complete for all the sites listed.</li>
 </ul>
 
+<form method="GET" name="chstate">
+<p><strong>Select State:</strong> <select name="network">
+ <option value="AL_DCP" <?php if ($network == "AL_DCP") echo "SELECTED"; ?>>Alabama
+ <option value="AK_DCP" <?php if ($network == "AK_DCP") echo "SELECTED"; ?>>Alaska
+ <option value="AR_DCP" <?php if ($network == "AR_DCP") echo "SELECTED"; ?>>Arkansas
+ <option value="AZ_DCP" <?php if ($network == "AZ_DCP") echo "SELECTED"; ?>>Arizona
+ <option value="CA_DCP" <?php if ($network == "CA_DCP") echo "SELECTED"; ?>>California
+ <option value="CO_DCP" <?php if ($network == "CO_DCP") echo "SELECTED"; ?>>Colorado
+ <option value="CT_DCP" <?php if ($network == "CT_DCP") echo "SELECTED"; ?>>Connecticut
+ <option value="DE_DCP" <?php if ($network == "DE_DCP") echo "SELECTED"; ?>>Delaware
+ <option value="FL_DCP" <?php if ($network == "FL_DCP") echo "SELECTED"; ?>>Florida
+ <option value="GA_DCP" <?php if ($network == "GA_DCP") echo "SELECTED"; ?>>Georgia
+ <option value="HI_DCP" <?php if ($network == "HI_DCP") echo "SELECTED"; ?>>Hawaii
+ <option value="ID_DCP" <?php if ($network == "ID_DCP") echo "SELECTED"; ?>>Idaho
+ <option value="IL_DCP" <?php if ($network == "IL_DCP") echo "SELECTED"; ?>>Illinois
+ <option value="IN_DCP" <?php if ($network == "IN_DCP") echo "SELECTED"; ?>>Indiana
+ <option value="IA_DCP" <?php if ($network == "IA_DCP") echo "SELECTED"; ?>>Iowa
+ <option value="KS_DCP" <?php if ($network == "KS_DCP") echo "SELECTED"; ?>>Kansas
+ <option value="KY_DCP" <?php if ($network == "KY_DCP") echo "SELECTED"; ?>>Kentucky
+ <option value="LA_DCP" <?php if ($network == "LA_DCP") echo "SELECTED"; ?>>Louisana
+ <option value="ME_DCP" <?php if ($network == "ME_DCP") echo "SELECTED"; ?>>Maine
+ <option value="MD_DCP" <?php if ($network == "MD_DCP") echo "SELECTED"; ?>>Maryland
+ <option value="MA_DCP" <?php if ($network == "MA_DCP") echo "SELECTED"; ?>>Massachusetts
+ <option value="MI_DCP" <?php if ($network == "MI_DCP") echo "SELECTED"; ?>>Michigan
+ <option value="MN_DCP" <?php if ($network == "MN_DCP") echo "SELECTED"; ?>>Minnesota
+ <option value="MS_DCP" <?php if ($network == "MS_DCP") echo "SELECTED"; ?>>Mississippi
+ <option value="MO_DCP" <?php if ($network == "MO_DCP") echo "SELECTED"; ?>>Missouri
+ <option value="MT_DCP" <?php if ($network == "MT_DCP") echo "SELECTED"; ?>>Montana
+ <option value="NE_DCP" <?php if ($network == "NE_DCP") echo "SELECTED"; ?>>Nebraska
+ <option value="NH_DCP" <?php if ($network == "NH_DCP") echo "SELECTED"; ?>>New Hampshire
+ <option value="NC_DCP" <?php if ($network == "NC_DCP") echo "SELECTED"; ?>>North Carolina
+ <option value="ND_DCP" <?php if ($network == "ND_DCP") echo "SELECTED"; ?>>North Dakota
+ <option value="NV_DCP" <?php if ($network == "NV_DCP") echo "SELECTED"; ?>>Nevada
+ <option value="NH_DCP" <?php if ($network == "NH_DCP") echo "SELECTED"; ?>>New Hampshire
+ <option value="NJ_DCP" <?php if ($network == "NJ_DCP") echo "SELECTED"; ?>>New Jersey
+ <option value="NM_DCP" <?php if ($network == "NM_DCP") echo "SELECTED"; ?>>New Mexico
+ <option value="NY_DCP" <?php if ($network == "NY_DCP") echo "SELECTED"; ?>>New York
+ <option value="OH_DCP" <?php if ($network == "OH_DCP") echo "SELECTED"; ?>>Ohio
+ <option value="OK_DCP" <?php if ($network == "OK_DCP") echo "SELECTED"; ?>>Oklahoma
+ <option value="OR_DCP" <?php if ($network == "OR_DCP") echo "SELECTED"; ?>>Oregon
+ <option value="PA_DCP" <?php if ($network == "PA_DCP") echo "SELECTED"; ?>>Pennsylvania
+ <option value="RI_DCP" <?php if ($network == "RI_DCP") echo "SELECTED"; ?>>Rhode Island
+ <option value="SC_DCP" <?php if ($network == "SC_DCP") echo "SELECTED"; ?>>South Carolina
+ <option value="SD_DCP" <?php if ($network == "SD_DCP") echo "SELECTED"; ?>>South Dakota
+ <option value="TN_DCP" <?php if ($network == "TN_DCP") echo "SELECTED"; ?>>Tennessee
+ <option value="TX_DCP" <?php if ($network == "TX_DCP") echo "SELECTED"; ?>>Texas
+ <option value="UT_DCP" <?php if ($network == "UT_DCP") echo "SELECTED"; ?>>Utah
+ <option value="VT_DCP" <?php if ($network == "VT_DCP") echo "SELECTED"; ?>>Vermont
+ <option value="VA_DCP" <?php if ($network == "VA_DCP") echo "SELECTED"; ?>>Virginia
+ <option value="WA_DCP" <?php if ($network == "WA_DCP") echo "SELECTED"; ?>>Washington
+ <option value="WV_DCP" <?php if ($network == "WV_DCP") echo "SELECTED"; ?>>West Virginia
+ <option value="WI_DCP" <?php if ($network == "WI_DCP") echo "SELECTED"; ?>>Wisconsin
+ <option value="WY_DCP" <?php if ($network == "WY_DCP") echo "SELECTED"; ?>>Wyoming
+</select>
+<input type="submit" value="Select State" />
+</form>
 
 <form method="GET" name="olselect">
 <table><tr><th>Station:</th><th>Year</th><th>Month</th><th>Day</th><th></th></tr>
 <tr>
-<td><?php echo networkSelect(iemdb("mesosite"),"DCP", $station); ?>
+<td><?php echo networkSelect(iemdb("mesosite"),$network, $station); ?>
 <br /><a href="site.phtml?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>">Select from map</a></td>
 <td><?php echo yearSelect(2002,$year); ?></td>
 <td><?php echo monthSelect($month); ?></td>

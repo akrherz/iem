@@ -1,10 +1,11 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+ $network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
 $pgconn = iemdb("hads");
 include("$rootpath/include/forms.php");
 include("$rootpath/include/network.php");
-$nt = new NetworkTable( Array("IA_DCP") );
+$nt = new NetworkTable( Array($network) );
 $cities = $nt->table;
 
 $minute = isset($_GET['minute']) ? $_GET["minute"] : 0;
@@ -23,8 +24,8 @@ include("$rootpath/include/header.php");
 
 <p>This application will display a table of observations valid at a given
 time.  The SHEF encoded variable identifier is used to show which sites
-reported which variables.  All times displayed are in central 
-standard/daylight time.  If you click on the site identifier, you will
+reported which variables.  All times displayed are in <strong>central 
+standard/daylight time</strong>.  If you click on the site identifier, you will
 get a listing of all observations for that site for the date of your 
 choice.
 
@@ -32,6 +33,7 @@ choice.
 <form method="GET" action="cat.phtml">
 <table>
 <tr>
+  <th>State</th>
   <th>Year</th>
   <th>Month</th>
   <th>Day</th>
@@ -41,6 +43,61 @@ choice.
 </tr>
 
 <tr>
+  <td>
+  Select State:<select name="network">
+ <option value="AL_DCP" <?php if ($network == "AL_DCP") echo "SELECTED"; ?>>Alabama
+ <option value="AK_DCP" <?php if ($network == "AK_DCP") echo "SELECTED"; ?>>Alaska
+ <option value="AR_DCP" <?php if ($network == "AR_DCP") echo "SELECTED"; ?>>Arkansas
+ <option value="AZ_DCP" <?php if ($network == "AZ_DCP") echo "SELECTED"; ?>>Arizona
+ <option value="CA_DCP" <?php if ($network == "CA_DCP") echo "SELECTED"; ?>>California
+ <option value="CO_DCP" <?php if ($network == "CO_DCP") echo "SELECTED"; ?>>Colorado
+ <option value="CT_DCP" <?php if ($network == "CT_DCP") echo "SELECTED"; ?>>Connecticut
+ <option value="DE_DCP" <?php if ($network == "DE_DCP") echo "SELECTED"; ?>>Delaware
+ <option value="FL_DCP" <?php if ($network == "FL_DCP") echo "SELECTED"; ?>>Florida
+ <option value="GA_DCP" <?php if ($network == "GA_DCP") echo "SELECTED"; ?>>Georgia
+ <option value="HI_DCP" <?php if ($network == "HI_DCP") echo "SELECTED"; ?>>Hawaii
+ <option value="ID_DCP" <?php if ($network == "ID_DCP") echo "SELECTED"; ?>>Idaho
+ <option value="IL_DCP" <?php if ($network == "IL_DCP") echo "SELECTED"; ?>>Illinois
+ <option value="IN_DCP" <?php if ($network == "IN_DCP") echo "SELECTED"; ?>>Indiana
+ <option value="IA_DCP" <?php if ($network == "IA_DCP") echo "SELECTED"; ?>>Iowa
+ <option value="KS_DCP" <?php if ($network == "KS_DCP") echo "SELECTED"; ?>>Kansas
+ <option value="KY_DCP" <?php if ($network == "KY_DCP") echo "SELECTED"; ?>>Kentucky
+ <option value="LA_DCP" <?php if ($network == "LA_DCP") echo "SELECTED"; ?>>Louisana
+ <option value="ME_DCP" <?php if ($network == "ME_DCP") echo "SELECTED"; ?>>Maine
+ <option value="MD_DCP" <?php if ($network == "MD_DCP") echo "SELECTED"; ?>>Maryland
+ <option value="MA_DCP" <?php if ($network == "MA_DCP") echo "SELECTED"; ?>>Massachusetts
+ <option value="MI_DCP" <?php if ($network == "MI_DCP") echo "SELECTED"; ?>>Michigan
+ <option value="MN_DCP" <?php if ($network == "MN_DCP") echo "SELECTED"; ?>>Minnesota
+ <option value="MS_DCP" <?php if ($network == "MS_DCP") echo "SELECTED"; ?>>Mississippi
+ <option value="MO_DCP" <?php if ($network == "MO_DCP") echo "SELECTED"; ?>>Missouri
+ <option value="MT_DCP" <?php if ($network == "MT_DCP") echo "SELECTED"; ?>>Montana
+ <option value="NE_DCP" <?php if ($network == "NE_DCP") echo "SELECTED"; ?>>Nebraska
+ <option value="NH_DCP" <?php if ($network == "NH_DCP") echo "SELECTED"; ?>>New Hampshire
+ <option value="NC_DCP" <?php if ($network == "NC_DCP") echo "SELECTED"; ?>>North Carolina
+ <option value="ND_DCP" <?php if ($network == "ND_DCP") echo "SELECTED"; ?>>North Dakota
+ <option value="NV_DCP" <?php if ($network == "NV_DCP") echo "SELECTED"; ?>>Nevada
+ <option value="NH_DCP" <?php if ($network == "NH_DCP") echo "SELECTED"; ?>>New Hampshire
+ <option value="NJ_DCP" <?php if ($network == "NJ_DCP") echo "SELECTED"; ?>>New Jersey
+ <option value="NM_DCP" <?php if ($network == "NM_DCP") echo "SELECTED"; ?>>New Mexico
+ <option value="NY_DCP" <?php if ($network == "NY_DCP") echo "SELECTED"; ?>>New York
+ <option value="OH_DCP" <?php if ($network == "OH_DCP") echo "SELECTED"; ?>>Ohio
+ <option value="OK_DCP" <?php if ($network == "OK_DCP") echo "SELECTED"; ?>>Oklahoma
+ <option value="OR_DCP" <?php if ($network == "OR_DCP") echo "SELECTED"; ?>>Oregon
+ <option value="PA_DCP" <?php if ($network == "PA_DCP") echo "SELECTED"; ?>>Pennsylvania
+ <option value="RI_DCP" <?php if ($network == "RI_DCP") echo "SELECTED"; ?>>Rhode Island
+ <option value="SC_DCP" <?php if ($network == "SC_DCP") echo "SELECTED"; ?>>South Carolina
+ <option value="SD_DCP" <?php if ($network == "SD_DCP") echo "SELECTED"; ?>>South Dakota
+ <option value="TN_DCP" <?php if ($network == "TN_DCP") echo "SELECTED"; ?>>Tennessee
+ <option value="TX_DCP" <?php if ($network == "TX_DCP") echo "SELECTED"; ?>>Texas
+ <option value="UT_DCP" <?php if ($network == "UT_DCP") echo "SELECTED"; ?>>Utah
+ <option value="VT_DCP" <?php if ($network == "VT_DCP") echo "SELECTED"; ?>>Vermont
+ <option value="VA_DCP" <?php if ($network == "VA_DCP") echo "SELECTED"; ?>>Virginia
+ <option value="WA_DCP" <?php if ($network == "WA_DCP") echo "SELECTED"; ?>>Washington
+ <option value="WV_DCP" <?php if ($network == "WV_DCP") echo "SELECTED"; ?>>West Virginia
+ <option value="WI_DCP" <?php if ($network == "WI_DCP") echo "SELECTED"; ?>>Wisconsin
+ <option value="WY_DCP" <?php if ($network == "WY_DCP") echo "SELECTED"; ?>>Wyoming
+</select>
+</td>
   <td><?php echo yearSelect(2002, $year, "year"); ?></td>
   <td><?php echo monthSelect($month); ?></td>
   <td><?php echo daySelect($day); ?></td>
@@ -64,9 +121,10 @@ $tbl = strftime("raw%Y_%m", $ts);
 $dstr = strftime("%Y-%m-%d %H:%M", $ts);
 $ldate = strftime("%d %b %Y %I:%M %p", $ts);
 
-$rs = pg_prepare($pgconn, "SELECT", "SELECT * from $tbl WHERE valid = $1 and station ~* 'I4$'");
+$rs = pg_prepare($pgconn, "SELECT", "SELECT t.* from $tbl t, stations s WHERE " .
+		"valid = $1 and s.id = t.station and s.network = $2");
 
-$rs = pg_execute($pgconn, "SELECT", Array($dstr) );
+$rs = pg_execute($pgconn, "SELECT", Array($dstr, $network) );
 pg_close($pgconn);
 
 /* Load up the data into a big fat array */
