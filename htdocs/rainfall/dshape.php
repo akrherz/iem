@@ -13,24 +13,24 @@ $ts = mktime(0,0,0,$month, $day, $year);
 
 if ($duration == 'year')
 {
-  $dir = sprintf("/mnt/a2/wepp/data/rainfall/shape/yearly");
+  $dir = sprintf("/mnt/mesonet/wepp/data/rainfall/shape/yearly");
   $fp = sprintf("%s_rain",  date("Y", $ts) );
 }
 else if ($duration == 'month')
 {
-  $dir = sprintf("/mnt/a2/wepp/data/rainfall/shape/monthly/%s", date("Y", $ts) );
+  $dir = sprintf("/mnt/mesonet/wepp/data/rainfall/shape/monthly/%s", date("Y", $ts) );
   $fp = sprintf("%s_rain",  date("Ym", $ts) );
 }
 else
 {
-  $dir = sprintf("/mnt/a2/wepp/data/rainfall/shape/daily/%s", date("Y/m", $ts));
+  $dir = sprintf("/mnt/mesonet/wepp/data/rainfall/shape/daily/%s", date("Y/m", $ts));
   $fp = sprintf("%s_rain",  date("Ymd", $ts) );
 }
 
 chdir("/tmp");
 copy($dir."/".$fp.".dbf", $fp.".dbf");
-copy("/mnt/a2/wepp/GIS/static/hrap_${geometry}_${epsg}.shp", $fp.".shp");
-copy("/mnt/a2/wepp/GIS/static/hrap_${geometry}_${epsg}.shx", $fp.".shx");
+copy("/mnt/mesonet/wepp/GIS/static/hrap_${geometry}_${epsg}.shp", $fp.".shp");
+copy("/mnt/mesonet/wepp/GIS/static/hrap_${geometry}_${epsg}.shx", $fp.".shx");
 copy("/mnt/mesonet/data/gis/meta/${epsg}.prj", $fp.".prj");
 copy("/mnt/mesonet/data/gis/avl/iemrainfall.avl", $fp.".avl");
 `zip ${fp}.zip ${fp}*`;
