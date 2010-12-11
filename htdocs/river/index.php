@@ -43,7 +43,7 @@ if (isset($_GET["state"])){
   (select distinct hvtec_nwsli, ugc, eventid, phenomena, wfo from warnings_". date("Y") ." WHERE 
    status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
    significance = 'W' and hvtec_nwsli IN (select nwsli from hvtec_nwsli WHERE state = $1 and
-   		 expire > now()) as foo
+   		 expire > now())) as foo
    WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli $nwsli_limiter
    and c.ugc = foo.ugc GROUP by h.river_name, h.name, h.nwsli, foo.wfo, foo.eventid, foo.phenomena, r.severity,
    r.stage_text, r.flood_text, r.forecast_text");
