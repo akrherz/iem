@@ -42,7 +42,9 @@ if (isset($_GET["state"])){
    riverpro r, nws_ugc c, 
   (select distinct hvtec_nwsli, ugc, eventid, phenomena, wfo from warnings_". date("Y") ." WHERE 
    status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
-   significance = 'W' and hvtec_nwsli IN (select nwsli from hvtec_nwsli WHERE state = $1)) as foo
+   significance = 'W' and hvtec_nwsli IN (select nwsli from hvtec_nwsli WHERE state = $1 and" .
+   		"expire > now())" .
+   		" and expire > now()) as foo
    WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli $nwsli_limiter
    and c.ugc = foo.ugc GROUP by h.river_name, h.name, h.nwsli, foo.wfo, foo.eventid, foo.phenomena, r.severity,
    r.stage_text, r.flood_text, r.forecast_text");
@@ -54,7 +56,7 @@ if (isset($_GET["state"])){
    from hvtec_nwsli h, riverpro r, nws_ugc c,
   (select distinct hvtec_nwsli, ugc, eventid, phenomena, wfo from warnings_". date("Y") ." WHERE 
    status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
-   significance = 'W' and wfo = $1) as foo
+   significance = 'W' and wfo = $1 and expire > now()) as foo
    WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli $nwsli_limiter
    and c.ugc = foo.ugc GROUP by h.river_name, h.name, h.nwsli, foo.wfo, foo.eventid, foo.phenomena, r.severity,
    r.stage_text, r.flood_text, r.forecast_text");
