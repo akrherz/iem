@@ -1,5 +1,48 @@
 Ext.BLANK_IMAGE_URL = '../ext/resources/images/default/s.gif';
 
+Ext.override(Ext.form.ComboBox, {
+	doQuery : function(q, forceAll){
+		if(q === undefined || q === null){
+			q = '';
+	}
+	var qe = {
+		query: q,
+		forceAll: forceAll,
+		combo: this,
+		cancel:false
+	};
+	if(this.fireEvent('beforequery', qe)===false || qe.cancel){
+		return false;
+	}
+	q = qe.query;
+	forceAll = qe.forceAll;
+	if(forceAll === true || (q.length >= this.minChars)){
+	if(this.lastQuery !== q){
+	this.lastQuery = q;
+	if(this.mode == 'local'){
+		this.selectedIndex = -1;
+		if(forceAll){
+			this.store.clearFilter();
+		}else{
+			this.store.filter(this.displayField, q, true);
+		}
+		this.onLoad();
+	}else{
+		this.store.baseParams[this.queryParam] = q;
+		this.store.load({
+			params: this.getParams(q)
+		});
+		this.expand();
+	}
+	}else{
+		this.selectedIndex = -1;
+		this.onLoad();
+	}
+	}
+	}
+});
+
+
 Ext.onReady(function(){
 
 states = [
@@ -96,29 +139,30 @@ states = [
             id: 'id'
         }, [
             {name: 'id', mapping: 'id'},
-            {name: 'name', mapping: 'name'}
+            {name: 'name', mapping: 'name'},
+            {name: 'combo', mapping: 'combo'}
         ])
     });
 	
 	var stateCB = new Ext.form.ComboBox({
-  		hiddenName:'state',
-  		store: new Ext.data.SimpleStore({
+  		hiddenName	: 'state',
+  		store		: new Ext.data.SimpleStore({
            fields: ['abbr', 'name'],
            data : states
   		}),
-  	valueField:'abbr',
-  	width:180,
-  	fieldLabel: 'Select State',
-  	displayField: 'name',
-  	typeAhead: true,
-  	tpl: '<tpl for="."><div class="x-combo-list-item">[{abbr}] {name}</div></tpl>',
-  	mode: 'local',
-  	triggerAction: 'all',
-  	emptyText:'Select/or type here...',
-  	selectOnFocus:true,
-  	lazyRender: true,
-  	id: 'stateselector',
-  		    listeners		: {
+  		valueField	: 'abbr',
+  		width		: 180,
+  		fieldLabel	: 'Select State',
+  		displayField: 'name',
+  		typeAhead	: true,
+  		tpl			: '<tpl for="."><div class="x-combo-list-item">[{abbr}] {name}</div></tpl>',
+  		mode		: 'local',
+  		triggerAction: 'all',
+  		emptyText	:'Select/or type here...',
+  		selectOnFocus:true,
+  		lazyRender	: true,
+  		id			: 'stateselector',
+  		listeners	: {
 				select: function(cb, record, idx){
 					stationStore.load({add: false, params: {network: record.data.abbr +"_DCP"}});
 					return false;
@@ -129,7 +173,7 @@ states = [
 	
 	var stationCB = new Ext.form.ComboBox({
 		store			: stationStore,
-		displayField	: 'name',
+		displayField	: 'combo',
 		valueField		: 'id',
 		width			: 300,
 		mode			: 'local',

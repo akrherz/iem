@@ -12,7 +12,7 @@ $ar = Array("stations"=> Array());
 while (list($sid,$data) = each($nt->table))
 {
   $z = Array("id"=>$sid, 
-             
+             "combo" => sprintf("[%s] %s", $sid, $data["name"]),
               "name"=> $data["name"],
               "lon" => $data["lon"],
               "lat" => $data["lat"]);
