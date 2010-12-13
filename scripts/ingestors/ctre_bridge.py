@@ -5,7 +5,7 @@
 import mx.DateTime
 import sys
 # Run every 3 minutes
-if mx.DateTime.now().minute % 3 != 0:
+if mx.DateTime.now().minute % 4 != 0:
     sys.exit(0)
 
 import urllib2
