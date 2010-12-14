@@ -1,10 +1,10 @@
 # My purpose in life is to sync the mesosite stations table to other
 # databases.  This will hopefully remove some hackery
 
+import iemdb
 import psycopg2
 import psycopg2.extras
-
-mesosite = psycopg2.connect(database="mesosite", host="iemdb")
+MESOSITE = iemdb.connect("mesosite")
 subscribers = ["iem","coop","hads"]
 
 def sync(dbname):
@@ -12,10 +12,10 @@ def sync(dbname):
     Actually do the syncing, please
     """
     # connect to synced database
-    dbconn = psycopg2.connect(database=dbname, host="iemdb")
+    dbconn = iemdb.connect( dbname )
     dbcursor = dbconn.cursor()
     # query stations from source
-    cur = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("""SELECT * from stations""")
     rows = cur.fetchall()
     cur.close()
@@ -36,4 +36,4 @@ def sync(dbname):
 
 for sub in subscribers:
     sync(sub)
-mesosite.close()
+MESOSITE.close()
