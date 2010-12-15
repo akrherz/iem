@@ -54,6 +54,6 @@ cfg = {
 #print "Max visibility %.3f Min Visibility: %.3f" % (max(vals), min(vals))
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
-pqstr = "plot ac %s00 vsby_contour.png vsby_contour_%s00.png png" % ( 
+pqstr = "plot ac %s00 iowa_vsby.png vsby_contour_%s00.png png" % ( 
    mx.DateTime.gmt().strftime("%Y%m%d%H"), mx.DateTime.gmt().strftime("%H") )
 iemplot.postprocess(tmpfp, pqstr)
