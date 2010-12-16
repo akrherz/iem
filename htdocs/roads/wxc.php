@@ -16,7 +16,9 @@ $rs = pg_query($conn, $sql);
 
 
 
-echo "Weather Central 001d0300 Surface Data\r\n 12\r\n   5 Station\r\n   8 Timestamp\r\n   3 Road Condition Code\r\n   1 Towing Ban\r\n   1 Limited Visibility\r\n   9 Lat\r\n   9 Lon\r\n   1 Road Type\r\n  10 Road Major\r\n  64 Road Minor\r\n 64 Simple Condition Text\r\n 128 Full Condition Text\r\n";
+echo "Weather Central 001d0300 Iowa Road Conditions TimeStamp=";
+echo gmdate("Y.m.d.Hi");
+echo "\r\n 12\r\n   5 Station\r\n   8 Timestamp\r\n   3 Road Condition Code\r\n   1 Towing Ban\r\n   1 Limited Visibility\r\n   9 Lat\r\n   9 Lon\r\n   1 Road Type\r\n  10 Road Major\r\n  64 Road Minor\r\n 64 Simple Condition Text\r\n 128 Full Condition Text\r\n";
 
 
 for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
