@@ -80,16 +80,20 @@ for ($i=0;$i<10;$i++)
 
  $baseref = "/mnt/mesonet/data/nexrad/NIDS/$rad/$prod/";
 
- $handle = opendir($baseref);
  $files = Array();
- while (false !== ($file = readdir($handle))) {
-    if ($file != "." && $file != "..") {
-	 $yyyymmdd = substr($file, 4, 8);
-	 $hhmm = substr($file, 13, 4);
-     if ($yyyymmdd == $day)
-		$files[] = $hhmm;
-    }
- }
+ if (is_dir($baseref)){ 
+ 	$handle = opendir($baseref);
+ 
+ 	while (false !== ($file = readdir($handle))) {
+    	if ($file != "." && $file != "..") {
+	 		$yyyymmdd = substr($file, 4, 8);
+	 		$hhmm = substr($file, 13, 4);
+     		if ($yyyymmdd == $day)
+				$files[] = $hhmm;
+    		}
+ 		}
+ 	}
+}
  sort($files);
 ?>
 
