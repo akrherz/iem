@@ -18,6 +18,11 @@ if form.has_key('year'):
 else:
   year1 = int(form["year1"][0])
   year2 = int(form["year2"][0])
+if ((year2 - year1) > 10):
+    print "Content-type: text/plain"
+    print
+    print 'ERROR: Please request less than 10 years worth of data...'
+    sys.exit()
 month1 = int(form["month1"][0])
 if (not form.has_key("month2")):  sys.exit()
 if (year1 < 1986 or year1 > mx.DateTime.now().year): sys.exit()
