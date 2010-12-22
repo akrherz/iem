@@ -34,7 +34,7 @@ def merge(ts):
     offset0 = int(( ts0 - jan1).hours)
     offset1 = int(( ts -  jan1).hours)
     bad = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
-    bad = numpy.where( bad > 0, bad, 0.00024)
+    bad = numpy.where( bad > 0. and bad < 10000., bad, 0.00024)
     print "Mean 12z: %.4f  Hourly: %.4f" % (numpy.average(good), 
            numpy.average(bad) )
     for offset in range(offset0, offset1):
