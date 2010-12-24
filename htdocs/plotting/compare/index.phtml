@@ -73,12 +73,12 @@ choices.
 </tr>
 
 <tr><th>Variable:</th><td colspan="3"><SELECT name="var">
-<option value="tmpf" <? if ($var == "tmpf") echo "SELECTED"; ?>>Temperature
-<option value="dwpf" <? if ($var == "dwpf") echo "SELECTED"; ?>>Dewpoint
-<option value="sknt" <? if ($var == "sknt") echo "SELECTED"; ?>>Wind Speed (knots)
-<option value="drct" <? if ($var == "drct") echo "SELECTED"; ?>>Wind Direction
-<option value="alti" <? if ($var == "alti") echo "SELECTED"; ?>>Altimeter
-<option value="phour" <? if ($var == "phour") echo "SELECTED"; ?>>Precip
+<option value="tmpf" <?php if ($var == "tmpf") echo "SELECTED"; ?>>Temperature
+<option value="dwpf" <?php if ($var == "dwpf") echo "SELECTED"; ?>>Dewpoint
+<option value="sknt" <?php if ($var == "sknt") echo "SELECTED"; ?>>Wind Speed (knots)
+<option value="drct" <?php if ($var == "drct") echo "SELECTED"; ?>>Wind Direction
+<option value="alti" <?php if ($var == "alti") echo "SELECTED"; ?>>Altimeter
+<option value="phour" <?php if ($var == "phour") echo "SELECTED"; ?>>Precip
 </SELECT>
 </td></tr>
 
