@@ -27,7 +27,7 @@ if (isset($_GET["img_x"]) && isset($_GET["img_y"]) )
 $layers = isset($_GET["layers"]) ? $_GET["layers"]: Array("cwas", "warnings", "uscounties", "nexrad", "watches");
 $cu = isset($_GET["cu"]) ? $_GET["cu"]: 0;
 $loop = isset($_GET["loop"]) ? $_GET["loop"] : 0;
-$tz = isset($_GET["tz"]) ? $_GET["tz"] : "CDT";
+$tz = isset($_GET["tz"]) ? $_GET["tz"] : "CST";
 $tzdict = Array("UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000, "CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200, "PST" => 28800);
 
 $tzoff = $tzdict[$tz];
