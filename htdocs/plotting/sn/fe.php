@@ -47,7 +47,7 @@ $olon = $row["lon"];
 $ovalid = strtotime($row["valid"]);
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
-  $ts = strtotime(substr($row["valid"],0,18));
+  $ts = strtotime(substr($row["valid"],0,19));
   if ($ovalid == $ts){ continue;}
   $distkm = haversine($olon, $row["lon"], $olat, $row["lat"]);
   $deltat = $ts - $ovalid;
@@ -82,7 +82,8 @@ include("$rootpath/include/header.php");
 
 <div class="warning">Application has been removed :)</div>
 
-<?php include("$rootpath/include/footer.php"); die(); ?>
+<?php include("$rootpath/include/footer.php"); die(); 
+?>
 <blockquote><a href="http://www.spotternetwork.org/">SpotterNetwork</a> is
 a community project that brings storm chasers together. The IEM collects the 
 minute interval position reports from this project and archives then.  This
