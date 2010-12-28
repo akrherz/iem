@@ -79,6 +79,10 @@ $THISPAGE="networks-other";
 include("$rootpath/include/header.php"); 
 ?>
 <h3>SpotterNetwork - Spotter Ground Speed Estimator</h3>
+
+<div class="warning">Application has been removed :)</div>
+
+<?php include("$rootpath/include/footer.php"); die(); ?>
 <blockquote><a href="http://www.spotternetwork.org/">SpotterNetwork</a> is
 a community project that brings storm chasers together. The IEM collects the 
 minute interval position reports from this project and archives then.  This
