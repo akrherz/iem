@@ -47,7 +47,7 @@ $olon = $row["lon"];
 $ovalid = strtotime($row["valid"]);
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
-  $ts = strtotime(substr($row["valid"],0,16));
+  $ts = strtotime(substr($row["valid"],0,18));
   if ($ovalid == $ts){ continue;}
   $distkm = haversine($olon, $row["lon"], $olat, $row["lat"]);
   $deltat = $ts - $ovalid;
