@@ -15,7 +15,7 @@ $titleDate = strftime("%b %d, %Y", $myTime);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
 
-$fp = "/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0003.dat";
+$fp = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0003.dat";
 if (! file_exists($fp))
 {
  $led = new DigitalLED74();

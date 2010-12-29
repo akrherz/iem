@@ -10,7 +10,7 @@ $myTime = mktime(0,0,0,$month,$day,$year);
 $titleDate = strftime("%b %d, %Y", $myTime);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
-$fcontents = file("/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0003.dat");
+$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0003.dat");
 
 
 $oldformat = 1;
