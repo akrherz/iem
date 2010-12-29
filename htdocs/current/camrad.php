@@ -86,7 +86,7 @@ $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("status", MS_ON );
 if ($ts > 0) 
 {
-  $fp = "/mnt/a1/ARCHIVE/data/". gmdate('Y/m/d/', $radts) ."GIS/uscomp/n0r_". gmdate('YmdHi', $radts) .".png";
+  $fp = "/mesonet/ARCHIVE/data/". gmdate('Y/m/d/', $radts) ."GIS/uscomp/n0r_". gmdate('YmdHi', $radts) .".png";
   $radar->set("data", $fp);
 }
 

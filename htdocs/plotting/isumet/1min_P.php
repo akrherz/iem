@@ -17,7 +17,7 @@ if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
 $titleDate = strftime("%b %d, %Y", $myTime);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
-$fcontents = file("/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
+$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
 
 
 $prec = array();

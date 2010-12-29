@@ -23,7 +23,7 @@ if ($wA > $myTime){
 $titleDate = strftime("%b %d, %Y", $myTime);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
-$fcontents = file("/mnt/a1/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
+$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
 
 $mph = array();
 $drct = array();
