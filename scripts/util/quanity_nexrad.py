@@ -12,7 +12,7 @@ cnt = 0
 while (now < ets):
   if now > mx.DateTime.gmt():
     sys.exit()
-  fp = "/mnt/a1/ARCHIVE/data/%s/%02i/%02i/comprad/n0r_%s.png" % (now.year, now.month, now.day, now.strftime("%Y%m%d_%H%M") ) 
+  fp = "/mesonet/ARCHIVE/data/%s/%02i/%02i/comprad/n0r_%s.png" % (now.year, now.month, now.day, now.strftime("%Y%m%d_%H%M") ) 
   if (not os.path.isfile(fp)):
     print 'MISS', fp
     cmd = "/mesonet/python/bin/python ../dl/radar_composite.py %s" % (

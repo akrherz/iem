@@ -24,7 +24,7 @@ def do(ts):
     now = ts0 + interval
     while now <= ts1:
         i += 1
-        fp = now.strftime("/mnt/a1/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png")
+        fp = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png")
         if not os.path.isfile(fp):
             now += interval
             continue
