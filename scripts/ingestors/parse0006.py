@@ -11,7 +11,7 @@ except:
   sys.exit(0)
 iemob = iemAccessOb.iemAccessOb("OT0006")
 
-fp = "/mnt/a1/ARCHIVE/data/%s/text/ot/ot0006.dat" % (mx.DateTime.now().strftime("%Y/%m/%d"),)
+fp = "/mesonet/ARCHIVE/data/%s/text/ot/ot0006.dat" % (mx.DateTime.now().strftime("%Y/%m/%d"),)
 
 if (not os.path.isfile(fp)):
   if (mx.DateTime.now().minute == 10 and mx.DateTime.now().hour == 12):

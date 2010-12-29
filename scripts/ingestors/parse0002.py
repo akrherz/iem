@@ -13,7 +13,7 @@ except:
 
 
 now = mx.DateTime.now()
-fp = now.strftime("/mnt/a1/ARCHIVE/data/%Y/%m/%d/text/ot/ot0002.dat")
+fp = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0002.dat")
 
 if (not os.path.isfile(fp)):
   sys.exit(0)

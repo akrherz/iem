@@ -13,7 +13,7 @@ interval = mx.DateTime.RelativeDateTime(hours=1)
 now = sts
 total = None
 while now <= ets:
-  fp = now.gmtime().strftime("/mnt/a1/ARCHIVE/data/%Y/%m/%d/stage4/ST4.%Y%m%d%H.01h.grib")
+  fp = now.gmtime().strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/stage4/ST4.%Y%m%d%H.01h.grib")
   if not os.path.isfile( fp ):
     now += interval
     continue

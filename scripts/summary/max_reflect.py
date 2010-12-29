@@ -15,7 +15,7 @@ def run(sts):
   maxn0r = None
   now = sts
   while (now < ets):
-    fp = now.strftime("/mnt/a1/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png")
+    fp = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png")
     if (not os.path.isfile(fp)):
       print "MISSING:", fp
       now += interval
@@ -37,7 +37,7 @@ def run(sts):
   del outdataset
 
   os.system("convert max.tiff max.png")
-  fp = sts.strftime("/mnt/a1/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d")
+  fp = sts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d")
   shutil.copyfile("max.png", fp+".png")
   shutil.copyfile("/home/ldm/data/gis/images/4326/USCOMP/n0r_0.wld", fp+".wld")
 
