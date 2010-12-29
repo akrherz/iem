@@ -8,7 +8,7 @@ $dirRef = strftime("%Y/%m/%d", $myTime);
 $titleDate = strftime("%b %d, %Y", $myTime);
 $jday = strftime("%j", $myTime);
 
-$fcontents = file('/mnt/a1/ARCHIVE/data/'.$dirRef.'/text/ot/ot0007.dat');
+$fcontents = file('/mesonet/ARCHIVE/data/'.$dirRef.'/text/ot/ot0007.dat');
 
 /* Create data arrays */
 $tmpf = array();
