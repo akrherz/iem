@@ -42,7 +42,7 @@ iemob.updateDatabase(iemdb)
 # Piggy Back
 iemob = iemAccessOb.iemAccessOb("OT0007")
 
-fp = "/mnt/a1/ARCHIVE/data/%s/text/ot/ot0007.dat" % (mx.DateTime.now().strftime("%Y/%m/%d"),)
+fp = "/mesonet/ARCHIVE/data/%s/text/ot/ot0007.dat" % (mx.DateTime.now().strftime("%Y/%m/%d"),)
 
 if (not os.path.isfile(fp)):
   sys.exit(0)
