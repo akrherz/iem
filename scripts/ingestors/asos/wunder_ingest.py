@@ -149,6 +149,16 @@ def doit(stid, now):
         tstr = tokens[ headers['TimeCAT'] ]
         addon = mx.DateTime.RelativeDateTime(hours=5)
         
+      elif headers.has_key('TimeHADT'):
+        tstr = tokens[ headers['TimeHADT'] ]
+        addon = mx.DateTime.RelativeDateTime(hours=4)
+      elif headers.has_key('TimeYST'):
+        tstr = tokens[ headers['TimeYST'] ]
+        addon = mx.DateTime.RelativeDateTime(hours=3)
+      elif headers.has_key('TimeBST'): # Not sure
+        tstr = tokens[ headers['TimeBST'] ]
+        addon = mx.DateTime.RelativeDateTime(hours=3)
+        
       else:
         print 'Unknown TimeZone!', headers.keys()
         continue
