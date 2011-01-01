@@ -3,7 +3,7 @@
 ?>
 <body bgcolor="white">
 
-<form method="GET" action="<?php echo $rootcgi; ?>/afos/retrieve.py" target="display">
+<form method="GET" action="retreive.php" target="display">
 
 <table border="0" width="100%">
 <tr>
@@ -11,7 +11,7 @@
   ex) <i>AFDDMX</i></th> 
   <td><input type="text" name="pil" size=20></td>
 
-  <td><SELECT name="limit">
+  <td><SELECT name="cnt">
 	<option value="1">Latest
 	<option value="2">Last 2
 	<option value="5">Last 5
