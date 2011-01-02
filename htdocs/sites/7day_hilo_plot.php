@@ -3,7 +3,8 @@
  include('../../config/settings.inc.php');
  include("$rootpath/include/database.inc.php");
  include("setup.php");
-$st->load_station( $st->table[$station]["climate_site"]);
+$cnetwork = sprintf("%sCLIMATE", $st->table[$station]["state"]);
+$st->load_station( $st->table[$station]["climate_site"], $cnetwork);
 $cities = $st->table;
 
  $climate_site = $cities[$station]["climate_site"];
