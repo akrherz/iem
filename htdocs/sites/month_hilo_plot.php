@@ -3,13 +3,16 @@
  include('../../config/settings.inc.php');
  include("$rootpath/include/database.inc.php");
  include('setup.php');
-$st->load_station( $st->table[$station]["climate_site"]);
+
+$cnetwork = sprintf("%sCLIMATE", $st->table[$station]["state"]);
+$st->load_station( $st->table[$station]["climate_site"], $cnetwork);
 $cities = $st->table;
 
  $climate_site = $cities[$station]["climate_site"];
  $hasclimate = 1;
  if ($climate_site == ""){ $hasclimate = 0; }
  $db = iemdb("access");
+ 
 
  /* Call with year and month, if not, then current! */
  $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
@@ -21,8 +24,9 @@ $cities = $st->table;
 $rs = pg_prepare($db, "SELECT", "SELECT day, max_tmpf, min_tmpf 
         from summary_$year WHERE 
         station = $1 and extract(month from day) = $2
-        and day <= 'TODAY' ORDER by day ASC");
-$rs = pg_execute($db, "SELECT", Array($station,$month));
+        and day <= 'TODAY' and network = $3 " .
+        "ORDER by day ASC");
+$rs = pg_execute($db, "SELECT", Array($station,$month, $network));
 
 $highs = Array();
 $lows = Array();

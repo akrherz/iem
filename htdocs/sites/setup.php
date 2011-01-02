@@ -4,10 +4,11 @@
  include_once("$rootpath/include/station.php");
  /* Make sure all is well! */
  $station = isset($_GET["station"]) ? substr($_GET["station"],0,12) : "";
-$st = new StationData($station);
+ $network = isset($_GET["network"]) ? $_GET["network"] : "";
+
+$st = new StationData($station, $network);
 $cities = $st->table;
 
- $network = isset($_GET["network"]) ? $_GET["network"] : "";
  if (strlen($station) == 0)
  {
     header("Location: locate.php");

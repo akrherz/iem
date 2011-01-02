@@ -93,7 +93,7 @@ table that you need, please let use know.</p>
 		  if (! $nohtml)  echo "</pre>\n";
 		}
   else if ($format == "shapefile") {
-    dl($mapscript);
+ 
     /* Create SHP,DBF bases */
     $filePre = "${network}_locs";
     $shpFname = "/var/www/htdocs/tmp/$filePre";
