@@ -5,22 +5,24 @@ include_once("$rootpath/include/database.inc.php");
 
 class StationData {
 
-  function StationData($a)
+  function StationData($a,$n)
   {
     $this->table = Array();
     $this->dbconn = iemdb("mesosite");
-    $rs = pg_prepare($this->dbconn, "SELECT  ST", "SELECT *, x(geom) as lon, y(geom) as lat from stations WHERE id = $1");
-    if (is_string($a)) $this->load_station($a);
+    $rs = pg_prepare($this->dbconn, "SELECT  ST", "SELECT *, " .
+    		"x(geom) as lon, y(geom) as lat from stations " .
+    		"WHERE id = $1 and network = $2");
+    if (is_string($a)) $this->load_station($a,$n);
     else if (is_array($a)) 
     {
-      foreach($a as $id) { $this->load_station($id); }
+      foreach($a as $id) { $this->load_station($id,$n); }
     }
 
   }
 
-  function load_station($id)
+  function load_station($id,$n)
   {
-    $rs = pg_execute($this->dbconn, "SELECT  ST", Array($id));
+    $rs = pg_execute($this->dbconn, "SELECT  ST", Array($id,$n));
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
     {
       $this->table[ $row["id"] ] = $row;
