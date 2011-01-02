@@ -2,6 +2,7 @@
 include("../../../config/settings.inc.php");
 
 $station = isset($_GET['station']) ? $_GET['station'] : "DSM";
+$network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
 $month = isset($_GET['month']) ? $_GET['month']: date("m");
 $year = isset($_GET['year']) ? $_GET['year']: date("Y");
 $ts = mktime(0,0,0, $month, 1, $year);
@@ -10,8 +11,9 @@ $today = time();
 
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/station.php");
-$st = new StationData($station);
-$st->load_station( $st->table[$station]['climate_site'] );
+$st = new StationData($station, $network);
+$cnetwork = sprintf("%sCLIMATE", $st->table[$station]["state"]);
+$st->load_station( $st->table[$station]['climate_site'], $cnetwork );
 $cities = $st->table;
 
 $hasclimate = 1;
