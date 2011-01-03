@@ -19,8 +19,13 @@ accessdb = pg.connect('iem', 'iemdb')
 csv = open('/tmp/ctre.txt', 'w')
 
 # Get Saylorville
-req = urllib2.Request("ftp://%s:%s@129.186.224.167/Saylorville_Table3Min_current.dat" % (secret.CTRE_FTPUSER,
+try:
+    req = urllib2.Request("ftp://%s:%s@129.186.224.167/Saylorville_Table3Min_current.dat" % (secret.CTRE_FTPUSER,
                                                         secret.CTRE_FTPPASS))
+except:
+    if mx.DateTime.now().minute % 4 == 0:
+        print 'Download CTRE Bridge Data Failed!!!'
+    sys.exit(0)
 #try:
 data = urllib2.urlopen(req).readlines()
 #except:
