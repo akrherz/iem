@@ -5,7 +5,8 @@
 import mx.DateTime
 import sys
 # Run every 3 minutes
-if mx.DateTime.now().minute % 4 != 0:
+now = mx.DateTime.now()
+if now.minute % 4 != 0:
     sys.exit(0)
 
 import urllib2
@@ -23,7 +24,7 @@ try:
     req = urllib2.Request("ftp://%s:%s@129.186.224.167/Saylorville_Table3Min_current.dat" % (secret.CTRE_FTPUSER,
                                                         secret.CTRE_FTPPASS))
 except:
-    if mx.DateTime.now().minute % 4 == 0:
+    if now.minute % 4 == 0:
         print 'Download CTRE Bridge Data Failed!!!'
     sys.exit(0)
 #try:
