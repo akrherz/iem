@@ -6,7 +6,7 @@ cd ../ingestors
 /mesonet/python/bin/python parse0006.py
 /mesonet/python/bin/python parse0002.py
 /mesonet/python/bin/python awos_adas.py
-/mesonet/python/bin/python ctre_bridge.py
+/mesonet/python/bin/python ctre_bridge.py &
 
 cd ../outgoing
 /mesonet/python/bin/python snet_collect.py
