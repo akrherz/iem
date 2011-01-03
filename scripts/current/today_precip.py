@@ -18,7 +18,7 @@ select s.station, s.network,
   (case when s.pday < 0 then 0 else s.pday end) as rainfall
 from summary_%s s, current c
 WHERE s.station = c.station and c.valid > (now() - '2 hours'::interval)
-and day = 'TODAY' 
+and day = 'TODAY' and s.network = c.network
 and (s.network ~* 'ASOS' or s.network = 'AWOS') and s.network != 'IQ_ASOS'
 """ % (now.year, )
 
