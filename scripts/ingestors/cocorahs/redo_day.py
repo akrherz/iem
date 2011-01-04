@@ -60,10 +60,10 @@ def runner(days):
 
     sql = "SELECT snow from summary_%s WHERE station = '%s' and day = '%s'" % (ts.year, id, ts.strftime("%Y-%m-%d") )
     rs = access.query(sql).dictresult()
-    dbval = float(rs[0]['snow'])
-    if (dbval != val):
-      print "DB SNOW UPDATE [%s] OLD: %s NEW: %s" % (id, dbval, val)
-      sql = "UPDATE summary_%s SET snow = %s WHERE station = '%s' and day = '%s'" % (ts.year, val, id, ts.strftime("%Y-%m-%d") )
+    if rs[0]['snow'] is None or float(rs[0]['snow']) != val:
+      print "DB SNOW UPDATE [%s] OLD: %s NEW: %s" % (id, rs[0]['snow'], val)
+      sql = "UPDATE summary_%s SET snow = %s WHERE station = '%s' and day = '%s'" % (ts.year, val, 
+                                                                    id, ts.strftime("%Y-%m-%d") )
       access.query(sql)
 
 
