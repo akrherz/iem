@@ -7,8 +7,6 @@
 # 19 Aug 2003	Don't worry about SCAN data anymore
 # 20 Mar 2005	Adopt for main mesonet server
 
-mount /mnt/backup2
-
 set YYYY_mm=`date --date "1 day ago" +"%Y_%m"`
 set yymmdd=`date --date "1 day ago" +"%y%m%d"`
 set yyyymmdd=`date --date "1 day ago" +"%Y%m%d"`
@@ -47,7 +45,8 @@ cd /tmp
 tar -cf ${yyyymmdd}.tar ${dd}_backup/
 rm -Rf ${dd}_backup/
 
-mv ${yyyymmdd}.tar /mnt/backup2/dailydata/
+mkdir -p ~/dailydata
+mv ${yyyymmdd}.tar ~/dailydata/
 #echo "Data Backup Done"
 
 #echo "Files in home"
@@ -57,4 +56,3 @@ mv ${yyyymmdd}.tar /mnt/backup2/dailydata/
 #mv ${yyyymmdd}.tgz /mnt/backup2/mesonethome/
 #echo "Done with Files"
 
-umount /mnt/backup2
