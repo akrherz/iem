@@ -21,7 +21,7 @@ for file in files:
   lon = rs[0]['lon']
   lat = rs[0]['lat']
   name = rs[0]['name']
-  print 'Adding name [%s] lon [%s] lat [%s]' % (name, lon, lat)
+  print 'Adding %s name [%s] lon [%s] lat [%s]' % (cid, name, lon, lat)
   sql = """insert into webcams (sts, id, name, pan0, online, network, 
          geom, removed, state) values (now(), '%s', '%s', 0, 't', 'IDOT', 'SRID=4326;POINT(%s %s)', 'f', 'IA')""" % (cid, name, lon, lat)
   mesosite.query( sql )
