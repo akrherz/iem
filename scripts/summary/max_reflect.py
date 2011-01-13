@@ -39,7 +39,7 @@ def run(sts):
   os.system("convert max.tiff max.png")
   # Insert into LDM
   cmd = "/home/ldm/bin/pqinsert -p 'plot a %s0000 bogus GIS/uscomp/max_n0r_0z0z_%s.png png' max.png" % (
-                                            ts.strftime("%Y%m%d"), ts.strftime("%Y%m%d") )
+                                            sts.strftime("%Y%m%d"), sts.strftime("%Y%m%d") )
   os.system(cmd)
 
   # Create tmp world file
