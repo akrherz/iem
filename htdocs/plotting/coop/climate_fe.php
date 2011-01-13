@@ -1,7 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
 $TITLE = "IEM | COOP Climate Plots";
-$station1 = isset($_GET["station1"]) ? $_GET["station1"] : "iowa";
+$station1 = isset($_GET["station1"]) ? $_GET["station1"] : "IA0000";
 $station2 = isset($_GET["station2"]) ? $_GET["station2"] : "";
 $mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
 $THISPAGE="networks-coop";
