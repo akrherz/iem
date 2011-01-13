@@ -43,7 +43,7 @@ def run(sts):
   os.system(cmd)
 
   # Create tmp world file
-  out = open('/tmp/tmpwld%s.wld' % (sts.strftime("%Y%m%d"),))
+  out = open('/tmp/tmpwld%s.wld' % (sts.strftime("%Y%m%d"),), 'w')
   out.write("""   0.010000000000%s
    0.00000
    0.00000
