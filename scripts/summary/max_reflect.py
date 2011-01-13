@@ -43,7 +43,7 @@ def run(sts):
   os.system(cmd)
 
   # Create tmp world file
-  out = open('/tmp/tmpwld%s.wld' % (ts.strftime("%Y%m%d"),))
+  out = open('/tmp/tmpwld%s.wld' % (sts.strftime("%Y%m%d"),))
   out.write("""   0.010000000000%s
    0.00000
    0.00000
@@ -54,12 +54,12 @@ def run(sts):
   
   # Insert world file as well
   cmd = "/home/ldm/bin/pqinsert -p 'plot a %s0000 bogus GIS/uscomp/max_n0r_0z0z_%s.wld wld' /tmp/tmpwld%s.wld" % (
-         ts.strftime("%Y%m%d"), ts.strftime("%Y%m%d"),  ts.strftime("%Y%m%d") )
+         sts.strftime("%Y%m%d"), sts.strftime("%Y%m%d"),  sts.strftime("%Y%m%d") )
   os.system(cmd)
 
   os.remove("max.tiff")
   os.remove("max.png")
-  os.remove( '/tmp/tmpwld%s.wld' % (ts.strftime("%Y%m%d"),) , 'w')
+  os.remove( '/tmp/tmpwld%s.wld' % (sts.strftime("%Y%m%d"),) , 'w')
 
 """
 s = mx.DateTime.DateTime(2008,6,6)
