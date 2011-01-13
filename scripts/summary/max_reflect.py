@@ -1,5 +1,6 @@
 
 import osgeo.gdal as gdal
+import random
 import osgeo.gdal_array
 from osgeo.gdalconst import *
 import numpy, mx.DateTime, os, shutil, urllib2, sys
@@ -49,7 +50,7 @@ def run(sts):
    0.00000
   -0.01000000000000%s
 -126.000000
-  50.0000""" % (v, random.randint(0,1000) ) )
+  50.0000""" % (random.randint(0,1000), random.randint(0,1000) ) )
   out.close()
   
   # Insert world file as well
