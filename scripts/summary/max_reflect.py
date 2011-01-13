@@ -60,7 +60,7 @@ def run(sts):
 
   os.remove("max.tiff")
   os.remove("max.png")
-  os.remove( '/tmp/tmpwld%s.wld' % (sts.strftime("%Y%m%d"),) , 'w')
+  os.remove( '/tmp/tmpwld%s.wld' % (sts.strftime("%Y%m%d"),) )
 
 """
 s = mx.DateTime.DateTime(2008,6,6)
