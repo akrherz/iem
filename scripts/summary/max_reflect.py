@@ -37,12 +37,29 @@ def run(sts):
   del outdataset
 
   os.system("convert max.tiff max.png")
-  fp = sts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d")
-  shutil.copyfile("max.png", fp+".png")
-  shutil.copyfile("/home/ldm/data/gis/images/4326/USCOMP/n0r_0.wld", fp+".wld")
+  # Insert into LDM
+  cmd = "/home/ldm/bin/pqinsert -p 'plot a %s0000 bogus GIS/uscomp/max_n0r_0z0z_%s.png png' max.png" % (
+                                            ts.strftime("%Y%m%d"), ts.strftime("%Y%m%d") )
+  os.system(cmd)
+
+  # Create tmp world file
+  out = open('/tmp/tmpwld%s.wld' % (ts.strftime("%Y%m%d"),))
+  out.write("""   0.010000000000%s
+   0.00000
+   0.00000
+  -0.01000000000000%s
+-126.000000
+  50.0000""" % (v, random.randint(0,1000) ) )
+  out.close()
+  
+  # Insert world file as well
+  cmd = "/home/ldm/bin/pqinsert -p 'plot a %s0000 bogus GIS/uscomp/max_n0r_0z0z_%s.wld wld' /tmp/tmpwld%s.wld" % (
+         ts.strftime("%Y%m%d"), ts.strftime("%Y%m%d"),  ts.strftime("%Y%m%d") )
+  os.system(cmd)
 
   os.remove("max.tiff")
   os.remove("max.png")
+  os.remove( '/tmp/tmpwld%s.wld' % (ts.strftime("%Y%m%d"),) )
 
 """
 s = mx.DateTime.DateTime(2008,6,6)
