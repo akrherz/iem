@@ -28,7 +28,7 @@ $ts = mktime($hour, $minute, 0, $month, $day, $year);
 /* This is our final image!  */
 $map2 = ms_newMapObj($mapFile);
 $map2->imagecolor->setrgb(155,155,155);
-$map2->setSize( $twidth * 4 + 11, $theight * 4 + $header + 13);
+$map2->setSize( $twidth * 4 + 11, $theight * 5 + $header + 13);
 $img2 = $map2->prepareImage();
 
 /* Title Bar */
