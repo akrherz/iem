@@ -9,6 +9,7 @@ import mx.DateTime
 MOS = iemdb.connect('mos', bypass=True)
 IEM = iemdb.connect('iem', bypass=True)
 mcursor = MOS.cursor()
+mcursor2 = MOS.cursor()
 icursor = IEM.cursor()
 
 def doit(now, model):
@@ -55,8 +56,11 @@ WHERE
 
         diff = forecast[row[0]] - row[2]
         if diff > 20 or diff < -20:
-            print "Major Diff ID: %s OB: %s MOS: %s" % (row[0], row[2], 
-                                                  forecast[row[0]])
+            mcursor2.execute("""
+            INSERT into large_difference(model, valid, station, ob, mos)
+            VALUES (%s, %s, %s, %s, %s)
+            """, (model, now.strftime("%Y-%m-%d %H:00"), row[0], row[2],
+                    forecast[row[0]]))
             continue
         lats.append( row[4] )
         lons.append( row[3] )
@@ -98,3 +102,5 @@ if __name__ == "__main__":
                                    int(sys.argv[4])), sys.argv[5] )
     else:
         doit( mx.DateTime.now(), sys.argv[1] )
+    mcursor2.close()
+    MOS.commit()
