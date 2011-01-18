@@ -1,17 +1,18 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/python
 
 import mx.DateTime
-from pyIEM import iemAccess, iemdb
+#from pyIEM import iemAccess, iemdb
 #iemaccess = iemAccess.iemAccess()
 #i = iemdb.iemdb()
 #climatedb = i["coop"]
 import pg
 climatedb = pg.connect('coop','iemdb', user='nobody')
 iemaccess = pg.connect('iem', 'iemdb', user='nobody')
+asos = pg.connect('asos', 'iemdb', user='nobody')
 
 ADJUSTMENT = 0
-s = mx.DateTime.DateTime(2010,8,18)
-e = mx.DateTime.DateTime(2010,9,17)
+s = mx.DateTime.DateTime(2010,12,18)
+e = mx.DateTime.DateTime(2011,1,17)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 def averageTemp(db, hi="high", lo="low"):
@@ -71,7 +72,7 @@ def main():
 
   # Lemars
   rs = climatedb.query("SELECT high, low, \
-    to_char(valid, '2009-mm-dd') as valid from climate \
+    to_char(valid, '2010-mm-dd') as valid from climate \
     WHERE station = 'ia4735'").dictresult()
 
   for i in range(len(rs)):
@@ -80,7 +81,7 @@ def main():
       db[ rs[i]['valid'] ]['avg_low'] = rs[i]['low']
 
   rs = climatedb.query("SELECT high, low, \
-    to_char(valid, '2010-mm-dd') as valid from climate \
+    to_char(valid, '2011-mm-dd') as valid from climate \
     WHERE station = 'ia4735'").dictresult()
                                                                                 
   for i in range(len(rs)):
@@ -88,6 +89,12 @@ def main():
       db[ rs[i]['valid'] ]['avg_high'] = rs[i]['high']
       db[ rs[i]['valid'] ]['avg_low'] = rs[i]['low']
 
+  # Compute Average wind speed
+  rs = asos.query("""
+  SELECT avg(sknt) from alldata where station = 'ORC' and 
+  valid BETWEEN '%s' and '%s' and sknt >= 0
+  """ % (s.strftime("%Y-%m-%d %H:%M"), e.strftime("%Y-%m-%d %H:%M"))).dictresult()
+  awind = rs[0]['avg']
 
   print 'Content-type: text/plain\n\n'
   print '  Orange City Climate Summary\n'
@@ -109,14 +116,17 @@ def main():
   c_cdd = cdd(db,"avg_high", "avg_low")
 
   print """
-Summary Information
+Summary Information [%s - %s]
 -------------------
               Observed     |  Climate  |  Diff  
     High        %4.1f           %4.1f       %4.1f
     Low         %4.1f           %4.1f       %4.1f
  HDD(base65)    %4.0f           %4.0f       %4.0f
  CDD(base65)    %4.0f           %4.0f       %4.0f
-""" % (h, ch, h - ch, l, cl, l - cl, l_hdd, c_hdd, l_hdd - c_hdd, l_cdd, c_cdd, l_cdd - c_cdd)
+ Wind[MPH]      %4.1f             M          M
+""" % (s.strftime("%d %B %Y"), e.strftime("%d %B %Y"), h, ch, h - ch, l, cl, 
+       l - cl, l_hdd, c_hdd, l_hdd - c_hdd, l_cdd, c_cdd, l_cdd - c_cdd,
+       awind)
 
 
 main()
