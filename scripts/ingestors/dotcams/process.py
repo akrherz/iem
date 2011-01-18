@@ -4,8 +4,11 @@
 #               CameraID (may have more than one camera in the future)
 #                  ViewID
 #                     GMT Timestamp....
-
+import sys
 FTP_PASS = "----"
+if FTP_PASS == "----":
+    print "FIX PASSWORD!"
+    sys.exit()
 
 import os, mx.DateTime, glob, re
 from PIL import Image, ImageDraw, ImageFont
