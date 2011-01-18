@@ -20,7 +20,7 @@ else
 endif
 
 
-set gdfile="`date -u +'%Y%m%d'`_prec.grd"
+set gdfile="/mesonet/data/gempak/precip/`date -u +'%Y%m%d'`_prec.grd"
 
 if (! -e ${gdfile} ) then
   cp /mesonet/data/gempak/precip/template.grd ${gdfile}
