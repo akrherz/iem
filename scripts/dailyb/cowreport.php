@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('America/Chicago');
+
 /* Generate some cow statistics! */
 $sts = mktime(0,0,0,date("m", time() - 86400),date("d", time() - 86400),
               date("Y", time() - 86400) );
