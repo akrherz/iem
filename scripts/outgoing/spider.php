@@ -1,4 +1,4 @@
-<?
+<?php
 // Actually, my first PHP script not running as apache!
 // Daryl Herzmann 17 Oct 2002
 
