@@ -1,3 +1,6 @@
+import sys
+sys.exit()
+
 from TileCache import Service, cgiHandler, cfgfiles
 
 if __name__ == '__main__':
