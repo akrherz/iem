@@ -60,7 +60,7 @@ if ($sz > 1000) then
 	/home/ldm/bin/pqinsert -p "gis c $ftm gis/images/900913/sat/conus_goes_wv4km.tif bogus tif" wv_900913.tif
 endif
 
-foreach mach (iemvs101.local iemvs102.local iemvs103.local iemvs104.local iemvs105.local iem50.local)
+foreach mach (iemvs100.local iemvs101.local iemvs102.local iemvs103.local iemvs104.local iemvs105.local iem50.local)
   scp -q GoesWest1V_latest.tif ldm@${mach}:/tmp/west1V_0.tif
   ssh -q ldm@${mach} "cat /tmp/west1V_0.tif | ~/scripts/rotate.csh gis/images/4326/goes/west1V_ tif"
   scp -q GoesWest1V_latest.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/west1V_0.tfw
