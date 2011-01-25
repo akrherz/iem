@@ -62,28 +62,28 @@ endif
 
 foreach mach (iemvs100.local iemvs101.local iemvs102.local iemvs103.local iemvs104.local iemvs105.local iem50.local)
   scp -q GoesWest1V_latest.tif ldm@${mach}:/tmp/west1V_0.tif
-  ssh -q ldm@${mach} "cat /tmp/west1V_0.tif | ~/scripts/rotate.csh gis/images/4326/goes/west1V_ tif"
+  ssh -q ldm@${mach} "cat /tmp/west1V_0.tif | ~/pyWWA/rotate.csh gis/images/4326/goes/west1V_ tif"
   scp -q GoesWest1V_latest.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/west1V_0.tfw
  
 
   scp -q GoesEast1V_latest.tif ldm@${mach}:/tmp/east1V_0.tif
-  ssh -q ldm@${mach} "cat /tmp/east1V_0.tif | ~/scripts/rotate.csh gis/images/4326/goes/east1V_ tif"
+  ssh -q ldm@${mach} "cat /tmp/east1V_0.tif | ~/pyWWA/rotate.csh gis/images/4326/goes/east1V_ tif"
   scp -q GoesEast1V_latest.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/east1V_0.tfw
 
   scp -q GoesWest04I4_latest.tif ldm@${mach}:/tmp/west04I4_0.tif
-  ssh -q ldm@${mach} "cat /tmp/west04I4_0.tif | ~/scripts/rotate.csh gis/images/4326/goes/west04I4_ tif"
+  ssh -q ldm@${mach} "cat /tmp/west04I4_0.tif | ~/pyWWA/rotate.csh gis/images/4326/goes/west04I4_ tif"
   scp -q GoesWest04I4_latest.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/west04I4_0.tfw
 
   scp -q GoesEast04I4_latest.tif ldm@${mach}:/tmp/east04I4_0.tif
-  ssh -q ldm@${mach} "cat /tmp/east04I4_0.tif | ~/scripts/rotate.csh gis/images/4326/goes/east04I4_ tif"
+  ssh -q ldm@${mach} "cat /tmp/east04I4_0.tif | ~/pyWWA/rotate.csh gis/images/4326/goes/east04I4_ tif"
   scp -q GoesEast04I4_latest.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/east04I4_0.tfw
 
   scp -q GoesWest04I3_latest.tif ldm@${mach}:/tmp/west04I3_0.tif
-  ssh -q ldm@${mach} "cat /tmp/west04I3_0.tif | ~/scripts/rotate.csh gis/images/4326/goes/west04I3_ tif"
+  ssh -q ldm@${mach} "cat /tmp/west04I3_0.tif | ~/pyWWA/rotate.csh gis/images/4326/goes/west04I3_ tif"
   scp -q GoesWest04I3_latest.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/west04I3_0.tfw
 
   scp -q GoesEast04I3_latest.tif ldm@${mach}:/tmp/east04I3_0.tif
-  ssh -q ldm@${mach} "cat /tmp/east04I3_0.tif | ~/scripts/rotate.csh gis/images/4326/goes/east04I3_ tif"
+  ssh -q ldm@${mach} "cat /tmp/east04I3_0.tif | ~/pyWWA/rotate.csh gis/images/4326/goes/east04I3_ tif"
   scp -q GoesEast04I3_latest.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/east04I3_0.tfw
 end
 
