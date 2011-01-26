@@ -4,7 +4,7 @@
    will cause IPVS to drop the node from the Farm! (we want this) */
 $f = file_get_contents("/proc/loadavg");
 $a = split(" ", $f);
-if (floatval($a[1]) > 30)
+if (floatval($a[1]) > 60)
 {
   echo $a[0];
 } else {
