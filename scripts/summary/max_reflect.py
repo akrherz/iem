@@ -1,4 +1,4 @@
-
+import time
 import osgeo.gdal as gdal
 import random
 import osgeo.gdal_array
@@ -66,6 +66,9 @@ def run(sts):
     os.remove("max.tiff")
     os.remove("max.png")
     os.remove( '/tmp/tmpwld%s.wld' % (sts.strftime("%Y%m%d"),) )
+  
+    # Sleep for a bit
+    time.sleep(60)
   
     # Iowa
     png = urllib2.urlopen("http://iemvs105.local/GIS/radmap.php?layers[]=uscounties&layers[]=nexrad_tc&ts=%s" % (
