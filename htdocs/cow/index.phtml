@@ -1,6 +1,7 @@
 <?php
 include("../../config/settings.inc.php");
  putenv("TZ=GMT");
+ date_default_timezone_set('GMT');
  $wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : Array();
  $ltype = isset($_GET["ltype"]) ? $_GET["ltype"] : Array();
  $syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
