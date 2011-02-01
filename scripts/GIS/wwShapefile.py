@@ -20,6 +20,7 @@ shp = shapelib.create("current_ww", shapelib.SHPT_POLYGON)
 dbf = dbflib.create("current_ww")
 dbf.add_field("ISSUED", dbflib.FTString, 12, 0)
 dbf.add_field("EXPIRED", dbflib.FTString, 12, 0)
+dbf.add_field("UPDATED", dbflib.FTString, 12, 0)
 dbf.add_field("TYPE", dbflib.FTString, 2, 0)
 dbf.add_field("GTYPE", dbflib.FTString, 1, 0)
 dbf.add_field("SIG", dbflib.FTString, 1, 0)
@@ -45,9 +46,11 @@ for i in range(len(rs)):
 	t = rs[i]["phenomena"]
 	issue = mx.DateTime.strptime(rs[i]["issue"][:16], "%Y-%m-%d %H:%M")
 	expire = mx.DateTime.strptime(rs[i]["expire"][:16],"%Y-%m-%d %H:%M")
+	updated = mx.DateTime.strptime(rs[i]["updated"][:16],"%Y-%m-%d %H:%M")
 	d = {}
 	d["ISSUED"] = issue.strftime("%Y%m%d%H%M")
 	d["EXPIRED"] = expire.strftime("%Y%m%d%H%M")
+	d["UPDATED"] = updated.strftime("%Y%m%d%H%M")
 	d["TYPE"] = t
 	d["GTYPE"] = g
 	d["SIG"] = rs[i]["significance"]
@@ -66,6 +69,7 @@ if (cnt == 0):
 	d = {}
 	d["ISSUED"] = "200000000000"
 	d["EXPIRED"] = "200000000000"
+	d["UPDATED"] = "200000000000"
 	d["TYPE"] = "ZZ"
 	d["GTYPE"] = "Z"
 	shp.write_object(-1, obj)
