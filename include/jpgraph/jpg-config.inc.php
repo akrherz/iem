@@ -6,7 +6,7 @@ date_default_timezone_set('America/Chicago');
 // Created:     2004-03-27
 // Ver:         $Id: jpg-config.inc.php 1871 2009-09-29 05:56:39Z ljp $
 //
-// Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
+// Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
 
 
@@ -37,8 +37,8 @@ date_default_timezone_set('America/Chicago');
 //
 //------------------------------------------------------------------------
 // define('CACHE_DIR','/tmp/jpgraph_cache/');
- define('TTF_DIR','/mesonet/data/gis/static/fonts/');
-// define('MBTTF_DIR','/usr/share/fonts/TrueType/');
+define('TTF_DIR','/mesonet/data/gis/static/fonts/');
+// define('MBTTF_DIR','/usr/share/fonts/truetype/');
 
 //-------------------------------------------------------------------------
 // Cache directory specification for use with CSIM graphs that are
@@ -129,11 +129,5 @@ define('CACHE_FILE_GROUP','www');
 // What permissions should the cached file have
 // (Set to '' will give the default persmissions for the 'PHP-user')
 define('CACHE_FILE_MOD',0664);
-
-// Default theme class name
-define('DEFAULT_THEME_CLASS', 'UniversalTheme');
-
-define('SUPERSAMPLING', true);
-define('SUPERSAMPLING_SCALE', 1);
 
 ?>

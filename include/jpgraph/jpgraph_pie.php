@@ -5,7 +5,7 @@
  // Created:     2001-02-14
  // Ver:         $Id: jpgraph_pie.php 1926 2010-01-11 16:33:07Z ljp $
  //
- // Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
+ // Copyright (c) Aditus Consulting. All rights reserved.
  //========================================================================
  */
 
@@ -23,9 +23,6 @@ define("PIE_VALUE_ADJPER",2);
 //===================================================
 class PiePlot {
     public $posx=0.5,$posy=0.5;
-    public $is_using_plot_theme = false;
-    public $theme="earth";
-    protected $use_plot_theme_colors = false;
     protected $radius=0.3;
     protected $explode_radius=array(),$explode_all=false,$explode_r=20;
     protected $labels=null, $legends=null;
@@ -42,6 +39,7 @@ class PiePlot {
  "pastel" => array(27,415,128,59,66,79,105,110,42,147,152,230,236,240,331,337,405,38),
  "water"  => array(8,370,24,40,335,56,213,237,268,14,326,387,10,388),
  "sand"   => array(27,168,34,170,19,50,65,72,131,209,46,393));
+    protected $theme="earth";
     protected $setslicecolors=array();
     protected $labeltype=0; // Default to percentage
     protected $pie_border=true,$pie_interior_border=true;
@@ -61,7 +59,7 @@ class PiePlot {
     function __construct($data) {
         $this->data = array_reverse($data);
         $this->title = new Text("");
-        $this->title->SetFont(FF_DEFAULT,FS_BOLD);
+        $this->title->SetFont(FF_FONT1,FS_BOLD);
         $this->value = new DisplayValue();
         $this->value->Show();
         $this->value->SetFormat('%.1f%%');
@@ -179,15 +177,10 @@ class PiePlot {
 
 
     function SetTheme($aTheme) {
-//        JpGraphError::RaiseL(15012,$aTheme);
-//        return;
-
-        if( in_array($aTheme,array_keys($this->themearr)) ) {
-            $this->theme = $aTheme;
-            $this->is_using_plot_theme = true;
-        } else {
-            JpGraphError::RaiseL(15001,$aTheme);//("PiePLot::SetTheme() Unknown theme: $aTheme");
-        }
+        if( in_array($aTheme,array_keys($this->themearr)) )
+        $this->theme = $aTheme;
+        else
+        JpGraphError::RaiseL(15001,$aTheme);//("PiePLot::SetTheme() Unknown theme: $aTheme");
     }
 
     function ExplodeSlice($e,$radius=20) {
@@ -403,10 +396,6 @@ class PiePlot {
         if( $this->labeltype == 2 ) {
             // Adjust the data so that it will add up to 100%
             $this->adjusted_data = $this->AdjPercentage($this->data);
-        }
-
-        if ($this->use_plot_theme_colors) {
-            $this->setslicecolors = null;
         }
 
         $colors = array_keys($img->rgb->rgb_table);
@@ -1029,10 +1018,6 @@ class PiePlot {
             $this->value->Stroke($img,$label,$xt-$dx*$w,$yt-$dy*$h);
         }
     }
-
-    function UsePlotThemeColors($flag = true) {
-        $this->use_plot_theme_colors = $flag;
-    }
 } // Class
 
 
@@ -1248,10 +1233,6 @@ class PieGraph extends Graph {
         $this->posx=$width/2;
         $this->posy=$height/2;
         $this->SetColor(array(255,255,255));
-
-        if ($this->graph_theme) {
-          $this->graph_theme->ApplyGraph($this);
-        }
     }
 
     //---------------
@@ -1271,24 +1252,11 @@ class PieGraph extends Graph {
             if( is_array($aObj) ) {
                 $n = count($aObj);
                 for($i=0; $i < $n; ++$i ) {
-                    //if ($aObj[$i]->theme) {
-                    //    $this->ClearTheme();
-                    //}
                     $this->plots[] = $aObj[$i];
                 }
             }
             else {
-                //if ($aObj->theme) {
-                //    $this->ClearTheme();
-                //}
                 $this->plots[] = $aObj;
-            }
-        }
-
-        if ($this->graph_theme) {
-            $this->graph_theme->SetupPlot($aObj);
-            if ($aObj->is_using_plot_theme) {
-                $aObj->UsePlotThemeColors();
             }
         }
     }
@@ -1335,7 +1303,6 @@ class PieGraph extends Graph {
 
     // Method description
     function Stroke($aStrokeFileName="") {
-
         // If the filename is the predefined value = '_csim_special_'
         // we assume that the call to stroke only needs to do enough
         // to correctly generate the CSIM maps.
