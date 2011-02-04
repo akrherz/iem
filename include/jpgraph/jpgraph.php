@@ -5,7 +5,7 @@
 // Created:     2001-01-08
 // Ver:         $Id: jpgraph.php 1924 2010-01-11 14:03:26Z ljp $
 //
-// Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
+// Copyright (c) Aditus Consulting. All rights reserved.
 //========================================================================
 
 require_once('jpg-config.inc.php');
@@ -15,11 +15,10 @@ require_once('jpgraph_ttf.inc.php');
 require_once('jpgraph_rgb.inc.php');
 require_once('jpgraph_text.inc.php');
 require_once('jpgraph_legend.inc.php');
-require_once('jpgraph_theme.inc.php');
 require_once('gd_image.inc.php');
 
 // Version info
-define('JPG_VERSION','3.5.0b1');
+define('JPG_VERSION','3.0.7');
 
 // Minimum required PHP version
 define('MIN_PHPVERSION','5.1.0');
@@ -160,7 +159,6 @@ define('SKEW3D_RIGHT',3);
 define("_JPG_DEBUG",false);
 define("_FORCE_IMGTOFILE",false);
 define("_FORCE_IMGDIR",'/tmp/jpgimg/');
-
 
 //
 // Automatic settings of path for cache and font directory
@@ -502,12 +500,12 @@ class Graph {
     public $cache_name;   // File name to be used for the current graph in the cache directory
     public $xgrid=null;   // X Grid object (linear or logarithmic)
     public $ygrid=null,$y2grid=null; //dito for Y
-    public $doframe,$frame_color, $frame_weight; // Frame around graph
+    public $doframe=true,$frame_color='black', $frame_weight=1; // Frame around graph
     public $boxed=false, $box_color='black', $box_weight=1;  // Box around plot area
     public $doshadow=false,$shadow_width=4,$shadow_color='gray@0.5'; // Shadow for graph
     public $xaxis=null;   // X-axis (instane of Axis class)
     public $yaxis=null, $y2axis=null, $ynaxis=array(); // Y axis (instance of Axis class)
-    public $margin_color; // Margin color of graph
+    public $margin_color=array(230,230,230); // Margin color of graph
     public $plotarea_color=array(255,255,255); // Plot area color
     public $title,$subtitle,$subsubtitle;  // Title and subtitle(s) text object
     public $axtype="linlin";  // Type of axis
@@ -538,15 +536,15 @@ class Graph {
     public $titlebackground = false;
     public $titlebackground_color = 'lightblue',
            $titlebackground_style = 1,
-           $titlebackground_framecolor,
-           $titlebackground_framestyle,
-           $titlebackground_frameweight,
-           $titlebackground_bevelheight;
+           $titlebackground_framecolor = 'blue',
+           $titlebackground_framestyle = 2,
+           $titlebackground_frameweight = 1,
+           $titlebackground_bevelheight = 3 ;
     public $titlebkg_fillstyle=TITLEBKG_FILLSTYLE_SOLID;
     public $titlebkg_scolor1='black',$titlebkg_scolor2='white';
-    public $framebevel, $framebeveldepth;
-    public $framebevelborder, $framebevelbordercolor;
-    public $framebevelcolor1, $framebevelcolor2;
+    public $framebevel = false, $framebeveldepth = 2 ;
+    public $framebevelborder = false, $framebevelbordercolor='black';
+    public $framebevelcolor1='white@0.4', $framebevelcolor2='black@0.4';
     public $background_image_mix=100;
     public $background_cflag = '';
     public $background_cflag_type = BGIMG_FILLPLOT;
@@ -557,17 +555,12 @@ class Graph {
            $iImgTransFillColor='white',$iImgTransHighQ=false,
            $iImgTransBorder=false,$iImgTransHorizonPos=0.5;
     public $legend;
-    public $graph_theme;
     protected $iYAxisDeltaPos=50;
     protected $iIconDepth=DEPTH_BACK;
     protected $iAxisLblBgType = 0,
               $iXAxisLblBgFillColor = 'lightgray', $iXAxisLblBgColor = 'black',
               $iYAxisLblBgFillColor = 'lightgray', $iYAxisLblBgColor = 'black';
     protected $iTables=NULL;
-
-    protected $isRunningClear = false;
-    protected $inputValues;
-    protected $isAfterSetScale = false;
 
     // aWIdth   Width in pixels of image
     // aHeight   Height in pixels of image
@@ -580,9 +573,6 @@ class Graph {
         if( !is_numeric($aWidth) || !is_numeric($aHeight) ) {
             JpGraphError::RaiseL(25008);//('Image width/height argument in Graph::Graph() must be numeric');
         }
-
-        // Initialize frame and margin
-        $this->InitializeFrameAndMargin();
 
         // Automatically generate the image file name based on the name of the script that
         // generates the graph
@@ -602,7 +592,7 @@ class Graph {
 
         $this->title = new Text();
         $this->title->ParagraphAlign('center');
-        $this->title->SetFont(FF_DEFAULT,FS_NORMAL); //FF_FONT2, FS_BOLD
+        $this->title->SetFont(FF_FONT2,FS_BOLD);
         $this->title->SetMargin(5);
         $this->title->SetAlign('center');
 
@@ -630,42 +620,6 @@ class Graph {
         $this->SetTickDensity(); // Normal density
 
         $this->tabtitle = new GraphTabTitle();
-
-        if (!$this->isRunningClear) {
-            $this->inputValues = array();
-            $this->inputValues['aWidth'] = $aWidth;
-            $this->inputValues['aHeight'] = $aHeight;
-            $this->inputValues['aCachedName'] = $aCachedName;
-            $this->inputValues['aTimeout'] = $aTimeout;
-            $this->inputValues['aInline'] = $aInline;
-
-            $theme_class = DEFAULT_THEME_CLASS;
-            if (class_exists($theme_class)) {
-                $this->graph_theme = new $theme_class();
-            }
-        }
-    }
-
-    function InitializeFrameAndMargin() {
-        $this->doframe=true;
-        $this->frame_color='black';
-        $this->frame_weight=1; 
-
-        $this->titlebackground_framecolor = 'blue';
-        $this->titlebackground_framestyle = 2;
-        $this->titlebackground_frameweight = 1;
-        $this->titlebackground_bevelheight = 3;
-        $this->titlebkg_fillstyle=TITLEBKG_FILLSTYLE_SOLID;
-        $this->titlebkg_scolor1='black';
-        $this->titlebkg_scolor2='white';
-        $this->framebevel = false;
-        $this->framebeveldepth = 2;
-        $this->framebevelborder = false;
-        $this->framebevelbordercolor='black';
-        $this->framebevelcolor1='white@0.4';
-        $this->framebevelcolor2='black@0.4';
-
-        $this->margin_color = array(250,250,250);
     }
 
     function SetupCache($aFilename,$aTimeout=60) {
@@ -782,10 +736,6 @@ class Graph {
                 $this->plots[] = $aPlot;
             }
         }
-
-        if ($this->graph_theme) {
-            $this->graph_theme->SetupPlot($aPlot);
-        }
     }
 
     function AddTable($aTable) {
@@ -835,10 +785,6 @@ class Graph {
         else {
             $this->y2plots[] = $aPlot;
         }
-
-        if ($this->graph_theme) {
-            $this->graph_theme->SetupPlot($aPlot);
-        }
     }
 
     // Add plot to the extra Y-axises
@@ -862,10 +808,6 @@ class Graph {
         }
         else {
             $this->ynplots[$aN][] = $aPlot;
-        }
-
-        if ($this->graph_theme) {
-            $this->graph_theme->SetupPlot($aPlot);
         }
     }
 
@@ -1116,21 +1058,6 @@ class Graph {
         $this->xgrid = new Grid($this->xaxis);
         $this->ygrid = new Grid($this->yaxis);
         $this->ygrid->Show();
-
-
-        if (!$this->isRunningClear) {
-            $this->inputValues['aAxisType'] = $aAxisType;
-            $this->inputValues['aYMin'] = $aYMin;
-            $this->inputValues['aYMax'] = $aYMax;
-            $this->inputValues['aXMin'] = $aXMin;
-            $this->inputValues['aXMax'] = $aXMax;
-
-            if ($this->graph_theme) {
-                $this->graph_theme->ApplyGraph($this);
-            }
-        }
-
-        $this->isAfterSetScale = true;
     }
 
     // Specify secondary Y scale
@@ -1157,10 +1084,6 @@ class Graph {
 
         // Deafult position is the max x-value
         $this->y2grid = new Grid($this->y2axis);
-
-        if ($this->graph_theme) {
-          $this->graph_theme->ApplyGraph($this);
-        }
     }
 
     // Set the delta position (in pixels) between the multiple Y-axis
@@ -1188,10 +1111,6 @@ class Graph {
         $this->ynaxis[$aN] = new Axis($this->img,$this->ynscale[$aN]);
         $this->ynaxis[$aN]->scale->ticks->SetDirection(SIDE_LEFT);
         $this->ynaxis[$aN]->SetLabelSide(SIDE_RIGHT);
-
-        if ($this->graph_theme) {
-            $this->graph_theme->ApplyGraph($this);
-        }
     }
 
     // Specify density of ticks when autoscaling 'normal', 'dense', 'sparse', 'verysparse'
@@ -1589,16 +1508,9 @@ class Graph {
     }
 
     function AdjustMarginsForTitles() {
-        $totrequired = 
-            ($this->title->t != '' 
-                ? $this->title->GetTextHeight($this->img) + $this->title->margin + 5 * SUPERSAMPLING_SCALE
-                : 0 ) +
-            ($this->subtitle->t != '' 
-                ? $this->subtitle->GetTextHeight($this->img) + $this->subtitle->margin + 5 * SUPERSAMPLING_SCALE
-                : 0 ) +
-            ($this->subsubtitle->t != '' 
-                ? $this->subsubtitle->GetTextHeight($this->img) + $this->subsubtitle->margin + 5 * SUPERSAMPLING_SCALE
-                : 0 ) ;
+        $totrequired = ($this->title->t != '' ? $this->title->GetTextHeight($this->img) + $this->title->margin + 5 : 0 ) +
+            ($this->subtitle->t != '' ? $this->subtitle->GetTextHeight($this->img) + $this->subtitle->margin + 5 : 0 ) +
+            ($this->subsubtitle->t != '' ? $this->subsubtitle->GetTextHeight($this->img) + $this->subsubtitle->margin + 5 : 0 ) ;
 
         $btotrequired = 0;
         if($this->xaxis != null &&  !$this->xaxis->hide && !$this->xaxis->hide_labels ) {
@@ -1633,24 +1545,13 @@ class Graph {
             // DO Nothing. It gets too messy to do this properly for 90 deg...
         }
         else{
-            // need more top margin
             if( $this->img->top_margin < $totrequired ) {
-                $this->SetMargin(
-                    $this->img->raw_left_margin,
-                    $this->img->raw_right_margin,
-                    $totrequired / SUPERSAMPLING_SCALE, 
-                    $this->img->raw_bottom_margin
-                );
+                $this->SetMargin($this->img->left_margin,$this->img->right_margin,
+                $totrequired,$this->img->bottom_margin);
             }
-
-            // need more bottom margin
             if( $this->img->bottom_margin < $btotrequired ) {
-                $this->SetMargin(
-                    $this->img->raw_left_margin,
-                    $this->img->raw_right_margin,
-                    $this->img->raw_top_margin,
-                    $btotrequired / SUPERSAMPLING_SCALE
-                );
+                $this->SetMargin($this->img->left_margin,$this->img->right_margin,
+                $this->img->top_margin,$btotrequired);
             }
         }
     }
@@ -2006,6 +1907,7 @@ class Graph {
     // $aStrokeFileName If != "" the image will be written to this file and NOT
     // streamed back to the browser
     function Stroke($aStrokeFileName='') {
+
         // Fist make a sanity check that user has specified a scale
         if( empty($this->yscale) ) {
             JpGraphError::RaiseL(25031);//('You must specify what scale to use with a call to Graph::SetScale().');
@@ -2048,10 +1950,6 @@ class Graph {
 
         // Setup pre-stroked adjustments and Legends
         $this->doPrestrokeAdjustments();
-
-        if ($this->graph_theme) {
-            $this->graph_theme->PreStrokeApply($this);
-        }
 
         // Bail out if any of the Y-axis not been specified and
         // has no plots. (This means it is impossible to do autoscaling and
@@ -2699,7 +2597,7 @@ class Graph {
         }
 
         $this->img->SetColor($this->margin_color);
-        $this->img->FilledRectangle(0,0,$this->img->width-1-$hadj,$this->img->height-1-$vadj);
+        // $this->img->FilledRectangle(0,0,$this->img->width-1-$hadj,$this->img->height-1-$vadj);
 
         $this->img->FilledRectangle(0,0,$this->img->width-1-$hadj,$this->img->top_margin);
         $this->img->FilledRectangle(0,$this->img->top_margin,$this->img->left_margin,$this->img->height-1-$hadj);
@@ -2740,7 +2638,7 @@ class Graph {
             $aa = $this->img->SetAngle(0);
             $this->StrokeFrame();
             $aa = $this->img->SetAngle($aa);
-            $this->StrokeBackgroundGrad(); 
+            $this->StrokeBackgroundGrad();
             if( $this->bkg_gradtype < 0 || ($this->bkg_gradtype > 0 && $this->bkg_gradstyle==BGRAD_MARGIN) ) {
                 $this->FillPlotArea();
             }
@@ -3084,79 +2982,6 @@ class Graph {
         return array($min,$max);
     }
 
-    function hasLinePlotAndBarPlot() {
-        $has_line = false;
-        $has_bar  = false;
-
-        foreach ($this->plots as $plot) {
-            if ($plot instanceof LinePlot) {
-                $has_line = true;
-            }
-            if ($plot instanceof BarPlot) {
-                $has_bar = true;
-            }
-        }
-
-        if ($has_line && $has_bar) {
-            return true;
-        }
-
-        return false;
-    }
-
-    function SetTheme($graph_theme) {
-
-        if (!($this instanceof PieGraph)) {
-            if (!$this->isAfterSetScale) {
-                JpGraphError::RaiseL(25133);//('Use Graph::SetTheme() after Graph::SetScale().');
-            }
-        }
-
-        if ($this->graph_theme) {
-            $this->ClearTheme();
-        }
-        $this->graph_theme = $graph_theme;
-        $this->graph_theme->ApplyGraph($this);
-    }
-
-    function ClearTheme() {
-        $this->graph_theme = null;
-
-        $this->isRunningClear = true;
-
-        $this->__construct(
-                $this->inputValues['aWidth'],
-                $this->inputValues['aHeight'],
-                $this->inputValues['aCachedName'],
-                $this->inputValues['aTimeout'],
-                $this->inputValues['aInline']
-            );
- 
-        if (!($this instanceof PieGraph)) {
-            if ($this->isAfterSetScale) {
-                $this->SetScale(
-                        $this->inputValues['aAxisType'],
-                        $this->inputValues['aYMin'],
-                        $this->inputValues['aYMax'],
-                        $this->inputValues['aXMin'],
-                        $this->inputValues['aXMax']
-                    );       
-            }
-        }
-
-        $this->isRunningClear = false;
-    }
-
-    function SetSupersampling($do = false, $scale = 2) {
-        if ($do) {
-            define('SUPERSAMPLING_SCALE', $scale);
-           // $this->img->scale = $scale;
-        } else {
-            define('SUPERSAMPLING_SCALE', 1);
-            //$this->img->scale = 0;
-        }
-    }
-
 } // Class
 
 //===================================================
@@ -3164,7 +2989,7 @@ class Graph {
 // Description: Holds properties for a line
 //===================================================
 class LineProperty {
-    public $iWeight=1, $iColor='black', $iStyle='solid', $iShow=false;
+    public $iWeight=1, $iColor='black', $iStyle='solid', $iShow=true;
 
     function __construct($aWeight=1,$aColor='black',$aStyle='solid') {
         $this->iWeight = $aWeight;
@@ -3517,7 +3342,7 @@ class SuperScriptText extends Text {
 class Grid {
     protected $img;
     protected $scale;
-    protected $majorcolor='#CCCCCC',$minorcolor='#DDDDDD';
+    protected $majorcolor='#DDDDDD',$minorcolor='#EEEEEE';
     protected $majortype='solid',$minortype='solid';
     protected $show=false, $showMinor=false,$majorweight=1,$minorweight=1;
     protected $fill=false,$fillcolor=array('#EFEFEF','#BBCCFF');
@@ -3610,7 +3435,7 @@ class Grid {
 
             for($i=0; $i < $nbrgrids; ++$i) {
                 $y=$aTicksPos[$i];
-                $this->img->StyleLine($xl,$y,$xr,$y,$style,true);
+                $this->img->StyleLine($xl,$y,$xr,$y,$style);
             }
         }
         elseif( $this->scale->type == 'x' ) {
@@ -3641,9 +3466,9 @@ class Grid {
             $x=$aTicksPos[$i];
             while( $i<count($aTicksPos) && ($x=$aTicksPos[$i]) <= $limit ) {
                 if    ( $aType == 'solid' )      $this->img->Line($x,$yl,$x,$yu);
-                elseif( $aType == 'dotted' )     $this->img->DashedLineForGrid($x,$yl,$x,$yu,1,6);
-                elseif( $aType == 'dashed' )     $this->img->DashedLineForGrid($x,$yl,$x,$yu,2,4);
-                elseif( $aType == 'longdashed' ) $this->img->DashedLineForGrid($x,$yl,$x,$yu,8,6);
+                elseif( $aType == 'dotted' )     $this->img->DashedLine($x,$yl,$x,$yu,1,6);
+                elseif( $aType == 'dashed' )     $this->img->DashedLine($x,$yl,$x,$yu,2,4);
+                elseif( $aType == 'longdashed' ) $this->img->DashedLine($x,$yl,$x,$yu,8,6);
                 ++$i;
             }
         }
@@ -3667,7 +3492,7 @@ class AxisPrototype {
     public $img=null;
     public $hide=false,$hide_labels=false;
     public $title=null;
-    public $font_family=FF_DEFAULT,$font_style=FS_NORMAL,$font_size=8,$label_angle=0;
+    public $font_family=FF_FONT1,$font_style=FS_NORMAL,$font_size=12,$label_angle=0;
     public $tick_step=1;
     public $pos = false;
     public $ticks_label = array();
@@ -3907,21 +3732,13 @@ class Axis extends AxisPrototype {
                 $pos=$aOtherAxisScale->Translate(0);
             }
         }
-
         $pos += $this->iDeltaAbsPos;
         $this->img->SetLineWeight($this->weight);
         $this->img->SetColor($this->color);
         $this->img->SetFont($this->font_family,$this->font_style,$this->font_size);
-
         if( $this->scale->type == "x" ) {
             if( !$this->hide_line ) {
-                // Stroke X-axis
-                $this->img->FilledRectangle(
-                    $this->img->left_margin,
-                    $pos,
-                    $this->img->width - $this->img->right_margin,
-                    $pos + $this->weight-1
-                );
+                $this->img->FilledRectangle($this->img->left_margin,$pos,$this->img->width-$this->img->right_margin,$pos+$this->weight-1);
             }
             if( $this->title_side == SIDE_DOWN ) {
                 $y = $pos + $this->img->GetFontHeight() + $this->title_margin + $this->title->margin;
@@ -3949,15 +3766,8 @@ class Axis extends AxisPrototype {
             // Add line weight to the height of the axis since
             // the x-axis could have a width>1 and we want the axis to fit nicely together.
             if( !$this->hide_line ) {
-                // Stroke Y-axis
-                $this->img->FilledRectangle(
-                    $pos - $this->weight + 1, 
-                    $this->img->top_margin,
-                    $pos,
-                    $this->img->height - $this->img->bottom_margin + $this->weight - 1
-                );
+                $this->img->FilledRectangle($pos-$this->weight+1,$this->img->top_margin,$pos,$this->img->height-$this->img->bottom_margin+$this->weight-1);
             }
-
             $x=$pos ;
             if( $this->title_side == SIDE_LEFT ) {
                 $x -= $this->title_margin;
@@ -4449,11 +4259,7 @@ class LinearTicks extends Ticks {
                 }
             }
             elseif( $aScale->type == "y" ) {
-                //@todo  s=2:20,12  s=1:50,6  $this->major_step:$nbr
-                // abs_point,limit s=1:270,80 s=2:540,160
-             // $this->major_step = 50;
                 $nbrmajticks=round(($aScale->GetMaxVal()-$aScale->GetMinVal())/$this->major_step)+1;
-//                $step = 5;
                 while( round($abs_pos) >= $limit ) {
                     $this->ticks_pos[$i] = round($abs_pos);
                     $this->ticks_label[$i]=$label;
@@ -4669,12 +4475,11 @@ class LinearScale {
     public $name = 'lin';
     public $auto_ticks=false; // When using manual scale should the ticks be automatically set?
     public $world_abs_size; // Plot area size in pixels (Needed public in jpgraph_radar.php)
+    public $world_size; // Plot area size in world coordinates
     public $intscale=false; // Restrict autoscale to integers
     protected $autoscale_min=false; // Forced minimum value, auto determine max
     protected $autoscale_max=false; // Forced maximum value, auto determine min
     private $gracetop=0,$gracebottom=0;
-
-    private $_world_size; // Plot area size in world coordinates
 
     function __construct($aMin=0,$aMax=0,$aType='y') {
         assert($aType=='x' || $aType=='y' );
@@ -5034,7 +4839,7 @@ class LinearScale {
         if( $this->world_size<=0 ) {
             // This should never ever happen !!
             JpGraphError::RaiseL(25074);
-            //("You have unfortunately stumbled upon a bug in JpGraph. It seems like the scale range is ".$this->world_size." [for ".$this->type." scale] <br> Please report Bug #01 to info@jpgraph.net and include the script that gave this error. This problem could potentially be caused by trying to use \"illegal\" values in the input data arrays (like trying to send in strings or only NULL values) which causes the autoscaling to fail.");
+            //("You have unfortunately stumbled upon a bug in JpGraph. It seems like the scale range is ".$this->world_size." [for ".$this->type." scale] <br> Please report Bug #01 to jpgraph@aditus.nu and include the script that gave this error. This problem could potentially be caused by trying to use \"illegal\" values in the input data arrays (like trying to send in strings or only NULL values) which causes the autoscaling to fail.");
         }
 
         // scale_factor = number of pixels per world unit
@@ -5213,20 +5018,6 @@ class LinearScale {
         }
         return 3; // $c smallest
     }
-
-    function __get($name) {
-        $variable_name = '_' . $name; 
-
-        if (isset($this->$variable_name)) {
-            return $this->$variable_name * SUPERSAMPLING_SCALE;
-        } else {
-            JpGraphError::RaiseL('25132', $name);
-        } 
-    }
-
-    function __set($name, $value) {
-        $this->{'_'.$name} = $value;
-    }
 } // Class
 
 
@@ -5239,7 +5030,7 @@ class DisplayValue {
     public $show=false;
     public $valign='',$halign='center';
     public $format='%.1f',$negformat='';
-    private $ff=FF_DEFAULT,$fs=FS_NORMAL,$fsize=8;
+    private $ff=FF_FONT1,$fs=FS_NORMAL,$fsize=10;
     private $iFormCallback='';
     private $angle=0;
     private $color='navy',$negcolor='';
@@ -5259,7 +5050,7 @@ class DisplayValue {
         $this->negcolor = $aNegcolor;
     }
 
-    function SetFont($aFontFamily,$aFontStyle=FS_NORMAL,$aFontSize=8) {
+    function SetFont($aFontFamily,$aFontStyle=FS_NORMAL,$aFontSize=10) {
         $this->ff=$aFontFamily;
         $this->fs=$aFontStyle;
         $this->fsize=$aFontSize;
@@ -5384,21 +5175,11 @@ class Plot {
     protected $weight=1;
     protected $center=false;
 
-    protected $inputValues;
-    protected $isRunningClear = false;
-
     function __construct($aDatay,$aDatax=false) {
         $this->numpoints = count($aDatay);
         if( $this->numpoints==0 ) {
             JpGraphError::RaiseL(25121);//("Empty input data array specified for plot. Must have at least one data point.");
         }
-
-        if (!$this->isRunningClear) {
-            $this->inputValues = array();
-            $this->inputValues['aDatay'] = $aDatay;
-            $this->inputValues['aDatax'] = $aDatax;
-        }
-
         $this->coords[0]=$aDatay;
         if( is_array($aDatax) ) {
             $this->coords[1]=$aDatax;
@@ -5562,12 +5343,6 @@ class Plot {
         if( $this->legend != '' ) {
             $aGraph->legend->Add($this->legend,$this->color,'',0,$this->legendcsimtarget,$this->legendcsimalt,$this->legendcsimwintarget);
         }
-    }
-
-    function Clear() {
-        $this->isRunningClear = true;
-        $this->__construct($this->inputValues['aDatay'], $this->inputValues['aDatax']);
-        $this->isRunningClear = false;
     }
 
 } // Class
