@@ -37,7 +37,7 @@ $rs = pg_query($coopdb, "select stationid,
    stationid in ('ia0200', 'ia1319', 'ia2203','ia8706', 'ia2364', 'ia2110',
     'ia5230', 'ia7708', 'ia7613', 'ia4585', 'ia4705') 
    and stationid = station 
-   and day >= '2010-01-01' and day <= '2010-12-31' 
+   and day >= '".date("Y")."-01-01' and day <= '".date("Y")."-12-31' 
    and extract(doy from day) = extract(doy from valid)  GROUP by stationid
    ORDER by stationid ASC");
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
