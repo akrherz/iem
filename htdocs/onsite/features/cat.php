@@ -36,6 +36,9 @@ $valid = strtotime( $row["valid"] );
 $fmt = "gif";
 if ($valid > strtotime("2010-02-19")){ $fmt = "png"; }
 
+if ($row["fbid"] == null){
+	$row["fbid"] = $valid;
+}
 
 $day = $row["d"];
 $thumb = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s_s.%s", $row["imageref"], $fmt);
