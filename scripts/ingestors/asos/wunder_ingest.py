@@ -53,16 +53,14 @@ def doit(stid, now):
       for i in range(len(tokens)):
         headers[ tokens[i] ] = i
       continue
-    if not headers.has_key("FullMetar"):
-      continue
-    mstr = (tokens[headers["FullMetar"]]).strip().replace("'","")
-    if mstr[:5] not in ("METAR","SPECI"):
-      continue
+  
     mtr = None
-    try:
-      mtr = Metar.Metar(mstr, now.month, now.year)
-    except:
-      pass
+    if headers.has_key("FullMetar"):
+      mstr = (tokens[headers["FullMetar"]]).strip().replace("'","")
+      try:
+        mtr = Metar.Metar(mstr, now.month, now.year)
+      except:
+        pass
     sky = {'skyc1': "", 'skyc2': "", 'skyc3': "", 'skyc4': "",
            'skyl1': "Null", 'skyl2': "Null", 'skyl3': "Null", 'skyl4': "Null"}
     if mtr is not None and mtr.time is not None:
