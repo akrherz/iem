@@ -36,7 +36,7 @@ def doit(stid, now):
   dir = "cache/%s/%s/" % (stid, now.year)
   if os.path.isdir(dir):
     os.makedirs(dir)
-  fp = "%s.txt" % (now.strftime("%Y%m%d"), )
+  fp = "%s%s.txt" % (dir, now.strftime("%Y%m%d"), )
   o = open(fp, 'w')
   o.write(data)
   o.close()
