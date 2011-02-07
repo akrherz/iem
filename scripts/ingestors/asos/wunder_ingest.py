@@ -7,6 +7,7 @@ asos = i['asos']
 mesosite = i['mesosite']
 import mx.DateTime, csv, time
 import sys
+import os
 from metar import Metar
 """
     EGI  2008-12-18 21:55
