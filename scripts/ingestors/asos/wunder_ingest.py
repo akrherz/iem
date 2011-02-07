@@ -34,7 +34,7 @@ def doit(stid, now):
     return 0
   # Save raw data, since I am an idiot have of the time
   dir = "cache/%s/%s/" % (stid, now.year)
-  if os.path.isdir(dir):
+  if not os.path.isdir(dir):
     os.makedirs(dir)
   fp = "%s%s.txt" % (dir, now.strftime("%Y%m%d"), )
   o = open(fp, 'w')
