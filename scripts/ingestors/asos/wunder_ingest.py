@@ -56,7 +56,7 @@ def doit(stid, now):
   
     mtr = None
     if headers.has_key("FullMetar"):
-      mstr = (tokens[headers["FullMetar"]]).strip().replace("'","")
+      mstr = (tokens[headers["FullMetar"]]).strip().replace("'","").replace("SPECI ","").replace("METAR ","")
       try:
         mtr = Metar.Metar(mstr, now.month, now.year)
       except:
