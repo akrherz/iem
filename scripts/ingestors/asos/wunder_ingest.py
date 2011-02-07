@@ -31,6 +31,15 @@ def doit(stid, now):
   except:
     print "Fail STID: %s NOW: %s" % (stid, now)
     return 0
+  # Save raw data, since I am an idiot have of the time
+  dir = "cache/%s/%s/" % (stid, now.year)
+  if os.path.isdir(dir):
+    os.makedirs(dir)
+  fp = "%s.txt" % (now.strftime("%Y%m%d"), )
+  o = open(fp, 'w')
+  o.write(data)
+  o.close()
+  
   lines = data.split("\n")
   headers = {}
   for line in lines: # Skip header
@@ -47,7 +56,7 @@ def doit(stid, now):
     if not headers.has_key("FullMetar"):
       continue
     mstr = (tokens[headers["FullMetar"]]).strip().replace("'","")
-    if mstr[:5] != "METAR":
+    if mstr[:5] not in ("METAR","SPECI"):
       continue
     mtr = None
     try:
