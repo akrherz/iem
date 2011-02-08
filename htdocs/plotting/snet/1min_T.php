@@ -138,7 +138,9 @@ $lineplot3->SetColor("black");
 
 $graph->Add($lineplot2);
 $graph->Add($lineplot);
-$graph->AddY2($lineplot3);
+if ($station != 'SPEI4'){
+ $graph->AddY2($lineplot3);
+}
 
 $graph->Stroke();
 
