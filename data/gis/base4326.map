@@ -750,6 +750,21 @@ LAYER
   TRANSPARENCY 70
 END
 
+LAYER
+  NAME nexrad_n0q
+  DATA /home/ldm/data/gis/images/4326/USCOMP/n0q_0.tif
+  TYPE RASTER
+  STATUS OFF
+  METADATA
+    "wms_title" "Composite NEXRAD"
+  END
+  PROJECTION
+    "init=epsg:4326"
+  END
+  OFFSITE 0 0 0
+  TRANSPARENCY 70
+END
+
 #
 LAYER
   TYPE POLYGON
