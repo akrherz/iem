@@ -49,11 +49,12 @@ def doday(ts):
             #print "USING %s NCVAR %s DIVISOR %s" % (make_fp(now), 
             #                                        ncvar, divisor)
             nc = netCDF3.Dataset(make_fp(now))
-            val = nc.variables[ncvar][:] / divisor
-            if total is None:
-                total = numpy.where(val > 0, val, 0)
-            else:
-                total += numpy.where( val > 0, val, 0)
+            if nc.variables.has_key(ncvar):
+                val = nc.variables[ncvar][:] / divisor
+                if total is None:
+                    total = numpy.where(val > 0, val, 0)
+                else:
+                    total += numpy.where( val > 0, val, 0)
             
             nc.close()
         now -= interval
