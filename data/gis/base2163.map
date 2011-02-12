@@ -390,6 +390,18 @@ LAYER
   END
 END
 
+LAYER
+  NAME "n0q-ramp"
+  TYPE POINT
+  STATUS default
+  TRANSFORM FALSE
+  TRANSPARENCY 10
+  CLASS
+    SYMBOL 'n0q-ramp'
+    #SIZE 40
+        COLOR 0 0 0
+  END
+END
 
 LAYER
   NAME logo

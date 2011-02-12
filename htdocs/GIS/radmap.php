@@ -19,7 +19,7 @@ $sectors = Array(
 
 /* Setup layers */
 $layers = isset($_GET["layers"])? $_GET["layers"]: 
-          Array("nexrad");
+          Array("n0q");
 
 /* Straight CGI Butter */
 $sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
@@ -147,6 +147,16 @@ if (in_array("nexrad_tc", $layers)){
  $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d.png", $ts) );
 }
 $radar->draw($img);
+
+/* Draw NEXRAD Layer */
+$n0q = $map->getlayerbyname("nexrad_n0q");
+$n0q->set("status", in_array("n0q", $layers) || 
+                      in_array("n0q_tc", $layers) );
+if (($ts + 300) < time()) {
+ $n0q->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png", $radts) );
+}
+$n0q->draw($img);
+
 
 $counties = $map->getlayerbyname("uscounties");
 $counties->set("status", in_array("uscounties", $layers) );
@@ -388,6 +398,11 @@ if (isset($_GET["title"])){
   $title = "VTEC ID: ". $_GET["vtec"];
 } else if (in_array("nexrad", $layers)){
   $title = "NEXRAD Base Reflectivity";
+} else if (in_array("n0q", $layers)){
+  $title = "NEXRAD Base Reflectivity";
+} else if (in_array("n0q_tc", $layers)){
+  $title = "IEM NEXRAD Daily Max Composite Reflectivity";
+  $d = gmdate("d M Y", $ts) ." UTC";
 } else if (in_array("nexrad_tc", $layers)){
   $title = "IEM NEXRAD Daily Max Composite Reflectivity";
   $d = gmdate("d M Y", $ts) ." UTC";
@@ -411,11 +426,17 @@ $point->setXY(40, 26);
 $point->draw($map, $layer, $img, "logo", "");
 $point->free();
 
-$layer = $map->getLayerByName("n0r-ramp");
-$point = ms_newpointobj();
-$point->setXY(560, 15);
 if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers) ){
+  $layer = $map->getLayerByName("n0r-ramp");
+  $point = ms_newpointobj();
+  $point->setXY(560, 15);
   $point->draw($map, $layer, $img, "n0r-ramp", "");
+}
+if (in_array("n0q", $layers) || in_array("n0q_tc", $layers) ){
+  $layer = $map->getLayerByName("n0q-ramp");
+  $point = ms_newpointobj();
+  $point->setXY(510, 15);
+  $point->draw($map, $layer, $img, "n0q-ramp", "");
 }
 $point->free();
 

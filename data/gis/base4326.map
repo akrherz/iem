@@ -902,6 +902,18 @@ LAYER
   END
 END
 
+LAYER
+  NAME "n0q-ramp"
+  TYPE POINT
+  STATUS default
+  TRANSFORM FALSE
+  TRANSPARENCY 10
+  CLASS
+    SYMBOL 'n0q-ramp'
+    #SIZE 40
+        COLOR 0 0 0
+  END
+END
 
 # Used in php plotter
 LAYER
@@ -1353,18 +1365,6 @@ LAYER
   END
 END
 
-LAYER
-  NAME "n0r-ramp"
-  TYPE POINT
-  STATUS default
-  TRANSFORM FALSE
-  TRANSPARENCY 10
-  CLASS
-    SYMBOL 'n0r-ramp'
-    #SIZE 40
-        COLOR 0 0 0
-  END
-END
 
 LAYER
   CONNECTIONTYPE postgis
