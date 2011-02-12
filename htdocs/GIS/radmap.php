@@ -125,7 +125,9 @@ $map->setExtent($sectors[$sector]['ext'][0],
                 $sectors[$sector]['ext'][1], 
                 $sectors[$sector]['ext'][2],
                 $sectors[$sector]['ext'][3]);
-//$map->selectOutputFormat("png24");
+if (in_array("n0q", $layers)){
+  $map->selectOutputFormat("png24");
+}
 
 $img = $map->prepareImage();
 
