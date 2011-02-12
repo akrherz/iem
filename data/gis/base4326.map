@@ -752,7 +752,7 @@ END
 
 LAYER
   NAME nexrad_n0q
-  DATA /home/ldm/data/gis/images/4326/USCOMP/n0q_0.tif
+  DATA /home/ldm/data/gis/images/4326/USCOMP/n0q_0.png
   TYPE RASTER
   STATUS OFF
   METADATA

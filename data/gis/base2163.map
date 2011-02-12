@@ -102,7 +102,7 @@ LAYER
  NAME nexrad_n0q
  STATUS OFF
  TYPE RASTER
- DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_0.tif"
+ DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_0.png"
  OFFSITE 0 0 0
  PROJECTION
   "init=epsg:4326"
