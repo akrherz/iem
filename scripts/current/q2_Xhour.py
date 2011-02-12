@@ -41,10 +41,11 @@ def doit(ts, hours):
         if not os.path.isfile(fp):
             continue
         nc = netCDF3.Dataset( fp )
-        if hr == 0:
-            total = nc.variables["rad_hsr_1h"][:]
-        else:
-            total += nc.variables["rad_hsr_1h"][:]
+        if nc.variables.has_key('rad_hsr_1h'):
+            if hr == 0:
+                total = nc.variables["rad_hsr_1h"][:]
+            else:
+                total += nc.variables["rad_hsr_1h"][:]
         nc.close()
     # Put some bad values in just to make the plot happy
     total[1350,1610] = 100.0
