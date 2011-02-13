@@ -159,7 +159,7 @@ if (($ts + 300) < time()) {
  $n0q->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png", $radts) );
 }
 $n0q->draw($img);
-
+$n0q->close(); /* Prevent caching */
 
 $counties = $map->getlayerbyname("uscounties");
 $counties->set("status", in_array("uscounties", $layers) );
