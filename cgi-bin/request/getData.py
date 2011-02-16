@@ -39,6 +39,8 @@ def Main():
     except:
         print "MALFORMED DATE:"
         sys.exit()
+    if sTS == eTS:
+        eTS = sTS + mx.DateTime.RelativeDateTime(days=1)
 
     delim = form["format"][0]
     tz = form["tz"][0]
@@ -58,7 +60,7 @@ def Main():
     if dataVars[0] == "all":
         queryCols = "tmpf, dwpf, relh, drct, sknt, p01m, alti, vsby, gust, skyc1, skyc2, skyc3, skyl1, skyl2, skyl3, metar"
         outCols = ['tmpf','dwpf','relh', 'drct','sknt','p01m','alti','vsby', 'gust',
-          'skyc1', 'skyc2', 'skyc3', 'skyl1', 'skyl2', 'skyl3', 'metar']
+          'skyc1', 'skyc2', 'skyc3', 'skyc4', 'skyl1', 'skyl2', 'skyl3', 'skyl4', 'metar']
     else:
         dataVars = tuple(dataVars)
         outCols = dataVars
