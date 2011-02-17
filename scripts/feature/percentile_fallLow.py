@@ -18,7 +18,7 @@ lats = []
 lons = []
 vals = []
 rs = coop.query("""SELECT stationid, min(low) as low from alldata
-     WHERE day > '2010-08-01' 
+     WHERE day > '2010-11-01' 
      GROUP by stationid ORDER by low DESC""").dictresult()
 for i in range(len(rs)):
   stid = rs[i]['stationid']
@@ -27,7 +27,7 @@ for i in range(len(rs)):
   ob = rs[i]['low']
   # Find obs
   rs2 = coop.query("""SELECT year, min(low) as loww from alldata where
-        stationid = '%s' and sday < '1020' and month > 7 and year < 2010 
+        stationid = '%s' and  year < 2011 and (sday >= '1101' or sday < '0114')
         GROUP by year
         ORDER by loww ASC
         """ % (stid.lower(),)
@@ -35,20 +35,20 @@ for i in range(len(rs)):
   for j in range(len(rs2)):
     if rs2[j]['loww'] > ob:
       break
-  print "[%s] 2010 low: %s  rank: %s" % (stid, ob, j)
+  print "[%s] 2011 low: %s  rank: %s" % (stid, ob, j)
   vals.append( (j+1) / float(len(rs2)) * 100.0 )
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "2010 Iowa Minimum Fall Temperature Percentile",
- '_valid'             : "between 1 Aug - 20 Oct [100% Warmest]",
+ '_title'             : "2010-2011 Iowa Minimum Winter Temp Percentile",
+ '_valid'             : "between 1 Nov - 14 Jan [100% Warmest]",
  'lbTitleString'      : "[%]",
  '_showvalues'        : True,
  '_format'            : '%.0f',
 }
 # Generates tmp.ps
 fp = iemplot.simple_contour(lons, lats, vals, cfg)
-#iemplot.postprocess(fp, "")
-iemplot.makefeature(fp)
+iemplot.postprocess(fp, "")
+#iemplot.makefeature(fp)

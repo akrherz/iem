@@ -3,15 +3,20 @@ from matplotlib import pyplot as plt
 import numpy
 import iemplot
 import iemdb
-COOP = iemdb.connect('coop', bypass=True)
-ccursor = COOP.cursor()
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor()
 
-ccursor.execute("select year, sum(precip) from alldata where stationid = 'ia0000' and month = 10 and sday < '1020' and year > 1989 GROUP by year ORDER by year ASC")
-years = []
-totals = []
-for row in ccursor:
-  years.append( row[0] )
-  totals.append( row[1] )
+icursor.execute("""
+select hr, dy, count(*) from (select distinct extract(hour from valid) as hr, extract(day from valid) as dy, 
+station from current_log WHERE network in ('ASOS','AWOS') and
+ valid > '2010-12-29' and valid < '2010-12-30 06:00' 
+ and vsby <= 1) as foo GROUP by hr, dy ORDER by dy, hr ASC
+""")
+sites = []
+#totals = []
+for row in icursor:
+  #years.append( row[0] )
+  sites.append( row[2] )
 
 #sixty = [2.56, 2.34, 2.18, 3.07, 2.12, 2.77]
 #sixtyl = ["Spencer, 6 Apr","Esterville, 1 Aug", "Davenport, 9 Jul", "Ottumwa, 25 Jun", "Lamoni, 26 May", "Lamoni, 5 Jun"]
@@ -21,12 +26,14 @@ for row in ccursor:
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-rects1 = ax.bar(numpy.arange(1990,2011)-0.33, totals, color='b')
-ax.plot( [1989,2011], [1.49, 1.49], color='r', label='Average 1.49')
+rects1 = ax.bar(numpy.arange(0,30)-0.33, sites, color='b')
+#ax.plot( [1989,2011], [1.49, 1.49], color='r', label='Average 1.49')
 #rects2 = ax.bar(numpy.arange(2005,2011), onetwenty, 0.33, color='r', label=('2 hour'))
 #ax.set_xticklabels( numpy.arange(1990,2011) )
-ax.set_xlim(1989.66, 2010.66)
-ax.legend(loc=2)
+ax.set_xlim(-0.33, 29.66)
+#ax.legend(loc=2)
+ax.set_xticks( (0,6,12,18,24,30) )
+ax.set_xticklabels( ('Mid\n29 Dec', '6 AM', 'Noon', '6 PM', 'Mid\n30 Dec', '6 AM'))
 
 #for i in range(6):
 #  label = "%s, %.2f" % (sixtyl[i], sixty[i])
@@ -37,9 +44,9 @@ ax.legend(loc=2)
 #                ha='center', va='bottom', rotation=90, fontsize=16)
 #
 
-ax.set_ylabel("Accumulation [inch]")
-ax.set_xlabel("Year")
-ax.set_title("Statewide Iowa Precipitation Accumulation [1-19 October]\n(Unofficial IEM Estimates)")
+ax.set_ylabel("Airport Sites [57 total]")
+ax.set_xlabel("29-30 Dec 2010")
+ax.set_title("Number of ASOS/AWOS sites reporting\n 1 mile or less visibility")
 ax.grid(True)
 plt.savefig('test.ps')
 iemplot.makefeature("test")

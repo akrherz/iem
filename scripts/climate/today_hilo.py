@@ -41,7 +41,7 @@ cfg = {
  'wkColorMap': 'gsltod',
  '_format': '%.0f',
 # '_labels': labels,
- '_title'       : "Average High + Low Temperature [F] (1893-2008)",
+ '_title'       : "Average High + Low Temperature [F] (1893-%s)" % (now.year,),
  '_valid'       : now.strftime("%d %b"),
 }
 
