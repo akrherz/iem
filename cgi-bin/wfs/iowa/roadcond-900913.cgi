@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MS_MAPFILE=/var/www/data/wfs/iowa/roadcond-900913.map
+MS_MAPFILE=/mesonet/www/apps/iemwebsite/data/wfs/iowa/roadcond-900913.map
 export MS_MAPFILE
 
-/var/www/cgi-bin/mapserv/mapserv
+/mesonet/www/apps/iemwebsite/cgi-bin/mapserv/mapserv
