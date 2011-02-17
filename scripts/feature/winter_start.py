@@ -11,7 +11,7 @@ vals = []
 ccursor.execute("""
     SELECT distinct id, x(geom), y(geom) from stations
     WHERE network ~* 'CLIMATE' and network not in ('HICLIMATE',
-    'AKCLIMATE')
+    'AKCLIMATE') 
 """)
 for row in ccursor:
 
@@ -35,6 +35,7 @@ for row in ccursor:
 
     for i in range(0,367):
         val = numpy.average(data[i:i+91])
+        print i, val
         if val < minv:
             minv = val
             pos = i

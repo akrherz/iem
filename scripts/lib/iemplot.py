@@ -795,7 +795,7 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
         numpy.average(sknt))
     plt.gcf().text(0.17,0.89, label)
     # Make a logo
-    im = image.imread('/var/www/htdocs/images/logo_small.png')
+    im = image.imread('/mesonet/www/apps/iemwebsite/htdocs/images/logo_small.png')
     #im[:,:,-1] = 0.8
 
     plt.figimage(im, 10, 625)

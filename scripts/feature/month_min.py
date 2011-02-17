@@ -16,7 +16,10 @@ mesosite = i['mesosite']
 vals = []
 lats = []
 lons = []
-rs = iem.query("SELECT station, x(geom) as lon, y(geom) as lat, min(min_tmpf) from summary WHERE network IN ('IA_ASOS','AWOS') and min_tmpf > 20 and day > '2009-07-01' and station != 'MUT' GROUP by station, lon, lat ORDER by min DESC").dictresult()
+rs = iem.query("""SELECT station, x(geom) as lon, y(geom) as lat, 
+min(min_tmpf) from summary_2011 WHERE network IN ('IA_ASOS','AWOS') 
+and min_tmpf < 20 and day >= '2011-01-01' and station not in ('ORC', 'CBF') 
+GROUP by station, lon, lat ORDER by min DESC""").dictresult()
 for i in range(len(rs)):
   vals.append( rs[i]['min'] )
   lats.append( rs[i]['lat'] )
@@ -27,17 +30,15 @@ cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "2009 Minimum Temperature after 1 July",
- '_valid'             : now.strftime("%d %b %Y"),
+ '_title'             : "2011 Minimum Temperature",
+ '_valid'             : "thru "+ now.strftime("%d %b %Y"),
  '_showvalues'        : True,
  '_format'            : '%.0f',
  'lbTitleString'      : "[F]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
-iemplot.simple_contour(lons, lats, vals, cfg)
+fp = iemplot.simple_contour(lons, lats, vals, cfg)
+#iemplot.postprocess(fp, '','')
+import iemplot
+iemplot.makefeature(fp)
 
-os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage tmp.ps tmp.png")
-os.system("xv tmp.png")
