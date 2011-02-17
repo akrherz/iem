@@ -37,9 +37,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 6650000
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/stations.log"
+  LOG "/var/webtmp/stations.log"
   METADATA
    "wms_title" "IEM Precipitation Analysis"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv"

@@ -32,9 +32,9 @@ WEB
   FOOTER ia_footer.html
   MINSCALE 9000
   MAXSCALE 3000000
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/IAoverlay.log"
+  LOG "/var/webtmp/IAoverlay.log"
 END
 
 

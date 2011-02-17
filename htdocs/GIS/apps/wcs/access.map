@@ -35,9 +35,9 @@ END
 #
 WEB
   TEMPLATE img.html
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/w0.log"
+  LOG "/var/webtmp/w0.log"
   METADATA
    "wcs_label" "NEXRAD WCS"
    "wcs_keywordlist" "WCS,IEM,NEXRAD"

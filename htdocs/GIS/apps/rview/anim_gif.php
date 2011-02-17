@@ -3,7 +3,7 @@
 
 $fts = isset($_GET["fts"]) ? intval($_GET["fts"]): exit();
 
-chdir("/var/www/htdocs/tmp");
+chdir("/var/webtmp");
 
 $lines = file($fts .".dat");
 

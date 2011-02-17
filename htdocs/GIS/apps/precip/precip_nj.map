@@ -32,9 +32,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 36650000
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/stations.log"
+  LOG "/var/webtmp/stations.log"
 END
 
 REFERENCE

@@ -35,9 +35,9 @@ END
 WEB
   MINSCALE 90000
   MAXSCALE 40000000
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/fancy.log"
+  LOG "/var/webtmp/fancy.log"
   TEMPLATE test.html
 END
 

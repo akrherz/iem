@@ -30,9 +30,9 @@ WEB
 #  FOOTER ia_footer.html
   MINSCALE 90000
   MAXSCALE 4650000
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/w0.log"
+  LOG "/var/webtmp/w0.log"
   METADATA
    "wfs_title" "IEM WFS Service"
    "wfs_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.420?map=/mesonet/www/html/GIS/apps/rainfall/rainfall.map&amp;"
