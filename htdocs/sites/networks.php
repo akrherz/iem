@@ -96,7 +96,7 @@ table that you need, please let use know.</p>
  
     /* Create SHP,DBF bases */
     $filePre = "${network}_locs";
-    $shpFname = "/var/www/htdocs/tmp/$filePre";
+    $shpFname = "/var/webtmp/$filePre";
     @unlink($shpFname.".shp");
     @unlink($shpFname.".shx");
     @unlink($shpFname.".dbf");
@@ -127,7 +127,7 @@ table that you need, please let use know.</p>
 
     $shpFile->free();
     dbase_close($dbfFile);
-    chdir("/var/www/htdocs/tmp/");
+    chdir("/var/webtmp/");
     copy("/mesonet/data/gis/meta/4326.prj", $filePre.".prj");
     popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf ".$filePre.".prj", 'r');
     echo "Shapefile Generation Complete.<br>";

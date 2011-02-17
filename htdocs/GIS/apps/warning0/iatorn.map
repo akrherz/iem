@@ -36,9 +36,9 @@ WEB
   FOOTER q_footer.html
   MINSCALE 90000
   MAXSCALE 4650000
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/iatorn.log"
+  LOG "/var/webtmp/iatorn.log"
 END
 
 

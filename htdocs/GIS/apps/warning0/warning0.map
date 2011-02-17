@@ -30,9 +30,9 @@ WEB
   FOOTER q_footer.html
 #  MINSCALE 90000
 #  MAXSCALE 40000000
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/warning0.log"
+  LOG "/var/webtmp/warning0.log"
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/warning0/warning0.map&amp;"

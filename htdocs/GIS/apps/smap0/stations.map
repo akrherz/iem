@@ -30,9 +30,9 @@ WEB
   HEADER q_header.html
   TEMPLATE stations2.html
   FOOTER q_footer.html
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/smap0.log"
+  LOG "/var/webtmp/smap0.log"
 END
 
 REFERENCE
