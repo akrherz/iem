@@ -163,7 +163,7 @@ if (intval($loop) ==  1){
 
   $urls = Array();
   $fts = time();
-  $f = fopen("/var/www/htdocs/tmp/". $fts .".dat", 'w');
+  $f = fopen("/var/webtmp/". $fts .".dat", 'w');
 
   for ($i=0;$i<$frames;$i++){
    $imgi = $frames - 1 - $i;
@@ -179,7 +179,7 @@ if (intval($loop) ==  1){
   $heightadd = 100;
   $urls = Array();
   $fts = time();
-  $f = fopen("/var/www/htdocs/tmp/". $fts .".dat", 'w');
+  $f = fopen("/var/webtmp/". $fts .".dat", 'w');
 
   for ($i=0;$i<$frames;$i++){
    $imgi = $frames - 1 - $i;
