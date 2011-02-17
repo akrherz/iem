@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MS_MAPFILE=/var/www/data/wms/goes/conus_wv.map
+MS_MAPFILE=/mesonet/www/apps/iemwebsite/data/wms/goes/conus_wv.map
 export MS_MAPFILE
 
-/var/www/cgi-bin/mapserv/mapserv
+/mesonet/www/apps/iemwebsite/cgi-bin/mapserv/mapserv

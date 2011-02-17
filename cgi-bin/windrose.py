@@ -1,7 +1,7 @@
 #!/mesonet/python/bin/python
 
 import sys
-sys.path.insert(0, '/var/www/scripts/lib')
+sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
 import os
 os.environ[ 'HOME' ] = '/tmp/'
 os.environ[ 'USER' ] = 'nobody'

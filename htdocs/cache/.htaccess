@@ -1,7 +1,7 @@
   AddHandler python-program .py
-  PythonPath "sys.path + ['/var/www/include/python/']"
+  PythonPath "sys.path + ['/mesonet/www/apps/iemwebsite/include/python/']"
   PythonHandler TileCache.Service
-  PythonOption TileCacheConfig /var/www/htdocs/cache/tilecache.cfg
+  PythonOption TileCacheConfig /mesonet/www/apps/iemwebsite/htdocs/cache/tilecache.cfg
 
   AddHandler cgi-script .cgi
   Options +ExecCGI

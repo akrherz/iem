@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MS_MAPFILE=/var/www/data/wms/nexrad/n0r-t.map
+MS_MAPFILE=/mesonet/www/apps/iemwebsite/data/wms/nexrad/n0r-t.map
 export MS_MAPFILE
 
-/var/www/cgi-bin/mapserv/mapserv
+/mesonet/www/apps/iemwebsite/cgi-bin/mapserv/mapserv
