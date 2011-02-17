@@ -100,7 +100,7 @@ $graph->Add($lineplot2);
 $graph->Add($lineplot);
 
 $fp = sprintf("jpg-%s-%s.png", time(), rand() );
-$graph->Stroke("/var/www/htdocs/tmp/$fp");
+$graph->Stroke("/var/webtmp/$fp");
 ?>
 <img src="/tmp/<?php echo $fp; ?>">
 
@@ -157,7 +157,7 @@ $graph->Add($sp1);
 
 
 $fp = sprintf("jpg-%s-%s.png", time(), rand() );
-$graph->Stroke("/var/www/htdocs/tmp/$fp");
+$graph->Stroke("/var/webtmp/$fp");
 ?>
 <img src="/tmp/<?php echo $fp; ?>">
 
@@ -211,7 +211,7 @@ $graph->Add($lineplot2);
 $graph->AddY2($lineplot);
 
 $fp = sprintf("jpg-%s-%s.png", time(), rand() );
-$graph->Stroke("/var/www/htdocs/tmp/$fp");
+$graph->Stroke("/var/webtmp/$fp");
 ?>
 <img src="/tmp/<?php echo $fp; ?>">
 
