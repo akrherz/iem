@@ -1,7 +1,10 @@
 <?php
-$rootpath='/home/akrherz/projects/iemwebsite/';
-//$rooturl='http://akrherz-laptop.agron.iastate.edu/iem';
-//$rooturl='http://ics128-198.icsincorporated.com/iem';
-$rooturl='http://localhost/iem';
-$mapscript='php_mapscript_461.so';
+date_default_timezone_set('America/Chicago');
+$rootpath='/mesonet/www/apps/iemwebsite/';
+$rooturl='http://mesonet.agron.iastate.edu';
+$rootcgi='http://mesonet.agron.iastate.edu/cgi-bin';
+$mapscript='php_mapscript_564.so';
+$fb_feature_key='';
+$fb_feature_secret='';
+$fb_feature_id='';
 ?>
