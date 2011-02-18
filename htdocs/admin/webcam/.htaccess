@@ -1,4 +1,4 @@
-AuthUserFile /var/www/config/admin.users
+AuthUserFile /mesonet/www/apps/iemwebsite/config/admin.users
 AuthGroupFile /dev/null
 AuthName Administrative
 AuthType Basic
