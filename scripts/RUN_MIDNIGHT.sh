@@ -10,6 +10,9 @@ cd ../dbutil
 /mesonet/python/bin/python rwis2archive.py
 /mesonet/python/bin/python snet2archive.py
 
+cd ../smos
+/mesonet/python/bin/python plot.py 0
+
 # Wait a bit before doing this
 sleep 600
 cd ../qc
