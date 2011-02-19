@@ -102,4 +102,4 @@ if __name__ == '__main__':
             ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(hour=0)
         makeplot( ts )
     else:
-        makeplot( int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), 0)
+        makeplot( mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), 0))
