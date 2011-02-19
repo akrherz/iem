@@ -37,3 +37,6 @@ cd ../iemre
 
 cd ../q2
 /mesonet/python/bin/python make_raster_24h.py
+
+cd ../smos
+/mesonet/python/bin/python ingest.py
