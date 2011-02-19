@@ -30,26 +30,36 @@ var custommap4 = new GMapType(layer4, G_SATELLITE_MAP.getProjection(), "Nexrad",
 map.addMapType(custommap4);
 </pre>
 
-<p>The <i>nexrad-n0r-900913</i> is the layer name and represents the "current" composite base reflectivity.  There are also these other layers available from the TMS:
-<ul>
- <li><i>nexrad-n0r-900913-m05m</i>: Composite 5 minutes old</li>
- <li><i>nexrad-n0r-900913-m10m</i>: Composite 10 minutes old</li>
- <li><i>nexrad-n0r-900913-m15m</i>: Composite 15 minutes old</li>
- <li><i>nexrad-n0r-900913-m20m</i>: Composite 20 minutes old</li>
- <li><i>nexrad-n0r-900913-m25m</i>: Composite 25 minutes old</li>
- <li><i>nexrad-n0r-900913-m30m</i>: Composite 30 minutes old</li>
- <li><i>nexrad-n0r-900913-m35m</i>: Composite 35 minutes old</li>
- <li><i>nexrad-n0r-900913-m40m</i>: Composite 40 minutes old</li>
- <li><i>nexrad-n0r-900913-m45m</i>: Composite 45 minutes old</li>
- <li><i>nexrad-n0r-900913-m50m</i>: Composite 50 minutes old</li>
- <li><i>conus-goes-ir-4km-900913</i>: GOES CONUS Infrared ~4km</li>
- <li><i>conus-goes-wv-4km-900913</i>: GOES CONUS Water Vapor ~4km</li>
- <li><i>conus-goes-vis-1km-900913</i>: GOES CONUS Visible ~1km</li>
- <li><i>q2-n1p-900913</i>: Q2 1 Hour Precipitation</li> 
- <li><i>q2-p24h-900913</i>: Q2 24 Hour Precipitation</li> 
-  <li><i>q2-p48h-900913</i>: Q2 48 Hour Precipitation</li> 
-   <li><i>q2-p72h-900913</i>: Q2 72 Hour Precipitation</li> 
-</ul>
+<p>The <i>nexrad-n0r-900913</i> is the layer name and represents the "current" composite base reflectivity.  
+Here are other TileCache services provided by the IEM.<br />
+<table cellpadding="2" cellspacing="0" border="1">
+<thead><tr><th>Service Name</th><th>Description</th></tr></thead>
+<tr><td>nexrad-n0q-900913</td><td>NEXRAD Base Reflectivity current</td></tr>
+<tr><td>nexrad-n0q-900913-m05m</td><td>... 5 minutes old ...</td></tr>
+<tr><td>nexrad-n0q-900913-m10m</td><td>... 10 minutes old ...</td></tr>
+<tr><td>nexrad-n0q-900913-m15m</td><td>... 15 minutes old ...</td></tr>
+<tr><td>nexrad-n0q-900913-m20m</td><td>... 20 minutes old ...</td></tr>
+<tr><td>nexrad-n0q-900913-m25m</td><td>... 25 minutes old ...</td></tr>
+<tr><td>nexrad-n0q-900913-m30m</td><td>... 30 minutes old ...</td></tr>
+<tr><td>nexrad-n0q-900913-m35m</td><td>... 35 minutes old ...</td></tr>
+<tr><td>nexrad-n0q-900913-m40m</td><td>... 40 minutes old ...</td></tr>
+<tr><td>nexrad-n0q-900913-m45m</td><td>... 45 minutes old ...</td></tr>
+<tr><td>nexrad-n0q-900913-m50m</td><td>... 50 minutes old ...</td></tr>
+<tr><td>conus-goes-ir-4km-900913</td>
+  <td>GOES CONUS Infrared ~4km</td></tr>
+<tr><td>conus-goes-wv-4km-900913</td>
+  <td>GOES CONUS Water Vapor ~4km</td></tr>
+<tr><td>conus-goes-vis-1km-900913</td>
+  <td>GOES CONUS Visible ~1km</td></tr>
+<tr><td>q2-n1p-900913</td>
+  <td>Q2 1 Hour Precipitation</td></tr> 
+<tr><td>q2-p24h-900913</td>
+  <td>Q2 24 Hour Precipitation</td></tr> 
+<tr><td>q2-p48h-900913</td>
+  <td>Q2 48 Hour Precipitation</td></tr> 
+<tr><td>q2-p72h-900913</td>
+  <td>Q2 72 Hour Precipitation</td></tr> 
+</table>
 
 <h4>Web Map Service (WMS)</h4>
 
