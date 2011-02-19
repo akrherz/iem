@@ -45,7 +45,7 @@ def makeplot(ts):
             'wkColorMap': 'BlAqGrYeOrRe',
             'nglSpreadColorStart': -1,
             'nglSpreadColorEnd'  : 2,
-           '_title'     : 'SMOS Satellite: Soil Moisture',
+           '_title'     : 'SMOS Satellite: Soil Moisture (0-5cm)',
            '_valid'     : "Satelite passes around %s UTC" % (ts.strftime("%d %B %Y %H"),),
            '_midwest'   : True,
            '_MaskZero'  : True,
@@ -68,7 +68,7 @@ def makeplot(ts):
     iemplot.postprocess(fp, pqstr)
     
     cfg = {
-           '_title': 'SMOS Satellite: Optical Depth',
+           '_title': 'SMOS Satellite: Land Cover Optical Depth (microwave L-band)',
            '_valid'     : "Satelite passes around %s UTC" % (ts.strftime("%d %B %Y %H"),),
            '_midwest'   : True,
            '_MaskZero'  : True,
