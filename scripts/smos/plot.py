@@ -94,10 +94,12 @@ if __name__ == '__main__':
     # At midnight, we have 12z previous day
     # At noon, we have 0z of that day
     # Run for hour
-    hr = int(sys.argv[1])
-    if hr == 0:
-        ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=-1,hour=12)
+    if len(sys.argv) == 2:
+        hr = int(sys.argv[1])
+        if hr == 0:
+            ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=-1,hour=12)
+        else:
+            ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(hour=0)
+        makeplot( ts )
     else:
-        ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(hour=0)
-    
-    makeplot( ts )
+        makeplot( int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), 0)
