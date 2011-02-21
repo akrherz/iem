@@ -434,14 +434,15 @@ if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers) ){
   $point = ms_newpointobj();
   $point->setXY(560, 15);
   $point->draw($map, $layer, $img, "n0r-ramp", "");
+  $point->free();
 }
 if (in_array("n0q", $layers) || in_array("n0q_tc", $layers) ){
   $layer = $map->getLayerByName("n0q-ramp");
   $point = ms_newpointobj();
   $point->setXY(510, 15);
   $point->draw($map, $layer, $img, "n0q-ramp", "");
+  $point->free();
 }
-$point->free();
 
 if (in_array("legend", $layers)){
   $map->embedLegend($img);
