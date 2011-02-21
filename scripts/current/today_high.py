@@ -47,8 +47,8 @@ cfg = {
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
-#pqstr = "plot ac %s summary/iowa_asos_high.png iowa_asos_high.png png" % (
-#        now.strftime("%Y%m%d%H%M"), )
-#iemplot.postprocess(tmpfp, '')
-iemplot.makefeature(tmpfp)
+pqstr = "plot ac %s summary/iowa_asos_high.png iowa_asos_high.png png" % (
+        now.strftime("%Y%m%d%H%M"), )
+iemplot.postprocess(tmpfp, '')
+#iemplot.makefeature(tmpfp)
 
