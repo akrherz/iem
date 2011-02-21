@@ -18,7 +18,7 @@ OpenLayers and Google Maps.  Here is an example for Google Maps:</p>
 var tileNEX = new GTileLayer(null,null,null); 
 tileNEX.getTileUrl = function(tile,zoom) {
    /* Include date at the end as a cachebuster */
-   return "http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0r-900913/"
+   return "http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/"
    + zoom + "/" + tile.x + "/" + tile.y +".png?"+ (new Date()).getTime(); 
 };
 tileNEX.isPng = function() { return true;};
@@ -30,8 +30,38 @@ var custommap4 = new GMapType(layer4, G_SATELLITE_MAP.getProjection(), "Nexrad",
 map.addMapType(custommap4);
 </pre>
 
+<p>Here is an example for <a href="http://openlayers.org">OpenLayers</a> and assumes your map projection
+is in spherical mercator.
+<pre style="border-top: 1px solid #ccc; background: #EEFFCC; border-bottom: 1px solid #ccc; padding-left: 5px;">
+function get_my_url (bounds) {
+    var res = this.map.getResolution();
+    var x = Math.round ((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
+    var y = Math.round ((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
+    var z = this.map.getZoom();
+
+    var path = z + "/" + x + "/" + y + "." + this.type +"?"+ parseInt(Math.random()*9999);
+    var url = this.url;
+    if (url instanceof Array) {
+        url = this.selectUrl(path, url);
+    }
+    return url + this.service +"/"+ this.layername +"/"+ path;
+
+}
+var n0q = new OpenLayers.Layer.TMS(
+        'NEXRAD Base Reflectivity',
+        'http://mesonet.agron.iastate.edu/cache/tile.py/',
+        {layername      : 'nexrad-n0q-900913',
+        service         : '1.0.0',
+        type            : 'png',
+        visibility      : true,
+        getURL          : get_my_url,
+        isBaseLayer     : false}
+);
+/* you'd then add n0q to your map object */
+</pre>
+
 <p>The <i>nexrad-n0r-900913</i> is the layer name and represents the "current" composite base reflectivity.  
-Here are other TileCache services provided by the IEM.<br />
+Here are other TileCache services provided by the IEM.  These are all TMS for spherical mercator.<br />
 <table cellpadding="2" cellspacing="0" border="1">
 <thead><tr><th>Service Name</th><th>Description</th></tr></thead>
 <tr><td>nexrad-n0q-900913</td><td>NEXRAD Base Reflectivity current</td></tr>
