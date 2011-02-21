@@ -41,7 +41,7 @@ def lookforfiles():
         where valid = '%s-06'""" % (ts.strftime("%Y-%m-%d %H:%M"),))
         row = scursor.fetchone()
         if row is None:
-            print "INGEST FILE!", file
+            #print "INGEST FILE!", file
             consume(file, ts)
             scursor.execute("""
             INSERT into obtimes(valid) values ('%s-06')
