@@ -5,6 +5,8 @@
 # channel 3 6.75um
 # channel 2 3.9um 
 # channel 1 0.65um  Vis
+# EAST -110 65.5 -29 -15
+# West -180 65.5 -102 -15
 
 rm *.tif >& /dev/null
 rm *.tfw >& /dev/null
@@ -36,10 +38,14 @@ set sze="`stat -c %s GoesEast1V_latest.tif`"
 if ($szw > 1000 && $sze > 1000) then
 	/mesonet/local/bin/gdal_merge.py -q -o vis.tif  -ul_lr -126 50 -66 24 -ps 0.04 0.04 GoesWest1V_latest.tif GoesEast1V_latest.tif
 	/home/ldm/bin/pqinsert -p "gis ac $ftm gis/images/4326/sat/conus_goes_vis4km.tif GIS/sat/conus_goes_vis4km_$atm.tif tif" vis.tif
-  	# Create 1km VIS variant for Google Maps
+  	# Create 1km VIS variant for Google Maps, CONUS
 	/mesonet/local/bin/gdal_merge.py -q -o vis.tif  -ul_lr -126 50 -66 24 -ps 0.01 0.01 GoesWest1V_latest.tif GoesEast1V_latest.tif
 	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 1000.0 1000.0 vis.tif vis_900913.tif
 	/home/ldm/bin/pqinsert -p "gis c $ftm gis/images/900913/sat/conus_goes_vis1km.tif bogus tif" vis_900913.tif
+	# Create full 1km VIS
+	/mesonet/local/bin/gdal_merge.py -q -o vis.tif  -ul_lr -180 65 -30 -15 -ps 0.01 0.01 GoesWest1V_latest.tif GoesEast1V_latest.tif
+	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 1000.0 1000.0 vis.tif vis_900913.tif
+	/mesonet/local/bin/gdaladdo -q vis_900913.tif 2 4 6 18
 endif
 
 set sz="`stat -c %s GoesEast04I4_latest.tif`"
@@ -49,6 +55,10 @@ if ($sz > 1000) then
 	# Create 4km IR variant for Google Maps
 	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 4000.0 4000.0 ir4.tif ir4_900913.tif
 	/home/ldm/bin/pqinsert -p "gis c $ftm gis/images/900913/sat/conus_goes_ir4km.tif bogus tif" ir4_900913.tif
+    # Full res!
+	/mesonet/local/bin/gdal_merge.py -q -o ir.tif  -ul_lr -180 65 -30 -15 -ps 0.01 0.01 GoesWest04I4_latest.tif GoesEast04I4_latest.tif
+	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 1000.0 1000.0 ir.tif ir_900913.tif
+	/mesonet/local/bin/gdaladdo -q ir_900913.tif 2 4 6 18
 endif
 
 set sz="`stat -c %s GoesEast04I3_latest.tif`"
@@ -58,6 +68,10 @@ if ($sz > 1000) then
 	# Create 4km WV variant for Google Maps
 	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 4000.0 4000.0 wv.tif wv_900913.tif
 	/home/ldm/bin/pqinsert -p "gis c $ftm gis/images/900913/sat/conus_goes_wv4km.tif bogus tif" wv_900913.tif
+    # Full res!
+	/mesonet/local/bin/gdal_merge.py -q -o ir.tif  -ul_lr -180 65 -30 -15 -ps 0.01 0.01 GoesWest04I3_latest.tif GoesEast04I3_latest.tif
+	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 1000.0 1000.0 wv.tif wv_900913.tif
+	/mesonet/local/bin/gdaladdo -q wv_900913.tif 2 4 6 18
 endif
 
 foreach mach (iemvs100.local iemvs101.local iemvs102.local iemvs103.local iemvs104.local iemvs105.local iem50.local)
@@ -85,6 +99,14 @@ foreach mach (iemvs100.local iemvs101.local iemvs102.local iemvs103.local iemvs1
   scp -q GoesEast04I3_latest.tif ldm@${mach}:/tmp/east04I3_0.tif
   ssh -q ldm@${mach} "cat /tmp/east04I3_0.tif | csh ~/pyWWA/rotate.csh gis/images/4326/goes/east04I3_ tif"
   scp -q GoesEast04I3_latest.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/east04I3_0.tfw
-end
+
+  scp -q vis_900913.tif ldm@${mach}:/tmp/vis_900913_0.tif
+  ssh -q ldm@${mach} "cat /tmp/vis_900913_0.tif | csh ~/pyWWA/rotate.csh gis/images/900913/goes/vis_ tif"
+  scp -q ir_900913.tif ldm@${mach}:/tmp/ir_900913_0.tif
+  ssh -q ldm@${mach} "cat /tmp/ir_900913_0.tif | csh ~/pyWWA/rotate.csh gis/images/900913/goes/ir_ tif"
+  scp -q wv_900913.tif ldm@${mach}:/tmp/wv_900913_0.tif
+  ssh -q ldm@${mach} "cat /tmp/wv_900913_0.tif | csh ~/pyWWA/rotate.csh gis/images/900913/goes/wv_ tif"
+
+ end
 
 #rm -f *.tif
