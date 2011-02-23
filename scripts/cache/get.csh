@@ -51,8 +51,8 @@ endif
 
 set sz="`stat -c %s GoesEast04I4_latest.tif`"
 if ($sz > 1000) then
-	/mesonet/local/bin/gdal_merge.py -q -o ir4.tif  -ul_lr -126 50 -66 24 -ps 0.04 0.04 GoesWest04I4_latest.tif GoesEast04I4_latest.tif
-	/home/ldm/bin/pqinsert -p "gis ac $ftm gis/images/4326/sat/conus_goes_ir4km.tif GIS/sat/conus_goes_ir4km_$atm.tif tif" ir4.tif
+	/mesonet/local/bin/gdal_merge.py -q -o ir.tif  -ul_lr -126 50 -66 24 -ps 0.04 0.04 GoesWest04I4_latest.tif GoesEast04I4_latest.tif
+	/home/ldm/bin/pqinsert -p "gis ac $ftm gis/images/4326/sat/conus_goes_ir4km.tif GIS/sat/conus_goes_ir4km_$atm.tif tif" ir.tif
 	# Create 4km IR variant for Google Maps
 	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 4000.0 4000.0 ir.tif ir_900913.tif
 	/home/ldm/bin/pqinsert -p "gis c $ftm gis/images/900913/sat/conus_goes_ir4km.tif bogus tif" ir_900913.tif
