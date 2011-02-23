@@ -73,4 +73,23 @@ LAYER
   #OFFSITE 0 0 0
 END
 
+LAYER
+  NAME "ir_4km_900913"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/goes/ir_0.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "GOES  IR"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "-180  -20 -20 65"
+  END
+  #OFFSITE 0 0 0
+END
+
+
 END
