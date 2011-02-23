@@ -43,7 +43,7 @@ if ($szw > 1000 && $sze > 1000) then
 	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 1000.0 1000.0 vis.tif vis_900913.tif
 	/home/ldm/bin/pqinsert -p "gis c $ftm gis/images/900913/sat/conus_goes_vis1km.tif bogus tif" vis_900913.tif
 	# Create full 1km VIS
-	rm vis_900913.tif
+	rm vis_900913.tif vis.tif
 	/mesonet/local/bin/gdal_merge.py -q -o vis.tif  -ul_lr -180 65 -30 -15 -ps 0.01 0.01 GoesWest1V_latest.tif GoesEast1V_latest.tif
 	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 1000.0 1000.0 vis.tif vis_900913.tif
 	/mesonet/local/bin/gdaladdo -q vis_900913.tif 2 4 6 18
