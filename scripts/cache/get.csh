@@ -104,11 +104,11 @@ foreach mach (iemvs100.local iemvs101.local iemvs102.local iemvs103.local iemvs1
   scp -q GoesEast04I3_latest.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/east04I3_0.tfw
 
   scp -q vis_900913.tif ldm@${mach}:/tmp/vis_900913_0.tif
-  ssh -q ldm@${mach} "cat /tmp/vis_900913_0.tif | csh ~/pyWWA/rotate.csh gis/images/900913/goes/vis_ tif"
+  ssh -q ldm@${mach} "mv /tmp/vis_900913_0.tif ~/data/gis/images/900913/goes/vis_0.tif"
   scp -q ir_900913.tif ldm@${mach}:/tmp/ir_900913_0.tif
-  ssh -q ldm@${mach} "cat /tmp/ir_900913_0.tif | csh ~/pyWWA/rotate.csh gis/images/900913/goes/ir_ tif"
+  ssh -q ldm@${mach} "mv /tmp/ir_900913_0.tif ~/data/gis/images/900913/goes/ir_0.tif"
   scp -q wv_900913.tif ldm@${mach}:/tmp/wv_900913_0.tif
-  ssh -q ldm@${mach} "cat /tmp/wv_900913_0.tif | csh ~/pyWWA/rotate.csh gis/images/900913/goes/wv_ tif"
+  ssh -q ldm@${mach} "mv /tmp/wv_900913_0.tif ~/data/gis/images/900913/goes/wv_0.tif"
 
  end
 
