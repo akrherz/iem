@@ -23,14 +23,11 @@ csv = open('/tmp/ctre.txt', 'w')
 try:
     req = urllib2.Request("ftp://%s:%s@129.186.224.167/Saylorville_Table3Min_current.dat" % (secret.CTRE_FTPUSER,
                                                         secret.CTRE_FTPPASS))
+    data = urllib2.urlopen(req).readlines()
 except:
-    if now.minute % 4 == 0:
+    if now.minute % 15 == 0:
         print 'Download CTRE Bridge Data Failed!!!'
     sys.exit(0)
-#try:
-data = urllib2.urlopen(req).readlines()
-#except:
-#  pass
 keys = data[0].strip().replace('"', '').split(',')
 vals = data[1].strip().replace('"', '').split(',')
 d = {}
