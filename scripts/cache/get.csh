@@ -59,7 +59,7 @@ if ($sz > 1000) then
     # Full res!
 	rm ir_900913.tif ir.tif
 	/mesonet/local/bin/gdal_merge.py -q -o ir.tif  -ul_lr -180 65 -30 -15 -ps 0.04 0.04 GoesWest04I4_latest.tif GoesEast04I4_latest.tif
-	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 1000.0 1000.0 ir.tif ir_900913.tif
+	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 4000.0 4000.0 ir.tif ir_900913.tif
 	/mesonet/local/bin/gdaladdo -q ir_900913.tif 2 4 6 18
 endif
 
@@ -73,7 +73,7 @@ if ($sz > 1000) then
     # Full res!
 	rm wv_900913.tif wv.tif
 	/mesonet/local/bin/gdal_merge.py -q -o wv.tif  -ul_lr -180 65 -30 -15 -ps 0.04 0.04 GoesWest04I3_latest.tif GoesEast04I3_latest.tif
-	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 1000.0 1000.0 wv.tif wv_900913.tif
+	/mesonet/local/bin/gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:900913 -tr 4000.0 4000.0 wv.tif wv_900913.tif
 	/mesonet/local/bin/gdaladdo -q wv_900913.tif 2 4 6 18
 endif
 
