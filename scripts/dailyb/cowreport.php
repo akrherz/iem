@@ -1,10 +1,10 @@
 <?php
-date_default_timezone_set('America/Chicago');
+date_default_timezone_set('UTC');
 
 /* Generate some cow statistics! */
-$sts = mktime(0,0,0,date("m", time() - 86400),date("d", time() - 86400),
+$sts = mktime(6,0,0,date("m", time() - 86400),date("d", time() - 86400),
               date("Y", time() - 86400) );
-$ets = mktime(0,0,0,date("m"),date("d"),date("Y"));
+$ets = mktime(6,0,0,date("m"),date("d"),date("Y"));
 
 include("../../include/cow.php");
 include("../../include/database.inc.php");
