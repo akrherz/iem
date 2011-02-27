@@ -136,9 +136,30 @@ function init(){
    airtemps.setVisibility(false);
 
    // NEXRAD Composite Layer.
-   var nexrad = new OpenLayers.Layer.WMS( 'NEXRAD',
-     'http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?', 
-     {layers: 'nexrad-n0r', format: 'image/png', transparent: 'true'});
+function get_my_url (bounds) {
+    var res = this.map.getResolution();
+    var x = Math.round ((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
+    var y = Math.round ((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
+    var z = this.map.getZoom();
+
+    var path = z + '/' + x + \"/\" + y + \".\" + this.type +\"?\"+ parseInt(Math.random()*9999);
+    var url = this.url;
+    if (url instanceof Array) {
+        url = this.selectUrl(path, url);
+    }
+    return url + this.service +\"/\"+ this.layername +\"/\"+ path;
+
+}
+var nexrad = new OpenLayers.Layer.TMS(
+        'NEXRAD Base Reflectivity',
+        'http://mesonet.agron.iastate.edu/cache/tile.py/',
+        {layername      : 'nexrad-n0q-900913',
+        service         : '1.0.0',
+        type            : 'png',
+        visibility      : true,
+        getURL          : get_my_url,
+        isBaseLayer     : false}
+);
    nexrad.setVisibility(false);
 
    // Finally add layers to the map :)
