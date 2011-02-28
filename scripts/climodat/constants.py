@@ -2,7 +2,7 @@
 import pg, mx.DateTime
 
 _THISYEAR = 2010
-_ENDYEAR = 2011
+_ENDYEAR = 2012
 #_ENDYEAR = 1951
 
 _ARCHIVEENDTS = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
