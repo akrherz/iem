@@ -53,6 +53,7 @@ for row in pcursor:
   if (row['phenomena'] == "TO"):
     torCount += 1
     torSize += float(row['size'])
+  i += 1
 
 #print "Largest Dimension %s m" % (maxDimension,)
 
@@ -111,8 +112,9 @@ if pcursor.rowcount == 0:
   s = "No warnings in database for this date"
   draw.text((100,78), s, font=font2, fill="#ffffff")
 
+i = 0
 for row in pcursor:
-  # - Map each polygon
+  # - Map each polygon]
   x0 = float(row['xc']) - (maxDimension/2.0) - buffer
   x1 = float(row['xc']) + (maxDimension/2.0) + buffer
   y0 = float(row['yc']) - (maxDimension/2.0) - 2 * buffer
@@ -167,6 +169,7 @@ for row in pcursor:
   url = "http://mesonet.agron.iastate.edu/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (ts.year, row['wfo'], row['phenomena'], row['significance'], row['eventid'] )
   altxt = "Click for text/image"
   imagemap.write("<AREA HREF=\"%s\" ALT=\"%s\" TITLE=\"%s\" SHAPE=RECT COORDS=\"%s,%s,%s,%s\">\n" % (url, altxt, altxt, mx0, my, mx0+thumbpx, my+thumbpx) )
+  i += 1
 
 for i in range(pcursor.rowcount):
   my = int(i / cols) * thumbpx + header
