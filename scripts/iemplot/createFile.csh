@@ -7,7 +7,7 @@ rm grid_25_25.grd
 which gdcfil
 gdcfil << EOF
  GDOUTF   = grid_25_25.grd
- PROJ     = MER
+ PROJ     = LCC/42;-95;45
  GRDAREA  = IA
  KXKY     = 25;25
  MAXGRD   = 20
