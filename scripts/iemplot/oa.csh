@@ -77,17 +77,28 @@ exit
 EOF
 
 # SFFILE = /home/ldm/data/gempak/surface/sao/${yymmdd}_sao.gem
-sfmod << EOF > /tmp/oa_sfmod.out
- SFFILE = /mesonet/data/gempak/meso/${yymmdd}_meso.gem
- SFOUTF = surface.gem
- DATTIM = /${hh}00
- AREA   = DSET
- SFPARM = ALTM
+#sfmod << EOF > /tmp/oa_sfmod.out
+# SFFILE = /mesonet/data/gempak/meso/${yymmdd}_meso.gem
+# SFOUTF = surface.gem
+# DATTIM = /${hh}00
+# AREA   = DSET
+# SFPARM = ALTM
+# list
+# run
+#
+#exit
+#EOF
+/mesonet/python/bin/python dump_alti.py
+sfedit << EOF > /tmp/oa_sfedit.out
+ SFEFIL   = alti.txt
+ SFFILE   = surface.gem
  list
  run
 
 exit
 EOF
+
+
 
 # GUESS    = grid_oa.grd*${gtime}F001
 # SFFILE = surface.gem
