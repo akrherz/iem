@@ -10,13 +10,13 @@ icursor.execute("""
  and valid > (now() - '60 minutes'::interval)
  """)
 
-o = open('alti.txt', 'w')
-o.write(""" PARM = ALTI                                                                     
+o = open('altm.txt', 'w')
+o.write(""" PARM = ALTM                                                                     
 
-    STN    YYMMDD/HHMM      ALTI
+    STN    YYMMDD/HHMM      ALTM
 """)
 
 for row in icursor:
-  o.write("   %4s    %s  %8.2f\n" % (row[0], ts, row[1]))
+  o.write("   %4s    %s  %8.2f\n" % (row[0], ts, row[1] * 33.8637526))
 
 o.close()
