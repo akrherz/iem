@@ -13,7 +13,7 @@ SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 #
 WEB
   TEMPLATE "test.html"
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   METADATA
     "wfs_title"	"IEM Iowa Road Conditions"

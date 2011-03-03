@@ -28,9 +28,9 @@ WEB
 #  FOOTER ia_footer.html
   MINSCALE 0
   MAXSCALE 465000000
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/w0.log"
+  LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM WMS KCCI-TV Super DopplerHD"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/kcci.cgi?"

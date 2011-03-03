@@ -10,7 +10,7 @@ SIZE 450 350
 EXTENT 200000 4400000 710000 4900000
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/static/"
-SYMBOLSET "/var/www/data/gis/symbols/stations.sym"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 
 
@@ -30,9 +30,9 @@ WEB
 #  FOOTER ia_footer.html
   MINSCALE 0
   MAXSCALE 465000000
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/w0.log"
+  LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM WMS Iowa Rainfall"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?"

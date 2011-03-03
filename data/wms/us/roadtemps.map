@@ -18,7 +18,7 @@ PROJECTION
 END
 
 WEB
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   TEMPLATE "test.html"
   METADATA

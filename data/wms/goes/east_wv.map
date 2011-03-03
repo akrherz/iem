@@ -20,12 +20,12 @@ WEB
   TEMPLATE ia.html
   MINSCALE 0
   MAXSCALE 465000000
-  IMAGEPATH "/var/www/html/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   LOG "/tmp/w0.log"
   METADATA
    "wms_title" "IEM GOES WV WMS Service"
-   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/data/wms/goes/east_wv.map&SERVICE=WMS&"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wms/goes/east_wv.map&SERVICE=WMS&"
    "wms_srs" "EPSG:4326"
    "wms_abstract" "IEM generated CONUS composite of GOES WV Satellite."
    "wms_keywords" "GOES,WEST,WV"
