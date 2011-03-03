@@ -20,12 +20,12 @@ WEB
   TEMPLATE ia.html
   MINSCALE 0
   MAXSCALE 465000000
-  IMAGEPATH "/mesonet/www/html/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/mesonet/www/html/tmp/w0.log"
+  LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM GOES VIS WMS Service"
-   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/data/wms/goes/conus_vis.map&SERVICE=WMS&"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wms/goes/conus_vis.map&SERVICE=WMS&"
    "wms_srs" "EPSG:4326"
    "wms_abstract" "IEM generated CONUS composite of GOES Visible Satellite."
    "wms_keywords" "GOES,VISIBILE"
