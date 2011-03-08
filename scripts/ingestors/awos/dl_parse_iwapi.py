@@ -17,7 +17,12 @@ def dosite(id):
     Process data for a given site
     """
     req = urllib2.Request("http://my.iwapi.com:8080/WXWeb/METAR?icao=%s" % (id,))
-    data = urllib2.urlopen(req).read()
+    try:
+        data = urllib2.urlopen(req).read()
+    except:
+        if mx.DateTime.now().minute == 0:
+            print 'IWAPI AWOS Download Fail for:', id
+            return
     mtr = Metar.Metar(data)
     iemid = mtr.station_id[-3:]
     gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month,
