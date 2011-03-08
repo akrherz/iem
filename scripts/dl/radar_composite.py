@@ -41,10 +41,10 @@ for i in ['lot','ict','sd','hun']:
 rs = postgis.query("select sel, xmax(geom), xmin(geom), ymax(geom), ymin(geom)\
      from watches_current ORDER by issued DESC").dictresult()
 for i in range(len(rs)):
-  xmin = float(rs[i]['xmin']) - 0.25 + (random.random() * 0.01)
-  ymin = float(rs[i]['ymin']) - 0.25 + (random.random() * 0.01)
-  xmax = float(rs[i]['xmax']) + 0.25 + (random.random() * 0.01)
-  ymax = float(rs[i]['ymax']) + 0.25 + (random.random() * 0.01)
+  xmin = float(rs[i]['xmin']) - 0.75 + (random.random() * 0.01)
+  ymin = float(rs[i]['ymin']) - 0.75 + (random.random() * 0.01)
+  xmax = float(rs[i]['xmax']) + 0.75 + (random.random() * 0.01)
+  ymax = float(rs[i]['ymax']) + 0.75 + (random.random() * 0.01)
   bbox = "%s,%s,%s,%s" % (xmin,ymin,xmax,ymax)
   sel = rs[i]['sel'].lower()
   save('custom', '%scomp.png'%(sel,), '%srad'% (sel,), sts, bbox)
