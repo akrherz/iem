@@ -1,4 +1,4 @@
-# BSD Licensed, Copyright (c) 2006-2008 MetaCarta, Inc.
+# BSD Licensed, Copyright (c) 2006-2010 TileCache Contributors
 
 """
 ArcXML support. This layer will make requests to an ArcIMS server.

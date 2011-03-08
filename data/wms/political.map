@@ -1,0 +1,84 @@
+MAP
+#
+# Start of map file
+#
+NAME "political"
+STATUS ON
+SIZE 450 350
+SHAPEPATH "/mesonet/data/gis/static/shape/900913/"
+IMAGECOLOR -1 -1 -1
+
+#
+PROJECTION
+   "init=epsg:900913"
+END
+
+#
+WEB
+  TEMPLATE ia.html
+  MINSCALE 0
+  MAXSCALE 465000000
+  IMAGEPATH "/var/webtmp/"
+  IMAGEURL "/tmp/"
+  LOG "/var/webtmp/political.log"
+  METADATA
+   "wms_title" "IEM Political Boundaries Service"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wms/political.map&SERVICE=WMS&"
+   "wms_srs" "EPSG:900913"
+   "wms_abstract" "IEM generated political boundaries."
+   "wms_keywords" "states,counties"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+  NAME "c-900913"
+  STATUS ON
+  DATA "us/counties.shp"
+  TYPE LINE
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "US Counties"
+    "wms_srs"   "EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  CLASS
+    SYMBOL 0
+    COLOR 0 0 0
+    SIZE 2
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+  NAME "s-900913"
+  STATUS ON
+  DATA "us/states.shp"
+  TYPE LINE
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "US States"
+    "wms_srs"   "EPSG:900913"
+    "wms_extent" "-126 24 -66 50"
+  END
+  CLASS
+    SYMBOL 0
+    COLOR 0 0 0
+    SIZE 3
+  END
+END
+
+END

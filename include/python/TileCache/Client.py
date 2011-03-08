@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-# BSD Licensed, Copyright (c) 2006-2008 MetaCarta, Inc.
+# BSD Licensed, Copyright (c) 2006-2010 TileCache Contributors
 
 import sys, urllib, urllib2, time, os, math
+import time
 import httplib
 try:
     from optparse import OptionParser
@@ -73,7 +74,7 @@ class WMS (object):
     def setBBox (self, box):
         self.params["bbox"] = ",".join(map(str, box))
 
-def seed (svc, layer, levels = (0, 5), bbox = None, padding = 0, force = False, reverse = False ):
+def seed (svc, layer, levels = (0, 5), bbox = None, padding = 0, force = False, reverse = False, delay = 0 ):
     from Layer import Tile
     try:
         padding = int(padding)
@@ -120,20 +121,25 @@ def seed (svc, layer, levels = (0, 5), bbox = None, padding = 0, force = False, 
                 box = "(%.4f %.4f %.4f %.4f)" % bounds
                 print "%02d (%06d, %06d) = %s [%.4fs : %.3f/s] %s/%s" \
                      % (z,x,y, box, time.time() - tileStart, total / (time.time() - start + .0001), zcount, ztiles)
+                if delay:
+                    time.sleep(delay)
 
 def main ():
     if not OptionParser:
         raise Exception("TileCache seeding requires optparse/OptionParser. Your Python may be too old.\nSend email to the mailing list \n(http://openlayers.org/mailman/listinfo/tilecache) about this problem for help.")
     usage = "usage: %prog <layer> [<zoom start> <zoom stop>]"
     
-    parser = OptionParser(usage=usage, version="%prog (2.10)")
+    parser = OptionParser(usage=usage, version="%prog $Id: Client.py 406 2010-10-15 11:00:18Z crschmidt $")
     
     parser.add_option("-f","--force", action="store_true", dest="force", default = False,
                       help="force recreation of tiles even if they are already in cache")
     
     parser.add_option("-b","--bbox",action="store", type="string", dest="bbox", default = None,
                       help="restrict to specified bounding box")
-    
+    parser.add_option("-c", "--config", action="store", type="string", dest="tilecacheconfig", 
+        default=None, help="path to configuration file")                 
+    parser.add_option("-d","--delay",action="store", type="int", dest="delay", default = 0,
+        help="Delay time between requests.")
     parser.add_option("-p","--padding",action="store", type="int", dest="padding", default = 0,
                       help="extra margin tiles to seed around target area. Defaults to 0 "+
                       "(some edge tiles might be missing).      A value of 1 ensures all tiles "+
@@ -149,7 +155,14 @@ def main ():
 
     from Service import Service, cfgfiles
     from Layer import Layer
-    svc = Service.load(*cfgfiles)
+    cfgs = cfgfiles
+    if options.tilecacheconfig:
+        configFile = options.tilecacheconfig
+        print "Config file set to %s" % (configFile)
+        cfgs = cfgs + (configFile,)
+ 
+    svc = Service.load(*cfgs)
+
     layer = svc.layers[args[0]]
     
     if options.bbox:
@@ -159,7 +172,7 @@ def main ():
     
         
     if len(args)>1:    
-        seed(svc, layer, map(int, args[1:3]), bboxlist , padding=options.padding, force = options.force, reverse = options.reverse)
+        seed(svc, layer, map(int, args[1:3]), bboxlist , padding=options.padding, force = options.force, reverse = options.reverse, delay=options.delay)
     else:
         for line in sys.stdin.readlines():
             lat, lon, delta = map(float, line.split(","))
