@@ -87,5 +87,6 @@ if __name__ == "__main__":
   else:
     yr = mx.DateTime.now().year
   main(yr)
+  main(yr-1)
   #for yr in range(1893,1951):
   #  main(yr)
