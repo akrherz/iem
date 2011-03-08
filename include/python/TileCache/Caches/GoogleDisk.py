@@ -1,4 +1,4 @@
-# BSD Licensed, Copyright (c) 2008 MetaCartas, Inc.
+# BSD Licensed, Copyright (c) 2008-2010 TileCache Contributors
 
 """
 Provides a subclass of Disk Cache which saves in a simple z/x/y.extension, with

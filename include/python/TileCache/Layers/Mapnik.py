@@ -1,4 +1,4 @@
-# BSD Licensed, Copyright (c) 2006-2008 MetaCarta, Inc.
+# BSD Licensed, Copyright (c) 2006-2010 TileCache Contributors
 
 import sys
 
@@ -48,8 +48,8 @@ class Mapnik(MetaLayer):
                     l = m.layers[layer_num]
                     if l.name not in layers:
                         del m.layers[layer_num]
-                    if self.debug:
-                        print >>sys.stderr, "Removed layer %s loaded from %s, not in list: %s" % (l.name, self.mapfile, layers)
+                        if self.debug:
+                            print >>sys.stderr, "Removed layer %s loaded from %s, not in list: %s" % (l.name, self.mapfile, layers)
                         
             # this will insure that it gets cached in mod_python
             self.mapnik = m

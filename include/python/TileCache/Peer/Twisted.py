@@ -1,4 +1,4 @@
-# BSD Licensed, Copyright (c) 2006-2008 MetaCarta, Inc.
+# BSD Licensed, Copyright (c) 2006-2010 TileCache Contributors
 
 from Swarm import Message, Client
 from twisted.internet.protocol import DatagramProtocol

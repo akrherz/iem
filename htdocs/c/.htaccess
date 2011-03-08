@@ -2,7 +2,4 @@
   PythonPath "sys.path + ['/mesonet/www/apps/iemwebsite/include/python/']"
   PythonInterpPerDirectory On
   PythonHandler TileCache.Service
-  PythonOption TileCacheConfig /mesonet/www/apps/iemwebsite/htdocs/cache/tilecache.cfg
-
-  AddHandler cgi-script .cgi
-  Options +ExecCGI
+  PythonOption TileCacheConfig /mesonet/www/apps/iemwebsite/htdocs/c/tilecache.cfg

@@ -1,4 +1,4 @@
-# BSD Licensed, Copyright (c) 2006-2008 MetaCarta, Inc.
+# BSD Licensed, Copyright (c) 2006-2010 TileCache Contributors
 
 from TileCache.Cache import Cache
 import time
@@ -9,7 +9,8 @@ class Memcached(Cache):
         import memcache
         if type(servers) is str: servers = map(str.strip, servers.split(","))
         self.cache = memcache.Client(servers, debug=0)
-   
+        self.timeout = int(kwargs.get('timeout', 0))
+  
     def getKey(self, tile):
          return "/".join(map(str, [tile.layer.name, tile.x, tile.y, tile.z]))
         
@@ -21,7 +22,7 @@ class Memcached(Cache):
     def set(self, tile, data):
         if self.readonly: return data
         key = self.getKey(tile)
-        self.cache.set(key, data, 300)
+        self.cache.set(key, data, self.timeout)
         return data
     
     def delete(self, tile):
