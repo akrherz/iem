@@ -66,7 +66,8 @@ LAYER
 END
 
 LAYER
-  NAME "nexrad-n0q-900913"
+  NAME "nexrad-n0q-900913-conus"
+  GROUP "nexrad-n0q-900913"
   STATUS ON
   DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_0.tif"
   TYPE RASTER
@@ -83,6 +84,43 @@ LAYER
   OFFSITE 0 0 0
 END
 
+LAYER
+  NAME "nexrad-n0q-900913-ak"
+  GROUP "nexrad-n0q-900913"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_0.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE)"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0q-900913-hi"
+  GROUP "nexrad-n0q-900913"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_0.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE)"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
 
 LAYER
   NAME "nexrad-n0q-900913-m05m"
