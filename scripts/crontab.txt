@@ -1,12 +1,12 @@
 # Only EDIT on SVN!
 #
 PYTHONPATH=/mesonet/www/apps/iemwebsite/scripts/lib
-0 18 * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_0Z.sh
+0 19 * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_0Z.sh
 0 0 * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_MIDNIGHT.sh
 0 12 * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_NOON.sh
 5 2 * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_2AM.sh
 0 11 * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_11AM.sh
-0 6 * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_12Z.sh
+0 7 * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_12Z.sh
 
 10 * * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_10_AFTER.sh 
 20 * * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_20_AFTER.sh 
