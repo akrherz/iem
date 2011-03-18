@@ -285,20 +285,20 @@ function computeSharedBorder(){
       buffer(exteriorring(geometryn(multi(ST_union(n.geom)),1)),0.02),
       exteriorring(geometryn(multi(ST_union(w.geom)),1))
             )  as a
-            from warnings_%s w, nws_ugc n WHERE gtype = 'P' 
+            from warnings w, nws_ugc n WHERE gtype = 'P' 
             and w.wfo = '%s' and phenomena = '%s' and eventid = '%s' 
             and significance = '%s' and n.polygon_class = 'C'
             and st_overlaps(n.geom, w.geom) 
             and n.ugc IN (
-                SELECT ugc from warnings_%s w WHERE
+                SELECT ugc from warnings w WHERE
                 gtype = 'C' and wfo = '%s'
           and phenomena = '%s' and eventid = '%s' and significance = '%s'
        )
          ) as foo
             WHERE not isempty(a) ) as foo
-       ", date("Y", $this->sts), $v["wfo"], $v["phenomena"],
+       ", $v["wfo"], $v["phenomena"],
             $v["eventid"], $v["significance"],
-          date("Y", $this->sts), $v["wfo"], $v["phenomena"],
+          $v["wfo"], $v["phenomena"],
             $v["eventid"], $v["significance"] );
 
         $rs = $this->callDB($sql);
@@ -327,7 +327,7 @@ function loadWarnings(){
 
     $rs = $this->callDB($sql);
     for ($i=0;$row = @pg_fetch_array($rs,$i);$i++){
-        $key = sprintf("%s-%s-%s-%s", date("Y", $this->sts), $row["wfo"], 
+        $key = sprintf("%s-%s-%s-%s", substr($row["issue"],0,4), $row["wfo"], 
                        $row["phenomena"], $row["eventid"]);
         if ( ! isset($this->warnings[$key]) ){
             $this->warnings[$key] = Array("ugc"=> Array(), "geom" => "",
