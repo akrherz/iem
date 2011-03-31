@@ -14,7 +14,7 @@ include("../../config/settings.inc.php");
  $eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d");
  $ehour = isset($_GET["ehour"]) ? $_GET["ehour"] : 12;
  $ets = mktime($ehour, 0, 0, $emonth, $eday, $eyear);
- $hail = isset($_GET["hail"]) ? $_GET["hail"] : 0.75;
+ $hail = isset($_GET["hail"]) ? $_GET["hail"] : 1.0;
  $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
  $lsrbuffer = isset($_GET["lsrbuffer"]) ? intval($_GET["lsrbuffer"]) : 15;
 
