@@ -6,7 +6,9 @@ postgis = i['postgis']
 
 tests = [
  'LSX.TO.11', 'CAE.TO.2', 'GSP.TO.5', 'PAH.SV.10', 'JKL.TO.4', 'LWX.TO.3',
- 'RNK.TO.2', 'IND.TO.7', 'IND.TO.8'
+ 'RNK.TO.2', 'IND.TO.7', 'IND.TO.8', 'LMK.TO.12', 'LMK.TO.13', 'LMK.TO.14',
+ 'PAH.TO.17', 'PAH.TO.18', 'PAH.TO.19', 'PAH.TO.20', 'PAH.TO.21',
+ 'MEG.TO.20'
 ]
 
 sql = "SELECT wfo, min(eventid), max(eventid), phenomena from warnings_%s \
