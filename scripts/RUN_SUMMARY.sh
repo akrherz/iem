@@ -35,6 +35,7 @@ cd ../year
 /mesonet/python/bin/python precip.py
 /mesonet/python/bin/python plot_gdd.py
 /mesonet/python/bin/python plot_gdd.py gdd52
+/mesonet/python/bin/python plot_gdd.py gdd48
 
 cd ../summary
 /mesonet/python/bin/python rwis_daily_summary.py
