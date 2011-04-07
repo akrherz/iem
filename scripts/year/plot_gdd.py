@@ -19,7 +19,9 @@ gbase = 50
 if len(sys.argv) == 2 and sys.argv[1] == "gdd52":
   gfunc = "gdd52"
   gbase = 52
-
+if len(sys.argv) == 2 and sys.argv[1] == "gdd48":
+  gfunc = "gdd48"
+  gbase = 48
 
 # Compute normal from the climate database
 ccursor.execute("""SELECT stationid,
@@ -60,4 +62,6 @@ tmpfp = iemplot.simple_contour(lons, lats, gdd50, cfg)
 pqstr = "plot c 000000000000 summary/gdd_jan1.png bogus png"
 if gbase == 52:
   pqstr = "plot c 000000000000 summary/gdd52_jan1.png bogus png"
+elif gbase == 48:
+  pqstr = "plot c 000000000000 summary/gdd48_jan1.png bogus png"
 iemplot.postprocess(tmpfp, pqstr)
