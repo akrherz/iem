@@ -97,7 +97,7 @@ for line in lines:
 
   # Insert into webcam log please
   sql = """INSERT into camera_log (cam, valid, drct) VALUES 
-           ('%s', '%s', %s)""" % (cid, now.strftime("%Y-%m-%d %H:%I"),
+           ('%s', '%s', %s)""" % (cid, now.strftime("%Y-%m-%d %H:%M"),
            drct)
   mesosite.query( sql )
 
