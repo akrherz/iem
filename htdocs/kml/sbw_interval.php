@@ -73,7 +73,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 for ($i=0;$row=@pg_fetch_array($result,$i);$i++){
   $sts = strtotime($row["issue"]);
   $ets = strtotime($row["expire"]);
-  $uri = sprintf("<a href=\"/vtec/#%s-O-NEW-K%s-%s-%s-%04d\">%s</a>", date('Y',$sts), $row["wfo"], $row["phenomena"], $row["significance"], $row["eventid"], $row["eventid"]);
+  $uri = sprintf("<a href=\"%s/vtec/#%s-O-NEW-K%s-%s-%s-%04d\">%s</a>", $rooturl, date('Y',$sts), $row["wfo"], $row["phenomena"], $row["significance"], $row["eventid"], $row["eventid"]);
   echo "<Placemark>
     <description>
         <![CDATA[
