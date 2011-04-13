@@ -12,17 +12,21 @@ $tsSQL = date("Y-m-d H:i:00+00", $ts);
 $tsSQL2 = date("Y-m-d H:i:00+00", $ts2);
 
 $year = date("Y", $ts);
-$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
+$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "";
 $mywfos = isset($_GET["wfos"]) ? $_GET["wfos"] : Array();
-if (sizeof($mywfos) == 0){ $mywfos[] = $wfo; }
-$wfo = $mywfos[0];
-$wfoList = implode("','", $mywfos);
+if (sizeof($mywfos) == 0 && $wfo != ""){ $mywfos[] = $wfo; }
+if (sizeof($mywfos) > 0){
+  $wfoList = implode("','", $mywfos);
+  $wfolimiter = "wfo IN ('$wfoList') and";
+} else {
+  $wfolimiter = "";
+}
 $rs = pg_prepare($connect, "SELECT-INT", "SELECT *, astext(geom) as t, 
            askml(geom) as kml,
            round(area(transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
-           WHERE wfo IN ('$wfoList') and issue >= $1 and issue <= $2
+           WHERE $wfolimiter issue >= $1 and issue <= $2
            and gtype = 'P' and eventid > 0
            ORDER by sz DESC, updated DESC, gtype ASC");
 $rs = pg_prepare($connect, "SELECT", "SELECT *, astext(geom) as t, 
@@ -30,7 +34,7 @@ $rs = pg_prepare($connect, "SELECT", "SELECT *, astext(geom) as t,
            round(area(transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
-           WHERE wfo IN ('$wfoList') and issue <= $1 and expire > $2
+           WHERE $wfolimiter issue <= $1 and expire > $2
            and gtype = 'P' and eventid > 0
            ORDER by sz DESC, updated DESC, gtype ASC");
 
