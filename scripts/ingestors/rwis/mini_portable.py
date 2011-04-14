@@ -59,7 +59,7 @@ def processfile( fp ):
         iem.data['tmpf'] = float( data['air_temp'] )
     if data.has_key('pave_temp') and data['pave_temp'] != '':
         iem.data['tsf0'] = float( data['pave_temp'] )
-    if data.has_key('pave_temp2') and data['pave_temp2'] != '':
+    if data.has_key('pave_temp2') and data['pave_temp2'] not in ['','n']:
         iem.data['tsf1'] = float( data['pave_temp2'] )
     if data.has_key('press') and data['press'] != '':
         iem.data['alti'] = float( data['press'] )
