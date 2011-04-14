@@ -43,6 +43,10 @@ if form.has_key('wfo[]'):
   aWFO.append('XXX') # Hack to make next section work
   wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
 
+if form.has_key('wfos[]'):
+  aWFO = form['wfos[]']
+  aWFO.append('XXX') # Hack to make next section work
+  wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
 
 os.chdir("/tmp/")
 fp = "wwa_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M") )

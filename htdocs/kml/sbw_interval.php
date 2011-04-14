@@ -5,8 +5,13 @@ include("$rootpath/include/database.inc.php");
 include("$rootpath/include/vtec.php");
 $connect = iemdb("postgis");
 
-$ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : die("APIFAIL");
-$ts2 = isset($_GET["ts2"]) ? strtotime($_GET["ts2"]) : die("APIFAIL");
+if (isset($_REQUEST["year1"])){
+	$ts = mktime($_REQUEST["hour1"], $_REQUEST["minute1"],0, $_REQUEST["month1"], $_REQUEST["day1"], $_REQUEST["year1"]);
+	$ts2 = mktime($_REQUEST["hour2"], $_REQUEST["minute2"],0, $_REQUEST["month2"], $_REQUEST["day2"], $_REQUEST["year2"]);
+} else { 
+	$ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : die("APIFAIL");
+	$ts2 = isset($_GET["ts2"]) ? strtotime($_GET["ts2"]) : die("APIFAIL");
+}
 
 $tsSQL = date("Y-m-d H:i:00+00", $ts);
 $tsSQL2 = date("Y-m-d H:i:00+00", $ts2);
