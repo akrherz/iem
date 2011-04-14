@@ -1,9 +1,10 @@
 <?php 
 include("../../../config/settings.inc.php");
+include("$rootpath/include/wfoLocs.php");
 
 function get_file_size($filename, $size_in = 'MB')
 {
-$size_in_bytes = filesize($filename);
+$size_in_bytes = @filesize($filename);
  
 // Precision: decimals at the end for each type of size
  
@@ -33,23 +34,39 @@ $size = round($size, $precision);
     return $size.' '.$size_in;
 }
 
-$TITLE = "IEM | Watch/Warn shapefiles";
+$TITLE = "IEM | NWS Watch Warning Archive Download";
 include("$rootpath/include/forms.php");
 $THISPAGE = "gis-";
 include("$rootpath/include/header.php"); ?>
 
-<h3 class="heading">Archived NWS Watch/Warning GIS Shapefiles</h3>
+<h3 class="heading">Archived NWS Watch/Warnings</h3>
 
-<p>This page allows you to generate a GIS shapefile of NWS issued watches
+<p>This page allows you to generate a custom GIS shapefile or Google Earth KML of NWS issued watches
 and warnings for a time period of your choice.  Please be sure to read the
-archive status and dbf schema below. The IEM's archive is certainly not complete or official.  If you are looking for a real-time source of warning shapefiles, you can find that <a href="http://mesonet.agron.iastate.edu/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
+archive status and dbf schema below. The IEM's archive is certainly not complete or official.  
+If you are looking for a real-time source of warning shapefiles, 
+you can find that <a href="http://mesonet.agron.iastate.edu/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
 
-<div class="warning"> Due to transient server load or other issues, this application sometimes fails to generate output.  You may wish to try shorting the duration of your request or email <a href="../../info/contacts.php">us</a> for help.
+<div class="warning"> Due to transient server load or other issues, this application sometimes fails to 
+generate output.  You may wish to try shorting the duration of your 
+request or email <a href="<?php echo $rooturl; ?>/info/contacts.php">us</a> for help.
 </div>
 
 <table><tr><td width="50%" valign="top">
+<div style="background: #EEEEEE; border: #000 solid 1px; padding: 5px;">
 
-<form method="GET" action="/cgi-bin/request/gis/watchwarn.py">
+<form method="GET" action="<?php echo $rootcgi; ?>/request/gis/watchwarn.py">
+
+<h4>Limit Weather Forecast Office (WFO)</h4>
+<select name="wfos[]" MULTIPLE size="5">
+ <option value="ALL" SELECTED>All Available</option>
+<?php
+while( list($key, $value) = each($wfos) ){
+  echo "<option value='$key'>[$key] ". $wfos[$key]["city"] ."</option>\n";
+}
+?>
+</select>
+
 <h4>Select time interval</h4>
 <i>(Times are in UTC.  Watches/Warnings <b>issued</b> between these times
 will be included in the output GIS file...)</i>
@@ -101,9 +118,18 @@ will be included in the output GIS file...)</i>
 
 <br /><input type="checkbox" name="limit0" value="yes">Limit Output to Tornado, Severe Thunderstorm, Marine, and Flash Flood Warnings
 <br /><input type="checkbox" name="limit1" value="yes">Limit Output to only Storm Based Warnings
-
-<p><input type="submit" value="Giveme shapefile now!">
+<script type="text/javascript">
+function kmlsub(f, url){
+	f.action = url;
+	f.submit();
+}
+</script>
+<p><input type="submit" value="Request Shapefile" onclick="kmlsub(this.form, '<?php echo $rootcgi; ?>/request/gis/watchwarn.py');"/>
+<input type="submit" value="Request KML (*)" onclick="kmlsub(this.form, '<?php echo $rooturl; ?>/kml/sbw_interval.php');" />
+ <input type="reset" />
+<br />* Only Storm Based Warnings are available via KML.
 </form>
+</div>
 
 <h4>Shapefile DBF schema:</h4>
 <table>
