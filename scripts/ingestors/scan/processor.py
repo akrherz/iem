@@ -168,5 +168,6 @@ def main():
                     continue
                 col = col.replace('  (loam)', '').replace('  (silt)', '')
                 data[col.strip()] = token
-            savedata( data , maxts)
+            if data.has_key('Date'):
+                savedata( data , maxts)
 main()
