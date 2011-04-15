@@ -64,7 +64,7 @@ def doit(ts, hours):
         ts.localtime().strftime("%d %B %Y %I:%M %p %Z"),),
      '_title'    : "NMQ Q2 %s Hour Precipitation" % (hours,),
     }
-    if hours == 1:
+    if hours == 1 or hours == 3:
         cfg['cnLevels'] = [0.01,0.02,0.05,0.07,0.1,0.15,0.25,0.50,0.75,1.0,1.25,1.5,1.75,2.0,2.25,2.5,3]
 
     # Scale factor is 10
