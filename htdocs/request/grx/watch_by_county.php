@@ -29,6 +29,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
     } else { 
     	$c = ", 255, 0, 0, 255";
     }
+    echo "\n;". $row["phenomena"] ." Watch Number ". $row["eventid"] ."\n";
 	echo "Polygon:\n";
 	$first = true;
 	foreach($tokens as $token){
