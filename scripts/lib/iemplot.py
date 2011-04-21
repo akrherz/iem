@@ -126,8 +126,12 @@ def simple_valplot(lons, lats, vals, cfg):
 
     # Create Workstation
     wks = Ngl.open_wks( "ps",tmpfp,rlist)
-
-    res = iowa()
+    if cfg.has_key("_conus"):
+        res = conus()
+    elif cfg.has_key("_midwest"):
+        res = midwest()
+    else:
+        res = iowa()
     if cfg.has_key("_spatialDataLimiter"):
         xmin, ymin, xmax, ymax = [ min(lons), min(lats), 
                                         max(lons), max(lats) ]
@@ -753,7 +757,7 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
         drct.append( row[1] )
         if row[2] < minvalid:
             minvalid = row[2]
-        if row[2] > minvalid:
+        if row[2] > maxvalid:
             maxvalid = row[2]
     acursor.close()
     db.close()
