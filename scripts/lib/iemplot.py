@@ -743,7 +743,7 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     db = iemdb.connect(database, bypass=True)
     acursor = db.cursor()
     acursor.execute("""SELECT sknt, drct, valid from alldata WHERE station = %s
-        and sknt >= 0 and drct >= 0 and valid > %s and valid < %s""", (
+        and valid > %s and valid < %s""", (
         station, sts, ets))
     sknt = []
     drct = []
@@ -753,8 +753,12 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
         if len(sknt) == 0:
             minvalid = row[2]
             maxvalid = row[2]
-        sknt.append( row[0] * 1.15 ) 
-        drct.append( row[1] )
+        if row[0] is None or row[0] < 0 or row[1] is None or row[1] < 0:
+            sknt.append( 0 )
+            drct.append( 0 )
+        else:
+            sknt.append( row[0] * 1.15 ) 
+            drct.append( row[1] )
         if row[2] < minvalid:
             minvalid = row[2]
         if row[2] > maxvalid:
