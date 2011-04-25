@@ -47,7 +47,7 @@ LAYER
   STATUS ON
   NAME "time_idx"
   TYPE POLYGON
-  DATA "the_geom from nexrad_n0q_tindex"
+  DATA "the_geom from nexrad_n0r_tindex"
   FILTER "datetime = '2006-06-23 03:10+00'"
   METADATA
     "wms_title" "NEXRAD BASE REFLECT"
