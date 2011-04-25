@@ -8,7 +8,7 @@ postgis = i['postgis']
 opener = urllib2.build_opener()
 
 def save(sectorName, file_name, dir_name, tstamp,bbox=None):
-  layers = "layers[]=n0r&layers[]=watch_by_county&layers[]=sbw&layers[]=uscounties"
+  layers = "layers[]=nexrad&layers[]=watch_by_county&layers[]=sbw&layers[]=uscounties"
   uri = "http://iemvs100.local/GIS/radmap.php?sector=%s&ts=%s&%s" % \
         (sectorName,tstamp, layers)
   if (bbox is not None):
