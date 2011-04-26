@@ -1,28 +1,28 @@
 # Run every 5 minutes
 cd dl
-/mesonet/python/bin/python radar_composite.py
+/mesonet/python/bin/python radar_composite.py &
 
 cd ../GIS
-/mesonet/python/bin/python 24h_lsr.py
+/mesonet/python/bin/python 24h_lsr.py 
 /mesonet/python/bin/python wwShapefile.py
 
 cd ../current
 /mesonet/python/bin/python lsr_snow_mapper.py >& /dev/null
 
 cd ../outgoing/snetnws
-./RUN.csh
+./RUN.csh &
 
 cd ../../ingestors/rwis
-./download.csh
+./download.csh &
 
 cd ../dotcams
-/mesonet/python/bin/python process.py
+/mesonet/python/bin/python process.py &
 
 cd ../awos
-/mesonet/python/bin/python parse_idot.py
+/mesonet/python/bin/python parse_idot.py &
 
 cd ../../q2
-/mesonet/python/bin/python make_raster.py
+/mesonet/python/bin/python make_raster.py &
 
 # Lets wait a bit now
 sleep 60
