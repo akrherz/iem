@@ -50,7 +50,7 @@ END
 LAYER
   NAME "nexrad-n0q"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -69,7 +69,7 @@ LAYER
   NAME "nexrad-n0q-900913-conus"
   GROUP "nexrad-n0q-900913"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_0.tif"
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -84,11 +84,48 @@ LAYER
   OFFSITE 0 0 0
 END
 
+LAYER
+  NAME "nexrad-n0q-900913-ak"
+  GROUP "nexrad-n0q-900913"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_0.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE)"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "nexrad-n0q-900913-hi"
+  GROUP "nexrad-n0q-900913"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_0.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT (GOOGLE)"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
 
 LAYER
   NAME "nexrad-n0q-900913-m05m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_1.tif"
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -107,7 +144,7 @@ END
 LAYER
   NAME "nexrad-n0q-900913-m10m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_2.tif"
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -125,7 +162,7 @@ END
 LAYER
   NAME "nexrad-n0q-900913-m15m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_3.tif"
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -143,7 +180,7 @@ END
 LAYER
   NAME "nexrad-n0q-900913-m20m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_4.tif"
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -161,7 +198,7 @@ END
 LAYER
   NAME "nexrad-n0q-900913-m25m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_5.tif"
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -180,7 +217,7 @@ END
 LAYER
   NAME "nexrad-n0q-900913-m30m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_6.tif"
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -198,7 +235,7 @@ END
 LAYER
   NAME "nexrad-n0q-900913-m35m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_7.tif"
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -216,7 +253,7 @@ END
 LAYER
   NAME "nexrad-n0q-900913-m40m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_8.tif"
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -234,7 +271,7 @@ END
 LAYER
   NAME "nexrad-n0q-900913-m45m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_9.tif"
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -252,7 +289,7 @@ END
 LAYER
   NAME "nexrad-n0q-900913-m50m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0r_10.tif"
+  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -271,7 +308,7 @@ END
 LAYER
   NAME "nexrad-n0q-m05m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_1.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -289,7 +326,7 @@ END
 LAYER
   NAME "nexrad-n0q-m10m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_2.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -308,7 +345,7 @@ END
 LAYER
   NAME "nexrad-n0q-m15m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_3.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -325,7 +362,7 @@ END
 LAYER
   NAME "nexrad-n0q-m20m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_4.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -342,7 +379,7 @@ END
 LAYER
   NAME "nexrad-n0q-m25m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_5.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -359,7 +396,7 @@ END
 LAYER
   NAME "nexrad-n0q-m30m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_6.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -376,7 +413,7 @@ END
 LAYER
   NAME "nexrad-n0q-m35m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_7.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -394,7 +431,7 @@ END
 LAYER
   NAME "nexrad-n0q-m40m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_8.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -412,7 +449,7 @@ END
 LAYER
   NAME "nexrad-n0q-m45m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_9.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -430,7 +467,7 @@ END
 LAYER
   NAME "nexrad-n0q-m50m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_10.tif"
+  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
