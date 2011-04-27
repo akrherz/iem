@@ -1,5 +1,5 @@
 
-import os, sys, mx.DateTime, pg
+import os, sys, mx.DateTime, pg, tempfile
 iemdb = pg.connect('iem', 'iemdb', user='nobody')
 
 dy = int(sys.argv[1])
@@ -30,11 +30,9 @@ if dy == 7:
 if dy == 14:
   dict['title'] = "14 DAY RAINFALL"
 
-out = open('top5rain%sday.scn' % (dy,), 'w')
+fd, path = tempfile.mkstemp()
+os.write(fd,  open('top5rainXday.tpl','r').read() % dict )
+os.close(fd)
 
-
-out.write( open('top5rain2day.tpl','r').read() % dict )
-
-out.close()
-
-os.system("/home/ldm/bin/pqinsert top5rain%sday.scn" % (dy,))
+os.system("/home/ldm/bin/pqinsert -p 'auto_top5rain_%sday.scn' %s" % (dy, path))
+os.remove(path)
