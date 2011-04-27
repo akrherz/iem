@@ -18,12 +18,12 @@ fd, path = tempfile.mkstemp()
 os.write(fd,  open('top5gusts.tpl','r').read() % dict )
 os.close(fd)
 
-os.system("/home/ldm/bin/pqinsert -p 'auto_top5highs.scn' %s" % (path,))
+os.system("/home/ldm/bin/pqinsert -p 'auto_top5gusts.scn' %s" % (path,))
 os.remove(path)
 
 fd, path = tempfile.mkstemp()
 os.write(fd,  open('top5gusts_time.tpl','r').read() % dict )
 os.close(fd)
 
-os.system("/home/ldm/bin/pqinsert -p 'auto_top5highs.scn' %s" % (path,))
+os.system("/home/ldm/bin/pqinsert -p 'auto_top5gusts_time.scn' %s" % (path,))
 os.remove(path)
