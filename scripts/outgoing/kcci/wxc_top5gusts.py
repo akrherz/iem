@@ -1,5 +1,5 @@
 
-import os, mx.DateTime, pg, sys
+import os, mx.DateTime, pg, sys, tempfile
 iemdb = pg.connect("iem", "iemdb", user="nobody")
 
 rs = iemdb.query("SELECT station from current WHERE network = 'KCCI' and \
@@ -14,11 +14,16 @@ dict['sid4'] = rs[3]['station']
 dict['sid5'] = rs[4]['station']
 dict['timestamp'] = mx.DateTime.now()
 
-out = open('top5gusts.scn', 'w')
+fd, path = tempfile.mkstemp()
+os.write(fd,  open('top5gusts.tpl','r').read() % dict )
+os.close(fd)
 
-out.write( open('top5_gusts.tpl','r').read() % dict )
+os.system("/home/ldm/bin/pqinsert -p 'auto_top5highs.scn' %s" % (path,))
+os.remove(path)
 
-out.close()
+fd, path = tempfile.mkstemp()
+os.write(fd,  open('top5gusts_time.tpl','r').read() % dict )
+os.close(fd)
 
-os.system("/home/ldm/bin/pqinsert top5gusts.scn")
-os.remove("top5gusts.scn")
+os.system("/home/ldm/bin/pqinsert -p 'auto_top5highs.scn' %s" % (path,))
+os.remove(path)
