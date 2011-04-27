@@ -104,7 +104,7 @@
 <shadow_color color_red="0.1" color_green="0.1" color_blue="0.1" color_alpha="0.3" />
 </flipbook>
 </observation>
-<observation table_file="snet8" field_name="Today Precip" station="%(sid1)s" x_position="1094.4" y_position="734.4" plotted="1" style="Text" BlankValue="" prefix="" suffix="%Q" from_unit="0" to_unit="0" filter_places="2" metline="1" continuous="1" alternate_name="Rainfall 1" data="0.62" ShowBlankPrefix="0" >
+<observation table_file="snet8" field_name="Today Precip" station="%(sid1)s" x_position="1094.4" y_position="734.4" plotted="1" style="Text" BlankValue="" prefix="" suffix="%%Q" from_unit="0" to_unit="0" filter_places="2" metline="1" continuous="1" alternate_name="Rainfall 1" data="0.62" ShowBlankPrefix="0" >
 <text text_size="100" text_size_y="110" item_name="" item_active="1" text_seperation="2" rotate="0" text_align_on_data="0" text_font="Kartika" font_bold="1" font_italic="0" font_underline="0" text_alignment="1" text_gradient="0" text_gradient_direction="0" text_gradient_scale="1" text_use_shadow="1" text_shadow_distance="5" text_shadow_direction="3" text_justify="2" text_kerning="0" text_bevel="0" text_bevel_size="0.2" text_use_side_color="1" use_outline="0" text_outline_width="0.015" text_outline_offset="0" text_always_load_from_style_file="0" text_style_file="" >
 <text_face_primary_color color_red="1" color_green="1" color_blue="1" color_alpha="1" />
 <text_face_secondary_color color_red="1" color_green="1" color_blue="1" color_alpha="1" />
@@ -119,7 +119,7 @@
 <shadow_color color_red="0.1" color_green="0.1" color_blue="0.1" color_alpha="0.3" />
 </flipbook>
 </observation>
-<observation table_file="snet8" field_name="Today Precip" station="%(sid2)s" x_position="1094.4" y_position="626.4" plotted="1" style="Text" BlankValue="" prefix="" suffix="%Q" from_unit="0" to_unit="0" filter_places="2" metline="1" continuous="1" alternate_name="Rainfall 2" data="0.72" ShowBlankPrefix="0" >
+<observation table_file="snet8" field_name="Today Precip" station="%(sid2)s" x_position="1094.4" y_position="626.4" plotted="1" style="Text" BlankValue="" prefix="" suffix="%%Q" from_unit="0" to_unit="0" filter_places="2" metline="1" continuous="1" alternate_name="Rainfall 2" data="0.72" ShowBlankPrefix="0" >
 <text text_size="100" text_size_y="110" item_name="" item_active="1" text_seperation="2" rotate="0" text_align_on_data="0" text_font="Kartika" font_bold="1" font_italic="0" font_underline="0" text_alignment="1" text_gradient="0" text_gradient_direction="0" text_gradient_scale="1" text_use_shadow="1" text_shadow_distance="5" text_shadow_direction="3" text_justify="2" text_kerning="0" text_bevel="0" text_bevel_size="0.2" text_use_side_color="1" use_outline="0" text_outline_width="0.015" text_outline_offset="0" text_always_load_from_style_file="0" text_style_file="" >
 <text_face_primary_color color_red="1" color_green="1" color_blue="1" color_alpha="1" />
 <text_face_secondary_color color_red="1" color_green="1" color_blue="1" color_alpha="1" />
@@ -134,7 +134,7 @@
 <shadow_color color_red="0.1" color_green="0.1" color_blue="0.1" color_alpha="0.3" />
 </flipbook>
 </observation>
-<observation table_file="snet8" field_name="Today Precip" station="%(sid3)s" x_position="1094.4" y_position="518.4" plotted="1" style="Text" BlankValue="" prefix="" suffix="%Q" from_unit="0" to_unit="0" filter_places="2" metline="1" continuous="1" alternate_name="Rainfall 3" data="1.11" ShowBlankPrefix="0" >
+<observation table_file="snet8" field_name="Today Precip" station="%(sid3)s" x_position="1094.4" y_position="518.4" plotted="1" style="Text" BlankValue="" prefix="" suffix="%%Q" from_unit="0" to_unit="0" filter_places="2" metline="1" continuous="1" alternate_name="Rainfall 3" data="1.11" ShowBlankPrefix="0" >
 <text text_size="100" text_size_y="110" item_name="" item_active="1" text_seperation="2" rotate="0" text_align_on_data="0" text_font="Kartika" font_bold="1" font_italic="0" font_underline="0" text_alignment="1" text_gradient="0" text_gradient_direction="0" text_gradient_scale="1" text_use_shadow="1" text_shadow_distance="5" text_shadow_direction="3" text_justify="2" text_kerning="0" text_bevel="0" text_bevel_size="0.2" text_use_side_color="1" use_outline="0" text_outline_width="0.015" text_outline_offset="0" text_always_load_from_style_file="0" text_style_file="" >
 <text_face_primary_color color_red="1" color_green="1" color_blue="1" color_alpha="1" />
 <text_face_secondary_color color_red="1" color_green="1" color_blue="1" color_alpha="1" />
@@ -149,7 +149,7 @@
 <shadow_color color_red="0.1" color_green="0.1" color_blue="0.1" color_alpha="0.3" />
 </flipbook>
 </observation>
-<observation table_file="snet8" field_name="Today Precip" station="%(sid4)s" x_position="1094.4" y_position="410.4" plotted="1" style="Text" BlankValue="" prefix="" suffix="%Q" from_unit="0" to_unit="0" filter_places="2" metline="1" continuous="1" alternate_name="Rainfall 4" data="1.05" ShowBlankPrefix="0" >
+<observation table_file="snet8" field_name="Today Precip" station="%(sid4)s" x_position="1094.4" y_position="410.4" plotted="1" style="Text" BlankValue="" prefix="" suffix="%%Q" from_unit="0" to_unit="0" filter_places="2" metline="1" continuous="1" alternate_name="Rainfall 4" data="1.05" ShowBlankPrefix="0" >
 <text text_size="100" text_size_y="110" item_name="" item_active="1" text_seperation="2" rotate="0" text_align_on_data="0" text_font="Kartika" font_bold="1" font_italic="0" font_underline="0" text_alignment="1" text_gradient="0" text_gradient_direction="0" text_gradient_scale="1" text_use_shadow="1" text_shadow_distance="5" text_shadow_direction="3" text_justify="2" text_kerning="0" text_bevel="0" text_bevel_size="0.2" text_use_side_color="1" use_outline="0" text_outline_width="0.015" text_outline_offset="0" text_always_load_from_style_file="0" text_style_file="" >
 <text_face_primary_color color_red="1" color_green="1" color_blue="1" color_alpha="1" />
 <text_face_secondary_color color_red="1" color_green="1" color_blue="1" color_alpha="1" />
@@ -164,7 +164,7 @@
 <shadow_color color_red="0.1" color_green="0.1" color_blue="0.1" color_alpha="0.3" />
 </flipbook>
 </observation>
-<observation table_file="snet8" field_name="Today Precip" station="%(sid5)s" x_position="1094.4" y_position="302.4" plotted="1" style="Text" BlankValue="" prefix="" suffix="%Q" from_unit="0" to_unit="0" filter_places="2" metline="1" continuous="1" alternate_name="Rainfall 5" data="0.69" ShowBlankPrefix="0" >
+<observation table_file="snet8" field_name="Today Precip" station="%(sid5)s" x_position="1094.4" y_position="302.4" plotted="1" style="Text" BlankValue="" prefix="" suffix="%%Q" from_unit="0" to_unit="0" filter_places="2" metline="1" continuous="1" alternate_name="Rainfall 5" data="0.69" ShowBlankPrefix="0" >
 <text text_size="100" text_size_y="110" item_name="" item_active="1" text_seperation="2" rotate="0" text_align_on_data="0" text_font="Kartika" font_bold="1" font_italic="0" font_underline="0" text_alignment="1" text_gradient="0" text_gradient_direction="0" text_gradient_scale="1" text_use_shadow="1" text_shadow_distance="5" text_shadow_direction="3" text_justify="2" text_kerning="0" text_bevel="0" text_bevel_size="0.2" text_use_side_color="1" use_outline="0" text_outline_width="0.015" text_outline_offset="0" text_always_load_from_style_file="0" text_style_file="" >
 <text_face_primary_color color_red="1" color_green="1" color_blue="1" color_alpha="1" />
 <text_face_secondary_color color_red="1" color_green="1" color_blue="1" color_alpha="1" />
