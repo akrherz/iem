@@ -299,9 +299,9 @@ $sbw = $map->getlayerbyname("sbw");
 $sbw->set("status", in_array("sbw", $layers) );
 $sbw->set("connection", $_DATABASES["postgis"]);
 $sbw->set("maxscale", 10000000);
-$sql = sprintf("geom from (select %s, geom, oid from warnings_%s 
-    WHERE significance != 'A' and issue <= '%s:00+00' and expire > '%s:00+00'
-    and gtype = 'P' %s) as foo using unique oid using SRID=4326", 
+$sql = sprintf("geom from (select %s, geom, oid from sbw_%s 
+    WHERE significance != 'A' and polygon_begin <= '%s:00+00' and polygon_end > '%s:00+00'
+    %s) as foo using unique oid using SRID=4326", 
     $ptext, gmstrftime("%Y",$ts),
     gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
     $vtec_limiter );
