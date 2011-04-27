@@ -15,13 +15,11 @@ dict['sid2'] = rs[1]['station']
 dict['sid3'] = rs[2]['station']
 dict['sid4'] = rs[3]['station']
 dict['sid5'] = rs[4]['station']
-dict['q'] = "%Q"
 
-out = open('top5rain.scn', 'w')
+fd, path = tempfile.mkstemp()
+os.write(fd,  open('top5rain.tpl','r').read() % dict )
+os.close(fd)
 
-out.write( open('top5rain.tpl','r').read() % dict )
+os.system("/home/ldm/bin/pqinsert -p 'auto_top5rain.scn' %s" % (path,))
+os.remove(path)
 
-out.close()
-
-os.system("/home/ldm/bin/pqinsert top5rain.scn")
-os.remove("top5rain.scn")
