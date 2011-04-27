@@ -1,6 +1,6 @@
 
 
-import os, mx.DateTime, pg
+import os, mx.DateTime, pg, tempfile
 iemdb = pg.connect('iem', 'iemdb', user='nobody')
 
 rs = iemdb.query("SELECT station from summary WHERE network = 'KCCI' and \
@@ -18,12 +18,9 @@ dict['fn'] = "Month Precip"
 dict['title'] = "%s RAINFALL" % (mx.DateTime.now().strftime("%B"),)
 
 
-out = open('top5monthrain.scn', 'w')
+fd, path = tempfile.mkstemp()
+os.write(fd,  open('top5rainXday.tpl','r').read() % dict )
+os.close(fd)
 
-out.write( open('top5rain2day.tpl','r').read() % dict )
-
-out.close()
-
-
-os.system("/home/ldm/bin/pqinsert top5monthrain.scn")
-os.remove("top5monthrain.scn")
+os.system("/home/ldm/bin/pqinsert -p 'auto_top5rain_month.scn' %s" % (path,))
+os.remove(path)
