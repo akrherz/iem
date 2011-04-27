@@ -1,6 +1,6 @@
 
 
-import os, mx.DateTime, pg, sys
+import os, mx.DateTime, pg, sys, tempfile
 iemdb = pg.connect("iem", "iemdb", user="nobody")
 
 rs = iemdb.query("SELECT station from current WHERE network = 'KCCI' and \
