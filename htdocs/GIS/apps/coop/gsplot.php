@@ -25,7 +25,9 @@ include("$rootpath/include/adodb-time.inc.php");
 $sts = adodb_mktime(0,0,0,$smonth, $sday, $year);
 $ets = adodb_mktime(0,0,0,$emonth, $eday, $year);
 
-
+if ($sts > $ets){
+	$sts = $ets - 86400;
+}
 
 
 function mktitlelocal($map, $imgObj, $titlet) { 
