@@ -27,10 +27,10 @@ def merge(ts):
     res = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
     good = res.transpose()
     # Prevent Large numbers
-    good = numpy.where( good < 10000., doog, 0.)
+    good = numpy.where( good < 10000., good, 0.)
 
     # Open up our RE file
-    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'a')
+    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'a')
     ts0 = ts + mx.DateTime.RelativeDateTime(days=-1)
     jan1 = mx.DateTime.DateTime(ts.year, 1, 1, 0, 0)
     offset0 = int(( ts0 - jan1).hours)
