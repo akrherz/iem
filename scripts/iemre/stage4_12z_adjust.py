@@ -26,6 +26,8 @@ def merge(ts):
     vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc24h"][400:-300,500:700] )
     res = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
     good = res.transpose()
+    # Prevent Large numbers
+    good = numpy.where( good < 10000., doog, 0.)
 
     # Open up our RE file
     nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'a')
@@ -36,16 +38,16 @@ def merge(ts):
     bad = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
     bad = numpy.where( bad > 0., bad, 0.00024)
     bad = numpy.where( bad < 10000., bad, 0.00024)
-    print "Mean 12z: %.4f  Hourly: %.4f" % (numpy.average(good), 
+    print "Mean 12z: %7.4f  Hourly: %7.4f" % (numpy.average(good), 
            numpy.average(bad) )
     for offset in range(offset0, offset1):
         data  = nc.variables["p01m"][offset,:,:]
         adjust = numpy.where( data > 0, data, 0.00001) / bad * good
         nc.variables["p01m"][offset,:,:] = numpy.where( adjust < 0.01, 0, adjust)
-        print "%s OLD %.4f NEW %.4f" % ((jan1 + mx.DateTime.RelativeDateTime(hours=offset)).strftime("%Y-%m-%d %H"), data[10,10], nc.variables["p01m"][offset,10,10])
+        print "%s OLD %7.4f NEW %7.4f" % ((jan1 + mx.DateTime.RelativeDateTime(hours=offset)).strftime("%Y-%m-%d %H"), data[10,10], nc.variables["p01m"][offset,10,10])
     nc.sync()
     bad = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
-    print "Mean 12z: %.4f  Hourly: %.4f" % (numpy.average(good), 
+    print "Mean 12z: %7.4f  Hourly: %7.4f" % (numpy.average(good), 
            numpy.average(bad) )
     nc.close()
 
