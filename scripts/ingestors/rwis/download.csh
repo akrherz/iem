@@ -24,6 +24,12 @@ wget --timeout=60 -q -O ${LOCAL_FILE2} ftp://rwis:${FTPPASS}@165.206.203.34/ExpS
 wget --timeout=60 -q -O /mesonet/data/incoming/AWOS.DAT ftp://rwis:${FTPPASS}@165.206.203.34/AWOS.DAT
 /home/ldm/bin/pqinsert -p "plot ac $GTS awos.txt raw/awos/${GTS}.txt txt" /mesonet/data/incoming/AWOS.DAT >& /dev/null
 
+# New AWOS File
+wget --timeout=60 -q -O /mesonet/data/incoming/iaawos_metar.txt ftp://rwis:${FTPPASS}@165.206.203.34/METAR.txt
+
+# Process AWOS METAR file
+/mesonet/python/bin/python awosMETAR.py
+
 # Actually ingest the data
 /mesonet/python/bin/python rawProcess.py
 
