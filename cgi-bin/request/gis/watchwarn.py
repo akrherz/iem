@@ -73,11 +73,15 @@ if form.has_key("limit0"):
 if form.has_key("limit1"):
   limiter += " and gtype = 'P' "
 
+table = "warnings"
+if sTS.year == eTS.year:
+    table = "warnings_%s" % (sTS.year,)
+
 sql = """SELECT *, astext(geom) as tgeom,
     area( transform(geom,2163) ) / 1000000.0 as area2d
-    from warnings WHERE isValid(geom) and 
+    from %s WHERE isValid(geom) and 
 	issue >= '%s' and issue < '%s' and eventid < 10000 
-	%s %s""" % ( sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
+	%s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
 cursor = mydb.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor)
 cursor.execute(sql)
 
