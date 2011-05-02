@@ -11,8 +11,5 @@ cd ../12z
 /mesonet/python/bin/python awos_rtp.py
 /mesonet/python/bin/python asos_low.py
 
-cd ../qc
-/mesonet/python/bin/python check5day.py
-
 cd ../util
 ./BACKUP.csh

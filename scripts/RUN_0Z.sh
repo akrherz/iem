@@ -9,10 +9,5 @@ cd ../summary
 cd ../dbutil
 /mesonet/python/bin/python rwis2archive.py 1
 
-
-
-cd ../qc
-/mesonet/python/bin/python check5day.py
-
 cd ../iemre
 /mesonet/python/bin/python stage4_12z_adjust.py
