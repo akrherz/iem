@@ -12,9 +12,9 @@ for line in open('/mesonet/data/incoming/iaawos_metar.txt', 'r'):
     data[ d['id'] ] = line
     
 fd, path = tempfile.mkstemp()
-os.write(fd,  '000\nNZUS99 KDMX %s\n' % (gmt.strftime("%d%H%M"),)) 
+os.write(fd,  '000\r\nNZUS99 KDMX %s\r\n' % (gmt.strftime("%d%H%M"),)) 
 for id in data.keys():
-    os.write(fd, '%s=\n' % (data[id].strip(),))
+    os.write(fd, '%s=\r\n' % (data[id].strip(),))
 os.close(fd)
 os.system("/home/ldm/bin/pqinsert -p 'LOCDSMMETAR.dat' %s" % (path,)) 
 os.remove(path) 
