@@ -42,6 +42,8 @@ def merge(ts):
            numpy.average(bad) )
     for offset in range(offset0, offset1):
         data  = nc.variables["p01m"][offset,:,:]
+        # Keep data within reason
+        data = numpy.where( data > 10000., 0., data)
         adjust = numpy.where( data > 0, data, 0.00001) / bad * good
         nc.variables["p01m"][offset,:,:] = numpy.where( adjust < 0.01, 0, adjust)
         print "%s OLD %7.4f NEW %7.4f" % ((jan1 + mx.DateTime.RelativeDateTime(hours=offset)).strftime("%Y-%m-%d %H"), data[10,10], nc.variables["p01m"][offset,10,10])
