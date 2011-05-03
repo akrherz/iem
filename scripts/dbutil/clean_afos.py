@@ -16,6 +16,6 @@ sql = """
  delete from %s WHERE 
    date(entered) < ('YESTERDAY'::date - '7 days'::interval) and
    (pil ~* '^(RR[1-9SA]|ROB|TAF|MAV|MET|MTR|MEX|RWR|STO|HML)' 
-    or pil in ('HPTNCF', 'WTSNCF','WRKTTU')
+    or pil in ('HPTNCF', 'WTSNCF','WRKTTU','TSTNCF')
    )""" % (table,)
 afos.query( sql )
