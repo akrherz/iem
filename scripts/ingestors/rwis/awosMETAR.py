@@ -1,6 +1,6 @@
 # Process AWOS METAR file 
 
-import re, tempfile, os, mx.DateTime
+import re, tempfile, os, mx.DateTime, subprocess
 gmt = mx.DateTime.gmt()
 
 data = {}
@@ -16,5 +16,7 @@ fd, path = tempfile.mkstemp()
 for id in data.keys():
     os.write(fd, '%s=\r\n' % (data[id].strip().replace("METAR ", ""),))
 os.close(fd)
-os.system("/home/ldm/bin/pqinsert -p 'data c 000000000000 LOCDSMMETAR.dat LOCDSMMETAR.dat txt' %s" % (path,)) 
+p = subprocess.Popen("/home/ldm/bin/pqinsert -p 'data c 000000000000 LOCDSMMETAR.dat LOCDSMMETAR.dat txt' %s" % (path,),
+                     shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) 
+os.waitpid(p.pid, 0)
 os.remove(path) 
