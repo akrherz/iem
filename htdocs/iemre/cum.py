@@ -19,6 +19,10 @@ os.chdir("/tmp")
 form = cgi.FormContent()
 ts0 = mx.DateTime.strptime( form["date0"][0], "%Y-%m-%d")
 ts1 = mx.DateTime.strptime( form["date1"][0], "%Y-%m-%d")
+# Make sure we aren't in the future
+tsend = mx.DateTime.today()
+if ts1 >= tsend:
+    ts1 = tsend - mx.DateTime.RelativeDateTime(days=1)
 format = form["format"][0]
 
 offset0 = int((ts0 - (ts0 + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
