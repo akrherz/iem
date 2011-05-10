@@ -20,6 +20,11 @@ if ts1.year != ts2.year:
     print 'Content-type: text/plain\n'
     print simplejson.dumps( {'error': 'Multi-year query not supported yet...', } )
     sys.exit()
+# Make sure we aren't in the future
+tsend = mx.DateTime.today()
+if ts2 >= tsend:
+    ts2 = tsend - mx.DateTime.RelativeDateTime(days=1)
+
 lat = float( form["lat"][0] )
 lon = float( form["lon"][0] )
 format = form["format"][0]
