@@ -146,15 +146,16 @@ var selectform = new Ext.form.FormPanel({
      items: [network_selector, dateselector, timeselector, realtime]
 });
 
-
+ var conn = new Ext.data.Connection({
+         timeout:120000
+        ,url:'obhour-json.php'
+        ,method:'GET'
+ });
 
 var pstore = new Ext.data.Store({
       root:'precip',
       autoLoad:false,
-      proxy: new Ext.data.HttpProxy({
-            url: 'obhour-json.php',
-            method: 'GET'
-     }),
+      proxy: new Ext.data.HttpProxy(conn),
      reader:  new Ext.data.JsonReader({
         root: 'precip',
             id: 'id'
@@ -207,7 +208,7 @@ var gpanel =  new Ext.grid.GridPanel({
             id: 'statusField'
         })
         ],
-        loadMask: {msg:'Loading Data...'},
+        loadMask: {msg:'Loading Data... This may take a minute...'},
         viewConfig:{forceFit:false},
         cm: new Ext.grid.ColumnModel([
             {header: "ID",  width: 40, sortable: true, dataIndex: 'id'},
