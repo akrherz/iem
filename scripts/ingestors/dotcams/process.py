@@ -89,9 +89,9 @@ for line in lines:
   del(i320)
 
   # Insert into LDM
-  cmd = "/home/ldm/bin/pqinsert -p 'webcam ac %s camera/stills/%s.jpg camera/%s/%s_%s.jpg jpg' %s-320x240.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid)
+  cmd = "/home/ldm/bin/pqinsert -p 'webcam c %s camera/stills/%s.jpg camera/%s/%s_%s.jpg jpg' %s-320x240.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid)
   os.system(cmd)
-  cmd = "/home/ldm/bin/pqinsert -p 'webcam c %s camera/640x480/%s.jpg bogus jpg' %s-640x480.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid )
+  cmd = "/home/ldm/bin/pqinsert -p 'webcam ac %s camera/640x480/%s.jpg camera/%s/%s_%s.jpg jpg' %s-640x480.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid )
   os.system(cmd)
 
 
