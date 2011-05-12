@@ -2,6 +2,7 @@
 include("../../../config/settings.inc.php");
 
 $station = isset($_GET['station']) ? $_GET['station'] : "DSM";
+$network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 $year = isset($_GET['year']) ? $_GET['year']: date("Y");
 $smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 5;
 $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 10;
@@ -22,18 +23,19 @@ $today = time();
 
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/station.php");
-$st = new StationData($station);
-$st->load_station( $st->table[$station]['climate_site'] );
+$st = new StationData($station, $network);
+$st->load_station( $st->table[$station]['climate_site'], 'IACLIMATE' );
 $cities = $st->table;
 $coopdb = iemdb("coop");
 $iem = iemdb("access");
 
 $climate_site = $cities[$station]["climate_site"];
 
-$q = "SELECT pday, day from summary_$year
-		WHERE station = '$station' and day between '$sdate' and '$edate'
-		ORDER by day ASC";
-$rs = pg_exec($iem, $q);
+$rs = pg_prepare($iem, "SELECT", "SELECT pday, day from summary_$year
+		WHERE station = $1 and network = $4 and day between $2 and $3
+		ORDER by day ASC");
+
+$rs = pg_execute($iem, "SELECT", Array($station, $sdate, $edate, $network));
 $obs = Array();
 $aobs = Array();
 $atot = 0;
@@ -70,7 +72,6 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 	$xlabels[$i] = "";
     $times[$i] = strtotime( $row["valid"] );
 }
-print_r($aobs);print_r($aclimate);die();
 
 pg_close($coopdb);
 

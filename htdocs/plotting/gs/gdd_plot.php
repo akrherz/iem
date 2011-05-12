@@ -2,6 +2,7 @@
  include("../../../config/settings.inc.php");
 
 $station = isset($_GET['station']) ? $_GET['station'] : "DSM";
+$network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 $year = isset($_GET['year']) ? $_GET['year']: date("Y");
 $smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 5;
 $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 10;
@@ -21,8 +22,8 @@ $today = time();
 
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/station.php");
-$st = new StationData($station);
-$st->load_station( $st->table[$station]['climate_site'] );
+$st = new StationData($station, $network);
+$st->load_station( $st->table[$station]['climate_site'], 'IACLIMATE' );
 $cities = $st->table;
 $coopdb = iemdb("coop");
 $iem = iemdb("access");
@@ -39,8 +40,9 @@ function calcGDD($high,$low)
 $climate_site = $cities[$station]["climate_site"];
 
 $rs = pg_prepare($iem, "SELECT", "SELECT max_tmpf, min_tmpf, day from summary_$year
-		WHERE station = $1 and day between $2 and $3 ORDER by day ASC");
-$rs = pg_execute($iem, "SELECT", Array($station, $sdate, $edate));
+		WHERE station = $1 and day between $2 and $3 " .
+				"and network = $4 ORDER by day ASC");
+$rs = pg_execute($iem, "SELECT", Array($station, $sdate, $edate, $network));
 $obs = Array();
 $aobs = Array();
 $atot = 0;
