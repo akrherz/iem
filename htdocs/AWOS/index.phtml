@@ -9,7 +9,7 @@ include("$rootpath/include/header.php");
 <ul>
  <li><span style="font-size: 1.3em;">AWOS<br />Quick Links</span></li>
  <li><a href="current.phtml"><img src="../images/view_text.png" /><br />Currents</a></li>
- <li><a href="../request/awos/1min.php"><img src="../images/down.png" /><br />Download</a></li>
+ <li><a href="<?php echo $rooturl; ?>/request/download.phtml?network=AWOS"><img src="../images/down.png" /><br />Download</a></li>
  <li><a href="../sites/locate.php?network=AWOS"><img src="../images/find.png" /><br />Locate Site</a></li>
 </ul>
 </div>
@@ -28,8 +28,8 @@ some of them are locally maintained by state agencies.[1]</p> </td><td>
 
 <div class="ninfo">
 <b><u>AWOS</u></b>
-<br>Reports: 3x per Hour
-<br>Stations: 37
+<br>Reports: 12x per Hour
+<br>Stations: 45
 <br><a href="<?php echo $rooturl; ?>/sites/locate.php?network=AWOS">Locations</a>
 </div></td></tr></table>
 
@@ -57,34 +57,42 @@ some of them are locally maintained by state agencies.[1]</p> </td><td>
 
 </UL>
 
-<p><h3 class="subtitle">Historical Data:</h3>
+<p><h3 class="subtitle">Archived One Minute Data:</h3>
 
-Observations from the AWOS network are saved in 1 minute intervals.  The DOT
-provides the IEM with a monthly update of this 1 minute dataset.  The 1 minute
-data from the previous month is uploaded to the IEM server around the first 
-week of the month.
+<p>The Iowa DOT kept an one minute interval archive of their data between
+1995 and 1 April 2011.  Due to communication changes, this archival was 
+discontinued.  You can download data from this archive at the links below.
 
 <ul>
-<li><a href="/plotting/awos/1station_1min.php">Daily Data Plotting</a></li>
-<li><a href="/request/awos/1min.php">Download/View/Plot Archived Data</a></li>
-<li><a href="/AWOS/reports/2002precip.phtml">2002 Precipitation Totals</a></li>
-<li><a href="/AWOS/reports/2003precip.phtml">2003 Precipitation Totals</a></li>
-<li><a href="/AWOS/reports/2004precip.phtml">2004 Precipitation Totals</a></li>
-<li><a href="/AWOS/reports/2005precip.phtml">2005 Precipitation Totals</a></li>
-<li><a href="/AWOS/reports/2006precip.phtml">2006 Precipitation Totals</a></li>
-<li><a href="/AWOS/reports/2007precip.phtml">2007 Precipitation Totals</a></li>
-<li><a href="/AWOS/reports/2008precip.phtml">2008 Precipitation Totals</a></li>
-<li><a href="/AWOS/reports/2009precip.phtml">2009 Precipitation Totals</a></li>
+  <li><a href="<?php echo $rooturl; ?>/plotting/awos/1station_1min.php">Daily Data Plotting</a></li>
+  <li><a href="<?php echo $rooturl; ?>/request/awos/1min.php">Download/View/Plot Archived Data</a></li>
+</ul>
+
+<p><h3 class="subtitle">Historical Data:</h3>
+
+<p>The IEM archives the routine METAR reports from this network at up to 
+5 minute intervals.
+
+<ul>
+<li><a href="<?php echo $rooturl; ?>/request/download.phtml?network=AWOS">Download</a></li>
+<li><a href="<?php echo $rooturl; ?>/AWOS/reports/2002precip.phtml">2002 Precipitation Totals</a></li>
+<li><a href="<?php echo $rooturl; ?>/AWOS/reports/2003precip.phtml">2003 Precipitation Totals</a></li>
+<li><a href="<?php echo $rooturl; ?>/AWOS/reports/2004precip.phtml">2004 Precipitation Totals</a></li>
+<li><a href="<?php echo $rooturl; ?>/AWOS/reports/2005precip.phtml">2005 Precipitation Totals</a></li>
+<li><a href="<?php echo $rooturl; ?>/AWOS/reports/2006precip.phtml">2006 Precipitation Totals</a></li>
+<li><a href="<?php echo $rooturl; ?>/AWOS/reports/2007precip.phtml">2007 Precipitation Totals</a></li>
+<li><a href="<?php echo $rooturl; ?>/AWOS/reports/2008precip.phtml">2008 Precipitation Totals</a></li>
+<li><a href="<?php echo $rooturl; ?>/AWOS/reports/2009precip.phtml">2009 Precipitation Totals</a></li>
 <li><a href="reports/mon_prec.php?year=2010">2010 Precipitation Totals</a></li>
 <li><a href="reports/mon_prec.php?year=2011">2011 Precipitation Totals</a></li>
-<li><a href="/cgi-bin/precip/catAZOS.py">Hourly Precipitation</a> tables</li>
+<li><a href="<?php echo $rootcgi; ?>/precip/catAZOS.py">Hourly Precipitation</a> tables</li>
 </ul>
 
 </td><td valign="top" width="50%"> 
 
 <h3 class="subtitle">MADIS QC Mesages:</h3>
 <ul>
- <li><a href="/QC/madis/network.phtml?network=AWOS">Raw QC Values</a></li>
+ <li><a href="<?php echo $rooturl; ?>/QC/madis/network.phtml?network=AWOS">Raw QC Values</a></li>
  <li><a href="http://www.madis-fsl.org/qcms_data/qc4/qchour.txt">Hourly</a></li>
  <li><a href="http://www.madis-fsl.org/qcms_data/qc4/qcday.txt">Daily</a></li>
  <li><a href="http://www.madis-fsl.org/qcms_data/qc4/qcweek.txt">Weekly</a></li>
@@ -93,34 +101,34 @@ week of the month.
 
 <h3 class="subtitle">Comparisons:</h3>
 <ul>
- <li><a href="/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
-  <li><a href="/wx/data/models/ruc2_iem_T.gif">Temperatures vs RUC2 Model</a></li>
-  <li><a href="/data/temps.gif">Temperatures vs RWIS Network</a></li>
-  <li><a href="/data/snet/Tcompare.gif">Temperatures vs SchoolNet Network</a></li>
-  <li><a href="/wx/data/models/ruc2_iem_Td.gif">Dew Points vs RUC2 Model</a></li>
-  <li><a href="/data/dewps.gif">Dew Points vs RWIS Network</a></li>
-  <li><a href="/data/snet/Dcompare.gif">Dew Points vs SchoolNet Network</a></li>
-  <li><a href="/wx/data/models/ruc2_iem_V.gif">Winds vs RUC2 Model</a></li>
-  <li><a href="/data/winds.gif">Winds vs RWIS Network</a></li>
-  <li><a href="/wx/data/models/ruc2_iem_Rh.gif">Relative Humidity vs RUC2 Model</a></li>
-  <li><a href="/data/snet/Pcompare.gif">Pressure vs SchoolNet Network (mb)</a></li>
-  <li><a href="/data/snet/P2compare.gif">Pressure vs SchoolNet Network (in)</a></li>
+ <li><a href="<?php echo $rooturl; ?>/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
+  <li><a href="<?php echo $rooturl; ?>/wx/data/models/ruc2_iem_T.gif">Temperatures vs RUC2 Model</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/temps.gif">Temperatures vs RWIS Network</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/snet/Tcompare.gif">Temperatures vs SchoolNet Network</a></li>
+  <li><a href="<?php echo $rooturl; ?>/wx/data/models/ruc2_iem_Td.gif">Dew Points vs RUC2 Model</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/dewps.gif">Dew Points vs RWIS Network</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/snet/Dcompare.gif">Dew Points vs SchoolNet Network</a></li>
+  <li><a href="<?php echo $rooturl; ?>/wx/data/models/ruc2_iem_V.gif">Winds vs RUC2 Model</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/winds.gif">Winds vs RWIS Network</a></li>
+  <li><a href="<?php echo $rooturl; ?>/wx/data/models/ruc2_iem_Rh.gif">Relative Humidity vs RUC2 Model</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/snet/Pcompare.gif">Pressure vs SchoolNet Network (mb)</a></li>
+  <li><a href="<?php echo $rooturl; ?>/data/snet/P2compare.gif">Pressure vs SchoolNet Network (in)</a></li>
 </ul>
 
 
 <h3 class="subtitle">QC Info:</h3>
 <ul>
-<li>Sites <a href="/QC/offline.php">offline</a> [<a href="http://mesonet.agron.iastate.edu/GIS/apps/stations/offline.php?network=awos">Graphical View</a>]</li>
-<li><a href="http://mesonet.agron.iastate.edu/QC/tickets.phtml">Open Trouble Tickets</a></li>
+<li>Sites <a href="<?php echo $rooturl; ?>/QC/offline.php">offline</a> [<a href="http://mesonet.agron.iastate.edu/GIS/apps/stations/offline.php?network=awos">Graphical View</a>]</li>
+<li><a href="<?php echo $rooturl; ?>/QC/tickets.phtml">Open Trouble Tickets</a></li>
 </ul>
 
 <h3 class="subtitle">Hourly Mesonet + NEXRAD:</h3>
 <UL>
-	<li><a href="../data/DMX_radar.gif">Des Moines</a></li>
-        <li><a href="../data/OAX_radar.gif">Omaha</a></li>
-        <li><a href="../data/DVN_radar.gif">Davenport</a></li>
-	<li><a href="../data/FSD_radar.gif">Sioux Falls</a></li>
-        <li><a href="../data/ARX_radar.gif">LaCrosse</a></li>
+	<li><a href="<?php echo $rooturl; ?>/data/DMX_radar.gif">Des Moines</a></li>
+        <li><a href="<?php echo $rooturl; ?>/data/OAX_radar.gif">Omaha</a></li>
+        <li><a href="<?php echo $rooturl; ?>/data/DVN_radar.gif">Davenport</a></li>
+	<li><a href="<?php echo $rooturl; ?>/data/FSD_radar.gif">Sioux Falls</a></li>
+        <li><a href="<?php echo $rooturl; ?>/data/ARX_radar.gif">LaCrosse</a></li>
 </UL>
 
 </td></tr></table>
