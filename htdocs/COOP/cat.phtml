@@ -14,18 +14,17 @@ include("$rootpath/include/header.php"); ?>
 
 <div class="text">
 
-
+<form name="switchnwsli" action="cat.phtml" method="GET">
 <?php 
 
 if (strlen($station) > 0) {
   $link = "cat.phtml?station=".$station."&network=". $network ."&sortvar=";
   if ($sortvar == "") $sortvar = "day";
  ?>
-<h3 class="subtitle">COOP obs listed by station</h3>(<i>Click on a date to get all obs for a particular date.</i>)
-<form name="switchnwsli" action="cat.phtml" method="GET">
-<p>Enter NWSLI:<input type="text" size="6" maxlength="5" name="station" value="<?php echo $station; ?>">
-Select Year: <?php echo yearSelect(2004, $year, "year"); ?>
-<input type="submit" value="View COOP Station"></form>
+ <h3 class="subtitle">COOP obs listed by station</h3>(<i>Click on a date to get all obs for a particular date.</i>)
+ 
+ <p>Enter NWSLI:<input type="text" size="6" maxlength="5" name="station" value="<?php echo $station; ?>">
+ Select Year: <?php echo yearSelect(2004, $year, "year"); ?>
 <?php } 
  
 if (strlen($date) > 0) { 
@@ -33,9 +32,10 @@ if (strlen($date) > 0) {
   $link = "cat.phtml?date=".$date."&network=". $network ."&sortvar=";
   if ($sortvar == "") $sortvar = "station";
 ?>
-<h3 class="subtitle">COOP obs listed by date</h3>(<i>Click on the NWSLI to view all obs from one station.</i>)
-<form name="switchdate" action="cat.phtml" method="GET">
-<p>Enter Date:<input type="text" size="11" maxlength="10" name="date" value="<?php echo $date; ?>">
+ <h3 class="subtitle">COOP obs listed by date</h3>(<i>Click on the NWSLI to view all obs from one station.</i>)
+ 
+ <p>Enter Date: <input type="text" size="11" maxlength="10" name="date" value="<?php echo $date; ?>">
+<?php } ?>
 Select State: <select name="network">
  <option value="AL_COOP" <?php if ($network == "AL_COOP") echo "SELECTED"; ?>>Alabama
  <option value="AK_COOP" <?php if ($network == "AK_COOP") echo "SELECTED"; ?>>Alaska
@@ -89,8 +89,8 @@ Select State: <select name="network">
  <option value="WI_COOP" <?php if ($network == "WI_COOP") echo "SELECTED"; ?>>Wisconsin
  <option value="WY_COOP" <?php if ($network == "WY_COOP") echo "SELECTED"; ?>>Wyoming
 </select>
-<input type="submit" value="View Date"></form>
-<?php } ?>
+<input type="submit" value="View Data">
+</form>
 
 <p><table border="1" cellspacing=0 cellpadding=2>
 <tr>
