@@ -8,15 +8,12 @@
 
  if ($date == "" && $station == "") $station = "AMSI4";
  include("$rootpath/include/forms.php");
-?>
-
-<?php 
 $TITLE = "IEM | COOP Obs";
 $THISPAGE = "networks-coop";
 include("$rootpath/include/header.php"); ?>
 
-<div class="text"
-<b>Nav:</b> <a href="/COOP/">NWS COOP</a> <b> > </b> Print Obs
+<div class="text">
+
 
 <?php 
 
@@ -98,7 +95,7 @@ Select State: <select name="network">
 <p><table border="1" cellspacing=0 cellpadding=2>
 <tr>
   <th><a href="<?php echo $link; ?>station">NWSLI:</a></th>
-  <th>Site Name:</th>
+  <th><a href="<?php echo $link; ?>sname">Site Name:</a></th>
   <th><a href="<?php echo $link; ?>day">Date:</a></th>
   <th><a href="<?php echo $link; ?>max_tmpf">Max Air Temp</a></th>
   <th><a href="<?php echo $link; ?>min_tmpf">Min Air Temp</a></th>
@@ -109,20 +106,24 @@ Select State: <select name="network">
 <?php 
  include("$rootpath/include/iemaccess.php");
  include("$rootpath/include/network.php");
+ 
  $nt = new NetworkTable($network);
  $cities = $nt->table;
- $iem = new IEMAccess();
+ $iemdb = iemdb("iem");
 
  $sortdir = "ASC";
  if ($sortvar == "pday" || $sortvar == "snow" || $sortvar == "snowd" ||
      $sortvar == "max_tmpf") 
    $sortdir = "DESC";
  if (strlen($station) > 0) {
-   $rs = $iem->query("SELECT * from summary_$year WHERE station = '$station'
-     and network ~* 'COOP' ORDER by $sortvar $sortdir");
+     $rs = pg_prepare($iemdb, "SELECT", "SELECT s.*, c.sname from summary_$year s, current c WHERE s.station = $1
+     and s.network = $2 and c.station = s.station and c.network = s.network ORDER by $sortvar $sortdir");
+     $rs = pg_execute($iemdb, "SELECT", Array($station, $network));
  } else {
-   $rs = $iem->query("SELECT * from summary_$year WHERE day = '$date' and
-     network = '$network' ORDER by $sortvar $sortdir");
+    $rs = pg_prepare($iemdb, "SELECT", "SELECT s.*, c.sname from summary_$year s, current c WHERE s.day = $1
+     and s.network = $2 and c.station = s.station and c.network = s.network ORDER by $sortvar $sortdir");
+    $rs = pg_execute($iemdb, "SELECT", Array($date, $network));
+
  }
  $hirow = 1;
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
