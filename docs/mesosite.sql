@@ -1,3 +1,73 @@
+---
+--- webcam logs
+---
+CREATE TABLE camera_log(
+	cam varchar(11),
+	valid timestamp with time zone,
+	drct smallint);
+CREATE INDEX camera_log_idx on camera_log(valid);
+GRANT SELECT on camera_log to apache,nobody;
+
+---
+--- webcam currents
+---
+CREATE TABLE camera_current(
+	cam varchar(11),
+	valid timestamp with time zone,
+	drct smallint);
+GRANT SELECT on camera_current to apache,nobody;
+
+---
+--- Webcam scheduling
+---
+CREATE TABLE webcam_scheduler(
+	cid varchar(10),
+	begints timestamp with time zone,
+	endts timestamp with time zone,
+	is_daily boolean,
+	filename varchar,
+	movie_seconds smallint);
+alter table webcam_scheduler SET with oids;	
+CREATE UNIQUE index webcam_scheduler_filename_idx on
+	webcam_scheduler(filename);
+GRANT ALL on webcam_scheduler to nobody,apache;
+
+---
+--- Store IEM settings
+---
+CREATE TABLE properties(
+  propname varchar,
+  propvalue varchar
+);
+GRANT ALL on properties to apache,nobody;
+CREATE UNIQUE index properties_idx on properties(propname, propvalue);
+
+---
+--- Webcam configurations
+---
+CREATE TABLE webcams(
+	id varchar(11),
+	ip inet,
+	name varchar,
+	pan0 smallint,
+	online boolean,
+	port int,
+	network varchar(10),
+	iservice varchar,
+	iserviceurl varchar,
+	sts timestamp with time zone,
+	ets timestamp with time zone,
+	county varchar,
+	hosted varchar,
+	hostedurl varchar,
+	sponsor varchar,
+	sponsorurl varchar,
+	removed boolean,
+	state varchar(2),
+	moviebase varchar);
+SELECT AddGeometryColumn('webcams', 'geom', 4326, 'POINT', 2);
+GRANT select on webcams to apache,nobody;
+
 CREATE TABLE stations(
 	id varchar(20),
 	name varchar(40),
@@ -13,11 +83,24 @@ CREATE TABLE stations(
 	remote_id int,
 	wfo varchar(3),
 	archive_begin timestamp with time zone,
-	archive_end timestamp with time zone
+	archive_end timestamp with time zone,
+	modified timestamp with time zone
 );
 CREATE UNIQUE index stations_idx on stations(id, network);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on stations to apache,nobody;
+
+CREATE OR REPLACE FUNCTION update_modified_column()
+	RETURNS TRIGGER AS $$
+	BEGIN
+	   NEW.modified = now(); 
+	   RETURN NEW;
+	END;
+	$$ language 'plpgsql';
+	
+CREATE TRIGGER update_stations_modtime BEFORE UPDATE
+        ON stations FOR EACH ROW EXECUTE PROCEDURE 
+        update_modified_column();
 
 ---
 create table iemmaps(
