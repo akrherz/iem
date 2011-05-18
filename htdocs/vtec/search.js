@@ -70,7 +70,27 @@ states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
 		["SC", "South Carolina"], ["SD", "South Dakota"], ["TN", "Tennessee"],
 		["TX", "Texas"], ["UT", "Utah"], ["VT", "Vermont"], ["VA", "Virginia"],
 		["WA", "Washington"], ["WV", "West Virginia"], ["WI", "Wisconsin"],
-		["WY", "Wyoming"]];
+		["WY", "Wyoming"],
+		["AM", "Atlantic Ocean AM"],
+		["AN", "Atlantic Ocean AN"],
+		["AS", "AS"],
+		["DC", "Distict of Columbia"],
+		["GM", "Gulf of Mexico"],
+		["GU", "Guam"],
+		["LC", "Lake St. Clair"],
+		["LE", "Lake Erie"],
+		["LH", "Lake Huron"],
+		["LM", "Lake Michigan"],
+		["LO", "Lake Ontario"],
+		["LS", "Lake Superior"],
+		["PH", "Hawaii PH Zones"],
+		["PK", "Alaska PK Zones"],
+		["PM", "Zones PM"],
+		["PR", "Puerto Rico"],
+		["PS", "Zones PS"],
+		["PZ", "Pacific Ocean PZ"],
+		["SL", "St. Lawrence River"]
+		];
 
 Ext.onReady(function() {
 
@@ -285,5 +305,6 @@ Ext.onReady(function() {
 						}]
 			});
 	gp.render('mytable');
+	gp.doLayout();
 
 });
