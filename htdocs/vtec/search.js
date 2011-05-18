@@ -255,7 +255,7 @@ Ext.onReady(function() {
 									+ Base64.encode(xd);
 						}
 					}
-				},],
+				}],
 				columns : [{
 							'header' : 'Event ID',
 							dataIndex : 'eventid',
