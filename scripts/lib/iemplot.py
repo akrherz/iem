@@ -690,6 +690,18 @@ def makefeature(tmpfp):
     # Step 4: Cleanup
     os.remove("%s.ps" % (tmpfp,) )
 
+def webprocess(tmpfp, rotate=""):
+    """
+    Postprocess this for the website!
+    """
+    cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors 256 +repage %s.ps %s.png" % (rotate, tmpfp, tmpfp)
+    os.system( cmd )
+    print "Content-Type: image/png\n"
+    print open("%s.png" % (tmpfp,)).read()
+
+    os.remove("%s.png" % (tmpfp,) )
+    os.remove("%s.ps" % (tmpfp,) )
+
 def postprocess(tmpfp, pqstr, rotate="", thumb=False, thumbpqstr="", fname=None):
     """
     Helper to postprocess the plot
