@@ -1,9 +1,9 @@
 <?php 
 include("../../config/settings.inc.php");
 
-$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.3.1/resources/css/ext-all.css"/>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.3.1/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.3.1/ext-all.js"></script>
+$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../ext-3.3.3/resources/css/ext-all.css"/>
+<script type="text/javascript" src="../ext-3.3.3/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="../ext-3.3.3/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js?v=3"></script>
 <script type="text/javascript" src="../lsr/Exporter-all.js"></script>
 <script type="text/javascript" src="search.js?v=3"></script>';
