@@ -28,10 +28,10 @@ else:
     ets = datetime.datetime(2011,10,1)
 baseV = 50
 if "base" in form:
-    baseV = int(form["base"])
+    baseV = int(form["base"].value)
 maxV = 86
 if "max" in form:
-    maxV = int(form["max"])
+    maxV = int(form["max"].value)
 
 
 # Make sure we aren't in the future
