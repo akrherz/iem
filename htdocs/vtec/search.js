@@ -122,7 +122,8 @@ Ext.onReady(function() {
 								}, {
 									name : 'eventid',
 									type : 'float'
-								}, {
+								}, {name: 'wfo'},
+								{
 									name : 'phenomena'
 								}, {
 									name : 'significance'
@@ -151,26 +152,33 @@ Ext.onReady(function() {
 						}, [{
 									name : 'ugc',
 									mapping : 'ugc'
-								}, {
-									name : 'name',
-									mapping : 'name'
+							}, {name : 'name',
+								mapping : 'name'
+							},
+								{
+								name : 'nicename',
+								convert : function(val, record){
+									
+									var e = record.ugc.substr(2,1) == "Z" ? " (Zone) " : "";
+									var s = String.format("[{0}] {1} {2}", record.ugc, 
+										record.name, e);
+							
+									return s;
+								}
 								}])
 			});
 
 	var ugcCB = new Ext.form.ComboBox({
 				store : ugcStore,
-				displayField : 'name',
+				displayField : 'nicename',
 				valueField : 'ugc',
 				width : 300,
 				mode : 'local',
 				triggerAction : 'all',
 				fieldLabel : 'County/Zone',
-				emptyText : 'Select County/Zone...',
-				tpl : new Ext.XTemplate(
-						'<tpl for="."><div class="search-item">',
-						'<span>[{ugc}] {name}</span>', '</div></tpl>'),
+				emptyText : 'Then Select County/Zone...',
 				typeAhead : false,
-				itemSelector : 'div.search-item',
+//				itemSelector : 'div.search-item',
 				hideTrigger : false,
 				listeners : {
 					select : function(cb, record, idx) {
@@ -180,8 +188,7 @@ Ext.onReady(function() {
 										ugc : record.data.ugc
 									}
 								});
-						gp.setTitle("VTEC Events for: " + record.data.name
-								+ " (UGC: " + record.data.ugc + ") ");
+						gp.setTitle("VTEC Events for: " + record.data.nicename);
 						return false;
 					}
 				}
@@ -195,7 +202,7 @@ Ext.onReady(function() {
 				}),
 		valueField : 'abbr',
 		width : 180,
-		fieldLabel : 'Select State',
+		fieldLabel : 'Step 1: Select State',
 		displayField : 'name',
 		typeAhead : true,
 		tpl : '<tpl for="."><div class="x-combo-list-item">[{abbr}] {name}</div></tpl>',
@@ -259,7 +266,13 @@ Ext.onReady(function() {
 				columns : [{
 							'header' : 'Event ID',
 							dataIndex : 'eventid',
-							width : 50
+							width : 50,
+							renderer : function(value, metaData, record){
+								var url = String.format("/vtec/#{0}-O-NEW-K{1}-{2}-{3}-{4}", record.data.issue.format('Y'),
+									record.data.wfo, record.data.phenomena, record.data.significance,
+									String.leftPad(record.data.eventid,4,'0'));
+								return "<a href='"+url+"' target='_blank'>"+ value +"</a>";
+							}
 						}, {
 							'header' : 'Phenomena',
 							sortable : true,
