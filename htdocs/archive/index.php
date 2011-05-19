@@ -25,6 +25,16 @@ having difficulty finding something, please let us know. </p>
  <li><a href="/cases/">... View all ...</a></li>
 </ul>
 
+<h3>NWS Watch/Warnings/Advisories</h3>
+<ul>
+ <li><a href="<?php echo $rooturl; ?>"/request/gis/watchwarn.phtml">Download Shapefiles</a>
+  <br />Download shapefiles of warning geometries and metadata.</li>
+ <li><a href="<?php echo $rooturl; ?>"/vtec/search.php">Search by County/Zone</a>
+  <br />Find archived warnings by searching for a county or zone.</li>
+ <li><a href="<?php echo $rooturl; ?>"/vtec/">VTEC Browser</a>
+  <br />Interactively navigate our archive of warnings.</li>
+</ul>
+
 <h3>RADAR Data</h3>
 <ul>
 
