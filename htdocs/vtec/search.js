@@ -284,7 +284,7 @@ Ext.onReady(function() {
 	                                        text : 'Export to Excel...',
 	                                        handler : function() {
 	                                                var xd = gp.getExcelXml(true);
-	                                                if (Ext.isIE6 || Ext.isIE7 || Ext.isIE8 || Ext.isSafari
+	                                                if (Ext.isIE6 || Ext.isIE7 || Ext.isIE8 || Ext.isIE9 || Ext.isSafari
 	                                                                || Ext.isSafari2 || Ext.isSafari3) {
 	                                                        var dataURL = 'exportexcel.php';
 	                                                        params = [{
@@ -293,8 +293,7 @@ Ext.onReady(function() {
 	                                                                        }];
 	                                                        post_to_url(dataURL, params, 'post');
 	                                                } else {
-	                                                        document.location = 'data:application/vnd.ms-excel;base64,'
-	                                                                        + Base64.encode(xd);
+	                                                        document.location = 'data:application/vnd.ms-excel;base64,'+ Base64.encode(xd);
 	                                                }
 	                                        }
                                 }],
