@@ -1,4 +1,19 @@
 Ext.BLANK_IMAGE_URL = '../ext/resources/images/default/s.gif';
+function post_to_url(path, params, method) {
+     method = method || "post";
+     var form = document.createElement("form");
+     form.setAttribute("method", method);
+     form.setAttribute("action", path);
+     for(var i=0; i<params.length; i++) {
+         var hiddenField = document.createElement("input");
+         hiddenField.setAttribute("type", "hidden");
+         hiddenField.setAttribute("name", params[i].name);
+         hiddenField.setAttribute("value", params[i].value);
+         form.appendChild(hiddenField);
+     }
+     document.body.appendChild(form);
+     form.submit();
+}
 
 Ext.override(Date, {
 			toUTC : function() {
