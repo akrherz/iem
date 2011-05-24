@@ -243,26 +243,7 @@ Ext.onReady(function() {
 					msg : 'Loading Data...'
 				},
 				store : eventStore,
-				tbar : [{
-					id : 'grid-excel-button',
-					icon : '../lsr/icons/excel.png',
-					text : 'Export to Excel...',
-					handler : function() {
-						var xd = gp.getExcelXml(true);
-						if (Ext.isIE6 || Ext.isIE7 || Ext.isIE8 || Ext.isSafari
-								|| Ext.isSafari2 || Ext.isSafari3) {
-							var dataURL = '../lsr/exportexcel.php';
-							params = [{
-										name : 'ex',
-										value : xd
-									}];
-							post_to_url(dataURL, params, 'post');
-						} else {
-							document.location = 'data:application/vnd.ms-excel;base64,'
-									+ Base64.encode(xd);
-						}
-					}
-				}],
+				tbar : [],
 				columns : [{
 							'header' : 'Event ID',
 							dataIndex : 'eventid',
@@ -319,5 +300,11 @@ Ext.onReady(function() {
 			});
 	gp.render('mytable');
 	gp.doLayout();
+        var exportButton = new Ext.ux.Exporter.Button({
+          component: gp,
+          text     : "Download as .xls"
+        });
+
+        gp.getTopToolbar().add(exportButton);
 
 });
