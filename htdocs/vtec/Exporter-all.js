@@ -1,73 +1,100 @@
 /**
- * allows for downloading of grid data (store) directly into excel
- * Method: extracts data of gridPanel store, uses columnModel to construct XML excel document,
- * converts to Base64, then loads everything into a data URL link.
- *
- * @author		Animal		<extjs support team>
- *
- */
-
-/**
- * base64 encode / decode
- * 
- * @location 	http://www.webtoolkit.info/
- *
- */
+*
+*  Base64 encode / decode
+*  http://www.webtoolkit.info/
+*
+**/
 
 var Base64 = (function() {
-    // Private property
-    	var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-    // Private method for UTF-8 encoding
-	    function utf8Encode(string) {
-	        string = string.replace(/\r\n/g,"\n");
-	        var utftext = "";
-	        for (var n = 0; n < string.length; n++) {
-	            var c = string.charCodeAt(n);
-	            if (c < 128) {
-	                utftext += String.fromCharCode(c);
-	            }
-	            else if((c > 127) && (c < 2048)) {
-	                utftext += String.fromCharCode((c >> 6) | 192);
-	                utftext += String.fromCharCode((c & 63) | 128);
-	            }
-	            else {
-	                utftext += String.fromCharCode((c >> 12) | 224);
-	                utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-	                utftext += String.fromCharCode((c & 63) | 128);
-	            }
-	        }
-	        return utftext;
-	    }
+    // private property
+    var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-    // Public method for encoding
-	    return {
-	        encode : (typeof btoa == 'function') ? function(input) { return btoa(input); } : function (input) {
-	            var output = "";
-	            var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-	            var i = 0;
-	            input = utf8Encode(input);
-	            while (i < input.length) {
-	                chr1 = input.charCodeAt(i++);
-	                chr2 = input.charCodeAt(i++);
-	                chr3 = input.charCodeAt(i++);
-	                enc1 = chr1 >> 2;
-	                enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-	                enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-	                enc4 = chr3 & 63;
-	                if (isNaN(chr2)) {
-	                    enc3 = enc4 = 64;
-	                } else if (isNaN(chr3)) {
-	                    enc4 = 64;
-	                }
-	                output = output +
-	                keyStr.charAt(enc1) + keyStr.charAt(enc2) +
-	                keyStr.charAt(enc3) + keyStr.charAt(enc4);
-	            }
-	            return output;
-	        }
-	    };
+    // private method for UTF-8 encoding
+    function utf8Encode(string) {
+        string = string.replace(/\r\n/g,"\n");
+        var utftext = "";
+        for (var n = 0; n < string.length; n++) {
+            var c = string.charCodeAt(n);
+            if (c < 128) {
+                utftext += String.fromCharCode(c);
+            }
+            else if((c > 127) && (c < 2048)) {
+                utftext += String.fromCharCode((c >> 6) | 192);
+                utftext += String.fromCharCode((c & 63) | 128);
+            }
+            else {
+                utftext += String.fromCharCode((c >> 12) | 224);
+                utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+                utftext += String.fromCharCode((c & 63) | 128);
+            }
+        }
+        return utftext;
+    }
+
+    // public method for encoding
+    return {
+        encode : (typeof btoa == 'function') ? function(input) { return btoa(input); } : function (input) {
+            var output = "";
+            var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+            var i = 0;
+            input = utf8Encode(input);
+            while (i < input.length) {
+                chr1 = input.charCodeAt(i++);
+                chr2 = input.charCodeAt(i++);
+                chr3 = input.charCodeAt(i++);
+                enc1 = chr1 >> 2;
+                enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+                enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+                enc4 = chr3 & 63;
+                if (isNaN(chr2)) {
+                    enc3 = enc4 = 64;
+                } else if (isNaN(chr3)) {
+                    enc4 = 64;
+                }
+                output = output +
+                keyStr.charAt(enc1) + keyStr.charAt(enc2) +
+                keyStr.charAt(enc3) + keyStr.charAt(enc4);
+            }
+            return output;
+        }
+    };
 })();
+
+Ext.LinkButton = Ext.extend(Ext.Button, {
+    template: new Ext.Template(
+        '<table border="0" cellpadding="0" cellspacing="0" class="x-btn-wrap"><tbody><tr>',
+        '<td class="x-btn-left"><i> </i></td><td class="x-btn-center"><a class="x-btn-text" href="{1}" target="{2}">{0}</a></td><td class="x-btn-right"><i> </i></td>',
+        "</tr></tbody></table>"),
+    
+    onRender:   function(ct, position){
+        var btn, targs = [this.text || ' ', this.href, this.target || "_self"];
+        if(position){
+            btn = this.template.insertBefore(position, targs, true);
+        }else{
+            btn = this.template.append(ct, targs, true);
+        }
+        var btnEl = btn.child("a:first");
+        btnEl.on('focus', this.onFocus, this);
+        btnEl.on('blur', this.onBlur, this);
+
+        this.initButtonEl(btn, btnEl);
+        Ext.ButtonToggleMgr.register(this);
+    },
+
+    onClick : function(e){
+        if(e.button != 0){
+            return;
+        }
+        if(!this.disabled){
+            this.fireEvent("click", this, e);
+            if(this.handler){
+                this.handler.call(this.scope || this, this, e);
+            }
+        }
+    }
+
+});
 
 Ext.override(Ext.grid.GridPanel, {
     getExcelXml: function(includeHidden) {
@@ -108,10 +135,10 @@ Ext.override(Ext.grid.GridPanel, {
                     '<ss:Interior ss:Pattern="Solid" ss:Color="#A3C9F1" />' +
                 '</ss:Style>' +
                 '<ss:Style ss:ID="even">' +
-                    '<ss:Interior ss:Pattern="Solid" ss:Color="#FFFFFF" />' +
+                    '<ss:Interior ss:Pattern="Solid" ss:Color="#CCFFFF" />' +
                 '</ss:Style>' +
                 '<ss:Style ss:Parent="even" ss:ID="evendate">' +
-                    '<ss:NumberFormat ss:Format="m/d/yy\ h:mm;@" />' +
+                    '<ss:NumberFormat ss:Format="[ENG][$-409]dd\-mmm\-yyyy;@" />' +
                 '</ss:Style>' +
                 '<ss:Style ss:Parent="even" ss:ID="evenint">' +
                     '<ss:NumberFormat ss:Format="0" />' +
@@ -120,10 +147,10 @@ Ext.override(Ext.grid.GridPanel, {
                     '<ss:NumberFormat ss:Format="0.00" />' +
                 '</ss:Style>' +
                 '<ss:Style ss:ID="odd">' +
-                    '<ss:Interior ss:Pattern="Solid" ss:Color="#EEEEEE" />' +
+                    '<ss:Interior ss:Pattern="Solid" ss:Color="#CCCCFF" />' +
                 '</ss:Style>' +
                 '<ss:Style ss:Parent="odd" ss:ID="odddate">' +
-                    '<ss:NumberFormat ss:Format="m/d/yy\ h:mm;@" />' +
+                    '<ss:NumberFormat ss:Format="[ENG][$-409]dd\-mmm\-yyyy;@" />' +
                 '</ss:Style>' +
                 '<ss:Style ss:Parent="odd" ss:ID="oddint">' +
                     '<ss:NumberFormat ss:Format="0" />' +
@@ -137,7 +164,8 @@ Ext.override(Ext.grid.GridPanel, {
     },
 
     createWorksheet: function(includeHidden) {
-	// Calculate cell data types and extra class names which affect formatting
+
+//      Calculate cell data types and extra class names which affect formatting
         var cellType = [];
         var cellTypeClass = [];
         var cm = this.getColumnModel();
@@ -153,11 +181,6 @@ Ext.override(Ext.grid.GridPanel, {
                     '<ss:Data ss:Type="String">' + cm.getColumnHeader(i) + '</ss:Data>' +
                     '<ss:NamedCell ss:Name="Print_Titles" /></ss:Cell>';
                 var fld = this.store.recordType.prototype.fields.get(cm.getDataIndex(i));
-                if (cm.getDataIndex(i) == ""){
-                        cellType.push("String");
-                        cellTypeClass.push("");
-                        continue;
-                }
                 switch(fld.type) {
                     case "int":
                         cellType.push("Number");
@@ -190,7 +213,7 @@ Ext.override(Ext.grid.GridPanel, {
             width: Math.floor(totalWidthInPixels * 30) + 50
         };
 
-		// Generate worksheet header details.
+//      Generate worksheet header details.
         var t = '<ss:Worksheet ss:Name="' + this.title + '">' +
             '<ss:Names>' +
                 '<ss:NamedRange ss:Name="Print_Titles" ss:RefersTo="=\'' + this.title + '\'!R1:R2" />' +
@@ -202,14 +225,15 @@ Ext.override(Ext.grid.GridPanel, {
                 '<ss:Row ss:Height="38">' +
                     '<ss:Cell ss:StyleID="title" ss:MergeAcross="' + (visibleColumnCount - 1) + '">' +
                       '<ss:Data xmlns:html="http://www.w3.org/TR/REC-html40" ss:Type="String">' +
-                        '<html:B>Local Storm Reports (timestamps are UTC)</html:B></ss:Data><ss:NamedCell ss:Name="Print_Titles" />' +
+                        '<html:B><html:U><html:Font html:Size="15">' + this.title +
+                        '</html:Font></html:U></html:B>Generated by ExtJs</ss:Data><ss:NamedCell ss:Name="Print_Titles" />' +
                     '</ss:Cell>' +
                 '</ss:Row>' +
                 '<ss:Row ss:AutoFitHeight="1">' +
-                headerXml +
+                headerXml + 
                 '</ss:Row>';
 
-		// Generate the data rows from the data in the Store
+//      Generate the data rows from the data in the Store
         for (var i = 0, it = this.store.data.items, l = it.length; i < l; i++) {
             t += '<ss:Row>';
             var cellClass = (i & 1) ? 'odd' : 'even';
@@ -218,10 +242,9 @@ Ext.override(Ext.grid.GridPanel, {
             for (var j = 0; j < cm.getColumnCount(); j++) {
                 if (includeHidden || !cm.isHidden(j)) {
                     var v = r[cm.getDataIndex(j)];
-                    t += '<ss:Cell ss:StyleID="' + cellClass + cellTypeClass[k] + '"><ss:Data ss:Type="' + cellType[j] + '">';
-                        if (cm.getDataIndex(j) == ""){ }
-                        else if (cellType[k] == 'DateTime') {
-                            t += v.format('Y-m-d\\TH:i:s');
+                    t += '<ss:Cell ss:StyleID="' + cellClass + cellTypeClass[k] + '"><ss:Data ss:Type="' + cellType[k] + '">';
+                        if (cellType[k] == 'DateTime') {
+                            t += v.format('Y-m-d');
                         } else {
                             t += v;
                         }
@@ -256,3 +279,4 @@ Ext.override(Ext.grid.GridPanel, {
         return result;
     }
 });
+

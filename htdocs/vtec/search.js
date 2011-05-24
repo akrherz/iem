@@ -126,6 +126,26 @@ Ext.onReady(function() {
 								{
 									name : 'phenomena'
 								}, {
+			name : 'pstring',
+			convert : function(val, record){
+				rec = pDict.getById(record.phenomena);
+				if (rec) {
+					return rec.data.name;
+				} else {
+					return record.phenomena;
+				}
+			}
+		},{
+			name : 'sig_string',
+			convert : function(val, record){
+				rec = sDict.getById(record.significance);
+				if (rec) {
+					return rec.data.name;
+				} else {
+					return record.phenomena;
+				}
+			}
+		},{
 									name : 'significance'
 								}, {
 									name : 'expire',
@@ -243,7 +263,26 @@ Ext.onReady(function() {
 					msg : 'Loading Data...'
 				},
 				store : eventStore,
-				tbar : [],
+				tbar : [{
+	                                        id : 'grid-excel-button',
+	                                        icon : '../lsr/icons/excel.png',
+	                                        text : 'Export to Excel...',
+	                                        handler : function() {
+	                                                var xd = gp.getExcelXml(true);
+	                                                if (Ext.isIE6 || Ext.isIE7 || Ext.isIE8 || Ext.isSafari
+	                                                                || Ext.isSafari2 || Ext.isSafari3) {
+	                                                        var dataURL = 'exportexcel.php';
+	                                                        params = [{
+	                                                                                name : 'ex',
+	                                                                                value : xd
+	                                                                        }];
+	                                                        post_to_url(dataURL, params, 'post');
+	                                                } else {
+	                                                        document.location = 'data:application/vnd.ms-excel;base64,'
+	                                                                        + Base64.encode(xd);
+	                                                }
+	                                        }
+                                }],
 				columns : [{
 							'header' : 'Event ID',
 							dataIndex : 'eventid',
@@ -257,30 +296,21 @@ Ext.onReady(function() {
 						}, {
 							'header' : 'Phenomena',
 							sortable : true,
-							dataIndex : 'phenomena',
-							width : 150,
-							renderer : function(value) {
-								rec = pDict.getById(value);
-
-								if (rec) {
-									return rec.data.name;
-								} else {
-									return value;
-								}
-							}
+							dataIndex : 'pstring',
+							width : 150
 						}, {
 							'header' : 'Significance',
 							sortable : true,
-							dataIndex : 'significance',
-							renderer : function(value) {
-								rec = sDict.getById(value);
-								if (rec) {
-									return rec.data.name;
-								} else {
-									return value;
-								}
-							}
+							dataIndex : 'sig_string'
 						}, {
+	header : 'VTEC Phenomena',
+	hidden : true,
+	dataIndex : 'phenomena'
+},{
+	header : 'VTEC Significance',
+	hidden : true,
+	dataIndex : 'significance'
+},{
 							'header' : 'Issued',
 							sortable : true,
 							dataIndex : 'issue',
@@ -300,11 +330,5 @@ Ext.onReady(function() {
 			});
 	gp.render('mytable');
 	gp.doLayout();
-        var exportButton = new Ext.ux.Exporter.Button({
-          component: gp,
-          text     : "Download as .xls"
-        });
-
-        gp.getTopToolbar().add(exportButton);
 
 });
