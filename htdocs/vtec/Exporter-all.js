@@ -214,9 +214,9 @@ Ext.override(Ext.grid.GridPanel, {
         };
 
 //      Generate worksheet header details.
-        var t = '<ss:Worksheet ss:Name="' + this.title + '">' +
+        var t = '<ss:Worksheet ss:Name="' + this.ugc + '">' +
             '<ss:Names>' +
-                '<ss:NamedRange ss:Name="Print_Titles" ss:RefersTo="=\'' + this.title + '\'!R1:R2" />' +
+                '<ss:NamedRange ss:Name="Print_Titles" ss:RefersTo="=\'' + this.ugc + '\'!R1:R2" />' +
             '</ss:Names>' +
             '<ss:Table x:FullRows="1" x:FullColumns="1"' +
                 ' ss:ExpandedColumnCount="' + visibleColumnCount +
