@@ -223,6 +223,7 @@ Ext.onReady(function() {
 										ugc : record.data.ugc
 									}
 								});
+						gp.ugc = record.data.ugc;
 						gp.setTitle("VTEC Events for: " + record.data.nicename);
 						return false;
 					}
@@ -271,6 +272,7 @@ Ext.onReady(function() {
 			});
 
 	var gp = new Ext.grid.GridPanel({
+			ugc : '',
 				height : 500,
 				width : 650,
 				title : 'Events Listing',
