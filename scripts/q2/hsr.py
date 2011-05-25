@@ -60,11 +60,12 @@ def doit(gts):
             print "Missing", fp
             continue
         nc = netCDF3.Dataset( fp )
-        val = nc.variables["hsr"][:,:] / 10.0 # convert to mm
+        val = nc.variables["hsr"][:,:] / 10.0 # convert to dBZ
         # Bump up by one, so that we can set missing to color index 0
-        val += 1.0
+        #val += 1.0
         # Base is -30dBZ, so we add 60 to get us above zero, I hope
-        val = numpy.where(val < 1.0, 0., val) + 60.0
+        val = (val + 30.0) * 2.0
+        val = numpy.where( val < 0., 0., val)
 
         ysz, xsz = numpy.shape(val)
         x0 = (tiles[tile][0] - west) * 100.0
