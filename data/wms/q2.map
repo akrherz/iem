@@ -34,6 +34,43 @@ WEB
    "wms_contactorganization" "Iowa State University"
   END
 END
+#------------------------------------------------------
+#
+LAYER
+  NAME "q2_hsr"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/4326/q2/hsr.png"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:4326"
+  END
+  METADATA
+    "wms_title" "NMQ Hybrid Scan Reflectivity"
+    "wms_srs"   "EPSG:4326 EPSG:26915"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
+
+LAYER
+  NAME "q2_hsr_900913"
+  STATUS ON
+  DATA "/home/ldm/data/gis/images/900913/q2/hsr.tif"
+  TYPE RASTER
+  MINSCALE 0
+  MAXSCALE 4650000000000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NMQ Hybrid Scan Reflectivity"
+    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+  OFFSITE 0 0 0
+END
 
 #------------------------------------------------------
 #
