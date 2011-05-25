@@ -59,7 +59,7 @@ def make_fp(tile, gts):
     """
     Return a string for the filename expected for this timestamp
     """
-    return "/mnt/a4/data/%s/nmq/tile%s/data/QPESUMS/grid/mosaic3d_nc/%s00.nc" % (
+    return "/mnt/a4/data/%s/nmq/tile%s/data/QPESUMS/grid/mosaic2d_nc/%s00.nc" % (
         gts.strftime("%Y/%m/%d"), tile, 
         gts.strftime("%Y%m%d-%H%M") )
     
@@ -80,7 +80,7 @@ def doit(gts):
             print "Missing", fp
             continue
         nc = netCDF3.Dataset( fp )
-        val = nc.variables["mrefl_mosaic"][0,:,:] / 10.0 # convert to mm
+        val = nc.variables["lcref"][:,:] / 10.0 # convert to mm
         # Bump up by one, so that we can set missing to color index 0
         val += 1.0
         val = numpy.where(val < 1.0, 0., val)
@@ -108,18 +108,18 @@ def doit(gts):
   %s""" % (gts.strftime("%Y%m%d%H%M"), west, north))
     o.close()
     # Inject WLD file
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/br_%s.wld wld' /tmp/q2.wld" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/lcref_%s.wld wld' /tmp/q2.wld" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
     os.system(pqstr)
     # Now we inject into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/br.png GIS/q2/br_%s.png png' q2.png" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/lcref.png GIS/q2/lcref_%s.png png' q2.png" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
     os.system(pqstr)
     # Create 900913 image
     cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 q2.png q2.tif"
     os.system( cmd )
     # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/br.tif GIS/q2/br_%s.tif tif' q2.tif" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/lcref.tif GIS/q2/lcref_%s.tif tif' q2.tif" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
     os.system(pqstr)
     
