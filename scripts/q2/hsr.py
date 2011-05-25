@@ -67,7 +67,7 @@ def doit(gts):
         #val += 1.0
         # Base is -30dBZ, so we add 60 to get us above zero, I hope
         #val = (val + 30.0) * 2.0
-        val = numpy.where( val > 0., (val +32.) * 2.0, val)
+        val = numpy.where( val > -33., (val +32.) * 2.0, val)
         val = numpy.where( val < -990., 0., val)
         val = numpy.where( val < 0., 1., val)
 
