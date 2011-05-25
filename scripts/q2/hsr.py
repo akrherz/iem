@@ -66,9 +66,10 @@ def doit(gts):
         # Bump up by one, so that we can set missing to color index 0
         #val += 1.0
         # Base is -30dBZ, so we add 60 to get us above zero, I hope
-        val = (val + 30.0) * 2.0
+        #val = (val + 30.0) * 2.0
+        val = numpy.where( val > 0., val * 2.0, val)
         val = numpy.where( val < -9990., 0., val)
-        val = numpy.where( val < -990., 1., val)
+        val = numpy.where( val < 0., 1., val)
 
         ysz, xsz = numpy.shape(val)
         x0 = (tiles[tile][0] - west) * 100.0
