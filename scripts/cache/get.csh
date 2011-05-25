@@ -77,7 +77,7 @@ if ($sz > 1000) then
 	/mesonet/local/bin/gdaladdo -q wv_900913.tif 2 4 6 18
 endif
 
-foreach mach (iemvs100.local iemvs101.local iemvs102.local iemvs103.local iemvs104.local iemvs105.local iemvs106.local iemvs107.local iemvs108.local iem21.local)
+foreach mach (iemvs100.local iemvs101.local iemvs102.local iemvs103.local iemvs104.local iemvs105.local iemvs106.local iemvs107.local iemvs108.local iem21.local iem50.local)
   scp -q GoesWest1V_latest.tif ldm@${mach}:/tmp/west1V_0.tif
   ssh -q ldm@${mach} "cat /tmp/west1V_0.tif | csh ~/pyWWA/rotate.csh gis/images/4326/goes/west1V_ tif"
   scp -q GoesWest1V_latest.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/west1V_0.tfw
