@@ -12,7 +12,9 @@ tests = [
  'LSX.TO.16', 'ILX.TO.2', 'RLX.TO.2', 'RLX.TO.3', 'MPX.TO.5', 'MPX.TO.6',
  'MPX.TO.7', 'FSD.TO.16', 'FSD.TO.17', 'FSD.TO.18', 'ARX.TO.9', 'ARX.TO.10',
  'ARX.TO.11', 'GRB.TO.17', 'GRB.TO.18', 'GRB.TO.19', 'DLH.TO.2', 'DLH.TO.3',
- 'MKX.TO.2', 'MKX.TO.3'
+ 'MKX.TO.2', 'MKX.TO.3', 'MEG.SV.449', 'MEG.SV.450', 'MEG.SV.451','MEG.SV.452',
+ 'MEG.SV.453','MEG.SV.454','MEG.SV.455','MEG.SV.456','MEG.SV.457','MEG.SV.458',
+ 'MEG.SV.459','MEG.SV.460','MEG.SV.461','CAE.SV.113'
 ]
 
 sql = "SELECT wfo, min(eventid), max(eventid), phenomena from warnings_%s \
