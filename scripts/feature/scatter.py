@@ -2,7 +2,7 @@
 import iemdb, math
 import numpy
 from matplotlib import pyplot as plt
-ASOS = iemdb.connect("asos", bypass=True)
+ASOS = iemdb.connect("coop", bypass=True)
 acursor = ASOS.cursor()
 
 
@@ -15,23 +15,30 @@ def wchtidx(tmpf, sped):
   return 35.74 + .6215 * tmpf - 35.75 * wci + \
      + .4275 * tmpf * wci
 
-#  min(case when extract(month from day) in (8,9) then low else 100 end), 
 acursor.execute("""
-    SELECT tmpf, sknt from alldata where station = 'DSM'
-    and tmpf < 0 and sknt >= 3 and tmpf > -50 and sknt < 100""")
-tmpf = []
-wchill = []
+SELECT day, high, snow
+from alldata where stationid = 'ia0200' 
+and year < 2011 ORDER by day ASC
+""")
+snow = []
+highs = []
+takenext = False
 for row in acursor:
-  tmpf.append( float(row[0]) )
-  wchill.append( wchtidx(row[0], row[1]) )
+    if takenext:
+        highs.append( float(row[1]) )
+    if row[2] > 0:
+        snow.append( float(row[2]) )
+        takenext = True
+    else:
+        takenext = False
 
+snow = numpy.array( snow )
+highs = numpy.array( highs )
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 
-tmpf = np.array( tmpf )
-wchill = np.array( wchill )
 
 nullfmt   = NullFormatter()         # no labels
 
@@ -57,40 +64,41 @@ axHistx.xaxis.set_major_formatter(nullfmt)
 axHisty.yaxis.set_major_formatter(nullfmt)
 
 # the scatter plot:
-axScatter.scatter(tmpf, wchill, c='b', edgecolor='none',
-                  s=50, alpha=0.05)
+axScatter.scatter(snow, highs, c='b', edgecolor='none',
+                  s=50, alpha=0.1)
+axScatter.plot([0,20],[32,32], c='r')
 
 #axScatter.set_xticks( (1,31,59,90,120,151,181,212,243,274,303,334) )
 #axScatter.set_xticklabels( ("Jan","Feb","Mar","Apr","May 1","Jun 1","Jul 1","Aug 1","Sep 1","Oct 1","Nov","Dec") )
 
-axScatter.set_xlim( (-30., 0.5) )
-axScatter.set_ylim( (-50., 0.5) )
+axScatter.set_xlim( (-0.5, 20) )
+axScatter.set_ylim( (-20., 80) )
 axScatter.grid(True)
-axScatter.set_ylabel("Wind Chill $^{\circ}\mathrm{F}$")
-axScatter.set_xlabel("Temperature $^{\circ}\mathrm{F}$ when wind > 2 knots")
+axScatter.set_ylabel("Next Day High Temperature $^{\circ}\mathrm{F}$")
+axScatter.set_xlabel("24 Hour Snowfall [in]")
 
 
-xbins = np.arange(-30.5, 0. + 0.6, 1)
-axHistx.hist(tmpf, bins=xbins)
+xbins = np.arange(-0.5, 20, 1)
+axHistx.hist(snow, bins=xbins)
 #axHistx.set_xticks( (1,31,59,90,120,151,181,212,243,274,303,334) )
-axHistx.set_xlim( (-30., 0.5) )
-axHistx.set_title("Des Moines [1948-2010] Air Temperature & Wind Chill")
+axHistx.set_xlim( (-0.5, 20) )
+axHistx.set_title("Ames Snowfall & Next Day High Temperature")
 axHistx.grid(True)
-axHistx.set_ylabel("Hours/Year")
-axHistx.set_yticks( numpy.arange(0,63*14,126))
-axHistx.set_yticklabels( numpy.arange(0,14,2) )
+axHistx.set_ylabel("Events")
+#axHistx.set_yticks( numpy.arange(0,63*14,126))
+#axHistx.set_yticklabels( numpy.arange(0,14,2) )
 
 
-ybins = np.arange(-50.5,0.6, 1) 
-axHisty.hist(wchill, bins=ybins, orientation='horizontal')
+ybins = np.arange(-20,80, 5) 
+axHisty.hist(highs, bins=ybins, orientation='horizontal')
 axHisty.grid(True)
 axHisty.set_ylim( axScatter.get_ylim() )
-axHisty.set_xlim(0,500)
-axHisty.set_xticks( numpy.arange(0,63*8,63))
-axHisty.set_xticklabels( numpy.arange(0,8) )
-axHisty.set_xlabel("Hours/Year")
+axHisty.set_xlim(0,400)
+axHisty.set_xticks( numpy.arange(0,400,100))
+#axHisty.set_xticklabels( numpy.arange(0,8) )
+axHisty.set_xlabel("Events")
 
-fig.savefig("110121.png", dpi=(40))
+fig.savefig("test.ps")
 import iemplot
-#iemplot.makefeature("test")
+iemplot.makefeature("test")
 #plt.savefig("test.png")
