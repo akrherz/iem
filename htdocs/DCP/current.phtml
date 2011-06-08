@@ -19,12 +19,12 @@
  include("$rootpath/include/iemaccessob.php");
 
  $iem = new IEMAccess();
- $network = $iem->getNetwork($network);
+ $ntbl = $iem->getNetwork($network);
 
 
 
  $db = Array();
- while (list($site, $iemob) = each($network) ){
+ while (list($site, $iemob) = each($ntbl) ){
   $db[$site] = Array();
   $db[$site]['tmpf'] = "";
   $db[$site]['max_tmpf'] = "";
