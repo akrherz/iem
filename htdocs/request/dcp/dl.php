@@ -86,17 +86,43 @@ if ($what == "download"){
 
  $result = pg_exec($connection, $query1);
  $rs =  pg_exec($connection, $sqlStr);
-
  pg_close($connection);
-echo "station".$d[$delim] ."station_name". $d[$delim] ."valid(GMT)". $d[$delim] ."variable". $d[$delim] ."value\n";
-
+ 
+ /* Load data into an array, yucky... */
+ $data = Array();
+ $cols = Array();
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
-  $sid = $row["station"];
-  echo $sid . $d[$delim] . $cities[$sid]["name"] ;
-  echo $d[$delim] . $row["dvalid"] . $d[$delim];
-  echo $row["key"]. $d[$delim] . $row["value"] ;
+ 	$valid = $row["dvalid"];
+ 	$sid = $row["station"];
+    if (! array_key_exists($sid, $data)){
+ 		$data[$sid] = Array();
+ 	}
+ 	if (! array_key_exists($valid, $data[$sid])){
+ 		$data[$sid][$valid] = Array();
+ 	}
+ 	$data[$sid][$valid][$row["key"]] = $row["value"];
+    $cols[$row["key"]] = 1; 	
+ }
+ 
+ echo "station".$d[$delim] ."station_name". $d[$delim] ."valid(GMT)". $d[$delim];
+ while(list($key,$val)=each($cols)){
+ 	echo $key . $d[$delim];
+ }
+ echo "\n";
+
+ 
+ while(list($sid,$val)=each($data)){
+ 	$sname = $cities[$sid]["name"];
+ 	while(list($key,$val)=each($data[$sid])){
+  echo $sid . $d[$delim] . $sname;
+  echo $d[$delim] . $key ;
+  reset($cols);
+  while(list($vkey,$val)=each($cols)){
+ 	echo @$data[$sid][$key][$vkey] . $d[$delim];
+  }
   echo "\n";
+ 	}
  }
 
 ?>
