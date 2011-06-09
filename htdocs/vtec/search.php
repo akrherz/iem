@@ -6,7 +6,7 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="../ext-3.3.3/resource
 <script type="text/javascript" src="../ext-3.3.3/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js?v=3"></script>
 <script type="text/javascript" src="Exporter-all.js"></script>
-<script type="text/javascript" src="search.js?v=4"></script>';
+<script type="text/javascript" src="search.js?v=5"></script>';
 $THISPAGE ="severe-vtec";
 $TITLE = "VTEC Search by County/Zone";
 include("$rootpath/include/header.php");
