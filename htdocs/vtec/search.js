@@ -220,7 +220,9 @@ Ext.onReady(function() {
 						eventStore.load({
 									add : false,
 									params : {
-										ugc : record.data.ugc
+										ugc : record.data.ugc,
+										sdate : Ext.getCmp('sdate').getValue().format('Y/m/d'),
+										edate : Ext.getCmp('edate').getValue().format('Y/m/d')
 									}
 								});
 						gp.ugc = record.data.ugc;
@@ -261,14 +263,45 @@ Ext.onReady(function() {
 		}
 	});
 
+	/* Date Selectors */
+	var sdate = new Ext.form.DateField({
+		fieldLabel : 'Start Date',
+		id : 'sdate',
+		format : 'd M Y',
+		minValue : new Date('1/1/1986'),
+		maxValue : new Date(),
+		value : new Date('1/1/1986')
+	});
+	var edate = new Ext.form.DateField({
+		fieldLabel : 'End Date',
+		id : 'edate',
+		format : 'd M Y',
+		minValue : new Date('1/1/1986'),
+		maxValue : new Date(),
+		value : new Date()
+	});
+	
+	
 	var form = new Ext.form.FormPanel({
 				applyTo : 'myform',
 				labelAlign : 'top',
 				width : 320,
 				style : 'padding-left: 5px;',
 				title : 'Select County/Zone to search for...',
-				items : [stateCB, ugcCB]
-
+				items : [stateCB, ugcCB, sdate, edate],
+				buttons : [{
+					text : 'Load Grid with Settings Above',
+					handler : function(){
+						eventStore.load({
+							add : false,
+							params : {
+								ugc : ugcCB.getValue(),
+								sdate : Ext.getCmp('sdate').getValue().format('Y/m/d'),
+								edate : Ext.getCmp('edate').getValue().format('Y/m/d')
+							}
+						});
+					}
+				}]
 			});
 
 	var gp = new Ext.grid.GridPanel({
