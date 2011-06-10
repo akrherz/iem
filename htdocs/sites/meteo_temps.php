@@ -11,7 +11,8 @@ $srad = Array();
 
 $dbconn = iemdb('access');
 $rs = pg_prepare($dbconn, "SELECT", "SELECT * from current_log WHERE
-      station = $1 and network = $2 ORDER by valid ASC");
+      station = $1 and network = $2 and tmpf BETWEEN -90 and 140 and dwpf BETWEEN -90 and 140
+      ORDER by valid ASC");
 $rs = pg_execute($dbconn, "SELECT", array($station, $network) );
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
