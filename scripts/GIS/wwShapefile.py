@@ -30,7 +30,7 @@ dbf.add_field("STATUS", dbflib.FTString, 3, 0)
 
 
 sql = """SELECT *, astext(geom) as tgeom from warnings_%s WHERE 
-	expire > '%s' and ST_IsValid(geom) ORDER by type ASC""" % (eTS.year, 
+	expire > '%s' and ((gtype = 'P' and ST_IsValid(geom)) or gtype = 'C') ORDER by type ASC""" % (eTS.year, 
         eTS.strftime("%Y-%m-%d %H:%M"),)
 #print sql
 rs = mydb.query(sql).dictresult()
