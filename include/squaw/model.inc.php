@@ -150,7 +150,7 @@ function writeLogs()
     $s .= "\n";
   }
 
-  $this->basinlogname = "../../tmp/". time() ."-log.dat";
+  $this->basinlogname = "/var/webtmp/". time() ."-log.dat";
   $fp = fopen($this->basinlogname, 'w');
   fwrite($fp, $s);
   fclose($fp);
@@ -436,7 +436,7 @@ function plot24HCurve()
 	$graph->Add($lineplot3);
 	$graph->Add($lineplot2);
 	$graph->Add($lineplot);
-	$fref = "../../tmp/24h_". time() .".png";
+	$fref = "/var/webtmp/24h_". time() .".png";
 	$graph->Stroke($fref);
 	return $fref;
 } // End of plotRecessionCurve
@@ -509,7 +509,7 @@ function plotRecessionCurve()
 	$graph->Add($lineplot3);
 	$graph->Add($lineplot2);
 	$graph->Add($lineplot);
-	$fref = "../../tmp/10d_". time() .".png";
+	$fref = "/var/webtmp/10d_". time() .".png";
 	$graph->Stroke($fref);
 	return $fref;
 } // End of plotRecessionCurve
