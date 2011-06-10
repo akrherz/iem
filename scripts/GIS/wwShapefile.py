@@ -8,6 +8,8 @@ mydb = i["postgis"]
 if (mydb == None): 
 	sys.exit(0)
 mydb.query("SET TIME ZONE 'GMT'")
+# Don't print out annonying errors about ST_IsValid failures
+mydb.query("set client_min_messages = ERROR")
 
 os.chdir("/tmp")
 
