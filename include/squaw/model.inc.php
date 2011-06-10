@@ -517,7 +517,7 @@ function plotRecessionCurve()
 function rainfallMap()
 {
 	global $rootpath, $basins, $mapscript;
-	dl($mapscript);
+
 
 	$map = ms_newMapObj("$rootpath/data/gis/squaw.map");
 	$map->set("width", 200);
