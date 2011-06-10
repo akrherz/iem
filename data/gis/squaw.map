@@ -25,7 +25,7 @@ WEB
   TEMPLATE bogus.html
   MINSCALE 90000
   MAXSCALE 40000000
-  IMAGEPATH "/mesonet/www/html/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
 END
 
@@ -73,7 +73,7 @@ END
 
 LAYER
   NAME iacounties
-  DATA "/mesonet/data/gis/static/shape/26915/iacounties.shp"
+  DATA "/mesonet/data/gis/static/shape/26915/iowa/iacounties.shp"
   TYPE LINE
   PROJECTION
     "init=epsg:26915"
