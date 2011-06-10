@@ -1,4 +1,4 @@
-AuthUserFile /mesonet/www/apps/squaw/security/htpasswd
+AuthUserFile /mesonet/www/apps/iemwebsite/config/admin.users
 AuthGroupFile /dev/null
 AuthName Administrative
 AuthType Basic
@@ -6,5 +6,6 @@ AuthType Basic
 <LIMIT GET>
 order deny,allow
 require user ames
+require user iowastate
 </LIMIT>
 
