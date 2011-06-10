@@ -438,7 +438,7 @@ function plot24HCurve()
 	$graph->Add($lineplot);
 	$fref = "/var/webtmp/24h_". time() .".png";
 	$graph->Stroke($fref);
-	return $fref;
+	return "/tmp/24h_". time() .".png";
 } // End of plotRecessionCurve
 
 function plotRecessionCurve()
@@ -511,7 +511,7 @@ function plotRecessionCurve()
 	$graph->Add($lineplot);
 	$fref = "/var/webtmp/10d_". time() .".png";
 	$graph->Stroke($fref);
-	return $fref;
+	return "/tmp/10d_". time() .".png";
 } // End of plotRecessionCurve
 
 function rainfallMap()
