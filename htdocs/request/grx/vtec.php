@@ -52,9 +52,9 @@ for($i=0;$row=@pg_fetch_array($result,$i);$i++){
 	echo "\n;". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] ." ". $row["eventid"] ."\n";
 	
 	if ($row["phenomena"] == "SV"){
-    	$c = "255, 255, 0";
+    	$c = "255, 255, 0, 255";
     } else { 
-    	$c = "255, 0, 0";
+    	$c = "255, 0, 0, 255";
     }
     echo "Color: $c\n";
     echo "Line:\n";
