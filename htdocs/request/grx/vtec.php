@@ -57,7 +57,7 @@ for($i=0;$row=@pg_fetch_array($result,$i);$i++){
     	$c = "255, 0, 0, 255";
     }
     echo "Color: $c\n";
-    echo "Line:\n";
+    echo "Line: 3, 0, \"\"\n";
 	$first = true;
 	foreach($tokens as $token){
 	
@@ -67,7 +67,7 @@ for($i=0;$row=@pg_fetch_array($result,$i);$i++){
 			$extra = $c;
 			$first = false;
 		}
-		echo sprintf("%s, %s\n", $parts[1], $parts[0]);
+		echo sprintf("%.4f, %.4f\n", $parts[1], $parts[0]);
 	}
 	echo "End:\n\n";
 }
