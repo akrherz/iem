@@ -413,6 +413,10 @@ function resetGmap(){
      Ext.getCmp('mygpanel').gmap.setCenter(point, 9);
 
      Ext.getCmp('mygpanel').gmap.clearOverlays();
+     
+     cfg.placefile = "http://mesonet.agron.iastate.edu/request/grx/vtec.php?"+ Ext.urlEncode(getVTEC());
+     gxml = new GGeoXml(cfg.vteckml);
+     
      cfg.vteckml = "http://mesonet.agron.iastate.edu/kml/vtec.php?"+ Ext.urlEncode(getVTEC());
      gxml = new GGeoXml(cfg.vteckml);
      Ext.getCmp('mygpanel').gmap.addOverlay(gxml);
@@ -507,12 +511,23 @@ var selectform = new Ext.FormPanel({
             text      : 'County Intersection KML',
             icon      : 'icons/kml.jpg',
             cls       : 'x-btn-text-icon',
+            style     : {marginBottom:'10px'},
             listeners : {
                click  : function() {
                   window.location.href = cfg.countykml;
                }  // End of handler
             }
-          }
+          },{
+              xtype     : 'button',
+              text      : 'GR Placefile Format',
+              icon      : 'icons/kml.jpg',
+              cls       : 'x-btn-text-icon',
+              listeners : {
+                 click  : function() {
+                    window.location.href = cfg.placefile;
+                 }  // End of handler
+              }
+            }
     ]
 });
 
