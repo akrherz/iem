@@ -29,10 +29,10 @@ $phenomena = $tokens[4];
 $significance = $tokens[5];
 $eventid = intval( $tokens[6] );
 
-$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.1.0/resources/css/ext-all.css"/>
+$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css"/>
 <link rel="stylesheet" type="text/css" href="../ext/ux/form/Spinner.css"/>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.0/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.1.0/ext-all.js"></script>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="Ext.ux.GMapPanel.js"></script>
 <script type="text/javascript" src="RowExpander.js"></script>
