@@ -22,6 +22,19 @@ $rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g,
 
 $result = pg_execute($connect, "SELECT", 
                      Array($wfo, $phenomena, $eventid, $significance) );
+if (pg_num_rows($result) <= 0) {
+    $rs = pg_prepare($connect, "SELECT2", "SELECT *, astext(geom) as t, 
+           askml(geom) as kml,
+           round(area(transform(geom,2163)) / 1000000.0) as psize,
+           length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
+           from warnings_$year 
+           WHERE wfo = $1 and phenomena = $2 and 
+           eventid = $3 and significance = $4
+           and gtype = 'C'");
+
+    $result = pg_execute($connect, "SELECT2", 
+               Array($wfo, $phenomena, $eventid, $significance) );
+}
 $fp = sprintf("%s-%s-%s-%s.txt", $wfo, $phenomena, $significance, $eventid);
  header("Content-type: application/octet-stream");
  header("Content-Disposition: attachment; filename=$fp");
