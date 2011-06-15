@@ -38,7 +38,7 @@ if (pg_num_rows($result) <= 0) {
 $fp = sprintf("%s-%s-%s-%s.txt", $wfo, $phenomena, $significance, $eventid);
  header("Content-type: application/octet-stream");
  header("Content-Disposition: attachment; filename=$fp");
-echo "Refresh: 0\n";
+echo "Refresh: 99999\n";
 echo "Threshold: 999\n";
 echo "Title: VTEC $wfo ${phenomena}.${significance} $eventid\n";            
                      
