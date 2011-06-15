@@ -50,12 +50,14 @@ for($i=0;$row=@pg_fetch_array($result,$i);$i++){
 	$phenomena = $row['phenomena'];
 	$significance = $row['significance'];
 	echo "\n;". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] ." ". $row["eventid"] ."\n";
-	echo "Polygon:\n";
-    if ($row["phenomena"] == "SV"){
-    	$c = ", 255, 255, 0, 255";
+	
+	if ($row["phenomena"] == "SV"){
+    	$c = "255, 255, 0";
     } else { 
-    	$c = ", 255, 0, 0, 255";
+    	$c = "255, 0, 0";
     }
+    echo "Color: $c\n";
+    echo "Line:\n";
 	$first = true;
 	foreach($tokens as $token){
 	
@@ -65,7 +67,7 @@ for($i=0;$row=@pg_fetch_array($result,$i);$i++){
 			$extra = $c;
 			$first = false;
 		}
-		echo sprintf("%s, %s%s\n", $parts[1], $parts[0], $extra);
+		echo sprintf("%s, %s\n", $parts[1], $parts[0]);
 	}
 	echo "End:\n\n";
 }
