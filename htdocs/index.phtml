@@ -1,134 +1,329 @@
-<?php
-include("../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/cameras.inc.php");
-include("$rootpath/include/feature.php");
-include("$rootpath/include/iemprop.php");
-$feature = genFeature();
-
-$rancam = "";
-$loop = 0;
-while ($rancam == "" && $loop < 20)
-{
-  srand ((float) microtime() * 10000000);
-  $t = array_rand($cameras);
-  if (@filemtime("/home/ldm/data/camera/stills/${t}.jpg") > (time() - 1200))
-  {
-    $rancam = $t;
-  }
-  $loop += 1;
+<HTML>
+<HEAD>
+	<TITLE>Iowa Mesonet Development</TITLE>
+	<META NAME="AUTHOR" CONTENT="Daryl Herzmann">
+	<style>
+	/* Generic class for warning messages */
+.warning {
+ border:solid 1px #000;
+ background:#FCF9CE url(images/warning.png) 6px 4px no-repeat;
+ color:#222222;
+ padding-left: 40px;
+ padding-top: 10px;
+ padding-bottom: 10px;
+ text-align: left;
 }
-if ($rancam == ""){ $rancam = "KCCI-001";}
+	.sans11{ font-size: 11px; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular }
+.title { border: 10px; font-size: 24px; font-family: Helvetica, Geneva, Swiss, SunSans-Regular }
+.siders {color: black; font-weight: bold; font-size: 12px; }
+.bluet {color: blue; font-weight: bold; font-size: 14px; }
+.here {color: black; font-weight: bold; font-size: 11px;}
+.there {font-size: 11px; font-family: Arial;}
+a {font-size: 11px; color: blue; }
+	</style>
+</HEAD>
 
-$TITLE = "Iowa Environmental Mesonet";
-$HEADEXTRA = "<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS feed\" href=\"/rss.php\" />";
- include("$rootpath/include/header.php"); ?>
-The Iowa Environmental Mesonet (IEM) collects 
-environmental data from cooperating members with observing networks.  The data 
-are stored and made available on this website.
+<?php 
+	$title = "Iowa Environmental Mesonet";?>
+<BODY rightmargin="0" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" BGCOLOR="#EEEEEE">
+<div class="warning">
+The IEM website celebrates its 10th anniversary today!  Here is how the homepage looked on
+17 June 2001.  Thank you for visiting the website and support of our project.
+  All of the links on the page take you to the current homepage.
+</div>
 
-<table><tr><td valign="top">
-<div id="left">
-<a href="agweather/" class="button">
-<span class="agweather">Ag Weather</span>
-</a>
-<a href="nws/" class="button">
-<span class="nws">NWS Users</span>
-</a>
-<a href="archive/" class="button">
-<span class="book">Researchers</span>
-</a>
-<br clear="all" />
-<h3 class="heading">Daily IEM Feature: &nbsp; <a href="feature_rss.php"><img src="images/rss.gif" style="border: 0px;" alt="RSS" /></a></h3>
-<?php echo $feature; ?><br style="clear: left;" />
+<TABLE width="100%" bgcolor="white" cellspacing="0" border="0" cellpadding="0" rowspacing="0" border="0">
+<TR bgcolor="#336699"><TD colspan="5" align="CENTER">
 
-<h3 class="heading">IEM Data Networks:</h3>
-<table cellspacing="0" width="100%"><tr class="odd">
-<td> <a href="<?php echo $rooturl; ?>/ASOS/">ASOS</a> &nbsp;+&nbsp; <a href="../AWOS/">AWOS</a></td>
-<td> <i>Airport stations reporting atmospherics.</i></td></tr>
-<tr class="even">
-<td> <a href="<?php echo $rooturl; ?>/DCP/">DCP</a></td>
-<td> <i>River gauges.</i></td></tr>
-<tr class="odd">
-<td> <a href="<?php echo $rooturl; ?>/RWIS/">IaDOT RWIS</a></td>
-<td> <i>Weather and roadway pavement data.</i></td></tr>
-<tr class="even">
-<td> <a href="<?php echo $rooturl; ?>/agclimate/">ISU AgClimate</a></td>
-<td> <i>Ag, soil, &amp; weather data.</i></td></tr>
-<tr class="odd">
-<td> <a href="<?php echo $rooturl; ?>/scan/">NRCS SCAN</a></td>
-<td> <i>Current soil and weather data.</i></td></tr>
-<tr class="even">
-<td> <a href="<?php echo $rooturl; ?>/nstl_flux/">USDA-ARS-NLAE Flux</a></td>
-<td> <i>Various heat and CO2 fluxes</i></td></tr>
-<tr class="odd">
-<td> <a href="<?php echo $rooturl; ?>/COOP/">NWS COOP</a></td>
-<td> <i>Climate observations.</i></td></tr>
-<tr class="even">
-<td> <a href="<?php echo $rooturl; ?>/schoolnet/">School Net</a></td>
-<td> <i>School weather stations.</i></td></tr>
-<tr class="odd">
-<td> <a href="<?php echo $rooturl; ?>/other/">Other</a></td>
-<td> <i>Miscellaneous sites.</i></td></tr>
-</table><p />
+	<font color="white" class="title"><?php print($title); ?></font>
 
-<div style="text-align: center;">
-<a href="http://www.agron.iastate.edu/initiatives/default.html"><img
-src="images/ptfmark.gif" alt="Agronomy Path to the Future" style="border:
-0px;" /></a>
-  &nbsp; &nbsp; 
-  <a href="http://www.iihr.uiowa.edu"><img src="images/iihrlogo.jpg"
-  alt="IIHR - University of Iowa" style="border:
-0px;" /></a>
+</TD></TR>
 
-  &nbsp; &nbsp; 
+<TR bgcolor="black"><TH colspan="5">
+	<span><font color="white"  class="sans11"> Department of Agronomy & Iowa State
+University</font></span>
+</TH></TR>
 
- <a href="http://www.dot.state.ia.us"><img src="images/doticon.gif"
- alt="DOT" style="border:
-0px;" /></a>
-  <br />&nbsp; &nbsp;
+<TR>
 
-  <a href="http://www.iastate.edu"><img src="images/isuicon.gif" alt="ISU"
-  style="border:
-0px;" /></a>
-  &nbsp; &nbsp; 
-  <a href="http://www.crh.noaa.gov/dmx/"><img src="images/nws.gif"
-  alt="NWS" style="border: 0px;" height="40" /></a></div></div></td><td valign="top">
+<TD bgcolor="#ccccff" width="3"><img src="/icons/spacer.gif" border="0" width="3"></TD>
+<TD bgcolor="#ccccff" valign="TOP" width="120">
+	<BR>
+	
+	<!-- Feature Section -->
+	<TABLE bgcolor="black" cellpadding="2" rowspacing="0" cellspacing="0" border="0" width="100%">
+	<TR><TD>
 
-<div id="right" style="padding-left: 3px;">
-<?php
-if (get_iemprop("homepage.lsrmap.on") == 'true'){ 
-	?>
-	<h3 class="heading">Current Snowfall Totals</h3>
-	<a href="data/lsr_snowfall.png"><img src="data/lsr_snowfall_thumb.png?<?php echo time(); ?>" border="0" /></a>
-	<br /><a href="<?php echo sprintf("%s/lsr/#DMX,DVN,ARX,FSD,OAX/%s/%s",
-  		$rooturl, gmdate("YmdHi", time() - (12*3600)),  
-  		gmdate("YmdHi", time() ) ); ?>">View LSRs in Map</a>
-<?php } ?>
-<h3 class="heading"><?php echo $cameras[$rancam]["name"] .", ". $cameras[$rancam]["state"]; ?> Webcam:</h3>
-<table width="100%">
-<tr><td><a href="<?php echo $rooturl; ?>/current/webcam.php#<?php echo  $cameras[$rancam]["network"]; ?>-0"><img src="<?php echo $rooturl; ?>/data/camera/stills/<?php echo $rancam; ?>.jpg?<?php echo time(); ?>" border="0" alt="Webcam" /></a>
-<ul class="iem-list"><li><a href="<?php echo $rooturl; ?>/current/webcam.php#<?php echo  $cameras[$rancam]["network"]; ?>-0">View other webcams</a></li></ul></td></tr>
-</table>
+	<TABLE bgcolor="#ffefd5" cellpadding="3" border="0" cellspacing="0" rowspacing="0" width="100%">
+	<TR><TD>
+		<font class="bluet">Feature:</font><BR>
+		<img src="http://www.meteor.iastate.edu/mesonet/data/feature.gif" width="150">
 
-<h3 class="heading">Most Popular Links:</h3>
-<ul class="iem-list"><li><a href="<?php echo $rooturl; ?>/timemachine/#1.0">Iowa Mesonet Plot</a> 
-  [<a href="/current/loop.phtml?prod=mesonet">Loop</a>]</li>
-<li><a href="<?php echo $rooturl; ?>/current/mcview.phtml?prod=comprad&amp;java=none&amp;mode=realtime&amp;frames=1">Current NEXRAD</a> [<a href="<?php echo $rooturl; ?>/current/mcview.phtml">Loop</a>]</li>
-<li><a href="<?php echo $rooturl; ?>/GIS/apps/iem/freeze.phtml">IEM Freeze</a></li>
-<li><a href="<?php echo $rooturl; ?>/rainfall/">IEM GIS Rainfall</a></li>
-<li><a href="<?php echo $rooturl; ?>/my/current.phtml">Sortable Currents</a></li>
-<li><a href="<?php echo $rooturl; ?>/onsite/features/tags/winter1011.html">Winter Storms of 2010-2011</a></li>
-</ul><p />
+<BR><B>14 Jun 2001:</B><BR>
+Powerful storms move into Iowa! Check out the radar.
 
-<h3 class="heading">News &amp; Notes: &nbsp; <a href="rss.php"><img src="images/rss.gif" style="border: 0px;" alt="RSS" /></a></h3>
-<?php include("$rootpath/include/news.php"); 
-?><br />
-<hr /><img src="images/script.gif" alt=""/><a 
-href="/mailman/listinfo/dailyb">Sign up</a> for the <a 
-href="/data/iemdb.html">Daily Bulletin</a></div>
-</td></tr></table>
-<br style="clear: both;" />
-&nbsp;
 
-<?php include("$rootpath/include/footer.php"); ?>
+	</TD>
+	</TR></TABLE>
+
+	</TD></TR></TABLE>
+	<!-- End of Feature Section -->
+	
+	
+	
+	<TABLE width="100%" cellpadding="2" rowspacing="2" border="0" cellspacing="0">
+	
+
+	<TR><TD><BR></TD></TR>
+
+	<TR>
+	<TD NOBR>
+		<span class="siders">Cooperating Members:</span>
+	</TD></TR>
+	<TR><TD>
+		<a href="http://www.crh.noaa.gov/dmx/">NWS Des Moines</a>
+		<BR><a href="http://www.weatherview.dot.state.ia.us/">IaDOT RWIS</a>
+		<BR><a href="http://www.meteor.iastate.edu/agclimate">ISU Agclimate Network</a>
+	</TD></TR>
+
+	<TR><TD><BR></TD></TR>
+
+	<TR>
+	<TD NOBR>
+		<P class="siders">Contact Information:
+	</TD></TR>
+	<TR><TD>
+		Dennis Todey<BR>
+		&nbsp; &nbsp; (<i><a href="mailto:dptodey@iastate.edu">dptodey@iastate.edu</a></i>)
+
+		<P>Daryl Herzmann<BR>
+		&nbsp; &nbsp; (<i><a href="mailto:akrherz@iastate.edu">akrherz@iastate.edu</a></i>)
+	</TD></TR>
+
+	<TR><TD><BR></TD></TR>
+
+	<TR><TD align="center">
+		<img
+src="http://www.pals.iastate.edu/cgi-bin/Count.cgi?df=mesonet.dat&chcolor=T" align="absmiddle">
+	</TD></TR>
+
+	</TABLE>
+
+	
+</TD>
+
+<TD bgcolor="#336699" width="3"> <img src="/icons/spacer.gif" border="0" width="3"></TD>
+<TD bgcolor="white" width="3"> <img src="/icons/spacer.gif" border="0" width="3"></TD>
+
+
+
+
+<TD width="500">
+
+	<TABLE border="0" cellpadding="3" cellspacing="0" rowspacing="0"><TR><TD>
+
+
+
+<P><img src="/icons/alert.red.gif">This site is a temporary test bed for Iowa mesonet products.  
+
+<BR><BR>
+
+
+
+<TABLE cellpadding="2" cellspacing="0" rowspacing="0" colspacing="0" border="0">
+
+<TR>
+	<TD colspan="2"><font class="bluet"><B>Current Data:</B></font></TD>
+	<TH>
+	17 Jun 2001 15 UTC
+	</TH>
+</TR>
+
+<TR>
+	<TD rowspan="6"><BR></TD>
+	<TD>Iowa DOT RWIS data with ASOS/AWOS data.</TD>
+	<TD> [ <a href="/index2.phtml">Current</a> ] </TD>
+</TR>
+<TR>
+	<TD>ASOS/AWOS data plotted by itself.</TD> 
+	<TD> [ <a href="/index2.phtml">Current</a> ] 
+	&nbsp; 48 / 49 Reporting
+	</TD>
+</TR>
+<TR>
+	<TD>RWIS data plotted by itself.</TD>
+	<TD> [ <a href="/index2.phtml">Current</a> ] 
+	&nbsp; 42 / 49 Reporting
+	</TD>
+</TR>
+
+<TR>
+	<TD>Today's total precip. [ASOS]</TD>
+	<TD> <a href="/index2.phtml">Plot</a> 
+	</TD>
+</TR>
+
+<TR>
+        <TD>Hourly Mesonet + DMX NEXRAD</TD>
+        <TD> <a href="/index2.phtml">Image</a>
+        </TD>
+</TR>
+
+<TR>
+        <TD>20 Minute Mesonet + DMX NEXRAD</TD>
+        <TD> <a href="/index2.phtml">Image</a> &nbsp; | &nbsp;
+        <a href="/index2.phtml">Loop</a>
+        </TD>
+</TR>
+
+<!-- spacer -->
+<TR>
+	<TD colspan="3">&nbsp;</TD>
+</TR>
+
+<TR>
+	
+	<TD colspan="2"><font class="bluet"><B>Comparison Plots:</B></font></TD>
+	<TD></TD>
+</TR>
+<TR>
+	<TD rowspan="3"> &nbsp;</TD>
+	<TD>Temperatures [RWIS vs ASOS].</TD>
+	<TD> 
+		<a href="/index2.phtml">Plot</a> | 
+		<a href="/index2.phtml">Contour</a>
+	</TD>
+</TR>
+<TR>
+	<TD>Dew Points [RWIS vs ASOS].</TD>
+	<TD> 
+		<a href="/index2.phtml">Plot</a> | 
+		<a href="/index2.phtml">Contour</a>
+	</TD>
+</TR>
+
+<TR>
+	<TD>Meteograms [RWIS vs ASOS].</TD>
+	<TD> 
+		<a href="/index2.phtml">Cedar Rapids</a> | 
+		<a href="/index2.phtml">Council Bluffs</a> | 
+		<a href="/index2.phtml">Des Moines</a> 
+	</TD>
+</TR>
+
+
+<!-- spacer -->
+<TR>
+	<TD colspan="4">&nbsp;</TD>
+</TR>
+
+<TR>
+	
+	<TD colspan="2"><font class="bluet"><B>Climatology:</B></font></TD>
+	<TD></TD>
+</TR>
+
+<TR>
+	<TD rowspan="5" > &nbsp;</TD>
+	<TD>High/Low Temperatures [ASOS/AWOS/RWIS].</TD>
+	<TD> 
+		[ <a href="/index2.phtml">Yesterday</a> ] 
+	</TD>
+</TR>
+
+<TR>
+	<TD colspan="2"> &nbsp; &nbsp; &nbsp;  <i>Selected Areas</I>
+		( <a href="/index2.phtml">Cedar Rapids</a> )
+		( <a href="/index2.phtml">Council Bluffs</a> ) 
+		( <a href="/index2.phtml">Des Moines</a> ) 
+	</TD>
+</TR>
+
+<TR>
+	
+	<TD>Total Precipitation [ASOS].</TD>
+	<TD> 
+		[ <a href="/index2.phtml">Yesterday</a> ] 
+		[ <a href="/index2.phtml">Ending 00Z</a> ] 
+		[ <a href="/index2.phtml">Ending 12Z</a> ] 
+	</TD>
+</TR>
+
+<TR>
+	
+	<TD>Growing Degree Days (base=50) [ASOS/AWOS]</TD>
+	<TD> 
+		 <a href="/index2.phtml">Plot</a> | <a href="/index2.phtml">Contour</a> 
+	</TD>
+</TR>
+
+<TR>
+	
+	<TD>Growing Degree Days (base=50) [RWIS]</TD>
+	<TD> 
+		 <a href="/index2.phtml">Plot</a> 
+	</TD>
+</TR>
+
+
+
+<!-- spacer -->
+<TR>
+	<TD colspan="3">&nbsp;</TD>
+</TR>
+
+<TR>
+	
+	<TD colspan="2"><font class="bluet"><B>Current Data Files:</B></font></TD>
+	<TD></TD>
+</TR>
+
+<TR>
+	<TD rowspan="3"> &nbsp;</TD>
+	<TD>ASOS/AWOS.</TD>
+	<TD> 
+		<a href="/index2.phtml">GEMPAK</a> 
+	</TD>
+</TR>
+
+<TR>
+	<TD>RWIS Data.</TD>
+	<TD> 
+		<a href="/index2.phtml">RAW CDF</a> | <a href="/index2.phtml">GEMPAK</a>
+	</TD>
+</TR>
+
+	
+<TR>
+	
+	<TD>Combined Mesonet.</TD>
+	<TD> 
+		<a href="/index2.phtml">GEMPAK</a> 
+	</TD>
+</TR>
+
+</TABLE>
+
+	</TD></TR></TABLE>
+
+<P align="CENTER"><font size="+1"><B> | </B></font>
+<font class="here">Homepage</font> <font size="+1"><B> | </B></font>
+<a class="there" href="/index2.phtml">Info</a> <font size="+1"><B> | </B></font>
+<a class="there" href="/index2.phtml">Docs</a> <font size="+1"><B> | </B></font>
+
+</TD></TR>
+
+<TR bgcolor="black"><TD colspan="5"><img src="/icons/spacer.gif" height="1" border="0" width="1"></TD></TR>
+
+<TR bgcolor="#EEEEEE">
+	<TD colspan="5" align="right">
+	&copy; 2001: Iowa Environmental Mesonet<BR>
+	Iowa State University
+	
+</TD></TR>
+
+</TABLE>
+
+</BODY>
+</HTML>
+
