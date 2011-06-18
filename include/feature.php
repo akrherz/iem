@@ -84,7 +84,7 @@ if ($row["voting"] == "f"){
   $s .= "<strong> Rate Feature: </strong> Good ($good votes) or Bad ($bad votes) &nbsp; Thanks for voting!";
 
 } else {
-  $s .= "<strong> Rate Feature: </strong> <a href=\"$rooturl/index2.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index2.phtml?feature_bad\">Bad</a> ($bad votes)";
+  $s .= "<strong> Rate Feature: </strong> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes)";
 }
 $s .= "<div id=\"fb-root\"></div><script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>
 	<fb:comments callback=\"$rooturl/fbcb.php\" title=\"". $row["title"] ."\" \" url=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
@@ -110,7 +110,7 @@ if (getenv("REMOTE_ADDR") == "192.188.162.21" )
  $s = "<img src=\"images/i3.jpg\" style=\"float: left; margin: 5px;\">
 Smokey, muah! <br /> &nbsp; &nbsp; &nbsp; &nbsp; 253 weeks now!!!!  Hehe, no more features, no more teachers, no more books, no more classes, dirty looks!  darly is liberated from the feature today!  Fancy that we made it this far, marriage will be simple compared with 253 weeks of courtship.  Darly have all sorts of free time now that he doesn't have to post smokey feature every week. I love you very much!<br />&nbsp; &nbsp; &nbsp; &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp;  love, darly";
 
-  $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index2.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index2.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
+  $s .= "<br style=\"clear: right;\" /><b>Rate Feature:</b> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes) &nbsp; &nbsp;<a href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
 }
 
   return $s;
