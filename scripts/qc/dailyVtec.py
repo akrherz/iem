@@ -14,8 +14,10 @@ tests = [
  'ARX.TO.11', 'GRB.TO.17', 'GRB.TO.18', 'GRB.TO.19', 'DLH.TO.2', 'DLH.TO.3',
  'MKX.TO.2', 'MKX.TO.3', 'MEG.SV.449', 'MEG.SV.450', 'MEG.SV.451','MEG.SV.452',
  'MEG.SV.453','MEG.SV.454','MEG.SV.455','MEG.SV.456','MEG.SV.457','MEG.SV.458',
- 'MEG.SV.459','MEG.SV.460','MEG.SV.461','CAE.SV.113', 'LUB.SV.56'
+ 'MEG.SV.459','MEG.SV.460','MEG.SV.461','CAE.SV.113', 'LUB.SV.56', 'MLB.SV.72'
 ]
+for i in range(2,69):
+    tests.append('VEF.SV.%s' % (i,))
 
 sql = "SELECT wfo, min(eventid), max(eventid), phenomena from warnings_%s \
        WHERE phenomena IN ('MA','FF','SV','TO') and significance = 'W' \
