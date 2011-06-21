@@ -24,7 +24,7 @@ FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 EXTENT -100 39 -94 43
 ##US
 #EXTENT -2110437 -2251067 2548326 1239063
-#UNITS METERS
+UNITS DD
 
 # IEM Box
 #EXTENT -27018.228515625 4217628 939122.4375 5111577
@@ -84,12 +84,11 @@ END
 
 LEGEND
   STATUS EMBED
-  OUTLINECOLOR 0 0 0
-  IMAGECOLOR 0 0 0
+  IMAGECOLOR 250 218 221
   LABEL
-    COLOR 255 255 255
+    COLOR 0 0 0
   END
-  POSITION UL
+  POSITION LL
 END
 
 
@@ -327,7 +326,7 @@ LAYER
   NAME warnings0_c
   CONNECTION "dbname=postgis host=iemdb user=nobody"
   #DATA "geom from (select phenomena, buffer(collect(geom),0) as geom from warnings WHERE gtype = 'C' and expire > now() GROUP by phenomena) as foo USING UNIQUE phenomena using SRID=4326"
-  DATA "geom from (select phenomena, type as wtype, geom, oid from warnings_2005 WHERE gtype = 'C' and significance = 'W' and phenomena = 'SV' ORDER by type ASC) as foo"
+  DATA "geom from (select phenomena,  geom from warnings WHERE gtype = 'P' and wfo = 'FWD' and significance = 'W' and phenomena in ('SV','TO') and issue > '2007-10-01') as foo USING unique oid using SRID=4326"
 #  DATA "geom from (select expire, oid, geom, phenomena from warnings_summary) as foo USING unique oid using SRID=4326"
   STATUS ON
   TYPE LINE
@@ -338,8 +337,9 @@ LAYER
   CLASSITEM "phenomena"
   CLASS
     EXPRESSION 'TO'
+    NAME "TORNADO"
     STYLE
-      COLOR 255 0 0
+      COLOR  0 0 0
       SIZE 2
       SYMBOL 1
     END
@@ -357,9 +357,10 @@ LAYER
   END
   CLASS
     EXPRESSION 'SV'
+    NAME "SVR TSTORM"
     STYLE
       COLOR 255 255 0
-      SIZE 2
+      SIZE 1
       SYMBOL 1
     END
    # STYLE 
@@ -387,25 +388,25 @@ END
 LAYER
   NAME counties
   STATUS OFF
-  TYPE POLYGON
-  DATA /mesonet/data/gis/static/shape/4326/iowa/iacounties.shp
+  TYPE LINE
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
    "proj=latlong"
   END
   CLASS
-    OUTLINECOLOR 205 201 165
+    COLOR 0 0 0 
     #OUTLINECOLOR 0 0 0
-    SIZE 1
+    SIZE 2
     SYMBOL 1
-    TEXT ([NAME])
-    LABEL
-     COLOR 255 255 255
-     TYPE BITMAP
-     SIZE SMALL
-     POSITION CC
-     PARTIALS FALSE
-     FORCE TRUE
-    END
+    #TEXT ([NAME])
+    #LABEL
+    # COLOR 255 255 255
+    # TYPE BITMAP
+    # SIZE SMALL
+    # POSITION CC
+    # PARTIALS FALSE
+    # FORCE TRUE
+    #END
   END
 END
 
@@ -487,8 +488,8 @@ LAYER
   CLASS
    # EXPRESSION /Iowa/
     STYLE
-      COLOR 0 255 255
-      SIZE 2
+      COLOR 255 255 255
+      SIZE 1
       SYMBOL "circle"
     END
 #    STYLE
@@ -711,7 +712,7 @@ END
 
 LAYER
   NAME terra
-  DATA "dusty.jpg"
+  DATA "/home/akrherz/DEV/sat/east2.tif"
   TYPE RASTER
   STATUS OFF
   PROJECTION
@@ -720,13 +721,29 @@ LAYER
 END
 
 LAYER
+  NAME terra2
+  DATA "/home/akrherz/DEV/sat/data.png"
+  TYPE RASTER
+  STATUS OFF
+  PROJECTION
+   "proj=lcc" 
+   "lat_0=25"
+    "lat_1=25"
+    "lat_2=25"
+   "lon_0=-95"
+   "ellps=WGS84"
+  END
+END
+
+LAYER
   NAME maxdbz
-  DATA "max_n0r_0z0z_20090809.png"
+  DATA "max.png"
   TYPE RASTER
   STATUS OFF
   PROJECTION
    "init=epsg:4326"
   END
+  OFFSITE 0 0 0
 END
 
 
