@@ -36,7 +36,7 @@ def merge(ts):
     offset0 = int(( ts0 - jan1).hours)
     offset1 = int(( ts -  jan1).hours)
     bad = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
-    bad.set_fill_value(0.)
+    
     bad = numpy.where( bad > 0., bad, 0.00024)
     bad = numpy.where( bad < 10000., bad, 0.00024)
     print "Stage IV 24h [Avg %5.2f Max %5.2f]  IEMRE Hourly [Avg %5.2f Max: %5.2f]" % (
