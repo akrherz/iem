@@ -36,21 +36,30 @@ def merge(ts):
     offset0 = int(( ts0 - jan1).hours)
     offset1 = int(( ts -  jan1).hours)
     bad = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
+    bad.set_fill_value(0.)
     bad = numpy.where( bad > 0., bad, 0.00024)
     bad = numpy.where( bad < 10000., bad, 0.00024)
-    print "Mean 12z: %7.4f  Hourly: %7.4f" % (numpy.average(good), 
-           numpy.average(bad) )
+    print "Stage IV 24h [Avg %5.2f Max %5.2f]  IEMRE Hourly [Avg %5.2f Max: %5.2f]" % (
+                    numpy.average(good), numpy.max(good), 
+                    numpy.average(bad), numpy.max(bad) )
     for offset in range(offset0, offset1):
         data  = nc.variables["p01m"][offset,:,:]
+        
         # Keep data within reason
         data = numpy.where( data > 10000., 0., data)
         adjust = numpy.where( data > 0, data, 0.00001) / bad * good
+        adjust = numpy.where( adjust > 250.0, 0, adjust)
         nc.variables["p01m"][offset,:,:] = numpy.where( adjust < 0.01, 0, adjust)
-        print "%s OLD %7.4f NEW %7.4f" % ((jan1 + mx.DateTime.RelativeDateTime(hours=offset)).strftime("%Y-%m-%d %H"), data[10,10], nc.variables["p01m"][offset,10,10])
+        ts = jan1 + mx.DateTime.RelativeDateTime(hours=offset)
+        print "%s IEMRE %5.2f %5.2f Adjusted %5.2f %5.2f" % (ts.strftime("%Y-%m-%d %H"), 
+                                    numpy.average(data), numpy.max(data),
+                                    numpy.average(nc.variables["p01m"][offset]),
+                                    numpy.max(nc.variables["p01m"][offset]))
     nc.sync()
     bad = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
-    print "Mean 12z: %7.4f  Hourly: %7.4f" % (numpy.average(good), 
-           numpy.average(bad) )
+    print "Stage IV 24h [Avg %5.2f Max %5.2f]  IEMRE Hourly [Avg %5.2f Max: %5.2f]" % (
+                    numpy.average(good), numpy.max(good), 
+                    numpy.average(bad), numpy.max(bad) )
     nc.close()
 
 if __name__ == "__main__":
