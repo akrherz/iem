@@ -4,7 +4,7 @@ cd dl
 
 cd ../GIS
 /mesonet/python/bin/python 24h_lsr.py 
-/mesonet/python/bin/python wwShapefile.py
+
 
 cd ../current
 /mesonet/python/bin/python lsr_snow_mapper.py >& /dev/null
