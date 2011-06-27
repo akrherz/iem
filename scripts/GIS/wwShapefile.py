@@ -4,8 +4,9 @@
 import shapelib, dbflib, mx.DateTime, zipfile, os, sys, shutil
 from pyIEM import wellknowntext, iemdb
 i = iemdb.iemdb()
+import pg
 mydb = i["postgis"]
-if (mydb == None): 
+if mydb is None: 
 	sys.exit(0)
 mydb.query("SET TIME ZONE 'GMT'")
 # Don't print out annonying errors about ST_IsValid failures
@@ -29,11 +30,12 @@ dbf.add_field("SIG", dbflib.FTString, 1, 0)
 dbf.add_field("WFO", dbflib.FTString, 3, 0)
 dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
 dbf.add_field("STATUS", dbflib.FTString, 3, 0)
+dbf.add_field("NWS_UGC", dbflib.FTString, 6, 0)
 
 
 sql = """SELECT *, astext(geom) as tgeom from warnings_%s WHERE 
-	expire > '%s' and ((gtype = 'P' and ST_IsValid(geom)) or gtype = 'C') ORDER by type ASC""" % (eTS.year, 
-        eTS.strftime("%Y-%m-%d %H:%M"),)
+	expire > '%s' and ((gtype = 'P' and ST_IsValid(geom)) or gtype = 'C') 
+	ORDER by type ASC""" % (eTS.year, eTS.strftime("%Y-%m-%d %H:%M"),)
 #print sql
 rs = mydb.query(sql).dictresult()
 
@@ -59,6 +61,7 @@ for i in range(len(rs)):
 	d["WFO"] = rs[i]["wfo"]
 	d["STATUS"] = rs[i]["status"]
 	d["ETN"] = rs[i]["eventid"]
+	d["NWS_UGC"] = rs[i]["ugc"]
 
 	obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
 	shp.write_object(-1, obj)

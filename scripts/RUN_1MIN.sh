@@ -3,6 +3,7 @@
 
 cd GIS
 /mesonet/python/bin/python attribute2shape.py
+/mesonet/python/bin/python wwShapefile.py &
 
 cd ../ingestors
 /mesonet/python/bin/python parse0006.py &
