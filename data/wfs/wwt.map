@@ -1,0 +1,208 @@
+MAP
+#
+# Start of map file
+#
+NAME "weatherwarn"
+STATUS ON
+SIZE 450 350
+#SYMBOLSET symbols/symbol.sym
+FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+EXTENT -155.0 15.0 -30.0 70.0
+UNITS DD
+SHAPEPATH "/mesonet/data/gis/static/"
+SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+IMAGECOLOR -1 -1 -1
+
+
+#
+# Projection definition, consult the PROJ.4 documentation for parameter discussion
+#
+PROJECTION
+   "init=epsg:4326"
+END
+
+#
+# Start of web interface definition
+#
+WEB
+#  HEADER ia_header.html
+  TEMPLATE img.html
+#  FOOTER ia_footer.html
+  MINSCALE 90000
+  MAXSCALE 4650000
+  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEURL "/tmp/"
+  LOG "/var/www/htdocs/tmp/w0.log"
+  METADATA
+   "wfs_title" "IEM Weather Warnings"
+   "wfs_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/data/wfs/ww.map&amp;"
+   "wfs_srs" "EPSG:4326"
+   "wfs_abstract" "Ba Ba Ba"
+#   "wms_fees" "None"
+   "wfs_keywords" "Ba"
+   "wfs_accessconstraints" "None"
+   "wfs_contactperson" "Daryl Herzmann"
+   "wfs_contactorganization" "Iowa State University"
+  END
+END
+
+LAYER
+  NAME counties
+  STATUS DEFAULT
+  TYPE POLYGON
+  DUMP true
+  DATA shape/4326/iowa/iacounties.shp
+  METADATA 
+    "wfs_title" "Iowa Counties"
+     "wfs_srs" "EPSG:4326"
+  END
+  PROJECTION
+    "init=epsg:4326"
+  END
+  CLASS
+    COLOR -1 -1 -1
+    OUTLINECOLOR 0 0 0 
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME archwarn_county
+  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  DATA "geom from (select geom, phenomena, issue, expire, wfo,  significance, eventid, oid from warnings_%YEAR% WHERE gtype = 'C' and expire > '%TS%' and issue < '%TS%' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
+  STATUS ON
+  DUMP true
+  TYPE POLYGON
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wfs_title" "County Based Warnings"
+    "wfs_srs" "EPSG:4326"
+    "gml_featureid" "OID"
+    "gml_include_items" "all" 
+  END
+  CLASSITEM "phenomena"
+  CLASS
+    EXPRESSION 'TO'
+    COLOR -1 -1 -1
+    OUTLINECOLOR 255 0 0
+    SIZE 2
+    SYMBOL 1
+  END
+  CLASS
+    EXPRESSION 'SV'
+    COLOR -1 -1 -1
+    OUTLINECOLOR 255 255 0
+    SIZE 2
+    SYMBOL 1
+  END
+  CLASS
+    EXPRESSION 'FF'
+    COLOR -1 -1 -1
+    OUTLINECOLOR 0 255 0
+    SIZE 2
+    SYMBOL 1
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME archwarn_polygon
+  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  DATA "geom from (select geom, phenomena, issue, expire, wfo,  significance, eventid, oid from warnings_%YEAR% WHERE gtype = 'P' and expire > '%TS%' and issue < '%TS%' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
+  STATUS ON
+  DUMP true
+  TYPE POLYGON
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wfs_title" "Polygon Based Warnings"
+    "wfs_srs" "EPSG:4326"
+    "gml_featureid" "OID"
+    "gml_include_items" "all" 
+  END
+  CLASSITEM 'phenomena'
+  CLASS
+        EXPRESSION /TO|SV/
+    COLOR -1 -1 -1
+    OUTLINECOLOR 255 255 255
+    SYMBOL 1
+    SIZE 1
+  END
+END
+
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warn_polygon
+  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  DATA "geom from (select geom, phenomena, issue, expire, wfo,  significance, eventid, oid from warnings WHERE gtype = 'P' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
+  STATUS ON
+  DUMP true
+  TYPE POLYGON
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wfs_title" "Current Polygon Based Warnings"
+    "wfs_srs" "EPSG:4326"
+    "gml_featureid" "OID"
+    "gml_include_items" "all" 
+  END
+  CLASSITEM 'phenomena'
+  CLASS
+        EXPRESSION /TO|SV/
+    COLOR -1 -1 -1
+    OUTLINECOLOR 255 255 255
+    SYMBOL 1
+    SIZE 1
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warn_county
+  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  DATA "geom from (select geom, phenomena, issue, expire, wfo, significance, eventid,  significance, eventid, oid from warnings WHERE gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
+  STATUS ON
+  DUMP true
+  TYPE POLYGON
+  PROJECTION
+   "init=epsg:4326"
+  END
+  METADATA
+    "wfs_title" "Current County Based Warnings"
+    "wfs_srs" "EPSG:4326"
+    "gml_featureid" "OID"
+    "gml_include_items" "all" 
+  END
+  CLASSITEM "phenomena"
+  CLASS
+    EXPRESSION 'TO'
+    COLOR -1 -1 -1
+    OUTLINECOLOR 255 0 0
+    SIZE 2
+    SYMBOL 1
+  END
+  CLASS
+    EXPRESSION 'SV'
+    COLOR -1 -1 -1
+    OUTLINECOLOR 255 255 0
+    SIZE 2
+    SYMBOL 1
+  END
+  CLASS
+    EXPRESSION 'FF'
+    COLOR -1 -1 -1
+    OUTLINECOLOR 0 255 0
+    SIZE 2
+    SYMBOL 1
+  END
+END
+
+
+END
