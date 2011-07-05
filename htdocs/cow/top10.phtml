@@ -26,6 +26,9 @@ $tstring = '1980-01-01';
 if ($tlimit == '2007'){
 	$tstring = '2007-10-01';
 }
+else if ($tlimit == '2011'){
+	$tstring = '2011-01-01';
+}
 $wlimit = "and wfo = $1";
 if ($wfo == 'ALL'){
 	$wlimit = "and 'ALL' = $1";
@@ -82,6 +85,8 @@ experimental at best.</p>
   <select name="tlimit">
    <option value="all" <?php if ($tlimit == 'all') echo 'SELECTED'; ?>>All Available</option>
    <option value="2007" <?php if ($tlimit == '2007') echo 'SELECTED'; ?>>After 1 Oct 2007</option>
+   <option value="2011" <?php if ($tlimit == '2011') echo 'SELECTED'; ?>>After 1 Jan 2011</option>
+   
   </select>
   </td>
   <td><input type="submit" value="Giveme Giveme!"></td>
