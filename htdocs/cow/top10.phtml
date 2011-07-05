@@ -1,0 +1,104 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/wfoLocs.php");
+include("$rootpath/include/forms.php");
+include("$rootpath/include/database.inc.php");
+include("$rootpath/include/vtec.php");
+$postgis = iemdb('postgis');
+
+$wfo = isset($_GET["wfo"])? $_GET["wfo"] : 'DMX';
+$limit = isset($_GET["limit"])? $_GET["limit"] : 'TOSV';
+$lstring = "'SV','TO'";
+if ($limit == "TO"){
+	$lstring = "'TO'";
+} else if ($limit == 'SV'){
+	$lstring = "'SV'";
+} else if ($limit == 'FF'){
+	$lstring = "'FF'";
+} else if ($limit == 'MA'){
+	$lstring = "'MA'";
+}
+
+pg_query($postgis, "SET TIME ZONE 'GMT'");
+$rs = pg_prepare($postgis, "SELECTASC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,0) as area, 
+eventid, date(issue), phenomena, significance from warnings 
+WHERE gtype = 'P' and wfo = $1 and phenomena in ($lstring) and 
+significance = 'W' ORDER by area ASC LIMIT 10");
+$rs = pg_prepare($postgis, "SELECTDESC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,0) as area, 
+eventid, date(issue), phenomena, significance from warnings 
+WHERE gtype = 'P' and wfo = $1 and phenomena in ($lstring) and 
+significance = 'W' ORDER by area DESC LIMIT 10");
+
+$TITLE = "NWS SVR/TOR Storm Based Warnings by Size";
+$THISPAGE ="severe-cow";
+include("$rootpath/include/header.php");
+?>
+<h3>Top 10 NWS WFO Storm Based Warnings by Size</h3>
+<p>This application prints out a listing of the top 10 largest and smallest
+storm based warnings by Weather Forecast Office (WFO). You can click the 
+Event ID to get more information on that warning.</p>
+
+<form name="selector" method="GET">
+<table>
+<thead>
+<tr>
+ <th>Select WFO:</th>
+ <th>Limit Option:</th>
+<td><td>
+<td><td>
+</tr>
+</head>
+<tbody>
+<tr>
+ <td><?php echo wfoSelect($wfo); ?></td>
+ <td>
+  <select name="limit">
+   <option value="TOSV" <?php if ($limit == 'TOSV') echo 'SELECTED'; ?>>Tornado + Severe Thunderstorm</option>
+   <option value="TO" <?php if ($limit == 'TO') echo 'SELECTED'; ?>>Tornado Only</option>
+   <option value="SV" <?php if ($limit == 'SV') echo 'SELECTED'; ?>>Severe Thunderstorm Only</option>
+   <option value="FF" <?php if ($limit == 'FF') echo 'SELECTED'; ?>>Flash Flood Only</option>
+   <option value="MA" <?php if ($limit == 'MA') echo 'SELECTED'; ?>>Marine Only</option>
+  </select>
+  </td>
+  <td><input type="submit" value="Giveme Giveme!"></td>
+  </tr>
+</table>
+</form>
+
+<h3>Top 10 Largest for WFO: <?php echo $wfo; ?></h3>
+<table>
+<tr><th>Date Issued</th><th>Size (sq km)</th><th>Phenomena</th></tr>
+<?php
+
+$rs = pg_execute($postgis, "SELECTDESC", Array($wfo));
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+    
+    $url = sprintf("%s/vtec/#%s-O-%s-K%s-%s-%s-%04d", $rooturl, substr($row['date'],0,4), 
+        'NEW', $wfo, $row["phenomena"], 
+        $row['significance'], $row["eventid"]);
+    echo sprintf("<tr><td>%s</td><td>%.0f</td><td><a href='%s'>%s %s %s</a></td></tr>\n",
+    	$row['date'], $row['area'], $url, $vtec_phenomena[$row['phenomena']], 
+    	$vtec_significance[$row["significance"]], $row['eventid']);
+  }
+?>
+</table>
+
+<h3>Top 10 Smallest for WFO: <?php echo $wfo; ?></h3>
+<table>
+<tr><th>Date Issued</th><th>Size (sq km)</th><th>Phenomena</th></tr>
+<?php
+
+$rs = pg_execute($postgis, "SELECTASC", Array($wfo));
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+    
+    $url = sprintf("%s/vtec/#%s-O-%s-K%s-%s-%s-%04d", $rooturl, substr($row['date'],0,4), 
+        'NEW', $wfo, $row["phenomena"], 
+        $row['significance'], $row["eventid"]);
+    echo sprintf("<tr><td>%s</td><td>%.0f</td><td><a href='%s'>%s %s %s</a></td></tr>\n",
+    	$row['date'], $row['area'], $url, $vtec_phenomena[$row['phenomena']], 
+    	$vtec_significance[$row["significance"]], $row['eventid']);
+  }
+?>
+</table>
+
+<?php include("$rootpath/include/footer.php"); ?>
