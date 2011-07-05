@@ -14,6 +14,7 @@ $station = isset($_GET["station"]) ? strtolower(substr($_GET["station"],0,6))
 $dloption = isset($_GET["dloption"]) ? $_GET["dloption"]
                                    : die("No download option specified");
 $mode = isset($_GET["mode"]) ? $_GET["mode"] : 'station';
+$source = isset($_GET["source"]) ? $_GET["source"] : 'climate71';
 $month = isset($_GET["month"]) ? substr($_GET["month"],0,2) : 1;
 $day = isset($_GET["day"]) ? substr($_GET["day"],0,2) : 1;
 $datestr = "2000-$month-$day";
@@ -22,14 +23,16 @@ $con = iemdb('coop');
 
 switch ($mode){
  case "station":
-$rs = pg_exec($con, "SELECT extract(month from valid) as month,
-   extract(day from valid) as day, * from climate WHERE 
-   station = '$station' ORDER by valid ASC");
- break;
+$rs = pg_prepare($con, "SELECT", "SELECT extract(month from valid) as month,
+   extract(day from valid) as day, * from $source WHERE 
+   station = $1 ORDER by valid ASC");
+$rs = pg_execute($con, "SELECT", Array($station));
+break;
  case "day":
-$rs = pg_exec($con, "SELECT extract(month from valid) as month,
-   extract(day from valid) as day, * from climate WHERE 
-   valid = '$datestr' ORDER by station ASC");
+$rs = pg_prepare($con, "SELECT", "SELECT extract(month from valid) as month,
+   extract(day from valid) as day, * from $source WHERE 
+   valid = $1 and station ~* 'ia' ORDER by station ASC");
+$rs = pg_execute($con, "SELECT", Array($datestr));
  break;
 }
 
