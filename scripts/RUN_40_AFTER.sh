@@ -51,6 +51,7 @@ cd black
 
 cd ../../iemre
 /mesonet/python/bin/python stage4_hourlyre.py
+/mesonet/python/bin/python stage4_hourlyre.py `date -u --date '3 hours ago' +'%Y %m %d %H'`
 /mesonet/python/bin/python stage4_hourlyre.py `date -u --date '1 day ago' +'%Y %m %d %H'`
 
 cd ../current
