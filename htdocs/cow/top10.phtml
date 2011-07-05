@@ -1,14 +1,16 @@
 <?php
+
 include("../../config/settings.inc.php");
 include("$rootpath/include/wfoLocs.php");
+$wfos["ALL"] = Array("city" => " --- All ---- ");
 include("$rootpath/include/forms.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/vtec.php");
 $postgis = iemdb('postgis');
 
-$wfo = isset($_GET["wfo"])? $_GET["wfo"] : 'DMX';
+$wfo = isset($_GET["wfo"])? $_GET["wfo"] : 'ALL';
 $limit = isset($_GET["limit"])? $_GET["limit"] : 'TOSV';
-$tlimit = isset($_GET["tlimit"])? $_GET["tlimit"] : 'all';
+$tlimit = isset($_GET["tlimit"])? $_GET["tlimit"] : '2007';
 $lstring = "'SV','TO'";
 if ($limit == "TO"){
 	$lstring = "'TO'";
@@ -24,16 +26,20 @@ $tstring = '1980-01-01';
 if ($tlimit == '2007'){
 	$tstring = '2007-10-01';
 }
+$wlimit = "and wfo = $1";
+if ($wfo == 'ALL'){
+	$wlimit = "and 'ALL' = $1";
+}
 
 pg_query($postgis, "SET TIME ZONE 'GMT'");
-$rs = pg_prepare($postgis, "SELECTASC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,0) as area, 
-eventid, date(issue), phenomena, significance from warnings 
-WHERE gtype = 'P' and wfo = $1 and phenomena in ($lstring) and 
-significance = 'W' and issue > '$tstring' ORDER by area ASC LIMIT 10");
-$rs = pg_prepare($postgis, "SELECTDESC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,0) as area, 
-eventid, date(issue), phenomena, significance from warnings 
-WHERE gtype = 'P' and wfo = $1 and phenomena in ($lstring) and 
-significance = 'W' and issue > '$tstring' ORDER by area DESC LIMIT 10");
+$rs = pg_prepare($postgis, "SELECTASC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,2) as area, 
+eventid, date(issue), phenomena, significance, wfo from warnings
+WHERE gtype = 'P' and phenomena in ($lstring) $wlimit and 
+significance = 'W' and issue > '$tstring' and ST_Area(geom) > 0 ORDER by area ASC LIMIT 10");
+$rs = pg_prepare($postgis, "SELECTDESC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,2) as area, 
+eventid, date(issue), phenomena, significance, wfo from warnings 
+WHERE gtype = 'P' and phenomena in ($lstring) $wlimit and 
+significance = 'W' and issue > '$tstring'  ORDER by area DESC LIMIT 10");
 
 $TITLE = "NWS SVR/TOR Storm Based Warnings by Size";
 $THISPAGE ="severe-cow";
@@ -42,7 +48,12 @@ include("$rootpath/include/header.php");
 <h3>Top 10 NWS WFO Storm Based Warnings by Size</h3>
 <p>This application prints out a listing of the top 10 largest and smallest
 storm based warnings by Weather Forecast Office (WFO). You can click the 
-Event ID to get more information on that warning.</p>
+Event ID to get more information on that warning. This page defaults to show the
+largest and smallest warnings from any WFO.  Storm Based Warnings did not become
+operational until 1 Oct 2007, so warning polygons prior to that date were only
+experimental at best.</p>
+
+<p><i>Please be patient for page to load...</i>
 
 <form name="selector" method="GET">
 <table>
@@ -78,37 +89,40 @@ Event ID to get more information on that warning.</p>
 </table>
 </form>
 
+
+
+
 <h3>Top 10 Largest for WFO: <?php echo $wfo; ?></h3>
-<table>
-<tr><th>Date Issued</th><th>Size (sq km)</th><th>Phenomena</th></tr>
+<table cellpadding="2" cellspacing="0" border="1">
+<tr><th>Date Issued</th><th>Size (sq km)</th><th>WFO</th><th>Phenomena</th></tr>
 <?php
 
 $rs = pg_execute($postgis, "SELECTDESC", Array($wfo));
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
     
     $url = sprintf("%s/vtec/#%s-O-%s-K%s-%s-%s-%04d", $rooturl, substr($row['date'],0,4), 
-        'NEW', $wfo, $row["phenomena"], 
+        'NEW', $row['wfo'], $row["phenomena"], 
         $row['significance'], $row["eventid"]);
-    echo sprintf("<tr><td>%s</td><td>%.0f</td><td><a href='%s'>%s %s %s</a></td></tr>\n",
-    	$row['date'], $row['area'], $url, $vtec_phenomena[$row['phenomena']], 
+    echo sprintf("<tr><td>%s</td><td>%.0f</td><td>%s</td><td><a href='%s'>%s %s %s</a></td></tr>\n",
+    	$row['date'], $row['area'], $row['wfo'], $url, $vtec_phenomena[$row['phenomena']], 
     	$vtec_significance[$row["significance"]], $row['eventid']);
   }
 ?>
 </table>
 
 <h3>Top 10 Smallest for WFO: <?php echo $wfo; ?></h3>
-<table>
-<tr><th>Date Issued</th><th>Size (sq km)</th><th>Phenomena</th></tr>
+<table cellpadding="2" cellspacing="0" border="1">
+<tr><th>Date Issued</th><th>Size (sq km)</th><th>WFO</th><th>Phenomena</th></tr>
 <?php
 
 $rs = pg_execute($postgis, "SELECTASC", Array($wfo));
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
     
     $url = sprintf("%s/vtec/#%s-O-%s-K%s-%s-%s-%04d", $rooturl, substr($row['date'],0,4), 
-        'NEW', $wfo, $row["phenomena"], 
+        'NEW', $row['wfo'], $row["phenomena"], 
         $row['significance'], $row["eventid"]);
-    echo sprintf("<tr><td>%s</td><td>%.0f</td><td><a href='%s'>%s %s %s</a></td></tr>\n",
-    	$row['date'], $row['area'], $url, $vtec_phenomena[$row['phenomena']], 
+    echo sprintf("<tr><td>%s</td><td>%.2f</td><td>%s</td><td><a href='%s'>%s %s %s</a></td></tr>\n",
+    	$row['date'], $row['area'], $row["wfo"], $url, $vtec_phenomena[$row['phenomena']], 
     	$vtec_significance[$row["significance"]], $row['eventid']);
   }
 ?>
