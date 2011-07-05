@@ -1,0 +1,76 @@
+# Computes the Climatology and fills out the table!
+import mx.DateTime
+import iemdb
+import psycopg2.extras
+import network
+nt = network.Table("IACLIMATE")
+COOP = iemdb.connect('coop')
+ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+ccursor2 = COOP.cursor()
+
+META = {
+    'climate81' : {'sts': mx.DateTime.DateTime(1981,1,1), 
+                   'ets': mx.DateTime.DateTime(2011,1,1)}       
+}
+
+def daily_averages(table):
+    """
+    Compute and Save the simple daily averages
+    """
+    sql = """
+    SELECT '2000-'|| to_char(day, 'MM-DD') as d, stationid, 
+    avg(high) as avg_high, avg(low) as avg_low,
+    max(high) as max_high, min(high) as min_high,
+    max(low) as max_low, min(high) as min_low,
+    max(precip) as max_precip, avg(precip) as precip,
+    avg(snow) as snow, count(*) as years,
+    avg( gdd50(high,low) ) as gdd50, avg( sdd86(high,low) ) as sdd86,
+    max( high - low) as max_range, min(high - low) as min_range
+    from alldata WHERE day >= '%s' and day < '%s' GROUP by d, stationid
+    """ % (META[table]['sts'].strftime("%Y-%m-%d"), META[table]['ets'].strftime("%Y-%m-%d"))
+    ccursor.execute(sql)
+    for row in ccursor:
+        id = row['stationid']
+        if not id.upper() in nt.sts.keys():
+            continue
+        sql = """DELETE from %s WHERE station = '%s' """ % (table, id)
+        ccursor2.execute(sql)
+        sql = """ INSERT into """+ table +""" (station, valid, high, low, precip, snow,
+        max_high, max_low, min_high, min_low, max_precip, years, gdd50, sdd86, max_range,
+        min_range) VALUES ('%(stationid)s', '%(d)s', %(avg_high)s, %(avg_low)s, %(precip)s,
+        %(snow)s, %(max_high)s, %(max_low)s, %(min_high)s, %(min_low)s, %(max_precip)s,
+        %(years)s, %(gdd50)s, %(sdd86)s, %(max_range)s, %(min_range)s)""" % row
+        ccursor2.execute(sql)
+
+    COOP.commit()
+
+def do_date(table, row, col, agg_col):
+    sql = """
+    SELECT year from alldata where stationid = '%s' and %s = %s and sday = '%s'
+    and day >= '%s' and day < '%s'
+    ORDER by year ASC
+    """ % (row['station'], col, row[agg_col], row['valid'].strftime("%m%d"),
+           META[table]['sts'].strftime("%Y-%m-%d"), META[table]['ets'].strftime("%Y-%m-%d"))
+    ccursor2.execute(sql)
+    row2 = ccursor2.fetchone()
+    sql = """ UPDATE %s SET %s_yr = %s WHERE station = '%s' and valid = '%s' """ % (
+                    table, agg_col, row2[0], row['station'], row['valid'])
+    ccursor2.execute(sql)
+
+def set_daily_extremes(table):
+    sql = """
+    SELECT * from %s
+    """ % (table,)
+    ccursor.execute(sql)
+    for row in ccursor:
+        do_date(table, row, 'high', 'max_high')
+        do_date(table, row, 'high', 'min_high')
+        do_date(table, row, 'low', 'max_low')
+        do_date(table, row, 'low', 'max_low')
+        do_date(table, row, 'precip', 'max_precip')
+            
+daily_averages('climate81')
+set_daily_extremes('climate81')
+COOP.commit()
+ccursor.close()
+ccursor2.close()
