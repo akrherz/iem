@@ -8,6 +8,7 @@ $postgis = iemdb('postgis');
 
 $wfo = isset($_GET["wfo"])? $_GET["wfo"] : 'DMX';
 $limit = isset($_GET["limit"])? $_GET["limit"] : 'TOSV';
+$tlimit = isset($_GET["tlimit"])? $_GET["tlimit"] : 'all';
 $lstring = "'SV','TO'";
 if ($limit == "TO"){
 	$lstring = "'TO'";
@@ -19,15 +20,20 @@ if ($limit == "TO"){
 	$lstring = "'MA'";
 }
 
+$tstring = '1980-01-01';
+if ($tlimit == '2007'){
+	$tstring = '2007-10-01';
+}
+
 pg_query($postgis, "SET TIME ZONE 'GMT'");
 $rs = pg_prepare($postgis, "SELECTASC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,0) as area, 
 eventid, date(issue), phenomena, significance from warnings 
 WHERE gtype = 'P' and wfo = $1 and phenomena in ($lstring) and 
-significance = 'W' ORDER by area ASC LIMIT 10");
+significance = 'W' and issue > '$tstring' ORDER by area ASC LIMIT 10");
 $rs = pg_prepare($postgis, "SELECTDESC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,0) as area, 
 eventid, date(issue), phenomena, significance from warnings 
 WHERE gtype = 'P' and wfo = $1 and phenomena in ($lstring) and 
-significance = 'W' ORDER by area DESC LIMIT 10");
+significance = 'W' and issue > '$tstring' ORDER by area DESC LIMIT 10");
 
 $TITLE = "NWS SVR/TOR Storm Based Warnings by Size";
 $THISPAGE ="severe-cow";
@@ -44,6 +50,7 @@ Event ID to get more information on that warning.</p>
 <tr>
  <th>Select WFO:</th>
  <th>Limit Option:</th>
+ <th>Time Period:</th>
 <td><td>
 <td><td>
 </tr>
@@ -58,6 +65,12 @@ Event ID to get more information on that warning.</p>
    <option value="SV" <?php if ($limit == 'SV') echo 'SELECTED'; ?>>Severe Thunderstorm Only</option>
    <option value="FF" <?php if ($limit == 'FF') echo 'SELECTED'; ?>>Flash Flood Only</option>
    <option value="MA" <?php if ($limit == 'MA') echo 'SELECTED'; ?>>Marine Only</option>
+  </select>
+  </td>
+   <td>
+  <select name="tlimit">
+   <option value="all" <?php if ($tlimit == 'all') echo 'SELECTED'; ?>>All Available</option>
+   <option value="2007" <?php if ($tlimit == '2007') echo 'SELECTED'; ?>>After 1 Oct 2007</option>
   </select>
   </td>
   <td><input type="submit" value="Giveme Giveme!"></td>
