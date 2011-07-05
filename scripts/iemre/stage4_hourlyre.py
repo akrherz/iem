@@ -7,7 +7,10 @@ import numpy
 import constants
 import os
 import sys
-import netCDF3
+try:
+    import netCDF3
+except:
+    import netCDF4 as netCDF3
 
 def merge(ts):
     """
