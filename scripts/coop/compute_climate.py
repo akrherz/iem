@@ -26,7 +26,7 @@ def daily_averages(table):
     SELECT '2000-'|| to_char(day, 'MM-DD') as d, stationid, 
     avg(high) as avg_high, avg(low) as avg_low,
     max(high) as max_high, min(high) as min_high,
-    max(low) as max_low, min(high) as min_low,
+    max(low) as max_low, min(low) as min_low,
     max(precip) as max_precip, avg(precip) as precip,
     avg(snow) as snow, count(*) as years,
     avg( gdd50(high,low) ) as gdd50, avg( sdd86(high,low) ) as sdd86,
@@ -38,7 +38,8 @@ def daily_averages(table):
         id = row['stationid']
         if not id.upper() in nt.sts.keys():
             continue
-        sql = """DELETE from %s WHERE station = '%s' """ % (table, id)
+        sql = """DELETE from %s WHERE station = '%s' and valid = '%s' """ % (
+                        table, id, row['d'])
         ccursor2.execute(sql)
         sql = """ INSERT into """+ table +""" (station, valid, high, low, precip, snow,
         max_high, max_low, min_high, min_low, max_precip, years, gdd50, sdd86, max_range,
