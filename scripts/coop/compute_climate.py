@@ -3,12 +3,17 @@ import mx.DateTime
 import iemdb
 import psycopg2.extras
 import network
+import sys
 nt = network.Table("IACLIMATE")
 COOP = iemdb.connect('coop')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 ccursor2 = COOP.cursor()
 
 META = {
+    'climate51' : {'sts': mx.DateTime.DateTime(1951,1,1), 
+                   'ets': mx.DateTime.DateTime(2011,1,1)},
+    'climate' : {'sts': mx.DateTime.DateTime(1893,1,1), 
+                   'ets': mx.DateTime.DateTime(2011,1,1)},
     'climate81' : {'sts': mx.DateTime.DateTime(1981,1,1), 
                    'ets': mx.DateTime.DateTime(2011,1,1)}       
 }
@@ -69,8 +74,8 @@ def set_daily_extremes(table):
         do_date(table, row, 'low', 'max_low')
         do_date(table, row, 'precip', 'max_precip')
             
-daily_averages('climate81')
-set_daily_extremes('climate81')
+daily_averages(sys.argv[1])
+set_daily_extremes(sys.argv[1])
 COOP.commit()
 ccursor.close()
 ccursor2.close()
