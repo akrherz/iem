@@ -37,12 +37,14 @@ $rs = pg_execute($con, "SELECT", Array($datestr));
 }
 
 
-$s = "StationID,Name,Latitude,Longitude,Month,Day,Avg_High,Avg_Low,Avg_Precip\n";
+$s = "Source,StationID,Name,Latitude,Longitude,Month,Day,Avg_High,Avg_Low,Avg_Precip,Max_Precip,Max_High,Min_High,Max_Low,Min_Low\n";
 for($i=0; $row = @pg_fetch_array($rs,$i); $i++){
   $sid = $row["station"];
-  $s .= sprintf("%s,%30s,%5.2f,%5.2f,%2d,%2d,%4.1f,%4.1f,%4.2f\n", $sid, $cities[strtoupper($sid)]["name"],
+  $s .= sprintf("%s,%s,%s,%5.2f,%5.2f,%2d,%2d,%4.1f,%4.1f,%4.2f,%.2f,%.0f,%.0f,%.0f,%.0f\n", 
+  	$source, $sid, $cities[strtoupper($sid)]["name"],
    $cities[strtoupper($sid)]["lat"], $cities[strtoupper($sid)]["lon"] ,
-   $row["month"], $row["day"], $row["high"], $row["low"], $row["precip"]);
+   $row["month"], $row["day"], $row["high"], $row["low"], $row["precip"], $row["max_precip"],
+   $row["max_high"], $row["min_high"], $row["max_low"], $row["min_low"]);
 }
 
 switch($dloption){
