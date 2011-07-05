@@ -9,13 +9,17 @@ import numpy
 import constants
 import os
 import sys
-import netCDF3
+try:
+    import netCDF3
+except:
+    import netCDF4 as netCDF3
 
 def merge(ts):
     """
     Process an hour's worth of stage4 data into the hourly RE
     """
 
+    # Load up the 12z 24h total, this is what we base our deltas on
     fp = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.24h.grib" % (
       ts.strftime("%Y/%m/%d"), ts.strftime("%Y%m%d%H") )
 
@@ -25,9 +29,10 @@ def merge(ts):
     lons = numpy.ravel( grib.variables["g5_lon_1"][400:-300,500:700] )
     vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc24h"][400:-300,500:700] )
     res = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
-    good = res.transpose()
-    # Prevent Large numbers
-    good = numpy.where( good < 10000., good, 0.)
+    stage4 = res.transpose()
+    # Prevent Large numbers, negative numbers
+    stage4 = numpy.where( stage4 < 10000., stage4, 0.)
+    stage4 = numpy.where( stage4 < 0., 0., stage4)
 
     # Open up our RE file
     nc = netCDF3.Dataset("/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'a')
@@ -35,19 +40,22 @@ def merge(ts):
     jan1 = mx.DateTime.DateTime(ts.year, 1, 1, 0, 0)
     offset0 = int(( ts0 - jan1).hours)
     offset1 = int(( ts -  jan1).hours)
-    bad = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
+    iemre = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
     
-    bad = numpy.where( bad > 0., bad, 0.00024)
-    bad = numpy.where( bad < 10000., bad, 0.00024)
+    iemre = numpy.where( iemre > 0., iemre, 0.00024)
+    iemre = numpy.where( iemre < 10000., iemre, 0.00024)
     print "Stage IV 24h [Avg %5.2f Max %5.2f]  IEMRE Hourly [Avg %5.2f Max: %5.2f]" % (
-                    numpy.average(good), numpy.max(good), 
-                    numpy.average(bad), numpy.max(bad) )
+                    numpy.average(stage4), numpy.max(stage4), 
+                    numpy.average(iemre), numpy.max(iemre) )
+    multiplier = stage4 / iemre
+    print "Multiplier MIN: %5.2f  AVG: %5.2f  MAX: %5.2f" % (
+                    numpy.min(multiplier), numpy.average(multiplier),numpy.max(multiplier))
     for offset in range(offset0, offset1):
         data  = nc.variables["p01m"][offset,:,:]
         
         # Keep data within reason
         data = numpy.where( data > 10000., 0., data)
-        adjust = numpy.where( data > 0, data, 0.00001) / bad * good
+        adjust = numpy.where( data > 0, data, 0.00001) * multiplier
         adjust = numpy.where( adjust > 250.0, 0, adjust)
         nc.variables["p01m"][offset,:,:] = numpy.where( adjust < 0.01, 0, adjust)
         ts = jan1 + mx.DateTime.RelativeDateTime(hours=offset)
@@ -56,10 +64,10 @@ def merge(ts):
                                     numpy.average(nc.variables["p01m"][offset]),
                                     numpy.max(nc.variables["p01m"][offset]))
     nc.sync()
-    bad = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
+    iemre = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
     print "Stage IV 24h [Avg %5.2f Max %5.2f]  IEMRE Hourly [Avg %5.2f Max: %5.2f]" % (
-                    numpy.average(good), numpy.max(good), 
-                    numpy.average(bad), numpy.max(bad) )
+                    numpy.average(stage4), numpy.max(stage4), 
+                    numpy.average(iemre), numpy.max(iemre) )
     nc.close()
 
 if __name__ == "__main__":
