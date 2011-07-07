@@ -55,13 +55,13 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 	$cgdd[$row["valid"]] = $gdd;
 }
 
-$rs = pg_prepare($coopdb, "SELECT2", "SELECT high, low, day, extract(year from day) as y, " .
+$rs = pg_prepare($coopdb, "SELECT232", "SELECT high, low, day, extract(year from day) as y, " .
 		"extract(month from day) as m,extract(day from day) as d from alldata " .
 		"WHERE stationid = $1 and day between $2 and $3 ORDER by day ASC");
-$rs = pg_execute($coopdb, "SELECT2", Array($station, $sdate, $edate));
+$rs = pg_execute($coopdb, "SELECT232", Array($station, $sdate, $edate));
 
 $q = "";
-$rs = pg_exec($coopdb, $q);
+
 $aobs = Array();
 $xlabels = Array();
 $zeroes = Array();
