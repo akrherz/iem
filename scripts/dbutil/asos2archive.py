@@ -5,6 +5,11 @@ i = iemdb.iemdb()
 asos = i['asos']
 iemdb = i['iem']
 
+def valcheck(v):
+    if v is None:
+        return 'Null'
+    return v
+
 # Hack it for today, just fuss with iowa
 if (len(sys.argv) > 1):
   ts = mx.DateTime.now()
@@ -33,18 +38,22 @@ for i in range(len(rs)):
   sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt,  alti, 
     p01m, gust, vsby, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar) 
     values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s',%s,%s,%s,%s,'%s')""" % (
-  ts.year,rs[i]['station'], rs[i]['valid'], (rs[i]['tmpf'] or "Null"), 
-  (rs[i]['dwpf'] or "Null"), (rs[i]['drct'] or "Null"), (rs[i]['sknt'] or "Null"),
-  (rs[i]['alti'] or "Null"), p01m, (rs[i]['gust'] or "Null"), 
-  (rs[i]['vsby'] or "Null"),
-  (rs[i]['skyc1'] or ""),
-  (rs[i]['skyc2'] or ""),
-  (rs[i]['skyc3'] or ""),
-  (rs[i]['skyc4'] or ""),
-  (rs[i]['skyl1'] or 'Null'),
-  (rs[i]['skyl2'] or 'Null'),
-  (rs[i]['skyl3'] or 'Null'), 
-  (rs[i]['skyl4'] or 'Null'),
+  ts.year,rs[i]['station'], rs[i]['valid'], 
+  valcheck(rs[i]['tmpf']), 
+  valcheck(rs[i]['dwpf']), 
+  valcheck(rs[i]['drct']), 
+  valcheck(rs[i]['sknt']),
+  valcheck(rs[i]['alti']), p01m, 
+  valcheck(rs[i]['gust']), 
+  valcheck(rs[i]['vsby']),
+  valcheck(rs[i]['skyc1']),
+  valcheck(rs[i]['skyc2']),
+  valcheck(rs[i]['skyc3']),
+  valcheck(rs[i]['skyc4']),
+  valcheck(rs[i]['skyl1']),
+  valcheck(rs[i]['skyl2']),
+  valcheck(rs[i]['skyl3']), 
+  valcheck(rs[i]['skyl4']),
   rs[i]['raw']
    )
   try:
