@@ -2,6 +2,9 @@
 cd 00z
 /mesonet/python/bin/python awos_rtp.py
 
+cd ../ingestors
+/mesonet/python/bin/python elnino.py
+
 cd ../summary
 /mesonet/python/bin/python max_reflect.py
 
