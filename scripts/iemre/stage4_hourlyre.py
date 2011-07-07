@@ -27,8 +27,8 @@ def merge(ts):
         vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc1h"][400:-300,500:700] )
         # Clip large values
         vals = numpy.where( vals > 250., 0, vals)
-        print 'STAGE4 MIN: %5.2f AVG: %5.2f MAX: %5.2f' % (numpy.min(vals), numpy.average(vals),
-                                                   numpy.max(vals))
+        #print 'STAGE4 MIN: %5.2f AVG: %5.2f MAX: %5.2f' % (numpy.min(vals), numpy.average(vals),
+        #                                           numpy.max(vals))
         res = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
     else:
         print 'Missing stage4 %s' % (fp,)
@@ -40,8 +40,8 @@ def merge(ts):
     res = numpy.where(res > 250., 0., res)
 
     # Print out some debugging information for now
-    print '%s MIN: %5.2f AVG: %5.2f MAX: %5.2f' % (ts, numpy.min(res), numpy.average(res),
-                                                   numpy.max(res))
+    #print '%s MIN: %5.2f AVG: %5.2f MAX: %5.2f' % (ts, numpy.min(res), numpy.average(res),
+    #                                               numpy.max(res))
     # Open up our RE file
     nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'a')
 
