@@ -55,6 +55,18 @@ Iowa Ag Weather information in a one-stop location.</div>
 
 </table>
 
+<h4>Historical Freeze Risk</h4>
+
+<blockquote>An air temperature less than 27 is generally considered to be the Hard Freeze, 
+that is a crop killing event, although plant damage and yield loss is often observed at 
+less extreme low temperatures. Crop threshold temperatures for plant damage in Fall differ
+from Spring thresholds (mainly because of plant size/height).</blockquote>
+
+<ul>
+ <li><a href="../COOP/freezing.php">Fall Freezing Dates</a></li>
+ <li><a href="../climodat/index.phtml?station=IA0200&report=22">First Fall Freeze Probabilities</a></li>
+</ul>
+
 <h4>External Links</h4>
 <ul>
  <li><a href="http://www.iowaagriculture.gov/climatology.asp">State of Iowa Climatologist</a></li>
