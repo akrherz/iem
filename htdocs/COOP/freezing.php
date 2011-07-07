@@ -1,7 +1,7 @@
 <?php 
 include("../../config/settings.inc.php");
 $TITLE = "IEM | Freezing Dates";
-$THISPAGE = "climate-year";
+$THISPAGE = "climatology-year";
 include("$rootpath/include/header.php");
 include("$rootpath/include/database.inc.php"); 
 include("$rootpath/include/network.php"); 
