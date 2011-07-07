@@ -24,7 +24,7 @@ years.
 temperature.  The "Average Lows" column shows when certain climatological
 thresholds are surpassed in the fall.
 </p>
-<?
+<?php
 function aSortBySecondIndex($multiArray, $secondIndex) {
         while (list($firstIndex, ) = each($multiArray))
                 $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
