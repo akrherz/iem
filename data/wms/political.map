@@ -81,4 +81,76 @@ LAYER
   END
 END
 
+#------------------------------------------------------
+#
+LAYER
+  NAME "wfo-900913"
+  STATUS ON
+  DATA "nws/cwas.shp"
+  TYPE LINE
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NWS County Warning Areas"
+    "wms_srs"   "EPSG:900913"
+    "wms_extent" "-180 10 -66 89"
+  END
+  CLASS
+    SYMBOL 0
+    COLOR 0 0 0
+    SIZE 3
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+  NAME "rfc-900913"
+  STATUS ON
+  DATA "nws/rfc.shp"
+  TYPE LINE
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NWS River Forecast Center HSA"
+    "wms_srs"   "EPSG:900913"
+    "wms_extent" "-180 10 -66 89"
+  END
+  CLASS
+    SYMBOL 0
+    COLOR 0 0 0
+    SIZE 3
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+  NAME "cwsu-900913"
+  STATUS ON
+  DATA "nws/cwsu.shp"
+  TYPE LINE
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:900913"
+  END
+  METADATA
+    "wms_title" "NWS CWSU"
+    "wms_srs"   "EPSG:900913"
+    "wms_extent" "-180 10 -66 89"
+  END
+  CLASS
+    SYMBOL 0
+    COLOR 0 0 0
+    SIZE 3
+  END
+END
+
 END
