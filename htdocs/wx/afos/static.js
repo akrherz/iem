@@ -1,6 +1,36 @@
 Ext.BLANK_IMAGE_URL = '../../ext/resources/images/default/s.gif';
 Ext.onReady(function(){
 
+	// Add the additional 'advanced' VTypes
+	Ext.apply(Ext.form.VTypes, {
+	    daterange : function(val, field) {
+	        var date = field.parseDate(val);
+
+	        if(!date){
+	            return false;
+	        }
+	        if (field.startDateField) {
+	            var start = Ext.getCmp(field.startDateField);
+	            if (!start.maxValue || (date.getTime() != start.maxValue.getTime())) {
+	                start.setMaxValue(date);
+	                start.validate();
+	            }
+	        }
+	        else if (field.endDateField) {
+	            var end = Ext.getCmp(field.endDateField);
+	            if (!end.minValue || (date.getTime() != end.minValue.getTime())) {
+	                end.setMinValue(date);
+	                end.validate();
+	            }
+	        }
+	        /*
+	         * Always return true since we're only using this vtype to set the
+	         * min/max allowed values (these are tested for after the vtype test)
+	         */
+	        return true;
+	    }
+	});	
+	
 /**
  * Prints the contents of an Ext.Panel
  */
@@ -59,7 +89,13 @@ var saveConfig = function() {
     cp.set("afospils", n);
 }
 
-var addTab = function(id, cnt) {
+var addTab = function(id, cnt, sdate, edate) {
+	if (!sdate){
+		sdate = new Date('12/31/2008');
+	} 
+	if (!edate){
+		edate = (new Date().add(Date.DAY, 1));
+	}
     var tid = id+"-"+cnt;
     tid = tid.toUpperCase();
     var a = tabs.find("id", tid);
@@ -70,7 +106,7 @@ var addTab = function(id, cnt) {
         closable:true,
         autoScroll:true,
         autoLoad: {url: 'retreive.php', 
-                   params: 'pil='+id+'&cnt='+cnt,
+                   params: 'pil='+id+'&cnt='+cnt+'&sdate='+sdate.format('Y-m-d')+'&edate='+ edate.format('Y-m-d'),
                    discardUrl:false},
         tbar: [refreshAction,
         {
@@ -90,7 +126,7 @@ var addTab = function(id, cnt) {
 tp.addListener('click', function(node, e){
   if(node.isLeaf()){
      e.stopEvent();
-     addTab(node.id, 1);
+     addTab(node.id, 1, null, null);
   }
 });
 
@@ -127,18 +163,40 @@ tp.addListener('click', function(node, e){
                    width: 100,
                    fieldLabel:'Entries:',
                    value:1
-                })
+                }), {
+                	xtype : 'datefield',
+                	maxDate : (new Date().add(Date.DAY, 1)),
+                	minDate : new Date('12/31/2008'),
+                	name : 'sdate',
+                	id : 'sdate',
+                	value : new Date('12/31/2008'),
+                	vtype : 'daterange',
+                	endDateField : 'edate',
+                	fieldLabel : 'Start Date'
+                }, {
+                	xtype : 'datefield',
+                	maxDate : (new Date().add(Date.DAY, 1)),
+                	minDate : new Date('12/31/2008'),
+                	name : 'edate',
+                	value : (new Date().add(Date.DAY, 1)),
+                	vtype : 'daterange',
+                	id : 'edate',
+                	startDateField : 'sdate',
+                	fieldLabel : 'End Date'
+                }
              ],
              buttons: [{
                  text:'Add',
                  handler: function() {
                     var pil = myform.getForm().findField('pil').getRawValue();
                     var cnt = myform.getForm().findField('sz').getRawValue();
+                    var sdate = myform.getForm().findField('sdate').getValue();
+                    var edate = myform.getForm().findField('edate').getValue();
                     if (pil == "" || cnt == ""){ 
                       Ext.MessageBox.alert('Error', 'PIL or Entries Invalid');
                       return;
                     }
-                   addTab(pil, cnt);
+                   addTab(pil, cnt, sdate, edate);
                  } // End of handler
              }]
   });
@@ -153,7 +211,7 @@ tp.addListener('click', function(node, e){
            var afos = myform2.getForm().findField('afos').getValue();
            var cnt = myform2.getForm().findField('sz').getRawValue();
            var pil = afos+wfo;
-           addTab(pil, cnt);
+           addTab(pil, cnt, null, null);
           } // End of handler
      }],
      items: [
@@ -239,6 +297,6 @@ for (var i=0; i < ar.length; i++)
 {
   if (ar[i] == ""){ continue; }
   var tokens= ar[i].split("-");
-  addTab( tokens[0], tokens[1]);
+  addTab( tokens[0], tokens[1], null, null);
 }
     });

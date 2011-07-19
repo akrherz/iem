@@ -6,6 +6,8 @@ $conn = iemdb('afos');
 
 $pil = strtoupper($_REQUEST["pil"]);
 $cnt = $_REQUEST["cnt"];
+$sdate = isset($_REQUEST["sdate"]) ? strtotime($_REQUEST["sdate"]) : mktime(0,0,0,2009,12,31);
+$edate = isset($_REQUEST["edate"]) ? strtotime($_REQUEST["edate"]) : time();
 
 /*
  * We need to optimize some things here, first search the current table
@@ -20,14 +22,18 @@ if (intval(date("m")) > 6){
 }
 /* Okay, lets try the local table first */
 $rs = pg_prepare($conn, "LSELECT", "SELECT * from $table WHERE pil = $1
-                         ORDER by entered DESC LIMIT $2");
-$rs = pg_execute($conn, "LSELECT", Array($pil, $cnt));
+						and entered BETWEEN $2 and $3
+                         ORDER by entered DESC LIMIT $4");
+$rs = pg_execute($conn, "LSELECT", Array($pil, date('Y-m-d H:i' , $sdate), 
+				date('Y-m-d H:i' , $edate), $cnt));
 if (pg_num_rows($rs) != $cnt){
 	/* Our optimization failed, shucks */
 	$rs = pg_prepare($conn, "SELECT", "SELECT * from products WHERE pil = $1
-                         ORDER by entered DESC LIMIT $2");
+						and entered BETWEEN $2 and $3
+                         ORDER by entered DESC LIMIT $4");
 
-	$rs = pg_execute($conn, "SELECT", Array($pil, $cnt));
+	$rs = pg_execute($conn, "SELECT", Array($pil,  date('Y-m-d H:i' , $sdate), 
+				date('Y-m-d H:i' , $edate), $cnt));
 }
 
 
