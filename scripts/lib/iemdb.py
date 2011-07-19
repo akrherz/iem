@@ -7,7 +7,7 @@ def connect(dbname, bypass=False):
     Generate a psycopg2 database connection
     """
     dbhost = 'iemdb'
-    dbuser = os.environ['USER']
+    dbuser = os.environ.get('USER', 'nobody')
     if dbuser == 'akrherz' and not bypass:
         dbhost = 'localhost'
     if dbuser == 'akrherz' and bypass:
