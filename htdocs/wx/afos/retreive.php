@@ -6,7 +6,7 @@ $conn = iemdb('afos');
 
 $pil = strtoupper($_REQUEST["pil"]);
 $cnt = $_REQUEST["cnt"];
-$sdate = isset($_REQUEST["sdate"]) ? strtotime($_REQUEST["sdate"]) : mktime(0,0,0,2009,12,31);
+$sdate = isset($_REQUEST["sdate"]) ? strtotime($_REQUEST["sdate"]) : mktime(0,0,0,12, 31,2009);
 $edate = isset($_REQUEST["edate"]) ? strtotime($_REQUEST["edate"]) : time();
 
 /*
