@@ -23,6 +23,8 @@ os.chdir("/tmp")
 form = cgi.FormContent()
 ts0 = mx.DateTime.strptime( form["date0"][0], "%Y-%m-%d")
 ts1 = mx.DateTime.strptime( form["date1"][0], "%Y-%m-%d")
+base = int(form["base"][0])
+ceil = int(form["ceil"][0])
 # Make sure we aren't in the future
 tsend = mx.DateTime.today()
 if ts1 >= tsend:
@@ -41,11 +43,11 @@ precip = numpy.sum(nc.variables['p01d'][offset0:offset1,:,:] / 25.4, axis=0)
 
 # GDD
 H = constants.k2f(nc.variables['high_tmpk'][offset0:offset1])
-H = numpy.where( H < 50, 50, H)
-H = numpy.where( H > 86, 86, H)
+H = numpy.where( H < base, base, H)
+H = numpy.where( H > ceil, ceil, H)
 L = constants.k2f(nc.variables['low_tmpk'][offset0:offset1])
-L = numpy.where( L < 50, 50, L)
-gdd = numpy.sum((H+L)/2.0 - 50.0, axis=0)
+L = numpy.where( L < base, base, L)
+gdd = numpy.sum((H+L)/2.0 - base, axis=0)
 
 nc.close()
 
