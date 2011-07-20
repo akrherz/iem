@@ -21,7 +21,7 @@ for i in range(2,69):
     tests.append('VEF.SV.%s' % (i,))
 for i in range(21,30):
     tests.append('OAX.FF.%s' % (i,))
-for i in range(228,248):
+for i in range(228,249):
     tests.append('OAX.SV.%s' % (i,))
     
 sql = "SELECT wfo, min(eventid), max(eventid), phenomena from warnings_%s \
@@ -33,7 +33,11 @@ for i in range(len(rs)):
   eEvent = int(rs[i]['max'])
   phenomena = rs[i]['phenomena']
   wfo = rs[i]['wfo']
-
+  for e in range(1,sEvent):
+    lookup = "%s.%s.%s" % (wfo, phenomena, e)
+    if lookup not in tests:
+      print "Warning Missing WFO: %s PHENOMENA: %s EVENTID: %s" % (wfo, phenomena, e)
+      
   for eventid in range(sEvent, eEvent):
     sql = "SELECT gtype, count(*) as c from warnings_%s WHERE wfo = '%s' \
            and phenomena = '%s' and eventid = '%s' and significance = 'W' \
