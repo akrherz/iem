@@ -55,6 +55,13 @@ Iowa Ag Weather information in a one-stop location.</div>
 
 </table>
 
+<h4>Aridity Index for Corn Belt</h4>
+
+<blockquote>
+ How Temperature and Precipitation have influenced corn by reporting district. 
+ <a href="http://www.mesonet.agron.iastate.edu/~windmill/AIpage.html">view here</a>.
+</blockquote>
+
 <h4>Historical Freeze Risk</h4>
 
 <blockquote>An air temperature less than 27 is generally considered to be the Hard Freeze, 
