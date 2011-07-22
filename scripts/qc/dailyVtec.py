@@ -16,7 +16,8 @@ tests = [
  'MEG.SV.453','MEG.SV.454','MEG.SV.455','MEG.SV.456','MEG.SV.457','MEG.SV.458',
  'MEG.SV.459','MEG.SV.460','MEG.SV.461','CAE.SV.113', 'LUB.SV.56', 'MLB.SV.72',
  'LBF.SV.186','MQT.MA.52','PIH.SV.29','PIH.SV.30', 'DDC.TO.1', 'ARX.TO.1', 'ARX.FF.1',
- 'CYS.TO.1', 'CYS.TO.2', 'DVN.TO.1', 'DVN.TO.3', 'DVN.TO.2'
+ 'CYS.TO.1', 'CYS.TO.2', 'DVN.TO.1', 'DVN.TO.3', 'DVN.TO.2', 'OAX.TO.1', 'GLD.TO.1',
+ 'GLD.TO.2','UNR.TO.1','UNR.TO.2', 'RIW.TO.1'
 ]
 for i in range(2,69):
     tests.append('VEF.SV.%s' % (i,))
