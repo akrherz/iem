@@ -49,7 +49,7 @@ Iowa Ag Weather information in a one-stop location.</div>
 <tr>
   <th>Stress Degree Days</th>
   <td></td>
-  <td><a href="../GIS/apps/coop/gsplot.phtml?var=sdd50&year=2010">Map of Totals</a>
+  <td><a href="../GIS/apps/coop/gsplot.phtml?var=sdd86&year=2010">Map of Totals</a>
   <br /><a href="../plotting/coop/acc.phtml">Single Site Graphs</a></td>
 </tr>
 
