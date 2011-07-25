@@ -16,34 +16,7 @@ set DEVICE="GF|MWmesonet.gif|900;700"
 
 set AREA="37;-104;48.5;-86"
 
-# Now we plot
-sfmap << EOF > MWmesonet_sfmap.out
-	AREA    = ${AREA}
-	GAREA	= ${AREA}
- 	SATFIL   =  
-	RADFIL   =  
-	SFPARM   =  skyc:.6;tmpf;wsym:1.2:2;alti;;dwpf;;;;brbk:0.8:1:231
-	COLORS   =  32;2;32;0;(50;70/4;23;23/DWPF);32
- 	DATTIM   =  ${date}/${hh}
- 	SFFILE   =  ${date}.gem
- 	LATLON   =  0
-        TITLE    =  32/-1/~ MidWest Mesonet Data
-        CLEAR    =  yes
-        PANEL    =  0
-        DEVICE   = ${DEVICE}
-        PROJ     =  LCC
-        FILTER   =  .5
-        TEXT     = 1
-        LUTFIL   =
-        STNPLT   =
-  CLRBAR = 
-	MAP	= 25 + 25//2
-	\$MAPFIL = HICNUS.NWS + hipowo.cia
-	list
-	run
 
-	exit
-EOF
 
 gddelt  << EOF > gddelt.out
         GDFILE = midwest.grd
@@ -81,6 +54,35 @@ EOF
 
 gpend
 
+
+# Now we plot
+sfmap << EOF > MWmesonet_sfmap.out
+	AREA    = ${AREA}
+	GAREA	= ${AREA}
+ 	SATFIL   =  
+	RADFIL   =  
+	SFPARM   =  skyc:.6;tmpf;wsym:1.2:2;alti;;dwpf;;;;brbk:0.8:1:231
+	COLORS   =  32;2;32;0;(50;70/4;23;23/DWPF);32
+ 	DATTIM   =  ${date}/${hh}
+ 	SFFILE   =  ${date}.gem
+ 	LATLON   =  0
+        TITLE    =  32/-1/~ MidWest Mesonet Data
+        CLEAR    =  yes
+        PANEL    =  0
+        DEVICE   = ${DEVICE}
+        PROJ     =  LCC
+        FILTER   =  .5
+        TEXT     = 1
+        LUTFIL   =
+        STNPLT   =
+  CLRBAR = 
+	MAP	= 25 + 25//2
+	\$MAPFIL = HICNUS.NWS + hipowo.cia
+	list
+	run
+
+	exit
+EOF
 
 gdcntr << EOF > MW_MESONET_gdcntr.out
 	AREA	= ${AREA}
