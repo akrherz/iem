@@ -14,7 +14,7 @@ iem = i['iem']
 # Compute normal from the climate database
 sql = """
 SELECT station, network, x(geom) as lon, y(geom) as lat, 
-avg( (max_tmpf + min_tmpf)/2.0 ) as avgt 
+avg( (max_tmpf + min_tmpf)/2.0 ) as avgt , count(*) as cnt 
 from summary_%s
 WHERE (network ~* 'ASOS' or network = 'AWOS') and network != 'IQ_ASOS' and
 extract(month from day) = extract(month from now()) 
@@ -27,6 +27,8 @@ vals = []
 valmask = []
 rs = iem.query(sql).dictresult()
 for i in range(len(rs)):
+  if rs[i]['cnt'] != now.day:
+    continue
   lats.append( rs[i]['lat'] )
   lons.append( rs[i]['lon'] )
   vals.append( rs[i]['avgt'] )
