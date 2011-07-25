@@ -69,6 +69,9 @@ oabsfc << EOF > oabsfc.out
         SFFILE   = ${date}.gem
         GDFILE   = midwest.grd
         SFPARM   = PMSL
+ GFUNC    = PMSL
+ GLEVEL   = 0
+ GVCORD   = NONE
         list
         run
 
@@ -82,7 +85,7 @@ gpend
 gdcntr << EOF > MW_MESONET_gdcntr.out
 	AREA	= ${AREA}
 	GAREA    = ${AREA}
-	GDATTIM  = F001
+	GDATTIM  = /${hh}00
 	GLEVEL   = 0
 	GVCORD   = NONE
 	GFUNC    = SM9S(PMSL)
