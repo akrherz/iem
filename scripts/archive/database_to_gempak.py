@@ -33,7 +33,10 @@ def run(ts):
     os.system( cmd )
     
     # GEMPAK plotting time!
-    
+    for hr in range(0,24):
+        now = ts + mx.DateTime.RelativeDateTime(hours=hr)
+        cmd = "csh MW_mesonet.csh %s" % (now.strftime("%Y %m %d %H"),)
+        os.system( cmd )
     
 if __name__ == '__main__':
     run( mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
