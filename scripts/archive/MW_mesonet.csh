@@ -45,6 +45,39 @@ sfmap << EOF > MWmesonet_sfmap.out
 	exit
 EOF
 
+gddelt  << EOF > gddelt.out
+        GDFILE = midwest.grd
+        GDATTIM = ALL
+        GDNUM   = ALL
+        GFUNC   = ALL
+        GLEVEL  = ALL
+        GVCORD  = ALL
+        list
+        run
+
+EOF
+
+
+oabsfc << EOF > oabsfc.out
+        DATTIM  = ${date}/${hh}00
+        DTAAREA  =
+        GUESS    =
+        GAMMA    = .3
+        SEARCH   = 20
+        NPASS    = 2
+        QCNTL    = 10;10;;;;;;
+        SFFILE   = ${date}.gem
+        GDFILE   = midwest.grd
+        SFPARM   = PMSL
+        list
+        run
+
+
+        exit
+EOF
+
+gpend
+
 
 gdcntr << EOF > MW_MESONET_gdcntr.out
 	AREA	= ${AREA}
@@ -52,8 +85,8 @@ gdcntr << EOF > MW_MESONET_gdcntr.out
 	GDATTIM  = F001
 	GLEVEL   = 0
 	GVCORD   = NONE
-	GFUNC    = SM9S(MMSL)
-	GDFILE   = RUC2
+	GFUNC    = SM9S(PMSL)
+	GDFILE   = midwest.grd
 	CINT     = 4
 	LINE     = 4
 	MAP      = 0
