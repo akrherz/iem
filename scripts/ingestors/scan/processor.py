@@ -128,14 +128,14 @@ def savedata( data , maxts ):
          c1smv, c2smv, c3smv, c4smv, c5smv, phour) 
         VALUES 
         ('%(station)s', '%(valid)s', '%(tmpf)s', '%(dwpf)s',
-         '%(srad)s','%(sknt)s',
-        '%(drct)s', '%(relh)s', '%(pres)s', '%(c1tmpf)s', 
+         %(srad)s,'%(sknt)s',
+        %(drct)s, %(relh)s, %(pres)s, %(c1tmpf)s, 
         '%(c2tmpf)s', 
         '%(c3tmpf)s', '%(c4tmpf)s', '%(c5tmpf)s', '%(c1smv)s',
          '%(c2smv)s', 
         '%(c3smv)s', '%(c4smv)s', '%(c5smv)s', '%(phour)s')
         """ % iem.data
-    scandb.query(sql)
+    scandb.query(sql.replace('None','null'))
 
 def load_times():
     """
