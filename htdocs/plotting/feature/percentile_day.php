@@ -51,7 +51,7 @@ include ("$rootpath/include/jpgraph/jpgraph_mgraph.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(600,300,"example1");
+$graph = new Graph(300,150,"example1");
 $graph->SetScale("textlin",0,100);
 $graph->img->SetMargin(30,5,20,20);
 $graph->SetMarginColor('white');
@@ -89,7 +89,7 @@ $lineplot->SetFillColor("red");
 $graph->Add($lineplot);
 
 
-$graph2 = new Graph(600,260);
+$graph2 = new Graph(300,130);
 $graph2->SetScale("textlin",0,100);
 $graph2->img->SetMargin(30,5,20,22);
 $graph2->SetMarginColor('white');
@@ -123,7 +123,7 @@ $mgraph = new MGraph();
 $mgraph->SetMargin(2,2,2,2);
 $mgraph->SetFrame(true,'darkgray',2);
 $mgraph->AddMix($graph,0,0);
-$mgraph->AddMix($graph2,0,300);
+$mgraph->AddMix($graph2,0,150);
 $mgraph->Stroke();
 
 ?>
