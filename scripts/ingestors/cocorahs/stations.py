@@ -23,6 +23,9 @@ h = data[0].split(",")
 for i in range(len( h )):
   header[ h[i] ] = i
 
+if not header.has_key('StationNumber'):
+    sys.exit(0)
+
 for row in  data[1:]:
   cols = row.split(",")
   id = cols[ header["StationNumber"] ]
