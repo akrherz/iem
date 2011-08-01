@@ -1,10 +1,9 @@
 # Something to collect the SNET obs from IEM Access...
-# Daryl Herzmann 21 Oct 2004
-# 26 May 2005	Port over the 
+
 
 from pyIEM import iemAccess, iemAccessNetwork, mesonet, iemAccessDatabase
 import sys, time, pickle, os, mx.DateTime, pg
-from pyIEM import stationTable
+import network
 
 gmt = mx.DateTime.gmt()
 tstr = gmt.strftime("%Y%m%d%H%M")
@@ -13,12 +12,13 @@ now = mx.DateTime.now()
 
 iemdb = pg.connect('iem', 'iemdb', user='nobody')
 
-st = stationTable.stationTable("/mesonet/TABLES/snet.stns")
-st.sts["SMAI4"]["name"] = "M-town"
-st.sts["SBZI4"]["name"] = "Zoo"
-st.sts["SMSI4"]["name"] = "Barnum"
-st.sts["STQI4"]["name"] = "Tama"
-st.sts["SBOI4"]["name"] = "Boone"
+st = network.Table( ('KCCI','KELO','KIMT') )
+
+st.sts["SMAI4"]["plot_name"] = "M-town"
+st.sts["SBZI4"]["plot_name"] = "Zoo"
+st.sts["SMSI4"]["plot_name"] = "Barnum"
+st.sts["STQI4"]["plot_name"] = "Tama"
+st.sts["SBOI4"]["plot_name"] = "Boone"
 
 
 def altiTxt(d):
@@ -168,7 +168,7 @@ def main():
   for sid in kcci.data.keys():
     try:
       of.write("%5s %-52s %-20.20s %2s %7.2f %8.2f %2s %4s %4.0f %4.0f %4.0f %4.0f %4s %4.0f %4.0f %4.0f %4.0f %3s %6.2f %6.2f %8s %6.2f %6.2f %6.2f %6.2f\n" % \
-      (sid, st.sts[sid]['name'], st.sts[sid]['name'], 'IA', 
+      (sid, st.sts[sid]['plot_name'], st.sts[sid]['plot_name'], 'IA', 
        st.sts[sid]['lat'], st.sts[sid]['lon'], 
    kcci.data[sid]['ts'].day, kcci.data[sid]['gts'].hour, 
    kcci.data[sid]['tmpf'], kcci.data[sid]['dwpf'], kcci.data[sid]['feel'],
