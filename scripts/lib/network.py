@@ -19,7 +19,8 @@ class Table(object):
             cursor.execute("""SELECT *, x(geom) as lon, y(geom) as lat
                 from stations WHERE network = %s ORDER by name ASC""", (n,))
             for row in cursor:
-             
-                self.sts[ row['id'] ] = row
+                self.sts[ row['id'] ] = {}
+                for key in row.keys():
+                    self.sts[ row['id'] ][key] = row[key]
         cursor.close()
         dbconn.close()
