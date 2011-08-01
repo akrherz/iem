@@ -20,7 +20,8 @@ tests = [
  'GLD.TO.2','UNR.TO.1','UNR.TO.2', 'RIW.TO.1', 'KEY.MA.150', 'GID.TO.1', 'GID.TO.2',
  'CHS.TO.1','ABR.TO.1','ABR.TO.2','ABR.TO.3', 'IWX.TO.1', 'IWX.TO.2', 'BYZ.TO.1',
  'TOP.TO.1', 'LOT.TO.1', 'LOT.TO.2', 'LOT.TO.3', 'FGF.TO.1', 'FGF.TO.2', 'FGF.TO.3',
- 'AKQ.TO.1','BIS.TO.1', 'LBF.TO.1'
+ 'AKQ.TO.1','BIS.TO.1', 'LBF.TO.1', 'LWX.FF.85', 'LWX.FF.86', 'LWX.FF.87', 'LWX.SV.327',
+ 'LWX.SV.328', 'TBW.MA.95',
 ]
 for i in range(2,69):
     tests.append('VEF.SV.%s' % (i,))
