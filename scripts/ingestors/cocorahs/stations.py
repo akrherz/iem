@@ -7,7 +7,7 @@ mesosite = i['mesosite']
 
 state = sys.argv[1]
 
-req = urllib2.Request("http://www.cocorahs.org/export/exportstations.aspx?State=%s&Format=CSV" % (state,) )
+req = urllib2.Request("http://data.cocorahs.org/cocorahs/export/exportreports.aspx?State=%s&Format=CSV" % (state,) )
 data = urllib2.urlopen(req).readlines()
 
 # Find current stations
