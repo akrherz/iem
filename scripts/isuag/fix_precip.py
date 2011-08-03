@@ -25,34 +25,22 @@ for i in range(len(rs)):
 
 def fix_daily(ts):
     """
-    Fix the daily precipitation values, just hard code the stupid IEMRE value
+    Instead of using the IEMRE value, we should total up the hourly
+    data, so to confuse people less
     """
-    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_daily.nc" % (ts.year,),'r')
-    p01d = nc.variables['p01d']
-    offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
     # Find ISUAG Data
-    rs = isuag.query("SELECT * from daily WHERE valid = '%s'" % (ts.strftime("%Y-%m-%d"),)).dictresult()
+    rs = isuag.query("""SELECT sum(c900) as rain, station from hourly 
+	WHERE date(valid) = '%s' GROUP by station""" % (ts.strftime("%Y-%m-%d"),)).dictresult()
     for i in range(len(rs)):
         stid = rs[i]['station']
         if stid in SKIP:
           continue
-        lat = sts[ stid ]['lat']
-        lon = sts[ stid ]['lon']
-        # Lookup IEMRE data
-        ix,jy = constants.find_ij(lon, lat)
-        estimate = p01d[offset,jy,ix] / 25.4
-        if estimate > 100:
-            estimate = 0
-        # Only print non-zero values please
-        if rs[i]['c90'] > 0 or estimate > 0:
-            print "DY %s %-20.20s %5.2f %s %5.2f" % (stid, sts[stid]['name'],
-                   rs[i]['c90'], rs[i]['c90_f'], estimate)
+        rain = rs[i]['rain']
         # Fix it
         sql = """UPDATE daily SET c90 = %.2f, c90_f = 'e' WHERE valid = '%s'
-              and station = '%s'""" % (estimate, ts.strftime("%Y-%m-%d"),
+              and station = '%s'""" % (rain, ts.strftime("%Y-%m-%d"),
               stid)
         isuag.query(sql)
-    nc.close()
 
 def fix_hourly(ts):
 
@@ -95,7 +83,7 @@ if __name__ == "__main__":
                            int(sys.argv[3]) )
     else:
         ts = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(days=-1,hour=0,minute=0,second=0)
-    fix_daily(ts)
     for hr in range(24):
-        ts += mx.DateTime.RelativeDateTime(hours=1)
-        fix_hourly( ts.gmtime() )
+        now = ts + mx.DateTime.RelativeDateTime(hours=hr)
+        fix_hourly( now.gmtime() )
+    fix_daily(ts)
