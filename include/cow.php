@@ -22,6 +22,9 @@ function cow($dbconn){
     $this->ugcCache = Array();   /* UGC information */
     $this->hailsize = 0.75;      /* Hail size limitation */
     $this->lsrbuffer = 15;       /* LSR report buffer in km */
+    $this->wind = 58;			/* Wind threshold in mph */
+    $this->useWindHailTag = false;  /* Option to use wind hail tag to verify */
+    $this->limitwarns = false;  /* Limit listed warnings to wind and hail criterion */
 }
 
 /* Standard Workflow */
@@ -64,6 +67,9 @@ function setLimitLSRType($arType){
 function setHailSize($val){
     $this->hailsize = $val;
 }
+function setWind($val){
+    $this->wind = $val;
+}
 
 function sqlWFOBuilder(){
     reset($this->wfo);
@@ -92,7 +98,7 @@ function sqlLSRTypeBuilder(){
 function sqlTypeBuilder(){
     if (sizeof($this->wtype) == 0) return "1 = 1";
 
-    $sql = "phenomena IN ('". implode(",", $this->wtype) ."')";
+    $sql = "w.phenomena IN ('". implode(",", $this->wtype) ."')";
     $sql = str_replace(",", "','", $sql);
     return $sql;
 }
@@ -311,19 +317,33 @@ function computeSharedBorder(){
     }
 }
 
+function sqlTagLimiter(){
+	if ($this->limitwarns){
+		return sprintf(" and ((s.windtag >= %s or s.hailtag >= %s) or (s.windtag is null and s.hailtag is null))", $this->wind, $this->hailsize);
+	}
+	return "";
+}
+
 function loadWarnings(){
     $sql = sprintf("
-    select *, astext(geom) as tgeom from 
+    select *, ST_astext(geom) as tgeom from 
       (SELECT distinct * from 
-        (select *, area(transform(geom,2163)) / 1000000.0 as area,
-         perimeter(transform(geom,2163)) as perimeter,
-         xmax(geom) as lon0, ymax(geom) as lat0 from 
-         warnings w WHERE %s and issue >= '%s' and issue < '%s' and
-         expire < '%s' and %s and significance = 'W' 
-         ORDER by issue ASC) as foo) 
-      as foo2", $this->sqlWFOBuilder(), 
+        (select s.hailtag, s.windtag, 
+         w.geom, w.issue, w.expire, w.wfo, w.status, w.significance,
+         w.phenomena, w.eventid, w.gtype, w.ugc,
+         ST_area(ST_transform(w.geom,2163)) / 1000000.0 as area,
+         ST_perimeter(ST_transform(w.geom,2163)) as perimeter,
+         xmax(w.geom) as lon0, ymax(w.geom) as lat0 from 
+         warnings w, sbw s WHERE s.wfo = w.wfo and s.phenomena = w.phenomena and
+         s.eventid = w.eventid and s.significance = w.significance and 
+         s.status = 'NEW' and s.issue = w.issue and 
+         %s and w.issue >= '%s' and w.issue < '%s' and
+         w.expire < '%s' and %s and w.significance = 'W' %s
+         ORDER by w.issue ASC) as foo) 
+      as foo2 ORDER by issue ASC", $this->sqlWFOBuilder(), 
    date("Y/m/d H:i", $this->sts), date("Y/m/d H:i", $this->ets), 
-   date("Y/m/d H:i", $this->ets), $this->sqlTypeBuilder() );
+   date("Y/m/d H:i", $this->ets), $this->sqlTypeBuilder(), 
+   $this->sqlTagLimiter() );
 
     $rs = $this->callDB($sql);
     for ($i=0;$row = @pg_fetch_array($rs,$i);$i++){
@@ -334,11 +354,11 @@ function loadWarnings(){
                                           "lsrs" => Array(), "perimeter" => 0,
                                           "parea" => 0 );
         }
+        $this->warnings[$key]["hailtag"] = $row["hailtag"];
+        $this->warnings[$key]["windtag"] = $row["windtag"];
         $this->warnings[$key]["issue"] = $row["issue"];
-        $this->warnings[$key]["expire"] = $row["expire"];
         $this->warnings[$key]["phenomena"] = $row["phenomena"];
         $this->warnings[$key]["wfo"] = $row["wfo"];
-        $this->warnings[$key]["status"] = $row["status"];
         $this->warnings[$key]["significance"] = $row["significance"];
         $this->warnings[$key]["area"] = $row["area"];
         $this->warnings[$key]["lat0"] = $row["lat0"];
@@ -350,6 +370,8 @@ function loadWarnings(){
         $this->warnings[$key]["buffered"] = 0;
         $this->warnings[$key]["verify"] = 0;
         if ($row["gtype"] == "P"){
+        	$this->warnings[$key]["status"] = $row["status"];
+        	$this->warnings[$key]["expire"] = $row["expire"];
             $this->warnings[$key]["geom"] = $row["tgeom"];
             $this->warnings[$key]["perimeter"] = $row["perimeter"];
             $this->warnings[$key]["parea"] = $row["area"];
@@ -369,12 +391,12 @@ function loadLSRs() {
         valid >= '%s' and valid < '%s' and %s and
         ((type = 'M' and magnitude >= 34) or 
          (type = 'H' and magnitude >= %s) or type = 'W' or
-         type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
+         type = 'T' or (type = 'G' and magnitude >= %s) or type = 'D'
          or type = 'F')
         ORDER by valid ASC", $this->lsrbuffer, 
         $this->sqlWFOBuilder(), 
         date("Y/m/d H:i", $this->sts), date("Y/m/d H:i", $this->ets), 
-        $this->sqlLSRTypeBuilder(), $this->hailsize);
+        $this->sqlLSRTypeBuilder(), $this->hailsize, $this->wind);
     $rs = $this->callDB($sql);
     for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
     {
@@ -415,6 +437,19 @@ function areaVerify() {
     }
 }
 
+function getVerifyHailSize($warn){
+	if ($this->useWindHailTag && $warn['hailtag'] != null && $warn['hailtag'] >= $this->hailsize){
+		return $warn['hailtag'];
+	}
+	return $this->hailsize;
+}
+function getVerifyWind($warn){
+	if ($this->useWindHailTag && $warn['windtag'] != null && $warn['windtag'] > $this->wind){
+		return $warn['windtag'];
+	}
+	return $this->wind;
+}
+
 function sbwVerify() {
     reset($this->warnings);
     while (list($k,$v) = each($this->warnings)) {
@@ -426,12 +461,12 @@ function sbwVerify() {
          and %s and wfo = '%s' and
         ((type = 'M' and magnitude >= 34) or 
          (type = 'H' and magnitude >= %s) or type = 'W' or
-         type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
+         type = 'T' or (type = 'G' and magnitude >= %s) or type = 'D'
          or type = 'F')
          and valid >= '%s' and valid <= '%s' 
          ORDER by valid ASC", 
          $v["geom"], $v["geom"], $this->sqlLSRTypeBuilder(), 
-         $v["wfo"], $this->hailsize,
+         $v["wfo"], $this->getVerifyHailSize($v), $this->getVerifyWind($v),
          date("Y/m/d H:i", strtotime($v["issue"])),
          date("Y/m/d H:i", strtotime($v["expire"])) );
         $rs = $this->callDB($sql);

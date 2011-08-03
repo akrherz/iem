@@ -38,9 +38,13 @@ function printWARN($cow, $warn)
   if ($warn["perimeter"] > 0){
   	$bratio = $warn["sharedborder"] / $warn["perimeter"] * 100.0;
   }
+  $windhail = "";
+  if ($warn["windtag"] != null){
+  	$windhail = sprintf("<br />H: %s\"<br />W: %s", $warn["hailtag"], $warn["windtag"]);
+  }
 
-  $s = sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a></td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f sq km</td><td>%.0f sq km</td><td>%.0f %%</td><td>%.0f%% <a href=\"../GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td><td>%.0f%%</td></tr>\n", 
-    $background, $uri, $warn["phenomena"], $warn["eventid"],
+  $s = sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a>%s</td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f sq km</td><td>%.0f sq km</td><td>%.0f %%</td><td>%.0f%% <a href=\"../GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td><td>%.0f%%</td></tr>\n", 
+    $background, $uri, $warn["phenomena"], $warn["eventid"], $windhail,
     gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["ets"]), 
     $uri, implode(", ",$counties), $uri, $warn["status"], $warn["area"], 
     $carea, ($carea - $warn["parea"])/ $carea  * 100,
@@ -59,9 +63,16 @@ $cow = new Cow( iemdb("postgis") );
 $cow->setLimitWFO( Array($wfo) );
 $cow->setLimitTime( $sts, $ets );
 $cow->setHailSize( $hail );
+$cow->setWind( $wind );
 $cow->setLimitType( $wtype );
 $cow->setLimitLSRType( $ltype );
 $cow->setLSRBuffer( $lsrbuffer );
+if (isset($useWindHailTag) && $useWindHailTag == 'Y'){
+	$cow->useWindHailTag = true;
+}
+if (isset($limitwarns) && $limitwarns == 'Y'){
+	$cow->limitwarns = true;
+}
 $cow->milk();
 
 $charturl = sprintf("chart.php?aw=%s&ae=%s&b=%s&c=%s&d=%s",
