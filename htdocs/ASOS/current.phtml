@@ -5,7 +5,11 @@
  $sortcol = isset($_GET['sortcol'])  ? $_GET['sortcol']: "ts";
  $sorder = isset($_GET['sorder']) ? $_GET['sorder']: "desc";
  $format = isset($_REQUEST["format"]) ? $_REQUEST['format'] : 'html';
-
+ if ($format == 'jsonp'){
+ 	header("Location: ../geojson/network_obs.php?network=$network&callback=mycallback");
+ 	die();
+ }
+ 
   $TITLE = "IEM | ASOS | Current Conditions";
   $REFRESH = "<meta http-equiv=\"refresh\" content=\"1200;\">";
   $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
@@ -173,6 +177,7 @@ Select State:<select name="network">
 <select name="format">
   <option value="html" <?php if ($format == "html") echo "SELECTED"; ?>>Web Page
   <option value="csv" <?php if ($format == "csv") echo "SELECTED"; ?>>Comma Delimited
+  <option value="jsonp" <?php if ($format == "jsonp") echo "SELECTED"; ?>>JSON-P
 </select></td>
 <td><input type="submit" value="Go!"></form></td>
 </tr></table>
