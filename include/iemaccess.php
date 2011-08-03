@@ -33,7 +33,7 @@ class IEMAccess {
   function getNetwork($network) {
     $ret = Array();
     $rs = pg_exec($this->dbconn, "select *, c.pday as ob_pday, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station, network) WHERE c.network = '$network' and s.day = 'TODAY'");
-    for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
       $ret[$row["station"]] = new IEMAccessOb($row);
     }
     return $ret;
