@@ -11,7 +11,7 @@ def checkdate(ts):
     check a date's worth of data for troublemakers
     '''
     strdate = ts.strftime("%Y-%m-%d")
-    icursor.execute("""SELECT station, max_tmpf, min_tmpf from summary
+    icursor.execute("""SELECT station, max_tmpf, min_tmpf from summary_"""+ ts.year +"""
     WHERE day = %s and network in ('IA_ASOS','AWOS')
     and max_tmpf > min_tmpf""", (strdate,))
                                     
@@ -31,7 +31,7 @@ def checkdate(ts):
     for id in numpy.where( (highs-lows)>(meandelta*1.5), stations, None):
         if id is not None:
             idx = stations.index(id)
-            print 'Delta Fail %s %s %.1f %.1f Tolerance: %.1f' % (id,
+            print 'Delta   %s %s %5.1f %5.1f Tolerance: %5.1f' % (id,
                                  strdate   , highs[idx], lows[idx], meandelta*1.5)
     # Check 2: Two sigma temperatures
     thres1 = numpy.average(highs) + (numpy.std(highs) * 2.)
@@ -39,14 +39,14 @@ def checkdate(ts):
     for id in numpy.where( highs > thres1, stations, None):
         if id is not None:
             idx = stations.index(id)
-            print '+2sigma Fail %s %s %.1f %.1f Tolerance: %.1f %.1f' % (id,
+            print '+2sigma %s %s %5.1f %5.1f Tolerance: %5.1f %5.1f' % (id,
                                   strdate,  highs[idx], lows[idx], thres1, thres2)                 
     for id in numpy.where( highs < thres2, stations, None):
         if id is not None:
             idx = stations.index(id)
-            print '-2sigma Fail %s %s %.1f %.1f Tolerance: %.1f %.1f' % (id,
+            print '-2sigma %s %s %5.1f %5.1f Tolerance: %5.1f %5.1f' % (id,
                                   strdate,  highs[idx], lows[idx], thres1, thres2)                 
     
 if __name__ == "__main__":
-    for i in range(0,24):
+    for i in range(0,7):
         checkdate( datetime.datetime.now() - datetime.timedelta(days=i))
