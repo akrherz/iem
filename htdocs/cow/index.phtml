@@ -82,9 +82,11 @@ while( list($key, $value) = each($wfos) ){
 </select> km</td>
 <th>LSR Type:</th>
 <td>
-<input name="ltype[]" type="checkbox" value="TO" <?php if (in_array("TO", $ltype)) echo "CHECKED"; ?>>Tornado
-<input name="ltype[]" type="checkbox" value="SV" <?php if (in_array("SV", $ltype)) echo "CHECKED"; ?>>Svr T'storm
-<input name="ltype[]" type="checkbox" value="MA" <?php if (in_array("MA", $ltype)) echo "CHECKED"; ?>>Marine
+<input name="ltype[]" type="checkbox" value="T" <?php if (in_array("T", $ltype)) echo "CHECKED"; ?>>Tornado
+<input name="ltype[]" type="checkbox" value="D" <?php if (in_array("D", $ltype)) echo "CHECKED"; ?>>Wind Damage
+<input name="ltype[]" type="checkbox" value="H" <?php if (in_array("H", $ltype)) echo "CHECKED"; ?>>Hail
+<input name="ltype[]" type="checkbox" value="G" <?php if (in_array("G", $ltype)) echo "CHECKED"; ?>>Wind Gust
+<br /><input name="ltype[]" type="checkbox" value="MA" <?php if (in_array("MA", $ltype)) echo "CHECKED"; ?>>Marine
 <input name="ltype[]" type="checkbox" value="FF" <?php if (in_array("FF", $ltype)) echo "CHECKED"; ?>>Flash Flood (2008+)
 </td></tr>
 <tr>
