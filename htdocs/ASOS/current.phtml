@@ -4,9 +4,8 @@
  $metar = isset($_GET['metar']) ? $_GET["metar"] : "no";
  $sortcol = isset($_GET['sortcol'])  ? $_GET['sortcol']: "ts";
  $sorder = isset($_GET['sorder']) ? $_GET['sorder']: "desc";
-?>
+ $format = isset($_REQUEST["format"]) ? $_REQUEST['format'] : 'html';
 
-<?php
   $TITLE = "IEM | ASOS | Current Conditions";
   $REFRESH = "<meta http-equiv=\"refresh\" content=\"1200;\">";
   $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
@@ -18,17 +17,13 @@ function new_window(url) {
 </script>
 ';
  $THISPAGE = "current-sort";
-  include("$rootpath/include/header.php"); 
+
   include("$rootpath/include/mlib.php"); 
   include("$rootpath/include/network.php");
   $nt = new NetworkTable($network);
   $cities = $nt->table;
   include("$rootpath/include/iemaccess.php");
   include("$rootpath/include/iemaccessob.php");
-
-$iem = new IEMAccess();
-$asos = $iem->getNetwork($network);
-
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
@@ -44,14 +39,69 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "skyl4" => "Cloud Level 4",
   "pday" => "Today Rainfall [inch]", );
 
-?>
+function aSortBySecondIndex($multiArray, $secondIndex, $sorder) {
+  while (list($firstIndex, ) = each($multiArray))
+       $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+  if ($sorder == "asc")
+        asort($indexMap);
+  else 
+        arsort($indexMap);
+  while (list($firstIndex, ) = each($indexMap))
+      if (is_numeric($firstIndex))
+                 $sortedArray[] = $multiArray[$firstIndex];
+      else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+  return $sortedArray;
+}
+
+$iem = new IEMAccess();
+$asos = $iem->getNetwork($network);
+
+/* Final data array */
+$mydata = Array();
+
+while ( list($key, $iemob) = each($asos) ){
+    $mydata[$key] = $iemob->db;
+    $mydata[$key]["ts"] = $iemob->ts;
+    $mydata[$key]["sname"] = $cities[$key]["name"];
+    $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
+    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
+       f2c($mydata[$key]["dwpf"]) );
+    $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
+       $mydata[$key]["relh"], $mydata[$key]["sped"]);
+    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
+      $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
+      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+    } else {
+      $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
+      if ($mydata[$key]["max_sknt_ts"] > 0) {
+         $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+      }
+    }
+
+} // End of while
+
+if($format == 'csv'){
+	$csv = "station,valid_gmt,tmpf,dwpf,sknt,drct,relh,vsby,phour_in,pday_in,metar\n";
+	while (list ($key, $val) = each ($mydata))  {
+		$data = $mydata[$key];
+		$csv .= sprintf("%s,%s,%.0f,%.0f,%.0f,%.0f,%.1f,%s,%.2f,%.2f,%s\n", $key, gmstrftime("%Y-%m-%d %I:%M", $data['ts']),
+			$data['tmpf'], $data['dwpf'], $data['sknt'], $data['drct'], $data['relh'], 
+			$data['vsby'], $data['phour'],
+			$data['pday'], $data['raw']);
+	}
+	header("Content-type: text/plain");
+	echo $csv;
+	die();
+}
 
 
-<?php $current_network = "ASOS"; include("$rootpath/include/current_bar.inc.php"); ?>
-<h3 class="subtitle">ASOS Conditions</h3><p>
+
+/* Begin HTML output! */
+  include("$rootpath/include/header.php"); 
+  $current_network = "ASOS"; include("$rootpath/include/current_bar.inc.php"); ?>
+
 <table border=1 cellspacing=0 cellpadding=1>
 <tr>
-  <th>View Options:</th>
   <td>
 <form method="GET" action="current.phtml">
 <input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
@@ -110,7 +160,7 @@ Select State:<select name="network">
  <option value="IQ_ASOS" <?php if ($network == "IQ_ASOS") echo "SELECTED"; ?>>Iraq/Afganistan Military
  <option value="PO_ASOS" <?php if ($network == "PO_ASOS") echo "SELECTED"; ?>>Pacific Ocean
 </select></td>
-  <td>Include METARS:
+  <td>Include METARS:<br />
   <input value="no" type="radio" name="metar" <?php if ($metar == "no") echo  "CHECKED"; ?>> No
   <input value="yes" type="radio" name="metar" <?php if ($metar == "yes") echo  "CHECKED"; ?>> Yes
 </td>
@@ -118,6 +168,11 @@ Select State:<select name="network">
 <select name="sorder">
   <option value="asc" <?php if ($sorder == "asc") echo "SELECTED"; ?>>Ascending
   <option value="desc" <?php if ($sorder == "desc") echo "SELECTED"; ?>>Decending
+</select></td>
+<td>Format:
+<select name="format">
+  <option value="html" <?php if ($format == "html") echo "SELECTED"; ?>>Web Page
+  <option value="csv" <?php if ($format == "csv") echo "SELECTED"; ?>>Comma Delimited
 </select></td>
 <td><input type="submit" value="Go!"></form></td>
 </tr></table>
@@ -168,44 +223,6 @@ a column to sort it.<br>\n";
 </tr></thead>
 <tbody>
 <?php
-function aSortBySecondIndex($multiArray, $secondIndex, $sorder) {
-  while (list($firstIndex, ) = each($multiArray))
-       $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-  if ($sorder == "asc")
-        asort($indexMap);
-  else 
-        arsort($indexMap);
-  while (list($firstIndex, ) = each($indexMap))
-      if (is_numeric($firstIndex))
-                 $sortedArray[] = $multiArray[$firstIndex];
-      else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-  return $sortedArray;
-}
-
-/* Final data array */
-$mydata = Array();
-
-while ( list($key, $iemob) = each($asos) ){
-    $mydata[$key] = $iemob->db;
-    $mydata[$key]["ts"] = $iemob->ts;
-    $mydata[$key]["sname"] = $cities[$key]["name"];
-    $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
-    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
-       f2c($mydata[$key]["dwpf"]) );
-    $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
-       $mydata[$key]["relh"], $mydata[$key]["sped"]);
-    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
-      $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
-    } else {
-      $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-      if ($mydata[$key]["max_sknt_ts"] > 0) {
-         $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
-      }
-    }
-
-} // End of while
-
 
 $finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
@@ -270,6 +287,7 @@ while (list ($key, $val) = each ($finalA))  {
   echo $row;
  }
 echo $old;
+
 
  $uri = "javascript:new_window('$rooturl/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network";
 ?>
