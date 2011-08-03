@@ -84,7 +84,7 @@ if($format == 'csv'){
 	$csv = "station,valid_gmt,tmpf,dwpf,sknt,drct,relh,vsby,phour_in,pday_in,metar\n";
 	while (list ($key, $val) = each ($mydata))  {
 		$data = $mydata[$key];
-		$csv .= sprintf("%s,%s,%.0f,%.0f,%.0f,%.0f,%.1f,%s,%.2f,%.2f,%s\n", $key, gmstrftime("%Y-%m-%d %I:%M", $data['ts']),
+		$csv .= sprintf("%s,%s,%.0f,%.0f,%.0f,%.0f,%.1f,%s,%.2f,%.2f,%s\n", $key, gmstrftime("%Y-%m-%d %H:%M", $data['ts']),
 			$data['tmpf'], $data['dwpf'], $data['sknt'], $data['drct'], $data['relh'], 
 			$data['vsby'], $data['phour'],
 			$data['pday'], $data['raw']);
