@@ -88,7 +88,8 @@ function sqlLSRTypeBuilder(){
         if ($v == "TO"){ $l[] = "T"; }
         else if ($v == "SV"){ $l[] = "H"; $l[] = "G"; $l[] = "D"; }
         else if ($v == "MA"){ $l[] = "M"; $l[] = "W"; }
-        else if ($v == "FF"){ $l[] = "F"; };
+        else if ($v == "FF"){ $l[] = "F"; }
+        else{ $l[] = $v; }
     }   
     $sql = "type IN ('". implode(",", $l) ."')";
     $sql = str_replace(",", "','", $sql);
