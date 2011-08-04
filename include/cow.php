@@ -496,6 +496,12 @@ function sbwVerify() {
             if ($verify){
                 $this->warnings[$k]["verify"] = True;
             }
+            /*
+             * Sometimes this happens, but not sure why
+             */
+            if (! array_key_exists($key, $this->lsrs)){
+            	continue;
+            }
             if (($verify || $this->lsrs[$key]["tdq"]) &&
                  ! $this->lsrs[$key]['warned'] ){
                 $this->warnings[$k]["lsrs"][] = $key;
