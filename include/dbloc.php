@@ -16,7 +16,6 @@ function dbloc($c, $sid){
 
 } // End of dbloc()
 
-//select Y(transform(geometryfromtext(ba, 4326), 26915)), X(transform(geometryfromtext(ba, 4326), 26915)) from (select 'POINT('||longitude||' '||latitude||')' as ba from stations WHERE id = 'AMW') as foo;
 
 function dbloc26915($c,$sid){
   $sid = substr($sid, 0, 6);
