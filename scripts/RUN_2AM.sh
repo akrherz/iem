@@ -17,6 +17,7 @@ cd ../dbutil
 
 cd ../qc
 /mesonet/python/bin/python check_iem_precip.py
+python hads_nwsli_squawk.py
 
 cd ../ingestors/cocorahs
 /mesonet/python/bin/python redo_day.py IA
