@@ -454,6 +454,12 @@ function getVerifyWind($warn){
 function sbwVerify() {
     reset($this->warnings);
     while (list($k,$v) = each($this->warnings)) {
+    	/*
+    	 * No SBW found?
+    	 */
+    	if (!array_key_exists('expire',$v)){
+    		continue;
+    	}
         /* Look for LSRs! */
         $sql = sprintf("SELECT distinct *
          from lsrs w WHERE 
