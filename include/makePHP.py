@@ -1,9 +1,9 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/python
 
 from pyIEM import iemdb
 import mx.DateTime
-i = iemdb.iemdb()
-mesosite = i['mesosite']
+import pg
+mesosite = pg.connect('mesosite', 'iemdb', user='nobody')
 
 rs = mesosite.query("SELECT *, x(geom), y(geom), case when removed then 'True' else 'False' end as r, case when online then 'True' else 'False' end as c from webcams  ORDER by name ASC").dictresult()
 
