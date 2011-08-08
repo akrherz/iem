@@ -10,7 +10,8 @@ include("../../config/settings.inc.php");
  $ets = "$d%2023:59";
  $uri = "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/data/wfs/ww.map&amp;year=$year&amp;startts=$sts&amp;endts=$ets&amp;";
  if (isset($_GET['time'])){
- 	 $sts = "$d%20".$_GET['time'];
+ 	$year = substr($d,0,4);
+ 	 $ts = "$d%20".$_GET['time'];
  	 $uri = "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/var/www/data/wfs/wwt.map&amp;year=$year&ts=$ts&amp;";
  }
  ?>
