@@ -1,31 +1,39 @@
 import iemdb 
-COOP = iemdb.connect('coop', bypass=True)
+COOP = iemdb.connect('asos', bypass=True)
 ccursor = COOP.cursor()
 
 ccursor.execute("""
-select sday, sum(case when high < 32 then 1 else 0 end), 
- sum(case when low < 32 then 1 else 0 end), count(*) from alldata where stationid = 'ia0200' and month = 3 group by sday ORDEr by sday ASC
+select date(valid) as d, avg(sknt) from t2011 where station = 'AMW' and sknt >= 0 and valid > '2011-06-01' and valid < '2011-07-08' GROUP by d ORDER by d ASC
 """)
-highs = []
-lows = []
+sknt = []
 for row in ccursor:
-  highs.append( row[1] / float(row[3]) * 100.0)
-  lows.append( row[2] / float(row[3]) * 100.0)
+  sknt.append( row[1] * 1.15 )
 
 import matplotlib.pyplot as plt
 import numpy as np
+import mx.DateTime
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-ax.bar(np.arange(1,32), highs, width=0.4, facecolor='r', label='High')
-ax.bar(np.arange(1,32)-0.4, lows, width=0.4, facecolor='b', label='Low')
-ax.set_xticks( [1,7,14,21,28] )
-ax.set_xlim(0.5,31.5)
+ax.bar(np.arange(0,len(sknt)) - 0.4, sknt, facecolor='r')
 ax.grid(True)
-ax.set_ylabel("Frequency [%]")
-ax.set_xlabel("Day of March")
-ax.set_title("Ames Temperature below Freezing in March")
-ax.legend()
+ax.set_ylabel("Average Wind Speed [mph]")
+#ax.set_xlabel("Date since 1 June 2011")
+ax.set_title("Ames Daily Average Wind Speed (1 Jun - 7 Jul 2011)")
+ax.set_xlim(-0.4,len(sknt)-0.4)
+xticks = []
+xticklabels = []
+for i in range(0,len(sknt)):
+  ts = mx.DateTime.DateTime(2011,6,1) + mx.DateTime.RelativeDateTime(days=i)
+  if ts.day == 1:
+    xticks.append(i)
+    xticklabels.append( ts.strftime("%-d\n%b") )
+  if ts.day % 3 == 0:
+    xticks.append(i)
+    xticklabels.append( ts.strftime("%-d") )
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+
 fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')

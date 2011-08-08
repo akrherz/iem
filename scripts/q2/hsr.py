@@ -2,7 +2,10 @@
 
 import numpy
 import mx.DateTime
-import netCDF3
+try:
+    import netCDF3
+except:
+    import netCDF4 as netCDF3
 from PIL import Image
 import os
 import sys
@@ -61,21 +64,26 @@ def doit(gts):
             continue
         nc = netCDF3.Dataset( fp )
         val = nc.variables["hsr"][:,:] / 10.0 # convert to dBZ
-        # -990 is no return
-        # -9990 is missing
-        # Bump up by one, so that we can set missing to color index 0
-        #val += 1.0
-        # Base is -30dBZ, so we add 60 to get us above zero, I hope
-        #val = (val + 30.0) * 2.0
+        # -99 is no return
+        # -999 is missing
+        #print "1. Min: %.2f  Avg: %.2f Max: %.2f" % (numpy.min(val), numpy.average(val),
+        #                                             numpy.max(val))
+        # Move the good data
         val = numpy.where( val > -33., (val +32.) * 2.0, val)
+        #print "2. Min: %.2f  Avg: %.2f Max: %.2f" % (numpy.min(val), numpy.average(val),
+        #                                             numpy.max(val))
         val = numpy.where( val < -990., 0., val)
+        #print "3. Min: %.2f  Avg: %.2f Max: %.2f" % (numpy.min(val), numpy.average(val),
+        #                                             numpy.max(val))
         val = numpy.where( val < 0., 1., val)
-
+        #print "4. Min: %.2f  Avg: %.2f Max: %.2f" % (numpy.min(val), numpy.average(val),
+        #                                             numpy.max(val))
         ysz, xsz = numpy.shape(val)
         x0 = (tiles[tile][0] - west) * 100.0
         y0 = (north - tiles[tile][1]) * 100.0
         #print tile, x0, xsz, y0, ysz, val[0,0]
         imgdata[y0:(y0+ysz-1),x0:(x0+xsz-1)] = val.astype('int')[:-1,:-1]
+        #print imgdata[1203:1205,3858:3861], x0, y0
         nc.close()
     # Stress our color ramp
     #for i in range(256):

@@ -2,60 +2,33 @@
 from matplotlib import pyplot as plt
 import numpy
 import iemplot
-import iemdb
-POSTGIS = iemdb.connect('postgis', bypass=True)
-acursor = POSTGIS.cursor()
 
-acursor.execute("""
-select extract(year from issued) as yr, count(*) from watches where 
-extract(month from issued) in (1,2,3) GROUP by yr ORDER by yr ASC
-""")
-apr1 = []
-years = []
-#totals = []
-for row in acursor:
-  years.append( row[0] )
-  apr1.append( row[1] )
+coverage = [25.0, 34.146341463414636, 51.968503937007867, 57.964601769911503, 40.465116279069768, 18.497109826589593, 6.4864864864864868, 6.4327485380116958, 2.083333333333333, 1.680672268907563, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+avgRain = [0.75143766403198242, 0.8477320787383289, 0.98347082663708785, 1.1510259577658324, 0.86791261185047242, 0.50188304923173321, 0.2912971084182327, 0.27489973369397613, 0.2098076475991143, 0.2139480975495667, 0.20024166336978774, 0.20125648210633476, 0.12343124389648437, 0.059379973581859043, 0.11521736780802409, 0.15796695152918497, 0.0, 0.0, 0.0]
+bins = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
-acursor.execute("""
-select extract(year from issued) as yr, count(*) from watches GROUP by yr ORDER by yr ASC
-""")
-full = []
-#totals = []
-for row in acursor:
-  full.append( row[1] )
-
-full = numpy.array(full)
-apr1= numpy.array(apr1)
-years = numpy.array(years)
+coverage = numpy.array(coverage)
+avgRain = numpy.array(avgRain)
+bins = numpy.array(bins)
 
 fig = plt.figure()
-ax = fig.add_subplot(111)
-
-ax.bar(years -0.4, apr1, color='r', label="Prior 1 Apr")
-ax.bar(years -0.4, full-apr1, bottom=apr1, color='b', label="After 1 Apr")
-#ax.plot( [1989,2011], [1.49, 1.49], color='r', label='Average 1.49')
-#rects2 = ax.bar(numpy.arange(2005,2011), onetwenty, 0.33, color='r', label=('2 hour'))
-#ax.set_xticklabels( numpy.arange(1990,2011) )
-ax.set_xlim(1996.5, 2011.5)
-ax.set_ylim(0,1100)
-#rects1[-1].set_facecolor('r')
-ax.legend(loc=2)
-#ax.set_xticks( (0,6,12,18,24,30) )
-#ax.set_xticklabels( ('Mid\n29 Dec', '6 AM', 'Noon', '6 PM', 'Mid\n30 Dec', '6 AM'))
-
-#for i in range(6):
-#  label = "%s, %.2f" % (sixtyl[i], sixty[i])
-#  ax.text( 2005 + i - 0.15, 0.05, label, color='white',
-#                ha='center', va='bottom', rotation=90, fontsize=16)
-#  label = "%s, %.2f" % (onetwentyl[i], onetwenty[i])
-#  ax.text( 2005 + i + 0.17, 0.05, label, color='white',
-#                ha='center', va='bottom', rotation=90, fontsize=16)
-#
-
-ax.set_ylabel("Number of Watches")
-ax.set_xlabel("Year, 2011 data to 1 Apr")
-ax.set_title("Storm Prediction Center Severe T'storm/Tornado Watches")
+ax = fig.add_subplot(211)
+bars = ax.bar(bins - 0.4, coverage, color='b', edgecolor='b')
+ax.set_xlim(-7, 12)
+#ax.plot((1893,2011), (numpy.average(apr1),numpy.average(apr1)), color='black') 
+ax.set_ylabel("1+ inch Areal Coverage [%]")
+ax.set_title("22 July 2011 Rainfall over Iowa")
 ax.grid(True)
+
+ax2 = fig.add_subplot(212)
+bars = ax2.bar(bins -0.4, avgRain, color='b', edgecolor='b')
+ax2.set_ylabel("Average Precipitation [inches]")
+#ax2.set_xlabel("Year, 2011 thru 21 June")
+ax2.set_xlabel("1 March - 21 July 2011 Deficit [inches]")
+ax2.set_xlim(-7,12)
+ax2.grid(True)
+
+
+
 plt.savefig('test.ps')
 iemplot.makefeature("test")
