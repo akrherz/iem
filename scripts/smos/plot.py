@@ -36,6 +36,8 @@ def makeplot(ts):
         lons.append( float(row[0]) )
         sm.append( row[2] * 100.)
         od.append( row[3] )
+    if len(lats) == 0:
+        return
     lats = np.array( lats )
     lons = np.array( lons )
     sm = np.array( sm )
