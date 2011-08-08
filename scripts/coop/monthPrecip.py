@@ -11,13 +11,13 @@
 # 23 Jul 2004	Use IEM Access for goodness sakes!
 #####################################################
 
-from pyIEM import iemAccess, iemdb, stationTable
+from pyIEM import iemdb, stationTable
 import  mx.DateTime, string
-iemaccess = iemAccess.iemAccess()
 i = iemdb.iemdb()
 st = stationTable.stationTable("/mesonet/TABLES/coop.stns")
 mydb = i['coop']
 mesositedb =  i["mesosite"]
+iemaccess =  i["iem"]
 
 o = open('IEMNWSMPR.txt','w')
 o.write("IEMNWSMPR\n")

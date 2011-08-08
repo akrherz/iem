@@ -17,7 +17,7 @@ mcursor.execute("""
     """)
 for row in mcursor:
     stations.append( row[0] )
-
+stations = ['CID','XXXXX']
 for yr in range(1951,2012):
     acursor.execute("""
     SELECT valid + '10 minutes'::interval, tmpf, dwpf from t%s WHERE station in %s
@@ -34,8 +34,11 @@ for yr in range(1951,2012):
             counts[ row[0].hour - 1] += 1
         
     climate[:,yr-1951] = hourly / counts * 1000.
-    print yr, numpy.sum(hourly) / numpy.sum(counts) * 1000.
+    avgV = numpy.sum(hourly) / numpy.sum(counts) * 1000.
+    print yr, avgV 
     
+    
+
 import matplotlib.pyplot as plt
 
 fig = plt.figure()

@@ -7,11 +7,13 @@ import datetime
 import tempfile
 import os
 import sys
+import math
 from windrose.windrose import WindroseAxes
 import matplotlib
 import matplotlib.image as image
 from matplotlib import pyplot as plt
 from matplotlib.patches import Rectangle
+from matplotlib.colors import rgb2hex
 import iemdb
 
 # Define grid bounds 
@@ -35,6 +37,45 @@ CONUS_NORTH = 53.7
 CONUS_SOUTH = 20.8
 CONUS_NX    = 140
 CONUS_NY    = 150
+
+def floatRgb(mag, cmin, cmax):
+       """
+       Return a tuple of floats between 0 and 1 for the red, green and
+       blue amplitudes.
+       """
+       x = float(mag-cmin)/float(cmax-cmin)
+       blue = min((max((4*(0.75-x), 0.)), 1.))
+       red  = min((max((4*(x-0.25), 0.)), 1.))
+       green= min((max((4*math.fabs(x-0.5)-1., 0.)), 1.))
+       return (red, green, blue)
+
+def bmap_clrbar(maxV, minV=0, levels=10):
+    """
+    Draw a color bar on a basemap plot, please!
+    """
+    # Figure out how many ticks we are going to have
+    step = (maxV - minV) / float(levels)
+    if step < 1:
+        levels = maxV - minV
+        step = 1
+    step = int(math.ceil(step))
+    
+    ytics=[]
+    for y in range(minV, maxV+1, step):
+        ytics.append(y)
+        
+    ax2 = plt.axes([0.97,0.09,0.02,0.75], frameon=True, axisbg='w', yticks=ytics, xticks=[])
+    for tick in ax2.yaxis.get_major_ticks():
+        tick.label1.set_fontsize(10)
+        tick.tick1On=False
+        tick.tick2On=False
+
+    for y in range(minV, maxV+1, 1):
+        c=rgb2hex(floatRgb(y,1,maxV))
+        if y==0:
+            c='w'
+
+        ax2.barh(y,1,align='center',height=1,color=c,ec=c)
 
 def hilo_valplot(lons, lats, highs, lows, cfg):
     """

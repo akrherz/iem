@@ -91,7 +91,7 @@ import matplotlib.pyplot as plt
 fig = plt.figure()
 ax = fig.add_subplot(211)
 ax.set_xlim(1972.5,2011.5)
-ax.set_title("1973-2011 RAGBRAI Weather")
+ax.set_title("1973-2011 RAGBRAI Weather (Des Moines Airport Data)")
 ax.bar(numpy.arange(1973,2012)-0.4, hindex, color='r')
 ax.set_ylim(60,100)
 ax.set_ylabel("Average Heat Index $^{\circ}\mathrm{F}$")

@@ -1,29 +1,83 @@
 import mx.DateTime
+import numpy as np
 from pyIEM import iemdb 
 i = iemdb.iemdb()
 asos = i['asos']
+coop = i['coop']
 
-# Extract daily stats
-rs = asos.query("""SELECT date(valid) as d, 
-  sum( case when skyc1 in ('BKN','OVC') or skyc2 in ('BKN','OVC') or skyc3 in ('BKN','OVC') then 1 else 0 end ) as clouds
-  from alldata where 
-  station = 'DVN' and tmpf > -50 and sknt >= 0 and valid > '1950-01-01' 
-  and extract(hour from valid) > 5 and extract(hour from valid) < 18 GROUP by d
-  ORDER by d ASC""").dictresult()
-cnt = [0]*366
-running = 0
-for i in range(len(rs)):
-  ts =  mx.DateTime.strptime( rs[i]['d'], '%Y-%m-%d')
-  if rs[i]['clouds'] < 3:
-    running += 1
-    ts -= mx.DateTime.RelativeDateTime(days=1)
-    cnt[ int(ts.strftime("%j")) - 1 ] += 1
-  else:
-    running = 0
-#  if running > 2:
-#    ts -= mx.DateTime.RelativeDateTime(days=1)
-#    cnt[ int(ts.strftime("%j")) - 1 ] += 1
+sts = mx.DateTime.DateTime(2001,1,1)
+ets = mx.DateTime.DateTime(2002,1,1)
+interval = mx.DateTime.RelativeDateTime(days=1)
+now = sts
+total = np.zeros( (12,))
+counts = np.zeros( (12,))
+years = []
+# Figure out the coldest high day
+while now < ets:
+  rs = coop.query("""
+  SELECT day, high from alldata where sday = '%s' and stationid = 'ia2203' and year > 1972
+  ORDER by high ASC LIMIT 1
+  """ % (now.strftime("%m%d"),)).dictresult()
+  high = rs[0]['high']
+  day = mx.DateTime.strptime(rs[0]['day'], '%Y-%m-%d')
+  # Get ASOS data
+  rs = asos.query("""
+  SELECT count(*), sum( case when skyc1 in ('BKN','OVC') or skyc2 in ('BKN','OVC') or skyc3 in ('BKN','OVC') then 1 else 0 end ) as clouds
+  ,max(tmpf) as high from t%s WHERE station = 'DSM' and valid BETWEEN '%s 8:00' and '%s 18:00'
+    """ % (day.strftime("%Y"), day.strftime("%Y-%m-%d"), day.strftime("%Y-%m-%d"))).dictresult()
+  if rs[0]['clouds'] is None:
+      rs[0] = {'clouds': 1, 'count': 1, 'high': 'M'}
+  print day, rs[0]['clouds'], rs[0]['count'], high, rs[0]['high']
+  #data.append( float(rs[0]['clouds']) / float(rs[0]['count']) )
+  #years.append( int(day.strftime("%j")) )
+  total[ now.month - 1 ] += float(rs[0]['clouds']) / float(rs[0]['count'])
+  counts[ now.month - 1 ] += 1.0
+  now += interval
 
-for y in range(0,366):
-  ts = mx.DateTime.DateTime(2000,1,1) + mx.DateTime.RelativeDateTime(days=y)
-  print '%s,%s' % (ts.strftime("%Y-%m-%d"), cnt[y])
+sts = mx.DateTime.DateTime(2001,1,1)
+ets = mx.DateTime.DateTime(2002,1,1)
+interval = mx.DateTime.RelativeDateTime(days=1)
+now = sts
+total2 = np.zeros( (12,))
+counts2 = np.zeros( (12,))
+years = []
+# Figure out the coldest high day
+while now < ets:
+  rs = coop.query("""
+  SELECT day, high from alldata where sday = '%s' and stationid = 'ia2203' and year > 1972
+  ORDER by high DESC LIMIT 1
+  """ % (now.strftime("%m%d"),)).dictresult()
+  high = rs[0]['high']
+  day = mx.DateTime.strptime(rs[0]['day'], '%Y-%m-%d')
+  # Get ASOS data
+  rs = asos.query("""
+  SELECT count(*), sum( case when skyc1 in ('BKN','OVC') or skyc2 in ('BKN','OVC') or skyc3 in ('BKN','OVC') then 1 else 0 end ) as clouds
+  ,max(tmpf) as high from t%s WHERE station = 'DSM' and valid BETWEEN '%s 8:00' and '%s 18:00'
+    """ % (day.strftime("%Y"), day.strftime("%Y-%m-%d"), day.strftime("%Y-%m-%d"))).dictresult()
+  if rs[0]['clouds'] is None:
+      rs[0] = {'clouds': 1, 'count': 1, 'high': 'M'}
+  print day, rs[0]['clouds'], rs[0]['count'], high, rs[0]['high']
+  #data.append( float(rs[0]['clouds']) / float(rs[0]['count']) )
+  #years.append( int(day.strftime("%j")) )
+  total2[ now.month - 1 ] += float(rs[0]['clouds']) / float(rs[0]['count'])
+  counts2[ now.month - 1 ] += 1.0
+  now += interval
+
+import matplotlib.pyplot as plt
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+ax.bar( np.arange(12) - 0.4, total / counts * 100.0, width=0.4, facecolor='b', label='Coldest')
+ax.bar( np.arange(12), total2 / counts2 * 100.0, width=0.4, facecolor='r', label='Warmest')
+ax.set_xlim(-0.5,11.5)
+ax.set_ylim(0,100)
+ax.set_ylabel("Approximate Average Cloudiness [%]")
+ax.set_xticklabels( ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec') )
+ax.set_xticks( np.arange(12))
+ax.set_title("Des Moines 8 AM - 6 PM Cloudiness during\n days with the record high temperature [1973-2010]")
+ax.grid(True)
+ax.legend()
+
+fig.savefig('test.ps')
+import iemplot
+iemplot.makefeature('test')

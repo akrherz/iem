@@ -48,3 +48,4 @@ tmpfp = iemplot.simple_valplot(lons, lats, precip, cfg)
 
 pqstr = "plot c 000000000000 summary/month_prec.png bogus png"
 iemplot.postprocess(tmpfp, pqstr)
+#iemplot.makefeature(tmpfp)

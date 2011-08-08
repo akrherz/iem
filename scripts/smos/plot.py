@@ -4,7 +4,7 @@ import iemdb
 import sys
 import numpy as np
 import mx.DateTime
-SMOS = iemdb.connect('smos')
+SMOS = iemdb.connect('smos', bypass=True)
 scursor = SMOS.cursor()
 
 def makeplot(ts):
@@ -67,6 +67,7 @@ def makeplot(ts):
     pqstr = "plot ac %s00 smos_iowa_sm%s.png smos_iowa_sm%s.png png" % (
                 ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
                 ts.strftime("%H"))
+    #iemplot.makefeature(fp)
     iemplot.postprocess(fp, pqstr)
     
     cfg = {
