@@ -8,11 +8,11 @@ include("../../config/settings.inc.php");
  $year = substr($year, 0, 4);
  $sts = "$d%2000:00";
  $ets = "$d%2023:59";
- $uri = "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wfs/ww.map&amp;year=$year&amp;startts=$sts&amp;endts=$ets&amp;";
+ $uri = "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wfs/ww.map&amp;YEAR=$year&amp;STARTTS=$sts&amp;ENDTS=$ets&amp;";
  if (isset($_GET['time'])){
  	$year = substr($d,0,4);
  	 $ts = "$d%20".$_GET['time'];
- 	 $uri = "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wfs/wwt.map&amp;year=$year&ts=$ts&amp;";
+ 	 $uri = "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wfs/wwt.map&amp;YEAR=$year&TS=$ts&amp;";
  }
  ?>
 <WFS_Capabilities
