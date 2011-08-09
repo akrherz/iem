@@ -13,7 +13,7 @@ $rs = pg_query($con, $sql);
 $row = pg_fetch_array($rs, 0);
 $valid = substr($row["valid"],0,16);
 
-//$mapscript = "php_mapscript_cvs.so";
+
 
 
 $map = ms_newMapObj('roads.map');
@@ -36,6 +36,7 @@ $map->set("height", 496);
 
 $img = $map->prepareImage();
 
+/*
 if ($metroview)
 {
   $background = $map->getlayerbyname("woiback");
@@ -45,6 +46,7 @@ if ($metroview)
 }
 $background->set("status", MS_ON);
 $background->draw($img);
+*/
 
 /*
 $counties = $map->getlayerbyname("counties");
