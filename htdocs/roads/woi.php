@@ -51,7 +51,7 @@ $counties->draw($img);
 
 $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
-$states->draw($img);
+//$states->draw($img);
 
 $roads = $map->getlayerbyname("roads");
 $roads->set("status", MS_ON);
