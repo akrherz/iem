@@ -31,6 +31,9 @@ WEB
     "ows_schemas_location" "http://ogc.dmsolutions.ca"
   END
 END
+
+CONFIG MS_NONSQUARE YES
+
  
 PROJECTION
 	"init=epsg:26915"
@@ -236,10 +239,11 @@ END
 
 
 LAYER
- NAME woiback
- DATA "images/4326/woiback.tif"
+ NAME woi-metro
+ DATA "images/26915/woi-metro.tif"
+ PROCESSING "CLOSE_CONNECTION=NORMAL"
  PROJECTION
-  "init=epsg:4326"
+  "init=epsg:26915"
  END
  METADATA
   "show_in_legend" "0"
@@ -249,10 +253,11 @@ LAYER
 END
 
 LAYER
- NAME ia_woiback
- DATA "images/4326/ia_woiback.tif"
+ NAME woi-iowa
+ DATA "images/26915/woi-iowa.tif"
+ PROCESSING "CLOSE_CONNECTION=NORMAL"
  PROJECTION
-  "init=epsg:4326"
+  "init=epsg:26915"
  END
  METADATA
   "show_in_legend" "0"
