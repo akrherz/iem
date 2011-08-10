@@ -8,10 +8,10 @@
 # 16 Sep 2003	Use iemAccess site stuff
 
 import sys, mx.DateTime, string
-from pyIEM import iemdb, iemAccess, iemAccessOb
-iemaccess = iemAccess.iemAccess()
+from pyIEM import iemdb, iemAccessOb
 i = iemdb.iemdb()
 mydb = i["other"]
+IEM = i["iem"]
 mydb.query("SET TIME ZONE 'GMT'")
 
 now = mx.DateTime.gmt()
@@ -64,13 +64,13 @@ else:
 
 sid = sys.argv[1]
 
-iemob = iemAccessOb.iemAccessOb(sid)
+iemob = iemAccessOb.iemAccessOb(sid, 'OT')
 iemob.data['tmpf'] = tmpf
 iemob.data['sknt'] = sknt
 iemob.data['dwpf'] = dwpf
 iemob.data['drct'] = drct
 iemob.setObTimeGMT(now)
-iemob.updateDatabase(iemaccess.iemdb)
+iemob.updateDatabase(IEM)
 
 try:
   mydb.query("INSERT into t%s (station, valid, tmpf, dwpf, sknt, drct) VALUES \
