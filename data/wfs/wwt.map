@@ -70,7 +70,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME archwarn_county
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo,  significance, eventid, oid from warnings_%YEAR% WHERE gtype = 'C' and expire > '%TS%' and issue < '%TS%' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
+  DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo,  significance, eventid, oid from warnings_%YEAR% WHERE gtype = 'C' and expire > '%TS%+00' and issue < '%TS%+00' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
@@ -112,7 +112,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME archwarn_polygon
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo,  significance, eventid, oid from warnings_%YEAR% WHERE gtype = 'P' and expire > '%TS%' and issue < '%TS%' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
+  DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo,  significance, eventid, oid from warnings_%YEAR% WHERE gtype = 'P' and expire > '%TS%+00' and issue < '%TS%+00' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
