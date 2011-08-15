@@ -12,6 +12,12 @@ class IEMAccessOb {
       $this->db["gust_ts"] = strtotime(substr($row["max_gust_ts"],0,16));
     }
     $this->db["obtime"] = strftime("%I:%M %p", $this->db["ts"]);
+    if ($this->db["max_tmpf"] == -99){
+    	$this->db["max_tmpf"] = null;
+    }
+  	if ($this->db["min_tmpf"] == 99){
+    	$this->db["min_tmpf"] = null;
+    }
   }
   
 
