@@ -47,7 +47,7 @@ def todb(data):
       postgis.query( sql )
 
 gmt = mx.DateTime.gmt()
-fp = "http://www.spotternetwork.org/feeds/grlevelx.txt"
+fp = "http://www.spotternetwork.org/feeds/gr-all.txt"
 try:
   data = urllib2.urlopen( fp ).read()
 except IOError:
