@@ -22,3 +22,6 @@ python hads_nwsli_squawk.py
 cd ../ingestors/cocorahs
 /mesonet/python/bin/python redo_day.py IA
 /mesonet/python/bin/python redo_day.py IL
+
+cd ../../windrose
+python daily_drive_network.py
