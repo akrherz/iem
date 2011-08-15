@@ -18,7 +18,8 @@ function neighbors($station,$lat,$lon){
          and id != $1 ORDER by dist ASC");
    $result = pg_execute($con, "_SELECT", Array($station) );
  
-   echo "<table cellpadding=\"3\" cellspacing=\"0\"><thead><tr><th>Distance [km]</th><th>Network</th><th>Station Name</th></tr></thead>";
+   echo "<table cellpadding=\"3\" cellspacing=\"0\" border=\"1\">
+   <thead><tr><th>Distance [km]</th><th>Network</th><th>Station Name</th></tr></thead>";
    for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
       echo sprintf("<tr><td>%.3f</td><td>%s</td><td><a href=\"site.php?station=%s&network=%s\">%s</a></td></tr>", 
       $row["dist"], $row["network"], $row["id"], $row["network"], $row["name"]);
@@ -29,7 +30,7 @@ function neighbors($station,$lat,$lon){
 ?>
 <h3 class="subtitle">Neighboring Stations</h3>
 <p>The following is a list of IEM tracked stations within roughly 25 kilometers
-from the site.</p>
+from the site. Click on the site name for more information.</p>
 
 <?php neighbors($station,$metadata["lat"],$metadata["lon"]); ?>
 <?php include("$rootpath/include/footer.php"); ?>

@@ -39,7 +39,7 @@ $lyr_c0s1->color->setRGB(255,0,0);
 $lyr_c0->label->set("buffer", 20);
 $lyr_c0->label->set("type", MS_BITMAP);
 $lyr_c0->label->set("size", MS_GIANT);
-$lyr_c0->label->set("position", MS_AUTO);
+$lyr_c0->label->set("position", MS_UC);
 $lyr_c0->label->color->setRGB(255,255,255);
 $lyr_c0->label->outlinecolor->setRGB(0,0,0);
 $logopt = ms_newpointobj();

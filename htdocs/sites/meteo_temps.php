@@ -3,6 +3,11 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/mlib.php");
 include("setup.php");
+include ("$rootpath/include/jpgraph/jpgraph.php");
+include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
+include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("$rootpath/include/jpgraph/jpgraph_led.php");
 
 $times = Array();
 $dwpf = Array();
@@ -21,16 +26,13 @@ for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
   $tmpf[] = $row["tmpf"];
   $srad[] = $row["srad"];
 }
+if (sizeof($tmpf) < 3){
+	$led = new DigitalLED74();
+ 	$led->StrokeNumber('NO DATA, SORRY',LEDC_GREEN);
+ 	die();
+}
 
 $hasrad = (max($srad) > 10);
-
-
-
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
-
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480,"example1");
