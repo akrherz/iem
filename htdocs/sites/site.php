@@ -7,7 +7,6 @@ $THISPAGE="iem-sites";
 $TITLE = "IEM | Site Information";
 include("$rootpath/include/header.php");
 ?>
-<h3 class="heading">IEM Site Information</h3><p>
 <?php $current = "base"; include("sidebar.php"); ?>
 
 <div style="float: left;">

@@ -15,6 +15,9 @@ $THISPAGE="iem-sites";
 
  $URL= "$rooturl/GIS/apps/ortho/site.php?station=${station}&zoom=${zoom}&type=${type}";
         $URL_BASE=$rooturl.'/sites/mapping.php?station='.$station.'&type='.$type;
+?>
+<div class="warning">This application works only for sites in Iowa.</div>
+<?php
 echo '<form method="GET" action="mapping.php">
   <input type="hidden" name="station" value="'.$station.'">
   <input type="hidden" name="network" value="'.$network.'">
