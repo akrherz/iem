@@ -20,14 +20,14 @@ $hasclimate = 1;
 if ($st->table[$station]['climate_site'] == ""){ $hasclimate = 0; }
 
 $coopdb = iemdb("coop");
-$iem = new IEMAccess();
+$IEM = iemdb('iem');
+$rs = pg_prepare($IEM, "SELECTOR", "SELECT pday, extract(day from day) as day from summary_$year
+		WHERE station = $1 and network = $2 and extract(month from day) = $3 
+		ORDER by day ASC");
 
 $climate_site = $cities[$station]["climate_site"];
 
-$q = "SELECT pday, extract(day from day) as day from summary_$year
-		WHERE station = '$station' and network = '$network' and extract(month from day) = $month 
-		ORDER by day ASC";
-$rs = $iem->query($q);
+$rs = pg_execute($IEM, "SELECTOR", Array($station, $network, $month));
 $obs = Array();
 $aobs = Array();
 $atot = 0;
@@ -42,7 +42,7 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 if ($hasclimate){
 /* Now we need the climate data */
-$q = "SELECT precip, extract(day from valid) as day from climate
+$q = "SELECT precip, extract(day from valid) as day from ncdc_climate71
 		WHERE station = '". strtolower($climate_site) ."' and extract(month from valid) = $month
 		ORDER by day ASC";
 $rs = pg_exec($coopdb, $q);
@@ -64,7 +64,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 }
 }
 pg_close($coopdb);
-
+pg_close($IEM);
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
@@ -92,7 +92,7 @@ $graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["name
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");
 
-if($hasclimate){
+if($hasclimate && sizeof($cdiff) > 0){
 // Create the linear plot
 $b1plot =new BarPlot($cdiff);
 $b1plot->SetFillColor("red");
@@ -110,7 +110,7 @@ $lp1->SetLegend("Actual Accum");
 $lp1->SetColor("blue");
 $lp1->SetWeight(2);
 
-if ($hasclimate){
+if ($hasclimate && sizeof($cdiff) > 0){
 $lp2=new LinePlot($aclimate);
 $lp2->SetLegend("Climate Accum");
 $lp2->SetColor("red");
@@ -121,7 +121,7 @@ $z->SetWeight(2);
 
 // Add the plot to the graph
 $graph->Add($lp1);
-if ($hasclimate){
+if ($hasclimate && sizeof($cdiff) > 0){
 $graph->Add($lp2);
 $graph->Add($g);
 $graph->Add($z);
