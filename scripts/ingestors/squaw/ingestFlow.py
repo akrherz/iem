@@ -11,6 +11,7 @@ for ob in tokens:
 	rs = mydb.query(sql).dictresult()
 	if len(rs) > 0:
 		continue
-	sql = "INSERT into real_flow(gauge_id, valid, cfs) VALUES (%s, '%s', %s)" \
-		% (ob[0], ob[1], ob[3])
-	mydb.query(sql)
+	if ob[3] != '':
+		sql = "INSERT into real_flow(gauge_id, valid, cfs) VALUES (%s, '%s', %s)" \
+			% (ob[0], ob[1], ob[3])
+		mydb.query(sql)
