@@ -52,7 +52,7 @@ $big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.%s", $row["i
 <div style="float: left; padding: 5px; ">
 <img src="<?php echo $thumb; ?>" style="margin: 5px;">
 <br /><a href="<?php echo $big; ?>">View larger image</a>
-<br /><?php echo wordwrap($row["caption"],40,"<br />"); ?>
+<br /><?php echo $row["caption"]; ?>
 </div>
 <h3><?php echo $row["title"]; ?></h3>
 <font size="-1"><?php echo $row["webdate"]; ?></font>
