@@ -162,3 +162,7 @@ os.remove(fp+".shp")
 os.remove(fp+".shx")
 os.remove(fp+".dbf")
 os.remove(fp+".prj")
+
+cursor.close()
+mydb.close()
+sys.exit(0)
