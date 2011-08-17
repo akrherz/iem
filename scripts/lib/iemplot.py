@@ -818,6 +818,9 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
             maxvalid = row[2]
     acursor.close()
     db.close()
+    if len(sknt) < 5:
+        print 'Not enough data! Only %s records found, abort.' % (len(sknt),)
+        return
     # Convert to numpy arrays
     sknt = numpy.array( sknt )
     drct = numpy.array( drct )
