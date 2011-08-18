@@ -7,16 +7,22 @@
 import iemdb
 POSTGIS = iemdb.connect('coop', bypass=True)
 pcursor = POSTGIS.cursor()
+pcursor2 = POSTGIS.cursor()
 
 years = []
 vals = []
+jday = []
 pcursor.execute("""
-select year, avg((low)) as a from alldata where month = 7 and 
-stationid = 'ia0000' and sday < '0726' GROUP by year ORDER by year ASC
+select year, max(precip) from alldata where stationid = 'ia0200' GROUP by year ORDER by year ASC
 """)
 for row in pcursor:
     years.append( float(row[0]) )
     vals.append( float(row[1]) )
+    pcursor2.execute("""SELECT extract(doy from day) from alldata where
+    stationid = 'ia0200' and year = %s and precip = %s
+    """, (row[0], row[1]))
+    row2 = pcursor2.fetchone()
+    jday.append( row2[0] )
 
 #vals[-1] = 99
 
@@ -28,7 +34,7 @@ averageVal = numpy.average(vals)
 years = numpy.array( years )
 
 fig = plt.figure()
-ax = fig.add_subplot(111)
+ax = fig.add_subplot(211)
 rects = ax.bar( years - 0.4, vals , fc='b', ec='b')
 #rects[-1].set_facecolor('r')
 for rect in rects:
@@ -39,16 +45,24 @@ for rect in rects:
       rect.set_facecolor("r")
       rect.set_edgecolor('r')
 ax.set_xlim(1892.5, 2011.5)
+ax.plot([1893,2011],[averageVal,averageVal], color='black')
 #ax.set_ylim(80,160)
 #ax.set_yticks((91,121,152))
 #ax.set_yticklabels(('Apr 1', 'May 1', 'Jun 1'))
 
-ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
-#ax.set_xlabel("*2011 thru 7 June")
+ax.set_ylabel("Max Daily Precip [inch]")
+ax.set_xlabel("*2011 thru 16 August")
 ax.grid(True)
-ax.set_ylim(55,70)
-ax.set_title("Iowa Average Low Temperature - July 1-25\nMax: %.1f$^{\circ}\mathrm{F}$ (1936) 2011: %.1f$^{\circ}\mathrm{F}$" % (numpy.max(vals), vals[-1]))
+#ax.set_ylim(55,70)
+ax.set_title("Ames 1893-2011 Daily Precipitation Maximum per year\nMax: %.2f (1954) Average: %.2f" % (numpy.max(vals), averageVal))
 
+ax = fig.add_subplot(212)
+ax.scatter( jday, vals)
+ax.grid(True)
+ax.set_xticks( (1,32,60,91,121,152,182,213,244,274,305,335,365) )
+ax.set_xticklabels( ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec') )
+ax.set_ylabel("Max Daily Precip [inch]")
+ax.set_xlabel("Day of Year")
 fig.savefig('test.ps')
 
 import iemplot
