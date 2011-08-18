@@ -3,7 +3,7 @@ import mx.DateTime
 import numpy
 ASOS = iemdb.connect('asos', bypass=True)
 acursor = ASOS.cursor()
-
+acursor.execute("SET TIME ZONE 'EDT5EST'")
 stemps = []
 svalid = []
 sdrct = []
@@ -14,12 +14,24 @@ sgust = []
 sprec = numpy.zeros( (1440,), 'f')
 
 acursor.execute("""
- SELECT extract(epoch from valid), tmpf, dwpf, drct, sknt, pres1, gust_sknt, precip, valid from t2011_1minute WHERE station = 'ORD'
- and valid BETWEEN '2011-07-23 00:00' and '2011-07-23 23:59' 
+ SELECT extract(epoch from (valid at time zone 'EDT')), tmpf, dwpf, drct, sknt, pres1, gust_sknt, precip, valid at time zone 'EDT' from t2011_1minute WHERE station = 'JFK'
+ and valid BETWEEN '2011-08-14 00:00-04' and '2011-08-14 23:59-04' 
 and drct >= 0 ORDER by valid ASC
 """)
+"""
+ 2011-08-14 02:10:00 |  0.06
+ 2011-08-14 02:28:00 |  0.13
+ 2011-08-14 02:47:00 |  0.39
+ 2011-08-14 02:47:00 |     0
+ 2011-08-14 02:51:00 |  0.42
+ 2011-08-14 03:30:00 |  0.02
+ 2011-08-14 03:36:00 |  0.02
+ 2011-08-14 03:51:00 |  0.23
+ 2011-08-14 04:51:00 |  2.83
+ 2011-08-14 05:51:00 |  0.56
+
+"""
 for row in acursor:
-    
         stemps.append( row[1])
         svalid.append( row[0])
         sdrct.append( row[3])
@@ -28,6 +40,7 @@ for row in acursor:
         pres1.append( row[5] )
         sgust.append( row[6] )
         offset = row[8].hour * 60 + row[8].minute
+        print offset, row[8]
         sprec[offset] = float(row[7]) 
 
 sprec = numpy.array( sprec )
@@ -40,8 +53,8 @@ for i in range(1440):
     rate60[i] = numpy.sum(sprec[i-60:i])
 print acc[:60]
 # Figure out ticks
-sts = mx.DateTime.DateTime(2011,7,23, 0)
-ets = mx.DateTime.DateTime(2011,7,24, 0)
+sts = mx.DateTime.DateTime(2011,8,14, 0)
+ets = mx.DateTime.DateTime(2011,8,15, 0)
 interval = mx.DateTime.RelativeDateTime(hours=1)
 now = sts
 xticks = []
@@ -52,7 +65,7 @@ while now <= ets:
     if now == sts or now.hour == 0:
         fmt = "%-I %p\n%-d %B"
     
-    if now == sts or now.minute == 0 or now.day % 2 == 0:
+    if now == sts or (now.minute == 0 and now.hour % 3 == 0 ):
         xticks.append( int(now) )
         xlabels.append( now.strftime(fmt))
         xlabels2.append( now.strftime("%-I %p"))
@@ -73,11 +86,11 @@ ax.set_xticks(xticks)
 ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels2)
 ax.grid(True)
-ax.set_xlim(min(xticks), max(xticks)-60*18*60)
+ax.set_xlim(min(xticks), max(xticks)-60*0*60)
 ax.legend(loc=7, prop=prop)
 #ax.set_ylim(0,10)
-ax.set_xlabel("Morning of 23 July 2011")
-ax.set_title("23 Jul 2011 Chicago O'Hare (KORD) One Minute Rainfall\nSet Local Daily Record of 6.86 inches")
+ax.set_xlabel("14 August 2011 (EDT)")
+ax.set_title("14 Aug 2011 New York City (KJFK) One Minute Rainfall\nSet Local Daily Record of 7.80 inches")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
