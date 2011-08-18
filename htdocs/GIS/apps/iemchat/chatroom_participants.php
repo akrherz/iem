@@ -2,7 +2,7 @@
 /* Create a map of chatroom participants */
 include("../../../../config/settings.inc.php");
 
-require_once "$rootpath/include/Zend/XmlRpc/Client.php";
+require_once "Zend/XmlRpc/Client.php";
 require_once "$rootpath/include/database.inc.php";
 $mesosite = iemdb("postgis");
 
