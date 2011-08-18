@@ -7,7 +7,7 @@ mcursor = MESOSITE.cursor()
 now = mx.DateTime.now()
 
 mcursor.execute("""SELECT max(id), network from stations 
-    WHERE network ~* 'ASOS' GROUP by network ORDER by random()""")
+    WHERE network ~* 'ASOS' and online = 't' GROUP by network ORDER by random()""")
 for row in mcursor:
     network = row[1]
     testfp = "/mesonet/share/windrose/climate/yearly/%s_yearly.png" % (row[0],)
