@@ -29,7 +29,8 @@ for i in range(21,30):
     tests.append('OAX.FF.%s' % (i,))
 for i in range(228,249):
     tests.append('OAX.SV.%s' % (i,))
-    
+for i in range(27,78):
+    tests.append('OAX.TO.%s' % (i,))
 sql = "SELECT wfo, min(eventid), max(eventid), phenomena from warnings_%s \
        WHERE phenomena IN ('MA','FF','SV','TO') and significance = 'W' \
        GROUP by wfo, phenomena" % (mx.DateTime.now().year, )
