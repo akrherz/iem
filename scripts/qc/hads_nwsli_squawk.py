@@ -12,5 +12,16 @@ for row in hcursor:
     hcursor2.execute("""
     DELETE from unknown where nwsli = %s
     """, (row[0],))
-    
+
+hcursor.execute("""
+ select nwsli, count(*), max(product) from unknown 
+ WHERE network ~* 'COOP' GROUP by nwsli ORDER by count DESC LIMIT 5
+""")
+for row in hcursor:
+    print 'COOP %7s %5s %s' % (row[0], row[1], row[2])
+    hcursor2.execute("""
+    DELETE from unknown where nwsli = %s
+    """, (row[0],))
+
+   
 HADS.commit()
