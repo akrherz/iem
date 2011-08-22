@@ -29,5 +29,7 @@ mcursor.execute("""
 DELETE from stations where id = %s and network = %s
 """, (id, network))
 
-IEM.close()
-MESOSITE.close()
+mcursor.close()
+icursor.close()
+IEM.commit()
+MESOSITE.commit()
