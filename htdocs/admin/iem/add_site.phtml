@@ -6,6 +6,7 @@ include("$rootpath/include/database.inc.php");
 $station = isset($_GET["station"]) ? $_GET["station"] : "";
 $sname = isset($_GET["sname"]) ? $_GET["sname"] : "";
 $state = isset($_GET["state"]) ? $_GET["state"] : "";
+$country = isset($_GET["country"]) ? $_GET["country"] : "";
 $elevation = isset($_GET["elevation"]) ? $_GET["elevation"] : "";
 $network = isset($_GET["network"]) ? $_GET["network"] : "";
 $online = isset($_GET["online"]) ? $_GET["online"] : "";
@@ -20,7 +21,7 @@ if (strlen($station) > 0 && strlen($sname) > 0)
    $sql = sprintf("INSERT into stations (id, network) values ('%s','%s')", $station, $network);
    echo $sql;
   pg_exec($pg_conn, $sql);
-   $sql = sprintf("UPDATE stations SET synop = 9999, country = 'US', plot_name = '%s', name = '%s', state = '%s', elevation = '%s', online = '%s', geom = 'SRID=4326;POINT(%s %s)' WHERE id = '%s' and network = '%s'", $sname, $sname, $state, $elevation, $online, $longitude, $latitude,  $station, $network);
+   $sql = sprintf("UPDATE stations SET synop = 9999, country = '%s', plot_name = '%s', name = '%s', state = '%s', elevation = '%s', online = '%s', geom = 'SRID=4326;POINT(%s %s)' WHERE id = '%s' and network = '%s'", $country, $sname, $sname, $state, $elevation, $online, $longitude, $latitude,  $station, $network);
   echo $sql;
   pg_exec($pg_conn, $sql);
 
@@ -50,6 +51,7 @@ and network:<input type="text" name="network"><input type="submit" value="go">
 <tr><th>Site ID:</th><td><input type="text" name="station" value="<?php echo $station; ?>"></td></tr>
 <tr><th>Name:</th><td><input type="text" name="sname" value="<?php echo $sname; ?>"></td></tr>
 <tr><th>State Abbrev:</th><td><input type="text" name="state" size="2" value="<?php echo $state; ?>"></td></tr>
+<tr><th>Country:</th><td><input type="text" name="country" size="2" value="<?php echo $country; ?>"></td></tr>
 <tr><th>Elevation (m):</th><td><input type="text" name="elevation" value="<?php echo $elevation; ?>"></td></tr>
 <tr><th>Network:</th><td><input type="text" name="network" value="<?php echo $network; ?>"></td></tr>
 <tr><th>Online (t or f):</th><td><input type="text" name="online" value="<?php echo $online; ?>"></td></tr>
