@@ -4,8 +4,8 @@ include("$rootpath/include/database.inc.php");
 $access = iemdb('access');
 $conn = iemdb('afos');
 
-$pil = strtoupper($_REQUEST["pil"]);
-$cnt = $_REQUEST["cnt"];
+$pil = isset($_REQUEST["pil"]) ? strtoupper($_REQUEST["pil"]) : 'AFDDMX';
+$cnt = isset($_REQUEST["cnt"]) ? intval($_REQUEST["cnt"]): 1;
 $sdate = isset($_REQUEST["sdate"]) ? strtotime($_REQUEST["sdate"]) : mktime(0,0,0,12, 31,2009);
 $edate = isset($_REQUEST["edate"]) ? strtotime($_REQUEST["edate"]) : time();
 
