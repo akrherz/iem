@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^n0r.cgi?(.*)$ /cache/tile.py?$1 [L]
