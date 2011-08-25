@@ -1,6 +1,6 @@
 <?php
  include("../../config/settings.inc.php");
- $network = isset($_GET['network']) ? $_GET["network"] : 'IA_ASOS';
+ $network = isset($_GET['network']) ? substr($_GET["network"],0,7) : 'IA_ASOS';
  $metar = isset($_GET['metar']) ? $_GET["metar"] : "no";
  $sortcol = isset($_GET['sortcol'])  ? $_GET['sortcol']: "ts";
  $sorder = isset($_GET['sorder']) ? $_GET['sorder']: "desc";
@@ -28,6 +28,8 @@ function new_window(url) {
   $cities = $nt->table;
   include("$rootpath/include/iemaccess.php");
   include("$rootpath/include/iemaccessob.php");
+  include_once "$rootpath/include/database.inc.php";
+  $mesosite = iemdb('mesosite');
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
@@ -70,8 +72,12 @@ while ( list($key, $iemob) = each($asos) ){
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
        f2c($mydata[$key]["dwpf"]) );
-    $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
-       $mydata[$key]["relh"], $mydata[$key]["sped"]);
+    if ($mydata[$key]["tmpf"] > -99 && $mydata[$key]["dwpf"] > -99){
+       $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
+         $mydata[$key]["relh"], $mydata[$key]["sped"]);
+    } else {
+    	$mydata[$key]["feel"] = null;
+    }
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
       $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
@@ -109,60 +115,20 @@ if($format == 'csv'){
   <td>
 <form method="GET" action="current.phtml">
 <input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
-Select State:<select name="network">
- <option value="AL_ASOS" <?php if ($network == "AL_ASOS") echo "SELECTED"; ?>>Alabama
- <option value="AK_ASOS" <?php if ($network == "AK_ASOS") echo "SELECTED"; ?>>Alaska
- <option value="AR_ASOS" <?php if ($network == "AR_ASOS") echo "SELECTED"; ?>>Arkansas
- <option value="AZ_ASOS" <?php if ($network == "AZ_ASOS") echo "SELECTED"; ?>>Arizona
- <option value="CA_ASOS" <?php if ($network == "CA_ASOS") echo "SELECTED"; ?>>California
- <option value="CO_ASOS" <?php if ($network == "CO_ASOS") echo "SELECTED"; ?>>Colorado
- <option value="CT_ASOS" <?php if ($network == "CT_ASOS") echo "SELECTED"; ?>>Connecticut
- <option value="DE_ASOS" <?php if ($network == "DE_ASOS") echo "SELECTED"; ?>>Delaware
- <option value="FL_ASOS" <?php if ($network == "FL_ASOS") echo "SELECTED"; ?>>Florida
- <option value="GA_ASOS" <?php if ($network == "GA_ASOS") echo "SELECTED"; ?>>Georgia
- <option value="HI_ASOS" <?php if ($network == "HI_ASOS") echo "SELECTED"; ?>>Hawaii
- <option value="ID_ASOS" <?php if ($network == "ID_ASOS") echo "SELECTED"; ?>>Idaho
- <option value="IL_ASOS" <?php if ($network == "IL_ASOS") echo "SELECTED"; ?>>Illinois
- <option value="IN_ASOS" <?php if ($network == "IN_ASOS") echo "SELECTED"; ?>>Indiana
- <option value="IA_ASOS" <?php if ($network == "IA_ASOS") echo "SELECTED"; ?>>Iowa
- <option value="KS_ASOS" <?php if ($network == "KS_ASOS") echo "SELECTED"; ?>>Kansas
- <option value="KY_ASOS" <?php if ($network == "KY_ASOS") echo "SELECTED"; ?>>Kentucky
- <option value="LA_ASOS" <?php if ($network == "LA_ASOS") echo "SELECTED"; ?>>Louisana
- <option value="ME_ASOS" <?php if ($network == "ME_ASOS") echo "SELECTED"; ?>>Maine
- <option value="MD_ASOS" <?php if ($network == "MD_ASOS") echo "SELECTED"; ?>>Maryland
- <option value="MA_ASOS" <?php if ($network == "MA_ASOS") echo "SELECTED"; ?>>Massachusetts
- <option value="MI_ASOS" <?php if ($network == "MI_ASOS") echo "SELECTED"; ?>>Michigan
- <option value="MN_ASOS" <?php if ($network == "MN_ASOS") echo "SELECTED"; ?>>Minnesota
- <option value="MS_ASOS" <?php if ($network == "MS_ASOS") echo "SELECTED"; ?>>Mississippi
- <option value="MO_ASOS" <?php if ($network == "MO_ASOS") echo "SELECTED"; ?>>Missouri
- <option value="MT_ASOS" <?php if ($network == "MT_ASOS") echo "SELECTED"; ?>>Montana
- <option value="NE_ASOS" <?php if ($network == "NE_ASOS") echo "SELECTED"; ?>>Nebraska
- <option value="NH_ASOS" <?php if ($network == "NH_ASOS") echo "SELECTED"; ?>>New Hampshire
- <option value="NC_ASOS" <?php if ($network == "NC_ASOS") echo "SELECTED"; ?>>North Carolina
- <option value="ND_ASOS" <?php if ($network == "ND_ASOS") echo "SELECTED"; ?>>North Dakota
- <option value="NV_ASOS" <?php if ($network == "NV_ASOS") echo "SELECTED"; ?>>Nevada
- <option value="NH_ASOS" <?php if ($network == "NH_ASOS") echo "SELECTED"; ?>>New Hampshire
- <option value="NJ_ASOS" <?php if ($network == "NJ_ASOS") echo "SELECTED"; ?>>New Jersey
- <option value="NM_ASOS" <?php if ($network == "NM_ASOS") echo "SELECTED"; ?>>New Mexico
- <option value="NY_ASOS" <?php if ($network == "NY_ASOS") echo "SELECTED"; ?>>New York
- <option value="OH_ASOS" <?php if ($network == "OH_ASOS") echo "SELECTED"; ?>>Ohio
- <option value="OK_ASOS" <?php if ($network == "OK_ASOS") echo "SELECTED"; ?>>Oklahoma
- <option value="OR_ASOS" <?php if ($network == "OR_ASOS") echo "SELECTED"; ?>>Oregon
- <option value="PA_ASOS" <?php if ($network == "PA_ASOS") echo "SELECTED"; ?>>Pennsylvania
- <option value="RI_ASOS" <?php if ($network == "RI_ASOS") echo "SELECTED"; ?>>Rhode Island
- <option value="SC_ASOS" <?php if ($network == "SC_ASOS") echo "SELECTED"; ?>>South Carolina
- <option value="SD_ASOS" <?php if ($network == "SD_ASOS") echo "SELECTED"; ?>>South Dakota
- <option value="TN_ASOS" <?php if ($network == "TN_ASOS") echo "SELECTED"; ?>>Tennessee
- <option value="TX_ASOS" <?php if ($network == "TX_ASOS") echo "SELECTED"; ?>>Texas
- <option value="UT_ASOS" <?php if ($network == "UT_ASOS") echo "SELECTED"; ?>>Utah
- <option value="VT_ASOS" <?php if ($network == "VT_ASOS") echo "SELECTED"; ?>>Vermont
- <option value="VA_ASOS" <?php if ($network == "VA_ASOS") echo "SELECTED"; ?>>Virginia
- <option value="WA_ASOS" <?php if ($network == "WA_ASOS") echo "SELECTED"; ?>>Washington
- <option value="WV_ASOS" <?php if ($network == "WV_ASOS") echo "SELECTED"; ?>>West Virginia
- <option value="WI_ASOS" <?php if ($network == "WI_ASOS") echo "SELECTED"; ?>>Wisconsin
- <option value="WY_ASOS" <?php if ($network == "WY_ASOS") echo "SELECTED"; ?>>Wyoming
- <option value="IQ_ASOS" <?php if ($network == "IQ_ASOS") echo "SELECTED"; ?>>Iraq/Afganistan Military
- <option value="PO_ASOS" <?php if ($network == "PO_ASOS") echo "SELECTED"; ?>>Pacific Ocean
+Select Network: 
+<select name="network">
+<?php 
+$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'ASOS' ORDER by name ASC");
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	$sel = '';
+	if ($network == $row["id"]){
+		$sel = " selected='SELECTED'";
+	}
+	echo sprintf("<option value='%s'%s>%s</option>\n",
+	  $row["id"], $sel, $row["name"]);
+}
+
+?>
 </select></td>
   <td>Include METARS:<br />
   <input value="no" type="radio" name="metar" <?php if ($metar == "no") echo  "CHECKED"; ?>> No
@@ -186,8 +152,10 @@ Select State:<select name="network">
 
 
 <?php
-echo "<br>Times are in CST/CDT. Table sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
-a column to sort it.<br>\n";
+echo "<br>Times are in CST/CDT. Currently, the daily summary are for CST/CDT date and not the
+local date for the sensor.  Will have to correct this :( Table sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
+a column to sort it. Click on site ID for more information. You can download data from 
+this network <a href='../request/download.phtml?network=${network}'>here</a>.<br />\n";
 ?>
 
 <form method="GET" action="<?php echo $rooturl; ?>/my/current.phtml">
