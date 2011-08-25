@@ -3,49 +3,61 @@ include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
  /* Add/Edit a site to the IEM Database */
 
-$station = isset($_GET["station"]) ? $_GET["station"] : "";
-$sname = isset($_GET["sname"]) ? $_GET["sname"] : "";
-$state = isset($_GET["state"]) ? $_GET["state"] : "";
-$country = isset($_GET["country"]) ? $_GET["country"] : "";
-$elevation = isset($_GET["elevation"]) ? $_GET["elevation"] : "";
-$network = isset($_GET["network"]) ? $_GET["network"] : "";
-$online = isset($_GET["online"]) ? $_GET["online"] : "";
-$latitude = isset($_GET["latitude"]) ? $_GET["latitude"] : "";
-$longitude = isset($_GET["longitude"]) ? $_GET["longitude"] : "";
+$station = isset($_REQUEST["station"]) ? substr($_REQUEST["station"],0,10) : "";
+$sname = isset($_REQUEST["sname"]) ? $_REQUEST["sname"] : "";
+$state = isset($_REQUEST["state"]) ? $_REQUEST["state"] : "";
+$country = isset($_REQUEST["country"]) ? $_REQUEST["country"] : "";
+$elevation = isset($_REQUEST["elevation"]) ? $_REQUEST["elevation"] : "";
+$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "";
+$online = isset($_REQUEST["online"]) ? $_REQUEST["online"] : "";
+$latitude = isset($_REQUEST["latitude"]) ? $_REQUEST["latitude"] : "";
+$longitude = isset($_REQUEST["longitude"]) ? $_REQUEST["longitude"] : "";
 
 $pg_conn = iemdb("mesosite");
 
 /* Input station Details */
-if (strlen($station) > 0 && strlen($sname) > 0)
+if (isset($_REQUEST["longitude"]) && isset($_REQUEST["latitude"]))
 {
    $sql = sprintf("INSERT into stations (id, network) values ('%s','%s')", $station, $network);
-   echo $sql;
-  pg_exec($pg_conn, $sql);
-   $sql = sprintf("UPDATE stations SET synop = 9999, country = '%s', plot_name = '%s', name = '%s', state = '%s', elevation = '%s', online = '%s', geom = 'SRID=4326;POINT(%s %s)' WHERE id = '%s' and network = '%s'", $country, $sname, $sname, $state, $elevation, $online, $longitude, $latitude,  $station, $network);
-  echo $sql;
-  pg_exec($pg_conn, $sql);
+   @pg_exec($pg_conn, $sql);
+
+   $sql = sprintf("UPDATE stations SET synop = 9999, country = '%s', plot_name = '%s', 
+   name = '%s', state = '%s', elevation = '%s', online = '%s', 
+   geom = 'SRID=4326;POINT(%s %s)' WHERE id = '%s' and network = '%s'", $country, $sname, $sname, 
+   $state, $elevation, $online, $longitude, $latitude,  $station, $network);
+   pg_exec($pg_conn, $sql);
 
   // Insert into mesosite
   `/mesonet/python/bin/python /mesonet/www/apps/iemwebsite/scripts/util/addSiteMesosite.py $network $station`;
 }
 
 /* Search for station */
-if (strlen($station) > 0 && strlen($sname) == 0) 
-{
-  $sql = sprintf("SELECT * from stations WHERE id = '%s' and network = '%s'", $station, $network);
-  echo $sql;
+$sql = sprintf("SELECT *, y(geom), x(geom) from stations WHERE id = '%s' and network = '%s'", 
+		$station, $network);
+$rs = pg_exec($pg_conn, $sql);
+if (pg_numrows($rs) == 1){
+  	$row = pg_fetch_assoc($rs,0);
+  	$elevation = $row['elevation'];
+  	$sname = $row["name"];
+  	$latitude = $row["y"];
+  	$online = $row["online"];
+  	$longitude = $row["x"];
+  	$country = $row["country"];
+  	$state = $row["state"];
 }
 
 ?>
 
 <h3>Add/Edit a Site to the mesosite database</h3>
 
-<form method="GET" name="finder">
+<p><a href="<?php echo $rooturl; ?>/admin/">Back to admin</a>
+
+<form method="POST" name="finder">
 <p>Find SiteID:<input type="text" name="station">
 and network:<input type="text" name="network"><input type="submit" value="go">
 </form>
 
-<form method="GET" name="editor">
+<form method="POST" name="editor">
 
 <table>
 <tr><th>Site ID:</th><td><input type="text" name="station" value="<?php echo $station; ?>"></td></tr>
@@ -59,7 +71,7 @@ and network:<input type="text" name="network"><input type="submit" value="go">
 <tr><th>Longitude:</th><td><input type="text" name="longitude" value="<?php echo $longitude; ?>"></td></tr>
 
 </table>
-
-<input type="submit">
+<input type="reset" />
+<input type="submit" />
 
 </form>
