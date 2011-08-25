@@ -36,7 +36,7 @@ recent data is from yesterday.</p>
      </tr>
      <tr>
        <td><input type="checkbox" name="vars[]" value="drct">Wind Direction</td>
-       <td><input type="checkbox" name="vars[]" value="sknt">Wind Speed</td>
+       <td><input type="checkbox" name="vars[]" value="sknt">Wind Speed [kts]</td>
      </tr>
      <tr>
        <td><input type="checkbox" name="vars[]" value="pday">Daily Precip Counter [2]</td>
@@ -48,6 +48,7 @@ recent data is from yesterday.</p>
      </tr>
      <tr>
        <td><input type="checkbox" name="vars[]" value="alti" colspan=2>Altimeter (Pressure)</td>
+       <td><input type="checkbox" name="vars[]" value="gust" colspan=2>Wind Gust [kts]</td>
      </tr>
      </table>
   </td>
