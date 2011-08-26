@@ -2,14 +2,16 @@
 # Daryl Herzmann 16 Jul 2003
 
 import re, mx.DateTime, string
+import sys
+ST = sys.argv[1]
 from pyIEM import stationTable, iemdb
 i = iemdb.iemdb()
 coopdb = i['coop']
 coopdb.query("BEGIN;")
 
-o = open("5321234136207dat.txt", 'r').readlines()
-s = mx.DateTime.DateTime(1970,1,1)
-e = mx.DateTime.DateTime(2010,1,1)
+o = open("%s_dat.txt" % (ST,), 'r').readlines()
+s = mx.DateTime.DateTime(1930,1,1)
+e = mx.DateTime.DateTime(1970,1,1)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 data = {}
@@ -18,7 +20,7 @@ for line in o[2:]:
   tokens = re.split(",", line)
   month = mx.DateTime.strptime(tokens[7], "%Y%m")
   var = tokens[5]
-  coopid = "ms"+ str(tokens[1][2:])
+  coopid = "%s%s" % (ST.lower(), str(tokens[1][2:]))
   sid = coopid
   if (not data.has_key(sid)):
     data[sid] = {}
@@ -84,9 +86,9 @@ while (now < e):
       snowd = 'Null'
       cnt += 1
 
-    sql = "INSERT into alldata_ms (stationid, day, high, low, precip, snow, \
+    sql = "INSERT into alldata_%s (stationid, day, high, low, precip, snow, \
            sday, year, month,snowd) values ('%s','%s',%s,%s,%s,%s,'%s',%s,%s,%s) "\
-           % (sid.lower(), now.strftime("%Y-%m-%d"), high, low, precip, snow,\
+           % (ST.lower(), sid.lower(), now.strftime("%Y-%m-%d"), high, low, precip, snow,\
            now.strftime("%m%d"), now.year, now.month, snowd)
     #sql = "UPDATE alldata SET snow = %s WHERE stationid = '%s' and day = '%s'" % (snow, sid.lower(), now.strftime("%Y-%m-%d"))
     #print sql
