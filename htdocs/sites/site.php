@@ -6,7 +6,7 @@ include("setup.php");
 $THISPAGE="iem-sites";
 $TITLE = sprintf("IEM | Site Info | %s %s", $station, $cities[$station]["name"]);
 $BODYEXTRA = "onload=\"javascript: load();\"";
-$HEADEXTRA = '<script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key='. $GOOGLEKEYS[$rooturl]["vtec"] .'" type="text/javascript"></script>';
+$HEADEXTRA = '<script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key='. $GOOGLEKEYS[$rooturl]["any"] .'" type="text/javascript"></script>';
 include("$rootpath/include/header.php");
 ?>
 <?php $current = "base"; include("sidebar.php"); ?>
