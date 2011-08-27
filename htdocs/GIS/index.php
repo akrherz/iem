@@ -103,7 +103,7 @@ back to 1951.</li>
   to 2003!</li>
  <li><a href="/data/gis/shape/4326/us/current_ww.zip">Current NWS Warnings</a>
  <br />A shapefile of active county based and polygon based weather warnings. 
-This file is updated every 5 minutes.</li>
+This file is updated every minute.</li>
  <li><a href="/request/gis/watchwarn.phtml">Archived NWS Warnings</a>
  <br />Generate a shapefile of weather warnings for a time period of your
  choice!</li>
