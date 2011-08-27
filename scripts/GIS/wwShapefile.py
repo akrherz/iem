@@ -33,7 +33,7 @@ dbf.add_field("STATUS", dbflib.FTString, 3, 0)
 dbf.add_field("NWS_UGC", dbflib.FTString, 6, 0)
 
 
-sql = """SELECT *, astext(ST_Simplify(geom,0.0001)) as tgeom from warnings_%s WHERE 
+sql = """SELECT *, astext(ST_Simplify(geom,0.001)) as tgeom from warnings_%s WHERE 
 	expire > '%s' and ((gtype = 'P' and ST_IsValid(geom)) or gtype = 'C') 
 	ORDER by type ASC""" % (eTS.year, eTS.strftime("%Y-%m-%d %H:%M"),)
 #print sql
