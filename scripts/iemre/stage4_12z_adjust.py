@@ -6,7 +6,7 @@ import Nio
 import mx.DateTime
 import Ngl
 import numpy
-import constants
+import iemre
 import os
 import sys
 try:
@@ -28,7 +28,7 @@ def merge(ts):
     lats = numpy.ravel( grib.variables["g5_lat_0"][200:-100,300:900] )
     lons = numpy.ravel( grib.variables["g5_lon_1"][200:-100,300:900] )
     vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc24h"][200:-100,300:900] )
-    res = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
+    res = Ngl.natgrid(lons, lats, vals, iemre.XAXIS, iemre.YAXIS)
     stage4 = res.transpose()
     # Prevent Large numbers, negative numbers
     stage4 = numpy.where( stage4 < 10000., stage4, 0.)

@@ -7,7 +7,7 @@ import numpy
 import mx.DateTime
 from pyIEM import iemdb, mesonet
 import Ngl
-import constants
+import iemre
 import network
 
 i = iemdb.iemdb()
@@ -35,7 +35,7 @@ def generic_gridder(rs, idx):
         print "Only %s observations found for %s, won't grid" % (len(vals),
                idx)
         return None
-    grid = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
+    grid = Ngl.natgrid(lons, lats, vals, iemre.XAXIS, iemre.YAXIS)
     if grid is not None:
         return grid.transpose()
     else:
@@ -57,10 +57,10 @@ def grid_day(nc, ts):
     if len(rs) > 4:
         res = generic_gridder(rs, 'high')
         if res is not None:
-            nc.variables['high_tmpk'][offset] = constants.f2k(res)
+            nc.variables['high_tmpk'][offset] = iemre.f2k(res)
         res = generic_gridder(rs, 'low')
         if res is not None:
-            nc.variables['low_tmpk'][offset] = constants.f2k(res)
+            nc.variables['low_tmpk'][offset] = iemre.f2k(res)
         res = generic_gridder(rs, 'precip')
         if res is not None:
             nc.variables['p01d'][offset] = res * 24.5

@@ -7,7 +7,7 @@ import numpy
 import mx.DateTime
 from pyIEM import iemdb, mesonet
 import Ngl
-import constants
+import iemre
 
 i = iemdb.iemdb()
 mesosite = i['mesosite']
@@ -39,7 +39,7 @@ def grid_skyc(rs):
     if len(vals) < 4:
         print "No SKYC data at all for time: %s" % (ts,)   
         return None
-    grid = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
+    grid = Ngl.natgrid(lons, lats, vals, iemre.XAXIS, iemre.YAXIS)
     if grid is not None:
         gt = grid.transpose()
         gt = numpy.where(gt > 0., gt, 0.0)
@@ -63,7 +63,7 @@ def generic_gridder(rs, idx):
         print "Only %s observations found for %s, won't grid" % (len(vals),
                idx)
         return None
-    grid = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
+    grid = Ngl.natgrid(lons, lats, vals, iemre.XAXIS, iemre.YAXIS)
     if grid is not None:
         return grid.transpose()
     else:
@@ -108,7 +108,7 @@ def grid_hour(nc, ts):
     if len(rs) > 4:
         res = generic_gridder(rs, 'max_tmpf')
         if res is not None:
-            nc.variables['tmpk'][offset] = constants.f2k(res)
+            nc.variables['tmpk'][offset] = iemre.f2k(res)
         res = grid_skyc(rs)
         if res is not None:
             nc.variables['skyc'][offset] = res

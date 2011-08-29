@@ -4,7 +4,7 @@ import Nio
 import mx.DateTime
 import Ngl
 import numpy
-import constants
+import iemre
 import os
 import sys
 try:
@@ -29,10 +29,10 @@ def merge(ts):
         vals = numpy.where( vals > 250., 0, vals)
         #print 'STAGE4 MIN: %5.2f AVG: %5.2f MAX: %5.2f' % (numpy.min(vals), numpy.average(vals),
         #                                           numpy.max(vals))
-        res = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
+        res = Ngl.natgrid(lons, lats, vals, iemre.XAXIS, iemre.YAXIS)
     else:
         print 'Missing stage4 %s' % (fp,)
-        res = numpy.zeros( (constants.NX, constants.NY))
+        res = numpy.zeros( (iemre.NX, iemre.NY))
 
     # Lets clip bad data
     res = numpy.where(res < 0, 0., res)
