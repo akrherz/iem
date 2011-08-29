@@ -34,13 +34,14 @@ for yr in range(byear, 1893):
         continue
 
       sql = """INSERT into alldata(stationid, day, high, low, precip,
-            snow, sday, year, month, snowd) VALUES ('ia2203', '%s-%s-%s',
-            %s, %s, %s, %s, '%02i%02i', %s, %s, %s)""" % (yr,
+            snow, sday, year, month, snowd, climoweek) VALUES ('ia2203', '%s-%s-%s',
+            %s, %s, %s, %s, '%02i%02i', %s, %s, %s,
+            (select climoweek from climoweek where sday = '%02i%02i'))""" % (yr,
             mo+1, dy+1, high, low, precip, snowfall, mo+1, dy+1, yr, mo+1,
-            snowd)
+            snowd, mo+1, dy+1)
       ccursor.execute(sql)
 
 
 nc.close()
 ccursor.close()
-COOP.close()
+COOP.commit()
