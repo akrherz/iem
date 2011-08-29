@@ -1,6 +1,6 @@
 # Generate the IEMRE climatology file, hmmm
 
-import constants
+import iemre
 try:
     import netCDF4 as netCDF3
 except:
@@ -31,8 +31,8 @@ def init_year(ts):
 
 
     # Setup Dimensions
-    nc.createDimension('lat', constants.NY)
-    nc.createDimension('lon', constants.NX)
+    nc.createDimension('lat', iemre.NY)
+    nc.createDimension('lon', iemre.NX)
     days = ((ts + mx.DateTime.RelativeDateTime(years=1)) - ts).days
     nc.createDimension('time', int(days) ) 
 
@@ -42,14 +42,14 @@ def init_year(ts):
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
-    lat[:] = constants.YAXIS
+    lat[:] = iemre.YAXIS
 
     lon = nc.createVariable('lon', numpy.float, ('lon',) )
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
-    lon[:] = constants.XAXIS
+    lon[:] = iemre.XAXIS
 
     tm = nc.createVariable('time', numpy.float, ('time',) )
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
