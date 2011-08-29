@@ -6,13 +6,23 @@ import math
 # 202,054 4,470,570 736,852 4,822,687
 # Or! 352km by 535km
 # So for ~25km, we'd want 23x and 15y
-SOUTH =  40.1356
-WEST  = -96.8732
-NORTH =  43.7538
-EAST  = -89.6463
+#SOUTH =  40.1356
+#WEST  = -96.8732
+#NORTH =  43.7538
+#EAST  = -89.6463
+# Midwest Extents in EPSG:2163
+# -312,635 -888,815 1,627,432 498,098
+# Or 2,339km by 1,388km 
+# So for ~25km, we'd want 94x and 55y
+SOUTH = 37.0
+WEST = -104.0
+NORTH = 49.0
+EAST = -80.5
 
-NX = 24
-NY = 16
+#NX = 24
+#NY = 16
+NX = 94
+NY = 55
 
 DX = (EAST-WEST)/float(NX-1)
 DY = (NORTH-SOUTH)/float(NY-1)

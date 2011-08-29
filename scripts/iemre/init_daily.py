@@ -1,7 +1,10 @@
 # Generate the IEMRE daily analysis file for a year
 
 import constants
-import netCDF3
+try:
+    import netCDF4 as netCDF3
+except:
+    import netCDF3
 import mx.DateTime
 import numpy
 import sys
@@ -11,7 +14,7 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
 
-    fp = "/mesonet/data/iemre/%s_daily.nc" % (ts.year, )
+    fp = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, )
     nc = netCDF3.Dataset(fp, 'w')
     nc.title         = "IEM Daily Reanalysis %s" % (ts.year,)
     nc.platform      = "Grided Observations"
@@ -57,23 +60,20 @@ def init_year(ts):
     tm[:] = numpy.arange(0, int(days) )
 
     # Tracked variables
-    high = nc.createVariable('high_tmpk', numpy.float, ('time', 'lat', 'lon'))
+    high = nc.createVariable('high_tmpk', numpy.float, ('time', 'lat', 'lon'), fill_value=1.e20)
     high.units = "K"
     high.long_name = "2m Air Temperature Daily High"
     high.standard_name = "2m Air Temperature"
-    high._FillValue = 1.e20
     high.coordinates = "lon lat"
 
-    low = nc.createVariable('low_tmpk', numpy.float, ('time', 'lat', 'lon'))
+    low = nc.createVariable('low_tmpk', numpy.float, ('time', 'lat', 'lon'), fill_value=1.e20)
     low.units = "K"
     low.long_name = "2m Air Temperature Daily Low"
     low.standard_name = "2m Air Temperature"
-    low._FillValue = 1.e20
     low.coordinates = "lon lat"
 
-    p01d = nc.createVariable('p01d', numpy.float, ('time','lat','lon'))
+    p01d = nc.createVariable('p01d', numpy.float, ('time','lat','lon'), fill_value=1.e20)
     p01d.units = 'mm'
-    p01d._FillValue = 1.e20
     p01d.long_name = 'Precipitation'
     p01d.standard_name = 'Precipitation'
     p01d.coordinates = "lon lat"
