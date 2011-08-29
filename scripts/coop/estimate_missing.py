@@ -11,10 +11,10 @@ mesosite = i['mesosite']
 #st.ids = ['IA8266',]
 # First we create a dictionary of sites we want to estimate from
 friends = {}
-for id in st.ids:
+for id in nt.sts.keys():
   sql = """select id, distance(geom, 'SRID=4326;POINT(%s %s)') from stations
          WHERE network = '%sCLIMATE' and id != '%s' ORDER by distance
-         ASC LIMIT 11""" % (st.sts[id]['lon'], st.sts[id]['lat'], state.upper(), id.upper())
+         ASC LIMIT 11""" % (nt.sts[id]['lon'], nt.sts[id]['lat'], state.upper(), id.upper())
   rs = mesosite.query(sql).dictresult()
   friends[id] = "('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" \
           % (rs[0]['id'].lower(), rs[1]['id'].lower(),\
