@@ -25,9 +25,9 @@ def merge(ts):
 
     grib = Nio.open_file(fp, 'r')
     # Rough subsample, since the whole enchillata is too much
-    lats = numpy.ravel( grib.variables["g5_lat_0"][200:-100,300:900] )
-    lons = numpy.ravel( grib.variables["g5_lon_1"][200:-100,300:900] )
-    vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc24h"][200:-100,300:900] )
+    lats = numpy.ravel( grib.variables["g5_lat_0"][200:-100:5,300:900:5] )
+    lons = numpy.ravel( grib.variables["g5_lon_1"][200:-100:5,300:900:5] )
+    vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc24h"][200:-100:5,300:900:5] )
     res = Ngl.natgrid(lons, lats, vals, iemre.XAXIS, iemre.YAXIS)
     stage4 = res.transpose()
     # Prevent Large numbers, negative numbers
