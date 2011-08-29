@@ -26,6 +26,12 @@ longterm = ['ia1635','ia4063','ia3509','ia3473','ia4389','ia5769','ia1319',
 'ia7842','ia2789','ia8688','ia5198','ia2203','ia2364',
 'ia0000']
 
+def get_table(sid):
+    """
+    Return the table which has the data for this siteID
+    """
+    return "alldata_%s" % (sid.lower()[:2],)
+
 def yrcnt(sid):
   """ Compute the number of years each month will have in the records """
   sts = startts(sid)

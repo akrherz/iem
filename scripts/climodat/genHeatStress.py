@@ -23,8 +23,8 @@ def write(mydb, stationID):
     monthlyIndex[now] = 0
     now += interval
 
-  rs = mydb.query("SELECT year, month, high from alldata WHERE \
-    stationid = '%s' and high > 86 and day >= '%s-01-01'" % (stationID, constants.startyear(stationID) ) ).dictresult()
+  rs = mydb.query("SELECT year, month, high from %s WHERE \
+    stationid = '%s' and high > 86 and day >= '%s-01-01'" % (constants.get_table(stationID), stationID, constants.startyear(stationID) ) ).dictresult()
   for i in range(len(rs)):
     ts = mx.DateTime.DateTime( int(rs[i]["year"]), int(rs[i]["month"]), 1)
     monthlyCount[ts] += 1

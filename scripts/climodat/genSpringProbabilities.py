@@ -17,10 +17,10 @@ def write(mydb, stationID):
 
     for base in (32,28,26,22):
         # Query Last doy for each year in archive
-        sql = "select year, max(extract(doy from day)) as doy from alldata \
+        sql = "select year, max(extract(doy from day)) as doy from %s \
            WHERE month < 7 and low <= %s and low > -40 and stationID = '%s' \
            and year >= %s and year < %s and month > 1 \
-         GROUP by year ORDER by doy ASC" % (base, stationID, constants.startyear(stationID), constants._ENDYEAR)
+         GROUP by year ORDER by doy ASC" % (constants.get_table(stationID), base, stationID, constants.startyear(stationID), constants._ENDYEAR)
         rs = mydb.query(sql).dictresult()
         cnt_years[base] = len(rs)
         if (len(rs) == 0):

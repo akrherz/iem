@@ -49,8 +49,8 @@ def process(id, csv,yr):
   # First, get our obs
   sql = "SELECT round(avg(high)::numeric,1) as avg_high,\
       round(avg(low)::numeric,1) as avg_low, \
-      round(sum(precip)::numeric,2) as rain from alldata WHERE \
-      stationid = '%s' and year = %s " % (id.lower(), yr)
+      round(sum(precip)::numeric,2) as rain from %s WHERE \
+      stationid = '%s' and year = %s " % (constants.get_table(id), id.lower(), yr)
   rs = mydb.query(sql).dictresult()
   oHigh = rs[0]["avg_high"]
   oLow = rs[0]["avg_low"]

@@ -9,9 +9,9 @@ def write(mydb, stationID):
   out.write("""# Top 30 single day rainfalls
  MONTH  DAY  YEAR   AMOUNT\n""")
 
-  rs = mydb.query("SELECT precip, day from alldata WHERE stationid = '%s' \
+  rs = mydb.query("SELECT precip, day from %s WHERE stationid = '%s' \
    and day >= '%s-01-01' ORDER by precip DESC LIMIT 30" \
-   % (stationID, constants.startyear(stationID) ) ).dictresult()
+   % (constants.get_table(stationID), stationID, constants.startyear(stationID) ) ).dictresult()
 
   for i in range(len(rs)):
     ts = mx.DateTime.strptime(rs[i]["day"], "%Y-%m-%d")

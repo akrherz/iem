@@ -1,18 +1,16 @@
-#!/mesonet/python/bin/python
-# Dump entire COOP archive to CSV files
-
-from pyIEM import stationTable, iemdb
+import constants
+from pyIEM import iemdb
+import network
+nt = network.Table("IACLIMATE")
 i = iemdb.iemdb()
 coop = i['coop']
 
-st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
-
-for id in st.ids:
+for id in nt.sts.keys():
   fn = "coop_data/%s.csv" % (st.sts[id]['name'].replace(" ", "_"), )
   out = open(fn, 'w')
   out.write("station,station_name,lat,lon,day,high,low,precip,snow,\n")
-  sql = "SELECT * from alldata WHERE stationid = '%s' ORDER by day ASC" \
-         % (id.lower(), )
+  sql = "SELECT * from %s WHERE stationid = '%s' ORDER by day ASC" \
+         % (constants.get_table(id), id.lower(), )
 
   rs = coop.query(sql).dictresult()
   for i in range(len(rs)):
