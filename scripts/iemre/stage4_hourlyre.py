@@ -30,6 +30,8 @@ def merge(ts):
         #print 'STAGE4 MIN: %5.2f AVG: %5.2f MAX: %5.2f' % (numpy.min(vals), numpy.average(vals),
         #                                           numpy.max(vals))
         res = Ngl.natgrid(lons, lats, vals, iemre.XAXIS, iemre.YAXIS)
+        grib.close()
+        del grib
     else:
         print 'Missing stage4 %s' % (fp,)
         res = numpy.zeros( (iemre.NX, iemre.NY))
@@ -49,6 +51,7 @@ def merge(ts):
     nc.variables["p01m"][offset,:,:] = res.transpose()
 
     nc.close()
+    del nc
 
 if __name__ == "__main__":
     if len(sys.argv) == 5:
