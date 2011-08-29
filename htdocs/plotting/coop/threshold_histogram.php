@@ -13,9 +13,9 @@ $ydata = Array();
 for($thres=-40;$thres<11;$thres++)
 {
   $sql = "SELECT y1, count(*) from 
-          ((SELECT year as y1, low from alldata 
+          ((SELECT year as y1, low from alldata_ia 
            WHERE month IN (12) $slimiter) UNION 
-          (SELECT year - 1 as y1, low from alldata 
+          (SELECT year - 1 as y1, low from alldata_ia 
            WHERE month IN (1,2) $slimiter)) as foo 
          WHERE low < ${thres} GROUP by y1";
   $rs = pg_exec($conn, $sql);
@@ -36,9 +36,9 @@ if ($station2 != "")
   for($thres=-40;$thres<11;$thres++)
   {
     $sql = "SELECT y1, count(*) from 
-          ((SELECT year as y1, low from alldata 
+          ((SELECT year as y1, low from alldata_ia 
            WHERE month IN (12) $slimiter) UNION 
-          (SELECT year - 1 as y1, low from alldata 
+          (SELECT year - 1 as y1, low from alldata_ia 
            WHERE month IN (1,2) $slimiter)) as foo 
          WHERE low < ${thres} GROUP by y1";
     $rs = pg_exec($conn, $sql);

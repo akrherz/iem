@@ -33,7 +33,10 @@ $subtitle = sprintf("Between %s and %s", date('M d', $sts), date('M d', $ets));
 
 /* Query out the average accumulations during that time */
 $coop = iemdb("coop");
-$sql = "select year, round(sum(precip)::numeric,2) as rain from alldata WHERE extract(doy from day) BETWEEN extract(doy from '$stsSQL'::date) and extract(doy from '$etsSQL'::date) and stationid = '$station' and year < extract(year from now()) GROUP by year ORDER by rain ASC";
+$sql = "select year, round(sum(precip)::numeric,2) as rain from alldata_ia
+  WHERE extract(doy from day) BETWEEN extract(doy from '$stsSQL'::date) and 
+  extract(doy from '$etsSQL'::date) and stationid = '$station' and 
+  year < extract(year from now()) GROUP by year ORDER by rain ASC";
 $rs = pg_exec($coop, $sql);
 
 /* Generate plot */

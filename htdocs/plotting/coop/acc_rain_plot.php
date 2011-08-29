@@ -49,7 +49,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 $rs = pg_prepare($coopdb, "SELECT2", "SELECT precip, day, " .
 		"extract(year from day) as y, extract(month from day) as m, " .
-		"extract(day from day) as d from alldata WHERE stationid = $1 " .
+		"extract(day from day) as d from alldata_ia WHERE stationid = $1 " .
 		"and day between $2 and $3 ORDER by day ASC");
 $rs = pg_execute($coopdb, "SELECT2", Array($station, $sdate, $edate));
 

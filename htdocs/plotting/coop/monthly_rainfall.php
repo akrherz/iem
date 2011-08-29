@@ -25,7 +25,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 }
 
 $sql = "select month, avg(c) as c from (select year, month, count(*) as c 
-    from alldata WHERE stationid = '$station' and precip > 0 
+    from alldata_ia WHERE stationid = '$station' and precip > 0 
     GROUP by year, month) as foo GROUP by month ORDER by month ASC";
 $result = pg_exec($connection, $sql);
 

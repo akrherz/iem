@@ -31,10 +31,10 @@ if ($season != "all"){
 
 
 $query2 = "SELECT avg( (high + low) /2 ) as avet, avg(high) as aveh, avg(low) as
- avel, year from alldata WHERE stationid = '". $station1 ."' and high > -90 and low > -90 ". $sqlAddition2 ." GROUP by year ORDER by
+ avel, year from alldata_ia WHERE stationid = '". $station1 ."' and high > -90 and low > -90 ". $sqlAddition2 ." GROUP by year ORDER by
  year ASC";
 $query3 = "SELECT avg( (high + low) /2 ) as avet, avg(high) as aveh, avg(low) as
- avel, year from alldata WHERE stationid = '". $station2 ."' and high > -90 and low > -90 ". $sqlAddition2 ." GROUP by year ORDER by
+ avel, year from alldata_ia WHERE stationid = '". $station2 ."' and high > -90 and low > -90 ". $sqlAddition2 ." GROUP by year ORDER by
  year ASC";
 
 
