@@ -5,7 +5,7 @@ include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");
 include("$rootpath/include/iemprop.php");
 $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
-$nt = new NetworkTable("COOPDB");
+$nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
 $coopdb = iemdb("coop");

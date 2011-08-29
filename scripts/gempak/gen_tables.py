@@ -5,7 +5,6 @@ import network
 import mx.DateTime
 
 cfg = {
-'coopdb.stns': ['COOPDB',],
 'iowa.stns' : ['AWOS', 'IA_ASOS'],
 'ia_main.stns' : ['IA_RWIS', 'AWOS', 'IA_ASOS'],
 'tier3.stns' : ['IA_ASOS', 'AWOS', 'IA_RWIS', 'KCCI', 'ISUAG'],
