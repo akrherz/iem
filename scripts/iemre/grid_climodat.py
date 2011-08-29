@@ -1,22 +1,22 @@
 import sys
-import netCDF3
+try:
+    import netCDF4 as netCDF3
+except:
+    import netCDF3
 import numpy
 import mx.DateTime
 from pyIEM import iemdb, mesonet
 import Ngl
 import constants
+import network
 
 i = iemdb.iemdb()
-mesosite = i['mesosite']
 coop = i['coop']
-locs = {}
 
-def load_stationtable():
-    sql = """SELECT id, x(geom) as lon, y(geom) as lat from
-         stations where network IN ('IACLIMATE')"""
-    rs = mesosite.query( sql ).dictresult()
-    for i in range(len(rs)):
-        locs[ rs[i]['id'].lower() ] = rs[i]
+nt = network.Table(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE',
+         'OHCLIMATE','MICLIMATE','KYCLIMATE','WICLIMATE','MNCLIMATE',
+         'SDCLIMATE','NDCLIMATE','NECLIMATE','KSCLIMATE','MOCLIMATE'))
+locs = nt.sts
 
 def generic_gridder(rs, idx):
     """
@@ -26,9 +26,10 @@ def generic_gridder(rs, idx):
     lons = []
     vals = []
     for i in range(len(rs)):
-        if rs[i][idx] is not None and locs.has_key(rs[i]['stationid']):
-            lats.append(  locs[rs[i]['stationid']]['lat'] )
-            lons.append(  locs[rs[i]['stationid']]['lon'] )
+        stid = rs[i]['stationid'].upper()
+        if rs[i][idx] is not None and locs.has_key(stid):
+            lats.append(  locs[stid]['lat'] )
+            lons.append(  locs[stid]['lon'] )
             vals.append( rs[i][idx]  )
     if len(vals) < 4:
         print "Only %s observations found for %s, won't grid" % (len(vals),
@@ -50,7 +51,7 @@ def grid_day(nc, ts):
 
 
     sql = """SELECT * from alldata WHERE day = '%s' and
-             stationid != 'ia0000' """ % (
+             substr(stationid,3,4) != '0000' """ % (
          ts.strftime("%Y-%m-%d"), )
     rs = coop.query( sql ).dictresult()
     if len(rs) > 4:
@@ -68,8 +69,6 @@ def grid_day(nc, ts):
             len(rs))
 
 def main(ts):
-    # Load up a station table we are interested in
-    load_stationtable()
 
     # Load up our netcdf file!
     nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,), 'a')
