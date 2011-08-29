@@ -1,5 +1,8 @@
 import sys
-import netCDF3
+try:
+    import netCDF4 as netCDF3
+except:
+    import netCDF3
 import numpy
 import mx.DateTime
 from pyIEM import iemdb, mesonet
@@ -15,7 +18,8 @@ locs = {}
 def load_stationtable():
     sql = """SELECT id, x(geom) as lon, y(geom) as lat from
          stations where network IN ('IA_ASOS','MO_ASOS','IL_ASOS',
-         'WI_ASOS','MN_ASOS', 'SD_ASOS', 'NE_ASOS', 'KS_ASOS', 'AWOS')"""
+         'WI_ASOS','MN_ASOS', 'SD_ASOS', 'NE_ASOS', 'KS_ASOS', 'AWOS',
+         'IN_ASOS','KY_ASOS','OH_ASOS','MI_ASOS')"""
     rs = mesosite.query( sql ).dictresult()
     for i in range(len(rs)):
         locs[ rs[i]['id'] ] = rs[i]
@@ -117,7 +121,7 @@ def main(ts):
     load_stationtable()
 
     # Load up our netcdf file!
-    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_hourly.nc" % (ts.year,), 'a')
+    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,), 'a')
     grid_hour(nc , ts)
 
     nc.close()

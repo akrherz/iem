@@ -1,10 +1,14 @@
 import sys
-import netCDF3
+try:
+    import netCDF4 as netCDF3
+except:
+    import netCDF3
 import numpy
 import mx.DateTime
 from pyIEM import iemdb, mesonet
 import Ngl
 import constants
+import random
 
 i = iemdb.iemdb()
 mesosite = i['mesosite']
@@ -13,7 +17,9 @@ locs = {}
 
 def load_stationtable():
     sql = """SELECT id, x(geom) as lon, y(geom) as lat from
-         stations where network IN ('IACLIMATE')"""
+         stations where network IN ('IACLIMATE','MNCLIMATE','NDCLIMATE',
+         'SDCLIMATE','NECLIMATE','KSCLIMATE','MOCLIMATE','ILCLIMATE',
+         'WICLIMATE','MICLIMATE','INCLIMATE','OHCLIMATE','KYCLIMATE')"""
     rs = mesosite.query( sql ).dictresult()
     for i in range(len(rs)):
         locs[ rs[i]['id'].lower() ] = rs[i]
@@ -27,7 +33,7 @@ def generic_gridder(rs, idx):
     vals = []
     for i in range(len(rs)):
         if rs[i][idx] is not None and locs.has_key(rs[i]['station']):
-            lats.append(  locs[rs[i]['station']]['lat'] )
+            lats.append(  locs[rs[i]['station']]['lat'] + (random.random() * .01)) 
             lons.append(  locs[rs[i]['station']]['lon'] )
             vals.append( rs[i][idx]  )
     if len(vals) < 4:
@@ -49,7 +55,7 @@ def grid_day(nc, ts):
     offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).days)
 
 
-    sql = """SELECT * from climate51 WHERE valid = '%s' and
+    sql = """SELECT * from ncdc_climate71 WHERE valid = '%s' and
              station != 'ia0000' """ % (
          ts.strftime("%Y-%m-%d"), )
     rs = coop.query( sql ).dictresult()
@@ -72,7 +78,7 @@ def main(ts):
     load_stationtable()
 
     # Load up our netcdf file!
-    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/dailyc.nc", 'a')
+    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/mw_dailyc.nc", 'a')
     grid_day(nc , ts)
 
     nc.close()

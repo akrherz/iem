@@ -25,9 +25,9 @@ def merge(ts):
 
     grib = Nio.open_file(fp, 'r')
     # Rough subsample, since the whole enchillata is too much
-    lats = numpy.ravel( grib.variables["g5_lat_0"][400:-300,500:700] )
-    lons = numpy.ravel( grib.variables["g5_lon_1"][400:-300,500:700] )
-    vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc24h"][400:-300,500:700] )
+    lats = numpy.ravel( grib.variables["g5_lat_0"][200:-100,300:900] )
+    lons = numpy.ravel( grib.variables["g5_lon_1"][200:-100,300:900] )
+    vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc24h"][200:-100,300:900] )
     res = Ngl.natgrid(lons, lats, vals, constants.XAXIS, constants.YAXIS)
     stage4 = res.transpose()
     # Prevent Large numbers, negative numbers
@@ -35,7 +35,7 @@ def merge(ts):
     stage4 = numpy.where( stage4 < 0., 0., stage4)
 
     # Open up our RE file
-    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'a')
+    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),'a')
     ts0 = ts + mx.DateTime.RelativeDateTime(days=-1)
     jan1 = mx.DateTime.DateTime(ts.year, 1, 1, 0, 0)
     offset0 = int(( ts0 - jan1).hours)

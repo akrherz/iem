@@ -22,9 +22,9 @@ def merge(ts):
     if os.path.isfile(fp):
         grib = Nio.open_file(fp, 'r')
         # Rough subsample, since the whole enchillata is too much
-        lats = numpy.ravel( grib.variables["g5_lat_0"][400:-300,500:700] )
-        lons = numpy.ravel( grib.variables["g5_lon_1"][400:-300,500:700] )
-        vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc1h"][400:-300,500:700] )
+        lats = numpy.ravel( grib.variables["g5_lat_0"][200:-100,300:900] )
+        lons = numpy.ravel( grib.variables["g5_lon_1"][200:-100,300:900] )
+        vals = numpy.ravel( grib.variables["A_PCP_GDS5_SFC_acc1h"][200:-100,300:900] )
         # Clip large values
         vals = numpy.where( vals > 250., 0, vals)
         #print 'STAGE4 MIN: %5.2f AVG: %5.2f MAX: %5.2f' % (numpy.min(vals), numpy.average(vals),
@@ -43,7 +43,7 @@ def merge(ts):
     #print '%s MIN: %5.2f AVG: %5.2f MAX: %5.2f' % (ts, numpy.min(res), numpy.average(res),
     #                                               numpy.max(res))
     # Open up our RE file
-    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'a')
+    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),'a')
 
     offset = int(( ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours) - 1
     nc.variables["p01m"][offset,:,:] = res.transpose()
