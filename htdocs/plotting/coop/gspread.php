@@ -6,7 +6,7 @@ $connection = pg_connect("iemdb","5432","coop");
 //---------------------------------------------------------------
 $total = floatval((51 * 100) + (3 * 184)) * 1.0;
 
-$query2 = "SELECT count(day) / $total.0  as freq, low from alldata 
+$query2 = "SELECT count(day) / $total.0  as freq, low from alldata_ia 
    WHERE month IN $ts and year > 1950 and low > -50 and low != high GROUP by low";
 $result = pg_exec($connection, $query2);
 
@@ -28,7 +28,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 
 //----------------------------------------------------------------
 
-$query2 = "SELECT count(day) / $total.0 as freq, high from alldata 
+$query2 = "SELECT count(day) / $total.0 as freq, high from alldata_ia 
    WHERE month IN $ts and year > 1950 and high > -50 and high != low GROUP by high";
 
 $result = pg_exec($connection, $query2);

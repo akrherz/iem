@@ -24,7 +24,7 @@ if ($season != "all"){
   $label = "Yearly";
 }
 
-$query2 = "SELECT avg( (high + low) /2 ) as avet, avg(high) as aveh, avg(low) as avel, year from alldata WHERE stationid = '". $station ."' ". $sqlAddition2 ." GROUP by year ORDER by year ASC";
+$query2 = "SELECT avg( (high + low) /2 ) as avet, avg(high) as aveh, avg(low) as avel, year from alldata_ia WHERE stationid = '". $station ."' ". $sqlAddition2 ." GROUP by year ORDER by year ASC";
 
 $result = pg_exec($connection, $query2);
 

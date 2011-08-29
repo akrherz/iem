@@ -31,7 +31,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 /* Collect deficits for May 1 to TODAY */
 $myobs = Array();
-$sql = "SELECT stationid, year, sum(precip) as rain from alldata  WHERE
+$sql = "SELECT stationid, year, sum(precip) as rain from alldata_ia  WHERE
         extract(doy from day) >= extract(doy from '2000-05-01'::date) and 
         extract(doy from day) < extract(doy from '2000-06-24'::date) and
         year > 1950 and year < 2006 GROUP by stationid, year";
@@ -44,7 +44,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 /* Collect deficits for May 1 to Oct 1 */
 $allobs = Array();
-$sql = "SELECT stationid, year, sum(precip) as rain from alldata  WHERE
+$sql = "SELECT stationid, year, sum(precip) as rain from alldata_ia  WHERE
         extract(doy from day) >= extract(doy from '2000-05-01'::date) and 
         extract(doy from day) < extract(doy from '2000-10-01'::date) and
         year > 1950 and year < 2006 GROUP by stationid, year";

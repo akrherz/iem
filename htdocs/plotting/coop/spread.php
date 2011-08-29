@@ -12,7 +12,7 @@ $station = 'ia0600';
 
 //---------------------------------------------------------------
 
-$query2 = "SELECT count(day) as freq, low from alldata 
+$query2 = "SELECT count(day) as freq, low from alldata_ia
    WHERE sday = '$dts' and low > -50 and low != high GROUP by low";
 
 $result = pg_exec($connection, $query2);
@@ -35,7 +35,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 
 //----------------------------------------------------------------
 
-$query2 = "SELECT count(day) as freq, high from alldata 
+$query2 = "SELECT count(day) as freq, high from alldata_ia 
    WHERE sday = '$dts' and high > -50 and high != low GROUP by high";
 
 $result = pg_exec($connection, $query2);
@@ -117,7 +117,7 @@ function normal_sample($x, $avg, $sd){
   return 1 / ($sd * sqrt(2 * pi())) * exp($expn);
 }
 
-$query3 = "SELECT high, low from alldata 
+$query3 = "SELECT high, low from alldata_ia 
    WHERE sday = '$dts' and high > -50 and high != low";
 $result = pg_exec($connection, $query3);
 $highs = Array();

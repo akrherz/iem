@@ -7,7 +7,7 @@ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 
 
 $query2 = "SELECT high, low, years, to_char(valid, 'mm dd') as valid from climate WHERE station = '". $station ."' ORDER by valid ASC";
-$query3 = "SELECT high, low from alldata WHERE
+$query3 = "SELECT high, low from alldata_ia WHERE
   stationid = '". $station ."' and year = ".$year." ORDER by day ASC";
 
 
