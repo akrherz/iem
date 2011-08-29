@@ -2,8 +2,10 @@
 # Script to initialize the reports database
 
 import pg, mx.DateTime, string, constants
-from pyIEM import stationTable
-st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
+import network
+nt = network.Table(('ILCLIMATE', 'INCLIMATE',
+         'OHCLIMATE','MICLIMATE','KYCLIMATE','WICLIMATE','MNCLIMATE',
+         'SDCLIMATE','NDCLIMATE','NECLIMATE','KSCLIMATE','MOCLIMATE'))
 mydb = pg.connect("coop", 'iemdb')
 
 #mydb.query("DELETE from r_monthly")
@@ -11,7 +13,7 @@ mydb = pg.connect("coop", 'iemdb')
 e = mx.DateTime.DateTime(1951, 1, 1)
 interval = mx.DateTime.RelativeDateTime(months=+1)
 
-st.ids = ['IA2364',]
+#st.ids = ['IA2364',]
 for id in st.ids:
   dbid = string.lower(id)
   s = constants.startts(dbid)

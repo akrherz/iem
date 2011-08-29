@@ -16,9 +16,9 @@ def go(mydb, stationID):
   rs = mydb.query("SELECT year, month, avg(high) as avg_high, \
     avg(low) as avg_low, sum(precip) as rain, \
     sum( CASE WHEN precip >= 0.01 THEN 1 ELSE 0 END ) as rcount, \
-    sum( CASE WHEN snow >= 0.01 THEN 1 ELSE 0 END ) as scount from alldata \
+    sum( CASE WHEN snow >= 0.01 THEN 1 ELSE 0 END ) as scount from %s \
     WHERE stationid = '%s' and day >= '%s-01-01' GROUP by year, month" \
-     % (stationID, constants.startyear(stationID) ) ).dictresult()
+     % (constants.get_table(stationID), stationID, constants.startyear(stationID) ) ).dictresult()
 
   for i in range(len(rs)):
     ts = mx.DateTime.DateTime( int(rs[i]["year"]), int(rs[i]["month"]), 1)

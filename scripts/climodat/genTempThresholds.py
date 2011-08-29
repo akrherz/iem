@@ -23,9 +23,9 @@ def write(mydb, stationID):
    sum(case when high >= 80 THEN 1 ELSE 0 END) as e80,
    sum(case when high >= 93 THEN 1 ELSE 0 END) as e93,
    sum(case when high >= 100 THEN 1 ELSE 0 END) as e100
-   from alldata WHERE stationid = '%s' 
+   from %s WHERE stationid = '%s' 
    and day >= '%s-01-01' GROUP by year ORDER by year ASC"""  % (
-   stationID, constants.startyear(stationID) ) ).dictresult()
+   constants.get_table(stationID), stationID, constants.startyear(stationID) ) ).dictresult()
 
   for i in range(len(rs)):
     out.write("%(year)4i %(m20)4i %(m10)4i %(m0)4i %(m32)4i %(e50)4i %(e70)4i %(e80)4i %(e93)4i %(e100)4i\n" % rs[i] )

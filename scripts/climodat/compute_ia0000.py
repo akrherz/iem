@@ -27,7 +27,7 @@ def do(now, var):
   lons = []
   vals = []
   # Extract Data
-  sql = "SELECT %s, upper(stationid) as s from alldata WHERE day = '%s' and \
+  sql = "SELECT %s, upper(stationid) as s from alldata_ia WHERE day = '%s' and \
          %s is NOT NULL" % (var, now.strftime("%Y-%m-%d"), var)
   rs = coop.query(sql).dictresult()
   for i in range(len(rs)):
@@ -51,8 +51,8 @@ def doday(now):
   print "%s HIGH: %.1f LOW: %.1f PRECIP: %.2f SNOW: %.2f" % (
     now.strftime("%Y-%m-%d"), data["high"], data["low"], data["precip"],
     data["snow"])
-  coop.query("DELETE from alldata WHERE stationid = 'ia0000' and day = '%s'" % ( now.strftime("%Y-%m-%d"),))
-  sql = """INSERT into alldata 
+  coop.query("DELETE from alldata_ia WHERE stationid = 'ia0000' and day = '%s'" % ( now.strftime("%Y-%m-%d"),))
+  sql = """INSERT into alldata_ia 
     (stationid, day, high, low, precip, snow, snowd, estimated, year, month, 
     sday, climoweek)
     VALUES ('ia0000', '%s', %.0f, %.0f, %.2f, %.1f, 0, true, %s, %s, '%s', 

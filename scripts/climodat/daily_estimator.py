@@ -191,11 +191,11 @@ def commit( ts ):
     Inject into the database!
     """
     # Remove old entries
-    sql = "DELETE from alldata WHERE day = '%s'" % (ts.strftime("%Y-%m-%d"),)
+    sql = "DELETE from alldata_ia WHERE day = '%s'" % (ts.strftime("%Y-%m-%d"),)
     coop.query( sql )
     # Inject!
     for id in stations.keys():
-        sql = "INSERT into alldata values ('%s', '%s', (select climoweek from climoweek where sday = '%s'), %.0f, %.0f, %.2f, %.1f, '%s', %s, %s, %.0f, 't')" % (id, ts.strftime("%Y-%m-%d"), ts.strftime("%m%d"), 
+        sql = "INSERT into alldata_ia values ('%s', '%s', (select climoweek from climoweek where sday = '%s'), %.0f, %.0f, %.2f, %.1f, '%s', %s, %s, %.0f, 't')" % (id, ts.strftime("%Y-%m-%d"), ts.strftime("%m%d"), 
         stations[id]['high'], stations[id]['low'], stations[id]['precip'],
         stations[id]['snow'],
         ts.strftime("%m%d"), ts.year, ts.month, stations[id]['snowd'])
