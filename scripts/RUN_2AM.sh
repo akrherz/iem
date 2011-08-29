@@ -1,7 +1,19 @@
 #!/bin/sh
 
 cd climodat
-/mesonet/python/bin/python daily_estimator.py
+/mesonet/python/bin/python daily_estimator.py IA
+/mesonet/python/bin/python daily_estimator.py KY
+/mesonet/python/bin/python daily_estimator.py IL
+/mesonet/python/bin/python daily_estimator.py IN
+/mesonet/python/bin/python daily_estimator.py OH
+/mesonet/python/bin/python daily_estimator.py MI
+/mesonet/python/bin/python daily_estimator.py WI
+/mesonet/python/bin/python daily_estimator.py MN
+/mesonet/python/bin/python daily_estimator.py ND
+/mesonet/python/bin/python daily_estimator.py SD
+/mesonet/python/bin/python daily_estimator.py NE
+/mesonet/python/bin/python daily_estimator.py KS
+/mesonet/python/bin/python daily_estimator.py MO
 /mesonet/python/bin/python compute_ia0000.py
 ./run.sh >& a
 

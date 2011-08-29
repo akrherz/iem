@@ -28,11 +28,16 @@ Steps:
  5) Run estimate for Iowa Average Site (ia0000)
 """
 import sys, os
-sys.path.append('../lib/')
+import iemre
+import network
 import iemplot
 import mx.DateTime
 import numpy
 import Ngl
+try:
+    import netCDF4 as netCDF3
+except:
+    import netCDF3
 from pyIEM import iemdb
 i = iemdb.iemdb()
 coop = i['coop']
@@ -40,34 +45,23 @@ wepp = i['wepp']
 iem = i['iem']
 mesosite = i['mesosite']
 
-delx = (iemplot.IA_EAST - iemplot.IA_WEST) / (iemplot.IA_NX - 1)
-dely = (iemplot.IA_NORTH - iemplot.IA_SOUTH) / (iemplot.IA_NY - 1)
+state = sys.argv[1]
 
-# Figure out which stations we care for
-stations = {}
-rs = mesosite.query("SELECT id, x(geom) as lon, y(geom) as lat from stations WHERE network = 'IACLIMATE' and id != 'IA0000'").dictresult()
-for i in range(len(rs)):
-    stations[ rs[i]['id'].lower() ] = rs[i]
-    # Figure out the gridi, gridy
-    y = 0
-    while (iemplot.IA_SOUTH + (dely * y)) < rs[i]['lat']:
-        y += 1
-    stations[ rs[i]['id'].lower() ]['gridy'] = y
-    x = 0
-    while (iemplot.IA_WEST + (delx * x)) < rs[i]['lon']:
-        x += 1
-    stations[ rs[i]['id'].lower() ]['gridx'] = x
+nt = network.Table("%sCLIMATE" % (state.upper(),))
+for id in nt.sts.keys():
+    i,j = iemre.find_ij(nt.sts[id]['lon'], nt.sts[id]['lat'])
+    nt.sts[id]['gridi'] = i
+    nt.sts[id]['gridj'] = j
+    for key in ['high','low','precip','snow','snowd']:
+        nt.sts[id][key] = None
+
 
 def hardcode_asos( ts ):
     """
     Hard set the ASOS DSM 
     """
-    # Figure out the sites we care about
-    asos2climate = {}
-    rs = mesosite.query("""SELECT id, climate_site from stations
-         where network = 'IA_ASOS'""").dictresult()
-    for i in range(len(rs)):
-        asos2climate[ rs[i]['id'] ] = rs[i]['climate_site'].lower()
+
+    nt2 = network.Table("IA_ASOS")
 
     # Get the ASOS data
     rs = iem.query("""
@@ -76,35 +70,35 @@ def hardcode_asos( ts ):
        and pday >= 0 and min_tmpf < 99 and max_tmpf > -99 ORDER by station ASC""" % (
        ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
-        cid = asos2climate[rs[i]['station']]
+        cid = nt2.sts[rs[i]['station']]['climate_site']
         print '%s - Precip: %.2f  DSM: %.2f High: %.1f DSM: %s Low: %.1f DSM: %s' % (rs[i]['station'],
-               stations[cid]['precip'], rs[i]['pday'],
-               stations[cid]['high'], rs[i]['max_tmpf'],
-               stations[cid]['low'], rs[i]['min_tmpf']
+               nt.sts[cid]['precip'], rs[i]['pday'],
+               nt.sts[cid]['high'], rs[i]['max_tmpf'],
+               nt.sts[cid]['low'], rs[i]['min_tmpf']
         )
-        stations[cid]['precip'] = rs[i]['pday']
-        stations[cid]['high'] = rs[i]['max_tmpf']
-        stations[cid]['low'] = rs[i]['min_tmpf']
+        nt.sts[cid]['precip'] = rs[i]['pday']
+        nt.sts[cid]['high'] = rs[i]['max_tmpf']
+        nt.sts[cid]['low'] = rs[i]['min_tmpf']
 
 
 def estimate_precip( ts ):
     """
-    Estimate precipitation based on IEM Rainfall 
+    Estimate precipitation based on IEMRE, ouch
     """
-    for id in stations.keys():
-        sql = """
-    SELECT rainfall from daily_rainfall_%s WHERE
-    hrap_i = ( select hrap_i from hrap_utm 
-               ORDER by distance( the_geom,
-                     transform(geometryfromtext('POINT(%s %s)',4326), 26915)) 
-               ASC LIMIT 1 ) and valid = '%s'
-        """ % (ts.year,  stations[id]['lon'], stations[id]['lat'],
-               ts.strftime("%Y-%m-%d") )
-        rs = wepp.query( sql ).dictresult()
-        if len(rs) == 0:
-            stations[id]['precip'] = 0
-        else:
-            stations[id]['precip'] = rs[0]['rainfall'] / 25.4
+    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,), 'r')
+    precip = nc.variables['p01m']
+    # Figure out what offsets we care about!
+    ts0 = ts + mx.DateTime.RelativeDateTime(hour=7)
+    offset0 = int(( ts0 - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours) - 1
+    ts1 = ts + mx.DateTime.RelativeDateTime(days=1,hour=6)
+    offset1 = int(( ts1 - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours) - 1
+    data = numpy.sum( precip[offset0:offset1], 0 )
+    for id in nt.sts.keys():
+        j = nt.sts[id]['gridj']
+        i = nt.sts[id]['gridi']
+        nt.sts[id]['precip'] = data[j,i] / 25.4
+
+    nc.close()
 
 def estimate_snow( ts ):
     """
@@ -119,7 +113,8 @@ def estimate_snow( ts ):
        SELECT x(geom) as lon, y(geom) as lat, snow, snowd
        from summary_%s WHERE day = '%s' and 
        network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
-        'KS_COOP', 'NE_COOP', 'SD_COOP')
+        'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
+        'OH_COOP')
        and snowd >= 0""" % (ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
         lats.append( rs[i]['lat'] )
@@ -128,33 +123,31 @@ def estimate_snow( ts ):
         snowd.append( rs[i]['snowd'] )
 
     if len(lats) < 5: # No data!
-        for id in stations.keys():
-            stations[id]['snow'] = 0
-            stations[id]['snowd'] = 0
+        for id in nt.sts.keys():
+            nt.sts[id]['snow'] = 0
+            nt.sts[id]['snowd'] = 0
         return
 
-    # Create axis
-    xaxis = iemplot.IA_WEST + delx * numpy.arange(0, iemplot.IA_NX)
-    yaxis = iemplot.IA_SOUTH + dely * numpy.arange(0, iemplot.IA_NY)
-    # Create the analysis
-    snowA = Ngl.natgrid(lons, lats, snow, xaxis, yaxis)
-    snowdA = Ngl.natgrid(lons, lats, snowd, xaxis, yaxis)
 
-    for id in stations.keys():
-        snowfall = snowA[stations[id]['gridx'], stations[id]['gridy']]
-        snowdepth = snowdA[stations[id]['gridx'], stations[id]['gridy']]
+    # Create the analysis
+    snowA = Ngl.natgrid(lons, lats, snow, iemre.XAXIS, iemre.YAXIS)
+    snowdA = Ngl.natgrid(lons, lats, snowd, iemre.XAXIS, iemre.YAXIS)
+
+    for id in nt.sts.keys():
+        snowfall = snowA[nt.sts[id]['gridi'], nt.sts[id]['gridj']]
+        snowdepth = snowdA[nt.sts[id]['gridi'], nt.sts[id]['gridj']]
         if snowfall > 0 and snowfall < 0.1:
-          stations[id]['snow'] = 0.0001
+          nt.sts[id]['snow'] = 0.0001
         elif snowfall < 0:
-          stations[id]['snow'] = 0
+          nt.sts[id]['snow'] = 0
         else:
-          stations[id]['snow'] = snowfall
+          nt.sts[id]['snow'] = snowfall
         if snowdepth > 0 and snowdepth < 0.1:
-          stations[id]['snowd'] = 0.0001
+          nt.sts[id]['snowd'] = 0.0001
         elif snowdepth < 0:
-          stations[id]['snowd'] = 0
+          nt.sts[id]['snowd'] = 0
         else:
-          stations[id]['snowd'] = snowdepth
+          nt.sts[id]['snowd'] = snowdepth
 
 def estimate_hilo( ts ):
     """
@@ -167,7 +160,10 @@ def estimate_hilo( ts ):
     lons = []
     rs = iem.query("""
        SELECT x(geom) as lon, y(geom) as lat, max_tmpf, min_tmpf
-       from summary_%s WHERE day = '%s' and network in ('IA_ASOS', 'AWOS')
+       from summary_%s WHERE day = '%s' and network in ('AWOS','IA_ASOS', 'MN_ASOS', 'WI_ASOS', 
+       'IL_ASOS', 'MO_ASOS',
+        'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
+        'OH_ASOS')
        and max_tmpf > -90 and min_tmpf < 90""" % (ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
         lats.append( rs[i]['lat'] )
@@ -175,42 +171,42 @@ def estimate_hilo( ts ):
         highs.append( rs[i]['max_tmpf'] )
         lows.append( rs[i]['min_tmpf'] )
 
-    # Create axis
-    xaxis = iemplot.IA_WEST + delx * numpy.arange(0, iemplot.IA_NX)
-    yaxis = iemplot.IA_SOUTH + dely * numpy.arange(0, iemplot.IA_NY)
     # Create the analysis
-    highA = Ngl.natgrid(lons, lats, highs, xaxis, yaxis)
-    lowA = Ngl.natgrid(lons, lats, lows, xaxis, yaxis)
+    highA = Ngl.natgrid(lons, lats, highs, iemre.XAXIS, iemre.YAXIS)
+    lowA = Ngl.natgrid(lons, lats, lows, iemre.XAXIS, iemre.YAXIS)
 
-    for id in stations.keys():
-        stations[id]['high'] = highA[stations[id]['gridx'], stations[id]['gridy']]
-        stations[id]['low'] = lowA[stations[id]['gridx'], stations[id]['gridy']]
+    for id in nt.sts.keys():
+        nt.sts[id]['high'] = highA[nt.sts[id]['gridi'], nt.sts[id]['gridj']]
+        nt.sts[id]['low'] = lowA[nt.sts[id]['gridi'], nt.sts[id]['gridj']]
 
 def commit( ts ):
     """
     Inject into the database!
     """
     # Remove old entries
-    sql = "DELETE from alldata_ia WHERE day = '%s'" % (ts.strftime("%Y-%m-%d"),)
+    sql = "DELETE from alldata_%s WHERE day = '%s'" % (state.lower(), ts.strftime("%Y-%m-%d"),)
     coop.query( sql )
     # Inject!
-    for id in stations.keys():
-        sql = "INSERT into alldata_ia values ('%s', '%s', (select climoweek from climoweek where sday = '%s'), %.0f, %.0f, %.2f, %.1f, '%s', %s, %s, %.0f, 't')" % (id, ts.strftime("%Y-%m-%d"), ts.strftime("%m%d"), 
-        stations[id]['high'], stations[id]['low'], stations[id]['precip'],
-        stations[id]['snow'],
-        ts.strftime("%m%d"), ts.year, ts.month, stations[id]['snowd'])
-        if os.environ['USER'] != 'akrherz':
-            coop.query( sql )
+    for id in nt.sts.keys():
+        sql = """INSERT into alldata_%s values ('%s', '%s', 
+        (select climoweek from climoweek where sday = '%s'), %.0f, %.0f, %.2f, %.1f, 
+        '%s', %s, %s, %.0f, 't')""" % (state, id.lower(), ts.strftime("%Y-%m-%d"), ts.strftime("%m%d"), 
+        nt.sts[id]['high'], nt.sts[id]['low'], nt.sts[id]['precip'],
+        nt.sts[id]['snow'],
+        ts.strftime("%m%d"), ts.year, ts.month, nt.sts[id]['snowd'])
+        
+        coop.query( sql )
        
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 4:
-        ts = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+    if len(sys.argv) == 5:
+        ts = mx.DateTime.DateTime( int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
     else:
         ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
     estimate_hilo( ts )
-    estimate_precip( ts )
-    estimate_snow( ts )
-    hardcode_asos( ts )
+    estimate_precip(ts )
+    estimate_snow(ts )
+    if state.upper() == 'IA':
+        hardcode_asos(ts )
     commit( ts )
