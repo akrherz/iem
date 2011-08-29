@@ -1,4 +1,4 @@
-# Assign a COOPDB site to each site in the mesosite database
+# Assign a site to each site in the mesosite database
 # Daryl Herzmann 5 May 2004
 
 from pyIEM import iemdb
