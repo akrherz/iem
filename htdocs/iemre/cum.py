@@ -1,11 +1,10 @@
 #!/mesonet/python/bin/python
 
 import sys
-sys.path.insert(0, "../../scripts/iemre/")
 sys.path.insert(1, "/mesonet/www/apps/iemwebsite/scripts/lib/")
 import os
 import cgi
-import constants
+import iemre
 try:
     import netCDF3
 except:
@@ -17,6 +16,7 @@ import shapelib
 import dbflib
 import shutil
 import zipfile
+import mesonet
 
 os.chdir("/tmp")
 
@@ -42,10 +42,10 @@ nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_daily.nc" % (ts0.year,), 'r')
 precip = numpy.sum(nc.variables['p01d'][offset0:offset1,:,:] / 25.4, axis=0)
 
 # GDD
-H = constants.k2f(nc.variables['high_tmpk'][offset0:offset1])
+H = mesonet.k2f(nc.variables['high_tmpk'][offset0:offset1])
 H = numpy.where( H < base, base, H)
 H = numpy.where( H > ceil, ceil, H)
-L = constants.k2f(nc.variables['low_tmpk'][offset0:offset1])
+L = mesonet.k2f(nc.variables['low_tmpk'][offset0:offset1])
 L = numpy.where( L < base, base, L)
 gdd = numpy.sum((H+L)/2.0 - base, axis=0)
 
@@ -65,7 +65,7 @@ if format == 'json':
     row = pcursor.fetchone()
     lat = row[1]
     lon = row[0]
-    i,j = constants.find_ij(lon, lat)
+    i,j = iemre.find_ij(lon, lat)
     myGDD = gdd[j,i]
     myPrecip = precip[j,i]
     res = {'data': [], }
@@ -83,11 +83,11 @@ if format == 'shp':
     fp = "iemre_%s_%s" % (ts0.strftime("%Y%m%d"), ts1.strftime("%Y%m"))
     shp = shapelib.create("%s.shp" % (fp,), shapelib.SHPT_POLYGON)
     
-    for x in constants.XAXIS:
-      for y in constants.YAXIS:
+    for x in iemre.XAXIS:
+      for y in iemre.YAXIS:
         obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1,
-           [[(x,y),(x,y+constants.DY),(x+constants.DX,y+constants.DY),
-             (x+constants.DX,y),(x,y)]])
+           [[(x,y),(x,y+iemre.DY),(x+iemre.DX,y+iemre.DY),
+             (x+iemre.DX,y),(x,y)]])
         shp.write_object(-1, obj)
     
     del(shp)
@@ -96,8 +96,8 @@ if format == 'shp':
     dbf.add_field("PREC_IN", dbflib.FTDouble, 10, 2)
     
     cnt = 0
-    for i in range(len(constants.XAXIS)):
-      for j in range(len(constants.YAXIS)):
+    for i in range(len(iemre.XAXIS)):
+      for j in range(len(iemre.YAXIS)):
         dbf.write_record(cnt, {'PREC_IN': precip[j,i], 'GDD': gdd[j,i]})
         cnt += 1
     
