@@ -38,7 +38,7 @@ offset1 = int((ts1 - (ts1 + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
 offset2 = int((ts2 - (ts2 + mx.DateTime.RelativeDateTime(month=1,day=1))).days) +1
 
 # Get our netCDF vars
-fp = "/mnt/mesonet/data/iemre/%s_daily.nc" % (ts1.year,)
+fp = "/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts1.year,)
 nc = netCDF3.Dataset(fp, 'r')
 hightemp = mesonet.k2f(nc.variables['high_tmpk'][offset1:offset2,j,i])
 lowtemp = mesonet.k2f(nc.variables['low_tmpk'][offset1:offset2,j,i])
@@ -50,7 +50,7 @@ c2000 = ts1 + mx.DateTime.RelativeDateTime(year=2000)
 coffset1 = int((c2000 - (mx.DateTime.DateTime(2000,1,1))).days)
 c2000 = ts2 + mx.DateTime.RelativeDateTime(year=2000)
 coffset2 = int((c2000 - (mx.DateTime.DateTime(2000,1,1))).days) +1
-cnc = netCDF3.Dataset("/mnt/mesonet/data/iemre/dailyc.nc", 'r')
+cnc = netCDF3.Dataset("/mnt/mesonet/data/iemre/mw_dailyc.nc", 'r')
 chigh = mesonet.k2f(cnc.variables['high_tmpk'][coffset1:coffset2,j,i])
 clow = mesonet.k2f(cnc.variables['low_tmpk'][coffset1:coffset2,j,i])
 cprecip = mesonet.k2f(cnc.variables['p01d'][coffset1:coffset2,j,i]) / 25.4

@@ -36,7 +36,7 @@ offset1 = int((ts1 - (ts1 + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
 
 
 fp = "/mnt/mesonet/data/iemre/%s_daily.nc" % (ts0.year,)
-nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_daily.nc" % (ts0.year,), 'r')
+nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts0.year,), 'r')
 
 # 2-D precipitation, inches
 precip = numpy.sum(nc.variables['p01d'][offset0:offset1,:,:] / 25.4, axis=0)
