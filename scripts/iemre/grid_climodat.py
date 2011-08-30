@@ -9,6 +9,7 @@ from pyIEM import iemdb, mesonet
 import Ngl
 import iemre
 import network
+import random
 
 i = iemdb.iemdb()
 coop = i['coop']
@@ -28,7 +29,7 @@ def generic_gridder(rs, idx):
     for i in range(len(rs)):
         stid = rs[i]['stationid'].upper()
         if rs[i][idx] is not None and locs.has_key(stid):
-            lats.append(  locs[stid]['lat'] )
+            lats.append(  locs[stid]['lat'] + (random.random() * 0.01) )
             lons.append(  locs[stid]['lon'] )
             vals.append( rs[i][idx]  )
     if len(vals) < 4:
