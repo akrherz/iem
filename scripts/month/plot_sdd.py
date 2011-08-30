@@ -23,7 +23,7 @@ for i in range(len(rs)):
 # Compute normal from the climate database
 sql = """SELECT stationid,
    sum(sdd86(high, low)) as sdd
-   from alldata WHERE year = %s and month = %s
+   from alldata_ia WHERE year = %s and month = %s
    GROUP by stationid""" % (now.year, now.month)
 
 lats = []
