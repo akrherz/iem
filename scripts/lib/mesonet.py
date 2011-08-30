@@ -17,7 +17,7 @@ def uv(sped,dir):
 
 
 def c2f(thisc):
-    return (9.00/5.00 * float(thisc)) + 32.00
+    return (9.00/5.00 * thisc) + 32.00
 
 def k2f(thisk):
-    return (9.00/5.00 * (float(thisk) - 273.15)) + 32.00
+    return (9.00/5.00 * (thisk - 273.15)) + 32.00
