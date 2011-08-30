@@ -54,12 +54,10 @@ def doday(now):
   coop.query("DELETE from alldata_ia WHERE stationid = 'ia0000' and day = '%s'" % ( now.strftime("%Y-%m-%d"),))
   sql = """INSERT into alldata_ia 
     (stationid, day, high, low, precip, snow, snowd, estimated, year, month, 
-    sday, climoweek)
-    VALUES ('ia0000', '%s', %.0f, %.0f, %.2f, %.1f, 0, true, %s, %s, '%s', 
-    (select climoweek from climoweek where sday = '%s'))""" % (
+    sday)
+    VALUES ('ia0000', '%s', %.0f, %.0f, %.2f, %.1f, 0, true, %s, %s, '%s')""" % (
     now.strftime("%Y-%m-%d"), data['high'], data['low'], data['precip'], 
-    data['snow'], now.year, now.month, now.strftime("%m%d"), 
-     now.strftime("%m%d"))
+    data['snow'], now.year, now.month, now.strftime("%m%d"))
   coop.query(sql)
 
 if len(sys.argv) == 4:

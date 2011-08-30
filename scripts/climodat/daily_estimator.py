@@ -9,7 +9,6 @@ Columns to complete:
 
  stationid | character(6)     | OK
  day       | date             | OK
- climoweek | integer          | Merge in from the climoweek relation
  high      | integer          | Natgrid ASOS+AWOS
  low       | integer          | Natgrid ASOS+AWOS
  precip    | double precision | Use the WEPP dataset
@@ -189,8 +188,8 @@ def commit( ts ):
     # Inject!
     for id in nt.sts.keys():
         sql = """INSERT into alldata_%s values ('%s', '%s', 
-        (select climoweek from climoweek where sday = '%s'), %.0f, %.0f, %.2f, %.1f, 
-        '%s', %s, %s, %.0f, 't')""" % (state, id.lower(), ts.strftime("%Y-%m-%d"), ts.strftime("%m%d"), 
+        %.0f, %.0f, %.2f, %.1f, 
+        '%s', %s, %s, %.0f, 't')""" % (state, id.lower(), ts.strftime("%Y-%m-%d"), 
         nt.sts[id]['high'], nt.sts[id]['low'], nt.sts[id]['precip'],
         nt.sts[id]['snow'],
         ts.strftime("%m%d"), ts.year, ts.month, nt.sts[id]['snowd'])
