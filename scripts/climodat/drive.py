@@ -21,11 +21,11 @@ DEBUG = 0
 
 for id in nt.sts.keys():
 #for id in ['IA2364',]:
-  print "processing [%s] %s" % (id, st.sts[id]["name"])
+  print "processing [%s] %s" % (id, nt.sts[id]["name"])
   dbid = string.lower(id)
-  rs = mydb.query("""SELECT * from %s WHERE stationid = '%s' and 
-    day >= '%s-01-01' ORDER by day ASC""" % (
-                dbid, constants.get_table(dbid), constants.startyear(dbid) ) ).dictresult()
+  rs = mydb.query("""SELECT d.*, c.climoweek from %s d, climoweek c WHERE stationid = '%s' and 
+    day >= '%s-01-01' and d.sday = c.sday ORDER by day ASC""" % (constants.get_table(dbid),
+                dbid, constants.startyear(dbid) ) ).dictresult()
 
   genPrecipEvents.go(mydb, rs, dbid)
   genPrecipEvents.write(mydb, dbid)
