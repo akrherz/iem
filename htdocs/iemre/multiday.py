@@ -53,7 +53,7 @@ coffset2 = int((c2000 - (mx.DateTime.DateTime(2000,1,1))).days) +1
 cnc = netCDF3.Dataset("/mnt/mesonet/data/iemre/mw_dailyc.nc", 'r')
 chigh = mesonet.k2f(cnc.variables['high_tmpk'][coffset1:coffset2,j,i])
 clow = mesonet.k2f(cnc.variables['low_tmpk'][coffset1:coffset2,j,i])
-cprecip = mesonet.k2f(cnc.variables['p01d'][coffset1:coffset2,j,i]) / 25.4
+cprecip = cnc.variables['p01d'][coffset1:coffset2,j,i] / 25.4
 cnc.close()
 
 res = {'data': [], }
