@@ -40,14 +40,14 @@ def merge(ts):
     jan1 = mx.DateTime.DateTime(ts.year, 1, 1, 0, 0)
     offset0 = int(( ts0 - jan1).hours)
     offset1 = int(( ts -  jan1).hours)
-    iemre = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
+    iemre2 = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
     
-    iemre = numpy.where( iemre > 0., iemre, 0.00024)
-    iemre = numpy.where( iemre < 10000., iemre, 0.00024)
+    iemre2 = numpy.where( iemre2 > 0., iemre2, 0.00024)
+    iemre2 = numpy.where( iemre2 < 10000., iemre2, 0.00024)
     print "Stage IV 24h [Avg %5.2f Max %5.2f]  IEMRE Hourly [Avg %5.2f Max: %5.2f]" % (
                     numpy.average(stage4), numpy.max(stage4), 
-                    numpy.average(iemre), numpy.max(iemre) )
-    multiplier = stage4 / iemre
+                    numpy.average(iemre2), numpy.max(iemre2) )
+    multiplier = stage4 / iemre2
     print "Multiplier MIN: %5.2f  AVG: %5.2f  MAX: %5.2f" % (
                     numpy.min(multiplier), numpy.average(multiplier),numpy.max(multiplier))
     for offset in range(offset0, offset1):
@@ -64,10 +64,10 @@ def merge(ts):
                                     numpy.average(nc.variables["p01m"][offset]),
                                     numpy.max(nc.variables["p01m"][offset]))
     nc.sync()
-    iemre = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
+    iemre2 = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
     print "Stage IV 24h [Avg %5.2f Max %5.2f]  IEMRE Hourly [Avg %5.2f Max: %5.2f]" % (
                     numpy.average(stage4), numpy.max(stage4), 
-                    numpy.average(iemre), numpy.max(iemre) )
+                    numpy.average(iemre2), numpy.max(iemre2) )
     nc.close()
 
 if __name__ == "__main__":
