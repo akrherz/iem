@@ -116,12 +116,18 @@ $files = "";
 $images = Array();
 $radtimes = Array();
 for ($i=0; $i < intval($frames); $i++){
-  $myuri = "$rooturl/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."$prod/n0r_". gmdate('Ymd_Hi', $loopts + ($i * (intval($interval) * 60)) ) .".png";
-  $myhref = "$rooturl/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."GIS/uscomp/n0r_". gmdate('YmdHi', $loopts + ($i * (intval($interval) * 60)) ) .".png";
-  $gisbase = "$rooturl/archive/data/". gmdate('Y/m/d/', $loopts + ($i * (intval($interval) * 60)) ) ."GIS/uscomp/";
+	$fts = $loopts + ($i * (intval($interval) * 60));
+	if ($fts > time()){
+		continue;
+	}
+  $myuri = "$rooturl/archive/data/". gmdate('Y/m/d/', $fts ) ."$prod/n0r_". 
+  		gmdate('Ymd_Hi', $fts ) .".png";
+  $myhref = "$rooturl/archive/data/". gmdate('Y/m/d/', $fts ) ."GIS/uscomp/n0r_".
+  	 gmdate('YmdHi', $fts ) .".png";
+  $gisbase = "$rooturl/archive/data/". gmdate('Y/m/d/', $fts ) ."GIS/uscomp/";
   $files .= $myuri .",";
   $images[] = $myuri;
-  $radtimes[] = $loopts + ($i * (intval($interval) * 60));
+  $radtimes[] = $fts;
 }
 
 /* We finally start output */
