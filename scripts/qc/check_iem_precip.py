@@ -4,8 +4,7 @@ Need something to daily QC the schoolnet precipitation against iemre I guess
 import iemdb
 import psycopg2.extras
 import sys
-sys.path.insert(0, "../iemre")
-import constants
+import iemre
 import netCDF3
 import mx.DateTime
 import numpy
@@ -13,7 +12,7 @@ ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=-1,hour=0,minute=0,se
 
 
 # Load up netcdf file
-nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_daily.nc" % (ts.year,),'r')
+nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),'r')
 p01d = nc.variables['p01d']
 offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
 
@@ -31,7 +30,7 @@ for row in icursor:
     lat = row['lat']
     lon = row['lon']
     # Lookup IEMRE data
-    ix,jy = constants.find_ij(lon, lat)
+    ix,jy = iemre.find_ij(lon, lat)
     estimate = p01d[offset,jy,ix] / 25.4
     # If site is offline, we could care less
     if row['pday'] < 0:
