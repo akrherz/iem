@@ -111,13 +111,13 @@ def savedata( data , maxts ):
             iem.data[ mapping[key]['iemvar'] ] = data[key]
 
     iem.data['valid'] = ts.strftime("%Y-%m-%d %H:%M")
-    iem.data['tmpf'] = mesonet.c2f(iem.data['tmpc'])
-    iem.data['dwpf'] = mesonet.c2f(iem.data['dwpc'])
-    iem.data['c1tmpf'] = mesonet.c2f(iem.data['c1tmpc'])
-    iem.data['c2tmpf'] = mesonet.c2f(iem.data['c2tmpc'])
-    iem.data['c3tmpf'] = mesonet.c2f(iem.data['c3tmpc'])
-    iem.data['c4tmpf'] = mesonet.c2f(iem.data['c4tmpc'])
-    iem.data['c5tmpf'] = mesonet.c2f(iem.data['c5tmpc'])     
+    iem.data['tmpf'] = mesonet.c2f(float(iem.data['tmpc']))
+    iem.data['dwpf'] = mesonet.c2f(float(iem.data['dwpc']))
+    iem.data['c1tmpf'] = mesonet.c2f(float(iem.data['c1tmpc']))
+    iem.data['c2tmpf'] = mesonet.c2f(float(iem.data['c2tmpc']))
+    iem.data['c3tmpf'] = mesonet.c2f(float(iem.data['c3tmpc']))
+    iem.data['c4tmpf'] = mesonet.c2f(float(iem.data['c4tmpc']))
+    iem.data['c5tmpf'] = mesonet.c2f(float(iem.data['c5tmpc']))     
 
     iem.updateDatabase(iemdb)
 
