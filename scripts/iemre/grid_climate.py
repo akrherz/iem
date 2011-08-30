@@ -41,6 +41,7 @@ def generic_gridder(rs, idx):
                idx)
         return None
     grid = Ngl.natgrid(lons, lats, vals, iemre.XAXIS, iemre.YAXIS)
+    print len(rs), idx, numpy.max(grid), numpy.min(grid)
     if grid is not None:
         return grid.transpose()
     else:
