@@ -1,8 +1,7 @@
 # Tired of all the junk precip data from the ISUAG network
 
 import sys
-sys.path.insert(0, "../iemre")
-import constants
+import iemre
 import mx.DateTime
 import netCDF3
 import numpy
@@ -47,7 +46,7 @@ def fix_hourly(ts):
     """
     Fix the hourly precipitation values, just hard code the stupid IEMRE value
     """
-    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_hourly.nc" % (ts.year,),'r')
+    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),'r')
     p01m = nc.variables['p01m']
     offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours)
     # Find ISUAG Data
@@ -59,7 +58,7 @@ def fix_hourly(ts):
         lat = sts[ stid ]['lat']
         lon = sts[ stid ]['lon']
         # Lookup IEMRE data
-        ix,jy = constants.find_ij(lon, lat)
+        ix,jy = iemre.find_ij(lon, lat)
         estimate = 0.
         if not numpy.ma.is_masked( p01m[offset,jy,ix] ):
             estimate = p01m[offset,jy,ix] / 25.4
