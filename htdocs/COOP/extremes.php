@@ -35,16 +35,16 @@ $cities = $nt->table;
  		"from $tbl WHERE station = $1" .
  		"ORDER by ". $sortcol ." ". $sortdir);
  	$rs = pg_execute($connection, "SELECT", Array($station) );
+ 	echo "<h3 class=\"heading\">COOP Extremes for ". $cities[strtoupper($station)]["name"] ." (ID: ". $station .")</h3>";
  } else {
  	$rs = pg_prepare($connection, "SELECT", "SELECT * " .
  		"from $tbl WHERE valid = $1 and substr(station,0,3) = $2" .
  		"ORDER by ". $sortcol ." ". $sortdir);
  	$rs = pg_execute($connection, "SELECT", Array($td, strtolower(substr($network,0,2))));
+ 	echo "<h3 class=\"heading\">COOP Extremes for ". date("d F", $valid) ."</h3>";
+ 	
  }
-?> 
-
-<h3 class="heading">COOP Extremes for <?php echo date("d F", $valid); ?></h3>
-
+ ?> 
 <div class="text">
 <p>This table gives a listing of <b>unofficial</b> daily records for NWS
 COOP stations.  Some records may have occured on multiple years, only one
