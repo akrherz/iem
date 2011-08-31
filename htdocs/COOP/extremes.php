@@ -88,6 +88,9 @@ contains records for sites that do and don't have data before 1951.
 
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
  {
+ 	if (!array_key_exists(strtoupper($row["station"]), $cities)){
+ 		continue;
+ 	}
    echo "<tr ";
    if ( ($i % 2) == 0) 
      echo "class='even'";
