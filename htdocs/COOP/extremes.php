@@ -119,7 +119,7 @@ for that date.</p>
    echo "<th rowspan='2' class='subtitle' valign='top'>Years</th>
    <th colspan='5' class='subtitle'>High Temperature [F]</th>
    <td>&nbsp;</td>
-   <th colspan='5' class='subtitle'>Low Temperature {F]</th>
+   <th colspan='5' class='subtitle'>Low Temperature [F]</th>
    <td>&nbsp;</td>
    <th colspan='3' class='subtitle'>Precipitation [inch]</th>
   </tr>
