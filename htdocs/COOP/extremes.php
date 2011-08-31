@@ -17,7 +17,7 @@
  $sortdir = isset($_GET["sortdir"]) ? $_GET['sortdir'] : 'ASC';
 
  
- $TITLE = "IEM | Daily Extremes";
+ $TITLE = "IEM | NWS COOP Daily Climatology";
  $THISPAGE = "networks-coop";
  include("$rootpath/include/header.php");
 
@@ -35,13 +35,13 @@ $cities = $nt->table;
  		"from $tbl WHERE station = $1" .
  		"ORDER by ". $sortcol ." ". $sortdir);
  	$rs = pg_execute($connection, "SELECT", Array($station) );
- 	echo "<h3 class=\"heading\">COOP Extremes for ". $cities[strtoupper($station)]["name"] ." (ID: ". $station .")</h3>";
+ 	echo "<h3 class=\"heading\">NWS COOP Climatology for ". $cities[strtoupper($station)]["name"] ." (ID: ". $station .")</h3>";
  } else {
  	$rs = pg_prepare($connection, "SELECT", "SELECT * " .
  		"from $tbl WHERE valid = $1 and substr(station,0,3) = $2" .
  		"ORDER by ". $sortcol ." ". $sortdir);
  	$rs = pg_execute($connection, "SELECT", Array($td, strtolower(substr($network,0,2))));
- 	echo "<h3 class=\"heading\">COOP Extremes for ". date("d F", $valid) ."</h3>";
+ 	echo "<h3 class=\"heading\">NWS COOP Climatology for ". date("d F", $valid) ."</h3>";
  	
  }
  ?> 
@@ -95,10 +95,18 @@ for that date.</p>
 </form>
 
 <br />
+<style>
+.red{
+ color: #f00;
+}
+.blue{
+ color: #00f;
+}
+</style>
 
 <?php
 
- echo "<table cellpadding=2 rowspacing=0 cellspacing=0 width='700px'>
+ echo "<table cellpadding=2 rowspacing=0 cellspacing=0 border='1'>
   <tr>
    <th rowspan='2' class='subtitle' valign='top'>";
  	if ($station != null){
@@ -109,19 +117,26 @@ for that date.</p>
  		echo "<a href='extremes.php?sortcol=station&day=".$day."&month=".$month."'>Station</a></th>";
  	}
    echo "<th rowspan='2' class='subtitle' valign='top'>Years</th>
-   <th colspan='4' class='subtitle'>High Temperature</th>
-   <th colspan='4' class='subtitle'>Low Temperature</th>
-   <th colspan='2' class='subtitle'>Precipitation</th>
+   <th colspan='5' class='subtitle'>High Temperature [F]</th>
+   <td>&nbsp;</td>
+   <th colspan='5' class='subtitle'>Low Temperature {F]</th>
+   <td>&nbsp;</td>
+   <th colspan='3' class='subtitle'>Precipitation [inch]</th>
   </tr>
   <tr>
+    <th><a href='extremes.php?sortcol=high".$uribase."'>Avg:</a></th>
     <th><a href='extremes.php?sortcol=max_high".$uribase."'>Max:</a></th>
        <th><a href='extremes.php?sortcol=max_high_yr".$uribase."'>Year:</a></th>
     <th><a href='extremes.php?sortcol=min_high".$uribase."'>Min:</a></th>
        <th><a href='extremes.php?sortcol=min_high_yr".$uribase."'>Year:</a></th>
+       <td>&nbsp;</td>
+	<th><a href='extremes.php?sortcol=low".$uribase."'>Avg:</a></th>
     <th><a href='extremes.php?sortcol=max_low".$uribase."'>Max:</a></th>
        <th><a href='extremes.php?sortcol=max_low_yr".$uribase."'>Year:</a></th>
     <th><a href='extremes.php?sortcol=min_low".$uribase."'>Min:</a></th>
         <th><a href='extremes.php?sortcol=min_low_yr".$uribase."'>Year:</a></th>
+        <td>&nbsp;</td>
+    <th><a href='extremes.php?sortcol=precip".$uribase."'>Avg:</a></th>
     <th><a href='extremes.php?sortcol=max_precip".$uribase."'>Max:</a></th>
         <th><a href='extremes.php?sortcol=max_precip_yr".$uribase."'>Year:</a></th>
   </tr>
@@ -142,19 +157,11 @@ for that date.</p>
    } else {
      echo "<td><a href=\"extremes.php?station=". $row["station"] . $uribase ."\">". $cities[strtoupper($row["station"])]["name"] ."</a></td>";
    }
-     echo "<td>". $row["years"] ."</td>
-     <td>". $row["max_high"] ."</td>
-     <td>". $row["max_high_yr"] ."</td>
-     <td>". $row["min_high"] ."</td>
-     <td>". $row["min_high_yr"] ."</td>
-     <td>". $row["max_low"] ."</td>
-     <td>". $row["max_low_yr"] ."</td>
-     <td>". $row["min_low"] ."</td>
-     <td>". $row["min_low_yr"] ."</td>
-     <td>". $row["max_precip"] ."</td>
-     <td>". $row["max_precip_yr"] ."</td>
-
-   </tr>";
+     echo sprintf("<td>%s</td><td>%.1f</td><td class='red'>%s</td><td>%s</td><td class='blue'>%s</td><td>%s</td><td>&nbsp;</td><td>%.1f</td>
+     <td class='red'>%s</td><td>%s</td><td class='blue'>%s</td><td>%s</td><td>&nbsp;</td><td>%.2f</td><td>%s</td><td>%s</td></tr>\n", $row["years"],
+     $row["high"], $row["max_high"], $row["max_high_yr"], $row["min_high"], $row["min_high_yr"],
+     $row["low"], $row["max_low"] , $row["max_low_yr"] , $row["min_low"], $row["min_low_yr"] ,
+     $row["precip"], $row["max_precip"] , $row["max_precip_yr"] );
 
  }
  pg_close($connection);
