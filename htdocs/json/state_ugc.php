@@ -7,7 +7,7 @@ require_once '../../config/settings.inc.php';
 require_once "$rootpath/include/database.inc.php";
 $dbconn = iemdb('postgis');
 $rs = pg_prepare($dbconn, "SELECT", "SELECT ugc, name " .
-		"from nws_ugc WHERE state = $1 ORDER by name ASC");
+		"from nws_ugc WHERE state = $1 and ugc is not null and name is not null ORDER by name ASC");
 
 $st = isset($_REQUEST["state"]) ? $_REQUEST["state"] : 'IA';
 
