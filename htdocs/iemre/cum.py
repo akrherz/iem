@@ -35,7 +35,7 @@ offset0 = int((ts0 - (ts0 + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
 offset1 = int((ts1 - (ts1 + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
 
 
-fp = "/mnt/mesonet/data/iemre/%s_daily.nc" % (ts0.year,)
+fp = "/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts0.year,)
 nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts0.year,), 'r')
 
 # 2-D precipitation, inches

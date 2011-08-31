@@ -24,13 +24,13 @@ offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
 
 res = {'data': [], }
 
-fp = "/mnt/mesonet/data/iemre/%s_daily.nc" % (ts.year,)
+fp = "/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,)
 if os.path.isfile(fp):
   nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,), 'r')
 
   c2000 = ts + mx.DateTime.RelativeDateTime(year=2000)
   coffset = int((c2000 - (mx.DateTime.DateTime(2000,1,1))).days)
-  cnc = netCDF3.Dataset("/mnt/mesonet/data/iemre/dailyc.nc", 'r')
+  cnc = netCDF3.Dataset("/mnt/mesonet/data/iemre/mw_dailyc.nc", 'r')
 
   res['data'].append({
     'daily_high_f': "%.1f" % (
