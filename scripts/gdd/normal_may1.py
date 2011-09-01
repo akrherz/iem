@@ -1,7 +1,6 @@
 # Generate a plot of normal GDD Accumulation since 1 May of this year
 
 import sys, os
-sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime
@@ -10,7 +9,8 @@ if now.month < 5 or now.month > 10:
   sys.exit(0)
 
 from pyIEM import iemdb, stationTable
-st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
+import network
+nt = network.Table('IACLIMATE')
 i = iemdb.iemdb()
 coop = i['coop']
 
@@ -18,7 +18,8 @@ coop = i['coop']
 sql = """SELECT station, sum(gdd50) as gdd, sum(sdd86) as sdd 
    from climate WHERE gdd50 IS NOT NULL and sdd86 IS NOT NULL and 
    valid >= '2000-05-01' and valid <=
-  ('2000-'||to_char(CURRENT_TIMESTAMP, 'mm-dd'))::date GROUP by station"""
+  ('2000-'||to_char(CURRENT_TIMESTAMP, 'mm-dd'))::date 
+  and substr(station,0,3) = 'ia' GROUP by station"""
 
 lats = []
 lons = []
@@ -27,8 +28,8 @@ sdd86 = []
 rs = coop.query(sql).dictresult()
 for i in range(len(rs)):
   id = rs[i]['station'].upper()
-  lats.append( st.sts[id]['lat'] )
-  lons.append( st.sts[id]['lon'] )
+  lats.append( nt.sts[id]['lat'] )
+  lons.append( nt.sts[id]['lon'] )
   gdd50.append( rs[i]['gdd'] )
   sdd86.append( rs[i]['sdd'] )
 

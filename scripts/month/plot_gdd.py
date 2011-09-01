@@ -1,7 +1,6 @@
 # Generate a plot of GDD 
 
 import sys, os
-sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime
@@ -12,12 +11,8 @@ i = iemdb.iemdb()
 coop = i['coop']
 mesosite = i['mesosite']
 
-# Now we load climatology
-sts = {}
-rs = mesosite.query("SELECT id, x(geom) as lon, y(geom) as lat from stations WHERE \
-    network = 'IACLIMATE'").dictresult()
-for i in range(len(rs)):
-    sts[ rs[i]["id"].lower() ] = rs[i]
+import network
+nt = network.Table("IACLIMATE")
 
 
 # Compute normal from the climate database
@@ -32,10 +27,10 @@ gdd50 = []
 valmask = []
 rs = coop.query(sql).dictresult()
 for i in range(len(rs)):
-  if not sts.has_key(rs[i]['stationid']):
+  if not nt.sts.has_key(rs[i]['stationid'].upper()):
     continue
-  lats.append( sts[rs[i]['stationid']]['lat'] )
-  lons.append( sts[rs[i]['stationid']]['lon'] )
+  lats.append( nt.sts[rs[i]['stationid'].upper()]['lat'] )
+  lons.append( nt.sts[rs[i]['stationid'].upper()]['lon'] )
   gdd50.append( rs[i]['gdd'] )
   valmask.append( True )
 
