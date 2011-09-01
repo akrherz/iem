@@ -1,5 +1,6 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 7);
  $network = isset($_GET['network']) ? substr($_GET["network"],0,7) : 'IA_ASOS';
  $metar = isset($_GET['metar']) ? $_GET["metar"] : "no";
  $sortcol = isset($_GET['sortcol'])  ? $_GET['sortcol']: "ts";

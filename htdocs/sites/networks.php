@@ -1,5 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
+define("IEM_APPID", 6);
 include("$rootpath/include/database.inc.php");
 $pgconn = iemdb("mesosite");
 $rs = pg_prepare($pgconn, "SELECT", "SELECT *, 

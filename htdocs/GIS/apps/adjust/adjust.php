@@ -24,7 +24,7 @@ function mktitle($map, $imgObj, $titlet) {
                                                                                 
   // point feature with text for location
   $point = ms_newpointobj();
-  $point->setXY(90, 10);
+  $point->setXY(9, 18);
                                                                                 
   $point->draw($map, $layer, $imgObj, "credits",
     $titlet);
@@ -34,11 +34,11 @@ function mktitle($map, $imgObj, $titlet) {
 
 
 $map = ms_newMapObj("stations.map");
-//iowa 
+//iowa
 //$map->setExtent(-97.5,40.5,-89.5,43.5);
-//$map->setExtent(-96.0,40.5,-90.0,43.5);
+$map->setExtent(-96.1,39.6,-94.4,41.3);
 // E CONUS
-$map->setExtent(-130,16,-72,70);
+//$map->setExtent(-130,16,-72,70);
 //$map->setExtent(-99.4, 30.3,-95.0, 34.3);
 //$map->setExtent(-84.2, 25.7,-80.7, 30.2);
 //$map->setExtent(-100.92, 38.83, -97.06, 42.04);
@@ -46,7 +46,7 @@ $map->setExtent(-130,16,-72,70);
 //$map->setExtent(-90,29,-72,33);
 //CLAYTON $map->setExtent(-92,42.5,-91.1,43.3);
 //$map->setExtent(-93.5,42.0,-92.8,42.6);
-$map->setSize(600,600);
+$map->setSize(320,280);
 $map->selectOutputFormat("PNG24");
 
 $namer = $map->getlayerbyname("namerica");
@@ -62,7 +62,7 @@ $iembox = $map->getlayerbyname("iembox");
 $iembox->set("status", MS_ON);
 
 $counties = $map->getlayerbyname("counties");
-$counties->set("status", MS_OFF);
+$counties->set("status", MS_ON);
 
 $terra = $map->getlayerbyname("terra");
 $terra->set("status", MS_ON);
@@ -108,7 +108,7 @@ $locs = $map->getlayerbyname("locs");
 $locs->set("status", MS_OFF);
 
 $cities = $map->getlayerbyname("sites");
-$cities->set("status", MS_OFF);
+$cities->set("status", MS_ON);
 
 $watches = $map->getlayerbyname("watches");
 $watches->set("status", MS_OFF);
@@ -129,18 +129,18 @@ $lakes->draw($img);
 //$watches->draw($img);
 $terra->draw($img);
 //$maxdbz->draw($img);
-$warnings0_c->draw($img);
-$states->draw($img);
+//$warnings0_c->draw($img);
 $counties->draw($img);
-//$locs->draw($img);
+$states->draw($img);
+$cities->draw($img);
 //$iembox->draw($img);
 
-$map->embedLegend($img);
+//$map->embedLegend($img);
 $map->drawLabelCache($img);
 $bars->draw($img);
 
-mktitle($map, $img, "4-5 Apr 2011 RADAR/Warnings");
-mkl($map, $img);
+mktitle($map, $img, "25 August 2011 Terra MODIS True Color _ 18 August 2011 Reported Hail Size [in]");
+//mkl($map, $img);
 $url = $img->saveWebImage();
 
 echo "<form method=\"GET\" action=\"adjust.php\">

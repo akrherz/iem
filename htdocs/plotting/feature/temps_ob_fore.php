@@ -12,8 +12,8 @@ $fdata = Array();
 /* Extract Obs */
 $dbconn = iemdb('asos');
 $sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, vsby
-  , wind_chill(tmpf, sknt) as wcht, alti from t2010 WHERE station = 'AMW' 
-  and dwpf > -99 and sknt >= 0 and valid > '2010-11-05' ORDER by valid ASC";
+  , wind_chill(tmpf, sknt) as wcht, alti from t2011 WHERE station = 'AMW' 
+  and dwpf > -99 and sknt >= 0 and valid > '2011-06-01' ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
@@ -22,9 +22,9 @@ for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 }
 
 $dbconn = iemdb('mos');
-$sql = "SELECT extract(epoch from ftime) as epoch, dpt, tmp, wsp from t2010
+$sql = "SELECT extract(epoch from ftime) as epoch, dpt, tmp, wsp from t2011
         WHERE station = 'KAMW' and model = 'GFS' and 
-        runtime = '2010-11-10 00:00+00' ORDER by ftime ASC";
+        runtime = '2011-06-20 00:00+00' ORDER by ftime ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
@@ -39,7 +39,7 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(320,300,"example1");
+$graph = new Graph(640,600,"example1");
 $graph->SetScale("datlin");
 //$graph->SetY2Scale("lin",0,50);
 $graph->img->SetMargin(40,10,50,80);
@@ -87,8 +87,8 @@ $graph->Add($lineplot);
 
 // Create the linear plot
 $lineplot4=new LinePlot($fdata,$ftimes);
-$lineplot4->SetLegend("GFS Frcst");
-$lineplot4->SetColor("red");
+$lineplot4->SetLegend("GFS MOS Frcst");
+$lineplot4->SetColor("blue");
 $lineplot4->SetStyle("dashed");
 $graph->Add($lineplot4);
 

@@ -3,9 +3,9 @@
 // Cool.....
 include("../../../config/settings.inc.php");
 
-$fcontents = file("data/SCHI4_060622.txt");
-$sts = mktime(8,0,0,6,22,2006);
-$ets = mktime(10,0,0,6,22,2006);
+$fcontents = file("data/SCOI4_110613.txt");
+$sts = mktime(13,50,0,6,13,2011);
+$ets = mktime(14,30,0,6,13,2011);
 
 $mph = array();
 $drct = array();
@@ -73,19 +73,19 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
 
 // Create the graph. These two calls are always required
-$graph = new Graph(640,480);
+$graph = new Graph(320,300);
 $graph->SetScale('datlin',0,360);
-$graph->SetYScale(0,'lin',0,60);
+$graph->SetYScale(0,'lin',0,70);
 $graph->SetYScale(1,'lin');
 $graph->SetColor("#f0f0f0");
 $graph->img->SetMargin(55,110,55,60);
 
-$graph->title->Set("Chariton, Iowa SchoolNet Sub 1 Minute Time Series");
+$graph->title->Set("Colo, Iowa SchoolNet Sub 1 Minute Time Series");
 $graph->title->SetFont(FF_FONT1,FS_BOLD,20);
 $graph->subtitle->Set("Tama SchoolNet");
 
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
-$graph->xaxis->SetTitle("Times on the morning of 22 June 2006");
+$graph->xaxis->SetTitle("Afternoon of 13 June 2011");
 $graph->xaxis->SetTitleMargin(27);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
@@ -119,12 +119,12 @@ $graph->ynaxis[1]->SetColor("black", "black");
 $graph->ynaxis[1]->SetLabelFormat('%0.3f');
 
 $graph->legend->SetLayout(LEGEND_HOR);
-$graph->legend->Pos(0.01,0.05);
+$graph->legend->Pos(0.01,0.07);
 $graph->legend->SetFont(FF_FONT1,FS_BOLD,14);
 
 // Create the linear plot
 $lineplot=new LinePlot($mph, $times);
-$lineplot->SetLegend("Instant Wind Speed");
+$lineplot->SetLegend("Wind Speed");
 $lineplot->SetColor("red");
 
 $lineplot2=new LinePlot($alti, $times);
@@ -143,7 +143,7 @@ $sp1=new ScatterPlot($drct, $times);
 $sp1->mark->SetType(MARK_FILLEDCIRCLE);
 $sp1->mark->SetFillColor("blue");
 $sp1->mark->SetWidth(3);
-$sp1->SetLegend("Wind Direction");
+$sp1->SetLegend("Wind Dir");
 
 
 $graph->Add($sp1);

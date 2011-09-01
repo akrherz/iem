@@ -1,7 +1,7 @@
 <?php
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-
+$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
 $month1 = isset($_GET["month1"]) ? $_GET["month1"]: die("No month1 specified");
@@ -17,7 +17,7 @@ $what = isset($_GET["what"]) ? $_GET["what"]: 'dl';
 
 
 include("$rootpath/include/network.php");
-$nt = new NetworkTable("IACLIMATE");
+$nt = new NetworkTable($network);
 $cities = $nt->table;
 include("adodb-time.inc.php");
 

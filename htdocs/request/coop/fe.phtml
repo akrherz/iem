@@ -1,5 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 3);
+$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
 include("$rootpath/include/iemprop.php");
 $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
 $TITLE = "IEM | COOP Data Download";
@@ -7,7 +9,7 @@ $THISPAGE = "networks-coop";
 include("$rootpath/include/header.php"); 
 include("$rootpath/include/network.php"); 
 include("$rootpath/include/forms.php"); 
-$nt = new NetworkTable("IACLIMATE");
+$nt = new NetworkTable($network);
 $cities = $nt->table;
 ?>
 <div class="text">
@@ -21,11 +23,26 @@ numerous folks working on the data quality of this important dataset
 and we are always interested in feedback.</li>
 </ul></p>
 
-<p>The quality controlled data is currently updated to <?php echo date('d M Y', $coop_archive_end); ?>.  While data is available for dates up until 
-yesterday, the values are estimated by the IEM.</p>
+<p>The quality controlled data <strong>for Iowa</strong> is currently updated 
+to <?php echo date('d M Y', $coop_archive_end); ?>.  While data is available for dates up 
+until yesterday, the values are estimated by the IEM.</p>
 
-<form method="GET" action="dl.php">
+<p>Data is available from the following states: 
+<a href="fe.phtml?network=ILCLIMATE">Illinois</a> ,
+<a href="fe.phtml?network=INCLIMATE">Indiana</a> ,
+<a href="fe.phtml?network=IACLIMATE">Iowa</a> ,
+<a href="fe.phtml?network=KSCLIMATE">Kansas</a>,
+<a href="fe.phtml?network=KYCLIMATE">Kentucky</a> ,
+<a href="fe.phtml?network=MICLIMATE">Michigan</a> ,
+<a href="fe.phtml?network=MNCLIMATE">Minnesota</a> ,
+<a href="fe.phtml?network=NECLIMATE">Nebraska</a> ,
+<a href="fe.phtml?network=OHCLIMATE">Ohio</a> ,
+<a href="fe.phtml?network=NDCLIMATE">North Dakota</a> ,
+<a href="fe.phtml?network=SDCLIMATE">South Dakota</a> ,
+<a href="fe.phtml?network=WICLIMATE">Wisconsin</a>.
 
+<form method="GET" action="dl.php" name="dlform">
+<input type="hidden" name="network" value="<?php echo $network; ?>" />
 <table>
 <tr><td width="50%">
 

@@ -3,6 +3,86 @@ body{
   margin: 0px;
   font-family: arial,sans-serif;
 }
+#menuwrapper {
+	min-width: 850px;
+	position: absolute;
+  	top: 75px;
+  	left: 10px;
+}
+.clearit {
+	clear: both;
+	height: 0;
+	line-height: 0.0;
+	font-size: 0;
+}
+#p7menubar, #p7menubar ul {
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	font-family: Arial, Helvetica, sans-serif;
+}
+#p7menubar a {
+	display: block;
+	text-decoration: none;
+	padding: 5px 10px 5px 10px;
+	border-right: 3px solid #eee;
+	font-size: .85em;
+	color: #0000FF;
+}
+#p7menubar a.trigger {
+	padding: 5px 16px 5px 10px;
+	background-image: url(images/p7PM_dark_south.gif);
+	background-repeat: no-repeat;
+	background-position: right center;
+}
+#p7menubar a.atrigger {
+	padding: 4px 16px 5px 10px;
+	border-top: 1px solid #000;
+	border-right: 1px solid #000;
+	border-left: 1px solid #000;
+	background-color: #fff;
+	background-image: url(images/p7PM_dark_south.gif);
+	background-repeat: no-repeat;
+	background-position: right center;
+}
+#p7menubar li {
+	float: left;
+	width: 9em;
+}
+#p7menubar li ul, #p7menubar ul li  {
+	width: 12em;
+}
+#p7menubar ul li a  {
+	color: #FFFFFF;
+	border-right: 0;
+	padding: 3px 12px 3px 16px;
+}
+#p7menubar li ul {
+	position: absolute;
+	display: none;
+	border-right: 1px solid #333333;
+	border-bottom: 1px solid #333333;
+}
+#p7menubar li:hover a, #p7menubar a:focus,
+#p7menubar a:active, #p7menubar li.p7hvr a {
+	color: #000000;
+	background-color: #78dbed;
+}
+#p7menubar li:hover ul, #p7menubar li.p7hvr ul {
+	display: block;
+}
+#p7menubar li:hover ul a, #p7menubar li.p7hvr ul a span{
+	color: #000000;
+	background-color: #FFFFFF;
+}
+#p7menubar li:hover ul .alink{
+	background-color: #c4f6ff;
+}
+#p7menubar ul a:hover {
+	background-color: #606060!important;
+	color: #FFFFFF!important;
+}
+#p7menubar li {width: auto;}
 a.button{
 background:url(../images/button.gif) no-repeat 0px 0px;
 display:block;
@@ -49,7 +129,7 @@ display:block;
 }
 #iem-header {
   background: #fff url(../images/hbar.gif) repeat-x;
-  height: 130px;
+  height: 100px;
   width: 100%;
 }
 #iem-header:after {
@@ -60,7 +140,6 @@ display:block;
     clear: both;
     visibility: hidden;
     }
-
     /* Holly Hack Targets IE Win only \*/
     * html #iem-header {height: 130px;}
     /* End Holly Hack */
@@ -125,27 +204,6 @@ display:block;
   list-style: none;
   display: inline;
 }
-#iemmenu {
-  font-size: 85%;
-  position: absolute;
-  top: 75px;
-  left: 5px;
-  width: 750px;
-  padding: 0px;
-  text-align: left;
-  margin-top: 0px;
-  clear: both;
-}
-#iemmenu li {
-  list-style: none;
-  display: inline;
-}
-#iemmenu a {
-  padding: 0 .2em 0 .4em;
-  border: none;
-  text-decoration: none;
-}
-
 .horiz-list li {
   list-style: none;
   display: inline;
@@ -154,6 +212,7 @@ display:block;
 
 #iem-content {
 	clear: left;
+	background: #fff;
 	padding: 5px;
 }
 #left { 

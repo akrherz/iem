@@ -146,6 +146,7 @@ var selectform = new Ext.form.FormPanel({
      items: [network_selector, dateselector, timeselector, realtime]
 });
 
+// http://www.sencha.com/forum/showthread.php?43298-HttpProxy-timeout-always-30-secs
  var conn = new Ext.data.Connection({
          timeout:120000
         ,url:'obhour-json.php'
