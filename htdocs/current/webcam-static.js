@@ -102,8 +102,6 @@ new Ext.Viewport({
   items     : [{
       region      :'north',
       height      : cfg.headerHeight,
-      collapsible : true,
-      title       : 'IEM Webcams',
       contentEl   : cfg.header
     },{
       xtype       : 'panel',

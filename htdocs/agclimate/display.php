@@ -131,7 +131,7 @@ often too low."
 </TD>
 <TD valign="TOP" width="250">
 
-	<?php include("include/dataLinks.php"); ?>
+	<?php include("$rootpath/include/dataLinks.php"); ?>
 
 </TD></TR>
 </table>
