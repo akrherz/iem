@@ -646,8 +646,10 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME sites
-  CONNECTION "host=iemdb user=nobody dbname=iem"
-  DATA "geom from (select station, oid, round(CASE WHEN max_gust > max_sknt THEN max_gust else max_sknt END::numeric * 1.15,0) as val, geom from summary_2010 WHERE network in ('IA_ASOS','AWOS') and day = '2010-01-25' and (max_gust > 0 or max_sknt > 0)) as foo using unique oid using srid=4326"
+  CONNECTION "host=iemdb user=nobody dbname=postgis"
+  #DATA "geom from (select station, oid, round(CASE WHEN max_gust > max_sknt THEN max_gust else max_sknt END::numeric * 1.15,0) as val, geom from summary_2010 WHERE network in ('IA_ASOS','AWOS') and day = '2010-01-25' and (max_gust > 0 or max_sknt > 0)) as foo using unique oid using srid=4326"
+  #DATA "geom from (select oid, geom, plot_name from stations where network = 'KCCI' and online = true) as foo using unique oid using srid=4326"
+  DATA "geom from (select random() as oid, geom, magnitude from lsrs_2011 where wfo in ('OAX','EAX','DMX') and magnitude >= 1 and valid BETWEEN '2011-08-18 12:00' and '2011-08-18 23:59' and type = 'H') as foo using unique oid using srid=4326"
   #FILTER "network = 'IA_RWIS'"
   STATUS ON
   TYPE POINT
@@ -658,20 +660,20 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    #SYMBOL 'triangle'
+    SYMBOL 'circle'
     COLOR 0 0 0
-    #SIZE 5
-    TEXT ([val])
+    SIZE 5
+    TEXT ([magnitude])
     LABEL
      COLOR 250 250 0 
       OUTLINECOLOR 0 0 0
       TYPE TRUETYPE
       FONT 'vera'
       ANTIALIAS TRUE
-      SIZE 12
-      POSITION AUTO
+      SIZE 10
+      POSITION UC
       PARTIALS TRUE
-      FORCE FALSE
+      FORCE TRUE
       BUFFER 1
       WRAP "_"
     END
@@ -712,7 +714,7 @@ END
 
 LAYER
   NAME terra
-  DATA "/home/akrherz/DEV/sat/east2.tif"
+  DATA "USA3.2011237.terra.250m.jpg"
   TYPE RASTER
   STATUS OFF
   PROJECTION
@@ -785,7 +787,7 @@ LAYER
     LABEL
       WRAP "_"
   #    OUTLINECOLOR 255 255 0
-      COLOR 255 255 0
+      COLOR 255 255 255
    #   SHADOWSIZE 1 1
    #   SHADOWCOLOR 0 0 0
       BACKGROUNDCOLOR 0 0 0

@@ -8,8 +8,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" <?php if (isset($GOOGLEKEYS)){echo "xmlns:v=\"urn:schemas-microsoft-com:vml\"";} if (isset($HTMLEXTRA)){ echo $HTMLEXTRA; }?>>
 <head>
  <title><?php echo isset($TITLE) ? $TITLE: "Iowa Environmental Mesonet"; ?></title>
- <link rel="stylesheet" type="text/css" media="screen" href="<?php echo $rooturl; ?>/css/main.css?v=3" />
- <link rel="stylesheet" type="text/css" media="print" href="<?php echo $rooturl; ?>/css/print.css?v=3" />
+ <link rel="stylesheet" type="text/css" media="screen" href="<?php echo $rooturl; ?>/css/main.css?v=4" />
+ <link rel="stylesheet" type="text/css" media="print" href="<?php echo $rooturl; ?>/css/print.css?v=4" />
  <?php if (isset($REFRESH)){ echo $REFRESH; } ?>
  <?php if (isset($HEADEXTRA)){ echo $HEADEXTRA;} ?>
 <script type="text/javascript">
@@ -25,6 +25,14 @@ ga.setAttribute('async', 'true');
 document.documentElement.firstChild.appendChild(ga);
 })();
 </script>
+<script type="text/javascript" src="<?php echo $rooturl; ?>/js/p7exp.js"></script>
+<!--[if lte IE 7]>
+<style>
+#menuwrapper, #p7menubar ul a {height: 1%;}
+a:active {width: auto;}
+</style>
+<![endif]-->
+</head>
 </head>
 <body <?php if (isset($BODYEXTRA)){ echo $BODYEXTRA;} ?>>
 <?php if (! isset($NOCONTENT)) echo "<div id=\"iem-main\">"; ?>
@@ -32,13 +40,11 @@ document.documentElement.firstChild.appendChild(ga);
 <?php include("$rootpath/include/webring.html"); ?>
 <div id="iem_header_logo">
 <a href="<?php echo $rooturl; ?>/"><img src="<?php echo $rooturl; ?>/images/logo_small.gif" alt="IEM" /></a>
-</div>
-                                                                                
+</div>                                                                         
 <div id="iem-header-title">
 <h3>Iowa Environmental Mesonet</h3>
 <h4>Iowa State University Department of Agronomy</h4>
-</div>
-                                                                                
+</div>                                                
 <div id="iem-header-items">
 <i><?php echo $phrase; ?></i>
 </div>
@@ -46,13 +52,13 @@ document.documentElement.firstChild.appendChild(ga);
 $_pages = Array(
  "archive" => Array(
     "base" => Array("title" => "Archive", "url" => "/archive/"),
+    "schema" => Array("title" => "Archive Schema", "url" => "/archive/schema.php"),
     "browse" => Array("title" => "Browse data/", "url" => "/archive/data/"),
     "birthday" => Array("title" => "Birthday Weather", "url" => "/onsite/birthday/"),
-    "cases" => Array("title" => "Cases", "url" => "/cases/"),
     "hrain" => Array("title" => "Hourly Precip", "url" => "/rainfall/obhour.phtml"),
     "iemre" => Array("title" => "IEM Reanalysis", "url" => "/iemre/"),
-    "mos" => Array("title" => "MOS", "url" => "/mos/"),
-    "schema" => Array("title" => "Schema", "url" => "/archive/schema.php"),
+    "cases" => Array("title" => "Interesting Cases", "url" => "/cases/"),
+	"mos" => Array("title" => "Model Output Statistics", "url" => "/mos/"),
     "tm" => Array("title" => "Time Machine", "url" => "/timemachine/"),
  ),
  "current" => Array(
@@ -67,7 +73,8 @@ $_pages = Array(
     "afos" => Array("title" => "NWS Text", "url" => "/wx/afos/"),
  ),
  "climatology" => Array(
-    "base" => Array("title" => "Climatology", "url" => "/climate/"),
+    "base" => Array("title" => "Climate", "url" => "/climate/"),
+	"extremes" => Array("title" => "Daily Climatology", "url" => "/COOP/extremes.php"),
     "main" => Array("title" => "Mainpage", "url" => "/climate/"),
     "climodat" => Array("title" => "Climodat", "url" => "/climodat/"),
     "drought" => Array("title" => "Drought", "url" => "/dm/"),
@@ -92,7 +99,7 @@ $_pages = Array(
     "variables" => Array("title" => "Variables", "url" => "/info/variables.phtml"),
  ),
  "networks" => Array(
-    "base" => Array("title" => "IEM Networks", "url" => "/"),
+    "base" => Array("title" => "Networks", "url" => "/"),
     "asos" => Array("title" => "ASOS", "url" => "/ASOS/"),
     "awos" => Array("title" => "AWOS", "url" => "/AWOS/"),
     "coop" => Array("title" => "NWS COOP", "url" => "/COOP/"),
@@ -142,33 +149,51 @@ $_pages = Array(
     "cool" => Array("title" => "Cool Lapses", "url" => "/cool/"),
  ),
 );
-$THISPAGE = isset($THISPAGE) ? $THISPAGE : "networks-base";
+$THISPAGE = isset($THISPAGE) ? $THISPAGE : "xxx-xxx";
 $ar = split("-", $THISPAGE);
 if (sizeof($ar) == 1) $ar[1] = "";
-echo "<div id=\"iem_nav\"><ul>\n";
-$b = "";
+echo "<div id=\"menuwrapper\"><ul id=\"p7menubar\">\n";
+/* Look for related IEM Apps */
+if (defined('IEM_APPID')){
+	include_once("$rootpath/include/database.inc.php");
+	$_mesosite = iemdb("mesosite");
+	pg_prepare($_mesosite, "_SELECTOR_", "SELECT * from iemapps where appid in 
+		(SELECT appid from iemapps_tags WHERE tag in (SELECT tag from iemapps_tags where appid = $1)
+		and appid != $1) ORDER by name ASC");
+	$rs = pg_execute($_mesosite, "_SELECTOR_", Array(IEM_APPID));
+	if (pg_numrows($rs) > 0){
+		echo "<li><a class=\"trigger\" href=\"#\"><img src=\"". $rooturl ."/images/star.png\" border=\"0\" alt=\"Related\" height=\"15\" style=\"margin-top: -3px; margin-right: 3px;\">Related</a>";
+		echo "<ul>\n";
+		for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+			$url = $rooturl . $row["url"];
+			if (substr($row["url"],0,1) == "h"){
+				$url = $row["url"];
+			}
+			echo sprintf("<li><a href=\"%s\">%s</a></li>", 
+         		$url,  $row["name"] );
+		}
+		echo "</ul></li>\n";
+	}
+	pg_close($_mesosite);
+}
 while( list($idx, $page) = each($_pages) )
 {
-  echo sprintf("<li%s><a href=\"%s\">%s</a></li>", 
-      ($ar[0] == $idx) ? " class=\"selected\"" : " ",
+  echo sprintf("<li><a class=\"%s\" href=\"%s\">%s</a>", 
+      ($ar[0] == $idx) ? "atrigger" : "trigger",
       $rooturl . $page["base"]["url"], $page["base"]["title"]);
-  if ($ar[0] == $idx)
-  {
-    $b .= "<div id=\"iem_subnav\"><ul>\n";
+
+    echo "<ul>\n";
     while( list($idx2, $page2) = each($page) )
     {
        if ($idx2 == "base") continue;
-       $b .= sprintf("<li%s><a href=\"%s\">%s</a></li>", 
-         ($ar[1] == $idx2) ? " class=\"selected\"" : " ",
-          $rooturl . $page[$idx2]["url"], 
-     ($ar[1] == $idx2) ? "[ ". $page[$idx2]["title"] ." ]": $page[$idx2]["title"] );
+       echo sprintf("<li><a%s href=\"%s\">%s</a></li>", 
+         ($ar[1] == $idx2) ? " class=\"alink\"" : "",
+          $rooturl . $page[$idx2]["url"],  $page[$idx2]["title"] );
     }
-    $b .= "</ul></div>\n";
-  }
+    echo "</ul></li>\n";
 }
-echo "</ul></div> $b";
-?>
 
- 
+echo "</ul><br class=\"clearit\"></div>";
+?>
 </div><!-- End of iem-header -->
 <?php if (! isset($NOCONTENT)) echo "<div id=\"iem-content\">"; ?>

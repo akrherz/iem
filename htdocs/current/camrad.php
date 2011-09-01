@@ -82,7 +82,7 @@ $db_ts = strftime("%Y-%m-%d %H:%M", $ts );
 $year = date("Y", $ts);
 $c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P' and significance = 'W' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
 
-$radar = $map->getlayerbyname("nexrad_n0r");
+$radar = $map->getlayerbyname("nexrad_n0q");
 $radar->set("status", MS_ON );
 if ($ts > 0) 
 {

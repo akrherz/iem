@@ -1,5 +1,6 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 4);
  $station = isset($_GET["station"])? substr($_GET["station"],0,5) : "";
  $network = isset($_GET["network"])? substr($_GET["network"],0,7) : "IA_COOP";
  $date = isset($_GET["date"]) ? substr($_GET["date"],0, 10) : "";
@@ -13,6 +14,10 @@ $THISPAGE = "networks-coop";
 include("$rootpath/include/header.php"); ?>
 
 <div class="text">
+
+<p>This page presents the raw observations of daily high and low temperature along with precipitation
+and snow when available.  The dates shown are the date when the observation was reported.  For observations
+made at 7 AM, this would be a for a 24 hour period up until that time and not for that local date.
 
 <form name="switchnwsli" action="cat.phtml" method="GET">
 <?php 

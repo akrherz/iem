@@ -3,6 +3,7 @@
  * List out COOP extremes table
  */
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 2);
  include("$rootpath/include/forms.php");
  include("$rootpath/include/database.inc.php");
  include("$rootpath/include/network.php"); 
@@ -18,7 +19,7 @@
 
  
  $TITLE = "IEM | NWS COOP Daily Climatology";
- $THISPAGE = "networks-coop";
+ $THISPAGE = "climatology-extremes";
  include("$rootpath/include/header.php");
 
 

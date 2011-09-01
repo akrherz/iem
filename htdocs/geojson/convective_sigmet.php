@@ -11,7 +11,7 @@ $postgis = iemdb("postgis");
 $rs = pg_query("SET TIME ZONE 'GMT'");
 $rs = pg_prepare($postgis, "SELECT", "SELECT *, 
       ST_asGeoJson(geom) as geojson
-      FROM sigmets_current WHERE sigmet_type = 'C' and expire > now()");
+      FROM sigmets_current WHERE sigmet_type = 'C' and expire > now() ");
 
 $rs = pg_execute($postgis, "SELECT", Array());
 

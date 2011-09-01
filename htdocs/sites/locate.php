@@ -5,6 +5,7 @@ if (isset($_GET["station"]) && isset($_GET["network"]))
   exit();
 }
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 5);
  include("$rootpath/include/database.inc.php");
  include("$rootpath/include/google_keys.php");
  include("$rootpath/include/imagemaps.php");
