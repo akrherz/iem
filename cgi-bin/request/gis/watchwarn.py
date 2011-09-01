@@ -80,7 +80,7 @@ if sTS.year == eTS.year:
 sql = """SELECT *, astext(geom) as tgeom,
     area( transform(geom,2163) ) / 1000000.0 as area2d
     from %s WHERE isValid(geom) and 
-	issue >= '%s' and issue < '%s' and eventid < 10000 
+	issue >= '%s+00' and issue < '%s+00' and eventid < 10000 
 	%s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
 cursor = mydb.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor)
 cursor.execute(sql)
