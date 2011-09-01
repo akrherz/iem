@@ -1,21 +1,25 @@
 <?php
 /* This is gonna be painful */
 include("../../config/settings.inc.php");
+define("IEM_APPID", 9);
  include("$rootpath/include/iemprop.php");
  $camera_refresh = get_iemprop("webcam.interval");
 $HEADEXTRA = "
-  <link rel='stylesheet' type='text/css' href='http://extjs.cachefly.net/ext-3.0.0/resources/css/ext-all.css'/>
-  <script type='text/javascript' src='http://extjs.cachefly.net/ext-3.0.0/adapter/ext/ext-base.js'></script>
-  <script type='text/javascript' src='http://extjs.cachefly.net/ext-3.0.0/ext-all.js'></script>
+  <link rel='stylesheet' type='text/css' href='http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css'/>
+  <script type='text/javascript' src='http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js'></script>
+  <script type='text/javascript' src='http://extjs.cachefly.net/ext-3.4.0/ext-all.js'></script>
 <script>
 Ext.namespace('cfg');
 cfg.refreshint = ${camera_refresh}000;
-cfg.header = 'iem-header';
-cfg.headerHeight = 150;
+cfg.header = 'myheader';
+cfg.headerHeight = 30;
 cfg.jsonSource = '../json/webcams.php';
 </script>
   <script type='text/javascript' src='webcam-static.js?v=3'></script>
 <style>
+#iem-header {
+	display : none;
+}
 .webimage {
   height: 240px;
   width : 320px;
@@ -39,7 +43,9 @@ include("$rootpath/include/header.php");
 ?>
 <div id="main">
 </div>
-
+<div id="myheader" class="x-hidden">
+<p>&nbsp; Go back to <a href="<?php echo $rooturl; ?>">IEM Homepage</a>.
+</div>
 <div id="help" class="x-hidden">
 <h3 style="margin: 10px;">Web Camera Interactive Viewer</h3>
 

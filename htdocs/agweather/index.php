@@ -1,5 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
+define("IEM_APPID", 11);
 $TITLE = "IEM | Agricultural Weather/Climate Information";
 $THISPAGE = "iem-info";
 include("$rootpath/include/header.php"); ?>

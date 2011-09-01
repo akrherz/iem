@@ -1,5 +1,6 @@
 <?php
  include("../../../config/settings.inc.php");
+ define("IEM_APPID", 13);
  $TITLE = "ISU Agclimate | Data Request";
 $THISPAGE="networks-agclimate";
  include("$rootpath/include/header.php");
