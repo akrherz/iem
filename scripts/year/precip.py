@@ -6,7 +6,10 @@ import numpy
 import re, os
 import math
 import mx.DateTime
-import netCDF3
+try:
+    import netCDF4 as netCDF3
+except:
+    import netCDF3
 import iemdb, network
 st = network.Table('IACLIMATE')
 COOP = iemdb.connect('coop', bypass=True)
@@ -20,7 +23,8 @@ lons = []
 
 # Get normals!
 ccursor.execute("""SELECT station, sum(precip) as acc from climate51 
-    WHERE valid <= '2000-%s' and station NOT IN ('ia7842','ia4381') 
+    WHERE valid <= '2000-%s' and station NOT IN ('ia7842','ia4381')
+    and substr(station,0,3) = 'ia' 
     GROUP by station ORDER by acc ASC""" % (ts.strftime("%m-%d"),
     ) )
 for row in ccursor:
@@ -52,9 +56,9 @@ lats = []
 lons = []
 ccursor.execute("""select station, norm, obs from 
     (select c.station, sum(c.precip) as norm from climate51 c 
-     where c.valid < '2000-%s' GROUP by c.station) as climate, 
+     where c.valid < '2000-%s' and substr(station,0,3) = 'ia' GROUP by c.station) as climate, 
     (select a.stationid, sum(a.precip) as obs from alldata a 
-     WHERE a.year = %s GROUP by stationid) as obs 
+     WHERE a.year = %s and substr(a.stationid,0,3) = 'ia' GROUP by stationid) as obs 
   WHERE obs.stationid = climate.station""" % (ts.strftime("%m-%d"),
     ts.year) )
 for row in ccursor:
