@@ -5,9 +5,13 @@ import numpy
 import re, os, sys
 import math, pdb
 import mx.DateTime
-from Scientific.IO.NetCDF import *
+try:
+    import netCDF4 as netCDF3
+except:
+    import netCDF3
 from pyIEM import stationTable, iemdb
-st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
+import network
+nt = network.Table("IACLIMATE")
 i = iemdb.iemdb()
 coop = i['coop']
 wepp = i['wepp']
@@ -40,16 +44,17 @@ if (ts.month < t0.month):  # overlapping year!
 else:
   v = " (valid >= '2000-%s' and valid <= '2000-%s') " % (t0.strftime("%m-%d"), ts.strftime("%m-%d"))
 
-sql = "SELECT station, sum(precip) as acc from climate51 \
-    WHERE %s and station NOT IN ('ia7842','ia4381', 'ia1063') \
-    GROUP by station ORDER by acc ASC" % (v,)
+sql = """SELECT station, sum(precip) as acc from climate51 
+    WHERE %s and station NOT IN ('ia7842','ia4381', 'ia1063') 
+    and substr(station,0,3) = 'ia'
+    GROUP by station ORDER by acc ASC""" % (v,)
 rs = coop.query(sql).dictresult()
 for i in range(len(rs)):
     station = rs[i]['station'].upper()
     #print station, rs[i]['acc']
     nrain.append(float(rs[i]['acc']))
-    lats.append(st.sts[station]['lat'])
-    lons.append(st.sts[station]['lon'])
+    lats.append(nt.sts[station]['lat'])
+    lons.append(nt.sts[station]['lon'])
 
 nrain = numpy.array( nrain )
 lats = numpy.array( lats )
@@ -80,7 +85,7 @@ while (now <= ts):
   fp = "/mesonet/wepp/data/rainfall/netcdf/daily/%s_rain.nc" % (now.strftime("%Y/%m/%Y%m%d") ,) 
   if not os.path.isfile(fp):
     print fp
-  nc = NetCDFFile(fp)
+  nc = netCDF3.Dataset(fp)
   if (lats is None):
     ncrain = numpy.ravel(nc.variables["rainfall_1day"]) / 25.4
     lats = numpy.ravel(nc.variables["latitude"])
