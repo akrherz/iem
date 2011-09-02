@@ -10,11 +10,12 @@ mydb = pg.connect("coop", 'iemdb')
 
 #mydb.query("DELETE from r_monthly")
 
-e = mx.DateTime.DateTime(1951, 1, 1)
+s = mx.DateTime.DateTime(1951, 1, 1)
+e = mx.DateTime.DateTime(2012, 1, 1)
 interval = mx.DateTime.RelativeDateTime(months=+1)
 
 #st.ids = ['IA2364',]
-for id in st.ids:
+for id in nt.sts.keys():
   dbid = string.lower(id)
   s = constants.startts(dbid)
   print dbid, s

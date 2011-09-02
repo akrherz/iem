@@ -11,7 +11,7 @@ def write(mydb, stationID):
 
     # Load up dict of dates..
     cnt = {}
-    for day in range(30,182):
+    for day in range(30,183):
         cnt[day] = {32: 0.0, 28: 0.0, 26: 0.0, 22: 0.0}
     cnt_years = {32: 0.0, 28: 0.0, 26: 0.0, 22: 0.0}
 
