@@ -23,7 +23,8 @@ $today = time();
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/station.php");
 $st = new StationData($station, $network);
-$st->load_station( $st->table[$station]['climate_site'], 'IACLIMATE' );
+$climate_site = $st->table[$station]['climate_site'];
+$st->load_station( $climate_site );
 $cities = $st->table;
 $coopdb = iemdb("coop");
 $iem = iemdb("access");
@@ -36,16 +37,24 @@ function calcGDD($high,$low)
     return (($high+$low)/2.00) - 50.00;
 
 }
-
-$climate_site = $cities[$station]["climate_site"];
-
-$rs = pg_prepare($iem, "SELECT", "SELECT max_tmpf, min_tmpf, day from summary_$year
+if (strrpos($network, "CLIMATE") > 0){
+	$rs = pg_prepare($coopdb, "SELECT", "SELECT high as max_tmpf, low as min_tmpf, day from 
+	alldata_". substr($climate_site,0,2) ."
+		WHERE stationid = $1 and day between $2 and $3 " .
+				" ORDER by day ASC");
+	$rs = pg_execute($coopdb, "SELECT", Array(strtolower($station), $sdate, $edate));
+} else {
+	$rs = pg_prepare($iem, "SELECT", "SELECT max_tmpf, min_tmpf, day from summary_$year
 		WHERE station = $1 and day between $2 and $3 " .
 				"and network = $4 ORDER by day ASC");
-$rs = pg_execute($iem, "SELECT", Array($station, $sdate, $edate, $network));
+	$rs = pg_execute($iem, "SELECT", Array($station, $sdate, $edate, $network));
+}
+
 $obs = Array();
 $aobs = Array();
 $atot = 0;
+$atimes = Array();
+$zeros = Array();
 for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
 	$hi = (float)$row["max_tmpf"];
@@ -54,6 +63,8 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 	$atot += $gdd;
 	$aobs[$i] = $atot;
 	$obs[$i] = $gdd;
+	$zeros[$i] = 0;
+	$atimes[$i] = strtotime( "2000-". substr($row["day"],5,15) );
 }
 
 /* Now we need the climate data */
@@ -66,7 +77,6 @@ $climate = Array();
 $cdiff = Array();
 $aclimate = Array();
 $atot = 0;
-$zeros = Array();
 $times = Array();
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
 {
@@ -78,7 +88,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 	}
     else $cdiff[$i] = "";
 	$aclimate[$i] = $atot;
-	$zeros[$i] = 0;
+	
     $times[$i] = strtotime( $row["valid"] );
 }
 
@@ -116,14 +126,13 @@ while (list($k,$v) = each($times))
    $graph->AddLine(new PlotLine(VERTICAL,$v,"tan",1));
 }
 
-
 // Create the linear plot
 $b1plot =new BarPlot($cdiff, $times);
 //$b1plot->SetFillColor("red");
 $b1plot->SetLegend("Accum Difference");
 
 // Create the linear plot
-$lp1=new LinePlot($aobs, $times);
+$lp1=new LinePlot($aobs, $atimes);
 $lp1->SetLegend("Actual Accum");
 $lp1->SetColor("blue");
 $lp1->SetWeight(3);
@@ -133,7 +142,8 @@ $lp2->SetLegend("Climate Accum");
 $lp2->SetColor("red");
 $lp2->SetWeight(3);
 
-$z = new LinePlot($zeros, $times);
+
+$z = new LinePlot($zeros, $atimes);
 $z->SetWeight(3);
 
 // Add the plot to the graph
