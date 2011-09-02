@@ -1,8 +1,8 @@
 <?php
 include("../../../config/settings.inc.php");
-
+define("IEM_APPID", 14);
  $station = isset($_GET['station']) ? $_GET['station']: "";
- $network = isset($network) ? $_GET['network'] : "IA_ASOS";
+ $network = isset($_REQUEST["network"]) ? $_REQUEST['network'] : "IA_ASOS";
  $year = isset($_GET['year']) ? $_GET['year'] : date("Y");
  $smonth = isset($_GET['smonth']) ? $_GET['smonth'] : 5;
  $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 10;
@@ -37,10 +37,23 @@ can cause errors in the accumulated values.</p>
 
 <div class="text">
 <P>Pick network to select station from:
-<br><a href="fe.phtml?network=IA_ASOS">ASOS</a>
- -or- <a href="fe.phtml?network=AWOS">AWOS</a>
- -or- <a href="fe.phtml?network=IA_COOP">NWS COOP</a>
- -or- <a href="fe.phtml?network=KCCI">KCCI SchoolNet</a>
+<form name='netselect' method='GET'>
+<?php 
+$mesosite = iemdb("mesosite");
+$rs = pg_query($mesosite, "SELECT id, name from networks where 
+	id ~* '^IA' or id ~* '^MN' or id ~* '^WI' or id ~* '^ND' or id ~* '^SD' or id ~* '^NE'
+	 or id ~* '^KS' or id ~* '^MO' or id ~* '^IL' or id ~* '^IN' or id ~* '^OH' or id ~* '^KY'
+	or id in ('KCCI','KELO','KIMT')");
+echo "<select name=\"network\">";
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	echo sprintf("<option value=\"%s\"%s>%s</option>", $row["id"], 
+	($row["id"] == $network) ? ' selected="selected"': '', $row["name"]);
+}
+echo "</select>";
+?>
+<input type="submit" value="Select Network" />
+</form>
+
 
 <?php if (strlen($station) > 0 ) { ?>
 <?php include_once("$rootpath/include/forms.php"); ?>
@@ -62,8 +75,8 @@ can cause errors in the accumulated values.</p>
 <input type="submit" value="Make Plot">
 </form>
 
-<p><img src="gdd_plot.php?<?php echo "station=$station&year=$year&smonth=$smonth&sday=$sday&emonth=$emonth&eday=$eday"; ?>" ALT="Time Series">
-<p><img src="rainfall_plot.php?<?php echo "station=$station&year=$year&smonth=$smonth&sday=$sday&emonth=$emonth&eday=$eday"; ?>" ALT="Time Series">
+<p><img src="gdd_plot.php?<?php echo "network=$network&station=$station&year=$year&smonth=$smonth&sday=$sday&emonth=$emonth&eday=$eday"; ?>" ALT="Time Series">
+<p><img src="rainfall_plot.php?<?php echo "network=$network&station=$station&year=$year&smonth=$smonth&sday=$sday&emonth=$emonth&eday=$eday"; ?>" ALT="Time Series">
 
 <?php } else { ?>
 
