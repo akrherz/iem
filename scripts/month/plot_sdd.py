@@ -12,13 +12,8 @@ i = iemdb.iemdb()
 coop = i['coop']
 mesosite = i['mesosite']
 
-# Now we load climatology
-sts = {}
-rs = mesosite.query("SELECT id, x(geom) as lon, y(geom) as lat from stations WHERE \
-    network = 'IACLIMATE'").dictresult()
-for i in range(len(rs)):
-    sts[ rs[i]["id"].lower() ] = rs[i]
-
+import network
+nt = network.Table("IACLIMATE")
 
 # Compute normal from the climate database
 sql = """SELECT stationid,
@@ -31,10 +26,10 @@ lons = []
 sdd86 = []
 valmask = []
 rs = coop.query(sql).dictresult()
-for i in range(len(rs)):
-  lats.append( sts[rs[i]['stationid']]['lat'] )
-  lons.append( sts[rs[i]['stationid']]['lon'] )
-  sdd86.append( rs[i]['sdd'] )
+for row in rs:
+  lats.append( nt.sts[row['stationid'].upper()]['lat'] )
+  lons.append( nt.sts[row['stationid'].upper()]['lon'] )
+  sdd86.append( row['sdd'] )
   valmask.append( True )
 
 cfg = {
