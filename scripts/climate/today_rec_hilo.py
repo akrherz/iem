@@ -8,8 +8,8 @@ now = mx.DateTime.now()
 
 import network
 nt = network.Table('IACLIMATE')
-st.sts["IA0200"]["lon"] = -93.6
-st.sts["IA5992"]["lat"] = 41.65
+nt.sts["IA0200"]["lon"] = -93.6
+nt.sts["IA5992"]["lat"] = 41.65
 import iemdb
 import psycopg2.extras
 coop = iemdb.connect('coop', bypass=True)
