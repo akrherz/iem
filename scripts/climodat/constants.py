@@ -61,11 +61,11 @@ def startyear(sid):
   return 1951
 
 def writeheader(out, stationID):
-  from pyIEM import stationTable
+  import network
   import string, mx.DateTime
   now = mx.DateTime.now()
   stationID = string.upper(stationID)
-  st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
+  nt = network.Table("%sCLIMATE" % (stationID[:2].upper(),))
   out.write("""# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s 
 # Climate Record: %s -> %s (data after %s is preliminary)
@@ -73,4 +73,4 @@ def writeheader(out, stationID):
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978\n""" % \
   (now.strftime("%d %b %Y"), startts(stationID).strftime("%d %b %Y"), \
    _ARCHIVEENDTS.strftime("%d %b %Y"), \
-   _QCENDTS.strftime("%d %b %Y"), stationID, st.sts[stationID]["name"]) )
+   _QCENDTS.strftime("%d %b %Y"), stationID, nt.sts[stationID]["name"]) )
