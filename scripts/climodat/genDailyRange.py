@@ -1,5 +1,3 @@
-#!/mesonet/python/bin/python
-# Daryl Herzmann 3 Mar 2004
 
 _REPORTID = "06"
 
