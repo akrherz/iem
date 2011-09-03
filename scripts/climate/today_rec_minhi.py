@@ -10,8 +10,9 @@ import network
 nt = network.Table('IACLIMATE')
 nt.sts["IA0200"]["lon"] = -93.6
 nt.sts["IA5992"]["lat"] = 41.65
-i = iemdb.iemdb()
-coop = i['coop']
+import iemdb
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor()
 
 # Compute normal from the climate database
 sql = """SELECT station, min_high, min_low from climate WHERE valid = '2000-%s'
@@ -23,14 +24,14 @@ lons = []
 highs = []
 lows = []
 labels = []
-rs = coop.query(sql).dictresult()
-for i in range(len(rs)):
-  id = rs[i]['station'].upper()
+ccursor.execute(sql)
+for row in ccursor:
+  id = row[0].upper()
   labels.append( id[2:] )
-  lats.append( st.sts[id]['lat'] )
-  lons.append( st.sts[id]['lon'] )
-  highs.append( rs[i]['min_high'] )
-  lows.append( rs[i]['min_low'] )
+  lats.append( nt.sts[id]['lat'] )
+  lons.append( nt.sts[id]['lon'] )
+  highs.append( row[1] )
+  lows.append( row[2] )
 
 
 #---------- Plot the points
