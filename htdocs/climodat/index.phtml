@@ -1,12 +1,13 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 15);
 include("$rootpath/include/iemprop.php");
 $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
  include("$rootpath/include/google_keys.php");
  include("$rootpath/include/imagemaps.php");
  $report = isset($_GET["report"])? substr($_GET["report"],0,2): "01";
  $station = isset($_GET["station"])? strtolower( substr($_GET["station"],0,6) ): "";
-
+ $network = isset($_REQUEST['network']) ? $_REQUEST['network'] : 'IACLIMATE';
 
  if (isset($_GET["id"])){
    $station = $_GET["id"];
@@ -23,8 +24,7 @@ $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
 
 $THISPAGE = "climatology-climodat";
 $TITLE = "IEM Climodat";
-if (strlen($station) == ""){
-  $network = "IACLIMATE";
+if (strlen($station) == "" || ! is_file("reports/${station}_$report.txt")){
   $api = $GOOGLEKEYS[$rooturl]["any"];
   $HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
  <script src='http://www.openlayers.org/api/OpenLayers.js'></script>
@@ -51,17 +51,35 @@ time on his behalf. Quality controlled information exists from <b>1 Jan 1951 til
 afterwards are based on preliminary data from <a href="http://www.ncdc.noaa.gov">NCDC</a> and other sources. Some sites have data back to 1893, so their reports 
 contain data dating back to then.
 
+<p>Data is available from the following states: 
+<a href="index.phtml?network=ILCLIMATE">Illinois</a> ,
+<a href="index.phtml?network=INCLIMATE">Indiana</a> ,
+<a href="index.phtml?network=IACLIMATE">Iowa</a> ,
+<a href="index.phtml?network=KSCLIMATE">Kansas</a>,
+<a href="index.phtml?network=KYCLIMATE">Kentucky</a> ,
+<a href="index.phtml?network=MICLIMATE">Michigan</a> ,
+<a href="index.phtml?network=MNCLIMATE">Minnesota</a> ,
+<a href="index.phtml?network=NECLIMATE">Nebraska</a> ,
+<a href="index.phtml?network=OHCLIMATE">Ohio</a> ,
+<a href="index.phtml?network=NDCLIMATE">North Dakota</a> ,
+<a href="index.phtml?network=SDCLIMATE">South Dakota</a> ,
+<a href="index.phtml?network=WICLIMATE">Wisconsin</a>.
+
 <p style="background: #aef;">The daily observations that are used in these summary reports can be downloaded from 
 <a href="<?php echo $rooturl; ?>/request/coop/fe.phtml">here</a>.</p>
 
 
-<div id="iem-form2"><form method="GET" action="index.phtml" name="olselect">
+<div id="iem-form2">
+<form method="GET" action="index.phtml" name="olselect">
+<input type="hidden" name="network" value="<?php echo $network; ?>" />
 
 <table cellpadding=2 cellspacing=1>
   <tr><th>Select Climate Station:</th><th>Select Report:</th><td></td></tr>
 
-<tr><td><?php echo networkSelect("IACLIMATE", strtoupper($station) ); ?>
-<br /><?php if (strlen($station) > 0){ echo "<a href=\"index.phtml?report=${report}\">Select from map</a>"; } ?></td>
+<tr><td><?php echo networkSelect($network, strtoupper($station) ); ?>
+<br /><?php if (strlen($station) > 0){ 
+	echo "<a href=\"index.phtml?report=${report}\">Select from map</a>"; 
+} ?></td>
 
 <td valign="top"><select name="report" size="1">
 <option value="01" <?php if ($report == "01") echo "SELECTED"; ?>>Precipitation Events per Climate Week
@@ -156,5 +174,7 @@ if you would like to see other variables in these files or have any other commen
 <p><b>Disclaimer:</b> While we use care to provide accurate weather/climatic information, errors may occur because of equipment or other failure. We therefore provide this information without any warranty of accuracy. Users of this weather/climate data do so at their own risk, and are advised to use independent judgement as to whether to verify the data presented.</p>
 </div>
 
-<?php } ?>
-<?php include("$rootpath/include/footer.php"); ?>
+<?php 
+}  
+include("$rootpath/include/footer.php"); 
+?>
