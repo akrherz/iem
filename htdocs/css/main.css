@@ -31,7 +31,7 @@ body{
 }
 #p7menubar a.trigger {
 	padding: 5px 16px 5px 10px;
-	background-image: url(images/p7PM_dark_south.gif);
+	background-image: url(../images/p7PM_dark_south.gif);
 	background-repeat: no-repeat;
 	background-position: right center;
 }
@@ -41,7 +41,7 @@ body{
 	border-right: 1px solid #000;
 	border-left: 1px solid #000;
 	background-color: #fff;
-	background-image: url(images/p7PM_dark_south.gif);
+	background-image: url(../images/p7PM_dark_south.gif);
 	background-repeat: no-repeat;
 	background-position: right center;
 }
