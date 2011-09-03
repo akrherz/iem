@@ -14,29 +14,31 @@ def ccdd(high, low):
 
   return cdd  
 
-def go(mydb, rs, stationID):
-  import mx.DateTime, constants
-  s = constants.startts(stationID)
-  e = constants._ENDTS
-  interval = mx.DateTime.RelativeDateTime(months=+1)
+def go(mydb, rs, stationID, updateAll=False):
+    import mx.DateTime, constants
+    if updateAll:
+        s = constants.startts(stationID)
+    else:
+        s = constants._ENDTS - mx.DateTime.RelativeDateTime(years=1)
+    e = constants._ENDTS
+    interval = mx.DateTime.RelativeDateTime(months=+1)
 
-  now = s
-  db = {}
-  while (now < e):
-    db[now] = 0
-    now += interval
+    now = s
+    db = {}
+    while (now < e):
+        db[now] = 0
+        now += interval
 
-  for i in range(len(rs)):
-    ts = mx.DateTime.strptime( rs[i]["day"] , "%Y-%m-%d")
-    mo = ts + mx.DateTime.RelativeDateTime(day=1)
-    db[mo] += ccdd(rs[i]["high"], rs[i]["low"])
+    for i in range(len(rs)):
+        ts = mx.DateTime.strptime( rs[i]["day"] , "%Y-%m-%d")
+        if ts < s:
+            continue
+        mo = ts + mx.DateTime.RelativeDateTime(day=1)
+        db[mo] += ccdd(rs[i]["high"], rs[i]["low"])
 
-#  mydb.query("DELETE from r_gdd WHERE stationID = '%s'" \
-#   % (stationID,) )
-  for mo in db.keys():
-    mydb.query("UPDATE r_monthly SET cdd = %s WHERE \
-      stationid = '%s' and monthdate = '%s' " %
-      (db[mo], stationID, mo.strftime("%Y-%m-%d") ) )
+    for mo in db.keys():
+        mydb.query("""UPDATE r_monthly SET cdd = %s WHERE 
+          stationid = '%s' and monthdate = '%s' """ % (db[mo], stationID, mo.strftime("%Y-%m-%d") ) )
 
 def write(mydb, stationID):
   import mx.DateTime, constants

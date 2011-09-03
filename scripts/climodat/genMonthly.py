@@ -1,36 +1,37 @@
-# Generate Monthly averages
-# Daryl Herzmann 4 Mar 2004
 
-def go(mydb, stationID):
-  import mx.DateTime, constants
-  s = constants.startts(stationID)
-  e = constants._ENDTS
-  interval = mx.DateTime.RelativeDateTime(months=+1)
+def go(mydb, stationID,updateAll=False):
+    """
+    Generate the monthly averages, but only do as much as necessary
+    """
+    import mx.DateTime, constants
+    if updateAll:
+        s = constants.startts(stationID)
+    else:
+        s = constants._ENDTS - mx.DateTime.RelativeDateTime(years=1)
+    e = constants._ENDTS
+    interval = mx.DateTime.RelativeDateTime(months=+1)
 
-  now = s
-  db = {}
-  while (now < e):
-    db[now] = {}
-    now += interval
+    now = s
+    db = {}
+    while (now < e):
+        db[now] = {}
+        now += interval
 
-  rs = mydb.query("SELECT year, month, avg(high) as avg_high, \
-    avg(low) as avg_low, sum(precip) as rain, \
-    sum( CASE WHEN precip >= 0.01 THEN 1 ELSE 0 END ) as rcount, \
-    sum( CASE WHEN snow >= 0.01 THEN 1 ELSE 0 END ) as scount from %s \
-    WHERE stationid = '%s' and day >= '%s-01-01' GROUP by year, month" \
-     % (constants.get_table(stationID), stationID, constants.startyear(stationID) ) ).dictresult()
+    rs = mydb.query("""SELECT year, month, avg(high) as avg_high, 
+        avg(low) as avg_low, sum(precip) as rain, 
+        sum( CASE WHEN precip >= 0.01 THEN 1 ELSE 0 END ) as rcount, 
+        sum( CASE WHEN snow >= 0.01 THEN 1 ELSE 0 END ) as scount from %s 
+        WHERE stationid = '%s' and day >= '%s-01-01' GROUP by year, month""" % (
+            constants.get_table(stationID), stationID, s.year ) ).dictresult()
 
-  for i in range(len(rs)):
-    ts = mx.DateTime.DateTime( int(rs[i]["year"]), int(rs[i]["month"]), 1)
-    sql = "UPDATE r_monthly SET avg_high = %s, avg_low = %s, \
-     rain = %s, rain_days = %s, snow_days = %s \
-     WHERE stationid = '%s' and monthdate = '%s' " \
-     % (rs[i]["avg_high"], rs[i]["avg_low"], rs[i]["rain"], rs[i]["rcount"], \
+    for i in range(len(rs)):
+        ts = mx.DateTime.DateTime( int(rs[i]["year"]), int(rs[i]["month"]), 1)
+        sql = """UPDATE r_monthly SET avg_high = %s, avg_low = %s, 
+     rain = %s, rain_days = %s, snow_days = %s 
+     WHERE stationid = '%s' and monthdate = '%s' """ % (rs[i]["avg_high"], 
+        rs[i]["avg_low"], rs[i]["rain"], rs[i]["rcount"], 
         rs[i]['scount'], stationID, ts.strftime("%Y-%m-%d") ) 
-    #try:
-    mydb.query(sql)
-    #except:
-    #  print sql
+        mydb.query(sql)
 
 
 def safePrint(val, cols, prec):
