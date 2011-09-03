@@ -34,7 +34,7 @@ a:active {width: auto;}
 <![endif]-->
 </head>
 </head>
-<body <?php if (isset($BODYEXTRA)){ echo $BODYEXTRA;} ?>>
+<body <?php if (isset($BODYEXTRA)){ echo $BODYEXTRA;} ?> onLoad="P7_ExpMenu()">
 <?php if (! isset($NOCONTENT)) echo "<div id=\"iem-main\">"; ?>
 <div id="iem-header">
 <?php include("$rootpath/include/webring.html"); ?>
