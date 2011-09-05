@@ -15,7 +15,7 @@ cd climodat
 /mesonet/python/bin/python daily_estimator.py KS
 /mesonet/python/bin/python daily_estimator.py MO
 /mesonet/python/bin/python compute_ia0000.py
-./run.sh >& a
+./run.sh >& a &
 
 cd ../iemre
 /mesonet/python/bin/python grid_climodat.py
