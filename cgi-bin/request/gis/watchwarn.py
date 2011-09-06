@@ -93,54 +93,54 @@ for row in cursor:
     try:
         f = wellknowntext.convert_well_known_text(s)
     except:
-        continue 
+        continue
 
-	g = row["gtype"]
-	t = row["phenomena"]
-	#issue = mx.DateTime.strptime(row["issue"][:16], "%Y-%m-%d %H:%M")
-	#expire = mx.DateTime.strptime(row["expire"][:16],"%Y-%m-%d %H:%M")
-	issue = row["issue"]
-	expire = row["expire"]
-	u = issue.utcoffset() or ZERO
-	issue -= u
-	expire -= u
-	d = {}
-	d["ISSUED"] = issue.strftime("%Y%m%d%H%M")
-	d["EXPIRED"] = expire.strftime("%Y%m%d%H%M")
-	d["PHENOM"] = t
-	d["GTYPE"] = g
-	d["SIG"] = row["significance"]
-	d["WFO"] = row["wfo"]
-	d["ETN"] = row["eventid"]
-	d["STATUS"] = row["status"]
-	d["NWS_UGC"] = row["ugc"]
-	d["AREA_KM2"] = row["area2d"]
-	if ((d["SIG"] is None or d["SIG"] == "") and d["PHENOM"] == 'FF'):
-		d["SIG"] = "W"
-		d["ETN"] = -1
-		d["STATUS"] = "ZZZ"
+    g = row["gtype"]
+    t = row["phenomena"]
+    #issue = mx.DateTime.strptime(row["issue"][:16], "%Y-%m-%d %H:%M")
+    #expire = mx.DateTime.strptime(row["expire"][:16],"%Y-%m-%d %H:%M")
+    issue = row["issue"]
+    expire = row["expire"]
+    u = issue.utcoffset() or ZERO
+    issue -= u
+    expire -= u
+    d = {}
+    d["ISSUED"] = issue.strftime("%Y%m%d%H%M")
+    d["EXPIRED"] = expire.strftime("%Y%m%d%H%M")
+    d["PHENOM"] = t
+    d["GTYPE"] = g
+    d["SIG"] = row["significance"]
+    d["WFO"] = row["wfo"]
+    d["ETN"] = row["eventid"]
+    d["STATUS"] = row["status"]
+    d["NWS_UGC"] = row["ugc"]
+    d["AREA_KM2"] = row["area2d"]
+    if ((d["SIG"] is None or d["SIG"] == "") and d["PHENOM"] == 'FF'):
+        d["SIG"] = "W"
+        d["ETN"] = -1
+        d["STATUS"] = "ZZZ"
 
-	obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
-	shp.write_object(-1, obj)
-	dbf.write_record(cnt, d)
-	del(obj)
-	cnt += 1
+    obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
+    shp.write_object(-1, obj)
+    dbf.write_record(cnt, d)
+    del(obj)
+    cnt += 1
 
 if (cnt == 0):
-	obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, [[(0.1, 0.1), (0.2, 0.2), (0.3, 0.1), (0.1, 0.1)]])
-	d = {}
-	d["ISSUED"] = "200000000000"
-	d["EXPIRED"] = "200000000000"
-	d["PHENOM"] = "ZZ"
-	d["GTYPE"] = "Z"
-	d["WFO"] = "ZZZ"
-	d["SIG"] = "Z"
-	d["ETN"] = 0
-	d["AREA_KM2"] = 0
-	d["STATUS"] = "ZZZ"
-	d["NWS_UGC"] = "ZZZZZZ"
-	shp.write_object(-1, obj)
-	dbf.write_record(0, d)
+    obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, [[(0.1, 0.1), (0.2, 0.2), (0.3, 0.1), (0.1, 0.1)]])
+    d = {}
+    d["ISSUED"] = "200000000000"
+    d["EXPIRED"] = "200000000000"
+    d["PHENOM"] = "ZZ"
+    d["GTYPE"] = "Z"
+    d["WFO"] = "ZZZ"
+    d["SIG"] = "Z"
+    d["ETN"] = 0
+    d["AREA_KM2"] = 0
+    d["STATUS"] = "ZZZ"
+    d["NWS_UGC"] = "ZZZZZZ"
+    shp.write_object(-1, obj)
+    dbf.write_record(0, d)
 
 del(shp)
 del(dbf)
