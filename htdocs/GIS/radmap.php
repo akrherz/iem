@@ -15,6 +15,18 @@ $sectors = Array(
          "ext" => Array(-2110437, -2251067, 2548326, 1239063)),
  "texas" => Array("epsg" => 2163, 
          "ext" => Array(-532031.375, -2133488,723680.125, -959689.625)),
+ "etexas" => Array("epsg" => 2163, 
+         "ext" => Array(-132031.375, -1933488,623680.125, -1259689.625)),
+ "florida" => Array("epsg" => 2163, 
+         "ext" => Array(1184257, -2271667,2198502, -1189456)),
+ "maine" => Array("epsg" => 2163, 
+         "ext" => Array(2201008.54544837, 209411.348773363,2516387.56069489, 732383.197334035)),
+ "michigan" => Array("epsg" => 2163, 
+         "ext" => Array(730416.409395838, -272656.019285361,1417612.99448585, 416901.954765397)),
+ "washington" => Array("epsg" => 2163, 
+         "ext" => Array(-1816611.94664531, 247411.313142634,-1231350.67314885, 688254.98213837)),
+ "california" => Array("epsg" => 2163, 
+         "ext" => Array(-2031905.01470961, -1244659.20932869,-1296945.03256045, -39583.1960413812)),
 );
 
 /* Setup layers */
@@ -150,6 +162,18 @@ if (in_array("nexrad_tc", $layers)){
  $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d.png", $ts) );
 }
 $radar->draw($img);
+
+$evis = $map->getlayerbyname("east_vis_1km");
+$evis->set("status", in_array("east_vis", $layers) );
+$evis->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/sat/GOES13_EAST_VIS_%Y%m%d%H%M.png", $ts) );
+$evis->draw($img);
+$evis->close();
+
+$evis = $map->getlayerbyname("east_vis_1km");
+$evis->set("status", in_array("west_vis", $layers) );
+$evis->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/sat/GOES11_WEST_VIS_%Y%m%d%H%M.png", $ts) );
+$evis->draw($img);
+$evis->close();
 
 /* Draw NEXRAD Layer */
 $n0q = $map->getlayerbyname("nexrad_n0q");
