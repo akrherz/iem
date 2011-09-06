@@ -22,6 +22,7 @@ function printNIDSMenu($prod){
 ?>
 <?php 
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 16);
 
 $rad = isset($_GET["rad"]) ? $_GET["rad"] : "DMX";
 $prod = isset($_GET["prod"]) ? $_GET["prod"]: "N0R";
