@@ -59,6 +59,7 @@ body{
 }
 #p7menubar li ul {
 	position: absolute;
+	z-index: 10;
 	display: none;
 	border-right: 1px solid #333333;
 	border-bottom: 1px solid #333333;
