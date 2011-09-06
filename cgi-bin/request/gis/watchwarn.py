@@ -77,7 +77,7 @@ table = "warnings"
 if sTS.year == eTS.year:
     table = "warnings_%s" % (sTS.year,)
 
-sql = """SELECT *, astext(geom) as tgeom,
+sql = """SELECT *, astext(ST_Simplify(geom,0.0001)) as tgeom,
     area( transform(geom,2163) ) / 1000000.0 as area2d
     from %s WHERE isValid(geom) and 
 	issue >= '%s+00' and issue < '%s+00' and eventid < 10000 
