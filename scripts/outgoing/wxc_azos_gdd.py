@@ -2,6 +2,7 @@
 # for our beloved ASOS/AWOS network
 
 import mx.DateTime, os, Ngl, numpy, shutil
+import sys
 from pyIEM import iemdb, stationTable
 st = stationTable.stationTable("/mesonet/TABLES/campbellDB.stns")
 i = iemdb.iemdb()
@@ -34,6 +35,9 @@ def load_soilt(data):
         soil_obs.append( rs[i]['c30'] )
         lats.append( st.sts[stid]['lat'] )
         lons.append( st.sts[stid]['lon'] )
+    if len(lons) == 0:
+        print 'No ISUAG Data for %s' % (valid,)
+        sys.exit()
     numxout = 40
     numyout = 40
     xmin    = min(lons) - 1.
