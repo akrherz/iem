@@ -87,10 +87,13 @@ cursor.execute(sql)
 
 cnt = 0
 for row in cursor:
-	s = row["tgeom"]
-	if (s == None or s == ""):
-		continue
-	f = wellknowntext.convert_well_known_text(s)
+    s = row["tgeom"]
+    if (s == None or s == ""):
+        continue
+    try:
+        f = wellknowntext.convert_well_known_text(s)
+    except:
+        continue 
 
 	g = row["gtype"]
 	t = row["phenomena"]
