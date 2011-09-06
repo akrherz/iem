@@ -92,7 +92,10 @@ chmod($script, 0755);
  header("Content-type: application/octet-stream");
  header("Content-Disposition: attachment; filename=${rad}_${fp}.zip");
 
- readfile("${rad}_${fp}.zip");
+ if (file_exists("${rad}_${fp}.zip")){
+ 	readfile("${rad}_${fp}.zip");
+ 	unlink("${rad}_${fp}.zip");
+ }
 //header("Content-type: text/plain");
 //readfile($script);
 
