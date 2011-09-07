@@ -1,5 +1,6 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 22);
  include("$rootpath/include/database.inc.php");
  $dbconn = iemdb("mesosite");
 
@@ -36,6 +37,8 @@ $rs = pg_prepare($dbconn, "SEARCH", "SELECT *,
     $q = "SELECT *, to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
            from news ORDER by entered DESC LIMIT 1";
     $result = pg_exec($dbconn, $q);
+    $row = pg_fetch_assoc($result,0);
+    $id = intval($row["id"]);
   }
 
 if (pg_numrows($result) == 1 && $id > 0){
@@ -46,7 +49,7 @@ if (pg_numrows($result) == 1 && $id > 0){
 
 }
 
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
+for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++) 
 { 
   $id = $row["id"];
   echo "<h3 style=\"border-top: 2px solid #00f;\">". $row["title"] ."</h3>\n";

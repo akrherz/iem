@@ -1,5 +1,6 @@
 <?php 
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 23);
 $TITLE = "IEM | Past Features";
 $ts = isset($_GET["ts"]) ? $_GET["ts"] : time();
 include("$rootpath/include/database.inc.php");
