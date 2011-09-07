@@ -46,7 +46,7 @@ class Ob(object):
                               "%Y-%m-%d %H:%M")
         if self.data['valid'] == self.data['old_valid']: # Same Ob!
             for key in rs[0].keys():
-                if rs[0][key] is not None:
+                if rs[0][key] is not None and key not in ['valid','network','station','geom']:
                     self.data[key] = rs[0][key]
 
     def setObTimeGMT(self, ts):
