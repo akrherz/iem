@@ -9,6 +9,9 @@ pg_exec($mos, "SET TIME ZONE 'GMT'");
 $station = isset($_GET["station"])? $_GET["station"]: "KAMW";
 $ts = isset($_GET["valid"])? strtotime($_GET["valid"]): time();
 $year = date("Y", $ts);
+if ($year == 1970){
+	exit();
+}
 
 $rs = pg_prepare($mos, "SELECTOR", "select *, t06_1 ||'/'||t06_2 as t06, 
                  t12_1 ||'/'|| t12_2 as t12  from t${year} WHERE station = $1
