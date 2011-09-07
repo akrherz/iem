@@ -3,7 +3,7 @@ include("../../config/settings.inc.php");
 define("IEM_APPID", 6);
 include("$rootpath/include/database.inc.php");
 $pgconn = iemdb("mesosite");
-$rs = pg_prepare($pgconn, "SELECT", "SELECT *, 
+$rs = pg_prepare($pgconn, "NTSELECT", "SELECT *, 
             x(geom) as longitude, y(geom) as latitude from stations 
             WHERE online = 'y' and 
 			network = $1 ORDER by name");
@@ -20,6 +20,14 @@ $TITLE = "IEM Station Locations";
 $THISPAGE = "iem-networks";
 include("$rootpath/include/header.php"); ?>
 
+
+<?php 
+if (isset($_REQUEST['station'])){
+	$current = "tables";
+	include("setup.php");
+	include("sidebar.php");
+}
+?>
 <h3 class="heading">Network Location Tables</h3>
 
 <div class="text">
@@ -61,7 +69,7 @@ table that you need, please let use know.</p>
 }
 
 	if (strlen($network) > 0){
-		$result = pg_execute($pgconn, "SELECT", Array($network) );
+		$result = pg_execute($pgconn, "NTSELECT", Array($network) );
 		if ($format == "html"){
 		  echo "<p><table cellspacing='0' cellpadding='2' border='1'>\n";
 		  echo "<caption><b>". $network ." Network</b></caption>\n";
@@ -69,7 +77,7 @@ table that you need, please let use know.</p>
 			<th>Longitude<sup>1</sup></th><th>Elevation [m]</th><th>Archive Begins</th></tr></thead>\n";
 		  for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
 			echo "<tr>\n
-			  <td>". $row["id"] ."</td>\n
+			  <td><a href=\"site.php?station=". $row["id"] ."&network=". $row["network"] ."\">". $row["id"] ."</a></td>\n
 			  <td>". $row["name"] ."</td>\n
 			  <td>". round($row["latitude"],5) . "</td>\n
 			  <td>". round($row["longitude"],5) . "</td>\n

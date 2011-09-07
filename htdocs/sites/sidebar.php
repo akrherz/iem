@@ -9,6 +9,7 @@ $o = Array(
   "cal" => Array("name" => "Calibration", "uri" => "cal.phtml?"),
   "loc" => Array("name" => "Location Maps", "uri" => "mapping.php?"),
   "meteo" => Array("name" => "Meteogram", "uri" => "meteo.php?"),
+	"tables" => Array("name" => "Network Table", "uri" => "networks.php?"),
   "neighbors" => Array("name" => "Neighbors", "uri" => "neighbors.php?"),
   "7dayhilo" => Array("name" => "7 Day High/Low Plot", "uri" => "plot.php?prod=0&"),
   "monthhilo" => Array("name" => "Month High/Low Plot", "uri" => "plot.php?prod=1&"),
@@ -22,7 +23,7 @@ while (list($key,$val) = each($o))
 {
   $uri = sprintf("%sstation=%s&network=%s", $val["uri"], $station, $network);
   echo "<div style=\"";
-  if ($current == $key) echo "-moz-border-radius: 1em; border: 1px solid #c00 ;";
+  if ($current == $key) echo "background: #eaf;";
   echo "width: 150px; float: left; padding-left: 10px;\"><a href=\"$uri\">". $val["name"] ."</a></div>";
 }
 ?>

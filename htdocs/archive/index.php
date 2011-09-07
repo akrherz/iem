@@ -1,5 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
+define("IEM_APPID", 19);
 $THISPAGE = "archive-main";
 $TITLE = "IEM | Archived Data Resources";
 include("$rootpath/include/header.php"); ?>
