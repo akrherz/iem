@@ -37,6 +37,7 @@ def makeplot(ts):
         sm.append( row[2] * 100.)
         od.append( row[3] )
     if len(lats) == 0:
+        print 'Did not find SMOS data for ts: %s' % (ts,)
         return
     lats = np.array( lats )
     lons = np.array( lons )
