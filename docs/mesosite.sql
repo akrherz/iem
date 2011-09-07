@@ -1,4 +1,31 @@
 ---
+--- IEM Apps Database!
+---
+CREATE TABLE iemapps(
+  appid serial unique,
+  name varchar(256) unique not null,
+  description text,
+  url varchar(256) not null
+);
+GRANT ALL on iemapps to nobody,apache;
+
+CREATE TABLE iemapps_tags(
+	appid int references iemapps(appid),
+	tag varchar(24) not null
+);
+CREATE UNIQUE INDEX iemapps_tags_idx on iemapps_tags(appid,tag);
+GRANT ALL on iemapps_tags to nobody,apache;
+
+---
+--- El Nino
+---
+CREATE TABLE elnino(
+  monthdate date,
+  anom_34 real
+);
+GRANT SELECT on elnino to nobody,apache;
+
+---
 --- webcam logs
 ---
 CREATE TABLE camera_log(
