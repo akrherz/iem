@@ -141,7 +141,7 @@ class Ob(object):
        skyc1, skyc2, skyc3, skyl1, skyl2, skyl3) VALUES 
         (%(station)s, %(network)s, (select geom from current 
         WHERE station = %(station)s and network = %(network)s), %(tmpf)s, %(dwpf)s, 
-         (CASE WHEN %(phour)s >= -1 THEN %(phour)s ELSE None END)::numeric, 
+         (CASE WHEN %(phour)s >= -1 THEN %(phour)s ELSE null END)::numeric, 
          %(tsf0)s,%(tsf1)s,%(tsf2)s, 
          %(tsf3)s,%(rwis_subf)s,%(pres)s, 
          %(drct)s,%(sknt)s,%(pday)s, 
