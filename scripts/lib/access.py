@@ -78,9 +78,9 @@ class Ob(object):
         table = "summary_%s" % (self.data['valid'].year,)
         sql = """UPDATE """+ table +""" c SET 
 	pday = 
-      (CASE WHEN %(pday)s >= -1 THEN %(pday)s ELSE pday END), 
+      (CASE WHEN %(pday)s >= -1 THEN %(pday)s ELSE pday END)::numeric, 
      pmonth = 
-      (CASE WHEN %(pmonth)s >= -1 THEN %(pmonth)s ELSE pmonth END), 
+      (CASE WHEN %(pmonth)s >= -1 THEN %(pmonth)s ELSE pmonth END)::numeric, 
      max_tmpf =
       (CASE WHEN max_tmpf < %(tmpf)s THEN %(tmpf)s ELSE max_tmpf END),
      min_tmpf =
@@ -109,7 +109,7 @@ class Ob(object):
     def update_current(self, db, dbpool):
         sql = """UPDATE current c SET tmpf = %(tmpf)s, dwpf = %(dwpf)s, 
 	phour = 
-      (CASE WHEN %(phour)s >= -1 THEN %(phour)s ELSE phour END), 
+      (CASE WHEN %(phour)s >= -1 THEN %(phour)s ELSE phour END)::numeric, 
        tsf0 = %(tsf0)s, tsf1 = %(tsf1)s, tsf2 = %(tsf2)s, 
        tsf3 = %(tsf3)s, rwis_subf = %(rwis_subf)s, pres = %(pres)s, 
        drct = %(drct)s, sknt = %(sknt)s, pday = %(pday)s, 
