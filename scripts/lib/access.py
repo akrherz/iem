@@ -76,7 +76,8 @@ class Ob(object):
                 traceback.print_exc()
 
     def updateDatabaseSummaryTemps(self, db, dbpool=None):
-        sql = """UPDATE summary_%(year)s SET 
+        table = "summary_%s" % (self.data['valid'].year,)
+        sql = """UPDATE """+ table +""" SET 
               max_tmpf = 
        (CASE WHEN max_tmpf < %(max_tmpf)s THEN %(max_tmpf)s ELSE max_tmpf END),
       min_tmpf = 
