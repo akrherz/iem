@@ -139,11 +139,15 @@ def estimate_snow( ts ):
           nt.sts[id]['snow'] = 0.0001
         elif snowfall < 0:
           nt.sts[id]['snow'] = 0
+        elif numpy.isnan(snowfall):
+          nt.sts[id]['snow'] = 0
         else:
           nt.sts[id]['snow'] = snowfall
         if snowdepth > 0 and snowdepth < 0.1:
           nt.sts[id]['snowd'] = 0.0001
         elif snowdepth < 0:
+          nt.sts[id]['snowd'] = 0
+        elif numpy.isnan(snowdepth):
           nt.sts[id]['snowd'] = 0
         else:
           nt.sts[id]['snowd'] = snowdepth
@@ -194,7 +198,6 @@ def commit( ts ):
         nt.sts[id]['high'], nt.sts[id]['low'], nt.sts[id]['precip'],
         nt.sts[id]['snow'],
         ts.strftime("%m%d"), ts.year, ts.month, nt.sts[id]['snowd'])
-        
         coop.query( sql )
        
 
