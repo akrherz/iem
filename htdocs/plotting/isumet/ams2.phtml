@@ -1,0 +1,48 @@
+<?php 
+include("../../../config/settings.inc.php");
+define("IEM_APPID", 24);
+$TITLE = "IEM | ISU AMS Station #2 on Agronomy";
+include("$rootpath/include/header.php"); 
+
+$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
+$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
+$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$myTime = mktime(0,0,0,$month, $day, $year);
+
+$dirRef = strftime("%Y/%m/%d", $myTime);
+$dataurl = "http://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0010.dat";
+
+?>
+<?php include("$rootpath/include/forms.php"); ?>
+
+<?php
+  $station = "isumet";
+?>
+
+<p>You can plot 1 minute data for this location.  Note that 
+the archive <br> begins 8 Sep 2011.</p>
+
+<table>
+<tr class="even"><td>
+
+
+  <form method="GET" action="ams2.phtml">
+  <?php yearSelect2(2011, $year, "year"); ?>
+  <?php monthSelect2($month, "month"); ?>
+  <?php echo daySelect2($day, "day"); ?>
+
+  <input type="submit" value="Make Plot"></form>
+
+</td></tr><tr><td>
+<a href="<?php echo $dataurl; ?>">View raw data file</a><br />
+<BR>
+<img src="1min.php?station=ot0010&year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<BR>
+<img src="1min_inside.php?station=ot0010&year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<BR>
+<img src="1min_V.php?station=ot0010&year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<BR>
+<img src="1min_P.php?station=ot0010&year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+</td></tr></table>
+</div>
+<?php include("$rootpath/include/footer.php"); ?>

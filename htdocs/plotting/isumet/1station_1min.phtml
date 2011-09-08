@@ -17,10 +17,6 @@ $dataurl = "http://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0002
 <div class="text">
 <a href="/other/">Other Networks</a> &nbsp;<b> > </b> &nbsp; ISU AMS Station
 
-<?php
-  $station = "isumet";
-?>
-
 <p>You can plot 1 minute data for this location.  Note that 
 the archive <br> begins 15 Jan 2003.</p>
 
@@ -76,13 +72,13 @@ the archive <br> begins 15 Jan 2003.</p>
 </td></tr><tr><td>
 <a href="<?php echo $dataurl; ?>">View raw data file</a><br />
 <BR>
-<img src="http://mesonet.agron.iastate.edu/plotting/isumet/1min.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
+<img src="http://mesonet.agron.iastate.edu/plotting/isumet/1min.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
 <BR>
-<img src="http://mesonet.agron.iastate.edu/plotting/isumet/1min_inside.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
+<img src="http://mesonet.agron.iastate.edu/plotting/isumet/1min_inside.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
 <BR>
-<img src="http://mesonet.agron.iastate.edu/plotting/isumet/1min_V.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
+<img src="http://mesonet.agron.iastate.edu/plotting/isumet/1min_V.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
 <BR>
-<img src="http://mesonet.agron.iastate.edu/plotting/isumet/1min_P.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>&station=<?php echo $station; ?>" ALT="Time Series">
+<img src="http://mesonet.agron.iastate.edu/plotting/isumet/1min_P.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
 </td></tr></table>
 </div>
 <?php include("$rootpath/include/footer.php"); ?>
