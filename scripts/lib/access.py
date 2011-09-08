@@ -137,7 +137,7 @@ class Ob(object):
        skyc2 = %(skyc2)s, skyl2 = %(skyl2)s, 
        skyc3 = %(skyc3)s, skyl3 = %(skyl3)s, 
        skyc4 = %(skyc4)s, skyl4 = %(skyl4)s,
-       valid = '%(valid)s', pcounter = %(pcounter)s, 
+       valid = '%(valid)s', pcounter = %(pcounter)s, discharge = %(discharge)s ,
        raw = (CASE WHEN length(raw) > length(%(raw)s) and valid = '%(valid)s'
           THEN raw ELSE %(raw)s END)
        WHERE station = %(station)s and network = %(network)s """ % self.data
@@ -151,7 +151,7 @@ class Ob(object):
        c1smv, c2smv, c3smv, c4smv, c5smv, vsby, 
        c1tmpf, c2tmpf, c3tmpf, c4tmpf, c5tmpf, 
        gust, raw, alti, rstage, ozone, co2, valid, 
-       skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, pcounter) VALUES 
+       skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, pcounter, discharge) VALUES 
         (%(station)s, %(network)s, (select geom from current 
         WHERE station = %(station)s and network = %(network)s), %(tmpf)s, %(dwpf)s, 
          (CASE WHEN %(phour)s >= -1 THEN %(phour)s ELSE null END)::numeric, 
@@ -168,7 +168,7 @@ class Ob(object):
          %(rstage)s, %(ozone)s,%(co2)s, 
          '%(valid)s', %(skyc1)s, %(skyc2)s, %(skyc3)s, %(skyc4)s,
                    %(skyl1)s, %(skyl2)s, %(skyl3)s, %(skyl4)s, 
-                   %(pcounter)s)  """ % self.data
+                   %(pcounter)s, %(discharge)s)  """ % self.data
         self.execQuery(sql, db, dbpool)
 
     def updateDatabase(self, db, dbpool=None):
