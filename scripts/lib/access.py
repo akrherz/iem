@@ -75,6 +75,16 @@ class Ob(object):
                 print sql
                 traceback.print_exc()
 
+    def updateDatabaseSummaryTemps(self, db, dbpool=None):
+        sql = """UPDATE summary_%(year)s SET 
+              max_tmpf = 
+       (CASE WHEN max_tmpf < %(max_tmpf)s THEN %(max_tmpf)s ELSE max_tmpf END),
+      min_tmpf = 
+       (CASE WHEN min_tmpf > %(min_tmpf)s THEN %(min_tmpf)s ELSE min_tmpf END) 
+      WHERE station = %(station)s and day = '%(valid)s'::date 
+      and network = %(network)s""" % self.data
+        self.execQuery(sql , db, dbpool)
+
     def update_summary(self, db, dbpool):
         table = "summary_%s" % (self.data['valid'].year,)
         sql = """UPDATE """+ table +""" c SET 
