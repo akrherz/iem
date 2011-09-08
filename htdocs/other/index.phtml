@@ -1,5 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
+define("IEM_APPID", 25);
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
@@ -42,6 +43,7 @@ purpose is to monitor for high winds impacting traffic.
 <ul>
 <li><a href="<?php echo $rooturl; ?>/plotting/mesonorth/ot_10min.phtml">Indoor Temperature for Met Cluster Room</a>, B548 Agronomy Hall.  Outfitted with 4 One-Wire sensors reporting every minute.</li>
 <li><a href="<?php echo $rooturl; ?>/plotting/isumet/1station_1min.phtml">ISU AMS Station</a>, On the roof.  Davis Weather station reporting every minute.</li>
+<li><a href="<?php echo $rooturl; ?>/plotting/isumet/ams2.phtml">ISU AMS Station #2</a>, On the roof.  Davis Vantage Pro 2, installed 8 Sep 2011.</li>
 <li><a href="<?php echo $rooturl; ?>/plotting/iemcc/">IEM Central Command</a>, On the roof.  High quality Campbell Scientific sensors reporting every minute.</li>
 </ul>
 
