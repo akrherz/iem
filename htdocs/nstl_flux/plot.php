@@ -120,7 +120,7 @@ if (sizeof($data["nstl10"]) > 1) {
 if (sizeof($data["nstlnsp"]) > 1) {
  $lineplot3=new LinePlot($data["nstlnsp"], $times["nstlnsp"]);
  $lineplot3->SetColor("black");
- $lineplot3->SetLegend( $labels["nspr"] );
+ $lineplot3->SetLegend( $labels["nstlnsp"] );
  $lineplot3->SetWeight(2);
  $graph->Add($lineplot3);
 }
