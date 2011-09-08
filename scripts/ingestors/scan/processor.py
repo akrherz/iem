@@ -108,7 +108,7 @@ def savedata( data , maxts ):
     iem.data['year'] = ts.year
     for key in data.keys():
         if mapping.has_key(key) and mapping[key]['iemvar'] != "":
-            iem.data[ mapping[key]['iemvar'] ] = data[key]
+            iem.data[ mapping[key]['iemvar'] ] = data[key].strip()
 
     iem.data['valid'] = ts.strftime("%Y-%m-%d %H:%M")
     iem.data['tmpf'] = mesonet.c2f(float(iem.data['tmpc']))
