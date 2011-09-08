@@ -8,7 +8,7 @@ yyyy = now.year
 rs = iemdb.query("""select station, network, sum(rain) as rain from 
   (SELECT station, network, max(phour) as rain, 
   extract(hour from (valid - '1 minute'::interval)) as hour from current_log 
-  WHERE (network IN ('AWOS') or network ~* 'ASOS' or network ~* 'DCP') 
+  WHERE (network IN ('AWOS') or network ~* 'ASOS') 
   and date(valid) = 'TODAY'::timestamp 
   and phour > 0 
   GROUP by station, network, hour) as foo 
