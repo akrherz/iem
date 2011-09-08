@@ -48,6 +48,7 @@ class Ob(object):
             for key in rs[0].keys():
                 if rs[0][key] is not None and key not in ['valid','network','station','geom']:
                     self.data[key] = rs[0][key]
+        return True
 
     def setObTimeGMT(self, ts):
         """
