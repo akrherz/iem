@@ -1,6 +1,6 @@
 
 import csv, pg, mx.DateTime, traceback
-other = pg.DB('other')
+other = pg.DB('other', 'iemdb')
 
 # Figure out max valid times
 maxts = {}
