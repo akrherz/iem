@@ -110,15 +110,20 @@ def savedata( data , maxts ):
         if mapping.has_key(key) and mapping[key]['iemvar'] != "":
             iem.data[ mapping[key]['iemvar'] ] = data[key].strip()
 
-    iem.data['valid'] = ts.strftime("%Y-%m-%d %H:%M")
-    iem.data['tmpf'] = mesonet.c2f(float(iem.data['tmpc']))
-    iem.data['dwpf'] = mesonet.c2f(float(iem.data['dwpc']))
-    iem.data['c1tmpf'] = mesonet.c2f(float(iem.data['c1tmpc']))
-    iem.data['c2tmpf'] = mesonet.c2f(float(iem.data['c2tmpc']))
-    iem.data['c3tmpf'] = mesonet.c2f(float(iem.data['c3tmpc']))
-    iem.data['c4tmpf'] = mesonet.c2f(float(iem.data['c4tmpc']))
-    iem.data['c5tmpf'] = mesonet.c2f(float(iem.data['c5tmpc']))     
-
+    iem.data['valid'] = ts
+    iem.data['tmpf'] = mesonet.c2f(float(iem.data.get('tmpc')))
+    iem.data['dwpf'] = mesonet.c2f(float(iem.data.get('dwpc')))
+    iem.data['c1tmpf'] = mesonet.c2f(float(iem.data.get('c1tmpc')))
+    iem.data['c2tmpf'] = mesonet.c2f(float(iem.data.get('c2tmpc')))
+    iem.data['c3tmpf'] = mesonet.c2f(float(iem.data.get('c3tmpc')))
+    iem.data['c4tmpf'] = mesonet.c2f(float(iem.data.get('c4tmpc')))
+    iem.data['c5tmpf'] = mesonet.c2f(float(iem.data.get('c5tmpc')))     
+    iem.data['c1smv'] = float(iem.data.get('c1smv'))
+    iem.data['c2smv'] = float(iem.data.get('c2smv'))
+    iem.data['c3smv'] = float(iem.data.get('c3smv'))
+    iem.data['c4smv'] = float(iem.data.get('c4smv'))
+    iem.data['c5smv'] = float(iem.data.get('c5smv'))
+    iem.data['phour'] = float(iem.data.get('phour'))
     iem.updateDatabase(iemdb)
 
     sql = """INSERT into t%(year)s_hourly (station, valid, tmpf, 
@@ -127,15 +132,15 @@ def savedata( data , maxts ):
          c5tmpf, 
          c1smv, c2smv, c3smv, c4smv, c5smv, phour) 
         VALUES 
-        ('%(station)s', '%(valid)s', '%(tmpf)s', '%(dwpf)s',
-         %(srad)s,'%(sknt)s',
+        (%(station)s, '%(valid)s', %(tmpf)s, %(dwpf)s,
+         %(srad)s,%(sknt)s,
         %(drct)s, %(relh)s, %(pres)s, %(c1tmpf)s, 
-        '%(c2tmpf)s', 
-        '%(c3tmpf)s', '%(c4tmpf)s', '%(c5tmpf)s', '%(c1smv)s',
-         '%(c2smv)s', 
-        '%(c3smv)s', '%(c4smv)s', '%(c5smv)s', '%(phour)s')
+        %(c2tmpf)s, 
+        %(c3tmpf)s, %(c4tmpf)s, %(c5tmpf)s, %(c1smv)s,
+         %(c2smv)s, 
+        %(c3smv)s, %(c4smv)s, %(c5smv)s, %(phour)s)
         """ % iem.data
-    scandb.query(sql.replace('None','null'))
+    scandb.query(sql)
 
 def load_times():
     """
@@ -162,7 +167,7 @@ def main():
         for row in lines[2:]:
             if row.strip() == "":
                 continue
-            tokens = row.split(",")
+            tokens = row.replace("'",'').split(",")
             for col, token in zip(cols, tokens):
                 if col.strip() == '':
                     continue
