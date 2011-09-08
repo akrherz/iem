@@ -32,13 +32,18 @@ def doit(now):
     if not st.sts.has_key(id):
       continue
     #labels.append( id[2:] )
-    lats.append( st.sts[id]['lat'] + (random.random() * 0.001))
+    lats.append( st.sts[id]['lat'] )
     lons.append( st.sts[id]['lon'] )
     vals.append( row[1] )
     if row[2] == 'IA_COOP' and row[1] > iamax:
         iamax = row[1]
 
 
+  if iamax == 0:
+      # Dummy in some bad data to prevent the contouring from going mad
+      lats.append( 42. )
+      lons.append( -96.0 )
+      vals.append( 1. )
     
   # Plot Iowa
   cfg = {
