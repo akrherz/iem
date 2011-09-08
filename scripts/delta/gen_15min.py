@@ -22,7 +22,7 @@ w1 = now + mx.DateTime.RelativeDateTime(minutes=-10)
 
 
 sql = "SELECT * from current_log WHERE \
-	valid BETWEEN '%s' and '%s'" % (w0.strftime("%Y-%m-%d %H:%M"), \
+	valid BETWEEN '%s' and '%s' and alti is not null" % (w0.strftime("%Y-%m-%d %H:%M"), \
 	w1.strftime("%Y-%m-%d %H:%M") ) 
 rs = iemdb.query(sql).dictresult()
 lh = {}
