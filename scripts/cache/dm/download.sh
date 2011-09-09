@@ -1,27 +1,23 @@
 #!/bin/bash
 
 DATADIR="`date --date 'last tuesday' +'%Y/%b%-d'`"
-#DATADIR="`date --date 'last tuesday' +'%Y'`"
 TS="`date --date 'last tuesday' +'%Y'`"
 TS2="`date --date 'last tuesday' +'%y%m%d'`"
 TS3="`date --date 'last tuesday' +'%m%d%y'`"
-#DATAFILE="usdm${TS3}.zip"
-DATAFILE="usdm${TS2}.zip"
-PASSWORD=`cat passwd`
+DATAFILE="usdm${TS2}m.zip"
 
-#lftp -u drought,${PASSWORD} -e "get /dm/shapefiles/$DATADIR/$DATAFILE; quit" http://drought.unl.edu
 wget -q http://droughtmonitor.unl.edu/shapefiles_combined/${TS}/usdm${TS2}m.zip
 
 unzip $DATAFILE
 
 # Combine Coverages
-/mesonet/python/bin/python combine.py $TS2
+#/mesonet/python/bin/python combine.py $TS2
 
 # Create combined zipfile
 #zip dm_current.zip dm_$TS2.shp dm_$TS2.shx dm_$TS2.dbf
-mv dm_$TS2.shp dm_current.shp
-mv dm_$TS2.shx dm_current.shx
-mv dm_$TS2.dbf dm_current.dbf
+mv usdm$TS2.shp dm_current.shp
+mv usdm$TS2.shx dm_current.shx
+mv usdm$TS2.dbf dm_current.dbf
 zip dm_current.zip dm_current.shp dm_current.shx dm_current.dbf
 
 # Copy it to the archive
@@ -41,7 +37,7 @@ ftime="`date --date 'last tuesday' +'%Y%m%d%H'`00"
 
 # Cleanup
 rm dm_current.shp dm_current.shx dm_current.dbf dm_current.zip
-mv Drought_* USDM*zip last/
+mv usdm* last/
 
 #ogr2ogr -t_srs EPSG:4326 test.shp Drought_Impacts_US.shp
 
