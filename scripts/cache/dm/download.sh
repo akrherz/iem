@@ -2,14 +2,15 @@
 
 DATADIR="`date --date 'last tuesday' +'%Y/%b%-d'`"
 #DATADIR="`date --date 'last tuesday' +'%Y'`"
-TS="`date --date 'last tuesday' +'%y%m%d'`"
-TS2="`date --date 'last tuesday' +'%Y%m%d'`"
+TS="`date --date 'last tuesday' +'%Y'`"
+TS2="`date --date 'last tuesday' +'%y%m%d'`"
 TS3="`date --date 'last tuesday' +'%m%d%y'`"
 #DATAFILE="usdm${TS3}.zip"
-DATAFILE="USDM${TS3}.zip"
+DATAFILE="usdm${TS2}.zip"
 PASSWORD=`cat passwd`
 
-lftp -u drought,${PASSWORD} -e "get /dm/shapefiles/$DATADIR/$DATAFILE; quit" http://drought.unl.edu
+#lftp -u drought,${PASSWORD} -e "get /dm/shapefiles/$DATADIR/$DATAFILE; quit" http://drought.unl.edu
+wget -q http://droughtmonitor.unl.edu/shapefiles_combined/${TS}/usdm${TS2}m.zip
 
 unzip $DATAFILE
 
