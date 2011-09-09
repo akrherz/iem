@@ -1,5 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 29);
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 include("$rootpath/include/database.inc.php");
 $pgconn = iemdb("access");
@@ -27,10 +28,10 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   }
   $data[$row["station"]][intval($row["month"])-1] = $row["precip"];
 }
-$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.0.0/resources/css/ext
+$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext
 -all.css"/>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/ext-all.js"></script>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/ext-all.js"></script>
 <script type="text/javascript" src="../../ext/ux/TableGrid.js"></script>
 <script>
 Ext.onReady(function(){
