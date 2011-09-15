@@ -4,6 +4,7 @@
 <policy> 
 <allow-from http-request-headers="*"> 
 <domain uri="*" /> 
+<domain uri="http://*" />
 </allow-from> 
 <grant-to> 
 <resource path="/" include-subpaths="true" /> 
