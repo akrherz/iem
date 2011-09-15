@@ -66,7 +66,8 @@ Select Date after 14 May 2010:
 <table cellpadding="2" cellspacing="0" border="1">
 <tr><th>Day</th><th>High Temperature</th><th>Low Temperature</th><th>Rainfall [inch]</th></tr>
 <?php
-$rs2 = pg_query($iem->dbconn, "SELECT day, max_tmpf, min_tmpf, pday from summary_2010 WHERE station = 'OT0009' ORDER by day ASC");
+$rs2 = pg_query($iem->dbconn, "SELECT day, max_tmpf, min_tmpf, pday from summary 
+  WHERE station = 'OT0009' ORDER by day DESC");
 for($i=0;$row=@pg_fetch_array($rs2,$i);$i++){
   echo sprintf("<tr><th>%s</th><td>%.1f</td><td>%.1f</td><td>%.2f</td></tr>", 
    $row["day"], $row["max_tmpf"], $row["min_tmpf"], $row["pday"]);
