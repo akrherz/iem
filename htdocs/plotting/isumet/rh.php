@@ -1,5 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
+include("$rootpath/include/mlib.php");
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
@@ -23,18 +24,15 @@ $titleDate = strftime("%b %d, %Y", $myTime);
 $dirRef = strftime("%Y/%m/%d", $myTime);
 
 $srad = array();
-$irelh = array();
-$orelh = array();
+$_dwpf = array();
 
 if ($station == null){
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
 	while (list ($line_num, $line) = each ($fcontents)) {
   		$valid[] = strtotime( substr($line, 0, 26) );
   		$parts = preg_split ("/\s+/", $line);
-		$mph[] = intval($parts[8]);
-		$drct[] = intval($parts[9]);
-		
-	} // End of while
+		$_dwpf[] = dwpf(intval($parts[6]), intval($parts[7]));
+	}
 } else {
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat");
 	/*
@@ -50,8 +48,7 @@ if ($station == null){
 		}
   		$tstring = sprintf("%s %s", $dirRef, $tokens[3]);
   		$valid[] = strtotime($tstring);
-  		$orelh[] = floatval($tokens[8]);
-  		$irelh[] = floatval($tokens[18]);
+  		$_dwpf[] = dwpf(floatval($tokens[5]), floatval($tokens[8]));
  	} // End of while
 	
 }
@@ -67,7 +64,7 @@ $graph->SetScale("datelin");
 $graph->img->SetMargin(55,40,55,60);
 
 //$graph->yaxis->scale->ticks->SetPrecision(1);
-$graph->title->Set("Inside and Outline Relative Humidity");
+$graph->title->Set("Dew Point Temperature");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
@@ -81,7 +78,7 @@ $graph->yaxis->SetColor("blue");
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 
-$graph->yaxis->SetTitle("Relative Humidity [%]");
+$graph->yaxis->SetTitle("Dew Point [F]");
 
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
@@ -92,17 +89,10 @@ $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
-$lineplot=new LinePlot($irelh, $valid);
-$lineplot->SetLegend("Inside RH");
+$lineplot=new LinePlot($_dwpf, $valid);
 $lineplot->SetColor("blue");
 
-$lineplot2=new LinePlot($orelh, $valid);
-$lineplot2->SetLegend("Outside RH");
-$lineplot2->SetColor("red");
-
-
 $graph->Add($lineplot);
-$graph->Add($lineplot2);
 
 $graph->Stroke();
 ?>
