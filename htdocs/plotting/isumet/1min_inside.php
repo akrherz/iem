@@ -21,10 +21,12 @@ $dirRef = strftime("%Y/%m/%d", $myTime);
 
 $prec = array();
 $tmpf = array();
+$relh = array();
 
 if ($station == null){
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
 	while (list ($line_num, $line) = each ($fcontents)) {
+		$parts = preg_split ("/\s+/", $line);
   		$valid[] = strtotime( substr($line, 0, 26) );
   		$tmpf[] = round (substr($line, 31, 5),2);
 		
@@ -45,6 +47,7 @@ if ($station == null){
   		$tstring = sprintf("%s %s", $dirRef, $tokens[3]);
   		$valid[] = strtotime($tstring);
   		$tmpf[] = $tokens[17];
+  		$relh[] = $tokens[18];
  	} // End of while
 	
 }
@@ -57,6 +60,7 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
 $graph->SetScale("datelin");
+$graph->SetY2Scale("lin",0,100);
 
 $graph->img->SetMargin(65,40,45,60);
 //$graph->xaxis->SetFont(FONT1,FS_BOLD);
@@ -66,7 +70,7 @@ $graph->xaxis->SetLabelAngle(90);
 //$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->yaxis->scale->ticks->Set(1,0.5);
 //$graph->yscale->SetGrace(10);
-$graph->title->Set("Map Room Temperature");
+$graph->title->Set("Map Room Temperature & Relative Humidity");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
@@ -75,6 +79,7 @@ $graph->legend->Pos(0.01,0.075);
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
 
+$graph->y2axis->SetTitle("Relative Humidity [%]");
 
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
@@ -95,9 +100,9 @@ $lineplot->SetColor("blue");
 //[DMF]$lineplot2->SetColor("blue");
 
 // Create the linear plot
-//[DMF]$lineplot3=new LinePlot($sr);
-//[DMF]$lineplot3->SetLegend("Solar Rad");
-//[DMF]$lineplot3->SetColor("black");
+$lineplot3=new LinePlot($relh, $valid);
+$lineplot3->SetLegend("Rel Humid");
+$lineplot3->SetColor("black");
 
 // Box for error notations
 //[DMF]$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
@@ -109,6 +114,7 @@ $lineplot->SetColor("blue");
 //[DMF]$graph->AddText($t1);
 
 $graph->Add($lineplot);
+$graph->AddY2($lineplot3);
 $graph->Stroke();
 
 ?>

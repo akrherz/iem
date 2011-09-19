@@ -17,13 +17,16 @@ $titleDate = strftime("%b %d, %Y", $myTime);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
 $tmpf = array();
+$relh = array();
 $valid = array();
 
 if ($station == null){
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
 	while (list ($line_num, $line) = each ($fcontents)) {
+		$parts = preg_split ("/\s+/", $line);
   		$valid[] = strtotime( substr($line, 0, 26) );
   		$tmpf[] = round (substr($line, 36, 6),2);
+  		$relh[] = intval($parts[7]);
  	} // End of while
 } else {
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat");
@@ -41,6 +44,7 @@ if ($station == null){
   		$tstring = sprintf("%s %s", $dirRef, $tokens[3]);
   		$valid[] = strtotime($tstring);
   		$tmpf[] = $tokens[5];
+  		$relh[] = floatval($tokens[8]);
  	} // End of while
 	
 }
@@ -52,6 +56,7 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
 $graph->SetScale("datlin");
+$graph->SetY2Scale("lin",0,100);
 
 $graph->img->SetMargin(65,40,45,60);
 //$graph->xaxis->SetFont(FONT1,FS_BOLD);
@@ -60,19 +65,17 @@ $graph->xaxis->SetLabelAngle(90);
 //$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->yaxis->scale->ticks->Set(1,0.5);
 //$graph->yscale->SetGrace(10);
-$graph->title->Set("Outside Temperature");
+$graph->title->Set("Outside Temperature & Relative Humidity");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
-$graph->legend->Pos(0.01,0.075);
+$graph->legend->Pos(0.01,0.065);
 
-//[DMF]$graph->y2axis->scale->ticks->Set(100,25);
-//[DMF]$graph->y2axis->scale->ticks->SetPrecision(0);
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
 
-//[DMF]$graph->y2axis->SetTitle("Solar Radiation [W m**-2]");
+$graph->y2axis->SetTitle("Relative Humidity [%]");
 
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
@@ -93,9 +96,9 @@ $lineplot->SetColor("red");
 //[DMF]$lineplot2->SetColor("blue");
 
 // Create the linear plot
-//[DMF]$lineplot3=new LinePlot($sr);
-//[DMF]$lineplot3->SetLegend("Solar Rad");
-//[DMF]$lineplot3->SetColor("black");
+$lineplot3=new LinePlot($relh, $valid);
+$lineplot3->SetLegend("Rel Humid");
+$lineplot3->SetColor("black");
 
 // Box for error notations
 //[DMF]$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
@@ -108,7 +111,7 @@ $lineplot->SetColor("red");
 
 //[DMF]$graph->Add($lineplot2);
 $graph->Add($lineplot);
-//[DMF]$graph->AddY2($lineplot3);
+$graph->AddY2($lineplot3);
 
 $graph->Stroke();
 
