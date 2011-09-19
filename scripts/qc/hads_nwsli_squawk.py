@@ -5,7 +5,9 @@ hcursor = HADS.cursor()
 hcursor2 = HADS.cursor()
 
 hcursor.execute("""
-select nwsli, count(*), max(product) from unknown GROUP by nwsli ORDER by count DESC LIMIT 5
+ select nwsli, count(*), max(product) from unknown 
+ where product !~* 'KTIR'
+ GROUP by nwsli ORDER by count DESC LIMIT 5
 """)
 for row in hcursor:
     print '%7s %5s %s' % (row[0], row[1], row[2])
@@ -25,3 +27,20 @@ for row in hcursor:
 
    
 HADS.commit()
+
+ASOS = iemdb.connect('asos')
+acursor = ASOS.cursor()
+acursor2 = ASOS.cursor()
+
+acursor.execute("""
+ select id, count(*), max(valid) from unknown 
+ GROUP by id ORDER by count DESC LIMIT 5
+""")
+for row in acursor:
+    print 'ASOS %7s %5s %s' % (row[0], row[1], row[2])
+    acursor2.execute("""
+    DELETE from unknown where id = %s
+    """, (row[0],))
+
+ASOS.commit()
+
