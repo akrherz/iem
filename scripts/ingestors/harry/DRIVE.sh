@@ -11,6 +11,6 @@ fi
 # Inject into database
 psql -f /tmp/harry.sql -h iemdb coop
 # Estimate ia0000
-/mesonet/python/bin/python ../../climodat/compute_ia0000.py $1 $2
+#/mesonet/python/bin/python ../../climodat/compute_ia0000.py $1 $2
 # Compute new records
 /mesonet/python/bin/python new_records.py $1 $2

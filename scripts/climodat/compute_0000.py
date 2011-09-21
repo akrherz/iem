@@ -1,0 +1,69 @@
+"""
+Compute the statewide average data based on IEMRE analysis
+"""
+try:
+    import netCDF4 as netCDF3
+except:
+    import netCDF3
+import iemdb
+import numpy
+import iemre
+import mesonet
+import mx.DateTime
+COOP = iemdb.connect("coop", bypass=True)
+ccursor = COOP.cursor()
+POSTGIS = iemdb.connect("postgis", bypass=True)
+pcursor = POSTGIS.cursor()
+
+def do_day(valid):
+    for state in ('IA','MN','WI','MI','OH','IN','IL','MO','KS','KY','ND','SD'):
+        do_state_day(state, valid)
+
+def do_state_day(stabbr, valid):
+    """
+    Create the statewide average value based on averages of the IEMRE 
+    """
+    # Get the bounds of the state
+    pcursor.execute("""
+    SELECT xmin(ST_Extent(the_geom)), xmax(ST_Extent(the_geom)), 
+    ymin(ST_Extent(the_geom)), ymax(ST_Extent(the_geom)) from states
+    where state_abbr = %s
+    """, (stabbr,))
+    row = pcursor.fetchone()
+    (ll_i, ll_j) = iemre.find_ij(row[0], row[2])
+    (ur_i, ur_j) = iemre.find_ij(row[1], row[3])
+
+    # Open IEMRE
+    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (valid.year,))
+    tcnt = int((valid - mx.DateTime.DateTime(valid.year,1,1)).days)
+
+    high_tmpk = nc.variables['high_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
+    high = mesonet.k2f( numpy.average(high_tmpk) )
+
+    low_tmpk = nc.variables['low_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
+    low = mesonet.k2f( numpy.average(low_tmpk) )
+
+    p01d = nc.variables['p01d'][tcnt,ll_j:ur_j,ll_i:ur_i]
+    precip = numpy.average(p01d) / 25.4
+    
+    nc.close()
+    
+    print '%s %s High: %4.1f Low: %4.1f Precip: %4.2f' % (stabbr, valid.strftime("%Y-%m-%d"),
+                                                high, low, precip)
+    
+    # Now we insert into the proper database!
+    ccursor.execute("""DELETE from alldata_%s WHERE stationid = '%s0000' 
+    and day = '%s'""" % ( stabbr, stabbr.lower(), valid.strftime("%Y-%m-%d"),))
+    
+    ccursor.execute("""INSERT into alldata_%s 
+    (stationid, day, high, low, precip, snow, snowd, estimated, year, month, 
+    sday)
+    VALUES ('%s0000', '%s', %.0f, %.0f, %.2f, %.1f, 0, true, %s, %s, '%s')""" % (
+    stabbr, stabbr.lower(), valid.strftime("%Y-%m-%d"), high, low, precip, 
+    0, valid.year, valid.month, valid.strftime("%m%d")))
+    
+if __name__ == '__main__':
+    do_day( mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1))
+    
+    ccursor.close()
+    COOP.commit()
