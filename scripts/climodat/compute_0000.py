@@ -9,6 +9,7 @@ import iemdb
 import numpy
 import iemre
 import mesonet
+import sys
 import mx.DateTime
 COOP = iemdb.connect("coop", bypass=True)
 ccursor = COOP.cursor()
@@ -63,7 +64,10 @@ def do_state_day(stabbr, valid):
     0, valid.year, valid.month, valid.strftime("%m%d")))
     
 if __name__ == '__main__':
-    do_day( mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1))
+    if len(sys.argv) == 4:
+        do_day( mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
+    else:
+        do_day( mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1))
     
     ccursor.close()
     COOP.commit()
