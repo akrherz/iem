@@ -46,6 +46,8 @@ def do_state_day(stabbr, valid):
 
     p01d = nc.variables['p01d'][tcnt,ll_j:ur_j,ll_i:ur_i]
     precip = numpy.average(p01d) / 25.4
+    if precip < 0:
+        precip = 0
     
     nc.close()
     
