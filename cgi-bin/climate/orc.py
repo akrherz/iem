@@ -11,8 +11,8 @@ iemaccess = pg.connect('iem', 'iemdb', user='nobody')
 asos = pg.connect('asos', 'iemdb', user='nobody')
 
 ADJUSTMENT = 0
-s = mx.DateTime.DateTime(2010,12,18)
-e = mx.DateTime.DateTime(2011,1,17)
+s = mx.DateTime.DateTime(2011,8,18)
+e = mx.DateTime.DateTime(2011,9,17)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 def averageTemp(db, hi="high", lo="low"):
