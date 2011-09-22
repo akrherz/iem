@@ -6,15 +6,16 @@ i = iemdb.iemdb()
 coop = i['coop']
 
 for id in nt.sts.keys():
-  fn = "coop_data/%s.csv" % (st.sts[id]['name'].replace(" ", "_"), )
+  fn = "coop_data/%s.csv" % (nt.sts[id]['name'].replace(" ", "_"), )
   out = open(fn, 'w')
   out.write("station,station_name,lat,lon,day,high,low,precip,snow,\n")
-  sql = "SELECT * from %s WHERE station = '%s' ORDER by day ASC" \
-         % (constants.get_table(id), id.lower(), )
+  sql = "SELECT * from %s WHERE station = '%s' ORDER by day ASC" % (
+         constants.get_table(id), id)
 
   rs = coop.query(sql).dictresult()
   for i in range(len(rs)):
-    out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,\n" % (id.lower(), st.sts[id]['name'], st.sts[id]['lat'], st.sts[id]['lon'],\
+    out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,\n" % (id.lower(), nt.sts[id]['name'], 
+       nt.sts[id]['lat'], nt.sts[id]['lon'],
        rs[i]['day'], rs[i]['high'], rs[i]['low'], rs[i]['precip'], rs[i]['snow']) )
 
   out.close()
