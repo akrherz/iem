@@ -1,7 +1,7 @@
 # Need something to generate a kitchen sink report of Climate Data
 # Daryl Herzmann 13 Dec 2004
 
-from constants import *
+import constants
 import sys
 import mx.DateTime
 from pyIEM import stationTable
@@ -27,8 +27,8 @@ def process(id, csv,yr):
     sql = "SELECT round(avg(high)::numeric,1) as avg_high,\
       round(avg(low)::numeric,1) as avg_low, \
       round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' and \
-      extract(month from valid) = %s" % (climatetable(id.lower()), id.lower(), i)
-    rs = mydb.query(sql).dictresult()
+      extract(month from valid) = %s" % (constants.climatetable(id.lower()), id.lower(), i)
+    rs = constants.mydb.query(sql).dictresult()
     aHigh = rs[0]["avg_high"]
     aLow = rs[0]["avg_low"]
     aRain = rs[0]["rain"]
@@ -38,7 +38,7 @@ def process(id, csv,yr):
       round(avg_low::numeric,1) as avg_low, \
       round(rain::numeric,2) as rain from r_monthly WHERE station = '%s' \
       and monthdate = '%s-%02i-01'" % (id.lower(), yr, i)
-    rs = mydb.query(sql).dictresult()
+    rs = constants.mydb.query(sql).dictresult()
     oHigh = rs[0]["avg_high"]
     oLow = rs[0]["avg_low"]
     oRain = rs[0]["rain"]
@@ -51,7 +51,7 @@ def process(id, csv,yr):
       round(avg(low)::numeric,1) as avg_low, \
       round(sum(precip)::numeric,2) as rain from %s WHERE \
       stationid = '%s' and year = %s " % (constants.get_table(id), id.lower(), yr)
-  rs = mydb.query(sql).dictresult()
+  rs = constants.mydb.query(sql).dictresult()
   oHigh = rs[0]["avg_high"]
   oLow = rs[0]["avg_low"]
   oRain = rs[0]["rain"]
@@ -59,8 +59,8 @@ def process(id, csv,yr):
   sql = "SELECT round(avg(high)::numeric,1) as avg_high,\
     round(avg(low)::numeric,1) as avg_low, \
     round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' " \
-    % (climatetable(id.lower()), id.lower(),)
-  rs = mydb.query(sql).dictresult()
+    % (constants.climatetable(id.lower()), id.lower(),)
+  rs = constants.mydb.query(sql).dictresult()
   aHigh = rs[0]["avg_high"]
   aLow = rs[0]["avg_low"]
   aRain = rs[0]["rain"]
