@@ -6,7 +6,7 @@ $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
  include("$rootpath/include/google_keys.php");
  include("$rootpath/include/imagemaps.php");
  $report = isset($_GET["report"])? substr($_GET["report"],0,2): "01";
- $station = isset($_GET["station"])? strtolower( substr($_GET["station"],0,6) ): "";
+ $station = isset($_GET["station"])? substr($_GET["station"],0,6) : "";
  $network = isset($_REQUEST['network']) ? $_REQUEST['network'] : 'IACLIMATE';
 
  if (isset($_GET["id"])){
@@ -76,7 +76,7 @@ contain data dating back to then.
 <table cellpadding=2 cellspacing=1>
   <tr><th>Select Climate Station:</th><th>Select Report:</th><td></td></tr>
 
-<tr><td><?php echo networkSelect($network, strtoupper($station) ); ?>
+<tr><td><?php echo networkSelect($network, $station ); ?>
 <br /><?php if (strlen($station) > 0){ 
 	echo "<a href=\"index.phtml?report=${report}\">Select from map</a>"; 
 } ?></td>

@@ -4,7 +4,7 @@ require_once "$rootpath/include/excel/Writer.php";
 
 // What is requested of us!
 $report = isset($_GET["report"])? substr($_GET["report"],0,2): "01";
-$station = isset($_GET["station"])? strtolower( substr($_GET["station"],0,6) ): "ia0200";
+$station = isset($_GET["station"])? substr($_GET["station"],0,6) : "IA0200";
 
 // Creating a workbook
 $workbook = new Spreadsheet_Excel_Writer();
