@@ -35,10 +35,10 @@ $rs = pg_query($coopdb, "select o.station,
    max(o.high) as maxtmpf, min(o.low) as mintmpf,
    avg( (o.high + o.low) / 2.0 ) as avgtmpf
   from alldata_ia o, climate51 c WHERE 
-   c.station in ('ia0200', 'ia1319', 'ia2203','ia8706', 'ia2364', 'ia2110',
-    'ia5230', 'ia7708', 'ia7613', 'ia4585', 'ia4705') 
+   c.station in ('IA0200', 'IA1319', 'IA2203','IA8706', 'IA2364', 'IA2110',
+    'IA5230', 'IA7708', 'IA7613', 'IA4585', 'IA4705') 
    and o.station = c.station 
-   and day >= '2011-05-01' and day < '2011-10-01' 
+   and day >= '".date("Y")."-05-01' and day < '".date("Y")."-10-01' 
    and extract(doy from day) = extract(doy from valid)  GROUP by o.station
    ORDER by o.station ASC");
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
