@@ -28,10 +28,10 @@ def do_climdiv_day(stabbr, valid):
     pcursor.execute("""
     SELECT stdiv_, xmin(ST_Extent(the_geom)), xmax(ST_Extent(the_geom)), 
     ymin(ST_Extent(the_geom)), ymax(ST_Extent(the_geom)) from climate_div
-    where st = %s
+    where st = %s GROUP by stdiv_
     """, (stabbr,))
     for row in pcursor:
-        stid = "%sC0%s" % (st, str(row[0])[-2:])
+        stid = "%sC0%s" % (stabbr, str(row[0])[-2:])
         (ll_i, ll_j) = iemre.find_ij(row[1], row[3])
         (ur_i, ur_j) = iemre.find_ij(row[2], row[4])
             # Open IEMRE
