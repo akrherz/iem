@@ -191,10 +191,10 @@ def commit( ts ):
     coop.query( sql )
     # Inject!
     for id in nt.sts.keys():
-        sql = """INSERT into alldata_%s(stationid, day, high, low, precip, snow, 
+        sql = """INSERT into alldata_%s(station, day, high, low, precip, snow, 
         sday, year, month, snowd, estimated) values ('%s', '%s', 
         %.0f, %.0f, %.2f, %.1f, 
-        '%s', %s, %s, %.0f, 't')""" % (state, id.lower(), ts.strftime("%Y-%m-%d"), 
+        '%s', %s, %s, %.0f, 't')""" % (state, id, ts.strftime("%Y-%m-%d"), 
         nt.sts[id]['high'], nt.sts[id]['low'], nt.sts[id]['precip'],
         nt.sts[id]['snow'],
         ts.strftime("%m%d"), ts.year, ts.month, nt.sts[id]['snowd'])

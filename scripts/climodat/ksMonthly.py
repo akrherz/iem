@@ -36,7 +36,7 @@ def process(id, csv,yr):
     # Fetch Obs
     sql = "SELECT round(avg_high::numeric,1) as avg_high, \
       round(avg_low::numeric,1) as avg_low, \
-      round(rain::numeric,2) as rain from r_monthly WHERE stationid = '%s' \
+      round(rain::numeric,2) as rain from r_monthly WHERE station = '%s' \
       and monthdate = '%s-%02i-01'" % (id.lower(), yr, i)
     rs = mydb.query(sql).dictresult()
     oHigh = rs[0]["avg_high"]

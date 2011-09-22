@@ -55,11 +55,11 @@ def do_climdiv_day(stabbr, valid):
                                                     high, low, precip)
 
         # Now we insert into the proper database!
-        ccursor.execute("""DELETE from alldata_%s WHERE stationid = '%s' 
+        ccursor.execute("""DELETE from alldata_%s WHERE station = '%s' 
         and day = '%s'""" % ( stabbr, stid, valid.strftime("%Y-%m-%d"),))
         
         ccursor.execute("""INSERT into alldata_%s 
-        (stationid, day, high, low, precip, snow, snowd, estimated, year, month, 
+        (station, day, high, low, precip, snow, snowd, estimated, year, month, 
         sday)
         VALUES ('%s', '%s', %.0f, %.0f, %.2f, %.1f, 0, true, %s, %s, '%s')""" % (
         stabbr, stid, valid.strftime("%Y-%m-%d"), high, low, precip, 
@@ -100,14 +100,14 @@ def do_state_day(stabbr, valid):
                                                 high, low, precip)
     
     # Now we insert into the proper database!
-    ccursor.execute("""DELETE from alldata_%s WHERE stationid = '%s0000' 
-    and day = '%s'""" % ( stabbr, stabbr.lower(), valid.strftime("%Y-%m-%d"),))
+    ccursor.execute("""DELETE from alldata_%s WHERE station = '%s0000' 
+    and day = '%s'""" % ( stabbr, stabbr, valid.strftime("%Y-%m-%d"),))
     
     ccursor.execute("""INSERT into alldata_%s 
-    (stationid, day, high, low, precip, snow, snowd, estimated, year, month, 
+    (station, day, high, low, precip, snow, snowd, estimated, year, month, 
     sday)
     VALUES ('%s0000', '%s', %.0f, %.0f, %.2f, %.1f, 0, true, %s, %s, '%s')""" % (
-    stabbr, stabbr.lower(), valid.strftime("%Y-%m-%d"), high, low, precip, 
+    stabbr, stabbr, valid.strftime("%Y-%m-%d"), high, low, precip, 
     0, valid.year, valid.month, valid.strftime("%m%d")))
     
 if __name__ == '__main__':

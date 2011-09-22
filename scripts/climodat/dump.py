@@ -9,7 +9,7 @@ for id in nt.sts.keys():
   fn = "coop_data/%s.csv" % (st.sts[id]['name'].replace(" ", "_"), )
   out = open(fn, 'w')
   out.write("station,station_name,lat,lon,day,high,low,precip,snow,\n")
-  sql = "SELECT * from %s WHERE stationid = '%s' ORDER by day ASC" \
+  sql = "SELECT * from %s WHERE station = '%s' ORDER by day ASC" \
          % (constants.get_table(id), id.lower(), )
 
   rs = coop.query(sql).dictresult()

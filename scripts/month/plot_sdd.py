@@ -16,10 +16,10 @@ import network
 nt = network.Table("IACLIMATE")
 
 # Compute normal from the climate database
-sql = """SELECT stationid,
+sql = """SELECT station,
    sum(sdd86(high, low)) as sdd
    from alldata_ia WHERE year = %s and month = %s
-   GROUP by stationid""" % (now.year, now.month)
+   GROUP by station""" % (now.year, now.month)
 
 lats = []
 lons = []
@@ -27,8 +27,8 @@ sdd86 = []
 valmask = []
 rs = coop.query(sql).dictresult()
 for row in rs:
-  lats.append( nt.sts[row['stationid'].upper()]['lat'] )
-  lons.append( nt.sts[row['stationid'].upper()]['lon'] )
+  lats.append( nt.sts[row['station'].upper()]['lat'] )
+  lons.append( nt.sts[row['station'].upper()]['lon'] )
   sdd86.append( row['sdd'] )
   valmask.append( True )
 

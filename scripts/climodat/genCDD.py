@@ -38,7 +38,7 @@ def go(mydb, rs, stationID, updateAll=False):
 
     for mo in db.keys():
         mydb.query("""UPDATE r_monthly SET cdd = %s WHERE 
-          stationid = '%s' and monthdate = '%s' """ % (db[mo], stationID, mo.strftime("%Y-%m-%d") ) )
+          station = '%s' and monthdate = '%s' """ % (db[mo], stationID, mo.strftime("%Y-%m-%d") ) )
 
 def write(mydb, stationID):
   import mx.DateTime, constants
@@ -49,7 +49,7 @@ def write(mydb, stationID):
 YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC\n""" \
    % (constants.startyear(stationID), constants._ENDYEAR, stationID,) )
 
-  rs = mydb.query("SELECT * from r_monthly WHERE stationid = '%s'" \
+  rs = mydb.query("SELECT * from r_monthly WHERE station = '%s'" \
    % (stationID,) ).dictresult()
   db = {}
   for i in range(len(rs)):

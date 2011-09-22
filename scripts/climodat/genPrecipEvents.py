@@ -65,10 +65,10 @@ def go(mydb, rs, stationID):
     cat5 += db[i]["cat5"]
     totRain += db[i]["total"]
 
-    mydb.query("DELETE from r_precipevents WHERE stationid = '%s' and \
+    mydb.query("DELETE from r_precipevents WHERE station = '%s' and \
      climoweek = %s" % (stationID, i) )
 
-    mydb.query("INSERT into r_precipevents(stationid, climoweek, maxval, maxyr, \
+    mydb.query("INSERT into r_precipevents(station, climoweek, maxval, maxyr, \
      meanval, cat1e, cat2e, cat3e, cat4e, cat5e) values ('%s', %s, %s, %s, \
      %4.2f, %s, %s, %s, %s, %s)" % (stationID, i, maxVal, maxyr, meanRain,\
      db[i]["cat1"], db[i]["cat2"], db[i]["cat3"], db[i]["cat4"], db[i]["cat5"]))
@@ -84,7 +84,7 @@ def write(mydb, stationID):
  CL                MAX         MEAN   0.01-    0.26-    0.51-    1.01-            TOTAL
  WK TIME PERIOD    VAL  YR     RAIN     0.25     0.50     1.00     2.00    >2.01  DAYS\n""")
 
-  rs = mydb.query("SELECT * from r_precipevents WHERE stationid = '%s'" % \
+  rs = mydb.query("SELECT * from r_precipevents WHERE station = '%s'" % \
    (stationID,) ).dictresult()
 
   annEvents = 0

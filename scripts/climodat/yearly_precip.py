@@ -18,7 +18,7 @@ def runYear(year):
   # Grab the data
   sql = """SELECT stationid, sum(precip) as total
            from alldata_ia WHERE year = %s and
-           stationid != 'ia0000' GROUP by stationid""" % (year,)
+           station != 'ia0000' GROUP by stationid""" % (year,)
 
   lats = []
   lons = []

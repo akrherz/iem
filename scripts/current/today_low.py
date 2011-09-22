@@ -13,10 +13,10 @@ icursor = IEM.cursor()
 sql = """
 select station, 
   x(geom) as lon, y(geom) as lat, 
-  min_low as low, network
+  min_tmpf as low, network
 from summary_%s
 WHERE day = 'TODAY' and min_tmpf < 90 
-and network ~* 'ASOS' and network not in ('PO_ASOS','IA_ASOS','AK_ASOS')
+and (network ~* 'ASOS' or network ~* 'AWOS' or network = 'IA_COOP') and network not in ('PO_ASOS','IQ_ASOS','AK_ASOS') 
 """ % (now.year, )
 
 lats = []
@@ -35,14 +35,14 @@ for row in icursor:
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
-# '_showvalues'        : True,
-# '_valuemask'         :   valmask,
+ '_showvalues'        : True,
+ '_valuemask'         :   valmask,
  'lbTitleString'    : 'F',
  '_format'            : '%.0f',
- '_title'             : "US Morning Low Temperature",
+ '_title'             : "Iowa Morning Low Temperature",
  '_valid'             : "%s" % (now.strftime("%d %b %Y"), ),
- '_labels'            : labels
- '_midwest'		: True
+ '_labels'            : labels,
+# '_midwest'		: True,
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)

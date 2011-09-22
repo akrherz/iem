@@ -21,14 +21,14 @@ def go(mydb, stationID,updateAll=False):
         avg(low) as avg_low, sum(precip) as rain, 
         sum( CASE WHEN precip >= 0.01 THEN 1 ELSE 0 END ) as rcount, 
         sum( CASE WHEN snow >= 0.01 THEN 1 ELSE 0 END ) as scount from %s 
-        WHERE stationid = '%s' and day >= '%s-01-01' GROUP by year, month""" % (
+        WHERE station = '%s' and day >= '%s-01-01' GROUP by year, month""" % (
             constants.get_table(stationID), stationID, s.year ) ).dictresult()
 
     for i in range(len(rs)):
         ts = mx.DateTime.DateTime( int(rs[i]["year"]), int(rs[i]["month"]), 1)
         sql = """UPDATE r_monthly SET avg_high = %s, avg_low = %s, 
      rain = %s, rain_days = %s, snow_days = %s 
-     WHERE stationid = '%s' and monthdate = '%s' """ % (rs[i]["avg_high"], 
+     WHERE station = '%s' and monthdate = '%s' """ % (rs[i]["avg_high"], 
         rs[i]["avg_low"], rs[i]["rain"], rs[i]["rcount"], 
         rs[i]['scount'], stationID, ts.strftime("%Y-%m-%d") ) 
         mydb.query(sql)
@@ -55,7 +55,7 @@ def write(mydb, stationID):
     db[now] = {"avg_high": "M", "avg_low": "M", "rain": "M"}
     now += interval
 
-  rs = mydb.query("SELECT * from r_monthly WHERE stationid = '%s'" \
+  rs = mydb.query("SELECT * from r_monthly WHERE station = '%s'" \
    % (stationID,) ).dictresult()
 
   for i in range(len(rs)):

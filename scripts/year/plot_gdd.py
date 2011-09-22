@@ -24,9 +24,9 @@ if len(sys.argv) == 2 and sys.argv[1] == "gdd48":
   gbase = 48
 
 # Compute normal from the climate database
-ccursor.execute("""SELECT stationid,
+ccursor.execute("""SELECT station,
    sum(%s(high, low)) as gdd
-   from alldata WHERE stationid != 'ia0000' and year = %s
+   from alldata_ia WHERE stationid != 'ia0000' and year = %s
    GROUP by stationid""" % (gfunc, now.year))
 
 lats = []
@@ -35,7 +35,7 @@ gdd50 = []
 valmask = []
 
 for row in ccursor:
-    station = row[0].upper()
+    station = row[0]
     if not st.sts.has_key(station):
         continue
     lats.append( st.sts[station]['lat'] )

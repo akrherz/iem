@@ -16,10 +16,10 @@ nt = network.Table("IACLIMATE")
 
 
 # Compute normal from the climate database
-sql = """SELECT stationid,
+sql = """SELECT station,
    sum(gdd50(high, low)) as gdd
    from alldata_ia WHERE year = %s and month = %s
-   GROUP by stationid""" % (now.year, now.month)
+   GROUP by station""" % (now.year, now.month)
 
 lats = []
 lons = []
@@ -27,10 +27,10 @@ gdd50 = []
 valmask = []
 rs = coop.query(sql).dictresult()
 for i in range(len(rs)):
-  if not nt.sts.has_key(rs[i]['stationid'].upper()):
+  if not nt.sts.has_key(rs[i]['station'].upper()):
     continue
-  lats.append( nt.sts[rs[i]['stationid'].upper()]['lat'] )
-  lons.append( nt.sts[rs[i]['stationid'].upper()]['lon'] )
+  lats.append( nt.sts[rs[i]['station'].upper()]['lat'] )
+  lons.append( nt.sts[rs[i]['station'].upper()]['lon'] )
   gdd50.append( rs[i]['gdd'] )
   valmask.append( True )
 
