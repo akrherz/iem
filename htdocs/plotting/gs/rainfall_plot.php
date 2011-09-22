@@ -34,7 +34,7 @@ $climate_site = $cities[$station]["climate_site"];
 if (strrpos($network, "CLIMATE") > 0){
 	$rs = pg_prepare($coopdb, "SELECT", "SELECT precip as pday, day from 
 	alldata_". substr($climate_site,0,2) ."
-		WHERE stationid = $1 and day between $2 and $3 " .
+		WHERE station = $1 and day between $2 and $3 " .
 				" ORDER by day ASC");
 	$rs = pg_execute($coopdb, "SELECT", Array(strtolower($station), $sdate, $edate));
 } else {
@@ -62,7 +62,7 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 /* Now we need the climate data */
 $q = "SELECT precip, valid from climate
-		WHERE station = '". strtolower($climate_site) ."' and valid between '$s2date' and
+		WHERE station = '". $climate_site ."' and valid between '$s2date' and
 		'$e2date'
 		ORDER by valid ASC";
 $rs = pg_exec($coopdb, $q);
@@ -108,7 +108,7 @@ $graph->xaxis->SetLabelAngle(90);
 
 $graph->yaxis->SetTitle("Precipitation (in)");
 $graph->title->Set( $cities[$station]["name"] ." [$station] Precipitation for ". $year );
-$graph->subtitle->Set("Climate Site: ". $cities[strtoupper($climate_site)]["name"] ."[". $climate_site ."]");
+$graph->subtitle->Set("Climate Site: ". $cities[$climate_site]["name"] ."[". $climate_site ."]");
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");
 

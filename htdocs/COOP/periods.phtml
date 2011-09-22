@@ -1,5 +1,6 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 31);
  $smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]): 0;
  $emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]): 0;
  $sday = isset($_GET["sday"]) ? intval($_GET["sday"]): 0;
@@ -54,13 +55,13 @@ if ($sday > 0) {
   <th><a href="<?php echo $link ."avg_low"; ?>">Avg Low Temp:</a></th>
 </tr>
 <?php
-  $sql = sprintf("select year, count(stationid) as stations, 
+  $sql = sprintf("select year, count(station) as stations, 
     avg(avg_high) as avg_high, avg(avg_low) as avg_low,
     avg((avg_high+avg_low)/2.0) as avg_temp from 
-        (select year, stationid, count(high) as days, 
-         avg(high) as avg_high, avg(low) as avg_low from alldata 
+        (select year, station, count(high) as days, 
+         avg(high) as avg_high, avg(low) as avg_low from alldata_ia 
          WHERE sday BETWEEN '%s' and '%s' and 
-     high > -70 and low > -70 GROUP By year, stationid) as foo 
+     high > -70 and low > -70 GROUP By year, station) as foo 
      WHERE $drestrict GROUP by year ORDER by %s DESC", date("md", $sts), date("md",$ets), $sortcol );
   $rs = pg_exec($coop, $sql);
   for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {

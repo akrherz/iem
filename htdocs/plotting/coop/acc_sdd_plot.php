@@ -7,7 +7,7 @@ $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
 
-$station = isset($_GET['station']) ? strtolower($_GET['station']) : die("No station");
+$station = isset($_GET['station']) ? $_GET['station'] : die("No station");
 
 $syear = isset($_GET['syear']) ? $_GET['syear']: die("No syear");
 $smonth = isset($_GET['smonth']) ? $_GET['smonth']: die("No smonth");
@@ -57,7 +57,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 $rs = pg_prepare($coopdb, "SELECT232", "SELECT high, low, day, extract(year from day) as y, " .
 		"extract(month from day) as m,extract(day from day) as d from alldata_ia " .
-		"WHERE stationid = $1 and day between $2 and $3 ORDER by day ASC");
+		"WHERE station = $1 and day between $2 and $3 ORDER by day ASC");
 $rs = pg_execute($coopdb, "SELECT232", Array($station, $sdate, $edate));
 
 $q = "";
@@ -118,7 +118,7 @@ $graph->xscale->ticks->SupressTickMarks();
 $graph->xaxis->SetLabelAngle(90);
 
 $graph->yaxis->SetTitle("Stress Degree Days");
-$graph->title->Set( $cities[strtoupper($station)]["name"] ." [$station] Stress Degree Days (base=86)");
+$graph->title->Set( $cities[$station]["name"] ." [$station] Stress Degree Days (base=86)");
 $graph->subtitle->Set("Plot Duration: $sdate -- $edate");
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");

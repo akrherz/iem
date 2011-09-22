@@ -2,23 +2,23 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $conn = iemdb("coop");
-$station1 = isset($_GET["station1"]) ? strtolower($_GET["station1"]) : 'ia0200';
-$station2 = isset($_GET["station2"]) ? strtolower($_GET["station2"]) : '';
+$station1 = isset($_GET["station1"]) ? $_GET["station1"] : 'IA0200';
+$station2 = isset($_GET["station2"]) ? $_GET["station2"] : '';
 
-$slimiter = "and stationid = '$station1'";
+$slimiter = "and station = '$station1'";
 if ($station1 == "iowa"){ $slimiter = ""; }
 
 $xdata = Array();
 $ydata = Array();
 for($thres=-40;$thres<11;$thres++)
 {
-  $sql = "SELECT y1, count(*) from 
+  pg_prepare($conn, "_SELECT0", "SELECT y1, count(*) from 
           ((SELECT year as y1, low from alldata_ia 
            WHERE month IN (12) $slimiter) UNION 
           (SELECT year - 1 as y1, low from alldata_ia 
            WHERE month IN (1,2) $slimiter)) as foo 
-         WHERE low < ${thres} GROUP by y1";
-  $rs = pg_exec($conn, $sql);
+         WHERE low < ${thres} GROUP by y1");
+  $rs = pg_execute($conn, "_SELECT0", Array() );
   $xdata[] = $thres;
   $ydata[] = pg_numrows($rs);
 }
@@ -35,13 +35,13 @@ if ($station2 != "")
   $ydata = Array();
   for($thres=-40;$thres<11;$thres++)
   {
-    $sql = "SELECT y1, count(*) from 
+    pg_prepare($conn, "_SECTOR0", "SELECT y1, count(*) from 
           ((SELECT year as y1, low from alldata_ia 
            WHERE month IN (12) $slimiter) UNION 
           (SELECT year - 1 as y1, low from alldata_ia 
            WHERE month IN (1,2) $slimiter)) as foo 
-         WHERE low < ${thres} GROUP by y1";
-    $rs = pg_exec($conn, $sql);
+         WHERE low < ${thres} GROUP by y1");
+    $rs = pg_execute($conn, "_SECTOR0", Array());
     $ydata[] = pg_numrows($rs);
   }
   $yrs2 = pg_numrows($rs);
@@ -82,7 +82,7 @@ for ($i=-30; $i < 10; $i=$i+10){
 $lineplot2=new LinePlot($pct, $xdata);
 $lineplot2->SetColor("blue");
 $lineplot2->SetWeight(3);
-$lineplot2->SetLegend("$yrs years at ". $cities[strtoupper($station1)]["name"] );
+$lineplot2->SetLegend("$yrs years at ". $cities[$station1]["name"] );
 $graph->Add($lineplot2);
 
 if ($station2 != "")
@@ -90,7 +90,7 @@ if ($station2 != "")
   $lineplot3=new LinePlot($pct2, $xdata);
   $lineplot3->SetColor("red");
   $lineplot3->SetWeight(3);
-  $lineplot3->SetLegend("$yrs2 years at ". $cities[strtoupper($station2)]["name"] );
+  $lineplot3->SetLegend("$yrs2 years at ". $cities[$station2]["name"] );
   $graph->Add($lineplot3);
 }
 

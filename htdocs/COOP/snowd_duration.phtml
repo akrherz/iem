@@ -12,7 +12,7 @@ $ts = strtotime("2000-${month}-${day}");
 $sday = date('md', $ts);
 
 $rs = pg_prepare($coopdb, "FIND", "SELECT * from alldata
-      WHERE stationid = $1 and sday = $2 and snowd > 0 ORDER
+      WHERE station = $1 and sday = $2 and snowd > 0 ORDER
       by year ASC");
 $rs = pg_prepare($coopdb, "FIND2", "SELECT min(day) as m from alldata
       WHERE day > $1 and stationid = $2 and snowd = 0");
@@ -24,7 +24,7 @@ $rs = pg_execute($coopdb, "FIND", Array(strtolower($station), $sday));
 $data = Array();
 for($i=0;$row=@pg_fetch_array($rs,$i); $i++)
 {
-  $rs2 = pg_execute($coopdb, "FIND2", Array($row["day"], strtolower($station)));
+  $rs2 = pg_execute($coopdb, "FIND2", Array($row["day"], $station));
   $row2 = pg_fetch_array($rs2,0);
   $sts = strtotime($row["day"]);
   $endts = strtotime($row2["m"]);

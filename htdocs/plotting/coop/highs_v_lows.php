@@ -6,7 +6,7 @@ include("$rootpath/include/network.php");
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
-$station = isset($_GET["station"]) ? $_GET["station"] : "ia0200";
+$station = isset($_GET["station"]) ? $_GET["station"] : "IA0200";
 $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 
@@ -16,7 +16,7 @@ $lows = Array();
 $coop = iemdb('coop');
 
 $rs = pg_prepare($coop,"SELECT", "SELECT * from alldata_ia WHERE 
-       stationid = $1 and sday = $2");
+       station = $1 and sday = $2");
 $ts = mktime(12,0,0,$month, $day, 2000);
 $sday = sprintf("%02d%02d", $month, $day);
 $rs = pg_execute($coop, "SELECT", Array(strtolower($station), $sday));
@@ -51,7 +51,7 @@ $graph->xaxis->SetTitleMargin(10);
 
 $graph->yaxis->SetTitle("High Temperature [F]");
 $graph->xaxis->SetTitle("Low Temperature [F]");
-$lgnd = sprintf("High/Low Observations %s [%s] on %s", $cities[strtoupper($station)]["name"], $station, date("M d", $ts));
+$lgnd = sprintf("High/Low Observations %s [%s] on %s", $cities[$station]["name"], $station, date("M d", $ts));
 $graph->tabtitle->Set($lgnd);
 
   $graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);

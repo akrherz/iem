@@ -1,5 +1,6 @@
 <?php
 include("../../../../config/settings.inc.php");
+define("IEM_APPID", 32);
 include("$rootpath/include/database.inc.php");
 $coopdb = iemdb("coop");
 include("$rootpath/include/forms.php");
@@ -93,19 +94,19 @@ $tr .= "# Download From: http://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.p
 
 
 /* Query the obs */
-$rs = pg_prepare($coopdb, "SELECT", "SELECT stationid, s_rainfall,
+$rs = pg_prepare($coopdb, "SELECT", "SELECT station, s_rainfall,
     s_gdd50, s_sdd86, c_rainfall, c_gdd50, s_sdd86, s_mintemp,
       s_maxtemp from (
-      SELECT stationid, 
+      SELECT station, 
 	  sum(precip) as s_rainfall, sum(gdd50(high,low)) as s_gdd50,
 	  sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
-	  max(high) as s_maxtemp from alldata 
-	  WHERE day >= $1 and day < $2 GROUP by stationid) as foo,
+	  max(high) as s_maxtemp from alldata_ia 
+	  WHERE day >= $1 and day < $2 GROUP by station) as foo,
 	 (SELECT station, 
       sum(precip) as c_rainfall, sum(gdd50) as c_gdd50,
       sum(sdd86) as c_sdd86 from climate51 
       WHERE valid >= $3 and valid < $4 GROUP by station) as foo2
-	WHERE foo2.station = foo.stationid ORDER by stationid ASC");
+	WHERE foo2.station = foo.station ORDER by station ASC");
 $rs = pg_execute($coopdb, "SELECT", Array(adodb_date("Y-m-d", $sts),
 	adodb_date("Y-m-d", $ets), "2000-". adodb_date('m-d', $sts), 
 	"2000-". adodb_date('m-d', $ets)));
@@ -116,7 +117,7 @@ $tr .= sprintf("%6s,%21s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s,%10s\n", 'ID',
  'CLIM_GDD50', 'CLIM_PRECIP', 'MAX_TEMP', 'MIN_TEMP');
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 
-  $ukey = strtoupper($row["stationid"]);
+  $ukey = $row["station"];
   if (! isset($cities[$ukey]) ) continue;
   $tr .= sprintf("%6s,%-21s,%10.4f,%10.4f,%10.0f,%10.0f,%10.2f,%10.0f,%10.2f,%10.0f,%10.0f\n", $ukey, 
   $cities[$ukey]['name'],

@@ -2,17 +2,16 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
-$station = isset($_GET["station"]) ? strtolower($_GET["station"]) : die("No station");
+$station = isset($_GET["station"]) ? $_GET["station"] : die("No station");
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 
+pg_prepare($connection, "SELECT1", "SELECT high, low, years, to_char(valid, 'mm dd') as valid from climate 
+	WHERE station = $1 ORDER by valid ASC");
+pg_prepare($connection, "SELECT2", "SELECT high, low from alldata_ia WHERE
+  station = $1 and year = $2 ORDER by day ASC");
 
-$query2 = "SELECT high, low, years, to_char(valid, 'mm dd') as valid from climate WHERE station = '". $station ."' ORDER by valid ASC";
-$query3 = "SELECT high, low from alldata_ia WHERE
-  stationid = '". $station ."' and year = ".$year." ORDER by day ASC";
-
-
-$result = pg_exec($connection, $query2);
-$result2 = pg_exec($connection, $query3);
+$result = pg_execute($connection, "SELECT1", Array($station) );
+$result2 = pg_execute($connection, "SELECT2", Array($station, $year) );
 
 $s1_hi = array();
 $s1_lo = array();
@@ -65,7 +64,7 @@ $graph->img->SetMargin(40,40,65,90);
 $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set($cities[strtoupper($station)]["name"] ." Climatological Comparison");
+$graph->title->Set($cities[$station]["name"] ." Climatological Comparison");
 $graph->subtitle->Set("Climate Record: ". $years_s1 ." yrs  vs Obs for yr: " . $year );
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,16);
