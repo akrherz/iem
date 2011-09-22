@@ -105,18 +105,18 @@ $img = $map->prepareImage();
 $counties->draw($img);
 $iards->draw($img);
 
-$rs = pg_prepare($coopdb, "SELECT", "SELECT stationid, 
+$rs = pg_prepare($coopdb, "SELECT", "SELECT station, 
 	sum(precip) as s_prec, sum(gdd50(high,low)) as s_gdd50,
 	sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
 	max(high) as s_maxtemp from alldata 
-	WHERE day >= $1 and day < $2 GROUP by stationid 
-	ORDER by stationid ASC");
+	WHERE day >= $1 and day < $2 GROUP by station 
+	ORDER by station ASC");
 $rs = pg_execute($coopdb, "SELECT", Array(adodb_date("Y-m-d", $sts),
 	adodb_date("Y-m-d", $ets)));
 	
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 	
-	$ukey = strtoupper($row["stationid"]);
+	$ukey = $row["station"];
 	if (! isset($cities[$ukey]) ) continue;
 		  	  // Red Dot...  
   $pt = ms_newPointObj();

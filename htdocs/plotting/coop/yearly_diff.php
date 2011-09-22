@@ -4,8 +4,8 @@ include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
 
 
-$station1 = isset($_GET["station1"]) ? strtolower($_GET["station1"]) : die("No station1");
-$station2 = isset($_GET["station2"]) ? strtolower($_GET["station2"]) : die("No station2");
+$station1 = isset($_GET["station1"]) ? $_GET["station1"] : die("No station1");
+$station2 = isset($_GET["station2"]) ? $_GET["station2"] : die("No station2");
 $season = isset($_GET["season"]) ? $_GET["season"]: "";
 
 
@@ -30,16 +30,18 @@ if ($season != "all"){
 }
 
 
-$query2 = "SELECT avg( (high + low) /2 ) as avet, avg(high) as aveh, avg(low) as
- avel, year from alldata_ia WHERE stationid = '". $station1 ."' and high > -90 and low > -90 ". $sqlAddition2 ." GROUP by year ORDER by
- year ASC";
-$query3 = "SELECT avg( (high + low) /2 ) as avet, avg(high) as aveh, avg(low) as
- avel, year from alldata_ia WHERE stationid = '". $station2 ."' and high > -90 and low > -90 ". $sqlAddition2 ." GROUP by year ORDER by
- year ASC";
+pg_prepare($connection, "SELECT1", "SELECT avg( (high + low) /2 ) as avet, avg(high) as aveh, 
+avg(low) as
+ avel, year from alldata_ia WHERE station = $1 and high > -90 and 
+ low > -90 ". $sqlAddition2 ." GROUP by year ORDER by
+ year ASC");
+pg_prepare($connection, "SELECT2", "SELECT avg( (high + low) /2 ) as avet, avg(high) as aveh, avg(low) as
+ avel, year from alldata_ia WHERE station = $1 and high > -90 and low > -90 ". $sqlAddition2 ." GROUP by year ORDER by
+ year ASC");
 
 
-$result = pg_exec($connection, $query2);
-$result2 = pg_exec($connection, $query3);
+$result = pg_execute($connection, "SELECT1", Array($station1));
+$result2 = pg_execute($connection, "SELECT2", Array($station2));
 
 $s1_hi = array();
 $s1_av = array();
@@ -113,7 +115,7 @@ $graph->legend->SetLayout(LEGEND_HOR);
 
 // Create the linear plot
 $lineplot=new LinePlot($s1_hi);
-$lineplot->SetLegend($cities[strtoupper($station1)]["name"] ." Avg High");
+$lineplot->SetLegend($cities[$station1]["name"] ." Avg High");
 $lineplot->SetColor("red");
 
 // Create the linear plot
@@ -123,7 +125,7 @@ $lineplot2->SetColor("red");
 
 // Create the linear plot
 $lineplot3=new LinePlot($s2_hi);
-$lineplot3->SetLegend($cities[strtoupper($station2)]["name"] ." Avg High");
+$lineplot3->SetLegend($cities[$station2]["name"] ." Avg High");
 $lineplot3->SetColor("blue");
 
 // Create the linear plot

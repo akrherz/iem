@@ -1,5 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
+define("IEM_APPID", 30);
 include("$rootpath/include/forms.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");
@@ -11,11 +12,11 @@ $cities = $nt->table;
 $coopdb = iemdb("coop");
 $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$station = isset($_GET["station"]) ? strtolower($_GET["station"]): "ia0200";
+$station = isset($_GET["station"]) ? $_GET["station"]: "IA0200";
 
 /* Go get it */
 $rs = pg_prepare($coopdb, "SELECT", "SELECT * from alldata WHERE
-      stationid = $1 and year = $2 and month = $3 ORDER by day ASC");
+      station = $1 and year = $2 and month = $3 ORDER by day ASC");
 $rs = pg_execute($coopdb, "SELECT", Array($station, $year, $month) );
 
 $TITLE = "IEM | COOP Data by Month";
@@ -34,7 +35,7 @@ month.  Values after <strong><?php echo date('d M Y', $coop_archive_end); ?>
 <td><select name="station">
 <?php
 while (list($id, $meta) = each($cities)){
-  $chk = (strtolower($id) == $station) ? "SELECTED": "";
+  $chk = ($id == $station) ? "SELECTED": "";
   echo sprintf("<option value=\"%s\" %s>%s [%s]</option>", $id, $chk, $meta["name"], $id);
 }
 ?>

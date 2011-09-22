@@ -40,9 +40,9 @@ function calcGDD($high,$low)
 if (strrpos($network, "CLIMATE") > 0){
 	$rs = pg_prepare($coopdb, "SELECT", "SELECT high as max_tmpf, low as min_tmpf, day from 
 	alldata_". substr($climate_site,0,2) ."
-		WHERE stationid = $1 and day between $2 and $3 " .
+		WHERE station = $1 and day between $2 and $3 " .
 				" ORDER by day ASC");
-	$rs = pg_execute($coopdb, "SELECT", Array(strtolower($station), $sdate, $edate));
+	$rs = pg_execute($coopdb, "SELECT", Array($station, $sdate, $edate));
 } else {
 	$rs = pg_prepare($iem, "SELECT", "SELECT max_tmpf, min_tmpf, day from summary_$year
 		WHERE station = $1 and day between $2 and $3 " .
@@ -69,7 +69,7 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 /* Now we need the climate data */
 $q = "SELECT gdd50, valid from climate
-		WHERE station = '". strtolower($climate_site) ."' and valid between '$s2date' and
+		WHERE station = '". $climate_site ."' and valid between '$s2date' and
 		'$e2date'
 		ORDER by valid ASC";
 $rs = pg_exec($coopdb, $q);

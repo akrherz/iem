@@ -30,7 +30,7 @@ foreach ($stations as $key => $value){
   if ($value == "_ALL"){
     $selectAll = 1;
   }
-  $stationString .= " '". strtolower($value) ."',";
+  $stationString .= " '". $value ."',";
   $i++;
 }
 
@@ -38,7 +38,7 @@ foreach ($stations as $key => $value){
 if ($selectAll){
   $stationString = "(";
   foreach ($cities as $key => $value){
-    $stationString .= " '". strtolower($key) ."',";
+    $stationString .= " '". $key ."',";
   }
 }
 
@@ -57,7 +57,7 @@ $ts2 = adodb_mktime(0, 0, 0, $month2, $day2, $year2) or
 $num_vars = count($vars);
 if ( $num_vars == 0 )  die("You did not specify data");
 
-$sqlStr = "SELECT stationid, ";
+$sqlStr = "SELECT station, ";
 for ($i=0; $i< $num_vars;$i++){
   $sqlStr .= $vars[$i] ." as var".$i.", ";
 }
@@ -71,7 +71,7 @@ $d = Array("space" => " ", "comma" => "," , "tab" => "\t");
 
 $sqlStr .= "to_char(day, 'YYYY/mm/dd') as dvalid from ".$table ;
 $sqlStr .= " WHERE day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ";
-$sqlStr .= " and stationid IN ". $stationString ." ORDER by day ASC";
+$sqlStr .= " and station IN ". $stationString ." ORDER by day ASC";
 
 /**
  * Must handle different ideas for what to do...
@@ -104,10 +104,10 @@ if ($what != "plot"){
 
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
-  $sid = $row["stationid"];
-  echo $sid . $d[$delim] . $cities[strtoupper($sid)]["name"] ;
+  $sid = $row["station"];
+  echo $sid . $d[$delim] . $cities[$sid]["name"] ;
   if ($gis == "yes"){
-     echo  $d[$delim] . $cities[strtoupper($sid)]["lat"] . $d[$delim] .  $cities[strtoupper($sid)]["lon"] ;
+     echo  $d[$delim] . $cities[$sid]["lat"] . $d[$delim] .  $cities[$sid]["lon"] ;
   } 
   echo $d[$delim] . $row["dvalid"] . $d[$delim];
   for ($j=0; $j < $num_vars;$j++){

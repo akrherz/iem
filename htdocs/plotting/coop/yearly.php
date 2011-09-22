@@ -2,7 +2,7 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
-$station = isset($_GET["station"]) ? strtolower($_GET["station"]) : die("No station");
+$station = isset($_GET["station"]) ? $_GET["station"] : die("No station");
 $season = isset($_GET["season"]) ? $_GET["season"]: "";
 
 $months = Array("spring" => "(3, 4, 5)" ,
@@ -24,9 +24,11 @@ if ($season != "all"){
   $label = "Yearly";
 }
 
-$query2 = "SELECT avg( (high + low) /2 ) as avet, avg(high) as aveh, avg(low) as avel, year from alldata_ia WHERE stationid = '". $station ."' ". $sqlAddition2 ." GROUP by year ORDER by year ASC";
+pg_prepare($connection, "SELECTOR", "SELECT avg( (high + low) /2 ) as avet, avg(high) as aveh, 
+avg(low) as avel, year from alldata_ia 
+WHERE station = $1 $sqlAddition2  GROUP by year ORDER by year ASC");
 
-$result = pg_exec($connection, $query2);
+$result = pg_execute($connection, "SELECTOR", Array($station));
 
 $ydata = array();
 $ydata2 = array();
@@ -72,7 +74,7 @@ $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetTextTickInterval(5);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set($label ." Average Temps for ". $cities[strtoupper($station)]["name"]);
+$graph->title->Set($label ." Average Temps for ". $cities[$station]["name"]);
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->SetTitle("Temperature [F]");
