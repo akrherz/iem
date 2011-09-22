@@ -119,7 +119,7 @@ def main():
     for id in data.keys():
         if data[id]['missing'] > (days * 0.1):
             continue
-        csite = xref[id].lower()
+        csite = xref[id]
         output.write("K%s %4.0f %4.0f %5.2f %5.2f %5.1f %6.3f %8.3f\n" % (id, 
         data[id]['gdd'], cdata[ csite ]['cgdd'],
         data[id]['precip'], cdata[ csite ]['crain'], data[id]['soilt'],
