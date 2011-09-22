@@ -24,7 +24,7 @@ def process(id, csv):
   sql = "SELECT year, round(avg(high)::numeric,1) as avg_high, \
     round(avg(low)::numeric,1) as avg_low, \
     round(sum(precip)::numeric,2) as rain from %s \
-    WHERE stationid = '%s' and year >= %s \
+    WHERE station = '%s' and year >= %s \
     GROUP by year ORDER by year ASC" % (constants.get_table(id), id.lower(), constants.startyear(id) )
   rs = constants.mydb.query(sql).dictresult()
   data = {}

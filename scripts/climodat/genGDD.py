@@ -40,7 +40,7 @@ def go(mydb, rs, stationID, updateAll=False):
 
     for mo in db.keys():
         mydb.query("""UPDATE r_monthly SET gdd40 = %s, gdd48 = %s, 
-          gdd50 = %s, gdd52 = %s WHERE stationid = '%s' and monthdate = '%s'""" % (
+          gdd50 = %s, gdd52 = %s WHERE station = '%s' and monthdate = '%s'""" % (
             db[mo][40], db[mo][48], db[mo][50], db[mo][52], stationID, mo.strftime("%Y-%m-%d") ) )
 
 def write(mydb, stationID):
@@ -50,7 +50,7 @@ def write(mydb, stationID):
   out.write("# GROWING DEGREE DAYS FOR 4 BASE TEMPS FOR STATION ID  %s \n" \
    % (stationID,) )
 
-  rs = mydb.query("SELECT * from r_monthly WHERE stationid = '%s'" \
+  rs = mydb.query("SELECT * from r_monthly WHERE station = '%s'" \
    % (stationID,) ).dictresult()
   db = {}
   for i in range(len(rs)):
@@ -63,7 +63,7 @@ def write(mydb, stationID):
     avg(gdd50) as avg_gdd50, stddev(gdd50) as std_gdd50, \
     avg(gdd52) as avg_gdd52, stddev(gdd52) as std_gdd52, \
     extract(month from monthdate) as month from r_monthly \
-    WHERE stationid = '%s' GROUP by month" % (stationID,) ).dictresult()
+    WHERE station = '%s' GROUP by month" % (stationID,) ).dictresult()
   adb = {}
   for i in range(len(rs)):
     month = int(rs[i]["month"])

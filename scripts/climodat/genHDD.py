@@ -38,7 +38,7 @@ def go(mydb, rs, stationID, updateAll=False):
 
     for mo in db.keys():
         mydb.query("""UPDATE r_monthly SET hdd = %s WHERE 
-          stationid = '%s' and monthdate = '%s' """ % (
+          station = '%s' and monthdate = '%s' """ % (
                                 db[mo], stationID, mo.strftime("%Y-%m-%d") ) )
 
 def write(mydb, stationID):

@@ -21,10 +21,10 @@ for i in range(len(rs)):
 
 
 # Compute normal from the climate database
-sql = """SELECT stationid,
+sql = """SELECT station,
    sum(gdd50(high, low)) as gdd
    from alldata WHERE year = %s and month in (5,6,7,8,9,10)
-   GROUP by stationid""" % (now.year)
+   GROUP by station""" % (now.year)
 
 lats = []
 lons = []
@@ -32,10 +32,10 @@ gdd50 = []
 valmask = []
 rs = coop.query(sql).dictresult()
 for i in range(len(rs)):
-  if not sts.has_key(rs[i]['stationid']):
+  if not sts.has_key(rs[i]['station']):
     continue
-  lats.append( sts[rs[i]['stationid']]['lat'] )
-  lons.append( sts[rs[i]['stationid']]['lon'] )
+  lats.append( sts[rs[i]['station']]['lat'] )
+  lons.append( sts[rs[i]['station']]['lon'] )
   gdd50.append( rs[i]['gdd'] )
   valmask.append( True )
 

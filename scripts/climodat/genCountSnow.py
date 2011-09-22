@@ -16,7 +16,7 @@ def write(mydb, stationID):
 YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN   
 """)
 
-  rs = mydb.query("SELECT * from r_monthly WHERE stationid = '%s'" % \
+  rs = mydb.query("SELECT * from r_monthly WHERE station = '%s'" % \
    (stationID,) ).dictresult()
 
   db = {}
@@ -41,7 +41,7 @@ YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
 
   rs = mydb.query("select extract(month from monthdate) as month, \
     stddev(snow_days), avg(snow_days) from r_monthly \
-    WHERE stationid = '%s' GROUP by month ORDER by month ASC" \
+    WHERE station = '%s' GROUP by month ORDER by month ASC" \
     % (stationID,) ).dictresult()
 
   db = {}
@@ -51,7 +51,7 @@ YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
   rs = mydb.query("SELECT avg(cnt), stddev(cnt) from ( \
        select extract(year from monthdate) as year, \
        sum(snow_days) as cnt from r_monthly \
-       WHERE stationid = '%s' GROUP by year) as foo" \
+       WHERE station = '%s' GROUP by year) as foo" \
     % (stationID,) ).dictresult()
   yrStd = rs[0]['stddev']
   yrAvg = rs[0]['avg']

@@ -12,10 +12,9 @@ e = mx.DateTime.DateTime(1951, 1, 1)
 interval = mx.DateTime.RelativeDateTime(months=+1)
 
 #for id in st.ids:
-for id in ['ia2364']:
-  dbid = string.lower(id)
+for dbid in ['ia2364']:
   now = s
   while (now < e):
-    mydb.query("INSERT into r_monthly(stationid, monthdate) values \
+    mydb.query("INSERT into r_monthly(station, monthdate) values \
      ('%s', '%s')" % (dbid, now.strftime("%Y-%m-%d") ) )
     now += interval

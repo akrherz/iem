@@ -19,11 +19,10 @@ import constants
 
 DEBUG = 0
 
-for id in nt.sts.keys():
+for dbid in nt.sts.keys():
 #for id in ['IA2364',]:
-  print "processing [%s] %s" % (id, nt.sts[id]["name"])
-  dbid = string.lower(id)
-  rs = mydb.query("""SELECT d.*, c.climoweek from %s d, climoweek c WHERE stationid = '%s' and 
+  print "processing [%s] %s" % (dbid, nt.sts[dbid]["name"])
+  rs = mydb.query("""SELECT d.*, c.climoweek from %s d, climoweek c WHERE station = '%s' and 
     day >= '%s-01-01' and d.sday = c.sday ORDER by day ASC""" % (constants.get_table(dbid),
                 dbid, constants.startyear(dbid) ) ).dictresult()
 

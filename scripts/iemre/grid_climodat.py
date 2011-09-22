@@ -27,7 +27,7 @@ def generic_gridder(rs, idx):
     lons = []
     vals = []
     for i in range(len(rs)):
-        stid = rs[i]['stationid'].upper()
+        stid = rs[i]['station']
         if rs[i][idx] is not None and locs.has_key(stid):
             lats.append(  locs[stid]['lat'] + (random.random() * 0.01) )
             lons.append(  locs[stid]['lon'] )
