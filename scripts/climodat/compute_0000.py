@@ -17,11 +17,13 @@ POSTGIS = iemdb.connect("postgis", bypass=True)
 pcursor = POSTGIS.cursor()
 
 def do_day(valid):
+    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (valid.year,))
     for state in ('IA','MN','WI','MI','OH','IN','IL','MO','KS','KY','ND','SD'):
-        do_state_day(state, valid)
-        do_climdiv_day(state, valid)
+        do_state_day(state, valid, nc)
+        do_climdiv_day(state, valid, nc)
+    nc.close()
         
-def do_climdiv_day(stabbr, valid):
+def do_climdiv_day(stabbr, valid, nc):
     """
     Compute the virtual climate division data as well
     """
@@ -35,7 +37,7 @@ def do_climdiv_day(stabbr, valid):
         (ll_i, ll_j) = iemre.find_ij(row[1], row[3])
         (ur_i, ur_j) = iemre.find_ij(row[2], row[4])
             # Open IEMRE
-        nc = netCDF3.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (valid.year,))
+        
         tcnt = int((valid - mx.DateTime.DateTime(valid.year,1,1)).days)
     
         high_tmpk = nc.variables['high_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
@@ -48,8 +50,6 @@ def do_climdiv_day(stabbr, valid):
         precip = numpy.average(p01d) / 25.4
         if precip < 0:
             precip = 0
-        
-        nc.close()
         
         print '%s %s High: %5.1f Low: %5.1f Precip: %4.2f' % (stid, valid.strftime("%Y-%m-%d"),
                                                     high, low, precip)
@@ -65,7 +65,7 @@ def do_climdiv_day(stabbr, valid):
         stabbr, stid, valid.strftime("%Y-%m-%d"), high, low, precip, 
         0, valid.year, valid.month, valid.strftime("%m%d")))
 
-def do_state_day(stabbr, valid):
+def do_state_day(stabbr, valid, nc):
     """
     Create the statewide average value based on averages of the IEMRE 
     """
@@ -80,7 +80,6 @@ def do_state_day(stabbr, valid):
     (ur_i, ur_j) = iemre.find_ij(row[1], row[3])
 
     # Open IEMRE
-    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (valid.year,))
     tcnt = int((valid - mx.DateTime.DateTime(valid.year,1,1)).days)
 
     high_tmpk = nc.variables['high_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
@@ -94,7 +93,6 @@ def do_state_day(stabbr, valid):
     if precip < 0:
         precip = 0
     
-    nc.close()
     
     print '%s %s High: %5.1f Low: %5.1f Precip: %4.2f' % (stabbr, valid.strftime("%Y-%m-%d"),
                                                 high, low, precip)
