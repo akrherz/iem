@@ -3,7 +3,8 @@ include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");     
 include("$rootpath/include/adodb-time.inc.php");
-$nt = new NetworkTable("IACLIMATE");
+$network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IACLIMATE";
+$nt = new NetworkTable($network);
 $cities = $nt->table;
 
 
@@ -60,7 +61,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 $rs = pg_prepare($coopdb, "SELECT2", "SELECT high, low, day, " .
 		"extract(year from day) as y, extract(month from day) as m, " .
-		"extract(day from day) as d from alldata_ia WHERE " .
+		"extract(day from day) as d from alldata_". substr($station,0,2) ." WHERE " .
 		"station = $1 and day between $2 and $3 " .
 		"ORDER by day ASC ");
 $rs = pg_execute($coopdb, "SELECT2", Array($station, $sdate, $edate));
