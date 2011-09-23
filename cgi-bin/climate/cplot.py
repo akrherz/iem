@@ -111,7 +111,8 @@ def yearly_plot(ax, cfg):
     #print ydata
     #sys.exit()
     xaxis = numpy.arange(cfg['first_year'], cfg['last_year']+1)
-    ax.bar( xaxis - 0.4, ydata, fc='#336699', ec='#CCCCCC')
+    #ax.bar( xaxis - 0.4, ydata, fc='#336699', ec='#CCCCCC')
+    ax.plot( xaxis, ydata, 'bo-')
     ax.set_title( "%s (%s - %s)\nLocation Name: %s" % (
                         META[cfg['plot_type']].get('title', 'TITLE'), cfg['first_year'], cfg['last_year'],
                         get_station_name(cfg['station'])))
@@ -120,7 +121,7 @@ def yearly_plot(ax, cfg):
     ax.set_xlim( cfg['first_year'] -1, cfg['last_year'] +1)
     miny = numpy.min(ydata)
     maxy = numpy.max(ydata)
-    ax.set_ylim( miny - (miny / 10.), maxy + (maxy / 10.))
+    ax.set_ylim( miny - ((maxy-miny) / 10.), maxy + ((maxy-miny) / 10.))
     ax.grid(True)
     
     if cfg['linregress']:
