@@ -16,7 +16,7 @@ coop = i['coop']
 
 def runYear(year):
   # Grab the data
-  sql = """SELECT stationid, count(*) as days
+  sql = """SELECT station, count(*) as days
            from alldata_ia WHERE year = %s and precip >= 0.01 
            and station != 'ia0000' GROUP by station""" % (year,)
 
@@ -28,7 +28,7 @@ def runYear(year):
   for i in range(len(rs)):
     if rs[i]['days'] < 10: # Arb Threshold
       continue
-    id = rs[i]['stationid'].upper()
+    id = rs[i]['station'].upper()
     if not st.sts.has_key(id):
       continue
     labels.append( id[2:] )

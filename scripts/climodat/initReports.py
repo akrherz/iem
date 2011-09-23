@@ -24,6 +24,6 @@ for n in range(1,11):
     print dbid, s
     now = s
     while (now < e):
-      mydb.query("INSERT into r_monthly(stationid, monthdate) values \
+      mydb.query("INSERT into r_monthly(station, monthdate) values \
      ('%s', '%s')" % (dbid, now.strftime("%Y-%m-%d") ) )
       now += interval

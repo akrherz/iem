@@ -16,9 +16,9 @@ coop = i['coop']
 
 def runYear(year):
   # Grab the data
-  sql = """SELECT stationid, sum(precip) as total
+  sql = """SELECT station, sum(precip) as total
            from alldata_ia WHERE year = %s and
-           station != 'ia0000' GROUP by stationid""" % (year,)
+           station != 'ia0000' GROUP by station""" % (year,)
 
   lats = []
   lons = []
@@ -28,7 +28,7 @@ def runYear(year):
   for i in range(len(rs)):
     if rs[i]['total'] < 10: # Arb Threshold
       continue
-    id = rs[i]['stationid'].upper()
+    id = rs[i]['station'].upper()
     if not st.sts.has_key(id):
       continue
     labels.append( id[2:] )
