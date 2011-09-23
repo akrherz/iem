@@ -50,7 +50,7 @@ def write(mydb, stationID):
 YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC\n""" \
    % (constants.startyear(stationID), constants._ENDYEAR, stationID,) )
 
-  rs = mydb.query("SELECT * from r_monthly WHERE stationid = '%s'" \
+  rs = mydb.query("SELECT * from r_monthly WHERE station = '%s'" \
    % (stationID,) ).dictresult()
   db = {}
   for i in range(len(rs)):

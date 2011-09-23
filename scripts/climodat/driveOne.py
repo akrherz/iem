@@ -15,7 +15,7 @@ import genTempThresholds, genRecordPeriods
 for id in ['IA0200',]:
   print "processing [%s] %s" % (id, nt.sts[id]["name"])
   dbid = string.lower(id)
-  rs = mydb.query("SELECT * from %s WHERE stationid = '%s' and \
+  rs = mydb.query("SELECT * from %s WHERE station = '%s' and \
     day >= '%s-01-01' ORDER by day ASC" \
     % (dbid, constants.get_table(dbid), constants.startyear(dbid) ) ).dictresult()
   #genSpringFall.write(mydb, rs, dbid, 32, "09")

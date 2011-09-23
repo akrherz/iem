@@ -16,10 +16,10 @@ coop = i['coop']
 
 def runYear(year):
   # Grab the data
-  sql = """SELECT stationid, avg(high) as avg_high, avg(low) as avg_low,
+  sql = """SELECT station, avg(high) as avg_high, avg(low) as avg_low,
            avg( (high+low)/2 ) as avg_tmp
            from alldata_ia WHERE year = %s and station != 'IA0000' and 
-           high is not Null and low is not Null GROUP by stationid""" % (year,)
+           high is not Null and low is not Null GROUP by station""" % (year,)
   rs = coop.query(sql).dictresult()
 
   # Plot Average Highs
@@ -28,7 +28,7 @@ def runYear(year):
   vals = []
   labels = []
   for i in range(len(rs)):
-    id = rs[i]['stationid'].upper()
+    id = rs[i]['station'].upper()
     if not st.sts.has_key(id):
       continue
     labels.append( id[2:] )
@@ -58,7 +58,7 @@ def runYear(year):
   vals = []
   labels = []
   for i in range(len(rs)):
-    id = rs[i]['stationid'].upper()
+    id = rs[i]['station'].upper()
     if not st.sts.has_key(id):
       continue
     labels.append( id[2:] )
@@ -87,7 +87,7 @@ def runYear(year):
   vals = []
   labels = []
   for i in range(len(rs)):
-    id = rs[i]['stationid'].upper()
+    id = rs[i]['station'].upper()
     if not st.sts.has_key(id):
       continue
     labels.append( id[2:] )

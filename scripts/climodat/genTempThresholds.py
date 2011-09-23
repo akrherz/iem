@@ -23,7 +23,7 @@ def write(mydb, stationID):
    sum(case when high >= 80 THEN 1 ELSE 0 END) as e80,
    sum(case when high >= 93 THEN 1 ELSE 0 END) as e93,
    sum(case when high >= 100 THEN 1 ELSE 0 END) as e100
-   from %s WHERE stationid = '%s' 
+   from %s WHERE station = '%s' 
    and day >= '%s-01-01' GROUP by year ORDER by year ASC"""  % (
    constants.get_table(stationID), stationID, constants.startyear(stationID) ) ).dictresult()
 
