@@ -1,12 +1,12 @@
 <?php
  include("../../../config/settings.inc.php");
+ define("IEM_APPID", 34);
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/google_keys.php");
 include("$rootpath/include/imagemaps.php");
 
-
  $station = isset($_GET["station"]) ? $_GET["station"]: "";
- $network = "IACLIMATE";
+ $network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IACLIMATE";
  $api = $GOOGLEKEYS[$rooturl]["any"];
 
  $syear = isset($_GET['syear']) ? $_GET['syear'] : date("Y");
@@ -16,12 +16,12 @@ include("$rootpath/include/imagemaps.php");
  $eyear = isset($_GET['eyear']) ? $_GET['eyear'] : date("Y");
  $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 6;
  $eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
-$dcgi = "syear=$syear&smonth=$smonth&sday=$sday&eyear=$eyear&emonth=$emonth&eday=$eday&";
+$dcgi = "network=$network&syear=$syear&smonth=$smonth&sday=$sday&eyear=$eyear&emonth=$emonth&eday=$eday&";
 ?>
 
 <?php 	
 $THISPAGE = "networks-coop";
-$TITLE = "IEM | Accumulated Traces";
+$TITLE = "IEM | NWS COOP Accumulated Departures";
 $HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
 <script src='http://www.openlayers.org/api/OpenLayers.js'></script>
 <script src='${rooturl}/js/olselect.php?network=${network}&c=". time() ."'></script>";
@@ -36,18 +36,31 @@ include("$rootpath/include/header.php"); ?>
         }
 </style>
 
-
 <h3 class="heading">Accumulated Data Traces</h3>
 
 <p>This application plots a graph of accumulated rainfall and growing degree 
 days for a time period of your choice!  If you are looking for the raw 
 data, you can download on the <a href="/request/coop/fe.phtml">COOP data download</a> page.  Your plot time duration can not exceed 5 years.  This page may take a few seconds to load, so please be patient.</p>
 
+<p>Data is available from the following states: 
+<a href="acc.phtml?network=ILCLIMATE">Illinois</a> ,
+<a href="acc.phtml?network=INCLIMATE">Indiana</a> ,
+<a href="acc.phtml?network=IACLIMATE">Iowa</a> ,
+<a href="acc.phtml?network=KSCLIMATE">Kansas</a>,
+<a href="acc.phtml?network=KYCLIMATE">Kentucky</a> ,
+<a href="acc.phtml?network=MICLIMATE">Michigan</a> ,
+<a href="acc.phtml?network=MNCLIMATE">Minnesota</a> ,
+<a href="acc.phtml?network=NECLIMATE">Nebraska</a> ,
+<a href="acc.phtml?network=OHCLIMATE">Ohio</a> ,
+<a href="acc.phtml?network=NDCLIMATE">North Dakota</a> ,
+<a href="acc.phtml?network=SDCLIMATE">South Dakota</a> ,
+<a href="acc.phtml?network=WICLIMATE">Wisconsin</a>.
+
 <div class="text">
 
 <?php include_once("$rootpath/include/forms.php"); ?>
 <form name="olselect" action="acc.phtml" method="GET">
-
+<input type="hidden" name="network" value="<?php echo $network; ?>" />
 <table style="padding: 3px; border: 0px; margin: 0px;">
 <thead>
 <tr><th>Climate Site:</th><td></td><th>Year:</th><th>Month:</th><th>Day:</th></tr>
