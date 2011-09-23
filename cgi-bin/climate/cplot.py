@@ -5,9 +5,6 @@ data, watch me fail
 
 -  seasonal temperatures, ex: summer daily max. temperature
 -  seasonal percipitation, ex: summer annual precip.
--  growing degree days
--  heating degree days
-
 
 """
 import sys
@@ -31,20 +28,42 @@ META = {
     'title': 'Annual Precipitation (rain + melted snow)',
     'ylabel': 'Precipitation [inches]',
     'xlabel': 'Year', 
-    'func': 'sum(precip)',         
+    'func': 'sum(precip)',
+    'month_bounds': '', 
+    'valid_offset': '',        
   }, 
  'annual_avg_temp': {
     'title': 'Annual Average Temperature',
     'ylabel': 'Temperature [F]',
     'xlabel': 'Year',   
-    'func': 'avg((high+low)/2.)',       
+    'func': 'avg((high+low)/2.)', 
+    'month_bounds': '',   
+    'valid_offset': '',     
   },  
  'frost_free': {
     'title': 'Frost Free Days',
     'ylabel': 'Days',
     'xlabel': 'Year',   
+    'month_bounds': '',  
     'func': '',       
-  },       
+    'valid_offset': '',  
+  },
+ 'gdd50': {
+    'title': 'Growing Degree Days (1 May - 1 Oct) (base=50)',
+    'ylabel': 'GDD Units [F]',
+    'xlabel': 'Year',   
+    'func': 'sum(gdd50(high,low))',       
+    'month_bounds': 'and month in (5,6,7,8,9)',  
+    'valid_offset': '',  
+  }, 
+  'hdd65': {
+    'title': 'Heating Degree Days (1 Oct - 1 May) (base=65)',
+    'ylabel': 'HDD Units [F]',
+    'xlabel': 'Year',   
+    'func': 'sum(hdd65(high,low))',
+    'month_bounds': 'and month in (10,11,12,1,2,3,4)',   
+    'valid_offset': " - '6 months'::interval ",        
+  },         
 }
 
 def get_station_name(station):
@@ -78,12 +97,14 @@ def yearly_plot(ax, cfg):
         """ % cfg )
     else:
         ccursor.execute("""
-        SELECT year, %s as data from alldata_%s WHERE station = '%s' and
-        year >= %s and year <= %s GROUP by year ORDER by year ASC
-        """ % (META[cfg['plot_type']]['func'], cfg['station'][:2], cfg['station'], cfg['first_year'], 
-           cfg['last_year']))
+        SELECT extract(year from (day %s)) as yr, %s as data from alldata_%s WHERE station = '%s' 
+         %s GROUP by yr ORDER by yr ASC
+        """ % (META[cfg['plot_type']]['valid_offset'], META[cfg['plot_type']]['func'], cfg['station'][:2], cfg['station'],  
+            META[cfg['plot_type']]['month_bounds']))
     ydata = []
     for row in ccursor:
+        if row[0] < cfg['first_year'] or row[0] > cfg['last_year']:
+            continue
         ydata.append( float(row[1]) )
     ydata = numpy.array( ydata )
     #print 'Content-type: text/plain\n'
@@ -97,7 +118,9 @@ def yearly_plot(ax, cfg):
     ax.set_xlabel( META[cfg['plot_type']].get('xlabel', 'XLABEL'))
     ax.set_ylabel( META[cfg['plot_type']].get('ylabel', 'YLABEL'))
     ax.set_xlim( cfg['first_year'] -1, cfg['last_year'] +1)
-    ax.set_ylim( numpy.min(ydata) - 3, numpy.max(ydata) + 3)
+    miny = numpy.min(ydata)
+    maxy = numpy.max(ydata)
+    ax.set_ylim( miny - (miny / 10.), maxy + (maxy / 10.))
     ax.grid(True)
     
     if cfg['linregress']:
