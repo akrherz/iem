@@ -1,8 +1,8 @@
 import mx.DateTime
 import grid_climodat
 
-sts = mx.DateTime.DateTime(2010,1,1)
-ets = mx.DateTime.DateTime(2010,5,13)
+sts = mx.DateTime.DateTime(1990,1,1)
+ets = mx.DateTime.DateTime(2010,1,1)
 interval = mx.DateTime.RelativeDateTime(days=1)
 now = sts
 while now < ets:

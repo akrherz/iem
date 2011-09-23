@@ -52,7 +52,7 @@ def grid_day(nc, ts):
 
 
     sql = """SELECT * from alldata WHERE day = '%s' and
-             substr(stationid,3,4) != '0000' """ % (
+             substr(station,3,4) != '0000' """ % (
          ts.strftime("%Y-%m-%d"), )
     rs = coop.query( sql ).dictresult()
     if len(rs) > 4:
