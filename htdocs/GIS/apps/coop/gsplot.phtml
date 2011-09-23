@@ -94,7 +94,7 @@ $tr .= "# Download From: http://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.p
 
 
 /* Query the obs */
-$rs = pg_prepare($coopdb, "SELECT", "SELECT station, s_rainfall,
+$rs = pg_prepare($coopdb, "SELECT", "SELECT foo.station, s_rainfall,
     s_gdd50, s_sdd86, c_rainfall, c_gdd50, s_sdd86, s_mintemp,
       s_maxtemp from (
       SELECT station, 
@@ -106,7 +106,7 @@ $rs = pg_prepare($coopdb, "SELECT", "SELECT station, s_rainfall,
       sum(precip) as c_rainfall, sum(gdd50) as c_gdd50,
       sum(sdd86) as c_sdd86 from climate51 
       WHERE valid >= $3 and valid < $4 GROUP by station) as foo2
-	WHERE foo2.station = foo.station ORDER by station ASC");
+	WHERE foo2.station = foo.station ORDER by foo.station ASC");
 $rs = pg_execute($coopdb, "SELECT", Array(adodb_date("Y-m-d", $sts),
 	adodb_date("Y-m-d", $ets), "2000-". adodb_date('m-d', $sts), 
 	"2000-". adodb_date('m-d', $ets)));
