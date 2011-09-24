@@ -26,8 +26,8 @@ if len(sys.argv) == 2 and sys.argv[1] == "gdd48":
 # Compute normal from the climate database
 ccursor.execute("""SELECT station,
    sum(%s(high, low)) as gdd
-   from alldata_ia WHERE stationid != 'ia0000' and year = %s
-   GROUP by stationid""" % (gfunc, now.year))
+   from alldata_ia WHERE station != 'ia0000' and year = %s
+   GROUP by station""" % (gfunc, now.year))
 
 lats = []
 lons = []
