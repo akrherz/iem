@@ -1,5 +1,5 @@
 # Output the 12z morning low temperature
-
+import sys
 import os, random
 import iemdb
 import iemplot
@@ -33,6 +33,8 @@ for row in icursor:
   labels.append( row[0] )
   valmask.append( row[4] in ['AWOS', 'IA_ASOS'] )
 
+if len(lats) < 4:
+    sys.exit()
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
