@@ -16,7 +16,7 @@ coop = iemdb.connect('coop', bypass=True)
 
 # Compute normal from the climate database
 sql = """SELECT station, max_high, min_low from climate WHERE valid = '2000-%s'
-    and substr(station,0,3) = 'ia'""" % (
+    and substr(station,0,3) = 'IA'""" % (
   now.strftime("%m-%d"),)
 
 lats = []
@@ -27,7 +27,7 @@ labels = []
 c = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
 c.execute(sql)
 for row in c:
-  id = row['station'].upper()
+  id = row['station']
   labels.append( id[2:] )
   lats.append( nt.sts[id]['lat'] )
   lons.append( nt.sts[id]['lon'] )
