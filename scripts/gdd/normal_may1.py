@@ -19,7 +19,7 @@ sql = """SELECT station, sum(gdd50) as gdd, sum(sdd86) as sdd
    from climate WHERE gdd50 IS NOT NULL and sdd86 IS NOT NULL and 
    valid >= '2000-05-01' and valid <=
   ('2000-'||to_char(CURRENT_TIMESTAMP, 'mm-dd'))::date 
-  and substr(station,0,3) = 'ia' GROUP by station"""
+  and substr(station,0,3) = 'IA' GROUP by station"""
 
 lats = []
 lons = []
@@ -27,7 +27,7 @@ gdd50 = []
 sdd86 = []
 rs = coop.query(sql).dictresult()
 for i in range(len(rs)):
-  id = rs[i]['station'].upper()
+  id = rs[i]['station']
   lats.append( nt.sts[id]['lat'] )
   lons.append( nt.sts[id]['lon'] )
   gdd50.append( rs[i]['gdd'] )

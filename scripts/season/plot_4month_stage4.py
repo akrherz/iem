@@ -46,11 +46,11 @@ else:
 
 sql = """SELECT station, sum(precip) as acc from climate51 
     WHERE %s and station NOT IN ('ia7842','ia4381', 'ia1063') 
-    and substr(station,0,3) = 'ia'
+    and substr(station,0,3) = 'IA'
     GROUP by station ORDER by acc ASC""" % (v,)
 rs = coop.query(sql).dictresult()
 for i in range(len(rs)):
-    station = rs[i]['station'].upper()
+    station = rs[i]['station']
     #print station, rs[i]['acc']
     nrain.append(float(rs[i]['acc']))
     lats.append(nt.sts[station]['lat'])

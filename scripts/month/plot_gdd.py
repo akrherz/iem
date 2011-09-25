@@ -27,10 +27,10 @@ gdd50 = []
 valmask = []
 rs = coop.query(sql).dictresult()
 for i in range(len(rs)):
-  if not nt.sts.has_key(rs[i]['station'].upper()):
+  if not nt.sts.has_key(rs[i]['station']):
     continue
-  lats.append( nt.sts[rs[i]['station'].upper()]['lat'] )
-  lons.append( nt.sts[rs[i]['station'].upper()]['lon'] )
+  lats.append( nt.sts[rs[i]['station']]['lat'] )
+  lons.append( nt.sts[rs[i]['station']]['lon'] )
   gdd50.append( rs[i]['gdd'] )
   valmask.append( True )
 
