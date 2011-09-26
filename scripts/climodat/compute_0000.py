@@ -19,7 +19,7 @@ pcursor = POSTGIS.cursor()
 def do_day(valid):
     nc = netCDF3.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (valid.year,))
     for state in ('NE', 'IA','MN','WI','MI','OH','IN','IL','MO','KS','KY','ND','SD'):
-        #do_state_day(state, valid, nc)
+        do_state_day(state, valid, nc)
         do_climdiv_day(state, valid, nc)
     nc.close()
         
