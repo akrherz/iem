@@ -17,7 +17,7 @@ sts = {}
 rs = mesosite.query("SELECT id, x(geom) as lon, y(geom) as lat from stations WHERE \
     network = 'IACLIMATE'").dictresult()
 for i in range(len(rs)):
-    sts[ rs[i]["id"].lower() ] = rs[i]
+    sts[ rs[i]["id"] ] = rs[i]
 
 
 # Compute normal from the climate database

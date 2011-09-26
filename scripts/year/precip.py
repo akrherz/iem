@@ -23,8 +23,8 @@ lons = []
 
 # Get normals!
 ccursor.execute("""SELECT station, sum(precip) as acc from climate51 
-    WHERE valid <= '2000-%s' and station NOT IN ('ia7842','ia4381')
-    and substr(station,0,3) = 'ia' 
+    WHERE valid <= '2000-%s' and station NOT IN ('IA7842','IA4381')
+    and substr(station,0,3) = 'IA' 
     GROUP by station ORDER by acc ASC""" % (ts.strftime("%m-%d"),
     ) )
 for row in ccursor:
