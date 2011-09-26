@@ -54,11 +54,11 @@ iemplot.postprocess(tmpfp, pqstr)
 drain = []
 lats = []
 lons = []
-ccursor.execute("""select station, norm, obs from 
+ccursor.execute("""select climate.station, norm, obs from 
     (select c.station, sum(c.precip) as norm from climate51 c 
-     where c.valid < '2000-%s' and substr(station,0,3) = 'ia' GROUP by c.station) as climate, 
+     where c.valid < '2000-%s' and substr(station,0,3) = 'IA' GROUP by c.station) as climate, 
     (select a.station, sum(a.precip) as obs from alldata a 
-     WHERE a.year = %s and substr(a.station,0,3) = 'ia' GROUP by station) as obs 
+     WHERE a.year = %s and substr(a.station,0,3) = 'IA' GROUP by station) as obs 
   WHERE obs.station = climate.station""" % (ts.strftime("%m-%d"),
     ts.year) )
 for row in ccursor:
