@@ -16,7 +16,7 @@ ccursor = COOP.cursor()
 
 # Compute normal from the climate database
 sql = """SELECT station, min_high, min_low from climate WHERE valid = '2000-%s'
-    and substr(station,0,3) = 'ia'""" % (
+    and substr(station,0,3) = 'IA'""" % (
   now.strftime("%m-%d"),)
 
 lats = []
