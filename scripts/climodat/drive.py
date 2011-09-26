@@ -18,9 +18,10 @@ import genCycles, genCountSnow, genTempThresholds, genRecordPeriods
 import constants
 
 DEBUG = 0
-
+updateAll= False
 for dbid in nt.sts.keys():
-#for id in ['IA2364',]:
+  #if dbid[2:] != '0000':
+  #  continue
   print "processing [%s] %s" % (dbid, nt.sts[dbid]["name"])
   rs = mydb.query("""SELECT d.*, c.climoweek from %s d, climoweek c WHERE station = '%s' and 
     day >= '%s-01-01' and d.sday = c.sday ORDER by day ASC""" % (constants.get_table(dbid),
@@ -31,7 +32,7 @@ for dbid in nt.sts.keys():
 
   gen30rains.write(mydb, dbid)
 
-  genGDD.go(mydb, rs, dbid)
+  genGDD.go(mydb, rs, dbid, updateAll)
   genGDD.write(mydb, dbid)
 
   genDailyRecords.write(mydb, dbid)
@@ -51,13 +52,13 @@ for dbid in nt.sts.keys():
   genSpringFall.write(mydb, rs, dbid, 26, "12")
   genSpringFall.write(mydb, rs, dbid, 24, "13")
  
-  genMonthly.go(mydb, dbid)
+  genMonthly.go(mydb, dbid, updateAll)
   genMonthly.write(mydb, dbid)
 
-  genHDD.go(mydb, rs, dbid)
+  genHDD.go(mydb, rs, dbid, updateAll)
   genHDD.write(mydb, dbid)
 
-  genCDD.go(mydb, rs, dbid)
+  genCDD.go(mydb, rs, dbid, updateAll)
   genCDD.write(mydb, dbid)
 
   genHeatStress.write(mydb, dbid)

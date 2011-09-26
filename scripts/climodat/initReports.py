@@ -3,7 +3,7 @@
 
 import pg, mx.DateTime, string, constants
 import network
-nt = network.Table(('ILCLIMATE', 'INCLIMATE',
+nt = network.Table(('ILCLIMATE', 'INCLIMATE','IACLIMATE',
          'OHCLIMATE','MICLIMATE','KYCLIMATE','WICLIMATE','MNCLIMATE',
          'SDCLIMATE','NDCLIMATE','NECLIMATE','KSCLIMATE','MOCLIMATE'))
 mydb = pg.connect("coop", 'iemdb')
@@ -15,9 +15,10 @@ e = mx.DateTime.DateTime(2012, 1, 1)
 interval = mx.DateTime.RelativeDateTime(months=+1)
 
 #for id in nt.sts.keys():
-for n in range(1,11):
-  for st in ['ND','SD','NE','KS','MO','IL','IN', 'OH','MI','WI','MN']:
-    dbid = "%sC%03i" % (string.lower(st), n)
+for n in range(0,1):
+  #for st in ['ND','SD','NE','KS','MO','IL','IN', 'OH','MI','WI','MN','KY','IA']:
+  for st in ['KY',]:
+    dbid = "%s0%03i" % (st, n)
     if not nt.sts.has_key(dbid.upper()):
       continue
     s = constants.startts(dbid)
