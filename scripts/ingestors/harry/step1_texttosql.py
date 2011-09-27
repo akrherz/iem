@@ -66,16 +66,16 @@ for line in lines:
     jday -= 54
     cw = jday / 7
  
-    alldata.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\tf\n" % \
-        (dbid, day, cw, hi, lo, pr, sf, sday, yr, mo,sd) )
+    alldata.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\tf\n" % \
+        (dbid, day,  hi, lo, pr, sf, sday, yr, mo,sd) )
 
 
 alldata.write("""\.
 -- Now we need to clear the old estimates away
-INSERT into alldata_estimates SELECT * from alldata WHERE year = %s
+INSERT into alldata_estimates SELECT * from alldata_ia WHERE year = %s
  and month = %s;
-DELETE from alldata WHERE year = %s and month = %s;
-INSERT into alldata SELECT * from alldata_tmp;
+DELETE from alldata_ia WHERE year = %s and month = %s;
+INSERT into alldata_ia SELECT * from alldata_tmp;
 
 -- Now we print out some estimation stats
 SELECT
@@ -92,7 +92,7 @@ SELECT
 FROM
   (select stationid, sum(precip) as rainfall, sum(snow) as snowfall,
           avg(high) as avghigh, avg(low) as avglow
-   from alldata
+   from alldata_ia
    WHERE month = %s and year = %s GROUP by stationid) as o,
   (select stationid, sum(precip) as rainfall, sum(snow) as snowfall,
           avg(high) as avghigh, avg(low) as avglow

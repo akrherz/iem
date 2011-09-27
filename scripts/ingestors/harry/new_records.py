@@ -29,7 +29,7 @@ for tbl in ['climate51','climate']:
     records[station][rs[i]['valid']] = rs[i]
 
   # Now, load up obs!
-  sql = "SELECT * from alldata WHERE day >= '%s' and day < '%s'" % \
+  sql = "SELECT * from alldata_ia WHERE day >= '%s' and day < '%s' and high is not null and low is not null" % \
         (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d") )
   rs = mydb.query(sql).dictresult()
   for i in range(len(rs)):
