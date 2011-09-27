@@ -27,7 +27,7 @@ def process(id, csv,yr):
     sql = "SELECT round(avg(high)::numeric,1) as avg_high,\
       round(avg(low)::numeric,1) as avg_low, \
       round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' and \
-      extract(month from valid) = %s" % (constants.climatetable(id.lower()), id.lower(), i)
+      extract(month from valid) = %s" % (constants.climatetable(id), id, i)
     rs = constants.mydb.query(sql).dictresult()
     aHigh = rs[0]["avg_high"]
     aLow = rs[0]["avg_low"]
@@ -37,7 +37,7 @@ def process(id, csv,yr):
     sql = "SELECT round(avg_high::numeric,1) as avg_high, \
       round(avg_low::numeric,1) as avg_low, \
       round(rain::numeric,2) as rain from r_monthly WHERE station = '%s' \
-      and monthdate = '%s-%02i-01'" % (id.lower(), yr, i)
+      and monthdate = '%s-%02i-01'" % (id, yr, i)
     rs = constants.mydb.query(sql).dictresult()
     oHigh = rs[0]["avg_high"]
     oLow = rs[0]["avg_low"]
@@ -50,7 +50,7 @@ def process(id, csv,yr):
   sql = "SELECT round(avg(high)::numeric,1) as avg_high,\
       round(avg(low)::numeric,1) as avg_low, \
       round(sum(precip)::numeric,2) as rain from %s WHERE \
-      station = '%s' and year = %s " % (constants.get_table(id), id.lower(), yr)
+      station = '%s' and year = %s " % (constants.get_table(id), id, yr)
   rs = constants.mydb.query(sql).dictresult()
   oHigh = rs[0]["avg_high"]
   oLow = rs[0]["avg_low"]
@@ -59,7 +59,7 @@ def process(id, csv,yr):
   sql = "SELECT round(avg(high)::numeric,1) as avg_high,\
     round(avg(low)::numeric,1) as avg_low, \
     round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' " \
-    % (constants.climatetable(id.lower()), id.lower(),)
+    % (constants.climatetable(id.lower()), id,)
   rs = constants.mydb.query(sql).dictresult()
   aHigh = rs[0]["avg_high"]
   aLow = rs[0]["avg_low"]
