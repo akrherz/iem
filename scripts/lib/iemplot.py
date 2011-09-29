@@ -8,8 +8,9 @@ import tempfile
 import os
 import sys
 import math
-from windrose.windrose import WindroseAxes
 import matplotlib
+matplotlib.use( 'Agg' )
+from windrose.windrose import WindroseAxes
 import matplotlib.image as image
 from matplotlib import pyplot as plt
 from matplotlib.patches import Rectangle
@@ -819,7 +820,14 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     acursor.close()
     db.close()
     if len(sknt) < 5:
-        print 'Not enough data! Only %s records found, abort.' % (len(sknt),)
+        fig = plt.figure(figsize=(6, 7), dpi=80, facecolor='w', edgecolor='w')
+        label = 'Not enough data available to generate plot'
+        plt.gcf().text(0.17,0.89, label)
+        if fp is not None:
+            plt.savefig(fp)
+        else:
+            print "Content-Type: image/png\n"
+            plt.savefig( sys.stdout, format='png' )
         return
     # Convert to numpy arrays
     sknt = numpy.array( sknt )
