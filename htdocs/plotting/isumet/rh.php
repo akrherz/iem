@@ -74,7 +74,7 @@ $graph->title->Set("$titleDate Relative Humidity");
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01,0.08);
 $graph->xaxis->SetLabelAngle(90);
-$graph->yaxis->scale->ticks->Set(90,15);
+//$graph->yaxis->scale->ticks->Set(90,15);
 //$graph->yaxis->scale->ticks->SetPrecision(0);
 //$graph->yaxis->scale->ticks->SetPrecision(0);
 
@@ -82,7 +82,7 @@ $graph->yaxis->SetColor("blue");
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 
-$graph->yaxis->SetTitle("Dew Point [F]");
+$graph->yaxis->SetTitle("Relative Humidity [%]");
 $graph->xaxis->SetLabelFormatString("h:i A", true);
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
