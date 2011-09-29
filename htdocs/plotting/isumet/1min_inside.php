@@ -1,5 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
+include_once "$rootpath/include/mlib.php";
 //  1 minute data plotter 
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -21,6 +22,7 @@ $dirRef = strftime("%Y/%m/%d", $myTime);
 
 $prec = array();
 $tmpf = array();
+$dwpf = array();
 $relh = array();
 
 if ($station == null){
@@ -48,6 +50,7 @@ if ($station == null){
   		$valid[] = strtotime($tstring);
   		$tmpf[] = $tokens[17];
   		$relh[] = $tokens[18];
+  		$dwpf[] = dwpf($tokens[17], $tokens[18]);
  	} // End of while
 	
 }
@@ -61,43 +64,39 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 $graph = new Graph(600,300,"example1");
 $graph->SetScale("datelin");
 $graph->SetY2Scale("lin",0,100);
-
-$graph->img->SetMargin(65,40,45,60);
-//$graph->xaxis->SetFont(FONT1,FS_BOLD);
-
+$graph->img->SetMargin(65,40,55,70);
 
 $graph->xaxis->SetLabelAngle(90);
 //$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->yaxis->scale->ticks->Set(1,0.5);
 //$graph->yscale->SetGrace(10);
-$graph->title->Set("Map Room Temperature & Relative Humidity");
-$graph->subtitle->Set($titleDate );
+$graph->title->Set("$titleDate Map Room Temperature, Dew Point & Relative Humidity");
 
 $graph->legend->SetLayout(LEGEND_HOR);
-$graph->legend->Pos(0.01,0.075);
+$graph->legend->Pos(0.2,0.09);
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
-
+$graph->xaxis->SetLabelFormatString("h:i A", true);
 $graph->y2axis->SetTitle("Relative Humidity [%]");
-
+$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
-$graph->xaxis->SetTitleMargin(30);
 //$graph->yaxis->SetTitleMargin(48);
 $graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
+$graph->xaxis->SetTitleMargin(40);
 
 // Create the linear plot
 $lineplot=new LinePlot($tmpf, $valid);
 $lineplot->SetLegend("Temperature");
-$lineplot->SetColor("blue");
+$lineplot->SetColor("red");
 
 // Create the linear plot
-//[DMF]$lineplot2=new LinePlot($dwpf);
-//[DMF]$lineplot2->SetLegend("Dew Point");
-//[DMF]$lineplot2->SetColor("blue");
+$lineplot2=new LinePlot($dwpf, $valid);
+$lineplot2->SetLegend("Dew Point");
+$lineplot2->SetColor("blue");
 
 // Create the linear plot
 $lineplot3=new LinePlot($relh, $valid);
@@ -114,6 +113,7 @@ $lineplot3->SetColor("black");
 //[DMF]$graph->AddText($t1);
 
 $graph->Add($lineplot);
+$graph->Add($lineplot2);
 $graph->AddY2($lineplot3);
 $graph->Stroke();
 

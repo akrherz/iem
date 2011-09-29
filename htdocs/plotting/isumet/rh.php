@@ -25,12 +25,15 @@ $dirRef = strftime("%Y/%m/%d", $myTime);
 
 $srad = array();
 $_dwpf = array();
+$irelh = array();
+$orelh = array();
 
 if ($station == null){
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
 	while (list ($line_num, $line) = each ($fcontents)) {
   		$valid[] = strtotime( substr($line, 0, 26) );
   		$parts = preg_split ("/\s+/", $line);
+  		$orelh[] = intval($parts[7]);
 		$_dwpf[] = dwpf(intval($parts[6]), intval($parts[7]));
 	}
 } else {
@@ -48,6 +51,8 @@ if ($station == null){
 		}
   		$tstring = sprintf("%s %s", $dirRef, $tokens[3]);
   		$valid[] = strtotime($tstring);
+  		$orelh[] = floatval($tokens[8]);
+  		$irelh[] = $tokens[18];
   		$_dwpf[] = dwpf(floatval($tokens[5]), floatval($tokens[8]));
  	} // End of while
 	
@@ -60,12 +65,11 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
-$graph->SetScale("datelin");
-$graph->img->SetMargin(55,40,55,60);
+$graph->SetScale("datelin",0,100);
+$graph->img->SetMargin(65,40,55,70);
 
 //$graph->yaxis->scale->ticks->SetPrecision(1);
-$graph->title->Set("Dew Point Temperature");
-$graph->subtitle->Set($titleDate );
+$graph->title->Set("$titleDate Relative Humidity");
 
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.01,0.08);
@@ -79,20 +83,26 @@ $graph->yaxis->SetColor("blue");
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 
 $graph->yaxis->SetTitle("Dew Point [F]");
-
+$graph->xaxis->SetLabelFormatString("h:i A", true);
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
-$graph->xaxis->SetTitleMargin(30);
+$graph->xaxis->SetTitleMargin(40);
 $graph->yaxis->SetTitleMargin(30);
 //$graph->y2axis->SetTitleMargin(28);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
-$lineplot=new LinePlot($_dwpf, $valid);
+$lineplot=new LinePlot($orelh, $valid);
 $lineplot->SetColor("blue");
-
+$lineplot->SetLegend("Outside");
 $graph->Add($lineplot);
+
+$lineplot2=new LinePlot($irelh, $valid);
+$lineplot2->SetColor("red");
+$lineplot2->SetLegend("Inside");
+$graph->Add($lineplot2);
+
 
 $graph->Stroke();
 ?>

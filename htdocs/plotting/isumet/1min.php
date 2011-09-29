@@ -1,5 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
+include_once "$rootpath/include/mlib.php";
 //  1 minute data plotter 
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -17,6 +18,7 @@ $titleDate = strftime("%b %d, %Y", $myTime);
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
 $tmpf = array();
+$dwpf = array();
 $relh = array();
 $valid = array();
 
@@ -27,6 +29,7 @@ if ($station == null){
   		$valid[] = strtotime( substr($line, 0, 26) );
   		$tmpf[] = round (substr($line, 36, 6),2);
   		$relh[] = intval($parts[7]);
+  		$dwpf[] = dwpf(round (substr($line, 36, 6),2), intval($parts[7]) );
  	} // End of while
 } else {
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat");
@@ -45,6 +48,7 @@ if ($station == null){
   		$valid[] = strtotime($tstring);
   		$tmpf[] = $tokens[5];
   		$relh[] = floatval($tokens[8]);
+  		$dwpf[] = dwpf($tokens[5], floatval($tokens[8]));
  	} // End of while
 	
 }
@@ -58,28 +62,28 @@ $graph = new Graph(600,300,"example1");
 $graph->SetScale("datlin");
 $graph->SetY2Scale("lin",0,100);
 
-$graph->img->SetMargin(65,40,45,60);
+$graph->img->SetMargin(65,40,55,70);
 //$graph->xaxis->SetFont(FONT1,FS_BOLD);
 
 $graph->xaxis->SetLabelAngle(90);
+$graph->xaxis->SetLabelFormatString("h:i A", true);
 //$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->yaxis->scale->ticks->Set(1,0.5);
 //$graph->yscale->SetGrace(10);
-$graph->title->Set("Outside Temperature & Relative Humidity");
-$graph->subtitle->Set($titleDate );
+$graph->title->Set("$titleDate Outside Temperature, Dew Point & Relative Humidity");
 
 $graph->legend->SetLayout(LEGEND_HOR);
-$graph->legend->Pos(0.01,0.065);
+$graph->legend->Pos(0.2,0.09);
 
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
 
 $graph->y2axis->SetTitle("Relative Humidity [%]");
-
+$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
-$graph->xaxis->SetTitleMargin(30);
+$graph->xaxis->SetTitleMargin(40);
 //$graph->yaxis->SetTitleMargin(48);
 $graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
@@ -91,9 +95,9 @@ $lineplot->SetLegend("Temperature");
 $lineplot->SetColor("red");
 
 // Create the linear plot
-//[DMF]$lineplot2=new LinePlot($dwpf);
-//[DMF]$lineplot2->SetLegend("Dew Point");
-//[DMF]$lineplot2->SetColor("blue");
+$lineplot2=new LinePlot($dwpf, $valid);
+$lineplot2->SetLegend("Dew Point");
+$lineplot2->SetColor("green");
 
 // Create the linear plot
 $lineplot3=new LinePlot($relh, $valid);
@@ -109,7 +113,7 @@ $lineplot3->SetColor("black");
 //[DMF]$t1->SetColor("black");
 //[DMF]$graph->AddText($t1);
 
-//[DMF]$graph->Add($lineplot2);
+$graph->Add($lineplot2);
 $graph->Add($lineplot);
 $graph->AddY2($lineplot3);
 
