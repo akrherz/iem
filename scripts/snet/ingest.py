@@ -185,7 +185,7 @@ def averageWinds():
         db[id].avgWinds()
 
 def sendWindAlert(id, alertSPED, alertDrctTxt, myThreshold):
-    if id in [904, 75, 907, 918, 9, 913]:
+    if id in [904, 75, 907, 918, 9, 913,924]:
         return
     if (not locs.has_key(id)):
         logger.info("\nCan't Alert ID: %s\n" % (id,) )
