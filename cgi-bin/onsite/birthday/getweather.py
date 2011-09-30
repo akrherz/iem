@@ -15,7 +15,7 @@ def mk_header():
 	print """
 	<HTML>
 	<HEAD>  
-        <TITLE>PALS | Weather On Your Birthday</TITLE>
+        <TITLE>IEM| Weather On Your Birthday</TITLE>
         <META name="author" content="Daryl Herzmann akrherz@iastate.edu">
         <link rel=stylesheet type=text/css href=/onsite/birthday/pals.css>
 	</HEAD>
@@ -84,7 +84,8 @@ def weather_logic(month, high, low, rain, snow):
 				return "Cloudy and rainy!!"
 
 def get_values(city, dateStr):
-	query_str = "SELECT high, low, precip, snow from alldata WHERE stationid = '"+city+"' and day = '"+dateStr+"' "
+	query_str = """SELECT high, low, precip, snow from alldata_ia 
+	WHERE station = '"+city+"' and day = '"+dateStr+"' """
 
 	results =  mydb.query(query_str).getresult()
 	rain = round(float(results[0][2]), 2)
