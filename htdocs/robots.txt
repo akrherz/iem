@@ -2,19 +2,9 @@
 
 User-agent: *
 Crawl-delay: 120
-Disallow: /tmp/
 Disallow: /cgi-bin/
 Disallow: /usage/
-Disallow: /archive/raw/
-Disallow: /archive/data/
-Disallow: /plotting/24h/
-Disallow: /plotting/48h/
-Disallow: /plotting/snet/
-Disallow: /kcci/plotting/
 Disallow: /data/NIDS/
 Disallow: /data/nexrd2/
 Disallow: /data/model/
 Disallow: /archive/nexrad/
-Disallow: /COOP/cat.phtml
-Disallow: /data/frost/
-Disallow: /GIS/apps/rview/
