@@ -52,8 +52,13 @@ if ($station == null){
 		if (sizeof($tokens) != 21){
 			continue;
 		}
-  		$tstring = sprintf("%s %s", $dirRef, $tokens[3]);
-  		$valid[] = strtotime($tstring);
+  		  		$tstring = sprintf("%s %s %s %s", $tokens[0], $tokens[1], $tokens[2], $tokens[3]);
+  		$v = strtotime($tstring);
+  		
+		if ($v < $myTime){
+			continue;
+		}
+		$valid[] = $v;
   		$mph[] = $tokens[9];
   		$drct[] = $tokens[10];
  	} // End of while

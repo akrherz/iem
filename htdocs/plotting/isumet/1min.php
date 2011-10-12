@@ -26,7 +26,11 @@ if ($station == null){
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
 	while (list ($line_num, $line) = each ($fcontents)) {
 		$parts = preg_split ("/\s+/", $line);
-  		$valid[] = strtotime( substr($line, 0, 26) );
+		$v = strtotime( substr($line, 0, 26) );
+		if ($v < $myTime){
+			continue;
+		}
+  		$valid[] = $v;
   		$tmpf[] = round (substr($line, 36, 6),2);
   		$relh[] = intval($parts[7]);
   		$dwpf[] = dwpf(round (substr($line, 36, 6),2), intval($parts[7]) );
@@ -44,8 +48,13 @@ if ($station == null){
 		if (sizeof($tokens) != 21){
 			continue;
 		}
-  		$tstring = sprintf("%s %s", $dirRef, $tokens[3]);
-  		$valid[] = strtotime($tstring);
+  		$tstring = sprintf("%s %s %s %s", $tokens[0], $tokens[1], $tokens[2], $tokens[3]);
+  		$v = strtotime($tstring);
+  		
+		if ($v < $myTime){
+			continue;
+		}
+		$valid[] = $v;
   		$tmpf[] = $tokens[5];
   		$relh[] = floatval($tokens[8]);
   		$dwpf[] = dwpf($tokens[5], floatval($tokens[8]));
