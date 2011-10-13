@@ -1,4 +1,4 @@
-<?
+<?php
 	$width = 87;
 	$height = 60;
 	$Font = '/mesonet/data/gis/static/fonts/handgotn.ttf';
