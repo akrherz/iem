@@ -85,8 +85,7 @@ def weather_logic(month, high, low, rain, snow):
 
 def get_values(city, dateStr):
 	query_str = """SELECT high, low, precip, snow from alldata_ia 
-	WHERE station = '"+city+"' and day = '"+dateStr+"' """
-
+	WHERE station = '%s' and day = '%s' """ % (city, dateStr)
 	results =  mydb.query(query_str).getresult()
 	rain = round(float(results[0][2]), 2)
 	try:
@@ -160,7 +159,7 @@ def Main():
 		print "Please use this URL <a href='http://mesonet.agron.iastate.edu/onsite/birthday/'>http://mesonet.agron.iastate.edu/onsite/birthday/</a>"
 		sys.exit(0)	
 
-	city = cityParts[0].lower()
+	city = cityParts[0].upper()
 	cityName = cityParts[1]
 	now = mx.DateTime.DateTime( int(year), int(month), int(day) )
 	nowM2 = now + mx.DateTime.RelativeDateTime(days=-2)
