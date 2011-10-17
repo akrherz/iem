@@ -41,12 +41,14 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 
  $query = "select station, valid, min_low, min_low_yr from climate 
      WHERE valid > '2000-08-01' and min_low <= 32 
-     and station NOT IN ('ia4381', 'ia7842') ORDER by valid";
+     and station NOT IN ('IA4381', 'IA7842') 
+     and substr(station,0,3) = 'IA' ORDER by valid";
  $rs = pg_exec($connection, $query);
 
  $query = "select station, valid, low from climate 
      WHERE valid > '2000-08-01' and low <= 40 
-     and station NOT IN ('ia4381', 'ia7842') ORDER by valid";
+     and station NOT IN ('IA4381', 'IA7842')
+     and substr(station,0,3) = 'IA' ORDER by valid";
  $rs2 = pg_exec($connection, $query);
 
 
