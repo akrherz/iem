@@ -168,4 +168,3 @@ os.remove(fp+".prj")
 
 cursor.close()
 mydb.close()
-sys.exit(0)
