@@ -17,7 +17,7 @@ coop = iemdb.connect('coop', bypass=True)
 
 # Compute normal from the climate database
 sql = """SELECT station, high, low from climate WHERE valid = '2000-%s' 
-    and substr(station,0,3) = 'ia'""" % (
+    and substr(station,0,3) = 'IA'""" % (
   now.strftime("%m-%d"),)
 
 lats = []
