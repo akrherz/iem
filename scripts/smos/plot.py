@@ -37,7 +37,7 @@ def makeplot(ts):
         sm.append( row[2] * 100.)
         od.append( row[3] )
     if len(lats) == 0:
-        print 'Did not find SMOS data for ts: %s' % (ts,)
+        #print 'Did not find SMOS data for ts: %s' % (ts,)
         return
     lats = np.array( lats )
     lons = np.array( lons )
@@ -105,5 +105,9 @@ if __name__ == '__main__':
         else:
             ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(hour=0)
         makeplot( ts )
+        # Run a day, a week ago ago as well
+        for d in [1,5]:
+            ts -= mx.DateTime.RelativeDateTime(days=d)
+            makeplot( ts )
     else:
         makeplot( mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), 0))
