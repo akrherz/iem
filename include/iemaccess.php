@@ -22,13 +22,18 @@ class IEMAccess {
 
   function getSingleSite($sid) {
     $sid = strtoupper($sid);
-    $rs = pg_exec($this->dbconn, "select *, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station, network) WHERE c.station = '$sid' and s.day = 'TODAY'");
+    $rs = pg_exec($this->dbconn, sprintf("select *, x(c.geom) as x, y(c.geom) as y, 
+    valid at time zone '%s' as lvalid,
+    max_gust_ts at time zone '%s' as lmax_gust_ts,
+    max_sknt_ts at time zone '%s' as lmax_sknt_ts from current c LEFT JOIN summary s USING (station, network) WHERE c.station = '$sid' and s.day = 'TODAY'", $this->tzname, $this->tzname,$this->tzname));
     return new IEMAccessOb(@pg_fetch_array($rs,0));
   }
 
   function getSingleSiteYest($sid) {
-    $rs = pg_exec($this->dbconn, "select * from current c LEFT JOIN summary s 
-    USING (station, network) WHERE c.station = '$sid' and s.day = 'YESTERDAY'");
+    $rs = pg_exec($this->dbconn, sprintf("select *, valid at time zone '%s' as lvalid,
+    max_gust_ts at time zone '%s' as lmax_gust_ts,
+    max_sknt_ts at time zone '%s' as lmax_sknt_ts from current c LEFT JOIN summary s 
+    USING (station, network) WHERE c.station = '$sid' and s.day = 'YESTERDAY'", $this->tzname, $this->tzname,$this->tzname ));
     return new IEMAccessOb(pg_fetch_array($rs,0));
   }
 
@@ -50,7 +55,9 @@ class IEMAccess {
 
   function getAll() {
     $ret = Array();
-    $rs = pg_exec($this->dbconn, "select *, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station, network) WHERE c.network IN ('IA_RWIS', 'IA_ASOS', 'AWOS', 'KCCI', 'KIMT') and s.day = 'TODAY' and c.valid > 'TODAY' ");
+    $rs = pg_exec($this->dbconn, "select *, x(c.geom) as x, y(c.geom) as y, valid at time zone '%s' as lvalid,
+    max_gust_ts at time zone '%s' as lmax_gust_ts,
+    max_sknt_ts at time zone '%s' as lmax_sknt_ts from current c LEFT JOIN summary s USING (station, network) WHERE c.network IN ('IA_RWIS', 'IA_ASOS', 'AWOS', 'KCCI', 'KIMT') and s.day = 'TODAY' and c.valid > 'TODAY' ");
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
       $ret[$row["station"]] = new IEMAccessOb($row);
     }
