@@ -31,6 +31,10 @@ function new_window(url) {
   include("$rootpath/include/iemaccessob.php");
   include_once "$rootpath/include/database.inc.php";
   $mesosite = iemdb('mesosite');
+  pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
+  $rs = pg_execute($mesosite, "FINDTZ", Array($network));
+  $row = pg_fetch_assoc($rs,0);
+  $tzname = $row["tzname"];
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
@@ -60,7 +64,7 @@ function aSortBySecondIndex($multiArray, $secondIndex, $sorder) {
   return $sortedArray;
 }
 
-$iem = new IEMAccess();
+$iem = new IEMAccess($tzname);
 $asos = $iem->getNetwork($network);
 
 /* Final data array */
@@ -68,7 +72,7 @@ $mydata = Array();
 
 while ( list($key, $iemob) = each($asos) ){
     $mydata[$key] = $iemob->db;
-    $mydata[$key]["ts"] = $iemob->ts;
+    $mydata[$key]["ts"] = $iemob->lts;
     $mydata[$key]["sname"] = $cities[$key]["name"];
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
@@ -81,11 +85,11 @@ while ( list($key, $iemob) = each($asos) ){
     }
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["lmax_gust_ts"],0,16) );
     } else {
       $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
       if ($mydata[$key]["max_sknt_ts"] > 0) {
-         $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+         $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["lmax_sknt_ts"],0,16) );
       }
     }
 
@@ -153,8 +157,8 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 
 
 <?php
-echo "<br>Times are in CST/CDT. Currently, the daily summary are for CST/CDT date and not the
-local date for the sensor.  Will have to correct this :( Table sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
+echo "<br /><strong>Times shown are for timezone: ${tzname}.</strong> The local day summary
+is based on that timezone. <br />Table sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
 a column to sort it. Click on site ID for more information. You can download data from 
 this network <a href='../request/download.phtml?network=${network}'>here</a>.<br />\n";
 ?>
@@ -217,7 +221,7 @@ while (list ($key, $val) = each ($finalA))  {
   $row .= "<td ";
   if ($tdiff > 10000){
     $fmt = "%d %b %I:%M %p";
-    $row .= "bgcolor=\"red\">". strftime($fmt, $asos[$key]->ts) ."</td><td colspan=\"16\">Site Offline</td></tr>";
+    $row .= "bgcolor=\"red\">". strftime($fmt, $asos[$key]->lts) ."</td><td colspan=\"16\">Site Offline</td></tr>";
     $old .= $row;
     continue;
   } else if ($tdiff > 7200){
@@ -229,7 +233,7 @@ while (list ($key, $val) = each ($finalA))  {
   } else {
     $fmt = "%I:%M %p";
   }
-  $row .= ">". strftime($fmt, $asos[$key]->ts) ."</td>
+  $row .= ">". strftime($fmt, $asos[$key]->lts) ."</td>
    <td align='center'>". round($parts["tmpf"],0) ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
      <td>". round($parts["dwpf"],0) ."</td>
      <td>". round($parts["feel"],0) ."</td>

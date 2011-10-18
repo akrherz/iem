@@ -10,8 +10,9 @@ include_once("$rootpath/include/database.inc.php");
 class IEMAccess {
   var $dbconn;
 
-  function IEMAccess() {
+  function IEMAccess($tzname="America/Chicago") {
     $this->dbconn = iemdb("access");
+    $this->tzname = $tzname;
  
   } // End of IEMAccess Constructor
 
@@ -26,13 +27,21 @@ class IEMAccess {
   }
 
   function getSingleSiteYest($sid) {
-    $rs = pg_exec($this->dbconn, "select * from current c LEFT JOIN summary s USING (station, network) WHERE c.station = '$sid' and s.day = 'YESTERDAY'");
+    $rs = pg_exec($this->dbconn, "select * from current c LEFT JOIN summary s 
+    USING (station, network) WHERE c.station = '$sid' and s.day = 'YESTERDAY'");
     return new IEMAccessOb(pg_fetch_array($rs,0));
   }
 
   function getNetwork($network) {
     $ret = Array();
-    $rs = pg_exec($this->dbconn, "select *, c.pday as ob_pday, x(c.geom) as x, y(c.geom) as y from current c LEFT JOIN summary s USING (station, network) WHERE c.network = '$network' and s.day = 'TODAY'");
+    $sql = sprintf("select *, c.pday as ob_pday, x(c.geom) as x, 
+    y(c.geom) as y, valid at time zone '%s' as lvalid,
+    max_gust_ts at time zone '%s' as lmax_gust_ts,
+    max_sknt_ts at time zone '%s' as lmax_sknt_ts from 
+    current c LEFT JOIN summary s USING (station, network) 
+    WHERE c.network = '$network' and s.day = date(now() at time zone '%s')",
+    $this->tzname, $this->tzname, $this->tzname, $this->tzname);
+    $rs = pg_exec($this->dbconn, $sql);
     for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
       $ret[$row["station"]] = new IEMAccessOb($row);
     }
