@@ -9,7 +9,7 @@ class mydata(dict):
         """
         val = self.get(key)
         if val is None and key == 'tzname':
-            return 'America/Chicago'
+            return "'America/Chicago'"
         if val is None:
             return 'null'
         if type(val) == type(''):
