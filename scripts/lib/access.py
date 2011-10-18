@@ -93,7 +93,7 @@ class Ob(object):
      max_drct = 
       (CASE WHEN max_gust < '%(peak_gust)s' THEN '%(peak_drct)s' ELSE max_drct END)
      WHERE station = '%(stationID)s' 
-     and day = date('%(peak_ts)s'::timestamptz at time zone '%(tzname)s')""" % (gdata,)
+     and day = date('%(peak_ts)s'::timestamptz at time zone '%(tzname)s')""" % gdata
         self.execQuery(sql, db, dbpool)
 
 
