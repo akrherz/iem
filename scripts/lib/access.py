@@ -8,6 +8,8 @@ class mydata(dict):
         Over-ride getitem so that the sql generated is proper
         """
         val = self.get(key)
+        if val is None and key == 'tzname':
+            return 'America/Chicago'
         if val is None:
             return 'null'
         if type(val) == type(''):
@@ -32,11 +34,14 @@ class Ob(object):
         if self.data.get('valid') is None:
             return False
 
+        # This will have some issues around the new year, sigh
         rs = db.query("""SELECT c.*, s.* from current c, summary_%s s WHERE 
-          c.station = '%s' and s.day = 'TODAY' and 
+          c.station = '%s' and s.day = date('%s'::timestamp at time zone '%s') and 
           c.station = s.station and c.network = s.network and
           c.network = '%s' """ % (
           self.data.get('valid').year, self.data.get('station'), 
+          self.data.get('valid').strftime("%Y-%m-%d %H:%M"),
+          self.data.get('tzname', 'America/Chicago'),
           self.data.get('network') ) ).dictresult()
         if len(rs) == 0:
             #print "No rows found for station: %(station)s network: %(network)s" % self.data
@@ -75,6 +80,23 @@ class Ob(object):
                 print sql
                 traceback.print_exc()
 
+
+    def updateDatabasePeakWind(self, db, gdata, dbpool=None):
+        table = "summary_%s" % (self.data['valid'].year,)
+        if gdata.get('tzname') is None:
+            gdata['tzname'] = 'America/Chicago'
+        sql = """UPDATE """+ table +""" SET 
+     max_gust = 
+      (CASE WHEN max_gust < '%(peak_gust)s' THEN '%(peak_gust)s' ELSE max_gust END),
+     max_gust_ts = 
+      (CASE WHEN max_gust < '%(peak_gust)s' THEN '%(peak_ts)s' ELSE max_gust_ts END),
+     max_drct = 
+      (CASE WHEN max_gust < '%(peak_gust)s' THEN '%(peak_drct)s' ELSE max_drct END)
+     WHERE station = '%(stationID)s' 
+     and day = date('%(peak_ts)s'::timestamptz at time zone '%(tzname)s')""" % (gdata,)
+        self.execQuery(sql, db, dbpool)
+
+
     def updateDatabaseSummaryTemps(self, db, dbpool=None):
         table = "summary_%s" % (self.data['valid'].year,)
         sql = """UPDATE """+ table +""" SET 
@@ -82,7 +104,7 @@ class Ob(object):
        (CASE WHEN max_tmpf < %(max_tmpf)s THEN %(max_tmpf)s ELSE max_tmpf END),
       min_tmpf = 
        (CASE WHEN min_tmpf > %(min_tmpf)s THEN %(min_tmpf)s ELSE min_tmpf END) 
-      WHERE station = %(station)s and day = '%(valid)s'::date 
+      WHERE station = %(station)s and day = date('%(valid)s'::timestamp at time zone %(tzname)s) 
       and network = %(network)s""" % self.data
         self.execQuery(sql , db, dbpool)
 
@@ -114,7 +136,7 @@ class Ob(object):
      max_srad =
       (CASE WHEN max_srad < %(max_srad)s THEN %(max_srad)s ELSE max_srad END), 
      snow = %(snow)s, snowd = %(snowd)s, snoww = %(snoww)s 
-     WHERE station = %(station)s and day = '%(valid)s'::date 
+     WHERE station = %(station)s and day = date('%(valid)s'::timestamp at time zone %(tzname)s) 
      and network = %(network)s """ % self.data
         self.execQuery(sql, db, dbpool)
 
