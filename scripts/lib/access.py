@@ -36,7 +36,7 @@ class Ob(object):
 
         # This will have some issues around the new year, sigh
         rs = db.query("""SELECT c.*, s.* from current c, summary_%s s WHERE 
-          c.station = '%s' and s.day = date('%s'::timestamp at time zone '%s') and 
+          c.station = '%s' and s.day = date('%s'::timestamptz at time zone '%s') and 
           c.station = s.station and c.network = s.network and
           c.network = '%s' """ % (
           self.data.get('valid').year, self.data.get('station'), 
@@ -104,7 +104,7 @@ class Ob(object):
        (CASE WHEN max_tmpf < %(max_tmpf)s THEN %(max_tmpf)s ELSE max_tmpf END),
       min_tmpf = 
        (CASE WHEN min_tmpf > %(min_tmpf)s THEN %(min_tmpf)s ELSE min_tmpf END) 
-      WHERE station = %(station)s and day = date('%(valid)s'::timestamp at time zone %(tzname)s) 
+      WHERE station = %(station)s and day = date('%(valid)s'::timestamptz at time zone %(tzname)s) 
       and network = %(network)s""" % self.data
         self.execQuery(sql , db, dbpool)
 
@@ -136,7 +136,7 @@ class Ob(object):
      max_srad =
       (CASE WHEN max_srad < %(max_srad)s THEN %(max_srad)s ELSE max_srad END), 
      snow = %(snow)s, snowd = %(snowd)s, snoww = %(snoww)s 
-     WHERE station = %(station)s and day = date('%(valid)s'::timestamp at time zone %(tzname)s) 
+     WHERE station = %(station)s and day = date('%(valid)s'::timestamptz at time zone %(tzname)s) 
      and network = %(network)s """ % self.data
         self.execQuery(sql, db, dbpool)
 
