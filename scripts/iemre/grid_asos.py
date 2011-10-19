@@ -30,6 +30,8 @@ def grid_wind(rs):
     udata = []
     vdata = []
     for row in rs:
+        if row['sknt'] is None or row['drct'] is None:
+            continue
         # mps
         u,v = mesonet.uv( row['sknt'] / 0.514, row['drct'] )
         if v is not None:
