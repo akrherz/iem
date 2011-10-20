@@ -17,3 +17,5 @@ cd ../smos
 sleep 600
 cd ../qc
 /mesonet/python/bin/python correctGusts.py
+
+python check_station_geom.py
