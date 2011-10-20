@@ -63,7 +63,411 @@ LAYER
     COLOR 191 191 191
   END
 END
+LAYER
+  NAME lakes
+  STATUS OFF
+  TYPE POLYGON
+  DATA /mesonet/data/gis/static/shape/4326/us/major_lakes.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    COLOR 0 0 250
+  END
+END
+LAYER
+  NAME nexrad_n0q
+  DATA /home/ldm/data/gis/images/4326/USCOMP/n0q_0.png
+  TYPE RASTER
+  STATUS OFF
+  METADATA
+    "wms_title" "Composite NEXRAD"
+  END
+  PROJECTION
+    "init=epsg:4326"
+  END
+  OFFSITE 0 0 0
+  TRANSPARENCY 70
+END
+LAYER
+  NAME uscounties
+  STATUS OFF
+  TYPE LINE
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    SYMBOL "circle"
+    COLOR 54 54 54
+    SIZE 1
+  END
+END
+###
+# Watch by County
+LAYER
+  CONNECTIONTYPE postgis
+  NAME "watch_by_county"
+  CONNECTION "dbname=postgis host=iemdb user=nobody"
+  STATUS OFF
+  TYPE LINE
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM "phenomena"
+  CLASS
+    EXPRESSION 'TO'
+    STYLE
+      COLOR 255 0 0
+      SIZE 2
+      SYMBOL 'circle'
+    END
+  END
+  CLASS
+    EXPRESSION 'SV'
+    STYLE
+      COLOR 255 255 0
+      SIZE 2
+      SYMBOL 'circle'
+    END
+  END
+END
+# watches
+LAYER
+ CONNECTIONTYPE postgis
+ NAME watches
+ CONNECTION "dbname=postgis host=iemdb"
+ DATA "geom from watches"
+ PROJECTION
+  "init=epsg:4326"
+ END
+ TYPE LINE
+ #FILTER "expired > CURRENT_TIMESTAMP"
+ CLASSITEM 'wtype'
+  CLASS
+    EXPRESSION /SVR/
+    STYLE
+      COLOR 0 0 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 255 0
+      SIZE 2
+       SYMBOL 'circle'
+    END
+  END
+  CLASS
+    EXPRESSION /TOR/
+    STYLE
+      COLOR 0 0 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 0 0
+      SIZE 2
+      SYMBOL 'circle'
+    END
+  END
+END
+LAYER
+  CONNECTIONTYPE postgis
+  NAME sbw
+  CONNECTION "dbname=postgis host=iemdb"
+  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
+  STATUS OFF
+  TYPE POLYGON
+  METADATA
+    "wms_title" "Current Polygon Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM 'phenomena'
+  # Tornado
+  CLASS
+    EXPRESSION /TO/
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 0 0
+      SIZE    1
+      SYMBOL  'circle'
+    END
+  END
+  # SVR
+  CLASS
+    EXPRESSION /SV/
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 0
+      SIZE    1
+      SYMBOL  'circle'
+    END
+  END
+  # MA
+  CLASS
+    EXPRESSION /MA/
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 255
+      SIZE    1
+      SYMBOL  'circle'
+    END
+  END
+  CLASS
+    EXPRESSION /ZZ/
+    NAME "Storm Based Warning"
+    STYLE
+      COLOR -1 -1 -1 
+      OUTLINECOLOR 255 255 255
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1 
+      OUTLINECOLOR 0 0 0
+      SIZE    1
+      SYMBOL  'circle'
+    END
+  END
+END
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings0_c
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  DATA "geom from (select phenomena, significance, geom, oid from warnings WHERE  expire > CURRENT_TIMESTAMP and gtype = 'C') as foo using unique oid using SRID=4326"
+  STATUS OFF
+  TYPE LINE
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    NAME "Flash Flood Warn"
+    EXPRESSION (('[phenomena]' = 'FF' or '[phenomena]' = 'MA') and '[significance]' = 'W')
+    STYLE
+      COLOR 0 255 0
+      SIZE 2
+      SYMBOL 'circle'
+    END
+  END
+  CLASS
+    NAME "Svr T'storm Warn"
+    EXPRESSION ('[phenomena]' = 'SV' and '[significance]' = 'W')
+    STYLE
+      COLOR 0 0 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 255 0
+      SIZE 2
+      SYMBOL 'circle'
+    END
+  END
+  CLASS
+    NAME "Tornado Warn"
+    EXPRESSION ('[phenomena]' = 'TO' and '[significance]' = 'W')
+    STYLE
+      COLOR 0 0 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 0 0
+      SIZE 2
+      SYMBOL 'circle'
+    END
+  END
 
+    # Advisories
+    CLASS
+        NAME "Winter Advisory"
+        EXPRESSION (('[phenomena]' = 'WW' or '[phenomena]' = 'BZ'  or '[phenomena]' = 'WS' or '[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'Y')
+        STYLE
+          COLOR  222 184 135
+          SIZE  3
+          SYMBOL    'circle'
+        END
+        #STYLE
+        #  COLOR 222 184 135
+        #  SIZE  1
+        #  SYMBOL    'circle'
+        #END
+    END
+    # Snow and Blowing snow
+    CLASS
+        NAME "Sn or Blow Sn Adv"
+        EXPRESSION (('[phenomena]' = 'LE' or '[phenomena]' = 'SN' or '[phenomena]' = 'BS' or '[phenomena]' = 'SB') and '[significance]' = 'Y')
+        STYLE
+          COLOR 176 224 230
+          SIZE  3 
+          SYMBOL    'circle'
+        END
+        STYLE
+          COLOR 255 255 255
+          SIZE  1
+          SYMBOL    'circle'
+        END
+    END
+
+    # Heavy Snow
+    CLASS
+        NAME "Heavy Snow Warn"
+        EXPRESSION ('[phenomena]' = 'HS' and '[significance]' = 'W')
+        STYLE
+          COLOR 138 43 226
+          SIZE 3
+          SYMBOL 'circle'
+        END
+        STYLE
+          COLOR 255 255 255
+          SIZE 1
+          SYMBOL 'circle'
+        END
+    END
+    # WW Warning
+    CLASS
+        NAME "Winter Storm Warn"
+        EXPRESSION (('[phenomena]' = 'LE' or '[phenomena]' = 'WS' or '[phenomena]' = 'WW') and '[significance]' = 'W')
+        COLOR   255 105 180
+        SIZE    3
+        SYMBOL  'circle'
+    END
+    # Sleet Fz
+    CLASS
+        NAME "Ice/Frz/Sleet Warn"
+        EXPRESSION (('[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'W')         
+        COLOR   255 20 147
+        SIZE    3
+        SYMBOL  'circle'
+    END
+    # Blizzard
+    CLASS
+        NAME "Blizzard Warn"
+        EXPRESSION ('[phenomena]' = 'BZ' and '[significance]' = 'W')
+        COLOR   255 0 0
+        SIZE    3
+        SYMBOL  'circle'
+    END
+    # Freeze Warning
+    CLASS
+        NAME "Freeze Warn"
+        EXPRESSION ('[phenomena]' = 'FZ' and '[significance]' = 'W')
+        COLOR   255 0 0
+        SIZE    3
+        SYMBOL  'circle'
+    END
+    # Marine Statement?
+    CLASS
+        NAME "Marine Statement"
+        EXPRESSION ('[phenomena]' = 'MA' and '[significance]' = 'S')
+        COLOR   0 200 0
+        SIZE    3
+        SYMBOL  'circle'
+    END
+    #CLASS
+    #    NAME "Other"
+    #    #EXPRESSION ('[phenomena]' = 'MA' and '[significance]' = 'S')
+    #    COLOR   200 200 200
+    #    SIZE    3
+    #    SYMBOL  'circle'
+    #END
+END
+# Bar Header Bar!
+LAYER
+  NAME bar640t
+  TYPE POLYGON
+  TRANSFORM FALSE
+  STATUS OFF
+  FEATURE
+    POINTS 0 0 0 36 640 36 640 0 0 0 END
+  END
+#  TRANSPARENCY 70
+  LABELCACHE FALSE
+  CLASS
+    COLOR 0 0 0
+  END
+END
+# Credits
+LAYER
+  NAME "bar640t-title"
+  TYPE ANNOTATION
+  STATUS OFF
+  TRANSFORM FALSE
+  CLASS
+    NAME 's14y'
+    LABEL
+      COLOR 255 255 0
+      TYPE TRUETYPE
+      SIZE 14
+      FONT 'arial'
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+      BUFFER 2
+    END
+  END
+  CLASS
+    NAME 's12w'
+    LABEL
+      COLOR 255 255 255
+      TYPE TRUETYPE
+      SIZE 12
+      FONT 'arial'
+      POSITION CR
+      FORCE TRUE
+      PARTIALS TRUE
+      BUFFER 2
+    END
+  END
+END
+# IEM Logo
+LAYER
+  NAME logo
+  TYPE POINT
+  STATUS default
+  TRANSFORM FALSE
+#  TRANSPARENCY 10
+  CLASS
+    SYMBOL 'iem_logo'
+    COLOR 0 0 0
+  END
+END
+LAYER
+  NAME nexrad_n0r
+  DATA /home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif
+  TYPE RASTER
+  STATUS OFF
+  METADATA
+    "wms_title" "Composite NEXRAD"
+  END
+  PROJECTION
+    "init=epsg:4326"
+  END
+  OFFSITE 0 0 0
+  TRANSPARENCY 70
+END
 LAYER
   NAME "east_vis_1km"
   STATUS ON
