@@ -30,7 +30,7 @@
     if ($i == 4) echo "</tr><tr>";
     $i++;
   }
-  echo "</tr><tr><th>RWIS</th>";
+  echo "</tr><tr>";
   while ( list($key, $value) = each($rwis22) ){
     echo "<th ";
     if ($current_network == $key)
@@ -39,5 +39,5 @@
        echo "><a href=\"". $value["url"] ."\">$key</a></th>";
   }
 ?>
-
+ <td></td>
 </tr></table>
