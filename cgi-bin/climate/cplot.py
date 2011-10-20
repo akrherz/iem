@@ -16,6 +16,9 @@ os.environ[ 'USER' ] = 'nobody'
 import cgi
 import matplotlib
 matplotlib.use( 'Agg' )
+import matplotlib
+matplotlib.rcParams['font.sans-serif'] = 'Arial'
+matplotlib.rcParams['font.family'] = 'sans-serif'
 from matplotlib import pyplot as plt
 import iemdb
 import numpy
@@ -239,6 +242,8 @@ def process_cgi(form):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    # Transparent background for the plot area
+    ax.patch.set_alpha(1.0)
 
     yearly_plot(ax, cfg)
 
