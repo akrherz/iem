@@ -25,9 +25,10 @@ if (isset($_GET["lat"]) && isset($_GET["lon"]))
 $result = "id,valid,tmpf,dwpf,sknt,drct,phour,alti,gust\n";
 while(list($k,$id) = each($stations))
 {
-  $rs = pg_exec($access, "SELECT distinct station, valid, tmpf, dwpf, sknt, drct,
-  phour, alti, gust from current_log WHERE station = '$id' 
-        ORDER by valid ASC");
+  $rs = pg_exec($access, "SELECT station, valid, max(tmpf) as tmpf, max(dwpf) as dwpf, 
+  max(sknt) as sknt, max(drct) as drct,
+  max(phour) as phour, max(alti) as alti, max(gust) as gust from current_log WHERE station = '$id' 
+        GROUP by station, valid ORDER by valid ASC");
   if (pg_num_rows($rs) == 0){ continue; }
   for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   {
