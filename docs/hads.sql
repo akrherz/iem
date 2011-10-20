@@ -10,5 +10,5 @@ CREATE TABLE raw2010_12() inherits (raw2010);
 CREATE TABLE unknown(
 	nwsli varchar(8),
 	product varchar(64),
-	network varchar(24),
+	network varchar(24)
 );
