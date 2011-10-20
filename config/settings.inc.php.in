@@ -1,8 +1,8 @@
 <?php
 date_default_timezone_set('America/Chicago');
-$rootpath='/mesonet/www/apps/iemwebsite/';
-$rooturl='http://mesonet.agron.iastate.edu';
-$rootcgi='http://mesonet.agron.iastate.edu/cgi-bin';
+$rootpath='/home/akrherz/projects/iemwebsite/';
+$rooturl='http://localhost/iem';
+$rootcgi='http://localhost/cgi-bin/iem';
 $mapscript='php_mapscript_564.so';
 $fb_feature_key='';
 $fb_feature_secret='';
