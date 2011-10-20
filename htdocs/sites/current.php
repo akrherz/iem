@@ -11,11 +11,11 @@ $THISPAGE="iem-sites";
 <?php 
   include ("$rootpath/include/iemaccess.php");
   include ("$rootpath/include/iemaccessob.php");
-  $iem = new IEMAccess();
+  $iem = new IEMAccess($metadata["tzname"]);
   $iemob = $iem->getSingleSite($station);
   $rs = $iemob->db;
 
- $vardict = Array("valid" => "Observation Time", "tmpf" => "Air Temp [F]",
+ $vardict = Array("lvalid" => "Observation Time", "tmpf" => "Air Temp [F]",
  "max_tmpf" => "Maximum Air Temperature [F]", "min_tmpf" => "Minimum Air Temperature [F]",
    "dwpf" => "Dew Point [F]", "relh" => "Relative Humidity [%]",
    "drct" => "Wind Direction", "sknt" => "Wind Speed [knots]",
@@ -25,12 +25,12 @@ $THISPAGE="iem-sites";
    "gust" => "Wind Gust [knots]", "raw" => "Raw Observation/Product");
 ?>
 <p>This application displays the last observation received by the IEM 
-from this site. The time stamp is in the US Central Time Zone.</p>
+from this site. The time stamp is in <strong><?php echo $metadata["tzname"]; ?></strong> timezone.</p>
 <table cellpadding="2" cellspacing="0" border="1">
 <?php
   foreach ( $vardict as $key => $value ) {
     if (array_key_exists($key, $rs) && $rs[$key] != "" && $rs[$key] != -99) {
-      if ($key == "valid") {
+      if ($key == "lvalid") {
         $t = date("d M Y, g A", strtotime($rs[$key]));
         echo '<tr><td><b>'. $value .'</b></td><td>'. $t .'</td></tr>';
       }

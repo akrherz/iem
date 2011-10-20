@@ -26,6 +26,14 @@ while (list($key,$val) = each($o))
   if ($current == $key) echo "background: #eaf;";
   echo "width: 150px; float: left; padding-left: 10px;\"><a href=\"$uri\">". $val["name"] ."</a></div>";
 }
+if (preg_match('/ASOS|AWOS/', $network) > 0){
+	$uri = sprintf("%s/request/download.phtml?network=%s", $rooturl, $network);
+	echo "<div style=\"width: 150px; float: left; padding-left: 10px; border-left: 4px solid #0F0;\"><a href=\"$uri\">Download</a></div>";
+}elseif (preg_match('/DCP/', $network) > 0){
+	$uri = sprintf("%s/request/dcp/fe.phtml?network=%s", $rooturl, $network);
+	echo "<div style=\"width: 150px; float: left; padding-left: 10px; border-left: 4px solid #0F0;\"><a href=\"$uri\">Download</a></div>";
+	
+}
 ?>
 <br clear="all" />
 <form method="GET" name="automatic">

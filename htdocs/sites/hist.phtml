@@ -22,7 +22,8 @@ $htmlout = "";
 
 $c = iemdb("access");
 if ($mode == "monthly"){
- $sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid
+ $sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid,
+   max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
    from summary_". $year ." WHERE station = '". $station ."' and
    extract(month from day) = ". $month ." and
    extract(year from day) = ". $year ."
@@ -32,7 +33,8 @@ if ($mode == "monthly"){
  if ($sortvar == "pday" || $sortvar == "max_tmpf" || $sortvar == "max_gust"){
    $sortorder = "DESC";
  }
- $sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid
+ $sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid,
+   max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
    from summary_". $year ." WHERE network = '$network' and
    day = '". $dateStr ."'  ORDER by $sortvar $sortorder";
 }
@@ -56,10 +58,11 @@ if ($mode == "monthly") {
     $str .= "<br><strike>Low: ". $row["min_tmpf"] ."</strike>";
   else
     $str .= "<br>Low: ". $row["min_tmpf"] ;
-  $str .= "<br>Rain: ". $row["pday"];
-
-  if (strlen($row["max_gust"]) > 0 && strlen($row["max_gust_ts"]) > 0) {
-    $gtim = strtotime(substr($row["max_gust_ts"],0,16));
+  if ($row["pday"] >= 0){
+  	$str .= "<br>Rain: ". $row["pday"];
+  }
+  if (strlen($row["max_gust"]) > 0 && strlen($row["lmax_gust_ts"]) > 0) {
+    $gtim = strtotime(substr($row["lmax_gust_ts"],0,16));
     $gs = date("h:i a", $gtim);
     $g = round($row["max_gust"] * 1.15,0);
     $str .= "<br>Gust:<br> ". drct2txt($row["max_drct"]) ." @ ". $g .
@@ -93,13 +96,13 @@ if ($mode == "monthly") {
     $htmlout .= "<td><strike>". $row["min_tmpf"] ."</strike></td>";
   else
     $htmlout .= "<td>". $row["min_tmpf"] ."</td>";
-  if ($row["pday"] == -99)
+  if ($row["pday"] < 0)
     $htmlout .= "<td>M</td>";
   else
     $htmlout .= "<td>". $row["pday"] ."</td>";
 
-  if (strlen($row["max_gust"]) > 0 && $row["max_gust_ts"] != "") {
-    $gtim = strtotime(substr($row["max_gust_ts"],0,16));
+  if (strlen($row["max_gust"]) > 0 && $row["lmax_gust_ts"] != "") {
+    $gtim = strtotime(substr($row["lmax_gust_ts"],0,16));
     $gs = date("h:i a", $gtim);
     $g = round($row["max_gust"] * 1.15,0);
 
@@ -126,12 +129,14 @@ if ($mode == "monthly") {
   echo "<input type=\"hidden\" name=\"station\" value=\"$station\">";
   echo "<input type=\"hidden\" name=\"network\" value=\"$network\">";
 if ($mode == "monthly"){
-  echo "The calendar chart below shows the daily reported climate variables.  You can click on a date to display the values for all sites for that day.";
+  echo "The calendar chart below shows the daily reported climate variables.  You can 
+  click on a date to display the values for all sites for that day. Time stamps are displayed
+  in the <strong>". $metadata["tzname"] ."</strong> timezone.";
   echo "<p>Year: &nbsp; ". yearSelect(2002, $year, "year");
   echo "<br />Month: &nbsp; ". monthSelect($month, "month");
   echo "<br /><input type='submit' value='Change'></form>";
 } else {
-  echo "The chart below lists out the reported summary values for a particular date for all SchoolNet8 sites.";
+  echo "The chart below lists out the reported summary values for a particular date.";
   echo "<p>Switch date shown:<br /><input type=\"hidden\" value=\"daily\" name=\"mode\">";
   echo yearSelect(2002, $year, "year");
   echo monthSelect($month, "month");
