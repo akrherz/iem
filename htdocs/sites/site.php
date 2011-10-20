@@ -16,7 +16,7 @@ include("$rootpath/include/header.php");
 
 <table><tr><td valign="top">
 
-<table>
+<table cellpadding='1' border='1' cellspacing='0'>
 <tr><th>Station Identifier:</th><td><?php echo $station; ?></td></tr>
 <tr><th>Station Name:</th><td><?php echo $cities[$station]["name"]; ?></td></tr>
 <tr><th>Network:</th><td><?php echo $network; ?></td></tr>
@@ -25,6 +25,7 @@ include("$rootpath/include/header.php");
 <tr><th>Latitude:</th><td><?php echo sprintf("%.5f", $cities[$station]["lat"]); ?></td></tr>
 <tr><th>Longitude:</th><td><?php echo sprintf("%.5f", $cities[$station]["lon"]); ?></td></tr>
 <tr><th>Elevation [m]:</th><td><?php echo $cities[$station]["elevation"]; ?></td></tr>
+<tr><th>Time Zone:</th><td><?php echo $cities[$station]["tzname"]; ?></td></tr>
 </table>
 
 </td><td>
