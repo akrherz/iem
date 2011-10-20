@@ -111,7 +111,8 @@ CREATE TABLE stations(
 	wfo varchar(3),
 	archive_begin timestamp with time zone,
 	archive_end timestamp with time zone,
-	modified timestamp with time zone
+	modified timestamp with time zone,
+	tzname varchar(32)
 );
 CREATE UNIQUE index stations_idx on stations(id, network);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);

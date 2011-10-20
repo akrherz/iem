@@ -38,3 +38,6 @@ CREATE FUNCTION gdd48(real, real) RETURNS numeric
     AS $_$select (( (CASE WHEN $3 > $1 THEN (case when $3 > $2 THEN $2 ELSE $3 END ) - $1 ELSE 0 END) + 
     (CASE WHEN $4 > $1 THEN $4 - $1 ELSE 0 END) ) / 2.0)::numeric$_$;
  
+ CREATE FUNCTION hdd65(real, real) RETURNS numeric
+ 	LANGUAGE sql
+ 	AS $_$select (case when (65 - (( $1 + $2 )/2.)) > 0 then ( $1 + $2 )/2. else 0 end)::numeric$_$;
