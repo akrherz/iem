@@ -7,48 +7,53 @@ import iemplot
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb, stationTable
-st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
-i = iemdb.iemdb()
-coop = i['coop']
+import network
+nt = network.Table("IACLIMATE")
+import iemdb
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor()
+ccursor2 = COOP.cursor()
 
 
 # Extract normals
 lats = []
 lons = []
 vals = []
-rs = coop.query("""SELECT stationid, min(low) as low from alldata
-     WHERE day > '2010-11-01' 
-     GROUP by stationid ORDER by low DESC""").dictresult()
-for i in range(len(rs)):
-  stid = rs[i]['stationid']
-  lats.append( st.sts[ rs[i]['stationid'].upper() ]['lat'] )
-  lons.append( st.sts[ rs[i]['stationid'].upper() ]['lon'] )
-  ob = rs[i]['low']
+ccursor.execute("""SELECT station, min(low) as low from alldata_ia
+     WHERE day > '2011-09-01' and station != 'IA4705'
+     GROUP by station ORDER by low DESC""")
+for row in ccursor:
+  stid = row[0]
+  lats.append( nt.sts[ stid ]['lat'] )
+  lons.append( nt.sts[ stid ]['lon'] )
+  ob = row[1]
   # Find obs
-  rs2 = coop.query("""SELECT year, min(low) as loww from alldata where
-        stationid = '%s' and  year < 2011 and (sday >= '1101' or sday < '0114')
+  ccursor2.execute("""SELECT year, min(low) as loww from alldata_ia where
+        station = '%s' and  year < 2011 and sday >= '0901' and sday < '1018'
         GROUP by year
         ORDER by loww ASC
-        """ % (stid.lower(),)
-       ).dictresult()
-  for j in range(len(rs2)):
-    if rs2[j]['loww'] > ob:
+        """ % (stid,)
+       )
+  j = 0
+  for row2 in ccursor2:
+    if row2[1] > ob:
       break
-  print "[%s] 2011 low: %s  rank: %s" % (stid, ob, j)
-  vals.append( (j+1) / float(len(rs2)) * 100.0 )
+    j += 1
+  rank = float(j+1) / (float(ccursor2.rowcount) +1 )* 100.0
+  print "[%s] 2011 low: %s rank: %.1f" % (stid, ob, rank)
+  vals.append( rank )
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "2010-2011 Iowa Minimum Winter Temp Percentile",
- '_valid'             : "between 1 Nov - 14 Jan [100% Warmest]",
+ '_title'             : "2011 Iowa Minimum Fall Temp Percentile",
+ '_valid'             : "between 1 Sep - 17 Oct [100% Warmest]",
  'lbTitleString'      : "[%]",
  '_showvalues'        : True,
  '_format'            : '%.0f',
 }
 # Generates tmp.ps
 fp = iemplot.simple_contour(lons, lats, vals, cfg)
-iemplot.postprocess(fp, "")
-#iemplot.makefeature(fp)
+#iemplot.postprocess(fp, "")
+iemplot.makefeature(fp)
