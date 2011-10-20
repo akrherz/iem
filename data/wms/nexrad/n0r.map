@@ -30,7 +30,7 @@ WEB
 #  FOOTER ia_footer.html
   MINSCALE 0
   MAXSCALE 465000000
-  IMAGEPATH "/mesonet/www/html/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   LOG "/tmp/n0r-w0.log"
   METADATA
