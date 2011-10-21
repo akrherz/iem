@@ -19,7 +19,8 @@ for row in mcursor:
     else:
         mtime = os.stat(testfp)[stat.ST_MTIME]
         age = float(now) - mtime
-        if age > (50*24*60*60): #50 days in seconds!
+        # 55 days in seconds, enough to cover the number of networks running
+        if age > (55*24*60*60): 
             print "Driving network %s because of age!" % (network,)
             os.system("/mesonet/python/bin/python drive_network_windrose.py %s" % (network,))
             sys.exit()
