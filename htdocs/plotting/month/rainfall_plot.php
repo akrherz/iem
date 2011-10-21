@@ -21,8 +21,8 @@ if ($st->table[$station]['climate_site'] == ""){ $hasclimate = 0; }
 
 $coopdb = iemdb("coop");
 $IEM = iemdb('iem');
-$rs = pg_prepare($IEM, "SELECTOR", "SELECT pday, extract(day from day) as day from summary_$year
-		WHERE station = $1 and network = $2 and extract(month from day) = $3 
+$rs = pg_prepare($IEM, "SELECTOR", "SELECT pday, extract(day from day) as day from summary_$year s, stations t
+		WHERE t.id = $1 and t.network = $2 and t.iemid = s.iemid and extract(month from day) = $3 
 		ORDER by day ASC");
 
 $climate_site = $cities[$station]["climate_site"];
