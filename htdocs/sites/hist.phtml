@@ -24,7 +24,8 @@ $c = iemdb("access");
 if ($mode == "monthly"){
  $sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid,
    max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
-   from summary_". $year ." WHERE station = '". $station ."' and
+   from summary_". $year ." s, stations t WHERE t.id = '". $station ."' and
+   t.iemid = s.iemid and 
    extract(month from day) = ". $month ." and
    extract(year from day) = ". $year ."
    ORDER by day ASC";
@@ -33,9 +34,9 @@ if ($mode == "monthly"){
  if ($sortvar == "pday" || $sortvar == "max_tmpf" || $sortvar == "max_gust"){
    $sortorder = "DESC";
  }
- $sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid,
+ $sql = "SELECT t.id as station, *, to_char(day, 'YYYYMMDD') as dvalid,
    max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
-   from summary_". $year ." WHERE network = '$network' and
+   from summary_". $year ." s, stations t WHERE t.iemid = s.iemid and t.network = '$network' and
    day = '". $dateStr ."'  ORDER by $sortvar $sortorder";
 }
 
