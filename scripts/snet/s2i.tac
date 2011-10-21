@@ -16,11 +16,17 @@ import traceback
 import secret
 import re, mx.DateTime, sys, os
 from pyIEM import mesonet, nwnformat
-from pyIEM import iemAccessOb, iemAccess, cameras
-iemaccess = iemAccess.iemAccess()
+from pyIEM import cameras
+import access
+import pg
+import network
+nt = network.Table(("KCCI","KIMT","KELO"))
+try:
+    iemaccess = pg.connect('iem', host=secret.dbhost)
+except:
+    iemaccess = pg.connect('iem', host=secret.dbhost, passwd=secret.dbpass)
 
 
-#class NWNClientFactory(protocol.ReconnectingClientFactory):                                        
 class NWNClientFactory(hubclient.HubClientProtocolBaseFactory):
     maxDelay = 60.0
     factor = 1.0
@@ -97,7 +103,9 @@ def saveData():
       db[key].sanityCheck()
       #if (mesonet.snetConv[sid] == "SCLS2"):
       #  print db[key].tmpf, db[key].humid
-      iem = iemAccessOb.iemAccessOb(mesonet.snetConv[sid])
+      nwsli = mesonet.snetConv[sid]
+      network = nt.sts[nwsli]['network']
+      iem = access.Ob(nwsli, network)
       db[key].avgWinds()
       db[key].ts += mx.DateTime.RelativeDateTime(second=0)
       iem.setObTime(db[key].ts)
@@ -115,8 +123,8 @@ def saveData():
       iem.data['srad'] = db[key].rad
       iem.data['max_srad'] = db[key].xsrad
       iem.data['pres'] = db[key].pres
-      iem.data['pday'] = db[key].pDay
-      iem.data['pmonth'] = db[key].pMonth
+      iem.data['pday'] = float(db[key].pDay)
+      iem.data['pmonth'] = float(db[key].pMonth)
       iem.data['gust'] = float(db[key].xsped) * 0.86897
       #if (mesonet.snetConv[sid] == "SFCM5"):
       #  print key, db[key].xsped, iem.data['gust']
