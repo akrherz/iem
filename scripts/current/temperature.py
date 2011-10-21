@@ -15,14 +15,14 @@ icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 sql = """
 SELECT 
-  station, network, tmpf, drct, sknt, x(geom) as lon, y(geom) as lat
+  station, c.network, tmpf, drct, sknt, x(s.geom) as lon, y(s.geom) as lat
 FROM 
-  current
+  current c, stations s
 WHERE
-  (network ~* 'ASOS' or network = 'AWOS') and network != 'IQ_ASOS' and
+  (c.network ~* 'ASOS' or c.network = 'AWOS') and s.country = 'US' and
+  s.id = c.station and s.network = c.network and 
   (valid + '30 minutes'::interval) > now() and
   tmpf >= -50 and tmpf < 140
-  and x(geom) > -120 and x(geom) < -60
 """
 
 lats = []
