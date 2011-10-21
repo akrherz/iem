@@ -44,9 +44,8 @@ def runner(days):
     rs = access.query(sql).dictresult()
     if (len(rs) == 0):
       print "ADDING Summary entry for id: %s" % (id,)
-      sql = "INSERT into summary_%s(station, geom, network, day, pday)\
-      VALUES ('%s', (select geom from current WHERE station = '%s'), '%s', '%s', %s) " \
-      % (ts.year, id, id, state+'COCORAHS', ts.strftime("%Y-%m-%d"), val )
+      sql = """INSERT into summary_%s(station, network, day, pday)
+      VALUES ('%s', '%s', '%s', %s) """ % (ts.year, id, id, state+'COCORAHS', ts.strftime("%Y-%m-%d"), val )
       access.query(sql)
     else:
       dbval = float(rs[0]['pday'])

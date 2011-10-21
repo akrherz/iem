@@ -7,31 +7,32 @@ import iemplot
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor()
 
 # Compute normal from the climate database
 sql = """
-select s.station, s.network,
+select s.id, s.network,
   x(s.geom) as lon, y(s.geom) as lat, 
-  (case when s.pday < 0 then 0 else s.pday end) as rainfall
-from summary_%s s, current c
-WHERE s.station = c.station and c.valid > (now() - '2 hours'::interval)
-and day = 'TODAY' and s.network = c.network
-and (s.network ~* 'ASOS' or s.network = 'AWOS') and s.network != 'IQ_ASOS'
+  (case when c.pday < 0 then 0 else c.pday end) as rainfall
+ from summary_%s c, current c2, stations s
+ WHERE s.id = c2.station and s.id = c.station and
+ c2.network = c.network and s.network = c2.network and c2.valid > (now() - '2 hours'::interval)
+ and c.day = 'TODAY'
+ and s.country = 'US' and (c.network ~* 'ASOS' or c.network = 'AWOS')
 """ % (now.year, )
 
 lats = []
 lons = []
 vals = []
 valmask = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] + (random.random() * 0.01))
-  vals.append( rs[i]['rainfall'] )
-  valmask.append(  (rs[i]['network'] in ['AWOS','IA_ASOS']) )
+icursor.execute(sql)
+for row in icursor:
+  lats.append( row[3] )
+  lons.append( row[2] )
+  vals.append( row[4] )
+  valmask.append(  (row[1] in ['AWOS','IA_ASOS']) )
 
 if len(lats) < 3:
   sys.exit(0)

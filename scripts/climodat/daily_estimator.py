@@ -109,11 +109,11 @@ def estimate_snow( ts ):
     lats = []
     lons = []
     rs = iem.query("""
-       SELECT x(geom) as lon, y(geom) as lat, snow, snowd
-       from summary_%s WHERE day = '%s' and 
-       network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
+       SELECT x(s.geom) as lon, y(s.geom) as lat, snow, snowd
+       from summary_%s c, stations s WHERE day = '%s' and 
+       c.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
         'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
-        'OH_COOP')
+        'OH_COOP') and c.network = s.network and c.station = s.id
        and snowd >= 0""" % (ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
         lats.append( rs[i]['lat'] )
@@ -162,11 +162,11 @@ def estimate_hilo( ts ):
     lats = []
     lons = []
     rs = iem.query("""
-       SELECT x(geom) as lon, y(geom) as lat, max_tmpf, min_tmpf
-       from summary_%s WHERE day = '%s' and network in ('AWOS','IA_ASOS', 'MN_ASOS', 'WI_ASOS', 
+       SELECT x(s.geom) as lon, y(s.geom) as lat, max_tmpf, min_tmpf
+       from summary_%s c, stations s WHERE day = '%s' and network in ('AWOS','IA_ASOS', 'MN_ASOS', 'WI_ASOS', 
        'IL_ASOS', 'MO_ASOS',
         'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
-        'OH_ASOS')
+        'OH_ASOS') and c.network = s.network and c.station = s.id
        and max_tmpf > -90 and min_tmpf < 90""" % (ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
         lats.append( rs[i]['lat'] )

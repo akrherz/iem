@@ -166,7 +166,7 @@ class Ob(object):
         self.execQuery(sql, db, dbpool)
 
     def insert_currentlog(self, db, dbpool):
-        sql = """INSERT into current_log(station, network, geom, tmpf, dwpf, 
+        sql = """INSERT into current_log(station, network, tmpf, dwpf, 
        phour, tsf0, tsf1, tsf2, 
        tsf3, rwis_subf, pres, drct, sknt, pday, 
        scond0, scond1, relh, scond2, scond3, srad, 
@@ -174,8 +174,7 @@ class Ob(object):
        c1tmpf, c2tmpf, c3tmpf, c4tmpf, c5tmpf, 
        gust, raw, alti, rstage, ozone, co2, valid, 
        skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, pcounter, discharge) VALUES 
-        (%(station)s, %(network)s, (select geom from current 
-        WHERE station = %(station)s and network = %(network)s), %(tmpf)s, %(dwpf)s, 
+        (%(station)s, %(network)s, %(tmpf)s, %(dwpf)s, 
          (CASE WHEN %(phour)s >= -1 THEN %(phour)s ELSE null END)::numeric, 
          %(tsf0)s,%(tsf1)s,%(tsf2)s, 
          %(tsf3)s,%(rwis_subf)s,%(pres)s, 

@@ -11,12 +11,13 @@ IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor()
 
 sql = """
-select station, 
-  x(geom) as lon, y(geom) as lat, 
-  min_tmpf as low, network
-from summary_%s
-WHERE day = 'TODAY' and min_tmpf < 90 
-and (network ~* 'ASOS' or network ~* 'AWOS' or network = 'IA_COOP') and network not in ('PO_ASOS','IQ_ASOS','AK_ASOS') 
+select c.station, 
+  x(s.geom) as lon, y(s.geom) as lat, 
+  min_tmpf as low, s.network
+ from summary_%s c, stations s
+ WHERE day = 'TODAY' and min_tmpf < 90 
+ and (c.network ~* 'ASOS' or c.network ~* 'AWOS' or c.network = 'IA_COOP') 
+ and s.country = 'US' and s.network = c.network and s.id = c.station 
 """ % (now.year, )
 
 lats = []

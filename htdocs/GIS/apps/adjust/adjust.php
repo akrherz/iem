@@ -36,7 +36,8 @@ function mktitle($map, $imgObj, $titlet) {
 $map = ms_newMapObj("stations.map");
 //iowa
 //$map->setExtent(-97.5,40.5,-89.5,43.5);
-$map->setExtent(-96.1,39.6,-94.4,41.3);
+$map->setExtent(-96.4,41.0,-90.4,43.5);
+//$map->setExtent(-96.1,39.6,-94.4,41.3);
 // E CONUS
 //$map->setExtent(-130,16,-72,70);
 //$map->setExtent(-99.4, 30.3,-95.0, 34.3);
@@ -46,7 +47,7 @@ $map->setExtent(-96.1,39.6,-94.4,41.3);
 //$map->setExtent(-90,29,-72,33);
 //CLAYTON $map->setExtent(-92,42.5,-91.1,43.3);
 //$map->setExtent(-93.5,42.0,-92.8,42.6);
-$map->setSize(320,280);
+$map->setSize(1024,768/2);
 $map->selectOutputFormat("PNG24");
 
 $namer = $map->getlayerbyname("namerica");
@@ -130,16 +131,16 @@ $lakes->draw($img);
 $terra->draw($img);
 //$maxdbz->draw($img);
 //$warnings0_c->draw($img);
-$counties->draw($img);
+//$counties->draw($img);
 $states->draw($img);
-$cities->draw($img);
+//$cities->draw($img);
 //$iembox->draw($img);
 
 //$map->embedLegend($img);
 $map->drawLabelCache($img);
 $bars->draw($img);
 
-mktitle($map, $img, "25 August 2011 Terra MODIS True Color _ 18 August 2011 Reported Hail Size [in]");
+mktitle($map, $img, "6 September 2011 Aqua MODIS True Color");
 //mkl($map, $img);
 $url = $img->saveWebImage();
 
