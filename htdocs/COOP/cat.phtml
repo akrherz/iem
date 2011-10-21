@@ -121,12 +121,12 @@ Select State: <select name="network">
      $sortvar == "max_tmpf") 
    $sortdir = "DESC";
  if (strlen($station) > 0) {
-     $rs = pg_prepare($iemdb, "SELECT", "SELECT c.*, s.station, s.name as sname from summary_$year c, stations s
+     $rs = pg_prepare($iemdb, "SELECT", "SELECT c.*, s.id as station, s.name as sname from summary_$year c, stations s
      WHERE s.id = $1 and s.network = $2 and c.iemid = s.iemid 
      and c.day <= 'TODAY' ORDER by $sortvar $sortdir");
      $rs = pg_execute($iemdb, "SELECT", Array($station, $network));
  } else {
-    $rs = pg_prepare($iemdb, "SELECT", "SELECT c2.*, s.station, s.name as sname from summary_$year c2, stations s
+    $rs = pg_prepare($iemdb, "SELECT", "SELECT c2.*, s.id as station, s.name as sname from summary_$year c2, stations s
      WHERE c2.day = $1  
      and s.network = $2 and c2.iemid = s.iemid ORDER by $sortvar $sortdir");
     $rs = pg_execute($iemdb, "SELECT", Array($date, $network));
