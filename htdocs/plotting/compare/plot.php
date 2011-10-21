@@ -27,11 +27,13 @@ $datax = array($station1 => array(), $station2 => array());
 
 /* Query IEMAccess */
 //$sql = "SELECT (extract(EPOCH from CURRENT_TIMESTAMP) - extract(EPOCH from ((CURRENT_TIMESTAMP - '2 days'::interval)::date)::timestamp))::int as toff
-$rs = pg_prepare($iem->dbconn, "SELECT", "SELECT extract(EPOCH from valid) as epoch, $var as data, station
-  from current_log WHERE station IN ($1,$2)
+$sql = "SELECT extract(EPOCH from valid) as epoch, $var as data, 
+  t.id as station
+  from current_log c, stations t WHERE t.id IN ($1,$2) and t.iemid = c.iemid 
   and valid < CURRENT_TIMESTAMP and $var > -99 ORDER by
-  valid ASC");
-$rs = pg_execute($iem->dbconn, "SELECT", Array($station1,$station2));
+  valid ASC";
+pg_prepare($iem->dbconn, "SELECT22", $sql);
+$rs = pg_execute($iem->dbconn, "SELECT22", Array($station1,$station2));
 
 /* Assign into data arrays */
 //$cnt=array($station1 => 0, $station2 => 0);
