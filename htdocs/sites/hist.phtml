@@ -13,7 +13,8 @@ $year = isset($_GET['year']) ? intval($_GET['year']) : date("Y", time() - 86400)
 $month = isset($_GET['month']) ? intval($_GET['month']) : date("m", time() - 86400);
 $day = isset($_GET['day']) ? intval($_GET['day']) : 1;
 $mode = isset($_GET['mode']) ? $_GET['mode'] : 'monthly';
-$sortvar = isset($_GET['sortvar']) ? $_GET['sortvar'] : 'station';
+$sortvar = isset($_GET['sortvar']) ? $_GET['sortvar'] : 'id';
+if ($sortvar == 'station'){ $sortvar = 'id'; }
 
 $ts = mktime(0,0,0, $month, $day, $year);
 $dateStr = strftime("%Y-%m-%d", $ts);
@@ -34,7 +35,7 @@ if ($mode == "monthly"){
  if ($sortvar == "pday" || $sortvar == "max_tmpf" || $sortvar == "max_gust"){
    $sortorder = "DESC";
  }
- $sql = "SELECT t.id as station, s.*, to_char(day, 'YYYYMMDD') as dvalid,
+ $sql = "SELECT t.id, s.*, to_char(day, 'YYYYMMDD') as dvalid,
    max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
    from summary_". $year ." s, stations t WHERE t.iemid = s.iemid and t.network = '$network' and
    day = '". $dateStr ."'  ORDER by $sortvar $sortorder";
