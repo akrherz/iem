@@ -29,7 +29,7 @@ def daily_averages(table):
     for st in ['nd','sd','ne','ks','mo','ia','mn','wi','il','in','oh','mi','ky']:
         print 'DA', st
         sql = """
-    SELECT '2000-'|| to_char(day, 'MM-DD') as d, stationid, 
+    SELECT '2000-'|| to_char(day, 'MM-DD') as d, station, 
     avg(high) as avg_high, avg(low) as avg_low,
     max(high) as max_high, min(high) as min_high,
     max(low) as max_low, min(low) as min_low,
@@ -37,12 +37,14 @@ def daily_averages(table):
     avg(snow) as snow, count(*) as years,
     avg( gdd50(high,low) ) as gdd50, avg( sdd86(high,low) ) as sdd86,
     max( high - low) as max_range, min(high - low) as min_range
-    from alldata_%s WHERE day >= '%s' and day < '%s' GROUP by d, stationid
+    from alldata_%s WHERE day >= '%s' and day < '%s' 
+    and station = 'NE0000'
+    GROUP by d, station
     """ % (st, META[table]['sts'].strftime("%Y-%m-%d"), 
-		META[table]['ets'].strftime("%Y-%m-%d"))
+		META[table]['ets'].strftime("%Y-%m-%d") )
         ccursor.execute(sql)
         for row in ccursor:
-            id = row['stationid']
+            id = row['station']
             if not id.upper() in nt.sts.keys():
                 continue
             sql = """DELETE from %s WHERE station = '%s' and valid = '%s' """ % (
@@ -50,7 +52,7 @@ def daily_averages(table):
             ccursor2.execute(sql)
             sql = """ INSERT into """+ table +""" (station, valid, high, low, precip, snow,
         max_high, max_low, min_high, min_low, max_precip, years, gdd50, sdd86, max_range,
-        min_range) VALUES ('%(stationid)s', '%(d)s', %(avg_high)s, %(avg_low)s, %(precip)s,
+        min_range) VALUES ('%(station)s', '%(d)s', %(avg_high)s, %(avg_low)s, %(precip)s,
         %(snow)s, %(max_high)s, %(max_low)s, %(min_high)s, %(min_low)s, %(max_precip)s,
         %(years)s, %(gdd50)s, %(sdd86)s, %(max_range)s, %(min_range)s)""" % row
             ccursor2.execute(sql)
@@ -59,7 +61,7 @@ def daily_averages(table):
 
 def do_date(table, row, col, agg_col):
     sql = """
-    SELECT year from alldata_%s where stationid = '%s' and %s = %s and sday = '%s'
+    SELECT year from alldata_%s where station = '%s' and %s = %s and sday = '%s'
     and day >= '%s' and day < '%s'
     ORDER by year ASC
     """ % (row['station'][:2].lower(), row['station'], col, row[agg_col], row['valid'].strftime("%m%d"),
@@ -72,7 +74,7 @@ def do_date(table, row, col, agg_col):
 
 def set_daily_extremes(table):
     sql = """
-    SELECT * from %s 
+    SELECT * from %s WHERE
     """ % (table,)
     ccursor.execute(sql)
     for row in ccursor:
