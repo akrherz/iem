@@ -22,9 +22,9 @@ $cities = $st->table;
 
  /* Get high and low temps for the past 7 days */
 $rs = pg_prepare($db, "SELECT", "SELECT day, max_tmpf, min_tmpf 
-        from summary_$year WHERE 
-        station = $1 and extract(month from day) = $2
-        and day <= 'TODAY' and network = $3 " .
+        from summary_$year s, stations t WHERE 
+        t.id = $1 and t.iemid = s.iemid and extract(month from day) = $2
+        and day <= 'TODAY' and t.network = $3 " .
         "ORDER by day ASC");
 $rs = pg_execute($db, "SELECT", Array($station,$month, $network));
 
