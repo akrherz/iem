@@ -1,3 +1,10 @@
+"""
+ This hacky code is an interface to the iem obs database for current and summary data
+ TODO: make it async
+ 
+ $Id: $:
+"""
+
 import traceback
 import mx.DateTime
 
@@ -31,24 +38,22 @@ class Ob(object):
         We want to load up current entry from the database and see what
         we have
         """
+        # Don't check the database, if we have nothing to compare it against
         if self.data.get('valid') is None:
             return False
 
         # This will have some issues around the new year, sigh
-        rs = db.query("""SELECT c.*, s.* from current c, summary_%s s WHERE 
-          c.station = '%s' and s.day = date('%s'::timestamptz at time zone '%s') and 
-          c.station = s.station and c.network = s.network and
-          c.network = '%s' """ % (
-          self.data.get('valid').year, self.data.get('station'), 
-          self.data.get('valid').strftime("%Y-%m-%d %H:%M"),
-          self.data.get('tzname', 'America/Chicago'),
-          self.data.get('network') ) ).dictresult()
+        sql = """SELECT c.*, s.* from current c, summary_%s s, stations t WHERE
+            c.iemid = s.iemid and c.iemid = t.iemid and
+            s.day = date('%s'::timestamptz at time zone t.tzname) and 
+            t.id = '%s' and t.network = '%s' """ % ( self.data.get('valid').year, 
+          self.data.get('valid').strftime("%Y-%m-%d %H:%M"), self.data.get('station'),
+          self.data.get('network') ) 
+        rs = db.query(sql).dictresult()
         if len(rs) == 0:
-            #print "No rows found for station: %(station)s network: %(network)s" % self.data
             return False
 
-        self.data['old_valid'] = mx.DateTime.strptime(rs[0]['valid'][:16], 
-                              "%Y-%m-%d %H:%M")
+        self.data['old_valid'] = mx.DateTime.strptime(rs[0]['valid'][:16], "%Y-%m-%d %H:%M")
         if self.data['valid'] == self.data['old_valid']: # Same Ob!
             for key in rs[0].keys():
                 if rs[0][key] is not None and key not in ['valid','network','station','geom']:
@@ -83,34 +88,35 @@ class Ob(object):
 
     def updateDatabasePeakWind(self, db, gdata, dbpool=None):
         table = "summary_%s" % (self.data['valid'].year,)
-        if gdata.get('tzname') is None:
-            gdata['tzname'] = 'America/Chicago'
-        sql = """UPDATE """+ table +""" SET 
+        sql = """UPDATE """+ table +""" s SET 
      max_gust = 
       (CASE WHEN max_gust < '%(peak_gust)s' THEN '%(peak_gust)s' ELSE max_gust END),
      max_gust_ts = 
       (CASE WHEN max_gust < '%(peak_gust)s' THEN '%(peak_ts)s' ELSE max_gust_ts END),
      max_drct = 
       (CASE WHEN max_gust < '%(peak_gust)s' THEN '%(peak_drct)s' ELSE max_drct END)
-     WHERE station = '%(stationID)s' 
-     and day = date('%(peak_ts)s'::timestamptz at time zone '%(tzname)s')""" % gdata
+      FROM stations t
+     WHERE t.iemid = s.iemid and t.id = '%(stationID)s' and t.network = '%(network)s' 
+     and day = date('%(peak_ts)s'::timestamptz at time zone t.tzname)""" % gdata
         self.execQuery(sql, db, dbpool)
 
 
     def updateDatabaseSummaryTemps(self, db, dbpool=None):
         table = "summary_%s" % (self.data['valid'].year,)
-        sql = """UPDATE """+ table +""" SET 
+        sql = """UPDATE """+ table +""" s SET 
               max_tmpf = 
        (CASE WHEN max_tmpf < %(max_tmpf)s THEN %(max_tmpf)s ELSE max_tmpf END),
       min_tmpf = 
        (CASE WHEN min_tmpf > %(min_tmpf)s THEN %(min_tmpf)s ELSE min_tmpf END) 
-      WHERE station = %(station)s and day = date('%(valid)s'::timestamptz at time zone %(tzname)s) 
-      and network = %(network)s""" % self.data
+       FROM stations t
+      WHERE t.iemid = s.iemid and t.id = %(station)s and 
+      day = date('%(valid)s'::timestamptz at time zone t.tzname) 
+      and t.network = %(network)s""" % self.data
         self.execQuery(sql , db, dbpool)
 
     def update_summary(self, db, dbpool):
         table = "summary_%s" % (self.data['valid'].year,)
-        sql = """UPDATE """+ table +""" c SET 
+        sql = """UPDATE """+ table +""" s SET 
 	pday = 
       (CASE WHEN %(pday)s >= -1 THEN %(pday)s ELSE pday END)::numeric, 
      pmonth = 
@@ -136,8 +142,10 @@ class Ob(object):
      max_srad =
       (CASE WHEN max_srad < %(max_srad)s THEN %(max_srad)s ELSE max_srad END), 
      snow = %(snow)s, snowd = %(snowd)s, snoww = %(snoww)s 
-     WHERE station = %(station)s and day = date('%(valid)s'::timestamptz at time zone %(tzname)s) 
-     and network = %(network)s """ % self.data
+     FROM stations t
+     WHERE t.iemid = s.iemid and t.id = %(station)s 
+     and day = date('%(valid)s'::timestamptz at time zone t.tzname) 
+     and t.network = %(network)s """ % self.data
         self.execQuery(sql, db, dbpool)
 
     def update_current(self, db, dbpool):
@@ -162,11 +170,12 @@ class Ob(object):
        valid = '%(valid)s', pcounter = %(pcounter)s, discharge = %(discharge)s ,
        raw = (CASE WHEN length(raw) > length(%(raw)s) and valid = '%(valid)s'
           THEN raw ELSE %(raw)s END)
-       WHERE station = %(station)s and network = %(network)s """ % self.data
+          FROM stations t
+       WHERE t.iemid = c.iemid and t.id = %(station)s and t.network = %(network)s """ % self.data
         self.execQuery(sql, db, dbpool)
 
     def insert_currentlog(self, db, dbpool):
-        sql = """INSERT into current_log(station, network, tmpf, dwpf, 
+        sql = """INSERT into current_log(iemid, tmpf, dwpf, 
        phour, tsf0, tsf1, tsf2, 
        tsf3, rwis_subf, pres, drct, sknt, pday, 
        scond0, scond1, relh, scond2, scond3, srad, 
@@ -174,7 +183,8 @@ class Ob(object):
        c1tmpf, c2tmpf, c3tmpf, c4tmpf, c5tmpf, 
        gust, raw, alti, rstage, ozone, co2, valid, 
        skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, pcounter, discharge) VALUES 
-        (%(station)s, %(network)s, %(tmpf)s, %(dwpf)s, 
+        ((SELECT iemid from stations where id = %(station)s and network = %(network)s), 
+        %(tmpf)s, %(dwpf)s, 
          (CASE WHEN %(phour)s >= -1 THEN %(phour)s ELSE null END)::numeric, 
          %(tsf0)s,%(tsf1)s,%(tsf2)s, 
          %(tsf3)s,%(rwis_subf)s,%(pres)s, 
