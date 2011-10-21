@@ -18,8 +18,8 @@ $dbconn = iemdb('access');
 $rs = pg_prepare($dbconn, "SELECT", "SELECT c.*, 
 	valid at time zone s.tzname as lvalid 
 	from current_log c, stations s WHERE
-    c.station = $1 and c.network = $2 and 
-    c.station = s.id and c.network = s.network and 
+    s.id = $1 and s.network = $2 and 
+    c.iemid = s.iemid and 
     tmpf BETWEEN -90 and 140 and dwpf BETWEEN -90 and 140
       ORDER by valid ASC");
 $rs = pg_execute($dbconn, "SELECT", array($station, $network) );
