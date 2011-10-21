@@ -15,13 +15,17 @@ $tmpf = Array();
 $srad = Array();
 
 $dbconn = iemdb('access');
-$rs = pg_prepare($dbconn, "SELECT", "SELECT * from current_log WHERE
-      station = $1 and network = $2 and tmpf BETWEEN -90 and 140 and dwpf BETWEEN -90 and 140
+$rs = pg_prepare($dbconn, "SELECT", "SELECT c.*, 
+	valid at time zone s.tzname as lvalid 
+	from current_log c, stations s WHERE
+    c.station = $1 and c.network = $2 and 
+    c.station = s.id and c.network = s.network and 
+    tmpf BETWEEN -90 and 140 and dwpf BETWEEN -90 and 140
       ORDER by valid ASC");
 $rs = pg_execute($dbconn, "SELECT", array($station, $network) );
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
-  $times[] = strtotime($row["valid"]);
+  $times[] = strtotime($row["lvalid"]);
   $dwpf[] = $row["dwpf"];
   $tmpf[] = $row["tmpf"];
   $srad[] = $row["srad"];
@@ -57,7 +61,8 @@ if ($hasrad) {
 //$graph->yaxis->SetTitleMargin(30);
 
 $graph->xaxis->title->SetFont(FF_FONT2,FS_BOLD,16);
-//$graph->xaxis->SetTitle("Valid Local Time");
+$graph->xaxis->SetTitle("Times in Timezone: ". $metadata["tzname"]);
+$graph->xaxis->SetTitleMargin(65);
 $graph->yaxis->SetTitle("Temperature [F]");
 //$graph->yaxis->SetTitle("Wind Direction [N=0, E=90, S=180, W=270]");
 //$graph->tabtitle->Set('Recent Comparison');
