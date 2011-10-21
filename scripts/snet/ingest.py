@@ -67,7 +67,7 @@ def makeConnect():
     notConnected = 0
     while (notConnected == 0):
         try:
-            tn = telnetlib.Telnet('127.0.0.1',14996)
+            tn = telnetlib.Telnet('192.168.0.21',14996)
             #tn = telnetlib.Telnet('129.186.26.186',14998)
             tn.read_until("login> ", 10)
             tn.write("%s\r\n" % (secret.cfg['hubuser'],) )
@@ -260,7 +260,7 @@ def fireLDM(report, route, id):
         logger.exception("Trouble inserting Alert!")
 
     # Save a copy of this alert!
-    shutil.copy("/tmp/"+fname, "alerts/%s_%s_%s" \
+    shutil.copy("/tmp/"+fname, "/mesonet/data/alerts/%s_%s_%s" \
                 % (mx.DateTime.now().strftime("%Y%m%d%H%M%S"), id, fname) )
 
 #==================================================
