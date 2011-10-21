@@ -7,17 +7,19 @@ import iemplot
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
+import iemdb
+import psycopg2.extras
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 sql = """
 select station, 
-  x(geom) as lon, y(geom) as lat, 
+  x(s.geom) as lon, y(s.geom) as lat, 
   pday 
-from summary_%s
+from summary_%s c, stations s
 WHERE day = 'TODAY' and pday >= 0 and pday < 20
-and network = 'IA_COOP'
+and c.network = 'IA_COOP' and c.network = s.network and
+s.id = c.station
 """ % (now.year, )
 
 lats = []
@@ -25,12 +27,12 @@ lons = []
 vals = []
 valmask = []
 labels = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] )
-  vals.append( rs[i]['pday'] )
-  labels.append( rs[i]['station'] )
+icursor.execute(sql)
+for row in icursor:
+  lats.append( row['lat'] )
+  lons.append( row['lon'] )
+  vals.append( row['pday'] )
+  labels.append( row['station'] )
   valmask.append( True )
 
 

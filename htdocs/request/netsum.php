@@ -9,7 +9,10 @@ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
 $ts = mktime(0,0,0,$month, $day, $year);
 
-$sql = sprintf("SELECT *, x(geom) as x, y(geom) as y from summary_%s WHERE network = '%s' and day = '%s' ORDER by station ASC", date("Y", $ts), $network, date("Y-m-d", $ts) );
+$sql = sprintf("SELECT *, x(s.geom) as x, y(s.geom) as y from 
+ summary_%s c, stations s WHERE s.network = '%s' and 
+ day = '%s' and s.network = c.network and s.id = c.station
+ ORDER by station ASC", date("Y", $ts), $network, date("Y-m-d", $ts) );
 $rs = pg_exec($connection, $sql);
 
 header("Content-type: text/plain");
@@ -20,6 +23,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
   $maxt = ($row["max_tmpf"] > -90) ? $row["max_tmpf"] : "M";
   $mint = ($row["min_tmpf"] < 90) ? $row["min_tmpf"] : "M";
   $rain = ($row["pday"] >= 0) ? $row["pday"] : "M";
-  echo sprintf("%s,%s,%s,%s,%s,%s,%s,\n", $row["station"], date("Y-m-d", $ts), $row["y"], $row["x"], $maxt, $mint, $rain);  
+  echo sprintf("%s,%s,%s,%s,%s,%s,%s,\n", $row["station"], 
+  date("Y-m-d", $ts), $row["y"], $row["x"], $maxt, $mint, $rain);  
 }
 ?>

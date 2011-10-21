@@ -7,38 +7,40 @@ import iemplot
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
+import iemdb
+import psycopg2.extras
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 # Compute normal from the climate database
 sql = """
-SELECT station, network, x(geom) as lon, y(geom) as lat, 
+SELECT station, s.network, x(s.geom) as lon, y(s.geom) as lat, 
 avg( (max_tmpf + min_tmpf)/2.0 ) as avgt , count(*) as cnt 
-from summary_%s
-WHERE (network ~* 'ASOS' or network = 'AWOS') and network != 'IQ_ASOS' and
+from summary_%s c, stations s
+WHERE (c.network ~* 'ASOS' or c.network = 'AWOS') and 
+c.network != 'IQ_ASOS' and c.network = s.network and s.id = c.station and
 extract(month from day) = extract(month from now()) 
-and max_tmpf > -30 and min_tmpf < 90 GROUP by station, network, lon, lat
+and max_tmpf > -30 and min_tmpf < 90 GROUP by station, s.network, lon, lat
 """ % (now.year,)
 
 lats = []
 lons = []
 vals = []
 valmask = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-  if rs[i]['cnt'] != now.day:
+icursor.execute(sql)
+for row in icursor:
+  if row['cnt'] != now.day:
     continue
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] )
-  vals.append( rs[i]['avgt'] )
-  valmask.append(  (rs[i]['network'] in ['AWOS','IA_ASOS']) )
+  lats.append( row['lat'] )
+  lons.append( row['lon'] )
+  vals.append( row['avgt'] )
+  valmask.append(  (row['network'] in ['AWOS','IA_ASOS']) )
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "Iowa 2009 %s Average Temperature" % (now.strftime("%B"),),
+ '_title'             : "Iowa %s Average Temperature" % (now.strftime("%Y %B"),),
  '_valid'             : "Average of the High + Low ending: %s" % (now.strftime("%d %B"),),
  '_showvalues'        : True,
  '_format'            : '%.0f',

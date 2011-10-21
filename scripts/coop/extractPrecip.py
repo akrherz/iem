@@ -14,40 +14,45 @@
 # 14 Feb 2005	Fix summary stuff
 ###################################
 
-from pyIEM import iemdb, stationTable, iemAccess
+from pyIEM import stationTable
 import  mx.DateTime, shapelib, dbflib
-i = iemdb.iemdb()
-iemaccess = iemAccess.iemAccess()
-#st = stationTable.stationTable("/mesonet/TABLES/iem_coop.stns")
+import iemdb
+import psycopg2.extras
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 now = mx.DateTime.now()
 dateStr = now.strftime("%y%m%d/1200")
 ts = now.strftime('%Y%m%d')
 yyyy = now.strftime('%Y')
-mydb = i['coop']
-iemaccess.query("update summary_%s SET max_tmpf = -99 WHERE day = 'TODAY' and max_tmpf > 200" % (yyyy,) )
+
+#icursor.execute("""update summary_%s SET max_tmpf = -99 WHERE 
+# day = 'TODAY' and max_tmpf > 200""" % (yyyy,) )
 
 cob = {}
 #for id in st.ids:
 #	cob[id] = {'TMPX': -99, 'TMPN': -99, 'P24I': -99, 'PMOI': -99,
 #				'SMOI': -99, 'SNOW': -99, 'SNOD': -99}
 
-rs = iemaccess.query("SELECT s.station, s.pday, coalesce(s.snow,-99) as snow, \
-	coalesce(snowd,-99) as snowd, max_tmpf, \
-	case when min_tmpf < 99 THEN min_tmpf ELSE -99 END as min_tmpf \
-        , x(s.geom) as lon, y(s.geom) as lat, sname \
-	from summary s, current c WHERE c.station = s.station and \
-        s.network ~* 'COOP' and min_tmpf > -99 and c.valid > 'TODAY' \
-	and day = 'TODAY'").dictresult()
+icursor.execute("""SELECT c.station, c.pday, 
+  coalesce(c.snow,-99) as snow, coalesce(c.snowd,-99) as snowd, 
+  c.max_tmpf, 
+	case when c.min_tmpf < 99 THEN c.min_tmpf ELSE -99 END as min_tmpf, 
+	x(s.geom) as lon, y(s.geom) as lat, s.name 
+	from summary c, current c2, stations s WHERE 
+	c.station = s.id and s.id = c2.station and 
+	c.network = s.network and s.network = c2.network and 
+    s.network ~* 'COOP' and min_tmpf > -99 and c2.valid > 'TODAY' 
+	and day = 'TODAY'""")
 
-for i in range(len( rs )):
-	thisStation = rs[i]["station"]
+for row in icursor:
+	thisStation = row["station"]
 	cob[ thisStation ] = {}
-	thisPrec = rs[i]["pday"]
-	thisSnow = rs[i]["snow"]
-	thisSnowD = rs[i]["snowd"]
-	thisHigh  = rs[i]["max_tmpf"]
-	thisLow   = rs[i]["min_tmpf"]
+	thisPrec = row["pday"]
+	thisSnow = row["snow"]
+	thisSnowD = row["snowd"]
+	thisHigh  = row["max_tmpf"]
+	thisLow   = row["min_tmpf"]
 
 	# First we update our cobs dictionary
 	cob[ thisStation ]["TMPX"] = float(thisHigh)
@@ -55,23 +60,24 @@ for i in range(len( rs )):
 	cob[ thisStation ]["P24I"] = round(float(thisPrec),2)
 	cob[ thisStation ]["SNOW"] = float(thisSnow)
 	cob[ thisStation ]["SNOD"] = float(thisSnowD)
-	cob[ thisStation ]["LAT"] = rs[i]['lat']
-	cob[ thisStation ]["LON"] = rs[i]['lon']
-	cob[ thisStation ]["NAME"] = rs[i]['sname']
+	cob[ thisStation ]["LAT"] = row['lat']
+	cob[ thisStation ]["LON"] = row['lon']
+	cob[ thisStation ]["NAME"] = row['name']
 	cob[ thisStation ]["PMOI"] = 0.
 	cob[ thisStation ]["SMOI"] = 0.
 
-rs2 = iemaccess.query("SELECT station, sum(pday) as tprec, \
-	sum( case when snow > 0 THEN snow ELSE 0 END) as tsnow from summary WHERE \
-  date_part('month', day) = date_part('month', CURRENT_TIMESTAMP::date) \
-	and date_part('year', day) = %s \
-  and pday >= 0.00 and network ~* 'COOP' GROUP by station" \
-  % (now.year,) ).dictresult()
+icursor.execute("""SELECT station, sum(pday) as tprec, 
+	sum( case when snow > 0 THEN snow ELSE 0 END) as tsnow 
+	from summary_%s WHERE 
+  date_part('month', day) = date_part('month', CURRENT_TIMESTAMP::date) 
+	and date_part('year', day) = %s 
+  and pday >= 0.00 and network ~* 'COOP' GROUP by station""" % (
+								now.year, now.year) )
 
-for i in range(len( rs2 )):
-	thisStation = rs2[i]["station"]
-	thisPrec = rs2[i]["tprec"]
-	thisSnow = rs2[i]["tsnow"]
+for row in icursor:
+	thisStation = row["station"]
+	thisPrec = row["tprec"]
+	thisSnow = row["tsnow"]
 	if (not cob.has_key(thisStation)):
 		continue
 	cob[ thisStation ]["PMOI"] = round(float(thisPrec),2)
@@ -122,3 +128,7 @@ for id in cob.keys():
 	del(obj)
 	j += 1
 o.close()
+
+icursor.close()
+IEM.commit()
+IEM.close()

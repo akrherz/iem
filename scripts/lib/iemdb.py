@@ -10,6 +10,8 @@ def connect(dbname, bypass=False):
     dbuser = os.environ.get('USER', 'nobody')
     if dbuser == 'akrherz' and not bypass:
         dbhost = 'localhost'
+        return psycopg2.connect(database=dbname, host=dbhost, user=dbuser,
+                                password='secret')
     if dbuser == 'akrherz' and bypass:
         dbuser = 'nobody'
     return psycopg2.connect(database=dbname, host=dbhost, user=dbuser)

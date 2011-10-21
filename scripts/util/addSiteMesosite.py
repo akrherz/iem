@@ -1,38 +1,39 @@
+"""
+ Main script that adds a site into the appropriate tables
+ $Id: $:
+"""
 
 import sys, mx.DateTime
-from pyIEM import iemdb, iemAccess
-i = iemdb.iemdb()
-mesosite = i['mesosite']
-iemaccess = iemAccess.iemAccess()
+import iemdb
+MESOSITE = iemdb.connect('mesosite')
+mcursor = MESOSITE.cursor()
+IEM = iemdb.connect('iem')
+icursor = IEM.cursor()
 
 _NETWORK = sys.argv[1]
 _ID = sys.argv[2]
 
-rs = mesosite.query("SELECT * from stations WHERE network = '%s' \
-   and online = 't' and id = '%s' " % (_NETWORK, _ID) ).dictresult()
+mcursor.execute("""SELECT * from stations WHERE network = '%s' 
+   and id = '%s' LIMIT 1""" % (_NETWORK, _ID) )
 
-#iemAccess.iemdb.query("BEGIN;")
-#iemAccess.iemdb.query("DELETE from current WHERE network = '%s'" % (_NETWORK) )
+for row in mcursor:
+    print "Adding station :%s:" % (_ID,)
 
-for i in range(len(rs)):
-  station = rs[i]["id"]
-  print "Adding station :%s:" % (station,)
-#  try:
-  iemaccess.iemdb.query("INSERT into current(station, geom, network, sname)\
-      VALUES ('%s', setsrid('%s'::geometry, 4326), '%s', '%s') " \
-      % (station, rs[i]["geom"], _NETWORK, rs[i]["name"] ) )
-  iemaccess.iemdb.query("INSERT into summary_%s(station, geom, network, day)\
-      VALUES ('%s', setsrid('%s'::geometry, 4326), '%s', '%s') " \
-      % (mx.DateTime.now().year, station, rs[i]["geom"], _NETWORK, 'TODAY' ) )
-  iemaccess.iemdb.query("INSERT into trend_1h(station, geom, network)\
-      VALUES ('%s', setsrid('%s'::geometry, 4326), '%s') " \
-      % (station, rs[i]["geom"], _NETWORK) )
-  iemaccess.iemdb.query("INSERT into trend_15m(station, geom, network)\
-      VALUES ('%s', setsrid('%s'::geometry, 4326), '%s') " \
-      % (station, rs[i]["geom"], _NETWORK) )
-#  except:
-#    print "Possible Dup! :%s:" % (station,)
+    for tbl in ['trend_1h', 'trend_15m']:
+        icursor.execute("""INSERT into %s (station, network)
+          VALUES ('%s', '%s') """ % (tbl, _ID, _NETWORK ) )
+  
+    tbl = 'summary_%s' % (mx.DateTime.now().year,)
+    icursor.execute("""INSERT into %s (station, network, day)
+          VALUES ('%s', '%s', 'TODAY') """ % (tbl, _ID, _NETWORK ) )
+    icursor.execute("""INSERT into %s (station, network, day)
+          VALUES ('%s', '%s', 'TOMORROW') """ % (tbl, _ID, _NETWORK ) )
+    tbl = 'current'
+    icursor.execute("""INSERT into %s (station, network, valid)
+          VALUES ('%s', '%s', '1980-01-01') """ % (tbl, _ID, _NETWORK ) )
 
-#iemAccess.iemdb.query("END;")
+icursor.close()
+IEM.commit()
+IEM.close()
 
 
