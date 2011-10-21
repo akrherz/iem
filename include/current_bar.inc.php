@@ -13,7 +13,7 @@
     "OT" => Array("url" => "$rooturl/other/current.phtml"),
     "SCAN" => Array("url" => "$rooturl/scan/current.phtml"),
     "My Favorites" => Array("url" => "$rooturl/my/current.phtml"),
-    "All" => Array("url" => "$rooturl/current/all.phtml") );
+    "Iowa" => Array("url" => "$rooturl/current/all.phtml") );
   $rwis22 = Array(
     "RWIS" => Array("url" => "$rooturl/RWIS/current.phtml"),
     "RWIS Surface" => Array("url" => "$rooturl/RWIS/currentSF.phtml"),

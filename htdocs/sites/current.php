@@ -31,7 +31,7 @@ from this site. The time stamp is in <strong><?php echo $metadata["tzname"]; ?><
   foreach ( $vardict as $key => $value ) {
     if (array_key_exists($key, $rs) && $rs[$key] != "" && $rs[$key] != -99) {
       if ($key == "lvalid") {
-        $t = date("d M Y, g A", strtotime($rs[$key]));
+        $t = date("d M Y, g:i A", strtotime($rs[$key]));
         echo '<tr><td><b>'. $value .'</b></td><td>'. $t .'</td></tr>';
       }
       else {

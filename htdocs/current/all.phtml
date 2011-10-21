@@ -5,7 +5,7 @@
  $sorder = isset($_GET["sorder"]) ? $_GET["sorder"] : "desc";
 
  $REFRESH = "<meta http-equiv=\"refresh\" content=\"60;\">";
- $TITLE = "IEM | ALL Current Conditions";
+ $TITLE = "IEM | Iowa Current Conditions";
 
  $THISPAGE = "current-sort";
   include("$rootpath/include/header.php"); 
@@ -16,7 +16,7 @@
   include("$rootpath/include/iemaccessob.php");
 
 $iem = new IEMAccess();
-$asos = $iem->getAll();
+$asos = $iem->getIowa();
 
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
