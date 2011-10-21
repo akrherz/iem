@@ -34,7 +34,7 @@ include("$rootpath/include/header.php"); ?>
  $sql = "SELECT station, 
    sum(case WHEN pday < 0 THEN 0 ELSE pday END) as pmonth, 
    sum(case WHEN pday < 0 THEN 1 ELSE 0 END) as missing from 
-   summary_$year WHERE network = '$network' 
+   summary_$year s, stations t WHERE t.network = '$network' and t.iemid = s.iemid
    and extract(month from now()) = extract(month from day) GROUP by station";
  $rs = pg_exec($dbconn, $sql);
  $monthDict = Array();
