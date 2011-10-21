@@ -24,15 +24,13 @@ class IEMAccess {
     $sid = strtoupper($sid);
     $rs = pg_exec($this->dbconn, sprintf("select *, 
     x(s.geom) as x, y(s.geom) as y, 
-    valid at time zone '%s' as lvalid,
-    max_gust_ts at time zone '%s' as lmax_gust_ts,
-    max_sknt_ts at time zone '%s' as lmax_sknt_ts,
+    valid at time zone s.tzname as lvalid,
+    max_gust_ts at time zone s.tzname as lmax_gust_ts,
+    max_sknt_ts at time zone s.tzname as lmax_sknt_ts,
     s.name as sname from 
     current c2, summary_%s c, stations s WHERE 
-    c.station = '$sid' and c.station = s.id and c.network = s.network
-    and c2.station = s.id and c2.network = s.network 
-    and c.day = date(now() at time zone s.tzname)", 
-    $this->tzname, $this->tzname,$this->tzname, date("Y")));
+    s.id = '$sid' and c.iemid = s.iemid and s.iemid = c2.iemid
+    and c.day = date(now() at time zone s.tzname)",  date("Y")));
     return new IEMAccessOb(@pg_fetch_array($rs,0));
   }
 
@@ -44,9 +42,7 @@ class IEMAccess {
     max_sknt_ts at time zone '%s' as lmax_sknt_ts,
     s.name as sname from 
     current c2, summary_%s c, stations s  
-    WHERE c.network = '$network' and c.network = c2.network and
-    c.network = s.network and c.station = s.id and 
-    s.id = c2.station and 
+    WHERE s.network = '$network' and c.iemid = s.iemid and c2.iemid = c.iemid and
     c.day = date(now() at time zone '%s')",
     $this->tzname, $this->tzname, $this->tzname, date("Y"), 
     $this->tzname);
@@ -65,12 +61,10 @@ class IEMAccess {
     max_sknt_ts at time zone '%s' as lmax_sknt_ts,
     s.name as sname from 
     current c2, summary_%s c, stations s WHERE 
-    c.network IN ('IA_RWIS', 'IA_ASOS', 'AWOS', 'KCCI', 'KIMT') 
+    s.network IN ('IA_RWIS', 'IA_ASOS', 'AWOS', 'KCCI', 'KIMT') 
     and c.day = 'TODAY' 
-    and c2.valid > 'TODAY' and s.network = c.network and
-    c.network = c2.network and s.id = c.station and 
-    c.station = c2.station", $this->tzname, 
-    $this->tzname, $this->tzname, date("Y")));
+    and c2.valid > 'TODAY' and c2.iemid = c.iemid and c.iemid = s.iemid", 
+    $this->tzname, $this->tzname, $this->tzname, date("Y")));
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
       $ret[$row["station"]] = new IEMAccessOb($row);
     }
