@@ -19,7 +19,7 @@ mesosite = i['mesosite']
 gmt = mx.DateTime.gmt()
 
 # we work from here
-os.chdir("work")
+os.chdir("/mesonet/data/dotcams")
 
 # Every three hours, clean up after ourselves :)
 if gmt.hour % 3 == 0 and gmt.minute < 5:
