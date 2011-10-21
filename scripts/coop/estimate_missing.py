@@ -39,7 +39,7 @@ for id in nt.sts.keys():
     except:
       print d, 'NDF'
       continue
-    if (sdev > 29):
+    if (sdev > 39):
       print d, sdev
       continue
     sql = "UPDATE alldata_%s SET estimated = true, %s = %i WHERE stationid = '%s' and day = '%s'"\
