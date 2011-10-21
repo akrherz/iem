@@ -12,12 +12,13 @@ i = iemdb.iemdb()
 iem = i['iem']
 
 sql = """
-select station, 
-  x(geom) as lon, y(geom) as lat, 
+select c.station, 
+  x(s.geom) as lon, y(s.geom) as lat, 
   min(tmpf) as low12z
-from current_log
-WHERE tmpf > -40 and valid > '%s 00:00:00+00' and valid < '%s 12:00:00+00' 
-and network in ('IA_ASOS', 'AWOS') GROUP by station, lon, lat
+ from current_log c, stations s
+ WHERE tmpf > -40 and valid > '%s 00:00:00+00' and valid < '%s 12:00:00+00' 
+ and s.network in ('IA_ASOS', 'AWOS') and s.network = c.network and
+ s.id = c.station GROUP by station, lon, lat
 """ % (now.strftime("%Y-%m-%d"), now.strftime("%Y-%m-%d"))
 
 lats = []
