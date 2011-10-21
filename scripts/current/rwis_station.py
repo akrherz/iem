@@ -14,11 +14,12 @@ iem = i['iem']
 # Compute normal from the climate database
 sql = """
 SELECT 
-  station, tmpf, dwpf, sknt, drct,  x(geom) as lon, y(geom) as lat
+  station, tmpf, dwpf, sknt, drct,  x(s.geom) as lon, y(s.geom) as lat
 FROM 
-  current
+  current c, stations s 
 WHERE
-  network IN ('IA_RWIS') and
+  c.network IN ('IA_RWIS') and c.network = s.network and
+  s.id = c.station and
   valid + '20 minutes'::interval > now() and
   tmpf > -50 and station not in ('RLMI4', 'ROCI4', 'RMYI4', 'RAII4')
 """
