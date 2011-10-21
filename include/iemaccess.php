@@ -26,7 +26,8 @@ class IEMAccess {
     x(s.geom) as x, y(s.geom) as y, 
     valid at time zone '%s' as lvalid,
     max_gust_ts at time zone '%s' as lmax_gust_ts,
-    max_sknt_ts at time zone '%s' as lmax_sknt_ts from 
+    max_sknt_ts at time zone '%s' as lmax_sknt_ts,
+    s.name as sname from 
     current c2, summary_%s c, stations s WHERE 
     c.station = '$sid' and c.station = s.id and c.network = s.network
     and c2.station = s.id and c2.network = s.network 
@@ -40,7 +41,8 @@ class IEMAccess {
     $sql = sprintf("select *, c.pday as ob_pday, x(s.geom) as x, 
     y(s.geom) as y, valid at time zone '%s' as lvalid,
     max_gust_ts at time zone '%s' as lmax_gust_ts,
-    max_sknt_ts at time zone '%s' as lmax_sknt_ts from 
+    max_sknt_ts at time zone '%s' as lmax_sknt_ts,
+    s.name as sname from 
     current c2, summary_%s c, stations s  
     WHERE c.network = '$network' and c.network = c2.network and
     c.network = s.network and c.station = s.id and 
@@ -60,7 +62,8 @@ class IEMAccess {
     $rs = pg_exec($this->dbconn, sprintf("select *, 
     x(s.geom) as x, y(s.geom) as y, valid at time zone '%s' as lvalid,
     max_gust_ts at time zone '%s' as lmax_gust_ts,
-    max_sknt_ts at time zone '%s' as lmax_sknt_ts from 
+    max_sknt_ts at time zone '%s' as lmax_sknt_ts,
+    s.name as sname from 
     current c2, summary_%s c, stations s WHERE 
     c.network IN ('IA_RWIS', 'IA_ASOS', 'AWOS', 'KCCI', 'KIMT') 
     and c.day = 'TODAY' 
