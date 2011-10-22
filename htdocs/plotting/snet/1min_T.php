@@ -26,15 +26,18 @@ if ($myTime == $today)
   $dbconn = iemdb("access");
   $tbl = "current_log";
   $pcol = ", pres as alti";
+  $rs = pg_prepare($dbconn, "SELECT", "SELECT * $pcol from $tbl c JOIN stations s ON (s.iemid = c.iemid)
+                 WHERE id = $1 and date(valid) = $2 ORDER by valid ASC");
 } else 
 {
 /* Dig in the archive for our data! */
   $dbconn = iemdb("snet");
   $tbl = sprintf("t%s", date("Y_m", $myTime) );
   $pcol = "";
-}
-$rs = pg_prepare($dbconn, "SELECT", "SELECT * $pcol from $tbl 
+  $rs = pg_prepare($dbconn, "SELECT", "SELECT * $pcol from $tbl 
                  WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
+}
+
 $rs = pg_execute($dbconn, "SELECT", Array($station, date("Y-m-d", $myTime)));
 if (pg_num_rows($rs) == 0) { 
  $led = new DigitalLED74();
