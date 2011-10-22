@@ -4,6 +4,7 @@ User-agent: *
 Crawl-delay: 120
 Disallow: /cgi-bin/
 Disallow: /usage/
+Disallow: /tmp/
 Disallow: /data/NIDS/
 Disallow: /data/nexrd2/
 Disallow: /data/model/
