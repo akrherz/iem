@@ -39,8 +39,8 @@ if (pg_num_rows($rs) != $cnt){
 
 if (pg_numrows($rs) == 0){
  if (substr($pil,0,3) == "MTR"){
-   $rs = pg_prepare($access, "SELECT2", "SELECT raw from current_log WHERE
-         raw != '' and station = $1 ORDER by valid DESC LIMIT $2");
+   $rs = pg_prepare($access, "SELECT2", "SELECT raw from current_log c, stations t WHERE
+         raw != '' and t.id = $1 and t.iemid = c.iemid ORDER by valid DESC LIMIT $2");
    $rs = pg_execute($access, "SELECT2", Array(substr($pil,3,3), $cnt));
    for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
    {
