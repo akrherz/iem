@@ -27,20 +27,20 @@ def sync(dbname):
     cur.execute("""SELECT * from stations WHERE modified > %s or iemid > %s""",
     (maxTS, maxID) )
     for row in cur:
-      # delete current stations in dest
-      dbcursor.execute("""DELETE from stations WHERE iemid = %s or 
-       (network = %s and id = %s)""", (row['iemid'], row['network'], row['id']))
+      if row['iemid'] > maxID:
+        dbcursor.execute("""INSERT into stations(iemid, network, id) 
+         VALUES('%s','%s','%s') """, (row['iemid'], row['network'], row['id']))
       # insert queried stations
-      dbcursor.execute("""INSERT into stations(id, name, state,
-     elevation, network, online, geom, params, county, plot_name, climate_site,
-     wfo, archive_begin, archive_end, remote_id, tzname, country, iemid,
-     modified) 
-     values (%(id)s,
-      %(name)s, %(state)s, %(elevation)s, %(network)s, %(online)s,
-     %(geom)s, %(params)s, %(county)s, %(plot_name)s, %(climate_site)s,
-     %(wfo)s, %(archive_begin)s, %(archive_end)s, %(remote_id)s,
-     %(tzname)s, %(country)s, %(iemid)s, %(modified)s)""",
-     row)
+      dbcursor.execute("""UPDATE stations SET name = %(name)s, 
+       state = %(state)s, elevation = %(elevation)s, online = %(online)s, 
+       geom = %(geom)s, params = %(params)s, county = %(county)s, 
+       plot_name = %(plot_name)s, climate_site = %(climate_site)s,
+       wfo = %(wfo)s, archive_begin = %(archive_begin)s, 
+       archive_end = %(archive_end)s, remote_id = %(remote_id)s, 
+       tzname = %(tzname)s, country = %(country)s, 
+       modified = %(modified)s
+       WHERE iemid = %(iemid)s""",
+       row)
     print 'Database: %s Modified %s rows TS: %s IEMID: %s' % (dbname, 
        cur.rowcount, maxTS, maxID)
     # close connection
