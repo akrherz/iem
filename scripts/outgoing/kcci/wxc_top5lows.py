@@ -2,8 +2,11 @@
 import os, mx.DateTime, pg, tempfile
 iemdb = pg.connect('iem', 'iemdb', user='nobody')
 
-rs = iemdb.query("SELECT station from summary WHERE network = 'KCCI' and \
-  day = 'TODAY' and min_tmpf > -30 ORDER by min_tmpf ASC").dictresult()
+rs = iemdb.query("""
+SELECT s.id as station from summary c, stations s WHERE 
+  s.network = 'KCCI' and s.iemid = c.iemid and 
+  day = 'TODAY' and s.id not in ('SCEI4','SWII4') ORDER by min_tmpf ASC
+""").dictresult()
 dict = {}
 dict['sid1'] = rs[0]['station']
 dict['sid2'] = rs[1]['station']

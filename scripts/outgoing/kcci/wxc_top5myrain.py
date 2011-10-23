@@ -5,9 +5,9 @@ iemdb = pg.connect('iem', 'iemdb', user='nobody')
 dy = int(sys.argv[1])
 now = mx.DateTime.now()
 
-sql = "SELECT station, sum(pday) as rain from summary \
-  WHERE network = 'KCCI' and \
-  day > '%s' and station not in ('SCEI4','SWII4') GROUP by station ORDER by rain DESC" % \
+sql = "SELECT s.id as station, sum(pday) as rain from summary c, stations s \
+  WHERE s.network = 'KCCI' and s.iemid = c.iemid and \
+  day > '%s' and s.id not in ('SCEI4','SWII4') GROUP by station ORDER by rain DESC" % \
  ( (now - mx.DateTime.RelativeDateTime(days= int(dy) )).strftime("%Y-%m-%d"), )
 
 rs = iemdb.query(sql).dictresult()

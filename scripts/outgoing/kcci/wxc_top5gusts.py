@@ -2,8 +2,8 @@
 import os, mx.DateTime, pg, sys, tempfile
 iemdb = pg.connect("iem", "iemdb", user="nobody")
 
-rs = iemdb.query("SELECT station from current WHERE network = 'KCCI' and \
-  valid > 'TODAY' and station not in ('SLOI4') ORDER by gust DESC").dictresult()
+rs = iemdb.query("SELECT t.id as station from current c, stations t WHERE t.network = 'KCCI' and \
+  valid > 'TODAY' and t.iemid = c.iemid and t.id not in ('SLOI4') ORDER by gust DESC").dictresult()
 dict = {}
 if len(rs) < 5:
   sys.exit(0)

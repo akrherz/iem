@@ -28,7 +28,7 @@ def compute_obs():
     """
     sql = """
 SELECT
-  station, x(geom) as lon, y(geom) as lat,
+  s.id, x(s.geom) as lon, y(s.geom) as lat,
   sum(CASE WHEN
    day = 'TODAY'::date and pday > 0 
    THEN pday ELSE 0 END) as p01,
@@ -39,16 +39,17 @@ SELECT
     pday > 0 
    THEN pday ELSE 0 END) as p03
 FROM 
-  summary
+  summary_%s c, stations s
 WHERE
-  network in ('IA_ASOS','AWOS') and
+  s.network in ('IA_ASOS','AWOS') and
+  s.iemid = c.iemid and 
   day IN ('TODAY'::date,'YESTERDAY'::date, 'TODAY'::date - '2 days'::interval)
-GROUP by station, lon, lat
-    """
+GROUP by s.id, lon, lat
+    """ % (mx.DateTime.now().year,)
     rs = access.query(sql).dictresult()
     data = {}
     for i in range(len(rs)):
-        data[rs[i]['station']] = rs[i]
+        data[rs[i]['id']] = rs[i]
     return data
 
 def main():
