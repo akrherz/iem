@@ -15,7 +15,7 @@ def toLALO( s ):
 
 o = open('%s_stn.txt' % (ST,), 'r')
 for line in o:
-  name = line[17:48].strip()
+  name = line[16:47].strip()
   stid = "%s%s" %(ST, line[2:6])
   tokens = line[48:].split()
   elev = tokens[-1]
@@ -29,7 +29,7 @@ for line in o:
         elevation, country, online) VALUES ('%s', '%sCLIMATE', 
         'SRID=4326;POINT(%s %s)', '%s', '%s', %s, 'US','t')""" % (stid, ST,
         lon, lat, ST, name, elev)
-    print 'Adding ID: %s %6.2f %6.2f' % (stid,lon, lat)
+    print 'Adding ID: %s %6.2f %6.2f %s' % (stid,lon, lat, name)
     mesosite.query( sql )
 
 mesosite.query("COMMIT;")

@@ -146,11 +146,11 @@ def load_times():
     """
     Load the latest ob times from the database
     """
-    rs = iemdb.query("""SELECT station, valid from current
-        WHERE network = 'SCAN'""").dictresult()
+    rs = iemdb.query("""SELECT t.id, valid from current c, stations t
+        WHERE t.iemid = c.iemid and t.network = 'SCAN'""").dictresult()
     d = {}
     for i in range(len(rs)):
-        d[ rs[i]['station'] ] = mx.DateTime.strptime( 
+        d[ rs[i]['id'] ] = mx.DateTime.strptime( 
                                             rs[i]['valid'][:16], '%Y-%m-%d %H:%M')
     return d
 

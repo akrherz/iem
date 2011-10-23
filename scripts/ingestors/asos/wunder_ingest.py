@@ -221,7 +221,7 @@ def recover():
     at the end of the month
     """
     network = sys.argv[1]
-    rs = mesosite.query("SELECT * from stations WHERE network = '%s' ORDER by id DESC" % (
+    rs = mesosite.query("SELECT * from stations WHERE network = '%s'  ORDER by id DESC" % (
                                                                                           network,)).dictresult()
     for i in range(len(rs)):
         sid = rs[i]['id']
@@ -255,7 +255,7 @@ def recover():
 def normal():
     network = sys.argv[1]
     # 1. Query for a list of stations to iterate over
-    rs = mesosite.query("SELECT * from stations WHERE network = '%s' ORDER by id DESC" % (
+    rs = mesosite.query("SELECT * from stations WHERE network = '%s'  ORDER by id DESC" % (
                                                                                           network,)).dictresult()
     for i in range(len(rs)):
         sid = rs[i]['id']
