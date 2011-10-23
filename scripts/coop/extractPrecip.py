@@ -34,19 +34,18 @@ cob = {}
 #	cob[id] = {'TMPX': -99, 'TMPN': -99, 'P24I': -99, 'PMOI': -99,
 #				'SMOI': -99, 'SNOW': -99, 'SNOD': -99}
 
-icursor.execute("""SELECT c.station, c.pday, 
+icursor.execute("""SELECT s.id, c.pday, 
   coalesce(c.snow,-99) as snow, coalesce(c.snowd,-99) as snowd, 
   c.max_tmpf, 
 	case when c.min_tmpf < 99 THEN c.min_tmpf ELSE -99 END as min_tmpf, 
 	x(s.geom) as lon, y(s.geom) as lat, s.name 
 	from summary c, current c2, stations s WHERE 
-	c.station = s.id and s.id = c2.station and 
-	c.network = s.network and s.network = c2.network and 
+	c.iemid = c2.iemid and s.iemid = c.iemid and 
     s.network ~* 'COOP' and min_tmpf > -99 and c2.valid > 'TODAY' 
 	and day = 'TODAY'""")
 
 for row in icursor:
-	thisStation = row["station"]
+	thisStation = row["id"]
 	cob[ thisStation ] = {}
 	thisPrec = row["pday"]
 	thisSnow = row["snow"]
@@ -66,16 +65,16 @@ for row in icursor:
 	cob[ thisStation ]["PMOI"] = 0.
 	cob[ thisStation ]["SMOI"] = 0.
 
-icursor.execute("""SELECT station, sum(pday) as tprec, 
+icursor.execute("""SELECT t.id, sum(pday) as tprec, 
 	sum( case when snow > 0 THEN snow ELSE 0 END) as tsnow 
-	from summary_%s WHERE 
+	from summary_%s s, stations t WHERE 
   date_part('month', day) = date_part('month', CURRENT_TIMESTAMP::date) 
 	and date_part('year', day) = %s 
-  and pday >= 0.00 and network ~* 'COOP' GROUP by station""" % (
+  and pday >= 0.00 and t.network ~* 'COOP' and t.iemid = s.iemid GROUP by id""" % (
 								now.year, now.year) )
 
 for row in icursor:
-	thisStation = row["station"]
+	thisStation = row["id"]
 	thisPrec = row["tprec"]
 	thisSnow = row["tsnow"]
 	if (not cob.has_key(thisStation)):

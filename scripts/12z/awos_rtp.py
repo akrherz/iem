@@ -26,29 +26,29 @@ out.write("""
 """ % ( ets.strftime("%m%d"), string.upper(sts.strftime("%d %b %Y")) ) )
 
 highs = {}
-rs = iemaccess.query("SELECT station, \
+rs = iemaccess.query("SELECT id, \
 	round(max(tmpf)::numeric,0) as max_tmpf, \
-	count(tmpf) as obs FROM current_log \
-	WHERE network = 'AWOS' and date(valid) = '%s' \
-	and tmpf > -99 GROUP by station " % \
+	count(tmpf) as obs FROM current_log c, stations t \
+	WHERE t.iemid = c.iemid and t.network = 'AWOS' and date(valid) = '%s' \
+	and tmpf > -99 GROUP by id " % \
 	(sts.strftime("%Y-%m-%d %H:%M"),) ).dictresult()
 
 for i in range(len(rs)):
-	highs[ rs[i]["station"] ] = int(rs[i]["max_tmpf"])
+	highs[ rs[i]["id"] ] = int(rs[i]["max_tmpf"])
 
 iemaccess.query("SET TIME ZONE 'GMT'")
 
 # 12z to 12z precip
 pcpn = {}
-rs = iemaccess.query("select station, sum(precip) from \
-		(select station, extract(hour from valid) as hour, \
-		max(phour) as precip from current_log WHERE network = 'AWOS' \
+rs = iemaccess.query("select id, sum(precip) from \
+		(select id, extract(hour from valid) as hour, \
+		max(phour) as precip from current_log c, stations t WHERE t.network = 'AWOS' and t.iemid = c.iemid \
 		and valid  >= '%s' and valid < '%s' \
-		GROUP by station, hour) as foo \
-	GROUP by station" % (sts.strftime("%Y-%m-%d %H:%M"), \
+		GROUP by id, hour) as foo \
+	GROUP by id" % (sts.strftime("%Y-%m-%d %H:%M"), \
 		ets.strftime("%Y-%m-%d %H:%M") ) ).dictresult()
 for i in range(len(rs)):
-	pcpn[ rs[i]["station"] ] = "%5.2f" % (float(rs[i]["sum"]),)
+	pcpn[ rs[i]["id"] ] = "%5.2f" % (float(rs[i]["sum"]),)
 
 #pcpn["DEH"] = "M"
 #pcpn["VTI"] = "M"
@@ -58,14 +58,14 @@ for i in range(len(rs)):
 #pcpn["MPZ"] = "M"
 
 lows = {}
-rs = iemaccess.query("SELECT station, \
+rs = iemaccess.query("SELECT id, \
 	round(min(tmpf)::numeric,0) as min_tmpf, \
-	count(tmpf) as obs FROM current_log \
-	WHERE network = 'AWOS' and date(valid) = 'TODAY' and \
-	extract(hour from valid) < 12 and tmpf > -99 GROUP by station").dictresult()
+	count(tmpf) as obs FROM current_log c, stations t \
+	WHERE t.iemid = c.iemid and t.network = 'AWOS' and date(valid) = 'TODAY' and \
+	extract(hour from valid) < 12 and tmpf > -99 GROUP by id").dictresult()
 
 for i in range(len(rs)):
-	lows[ rs[i]["station"] ] = int(rs[i]["min_tmpf"])
+	lows[ rs[i]["id"] ] = int(rs[i]["min_tmpf"])
 
 
 for s in st.ids:

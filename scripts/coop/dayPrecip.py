@@ -36,14 +36,14 @@ o.write("   VALID AT 7AM ON: "+ string.upper( now.strftime("%d %b %Y") ) +"\n\n"
 o.write("%-6s%-24s%10s%11s%10s\n" % ('ID', 'STATION', \
 	'PREC (IN)', 'CLIMO4DATE', 'DIFF') )
 
-queryStr = "SELECT station,  pday  as prectot from summary \
-	WHERE day = '%s' and network = 'IA_COOP' and pday >= 0" % (now.strftime("%Y-%m-%d"),)
+queryStr = "SELECT id,  pday  as prectot from summary_%s s JOIN stations t ON (t.iemid = s.iemid) \
+	WHERE day = '%s' and t.network = 'IA_COOP' and pday >= 0" % (now.year, now.strftime("%Y-%m-%d"),)
 
 rs = iemaccess.query(queryStr).dictresult()
 
 d = {}
 for i in range(len(rs)):
-	thisStation = rs[i]["station"]
+	thisStation = rs[i]["id"]
 	thisPrec = rs[i]["prectot"]
 	if (st.sts.has_key(thisStation)):
 		d[thisStation] = {'prectot': float(rs[i]["prectot"]) }

@@ -14,11 +14,12 @@ icursor = IEM.cursor()
 # Compute normal from the climate database
 sql = """
 SELECT 
-  station, network, pday, x(geom) as lon, y(geom) as lat
+  id, s.network, pday, x(s.geom) as lon, y(s.geom) as lat
 FROM 
-  current
+  current c, stations s
 WHERE
-  network IN ('IA_COOP') and
+  c.iemid = s.iemid and 
+  s.network IN ('IA_COOP') and
   valid > 'TODAY' and pday >= 0
 """
 

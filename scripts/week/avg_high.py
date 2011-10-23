@@ -13,16 +13,17 @@ iem = i['iem']
 
 # Compute normal from the climate database
 sql = """
-select station, 
-  x(geom) as lon, y(geom) as lat, 
+select s.id, 
+  x(s.geom) as lon, y(s.geom) as lat, 
   avg(max_tmpf) as max_tmpf
-from summary 
-WHERE max_tmpf > -50 
-and day >= ('TODAY'::date - '7 days'::interval)
-and day < 'TODAY' 
-and network ~* 'ASOS' and network != 'IQ_ASOS'
-GROUP by station, lon, lat
-"""
+ from summary_%s c, stations s
+ WHERE max_tmpf > -50 
+ and day >= ('TODAY'::date - '7 days'::interval)
+ and day < 'TODAY' 
+ and s.network ~* 'ASOS' and s.country = 'US' and
+ c.iemid = s.iemid
+GROUP by id, lon, lat
+""" % (now.year,)
 
 lats = []
 lons = []

@@ -14,14 +14,15 @@ iem = i['iem']
 # Compute normal from the climate database
 sql = """
 SELECT 
-  station, max_tmpf, min_tmpf, x(geom) as lon, y(geom) as lat
+  s.id as station, max_tmpf, min_tmpf, x(s.geom) as lon, y(s.geom) as lat
 FROM 
-  summary
+  summary_%s c, stations s
 WHERE
-  network IN ('AWOS', 'IA_ASOS') and
+  c.iemid = s.iemid and 
+  s.network IN ('AWOS', 'IA_ASOS') and
   day = '%s'
   and max_tmpf > -50 
-""" % (now.strftime("%Y-%m-%d"),)
+""" % (now.year, now.strftime("%Y-%m-%d"))
 
 lats = []
 lons = []

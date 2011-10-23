@@ -43,16 +43,16 @@ o.write("   VALID FOR YEAR THRU: "+ string.upper( now.strftime("%d %B %Y") ) +"\
 o.write("%-6s%-24.24s%9s%10s%11s%10s\n" % ('ID', 'STATION', 'REPORTS', \
 	'PREC (IN)', 'CLIMO2DATE', 'DIFF') )
 
-queryStr = "SELECT station, count(station) as cnt, \
-  sum(CASE WHEN pday > 0 THEN pday ELSE 0 END) as prectot from summary \
-	WHERE extract(year from day) = %s and network = 'IA_COOP' and pday >= 0 \
-  GROUP by station" % (now.year,)
+queryStr = "SELECT id, count(id) as cnt, \
+  sum(CASE WHEN pday > 0 THEN pday ELSE 0 END) as prectot from summary_%s s JOIN stations t ON (s.iemid = t.iemid) \
+	WHERE extract(year from day) = %s and t.network = 'IA_COOP' and pday >= 0 \
+  GROUP by id" % (now.year,now.year)
 
 rs = iemaccess.query(queryStr).dictresult()
 
 d = {}
 for i in range(len(rs)):
-	thisStation = rs[i]["station"]
+	thisStation = rs[i]["id"]
 	thisPrec = rs[i]["prectot"]
 	thisCount = rs[i]["cnt"]
 	if (st.sts.has_key(thisStation)):

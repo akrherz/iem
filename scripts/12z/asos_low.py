@@ -12,13 +12,12 @@ i = iemdb.iemdb()
 iem = i['iem']
 
 sql = """
-select c.station, 
+select s.id, 
   x(s.geom) as lon, y(s.geom) as lat, 
   min(tmpf) as low12z
  from current_log c, stations s
  WHERE tmpf > -40 and valid > '%s 00:00:00+00' and valid < '%s 12:00:00+00' 
- and s.network in ('IA_ASOS', 'AWOS') and s.network = c.network and
- s.id = c.station GROUP by station, lon, lat
+ and s.network in ('IA_ASOS', 'AWOS') and s.iemid = c.iemid GROUP by id, lon, lat
 """ % (now.strftime("%Y-%m-%d"), now.strftime("%Y-%m-%d"))
 
 lats = []
@@ -31,7 +30,7 @@ for i in range(len(rs)):
   lats.append( rs[i]['lat'] )
   lons.append( rs[i]['lon'] )
   vals.append( rs[i]['low12z'] )
-  labels.append( rs[i]['station'] )
+  labels.append( rs[i]['id'] )
   valmask.append( True )
 
 if len(rs) < 5:

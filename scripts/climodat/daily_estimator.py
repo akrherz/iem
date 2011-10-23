@@ -64,13 +64,13 @@ def hardcode_asos( ts ):
 
     # Get the ASOS data
     rs = iem.query("""
-       SELECT station, pday, max_tmpf, min_tmpf
-       from summary_%s WHERE day = '%s' and network in ('IA_ASOS')
-       and pday >= 0 and min_tmpf < 99 and max_tmpf > -99 ORDER by station ASC""" % (
+       SELECT id, pday, max_tmpf, min_tmpf
+       from summary_%s s, stations t WHERE t.iemid = s.iemid and day = '%s' and t.network in ('IA_ASOS')
+       and pday >= 0 and min_tmpf < 99 and max_tmpf > -99 ORDER by id ASC""" % (
        ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
-        cid = nt2.sts[rs[i]['station']]['climate_site']
-        print '%s - Precip: %.2f  DSM: %.2f High: %.1f DSM: %s Low: %.1f DSM: %s' % (rs[i]['station'],
+        cid = nt2.sts[rs[i]['id']]['climate_site']
+        print '%s - Precip: %.2f  DSM: %.2f High: %.1f DSM: %s Low: %.1f DSM: %s' % (rs[i]['id'],
                nt.sts[cid]['precip'], rs[i]['pday'],
                nt.sts[cid]['high'], rs[i]['max_tmpf'],
                nt.sts[cid]['low'], rs[i]['min_tmpf']
@@ -111,9 +111,9 @@ def estimate_snow( ts ):
     rs = iem.query("""
        SELECT x(s.geom) as lon, y(s.geom) as lat, snow, snowd
        from summary_%s c, stations s WHERE day = '%s' and 
-       c.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
+       s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
         'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
-        'OH_COOP') and c.network = s.network and c.station = s.id
+        'OH_COOP') and c.iemid = s.iemid 
        and snowd >= 0""" % (ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
         lats.append( rs[i]['lat'] )
@@ -163,10 +163,10 @@ def estimate_hilo( ts ):
     lons = []
     rs = iem.query("""
        SELECT x(s.geom) as lon, y(s.geom) as lat, max_tmpf, min_tmpf
-       from summary_%s c, stations s WHERE day = '%s' and network in ('AWOS','IA_ASOS', 'MN_ASOS', 'WI_ASOS', 
+       from summary_%s c, stations s WHERE day = '%s' and s.network in ('AWOS','IA_ASOS', 'MN_ASOS', 'WI_ASOS', 
        'IL_ASOS', 'MO_ASOS',
         'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
-        'OH_ASOS') and c.network = s.network and c.station = s.id
+        'OH_ASOS') and c.iemid = s.iemid
        and max_tmpf > -90 and min_tmpf < 90""" % (ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
     for i in range(len(rs)):
         lats.append( rs[i]['lat'] )

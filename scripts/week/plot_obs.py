@@ -13,15 +13,16 @@ iem = i['iem']
 
 # Compute normal from the climate database
 sql = """
-select station, 
-  x(geom) as lon, y(geom) as lat, 
+select s.id, 
+  x(s.geom) as lon, y(s.geom) as lat, 
   sum(pday) as rainfall
-from summary 
-WHERE day > ('TODAY'::date - '7 days'::interval) 
-and network in ('AWOS', 'IA_ASOS')
-and pday >= 0 and pday < 30
-GROUP by station, lon, lat
-"""
+ from summary_%s c, stations s
+ WHERE day > ('TODAY'::date - '7 days'::interval) 
+ and s.network in ('AWOS', 'IA_ASOS')
+ and pday >= 0 and pday < 30 and 
+ s.iemid = c.iemid
+ GROUP by s.id, lon, lat
+""" % (now.year,)
 
 lats = []
 lons = []

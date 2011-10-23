@@ -16,9 +16,9 @@ def doit(now):
   Generate some plots for the COOP data!
   """
   # We'll assume all COOP data is 12z, sigh for now
-  sql = """SELECT station, pday, network
-           from summary_%s WHERE day = '%s' and
-           network ~* 'COOP' and pday >= 0""" % (now.year,
+  sql = """SELECT id, pday, network
+           from summary_%s s JOIN stations t ON (t.iemid = s.iemid) WHERE day = '%s' and
+           t.network ~* 'COOP' and pday >= 0""" % (now.year,
            now.strftime("%Y-%m-%d") )
 
   lats = []
