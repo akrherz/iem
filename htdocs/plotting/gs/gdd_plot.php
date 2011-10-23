@@ -44,8 +44,9 @@ if (strrpos($network, "CLIMATE") > 0){
 				" ORDER by day ASC");
 	$rs = pg_execute($coopdb, "SELECT", Array($station, $sdate, $edate));
 } else {
-	$rs = pg_prepare($iem, "SELECT", "SELECT max_tmpf, min_tmpf, day from summary_$year
-		WHERE station = $1 and day between $2 and $3 " .
+	$rs = pg_prepare($iem, "SELECT", "SELECT max_tmpf, min_tmpf, day from summary_$year s JOIN stations t
+	ON (t.iemid = s.iemid) 
+		WHERE id = $1 and day between $2 and $3 " .
 				"and network = $4 ORDER by day ASC");
 	$rs = pg_execute($iem, "SELECT", Array($station, $sdate, $edate, $network));
 }
