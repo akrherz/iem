@@ -10,8 +10,8 @@ coopdb = i['coop']
 coopdb.query("BEGIN;")
 
 o = open("%s_dat.txt" % (ST,), 'r').readlines()
-s = mx.DateTime.DateTime(1930,1,1)
-e = mx.DateTime.DateTime(1970,1,1)
+s = mx.DateTime.DateTime(2010,1,1)
+e = mx.DateTime.DateTime(2011,1,1)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 data = {}

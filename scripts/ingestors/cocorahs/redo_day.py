@@ -40,28 +40,28 @@ def runner(days):
     val = safeP(cols[ header["TotalPrecipAmt"] ])
     #print id, ts, val
 
-    sql = "SELECT pday from summary_%s WHERE station = '%s' and day = '%s'" % (ts.year, id, ts.strftime("%Y-%m-%d") )
+    sql = "SELECT t.iemid, pday from summary_%s s JOIN stations t ON (t.iemid = s.iemid) WHERE t.id = '%s' and day = '%s'" % (ts.year, id, ts.strftime("%Y-%m-%d") )
     rs = access.query(sql).dictresult()
     if (len(rs) == 0):
       print "ADDING Summary entry for id: %s" % (id,)
-      sql = """INSERT into summary_%s(station, network, day, pday)
-      VALUES ('%s', '%s', '%s', %s) """ % (ts.year, id, id, state+'COCORAHS', ts.strftime("%Y-%m-%d"), val )
+      sql = """INSERT into summary_%s(iemid, day, pday)
+      VALUES ((select iemid from stations where id = '%s'), '%s', %s) """ % (ts.year, id,  ts.strftime("%Y-%m-%d"), val )
       access.query(sql)
     else:
       dbval = float(rs[0]['pday'])
       if (dbval != val):
         print "DB UPDATE [%s] OLD: %s NEW: %s" % (id, dbval, val)
-        sql = "UPDATE summary_%s SET pday = %s WHERE station = '%s' and day = '%s'" % (ts.year, val, id, ts.strftime("%Y-%m-%d") )
+        sql = "UPDATE summary_%s s SET pday = %s FROM stations t WHERE t.iemid = s.iemid and t.id = '%s' and day = '%s'" % (ts.year, val, id, ts.strftime("%Y-%m-%d") )
         access.query(sql)
 
     #------------------
     val = safeP(cols[ header["NewSnowDepth"] ])
 
-    sql = "SELECT snow from summary_%s WHERE station = '%s' and day = '%s'" % (ts.year, id, ts.strftime("%Y-%m-%d") )
+    sql = "SELECT snow from summary_%s s JOIN stations t ON (t.iemid = s.iemid) WHERE t.id = '%s' and day = '%s'" % (ts.year, id, ts.strftime("%Y-%m-%d") )
     rs = access.query(sql).dictresult()
     if rs[0]['snow'] is None or float(rs[0]['snow']) != val:
       print "DB SNOW UPDATE [%s] OLD: %s NEW: %s" % (id, rs[0]['snow'], val)
-      sql = "UPDATE summary_%s SET snow = %s WHERE station = '%s' and day = '%s'" % (ts.year, val, 
+      sql = "UPDATE summary_%s s SET snow = %s FROM stations t WHERE t.iemid = s.iemid and t.id = '%s' and day = '%s'" % (ts.year, val, 
                                                                     id, ts.strftime("%Y-%m-%d") )
       access.query(sql)
 

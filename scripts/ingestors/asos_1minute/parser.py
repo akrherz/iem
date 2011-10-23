@@ -224,9 +224,9 @@ def runner(station, monthts):
  
 
 if len(sys.argv) == 3:
-    for station in ["FSD", "MLI", 'OMA', 'MCW','BRL','AMW','MIW','SPW','OTM',
+    for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW','BRL','AMW','MIW','SPW','OTM',
                 'CID','EST',
-                'IOW','SUX','DBQ','ALO','DSM','DVN','LWD']:
+                'IOW','SUX','DBQ','ALO','DSM']:
         runner(station, 
                mx.DateTime.DateTime(int(sys.argv[1]),int(sys.argv[2]),1))
 else:

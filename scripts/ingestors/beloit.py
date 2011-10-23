@@ -13,7 +13,7 @@ ts = mx.DateTime.DateTime(year,1,1) + mx.DateTime.RelativeDateTime(days=(doy-1))
 high = mesonet.c2f( float(tokens[3]) )
 low = mesonet.c2f( float(tokens[4]) )
 pday = float(tokens[5]) / 25.4
-iemdb.query("UPDATE summary_%s SET max_tmpf = %s, min_tmpf = %s, pday = %s WHERE station = 'OT0009' and day = '%s'" % (ts.year, high, low, pday, ts.strftime("%Y-%m-%d")))
+iemdb.query("UPDATE summary_%s s SET max_tmpf = %s, min_tmpf = %s, pday = %s FROM stations t WHERE t.id = 'OT0009' and t.iemid = s.iemid and day = '%s'" % (ts.year, high, low, pday, ts.strftime("%Y-%m-%d")))
 
 hrfile = open('/mnt/home/mesonet/ot/ot0005/incoming/Beloit/BeloitHourly.dat','r').readlines()
 
