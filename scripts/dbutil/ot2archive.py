@@ -13,7 +13,7 @@ sql = "DELETE from t%s WHERE date(valid) = '%s'" % (ts.year,
 other.query(sql)
 
 # Get obs from Access
-sql = "SELECT * from current_log WHERE date(valid) = '%s' and network = 'OT'" % (ts.strftime("%Y-%m-%d"), )
+sql = "SELECT c.*, t.id from current_log c JOIN stations t on (t.iemid = c.iemid) WHERE date(valid) = '%s' and t.network = 'OT'" % (ts.strftime("%Y-%m-%d"), )
 rs = iemdb.query(sql).dictresult()
 
 for i in range(len(rs)):
@@ -25,7 +25,7 @@ for i in range(len(rs)):
     alti = rs[i]['mslp'] * .03 
   sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt,  alti, 
          pday, gust, c1tmpf,srad) values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,%s)""" % \
-  (ts.year,rs[i]['station'], rs[i]['valid'], (rs[i]['tmpf'] or "Null"), \
+  (ts.year,rs[i]['id'], rs[i]['valid'], (rs[i]['tmpf'] or "Null"), \
   (rs[i]['dwpf'] or "Null"), (rs[i]['drct'] or "Null"), (rs[i]['sknt'] or "Null"),\
   (alti or "Null"), pday, (rs[i]['gust'] or "Null") , 
    (rs[i]['c1tmpf'] or "Null"), (rs[i]['srad'] or "Null"))
