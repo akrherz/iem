@@ -110,15 +110,29 @@ def grid_hour(nc, ts):
     # If we are near realtime, look in IEMAccess instead of ASOS database
     if (mx.DateTime.gmt() - ts).hours < 36:
         dbconn = iemdb.connect('iem', bypass=True)
+        pcursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         table = "current_log"
         pcolumn = "(phour * 25.4)"
+        sql = """SELECT t.id as station,
+         max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
+         max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
+         max(getskyc(skyc1)) as max_skyc1,
+         max(getskyc(skyc2)) as max_skyc2,
+         max(getskyc(skyc3)) as max_skyc3,
+         max(case when %s > 0 and %s < 1000 then %s else 0 end) as max_p01m,
+         max(case when dwpf > -60 and dwpf < 100 THEN dwpf else null end) as max_dwpf,
+         max(case when sknt >= 0 then sknt else 0 end) as sknt, 
+         max(case when sknt >= 0 then drct else 0 end) as drct from %s s, stations t
+         WHERE t.id in %s and t.iemid = s.iemid and 
+         valid >= '%s+00' and valid < '%s+00' GROUP by station""" % (
+         pcolumn, pcolumn, pcolumn, table, ids, 
+         ts0.strftime("%Y-%m-%d %H:%M"), ts1.strftime("%Y-%m-%d %H:%M") )
     else:
         dbconn = iemdb.connect('asos', bypass=True)
+        pcursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         table = "t%s" % (ts.localtime().year,)
         pcolumn = "p01m"
-
-    pcursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    sql = """SELECT station,
+        sql = """SELECT station,
          max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
          max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
          max(getskyc(skyc1)) as max_skyc1,
@@ -132,6 +146,7 @@ def grid_hour(nc, ts):
          valid >= '%s+00' and valid < '%s+00' GROUP by station""" % (
          pcolumn, pcolumn, pcolumn, table, ids, 
          ts0.strftime("%Y-%m-%d %H:%M"), ts1.strftime("%Y-%m-%d %H:%M") )
+
     pcursor.execute( sql )
     
     if pcursor.rowcount > 4:

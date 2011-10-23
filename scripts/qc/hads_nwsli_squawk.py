@@ -4,6 +4,7 @@ HADS = iemdb.connect('hads')
 hcursor = HADS.cursor()
 hcursor2 = HADS.cursor()
 
+print 'Unknown NWSLIs from DCPish sites'
 hcursor.execute("""
  select nwsli, count(*), max(product) from unknown 
  where product !~* 'KTIR'
@@ -15,6 +16,7 @@ for row in hcursor:
     DELETE from unknown where nwsli = %s
     """, (row[0],))
 
+print 'Unknown NWSLIs from COOPish sites'
 hcursor.execute("""
  select nwsli, count(*), max(product) from unknown 
  WHERE network ~* 'COOP' GROUP by nwsli ORDER by count DESC LIMIT 5
@@ -32,6 +34,7 @@ ASOS = iemdb.connect('asos')
 acursor = ASOS.cursor()
 acursor2 = ASOS.cursor()
 
+print 'Unknown IDs from ASOSish sites'
 acursor.execute("""
  select id, count(*), max(valid) from unknown 
  GROUP by id ORDER by count DESC LIMIT 5

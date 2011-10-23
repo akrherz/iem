@@ -21,11 +21,11 @@ for station in st.ids:
 # Load up arrays for the first time....
 def preload():
     iemaccess = pg.connect("iem", 'iemdb')
-    sql = "SELECT pday, station from current WHERE \
-      network in ('KCCI','KELO','KIMT')"
+    sql = "SELECT pday, t.id from current c, stations t WHERE \
+      t.network in ('KCCI','KELO','KIMT') and c.iemid = t.iemid"
     rs = iemaccess.query(sql).dictresult()
     for i in range(len(rs)):
-        sid = rs[i]['station']
+        sid = rs[i]['id']
 
         db[sid]["pday"] = [rs[i]['pday']]*60
     iemaccess.close()
@@ -33,11 +33,11 @@ def preload():
 def process(tv):
 # (station varchar(10), network varchar(10), valid timestamp with time zone, event varchar(10), magnitude real
     iemaccess = pg.connect("iem", 'iemdb')
-    sql = "SELECT pday, station from current WHERE \
-      network = '%s'" % (tv,)
+    sql = "SELECT pday, t.id, t.iemid from current c, stations t WHERE \
+      t.network = '%s' and c.iemid = t.iemid" % (tv,)
     rs = iemaccess.query(sql).dictresult()
     for i in range(len(rs)):
-        sid = rs[i]['station']
+        sid = rs[i]['id']
         pday = rs[i]['pday']
         db[sid]["pday"] = [pday] + db[sid]["pday"][0:-1]
 
@@ -57,7 +57,7 @@ def process(tv):
         d = pday - float(db[sid]["pday"][59])
         if (d < 0):
           d = pday
-        sql = "UPDATE current SET phour = %s WHERE station = '%s' " % (d, sid)
+        sql = "UPDATE current SET phour = %s WHERE iemid = %s " % (d, rs[i]['iemid'])
         #print sql
         iemaccess.query(sql)
     iemaccess.close()

@@ -24,7 +24,7 @@ dir = "/home/ldm/data/camera/stills/"
 files = os.listdir(dir)
 network = "KCCI"
 for file in files:
-    if (file == "SMAI4.jpg" or file == "S03I4.jpg" or file == "KCRG-014.jpg"):
+    if file in ["SMAI4.jpg", "S03I4.jpg", "KCRG-014.jpg", 'SGLI4.jpg']:
         continue
     if len(file) > 4 and file[:4] == "IDOT":
         continue

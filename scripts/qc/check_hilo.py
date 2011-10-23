@@ -11,8 +11,8 @@ def checkdate(ts):
     check a date's worth of data for troublemakers
     '''
     strdate = ts.strftime("%Y-%m-%d")
-    icursor.execute("""SELECT station, max_tmpf, min_tmpf from summary_"""+ `ts.year` +"""
-    WHERE day = %s and network in ('IA_ASOS','AWOS')
+    icursor.execute("""SELECT t.id, max_tmpf, min_tmpf from summary_"""+ `ts.year` +""" s JOIN stations t ON (t.iemid = s.iemid)
+    WHERE day = %s and t.network in ('IA_ASOS','AWOS')
     and max_tmpf > min_tmpf""", (strdate,))
                                     
     highs = []
