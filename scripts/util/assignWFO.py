@@ -6,7 +6,7 @@ mydb = i["mesosite"]
 
 rs = mydb.query("select s.id, c.wfo from stations s, cwa c WHERE \
   s.geom && c.the_geom and contains(c.the_geom, s.geom) \
-  and s.wfo IS NULL").dictresult()
+  and (s.wfo IS NULL or s.wfo = '')").dictresult()
 
 for i in range(len(rs)):
   id = rs[i]['id']
