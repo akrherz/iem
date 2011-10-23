@@ -5,8 +5,8 @@
 $wepp = iemdb("wepp");
 $iem = iemdb("iem");
 
-$rs = pg_prepare($iem, "SELECTSUM", "SELECT day, pday from summary WHERE
- 		station = $1 and day >= $2 and day < $3");
+$rs = pg_prepare($iem, "SELECTSUM", "SELECT day, pday from summary s JOIN stations t ON (t.iemid = s.iemid) WHERE
+ 		t.id = $1 and day >= $2 and day < $3");
 $rs = pg_prepare($wepp, "SELECTRAIN", "select rainfall / 25.4 as inch, 
 	valid from daily_rainfall
 	WHERE hrap_i = $1 and valid >= $2 and valid < $3 ORDER by valid ASC");
