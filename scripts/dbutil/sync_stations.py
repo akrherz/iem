@@ -29,7 +29,7 @@ def sync(dbname):
     for row in cur:
       if row['iemid'] > maxID:
         dbcursor.execute("""INSERT into stations(iemid, network, id) 
-         VALUES('%s','%s','%s') """, (row['iemid'], row['network'], row['id']))
+         VALUES(%s,%s,%s) """, (row['iemid'], row['network'], row['id']))
       # insert queried stations
       dbcursor.execute("""UPDATE stations SET name = %(name)s, 
        state = %(state)s, elevation = %(elevation)s, online = %(online)s, 
