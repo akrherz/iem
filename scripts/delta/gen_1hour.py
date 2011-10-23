@@ -5,9 +5,9 @@ import mx.DateTime
 iemdb = iemAccessDatabase.iemAccessDatabase()
 
 # First, we get a dict going of our current obs
-rs = iemdb.query("SELECT *, x(geom) as lon, y(geom) as lat \
-	from current WHERE \
-	(valid + '1 hour'::interval) > CURRENT_TIMESTAMP and alti is not Null").dictresult()
+rs = iemdb.query("SELECT s.id as station, c.*, x(s.geom) as lon, y(s.geom) as lat \
+	from current c, stations s WHERE \
+	(valid + '1 hour'::interval) > CURRENT_TIMESTAMP and alti is not Null and c.iemid = s.iemid").dictresult()
 c = {}
 for i in range(len(rs)):
 	id = rs[i]["station"]
@@ -21,13 +21,13 @@ w0 = lhour + mx.DateTime.RelativeDateTime(hours=-1,minute=49)
 w1 = lhour + mx.DateTime.RelativeDateTime(minute=11)
 
 
-sql = "SELECT * from current_log WHERE \
+sql = "SELECT c.*, t.id from current_log c, stations t WHERE t.iemid = c.iemid and \
 	valid BETWEEN '%s' and '%s' and alti is not null" % (w0.strftime("%Y-%m-%d %H:%M"), \
 	w1.strftime("%Y-%m-%d %H:%M") ) 
 rs = iemdb.query(sql).dictresult()
 lh = {}
 for i in range(len(rs)):
-	id = rs[i]["station"]
+	id = rs[i]["id"]
 	lh[id] = {}
 	lh[id] = rs[i]
 

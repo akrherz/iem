@@ -11,13 +11,12 @@ IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor()
 
 sql = """
-  select station, 
+  select s.id, 
   x(s.geom) as lon, y(s.geom) as lat, 
-  max_tmpf as high, c.network
-  from summary_%s c JOIN stations s
-  on (s.id = c.station and s.network = c.network)
-  WHERE day = 'TODAY' and max_tmpf > -40 
-  and c.network in ('IA_ASOS', 'AWOS', 'IL_ASOS','MO_ASOS','KS_ASOS',
+  max_tmpf as high, s.network
+  from summary_%s c, stations s
+  WHERE c.iemid = s.iemid and day = 'TODAY' and max_tmpf > -40 
+  and s.network in ('IA_ASOS', 'AWOS', 'IL_ASOS','MO_ASOS','KS_ASOS',
   'NE_ASOS','SD_ASOS','MN_ASOS','WI_ASOS')
 """ % (now.year, )
 

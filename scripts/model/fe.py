@@ -7,8 +7,8 @@ table = network.Table( ['AWOS', 'IA_ASOS'] )
 import mx.DateTime
 import ingest
 
-sts = mx.DateTime.DateTime(2010,6,7,0,0)
-ets = mx.DateTime.DateTime(2010,7,21,12,0)
+sts = mx.DateTime.DateTime(2011,2,27,12,0)
+ets = mx.DateTime.DateTime(2011,2,27,18,0)
 interval = mx.DateTime.RelativeDateTime(hours=6)
 
 now = sts

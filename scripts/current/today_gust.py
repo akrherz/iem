@@ -13,12 +13,12 @@ icursor = IEM.cursor()
 
 # Compute normal from the climate database
 sql = """
-  select c.station, s.network,
+  select s.id, s.network,
   x(s.geom) as lon, y(s.geom) as lat, 
   case when c.max_sknt > c.max_gust then c.max_sknt else c.max_gust END  as wind
   from summary_%s c, current c2, stations s
-  WHERE s.id = c.station and c2.valid > 'TODAY' and c.day = 'TODAY'
-  and s.network = c.network and s.network = c2.network and c2.station = s.id
+  WHERE s.iemid = c.iemid and c2.valid > 'TODAY' and c.day = 'TODAY'
+  and c2.iemid = s.iemid
   and (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US'
   ORDER by lon, lat
 """ % (now.year,)

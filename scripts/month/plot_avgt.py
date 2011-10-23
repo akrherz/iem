@@ -14,13 +14,13 @@ icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 # Compute normal from the climate database
 sql = """
-SELECT station, s.network, x(s.geom) as lon, y(s.geom) as lat, 
+SELECT id, s.network, x(s.geom) as lon, y(s.geom) as lat, 
 avg( (max_tmpf + min_tmpf)/2.0 ) as avgt , count(*) as cnt 
-from summary_%s c, stations s
-WHERE (c.network ~* 'ASOS' or c.network = 'AWOS') and 
-c.network != 'IQ_ASOS' and c.network = s.network and s.id = c.station and
+from summary_%s c JOIN stations s ON (s.iemid = c.iemid) 
+WHERE (s.network ~* 'ASOS' or s.network = 'AWOS') and 
+s.country = 'US' and 
 extract(month from day) = extract(month from now()) 
-and max_tmpf > -30 and min_tmpf < 90 GROUP by station, s.network, lon, lat
+and max_tmpf > -30 and min_tmpf < 90 GROUP by id, s.network, lon, lat
 """ % (now.year,)
 
 lats = []

@@ -5,14 +5,14 @@ i = iemdb.iemdb()
 iem = i['iem']
 
 def compute(ts):
-  sql = "select f2.station, f2.network, n, x from \
-   (SELECT station, network, min(pday) as n from \
-   current_log WHERE network IN ('KELO','KIMT','KCCI') and valid IN ('%s',\
-   '%s','%s','%s') and pday >= 0 GROUP by station, network) as f1,\
-   (SELECT station, network, max(pday) as x from \
-   current_log WHERE network IN ('KELO','KIMT','KCCI') and valid IN ('%s',\
-   '%s','%s','%s') and pday >= 0 GROUP by station, network) as f2\
-   WHERE f1.station = f2.station and f1.network = f2.network"\
+  sql = "select f2.id, f2.network, n, x from \
+   (SELECT id, network, min(pday) as n from \
+   current_log c, stations t WHERE t.network IN ('KELO','KIMT','KCCI') and valid IN ('%s',\
+   '%s','%s','%s') and pday >= 0 and t.iemid = c.iemid GROUP by id, network) as f1,\
+   (SELECT id, network, max(pday) as x from \
+   current_log c, stations t WHERE t.network IN ('KELO','KIMT','KCCI') and valid IN ('%s',\
+   '%s','%s','%s') and pday >= 0 and t.iemid = c.iemid GROUP by id, network) as f2\
+   WHERE f1.id = f2.id and f1.network = f2.network"\
    % ( ts + mx.DateTime.RelativeDateTime(hours=-2, minute=56),\
        ts + mx.DateTime.RelativeDateTime(hours=-2, minute=57),\
        ts + mx.DateTime.RelativeDateTime(hours=-2, minute=58),\
@@ -25,7 +25,7 @@ def compute(ts):
   for i in range(len(rs)):
     x = rs[i]['x']
     n = rs[i]['n']
-    station = rs[i]['station']
+    station = rs[i]['id']
 
     phour = x - n
     if (phour < 0):

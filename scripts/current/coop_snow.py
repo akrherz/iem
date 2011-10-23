@@ -13,13 +13,13 @@ icursor = IEM.cursor()
 
 sql = """
 SELECT 
-  c.station, c.network, snow, x(s.geom) as lon, y(s.geom) as lat
+  s.id, s.network, snow, x(s.geom) as lon, y(s.geom) as lat
 FROM 
   summary_%s c, stations s
 WHERE
-  c.network IN ('IA_COOP') and
+  s.network IN ('IA_COOP') and
   day = 'TODAY' and snow >= 0
-  and c.network = s.network and s.id = c.station
+  and c.iemid = s.iemid
 """ % (now.year, )
 
 lats = []

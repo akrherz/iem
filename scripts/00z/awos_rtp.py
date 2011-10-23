@@ -32,12 +32,12 @@ out.write("""
 
 # We get 18 hour highs
 highs = {}
-sql = "SELECT station, \
+sql = "SELECT t.id as station, \
 	round(max(tmpf)::numeric,0) as max_tmpf, \
-	count(tmpf) as obs FROM current_log \
-	WHERE network = 'AWOS' and valid > '%s' \
+	count(tmpf) as obs FROM current_log c, stations t\
+	WHERE t.iemid = c.iemid and t.network = 'AWOS' and valid > '%s' \
         and valid < '%s' \
-	and tmpf > -99 GROUP by station " % \
+	and tmpf > -99 GROUP by t.id " % \
 	(sts6z.strftime("%Y-%m-%d %H:%M"),
          ets.strftime("%Y-%m-%d %H:%M") )
 rs = iemaccess.query(sql).dictresult()
@@ -47,12 +47,12 @@ for i in range(len(rs)):
 
 # 12z to 12z precip
 pcpn = {}
-rs = iemaccess.query("select station, sum(precip) from \
-		(select station, extract(hour from valid) as hour, \
-		max(phour) as precip from current_log WHERE network = 'AWOS' \
+rs = iemaccess.query("select id as station, sum(precip) from \
+		(select t.id, extract(hour from valid) as hour, \
+		max(phour) as precip from current_log c, stations t WHERE t.network = 'AWOS' and t.iemid = c.iemid \
 		and valid  >= '%s' and valid < '%s' \
-		GROUP by station, hour) as foo \
-	GROUP by station" % (sts24h.strftime("%Y-%m-%d %H:%M"), \
+		GROUP by t.id, hour) as foo \
+	GROUP by id" % (sts24h.strftime("%Y-%m-%d %H:%M"), \
 		ets.strftime("%Y-%m-%d %H:%M") ) ).dictresult()
 for i in range(len(rs)):
 	pcpn[ rs[i]["station"] ] = "%5.2f" % (float(rs[i]["sum"]),)
@@ -60,11 +60,11 @@ for i in range(len(rs)):
 pcpn["MXO"] = "M"
 
 lows = {}
-rs = iemaccess.query("SELECT station, \
+rs = iemaccess.query("SELECT t.id as station, \
 	round(min(tmpf)::numeric,0) as min_tmpf, \
-	count(tmpf) as obs FROM current_log \
-	WHERE network = 'AWOS' and valid > '%s' and \
-	valid < '%s' and tmpf > -99 GROUP by station" % \
+	count(tmpf) as obs FROM current_log c, stations t\
+	WHERE t.iemid = c.iemid and t.network = 'AWOS' and valid > '%s' and \
+	valid < '%s' and tmpf > -99 GROUP by t,id" % \
         ( sts6z.strftime("%Y-%m-%d %H:%M"), ets.strftime("%Y-%m-%d %H:%M")) ).dictresult()
 
 for i in range(len(rs)):

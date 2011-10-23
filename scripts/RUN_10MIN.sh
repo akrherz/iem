@@ -1,5 +1,5 @@
 # Run every 10 minutes please
-#set echo
+#set -x
 
 cd current
 /mesonet/python/bin/python vsby.py >& /dev/null

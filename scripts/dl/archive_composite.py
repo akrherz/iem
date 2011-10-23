@@ -8,13 +8,13 @@ postgis = i['postgis']
 opener = urllib2.build_opener()
 
 def save(sectorName, file_name, dir_name, tstamp,bbox=None):
-  layers = "layers[]=nexrad&layers[]=watch_by_county&layers[]=sbw&layers[]=uscounties"
+  layers = "layers[]=n0q&layers[]=watch_by_county&layers[]=sbw&layers[]=uscounties"
   #layers = "layers[]=nexrad&layers[]=county_warnings&layers[]=watches&layers[]=uscounties"
   #layers = "layers[]=nexrad&layers[]=watches&layers[]=uscounties"
-  uri = "http://iem50.local/GIS/radmap.php?sector=%s&ts=%s&%s" % \
+  uri = "http://iemvs100.local/GIS/radmap.php?sector=%s&ts=%s&%s" % \
         (sectorName,tstamp, layers)
   if (bbox is not None):
-    uri = "http://iem50.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % \
+    uri = "http://iemvs100.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % \
         (bbox,tstamp, layers)
 
   try:
@@ -40,14 +40,14 @@ def save(sectorName, file_name, dir_name, tstamp,bbox=None):
 # 2002 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC
 """
 
-sts = mx.DateTime.DateTime(2010,5,29,0,0)
-ets = mx.DateTime.DateTime(2010,5,29,8,0)
+sts = mx.DateTime.DateTime(2011,9,6,16,40)
+ets = mx.DateTime.DateTime(2011,9,6,16,50)
 interval = mx.DateTime.RelativeDateTime(minutes=5)
 now = sts
 while (now < ets):
   #if now.hour == 0 and now.minute == 0:
   #  time.sleep( 300 )  # 5 minute break
-  #print now
+  print now
   s = now.strftime("%Y%m%d%H%M")
   save('conus', 'uscomp.png', 'usrad', s)
   save('iem', 'mwcomp.png', 'comprad', s)

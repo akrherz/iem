@@ -13,13 +13,12 @@ IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 sql = """
-select station, 
+select id, 
   x(s.geom) as lon, y(s.geom) as lat, 
   pday 
 from summary_%s c, stations s
 WHERE day = 'TODAY' and pday >= 0 and pday < 20
-and c.network = 'IA_COOP' and c.network = s.network and
-s.id = c.station
+and s.network = 'IA_COOP' and s.iemid = c.iemid
 """ % (now.year, )
 
 lats = []
@@ -32,7 +31,7 @@ for row in icursor:
   lats.append( row['lat'] )
   lons.append( row['lon'] )
   vals.append( row['pday'] )
-  labels.append( row['station'] )
+  labels.append( row['id'] )
   valmask.append( True )
 
 

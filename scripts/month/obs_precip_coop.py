@@ -12,13 +12,14 @@ i = iemdb.iemdb()
 access = i['iem']
 
 # Compute normal from the climate database
-sql = """SELECT station,
+sql = """SELECT id,
       sum(CASE WHEN pday < 0 THEN 0 ELSE pday END) as precip,
       sum(CASE when pday < 0 THEN 1 ELSE 0 END) as missing,
-      x(geom) as lon, y(geom) as lat from summary 
-     WHERE network in ('IA_COOP') and
+      x(s.geom) as lon, y(s.geom) as lat from summary_%s c JOIN  stations s
+     ON (s.iemid = c.iemid) 
+     WHERE s.network in ('IA_COOP') and s.iemid = c.iemid and 
       extract(month from day) = %s and extract(year from day) = extract(year from now())
-     GROUP by station, lat, lon""" % (
+     GROUP by id, lat, lon""" % (now.year, 
   now.strftime("%m"),)
 
 lats = []
@@ -29,7 +30,7 @@ rs = access.query(sql).dictresult()
 for i in range(len(rs)):
   if rs[i]['missing'] > (now.day / 3):
     continue
-  id = rs[i]['station']
+  id = rs[i]['id']
   labels.append( id )
   lats.append( rs[i]['lat'] )
   lons.append( rs[i]['lon'] )

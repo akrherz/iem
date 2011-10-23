@@ -37,11 +37,12 @@ def doit(now, model):
     # Load up the currents!
     icursor.execute("""
 SELECT 
-  station, network, tmpf, x(geom) as lon, y(geom) as lat
+  s.id, s.network, tmpf, x(s.geom) as lon, y(s.geom) as lat
 FROM 
-  current
+  current c, stations s
 WHERE
-  (network ~* 'ASOS' or network = 'AWOS') and 
+  c.iemid = s.iemid and
+  (s.network ~* 'ASOS' or s.network = 'AWOS') and 
   valid + '15 minutes'::interval > now() and
   tmpf > -50
     """)
