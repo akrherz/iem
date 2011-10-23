@@ -66,7 +66,7 @@ class IEMAccess {
     and c2.valid > 'TODAY' and c2.iemid = c.iemid and c.iemid = s.iemid", 
     $this->tzname, $this->tzname, $this->tzname, date("Y")));
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-      $ret[$row["station"]] = new IEMAccessOb($row);
+      $ret[$row["id"]] = new IEMAccessOb($row);
     }
     return $ret;
   }
