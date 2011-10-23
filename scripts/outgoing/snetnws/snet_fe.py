@@ -181,8 +181,8 @@ def willEmail(network, thres):
 
     # Okay, pre-emptive check to iemdb to see how many obs are old
     mythres = thres + mx.DateTime.RelativeDateTime(minutes=6)
-    rs = iem.query("SELECT count(*) as c from current WHERE \
-      network = '%s' and valid < '%s' " % \
+    rs = iem.query("SELECT count(*) as c from current c, stations t WHERE \
+      t.iemid = c.iemid and t.network = '%s' and valid < '%s' " % \
       (network, mythres.strftime('%Y-%m-%d %H:%M') ) ).dictresult() 
     if (len(rs) > 0):
         cnt_offline = rs[0]['c']

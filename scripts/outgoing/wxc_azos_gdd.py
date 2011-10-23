@@ -76,22 +76,22 @@ def compute_obs(sts, ets):
     """
     sql = """
 SELECT
-  station, x(s.geom) as lon, y(s.geom) as lat,
+  id, x(s.geom) as lon, y(s.geom) as lat,
   sum( case when max_tmpf = -99 THEN 1 ELSE 0 END) as missing,
   sum( gdd50(max_tmpf, min_tmpf) ) as gdd,
   sum( case when pday > 0 THEN pday ELSE 0 END ) as precip
 FROM 
   summary_%s c, stations s
 WHERE
-  network in ('IA_ASOS','AWOS') and
+  s.network in ('IA_ASOS','AWOS') and
   day >= '%s' and day < '%s' and
-  c.station = s.id and c.network = s.network
-GROUP by station, lon, lat
+  c.iemid = s.iemid
+GROUP by s.id, lon, lat
     """ % (sts.year, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d"))
     rs = access.query(sql).dictresult()
     data = {}
     for i in range(len(rs)):
-        data[rs[i]['station']] = rs[i]
+        data[rs[i]['id']] = rs[i]
     return data
 
 def main():

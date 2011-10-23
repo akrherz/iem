@@ -3,8 +3,10 @@
 import os, mx.DateTime, pg, tempfile
 iemdb = pg.connect('iem', 'iemdb', user='nobody')
 
-rs = iemdb.query("SELECT station from summary WHERE network = 'KCCI' and \
-  day = 'TODAY' and station not in ('SCEI4','SWII4') ORDER by pmonth DESC").dictresult()
+rs = iemdb.query("""SELECT s.id as station from summary c, stations s WHERE 
+  s.network = 'KCCI' and s.iemid = c.iemid and 
+  day = 'TODAY' and s.id not in ('SCEI4','SWII4') ORDER by pmonth DESC
+  """).dictresult()
 dict = {}
 dict['dy'] = 31
 dict['timestamp'] = mx.DateTime.now()
