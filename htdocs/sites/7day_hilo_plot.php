@@ -26,7 +26,7 @@ $xlabels = Array();
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $ts = strtotime($row["day"]);
   $xlabels[] = date("m/d", $ts);
-  if ($row["max_tmpf"] < $row["min_tmpf"]){
+  if ($row["max_tmpf"] < $row["min_tmpf"] || $row["max_tmpf"] < -100 || $row["min_tmpf"] < -100){
   	$highs[] = "";
   	$lows[] = "";
   } else {
