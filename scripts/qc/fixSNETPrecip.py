@@ -29,7 +29,7 @@ def process(ts):
         if (maxPrecip < 0):
             continue
 
-        sql = "UPDATE summary_%s SET pday = %s WHERE station = '%s' and day = '%s' " % (ts.year, maxPrecip, nwsli, ts.strftime("%Y-%m-%d") )
+        sql = "UPDATE summary_%s s SET pday = %s FROM stations t WHERE t.id = '%s' and t.iemid = s.iemid and day = '%s' " % (ts.year, maxPrecip, nwsli, ts.strftime("%Y-%m-%d") )
         iemaccess.query(sql)
 
 

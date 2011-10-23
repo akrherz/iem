@@ -19,14 +19,14 @@ offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
 
 iem = iemdb.connect("iem", bypass=True)
 icursor = iem.cursor(cursor_factory=psycopg2.extras.DictCursor)
-icursor.execute("""SELECT x(geom) as lon, y(geom) as lat, station, pday
-  FROM summary where network in ('KCCI','KIMT','AWOS') and day = 'YESTERDAY'::date
-  ORDER by pday DESC""")
+icursor.execute("""SELECT x(geom) as lon, y(geom) as lat, id, pday
+  FROM summary_%s s JOIN stations t ON (t.iemid = s.iemid) where t.network in ('KCCI','KIMT','AWOS') and day = 'YESTERDAY'::date
+  ORDER by pday DESC""" % (ts.year,))
 obs = []
 estimates = []
 fmt = "%7s %5s OB: %.2f EST: %4.2f"
 for row in icursor:
-    station = row['station']
+    station = row['id']
     lat = row['lat']
     lon = row['lon']
     # Lookup IEMRE data
