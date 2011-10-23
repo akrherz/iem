@@ -31,15 +31,15 @@ include("$rootpath/include/header.php"); ?>
  /* Compute monthly rainfall totals! */
  $dbconn = iemdb("access");
  $year = date("Y");
- $sql = "SELECT station, 
+ $sql = "SELECT id, 
    sum(case WHEN pday < 0 THEN 0 ELSE pday END) as pmonth, 
    sum(case WHEN pday < 0 THEN 1 ELSE 0 END) as missing from 
    summary_$year s, stations t WHERE t.network = '$network' and t.iemid = s.iemid
-   and extract(month from now()) = extract(month from day) GROUP by station";
+   and extract(month from now()) = extract(month from day) GROUP by id";
  $rs = pg_exec($dbconn, $sql);
  $monthDict = Array();
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){ 
-   $monthDict[ $row["station"] ] = Array("accum" => round($row["pmonth"],2), "missing" => $row["missing"] );
+   $monthDict[ $row["id"] ] = Array("accum" => round($row["pmonth"],2), "missing" => $row["missing"] );
  }
 
  $iem = new IEMAccess();
