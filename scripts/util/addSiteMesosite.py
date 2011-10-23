@@ -5,32 +5,39 @@
 
 import sys, mx.DateTime
 import iemdb
+import psycopg2.extras
 MESOSITE = iemdb.connect('mesosite')
-mcursor = MESOSITE.cursor()
+mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 IEM = iemdb.connect('iem')
 icursor = IEM.cursor()
 
-_NETWORK = sys.argv[1]
-_ID = sys.argv[2]
+# Figure out the highest ID we have from current table
+icursor.execute("""SELECT max(iemid) from current""")
+row = icursor.fetchone()
+maxID = row[0]
+print maxID 
 
-mcursor.execute("""SELECT * from stations WHERE network = '%s' 
-   and id = '%s' LIMIT 1""" % (_NETWORK, _ID) )
+# Figure out new stations
+mcursor.execute("""SELECT * from stations WHERE iemid > %s""" % (maxID,) )
 
 for row in mcursor:
-    print "Adding station :%s:" % (_ID,)
+    print "Adding station ID: %s NETWORK: %s" % (row['id'], row['network'])
 
     for tbl in ['trend_1h', 'trend_15m']:
-        icursor.execute("""INSERT into %s (station, network)
-          VALUES ('%s', '%s') """ % (tbl, _ID, _NETWORK ) )
+        icursor.execute("""INSERT into %s (iemid)
+          VALUES ( %s) """ % (tbl,  row['iemid'] ) )
   
     tbl = 'summary_%s' % (mx.DateTime.now().year,)
-    icursor.execute("""INSERT into %s (station, network, day)
-          VALUES ('%s', '%s', 'TODAY') """ % (tbl, _ID, _NETWORK ) )
-    icursor.execute("""INSERT into %s (station, network, day)
-          VALUES ('%s', '%s', 'TOMORROW') """ % (tbl, _ID, _NETWORK ) )
+    icursor.execute("""INSERT into %s ( day, iemid)
+          VALUES ('TODAY', %s) """ % (tbl, 
+          row['iemid'] ) )
+    icursor.execute("""INSERT into %s ( day, iemid)
+          VALUES ( 'TOMORROW', %s) """ % (tbl,
+          row['iemid'] ) )
     tbl = 'current'
-    icursor.execute("""INSERT into %s (station, network, valid)
-          VALUES ('%s', '%s', '1980-01-01') """ % (tbl, _ID, _NETWORK ) )
+    icursor.execute("""INSERT into %s ( valid, iemid)
+          VALUES ('1980-01-01', %s) """ % (tbl,
+          row['iemid'] ) )
 
 icursor.close()
 IEM.commit()

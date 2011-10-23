@@ -7,7 +7,7 @@ import pg
 import sys
 import os
 import urllib2
-postgis = pg.connect('postgis')
+postgis = pg.connect('postgis', 'iemdb')
 
 # Get the name of the file we wish to download
 if len(sys.argv) == 1:
