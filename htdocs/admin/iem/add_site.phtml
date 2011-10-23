@@ -1,7 +1,10 @@
 <?php
+ /* 
+  * Add/Edit a site to the IEM Database 
+  * $Id: $:
+  */
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
- /* Add/Edit a site to the IEM Database */
 
 $station = isset($_REQUEST["station"]) ? substr($_REQUEST["station"],0,10) : "";
 $sname = isset($_REQUEST["sname"]) ? $_REQUEST["sname"] : "";
@@ -26,9 +29,8 @@ if (isset($_REQUEST["longitude"]) && isset($_REQUEST["latitude"]))
    geom = 'SRID=4326;POINT(%s %s)' WHERE id = '%s' and network = '%s'", $country, $sname, $sname, 
    $state, $elevation, $online, $longitude, $latitude,  $station, $network);
    pg_exec($pg_conn, $sql);
-
-  // Insert into mesosite
-  `/mesonet/python/bin/python /mesonet/www/apps/iemwebsite/scripts/util/addSiteMesosite.py $network $station`;
+   
+   echo "<h2>Updated Station Table!</h2>";
 }
 
 /* Search for station */
