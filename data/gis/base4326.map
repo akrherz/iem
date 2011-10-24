@@ -1183,7 +1183,7 @@ LAYER
   CONNECTION "user=nobody dbname=iem host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, round(tsf0::numeric,0) as tsf0,
-    oid from current c JOIN stations t ON (t.iemid = c.iemid) WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
+    c.iemid as oid from current c JOIN stations t ON (t.iemid = c.iemid) WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
     and tsf0 > -30) as foo using unique oid using srid=4326"
   STATUS OFF
   TYPE POINT
