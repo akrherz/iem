@@ -1,5 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 38);
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 include("$rootpath/include/database.inc.php");
 $pgconn = iemdb("access");
@@ -9,27 +10,27 @@ $cities = $nt->table;
 
 
 $rs = pg_query($pgconn, "SELECT 
- station,
+ id,
  sum(pday) as precip,
  extract(month from day) as month
-FROM summary_${year}
+FROM summary_${year} s JOIN stations t ON (t.iemid = s.iemid)
 WHERE
  network = 'AWOS'
  and pday >= 0
-GROUP by station, month");
+GROUP by id, month");
 $data = Array();
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
-  if (!array_key_exists($row['station'], $data))
+  if (!array_key_exists($row['id'], $data))
   { 
-    $data[$row['station']] = Array(null,null,null,null,null,null,null,
+    $data[$row['id']] = Array(null,null,null,null,null,null,null,
       null,null,null,null,null);
   }
-  $data[$row["station"]][intval($row["month"])-1] = $row["precip"];
+  $data[$row["id"]][intval($row["month"])-1] = $row["precip"];
 }
-$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.2.0/resources/css/ext-all.css"/>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.2.0/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.2.0/ext-all.js"></script>
+$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css"/>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/ext-all.js"></script>
 <script type="text/javascript" src="../../ext/ux/TableGrid.js"></script>
 <script>
 Ext.onReady(function(){
