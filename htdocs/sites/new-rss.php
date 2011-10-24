@@ -12,16 +12,13 @@
  
  
  header("Content-type: text/xml");
- echo "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
- echo "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">\n";
- echo "<channel>\n";
- echo "<atom:link href=\"http://mesonet.agron.iastate.edu/sites/new-rss.php\" rel=\"self\" type=\"application/rss+xml\" />\n";
- echo "<title>Iowa Environmental Mesonet - New Stations</title>\n";
- echo "<link>http://mesonet.agron.iastate.edu/sites/locate.php</link>\n";
- echo "<description>
-  RSS feed of new stations added to IEM metadata tables...
-</description>\n";
- echo "<lastBuildDate>". date('D, d M Y H:i:s O') ."</lastBuildDate>\n";
+ echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+ echo "<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:georss=\"http://www.georss.org/georss\">\n";
+ echo "<title>Iowa Environmental Mesonet - New Stations GeoRSS</title>\n";
+ echo "<subtitle>Iowa Environmental Mesonet - New Stations GeoRSS</subtitle>\n";
+ echo "<link href=\"http://mesonet.agron.iastate.edu/sites/locate.php\" />\n";
+ echo "<updated>". gmdate('Y-m-d\\TH:i:s\\Z') ."</updated>\n";
+ echo "<author><name>Daryl Herzmann</name><email>akrherz@iastate.edu</email></author>\n";
  
  for ($i=0; $row = @pg_fetch_array($rs, $i); $i++) {
  	$cbody = "<pre>\n";
@@ -32,15 +29,15 @@
     $cbody .= "Ele [m]: ". $row["elevation"] ."\n";
     $cbody .= "Network: ". $row["netname"] ."(". $row["network"] .")\n";
  	$cbody .= "</pre>\n";
-  echo "<item>\n";
+  echo "<entry>\n";
   echo "<title>". $row["name"] ." [". $row["id"] ."]</title>\n";
   echo "<author>akrherz@iastate.edu (Daryl Herzmann)</author>\n";
-  echo "<link>http://mesonet.agron.iastate.edu/sites/site.php?station=". $row["id"] ."&amp;network=". $row["network"] ."</link>\n";
-  echo "<guid>http://mesonet.agron.iastate.edu/sites/site.php?station=". $row["id"] ."&amp;network=". $row["network"] ."</guid>\n";
-  echo "<description>". $cbody ."</description>\n";
-  echo "</item>\n";
+  echo "<link href=\"http://mesonet.agron.iastate.edu/sites/site.php?station=". $row["id"] ."&amp;network=". $row["network"] ."\" />\n";
+  echo "<summary>". $cbody ."</summary>\n";
+  echo "<updated>". gmdate('Y-m-d\\TH:i:s\\Z', strtotime($row["modified"])) ."</updated>\n";
+  echo "<georss:point>". $row["lat"] ." ". $row["lon"] ."</georss:point>\n";
+  echo "</entry>\n";
  }
- echo "</channel>\n";
- echo "</rss>\n";
+ echo "</feed>\n";
 
 ?>
