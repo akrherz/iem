@@ -30,6 +30,11 @@ if (isset($_REQUEST['station'])){
 ?>
 <h3 class="heading">Network Location Tables</h3>
 
+<div style="float: right; width: 150px; border: 1px solid #000; margin: 10px; padding: 5px;">
+<a href="new-rss.php"><img src="../images/rss.gif" style="border: 0px;" alt="RSS" /></a> Feed of newly 
+added stations.
+</div>
+
 <div class="text">
 <p>With this form, you can generate a station table for any
 of the networks listed below.  If there is a particular format for a station
