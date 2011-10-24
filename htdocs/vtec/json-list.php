@@ -1,13 +1,18 @@
 <?php
 /* Giveme JSON data listing products */
 require_once 'Zend/Json.php';
-require_once '../..//config/settings.inc.php';
+require_once '../../config/settings.inc.php';
 require_once "$rootpath/include/database.inc.php";
 
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'GMT'");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
+if ($year < 1986 || $year > intval(gmdate("Y"))){
+	$ar = Array("error" => "Invalid year specified");
+	echo Zend_Json::encode($ar);
+	die();
+}
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
