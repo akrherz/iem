@@ -187,7 +187,7 @@ while( list($idx, $page) = each($_pages) )
     {
        if ($idx2 == "base") continue;
        echo sprintf("<li><a%s href=\"%s\">%s</a></li>", 
-         ($ar[1] == $idx2) ? " class=\"alink\"" : "",
+         ($ar[1] == $idx2 && $ar[0] == $idx) ? " class=\"alink\"" : "",
           $rooturl . $page[$idx2]["url"],  $page[$idx2]["title"] );
     }
     echo "</ul></li>\n";
