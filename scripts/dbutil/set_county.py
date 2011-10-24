@@ -20,7 +20,7 @@ for row in mcursor:
   id = row[0]
   cnty = re.sub("'", " ", row[1])
   print 'Assinging ID: %s to county: %s' % (id, cnty)
-  mcursor.execute("UPDATE stations SET county = '%s' WHERE id = '%s'" % (cnty, id) )
+  mcursor2.execute("UPDATE stations SET county = '%s' WHERE id = '%s'" % (cnty, id) )
 
 mcursor2.close()
 MESOSITE.commit()
