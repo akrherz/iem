@@ -3,7 +3,7 @@
 
 python set_elevation.py
 python set_county.py
-python assignClimate.py
+python set_climate.py
 python set_wfo.py
 python set_timezone.py
 
