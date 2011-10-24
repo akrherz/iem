@@ -1065,7 +1065,7 @@ LAYER
   CONNECTIONTYPE postgis
   CONNECTION "user=nobody dbname=iem host=iemdb"
   NAME "current_sites"
-  DATA "geom from (select oid as foid, geom, station, network from current 
+  DATA "geom from (select c.iemid as foid, geom, station, network from current c JOIN stations t ON (t.iemid = c.iemid)
        WHERE valid > (now() - '70 minutes'::interval) and network !~* 'COOP' ) as foo
        USING srid=4326 USING unique foid"
   STATUS OFF
@@ -1099,7 +1099,7 @@ LAYER
   CONNECTIONTYPE postgis
   CONNECTION "user=nobody dbname=iem host=iemdb"
   NAME "current_temps"
-  DATA "geom from (select oid as foid, geom, round(tmpf::numeric,0) as tmpf from current
+  DATA "geom from (select c.iemid as foid, geom, round(tmpf::numeric,0) as tmpf from current c JOIN stations t ON (t.iemid = c.iemid)
        WHERE valid > (now() - '70 minutes'::interval) and tmpf > -60 ) as foo
        USING srid=4326 USING unique foid"
   STATUS OFF
@@ -1133,7 +1133,7 @@ LAYER
   CONNECTIONTYPE postgis
   CONNECTION "user=nobody dbname=iem host=iemdb"
   NAME "current_barbs"
-  DATA "geom from (select oid as foid, geom,
+  DATA "geom from (select c.iemid as foid, geom,
     case WHEN sknt between 0 and 4.99 THEN chr(227)
        WHEN sknt between 5 and 9.99   THEN chr(228)
        WHEN sknt between 10 and 14.99 THEN chr(229)
@@ -1145,7 +1145,7 @@ LAYER
        WHEN sknt between 40  and 44.99 THEN chr(235)
        WHEN sknt between 45  and 49.99 THEN chr(236)
        ELSE '0' END as sknt,
-    (0 - drct) as drct, oid from current 
+    (0 - drct) as drct, oid from current c JOIN stations t ON (t.iemid = c.iemid)
        WHERE sknt >= 0 and valid > (now() - '70 minutes'::interval) ) as foo
        USING srid=4326 USING unique foid"
   STATUS OFF
@@ -1183,7 +1183,7 @@ LAYER
   CONNECTION "user=nobody dbname=iem host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, round(tsf0::numeric,0) as tsf0,
-    oid from current WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
+    oid from current c JOIN stations t ON (t.iemid = c.iemid) WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
     and tsf0 > -30) as foo using unique oid using srid=4326"
   STATUS OFF
   TYPE POINT
@@ -1250,7 +1250,7 @@ LAYER
   CONNECTION "user=nobody dbname=iem host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, round(tmpf::numeric,0) as tmpf, 
-    oid as foid from current WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
+    c.iemid as foid from current c JOIN stations t ON (t.iemid = c.iemid) WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
     ) as foo using unique foid using srid=4326"
   STATUS OFF
   TYPE POINT
@@ -1396,7 +1396,7 @@ LAYER
   CONNECTION "user=nobody dbname=iem host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, alti_15m,
-    oid from trend_15m WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
+    oid from trend_15m c JOIN stations t ON (t.iemid = c.iemid) WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
     ) as foo using unique oid using srid=4326"
   STATUS OFF
   TYPE POINT
@@ -1434,7 +1434,7 @@ LAYER
   CONNECTION "user=nobody dbname=iem host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, alti_1h,
-    oid from trend_1h WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
+    oid from trend_1h c JOIN stations t ON (t.iemid = c.iemid) WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
     ) as foo using unique oid using srid=4326"
   STATUS OFF
   TYPE POINT
