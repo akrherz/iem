@@ -10,23 +10,23 @@ $cities = $nt->table;
 
 
 $rs = pg_query($pgconn, "SELECT 
- station,
+ id,
  sum(pday) as precip,
  extract(month from day) as month
-FROM summary_${year}
-WHERE
- network = 'IA_ASOS'
+ FROM summary_${year} s JOIN stations t on (t.iemid = s.iemid) 
+ WHERE
+ t.network = 'IA_ASOS'
  and pday >= 0
-GROUP by station, month");
+GROUP by id, month");
 $data = Array();
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
-  if (!array_key_exists($row['station'], $data))
+  if (!array_key_exists($row['id'], $data))
   { 
-    $data[$row['station']] = Array(null,null,null,null,null,null,null,
+    $data[$row['id']] = Array(null,null,null,null,null,null,null,
       null,null,null,null,null);
   }
-  $data[$row["station"]][intval($row["month"])-1] = $row["precip"];
+  $data[$row["id"]][intval($row["month"])-1] = $row["precip"];
 }
 $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext
 -all.css"/>
