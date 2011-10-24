@@ -11,7 +11,7 @@
  echo "<description>
   Iowa Environmental Mesonet Daily Feature
 </description>\n";
- echo "<lastBuildDate>". date('D, d M Y h:i:s O') ."</lastBuildDate>\n";
+ echo "<lastBuildDate>". date('D, d M Y H:i:s O') ."</lastBuildDate>\n";
  $conn = iemdb("mesosite");
  $rs = pg_exec($conn, "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref from feature ORDER by valid DESC LIMIT 20");
  pg_close($conn);

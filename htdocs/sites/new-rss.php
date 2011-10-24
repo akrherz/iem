@@ -21,7 +21,7 @@
  echo "<description>
   RSS feed of new stations added to IEM metadata tables...
 </description>\n";
- echo "<lastBuildDate>". date('D, d M Y h:i:s O') ."</lastBuildDate>\n";
+ echo "<lastBuildDate>". date('D, d M Y H:i:s O') ."</lastBuildDate>\n";
  
  for ($i=0; $row = @pg_fetch_array($rs, $i); $i++) {
  	$cbody = "<pre>\n";
