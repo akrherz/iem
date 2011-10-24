@@ -11,7 +11,7 @@
  echo "<description>
   Iowa Environmental Mesonet News and Notes
 </description>\n";
- echo "<lastBuildDate>". date('D, d M Y h:i:s O')  ."</lastBuildDate>\n";
+ echo "<lastBuildDate>". date('D, d M Y H:i:s O')  ."</lastBuildDate>\n";
  $conn = iemdb("mesosite");
  $rs = pg_exec($conn, "SELECT * from news ORDER by entered DESC LIMIT 20");
  pg_close($conn);
