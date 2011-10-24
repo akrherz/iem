@@ -18,6 +18,7 @@
  echo "<subtitle>Iowa Environmental Mesonet - New Stations GeoRSS</subtitle>\n";
  echo "<link href=\"http://mesonet.agron.iastate.edu/sites/locate.php\" />\n";
  echo "<updated>". gmdate('Y-m-d\\TH:i:s\\Z') ."</updated>\n";
+ echo "<id>iem-new-sites-rss</id>\n";
  echo "<author><name>Daryl Herzmann</name><email>akrherz@iastate.edu</email></author>\n";
  
  for ($i=0; $row = @pg_fetch_array($rs, $i); $i++) {
@@ -33,7 +34,8 @@
   echo "<title>". $row["name"] ." [". $row["id"] ."]</title>\n";
   echo "<author>akrherz@iastate.edu (Daryl Herzmann)</author>\n";
   echo "<link href=\"http://mesonet.agron.iastate.edu/sites/site.php?station=". $row["id"] ."&amp;network=". $row["network"] ."\" />\n";
-  echo "<summary>". $cbody ."</summary>\n";
+  echo "<content>". $cbody ."</content>\n";
+  echo "<id>". $row["iemid"] ."</id>\n";
   echo "<updated>". gmdate('Y-m-d\\TH:i:s\\Z', strtotime($row["modified"])) ."</updated>\n";
   echo "<georss:point>". $row["lat"] ." ". $row["lon"] ."</georss:point>\n";
   echo "</entry>\n";
