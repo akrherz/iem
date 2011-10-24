@@ -22,19 +22,22 @@
  echo "<author><name>Daryl Herzmann</name><email>akrherz@iastate.edu</email></author>\n";
  
  for ($i=0; $row = @pg_fetch_array($rs, $i); $i++) {
- 	$cbody = "<p>\n";
- 	$cbody .= "<br />ID     : ". $row["id"] ."\n";
- 	$cbody .= "<br />Name   : ". $row["name"] ."\n";
-	$cbody .= "<br />Lat    : ". $row["lat"] ."\n";
-    $cbody .= "<br />Lon    : ". $row["lon"] ."\n";
-    $cbody .= "<br />Ele [m]: ". $row["elevation"] ."\n";
-    $cbody .= "<br />Network: ". $row["netname"] ."(". $row["network"] .")\n";
- 	$cbody .= "</p>\n";
+ 	$cbody = "<pre>\n";
+ 	$cbody .= "ID     : ". $row["id"] ."\n";
+ 	$cbody .= "Name   : ". $row["name"] ."\n";
+	$cbody .= "Lat    : ". $row["lat"] ."\n";
+    $cbody .= "Lon    : ". $row["lon"] ."\n";
+    $cbody .= "Ele [m]: ". $row["elevation"] ."\n";
+    $cbody .= "Network: ". $row["netname"] ."(". $row["network"] .")\n";
+ 	$cbody .= "</pre>\n";
+ 	$cbody = ereg_replace("&","&amp;", $cbody);
+    $cbody = ereg_replace(">","&gt;", $cbody);
+    $cbody = ereg_replace("<","&lt;", $cbody);
   echo "<entry>\n";
   echo "<title>". $row["name"] ." [". $row["id"] ."]</title>\n";
   echo "<author><name>Daryl Herzmann</name><email>akrherz@iastate.edu</email></author>\n";
   echo "<link href=\"http://mesonet.agron.iastate.edu/sites/site.php?station=". $row["id"] ."&amp;network=". $row["network"] ."\" />\n";
-  echo "<content>". $cbody ."</content>\n";
+  echo "<content type=\"html\">". $cbody ."</content>\n";
   echo "<id>http://mesonet.agron.iastate.edu/sites/site.php?station=". $row["id"] ."&amp;network=". $row["network"] ."</id>\n";
   echo "<updated>". gmdate('Y-m-d\\TH:i:s\\Z', strtotime($row["modified"])) ."</updated>\n";
   echo "<georss:point>". $row["lat"] ." ". $row["lon"] ."</georss:point>\n";
