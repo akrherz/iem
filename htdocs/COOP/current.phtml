@@ -154,7 +154,7 @@ Option 2: <strong>View by WFO:</strong> <?php echo wfoSelect($wfo); ?>
 </form>
 
 <?php
-echo "<p>Sorted by: ". $cols[$sortcol] ;
+echo "<p>Sorted by: <strong>". $cols[$sortcol] ."</strong>. Times are presented in the local time of the site.";
  
 ?>
 <form name="st" action="/my/current.phtml" method="GET">
@@ -202,7 +202,7 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
  	
     $bgcolor = (date("Ymd") != date("Ymd", $dict["ts"])) ? '#F00': '#FFF';
     $fmt = (date("Ymd") != date("Ymd", $dict["ts"])) ? '%d %b %I:%M %p': '%I:%M %p';
-    $s .= "<td style=\"background: $bgcolor;\">". strftime($fmt, $dict["ts"]) ."</td>";
+    $s .= "<td style=\"background: $bgcolor;\">". strftime($fmt, $dict["lts"]) ."</td>";
     
     $s .= sprintf("<td>%s</td><td><span style=\"color: #F00;\">%s</span></td>
     <td><span style=\"color: #00F;\">%s</span></td>", 
