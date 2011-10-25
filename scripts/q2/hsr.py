@@ -1,4 +1,7 @@
-# Generate a GIS raster from the 8 NMQ data tiles! :)
+"""
+ Generate a raster from 8 tiles of HSR
+ $Id: $:
+"""
 
 import numpy
 import mx.DateTime
@@ -9,6 +12,7 @@ except:
 from PIL import Image
 import os
 import sys
+import tempfile
 
 # NW Corner of tiles
 tiles = {
@@ -91,33 +95,37 @@ def doit(gts):
     # Create Image
     png = Image.fromarray( imgdata )
     png.putpalette( make_colorramp() )
-    png.save('q2.png')
+    sfp, tmpname = tempfile.mkstemp()
+    png.save('%s.png' % (tmpname,))
     # Now we need to generate the world file
-    o = open('/tmp/q2.wld', 'w')
+    o = open('%s.wld' % (tmpname,), 'w')
     o.write("""   0.0100000000000%s
    0.00000
    0.00000
-  -0.010000000000000000%.0f
+  -0.010000000000000000
 %s
-  %s""" % (gts.strftime("%Y%m%d%H%M"), west, north, val[1000,1000]))
+  %s""" % (gts.strftime("%Y%m%d%H%M%S"), west, north))
     o.close()
     # Inject WLD file
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/hsr_%s.wld wld' /tmp/q2.wld" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/hsr_%s.wld wld' %s.wld" % (
+                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpname )
     os.system(pqstr)
     # Now we inject into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/hsr.png GIS/q2/hsr_%s.png png' q2.png" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/hsr.png GIS/q2/hsr_%s.png png' %s.png" % (
+                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpname )
     os.system(pqstr)
     # Create 900913 image
-    cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 q2.png q2.tif"
+    cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpname, tmpname)
     os.system( cmd )
     # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/hsr.tif GIS/q2/hsr_%s.tif tif' q2.tif" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/hsr.tif GIS/q2/hsr_%s.tif tif' %s.tif" % (
+                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpname )
     os.system(pqstr)
     
-    os.unlink('q2.tif')
+    for suffix in ['tif',  'png', 'wld']:
+        os.unlink('%s.%s' % (tmpname, suffix))
+    os.close(sfp)
+    os.unlink(tmpname)
 
 if __name__ == "__main__":
     if len(sys.argv) == 6:
