@@ -1,77 +1,71 @@
 <?php 
 include("../../config/settings.inc.php");
-$network = isset($_GET['network']) ? $_GET['network'] : 'IA_COOP'; 
-$wfo = isset($_REQUEST["wfo"]) ? $_REQUEST['wfo'] : null;
-  $winter = 1;
-  $shef = isset($_GET['shef']) ? $_GET['shef'] : 0;
-  $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
-
-$TITLE = "IEM | COOP | Last Observation";
-$HEADEXTRA = '<script language="JavaScript" type="text/javascript">
-	<!--//BEGIN Script
-	function new_window(url) {
- 	link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-	}
-	//END Script-->
-	</script>
-<script type="text/javascript" src="../js/tableruler.js"></script>
-<script type="text/javascript">
-    window.onload=function(){tableruler();}
-</script>';
- $THISPAGE = "current-sort";
-include("$rootpath/include/header.php"); ?>
-<div class="text">
-<a href="/COOP/">COOP Network</a> &nbsp; <b> > </b> &nbsp; Last Observation
-<?php
+define("IEM_APPID", 41);
  include("$rootpath/include/network.php");
  include("$rootpath/include/wfoLocs.php");
  include("$rootpath/include/forms.php");
  include("$rootpath/include/iemaccess.php");
  include("$rootpath/include/iemaccessob.php");
+ 
+  $network = isset($_GET['network']) ? $_GET['network'] : 'IA_COOP'; 
+  $wfo = isset($_REQUEST["wfo"]) ? $_REQUEST['wfo'] : null;
+  $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
 
- $iem = new IEMAccess();
+   $iem = new IEMAccess();
  if ($wfo == null){
    $net = $iem->getNetwork($network);
-   $baseurl = "current.phtml?network=$network&shef=$shef&sortcol=";
+   $baseurl = "current.phtml?network=$network&sortcol=";
  } else {
  	$net = $iem->getWFO_COOP($wfo);
- 	$baseurl = "current.phtml?wfo=$wfo&shef=$shef&sortcol=";
+ 	$baseurl = "current.phtml?wfo=$wfo&sortcol=";
  }
- 
+  
+  $TITLE = "IEM | NWS COOP | Current Sortables";
+ $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+	<!--//BEGIN Script
+	function new_window(url) {
+ 	link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
+	}
+	//END Script-->
+	</script>';
+ $THISPAGE = "current-sort";
+include("$rootpath/include/header.php"); ?>
+<div class="text">
+<a href="/COOP/">NWS COOP Network</a> &nbsp; <b> > </b> &nbsp; Current Sortables Application
+<?php
+
  $db = Array();
  while (list($site, $iemob) = each($net) ){
   $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"",
                       'min_tmpf'=>"", 'max_tmpf'=>"", 'tmpf'=>"", 'snoww'=>"");
   $db[$site]['ts'] = $iemob->ts;
+  $db[$site]['lts'] = $iemob->lts;
   $db[$site]['sid'] = $site;
   $db[$site]['sname'] = $iemob->db["sname"];
+  $db[$site]['state'] = $iemob->db["state"];
   $db[$site]['network'] = $iemob->db["network"];
-  $db[$site]['raw'] = $iemob->db["raw"];
   $db[$site]['county'] = $iemob->db["county"];
-  if ( date("Ymd") != date("Ymd", $iemob->ts) ){
-    continue;
-  }
-  if ($iemob->db["tmpf"] != -99) {
+  if ($iemob->db["tmpf"] > -100) {
     $db[$site]['tmpf'] = $iemob->db["tmpf"];
   }
-  if ($iemob->db["max_tmpf"] != -99) {
+  if ($iemob->db["max_tmpf"] > -100) {
     $db[$site]['max_tmpf'] = $iemob->db["max_tmpf"];
   }
-  if ($iemob->db["min_tmpf"] != 99) {
+  
+  if ($iemob->db["min_tmpf"] < 99) {
     $db[$site]['min_tmpf'] = $iemob->db["min_tmpf"];
   } 
-  if ($iemob->db["phour"] != -99)
-    $db[$site]['phour'] = $iemob->db["phour"];
+  
   $db[$site]['pday'] = $iemob->db["pday"];
   $db[$site]['snoww'] = $iemob->db["snoww"];
-  $db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : " ";
-  $db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : " ";
+  $db[$site]['snow'] = ($iemob->db["snow"] >= 0) ? $iemob->db["snow"] : "";
+  $db[$site]['snowd'] = ($iemob->db["snowd"] >= 0) ? $iemob->db["snowd"] : "";
   $db[$site]["ratio"] = -1;
   if ($db[$site]["snow"] > 0.001 && $db[$site]["pday"] > 0.001)
    {
      $db[$site]["ratio"] = intval( $db[$site]["snow"] / $db[$site]["pday"] );
    }
- }
+  }
 
 function aSortBySecondIndex($multiArray, $secondIndex) {
         while (list($firstIndex, ) = each($multiArray))
@@ -97,7 +91,7 @@ $cols = Array("ts" => "Valid", "county" => "County",
 
 <form method="GET" action="current.phtml" name="stctrl">
 <input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
-<b>Show State:</b><select name="network">
+Option 1: <strong>View by State:</strong> <select name="network">
  <option value="AL_COOP" <?php if ($network == "AL_COOP") echo "SELECTED"; ?>>Alabama
  <option value="AK_COOP" <?php if ($network == "AK_COOP") echo "SELECTED"; ?>>Alaska
  <option value="AR_COOP" <?php if ($network == "AR_COOP") echo "SELECTED"; ?>>Arkansas
@@ -155,16 +149,12 @@ $cols = Array("ts" => "Valid", "county" => "County",
 
 <form method="GET" action="current.phtml" name="wfoctrl">
 <input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
-<b>Show WFO:</b><?php echo wfoSelect($wfo); ?><input type="submit" value="Go!">
+Option 2: <strong>View by WFO:</strong> <?php echo wfoSelect($wfo); ?>
+<input type="submit" value="Go!">
 </form>
 
 <?php
 echo "<p>Sorted by: ". $cols[$sortcol] ;
-if ($shef){
-  echo " . Sorry, SHEF observations are not available at this time.";
-  $shef = 0;
-}
-
  
 ?>
 <form name="st" action="/my/current.phtml" method="GET">
@@ -185,73 +175,64 @@ if ($shef){
   <th><a href="<?php echo $baseurl; ?>max_tmpf">24h High</a></th>
   <th><a href="<?php echo $baseurl; ?>min_tmpf">24h Low</a></th>
   <th><a href="<?php echo $baseurl; ?>pday">24hour Rain</a></th>
-<?php if($winter) { ?>
   <th><a href="<?php echo $baseurl; ?>snow">Snowfall</a></th>
   <th><a href="<?php echo $baseurl; ?>ratio">Ratio</a></th>
   <th><a href="<?php echo $baseurl; ?>snowd">Snow Depth</a></th>
   <th><a href="<?php echo $baseurl; ?>snoww">SWE</a></th>
-<?php } ?>
 </tr></thead>
 <tbody>
 <?php
+
+ function precip_formatter($val){
+ 	if ($val == '') return '';
+ 	if ($val == 0.001) return 'T';
+ 	if ($val < 0) return 'M';
+ 	return $val;
+ }
+
+ function make_row($dict, $oddrow){
+ 	$s = "<tr";
+ 	if ($oddrow) $s .= ' bgcolor="#EEEEEE"';
+ 	$s .= ">";
+
+ 	$s .= "<th><input type=\"checkbox\" name=\"st[]\" value=\"". $dict["sid"] ."\" /></th>";
+ 	$s .= "<td><a href=\"cat.phtml?station=". $dict["sid"] ."&network=". $dict["network"] . "\">". $dict['sid'] ."</a></td>";
+    $s .= "<td>". $dict["sname"] .", ". $dict["state"] ."</td>";
+    $s .= "<td>". $dict["county"] ."</td>";
+ 	
+    $bgcolor = (date("Ymd") != date("Ymd", $dict["ts"])) ? '#F00': '#FFF';
+    $fmt = (date("Ymd") != date("Ymd", $dict["ts"])) ? '%d %b %I:%M %p': '%I:%M %p';
+    $s .= "<td style=\"background: $bgcolor;\">". strftime($fmt, $dict["ts"]) ."</td>";
+    
+    $s .= sprintf("<td>%s</td><td><span style=\"color: #F00;\">%s</span></td>
+    <td><span style=\"color: #00F;\">%s</span></td>", 
+     $dict["tmpf"] != "" ? $dict["tmpf"] : "M",
+     $dict["max_tmpf"] != "" ? $dict["max_tmpf"] : "M",
+     $dict["min_tmpf"] != "" ? $dict["min_tmpf"] : "M"
+    );
+    
+    $s .= sprintf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>", precip_formatter($dict["pday"]),
+    precip_formatter($dict["snow"]), precip_formatter($dict["ratio"]), precip_formatter($dict["snowd"]),
+    precip_formatter($dict["snoww"]));
+    
+ 	$s .= "</tr>\n";
+ 	return $s;
+ }
+
  $oddrow = true;
- $now = time();
+ $firstsection = "";
+ $lastsection = "";
  while (list($site, $value) = each($db) ){
-   $network = $value["network"];
    $oddrow = ! $oddrow;
-   $tdiff = $now - $value["ts"];
-   if ( intval( date("Y", $value["ts"]) ) < 2003 ) continue;
-
-   echo "<tr ";
-   if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
-   echo "><th><input type=\"checkbox\" name=\"st[]\"
-   value=\"".$site."\"></th><td><a href=\"cat.phtml?station=$site&network=$network\">$site</a> </td>
-    <td>". $value["sname"] ."</td>
-    <td>". $value["county"] ."</td>";
-   echo "<td ";
-   if ($tdiff > (24*3600) || date("Ymd") != date("Ymd", $value["ts"]) ){
-     echo 'bgcolor="red">'. strftime("%d %b %I:%M %p", $value["ts"]) .'</td>';
+   if (date("Ymd", $value["ts"]) == date("Ymd")){
+   		$firstsection .= make_row($value, $oddrow);
    } else {
-     echo ">". strftime("%I:%M %p", $value["ts"]) ."</td>";
-   }
-
-   if ( date("Ymd") != date("Ymd", $value["ts"]) ){
-     echo "<td colspan=\"7\">No report for today</td>";
-     continue;
-   }
-
-   if (isset($value["tmpf"])){
-   echo "<td>". $value["tmpf"] ."</td>
-   <td><font color=\"#ff0000\">". $value["max_tmpf"] ."</font></td>
-   <td><font color=\"#0000ff\">". $value["min_tmpf"] ."</font></td>";
-   } else{
-    echo "<td colspan=3></td>";
-   }
-   if ($value["pday"] == 0.001) $value["pday"] = "T";
-   if ($value["pday"] < 0) $value["pday"] = "M";
-   if ($value["snow"] == 0.001) $value["snow"] = "T";
-   if ($value["snowd"] == 0.001) $value["snowd"] = "T";
-   if ($value["snow"] < 0) $value["snow"] = "M";
-   if ($value["snoww"] < 0) $value["snoww"] = "M";
-
-   echo "<td>". $value["pday"] ."</td>";
-   if ($winter) 
-   {
-    echo "<td>". $value["snow"] ."</td>";
-    if ($value["ratio"] > 0) echo "<td>". $value["ratio"] ."</td>";
-    else echo "<td></td>";
-    echo "<td>". $value["snowd"] ."</td>";
-    echo "<td>". $value["snoww"] ."</td>";
-   }
-   echo "</tr>";
-   if ($shef) 
-   {
-	echo "<tr align=\"center\" ";
-    if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
-    echo "><td colspan=\"10\"><font color=\"brown\">". $value["raw"]
-    ."</font></td></tr>";
+   		$value["tmpf"] = "";
+   		$lastsection .= make_row($value, $oddrow);
    }
  }
+ echo $firstsection;
+ echo $lastsection;
 ?>
 </tbody><tfoot>
 <tr>
