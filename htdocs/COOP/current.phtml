@@ -1,6 +1,7 @@
 <?php 
 include("../../config/settings.inc.php");
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_COOP'; 
+$wfo = isset($_REQUEST["wfo"]) ? $_REQUEST['wfo'] : null;
   $winter = 1;
   $shef = isset($_GET['shef']) ? $_GET['shef'] : 0;
   $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
@@ -23,14 +24,20 @@ include("$rootpath/include/header.php"); ?>
 <a href="/COOP/">COOP Network</a> &nbsp; <b> > </b> &nbsp; Last Observation
 <?php
  include("$rootpath/include/network.php");
- $nt = new NetworkTable($network);
- $cities = $nt->table;
+ include("$rootpath/include/wfoLocs.php");
+ include("$rootpath/include/forms.php");
  include("$rootpath/include/iemaccess.php");
  include("$rootpath/include/iemaccessob.php");
 
  $iem = new IEMAccess();
- $net = $iem->getNetwork($network);
-
+ if ($wfo == null){
+   $net = $iem->getNetwork($network);
+   $baseurl = "current.phtml?network=$network&shef=$shef&sortcol=";
+ } else {
+ 	$net = $iem->getWFO_COOP($wfo);
+ 	$baseurl = "current.phtml?wfo=$wfo&shef=$shef&sortcol=";
+ }
+ 
  $db = Array();
  while (list($site, $iemob) = each($net) ){
   $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"",
@@ -40,7 +47,7 @@ include("$rootpath/include/header.php"); ?>
   $db[$site]['sname'] = $iemob->db["sname"];
   $db[$site]['network'] = $iemob->db["network"];
   $db[$site]['raw'] = $iemob->db["raw"];
-  $db[$site]['county'] = $cities[$site]["county"];
+  $db[$site]['county'] = $iemob->db["county"];
   if ( date("Ymd") != date("Ymd", $iemob->ts) ){
     continue;
   }
@@ -143,16 +150,13 @@ $cols = Array("ts" => "Valid", "county" => "County",
  <option value="WI_COOP" <?php if ($network == "WI_COOP") echo "SELECTED"; ?>>Wisconsin
  <option value="WY_COOP" <?php if ($network == "WY_COOP") echo "SELECTED"; ?>>Wyoming
 </select>
-<!--
-<b>Show SHEF obs:</b>
-<select name="shef">
- <option value="0" <?php if (! $shef) echo "SELECTED"; ?>>No
- <option value="1" <?php if ($shef) echo "SELECTED"; ?>>Yes
-</select>
--->
 <input type="submit" value="Go!">
 </form>
 
+<form method="GET" action="current.phtml" name="wfoctrl">
+<input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
+<b>Show WFO:</b><?php echo wfoSelect($wfo); ?><input type="submit" value="Go!">
+</form>
 
 <?php
 echo "<p>Sorted by: ". $cols[$sortcol] ;
@@ -161,7 +165,7 @@ if ($shef){
   $shef = 0;
 }
 
- $baseurl = "current.phtml?network=$network&shef=$shef&sortcol=";
+ 
 ?>
 <form name="st" action="/my/current.phtml" method="GET">
 <table cellspacing="0" cellpadding="2" border="1"
