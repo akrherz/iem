@@ -13,7 +13,7 @@ IEM provided archives/applications of NWS data.</div>
 <tr><td valign="top" width="50%">
 <h4>IEM Apps</h4>
 <ul>
- <li><a href="../ASOS/current.phtml">Sortable Currents</a></li>
+ <li><a href="obs.php">Sortable Currents by WFO</a></li>
  <li><a href="../DCP/plot.phtml">Archived DCP Data Plotter</a>
  <br />Simple app to plot out current/historical DCP (river gauges) data for a site
  of your choice.</li>

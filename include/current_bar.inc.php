@@ -19,6 +19,7 @@
     "RWIS Surface" => Array("url" => "$rooturl/RWIS/currentSF.phtml"),
     "RWIS Traffic" => Array("url" => "$rooturl/RWIS/traffic.phtml"),
     "RWIS Soil" => Array("url" => "$rooturl/RWIS/soil.phtml"),
+    "By NWS WFO" => Array("url" => "$rooturl/nws/obs.php"),
   );
   $i = 0;
   while ( list($key, $value) = each($d) ){
@@ -39,5 +40,4 @@
        echo "><a href=\"". $value["url"] ."\">$key</a></th>";
   }
 ?>
- <td></td>
 </tr></table>
