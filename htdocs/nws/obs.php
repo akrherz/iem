@@ -57,7 +57,8 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 </tr></table>
 
 <?php
-echo "<p>Sorted by column <b>". $vals[$sortcol] ."</b>.";
+echo "<p>Sorted by column <b>". $vals[$sortcol] ."</b>. Timestamps displayed are the local time for
+the sensor.";
 ?>
 
 <form method="GET" action="<?php echo $rooturl; ?>/my/current.phtml">
@@ -155,13 +156,13 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["lmax_gust_ts"],0,16) );
     } else {
       $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
       $mydata[$key]["peak_ts"] = 0;
       if ($mydata[$key]["max_sknt_ts"] > 0)
       {
-        $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+        $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["lmax_sknt_ts"],0,16) );
       }
     }
 
@@ -181,7 +182,8 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
     echo "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
 
     $tdiff = $now - $parts["ts"];
-    echo "<td>". $parts["sname"] . " (". $key .")</td>";
+    $moreinfo = sprintf("%s/sites/site.php?station=%s&network=%s", $rooturl, $key, $parts["network"]);
+    echo "<td>". $parts["sname"] . " (<a href=\"$moreinfo\">". $key ."</a>,". $parts["network"] .")</td>";
     echo "<td ";
     if ($tdiff > 10000){
       $fmt = "%d %b %I:%M %p";
@@ -196,7 +198,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
       $fmt = "%I:%M %p";
     }
 
-    echo ">". strftime($fmt, $parts["ts"]) ."</td>
+    echo ">". strftime($fmt, $asos[$key]->lts) ."</td>
      <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font>)</td>
      <td>". round($parts["dwpf"],0) ."</td>
      <td>". round($parts["feel"],0) ."</td>
