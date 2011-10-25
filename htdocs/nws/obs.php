@@ -63,7 +63,7 @@ echo "<p>Sorted by column <b>". $vals[$sortcol] ."</b>.";
 <form method="GET" action="<?php echo $rooturl; ?>/my/current.phtml">
 
 
-<?php $uri = "obs.php?metar=$metar&sorder=$sorder&sortcol="; ?>
+<?php $uri = "obs.php?wfo=$wfo&metar=$metar&sorder=$sorder&sortcol="; ?>
 <table style="width: 100%; font-size: 10pt;" cellspacing=0 cellpadding=1 border=1>
 <thead>
 <tr>
