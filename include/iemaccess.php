@@ -37,14 +37,14 @@ class IEMAccess {
   function getNetwork($network) {
     $ret = Array();
     $sql = sprintf("select s.id, s.id as station, *, c.pday as ob_pday, x(s.geom) as x, 
-    y(s.geom) as y, valid at time zone '%s' as lvalid,
-    max_gust_ts at time zone '%s' as lmax_gust_ts,
-    max_sknt_ts at time zone '%s' as lmax_sknt_ts,
+    y(s.geom) as y, valid at time zone s.tzname as lvalid,
+    max_gust_ts at time zone s.tzname as lmax_gust_ts,
+    max_sknt_ts at time zone s.tzname as lmax_sknt_ts,
     s.name as sname from 
     current c2, summary_%s c, stations s  
     WHERE s.network = '$network' and c.iemid = s.iemid and c2.iemid = c.iemid and
     c.day = date(now() at time zone '%s')",
-    $this->tzname, $this->tzname, $this->tzname, date("Y"), 
+     date("Y"), 
     $this->tzname);
     $rs = pg_exec($this->dbconn, $sql);
     for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
