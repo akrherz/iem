@@ -80,10 +80,11 @@ class IEMAccess {
     s.name as sname from 
     current c2, summary_%s c, stations s WHERE 
     s.wfo = '%s' 
-    and c.day = 'TODAY' 
-    and c2.valid > 'TODAY' and c2.iemid = c.iemid and c.iemid = s.iemid", 
+    and c.day = date(now() at time zone s.tzname) 
+    and c2.valid > date(now() at time zone s.tzname)
+    and c2.iemid = c.iemid and c.iemid = s.iemid", 
     date("Y"), $wfo));
-    for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+    for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
       $ret[$row["id"]] = new IEMAccessOb($row);
     }
     return $ret;
