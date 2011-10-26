@@ -65,9 +65,9 @@ if ($mode == "rt"){
       to_char(valid, 'YYYY-MM-DD HH24') as newd,
       extract(minute from valid) as minute
     FROM
-      current_log
+      current_log c JOIN stations s on (s.iemid = c.iemid)
     WHERE
-      station = '$station' 
+      s.id = '$station' 
     ORDER by valid ASC) as foo)  as bar
  GROUP by valid, gvalid ORDER by gvalid ASC";
  $minInterval = 20;
