@@ -507,7 +507,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, significance, geom, oid from warnings WHERE  expire > CURRENT_TIMESTAMP and gtype = 'C') as foo using unique oid using SRID=4326"
+  DATA "geom from (select phenomena, significance, geom, random() as  oid from warnings WHERE  expire > CURRENT_TIMESTAMP and gtype = 'C') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE LINE
   PROJECTION
@@ -650,7 +650,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME sbw
   CONNECTION "dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
+  DATA "geom from (select phenomena, geom, random() as oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
   METADATA
@@ -734,7 +734,7 @@ LAYER
   NAME warnings0_p
   CONNECTION "dbname=postgis host=iemdb"
   #DATA "geom from warnings"
-  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
+  DATA "geom from (select phenomena, geom, random() as oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
   METADATA
@@ -1396,7 +1396,7 @@ LAYER
   CONNECTION "user=nobody dbname=iem host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, alti_15m,
-    oid from trend_15m c JOIN stations t ON (t.iemid = c.iemid) WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
+    c.iemid as oid from trend_15m c JOIN stations t ON (t.iemid = c.iemid) WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
     ) as foo using unique oid using srid=4326"
   STATUS OFF
   TYPE POINT
@@ -1434,7 +1434,7 @@ LAYER
   CONNECTION "user=nobody dbname=iem host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, alti_1h,
-    oid from trend_1h c JOIN stations t ON (t.iemid = c.iemid) WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
+    c.iemid as oid from trend_1h c JOIN stations t ON (t.iemid = c.iemid) WHERE (updated > CURRENT_TIMESTAMP - '1 hours'::interval)
     ) as foo using unique oid using srid=4326"
   STATUS OFF
   TYPE POINT
