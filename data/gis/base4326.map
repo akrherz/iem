@@ -1145,7 +1145,7 @@ LAYER
        WHEN sknt between 40  and 44.99 THEN chr(235)
        WHEN sknt between 45  and 49.99 THEN chr(236)
        ELSE '0' END as sknt,
-    (0 - drct) as drct, oid from current c JOIN stations t ON (t.iemid = c.iemid)
+    (0 - drct) as drct from current c JOIN stations t ON (t.iemid = c.iemid)
        WHERE sknt >= 0 and valid > (now() - '70 minutes'::interval) ) as foo
        USING srid=4326 USING unique foid"
   STATUS OFF
