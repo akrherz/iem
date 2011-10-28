@@ -5,7 +5,7 @@ cd dl
 cd ../outgoing/snetnws
 python snet_fe.py &
 
-cd ../..GIS
+cd ../../GIS
 /mesonet/python/bin/python 24h_lsr.py 
 
 cd ../current
