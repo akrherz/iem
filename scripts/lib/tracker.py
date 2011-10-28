@@ -100,7 +100,7 @@ class Engine(object):
 ================================================================
 """
 
-        mailStr = mformat % (ticketID, sid, myOb.get("sname", "Unknown"), \
+        mailStr = mformat % (ticketID, sid, myOb.get("sname"), \
                           str(myOb.get('ts')), openTickets, closedTickets )
 
         # Update IEMAccess
@@ -115,7 +115,7 @@ class Engine(object):
         if (dontmail != 0):
             return
 
-        subject = "[IEM] %s Offline" % ( myOb.get("sname", "Unknown"), )
+        subject = "[IEM] %s Offline" % ( myOb.get("sname"), )
         # Okay, we need to figure out who should be alerted about this outage
         rs = mydb.query("""SELECT * from iem_site_contacts WHERE 
           s_mid = '%s' and email IS NOT NULL""" % (sid,)).dictresult()
@@ -199,7 +199,7 @@ class Engine(object):
   * Questions about this alert?  Email:  akrherz@iastate.edu
   * Thanks!!!
 """
-        mailStr = mformat % (sid, myOb.get("sname", "Unknown"), ticketID, \
+        mailStr = mformat % (sid, myOb.get("sname"), ticketID, \
                           str(myOb.get('ts')), offlineDur )
 
         sql = """DELETE from offline WHERE station = '%s' 
@@ -212,7 +212,7 @@ class Engine(object):
         if dontmail != 0:
             return
 
-        subject = "[IEM] %s Online" % ( myOb.get("sname", "Unknown"), )
+        subject = "[IEM] %s Online" % ( myOb.get("sname"), )
         rs = mydb.query("""SELECT * from iem_site_contacts WHERE 
              s_mid = '%s' and email IS NOT NULL""" % (sid,)).dictresult()
         for i in range(len(rs)):
