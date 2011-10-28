@@ -147,17 +147,18 @@ class Engine(object):
         Perhaps this station is back online!
         """
         # Did we consider this station offline
-        sql = """SELECT * from offline WHERE station = '%s' and 
+        sql = """SELECT trackerid, valid from offline WHERE station = '%s' and 
               network = '%s' """ % (sid, network)
         icursor = IEM.cursor()
         icursor.execute( sql )
+        row = icursor.fetchone()
         rowcount = icursor.rowcount
         icursor.close()
         if rowcount == 0:
             return
 
-        ticketID = rs[0]['trackerid']
-        offlineAt = rs[0]['valid']
+        ticketID = row[0]
+        offlineAt = str(row[1])
         offlineTS = mx.DateTime.strptime(offlineAt[:19], "%Y-%m-%d %H:%M:%S")
         offlineDur = (myOb.get('ts') - offlineTS).strftime('%d days %H hours %M minutes')
         try:
