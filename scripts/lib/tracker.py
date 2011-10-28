@@ -2,16 +2,15 @@ import pg, sys, mx.DateTime
 import smtplib
 from email.MIMEText import MIMEText
 
-from pyIEM import iemAccess
-iem = iemAccess.iemAccess()
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
 
 class Engine(object):
 
-    def __init__(self, st):
+    def __init__(self):
         """
         IEM Tracker instance, we can bunch emails this way
         """
-        self.st = st
         self.emails = {}
         pass
 
@@ -23,8 +22,11 @@ class Engine(object):
         # Check to see if we already know this site is offline!
         sql = """SELECT * from offline WHERE station = '%s' 
               and network = '%s' """ % (sid, network)
-        rs = iem.query(sql).dictresult()
-        if len(rs) > 0:
+        icursor = IEM.cursor()
+        icursor.execute( sql )
+        rowcount = icursor.rowcount
+        icursor.close()
+        if rowcount > 0:
             return
 
         openTickets = ""
@@ -98,19 +100,22 @@ class Engine(object):
 ================================================================
 """
 
-        mailStr = mformat % (ticketID, sid, self.st.sts[sid]["name"], \
+        mailStr = mformat % (ticketID, sid, myOb.get("sname", "Unknown"), \
                           str(myOb.ts), openTickets, closedTickets )
 
         # Update IEMAccess
         sql = """INSERT into offline(station, network, valid, trackerid) 
                 values ('%s','%s','%s', %s)""" % (sid, network, 
                 myOb.ts, ticketID)
-        iem.query(sql)
+        icursor = IEM.cursor()
+        icursor.execute(sql)
+        icursor.close()
+        IEM.commit()
 
         if (dontmail != 0):
             return
 
-        subject = "[IEM] %s Offline" % ( self.st.sts[sid]["name"], )
+        subject = "[IEM] %s Offline" % ( myOb.get("sname", "Unknown"), )
         # Okay, we need to figure out who should be alerted about this outage
         rs = mydb.query("""SELECT * from iem_site_contacts WHERE 
           s_mid = '%s' and email IS NOT NULL""" % (sid,)).dictresult()
@@ -144,8 +149,11 @@ class Engine(object):
         # Did we consider this station offline
         sql = """SELECT * from offline WHERE station = '%s' and 
               network = '%s' """ % (sid, network)
-        rs = iem.query(sql).dictresult()
-        if len(rs) == 0:
+        icursor = IEM.cursor()
+        icursor.execute( sql )
+        rowcount = icursor.rowcount
+        icursor.close()
+        if rowcount == 0:
             return
 
         ticketID = rs[0]['trackerid']
@@ -190,16 +198,20 @@ class Engine(object):
   * Questions about this alert?  Email:  akrherz@iastate.edu
   * Thanks!!!
 """
-        mailStr = mformat % (sid, self.st.sts[sid]["name"], ticketID, \
+        mailStr = mformat % (sid, myOb.get("sname", "Unknown"), ticketID, \
                           str(myOb.ts), offlineDur )
 
         sql = """DELETE from offline WHERE station = '%s' 
               and network = '%s' """ % (sid, network)
-        iem.query(sql)
+        icursor = IEM.cursor()
+        icursor.execute( sql )
+        icursor.close()
+        IEM.commit()
+
         if dontmail != 0:
             return
 
-        subject = "[IEM] %s Online" % ( self.st.sts[sid]["name"], )
+        subject = "[IEM] %s Online" % ( myOb.get("sname", "Unknown"), )
         rs = mydb.query("""SELECT * from iem_site_contacts WHERE 
              s_mid = '%s' and email IS NOT NULL""" % (sid,)).dictresult()
         for i in range(len(rs)):

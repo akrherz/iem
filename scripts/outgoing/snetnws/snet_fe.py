@@ -1,11 +1,24 @@
-# Script to take current SHEF obs and generate a METAR summary
-# Daryl Herzmann 19 Mar 2002
-# 24 Mar 2005	Basically rewrite
-
-import os, re, mx.DateTime, shapelib, dbflib
-from pyIEM import stationTable, tracker, sob, iemAccess
-from pyIEM.mesonet import *
+"""
+ Script to take current SHEF obs and generate a METAR summary
+$Id: $:
+"""
 from twisted.python import log
+log.startLogging( open('/mesonet/data/logs/snet_fe.log', 'a') )
+
+import re, mx.DateTime
+SCRIPT_TIME = mx.DateTime.now()
+
+import tempfile
+import os
+import sys
+import access
+import network
+import tracker
+import mesonet
+iemtracker = tracker.Engine()
+nt = network.Table(("KCCI", "KELO", "KIMT"))
+import iemdb
+IEM = iemdb.connect("iem", bypass=True)
 
 badPrecip = [
   "SCOI4", # 70140
@@ -14,27 +27,28 @@ badPrecip = [
   "SLUI4", # 56996
   "SOSI4", # 62514
   "SFCI4", "SNII4",
-  "SRSI4", "SNKI4", "SRUM5",'BKGS2', 'LMSM5', 'SDNI4', 'MTMS2', 'MLES2', 'KKAS2', 'CLTS2', 'MTYS2', 'BHHS2', 'PESS2', 'ICSI4', 'WHSS2', 'MOBS2', 'CHAS2', 'RDPS2', 'GETS2', 'ESDS2', 'CLYI4', 'FSNS2', 'WMSM5', 'EPJS2', 'CCES2', 'RRCM5', 'MMSS2', 'LDSS2', "SKWI4","SBLM5"]
+  "SRSI4", "SNKI4", "SRUM5",'BKGS2', 'LMSM5', 'SDNI4', 'MTMS2', 'MLES2', 'KKAS2', 'CLTS2', 
+  'MTYS2', 'BHHS2', 'PESS2', 'ICSI4', 'WHSS2', 'MOBS2', 'CHAS2', 'RDPS2', 'GETS2', 'ESDS2', 
+  'CLYI4', 'FSNS2', 'WMSM5', 'EPJS2', 'CCES2', 'RRCM5', 'MMSS2', 'LDSS2', "SKWI4","SBLM5"]
 
-log.startLogging( open('snet.log', 'a') )
-
-
-st = stationTable.stationTable("/mesonet/TABLES/snet.stns")
-
-iem = iemAccess.iemAccess()
-
-now = mx.DateTime.gmt()
-lnow = mx.DateTime.now()
-sDate = now.strftime("%d%H%M")
 
 # Files we write
-SAOFILE = open('snet.sao','w')
-CSVFILE = open('snet.csv','w')
-KELOCSV = open('kelo.csv','w')
-DMXRR5 = open('SUADSMRR5DMX.dat','w')
-LOCDSMRR5 = open('LOCDSMRR5DMX.dat','w')
-FSDRR5 = open('SUAFSDRR5FSD.dat','w')
-BADRR5 = open('kimt_RR5.dat','w')
+(tmpfp, tmpfname) = tempfile.mkstemp()
+saofn = "%s.sao" % (tmpfname,)
+csvfn = "%s.csv" % (tmpfname,)
+kelocsvfn = "%s_kelo.csv" % (tmpfname,)
+rr5fn = "%s_RR5.dat" % (tmpfname,)
+locdsmfn = "%s_LOCDSM.dat" % (tmpfname,)
+fsdrr5fn = "%s_FSD.dat" % (tmpfname,)
+kimtrr5fn = "%s_kimt.dat" % (tmpfname,)
+
+SAOFILE = open(saofn,'w')
+CSVFILE = open(csvfn,'w')
+KELOCSVFILE = open(kelocsvfn,'w')
+DMXRR5 = open(rr5fn,'w')
+LOCDSMRR5 = open(locdsmfn,'w')
+FSDRR5 = open(fsdrr5fn,'w')
+BADRR5 = open(kimtrr5fn,'w')
 
 ###
 # Two dicts to hold information about precip accumulations
@@ -47,7 +61,7 @@ moCntr = {}
 #   - function to simply write the header on the SAO file
 #
 def writeHeader():
-    now = mx.DateTime.gmt()
+    now = SCRIPT_TIME.gmtime()
     sDate = now.strftime("%d%H%M")
 
     SAOFILE.write("\001\015\015\012001\n")
@@ -57,7 +71,7 @@ def writeHeader():
     #DMXRR5.write("SRUS53 KDMX "+sDate+"\015\015\012")
     #DMXRR5.write("RR5DMX\015\015\012")
 
-    now = mx.DateTime.now() + mx.DateTime.RelativeDateTime(minutes=+4)
+    now = SCRIPT_TIME + mx.DateTime.RelativeDateTime(minutes=+4)
     sDate = now.strftime("%m%d")
     hour = now.strftime("%H%M")
 
@@ -110,45 +124,156 @@ def writeCounters():
     o.write("%s %.2f %.2f\n" % (key, MOelem, YRelem) )
   o.close()
 
-def doNetwork(network, shefFile, thres):
+def fetch_pmonth(obs, nwsli):
+    if obs.has_key(nwsli):
+        return obs[nwsli].data.get('pmonth',-1)
+    return -1
+
+def precip_diff(current, past):
+    if current < 0 or past < 0:
+        return None
+    if current >= past:
+        return current - past
+    if past > current:
+        return current
+    log.msg("Precip diff logic fault! Current: %s Past: %s" % (current,past))
+    return None
+
+def pretty_tmpf(ob):
+    val = ob.get('tmpf', None)
+    if val is None:
+        return 'M'
+    if val < -60:
+        return 'M'
+    return "%.0f" % (val,)
+
+def pretty_precip(val):
+    if val is None:
+        return 'M'
+    if val < 0:
+        return 'M'
+    return "%.2f" % (val,)
+
+def getm_c(ob, idx):
+    val = ob.get(idx, None)
+    if val is None:
+        return 'M'
+    valc = mesonet.f2c( val )
+    if valc is None:
+        return 'M'
+    return '%.0f' % (valc,)
+
+def doNetwork(_network, shef_fp, thres):
+    """
+    Process a schoolnet network and do various things
+    @param network string network name
+    @param shef_fp file pointer to shef product file
+    @param thres time threshold we care about for alerting
+    """
+    now = mx.DateTime.now()
     # Get Obs
-    obs = iem.getNetwork(network)
+    obs = access.get_network(_network, IEM)
+    tophour_obs = access.get_network_recent(_network, IEM, now + mx.DateTime.RelativeDateTime(minute=0))
+    hr3_obs = access.get_network_recent(_network, IEM, now + mx.DateTime.RelativeDateTime(hours=-3))
+    hr6_obs = access.get_network_recent(_network, IEM, now + mx.DateTime.RelativeDateTime(hours=-6))
+
     # Check to see if we will be alerting for offline stuff
-    dontmail = willEmail(network, thres)
-    #dontmail = 1
+    dontmail = will_email(_network, obs, thres)
+    if len(sys.argv) > 1:
+        log.msg("Running in safe mode due to sys.argv")
+        dontmail = True
+
     keys = obs.keys()
     keys.sort()
     for nwsli in keys:
-        myOb = sob.sob(obs[nwsli], 'D', iemaccess=iem)
-        myOb.doPrec()
-        if (myOb.ts < thres):  
-            tracker.doAlert(st, myOb.stationID, myOb, network, '%ssnet' % (network.lower(),) , dontmail)
+        ob = obs[nwsli].data
+        if ob['ts'] < thres:  
+            iemtracker.doAlert(nwsli, ob, _network, '%ssnet' % (_network.lower(),) , dontmail)
             continue
+        iemtracker.checkStation(nwsli, ob, _network, '%ssnet' % (_network.lower(),), dontmail)
+        
+        current_pmonth = fetch_pmonth(obs, nwsli)
+        tophour_pmonth = fetch_pmonth(tophour_obs, nwsli)
+        hr3_pmonth = fetch_pmonth(hr3_obs, nwsli)
+        hr6_pmonth = fetch_pmonth(hr6_obs, nwsli)
+        
+        if not moCntr.has_key(nwsli):
+            moCntr[nwsli] = 0.
+            yrCntr[nwsli] = 0.
+                    
+        # reset
+        if moCntr[nwsli] > current_pmonth: 
+            yrCntr[nwsli] += current_pmonth
+        moCntr[nwsli] = current_pmonth
 
-        tracker.checkStation(st, myOb.stationID, myOb, network, '%ssnet' % (network.lower(),), dontmail)
- 
+        pcounter = yrCntr[nwsli] + current_pmonth
 
-        if (float(myOb.pMonth) < moCntr[nwsli] and float(myOb.pMonth) >= 0):  # Reset Monthly counter
-            yrCntr[nwsli] = yrCntr[nwsli] + moCntr[nwsli]
-        moCntr[nwsli] = float(myOb.pMonth)
-        myOb.pYear = yrCntr[nwsli] 
-        if (float(myOb.pMonth) >= 0):
-            myOb.pYear = yrCntr[nwsli] + float(myOb.pMonth)
+        # Compute offsets
+        phour = precip_diff(current_pmonth, tophour_pmonth)
+        p03i = precip_diff(current_pmonth, hr3_pmonth)
+        p06i = precip_diff(current_pmonth, hr6_pmonth)
+        pday = ob['pday']
 
-        if badPrecip.__contains__(nwsli):
-            myOb.printSHEF_tmp(shefFile, cancelPrecip=1,sname=st.sts[nwsli]['name'])
-            if (network == "KCCI"):
-                myOb.printPCIRP(LOCDSMRR5, cancelPrecip=1)
-        else:
-            myOb.printSHEF_tmp(shefFile,sname=st.sts[nwsli]['name'])
-            if (network == "KCCI"):
-                myOb.printPCIRP(LOCDSMRR5)
-        myOb.printD2D(CSVFILE)
-        if (network == 'KELO'):
-            myOb.printD2D(KELOCSV)
-        if network != 'KIMT':
-            myOb.printMETAR(SAOFILE)
+        if nwsli in badPrecip:
+            phour = None
+            p03i = None
+            p06i = None
+            pcounter = None
+            pday = None
 
+        # Finally ready to write SHEF!
+        shef_fp.write("%s %s / %4s / %4s / %4s / %5s : %s\n" % (nwsli,
+                                pretty_tmpf(ob), pretty_precip(phour),
+                                pretty_precip(p03i), pretty_precip(p06i),
+                                pretty_precip(pcounter), 
+                                ob.get('sname', 'Unknown')))
+        if _network == 'KCCI':
+            LOCDSMRR5.write("%s      %3s / %5s\n" % (nwsli,
+                                pretty_tmpf(ob), pretty_precip(pcounter)))
+        # CSV FILE!
+        for fp in [CSVFILE, KELOCSVFILE]:
+            if _network != 'KELO' and fp == KELOCSVFILE:
+                continue
+            fp.write("%s,%s,%s,%s,%i,%s,%s,%s,%s\n" % (nwsli,
+                ob['ts'].gmtime().strftime("%Y/%m/%d %H:%M:%S"), getm_c(ob, 'tmpf'),
+                getm_c(ob, 'dwpf'), ob['sknt'], ob['drct'], phour or 'M', pday or 'M', ob['pres']))
+
+        if _network != 'KIMT':
+            SAOFILE.write( obs[nwsli].metar() )
+
+
+
+
+
+def will_email(_network, obs, thres):
+    """
+    Preemptive checking to make sure we don't email!
+    """
+    cnt_threshold = 25
+    if (_network == 'KIMT'):
+        cnt_threshold = 10
+    cnt_offline = 0
+    # First, look into the offline database to see how many active tickets
+    icursor = IEM.cursor()
+    icursor.execute("""SELECT count(*) as c from offline WHERE 
+      network = %s and length(station) = 5""", (_network,) )
+    row = icursor.fetchone()
+    cnt_offline = row[0]
+
+    log.msg("Portfolio says cnt_offline: %s %s" % (_network, cnt_offline))
+    if cnt_offline > cnt_threshold:
+        return True
+
+    # Check obs
+    cnt_offline = 0
+    for nwsli in obs.keys():
+        if obs[nwsli].data['ts'] < thres:
+            cnt_offline += 1
+    log.msg("IEMAccess says cnt_offline: %s %s" % (_network, cnt_offline))
+    if cnt_offline > cnt_threshold:
+        return True
+
+    return False
 
 def closeFiles():
     SAOFILE.write("\015\015\012\003")
@@ -159,50 +284,55 @@ def closeFiles():
     LOCDSMRR5.close()
     FSDRR5.write(".END\n")
     FSDRR5.close()
+    CSVFILE.close()
+    KELOCSVFILE.close()
+
+def post_process():
+    """
+    Last actions after we are done generating all these files :)
+    """
+    
+    saoname = "IA.snet%s.sao" % (SCRIPT_TIME.gmtime().strftime("%d%H%M"),)
+    cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % (saoname, saofn)
+    os.system( cmd )
+    os.unlink(saofn)
+
+    cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('snet.csv', csvfn)
+    os.system( cmd )
+    os.unlink(csvfn)
+
+    cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('kelo.csv', kelocsvfn)
+    os.system( cmd )
+    os.unlink(kelocsvfn)
+    
+    if SCRIPT_TIME.minute in [15,35]:
+        cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('LOCDSMRR5DMX.dat', locdsmfn)
+        os.system( cmd )
+    if SCRIPT_TIME.minute in [55,]:
+        cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('SUADSMRR5DMX.dat', rr5fn)
+        os.system( cmd )
+        cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('SUAFSDRR5FSD.dat', fsdrr5fn)
+        os.system( cmd )
+    os.unlink(locdsmfn)
+    os.unlink(rr5fn)
+    os.unlink(fsdrr5fn)
+    
+    #
+    os.unlink(kimtrr5fn)
 
 
-#
-# Check to make sure our email alerts are not excessive
-#
-def willEmail(network, thres):
-    cnt_threshold = 25
-    if (network == 'KIMT'):
-        cnt_threshold = 10
-    cnt_offline = 0
-    # First, look into the offline database to see how many active tickets
-    rs = iem.query("SELECT count(*) as c from offline WHERE \
-      network = '%s' and length(station) = 5" % (network,) ).dictresult()
-    if (len(rs) > 0):
-        cnt_offline = rs[0]['c']
-
-    log.msg("Portfolio says cnt_offline: %s %s" % (network, cnt_offline,))
-    if (cnt_offline > cnt_threshold):
-        return 1
-
-    # Okay, pre-emptive check to iemdb to see how many obs are old
-    mythres = thres + mx.DateTime.RelativeDateTime(minutes=6)
-    rs = iem.query("SELECT count(*) as c from current c, stations t WHERE \
-      t.iemid = c.iemid and t.network = '%s' and valid < '%s' " % \
-      (network, mythres.strftime('%Y-%m-%d %H:%M') ) ).dictresult() 
-    if (len(rs) > 0):
-        cnt_offline = rs[0]['c']
-        log.msg("IEMAccess says cnt_offline: %s, %s, %s" % (network, mythres,cnt_offline,))
-
-    if (cnt_offline > cnt_threshold):
-        return 1
-
-    return 0
-
-def Main():
+def main():
     loadCounters()
     writeHeader()
     now = mx.DateTime.now()
     doNetwork('KCCI', DMXRR5, now - mx.DateTime.RelativeDateTime(minutes=60))
-    #DMXRR5.write(":Iowa Environmental Mesonet - KIMT StormNet\n")
     doNetwork('KIMT', BADRR5, now - mx.DateTime.RelativeDateTime(minutes=60))
     doNetwork('KELO', FSDRR5, now - mx.DateTime.RelativeDateTime(minutes=300))
 
-
     writeCounters()
     closeFiles()
-Main()
+    post_process()
+    log.msg("FINISH...")
+
+if __name__ == '__main__':
+    main()

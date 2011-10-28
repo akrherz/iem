@@ -2,17 +2,16 @@
 cd dl
 /mesonet/python/bin/python radar_composite.py 
 
-cd ../GIS
-/mesonet/python/bin/python 24h_lsr.py 
+cd ../outgoing/snetnws
+python snet_fe.py &
 
+cd ../..GIS
+/mesonet/python/bin/python 24h_lsr.py 
 
 cd ../current
 /mesonet/python/bin/python lsr_snow_mapper.py >& /dev/null
 
-cd ../outgoing/snetnws
-./RUN.csh &
-
-cd ../../ingestors/rwis
+cd ../ingestors/rwis
 ./download.csh &
 
 cd ../dotcams
