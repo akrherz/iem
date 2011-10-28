@@ -34,7 +34,7 @@ for tbl in ['climate51','climate']:
   rs = mydb.query(sql).dictresult()
   for i in range(len(rs)):
     dkey = "2000-%s" % (rs[i]['day'][5:], )
-    stid = rs[i]['stationid']
+    stid = rs[i]['station']
     if (not records.has_key(stid)):
       continue
     r = records[stid][dkey]
