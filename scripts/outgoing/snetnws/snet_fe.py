@@ -332,6 +332,7 @@ def main():
     writeCounters()
     closeFiles()
     post_process()
+    iemtracker.send()
     log.msg("FINISH...")
 
 if __name__ == '__main__':
