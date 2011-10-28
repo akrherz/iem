@@ -63,7 +63,7 @@ def generate_table(fn, networks,fourchar=False):
             if fourchar:
                 gemID = id[:4]
             output.write("%-8s %6s %-32.32s %2s %2s %5.0f %6.0f %4.0f %2s\n" % (
-                    gemID, st["synop"], st["name"], 
+                    gemID, st["synop"] or '999999', st["name"], 
                     st["state"], st["country"], st["lat"] * 100 , st["lon"] * 100, 
                     int(st["elevation"]), st["spri"]) )
     output.close()
