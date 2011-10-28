@@ -7,6 +7,8 @@
 
 import traceback
 import mx.DateTime
+import psycopg2.extras
+import mesonet
 
 class mydata(dict):
     
@@ -22,6 +24,55 @@ class mydata(dict):
         if type(val) == type(''):
             return "'%s'" % (val,)
         return val
+
+def get_network(network, dbconn, valid=mx.DateTime.now()):
+    """
+    Return a dict of Ob  for the given network
+    @param network string network name
+    @param dbconn database connection
+    @param valid optional timestamp to use to fetch obs for!
+    @return dict of obs
+    """
+    obs = {}
+    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor.execute("""
+    SELECT c.*, s.*, t.id, t.name as sname from current c, summary_%s s, stations t WHERE
+    t.iemid = s.iemid and s.iemid = c.iemid and t.network = '%s' and
+    s.day = '%s'
+    """ % (valid.year, network, valid.strftime("%Y-%m-%d")))
+    for row in cursor:
+        obs[ row['id'] ] = Ob(row['id'], network)
+        for key in row.keys():
+            obs[ row['id'] ].data[key] = row[key]
+        obs[ row['id'] ].data['ts'] = mx.DateTime.strptime(str(row['valid'])[:16], "%Y-%m-%d %H:%M")
+    cursor.close()
+    return obs
+
+def get_network_recent(network, dbconn, valid, window=10):
+    """
+    Return a dict of Ob for recent data in current_log
+    @param network string network name
+    @param dbconn database connection
+    @param valid timestamp to use to fetch obs for!
+    @param window observation window to look for obs
+    @return dict of obs
+    """
+    obs = {}
+    cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor.execute("""
+    SELECT c.*, t.id from current_log c JOIN stations t ON (t.iemid = c.iemid) WHERE
+    t.network = %s and c.valid BETWEEN %s and %s::timestamptz + '%s minutes'::interval ORDER by valid ASC
+    """ , (network, valid.strftime("%Y-%m-%d %H:%M"), valid.strftime("%Y-%m-%d %H:%M"), window))
+    for row in cursor:
+        id = row['id']
+        if obs.has_key(id):
+            continue
+        obs[ row['id'] ] = Ob(row['id'], network)
+        for key in row.keys():
+            obs[ row['id'] ].data[key] = row[key]
+        obs[ row['id'] ].data['ts'] = mx.DateTime.strptime(str(row['valid'])[:16], "%Y-%m-%d %H:%M")
+    cursor.close()
+    return obs
 
 class Ob(object):
 
@@ -84,7 +135,6 @@ class Ob(object):
             except:
                 print sql
                 traceback.print_exc()
-
 
     def updateDatabasePeakWind(self, db, gdata, dbpool=None):
         table = "summary_%s" % (self.data['valid'].year,)
@@ -214,3 +264,34 @@ class Ob(object):
             self.update_current(db, dbpool)
         else:
             self.insert_currentlog(db, dbpool)
+            
+    def metar(self):
+        """
+        Return a METAR representation of this observation :)
+        """
+        s = ""
+        # First up, is the ID, which needs to be 3 or 4 char :(
+        mid = self.data.get('station')
+        if len(self.data.get('station')) > 4:
+            mid = 'Q%s' % (self.data.get('station')[:3])
+        # Metar Time
+        mtrts = self.data.get('ts').gmtime().strftime("%d%H%MZ")
+        # Wind Direction
+        mdir = self.data.get('drct', 0)
+        if mdir == 360:
+            mdir = 0
+        mwind = "%03i%02iKT" % (mdir, self.data.get('sknt', 0) )
+        # Temperature
+        mtmp = "%s/%s" % (mesonet.metar_tmpf(self.data.get('tmpf')), 
+                          mesonet.metar_tmpf(self.data.get('dwpf')))
+        # Altimeter
+        malti = "A%04i" % (self.data.get('pres',0) * 100.0,)
+        # Remarks
+        tgroup = "T%s%s" % (mesonet.metar_tmpf_tgroup(self.data.get('tmpf')), 
+                            mesonet.metar_tmpf_tgroup(self.data.get('dwpf')))
+        # Phour
+        phour = "P%04i" % (self.data.get('phour',0),)
+        # Pday
+        pday = "7%04i" % (self.data.get('pday',0),)
+        return "%s %s %s %s RMK %s %s %s %s=\015\015\012" % (mid, mtrts, mwind, mtmp, 
+                                    malti, tgroup, phour, pday)
