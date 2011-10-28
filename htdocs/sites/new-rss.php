@@ -7,7 +7,7 @@
  include("$rootpath/include/database.inc.php");
  $conn = iemdb("mesosite");
  $rs = pg_exec($conn, "SELECT s.*, x(geom) as lon, y(geom) as lat, t.name as netname from stations s JOIN networks t 
- 	ON (t.id = s.network) ORDER by iemid DESC LIMIT 25");
+ 	ON (t.id = s.network) WHERE s.elevation > -990 ORDER by iemid DESC LIMIT 25");
  pg_close($conn);
  
  
