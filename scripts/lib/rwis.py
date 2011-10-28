@@ -56,6 +56,9 @@ class RWISOb(object):
     for i in range(4):
       self.sfdata[i] = {"dry": -99, "tmpc": -99, "tmpf": -99}
 
+  def get(self, key):
+      return self.__getattribute__(key)
+
   def add_sfdata(self, dict):
     sensorid = int(dict["Senid"])
     self.stationNum = int( dict["Rpuid"] )
