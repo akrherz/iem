@@ -1,5 +1,4 @@
 import sys
-sys.path.append("../../lib")
 
 import re, mx.DateTime, pg, os, csv
 from pyIEM import  mesonet
@@ -19,6 +18,7 @@ class rnetwork:
             id = int( row["Rpuid"] )
             self.obs[ id ] = rwis.RWISOb()
             self.obs[ id ].add_atdata( row )
+            self.obs[ id ].sname = st.sts[ self.obs[id].stationID ]['name']
         csvfile.close()
 
         csvfile = open(SF_FILENAME)
@@ -69,7 +69,7 @@ class rnetwork:
           return  
       dontmail = self.checkOffline('IA_RWIS', 300)
       thres = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=3)
-      track = tracker.Engine( st )
+      track = tracker.Engine()
       for id in self.obs.keys():
           sid = self.obs[id].stationID
           if self.obs[id].gmt_ts > thres:

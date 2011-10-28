@@ -47,7 +47,7 @@ class Engine(object):
             sql = """INSERT into tt_log(portfolio, s_mid, author, status_c, 
                   comments, tt_id) VALUES ('%s', '%s', 'mesonet', 
                   'OKAY', 'Site Offline since %s', %s )""" % ( 
-                  portNetID, sid, myOb.ts, ticketID )
+                  portNetID, sid, myOb.get('ts'), ticketID )
             mydb.query(sql)
 
             # Lets get a list of Tickets currently open for this site
@@ -101,12 +101,12 @@ class Engine(object):
 """
 
         mailStr = mformat % (ticketID, sid, myOb.get("sname", "Unknown"), \
-                          str(myOb.ts), openTickets, closedTickets )
+                          str(myOb.get('ts')), openTickets, closedTickets )
 
         # Update IEMAccess
         sql = """INSERT into offline(station, network, valid, trackerid) 
                 values ('%s','%s','%s', %s)""" % (sid, network, 
-                myOb.ts, ticketID)
+                myOb.get('ts'), ticketID)
         icursor = IEM.cursor()
         icursor.execute(sql)
         icursor.close()
@@ -159,7 +159,7 @@ class Engine(object):
         ticketID = rs[0]['trackerid']
         offlineAt = rs[0]['valid']
         offlineTS = mx.DateTime.strptime(offlineAt[:19], "%Y-%m-%d %H:%M:%S")
-        offlineDur = (myOb.ts - offlineTS).strftime('%d days %H hours %M minutes')
+        offlineDur = (myOb.get('ts') - offlineTS).strftime('%d days %H hours %M minutes')
         try:
             import pg
             mydb = pg.connect("portfolio", "meteor.geol.iastate.edu", 
@@ -168,7 +168,7 @@ class Engine(object):
             mydb.query("""INSERT into tt_log(portfolio, s_mid, author, 
                  status_c, comments, tt_id) VALUES ('%s', '%s', 'mesonet', 
                  'CLOSED', 'Site Back Online at: %s', %s)""" % (
-                 portNetID, sid, myOb.ts, ticketID))
+                 portNetID, sid, myOb.get('ts'), ticketID))
             mydb.query("""UPDATE tt_base SET last = CURRENT_TIMESTAMP, 
                        status = 'CLOSED' WHERE id = %s """ % (ticketID,))
 
@@ -199,7 +199,7 @@ class Engine(object):
   * Thanks!!!
 """
         mailStr = mformat % (sid, myOb.get("sname", "Unknown"), ticketID, \
-                          str(myOb.ts), offlineDur )
+                          str(myOb.get('ts')), offlineDur )
 
         sql = """DELETE from offline WHERE station = '%s' 
               and network = '%s' """ % (sid, network)
