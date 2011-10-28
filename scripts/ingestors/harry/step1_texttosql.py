@@ -4,8 +4,8 @@ import sys, re, mx.DateTime, string
 
 # We need to convert some station IDs to other IDs, somewhat yucky
 stconv = {
-  'ia6199': 'ia6200', # Oelwein
-  'ia3288': 'ia3290', # Glenwood
+  'IA6199': 'IA6200', # Oelwein
+  'IA3288': 'IA3290', # Glenwood
 }
 
 year = int(sys.argv[1])
@@ -26,7 +26,7 @@ for line in lines:
   tokens = re.split(",", line)
   if len(tokens) == 23 and len(tokens[0]) > 0:
     stid = tokens[0]
-    dbid = "%s%04.0f" % ("ia", int(stid))
+    dbid = "%s%04.0f" % ("IA", int(stid))
     if stconv.has_key(dbid):
       dbid = stconv[dbid]
     yr = int(tokens[2])
@@ -90,16 +90,16 @@ SELECT
   round(avg( abs(e.snowfall - o.snowfall) )::numeric,4) as snowfall_me
 
 FROM
-  (select stationid, sum(precip) as rainfall, sum(snow) as snowfall,
+  (select station, sum(precip) as rainfall, sum(snow) as snowfall,
           avg(high) as avghigh, avg(low) as avglow
    from alldata_ia
-   WHERE month = %s and year = %s GROUP by stationid) as o,
-  (select stationid, sum(precip) as rainfall, sum(snow) as snowfall,
+   WHERE month = %s and year = %s GROUP by station) as o,
+  (select station, sum(precip) as rainfall, sum(snow) as snowfall,
           avg(high) as avghigh, avg(low) as avglow
    from alldata_estimates
-   WHERE month = %s and year = %s GROUP by stationid) as e
+   WHERE month = %s and year = %s GROUP by station) as e
 WHERE
-  o.stationid = e.stationid
+  o.station = e.station
 ;
 COMMIT;
 """ % (year, month, year, month, month, year, month, year) )
