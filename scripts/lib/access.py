@@ -273,7 +273,7 @@ class Ob(object):
         # First up, is the ID, which needs to be 3 or 4 char :(
         mid = self.data.get('station')
         if len(self.data.get('station')) > 4:
-            mid = 'Q%s' % (self.data.get('station')[:3])
+            mid = 'Q%s' % (self.data.get('station')[1:4])
         # Metar Time
         mtrts = self.data.get('ts').gmtime().strftime("%d%H%MZ")
         # Wind Direction
