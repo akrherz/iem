@@ -1065,7 +1065,7 @@ LAYER
   CONNECTIONTYPE postgis
   CONNECTION "user=nobody dbname=iem host=iemdb"
   NAME "current_sites"
-  DATA "geom from (select c.iemid as foid, geom, station, network from current c JOIN stations t ON (t.iemid = c.iemid)
+  DATA "geom from (select c.iemid as foid, geom, t.id as station, network from current c JOIN stations t ON (t.iemid = c.iemid)
        WHERE valid > (now() - '70 minutes'::interval) and network !~* 'COOP' ) as foo
        USING srid=4326 USING unique foid"
   STATUS OFF
