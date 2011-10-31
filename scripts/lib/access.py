@@ -76,15 +76,16 @@ def get_network_recent(network, dbconn, valid, window=10):
 
 class Ob(object):
 
-    def __init__(self, station, network):
+    def __init__(self, station, network, txn=None):
         """
         Construct an Ob instance from
         @param station string station
         @param network string network
         """
         self.data = mydata({'station': station, 'network': network})
+        self.txn = txn
 
-    def load_and_compare(self, db):
+    def load_and_compare(self, db=None):
         """
         We want to load up current entry from the database and see what
         we have
@@ -99,16 +100,23 @@ class Ob(object):
             s.day = date('%s'::timestamptz at time zone t.tzname) and 
             t.id = '%s' and t.network = '%s' """ % ( self.data.get('valid').year, 
           self.data.get('valid').strftime("%Y-%m-%d %H:%M"), self.data.get('station'),
-          self.data.get('network') ) 
-        rs = db.query(sql).dictresult()
-        if len(rs) == 0:
-            return False
+          self.data.get('network') )
+        if self.txn is not None:
+            self.txn.execute(sql)
+            if self.txn.rowcount == 0:
+                return False
+            row = self.txn.fetchone()
+        else:
+            rs = db.query(sql).dictresult()
+            if len(rs) == 0:
+                return False
+            row = rs[0]
 
-        self.data['old_valid'] = mx.DateTime.strptime(rs[0]['valid'][:16], "%Y-%m-%d %H:%M")
+        self.data['old_valid'] = mx.DateTime.strptime(str(row['valid'])[:16], "%Y-%m-%d %H:%M")
         if self.data['valid'] == self.data['old_valid']: # Same Ob!
-            for key in rs[0].keys():
-                if rs[0][key] is not None and key not in ['valid','network','station','geom']:
-                    self.data[key] = rs[0][key]
+            for key in row.keys():
+                if row[key] is not None and key not in ['valid','network','station','geom']:
+                    self.data[key] = row[key]
         return True
 
     def setObTimeGMT(self, ts):
@@ -127,6 +135,8 @@ class Ob(object):
         """
         Helper function for select/update queries
         """
+        if self.txn is not None:
+            return self.txn.execute(sql)
         if dbpool != None:
             dbpool.runOperation( sql )
         else:
@@ -151,7 +161,7 @@ class Ob(object):
         self.execQuery(sql, db, dbpool)
 
 
-    def updateDatabaseSummaryTemps(self, db, dbpool=None):
+    def updateDatabaseSummaryTemps(self, db=None, dbpool=None):
         table = "summary_%s" % (self.data['valid'].year,)
         sql = """UPDATE """+ table +""" s SET 
               max_tmpf = 
@@ -164,7 +174,7 @@ class Ob(object):
       and t.network = %(network)s""" % self.data
         self.execQuery(sql , db, dbpool)
 
-    def update_summary(self, db, dbpool):
+    def update_summary(self, db=None, dbpool=None):
         table = "summary_%s" % (self.data['valid'].year,)
         sql = """UPDATE """+ table +""" s SET 
 	pday = 
@@ -198,7 +208,7 @@ class Ob(object):
      and t.network = %(network)s """ % self.data
         self.execQuery(sql, db, dbpool)
 
-    def update_current(self, db, dbpool):
+    def update_current(self, db=None, dbpool=None):
         sql = """UPDATE current c SET tmpf = %(tmpf)s, dwpf = %(dwpf)s, 
 	phour = 
       (CASE WHEN %(phour)s >= -1 THEN %(phour)s ELSE phour END)::numeric, 
@@ -223,8 +233,8 @@ class Ob(object):
           FROM stations t
        WHERE t.iemid = c.iemid and t.id = %(station)s and t.network = %(network)s """ % self.data
         self.execQuery(sql, db, dbpool)
-
-    def insert_currentlog(self, db, dbpool):
+        
+    def insert_currentlog(self, db=None, dbpool=None):
         sql = """INSERT into current_log(iemid, tmpf, dwpf, 
        phour, tsf0, tsf1, tsf2, 
        tsf3, rwis_subf, pres, drct, sknt, pday, 
@@ -252,7 +262,8 @@ class Ob(object):
                    %(pcounter)s, %(discharge)s)  """ % self.data
         self.execQuery(sql, db, dbpool)
 
-    def updateDatabase(self, db, dbpool=None):
+
+    def updateDatabase(self, db=None, dbpool=None):
         """
         Update the Access database with this observation info
         """
@@ -264,7 +275,7 @@ class Ob(object):
             self.update_current(db, dbpool)
         else:
             self.insert_currentlog(db, dbpool)
-            
+
     def metar(self):
         """
         Return a METAR representation of this observation :)
