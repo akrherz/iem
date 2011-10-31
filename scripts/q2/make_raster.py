@@ -1,11 +1,18 @@
-# Generate a GIS raster from the 8 NMQ data tiles! :)
+"""
+ Generate a raster of data from raw Q2 netcdf files
+ $Id: $:
+"""
 
 import numpy
 import mx.DateTime
-import netCDF3
+try:
+    import netCDF3
+except:
+    import netCDF4 as netCDF3
 from PIL import Image
 import os
 import sys
+import tempfile
 
 # NW Corner of tiles
 tiles = {
@@ -94,12 +101,15 @@ def doit(gts):
     # Stress our color ramp
     #for i in range(256):
     #    imgdata[i*10:i*10+10,0:100] = i
+    
+    (tmpfp, tmpfn) = tempfile.mkstemp()
+    
     # Create Image
     png = Image.fromarray( imgdata )
     png.putpalette( make_colorramp() )
-    png.save('q2.png')
+    png.save('%s.png' % (tmpfn,))
     # Now we need to generate the world file
-    o = open('/tmp/q2.wld', 'w')
+    o = open('%s.wld' % (tmpfn,), 'w')
     o.write("""   0.0100000000000%s
    0.00000
    0.00000
@@ -108,22 +118,26 @@ def doit(gts):
   %s""" % (gts.strftime("%Y%m%d%H%M"), west, north))
     o.close()
     # Inject WLD file
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/n1p_%s.wld wld' /tmp/q2.wld" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/n1p_%s.wld wld' %s.wld" % (
+                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpfn )
     os.system(pqstr)
     # Now we inject into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/n1p.png GIS/q2/n1p_%s.png png' q2.png" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/n1p.png GIS/q2/n1p_%s.png png' %s.png" % (
+                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpfn )
     os.system(pqstr)
     # Create 900913 image
-    cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 q2.png q2.tif"
+    cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpfn, tmpfn)
     os.system( cmd )
     # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/n1p.tif GIS/q2/n1p_%s.tif tif' q2.tif" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M") )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/n1p.tif GIS/q2/n1p_%s.tif tif' %s.tif" % (
+                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpfn )
     os.system(pqstr)
     
-    os.unlink('q2.tif')
+    os.unlink('%s.tif' % (tmpfn,))
+    os.unlink('%s.png' % (tmpfn,))
+    os.unlink('%s.wld' % (tmpfn,))
+    os.close(tmpfp)
+    os.unlink(tmpfn)
 
 if __name__ == "__main__":
     if len(sys.argv) == 6:
