@@ -9,6 +9,15 @@ sleep 4
 sleep 4
 /mesonet/python/bin/python polygonMosaic.py W
 
+cd ../iemre
+/mesonet/python/bin/python stage4_hourlyre.py
+/mesonet/python/bin/python stage4_hourlyre.py `date -u --date '3 hours ago' +'%Y %m %d %H'`
+/mesonet/python/bin/python stage4_hourlyre.py `date -u --date '1 day ago' +'%Y %m %d %H'`
+
+cd ../current
+/mesonet/python/bin/python stage4_hourly.py
+/mesonet/python/bin/python stage4_today_total.py
+
 cd ../qc
 /mesonet/python/bin/python checkWebcam.py
 
@@ -49,14 +58,7 @@ cd ../plots
 cd black
 ./surfaceContours.csh
 
-cd ../../iemre
-/mesonet/python/bin/python stage4_hourlyre.py
-/mesonet/python/bin/python stage4_hourlyre.py `date -u --date '3 hours ago' +'%Y %m %d %H'`
-/mesonet/python/bin/python stage4_hourlyre.py `date -u --date '1 day ago' +'%Y %m %d %H'`
 
-cd ../current
-/mesonet/python/bin/python stage4_hourly.py
-/mesonet/python/bin/python stage4_today_total.py
 
-cd ../model
+cd ../../model
 /mesonet/python/bin/python ingest.py
