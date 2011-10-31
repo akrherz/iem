@@ -15,10 +15,12 @@ icursor = IEM.cursor()
 icursor.execute("""SELECT max(iemid) from current""")
 row = icursor.fetchone()
 maxID = row[0]
-print maxID 
 
 # Figure out new stations
-mcursor.execute("""SELECT * from stations WHERE iemid > %s""" % (maxID,) )
+if len(sys.argv) == 3:
+    mcursor.execute("""SELECT * from stations WHERE id = %s and network = %s""" , (sys.argv[2],sys.argv[1]) )
+else:
+    mcursor.execute("""SELECT * from stations WHERE iemid > %s""" % (maxID,) )
 
 for row in mcursor:
     print "Adding station ID: %s NETWORK: %s" % (row['id'], row['network'])
