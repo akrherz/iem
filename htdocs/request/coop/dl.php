@@ -1,6 +1,8 @@
 <?php
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+$connection =iemdb("coop");
+include("$rootpath/include/mlib.php");
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
@@ -84,8 +86,37 @@ if ($what == "download"){
  header("Content-type: text/plain");
 }
 
-if ($what != "plot"){
- $connection =iemdb("coop");
+if (in_array('daycent', $vars)){
+	/*
+	 * > Daily Weather Data File (use extra weather drivers = 0):
+	 * > 
+	 * > 1 1 1990 1 7.040 -10.300 0.000
+	 * > 
+> NOTES:
+> Column 1 - Day of month, 1-31
+> Column 2 - Month of year, 1-12
+> Column 3 - Year
+> Column 4 - Day of the year, 1-366
+> Column 5 - Maximum temperature for day, degrees C
+> Column 6 - Minimum temperature for day, degrees C
+> Column 7 - Precipitation for day, centimeters
+	 */
+	if (sizeof($stations) > 1) die("Sorry, only one station request at a time for daycent option");
+	if ($selectAll) die("Sorry, only one station request at a time for daycent option");
+	pg_prepare($connection, "DAYCENT", "SELECT extract(doy from day) as doy, high, low, precip,
+		month, year, extract(day from day) as lday 
+		from $table WHERE station IN ". $stationString ." and day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
+	$rs = pg_execute($connection, 'DAYCENT', Array());
+	echo "Daily Weather Data File (use extra weather drivers = 0):\n";
+	echo "\n";
+	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+		echo sprintf("%s %s %s %s %.2f %.2f %.2f\n", $row["lday"], $row["month"], $row["year"], 
+		$row["doy"], f2c($row["high"]), f2c($row["low"]), $row["precip"] * 25.4);
+	}
+	
+}
+else if ($what != "plot"){
+ 
  $rs =  pg_exec($connection, $sqlStr);
 
  pg_close($connection);
