@@ -46,7 +46,7 @@ until yesterday, the values are estimated by the IEM.</p>
 <table>
 <tr><td width="50%">
 
-<p><h3 class="subtitle">1. Select Station:</h3><br>
+<p><h3 class="subtitle">1. Select Station:</h3>
 <i>Select One or More or All stations in the network.</i><br />
 <select name="station[]" size="5" MULTIPLE>
 	<option value="_ALL">--Select ALL--
@@ -60,7 +60,7 @@ while (list($key,$val) = each($cities)){
 </select>
 
 
-<p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
+<p><h3 class="subtitle">2. Select Start/End Time:</h3>
 <i>Please note the start year in the station selector. Some sites start
 in 1951 others are earlier. If you only want data for one day, set the
 start and end times to the same value.</i>
@@ -97,24 +97,28 @@ start and end times to the same value.</i>
   </tr>
 </table>
 
-<p><h3 class="subtitle">3. Select Variables:</h3><br>
+<p><h3 class="subtitle">3. Select Variables / Model Input Format:</h3>
+<i>Select either one or more data variables or a predefined format that 
+should work within the specified Model input format.  Please <a href="../../info/contact.php">contact us</a>
+to have your format added to the list!</i>
 <select size=5 name="vars[]" MULTIPLE>
-  <option value="high">High Temperature [F]
-  <option value="low">Low Temperature [F]
-  <option value="precip">Rainfall [inch]
-  <option value="snow">Snowfall [inch]
-  <option value="snowd">Snow Depth (since 1991) [inch]
+  <option value="daycent">Model: DailyDayCent (no extra drivers)</option> 
+  <option value="high">Variable: High Temperature [F]</option>
+  <option value="low">Variable: Low Temperature [F]</option>
+  <option value="precip">Variable: Rainfall [inch]</option>
+  <option value="snow">Variable: Snowfall [inch]</option>
+  <option value="snowd">Variable: Snow Depth (since 1991) [inch]</option>
 </select>
 
 </td><td valign="TOP">
 
-<p><h3 class="subtitle">4. How to view?</h3><br>
+<p><h3 class="subtitle">4. How to view?</h3>
 <select name="what">
   <option value="download">Download to Disk
   <option value="view">View on-line
 </select>
 
-<p><h3 class="subtitle">5. Data Delimitation:</h3><br>
+<p><h3 class="subtitle">5. Data Delimitation:</h3>
 How shall the output values be seperated?
 <br><select name="delim">
     <option value="comma">Comma
@@ -123,7 +127,7 @@ How shall the output values be seperated?
    </select>
 
 <p>
-<h3 class="subtitle">6. Include Lat / Lons?</h3><img src="<?php echo $rooturl; ?>/images/gisready.png"><br>
+<h3 class="subtitle">6. Include Lat / Lons?</h3><img src="<?php echo $rooturl; ?>/images/gisready.png">
  <select name="gis">
    <option value="no">No
    <option value="yes">Yes
