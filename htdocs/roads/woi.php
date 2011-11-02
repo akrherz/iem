@@ -18,14 +18,15 @@ $map = ms_newMapObj('roads.map');
 //$map->setProjection("init=epsg:4326");
 $map->setProjection("init=epsg:26915");
 $map->selectOutputFormat("png24");
-$map->setSize(720, 486);
+$map->setSize(864, 486);
 if ($metroview)
 {
-  $map->setextent(360000, 4580000, 559000, 4690000);
+  $map->setextent(320000, 4540000, 594000, 4710000);
   //$map->setextent(-95.3,  40.71, -92.3,  43.11);
 } else
 {
-  $map->setextent(25000, 4420000, 920000, 4920000);
+
+  $map->setextent(-60000, 4385000, 980000, 4970000);
   //$map->setextent(-107.9, 40, -88.9,  44.9);
 }
 
