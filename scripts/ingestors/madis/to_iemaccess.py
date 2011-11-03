@@ -1,16 +1,27 @@
-
-from Scientific.IO.NetCDF import *
+"""
+Suck in MADIS data into the iemdb
+$Id: $:
+"""
+import netCDF3
 import string, re, mx.DateTime, os, sys
-from pyIEM import iemAccess, iemAccessOb, mesonet
-iemaccess = iemAccess.iemAccess()
+import access
+import iemdb
+import mesonet
+IEM = iemdb.connect('iem')
+icursor = IEM.cursor()
 
+fp = None
+for i in range(0,4):
+  ts = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=i)
+  testfp = ts.strftime("/mesonet/data/madis/mesonet/%Y%m%d_%H00.nc")
+  if os.path.isfile(testfp):
+    fp = testfp
+    break
 
-files = os.listdir("/mesonet/data/madis/mesonet/")
-files.sort()
- 
-if  (files[-1][-2:] == "gz"):
+if fp is None:
   sys.exit()
-nc = NetCDFFile("/mesonet/data/madis/mesonet/"+ files[-1])
+
+nc = netCDF3.Dataset(fp)
 
 def sanityCheck(val, lower, upper, rt):
   if (val > lower and val < upper):
@@ -39,30 +50,38 @@ subk1       = nc.variables["roadSubsurfaceTemp1"]
 
 db = {}
 
+MY_PROVIDERS = ["MNDOT", "KSDOT", "WIDOT", "INDOT", "NDDOT",
+ "NEDOR", "WYDOT", "OHDOT", "MDDOT", "NHDOT", "WVDOT"]
+
+def provider2network(p):
+  return '%s_RWIS' % (p[:2],)
+
 for recnum in range(len(providers)):
-  thisProvider = re.sub('\x00', '', providers[recnum].tostring())
-  thisStation  = re.sub('\x00', '', stations[recnum].tostring())
-  if (thisProvider == "MNDOT" or thisProvider == "KSDOT" or thisProvider == "RAWS" or thisProvider == "WIDOT" or thisProvider == "INDOT" or thisProvider == "NDDOT" or thisProvider == "NEDOR" or thisProvider == "GLDNWS" or thisProvider == "WYDOT" or thisProvider == "OHDOT" or thisProvider == "MDDOT" or thisProvider == "NHDOT"):
-    db[thisStation] = {}
-    ticks = obTime[recnum]
-    ts = mx.DateTime.gmtime(ticks)
-    db[thisStation]['ts'] = ts
-    db[thisStation]['pres'] = sanityCheck(pressure[recnum][0], 0, 1000000, -99)
-    db[thisStation]['tmpk'] = sanityCheck(tmpk[recnum][0], 0, 500, -99)
-    db[thisStation]['dwpk'] = sanityCheck(dwpk[recnum][0], 0, 500, -99)
-    db[thisStation]['tmpk_dd'] = tmpk_dd[recnum][0]
-    db[thisStation]['drct'] = sanityCheck(drct[recnum][0], -1, 361, -99)
-    db[thisStation]['smps'] = sanityCheck(smps[recnum][0], -1, 200, -99)
-    db[thisStation]['gmps'] = sanityCheck(gmps[recnum][0], -1, 200, -99)
-    db[thisStation]['rtk1'] = sanityCheck(rtk1[recnum][0], 0, 500, -99)
-    db[thisStation]['rtk2'] = sanityCheck(rtk2[recnum][0], 0, 500, -99)
-    db[thisStation]['rtk3'] = sanityCheck(rtk3[recnum][0], 0, 500, -99)
-    db[thisStation]['rtk4'] = sanityCheck(rtk4[recnum][0], 0, 500, -99)
-    db[thisStation]['subk'] = sanityCheck(subk1[recnum][0],0,500,-99)
-    db[thisStation]['pday'] = sanityCheck(pcpn[recnum][0],-1,5000,-99)
+  thisProvider = ''.join( providers[recnum] )
+  thisStation  = ''.join( stations[recnum] )
+  if not thisProvider in MY_PROVIDERS:
+    continue
+  db[thisStation] = {}
+  ticks = obTime[recnum]
+  ts = mx.DateTime.gmtime(ticks)
+  db[thisStation]['ts'] = ts
+  db[thisStation]['network'] = provider2network(thisProvider)
+  db[thisStation]['pres'] = sanityCheck(pressure[recnum][0], 0, 1000000, -99)
+  db[thisStation]['tmpk'] = sanityCheck(tmpk[recnum][0], 0, 500, -99)
+  db[thisStation]['dwpk'] = sanityCheck(dwpk[recnum][0], 0, 500, -99)
+  db[thisStation]['tmpk_dd'] = tmpk_dd[recnum][0]
+  db[thisStation]['drct'] = sanityCheck(drct[recnum][0], -1, 361, -99)
+  db[thisStation]['smps'] = sanityCheck(smps[recnum][0], -1, 200, -99)
+  db[thisStation]['gmps'] = sanityCheck(gmps[recnum][0], -1, 200, -99)
+  db[thisStation]['rtk1'] = sanityCheck(rtk1[recnum][0], 0, 500, -99)
+  db[thisStation]['rtk2'] = sanityCheck(rtk2[recnum][0], 0, 500, -99)
+  db[thisStation]['rtk3'] = sanityCheck(rtk3[recnum][0], 0, 500, -99)
+  db[thisStation]['rtk4'] = sanityCheck(rtk4[recnum][0], 0, 500, -99)
+  db[thisStation]['subk'] = sanityCheck(subk1[recnum][0],0,500,-99)
+  db[thisStation]['pday'] = sanityCheck(pcpn[recnum][0],-1,5000,-99)
 
 for sid in db.keys():
-  iem = iemAccessOb.iemAccessOb(sid)
+  iem = access.Ob(sid, db[sid]['network'], icursor)
   iem.setObTimeGMT( db[sid]['ts'] )
   iem.data['tmpf'] = mesonet.k2f( db[sid]['tmpk'] )
   iem.data['dwpf'] = mesonet.k2f( db[sid]['dwpk'] )
@@ -86,5 +105,10 @@ for sid in db.keys():
     iem.data['rwis_subf'] = mesonet.k2f( db[sid]['subk'] )
   if (db[sid]['pday'] >= 0):
     iem.data['pday'] = float(db[sid]['pday']) * (1.00/25.4)
-  iem.updateDatabase(iemaccess.iemdb)
+  iem.updateDatabase()
   del(iem)
+
+nc.close()
+icursor.close()
+IEM.commit()
+IEM.close()

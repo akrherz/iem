@@ -9,7 +9,7 @@ cd ../ingestors/rwis
 /mesonet/python/bin/python acquireClarus.py
 
 cd ../madis
-/mesonet/python/bin/python to_iemaccess.py
+python to_iemaccess.py
 
 cd ../../snet
 ./RUN.csh
