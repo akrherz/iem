@@ -1,0 +1,7 @@
+[appauth]
+client_id=992627006709.apps.googleusercontent.com
+app_secret=blah
+  
+[googleauth]
+access_token=blah
+refresh_token=blah
