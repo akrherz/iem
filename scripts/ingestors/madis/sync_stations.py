@@ -6,10 +6,23 @@ $Id: $:
 import netCDF3
 import mx.DateTime
 import iemdb
+import os
 MESOSITE = iemdb.connect('mesosite')
 mcursor = MESOSITE.cursor()
 
-nc = netCDF3.Dataset('/mesonet/data/madis/mesonet/20111103_1800.nc')
+fp = None
+for i in range(0,4):
+  ts = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=i)
+  testfp = ts.strftime("/mesonet/data/madis/mesonet/%Y%m%d_%H00.nc")
+  if os.path.isfile(testfp):
+    fp = testfp
+    break
+
+if fp is None:
+  sys.exit()
+
+nc = netCDF3.Dataset(fp)
+
 
 stations   = nc.variables["stationId"]
 names   = nc.variables["stationName"]
@@ -20,7 +33,10 @@ elevations  = nc.variables["elevation"]
 
 
 MY_PROVIDERS = ["MNDOT", "KSDOT", "WIDOT", "INDOT", "NDDOT",
- "NEDOR", "WYDOT", "OHDOT", "MDDOT", "NHDOT", "WVDOT"]
+ "NEDOR", "WYDOT", "OHDOT", "MDDOT", "NHDOT", "WVDOT", "NVDOT",
+ "AKDOT", "VTDOT", "WIDOT", "MEDOT", "VADOT","CODOT", "FLDOT",
+ "GADOT"]
+
 
 for recnum in range(len(providers)):
   thisProvider = ''.join(providers[recnum])
