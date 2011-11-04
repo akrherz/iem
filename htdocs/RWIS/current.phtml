@@ -17,7 +17,9 @@ function new_window(url) {
 <?php 
   include("$rootpath/include/iemaccess.php");
   include("$rootpath/include/iemaccessob.php");
-
+  include_once "$rootpath/include/database.inc.php";
+  $mesosite = iemdb('mesosite');
+  
 $iem = new IEMAccess();
 $rwis = $iem->getNetwork($network);
 
@@ -34,19 +36,18 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 <?php $current_network = "RWIS"; include("$rootpath/include/current_bar.inc.php"); ?>
 <form method="GET" action="current.phtml">
 <select name="network">
-  <option value="IN_RWIS" <?php if ($network == "IN_RWIS") echo "SELECTED"; ?>>Indiana 
-  <option value="IA_RWIS" <?php if ($network == "IA_RWIS") echo "SELECTED"; ?>>Iowa
-  <option value="IL_RWIS" <?php if ($network == "IL_RWIS") echo "SELECTED"; ?>>Illinois
-  <option value="KS_RWIS" <?php if ($network == "KS_RWIS") echo "SELECTED"; ?>>Kansas
-  <option value="MD_RWIS" <?php if ($network == "MD_RWIS") echo "SELECTED"; ?>>Maryland
-  <option value="MN_RWIS" <?php if ($network == "MN_RWIS") echo "SELECTED"; ?>>Minnesota
-  <option value="NE_RWIS" <?php if ($network == "NE_RWIS") echo "SELECTED"; ?>>Nebraska
-  <option value="NH_RWIS" <?php if ($network == "NH_RWIS") echo "SELECTED"; ?>>New Hampshire
-  <option value="ND_RWIS" <?php if ($network == "ND_RWIS") echo "SELECTED"; ?>>North Dakota
-  <option value="OH_RWIS" <?php if ($network == "OH_RWIS") echo "SELECTED"; ?>>Ohio
-  <option value="SD_RWIS" <?php if ($network == "SD_RWIS") echo "SELECTED"; ?>>South Dakota
-  <option value="WI_RWIS" <?php if ($network == "WI_RWIS") echo "SELECTED"; ?>>Wisconsin
-  <option value="WY_RWIS" <?php if ($network == "WY_RWIS") echo "SELECTED"; ?>>Wyoming
+<?php 
+$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC");
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	$sel = '';
+	if ($network == $row["id"]){
+		$sel = " selected='SELECTED'";
+	}
+	echo sprintf("<option value='%s'%s>%s</option>\n",
+	  $row["id"], $sel, $row["name"]);
+}
+
+?>
 </select>
 <input type="submit" value="Show State">
 </form>
