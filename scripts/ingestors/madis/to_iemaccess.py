@@ -2,7 +2,7 @@
 Suck in MADIS data into the iemdb
 $Id: $:
 """
-import netCDF3
+import netCDF4
 import string, re, mx.DateTime, os, sys
 import access
 import iemdb
@@ -21,7 +21,7 @@ for i in range(0,4):
 if fp is None:
   sys.exit()
 
-nc = netCDF3.Dataset(fp)
+nc = netCDF4.Dataset(fp)
 
 def sanityCheck(val, lower, upper, rt):
   if (val > lower and val < upper):
@@ -51,14 +51,16 @@ subk1       = nc.variables["roadSubsurfaceTemp1"]
 db = {}
 
 MY_PROVIDERS = ["MNDOT", "KSDOT", "WIDOT", "INDOT", "NDDOT",
- "NEDOR", "WYDOT", "OHDOT", "MDDOT", "NHDOT", "WVDOT"]
+ "NEDOR", "WYDOT", "OHDOT", "MDDOT", "NHDOT", "WVDOT", "NVDOT",
+ "AKDOT", "VTDOT", "WIDOT", "MEDOT", "VADOT", "CODOT", "FLDOT",
+ "GADOT"]
+
 
 def provider2network(p):
   return '%s_RWIS' % (p[:2],)
-
 for recnum in range(len(providers)):
-  thisProvider = ''.join( providers[recnum] )
-  thisStation  = ''.join( stations[recnum] )
+  thisProvider =  providers[recnum].tostring().replace('\x00','')
+  thisStation  =  stations[recnum].tostring().replace('\x00','')
   if not thisProvider in MY_PROVIDERS:
     continue
   db[thisStation] = {}
@@ -66,19 +68,19 @@ for recnum in range(len(providers)):
   ts = mx.DateTime.gmtime(ticks)
   db[thisStation]['ts'] = ts
   db[thisStation]['network'] = provider2network(thisProvider)
-  db[thisStation]['pres'] = sanityCheck(pressure[recnum][0], 0, 1000000, -99)
-  db[thisStation]['tmpk'] = sanityCheck(tmpk[recnum][0], 0, 500, -99)
-  db[thisStation]['dwpk'] = sanityCheck(dwpk[recnum][0], 0, 500, -99)
-  db[thisStation]['tmpk_dd'] = tmpk_dd[recnum][0]
-  db[thisStation]['drct'] = sanityCheck(drct[recnum][0], -1, 361, -99)
-  db[thisStation]['smps'] = sanityCheck(smps[recnum][0], -1, 200, -99)
-  db[thisStation]['gmps'] = sanityCheck(gmps[recnum][0], -1, 200, -99)
-  db[thisStation]['rtk1'] = sanityCheck(rtk1[recnum][0], 0, 500, -99)
-  db[thisStation]['rtk2'] = sanityCheck(rtk2[recnum][0], 0, 500, -99)
-  db[thisStation]['rtk3'] = sanityCheck(rtk3[recnum][0], 0, 500, -99)
-  db[thisStation]['rtk4'] = sanityCheck(rtk4[recnum][0], 0, 500, -99)
-  db[thisStation]['subk'] = sanityCheck(subk1[recnum][0],0,500,-99)
-  db[thisStation]['pday'] = sanityCheck(pcpn[recnum][0],-1,5000,-99)
+  db[thisStation]['pres'] = sanityCheck(pressure[recnum], 0, 1000000, -99)
+  db[thisStation]['tmpk'] = sanityCheck(tmpk[recnum], 0, 500, -99)
+  db[thisStation]['dwpk'] = sanityCheck(dwpk[recnum], 0, 500, -99)
+  db[thisStation]['tmpk_dd'] = tmpk_dd[recnum]
+  db[thisStation]['drct'] = sanityCheck(drct[recnum], -1, 361, -99)
+  db[thisStation]['smps'] = sanityCheck(smps[recnum], -1, 200, -99)
+  db[thisStation]['gmps'] = sanityCheck(gmps[recnum], -1, 200, -99)
+  db[thisStation]['rtk1'] = sanityCheck(rtk1[recnum], 0, 500, -99)
+  db[thisStation]['rtk2'] = sanityCheck(rtk2[recnum], 0, 500, -99)
+  db[thisStation]['rtk3'] = sanityCheck(rtk3[recnum], 0, 500, -99)
+  db[thisStation]['rtk4'] = sanityCheck(rtk4[recnum], 0, 500, -99)
+  db[thisStation]['subk'] = sanityCheck(subk1[recnum],0,500,-99)
+  db[thisStation]['pday'] = sanityCheck(pcpn[recnum],-1,5000,-99)
 
 for sid in db.keys():
   iem = access.Ob(sid, db[sid]['network'], icursor)
@@ -107,7 +109,6 @@ for sid in db.keys():
     iem.data['pday'] = float(db[sid]['pday']) * (1.00/25.4)
   iem.updateDatabase()
   del(iem)
-
 nc.close()
 icursor.close()
 IEM.commit()
