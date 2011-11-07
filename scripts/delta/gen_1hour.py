@@ -40,6 +40,7 @@ for id in c.keys():
 
 	if (d < 1 and d > -1):
 		#print id, c[id]["lat"], c[id]["lon"], c[id]["alti"], lh[id]["alti"], d
-		iemdb.query("UPDATE trend_1h SET alti_1h = %s, \
-			updated = CURRENT_TIMESTAMP WHERE station = '%s'" % (d, id) )
+		iemdb.query("""UPDATE trend_1h t SET alti_1h = %s, 
+			updated = CURRENT_TIMESTAMP FROM stations s 
+   WHERE s.iemid = t.iemid and s.id = '%s'""" % (d, id) )
 
