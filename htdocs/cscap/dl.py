@@ -42,7 +42,7 @@ def get_data():
     token.authorize(spr_client)
     # Hard Code Nafziger for now
     datakey = '0AqZGw0coobCxdC1sZ3l0RmFsV0hfekoyc2JYdHBxQ2c'
-    res += "<table border='1' cellspacing='0' cellpadding='2'><tr><th>Year</th><th>Site</th><th>Tillage</th><th>AGR1</th></tr>"
+    res += "<table border='1' cellspacing='0' cellpadding='2'><tr><th>Year</th><th>Site</th><th>Tillage</th><th>MyID</th><th>AGR1</th></tr>"
     
     feed = spr_client.get_worksheets(datakey)
     for entry in feed.entry:
@@ -52,9 +52,9 @@ def get_data():
             data = dataentry.to_dict()
             if data.get('tillage') is None:
                 continue
-            res += "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
+            res += "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
                                 entry.title, data.get('uniqueid'),
-                                data.get('tillage'),
+                                data.get('tillage'), data.get('myid'),
                                 data.get('agr1') or 'M')
     res += "</table>"
     return res
