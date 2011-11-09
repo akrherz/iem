@@ -41,7 +41,7 @@ def get_data():
     spr_client = gdata.spreadsheets.client.SpreadsheetsClient()
     token.authorize(spr_client)
     # Hard Code Nafziger for now
-    datakey = '0AqZGw0coobCxdHNiR3NNVXdiWC1MRzBmaFJ6d3FQc3c'
+    datakey = '0AqZGw0coobCxdC1sZ3l0RmFsV0hfekoyc2JYdHBxQ2c'
     res += "<table border='1' cellspacing='0' cellpadding='2'><tr><th>Year</th><th>Site</th><th>Tillage</th><th>AGR1</th></tr>"
     
     feed = spr_client.get_worksheets(datakey)
