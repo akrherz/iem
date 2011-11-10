@@ -21,7 +21,7 @@ icursor.execute("""
     summary_2011 t JOIN stations s ON (s.iemid = t.iemid) where network ~* 'COOP' and day in ('2011-11-09') and snow >= 0 and 
     x(geom) BETWEEN %s and %s and
     y(geom) BETWEEN %s and %s  
-    GROUP by station, lon, lat
+    GROUP by id, lon, lat
 """, (iemplot.MW_WEST, iemplot.MW_EAST, iemplot.MW_SOUTH, iemplot.MW_NORTH))
 for row in icursor:
     if row[4] == 2:
