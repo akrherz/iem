@@ -17,8 +17,8 @@ lats = []
 lons = []
 sources = []
 icursor.execute("""
-    SELECT station, sum(snow), x(geom) as lon, y(geom) as lat, count(*) from
-    summary_2011 where network ~* 'COOP' and day in ('2011-11-09') and snow >= 0 and 
+    SELECT id, sum(snow), x(geom) as lon, y(geom) as lat, count(*) from
+    summary_2011 t JOIN stations s ON (s.iemid = t.iemid) where network ~* 'COOP' and day in ('2011-11-09') and snow >= 0 and 
     x(geom) BETWEEN %s and %s and
     y(geom) BETWEEN %s and %s  
     GROUP by station, lon, lat
