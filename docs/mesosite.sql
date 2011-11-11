@@ -97,6 +97,7 @@ GRANT select on webcams to apache,nobody;
 
 CREATE TABLE stations(
 	id varchar(20),
+	synop int,
 	name varchar(40),
 	state char(2),
 	country char(2),
@@ -108,15 +109,19 @@ CREATE TABLE stations(
 	plot_name varchar(40),
 	climate_site varchar(6),
 	remote_id int,
+	nwn_id int,
+	spri smallint,
 	wfo varchar(3),
-	archive_begin timestamp with time zone,
+	archive_begin date,
 	archive_end timestamp with time zone,
 	modified timestamp with time zone,
-	tzname varchar(32)
+	tzname varchar(32),
+	iemid SERIAL
 );
 CREATE UNIQUE index stations_idx on stations(id, network);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on stations to apache,nobody;
+grant all on stations_iemid_seq to nobody,apache
 
 CREATE OR REPLACE FUNCTION update_modified_column()
 	RETURNS TRIGGER AS $$

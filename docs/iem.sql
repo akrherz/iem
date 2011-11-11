@@ -1,10 +1,37 @@
+--- $ createdb iem
+--- $ psql -f /usr/pgsql-9.0/share/contrib/postgis-1.5/postgis.sql iem
+--- $ psql -f /usr/pgsql-9.0/share/contrib/postgis-1.5/spatial_ref_sys.sql iem
+
+---
+--- Quasi synced from mesosite database
+---
+CREATE TABLE stations(
+	id varchar(20),
+	synop int,
+	name varchar(64),
+	state char(2),
+	country char(2),
+	elevation real,
+	network varchar(20),
+	online boolean,
+	params varchar(300),
+	county varchar(50),
+	plot_name varchar(64),
+	climate_site varchar(6),
+	remote_id int,
+	wfo char(3),
+	archive_begin timestamp with time zone,
+	archive_end timestamp with time zone,
+	tzname varchar(32),
+	modified timestamp with time zone,
+	iemid int PRIMARY KEY
+	);
+SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
+GRANT SELECT on stations to nobody,apache;
 
 
 CREATE TABLE current (
-    station character varying(20),
-    geom geometry,
-    network character varying(10),
-    sname character varying,
+    iemid int REFERENCES stations(iemid),
     tmpf real,
     dwpf real,
     drct real,
@@ -55,16 +82,12 @@ CREATE TABLE current (
     skyc4 character(3),
     skyl4 integer,
     pcounter real,
-    discharge real,
-    CONSTRAINT "$1" CHECK ((srid(geom) = 4326)),
-    CONSTRAINT "$2" CHECK ((geometrytype(geom) = 'POINT'::text))
+    discharge real
 );
+CREATE UNIQUE index current_iemid_idx on current(iemid);
 
 CREATE TABLE current_log (
-    station character varying(20),
-    geom geometry,
-    network character varying(10),
-    sname character varying,
+    iemid int REFERENCES stations(iemid),
     tmpf real,
     dwpf real,
     drct real,
@@ -115,16 +138,15 @@ CREATE TABLE current_log (
     skyc4 character(3),
     skyl4 integer,
     pcounter real,
-    CONSTRAINT "$1" CHECK ((srid(geom) = 4326)),
-    CONSTRAINT "$2" CHECK ((geometrytype(geom) = 'POINT'::text))
+    discharge real
 );
 
-CREATE FUNCTION current_update_log() RETURNS trigger
+CREATE OR REPLACE FUNCTION current_update_log() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
   BEGIN
    IF (NEW.valid != OLD.valid) THEN
-     INSERT into current_log SELECT * from current WHERE station = NEW.station and network = NEW.network;
+     INSERT into current_log SELECT * from current WHERE iemid = NEW.iemid;
    END IF;
    RETURN NEW;
   END
@@ -134,14 +156,11 @@ CREATE TRIGGER current_update_tigger AFTER UPDATE ON current
 FOR EACH ROW EXECUTE PROCEDURE current_update_log();
 
 
-SELECT AddGeometryColumn('current', 'geom', 4326, 'POINT', 2);
-
 CREATE TABLE summary (
-    station character varying(20),
+	iemid int REFERENCES stations(iemid),
     max_tmpf real,
     min_tmpf real,
     day date,
-    network character varying(10),
     max_sknt real,
     max_gust real,
     max_sknt_ts timestamp with time zone,
@@ -160,6 +179,190 @@ CREATE TABLE summary (
     max_drct real,
     max_srad smallint
 );
-SELECT AddGeometryColumn('summary', 'geom', 4326, 'POINT', 2);
 
-CREATE TABLE summary_2010() inherits (summary);
+CREATE TABLE summary_2011() inherits (summary);
+
+CREATE TABLE trend_15m(
+	iemid int REFERENCES stations(iemid),
+	updated timestamp with time zone,
+	alti_15m real
+);
+GRANT SELECT on trend_15m to nobody,apache;
+
+CREATE TABLE trend_1h(
+	iemid int REFERENCES stations(iemid),
+	updated timestamp with time zone,
+	alti_1h real
+);
+GRANT SELECT on trend_1h to nobody,apache;
+
+CREATE TABLE rwis_locations(
+  id smallint UNIQUE,
+  nwsli char(5)
+);
+
+--
+-- RWIS Deep Soil Probe Data
+--
+CREATE TABLE rwis_soil_data(
+  location_id smallint references rwis_locations(id),
+  sensor_id smallint,
+  valid timestamp with time zone,
+  temp real,
+  moisture real
+);
+CREATE TABLE rwis_soil_data_log(
+  location_id smallint references rwis_locations(id),
+  sensor_id smallint,
+  valid timestamp with time zone,
+  temp real,
+  moisture real
+);
+
+GRANT select on rwis_soil_data to apache,nobody;
+
+CREATE FUNCTION rwis_soil_update_log() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+   IF (NEW.valid != OLD.valid) THEN
+     INSERT into rwis_soil_data_log 
+        SELECT * from rwis_soil_data WHERE sensor_id = NEW.sensor_id
+        and location_id = NEW.location_id;
+   END IF;
+   RETURN NEW;
+  END
+ $$;
+
+CREATE TRIGGER rwis_soil_update_tigger
+    AFTER UPDATE ON rwis_soil_data
+    FOR EACH ROW
+    EXECUTE PROCEDURE rwis_soil_update_log();
+
+--
+-- RWIS Traffic Data Storage
+-- 
+CREATE TABLE rwis_traffic_sensors(
+  id SERIAL UNIQUE,
+  location_id smallint references rwis_locations(id),
+  lane_id smallint,
+  name varchar(64)
+);
+
+CREATE OR REPLACE view rwis_traffic_meta AS 
+  SELECT l.id as location_id, l.nwsli as nwsli, s.id as sensor_id,
+  s.lane_id as lane_id
+  FROM rwis_locations l, rwis_traffic_sensors s WHERE
+  l.id = s.location_id;
+
+
+CREATE TABLE rwis_traffic_data(
+  sensor_id int references rwis_traffic_sensors(id),
+  valid timestamp with time zone,
+  avg_speed real,
+  avg_headway real,
+  normal_vol real,
+  long_vol real,
+  occupancy real
+);
+
+CREATE TABLE rwis_traffic_data_log(
+  sensor_id int references rwis_traffic_sensors(id),
+  valid timestamp with time zone,
+  avg_speed real,
+  avg_headway real,
+  normal_vol real,
+  long_vol real,
+  occupancy real
+);
+
+CREATE FUNCTION rwis_traffic_update_log() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+   IF (NEW.valid != OLD.valid) THEN
+     INSERT into rwis_traffic_data_log 
+        SELECT * from rwis_traffic_data WHERE sensor_id = NEW.sensor_id;
+   END IF;
+   RETURN NEW;
+  END
+ $$;
+
+CREATE TRIGGER rwis_traffic_update_tigger
+    AFTER UPDATE ON rwis_traffic_data
+    FOR EACH ROW
+    EXECUTE PROCEDURE rwis_traffic_update_log();
+
+
+CREATE VIEW rwis_traffic AS 
+  SELECT * from 
+  rwis_traffic_sensors s, rwis_traffic_data d
+  WHERE d.sensor_id = s.id;
+
+GRANT SELECT on rwis_traffic_data to apache,nobody;
+GRANT SELECT on rwis_traffic_data_log to apache,nobody;
+GRANT SELECT on rwis_traffic_sensors to apache,nobody;
+GRANT SELECT on rwis_traffic to apache,nobody;
+
+INSERT into rwis_locations values (58, 'RPFI4');
+INSERT into rwis_locations values (30, 'RMCI4');
+INSERT into rwis_locations values (54, 'RSYI4');
+INSERT into rwis_locations values (42, 'RSPI4');
+INSERT into rwis_locations values (48, 'RWBI4');
+INSERT into rwis_locations values (22, 'RGRI4');
+INSERT into rwis_locations values (45, 'RURI4');
+INSERT into rwis_locations values (43, 'RSLI4');
+INSERT into rwis_locations values (60, 'RDNI4');
+INSERT into rwis_locations values (61, 'RQCI4');
+INSERT into rwis_locations values (57, 'RTMI4');
+INSERT into rwis_locations values (49, 'RHAI4');
+INSERT into rwis_locations values (52, 'RCRI4');
+INSERT into rwis_locations values (53, 'RCFI4');
+INSERT into rwis_locations values (02, 'RTNI4');
+INSERT into rwis_locations values (03, 'RTOI4');
+INSERT into rwis_locations values (00, 'RDAI4');
+INSERT into rwis_locations values (01, 'RALI4');
+INSERT into rwis_locations values (06, 'RAVI4');
+INSERT into rwis_locations values (07, 'RBUI4');
+INSERT into rwis_locations values (04, 'RAMI4');
+INSERT into rwis_locations values (05, 'RAKI4');
+INSERT into rwis_locations values (46, 'RWLI4');
+INSERT into rwis_locations values (47, 'RWII4');
+INSERT into rwis_locations values (08, 'RCAI4');
+INSERT into rwis_locations values (09, 'RCDI4');
+INSERT into rwis_locations values (28, 'RMQI4');
+INSERT into rwis_locations values (29, 'RMTI4');
+INSERT into rwis_locations values (40, 'RSGI4');
+INSERT into rwis_locations values (41, 'RSCI4');
+INSERT into rwis_locations values (59, 'RCTI4');
+INSERT into rwis_locations values (51, 'RIGI4');
+INSERT into rwis_locations values (24, 'RIOI4');
+INSERT into rwis_locations values (56, 'RDYI4');
+INSERT into rwis_locations values (25, 'RJFI4');
+INSERT into rwis_locations values (39, 'RSDI4');
+INSERT into rwis_locations values (26, 'RLEI4');
+INSERT into rwis_locations values (27, 'RMNI4');
+INSERT into rwis_locations values (20, 'RDBI4');
+INSERT into rwis_locations values (38, 'RROI4');
+INSERT into rwis_locations values (21, 'RFDI4');
+INSERT into rwis_locations values (11, 'RCNI4');
+INSERT into rwis_locations values (10, 'RCII4');
+INSERT into rwis_locations values (13, 'RCEI4');
+INSERT into rwis_locations values (12, 'RCBI4');
+INSERT into rwis_locations values (15, 'RDCI4');
+INSERT into rwis_locations values (14, 'RDVI4');
+INSERT into rwis_locations values (17, 'RDMI4');
+INSERT into rwis_locations values (16, 'RDSI4');
+INSERT into rwis_locations values (19, 'RDWI4');
+INSERT into rwis_locations values (18, 'RDEI4');
+INSERT into rwis_locations values (31, 'RMVI4');
+INSERT into rwis_locations values (23, 'RIAI4');
+INSERT into rwis_locations values (37, 'RPLI4');
+INSERT into rwis_locations values (36, 'ROTI4');
+INSERT into rwis_locations values (35, 'ROSI4');
+INSERT into rwis_locations values (34, 'RONI4');
+INSERT into rwis_locations values (33, 'RNHI4');
+INSERT into rwis_locations values (55, 'RBFI4');
+INSERT into rwis_locations values (32, 'RMPI4');
+INSERT into rwis_locations values (44, 'RTPI4');
+INSERT into rwis_locations values (50, 'RSBI4');
