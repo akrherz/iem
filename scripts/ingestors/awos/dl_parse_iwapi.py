@@ -25,6 +25,8 @@ def dosite(id):
         return
         
     mtr = Metar.Metar(data)
+    if mtr.time is None:
+        return
     iemid = mtr.station_id[-3:]
     gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month,
                   mtr.time.day, mtr.time.hour, mtr.time.minute)
