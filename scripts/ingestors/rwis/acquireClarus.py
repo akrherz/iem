@@ -29,6 +29,8 @@ for row in r:
     continue
   sid = "CL%s" % (row['ClarusSiteID'],)
   if (not obs.has_key(sid)):
+    if (row['ClarusContribID'] == "18"):
+      obs[sid] = iemAccessOb.iemAccessOb(sid, 'IN_RWIS')
     if (row['ClarusContribID'] == "17"):
       obs[sid] = iemAccessOb.iemAccessOb(sid, 'IL_RWIS')
     if (row['ClarusContribID'] == "44"):
