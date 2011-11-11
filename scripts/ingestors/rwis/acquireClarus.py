@@ -11,13 +11,13 @@ import csv, sys
 m = mx.DateTime.now().minute / 20
 gmt = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(minute=(20*m))
 #url = "http://www.clarus-system.com/SubShowObs.jsp?subId=2008112400&file=%s.csv" % (gmt.strftime("%Y%m%d_%H%M"),)
-url = "http://www.clarus-system.com/SubShowObs.jsp?subId=2009112900&file=%s.csv" % (gmt.strftime("%Y%m%d_%H%M"),)
+url = "http://www.clarus-system.com/SubShowObs.jsp?subId=2011111100&file=%s.csv" % (gmt.strftime("%Y%m%d_%H%M"),)
 #print url
 req = urllib2.Request(url)
-try:
-  data = urllib2.urlopen(req)
-except:
-  sys.exit(0)
+#try:
+data = urllib2.urlopen(req)
+#except:
+#  sys.exit(0)
 
 # Process the dataset into dicts
 obs = {}
@@ -56,3 +56,4 @@ for id in obs.keys():
   obs[id].updateDatabase(access)
 
 # Loop over stations, update iemaccess
+

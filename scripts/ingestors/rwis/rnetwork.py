@@ -27,6 +27,7 @@ class rnetwork:
             if not self.obs.has_key( id ):
                 self.obs[ id ] = rwis.RWISOb()
             self.obs[ id ].add_sfdata( row )
+            self.obs[ id ].sname = st.sts[ self.obs[id].stationID ]['name']
         csvfile.close()
 
     def checkOffline(self, network, thres):
@@ -93,7 +94,7 @@ class rnetwork:
             sid =  self.obs[id].stationID
             if self.obs[id].gmt_ts < thres:
                 continue
-            if sid in ["RIOI4","ROSI4","RSMI4"]:
+            if sid in ["RIOI4","ROSI4","RSMI4",'RMCI4']:
                 continue
             self.obs[id].printMETAR(fp) 
 
@@ -111,7 +112,7 @@ class rnetwork:
             sid =  self.obs[id].stationID
             if self.obs[id].gmt_ts < thres:
                 continue
-            if sid in ["RIOI4","ROSI4","RSMI4"]:
+            if sid in ["RIOI4","ROSI4","RSMI4",'RMCI4']:
                 continue
             self.obs[id].printMETAR2(fp) 
 
