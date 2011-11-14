@@ -1,5 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
+define("IEM_APPID", 42);
 include("$rootpath/include/imagemaps.php");
 include("$rootpath/include/forms.php");
 include("$rootpath/include/database.inc.php");
@@ -11,16 +12,16 @@ $day = isset($_GET["day"]) ? $_GET["day"] : 25;
 $ts = strtotime("2000-${month}-${day}");
 $sday = date('md', $ts);
 
-$rs = pg_prepare($coopdb, "FIND", "SELECT * from alldata
+$rs = pg_prepare($coopdb, "FIND", "SELECT * from alldata_ia
       WHERE station = $1 and sday = $2 and snowd > 0 ORDER
       by year ASC");
-$rs = pg_prepare($coopdb, "FIND2", "SELECT min(day) as m from alldata
-      WHERE day > $1 and stationid = $2 and snowd = 0");
+$rs = pg_prepare($coopdb, "FIND2", "SELECT min(day) as m from alldata_ia
+      WHERE day > $1 and station = $2 and snowd = 0");
 
 $table = "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\"><tr><th>Start Day</th><th>Depth [inch]</th><th>End Date</th><th>Duration [days]</th></tr>";
 
 /* Find all snow days for this date! */
-$rs = pg_execute($coopdb, "FIND", Array(strtolower($station), $sday));
+$rs = pg_execute($coopdb, "FIND", Array(strtoupper($station), $sday));
 $data = Array();
 for($i=0;$row=@pg_fetch_array($rs,$i); $i++)
 {
@@ -33,9 +34,9 @@ for($i=0;$row=@pg_fetch_array($rs,$i); $i++)
   $table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%.0f</td></tr>", 
             date('Y M d', $sts), $row["snowd"], date('Y M d',$endts), $days);
 }
-
-$table .= sprintf("<tr><th colspan=\"3\" align=\"right\">Average</th><td>%.0f</td></tr>", (array_sum($data) / pg_num_rows($rs)));
-
+if (pg_num_rows($rs) > 0){
+  $table .= sprintf("<tr><th colspan=\"3\" align=\"right\">Average</th><td>%.0f</td></tr>", (array_sum($data) / pg_num_rows($rs)));
+}
 $table .= "</table>";
 
 $THISPAGE = "networks-coop";
