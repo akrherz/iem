@@ -22,9 +22,7 @@ $ndate = adodb_date("Y-m-d", $ts);
 
 include("$rootpath/include/forms.php");
 
-?>
-
-<?php $TITLE = "IEM | NWS COOP Daily Plotter";
+ $TITLE = "IEM | NWS COOP Daily Plotter";
 $THISPAGE = "networks-coop";
 $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
@@ -179,7 +177,7 @@ if ($source == "qc")
   $c = iemdb("access");
   $cutstring1 = 0;
   $cutstring2 = 5;
-  $sql = sprintf("SELECT station, day, snowd, max_tmpf as high, min_tmpf as low, pday as precip, snow, snowd from summary_%s WHERE day = '%s' and network = 'IA_COOP' and min_tmpf < 90 and max_tmpf > -90", adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
+  $sql = sprintf("SELECT id as station, day, snowd, max_tmpf as high, min_tmpf as low, pday as precip, snow, snowd from summary_%s s JOIN stations t on (t.iemid = s.iemid) WHERE day = '%s' and network = 'IA_COOP' and min_tmpf < 90 and max_tmpf > -90", adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
 }
 
 $rs =  pg_exec($c, $sql);
