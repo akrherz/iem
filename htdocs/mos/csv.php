@@ -9,7 +9,7 @@ pg_exec($mos, "SET TIME ZONE 'GMT'");
 $station = isset($_GET["station"])? $_GET["station"]: "KAMW";
 $ts = isset($_GET["valid"])? strtotime($_GET["valid"]): time();
 $year = date("Y", $ts);
-if ($year == 1970){
+if ($year < 2000){
 	exit();
 }
 
