@@ -1,6 +1,10 @@
 # Only EDIT on SVN!
 #
 PYTHONPATH=/mesonet/www/apps/iemwebsite/scripts/lib
+#
+@reboot cd /mesonet/www/apps/iemwebsite/scripts/snet; python data_monitor.py
+@reboot cd /mesonet/www/apps/iemwebsite/scripts/snet; python ingest.py
+#
 0 18 * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_0Z.sh
 0 0 * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_MIDNIGHT.sh
 0 12 * * * cd /mesonet/www/apps/iemwebsite/scripts; sh RUN_NOON.sh
