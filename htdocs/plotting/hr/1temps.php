@@ -8,14 +8,13 @@ include("$rootpath/include/database.inc.php");
 
 $connection = iemdb("access");
 
+pg_prepare($connection, "SELECT", "SELECT tmpf, dwpf  
+	, valid from current_log c JOIN stations s on (s.iemid = c.iemid) 
+        WHERE id = $1 
+	and valid + '".$hours." hours'::interval > CURRENT_TIMESTAMP 
+        ORDER by valid ASC");
 
-$query1 = "SET TIME ZONE 'GMT'";
-$query2 = "SELECT tmpf, dwpf  
-	, valid from current_log WHERE station = '". $station ."' 
-	and valid + '".$hours." hours' > CURRENT_TIMESTAMP ORDER by valid ASC";
-
-// $result = pg_exec($connection, $query1);
-$result = pg_exec($connection, $query2);
+$result = pg_execute($connection, "SELECT", array($station));
 
 $ydata = array();
 $ydata2 = array();
