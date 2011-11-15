@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: twittytwister
+Version: 0.1
+Summary: Twitter client for Twisted Python
+Home-page: http://github.com/dustin/twitty-twister/
+Author: Dustin Sallings
+Author-email: dustin@spy.net
+License: MIT
+Description: UNKNOWN
+Platform: any
