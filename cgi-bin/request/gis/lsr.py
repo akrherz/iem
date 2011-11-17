@@ -71,7 +71,7 @@ for i in range(len(rs)):
 	issue = mx.DateTime.strptime(rs[i]["valid"][:16], "%Y-%m-%d %H:%M")
 	d = {}
 	d["VALID"] = issue.strftime("%Y%m%d%H%M")
-	d["MAG"] = float(rs[i]['magnitude'])
+	d["MAG"] = float(rs[i]['magnitude'] or 0)
 	d["TYPECODE"] = rs[i]['type']
 	d["WFO"] = rs[i]['wfo']
 	d["TYPETEXT"] = rs[i]['typetext']
