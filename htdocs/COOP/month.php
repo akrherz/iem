@@ -14,10 +14,7 @@ $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 $station = isset($_GET["station"]) ? $_GET["station"]: "IA0200";
 
-/* Go get it */
-$rs = pg_prepare($coopdb, "SELECT", "SELECT * from alldata WHERE
-      station = $1 and year = $2 and month = $3 ORDER by day ASC");
-$rs = pg_execute($coopdb, "SELECT", Array($station, $year, $month) );
+
 
 $TITLE = "IEM | COOP Data by Month";
 $THISPAGE="networks-coop";
@@ -52,7 +49,11 @@ while (list($id, $meta) = each($cities)){
 <thead><tr><th>Station ID:</th><th>Date</th><th>High</th><th>Low</th><th>Precip</th><th>Snow</th><th>Snowdepth</th></tr></thead>
 <tbody>
 <?php
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+/* Go get it */
+$rs = pg_prepare($coopdb, "MYSELECT", "SELECT * from alldata WHERE
+      station = $1 and year = $2 and month = $3 ORDER by day ASC");
+$rs = pg_execute($coopdb, "MYSELECT", Array($station,  $year, $month) );
+for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
   echo sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
        $cities[strtoupper($station)]["name"], $row["day"], $row["high"], 
        $row["low"], $row["precip"], $row["snow"], $row["snowd"]);
