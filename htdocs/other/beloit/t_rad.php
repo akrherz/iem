@@ -21,14 +21,18 @@ if ($myTime == $today)
   /* Look in IEM Access! */
   $dbconn = iemdb("access");
   $tbl = "current_log";
+  $rs = pg_prepare($dbconn, "SELECT", "SELECT * from $tbl s JOIN stations t on
+  			(t.iemid = s.iemid)
+                 WHERE t.id = $1 and date(valid) = $2 ORDER by valid ASC");
 } else 
 {
 /* Dig in the archive for our data! */
   $dbconn = iemdb("other");
   $tbl = sprintf("t%s", date("Y", $myTime) );
-}
-$rs = pg_prepare($dbconn, "SELECT", "SELECT * from $tbl 
+  $rs = pg_prepare($dbconn, "SELECT", "SELECT * from $tbl 
                  WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
+}
+
 $rs = pg_execute($dbconn, "SELECT", Array($station, date("Y-m-d", $myTime)));
 if (pg_num_rows($rs) == 0) { 
  $led = new DigitalLED74();
