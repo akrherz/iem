@@ -1,4 +1,7 @@
-# Process data from the mini and portables 
+"""
+ Process data from the mini and portables 
+$Id: $:
+"""
 
 import mx.DateTime
 from pyIEM import iemAccess
@@ -26,6 +29,8 @@ def processfile( fp ):
     heading = o[0].split(",")
     cols = o[1].split(",")
     data = {}
+    if len(cols) < len(heading):
+        return
     for i in range(len(heading)):
         if cols[i].strip() != "/":
             data[ heading[i].strip() ] = cols[i].strip()
