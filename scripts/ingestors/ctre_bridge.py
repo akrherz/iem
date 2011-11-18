@@ -82,7 +82,7 @@ csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RLRI4',
 
 csv.close()
 
-cmd = "/home/ldm/bin/pqinsert -p 'data c 000000000000 csv/ctre.txt bogus txt' /tmp/ctre.txt"
+cmd = "/home/ldm/bin/pqinsert -p 'data c 000000000000 csv/ctre.txt bogus txt' /tmp/ctre.txt >& /dev/null"
 if ((mx.DateTime.now() - ts1).seconds > 3600. and
    (mx.DateTime.now() - ts2).seconds > 3600.):
     sys.exit()
