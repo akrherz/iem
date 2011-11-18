@@ -1,5 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
+define("IEM_APPID", 43);
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/forms.php"); 
 $dbconn = iemdb('postgis');
@@ -42,7 +43,10 @@ if (isset($_GET["month"]) && isset($_GET["segid"]) )
    conditions for that time.";
   echo "<br /><table border=1 cellpadding=2 cellspacing=0><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th><th>Condition</th></tr>";
 
-   $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor from roads_base b, roads_${season}_log l, roads_conditions c WHERE l.segid = $1 and extract(month from l.valid) = $2 and l.cond_code = c.code and b.segid = l.segid ORDER by valid ASC");
+  if ($month > 9 and $season == 2011){ $season = 2012;}
+   $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor from roads_base b, 
+   roads_${season}_log l, roads_conditions c WHERE l.segid = $1 and 
+   extract(month from l.valid) = $2 and l.cond_code = c.code and b.segid = l.segid ORDER by valid ASC");
   $rs = pg_execute($dbconn, "SELECT", Array($segid, $month));
 
   for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
