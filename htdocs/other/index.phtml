@@ -1,6 +1,8 @@
 <?php 
 include("../../config/settings.inc.php");
 define("IEM_APPID", 25);
+include("$rootpath/include/forms.php");
+include("$rootpath/include/imagemaps.php");
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
@@ -54,7 +56,24 @@ purpose is to monitor for high winds impacting traffic.
 <li><a href="beloit/">Beloit Weather Station</a> located at a facility on Northwestern Avenue.</li>
 </ul>
 
+<h3>Raw Data Download!</h3>
+<form name="dl" action="<?php echo $rootcgi; ?>/request/other.py">
+<table>
+<tr><th rowspan="2">Select Location: <?php echo networkSelect("OT", ""); ?></th>
+ <th>Start Date:</th> 
+  <td><?php echo yearSelect2(2003, date("Y"), "year1"); ?></td>
+  <td><?php echo monthSelect(date("m"), "month1"); ?></td>
+  <td><?php echo daySelect2(date("d"), "day1"); ?></td></tr>
 
+<tr>
+ <th>End Date:</th>
+  <td><?php echo yearSelect2(2003, date("Y"), "year2"); ?></td>
+  <td><?php echo monthSelect(date("m"), "month2"); ?></td>
+  <td><?php echo daySelect2(date("d"), "day2"); ?></td></tr>
+
+</table>
+<input type="submit" value="Request Data" />
+</form>
 
 
 <?php include("$rootpath/include/footer.php"); ?>
