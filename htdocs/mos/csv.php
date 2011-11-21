@@ -20,7 +20,10 @@ $rs = pg_prepare($mos, "SELECTOR", "select *, t06_1 ||'/'||t06_2 as t06,
 
 if (isset($_GET["runtime"]) && isset($_GET["model"])){
   $ts = strtotime($_GET["runtime"]);
-  $year = date("Y", $ts);
+  $year = intval(date("Y", $ts));
+  if ($year < 2007){
+  	die("Bad runtime '". $_GET["runtime"]. "'");
+  }
   $rs = pg_prepare($mos, "SELECTOR2", "select *, t06_1 ||'/'||t06_2 as t06, 
                  t12_1 ||'/'|| t12_2 as t12  from t${year} WHERE station = $1
                  and runtime = $2 and model = $3 ORDER by ftime ASC");
