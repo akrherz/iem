@@ -27,7 +27,6 @@ for line in open('alert.txt'):
 
 for miss in missing:
   if not stations.has_key(miss):
-    print 'Unknown', miss
     continue
   data = stations[miss]
   sql = "INSERT into stations(id, synop, name, state, country, network, online,\

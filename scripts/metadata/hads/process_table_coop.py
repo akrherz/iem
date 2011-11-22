@@ -27,7 +27,6 @@ for line in open('coop.txt'):
 
 for miss in missing:
   if not stations.has_key(miss):
-    print 'Unknown', miss
     continue
   data = stations[miss]
   sql = "INSERT into stations(id, synop, name, state, country, network, online,\
@@ -38,16 +37,16 @@ for miss in missing:
   mcursor = MESOSITE.cursor()
   try:
     mcursor.execute(sql)
+    print 'Adding %s %s_COOP' % (data['id'], data['state'])
   except:
+    print 'Error %s %s_COOP' % (data['id'], data['state'])
+  finally:
     mcursor.close()
   MESOSITE.commit()
-
-
-  cmd = "/mesonet/python/bin/python /mesonet/www/apps/iemwebsite/scripts/util/addSiteMesosite.py %s_COOP %s" % (data['state'], miss)
-  os.system(cmd)
 
   hcursor2.execute("""
   DELETE from unknown where nwsli = %s
   """, (miss,))
 
+MESOSITE.commit()
 HADS.commit()
