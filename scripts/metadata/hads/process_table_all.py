@@ -25,35 +25,38 @@ for line in open('all_dcp_defs.txt'):
   stations[tokens[1]] = {
     'name': tokens[9].replace('"', '').replace("'","").title(),
     'state': tokens[3].strip(),
-    'lon' : lat,
-    'lat' : lon,
+    'country': 'US',
+    'lon' : lon,
+    'lat' : lat,
     'id': tokens[1]
     }
+  if tokens[3].strip() == 'CN':
+    stations[tokens[1]]['country'] = 'CN'
+    stations[tokens[1]]['state'] = tokens[4].strip()[:2]
 
 
 for miss in missing:
   if not stations.has_key(miss):
-    print 'Unknown', miss
     continue
   data = stations[miss]
   sql = "INSERT into stations(id, synop, name, state, country, network, online,\
          geom, plot_name \
-         ) VALUES ('%(id)s', 99999, '%(name)s', '%(state)s', 'US', '%(state)s_DCP', 't',\
+         ) VALUES ('%(id)s', 99999, '%(name)s', '%(state)s', '%(country)s', '%(state)s_DCP', 't',\
          'SRID=4326;POINT(%(lon)s %(lat)s)',  '%(name)s')" % data
 
   mcursor = MESOSITE.cursor()
   try:
     mcursor.execute(sql)
+    print 'Adding %s %s_DCP' % (data['id'], data['state'])
   except:
+    print 'Error %s %s_DCP' % (data['id'], data['state'])
+  finally:
     mcursor.close()
   MESOSITE.commit()
-
-
-  cmd = "/mesonet/python/bin/python /mesonet/www/apps/iemwebsite/scripts/util/addSiteMesosite.py %s_DCP %s" % (data['state'], miss)
-  os.system(cmd)
 
   hcursor2.execute("""
   DELETE from unknown where nwsli = %s
   """, (miss,))
 
+MESOSITE.commit()
 HADS.commit()
