@@ -6,23 +6,25 @@ hcursor2 = HADS.cursor()
 
 print 'Unknown NWSLIs from DCPish sites'
 hcursor.execute("""
- select nwsli, count(*), max(product) from unknown 
+ select nwsli, count(*) as tot, max(product), count(distinct substr(product,1,8)), count(distinct product) from unknown 
  where product !~* 'KTIR'
- GROUP by nwsli ORDER by count DESC LIMIT 5
+ GROUP by nwsli ORDER by tot DESC LIMIT 5
 """)
 for row in hcursor:
-    print '%7s %5s %s' % (row[0], row[1], row[2])
+    print '%7s Tot:%4s Days:%2s Products: %s %s' % (row[0], row[1], row[3], 
+      row[4], row[2])
     hcursor2.execute("""
     DELETE from unknown where nwsli = %s
     """, (row[0],))
 
 print 'Unknown NWSLIs from COOPish sites'
 hcursor.execute("""
- select nwsli, count(*), max(product) from unknown 
- WHERE network ~* 'COOP' GROUP by nwsli ORDER by count DESC LIMIT 5
+ select nwsli, count(*) as tot, max(product), count(distinct substr(product,1,8)), count(distinct product) from unknown 
+ WHERE network ~* 'COOP' GROUP by nwsli ORDER by tot DESC LIMIT 5
 """)
 for row in hcursor:
-    print 'COOP %7s %5s %s' % (row[0], row[1], row[2])
+    print 'COOP %7s Tot:%4s Days:%2s Products: %s %s' % (row[0], row[1], 
+     row[3], row[4], row[2])
     hcursor2.execute("""
     DELETE from unknown where nwsli = %s
     """, (row[0],))
