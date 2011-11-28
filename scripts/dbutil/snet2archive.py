@@ -33,7 +33,7 @@ out.write("COPY t%s FROM stdin;\n" % (ts.strftime("%Y_%m"),) )
 for i in range(len(rs)):
   if (rs[i]['pmonth'] is None):
     rs[i]['pmonth'] = 0
-  s = "%(id)s\t%(valid)s\t%(tmpf)s\t%(dwpf)s\t%(drct)s\t%(sknt)s\t%(pday)s\t%(pmonth)s\t%(srad)s\t%(relh)s\t%(pres)s\t%(gust)s\n" % rs[i]
+  s = "%(id)s\t%(valid)s\t%(tmpf).0f\t%(dwpf).0f\t%(drct).0f\t%(sknt)s\t%(pday)s\t%(pmonth)s\t%(srad)s\t%(relh)s\t%(pres)s\t%(gust).0f\n" % rs[i]
   out.write(s.replace("None","null"))
   if (i > 0 and i % 1000 == 0):
     out.write("\.\nCOPY t%s FROM stdin;\n" % (ts.strftime("%Y_%m"),) )
@@ -41,4 +41,5 @@ for i in range(len(rs)):
 out.write("\.\n")
 out.close()
 
-so, si = os.popen4("psql -h iemdb -f /tmp/snet_dbinsert.sql snet")
+si, soe = os.popen4("psql -h iemdb -f /tmp/snet_dbinsert.sql snet")
+print soe.read()
