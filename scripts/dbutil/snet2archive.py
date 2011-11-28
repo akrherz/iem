@@ -42,4 +42,6 @@ out.write("\.\n")
 out.close()
 
 si, soe = os.popen4("psql -h iemdb -f /tmp/snet_dbinsert.sql snet")
-print soe.read()
+output = soe.read().replace("DELETE 0\n","")
+if len(output) > 0:
+  print output
