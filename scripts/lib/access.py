@@ -117,6 +117,11 @@ class Ob(object):
             for key in row.keys():
                 if row[key] is not None and key not in ['valid','network','station','geom']:
                     self.data[key] = row[key]
+        # We can always load up the summary obs, since we queried for the local ob summary?
+        else:
+            for key in ['pmonth', 'max_tmpf', 'min_tmpf', 'max_sknt', 'max_gust', 'max_gust_ts',
+                        'max_sknt_ts', 'max_drct']:
+                self.data[key] = row[key]
         return True
 
     def setObTimeGMT(self, ts):
@@ -197,8 +202,7 @@ class Ob(object):
       (CASE WHEN max_gust < %(gust)s THEN %(gust)s ELSE max_gust END), 
      max_gust_ts =
       (CASE WHEN max_gust < %(gust)s THEN '%(valid)s' ELSE max_gust_ts END), 
-     max_drct =
-      (CASE WHEN %(max_drct)s > 0 THEN %(max_drct)s ELSE max_drct END), 
+     max_drct = (CASE WHEN %(max_drct)s > 0 THEN %(max_drct)s ELSE max_drct END), 
      max_srad =
       (CASE WHEN max_srad < %(max_srad)s THEN %(max_srad)s ELSE max_srad END), 
      snow = %(snow)s, snowd = %(snowd)s, snoww = %(snoww)s 
@@ -271,7 +275,7 @@ class Ob(object):
         self.update_summary(db, dbpool)
 
         # We can update current if old_ts is not set or ts > old_ts
-        if self.data.get('old_valid') is None or self.data.get('valid') > self.data.get('old_valid'):
+        if self.data.get('old_valid') is None or self.data.get('valid') >= self.data.get('old_valid'):
             self.update_current(db, dbpool)
         else:
             self.insert_currentlog(db, dbpool)
