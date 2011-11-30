@@ -70,10 +70,10 @@ class RWISOb(object):
     tsub = dict["subsftemp"]
     self.sfdata[sensorid]["dry"] = dict["sfcond"]
 
-    if (len(ttempf) > 0 and ttempf != ERROR_VAL):
+    if ttempf is not None and ttempf not in ['', ERROR_VAL]:
       self.sfdata[sensorid]["tmpf"] =round(mesonet.c2f( float( ttempf) / 100.00),2)
 
-    if (len(tsub) > 0 and tsub != ERROR_VAL):
+    if tsub is not None and tsub not in ['', ERROR_VAL]:
       self.subT = round(mesonet.c2f( float(tsub) / 100.00 ),2)
 
   def add_atdata(self, dict):
