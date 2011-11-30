@@ -1,27 +1,27 @@
 <?php 
 include("../../../config/settings.inc.php");
-define("IEM_APPID", 44);
+define("IEM_APPID", 45);
 include_once "$rootpath/include/database.inc.php";
 $mesosite = iemdb('mesosite');
  
-$network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
-$TITLE = "IEM | DCP Data Download";
-$THISPAGE = "networks-dcp";
+$network = isset($_GET['network']) ? $_GET["network"] : 'IA_COOP';
+$TITLE = "IEM | NWS COOP Raw Observations Data Download";
+$THISPAGE = "networks-coop";
 include("$rootpath/include/header.php"); 
  include("$rootpath/include/imagemaps.php");
  include("$rootpath/include/forms.php"); 
 ?>
 
-<h3>DCP/HADS Data Download</h3>
+<h3>NWS COOP Raw Data Download</h3>
 
-<p>This form allows you to download whatever data the IEM was able to collect from
-the GOES/DCP/HADS/AHPS (insert other accoynms here) data collection platforms.  This
-dataset is huge and the download may take a number of seconds to process.</p>
+<p>This form provides access to the raw observations from the NWS COOP network. The
+high and low temperature values are for the 24 hour period prior to the observation
+on the date! Typically, this is a period ending at 8 AM localtime.</p>
 
 <form method="GET" name="chstate">
-<p>Select from State/Country: <select name="network">
+<p>Select from State: <select name="network">
 <?php 
-$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' ORDER by name ASC");
+$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'COOP' ORDER by name ASC");
 for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	$sel = '';
 	if ($network == $row["id"]){
@@ -33,11 +33,11 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 
 ?>
 </select>
-<input type="submit" value="Change Group" />
+<input type="submit" value="Change Network" />
 </form>
 
 
-<form method="GET" action="dl.php" name='dl'>
+<form method="GET" action="obs-dl.php" name='dl'>
 <input type='hidden' name='network' value="<?php echo $network; ?>" />
 
 <table>
@@ -47,7 +47,6 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 <?php echo networkMultiSelect($network, ""); ?>
 
 <p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
-<i>Times are in UTC. Archive starts in 2002 for Iowa, 9 Dec 2010 for all others.</i>
 <table>
   <tr>
     <td></td>
@@ -57,8 +56,8 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 
   <tr>
     <th>Start:</th>
-    <td rowspan="2">
-     <?php echo yearSelect(2002, date("Y"), "year"); ?>
+    <td>
+     <?php echo yearSelect2(2010, date("Y"), "year1"); ?>
     </td>
     <td>
      <?php echo monthSelect("", "month1"); ?>
@@ -74,6 +73,9 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 
   <tr>
     <th>End:</th>
+    <td>
+     <?php echo yearSelect2(2010, date("Y"), "year2"); ?>
+    </td>
     <td>
      <?php echo monthSelect("", "month2"); ?>
     </td>
