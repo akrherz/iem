@@ -50,6 +50,7 @@ class RWISOb(object):
     self.metarID    = None
     self.gust       = None
     self.vsby       = None
+    self.sname      = None
     self.error      = 0
     self.subT = -99
     self.sfdata = [0]*4
