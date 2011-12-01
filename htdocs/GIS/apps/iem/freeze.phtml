@@ -38,11 +38,11 @@ else if ($state == "IA_NW")
 else if ($state == "IA")
   $sextent = "-96, 40, -91, 45";
 else if ($state == "AK")
-  $sextent = "-178.227822 51.590982,-130.007704 71.38269";
+  $sextent = "-178.227822, 51.590982,-130.007704, 71.38269";
 else if ($state == "HI")
-  $sextent = "-160.249925 18.913826,-154.809286 22.23603";
-  
-
+  $sextent = "-160.249925, 18.913826,-154.809286, 22.23603";
+else if ($state == "NW")
+  $sextent = "-120.85, 37.983, -101.853, 51.983";
 
  if (isset($sextent))
    $oextents = $sextent;
@@ -209,6 +209,7 @@ $url = $img->saveWebImage();
  <option value="<?php echo $uri; ?>?state=MN_S" <?php if ($state == "MN_S") echo "SELECTED"; ?>>Minnesota (South)
  <option value="<?php echo $uri; ?>?state=MO" <?php if ($state == "MO") echo "SELECTED"; ?>>Missouri
  <option value="<?php echo $uri; ?>?state=ND" <?php if ($state == "ND") echo "SELECTED"; ?>>North Dakota
+ <option value="<?php echo $uri; ?>?state=NW" <?php if ($state == "NW") echo "SELECTED"; ?>>Pacific NW
  <option value="<?php echo $uri; ?>?state=SD" <?php if ($state == "SD") echo "SELECTED"; ?>>South Dakota
  <option value="<?php echo $uri; ?>?state=WI" <?php if ($state == "WI") echo "SELECTED"; ?>>Wisconsin
 </select></form>
