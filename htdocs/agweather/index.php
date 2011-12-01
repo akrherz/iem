@@ -43,7 +43,9 @@ Iowa Ag Weather information in a one-stop location.</div>
 
 <tr>
  <th>Soil Temperatures</th>
- <td><a href="../agclimate/soilt.php">County Estimates</a></td>
+ <td><a href="../agclimate/soilt.php">County Estimates</a>
+  <br /><a href="../timemachine/#57.0">Archived County Estimates</a>
+ </td>
  <td></td>
 </tr>
 
