@@ -14,8 +14,9 @@ ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=day_ago)
 soil_obs = []
 lats = []
 lons = []
-rs = isuag.query("SELECT station, c30 from daily WHERE \
-     valid = '%s' and c30 > 0" % (ts.strftime("%Y-%m-%d"), ) ).dictresult()
+rs = isuag.query("""SELECT station, c30 from daily WHERE 
+     valid = '%s' and c30 > 0 and station not in ('A135849','A131909')""" % (
+     ts.strftime("%Y-%m-%d"), ) ).dictresult()
 for i in range(len(rs)):
   stid = rs[i]['station']
   soil_obs.append( rs[i]['c30'] )
@@ -35,10 +36,10 @@ def sampler(xaxis, yaxis, vals, x, y):
 # Grid it
 numxout = 40
 numyout = 40
-xmin    = min(lons) - 1.
-ymin    = min(lats) - 1.
-xmax    = max(lons) + 1.
-ymax    = max(lats) + 1.
+xmin    = min(lons) - 2.
+ymin    = min(lats) - 2.
+xmax    = max(lons) + 2.
+ymax    = max(lats) + 2.
 xc      = (xmax-xmin)/(numxout-1)
 yc      = (ymax-ymin)/(numyout-1)
 
@@ -116,18 +117,21 @@ contour = Ngl.contour_map(wks,analysis2,resources)
 # Draw text!
 txres               = Ngl.Resources()
 txres.txFontHeightF = 0.02
+#txres.txFontHeightF = 0.03
 txres.txFont        = "helvetica-bold"
 
 # Query out centroids of counties...
-rs = postgis.query("SELECT x(centroid(the_geom)) as lon, \
-  y(centroid(the_geom)) as lat \
- from uscounties WHERE state_name = 'Iowa'").dictresult()
+rs = postgis.query("""SELECT x(centroid(the_geom)) as lon, 
+  y(centroid(the_geom)) as lat 
+ from uscounties WHERE state_name = 'Iowa'""").dictresult()
 for i in range(len(rs)):
   lat = rs[i]['lat']
   lon = rs[i]['lon']
   smp = sampler(xo,yo,analysis, lon, lat)
 
   text = Ngl.add_text(wks,contour,"%.0f" % (smp,),lon,lat,txres)
+
+#Ngl.add_text(wks,contour,"Data Currently in Error", -93,42,txres)
 
 Ngl.panel(wks,[contour,],[1,1])
 
@@ -136,4 +140,8 @@ Ngl.panel(wks,[contour,],[1,1])
 Ngl.end()
 
 os.system("convert -trim  highs.ps obs.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 soilt_day%s.png bogus png' obs.png" % (day_ago,) )
+routes = "a"
+if day_ago < 4:
+  routes = "ac" 
+os.system("/home/ldm/bin/pqinsert -p 'plot %s %s0000 soilt_day%s.png isuag_county_4inch_soil.png png' obs.png" % (
+ routes, ts.strftime("%Y%m%d"), day_ago) )

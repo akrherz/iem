@@ -17,7 +17,7 @@ def initdb(fn):
   ts = mx.DateTime.strptime(fname, "D%d%b%y.TXT")
   # The default file contains data for the past 2 days and a few hours
   # for today.
-  s = ts + mx.DateTime.RelativeDateTime(days=-2)
+  s = ts + mx.DateTime.RelativeDateTime(days=-3)
   e = ts
 
   for id in st.ids:
@@ -61,7 +61,10 @@ def process(fn, s, e):
           if (not obs[stationID].has_key(ts)):
             #print 'Why are we missing %s' % (ts,)
             continue
-          obs[stationID][ts][ dcols[i] ] = tokens[4+i]
+          try:
+            obs[stationID][ts][ dcols[i] ] = tokens[4+i]
+          except:
+            print stationID, dcols, i
       
 
 def prepareDB(s,e):
@@ -85,12 +88,18 @@ def insertData(s, e):
         if (d.has_key('c11') ): # Daily Value
           d['valid'] = ts.strftime("%Y-%m-%d")
           d['station'] = stid
-          mydb.insert("daily", d)
+          try:
+            mydb.insert("daily", d)
+          except:
+            continue
 
         if (d.has_key('c100') ): # We can insert both daily and hourly vals
           d['valid'] = ts.strftime("%Y-%m-%d %H:%M:00-0600")
           d['station'] = stid
-          mydb.insert("hourly", d)
+          try:
+            mydb.insert("hourly", d)
+          except:
+            continue
 
 def printReport(ts):
   now = ts + mx.DateTime.RelativeDateTime(days=-1, hour=0)
