@@ -1,5 +1,6 @@
 <?php
 include("../../../../config/settings.inc.php");
+define("IEM_APPID", 46);
 include("$rootpath/include/database.inc.php");
 
 $state = isset($_GET['state']) ? $_GET['state'] : '' ;
@@ -36,7 +37,11 @@ else if ($state == "IA_NW")
   $sextent = "-96.6, 41.9, -93.6, 43.8";
 else if ($state == "IA")
   $sextent = "-96, 40, -91, 45";
-
+else if ($state == "AK")
+  $sextent = "-178.227822 51.590982,-130.007704 71.38269";
+else if ($state == "HI")
+  $sextent = "-160.249925 18.913826,-154.809286 22.23603";
+  
 
 
  if (isset($sextent))
@@ -189,7 +194,9 @@ $url = $img->saveWebImage();
 <form name="ba">
 <select name="ba" onChange="location=this.form.ba.options[this.form.ba.selectedIndex].value">
  <option value="#"> -- User Defined --
- <option value="<?php echo $uri; ?>?state=A" <?php if ($state == "A") echo "SELECTED"; ?>>View All
+ <option value="<?php echo $uri; ?>?state=A" <?php if ($state == "A") echo "SELECTED"; ?>>MidWest US
+ <option value="<?php echo $uri; ?>?state=AK" <?php if ($state == "AK") echo "SELECTED"; ?>>Alaska
+ <option value="<?php echo $uri; ?>?state=HI" <?php if ($state == "HI") echo "SELECTED"; ?>>Hawaii
  <option value="<?php echo $uri; ?>?state=IL" <?php if ($state == "IL") echo "SELECTED"; ?>>Illinois
  <option value="<?php echo $uri; ?>?state=IA" <?php if ($state == "IA") echo "SELECTED"; ?>>Iowa
  <option value="<?php echo $uri; ?>?state=IA_NE" <?php if ($state == "IA_NE") echo "SELECTED"; ?>>Iowa (NE)
