@@ -96,6 +96,9 @@ def run(model, station, lon, lat, ts):
 
 if __name__ == '__main__':
     gts = mx.DateTime.gmt()
+    if len(sys.argv) == 5:
+        gts = mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]),int(sys.argv[3]),
+                                   int(sys.argv[4]))
     if gts.hour % 6 == 0:
         ts = gts - mx.DateTime.RelativeDateTime(hours=6,minute=0,second=0)
         for id in table.sts.keys():
