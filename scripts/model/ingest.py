@@ -4,10 +4,10 @@
 $Id: $:
 """
 import sys
-import db, network
+import iemdb, network
 table = network.Table( ['AWOS', 'IA_ASOS'] )
-dbconn = db.connect('mos')
-dbconn.query("SET TIME ZONE 'GMT'")
+MOS = iemdb.connect('mos')
+mcursor = MOS.cursor()
 
 import csv, urllib2
 import mx.DateTime
@@ -67,7 +67,7 @@ def run(model, station, lon, lat, ts):
     sql = """DELETE from model_gridpoint_%s WHERE station = '%s' and 
           model = '%s' and runtime = '%s+00' """ % (ts.year, station,
           model,ts.strftime("%Y-%m-%d %H:%M") )
-    dbconn.query( sql )
+    mcursor.execute( sql )
 
     r = csv.DictReader( fp )
     for row in r:
@@ -92,7 +92,7 @@ def run(model, station, lon, lat, ts):
               '%s+00', %s, %s, %s, %s, %s)""" % ( ts.year, station, model,
               ts.strftime("%Y-%m-%d %H:%M"), fts.strftime("%Y-%m-%d %H:%M"),
               sbcape, sbcin, pwater, precipcon, precip)
-        dbconn.query( sql )
+        mcursor.execute( sql )
 
 if __name__ == '__main__':
     gts = mx.DateTime.gmt()
@@ -104,3 +104,6 @@ if __name__ == '__main__':
     for id in table.sts.keys():
         ts = gts - mx.DateTime.RelativeDateTime(hours=2,minute=0,second=0)
         run("RUC", "K"+id, table.sts[id]['lon'], table.sts[id]['lat'], ts)
+    mcursor.close()
+    MOS.commit()
+    MOS.close()
