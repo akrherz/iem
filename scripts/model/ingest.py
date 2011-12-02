@@ -16,7 +16,7 @@ BASE_URL = "http://motherlode.ucar.edu/thredds/ncss/grid/fmrc/NCEP/"
 URLS = {
  'NAM' : "NAM/CONUS_12km/conduit/runs/NCEP-NAM-CONUS_12km-conduit_RUN_%Y-%m-%dT%H:00:00Z",
  'GFS' : "GFS/Global_0p5deg/runs/NCEP-GFS-Global_0p5deg_RUN_%Y-%m-%dT%H:00:00Z",
- 'RUC' : "RUC2/CONUS_13km/runs/NCEP-RUC2-CONUS_13km-pressure_RUN_%Y-%m-%dT%H:00:00Z",
+ 'RUC' : "RUC2/CONUS_13km/runs/NCEP-RUC2-CONUS_13km_RUN_%Y-%m-%dT%H:00:00Z",
 }
 VLOOKUP = {
  'sbcape': {'NAM': 'Convective_available_potential_energy_surface',
