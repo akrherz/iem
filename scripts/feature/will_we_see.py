@@ -37,7 +37,7 @@ for i in range(7):
       ax.text(-40 + j - 0.3, data[j], "%s" % (i+1,), color=colors[i], ha="right")
       break
 
-ax.text(1,3, "Example: We have ~80% chance\nof one day with a low of 0 or less,\nbut ~30% chance of 7 days below 0", bbox=dict(color='#EEEEEE',boxstyle='round'))
+ax.text(1,10, "Example: We have ~80% chance\nof one day with a low of 0 or less,\nbut ~30% chance of 7 days below 0", bbox=dict(color='#EEEEEE',boxstyle='round'))
 ax.set_xlim(-30,30)
 fig.savefig('test.ps')
 import iemplot

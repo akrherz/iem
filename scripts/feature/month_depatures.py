@@ -1,63 +1,53 @@
 import iemdb
+import mx.DateTime
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
+climate = []
 ccursor.execute("""
- SELECT avg(high), avg(low) from alldata where stationid = 'ia2203' and month = 7 
- and year > 1892
-""")
-row = ccursor.fetchone()
-avgHigh = row[0]
-avgLow = row[1]
-
-highs = []
-lows = []
-ccursor.execute("""
- SELECT year, avg(high), avg(low) from alldata where stationid = 'ia2203' and month = 7
- GROUP by year ORDER by year ASC
+ SELECT avg(sum), month from (SELECT year, month, sum(precip) from alldata_ia where station = 'IA2203' 
+ GROUP by year, month) as foo GROUP by month ORDER by month ASC
 """)
 for row in ccursor:
-    highs.append( float(row[1] - avgHigh) )
-    lows.append( float(row[2] - avgLow) )
+  climate.append( row[0] )
+
+diff = []
+ccursor.execute("""
+ SELECT year, month, sum(precip) from alldata_ia where station = 'IA2203' and year > 2004
+ GROUP by year, month ORDER by year, month ASC
+""")
+for row in ccursor:
+    diff.append( row[2] - climate[ row[1] -1] )
 
 import numpy
 import matplotlib.pyplot as plt
 fig = plt.figure()
-ax = fig.add_subplot(311)
-ax.set_title("Des Moines July Temperatures")
+ax = fig.add_subplot(111)
+ax.set_title("Des Moines Monthly Precipitation Departures")
 
-bars = ax.bar(numpy.arange(1893,2012) - 0.4, highs, facecolor='r', edgecolor='r')
+xticks = []
+xticklabels = []
+for i in range(0, len(diff),6):
+  ts = mx.DateTime.DateTime(2005,1,1) + mx.DateTime.RelativeDateTime(months=i)
+  if ts.month == 1:
+    fmt = "%b\n%Y"
+  else:
+    fmt = "%b"
+  xticklabels.append( ts.strftime(fmt) )
+  xticks.append( i )
+
+bars = ax.bar(numpy.arange(0, len(diff))-0.4, diff, fc='b', ec='b')
 for bar in bars:
   if bar.get_xy()[1] < 0:
-    bar.set_facecolor('b')
-    bar.set_edgecolor('b')
-ax.set_xlim( 1892.5,2011.5 )
-ax.set_ylabel("Daily High Temp.\n Departure $^{\circ}\mathrm{F}$")
+    bar.set_facecolor('r')
+    bar.set_edgecolor('r')
+ax.set_ylabel("Precipitation Departure [inch]")
+ax.set_xlabel("* Oct 2011 total thru 24 Oct")
 ax.grid(True)
-
-ax = fig.add_subplot(312)
-
-bars= ax.bar(numpy.arange(1893,2012) - 0.4, lows, facecolor='r', edgecolor='r')
-for bar in bars:
-  if bar.get_xy()[1] < 0:
-    bar.set_facecolor('b')
-    bar.set_edgecolor('b')
-ax.set_xlim( 1892.5,2011.5 )
-ax.set_ylabel("Daily Low Temp.\n Departure $^{\circ}\mathrm{F}$")
-ax.grid(True)
-
-ax = fig.add_subplot(313)
-
-ax.scatter( lows, highs )
-ax.scatter( lows[-1], highs[-1], facecolor='r', label='2011' )
-ax.set_xlim( -10,10)
-ax.set_ylim( -15,15)
-ax.plot([-15,15],[-15,15])
-ax.set_ylabel("Daily High Temp.\n Departure $^{\circ}\mathrm{F}$")
-ax.set_xlabel("Low Temp. Departure $^{\circ}\mathrm{F}$")
-import scipy.stats
-ax.text( 7,-14, "$R^{2}$ %.1f" % ((scipy.stats.corrcoef(lows, highs)[0,1]) ** 2,))
-ax.grid(True)
-ax.legend(loc=2)
+ax.set_xticks( xticks )
+ax.set_xticklabels( xticklabels )
+ax.set_xlim(-0.5, len(diff)+0.5)
 
 fig.savefig('test.ps')
+import iemplot
+iemplot.makefeature('test')
