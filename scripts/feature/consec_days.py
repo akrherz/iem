@@ -3,40 +3,67 @@ import numpy
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
-ccursor.execute("SELECT day, high, extract(doy from day) from alldata WHERE stationid = 'ia0200' and year > 1893 and year < 2011 ORDER by day ASC")
+ccursor.execute("""
+ SELECT day + '4 months'::interval, day, high from alldata_ia where station = 'IA0200' 
+ and day > '1899-09-01' ORDER by day ASC
+""")
 
-dchange = numpy.zeros( (366,))
-uchange = numpy.zeros( (366,))
-
-lval = 0
+doy = []
+cnts = []
+ryear = 1900
+mindoy = None
 for row in ccursor:
-    diff = lval - row[1]
-    if diff < dchange[row[2]-1]:
-        dchange[row[2]-1] = diff
-    if diff > uchange[row[2]-1]:
-        uchange[row[2]-1] = diff
-    lval = row[1]
-            
+    if mindoy is None and row[2] < 32:
+        ryear = row[0].year
+        mindoy = 1
+        doy.append( int(row[0].strftime("%j")) )
+        cnts.append( 0 )
+    if row[2] < 32:
+        cnts[-1] += 1
+    if ryear != row[0].year:
+        mindoy = None
+        ryear = row[0].year
+
 import matplotlib.pyplot as plt
+import mx.DateTime
+cnts = numpy.array(cnts)
+
+xticks = [1,32,62,93,124]
+xticklabels = ['1 Sep','1 Oct', '1 Nov', '1 Dec', '1 Jan']
 
 fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.bar( numpy.arange(1,367) - 0.4, dchange, facecolor='b', edgecolor='b')
-ax.bar( numpy.arange(1,367) - 0.4, uchange, facecolor='r', edgecolor='r')
-
-#ax.text(maxB[0,-1], maxB[1,-1], ' 2010 Mar 2 [%.0f,%.0f]' % (maxB[0,-1], maxB[1,-1]))
-
-ax.set_xlim(0.5,367.5)
-ax.set_xticks( (1,32,60,91,121,152,182,213,244,274,305,335,365) )
-ax.set_xticklabels( ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec') )
-#ax.set_ylim(0,100)
-ax.set_ylabel("High Temperature Change [F]")
-#ax.set_xlabel(" [days]")
-#ax.set_xticks( [1,3,5,7,9,11] )
-#ax.set_xticklabels( ['Jan','Mar','May','Jul','Sep','Nov'] )
-
-ax.set_title("Extreme Day to Day High Temperature Change\nAmes [1893-2010]")
+ax = fig.add_subplot(311)
+ax.scatter( numpy.arange(1899,2012), doy)
+ax.set_yticks(xticks)
+ax.set_yticklabels(xticklabels)
+ax.set_ylim(32,135)
+ax.set_xlim(1898.5,2011.5)
+ax.set_ylabel("First Day")
 ax.grid(True)
+ax.set_title("Ames [1900-2011] Days Below Freezing")
+
+ax2 = fig.add_subplot(312)
+bars = ax2.bar( numpy.arange(1899,2011)-0.4, cnts[:-1], facecolor='b', 
+        edgecolor='b')
+avgV = numpy.average(cnts)
+for bar in bars:
+  if bar.get_height() < avgV:
+    bar.set_facecolor('r')
+    bar.set_edgecolor('r')
+ax2.set_xlim(1898.5,2010.5)
+ax2.set_ylabel("Frozen Days")
+ax2.grid(True)
+
+ax3 = fig.add_subplot(313)
+ax3.scatter( doy[:-1], cnts[:-1], color='b')
+ax3.set_xticks(xticks)
+ax3.set_xticklabels(xticklabels)
+ax3.set_xlim(32,135)
+ax3.plot([32,135], [avgV,avgV], color='k')
+ax3.grid(True)     
+ax3.set_xlabel("First Day")
+ax3.set_ylabel("Frozen Days")
+
 
 fig.savefig('test.ps')
 import iemplot

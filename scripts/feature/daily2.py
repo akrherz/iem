@@ -2,65 +2,61 @@ import numpy
 
 import iemdb
 import mx.DateTime
-COOP = iemdb.connect('coop', bypass=True)
+COOP = iemdb.connect('iem', bypass=True)
 ccursor = COOP.cursor()
 
+data = {'BRL': [], 'PAFA': [], 'MIA': []}
+
 ccursor.execute("""
-select extract( doy from o.day) as doy, count(*), sum(case when o.high > c.high then 1 else 0 end), sum(case when o.low > c.low then 1 else 0 end) from alldata o, climate71 c where o.station = 'IA0200' and o.day >= '2001-01-01' and to_char(o.day, 'MMDD') = to_char(c.valid, 'MMDD') 
-and c.station = 'IA0200' GROUP by doy ORDER by doy ASc
+select day, max_tmpf, id from summary_2011 s JOIn stations t on (t.iemid = s.iemid) where t.id in ('BRL','MIA','PAFA') and day < '2011-11-22' ORDER by day ASC 
 """)
 
-highs = []
-lows = []
 for row in ccursor:
-  highs.append( row[2] / float(row[1]) )
-  lows.append( row[3] / float(row[1]) )
-
-highs = numpy.array(highs)
-lows = numpy.array(lows)
+    data[row[2]].append( float(row[1]) )
 
 xticks = []
 xticklabels = []
-for i in range(0,len(highs)):
-  ts = mx.DateTime.DateTime(2000,1,1) + mx.DateTime.RelativeDateTime(days=i)
+for i in range(0,len(data['BRL'])):
+  ts = mx.DateTime.DateTime(2011,1,1) + mx.DateTime.RelativeDateTime(days=i)
   if ts.day == 1:
     xticks.append( i )
     xticklabels.append( ts.strftime("%-d\n%b") )
-  elif (ts.day + 1) % 2 == 0:
-    xticks.append( i )
-    xticklabels.append( ts.strftime("%-d") )
+  #elif (ts.day + 1) % 2 == 0:
+  #  xticks.append( i )
+  #  xticklabels.append( ts.strftime("%-d") )
 
 import matplotlib.pyplot as plt
 
 fig = plt.figure()
-ax = fig.add_subplot(211)
-bars = ax.bar( numpy.arange(len(highs))-0.4, highs * 100., ec='#45EC4B', fc='#45EC4B')
-for bar in bars:
-  if bar.get_y() < 0:
-    bar.set_facecolor('blue')
-    bar.set_edgecolor('blue')
+ax = fig.add_subplot(111)
+ax.plot( numpy.arange(len(data['BRL'])), data['BRL'], label="Burlington, IA")
+ax.plot( numpy.arange(len(data['MIA'])), data['MIA'], label="Miami, FL")
+ax.plot( numpy.arange(len(data['PAFA'])), data['PAFA'], label="Fairbanks, AK")
 ax.grid(True)
 ax.set_xticks( xticks )
 ax.set_xticklabels( xticklabels)
 #ax.set_xlim(0,len(highs)+2)
-ax.set_xlim(273.5,305.5)
-ax.set_ylim(0,100)
-ax.set_title("Ames 2001-2011 Percentage of Days above 1971-2000 Average", color='blue')
-ax.set_ylabel("High Temperature", color='blue') 
+jul1 = int((mx.DateTime.DateTime(2011,7,1) - mx.DateTime.DateTime(2011,1,1)).days)
+ax.set_xlim(jul1-1,335.5)
+#ax.set_ylim(0,100)
+ax.set_title("1 Jul - 21 Nov 2011 Daily High Temperatures")
+ax.set_ylabel("High Temperature") 
+ax.legend(loc=3)
 
-ax2 = fig.add_subplot(212)
-bars = ax2.bar( numpy.arange(len(lows)) -0.4, lows * 100., ec='#BE69CB', fc='#BE69CB')
-for bar in bars:
-  if bar.get_y() < 0:
-    bar.set_facecolor('green')
-    bar.set_edgecolor('green')
-ax2.grid(True)
-ax2.set_xticks( xticks )
-ax2.set_xticklabels( xticklabels)
-#ax2.set_xlim(0,len(highs)+2)
-ax2.set_ylim(0,100)
-ax2.set_xlim(273.5,305.5)
-ax2.set_ylabel("Low Temperature", color='blue') 
+jul7 = int((mx.DateTime.DateTime(2011,7,7) - mx.DateTime.DateTime(2011,1,1)).days)
+ax.annotate("July 7: Three sites\nwithin 2$^{\circ}\mathrm{F}$", xy=(jul7, data['PAFA'][jul7] - 4),  xycoords='data',
+                xytext=(10, -120), textcoords='offset points',
+                bbox=dict(boxstyle="round", fc="0.8"),
+                arrowprops=dict(arrowstyle="->",
+                connectionstyle="angle3,angleA=0,angleB=-90"))
+
+nov17 = int((mx.DateTime.DateTime(2011,11,17) - mx.DateTime.DateTime(2011,1,1)).days)
+ax.annotate("Nov 17\nFairbanks: -31$^{\circ}\mathrm{F}$\nMiami: 85$^{\circ}\mathrm{F}$", xy=(nov17, data['PAFA'][nov17]),  xycoords='data',
+                xytext=(-150, 0), textcoords='offset points',
+                bbox=dict(boxstyle="round", fc="0.8"),
+                arrowprops=dict(arrowstyle="->",
+                connectionstyle="angle3,angleA=-90,angleB=0"))
+
 
 fig.savefig('test.ps')
 import iemplot
