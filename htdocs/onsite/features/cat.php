@@ -67,7 +67,7 @@ $big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.%s", $row["i
 </div>
 <div id="fb-root"></div>
 <script src="http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1"></script>
-<fb:comments send_notification_uid="16922938" callback="<?php echo $rooturl; ?>/fbcb.php" title="<?php echo $row["title"]; ?>" url="<?php echo $rooturl; ?>/onsite/features/cat.php?day=<?php echo $day; ?>" xid="<?php echo $row["fbid"]; ?>" numposts="6" width="600"></fb:comments>
+<fb:comments send_notification_uid="16922938" callback="<?php echo $rooturl; ?>/fbcb.php" title="<?php echo $row["title"]; ?>" href="<?php echo $rooturl; ?>/onsite/features/cat.php?day=<?php echo $day; ?>" xid="<?php echo $row["fbid"]; ?>" numposts="6" width="600"></fb:comments>
 
 
 
