@@ -87,7 +87,7 @@ if ($row["voting"] == "f"){
   $s .= "<strong> Rate Feature: </strong> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes)";
 }
 $s .= "<div id=\"fb-root\"></div><script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>
-	<fb:comments send_notification_uid=\"16922938\" callback=\"$rooturl/fbcb.php\" title=\"". $row["title"] ."\" \" url=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
+	<fb:comments send_notification_uid=\"16922938\" callback=\"$rooturl/fbcb.php\" title=\"". $row["title"] ."\" \" href=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
 
 $s .= "</div>";
 
