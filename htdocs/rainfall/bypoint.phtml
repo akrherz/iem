@@ -5,8 +5,9 @@
 $wepp = iemdb("wepp");
 $iem = iemdb("iem");
 
-$rs = pg_prepare($iem, "SELECTSUM", "SELECT day, pday from summary s JOIN stations t ON (t.iemid = s.iemid) WHERE
- 		t.id = $1 and day >= $2 and day < $3");
+$rs = pg_prepare($iem, "SELECTSUM", "SELECT day, pday from 
+      summary s JOIN stations t ON (t.iemid = s.iemid) WHERE
+      t.id = $1 and day >= $2 and day < $3");
 $rs = pg_prepare($wepp, "SELECTRAIN", "select rainfall / 25.4 as inch, 
 	valid from daily_rainfall
 	WHERE hrap_i = $1 and valid >= $2 and valid < $3 ORDER by valid ASC");
@@ -98,9 +99,9 @@ $row = pg_fetch_array($rs);
 
 $hrap_i = $row["hrap_i"];
 $data .= "# Latitude: $latitude Longitude: $longitude HRAP_I: $hrap_i
-Date  Estimate";
+Date,Estimate";
 if ($method == 'id'){
-  $data .= "  Observation\n";
+  $data .= ",Observation\n";
 } else {
   $data .= "\n";
 }
@@ -121,10 +122,10 @@ while ($row = pg_fetch_array($rs))
 while (list($k,$v) = each($d))
 {
   if ($method == "id") {
-	$data .=  sprintf("%s%5.2f%9s\n", $k, $d[$k]["rain"],
+	$data .=  sprintf("%s,%5.2f,%9s\n", $k, $d[$k]["rain"],
 			$d[$k]["ob"]);
   } else {
-	$data .=  sprintf("%s%5.2f\n", $k, $d[$k]["rain"]);
+	$data .=  sprintf("%s,%5.2f\n", $k, $d[$k]["rain"]);
   }
 }
 //$data .= sprintf("%s %s%4.2f%9s\n", $year, "Total:", $tot, $otot);
