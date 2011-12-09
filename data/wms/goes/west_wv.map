@@ -42,7 +42,7 @@ LAYER
   STATUS ON
   MINSCALE 0
   MAXSCALE 465000000
-  DATA "/home/ldm/data/gis/images/awips211/GOES11_WEST_WV.png"
+  DATA "/home/ldm/data/gis/images/awips211/GOES15_WEST_WV.png"
   TYPE RASTER
   PROJECTION
     "proj=lcc"
