@@ -4,6 +4,9 @@ $THISPAGE="iem-sites";
  $TITLE = "IEM | Site Location";
  include("../../config/settings.inc.php");
  include("$rootpath/include/header.php"); 
+ include("$rootpath/include/mlib.php");
+ $current = "loc"; include("sidebar.php"); 
+ 
 if ($metadata["state"] != "IA"){
 	echo "<div class='warning'>Sorry, this application does not work for sites 
 	outside of Iowa.</div>";
@@ -11,8 +14,7 @@ if ($metadata["state"] != "IA"){
     die();
 }
  
- include("$rootpath/include/mlib.php");
- $current = "loc"; include("sidebar.php"); 
+
  $type = isset($_GET["type"]) ? $_GET["type"] : "doqqs";
  $zoom = isset($_GET["zoom"]) ? $_GET["zoom"] : 3;
  if ($zoom < 0) $zoom = 0;
