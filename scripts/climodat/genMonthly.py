@@ -196,12 +196,9 @@ YEAR   JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC   A
         moTot[mo] += db[ts]["rain"]
         yrSum += db[ts]["rain"]
       out.write( safePrint( db[ts]["rain"], 6, 2) )
-    if yr != constants._ARCHIVEENDTS.year:
-      yrAvg += float(yrSum) 
-      out.write("%6.2f\n" % ( float(yrSum), ) )
-    else:
-      out.write("     M\n")
-
+    yrAvg += float(yrSum) 
+    out.write("%6.2f\n" % ( float(yrSum), ) )
+   
   out.write("MEAN")
   for mo in range(1,13):
     moAvg = moTot[mo] / float( YRCNT[mo] )
