@@ -4,21 +4,24 @@ $THISPAGE="iem-sites";
  $TITLE = "IEM | Site Location";
  include("../../config/settings.inc.php");
  include("$rootpath/include/header.php"); 
+if ($metadata["state"] != "IA"){
+	echo "<div class='warning'>Sorry, this application does not work for sites 
+	outside of Iowa.</div>";
+	include("$rootpath/include/footer.php");
+    die();
+}
+ 
  include("$rootpath/include/mlib.php");
-?>
-<?php $current = "loc"; include("sidebar.php"); ?>
-<?php
+ $current = "loc"; include("sidebar.php"); 
  $type = isset($_GET["type"]) ? $_GET["type"] : "doqqs";
  $zoom = isset($_GET["zoom"]) ? $_GET["zoom"] : 3;
  if ($zoom < 0) $zoom = 0;
  if ($zoom > 5) $zoom = 5; 
 
  $URL= "$rooturl/GIS/apps/ortho/site.php?station=${station}&zoom=${zoom}&type=${type}";
-        $URL_BASE=$rooturl.'/sites/mapping.php?station='.$station.'&type='.$type;
-?>
-<div class="warning">This application works only for sites in Iowa.</div>
-<?php
-echo '<form method="GET" action="mapping.php">
+ $URL_BASE=$rooturl.'/sites/mapping.php?station='.$station.'&type='.$type;
+
+ echo '<form method="GET" action="mapping.php">
   <input type="hidden" name="station" value="'.$station.'">
   <input type="hidden" name="network" value="'.$network.'">
   <input type="hidden" name="zoom" value="'.$zoom.'">
