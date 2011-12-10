@@ -48,5 +48,5 @@ def checkdate(ts):
                                   strdate,  highs[idx], lows[idx], thres1, thres2)                 
     
 if __name__ == "__main__":
-    for i in range(0,7):
+    for i in range(0,2):
         checkdate( datetime.datetime.now() - datetime.timedelta(days=i))
