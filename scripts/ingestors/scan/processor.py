@@ -6,8 +6,10 @@ import mx.DateTime
 import mesonet
 import access
 import pg
-iemdb = pg.connect("iem", "iemdb")
 scandb = pg.connect("scan", "iemdb")
+import iemdb
+ACCESS = iemdb.connect('iem')
+icursor = ACCESS.cursor()
 
 mapping = {
     'Site Id': {'iemvar': 'station', 'multiplier': 1},
@@ -105,10 +107,11 @@ def savedata( data , maxts ):
     if maxts[id] > ts:
         return
     iem = access.Ob(id, 'SCAN')
+    iem.txn = icursor
     iem.data['ts'] = ts
     iem.data['year'] = ts.year
     for key in data.keys():
-        if mapping.has_key(key) and mapping[key]['iemvar'] != "":
+        if mapping.has_key(key) and mapping[key]['iemvar'] != "" and key != 'Site Id':
             iem.data[ mapping[key]['iemvar'] ] = data[key].strip()
 
     iem.data['valid'] = ts
@@ -125,7 +128,7 @@ def savedata( data , maxts ):
     iem.data['c4smv'] = float(iem.data.get('c4smv'))
     iem.data['c5smv'] = float(iem.data.get('c5smv'))
     iem.data['phour'] = float(iem.data.get('phour'))
-    iem.updateDatabase(iemdb)
+    iem.updateDatabase()
 
     sql = """INSERT into t%(year)s_hourly (station, valid, tmpf, 
         dwpf, srad, 
@@ -133,7 +136,7 @@ def savedata( data , maxts ):
          c5tmpf, 
          c1smv, c2smv, c3smv, c4smv, c5smv, phour) 
         VALUES 
-        (%(station)s, '%(valid)s', %(tmpf)s, %(dwpf)s,
+        (%(id)s, '%(valid)s', %(tmpf)s, %(dwpf)s,
          %(srad)s,%(sknt)s,
         %(drct)s, %(relh)s, %(pres)s, %(c1tmpf)s, 
         %(c2tmpf)s, 
@@ -147,12 +150,12 @@ def load_times():
     """
     Load the latest ob times from the database
     """
-    rs = iemdb.query("""SELECT t.id, valid from current c, stations t
-        WHERE t.iemid = c.iemid and t.network = 'SCAN'""").dictresult()
+    icursor.execute("""SELECT t.id, valid from current c, stations t
+        WHERE t.iemid = c.iemid and t.network = 'SCAN'""")
     d = {}
-    for i in range(len(rs)):
-        d[ rs[i]['id'] ] = mx.DateTime.strptime( 
-                                            rs[i]['valid'][:16], '%Y-%m-%d %H:%M')
+    for row in icursor:
+        d[ row[0] ] = mx.DateTime.strptime( 
+                                            str(row[1])[:16], '%Y-%m-%d %H:%M')
     return d
 
 def main():
@@ -177,3 +180,5 @@ def main():
             if data.has_key('Date'):
                 savedata( data , maxts)
 main()
+icursor.close()
+ACCESS.commit()
