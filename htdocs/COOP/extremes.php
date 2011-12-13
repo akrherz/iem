@@ -41,7 +41,7 @@ $cities = $nt->table;
  	$rs = pg_prepare($connection, "SELECT", "SELECT * " .
  		"from $tbl WHERE valid = $1 and substr(station,0,3) = $2" .
  		"ORDER by ". $sortcol ." ". $sortdir);
- 	$rs = pg_execute($connection, "SELECT", Array($td, strtolower(substr($network,0,2))));
+ 	$rs = pg_execute($connection, "SELECT", Array($td, strtoupper(substr($network,0,2))));
  	echo "<h3 class=\"heading\">NWS COOP Climatology for ". date("d F", $valid) ."</h3>";
  	
  }
