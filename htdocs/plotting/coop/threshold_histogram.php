@@ -10,15 +10,15 @@ if ($station1 == "iowa"){ $slimiter = ""; }
 
 $xdata = Array();
 $ydata = Array();
-for($thres=-40;$thres<11;$thres++)
-{
   pg_prepare($conn, "_SELECT0", "SELECT y1, count(*) from 
           ((SELECT year as y1, low from alldata_ia 
            WHERE month IN (12) $slimiter) UNION 
           (SELECT year - 1 as y1, low from alldata_ia 
            WHERE month IN (1,2) $slimiter)) as foo 
-         WHERE low < ${thres} GROUP by y1");
-  $rs = pg_execute($conn, "_SELECT0", Array() );
+         WHERE low < $1 GROUP by y1");
+for($thres=-40;$thres<11;$thres++)
+{
+  $rs = pg_execute($conn, "_SELECT0", Array($thres) );
   $xdata[] = $thres;
   $ydata[] = pg_numrows($rs);
 }
@@ -29,19 +29,20 @@ while( list($k,$v) = each($ydata))
   $pct[] = $v / $yrs * 100.0;
 }
 
+
 if ($station2 != "")
 {
-  $slimiter = "and stationid = '$station2'";
+  $slimiter = "and station = '$station2'";
   $ydata = Array();
-  for($thres=-40;$thres<11;$thres++)
-  {
-    pg_prepare($conn, "_SECTOR0", "SELECT y1, count(*) from 
+  pg_prepare($conn, "_SECTOR1", "SELECT y1, count(*) from 
           ((SELECT year as y1, low from alldata_ia 
            WHERE month IN (12) $slimiter) UNION 
           (SELECT year - 1 as y1, low from alldata_ia 
            WHERE month IN (1,2) $slimiter)) as foo 
-         WHERE low < ${thres} GROUP by y1");
-    $rs = pg_execute($conn, "_SECTOR0", Array());
+         WHERE low < $1 GROUP by y1");
+  for($thres=-40;$thres<11;$thres++)
+  {
+    $rs = pg_execute($conn, "_SECTOR1", Array($thres));
     $ydata[] = pg_numrows($rs);
   }
   $yrs2 = pg_numrows($rs);
