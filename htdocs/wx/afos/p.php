@@ -57,7 +57,7 @@ for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
 		echo "<br clear=\"both\" />";
 	}
 	if (strtotime($row["mytime"]) != $basets){ continue; }
-	if (preg_match("xml", $row["data"]) > 0){
+	if (preg_match('/xml/', $row["data"]) > 0){
       echo "<pre>". $row["data"] ."</pre>\n";
 	} else {
 		echo "<pre>". htmlentities($row["data"]) ."</pre>\n";
