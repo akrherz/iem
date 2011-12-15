@@ -74,7 +74,7 @@ body{
 }
 #p7menubar li:hover ul a, #p7menubar li.p7hvr ul a span{
 	color: #000000;
-	background-color: #FFFFFF;
+	background-color: #f3f3f3;
 }
 #p7menubar li:hover ul .alink{
 	background-color: #c4f6ff;
@@ -84,8 +84,6 @@ body{
 	color: #FFFFFF!important;
 }
 #p7menubar li {width: auto;}
-
-
 #iem-main {
 	min-width: 800px; 
 	/* border: #000 solid; */
@@ -238,87 +236,6 @@ ul.iem-list {
 	padding-left: 5px;
 	padding-bottom: 2px;
 }
-#iem_nav {
-    border: 1px solid #ccc;
-    border-top: 2px solid #ccc;
-        height: 24px;
-    width: 100%;
-    min-width: 800px;
-        clear: both;
-        margin: 0px 0px 0px 0px;
-        padding: 0px;
-    background-color: #f0f4f5;
-        }
-#iem_nav ul {
-        margin: 0px 0px 0px 5px;
-        padding: 0px;
-        list-style-type: none;
-        }
-#iem_nav ul li {
-        margin: 0;
-        display: block;
-        float: left;
-        white-space: nowrap;
-        padding: 4px 12px;
-        background-image: none;
-        }
-#iem_nav ul li a, 
-#iem_nav ul li a:visited  {
-        margin: 0px 0px 0px 0px;
-        color: #00f;
-        text-decoration: none;
-        }
-#iem_nav ul li a:hover, 
-#iem_nav ul li a:active  {
-        text-decoration: underline;
-        }
-#iem_nav ul li.selected {
-        background-color: white;
-    border: 2px solid #ccc;
-        border-bottom: 2px solid #fff;
-        padding: 3px 12px;
-        }
-/* Subnav bar! */
-#iem_subnav {
-        height: 30px;
-        display: block;
-        float: left;
-        clear: both;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-top: 0px;
-        }
-#iem_subnav ul {
-        margin: -10px 0 0 2px;
-        padding: 0;
-        list-style-type: none;
-        }
-#iem_subnav ul li {
-        float: left;
-        margin: 7px 0 0 0;
-        padding: 10px 2px 10px 0;
-        color: #333;
-        font-size: 0.9em;
-        }
-#iem_subnav ul li a, 
-#iem_subnav ul li a:visited  {
-        margin: 0 0 0 0;
-        padding: 10px 11px 10px 11px;
-        color: #333;
-        font-size: 0.9em;
-        text-decoration: none;
-        }
-#iem_subnav ul li a:hover, 
-#iem_subnav ul li a:active  {
-        text-decoration: underline;
-        }
-#iem_subnav ul li.selected {
-        font-weight: bold;
-        }
 #iem_header_logo img {
   border: 0px;
 }
@@ -351,19 +268,6 @@ ul.iem-list {
     clear: both;
     visibility: hidden;
     }
-/* Stylized header with side bar */
-/* .heading { 
-	border-color: #336699;
-	background-color: #CCCCCC;
-	color: #003366;
-	font-weight:bolder;
-	border-top: 1px solid;
-	border-right: 6px solid;
-	padding: 1px;
-	padding-left: 3px;
-    margin-top: 1px;
-    margin-bottom: 3px;
-} */
 .heading {
   border-bottom: 1px solid #CCCCCC;
   color: #336699;

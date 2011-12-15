@@ -64,14 +64,16 @@ function genFeature()
   $s = "<span style=\"font-size: larger; font-weight: bold;\">". $row["title"] ."</span><br />\n";
   $s .= "<span style=\"font-size: smaller; float: left;\">Posted: " . $row["webdate"] ."</span>";
   $s .= printTags($tags);
-  $s .= "<span style=\"font-size: smaller; float: right;\">
-  <a href=\"$fburl\"><img src=\"http://facebook.com/favicon.ico\" border=\"0\" />Facebook</a> | 
-  <a href=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\">Permalink</a> | 
-  <a href=\"$rooturl/onsite/features/past.php\">Past Features</a> | 
-  <a href=\"$rooturl/onsite/features/tags/\">Tags</a></span>";
 
+$s .= "<div style=\"font-size: smaller; float: right; margin: 5px;\">";
+$s .= "<a class=\"button left\" href=\"$fburl\">Facebook</a>"; 
+$s .= "<a class=\"button middle\" href=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\">Permalink</a>";
+$s .= "<a class=\"button middle\" href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
+$s .= "<a class=\"button right\" href=\"$rooturl/onsite/features/tags/\">Tags</a></div>";
+  
+  
  /* Feature Image! */
-  $s .= "<div style=\"background: #eee; float: right; border: 1px solid #ee0; padding: 3px; margin-left: 10px; width: ${width}px;\"><a href=\"$rooturl/onsite/features/". $row["imageref"] .".png\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.png\" alt=\"Feature\" /></a><br />". $row["caption"] ."</div>";
+  $s .= "<div style=\"margin-left: 5px; border: 1px #f3f3f3 solid; float: right; padding: 3px; width: ${width}px;\"><a href=\"$rooturl/onsite/features/". $row["imageref"] .".png\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.png\" alt=\"Feature\" /></a><br />". $row["caption"] ."</div>";
 
   $s .= "<br /><div class='story' style=\"text-align: justify;\">". $row["story"] ."</div>";
 
@@ -81,11 +83,16 @@ $s .= "<div style=\"float: left; margin-bottom: 10px; margin-left: 15px; \">";
 if ($row["voting"] == "f"){
   
 } else if ($voted){
-  $s .= "<strong> Rate Feature: </strong> Good ($good votes) or Bad ($bad votes) &nbsp; Thanks for voting!";
-
+ 	$goodurl = "index.phtml";
+	$badurl = "index.phtml";
+	$msg = "Thanks for voting!";
 } else {
-  $s .= "<strong> Rate Feature: </strong> <a href=\"$rooturl/index.phtml?feature_good\">Good</a> ($good votes) or <a href=\"$rooturl/index.phtml?feature_bad\">Bad</a> ($bad votes)";
+	$goodurl = "$rooturl/index.phtml?feature_good";
+	$badurl = "$rooturl/index.phtml?feature_bad";
+	$msg = "Rate Feature";
 }
+
+$s .= "<div style=\"float: left; margin-bottom: 5px;\"><strong>$msg</strong> <a class=\"button add\" href=\"$goodurl\">Good ($good votes)</a><a class=\"button delete\" href=\"$badurl\">Bad ($bad votes)</a></div>";
 $s .= "<div id=\"fb-root\"></div><script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>
 	<fb:comments send_notification_uid=\"16922938\" callback=\"$rooturl/fbcb.php\" title=\"". $row["title"] ."\" \" href=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
 
