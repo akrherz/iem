@@ -84,21 +84,8 @@ body{
 	color: #FFFFFF!important;
 }
 #p7menubar li {width: auto;}
-.agweather{
-background:url(../images/tractor.png) no-repeat 0px 0px;
-text-indent:40px;
-display:block;
-}
-.nws{
-background:url(../images/nws.png) no-repeat 0px 0px;
-text-indent:40px;
-display:block;
-}
-.book{
-background:url(../images/book.png) no-repeat 0px 0px;
-text-indent:40px;
-display:block;
-}
+
+
 #iem-main {
 	min-width: 800px; 
 	/* border: #000 solid; */
@@ -554,6 +541,18 @@ a.flag {
 a.up {
     background: url(sprite.png)  10px -133px no-repeat #f3f3f3;
     padding-left: 30px;
+}
+a.book{
+	background:url(../images/book.png) no-repeat 5px 5px #f3f3f3;
+	padding-left: 40px;
+}
+a.agweather{
+	background:url(../images/tractor.png) no-repeat 5px 5px #f3f3f3;
+	padding-left: 40px;
+}
+a.nws{
+	background:url(../images/nws.png) no-repeat 5px 5px #f3f3f3;
+	padding-left: 40px;
 }
 a.down {
     background: url(sprite.png)  10px -168px no-repeat #f3f3f3;
