@@ -178,7 +178,7 @@ if (defined('IEM_APPID')){
 }
 while( list($idx, $page) = each($_pages) )
 {
-  echo sprintf("<li><a class=\"%s\" href=\"%s\">%s</a>", 
+  	echo sprintf("<li><a class=\"%s\" href=\"%s\">%s</a>", 
       ($ar[0] == $idx) ? "atrigger" : "trigger",
       $rooturl . $page["base"]["url"], $page["base"]["title"]);
 
