@@ -66,19 +66,18 @@ function networkMultiSelect($network, $selected, $extra=Array())
    return $s;
 }
 
-function networkSelect($network, $selected, $extra=Array())
+function networkSelect($network, $selected, $extra=Array(),
+		$selectName="station")
 {
     global $rootpath;
-    $network = strtoupper($network);
     $s = "";
     include_once("$rootpath/include/network.php");
     $nt = new NetworkTable($network);
     $cities = $nt->table;
     reset($cities);
-    $s .= "<select name=\"station\">\n";
+    $s .= "<select name=\"$selectName\">\n";
     while (list($sid, $tbl) = each($cities))
     {
-        if ($tbl["network"] != $network) continue;
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
         $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
