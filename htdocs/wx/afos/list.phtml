@@ -4,9 +4,15 @@ define("IEM_APPID", 48);
 include("$rootpath/include/wfoLocs.php");
 include("$rootpath/include/forms.php");
 include("$rootpath/include/database.inc.php");
+include("$rootpath/include/imagemaps.php");
 $afos = iemdb("afos");
 
-$wfo = isset($_GET["wfo"])? $_GET["wfo"] : 'DMX';
+$wfo = isset($_REQUEST["wfo"])? $_REQUEST["wfo"] : null;
+$source = isset($_REQUEST["source"])? substr($_GET["source"],0,4) : 'DMX';
+$dbsource = $source;
+if (strlen($source) == 3){ $dbsource = "K$source";}
+if ($wfo != null){ $source = $wfo; }
+
 $view = isset($_GET["view"])? $_GET["view"] : 'time';
 $year = isset($_GET["year"])? intval($_GET["year"]) : date("Y");
 $month = isset($_GET["month"])? intval($_GET["month"]) : date("m");
@@ -19,23 +25,23 @@ if ($month > 6){
 }
 
 pg_query($afos, "SET TIME ZONE 'GMT'");
-$rs = pg_prepare($afos, "SELECT", "SELECT pil, entered from $table
-      WHERE pil ~* $1 and entered BETWEEN $2 and $3 ORDER by entered ASC");
+$rs = pg_prepare($afos, "_SELECT", "SELECT pil, entered from $table
+      WHERE source = $1 and entered BETWEEN $2 and $3 ORDER by entered ASC");
 
-$TITLE = "NWS Text Product by WFO by Date";
+$TITLE = "NWS Text Product by Issuing Center by Date";
 $THISPAGE ="current-afos";
 include("$rootpath/include/header.php");
 ?>
-<h3>NWS Text Products by WFO by Date</h3>
+<h3>NWS Text Products by Issuing Center by Date</h3>
 <p>This application prints out a listing of IEM archived text products
-by issuing NWS Weather Forecast Office (WFO) and by date.  After about
+by issuing NWS Issuing Center and by date.  After about
 seven days, the IEM purges a lot of the frequently issued products like
 SHEF and METAR data. This archive exists back to 1 January 2009.</p>
 
 <form name="selector" method="GET">
 <table>
 <thead>
-<tr><th>Select WFO:</th>
+<tr><th>Select Issuing Center:</th>
     <th colspan="3">Select UTC Date:</th>
     <th>View Option</th>
     <th></th></tr>
@@ -43,7 +49,8 @@ SHEF and METAR data. This archive exists back to 1 January 2009.</p>
 
 <tbody>
 <tr>
- <td><?php echo wfoSelect($wfo); ?></td>
+ <td><?php echo networkSelect(Array("WFO","RFC","NWS","NCEP"), 
+ 		$source, Array(), "source"); ?></td>
  <td><?php echo yearSelect(2009, $year); ?></td>
  <td><?php echo monthSelect($month); ?></td>
  <td><?php echo daySelect($day); ?></td>
@@ -57,7 +64,7 @@ SHEF and METAR data. This archive exists back to 1 January 2009.</p>
 </form>
 <?php
 
-$rs = pg_execute($afos, "SELECT", Array($wfo."$", date("Y-m-d H:i", $ts)."+00",
+$rs = pg_execute($afos, "_SELECT", Array($dbsource, date("Y-m-d H:i", $ts)."+00",
       date("Y-m-d H:i", $ts+86400)."+00"));
 if ($view == "grid"){
   $columns = Array();
