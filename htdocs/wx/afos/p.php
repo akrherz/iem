@@ -2,6 +2,7 @@
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 47);
 include("$rootpath/include/database.inc.php");
+$THISPAGE = "archive-afos";
 include("$rootpath/include/header.php");
 
 $e = isset($_GET['e']) ? intval($_GET['e']) : "201112151144";

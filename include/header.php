@@ -59,6 +59,7 @@ $_pages = Array(
     "iemre" => Array("title" => "IEM Reanalysis", "url" => "/iemre/"),
     "cases" => Array("title" => "Interesting Cases", "url" => "/cases/"),
 	"mos" => Array("title" => "Model Output Statistics", "url" => "/mos/"),
+	"afos" => Array("title" => "NWS Text Products", "url" => "/wx/afos/list.phtml"),
     "tm" => Array("title" => "Time Machine", "url" => "/timemachine/"),
  ),
   "climatology" => Array(
@@ -150,7 +151,7 @@ $_pages = Array(
  ),
 );
 $THISPAGE = isset($THISPAGE) ? $THISPAGE : "xxx-xxx";
-$ar = split("-", $THISPAGE);
+$ar = preg_split('/-/', $THISPAGE);
 if (sizeof($ar) == 1) $ar[1] = "";
 echo "<div id=\"menuwrapper\"><ul id=\"p7menubar\">\n";
 /* Look for related IEM Apps */

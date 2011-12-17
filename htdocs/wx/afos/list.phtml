@@ -6,6 +6,9 @@ include("$rootpath/include/forms.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/imagemaps.php");
 $afos = iemdb("afos");
+$TITLE = "NWS Text Product by Issuing Center by Date";
+$THISPAGE ="archive-afos";
+include("$rootpath/include/header.php");
 
 $wfo = isset($_REQUEST["wfo"])? $_REQUEST["wfo"] : null;
 $source = isset($_REQUEST["source"])? substr($_GET["source"],0,4) : 'DMX';
@@ -27,10 +30,6 @@ if ($month > 6){
 pg_query($afos, "SET TIME ZONE 'GMT'");
 $rs = pg_prepare($afos, "_SELECT", "SELECT pil, entered from $table
       WHERE source = $1 and entered BETWEEN $2 and $3 ORDER by entered ASC");
-
-$TITLE = "NWS Text Product by Issuing Center by Date";
-$THISPAGE ="current-afos";
-include("$rootpath/include/header.php");
 ?>
 <h3>NWS Text Products by Issuing Center by Date</h3>
 <p>This application prints out a listing of IEM archived text products
