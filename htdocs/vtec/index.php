@@ -19,7 +19,7 @@ if ($imobile){
 
 /* Pure IEM 2.0 App to do vtec stuff.  Shorter url please as well */
 $v = isset($_GET["vtec"]) ? $_GET["vtec"] : "2008-O-NEW-KJAX-TO-W-0048";
-$tokens = split("-", $v);
+$tokens = preg_split('/-/', $v);
 $year = $tokens[0];
 $operation = $tokens[1];
 $vstatus = $tokens[2];
@@ -49,7 +49,7 @@ Ext.namespace("cfg");
 cfg.startYear = 1986;
 cfg.header = "iem-header";
 </script>
-<script type="text/javascript" src="static.js?v=1.0.5"></script>';
+<script type="text/javascript" src="static.js?v=1.0.6"></script>';
 $TITLE = "IEM Valid Time Extent Code (VTEC) App";
 $NOCONTENT = 1;
 $THISPAGE ="severe-vtec";
