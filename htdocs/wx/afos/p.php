@@ -31,7 +31,7 @@ if ($dir == 'next'){
 }
 
 $rs = pg_prepare($conn, "_LSELECT", "SELECT data, 
-				entered at time zone 'UTC' as mytime from $table
+				entered at time zone 'UTC' as mytime, source from $table
                  WHERE pil = $1 and entered between $2 and $3
                  ORDER by entered $sortdir LIMIT 10");
 $rs = pg_execute($conn, "_LSELECT", Array($pil, 
@@ -50,9 +50,9 @@ for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
 		$newe = date("YmdHi", $basets);
 		echo "<p>Displaying AFOS PIL: <strong>$pil</strong> Received: <strong>". date("Y-m-d H:i", $basets) ." UTC</strong>";
 		echo "<div class=\"buttons\"><a class=\"button down\" href=\"p.php?dir=prev&pil=$pil&e=$newe\">Previous in Time</a>";
-		echo sprintf("<a class=\"button save\" href=\"list.phtml?wfo=%s&day=%s&month=%s&year=%s\">View All %s Products for %s</a>", 
-		substr($pil,3,3), date("d", $basets), date("m", $basets), 
-		date("Y", $basets), substr($pil,3,3), date("d M Y", $basets) );
+		echo sprintf("<a class=\"button save\" href=\"list.phtml?source=%s&day=%s&month=%s&year=%s\">View All %s Products for %s</a>", 
+		$row["source"], date("d", $basets), date("m", $basets), 
+		date("Y", $basets), $row["source"], date("d M Y", $basets) );
 		echo "<a class=\"button up\" href=\"p.php?dir=next&pil=$pil&e=$newe\">Next in Time</a></div>";
 		echo "<br clear=\"both\" />";
 	}
