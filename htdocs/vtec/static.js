@@ -64,6 +64,7 @@ var nexradOpacity;
 var wfo_selector;
 /* Misc */
 var lsrkml;
+var sbwkml;
 var borderkml;
 var delayedTaskSpinner;
 
@@ -415,15 +416,15 @@ function resetGmap(){
      Ext.getCmp('mygpanel').gmap.clearOverlays();
      
      cfg.placefile = "http://mesonet.agron.iastate.edu/request/grx/vtec.php?"+ Ext.urlEncode(getVTEC());
-     gxml = new GGeoXml(cfg.vteckml);
+     //gxml = new GGeoXml(cfg.vteckml);
      
-     cfg.vteckml = "http://mesonet.agron.iastate.edu/kml/vtec.php?"+ Ext.urlEncode(getVTEC());
-     gxml = new GGeoXml(cfg.vteckml);
-     Ext.getCmp('mygpanel').gmap.addOverlay(gxml);
-
      cfg.lsrkml = "http://mesonet.agron.iastate.edu/kml/sbw_lsrs.php?"+ Ext.urlEncode(getVTEC());
      lsrkml = new GGeoXml(cfg.lsrkml);
      Ext.getCmp('mygpanel').gmap.addOverlay(lsrkml);
+     
+     cfg.vteckml = "http://mesonet.agron.iastate.edu/kml/vtec.php?"+ Ext.urlEncode(getVTEC());
+     sbwkml = new GGeoXml(cfg.vteckml);
+     Ext.getCmp('mygpanel').gmap.addOverlay(sbwkml);
 
      cfg.countykml = "http://mesonet.agron.iastate.edu/kml/sbw_county_intersect.php?"+ Ext.urlEncode(getVTEC());
      borderkml = new GGeoXml(cfg.countykml);
@@ -844,6 +845,17 @@ googlePanel = new Ext.ux.GMapPanel({
     disabled:true,
     zoomLevel: 14,
     tbar: [new Ext.Button({
+        text: 'Hide Warnings',
+        handler: function(){
+               if (sbwkml.isHidden()){
+                 sbwkml.show();
+                 this.setText('Hide Warnings');
+               } else {
+                 sbwkml.hide();
+                 this.setText('Show Warnings');
+               } 
+         }
+    }),new Ext.Button({
           text: 'Hide Storm Reports',
           handler: function(){
                  if (lsrkml.isHidden()){
