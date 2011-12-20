@@ -40,8 +40,9 @@ LAYER
   CONNECTION "user=nobody dbname=iem host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, round(tmpf::numeric,0) as tmpf, 
-    oid as foid from current WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
-    ) as foo using unique foid using srid=4326"
+    iemid from current c JOIn stations s on (s.iemid = c.iemid) 
+    WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
+    ) as foo using unique iemid using srid=4326"
   STATUS OFF
   METADATA
     "wms_title" "2 Meter Air Temps"
