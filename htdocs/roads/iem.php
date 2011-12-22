@@ -112,7 +112,7 @@ if (! $metroview)
   $pt = ms_newPointObj();
   $pt->setXY(555, 160);
   $pt->draw($map, $ia511, $img, 0, "");
-  $pt->free();
+
 }
 
 if ($thumbnail) {
@@ -167,13 +167,13 @@ if ($thumbnail) {
 } else {
  $point->setXY(500, 10);
 }
-$point->draw($map, $layer, $img, "credits", date('Y-m-d h:i A', $ts));
-$point->free();
+$point->draw($map, $layer, $img, 0, date('Y-m-d h:i A', $ts));
+
 
 $point = ms_newpointobj();
 $point->setXY(500, 22);
 $point->draw($map, $layer, $img, 1, "Limited Visibility");
-$point->free();
+
 
 
 header("Content-type: image/png");

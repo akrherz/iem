@@ -30,8 +30,7 @@ if ($metroview)
   $map->setextent(190000, 4430000, 759000, 4910000);
   //$map->setextent(-107.9, 40, -88.9,  44.9);
 }
-$map->set("width", 720);
-$map->set("height", 496);
+$map->setsize(720, 496);
 
 
 $img = $map->prepareImage();
@@ -60,7 +59,7 @@ $states->draw($img);
 
 $roads = $map->getlayerbyname("roads");
 $roads->set("status", MS_ON);
-$roads->set("transparency", MS_GD_ALPHA);
+
 for ($k=0;$k<17;$k++)
 {
   $r_c1 = $roads->getClass($k);

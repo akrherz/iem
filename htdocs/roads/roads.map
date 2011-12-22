@@ -42,27 +42,10 @@ END
 OUTPUTFORMAT
   NAME PNG24
   MIMETYPE "image/png"
-  DRIVER "GD/PNG"
+  DRIVER "AGG/PNG"
   IMAGEMODE RGB
   TRANSPARENT OFF
 END
-
-OUTPUTFORMAT
-  NAME jpeg
-  MIMETYPE "image/jpeg"
-  DRIVER "GD/JPEG"
-  IMAGEMODE RGB
-  FORMATOPTION "QUALITY=80"
-  TRANSPARENT OFF
-END
-
-SYMBOL 
-  NAME "circle"
-  TYPE ELLIPSE
-  Filled TRUE
-  POINTS 1 1 END
-END
-
 SYMBOL
   NAME "logokey"
   TYPE PIXMAP
@@ -135,7 +118,6 @@ SYMBOL
   POINTS 
    1 1
   END
-  STYLE 1 5 END
 END
 
 
@@ -293,9 +275,8 @@ LAYER
   END
   CLASS
     STYLE
-     SYMBOL 'circle'
      COLOR 174 174 174
-     SIZE 2
+     WIDTH 2.0
      ANTIALIAS TRUE
     END
   END
@@ -325,8 +306,7 @@ LAYER
     EXPRESSION ([t] < 15)
     STYLE
       COLOR 0 0 255
-      SIZE 4
-      SYMBOL 'circle'
+      WIDTH 4.0
     END
   END
   CLASS
@@ -334,8 +314,7 @@ LAYER
     EXPRESSION ([t] >= 15 and [t] < 25)
     STYLE
       COLOR 51 255 0
-      SIZE 4
-      SYMBOL 'circle'
+      WIDTH 4.0
     END
   END
   CLASS
@@ -343,8 +322,7 @@ LAYER
     EXPRESSION ([t] >= 25 and [t] < 35)
     STYLE
       COLOR 255 255 0
-      SIZE 4
-      SYMBOL 'circle'
+      WIDTH 4.0
     END
   END
   CLASS
@@ -352,8 +330,7 @@ LAYER
     EXPRESSION ([t] >= 35 and [t] < 40)
     STYLE
       COLOR 255 204 0
-      SIZE 4
-      SYMBOL 'circle'
+      WIDTH 4.0
     END
   END
   CLASS
@@ -361,8 +338,7 @@ LAYER
     EXPRESSION ([t] >= 40)
     STYLE
       COLOR 255 102 0
-      SIZE 4
-      SYMBOL 'circle'
+      WIDTH 4.0
     END
   END
 END
@@ -392,8 +368,7 @@ LAYER
     EXPRESSION ([lv] = 1)
     STYLE
       COLOR 200 200 200
-      SIZE 16
-      SYMBOL 'circle'
+      WIDTH 16.0
     END
   END
 END
@@ -424,13 +399,11 @@ LAYER
     EXPRESSION ([cond_code] = 0)
     STYLE
       COLOR 153 153 153
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR 0 0 0
-      SIZE 3
-      SYMBOL 'circle'
+      WIDTH 3.0
       #ANTIALIAS TRUE
     END
   END
@@ -439,8 +412,7 @@ LAYER
     EXPRESSION ([cond_code] = 1)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR 0 204 0
@@ -453,8 +425,7 @@ LAYER
     EXPRESSION ([cond_code] >= 3 and [cond_code] <= 14)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       #COLOR  152 152 152
@@ -473,8 +444,7 @@ LAYER
     END
     STYLE
       COLOR 230 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR  250 250 0
@@ -487,8 +457,7 @@ LAYER
     EXPRESSION ([cond_code] = 51)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR  232 95 1
@@ -502,8 +471,7 @@ LAYER
     EXPRESSION ([cond_code] = 15)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR 255 197 197
@@ -516,8 +484,7 @@ LAYER
     EXPRESSION ([cond_code] = 19)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR 254 51 153
@@ -530,8 +497,7 @@ LAYER
     EXPRESSION ([cond_code] = 23)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR 181 0 181
@@ -545,8 +511,7 @@ LAYER
     EXPRESSION ([cond_code] = 56)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR 255 197 197
@@ -559,8 +524,7 @@ LAYER
     EXPRESSION ([cond_code] = 60)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR 254 51 153
@@ -573,8 +537,7 @@ LAYER
     EXPRESSION ([cond_code] = 64)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR 181 0 181
@@ -588,8 +551,7 @@ LAYER
     EXPRESSION ([cond_code] = 27)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR 255 197 197
@@ -602,8 +564,7 @@ LAYER
     EXPRESSION ([cond_code] = 31)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR 254 51 153
@@ -616,8 +577,7 @@ LAYER
     EXPRESSION ([cond_code] = 35)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR 181 0 181
@@ -631,8 +591,7 @@ LAYER
     EXPRESSION ([cond_code] = 39)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR  153 255 255
@@ -645,8 +604,7 @@ LAYER
     EXPRESSION ([cond_code] = 43)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR  0 153 254
@@ -659,8 +617,7 @@ LAYER
     EXPRESSION ([cond_code] = 47)
     STYLE
       COLOR 0 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR  0 0 158
@@ -708,8 +665,7 @@ LAYER
     EXPRESSION ([cond_code] = 0)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR 0 0 0
@@ -722,8 +678,7 @@ LAYER
     EXPRESSION ([cond_code] = 1)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR 0 204 0
@@ -736,8 +691,7 @@ LAYER
     EXPRESSION ([cond_code] >= 3 and [cond_code] <= 14)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       #COLOR  152 152 152
@@ -757,8 +711,7 @@ LAYER
     END
     STYLE
       COLOR 230 0 0
-      SIZE 5
-      SYMBOL 'circle'
+      WIDTH 5.0
     END
     STYLE
       COLOR  250 250 0
@@ -771,8 +724,7 @@ LAYER
     EXPRESSION ([cond_code] = 51)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR  232 95 1
@@ -785,8 +737,7 @@ LAYER
     EXPRESSION ([cond_code] = 15)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR 255 197 197
@@ -799,8 +750,7 @@ LAYER
     EXPRESSION ([cond_code] = 19)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR 254 51 153
@@ -813,8 +763,7 @@ LAYER
     EXPRESSION ([cond_code] = 23)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR 181 0 181
@@ -828,8 +777,7 @@ LAYER
     EXPRESSION ([cond_code] = 56)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR 255 197 197
@@ -842,8 +790,7 @@ LAYER
     EXPRESSION ([cond_code] = 60)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR 254 51 153
@@ -856,8 +803,7 @@ LAYER
     EXPRESSION ([cond_code] = 64)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR 181 0 181
@@ -870,8 +816,7 @@ LAYER
     EXPRESSION ([cond_code] = 27)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR 255 197 197
@@ -884,8 +829,7 @@ LAYER
     EXPRESSION ([cond_code] = 31)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR 254 51 153
@@ -898,8 +842,7 @@ LAYER
     EXPRESSION ([cond_code] = 35)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR 181 0 181
@@ -914,8 +857,7 @@ LAYER
     EXPRESSION ([cond_code] = 39)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR  153 255 255
@@ -928,8 +870,7 @@ LAYER
     EXPRESSION ([cond_code] = 43)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR  0 153 254
@@ -942,8 +883,7 @@ LAYER
     EXPRESSION ([cond_code] = 47)
     STYLE
       COLOR 220 220 220
-      SIZE 7
-      SYMBOL 'circle'
+      WIDTH 7.0
     END
     STYLE
       COLOR  0 0 158
@@ -979,7 +919,6 @@ LAYER
   END
   CLASS
     STYLE
-      #SYMBOL 'circle'
       COLOR 200 200 200
       WIDTH 3
       ANTIALIAS TRUE
@@ -1071,7 +1010,10 @@ LAYER
   CLASS
     NAME 'credits'
     LABEL
-      BACKGROUNDCOLOR 0 0 0
+      #STYLE # a shadow
+      #  GEOMTRANSFORM 'labelpoly'
+      #  COLOR 250 250 250
+      #END
       COLOR 255 255 255
       TYPE BITMAP
       SIZE medium

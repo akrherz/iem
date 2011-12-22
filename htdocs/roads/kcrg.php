@@ -45,7 +45,7 @@ $background->draw($img);
 
 $roads = $map->getlayerbyname("roads");
 $roads->set("status", MS_ON);
-$roads->set("transparency", MS_GD_ALPHA);
+
 for ($k=0;$k<17;$k++)
 {
   $r_c1 = $roads->getClass($k);
@@ -90,7 +90,7 @@ if (! $metroview)
   $pt = ms_newPointObj();
   $pt->setXY(555, 160);
   //$pt->draw($map, $ia511, $img, 0, "");
-  $pt->free();
+
 }
 
 $logokey2 = $map->getlayerbyname("colorkey");
@@ -127,7 +127,7 @@ $layer = $map->getLayerByName("credits");
 $c = $layer->getClass(0);
 $point = ms_newpointobj();
 $point->setXY(500, 10);
-$point->draw($map, $layer, $img, "credits", $valid);
+$point->draw($map, $layer, $img, 0, $valid);
 
 header("Content-type: image/png");
 $img->saveImage('');
