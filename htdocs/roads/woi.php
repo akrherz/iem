@@ -56,7 +56,6 @@ $states->set("status", MS_ON);
 
 $roads = $map->getlayerbyname("roads");
 $roads->set("status", MS_ON);
-$roads->set("transparency", MS_GD_ALPHA);
 for ($k=0;$k<17;$k++)
 {
   $r_c1 = $roads->getClass($k);

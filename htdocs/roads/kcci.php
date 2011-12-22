@@ -79,7 +79,7 @@ if (! $metroview && ! $eightbit)
 {
   $roads->set("data", "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1 and b.us1 NOT IN (6) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915");
 }
-$roads->set("transparency", MS_GD_ALPHA);
+
 for ($k=0;$k<17;$k++)
 {
   $r_c1 = $roads->getClass($k);
@@ -136,7 +136,7 @@ if (! $metroview)
   $pt = ms_newPointObj();
   $pt->setXY(555, 160);
   //$pt->draw($map, $ia511, $img, 0, "");
-  $pt->free();
+
 }
 
 $logokey2 = $map->getlayerbyname("colorkey");
@@ -178,7 +178,7 @@ $layer = $map->getLayerByName("credits");
 $c = $layer->getClass(0);
 $point = ms_newpointobj();
 $point->setXY(500, 10);
-$point->draw($map, $layer, $img, "credits", $valid);
+$point->draw($map, $layer, $img, 0, $valid);
 
 header("Content-type: image/png");
 $img->saveImage('');

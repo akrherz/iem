@@ -38,7 +38,7 @@ $background->draw($img);
 //$states->draw($img);
 
 $roads = $map->getlayerbyname("roads");
-$roads->set("transparency", MS_GD_ALPHA);
+//$roads->set("transparency", MS_GD_ALPHA);
 $roads->set("status", MS_ON);
 
 if (isset($_GET["extreme"]) )
@@ -123,7 +123,7 @@ $layer = $map->getLayerByName("credits");
 $c = $layer->getClass(0);
 $point = ms_newpointobj();
 $point->setXY(1150, 10);
-$point->draw($map, $layer, $img, "credits", $valid);
+$point->draw($map, $layer, $img, 0, $valid);
 
 header("Content-type: image/jpeg");
 $img->saveImage('');
