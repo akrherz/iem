@@ -39,14 +39,12 @@ function mktitlelocal($map, $imgObj, $titlet) {
   $point->setXY( 0, 10);
   $point->draw($map, $layer, $imgObj, 0,
     $titlet ."                                                                                ");
-  $point->free();
 
      // point feature with text for location
   $point = ms_newpointobj();
   $point->setXY( 0, 460);
   $point->draw($map, $layer, $imgObj, 1,
     "  Iowa Environmental Mesonet | NWS COOP ");
-  $point->free();
 }
 
 function plotNoData($map, $img){
@@ -56,7 +54,6 @@ function plotNoData($map, $img){
   $point->setXY( 100, 200);
   $point->draw($map, $layer, $img, 1,
     "  No data found for this date! ");
-  $point->free();
 
 }
 
@@ -84,13 +81,19 @@ $width = 640;
 
 $proj = "init=epsg:26915";
 
-$map = ms_newMapObj("base.map");
+$map = ms_newMapObj("$rootpath/data/gis/base26915.map");
+$map->setsize(640,480);
 $map->setProjection($proj);
-
 $map->setextent(250000, 4450000, 690000, 4880000);
 
 $counties = $map->getlayerbyname("counties");
 $counties->set("status", MS_ON);
+
+$states = $map->getlayerbyname("states");
+$states->set("status", MS_ON);
+
+$bar640t = $map->getlayerbyname("bar640t");
+$bar640t->set("status", MS_ON);
 
 $snet = $map->getlayerbyname("snet");
 $snet->set("status", MS_ON);
@@ -103,7 +106,9 @@ $ponly->set("status", MS_ON);
 
 $img = $map->prepareImage();
 $counties->draw($img);
+$states->draw($img);
 $iards->draw($img);
+$bar640t->draw($img);
 
 $rs = pg_prepare($coopdb, "SELECT", "SELECT station, 
 	sum(precip) as s_prec, sum(gdd50(high,low)) as s_gdd50,
@@ -122,19 +127,18 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
   $pt = ms_newPointObj();
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
   $pt->draw($map, $ponly, $img, 0, '' );
-  $pt->free();
 
   // City Name
   $pt = ms_newPointObj();
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-  $pt->draw($map, $snet, $img, 1, $cities[$ukey]['name'] );
-  $pt->free();
+  $pt->draw($map, $snet, $img, 3, $cities[$ukey]['name'] );
+
 		  // Value UL
   $pt = ms_newPointObj();
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
   $pt->draw($map, $snet, $img, 0,
      round($row["s_".$var], $rnd[$var]) );
-  $pt->free();
+
   
   
 	}
