@@ -141,7 +141,6 @@ while (list($key, $drct) = each($cdrct))
    $pt = ms_newPointObj();
    $pt->setXY($lon, $lat, 0);
    $pt->draw($map, $cp, $img, 0, intval( substr($key,5,3) ) );
-   $pt->free();
 
    if ($cdrct[$key] >= 0 && $network != 'IDOT')
    {
@@ -149,7 +148,6 @@ while (list($key, $drct) = each($cdrct))
      $pt->setXY($lon, $lat, 0);
      $cl2->label->set("angle",  (0 - $cdrct[$key]) + 90 );
      $pt->draw($map, $cp, $img, 1, 'a' );
-     $pt->free();
    }
 }
 $d = date("m/d/Y h:i A", $radts);
@@ -157,7 +155,7 @@ $d = date("m/d/Y h:i A", $radts);
 $layer = $map->getLayerByName("credits");
 $point = ms_newpointobj();
 $point->setXY(125, 10);
-$point->draw($map, $layer, $img, "credits",  "RADAR: $d");
+$point->draw($map, $layer, $img, 0,  "RADAR: $d");
 
 $map->drawLabelCache($img);
 
