@@ -299,7 +299,7 @@ $ptext = "'ZZ' as phenomena";
 $sbwh = $map->getlayerbyname("sbw");
 $sbwh->set("status", in_array("sbwh", $layers) );
 $sbwh->set("connection", $_DATABASES["postgis"]);
-$sbwh->set("maxscale", 10000000);
+//$sbwh->set("maxscale", 10000000);
 $sql = sprintf("geom from (select %s, geom, oid from sbw_%s 
     WHERE significance != 'A' and polygon_begin <= '%s:00+00' and 
     polygon_end > '%s:00+00'
@@ -322,7 +322,7 @@ if (in_array("sbw", $layers) && in_array("cbw", $layers))
 $sbw = $map->getlayerbyname("sbw");
 $sbw->set("status", in_array("sbw", $layers) );
 $sbw->set("connection", $_DATABASES["postgis"]);
-$sbw->set("maxscale", 10000000);
+//$sbw->set("maxscale", 10000000);
 $sql = sprintf("geom from (select %s, geom, oid from sbw_%s 
     WHERE significance != 'A' and polygon_begin <= '%s:00+00' and polygon_end > '%s:00+00'
     %s) as foo using unique oid using SRID=4326", 
@@ -437,35 +437,30 @@ if (isset($_GET["title"])){
   $title = "IEM Plot";
 }
 $point->draw($map, $tlayer, $img, 0, $title);
-$point->free();
 
 $point = ms_newpointobj();
 $point->setXY(80, 29);
 if (isset($_REQUEST["tz"])) { putenv("TZ=". substr($_REQUEST["tz"],0,10)); }
 $point->draw($map, $tlayer, $img, 1,"$d");
-$point->free();
 
 $map->drawLabelCache($img);
 
 $layer = $map->getLayerByName("logo");
 $point = ms_newpointobj();
 $point->setXY(40, 26);
-$point->draw($map, $layer, $img, "logo", "");
-$point->free();
+$point->draw($map, $layer, $img, 0, "");
 
 if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers) ){
   $layer = $map->getLayerByName("n0r-ramp");
   $point = ms_newpointobj();
   $point->setXY(560, 15);
-  $point->draw($map, $layer, $img, "n0r-ramp", "");
-  $point->free();
+  $point->draw($map, $layer, $img, 0, "");
 }
 if (in_array("n0q", $layers) || in_array("n0q_tc", $layers) ){
   $layer = $map->getLayerByName("n0q-ramp");
   $point = ms_newpointobj();
   $point->setXY(510, 15);
-  $point->draw($map, $layer, $img, "n0q-ramp", "");
-  $point->free();
+  $point->draw($map, $layer, $img, 0, "");
 }
 
 if (in_array("legend", $layers)){
