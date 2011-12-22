@@ -31,7 +31,7 @@ function mktitle($map, $imgObj, $titlet) {
        $point->setXY( 100, 
                      10);
 
-       $point->draw($map, $layer, $imgObj, "credits",
+       $point->draw($map, $layer, $imgObj, 0,
                      $titlet);
 }
 function skntChar($sknt){
@@ -70,7 +70,7 @@ $width = 450;
 
 $proj = "init=epsg:26915";
 
-$projInObj = ms_newprojectionobj("proj=latlong");
+$projInObj = ms_newprojectionobj("init=epsg:4326");
 $projOutObj = ms_newprojectionobj($proj);
 
 $varDef = Array("tmpf" => "Current Temperatures",
@@ -99,7 +99,7 @@ $rnd = Array("tmpf" => 0,
 $height = 480;
 $width = 640;
 
-$map = ms_newMapObj("base.map");
+$map = ms_newMapObj("$rootpath/data/gis/base26915.map");
 $map->set("width", $width);
 $map->set("height", $height);
 
@@ -116,7 +116,7 @@ else
     $map->setextent(300000, 4480000, 550000, 4800000);
 }
 
-$counties = $map->getlayerbyname("counties");
+$counties = $map->getlayerbyname("uscounties");
 $counties->set("status", MS_ON);
 
 $states = $map->getlayerbyname("states");
@@ -132,15 +132,12 @@ $bclass = $barbs->getClass(0);
 
 $temps = $map->getlayerbyname("temps");
 $temps->set("status", MS_ON);
-$temps->setprojection("proj=latlong");
 
-$dmx = $map->getlayerbyname("DMX");
-$dmx->set("status", MS_ON);
 
 $iards = $map->getlayerbyname("interstates");
 $iards->set("status", MS_ON);
 
-$mwradar = $map->getlayerbyname("mwradar");
+$mwradar = $map->getlayerbyname("nexrad_n0q");
 $mwradar->set("status", MS_ON);
 
 $img = $map->prepareImage();
@@ -164,19 +161,16 @@ foreach($data as $key => $value){
      $rotate =  0 - intval($bzz["drct"]);
      $bclass->label->set("angle", doubleval($rotate));
      $pt->draw($map, $barbs, $img, 0, skntChar($bzz["sknt"]) );
-     $pt->free();
 
      $pt = ms_newPointObj();
      $pt->setXY($Scities[$key]["lon"], $Scities[$key]["lat"], 0);
      $tmpf = intval($bzz['tmpf']);
      $pt->draw($map, $temps, $img, 0, round($bzz['tmpf'], $rnd['tmpf']) );
-     $pt->free();
 
      $pt = ms_newPointObj();
      $pt->setXY($Scities[$key]["lon"], $Scities[$key]["lat"], 0);
      $dwpf = intval($bzz['dwpf']);
      $pt->draw($map, $temps, $img, 1, round($bzz['dwpf'], $rnd['dwpf']) );
-     $pt->free();
   }
 }
 
