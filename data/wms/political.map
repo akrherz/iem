@@ -24,7 +24,7 @@ WEB
   METADATA
    "wms_title" "IEM Political Boundaries Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wms/political.map&SERVICE=WMS&"
-   "wms_srs" "EPSG:900913"
+   "wms_srs" "EPSG:900913 EPSG:3857"
    "wms_abstract" "IEM generated political boundaries."
    "wms_keywords" "states,counties"
    "wms_accessconstraints" "None"
@@ -48,7 +48,7 @@ LAYER
   END
   METADATA
     "wms_title" "US Counties"
-    "wms_srs"   "EPSG:900913"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   CLASS
@@ -72,7 +72,7 @@ LAYER
   END
   METADATA
     "wms_title" "US States"
-    "wms_srs"   "EPSG:900913"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   CLASS
@@ -96,7 +96,7 @@ LAYER
   END
   METADATA
     "wms_title" "NWS County Warning Areas"
-    "wms_srs"   "EPSG:900913"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
     "wms_extent" "-180 10 -66 89"
   END
   CLASS
@@ -120,7 +120,7 @@ LAYER
   END
   METADATA
     "wms_title" "NWS River Forecast Center HSA"
-    "wms_srs"   "EPSG:900913"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
     "wms_extent" "-180 10 -66 89"
   END
   CLASS
@@ -144,7 +144,7 @@ LAYER
   END
   METADATA
     "wms_title" "NWS CWSU"
-    "wms_srs"   "EPSG:900913"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
     "wms_extent" "-180 10 -66 89"
   END
   CLASS
