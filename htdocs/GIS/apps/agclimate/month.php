@@ -26,12 +26,10 @@ $myStations = $ISUAGcities;
 $height = 480;
 $width = 640;
 
-$proj = "proj=tmerc,lat_0=41.5,lon_0=-93.65,x_0=0,y_0=0,k=0.9999";
-
-$map = ms_newMapObj("base.map");
-$map->setProjection($proj);
+$map = ms_newMapObj("$rootpath/data/gis/base26915.map");
+$map->setProjection("init=epsg:26915");
 $map->setsize($width,$height);
-$map->setextent(-252561, -133255, 300625, 277631);
+$map->setextent(175000, 4440000, 775000, 4890000);
 
 $counties = $map->getlayerbyname("counties");
 $counties->set("status", MS_ON);
@@ -43,13 +41,20 @@ $sclass = $snet->getClass(0);
 $iards = $map->getlayerbyname("iards");
 $iards->set("status", 1);
 
+$bar640t = $map->getlayerbyname("bar640t");
+$bar640t->set("status", MS_ON);
+
+$states = $map->getlayerbyname("states");
+$states->set("status", MS_ON);
 
 $ponly = $map->getlayerbyname("pointonly");
 $ponly->set("status", MS_ON);
 
 $img = $map->prepareImage();
 $counties->draw($img);
+$states->draw($img);
 $iards->draw($img);
+$bar640t->draw($img);
 
 $c = iemdb("isuag");
 $sql = "select station, sum($dvar) as s from daily 
@@ -66,13 +71,11 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   $pt->draw($map, $ponly, $img, 0, ' ' );
-  $pt->free();
 
   // Value UL
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   $pt->draw($map, $snet, $img, 0, $val);
-  $pt->free();
 
   // City Name
   $pt = ms_newPointObj();
@@ -82,7 +85,6 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   } else {
     $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['name'] );
   }
-  $pt->free();
 }
 if ($i == 0)
    plotNoData($map, $img);
@@ -95,7 +97,6 @@ $layer = $map->getLayerByName("logo");
 $point = ms_newpointobj();
 $point->setXY( 35, 25);
 $point->draw($map, $layer, $img, 0, "");
-$point->free();
 
 $url = $img->saveWebImage();
 

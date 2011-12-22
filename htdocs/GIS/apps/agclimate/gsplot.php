@@ -59,7 +59,7 @@ $width = $width;
 
 $proj = "init=epsg:26915";
 
-$map = ms_newMapObj("base.map");
+$map = ms_newMapObj("$rootpath/data/gis/base26915.map");
 $map->setsize($width,$height);
 $map->setProjection($proj);
 
@@ -76,13 +76,20 @@ $sclass = $snet->getClass(0);
 $iards = $map->getlayerbyname("iards");
 $iards->set("status", MS_ON);
 
+$bar640t = $map->getlayerbyname("bar640t");
+$bar640t->set("status", MS_ON);
 
 $ponly = $map->getlayerbyname("pointonly");
 $ponly->set("status", MS_ON);
 
+$states = $map->getlayerbyname("states");
+$states->set("status", MS_ON);
+
 $img = $map->prepareImage();
 $counties->draw($img);
+$states->draw($img);
 $iards->draw($img);
+$bar640t->draw($img);
 
 $c = iemdb("isuag");
 $climatedb = iemdb("coop");
@@ -107,7 +114,7 @@ function gdd($high, $low, $ceiling, $floor)
 $climate = Array();
 reset($ISUAGcities);
 while( list($key,$val) = each($ISUAGcities) ) {
-  $csite = strtolower($ISUAGcities[$key]["climate_site"]);
+  $csite = $ISUAGcities[$key]["climate_site"];
   $climate[$key] = Array('gdd32'=> 0, 'gdd50' => 0,'sdd86'=>0,'prec'=>0);
 
   $sql = sprintf("SELECT * from climate51 WHERE station = '%s' and
@@ -253,14 +260,12 @@ foreach($vals as $key => $value){
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   $pt->draw($map, $ponly, $img, 0, ' ' );
-  $pt->free();
 
   // Value UL
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   $pt->draw($map, $snet, $img, 0, 
      round($value, $rnd[$var]) );
-  $pt->free();
 
   // Climate
   if ($var == "gdd32" || $var == "gdd50" || $var == "prec")
@@ -268,7 +273,6 @@ foreach($vals as $key => $value){
     $pt = ms_newPointObj();
     $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
     $pt->draw($map, $snet, $img, 2, "(". round($value - $climate[$key][$var],$rnd[$var]) .")");
-    $pt->free();
 
   }
 
@@ -283,7 +287,6 @@ foreach($vals as $key => $value){
       $pt->draw($map, $snet, $img, 2, 
         round($row[$var2], $rnd[$var2]) ." ". $row[$var2 .'_f'] );
     }
-    $pt->free();
   }
 
   // City Name
@@ -294,7 +297,6 @@ foreach($vals as $key => $value){
   } else {
     $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['name'] );
   }
-  $pt->free();
 }
 if ($i == 0)
    plotNoData($map, $img);
@@ -305,7 +307,6 @@ $layer = $map->getLayerByName("logo");
 $point = ms_newpointobj();
 $point->setXY( 37, 27);
 $point->draw($map, $layer, $img, 0, "");
-$point->free();
 
 header("Content-type: image/png");
 $img->saveImage('');
