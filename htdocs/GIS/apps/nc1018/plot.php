@@ -143,7 +143,7 @@ $param["title"] .= strftime("%d %b %Y", $ts);
 
 
 /* Start Mapping */
-$map = ms_newMapObj("base.map");
+$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 $map->setSize($map_width, $map_height);
 
 /* Set Extents */
@@ -167,7 +167,7 @@ function add_and_draw($name)
 
 
 $colors = $param["cramp"];
-$rainfall = $map->getlayerbyname("highs");
+$rainfall = $map->getlayerbyname("nc1018");
 $rainfall->set("status", MS_ON);
 $rainfall->set("data", $param["sql"]);
 
@@ -241,17 +241,17 @@ $c11s->color->setRGB($colors[11]['r'], $colors[11]['g'], $colors[11]['b']);
 
 $rainfall->draw($img);
 
-add_and_draw("counties");
+add_and_draw("uscounties");
 add_and_draw("states");
 
 /* Need something to draw bars! */
-$bar = $map->getlayerbyname("bar");
+$bar = $map->getlayerbyname("bar640t");
 
 $layer = $map->getLayerByName("credits");
 $rt = ms_newRectObj();
 $rt->setextent(0, 30, $map_width, 5);
 $rt->draw($map, $bar, $img, 0, "");
-$rt->free();
+
 $point = ms_newpointobj();
 $point->setXY(50, 20);
 $point->draw($map, $layer, $img, 0, $param["title"]);
@@ -260,12 +260,12 @@ $point->draw($map, $layer, $img, 0, $param["title"]);
 $rt = ms_newRectObj();
 $rt->setextent(0, $map_height, $map_width, $map_height - 20);
 $rt->draw($map, $bar, $img, 0, "");
-$rt->free();
+
 
 $rt = ms_newRectObj();
 $rt->setextent(0, $map_height, 60, $map_height - 210);
 $rt->draw($map, $bar, $img, 0, "");
-$rt->free();
+
 
 $point = ms_newpointobj();
 $point->setXY(5, $map_height - 10);
@@ -290,7 +290,7 @@ for ($k=11;$k>=0;$k--){
  $cl->label->set("offsetx", $width * 1.25);
  $cl->label->set("offsety", 0);
  $p->draw($map, $layer, $img, 11- $k, @$param["ramp"][$k]);
- $p->free();
+
  $y = $y + $height;
 }
 
