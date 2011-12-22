@@ -5,11 +5,11 @@ MAP
 NAME base2163
 STATUS ON
 SIZE 640 480
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONTSET "./fonts.list"
 EXTENT -2110437 -2251067 2548326 1239063
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/static/"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "./stations.sym"
 IMAGECOLOR 0 0 250
 IMAGETYPE PNG
 TRANSPARENT OFF
@@ -30,15 +30,24 @@ WEB
   LOG "/tmp/warning0.log"
 END
 
-SYMBOL
-  NAME 'fill45'
-  TYPE Ellipse
-  FILLED TRUE
-  POINTS
-   1 1
-  END
-  STYLE 1 5 END
+OUTPUTFORMAT
+  NAME "png"
+  DRIVER AGG/PNG
+  MIMETYPE "image/png"
+  IMAGEMODE PC256
+  EXTENSION "png"
+  FORMATOPTION "GAMMA=0.75"
 END
+
+OUTPUTFORMAT
+  NAME "png24"
+  DRIVER AGG/PNG
+  MIMETYPE "image/png"
+  IMAGEMODE RGB
+  EXTENSION "png"
+  FORMATOPTION "GAMMA=0.75"
+END
+
 
 #
 SCALEBAR
@@ -179,10 +188,10 @@ LAYER
    "init=epsg:2163"
   END
   CLASS
-  #  COLOR 105 105 105
-    COLOR 0 0 0
-    SYMBOL 'circle'
-    SIZE 2
+    STYLE
+      COLOR 0 0 0
+      WIDTH 1.0
+    END
   END
 #  TRANSPARENCY 80
 END
@@ -350,26 +359,22 @@ LAYER
     EXPRESSION /SVR/
     STYLE
       COLOR 0 0 0
-      SIZE 4
-      SYMBOL 'circle'
+      WIDTH 4.0
     END
     STYLE
       COLOR 255 255 0
-      SIZE 2
-       SYMBOL 'circle'
+      WIDTH 2.0
     END
   END
   CLASS
     EXPRESSION /TOR/
     STYLE
       COLOR 0 0 0
-      SIZE 4
-      SYMBOL 'circle'
+      WIDTH 4.0
     END
     STYLE
       COLOR 255 0 0
-      SIZE 2
-      SYMBOL 'circle'
+      WIDTH 2.0
     END
   END
 END
@@ -384,7 +389,11 @@ LAYER
     NAME 'credits'
     LABEL
       COLOR 0 0 0
-      BACKGROUNDCOLOR 250 250 250
+      STYLE # a shadow
+        GEOMTRANSFORM 'labelpoly'
+        COLOR 250 250 250
+        OFFSET 2 2
+      END
 #      SHADOWSIZE 1 1
 #      SHADOWCOLOR 0 0 0
 #      BACKGROUNDSHADOWCOLOR 0 0 0
@@ -467,7 +476,7 @@ LAYER
       COLOR 255 255 0
       TYPE TRUETYPE
       SIZE 14
-      FONT 'arial'
+      FONT 'liberation'
       POSITION CR
       FORCE TRUE
       PARTIALS TRUE
@@ -480,7 +489,7 @@ LAYER
       COLOR 255 255 255
       TYPE TRUETYPE
       SIZE 12
-      FONT 'arial'
+      FONT 'liberation'
       POSITION CR
       FORCE TRUE
       PARTIALS TRUE
@@ -505,16 +514,14 @@ LAYER
     EXPRESSION 'TO'
     STYLE
       COLOR 255 0 0
-      SIZE 2
-      SYMBOL 'circle'
+      WIDTH 2.0
     END
   END
   CLASS
     EXPRESSION 'SV'
     STYLE
       COLOR 255 255 0
-      SIZE 2
-      SYMBOL 'circle'
+      WIDTH 2.0
     END
   END
 END

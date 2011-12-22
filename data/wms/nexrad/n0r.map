@@ -36,12 +36,13 @@ WEB
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?"
-   "wms_srs" "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
+   "wms_srs" "EPSG:4326 epsg:900913 EPSG:102100 EPSG:3857"
    "wms_abstract" "IEM generated CONUS composite of NWS WSR-88D level III base reflectivity."
    "wms_keywords" "NEXRAD,N0R"
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
+   "wms_enable_request" "*"
   END
 END
 
@@ -74,11 +75,11 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE)"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_srs"   "epsg:3857 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   OFFSITE 0 0 0
@@ -94,11 +95,11 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M5 MINS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_srs"   "epsg:3857 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   OFFSITE 0 0 0
@@ -114,11 +115,11 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M10 MINS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_srs"   "epsg:3857 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   OFFSITE 0 0 0
@@ -133,11 +134,11 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M15 MINS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_srs"   "epsg:3857 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   OFFSITE 0 0 0
@@ -152,11 +153,11 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M20 MINS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_srs"   "epsg:3857 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   OFFSITE 0 0 0
@@ -171,11 +172,11 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M25 MINS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_srs"   "epsg:3857 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   OFFSITE 0 0 0
@@ -191,11 +192,11 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M30 MINS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_srs"   "epsg:3857 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   OFFSITE 0 0 0
@@ -210,11 +211,11 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M35 MINS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_srs"   "epsg:3857 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   OFFSITE 0 0 0
@@ -229,11 +230,11 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M40 MINS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_srs"   "epsg:3857 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   OFFSITE 0 0 0
@@ -248,11 +249,11 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M45 MINS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_srs"   "epsg:3857 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   OFFSITE 0 0 0
@@ -267,11 +268,11 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M50 MINS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
+    "wms_srs"   "epsg:3857 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
   OFFSITE 0 0 0

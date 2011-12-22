@@ -3,11 +3,11 @@ MAP
 NAME base4326
 STATUS ON
 SIZE 640 480
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONTSET "./fonts.list"
 EXTENT -104 37 -87 49
 UNITS DD
 SHAPEPATH "./"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "./stations.sym"
 IMAGETYPE PNG
 IMAGECOLOR 0 0 255
 #TRANSPARENT ON
@@ -30,7 +30,7 @@ SYMBOL
   POINTS
    1 1
   END
-  STYLE 1 5 END
+  #STYLE 1 5 END
 END
 
 
@@ -57,7 +57,7 @@ LEGEND
     COLOR 255 255 255
   #  SIZE 16
   #  TYPE TRUETYPE
-  #  FONT 'arial'
+  #  FONT 'liberation'
   #  FORCE TRUE
   #  PARTIALS TRUE
   #  BUFFER 2
@@ -95,6 +95,33 @@ LAYER
   DATA /home/ldm/data/gis/images/4326/goes/east1V_0.tif
   PROJECTION
     "init=epsg:4326"
+  END
+END
+
+LAYER
+  NAME singlebox
+  TYPE POLYGON
+  STATUS OFF
+  TRANSFORM FALSE
+  LABELCACHE OFF
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME nc1018
+  # Connect to a remote spatial database
+  CONNECTION "user=nobody dbname=nc1018 host=iemdb"
+  # Get the lines from the 'geom' column of the 'roads' table
+  DATA "the_geom from (select d.fips, 
+    round(((1.8 * d.high::real) + 32.0)::numeric, 0) as high, 
+    the_geom from weather d, counties c
+    WHERE d.valid = '1978-05-19' and d.fips = c.fips) as foo 
+    using unique fips using srid=4326"
+  STATUS OFF
+  TYPE POLYGON
+  LABELCACHE OFF
+  PROJECTION
+   "init=epsg:4326"
   END
 END
 
@@ -798,7 +825,7 @@ LAYER
      "wms_srs"   "EPSG:26915"
   END
   PROJECTION
-    "proj=latlong"
+    "init=epsg:4326"
   END
   CLASS
     OUTLINECOLOR 250 250 250
@@ -811,10 +838,8 @@ LAYER
   TYPE POINT
   STATUS default
   TRANSFORM FALSE
-#  TRANSPARENCY 10
   CLASS
     SYMBOL 'iem_logo'
-    COLOR 0 0 0
   END
 END
 
@@ -846,7 +871,7 @@ LAYER
       COLOR 255 255 0
       TYPE TRUETYPE
       SIZE 14
-      FONT 'arial'
+      FONT 'liberation'
       POSITION CR
       FORCE TRUE
       PARTIALS TRUE
@@ -859,7 +884,7 @@ LAYER
       COLOR 255 255 255
       TYPE TRUETYPE
       SIZE 12
-      FONT 'arial'
+      FONT 'liberation'
       POSITION CR
       FORCE TRUE
       PARTIALS TRUE
@@ -878,14 +903,18 @@ LAYER
     NAME 'credits'
     LABEL
       COLOR 0 0 0
-      BACKGROUNDCOLOR 250 250 250
+      STYLE # a shadow
+        GEOMTRANSFORM 'labelpoly'
+        COLOR 250 250 250
+      END
+#      BACKGROUNDCOLOR 250 250 250
 #      SHADOWSIZE 1 1
 #      SHADOWCOLOR 0 0 0
 #      BACKGROUNDSHADOWCOLOR 0 0 0
 #      BACKGROUNDSHADOWSIZE 1 1
       TYPE TRUETYPE
       SIZE 16
-      FONT 'altgot2n'
+      FONT 'liberation-bold'
       POSITION CR
       FORCE TRUE
       PARTIALS TRUE
@@ -896,7 +925,12 @@ LAYER
     NAME 'credits-mono'
     LABEL
       COLOR 10 10 10
-      BACKGROUNDCOLOR 245 245 245
+      STYLE # a shadow
+        GEOMTRANSFORM 'labelpoly'
+        COLOR 250 250 250
+        OFFSET 2 2
+      END
+#      BACKGROUNDCOLOR 245 245 245
 #      SHADOWSIZE 1 1
 #      SHADOWCOLOR 0 0 0
 #      BACKGROUNDSHADOWCOLOR 0 0 0
@@ -991,7 +1025,7 @@ LAYER
   TYPE POINT
   LABELCACHE ON
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -1039,7 +1073,7 @@ LAYER
 #  LABELANGLEITEM "WIND_ROTAT"
   LABELCACHE ON
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR 255 0 0
@@ -1084,7 +1118,7 @@ LAYER
       OFFSET 7 0
       POSITION CR
       COLOR 0 255 0
-      BACKGROUNDCOLOR -1 -1 -1
+#      BACKGROUNDCOLOR -1 -1 -1
       OUTLINECOLOR 0 0 0
       TYPE BITMAP
       ANTIALIAS false
@@ -1116,7 +1150,7 @@ LAYER
       OFFSET -7 0
       POSITION CL
       COLOR 255 0 0
-      BACKGROUNDCOLOR -1 -1 -1
+#      BACKGROUNDCOLOR -1 -1 -1
       OUTLINECOLOR 0 0 0
       TYPE BITMAP
       ANTIALIAS false
@@ -1164,7 +1198,7 @@ LAYER
       OFFSET 4 -12
       POSITION CC
       COLOR 255 255 255
-      BACKGROUNDCOLOR -1 -1 -1
+#      BACKGROUNDCOLOR -1 -1 -1
       OUTLINECOLOR -1 -1 -1
       TYPE TRUETYPE
       FONT weather
@@ -1250,7 +1284,9 @@ LAYER
   CONNECTION "user=nobody dbname=iem host=iemdb"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, round(tmpf::numeric,0) as tmpf, 
-    c.iemid as foid from current c JOIN stations t ON (t.iemid = c.iemid) WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
+    c.iemid as foid from current c JOIN stations t ON (t.iemid = c.iemid) 
+    WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
+    and tmpf is not null
     ) as foo using unique foid using srid=4326"
   STATUS OFF
   TYPE POINT
@@ -1259,14 +1295,15 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    EXPRESSION ([tmpf] >= 35 && [tmpf] < 120)
+    EXPRESSION ([tmpf] >= 35 AND [tmpf] < 120)
     TEXT ([tmpf])
     COLOR -1 -1 -1
     LABEL
       COLOR 30 190 20
-      #OUTLINECOLOR 250 250 250
-      TYPE BITMAP
-      SIZE MEDIUM
+      OUTLINECOLOR 0 0 0
+      TYPE TRUETYPE
+      FONT 'liberation'
+      SIZE 10
       POSITION UL
       OFFSET 2 2
       BUFFER 1
@@ -1280,9 +1317,10 @@ LAYER
     COLOR -1 -1 -1
     LABEL
       COLOR 215 255 0
-      #OUTLINECOLOR 250 250 250
-      TYPE BITMAP
-      SIZE MEDIUM
+      OUTLINECOLOR 0 0 0
+      TYPE TRUETYPE
+      FONT 'liberation'
+      SIZE 10
       POSITION UL
       OFFSET 2 2
       BUFFER 1
@@ -1296,9 +1334,10 @@ LAYER
     COLOR -1 -1 -1
     LABEL
       COLOR 255 164 0
-      #OUTLINECOLOR 250 250 250
-      TYPE BITMAP
-      SIZE MEDIUM
+      OUTLINECOLOR 0 0 0
+      TYPE TRUETYPE
+      FONT 'liberation'
+      SIZE 10
       POSITION UL
       OFFSET 2 2
       BUFFER 1
@@ -1312,8 +1351,10 @@ LAYER
     COLOR -1 -1 -1
     LABEL
       COLOR 255 50 0
-      TYPE BITMAP
-      SIZE MEDIUM
+      OUTLINECOLOR 0 0 0
+      TYPE TRUETYPE
+      FONT 'liberation'
+      SIZE 10
       POSITION UL
       OFFSET 2 2
       BUFFER 1
@@ -1327,8 +1368,10 @@ LAYER
     COLOR -1 -1 -1
     LABEL
       COLOR 255 0 144
-      TYPE BITMAP
-      SIZE MEDIUM
+      OUTLINECOLOR 0 0 0
+      TYPE TRUETYPE
+      FONT 'liberation'
+      SIZE 10
       POSITION UL
       OFFSET 2 2
       BUFFER 1
@@ -1343,8 +1386,10 @@ LAYER
     LABEL
       #COLOR 232 164 226
       COLOR 255 0 255
-      TYPE BITMAP
-      SIZE MEDIUM
+      OUTLINECOLOR 0 0 0
+      TYPE TRUETYPE
+      FONT 'liberation'
+      SIZE 10
       POSITION UL
       OFFSET 2 2
       BUFFER 1
@@ -1359,8 +1404,10 @@ LAYER
     LABEL
       #COLOR 232 214 226
       COLOR 255 255 255
-      TYPE BITMAP
-      SIZE MEDIUM
+      OUTLINECOLOR 0 0 0
+      TYPE TRUETYPE
+      FONT 'liberation'
+      SIZE 10
       POSITION UL
       OFFSET 2 2
       BUFFER 1

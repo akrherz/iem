@@ -27,6 +27,7 @@ WEB
     "wfs_contactorganization" "Iowa State University"
     "wfs_encoding" "ISO-8859-1"
     "ows_schemas_location" "http://ogc.dmsolutions.ca"
+       "wms_enable_request" "*"
   END
 END
  
