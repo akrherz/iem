@@ -27,8 +27,8 @@ function tv_logo($map, $imgObj, $titlet)
  $point = ms_newpointobj();
  $point->setXY(80, 400);
 
- $point->draw($map, $layer, $imgObj, "logo", "");
- $point->free();
+ $point->draw($map, $layer, $imgObj, 0, "");
+
 
 
 }
@@ -40,7 +40,7 @@ function mktitle($map, $imgObj, $titlet) {
   $point = ms_newpointobj();
   $point->setXY(10, 15);
                                                                                 
-  $point->draw($map, $layer, $imgObj, "credits",
+  $point->draw($map, $layer, $imgObj, 0,
     $titlet);
 }
                                                                                 
@@ -53,8 +53,8 @@ function mklogolocal($map, $imgObj) {
  $point = ms_newpointobj();
  $point->setXY(40, 26);
                                                                                 
- $point->draw($map, $layer, $imgObj, "logo", "");
- $point->free();
+ $point->draw($map, $layer, $imgObj, 0, "");
+
 
 }
 
