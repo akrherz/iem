@@ -10,7 +10,7 @@ IMAGECOLOR -1 -1 -1
 
 #
 PROJECTION
-   "init=epsg:900913"
+   "init=epsg:3857"
 END
 
 #
@@ -30,6 +30,7 @@ WEB
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
+      "wms_enable_request" "*"
   END
 END
 
@@ -43,7 +44,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "US Counties"
@@ -67,7 +68,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "US States"
@@ -91,7 +92,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NWS County Warning Areas"
@@ -115,7 +116,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NWS River Forecast Center HSA"
@@ -139,7 +140,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 465000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NWS CWSU"

@@ -42,6 +42,7 @@ WEB
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
+      "wms_enable_request" "*"
   END
 END
 
@@ -75,7 +76,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE)"
@@ -95,7 +96,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE)"
@@ -115,7 +116,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE)"
@@ -134,7 +135,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M5 MINS"
@@ -154,7 +155,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M10 MINS"
@@ -173,7 +174,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M15 MINS"
@@ -192,7 +193,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M20 MINS"
@@ -211,7 +212,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M25 MINS"
@@ -231,7 +232,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M30 MINS"
@@ -250,7 +251,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M35 MINS"
@@ -269,7 +270,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M40 MINS"
@@ -288,7 +289,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M45 MINS"
@@ -307,7 +308,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NEXRAD BASE REFLECT (GOOGLE) M50 MINS"

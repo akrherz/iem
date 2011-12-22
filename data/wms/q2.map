@@ -32,6 +32,7 @@ WEB
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
+      "wms_enable_request" "*"
   END
 END
 #------------------------------------------------------
@@ -63,7 +64,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "NMQ Hybrid Scan Reflectivity"
@@ -103,7 +104,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "Q2 1 Hour Precip"
@@ -141,7 +142,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "Q2 24 Hour Precipitation"
@@ -179,7 +180,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "Q2 48 Hour Precipitation"
@@ -217,7 +218,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "Q2 72 Hour Precipitation"

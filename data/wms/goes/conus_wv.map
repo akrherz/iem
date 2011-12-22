@@ -32,6 +32,7 @@ WEB
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
+      "wms_enable_request" "*"
   END
 END
 
@@ -63,7 +64,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "GOES CONUS WV"
@@ -81,7 +82,7 @@ LAYER
   MINSCALE 0
   MAXSCALE 4650000000000000
   PROJECTION
-    "init=epsg:900913"
+    "init=epsg:3857"
   END
   METADATA
     "wms_title" "GOES WV"

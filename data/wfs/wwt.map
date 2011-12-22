@@ -43,6 +43,7 @@ WEB
    "wfs_accessconstraints" "None"
    "wfs_contactperson" "Daryl Herzmann"
    "wfs_contactorganization" "Iowa State University"
+      "wms_enable_request" "*"
   END
 END
 
