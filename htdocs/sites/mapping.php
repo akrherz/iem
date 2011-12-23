@@ -74,7 +74,7 @@ $ll->draw($img);
 $pt = ms_newPointObj();
 $pt->setXY($loc["x"], $loc["y"], 0);
 $pt->draw($map, $site, $img, 0, "  ");
-$pt->free();
+
 
 /**
 $rt = ms_newRectObj();
