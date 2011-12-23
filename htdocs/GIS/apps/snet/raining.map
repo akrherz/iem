@@ -260,7 +260,7 @@ LAYER
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
-      FONT arialblk
+      FONT liberation
       BUFFER 1
       FORCE true
       POSITION AUTO
@@ -278,7 +278,7 @@ LAYER
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
-      FONT arialblk
+      FONT liberation
       ANTIALIAS true
       BUFFER 1
       FORCE true
