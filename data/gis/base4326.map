@@ -784,6 +784,7 @@ END
 
 INCLUDE "inc_lsrs.map"
 INCLUDE "inc_spc.map"
+INCLUDE "inc_iem.map"
 
 LAYER
   NAME nexrad_n0r
@@ -992,7 +993,7 @@ LAYER
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
-      FONT arial
+      FONT liberation
       ANTIALIAS false
       BUFFER 0
       FORCE true
@@ -1010,7 +1011,7 @@ LAYER
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
-      FONT arial
+      FONT liberation
       ANTIALIAS false
       BUFFER 0
       FORCE true
@@ -1038,7 +1039,7 @@ LAYER
       MINSIZE 4
       MAXSIZE 18
       TYPE TRUETYPE
-      FONT arial
+      FONT liberation
       ANTIALIAS true
       BUFFER 0
       FORCE true
