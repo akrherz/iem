@@ -181,7 +181,7 @@ $cl->set("name", "ccc");
 $lbl = $cl->label;
 $lbl->set("type", MS_TRUETYPE);
 $lbl->set("antialias", MS_OFF);
-$lbl->set("font", "arial");
+$lbl->set("font", "liberation");
 $lbl->set("size", 18);
 //$lbl->set("color", $black);
 $lbl->set("position", MS_AUTO);
