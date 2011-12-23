@@ -19,15 +19,15 @@
 //  "UDX" => "proj=lcc,lat_1=40,lat_2=43,lat_0=39.83,lon_0=-103,x_0=500000,y_0=0"
 //  "EAX" => "proj=tmerc,lat_0=36.166,lon_0=-94.5,k=0.9999,x_0=850000,y_0=0",
 $projs = Array("KCC" => "init=epsg:26915",
-  "DMX" => "proj=latlong",
-  "FSD" => "proj=latlong",
-  "ARX" => "proj=latlong",
-  "OAX" => "proj=latlong",
-  "ABR" => "proj=latlong",
-  "DVN" => "proj=latlong",
-  "EAX" => "proj=latlong",
-  "MPX" => "proj=latlong",
-  "UDX" => "proj=latlong"
+  "DMX" => "init=epsg:4326",
+  "FSD" => "init=epsg:4326",
+  "ARX" => "init=epsg:4326",
+  "OAX" => "init=epsg:4326",
+  "ABR" => "init=epsg:4326",
+  "DVN" => "init=epsg:4326",
+  "EAX" => "init=epsg:4326",
+  "MPX" => "init=epsg:4326",
+  "UDX" => "init=epsg:4326"
 );
 
 // "FSD" => Array(600178, -54000, 880341, 380783),
