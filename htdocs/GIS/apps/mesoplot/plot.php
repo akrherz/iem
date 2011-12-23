@@ -187,7 +187,7 @@ $map->drawLabelCache($img);
 //$pt = ms_newPointObj();
 //$pt->setXY(-94, 42, 0);
 //$pt->draw($map, $ly2, $img, 0, "");
-//$pt->free();
+
 
 //$layer2->draw($img);
 //$ly->draw( $img);

@@ -646,10 +646,11 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME sites
-  CONNECTION "host=iemdb user=nobody dbname=postgis"
+  CONNECTION "host=iemdb user=nobody dbname=iem"
   #DATA "geom from (select station, oid, round(CASE WHEN max_gust > max_sknt THEN max_gust else max_sknt END::numeric * 1.15,0) as val, geom from summary_2010 WHERE network in ('IA_ASOS','AWOS') and day = '2010-01-25' and (max_gust > 0 or max_sknt > 0)) as foo using unique oid using srid=4326"
   #DATA "geom from (select oid, geom, plot_name from stations where network = 'KCCI' and online = true) as foo using unique oid using srid=4326"
-  DATA "geom from (select random() as oid, geom, magnitude from lsrs_2011 where wfo in ('OAX','EAX','DMX') and magnitude >= 1 and valid BETWEEN '2011-08-18 12:00' and '2011-08-18 23:59' and type = 'H') as foo using unique oid using srid=4326"
+  #DATA "geom from (select random() as oid, geom, magnitude from lsrs_2011 where wfo in ('OAX','EAX','DMX') and magnitude >= 1 and valid BETWEEN '2011-08-18 12:00' and '2011-08-18 23:59' and type = 'H') as foo using unique oid using srid=4326"
+  DATA "geom from (select s.iemid as oid, geom, round(max_tmpf::numeric,0) as magnitude from summary_2011 t JOIN stations s on (s.iemid = t.iemid) where s.state = 'IA' and t.day = 'TODAY' and max_tmpf > 0 and network in ('AWOS','IA_ASOS')) as foo using UNIQUE oid using srid=4326"
   #FILTER "network = 'IA_RWIS'"
   STATUS ON
   TYPE POINT
@@ -686,7 +687,7 @@ LAYER
   NAME locs
   CONNECTION "host=iemdb user=nobody dbname=iem"
   #DATA "geom from (select oid, geom,  round(max_tmpf::numeric,0) as mint from summary WHERE network IN ('IA_ASOS','AWOS') and day = '2009-04-06' and min_tmpf < 50) as foo using unique oid using srid=4326"
-  DATA "geom from (select distinct station, geom  from summary_2010 WHERE network ~* 'COOP' and day > '2010-09-01' and day < '2010-11-22' and snow >= 1) as foo using unique station using srid=4326"
+  DATA "geom from (select distinct id, geom  from summary_2011 s JOIN stations t on (t.iemid = s.iemid) WHERE network ~* 'COOP' and day > '2011-09-01' and snow >= 1) as foo using unique id using srid=4326"
 #  FILTER "state = 'IA'"
 #  FILTER "network = 'IA_RWIS'"
   STATUS ON
@@ -714,7 +715,7 @@ END
 
 LAYER
   NAME terra
-  DATA "AERONET_Ames.2011249.aqua.250m.jpg"
+  DATA "AERONET_Ames.2011313.aqua.250m.jpg"
   TYPE RASTER
   STATUS OFF
   PROJECTION

@@ -102,7 +102,7 @@ LAYER
   TYPE POLYGON
   DATA "/mesonet/data/gis/static/shape/4326/iem/cwas.shp"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   LABELITEM "CWA"
   CLASS
@@ -145,7 +145,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     OUTLINECOLOR 0 255 0
@@ -167,7 +167,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -193,7 +193,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'C'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR 255 0 0
@@ -218,7 +218,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -244,7 +244,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'P'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1

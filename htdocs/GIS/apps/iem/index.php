@@ -20,7 +20,7 @@ function copyright($map, $imgObj, $titlet) {
        $point->setXY($map->width - 150, 
                      $map->height - 10);
 
-       $point->draw($map, $layer, $imgObj, "credits",
+       $point->draw($map, $layer, $imgObj, 0,
                      $titlet);
 }
 
@@ -29,7 +29,7 @@ function domap($radius){
   global $loc;
   $map = ms_newMapObj("iem.map");
 
-  $projInObj = ms_newprojectionobj("proj=latlong");
+  $projInObj = ms_newprojectionobj("init=epsg:4326");
   $projOutObj = ms_newprojectionobj( $map->getProjection() );
 
   $dPoint = ms_newpointobj();

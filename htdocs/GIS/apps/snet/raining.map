@@ -5,11 +5,11 @@ MAP
 NAME raining
 STATUS ON
 SIZE 500 400
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONTSET "../../../../data/gis/fonts.list"
 EXTENT 200000 4400000 710000 4900000
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/static/shape/"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "../../../../data/gis/stations.sym"
 IMAGECOLOR 220 220 220
 IMAGETYPE PNG
 TRANSPARENT off
@@ -299,14 +299,14 @@ LAYER
     NAME 'credits'
     LABEL
       COLOR 0 0 0
-      BACKGROUNDCOLOR 250 250 250
+      #BACKGROUNDCOLOR 250 250 250
 #      SHADOWSIZE 1 1
 #      SHADOWCOLOR 0 0 0
 #      BACKGROUNDSHADOWCOLOR 0 0 0
 #      BACKGROUNDSHADOWSIZE 1 1
       TYPE TRUETYPE
       SIZE 16
-      FONT 'kcci'
+      FONT 'liberation'
       POSITION CR
       FORCE TRUE
       PARTIALS TRUE

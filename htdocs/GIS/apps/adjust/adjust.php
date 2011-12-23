@@ -36,18 +36,18 @@ function mktitle($map, $imgObj, $titlet) {
 $map = ms_newMapObj("stations.map");
 //iowa
 //$map->setExtent(-97.5,40.5,-89.5,43.5);
-$map->setExtent(-96.4,41.0,-90.4,43.5);
+//$map->setExtent(-96.9,41.2,-91.7,42.5);
 //$map->setExtent(-96.1,39.6,-94.4,41.3);
 // E CONUS
-//$map->setExtent(-130,16,-72,70);
-//$map->setExtent(-99.4, 30.3,-95.0, 34.3);
+$map->setExtent(-126,22,-66,52);
+//$map->setExtent(-103.4, 37.3,-90.0, 44.3);
 //$map->setExtent(-84.2, 25.7,-80.7, 30.2);
 //$map->setExtent(-100.92, 38.83, -97.06, 42.04);
 //$map->setExtent(-103.37, 38.05,-99.40, 40.63);
 //$map->setExtent(-90,29,-72,33);
 //CLAYTON $map->setExtent(-92,42.5,-91.1,43.3);
 //$map->setExtent(-93.5,42.0,-92.8,42.6);
-$map->setSize(1024,768/2);
+$map->setSize(800,600);
 $map->selectOutputFormat("PNG24");
 
 $namer = $map->getlayerbyname("namerica");
@@ -106,10 +106,10 @@ $rect->project($projin, $projout);
 //  $rect->maxx + 50000, $rect->maxy + 50000);
 
 $locs = $map->getlayerbyname("locs");
-$locs->set("status", MS_OFF);
+$locs->set("status", MS_ON);
 
 $cities = $map->getlayerbyname("sites");
-$cities->set("status", MS_ON);
+$cities->set("status", MS_OFF);
 
 $watches = $map->getlayerbyname("watches");
 $watches->set("status", MS_OFF);
@@ -128,19 +128,19 @@ $namer->draw($img);
 //$dm->draw($img);
 $lakes->draw($img);
 //$watches->draw($img);
-$terra->draw($img);
+//$terra->draw($img);
 //$maxdbz->draw($img);
 //$warnings0_c->draw($img);
 //$counties->draw($img);
 $states->draw($img);
-//$cities->draw($img);
+$locs->draw($img);
 //$iembox->draw($img);
 
 //$map->embedLegend($img);
 $map->drawLabelCache($img);
 $bars->draw($img);
 
-mktitle($map, $img, "6 September 2011 Aqua MODIS True Color");
+mktitle($map, $img, "1 Sep - 29 Nov 2011: 1+\" Snowfall Reports");
 //mkl($map, $img);
 $url = $img->saveWebImage();
 

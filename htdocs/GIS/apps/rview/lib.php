@@ -90,7 +90,7 @@ function drawStateNEXRAD($hlext) {
  $rt = ms_newRectObj();
  $rt->setextent($hlext[0], $hlext[1], $hlext[2], $hlext[3]);
  $rt->draw($map, $rect, $img, 0, " ");
- $rt->free();
+
 
   
  $url = $img->saveWebImage();

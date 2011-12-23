@@ -14,7 +14,7 @@ function mktitle($map, $imgObj, $titlet) {
   $point = ms_newpointobj();
   $point->setXY(5, 12);
 
-  $point->draw($map, $layer, $imgObj, "credits",
+  $point->draw($map, $layer, $imgObj, 0,
     $titlet);
 }
 
@@ -213,7 +213,7 @@ foreach($sts as $key => $value){
     $rotate =  0 - intval($bzz->db["drct"]);
     $bclass->label->set("angle", doubleval($rotate));
     $pt->draw($map, $barbs, $img, 0, skntChar($bzz->db["sknt"]) );
-    $pt->free();
+
   }
 
    if ($var == "barb" && $bzz->db["sknt"] > -1) {
@@ -222,29 +222,29 @@ foreach($sts as $key => $value){
     $rotate =  0 - intval($bzz->db["drct"]);
     $bclass->label->set("angle", doubleval($rotate));
     $pt->draw($map, $barbs, $img, 0, skntChar($bzz->db["sknt"]) );
-    $pt->free();
+
                                                                                 
     $pt = ms_newPointObj();
     $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
     $pt->draw($map, $currents, $img, 0, round($bzz->db['sknt'], @$rnd['sknt']) );
-    $pt->free();
+
    } else if ($var != "barb" && $val > -99){
      $pt = ms_newPointObj();
      $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
      $pt->draw($map, $currents, $img, 0, $val );
-     $pt->free();
+
    }
    if (in_array('labels', $layers)) {
     if (strlen($network) == 0){
      $pt = ms_newPointObj();
      $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
      $pt->draw($map, $sname, $img, 0, $bzz->db["sname"] );
-     $pt->free();
+ 
     } else {
      $pt = ms_newPointObj();
      $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
      $pt->draw($map, $sname, $img, 0, $key );
-     $pt->free();
+   
     }
    }
   }

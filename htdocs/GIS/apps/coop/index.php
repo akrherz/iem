@@ -141,7 +141,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
   $pt = ms_newPointObj();
   $pt->setXY($cities[$station]['lon'], $cities[$station]['lat'], 0);
   $pt->draw($map, $datal, $img, 0, $row["d"] );
-  $pt->free();
+
 }
 
 $namer->draw($img);
