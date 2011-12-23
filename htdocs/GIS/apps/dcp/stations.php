@@ -9,7 +9,7 @@ function mktitle($map, $imgObj, $titlet) {
   $point->setXY( 0,
                      40);
 
-  $point->draw($map, $layer, $imgObj, "credits",
+  $point->draw($map, $layer, $imgObj, 0,
     $titlet);
 }
 

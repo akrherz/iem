@@ -84,15 +84,14 @@ function mktitle($map, $imgObj, $titlet) {
   $point = ms_newpointobj();
   $point->setXY(0, 470);
 
-  $point->draw($map, $layer, $imgObj, "credits",
+  $point->draw($map, $layer, $imgObj, 0,
     $titlet);
 }
 
 
 
 $map = ms_newMapObj("raining.map");
-$map->set("width", 640);
-$map->set("height", 480);
+$map->setsize(640,480);
 
 $pad = 1;
 $lpad = 0.4;
@@ -153,14 +152,14 @@ foreach($stbl as $key => $value){
        $pt->draw($map, $site, $img, 1, "" );
      }
    }
-   $pt->free();
+
 
    if (strlen($station) > 0)
    {
      $pt = ms_newPointObj();
      $pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
      $pt->draw($map, $dot, $img, 1, $data[$key]["sname"] );
-     $pt->free();
+     
    }
 }
 
@@ -174,7 +173,7 @@ foreach($data as $key => $value){
      $pt = ms_newPointObj();
      $pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
      $pt->draw($map, $dot, $img, 0, $key ." (". $data[$key]['p15m'] .")" );
-     $pt->free();
+     
    }
 }
 

@@ -76,7 +76,7 @@ foreach($myStations as $key => $value){
    $pt = ms_newPointObj();
    $pt->setXY($cities[$value]["lon"], $cities[$value]["lat"], 0);
    $pt->draw($map, $dot, $img, 0, $cities[$value]['name'] );
-   $pt->free();
+
 }
 
   $ts = strftime("%d %b %I%p");

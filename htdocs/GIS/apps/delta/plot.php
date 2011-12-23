@@ -24,7 +24,7 @@ function mktitle($map, $imgObj, $titlet) {
        $point = ms_newpointobj();
        $point->setXY( 10, 460);
 
-       $point->draw($map, $layer, $imgObj, "credits",
+       $point->draw($map, $layer, $imgObj, 0,
                      $titlet);
 }
 
@@ -45,7 +45,7 @@ else
 	$temps = $map->getlayerbyname("delta-surface15m");
 $temps->set("status", MS_ON);
 
-$n0r = $map->getlayerbyname("nexrad_n0r");
+$n0r = $map->getlayerbyname("nexrad_n0q");
 $n0r->set("status", MS_ON);
 
 

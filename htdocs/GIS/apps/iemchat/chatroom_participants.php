@@ -120,21 +120,21 @@ $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
 $point->setXY(80, 12);
 $point->draw($map, $tlayer, $img, 0,"IEMCHAT Users In Chatroom");
-$point->free();
+
 
 $point = ms_newpointobj();
 $point->setXY(80, 29);
 $d = strftime("%d %B %Y %-2I:%M %p %Z" ,  time());
 $point->draw($map, $tlayer, $img, 1,"$d");
-$point->free();
+
 
 $map->drawLabelCache($img);
 
 $layer = $map->getLayerByName("logo");
 $point = ms_newpointobj();
 $point->setXY(40, 26);
-$point->draw($map, $layer, $img, "logo", "");
-$point->free();
+$point->draw($map, $layer, $img, 0, "");
+
 
 
 
