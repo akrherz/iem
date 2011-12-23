@@ -35,6 +35,8 @@ WEB
   #LOG "/mesonet/www/html/tmp/sw.log"
 END
 
+INCLUDE "inc_iem.map"
+
 LAYER
   NAME temps
   STATUS OFF

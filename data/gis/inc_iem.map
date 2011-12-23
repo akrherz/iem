@@ -1,0 +1,70 @@
+#
+# Generic stuff useful to all IEM base*.map
+#
+
+LAYER
+  NAME "iem_headerbar"
+  TYPE POLYGON
+  TRANSFORM FALSE
+  UNITS pixels
+  FEATURE
+    POINTS 0 0 0 53 2000 53 2000 0 0 0 END
+  END
+  STATUS OFF
+  LABELCACHE OFF
+  CLASS
+    STYLE
+      COLOR 0 0 0
+    END
+  END
+END
+
+LAYER
+  NAME "iem_headerbar_logo"
+  TYPE POINT
+  TRANSFORM FALSE
+  UNITS pixels
+  FEATURE
+    POINTS 40 30 END
+  END
+  STATUS OFF
+  LABELCACHE OFF
+  CLASS
+    STYLE
+      SYMBOL 'iem_logo'
+    END
+  END
+END
+
+LAYER
+  NAME "iem_headerbar_title"
+  TYPE ANNOTATION
+  STATUS OFF
+  LABELCACHE OFF
+  TRANSFORM FALSE
+  UNITS pixels
+  CLASS
+    NAME 'main'
+    LABEL
+      COLOR 255 255 0
+      TYPE TRUETYPE
+      SIZE 18
+      FONT 'liberation-bold'
+      POSITION UR
+      FORCE TRUE
+      PARTIALS TRUE
+    END
+  END
+  CLASS
+    NAME 'sub'
+    LABEL
+      COLOR 255 255 255
+      TYPE TRUETYPE
+      SIZE 12
+      FONT 'liberation-mono'
+      POSITION UR
+      FORCE TRUE
+      PARTIALS TRUE
+    END
+  END
+END
