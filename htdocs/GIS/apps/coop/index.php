@@ -64,7 +64,7 @@ $datal->setProjection("init=epsg:4326");
 $datalc0 = ms_newClassObj($datal);
 $datalc0->label->color->setrgb(255,255,0);
 $datalc0->label->set("type", MS_TRUETYPE);
-$datalc0->label->set("font", "arial");
+$datalc0->label->set("font", "liberation");
 $datalc0->label->set("size", 12);
 $datalc0->label->set("force", MS_TRUE);
 $datalc0->label->set("partials", MS_TRUE);
