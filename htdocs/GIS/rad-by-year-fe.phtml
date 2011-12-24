@@ -43,7 +43,7 @@ if ($map_x != 0 && $map_y != 0)
 
 
 $ourl = sprintf("rby-overview.php?BBOX=%s,%s,%s,%s",  $extents[0], $extents[1], $extents[2], $extents[3]);
-$url = sprintf("rad-by-year.php?month=%s&day=%s&hour=%s&minute=%s&BBOX=%s,%s,%s,%s", $month, $day, $hour, $minute, $extents[0], $extents[1], $extents[2], $extents[3]);
+$image_url = sprintf("rad-by-year.php?month=%s&day=%s&hour=%s&minute=%s&BBOX=%s,%s,%s,%s", $month, $day, $hour, $minute, $extents[0], $extents[1], $extents[2], $extents[3]);
 
 $THISPAGE = "gis-nexrad";
 $TITLE = "IEM NEXRAD by Year";
@@ -79,7 +79,7 @@ include("$rootpath/include/header.php");
 </table>
 </form>
 <p><i>The image below may take a few moments to appear...</i><br />
-<img src="<?php echo $url; ?>">
+<img src="<?php echo $image_url; ?>">
 
 <?php
 include("$rootpath/include/footer.php");
