@@ -268,6 +268,8 @@ def modPythonHandler (apacheReq, service):
             apacheReq.write("")
         else: 
             apacheReq.write(image)
+    except IOError, E:
+        pass
     except TileCacheException, E:
         apacheReq.content_type = "text/plain"
         apacheReq.status = apache.HTTP_NOT_FOUND
