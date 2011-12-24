@@ -1,6 +1,8 @@
 <?php
 include("../../../../config/settings.inc.php");
+define("IEM_APPID", 49);
 include("$rootpath/include/database.inc.php");
+include_once "$rootpath/include/iemmap.php";
 
 $var = isset($_GET["var"]) ? $_GET["var"]: "high";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
@@ -91,25 +93,6 @@ if ($source == "qc") $nt = new NetworkTable("IACLIMATE");
 else $nt = new NetworkTable("IA_COOP");
 $cities = $nt->table;
 
-function mktitlelocal($map, $imgObj, $titlet, $height) { 
- 
-  $layer = $map->getLayerByName("credits");
- 
-     // point feature with text for location
-  $point = ms_newpointobj();
-  $point->setXY( 0, 10);
-  $point->draw($map, $layer, $imgObj, 0,
-    $titlet ."                                                                                ");
-  $point->free();
-
-     // point feature with text for location
-  $point = ms_newpointobj();
-  $point->setXY( 0, $height - 15);
-  $point->draw($map, $layer, $imgObj, 1,
-    "  Iowa Environmental Mesonet | NWS COOP ");
-  $point->free();
-}
-
 function plotNoData($map, $img){
   $layer = $map->getLayerByName("credits");
 
@@ -117,7 +100,7 @@ function plotNoData($map, $img){
   $point->setXY( 100, 200);
   $point->draw($map, $layer, $img, 1,
     "  No data found for this date! ");
-  $point->free();
+
 
 }
 
@@ -209,12 +192,10 @@ foreach($vals as $key => $value){
     $pt = ms_newPointObj();
     $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
     $pt->draw($map, $ponly, $img, 0, '' );
-    $pt->free();
 
     $pt = ms_newPointObj();
     $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
     $pt->draw($map, $cityname, $img, 0, substr($key,$cutstring1,$cutstring2) );
-    $pt->free();
   }
 
   // Value UL
@@ -222,15 +203,13 @@ foreach($vals as $key => $value){
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
   if ($value == 0.0001) $value = "T";
   $pt->draw($map, $snet, $img, 2, $value);
-  $pt->free();
 }
 $map->drawLabelCache($img);
-
 
 if ($i == 0)
    plotNoData($map, $img);
 
-mktitlelocal($map, $img, " $ndate ". $varDef[$var] ."  ", $height);
+iemmap_title($map, $img, $ndate ." ". $varDef[$var] );
 $map->drawLabelCache($img);
 
 $url = $img->saveWebImage();
