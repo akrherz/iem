@@ -1,6 +1,8 @@
 <?php
 include("../../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+define("IEM_APPID", 52);
+include_once "$rootpath/include/database.inc.php";
+include_once "$rootpath/include/iemmap.php";
 $coopdb = iemdb("coop");
 include("$rootpath/include/network.php");
 $nt = new NetworkTable("IACLIMATE");
@@ -13,9 +15,6 @@ $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
 $THISPAGE = "networks-coop";
 $TITLE = "IEM | NWS COOP Plotting";
 include("$rootpath/include/header.php");
-?>
-
-<?php
 
 include("$rootpath/include/mlib.php");
 include("../rview/lib.php");
@@ -105,9 +104,6 @@ $var = Array("max_precip" => "Record Daily Precip [in]",
   "min_high" => "Record Min High Temp [F]",
   "high" => "Average High Temp [F]");
 
-
-
-
 $dbdate = "2000-". $month ."-". $day;
 
 if (strcmp($area, 'all') != 0){
@@ -133,11 +129,12 @@ $dbarray = Array("high" => "round(high::numeric, 0)::int",
 }
 
 $sql = "SELECT station, years as yrs, ". $dbarray[$plot] ." as d 
-    from climate WHERE valid = '". $dbdate ."'";
+    from climate WHERE valid = '". $dbdate ."'
+    and substr(station,1,2) = 'IA'";
 
 $rs = pg_query($coopdb, $sql);
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
-  $station = strtoupper($row["station"]);
+  $station = $row["station"];
   $pt = ms_newPointObj();
   $pt->setXY($cities[$station]['lon'], $cities[$station]['lat'], 0);
   $pt->draw($map, $datal, $img, 0, $row["d"] );
@@ -149,15 +146,11 @@ $counties->draw($img);
 $stlayer->draw( $img);
 //$ttt->draw($img);
 $datal->draw($img);
-mktitle($map, $img, "                 ". $plotDate ." ". $var[$plot]);
-
+iemmap_title($map, $img, $plotDate ." ". $var[$plot]);
 
 $map->drawLabelCache($img);
-mklogolocal($map, $img);
 
 $url = $img->saveWebImage();
-
-$im = @imagecreatefrompng("/var/www/htdocs/". $url );
 
 echo "<h3 class=\"heading\">COOP Climate Data</h3><p>
  <div class=\"text\">Using the COOP data archive, daily averages and extremes
