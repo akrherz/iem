@@ -1,5 +1,6 @@
 <?php
 include("../../../../config/settings.inc.php");
+include_once "$rootpath/include/iemmap.php";
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");
 $nt = new NetworkTable("ISUAG");
@@ -18,10 +19,6 @@ $sts = mktime(0,0,0,$month,1,$year);
 $sdate = date("d M", $sts);
 $edate = date("d M Y", $ets);
 
-
-include("lib.php");
-
-
 $myStations = $ISUAGcities;
 $height = 480;
 $width = 640;
@@ -34,9 +31,8 @@ $map->setextent(175000, 4440000, 775000, 4890000);
 $counties = $map->getlayerbyname("counties");
 $counties->set("status", MS_ON);
 
-$snet = $map->getlayerbyname("snet");
+$snet = $map->getlayerbyname("station_plot");
 $snet->set("status", MS_ON);
-$sclass = $snet->getClass(0);
 
 $iards = $map->getlayerbyname("iards");
 $iards->set("status", 1);
@@ -90,7 +86,8 @@ if ($i == 0)
    plotNoData($map, $img);
 
 $title = Array("c90" => "Rainfall (inches)", "c70" => "Potential Evapotranspiration (in)");
-mktitlelocal($map, $img, $height, "      ". $title[$dvar] ." [ $sdate thru ". $edate ." ]");
+
+iemmap_title($map, $img, $title[$dvar] ." [ $sdate thru ". $edate ." ]");
 $map->drawLabelCache($img);
 
 $layer = $map->getLayerByName("logo");

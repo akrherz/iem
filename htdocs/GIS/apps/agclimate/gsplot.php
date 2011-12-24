@@ -1,5 +1,6 @@
 <?php
 include("../../../../config/settings.inc.php");
+include_once "$rootpath/include/iemmap.php";
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/network.php");
 $nt = new NetworkTable("ISUAG");
@@ -29,9 +30,6 @@ $emonth = strftime("%m", $gs_end);
 $eday = strftime("%d", $gs_end);
 $smonth = strftime("%m", $gs_start);
 $sday = strftime("%d", $gs_start);
-
-
-include("lib.php");
 
 $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
   "gdd32" => "Growing Degree Days (base=32)",
@@ -69,9 +67,8 @@ $map->setextent(175000, 4440000, 775000, 4890000);
 $counties = $map->getlayerbyname("counties");
 $counties->set("status", MS_ON);
 
-$snet = $map->getlayerbyname("snet");
+$snet = $map->getlayerbyname("station_plot");
 $snet->set("status", MS_ON);
-$sclass = $snet->getClass(0);
 
 $iards = $map->getlayerbyname("iards");
 $iards->set("status", MS_ON);
@@ -264,8 +261,7 @@ foreach($vals as $key => $value){
   // Value UL
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  $pt->draw($map, $snet, $img, 0, 
-     round($value, $rnd[$var]) );
+  $pt->draw($map, $snet, $img, 1, round($value, $rnd[$var]) );
 
   // Climate
   if ($var == "gdd32" || $var == "gdd50" || $var == "prec")
@@ -293,20 +289,15 @@ foreach($vals as $key => $value){
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   if ($key == "A131909" || $key == "A130209"){
-    $pt->draw($map, $snet, $img, 3, $ISUAGcities[$key]['name'] );
+    $pt->draw($map, $snet, $img, 0, $ISUAGcities[$key]['name'] );
   } else {
-    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['name'] );
+    $pt->draw($map, $snet, $img, 0, $ISUAGcities[$key]['name'] );
   }
 }
-if ($i == 0)
-   plotNoData($map, $img);
 
-mktitlelocal($map, $img, $height, "      ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .") ");
 $map->drawLabelCache($img);
-$layer = $map->getLayerByName("logo");
-$point = ms_newpointobj();
-$point->setXY( 37, 27);
-$point->draw($map, $layer, $img, 0, "");
+iemmap_title($map, $img, $year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .") ",
+	($i==0) ? 'No Data Found!': null);
 
 header("Content-type: image/png");
 $img->saveImage('');

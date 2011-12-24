@@ -1,6 +1,7 @@
 <?php
 include("../../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include_once "$rootpath/include/iemmap.php";
+include_once "$rootpath/include/database.inc.php";
 include("$rootpath/include/network.php");
 $nt = new NetworkTable("ISUAG");
 $ISUAGcities = $nt->table;
@@ -10,17 +11,11 @@ $month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 86400 - (7 *
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 86400 - (7 * 3600) );
 $date = isset($_GET["date"]) ? $_GET["date"]: $year ."-". $month ."-". $day;
 
-
 $var = (isset($_GET["var"]) && $_GET["var"] != "" ) ? $_GET["var"] : "c11";
 $var2 = (isset($_GET["var2"]) && $_GET["var2"] != "" ) ? $_GET["var2"] : "";
 $direct = isset($_GET["direct"]) ? $_GET['direct']: "";
 
 $ts = strtotime($date);
-
-
-include("lib.php");
-
-
 
 $varDef = Array("c11" => "High Air Temperatures",
   "c12" => "Low Air Temperatures [F]",
@@ -62,9 +57,8 @@ $map->setextent(175000, 4440000, 775000, 4890000);
 $counties = $map->getlayerbyname("counties");
 $counties->set("status", MS_ON);
 
-$snet = $map->getlayerbyname("snet");
+$snet = $map->getlayerbyname("station_plot");
 $snet->set("status", MS_ON);
-$sclass = $snet->getClass(0);
 
 $iards = $map->getlayerbyname("iards");
 $iards->set("status", MS_ON);
@@ -131,7 +125,7 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   // Value UL
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  $pt->draw($map, $snet, $img, 0, 
+  $pt->draw($map, $snet, $img, 1, 
      round($row[$var], $rnd[$var]) ." ". $row[$var .'_f'] );
 
 
@@ -154,22 +148,16 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   if ($key == "A131909" || $key == "A130209"){
-    $pt->draw($map, $snet, $img, 3, $ISUAGcities[$key]['name'] );
+    $pt->draw($map, $snet, $img, 0, $ISUAGcities[$key]['name'] );
   } else {
-    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['name'] );
+    $pt->draw($map, $snet, $img, 0, $ISUAGcities[$key]['name'] );
   }
 
 }
-if ($i == 0)
-   plotNoData($map, $img);
 
-mktitlelocal($map, $img, $height, "       ". $varDef[$var . $var2] ." on ". date("d M Y", $ts) ."    ");
+iemmap_title($map, $img, $varDef[$var . $var2] ." on ". date("d M Y", $ts),
+	($i == 0) ? 'No Data Found!': null );
 $map->drawLabelCache($img);
-$layer = $map->getLayerByName("logo");
-$point = ms_newpointobj();
-$point->setXY( 35, 25);
-$point->draw($map, $layer, $img, 0, "");
-
 
 $url = $img->saveWebImage();
 
