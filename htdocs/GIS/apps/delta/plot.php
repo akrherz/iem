@@ -1,5 +1,6 @@
 <?php
 include("../../../../config/settings.inc.php");
+include_once "$rootpath/include/iemmap.php";
 //  mesoplot/plot.php
 //  - Replace GEMPAK mesoplots!!!
 $i = isset($_GET["i"]) ? $_GET["i"] : "1h";
@@ -14,23 +15,8 @@ if ($i == "1h")
 	}
 }
 
-
-
-function mktitle($map, $imgObj, $titlet) { 
- 
-        $layer = $map->getLayerByName("credits");
- 
-       // point feature with text for location
-       $point = ms_newpointobj();
-       $point->setXY( 10, 460);
-
-       $point->draw($map, $layer, $imgObj, 0,
-                     $titlet);
-}
-
-
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
-$map->setExtent(-96.7, 39.35, -90, 44.12);
+$map->setExtent(-96.7, 39.65, -90, 44.42);
 
 
 $counties = $map->getlayerbyname("uscounties");
@@ -48,9 +34,6 @@ $temps->set("status", MS_ON);
 $n0r = $map->getlayerbyname("nexrad_n0q");
 $n0r->set("status", MS_ON);
 
-
-
-
 $img = $map->prepareImage();
 $namer = $map->getlayerbyname("namerica");
 $namer->set("status", MS_ON);
@@ -62,9 +45,9 @@ $states->draw($img);
 $temps->draw($img);
 $t = date("d M Y h:i A", $plotts);
 if ($i == "1h")
-mktitle($map, $img, "  1 hour Pressure Change [inches] valid $t");
+iemmap_title($map, $img, "1 hour Pressure Change [inches]"," valid $t");
 if ($i == "15m")
-mktitle($map, $img, "  Recent 15 minute Pressure Change [inches] valid $t");
+iemmap_title($map, $img, "Recent 15 minute Pressure Change [inches]"," valid $t");
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
