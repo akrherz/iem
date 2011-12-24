@@ -1,6 +1,7 @@
 <?php
 include("../../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include_once "$rootpath/include/iemmap.php";
+include_once "$rootpath/include/database.inc.php";
 include("$rootpath/include/network.php");
 $nt = new NetworkTable("ISUAG");
 $ISUAGcities = $nt->table;
@@ -16,10 +17,6 @@ $direct = isset($_GET["direct"]) ? $_GET['direct']: "";
 
 $ts = strtotime($date);
 
-
-include("lib.php");
-
-
 $myStations = $ISUAGcities;
 $height = 480;
 $width = 640;
@@ -32,9 +29,8 @@ $map->setextent(175000, 4440000, 775000, 4890000);
 $counties = $map->getlayerbyname("counties");
 $counties->set("status", MS_ON);
 
-$snet = $map->getlayerbyname("snet");
+$snet = $map->getlayerbyname("station_plot");
 $snet->set("status", MS_ON);
-$sclass = $snet->getClass(0);
 
 $iards = $map->getlayerbyname("iards");
 $iards->set("status", 1);
@@ -117,36 +113,27 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   // Value UL
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  $pt->draw($map, $snet, $img, 0, $val);
+  $pt->draw($map, $snet, $img, 1, $val);
 
 
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   $pt->draw($map, $snet, $img, 2, "(".round($val - $avg,0).")");
 
-  
-
   // City Name
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   if ($key == "A131909" || $key == "A130209"){
-    $pt->draw($map, $snet, $img, 3, $ISUAGcities[$key]['name'] );
+    $pt->draw($map, $snet, $img, 0, $ISUAGcities[$key]['name'] );
   } else {
-    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['name'] );
+    $pt->draw($map, $snet, $img, 0, $ISUAGcities[$key]['name'] );
   }
 
 }
-if ($i == 0)
-   plotNoData($map, $img);
 
-mktitlelocal($map, $img, $height, "      Standard Chill Units [ $sdate thru ". date("Y-m-d", $ts) ." ]");
+iemmap_title($map, $img, "Standard Chill Units [ $sdate thru ". date("Y-m-d", $ts) ." ]",
+	($i == 0) ? 'No Data Found!': null);
 $map->drawLabelCache($img);
-
-$layer = $map->getLayerByName("logo");
-$point = ms_newpointobj();
-$point->setXY( 35, 25);
-$point->draw($map, $layer, $img, 0, "");
-
 
 $url = $img->saveWebImage();
 
