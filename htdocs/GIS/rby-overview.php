@@ -31,11 +31,7 @@ $rect->set("status", MS_ON);
 $rt = ms_newRectObj();
 $rt->setextent($extents[0], $extents[1], $extents[2], $extents[3]);
 $rt->draw($map, $rect, $img, 0, " ");
-$rt->free();
-
 
 header ("Content-type: image/png");
 $img->saveImage('');
-
-
 ?>
