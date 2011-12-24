@@ -42,14 +42,13 @@ $point = ms_newpointobj();
 $point->setXY(80, 12);
 $d = date("d M h:i A", $ts);
 $point->draw($map2, $tlayer, $img2, 0,"NEXRAD by Year for Time: $d");
-$point->free();
+
 
 /* Draw the subtitle */
 $point = ms_newpointobj();
 $point->setXY(80, 29);
 $d = date("d M Y h:i A T");
 $point->draw($map2, $tlayer, $img2, 1," map generated $d");
-$point->free();
 
 /* Draw the logo! */
 $layer = $map2->getLayerByName("logo");
@@ -58,14 +57,12 @@ $c0s0 = $c0->getStyle(0);
 $c0s0->set("size", 40);
 $point = ms_newpointobj();
 $point->setXY(40, 20);
-$point->draw($map2, $layer, $img2, "logo", "");
-$point->free();
+$point->draw($map2, $layer, $img2, 0, "");
 
 $layer = $map2->getLayerByName("n0r-ramp");
 $point = ms_newpointobj();
 $point->setXY(560, 15);
-$point->draw($map2, $layer, $img2, "n0r-ramp", "");
-$point->free();
+$point->draw($map2, $layer, $img2, 0, "");
 
 $map2->drawLabelCache($img2);
 
@@ -92,11 +89,14 @@ for ($year=$beginYear; $year <= $endYear; $year++)
   $lakes->draw($img);
 
   /* Draw NEXRAD Layer */
-  $radar = $map->getlayerbyname("nexrad_n0r");
-  $radar->set("status", MS_ON);
-  $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts) );
-  $radar->draw($img);
-
+  $radarfp =  gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts);
+  if (is_file($radarfp)){
+  	$radar = $map->getlayerbyname("nexrad_n0r");
+  	$radar->set("status", MS_ON);
+  	$radar->set("data", $radarfp);
+  	$radar->draw($img);
+  }
+  
   $counties = $map->getlayerbyname("uscounties");
   if (($extents[2] - $extents[0]) > 5) {
     $counties->set("status", MS_OFF);
@@ -117,13 +117,12 @@ for ($year=$beginYear; $year <= $endYear; $year++)
   $point = ms_newpointobj();
   $point->setXY(2, 8);
   $point->draw($map, $tlayer, $img, 1,"$year");
-  $point->free();
 
 
   $map->drawLabelCache($img);
 
-  $y0 = intval($i / 4) * ($theight+3) + ($theight/2) + $header;
-  $x0 = ($i % 4) * ($twidth+3) + ($twidth/2) + 3;
+  $y0 = intval($i / 4) * ($theight+3)  + $header;
+  $x0 = ($i % 4) * ($twidth+3)  + 3;
   $img2->pasteImage($img, -1, $x0, $y0, 0);
   $i += 1;
 }
