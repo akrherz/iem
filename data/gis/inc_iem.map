@@ -44,7 +44,6 @@ LAYER
   TRANSFORM FALSE
   UNITS pixels
   CLASS
-    NAME 'main'
     LABEL
       COLOR 255 255 0
       TYPE TRUETYPE
@@ -56,7 +55,6 @@ LAYER
     END
   END
   CLASS
-    NAME 'sub'
     LABEL
       COLOR 255 255 255
       TYPE TRUETYPE
@@ -65,6 +63,55 @@ LAYER
       POSITION UR
       FORCE TRUE
       PARTIALS TRUE
+    END
+  END
+END
+
+LAYER
+  NAME "station_plot"
+  TYPE POINT
+  PROJECTION
+   "init=epsg:4326"
+  END
+  LABELCACHE ON
+  STATUS OFF
+  CLASS
+    NAME "station-cr"
+    COLOR 0 0 0
+    LABEL
+      COLOR 0 0 0
+      FONT 'liberation'
+      POSITION CR
+      TYPE TRUETYPE
+      FORCE TRUE
+      SIZE 12
+      PARTIALS FALSE
+    END
+  END
+  CLASS
+    NAME "station-ul"
+    COLOR 0 0 0
+    LABEL
+      COLOR 255 0 0
+      FONT 'liberation'
+      POSITION UL
+      TYPE TRUETYPE
+      FORCE TRUE
+      SIZE 12
+      PARTIALS FALSE
+    END
+  END
+  CLASS
+    NAME "station-ll"
+    COLOR 0 0 255
+    LABEL
+      COLOR 0 0 255
+      FONT 'liberation'
+      POSITION LL
+      TYPE TRUETYPE
+      FORCE TRUE
+      SIZE 12
+      PARTIALS FALSE
     END
   END
 END

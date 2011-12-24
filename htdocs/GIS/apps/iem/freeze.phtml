@@ -1,6 +1,7 @@
 <?php
 include("../../../../config/settings.inc.php");
 define("IEM_APPID", 46);
+include_once "$rootpath/include/iemmap.php";
 include("$rootpath/include/database.inc.php");
 
 $state = isset($_GET['state']) ? $_GET['state'] : '' ;
@@ -59,30 +60,6 @@ else if ($state == "NW")
    $extents = $oextents;
  }
 
-
-function mktitle($map, $imgObj, $titlet) {
-  $layer = $map->getLayerByName("credits");
-                                                                                 
-  // point feature with text for location
-  $point = ms_newpointobj();
-  $point->setXY(10, 15);
-                                                                                 
-  $point->draw($map, $layer, $imgObj, 0,
-    $titlet);
-}
-                                                                                 
-function mklogolocal($map, $imgObj) {
-                                                                                 
- $layer = $map->getLayerByName("logo");
-                                                                                 
- // point feature with text for location
- $point = ms_newpointobj();
- $point->setXY(44, 24);
-                                                                                 
- $point->draw($map, $layer, $imgObj, 0, "");
-}
-
-
 $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 
 $arExtents = explode(",", $extents);
@@ -123,9 +100,8 @@ $sites->draw($img);
 
 $d = date("d F Y h:i a");
 
-mktitle($map, $img, "                        IEM Freeze valid: ". $d);
 $map->drawLabelCache($img);
-mklogolocal($map, $img);
+iemmap_title($map, $img, "IEM Freeze valid: ". $d);
 
 $ltmp = $map->drawLegend();
 $legendsrc = $ltmp->saveWebImage();

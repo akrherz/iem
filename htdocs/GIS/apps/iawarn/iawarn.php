@@ -19,7 +19,8 @@ include("$rootpath/include/mlib.php");
 include("$rootpath/include/currentOb.php");
 include("$rootpath/include/nexlib2.php");
 ?>
-
+<div class="warning">This app will be discontinued. If you are still using this app, 
+please let <a href="../../../info/contacts.php">contact us</a>.</div>
 <table bgcolor="black" width="100%" cellpadding=2 border=0 cellspacing=0>
   <tr><td>
 <table width="100%" bgcolor="white" cellpadding=2 border=0 cellspacing=0>
