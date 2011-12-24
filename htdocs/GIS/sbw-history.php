@@ -48,8 +48,8 @@ if ($rows < 2)
   $height = 540;
   $twidth = 206;
   $theight = 154;
-  $px = Array(110,320,530,110,320,530,110,320,530);
-  $py = Array(130,130,130,290,290,290,450,450,450);
+  $px = Array(10,220,430,10,220,430,10,220,430);
+  $py = Array(60,60,60,230,230,230,390,390,390);
 }
 
 $map2 = ms_newMapObj($mapFile);
@@ -100,13 +100,11 @@ $point->draw($map2, $tlayer, $img2, 0,"Storm Based Warning History (First 9 show
 } else{
 $point->draw($map2, $tlayer, $img2, 0,"Storm Based Warning History");
 }
-$point->free();
     
 $point = ms_newpointobj();
 $point->setXY(80, 29);
 $d = strftime("%d %B %Y %-2I:%M %p %Z" ,  strtotime($row["init_expire"]) );
 $point->draw($map2, $tlayer, $img2, 1,"$wfo ". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] ." #$eventid till  $d");
-$point->free();
 
 $layer = $map2->getLayerByName("logo");
 //$lcl0 = $layer->getClass(0);
@@ -114,8 +112,7 @@ $layer = $map2->getLayerByName("logo");
 //$lcl0s0->set("size", 40);
 $point = ms_newpointobj();
 $point->setXY(40, 26);
-$point->draw($map2, $layer, $img2, "logo", "");
-$point->free();
+$point->draw($map2, $layer, $img2, 0, "");
 
 $map2->drawLabelCache($img2);
 
@@ -145,12 +142,16 @@ $sz0 = $row["area"];
   $lakes->draw($img);
 
   /* Draw NEXRAD Layer */
-  $radar = $map->getlayerbyname("nexrad_n0r");
-  $radar->set("status", MS_ON);
+  $radarfp = "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif";
   if (($ts + 300) < time()) {
-   $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts) );
+   $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts);
   }
-  $radar->draw($img);
+  if (is_file($radarfp)){
+  	$radar = $map->getlayerbyname("nexrad_n0r");
+  	$radar->set("status", MS_ON);
+  	$radar->set("data", $radarfp);
+  	$radar->draw($img);
+  }
 
   $counties = $map->getlayerbyname("uscounties");
   $counties->set("status", MS_ON);
@@ -205,13 +206,11 @@ $sz0 = $row["area"];
   $point = ms_newpointobj();
   $point->setXY(2, 12);
   $point->draw($map, $tlayer, $img, 0, $vtec_status[$row["status"]] );
-  $point->free();
     
   $point = ms_newpointobj();
   $point->setXY(2, 29);
   $d = strftime("%d %b %Y %-2I:%M %p %Z" ,  $ts);
   $point->draw($map, $tlayer, $img, 1,"$d");
-  $point->free();
 
 
   $map->embedLegend($img);
