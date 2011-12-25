@@ -31,7 +31,7 @@ function drawStateNEXRAD($hlext) {
  $map->set("height", $height);
 
  $map->setextent(-96.639706, 40.375437,-90.140061, 43.501196);
- $map->setProjection("proj=latlong");
+ $map->setProjection("init=epsg:4326");
 
  $counties = $map->getlayerbyname("counties_unproj");
  $counties->set("status", MS_ON);
@@ -80,7 +80,7 @@ function drawCountyNEXRAD($site, $extents) {
   $map->set("height", $height);
 
   $map->setextent($extents[0],$extents[1], $extents[2],$extents[3] );
-  $map->setProjection("proj=latlong");
+  $map->setProjection("init=epsg:4326");
 
   $counties = $map->getlayerbyname("counties_unproj");
   $counties->set("status", MS_ON);
@@ -108,7 +108,7 @@ function drawKCCI($extents) {
   $map->set("height", $height);
 
   $map->setextent($extents[0],$extents[1], $extents[2],$extents[3] );
-  $map->setProjection("proj=latlong");
+  $map->setProjection("init=epsg:4326");
 
   $counties = $map->getlayerbyname("counties_unproj");
   $counties->set("status", MS_ON);

@@ -35,7 +35,7 @@ include("lib.php");
 include("$rootpath/include/nexradLoc.php");
 
 
-$latlon = ms_newprojectionobj("proj=latlong");
+$latlon = ms_newprojectionobj("init=epsg:4326");
 $p26915 = ms_newprojectionobj("init=epsg:26915");
 
 

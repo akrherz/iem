@@ -241,7 +241,7 @@ LAYER
   TYPE POINT
   LABELCACHE ON
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     TEXT ([ tmpf ])
@@ -283,7 +283,7 @@ LAYER
   LABELANGLEITEM drct
   LABELCACHE OFF
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     TEXT ([sknt])
@@ -332,7 +332,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -353,7 +353,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -369,7 +369,7 @@ LAYER
   TYPE POLYGON
   DATA shape/states.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     OUTLINECOLOR 0 0 0

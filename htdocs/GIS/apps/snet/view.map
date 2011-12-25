@@ -67,7 +67,7 @@ END
 #  TYPE RASTER
 #  STATUS ON
 #  PROJECTION
-#   "proj=latlong"
+#   "init=epsg:4326"
 #  END
 #END
 

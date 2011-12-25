@@ -19,7 +19,7 @@ INTERLACE off
 
 #
 PROJECTION
-#  "proj=latlong"
+#  "init=epsg:4326"
   "init=epsg:26915"
 END
 
@@ -71,7 +71,7 @@ LAYER
      "wms_srs"   "EPSG:26915"
   END
   PROJECTION
-    "proj=latlong"
+    "init=epsg:4326"
   END
   CLASS
     OUTLINECOLOR 250 250 250
@@ -99,7 +99,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   PROJECTION
-    "proj=latlong"
+    "init=epsg:4326"
   END
   OFFSITE 1
   TRANSPARENCY 70
@@ -115,7 +115,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   PROJECTION
-    "proj=latlong"
+    "init=epsg:4326"
   END
   OFFSITE 0
 END
@@ -132,7 +132,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   PROJECTION
-    "proj=latlong"
+    "init=epsg:4326"
   END
   OFFSITE 1
   TRANSPARENCY 70
@@ -173,7 +173,7 @@ LAYER
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/iem/nex_rings.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     OUTLINECOLOR 255 0 0
@@ -186,7 +186,7 @@ LAYER
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/iem/cwas.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   LABELITEM "CWA"
   CLASS
@@ -210,7 +210,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   PROJECTION
-    "proj=latlong"
+    "init=epsg:4326"
   END
   CLASS
     SYMBOL "circle"
@@ -240,7 +240,7 @@ LAYER
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     SYMBOL "circle"
@@ -257,7 +257,7 @@ LAYER
   DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
 
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     SYMBOL "circle"
@@ -272,7 +272,7 @@ LAYER
  CONNECTION "user=akrherz dbname=postgis host=iemdb"
  DATA "geom from watches"
  PROJECTION
-  "proj=latlong"
+  "init=epsg:4326"
  END
  TYPE POLYGON
  FILTER "expired > CURRENT_TIMESTAMP"
@@ -308,7 +308,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASSITEM 'type'
   CLASS
@@ -342,7 +342,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'C'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR 255 0 0
@@ -367,7 +367,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -392,7 +392,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'P'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -421,7 +421,7 @@ LAYER
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/iem/cwa_counties.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASSITEM 'FIPS'
   CLASS
@@ -444,7 +444,7 @@ LAYER
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/iem/cwas.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   LABELITEM "WFO"
 #  CLASSITEM "WFO"

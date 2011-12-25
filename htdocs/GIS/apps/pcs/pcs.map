@@ -20,7 +20,7 @@ INTERLACE off
 # Projection definition, consult the PROJ.4 documentation for parameter discussion
 #
 PROJECTION
-  "proj=latlong"
+  "init=epsg:4326"
 END
 
 #
@@ -41,7 +41,7 @@ LAYER
   TYPE POLYGON
   DATA shape/iacounties3.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     OUTLINECOLOR 0 0 255
@@ -55,7 +55,7 @@ LAYER
   NAME n1p
   STATUS DEFAULT
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   OFFSITE 0 0 0
   TRANSPARENCY 75
@@ -74,7 +74,7 @@ LAYER
   STATUS ON
   TYPE POINT
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
 #  CLASSITEM "yrs"
   CLASS

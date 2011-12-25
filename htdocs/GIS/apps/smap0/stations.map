@@ -20,7 +20,7 @@ INTERLACE off
 # Projection definition, consult the PROJ.4 documentation for parameter discussion
 #
 PROJECTION
-  "proj=latlong"
+  "init=epsg:4326"
 END
 
 #

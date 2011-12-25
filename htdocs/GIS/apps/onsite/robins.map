@@ -64,7 +64,7 @@ LAYER
   TYPE POLYGON
   DATA shape/iacounties3.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     OUTLINECOLOR 255 0 0
@@ -82,12 +82,8 @@ LAYER
   TEMPLATE q_template.html
   LABELITEM 'id'
   PROJECTION
-    "proj=latlong"
-    "ellps=GRS80"
-    "zone=15"
-    "north"
-    "no_defs"
-  END
+    "init=epsg:26915"
+ END
   CLASS
     COLOR -1 -1 -1
     BACKGROUNDCOLOR -1 -1 -1

@@ -17,11 +17,11 @@ $map->setProjection( $projs[$site] );
 
 $counties = $map->getlayerbyname("iowa_counties");
 $counties->set("status", MS_ON);
-$counties->setProjection("proj=latlong");
+$counties->setProjection("init=epsg:4326");
 
 $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
-$states->setProjection("proj=latlong");
+$states->setProjection("init=epsg:4326");
 
 $c0 = $map->getlayerbyname("warnings0_c");
 $c0->set("status", 1);

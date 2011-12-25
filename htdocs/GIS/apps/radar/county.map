@@ -65,7 +65,7 @@ LAYER
   TYPE POLYGON
   DATA shape/states.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     OUTLINECOLOR 0 0 0
@@ -78,7 +78,7 @@ LAYER
   TYPE POLYGON
   DATA shape/nws/iem_counties.shp
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   LABELITEM 'NAME'
   TEMPLATE 'county.php?ba=[linkitem]'
@@ -110,7 +110,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -132,7 +132,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
