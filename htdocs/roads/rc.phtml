@@ -1,12 +1,11 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 54);
 include("$rootpath/include/database.inc.php");
 $conn = iemdb("postgis");
 
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "segid";
-?>
-
-<?php $THISPAGE = "roads-sort"; 
+ $THISPAGE = "roads-sort"; 
  $REFRESH = '<meta http-equiv="refresh" content="600">';
 include("$rootpath/include/header.php"); 
 
@@ -20,9 +19,15 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
 {
   $seg = intval($row["segid"]);
   $obs[$seg] = $row;
-  $t = split(" to ", $row["minor"]);
-  $obs[$seg]["minor0"] = $t[0];
-  $obs[$seg]["minor1"] = $t[1];
+  $t = preg_split('/ to /', $row["minor"]);
+  if (sizeof($t) == 2){
+  	$obs[$seg]["minor0"] = $t[0];
+  	$obs[$seg]["minor1"] = $t[1];
+  } else {
+  	$obs[$seg]["minor0"] = $t[0];
+  	$obs[$seg]["minor1"] = '';
+  }
+  
   if ($row["type"] == 1){ $obs[$seg]["number"] = intval($row["int1"]); }
   if ($row["type"] == 2){ $obs[$seg]["number"] = intval($row["us1"]); }
   if ($row["type"] == 3){ $obs[$seg]["number"] = intval($row["st1"]); }
