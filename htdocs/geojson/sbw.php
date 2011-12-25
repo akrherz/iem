@@ -32,7 +32,7 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT *,
       FROM warnings WHERE
       issue < $2 and
       expire > $1 and expire < $3 $str_wfo_list
-      and gtype = 'P'
+      and gtype = 'P' and significance is not null
       LIMIT 500");
 
 $rs = pg_execute($postgis, "SELECT", Array(date("Y-m-d H:i", $sts), 
