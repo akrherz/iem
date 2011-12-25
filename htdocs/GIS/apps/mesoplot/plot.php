@@ -2,9 +2,7 @@
 include("../../../../config/settings.inc.php");
 //  mesoplot/plot.php
 //  - Replace GEMPAK mesoplots!!!
-
-
-
+include_once "$rootpath/include/iemmap.php";
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
@@ -19,21 +17,6 @@ $titles = Array("KCCI" => "KCCI SchoolNet8",
 
 $iem = new IEMAccess();
 $data = $iem->getNetwork($network);
-
-
-
-function mktitle($map, $imgObj, $titlet) { 
- 
-        $layer = $map->getLayerByName("credits");
- 
-       // point feature with text for location
-       $point = ms_newpointobj();
-       $point->setXY( 100, 
-                     10);
-
-       $point->draw($map, $layer, $imgObj, 0,
-                     $titlet);
-}
 function skntChar($sknt){
   if ($sknt < 2)  return chr(0);
   if ($sknt < 5)  return chr(227);
@@ -122,17 +105,12 @@ $counties->set("status", MS_ON);
 $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
 
-$snet = $map->getlayerbyname("snet");
-$snet->set("status", MS_ON);
-$sclass = $snet->getClass(0);
-
 $barbs = $map->getlayerbyname("barbs");
 $barbs->set("status", MS_ON);
 $bclass = $barbs->getClass(0);
 
-$temps = $map->getlayerbyname("temps");
+$temps = $map->getlayerbyname("station_plot");
 $temps->set("status", MS_ON);
-
 
 $iards = $map->getlayerbyname("interstates");
 $iards->set("status", MS_ON);
@@ -146,9 +124,6 @@ $counties->draw($img);
 $states->draw($img);
 $iards->draw($img);
 $mwradar->draw($img);
-$sclass->label->set("position", "AUTO");
-$sclass->label->set("buffer", 2);
-$sclass->label->set("force", "true");
 $now = time();
 
 foreach($data as $key => $value){
@@ -165,36 +140,23 @@ foreach($data as $key => $value){
      $pt = ms_newPointObj();
      $pt->setXY($Scities[$key]["lon"], $Scities[$key]["lat"], 0);
      $tmpf = intval($bzz['tmpf']);
-     $pt->draw($map, $temps, $img, 0, round($bzz['tmpf'], $rnd['tmpf']) );
+     $pt->draw($map, $temps, $img, 1, round($bzz['tmpf'], $rnd['tmpf']) );
 
      $pt = ms_newPointObj();
      $pt->setXY($Scities[$key]["lon"], $Scities[$key]["lat"], 0);
      $dwpf = intval($bzz['dwpf']);
-     $pt->draw($map, $temps, $img, 1, round($bzz['dwpf'], $rnd['dwpf']) );
+     $pt->draw($map, $temps, $img, 2, round($bzz['dwpf'], $rnd['dwpf']) );
   }
 }
 
   $ts = strftime("%I %p");
 
-$snet->draw($img);
 $temps->draw($img);
-//$dmx->draw($img);
-
-//mktitle($map, $img, "     ". $varDef[$var] ." @ ". date("h:i A d M Y") ."                                                    ");
-mktitle($map, $img, $titles[$network] ."  Station Plot @ ". date("h:i A d M Y") ."                                                    ");
 $map->drawLabelCache($img);
 
-//$pt = ms_newPointObj();
-//$pt->setXY(-94, 42, 0);
-//$pt->draw($map, $ly2, $img, 0, "");
+iemmap_title($map, $img, $titles[$network] ."  Station Plot", 
+			"Valid: ". date("h:i A d M Y") );
 
-
-//$layer2->draw($img);
-//$ly->draw( $img);
-
-//$img = $map->draw();
-
-//$url = $img->saveWebImage(MS_PNG, 0,0,-1);
 header("Content-type: image/png");
 $img->saveImage('');
 ?>

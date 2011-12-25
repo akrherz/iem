@@ -6,11 +6,11 @@ NAME robins
 STATUS ON
 SIZE 450 400
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONTSET "/mesonet/www/apps/iemwebsite/data/gis/fonts.list"
 EXTENT 200000 4400000 710000 4900000
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/static/"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
 TRANSPARENT off
@@ -20,11 +20,7 @@ INTERLACE off
 # Projection definition, consult the PROJ.4 documentation for parameter discussion
 #
 PROJECTION
-  "proj=utm"
-  "ellps=GRS80"
-  "zone=15"
-  "north"
-  "no_defs"
+ "init=epsg:26915"
 END
 
 #
@@ -62,7 +58,7 @@ LAYER
   NAME counties
   STATUS ON
   TYPE POLYGON
-  DATA shape/iacounties3.shp
+  DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -75,24 +71,24 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME robins
-  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
   DATA "the_geom from robins"
   STATUS DEFAULT
   TYPE POINT
   TEMPLATE q_template.html
   LABELITEM 'id'
   PROJECTION
-    "init=epsg:26915"
+    "init=epsg:4326"
  END
   CLASS
     COLOR -1 -1 -1
     BACKGROUNDCOLOR -1 -1 -1
     OUTLINECOLOR 0 0 255
-    SYMBOL 1
+    SYMBOL 0
     SIZE 3
     LABEL
       TYPE TRUETYPE
-      FONT ARIALBLK
+      FONT 'liberation'
       SIZE 10
       POSITION UC
       COLOR 0 0 0

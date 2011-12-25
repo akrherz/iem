@@ -2,7 +2,7 @@
 /* Something to generate the plots! */
 
 include_once("../../../../config/settings.inc.php");
-
+include_once "$rootpath/include/iemmap.php";
 
 if (isset($argv))
    for ($i=1;$i<count($argv);$i++)
@@ -150,9 +150,12 @@ $map->setSize($map_width, $map_height);
 $arExtents = explode(",", $extents);
 $map->setextent($arExtents[0], $arExtents[1], $arExtents[2], $arExtents[3]);
 
+$namer = $map->getLayerByName("namerica");
+$namer->set("status", MS_ON);
 
 /* Prepare the Image */
 $img = $map->prepareImage();
+$namer->draw($img);
 
 function add_and_draw($name)
 {
@@ -244,32 +247,8 @@ $rainfall->draw($img);
 add_and_draw("uscounties");
 add_and_draw("states");
 
-/* Need something to draw bars! */
-$bar = $map->getlayerbyname("bar640t");
-
-$layer = $map->getLayerByName("credits");
-$rt = ms_newRectObj();
-$rt->setextent(0, 30, $map_width, 5);
-$rt->draw($map, $bar, $img, 0, "");
-
-$point = ms_newpointobj();
-$point->setXY(50, 20);
-$point->draw($map, $layer, $img, 0, $param["title"]);
-
-
-$rt = ms_newRectObj();
-$rt->setextent(0, $map_height, $map_width, $map_height - 20);
-$rt->draw($map, $bar, $img, 0, "");
-
-
-$rt = ms_newRectObj();
-$rt->setextent(0, $map_height, 60, $map_height - 210);
-$rt->draw($map, $bar, $img, 0, "");
-
-
-$point = ms_newpointobj();
-$point->setXY(5, $map_height - 10);
-$point->draw($map, $layer, $img, 1, "Map Units: ". $param["units"] ."  NC1018 EXPERIMENTAL PLOT         Map Generated on  ". date("Y/m/d"));
+iemmap_title($map, $img, $param["title"],
+"Map Units: ". $param["units"] ."  NC1018 EXPERIMENTAL PLOT");
 
 $layer = $map->getLayerByName("singlebox");
 $x = 1;
