@@ -64,6 +64,122 @@ LEGEND
   END
   POSITION LR
 END
+
+LAYER
+  NAME DMX
+  STATUS ON
+  TYPE RASTER
+  DATA /home/ldm/data/gis/images/4326/DMX/n0r_0.tif
+  OFFSITE 0 0 0
+  PROJECTION
+   "init=epsg:4326"
+  END
+END
+
+
+LAYER
+  NAME EAX
+  STATUS ON
+  TYPE RASTER
+  DATA /home/ldm/data/gis/images/4326/EAX/n0r_0.tif
+  OFFSITE  0 0 0
+  PROJECTION
+   "init=epsg:4326"
+  END
+END
+
+LAYER
+  NAME KCCI
+  STATUS ON
+  TYPE RASTER
+  DATA /home/ldm/data/gis/images/26915/KCCI/KCCI_N0R_0.tif
+  #DATA /mesonet/data/gis/images/kcci2.tif
+  OFFSITE  0 0 0
+  TRANSPARENCY 80
+  PROJECTION
+   "init=epsg:26915"
+  END
+END
+
+
+LAYER
+  NAME FSD
+  STATUS ON
+  TYPE RASTER
+  DATA /home/ldm/data/gis/images/4326/FSD/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+LAYER
+  NAME ABR
+  STATUS ON
+  TYPE RASTER
+  DATA /home/ldm/data/gis/images/4326/ABR/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+LAYER
+  NAME UDX
+  STATUS ON
+  TYPE RASTER
+  DATA /home/ldm/data/gis/images/4326/UDX/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+LAYER
+  NAME MPX
+  STATUS ON
+  TYPE RASTER
+  DATA /home/ldm/data/gis/images/4326/MPX/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+
+LAYER
+  NAME ARX
+  STATUS ON
+  TYPE RASTER
+  DATA /home/ldm/data/gis/images/4326/ARX/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+LAYER
+  NAME DVN
+  STATUS ON
+  TYPE RASTER
+  DATA /home/ldm/data/gis/images/4326/DVN/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+LAYER
+  NAME OAX
+  STATUS ON
+  TYPE RASTER
+  DATA /home/ldm/data/gis/images/4326/OAX/n0r_0.tif
+  OFFSITE  0 0 0
+END
+
+LAYER
+  TYPE POINT
+  NAME site
+  STATUS ON
+  CLASS
+   SYMBOL 'x'
+   COLOR 0 0 0
+   SIZE 8
+  END
+  CLASS
+   SYMBOL 'circle'
+   COLOR 255 255 255
+   SIZE 8
+  END
+  CLASS
+   SYMBOL 'triangle'
+   COLOR 250 250 0
+   SIZE 8
+ END
+END
+
 LAYER
   NAME "east_vis_1km"
   STATUS ON
