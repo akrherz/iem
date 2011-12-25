@@ -168,7 +168,7 @@ $goes_west04I4->draw($img);
 $ly = ms_newlayerobj($map);
 $ly->set("status", MS_ON);
 $ly->set("type", MS_LAYER_POINT);
-$ly->setProjection("proj=latlong");
+$ly->setProjection("init=epsg:4326");
 
 $cl = ms_newclassobj($ly);
 $cl->set("status", MS_ON);
@@ -189,7 +189,7 @@ $lbl->set("force", MS_ON);
 
 $ly2 = $map->getLayerByName("pointonly");
 $ly2->set("status", MS_ON);
-$ly2->setProjection("proj=latlong");
+$ly2->setProjection("init=epsg:4326");
 
 $barbs = $map->getlayerbyname("barbs");
 $barbs->set("status", MS_ON);
