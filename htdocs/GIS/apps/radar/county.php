@@ -78,7 +78,7 @@ $lat_ur = $ur[1];
 
 //------------------------------------------------------------------
 
-$projInObj = ms_newprojectionobj("proj=latlong");
+$projInObj = ms_newprojectionobj("init=epsg:4326");
 $projOutObj = ms_newprojectionobj( $projs[$site] );
 
 $ll_Point = ms_newpointobj();

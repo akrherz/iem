@@ -25,7 +25,7 @@ $width = 350;
 
 $map = ms_newMapObj("pcs.map");
 //$map->setProjection("proj=lcc,lat_1=42.0666,lat_2=43.2666,lat_0=41.5,lon_0=-93.5,x_0=1500000,y_0=1000000");
-$map->setProjection("proj=latlong");
+$map->setProjection("init=epsg:4326");
 
 if (strlen($plot) == 0){
   $plot = 'high';
@@ -67,11 +67,11 @@ if (isset($county)){
 
 $counties = $map->getlayerbyname("counties");
 $counties->set("status", MS_ON);
-$counties->setProjection("proj=latlong");
+$counties->setProjection("init=epsg:4326");
 
 $datal = $map->getlayerbyname("datal");
 $datal->set("status", MS_ON);
-$datal->setProjection("proj=latlong");
+$datal->setProjection("init=epsg:4326");
 
 $datal->set("data", "geom from (SELECT map.oid,
       round(data.p01i::numeric,2)::float::text as p01i, data.station,
@@ -83,7 +83,7 @@ $datal->set("data", "geom from (SELECT map.oid,
 $n1p = $map->getlayerbyname("n1p");
 $n1p->set("status", MS_ON);
 $n1p->set("data", "/mesonet/www/html/archive/data/2002/".$month."/".$day."/GIS/n1p_".$hour."00.png");
-$n1p->setProjection("proj=latlong");
+$n1p->setProjection("init=epsg:4326");
 
 
 $img = $map->prepareImage();

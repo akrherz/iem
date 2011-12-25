@@ -141,7 +141,7 @@ LAYER
   TEMPLATE q_template.html
 #  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASSITEM 'type'
   CLASS
@@ -181,7 +181,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASSITEM 'type'
   CLASS
@@ -200,7 +200,7 @@ LAYER
  CONNECTION "user=akrherz dbname=postgis host=iemdb"
  DATA "geom from watches"
  PROJECTION
-  "proj=latlong"
+  "init=epsg:4326"
  END
  TYPE LINE
  STATUS DEFAULT

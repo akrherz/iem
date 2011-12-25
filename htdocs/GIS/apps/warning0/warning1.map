@@ -105,7 +105,7 @@ LAYER
      "wms_extent" "-116 25 -66 50"
   END
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     OUTLINECOLOR 0 255 0
@@ -128,7 +128,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "expire > CURRENT_TIMESTAMP and gtype = 'C'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -155,7 +155,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'C'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR 255 0 0
@@ -181,7 +181,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -208,7 +208,7 @@ LAYER
   TEMPLATE q_template.html
   FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'P'"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1

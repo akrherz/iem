@@ -6,7 +6,7 @@ include("$rootpath/include/database.inc.php");
 
 //select linkitem, name from nws_counties WHERE GeometryFromText('POINT(-95  42)', -1) && the_geom;
 
-$projInObj = ms_newprojectionobj("proj=latlong");
+$projInObj = ms_newprojectionobj("init=epsg:4326");
 $projOutObj = ms_newprojectionobj( $projs[$site] );
 
 //echo "<p>UPPER RIGHT X: ". $lon_ur;

@@ -182,7 +182,7 @@ LAYER
   END
   TEMPLATE q_template.html
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASSITEM "wtype"
   CLASS
@@ -231,7 +231,7 @@ LAYER
   END
   TEMPLATE q_template.html
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASSITEM "wtype"
   CLASS
@@ -278,7 +278,7 @@ LAYER
   END
   TEMPLATE q_template.html
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -303,7 +303,7 @@ LAYER
   END
   TEMPLATE q_template.html
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   CLASS
     COLOR -1 -1 -1
@@ -320,7 +320,7 @@ LAYER
  CONNECTION "user=akrherz dbname=postgis host=iemdb"
  DATA "geom from watches"
  PROJECTION
-  "proj=latlong"
+  "init=epsg:4326"
  END
  TYPE LINE
  STATUS ON
@@ -346,7 +346,7 @@ LAYER
  CONNECTION "user=akrherz dbname=postgis host=iemdb"
  DATA "geom from watches"
  PROJECTION
-  "proj=latlong"
+  "init=epsg:4326"
  END
  TYPE LINE
  STATUS ON
@@ -373,7 +373,7 @@ LAYER
  CONNECTION "user=akrherz dbname=postgis host=iemdb"
  DATA "geom from watches"
  PROJECTION
-  "proj=latlong"
+  "init=epsg:4326"
  END
  TYPE LINE
  STATUS ON
