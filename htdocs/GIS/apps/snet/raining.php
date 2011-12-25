@@ -1,5 +1,6 @@
 <?php
  include("../../../../config/settings.inc.php");
+ include_once "$rootpath/include/iemmap.php";
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/network.php");
 include("$rootpath/include/nexlib2.php");
@@ -90,7 +91,7 @@ function mktitle($map, $imgObj, $titlet) {
 
 
 
-$map = ms_newMapObj("raining.map");
+$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 $map->setsize(640,480);
 
 $pad = 1;
@@ -105,19 +106,21 @@ if (strlen($station) > 0)
 }
 
 
-$counties = $map->getlayerbyname("counties");
+$counties = $map->getlayerbyname("uscounties");
 $counties->set("status", MS_ON);
+
+$namer = $map->getLayerByName("namerica");
+$namer->set("status", MS_ON);
 
 $stlayer = $map->getlayerbyname("states");
 $stlayer->set("status", 1);
 
-$dot = $map->getlayerbyname("dot");
+$dot = $map->getlayerbyname("pointonly");
 $dot->set("status", MS_ON);
 $dot->setProjection("init=epsg:4326");
 
 $site = $map->getlayerbyname("site");
 $site->set("status", MS_ON);
-$site->setProjection("init=epsg:4326");
 
 $radar = $map->getlayerbyname( substr($rad,0,3) );
 $radar->set("status", MS_ON);
@@ -129,7 +132,7 @@ $st_cl->set("status", MS_ON);
 
 $img = $map->prepareImage();
 
-
+$namer->draw($img);
 $counties->draw($img);
 $stlayer->draw( $img);
 $radar->draw($img);
@@ -138,8 +141,9 @@ $precip = Array();
 
 $now = time();
 foreach($stbl as $key => $value){
-   if ($key == "S03I4" || $key == "SDNI4" || $key == "SRUM5" || $key == "GETS2") continue;
-
+   //if ($key == "S03I4" || $key == "SDNI4" || $key == "SRUM5" || $key == "GETS2") continue;
+	if (! array_key_exists($key, $data)){ continue; }
+	
    $pt = ms_newPointObj();
    $pt->setXY($stbl[$key]["lon"], $stbl[$key]["lat"], 0);
    /** Data is old */
@@ -188,8 +192,8 @@ if ($rad == "DMXA" || $rad == "DMXB" ||$rad == "DMXC" ) { $rad2 = "DMX"; }
 $radTS = filemtime("/home/ldm/data/gis/images/4326/$rad2/n0r_0.tif");
 $r = date("m/d h:i a", $radTS);
 
-mktitle($map, $img, " SNET 15min rain ending: ". $ts ." , NEXRAD valid: $r");
 $map->drawLabelCache($img);
+iemmap_title($map, $img, "SNET 15min rain ending: ". $ts , "NEXRAD valid: $r");
 
 $url = $img->saveWebImage();
 
