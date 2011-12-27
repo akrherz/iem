@@ -1,9 +1,14 @@
 <?php 
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 55);
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/feature.php");
-$day = isset($_GET["day"]) ? substr($_GET["day"],0,10) : die("No date specified");
+$day = isset($_GET["day"]) ? substr($_GET["day"],0,10) : null;
 $offset = isset($_GET["offset"]) ? $_GET["offset"] : 0;
+if ($day == null){
+	$day = Date("Y-m-d");
+	$offset = -1;
+}
 
 $dbconn = iemdb("mesosite");
 $rs = pg_prepare($dbconn, "yesterday", "SELECT *, date(valid) as d,
@@ -27,10 +32,6 @@ $result = pg_execute($dbconn, $q, Array($day));
 
 if (pg_num_rows($result) == 0){ die("Feature Not Found"); }
 
-$TITLE = "IEM | Past Feature"; 
-$THISPAGE = "iem-feature";
-include("$rootpath/include/header.php"); 
-
 $row = pg_fetch_array($result,0);
 $valid = strtotime( $row["valid"] );
 $fmt = "gif";
@@ -44,18 +45,28 @@ $day = $row["d"];
 $thumb = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s_s.%s", $row["imageref"], $fmt);
 $big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.%s", $row["imageref"], $fmt);
 
+$TITLE = "IEM Past Feature $day - ". $row["title"]; 
+$THISPAGE = "iem-feature";
+include("$rootpath/include/header.php"); 
+
 ?>
-<a href="cat.php?day=<?php echo $day; ?>&offset=-1">Previous Feature</a> &nbsp; &nbsp; <a href="cat.php?day=<?php echo $day; ?>&offset=+1">Next Feature</a>
+<a class="button down" href="cat.php?day=<?php echo $day; ?>&offset=-1">Previous Feature by Date</a> 
+<strong>IEM Daily Feature for <?php echo $day; ?></strong>
+<a class="button up" href="cat.php?day=<?php echo $day; ?>&offset=+1">Next Feature by Date</a>
 <hr />
 <!-- Begin Feature Display -->
 <div style="width: 640px;">
+
+<table cellpadding="2" cellspacing="0" border="1">
+<tr><td>Title:</td><td><strong><?php echo $row["title"]; ?></strong></td></tr>
+<tr><td>Posted:</td><td><?php echo $row["webdate"]; ?></td></tr>
+</table>
+
 <div style="float: left; padding: 5px; ">
-<img src="<?php echo $thumb; ?>" style="margin: 5px;">
+<a href="<?php echo $big; ?>"><img src="<?php echo $thumb; ?>" style="margin: 5px; border:0px;"></a>
 <br /><a href="<?php echo $big; ?>">View larger image</a>
 <br /><?php echo $row["caption"]; ?>
 </div>
-<h3><?php echo $row["title"]; ?></h3>
-<font size="-1"><?php echo $row["webdate"]; ?></font>
 <?php
   echo "<br><div class='story'>". $row["story"] ;
   if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 0))
@@ -67,9 +78,9 @@ $big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.%s", $row["i
 </div>
 <div id="fb-root"></div>
 <script src="http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1"></script>
-<fb:comments send_notification_uid="16922938" callback="<?php echo $rooturl; ?>/fbcb.php" title="<?php echo $row["title"]; ?>" href="<?php echo $rooturl; ?>/onsite/features/cat.php?day=<?php echo $day; ?>" xid="<?php echo $row["fbid"]; ?>" numposts="6" width="600"></fb:comments>
-
-
+<fb:comments send_notification_uid="16922938" 
+ callback="<?php echo $rooturl; ?>/fbcb.php" title="<?php echo $row["title"]; ?>" 
+ href="<?php echo $rooturl; ?>/onsite/features/cat.php?day=<?php echo $day; ?>" 
+ xid="<?php echo $row["fbid"]; ?>" numposts="6" width="600"></fb:comments>
 
 <?php include("$rootpath/include/footer.php"); ?>
-
