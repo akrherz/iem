@@ -161,17 +161,17 @@ if (defined('IEM_APPID')){
 	pg_prepare($_mesosite, "_SELECTOR_", "SELECT * from iemapps where appid in 
 		(SELECT appid from iemapps_tags WHERE tag in (SELECT tag from iemapps_tags where appid = $1)
 		and appid != $1) ORDER by name ASC");
-	$rs = pg_execute($_mesosite, "_SELECTOR_", Array(IEM_APPID));
-	if (pg_numrows($rs) > 0){
+	$_rs = pg_execute($_mesosite, "_SELECTOR_", Array(IEM_APPID));
+	if (pg_numrows($_rs) > 0){
 		echo "<li><a class=\"trigger\" href=\"#\"><img src=\"". $rooturl ."/images/star.png\" border=\"0\" alt=\"Related\" height=\"15\" style=\"margin-top: -3px; margin-right: 3px;\">Related</a>";
 		echo "<ul>\n";
-		for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
-			$url = $rooturl . $row["url"];
-			if (substr($row["url"],0,1) == "h"){
-				$url = $row["url"];
+		for ($i=0;$_row=@pg_fetch_assoc($_rs,$i);$i++){
+			$url = $rooturl . $_row["url"];
+			if (substr($_row["url"],0,1) == "h"){
+				$url = $_row["url"];
 			}
 			echo sprintf("<li><a href=\"%s\">%s</a></li>", 
-         		$url,  $row["name"] );
+         		$url,  $_row["name"] );
 		}
 		echo "</ul></li>\n";
 	}
