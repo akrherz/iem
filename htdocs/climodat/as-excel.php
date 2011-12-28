@@ -45,7 +45,7 @@ $splitter = Array(
 );
 
 
-$fc = file("reports/${station}_${report}.txt");
+$fc = file("/mesonet/share/climodat/reports/${station}_${report}.txt");
 while (list ($line_num, $line) = each ($fc)) {
  if (sizeof($line) == 0) continue;
 
