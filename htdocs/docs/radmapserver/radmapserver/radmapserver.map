@@ -8,7 +8,7 @@ IMAGETYPE PNG
 
 # Map projection definition
 PROJECTION
-  "proj=latlong"
+  "init=epsg:4326"
 END
 
 
@@ -27,7 +27,7 @@ LAYER
   NAME radar
   DATA "/var/www/htdocs/radmapserver/gisdata/radar.tif"
   PROJECTION
-   "proj=latlong"
+   "init=epsg:4326"
   END
   OFFSITE 0 0 0
 END
@@ -39,7 +39,7 @@ LAYER
   NAME states
   DATA "/var/www/htdocs/radmapserver/gisdata/states.shp"
   PROJECTION
-    "proj=latlong"
+    "init=epsg:4326"
   END
   CLASS
     OUTLINECOLOR 255 0 0
