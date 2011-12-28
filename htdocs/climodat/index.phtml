@@ -14,17 +14,17 @@ $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
  }
 
  if (isset($_GET["dl"]) ){
-   if (is_file("reports/${station}_${report}.txt") ){
+   if (is_file("/mesonet/share/climodat/reports/${station}_${report}.txt") ){
      header("Content-type: application/octet-stream");
      header("Content-Disposition: attachment; filename=${station}_${report}.txt");
-     readfile("reports/${station}_${report}.txt");
+     readfile("/mesonet/share/climodat/reports/${station}_${report}.txt");
      die();
    }
  }
 
 $THISPAGE = "climatology-climodat";
 $TITLE = "IEM Climodat";
-if ($station == "" || ! is_file("reports/${station}_$report.txt")){
+if ($station == "" || ! is_file("/mesonet/share/climodat/reports/${station}_$report.txt")){
   $api = $GOOGLEKEYS[$rooturl]["any"];
   $HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
  <script src='http://www.openlayers.org/api/OpenLayers.js'></script>
@@ -117,7 +117,7 @@ contain data dating back to then.
 <p>
 <?php 
 
-if (is_file("reports/${station}_$report.txt")){
+if (is_file("/mesonet/share/climodat/reports/${station}_$report.txt")){
 echo "<table cellpadding=\"2\"><tr><th>Download Options</th><td><form name=\"dl\" action=\"index.phtml\">
   <input type=\"hidden\" name=\"dl\" value=\"yes\">
   <input type=\"hidden\" name=\"station\" value=\"$station\"> 
@@ -131,7 +131,7 @@ echo "<table cellpadding=\"2\"><tr><th>Download Options</th><td><form name=\"dl\
 </tr></table>"; 
 
 echo "<pre>\n";
-  include("reports/${station}_$report.txt");
+  include("/mesonet/share/climodat/reports/${station}_$report.txt");
 echo "</pre>\n";
 } else {
 ?> 
