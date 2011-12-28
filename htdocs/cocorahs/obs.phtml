@@ -1,5 +1,6 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 57);
  $station = isset($_GET["station"])? $_GET["station"] : "";
  $network = isset($_GET["network"])? $_GET["network"] : "IACOCORAHS";
  $date = isset($_GET["date"]) ? substr($_GET["date"],0, 10) : "";
@@ -10,14 +11,8 @@
  include("$rootpath/include/forms.php");
  include("$rootpath/include/network.php");
  $nt = new NetworkTable($network);
-?>
-
-<?php $TITLE = "IEM | CoCoRaHS Observations";
-include("$rootpath/include/header.php"); ?>
-
-<div class="text"
-
-<?php 
+$TITLE = "IEM | CoCoRaHS Observations";
+include("$rootpath/include/header.php"); 
 
 if (strlen($station) > 0) {
   $link = "obs.phtml?station=".$station."&network=". $network ."&sortvar=";
@@ -33,7 +28,7 @@ Select Year: <?php echo yearSelect(2007, $year, "year"); ?>
 if (strlen($date) > 0) { 
   $year = substr($date,0,4);
   $link = "obs.phtml?date=".$date."&network=". $network ."&sortvar=";
-  if ($sortvar == "") $sortvar = "station";
+  if ($sortvar == "") $sortvar = "id";
 ?>
 <h3 class="subtitle">CoCoRaHS obs listed by date</h3>(<i>Click on the Station Number to view all obs from one station.</i>)
 <form name="switchdate" action="obs.phtml" method="GET">
@@ -64,16 +59,18 @@ Select State: <select name="network">
      $sortvar == "max_tmpf") 
    $sortdir = "DESC";
  if (strlen($station) > 0) {
-   $rs = $iem->query("SELECT * from summary_$year WHERE station = '$station'
+   $rs = $iem->query("SELECT s.*, t.id from summary_$year s JOIN stations t 
+   ON (t.iemid = s.iemid) WHERE t.id = '$station'
      ORDER by $sortvar $sortdir");
  } else {
-   $sql = "SELECT * from summary_$year WHERE day = '$date' and
+   $sql = "SELECT s.*, t.id from summary_$year s JOIN stations t
+   ON (t.iemid = s.iemid) WHERE day = '$date' and
      network = '$network' ORDER by $sortvar $sortdir";
    $rs = $iem->query($sql);
  }
  $hirow = 1;
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-   $nwsli = $row["station"];
+   $nwsli = $row["id"];
 
    $rain = $row["pday"];
    if ($rain == 0.0001) $rain = "T";

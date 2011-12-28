@@ -1,10 +1,9 @@
 <?php 
 include("../../config/settings.inc.php");
+define("IEM_APPID", 56);
 $network = isset($_GET['network']) ? $_GET['network'] : 'IACOCORAHS'; 
 $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
-?>
 
-<?php  
 $TITLE = "IEM | CoCoRaHS | Last Observation";
 $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
 	<!--//BEGIN Script
@@ -31,11 +30,12 @@ include("$rootpath/include/header.php"); ?>
  /* Compute monthly rainfall totals! */
  $dbconn = iemdb("access");
  $year = date("Y");
+ $first_of_month = date("Y-m");
  $sql = "SELECT id, 
    sum(case WHEN pday < 0 THEN 0 ELSE pday END) as pmonth, 
    sum(case WHEN pday < 0 THEN 1 ELSE 0 END) as missing from 
    summary_$year s, stations t WHERE t.network = '$network' and t.iemid = s.iemid
-   and extract(month from now()) = extract(month from day) GROUP by id";
+   and day >= '${first_of_month}-01' GROUP by id";
  $rs = pg_exec($dbconn, $sql);
  $monthDict = Array();
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){ 
