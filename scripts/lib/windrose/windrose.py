@@ -350,8 +350,9 @@ class WindroseAxes(PolarAxes):
 
         for j in range(nsector):
             offset = 0
-            for i in range(nbins):
-                if i > 0:
+            # Skip the first bin!
+            for i in range(1, nbins):
+                if i > 1:
                     offset += self._info['table'][i-1, j]
                 val = self._info['table'][i, j]
                 zorder = ZBASE + nbins - i
@@ -361,7 +362,9 @@ class WindroseAxes(PolarAxes):
                 self.add_patch(patch)
                 if j == 0:
                     self.patches_list.append(patch)
-        self._update()
+        #self._update()
+        self.set_rmax(rmax=np.max(np.sum(self._info['table'][1:,:], axis=0)))
+        self.set_radii_angle(angle=self.radii_angle)
 
 
     def box(self, dir, var, **kwargs):

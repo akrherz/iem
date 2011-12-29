@@ -45,6 +45,7 @@ def floatRgb(mag, cmin, cmax):
        blue amplitudes.
        """
        x = float(mag-cmin)/float(cmax-cmin)
+       #print 'Mag', mag, 'CMIN', cmin, 'CMAX', cmax, 'X', x
        blue = min((max((4*(0.75-x), 0.)), 1.))
        red  = min((max((4*(x-0.25), 0.)), 1.))
        green= min((max((4*math.fabs(x-0.5)-1., 0.)), 1.))
@@ -65,18 +66,23 @@ def bmap_clrbar(maxV, minV=0, levels=10):
     for y in range(minV, maxV+1, step):
         ytics.append(y)
         
-    ax2 = plt.axes([0.97,0.09,0.02,0.75], frameon=True, axisbg='w', yticks=ytics, xticks=[])
+    ax2 = plt.axes([0.97,0.1,0.02,0.8], frameon=True, axisbg='w', yticks=ytics, xticks=[])
     for tick in ax2.yaxis.get_major_ticks():
         tick.label1.set_fontsize(10)
         tick.tick1On=False
         tick.tick2On=False
 
-    for y in range(minV, maxV+1, 1):
+    # We want to make a nice color bar
+    step = (maxV - minV) / float(256)
+    print 'Step is', step
+    for y in numpy.arange(minV, maxV, step):
         c=rgb2hex(floatRgb(y,1,maxV))
         if y==0:
             c='w'
 
-        ax2.barh(y,1,align='center',height=1,color=c,ec=c)
+        ax2.barh(y,1,align='center',height=step,fc=c,ec=c)
+
+    return ax2
 
 def hilo_valplot(lons, lats, highs, lows, cfg):
     """
@@ -744,7 +750,8 @@ def webprocess(tmpfp, rotate=""):
     os.remove("%s.png" % (tmpfp,) )
     os.remove("%s.ps" % (tmpfp,) )
 
-def postprocess(tmpfp, pqstr, rotate="", thumb=False, thumbpqstr="", fname=None):
+def postprocess(tmpfp, pqstr, rotate="", thumb=False, 
+            thumbpqstr="", fname=None):
     """
     Helper to postprocess the plot
     """
@@ -799,27 +806,30 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     acursor.execute("""SELECT sknt, drct, valid from alldata WHERE station = %s
         and valid > %s and valid < %s""", (
         station, sts, ets))
-    sknt = []
-    drct = []
+    sped = numpy.zeros( (acursor.rowcount,), 'f')
+    drct = numpy.zeros( (acursor.rowcount,), 'f')
+    i = 0
     for row in acursor:
         if row[2].month not in months or row[2].hour not in hours:
             continue
-        if len(sknt) == 0:
+        if i == 0:
             minvalid = row[2]
             maxvalid = row[2]
-        if row[0] is None or row[0] < 0 or row[1] is None or row[1] < 0:
-            sknt.append( 0 )
-            drct.append( 0 )
-        else:
-            sknt.append( row[0] * 1.15 ) 
-            drct.append( row[1] )
         if row[2] < minvalid:
             minvalid = row[2]
         if row[2] > maxvalid:
             maxvalid = row[2]
+        if row[0] is None or row[0] < 0 or row[1] is None or row[1] < 0:
+            sped[i] =  0 
+            drct[i] = 0 
+        else:
+            sped[i] =  row[0] * 1.15  # mph 
+            drct[i] =  row[1] 
+        i += 1
+
     acursor.close()
     db.close()
-    if len(sknt) < 5:
+    if i < 5:
         fig = plt.figure(figsize=(6, 7), dpi=80, facecolor='w', edgecolor='w')
         label = 'Not enough data available to generate plot'
         plt.gcf().text(0.17,0.89, label)
@@ -829,20 +839,16 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
             print "Content-Type: image/png\n"
             plt.savefig( sys.stdout, format='png' )
         return
-    # Convert to numpy arrays
-    sknt = numpy.array( sknt )
-    drct = numpy.array( drct )
+
     # Generate figure
     fig = plt.figure(figsize=(6, 7), dpi=80, facecolor='w', edgecolor='w')
     rect = [0.1, 0.1, 0.8, 0.8]
     ax = WindroseAxes(fig, rect, axisbg='w')
     fig.add_axes(ax)
-    ax.bar(drct, sknt, normed=True, bins=(1,2,5,7,10,15,20), opening=0.8, edgecolor='white')
-    #l = ax.legend(borderaxespad=-0.1)
-    #plt.setp(l.get_texts(), fontsize=8)
-    #ax.set_title("Ames [KAMW] Windrose Plot")
+    ax.bar(drct, sped, normed=True, bins=(0,2,5,7,10,15,20), opening=0.8, 
+           edgecolor='white')
     handles = []
-    for p in ax.patches_list[1:]:
+    for p in ax.patches_list:
         color = p.get_facecolor()
         handles.append( Rectangle((0, 0), 0.1, 0.3,
                     facecolor=color, edgecolor='black'))
@@ -860,12 +866,18 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     if len(months) < 12:
         for h in months: 
             tlimit += "%s," % (datetime.datetime(2000,h,1).strftime("%b"),)
-    label = "%s [%s] Windrose Plot\n[%s]\nPeriod of Record: %s - %s\nNumber of Obs: %s   Calm: %.1f%%   Avg Speed: %.1f mph" % (sname, station, tlimit,
+    label = """[%s] %s  
+Windrose Plot [%s]
+Period of Record: %s - %s
+Obs Count: %s Calm: %.1f%% Avg Speed: %.1f mph""" % (station, sname, 
+                                                             tlimit,
         minvalid.strftime("%d %b %Y"), maxvalid.strftime("%d %b %Y"), 
-        len(sknt), 
-        numpy.sum( numpy.where(sknt < 2., 1., 0.)) / float(len(sknt)) * 100.,
-        numpy.average(sknt))
+        numpy.shape(sped)[0], 
+        numpy.sum( numpy.where(sped < 2., 1., 0.)) / numpy.shape(sped)[0] * 100.,
+        numpy.average(sped))
     plt.gcf().text(0.17,0.89, label)
+    plt.gcf().text(0.01,0.1, "Generated: %s" % (mx.DateTime.now().strftime("%d %b %Y"),),
+                   verticalalignment="bottom")
     # Make a logo
     im = image.imread('/mesonet/www/apps/iemwebsite/htdocs/images/logo_small.png')
     #im[:,:,-1] = 0.8
@@ -878,4 +890,4 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
         print "Content-Type: image/png\n"
         plt.savefig( sys.stdout, format='png' )
    
-    del sknt, drct, im
+    del sped, drct, im
