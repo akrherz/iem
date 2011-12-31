@@ -20,7 +20,7 @@ maxID = row[0]
 if len(sys.argv) == 3:
     mcursor.execute("""SELECT * from stations WHERE id = %s and network = %s""" , (sys.argv[2],sys.argv[1]) )
 else:
-    mcursor.execute("""SELECT * from stations WHERE iemid > %s""" % (maxID,) )
+    mcursor.execute("""SELECT * from stations WHERE online and iemid > %s""" % (maxID,) )
 
 for row in mcursor:
     print "Adding station ID: %s NETWORK: %s" % (row['id'], row['network'])
@@ -33,6 +33,7 @@ for row in mcursor:
     icursor.execute("""INSERT into %s ( day, iemid)
           VALUES ('TODAY', %s) """ % (tbl, 
           row['iemid'] ) )
+    tbl = 'summary_%s' % ((mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=1)).year,)
     icursor.execute("""INSERT into %s ( day, iemid)
           VALUES ( 'TOMORROW', %s) """ % (tbl,
           row['iemid'] ) )
