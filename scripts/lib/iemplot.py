@@ -325,9 +325,16 @@ def simple_contour(lons, lats, vals, cfg):
         analysis = numpy.ma.array(analysis, mask=mask)
 
     # Generate Contour
-    contour = Ngl.contour_map(wks,analysis,res)
-
-
+    if numpy.min(analysis) == numpy.max(analysis):
+        if cfg.has_key("_conus"):
+            res = conus()
+        elif cfg.has_key("_midwest"):
+            res = midwest()
+        else:
+            res = iowa()
+        contour = Ngl.map(wks, res)
+    else:
+        contour = Ngl.contour_map(wks,analysis,res)
 
     if cfg.has_key("_showvalues") and cfg['_showvalues']:
         txres              = Ngl.Resources()
