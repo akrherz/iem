@@ -111,6 +111,13 @@ def do_state_day(stabbr, valid, nc):
 if __name__ == '__main__':
     if len(sys.argv) == 4:
         do_day( mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
+    elif len(sys.argv) == 3:
+        sts = mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), 1)
+        ets = sts + mx.DateTime.RelativeDateTime(months=1)
+        now = sts
+        while now < ets:
+            do_day( now )
+            now += mx.DateTime.RelativeDateTime(days=1)
     else:
         do_day( mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1))
     
