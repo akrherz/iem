@@ -1,8 +1,18 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/python
 # Need something for a Camera Interface
-
 import cgi
-from pyIEM import cameras
+import sys
+sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
+import iemdb
+MESOSITE = iemdb.connect('mesosite', bypass=True)
+mcursor = MESOSITE.cursor()
+cameras = {}
+mcursor.execute("""
+  SELECT id, ip, name, port from webcams where network in ('KELO','KCRG','KCCI')
+ ORDER by name ASC
+""")
+for row in mcursor:
+	cameras[ row[0] ] = {'ip': row[1], 'name': row[2], 'port': row[3]}
 
 def printHeader():
 	print """
@@ -16,12 +26,12 @@ def printForm(selcam):
 	print '<form method="GET" action="camera.py">'
 	print "<b>Select Camera:</b>"
 	print '<select name="id">'
-	k = cameras.cams.keys()
+	k = cameras.keys()
 	k.sort()
 	for cam in k:
 		print '<option value="'+ cam +'" ',
 		if (cam == selcam): print " SELECTED ",
-		print '>[%s] %s' % (cam, cameras.cams[cam]['name'])
+		print '>[%s] %s' % (cam, cameras[cam]['name'])
 	print '</select><input type="submit"></form>'
 
 def printInterface(cam):
@@ -34,7 +44,7 @@ def printInterface(cam):
 </applet>\
 <p><a href=\"http://%(ip)s/admin/\">Admin Interface</a>\
 </body>\
-</html>" % cameras.cams[cam]
+</html>" % cameras[cam]
 
 def main():
 	print 'Content-type: text/html \n\n'
@@ -46,7 +56,7 @@ def main():
 
 	printHeader()
 	printForm(cam)
-	if (cameras.cams.has_key(cam)):
+	if (cameras.has_key(cam)):
 		printInterface(cam)
 
 
