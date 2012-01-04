@@ -13,6 +13,7 @@ mcursor.execute("""
 """)
 for row in mcursor:
 	cameras[ row[0] ] = {'ip': row[1], 'name': row[2], 'port': row[3]}
+MESOSITE.close()
 
 def printHeader():
 	print """
