@@ -158,7 +158,7 @@ if (($ts + 300) < time()) {
 if (in_array("nexrad_tc", $layers)){
  $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d.png", $ts);
 }
-if (is_file($radarfp)){
+if (defined("radarfp") && is_file($radarfp)){
   $radar = $map->getlayerbyname("nexrad_n0r");
   $radar->set("status", in_array("nexrad", $layers) || 
                       in_array("nexrad_tc", $layers) );
