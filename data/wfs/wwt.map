@@ -6,11 +6,11 @@ NAME "weatherwarn"
 STATUS ON
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONtsET "/mesonet/www/apps/iemwebsite/data/gis/fonts.list"
 EXTENT -155.0 15.0 -30.0 70.0
-UNITS DD
+UNIts DD
 SHAPEPATH "/mesonet/data/gis/static/"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/stations.sym"
 IMAGECOLOR -1 -1 -1
 
 
@@ -43,7 +43,7 @@ WEB
    "wfs_accessconstraints" "None"
    "wfs_contactperson" "Daryl Herzmann"
    "wfs_contactorganization" "Iowa State University"
-      "wms_enable_request" "*"
+   "ows_enable_request" "*"
   END
 END
 
@@ -70,13 +70,17 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME archwarn_county
-  CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo,  significance, eventid, oid from warnings_%YEAR% WHERE gtype = 'C' and expire > '%TS%+00' and issue < '%TS%+00' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo,  significance, eventid, oid from warnings_%year% WHERE gtype = 'C' and expire > '%ts%+00' and issue < '%ts%+00' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
+  END
+  VALIDATION
+   year "^[0-9]{4}$"
+   ts "[0-9\-\s]+"
   END
   METADATA
     "wfs_title" "County Based Warnings"
@@ -112,13 +116,17 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME archwarn_polygon
-  CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo,  significance, eventid, oid from warnings_%YEAR% WHERE gtype = 'P' and expire > '%TS%+00' and issue < '%TS%+00' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo,  significance, eventid, oid from warnings_%year% WHERE gtype = 'P' and expire > '%ts%+00' and issue < '%ts%+00' ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
+  END
+  VALIDATION
+   year "^[0-9]{4}$"
+   ts "[0-9\-\s]+"
   END
   METADATA
     "wfs_title" "Polygon Based Warnings"
@@ -140,13 +148,17 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warn_polygon
-  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
   DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo,  significance, eventid, oid from warnings WHERE gtype = 'P' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
+  END
+  VALIDATION
+   year "^[0-9]{4}$"
+   ts "[0-9\-\s]+"
   END
   METADATA
     "wfs_title" "Current Polygon Based Warnings"
@@ -167,13 +179,17 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warn_county
-  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
   DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo, significance, eventid,  significance, eventid, oid from warnings WHERE gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
+  END
+  VALIDATION
+   year "^[0-9]{4}$"
+   ts "[0-9\-\s]+"
   END
   METADATA
     "wfs_title" "Current County Based Warnings"
