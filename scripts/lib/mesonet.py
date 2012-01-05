@@ -1,6 +1,19 @@
 # Library of help functions
 import math
 
+def relh(tmpf, dwpf):
+  if (tmpf == None or dwpf == None or tmpf == "M" or dwpf == "M" or tmpf == -99 or dwpf == -99):
+    return "M"
+  tmpc = f2c(tmpf)
+  dwpc = f2c(dwpf)
+  if (tmpc == dwpc):
+    return 100.0
+  e  = 6.112 * math.exp( (17.67 * dwpc) / (dwpc + 243.5));
+  es  = 6.112 * math.exp( (17.67 * tmpc) / (tmpc + 243.5));
+  relh = ( e / es ) * 100.00;
+  return relh
+
+
 def uv(sped,dir):
     """
     Compute the u and v components of the wind 
