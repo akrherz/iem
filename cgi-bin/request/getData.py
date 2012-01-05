@@ -1,14 +1,19 @@
-#!/mesonet/python/bin/python
-# Script to control download of most data from mesonet site
-# Daryl Herzmann 19 Nov 2001
+#!/usr/bin/python
+"""
+Download interface for ASOS/AWOS data from the asos database
+"""
 
-import cgi, re, string, sys, mx.DateTime
-from pyIEM import iemdb, mesonet
-i = iemdb.iemdb()
-asosdb = i['asos']
-mesositedb = i['mesosite']
+import cgi, re, string, sys
+import mx.DateTime
+import sys
+sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
+import iemdb
+import mesonet
+import psycopg2.extras
+ASOS = iemdb.connect('asos', bypass=True)
+acursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-def Main():
+def main():
     print "Content-type: text/plain \n\n",
     form = cgi.FormContent()
     if (not form.has_key("station")):
@@ -17,11 +22,12 @@ def Main():
     station = (string.strip( form["station"][0] )).upper()
     gisextra = []
     if form.has_key("latlon") and form["latlon"][0] == "yes":
-        rs = mesositedb.query("SELECT x(geom) as lon, y(geom) as lat \
-             from stations WHERE id = '%s'" % (station,)).dictresult()
-        if len(rs) > 0:
-            gisextra.append( "%.4f" % (rs[0]['lon'],) )
-            gisextra.append( "%.4f" % (rs[0]['lat'],) )
+        acursor.execute("""SELECT x(geom) as lon, y(geom) as lat 
+             from stations WHERE id = '%s'""" % (station,))
+        if acursor.rowcount > 0:
+            row = acursor.fetchone()
+            gisextra.append( "%.4f" % (row['lon'],) )
+            gisextra.append( "%.4f" % (row['lat'],) )
     dataVars = form["data"]
     if form.has_key("year"):
       year1 = int(form["year"][0])
@@ -45,7 +51,6 @@ def Main():
     delim = form["format"][0]
     tz = form["tz"][0]
     #timeRange = form["timeRange"][0]
-    mydb = asosdb
 
     #if timeRange == "allYear":
     #    sts = sTS + mx.DateTime.RelativeDateTime(month=1,day=1)
@@ -72,22 +77,22 @@ def Main():
       ORDER by valid ASC""" % (sts.strftime("%Y-%m-%d"),
       ets.strftime("%Y-%m-%d"), station)
 
-    if delim == "tab":
+    if delim == "tdf":
         rD = "\t"
         queryCols = re.sub("," , "\t", queryCols) 
     else:
         rD = ","
 
     if tz == "GMT":
-        mydb.query("SET TIME ZONE 'GMT' ")
+        acursor.execute("SET TIME ZONE 'GMT' ")
     #print queryStr
-    rs = mydb.query( queryStr ).dictresult()
+    acursor.execute( queryStr )
 
 
 #    print "#DEBUG: SQL String    -> "+queryStr
     print "#DEBUG: Format Typ    -> "+delim
     print "#DEBUG: Time Zone     -> "+ tz
-    print "#DEBUG: Entries Found -> "+ str(len(rs))
+    print "#DEBUG: Entries Found -> %s" % (acursor.rowcount,)
     print "station"+rD+"valid ("+tz+" timezone)"+rD,
     if len(gisextra) > 0:
         print "lon"+rD+"lat"+rD,
@@ -97,22 +102,27 @@ def Main():
     if len(gisextra) > 0:
         gtxt = rD.join( gisextra ) + rD
 
-    for i in range(len(rs)):
-        sys.stdout.write( rs[i]["station"] + rD )
-        sys.stdout.write( rs[i]["valid"] + rD )
+    for row in acursor:
+        sys.stdout.write( row["station"] + rD )
+        sys.stdout.write( row["valid"].strftime("%Y-%m-%d %H:%M") + rD )
         sys.stdout.write( gtxt )
         for data1 in outCols:
             if data1 == 'relh':
-               rs[i]['relh'] = mesonet.relh( rs[i]['tmpf'], rs[i]['dwpf'] )
-            if data1 == 'tmpc':
-               rs[i]['tmpc'] = mesonet.f2c( rs[i]['tmpf'] )
-            if data1 == 'dwpc':
-               rs[i]['dwpc'] = mesonet.f2c( rs[i]['dwpf'] )
-            if data1 in ["metar","skyc1","skyc2","skyc3","skyc4"]:
-                sys.stdout.write("%s%s" % (rs[i][data1], rD))
-            elif rs[i][ data1 ] is None or rs[i][ data1 ] <= -99.0 or rs[i][ data1 ] == "M":
+                val = mesonet.relh( row['tmpf'], row['dwpf'] )
+                sys.stdout.write("%.2f%s" % (val, rD))
+            elif data1 == 'tmpc':
+                val = mesonet.f2c( row['tmpf'] )
+                sys.stdout.write("%.2f%s" % (val, rD))
+            elif data1 == 'dwpc':
+                val = mesonet.f2c( row['dwpf'] )
+                sys.stdout.write("%.2f%s" % (val, rD))
+            elif data1 in ["metar","skyc1","skyc2","skyc3","skyc4"]:
+                sys.stdout.write("%s%s" % (row[data1], rD))
+            elif row[ data1 ] is None or row[ data1 ] <= -99.0 or row[ data1 ] == "M":
                 sys.stdout.write("M%s" % (rD,))
             else:  
-                sys.stdout.write("%2.2f%s" % (rs[i][ data1 ], rD))
+                sys.stdout.write("%2.2f%s" % (row[ data1 ], rD))
         print
-Main()
+        
+if __name__ == '__main__':
+    main()
