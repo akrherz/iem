@@ -41,8 +41,8 @@ if ($rows < 2)
   $height = 540;
   $twidth = 316;
   $theight = 236;
-  $px = Array(160,480,160,480);
-  $py = Array(170,170,410,410);
+  $px = Array(3,323,3,323);
+  $py = Array(50,50,290,290);
 } else {
   $width = 640;
   $height = 540;

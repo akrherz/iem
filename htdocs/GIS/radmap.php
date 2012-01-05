@@ -152,16 +152,19 @@ $lakes->set("status", MS_ON);
 $lakes->draw($img);
 
 /* Draw NEXRAD Layer */
-$radar = $map->getlayerbyname("nexrad_n0r");
-$radar->set("status", in_array("nexrad", $layers) || 
-                      in_array("nexrad_tc", $layers) );
 if (($ts + 300) < time()) {
- $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts) );
+ $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts);
 }
 if (in_array("nexrad_tc", $layers)){
- $radar->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d.png", $ts) );
+ $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d.png", $ts);
 }
-$radar->draw($img);
+if (is_file($radarfp)){
+  $radar = $map->getlayerbyname("nexrad_n0r");
+  $radar->set("status", in_array("nexrad", $layers) || 
+                      in_array("nexrad_tc", $layers) );
+  $radar->set("data", $radarfp);
+  $radar->draw($img);
+}
 
 $evis = $map->getlayerbyname("east_vis_1km");
 $evis->set("status", in_array("east_vis", $layers) );
