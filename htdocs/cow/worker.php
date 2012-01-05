@@ -46,7 +46,7 @@ function printWARN($cow, $warn)
   $s = sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a>%s</td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f sq km</td><td>%.0f sq km</td><td>%.0f %%</td><td>%.0f%% <a href=\"../GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td><td>%.0f%%</td></tr>\n", 
     $background, $uri, $warn["phenomena"], $warn["eventid"], $windhail,
     gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["ets"]), 
-    $uri, implode(", ",$counties), $uri, $warn["status"], $warn["area"], 
+    $uri, implode(", ",$counties), $uri, $warn["status"], $warn["parea"], 
     $carea, ($carea - $warn["parea"])/ $carea  * 100,
     $bratio,
     date("Y", $ts), $warn["wfo"], $warn["phenomena"], $warn["significance"],
