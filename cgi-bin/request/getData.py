@@ -12,6 +12,8 @@ import mesonet
 import psycopg2.extras
 ASOS = iemdb.connect('asos', bypass=True)
 acursor = ASOS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+MESOSITE = iemdb.connect('mesosite', bypass=True)
+mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 def main():
     print "Content-type: text/plain \n\n",
@@ -22,10 +24,10 @@ def main():
     station = (string.strip( form["station"][0] )).upper()
     gisextra = []
     if form.has_key("latlon") and form["latlon"][0] == "yes":
-        acursor.execute("""SELECT x(geom) as lon, y(geom) as lat 
+        mcursor.execute("""SELECT x(geom) as lon, y(geom) as lat 
              from stations WHERE id = '%s'""" % (station,))
-        if acursor.rowcount > 0:
-            row = acursor.fetchone()
+        if mcursor.rowcount > 0:
+            row = mcursor.fetchone()
             gisextra.append( "%.4f" % (row['lon'],) )
             gisextra.append( "%.4f" % (row['lat'],) )
     dataVars = form["data"]
