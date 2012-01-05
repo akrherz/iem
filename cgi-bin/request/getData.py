@@ -111,7 +111,10 @@ def main():
         for data1 in outCols:
             if data1 == 'relh':
                 val = mesonet.relh( row['tmpf'], row['dwpf'] )
-                sys.stdout.write("%.2f%s" % (val, rD))
+                if val != "M":
+                    sys.stdout.write("%.2f%s" % (val, rD))
+                else:
+                    sys.stdout.write("M%s" % (rD,))
             elif data1 == 'tmpc':
                 val = mesonet.f2c( row['tmpf'] )
                 sys.stdout.write("%.2f%s" % (val, rD))
