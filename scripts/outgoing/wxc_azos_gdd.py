@@ -4,7 +4,8 @@
 import mx.DateTime, os, Ngl, numpy, shutil
 import sys
 from pyIEM import iemdb, stationTable
-st = stationTable.stationTable("/mesonet/TABLES/campbellDB.stns")
+import network
+nt = network.Table("ISUAG")
 i = iemdb.iemdb()
 access = i['iem']
 coop = i['coop']
@@ -33,8 +34,8 @@ def load_soilt(data):
     for i in range(len(rs)):
         stid = rs[i]['station']
         soil_obs.append( rs[i]['c30'] )
-        lats.append( st.sts[stid]['lat'] )
-        lons.append( st.sts[stid]['lon'] )
+        lats.append( nt.sts[stid]['lat'] )
+        lons.append( nt.sts[stid]['lon'] )
     if len(lons) == 0:
         print 'No ISUAG Data for %s' % (valid,)
         sys.exit()
