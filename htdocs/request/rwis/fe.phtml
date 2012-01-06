@@ -1,5 +1,6 @@
 <?php 
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 63);
 include("$rootpath/include/imagemaps.php");
 include("$rootpath/include/forms.php");
 
@@ -7,8 +8,6 @@ $TITLE = "IEM | RWIS Data Download";
 $THISPAGE = "networks-rwis";
 include("$rootpath/include/header.php"); 
 ?>
-<div class="text">
-
 
 <p>Filling out this form will provide you with whatever archive data the
 IEM has from the RWIS network.  The archive has some holes in it around the
@@ -71,20 +70,20 @@ year 2000 and 2001, but it mostly in tack outside of those dates.</p>
 
 <p><h3 class="subtitle">3. Select Variables:</h3><br>
 <select size=5 name="vars[]" MULTIPLE>
-  <option value="tmpf">Air Temperature
-  <option value="dwpf">Dew Point Temperature
+  <option value="tmpf">Air Temperature [F]
+  <option value="dwpf">Dew Point Temperature [F]
   <option value="sknt">Wind Speed [knots]
-  <option value="drct">Wind Direction
+  <option value="drct">Wind Direction [degree N]
   <option value="gust">Wind Gust [knots]
-  <option value="tfs0">Pavement Sensor0 Temperature
+  <option value="tfs0">Pavement Sensor0 Temperature [F]
   <option value="tfs0_text">Pavement Sensor0 Condition
-  <option value="tfs1">Pavement Sensor1 Temperature
+  <option value="tfs1">Pavement Sensor1 Temperature [F]
   <option value="tfs1_text">Pavement Sensor1 Condition
-  <option value="tfs2">Pavement Sensor2 Temperature
+  <option value="tfs2">Pavement Sensor2 Temperature [F]
   <option value="tfs2_text">Pavement Sensor2 Condition
-  <option value="tfs3">Pavement Sensor3 Temperature
+  <option value="tfs3">Pavement Sensor3 Temperature [F]
   <option value="tfs3_text">Pavement Sensor3 Condition
-  <option value="subf">Subsurface Temperature
+  <option value="subf">Subsurface Temperature [F]
 </select>
 
 </td><td valign="TOP">
@@ -115,7 +114,6 @@ How shall the output values be seperated?
 <p><h3 class="subtitle">Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
-</form></div>
-
+</form>
 
 <?php include("$rootpath/include/footer.php"); ?>
