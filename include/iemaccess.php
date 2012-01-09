@@ -35,6 +35,16 @@ class IEMAccess {
   }
 
   function getNetwork($network) {
+  	if (is_array($network)){
+		$nstring = "s.network in (";
+  		while (list($key,$value) = each($network)){
+  			$nstring .= "'$value',";
+  		}
+		$nstring .= "'X')";
+  	}
+  	else {
+  		$nstring = sprintf("s.network = '%s'", $network);
+  	}
     $ret = Array();
     $sql = sprintf("select s.id, s.id as station, *, c.pday as ob_pday, x(s.geom) as x, 
     y(s.geom) as y, valid at time zone s.tzname as lvalid,
@@ -42,7 +52,7 @@ class IEMAccess {
     max_sknt_ts at time zone s.tzname as lmax_sknt_ts,
     s.name as sname from 
     current c2, summary_%s c, stations s  
-    WHERE s.network = '$network' and c.iemid = s.iemid and c2.iemid = c.iemid and
+    WHERE $nstring and c.iemid = s.iemid and c2.iemid = c.iemid and
     c.day = date(now() at time zone '%s')",
      date("Y"), 
     $this->tzname);
