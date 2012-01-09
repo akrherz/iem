@@ -35,7 +35,7 @@ elevations  = nc.variables["elevation"]
 MY_PROVIDERS = ["MNDOT", "KSDOT", "WIDOT", "INDOT", "NDDOT",
  "NEDOR", "WYDOT", "OHDOT", "MDDOT", "NHDOT", "WVDOT", "NVDOT",
  "AKDOT", "VTDOT", "WIDOT", "MEDOT", "VADOT","CODOT", "FLDOT",
- "GADOT"]
+ "GADOT", "KYTC-RWIS"]
 
 
 for recnum in range(len(providers)):
