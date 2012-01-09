@@ -116,11 +116,17 @@ def main():
                 else:
                     sys.stdout.write("M%s" % (rD,))
             elif data1 == 'tmpc':
-                val = mesonet.f2c( row['tmpf'] )
-                sys.stdout.write("%.2f%s" % (val, rD))
+                if row['tmpf'] is not None:
+                    val = mesonet.f2c( row['tmpf'] )
+                    sys.stdout.write("%.2f%s" % (val, rD))
+                else:
+                    sys.stdout.write("M%s" % (rD,))
             elif data1 == 'dwpc':
-                val = mesonet.f2c( row['dwpf'] )
-                sys.stdout.write("%.2f%s" % (val, rD))
+                if row['dwpf'] is not None:
+                    val = mesonet.f2c( row['dwpf'] )
+                    sys.stdout.write("%.2f%s" % (val, rD))
+                else:
+                    sys.stdout.write("M%s" % (rD,))
             elif data1 in ["metar","skyc1","skyc2","skyc3","skyc4"]:
                 sys.stdout.write("%s%s" % (row[data1], rD))
             elif row[ data1 ] is None or row[ data1 ] <= -99.0 or row[ data1 ] == "M":
