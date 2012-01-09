@@ -1,7 +1,11 @@
-# Clean up the AFOS database
+"""
+ Clean up the AFOS database
+$Id: $:
+"""
 
-import pg, mx.DateTime
-afos = pg.connect('afos', 'iemdb')
+import iemdb, mx.DateTime
+AFOS = iemdb.connect('afos')
+acursor = AFOS.cursor()
 
 now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=7)
 table = "products_%s_" % (now.year,)
@@ -18,4 +22,6 @@ sql = """
    (pil ~* '^(RR[1-9SA]|ROB|TAF|MAV|MET|MTR|MEX|RWR|STO|HML)' 
     or pil in ('HPTNCF', 'WTSNCF','WRKTTU','TSTNCF', 'HD3RSA')
    )""" % (table,)
-afos.query( sql )
+acursor.execute( sql )
+acursor.close()
+AFOS.commit()

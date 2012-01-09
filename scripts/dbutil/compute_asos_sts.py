@@ -1,6 +1,8 @@
-# Look into the ASOS database and figure out the start time of various 
-# sites for a given network.
-
+"""
+ Look into the ASOS database and figure out the start time of various 
+ sites for a given network.
+$Id: $:
+"""
 
 import iemdb, network, sys
 asos = iemdb.connect('asos', bypass=True)
