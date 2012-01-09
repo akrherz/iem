@@ -251,6 +251,12 @@ $now = time();
 while ( list($key, $val) = each($mydata) ) {
   $tdiff = $now - $val->db["ts"];
 
+  if ($val->db['dwpf'] < -99.0) $val->db['dwpf'] = 'M';
+  else $val->db['dwpf'] = round($val->db['dwpf'],1);
+
+  if ($val->db['tmpf'] < -99.0) $val->db['tmpf'] = 'M';
+  else $val->db['tmpf'] = round($val->db['tmpf'],1);
+
   if ($val->db['tsf0'] == "") $val->db['tsf0'] = -99.99;
   if ($val->db['tsf1'] == "") $val->db['tsf1'] = -99.99;
   if ($val->db['tsf2'] == "") $val->db['tsf2'] = -99.99;
@@ -288,7 +294,7 @@ while ( list($key, $val) = each($mydata) ) {
   if (round($val->db['pave_avg'],0) == -100) $val->db['pave_avg'] = 'M';
   else $val->db['pave_avg'] = round($val->db['pave_avg'],0);
 
-  $s = sprintf("%6s %-52s %2s %7s %8s %2s %4s %5.1f %5.1f %4.0f %4.0f %5.1f %5s %5s %5s %5s %5s %5s\n", $key, 
+  $s = sprintf("%6s %-52s %2s %7s %8s %2s %4s %5.1f %5s %4.0f %4.0f %5.1f %5s %5s %5s %5s %5s %5s\n", $key, 
     $cities[$key]['name'], $val->db['state'], round($cities[$key]['lat'],2), 
      round($cities[$key]['lon'],2),
      date('d', $val->db['ts'] + (6*3600) ), date('H', $val->db['ts'] + (6*3600)),
