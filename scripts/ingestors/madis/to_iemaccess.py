@@ -53,11 +53,12 @@ db = {}
 MY_PROVIDERS = ["MNDOT", "KSDOT", "WIDOT", "INDOT", "NDDOT",
  "NEDOR", "WYDOT", "OHDOT", "MDDOT", "NHDOT", "WVDOT", "NVDOT",
  "AKDOT", "VTDOT", "WIDOT", "MEDOT", "VADOT", "CODOT", "FLDOT",
- "GADOT"]
+ "GADOT", "KYTC-RWIS"]
 
 
 def provider2network(p):
   return '%s_RWIS' % (p[:2],)
+
 for recnum in range(len(providers)):
   thisProvider =  providers[recnum].tostring().replace('\x00','')
   thisStation  =  stations[recnum].tostring().replace('\x00','')
