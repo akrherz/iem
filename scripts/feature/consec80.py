@@ -7,29 +7,21 @@ COOP = iemdb.connect("coop", bypass=True)
 ccursor = COOP.cursor()
 
 
-ccursor.execute("""SELECT month, high, year from alldata 
-  WHERe station = 'IA0200' and day >= '1893-01-01'
+ccursor.execute("""SELECT month, high, year, day from alldata 
+  WHERe station = 'IA2203' and day >= '1893-01-01' and month = 12 
   ORDER by day ASC"""  )
 
 running = 0
-biggest = numpy.zeros( (12,), 'f')
-years = numpy.zeros( (12,), 'f')
-omonth = 12
+biggest = 0
 for row in ccursor:
-  month = row[0]
-  if month != omonth:
-    if running >= biggest[omonth-1]:
-        biggest[omonth-1] = running
-        years[omonth-1] = row[2]
-    running = 0
-  if row[1] >= 80:
+  if row[1] >= 50:
     running += 1
-    if running >= biggest[month-1]:
-        biggest[month-1] = running
-        years[omonth-1] = row[2]
+    if running >= biggest:
+        biggest = running
+    if running > 3 and row[3].day > 20:
+        print running, row
   else:
     running = 0
-  omonth = month
 
 import matplotlib.pyplot as plt
 

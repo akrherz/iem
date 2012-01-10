@@ -1,83 +1,44 @@
 import numpy
 from matplotlib import pyplot as plt
-
-data = """40.324,9.756
-43.724,-35.000
-44.250,24.996
-41.250,33.703
-42.900,8.382
-41.000,10.233
-38.519,13.731
-41.584,31.576
-35.000,23.004
-45.800,14.956
-31.951,35.189
-37.100,34.421
-42.995,25.194
-38.336,23.553
-39.735,19.936
-38.400,16.854
-60.897,8.980
-36.962,19.388
-37.950,27.454
-36.166,23.345
-56.696,-3.162
-41.950,28.680
-46.800,28.432
-40.400,18.794
-40.319,31.257
-41.000,13.726
-48.062,26.662
-43.092,26.443
-38.940,25.883
-44.052,-13.771
-60.550,7.398
-38.665,21.713
-53.200,11.714
-40.393,25.988
-45.468,30.386
-42.417,25.754
-40.250,24.242
-43.745,7.211
-36.000,25.811
-43.627,10.704
-44.015,-5.509
-57.450,10.021
-60.035,10.131
-42.750,30.810
-40.550,32.034
-38.550,18.507
-45.672,24.599
-37.850,18.467
-44.735,-35.000
-49.514,10.131
-41.400,36.608
-44.162,-35.000
-40.261,26.144
-42.050,29.844
-45.770,20.714
-38.943,31.985
-51.119,9.328"""
-tmpf = []
-dbz = []
-for line in data.split("\n"):
-  tokens = line.split(',')
-  tmpf.append( float(tokens[0]))
-  dbz.append( float(tokens[1]))
+import iemdb
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor()
 
 
-import numpy as np
-import matplotlib.pyplot as plt
+ccursor.execute("""select foo2.yr, foo.avg, foo2.avg from (select 
+extract(year from day + '1 month'::interval) as yr, avg((high+low)/2.0)
+ from alldata_ia where station = 'IA2203' and month in (1,2) and 
+ sday > '0109' GROUP by yr) as foo2 JOIN (select 
+ extract(year from day + '1 month'::interval) as yr, avg((high+low)/2.0) 
+ from alldata_ia where station = 'IA2203' and month in (12,1) and
+  (sday < '0110' or sday > '1130') GROUP by yr) as foo ON (foo2.yr = foo.yr)
+  ORDER by foo2.yr ASC""")
+x = []
+y = []
+for row in ccursor:
+    x.append( float(row[1]))
+    y.append( float(row[2]))
 
+x = numpy.array( x )
+print x[-1]
+y = numpy.array( y )
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-ax.scatter(dbz, tmpf)
-ax.set_xlabel("Average NEXRAD Reflectivity [dBZ]")
-ax.set_ylabel("Average Air Temperature [F]")
-ax.set_title("Iowa Airport Sites between 12-4 PM on 2 Nov 2011")
-ax.set_xlim(-30,45)
+ax.scatter(x, y)
+ax.plot([5,35],[5,35])
+ax.plot([5,35],[numpy.average(y), numpy.average(y)], color='r')
+ax.text(5,numpy.average(y)+0.1, "%.1f" % (numpy.average(y),), color='r')
+ax.plot([numpy.average(x), numpy.average(x)],[5,35], color='g')
+ax.text(numpy.average(x)+0.1,33, "%.1f" % (numpy.average(x),), color='g')
+ax.plot([30.97,30.97],[5,35], color='k')
+ax.text(31,7,"31.0\n2012")
+ax.set_xlabel("1 Dec - 8 Jan Average Temperature [F]")
+ax.set_ylabel("8 Jan - 28 Feb Average Temperature [F]")
+ax.set_title("Iowa Average Winter Temperature [Dec,Jan,Feb] (1893-2011)")
+ax.set_xlim(5,40)
+ax.set_ylim(5,40)
 ax.grid(True)
 
 fig.savefig("test.ps")
