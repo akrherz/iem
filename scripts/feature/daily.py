@@ -1,7 +1,33 @@
 import iemdb
 import numpy
-ASOS = iemdb.connect('asos', bypass=True)
-acursor = ASOS.cursor()
+import ephem
+import mx.DateTime
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor()
+ISUAG = iemdb.connect('isuag', bypass=True)
+icursor = ISUAG.cursor()
+
+def compute_daytime():
+    arr = []
+    sun = ephem.Sun()
+    ames = ephem.Observer()
+    ames.lat = '41.99206'
+    ames.long = '-93.62183'
+    sts = mx.DateTime.DateTime(2000,1,1)
+    ets = mx.DateTime.DateTime(2001,1,1)
+    interval = mx.DateTime.RelativeDateTime(days=1)
+    now = sts
+    while now < ets:
+        ames.date = now.strftime("%Y/%m/%d")
+        rise = mx.DateTime.strptime(str(ames.next_rising(sun)), "%Y/%m/%d %H:%M:%S")
+        set = mx.DateTime.strptime(str(ames.next_setting(sun)), "%Y/%m/%d %H:%M:%S")
+        if set < rise:
+            ames.date = (now - interval).strftime("%Y/%m/%d")
+            rise = mx.DateTime.strptime(str(ames.next_rising(sun)), "%Y/%m/%d %H:%M:%S")
+        arr.append( (set-rise).minutes / 60.0)
+        now += interval
+
+    return arr
 
 def smooth(x,window_len=11,window='hanning'):
 
@@ -30,30 +56,24 @@ def smooth(x,window_len=11,window='hanning'):
     y=numpy.convolve(w/w.sum(),s,mode='valid')
     return y
 
+daylight = compute_daytime()
 
-acursor.execute("""
---- select doy, count(*), sum(case when t >=80 then 1 else 0 end), 
---- sum(case when t >= 80 and d < 60 then 1 else 0 end) from 
---- (select extract(year from valid) as year, extract(doy from valid) as doy, max(tmpf) as t, 
---- max(dwpf) as d from alldata where station = 'DSM' and extract(hour from valid) 
---- between 11 and 19 GROUP by year, doy) as foo GROUP by doy ORDER by doy
- SELECT doy, sum(case when data > 2 then 1 else 0 end),
- sum(case when data > 0 then 1 else 0 end), count(*) from
- (SELECT extract(year from valid) as yr, extract(doy from valid) as doy, 
- sum(case when sknt > 26 or gust > 26 then 1 else 0 end) as data
- from alldata where station = 'DSM' and sknt >= 0 
- and extract(minute from valid) in (50,51,52,53,54,55,56,57,58,59,0) GROUP by yr, doy) as foo
- GROUP by doy ORDER by doy ASC
+icursor.execute("""
+select extract(doy from valid) as doy, avg(c30) from daily where station = 'A130209' GROUP by doy ORDER by doy ASC
 """)
+soil = []
+for row in icursor:
+    soil.append( row[1] )
 
-import datetime
-data3 = numpy.zeros( (366,), 'f')
-data1 = numpy.zeros( (366,), 'f')
-for row in acursor:
-    data3[int(row[0])-1] = float(row[1]) / float(row[3]) * 100.0
-    data1[int(row[0])-1] = float(row[2]) / float(row[3]) * 100.0
+ccursor.execute("""
+SELECT high, low from climate where station = 'IA0200' ORDER by valid ASC
+""")
+highs = []
+lows = []
+for row in ccursor:
+    highs.append( row[0] )
+    lows.append( row[1] )
 
-import mx.DateTime
 import matplotlib.pyplot as plt
 import numpy as np
 fig = plt.figure()
@@ -70,33 +90,21 @@ while now < ets:
   xticklabels.append( now.strftime("%b") )
   now += interval
 
-smdata3 = smooth(data3, window='flat')
-smdata1 = smooth(data1, window='flat')
-print numpy.shape(smdata3)
-ax.plot( np.arange(1,len(smdata3)+1) - 0.3, smdata3, color='r', label='3+ Hours / Day')
-ax.plot( np.arange(1,len(smdata1)+1) - 0.3, smdata1, color='b', label='1+ Hours / Day')
-ax.set_ylim(0,35)
+print len(highs), len(lows)
+ax.plot( np.arange(1,367), highs, color='r', label='High Temp')
+ax.plot( np.arange(1,367), lows, color='b', label='Low Temp')
+ax.plot( np.arange(1,367), soil, color='g', label='4in Soil')
+ax2 = ax.twinx()
+ax2.plot( np.arange(1,367), daylight, color='k')
 ax.set_xticks(xticks)
-ax.set_xlim(min(xticks)-1, max(xticks)+1)
-ax.set_xticklabels(xticklabels)
-ax.set_xlim(0., len(data3)+1)
-ax.set_xlabel("* Data has a two week smoothing applied")
-ax.set_ylabel("Frequency [%]")
+ax.set_xlim(min(xticks)-1, max(xticks)+32)
+ax2.set_xticklabels(xticklabels)
+ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
+ax2.set_ylabel("Daylight Length [hours]")
 #ax.set_xlabel("1 Jan - 26 May 2011")
-ax.set_title("Des Moines Frequency of Wind Obs Over 30mph [1933-2011]")
+ax.set_title("Ames Daily Climatologies")
 ax.grid(True)
-ax.legend()
-"""
-sts = mx.DateTime.DateTime(2011,1,1)
-j = 0
-ax.text(10,175, 'Days over 100', size=16)
-for i in range(len(data)):
-    if data[i] >= 100:
-        ets = sts + mx.DateTime.RelativeDateTime(days=i)
-        txt = "%s. %s - %s" % (j+1, ets.strftime("%b %d"), data[i])
-        ax.text(10, 150-(j*24), txt, size=16)
-        j += 1
-"""
+ax.legend(loc=2)
 fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')

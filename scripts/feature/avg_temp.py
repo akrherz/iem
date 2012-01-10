@@ -1,27 +1,14 @@
 
-from pyIEM import iemdb, mesonet
-i = iemdb.iemdb()
-asos = i['asos']
+import mesonet, iemdb
+ASOS = iemdb.connect('asos', bypass=True)
+acursor = ASOS.cursor()
 
 import mx.DateTime
 
-sts = mx.DateTime.DateTime(2000,7,1)
-ets = mx.DateTime.DateTime(2000,8,18)
-hrs = (ets - sts).hours
 
-rs = asos.query("SELECT valid, tmpf, dwpf from alldata WHERE station = 'DSM' and tmpf > 30 and dwpf > 0 and extract(doy from valid) < extract(doy from 'TOMORROW'::date) and extract(month from valid) in (7,8) ORDER by valid ASC").dictresult()
-yrtot = 0
-ots = mx.DateTime.DateTime(1950,1,1)
-for i in range(len(rs)):
-  ts = mx.DateTime.strptime(rs[i]['valid'][:16], '%Y-%m-%d %H:%M')
-  if ots.year != ts.year:
-    print "%s,%.2f" % (ots.year, yrtot / hrs)
-    yrtot = 0
-  if ots.strftime("%Y%m%d%H") != ts.strftime("%Y%m%d%H"):
-    h = mesonet.heatidx(rs[i]['tmpf'], mesonet.relh(rs[i]['tmpf'], rs[i]['dwpf']))
-    #if h > rs[i]['tmpf']:
-    #  yrtot += (h - rs[i]['tmpf'])
-    yrtot += rs[i]['tmpf']
-  ots = ts
+acursor.execute("SELECT valid, tmpf, dwpf from alldata WHERE station = 'DSM' and extract(month from valid) = 12 and extract(hour from valid) in (14,15,16,17) and tmpf > -50 and dwpf > -50 ORDER by valid ASC")
+tot = 0
+for row in acursor:
+  tot += mesonet.relh(float(row[1]), float(row[2]))
 
-print "%s,%.2f" % (ots.year, yrtot / hrs)
+print "%.2f" % (tot / float(acursor.rowcount),)

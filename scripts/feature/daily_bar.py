@@ -1,66 +1,39 @@
 import iemdb 
 import numpy as np
 import datetime
+import mx.DateTime
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
-def smooth(x,window_len=14,window='hanning'):
-
-    if x.ndim != 1:
-        raise ValueError, "smooth only accepts 1 dimension arrays."
-
-    if x.size < window_len:
-        raise ValueError, "Input vector needs to be bigger than window size."
-
-
-    if window_len<3:
-        return x
-
-
-    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
-
-
-    s=np.r_[2*x[0]-x[window_len:1:-1],x,2*x[-1]-x[-1:-window_len:-1]]
-    #print(len(s))
-    if window == 'flat': #moving average
-        w=ones(window_len,'d')
-    else:
-        w=eval('np.'+window+'(window_len)')
-
-    y=np.convolve(w/w.sum(),s,mode='same')
-    return y[window_len-1:-window_len+1]
-
-
 ccursor.execute("""
- select extract(doy from day) as doy, 
-  sum(case when high - low > 29 then 1 else 0 end), 
-  sum(case when high - low > 34 then 1 else 0 end), 
-  sum(case when high - low > 19 then 1 else 0 end), 
-  count(*) from alldata_ia where station = 'IA0200' GROUP by doy
+ select foo2.sday, foo2.min, (foo2.min - foo3.avg) / foo3.stddev from 
+ (select sday, avg(high), stddev(high) from alldata_ia where 
+  station = 'IA0200' GROUP by sday) as foo3 JOIN (select sday, min(high) 
+  from (select sday, high, rank() OVER 
+  (partition by sday order by high DESC) from alldata_ia 
+  where station = 'IA0200') as foo where rank < 6 GROUP by sday) as foo2 
+  on (foo2.sday = foo3.sday)
 """)
 
-cnts = np.zeros( (366,) , 'f')
-cnts35 = np.zeros( (366,) , 'f')
-cnts20 = np.zeros( (366,) , 'f')
+p95 = np.zeros( (366,) , 'f')
+pdev = np.zeros( (366,) , 'f')
 for row in ccursor:
-  cnts[ int(row[0]) - 1 ] = row[1] / float(row[4]) * 100.0
-  cnts35[ int(row[0]) - 1 ] = row[2] / float(row[4]) * 100.0
-  cnts20[ int(row[0]) - 1 ] = row[3] / float(row[4]) * 100.0
+  ts = mx.DateTime.strptime("2000%s" % (row[0],), '%Y%m%d')
+  doy = int((ts - mx.DateTime.DateTime(2000,1,1)).days)
+  p95[ doy ] = row[1]
+  pdev[ doy ] = row[2]
 
 
 import matplotlib.pyplot as plt
 import mx.DateTime
 fig = plt.figure()
-ax = fig.add_subplot(111)
+ax = fig.add_subplot(211)
 
-ax.bar(np.arange(0,366) - 0.5, cnts20, ec='tan', fc='tan', label="20+ $^{\circ}\mathrm{F}$")
-ax.bar(np.arange(0,366) - 0.5, cnts, ec='b', fc='b', label="30+ $^{\circ}\mathrm{F}$")
-ax.bar(np.arange(0,366) - 0.5, cnts35, ec='r', fc='r', label='35+ $^{\circ}\mathrm{F}$')
+ax.bar(np.arange(0,366) - 0.5, p95, ec='tan', fc='tan')
 
 ax.grid(True)
-ax.set_ylabel("Observed Frequency [%]")
-ax.set_title("Ames Daily Frequency of Difference\nbetween High + Low Temp [1893-2011]")
+ax.set_ylabel("High Temperature $^{\circ}\mathrm{F}$")
+ax.set_title("Ames 95th Percentile High Temperature [1893-2011]")
 ax.set_xlim(-0.4,366)
 ax.set_ylim(0,100)
 xticks = []
@@ -72,12 +45,30 @@ for i in range(0,366):
     xticklabels.append( ts.strftime("%b") )
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
-#ax.annotate("Chances are\nnot good", xy=(306, pltdata[306]),  xycoords='data',
-#                xytext=(10, 30), textcoords='offset points',
-#                bbox=dict(boxstyle="round", fc="0.8"),
-#                arrowprops=dict(arrowstyle="->",
-#               connectionstyle="angle3,angleA=0,angleB=-90"))
-ax.legend(ncol=1,loc=2)
+
+ax.annotate("50s in December are like\n100 degrees in July", xy=(340, 50),  
+  xycoords='data',
+                xytext=(-210, -40), textcoords='offset points',
+                bbox=dict(boxstyle="round", fc="0.8"),
+                arrowprops=dict(arrowstyle="->",
+                connectionstyle="angle3,angleA=-90,angleB=0"))
+
+ax.annotate("", xy=(200, 90),
+  xycoords='data',
+                xytext=(0, -80), textcoords='offset points',
+                bbox=dict(boxstyle="round", fc="0.8"),
+                arrowprops=dict(arrowstyle="->",
+                connectionstyle="angle3,angleA=-90,angleB=0"))
+
+
+ax2 = fig.add_subplot(212)
+ax2.bar( np.arange(0,366) - 0.5, pdev, ec='skyblue', fc='skyblue')
+ax2.set_xlim(-0.4,366)
+ax2.set_xticks(xticks)
+ax2.set_xticklabels(xticklabels)
+ax2.set_xlim(-0.4,366)
+ax2.set_ylabel("Departure from Average [$\sigma$]")
+ax2.grid(True)
 
 fig.savefig('test.ps')
 import iemplot

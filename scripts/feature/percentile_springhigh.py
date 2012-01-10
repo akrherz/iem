@@ -1,72 +1,44 @@
 # Month percentile 
-
-import sys, os, random
-sys.path.append("../lib/")
+import iemdb, network
 import iemplot
+nt = network.Table("IACLIMATE")
+COOP = iemdb.connect("coop", bypass=True)
+ccursor = COOP.cursor()
+ccursor.execute("""
+ select foo2.station, max(foo2.min) as maxprev, min(foo.d2012) as thisyear, 
+ sum(case when foo.d2012 > foo2.min then 1 else 0 end), count(*) from 
 
-import mx.DateTime
-now = mx.DateTime.now()
+   (select station, extract(year from day + '3 months'::interval) as yr, 
+   min(low) from alldata_ia where month in (10,11,12,1)  
+   and day < '2011-09-01' and (sday > '0901' or sday < '0111') and station = 'IA2203'
+   GROUP by station, yr) as foo2, 
 
-from pyIEM import iemdb, stationTable
-st = stationTable.stationTable("/mesonet/TABLES/coopClimate.stns")
-i = iemdb.iemdb()
-coop = i['coop']
-iem = i['iem']
-mesosite = i['mesosite']
+   (select station, min(low) as d2012 from alldata_ia where day > '2011-09-01' 
+   GROUP  by station) as foo 
 
-xref = {}
-rs = mesosite.query("SELECT id, climate_site, x(geom) as lon, y(geom) as lat from stations WHERE network in ('IA_ASOS', 'AWOS')").dictresult()
-for i in range(len(rs)):
-  xref[ rs[i]['id'] ] = rs[i]
-
-
-# Extract normals
+ where foo.station = foo2.station GROUP by foo2.station
+""")
 lats = []
 lons = []
 vals = []
-rs = iem.query("""SELECT station, max(max_tmpf) as low from summary_2010
-     WHERE day > '2010-01-01' and network in ('IA_ASOS', 'AWOS') and
-     max_tmpf > 40 and station not in ('CKP') GROUP by station""").dictresult()
-for i in range(len(rs)):
-  stid = rs[i]['station']
-  lats.append( xref[ rs[i]['station'].upper() ]['lat'] )
-  lons.append( xref[ rs[i]['station'].upper() ]['lon'] )
-  ob = rs[i]['low']
-  cid = xref[ stid ]['climate_site']
-  # Find obs
-  rs2 = coop.query("""SELECT year, max(high) as highm from alldata where
-        stationid = '%s' and sday < '0329' GROUP by year
-        ORDER by highm ASC
-        """ % (cid.lower(),)
-       ).dictresult()
-  for j in range(len(rs2)):
-    if rs2[j]['highm'] > ob:
-      break
-  print "[%s] 2010 high: %s  rank: %s" % (stid, ob, j)
-  vals.append( (j+1) / float(len(rs2)) * 100.0 )
+for row in ccursor:
+    print row
+    if not nt.sts.has_key(row[0]):
+        continue
+    vals.append( float(row[3]) / float(row[4]) * 100.0 )
+    lats.append( nt.sts[row[0]]['lat'] )
+    lons.append( nt.sts[row[0]]['lon'] )
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "2010 Iowa Maximum Temperature Percentile",
- '_valid'             : "between 1 Jan - 29 Mar [100% Warmest]",
+ '_title'             : "2011-2012 Coldest Winter Temperature Percentile",
+ '_valid'             : "1 Nov 2011 - 9 Jan 2012, comparing 1893-2010 [100% Warmest]",
  'lbTitleString'      : "[%]",
  '_showvalues'        : True,
  '_format'            : '%.0f',
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
-fp = iemplot.simple_contour(lons, lats, vals, cfg)
-
-os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage %s.ps %s.png" % (fp,fp))
-if os.environ['USER'] == 'akrherz':
-  os.system("xv %s.png" % (fp,))
-  sys.exit()
-os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 320x210 -density 120 +repage tmp.ps tmp.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 lsr_snowfall_thumb.png bogus png' tmp.png")
-os.remove("tmp.png")
-os.remove("tmp.ps")
-
+tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
+iemplot.makefeature(tmpfp)
