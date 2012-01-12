@@ -65,8 +65,8 @@ def main():
     ets = eTS
 
     if dataVars[0] == "all":
-        queryCols = "tmpf, dwpf, relh, drct, sknt, p01m, alti, vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar"
-        outCols = ['tmpf','dwpf','relh', 'drct','sknt','p01m','alti','vsby', 'gust',
+        queryCols = "tmpf, dwpf, relh, drct, sknt, p01i, alti, vsby, gust, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar"
+        outCols = ['tmpf','dwpf','relh', 'drct','sknt','p01i','alti','vsby', 'gust',
           'skyc1', 'skyc2', 'skyc3', 'skyc4', 'skyl1', 'skyl2', 'skyl3', 'skyl4', 'metar']
     else:
         dataVars = tuple(dataVars)
