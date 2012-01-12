@@ -152,19 +152,22 @@ $lakes->set("status", MS_ON);
 $lakes->draw($img);
 
 /* Draw NEXRAD Layer */
-if (($ts + 300) < time()) {
- $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts);
+if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)){
+  $radarfp = "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif";
+  if (($ts + 300) < time()) {
+    $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts);
+  }
+  if (in_array("nexrad_tc", $layers)){
+    $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d.png", $ts);
+  }
+  if (is_file($radarfp)){
+    $radar = $map->getlayerbyname("nexrad_n0r");
+    $radar->set("status", MS_ON );
+    $radar->set("data", $radarfp);
+    $radar->draw($img);
+  }
 }
-if (in_array("nexrad_tc", $layers)){
- $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d.png", $ts);
-}
-if (defined("radarfp") && is_file($radarfp)){
-  $radar = $map->getlayerbyname("nexrad_n0r");
-  $radar->set("status", in_array("nexrad", $layers) || 
-                      in_array("nexrad_tc", $layers) );
-  $radar->set("data", $radarfp);
-  $radar->draw($img);
-}
+
 
 $evis = $map->getlayerbyname("east_vis_1km");
 $evis->set("status", in_array("east_vis", $layers) );
@@ -178,15 +181,21 @@ $evis->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/sat/GOES11_WES
 $evis->draw($img);
 $evis->close();
 
-/* Draw NEXRAD Layer */
-$n0q = $map->getlayerbyname("nexrad_n0q");
-$n0q->set("status", in_array("n0q", $layers) || 
-                      in_array("n0q_tc", $layers) );
-if (($ts + 300) < time()) {
- $n0q->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png", $radts) );
+if (in_array("n0q", $layers) || in_array("n0q_tc", $layers)){
+  $radarfp = "/home/ldm/data/gis/images/4326/USCOMP/n0q_0.png";
+  if (($ts + 300) < time()) {
+    $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png", $radts);
+  }
+  if (in_array("n0q_tc", $layers)){
+    $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0q_0z0z_%Y%m%d.png", $ts);
+  }
+  if (is_file($radarfp)){
+    $radar = $map->getlayerbyname("nexrad_n0q");
+    $radar->set("status", MS_ON );
+    $radar->set("data", $radarfp);
+    $radar->draw($img);
+  }
 }
-$n0q->draw($img);
-$n0q->close(); /* Prevent caching */
 
 $counties = $map->getlayerbyname("uscounties");
 $counties->set("status", in_array("uscounties", $layers) );
