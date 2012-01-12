@@ -115,6 +115,11 @@ def main():
                     sys.stdout.write("%.2f%s" % (val, rD))
                 else:
                     sys.stdout.write("M%s" % (rD,))
+            elif data1 == 'p01i':
+                if row['p01m'] >= 0:
+                    sys.stdout.write("%.2f%s" % (row['p01m'] / 25.4, rD))
+                else:
+                    sys.stdout.write("M%s" % (rD,))
             elif data1 == 'tmpc':
                 if row['tmpf'] is not None:
                     val = mesonet.f2c( row['tmpf'] )
