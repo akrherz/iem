@@ -7,7 +7,7 @@ EXTENT 200000 4450000 710000 4950000
 UNITS METERS
 IMAGECOLOR 140 144 90
 IMAGETYPE PNG24
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/stations.sym"
 
 
 #
@@ -43,24 +43,7 @@ OUTPUTFORMAT
   TRANSPARENT OFF
 END
 
-OUTPUTFORMAT
-  NAME jpeg
-  MIMETYPE "image/jpeg"
-  DRIVER "GD/JPEG"
-  IMAGEMODE RGB
-  FORMATOPTION "QUALITY=80"
-  TRANSPARENT OFF
-END
 
-SYMBOL
-  NAME 'fill45'
-  TYPE Ellipse
-  FILLED TRUE
-  POINTS
-   1 1
-  END
-  STYLE 1 5 END
-END
 
 
 LEGEND
@@ -174,7 +157,7 @@ LAYER
     STYLE
       COLOR  250 250 0
       SIZE 3
-      SYMBOL 'fill45'
+      SYMBOL 'circle'
     END
   END
   CLASS
