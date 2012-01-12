@@ -1,6 +1,8 @@
-#!/mesonet/python/bin/python
-
-# Produce a OA GDD Plot, dynamically!
+#!/usr/bin/python
+"""
+ Produce a OA GDD Plot, dynamically!
+$Id: $:
+"""
 import sys, os
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
 os.environ[ 'HOME' ] = '/tmp/'
@@ -9,11 +11,9 @@ import iemplot
 import cgi
 import datetime
 import network
-
-from pyIEM import iemdb
-i = iemdb.iemdb()
-coop = i['coop']
-mesosite = i['mesosite']
+import iemdb
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor()
 
 form = cgi.FieldStorage()
 if ("year1" in form and "year2" in form and 
@@ -49,24 +49,24 @@ st = network.Table("IACLIMATE")
 
 
 # Compute normal from the climate database
-sql = """SELECT stationid,
+sql = """SELECT station,
    sum(gddXX(%s, %s, high, low)) as gdd
-   from alldata WHERE year = %s and day >= '%s' and day < '%s'
-   GROUP by stationid""" % (baseV, maxV, sts.year, sts.strftime("%Y-%m-%d"),
+   from alldata_ia WHERE year = %s and day >= '%s' and day < '%s'
+   GROUP by station""" % (baseV, maxV, sts.year, sts.strftime("%Y-%m-%d"),
                             ets.strftime("%Y-%m-%d"))
 
 lats = []
 lons = []
 gdd50 = []
 valmask = []
-rs = coop.query(sql).dictresult()
-for i in range(len(rs)):
-  id = rs[i]['stationid'].upper()
+ccursor.execute(sql)
+for row in ccursor:
+  id = row[0]
   if not st.sts.has_key(id):
     continue
   lats.append( st.sts[id]['lat'] )
   lons.append( st.sts[id]['lon'] )
-  gdd50.append( rs[i]['gdd'] )
+  gdd50.append( row[1] )
   valmask.append( True )
 
 cfg = {
@@ -77,7 +77,8 @@ cfg = {
  '_valueMask'         : valmask,
  '_format'            : '%.0f',
  '_title'             : "Iowa %s thru %s GDD(base=%s,max=%s) Accumulation" % (
-                        sts.strftime("%Y: %d %B"), (ets - datetime.timedelta(days=1)).strftime("%d %B"),
+                        sts.strftime("%Y: %d %b"), 
+                        (ets - datetime.timedelta(days=1)).strftime("%d %b"),
                         baseV, maxV),
  'lbTitleString'      : "F",
 }

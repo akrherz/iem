@@ -1,4 +1,7 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/python
+"""
+$Id: $:
+"""
 
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
@@ -45,4 +48,5 @@ if form["network"].value in ('IA_RWIS'):
     database = 'rwis'
 
 import iemplot
-iemplot.windrose(form["station"].value, database=database,sts=sts, ets=ets, months=months, hours=hours)
+iemplot.windrose(form["station"].value, database=database,sts=sts, ets=ets, 
+                 months=months, hours=hours)

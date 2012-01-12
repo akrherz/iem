@@ -11,8 +11,8 @@ iemaccess = pg.connect('iem', 'iemdb', user='nobody')
 asos = pg.connect('asos', 'iemdb', user='nobody')
 
 ADJUSTMENT = 0
-s = mx.DateTime.DateTime(2011,9,18)
-e = mx.DateTime.DateTime(2011,10,17)
+s = mx.DateTime.DateTime(2011,11,18)
+e = mx.DateTime.DateTime(2011,12,17)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 def averageTemp(db, hi="high", lo="low"):
@@ -54,16 +54,16 @@ def main():
         'avg_high': 'M', 'avg_low': 'M'}
     now += interval
 
-  rs = iemaccess.query("SELECT day, max_tmpf, min_tmpf from summary_%s \
-    WHERE station = 'SUX'" % (now.year -1, ) ).dictresult()
+  rs = iemaccess.query("""SELECT day, max_tmpf, min_tmpf from summary_%s s JOIN stations t
+    ON (t.iemid = s.iemid) WHERE t.id = 'SUX'""" % (now.year -1, ) ).dictresult()
 
   for i in range(len(rs)):
     if (db.has_key( rs[i]['day'] )):
       db[ rs[i]['day'] ]['high'] = rs[i]['max_tmpf'] + ADJUSTMENT
       db[ rs[i]['day'] ]['low'] = rs[i]['min_tmpf']  + ADJUSTMENT
 
-  rs = iemaccess.query("SELECT day, max_tmpf, min_tmpf from summary_%s \
-    WHERE station = 'SUX'" % (now.year, ) ).dictresult()
+  rs = iemaccess.query("""SELECT day, max_tmpf, min_tmpf from summary_%s s JOIN stations t
+    ON (t.iemid = s.iemid) WHERE t.id = 'SUX'""" % (now.year, ) ).dictresult()
 
   for i in range(len(rs)):
     if (db.has_key( rs[i]['day'] )):

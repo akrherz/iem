@@ -16,7 +16,6 @@ os.environ[ 'USER' ] = 'nobody'
 import cgi
 import matplotlib
 matplotlib.use( 'Agg' )
-import matplotlib
 matplotlib.rcParams['font.sans-serif'] = 'Arial'
 matplotlib.rcParams['font.family'] = 'sans-serif'
 from matplotlib import pyplot as plt
@@ -173,12 +172,13 @@ def yearly_plot(ax, cfg):
     elif cfg['plot_type'] == 'rain_days':
         cfg['st'] = cfg['station'][:2]
         ccursor.execute("""
-select year as yr, avg(cnt) 
-from (select station, year, sum(case when precip >= 1.25 then 1 else 0 end) as cnt from 
-alldata_%(st)s WHERE 
-station in (select distinct station from alldata_%(st)s where year = %(first_year)s 
-and precip > 0 and year >= %(first_year)s and  year <= %(last_year)s) 
-GROUP by station, year) as foo GROUP by yr ORDER by yr ASC
+ select year as yr, avg(cnt) 
+ from (select station, year, sum(case when precip >= 1.25 then 1 else 0 end) as cnt from 
+ alldata_%(st)s WHERE 
+ station in (select distinct station from alldata_%(st)s where year = %(first_year)s 
+ and precip > 0 and year >= %(first_year)s and  year <= %(last_year)s) and
+ station in (select id from stations where network = '%(st)sCLIMATE' and climate_site = '%(station)s')
+ GROUP by station, year) as foo GROUP by yr ORDER by yr ASC
         """ % cfg )
     else:
         ccursor.execute("""
@@ -229,6 +229,28 @@ GROUP by station, year) as foo GROUP by yr ORDER by yr ASC
         #ypos = max(ydata) - (max(ydata) - min(ydata)) * 0.15
         #ax.text( cfg['first_year'], ypos, '2000 %.2f' % (numpy.average(y00),), color='#CC6633')
 
+def dailyc_plot(ax, cfg):
+    """
+    Plot daily climate
+    """
+    COOP = iemdb.connect('coop', bypass=True)
+    ccursor = COOP.cursor()
+    chighs = []
+    clows = []
+    ccursor.execute("""
+    SELECT high, low from climate51 WHERE station = 'IA0200' ORDER by valid ASC
+    """)
+    for row in ccursor:
+        chighs.append( float(row[0]) )
+        clows.append( float(row[1]) )
+    chighs = numpy.array( chighs )
+    clows = numpy.array( clows )
+
+    ax.bar( numpy.arange(len(chighs)), chighs-clows, bottom=clows, width=1.0, ec='#ff0000',
+            fc='#ff0000')
+    
+    COOP.close()
+
 def process_cgi(form):
     """
     Handle a CGI request
@@ -245,7 +267,10 @@ def process_cgi(form):
     # Transparent background for the plot area
     ax.patch.set_alpha(1.0)
 
-    yearly_plot(ax, cfg)
+    if cfg.get('plot_type') == 'dailyc':
+        dailyc_plot(ax, cfg)
+    else:
+        yearly_plot(ax, cfg)
 
     format = form.getvalue('format', 'png')
     if format in ['eps',]:
