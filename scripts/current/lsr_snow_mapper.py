@@ -17,9 +17,9 @@ lats = []
 lons = []
 pcursor.execute("""SELECT state, 
       max(magnitude) as val, x(geom) as lon, y(geom) as lat
-      from lsrs_2011 WHERE type in ('S') and magnitude >= 0 and 
+      from lsrs_%s WHERE type in ('S') and magnitude >= 0 and 
       valid > now() - '12 hours'::interval
-      GROUP by state, lon, lat""")
+      GROUP by state, lon, lat""" % (now.year,))
 for row in pcursor:
   vals.append( row[1] )
   lats.append( row[3] )
