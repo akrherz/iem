@@ -1,0 +1,59 @@
+MAP
+#
+# Start of map file
+#
+NAME "RIDGE"
+STATUS ON
+SIZE 800 600
+EXTENT -179 1 -40 89
+UNITS DD
+SHAPEPATH "/mesonet/data/gis/"
+IMAGECOLOR -1 -1 -1
+
+PROJECTION
+   "init=epsg:4326"
+END
+
+WEB
+  MINSCALE 90000
+  MAXSCALE 4650000
+  IMAGEPATH "/var/webtmp/"
+  IMAGEURL "/tmp/"
+  LOG "/var/webtmp/w0.log"
+  METADATA
+   "wms_title" "IEM WMS RIDGE Service"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?"
+   "wms_srs" "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
+   "wms_abstract" "IEM generated RIDGE imagery."
+   "wms_keywords" "NEXRAD,N0Q"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+   "wms_enable_request" "*"
+  END
+END
+
+# raster layer
+LAYER
+  NAME "single"
+  TYPE RASTER
+  STATUS ON
+  DEBUG ON
+  DUMP TRUE
+  PROJECTION
+    "init=epsg:4326"
+  END
+  VALIDATION
+    prod                   "^[A-Z0-9]{3}$"
+    sector                 "^[A-Z]{3}$"
+  END
+  METADATA
+    "wms_title" "NEXRAD BASE REFLECT"
+    "wms_srs"   "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
+    "wms_extent" "-171 15 -66 70"
+  END
+  OFFSITE 255 255 255
+  DATA "/home/ldm/data/gis/images/4326/ridge/%sector%/%prod%_0.png"
+END
+
+END

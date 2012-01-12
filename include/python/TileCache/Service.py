@@ -25,10 +25,19 @@ class Request (object):
     def __init__ (self, service):
         self.service = service
     def getLayer(self, layername):    
-        try:
-            return self.service.layers[layername]
-        except:
-            raise TileCacheException("The requested layer (%s) does not exist. Available layers are: \n * %s" % (layername, "\n * ".join(self.service.layers.keys()))) 
+        #try:
+        if layername.find("::") > 0:
+            (sector,prod,tstring) = (layername.split("::")[1]).split('-')
+            mylayername = 'ridge'
+            layer = self.service.layers[mylayername]
+            layer.name = layername
+            layer.url = "%ssector=%s&prod=%s&tstring=%s&" % (layer.metadata['baseurl'],
+                sector, prod, tstring)
+        else:
+            layer = self.service.layers[layername]
+        return layer
+        #except:
+        #    raise TileCacheException("The requested layer (%s) does not exist. Available layers are: \n * %s" % (layername, "\n * ".join(self.service.layers.keys()))) 
 
     
 def import_module(name):
