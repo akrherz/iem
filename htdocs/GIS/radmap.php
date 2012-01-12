@@ -430,6 +430,7 @@ $bar640t->draw($img);
 $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
 $point->setXY(80, 12);
+if (isset($_REQUEST["tz"])) { date_default_timezone_set($_REQUEST["tz"]); }
 $d = strftime("%d %B %Y %-2I:%M %p %Z" ,  $ts); 
 if (isset($_GET["title"])){
   $title = substr($_GET["title"],0,50);
@@ -452,7 +453,6 @@ $point->draw($map, $tlayer, $img, 0, $title);
 
 $point = ms_newpointobj();
 $point->setXY(80, 29);
-if (isset($_REQUEST["tz"])) { putenv("TZ=". substr($_REQUEST["tz"],0,10)); }
 $point->draw($map, $tlayer, $img, 1,"$d");
 
 $map->drawLabelCache($img);
