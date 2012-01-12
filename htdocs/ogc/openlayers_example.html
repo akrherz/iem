@@ -1,0 +1,91 @@
+<html>
+<head>
+  <title>IEM TMS + OpenLayers Example</title>
+  <script src="http://openlayers.org/api/OpenLayers.js"></script> 
+  <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script> 
+    
+<script type="text/javascript">
+function init(){
+    var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
+        restrictedExtent = maxExtent.clone(),
+        maxResolution = 156543.0339;
+    
+    var options = {
+        projection: new OpenLayers.Projection("EPSG:900913"),
+        displayProjection: new OpenLayers.Projection("EPSG:4326"),
+        units: "m",
+        numZoomLevels: 18,
+        maxResolution: maxResolution,
+        maxExtent: maxExtent,
+        restrictedExtent: restrictedExtent
+    };
+    map = new OpenLayers.Map('map', options);
+
+    // create Google Mercator layers
+    var gmap = new OpenLayers.Layer.Google(
+        "Google Streets",
+        {sphericalMercator: true}
+    );
+
+
+    function get_my_url (bounds) {
+            var res = this.map.getResolution();
+            var x = Math.round ((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
+            var y = Math.round ((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
+            var z = this.map.getZoom();
+
+            var path = z + "/" + x + "/" + y + "." + this.type +"?"+ parseInt(Math.random()*9999);
+            var url = this.url;
+            if (url instanceof Array) {
+                url = this.selectUrl(path, url);
+            }
+            return url + this.service +"/"+ this.layername +"/"+ path;
+
+    }
+    var n0q = new OpenLayers.Layer.TMS(
+                'NEXRAD Base Reflectivity',
+                'http://mesonet.agron.iastate.edu/cache/tile.py/',
+                // Find more layer names here: http://mesonet.agron.iastate.edu/ogc/
+                {layername      : 'nexrad-n0q-900913',
+                service         : '1.0.0',
+                type            : 'png',
+                visibility      : true,
+                getURL          : get_my_url,
+                isBaseLayer     : false}
+    );
+    var irsat = new OpenLayers.Layer.TMS(
+            'GOES 13 IR Satellite',
+            'http://mesonet.agron.iastate.edu/cache/tile.py/',
+            {layername      : 'goes13-ir-4km-900913',
+            service         : '1.0.0',
+            type            : 'png',
+            visibility      : false,
+            getURL          : get_my_url,
+            isBaseLayer     : false}
+    );
+    var vissat = new OpenLayers.Layer.TMS(
+            'GOES 13 Vis Satellite',
+            'http://mesonet.agron.iastate.edu/cache/tile.py/',
+            {layername      : 'goes13-vis-1km-900913',
+            service         : '1.0.0',
+            type            : 'png',
+            visibility      : false,
+            getURL          : get_my_url,
+            isBaseLayer     : false}
+    );
+    
+    map.addLayers([gmap, irsat, vissat, n0q]);
+    var ls = new OpenLayers.Control.LayerSwitcher();
+    map.addControl(ls);
+    ls.maximizeControl();
+    map.addControl(new OpenLayers.Control.MousePosition());
+    if (!map.getCenter()){ map.zoomToMaxExtent(); }
+}
+</script>
+</head>
+<body onload="init()">
+	
+<div style="width:100%; height:100%" id="map"></div>
+	
+</body>
+</html>
