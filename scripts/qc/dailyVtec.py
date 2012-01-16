@@ -5,32 +5,9 @@ i = iemdb.iemdb()
 postgis = i['postgis']
 
 tests = [
- 'LSX.TO.11', 'CAE.TO.2', 'GSP.TO.5', 'PAH.SV.10', 'JKL.TO.4', 'LWX.TO.3',
- 'RNK.TO.2', 'IND.TO.7', 'IND.TO.8', 'LMK.TO.12', 'LMK.TO.13', 'LMK.TO.14',
- 'PAH.TO.17', 'PAH.TO.18', 'PAH.TO.19', 'PAH.TO.20', 'PAH.TO.21',
- 'MEG.TO.20', 'ICT.TO.6', 'OAX.TO.8', 'DMX.TO.16', 'FSD.TO.2', 'SGF.TO.10',
- 'LSX.TO.16', 'ILX.TO.2', 'RLX.TO.2', 'RLX.TO.3', 'MPX.TO.5', 'MPX.TO.6',
- 'MPX.TO.7', 'FSD.TO.16', 'FSD.TO.17', 'FSD.TO.18', 'ARX.TO.9', 'ARX.TO.10',
- 'ARX.TO.11', 'GRB.TO.17', 'GRB.TO.18', 'GRB.TO.19', 'DLH.TO.2', 'DLH.TO.3',
- 'MKX.TO.2', 'MKX.TO.3', 'MEG.SV.449', 'MEG.SV.450', 'MEG.SV.451','MEG.SV.452',
- 'MEG.SV.453','MEG.SV.454','MEG.SV.455','MEG.SV.456','MEG.SV.457','MEG.SV.458',
- 'MEG.SV.459','MEG.SV.460','MEG.SV.461','CAE.SV.113', 'LUB.SV.56', 'MLB.SV.72',
- 'LBF.SV.186','MQT.MA.52','PIH.SV.29','PIH.SV.30', 'DDC.TO.1', 'ARX.TO.1', 'ARX.FF.1',
- 'CYS.TO.1', 'CYS.TO.2', 'DVN.TO.1', 'DVN.TO.3', 'DVN.TO.2', 'OAX.TO.1', 'GLD.TO.1',
- 'GLD.TO.2','UNR.TO.1','UNR.TO.2', 'RIW.TO.1', 'KEY.MA.150', 'GID.TO.1', 'GID.TO.2',
- 'CHS.TO.1','ABR.TO.1','ABR.TO.2','ABR.TO.3', 'IWX.TO.1', 'IWX.TO.2', 'BYZ.TO.1',
- 'TOP.TO.1', 'LOT.TO.1', 'LOT.TO.2', 'LOT.TO.3', 'FGF.TO.1', 'FGF.TO.2', 'FGF.TO.3',
- 'AKQ.TO.1','BIS.TO.1', 'LBF.TO.1', 'LWX.FF.85', 'LWX.FF.86', 'LWX.FF.87', 'LWX.SV.327',
- 'LWX.SV.328', 'TBW.MA.95', 'JAX.SV.227', 'GUM.MA.2','BTV.SV.103', 'SLC.TO.1'
 ]
-for i in range(2,69):
-    tests.append('VEF.SV.%s' % (i,))
-for i in range(21,30):
-    tests.append('OAX.FF.%s' % (i,))
-for i in range(228,249):
-    tests.append('OAX.SV.%s' % (i,))
-for i in range(27,78):
-    tests.append('OAX.TO.%s' % (i,))
+#for i in range(27,78):
+#    tests.append('OAX.TO.%s' % (i,))
 sql = "SELECT wfo, min(eventid), max(eventid), phenomena from warnings_%s \
        WHERE phenomena IN ('MA','FF','SV','TO') and significance = 'W' \
        GROUP by wfo, phenomena" % (mx.DateTime.now().year, )
