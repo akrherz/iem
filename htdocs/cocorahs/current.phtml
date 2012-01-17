@@ -107,25 +107,25 @@ $cols = Array("ts" => "Valid", "county" => "County",
 echo "<p>Sorted by: ". $cols[$sortcol] ;
 
 
- $baseurl = "current.phtml?network=$network&sortcol=";
+ $baseurl2 = "current.phtml?network=$network&sortcol=";
 ?> . The number of observations missing for this month is shown in parenthesis.
 <form name="st" action="/my/current.phtml" method="GET">
 <table style="width: 100%; font-size: 10pt;" class="ruler" border="1">
 <thead>
 <tr>
   <th rowspan=2>Add:</th>
-  <th rowspan=2><a href="<?php echo $baseurl; ?>sid">SiteID:</a></th>
-  <th rowspan=2><a href="<?php echo $baseurl; ?>sname">Station Name:</a></th>
-  <th rowspan=2><a href="<?php echo $baseurl; ?>county">County:</a></th>
-  <th rowspan=2><a href="<?php echo $baseurl; ?>ts">Valid:</a></th>
+  <th rowspan=2><a href="<?php echo $baseurl2; ?>sid">SiteID:</a></th>
+  <th rowspan=2><a href="<?php echo $baseurl2; ?>sname">Station Name:</a></th>
+  <th rowspan=2><a href="<?php echo $baseurl2; ?>county">County:</a></th>
+  <th rowspan=2><a href="<?php echo $baseurl2; ?>ts">Valid:</a></th>
   <th colspan=5>Hydro</th></tr>
 
 <tr>
-  <th><a href="<?php echo $baseurl; ?>pday">24hour Rain</a></th>
-  <th><a href="<?php echo $baseurl; ?>pmonth">Month Rain</a></th>
-  <th><a href="<?php echo $baseurl; ?>snow">Snowfall</a></th>
-  <th><a href="<?php echo $baseurl; ?>ratio">Ratio</a></th>
-  <th><a href="<?php echo $baseurl; ?>snowd">Snow Depth</a></th>
+  <th><a href="<?php echo $baseurl2; ?>pday">24hour Rain</a></th>
+  <th><a href="<?php echo $baseurl2; ?>pmonth">Month Rain</a></th>
+  <th><a href="<?php echo $baseurl2; ?>snow">Snowfall</a></th>
+  <th><a href="<?php echo $baseurl2; ?>ratio">Ratio</a></th>
+  <th><a href="<?php echo $baseurl2; ?>snowd">Snow Depth</a></th>
 </tr></thead>
 <tbody>
 <?php

@@ -17,7 +17,7 @@ $products = Array(
 		"name" => "NEXRAD 1 Hour Precip")
 );
 
-$baseurl = 'http://mesonet.agron.iastate.edu/archive/data/';
+$baseurl2 = 'http://mesonet.agron.iastate.edu/archive/data/';
 $files = "";
 $hrefs = "";
 $loopendts = time();
@@ -29,7 +29,7 @@ for($i=$q; $i >= 0; $i--)
 {
 	$ts = $loopendts - ($products[$prod]["tint"] * $i);
 	$gts = strtotime( gmdate("Y-m-d H:i", $ts) );
-	$u = $baseurl . strftime("%Y/%m/%d/". $products[$prod]["aformat"], $gts);
+	$u = $baseurl2 . strftime("%Y/%m/%d/". $products[$prod]["aformat"], $gts);
 	$hrefs .= "<br><img src=\"$u\">";
 	$files .= $u .","; 
 }
