@@ -2,7 +2,6 @@
 include("setup.php");
 $THISPAGE="iem-sites";
  $TITLE = "IEM | Site Location";
- include("../../config/settings.inc.php");
  include("$rootpath/include/header.php"); 
  include("$rootpath/include/mlib.php");
  $current = "loc"; include("sidebar.php"); 
