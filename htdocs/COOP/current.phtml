@@ -1,4 +1,7 @@
 <?php 
+/*
+ * NWS COOP currents lister
+ */
 include("../../config/settings.inc.php");
 define("IEM_APPID", 41);
  include("$rootpath/include/network.php");
@@ -30,8 +33,6 @@ define("IEM_APPID", 41);
 	</script>';
  $THISPAGE = "current-sort";
 include("$rootpath/include/header.php"); ?>
-<div class="text">
-<a href="/COOP/">NWS COOP Network</a> &nbsp; <b> > </b> &nbsp; Current Sortables Application
 <?php
 
  $db = Array();
@@ -154,7 +155,10 @@ Option 2: <strong>View by WFO:</strong> <?php echo wfoSelect($wfo); ?>
 </form>
 
 <?php
-echo "<p>Sorted by: <strong>". $cols[$sortcol] ."</strong>. Times are presented in the local time of the site.";
+echo "<p>Sorted by: <strong>". $cols[$sortcol] ."</strong>. 
+Times are presented in the local time of the site. Click on the identifier to
+get all daily observations for the site.  Click on the site name to get more
+information on the site.";
  
 ?>
 <form name="st" action="/my/current.phtml" method="GET">
@@ -195,13 +199,16 @@ echo "<p>Sorted by: <strong>". $cols[$sortcol] ."</strong>. Times are presented 
  	if ($oddrow) $s .= ' bgcolor="#EEEEEE"';
  	$s .= ">";
 
+ 	$sitesurl = sprintf("%s/sites/site.php?station=%s&network=%s",
+ 		BASEURL, $dict["sid"], $dict["network"]);
+ 	
  	$s .= "<th><input type=\"checkbox\" name=\"st[]\" value=\"". $dict["sid"] ."\" /></th>";
  	$s .= "<td><a href=\"cat.phtml?station=". $dict["sid"] ."&network=". $dict["network"] . "\">". $dict['sid'] ."</a></td>";
-    $s .= "<td>". $dict["sname"] .", ". $dict["state"] ."</td>";
+ 	$s .= "<td><a href=\"$sitesurl\">". $dict["sname"] .", ". $dict["state"] ."</a></td>";
     $s .= "<td>". $dict["county"] ."</td>";
  	
-    $bgcolor = (date("Ymd") != date("Ymd", $dict["ts"])) ? '#F00': '#FFF';
-    $fmt = (date("Ymd") != date("Ymd", $dict["ts"])) ? '%d %b %I:%M %p': '%I:%M %p';
+    $bgcolor = (date("Ymd") != date("Ymd", $dict["ts"])) ? '#F00': 'inherit';
+    $fmt = (date("Ymd") != date("Ymd", $dict["ts"])) ? '%d %b %Y %I:%M %p': '%I:%M %p';
     $s .= "<td style=\"background: $bgcolor;\">". strftime($fmt, $dict["lts"]) ."</td>";
     
     $s .= sprintf("<td>%s</td><td><span style=\"color: #F00;\">%s</span></td>
@@ -249,7 +256,7 @@ echo "<p>Sorted by: <strong>". $cols[$sortcol] ."</strong>. Times are presented 
 </table>
 <input type="submit" value="Add to Favorites">
 </form>
-</div>
+
 
 <?php include("$rootpath/include/footer.php");
 ?>
