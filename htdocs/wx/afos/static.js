@@ -37,7 +37,8 @@ Ext.onReady(function(){
 Ext.ux.Printer.PanelRenderer = Ext.extend(Ext.ux.Printer.BaseRenderer, {
 
  /**
-  * Generates the HTML fragment that will be rendered inside the <html> element of the printing window
+  * Generates the HTML fragment that will be rendered inside the <html> 
+  * element of the printing window
   */
  generateBody: function(panel) {
    return String.format("<div class='x-panel-print'>{0}</div>", panel.body.dom.innerHTML);
@@ -72,10 +73,17 @@ var refreshAction = new Ext.Action({
   handler: function() {
     var id = tabs.getActiveTab().getId();
     var tokens= id.split("-");
+    var uri;
+    if (tokens.length == 2){
+    	uri = 'pil='+ tokens[0] +'&cnt='+ tokens[1];
+    }
+    if (tokens.length == 3){
+    	uri = 'pil='+ tokens[0] +'&cnt='+ tokens[1] +'&center='+ tokens[2];
+    }
     tabs.getActiveTab().getUpdater().update({
-          url: 'retreive.php', 
-         params: 'pil='+ tokens[0] +'&cnt='+ tokens[1],
-         discardUrl:false
+          url       : 'retreive.php', 
+         params     : uri,
+         discardUrl : false
 }); 
   }
 });
@@ -87,9 +95,9 @@ var saveConfig = function() {
       n = n +","+ q.getId();
     }
     cp.set("afospils", n);
-}
+};
 
-var addTab = function(id, cnt, sdate, edate) {
+var addTab = function(id, center, cnt, sdate, edate) {
 	if (!sdate){
 		sdate = new Date('12/31/2008');
 	} 
@@ -100,13 +108,20 @@ var addTab = function(id, cnt, sdate, edate) {
     tid = tid.toUpperCase();
     var a = tabs.find("id", tid);
     if (a.length > 0){ tabs.setActiveTab(tid); return; }
+    var uri = 'pil='+id+'&cnt='+cnt+'&sdate='+sdate.format('Y-m-d')+'&edate='+ edate.format('Y-m-d');
+    var title = id;
+    if (center != null){
+    	uri = uri +"&center="+center;
+    	title = title +"-"+ center;
+    	tid = tid +"-"+ center;
+    }
     tabs.add({
-        id: tid,
-        title: id,
-        closable:true,
-        autoScroll:true,
-        autoLoad: {url: 'retreive.php', 
-                   params: 'pil='+id+'&cnt='+cnt+'&sdate='+sdate.format('Y-m-d')+'&edate='+ edate.format('Y-m-d'),
+        id         : tid,
+        title      : title,
+        closable   : true,
+        autoScroll : true,
+        autoLoad   : {url: 'retreive.php', 
+                   params: uri,
                    discardUrl:false},
         tbar: [refreshAction,
         {
@@ -121,12 +136,12 @@ var addTab = function(id, cnt, sdate, edate) {
         saveConfig();
      });
     saveConfig();
-}
+};
 
 tp.addListener('click', function(node, e){
   if(node.isLeaf()){
      e.stopEvent();
-     addTab(node.id, 1, null, null);
+     addTab(node.id, null, 1, null, null);
   }
 });
 
@@ -155,6 +170,12 @@ tp.addListener('click', function(node, e){
                    allowBlank:false,
                    width: 150,
                    emptyText:'(Example) AFDDMX'
+                },{
+                    fieldLabel : 'Center:',
+                    name       : 'center',
+                    allowBlank : true,
+                    width      : 150,
+                    emptyText  : '(Optional)'
                 }, new Ext.form.NumberField({
                    allowBlank:false,
                    maxValue:99,
@@ -189,6 +210,7 @@ tp.addListener('click', function(node, e){
                  text:'Add',
                  handler: function() {
                     var pil = myform.getForm().findField('pil').getRawValue();
+                    var center = myform.getForm().findField('center').getRawValue();
                     var cnt = myform.getForm().findField('sz').getRawValue();
                     var sdate = myform.getForm().findField('sdate').getValue();
                     var edate = myform.getForm().findField('edate').getValue();
@@ -196,7 +218,7 @@ tp.addListener('click', function(node, e){
                       Ext.MessageBox.alert('Error', 'PIL or Entries Invalid');
                       return;
                     }
-                   addTab(pil, cnt, sdate, edate);
+                   addTab(pil, center, cnt, sdate, edate);
                  } // End of handler
              }]
   });
@@ -211,7 +233,7 @@ tp.addListener('click', function(node, e){
            var afos = myform2.getForm().findField('afos').getValue();
            var cnt = myform2.getForm().findField('sz').getRawValue();
            var pil = afos+wfo;
-           addTab(pil, cnt, null, null);
+           addTab(pil, null, cnt, null, null);
           } // End of handler
      }],
      items: [
@@ -293,10 +315,14 @@ tp.addListener('click', function(node, e){
 
 var a = cp.get("afospils", "");
 var ar = a.split(",");
-for (var i=0; i < ar.length; i++)
-{
+for (var i=0; i < ar.length; i++){
   if (ar[i] == ""){ continue; }
-  var tokens= ar[i].split("-");
-  addTab( tokens[0], tokens[1], null, null);
+  var tokens = ar[i].split("-");
+  if (tokens.length == 2){
+    addTab( tokens[0], null, tokens[1], null, null);
+  }
+  else if (tokens.length == 3){
+	    addTab( tokens[0], tokens[2], tokens[1], null, null);
+  }
 }
     });
