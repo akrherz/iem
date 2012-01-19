@@ -1,13 +1,14 @@
 <?php
 /* AJAX AFOS Retreiver */
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 59);
 
 $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css"/>
 <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/ext-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
 <script type="text/javascript" src="Printer-all.js"></script>
-<script type="text/javascript" src="static.js?v=4"></script>';
+<script type="text/javascript" src="static.js?v=5"></script>';
 $TITLE = "IEM NWS Text Product Finder";
 $NOCONTENT = 1;
 $THISPAGE ="current-afos";
@@ -15,6 +16,11 @@ include("$rootpath/include/header.php");
 ?>
 <div id="help">
 <h3>IEM NWS Text Product Finder</h3>
+
+<p>Update 19 Jan 2012: Added the ability to limit a AFOS PIL by the issuing
+center ID (4 character).  For example, the AFOS pil RWRTX is issued by a 
+number of centers in Texas.  To only get RWRTX from Fort Worth, enter KFWD
+for the center.
 
 <br />&nbsp;
 <p>If you don't like this app, <a href="old.phtml">here is the old one</a>.</p>

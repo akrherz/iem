@@ -6,6 +6,7 @@ $conn = iemdb('afos');
 
 $pil = isset($_REQUEST["pil"]) ? strtoupper($_REQUEST["pil"]) : 'AFDDMX';
 $cnt = isset($_REQUEST["cnt"]) ? intval($_REQUEST["cnt"]): 1;
+$center = isset($_REQUEST["center"]) ? substr($_REQUEST["center"],0,4): "";
 $sdate = isset($_REQUEST["sdate"]) ? strtotime($_REQUEST["sdate"]) : mktime(0,0,0,12, 31,2009);
 $edate = isset($_REQUEST["edate"]) ? strtotime($_REQUEST["edate"]) : time();
 
@@ -20,16 +21,20 @@ if (intval(date("m")) > 6){
 } else {
 	$table .= "0106";
 }
+$sourcelimit = "";
+if ($center != ""){
+	$sourcelimit = " and source = '$center' ";
+}
 /* Okay, lets try the local table first */
 $rs = pg_prepare($conn, "LSELECT", "SELECT * from $table WHERE pil = $1
-						and entered BETWEEN $2 and $3
+						and entered BETWEEN $2 and $3 $sourcelimit
                          ORDER by entered DESC LIMIT $4");
 $rs = pg_execute($conn, "LSELECT", Array($pil, date('Y-m-d H:i' , $sdate), 
 				date('Y-m-d H:i' , $edate), $cnt));
 if (pg_num_rows($rs) != $cnt){
 	/* Our optimization failed, shucks */
 	$rs = pg_prepare($conn, "SELECT", "SELECT * from products WHERE pil = $1
-						and entered BETWEEN $2 and $3
+						and entered BETWEEN $2 and $3 $sourcelimit
                          ORDER by entered DESC LIMIT $4");
 
 	$rs = pg_execute($conn, "SELECT", Array($pil,  date('Y-m-d H:i' , $sdate), 
