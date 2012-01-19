@@ -231,6 +231,9 @@ class Ob(object):
        skyc2 = %(skyc2)s, skyl2 = %(skyl2)s, 
        skyc3 = %(skyc3)s, skyl3 = %(skyl3)s, 
        skyc4 = %(skyc4)s, skyl4 = %(skyl4)s,
+       p03i = %(p03i)s, p06i = %(p06i)s, p24i = %(p24i)s,
+       max_tmpf_6hr = %(max_tmpf_6hr)s, min_tmpf_6hr = %(min_tmpf_6hr)s,
+       max_tmpf_24hr = %(max_tmpf_24hr)s, min_tmpf_24hr = %(min_tmpf_24hr)s,
        valid = '%(valid)s', pcounter = %(pcounter)s, discharge = %(discharge)s ,
        raw = (CASE WHEN length(raw) > length(%(raw)s) and valid = '%(valid)s'
           THEN raw ELSE %(raw)s END)
@@ -246,6 +249,7 @@ class Ob(object):
        c1smv, c2smv, c3smv, c4smv, c5smv, vsby, 
        c1tmpf, c2tmpf, c3tmpf, c4tmpf, c5tmpf, 
        gust, raw, alti, rstage, ozone, co2, valid, 
+       p03i, p06i, p24i, max_tmpf_6hr, min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr,
        skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, pcounter, discharge) VALUES 
         ((SELECT iemid from stations where id = %(station)s and network = %(network)s), 
         %(tmpf)s, %(dwpf)s, 
@@ -261,7 +265,10 @@ class Ob(object):
          %(c4tmpf)s,%(c5tmpf)s, 
          %(gust)s,%(raw)s,%(alti)s, 
          %(rstage)s, %(ozone)s,%(co2)s, 
-         '%(valid)s', %(skyc1)s, %(skyc2)s, %(skyc3)s, %(skyc4)s,
+         '%(valid)s', 
+         %(p03i)s, %(p06i)s, %(p24i)s,
+         %(max_tmpf_6hr)s, %(min_tmpf_6hr)s, %(max_tmpf_24hr)s, %(min_tmpf_24hr)s,
+         %(skyc1)s, %(skyc2)s, %(skyc3)s, %(skyc4)s,
                    %(skyl1)s, %(skyl2)s, %(skyl3)s, %(skyl4)s, 
                    %(pcounter)s, %(discharge)s)  """ % self.data
         self.execQuery(sql, db, dbpool)
