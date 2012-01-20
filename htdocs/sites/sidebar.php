@@ -43,6 +43,14 @@ if (preg_match('/ASOS|AWOS/', $network) > 0){
 ?>
 <br clear="all" />
 <form method="GET" name="automatic">
+<?php 
+if (isset($savevars)){
+	while (list($k,$v)=each($savevars)){
+		echo sprintf("<input type=\"hidden\" value=\"%s\" name=\"%s\" />",
+		$v, $k);
+	}
+}
+?>
 <input type="hidden" name="network" value="<?php echo $network; ?>">
 <p>Other Sites in network:
 <?php 

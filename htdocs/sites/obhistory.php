@@ -90,7 +90,8 @@ $THISPAGE="iem-sites";
 $TITLE = "IEM | Observation History";
 include("$rootpath/include/header.php"); 
 
-$current = "obhistory"; include("sidebar.php");
+$savevars = Array("year"=>$year,
+ "month"=>$month, "day"=>$day); $current = "obhistory"; include("sidebar.php");
 ?>
 <script type="text/javascript">
 var hide = false;
