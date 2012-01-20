@@ -115,9 +115,9 @@ def main():
                     sys.stdout.write("%.2f%s" % (val, rD))
                 else:
                     sys.stdout.write("M%s" % (rD,))
-            elif data1 == 'p01i':
-                if row['p01m'] >= 0:
-                    sys.stdout.write("%.2f%s" % (row['p01m'] / 25.4, rD))
+            elif data1 == 'p01m':
+                if row['p01i'] >= 0:
+                    sys.stdout.write("%.2f%s" % (row['p01i'] * 25.4, rD))
                 else:
                     sys.stdout.write("M%s" % (rD,))
             elif data1 == 'tmpc':
