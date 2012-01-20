@@ -14,6 +14,8 @@ $o = Array(
   "7dayhilo" => Array("name" => "7 Day High/Low Plot", "uri" => "plot.php?prod=0&"),
   "monthhilo" => Array("name" => "Month High/Low Plot", "uri" => "plot.php?prod=1&"),
   "monthrain" => Array("name" => "Month Rainfall Plot", "uri" => "plot.php?prod=2&"),
+  "obhistory" => Array("name" => "Observation History", "uri" => "obhistory.php?",
+	"azos" => True),
   "windrose" => Array("name" => "Wind Roses", "uri" => "windrose.phtml?"),
   "custom_windrose" => Array("name" => "Custom Wind Roses", "uri" => "dyn_windrose.phtml?"),
   "calendar" => Array("name" => "Data Calendar", "uri" => "hist.phtml?"),
@@ -21,11 +23,15 @@ $o = Array(
 
 while (list($key,$val) = each($o))
 {
-  $uri = sprintf("%sstation=%s&network=%s", $val["uri"], $station, $network);
-  echo "<div style=\"";
-  if ($current == $key) echo "background: #eaf;";
-  echo "width: 150px; float: left; padding-left: 10px;\"><a href=\"$uri\">". $val["name"] ."</a></div>";
+	if (array_key_exists("azos", $val) &&  preg_match('/ASOS|AWOS/', $network) <= 0){
+		continue;
+	}
+  	$uri = sprintf("%sstation=%s&network=%s", $val["uri"], $station, $network);
+  	echo "<div style=\"";
+  	if ($current == $key) echo "background: #eaf;";
+  	echo "width: 150px; float: left; padding-left: 10px;\"><a href=\"$uri\">". $val["name"] ."</a></div>";
 }
+
 if (preg_match('/ASOS|AWOS/', $network) > 0){
 	$uri = sprintf("%s/request/download.phtml?network=%s", $rooturl, $network);
 	echo "<div style=\"width: 150px; float: left; padding-left: 10px; border-left: 4px solid #0F0;\"><a href=\"$uri\">Download</a></div>";
