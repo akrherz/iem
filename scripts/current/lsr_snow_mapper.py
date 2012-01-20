@@ -15,16 +15,33 @@ vals = []
 valmask = []
 lats = []
 lons = []
+
+pcursor.execute("""SELECT snow, 
+      x(geom) as lon, y(geom) as lat
+      from snowfall_pns where valid > 'TODAY'""")
+for row in pcursor:
+    if row[2] in lats and row[1] in lons:
+        continue
+    vals.append( row[0] )
+    lats.append( row[2] )
+    lons.append( row[1] )
+
+    valmask.append( False )
+
 pcursor.execute("""SELECT state, 
       max(magnitude) as val, x(geom) as lon, y(geom) as lat
       from lsrs_%s WHERE type in ('S') and magnitude >= 0 and 
       valid > now() - '12 hours'::interval
       GROUP by state, lon, lat""" % (now.year,))
 for row in pcursor:
+  if row[3] in lats and row[2] in lons:
+    continue
   vals.append( row[1] )
   lats.append( row[3] )
   lons.append( row[2] )
   valmask.append( row[0] in ['IA',] )
+
+
 
 if len(vals) < 2:
   vals = [1., .02, .03]
