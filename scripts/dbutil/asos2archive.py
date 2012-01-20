@@ -37,9 +37,9 @@ for i in range(len(rs)):
   sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt,  alti, 
     p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar,
     p03i, p06i, p24i, max_tmpf_6hr, min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr,
-    mslp) 
+    mslp, presentwx) 
     values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s',%s,%s,%s,%s,'%s',
-    %s,%s,%s,%s,%s,%s,%s,%s)""" % (
+    %s,%s,%s,%s,%s,%s,%s,%s,'%s')""" % (
   ts.year,rs[i]['id'], rs[i]['valid'], 
   valcheck(rs[i]['tmpf']), 
   valcheck(rs[i]['dwpf']), 
@@ -64,7 +64,8 @@ for i in range(len(rs)):
   valcheck(rs[i]['min_tmpf_6hr']),
   valcheck(rs[i]['max_tmpf_24hr']),
   valcheck(rs[i]['min_tmpf_24hr']),
-  valcheck(rs[i]['pres'])
+  valcheck(rs[i]['pres']),
+  valcheck(rs[i]['presentwx'])
 )
   try:
     asos.query(sql)
