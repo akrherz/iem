@@ -33,11 +33,9 @@ rs = iemdb.query(sql).dictresult()
 #print len(rs)
 for i in range(len(rs)):
   #if ((i%1000)==0): print i
-  p01m = 0
-  if (rs[i]['phour'] is not None and float(rs[i]['phour']) > 0):
-    p01m = float(rs[i]['phour']) * 25.4
+
   sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt,  alti, 
-    p01m, gust, vsby, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar,
+    p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar,
     p03i, p06i, p24i, max_tmpf_6hr, min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr,
     mslp) 
     values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s',%s,%s,%s,%s,'%s',
@@ -47,7 +45,7 @@ for i in range(len(rs)):
   valcheck(rs[i]['dwpf']), 
   valcheck(rs[i]['drct']), 
   valcheck(rs[i]['sknt']),
-  valcheck(rs[i]['alti']), p01m, 
+  valcheck(rs[i]['alti']), valcheck(rs[i]['phour']), 
   valcheck(rs[i]['gust']), 
   valcheck(rs[i]['vsby']),
   (rs[i]['skyc1'] or ''),

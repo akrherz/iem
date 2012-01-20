@@ -131,7 +131,7 @@ def grid_hour(nc, ts):
         dbconn = iemdb.connect('asos', bypass=True)
         pcursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         table = "t%s" % (ts.localtime().year,)
-        pcolumn = "p01m"
+        pcolumn = "p01i"
         sql = """SELECT station,
          max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
          max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
