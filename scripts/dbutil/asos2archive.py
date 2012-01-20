@@ -38,7 +38,7 @@ for i in range(len(rs)):
     p01m = float(rs[i]['phour']) * 25.4
   sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt,  alti, 
     p01m, gust, vsby, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar,
-    p03i, p06i, p24i, max_tmpf_6hr, min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24h,
+    p03i, p06i, p24i, max_tmpf_6hr, min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr,
     mslp) 
     values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s',%s,%s,%s,%s,'%s',
     %s,%s,%s,%s,%s,%s,%s,%s)""" % (
