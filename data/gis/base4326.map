@@ -307,9 +307,8 @@ LAYER
   END
   CLASS
     STYLE
-      SYMBOL 'circle'
       COLOR 0 0 0
-      SIZE 2
+      WIDTH 2.0
     END
   END
 END
@@ -338,9 +337,8 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    SYMBOL "circle"
     COLOR 54 54 54
-    SIZE 1
+    WIDTH 1.0
   END
 END
 
@@ -1645,16 +1643,14 @@ LAYER
     EXPRESSION 'TO'
     STYLE
       COLOR 255 0 0
-      SIZE 2
-      SYMBOL 'circle'
+      WIDTH 2.0
     END
   END
   CLASS
     EXPRESSION 'SV'
     STYLE
       COLOR 255 255 0
-      SIZE 2
-      SYMBOL 'circle'
+      WIDTH 2.0
     END
   END
 END
