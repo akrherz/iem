@@ -337,8 +337,9 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
+    SYMBOL "circle"
     COLOR 54 54 54
-    WIDTH 1.0
+    SIZE 1
   END
 END
 
