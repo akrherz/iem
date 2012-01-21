@@ -174,6 +174,7 @@ this network <a href='../request/download.phtml?network=${network}'>here</a>.<br
   <th rowspan="2">ADD:</th>
   <th rowspan="2"><a href="<?php echo $uri; ?>sname">Station</a></th>
   <th rowspan="2"><a href="<?php echo $uri; ?>ts">Ob Time</a></th>
+  <th rowspan="2">Present Wx</th>
   <th colspan="5">Temps &deg;F</th>
   <th colspan="3">&nbsp;</th>
   <th colspan="3">Wind [knots]</th>
@@ -233,7 +234,7 @@ while (list ($key, $val) = each ($finalA))  {
   } else {
     $fmt = "%I:%M %p";
   }
-  $row .= ">". strftime($fmt, $asos[$key]->lts) ."</td>
+  $row .= ">". strftime($fmt, $asos[$key]->lts) ."</td><td align='center'>". $parts["presentwx"] ."</td>
    <td align='center'>". round($parts["tmpf"],0) ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
      <td>". round($parts["dwpf"],0) ."</td>
      <td>". round($parts["feel"],0) ."</td>
@@ -258,7 +259,7 @@ while (list ($key, $val) = each ($finalA))  {
     $row .= "<tr";
     if ($i % 2 == 0)  $row .= " bgcolor='#eeeeee'";
     $row .= ">";
-    $row .= "<td colspan=\"20\">
+    $row .= "<td colspan=\"21\">
              <font color=\"brown\">". $parts["raw"] ."</font></td>
              </tr>\n";
    }
@@ -272,7 +273,7 @@ echo $old;
 </tbody>
 <tfoot>
 <tr>
- <td colspan="3">&nbsp;</td>
+ <td colspan="4">&nbsp;</td>
  <td><a href="<?php echo $uri; ?>&var=tmpf');">Plot</a></td>
  <td><a href="<?php echo $uri; ?>&var=max_tmpf');">Plot</a></td>
  <td><a href="<?php echo $uri; ?>&var=min_tmpf');">Plot</a></td>
