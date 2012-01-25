@@ -1,5 +1,5 @@
 <?php
-include("../../../../config/settings.inc.php");
+include_once("../../../../config/settings.inc.php");
 include_once "$rootpath/include/iemmap.php";
 include_once "$rootpath/include/database.inc.php";
 include("$rootpath/include/network.php");
