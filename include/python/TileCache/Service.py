@@ -28,11 +28,21 @@ class Request (object):
         #try:
         if layername.find("::") > 0:
             (sector,prod,tstring) = (layername.split("::")[1]).split('-')
-            mylayername = 'ridge'
+            if len(tstring) == 12:
+                mylayername = 'ridge-t'
+                year = tstring[:4]
+                month = tstring[4:6]
+                day = tstring[6:8]
+                ts = tstring[8:12]
+                uri = "year=%s&month=%s&day=%s&time=%s&" % (year, 
+                                            month, day,  ts)
+            else:
+                mylayername = 'ridge'
+                uri = ''
             layer = self.service.layers[mylayername]
             layer.name = layername
-            layer.url = "%ssector=%s&prod=%s&tstring=%s&" % (layer.metadata['baseurl'],
-                sector, prod, tstring)
+            layer.url = "%ssector=%s&prod=%s&%s" % (layer.metadata['baseurl'],
+                sector, prod, uri)
         else:
             layer = self.service.layers[layername]
         return layer
