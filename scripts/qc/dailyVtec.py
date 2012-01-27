@@ -4,7 +4,7 @@ from pyIEM import iemdb
 i = iemdb.iemdb()
 postgis = i['postgis']
 
-tests = [
+tests = ['HGX.FF.7',
 ]
 #for i in range(27,78):
 #    tests.append('OAX.TO.%s' % (i,))
