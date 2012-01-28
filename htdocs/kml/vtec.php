@@ -49,8 +49,8 @@ if (pg_num_rows($result) > 0) {
 header("Content-Type: application/vnd.google-earth.kml+xml");
 // abgr
 $color = "7dff0000";
-$ca = Array("TO" => "ff0000ff", "SV" => "ff00ffff", "FF" => "ff00ff00",
-             "MA" => "ff00ff00");
+$ca = Array("TO" => "7d0000ff", "SV" => "7d00ffff", "FF" => "7d00ff00",
+             "MA" => "7d00ff00");
 if (isset($ca[$phenomena])) { $color = $ca[$phenomena]; }
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -58,12 +58,11 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <Document>
     <Style id=\"iemstyle\">
       <LineStyle>
-        <width>2</width>
-        <color>$color</color>
+        <width>1</width>
+        <color>ff000000</color>
       </LineStyle>
       <PolyStyle>
-        <color>00ffffff</color>
-        <outline>1</outline>
+        <color>$color</color>
       </PolyStyle>
     </Style>
 ";
