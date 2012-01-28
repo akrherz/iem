@@ -63,6 +63,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
       </LineStyle>
       <PolyStyle>
         <color>00ffffff</color>
+        <outline>1</outline>
       </PolyStyle>
     </Style>
 ";
