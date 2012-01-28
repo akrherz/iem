@@ -26,7 +26,7 @@ free to email Daryl (akrherz@iastate.edu) and make your request.</p>
 
 <p>Population of this archive was discontinued by the DOT on 1 April 2011. Data
 for dates after that date can be found 
-<a href="<?php echo $rooturl; ?>/request/download.phtml">here</a>, but it is only
+<a href="<?php echo $rooturl; ?>/request/download.phtml?network=AWOS">here</a>, but it is only
 at a 5-10 minute interval.
 
 <ul>
