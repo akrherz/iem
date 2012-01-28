@@ -1,6 +1,7 @@
 <?php 
 include("../../config/settings.inc.php");
-  $TITLE = "IEM | AWOS Network";
+define("IEM_APPID", 64);
+$TITLE = "IEM | AWOS Network";
 $THISPAGE = "networks-awos";
 include("$rootpath/include/header.php"); 
 ?>
@@ -24,7 +25,8 @@ ASOS, the AWOS sensors primarily provide the aviation community with current
 weather observations.  The data is also transmitted by phone lines or satellite
 uplinks for use by other agencies. The AWOS sites are either 
 federally operated by the FAA or 
-some of them are locally maintained by state agencies.[1]</p> </td><td>
+some of them are locally maintained by state agencies.[1]</td>
+<td>
 
 <div class="ninfo">
 <b><u>AWOS</u></b>
@@ -60,8 +62,10 @@ some of them are locally maintained by state agencies.[1]</p> </td><td>
 <p><h3 class="subtitle">Archived One Minute Data:</h3>
 
 <p>The Iowa DOT kept an one minute interval archive of their data between
-1995 and 1 April 2011.  Due to communication changes, this archival was 
-discontinued.  You can download data from this archive at the links below.
+1995 and <strong>1 April 2011</strong>.  Due to communication changes, 
+this archival was discontinued.  You can download data from this archive at the 
+links below.  You can use <a href="<?php echo $rooturl; ?>/request/download.phtml?network=AWOS">this link</a>
+for 5-10 minute interval data after 1 April 2011.
 
 <ul>
   <li><a href="<?php echo $rooturl; ?>/plotting/awos/1station_1min.php">Daily Data Plotting</a></li>
@@ -85,6 +89,7 @@ discontinued.  You can download data from this archive at the links below.
 <li><a href="<?php echo $rooturl; ?>/AWOS/reports/2009precip.phtml">2009 Precipitation Totals</a></li>
 <li><a href="reports/mon_prec.php?year=2010">2010 Precipitation Totals</a></li>
 <li><a href="reports/mon_prec.php?year=2011">2011 Precipitation Totals</a></li>
+<li><a href="reports/mon_prec.php?year=2012">2011 Precipitation Totals</a></li>
 <li><a href="<?php echo $rootcgi; ?>/precip/catAZOS.py">Hourly Precipitation</a> tables</li>
 </ul>
 

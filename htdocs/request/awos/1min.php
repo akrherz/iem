@@ -1,5 +1,6 @@
 <?php 
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 65);
 $THISPAGE = "networks-awos";
 $TITLE = "IEM | AWOS 1 Minute Data Download";
 include("$rootpath/include/header.php"); 
@@ -11,7 +12,7 @@ $bogus = 0;
 ?>
 
 <div class="text">
-<b>Nav:</b> <a href="/AWOS/">AWOS</a> <b> > </b>
+<b>Nav:</b> <a href="/AWOS/">AWOS</a> <b> &gt; </b>
   Download Data
 
 <p>The Iowa Department of Transportation (DOT) manages the 
@@ -20,7 +21,13 @@ is published to the world in real-time, they also collect one minute interval
 data internally.  Each month, the DOT kindly provides us with the previous
 month's archive of one minute data.  We process this data into our database
 and make the observations available here for download.  Please don't make
-giant data requests through this interface, instead feel free to email Daryl (akrherz@iastate.edu) and make your request.</p>
+giant data requests through this interface, instead feel 
+free to email Daryl (akrherz@iastate.edu) and make your request.</p>
+
+<p>Population of this archive was discontinued by the DOT on 1 April 2011. Data
+for dates after that date can be found 
+<a href="<?php echo $rooturl; ?>/request/download.phtml">here</a>, but it is only
+at a 5-10 minute interval.
 
 <ul>
  <li><b>Archive Begins:</b> 1 Jan 1995 (for some sites, not all)</li>
