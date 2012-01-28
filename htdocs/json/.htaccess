@@ -1,0 +1,5 @@
+AddHandler cgi-script .py
+Options +ExecCGI
+
+RewriteEngine On
+RewriteRule ^radar radar.py

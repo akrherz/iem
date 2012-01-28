@@ -30,6 +30,10 @@ class Request (object):
             (sector,prod,tstring) = (layername.split("::")[1]).split('-')
             if len(tstring) == 12:
                 mylayername = 'ridge-t'
+                if sector in ['USCOMP',]:
+                    mylayername = 'ridge-composite-t'
+                    sector = sector.lower()
+                    prod = prod.lower()
                 year = tstring[:4]
                 month = tstring[4:6]
                 day = tstring[6:8]
