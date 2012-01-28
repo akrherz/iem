@@ -1,14 +1,15 @@
-
-from pyIEM import iemdb
-import mx.DateTime, sys, traceback
-i = iemdb.iemdb()
-asos = i['asos']
-iemdb = i['iem']
-
-def valcheck(v):
-    if v is None:
-        return 'Null'
-    return v
+"""
+ Dump ASOS observations into the long term archive...
+$Id: $:
+"""
+import mx.DateTime
+import sys
+import iemdb
+import psycopg2.extras
+ASOS = iemdb.connect('asos')
+IEM = iemdb.connect('iem')
+acursor = ASOS.cursor()
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 # Hack it for today, just fuss with iowa
 if (len(sys.argv) > 1):
@@ -20,55 +21,52 @@ else:
 
 # Delete any obs from yesterday
 sql = "DELETE from t%s WHERE date(valid) = '%s'" % (ts.year, ts.strftime("%Y-%m-%d") )
-asos.query(sql)
+acursor.execute(sql)
 
 # Get obs from Access
 sql = """SELECT c.*, t.network, t.id from current_log c, stations t WHERE date(valid) = '%s' 
       and %s and (t.network ~* 'ASOS' or t.network ~* 'AWOS')
       and t.iemid = c.iemid""" % (
       ts.strftime("%Y-%m-%d"), networks)
-rs = iemdb.query(sql).dictresult()
-
-# Fire them into Archive
-#print len(rs)
-for i in range(len(rs)):
-  #if ((i%1000)==0): print i
-
-  sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt,  alti, 
+icursor.execute(sql)
+for row in icursor:
+    sql = """INSERT into t"""+ ts.year +""" (station, valid, tmpf, dwpf, drct, sknt,  alti, 
     p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar,
     p03i, p06i, p24i, max_tmpf_6hr, min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr,
     mslp, presentwx) 
-    values('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s',%s,%s,%s,%s,'%s',
-    %s,%s,%s,%s,%s,%s,%s,%s,'%s')""" % (
-  ts.year,rs[i]['id'], rs[i]['valid'], 
-  valcheck(rs[i]['tmpf']), 
-  valcheck(rs[i]['dwpf']), 
-  valcheck(rs[i]['drct']), 
-  valcheck(rs[i]['sknt']),
-  valcheck(rs[i]['alti']), valcheck(rs[i]['phour']), 
-  valcheck(rs[i]['gust']), 
-  valcheck(rs[i]['vsby']),
-  (rs[i]['skyc1'] or ''),
-  (rs[i]['skyc2'] or ''),
-  (rs[i]['skyc3'] or ''),
-  (rs[i]['skyc4'] or ''),
-  valcheck(rs[i]['skyl1']),
-  valcheck(rs[i]['skyl2']),
-  valcheck(rs[i]['skyl3']), 
-  valcheck(rs[i]['skyl4']),
-  rs[i]['raw'],
-  valcheck(rs[i]['p03i']),
-  valcheck(rs[i]['p06i']),
-  valcheck(rs[i]['p24i']),
-  valcheck(rs[i]['max_tmpf_6hr']),
-  valcheck(rs[i]['min_tmpf_6hr']),
-  valcheck(rs[i]['max_tmpf_24hr']),
-  valcheck(rs[i]['min_tmpf_24hr']),
-  valcheck(rs[i]['pres']),
-  valcheck(rs[i]['presentwx'])
-)
-  try:
-    asos.query(sql)
-  except:
-    print sql
-    traceback.print_exc(file=sys.stdout)
+    values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+    %s,%s,%s,%s,%s,%s,%s,%s,%s)""" 
+
+    args = (row['id'], row['valid'],  row['tmpf'], 
+  row['dwpf'],  row['drct'],  row['sknt'],  row['alti'], row['phour'], 
+  row['gust'], 
+  row['vsby'],
+  row['skyc1'] ,
+  row['skyc2'] ,
+  row['skyc3'] ,
+  row['skyc4'] ,
+  row['skyl1'],
+  row['skyl2'],
+  row['skyl3'], 
+  row['skyl4'],
+  row['raw'],
+  row['p03i'],
+  row['p06i'],
+  row['p24i'],
+  row['max_tmpf_6hr'],
+  row['min_tmpf_6hr'],
+  row['max_tmpf_24hr'],
+  row['min_tmpf_24hr'],
+  row['pres'],
+  row['presentwx'])
+  
+    acursor.execute(sql, args)
+
+if icursor.rowcount == 0:
+    print 'Nothing done for asos2archive.py?'
+
+icursor.close()
+IEM.commit()
+ASOS.commit()
+ASOS.close()
+IEM.close()
