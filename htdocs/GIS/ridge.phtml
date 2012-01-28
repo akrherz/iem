@@ -1,0 +1,159 @@
+<?php 
+include("../../config/settings.inc.php");
+define("IEM_APPID", 67);
+$THISPAGE = "gis-ridge";
+$TITLE = "IEM | GIS RADAR Information";
+include("$rootpath/include/header.php"); ?>
+<style>
+.coded {
+	border-top: 1px solid #ccc; 
+	background: #EEFFCC; 
+	border-bottom: 1px solid #ccc; 
+	padding-left: 5px;
+}
+</style>
+<h3>IEM Provided NWS NEXRAD Imagery for GIS</h3>
+
+<div class="warning">This services are provided as-is and without warranty.
+The purpose is to provide an archive to help support display applications
+and produce plots within GIS. Please do not use these services in applications
+that have thousands of simultaneous users!  Our servers will melt!</div>
+
+<div style="width: 310px; float: right; border: 1px solid #000; padding: 5px; margin: 5px;">
+<a href="http://mesonet.agron.iastate.edu/archive/data/1999/05/04/GIS/ridge/TLX/N0R/TLX_N0R_199905040012.png">
+<img width="300" src="http://mesonet.agron.iastate.edu/archive/data/1999/05/04/GIS/ridge/TLX/N0R/TLX_N0R_199905040012.png">
+</a>
+<br />May 3, 1999 : Moore Oklahoma F5 Tornado 7:12 PM.
+</div>
+
+
+
+<p>Since 2003, the IEM has been providing <a href="../docs/nexrad_composites/">composites</a> 
+of National Weather Service
+RADAR imagery for use within GIS systems.  While these composites are nice, they
+are often ugly at very small scales (due to the crude nature of the compositing
+process).  These images are also of base reflectivity and not of non-compositable
+products like velocity.
+
+<p>The services mentioned on this page provide access to products that contain
+data from one RADAR site for one level3 product at one volume scan time!  The 
+archive for these products starts in 2012, but is being backfilled to cover high
+end events of the past.  This processing is very compute intensive, so backfilling
+is non trivial.
+
+<p>These images are provided in the 
+<a href="http://spatialreference.org/ref/epsg/4326">EPSG:4326</a> projection. This
+is a commonly used projection for what people like to call "un-projected" lat/lon. Of
+course, this is not correct terminology, but anyway...
+
+<h3>Realtime Raw Data:</h3>
+
+<p>The most recent imagery is dumped into a browser navigable folder 
+<a href="/data/gis/images/4326/ridge/">here</a>. There is one folder per RADAR
+site given by its three character call identifier.  Data for FAA and DOD RADARs
+is available as well here.  Due to storage and CPU constraints, we are not 
+processing all level3 products at this time.  The current list is:
+<ul>
+ <li>TR0 - TDWR Base Reflectivity</li>
+ <li>TV0 - TDWR Base Velocity</li>
+ <li>N0Q - 8bit High Resolution Base Reflectivity</li>
+ <li>N0S - Storm Relative Base Velocity</li>
+ <li>N0Z - 248nm Base Reflectivity</li>
+ <li>N0U - 8bit Base Velocity</li>
+ <li>NET - Net Echo Tops</li>
+</ul>
+
+<p><strong>Wait! Why are you not processing XYZ?</strong> Well, perhaps because
+nobody has requested it. Contact us and let us know why XYZ is important! :)
+
+<p>These products are located within each RADAR ID folder as sub-folders.  Then
+inside of the product folder, is the raw imagery.  Each image has an associated
+world file and a json formatted metadata file.  This json metadata has information
+like volume coverage pattern and may contain other information in the future.
+
+<h3>Archived Raw Data:</h3>
+
+<p>An intense aspect of this effort is to archive all of the images we generate!
+This is a scary proposition at the moment, but if we fail, let us fail in a 
+spectacular manner!  This should generate terabytes of data per year and millions
+of files!  Anyway, these images are organized like the real-time data, but in
+per-UTC day folders like so:
+<br />
+<a href="/archive/data/<?php echo date("Y/m/d"); ?>/GIS/ridge/"><?php echo $rooturl; ?>/archive/data/<?php echo date("Y/m/d"); ?>/GIS/ridge/</a> 
+
+<p>Data appears in the archive at the same time as it does for the realtime data.
+So this is neat, but how can you programically work with this data?
+
+<h3>JSON Metadata services</h3>
+
+<p>In order to write fancy pants web applications, you need to be able to find out
+what imagery exists in the IEM's archive!  Here are details on a few JSON emitting
+web services that may be able to help you.  These services are still being developed,
+so please send critical feedback on how to improve them.
+
+<p><strong>Available RADARs:</strong><br /> This service returns single site and
+composite RADAR IDs for a location and time of your choice.  This attempts to 
+answer the question: if I want to show a map for New York City on 28 March 2011, 
+which RADAR sites are available?<br />
+<pre class="coded">
+URI: http://mesonet.agron.iastate.edu/json/radar?operation=available
+HTTPD GET Variables:
+ lat    - Latitude of your interested point 
+ lon    - Longitude (-180 to 180) of your interested point
+</pre></p>
+
+<p><strong>Available Products for RADAR:</strong><br /> This service returns
+what products are available for this RADAR near a given time. <br />
+<pre class="coded">
+URI: http://mesonet.agron.iastate.edu/json/radar?operation=products
+HTTPD GET Variables:
+ radar  - RADAR identifier 
+ start  - UTC timestamp in ISO-8601 format YYYY-mm-ddTHH:MMZ
+</pre></p>
+
+<p><strong>Available Volume Scans for RADAR+Product+Time Interval:</strong>
+<br /> This service returns what volume scan times are available for a given
+radar, product, and during a period of time.  The results of this query can
+then be fed back to request actual images or tiles from the Tile Map Service.<br />
+<pre class="coded">
+URI: http://mesonet.agron.iastate.edu/json/radar?operation=list
+HTTPD GET Variables:
+ radar  - RADAR identifier 
+ product- level3 product identifier
+ start  - UTC timestamp in ISO-8601 format YYYY-mm-ddTHH:MMZ
+ end    - UTC timestamp in ISO-8601 format YYYY-mm-ddTHH:MMZ
+</pre></p>
+
+<h3>Tile Map Service</h3>
+
+<p>The IEM provides a caching <a href="../ogc/">tile map service</a> to provide 
+tiles to Google Maps type applications in spherical mercator projection. This
+archive and current realtime imagery is exposed via this service!  Here is how
+you can access it:<br />
+<pre class="coded">
+Archived:
+http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::BMX-N0Q-201201230813/7/33/50.png
+
+Latest imagery:
+http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::BMX-N0Q-0/7/33/50.png
+</pre>
+
+<p>The 7/33/50 portion is the standard Z/X/Y tile map specification, your plotting
+application will generate these automatically.  The key portion is the 
+"ridge::BMX-N0Q-201201230813" service name.  This is used by the server code to 
+find the archived image you want.  The "BMX-N0Q-201201230813" should hopefully 
+make sense, it is the combination of RADAR ID, product ID, and UTC timestamp of
+the imagery!  Specifying zero as the timestamp will give you the most recent 
+image, which is hopefully current!
+
+<p>There you have it, we would be happy to know what you think of this.  Hopefully
+you come up with interesting things that do not overwhelm our server :)  Someday,
+we will come up with something clever to provide legends for the imagery!
+
+<h3>Final Notes and Credits:</h3>
+
+<p>A big thanks goes to the National Weather Service RIDGE team, who we have worked
+with on their RADAR web mapping projects.  It is our hope that many of the services
+developed will find a stable and permanent home with the NWS someday!
+
+<?php include("$rootpath/include/footer.php"); ?>

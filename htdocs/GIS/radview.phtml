@@ -1,23 +1,45 @@
 <?php 
 include("../../config/settings.inc.php");
-$THISPAGE = "gis";
-$TITLE = "IEM | RadView";
+define("IEM_APPID", 66);
+$THISPAGE = "gis-radview";
+$TITLE = "IEM | GIS RADAR Information";
 include("$rootpath/include/header.php"); ?>
-<b>Nav:</b> <a href="/GIS/">GIS</a> > IEM RadView
 
-<h3 class="heading">IEM RadView</h3>
+<h3 class="heading">IEM Provided RADAR Information for GIS</h3>
 
-<div class="text">
 <p>Our RadView project is an effort to get real time NWS NEXRAD information
-into GIS applications.  We are currently arriving at solutions from a 
-variety of angles and are looking for public interest in this dataset.  
-Please <a href="/info/contacts.php">contact us</a> if you are at all interested...
+into GIS applications.  We have no magic bullets for getting this information
+into GIS systems, but have a number of things for you to try out!
 
-<p>Data provided from this service is for educational purposes only.  Errors
-can and do happen.
+<div class="warning">These services are provided with-out warranty and with 
+program interfaces that may change or go away!</div>
+
+<h3>Quick links to specific products</h3>
+<table width="100%">
+<tr>
+
+<td valign="top">
+<a href="../docs/nexrad_composites"><strong>NEXRAD Composites</strong><br />
+<img src="../docs/nexrad_composites/example_raster.png" width="250" /></a>
+</td>
+
+<td valign="top">
+<a href="ridge.phtml"><strong>Single RADAR Imagery</strong><br />
+<img src="TLX_N0R_199905032356.png" width="250" /></a>
+</td>
+
+<td valign="top">
+<a href="../ogc/"><strong>OGC Web Services</strong><br />
+<img src="olcode.png" width="250" /></a>
+</td>
+
+</tr>
+
+</table>
 
 <h3 class="subtitle">News:</h3>
 <ul>
+ <li><strong>28 Jan 2012:</strong> Release the <a href="ridge.phtml">Single Site NEXRAD</a> services.</li>
  <li><b>28 Apr 2004:</b> Release the <a href="/request/gis/nids2gis.phtml">NIDS 2 GIS</a> application.
  <li><b>26 Apr 2004:</b> Add in links for the nationwide composites of NTP (storm total precip) and N1P (1 hour precip)!
  <li><b>13 Jan 2004:</b> Release the nationwide composite WMS!
@@ -51,8 +73,11 @@ following URLs contain pure RASTER data layers.
   <td>US Base Reflectivity (N0R) Composite<br>(generated every 5 minutes)</td>
   <td>4326<br> <i>(Lat-Lon)</i></td>
   <td>
+  <ul>
    <li><a href="/data/gis/images/unproj/USCOMP/n0r_0.png">PNG format</a></li>
-   <li><a href="/data/gis/images/unproj/USCOMP/n0r_0.tif">8bit TIFF</a></li></td>
+   <li><a href="/data/gis/images/unproj/USCOMP/n0r_0.tif">8bit TIFF</a></li>
+   </ul>
+   </td>
   <td><a href="/data/gis/images/unproj/USCOMP/n0r_0.tfw">Decimal Degree Units</a></td>
 </tr>
 
@@ -60,8 +85,11 @@ following URLs contain pure RASTER data layers.
   <td>US Storm Total Precip (NTP) Composite<br>(generated every 5 minutes)</td>
   <td>4326<br> <i>(Lat-Lon)</i></td>
   <td>
+  <ul>
    <li><a href="/data/gis/images/unproj/USCOMP/ntp_0.png">PNG format</a></li>
-   <li><a href="/data/gis/images/unproj/USCOMP/ntp_0.tif">8bit TIFF</a></li></td>
+   <li><a href="/data/gis/images/unproj/USCOMP/ntp_0.tif">8bit TIFF</a></li>
+   </ul>
+   </td>
   <td><a href="/data/gis/images/unproj/USCOMP/ntp_0.tfw">Decimal Degree Units</a></td>
 </tr>
 
@@ -69,8 +97,10 @@ following URLs contain pure RASTER data layers.
   <td>US 1 Hour Precip (N1P) Composite<br>(generated every 5 minutes)</td>
   <td>4326<br> <i>(Lat-Lon)</i></td>
   <td>
+  <ul>
    <li><a href="/data/gis/images/unproj/USCOMP/n1p_0.png">PNG format</a></li>
-   <li><a href="/data/gis/images/unproj/USCOMP/n1p_0.tif">8bit TIFF</a></li></td>
+   <li><a href="/data/gis/images/unproj/USCOMP/n1p_0.tif">8bit TIFF</a></li>
+   </ul></td>
   <td><a href="/data/gis/images/unproj/USCOMP/n1p_0.wld">Decimal Degree Units</a></td>
 </tr>
 
@@ -80,8 +110,10 @@ following URLs contain pure RASTER data layers.
   <td>26915
    <br><i>UTM Zone 15N</i></td>
   <td>
+  <ul>
     <li><a href="/data/gis/images/26915/KCCI/KCCI_N0R_0.png">PNG format</a></li>
-    <li><a href="/data/gis/images/26915/KCCI/KCCI_N0R_0.tif">8bit TIFF</a></li></td>
+    <li><a href="/data/gis/images/26915/KCCI/KCCI_N0R_0.tif">8bit TIFF</a></li>
+    </ul></td>
   <td><a href="/data/gis/images/26915/KCCI/KCCI_N0R_0.wld">Meters</a></td>
 </tr>
 
@@ -118,6 +150,6 @@ NEXRAD site reports the value for a different timespan.  Basically, once the
 radar detects rain, it will begin to accumulate the rainfall in the NTP product.
 Once it stops raining for an hour, the value is reset to zero.  Since all sites
 reset at different times, you see the issue.</li>
-</ol></div>
+</ol>
 
 <?php include("$rootpath/include/footer.php"); ?>
