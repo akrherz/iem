@@ -58,12 +58,10 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <Document>
     <Style id=\"iemstyle\">
       <LineStyle>
-        <width>1</width>
+        <width>2</width>
         <color>ff000000</color>
       </LineStyle>
-      <PolyStyle>
-        <color>$color</color>
-      </PolyStyle>
+
     </Style>
 ";
 
