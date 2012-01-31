@@ -10,17 +10,25 @@ define("IEM_APPID", 41);
  include("$rootpath/include/iemaccess.php");
  include("$rootpath/include/iemaccessob.php");
  
-  $network = isset($_GET['network']) ? $_GET['network'] : 'IA_COOP'; 
-  $wfo = isset($_REQUEST["wfo"]) ? $_REQUEST['wfo'] : null;
-  $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
+$network = isset($_GET['network']) ? $_GET['network'] : 'IA_COOP'; 
+$wfo = isset($_REQUEST["wfo"]) ? $_REQUEST['wfo'] : null;
+$sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
+$sortdir = isset($_GET['sortdir']) ? $_GET['sortdir'] : 'desc';
+if ($sortdir != "asc" && $sortdir != "desc") $sortdir = "desc";
+
+function get_sortdir($baseurl, $column, $sortCol, $sortDir){
+	$newSort = ($sortDir == "asc") ? "desc" : "asc";
+	if ($column == $sortCol) return "${baseurl}&sortcol=$column&sortdir=$newSort";
+	return "${baseurl}&sortcol=$column&sortdir=$sortDir";
+}
 
    $iem = new IEMAccess();
  if ($wfo == null){
    $net = $iem->getNetwork($network);
-   $baseurl = "current.phtml?network=$network&sortcol=";
+   $baseurl = "current.phtml?network=$network";
  } else {
  	$net = $iem->getWFO_COOP($wfo);
- 	$baseurl = "current.phtml?wfo=$wfo&sortcol=";
+ 	$baseurl = "current.phtml?wfo=$wfo";
  }
   
   $TITLE = "IEM | NWS COOP | Current Sortables";
@@ -68,17 +76,22 @@ include("$rootpath/include/header.php"); ?>
    }
   }
 
-function aSortBySecondIndex($multiArray, $secondIndex) {
-        while (list($firstIndex, ) = each($multiArray))
-                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
-        while (list($firstIndex, ) = each($indexMap))
-                if (is_numeric($firstIndex))
-                        $sortedArray[] = $multiArray[$firstIndex];
-                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-        return $sortedArray;
+function aSortBySecondIndex($multiArray, $secondIndex, $sortDir) {
+	while (list($firstIndex, ) = each($multiArray))
+    	$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];     
+    if ($sortDir == "desc"){   
+		arsort($indexMap);
+	} else{
+		asort($indexMap);
+	}
+    while (list($firstIndex, ) = each($indexMap))
+    	if (is_numeric($firstIndex))
+        	$sortedArray[] = $multiArray[$firstIndex];
+        else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+    return $sortedArray;
 }
 
-$db = aSortBySecondIndex($db, $sortcol);
+$db = aSortBySecondIndex($db, $sortcol, $sortdir);
 
 $cols = Array("ts" => "Valid", "county" => "County",
   "sid" => "Site ID", "sname" => "Station Name", 
@@ -156,10 +169,12 @@ Option 2: <strong>View by WFO:</strong> <?php echo wfoSelect($wfo); ?>
 </form>
 
 <?php
-echo "<p>Sorted by: <strong>". $cols[$sortcol] ."</strong>. 
+$sorts = Array("asc" => "Ascending", "desc" => "Descending");
+echo "<p>Sorted by: <strong>". $cols[$sortcol] ." ". $sorts[$sortdir] ."</strong>. 
 Times are presented in the local time of the site. Click on the identifier to
 get all daily observations for the site.  Click on the site name to get more
-information on the site.";
+information on the site. Click on the column heading to sort the column, clicking
+again will reverse the sort.";
  
 ?>
 <form name="st" action="/my/current.phtml" method="GET">
@@ -168,22 +183,22 @@ information on the site.";
 <thead>
 <tr>
   <th rowspan=2>Add:</th>
-  <th rowspan=2><a href="<?php echo $baseurl; ?>sid">SiteID:</a></th>
-  <th rowspan=2><a href="<?php echo $baseurl; ?>sname">Station Name:</a></th>
-  <th rowspan=2><a href="<?php echo $baseurl; ?>county">County:</a></th>
-  <th rowspan=2><a href="<?php echo $baseurl; ?>ts">Valid:</a></th>
+  <th rowspan=2><a href="<?php echo get_sortdir($baseurl, "sid", $sortcol, $sortdir); ?>">SiteID:</a></th>
+  <th rowspan=2><a href="<?php echo get_sortdir($baseurl, "sname", $sortcol, $sortdir); ?>">Station Name:</a></th>
+  <th rowspan=2><a href="<?php echo get_sortdir($baseurl, "county", $sortcol, $sortdir); ?>">County:</a></th>
+  <th rowspan=2><a href="<?php echo get_sortdir($baseurl, "ts", $sortcol, $sortdir); ?>">Valid:</a></th>
   <th colspan=3>Temperatures [F]</th>
   <th colspan="5">Hydro</th></tr>
 
 <tr>
-  <th><a href="<?php echo $baseurl; ?>tmpf">At Ob</a></th>
-  <th><a href="<?php echo $baseurl; ?>max_tmpf">24h High</a></th>
-  <th><a href="<?php echo $baseurl; ?>min_tmpf">24h Low</a></th>
-  <th><a href="<?php echo $baseurl; ?>pday">24hour Rain</a></th>
-  <th><a href="<?php echo $baseurl; ?>snow">Snowfall</a></th>
-  <th><a href="<?php echo $baseurl; ?>ratio">Ratio</a></th>
-  <th><a href="<?php echo $baseurl; ?>snowd">Snow Depth</a></th>
-  <th><a href="<?php echo $baseurl; ?>snoww">SWE</a></th>
+  <th><a href="<?php echo get_sortdir($baseurl, "tmpf", $sortcol, $sortdir); ?>">At Ob</a></th>
+  <th><a href="<?php echo get_sortdir($baseurl, "max_tmpf", $sortcol, $sortdir); ?>">24h High</a></th>
+  <th><a href="<?php echo get_sortdir($baseurl, "min_tmpf", $sortcol, $sortdir); ?>">24h Low</a></th>
+  <th><a href="<?php echo get_sortdir($baseurl, "pday", $sortcol, $sortdir); ?>">24hour Rain</a></th>
+  <th><a href="<?php echo get_sortdir($baseurl, "snow", $sortcol, $sortdir); ?>">Snowfall</a></th>
+  <th><a href="<?php echo get_sortdir($baseurl, "ratio", $sortcol, $sortdir); ?>">Ratio</a></th>
+  <th><a href="<?php echo get_sortdir($baseurl, "snowd", $sortcol, $sortdir); ?>">Snow Depth</a></th>
+  <th><a href="<?php echo get_sortdir($baseurl, "snoww", $sortcol, $sortdir); ?>">SWE</a></th>
 </tr></thead>
 <tbody>
 <?php
