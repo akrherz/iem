@@ -102,6 +102,7 @@ Select State: <select name="network">
   <th><a href="<?php echo $link; ?>station">NWSLI:</a></th>
   <th><a href="<?php echo $link; ?>sname">Site Name:</a></th>
   <th><a href="<?php echo $link; ?>day">Date:</a></th>
+  <th><a href="<?php echo $link; ?>coop_tmpf">Temp at Ob</a></th>
   <th><a href="<?php echo $link; ?>max_tmpf">Max Air Temp</a></th>
   <th><a href="<?php echo $link; ?>min_tmpf">Min Air Temp</a></th>
   <th><a href="<?php echo $link; ?>pday">Precip</a></th>
@@ -121,12 +122,16 @@ Select State: <select name="network">
      $sortvar == "max_tmpf") 
    $sortdir = "DESC";
  if (strlen($station) > 0) {
-     $rs = pg_prepare($iemdb, "SELECT", "SELECT c.*, s.id as station, s.name as sname from summary_$year c, stations s
+     $rs = pg_prepare($iemdb, "SELECT", "SELECT c.*, s.id as station, 
+     s.name as sname, c.coop_valid at time zone s.tzname as cts 
+     from summary_$year c, stations s
      WHERE s.id = $1 and s.network = $2 and c.iemid = s.iemid 
      and c.day <= 'TODAY' ORDER by $sortvar $sortdir");
      $rs = pg_execute($iemdb, "SELECT", Array($station, $network));
  } else {
-    $rs = pg_prepare($iemdb, "SELECT", "SELECT c2.*, s.id as station, s.name as sname from summary_$year c2, stations s
+    $rs = pg_prepare($iemdb, "SELECT", "SELECT c2.*, s.id as station, 
+     s.name as sname, c2.coop_valid at time zone s.tzname as cts
+     from summary_$year c2, stations s
      WHERE c2.day = $1  
      and s.network = $2 and c2.iemid = s.iemid ORDER by $sortvar $sortdir");
     $rs = pg_execute($iemdb, "SELECT", Array($date, $network));
@@ -138,11 +143,15 @@ Select State: <select name="network">
 
    $high = $row["max_tmpf"];
    if ($high == "-99" || $high == "") $high = "M";
-   if ($high > 130 || $high < -50) $high = "M";
+   if ($high > 130 || $high < -90) $high = "M";
 
+   $tmpf = $row["coop_tmpf"];
+   if ($tmpf == "-99" || $tmpf == "") $tmpf = "M";
+   if ($tmpf > 130 || $tmpf < -90) $tmpf = "M";
+   
    $low = $row["min_tmpf"];
    if ($low == "99" || $low == "" || $low == -99) $low = "M";
-   if ($low > 130 || $low < -50) $low = "M";
+   if ($low > 130 || $low < -90) $low = "M";
 
    $rain = $row["pday"];
    if ($rain == 0.0001 || $rain == 0.001) $rain = "T";
@@ -170,14 +179,18 @@ Select State: <select name="network">
    }
 
    echo "</td><td>". $cities[$nwsli]["name"] ."</td><td>";
-
+	$dstring = $row["day"];
+   if ($row["cts"]){
+		$dstring = date("j M Y gA", strtotime(substr($row["coop_valid"],0,16)));		
+	}
+   
    if (strlen($date) > 0){
-      echo $row["day"];
+      echo $dstring;
    } else {
-      echo "<a href=\"cat.phtml?date=". $row["day"] ."&network=". $network ."\">". $row["day"] ."</a>";
+      echo "<a href=\"cat.phtml?date=". $row["day"] ."&network=". $network ."\">". $dstring ."</a>";
    }
 
-   echo "</td><td>". $high ."</td><td>". $low ."</td><td>". $rain ."</td><td>". $snow ."</td><td>". $snowd ."</td></tr>\n";
+   echo "</td><td>". $tmpf ."</td><td>". $high ."</td><td>". $low ."</td><td>". $rain ."</td><td>". $snow ."</td><td>". $snowd ."</td></tr>\n";
  }
 
  
