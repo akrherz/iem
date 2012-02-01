@@ -115,7 +115,7 @@ class Ob(object):
         self.data['old_valid'] = mx.DateTime.strptime(str(row['valid'])[:16], "%Y-%m-%d %H:%M")
         if self.data['valid'] == self.data['old_valid']: # Same Ob!
             for key in row.keys():
-                if row[key] is not None and key not in ['valid','network','station','geom']:
+                if row[key] is not None and key not in ['coop_valid', 'valid','network','station','geom']:
                     self.data[key] = row[key]
         # We can always load up the summary obs, since we queried for the local ob summary?
         else:
