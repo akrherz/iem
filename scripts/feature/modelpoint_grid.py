@@ -9,7 +9,7 @@ mcursor = MOS.cursor()
 # GFS has 8 days worth of data
 # NAM has 3.5 days
 PLOTDAYS = 3
-sts = datetime.datetime(2011,2,19,0, tzinfo=iemtz.Central)
+sts = datetime.datetime(2012,2,3,0, tzinfo=iemtz.Central)
 #___________________________
 # No more custom
 MODELDAYS = PLOTDAYS+8-2
@@ -39,8 +39,8 @@ for i in range(0,MODELDAYS*4,4):
 
 
 mcursor.execute("""
-select runtime, ftime, precip from model_gridpoint_2011 
-where station = 'KMSP' and ftime > %s and ftime <= %s and model = 'GFS'
+select runtime, ftime, precip from model_gridpoint_2012 
+where station = 'KDSM' and ftime > %s and ftime <= %s and model = 'GFS'
 """, (sts, ets))
 
 for row in mcursor:
@@ -82,7 +82,7 @@ ax.set_ylim(0,MODELDAYS*4)
 fig.colorbar( res )
 ax.grid(True)
 
-ax.set_title("GFS Grid Point Forecast for Burlington\n3 Hour Total Precipitation [inch]")
+ax.set_title("GFS Grid Point Forecast for Des Moines\n3 Hour Total Precipitation [inch]")
 
 ax.set_xticks( numpy.array(xticks) + 0.5 )
 ax.set_xticklabels( xlabels )
@@ -92,5 +92,5 @@ ax.set_yticklabels( ylabels )
 ax.set_xlabel('Forecast Date')
 ax.set_ylabel('Model Run')
 import iemplot
-fig.savefig('test.png')
-#iemplot.makefeature('test')
+fig.savefig('test.ps')
+iemplot.makefeature('test')
