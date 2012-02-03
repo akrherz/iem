@@ -13,7 +13,8 @@ import iemdb
 import glob
 
 NIDS = {
-    'N0Q': 'High res reflectivity'
+    'N0Q': 'High res reflectivity',
+    'N0S': 'Storm Relative Base Velocity'
 }
 
 def parse_time(s):
@@ -28,23 +29,38 @@ def parse_time(s):
 
 def available_radars(form):
     """
-    Return available RADAR sites for the given location
+    Return available RADAR sites for the given location and date!
     """
-    lat = form.getvalue('lat', 41.99)
-    lon = form.getvalue('lon', -95.0)
+    lat = form.getvalue('lat', None)
+    lon = form.getvalue('lon', None)
+    start_gts = parse_time( form.getvalue('start', '2012-01-27T00:00Z') )
     MESOSITE = iemdb.connect('mesosite', bypass=True)
     mcursor = MESOSITE.cursor()
     root = {'radars': []}
-    mcursor.execute("""
-    select id, name, 
-    ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) as dist 
-    from stations where network in ('NEXRAD','ASR4','ASR11','TWDR') 
-    and ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) < 3 
-    ORDER by dist asc
-    """ % (lon, lat, lon, lat))
-    root['radars'].append({'id': 'USCOMP', 'name': 'National Composite'})
+    if lat is None or lon is None:
+        sql = """
+        select id, name,
+        x(geom) as lon, y(geom) as lat, network
+        from stations where network in ('NEXRAD','ASR4','ASR11','TWDR') 
+        ORDER by id asc"""
+    else:
+        sql = """
+        select id, name, x(geom) as lon, y(geom) as lat, network, 
+        ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) as dist 
+        from stations where network in ('NEXRAD','ASR4','ASR11','TWDR') 
+        and ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) < 3 
+        ORDER by dist asc
+        """ % (lon, lat, lon, lat)
+    mcursor.execute(sql)
+    root['radars'].append({'id': 'USCOMP', 'name': 'National Composite',
+                           'lat': 42.5, 'lon': -95, 'type': 'COMPOSITE'})
     for row in mcursor:
-        root['radars'].append({'id': row[0], 'name': row[1]})
+        radar = row[0]
+        if not os.path.isdir(start_gts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"+
+                    radar)):
+            continue
+        root['radars'].append({'id': radar, 'name': row[1], 'lat': row[3], 
+                               'lon': row[2], 'type': row[4]})
     mcursor.close()
     MESOSITE.close()
     return root

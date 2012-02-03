@@ -94,12 +94,15 @@ so please send critical feedback on how to improve them.
 <p><strong>Available RADARs:</strong><br /> This service returns single site and
 composite RADAR IDs for a location and time of your choice.  This attempts to 
 answer the question: if I want to show a map for New York City on 28 March 2011, 
-which RADAR sites are available?<br />
+which RADAR sites are available?  If you do not specific a location, the
+service returns an estimate of RADARs available for the date of your timestamp.
+<br />
 <pre class="coded">
 URI: http://mesonet.agron.iastate.edu/json/radar?operation=available
 HTTPD GET Variables:
- lat    - Latitude of your interested point 
- lon    - Longitude (-180 to 180) of your interested point
+ lat    - (optional) Latitude of your interested point 
+ lon    - (optional) Longitude (-180 to 180) of your interested point
+ start  - UTC timestamp in ISO-8601 format YYYY-mm-ddTHH:MMZ
 </pre></p>
 
 <p><strong>Available Products for RADAR:</strong><br /> This service returns
