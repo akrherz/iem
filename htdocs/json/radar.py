@@ -100,7 +100,9 @@ def list_products(form):
     root = {'products': []}
     if radar == 'USCOMP':
         for dir in ['N0Q','N0R']:
-            root['products'].append({'id': dir, 'name': NIDS.get(dir,dir)})
+            testfp = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/"+dir+"_%Y%m%d0000.png")
+            if os.path.isfile(testfp):
+                root['products'].append({'id': dir, 'name': NIDS.get(dir,dir)})
     else:
         basedir = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"+radar)
         if os.path.isdir( basedir ):
