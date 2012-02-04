@@ -55,16 +55,14 @@ $map = ms_newMapObj("$rootpath/data/gis/base4326.map");
 
 /* Hard coded extents based on network */
 if ($network == "KCCI")
- $map->setExtent(-95.0,40.45,-92.1,43.3);
+ $map->setExtent(-95.1,40.55,-92.2,43.4);
 elseif ($network == "IDOT")
  $map->setExtent(-95.5,39.7,-91.2,44.6);
 elseif ($network == "KELO")
  $map->setExtent(-98.8,42.75,-95.9,45.6);
 elseif ($network == "KCRG")
  $map->setExtent(-93.0,40.9,-90.1,43.7);
-
-$map->set("width", 320);
-$map->set("height", 240);
+$map->setSize(320,240);
 
 $namer = $map->getlayerbyname("namerica");
 $namer->set("status", 1);
@@ -96,13 +94,15 @@ $cp->set("type", MS_SHAPE_POINT);
 $cp->set("status", MS_ON);
 $cp->set("labelcache", MS_OFF);
 $cl = ms_newClassObj($cp);
-$cl->label->set("type", MS_BITMAP);
-$cl->label->set("size", MS_MEDIUM);
+$cl->label->set("type", MS_TRUETYPE);
+$cl->label->set("size", 10);
 $cl->label->set("position", MS_CR);
+$cl->label->set("font", "liberation-bold");
 $cl->label->set("force", MS_ON);
 $cl->label->set("offsetx", 6);
 $cl->label->set("offsety", 0);
 $cl->label->outlinecolor->setRGB(255, 255, 255);
+$cl->label->color->setRGB(0, 0, 0);
 
 $cl2 = ms_newClassObj($cp);
 $cl2->label->set("type", MS_TRUETYPE);
@@ -154,7 +154,7 @@ $d = date("m/d/Y h:i A", $radts);
 
 $layer = $map->getLayerByName("credits");
 $point = ms_newpointobj();
-$point->setXY(125, 10);
+$point->setXY(5, 10);
 $point->draw($map, $layer, $img, 0,  "RADAR: $d");
 
 $map->drawLabelCache($img);
