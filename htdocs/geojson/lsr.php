@@ -26,15 +26,33 @@ $str_wfo_list = "and wfo in ('$wfoList')";
 if ($wfoList == ""){  $str_wfo_list = ""; }
 
 $rs = pg_query("SET TIME ZONE 'GMT'");
-$rs = pg_prepare($postgis, "SELECT", "SELECT *, 
+if (isset($_REQUEST["phenomena"])){
+  $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
+  $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
+  $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
+  $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
+  $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
+
+/* Now we fetch warning and perhaps polygon */
+  $rs = pg_prepare($postgis, "SELECT", "SELECT l.*, x(l.geom) as lon, y(l.geom) as lat
+           from warnings_$year w, lsrs_$year l
+           WHERE w.wfo = $1 and w.phenomena = $2 and 
+           w.eventid = $3 and w.significance = $4
+           and w.geom && l.geom and l.valid BETWEEN w.issue and w.expire
+           and w.gtype = 'P'");
+  $rs = pg_execute($postgis, "SELECT", Array($wfo, $phenomena,
+  		$eventid, $significance));
+	
+} else {
+	$rs = pg_prepare($postgis, "SELECT", "SELECT *, 
       x(geom) as lon, y(geom) as lat 
       FROM lsrs WHERE
       valid BETWEEN $1 and $2 $str_wfo_list
       LIMIT 500");
 
-$rs = pg_execute($postgis, "SELECT", Array(date("Y-m-d H:i", $sts), 
+	$rs = pg_execute($postgis, "SELECT", Array(date("Y-m-d H:i", $sts), 
                                            date("Y-m-d H:i", $ets) ) );
-
+}
 
 $ar = Array("type"=>"FeatureCollection",
       "crs" => Array("type"=>"EPSG", 

@@ -1,2 +1,0 @@
-RewriteEngine On
-RewriteRule ^p.phppid=([^\.]+) p.php?pid=$1 [L]

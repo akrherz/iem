@@ -1,5 +1,6 @@
 <?php
  include("../config/settings.inc.php");
+ define("IEM_APPID", 62);
  include("$rootpath/include/database.inc.php");
  header("Content-type: text/xml");
  echo "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";

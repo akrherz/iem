@@ -13,8 +13,15 @@ import iemdb
 import glob
 
 NIDS = {
-    'N0Q': 'High res reflectivity',
-    'N0S': 'Storm Relative Base Velocity'
+    'N0Q': 'Base Reflectivity (High Res)',
+    'N0U': 'Base Radial Velocity (High Res)',
+    'N0S': 'Storm Relative Radial Velocity',
+    'NET': 'Echo Tops',
+    'N0R': 'Base Reflectivity',
+    'N0V': 'Base Radial Velocity',
+    'N0Z': 'Base Reflectivity',
+    'TR0': 'TDWR Base Reflectivity',
+    'TV0': 'TDWR Radial Velocity',
 }
 
 def parse_time(s):
