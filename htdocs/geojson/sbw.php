@@ -27,18 +27,39 @@ if ($wfoList == ""){  $str_wfo_list = ""; }
 
 
 $rs = pg_query("SET TIME ZONE 'GMT'");
-$rs = pg_prepare($postgis, "SELECT", "SELECT *, 
+
+if (isset($_REQUEST["phenomena"])){
+  $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
+  $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
+  $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
+  $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
+  $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
+  	
+  $rs = pg_prepare($postgis, "SELECT", "SELECT *, 
+      ST_asGeoJson(geom) as geojson
+      FROM warnings_$year WHERE
+      gtype = $5 and significance = $1 and wfo = $2
+      and eventid = $3 and phenomena = $4");
+  $rs = pg_execute($postgis, "SELECT", Array($significance, $wfo,
+  		$eventid, $phenomena, 'P'));
+  if (pg_num_rows($rs) < 1){
+
+  	$rs = pg_execute($postgis, "SELECT", Array($significance, $wfo,
+  		$eventid, $phenomena, 'C'));
+  }
+  
+} else {
+	$rs = pg_prepare($postgis, "SELECT", "SELECT *, 
       ST_asGeoJson(geom) as geojson
       FROM warnings WHERE
       issue < $2 and
       expire > $1 and expire < $3 $str_wfo_list
       and gtype = 'P' and significance is not null
       LIMIT 500");
-
-$rs = pg_execute($postgis, "SELECT", Array(date("Y-m-d H:i", $sts), 
+  $rs = pg_execute($postgis, "SELECT", Array(date("Y-m-d H:i", $sts), 
                                            date("Y-m-d H:i", $ets),
                                            date("Y-m-d H:i", $ets + 86400*10)));
-
+}
 
 $ar = Array("type"=>"FeatureCollection",
       "crs" => Array("type"=>"EPSG", 

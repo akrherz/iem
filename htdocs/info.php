@@ -1,5 +1,6 @@
 <?php
 include("../config/settings.inc.php");
+define("IEM_APPID", 61);
 $TITLE = "IEM | Information";
 $THISPAGE = "iem-info";
 include("$rootpath/include/header.php"); ?>
