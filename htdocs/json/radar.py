@@ -72,6 +72,33 @@ def available_radars(form):
     MESOSITE.close()
     return root
 
+def find_scans(root, radar, product, sts, ets):
+    """
+    Find scans for a given radar, product, and start and end time
+    """
+    now = sts
+    if radar in ['USCOMP',]:
+        now -= mx.DateTime.RelativeDateTime(minutes=(now.minute % 5))
+        while now < ets:
+            if os.path.isfile( now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/"+
+                    product.lower() +"_%Y%m%d%H%M.png") ):
+                root['scans'].append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
+            now += mx.DateTime.RelativeDateTime(minutes=5)
+    else:
+        while now < ets:
+            if os.path.isfile( now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"+
+                    radar+"/"+product+"/"+radar+"_"+product+"_%Y%m%d%H%M.png") ):
+                root['scans'].append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
+            now += mx.DateTime.RelativeDateTime(minutes=1)
+
+def is_realtime(sts):
+    """
+    Check to see if this time is close to realtime...
+    """
+    if (mx.DateTime.gmt() - sts).seconds > 3600:
+        return False
+    return True
+
 def list_files(form):
     """
     List available NEXRAD files based on the form request
@@ -82,19 +109,11 @@ def list_files(form):
     end_gts = parse_time( form.getvalue('end', '2012-01-27T01:00Z') )
     #root = {'metaData': {'nexrad': nexrad, 'product': product}, 'scans' : []}
     root = {'scans': []}
-    now = start_gts
-    if radar in ['USCOMP',]:
-        now += mx.DateTime.RelativeDateTime(minutes=(5- now.minute))
-        while now < end_gts:
-            root['scans'].append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
-            now += mx.DateTime.RelativeDateTime(minutes=5)
-    else:
-        while now < end_gts:
-            if os.path.isfile( now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"+
-                    radar+"/"+product+"/"+radar+"_"+product+"_%Y%m%d%H%M.png") ):
-                root['scans'].append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
-            now += mx.DateTime.RelativeDateTime(minutes=1)
-    
+    find_scans(root, radar, product, start_gts, end_gts)
+    if len(root['scans']) == 0 and is_realtime(start_gts):
+        now = start_gts - mx.DateTime.RelativeDateTime(minutes=10)
+        find_scans(root, radar, product, now, end_gts)
+        
     return root
 
 def list_products(form):
