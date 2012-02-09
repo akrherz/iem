@@ -18,7 +18,7 @@ if ($imobile){
 }
 
 /* Pure IEM 2.0 App to do vtec stuff.  Shorter url please as well */
-$v = isset($_GET["vtec"]) ? $_GET["vtec"] : "2008-O-NEW-KJAX-TO-W-0048";
+$v = isset($_GET["vtec"]) ? $_GET["vtec"] : "2012-O-NEW-KBMX-TO-W-0001";
 $tokens = preg_split('/-/', $v);
 $year = $tokens[0];
 $operation = $tokens[1];
