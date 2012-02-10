@@ -79,13 +79,13 @@ def find_scans(root, radar, product, sts, ets):
     now = sts
     if radar in ['USCOMP',]:
         now -= mx.DateTime.RelativeDateTime(minutes=(now.minute % 5))
-        while now < ets:
+        while now < ets and len(root['scans']) < 300:
             if os.path.isfile( now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/"+
                     product.lower() +"_%Y%m%d%H%M.png") ):
                 root['scans'].append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
             now += mx.DateTime.RelativeDateTime(minutes=5)
     else:
-        while now < ets:
+        while now < ets and len(root['scans']) < 300:
             if os.path.isfile( now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"+
                     radar+"/"+product+"/"+radar+"_"+product+"_%Y%m%d%H%M.png") ):
                 root['scans'].append({'ts': now.strftime("%Y-%m-%dT%H:%MZ")})
