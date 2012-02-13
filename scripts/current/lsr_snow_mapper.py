@@ -51,8 +51,8 @@ if len(vals) < 2:
 
 # Now, we need to add in zeros, lets say we are looking at a .25 degree box
 buffer = 1.0
-for lat in numpy.arange(iemplot.IA_SOUTH, iemplot.IA_NORTH, buffer):
-  for lon in numpy.arange(iemplot.IA_WEST, iemplot.IA_EAST, buffer):
+for lat in numpy.arange(iemplot.MW_SOUTH, iemplot.MW_NORTH, buffer):
+  for lon in numpy.arange(iemplot.MW_WEST, iemplot.MW_EAST, buffer):
     found = False
     for j in range(len(lats)):
       if (lats[j] > (lat-(buffer/2.)) and lats[j] < (lat+(buffer/2.)) and
@@ -81,3 +81,9 @@ tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 pqstr = "plot c 000000000000 lsr_snowfall.png bogus png"
 thumbpqstr = "plot c 000000000000 lsr_snowfall_thumb.png bogus png"
 iemplot.postprocess(tmpfp,pqstr, thumb=True, thumbpqstr=thumbpqstr)
+
+cfg['_midwest'] = True
+cfg['_showvalues'] = False
+tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
+pqstr = "plot c 000000000000 mw_lsr_snowfall.png bogus png"
+iemplot.postprocess(tmpfp,pqstr)
