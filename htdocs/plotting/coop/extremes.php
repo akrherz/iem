@@ -2,7 +2,7 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
-$station = isset($_GET["station"]) ? strtolower($_GET["station"]) : die();
+$station = isset($_GET["station"]) ? strtoupper($_GET["station"]) : die();
 $var = isset($_GET["var"]) ? $_GET["var"]: die();
 
 $rs = pg_prepare($connection, "SELECT", "SELECT max_".$var." as max, " .
