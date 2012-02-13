@@ -8,6 +8,10 @@ $dirRef = strftime("%Y/%m/%d", $myTime);
 $titleDate = strftime("%b %d, %Y", $myTime);
 $jday = strftime("%j", $myTime);
 
+$fp = '/mesonet/ARCHIVE/data/'.$dirRef.'/text/ot/ot0007.dat';
+if (! is_file($fp)){
+	die("No data for date!");
+}
 $fcontents = file('/mesonet/ARCHIVE/data/'.$dirRef.'/text/ot/ot0007.dat');
 
 /* Create data arrays */
