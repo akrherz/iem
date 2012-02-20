@@ -35,7 +35,10 @@ for row in r:
       obs[sid] = iemAccessOb.iemAccessOb(sid, 'IL_RWIS')
     if (row['ClarusContribID'] == "44"):
       obs[sid] = iemAccessOb.iemAccessOb(sid, 'SD_RWIS')
-    ts = mx.DateTime.strptime(row['Timestamp'][:16], '%Y-%m-%d %H:%M')
+    try:
+      ts = mx.DateTime.strptime(row['Timestamp'][:16], '%Y-%m-%d %H:%M')
+    except:
+      continue
     obs[sid].setObTimeGMT( ts )
   if (row['ObsTypeName'] == 'essDewpointTemp'):
     obs[sid].data['dwpf'] = mesonet.c2f(row['Observation'])
