@@ -31,7 +31,8 @@ Iowa Ag Weather information in a one-stop location.</div>
 <tr>
   <th>Precipitation</th>
   <td><a href="../data/summary/today_prec.png">Today's total</a></td>
-  <td><a href="../plotting/coop/acc.phtml">Single Site Graphs</a></td>
+  <td><a href="../GIS/apps/coop/gsplot.phtml?var=prec&smonth=1&sday=1&year=<?php echo date("Y"); ?>">Map of Totals</a>
+  <br /><a href="../plotting/coop/acc.phtml">Single Site Graphs</a></td>
 </tr>
 
 
