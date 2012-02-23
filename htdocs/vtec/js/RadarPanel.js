@@ -340,7 +340,7 @@ App.RadarPanel = Ext.extend(GeoExt.MapPanel, {
 		var rl = this.getRadarLayer();
 		this.getFooterbar('status').update(rl.radar + " "
 				+ rl.radarProduct + " "
-				+ rl.radarTime.fromUTC().format("d M Y H:i A T"));
+				+ rl.radarTime.fromUTC().format("d M Y g:i A T"));
 		rl.setName("RADAR: "+ rl.radar +" "+ rl.radarProduct );
 		rl.setVisibility(true);
 		rl.redraw();
