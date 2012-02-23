@@ -7,7 +7,7 @@ hcursor2 = HADS.cursor()
 print 'Unknown NWSLIs from DCPish sites'
 hcursor.execute("""
  select nwsli, count(*) as tot, max(product), count(distinct substr(product,1,8)), count(distinct product) from unknown 
- where product !~* 'KTIR'
+ where product !~* 'KTIR' and length(nwsli) = 5
  GROUP by nwsli ORDER by tot DESC LIMIT 5
 """)
 for row in hcursor:
