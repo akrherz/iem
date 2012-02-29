@@ -1,10 +1,16 @@
+"""
+My purpose in life is to daily check the VTEC database and see if there are
+any IDs that are missing.  daryl then follows up with the weather bureau
+reporting anything he finds after an investigation.
 
+$Id: $:
+"""
 import mx.DateTime
 from pyIEM import iemdb
 i = iemdb.iemdb()
 postgis = i['postgis']
 
-tests = ['HGX.FF.7',
+tests = ['HGX.FF.7', 'GUM.MA.1', 'GUM.MA.2',
 ]
 #for i in range(27,78):
 #    tests.append('OAX.TO.%s' % (i,))
