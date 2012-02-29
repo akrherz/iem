@@ -109,7 +109,9 @@ $graph->xaxis->SetPos("min");
 $sensors = Array("Out of Subfloor", "Inbound Top", "Outbound Top", "Room");
 if ($myTime > mktime(0,0,0,7,9,2006))
   $sensors = Array("In Air Handler", "Out Air Handler", "Out Floor", "Room");
-
+if ($myTime > mktime(0,0,0,2,29,2012))
+  $sensors = Array("In Air Handler", "Out Air Handler", "Out Rack", "In Rack");
+  
 // Create the linear plot
 $lineplot=new LinePlot($t1, $times);
 if (sizeof($t2) > 0) {
