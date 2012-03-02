@@ -3,7 +3,7 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $conn = iemdb("postgis");
 
-$v = isset($_GET["vtec"]) ? $_GET["vtec"] : "2008-O-NEW-KJAX-TO-W-0048";
+$v = isset($_GET["vtec"]) ? substr($_GET["vtec"],0,25) : "2008-O-NEW-KJAX-TO-W-0048";
 $tokens = split("-", $v);
 $year = $tokens[0];
 $operation = $tokens[1];
