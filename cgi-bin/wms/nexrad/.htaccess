@@ -1,2 +1,2 @@
-#RewriteEngine On
-#RewriteRule ^n0r.cgi?$ /cgi-bin/mapserv/mapserv.fcgi?map=/mesonet/www/apps/iemwebsite/data/wms/nexrad/n0r.map& [QSA,L]
+RewriteEngine On
+RewriteRule ^n0r.cgi?$ /cgi-bin/mapserv/mapserv.fcgi?map=/mesonet/www/apps/iemwebsite/data/wms/nexrad/n0r.map& [QSA,L]
