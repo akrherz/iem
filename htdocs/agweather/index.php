@@ -76,6 +76,7 @@ from Spring thresholds (mainly because of plant size/height).</blockquote>
 <ul>
  <li><a href="../COOP/freezing.php">Fall Freezing Dates</a></li>
  <li><a href="../climodat/index.phtml?station=IA0200&report=22">First Fall Freeze Probabilities</a></li>
+ <li><a href="../plotting/coop/threshold_histogram_fe.phtml">Winter Minimum Temperature Frequencies</a></li>
 </ul>
 
 <h4>External Links</h4>
@@ -83,6 +84,8 @@ from Spring thresholds (mainly because of plant size/height).</blockquote>
  <li><a href="http://www.iowaagriculture.gov/climatology.asp">State of Iowa Climatologist</a></li>
  <li><a href="http://www.nass.usda.gov/Charts_and_Maps/Crop_Progress_&_Condition/index.asp">USDA Charts &amp; Maps of Crop Progress</a></li>
  <li><a href="http://www.nass.usda.gov/Publications/State_Crop_Progress_and_Condition/index.asp">USDA State Crop Progress &amp; Condition</a></li>
+ <li><a href="http://planthardiness.ars.usda.gov/PHZMWeb/">USDA Plant Hardiness Map</a> (enter
+ your zipcode or click on the map)</li>
 </ul>
 
 <?php include("$rootpath/include/footer.php"); ?>
