@@ -30,7 +30,7 @@ sql = """SELECT c.*, t.network, t.id from current_log c, stations t WHERE date(v
       ts.strftime("%Y-%m-%d"), networks)
 icursor.execute(sql)
 for row in icursor:
-    sql = """INSERT into t"""+ ts.year +""" (station, valid, tmpf, dwpf, drct, sknt,  alti, 
+    sql = """INSERT into t"""+ str(ts.year) +""" (station, valid, tmpf, dwpf, drct, sknt,  alti, 
     p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, metar,
     p03i, p06i, p24i, max_tmpf_6hr, min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr,
     mslp, presentwx) 
