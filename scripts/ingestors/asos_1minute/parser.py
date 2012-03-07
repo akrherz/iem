@@ -57,7 +57,7 @@ P2_RE = re.compile(r"""
 (?P<hr>[0-9]{2})(?P<mi>[0-9]{2})
 (?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s+
 \[?(?P<ptype>[a-zA-Z0-9\?\-\+\.]{1,2})\s?\]?\s?\s?
-\[?((?P<unk>\d+)V?|\s+(?P<unk_miss>[M ]))\s+\]?\s+
+\[?((?P<unk>\d+)V?|\s+(?P<unk_miss>[M ]))\s+\]?\s?
 \[?\s*((?P<precip>\d+\.\d*)|(?P<precip_miss>M))\s*\]?
 ............\s+
 \[?((?P<unk2>\d*)|(?P<unk2_miss>M))\]?\s+
@@ -70,6 +70,7 @@ P2_RE = re.compile(r"""
 
 
 p2_examples = [
+"94908KDBQ DBQ2012020713191919  NP [0000  ][ 0.00]            39971   29.196  29.197  29.204    29   23          ",
 "14972KSPW SPW2009110517122312  NP  0000   [ 0.00]            39992   28.661  28.673            50   34         ",
 "94991KLWD LWD2009122215352135  NP  0000     0.00             39992   28.738  28.736          [ 32]  30         ",
 "14944KFSD FSD2010013123590559  NP           0.00             39985   28.686  28.681  28.684     7    2         ",
@@ -228,6 +229,9 @@ if len(sys.argv) == 3:
                 'CID','EST',
                 'IOW','SUX','DBQ','ALO','DSM']:
         runner(station, 
+               mx.DateTime.DateTime(int(sys.argv[1]),int(sys.argv[2]),1))
+elif len(sys.argv) == 4:
+        runner(sys.argv[3], 
                mx.DateTime.DateTime(int(sys.argv[1]),int(sys.argv[2]),1))
 else:
     test()
