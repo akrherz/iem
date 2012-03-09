@@ -20,6 +20,8 @@ set dateY=${YYYY}${mm}${dd}
 set hh=`date --date '1 minute' -u +%H`
 set mm=`date --date '1 minute' -u +%M`
 
+set localtime="`date +'%Y/%m/%d %I:%M %p'`"
+
 if (${mm} > 40 ) then
 	set mm = "40"
 	set m = "4"
@@ -105,7 +107,7 @@ $GEMEXE/sfmap << EOF > /dev/null
 	PROJ     = ${proj}
 	CLEAR    = yes
 	PANEL	= 0
-	TITLE	= ${TITLE}
+	TITLE	= ${TITLE} (${localtime})
 	SCALE	= 0
 	GVECT   =
 	WIND    = 
