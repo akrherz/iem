@@ -9,6 +9,8 @@ set date=${yy}${MM}${dd}
 set hh=`date -u --date '1 minute' +%H`
 set mm=`date -u --date '1 minute' +%M`
 
+set localtime="`date +'%Y/%m/%d %I:%M %p'`"
+
 if (${mm} > 40 ) then
         set mm = "40"
 else if (${mm} > 20) then
@@ -36,7 +38,7 @@ $GEMEXE/sfmap_gf << EOF > /tmp/awos_plot_sfmap.out
  	DATTIM   =  ${date}/${hh}${mm}
 	SFFILE   =  /mesonet/data/gempak/awos/${date}_awos.gem
  	LATLON   =  0
-        TITLE    =  32/-1/~ AWOS Data (`date +'%Y-%m-%d %I:%M %p'`)
+        TITLE    =  32/-1/~ AWOS Data (${localtime})
         CLEAR    =  no
         PANEL    =  0
         DEVICE   = ${DEVICE}
@@ -53,7 +55,7 @@ $GEMEXE/sfmap_gf << EOF > /tmp/awos_plot_sfmap.out
 	SFFILE	= /mesonet/data/gempak/meso/${date}_meso.gem
 	DEVICE	= ${DEVICE2}
 	SFPARM	= ;CEIL;wsym:1.2:2;;;;;;;brbk:1:2:111
-	TITLE	= 32/-1/~ ASOS/AWOS Ceiling 100ft
+	TITLE	= 32/-1/~ ASOS/AWOS Ceiling 100ft (${localtime})
 	CLEAR	= yes
 	list
 	run
