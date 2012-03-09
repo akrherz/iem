@@ -26,14 +26,21 @@ include("$rootpath/include/header.php");
         }
 </style>
 
-<h3>ASOS data download</h3>
-<p>The IEM maintains an ever growing archive of ASOS data for sites in the
-United States.  This archive is, by no means, complete and the begining of
-the archive varies by site.  If you don't get data for a request, please feel
-free to <a href="../info/contacts.php">contact us</a> for help.  You may also 
-find what 
-you need on <a href="http://wunderground.com">Weather Underground's</a>
-excellent website. Please also note, that for Iowa <a href="asos/1min.phtml">ASOS</a> and <a href="awos/1min.php">AWOS</a> data, the IEM has a special one minute interval archive available.
+<h3>ASOS/AWOS data download</h3>
+
+<p>The IEM maintains an ever growing archive of automated airport weather
+observations from around the world!  These observations are typically called 
+'ASOS' or sometimes 'AWOS' sensors.  A more generic term may be METAR data, 
+which is a term that describes the format the data is transmitted as. If you 
+don't get data for a request, please feel free to 
+<a href="../info/contacts.php">contact us</a> for help. The IEM also has a one
+minute interval dataset for Iowa <a href="asos/1min.phtml">ASOS</a> (2000-) 
+and <a href="awos/1min.php">AWOS</a> (1995-2011) sites.  This archive
+simply provides the as-is collection of historical observations, very little 
+quality control is done.
+
+<div class="warning">Please be patient with this page as it will take a number
+of seconds to process your request and provide the result.</div>
 
 <form name="netselect">
 <table><tr><th>Select Network</th>
@@ -50,19 +57,7 @@ excellent website. Please also note, that for Iowa <a href="asos/1min.phtml">ASO
 
 <form method="GET" action="<?php echo $rootcgi; ?>/request/getData.py" name="olselect">
 <div id="map"></div>
-<div id="sname" unselectable="on">No site selected</div>
-
-
-<p>In general, data from the Iowa ASOS network is almost always available.
-Data from other states is more sporatic.  If you have any questions, please
-don't hesitate to contact us.
-
-<p><b>Other download pages:</b>
-<ul>
-  <li><a href="/request/awos/1min.php">1 minute interval Iowa AWOS data</a></li>
-  <li><a href="<?php echo $rooturl; ?>/request/asos/1min.phtml">1 minute interval Iowa ASOS data</a></li>
-  <li><a href="/request/rwis/fe.phtml">Iowa RWIS data</a></li>
-</ul>
+<div id="sname">No site selected</div>
 
 </TD>
 
@@ -148,7 +143,7 @@ for all observations, the IEM continues to backfill this information.
 </TD></TR></TABLE>
 </form>
 
-</TD></TR></div>
+
 
 <?php include("$rootpath/include/footer.php"); ?>
 
