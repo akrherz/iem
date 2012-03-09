@@ -2,6 +2,9 @@ cd mos
 /mesonet/python/bin/python current_bias.py NAM
 /mesonet/python/bin/python current_bias.py GFS
 
+cd ../plots
+./RUN_PLOTS
+
 cd ../delta
 ./RUN.csh
 
@@ -28,8 +31,6 @@ cd ../iemplot
 cd ../dbutil
 /mesonet/python/bin/python asos2archive.py iowa
 
-cd ../plots
-./RUN_PLOTS
 
 cd ../iemre
 /mesonet/python/bin/python grid_asos.py
