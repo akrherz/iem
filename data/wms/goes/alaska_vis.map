@@ -1,0 +1,66 @@
+MAP
+#
+# Start of map file
+#
+NAME "goes_east_vis"
+STATUS ON
+SIZE 450 350
+EXTENT -126 24 -66 50
+UNITS DD
+SHAPEPATH "/mesonet/data/gis/"
+IMAGECOLOR -1 -1 -1
+
+#
+PROJECTION
+   "init=epsg:4326"
+END
+
+#
+WEB
+  TEMPLATE ia.html
+  MINSCALE 0
+  MAXSCALE 465000000
+  IMAGEPATH "/var/webtmp/"
+  IMAGEURL "/tmp/"
+  LOG "/var/webtmp/w0.log"
+  METADATA
+   "wms_title" "IEM GOES VIS WMS Service"
+   "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wms/goes/alaska_vis.map&SERVICE=WMS"
+   "wms_srs" "EPSG:4326 EPSG:3857"
+   "wms_abstract" "GOES East VIS Satellite."
+   "wms_keywords" "GOES,EAST,VIS"
+   "wms_accessconstraints" "None"
+   "wms_contactperson" "Daryl Herzmann"
+   "wms_contactorganization" "Iowa State University"
+      "wms_enable_request" "*"
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+  NAME "alaska_vis"
+  STATUS ON
+  MINSCALE 0
+  MAXSCALE 465000000
+  DATA "/home/ldm/data/gis/images/awips207/GOES15_AK_VIS.png"
+  TYPE RASTER
+  PROJECTION
+    "proj=stere"
+    "lat_ts=60"
+    "lat_0=90"
+    "lat_2=25"
+    "lon_0=-150"
+    "a=6371200.0"
+    "b=6371200.0"
+  END
+  METADATA
+    "wms_title" "GOES ALASKA VIS"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+      PROCESSING "CLOSE_CONNECTION=NORMAL"
+  #OFFSITE 0 0 0
+END
+
+END
