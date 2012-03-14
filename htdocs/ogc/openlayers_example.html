@@ -99,7 +99,18 @@ function init(){
             isBaseLayer     : false}
     );
     
-    map.addLayers([gmap, irsat, vissat, hawaiisat, aksat, n0q]);
+    var states = new OpenLayers.Layer.TMS(
+            'US State Borders',
+            'http://mesonet.agron.iastate.edu/c/tile.py/',
+            {layername      : 's-900913',
+            service         : '1.0.0',
+            type            : 'png',
+            visibility      : false,
+            getURL          : get_my_url,
+            isBaseLayer     : false}
+    );
+    
+    map.addLayers([gmap, irsat, vissat, hawaiisat, aksat, states, n0q]);
     var ls = new OpenLayers.Control.LayerSwitcher();
     map.addControl(ls);
     ls.maximizeControl();
