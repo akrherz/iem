@@ -44,7 +44,7 @@ if (($phenomena == "SV" || $phenomena == "TO" || $phenomena == "FF" || $phenomen
 $result = pg_exec($connect, $sql);
 
 $ar = Array("products" => Array() );
-for( $i=0; $z = @pg_fetch_array($result,$i); $i++)
+for( $i=0; $z = @pg_fetch_assoc($result,$i); $i++)
 {
   $z["id"] = $i +1;
   $z["phenomena"] = $phenomena;
