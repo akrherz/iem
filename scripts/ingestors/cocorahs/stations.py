@@ -12,7 +12,7 @@ data = urllib2.urlopen(req).readlines()
 
 # Find current stations
 stations = []
-sql = "SELECT id from stations WHERE network = '%sCOCORAHS'" % (state,)
+sql = "SELECT id from stations WHERE network = '%sCOCORAHS' and y(geom) > 0" % (state,)
 rs = mesosite.query(sql).dictresult()
 for i in range(len(rs)):
   stations.append( rs[i]['id'] )
@@ -27,7 +27,7 @@ if not header.has_key('StationNumber'):
     sys.exit(0)
 
 for row in  data[1:]:
-  cols = row.split(",")
+  cols = row.split(", ")
   id = cols[ header["StationNumber"] ]
   if (id in stations):
     continue
@@ -37,15 +37,21 @@ for row in  data[1:]:
   lat = cols[ header["Latitude"] ].strip()
   lon = cols[ header["Longitude"] ].strip()
 
-  if (name == "" or lat == "" or lon == ""):
+  if (lat == "0" or lon == "-0"):
     continue
 
-  print "NEW COCORAHS SITE", id, name, cnty
+  print "NEW COCORAHS SITE", id, name, cnty, lat, lon
   
   sql = "INSERT into stations(id, synop, name, state, country, network, online,\
          geom, county, plot_name \
          ) VALUES ('%s',99999, '%s', '%s', 'US', '%sCOCORAHS', 't',\
          'SRID=4326;POINT(%s %s)', '%s', '%s')" % (id, name,\
          state, state, lon, lat, cnty, name)
-  mesosite.query(sql)
+  try:
+    mesosite.query(sql)
+  except:
+    sql = """UPDATE stations SET geom = 'SRID=4326;POINT(%s %s)'
+           WHERE id = '%s' and network = '%sCOCORAHS'""" % (lon, lat,
+           id, state)
+    mesosite.query( sql )
 
