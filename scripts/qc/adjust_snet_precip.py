@@ -25,7 +25,7 @@ def process(ts):
         fp = "/mesonet/ARCHIVE/raw/snet/%s/%s.dat" % (ts.strftime("%Y_%m/%d"), 
                                                       nwnid)
         if not os.path.isfile(fp):
-            print 'Missing: %s' % (fp,)
+            #print 'Missing: %s' % (fp,)
             continue
 
         maxPrecip = -99
