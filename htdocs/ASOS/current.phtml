@@ -58,9 +58,7 @@ function aSortBySecondIndex($multiArray, $secondIndex, $sorder) {
   else 
         arsort($indexMap);
   while (list($firstIndex, ) = each($indexMap))
-      if (is_numeric($firstIndex))
-                 $sortedArray[] = $multiArray[$firstIndex];
-      else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+      $sortedArray[$firstIndex] = $multiArray[$firstIndex];
   return $sortedArray;
 }
 
@@ -108,8 +106,6 @@ if($format == 'csv'){
 	echo $csv;
 	die();
 }
-
-
 
 /* Begin HTML output! */
   include("$rootpath/include/header.php"); 
