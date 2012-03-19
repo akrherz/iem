@@ -50,7 +50,7 @@ st = network.Table("IACLIMATE")
 
 # Compute normal from the climate database
 sql = """SELECT station,
-   sum(gddXX(%s, %s, high, low)) as gdd
+   sum(gddXX(%s, %s, high, low)) as gdd, count(*)
    from alldata_ia WHERE year = %s and day >= '%s' and day < '%s'
    GROUP by station""" % (baseV, maxV, sts.year, sts.strftime("%Y-%m-%d"),
                             ets.strftime("%Y-%m-%d"))
@@ -60,9 +60,12 @@ lons = []
 gdd50 = []
 valmask = []
 ccursor.execute(sql)
+total_days = (ets - sts).days
 for row in ccursor:
   id = row[0]
   if not st.sts.has_key(id):
+    continue
+  if row[2] < (total_days * 0.9):
     continue
   lats.append( st.sts[id]['lat'] )
   lons.append( st.sts[id]['lon'] )
