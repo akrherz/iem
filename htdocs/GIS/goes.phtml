@@ -6,7 +6,28 @@ include("$rootpath/include/header.php"); ?>
 
 <h4>GOES Satellite Imagery for GIS</h4>
 
-<img src="vis_example.jpg" />
+<p>The IEM receives a "real-time" feed of GOES East and West satellite imagery
+in GINI format.  We process this into GIS-ready RASTERs for download and web
+services.  This page details this dataset.
+
+<table cellpadding="3" cellspacing="0" border="1">
+<tr>
+ <th>AWIPS native projections</th>
+ <th>Reprojected into EPSG:4326 "lat/long"</th>
+ <th>Ready for Google-Maps</th>
+ </tr>
+ 
+<tr>
+ <td><img src="goes-gini-example.png" />
+ <br /><a href="<?php echo $rooturl; ?>/data/gis/images/">current imagery folder</a></td>
+ <td valign="top"><img src="goes4326_example.png" />
+ <br /><a href="<?php echo $rooturl; ?>/data/gis/images/4326/goes">current imagery folder</a></td>
+ <td valign="top"><img src="goes-gm.png" />
+ <br /><a href="<?php echo $rooturl; ?>/ogc/">Tile Map Service</a>
+ <br /><a href="<?php echo $rooturl; ?>/ogc/openlayers_example.html">OpenLayers Example</a></td>
+ </tr>
+ 
+</table>
 
 <p>The <a href="http://www.goes.noaa.gov/">GOES (Geostationary Satellite)</a> 
 provide the commonly seen views of clouds from space.  The IEM receives a near
@@ -99,8 +120,7 @@ numbers into Proj4 strings.
 <p>Since 8 March 2009, water vapor channel was added to the archive as well.
 <p>Since 21 June 2011, the IEM started archiving GOES East and West vis,ir, and water vapor
 imagery in PNG format on the AWIPS 211 projection.
-<p>Since 14 March 2012, the IEM started archiving all of the GINI formatted
-satellite imagery.
+<p>Since 14 March 2012, the IEM started archiving all of the GINI processed imagery.
 
 <div class="iem-form">
 <strong>Today's archive of imagery</strong>
