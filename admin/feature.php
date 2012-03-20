@@ -1,6 +1,6 @@
 <?php
 /* Web based feature publisher */
-include("../../config/settings.inc.php");
+include("../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/facebook.php");
 
