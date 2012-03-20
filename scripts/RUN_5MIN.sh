@@ -1,6 +1,6 @@
 # Run every 5 minutes
 cd dl
-/mesonet/python/bin/python radar_composite.py 
+python radar_composite.py 
 
 cd ../outgoing/snetnws
 python snet_fe.py &
