@@ -1,9 +1,16 @@
-# Cache NEXRAD composites for the website
-
-import urllib2, os, mx.DateTime, time, random, sys
-from pyIEM import iemdb
-i = iemdb.iemdb()
-postgis = i['postgis']
+"""
+ Cache NEXRAD composites for the website
+$Id: $:
+"""
+import urllib2
+import os
+import mx.DateTime
+import time
+import random
+import sys
+import iemdb
+POSTGIS = iemdb.connect('postgis', bypass=True)
+pcursor = POSTGIS.cursor()
 
 opener = urllib2.build_opener()
 
@@ -15,6 +22,7 @@ def save(sectorName, file_name, dir_name, tstamp,bbox=None):
     uri = "http://iem50.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % \
         (bbox,tstamp, layers)
   try:
+    print uri
     f = opener.open(uri)
   except:
     time.sleep(5)
@@ -38,13 +46,13 @@ for i in ['lot','ict','sd','hun']:
   save(i, '%scomp.png'%(i,), '%srad' %(i,), sts)
 
 # Now, we query for watches.
-rs = postgis.query("select sel, xmax(geom), xmin(geom), ymax(geom), ymin(geom)\
-     from watches_current ORDER by issued DESC").dictresult()
-for i in range(len(rs)):
-  xmin = float(rs[i]['xmin']) - 0.75 + (random.random() * 0.01)
-  ymin = float(rs[i]['ymin']) - 0.75 + (random.random() * 0.01)
-  xmax = float(rs[i]['xmax']) + 0.75 + (random.random() * 0.01)
-  ymax = float(rs[i]['ymax']) + 0.75 + (random.random() * 0.01)
+pcursor.execute("""select sel, xmax(geom), xmin(geom), ymax(geom), ymin(geom)
+     from watches_current ORDER by issued DESC""")
+for row in pcursor:
+  xmin = float(row[2]) - 0.75 
+  ymin = float(row[4]) - 0.75 
+  xmax = float(row[1]) + 0.75 
+  ymax = float(row[3]) + 1.5 
   bbox = "%s,%s,%s,%s" % (xmin,ymin,xmax,ymax)
-  sel = rs[i]['sel'].lower()
+  sel = row[0].lower()
   save('custom', '%scomp.png'%(sel,), '%srad'% (sel,), sts, bbox)
