@@ -5,13 +5,13 @@ MAP
 NAME mosaic
 STATUS ON
 SIZE 900 600
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONTSET "/mesonet/www/apps/iemwebsite/data/gis/fonts.list"
 # 3 x 2  1200 x 800 km
 EXTENT -200000 4300000 1000000 5100000
 #EXTENT -104 37 -87 49
 UNITS METERS
-SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SHAPEPATH "/home/ldm/data/gis/"
+SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/symbols/stations.sym"
 IMAGECOLOR 0 0 250
 IMAGETYPE PNG
 TRANSPARENT OFF
@@ -156,7 +156,7 @@ END
 
 LAYER
  NAME KCCI
- DATA /mesonet/data/gis/images/26915/KCCI/KCCI_N0R_0.tif
+ DATA /home/ldm/data/gis/images/26915/KCCI/KCCI_N0R_0.tif
  TYPE RASTER
  STATUS ON
  PROJECTION
@@ -226,7 +226,7 @@ LAYER
     NAME 'credits'
     LABEL
       COLOR 0 0 0
-      BACKGROUNDCOLOR 250 250 250
+#      BACKGROUNDCOLOR 250 250 250
 #      SHADOWSIZE 1 1
 #      SHADOWCOLOR 0 0 0
 #      BACKGROUNDSHADOWCOLOR 0 0 0
