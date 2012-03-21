@@ -16,13 +16,14 @@ opener = urllib2.build_opener()
 
 def save(sectorName, file_name, dir_name, tstamp,bbox=None):
   layers = "layers[]=n0q&layers[]=watch_by_county&layers[]=sbw&layers[]=uscounties"
-  uri = "http://iem50.local/GIS/radmap.php?sector=%s&ts=%s&%s" % \
+  if sectorName == 'conus':
+    layers = "layers[]=n0q&layers[]=watch_by_county&layers[]=uscounties"
+  uri = "http://iemvs107.local/GIS/radmap.php?sector=%s&ts=%s&%s" % \
         (sectorName,tstamp, layers)
   if (bbox is not None):
-    uri = "http://iem50.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % \
+    uri = "http://iemvs107.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % \
         (bbox,tstamp, layers)
   try:
-    print uri
     f = opener.open(uri)
   except:
     time.sleep(5)
