@@ -43,7 +43,7 @@ LAYER
   STATUS ON
   MINSCALE 0
   MAXSCALE 465000000
-  DATA "/home/ldm/data/gis/images/awips208/GOES15_HI_VIS.png"
+  DATA "/home/ldm/data/gis/images/awips208/GOES_HI_VIS.png"
   TYPE RASTER
   PROJECTION
     "proj=merc"
