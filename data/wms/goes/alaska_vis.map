@@ -43,7 +43,7 @@ LAYER
   STATUS ON
   MINSCALE 0
   MAXSCALE 465000000
-  DATA "/home/ldm/data/gis/images/awips207/GOES15_AK_VIS.png"
+  DATA "/home/ldm/data/gis/images/awips207/GOES_AK_VIS.png"
   TYPE RASTER
   PROJECTION
     "proj=stere"

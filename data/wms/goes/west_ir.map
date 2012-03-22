@@ -43,7 +43,7 @@ LAYER
   STATUS ON
   MINSCALE 0
   MAXSCALE 465000000
-  DATA "/home/ldm/data/gis/images/awips211/GOES15_WEST_IR.png"
+  DATA "/home/ldm/data/gis/images/awips211/GOES_WEST_IR.png"
   TYPE RASTER
   PROJECTION
     "proj=lcc"

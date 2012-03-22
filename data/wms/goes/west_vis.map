@@ -41,7 +41,7 @@ END
 LAYER
   NAME "west_vis_1km"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/awips211/GOES15_WEST_VIS.png"
+  DATA "/home/ldm/data/gis/images/awips211/GOES_WEST_VIS.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
