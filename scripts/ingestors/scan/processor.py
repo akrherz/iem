@@ -97,7 +97,9 @@ def savedata( data , maxts ):
     """
     Save away our data into IEM Access
     """
-    if data.has_key('Time (CST)'):
+    if data.has_key('Time'):
+        tstr = "%s %s" % (data['Date'], data['Time'])
+    elif data.has_key('Time (CST)'):
         tstr = "%s %s" % (data['Date'], data['Time (CST)'])
     else:
         tstr = "%s %s" % (data['Date'], data['Time (CDT)'])
