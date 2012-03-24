@@ -10,7 +10,10 @@ from pyIEM import iemdb
 i = iemdb.iemdb()
 postgis = i['postgis']
 
-tests = ['HGX.FF.7', 'GUM.MA.1', 'GUM.MA.2','MRX.SV.18', 'SGF.TO.23'
+tests = ['HGX.FF.7', 'GUM.MA.1', 'GUM.MA.2','MRX.SV.18', 'SGF.TO.23',
+         'LMK.TO.81', 'LMK.TO.82', 'LSX.TO.11', 'IND.TO.7', 'IND.TO.8',
+         'PAH.TO.52', 'PAH.TO.53','PAH.TO.54', 'PAH.TO.55', 'MRX.TO.58',
+         'ILX.TO.2'
 ]
 #for i in range(27,78):
 #    tests.append('OAX.TO.%s' % (i,))
