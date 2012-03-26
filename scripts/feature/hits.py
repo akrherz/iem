@@ -17,7 +17,7 @@ ax.semilogy(x, y)
 xticks = []
 xticklabels = []
 ts0 = mx.DateTime.DateTime(2001,1,1)
-ts1 = mx.DateTime.DateTime(2012,1,2)
+ts1 = mx.DateTime.DateTime(2013,1,2)
 interval = mx.DateTime.RelativeDateTime(days=1)
 now = ts0
 while now < ts1:
@@ -28,7 +28,7 @@ while now < ts1:
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 ax.set_ylabel("Maximum Daily Web Hits")
-ax.set_title("IEM Website Hits Milestones [17 Jun 2001-2011]")
+ax.set_title("IEM Website Hits Milestones [17 Jun 2001-2012]")
 ax.grid(True)
 fig.savefig('test.png')
 #import iemplot

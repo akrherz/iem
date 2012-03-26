@@ -2,32 +2,46 @@ import iemdb
 import numpy
 import ephem
 import mx.DateTime
-COOP = iemdb.connect('coop', bypass=True)
-ccursor = COOP.cursor()
-ISUAG = iemdb.connect('isuag', bypass=True)
-icursor = ISUAG.cursor()
 
-def compute_daytime():
+def compute_sunrise(lat, long):
     arr = []
     sun = ephem.Sun()
     ames = ephem.Observer()
-    ames.lat = '41.99206'
-    ames.long = '-93.62183'
-    sts = mx.DateTime.DateTime(2000,1,1)
-    ets = mx.DateTime.DateTime(2001,1,1)
+    ames.lat = lat
+    ames.long = long
+    sts = mx.DateTime.DateTime(2012,1,1)
+    ets = mx.DateTime.DateTime(2013,1,1)
     interval = mx.DateTime.RelativeDateTime(days=1)
     now = sts
+    doy = []
+    i = 1
+    returnD = 0
+    findT = 0
     while now < ets:
         ames.date = now.strftime("%Y/%m/%d")
         rise = mx.DateTime.strptime(str(ames.next_rising(sun)), "%Y/%m/%d %H:%M:%S")
+        rise = rise.localtime()
         set = mx.DateTime.strptime(str(ames.next_setting(sun)), "%Y/%m/%d %H:%M:%S")
-        if set < rise:
-            ames.date = (now - interval).strftime("%Y/%m/%d")
-            rise = mx.DateTime.strptime(str(ames.next_rising(sun)), "%Y/%m/%d %H:%M:%S")
-        arr.append( (set-rise).minutes / 60.0)
+        #if set < rise:
+        #    ames.date = (now - interval).strftime("%Y/%m/%d")
+        #    rise = mx.DateTime.strptime(str(ames.next_rising(sun)), "%Y/%m/%d %H:%M:%S")
+        #arr.append( (set-rise).minutes / 60.0)
+        offset = rise.hour * 60 + rise.minute
+        if now.month == 3 and now.day == 11:
+            findT = arr[-1]
+            arr.append(None)
+            doy.append( i + 0.5)
+        if now.month == 11 and now.day == 4:
+            arr.append(None)
+            doy.append( i + 0.5)
+        if returnD == 0 and offset <= findT:
+            returnD = i
+        arr.append( offset )
+        doy.append( i )
+        i += 1
         now += interval
 
-    return arr
+    return doy, arr, returnD
 
 def smooth(x,window_len=11,window='hanning'):
 
@@ -56,55 +70,46 @@ def smooth(x,window_len=11,window='hanning'):
     y=numpy.convolve(w/w.sum(),s,mode='valid')
     return y
 
-daylight = compute_daytime()
-
-icursor.execute("""
-select extract(doy from valid) as doy, avg(c30) from daily where station = 'A130209' GROUP by doy ORDER by doy ASC
-""")
-soil = []
-for row in icursor:
-    soil.append( row[1] )
-
-ccursor.execute("""
-SELECT high, low from climate where station = 'IA0200' ORDER by valid ASC
-""")
-highs = []
-lows = []
-for row in ccursor:
-    highs.append( row[0] )
-    lows.append( row[1] )
+doy, ames, rames = compute_sunrise('41.99206','-93.62183')
+doy, stl, rstl = compute_sunrise('38.75245','-90.3734')
+doy, msp, rmsp = compute_sunrise('44.88537','-93.23131')
 
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.font_manager
+prop = matplotlib.font_manager.FontProperties(size=12)
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
 xticks = []
 xticklabels = []
-sts = mx.DateTime.DateTime(2000,1,1)
-ets = mx.DateTime.DateTime(2001,1,1)
+sts = mx.DateTime.DateTime(2012,1,1)
+ets = mx.DateTime.DateTime(2013,1,1)
 interval = mx.DateTime.RelativeDateTime(months=1)
 now = sts
 while now < ets:
-  xticks.append( (now - mx.DateTime.DateTime(2000,1,1)).days )
+  xticks.append( (now - mx.DateTime.DateTime(2012,1,1)).days )
   xticklabels.append( now.strftime("%b") )
   now += interval
 
-print len(highs), len(lows)
-ax.plot( np.arange(1,367), highs, color='r', label='High Temp')
-ax.plot( np.arange(1,367), lows, color='b', label='Low Temp')
-ax.plot( np.arange(1,367), soil, color='g', label='4in Soil')
-ax2 = ax.twinx()
-ax2.plot( np.arange(1,367), daylight, color='k')
+#print len(highs), len(lows)
+ax.plot( doy, ames, color='k', label="Ames - %s days" % (rames - 71,))
+print [71, rames], [ames[69], ames[rames]]
+ax.plot( [71, rames], [ames[69], ames[rames]], color='k', linestyle='--')
+ax.plot( doy, msp, color='b', label="Minneapolis - %s days" % (rmsp-71,))
+ax.plot( [71, rmsp], [msp[69], msp[rmsp]], color='b', linestyle='--')
+ax.plot( doy, stl, color='r', label='Saint Louis - %s days' % (rstl-71,))
+ax.plot( [71, rstl], [stl[69], stl[rstl]], color='r', linestyle='--')
 ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
 ax.set_xlim(min(xticks)-1, max(xticks)+32)
-ax2.set_xticklabels(xticklabels)
-ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
-ax2.set_ylabel("Daylight Length [hours]")
+ax.set_ylabel("Local Sunrise Time (CST or CDT)")
+ax.set_yticks(numpy.arange(300,510,30))
+ax.set_yticklabels( ('5 AM', '5:30', '6 AM', '6:30', '7 AM', '7:30', '8 AM', '8:30'))
 #ax.set_xlabel("1 Jan - 26 May 2011")
-ax.set_title("Ames Daily Climatologies")
+ax.set_title("Number of Days to retrieve our stolen morning daylight hour")
 ax.grid(True)
-ax.legend(loc=2)
+ax.legend(loc=4, prop=prop)
 fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')
