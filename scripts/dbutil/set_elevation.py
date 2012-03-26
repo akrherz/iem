@@ -1,6 +1,7 @@
 
 import urllib2, re, time
 import iemdb
+import simplejson
 MESOSITE = iemdb.connect('mesosite')
 mcursor = MESOSITE.cursor()
 mcursor2 = MESOSITE.cursor()
@@ -15,12 +16,15 @@ for row in mcursor:
   lon = row[1]
   id = row[4]
   network = row[0]
-  r = urllib2.urlopen('http://weather.gladstonefamily.net/cgi-bin/wx-get-elevation.pl?lat=%s&lng=%s' % (lat,lon)).read()
-  tokens =  re.findall(' ele="([0-9\.\-]*)" ', r)
-  if len(tokens) == 0:
-    print 'ERROR WITH ', id, r
-    continue
-  newelev = float(tokens[0])
+  #r = urllib2.urlopen('http://weather.gladstonefamily.net/cgi-bin/wx-get-elevation.pl?lat=%s&lng=%s' % (lat,lon)).read()
+  r = urllib2.urlopen('http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/Elevation/ESRI_Elevation_World/MapServer/exts/ElevationsSOE/ElevationLayers/1/GetElevationAtLonLat?lon=%s&lat=%s&f=pjson' % (lon,lat)).read()
+  #tokens =  re.findall(' ele="([0-9\.\-]*)" ', r)
+  #if len(tokens) == 0:
+  #  print 'ERROR WITH %s La: %s Lo: %s Res: %s' % (id, lat, lon, r)
+  #  continue
+  #newelev = float(tokens[0])
+  json = simplejson.loads(r)
+  newelev = json['elevation']
 
   print "%7s %s OLD: %s NEW: %.3f" % (id, network, elev, newelev)
   mcursor2.execute("UPDATE stations SET elevation = %s WHERE id = '%s' and network = '%s'" % (newelev, id, network))
