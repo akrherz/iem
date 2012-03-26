@@ -10,7 +10,7 @@ icursor = IEM.cursor()
 
 climate = {}
 ccursor.execute("""
-	SELECT station, high from ncdc_climate71 where valid = '2000-03-17'
+	SELECT station, high from ncdc_climate71 where valid = '2000-03-21'
 """)
 for row in ccursor:
     climate[ row[0].lower() ] = row[1]
@@ -24,9 +24,10 @@ for row in mcursor:
     xref[ row[0] ] = row[1].lower()
 
 icursor.execute("""
-	SELECT station, x(geom), y(geom), max_tmpf from summary_2011 WHERE
-      	day = 'TODAY' and network ~* 'ASOS' and max_tmpf > -40 and
-	network not in ('AK_ASOS','HI_ASOS') and station not in ('MWM','FYV')
+	SELECT t.id, x(geom), y(geom), max_tmpf, t.state from summary_2012 s JOIN stations t on (t.iemid = s.iemid) and 
+      	day = '2012-03-21' and t.network ~* 'ASOS' and max_tmpf > -40 and
+        max_tmpf < 100 and t.id not in ('SQI') and 
+	t.network not in ('AK_ASOS','HI_ASOS') and t.country = 'US'
 """)
 vals = []
 lons = []
@@ -38,6 +39,8 @@ for row in icursor:
     csite = xref[stid]
     if not climate.has_key(csite):
         continue
+    if row[4] == 'ND':
+        print row
     chigh = climate[csite]
 
     vals.append( row[3] - chigh )
@@ -46,18 +49,17 @@ for row in icursor:
 
 cfg = {
     '_conus':   True,
-    'wkColorMap': 'BlAqGrYeOrRe',
+    'wkColorMap': 'ViBlGrWhYeOrRe',
      'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
-# 'cnLevelSelectionMode': 'ManualLevels',
-#  'cnLevelSpacingF'      : 4.0,
-# 'cnMinLevelValF'       : 360.0,
-# 'cnMaxLevelValF'       : 408.0,
+ 'cnLevelSelectionMode': 'ManualLevels',
+  'cnLevelSpacingF'      : 15.0,
+ 'cnMinLevelValF'       : -60.0,
+ 'cnMaxLevelValF'       : 60.0,
 # 'lbLabelStride'    : 1,
 # 'lbLabelFontHeightF': 0.012,
-'tiMainFontHeightF': 0.02,
- '_title'             : "High Temperature Departure ",
- '_valid'             : " 17 Mar 2011",
+ '_title'             : "High Temperature Departure from 1981-2010 Average",
+ '_valid'             : " 21 Mar 2011",
   'lbTitleString'      : "F",
 #  'cnExplicitLabelBarLabelsOn': True,
 #  'lbLabelStrings': labels,

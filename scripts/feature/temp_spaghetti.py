@@ -21,83 +21,33 @@ ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 #ax.set_xlabel("Local Hour of Day [CDT]")
 #ax.set_ylabel("Air & Dew Point (dash) Temp [F]", fontsize=9)
-ax.set_title("2011 Des Moines (KDSM) Failures to reach 100$^{\circ}\mathrm{F}$")
+ax.set_title("7 March 2012 Cold Front Passage")
 ax.set_ylabel("Air Temperature $^{\circ}\mathrm{F}$")
-ax.set_xlabel("* 15 minute flat smoothing applied")
-
-def smooth(x,window_len=11,window='hanning'):
-
-    if x.ndim != 1:
-        raise ValueError, "smooth only accepts 1 dimension arrays."
-
-    if x.size < window_len:
-        raise ValueError, "Input vector needs to be bigger than window size."
-
-
-    if window_len<3:
-        return x
-
-
-    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
-
-
-    s=numpy.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
-    #print(len(s))
-    if window == 'flat': #moving average
-        w=numpy.ones(window_len,'d')
-    else:
-        w=eval('numpy.'+window+'(window_len)')
-
-    y=numpy.convolve(w/w.sum(),s,mode='valid')
-    return y
+ax.set_xlabel("CST")
+ax.set_ylim(30,75)
 
 import iemdb
-ASOS = iemdb.connect('asos', bypass=True)
-acursor = ASOS.cursor()
-
 IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor()
 
-# Extract 100 degree obs
-icursor.execute("""
- SELECT day from summary_2011 where station = 'DSM' and max_tmpf = 99
- ORDER by day ASC
-""")
-maxD = 0
-colors = ['r','b','green']
-diff = 0.0
-w = numpy.bartlett(15)
-for row in icursor:
-    d = row[0]
-    print d
-    acursor.execute("""
-        SELECT valid, tmpf  from t%s_1minute WHERE station = 'DSM' and valid BETWEEN
-        '%s 00:00' and '%s 23:59'::timestamp
-        and tmpf > -50 ORDER by valid ASC
-        """ % (d.year, d, d))
+names = {'CBF': 'Council Bluffs', 'AXA': 'Algona', 'SHL': 'Sheldon',
+   'TNU': 'Newton', 'AWG': 'Washington', 'DEH': 'Decorah',
+   'BNW': 'Boone'}
+
+for id in ['CBF', 'AXA','SHL','BNW','TNU','AWG','DEH']:
+    icursor.execute("""
+        SELECT valid, tmpf from current_log c JOIN stations s on (s.iemid = c.iemid)
+        where valid > '2012-03-07' and valid < '2012-03-08' and s.id = '%s' ORDER by valid ASC
+        """ % (id,))
     times = []
     tmpf = []
-    dwpf = []
-    raining = False
-    for row2 in acursor:
-        
+    for row2 in icursor:
         times.append( row2[0].hour * 60 + row2[0].minute )
         tmpf.append( row2[1] )
     tmpf = numpy.array( tmpf )
-        #dwpf.append( row2[3] )
-    #diff += tot2 - tot
-    #c = '#E8AFAF'
-    #if raining:
-    #    c = 'b'
-    #c = colors.pop()
-    ax.plot(smooth(tmpf, window_len=15, window='flat'),  label= d.strftime("%d %B") )
-    #ax.plot(times, dwpf, linestyle='--', c=c)
-#ax.text(6*60, 67, "6-10 AM Diff: %.1f$^{\circ}\mathrm{F}$" % ((diff/3.,) ))
-#ax.text(14*60, 67, "Marshalltown, IA (KMIW ASOS)")
-ax.set_ylim(74,100)
+    ax.plot(times, tmpf, label='%s'% (names[id],))
 ax.grid(True)
-ax.legend(loc=2, prop=prop)
+ax.legend(loc=2, ncol=4, prop=prop)
 
 import iemplot
 fig.savefig('test.ps')

@@ -1,55 +1,43 @@
 import iemdb
+import numpy
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
-def doit():
-    streak0 = 0
-    streak1 = 0
-    maxs0 = [0]*366
-    maxs1 = [0]*366
-    maxp = [0]*366
-    ccursor.execute("""SELECT precip, extract(doy from day) as d, day 
-    from alldata where stationid = 'ia0200' and year < 2010 ORDER by day ASC""")
-    for row in ccursor:
-        p = row[0]
-        if p < 0.10:
-            streak1 += 1
-        else:
-            streak1 = 0
-        if p < 0.001:
-            streak0 += 1
-        else:
-            streak0= 0
-        maxs0[int(row[1])-1] = max(streak0, maxs0[int(row[1])-1])
-        maxs1[int(row[1])-1] = max(streak1, maxs1[int(row[1])-1])
-        maxp[int(row[1])-1] = max(p, maxp[int(row[1])-1])
-    return maxs0[:365], maxs1[:365], maxp[:365]
+obs = numpy.zeros( (2013-1893,31), 'f')
 
-maxs0, maxs1, maxp = doit()
+ccursor.execute("""SELECT day, high 
+    from alldata where station = 'IA0200' and month = 3
+    and year > 1892""")
+for row in ccursor:
+    obs[row[0].year-1893,row[0].day-1] = row[1]
+
+
+minT = numpy.zeros( (31,), 'f')
+lbl = [""]*31
+for yr in range(1893,2013):
+  for dinterval in range(1,32):
+    for dom in range(1,32-dinterval+1):
+       mv = numpy.min( obs[yr-1893,(dom-1):(dom+dinterval-1)] )
+       if mv > minT[dinterval-1]:
+           #print dy, yr, mv
+           minT[dinterval-1] = mv
+           lbl[dinterval-1] = "%s-%s %s" % (dom,dom+dinterval-1,yr,)
+
 
 import matplotlib.pyplot as plt
+import matplotlib.font_manager
 import numpy
-
+prop = matplotlib.font_manager.FontProperties(size=10) 
 fig = plt.figure()
-ax = fig.add_subplot(211)
-ax.plot(numpy.arange(0,365), maxs1, color='b', label='Below 0.10"')
-ax.plot(numpy.arange(0,365), maxs0, color='r', label='No Rain')
-ax.set_xticks( (1,31,59,90,120,151,181,212,243,274,303,334) )
-ax.set_xticklabels( ("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec") )
-ax.set_xlim(0,365)
-ax.set_ylim(0,120)
-ax.legend(loc=9)
+ax = fig.add_subplot(111)
+bars = ax.bar(numpy.arange(1,32)-0.4, minT, fc='lightblue')
+for i in range(1,32):
+  ax.text(i-0.3, minT[i-1]-2, lbl[i-1], rotation=90, va='top',fontproperties=prop)
 ax.grid(True)
-ax.set_ylabel('Max Consecutive Days"')
-ax.set_title("Ames Precipitation Climatologies [1893-2009]")
-
-ax = fig.add_subplot(212)
-ax.bar(numpy.arange(0,365), maxp, facecolor='b', edgecolor='b')
-ax.set_xticks( (1,31,59,90,120,151,181,212,243,274,303,334) )
-ax.set_xticklabels( ("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec") )
-ax.set_xlim(0,356)
-ax.set_ylabel("Maximum Daily Rainfall [inch]")
-ax.grid(True)
+ax.set_xlabel("Number of Days in March, ties not shown")
+ax.set_ylabel("Minimum High Temperature $^{\circ}\mathrm{F}$")
+ax.set_title("Maximum of Minimum High Temperature over a period in March\nAmes (1893-2011)")
+ax.set_xlim(0,32)
 import iemplot
 fig.savefig('test.ps')
 iemplot.makefeature('test')   
