@@ -29,6 +29,33 @@ services.  This page details this dataset.
  
 </table>
 
+<h4>IEM GOES Ingest Status</h4>
+
+<?php 
+ $fpbase = "/home/ldm/data/gis/images/awips211";
+ $east = json_decode(file_get_contents("$fpbase/GOES_EAST_IR.json")); 
+ $west = json_decode(file_get_contents("$fpbase/GOES_WEST_IR.json")); 
+ 
+ ?>
+<table border="1" cellspacing="0" cellpadding="3">
+ <tr><th></th><th>Bird</th><th>Latest Imagery</th><th>JSON Metadata</th></tr>
+ <tr><th>East</th>
+ 	<td><?php echo $east->{"meta"}->{"bird"}; ?></td>
+ 	<td><?php echo $east->{"meta"}->{"valid"}; ?></td>
+ 	<td><a href="../data/gis/images/awips211/GOES_EAST_IR.json">IR</a> - 
+ 	<a href="../data/gis/images/awips211/GOES_EAST_VIS.json">VIS</a> -
+ 	<a href="../data/gis/images/awips211/GOES_EAST_WV.json">WV</a></td> 
+ 	</tr>
+ <tr><th>West</th>
+ 	<td><?php echo $west->{"meta"}->{"bird"}; ?></td>
+ 	<td><?php echo $west->{"meta"}->{"valid"}; ?></td>
+ 	 <td><a href="../data/gis/images/awips211/GOES_WEST_IR.json">IR</a> - 
+ 	<a href="../data/gis/images/awips211/GOES_WEST_VIS.json">VIS</a> -
+ 	<a href="../data/gis/images/awips211/GOES_WEST_WV.json">WV</a></td> 
+ 	</tr>
+</table>
+
+
 <p>The <a href="http://www.goes.noaa.gov/">GOES (Geostationary Satellite)</a> 
 provide the commonly seen views of clouds from space.  The IEM receives a near
 real-time feed of this data in GINI format and processes it into geo-referenced
