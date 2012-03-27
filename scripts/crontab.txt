@@ -51,8 +51,8 @@ PYTHONPATH=/mesonet/www/apps/iemwebsite/scripts/lib
 50 17  * * * cd /mesonet/www/apps/iemwebsite/scripts/cache; ./downloadRUC.csh 21
 
 # Get GIS Sat Data!
-18 * * * * cd /mesonet/www/apps/iemwebsite/scripts/cache; ./get.csh 45
-48 * * * * cd /mesonet/www/apps/iemwebsite/scripts/cache; ./get.csh 15
+18 * * * * cd /mesonet/www/apps/iemwebsite/scripts/cache; sh nesdis_satellite.sh 45
+48 * * * * cd /mesonet/www/apps/iemwebsite/scripts/cache; sh nesdis_satellite.sh 15
 
 00,15,30,45 * * * * cd /mesonet/www/apps/iemwebsite/scripts/GIS/SCRIPTS; ./RUN_RADAR
 03,13,24 * * * * cd /mesonet/www/apps/iemwebsite/scripts/plots; ./HOURLY_PLOTS
