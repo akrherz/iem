@@ -205,6 +205,10 @@ $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
 $states->draw($img);
 
+$cwas = $map->getlayerbyname("cwas");
+$cwas->set("status", in_array("cwas", $layers) );
+$cwas->draw($img);
+
 /* Buffered LSRs */
 if (in_array("bufferedlsr", $layers)){
 $blsr = ms_newLayerObj($map);
@@ -299,9 +303,10 @@ if (isset($_GET["vtec"]))
   $wcc0->set("name", $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] );
   $wcc0s0 = ms_newStyleObj($wcc0);
   $wcc0s0->color->setRGB(255,0,0);
-  $wcc0s0->set("size", 3);
+  $wcc0s0->set("width", 3);
   $wcc0s0->set("symbol", 'circle');
   $wc->draw($img);
+  
 }
 
 
@@ -321,8 +326,6 @@ $sql = sprintf("geom from (select %s, geom, oid from sbw_%s
     $vtec_limiter );
 $sbwh->set("data", $sql);
 $sbwh->draw($img);
-
-
 
 
 /* Storm Based Warning */
@@ -355,7 +358,13 @@ $sql = sprintf("geom from (select *, oid from warnings_%s WHERE issue <= '%s:00+
 $w0c->set("data", $sql);
 $w0c->draw($img);
 
-
+$w0c = $map->getlayerbyname("warnings0_c");
+$w0c->set("connection", $_DATABASES["postgis"]);
+$w0c->set("status", in_array("warnings_all", $layers) );
+$sql = sprintf("geom from (select phenomena, significance, geom, oid from warnings WHERE gtype = 'P' and wfo = '%s' and significance = 'W' and phenomena in ('SV','TO') and issue > '2007-10-01') as foo USING unique oid using SRID=4326)", 
+    'OAX');
+$w0c->set("data", $sql);
+$w0c->draw($img);
 
 
 /* Local Storm Reports */
