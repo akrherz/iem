@@ -1,13 +1,16 @@
-# Process SCAN dataset
+"""
+Download and process the scan dataset
+$Id: $:
+"""
 
 import urllib
 import urllib2
 import mx.DateTime
 import mesonet
 import access
-import pg
-scandb = pg.connect("scan", "iemdb")
 import iemdb
+SCAN = iemdb.connect('scan', bypass=True)
+scursor = SCAN.cursor()
 ACCESS = iemdb.connect('iem')
 icursor = ACCESS.cursor()
 
@@ -146,7 +149,7 @@ def savedata( data , maxts ):
          %(c2smv)s, 
         %(c3smv)s, %(c4smv)s, %(c5smv)s, %(phour)s)
         """ % iem.data
-    scandb.query(sql)
+    scursor.execute(sql)
 
 def load_times():
     """
@@ -166,7 +169,11 @@ def main():
         postvars['sitenum'] = id
         data = urllib.urlencode(postvars)
         req = urllib2.Request(URI, data)
-        response = urllib2.urlopen(req)
+        try:
+            response = urllib2.urlopen(req)
+        except:
+            print 'Failed to download: %s %s' % (id, URI)
+            continue
         lines = response.readlines()
         cols = lines[1].split(",")
         data = {}
@@ -183,4 +190,6 @@ def main():
                 savedata( data , maxts)
 main()
 icursor.close()
+scursor.close()
 ACCESS.commit()
+SCAN.commit()
