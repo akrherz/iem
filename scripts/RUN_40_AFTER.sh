@@ -31,7 +31,7 @@ cd ../ingestors/squaw
 ./ingest.sh
 
 cd ../scan
-/mesonet/python/bin/python processor.py
+python scan_ingest.py
 
 cd ../raws
 ./download.csh
