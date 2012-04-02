@@ -170,7 +170,7 @@ def main():
         data = urllib.urlencode(postvars)
         req = urllib2.Request(URI, data)
         try:
-            response = urllib2.urlopen(req)
+            response = urllib2.urlopen(req, timeout=15)
         except:
             print 'Failed to download: %s %s' % (id, URI)
             continue
