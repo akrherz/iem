@@ -36,6 +36,10 @@ class StationData {
     {
       $this->table[ $row["id"] ] = $row;
     }
+    if (pg_num_rows($rs) < 1){
+    	return false;
+    }
+    return true;
   }
 
   function get($id)
