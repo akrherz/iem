@@ -9,7 +9,7 @@ mcursor = MOS.cursor()
 # GFS has 8 days worth of data
 # NAM has 3.5 days
 PLOTDAYS = 3
-sts = datetime.datetime(2012,2,22,0, tzinfo=iemtz.Central)
+sts = datetime.datetime(2012,4,8,0, tzinfo=iemtz.Central)
 #___________________________
 # No more custom
 MODELDAYS = PLOTDAYS+8-2
