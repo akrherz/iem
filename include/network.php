@@ -16,7 +16,6 @@ class NetworkTable {
     {
       foreach($a as $network) { $this->load_network($network); }
     }
-	pg_close($this->dbconn);
   }
 
   function load_network($network)
