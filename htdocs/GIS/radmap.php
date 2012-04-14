@@ -1,9 +1,72 @@
 <?php
-/* Tis my job to produce pretty maps with lots of options :) */
+/* 
+ * I am sort of inspired by the old mapblaster days.  Lets create a map of
+ * all sorts of data with tons of CGI vars, yippeee
+ * 
+ * $Id: $:
+ */
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/vtec.php");
 $postgis = iemdb("postgis");
+
+$plotmeta = Array("title" => Array(),
+	"subtitle" => "");
+
+function draw_header($map, $img, $width, $height){
+	/*
+	 * Draw the black bar at the top of the screen
+	 */
+	$layer = ms_newLayerObj($map);
+	$layer->set("status", MS_ON );
+	$layer->set("type", MS_LAYER_POLYGON );
+	$layer->set("transform", MS_OFF );
+	$wkt = "POLYGON((0 0, 0 $height, $width $height, $width 0, 0 0))";
+	$layer->addFeature(ms_shapeObjFromWkt($wkt));
+
+	$layerc0 = ms_newClassObj($layer);
+	$layerc0s0 = ms_newStyleObj($layerc0);
+	$layerc0s0->color->setRGB(0,0,0);
+	$layer->draw($img);
+}
+
+function get_goes_fn_and_time($ts, $sector, $product){
+	/*
+	 * Return a filename or NULL for a requested GOES Product and time
+	 * using a crude search algorithm
+	 */
+	$base = "/mnt/mesonet/ARCHIVE/data/";
+	for($i=0;$i<60;$i++){
+		foreach (array(1,-1) as $mul){
+			$lts = $ts + ($i*60*$mul);
+			$testfn = $base . gmdate("Y/m/d", $lts) ."/GIS/sat/awips211/GOES_${sector}_${product}_".
+					gmdate("YmdHi", $lts) .".png";
+			if (is_file($testfn)){
+				return Array($testfn, $lts);
+			}
+		}
+	}
+	return Array(NULL,NULL);
+}
+
+function get_ridge_fn_and_time($ts, $radar, $product){
+	/*
+	 * Return a filename or NULL for a requested RIDGE Product and time
+	 * using a crude search algorithm
+	 */
+	$base = "/mnt/mesonet/ARCHIVE/data/";
+	for($i=0;$i<10;$i++){
+		foreach (array(1,-1) as $mul){
+			$lts = $ts + ($i*60*$mul);
+			$testfn = $base . gmdate("Y/m/d", $lts) ."/GIS/ridge/$radar/$product/${radar}_${product}_".
+					gmdate("YmdHi", $lts) .".png";
+			if (is_file($testfn)){
+				return Array($testfn, $lts);
+			}
+		}
+	}
+	return Array(NULL,NULL);
+}
 
 $sectors = Array(
  "iem" => Array("epsg" => 4326, "ext" => Array(-100.0, 38.5, -88.0, 46.5)),
@@ -137,7 +200,7 @@ $map->setExtent($sectors[$sector]['ext'][0],
                 $sectors[$sector]['ext'][1], 
                 $sectors[$sector]['ext'][2],
                 $sectors[$sector]['ext'][3]);
-if (in_array("n0q", $layers)){
+if (in_array("n0q", $layers) || in_array("ridge", $layers)){
   $map->selectOutputFormat("png24");
 }
 
@@ -168,19 +231,6 @@ if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)){
   }
 }
 
-
-$evis = $map->getlayerbyname("east_vis_1km");
-$evis->set("status", in_array("east_vis", $layers) );
-$evis->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/sat/GOES13_EAST_VIS_%Y%m%d%H%M.png", $ts) );
-$evis->draw($img);
-$evis->close();
-
-$evis = $map->getlayerbyname("east_vis_1km");
-$evis->set("status", in_array("west_vis", $layers) );
-$evis->set("data", gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/sat/GOES11_WEST_VIS_%Y%m%d%H%M.png", $ts) );
-$evis->draw($img);
-$evis->close();
-
 if (in_array("n0q", $layers) || in_array("n0q_tc", $layers)){
   $radarfp = "/home/ldm/data/gis/images/4326/USCOMP/n0q_0.png";
   if (($ts + 300) < time()) {
@@ -197,6 +247,37 @@ if (in_array("n0q", $layers) || in_array("n0q_tc", $layers)){
   }
 }
 
+if (in_array("ridge", $layers) && isset($_REQUEST["ridge_radar"]) &&
+	isset($_REQUEST["ridge_product"])){
+		$res = get_ridge_fn_and_time($ts, strtoupper($_REQUEST["ridge_radar"]), 
+										strtoupper($_REQUEST["ridge_product"]));
+		if ($res[0] != NULL){
+			$radar = $map->getlayerbyname("nexrad_n0q");
+    		$radar->set("status", MS_ON );
+    		$radar->set("data", $res[0]);
+    		$radar->draw($img);
+    		$plotmeta["subtitle"] .= sprintf(" RIDGE %s %s %s ", 
+    			$_REQUEST["ridge_radar"], $_REQUEST["ridge_product"],
+    			strftime("%-2I:%M %p %Z" ,  $res[1]));
+		}
+}
+
+if (in_array("goes", $layers) && isset($_REQUEST["goes_sector"]) &&
+	isset($_REQUEST["goes_product"])){
+		$res = get_goes_fn_and_time($ts, strtoupper($_REQUEST["goes_sector"]), 
+										strtoupper($_REQUEST["goes_product"]));
+		if ($res[0] != NULL){
+			$radar = $map->getlayerbyname("east_vis_1km");
+    		$radar->set("status", MS_ON );
+    		$radar->set("data", $res[0]);
+    		$radar->draw($img);
+    		
+    		$plotmeta["subtitle"] .= sprintf(" GOES %s %s %s ", 
+    			$_REQUEST["goes_sector"], $_REQUEST["goes_product"],
+    			strftime("%-2I:%M %p %Z" ,  $res[1]));
+		}
+}
+
 $counties = $map->getlayerbyname("uscounties");
 $counties->set("status", in_array("uscounties", $layers) );
 $counties->draw($img);
@@ -211,40 +292,40 @@ $cwas->draw($img);
 
 /* Buffered LSRs */
 if (in_array("bufferedlsr", $layers)){
-$blsr = ms_newLayerObj($map);
-$blsr->setConnectionType( MS_POSTGIS);
-$blsr->set("connection", $_DATABASES["postgis"]);
-$blsr->set("status", in_array("bufferedlsr", $layers) );
-$sql = "geo from (select distinct city, magnitude, valid, 
-  ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326) as geo, 
-  type as ltype, city || magnitude || x(geom) || y(geom) as k 
-  from lsrs_". date("Y", $ts) ." WHERE
-  geom && (select geom from warnings_". date("Y", $ts) ." WHERE 
-           wfo = '$wfo' and phenomena = '$phenomena' and 
-           significance = '$significance' and eventid = $eventid 
-           and gtype = 'P' LIMIT 1) and
-  ST_Contains((select geom from warnings_". date("Y", $ts) ." WHERE 
-           wfo = '$wfo' and phenomena = '$phenomena' and 
-           significance = '$significance' and eventid = $eventid 
-           and gtype = 'P' LIMIT 1), geom) and
-  valid >= '". date("Y-m-d H:i", $ts) ."' and 
-  valid < '". date("Y-m-d H:i", $ts2) ."' and
-  ((type = 'M' and magnitude >= 34) or 
-         (type = 'H' and magnitude >= 0.75) or type = 'W' or
-         type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
-         or type = 'F') ORDER by valid DESC) as foo 
-  USING unique k USING SRID=4326";
-$blsr->set("data", $sql);
-$blsr->set("type", MS_LAYER_POLYGON);
-$blsr->setProjection("init=epsg:4326");
-$blc0 = ms_newClassObj($blsr);
-$blc0->set("name", "Buffered LSRs (15km)");
-$blc0s0 = ms_newStyleObj($blc0);
-$blc0s0->set("symbolname", 'circle');
-$blc0s0->color->setRGB(0,0,0);
-$blc0s0->backgroundcolor->setRGB(0,180,120);
-$blc0s0->outlinecolor->setRGB(50,50,50);
-$blsr->draw($img);
+	$blsr = ms_newLayerObj($map);
+	$blsr->setConnectionType( MS_POSTGIS);
+	$blsr->set("connection", $_DATABASES["postgis"]);
+	$blsr->set("status", in_array("bufferedlsr", $layers) );
+	$sql = "geo from (select distinct city, magnitude, valid, 
+	  ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326) as geo, 
+	  type as ltype, city || magnitude || x(geom) || y(geom) as k 
+	  from lsrs_". date("Y", $ts) ." WHERE
+	  geom && (select geom from warnings_". date("Y", $ts) ." WHERE 
+	           wfo = '$wfo' and phenomena = '$phenomena' and 
+	           significance = '$significance' and eventid = $eventid 
+	           and gtype = 'P' LIMIT 1) and
+	  ST_Contains((select geom from warnings_". date("Y", $ts) ." WHERE 
+	           wfo = '$wfo' and phenomena = '$phenomena' and 
+	           significance = '$significance' and eventid = $eventid 
+	           and gtype = 'P' LIMIT 1), geom) and
+	  valid >= '". date("Y-m-d H:i", $ts) ."' and 
+	  valid < '". date("Y-m-d H:i", $ts2) ."' and
+	  ((type = 'M' and magnitude >= 34) or 
+	         (type = 'H' and magnitude >= 0.75) or type = 'W' or
+	         type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
+	         or type = 'F') ORDER by valid DESC) as foo 
+	  USING unique k USING SRID=4326";
+	$blsr->set("data", $sql);
+	$blsr->set("type", MS_LAYER_POLYGON);
+	$blsr->setProjection("init=epsg:4326");
+	$blc0 = ms_newClassObj($blsr);
+	$blc0->set("name", "Buffered LSRs (15km)");
+	$blc0s0 = ms_newStyleObj($blc0);
+	$blc0s0->set("symbolname", 'circle');
+	$blc0s0->color->setRGB(0,0,0);
+	$blc0s0->backgroundcolor->setRGB(0,180,120);
+	$blc0s0->outlinecolor->setRGB(50,50,50);
+	$blsr->draw($img);
 }
 
 /* Watch by County */
@@ -266,7 +347,7 @@ $watches->set("data", $sql );
 $watches->draw($img);
 
 /* Plot the warning explicitly */
-if (isset($_GET["pid"]))
+if (isset($_REQEST["pid"]))
 {
   $wc = ms_newLayerObj($map);
   $wc->setConnectionType( MS_POSTGIS );
@@ -288,7 +369,7 @@ if (isset($_GET["pid"]))
 
 
 /* Plot the warning explicitly */
-if (isset($_GET["vtec"]))
+if (isset($_REQUEST["vtec"]))
 {
   $wc = ms_newLayerObj($map);
   $wc->setConnectionType( MS_POSTGIS);
@@ -377,47 +458,46 @@ if ($ts2 > $ts){
  $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid = '". gmstrftime("%Y-%m-%d %H:%M", $ts) .":00+00') as foo USING unique k USING SRID=4326";
 }
 $lsrs->set("data", $sql);
-//echo $sql; die();
 $lsrs->draw($img);
 
 /* County Intersection */
 if (in_array("ci", $layers) ){
-$ci = ms_newLayerObj($map);
-$ci->setConnectionType( MS_POSTGIS);
-$ci->set("connection", $_DATABASES["postgis"]);
-$ci->set("status", in_array("ci", $layers) );
-$sql = "geo from (select setsrid(a,4326) as geo, random() as k
-      from (
-select 
-   intersection(
-      buffer(exteriorring(geometryn(multi(ST_union(n.geom)),1)),0.02),
-      exteriorring(geometryn(multi(ST_union(w.geom)),1))
-   ) as a
-   from warnings_". date("Y", $ts) ." w, nws_ugc n WHERE gtype = 'P' and w.wfo = '$wfo'
-   and phenomena = '$phenomena' and eventid = $eventid 
-   and significance = '$significance'
-   and n.polygon_class = 'C' and ST_OverLaps(n.geom, w.geom)
-   and n.ugc IN (
-          SELECT ugc from warnings_". date("Y", $ts) ." WHERE
-          gtype = 'C' and wfo = '$wfo' 
-          and phenomena = '$phenomena' and eventid = $eventid 
-          and significance = '$significance'
-       )
-   and isvalid(w.geom)
-) as foo 
-      WHERE not isempty(a)
-         ) as foo2 
-  USING unique k USING SRID=4326";
-$ci->set("data", $sql);
-$ci->set("type", MS_LAYER_LINE);
-$ci->setProjection("init=epsg:4326");
-$cic0 = ms_newClassObj($ci);
-$cic0->set("name", "County Intersection");
-$cic0s0 = ms_newStyleObj($cic0);
-$cic0s0->set("symbolname", 'circle');
-$cic0s0->color->setRGB(250,0,250);
-$cic0s0->set("size", 5);
-$ci->draw($img);
+	$ci = ms_newLayerObj($map);
+	$ci->setConnectionType( MS_POSTGIS);
+	$ci->set("connection", $_DATABASES["postgis"]);
+	$ci->set("status", in_array("ci", $layers) );
+	$sql = "geo from (select setsrid(a,4326) as geo, random() as k
+	      from (
+	select 
+	   intersection(
+	      buffer(exteriorring(geometryn(multi(ST_union(n.geom)),1)),0.02),
+	      exteriorring(geometryn(multi(ST_union(w.geom)),1))
+	   ) as a
+	   from warnings_". date("Y", $ts) ." w, nws_ugc n WHERE gtype = 'P' and w.wfo = '$wfo'
+	   and phenomena = '$phenomena' and eventid = $eventid 
+	   and significance = '$significance'
+	   and n.polygon_class = 'C' and ST_OverLaps(n.geom, w.geom)
+	   and n.ugc IN (
+	          SELECT ugc from warnings_". date("Y", $ts) ." WHERE
+	          gtype = 'C' and wfo = '$wfo' 
+	          and phenomena = '$phenomena' and eventid = $eventid 
+	          and significance = '$significance'
+	       )
+	   and isvalid(w.geom)
+	) as foo 
+	      WHERE not isempty(a)
+	         ) as foo2 
+	  USING unique k USING SRID=4326";
+	$ci->set("data", $sql);
+	$ci->set("type", MS_LAYER_LINE);
+	$ci->setProjection("init=epsg:4326");
+	$cic0 = ms_newClassObj($ci);
+	$cic0->set("name", "County Intersection");
+	$cic0s0 = ms_newStyleObj($cic0);
+	$cic0s0->set("symbolname", 'circle');
+	$cic0s0->color->setRGB(250,0,250);
+	$cic0s0->set("size", 5);
+	$ci->draw($img);
 }
 
 /* roads */
@@ -432,9 +512,7 @@ $roadsint->set("connection", $_DATABASES["postgis"]);
 $roadsint->set("status", in_array("roads-inter", $layers) );
 $roadsint->draw($img);
 
-$bar640t = $map->getLayerByName("bar640t");
-$bar640t->set("status", 1);
-$bar640t->draw($img);
+
 
 $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
@@ -457,12 +535,25 @@ if (isset($_GET["title"])){
   $d = gmdate("d M Y", $ts) ." UTC";
 } else {
   $title = "IEM Plot";
+  if ($plotmeta["subtitle"] != ""){
+  	$title = $plotmeta["subtitle"];
+  	$plotmeta["subtitle"] = "";
+  }
 }
+
+$header_height = ($plotmeta["subtitle"] == "")? 36: 53;
+draw_header($map, $img, $width, $header_height);
+
 $point->draw($map, $tlayer, $img, 0, $title);
 
 $point = ms_newpointobj();
 $point->setXY(80, 29);
 $point->draw($map, $tlayer, $img, 1,"$d");
+if ($plotmeta["subtitle"] != ""){
+	$point = ms_newpointobj();
+	$point->setXY(80, 46);
+	$point->draw($map, $tlayer, $img, 1, $plotmeta["subtitle"]);
+}
 
 $map->drawLabelCache($img);
 
@@ -474,13 +565,13 @@ $point->draw($map, $layer, $img, 0, "");
 if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers) ){
   $layer = $map->getLayerByName("n0r-ramp");
   $point = ms_newpointobj();
-  $point->setXY(560, 15);
+  $point->setXY(($width - 80), 15);
   $point->draw($map, $layer, $img, 0, "");
 }
 if (in_array("n0q", $layers) || in_array("n0q_tc", $layers) ){
   $layer = $map->getLayerByName("n0q-ramp");
   $point = ms_newpointobj();
-  $point->setXY(510, 15);
+  $point->setXY(($width - 130), 18);
   $point->draw($map, $layer, $img, 0, "");
 }
 
