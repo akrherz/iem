@@ -144,7 +144,7 @@ def do_job(job):
                                     warning['phenomena'],warning['eventid'],
                                     now.strftime("%d %b %Y %H%M"))))
             
-            url = "http://iem50.local/GIS/radmap.php?"
+            url = "http://iem21.local/GIS/radmap.php?"
             url += "layers[]=ridge&ridge_product=N0Q&ridge_radar=%s&" % (job['radar'],)
             url += "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&"
             url += "vtec=%s.O.NEW.K%s.%s.W.%04i&ts=%s" % ( job['sts'].year, job['wfo'],
