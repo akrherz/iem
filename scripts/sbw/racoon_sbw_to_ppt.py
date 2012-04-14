@@ -25,7 +25,9 @@ def check_for_work():
     MESOSITE = iemdb.connect('mesosite', bypass=True)
     mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
     mcursor2 = MESOSITE.cursor()
-    mcursor.execute("""SELECT jobid, wfo, radar, sts, ets 
+    mcursor.execute("""SELECT jobid, wfo, radar, 
+        sts at time zone 'UTC' as sts, 
+        ets at time zone 'UTC' as ets
         from racoon_jobs WHERE processed = False""")
     jobs = []
     for row in mcursor:
@@ -42,7 +44,10 @@ def get_warnings(sts, ets, wfo):
     """
     POSTGIS = iemdb.connect('postgis', bypass=True)
     pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    sql = """SELECT phenomena, eventid, issue, expire from warnings_%s WHERE
+    sql = """SELECT phenomena, eventid, 
+    issue at time zone 'UTC' as issue, 
+    expire at time zone 'UTC' as expire,
+    ST_Area(ST_Transform(geom,2163))/1000000.0 as area from warnings_%s WHERE
     wfo = '%s' and phenomena in ('SV','TO') and significance = 'W' and 
     gtype = 'P' and issue BETWEEN '%s+00' and '%s+00' ORDER by issue ASC""" % (
     sts.year, wfo, sts.strftime("%Y-%m-%d %H:%M"), 
@@ -82,6 +87,13 @@ def do_job(job):
     titlestyle.addElement(GraphicProperties(fillcolor="#ffff99"))
     doc.styles.addElement(titlestyle)
 
+    # Style for the title frame of the page
+    # We set a centered 34pt font with yellowish background
+    indexstyle = Style(name="MyMaster-title", family="presentation")
+    indexstyle.addElement(ParagraphProperties(textalign="center"))
+    indexstyle.addElement(TextProperties(fontsize="22pt"))
+    doc.styles.addElement(indexstyle)
+
     # Style for the photo frame
     photostyle = Style(name="MyMaster-photo", family="presentation")
     doc.styles.addElement(photostyle)
@@ -96,9 +108,10 @@ def do_job(job):
     doc.automaticstyles.addElement(dpstyle)
     i = 0
     for warning in warnings:
-        page = Page(stylename=dpstyle, masterpagename=masterpage)
+        # Make Index page for the warning
+        page = Page(masterpagename=masterpage)
         doc.presentation.addElement(page)
-        titleframe = Frame(stylename=titlestyle, width="720pt", height="56pt", 
+        titleframe = Frame(stylename=indexstyle, width="720pt", height="500pt", 
                        x="40pt", y="10pt")
         page.addElement(titleframe)
         textbox = TextBox()
@@ -106,27 +119,48 @@ def do_job(job):
         textbox.addElement(P(text="%s.O.NEW.K%s.%s.W.%04i" % ( 
                                     job['sts'].year, job['wfo'],
                                 warning['phenomena'],warning['eventid'])))
+        textbox.addElement(P(text="Issue: %s UTC" % ( 
+                                    warning['issue'].strftime("%d %b %Y %H:%M"),)))
+        textbox.addElement(P(text="Expire: %s UTC" % ( 
+                                    warning['expire'].strftime("%d %b %Y %H:%M"),)))
+        textbox.addElement(P(text="Area: %.1f square km" % ( 
+                                    warning['area'],)))
+
+        now = warning['issue']
+        while now <= warning['expire']:
+            page = Page(stylename=dpstyle, masterpagename=masterpage)
+            doc.presentation.addElement(page)
+            titleframe = Frame(stylename=titlestyle, width="720pt", height="56pt", 
+                           x="40pt", y="10pt")
+            page.addElement(titleframe)
+            textbox = TextBox()
+            titleframe.addElement(textbox)
+            textbox.addElement(P(text="%s.W.%04i Time: %s UTC" % ( 
+                                    warning['phenomena'],warning['eventid'],
+                                    now.strftime("%d %b %Y %H%M"))))
+            
+            url = "http://mesonet.agron.iastate.edu/GIS/radmap.php?"
+            url += "layers[]=ridge&ridge_product=N0Q&ridge_radar=%s&" % (job['radar'],)
+            url += "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&"
+            url += "vtec=%s.O.NEW.K%s.%s.W.%04i&ts=%s" % ( job['sts'].year, job['wfo'],
+                                    warning['phenomena'],warning['eventid'],
+                                    now.strftime("%Y%m%d%H%M"))
         
-        url = "http://mesonet.agron.iastate.edu/GIS/radmap.php?"
-        url += "layers[]=ridge&ridge_product=N0Q&ridge_radar=%s&" % (job['radar'],)
-        url += "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&"
-        url += "vtec=%s.O.NEW.K%s.%s.W.%04i" % ( job['sts'].year, job['wfo'],
-                                warning['phenomena'],warning['eventid'])
-    
-        cmd = "wget -q -O %i.png '%s'" % (i, url)
-        os.system(cmd)
-        photoframe = Frame(stylename=photostyle, width="640pt", 
-                           height="480pt", x="80pt", y="70pt")
-        page.addElement(photoframe)
-        href = doc.addPicture("%i.png" % (i,))
-        photoframe.addElement(Image(href=href))
-        i += 1
+            cmd = "wget -q -O %i.png '%s'" % (i, url)
+            os.system(cmd)
+            photoframe = Frame(stylename=photostyle, width="640pt", 
+                               height="480pt", x="80pt", y="70pt")
+            page.addElement(photoframe)
+            href = doc.addPicture("%i.png" % (i,))
+            photoframe.addElement(Image(href=href))
+            i += 1
+            now += datetime.timedelta(minutes=15)
 
     doc.save(outputfile)
     del doc
     cmd = "unoconv -f ppt %s" % (outputfile,)
     os.system( cmd )
-    os.rename("%s.ppt" % (basefn,), "/var/webtmp/%s.ppt" % (basefn,))
+    os.rename("%s.ppt" % (basefn,), "/mesonet/share/pickup/racoon/%s.ppt" % (basefn,))
 
 
 if __name__ == "__main__":
