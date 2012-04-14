@@ -214,6 +214,22 @@ $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", MS_ON);
 $lakes->draw($img);
 
+if (in_array("goes", $layers) && isset($_REQUEST["goes_sector"]) &&
+	isset($_REQUEST["goes_product"])){
+		$res = get_goes_fn_and_time($ts, strtoupper($_REQUEST["goes_sector"]), 
+										strtoupper($_REQUEST["goes_product"]));
+		if ($res[0] != NULL){
+			$radar = $map->getlayerbyname("east_vis_1km");
+    		$radar->set("status", MS_ON );
+    		$radar->set("data", $res[0]);
+    		$radar->draw($img);
+    		
+    		$plotmeta["subtitle"] .= sprintf(" GOES %s %s %s ", 
+    			$_REQUEST["goes_sector"], $_REQUEST["goes_product"],
+    			strftime("%-2I:%M %p %Z" ,  $res[1]));
+		}
+}
+
 /* Draw NEXRAD Layer */
 if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)){
   $radarfp = "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif";
@@ -258,22 +274,6 @@ if (in_array("ridge", $layers) && isset($_REQUEST["ridge_radar"]) &&
     		$radar->draw($img);
     		$plotmeta["subtitle"] .= sprintf(" RIDGE %s %s %s ", 
     			$_REQUEST["ridge_radar"], $_REQUEST["ridge_product"],
-    			strftime("%-2I:%M %p %Z" ,  $res[1]));
-		}
-}
-
-if (in_array("goes", $layers) && isset($_REQUEST["goes_sector"]) &&
-	isset($_REQUEST["goes_product"])){
-		$res = get_goes_fn_and_time($ts, strtoupper($_REQUEST["goes_sector"]), 
-										strtoupper($_REQUEST["goes_product"]));
-		if ($res[0] != NULL){
-			$radar = $map->getlayerbyname("east_vis_1km");
-    		$radar->set("status", MS_ON );
-    		$radar->set("data", $res[0]);
-    		$radar->draw($img);
-    		
-    		$plotmeta["subtitle"] .= sprintf(" GOES %s %s %s ", 
-    			$_REQUEST["goes_sector"], $_REQUEST["goes_product"],
     			strftime("%-2I:%M %p %Z" ,  $res[1]));
 		}
 }
