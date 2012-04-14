@@ -123,11 +123,16 @@ def do_job(job):
                                     warning['issue'].strftime("%d %b %Y %H:%M"),)))
         textbox.addElement(P(text="Expire: %s UTC" % ( 
                                     warning['expire'].strftime("%d %b %Y %H:%M"),)))
-        textbox.addElement(P(text="Area: %.1f square km" % ( 
-                                    warning['area'],)))
-
+        textbox.addElement(P(text="Area: %.1f square km (%.1f square miles)" % ( 
+                                    warning['area'], warning['area'] / 0.386102)))
+        times = []
         now = warning['issue']
-        while now <= warning['expire']:
+        while now < warning['expire']:
+            times.append( now )
+            now += datetime.timedelta(minutes=15)
+        times.append( warning['expire'] - datetime.timedelta(minutes=1))
+        
+        for now in times:    
             page = Page(stylename=dpstyle, masterpagename=masterpage)
             doc.presentation.addElement(page)
             titleframe = Frame(stylename=titlestyle, width="720pt", height="56pt", 
@@ -139,7 +144,7 @@ def do_job(job):
                                     warning['phenomena'],warning['eventid'],
                                     now.strftime("%d %b %Y %H%M"))))
             
-            url = "http://mesonet.agron.iastate.edu/GIS/radmap.php?"
+            url = "http://iem50.local/GIS/radmap.php?"
             url += "layers[]=ridge&ridge_product=N0Q&ridge_radar=%s&" % (job['radar'],)
             url += "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&"
             url += "vtec=%s.O.NEW.K%s.%s.W.%04i&ts=%s" % ( job['sts'].year, job['wfo'],
@@ -154,7 +159,6 @@ def do_job(job):
             href = doc.addPicture("%i.png" % (i,))
             photoframe.addElement(Image(href=href))
             i += 1
-            now += datetime.timedelta(minutes=15)
 
     doc.save(outputfile)
     del doc
