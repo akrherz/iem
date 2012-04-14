@@ -165,7 +165,10 @@ def do_job(job):
     del doc
     cmd = "unoconv -f ppt %s" % (outputfile,)
     os.system( cmd )
-    os.rename("%s.ppt" % (basefn,), "/mesonet/share/pickup/racoon/%s.ppt" % (basefn,))
+    print "%s.ppt" % (basefn,)
+    if os.path.isfile("%s.ppt" % (basefn,)):
+        print 'Here!'
+        os.rename("%s.ppt" % (basefn,), "/mesonet/share/pickup/racoon/%s.ppt" % (basefn,))
 
 
 if __name__ == "__main__":
