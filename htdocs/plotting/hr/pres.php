@@ -10,7 +10,8 @@ $connection = iemdb("access");
 
 $query1 = "SET TIME ZONE 'GMT'";
 $query2 = "SELECT tmpf, alti
-        , valid from current_log WHERE alti > 0 and station = '". $station ."'
+        , valid from current_log c JOIN stations t on (t.iemid = c.iemid) 
+        WHERE alti > 0 and t.id = '". $station ."'
         and valid + '".$hours." hours' > CURRENT_TIMESTAMP ORDER by valid ASC";
 
 // $result = pg_exec($connection, $query1);
