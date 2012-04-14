@@ -14,8 +14,9 @@ if (isset($_REQUEST["jobid"])){
 	$row = pg_fetch_assoc($rs,0);
 	$sts = strtotime($row["sts"]);
 	$ets = strtotime($row["ets"]);
-	$fn = sprintf("/var/webtmp/%s-%s-%s-%s.ppt",  $row["wfo"], $row["radar"],
+	$basefn = sprintf("%s-%s-%s-%s.ppt",  $row["wfo"], $row["radar"],
 		gmdate("YmdH", $sts), gmdate("YmdH", $ets));
+	$fn = sprintf("/mesonet/share/pickup/racoon/%s",  $basefn);
 	if (is_file($fn)){
 		$status = "DONE!";
 	}
@@ -25,7 +26,9 @@ if (isset($_REQUEST["jobid"])){
 
 $TITLE = "IEM Racoon | Warnings overview in PowerPoint";
 $THISPAGE = "severe-raccon";
-$REFRESH = "<meta http-equiv=\"refresh\" content=\"60\">";
+if ($status != "DONE!"){
+  $REFRESH = "<meta http-equiv=\"refresh\" content=\"60\">";
+}
 include("$rootpath/include/header.php");
 ?>
 <h3 class="heading">IEM Racoon</h3>
@@ -33,5 +36,12 @@ include("$rootpath/include/header.php");
 <p>This page will refresh once per minute with the status of your request.
 
 <p>Current status is: <?php echo $status; ?>
+<?php 
+if ($status == "DONE!"){
+	echo sprintf("<p>Download your powerpoint <a href=\"%s/pickup/racoon/%s\">here</a>",
+		BASEURL, $basefn);
+}
+
+?>
 
 <?php include("$rootpath/include/footer.php"); ?>
