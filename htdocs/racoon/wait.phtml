@@ -1,0 +1,37 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/forms.php");
+include("$rootpath/include/imagemaps.php");
+include_once "$rootpath/include/database.inc.php";
+
+$jobid = $_REQUEST["jobid"];
+$status = "PROCESSING";
+if (isset($_REQUEST["jobid"])){
+	$mesosite = iemdb("mesosite");
+	pg_prepare($mesosite, "SELECT", "SELECT * from racoon_jobs where jobid = $1");
+	$rs = pg_execute($mesosite, "SELECT", Array($_REQUEST["jobid"]));
+	if (pg_num_rows($rs) < 1) die();
+	$row = pg_fetch_assoc($rs,0);
+	$sts = strtotime($row["sts"]);
+	$ets = strtotime($row["ets"]);
+	$fn = sprintf("/var/webtmp/%s-%s-%s-%s.ppt",  $row["wfo"], $row["radar"],
+		gmdate("YmdH", $sts), gmdate("YmdH", $ets));
+	if (is_file($fn)){
+		$status = "DONE!";
+	}
+	
+	pg_close($mesosite);
+}
+
+$TITLE = "IEM Racoon | Warnings overview in PowerPoint";
+$THISPAGE = "severe-raccon";
+$REFRESH = "<meta http-equiv=\"refresh\" content=\"60\">";
+include("$rootpath/include/header.php");
+?>
+<h3 class="heading">IEM Racoon</h3>
+
+<p>This page will refresh once per minute with the status of your request.
+
+<p>Current status is: <?php echo $status; ?>
+
+<?php include("$rootpath/include/footer.php"); ?>

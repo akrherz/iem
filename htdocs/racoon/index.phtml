@@ -1,0 +1,85 @@
+<?php
+include("../../config/settings.inc.php");
+include("$rootpath/include/forms.php");
+include("$rootpath/include/imagemaps.php");
+include_once "$rootpath/include/database.inc.php";
+
+$wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'OAX';
+$radar = isset($_REQUEST["radar"]) ? $_REQUEST["radar"] : 'OAX';
+$year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : date("Y");
+$month1 = isset($_REQUEST["month1"]) ? intval($_REQUEST["month1"]) : date("m");
+$day1= isset($_REQUEST["day1"]) ? intval($_REQUEST["day1"]) : date("d");
+$hour1 = isset($_REQUEST["hour1"]) ? intval($_REQUEST["hour1"]) : 0;
+$month2 = isset($_REQUEST["month2"]) ? intval($_REQUEST["month2"]) : date("m");
+$day2 = isset($_REQUEST["day2"]) ? intval($_REQUEST["day2"]) : date("d");
+$hour2 = isset($_REQUEST["hour2"]) ? intval($_REQUEST["hour2"]) : 23;
+$sts = gmmktime($hour1, 0, 0, $month1, $day1, $year);
+$ets = gmmktime($hour2, 0, 0, $month2, $day2, $year);
+
+if (isset($_REQUEST["wfo"])){
+	$mesosite = iemdb("mesosite");
+	pg_prepare($mesosite, "INSERT", "INSERT into racoon_jobs(wfo, sts, ets,
+	radar) values ($1,$2,$3,$4) returning jobid");
+	$rs = pg_execute($mesosite, "INSERT", array($wfo, 
+		date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $radar));
+	$row = pg_fetch_assoc($rs,0);
+	pg_close($mesosite);
+	$jobid = $row["jobid"];
+	Header("Location: wait.phtml?jobid=$jobid");
+	die();
+}
+
+$TITLE = "IEM Racoon | Warnings overview in PowerPoint";
+$THISPAGE = "severe-raccon";
+include("$rootpath/include/header.php");
+?>
+<h3 class="heading">IEM Racoon</h3>
+
+<p>IEM Racoon generates a Microsoft Powerpoint presentation of a National
+Weather Service office's storm based warnings for a time period of your choice.</p>
+
+<form method="GET" name="racoon">
+<table>
+<tr><th>Select Weather Office</th>
+	<td colspan="4"><?php echo networkSelect("WFO", $wfo, Array(), "wfo"); ?></td></tr>
+<tr><th>Select RADAR source</th>
+	<td colspan="4"><?php echo networkSelect("NEXRAD", $radar, Array(), "radar"); ?></td></tr>
+  <tr>
+    <td></td>
+    <th>Year</th><th>Month</th><th>Day</th>
+    <th>Hour</th>
+  </tr>
+
+  <tr>
+    <th>Start:</th>
+    <td rowspan="2">
+     <?php echo yearSelect2(2002, date("Y"), "year"); ?>
+    </td>
+    <td>
+     <?php echo monthSelect2(0,"month1"); ?>
+    </td>
+    <td>
+     <?php echo daySelect2(0, "day1"); ?>
+    </td>
+    <td>
+     <?php echo gmtHourSelect(0, "hour1"); ?>
+    </td>
+  </tr>
+
+  <tr>
+    <th>End Time:</th>
+    <td>
+     <?php echo monthSelect2(0,"month2"); ?>
+    </td>
+    <td>
+     <?php echo daySelect2(0, "day2"); ?>
+    </td>
+    <td>
+     <?php echo gmtHourSelect(0, "hour2"); ?>
+    </td>
+  </tr>
+</table>
+<p><input type="submit" value="Make my powerpoint!" />
+</form>
+
+<?php include("$rootpath/include/footer.php"); ?>
