@@ -9,6 +9,7 @@ import sys
 import tempfile
 import getopt
 import struct
+import shutil
 import datetime
 import iemdb
 import psycopg2.extras
@@ -168,7 +169,7 @@ def do_job(job):
     print "%s.ppt" % (basefn,)
     if os.path.isfile("%s.ppt" % (basefn,)):
         print 'Here!'
-        os.rename("%s.ppt" % (basefn,), "/mesonet/share/pickup/racoon/%s.ppt" % (basefn,))
+        shutil.copyfile("%s.ppt" % (basefn,), "/mesonet/share/pickup/racoon/%s.ppt" % (basefn,))
 
 
 if __name__ == "__main__":
