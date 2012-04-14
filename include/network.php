@@ -16,7 +16,7 @@ class NetworkTable {
     {
       foreach($a as $network) { $this->load_network($network); }
     }
-
+	pg_close($this->dbconn);
   }
 
   function load_network($network)
@@ -35,6 +35,10 @@ class NetworkTable {
     {
       $this->table[ $row["id"] ] = $row;
     }
+    if (pg_num_rows($rs) < 1){
+    	return false;
+    }
+    return true;
   }
 
 
