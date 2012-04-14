@@ -2,7 +2,7 @@
 /mesonet/www/apps/nwnwebsite/scripts/GEN.csh &
 
 cd sbw
-python racoon_sbw_to_ppt.py
+python racoon_sbw_to_ppt.py &
 
 cd ../GIS
 /mesonet/python/bin/python attribute2shape.py
