@@ -4,6 +4,7 @@
 Generate a Powerpoint file for an event
 """
 import os
+os.putenv("DISPLAY", "localhost:1")
 import sys
 import tempfile
 import getopt
