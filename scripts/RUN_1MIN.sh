@@ -1,7 +1,10 @@
 # Run every minute!
 /mesonet/www/apps/nwnwebsite/scripts/GEN.csh &
 
-cd GIS
+cd sbw
+python racoon_sbw_to_ppt.py
+
+cd ../GIS
 /mesonet/python/bin/python attribute2shape.py
 /mesonet/python/bin/python wwShapefile.py &
 
