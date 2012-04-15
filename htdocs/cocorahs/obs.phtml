@@ -59,18 +59,18 @@ Select State: <select name="network">
      $sortvar == "max_tmpf") 
    $sortdir = "DESC";
  if (strlen($station) > 0) {
-   $rs = $iem->query("SELECT s.*, t.id from summary_$year s JOIN stations t 
+   $rs = $iem->query("SELECT s.*, t.id as station from summary_$year s JOIN stations t 
    ON (t.iemid = s.iemid) WHERE t.id = '$station'
      ORDER by $sortvar $sortdir");
  } else {
-   $sql = "SELECT s.*, t.id from summary_$year s JOIN stations t
+   $sql = "SELECT s.*, t.id as station from summary_$year s JOIN stations t
    ON (t.iemid = s.iemid) WHERE day = '$date' and
      network = '$network' ORDER by $sortvar $sortdir";
    $rs = $iem->query($sql);
  }
  $hirow = 1;
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
-   $nwsli = $row["id"];
+   $nwsli = $row["station"];
 
    $rain = $row["pday"];
    if ($rain == 0.0001) $rain = "T";
