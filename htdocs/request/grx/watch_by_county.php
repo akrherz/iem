@@ -12,7 +12,7 @@ header("Content-type: text/plain");
  $rs = pg_query($dbconn, "select phenomena, eventid, " .
  		"ST_asText(ST_Simplify(ST_multi(ST_union(geom)),0.01)) as g from warnings " .
  		"WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= now() and expire > now() " .
- 		"GROUP by phenomena, eventid ORDER by phenomena ASC");
+ 		"and ugc ~* 'C' GROUP by phenomena, eventid ORDER by phenomena ASC");
 
 echo "Refresh: 10\n";
 echo "Threshold: 999\n";
