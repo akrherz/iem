@@ -34,9 +34,7 @@ if ($station == null){
   		$tmpf[] = round (substr($line, 36, 6),2);
   		$relh[] = intval($parts[7]);
   		$d = dwpf(round (substr($line, 36, 6),2), intval($parts[7]) );
-  		if ($d > -40 && $d < 90){
-  			$dwpf[] = $d;
-  		}
+  		$dwpf[] = ($d > -40 && $d < 90)? $d : "";
  	} // End of while
 } else {
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat");
