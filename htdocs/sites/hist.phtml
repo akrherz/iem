@@ -124,18 +124,18 @@ if ($mode == "monthly") {
   include("$rootpath/include/header.php"); 
   $current="calendar"; include('sidebar.php');
 ?>
-<div id="justone">
 <h2>Data Calendar for <?php echo $st->table[$station]["name"]; ?></h2>
-<div class="hide">
+
 
 <?php
   echo "<form method=\"GET\">";
   echo "<input type=\"hidden\" name=\"station\" value=\"$station\">";
   echo "<input type=\"hidden\" name=\"network\" value=\"$network\">";
 if ($mode == "monthly"){
-  echo "The calendar chart below shows the daily reported climate variables.  You can 
-  click on a date to display the values for all sites for that day. Time stamps are displayed
-  in the <strong>". $metadata["tzname"] ."</strong> timezone.";
+  echo "The calendar chart below shows the daily reported climate variables.  
+  You can click on a date to display the values for all sites for that day. 
+  Time stamps are displayed in the <strong>". $metadata["tzname"] ."</strong> 
+  timezone. Wind speeds are in mph and temperatures in Fahrenheit.";
   echo "<p>Year: &nbsp; ". yearSelect(2002, $year, "year");
   echo "<br />Month: &nbsp; ". monthSelect($month, "month");
   echo "<br /><input type='submit' value='Change'></form>";
@@ -151,7 +151,7 @@ echo "<p>Date show in table: $nicedate";
 echo "</div>";
 echo $htmlout;
 ?>
-<div class="hide">
+
 <br clear="all"/>
 <p><b>Notes:</b>
 <ul>
@@ -161,9 +161,8 @@ are not included.</li>
 <li>Values that are <strike>crossed out</strike> failed a crude quality control routine.</li>
 <li>Peak wind gusts are unavailable prior to 11 July 2002.</li>
 </ul>
-</div>
 
-</div>
+
 
 <?php
   include("$rootpath/include/footer.php"); 
