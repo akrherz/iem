@@ -23,7 +23,7 @@ select the appropiate stations and weather variables desired below.
 <table width="100%">
 <tr><td valign="top">
 
-<b><h4 class="subtitle">Select station(s):</h4></b>
+<h4 class="subtitle">Select station(s):</h4>
   <input type="checkbox" name="sts[]" value="A130209">Ames<BR>
   <input type="checkbox" name="sts[]" value="A131069">Calmar<BR>
   <input type="checkbox" name="sts[]" value="A131299">Castana<BR>
@@ -40,10 +40,12 @@ select the appropiate stations and weather variables desired below.
 
 </td><td valign="top">
 
-<b><h4 class="subtitle">Select data:</h4></b>
+<h4 class="subtitle">Select data:</h4>
   <input type="checkbox" name="vars[]" value="c11">High Temperature<BR>
   <input type="checkbox" name="vars[]" value="c12">Low Temperature<BR>
+  <input type="checkbox" name="vars[]" value="c30l">Daily Low 4in Soil Temperature<br />
   <input type="checkbox" name="vars[]" value="c30">Average 4in Soil Temperature<BR>
+  <input type="checkbox" name="vars[]" value="c30h">Daily Max 4in Soil Temperature<br />
   <input type="checkbox" name="vars[]" value="c40">Average Windspeed<BR>
   <input type="checkbox" name="vars[]" value="c509">Max Wind Gust -- 1 min<BR>
   <input type="checkbox" name="vars[]" value="c529">Max Wind Gust -- 5 sec<BR>

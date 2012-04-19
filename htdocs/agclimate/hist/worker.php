@@ -14,7 +14,9 @@ $d = Array("comma" => "," , "tab" => "\t", "space" => " ");
 $vardict = Array(
   "c11" => "High Air Temp",
   "c12" => "Low Air Temp",
-  "c30" => "Soil Temp",
+  "c30" => "Daily Average Soil Temp",
+  "c30l" => "Daily Low Soil Temp",
+  "c30h" => "Daily High Soil Temp",
   "c40" => "Average Wind Vel",
   "c509" => "Max Wind Vel (1 min)",
   "c529" => "Max Wind Vel (5 sec)",
@@ -74,10 +76,13 @@ if ($sts > $ets) die("Your start time is greater than your end time!");
 $str_stns = implode("','", $st);
 $str_vars = implode(",", $fvars);
 $str_sts  = strftime("%Y-%m-%d %H:00", $sts);
-if ($rtype == 'hourly')
+if ($rtype == 'hourly'){
   $str_ets  = strftime("%Y-%m-%d %H:00", $ets + 86400);
-else
+  $tsfmt = "YYYY-MM-DD HH24:MI";
+} else{
   $str_ets  = strftime("%Y-%m-%d %H:00", $ets );
+  $tsfmt = "YYYY-MM-DD";
+}
 
 if ( isset($_GET["todisk"]) ) {
   header("Content-type: application/octet-stream");
@@ -99,7 +104,7 @@ echo $cr;
 $c = iemdb("isuag");
 $rs = Array();
 $tbl = sprintf("%s", $rtype);
-$sql = "SELECT station, to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid, 
+$sql = "SELECT station, to_char(valid, '${tsfmt}') as dvalid, 
    $str_vars from $tbl 
    WHERE station IN ('$str_stns') and
    valid BETWEEN '$str_sts' and '$str_ets'
