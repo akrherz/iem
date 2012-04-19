@@ -51,22 +51,25 @@ def floatRgb(mag, cmin, cmax):
        green= min((max((4*math.fabs(x-0.5)-1., 0.)), 1.))
        return (red, green, blue)
 
-def bmap_clrbar(maxV, minV=0, levels=10):
+def bmap_clrbar(maxV, minV=0, levels=256, label=None):
     """
     Draw a color bar on a basemap plot, please!
     """
     # Figure out how many ticks we are going to have
-    step = (maxV - minV) / float(levels)
-    if step < 1:
-        levels = maxV - minV
-        step = 1
-    step = int(math.ceil(step))
-    
+    step = (maxV - minV) / 10.0    
     ytics=[]
-    for y in range(minV, maxV+1, step):
+    yticklabels = []
+    for y in numpy.arange(minV, maxV+step, step):
+        fmt = '%.0f'
+        if step < 0.2:
+            fmt = '%.2f'
+        elif step < 0.5:
+            fmt = '%.1f'
         ytics.append(y)
+        yticklabels.append(fmt % y)
         
-    ax2 = plt.axes([0.97,0.1,0.02,0.8], frameon=True, axisbg='w', yticks=ytics, xticks=[])
+    ax2 = plt.axes([0.97,0.1,0.02,0.8], frameon=True, axisbg='w', 
+                   yticks=ytics, yticklabels=yticklabels, xticks=[])
     for tick in ax2.yaxis.get_major_ticks():
         tick.label1.set_fontsize(10)
         tick.tick1On=False
@@ -76,11 +79,16 @@ def bmap_clrbar(maxV, minV=0, levels=10):
     step = (maxV - minV) / float(256)
     print 'Step is', step
     for y in numpy.arange(minV, maxV, step):
-        c=rgb2hex(floatRgb(y,1,maxV))
+        c=rgb2hex(floatRgb(y,minV,maxV))
         if y==0:
             c='w'
 
         ax2.barh(y,1,align='center',height=step,fc=c,ec=c)
+
+    if label:
+        ax2.text(-2.5, 0.5, label, transform=ax2.transAxes,
+                 size='medium', color='k', horizontalalignment='center', 
+                 rotation='vertical', verticalalignment='center')
 
     return ax2
 
@@ -806,19 +814,31 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     sname = row[0][0]
     mcursor.close()
     db.close()
+    monthLimiter = "and extract(month from valid) in %s" % (
+                                    (str(tuple(months))).replace("'",""),)
+    if len(months) == 1:
+        monthLimiter = "and extract(month from valid) = %s" % (months[0],)
+
+    hourLimiter = "and extract(hour from valid) in %s" % (
+                                    (str(tuple(hours))).replace("'",""),)
+    if len(hours) == 1:
+        hourLimiter = "and extract(hour from valid) = %s" % (hours[0],)
 
     # Query observations
     db = iemdb.connect(database, bypass=True)
     acursor = db.cursor()
-    acursor.execute("""SELECT sknt, drct, valid from alldata WHERE station = %s
-        and valid > %s and valid < %s""", (
-        station, sts, ets))
+    sql = """SELECT sknt, drct, valid from alldata WHERE station = '%s'
+        and valid > '%s' and valid < '%s'
+        %s
+        %s """ % (
+        station, sts, ets, monthLimiter, hourLimiter)
+    acursor.execute( sql )
     sped = numpy.zeros( (acursor.rowcount,), 'f')
     drct = numpy.zeros( (acursor.rowcount,), 'f')
     i = 0
     for row in acursor:
-        if row[2].month not in months or row[2].hour not in hours:
-            continue
+        #if row[2].month not in months or row[2].hour not in hours:
+        #    continue
         if i == 0:
             minvalid = row[2]
             maxvalid = row[2]
@@ -833,6 +853,8 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
             sped[i] =  row[0] * 1.15  # mph 
             drct[i] =  row[1] 
         i += 1
+
+    print numpy.average( sped )
 
     acursor.close()
     db.close()
