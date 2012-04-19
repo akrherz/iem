@@ -854,8 +854,6 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
             drct[i] =  row[1] 
         i += 1
 
-    print numpy.average( sped )
-
     acursor.close()
     db.close()
     if i < 5:
