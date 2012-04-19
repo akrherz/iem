@@ -8,6 +8,7 @@ cat report.txt | mail -s "ISU AgClimate Data Report" -c krberns@iastate.edu akrh
 /mesonet/python/bin/python fix_precip.py
 /mesonet/python/bin/python fix_precip.py `date --date '2 day ago' +'%Y %m %d'`
 /mesonet/python/bin/python fix_precip.py `date --date '3 day ago' +'%Y %m %d'`
+python compute_soil_hilo.py
 
 fp="air-temp-out"
 wget -q http://${WEBHOST}/GIS/apps/agclimate/plot.php\?direct=yes\&var=c11\&var2=c12\&date=${dstr} -O air-temp-out.png
