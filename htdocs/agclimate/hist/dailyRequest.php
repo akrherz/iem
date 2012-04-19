@@ -50,7 +50,7 @@ select the appropiate stations and weather variables desired below.
   <input type="checkbox" name="vars[]" value="c90">Daily Precipitation<BR>
   <input type="checkbox" name="vars[]" value="c20">Average Relative Humidity<BR>
   <input type="checkbox" name="vars[]" value="c80">Solar Radiation<BR>
-  <input type="checkbox" name="vars[]" value="c70">Evapotranspiration<BR>
+  <input type="checkbox" name="vars[]" value="c70">Evapotranspiration (inch)<br />
 
 </td></tr></table>
 
