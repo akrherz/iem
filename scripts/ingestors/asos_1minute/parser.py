@@ -1,12 +1,14 @@
-# Something to parse the mess we get from NCDC each month
-# Better than nothing, though....
+"""
+ Attempt to process the 1 minute archives available from NCDC
 
-import re, os, sys
+ $Id: $:
+"""
+
+import re
+import os
+import sys
 import mx.DateTime
-
-DBHOST = "iemdb"
-if os.environ["USER"] == "akrherz":
-  DBHOST = "localhost"
+import urllib2
 
 P1_RE = re.compile(r"""
 (?P<wban>[0-9]{5})
@@ -170,6 +172,25 @@ def test():
     for ex in p2_examples:
       m = p2_parser( ex )
 
+def download(station, monthts):
+    """
+    Download a month file from NCDC
+    """
+    baseuri = "ftp://ftp.ncdc.noaa.gov/pub/data/asos-onemin/"
+    datadir = "data/%s" % (station,)
+    if not os.path.isdir(datadir):
+        os.makedirs(datadir)
+    for page in [5,6]:
+        uri = baseuri + "640%s-%s/640%s0K%s%s.dat" % (page, monthts.year, page,
+                                    station, monthts.strftime("%Y%m"))
+        url = urllib2.Request(uri)
+        fp = urllib2.urlopen(url)
+        data = fp.read()
+        o = open("%s/640%s0K%s%s.dat" % (datadir, page,
+                                    station, monthts.strftime("%Y%m")),'w')
+        o.write(data)
+        o.close()
+
 def runner(station, monthts):
     """
     Parse a month's worth of data please
@@ -177,18 +198,29 @@ def runner(station, monthts):
 
     # Our final amount of data
     data = {}
-
+    fp5 = 'data/%s/64050K%s%s%02i.dat' % (station,
+            station, monthts.year, monthts.month)
+    fp6 = 'data/%s/64060K%s%s%02i.dat' % (station,
+            station, monthts.year, monthts.month)
+    if not os.path.isfile( fp5 ):
+        download(station, monthts)
+        if not os.path.isfile( fp5 ):
+            print "NCDC did not have %s station for %s" % (station,
+                                                monthts.strftime("%b %Y"))
+            return
     # We have two files to worry about
-    page1 = open('data/%s/64050K%s%s%02i.dat' % (station,
-            station, monthts.year, monthts.month), 'r')
-    page2 = open('data/%s/64060K%s%s%02i.dat' % (station,
-            station, monthts.year, monthts.month), 'r')
-
+    page1 = open(fp5, 'r')
+    
+    cnt = 60*24*31
     for ln in page1:
       d = p1_parser( ln )
       if d is None:
         continue
       data[ d['ts'] ] = d
+      cnt -= 1
+    page1.close()
+
+    page2 = open(fp6, 'r')
     for ln in page2:
       d = p2_parser( ln )
       if d is None:
@@ -197,8 +229,10 @@ def runner(station, monthts):
         data[ d['ts'] ] = {}
       for k in d.keys():
         data[ d['ts'] ][ k ] = d[k]
-
-    out = open('/tmp/dbinsert.sql', 'w')
+    page2.close()
+    
+    tmpfp = "/tmp/%s%s-dbinsert.sql" % (station, monthts.strftime("%Y%m"))
+    out = open( tmpfp , 'w')
     out.write("""DELETE from t%s_1minute WHERE station = '%s' and 
                valid BETWEEN '%s 00:00-0600' and '%s 00:00-0600';\n""" % (
          monthts.year, station, monthts.strftime("%Y-%m-%d"),
@@ -220,22 +254,26 @@ def runner(station, monthts):
     out.write("\.\n")
     out.close()
 
-    os.system("psql -f /tmp/dbinsert.sql -h %s asos" % (DBHOST,))
+    os.system("psql -f %s -h iemdb asos" % (tmpfp,))
+    os.unlink( tmpfp )
     print "%s Station: %s processed %s entries" % (mx.DateTime.now(),
            station, len(data.keys()))
     del data
-    page1.close()
-    page2.close()
-
+    
 if len(sys.argv) == 3:
-    for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW','BRL','AMW','MIW','SPW','OTM',
-                'CID','EST',
-                'IOW','SUX','DBQ','ALO','DSM']:
+    for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW', 'BRL', 'AMW',
+                    'MIW', 'SPW', 'OTM', 'CID', 'EST', 'IOW', 'SUX', 'DBQ',
+                    'ALO', 'DSM']:
         runner(station, 
                mx.DateTime.DateTime(int(sys.argv[1]),int(sys.argv[2]),1))
 elif len(sys.argv) == 4:
-        runner(sys.argv[3], 
-               mx.DateTime.DateTime(int(sys.argv[1]),int(sys.argv[2]),1))
+        if int(sys.argv[3]) != 0:
+            months = [int(sys.argv[3]),]
+        else:
+            months = range(1,13)
+        for month in months:
+            runner(sys.argv[1], 
+               mx.DateTime.DateTime(int(sys.argv[2]),month,1))
 else:
     test()
 """
