@@ -221,8 +221,11 @@ def runner(station, monthts):
     out.close()
 
     os.system("psql -f /tmp/dbinsert.sql -h %s asos" % (DBHOST,))
-    print "Station: %s processed %s entries" % (station, len(data.keys()))
- 
+    print "%s Station: %s processed %s entries" % (mx.DateTime.now(),
+           station, len(data.keys()))
+    del data
+    page1.close()
+    page2.close()
 
 if len(sys.argv) == 3:
     for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW','BRL','AMW','MIW','SPW','OTM',
