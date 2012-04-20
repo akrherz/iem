@@ -277,6 +277,9 @@ if (in_array("ridge", $layers) && isset($_REQUEST["ridge_radar"]) &&
     			strftime("%-2I:%M %p %Z" ,  $res[1]));
 		}
 }
+#$counties = $map->getlayerbyname("iowa_incorporated_cities_2010");
+#$counties->set("status", in_array("uscounties", $layers) );
+#$counties->draw($img);
 
 $counties = $map->getlayerbyname("uscounties");
 $counties->set("status", in_array("uscounties", $layers) );
@@ -517,8 +520,14 @@ $roadsint->draw($img);
 $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
 $point->setXY(80, 12);
-if (isset($_REQUEST["tz"])) { date_default_timezone_set($_REQUEST["tz"]); }
-$d = strftime("%d %B %Y %-2I:%M %p %Z" ,  $ts); 
+$tzformat = "%d %B %Y %-2I:%M %p %Z";
+if (isset($_REQUEST["tz"])) { 
+	date_default_timezone_set($_REQUEST["tz"]); 
+	if ($_REQUEST["tz"] == 'UTC'){
+		$tzformat = "%d %B %Y %-2I:%M %Z";
+	}
+}
+$d = strftime($tzformat ,  $ts); 
 if (isset($_GET["title"])){
   $title = substr($_GET["title"],0,50);
 } else if ( isset($_GET["vtec"]) ){
