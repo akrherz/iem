@@ -21,7 +21,8 @@ $height = $ar[1];
 $gs_start = mktime(0,0,0,$smonth,$sday,$year);
 $gs_end = mktime(0,0,0,$emonth,$eday,$year);
 
-$round = Array("prec" => 2, "gdd50" => 0, "gdd32" => 0, "et" => 2, "sgdd50" => 0, "sdd86" => 0, "srad" => 0);
+$round = Array("prec" => 2, "gdd50" => 0, "gdd32" => 0, "et" => 2, 
+	"sgdd50" => 0, "sgdd52" => 0, "sdd86" => 0, "srad" => 0);
 
 $today = time();
 if ($gs_end >= $today)  $gs_end = $today;
@@ -37,17 +38,18 @@ $varDef = Array("gdd50" => "Growing Degree Days (base=50)",
   "prec" => "Precipitation",
   "srad" => "Solar Radiation (langleys)",
   "sgdd50" => "Soil Growing Degree Days (base=50)",
+  "sgdd52" => "Soil Growing Degree Days (base=52)",
   "sdd86" => "Stress Degree Days (base=86)"
 );
 
 
 
-$rnd = Array("gdd50" => 0,
+$rnd = Array("gdd50" => 0, 
   "gdd32" => 0,
   "et" => 2, "c11" => 2,
   "prec" => 2,
   "srad" => 0,
-  "sgdd50" => 0,
+  "sgdd50" => 0, "sgdd52" => 0,
   "sdd86" => 0);
 
 
@@ -183,7 +185,7 @@ if ($var == 'sdd86') {
   $vals = $gdds;
 }  
 /* ------------------------------------------------------- */
-else if ($var == 'sgdd50') {
+else if ($var == 'sgdd50' || $var == 'sgdd52') {
   $q = "SELECT station, date(valid) as dvalid, 
      max(c300) as high, min(c300) as low
      from hourly WHERE valid >= '". $sstr ."'
@@ -195,8 +197,11 @@ else if ($var == 'sgdd50') {
     $stid = $row['station'];
     $high = (float)$row['high'];
     $low  = (float)$row['low'];
-    $tgdd = gdd($high, $low, 86, 50);
-
+    if ($var == 'sgdd50'){
+    	$tgdd = gdd($high, $low, 86, 50);
+    } else{
+    	$tgdd = gdd($high, $low, 86, 52);
+    }
     if (! isset($gdds[$stid]) ) $gdds[$stid] = 0;
     $gdds[$stid] = $gdds[$stid] + $tgdd;
   }
