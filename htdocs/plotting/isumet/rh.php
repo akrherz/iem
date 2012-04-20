@@ -50,7 +50,12 @@ if ($station == null){
 			continue;
 		}
   		$tstring = sprintf("%s %s", $dirRef, $tokens[3]);
-  		$valid[] = strtotime($tstring);
+	  	$v = strtotime($tstring);
+  		
+		if ($v < $myTime || trim($tstring) == ""){
+			continue;
+		}
+		$valid[] = $v;
   		$orelh[] = floatval($tokens[8]);
   		$irelh[] = $tokens[18];
   		$_dwpf[] = dwpf(floatval($tokens[5]), floatval($tokens[8]));

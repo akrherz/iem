@@ -48,8 +48,12 @@ if ($station == null){
 		if (sizeof($tokens) != 21){
 			continue;
 		}
-  		$tstring = sprintf("%s %s", $dirRef, $tokens[3]);
-  		$valid[] = strtotime($tstring);
+	  	$v = strtotime($tstring);
+  		
+		if ($v < $myTime || trim($tstring) == ""){
+			continue;
+		}
+		$valid[] = $v;
   		$srad[] = floatval($tokens[19]);
   		$uvindex[] = floatval($tokens[20]);
  	} // End of while
