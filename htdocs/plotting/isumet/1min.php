@@ -49,10 +49,11 @@ if ($station == null){
 		if (sizeof($tokens) != 21){
 			continue;
 		}
-  		$tstring = sprintf("%s %s %s %s", $tokens[0], $tokens[1], $tokens[2], $tokens[3]);
+  		$tstring = sprintf("%s %s %s %s", $tokens[0], $tokens[1], $tokens[2], 
+  				$tokens[3]);
   		$v = strtotime($tstring);
   		
-		if ($v < $myTime){
+		if ($v < $myTime || trim($tstring) == ""){
 			continue;
 		}
 		$valid[] = $v;
@@ -60,7 +61,6 @@ if ($station == null){
   		$relh[] = floatval($tokens[8]);
   		$dwpf[] = dwpf($tokens[5], floatval($tokens[8]));
  	} // End of while
-	
 }
 	
 include ("$rootpath/include/jpgraph/jpgraph.php");
