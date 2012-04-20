@@ -43,7 +43,7 @@ if ($station == null){
   		  		$tstring = sprintf("%s %s %s %s", $tokens[0], $tokens[1], $tokens[2], $tokens[3]);
   		$v = strtotime($tstring);
   		
-		if ($v < $myTime){
+		if ($v < $myTime || trim($tstring) == ""){
 			continue;
 		}
 		$valid[] = $v;
