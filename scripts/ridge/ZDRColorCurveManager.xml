@@ -1,0 +1,1359 @@
+<root>
+<Level type="double" lowerValue="8.0">
+	<red>255</red>
+	<green>186</green>
+	<blue>186</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="7.875" upperValue="8.0">
+	<red>255</red>
+	<green>180</green>
+	<blue>180</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="7.75" upperValue="7.875">
+	<red>255</red>
+	<green>175</green>
+	<blue>175</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="7.625" upperValue="7.75">
+	<red>255</red>
+	<green>169</green>
+	<blue>169</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="7.5" upperValue="7.625">
+	<red>255</red>
+	<green>163</green>
+	<blue>163</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="7.375" upperValue="7.5">
+	<red>255</red>
+	<green>156</green>
+	<blue>156</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="7.25" upperValue="7.375">
+	<red>255</red>
+	<green>150</green>
+	<blue>150</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="7.125" upperValue="7.25">
+	<red>255</red>
+	<green>143</green>
+	<blue>143</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="7.0" upperValue="7.125">
+	<red>255</red>
+	<green>135</green>
+	<blue>135</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="6.875" upperValue="7.0">
+	<red>255</red>
+	<green>127</green>
+	<blue>127</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="6.75" upperValue="6.875">
+	<red>255</red>
+	<green>119</green>
+	<blue>119</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="6.625" upperValue="6.75">
+	<red>255</red>
+	<green>110</green>
+	<blue>110</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="6.5" upperValue="6.625">
+	<red>255</red>
+	<green>101</green>
+	<blue>101</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="6.375" upperValue="6.5">
+	<red>255</red>
+	<green>90</green>
+	<blue>90</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="6.25" upperValue="6.375">
+	<red>255</red>
+	<green>78</green>
+	<blue>78</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="6.125" upperValue="6.25">
+	<red>255</red>
+	<green>63</green>
+	<blue>63</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="6.0" upperValue="6.125">
+	<red>255</red>
+	<green>45</green>
+	<blue>45</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.9375" upperValue="6.0">
+	<red>255</red>
+	<green>0</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.875" upperValue="5.9375">
+	<red>255</red>
+	<green>45</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.8125" upperValue="5.875">
+	<red>255</red>
+	<green>63</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.75" upperValue="5.8125">
+	<red>255</red>
+	<green>78</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.6875" upperValue="5.75">
+	<red>255</red>
+	<green>90</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.625" upperValue="5.6875">
+	<red>255</red>
+	<green>101</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.5625" upperValue="5.625">
+	<red>255</red>
+	<green>110</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.5" upperValue="5.5625">
+	<red>255</red>
+	<green>119</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.4375" upperValue="5.5">
+	<red>255</red>
+	<green>127</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.375" upperValue="5.4375">
+	<red>255</red>
+	<green>135</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.3125" upperValue="5.375">
+	<red>255</red>
+	<green>143</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.25" upperValue="5.3125">
+	<red>255</red>
+	<green>150</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.1875" upperValue="5.25">
+	<red>255</red>
+	<green>156</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.125" upperValue="5.1875">
+	<red>255</red>
+	<green>163</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.0625" upperValue="5.125">
+	<red>255</red>
+	<green>169</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="5.0" upperValue="5.0625">
+	<red>255</red>
+	<green>175</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.9375" upperValue="5.0">
+	<red>255</red>
+	<green>180</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.875" upperValue="4.9375">
+	<red>255</red>
+	<green>186</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.8125" upperValue="4.875">
+	<red>255</red>
+	<green>191</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.75" upperValue="4.8125">
+	<red>255</red>
+	<green>197</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.6875" upperValue="4.75">
+	<red>255</red>
+	<green>202</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.625" upperValue="4.6875">
+	<red>255</red>
+	<green>207</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.5625" upperValue="4.625">
+	<red>255</red>
+	<green>212</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.5" upperValue="4.5625">
+	<red>255</red>
+	<green>216</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.4375" upperValue="4.5">
+	<red>255</red>
+	<green>221</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.375" upperValue="4.4375">
+	<red>255</red>
+	<green>226</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.3125" upperValue="4.375">
+	<red>255</red>
+	<green>230</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.25" upperValue="4.3125">
+	<red>255</red>
+	<green>235</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.1875" upperValue="4.25">
+	<red>255</red>
+	<green>239</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.125" upperValue="4.1875">
+	<red>255</red>
+	<green>243</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.0625" upperValue="4.125">
+	<red>255</red>
+	<green>247</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="4.0" upperValue="4.0625">
+	<red>255</red>
+	<green>251</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.9375" upperValue="4.0">
+	<red>255</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.875" upperValue="3.9375">
+	<red>251</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.8125" upperValue="3.875">
+	<red>247</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.75" upperValue="3.8125">
+	<red>243</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.6875" upperValue="3.75">
+	<red>239</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.625" upperValue="3.6875">
+	<red>235</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.5625" upperValue="3.625">
+	<red>230</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.5" upperValue="3.5625">
+	<red>226</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.4375" upperValue="3.5">
+	<red>221</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.375" upperValue="3.4375">
+	<red>216</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.3125" upperValue="3.375">
+	<red>212</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.25" upperValue="3.3125">
+	<red>207</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.1875" upperValue="3.25">
+	<red>202</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.125" upperValue="3.1875">
+	<red>197</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.0625" upperValue="3.125">
+	<red>191</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="3.0" upperValue="3.0625">
+	<red>186</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.96875" upperValue="3.0">
+	<red>180</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.9375" upperValue="2.96875">
+	<red>175</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.90625" upperValue="2.9375">
+	<red>169</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.875" upperValue="2.90625">
+	<red>163</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.84375" upperValue="2.875">
+	<red>156</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.8125" upperValue="2.84375">
+	<red>150</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.78125" upperValue="2.8125">
+	<red>143</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.75" upperValue="2.78125">
+	<red>135</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.71875" upperValue="2.75">
+	<red>127</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.6875" upperValue="2.71875">
+	<red>119</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.65625" upperValue="2.6875">
+	<red>110</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.625" upperValue="2.65625">
+	<red>101</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.59375" upperValue="2.625">
+	<red>90</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.5625" upperValue="2.59375">
+	<red>78</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.53125" upperValue="2.5625">
+	<red>63</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.5" upperValue="2.53125">
+	<red>45</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.46875" upperValue="2.5">
+	<red>0</red>
+	<green>255</green>
+	<blue>0</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.4375" upperValue="2.46875">
+	<red>25</red>
+	<green>252</green>
+	<blue>25</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.40625" upperValue="2.4375">
+	<red>35</red>
+	<green>250</green>
+	<blue>35</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.375" upperValue="2.40625">
+	<red>43</red>
+	<green>247</green>
+	<blue>43</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.34375" upperValue="2.375">
+	<red>50</red>
+	<green>244</green>
+	<blue>50</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.3125" upperValue="2.34375">
+	<red>56</red>
+	<green>241</green>
+	<blue>56</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.28125" upperValue="2.3125">
+	<red>61</red>
+	<green>237</green>
+	<blue>61</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.25" upperValue="2.28125">
+	<red>66</red>
+	<green>234</green>
+	<blue>66</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.21875" upperValue="2.25">
+	<red>71</red>
+	<green>231</green>
+	<blue>71</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.1875" upperValue="2.21875">
+	<red>75</red>
+	<green>228</green>
+	<blue>75</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.15625" upperValue="2.1875">
+	<red>79</red>
+	<green>225</green>
+	<blue>79</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.125" upperValue="2.15625">
+	<red>83</red>
+	<green>221</green>
+	<blue>83</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.09375" upperValue="2.125">
+	<red>87</red>
+	<green>218</green>
+	<blue>87</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.0625" upperValue="2.09375">
+	<red>90</red>
+	<green>215</green>
+	<blue>90</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.03125" upperValue="2.0625">
+	<red>94</red>
+	<green>211</green>
+	<blue>94</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="2.0" upperValue="2.03125">
+	<red>97</red>
+	<green>208</green>
+	<blue>97</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.96875" upperValue="2.0">
+	<red>100</red>
+	<green>204</green>
+	<blue>100</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.9375" upperValue="1.96875">
+	<red>103</red>
+	<green>200</green>
+	<blue>103</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.90625" upperValue="1.9375">
+	<red>106</red>
+	<green>197</green>
+	<blue>106</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.875" upperValue="1.90625">
+	<red>109</red>
+	<green>193</green>
+	<blue>109</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.84375" upperValue="1.875">
+	<red>112</red>
+	<green>189</green>
+	<blue>112</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.8125" upperValue="1.84375">
+	<red>115</red>
+	<green>185</green>
+	<blue>115</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.78125" upperValue="1.8125">
+	<red>118</red>
+	<green>181</green>
+	<blue>118</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.75" upperValue="1.78125">
+	<red>120</red>
+	<green>177</green>
+	<blue>120</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.71875" upperValue="1.75">
+	<red>123</red>
+	<green>173</green>
+	<blue>123</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.6875" upperValue="1.71875">
+	<red>125</red>
+	<green>168</green>
+	<blue>125</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.65625" upperValue="1.6875">
+	<red>128</red>
+	<green>164</green>
+	<blue>128</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.625" upperValue="1.65625">
+	<red>130</red>
+	<green>159</green>
+	<blue>130</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.59375" upperValue="1.625">
+	<red>133</red>
+	<green>155</green>
+	<blue>133</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.5625" upperValue="1.59375">
+	<red>135</red>
+	<green>150</green>
+	<blue>135</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.53125" upperValue="1.5625">
+	<red>137</red>
+	<green>145</green>
+	<blue>137</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.5" upperValue="1.53125">
+	<red>140</red>
+	<green>140</green>
+	<blue>140</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.46875" upperValue="1.5">
+	<red>137</red>
+	<green>145</green>
+	<blue>145</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.4375" upperValue="1.46875">
+	<red>135</red>
+	<green>150</green>
+	<blue>150</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.40625" upperValue="1.4375">
+	<red>133</red>
+	<green>154</green>
+	<blue>154</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.375" upperValue="1.40625">
+	<red>131</red>
+	<green>159</green>
+	<blue>159</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.34375" upperValue="1.375">
+	<red>128</red>
+	<green>163</green>
+	<blue>163</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.3125" upperValue="1.34375">
+	<red>126</red>
+	<green>168</green>
+	<blue>168</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.28125" upperValue="1.3125">
+	<red>123</red>
+	<green>172</green>
+	<blue>172</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.25" upperValue="1.28125">
+	<red>121</red>
+	<green>176</green>
+	<blue>176</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.21875" upperValue="1.25">
+	<red>118</red>
+	<green>180</green>
+	<blue>180</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.1875" upperValue="1.21875">
+	<red>116</red>
+	<green>184</green>
+	<blue>184</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.15625" upperValue="1.1875">
+	<red>113</red>
+	<green>188</green>
+	<blue>188</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.125" upperValue="1.15625">
+	<red>110</red>
+	<green>191</green>
+	<blue>191</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.09375" upperValue="1.125">
+	<red>108</red>
+	<green>195</green>
+	<blue>195</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.0625" upperValue="1.09375">
+	<red>105</red>
+	<green>199</green>
+	<blue>199</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.03125" upperValue="1.0625">
+	<red>102</red>
+	<green>202</green>
+	<blue>202</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="1.0" upperValue="1.03125">
+	<red>99</red>
+	<green>206</green>
+	<blue>206</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.96875" upperValue="1.0">
+	<red>95</red>
+	<green>209</green>
+	<blue>209</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.9375" upperValue="0.96875">
+	<red>92</red>
+	<green>213</green>
+	<blue>213</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.90625" upperValue="0.9375">
+	<red>89</red>
+	<green>216</green>
+	<blue>216</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.875" upperValue="0.90625">
+	<red>85</red>
+	<green>219</green>
+	<blue>219</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.84375" upperValue="0.875">
+	<red>82</red>
+	<green>222</green>
+	<blue>222</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.8125" upperValue="0.84375">
+	<red>78</red>
+	<green>226</green>
+	<blue>226</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.78125" upperValue="0.8125">
+	<red>74</red>
+	<green>229</green>
+	<blue>229</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.75" upperValue="0.78125">
+	<red>70</red>
+	<green>232</green>
+	<blue>232</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.71875" upperValue="0.75">
+	<red>65</red>
+	<green>235</green>
+	<blue>235</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.6875" upperValue="0.71875">
+	<red>60</red>
+	<green>238</green>
+	<blue>238</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.65625" upperValue="0.6875">
+	<red>55</red>
+	<green>241</green>
+	<blue>241</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.625" upperValue="0.65625">
+	<red>49</red>
+	<green>244</green>
+	<blue>244</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.59375" upperValue="0.625">
+	<red>42</red>
+	<green>247</green>
+	<blue>247</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.5625" upperValue="0.59375">
+	<red>35</red>
+	<green>250</green>
+	<blue>250</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.53125" upperValue="0.5625">
+	<red>24</red>
+	<green>253</green>
+	<blue>253</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.5" upperValue="0.53125">
+	<red>0</red>
+	<green>255</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.484375" upperValue="0.5">
+	<red>0</red>
+	<green>251</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.46875" upperValue="0.484375">
+	<red>0</red>
+	<green>247</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.453125" upperValue="0.46875">
+	<red>0</red>
+	<green>243</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.4375" upperValue="0.453125">
+	<red>0</red>
+	<green>239</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.421875" upperValue="0.4375">
+	<red>0</red>
+	<green>235</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.40625" upperValue="0.421875">
+	<red>0</red>
+	<green>230</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.390625" upperValue="0.40625">
+	<red>0</red>
+	<green>226</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.375" upperValue="0.390625">
+	<red>0</red>
+	<green>221</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.359375" upperValue="0.375">
+	<red>0</red>
+	<green>216</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.34375" upperValue="0.359375">
+	<red>0</red>
+	<green>212</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.328125" upperValue="0.34375">
+	<red>0</red>
+	<green>207</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.3125" upperValue="0.328125">
+	<red>0</red>
+	<green>202</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.296875" upperValue="0.3125">
+	<red>0</red>
+	<green>197</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.28125" upperValue="0.296875">
+	<red>0</red>
+	<green>191</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.265625" upperValue="0.28125">
+	<red>0</red>
+	<green>186</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.25" upperValue="0.265625">
+	<red>0</red>
+	<green>180</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.234375" upperValue="0.25">
+	<red>0</red>
+	<green>175</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.21875" upperValue="0.234375">
+	<red>0</red>
+	<green>169</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.203125" upperValue="0.21875">
+	<red>0</red>
+	<green>163</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.1875" upperValue="0.203125">
+	<red>0</red>
+	<green>156</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.171875" upperValue="0.1875">
+	<red>0</red>
+	<green>150</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.15625" upperValue="0.171875">
+	<red>0</red>
+	<green>143</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.140625" upperValue="0.15625">
+	<red>0</red>
+	<green>135</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.125" upperValue="0.140625">
+	<red>0</red>
+	<green>127</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.109375" upperValue="0.125">
+	<red>0</red>
+	<green>119</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.09375" upperValue="0.109375">
+	<red>0</red>
+	<green>110</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.078125" upperValue="0.09375">
+	<red>0</red>
+	<green>101</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.0625" upperValue="0.078125">
+	<red>0</red>
+	<green>90</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.046875" upperValue="0.0625">
+	<red>0</red>
+	<green>78</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.03125" upperValue="0.046875">
+	<red>0</red>
+	<green>63</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.015625" upperValue="0.03125">
+	<red>0</red>
+	<green>45</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="0.0" upperValue="0.015625">
+	<red>0</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.03125" upperValue="0.0">
+	<red>45</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.0625" upperValue="-0.03125">
+	<red>63</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.09375" upperValue="-0.0625">
+	<red>78</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.125" upperValue="-0.09375">
+	<red>90</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.15625" upperValue="-0.125">
+	<red>101</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.1875" upperValue="-0.15625">
+	<red>110</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.21875" upperValue="-0.1875">
+	<red>119</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.25" upperValue="-0.21875">
+	<red>127</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.28125" upperValue="-0.25">
+	<red>135</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.3125" upperValue="-0.28125">
+	<red>143</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.34375" upperValue="-0.3125">
+	<red>150</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.375" upperValue="-0.34375">
+	<red>156</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.40625" upperValue="-0.375">
+	<red>163</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.4375" upperValue="-0.40625">
+	<red>169</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.46875" upperValue="-0.4375">
+	<red>175</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.5" upperValue="-0.46875">
+	<red>180</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.59375" upperValue="-0.5">
+	<red>186</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.6875" upperValue="-0.59375">
+	<red>191</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.78125" upperValue="-0.6875">
+	<red>197</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.875" upperValue="-0.78125">
+	<red>202</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-0.96875" upperValue="-0.875">
+	<red>207</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-1.0625" upperValue="-0.96875">
+	<red>212</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-1.15625" upperValue="-1.0625">
+	<red>216</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-1.25" upperValue="-1.15625">
+	<red>221</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-1.34375" upperValue="-1.25">
+	<red>226</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-1.4375" upperValue="-1.34375">
+	<red>230</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-1.53125" upperValue="-1.4375">
+	<red>235</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-1.625" upperValue="-1.53125">
+	<red>239</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-1.71875" upperValue="-1.625">
+	<red>243</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-1.8125" upperValue="-1.71875">
+	<red>247</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-1.90625" upperValue="-1.8125">
+	<red>251</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-2.0" upperValue="-1.90625">
+	<red>255</red>
+	<green>0</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-2.125" upperValue="-2.0">
+	<red>255</red>
+	<green>45</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-2.25" upperValue="-2.125">
+	<red>255</red>
+	<green>64</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-2.375" upperValue="-2.25">
+	<red>255</red>
+	<green>79</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-2.5" upperValue="-2.375">
+	<red>255</red>
+	<green>91</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-2.625" upperValue="-2.5">
+	<red>255</red>
+	<green>102</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-2.75" upperValue="-2.625">
+	<red>255</red>
+	<green>112</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-2.875" upperValue="-2.75">
+	<red>255</red>
+	<green>121</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-3.0" upperValue="-2.875">
+	<red>255</red>
+	<green>129</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-3.125" upperValue="-3.0">
+	<red>255</red>
+	<green>137</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-3.25" upperValue="-3.125">
+	<red>255</red>
+	<green>145</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-3.375" upperValue="-3.25">
+	<red>255</red>
+	<green>152</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-3.5" upperValue="-3.375">
+	<red>255</red>
+	<green>159</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-3.625" upperValue="-3.5">
+	<red>255</red>
+	<green>165</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-3.75" upperValue="-3.625">
+	<red>255</red>
+	<green>171</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" lowerValue="-3.875" upperValue="-3.75">
+	<red>255</red>
+	<green>178</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="double" upperValue="-3.875">
+	<red>255</red>
+	<green>183</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+<Level type="string" value="RF" largeLabel="true">
+	<red>255</red>
+	<green>255</green>
+	<blue>255</blue>
+	<alpha>255</alpha>
+</Level>
+
+</root>
