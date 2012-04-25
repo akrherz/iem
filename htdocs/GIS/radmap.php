@@ -303,14 +303,12 @@ if (in_array("bufferedlsr", $layers)){
 	  ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326) as geo, 
 	  type as ltype, city || magnitude || x(geom) || y(geom) as k 
 	  from lsrs_". date("Y", $ts) ." WHERE
-	  geom && (select geom from warnings_". date("Y", $ts) ." WHERE 
+	  ST_Overlaps((select geom from warnings_". date("Y", $ts) ." WHERE 
 	           wfo = '$wfo' and phenomena = '$phenomena' and 
 	           significance = '$significance' and eventid = $eventid 
-	           and gtype = 'P' LIMIT 1) and
-	  ST_Contains((select geom from warnings_". date("Y", $ts) ." WHERE 
-	           wfo = '$wfo' and phenomena = '$phenomena' and 
-	           significance = '$significance' and eventid = $eventid 
-	           and gtype = 'P' LIMIT 1), geom) and
+	           and gtype = 'P' LIMIT 1), 
+	     ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326)
+	           ) and
 	  valid >= '". date("Y-m-d H:i", $ts) ."' and 
 	  valid < '". date("Y-m-d H:i", $ts2) ."' and
 	  ((type = 'M' and magnitude >= 34) or 
