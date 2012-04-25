@@ -856,7 +856,7 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
 
     acursor.close()
     db.close()
-    if i < 5:
+    if i < 5 or max(sped) == 0:
         fig = plt.figure(figsize=(6, 7), dpi=80, facecolor='w', edgecolor='w')
         label = 'Not enough data available to generate plot'
         plt.gcf().text(0.17,0.89, label)
