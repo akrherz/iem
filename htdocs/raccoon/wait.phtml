@@ -16,7 +16,7 @@ if (isset($_REQUEST["jobid"])){
 	$ets = strtotime($row["ets"]);
 	$basefn = sprintf("%s-%s-%s-%s.ppt",  $row["wfo"], $row["radar"],
 		gmdate("YmdH", $sts), gmdate("YmdH", $ets));
-	$fn = sprintf("/mesonet/share/pickup/racoon/%s",  $basefn);
+	$fn = sprintf("/mesonet/share/pickup/raccoon/%s",  $basefn);
 	if (is_file($fn)){
 		$status = "DONE!";
 	}
