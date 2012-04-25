@@ -29,16 +29,16 @@ if (isset($_REQUEST["wfo"])){
 	die();
 }
 
-$TITLE = "IEM Racoon | Warnings overview in PowerPoint";
-$THISPAGE = "severe-raccon";
+$TITLE = "IEM Raccoon | Warnings overview in PowerPoint";
+$THISPAGE = "severe-raccoon";
 include("$rootpath/include/header.php");
 ?>
 <h3 class="heading">IEM Racoon</h3>
 
-<p>IEM Racoon generates a Microsoft Powerpoint presentation of a National
+<p>IEM Raccoon generates a Microsoft Powerpoint presentation of a National
 Weather Service office's storm based warnings for a time period of your choice.</p>
 
-<form method="GET" name="racoon">
+<form method="GET" name="raccoon">
 <table>
 <tr><th>Select Weather Office</th>
 	<td colspan="4"><?php echo networkSelect("WFO", $wfo, Array(), "wfo"); ?></td></tr>
