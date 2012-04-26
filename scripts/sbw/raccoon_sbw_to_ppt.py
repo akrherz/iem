@@ -4,7 +4,7 @@ Generate a Powerpoint file for an event
 
 $Id: $:
 """
-__REV__ = "$Revision: $:"
+__REV__ = "$Rev: $:"
 import os
 os.putenv("DISPLAY", "localhost:1")
 import sys
