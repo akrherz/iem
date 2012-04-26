@@ -295,7 +295,6 @@ function computeSharedBorder(){
             from warnings w, nws_ugc n WHERE gtype = 'P' 
             and w.wfo = '%s' and phenomena = '%s' and eventid = '%s' 
             and significance = '%s' and n.polygon_class = 'C'
-            and st_overlaps(n.geom, w.geom) 
             and n.ugc IN (
                 SELECT ugc from warnings w WHERE
                 gtype = 'C' and wfo = '%s'

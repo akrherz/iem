@@ -1,8 +1,10 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
 Generate a Powerpoint file for an event
+
+$Id: $:
 """
+__REV__ = "$Revision: $:"
 import os
 os.putenv("DISPLAY", "localhost:1")
 import sys
@@ -12,13 +14,25 @@ import struct
 import shutil
 import datetime
 import iemdb
+import random
 import psycopg2.extras
 from odf.opendocument import OpenDocumentPresentation
 from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties
 from odf.style import TextProperties, GraphicProperties, ParagraphProperties
 from odf.style import DrawingPageProperties
-from odf.text import P
+from odf.text import P, S
 from odf.draw  import Page, Frame, TextBox, Image
+
+def test_job():
+    """
+    For command line testing, lets provide a dummy job
+    """
+    jobs = []
+    jobs.append({'wfo': 'OAX', 'radar': 'OAX',
+                 'sts': datetime.datetime(2012,3,28),
+                 'ets': datetime.datetime(2012,3,29,12),
+                 'jobid': random.randint(1,1000000)})
+    return jobs
 
 def check_for_work():
     """
@@ -83,7 +97,7 @@ def do_job(job):
 
     # Style for the title frame of the page
     # We set a centered 34pt font with yellowish background
-    titlestyle = Style(name="MyMaster-title", family="presentation")
+    titlestyle = Style(name="MyMaster-title2", family="presentation")
     titlestyle.addElement(ParagraphProperties(textalign="center"))
     titlestyle.addElement(TextProperties(fontsize="34pt"))
     titlestyle.addElement(GraphicProperties(fillcolor="#ffff99"))
@@ -93,7 +107,9 @@ def do_job(job):
     # We set a centered 34pt font with yellowish background
     indexstyle = Style(name="MyMaster-title", family="presentation")
     indexstyle.addElement(ParagraphProperties(textalign="center"))
-    indexstyle.addElement(TextProperties(fontsize="22pt"))
+    indexstyle.addElement(TextProperties(fontsize="32pt"))
+    indexstyle.addElement(GraphicProperties(fillcolor="#ffffff",
+                                            stroke="none"))
     doc.styles.addElement(indexstyle)
 
     # Style for the photo frame
@@ -108,13 +124,41 @@ def do_job(job):
     #dpstyle.addElement(DrawingPageProperties(transitiontype="automatic",
     #   transitionstyle="move-from-top", duration="PT5S"))
     doc.automaticstyles.addElement(dpstyle)
+    
+    # Title slide
+    page = Page(masterpagename=masterpage)
+    doc.presentation.addElement(page)
+    frame = Frame(stylename=indexstyle, width="720pt", height="500pt", 
+                  x="40pt", y="10pt")
+    page.addElement( frame )
+    textbox = TextBox()
+    frame.addElement(textbox)
+    textbox.addElement(P(text="IEM Raccoon Report"))
+    
+    frame = Frame(stylename=indexstyle, width="720pt", height="500pt", 
+                  x="40pt", y="150pt")
+    page.addElement( frame )
+    textbox = TextBox()
+    frame.addElement(textbox)
+    textbox.addElement(P(text="WFO: %s" % (job['wfo'],)))
+    textbox.addElement(P(text="Radar: %s" % (job['radar'],)))
+    textbox.addElement(P(text="Start Time: %s UTC" % (job['sts'].strftime("%d %b %Y %H"),)))
+    textbox.addElement(P(text="End Time: %s UTC" % (job['ets'].strftime("%d %b %Y %H"),)))
+    textbox.addElement(P(text=""))
+    textbox.addElement(P(text="Raccoon Version: %s" % (__REV__,)))
+    textbox.addElement(P(text="Generated on: %s" % (
+                                    datetime.datetime.utcnow().strftime("%d %b %Y %H:%M %Z"))))
+    textbox.addElement(P(text=""))
+    textbox.addElement(P(text="Bugs/Comments/Yelling?: daryl herzmann akrherz@iastate.edu"))
+    
+    
     i = 0
     for warning in warnings:
         # Make Index page for the warning
         page = Page(masterpagename=masterpage)
         doc.presentation.addElement(page)
-        titleframe = Frame(stylename=indexstyle, width="720pt", height="500pt", 
-                       x="40pt", y="10pt")
+        titleframe = Frame(stylename=indexstyle, width="700pt", height="500pt", 
+                       x="10pt", y="10pt")
         page.addElement(titleframe)
         textbox = TextBox()
         titleframe.addElement(textbox)
@@ -127,6 +171,22 @@ def do_job(job):
                                     warning['expire'].strftime("%d %b %Y %H:%M"),)))
         textbox.addElement(P(text="Area: %.1f square km (%.1f square miles)" % ( 
                                     warning['area'], warning['area'] / 0.386102)))
+        
+        url = "http://iem21.local/GIS/radmap.php?"
+        url += "layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw"
+        url += "&layers[]=uscounties&layers[]=bufferedlsr&lsrbuffer=15"
+        url += "&vtec=%s.O.NEW.K%s.%s.W.%04i" % ( job['sts'].year, job['wfo'],
+                                    warning['phenomena'],warning['eventid'])
+        
+        cmd = "wget -q -O %i.png '%s'" % (i, url)
+        os.system(cmd)
+        photoframe = Frame(stylename=photostyle, width="480pt", 
+                               height="360pt", x="160pt", y="200pt")
+        page.addElement(photoframe)
+        href = doc.addPicture("%i.png" % (i,))
+        photoframe.addElement(Image(href=href))
+        i += 1
+        
         times = []
         now = warning['issue']
         while now < warning['expire']:
@@ -149,6 +209,8 @@ def do_job(job):
             url = "http://iem21.local/GIS/radmap.php?"
             url += "layers[]=ridge&ridge_product=N0Q&ridge_radar=%s&" % (job['radar'],)
             url += "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&"
+            url += "layers[]=lsrs&ts2=%s&" % (
+                    (now + datetime.timedelta(minutes=15)).strftime("%Y%m%d%H%M"),)
             url += "vtec=%s.O.NEW.K%s.%s.W.%04i&ts=%s" % ( job['sts'].year, job['wfo'],
                                     warning['phenomena'],warning['eventid'],
                                     now.strftime("%Y%m%d%H%M"))
@@ -173,7 +235,10 @@ def do_job(job):
 
 
 if __name__ == "__main__":
-    jobs = check_for_work()
+    if len(sys.argv) == 2:
+        jobs = test_job()
+    else:
+        jobs = check_for_work()
     if len(jobs) == 0:
         sys.exit()
     for job in jobs:
