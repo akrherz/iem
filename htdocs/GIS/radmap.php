@@ -477,7 +477,7 @@ if (in_array("ci", $layers) ){
 	   from warnings_". date("Y", $ts) ." w, nws_ugc n WHERE gtype = 'P' and w.wfo = '$wfo'
 	   and phenomena = '$phenomena' and eventid = $eventid 
 	   and significance = '$significance'
-	   and n.polygon_class = 'C' and ST_OverLaps(n.geom, w.geom)
+	   and n.polygon_class = 'C' 
 	   and n.ugc IN (
 	          SELECT ugc from warnings_". date("Y", $ts) ." WHERE
 	          gtype = 'C' and wfo = '$wfo' 
@@ -495,9 +495,9 @@ if (in_array("ci", $layers) ){
 	$cic0 = ms_newClassObj($ci);
 	$cic0->set("name", "County Intersection");
 	$cic0s0 = ms_newStyleObj($cic0);
-	$cic0s0->set("symbolname", 'circle');
+	//$cic0s0->set("symbolname", 'circle');
 	$cic0s0->color->setRGB(250,0,250);
-	$cic0s0->set("size", 5);
+	$cic0s0->set("width", 5);
 	$ci->draw($img);
 }
 
