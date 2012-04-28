@@ -20,7 +20,7 @@ tests = ['HGX.FF.7', 'GUM.MA.1', 'GUM.MA.2','MRX.SV.18', 'SGF.TO.23',
          'GLD.TO.1', 'GLD.TO.2', 'LBF.TO.6', 'DDC.TO.1', 'GID.TO.3',
          'GID.TO.4', 'OAX.TO.1', 'DMX.TO.1', 'FSD.TO.1', 'FSD.TO.2',
          'HGX.FF.24', 'HGX.FF.25','MPX.TO.5', 'MPX.TO.6', 'FSD.TO.6',
-         'FSD.TO.7',
+         'FSD.TO.7', 'PUB.TO.2', 'GLD.TO.5', 'OHX.SV.116',
 ]
 #for i in range(27,78):
 #    tests.append('OAX.TO.%s' % (i,))
