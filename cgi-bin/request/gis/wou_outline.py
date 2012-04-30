@@ -2,7 +2,14 @@
 # Generate a shapefile of the WOU outline.
 # 28 Aug 2004 port to iem40
 
-import shapelib, dbflib, mx.DateTime, zipfile, os, sys, shutil, cgi
+import shapelib
+import dbflib
+import mx.DateTime
+import zipfile
+import os
+import sys
+import shutil
+import cgi
 from pyIEM import wellknowntext, iemdb
 
 i = iemdb.iemdb()
@@ -24,7 +31,7 @@ dbf = dbflib.create(fp)
 dbf.add_field("SIG", dbflib.FTString, 1, 0)
 dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
 
-sql = """select astext(multi(ST_union(geom))) as tgeom 
+sql = """select astext(multi(ST_union(ST_SnapToGrid(geom,0.00001)))) as tgeom 
        from warnings_%s WHERE significance = 'A' and 
        phenomena IN ('TO','SV') and eventid = %s and
        isvalid(geom) and 
