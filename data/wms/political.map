@@ -5,7 +5,7 @@ MAP
 NAME "political"
 STATUS ON
 SIZE 450 350
-SHAPEPATH "/mesonet/data/gis/static/shape/900913/"
+SHAPEPATH "/mesonet/data/gis/static/shape/3857/"
 IMAGECOLOR -1 -1 -1
 
 #
@@ -31,6 +31,29 @@ WEB
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
       "wms_enable_request" "*"
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+  NAME "fz-900913"
+  STATUS ON
+  DATA "nws/fire_zones.shp"
+  TYPE LINE
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "NWS Fire Weather Zones"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+  CLASS
+    COLOR 0 0 0
+    WIDTH 2.0
   END
 END
 
