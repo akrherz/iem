@@ -52,8 +52,10 @@ LAYER
     "wms_extent" "-126 24 -66 50"
   END
   CLASS
-    COLOR 0 0 0
-    WIDTH 2.0
+  	STYLE
+    	COLOR 0 0 0
+    	WIDTH 2.0
+    END
   END
 END
 
