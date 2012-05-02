@@ -84,7 +84,7 @@ def doit(gts):
     for tile in range(1,9):
         fp = make_fp(tile, gts)
         if not os.path.isfile(fp):
-            print "Missing", fp
+            print "Missing Tile: %s Time: %s" % (tile, gts)
             continue
         nc = netCDF3.Dataset( fp )
         val = nc.variables["rad_hsr_1h"][:] / 10.0 # convert to mm
