@@ -9,7 +9,7 @@ $pgconn = iemdb('postgis');
 $rs = pg_query($pgconn, "SELECT x(tml_geom) as lon, y(tml_geom) as lat,
 	tml_valid at time zone 'UTC' as tmlv, tml_direction, tml_sknt, 
 	polygon_end at time zone 'UTC' as pe from sbw_". date("Y") ." 
-	WHERE polygon_end > 'TODAY' and phenomena = 'TO' 
+	WHERE polygon_end > now() and phenomena = 'TO' and status != 'CAN'
 	and tml_valid is not null");
 
 header( 'Content-type: text/plain');
