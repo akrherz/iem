@@ -5,11 +5,13 @@
  */
 include("../../../config/settings.inc.php");
 include_once "$rootpath/include/database.inc.php";
+$plimit = isset($_GET["all"]) ? "('TO','SV')" : "('TO')";
 $pgconn = iemdb('postgis');
 $rs = pg_query($pgconn, "SELECT x(tml_geom) as lon, y(tml_geom) as lat,
 	tml_valid at time zone 'UTC' as tmlv, tml_direction, tml_sknt, 
-	polygon_end at time zone 'UTC' as pe from sbw_". date("Y") ." 
-	WHERE polygon_end > now() and phenomena = 'TO' and status != 'CAN'
+	polygon_end at time zone 'UTC' as pe, eventid, wfo, phenomena
+	 from sbw_". date("Y") ." 
+	WHERE polygon_end > now() and phenomena in $plimit and status != 'CAN'
 	and tml_valid is not null");
 
 header( 'Content-type: text/plain');
@@ -19,7 +21,7 @@ putenv("TZ=GMT");
 
 echo "RefreshSeconds: 60
 Threshold: 999
-Title: NWS Tornado Time-Mot-Loc 
+Title: NWS Warning Time-Mot-Loc 
 Color: 255 0 0
 Font: 1, 11, 1, \"Courier New\" 
 
@@ -39,7 +41,8 @@ for ($k=0;$row=@pg_fetch_array($rs,$k);$k++){
 	$lon2 = round($lon1 + (($distance * cos(deg2rad(270-$dir)))/(111325 * cos(deg2rad($lat1)))),6);
 	$lat2 = round($lat1 + (($distance * sin(deg2rad(270-$dir)))/111325),6);
 
-	echo "Line: 2,0,\"NWS Tornado Track\"
+	echo "Line: 2,0,\"NWS Warning Track (". $row["wfo"] ."-". $row["phenomena"] 
+	."-". $row["eventid"].")\"
   ".$lat1.",".$lon1."
   ".$lat2.",".$lon2."
 End:
