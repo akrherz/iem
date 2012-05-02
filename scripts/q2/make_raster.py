@@ -128,7 +128,7 @@ def doit(gts):
     subprocess.call(pqstr, shell=True)
     # Create 900913 image
     cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpfn, tmpfn)
-    subprocess.call(pqstr, shell=True)
+    subprocess.call(cmd, shell=True)
     # Insert into LDM
     pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/n1p.tif GIS/q2/n1p_%s.tif tif' %s.tif" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpfn )
