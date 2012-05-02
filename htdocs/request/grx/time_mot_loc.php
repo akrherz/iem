@@ -6,6 +6,7 @@
 include("../../../config/settings.inc.php");
 include_once "$rootpath/include/database.inc.php";
 $plimit = isset($_GET["all"]) ? "('TO','SV')" : "('TO')";
+$title = isset($_GET["all"]) ? "SVR+TOR" : "TOR";
 $pgconn = iemdb('postgis');
 $rs = pg_query($pgconn, "SELECT x(tml_geom) as lon, y(tml_geom) as lat,
 	tml_valid at time zone 'UTC' as tmlv, tml_direction, tml_sknt, 
@@ -21,7 +22,7 @@ putenv("TZ=GMT");
 
 echo "RefreshSeconds: 60
 Threshold: 999
-Title: NWS Warning Time-Mot-Loc 
+Title: NWS $title Warning Time-Mot-Loc 
 Color: 255 0 0
 Font: 1, 11, 1, \"Courier New\" 
 
