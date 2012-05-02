@@ -59,5 +59,8 @@ End:
 		//echo "Object: ".$lat2.",".$lon2."\n  Text: 0,0,1,\"".$t_now."\"\nEnd:\n\n";
 		echo "Place: ".$lat2.",".$lon2.",".$t_now."\n";
 	}
+	
+	echo "\nColor: 255 0 0\n";
+	echo "Threshold: 999\n\n";
 }
 ?>
