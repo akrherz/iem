@@ -13,6 +13,7 @@ from PIL import Image
 import os
 import sys
 import tempfile
+import subprocess
 
 # NW Corner of tiles
 tiles = {
@@ -120,18 +121,18 @@ def doit(gts):
     # Inject WLD file
     pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/n1p_%s.wld wld' %s.wld" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpfn )
-    os.system(pqstr)
+    subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
     pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/n1p.png GIS/q2/n1p_%s.png png' %s.png" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpfn )
-    os.system(pqstr)
+    subprocess.call(pqstr, shell=True)
     # Create 900913 image
     cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpfn, tmpfn)
-    os.system( cmd )
+    subprocess.call(pqstr, shell=True)
     # Insert into LDM
     pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/n1p.tif GIS/q2/n1p_%s.tif tif' %s.tif" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpfn )
-    os.system(pqstr)
+    subprocess.call(pqstr, shell=True)
     
     os.unlink('%s.tif' % (tmpfn,))
     os.unlink('%s.png' % (tmpfn,))
