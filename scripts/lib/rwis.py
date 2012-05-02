@@ -129,12 +129,15 @@ class RWISOb(object):
     o.close()
 
     if ( int(gmtNow - self.gmt_ts) < (30*60) ): # 30 minutes
-      os.system("echo '"+mailStr+"' | mail -s 'RWIS OB' -c akrherz@iastate.edu iarwis-alert@mesonet.agron.iastate.edu")
-
-    else:
-      cmd = "echo '"+mailStr+"' | mail -s 'RWIS OB [NO ALERT]' akrherz@iastate.edu"
-      os.system(cmd)
-
+        import smtplib
+        from email.mime.text import MIMEText
+        msg = MIMEText(mailStr)
+        msg['From'] = 'akrherz@iastate.edu'
+        msg['To'] = 'iarwis-alert@mesonet.agron.iastate.edu'
+        msg['Subject'] = 'Iowa RWIS Wind Gust %s %s' % (self.gust, stname)
+        s = smtplib.SMTP('mailhub.iastate.edu')
+        s.sendmail(msg['From'], [msg['To']], msg.as_string())
+        s.quit()
     
 
   def parseTime(self, inStr):
