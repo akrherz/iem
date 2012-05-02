@@ -23,7 +23,6 @@ putenv("TZ=GMT");
 echo "RefreshSeconds: 60
 Threshold: 999
 Title: NWS $title Warning Time-Mot-Loc 
-Color: 255 0 0
 Font: 1, 11, 1, \"Courier New\" 
 
 ";
@@ -41,7 +40,12 @@ for ($k=0;$row=@pg_fetch_array($rs,$k);$k++){
 	$distance = $spd * $dur;
 	$lon2 = round($lon1 + (($distance * cos(deg2rad(270-$dir)))/(111325 * cos(deg2rad($lat1)))),6);
 	$lat2 = round($lat1 + (($distance * sin(deg2rad(270-$dir)))/111325),6);
-
+	if ($row["phenomena"] == 'SV'){
+		echo "Color: 255 255 0\n";
+	} else {
+		echo "Color: 255 0 0\n";
+	}
+	
 	echo "Line: 2,0,\"NWS Warning Track (". $row["wfo"] ."-". $row["phenomena"] 
 	."-". $row["eventid"].")\"
   ".$lat1.",".$lon1."
@@ -64,7 +68,6 @@ End:
 		echo "Place: ".$lat2.",".$lon2.",".$t_now."\n";
 	}
 	
-	echo "\nColor: 255 0 0\n";
 	echo "Threshold: 999\n\n";
 }
 ?>
