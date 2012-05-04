@@ -18,10 +18,10 @@ def save(sectorName, file_name, dir_name, tstamp,bbox=None):
   layers = "layers[]=n0q&layers[]=watch_by_county&layers[]=sbw&layers[]=uscounties"
   if sectorName == 'conus':
     layers = "layers[]=n0q&layers[]=watch_by_county&layers[]=uscounties"
-  uri = "http://iemvs107.local/GIS/radmap.php?sector=%s&ts=%s&%s" % \
+  uri = "http://iem21.local/GIS/radmap.php?sector=%s&ts=%s&%s" % \
         (sectorName,tstamp, layers)
   if (bbox is not None):
-    uri = "http://iemvs107.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % \
+    uri = "http://iem21.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % \
         (bbox,tstamp, layers)
   try:
     f = opener.open(uri)
