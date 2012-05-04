@@ -66,6 +66,21 @@ LEGEND
 END
 
 LAYER
+  NAME "places2010"
+  TYPE POLYGON
+  STATUS OFF
+  DATA /mesonet/data/gis/static/shape/4326/us/2010_Places.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    STYLE
+      COLOR 200 200 200
+    END
+  END
+END
+
+LAYER
   NAME DMX
   STATUS ON
   TYPE RASTER
