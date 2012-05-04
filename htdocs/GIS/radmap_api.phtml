@@ -57,7 +57,7 @@ width="640" height="480" alt="radmap image"/>
  <li><i>legend</i> - Include Legend on the Map</li>
  <li><i>lsrs</i> - Local Storm Reports <sup>[1]</sup></li>
  <li><i>nexrad</i> - CONUS Nexrad Base Reflectivity Composite <sup>[2]</sup></li>
- <li><i>uscountines</i> - CONUS Counties </li>
+ <li><i>places</i> - 2010 Census Incorporated Places </li>
  <li><i>ridge</i> - Single Site <a href="ridge.phtml">NEXRAD/TDWR</a> imagery, you
  also need to specify the RADAR site and level 3 product as two seperate 
  CGI variables. <sup>[2]</sup>
@@ -68,6 +68,7 @@ width="640" height="480" alt="radmap image"/>
  </li>
  <li><i>roads</i> - Iowa Winter Road Conditions</li>
  <li><i>sbw</i> - Storm based Watch/Warning/Advisories</li>
+  <li><i>uscountines</i> - CONUS Counties </li>
  <li><i>watch_by_county</i> - Convective Watch-by-County</li>
  <li><i>watches</i> - Polygon SPC Watch boundaries</li>
 </ul>
@@ -191,6 +192,7 @@ os.system("ffmpeg -y -i %05d.png -b 2000k out.mp4")
  <li><strong>18 Oct 2011:</strong> Cleanup and clarify LSRs.</li>
  <li><strong>14 Apr 2012:</strong> Another cleanup and add ridge and GOES
  imagery layers as available plotting options.</li>
+ <li><strong>4 May 2012:</strong> Add incorporated places as a layer option.</li>
 </ul>
 
 </div>

@@ -173,7 +173,7 @@ def do_job(job):
                                     warning['area'], warning['area'] / 0.386102)))
         
         url = "http://iem21.local/GIS/radmap.php?"
-        url += "layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw"
+        url += "layers[]=places&layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw"
         url += "&layers[]=uscounties&layers[]=bufferedlsr&lsrbuffer=15"
         url += "&vtec=%s.O.NEW.K%s.%s.W.%04i" % ( job['sts'].year, job['wfo'],
                                     warning['phenomena'],warning['eventid'])

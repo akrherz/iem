@@ -68,6 +68,21 @@ END
 INCLUDE "inc_iem.map"
 
 LAYER
+  NAME "places2010"
+  TYPE POLYGON
+  STATUS OFF
+  DATA /mesonet/data/gis/static/shape/2163/us/2010_Places.shp
+  PROJECTION
+   "init=epsg:2163"
+  END
+  CLASS
+    STYLE
+      COLOR 200 200 200
+    END
+  END
+END
+
+LAYER
   NAME namerica
   STATUS OFF
   TYPE POLYGON
