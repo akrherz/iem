@@ -134,7 +134,7 @@ class RWISOb(object):
         msg = MIMEText(mailStr)
         msg['From'] = 'akrherz@iastate.edu'
         msg['To'] = 'iarwis-alert@mesonet.agron.iastate.edu'
-        msg['Subject'] = 'Iowa RWIS Wind Gust %.0f %s' % (self.gust, stname)
+        msg['Subject'] = 'Iowa RWIS Wind Gust %.0f kts %s' % (self.gust, stname)
         s = smtplib.SMTP('mailhub.iastate.edu')
         s.sendmail(msg['From'], [msg['To']], msg.as_string())
         s.quit()
