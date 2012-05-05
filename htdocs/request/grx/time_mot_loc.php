@@ -47,7 +47,20 @@ for ($k=0;$row=@pg_fetch_array($rs,$k);$k++){
 					$row["line"], $matches);
 		$lats = $matches["lat"];
 		$lons = $matches["lon"];
+		echo "Color: 255 255 0 100\n";
+		echo "Polygon:\n";
+		$two = "";
+		for($m=sizeof($lats)-1; $m > -1; $m--){
+			echo sprintf("%s,%s\n", $lats[$m], $lons[$m]);
+	  		$lon2 = round($lons[$m] + (($distance * cos(deg2rad(270-$dir)))/(111325 * cos(deg2rad($lats[$m])))),6);
+	  		$lat2 = round($lats[$m] + (($distance * sin(deg2rad(270-$dir)))/111325),6);
+			$two = sprintf("%s,%s\n%s", $lat2, $lon2, $two);
+		}
+		echo $two;
+		echo "End:\n";
+		
 	}
+	reset($lats);
 	for($m=0; $m < sizeof($lats); $m++){
 		$lat1 = $lats[$m];
 		$lon1 = $lons[$m];
