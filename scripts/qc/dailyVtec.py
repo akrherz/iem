@@ -22,7 +22,7 @@ tests = ['HGX.FF.7', 'GUM.MA.1', 'GUM.MA.2','MRX.SV.18', 'SGF.TO.23',
          'HGX.FF.24', 'HGX.FF.25','MPX.TO.5', 'MPX.TO.6', 'FSD.TO.6',
          'FSD.TO.7', 'PUB.TO.2', 'GLD.TO.5', 'OHX.SV.116', 'FSD.TO.12',
          'ARX.TO.1', 'ARX.TO.2', 'ARX.TO.3', 'DVN.TO.1', 'DVN.TO.2', 'DVN.TO.3', 
-         
+         'CYS.TO.2', 'CYS.TO.1', 'BOU.TO.1', 'BOU.TO.2',
 ]
 #for i in range(27,78):
 #    tests.append('OAX.TO.%s' % (i,))
