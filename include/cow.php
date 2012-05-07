@@ -97,7 +97,7 @@ function sqlLSRTypeBuilder(){
 }
 
 function sqlTypeBuilder(){
-    if (sizeof($this->wtype) == 0) return "1 = 1";
+    if (sizeof($this->wtype) == 0) return "w.phenomena IN ('ZZ')";
 
     $sql = "w.phenomena IN ('". implode(",", $this->wtype) ."')";
     $sql = str_replace(",", "','", $sql);

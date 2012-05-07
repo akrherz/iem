@@ -80,6 +80,15 @@ $charturl = sprintf("chart.php?aw=%s&ae=%s&b=%s&c=%s&d=%s",
             $cow->computeUnwarnedEvents(), $cow->computeWarningsUnverified(),
             "NA");
 
+if (sizeof($ltype) == 0){
+	echo "<div class='warning'>You did not select any of the Local Storm 
+	Report types above, so none are listed below...<br /><br /></div>";
+}
+if (sizeof($wtype) == 0){
+	echo "<div class='warning'>You did not select any of the Warning 
+	types above, so none are listed below...<br /><br /></div>";
+}
+
 ?>
 <h3 class="heading">Summary:</h3>
 <?php echo "<b>Begin Date:</b> ". date("m/d/Y H:i", $sts) ." <b>End Date:</b> ". date("m/d/Y H:i", $ets); ?>
