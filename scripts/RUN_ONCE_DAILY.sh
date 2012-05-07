@@ -1,7 +1,7 @@
 # Run once daily
 
 cd qc
-/mesonet/python/bin/python dailyVtec.py
+python check_vtec_eventids.py
 
 cd ../outgoing
 /mesonet/python/bin/python wxc_moon.py
