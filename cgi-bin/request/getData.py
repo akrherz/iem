@@ -1,6 +1,7 @@
 #!/usr/bin/python
 """
 Download interface for ASOS/AWOS data from the asos database
+$Id: $:
 """
 
 import cgi, re, string, sys

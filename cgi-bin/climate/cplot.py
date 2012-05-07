@@ -1,4 +1,4 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/python
 """
 Gonna try to make something that can plot most anything under the moon for the COOP 
 data, watch me fail

@@ -1,11 +1,22 @@
-#!/mesonet/python/bin/python
-# Output by township
-
-from pyIEM import iemdb, wellknowntext
-import shapelib, dbflib, os, cgi, mx.DateTime, sys, zipfile, shutil
-i = iemdb.iemdb()
-mydb = i['wepp']
-
+#!/usr/bin/env python
+"""
+Provide IDEP soil moisture on a per township basis
+$Id: $:
+"""
+import sys
+sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
+import iemdb
+import wellknowntext
+import shapelib
+import dbflib
+import os
+import cgi
+import mx.DateTime
+import sys
+import zipfile
+import shutil
+WEPP = iemdb.connect('wepp', bypass=True)
+wcursor = WEPP.cursor()
 
 os.chdir('/tmp/')
 
@@ -42,15 +53,16 @@ twp = {}
 
 sql = "SELECT astext(transform(the_geom,4326)) as tg, model_twp from iatwp"
 if form.has_key("point"):
-  sql = "SELECT astext(transform(centroid(the_geom),4326)) as tg, model_twp from iatwp"
-
-rs = mydb.query(sql).dictresult()
-for i in range(len(rs)):
-  twp[ rs[i]["model_twp"] ] = rs[i]["tg"]
+  sql = """SELECT astext(transform(centroid(the_geom),4326)) as tg, model_twp 
+      from iatwp"""
+wcursor.execute( sql )
+for row in wcursor:
+    twp[ row[1] ] = row[0]
 
 # Now, lets figure out what data we want
-sql = "SELECT * from waterbalance_by_twp WHERE valid = '%s'" \
-       % (ts.strftime("%Y-%m-%d"), )
+sql = """SELECT model_twp, vsm, -1, s10cm, s20cm 
+        from waterbalance_by_twp WHERE valid = '%s'""" % (
+                                        ts.strftime("%Y-%m-%d"), )
 day1 = ts.strftime("%Y%m%d")
 day2 = ts.strftime("%Y%m%d")
 if interval is not None:
@@ -69,7 +81,7 @@ if monthly is not None:
     day1 = (ts + mx.DateTime.RelativeDateTime(day=1)).strftime("%Y%m%d")
     day2 = (ts + mx.DateTime.RelativeDateTime(day=1,months=1) - mx.DateTime.RelativeDateTime(days=1) ).strftime("%Y%m%d")
 
-rs = mydb.query(sql).dictresult()
+wcursor.execute( sql )
 
 if form.has_key("point"):
   shp = shapelib.create(fp, shapelib.SHPT_POINT)
@@ -84,12 +96,13 @@ dbf.add_field("VSM_STDD", dbflib.FTDouble, 8, 4)
 dbf.add_field("S10CM", dbflib.FTDouble, 8, 4)
 dbf.add_field("S20CM", dbflib.FTDouble, 8, 4)
 
-for i in range(len(rs)):
-  m = rs[i]["model_twp"]
-  vsm = float(rs[i]["vsm"])
-  vsms = float(rs[i]["vsm_stddev"])
-  s10 = float(rs[i]["s10cm"])
-  s20 = float(rs[i]["s20cm"])
+i = 0
+for row in wcursor:
+  m = row[0]
+  vsm = row[1]
+  vsms = row[2]
+  s10 = row[3]
+  s20 = row[4]
 
   f = wellknowntext.convert_well_known_text( twp[m] )
   if form.has_key("point"):
@@ -98,9 +111,11 @@ for i in range(len(rs)):
     obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
   shp.write_object(-1, obj)
   dbf.write_record(i, (day1,day2,m,vsm,vsms,s10,s20) )
+  i += 1
 
 del(dbf)
 del(shp)
+WEPP.close()
 
 o = open(fp+".txt", 'w')
 o.write("""

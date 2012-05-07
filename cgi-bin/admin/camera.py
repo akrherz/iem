@@ -1,5 +1,9 @@
-#!/usr/bin/python
-# Need something for a Camera Interface
+#!/usr/bin/env python
+"""
+Simple web interface to connect to webcams via java applet
+$Id: $:
+"""
+
 import cgi
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
@@ -57,7 +61,7 @@ def main():
 
 	printHeader()
 	printForm(cam)
-	if (cameras.has_key(cam)):
+	if cameras.has_key(cam):
 		printInterface(cam)
 
 

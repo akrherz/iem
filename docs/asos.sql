@@ -1,0 +1,32 @@
+CREATE TABLE alldata(
+ station        character varying(4)  ,    
+ valid          timestamp with time zone  ,
+ tmpf           real            ,          
+ dwpf           real            ,          
+ drct           real              ,        
+ sknt           real             ,         
+ alti           real                ,      
+ gust           real               ,       
+ vsby           real                ,      
+ skyc1          character(3)         ,     
+ skyc2          character(3)          ,    
+ skyc3          character(3)           ,   
+ skyl1          integer                 ,  
+ skyl2          integer                  , 
+ skyl3          integer                   ,
+ metar          character varying(256)    ,
+ skyc4          character(3)              ,
+ skyl4          integer                   ,
+ p03i           real                      ,
+ p06i           real                      ,
+ p24i           real                      ,
+ max_tmpf_6hr   real                      ,
+ min_tmpf_6hr   real                      ,
+ max_tmpf_24hr  real                      ,
+ min_tmpf_24hr  real                      ,
+ mslp           real                      ,
+ p01i           real                      ,
+ presentwx     character varying(24)     
+);
+
+CREATE TABLE t2012 () inherits (alldata);

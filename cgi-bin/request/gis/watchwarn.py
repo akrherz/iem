@@ -1,14 +1,24 @@
-#!/mesonet/python/bin/python
-# Something to dump current warnings to a shapefile
+#!/usr/bin/env python
+"""
+Generate a shapefile of warnings based on the CGI request
+$Id: $:
+"""
 
-import shapelib, dbflib, mx.DateTime, zipfile, os, sys, shutil, cgi
-os.environ['TZ'] = 'UTC'
-from pyIEM import wellknowntext
+import shapelib
+import dbflib
+import mx.DateTime
+import zipfile
+import os
+import shutil
+import cgi
 import psycopg2
 import psycopg2.extras
 
-mydb = psycopg2.connect("dbname='postgis' host='iemdb' user='nobody'")
-
+import sys
+sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
+import wellknowntext
+import iemdb
+POSTGIS = iemdb.connect('postgis')
 
 # Get CGI vars
 form = cgi.FormContent()
@@ -78,11 +88,18 @@ if sTS.year == eTS.year:
     table = "warnings_%s" % (sTS.year,)
 
 sql = """SELECT *, astext(ST_Simplify(geom,0.0001)) as tgeom,
-    area( transform(geom,2163) ) / 1000000.0 as area2d
+    area( transform(geom,2163) ) / 1000000.0 as area2d,
+    issue at time zone 'UTC' as utc_issue,
+    expire at time zone 'UTC' as utc_expire
     from %s WHERE isValid(geom) and 
 	issue >= '%s+00' and issue < '%s+00' and eventid < 10000 
-	%s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
-cursor = mydb.cursor('cursor_unique_name', cursor_factory=psycopg2.extras.DictCursor)
+	%s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), 
+                 eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
+cursor = POSTGIS.cursor('cursor_unique_name', 
+                     cursor_factory=psycopg2.extras.DictCursor)
+#print 'Content-type: text/plain\n'
+#print sql
+#sys.exit()
 cursor.execute(sql)
 
 cnt = 0
@@ -95,20 +112,16 @@ for row in cursor:
     except:
         continue
 
-    g = row["gtype"]
-    t = row["phenomena"]
     #issue = mx.DateTime.strptime(row["issue"][:16], "%Y-%m-%d %H:%M")
     #expire = mx.DateTime.strptime(row["expire"][:16],"%Y-%m-%d %H:%M")
-    issue = row["issue"]
-    expire = row["expire"]
-    u = issue.utcoffset() or ZERO
-    issue -= u
-    expire -= u
+    issue = row["utc_issue"]
+    expire = row["utc_expire"]
+
     d = {}
     d["ISSUED"] = issue.strftime("%Y%m%d%H%M")
     d["EXPIRED"] = expire.strftime("%Y%m%d%H%M")
-    d["PHENOM"] = t
-    d["GTYPE"] = g
+    d["PHENOM"] = row["phenomena"]
+    d["GTYPE"] = row["gtype"]
     d["SIG"] = row["significance"]
     d["WFO"] = row["wfo"]
     d["ETN"] = row["eventid"]
@@ -144,6 +157,8 @@ if (cnt == 0):
 
 del(shp)
 del(dbf)
+cursor.close()
+POSTGIS.close()
 
 # Create zip file, send it back to the clients
 shutil.copyfile("/mesonet/data/gis/meta/4326.prj", fp+".prj")
@@ -166,5 +181,5 @@ os.remove(fp+".shx")
 os.remove(fp+".dbf")
 os.remove(fp+".prj")
 
-cursor.close()
-mydb.close()
+
+# END

@@ -1,4 +1,4 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/env python
 """
 Download interface for data from 'other' network
 $Id$:

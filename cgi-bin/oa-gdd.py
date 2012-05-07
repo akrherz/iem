@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
  Produce a OA GDD Plot, dynamically!
 $Id: $:
