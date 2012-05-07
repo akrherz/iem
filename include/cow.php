@@ -82,7 +82,7 @@ function sqlWFOBuilder(){
 
 function sqlLSRTypeBuilder(){
     reset($this->ltype);
-    if (sizeof($this->ltype) == 0){ return "1 = 1"; }
+    if (sizeof($this->ltype) == 0){ return "type in ('@')"; }
     $l = Array();
     while( list($k,$v) = each($this->ltype)){
         if ($v == "TO"){ $l[] = "T"; }
