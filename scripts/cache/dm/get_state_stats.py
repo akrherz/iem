@@ -9,8 +9,8 @@ d1 = []
 d2 = []
 d3 = []
 d4 = []
-sts = mx.DateTime.DateTime(2000,1,4)
-ets = mx.DateTime.DateTime(2011,9,9)
+sts = mx.DateTime.DateTime(2011,1,4)
+ets = mx.DateTime.DateTime(2011,12,16)
 interval = mx.DateTime.RelativeDateTime(days=7)
 now = sts
 while now < ets:
@@ -32,12 +32,12 @@ while now < ets:
             d4.append( float(tokens[7]) )
             break
     now += interval
-
+    #"""
 xticks = []
 xticklabels = []
-for yr in range(2000,2013):
-    xticks.append( float(mx.DateTime.DateTime(yr,1,1)))
-    xticklabels.append( yr )
+for yr in range(1,13):
+    xticks.append( float(mx.DateTime.DateTime(2011,yr,1)))
+    xticklabels.append( mx.DateTime.DateTime(2011,yr,1).strftime("%b") )
 
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
@@ -47,16 +47,32 @@ fig = plt.figure()
 ax= fig.add_subplot(111)
 
 #ax.fill_between(valid, d0, 0, facecolor='#f6eb13', label='D0 Abnormal')
-ax.bar(valid, d0, fc='#f6eb13', ec='#f6eb13', label='D0 Abnormal')
-ax.bar(valid, d1, fc='#ffcc66', ec='#ffcc66', label='D1 Moderate')
-ax.bar(valid, d2, fc='#ff9900', ec='#ff9900', label='D2 Severe')
-ax.bar(valid, d3, fc='#ff3333', ec='#ff3333', label='D3 Extreme')
-ax.bar(valid, d4, fc='#660000', ec='#660000', label='D4 Exceptional')
+ax.bar(valid, d0, width=7*86400, fc='#f6eb13', ec='#f6eb13', label='D0 Abnormal')
+ax.bar(valid, d1, width=7*86400, fc='#ffcc66', ec='#ffcc66', label='D1 Moderate')
+ax.bar(valid, d2, width=7*86400, fc='#ff9900', ec='#ff9900', label='D2 Severe')
+ax.bar(valid, d3, width=7*86400, fc='#ff3333', ec='#ff3333', label='D3 Extreme')
+ax.bar(valid, d4, width=7*86400, fc='#660000', ec='#660000', label='D4 Exceptional')
+
+ax.annotate("",
+       xytext=(float(mx.DateTime.DateTime(2011,9,1)), 10), xycoords='data',
+       xy=(float(mx.DateTime.DateTime(2011,12,1)), 25), textcoords='data',
+       arrowprops=dict(arrowstyle="->",
+                            connectionstyle="arc3"),
+       )
+ax.annotate("",
+       xy=(float(mx.DateTime.DateTime(2011,12,8)), 65), xycoords='data',
+       xytext=(float(mx.DateTime.DateTime(2011,11,1)), 85), textcoords='data',
+       arrowprops=dict(arrowstyle="->",
+                            connectionstyle="arc3"),
+       )
+
+
 ax.set_xticks( xticks )
+ax.set_ylim(0,100)
 ax.set_xlim( min(xticks), max(valid))
 ax.set_xticklabels( xticklabels)
 ax.set_ylabel("Percentage of Iowa Area [%]")
-ax.set_title("Areal coverage of Drought in Iowa\nfrom US Drought Monitor [1 Jan 2000 - 6 Sep 2011]")
+ax.set_title("2011 Areal coverage of Drought in Iowa\nfrom US Drought Monitor")
 ax.grid(True)
 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
           fancybox=True, shadow=True, ncol=5, prop=prop)

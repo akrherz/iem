@@ -1,6 +1,7 @@
 # Something to store constants of our effort
 import numpy
 import math
+import mx.DateTime
 
 # Iowa Extents in EPSG:26915
 # 202,054 4,470,570 736,852 4,822,687
@@ -30,6 +31,14 @@ DY = (NORTH-SOUTH)/float(NY-1)
 XAXIS = numpy.arange(WEST, EAST + DX, DX)
 YAXIS = numpy.arange(SOUTH, NORTH + DY -0.01, DY)
 
+def hour_idx(ts):
+    """
+    Return the netCDF hourly grid index value for this timestamp
+    @param ts mx.DateTime object
+    @return int index value
+    """
+    basets = mx.DateTime.DateTime(ts.year,1,1,0,0)
+    return int((ts - basets).hours)
 
 def k2f(ar):
     """

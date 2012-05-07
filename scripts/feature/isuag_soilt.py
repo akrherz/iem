@@ -32,7 +32,7 @@ for yr in range(1988,2013):
   ax.plot(x, y, color=color)
 
 ax.set_title("ISU AgClimate Ames Site 4 inch Soil Temperature\n1 Jan - 30 Apr Yearly Timeseries [1988-2012]")
-ax.set_xlabel("Red Line is 1 Jan - 18 Mar 2012")
+ax.set_xlabel("Red Line is 1 Jan - 23 Apr 2012")
 ax.grid(True)
 ax.set_ylabel('Daily Avg Temp $^{\circ}\mathrm{F}$')
 ax.set_xticks( (1,32,60,91,121,152,182,213,244,274,305,335,365) )

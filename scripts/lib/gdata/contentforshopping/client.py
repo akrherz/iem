@@ -61,7 +61,9 @@ class ContentForShoppingClient(gdata.client.GDClient):
     gdata.client.GDClient.__init__(self, **kwargs)
 
   def _create_uri(self, account_id, resource, path=(), use_projection=True,
-                  dry_run=False, warnings=False):
+                  dry_run=False, warnings=False, max_results=None,
+                  start_token=None, start_index=None,
+                  performance_start=None, performance_end=None):
     """Create a request uri from the given arguments.
 
     If arguments are None, use the default client attributes.
@@ -81,6 +83,16 @@ class ContentForShoppingClient(gdata.client.GDClient):
       request_params.append('dry-run')
     if warnings:
       request_params.append('warnings')
+    if max_results is not None:
+      request_params.append('max-results=%s' % max_results)
+    if start_token is not None:
+      request_params.append('start-token=%s' % start_token)
+    if start_index is not None:
+      request_params.append('start-index=%s' % start_index)
+    if performance_start is not None:
+      request_params.append('performance.start=%s' % performance_start)
+    if performance_end is not None:
+      request_params.append('performance.end=%s' % performance_end)
     request_params = '&'.join(request_params)
 
     if request_params:
@@ -118,6 +130,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
     return self.get_entry(uri, desired_class=ProductEntry,
                           auth_token=auth_token)
 
+  GetProduct = get_product
+
   def insert_product(self, product, account_id=None, auth_token=None,
                      dry_run=False, warnings=False):
     """Create a new product, by posting the product entry feed.
@@ -135,6 +149,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
     uri = self._create_uri(account_id, 'items/products',
                            dry_run=dry_run, warnings=warnings)
     return self.post(product, uri=uri, auth_token=auth_token)
+
+  InsertProduct = insert_product
 
   def update_product(self, product, account_id=None, auth_token=None,
                      dry_run=False, warnings=False):
@@ -158,6 +174,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
                            dry_run=dry_run, warnings=warnings)
     return self.update(product, uri=uri, auth_token=auth_token)
 
+  UpdateProduct = update_product
+
   def delete_product(self, product, account_id=None, auth_token=None,
                      dry_run=False, warnings=False):
     """Delete a product
@@ -179,24 +197,41 @@ class ContentForShoppingClient(gdata.client.GDClient):
                            dry_run=dry_run, warnings=warnings)
     return self.delete(uri, auth_token=auth_token)
 
+  DeleteProduct = delete_product
+
   # Operations on multiple products
 
-  def get_products(self, start_index=None, max_results=None, account_id=None,
-                   auth_token=None):
+  def get_products(self, max_results=None, start_token=None, start_index=None,
+                   performance_start=None, performance_end=None,
+                   account_id=None, auth_token=None):
     """Get a feed of products for the account.
 
     :param max_results: The maximum number of results to return (default 25,
                         maximum 250).
+    :param start_token: The start token of the feed provided by the API.
     :param start_index: The starting index of the feed to return (default 1,
                         maximum 10000)
+    :param performance_start: The start date (inclusive) of click data returned.
+                              Should be represented as YYYY-MM-DD; not appended
+                              if left as None.
+    :param performance_end: The end date (inclusive) of click data returned.
+                            Should be represented as YYYY-MM-DD; not appended
+                            if left as None.
     :param account_id: The Merchant Center Account ID. If ommitted the default
                        Account ID will be used for this client
     :param auth_token: An object which sets the Authorization HTTP header in its
                        modify_request method.
     """
-    uri = self._create_uri(account_id, 'items/products')
+    uri = self._create_uri(account_id, 'items/products',
+                           max_results=max_results,
+                           start_token=start_token,
+                           start_index=start_index,
+                           performance_start=performance_start,
+                           performance_end=performance_end)
     return self.get_feed(uri, auth_token=auth_token,
         desired_class=gdata.contentforshopping.data.ProductFeed)
+
+  GetProducts = get_products
 
   def batch(self, feed, account_id=None, auth_token=None,
             dry_run=False, warnings=False):
@@ -216,6 +251,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
     return self.post(feed, uri=uri, auth_token=auth_token,
                      desired_class=ProductFeed)
 
+  Batch = batch
+
   def insert_products(self, products, account_id=None, auth_token=None,
                       dry_run=False, warnings=False):
     """Insert the products using a batch request
@@ -230,7 +267,10 @@ class ContentForShoppingClient(gdata.client.GDClient):
     :param warnings: Flag to include warnings in response. False by default.
     """
     feed = self._create_batch_feed(products, 'insert')
-    return self.batch(feed)
+    return self.batch(feed, account_id=account_id, auth_token=auth_token,
+                      dry_run=dry_run, warnings=warnings)
+
+  InsertProducts = insert_products
 
   def update_products(self, products, account_id=None, auth_token=None,
                       dry_run=False, warnings=False):
@@ -248,7 +288,10 @@ class ContentForShoppingClient(gdata.client.GDClient):
     .. note:: Entries must have the atom:id element set.
     """
     feed = self._create_batch_feed(products, 'update')
-    return self.batch(feed)
+    return self.batch(feed, account_id=account_id, auth_token=auth_token,
+                      dry_run=dry_run, warnings=warnings)
+
+  UpdateProducts = update_products
 
   def delete_products(self, products, account_id=None, auth_token=None,
                       dry_run=False, warnings=False):
@@ -266,7 +309,10 @@ class ContentForShoppingClient(gdata.client.GDClient):
     .. note:: Entries must have the atom:id element set.
     """
     feed = self._create_batch_feed(products, 'delete')
-    return self.batch(feed)
+    return self.batch(feed, account_id=account_id, auth_token=auth_token,
+                      dry_run=dry_run, warnings=warnings)
+
+  DeleteProducts = delete_products
 
   # Operations on datafeeds
 
@@ -279,6 +325,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
     uri = self._create_uri(account_id, 'datafeeds/products',
                            use_projection=False)
     return self.get_feed(uri, desired_class=DatafeedFeed)
+
+  GetDatafeeds = get_datafeeds
 
   # Operations on a single datafeed
 
@@ -295,6 +343,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
                            use_projection=False)
     return self.get_feed(uri, auth_token=auth_token,
                          desired_class=DatafeedEntry)
+
+  GetDatafeed = get_datafeed
 
   def insert_datafeed(self, entry, account_id=None, auth_token=None,
                       dry_run=False, warnings=False):
@@ -314,6 +364,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
                            use_projection=False, dry_run=dry_run,
                            warnings=warnings)
     return self.post(entry, uri=uri, auth_token=auth_token)
+
+  InsertDatafeed = insert_datafeed
 
   def update_datafeed(self, entry, feed_id, account_id=None, auth_token=None,
                       dry_run=False, warnings=False):
@@ -335,6 +387,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
                            warnings=warnings)
     return self.update(entry, auth_token=auth_token, uri=uri)
 
+  UpdateDatafeed = update_datafeed
+
   def delete_datafeed(self, feed_id, account_id=None, auth_token=None):
     """Delete a single datafeed.
 
@@ -347,6 +401,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
     uri = self._create_uri(account_id, 'datafeeds/products', path=[feed_id],
                            use_projection=False)
     return self.delete(uri, auth_token=auth_token)
+
+  DeleteDatafeed = delete_datafeed
 
   # Operations on client accounts
 
@@ -362,6 +418,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
                            use_projection=False)
     return self.get_feed(uri, desired_class=ClientAccountFeed,
                          auth_token=auth_token)
+
+  GetClientAccounts = get_client_accounts
 
   def insert_client_account(self, entry, account_id=None, auth_token=None,
                             dry_run=False, warnings=False):
@@ -380,6 +438,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
                            use_projection=False, dry_run=dry_run,
                            warnings=warnings)
     return self.post(entry, uri=uri, auth_token=auth_token)
+
+  InsertClientAccount = insert_client_account
 
   def update_client_account(self, entry, client_account_id, account_id=None,
                             auth_token=None, dry_run=False, warnings=False):
@@ -400,6 +460,8 @@ class ContentForShoppingClient(gdata.client.GDClient):
                            dry_run=dry_run, warnings=warnings)
     return self.update(entry, uri=uri, auth_token=auth_token)
 
+  UpdateClientAccount = update_client_account
+
   def delete_client_account(self, client_account_id, account_id=None,
                             auth_token=None, dry_run=False, warnings=False):
     """Delete a client account
@@ -418,3 +480,5 @@ class ContentForShoppingClient(gdata.client.GDClient):
                            path=[client_account_id], use_projection=False,
                            dry_run=dry_run, warnings=warnings)
     return self.delete(uri, auth_token=auth_token)
+
+  DeleteClientAccount = delete_client_account

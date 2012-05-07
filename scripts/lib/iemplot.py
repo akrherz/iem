@@ -67,18 +67,19 @@ def bmap_clrbar(maxV, minV=0, levels=256, label=None):
             fmt = '%.1f'
         ytics.append(y)
         yticklabels.append(fmt % y)
-        
+
     ax2 = plt.axes([0.97,0.1,0.02,0.8], frameon=True, axisbg='w', 
                    yticks=ytics, yticklabels=yticklabels, xticks=[])
+    ax2.set_ylim(minV,maxV)
     for tick in ax2.yaxis.get_major_ticks():
         tick.label1.set_fontsize(10)
         tick.tick1On=False
         tick.tick2On=False
 
     # We want to make a nice color bar
-    step = (maxV - minV) / float(256)
+    step = (maxV - minV) / float(levels)
     print 'Step is', step
-    for y in numpy.arange(minV, maxV, step):
+    for y in numpy.arange(minV, maxV+step, step):
         c=rgb2hex(floatRgb(y,minV,maxV))
         if y==0:
             c='w'

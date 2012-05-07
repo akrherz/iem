@@ -5,6 +5,7 @@ import psycopg2.extras
 import matplotlib.pyplot as plt
 import numpy
 import mx.DateTime
+import iemplot
 import pyproj
 P2163 = pyproj.Proj(init='epsg:2163')
 postgis = iemdb.connect('postgis', bypass=True)
@@ -52,8 +53,8 @@ pcursor.execute("""
      x(ST_CEntroid(geom)) as lon, y(ST_Centroid(geom)) as lat,
      ST_AsText(ST_Transform(geom,2163)) as projtext
     from warnings
-    WHERE issue > '2008-01-01' and issue < '2011-01-01' and gtype = 'P' and significance = 'W' and 
-    phenomena in ('TO')
+    WHERE issue > '2008-01-01' and issue < '2012-01-01' and gtype = 'P' and significance = 'W' and 
+    phenomena in ('TO') and wfo = 'OAX'
 """) # and wfo = 'DMX' and eventid = 13 and phenomena= 'TO' and issue < '2009-01-01'
 i = 0
 for row in pcursor:
@@ -171,7 +172,7 @@ ax.grid(True)
 #ax.set_yticklabels( numpy.arange(-60,61,10))
 ax.set_xlabel("Distance from Moving Line along path [km]")
 ax.set_ylabel("Increasing Time [minutes]")
-ax.set_title("TOR Report Displacement from Tracking Line\nfrom the moving TIME..MOT..LOC (1 Jan 2008-22 Jul 2011)")
+ax.set_title("TOR Report Displacement from Tracking Line [OAX Only]\nfrom the moving TIME..MOT..LOC\n (1 Jan 2008-1 Jan 2012)")
 clr = fig.colorbar(res)
 clr.ax.set_ylabel("Reports")
 

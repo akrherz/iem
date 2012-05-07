@@ -19,7 +19,8 @@ def build_treatments(feed):
                 if key in ['uniqueid','name','key'] or key[0] == '_':
                     continue
                 print 'Found Key: %s' % (key,)
-                data[key] = {'TIL': [None,], 'ROT': [None,], 'DWM': [None,], 'NIT': [None,], 
+                data[key] = {'TIL': [None,], 'ROT': [None,], 'DWM': [None,], 
+                             'NIT': [None,], 
                              'LND': [None,], 'REPS': 1}
         if row['key'] is None or row['key'] == '':
             continue
@@ -32,7 +33,7 @@ def build_treatments(feed):
                 if cell is not None and cell != '':
                     if treatment_key[:3] in data[sitekey].keys():
                         data[sitekey][treatment_key[:3]].append( treatment_key )
-                if treatment_key == 'REPS' and cell not in ('?','TBD'):
+                if treatment_key == 'REPS' and cell not in ('?','TBD', None):
                     print 'Found REPS for site: %s as: %s' % (sitekey, int(cell))
                     data[sitekey]['REPS'] = int(cell)
     
