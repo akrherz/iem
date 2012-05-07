@@ -1,6 +1,10 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/env python
 
-import pg, cgi, string, os, sys
+import pg
+import cgi
+import string
+import os
+import sys
 
 def Main():
   print 'Content-type: text/plain; charset=""'

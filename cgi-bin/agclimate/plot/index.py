@@ -1,4 +1,4 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/env python
 # This is the file that will plot anything asked for
 # Daryl Herzmann 7-11-99
 # 9-10-99: Fixed a strange problem with the precip

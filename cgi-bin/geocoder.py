@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
  Geocoder used by:
   - IEM Rainfall App

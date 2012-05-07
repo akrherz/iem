@@ -1,4 +1,26 @@
 ---
+--- Racoon Work Tasks
+---
+CREATE TABLE racoon_jobs(
+  jobid varchar(32) default md5(random()::text),
+  wfo varchar(3),
+  sts timestamp with time zone,
+  ets timestamp with time zone,
+  radar varchar(3),
+  processed boolean default false
+);
+GRANT all on racoon_jobs to apache,nobody;
+
+---
+--- Oauth tokens
+---
+CREATE TABLE oauth_tokens(
+  username text,
+  token text,
+  secret text
+);
+
+---
 --- IEM Apps Database!
 ---
 CREATE TABLE iemapps(

@@ -82,7 +82,14 @@ CREATE TABLE current (
     skyc4 character(3),
     skyl4 integer,
     pcounter real,
-    discharge real
+    discharge real,
+    p03i real,
+    p06i real,
+    p24i real,
+    max_tmpf_6hr real,
+    min_tmpf_6hr real,
+    max_tmpf_24hr real,
+    min_tmpf_24hr real
 );
 CREATE UNIQUE index current_iemid_idx on current(iemid);
 
@@ -138,7 +145,14 @@ CREATE TABLE current_log (
     skyc4 character(3),
     skyl4 integer,
     pcounter real,
-    discharge real
+    discharge real,
+    p03i real,
+    p06i real,
+    p24i real,
+    max_tmpf_6hr real,
+    min_tmpf_6hr real,
+    max_tmpf_24hr real,
+    min_tmpf_24hr real
 );
 
 CREATE OR REPLACE FUNCTION current_update_log() RETURNS trigger
@@ -177,7 +191,9 @@ CREATE TABLE summary (
     snow_qc character(1),
     snoww real,
     max_drct real,
-    max_srad smallint
+    max_srad smallint,
+    coop_tmpf real,
+    coop_valid timestamp with time zone
 );
 
 CREATE TABLE summary_2011() inherits (summary);
