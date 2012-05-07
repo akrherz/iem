@@ -10,6 +10,8 @@ import sys
 import mx.DateTime
 import urllib2
 
+BASEDIR="/mesonet/ARCHIVE/raw/asos/"
+
 P1_RE = re.compile(r"""
 (?P<wban>[0-9]{5})
 (?P<faaid>[0-9A-Z]{4})\s
@@ -177,7 +179,7 @@ def download(station, monthts):
     Download a month file from NCDC
     """
     baseuri = "ftp://ftp.ncdc.noaa.gov/pub/data/asos-onemin/"
-    datadir = "data/%s" % (station,)
+    datadir = "%s/data/%s" % (BASEDIR, station)
     if not os.path.isdir(datadir):
         os.makedirs(datadir)
     for page in [5,6]:
@@ -198,9 +200,9 @@ def runner(station, monthts):
 
     # Our final amount of data
     data = {}
-    fp5 = 'data/%s/64050K%s%s%02i.dat' % (station,
+    fp5 = '%sdata/%s/64050K%s%s%02i.dat' % (BASEDIR, station,
             station, monthts.year, monthts.month)
-    fp6 = 'data/%s/64060K%s%s%02i.dat' % (station,
+    fp6 = '%sdata/%s/64060K%s%s%02i.dat' % (BASEDIR, station,
             station, monthts.year, monthts.month)
     if not os.path.isfile( fp5 ):
         download(station, monthts)
