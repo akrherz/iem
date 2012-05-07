@@ -23,9 +23,12 @@ __author__ = 'afshar (Ali Afshar), dhermes (Daniel Hermes)'
 
 import atom.core
 import atom.data
+import atom.http_core
 import gdata.data
 
 
+GD_NAMESPACE = 'http://schemas.google.com/g/2005'
+GD_NAMESPACE_TEMPLATE = '{http://schemas.google.com/g/2005}%s'
 SC_NAMESPACE_TEMPLATE = ('{http://schemas.google.com/'
                         'structuredcontent/2009}%s')
 SCP_NAMESPACE_TEMPLATE = ('{http://schemas.google.com/'
@@ -57,6 +60,15 @@ class AdditionalImageLink(atom.core.XmlElement):
   The URLs of any additional images for the product. This tag may be repeated.
   """
   _qname = SC_NAMESPACE_TEMPLATE % 'additional_image_link'
+
+
+class Channel(atom.core.XmlElement):
+  """
+  sc:channel element
+
+  The channel for the product. Supported values are: 'online', 'local'
+  """
+  _qname = SC_NAMESPACE_TEMPLATE % 'channel'
 
 
 class ContentLanguage(atom.core.XmlElement):
@@ -94,6 +106,29 @@ class Adult(atom.core.XmlElement):
   """
   _qname = SC_NAMESPACE_TEMPLATE % 'adult'
 
+
+class Attribute(atom.core.XmlElement):
+  """sc:attribute element
+
+  Generic attribute used for generic projection and to define
+  custom elements.
+  """
+  _qname = SC_NAMESPACE_TEMPLATE % 'attribute'
+  name = 'name'
+  type = 'type'
+  unit = 'unit'
+
+
+class Group(atom.core.XmlElement):
+  """sc:group element
+
+  Generic group used for generic projection and to define
+  custom elements groups.
+  """
+  _qname = SC_NAMESPACE_TEMPLATE % 'group'
+  attribute = [Attribute]
+
+
 # Destination Attributes (to be used with app:control element)
 
 class RequiredDestination(atom.core.XmlElement):
@@ -111,6 +146,18 @@ class RequiredDestination(atom.core.XmlElement):
   dest = 'dest'
 
 
+class ValidateDestination(atom.core.XmlElement):
+  """sc:validate_destination element
+
+  This element defines the validate destination for a product, namely
+  "ProductSearch", "ProductAds" or "CommerceSearch". It should be added to the
+  app:control element (ProductEntry's "control" attribute) to specify which the
+  destinations you would like error info for.
+  """
+  _qname = SC_NAMESPACE_TEMPLATE % 'validate_destination'
+  dest = 'dest'
+
+
 class ExcludedDestination(atom.core.XmlElement):
   """sc:excluded_destination element
 
@@ -118,9 +165,6 @@ class ExcludedDestination(atom.core.XmlElement):
   "ProductSearch", "ProductAds" or "CommerceSearch". It should be added to the
   app:control element (ProductEntry's "control" attribute) to specify where the
   product should not appear in search APIs.
-
-  By default, when omitted, the api attempts to upload to as many destinations
-  as possible.
   """
   _qname = SC_NAMESPACE_TEMPLATE % 'excluded_destination'
   dest = 'dest'
@@ -182,14 +226,37 @@ class Warnings(atom.core.XmlElement):
   _qname = SC_NAMESPACE_TEMPLATE % 'warnings'
   warnings = [WarningElement]
 
+
+class Datapoint(atom.core.XmlElement):
+  """sc:datapoint element
+
+  Datapoint representing click data for an item on
+  a given day.
+  """
+  _qname = SC_NAMESPACE_TEMPLATE % 'datapoint'
+  clicks = 'clicks'
+  date = 'date'
+
+
+class Performance(atom.core.XmlElement):
+  """sc:performance element
+
+  Container element for daily click data.
+  """
+  _qname = SC_NAMESPACE_TEMPLATE % 'performance'
+  datapoint = [Datapoint]
+
+
 class ProductControl(atom.data.Control):
   """
   app:control element
 
   overridden to provide additional elements in the sc namespace.
   """
-  required_destination = RequiredDestination
-  excluded_destination = ExcludedDestination
+  _qname = atom.data.Control._qname[1]
+  required_destination = [RequiredDestination]
+  validate_destination = [ValidateDestination]
+  excluded_destination = [ExcludedDestination]
   warnings = Warnings
 
 # Content API for Shopping, product (scp) attributes
@@ -221,15 +288,6 @@ class Brand(atom.core.XmlElement):
   The brand of the product
   """
   _qname = SCP_NAMESPACE_TEMPLATE % 'brand'
-
-
-class Channel(atom.core.XmlElement):
-  """
-  scp:channel element
-
-  The channel for the product. Supported values are: 'online', 'local'
-  """
-  _qname = SCP_NAMESPACE_TEMPLATE % 'channel'
 
 
 class Color(atom.core.XmlElement):
@@ -578,9 +636,10 @@ class ProductEntry(gdata.data.BatchEntry):
 
     This should be a :class:`atom.data.Link` element, for example::
 
+      link = atom.data.Link(rel='alternate', type='text/html',
+                            href='http://www.somehost.com/123456jsh9')
       entry = ProductEntry()
-      entry.title = atom.data.Link(rel='alternate', type='text/html',
-                                   href='http://www.somehost.com/123456jsh9')
+      entry.link.append(link)
 
   .. attribute:: additional_image_link
 
@@ -599,6 +658,19 @@ class ProductEntry(gdata.data.BatchEntry):
 
       entry = ProductEntry()
       entry.author = atom.data.Author(u'Isaac Asimov')
+
+  .. attribute:: attribute
+
+    List of generic attributes.
+
+    This should be a list of :class:`Attribute` elements, for example::
+
+      attribute = Attribute('foo')
+      attribute.name = 'bar'
+      attribute.type = 'baz'
+      attribute.unit = 'kg'
+      entry = ProductEntry()
+      entry.attributes.append(attribute)
 
   .. attribute:: availability
 
@@ -795,6 +867,12 @@ class ProductEntry(gdata.data.BatchEntry):
       entry = ProductEntry()
       entry.pattern = Pattern('polka dots')
 
+  .. attribute:: performance
+
+    The performance of the product.
+
+    This should be a :class:`Performance` element.
+
   .. attribute:: price
 
     The price for this product.
@@ -838,9 +916,10 @@ class ProductEntry(gdata.data.BatchEntry):
     This should be a :class:`Shipping` with the necessary rules embedded as
     elements, for example::
 
+      shipping = Shipping()
+      shipping.shipping_price = ShippingPrice('10.00', unit='USD')
       entry = ProductEntry()
-      entry.shipping = Shipping()
-      entry.shipping.shipping_price = ShippingPrice('10.00', unit='USD')
+      entry.shipping.append(shipping)
 
   .. attribute:: shipping_weight
 
@@ -879,9 +958,10 @@ class ProductEntry(gdata.data.BatchEntry):
     This should be a :class:`Tax` element, with the tax rule elements embedded
     within, for example::
 
+      tax = Tax()
+      tax.tax_rate = TaxRate('17.5')
       entry = ProductEntry()
-      entry.tax = Tax()
-      entry.tax.tax_rate = TaxRate('17.5')
+      entry.tax.append(tax)
 
   .. attribute:: year
 
@@ -891,10 +971,11 @@ class ProductEntry(gdata.data.BatchEntry):
 
       entry = ProductEntry()
       entry.year = Year('2001')
-"""
+  """
 
   additional_image_link = [AdditionalImageLink]
   author = Author
+  attribute = [Attribute]
   availability = Availability
   brand = Brand
   channel = Channel
@@ -909,6 +990,7 @@ class ProductEntry(gdata.data.BatchEntry):
   gender = Gender
   genre = Genre
   google_product_category = GoogleProductCategory
+  group = [Group]
   gtin = Gtin
   image_link = ImageLink
   item_group_id = ItemGroupID
@@ -916,16 +998,108 @@ class ProductEntry(gdata.data.BatchEntry):
   material = Material
   mpn = Mpn
   pattern = Pattern
+  performance = Performance
   price = Price
   product_id = ProductId
   product_type = ProductType
   quantity = Quantity
-  shipping = Shipping
+  shipping = [Shipping]
   shipping_weight = ShippingWeight
   size = [Size]
   target_country = TargetCountry
-  tax = Tax
+  tax = [Tax]
   year = Year
+
+  def get_batch_errors(self):
+    """Attempts to parse errors from atom:content element.
+
+    If the atom:content element is type application/vnd.google.gdata.error+xml,
+    then it will contain a gd:errors block.
+
+    Returns:
+      If the type of the content element is not
+          'application/vnd.google.gdata.error+xml', or 0 or more than 1
+          gd:errors elements are found within the <content type='app...'> block,
+          then None is returned. Other wise, the gd:errors element parsed
+          as a ContentForShoppingErrors object is returned.
+    """
+    if self.content.type == 'application/vnd.google.gdata.error+xml':
+      errors_elements = self.content.get_elements(tag='errors',
+                                                  namespace=GD_NAMESPACE)
+      if len(errors_elements) == 1:
+        errors_block = errors_elements[0]
+        return atom.core.parse(errors_block.to_string(),
+                               ContentForShoppingErrors)
+    return None
+
+  GetBatchErrors = get_batch_errors
+
+
+class ErrorDomain(atom.core.XmlElement):
+  """gd:domain element
+
+  The scope of the error. If the error is global (e.g. missing title) then sc
+  value is returned. Otherwise a comma-separated list of destinations is
+  returned.
+
+  This element should be placed inside the gd:error (ContentForShoppingError)
+  element.
+  """
+  _qname = GD_NAMESPACE_TEMPLATE % 'domain'
+
+
+class ErrorCode(atom.core.XmlElement):
+  """gd:code element
+
+  A code to categorize the errors.
+
+  This element should be placed inside the gd:error (ContentForShoppingError)
+  element.
+  """
+  _qname = GD_NAMESPACE_TEMPLATE % 'code'
+
+
+class ErrorLocation(atom.core.XmlElement):
+  """gd:location element
+
+  The name of the attribute that failed validation.
+
+  This element should be placed inside the gd:error (ContentForShoppingError)
+  element.
+  """
+  _qname = GD_NAMESPACE_TEMPLATE % 'location'
+  type = 'type'
+
+
+class InternalReason(atom.core.XmlElement):
+  """gd:internalReason element
+
+  A more detailed message to explain the cause of the error.
+
+  This element should be placed inside the gd:error (ContentForShoppingError)
+  element.
+  """
+  _qname = GD_NAMESPACE_TEMPLATE % 'internalReason'
+
+
+class ContentForShoppingError(atom.core.XmlElement):
+  """gd:error element
+
+  This element should be placed inside the gd:errors (ContentForShoppingErrors)
+  element.
+  """
+  _qname = GD_NAMESPACE_TEMPLATE % 'error'
+  domain = ErrorDomain
+  code = ErrorCode
+  location = ErrorLocation
+  internal_reason = InternalReason
+  id = atom.data.Id
+
+
+class ContentForShoppingErrors(atom.core.XmlElement):
+  """The gd:errors element."""
+  _qname = GD_NAMESPACE_TEMPLATE % 'errors'
+  errors = [ContentForShoppingError]
 
 
 # opensearch needs overriding for wrong version
@@ -951,6 +1125,26 @@ class ProductFeed(gdata.data.BatchFeed):
   total_results = TotalResults
   items_per_page = ItemsPerPage
   start_index = StartIndex
+
+  def get_start_token(self):
+    """Attempts to parse start-token from rel="next" link.
+
+    A products feed may contain a rel="next" atom:link and the
+    href contained in the link may have a start-token query parameter.
+
+    Returns:
+      If there is no rel="next" link or the rel="next" link doesn't contain
+      the start-token query parameter, None is returned. Otherwise, the
+      string value of the start-token query parameter is returned.
+    """
+    next_link = self.get_next_link()
+    if next_link is not None:
+      uri = atom.http_core.parse_uri(next_link.href)
+      if 'start-token' in uri.query:
+        return uri.query['start-token']
+    return None
+
+  GetStartToken = get_start_token
 
 
 class Edited(atom.core.XmlElement):

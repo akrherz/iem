@@ -18,7 +18,6 @@
 
 __author__ = 'vicfryzel@google.com (Vic Fryzel)'
 
-import re
 import atom.core
 import atom.data
 import gdata.acl.data
@@ -112,6 +111,11 @@ class Filename(atom.core.XmlElement):
 class SuggestedFilename(atom.core.XmlElement):
   """The DocList docs:suggestedFilename element."""
   _qname = DOCUMENTS_TEMPLATE % 'suggestedFilename'
+
+
+class Description(atom.core.XmlElement):
+  """The DocList docs:description element."""
+  _qname = DOCUMENTS_TEMPLATE % 'description'
 
 
 class CategoryFinder(object):
@@ -387,7 +391,7 @@ class AclFeed(gdata.acl.data.AclFeed):
   entry = [AclEntry]
 
 
-class Resource(gdata.data.GDEntry, CategoryFinder):
+class Resource(gdata.data.BatchEntry, CategoryFinder):
   """DocList version of an Atom Entry."""
 
   last_viewed = LastViewed
@@ -399,6 +403,7 @@ class Resource(gdata.data.GDEntry, CategoryFinder):
   feed_link = [gdata.data.FeedLink]
   filename = Filename
   suggested_filename = SuggestedFilename
+  description = Description
   # Only populated if you request /feeds/default/private/expandAcl
   acl_feed = AclFeed
 
@@ -470,7 +475,7 @@ class Resource(gdata.data.GDEntry, CategoryFinder):
   InCollections = in_collections
 
 
-class ResourceFeed(gdata.data.GDFeed):
+class ResourceFeed(gdata.data.BatchFeed):
   """Main feed containing a list of resources."""
   entry = [Resource]
 

@@ -17,11 +17,11 @@ mcursor.execute("""
     """)
 for row in mcursor:
     stations.append( row[0] )
-stations = ['CID','XXXXX']
+stations = ['DSM','XXXXX']
 for yr in range(1951,2012):
     acursor.execute("""
     SELECT valid + '10 minutes'::interval, tmpf, dwpf from t%s WHERE station in %s
-    and extract(month from valid) = 7 and dwpf > -30 and tmpf > -30
+    and extract(month from valid) in (6,7,8) and dwpf > -30 and tmpf > -30
     """ % (yr, str(tuple(stations))))
     hourly = numpy.zeros( (24,), 'f')
     counts = numpy.zeros( (24,), 'f')

@@ -28,7 +28,8 @@ token.authorize(spr_client)
 docs_client = gdata.docs.client.DocsClient()
 token.authorize(docs_client)
 
-query = gdata.docs.client.DocsQuery(show_collections='true', title='Synced Data')
+query = gdata.docs.client.DocsQuery(show_collections='true', 
+                                    title='Data Entry Spreadsheets')
 feed = docs_client.GetAllResources(query=query)
 sync_data = feed[0]
 
@@ -41,7 +42,8 @@ treatments, treatment_names = util.build_treatments(treat_feed)
 Okay, we are cross product TIL x ROT x DWN x NIT
 """
 
-headers = ['UniqueID', 'Rep', 'Tillage', 'Rotation', 'Drainage', 'Nitrogen', 'Landscape','My ID']
+headers = ['UniqueID', 'Rep', 'Tillage', 'Rotation', 'Drainage', 
+           'Nitrogen', 'Landscape','My ID']
 
 for entry in meta_feed.entry:
     data = entry.to_dict()
@@ -49,6 +51,8 @@ for entry in meta_feed.entry:
     if sitekey is None:
         continue
     leadpi = data.get('leadpi')
+    colfolder = data.get('colfolder')
+    collect = docs_client.get_resource_by_id(colfolder)
     
     # Figure out how many 
     rows = []
@@ -73,9 +77,9 @@ for entry in meta_feed.entry:
                             entry.set_value('myid', '')
                             rows.append(entry)
     # Create the plots cross reference
-    title = '%s %s Plot Identifiers' % (leadpi, sitekey.upper())
+    title = '%s %s Plot Identifiers' % (sitekey.upper(), leadpi)
     doc = gdata.docs.data.Resource(type='spreadsheet', title=title)
-    doc = docs_client.CreateResource(doc, collection=sync_data)
+    doc = docs_client.CreateResource(doc, collection=collect)
     spreadkey= doc.resource_id.text.split(':')[1]
     sheet = 'od6'
     for colnum in range(len(headers)):
@@ -84,4 +88,3 @@ for entry in meta_feed.entry:
         spr_client.update(cell)
     for row in rows:
         spr_client.add_list_entry(row, spreadkey, sheet)
-    sys.exit()

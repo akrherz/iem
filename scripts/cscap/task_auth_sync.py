@@ -17,7 +17,6 @@ token = gauth.OAuth2Token(client_id=config.get('appauth','client_id'),
                                 client_secret=config.get('appauth', 'app_secret'),
                                 user_agent='daryl.testing',
                                 scope=config.get('googleauth', 'scopes'),
-                                access_token=config.get('googleauth', 'access_token'),
                                 refresh_token=config.get('googleauth', 'refresh_token'))
 
 spr_client = gdata.sites.client.SitesClient( config.get('cscap', 'sitename') )
@@ -25,7 +24,12 @@ token.authorize(spr_client)
 
 site_users = []
 for acl in spr_client.get_acl_feed().entry:
-    site_users.append( acl.scope.value )
+    #print "IN: ||%s||" % (acl.scope.value,)
+    userid =  acl.scope.value 
+    if userid not in site_users:
+        site_users.append( acl.scope.value )
+    if userid == 'smzuber@illinois.edu':
+        print acl
     
 docs_client = gdata.docs.client.DocsClient()
 token.authorize(docs_client)
@@ -38,6 +42,7 @@ acl_feed = docs_client.GetResourceAcl( cscap )
 for acl in acl_feed.entry:
     #print acl.role.value, acl.scope.type, acl.scope.value
     userid = acl.scope.value
+    #print "OUT: ||%s||" % (userid,)
     if userid in site_users:
         site_users.remove( userid )
 
@@ -50,6 +55,7 @@ for loser in site_users:
                     batch_operation=gdata.data.BatchOperation(type='insert'),
                     )
                 )
-                
+            
+print cscap.GetAclLink().href
 if len(acls) > 0:
-    docs_client.BatchProcessAclEntries(cscap, acls)
+    print docs_client.BatchProcessAclEntries(cscap, acls)

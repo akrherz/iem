@@ -6,7 +6,7 @@
 import sys, mx.DateTime
 import iemdb
 import psycopg2.extras
-MESOSITE = iemdb.connect('mesosite')
+MESOSITE = iemdb.connect('mesosite', bypass=True)
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 IEM = iemdb.connect('iem')
 icursor = IEM.cursor()

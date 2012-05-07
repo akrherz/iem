@@ -55,7 +55,9 @@ import atom.http_core
 
 try:
   import simplejson
+  from simplejson.decoder import JSONDecodeError
 except ImportError:
+  JSONDecodeError = None
   try:
     # Try to import from django, should work on App Engine
     from django.utils import simplejson
@@ -103,11 +105,14 @@ AUTH_SCOPES = {
         'https://docs.googleusercontent.com/'),
     'lh2': ( # Picasa Web Albums API
         'http://picasaweb.google.com/data/',),
-    'apps': ( # Google Apps Provisioning API
+    'apps': ( # Google Apps Domain Info & Management APIs
         'https://apps-apis.google.com/a/feeds/user/',
         'https://apps-apis.google.com/a/feeds/policies/',
         'https://apps-apis.google.com/a/feeds/alias/',
-        'https://apps-apis.google.com/a/feeds/groups/'),
+        'https://apps-apis.google.com/a/feeds/groups/',
+        'https://apps-apis.google.com/a/feeds/compliance/audit/',
+        'https://apps-apis.google.com/a/feeds/migration/',
+        'https://apps-apis.google.com/a/feeds/emailsettings/2.0/'),
     'weaver': ( # Health H9 Sandbox
         'https://www.google.com/h9/feeds/',),
     'wise': ( # Spreadsheets Data API
@@ -145,6 +150,37 @@ class OAuth2AccessTokenError(Error):
   """Raised when an OAuth2 error occurs."""
   def __init__(self, error_message):
     self.error_message = error_message
+
+
+class OAuth2RevokeError(Error):
+  """Raised when an OAuth2 token revocation was unsuccessful."""
+
+  def __init__(self, http_response, response_body=None):
+    """Sets the HTTP information in the error.
+
+    Args:
+      http_response: The response from the server, contains error information.
+      response_body: string (optional) specified if the response has already
+                     been read from the http_response object.
+    """
+    body = response_body or http_response.read()
+
+    self.status = http_response.status
+    self.reason = http_response.reason
+    self.body = body
+    self.headers = atom.http_core.get_headers(http_response)
+
+    self.error_msg = 'Invalid response %s.' % self.status
+    try:
+      json_from_body = simplejson.loads(body)
+      if isinstance(json_from_body, dict):
+        self.error_msg = json_from_body.get('error', self.error_msg)
+    except (ValueError, JSONDecodeError):
+      pass
+
+  def __str__(self):
+    return 'OAuth2RevokeError(status=%i, error=%s)' % (self.status,
+                                                       self.error_msg)
 
 
 # ClientLogin functions and classes.
@@ -1124,7 +1160,8 @@ class OAuth2Token(object):
   def __init__(self, client_id, client_secret, scope, user_agent,
       auth_uri='https://accounts.google.com/o/oauth2/auth',
       token_uri='https://accounts.google.com/o/oauth2/token',
-      access_token=None, refresh_token=None):
+      access_token=None, refresh_token=None,
+      revoke_uri='https://accounts.google.com/o/oauth2/revoke'):
     """Create an instance of OAuth2Token
 
     This constructor is not usually called by the user, instead
@@ -1139,6 +1176,8 @@ class OAuth2Token(object):
         defaults to Google's endpoints but any OAuth 2.0 provider can be used.
       token_uri: string, URI for token endpoint. For convenience
         defaults to Google's endpoints but any OAuth 2.0 provider can be used.
+      revoke_uri: string, URI for revoke endpoint. For convenience
+        defaults to Google's endpoints but any OAuth 2.0 provider can be used.
       access_token: string, access token.
       refresh_token: string, refresh token.
     """
@@ -1148,6 +1187,7 @@ class OAuth2Token(object):
     self.user_agent = user_agent
     self.auth_uri = auth_uri
     self.token_uri = token_uri
+    self.revoke_uri = revoke_uri
     self.access_token = access_token
     self.refresh_token = refresh_token
 
@@ -1177,8 +1217,10 @@ class OAuth2Token(object):
         'user-agent': self.user_agent,
     }
 
-    http_request = atom.http_core.HttpRequest(uri=self.token_uri, method='POST', headers=headers)
-    http_request.add_body_part(body, mime_type='application/x-www-form-urlencoded')
+    http_request = atom.http_core.HttpRequest(
+        uri=self.token_uri, method='POST', headers=headers)
+    http_request.add_body_part(
+        body, mime_type='application/x-www-form-urlencoded')
     response = request(http_request)
     body = response.read()
     if response.status == 200:
@@ -1197,16 +1239,19 @@ class OAuth2Token(object):
     else:
       self.token_expiry = None
 
-  def generate_authorize_url(self, redirect_uri='oob', response_type='code', **kwargs):
+  def generate_authorize_url(self, redirect_uri='oob', response_type='code',
+                             access_type='offline', **kwargs):
     """Returns a URI to redirect to the provider.
 
     Args:
-      redirect_uri: string, Either the string 'oob' for a non-web-based
-                    application, or a URI that handles the callback from
-                    the authorization server.
-      response_type: string, Either the string 'code' for server-side or
-                     native application, or the string 'token' for client-
-                     side application.
+      redirect_uri: Either the string 'oob' for a non-web-based application, or
+                    a URI that handles the callback from the authorization
+                    server.
+      response_type: Either the string 'code' for server-side or native
+                     application, or the string 'token' for client-side
+                     application.
+      access_type: Either the string 'offline' to request a refresh token or
+                   'online'.
 
     If redirect_uri is 'oob' then pass in the
     generated verification code to get_access_token,
@@ -1223,6 +1268,7 @@ class OAuth2Token(object):
       'client_id': self.client_id,
       'redirect_uri': redirect_uri,
       'scope': self.scope,
+      'access_type': access_type
       }
     query.update(kwargs)
     parts = list(urlparse.urlparse(self.auth_uri))
@@ -1283,9 +1329,8 @@ class OAuth2Token(object):
        A modified instance of client that was passed in.
 
     Example:
-
-      c = gdata.client.GDClient(source='user-agent')
-      c = token.authorize(c)
+      >>> c = gdata.client.GDClient(source='user-agent')
+      >>> c = token.authorize(c)
     """
     client.auth_token = self
     request_orig = client.http_client.request
@@ -1305,13 +1350,42 @@ class OAuth2Token(object):
     client.http_client.request = new_request
     return client
 
+  def revoke(self, revoke_uri=None, refresh_token=None):
+    """Revokes access via a refresh token.
+
+    Args:
+      revoke_uri: string, URI for revoke endpoint. If not provided, or if
+        None is provided, the revoke_uri attribute on the object is used.
+      refresh_token: string, refresh token. If not provided, or if None is
+        provided, the refresh_token attribute on the object is used.
+
+    Raises:
+      UnsupportedTokenType if the token is not one of the supported token
+      classes listed above.
+
+    Example:
+      >>> token.revoke()
+    """
+    base_revoke_uri = revoke_uri or self.revoke_uri
+    refresh_token = refresh_token or self.refresh_token
+    revoke_uri = atom.http_core.ParseUri(base_revoke_uri)
+    revoke_uri.query['token'] = refresh_token
+    http_client = atom.http_core.HttpClient()
+    http_request = atom.http_core.HttpRequest(uri=revoke_uri, method='GET')
+    response = http_client.request(http_request)
+    if response.status != 200:
+      raise OAuth2RevokeError(response)
+    else:
+      self._invalid = True
+
   def modify_request(self, http_request):
     """Sets the Authorization header in the HTTP request using the token.
 
     Returns:
       The same HTTP request object which was passed in.
     """
-    http_request.headers['Authorization'] = '%s%s' % (OAUTH2_AUTH_LABEL, self.access_token)
+    http_request.headers['Authorization'] = '%s%s' % (OAUTH2_AUTH_LABEL,
+                                                      self.access_token)
     return http_request
 
   ModifyRequest = modify_request

@@ -1,94 +1,89 @@
 import matplotlib.pyplot as plt
 import numpy
+import mesonet
+import math
 from scipy import stats
+import matplotlib.font_manager
+prop = matplotlib.font_manager.FontProperties(size=12)
+import iemdb
+ASOS = iemdb.connect('asos', bypass=True)
+acursor = ASOS.cursor()
+
+SYEAR = 1970
+
+def get_data(station):
+    data = []
+    for yr in range(SYEAR,2012):
+        acursor.execute("""
+        SELECT valid + '10 minutes'::interval, tmpf, dwpf from t%s WHERE station = '%s'
+        and extract(year from valid + '0 month'::interval) = %s 
+        and extract(month from valid) in (6,7,8) and dwpf > -30 and tmpf > -30
+        """ % (yr, station, yr))
+        tot = 0
+        for row in acursor:
+            dwpc = mesonet.f2c( row[2] )
+            e  = 6.112 * math.exp( (17.67 * dwpc) / (dwpc + 243.5))
+            mixr =  0.62197 * e / (1000.0 - e)
+            if mixr > 0:
+                tot += mixr
+        data.append( tot / float(acursor.rowcount) * 1000.0)
+    return numpy.array( data )
 
 
-data = """1951 14.6203301847
-1952 14.7525724024
-1953 13.7012004852
-1954 12.6861538738
-1955 16.0190146416
-1956 14.3645331264
-1957 11.8256201968
-1958 15.4606793076
-1959 15.1960272342
-1960 13.031668961
-1961 13.9352092519
-1962 12.1059129015
-1963 12.1269645169
-1964 13.5482540354
-1965 13.0366506055
-1966 12.9079846665
-1967 13.4936179966
-1968 14.4740398973
-1969 14.1783189029
-1970 13.8691021129
-1971 13.166282326
-1972 14.5459212363
-1973 13.835189864
-1974 12.9683567211
-1975 13.9612555504
-1976 12.9710864276
-1977 14.9708809331
-1978 14.8850884289
-1979 15.7486870885
-1980 15.6400222331
-1981 15.7769229263
-1982 14.1498511657
-1983 13.7509377673
-1984 14.1931707039
-1985 13.8350110501
-1986 14.6822733805
-1987 15.1202119887
-1988 14.8442778736
-1989 15.4766663909
-1990 15.0378961116
-1991 14.4752450287
-1992 14.7258993238
-1993 15.6743917614
-1994 16.8363414705
-1995 15.7376695424
-1996 14.4159207121
-1997 13.6545738205
-1998 13.1685780361
-1999 15.2304945514
-2000 13.3567638695
-2001 13.1648657843
-2002 14.1233820468
-2003 14.8195521906
-2004 14.9218328297
-2005 15.3806759045
-2006 15.7159809023
-2007 12.3090678826
-2008 13.8108404353
-2009 12.1449939907
-2010 13.9541616663
-2011 14.9761717767"""
 
-years = []
-vals = []
-for line in data.split("\n"):
-    tokens = line.split()
-    vals.append( float(tokens[1]) )
-    years.append( float(tokens[0]) )
+years = numpy.arange(SYEAR,2012)
 
-vals = numpy.array( vals )
-years = numpy.array( years )
-h_slope, intercept, h_r_value, p_value, std_err = stats.linregress(years, vals)
-print h_slope, h_r_value ** 2, intercept
-trend = numpy.array( vals )
-for yr in range(1951,2012):
-    trend[yr-1951] = intercept + (yr) * h_slope
+fig = plt.figure(figsize=(8,6))
+ax = fig.add_subplot(111)
 
-fig = plt.figure(figsize=(6,8))
-ax = fig.add_subplot(211)
-ax.set_xlim(1950.5,2012)
-ax.bar(years, vals)
-ax.plot( years -0.4, trend, color='r')
-ax.text(1951, 16.3, 'Slope: %.2f/decade R^2: %.2f' % (h_slope * 10, h_r_value**2))
-ax.set_title("Washington National KDCA\n Average July Surface Mixing Ratio")
-ax.set_ylabel("Mixing Ratio [g/kg]")
+ax2 = ax.twinx()
+def h2opsat(t):
+    pwat=6.107799961 + t*(4.436518521e-1 + t*(1.428945805e-2 + t*(2.650648471e-4 + t*(3.031240396e-6 + t*(2.034080948e-8 + t*6.136820929e-11)))))
+    pice=6.109177956 + t*(5.034698970e-1 + t*(1.886013408e-2 + t*(4.176223716e-4 + t*(5.824720280e-6 + t*(4.838803174e-8 + t*1.838826904e-10)))))
+    return min(pwat,pice)
+
+def dewpoint(t,ph2o):
+    
+    while (h2opsat(t)>=ph2o):
+        t -= 0.1
+    return t
+def conv(mixr):
+    spc = mixr / (1 + mixr / 1000.0 )
+    vmr = 28.9644 / (28.9644 - 18.01534 * ( 1.0 - 1000.0 / spc))
+    ph2o = vmr * 1012.5
+    dwpc = dewpoint(35,ph2o)
+    return mesonet.c2f( dwpc )
+def update_ax2(ax1):
+   y1, y2 = ax1.get_ylim()
+   ax2.set_ylim(conv(y1), conv(y2))
+   ax2.figure.canvas.draw()
+ax.callbacks.connect("ylim_changed", update_ax2)
+
+ax.set_xlim(SYEAR - 0.5,2011.5)
+stations = {'DSM': {'name':'Des Moines', 'color': 'r', 'marker': '^'}, 
+            #'STL': {'name': 'Saint Louis', 'color': 'b', 'marker': 'x'}, 
+            #'MCI': {'name': 'Kansas City', 'color': 'g', 'marker': 'o'}
+            }
+for station in stations.keys():
+    data = get_data(station)
+
+    h_slope, intercept, h_r_value, p_value, std_err = stats.linregress(years, data)
+    trend = numpy.array( data )
+    for yr in range(SYEAR,2012):
+        trend[yr-SYEAR] = intercept + (yr) * h_slope
+    ax.scatter(years, data, facecolor='%s'% (stations[station]['color'],),
+               marker='%s'% (stations[station]['marker'],), s=60,
+               label="%s %.2f$^{\circ}\mathrm{F}$/decade\n$R^2$: %.2f" % (stations[station]['name'],
+                                               (trend[9] - trend[0]), h_r_value**2 ))
+    ax.plot( years, trend, color='%s'% (stations[station]['color'],))
+
+ax.set_title("%s-2011 June July August Dew Point Trends" % (SYEAR,))
+ax.set_ylabel("Mean Mixing Ratio [g/kg]")
+ax2.set_ylabel("Dew Point $^{\circ}\mathrm{F}$")
 ax.set_ylim(10,17)
+ax.legend(prop=prop, ncol=2)
+ax.grid()
+#ax.set_ylim(10,17)
 """
 ax2 = fig.add_subplot(312)
 
@@ -102,7 +97,7 @@ ax2.set_ylabel("Mixing Ration [g/kg]")
 #ax2.set_ylim(8,14)
 ax2.grid(True)
 ax2.set_xlim(1950.5,2011.5)
-"""
+
 ax3 = fig.add_subplot(212)
 
 bars = ax3.bar(years-0.4, vals - trend, edgecolor='b', facecolor='b')
@@ -115,6 +110,7 @@ ax3.set_title("Departure from Trend")
 ax3.set_ylabel("Mixing Ratio [g/kg]")
 ax3.grid(True)
 ax3.set_xlim(1950.5,2011.5)
+"""
 #ax3.set_xlabel("*2011 total thru 26 July")
 fig.savefig('test.png')
 #import iemplot

@@ -3,7 +3,7 @@ import mx.DateTime
 import numpy
 ASOS = iemdb.connect('asos', bypass=True)
 acursor = ASOS.cursor()
-acursor.execute("SET TIME ZONE 'EDT5EST'")
+#acursor.execute("SET TIME ZONE 'CDT6CST'")
 stemps = []
 sdrct = []
 ssknt = []
@@ -14,12 +14,14 @@ sprec = numpy.zeros( (1500,), 'f')
 svalid = numpy.zeros( (1500,), 'f')
 
 acursor.execute("""
- SELECT extract(epoch from (valid at time zone 'EDT')), tmpf, dwpf, drct, sknt, pres1, gust_sknt, precip,
-  valid at time zone 'EDT' from t2011_1minute WHERE station = 'BGM'
- and valid BETWEEN '2011-09-07 00:00-04' and '2011-09-08 00:59-04' 
-and drct >= 0 ORDER by valid ASC
+ SELECT extract(epoch from (valid at time zone 'CDT')), tmpf, dwpf, drct, sknt, pres1, gust_sknt, precip,
+  valid at time zone 'CDT' from t2012_1minute WHERE station = 'DSM'
+ and valid BETWEEN '2012-05-03 00:00-05' and '2012-05-03 12:59-05' 
+ ORDER by valid ASC
 """)
 for row in acursor:
+        if row[7] > 0:
+          print row
         stemps.append( row[1])
         
         sdrct.append( row[3])
@@ -41,10 +43,10 @@ for i in range(1500):
     acc[i] = acc[i-1] + sprec[i]
     rate15[i] = numpy.sum(sprec[i-15:i]) * 4
     rate60[i] = numpy.sum(sprec[i-60:i])
-    svalid[i] =  mx.DateTime.DateTime(2011,9,7, 0) + mx.DateTime.RelativeDateTime(minutes=i)
+    svalid[i] =  mx.DateTime.DateTime(2012,4,14, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 # Figure out ticks
-sts = mx.DateTime.DateTime(2011,9,7, 0)
-ets = mx.DateTime.DateTime(2011,9,8, 0,59)
+sts = mx.DateTime.DateTime(2012,4,14, 17,0)
+ets = mx.DateTime.DateTime(2012,4,14, 21,1)
 interval = mx.DateTime.RelativeDateTime(hours=1)
 now = sts
 xticks = []
@@ -55,7 +57,7 @@ while now <= ets:
     if now == sts or now.hour == 0:
         fmt = "%-I %p\n%-d %B"
     
-    if now == sts or (now.minute == 0 and now.hour % 3 == 0 ):
+    if now == sts or (now.minute == 0 and now.hour % 1 == 0 ):
         xticks.append( int(now) )
         xlabels.append( now.strftime(fmt))
         xlabels2.append( now.strftime("%-I %p"))
@@ -79,11 +81,11 @@ ax.set_xticks(xticks)
 ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels2)
 ax.grid(True)
-ax.set_xlim(min(xticks), max(svalid))
-ax.legend(loc=2, prop=prop)
+ax.set_xlim(min(xticks), max(xticks))
+ax.legend(loc=1, prop=prop)
 #ax.set_ylim(0,10)
-ax.set_xlabel("7 September 2011 (EDT)")
-ax.set_title("7 Sep 2011 Binghamton (KBGM) One Minute Rainfall\nSet Local (1 AM - 1 AM) Daily Record of 7.49 inches")
+ax.set_xlabel("14 April 2012 (CDT)")
+ax.set_title("14 Apr 2012 Des Moines (KDSM) One Minute Rainfall\n3.43 inches reported, second highest daily total for April")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))

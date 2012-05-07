@@ -95,7 +95,10 @@ class AtomPubClient(object):
     # HTTP request.
     for name, value in kwargs.iteritems():
       if value is not None:
-        value.modify_request(http_request)
+        if hasattr(value, 'modify_request'):
+          value.modify_request(http_request)
+        else:
+          http_request.uri.query[name] = str(value)
     # Default to an http request if the protocol scheme is not set.
     if http_request.uri.scheme is None:
       http_request.uri.scheme = 'http'
@@ -178,9 +181,9 @@ class AtomPubClient(object):
 
     # Set the user agent header for logging purposes.
     if self.source:
-      http_request.headers['User-Agent'] = '%s gdata-py/2.0.15' % self.source
+      http_request.headers['User-Agent'] = '%s gdata-py/2.0.17' % self.source
     else:
-      http_request.headers['User-Agent'] = 'gdata-py/2.0.15'
+      http_request.headers['User-Agent'] = 'gdata-py/2.0.17'
 
     return http_request
 
