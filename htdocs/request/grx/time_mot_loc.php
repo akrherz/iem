@@ -34,6 +34,7 @@ for ($k=0;$row=@pg_fetch_array($rs,$k);$k++){
 	$min = $dur/60;
 	$spd = floatval($row["tml_sknt"]) * 0.514444444;
 	$dir = floatval($row["tml_direction"]);
+	$descript = sprintf("%s/%s", $dir, $row["tml_sknt"]);
 	$distance = $spd * $dur;
 
 	/* Some magic if we have a line or a string! */
@@ -73,7 +74,7 @@ for ($k=0;$row=@pg_fetch_array($rs,$k);$k++){
 	  $lat2 = round($lat1 + (($distance * sin(deg2rad(270-$dir)))/111325),6);
 
 	  echo "Line: 2,0,\"NWS Warning Track (". $row["wfo"] ."-". $row["phenomena"] 
-	."-". $row["eventid"].")\"
+	."-". $row["eventid"].")\\n".$descript."\"
   ".$lat1.",".$lon1."
   ".$lat2.",".$lon2."
 End:
