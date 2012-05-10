@@ -39,6 +39,9 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
 <ul>
  <li><a href="../cow/">IEM Cow</a>
   <br />Interactive Storm Based Warning verification app</li>
+   <li><a href="../raccoon/">IEM Raccoon</a>
+  <br />Generate Microsoft Powerpoint of Storm Based Warnings for a WFO 
+  and RADAR site of your choice.</li>
  <li><a href="../request/gis/watchwarn.phtml">GIS Shapefiles</a>
   <br />of archived Storm Based Warning polygons.</li>
 </ul>

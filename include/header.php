@@ -134,10 +134,11 @@ $_pages = Array(
  "severe" => Array(
     "base" => Array("title" => "Severe Weather", "url" => "/current/severe.phtml"),
     "main" => Array("title" => "Mainpage", "url" => "/current/severe.phtml"),
-    "cow" => Array("title" => "IEM Cow", "url" => "/cow/"),
+    "cow" => Array("title" => "IEM Cow (SBW Verification)", "url" => "/cow/"),
     "iembot" => Array("title" => "iembot", "url" => "/projects/iembot/"),
     "interact" => Array("title" => "Interact Radar", "url" => "/GIS/apps/rview/warnings.phtml"),
-    "lsr" => Array("title" => "LSR App", "url" => "/lsr/"),
+    "lsr" => Array("title" => "Local Storm Report App", "url" => "/lsr/"),
+    "raccoon" => Array("title" => "IEM Raccoon (SBW Powerpoints)", "url" => "/raccoon/"),
     "river" => Array("title" => "River Summary", "url" => "/river/"),
     "watch" => Array("title" => "SPC Watches", "url" => "/GIS/apps/rview/watch.phtml"),
     "vtec" => Array("title" => "VTEC Browser", "url" => "/vtec/"),
