@@ -37,7 +37,7 @@ foreach ($stations as $key => $value){
 
 if ($selectAll){
   $stationString = "(";
-  foreach ($Rcities as $key => $value){
+  foreach ($cities as $key => $value){
     $stationString .= " '". $key ."',";
   }
 }
