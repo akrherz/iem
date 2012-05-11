@@ -1,11 +1,23 @@
-# Generate a raster of q2 data for 24h total each hour
+"""
+ Generate a raster of 24hour precipitation totals from Q2
+
+ run from RUN_10_AFTER.sh
+
+ $Id: $:
+"""
 
 import numpy
 import mx.DateTime
-import netCDF3
+try:
+    import netCDF3
+except:
+    import netCDF4 as netCDF3
 from PIL import Image
 import os
 import sys
+import tempfile
+import random
+import subprocess
 
 # NW Corner of tiles
 tiles = {
@@ -18,6 +30,12 @@ tiles = {
          7: [-90., 40.],
          8: [-80., 40.]
          }
+
+def random_zeros():
+    """
+    Need some random zeros to make pqinsert happier
+    """
+    return "%s" % ("0" * random.randint(0, 10),)
 
 def make_colorramp():
     """
@@ -77,7 +95,7 @@ def doit(gts, hr):
     for tile in range(1,9):
         fp = make_fp(tile, gts)
         if not os.path.isfile(fp):
-            print "Missing", fp
+            print "q2_raster_24h Missing Tile: %s Time: %s" % (tile, gts)
             continue
         nc = netCDF3.Dataset( fp )
         # Our 24h rasters will support ~24 inch rainfalls
@@ -95,37 +113,42 @@ def doit(gts, hr):
     # Stress our color ramp
     #for i in range(256):
     #    imgdata[i*10:i*10+10,0:100] = i
+    (tmpfp, tmpfn) = tempfile.mkstemp()
     # Create Image
     png = Image.fromarray( imgdata )
     png.putpalette( make_colorramp() )
-    png.save('q2.png')
+    png.save('%s.png' % (tmpfn,))
     # Now we need to generate the world file
-    o = open('/tmp/q2.wld', 'w')
-    o.write("""   0.0100000000000%s%s
-   0.00000
-   0.00000
-  -0.010000000000000000
+    o = open('%s.wld' % (tmpfn,), 'w')
+    o.write("""   0.010%s
+   0.00%s
+   0.00%s
+  -0.010%s
 %s
-  %s""" % (gts.strftime("%Y%m%d%H%M"), mx.DateTime.now().second,
+  %s""" % (random_zeros(), random_zeros(), random_zeros(), random_zeros(),
            west, north))
     o.close()
     # Inject WLD file
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/p%sh_%s.wld wld' /tmp/q2.wld" % (
-                    gts.strftime("%Y%m%d%H%M"),hr, gts.strftime("%Y%m%d%H%M") )
-    os.system(pqstr)
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/p%sh_%s.wld wld' %s.wld" % (
+                    gts.strftime("%Y%m%d%H%M"),hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
+    subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/p%sh.png GIS/q2/p%sh_%s.png png' q2.png" % (
-                    gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M") )
-    os.system(pqstr)
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/p%sh.png GIS/q2/p%sh_%s.png png' %s.png" % (
+                    gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
+    subprocess.call(pqstr, shell=True)
     # Create 900913 image
-    cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 q2.png q2.tif"
-    os.system( cmd )
+    cmd = "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpfn, tmpfn)
+    subprocess.call( cmd , shell=True)
     # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/p%sh.tif GIS/q2/p%sh_%s.tif tif' q2.tif" % (
-                    gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M") )
-    os.system(pqstr)
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/p%sh.tif GIS/q2/p%sh_%s.tif tif' %s.tif" % (
+                    gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
+    subprocess.call(pqstr, shell=True)
     
-    os.unlink('q2.tif')
+    os.unlink('%s.tif' % (tmpfn,))
+    os.unlink('%s.png' % (tmpfn,))
+    os.unlink('%s.wld' % (tmpfn,))
+    os.close(tmpfp)
+    os.unlink(tmpfn)
 
 if __name__ == "__main__":
     if len(sys.argv) == 5:

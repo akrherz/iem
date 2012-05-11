@@ -1,5 +1,8 @@
 """
  Generate a raster of data from raw Q2 netcdf files
+ 
+ run from RUN_5MIN.sh
+ 
  $Id: $:
 """
 
@@ -13,7 +16,9 @@ from PIL import Image
 import os
 import sys
 import tempfile
+import random
 import subprocess
+#import gdal
 
 # NW Corner of tiles
 tiles = {
@@ -70,7 +75,13 @@ def make_fp(tile, gts):
     return "/mnt/a4/data/%s/nmq/tile%s/data/QPESUMS/grid/q2rad_hsr_nc/short_qpe/%s00.nc" % (
         gts.strftime("%Y/%m/%d"), tile, 
         gts.strftime("%Y%m%d-%H%M") )
-    
+
+def random_zeros():
+    """
+    Need some random zeros to make pqinsert happier
+    """
+    return "%s" % ("0" * random.randint(0, 10),)
+
 def doit(gts):
     """
     Actually generate a PNG file from the 8 NMQ tiles
@@ -85,7 +96,7 @@ def doit(gts):
     for tile in range(1,9):
         fp = make_fp(tile, gts)
         if not os.path.isfile(fp):
-            print "Missing Tile: %s Time: %s" % (tile, gts)
+            print "q2_raster Missing Tile: %s Time: %s" % (tile, gts)
             continue
         nc = netCDF3.Dataset( fp )
         val = nc.variables["rad_hsr_1h"][:] / 10.0 # convert to mm
@@ -96,27 +107,30 @@ def doit(gts):
         ysz, xsz = numpy.shape(val)
         x0 = (tiles[tile][0] - west) * 100.0
         y0 = (north - tiles[tile][1]) * 100.0
-        #print tile, x0, xsz, y0, ysz, val[0,0]
+        #print tile, x0, xsz, y0, ysz, val[0,0], numpy.max( val )
         imgdata[y0:(y0+ysz-1),x0:(x0+xsz-1)] = val.astype('int')[:-1,:-1]
         nc.close()
     # Stress our color ramp
     #for i in range(256):
     #    imgdata[i*10:i*10+10,0:100] = i
-    
     (tmpfp, tmpfn) = tempfile.mkstemp()
     
     # Create Image
     png = Image.fromarray( imgdata )
     png.putpalette( make_colorramp() )
     png.save('%s.png' % (tmpfn,))
+    #test = gdal.Open('%s.png' % (tmpfn,), 0)
+    #testd = test.ReadAsArray()
+    #print testd[2632,3902], imgdata[2632,3902], numpy.max(testd), numpy.max(imgdata)
     # Now we need to generate the world file
     o = open('%s.wld' % (tmpfn,), 'w')
-    o.write("""   0.0100000000000%s
-   0.00000
-   0.00000
-  -0.010000000000000000
+    o.write("""   0.010%s
+   0.00%s
+   0.00%s
+  -0.010%s
 %s
-  %s""" % (gts.strftime("%Y%m%d%H%M"), west, north))
+  %s""" % (random_zeros(), random_zeros(), random_zeros(), random_zeros(), 
+           west, north))
     o.close()
     # Inject WLD file
     pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/n1p_%s.wld wld' %s.wld" % (
@@ -127,7 +141,7 @@ def doit(gts):
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     # Create 900913 image
-    cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpfn, tmpfn)
+    cmd = "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpfn, tmpfn)
     subprocess.call(cmd, shell=True)
     # Insert into LDM
     pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/n1p.tif GIS/q2/n1p_%s.tif tif' %s.tif" % (
