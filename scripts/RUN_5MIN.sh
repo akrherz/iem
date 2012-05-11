@@ -21,7 +21,7 @@ cd ../dotcams
 #/mesonet/python/bin/python parse_idot.py 
 
 cd ../../q2
-/mesonet/python/bin/python make_raster.py 
+python make_raster.py 
 
 # Lets wait a bit now
 sleep 60
