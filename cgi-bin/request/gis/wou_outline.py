@@ -1,4 +1,4 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/env python
 # Generate a shapefile of the WOU outline.
 # 28 Aug 2004 port to iem40
 
@@ -10,12 +10,15 @@ import os
 import sys
 import shutil
 import cgi
-from pyIEM import wellknowntext, iemdb
+import sys
+sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
+import wellknowntext
+import iemdb
+import psycopg2.extras
+POSTGIS = iemdb.connect('postgis', bypass=True)
+pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-i = iemdb.iemdb()
-mydb = i["postgis"]
-
-mydb.query("SET TIME ZONE 'GMT'")
+pcursor.execute("SET TIME ZONE 'GMT'")
 
 # Get CGI vars
 form = cgi.FormContent()
@@ -31,19 +34,20 @@ dbf = dbflib.create(fp)
 dbf.add_field("SIG", dbflib.FTString, 1, 0)
 dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
 
-sql = """select astext(multi(ST_union(ST_SnapToGrid(geom,0.00001)))) as tgeom 
+sql = """select astext(multi(ST_union(ST_SnapToGrid(geom,0.0001)))) as tgeom 
        from warnings_%s WHERE significance = 'A' and 
        phenomena IN ('TO','SV') and eventid = %s and
        isvalid(geom) and 
        issue < ((select issued from watches WHERE num = %s
                 and extract(year from issued) = %s LIMIT 1) + '60 minutes'::interval)
        """ % (year, etn, etn, year) 
-rs = mydb.query(sql).dictresult()
+pcursor.execute(sql)
 
-if len(rs) == 0:
+if pcursor.rowcount == 0:
     sys.exit()
 
-s = rs[0]["tgeom"]
+row = pcursor.fetchone()
+s = row["tgeom"]
 f = wellknowntext.convert_well_known_text(s)
 
 d = {}
