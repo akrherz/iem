@@ -2,9 +2,9 @@
 """
 Generate a Powerpoint file for an event
 
-$Id$:
+$Id: raccoon_sbw_to_ppt.py 8221 2012-05-04 14:06:49Z akrherz $:
 """
-__REV__ = "$Rev$:"
+__REV__ = "$Rev: 8221 $:"
 import os
 os.putenv("DISPLAY", "localhost:1")
 import sys
@@ -170,7 +170,7 @@ def do_job(job):
         textbox.addElement(P(text="Expire: %s UTC" % ( 
                                     warning['expire'].strftime("%d %b %Y %H:%M"),)))
         textbox.addElement(P(text="Area: %.1f square km (%.1f square miles)" % ( 
-                                    warning['area'], warning['area'] / 0.386102)))
+                                    warning['area'], warning['area'] * 0.386102)))
         
         url = "http://iem21.local/GIS/radmap.php?"
         url += "layers[]=places&layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw"
