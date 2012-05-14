@@ -14,6 +14,7 @@ import genDailyRecordsRain, genDailyRange, genDailyMeans, genCountLows32
 import genSpringFall, genMonthly, genHDD, genCDD, genHeatStress
 import genCountRain, genFrostProbabilities, genSpringProbabilities
 import genCycles, genCountSnow, genTempThresholds, genRecordPeriods
+import gen_precip_cats
 
 import constants
 
@@ -74,3 +75,5 @@ for dbid in nt.sts.keys():
   genTempThresholds.write(mydb, dbid)
 
   genRecordPeriods.write(mydb, rs, dbid)
+  
+  gen_precip_cats.write(mydb, rs, dbid)
