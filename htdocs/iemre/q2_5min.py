@@ -1,9 +1,13 @@
-#!/mesonet/python/bin/python
-# Extract the 5 minute interval data from the Q2 netCDF files
+#!/usr/bin/env python
+"""
+ Extract the 5 minute interval data from the Q2 netCDF files
+
+$Id: $:
+"""
 
 import cgi
 import os
-import netCDF3
+import netCDF4
 import mx.DateTime
 
 form = cgi.FormContent()
@@ -38,8 +42,8 @@ while now <= ets:
     if not os.path.isfile(fp):
         val = "M"
     else:
-        nc = netCDF3.Dataset(fp)
-        val = "%.3f" % (nc.variables["preciprate_hsr"][y,x] / 12.0 / 25.4,)
+        nc = netCDF4.Dataset(fp)
+        val = "%.3f" % (nc.variables["preciprate_hsr"][y,x] / nc.variables["preciprate_hsr"].Scale / 12.0 / 25.4,)
         nc.close()
     # Lat, Lon
     print "%s,%s,%s" % (now.strftime("%Y-%m-%d"),
