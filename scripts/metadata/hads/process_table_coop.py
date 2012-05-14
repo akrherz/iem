@@ -30,9 +30,9 @@ for miss in missing:
     continue
   data = stations[miss]
   sql = "INSERT into stations(id, synop, name, state, country, network, online,\
-         geom, plot_name \
+         geom, plot_name, elevation \
          ) VALUES ('%(id)s', 99999, '%(name)s', '%(state)s', 'US', '%(state)s_COOP', 't',\
-         'SRID=4326;POINT(%(lon)s %(lat)s)',  '%(name)s')" % data
+         'SRID=4326;POINT(%(lon)s %(lat)s)',  '%(name)s', -999)" % data
 
   mcursor = MESOSITE.cursor()
   try:
