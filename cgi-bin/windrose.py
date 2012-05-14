@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
-$Id: $:
+Generate a PNG windrose based on the CGI parameters
 """
 
 import sys
