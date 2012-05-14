@@ -43,7 +43,7 @@ def runner(days):
     sql = "SELECT t.iemid, pday from summary_%s s JOIN stations t ON (t.iemid = s.iemid) WHERE t.id = '%s' and day = '%s'" % (ts.year, id, ts.strftime("%Y-%m-%d") )
     rs = access.query(sql).dictresult()
     if (len(rs) == 0):
-      print "ADDING Summary entry for id: %s" % (id,)
+      print "ADDING Summary entry for id: %s %s" % (id, ts.strftime("%Y-%m-%d"))
       sql = """INSERT into summary_%s(iemid, day, pday)
       VALUES ((select iemid from stations where id = '%s'), '%s', %s) """ % (ts.year, id,  ts.strftime("%Y-%m-%d"), val )
       access.query(sql)
@@ -59,7 +59,9 @@ def runner(days):
 
     sql = "SELECT snow from summary_%s s JOIN stations t ON (t.iemid = s.iemid) WHERE t.id = '%s' and day = '%s'" % (ts.year, id, ts.strftime("%Y-%m-%d") )
     rs = access.query(sql).dictresult()
-    if rs[0]['snow'] is None or float(rs[0]['snow']) != val:
+    if len(rs) == 0:
+      print 'NEED entry for %s %s' % (id, ts.strftime("%Y-%m-%d"))
+    elif rs[0]['snow'] is None or float(rs[0]['snow']) != val:
       print "DB SNOW UPDATE [%s] OLD: %s NEW: %s" % (id, rs[0]['snow'], val)
       sql = "UPDATE summary_%s s SET snow = %s FROM stations t WHERE t.iemid = s.iemid and t.id = '%s' and day = '%s'" % (ts.year, val, 
                                                                     id, ts.strftime("%Y-%m-%d") )
