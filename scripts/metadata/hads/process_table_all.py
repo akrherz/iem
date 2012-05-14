@@ -7,7 +7,7 @@ MESOSITE = iemdb.connect('mesosite')
 
 missing = []
 hcursor.execute("""
-SELECT distinct nwsli from unknown WHERE network ~* 'DCP'
+SELECT distinct nwsli from unknown WHERE nwsli ~* 'QR'
 """)
 for row in hcursor:
   missing.append( row[0] )
@@ -33,7 +33,8 @@ for line in open('all_dcp_defs.txt'):
   if tokens[3].strip() == 'CN':
     stations[tokens[1]]['country'] = 'CN'
     stations[tokens[1]]['state'] = tokens[4].strip()[:2]
-
+  if tokens[4].strip() == 'ALQ':
+    stations[tokens[1]]['state'] = 'AB'
 
 for miss in missing:
   if not stations.has_key(miss):

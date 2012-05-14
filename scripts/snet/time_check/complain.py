@@ -12,14 +12,14 @@ bad = 0
 for line in lines:
   t = line.split("|")
   sid = t[0]
-  if sid in ('SALI4', 'SAGI4','SLOI4'):
+  #if sid in ('SALI4', 'SAGI4','SLOI4'):
   #  print "Skip Mallard"
-    continue
+  #  continue
   sname = t[1]
   dur = float(t[2])
   if (not mesonet.kcciBack.has_key(sid)):
     continue
-  if (dur > -1000):
+  if (dur < 1000):
     continue
   sql = "SELECT email from iem_site_contacts WHERE portfolio = 'kccisnet' \
          and s_mid = '%s'" % (sid, )

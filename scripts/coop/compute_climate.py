@@ -10,14 +10,14 @@ nt = network.Table(("IACLIMATE", "MNCLIMATE", "NDCLIMATE", "SDCLIMATE",
 COOP = iemdb.connect('coop')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 ccursor2 = COOP.cursor()
-
+THISYEAR = mx.DateTime.now().year
 META = {
     'climate51' : {'sts': mx.DateTime.DateTime(1951,1,1), 
-                   'ets': mx.DateTime.DateTime(2011,1,1)},
+                   'ets': mx.DateTime.DateTime(THISYEAR,1,1)},
     'climate71' : {'sts': mx.DateTime.DateTime(1971,1,1), 
                    'ets': mx.DateTime.DateTime(2001,1,1)},
     'climate' : {'sts': mx.DateTime.DateTime(1893,1,1), 
-                   'ets': mx.DateTime.DateTime(2011,1,1)},
+                   'ets': mx.DateTime.DateTime(THISYEAR,1,1)},
     'climate81' : {'sts': mx.DateTime.DateTime(1981,1,1), 
                    'ets': mx.DateTime.DateTime(2011,1,1)}       
 }
@@ -27,7 +27,7 @@ def daily_averages(table):
     Compute and Save the simple daily averages
     """
     for st in ['nd','sd','ne','ks','mo','ia','mn','wi','il','in','oh','mi','ky']:
-        print 'DA', st
+        print 'Computing Daily Averages for state:', st
         sql = """
     SELECT '2000-'|| to_char(day, 'MM-DD') as d, station, 
     avg(high) as avg_high, avg(low) as avg_low,
@@ -38,7 +38,6 @@ def daily_averages(table):
     avg( gdd50(high,low) ) as gdd50, avg( sdd86(high,low) ) as sdd86,
     max( high - low) as max_range, min(high - low) as min_range
     from alldata_%s WHERE day >= '%s' and day < '%s' 
-    and station = 'NE0000'
     GROUP by d, station
     """ % (st, META[table]['sts'].strftime("%Y-%m-%d"), 
 		META[table]['ets'].strftime("%Y-%m-%d") )
@@ -64,17 +63,20 @@ def do_date(table, row, col, agg_col):
     SELECT year from alldata_%s where station = '%s' and %s = %s and sday = '%s'
     and day >= '%s' and day < '%s'
     ORDER by year ASC
-    """ % (row['station'][:2].lower(), row['station'], col, row[agg_col], row['valid'].strftime("%m%d"),
-           META[table]['sts'].strftime("%Y-%m-%d"), META[table]['ets'].strftime("%Y-%m-%d"))
+    """ % (row['station'][:2].lower(), row['station'], col, row[agg_col], 
+           row['valid'].strftime("%m%d"),
+           META[table]['sts'].strftime("%Y-%m-%d"), 
+           META[table]['ets'].strftime("%Y-%m-%d"))
     ccursor2.execute(sql)
     row2 = ccursor2.fetchone()
-    sql = """ UPDATE %s SET %s_yr = %s WHERE station = '%s' and valid = '%s' """ % (
+    if row2 is not None:
+        sql = """ UPDATE %s SET %s_yr = %s WHERE station = '%s' and valid = '%s' """ % (
                     table, agg_col, row2[0], row['station'], row['valid'])
-    ccursor2.execute(sql)
+        ccursor2.execute(sql)
 
 def set_daily_extremes(table):
     sql = """
-    SELECT * from %s WHERE
+    SELECT * from %s 
     """ % (table,)
     ccursor.execute(sql)
     for row in ccursor:
@@ -85,7 +87,7 @@ def set_daily_extremes(table):
         do_date(table, row, 'precip', 'max_precip')
         COOP.commit()
        
-daily_averages(sys.argv[1])
+#daily_averages(sys.argv[1])
 set_daily_extremes(sys.argv[1])
 COOP.commit()
 ccursor.close()

@@ -100,7 +100,8 @@ for i in range(len(rs)):
     cnt += 1
 
 if (cnt == 0):
-    print 'No NEXRAD attributes found, this may be bad!'
+    if now.minute == 1:
+        print 'No NEXRAD attributes found, this may be bad!'
     obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[(0.1, 0.1),]] )
     d = {}
     d["VALID"] = "200000000000"

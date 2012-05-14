@@ -7,8 +7,9 @@ import string, re, mx.DateTime, os, sys
 import access
 import iemdb
 import mesonet
+import psycopg2.extras
 IEM = iemdb.connect('iem')
-icursor = IEM.cursor()
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 fp = None
 for i in range(0,4):
@@ -86,6 +87,9 @@ for recnum in range(len(providers)):
 for sid in db.keys():
   iem = access.Ob(sid, db[sid]['network'], icursor)
   iem.setObTimeGMT( db[sid]['ts'] )
+  if not iem.load_and_compare():
+    print 'Missing fp: %s network: %s station: %s' % (fp, 
+           db[sid]['network'], sid)
   iem.data['tmpf'] = mesonet.k2f( db[sid]['tmpk'] )
   iem.data['dwpf'] = mesonet.k2f( db[sid]['dwpk'] )
   if (db[sid]['drct'] >= 0):

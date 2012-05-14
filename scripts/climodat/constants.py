@@ -1,12 +1,12 @@
 
 import pg, mx.DateTime
 
-_THISYEAR = 2010
-_ENDYEAR = 2012
+_THISYEAR = 2013
+_ENDYEAR = 2013
 #_ENDYEAR = 1951
 
 _ARCHIVEENDTS = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
-_ENDTS = mx.DateTime.DateTime(2012,1,1)
+_ENDTS = mx.DateTime.DateTime(2013,1,1)
 #_YEARS = 58
 #_YRCNT = [0,58,58,58,57,57,57,57,57,57,57,57,57]
 mydb = pg.connect('coop', 'iemdb',user='nobody')
