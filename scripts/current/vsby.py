@@ -14,11 +14,11 @@ iem = i['iem']
 # Compute normal from the climate database
 sql = """
 SELECT 
-  station, network, vsby, x(geom) as lon, y(geom) as lat
+  id, network, vsby, x(geom) as lon, y(geom) as lat
 FROM 
-  current
+  current c JOIN stations s ON (s.iemid = c.iemid)
 WHERE
-  network IN ('AWOS', 'IA_ASOS','IL_ASOS','MN_ASOS','WI_ASOS','SD_ASOS',
+  s.network IN ('AWOS', 'IA_ASOS','IL_ASOS','MN_ASOS','WI_ASOS','SD_ASOS',
               'NE_ASOS','MO_ASOS') and
   valid + '15 minutes'::interval > now() and
   vsby >= 0 and vsby <= 10
