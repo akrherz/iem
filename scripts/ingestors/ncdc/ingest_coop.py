@@ -10,8 +10,8 @@ coopdb = i['coop']
 coopdb.query("BEGIN;")
 
 o = open("%s_dat.txt" % (ST,), 'r').readlines()
-s = mx.DateTime.DateTime(2010,1,1)
-e = mx.DateTime.DateTime(2011,1,1)
+s = mx.DateTime.DateTime(1893,1,1)
+e = mx.DateTime.DateTime(1951,1,1)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 
 data = {}
@@ -20,7 +20,7 @@ for line in o[2:]:
   tokens = re.split(",", line)
   month = mx.DateTime.strptime(tokens[7], "%Y%m")
   var = tokens[5]
-  coopid = "%s%s" % (ST.lower(), str(tokens[1][2:]))
+  coopid = "%s%s" % (ST.upper(), str(tokens[1][2:]))
   sid = coopid
   if (not data.has_key(sid)):
     data[sid] = {}
@@ -68,8 +68,11 @@ while (now < e):
       precip =  data[sid][now]["PRCP"]
       cnt += 1
 
-    if (data[sid][now]["SNOW"] != 'Null'):
-      snow = int(float(data[sid][now]["SNOW"]))  /10.0
+    if (data[sid][now]["SNOW"] not in ['Null','']):
+      try:
+        snow = int(float(data[sid][now]["SNOW"]))  /10.0
+      except:
+        print '|%s|' % (data[sid][now]["SNOW"],)
       if (snow < 0 or snow > 30):
         snow = 'Null'
         cnt += 1
@@ -86,9 +89,8 @@ while (now < e):
       snowd = 'Null'
       cnt += 1
 
-    sql = "INSERT into alldata_%s (stationid, day, high, low, precip, snow, \
-           sday, year, month,snowd) values ('%s','%s',%s,%s,%s,%s,'%s',%s,%s,%s) "\
-           % (ST.lower(), sid.lower(), now.strftime("%Y-%m-%d"), high, low, precip, snow,\
+    sql = """INSERT into alldata_%s (station, day, high, low, precip, snow, 
+           sday, year, month,snowd) values ('%s','%s',%s,%s,%s,%s,'%s',%s,%s,%s) """ % (ST.lower(), sid.upper(), now.strftime("%Y-%m-%d"), high, low, precip, snow,
            now.strftime("%m%d"), now.year, now.month, snowd)
     #sql = "UPDATE alldata SET snow = %s WHERE stationid = '%s' and day = '%s'" % (snow, sid.lower(), now.strftime("%Y-%m-%d"))
     #print sql

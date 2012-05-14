@@ -6,13 +6,14 @@ ccursor = COOP.cursor()
 nc = netCDF3.Dataset('DSM.nc')
 
 byear = nc.variables['byear'][:]
-maxt = nc.variables['maxt']
-mint = nc.variables['mint']
-pcpn = nc.variables['pcpn']
-snow = nc.variables['snow']
-snwg = nc.variables['snwg']
+maxt = nc.variables['maxt'][:]
+mint = nc.variables['mint'][:]
+pcpn = nc.variables['pcpn'][:]
+snow = nc.variables['snow'][:]
+snwg = nc.variables['snwg'][:]
 
-for yr in range(byear, 1893):
+for yr in range(byear, 2011):
+  print yr
   for mo in range(12):
     for dy in range(31):
       high = float(maxt[yr-byear,mo,dy]) / 1.0
@@ -33,12 +34,11 @@ for yr in range(byear, 1893):
       if high == 'null' or low == 'null':
         continue
 
-      sql = """INSERT into alldata(stationid, day, high, low, precip,
-            snow, sday, year, month, snowd, climoweek) VALUES ('ia2203', '%s-%s-%s',
-            %s, %s, %s, %s, '%02i%02i', %s, %s, %s,
-            (select climoweek from climoweek where sday = '%02i%02i'))""" % (yr,
+      sql = """INSERT into alldata_tmp(station, day, high, low, precip,
+            snow, sday, year, month, snowd) VALUES ('IA2203', '%s-%s-%s',
+            %s, %s, %s, %s, '%02i%02i', %s, %s, %s)""" % (yr,
             mo+1, dy+1, high, low, precip, snowfall, mo+1, dy+1, yr, mo+1,
-            snowd, mo+1, dy+1)
+            snowd)
       ccursor.execute(sql)
 
 

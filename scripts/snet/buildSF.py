@@ -12,10 +12,10 @@ now = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(minutes=-3)
 sftime = now.strftime("%y%m%d/%H%M")
 
 def main():
-	rs = iemdb.query("SELECT *, s.pmonth from current c, summary s, stations t \
+	rs = iemdb.query("SELECT *, s.pmonth from current c, summary_%s s, stations t \
 		WHERE s.day = 'TODAY' and s.iemid = c.iemid and t.iemid = c.iemid and \
 		t.network IN ('KCCI', 'KELO') and \
-		c.valid > (CURRENT_TIMESTAMP - '40 minutes'::interval)").dictresult()
+		c.valid > (CURRENT_TIMESTAMP - '40 minutes'::interval)" % (now.year,) ).dictresult()
 
 	out = open("sfedit.fil", 'w')
 	for i in range(len(rs)):

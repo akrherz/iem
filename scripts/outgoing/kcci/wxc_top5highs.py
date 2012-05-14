@@ -5,7 +5,7 @@ iemdb = pg.connect('iem', 'iemdb', user='nobody')
 rs = iemdb.query("""
 SELECT s.id as station from summary c, stations s WHERE 
   s.network = 'KCCI' and s.iemid = c.iemid and 
-  day = 'TODAY' and s.id not in ('SCEI4','SWII4') ORDER by max_tmpf DESC
+  day = 'TODAY' and s.id not in ('SCBI4', 'SCEI4','SWII4') ORDER by max_tmpf DESC
 """).dictresult()
 dict = {}
 dict['sid1'] = rs[0]['station']

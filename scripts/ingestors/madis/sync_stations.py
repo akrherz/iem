@@ -11,7 +11,7 @@ MESOSITE = iemdb.connect('mesosite')
 mcursor = MESOSITE.cursor()
 
 fp = None
-for i in range(0,4):
+for i in range(0,9):
   ts = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=i)
   testfp = ts.strftime("/mesonet/data/madis/mesonet/%Y%m%d_%H00.nc")
   if os.path.isfile(testfp):

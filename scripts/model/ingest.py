@@ -69,6 +69,7 @@ def run(model, station, lon, lat, ts):
           model,ts.strftime("%Y-%m-%d %H:%M") )
     mcursor.execute( sql )
 
+    count = 0
     r = csv.DictReader( fp )
     for row in r:
         for k in row.keys():
@@ -93,6 +94,8 @@ def run(model, station, lon, lat, ts):
               ts.strftime("%Y-%m-%d %H:%M"), fts.strftime("%Y-%m-%d %H:%M"),
               sbcape, sbcin, pwater, precipcon, precip)
         mcursor.execute( sql )
+        count += 1
+    return count
 
 if __name__ == '__main__':
     gts = mx.DateTime.gmt()
@@ -102,8 +105,12 @@ if __name__ == '__main__':
     if gts.hour % 6 == 0:
         ts = gts - mx.DateTime.RelativeDateTime(hours=6,minute=0,second=0)
         for id in table.sts.keys():
-            run("GFS", "K"+id, table.sts[id]['lon'], table.sts[id]['lat'], ts)
-            run("NAM", "K"+id, table.sts[id]['lon'], table.sts[id]['lat'], ts)
+            cnt = run("GFS", "K"+id, table.sts[id]['lon'], table.sts[id]['lat'], ts)
+            if cnt == 0:
+                print 'No data', "K"+id, ts, 'GFS'
+            cnt = run("NAM", "K"+id, table.sts[id]['lon'], table.sts[id]['lat'], ts)
+            if cnt == 0:
+                print 'No data', "K"+id, ts, 'GFS'
     for id in table.sts.keys():
         ts = gts - mx.DateTime.RelativeDateTime(hours=2,minute=0,second=0)
         run("RUC", "K"+id, table.sts[id]['lon'], table.sts[id]['lat'], ts)

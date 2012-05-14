@@ -1,7 +1,6 @@
 """
   Check to make sure the station metadata is reasonable!
 
-$Id$:
 """
 import iemdb
 MESOSITE = iemdb.connect('mesosite', bypass=True)
