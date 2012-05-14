@@ -44,7 +44,11 @@ for i in range(len(rs)):
 	s = rs[i]["tgeom"]
 	if (s == None or s == ""):
 		continue
-	f = wellknowntext.convert_well_known_text(s)
+        #print rs[i]['phenomena'], rs[i]['eventid'], rs[i]['wfo'], rs[i]['ugc']
+        try:
+	    f = wellknowntext.convert_well_known_text(s)
+        except:
+            continue
 
 	g = rs[i]["gtype"]
 	t = rs[i]["phenomena"]
