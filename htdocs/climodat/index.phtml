@@ -83,33 +83,42 @@ contain data dating back to then.
 } ?></td>
 
 <td valign="top"><select name="report" size="1">
+<optgroup label="Precipitation">
+<option value="05" <?php if ($report == "05") echo "SELECTED"; ?>>Daily Maximum Precipitation
+<option value="17" <?php if ($report == "17") echo "SELECTED"; ?>>Monthly Precipitation Totals + Averages
+<option value="21" <?php if ($report == "21") echo "SELECTED"; ?>>Monthly Rainy Days
+<option value="28" <?php if ($report == "28") echo "SELECTED"; ?>>Precipitation Events by Year
 <option value="01" <?php if ($report == "01") echo "SELECTED"; ?>>Precipitation Events per Climate Week
 <option value="02" <?php if ($report == "02") echo "SELECTED"; ?>>Top 30 Rainfall Events
-<option value="03" <?php if ($report == "03") echo "SELECTED"; ?>>Growing Degree Days
+</optgroup>
+<optgroup label="Temperature">
 <option value="04" <?php if ($report == "04") echo "SELECTED"; ?>>Daily Record Highs and Lows
-<option value="05" <?php if ($report == "05") echo "SELECTED"; ?>>Daily Maximum Precipitation
 <option value="06" <?php if ($report == "06") echo "SELECTED"; ?>>Daily Record Hi and Low Ranges
 <option value="07" <?php if ($report == "07") echo "SELECTED"; ?>>Daily Mean Highs and Lows
+<option value="27" <?php if ($report == "27") echo "SELECTED"; ?>>High/Low Consecutive Day Streaks
+<option value="14" <?php if ($report == "14") echo "SELECTED"; ?>>Monthly Average Maximum Temperatures
+<option value="15" <?php if ($report == "15") echo "SELECTED"; ?>>Monthly Average Minimum Temperatures
+<option value="16" <?php if ($report == "16") echo "SELECTED"; ?>>Monthly Average Mean Temperatures
+<option value="18" <?php if ($report == "18") echo "SELECTED"; ?>>Monthly Heating Degree Days
+<option value="19" <?php if ($report == "19") echo "SELECTED"; ?>>Monthly Cooling Degree Days
 <option value="08" <?php if ($report == "08") echo "SELECTED"; ?>>Number of Days Each Year Min &gt;= 32
+<option value="20" <?php if ($report == "20") echo "SELECTED"; ?>>Heat Stress Variables
+<option value="26" <?php if ($report == "26") echo "SELECTED"; ?>>Yearly Temperature Exceedance Histograms
+</optgroup>
+<optgroup label="Growing Season">
+<option value="03" <?php if ($report == "03") echo "SELECTED"; ?>>Growing Degree Days
 <option value="09" <?php if ($report == "09") echo "SELECTED"; ?>>Last Spring/First Fall/Length of Season Base=32
 <option value="10" <?php if ($report == "10") echo "SELECTED"; ?>>Last Spring/First Fall/Length of Season Base=30
 <option value="11" <?php if ($report == "11") echo "SELECTED"; ?>>Last Spring/First Fall/Length of Season Base=28
 <option value="12" <?php if ($report == "12") echo "SELECTED"; ?>>Last Spring/First Fall/Length of Season Base=26
 <option value="13" <?php if ($report == "13") echo "SELECTED"; ?>>Last Spring/First Fall/Length of Season Base=24
-<option value="14" <?php if ($report == "14") echo "SELECTED"; ?>>Monthly Average Maximum Temperatures
-<option value="15" <?php if ($report == "15") echo "SELECTED"; ?>>Monthly Average Minimum Temperatures
-<option value="16" <?php if ($report == "16") echo "SELECTED"; ?>>Monthly Average Mean Temperatures
-<option value="17" <?php if ($report == "17") echo "SELECTED"; ?>>Monthly Precipitation Totals + Averages
-<option value="18" <?php if ($report == "18") echo "SELECTED"; ?>>Monthly Heating Degree Days
-<option value="19" <?php if ($report == "19") echo "SELECTED"; ?>>Monthly Cooling Degree Days
-<option value="20" <?php if ($report == "20") echo "SELECTED"; ?>>Heat Stress Variables
-<option value="21" <?php if ($report == "21") echo "SELECTED"; ?>>Monthly Rainy Days
 <option value="22" <?php if ($report == "22") echo "SELECTED"; ?>>First Fall Freeze Probabilities
 <option value="23" <?php if ($report == "23") echo "SELECTED"; ?>>Last Spring Freeze Probabilities
 <option value="24" <?php if ($report == "24") echo "SELECTED"; ?>>Freeze/Thaw Cycles
+</optgroup>
+<optgroup label="Snow">
 <option value="25" <?php if ($report == "25") echo "SELECTED"; ?>>Monthly Snowy Days
-<option value="26" <?php if ($report == "26") echo "SELECTED"; ?>>Yearly Temperature Exceedance Histograms
-<option value="27" <?php if ($report == "27") echo "SELECTED"; ?>>High/Low Consecutive Day Streaks
+</optgroup>
 </select></td>
 <td><input type="submit" value="View Report"></td></tr></table>
 </form>
