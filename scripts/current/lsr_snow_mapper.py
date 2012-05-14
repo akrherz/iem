@@ -26,7 +26,7 @@ for row in pcursor:
     lats.append( row[2] )
     lons.append( row[1] )
 
-    valmask.append( False )
+    valmask.append( True )
 
 pcursor.execute("""SELECT state, 
       max(magnitude) as val, x(geom) as lon, y(geom) as lat
