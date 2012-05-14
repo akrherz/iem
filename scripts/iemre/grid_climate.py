@@ -54,7 +54,8 @@ def grid_day(nc, ts):
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
     offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).days)
-
+    if ts.day == 29 and ts.month == 2:
+        ts = mx.DateTime.DateTime(2000,3,1)
 
     sql = """SELECT * from ncdc_climate71 WHERE valid = '%s' and
              station != 'ia0000' """ % (
@@ -69,7 +70,7 @@ def grid_day(nc, ts):
             nc.variables['low_tmpk'][offset] = iemre.f2k(res)
         res = generic_gridder(rs, 'precip')
         if res is not None:
-            nc.variables['p01d'][offset] = res * 24.5
+            nc.variables['p01d'][offset] = res * 25.4
     else:
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"), 
             len(rs))

@@ -65,7 +65,7 @@ def grid_day(nc, ts):
             nc.variables['low_tmpk'][offset] = iemre.f2k(res)
         res = generic_gridder(rs, 'precip')
         if res is not None:
-            nc.variables['p01d'][offset] = res * 24.5
+            nc.variables['p01d'][offset] = res * 25.4
     else:
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"), 
             len(rs))

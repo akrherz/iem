@@ -40,6 +40,8 @@ def merge(ts):
     jan1 = mx.DateTime.DateTime(ts.year, 1, 1, 0, 0)
     offset0 = int(( ts0 - jan1).hours)
     offset1 = int(( ts -  jan1).hours)
+    if offset0 < 0:
+        offset0 = 0
     iemre2 = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
     
     iemre2 = numpy.where( iemre2 > 0., iemre2, 0.00024)
