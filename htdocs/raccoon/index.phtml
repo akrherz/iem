@@ -18,21 +18,38 @@ $sts = gmmktime($hour1, 0, 0, $month1, $day1, $year);
 $ets = gmmktime($hour2, 0, 0, $month2, $day2, $year);
 
 if (isset($_REQUEST["wfo"])){
-	$mesosite = iemdb("mesosite");
-	pg_prepare($mesosite, "INSERT", "INSERT into racoon_jobs(wfo, sts, ets,
-	radar) values ($1,$2,$3,$4) returning jobid");
-	$rs = pg_execute($mesosite, "INSERT", array($wfo, 
-		date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $radar));
-	$row = pg_fetch_assoc($rs,0);
-	pg_close($mesosite);
-	$jobid = $row["jobid"];
-	Header("Location: wait.phtml?jobid=$jobid");
-	die();
+	/* Check to make sure we have warnings first! */
+	$postgis = iemdb("postgis");
+	$rs = pg_prepare($postgis, "SELECT", "SELECT issue from sbw_${year}
+	WHERE wfo = $1 and phenomena in ('SV','TO') and significance = 'W' and
+	issue BETWEEN $2 and $3");
+	$rs = pg_execute($postgis, "SELECT", Array($wfo, 
+		date("Y-m-d H:i", $sts) ."+00", date("Y-m-d H:i", $ets) ."+00"));
+	pg_close($postgis);
+	if (pg_num_rows($rs) < 1){
+		$err = "Sorry, did not find any warnings for your selected WFO and
+		time period, please try again!";
+	} else {
+		$mesosite = iemdb("mesosite");
+		pg_prepare($mesosite, "INSERT", "INSERT into racoon_jobs(wfo, sts, ets,
+		radar) values ($1,$2,$3,$4) returning jobid");
+		$rs = pg_execute($mesosite, "INSERT", array($wfo, 
+			date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $radar));
+		$row = pg_fetch_assoc($rs,0);
+		pg_close($mesosite);
+		$jobid = $row["jobid"];
+		Header("Location: wait.phtml?jobid=$jobid");
+		die();
+	}
 }
 
 $TITLE = "IEM Raccoon | Warnings overview in PowerPoint";
 $THISPAGE = "severe-raccoon";
 include("$rootpath/include/header.php");
+
+if (isset($err)){
+	echo sprintf("<div class='warning'>%s</div>", $err);
+}
 ?>
 <h3 class="heading">IEM Raccoon</h3>
 
@@ -52,8 +69,9 @@ way to look back through an event.</p>
 office you are interested in viewing warnings from and the RADAR source to use
 for graphics generated in the Powerpoint.  The RADAR archives are not complete
 prior to February 2012, but have been selectively backfilled.  If there is a 
-case you are really interested in, please let us know and we can probably back
-fill imagery for the event.
+case you are really interested in, please 
+<a href="<?php echo $rooturl; ?>/info/contact.php">let us know</a> and we can 
+probably back fill imagery for the event.
 
 <form method="GET" name="raccoon">
 <table>
@@ -73,26 +91,26 @@ fill imagery for the event.
      <?php echo yearSelect2(2002, date("Y"), "year"); ?>
     </td>
     <td>
-     <?php echo monthSelect2(0,"month1"); ?>
+     <?php echo monthSelect2($month1,"month1"); ?>
     </td>
     <td>
-     <?php echo daySelect2(0, "day1"); ?>
+     <?php echo daySelect2($day1, "day1"); ?>
     </td>
     <td>
-     <?php echo gmtHourSelect(0, "hour1"); ?>
+     <?php echo gmtHourSelect($hour1, "hour1"); ?>
     </td>
   </tr>
 
   <tr>
     <th>End Time:</th>
     <td>
-     <?php echo monthSelect2(0,"month2"); ?>
+     <?php echo monthSelect2($month2,"month2"); ?>
     </td>
     <td>
-     <?php echo daySelect2(0, "day2"); ?>
+     <?php echo daySelect2($day2, "day2"); ?>
     </td>
     <td>
-     <?php echo gmtHourSelect(0, "hour2"); ?>
+     <?php echo gmtHourSelect($hour2, "hour2"); ?>
     </td>
   </tr>
 </table>
