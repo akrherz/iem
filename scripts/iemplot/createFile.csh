@@ -12,7 +12,7 @@ gdcfil << EOF
  KXKY     = 25;25
  MAXGRD   = 20
  CPYFIL   =  
- ANLYSS   = 0.5/2;2;2;2
+ ANLYSS   = 0.5
  list
  run
 

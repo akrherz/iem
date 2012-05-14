@@ -6,7 +6,7 @@ IEM = iemdb.connect("iem", bypass=True)
 icursor = IEM.cursor()
 
 icursor.execute("""
- SELECT station, alti from current WHERE alti > 0 
+ SELECT t.id, alti from current c, stations t WHERE alti > 0 and t.iemid = c.iemid 
  and valid > (now() - '60 minutes'::interval)
  """)
 

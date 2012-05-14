@@ -56,7 +56,7 @@ gdcntr << EOF > /tmp/pres_plot_gdcntr.out
 	GLEVEL   = 0
 	GVCORD   = NONE
 	GFUNC    = SM9S(ALTM)
-	GDFILE   = grid_25_25.grd
+	GDFILE   = grid_oa.grd
 	CINT     = 1
 	LINE     = 4
 	MAP      = 0
