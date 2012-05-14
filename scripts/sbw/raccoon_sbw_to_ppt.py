@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Generate a Powerpoint file for an event
+Generate a Powerpoint file for an event.  This script looks for queued jobs 
+within the database and runs them sequentially each minute
 
-$Id: raccoon_sbw_to_ppt.py 8221 2012-05-04 14:06:49Z akrherz $:
 """
-__REV__ = "$Rev: 8221 $:"
+__REV__ = "14May2012"
 import os
 os.putenv("DISPLAY", "localhost:1")
 import sys
