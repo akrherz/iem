@@ -57,9 +57,9 @@ def main():
     lon = -93.66308
     imgx = None
     imgy = None
-    output = open('desmoines.txt', 'a')
-    sts = mx.DateTime.DateTime(2001,1,1)
-    ets = mx.DateTime.DateTime(2012,4,1)
+    #output = open('desmoines.txt', 'a')
+    sts = mx.DateTime.DateTime(2010,7,1)
+    ets = mx.DateTime.DateTime(2012,4,16)
     interval = mx.DateTime.RelativeDateTime(days=1)
     now = sts
     while now < ets:
@@ -67,6 +67,8 @@ def main():
         for scan in get_scans_for_date( now ):
             if imgx is None:
                 imgx, imgy = compute_xy(scan, lon, lat)
+                print imgx, imgy
+                sys.exit()
             val = get_value(scan, imgx, imgy)
             output.write("%s,%.2f\n" %(scan, vals[val]))
         now += interval
