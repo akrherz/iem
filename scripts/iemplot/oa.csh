@@ -15,7 +15,6 @@ set yymmdd="$yy$mm$dd"
 set yyyymmddhh_1h="`date -u --date '1 hour ago' +'%Y%m%d%H'`"
 set gtime="`date -u --date '1 hour ago' +'%y%m%d/%H00'`"
 
-rm -f grid_oa.grd
 
 gddelt << EOF > /tmp/oa_gddelt.out
  GDFILE = grid_25_25.grd
