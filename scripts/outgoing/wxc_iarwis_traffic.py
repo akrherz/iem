@@ -41,6 +41,6 @@ for row in icursor:
     out.write("%(id)3s %(nwsli)5.5s %(lat)7.4f %(lon)9.4f %(name)-32.32s %(day)2.0f %(hour)2.0f %(minute)2.0f %(avgspeed)5.1f %(normalvol)4.0f %(longvol)4.0f %(occ)4.0f\n" % row )
 
 out.close()
-os.system("/home/ldm/bin/pqinsert -p \"wxc_iarwis_traffic.txt\" wxc_iarwis_traffic.txt")
+os.system("/home/ldm/bin/pqinsert -p \"wxc_iarwis_traffic.txt\" wxc_iarwis_traffic.txt >& /dev/null")
 shutil.copyfile("wxc_iarwis_traffic.txt", "/mesonet/share/pickup/wxc/wxc_iarwis_traffic.txt")
 os.remove("wxc_iarwis_traffic.txt")
