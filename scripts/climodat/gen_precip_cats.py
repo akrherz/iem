@@ -31,7 +31,7 @@ def write(mydb, rs, stationID):
     out.write("""\
 # Number of days per year with precipitation at or above threshold [inch]
 # Partitioned by month of the year, 'ALL' represents the entire year
-YEAR MON %4.2f %4.2f %4.2f %4.2f %4.2f %4.2f
+YEAR MON %5.2f %4.2f %4.2f %4.2f %4.2f %4.2f
 """ % (CATS[0], CATS[1], CATS[2], CATS[3], CATS[4], CATS[5]))
  
     for mo in range(13):
