@@ -2,6 +2,13 @@
 include("../../../../config/settings.inc.php");
 include_once "$rootpath/include/iemmap.php";
 include("$rootpath/include/database.inc.php");
+$dbconn = iemdb("isuag");
+$dvar = isset($_GET["dvar"]) ? $_GET["dvar"] : "c90";
+$rs = pg_prepare($dbconn, "SELECT", "select station, sum($dvar) as s from daily 
+   WHERE extract(month from valid) = $1 and
+         extract(year from valid) = $2 GROUP by station");
+
+
 include("$rootpath/include/network.php");
 $nt = new NetworkTable("ISUAG");
 $ISUAGcities = $nt->table;
@@ -10,10 +17,8 @@ $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400 - (7 * 36
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 86400 - (7 * 3600) );
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 86400 - (7 * 3600) );
 $date = isset($_GET["date"]) ? $_GET["date"]: $year ."-". $month ."-". $day;
-$dvar = isset($_GET["dvar"]) ? $_GET["dvar"] : "c90";
 
 $direct = isset($_GET["direct"]) ? $_GET['direct']: "";
-
 $ets = strtotime($date);
 $sts = mktime(0,0,0,$month,1,$year);
 $sdate = date("d M", $sts);
@@ -52,12 +57,9 @@ $states->draw($img);
 $iards->draw($img);
 $bar640t->draw($img);
 
-$c = iemdb("isuag");
-$sql = "select station, sum($dvar) as s from daily 
-   WHERE extract(month from valid) = $month and
-         extract(year from valid) = $year GROUP by station";
-$rs =  pg_exec($c, $sql);
-for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+$rs = pg_execute($dbconn, "SELECT", Array($month, $year));
+
+for ($i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
   $key = $row["station"];
   if ($key == "A133259" or $key == "A130209") continue;
 
@@ -77,7 +79,7 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   if ($key == "A131909" || $key == "A130209"){
-    $pt->draw($map, $snet, $img, 3, $ISUAGcities[$key]['name'] );
+    $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['name'] );
   } else {
     $pt->draw($map, $snet, $img, 1, $ISUAGcities[$key]['name'] );
   }
@@ -85,15 +87,10 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
 if ($i == 0)
    plotNoData($map, $img);
 
-$title = Array("c90" => "Rainfall (inches)", "c70" => "Potential Evapotranspiration (in)");
+$title = Array("c90" => "Rainfall (inches)", "c70" => "Potential Evapotrans. (in)");
 
 iemmap_title($map, $img, $title[$dvar] ." [ $sdate thru ". $edate ." ]");
 $map->drawLabelCache($img);
-
-$layer = $map->getLayerByName("logo");
-$point = ms_newpointobj();
-$point->setXY( 35, 25);
-$point->draw($map, $layer, $img, 0, "");
 
 $url = $img->saveWebImage();
 
