@@ -27,7 +27,7 @@ def write(mydb, rs, stationID):
     out = open("reports/%s_%s.txt" % (stationID, _REPORTID), 'w')
     constants.writeheader(out, stationID)
     out.write("""\
-# Number of days per year with precipitation at or above threshold
+# Number of days per year with precipitation at or above threshold [inch]
 YEAR %4.2f %4.2f %4.2f %4.2f %4.2f %4.2f
 """ % (CATS[0], CATS[1], CATS[2], CATS[3], CATS[4], CATS[5]))
  
