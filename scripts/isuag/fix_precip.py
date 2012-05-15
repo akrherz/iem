@@ -1,14 +1,19 @@
-# Tired of all the junk precip data from the ISUAG network
+"""
+  Corrects the often poor precip data from the ISUAG network
+"""
 
 import sys
 import iemre
 import mx.DateTime
-import netCDF3
+import netCDF4
 import numpy
-from pyIEM import iemdb
-i = iemdb.iemdb()
-isuag = i['isuag']
-mesosite = i['mesosite']
+import iemdb
+import psycopg2.extras
+ISUAG = iemdb.connect('isuag', bypass=True)
+icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
+icursor2 = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
+MESOSITE = iemdb.connect('mesosite', bypass=True)
+mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 SKIP = ['A134759', # Lewis
         'A133259',
@@ -18,9 +23,10 @@ SKIP = ['A134759', # Lewis
 ]
 
 sts = {}
-rs = mesosite.query("SELECT id, x(geom) as lon, y(geom) as lat, name from stations WHERE network = 'ISUAG'").dictresult()
-for i in range(len(rs)):
-    sts[ rs[i]['id'] ] = rs[i]
+mcursor.execute("""SELECT id, x(geom) as lon, y(geom) as lat, name from 
+    stations WHERE network = 'ISUAG'""")
+for row in mcursor:
+    sts[ row['id'] ] = row
 
 def fix_daily(ts):
     """
@@ -28,31 +34,32 @@ def fix_daily(ts):
     data, so to confuse people less
     """
     # Find ISUAG Data
-    rs = isuag.query("""SELECT sum(c900) as rain, station from hourly 
-	WHERE date(valid) = '%s' GROUP by station""" % (ts.strftime("%Y-%m-%d"),)).dictresult()
-    for i in range(len(rs)):
-        stid = rs[i]['station']
+    icursor.execute("""SELECT sum(c900) as rain, station from hourly 
+	WHERE date(valid) = '%s' GROUP by station""" % (ts.strftime("%Y-%m-%d"),))
+    for row in icursor:
+        stid = row['station']
         if stid in SKIP:
           continue
-        rain = rs[i]['rain']
+        rain = row['rain']
         # Fix it
         sql = """UPDATE daily SET c90 = %.2f, c90_f = 'e' WHERE valid = '%s'
               and station = '%s'""" % (rain, ts.strftime("%Y-%m-%d"),
               stid)
-        isuag.query(sql)
+        icursor2.execute(sql)
 
 def fix_hourly(ts):
 
     """
     Fix the hourly precipitation values, just hard code the stupid IEMRE value
     """
-    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),'r')
+    nc = netCDF4.Dataset("/mnt/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),'r')
     p01m = nc.variables['p01m']
     offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours)
     # Find ISUAG Data
-    rs = isuag.query("SELECT * from hourly WHERE valid = '%s+00'" % (ts.strftime("%Y-%m-%d"),)).dictresult()
-    for i in range(len(rs)):
-        stid = rs[i]['station']
+    icursor.execute("SELECT * from hourly WHERE valid = '%s+00'" % (
+                                                ts.strftime("%Y-%m-%d"),))
+    for row in icursor:
+        stid = row['station']
         if stid in SKIP:
           continue
         lat = sts[ stid ]['lat']
@@ -68,13 +75,13 @@ def fix_hourly(ts):
         if rs[i]['c900'] > 0 or estimate > 0:
             print "%s %s %-20.20s Ob: %5.2f F: %s E: %5.2f" % (
                   ts.strftime("%m%d/%H"), stid, sts[stid]['name'],
-                  rs[i]['c900'], rs[i]['c900_f'], estimate)
+                  row['c900'], row['c900_f'], estimate)
         # Fix it
         sql = """UPDATE hourly SET c900 = %.2f, c900_f = 'e' 
               WHERE valid = '%s+00'
               and station = '%s'""" % (estimate, ts.strftime("%Y-%m-%d %H:%M"),
               stid)
-        isuag.query(sql)
+        icursor2.execute(sql)
     nc.close()
 
 if __name__ == "__main__":
@@ -87,3 +94,7 @@ if __name__ == "__main__":
         now = ts + mx.DateTime.RelativeDateTime(hours=hr)
         fix_hourly( now.gmtime() )
     fix_daily(ts)
+    icursor.close()
+    icursor2.close()
+    ISUAG.commit()
+    ISUAG.close()

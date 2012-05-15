@@ -1,13 +1,13 @@
 dstr=`date --date '1 day ago' +'%Y-%m-%d'`
-WEBHOST="iemvs101.local"
+WEBHOST="iem21.local"
 export PATH=$PATH:/mesonet/local/bin
 
-/mesonet/python/bin/python process.py /mnt/mesonet/data/agclimate/`date +'D%d%b%y.TXT'`
+python process.py /mnt/mesonet/data/agclimate/`date +'D%d%b%y.TXT'`
 cat report.txt | mail -s "ISU AgClimate Data Report" -c krberns@iastate.edu akrherz@iastate.edu
 
-/mesonet/python/bin/python fix_precip.py
-/mesonet/python/bin/python fix_precip.py `date --date '2 day ago' +'%Y %m %d'`
-/mesonet/python/bin/python fix_precip.py `date --date '3 day ago' +'%Y %m %d'`
+python fix_precip.py
+python fix_precip.py `date --date '2 day ago' +'%Y %m %d'`
+python fix_precip.py `date --date '3 day ago' +'%Y %m %d'`
 python compute_soil_hilo.py
 
 fp="air-temp-out"
@@ -117,6 +117,6 @@ wget -q http://${WEBHOST}/GIS/apps/agclimate/month.php\?dvar=c70\&direct=yes -O 
 /home/ldm/bin/pqinsert -p "plot c 000000000000 agclimate/${fp}.png bogus png" ${fp}.png
 rm -f ${fp}.png
 
-/mesonet/python/bin/python fancy_4inch.py 1
-/mesonet/python/bin/python fancy_4inch.py 2
-/mesonet/python/bin/python fancy_4inch.py 3
+python fancy_4inch.py 1
+python fancy_4inch.py 2
+python fancy_4inch.py 3
