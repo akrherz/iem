@@ -11,7 +11,7 @@ CATS = numpy.array([0.01,0.5,1.,2.,3.,4.])
 
 def write(mydb, rs, stationID):
     """
-    standard interative here....
+    standard iterative here....
     """
     startyear = constants.startyear(stationID)
     years = constants._ENDYEAR - startyear
@@ -30,29 +30,16 @@ def write(mydb, rs, stationID):
     constants.writeheader(out, stationID)
     out.write("""\
 # Number of days per year with precipitation at or above threshold [inch]
-# Partitioned by month of the year, 'ALL' represents the entire year
-YEAR MON %5.2f %4.2f %4.2f %4.2f %4.2f %4.2f
-""" % (CATS[0], CATS[1], CATS[2], CATS[3], CATS[4], CATS[5]))
- 
-    for mo in range(13):
-        lbl = "ALL"
-        if mo > 0:
-            lbl = mx.DateTime.DateTime(2000,mo,1).strftime("%b").upper()
-        for yr in range(startyear, constants._ENDYEAR):
-            out.write("%s %s %5.0f %4.0f %4.0f %4.0f %4.0f %4.0f\n" % (yr, lbl,
-                data[mo, yr-startyear,0], data[mo, yr-startyear,1],data[mo, yr-startyear,2],
-                data[mo, yr-startyear,3],data[mo, yr-startyear,4],data[mo, yr-startyear,5]))
+# Partitioned by month of the year, 'ANN' represents the entire year
+""")
 
-        minv = numpy.min(data[mo,:-1,:],0)
-        out.write("MIN  %s %5.0f %4.0f %4.0f %4.0f %4.0f %4.0f\n" % (lbl, minv[0], minv[1],
-                                                           minv[2], minv[3],
-                                                           minv[4], minv[5]))
-        avgv = numpy.average(data[mo,:-1,:],0)
-        out.write("AVG  %s %5.1f %4.1f %4.1f %4.1f %4.1f %4.1f\n" % (lbl, avgv[0], avgv[1],
-                                                           avgv[2], avgv[3],
-                                                           avgv[4], avgv[5]))
-        maxv = numpy.max(data[mo,:-1,:],0)
-        out.write("MAX  %s %5.0f %4.0f %4.0f %4.0f %4.0f %4.0f\n" % (lbl, maxv[0], maxv[1],
-                                                           maxv[2], maxv[3],
-                                                           maxv[4], maxv[5]))
+    for c in range(len(CATS)):
+        out.write("""\
+YEAR %4.2f JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
+""" % (CATS[c],))
+        for yr in range(startyear, constants._ENDYEAR): 
+            out.write("%s %4.2f " % (yr, CATS[c]))
+            for mo in range(1,13):
+                out.write("%3.0f " % (data[mo, yr-startyear,c],))
+            out.write("%3.0f\n" % (data[0,yr-startyear,c],))
     out.close()
