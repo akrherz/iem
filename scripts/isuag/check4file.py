@@ -1,3 +1,6 @@
+"""
+Run from RUN_20_AFTER.sh to see if we have any data we are expecting to see!
+"""
 
 import os
 import shutil

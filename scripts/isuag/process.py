@@ -1,127 +1,146 @@
-
-import re, string, mx.DateTime, string, sys, traceback
-from pyIEM import iemdb, stationTable
-#i = iemdb.iemdb()
-st = stationTable.stationTable("/mesonet/TABLES/campbellDB.stns")
-#mydb = i['isuag']
+"""
+Process the raw file (argument #1) into the IEM database
+"""
+import re
+import string
+import mx.DateTime
+import string
+import sys
+import traceback
+import network
+nt = network.Table("ISUAG")
 import pg
-mydb = pg.DB('isuag',host='iemdb')
+mydb = pg.DB('isuag')
 mydb.query("SET TIME ZONE 'CST6'")
-
 
 obs = {}
 
 def initdb(fn):
-  fname = re.split("/", fn)[-1]
-  #print fname
-  ts = mx.DateTime.strptime(fname, "D%d%b%y.TXT")
-  # The default file contains data for the past 2 days and a few hours
-  # for today.
-  s = ts + mx.DateTime.RelativeDateTime(days=-3)
-  e = ts
+    """
+    Initialize the observation dataset based on the filename provided and some
+    knowledge on what data should reside in that file!
+    """
+    fname = re.split("/", fn)[-1]
+    ts = mx.DateTime.strptime(fname, "D%d%b%y.TXT")
+    # The default file contains data for the past 2 days and a few hours
+    # for today.
+    s = ts + mx.DateTime.RelativeDateTime(days=-3)
+    e = ts
 
-  for id in st.ids:
-    obs[id] = {}
+    for id in nt.sts.keys():
+        obs[id] = {}
 
-  now = s 
-  interval = mx.DateTime.RelativeDateTime(hours=+1)
-  while (now <= e):
-    for id in st.ids:
-      obs[id][now] = {}
-    now = now + interval
+    now = s 
+    interval = mx.DateTime.RelativeDateTime(hours=+1)
+    while (now <= e):
+        for id in nt.sts.keys():
+            obs[id][now] = {}
+        now = now + interval
 
-  return s, e
+    return s, e
 
 def process(fn, s, e):
-  lines = open(fn, 'r').readlines()
-  for line in lines:
-    if (line[0] == "*"):
-      stationID = string.upper(line[3:10])
-      dc = re.split(",", line)[1:-1]
-      dcols = []
-      for c in dc:
-        dcols.append("c"+ string.strip(c))
-        dcols.append("c"+ string.strip(c) +"_f")
-#      print stationID, dcols
-    else: # We have a data line!!!
-      tokens = re.split(",", line)
-      if (len(tokens) < 4):
-        break
-      ts = mx.DateTime.DateTime(int(tokens[2]), int(tokens[0]), int(tokens[1]))
-      # If this row is an hourly ob
-      if (int(dc[0]) == 100):
-        hr = int(tokens[3]) / 100
-        if (hr == 24):
-          hr = 0
-          ts += mx.DateTime.RelativeDateTime(days=1)
-        ts += mx.DateTime.RelativeDateTime(hour=hr)
-      
-      if (ts < e):
-        for i in range(len(dcols)):
-          if (not obs[stationID].has_key(ts)):
-            #print 'Why are we missing %s' % (ts,)
+    """
+    Actually process the file! 
+    """
+    lines = open(fn, 'r').readlines()
+    for line in lines:
+        if (line[0] == "*"):
+            stationID = string.upper(line[3:10])
+            dc = re.split(",", line)[1:-1]
+            dcols = []
+            for c in dc:
+                dcols.append("c"+ string.strip(c))
+                dcols.append("c"+ string.strip(c) +"_f")
             continue
-          try:
-            obs[stationID][ts][ dcols[i] ] = tokens[4+i]
-          except:
-            print stationID, dcols, i
+        tokens = re.split(",", line)
+        if (len(tokens) < 4):
+            break
+        ts = mx.DateTime.DateTime(int(tokens[2]), int(tokens[0]), int(tokens[1]))
+        # If this row is an hourly ob
+        if (int(dc[0]) == 100):
+            hr = int(tokens[3]) / 100
+            if (hr == 24):
+                hr = 0
+                ts += mx.DateTime.RelativeDateTime(days=1)
+            ts += mx.DateTime.RelativeDateTime(hour=hr)
+      
+        if (ts < e):
+            for i in range(len(dcols)):
+                if not obs.has_key(stationID) or not obs[stationID].has_key(ts):
+                    continue
+                try:
+                    obs[stationID][ts][ dcols[i] ] = tokens[4+i]
+                except:
+                    print stationID, dcols, i
       
 
 def prepareDB(s,e):
-  dayOne = s.strftime("%Y-%m-%d")
-  dayTwo = (s + mx.DateTime.RelativeDateTime(days=+1) ).strftime("%Y-%m-%d")
+    dayOne = s.strftime("%Y-%m-%d")
+    dayTwo = (s + mx.DateTime.RelativeDateTime(days=+1) ).strftime("%Y-%m-%d")
 
-  sql = "DELETE from daily WHERE valid IN ('%s','%s')" % (dayOne, dayTwo) 
-  mydb.query(sql)
+    sql = "DELETE from daily WHERE valid IN ('%s','%s')" % (dayOne, dayTwo) 
+    mydb.query(sql)
 
-  sql = "DELETE from hourly WHERE valid >= '%s' and valid < '%s 23:59' \
-    " % ( dayOne, e.strftime("%Y-%m-%d"))
-  mydb.query(sql)
+    sql = """DELETE from hourly WHERE valid >= '%s' and valid < '%s 23:59' 
+    """ % ( dayOne, e.strftime("%Y-%m-%d"))
+    mydb.query(sql)
 
 
 def insertData(s, e):
-  for stid in obs.keys():
-    for ts in obs[stid].keys():
-      d = obs[stid][ts]
-      if (ts <= e):
-        #print stid, ts.strftime("%Y-%m-%d %H:%M:00-0600"), d.keys()
-        if (d.has_key('c11') ): # Daily Value
-          d['valid'] = ts.strftime("%Y-%m-%d")
-          d['station'] = stid
-          try:
-            mydb.insert("daily", d)
-          except:
-            continue
+    """
+    Actually put the data to the database, gasp!
+    """
+    for stid in obs.keys():
+        for ts in obs[stid].keys():
+            d = obs[stid][ts]
+            if ts > e:
+                continue
+                #print stid, ts.strftime("%Y-%m-%d %H:%M:00-0600"), d.keys()
+            if (d.has_key('c11') ): # Daily Value
+                d['valid'] = ts.strftime("%Y-%m-%d")
+                d['station'] = stid
+                try:
+                    mydb.insert("daily", d)
+                except:
+                    continue
 
-        if (d.has_key('c100') ): # We can insert both daily and hourly vals
-          d['valid'] = ts.strftime("%Y-%m-%d %H:%M:00-0600")
-          d['station'] = stid
-          try:
-            mydb.insert("hourly", d)
-          except:
-            continue
+            if (d.has_key('c100') ): # We can insert both daily and hourly vals
+                d['valid'] = ts.strftime("%Y-%m-%d %H:%M:00-0600")
+                d['station'] = stid
+                try:
+                    mydb.insert("hourly", d)
+                except:
+                    continue
 
 def printReport(ts):
-  now = ts + mx.DateTime.RelativeDateTime(days=-1, hour=0)
-  o = open('report.txt', 'w')
+    """
+    Create a quasi useful report that we can send to folks interested in 
+    the flags generated on the data...
+    """
+    now = ts + mx.DateTime.RelativeDateTime(days=-1, hour=0)
+    output = open('report.txt', 'w')
 
-  o.write("""
+    output.write("""
 
-  ISU AgClimate Daily Data Report  (%-10s)
+  ISU AgClimate Daily Data Report  (%s)
   ---------------------------------------------
 """ % (now.strftime("%b %d, %Y")) )
 
-  fmt = "%-15s %4s %4s %4s %4s %4s %4s %4s %4s\n"
-  o.write(fmt % ('','c11','c12','c20','c30','c40','c80','c90','c70'))
-  for stid in obs.keys():
-    ob = obs[stid][now]
-    try:
-      o.write(fmt % (st.sts[stid]['name'],ob['c11_f'],ob['c12_f'],ob['c20_f'],\
-       ob['c30_f'], ob['c40_f'], ob['c80_f'], ob['c90_f'], ob['c70_f'] ) )
-    except:
-      continue
+    fmt = "%-15s %4s %4s %4s %4s %4s %4s %4s %4s %4s\n"
+    output.write(fmt % ('','c11','c12','c20','c30','c40','c80','c90','c70','Rain'))
+    ids = obs.keys()
+    ids.sort()
+    for stid in ids:
+        ob = obs[stid][now]
+        try:
+            output.write(fmt % (nt.sts[stid]['name'], ob['c11_f'], ob['c12_f'],
+                           ob['c20_f'], ob['c30_f'], ob['c40_f'], ob['c80_f'], 
+                           ob['c90_f'], ob['c70_f'], ob['c90'].strip() ) )
+        except:
+            continue
 
-  o.write("""
+    output.write("""
 
 Data Columns:              QC Flags:
   c11  High Temperature      M   The data is missing
@@ -133,13 +152,13 @@ Data Columns:              QC Flags:
   c80  Solar Radiation
   c90  Precipitation
 """)
-  o.close()
+    output.close()
 
 def Main():
-  f = sys.argv[1]
-  s, e = initdb(f)
-  process(f, s, e)
-  prepareDB(s, e)
-  insertData(s, e)
-  printReport(e)
+    f = sys.argv[1]
+    s, e = initdb(f)
+    process(f, s, e)
+    prepareDB(s, e)
+    insertData(s, e)
+    printReport(e)
 Main()
