@@ -12,7 +12,7 @@ mv coop_data/* /mesonet/share/pickup/coop_data/
 
 python avg_temp.py `date +%Y`
 python precip_days.py `date +%Y`
-/mesonet/python/bin/python yearly_precip.py `date +%Y`
+python yearly_precip.py `date +%Y`
 
 cd /mesonet/share/pickup/coop_data/
 zip coop_data.zip *.csv
