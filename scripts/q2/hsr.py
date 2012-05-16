@@ -1,30 +1,20 @@
 """
  Generate a raster from 8 tiles of HSR
- $Id: $:
+
+ftp://ftp.nssl.noaa.gov/users/langston/NMQ_UPDATES/April_14_2011/NSSL_National_3D_Mosaic_April2011.pdf
+
 """
 
 import numpy
 import mx.DateTime
-try:
-    import netCDF3
-except:
-    import netCDF4 as netCDF3
+import netCDF4
 from PIL import Image
 import os
 import sys
+import random
+import subprocess
 import tempfile
-
-# NW Corner of tiles
-tiles = {
-         1: [-130., 55.],
-         2: [-110., 55.],
-         3: [-90., 55.],
-         4: [-80., 55.],
-         5: [-130., 40.],
-         6: [-110., 40.],
-         7: [-90., 40.],
-         8: [-80., 40.]
-         }
+import nmq
 
 def make_colorramp():
     """
@@ -49,7 +39,7 @@ def make_fp(tile, gts):
     return "/mnt/a4/data/%s/nmq/tile%s/data/QPESUMS/grid/mosaic2d_nc/%s00.nc" % (
         gts.strftime("%Y/%m/%d"), tile, 
         gts.strftime("%Y%m%d-%H%M") )
-    
+
 def doit(gts):
     """
     Actually generate a PNG file from the 8 NMQ tiles
@@ -64,28 +54,39 @@ def doit(gts):
     for tile in range(1,9):
         fp = make_fp(tile, gts)
         if not os.path.isfile(fp):
-            print "Missing", fp
+            print "q2_HSR Missing Tile: %s Time: %s" % (tile, gts)
             continue
-        nc = netCDF3.Dataset( fp )
-        val = nc.variables["hsr"][:,:] / 10.0 # convert to dBZ
+        nc = netCDF4.Dataset( fp )
+        """
+        short hsr(Lat, Lon) ;
+          hsr:Units = "dBZ" ;
+          hsr:TypeName = "hsr" ;
+          hsr:MissingData = -999.f ; # After scale factor is applied!
+          hsr:Scale = 10.f ;
+          hsr:attributes =  ;
+        """
+        val = nc.variables["hsr"][:,:] / nc.variables['hsr'].Scale
+        #print val[952:957,1727:1732]
+
         # -99 is no return
         # -999 is missing
-        #print "1. Min: %.2f  Avg: %.2f Max: %.2f" % (numpy.min(val), numpy.average(val),
-        #                                             numpy.max(val))
-        # Move the good data
-        val = numpy.where( val > -33., (val +32.) * 2.0, val)
-        #print "2. Min: %.2f  Avg: %.2f Max: %.2f" % (numpy.min(val), numpy.average(val),
-        #                                             numpy.max(val))
+        # Covert to base 0 and now color index value
+        val = numpy.where( val > -33., (val + 32.) * 2.0, val )
+        #print val[952:957,1727:1732]
+
+        # Missing data is color 0
         val = numpy.where( val < -990., 0., val)
-        #print "3. Min: %.2f  Avg: %.2f Max: %.2f" % (numpy.min(val), numpy.average(val),
-        #                                             numpy.max(val))
+        #print val[952:957,1727:1732]
+
+        # No return is index 1
         val = numpy.where( val < 0., 1., val)
         #print "4. Min: %.2f  Avg: %.2f Max: %.2f" % (numpy.min(val), numpy.average(val),
         #                                             numpy.max(val))
         ysz, xsz = numpy.shape(val)
-        x0 = (tiles[tile][0] - west) * 100.0
-        y0 = (north - tiles[tile][1]) * 100.0
-        #print tile, x0, xsz, y0, ysz, val[0,0]
+        x0 = (nmq.TILES[tile][0] - west) * 100.0
+        y0 = (north - nmq.TILES[tile][1]) * 100.0
+        #print tile, x0, xsz, y0, ysz
+        #print val[952:957,1727:1732]
         imgdata[y0:(y0+ysz-1),x0:(x0+xsz-1)] = val.astype('int')[:-1,:-1]
         #print imgdata[1203:1205,3858:3861], x0, y0
         nc.close()
@@ -93,35 +94,30 @@ def doit(gts):
     #for i in range(256):
     #    imgdata[i*10:i*10+10,0:100] = i
     # Create Image
+    #print imgdata[2453:2455,3727:3730]
     png = Image.fromarray( imgdata )
     png.putpalette( make_colorramp() )
     sfp, tmpname = tempfile.mkstemp()
     png.save('%s.png' % (tmpname,))
     # Now we need to generate the world file
-    o = open('%s.wld' % (tmpname,), 'w')
-    o.write("""   0.0100000000000%s
-   0.00000
-   0.00000
-  -0.010000000000000000
-%s
-  %s""" % (gts.strftime("%Y%m%d%H%M%S"), west, north))
-    o.close()
+    nmq.write_worldfile('%s.wld' % (tmpname,))
+    
     # Inject WLD file
     pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/hsr_%s.wld wld' %s.wld" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpname )
-    os.system(pqstr)
+    subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
     pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/hsr.png GIS/q2/hsr_%s.png png' %s.png" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpname )
-    os.system(pqstr)
+    subprocess.call(pqstr, shell=True)
     # Create 900913 image
-    cmd = "/mesonet/local/bin/gdalwarp -s_srs EPSG:4326 -t_srs EPSG:900913 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpname, tmpname)
-    os.system( cmd )
+    cmd = "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpname, tmpname)
+    subprocess.call( cmd , shell=True)
     # Insert into LDM
     pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/hsr.tif GIS/q2/hsr_%s.tif tif' %s.tif" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpname )
-    os.system(pqstr)
-    
+    subprocess.call(pqstr, shell=True)
+    #subprocess.call("gimp %s.png" % (tmpname,), shell=True)
     for suffix in ['tif',  'png', 'wld']:
         os.unlink('%s.%s' % (tmpname, suffix))
     os.close(sfp)
