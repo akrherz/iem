@@ -1,21 +1,26 @@
+"""
+ Dump!
+"""
 import constants
-from pyIEM import iemdb
 import network
 nt = network.Table("IACLIMATE")
-i = iemdb.iemdb()
-coop = i['coop']
+import iemdb
+import psycopg2.extras
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 for id in nt.sts.keys():
-  fn = "coop_data/%s.csv" % (nt.sts[id]['name'].replace(" ", "_"), )
-  out = open(fn, 'w')
-  out.write("station,station_name,lat,lon,day,high,low,precip,snow,\n")
-  sql = "SELECT * from %s WHERE station = '%s' ORDER by day ASC" % (
+    fn = "coop_data/%s.csv" % (nt.sts[id]['name'].replace(" ", "_"), )
+    out = open(fn, 'w')
+    out.write("station,station_name,lat,lon,day,high,low,precip,snow,\n")
+    sql = "SELECT * from %s WHERE station = '%s' ORDER by day ASC" % (
          constants.get_table(id), id)
 
-  rs = coop.query(sql).dictresult()
-  for i in range(len(rs)):
-    out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,\n" % (id.lower(), nt.sts[id]['name'], 
-       nt.sts[id]['lat'], nt.sts[id]['lon'],
-       rs[i]['day'], rs[i]['high'], rs[i]['low'], rs[i]['precip'], rs[i]['snow']) )
+    ccursor.execute( sql )
+    for row in ccursor:
+        out.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,\n" % (id.lower(), 
+                nt.sts[id]['name'], nt.sts[id]['lat'], nt.sts[id]['lon'],
+                row['day'], row['high'], row['low'], row['precip'], 
+                row['snow']) )
 
-  out.close()
+    out.close()

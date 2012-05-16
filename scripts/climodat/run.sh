@@ -1,16 +1,17 @@
 #!/bin/sh
 
-/mesonet/python/bin/python drive.py
-/mesonet/python/bin/python ksYearly.py 
-/mesonet/python/bin/python ksMonthly.py
-/mesonet/python/bin/python dump.py
+# Generate the reports
+python drive.py
+python ksYearly.py 
+python ksMonthly.py
+python dump.py
 
 mv reports/* /mesonet/share/climodat/reports/
 mv ks/* /mesonet/share/climodat/ks/
 mv coop_data/* /mesonet/share/pickup/coop_data/
 
-/mesonet/python/bin/python avg_temp.py `date +%Y`
-/mesonet/python/bin/python precip_days.py `date +%Y`
+python avg_temp.py `date +%Y`
+python precip_days.py `date +%Y`
 /mesonet/python/bin/python yearly_precip.py `date +%Y`
 
 cd /mesonet/share/pickup/coop_data/
