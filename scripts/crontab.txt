@@ -1,5 +1,6 @@
 # Only EDIT on SVN!
 #
+PATH=/home/ldm/bin:/usr/bin:/bin:/sbin:/usr/sbin:/home/mesonet/bin:/usr/local/bin
 PYTHONPATH=/mesonet/www/apps/iemwebsite/scripts/lib
 #
 * * * * * cd /mesonet/scripts/pyVBCam/scripts; /usr/bin/python acquireRT.py
