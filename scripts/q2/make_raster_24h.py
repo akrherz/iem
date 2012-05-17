@@ -2,40 +2,18 @@
  Generate a raster of 24hour precipitation totals from Q2
 
  run from RUN_10_AFTER.sh
-
- $Id: $:
 """
 
 import numpy
 import mx.DateTime
-try:
-    import netCDF3
-except:
-    import netCDF4 as netCDF3
+import netCDF4
 from PIL import Image
 import os
 import sys
 import tempfile
 import random
 import subprocess
-
-# NW Corner of tiles
-tiles = {
-         1: [-130., 55.],
-         2: [-110., 55.],
-         3: [-90., 55.],
-         4: [-80., 55.],
-         5: [-130., 40.],
-         6: [-110., 40.],
-         7: [-90., 40.],
-         8: [-80., 40.]
-         }
-
-def random_zeros():
-    """
-    Need some random zeros to make pqinsert happier
-    """
-    return "%s" % ("0" * random.randint(0, 10),)
+import nmq
 
 def make_colorramp():
     """
@@ -95,18 +73,19 @@ def doit(gts, hr):
     for tile in range(1,9):
         fp = make_fp(tile, gts)
         if not os.path.isfile(fp):
-            print "q2_raster_24h Missing Tile: %s Time: %s" % (tile, gts)
+            print "q2_raster_%sh Missing Tile: %s Time: %s" % (hr, tile, gts)
             continue
-        nc = netCDF3.Dataset( fp )
+        nc = netCDF4.Dataset( fp )
         # Our 24h rasters will support ~24 inch rainfalls
-        val = nc.variables["rad_hsr_%sh" % (hr,)][:] / 10.0 / 2.0 # convert to mm
+        hsr = nc.variables["rad_hsr_%sh" % (hr,)]
+        val = hsr[:] / hsr.Scale / 2.0 # convert to mm
         # Bump up by one, so that we can set missing to color index 0
         val += 1.0
         val = numpy.where(val < 1.0, 0., val)
 
         ysz, xsz = numpy.shape(val)
-        x0 = (tiles[tile][0] - west) * 100.0
-        y0 = (north - tiles[tile][1]) * 100.0
+        x0 = (nmq.TILES[tile][0] - west) * 100.0
+        y0 = (north - nmq.TILES[tile][1]) * 100.0
         #print tile, x0, xsz, y0, ysz, val[0,0]
         imgdata[y0:(y0+ysz-1),x0:(x0+xsz-1)] = val.astype('int')[:-1,:-1]
         nc.close()
@@ -119,15 +98,7 @@ def doit(gts, hr):
     png.putpalette( make_colorramp() )
     png.save('%s.png' % (tmpfn,))
     # Now we need to generate the world file
-    o = open('%s.wld' % (tmpfn,), 'w')
-    o.write("""   0.010%s
-   0.00%s
-   0.00%s
-  -0.010%s
-%s
-  %s""" % (random_zeros(), random_zeros(), random_zeros(), random_zeros(),
-           west, north))
-    o.close()
+    nmq.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
     pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/p%sh_%s.wld wld' %s.wld" % (
                     gts.strftime("%Y%m%d%H%M"),hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
