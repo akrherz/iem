@@ -2,35 +2,21 @@
  Generate a raster of data from raw Q2 netcdf files
  
  run from RUN_5MIN.sh
- 
- $Id: $:
+
 """
 
 import numpy
 import mx.DateTime
-try:
-    import netCDF3
-except:
-    import netCDF4 as netCDF3
+import netCDF4
 from PIL import Image
 import os
 import sys
 import tempfile
 import random
 import subprocess
+import nmq
 #import gdal
 
-# NW Corner of tiles
-tiles = {
-         1: [-130., 55.],
-         2: [-110., 55.],
-         3: [-90., 55.],
-         4: [-80., 55.],
-         5: [-130., 40.],
-         6: [-110., 40.],
-         7: [-90., 40.],
-         8: [-80., 40.]
-         }
 
 def make_colorramp():
     """
@@ -76,13 +62,7 @@ def make_fp(tile, gts):
         gts.strftime("%Y/%m/%d"), tile, 
         gts.strftime("%Y%m%d-%H%M") )
 
-def random_zeros():
-    """
-    Need some random zeros to make pqinsert happier
-    """
-    return "%s" % ("0" * random.randint(0, 10),)
-
-def doit(gts):
+def doit(gts, varname, prefix):
     """
     Actually generate a PNG file from the 8 NMQ tiles
     """
@@ -98,15 +78,16 @@ def doit(gts):
         if not os.path.isfile(fp):
             print "q2_raster Missing Tile: %s Time: %s" % (tile, gts)
             continue
-        nc = netCDF3.Dataset( fp )
-        val = nc.variables["rad_hsr_1h"][:] / 10.0 # convert to mm
+        nc = netCDF4.Dataset( fp )
+        hsr = nc.variables[varname]
+        val = hsr[:] / hsr.Scale # convert to mm
         # Bump up by one, so that we can set missing to color index 0
         val += 1.0
         val = numpy.where(val < 1.0, 0., val)
 
         ysz, xsz = numpy.shape(val)
-        x0 = (tiles[tile][0] - west) * 100.0
-        y0 = (north - tiles[tile][1]) * 100.0
+        x0 = (nmq.TILES[tile][0] - west) * 100.0
+        y0 = (north - nmq.TILES[tile][1]) * 100.0
         #print tile, x0, xsz, y0, ysz, val[0,0], numpy.max( val )
         imgdata[y0:(y0+ysz-1),x0:(x0+xsz-1)] = val.astype('int')[:-1,:-1]
         nc.close()
@@ -123,29 +104,24 @@ def doit(gts):
     #testd = test.ReadAsArray()
     #print testd[2632,3902], imgdata[2632,3902], numpy.max(testd), numpy.max(imgdata)
     # Now we need to generate the world file
-    o = open('%s.wld' % (tmpfn,), 'w')
-    o.write("""   0.010%s
-   0.00%s
-   0.00%s
-  -0.010%s
-%s
-  %s""" % (random_zeros(), random_zeros(), random_zeros(), random_zeros(), 
-           west, north))
-    o.close()
+    nmq.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/n1p_%s.wld wld' %s.wld" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpfn )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/%s_%s.wld wld' %s.wld" % (
+                    gts.strftime("%Y%m%d%H%M"), prefix, 
+                    gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/n1p.png GIS/q2/n1p_%s.png png' %s.png" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpfn )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/%s.png GIS/q2/%s_%s.png png' %s.png" % (
+                    gts.strftime("%Y%m%d%H%M"), prefix, prefix, 
+                    gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     # Create 900913 image
     cmd = "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff -tr 1000.0 1000.0 %s.png %s.tif" % (tmpfn, tmpfn)
     subprocess.call(cmd, shell=True)
     # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/n1p.tif GIS/q2/n1p_%s.tif tif' %s.tif" % (
-                    gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpfn )
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/%s.tif GIS/q2/%s_%s.tif tif' %s.tif" % (
+                    gts.strftime("%Y%m%d%H%M"), prefix, prefix, 
+                    gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     
     os.unlink('%s.tif' % (tmpfn,))
@@ -157,11 +133,14 @@ def doit(gts):
 if __name__ == "__main__":
     if len(sys.argv) == 6:
         doit(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
-                                   int(sys.argv[4]), int(sys.argv[5])))
+                                   int(sys.argv[4]), int(sys.argv[5])), 
+             "rad_hsr_1h", "n1p")
+        doit(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
+                                   int(sys.argv[4]), int(sys.argv[5])), 
+             "preciprate_hsr", "r5m")
     else:
         gts = mx.DateTime.gmtime() - mx.DateTime.RelativeDateTime(minutes=10)
         offset = gts.minute % 5
         gts -= mx.DateTime.RelativeDateTime(minutes=offset)
-        doit( gts )
-
-    
+        doit( gts, "rad_hsr_1h", "n1p")
+        doit( gts, "preciprate_hsr", "r5m")
