@@ -2,7 +2,10 @@
 cd dl
 python radar_composite.py 
 
-cd ../outgoing/snetnws
+cd ../outgoing
+python dump_precip.py
+
+cd snetnws
 python snet_fe.py &
 
 cd ../../GIS
