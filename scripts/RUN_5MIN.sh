@@ -25,7 +25,7 @@ python make_raster.py
 
 # Lets wait a bit now
 sleep 60
-/mesonet/python/bin/python hsr.py
+python hsr.py
 
 cd ../current
 /mesonet/python/bin/python q2_5min_rate.py
