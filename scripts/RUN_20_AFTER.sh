@@ -1,6 +1,6 @@
 
 cd isuag
-/mesonet/python/bin/python check4file.py
+python check4file.py
 
 sleep 60
 cd ../plots
