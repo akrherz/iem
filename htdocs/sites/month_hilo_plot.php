@@ -41,8 +41,9 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
     $highs[] = $row["max_tmpf"]; 
     if (intval($row["max_tmpf"]) > $maxVal) $maxVal = $row["max_tmpf"];
   }
-  if (intval($row["min_tmpf"]) > 90) {  $lows[] = Null; }
-  else { 
+  if (intval($row["min_tmpf"]) > 90 || intval($row["min_tmpf"]) == -9999) {  
+  	$lows[] = Null; 
+  } else { 
     $lows[] = $row["min_tmpf"]; 
     if (intval($row["min_tmpf"]) < $minVal) $minVal = $row["min_tmpf"];
   }
