@@ -8,8 +8,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" <?php if (isset($GOOGLEKEYS)){echo "xmlns:v=\"urn:schemas-microsoft-com:vml\"";} if (isset($HTMLEXTRA)){ echo $HTMLEXTRA; }?>>
 <head>
  <title><?php echo isset($TITLE) ? $TITLE: "Iowa Environmental Mesonet"; ?></title>
- <link rel="stylesheet" type="text/css" media="screen" href="<?php echo $rooturl; ?>/css/main.css?v=5" />
- <link rel="stylesheet" type="text/css" media="print" href="<?php echo $rooturl; ?>/css/print.css?v=4" />
+ <link rel="stylesheet" type="text/css" media="screen" href="/css/main.css?v=5" />
+ <link rel="stylesheet" type="text/css" media="print" href="/css/print.css?v=4" />
  <?php if (isset($REFRESH)){ echo $REFRESH; } ?>
  <?php if (isset($HEADEXTRA)){ echo $HEADEXTRA;} ?>
 <script type="text/javascript">
@@ -25,7 +25,7 @@ ga.setAttribute('async', 'true');
 document.documentElement.firstChild.appendChild(ga);
 })();
 </script>
-<script type="text/javascript" src="<?php echo $rooturl; ?>/js/p7exp.js"></script>
+<script type="text/javascript" src="/js/p7exp.js"></script>
 <!--[if lte IE 7]>
 <style>
 #menuwrapper, #p7menubar ul a {height: 1%;}
@@ -39,7 +39,7 @@ a:active {width: auto;}
 <div id="iem-header">
 <?php include("$rootpath/include/webring.html"); ?>
 <div id="iem_header_logo">
-<a href="<?php echo $rooturl; ?>/"><img src="<?php echo $rooturl; ?>/images/logo_small.gif" alt="IEM" /></a>
+<a href="<?php echo $rooturl; ?>/"><img src="/images/logo_small.gif" alt="IEM" /></a>
 </div>                                                                         
 <div id="iem-header-title">
 <h3>Iowa Environmental Mesonet</h3>
@@ -165,7 +165,7 @@ if (defined('IEM_APPID')){
 		and appid != $1) ORDER by name ASC");
 	$_rs = pg_execute($_mesosite, "_SELECTOR_", Array(IEM_APPID));
 	if (pg_numrows($_rs) > 0){
-		echo "<li><a class=\"trigger\" href=\"#\"><img src=\"". $rooturl ."/images/star.png\" border=\"0\" alt=\"Related\" height=\"15\" style=\"margin-top: -3px; margin-right: 3px;\">Related</a>";
+		echo "<li><a class=\"trigger\" href=\"#\"><img src=\"/images/star.png\" border=\"0\" alt=\"Related\" height=\"15\" style=\"margin-top: -3px; margin-right: 3px;\">Related</a>";
 		echo "<ul>\n";
 		for ($i=0;$_row=@pg_fetch_assoc($_rs,$i);$i++){
 			$url = $rooturl . $_row["url"];
