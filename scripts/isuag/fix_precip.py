@@ -72,7 +72,7 @@ def fix_hourly(ts):
         if estimate > 100:
             estimate = 0
             print "Missing Estimate", ts
-        if rs[i]['c900'] > 0 or estimate > 0:
+        if row['c900'] > 0 or estimate > 0:
             print "%s %s %-20.20s Ob: %5.2f F: %s E: %5.2f" % (
                   ts.strftime("%m%d/%H"), stid, sts[stid]['name'],
                   row['c900'], row['c900_f'], estimate)

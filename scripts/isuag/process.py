@@ -10,7 +10,7 @@ import traceback
 import network
 nt = network.Table("ISUAG")
 import pg
-mydb = pg.DB('isuag')
+mydb = pg.DB('isuag', 'iemdb')
 mydb.query("SET TIME ZONE 'CST6'")
 
 obs = {}
@@ -32,7 +32,7 @@ def initdb(fn):
 
     now = s 
     interval = mx.DateTime.RelativeDateTime(hours=+1)
-    while (now <= e):
+    while now <= e:
         for id in nt.sts.keys():
             obs[id][now] = {}
         now = now + interval
@@ -54,18 +54,18 @@ def process(fn, s, e):
                 dcols.append("c"+ string.strip(c) +"_f")
             continue
         tokens = re.split(",", line)
-        if (len(tokens) < 4):
+        if len(tokens) < 4:
             break
         ts = mx.DateTime.DateTime(int(tokens[2]), int(tokens[0]), int(tokens[1]))
         # If this row is an hourly ob
-        if (int(dc[0]) == 100):
+        if int(dc[0]) == 100:
             hr = int(tokens[3]) / 100
             if (hr == 24):
                 hr = 0
                 ts += mx.DateTime.RelativeDateTime(days=1)
             ts += mx.DateTime.RelativeDateTime(hour=hr)
       
-        if (ts < e):
+        if ts < e:
             for i in range(len(dcols)):
                 if not obs.has_key(stationID) or not obs[stationID].has_key(ts):
                     continue
