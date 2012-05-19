@@ -16,27 +16,27 @@ BASE_URL = "http://motherlode.ucar.edu/thredds/ncss/grid/fmrc/NCEP/"
 URLS = {
  'NAM' : "NAM/CONUS_12km/conduit/runs/NCEP-NAM-CONUS_12km-conduit_RUN_%Y-%m-%dT%H:00:00Z",
  'GFS' : "GFS/Global_0p5deg/runs/NCEP-GFS-Global_0p5deg_RUN_%Y-%m-%dT%H:00:00Z",
- 'RUC' : "RUC2/CONUS_13km/runs/NCEP-RUC2-CONUS_13km_RUN_%Y-%m-%dT%H:00:00Z",
+ 'RAP' : "RAP/CONUS_13km/runs/NCEP-RAP-CONUS_13km_RUN_%Y-%m-%dT%H:00:00Z",
 }
 VLOOKUP = {
  'sbcape': {'NAM': 'Convective_available_potential_energy_surface',
             'GFS': 'Convective_available_potential_energy_surface',
-            'RUC': 'Convective_available_potential_energy_surface'},
+            'RAP': 'Convective_available_potential_energy_surface'},
  'sbcin': {'NAM': 'Convective_inhibition_surface',
            'GFS': 'Convective_inhibition_surface',
-           'RUC': 'Convective_inhibition_surface'},
+           'RAP': 'Convective_inhibition_surface'},
  'pwater': {'NAM': 'Precipitable_water',
             'GFS': 'Precipitable_water',
-            'RUC': 'Precipitable_water'},
- 'precipcon': {'RUC': 'Convective_precipitation',
+            'RAP': 'Precipitable_water'},
+ 'precipcon': {'RAP': 'Convective_precipitation',
             'NAM': 'Convective_precipitation',
             'GFS': 'Convective_precipitation',
            },
- 'precipnon': {'RUC': 'Large_scale_precipitation_non-convective',
+ 'precipnon': {'RAP': 'Large_scale_precipitation_non-convective',
             'NAM': None,
             'GFS': None
            },
- 'precip': {'RUC': None,
+ 'precip': {'RAP': None,
             'NAM': 'Total_precipitation',
             'GFS': 'Total_precipitation',
            },
@@ -78,7 +78,7 @@ def run(model, station, lon, lat, ts):
         sbcin = clean( row[ VLOOKUP['sbcin'][model] ] )
         pwater = clean( row[ VLOOKUP['pwater'][model] ] )
         precipcon = clean( row[ VLOOKUP['precipcon'][model] ] )
-        if model == "RUC":
+        if model == "RAP":
             precip = float(row[ VLOOKUP['precipcon'][model] ]) + float(row[ VLOOKUP['precipnon'][model] ])
         else:
             precip = clean( row[ VLOOKUP['precip'][model] ] )
@@ -90,10 +90,10 @@ def run(model, station, lon, lat, ts):
         sql = """INSERT into model_gridpoint_%s(station, model, runtime, 
               ftime, sbcape, sbcin, pwater, precipcon, precip) 
               VALUES ('%s','%s', '%s+00',
-              '%s+00', %s, %s, %s, %s, %s)""" % ( ts.year, station, model,
+              '%s+00', %s, %s, %s, %s, %s )""" % ( ts.year, station, model,
               ts.strftime("%Y-%m-%d %H:%M"), fts.strftime("%Y-%m-%d %H:%M"),
               sbcape, sbcin, pwater, precipcon, precip)
-        mcursor.execute( sql )
+        mcursor.execute( sql.replace(' nan ', 'Null') )
         count += 1
     return count
 
@@ -113,7 +113,7 @@ if __name__ == '__main__':
                 print 'No data', "K"+id, ts, 'GFS'
     for id in table.sts.keys():
         ts = gts - mx.DateTime.RelativeDateTime(hours=2,minute=0,second=0)
-        run("RUC", "K"+id, table.sts[id]['lon'], table.sts[id]['lat'], ts)
+        run("RAP", "K"+id, table.sts[id]['lon'], table.sts[id]['lat'], ts)
     mcursor.close()
     MOS.commit()
     MOS.close()

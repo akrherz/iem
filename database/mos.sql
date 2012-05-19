@@ -1,3 +1,16 @@
+CREATE TABLE model_gridpoint (
+    station character varying(4),
+    model character varying(12),
+    runtime timestamp with time zone,
+    ftime timestamp with time zone,
+    sbcape real,
+    sbcin real,
+    pwater real,
+    precipcon real,
+    precip real
+);
+CREATE TABLE model_gridpoint_2012 () INHERITS (model_gridpoint);
+
 ---
 --- Not sure why, just something to hold a curiousity of large MOS differences
 ---
