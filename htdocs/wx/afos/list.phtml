@@ -1,4 +1,7 @@
 <?php
+/*
+ * Create lists of links to archived AFOS products based on what the user wants
+ */
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 48);
 include("$rootpath/include/wfoLocs.php");
@@ -20,12 +23,22 @@ $view = isset($_GET["view"])? $_GET["view"] : 'time';
 $year = isset($_GET["year"])? intval($_GET["year"]) : date("Y");
 $month = isset($_GET["month"])? intval($_GET["month"]) : date("m");
 $day = isset($_GET["day"])? intval($_GET["day"]) : date("d");
+$year2 = isset($_GET["year2"])? intval($_GET["year2"]) : date("Y");
+$month2 = isset($_GET["month2"])? intval($_GET["month2"]) : date("m");
+$day2 = isset($_GET["day2"])? intval($_GET["day2"]) : date("d");
 $ts = mktime(0,0,0, $month, $day, $year);
+$ts2 = $ts + 86400;
 
 $table = sprintf("products_%s_0106", $year);
 if ($month > 6){
   $table = sprintf("products_%s_0712", $year);
 }
+
+if (isset($_REQUEST['drange'])){
+	$ts2 = mktime(0,0,0, $month2, $day2, $year2);
+	$table = "products";
+}
+
 
 pg_query($afos, "SET TIME ZONE 'GMT'");
 $rs = pg_prepare($afos, "_SELECT", "SELECT pil, entered from $table
@@ -35,16 +48,21 @@ $rs = pg_prepare($afos, "_SELECT", "SELECT pil, entered from $table
 <p>This application prints out a listing of IEM archived text products
 by issuing NWS Issuing Center and by date.  After about
 seven days, the IEM purges a lot of the frequently issued products like
-SHEF and METAR data. This archive exists back to 1 January 2009.</p>
+SHEF and METAR data. This archive exists back to 1 January 2009. Please be
+patient with this page if you select a range of dates to search for products.</p>
 
 <form name="selector" method="GET">
 <table>
 <thead>
 <tr><th>Select Issuing Center:</th>
-    <th colspan="3">Select UTC Date:</th>
+    <th colspan="3">Start UTC Date:</th>
+    <th colspan="3">End UTC Date:<br />
+    <input type="checkbox" name="drange" value="yes" 
+    <?php if (isset($_REQUEST["drange"])){ echo "checked='checked'"; }?>
+    />Search over date range</th>
     <th>View Option</th>
     <th></th></tr>
-</head>
+</thead>
 
 <tbody>
 <tr>
@@ -53,9 +71,13 @@ SHEF and METAR data. This archive exists back to 1 January 2009.</p>
  <td><?php echo yearSelect(2009, $year); ?></td>
  <td><?php echo monthSelect($month); ?></td>
  <td><?php echo daySelect($day); ?></td>
+ <td><?php echo yearSelect2(2009, $year2, "year2"); ?></td>
+ <td><?php echo monthSelect($month2, "month2"); ?></td>
+ <td><?php echo daySelect2($day2, "day2"); ?></td>
  <td><select name="view">
   <option value="time" <?php if ($view == "time"){ echo "SELECTED";} ?>>Chronologically</option>
   <option value="grid" <?php if ($view == "grid"){ echo "SELECTED";} ?>>PIL Grid</option>
+  <option value="prod" <?php if ($view == "prod"){ echo "SELECTED";} ?>>Product List</option>
     </select>
  </td>
  <td><input type="submit" value="Giveme Giveme!"></td>
@@ -64,8 +86,24 @@ SHEF and METAR data. This archive exists back to 1 January 2009.</p>
 <?php
 
 $rs = pg_execute($afos, "_SELECT", Array($dbsource, date("Y-m-d H:i", $ts)."+00",
-      date("Y-m-d H:i", $ts+86400)."+00"));
-if ($view == "grid"){
+      date("Y-m-d H:i", $ts2)."+00"));
+if ($view == "prod"){
+  $prods = Array();
+  for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+    $ts = strtotime($row["entered"]);
+    $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
+    @$prods[$row["pil"]] .= sprintf("<tr><td><a href=\"%s\">%s</a></td>
+    	<td>%s</td><td>%s</td></tr>", 
+       $url, $row["pil"], gmdate("Y-m-d", $ts), gmdate("H:i", $ts));
+  }
+  $keys = array_keys($prods);
+  asort($keys);
+  echo "<table><tr><th>Product Link</th><th>Date</th><th>UTC Time</th></tr>";
+  while(list($i,$k) = each($keys)){
+    echo sprintf("%s", $prods[$k]);
+  }
+  echo "</table>";
+} else if ($view == "grid"){
   $columns = Array();
   for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
     $ts = strtotime($row["entered"]);
