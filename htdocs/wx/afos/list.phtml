@@ -28,15 +28,16 @@ $month2 = isset($_GET["month2"])? intval($_GET["month2"]) : date("m");
 $day2 = isset($_GET["day2"])? intval($_GET["day2"]) : date("d");
 $ts = mktime(0,0,0, $month, $day, $year);
 $ts2 = $ts + 86400;
-
+$d2display = "none";
 $table = sprintf("products_%s_0106", $year);
 if ($month > 6){
   $table = sprintf("products_%s_0712", $year);
 }
 
 if (isset($_REQUEST['drange'])){
-	$ts2 = mktime(0,0,0, $month2, $day2, $year2);
+	$ts2 = mktime(0,0,0, $month2, $day2, $year2) + 86400;
 	$table = "products";
+	$d2display = "block";
 }
 
 
@@ -49,15 +50,25 @@ $rs = pg_prepare($afos, "_SELECT", "SELECT pil, entered from $table
 by issuing NWS Issuing Center and by date.  After about
 seven days, the IEM purges a lot of the frequently issued products like
 SHEF and METAR data. This archive exists back to 1 January 2009. Please be
-patient with this page if you select a range of dates to search for products.</p>
-
+patient with this page if you select a range of dates.</p>
+<script type="text/javascript">
+function showHide(v){
+	var d2 = document.getElementById("d2");
+	if (document.getElementById("drange").checked){
+		d2.style.display = "block";
+	} else{
+		d2.style.display = "none";
+	}
+}
+</script>
 <form name="selector" method="GET">
 <table>
 <thead>
 <tr><th>Select Issuing Center:</th>
-    <th colspan="3">Start UTC Date:</th>
-    <th colspan="3">End UTC Date:<br />
-    <input type="checkbox" name="drange" value="yes" 
+    <th>Start UTC Date:</th>
+    <th>End UTC Date:<br />
+    <input id="drange" type="checkbox" name="drange" value="yes" 
+    onClick="showHide(this.value)"
     <?php if (isset($_REQUEST["drange"])){ echo "checked='checked'"; }?>
     />Search over date range</th>
     <th>View Option</th>
@@ -68,12 +79,14 @@ patient with this page if you select a range of dates to search for products.</p
 <tr>
  <td><?php echo networkSelect(Array("WFO","RFC","NWS","NCEP"), 
  		$source, Array(), "source"); ?></td>
- <td><?php echo yearSelect(2009, $year); ?></td>
- <td><?php echo monthSelect($month); ?></td>
- <td><?php echo daySelect($day); ?></td>
- <td><?php echo yearSelect2(2009, $year2, "year2"); ?></td>
- <td><?php echo monthSelect($month2, "month2"); ?></td>
- <td><?php echo daySelect2($day2, "day2"); ?></td>
+ <td><?php echo yearSelect(2009, $year); ?>
+ <?php echo monthSelect($month); ?>
+ <?php echo daySelect($day); ?></td>
+ 
+ <td><div id="d2" style="display: <?php echo $d2display; ?>;"><?php echo yearSelect2(2009, $year2, "year2"); ?>
+ <?php echo monthSelect($month2, "month2"); ?>
+ <?php echo daySelect2($day2, "day2"); ?></div></td>
+ 
  <td><select name="view">
   <option value="time" <?php if ($view == "time"){ echo "SELECTED";} ?>>Chronologically</option>
   <option value="grid" <?php if ($view == "grid"){ echo "SELECTED";} ?>>PIL Grid</option>
