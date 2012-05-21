@@ -1,9 +1,9 @@
 """
 Extract station data from file and update any new stations we find, please
-$Id: $:
+
 """
 
-import netCDF3
+import netCDF4
 import mx.DateTime
 import iemdb
 import os
@@ -21,7 +21,7 @@ for i in range(0,9):
 if fp is None:
   sys.exit()
 
-nc = netCDF3.Dataset(fp)
+nc = netCDF4.Dataset(fp)
 
 
 stations   = nc.variables["stationId"]
