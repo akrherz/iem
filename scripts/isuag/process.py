@@ -133,12 +133,12 @@ def printReport(ts):
     ids.sort()
     for stid in ids:
         ob = obs[stid][now]
-        try:
-            output.write(fmt % (nt.sts[stid]['name'], ob['c11_f'], ob['c12_f'],
-                           ob['c20_f'], ob['c30_f'], ob['c40_f'], ob['c80_f'], 
-                           ob['c90_f'], ob['c70_f'], ob['c90'].strip() ) )
-        except:
-            continue
+        output.write(fmt % (nt.sts[stid]['name'], ob,get('c11_f', 'NA'), 
+                ob.get('c12_f', 'NA'), ob.get('c20_f', 'NA'), 
+                ob.get('c30_f', 'NA'), ob.get('c40_f', 'NA'), 
+                ob.get('c80_f', 'NA'), ob.get('c90_f', 'NA'), 
+                ob.get('c70_f', 'NA'), ob.get('c90', 'NA').strip() ) )
+
 
     output.write("""
 
