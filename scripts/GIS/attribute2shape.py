@@ -185,6 +185,8 @@ Contact Info:
 
 """
 z.writestr("current_nexattr.txt", information)
+zinfo = z.getinfo('current_nexattr.txt')
+zinfo.external_attr = 0664 << 16
 z.close()
 
 cmd = "/home/ldm/bin/pqinsert -p \"zip c %s gis/shape/4326/us/current_nexattr.zip bogus zip\" current_nexattr.zip" % (now.strftime("%Y%m%d%H%M"),)
