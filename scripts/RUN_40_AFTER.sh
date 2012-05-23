@@ -1,6 +1,6 @@
 
 cd dl
-/mesonet/python/bin/python ncep_stage4.py
+python ncep_stage4.py
 
 cd ../sbw
 /mesonet/python/bin/python polygonMosaic.py S

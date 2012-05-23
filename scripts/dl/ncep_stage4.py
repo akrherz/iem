@@ -1,9 +1,11 @@
-# Script to download the NCEP stage4 data and then inject into LDM for
-# sweet archival action
-
-import mx.DateTime, urllib2, gzip, os, zlib, base64
-import StringIO
-
+"""
+ Script to download the NCEP stage4 data and then inject into LDM for
+ sweet archival action
+"""
+import mx.DateTime
+import urllib2
+import os
+import subprocess
 
 def download(now, offset ):
     """
@@ -19,11 +21,11 @@ def download(now, offset ):
         hours.append( 24 )
     for hr in hours:
         url = "%s.%02ih.Z" % ( ts.strftime("ftp://ftpprd.ncep.noaa.gov/pub/data/nccf/com/hourly/prod/nam_pcpn_anal.%Y%m%d/ST4.%Y%m%d%H"), hr)
-        #try:
-        data = urllib2.urlopen( url ).read()
-        #except:
-        #    print "Download FAIL %s" % (url,)
-        #    continue
+        try:
+            data = urllib2.urlopen( url ).read()
+        except IOError:
+            print "Download NCEP stage IV failure HR: %s TIME: %s" % (hr, ts)
+            continue
         # Same temp file
         o = open("tmp.grib.Z", 'wb')
         o.write( data )
@@ -31,7 +33,7 @@ def download(now, offset ):
         os.system("gunzip -f tmp.grib.Z")
         # Inject into LDM
         cmd = "/home/ldm/bin/pqinsert -p 'data a %s blah stage4/ST4.%s.%02ih.grib grib' tmp.grib" % (ts.strftime("%Y%m%d%H%M"), ts.strftime("%Y%m%d%H"), hr)
-        os.system( cmd )
+        subprocess.call( cmd, shell=True )
         os.remove('tmp.grib')
 
 if __name__ == "__main__":
