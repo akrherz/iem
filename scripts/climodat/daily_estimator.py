@@ -92,6 +92,8 @@ def estimate_precip( ts ):
     ts1 = ts + mx.DateTime.RelativeDateTime(days=1,hour=6)
     offset1 = int(( ts1 - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours) - 1
     data = numpy.sum( precip[offset0:offset1], 0 )
+    # Gross QC check
+    data = numpy.where( data > 1000.0, 0, data)
     for id in nt.sts.keys():
         j = nt.sts[id]['gridj']
         i = nt.sts[id]['gridi']
