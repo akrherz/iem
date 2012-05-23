@@ -1,13 +1,19 @@
-# Something to dump current warnings to a shapefile
-# 28 Aug 2004 port to iem40
-
-import shapelib, dbflib, mx.DateTime, zipfile, os, sys, shutil
-from pyIEM import wellknowntext, iemdb
-i = iemdb.iemdb()
-mydb = i["postgis"]
-if (mydb == None): 
-	sys.exit(0)
-mydb.query("SET TIME ZONE 'GMT'")
+"""
+ Write current storm attributes to a shapefile...
+"""
+import shapelib
+import dbflib
+import mx.DateTime
+import zipfile
+import os
+import sys
+import shutil
+import wellknowntext
+import iemdb
+import subprocess
+import psycopg2.extras
+POSTGIS = iemdb.connect('postgis', bypass=True)
+pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 """
  nexrad         | character(3)             |
@@ -57,41 +63,41 @@ dbf.add_field("SKNT", dbflib.FTDouble, 3, 0)
 dbf.add_field("LAT", dbflib.FTDouble, 10, 4)
 dbf.add_field("LON", dbflib.FTDouble, 10, 4)
 
-sql = "DELETE from nexrad_attributes WHERE valid < '%s'" % \
-	(eTS.strftime("%Y-%m-%d %H:%M"), )
-mydb.query(sql)
-sql = "SELECT *, astext(geom) as tgeom, x(geom) as lon, \
-       y(geom) as lat from nexrad_attributes "
-rs = mydb.query(sql).dictresult()
+sql = """DELETE from nexrad_attributes WHERE valid < '%s+00'""" % (
+							eTS.strftime("%Y-%m-%d %H:%M"), )
+pcursor.execute( sql )
+sql = """SELECT *, valid at time zone 'UTC' as utcvalid, 
+	astext(geom) as tgeom, x(geom) as lon, 
+       y(geom) as lat from nexrad_attributes """
+pcursor.execute( sql )
 
 cnt = 0
-for i in range(len(rs)):
+for row in pcursor:
     #print rs[i]
-    s = rs[i]["tgeom"]
-    if (s == None or s == ""):
+    s = row["tgeom"]
+    if s == None or s == "":
         continue
     f = wellknowntext.convert_well_known_text(s)
 
     d = {}
-    valid = mx.DateTime.strptime(rs[i]["valid"][:16], "%Y-%m-%d %H:%M")
-    d["VALID"] = valid.strftime("%Y%m%d%H%M")
-    d["NEXRAD"] = rs[i]['nexrad']
-    d["STORM_ID"] = rs[i]['storm_id']
-    d["AZIMUTH"] = float(rs[i]['azimuth'])
-    d["RANGE"] = float(rs[i]['range'])
-    d["TVS"] = rs[i]['tvs']
-    d["MESO"] = rs[i]['meso']
-    d["POSH"] = float(rs[i]['posh'])
-    d["POH"] = float(rs[i]['poh'])
-    d["MAX_SIZE"] = float(rs[i]['max_size'])
-    d["VIL"] = float(rs[i]['vil'])
-    d["MAX_DBZ"] = float(rs[i]['max_dbz'])
-    d["MAX_DBZ_H"] = float(rs[i]['max_dbz_height'])
-    d["TOP"] = float(rs[i]['top'])
-    d["DRCT"] = float(rs[i]['drct'])
-    d["SKNT"] = float(rs[i]['sknt'])
-    d["LAT"] = float(rs[i]['lat'])
-    d["LON"] = float(rs[i]['lon'])
+    d["VALID"] = row['utcvalid'].strftime("%Y%m%d%H%M")
+    d["NEXRAD"] = row['nexrad']
+    d["STORM_ID"] = row['storm_id']
+    d["AZIMUTH"] = float(row['azimuth'])
+    d["RANGE"] = float(row['range'])
+    d["TVS"] = row['tvs']
+    d["MESO"] = row['meso']
+    d["POSH"] = float(row['posh'])
+    d["POH"] = float(row['poh'])
+    d["MAX_SIZE"] = float(row['max_size'])
+    d["VIL"] = float(row['vil'])
+    d["MAX_DBZ"] = float(row['max_dbz'])
+    d["MAX_DBZ_H"] = float(row['max_dbz_height'])
+    d["TOP"] = float(row['top'])
+    d["DRCT"] = float(row['drct'])
+    d["SKNT"] = float(row['sknt'])
+    d["LAT"] = float(row['lat'])
+    d["LON"] = float(row['lon'])
     #print d
     obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[f,]] )
     shp.write_object(-1, obj)
@@ -182,7 +188,7 @@ z.writestr("current_nexattr.txt", information)
 z.close()
 
 cmd = "/home/ldm/bin/pqinsert -p \"zip c %s gis/shape/4326/us/current_nexattr.zip bogus zip\" current_nexattr.zip" % (now.strftime("%Y%m%d%H%M"),)
-os.system(cmd)
+subprocess.call(cmd, shell=True)
 
-
-sys.exit(0)
+for suffix in ['zip', 'shp', 'dbf', 'shx', 'prj']:
+	os.unlink('current_nexattr.%s' % (suffix,))
