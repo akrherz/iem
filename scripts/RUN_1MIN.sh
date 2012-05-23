@@ -5,7 +5,7 @@ cd sbw
 python raccoon_sbw_to_ppt.py &
 
 cd ../GIS
-/mesonet/python/bin/python attribute2shape.py
+python attribute2shape.py
 /mesonet/python/bin/python wwShapefile.py &
 
 cd ../ingestors
