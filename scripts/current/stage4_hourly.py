@@ -1,33 +1,33 @@
-# Plot one hour stage4 data, please
-
+"""
+ Plot one hour stage4 data, please
+"""
 import sys, os, random
-sys.path.append("../lib/")
 import iemplot, network
 
 import mx.DateTime
 import Nio
 
 def doit(ts):
-  """
-  Generate hourly plot of stage4 data
-  """
-  gmtnow = mx.DateTime.gmt()
-  routes = "a"
-  if (gmtnow - ts).hours < 2:
-    routes = "ac"
+    """
+    Generate hourly plot of stage4 data
+    """
+    gmtnow = mx.DateTime.gmt()
+    routes = "a"
+    if (gmtnow - ts).hours < 2:
+        routes = "ac"
 
-  fp = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib" % (
-      ts.strftime("%Y/%m/%d"), ts.strftime("%Y%m%d%H") )
-  if not os.path.isfile(fp):
-    print 'Missing stage4 %s' % (fp,)
-    return
+    fp = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib" % (
+                        ts.strftime("%Y/%m/%d"), ts.strftime("%Y%m%d%H") )
+    if not os.path.isfile(fp):
+        print 'Missing stage4 %s' % (fp,)
+        return
 
-  grib = Nio.open_file(fp)
-  lats = grib.variables["g5_lat_0"][:]
-  lons = grib.variables["g5_lon_1"][:]
-  vals = grib.variables["A_PCP_GDS5_SFC_acc1h"][:] / 25.4
+    grib = Nio.open_file(fp)
+    lats = grib.variables["g5_lat_0"][:]
+    lons = grib.variables["g5_lon_1"][:]
+    vals = grib.variables["A_PCP_GDS5_SFC_acc1h"][:] / 25.4
 
-  cfg = {
+    cfg = {
      'wkColorMap': 'BlAqGrYeOrRe',
      'nglSpreadColorStart': -1,
      'nglSpreadColorEnd'  : 2,
@@ -35,15 +35,15 @@ def doit(ts):
      'lbTitleString'      : "[inch]",
      '_valid'    : 'Hour Ending %s' % (ts.localtime().strftime("%d %B %Y %I %p %Z"),),
      '_title'    : "StageIV 1 Hour Precipitation [inch]",
-  }
+     }
 
-  tmpfp = iemplot.simple_grid_fill(lons, lats, vals, cfg)
-  pqstr = "plot %s %s00 iowa_stage4_1h.png iowa_stage4_1h_%s.png png" % (
-    routes, ts.strftime("%Y%m%d%H"), ts.strftime("%H"))
-  iemplot.postprocess(tmpfp, pqstr)
+    tmpfp = iemplot.simple_grid_fill(lons, lats, vals, cfg)
+    pqstr = "plot %s %s00 iowa_stage4_1h.png iowa_stage4_1h_%s.png png" % (
+                            routes, ts.strftime("%Y%m%d%H"), ts.strftime("%H"))
+    iemplot.postprocess(tmpfp, pqstr)
 
-  # Plot Midwest
-  cfg = {
+    # Plot Midwest
+    cfg = {
      'wkColorMap': 'BlAqGrYeOrRe',
      'nglSpreadColorStart': -1,
      'nglSpreadColorEnd'  : 2,
@@ -52,12 +52,12 @@ def doit(ts):
      'lbTitleString'      : "[inch]",
      '_valid'    : 'Hour Ending %s' % (ts.localtime().strftime("%d %B %Y %I %p %Z"),),
      '_title'    : "StageIV 1 Hour Precipitation [inch]",
-  }
+     }
 
-  tmpfp = iemplot.simple_grid_fill(lons, lats, vals, cfg)
-  pqstr = "plot %s %s00 midwest_stage4_1h.png midwest_stage4_1h_%s.png png" % (
+    tmpfp = iemplot.simple_grid_fill(lons, lats, vals, cfg)
+    pqstr = "plot %s %s00 midwest_stage4_1h.png midwest_stage4_1h_%s.png png" % (
       routes, ts.strftime("%Y%m%d%H"),ts.strftime("%H") )
-  iemplot.postprocess(tmpfp, pqstr)
+    iemplot.postprocess(tmpfp, pqstr)
 
 
 if len(sys.argv) == 5:

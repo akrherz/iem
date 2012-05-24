@@ -8,12 +8,12 @@ python polygonMosaic.py T
 python polygonMosaic.py W
 
 cd ../iemre
-/mesonet/python/bin/python stage4_hourlyre.py
-/mesonet/python/bin/python stage4_hourlyre.py `date -u --date '3 hours ago' +'%Y %m %d %H'`
-/mesonet/python/bin/python stage4_hourlyre.py `date -u --date '1 day ago' +'%Y %m %d %H'`
+python stage4_hourlyre.py
+python stage4_hourlyre.py `date -u --date '3 hours ago' +'%Y %m %d %H'`
+python stage4_hourlyre.py `date -u --date '1 day ago' +'%Y %m %d %H'`
 
 cd ../current
-/mesonet/python/bin/python stage4_hourly.py
+python stage4_hourly.py
 /mesonet/python/bin/python stage4_today_total.py
 
 cd ../qc
