@@ -3,13 +3,13 @@
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connect = iemdb("access");
-
+$year = date("Y");
 /* Now we fetch warning and perhaps polygon */
-$query2 = "SELECT *, askml(c.geom) as kml
-           from current c, summary s
-           WHERE c.network = s.network and c.station = s.station and 
+$query2 = "SELECT *, askml(t.geom) as kml, t.name as sname
+           from current c, summary_${year} s, stations t
+           WHERE c.iemid = s.iemid and c.iemid = t.iemid and 
            s.day = 'TODAY' and 
-           c.network = 'KCCI' and valid > (now() - '30 minutes'::interval)";
+           t.network = 'KCCI' and valid > (now() - '30 minutes'::interval)";
 
 $result = pg_exec($connect, $query2);
 
