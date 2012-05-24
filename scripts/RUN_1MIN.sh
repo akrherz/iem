@@ -20,7 +20,7 @@ cd ../outgoing
 cd ../ingestors/sn
 /mesonet/python/bin/python parser.py >& /dev/null &
 
-cd ../awos
-/mesonet/python/bin/python dl_parse_iwapi.py
+#cd ../awos
+#/mesonet/python/bin/python dl_parse_iwapi.py
 
 
