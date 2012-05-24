@@ -18,7 +18,7 @@ def dosite(id):
     """
     req = urllib2.Request("http://my.iwapi.com:8080/WXWeb/METAR?icao=%s" % (id,))
     try:
-        data = urllib2.urlopen(req).read()
+        data = urllib2.urlopen(req, timeout=15).read()
     except:
         if mx.DateTime.now().minute == 0:
             print 'IWAPI AWOS Download Fail for:', id
