@@ -133,7 +133,7 @@ def printReport(ts):
     ids.sort()
     for stid in ids:
         ob = obs[stid][now]
-        output.write(fmt % (nt.sts[stid]['name'], ob,get('c11_f', 'NA'), 
+        output.write(fmt % (nt.sts[stid]['name'], ob.get('c11_f', 'NA'), 
                 ob.get('c12_f', 'NA'), ob.get('c20_f', 'NA'), 
                 ob.get('c30_f', 'NA'), ob.get('c40_f', 'NA'), 
                 ob.get('c80_f', 'NA'), ob.get('c90_f', 'NA'), 
