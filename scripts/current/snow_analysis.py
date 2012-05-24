@@ -1,6 +1,6 @@
 """
 IEM Snowfall Analysis Engine
-$Id$:
+
 """
 import iemre
 import iemplot
