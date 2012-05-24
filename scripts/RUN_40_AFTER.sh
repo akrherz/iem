@@ -3,11 +3,9 @@ cd dl
 python ncep_stage4.py
 
 cd ../sbw
-/mesonet/python/bin/python polygonMosaic.py S
-sleep 4
-/mesonet/python/bin/python polygonMosaic.py T
-sleep 4
-/mesonet/python/bin/python polygonMosaic.py W
+python polygonMosaic.py S
+python polygonMosaic.py T
+python polygonMosaic.py W
 
 cd ../iemre
 /mesonet/python/bin/python stage4_hourlyre.py
