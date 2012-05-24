@@ -98,7 +98,16 @@ CREATE table r_monthly(
   gdd40 smallint,
   gdd48 smallint,
   gdd50 smallint,
-  gdd52 smallint
+  gdd52 smallint,
+  avg_high smallint,
+  avg_low smallint,
+  rain real,
+  hdd real,
+  cdd real,
+  rain_days smallint,
+  snow_days smallint,
+  hdd60 real,
+  cdd60 real
 );
 grant select on r_rmonthly to nobody;
 create unique index r_monthly_idx
