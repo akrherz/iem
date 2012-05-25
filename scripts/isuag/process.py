@@ -137,7 +137,7 @@ def printReport(ts):
                 ob.get('c12_f', 'NA'), ob.get('c20_f', 'NA'), 
                 ob.get('c30_f', 'NA'), ob.get('c40_f', 'NA'), 
                 ob.get('c80_f', 'NA'), ob.get('c90_f', 'NA'), 
-                ob.get('c70_f', 'NA'), ob.get('c90', 'NA').strip() ) )
+                ob.get('c70_f', 'NA'), ob.get('c90', 'NA') ) )
 
 
     output.write("""
