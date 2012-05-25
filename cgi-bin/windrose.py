@@ -36,6 +36,11 @@ if "hour1" in form and "hourlimit" in form:
 else:
     hours = numpy.arange(0,24)
 
+if "units" in form and form["units"].value in ['mph', 'kts', 'mps', 'kph']:
+    units = form["units"].value
+else:
+    units = "mph"
+
 if "month1" in form and "monthlimit" in form:
     months = numpy.array( (int(form["month1"].value),) )
 else:
@@ -49,4 +54,4 @@ if form["network"].value in ('IA_RWIS'):
 
 import iemplot
 iemplot.windrose(form["station"].value, database=database,sts=sts, ets=ets, 
-                 months=months, hours=hours)
+                 months=months, hours=hours, units=units)

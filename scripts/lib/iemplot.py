@@ -1,4 +1,6 @@
-# Generate PyNGL resources necessary for a 'standardized' IEM plot, maybe!
+"""
+ Generate PyNGL resources necessary for a 'standardized' IEM plot, maybe!
+"""
 
 import Ngl
 import numpy
@@ -803,10 +805,25 @@ def postprocess(tmpfp, pqstr, rotate="", thumb=False,
 
 def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     hours=numpy.arange(0,24), sts=datetime.datetime(1900,1,1),
-    ets=datetime.datetime(2050,1,1)):
+    ets=datetime.datetime(2050,1,1), units="mph"):
     """
     Create a standard windrose plot that we can all happily use
     """
+    windunits = {
+        'mph': {'label': 'miles per hour', 'dbmul': 1.15,
+                'bins':(0,2,5,7,10,15,20),
+                'binlbl':('2-5','5-7','7-10','10-15','15-20','20+')},
+        'kts': {'label': 'knots', 'dbmul': 1.0,
+                'bins':(0,2,5,7,10,15,20),
+                'binlbl':('2-5','5-7','7-10','10-15','15-20','20+')},
+        'mps': {'label': 'meters per second', 'dbmul': 0.5144,
+                'bins':(0,2,4,6,8,10,12),
+                'binlbl':('2-4','4-6','6-8','8-10','10-12','12+')},    
+        'kph': {'label': 'kilometers per hour', 'dbmul': 1.609,
+                'bins':(0,4,10,14,20,30,40),
+                'binlbl':('4-10','10-14','14-20','20-30','30-40','40+')},              
+    }
+    
     # Query metadata
     db = iemdb.connect('mesosite', bypass=True)
     mcursor = db.cursor()
@@ -851,7 +868,7 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
             sped[i] =  0 
             drct[i] = 0 
         else:
-            sped[i] =  row[0] * 1.15  # mph 
+            sped[i] =  row[0] * windunits[units]['dbmul'] 
             drct[i] =  row[1] 
         i += 1
 
@@ -873,15 +890,15 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     rect = [0.1, 0.1, 0.8, 0.8]
     ax = WindroseAxes(fig, rect, axisbg='w')
     fig.add_axes(ax)
-    ax.bar(drct, sped, normed=True, bins=(0,2,5,7,10,15,20), opening=0.8, 
+    ax.bar(drct, sped, normed=True, bins=windunits[units]['bins'], opening=0.8, 
            edgecolor='white')
     handles = []
     for p in ax.patches_list:
         color = p.get_facecolor()
         handles.append( Rectangle((0, 0), 0.1, 0.3,
                     facecolor=color, edgecolor='black'))
-    l = fig.legend( handles, ('2-5','5-7','7-10','10-15','15-20','20+') , loc=3,
-     ncol=6, title='Wind Speed [mph]', mode=None, columnspacing=0.9, 
+    l = fig.legend( handles, windunits[units]['binlbl'] , loc=3,
+     ncol=6, title='Wind Speed [%s]' % (units,), mode=None, columnspacing=0.9, 
      handletextpad=0.45)
     plt.setp(l.get_texts(), fontsize=10)
     # Now we put some fancy debugging info on the plot
@@ -897,12 +914,12 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     label = """[%s] %s  
 Windrose Plot [%s]
 Period of Record: %s - %s
-Obs Count: %s Calm: %.1f%% Avg Speed: %.1f mph""" % (station, sname, 
+Obs Count: %s Calm: %.1f%% Avg Speed: %.1f %s""" % (station, sname, 
                                                              tlimit,
         minvalid.strftime("%d %b %Y"), maxvalid.strftime("%d %b %Y"), 
         numpy.shape(sped)[0], 
         numpy.sum( numpy.where(sped < 2., 1., 0.)) / numpy.shape(sped)[0] * 100.,
-        numpy.average(sped))
+        numpy.average(sped), units)
     plt.gcf().text(0.17,0.89, label)
     plt.gcf().text(0.01,0.1, "Generated: %s" % (mx.DateTime.now().strftime("%d %b %Y"),),
                    verticalalignment="bottom")
