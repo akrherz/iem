@@ -6,7 +6,7 @@ import netCDF4
 import mx.DateTime
 import iemdb
 import os
-MESOSITE = iemdb.connect('mesosite')
+MESOSITE = iemdb.connect('mesosite', bypass=True)
 mcursor = MESOSITE.cursor()
 
 fp = None
@@ -38,11 +38,11 @@ MY_PROVIDERS = ["MNDOT", "KSDOT", "WIDOT", "INDOT", "NDDOT",
 
 
 for recnum in range(len(providers)):
-    thisProvider = providers[recnum].tostring().strip()
+    thisProvider = providers[recnum].tostring().replace('\x00','')
     if not thisProvider in MY_PROVIDERS:
         continue
-    stid = stations[recnum].tostring().strip()
-    name = names[recnum].tostring().strip().replace("'", "")
+    stid = stations[recnum].tostring().replace('\x00','')
+    name = names[recnum].tostring().replace("'", "").replace('\x00','')
     network = '%s_RWIS' % (thisProvider[:2],)
     mcursor.execute("""SELECT * from stations where id = %s and network = %s""",
                     (stid, network))
@@ -50,10 +50,10 @@ for recnum in range(len(providers)):
         continue
     print 'Adding network: %s station: %s' % (network, stid)
     sql = """INSERT into stations(id, network, synop, country, plot_name,
-   name, state, elevation, online, geom) VALUES ('%s', '%s', 9999, 'US',
-   '%s', '%s', '%s', %s, 't', 'SRID=4326;POINT(%s %s)')""" % (stid,
-   network, name, name, network[:2], elevations[recnum][0], longitudes[recnum][0],
-   latitudes[recnum][0])
+    name, state, elevation, online, geom) VALUES ('%s', '%s', 9999, 'US',
+    '%s', '%s', '%s', %s, 't', 'SRID=4326;POINT(%s %s)')""" % (stid,
+    network, name, name, network[:2], elevations[recnum], longitudes[recnum],
+    latitudes[recnum])
     mcursor.execute(sql)
 nc.close()
 mcursor.close()
