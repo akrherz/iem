@@ -811,16 +811,16 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     """
     windunits = {
         'mph': {'label': 'miles per hour', 'dbmul': 1.15,
-                'bins':(0,2,5,7,10,15,20),
+                'bins':(0,2,5,7,10,15,20), 'abbr': 'mph',
                 'binlbl':('2-5','5-7','7-10','10-15','15-20','20+')},
         'kts': {'label': 'knots', 'dbmul': 1.0,
-                'bins':(0,2,5,7,10,15,20),
+                'bins':(0,2,5,7,10,15,20), 'abbr': 'kts',
                 'binlbl':('2-5','5-7','7-10','10-15','15-20','20+')},
         'mps': {'label': 'meters per second', 'dbmul': 0.5144,
-                'bins':(0,2,4,6,8,10,12),
+                'bins':(0,2,4,6,8,10,12), 'abbr': '$m s^{-1}$',
                 'binlbl':('2-4','4-6','6-8','8-10','10-12','12+')},    
         'kph': {'label': 'kilometers per hour', 'dbmul': 1.609,
-                'bins':(0,4,10,14,20,30,40),
+                'bins':(0,4,10,14,20,30,40), 'abbr': '$km h^{-1}$',
                 'binlbl':('4-10','10-14','14-20','20-30','30-40','40+')},              
     }
     
@@ -898,8 +898,8 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
         handles.append( Rectangle((0, 0), 0.1, 0.3,
                     facecolor=color, edgecolor='black'))
     l = fig.legend( handles, windunits[units]['binlbl'] , loc=3,
-     ncol=6, title='Wind Speed [%s]' % (units,), mode=None, columnspacing=0.9, 
-     handletextpad=0.45)
+     ncol=6, title='Wind Speed [%s]' % (windunits[units]['abbr'],), 
+     mode=None, columnspacing=0.9, handletextpad=0.45)
     plt.setp(l.get_texts(), fontsize=10)
     # Now we put some fancy debugging info on the plot
     tlimit = "Time Domain: "
@@ -919,7 +919,7 @@ Obs Count: %s Calm: %.1f%% Avg Speed: %.1f %s""" % (station, sname,
         minvalid.strftime("%d %b %Y"), maxvalid.strftime("%d %b %Y"), 
         numpy.shape(sped)[0], 
         numpy.sum( numpy.where(sped < 2., 1., 0.)) / numpy.shape(sped)[0] * 100.,
-        numpy.average(sped), units)
+        numpy.average(sped), windunits[units]['abbr'])
     plt.gcf().text(0.17,0.89, label)
     plt.gcf().text(0.01,0.1, "Generated: %s" % (mx.DateTime.now().strftime("%d %b %Y"),),
                    verticalalignment="bottom")
