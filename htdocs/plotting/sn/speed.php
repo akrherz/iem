@@ -1,4 +1,5 @@
 <?php
+die();
 /* Generate a ground speed estimate plot from SN data
  */
 include ("../../../config/settings.inc.php");
