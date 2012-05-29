@@ -17,9 +17,6 @@ cd ../ingestors
 cd ../outgoing
 /mesonet/python/bin/python snet_collect.py >& /dev/null &
 
-cd ../ingestors/sn
-/mesonet/python/bin/python parser.py >& /dev/null &
-
 #cd ../awos
 #/mesonet/python/bin/python dl_parse_iwapi.py
 
