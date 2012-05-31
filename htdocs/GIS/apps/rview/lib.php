@@ -33,15 +33,29 @@ function tv_logo($map, $imgObj, $titlet)
 
 }
 
-function mktitle($map, $imgObj, $titlet) {
-  $layer = $map->getLayerByName("credits");
-                                                                                
-  // point feature with text for location
-  $point = ms_newpointobj();
-  $point->setXY(10, 15);
-                                                                                
-  $point->draw($map, $layer, $imgObj, 0,
-    $titlet);
+function mktitle($map, $imgObj, $titlet, $subtitle="", $width=640) {
+	$height = ($subtitle == "")? 36: 53;
+	$layer = ms_newLayerObj($map);
+	$layer->set("status", MS_ON );
+	$layer->set("type", MS_LAYER_POLYGON );
+	$layer->set("transform", MS_OFF );
+	$wkt = "POLYGON((0 0, 0 $height, $width $height, $width 0, 0 0))";
+	$layer->addFeature(ms_shapeObjFromWkt($wkt));
+
+	$layerc0 = ms_newClassObj($layer);
+	$layerc0s0 = ms_newStyleObj($layerc0);
+	$layerc0s0->color->setRGB(0,0,0);
+	$layer->draw($imgObj);
+	
+	$tlayer = $map->getLayerByName("iem_headerbar_title");
+  	$point = ms_newpointobj();
+  	$point->setXY(82, 22);
+  	$point->draw($map, $tlayer, $imgObj, 0, $titlet);
+  	if ($subtitle != ""){
+		$point = ms_newpointobj();
+		$point->setXY(82, 39);
+		$point->draw($map, $tlayer, $imgObj, 1, $subtitle);
+  	}
 }
                                                                                 
 function mklogolocal($map, $imgObj) {
