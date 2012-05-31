@@ -294,8 +294,8 @@ if (isset($singleWarning))
 
 if (! isset($_GET["iem"])) {
  $map->embedScalebar($img);
- mktitle($map, $img, "                 $maptitle $d");
  $map->drawLabelCache($img);
+ mktitle($map, $img, $maptitle, "Valid: $d", $width);
  mklogolocal($map, $img);
 } else {
  tv_logo($map,$img, "    $d");
