@@ -36,12 +36,12 @@ if ($wfo == 'ALL'){
 
 pg_query($postgis, "SET TIME ZONE 'GMT'");
 $rs = pg_prepare($postgis, "SELECTASC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,2) as area, 
-eventid, date(issue), phenomena, significance, wfo from warnings
-WHERE gtype = 'P' and phenomena in ($lstring) $wlimit and 
+eventid, date(issue), phenomena, significance, wfo from sbw
+WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and 
 significance = 'W' and issue > '$tstring' and ST_Area(geom) > 0 ORDER by area ASC LIMIT 10");
 $rs = pg_prepare($postgis, "SELECTDESC", "select round((ST_AREA(ST_Transform(geom,2163)) / 1000000.0)::numeric,2) as area, 
-eventid, date(issue), phenomena, significance, wfo from warnings 
-WHERE gtype = 'P' and phenomena in ($lstring) $wlimit and 
+eventid, date(issue), phenomena, significance, wfo from sbw 
+WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and 
 significance = 'W' and issue > '$tstring'  ORDER by area DESC LIMIT 10");
 
 $TITLE = "NWS SVR/TOR Storm Based Warnings by Size";
