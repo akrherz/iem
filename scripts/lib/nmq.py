@@ -20,7 +20,7 @@ def random_zeros():
     """
     Generate some number of random zeros
     """
-    return "%s" % ("0" * random.randint(0, 10),)
+    return "%s" % ("0" * random.randint(0, 20),)
 
 def write_worldfile( filename ):
     """
@@ -36,3 +36,11 @@ def write_worldfile( filename ):
 %s""" % (random_zeros(), random_zeros(), random_zeros(), random_zeros(),
             WEST, NORTH))
     output.close()
+    
+def make_mosaic2d_fp(tile, gts):
+    """
+    Return a string for the filename expected for this timestamp
+    """
+    return "/mnt/a4/data/%s/nmq/tile%s/data/QPESUMS/grid/mosaic2d_nc/%s00.nc" % (
+        gts.strftime("%Y/%m/%d"), tile, 
+        gts.strftime("%Y%m%d-%H%M") )
