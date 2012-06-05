@@ -17,8 +17,8 @@ def setupCSV():
     return out
 
 def metadata(id,csv):
-    csv.write("%s,%s,%s,%s," % (id, st.sts[id]["name"], st.sts[id]["lat"], 
-                                st.sts[id]["lon"] ) )
+    csv.write("%s,%s,%s,%s," % (id, nt.sts[id]["name"], nt.sts[id]["lat"], 
+                                nt.sts[id]["lon"] ) )
 
 def process(id, csv):
   # Fetch Yearly Totals
