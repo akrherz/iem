@@ -6,8 +6,9 @@ $connection = iemdb("access");
 $network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
 
 $rs = pg_prepare($connection, "SELECT", "select count(*), tvalid from ( 
-    select station, to_char(valid, 'mmdd/HH24') as tvalid, count(*)
-    from current_log WHERE network= $1 GROUP by station, tvalid) as foo
+    select t.id, to_char(valid, 'mmdd/HH24') as tvalid, count(*)
+    from current_log c JOIN stations t on (t.iemid = c.iemid) 
+    WHERE t.network= $1 GROUP by id, tvalid) as foo
   GROUP by tvalid ORDER by tvalid ASC");
 
 $result = pg_exec($connection, "SET TIME ZONE 'GMT'");
