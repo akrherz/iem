@@ -69,7 +69,6 @@ for line in lines:
         i0 = Image.open( fp )
         i320 = i0.resize((320, 240), Image.ANTIALIAS)
     except:
-        print "ERROR: ", fp
         os.unlink( fp )
         continue
 
@@ -95,7 +94,6 @@ for line in lines:
 
     # Insert into LDM
     cmd = "/home/ldm/bin/pqinsert -p 'webcam c %s camera/stills/%s.jpg camera/%s/%s_%s.jpg jpg' %s-320x240.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid)
-    print cmd
     subprocess.call(cmd, shell=True)
     cmd = "/home/ldm/bin/pqinsert -p 'webcam ac %s camera/640x480/%s.jpg camera/%s/%s_%s.jpg jpg' %s-640x480.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid )
     subprocess.call(cmd, shell=True)
