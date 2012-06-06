@@ -17,8 +17,9 @@ from PIL import Image, ImageDraw, ImageFont
 font = ImageFont.truetype('veramono.ttf', 10)
 import subprocess
 import iemdb
+import mesonet
 import psycopg2.extras
-MESOSITE = iemdb.connect('mesosite')
+MESOSITE = iemdb.connect('mesosite', bypass=True)
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 gmt = mx.DateTime.gmt()
 
@@ -41,7 +42,7 @@ p = subprocess.Popen("wget --timeout=20 -m --ftp-user=rwis --ftp-password=%s \
            gmt.strftime("%d-%H")), shell=True, stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
 stdout, stderr = p.communicate()
-lines = stdout.split("\n")
+lines = stderr.split("\n")
 for line in lines:
     # Look for RETR (.*)
     tokens = re.findall("RETR Vid-000512([0-9]{3})-([0-9][0-9])-([0-9][0-9])-([0-9]{4})-([0-9][0-9])-([0-9][0-9])-([0-9][0-9])-([0-9][0-9]).jpg", line)
@@ -68,7 +69,7 @@ for line in lines:
         i0 = Image.open( fp )
         i320 = i0.resize((320, 240), Image.ANTIALIAS)
     except:
-        #print "ERROR: ", fp
+        print "ERROR: ", fp
         os.unlink( fp )
         continue
 
@@ -94,6 +95,7 @@ for line in lines:
 
     # Insert into LDM
     cmd = "/home/ldm/bin/pqinsert -p 'webcam c %s camera/stills/%s.jpg camera/%s/%s_%s.jpg jpg' %s-320x240.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid)
+    print cmd
     subprocess.call(cmd, shell=True)
     cmd = "/home/ldm/bin/pqinsert -p 'webcam ac %s camera/640x480/%s.jpg camera/%s/%s_%s.jpg jpg' %s-640x480.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid )
     subprocess.call(cmd, shell=True)

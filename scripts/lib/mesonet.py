@@ -1,6 +1,44 @@
 # Library of help functions
 import math
 
+def drct2dirTxt(dir):
+  if (dir == None):
+    return "N"
+  dir = int(dir)
+  if (dir >= 350 or dir < 13):
+    return "N"
+  elif (dir >= 13 and dir < 35):
+    return "NNE"
+  elif (dir >= 35 and dir < 57):
+    return "NE"
+  elif (dir >= 57 and dir < 80):
+    return "ENE"
+  elif (dir >= 80 and dir < 102):
+    return "E"
+  elif (dir >= 102 and dir < 127):
+    return "ESE"
+  elif (dir >= 127 and dir < 143):
+    return "SE"
+  elif (dir >= 143 and dir < 166):
+    return "SSE"
+  elif (dir >= 166 and dir < 190):
+    return "S"
+  elif (dir >= 190 and dir < 215):
+    return "SSW"
+  elif (dir >= 215 and dir < 237):
+    return "SW"
+  elif (dir >= 237 and dir < 260):
+    return "WSW"
+  elif (dir >= 260 and dir < 281):
+    return "W"
+  elif (dir >= 281 and dir < 304):
+    return "WNW"
+  elif (dir >= 304 and dir < 324):
+    return "NW"
+  elif (dir >= 324 and dir < 350):
+    return "NNW"
+
+
 def relh(tmpf, dwpf):
   if (tmpf == None or dwpf == None or tmpf == "M" or dwpf == "M" or tmpf == -99 or dwpf == -99):
     return "M"
