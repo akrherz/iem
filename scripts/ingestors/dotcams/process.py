@@ -7,8 +7,8 @@
                      GMT Timestamp....
 """
 import sys
-FTP_PASS = "rwisftp1"
-if FTP_PASS == "----":
+FTP_PASS = None
+if FTP_PASS is None:
     print "FIX PASSWORD!"
     sys.exit()
 
@@ -36,13 +36,12 @@ for row in mcursor:
   cameras[ row['id'] ] = row
 
 
-p = subprocess.Popen("wget  -m --ftp-user=rwis --ftp-password=%s \
+p = subprocess.Popen("wget --timeout=20 -m --ftp-user=rwis --ftp-password=%s \
            ftp://165.206.203.34/rwis_images/*%s-??.jpg" % (FTP_PASS,
-           gmt.strftime("%H")), shell=True, stdout=subprocess.PIPE,
+           gmt.strftime("%d-%H")), shell=True, stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
-
-data = p.stdout.read()
-lines = data.split("\n")
+stdout, stderr = p.communicate()
+lines = stdout.split("\n")
 for line in lines:
     # Look for RETR (.*)
     tokens = re.findall("RETR Vid-000512([0-9]{3})-([0-9][0-9])-([0-9][0-9])-([0-9]{4})-([0-9][0-9])-([0-9][0-9])-([0-9][0-9])-([0-9][0-9]).jpg", line)
