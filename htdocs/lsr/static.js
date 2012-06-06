@@ -417,6 +417,23 @@ sbwGridPanel = new Ext.grid.GridPanel({
               Ext.ux.Printer.print(Ext.getCmp("sbwGridPanel"));
             }
     },{
+        id      : 'grid-excel-button',
+        icon    : 'icons/excel.png',
+        text    : 'Export to Excel...',
+        handler : function(){
+           var xd = sbwGridPanel.getExcelXml(true);
+           if (Ext.isIE6 || Ext.isIE7 || Ext.isIE8 || Ext.isSafari || Ext.isSafari2 || Ext.isSafari3) {
+                 var dataURL = 'exportexcel.php';
+                 params =[{
+                      name: 'ex',
+                      value: xd
+                 }];
+                 post_to_url(dataURL, params, 'post');
+            } else {
+                 document.location = 'data:application/vnd.ms-excel;base64,' + Base64.encode(xd);
+            }
+        }
+      },{
             xtype     : 'button',
             text      : 'Save Shapefile',
             icon      : 'icons/shapefile.gif',
