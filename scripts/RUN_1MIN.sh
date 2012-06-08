@@ -15,7 +15,7 @@ cd ../ingestors
 python ctre_bridge.py &
 
 cd ../outgoing
-/mesonet/python/bin/python snet_collect.py >& /dev/null &
+python snet_collect.py &
 
 #cd ../awos
 #/mesonet/python/bin/python dl_parse_iwapi.py
