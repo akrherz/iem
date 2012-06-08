@@ -1,5 +1,50 @@
 # Library of help functions
 import math
+def feelslike(tmpf, relh, sped):
+  if (tmpf > 50):
+    return heatidx(tmpf, relh)
+  else:
+    return wchtidx(tmpf, sped)
+
+def heatidx(tmpf, relh):
+  if (tmpf > 140):
+    return -99
+  if (relh == 0):
+    return -99
+
+  PR_HEAT =  61 + ( tmpf - 68 ) * 1.2 + relh * .094
+  if (PR_HEAT < 77):
+    return PR_HEAT
+
+  t2 = tmpf * tmpf;
+  t3 = tmpf * tmpf * tmpf
+  r2 = relh * relh
+  r3 = relh * relh * relh
+
+  return  17.423 +  0.185212 * tmpf \
+     +  5.37941 * relh \
+     -  0.100254 * tmpf * relh \
+     +  0.00941695 * t2 \
+     +  0.00728898 * r2 \
+     +  0.000345372 * t2 * relh \
+     -  0.000814971 * tmpf * r2 \
+     +  0.0000102102 * t2 * r2 \
+     -  0.000038646 * t3 \
+     +  0.0000291583 * r3 \
+     +  0.00000142721 * t3 * relh \
+     +  0.000000197483 * tmpf * r3 \
+     -  0.0000000218429 * t3 * r2 \
+     +  0.000000000843296  * t2 * r3 \
+     -  0.0000000000481975  * t3 * r3
+
+
+def wchtidx(tmpf, sped):
+  if (sped < 3):
+    return tmpf
+  import math
+  wci = math.pow(sped,0.16);
+
+  return 35.74 + .6215 * tmpf - 35.75 * wci + .4275 * tmpf * wci
 
 def drct2dirTxt(dir):
   if (dir == None):
