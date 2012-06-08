@@ -5,12 +5,10 @@ sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime
-now = mx.DateTime.now()
+now = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=1)
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
-wepp = i['wepp']
+import pg
+wepp = pg.connect('wepp', 'iemdb', user='nobody')
 
 # Compute normal from the climate database
 sql = """
@@ -26,8 +24,8 @@ GROUP by station, lon, lat
 sql = """
 SELECT x(transform(centroid(the_geom),4326)) as lon, 
        y(transform(centroid(the_geom),4326)) as lat, maxday from
- (SELECT hrap_i, max(valid) as maxday from daily_rainfall_2009 
-  WHERE rainfall / 25.4 > 0.24 GROUP by hrap_i) as dr, hrap_polygons h
+ (SELECT hrap_i, max(valid) as maxday from daily_rainfall_2012 
+  WHERE rainfall / 25.4 > 0.50 GROUP by hrap_i) as dr, hrap_polygons h
  WHERE h.hrap_i = dr.hrap_i
 """
 
@@ -46,18 +44,12 @@ cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "Iowa Days since last 0.25in plus Rainfall",
+ '_title'             : "Days since last 0.5in plus Daily Rainfall",
  '_valid'             : "%s" % ( now.strftime("%d %b %Y"), ),
  'lbTitleString'      : "[days]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
+#'cnFillMode'          : 'CellFill',
 }
 # Generates tmp.ps
-iemplot.simple_contour(lons, lats, vals, cfg)
+tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
 
-os.system("convert -rotate -90 -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 +repage tmp.ps tmp.png")
-if os.environ["USER"] == "akrherz":
-  os.system("xv tmp.png")
-#os.remove("tmp.png")
-#os.remove("tmp.ps")
+iemplot.makefeature(tmpfp)
