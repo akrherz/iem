@@ -14,9 +14,10 @@ sprec = numpy.zeros( (1500,), 'f')
 svalid = numpy.zeros( (1500,), 'f')
 
 acursor.execute("""
- SELECT extract(epoch from (valid at time zone 'CDT')), tmpf, dwpf, drct, sknt, pres1, gust_sknt, precip,
-  valid at time zone 'CDT' from t2012_1minute WHERE station = 'DSM'
- and valid BETWEEN '2012-05-03 00:00-05' and '2012-05-03 12:59-05' 
+ SELECT extract(epoch from (valid at time zone 'EDT')), tmpf, dwpf, drct, 
+  sknt, pres1, gust_sknt, precip,
+  valid at time zone 'EDT' from t2012_1minute WHERE station = 'MIA'
+ and valid BETWEEN '2012-05-22 00:00-04' and '2012-05-22 23:59-04' 
  ORDER by valid ASC
 """)
 for row in acursor:
@@ -43,10 +44,10 @@ for i in range(1500):
     acc[i] = acc[i-1] + sprec[i]
     rate15[i] = numpy.sum(sprec[i-15:i]) * 4
     rate60[i] = numpy.sum(sprec[i-60:i])
-    svalid[i] =  mx.DateTime.DateTime(2012,4,14, 0) + mx.DateTime.RelativeDateTime(minutes=i)
+    svalid[i] =  mx.DateTime.DateTime(2012,5,22, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 # Figure out ticks
-sts = mx.DateTime.DateTime(2012,4,14, 17,0)
-ets = mx.DateTime.DateTime(2012,4,14, 21,1)
+sts = mx.DateTime.DateTime(2012,5,22, 12,0)
+ets = mx.DateTime.DateTime(2012,5,23, 0,0)
 interval = mx.DateTime.RelativeDateTime(hours=1)
 now = sts
 xticks = []
@@ -73,6 +74,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 print numpy.shape(svalid)
 print numpy.shape(acc)
+print numpy.max(rate60)
 ax.plot(svalid, acc, color='b', label="Accumulation")
 ax.plot(svalid, sprec * 60, color='black', label="Hourly Rate over 1min")
 ax.plot(svalid, rate15, color='g', label="Hourly Rate over 15min", linewidth=2)
@@ -82,10 +84,10 @@ ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels2)
 ax.grid(True)
 ax.set_xlim(min(xticks), max(xticks))
-ax.legend(loc=1, prop=prop)
-#ax.set_ylim(0,10)
-ax.set_xlabel("14 April 2012 (CDT)")
-ax.set_title("14 Apr 2012 Des Moines (KDSM) One Minute Rainfall\n3.43 inches reported, second highest daily total for April")
+ax.legend(loc=2, prop=prop, ncol=2)
+ax.set_ylim(0,12)
+ax.set_xlabel("22 May 2012 (EDT)")
+ax.set_title("22 May 2012 Miami, FL (KMIA) One Minute Rainfall\n9.70 inches reported, second highest daily total for May")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))

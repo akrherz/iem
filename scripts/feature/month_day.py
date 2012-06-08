@@ -1,52 +1,36 @@
 import iemdb
+import numpy as np
+import numpy.ma
 
-COOP = iemdb.connect('coop', bypass=True)
+COOP = iemdb.connect('postgis', bypass=True)
 ccursor = COOP.cursor()
 
-lcnts = [0]*30
-hcnts = [0]*30
-
-for year in range(1893,2011):
-  ccursor.execute("""
-  SELECT extract(day from day), high from alldata where stationid = 'ia0200'
-  and month = 4 and year = %s ORDER by high ASC
-  """, (year,))
-  row = ccursor.fetchone()
-  low = row[1]
-  lcnts[ int(row[0]) - 1] += 1
-  for row in ccursor:
-    if row[1] == low:
-      lcnts[ int(row[0]) -1] += 1
-    else:
-      break
-
-  ccursor.execute("""
-  SELECT extract(day from day), high from alldata where stationid = 'ia0200'
-  and month = 4 and year = %s ORDER by high DESC
-  """, (year,))
-  row = ccursor.fetchone()
-  low = row[1]
-  hcnts[ int(row[0]) - 1] += 1
-  for row in ccursor:
-    if row[1] == low:
-      hcnts[ int(row[0]) -1] += 1
-    else:
-      break
-
-
+ccursor.execute("""
+ select extract(day from issue) as d, extract(year from issue) as y,
+ count(*) from warnings WHERE gtype = 'C' and 
+ wfo in ('DMX','DVN','FSD','OAX','ARX') and substr(ugc, 1,3) = 'IAC' 
+ and extract(month from issue) = 5 and phenomena in ('SV','TO') 
+ and significance = 'W' GROUP by d, y
+""")
+data = numpy.ma.zeros( (2013-1986,31), 'f')
+for row in ccursor:
+    data[row[1]-1986,row[0]-1] = row[2]
+data.mask = numpy.where(data == 0, True, False)
 import matplotlib.pyplot as plt
-import numpy as np
-fig = plt.figure()
-ax = fig.add_subplot(111)
+fig, ax = plt.subplots(1,1)
 
-ax.bar(np.arange(1,31)-0.4, lcnts, width=0.3, facecolor='b', label='Coldest')
-ax.bar(np.arange(1,31), hcnts, width=0.3, facecolor='r', label='Warmest')
-ax.legend(loc=2,ncol=2)
-ax.set_title("Warmest and Coolest April Daily High Temperature\nAmes [1893-2010]")
-ax.set_ylabel("Occurences, ties included")
-ax.set_xlabel("Day of Month")
-ax.set_xlim(0.5,30.5)
+#res = ax.contourf( data, extend='max')
+res = ax.imshow( data, aspect='auto', rasterized=True, interpolation='nearest')
+fig.colorbar(res)
+ax.set_title("May Severe T'Storm + Tornado Warnings in Iowa\nCounty Based Warnings [1986-2012]")
+ax.set_ylabel("Year")
+ax.set_xlabel("Day of May")
+ax.set_xticks([0,7,14,21,28])
+ax.set_xticklabels([1,8,15,22,29])
+ax.set_yticks([0,4,9,14,19,24])
+ax.set_yticklabels([1986,1990,1995,2000,2005,2010])
 ax.grid(True)
+
 fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test') 
