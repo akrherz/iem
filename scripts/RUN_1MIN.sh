@@ -6,13 +6,13 @@ python raccoon_sbw_to_ppt.py &
 
 cd ../GIS
 python attribute2shape.py
-/mesonet/python/bin/python wwShapefile.py &
+python wwa2shp.py &
 
 cd ../ingestors
 #/mesonet/python/bin/python parse0006.py &
 /mesonet/python/bin/python parse0002.py &
 #/mesonet/python/bin/python awos_adas.py &
-/usr/bin/python ctre_bridge.py &
+python ctre_bridge.py &
 
 cd ../outgoing
 /mesonet/python/bin/python snet_collect.py >& /dev/null &
