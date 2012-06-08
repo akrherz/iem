@@ -1,39 +1,51 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 70);
  include("$rootpath/include/database.inc.php");
  $conn = iemdb("postgis");
- $width = isset($_GET["width"])? $_GET["width"] : "320";
  $sel = isset($_GET["sel"]) ? intval($_GET["sel"]) : -1;
-$rs = pg_prepare($conn, "SELECT", "SELECT * from watches_current 
-      WHERE sel = $1");
-
  $REFRESH = "<meta http-equiv=\"refresh\" content=\"300;\">";
  $TITLE = "IEM | SPC Watches Overview";
  $THISPAGE = "current-radar";
  include("$rootpath/include/header.php");
-?>
-
-<?php if ($sel != -1) { 
- $rs = pg_execute($conn, "SELECT", Array("SEL". $sel));
-?>
+ 
+ $metdata = Array();
+ $rs = pg_query($conn, "SELECT * from watches_current");
+ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+ 	$metadata[$row["sel"]] = $row;
+ 	$metadata[$row["sel"]]["sts"] = strtotime(substr($row["issued"],0,16));
+ 	$metadata[$row["sel"]]["ets"] = strtotime(substr($row["expired"],0,16));
+ }
+ 
+ if ($sel > -1) { 
+	$row = $metadata["SEL". $sel];
+ 	?>
 
 <a href="sel.phtml">View All Watches</a>
 
 <p><img src="/data/sel<?php echo $sel; ?>comp.png" />
 <?php
 
- $row = @pg_fetch_array($rs);
-
  echo "<br /><pre>". $row["report"] ."</pre>";
 
 ?>
 <?php } else { ?>
 
-<p>Click on an image to get an enlarged view as well as the text for the watch. These images are for the last 10 areas in which watches have been valid for.  If the watch is currently valid, it will appear on the plot.
+<p>Click on an image to get an enlarged view as well as the text for the watch. 
+These images are for the last 10 areas in which watches have been valid for.  
+If the watch is currently valid, it will appear on the plot.  The timestamps
+presented are in US Central time.
 
 <?php
   for ($i=0;$i<10;$i++){
-    echo "<div style=\"float: left;\"><b>SEL${i}:</b><br /><a href=\"sel.phtml?sel=${i}\"><img src=\"$rooturl/data/sel${i}comp.png\" width=\"$width\"></a></div>";
+  	$row = $metadata["SEL".$i];
+    echo "<div style=\"float: left;\">
+    <strong>SEL${i}:</strong> Issued: ". date("j M Y g:i A" ,$row["sts"]) 
+    ."<br />Expired: ". date("j M Y g:i A" ,$row["ets"]) .", 
+    <a href=\"/GIS/apps/rview/watch.phtml?year=". date("Y" ,$row["sts"]) ."&num=". $row["num"] ."\">more info</a>
+    <br /><a href=\"sel.phtml?sel=${i}\">
+    <img src=\"$rooturl/data/sel${i}comp.png\"></a>
+    </div>";
   }
 
 } 
