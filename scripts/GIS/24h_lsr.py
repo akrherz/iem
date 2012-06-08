@@ -1,13 +1,21 @@
-# Something to dump current warnings to a shapefile
-# 28 Aug 2004 port to iem40
+"""
+ Dump 24 hour LSRs to a file
+"""
 
-import shapelib, dbflib, mx.DateTime, zipfile, os, sys, shutil
-from pyIEM import wellknowntext, iemdb
-i = iemdb.iemdb()
-mydb = i["postgis"]
-if (mydb == None): 
-	sys.exit(0)
-mydb.query("SET TIME ZONE 'GMT'")
+import shapelib
+import dbflib
+import mx.DateTime
+import zipfile
+import os
+import sys
+import shutil
+import wellknowntext
+import iemdb
+import subprocess
+import psycopg2.extras
+POSTGIS = iemdb.connect('postgis', bypass=True)
+pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+pcursor.execute("SET TIME ZONE 'GMT'")
 
 os.chdir("/tmp/")
 
@@ -44,28 +52,28 @@ dbf.add_field("REMARK", dbflib.FTString, 200, 0)
 
 
 #sql = "SELECT *, astext(geom) as tgeom from warnings WHERE issue < '%s' and \
-sql = "SELECT distinct *, astext(geom) as tgeom from lsrs_%s WHERE valid > (now() -'1 day'::interval) " % (eTS.year,)
-rs = mydb.query(sql).dictresult()
+sql = """SELECT distinct *, astext(geom) as tgeom from lsrs_%s WHERE 
+	valid > (now() -'1 day'::interval) """ % (eTS.year,)
+pcursor.execute(sql)
 
 cnt = 0
-for i in range(len(rs)):
+for row in pcursor:
 	
-	s = rs[i]["tgeom"]
-	if (s == None or s == ""):
+	s = row["tgeom"]
+	if s == None or s == "":
 		continue
 	f = wellknowntext.convert_well_known_text(s)
 
-	issue = mx.DateTime.strptime(rs[i]["valid"][:16], "%Y-%m-%d %H:%M")
 	d = {}
-	d["VALID"] = issue.strftime("%Y%m%d%H%M")
-	d["MAG"] = float(rs[i]['magnitude'])
-	d["TYPECODE"] = rs[i]['type']
-	d["WFO"] = rs[i]['wfo']
-	d["TYPETEXT"] = rs[i]['typetext']
-	d["CITY"] = rs[i]['city']
-	d["COUNTY"] = rs[i]['county']
-	d["SOURCE"] = rs[i]['source']
-	d["REMARK"] = rs[i]['remark'][:200]
+	d["VALID"] = row['valid'].strftime("%Y%m%d%H%M")
+	d["MAG"] = float(row['magnitude'])
+	d["TYPECODE"] = row['type']
+	d["WFO"] = row['wfo']
+	d["TYPETEXT"] = row['typetext']
+	d["CITY"] = row['city']
+	d["COUNTY"] = row['county']
+	d["SOURCE"] = row['source']
+	d["REMARK"] = row['remark'][:200]
 	obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[f]] )
 	shp.write_object(-1, obj)
 	dbf.write_record(cnt, d)
@@ -84,5 +92,7 @@ z.write("lsr_24hour.prj")
 z.close()
 
 cmd = "/home/ldm/bin/pqinsert -p \"zip c %s gis/shape/4326/us/lsr_24hour.zip bogus zip\" lsr_24hour.zip" % (eTS.strftime("%Y%m%d%H%M"),)
-os.system(cmd)
+subprocess.call(cmd, shell=True)
 
+for suffix in ['shp', 'shx', 'dbf', 'prj', 'zip']:
+	os.remove('lsr_24hour.%s' % (suffix,))
