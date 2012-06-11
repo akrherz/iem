@@ -2,7 +2,7 @@
 Create a plot of the 5 minute interval precip rate
 """
 
-import netCDF3
+import netCDF4
 import mx.DateTime
 import iemplot
 import numpy
@@ -35,7 +35,7 @@ def doit(ts):
             print make_fp(ts)
             return
         limit -= 1
-    nc = netCDF3.Dataset(make_fp(ts))
+    nc = netCDF4.Dataset(make_fp(ts))
     val = nc.variables["preciprate_hsr"][:]
     nc.close()
         
