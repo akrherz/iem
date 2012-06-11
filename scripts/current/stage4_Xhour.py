@@ -1,5 +1,5 @@
 """
-Create a plot of today's total precipitation from the Stage4 estimates
+Create a variable X hour plot of stage IV estimates
 """
 
 import pygrib
@@ -8,12 +8,12 @@ import iemplot
 import numpy
 import os, sys
 
-def doday(ts):
+def do(ts, hours):
     """
     Create a plot of precipitation stage4 estimates for some day
     """
-    sts = ts + mx.DateTime.RelativeDateTime(hour=1, minute=0)
-    ets = ts + mx.DateTime.RelativeDateTime(hour=1, days=1, minute=0)
+    sts = ts - mx.DateTime.RelativeDateTime(hours=hours, minute=0)
+    ets = ts 
     interval = mx.DateTime.RelativeDateTime(hours=1)
     now = sts
     total = None
@@ -22,6 +22,7 @@ def doday(ts):
         fp = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib" % (
             now.gmtime().strftime("%Y/%m/%d"), 
             now.gmtime().strftime("%Y%m%d%H") )
+        print fp
         if os.path.isfile(fp):
             lts = now
             grbs = pygrib.open(fp)
@@ -51,32 +52,33 @@ def doday(ts):
      'lbTitleString'      : "[inch]",
      '_valid'    : 'Total up to %s' % (
         (lts - mx.DateTime.RelativeDateTime(minutes=1)).strftime("%d %B %Y %I:%M %p %Z"),),
-     '_title'    : "NCEP StageIV Today's Precipitation [inch]",
+     '_title'    : "NCEP StageIV %s Hour Precipitation [inch]" % (hours,),
     }
 
     tmpfp = iemplot.simple_grid_fill(lons, lats, total / 25.4, cfg)
-    pqstr = "plot ac %s00 iowa_stage4_1d.png iowa_stage4_1d.png png" % (
-            ts.strftime("%Y%m%d%H"), )
+    pqstr = "plot ac %s00 iowa_stage4_%sh.png iowa_stage4_%sh.png png" % (
+            ts.strftime("%Y%m%d%H"), hours, hours)
     iemplot.postprocess(tmpfp, pqstr)
     
     # Midwest
     cfg['_midwest'] = True
     tmpfp = iemplot.simple_grid_fill(lons, lats, total / 25.4, cfg)
-    pqstr = "plot ac %s00 midwest_stage4_1d.png midwest_stage4_1d.png png" % (
-            ts.strftime("%Y%m%d%H"), )
+    pqstr = "plot ac %s00 midwest_stage4_%sh.png midwest_stage4_%sh.png png" % (
+            ts.strftime("%Y%m%d%H"), hours, hours)
     iemplot.postprocess(tmpfp, pqstr)
     del(cfg['_midwest'])
     
     # CONUS
     cfg['_conus'] = True
     tmpfp = iemplot.simple_grid_fill(lons, lats, total / 25.4, cfg)
-    pqstr = "plot ac %s00 conus_stage4_1d.png conus_stage4_1d.png png" % (
-            ts.strftime("%Y%m%d%H"), )
+    pqstr = "plot ac %s00 conus_stage4_%sh.png conus_stage4_%sh.png png" % (
+            ts.strftime("%Y%m%d%H"), hours, hours)
     iemplot.postprocess(tmpfp, pqstr)
     del(cfg['_conus'])
     
 if __name__ == "__main__":
     if len(sys.argv) == 4:
-        doday(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
+        do(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])),
+              int(sys.argv[4]))
     else:
-        doday(mx.DateTime.now())
+        do(mx.DateTime.now(), int(sys.argv[1]))

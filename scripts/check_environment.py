@@ -5,3 +5,6 @@ import pg
 import xlwt
 import mx.DateTime
 import mapscript
+import netCDF4
+import Nio
+import pygrib
