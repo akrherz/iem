@@ -14,7 +14,9 @@ python stage4_hourlyre.py `date -u --date '1 day ago' +'%Y %m %d %H'`
 
 cd ../current
 python stage4_hourly.py
-/mesonet/python/bin/python stage4_today_total.py
+python stage4_today_total.py
+python stage4_Xhour.py 24
+python stage4_Xhour.py 36
 
 cd ../qc
 /mesonet/python/bin/python checkWebcam.py
