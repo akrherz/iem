@@ -2,7 +2,7 @@
 Create a plot of today's total precipitation from the Stage4 estimates
 """
 
-import netCDF3
+import netCDF4
 import mx.DateTime
 import iemplot
 import numpy
@@ -48,7 +48,7 @@ def doday(ts):
                 divisor = 12.0
             #print "USING %s NCVAR %s DIVISOR %s" % (make_fp(now), 
             #                                        ncvar, divisor)
-            nc = netCDF3.Dataset(make_fp(now))
+            nc = netCDF4.Dataset(make_fp(now))
             if nc.variables.has_key(ncvar):
                 val = nc.variables[ncvar][:] / divisor
                 if total is None:
