@@ -22,7 +22,7 @@ def do(ts, hours):
         fp = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib" % (
             now.gmtime().strftime("%Y/%m/%d"), 
             now.gmtime().strftime("%Y%m%d%H") )
-        print fp
+
         if os.path.isfile(fp):
             lts = now
             grbs = pygrib.open(fp)
