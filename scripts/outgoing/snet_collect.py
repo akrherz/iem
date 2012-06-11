@@ -192,15 +192,15 @@ def main():
             of.write("%2s %4s %4.0f %4.0f %4.0f %4.0f %4s " % (
                 kcci[sid].data['ts'].day, kcci[sid].data['ts'].hour, 
                 kcci[sid].data['tmpf'], kcci[sid].data['dwpf'], 
-                kcci[sid].data['feel'], kcci[sid].data['drct'], 
-                kcci[sid].data['drctTxt']))
+                kcci[sid].data['feel'], kcci[sid].data.get('drct'), 
+                kcci[sid].data.get('drctTxt')))
             of.write("%4.0f %4.0f %4.0f %4.0f %3s " % (
                 kcci[sid].data['sknt'], 
                 kcci[sid].data['max_tmpf'], kcci[sid].data['min_tmpf'], 
-                kcci[sid].data['max_sped'], kcci[sid].data['max_drctTxt']))
+                kcci[sid].data['max_sped'], kcci[sid].data.get('max_drctTxt')))
             of.write("%6.2f %6.2f %8s %6.2f %6.2f %6.2f %6.2f\n" % (
                 kcci[sid].data['pday'], kcci[sid].data['pmonth'], 
-                kcci[sid].data['gtim2'], kcci[sid].data.get('p2day',0), 
+                kcci[sid].data.get('gtim2'), kcci[sid].data.get('p2day',0), 
                 kcci[sid].data.get('p3day',0), kcci[sid].data.get('p7day',0), 
                 kcci[sid].data.get('p14day',0) ) )
 
