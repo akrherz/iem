@@ -5,7 +5,9 @@
 import sys
 import constants
 import network
-nt = network.Table("IACLIMATE")
+nt = network.Table(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE',
+         'OHCLIMATE','MICLIMATE','KYCLIMATE','WICLIMATE','MNCLIMATE',
+         'SDCLIMATE','NDCLIMATE','NECLIMATE','KSCLIMATE','MOCLIMATE'))
 
 def setupCSV():
     out = open("ks/yearly.csv", 'w')
@@ -27,7 +29,7 @@ def process(id, csv):
     round(sum(precip)::numeric,2) as rain from %s 
     WHERE station = '%s' and year >= %s 
     GROUP by year ORDER by year ASC""" % (constants.get_table(id), 
-                                        id.lower(), constants.startyear(id) )
+                                        id, constants.startyear(id) )
     rs = constants.mydb.query(sql).dictresult()
     data = {}
     for i in range(len(rs)):
@@ -45,7 +47,7 @@ def process(id, csv):
     sql = """SELECT round(avg(high)::numeric,1) as avg_high,
     round(avg(low)::numeric,1) as avg_low, 
     round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' """ % (
-        constants.climatetable(id.lower()), id.lower(),)
+        constants.climatetable(id), id)
     rs = constants.mydb.query(sql).dictresult()
     aHigh = rs[0]["avg_high"]
     aLow = rs[0]["avg_low"]
@@ -57,7 +59,9 @@ def process(id, csv):
 
 def main():
     csv = setupCSV()
-    for id in nt.sts.keys():
+    keys = nt.sts.keys()
+    keys.sort()
+    for id in keys:
         #if (id == 'IA7844' or id == 'IA4381'):
         #  continue
         print "processing [%s] %s" % (id, nt.sts[id]["name"])
