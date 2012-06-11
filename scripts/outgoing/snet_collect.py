@@ -105,7 +105,8 @@ def main():
     of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,max_srad,\n")
     for sid in kcci.keys():
         try:
-            of.write("%(id)s,%(ticks)s,%(tmpf).0f,%(dwpf).0f,%(relh).0f,%(feel).0f,%(pres).2f,%(altiTend)s,%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f,%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f,%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f,%(max_gust).0f,%(max_drct).0f,%(max_sped).0f,%(max_drctTxt)s,%(max_srad).0f,\n" % kcci[sid].data )
+            s = "%(id)s,%(ticks)s,%(tmpf).0f,%(dwpf).0f,%(relh).0f,%(feel).0f,%(pres).2f,%(altiTend)s,%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f,%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f,%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f,%(max_gust).0f,%(max_drct).0f,%(max_sped).0f,%(max_drctTxt)s,%(max_srad).0f,\n" % kcci[sid].data 
+            of.write(s.replace("'", ""))
         except:
             print kcci[sid]
             print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
@@ -122,13 +123,13 @@ def main():
         if (now - kcci[sid].data['ts']) > 3600:
             kcci[sid].data['online'] = 0
         try:
-            of.write("%(id)s,%(ticks).0f,%(tmpf).0f,%(dwpf).0f," % kcci[sid].data )
-            of.write("%(relh).0f,%(feel).0f,%(pres).2f,%(altiTend)s," % kcci[sid].data )
-            of.write("%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f," % kcci[sid].data )
-            of.write("%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f," % kcci[sid].data )
-            of.write("%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f," % kcci[sid].data )
-            of.write("%(max_sknt).0f,%(max_drct).0f,%(max_sped).0f," % kcci[sid].data )
-            of.write("%(max_drctTxt)s,%(srad).0f,%(max_srad).0f,%(online)s,\n" % kcci[sid].data )
+            of.write(("%(id)s,%(ticks).0f,%(tmpf).0f,%(dwpf).0f," % kcci[sid].data ).replace("'", ""))
+            of.write(("%(relh).0f,%(feel).0f,%(pres).2f,%(altiTend)s," % kcci[sid].data ).replace("'", "") )
+            of.write(("%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f," % kcci[sid].data ).replace("'", "") )
+            of.write(("%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f," % kcci[sid].data  ).replace("'", ""))
+            of.write(("%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f," % kcci[sid].data ).replace("'", "") )
+            of.write(("%(max_sknt).0f,%(max_drct).0f,%(max_sped).0f," % kcci[sid].data ).replace("'", "") )
+            of.write(("%(max_drctTxt)s,%(srad).0f,%(max_srad).0f,%(online)s,\n" % kcci[sid].data ).replace("'", "") )
         except:
             print kcci[sid].data
             print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
@@ -142,7 +143,7 @@ def main():
     of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,srad,max_srad,\n")
     for sid in kimt.keys():
         try:
-            of.write("%(id)s,%(ticks).0f,%(tmpf).0f,%(dwpf).0f,%(relh).0f,%(feel).0f,%(pres).2f,%(altiTend)s,%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f,%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f,%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f,%(max_sknt).0f,%(max_drct).0f,%(max_sped).0f,%(max_drctTxt)s,%(srad).0f,%(max_srad).0f,\n" % kimt[sid].data )
+            of.write(("%(id)s,%(ticks).0f,%(tmpf).0f,%(dwpf).0f,%(relh).0f,%(feel).0f,%(pres).2f,%(altiTend)s,%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f,%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f,%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f,%(max_sknt).0f,%(max_drct).0f,%(max_sped).0f,%(max_drctTxt)s,%(srad).0f,%(max_srad).0f,\n" % kimt[sid].data  ).replace("'", ""))
         except:
             print kimt[sid].data
             #print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
