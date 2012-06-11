@@ -12,7 +12,7 @@ cd ../../GIS
 python 24h_lsr.py 
 
 cd ../current
-/mesonet/python/bin/python lsr_snow_mapper.py >& /dev/null
+python lsr_snow_mapper.py >& /dev/null
 
 cd ../ingestors/rwis
 ./download.csh &
@@ -31,8 +31,8 @@ sleep 60
 python hsr.py
 
 cd ../current
-/mesonet/python/bin/python q2_5min_rate.py
-/mesonet/python/bin/python q2_today_total.py
-/mesonet/python/bin/python q2_Xhour.py 1
-/mesonet/python/bin/python q2_Xhour.py 3
-/mesonet/python/bin/python q2_Xhour.py 6
+python q2_5min_rate.py
+python q2_today_total.py
+python q2_Xhour.py 1
+python q2_Xhour.py 3
+python q2_Xhour.py 6

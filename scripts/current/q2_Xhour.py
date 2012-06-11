@@ -2,7 +2,7 @@
 Create a plot of the X Hour interval precipitation
 """
 
-import netCDF3
+import netCDF4
 import mx.DateTime
 import iemplot
 import numpy
@@ -40,7 +40,7 @@ def doit(ts, hours):
         fp = make_fp(lts)
         if not os.path.isfile(fp):
             continue
-        nc = netCDF3.Dataset( fp )
+        nc = netCDF4.Dataset( fp )
         if nc.variables.has_key('rad_hsr_1h'):
             if hr == 0:
                 total = nc.variables["rad_hsr_1h"][:]
