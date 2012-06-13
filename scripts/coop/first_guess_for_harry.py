@@ -26,33 +26,174 @@ ccursor = COOP.cursor()
 IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor()
 
-SITES = ['IA0112', 'IA0133', 'IA0157', 'IA0197', 'IA0200', 'IA0203', 'IA0241', 
-         'IA0364', 'IA0385', 'IA0536', 'IA0576', 'IA0600', 'IA0608', 'IA0745', 
-         'IA0753', 'IA0807', 'IA0910', 'IA0923', 'IA0933', 'IA1126', 'IA1063', 
-         'IA1233', 'IA1257', 'IA1277', 'IA1314', 'IA1319', 'IA1354', 'IA1394', 
-         'IA1402', 'IA1442', 'IA1533', 'IA1541', 'IA1635', 'IA0149', 'IA1704', 
-         'IA1705', 'IA0512', 'IA1833', 'IA1954', 'IA1962', 'IA2070', 'IA2110', 
-         'IA2171', 'IA2203', 'IA2209', 'IA2235', 'IA2299', 'IA2311', 'IA2364', 
-         'IA2367', 'IA2638', 'IA2573', 'IA2603', 'IA2689', 'IA2723', 'IA2724', 
-         'IA7892', 'IA2789', 'IA2864', 'IA2977', 'IA2999', 'IA3007', 'IA3120', 
-         'IA3288', 'IA3438', 'IA3473', 'IA3487', 'IA3509', 'IA3517', 'IA3584', 
-         'IA4094', 'IA3632', 'IA3718', 'IA3909', 'IA2041', 'IA3675', 'IA4063', 
-         'IA4101', 'IA4106', 'IA4142', 'IA4228', 'IA4244', 'IA4308', 'IA4874', 
-         'IA4381', 'IA4389', 'IA4502', 'IA4557', 'IA4585', 'IA4587', 'IA4624', 
-         'IA4705', 'IA4735', 'IA4758', 'IA4894', 'IA4926', 'IA4963', 'IA5086', 
-         'IA5123', 'IA5131', 'IA5198', 'IA5199', 'IA5230', 'IA5235', 'IA5250', 
-         'IA5493', 'IA5876', 'IA0001', 'IA5650', 'IA5769', 'IA5796', 'IA5837', 
-         'IA5952', 'IA5992', 'IA6103', 'IA6151', 'IA6160', 'IA6190', 'IA6199', 
-         'IA0002', 'IA6243', 'IA6305', 'IA6316', 'IA6327', 'IA6389', 'IA6273', 
-         'IA6527', 'IA6566', 'IA6719', 'IA7326', 'IA6766', 'IA6800', 'IA6891', 
-         'IA6910', 'IA6940', 'IA7147', 'IA7152', 'IA7161', 'IA7312', 'IA7386', 
-         'IA7594', 'IA7613', 'IA7664', 'IA7669', 'IA7678', 'IA7700', 'IA7708', 
-         'IA7859', 'IA0003', 'IA7726', 'IA7842', 'IA7844', 'IA8009', 'IA7979', 
-         'IA8026', 'IA8062', 'IA8296', 'IA8339', 'IA8568', 'IA8668', 'IA8688', 
-         'IA8706', 'IA8755', 'IA8806', 'IA9067', 'IA9132', 'IA9750', 'IA8410', 
-         'IA8693']
+DATA = """IA0112,ALBI4,A
+IA0133,ALGI4,B
+IA0157,ASNI4,C
+IA0200,AMSI4,F
+IA0203,AESI4,G
+IA0214,AMOI4,H
+IA0241,AKYI4,I
+IA0364,ATLI4,J
+IA0385,AUDI4,K
+IA0536,BCNI4,L
+IA0576,BEDI4,M
+IA0600,BLLI4,N
+IA0608,BLVI4,O
+IA0745,BLKI4,P
+IA0753,BLMI4,Q
+IA0807,BNWI4,R
+IA0910,BRII4,S
+IA0923,BTTI4,T
+IA0933,BRKI4,U
+IA1060,BLGI4,W
+IA1126,CMRI4,V
+IA1233,CINI4,Y
+IA1257,CASI4,Z
+IA1277,CSAI4,AA
+IA1319,CRPI4,AC
+IA1354,CNTI4,AD
+IA1394,CHRI4,AE
+IA1402,CIYI4,AF
+IA1442,CKPI4,AG
+IA1533,CLDI4,AH
+IA1541,CLII4,AI
+IA1635,CLNI4,AJ
+IA0149,ALRI4,AK
+IA1704,CLUI4,AL
+IA1705,CGGI4,AM
+IA0512,BTLI4,AO
+IA1833,CRNI4,AQ
+IA1954,CRCI4,AR
+IA1962,CRTI4,AS
+IA2041,DAKI4,CE
+IA2110,DCRI4,AU
+IA2171,DNSI4,AV
+IA2209,DMX,AX
+IA2235,DWTI4,AY
+IA2299,DNNI4,AZ
+IA2311,DORI4,BA
+IA2364,DLDI4,BB
+IA2573,ELDI4,BE
+IA2603,EKRI4,BF
+IA2638,ELMI4,BD
+IA2689,EMMI4,BG
+IA2724,ESTI4,BI
+IA7892,SNYI4,BJ
+IA2789,FRFI4,BK
+IA2864,FYTI4,BL
+IA2977,FSCI4,BM
+IA2999,WMTI4,BN
+IA3007,FTMI4,BO
+IA3120,GRWI4,BQ
+IA3288,GLNI4,BS
+IA3438,GRNI4,BT
+IA3473,GRII4,BU
+IA3487,GNDI4,BV
+IA3509,GTHI4,BW
+IA3517,GTTI4,BX
+IA3584,HPTI4,BY
+IA3632,HRLI4,CA
+IA3675,HSII4,CF
+IA3718,HAWI4,CB
+IA3909,HSTI4,CC
+IA4063,IDAI4,CH
+IA4094,IONI4,BZ
+IA4101,ICYI4,CI
+IA4142,IWAI4,CK
+IA4228,JFFI4,CL
+IA4244,JWLI4,CM
+IA4308,KANI4,CN
+IA4381,EOKI4,CP
+IA4389,KEQI4,CQ
+IA4502,KNXI4,CR
+IA4557,LMLI4,CS
+IA4585,3OI,CU
+IA4624,LSGI4,CW
+IA4705,LECI4,CX
+IA4735,LEMI4,CY
+IA4758,LENI4,CZ
+IA4874,LSXI4,CO
+IA4894,LOGI4,DA
+IA4926,LORI4,DB
+IA4963,LWDI4,DC
+IA5086,MHRI4,DD
+IA5123,MPTI4,DE
+IA5131,MKTI4,DF
+IA5198,MSHI4,DH
+IA5230,MCWI4,DJ
+IA5235,MCW,DK
+IA5250,MSNI4,DL
+IA5493,MFRI4,DM
+IA5650,MZUI4,DP
+IA5769,MTAI4,DQ
+IA5796,MPZI4,DR
+IA5837,MCTI4,DS
+IA5876,NHUI4,DN
+IA5952,NHPI4,DT
+IA5992,NWTI4,DU
+IA6103,NWDI4,DV
+IA6151,OAKI4,DW
+IA6160,OKMI4,DX
+IA6190,OCHI4,DY
+IA6199,OLNI4,DZ
+IA6243,ONAI4,EB
+IA6273,ORCI4,EG
+IA6305,OSAI4,EC
+IA6316,OSEI4,ED
+IA6327,OSKI4,EE
+IA6527,PEAI4,EH
+IA6566,PERI4,EI
+IA6719,POCI4,EJ
+IA6766,PSTI4,EL
+IA6800,PGHI4,EM
+IA6891,RANI4,EN
+IA6910,RADI4,EO
+IA6940,ROKI4,EP
+IA7147,RKRI4,EQ
+IA7152,RKVI4,ER
+IA7161,RKWI4,ES
+IA7312,SACI4,ET
+IA7326,SANI4,EK
+IA7386,SNBI4,EU
+IA7594,SHDI4,EV
+IA7613,SDHI4,EW
+IA7664,SIBI4,EX
+IA7669,SIDI4,EY
+IA7678,SGYI4,EZ
+IA7700,SIXI4,FA
+IA7859,SPRI4,FC
+IA7726,SXRI4,FE
+IA7844,3SE,FG
+IA7979,SLBI4,FI
+IA8009,SPTI4,FH
+IA8026,SWEI4,FJ
+IA8062,SWHI4,FK
+IA8296,TLDI4,FN
+IA8339,TRPI4,FO
+IA8568,VNTI4,FP
+IA8668,WAPI4,FR
+IA8688,WSHI4,FS
+IA8755,WAUI4,FV
+IA8806,WEBI4,FW
+IA9067,WLBI4,FY
+IA9132,WTRI4,FZ
+IA9750,ZRGI4,GA
+IA8410,UNDI4,GB
+IA8693,WHTI4,GC"""
 
-def get_site(year, month, site):
+METADATA = {}
+ordering = []
+for line in DATA.split("\n"):
+    tokens = line.split(",")
+    METADATA[ tokens[2].strip() ] = {'IEMRE': tokens[0], 'NWSLI': tokens[1]}
+    ordering.append( tokens[2].strip() )
+
+def good_value(val, bad):
+    if val == bad:
+        return 'M'
+    return val
+
+def get_site(year, month, iemre, nwsli):
     """
     do our work for this site
     """
@@ -66,36 +207,27 @@ def get_site(year, month, site):
                      'iemre': {'high': '', 'low': '', 'atob': '', 
                               'prec': '', 'sf': '', 'sog': ''}})
         sts += mx.DateTime.RelativeDateTime(days=1)
-    # Figure out the COOP NWSLI for this site
-    mcursor.execute(""" select id, ST_distance(
-    (select geom from stations where network = 'IACLIMATE' and id = %s), 
-    geom) from stations where network = 'IA_COOP' and climate_site = %s 
-    ORDER by st_distance ASC LIMIT 1""", (site, site))
-    if mcursor.rowcount == 0:
-        print 'ERROR', site
-        return data
-    nwsli = mcursor.fetchone()[0]
 
     # Go fetch COOP obs
     icursor.execute("""
     select extract(day from day), s.max_tmpf, s.min_tmpf, s.snow, s.snowd, 
     s.coop_tmpf, s.pday from summary_%s s JOIN stations t on (t.iemid = s.iemid) 
-    WHERE t.id = '%s' and extract(month from day) = %s
+    WHERE t.id = '%s' and extract(month from day) = %s and t.network = 'IA_COOP'
     """ % (year, nwsli, month))
     for row in icursor:
         idx = int(row[0])
-        data[idx]['coop']['high'] = row[1]
-        data[idx]['coop']['low'] = row[2]
+        data[idx]['coop']['high'] = good_value(row[1], -99)
+        data[idx]['coop']['low'] = good_value(row[2], 99)
         data[idx]['coop']['atob'] = row[5]
-        data[idx]['coop']['sf'] = row[3]
-        data[idx]['coop']['sog'] = row[4]
-        data[idx]['coop']['prec'] = row[6]
+        data[idx]['coop']['sf'] = good_value(row[3], -99)
+        data[idx]['coop']['sog'] = good_value(row[4], -99)
+        data[idx]['coop']['prec'] = good_value(row[6], -99)
 
     # Go Fetch IEMRE
     ccursor.execute("""
     select extract(day from day), high, low, snow, snowd, precip from 
     alldata_ia where station = %s and year = %s and month = %s
-    """, (site, year, month))
+    """, (iemre, year, month))
     for row in ccursor:
         idx = int(row[0])
         data[idx]['iemre']['high'] = row[1]
@@ -113,14 +245,14 @@ def get_sitename(site):
         return site
     return mcursor.fetchone()[0]
 
-def print_data(year, month, site, sheet, data):
+def print_data(year, month, iemre, nwsli, sheet, data):
     """
     Print out our data file!
     """
     row = sheet.row(0)
     row.write(8, '?')
     row.write(10, '?')
-    row.write(12, get_sitename(site))
+    row.write(12, "%s %s NWSLI: %s" % (get_sitename(iemre), iemre, nwsli) )
     row = sheet.row(1)
     row.write(2, 'YR')
     row.write(3, 'MO')
@@ -143,7 +275,7 @@ def print_data(year, month, site, sheet, data):
     while sts < ets:
         idx = int(sts.day)
         row = sheet.row(idx+1)
-        row.write(0, '%s' % (int(site[2:]),))
+        row.write(0, '%s' % (int(iemre[2:]),))
         row.write(2, year)
         row.write(3, month)
         row.write(4, sts.day)
@@ -165,9 +297,10 @@ def runner(year, month):
     Actually generate a text file for the given month
     """
     book = Workbook()
-    for site in SITES:
-        data = get_site(year, month, site)
-        sheet = book.add_sheet(site[2:])
+    for label in ordering:
+        data = get_site(year, month, METADATA[label]['IEMRE'],
+                        METADATA[label]['NWSLI'])
+        sheet = book.add_sheet(label)
         sheet.col(0).width = 256*5
         sheet.col(1).width = 256*2
         sheet.col(2).width = 256*5
@@ -175,8 +308,9 @@ def runner(year, month):
         sheet.col(4).width = 256*4
         for col in range(5,17):
             sheet.col(col).width = 256*5
-        print_data( year, month, site, sheet, data)
-    book.save("IEM%s%s.xlsx" % (year, month))
+        print_data( year, month, METADATA[label]['IEMRE'],
+                        METADATA[label]['NWSLI'], sheet, data)
+    book.save("IEM%s%02i.xls" % (year, month))
 
 if __name__ == '__main__':
     runner(int(sys.argv[1]), int(sys.argv[2]))
