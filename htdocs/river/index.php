@@ -1,5 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
+define("IEM_APPID", 71);
 include("$rootpath/include/database.inc.php");
 $THISPAGE = "severe-river";
 include("$rootpath/include/header.php");
@@ -19,7 +20,9 @@ $sevcol = Array(
 
 $nwsli_limiter = "";
 if (isset($_GET["dvn"])){
- $nwsli_limiter = "and r.nwsli IN ('FLTI2', 'CMMI4', 'LECI4', 'RCKI2', 'ILNI2', 'MUSI4', 'NBOI2', 'KHBI2', 'DEWI4', 'CNEI4', 'CJTI4', 'WAPI4','LNTI4', 'CMOI2', 'JOSI2', 'MLII2','GENI2')";
+ $nwsli_limiter = "and r.nwsli IN ('FLTI2', 'CMMI4', 'LECI4', 'RCKI2', 'ILNI2', 
+ 'MUSI4', 'NBOI2', 'KHBI2', 'DEWI4', 'CNEI4', 'CJTI4', 'WAPI4','LNTI4', 'CMOI2', 
+ 'JOSI2', 'MLII2','GENI2')";
  echo "<style>
 #iem-header {
   display: none;
@@ -36,9 +39,10 @@ body {
 </style>";
 }
 
-if (isset($_GET["state"])){
- $rs = pg_prepare($postgis, "SELECT", "select h.name, h.river_name, h.nwsli, foo.wfo, foo.eventid, foo.phenomena, r.severity, r.stage_text, r.flood_text, r.forecast_text, 
-   sumtxt(c.name || ', ') as counties from hvtec_nwsli h, 
+if (isset($_REQUEST["state"])){
+ $rs = pg_prepare($postgis, "SELECT", "select h.name, h.river_name, h.nwsli, 
+ foo.wfo, foo.eventid, foo.phenomena, r.severity, r.stage_text, 
+ r.flood_text, r.forecast_text, sumtxt(c.name || ', ') as counties from hvtec_nwsli h, 
    riverpro r, nws_ugc c, 
   (select distinct hvtec_nwsli, ugc, eventid, phenomena, wfo from warnings_". date("Y") ." WHERE 
    status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
@@ -49,6 +53,19 @@ if (isset($_GET["state"])){
    r.stage_text, r.flood_text, r.forecast_text");
  $rs = pg_execute($postgis, "SELECT", Array($state));
  $ptitle = "<h3>River Forecast Point Monitor by State</h3>";
+} else if (isset($_REQUEST["all"])){
+ $rs = pg_prepare($postgis, "SELECT", "select h.name, h.river_name, h.nwsli, 
+ foo.wfo, foo.eventid, foo.phenomena, r.severity, r.stage_text, 
+ r.flood_text, r.forecast_text, sumtxt(c.name || ', ') as counties from hvtec_nwsli h, 
+   riverpro r, nws_ugc c, 
+  (select distinct hvtec_nwsli, ugc, eventid, phenomena, wfo from warnings_". date("Y") ." WHERE 
+   status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
+   significance = 'W' and  expire > now()) as foo
+   WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli 
+   and c.ugc = foo.ugc GROUP by h.river_name, h.name, h.nwsli, foo.wfo, foo.eventid, foo.phenomena, r.severity,
+   r.stage_text, r.flood_text, r.forecast_text");
+ $rs = pg_execute($postgis, "SELECT", Array());
+ $ptitle = "<h3>River Forecast Point Monitor (view all)</h3>";
 } else {
  $rs = pg_prepare($postgis, "SELECT", "select h.name, h.river_name, h.nwsli, foo.wfo, foo.eventid, foo.phenomena, r.severity, r.stage_text, r.flood_text, r.forecast_text, 
    sumtxt(c.name || ', ') as counties
@@ -78,6 +95,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
    $row["forecast_text"]);
 }
 echo $ptitle;
+echo "<a href=\"?all\">View All</a>";
 echo "<p><form method='GET' name='wfo'>";
 echo 'Select by NWS Forecast Office:'. wfoSelect($wfo);
 echo "<input type='submit' value='Select by WFO'>";
