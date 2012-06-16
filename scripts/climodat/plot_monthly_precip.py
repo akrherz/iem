@@ -42,7 +42,7 @@ def do_month(ts, routes='m'):
      }
 
     tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
-    pqstr = "plot %s %s summary/iemre_iowa_total_precip.png %s/summary/iemre_total_precip.png png" % (
+    pqstr = "plot %s %s summary/iemre_iowa_total_precip.png %s/summary/iemre_iowa_total_precip.png png" % (
                                     routes, ts.strftime("%Y%m%d%H%M"), 
                                                               ts.strftime("%Y/%m"),)
     iemplot.postprocess(tmpfp, pqstr)
