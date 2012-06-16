@@ -1,5 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
+define("IEM_APPID", 72);
 $TITLE = "IEM | Current | Monthly Plots";
 $THISPAGE = "current-month";
 include("$rootpath/include/header.php"); 
@@ -18,6 +19,10 @@ include("$rootpath/include/header.php");
 <li><a href="/plotting/month/rainfall.phtml">Plots of Monthly Rainfall</a></li>
 <li><a href="../AWOS/reports/mon_prec.php">AWOS Monthly Totals</a></li>
 <li><a href="../ASOS/reports/mon_prec.php">ASOS Monthly Totals</a></li>
+	<li><a href="/timemachine/#58.0">Iowa Precipitation Analysis</a>
+	<br />Contour 
+	plot of analyzed precipitation for this month and previous months back
+	to 1893.</li>
 </ul>
 
 <h4>Snowfall</h4>
