@@ -82,10 +82,15 @@ $c0->set("data", "geom from (select significance, phenomena, geom, oid from warn
 
 $radar = $map->getlayerbyname("nexrad_n0q");
 $radar->set("status", MS_ON );
-if ($ts > 0) 
-{
-  $fp = "/mesonet/ARCHIVE/data/". gmdate('Y/m/d/', $radts) ."GIS/uscomp/n0r_". gmdate('YmdHi', $radts) .".png";
-  $radar->set("data", $fp);
+$fp = "/mesonet/ARCHIVE/data/". gmdate('Y/m/d/', $radts) ."GIS/uscomp/n0r_". gmdate('YmdHi', $radts) .".png";
+if (file_exists($fp)){
+  	$radar->set("data", $fp);
+	$title = "RADAR";
+	$y = 10;
+} else{
+  	$radar->set("status", MS_OFF );
+	$title = "RADAR Unavailable\n";
+	$y = 20;
 }
 
 
@@ -154,8 +159,8 @@ $d = date("m/d/Y h:i A", $radts);
 
 $layer = $map->getLayerByName("credits");
 $point = ms_newpointobj();
-$point->setXY(5, 10);
-$point->draw($map, $layer, $img, 0,  "RADAR: $d");
+$point->setXY(5, $y);
+$point->draw($map, $layer, $img, 0,  "${title}: $d");
 
 $map->drawLabelCache($img);
 
