@@ -1032,6 +1032,7 @@ LAYER
   TYPE ANNOTATION
   STATUS OFF
   TRANSFORM FALSE
+  LABELCACHE OFF
   CLASS
     NAME 'credits'
     LABEL
@@ -1047,7 +1048,7 @@ LAYER
 #      BACKGROUNDSHADOWSIZE 1 1
       TYPE TRUETYPE
       SIZE 16
-      FONT 'liberation-bold'
+      FONT 'liberation'
       POSITION CR
       FORCE TRUE
       PARTIALS TRUE
