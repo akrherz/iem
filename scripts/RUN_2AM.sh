@@ -1,19 +1,19 @@
 #!/bin/sh
 
 cd climodat
-/mesonet/python/bin/python daily_estimator.py IA
-/mesonet/python/bin/python daily_estimator.py KY
-/mesonet/python/bin/python daily_estimator.py IL
-/mesonet/python/bin/python daily_estimator.py IN
-/mesonet/python/bin/python daily_estimator.py OH
-/mesonet/python/bin/python daily_estimator.py MI
-/mesonet/python/bin/python daily_estimator.py WI
-/mesonet/python/bin/python daily_estimator.py MN
-/mesonet/python/bin/python daily_estimator.py ND
-/mesonet/python/bin/python daily_estimator.py SD
-/mesonet/python/bin/python daily_estimator.py NE
-/mesonet/python/bin/python daily_estimator.py KS
-/mesonet/python/bin/python daily_estimator.py MO
+python daily_estimator.py IA
+python daily_estimator.py KY
+python daily_estimator.py IL
+python daily_estimator.py IN
+python daily_estimator.py OH
+python daily_estimator.py MI
+python daily_estimator.py WI
+python daily_estimator.py MN
+python daily_estimator.py ND
+python daily_estimator.py SD
+python daily_estimator.py NE
+python daily_estimator.py KS
+python daily_estimator.py MO
 
 cd ../iemre
 /mesonet/python/bin/python grid_climodat.py

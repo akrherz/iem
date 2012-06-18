@@ -33,16 +33,15 @@ import iemplot
 import mx.DateTime
 import numpy
 import Ngl
-try:
-    import netCDF4 as netCDF3
-except:
-    import netCDF3
-from pyIEM import iemdb
-i = iemdb.iemdb()
-coop = i['coop']
-wepp = i['wepp']
-iem = i['iem']
-mesosite = i['mesosite']
+import netCDF4
+import iemdb
+import psycopg2.extras
+COOP = iemdb.connect('coop')
+ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+IEM = iemdb.connect('iem')
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+
 
 state = sys.argv[1]
 
@@ -63,28 +62,28 @@ def hardcode_asos( ts ):
     nt2 = network.Table("IA_ASOS")
 
     # Get the ASOS data
-    rs = iem.query("""
+    icursor.execute("""
        SELECT id, pday, max_tmpf, min_tmpf
        from summary_%s s, stations t WHERE t.iemid = s.iemid and day = '%s' and t.network in ('IA_ASOS')
        and pday >= 0 and min_tmpf < 99 and max_tmpf > -99 ORDER by id ASC""" % (
-       ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
-    for i in range(len(rs)):
-        cid = nt2.sts[rs[i]['id']]['climate_site']
-        print '%s - Precip: %.2f  DSM: %.2f High: %.1f DSM: %s Low: %.1f DSM: %s' % (rs[i]['id'],
-               nt.sts[cid]['precip'], rs[i]['pday'],
-               nt.sts[cid]['high'], rs[i]['max_tmpf'],
-               nt.sts[cid]['low'], rs[i]['min_tmpf']
+       ts.year, ts.strftime("%Y-%m-%d")))
+    for row in icursor:
+        cid = nt2.sts[row['id']]['climate_site']
+        print '%s - Precip: %.2f  DSM: %.2f High: %.1f DSM: %s Low: %.1f DSM: %s' % (row['id'],
+               nt.sts[cid]['precip'], row['pday'],
+               nt.sts[cid]['high'], row['max_tmpf'],
+               nt.sts[cid]['low'], row['min_tmpf']
         )
-        nt.sts[cid]['precip'] = rs[i]['pday']
-        nt.sts[cid]['high'] = rs[i]['max_tmpf']
-        nt.sts[cid]['low'] = rs[i]['min_tmpf']
+        nt.sts[cid]['precip'] = row['pday']
+        nt.sts[cid]['high'] = row['max_tmpf']
+        nt.sts[cid]['low'] = row['min_tmpf']
 
 
 def estimate_precip( ts ):
     """
     Estimate precipitation based on IEMRE, ouch
     """
-    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,), 'r')
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,), 'r')
     precip = nc.variables['p01m']
     # Figure out what offsets we care about!
     ts0 = ts + mx.DateTime.RelativeDateTime(hour=7)
@@ -110,18 +109,18 @@ def estimate_snow( ts ):
     snow = []
     lats = []
     lons = []
-    rs = iem.query("""
+    icursor.execute("""
        SELECT x(s.geom) as lon, y(s.geom) as lat, snow, snowd
        from summary_%s c, stations s WHERE day = '%s' and 
        s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
         'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
         'OH_COOP') and c.iemid = s.iemid 
-       and snowd >= 0""" % (ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
-    for i in range(len(rs)):
-        lats.append( rs[i]['lat'] )
-        lons.append( rs[i]['lon'] )
-        snow.append( rs[i]['snow'] )
-        snowd.append( rs[i]['snowd'] )
+       and snowd >= 0""" % (ts.year, ts.strftime("%Y-%m-%d")))
+    for row in icursor:
+        lats.append( row['lat'] )
+        lons.append( row['lon'] )
+        snow.append( row['snow'] )
+        snowd.append( row['snowd'] )
 
     if len(lats) < 5: # No data!
         for id in nt.sts.keys():
@@ -163,18 +162,18 @@ def estimate_hilo( ts ):
     lows = []
     lats = []
     lons = []
-    rs = iem.query("""
+    icursor.execute("""
        SELECT x(s.geom) as lon, y(s.geom) as lat, max_tmpf, min_tmpf
        from summary_%s c, stations s WHERE day = '%s' and s.network in ('AWOS','IA_ASOS', 'MN_ASOS', 'WI_ASOS', 
        'IL_ASOS', 'MO_ASOS',
         'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
         'OH_ASOS') and c.iemid = s.iemid
-       and max_tmpf > -90 and min_tmpf < 90""" % (ts.year, ts.strftime("%Y-%m-%d"))).dictresult()
-    for i in range(len(rs)):
-        lats.append( rs[i]['lat'] )
-        lons.append( rs[i]['lon'] )
-        highs.append( rs[i]['max_tmpf'] )
-        lows.append( rs[i]['min_tmpf'] )
+       and max_tmpf > -90 and min_tmpf < 90""" % (ts.year, ts.strftime("%Y-%m-%d")))
+    for row in icursor:
+        lats.append( row['lat'] )
+        lons.append( row['lon'] )
+        highs.append( row['max_tmpf'] )
+        lows.append( row['min_tmpf'] )
 
     # Create the analysis
     highA = Ngl.natgrid(lons, lats, highs, iemre.XAXIS, iemre.YAXIS)
@@ -190,7 +189,7 @@ def commit( ts ):
     """
     # Remove old entries
     sql = "DELETE from alldata_%s WHERE day = '%s'" % (state.lower(), ts.strftime("%Y-%m-%d"),)
-    coop.query( sql )
+    ccursor.execute( sql )
     # Inject!
     for id in nt.sts.keys():
         sql = """INSERT into alldata_%s(station, day, high, low, precip, snow, 
@@ -200,7 +199,7 @@ def commit( ts ):
         nt.sts[id]['high'], nt.sts[id]['low'], nt.sts[id]['precip'],
         nt.sts[id]['snow'],
         ts.strftime("%m%d"), ts.year, ts.month, nt.sts[id]['snowd'])
-        coop.query( sql )
+        ccursor.execute( sql )
        
 
 
@@ -215,3 +214,10 @@ if __name__ == '__main__':
     if state.upper() == 'IA':
         hardcode_asos(ts )
     commit( ts )
+    ccursor.close()
+    COOP.commit()
+    COOP.close()
+    icursor.close()
+    IEM.commit()
+    IEM.close()
+    
