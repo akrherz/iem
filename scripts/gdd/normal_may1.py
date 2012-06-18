@@ -8,11 +8,12 @@ now = mx.DateTime.now()
 if now.month < 5 or now.month > 10:
   sys.exit(0)
 
-from pyIEM import iemdb, stationTable
 import network
 nt = network.Table('IACLIMATE')
-i = iemdb.iemdb()
-coop = i['coop']
+import iemdb
+COOP = iemdb.connect('coop', bypass=True)
+import psycopg2.extras
+ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 # Compute normal from the climate database
 sql = """SELECT station, sum(gdd50) as gdd, sum(sdd86) as sdd 
@@ -25,13 +26,13 @@ lats = []
 lons = []
 gdd50 = []
 sdd86 = []
-rs = coop.query(sql).dictresult()
-for i in range(len(rs)):
-  id = rs[i]['station']
+ccursor.execute( sql )
+for row in ccursor:
+  id = row['station']
   lats.append( nt.sts[id]['lat'] )
   lons.append( nt.sts[id]['lon'] )
-  gdd50.append( rs[i]['gdd'] )
-  sdd86.append( rs[i]['sdd'] )
+  gdd50.append( row['gdd'] )
+  sdd86.append( row['sdd'] )
 
 
 cfg = {
