@@ -2,16 +2,13 @@
 import os
 import psycopg2
 
-def connect(dbname, bypass=False):
+def connect(dbname, bypass=False, dbhost='iemdb'):
     """
     Generate a psycopg2 database connection
     """
-    dbhost = 'iemdb'
     dbuser = os.environ.get('USER', 'nobody')
     if dbuser == 'akrherz' and not bypass:
-        dbhost = 'localhost'
-        return psycopg2.connect(database=dbname, host=dbhost, user=dbuser,
-                                password='secret')
+        return psycopg2.connect(database=dbname)
     if dbuser == 'akrherz' and bypass:
         dbuser = 'nobody'
     return psycopg2.connect(database=dbname, host=dbhost, user=dbuser)
