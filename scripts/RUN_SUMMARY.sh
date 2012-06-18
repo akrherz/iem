@@ -29,7 +29,7 @@ cd ../gs
 
 
 cd ../season
-/mesonet/python/bin/python plot_4month_stage4.py
+python plot_4month_stage4.py
 
 cd ../year
 python precip.py

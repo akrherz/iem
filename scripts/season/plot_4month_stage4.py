@@ -5,16 +5,13 @@ import numpy
 import re, os, sys
 import math, pdb
 import mx.DateTime
-try:
-    import netCDF4 as netCDF3
-except:
-    import netCDF3
-from pyIEM import stationTable, iemdb
+import netCDF4
+import iemdb
+import subprocess
 import network
 nt = network.Table("IACLIMATE")
-i = iemdb.iemdb()
-coop = i['coop']
-wepp = i['wepp']
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor()
 
 ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(hours=27)
 t0 = ts - mx.DateTime.RelativeDateTime(months=4) + mx.DateTime.RelativeDateTime(day=1)
@@ -48,11 +45,11 @@ sql = """SELECT station, sum(precip) as acc from climate51
     WHERE %s and station NOT IN ('ia7842','ia4381', 'ia1063') 
     and substr(station,0,3) = 'IA'
     GROUP by station ORDER by acc ASC""" % (v,)
-rs = coop.query(sql).dictresult()
-for i in range(len(rs)):
-    station = rs[i]['station']
+ccursor.execute( sql )
+for row in ccursor:
+    station = row[0]
     #print station, rs[i]['acc']
-    nrain.append(float(rs[i]['acc']))
+    nrain.append(float(row[1]))
     lats.append(nt.sts[station]['lat'])
     lons.append(nt.sts[station]['lon'])
 
@@ -82,25 +79,28 @@ lons = None
 interval = mx.DateTime.RelativeDateTime(days=1)
 now = t0
 while (now <= ts):
-  fp = "/mesonet/wepp/data/rainfall/netcdf/daily/%s_rain.nc" % (now.strftime("%Y/%m/%Y%m%d") ,) 
-  if not os.path.isfile(fp):
-    print fp
-  nc = netCDF3.Dataset(fp)
-  if (lats is None):
-    ncrain = numpy.ravel(nc.variables["rainfall_1day"]) / 25.4
-    lats = numpy.ravel(nc.variables["latitude"])
-    lons = numpy.ravel(nc.variables["longitude"])
+    fp = "/mesonet/wepp/data/rainfall/netcdf/daily/%s_rain.nc" % (now.strftime("%Y/%m/%Y%m%d") ,) 
+    if not os.path.isfile(fp):
+        print fp
+        now += interval
+        continue
+    nc = netCDF4.Dataset(fp)
+    if lats is None:
+        ncrain = numpy.ravel(nc.variables["rainfall_1day"]) / 25.4
+        lats = numpy.ravel(nc.variables["latitude"])
+        lons = numpy.ravel(nc.variables["longitude"])
+        now += interval
+        continue
+    a = numpy.ravel(nc.variables["rainfall_1day"]) / 25.4
+    # No daily values over 10 inches, sigh
+    #a = numpy.where(a>10,0,a)
+    b = ncrain
+    ncrain = a + b
+    #print now, max(a), max(ncrain)
+    if max(a) > 10:
+        print "MAX RAIN>10 DATE:%s VALUE:%s" % (now, max(a))
     now += interval
-    continue
-  a = numpy.ravel(nc.variables["rainfall_1day"]) / 25.4
-  # No daily values over 10 inches, sigh
-  #a = numpy.where(a>10,0,a)
-  b = ncrain
-  ncrain = a + b
-  #print now, max(a), max(ncrain)
-  if (max(a) > 10):
-    print "MAX RAIN>10 DATE:%s VALUE:%s" % (now, max(a))
-  now += interval
+    nc.close()
 
 zobs = Ngl.natgrid(lons, lats, ncrain, xo, yo)
 # Kill DVN troubles :(
@@ -218,17 +218,17 @@ contour = Ngl.contour_map(xobs,zobs,resources)
 del contour
  
 Ngl.end()
-os.system("convert -trim obs.ps obs.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/4mon_stage4obs.png bogus png' obs.png")
+subprocess.call("convert -trim obs.ps obs.png", shell=True)
+subprocess.call("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/4mon_stage4obs.png bogus png' obs.png", shell=True)
 os.remove("obs.ps")
 os.remove("obs.png")
 
-os.system("convert -trim  norms.ps norms.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/4mon_normals.png bogus png' norms.png")
+subprocess.call("convert -trim  norms.ps norms.png", shell=True)
+subprocess.call("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/4mon_normals.png bogus png' norms.png", shell=True)
 os.remove("norms.ps")
 os.remove("norms.png")
 
-os.system("convert -trim  diff.ps diff.png")
-os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/4mon_diff.png bogus png' diff.png")
+subprocess.call("convert -trim  diff.ps diff.png", shell=True)
+subprocess.call("/home/ldm/bin/pqinsert -p 'plot c 000000000000 summary/4mon_diff.png bogus png' diff.png", shell=True)
 os.remove("diff.ps")
 os.remove("diff.png")
