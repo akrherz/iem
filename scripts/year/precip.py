@@ -6,10 +6,7 @@ import numpy
 import re, os
 import math
 import mx.DateTime
-try:
-    import netCDF4 as netCDF3
-except:
-    import netCDF3
+import netCDF4
 import iemdb, network
 st = network.Table('IACLIMATE')
 COOP = iemdb.connect('coop', bypass=True)
@@ -85,7 +82,7 @@ iemplot.postprocess(tmpfp, pqstr)
 
 # -----------------------------------
 # - Stage4 Observations
-nc = netCDF3.Dataset("/mesonet/wepp/data/rainfall/netcdf/yearly/%srain.nc" % (ts.year,) )
+nc = netCDF4.Dataset("/mesonet/wepp/data/rainfall/netcdf/yearly/%srain.nc" % (ts.year,) )
 ncrain = nc.variables["yrrain"][:] 
 lats = nc.variables["latitude"][:]
 lons = nc.variables["longitude"][:]
