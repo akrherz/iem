@@ -37,5 +37,3 @@ python plot_gdd.py
 python plot_gdd.py gdd52
 python plot_gdd.py gdd48
 
-cd ../summary
-/mesonet/python/bin/python rwis_daily_summary.py
