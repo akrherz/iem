@@ -1,9 +1,9 @@
 # Scripts to run for summary type plots
 # Run this only a couple of times per day, probably
-set echo
+#set echo
 
 cd gdd
-/mesonet/python/bin/python normal_may1.py
+python normal_may1.py
 
 cd ../current
 /mesonet/python/bin/python plot_hilo.py 1
