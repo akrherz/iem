@@ -205,7 +205,7 @@ def doNetwork(_network, shef_fp, thres, qdict):
         p06i = precip_diff(current_pmonth, hr6_pmonth)
         pday = ob['pday']
 
-        if qdict.get(nwsli, {}).get('precip', False):
+        if qdict.get(nwsli, {}).get('precip', False) or network == 'KIMT':
             phour = None
             p03i = None
             p06i = None
