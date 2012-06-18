@@ -1,13 +1,12 @@
 """
  Script to take current SHEF obs and generate a METAR summary
-$Id: $:
 """
 from twisted.python import log
 log.startLogging( open('/mesonet/data/logs/snet_fe.log', 'a') )
 
 import re, mx.DateTime
 SCRIPT_TIME = mx.DateTime.now()
-
+import subprocess
 import tempfile
 import os
 import sys
@@ -20,16 +19,7 @@ nt = network.Table(("KCCI", "KELO", "KIMT"))
 import iemdb
 IEM = iemdb.connect("iem", bypass=True)
 
-badPrecip = [
-  "SCOI4", # 70140
-  "SBSI4", # 70139
-  "SGRI4", # 70127
-  "SLUI4", # 56996
-  "SOSI4", # 62514
-  "SFCI4", "SNII4",
-  "SRSI4", "SNKI4", "SRUM5",'BKGS2', 'LMSM5', 'SDNI4', 'MTMS2', 'MLES2', 'KKAS2', 'CLTS2', 
-  'MTYS2', 'BHHS2', 'PESS2', 'ICSI4', 'WHSS2', 'MOBS2', 'CHAS2', 'RDPS2', 'GETS2', 'ESDS2', 
-  'CLYI4', 'FSNS2', 'WMSM5', 'EPJS2', 'CCES2', 'RRCM5', 'MMSS2', 'LDSS2', "SKWI4","SBLM5"]
+
 
 
 # Files we write
@@ -163,12 +153,13 @@ def getm_c(ob, idx):
         return 'M'
     return '%.0f' % (valc,)
 
-def doNetwork(_network, shef_fp, thres):
+def doNetwork(_network, shef_fp, thres, qdict):
     """
     Process a schoolnet network and do various things
     @param network string network name
     @param shef_fp file pointer to shef product file
     @param thres time threshold we care about for alerting
+    @param qdict dictionary of sites we don't care about
     """
     now = mx.DateTime.now()
     # Get Obs
@@ -214,7 +205,7 @@ def doNetwork(_network, shef_fp, thres):
         p06i = precip_diff(current_pmonth, hr6_pmonth)
         pday = ob['pday']
 
-        if nwsli in badPrecip:
+        if qdict.get(nwsli, {}).get('precip', False):
             phour = None
             p03i = None
             p06i = None
@@ -228,7 +219,7 @@ def doNetwork(_network, shef_fp, thres):
                                 pretty_precip(pcounter), 
                                 ob.get('sname', 'Unknown')))
         if _network == 'KCCI':
-            LOCDSMRR5.write("%s      %3s / %5s\n" % (nwsli,
+                LOCDSMRR5.write("%s      %3s / %5s\n" % (nwsli,
                                 pretty_tmpf(ob), pretty_precip(pcounter)))
         # CSV FILE!
         for fp in [CSVFILE, KELOCSVFILE]:
@@ -294,46 +285,67 @@ def post_process():
     
     saoname = "IA.snet%s.sao" % (SCRIPT_TIME.gmtime().strftime("%d%H%M"),)
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % (saoname, saofn)
-    os.system( cmd )
+    subprocess.call( cmd, shell=True )
     os.unlink(saofn)
 
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('snet.csv', csvfn)
-    os.system( cmd )
+    subprocess.call( cmd, shell=True )
     os.unlink(csvfn)
 
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('kelo.csv', kelocsvfn)
-    os.system( cmd )
+    subprocess.call( cmd, shell=True )
     os.unlink(kelocsvfn)
     
     if SCRIPT_TIME.minute in [15,35]:
         cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('LOCDSMRR5DMX.dat', locdsmfn)
-        os.system( cmd )
+        subprocess.call( cmd, shell=True )
     if SCRIPT_TIME.minute in [55,]:
         cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('SUADSMRR5DMX.dat', rr5fn)
-        os.system( cmd )
+        subprocess.call( cmd, shell=True )
         cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('SUAFSDRR5FSD.dat', fsdrr5fn)
-        os.system( cmd )
+        subprocess.call( cmd, shell=True )
     os.unlink(locdsmfn)
     os.unlink(rr5fn)
     os.unlink(fsdrr5fn)
-    
-    #
     os.unlink(kimtrr5fn)
 
+def loadQC():
+    """
+    See which sites have flags against them
+    """
+    qdict = {}
+    portfolio = iemdb.connect('portfolio', dbhost='meteor.geol.iastate.edu',
+                              bypass=True)
+    pcursor = portfolio.cursor()
+    
+    pcursor.execute("""
+    select s_mid, sensor, status from tt_base WHERE sensor is not null 
+    and status != 'CLOSED' and portfolio in ('kccisnet','kelosnet','kimtsnet')
+    """)
+    for row in pcursor:
+        if not qdict.has_key(row[0]):
+            qdict[row[0]] = {}
+        if row[1].find("precip") > -1:
+            qdict[row[0]]['precip'] = True
+    
+    pcursor.close()
+    portfolio.close()
+    return qdict
 
-def main():
+if __name__ == '__main__':
+    qdict = loadQC()
     loadCounters()
     writeHeader()
     now = mx.DateTime.now()
-    doNetwork('KCCI', DMXRR5, now - mx.DateTime.RelativeDateTime(minutes=60))
-    doNetwork('KIMT', BADRR5, now - mx.DateTime.RelativeDateTime(minutes=60))
-    doNetwork('KELO', FSDRR5, now - mx.DateTime.RelativeDateTime(minutes=300))
+    doNetwork('KCCI', DMXRR5, now - mx.DateTime.RelativeDateTime(minutes=60),
+              qdict)
+    doNetwork('KIMT', BADRR5, now - mx.DateTime.RelativeDateTime(minutes=60),
+              qdict)
+    doNetwork('KELO', FSDRR5, now - mx.DateTime.RelativeDateTime(minutes=300),
+              qdict)
 
     writeCounters()
     closeFiles()
     post_process()
     iemtracker.send()
     log.msg("FINISH...")
-
-if __name__ == '__main__':
-    main()
