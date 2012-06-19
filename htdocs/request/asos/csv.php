@@ -37,7 +37,7 @@ while(list($k,$id) = each($stations))
 		max(x(s.geom)) as lon, max(y(s.geom)) as lat from t%s t, stations s
 		where s.id = $1 and (s.network ~* 'ASOS' or s.network ~* 'AWOS')
 		and t.station = s.id and t.valid BETWEEN '%s'::date 
-		and '%s'::date + '8 days'::interval GROUP by station, valid 
+		and '%s'::date + '9 days'::interval GROUP by station, valid 
 		ORDER by valid ASC", date("Y", $ts), 
 		date("Y-m-d", $ts), date("Y-m-d", $ts) ));
 		}
