@@ -3,7 +3,7 @@
 # 
 YYYY=$(date -u +'%Y')
 MM=$(date -u +'%m')
-DD=$(date -u +'%m')
+DD=$(date -u +'%d')
 HH=$(date -u +'%H')
 
 cd mos
