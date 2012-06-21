@@ -1,3 +1,11 @@
+#
+# We are run at :10 after the hour, some of these processes are intensive 
+# 
+YYYY=$(date -u +'%Y')
+MM=$(date -u +'%m')
+DD=$(date -u +'%m')
+HH=$(date -u +'%H')
+
 cd mos
 /mesonet/python/bin/python current_bias.py NAM
 /mesonet/python/bin/python current_bias.py GFS
@@ -37,7 +45,7 @@ cd ../iemre
 /mesonet/python/bin/python grid_asos.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
 
 cd ../q2
-python make_raster_24h.py
+python make_raster_24h.py $YYYY $MM $DD $HH
 
 cd ../smos
 /mesonet/python/bin/python ingest.py
