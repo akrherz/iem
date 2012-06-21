@@ -16,6 +16,14 @@ TILES = {
 WEST = -130.00
 NORTH = 55.00
 
+def get_image_xy(lon, lat):
+    """
+    Return the x, y pair for the point in the image valid for this lon, lat
+    """
+    x = (lon - WEST) * 100
+    y = (NORTH - lat) * 100
+    return x, y
+
 def random_zeros():
     """
     Generate some number of random zeros
