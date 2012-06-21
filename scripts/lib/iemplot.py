@@ -187,7 +187,7 @@ def simple_valplot(lons, lats, vals, cfg):
     wks = Ngl.open_wks( "ps",tmpfp,rlist)
     if cfg.has_key("_conus"):
         res = conus()
-    elif cfg.has_key("_midwest"):
+    elif cfg.get("_midwest", False):
         res = midwest()
     else:
         res = iowa()
@@ -260,7 +260,7 @@ def simple_grid_fill(xaxis, yaxis, grid, cfg):
     wks = Ngl.open_wks( "ps",tmpfp,rlist)
     if cfg.has_key("_conus"):
         res = conus()
-    elif cfg.has_key("_midwest"):
+    elif cfg.get("_midwest", False):
         res = midwest()
     else:
         res = iowa2()
@@ -321,7 +321,7 @@ def simple_contour(lons, lats, vals, cfg):
     # Create Analysis
     if cfg.has_key("_conus"):
         analysis, res = grid_conus(lons, lats, vals)
-    elif cfg.has_key("_midwest"):
+    elif cfg.get("_midwest", False):
         analysis, res = grid_midwest(lons, lats, vals)
     else:
         analysis, res = grid_iowa(lons, lats, vals)
@@ -686,6 +686,8 @@ def midwest():
                                "Conterminous US : Nebraska",
                                "Conterminous US : Kansas",
                                "Conterminous US : Missouri",
+                               "Conterminous US : Ohio",
+                               "Conterminous US : Kentucky",
                                ]
     res.mpShapeMode = "FreeAspect"
 
@@ -734,6 +736,8 @@ def midwest():
                                    "Conterminous US : Michigan",
                                    "Conterminous US : South Dakota",
                                    "Conterminous US : North Dakota",
+                                   "Conterminous US : Ohio",
+                                   "Conterminous US : Kentucky",
                                    ]
 
 
@@ -769,7 +773,7 @@ def webprocess(tmpfp, rotate=""):
     os.remove("%s.ps" % (tmpfp,) )
 
 def postprocess(tmpfp, pqstr, rotate="", thumb=False, 
-            thumbpqstr="", fname=None):
+            thumbpqstr="", fname=None, colors=256):
     """
     Helper to postprocess the plot
     """
@@ -777,7 +781,7 @@ def postprocess(tmpfp, pqstr, rotate="", thumb=False,
         print "File %s.ps is missing!" % (tmpfp,)
         return
     # Step 1. Convert to PNG
-    cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors 256 +repage %s.ps %s.png" % (rotate, tmpfp, tmpfp)
+    cmd = "convert %s -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors %s +repage %s.ps %s.png" % (rotate, colors, tmpfp, tmpfp)
     os.system( cmd )
 
     if fname is not None:

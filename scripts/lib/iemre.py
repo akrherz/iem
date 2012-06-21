@@ -40,6 +40,15 @@ def hour_idx(ts):
     basets = mx.DateTime.DateTime(ts.year,1,1,0,0)
     return int((ts - basets).hours)
 
+def day_idx(ts):
+    """
+    Return the netCDF daily grid index value for this timestamp
+    @param ts mx.DateTime object
+    @return int index value
+    """
+    basets = mx.DateTime.DateTime(ts.year,1,1,0,0)
+    return int((ts - basets).days)
+
 def k2f(ar):
     """
     Convert numpy array ar from Kelvin to Fahrenhit
