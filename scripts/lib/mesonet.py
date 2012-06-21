@@ -1,5 +1,20 @@
 # Library of help functions
 import math
+import os
+import subprocess
+
+def bring_me_file(fp):
+    """
+    Tool to copy a file from the IEM to my local disk for testing purposes
+    """
+    dir = os.path.dirname( fp )
+    if not os.path.isdir( dir ):
+        os.makedirs( dir )
+    cmd = "scp -q mesonet@mesonet:%s %s" % (fp, fp)
+    print "SCP from IEM: %s" % (fp,)
+    subprocess.call(cmd, shell=True)
+    
+
 def feelslike(tmpf, relh, sped):
   if (tmpf > 50):
     return heatidx(tmpf, relh)

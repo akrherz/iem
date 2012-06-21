@@ -2,7 +2,8 @@
 Support the NMQ netCDF files
 """
 import random
-
+import mx.DateTime
+import os
 TILES = {
          1: [-130., 55.], # 2001x1501  NW
          2: [-110., 55.], # 2001x1501  
@@ -15,6 +16,46 @@ TILES = {
 }
 WEST = -130.00
 NORTH = 55.00
+
+def get_precip(sts, ets):
+    """
+    Get the precip data for a period of choice
+    """
+    # Expensive
+    import osgeo.gdal as gdal
+    # Figure out our period
+    pointer = sts
+    
+    # Figure out which files we have available to make this work
+    files = []
+    for dayint in [1,1]:
+        now = pointer + mx.DateTime.RelativeDateTime(days=dayint)
+        while now <= ets:
+            gmt = now.gmtime()
+            fp = gmt.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/q2/p"+ 
+                               ` 24*dayint ` +"h_%Y%m%d%H00.png")
+            if os.path.isfile(fp):
+                files.append( fp )
+                pointer = now
+            #else:
+            #    mesonet.bring_me_file( fp )
+            now += mx.DateTime.RelativeDateTime(days=dayint)
+
+    if len(files) == 0:
+        print 'No Data Available for Q2 monthly_total_plot.py'
+        return None
+    # Now we have files to loop over and add precip data too!
+    total = None
+    for file in files:
+        img = gdal.Open(file, 0)
+        data = img.ReadAsArray() # 3500, 7000 (y,x) staring upper left I think
+        if total is None:
+            total = data
+        else:
+            total += data
+        del img
+        
+    return total
 
 def get_image_xy(lon, lat):
     """
