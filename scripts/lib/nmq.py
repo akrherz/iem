@@ -4,6 +4,8 @@ Support the NMQ netCDF files
 import random
 import mx.DateTime
 import os
+import mesonet
+import numpy
 TILES = {
          1: [-130., 55.], # 2001x1501  NW
          2: [-110., 55.], # 2001x1501  
@@ -50,7 +52,7 @@ def get_precip(sts, ets):
         img = gdal.Open(file, 0)
         data = img.ReadAsArray() # 3500, 7000 (y,x) staring upper left I think
         if total is None:
-            total = data
+            total = numpy.zeros( numpy.shape(data) , 'f')
         else:
             total += data
         del img
