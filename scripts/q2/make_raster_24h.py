@@ -2,6 +2,12 @@
  Generate a raster of 24hour precipitation totals from Q2
 
  run from RUN_10_AFTER.sh
+ 
+ 255 levels...  wanna do 0 to 20 inches
+ 
+ 0-1   -> 100 - 0.01 res
+ 1-5   -> 80 - 0.05 res
+ 5-20  -> 75 - 0.20 res
 """
 
 import numpy
@@ -14,6 +20,7 @@ import tempfile
 import random
 import subprocess
 import nmq
+import mesonet
 
 def make_colorramp():
     """
@@ -73,21 +80,32 @@ def doit(gts, hr):
     for tile in range(1,9):
         fp = make_fp(tile, gts)
         if not os.path.isfile(fp):
+            #mesonet.bring_me_file( fp )
             print "q2_raster_%sh Missing Tile: %s Time: %s" % (hr, tile, gts)
             continue
         nc = netCDF4.Dataset( fp )
         # Our 24h rasters will support ~24 inch rainfalls
         hsr = nc.variables["rad_hsr_%sh" % (hr,)]
-        val = hsr[:] / hsr.Scale / 2.0 # convert to mm
-        # Bump up by one, so that we can set missing to color index 0
-        val += 1.0
-        val = numpy.where(val < 1.0, 0., val)
+        val = hsr[:] / hsr.Scale # mm
+        image = numpy.zeros( numpy.shape(val), 'i')
+        """
+         255 levels...  wanna do 0 to 20 inches
+         index 255 is missing, index 0 is 0
+         0-1   -> 100 - 0.01 res ||  0 - 25   -> 100 - 0.25 mm  1
+         1-5   -> 80 - 0.05 res  ||  25 - 125 ->  80 - 1.25 mm  101
+         5-20  -> 75 - 0.20 res  || 125 - 500  ->  75 - 5 mm    181
+        """
+        image = numpy.where(val >= 500, 254, image)
+        image = numpy.where(numpy.logical_and(val >= 125, val < 500), 180 + ((val - 125.) / 5.0), image)
+        image = numpy.where(numpy.logical_and(val >= 25, val < 125), 100 + ((val - 25.) / 1.25), image)
+        image = numpy.where(numpy.logical_and(val >= 0, val < 25), 0 + ((val - 0.) / 0.25), image)
+        image = numpy.where( val < 0, 255, image)
 
         ysz, xsz = numpy.shape(val)
         x0 = (nmq.TILES[tile][0] - west) * 100.0
         y0 = (north - nmq.TILES[tile][1]) * 100.0
         #print tile, x0, xsz, y0, ysz, val[0,0]
-        imgdata[y0:(y0+ysz-1),x0:(x0+xsz-1)] = val.astype('int')[:-1,:-1]
+        imgdata[y0:(y0+ysz-1),x0:(x0+xsz-1)] = image[:-1,:-1]
         nc.close()
     # Stress our color ramp
     #for i in range(256):
