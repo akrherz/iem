@@ -1,7 +1,10 @@
 <?php
+/*
+ * Download COOP observations from the QC'd table
+ */
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-$connection =iemdb("coop");
+$connection = iemdb("coop");
 include("$rootpath/include/mlib.php");
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
@@ -71,9 +74,9 @@ $nicedate = adodb_date("Y-m-d", $ts1);
 
 $d = Array("space" => " ", "comma" => "," , "tab" => "\t");
 
-$sqlStr .= "to_char(day, 'YYYY/mm/dd') as dvalid from ".$table ;
-$sqlStr .= " WHERE day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ";
-$sqlStr .= " and station IN ". $stationString ." ORDER by day ASC";
+$sqlStr .= "to_char(day, 'YYYY/mm/dd') as dvalid, extract(doy from day) 
+ as doy from $table WHERE day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' 
+ and station IN ". $stationString ." ORDER by day ASC";
 
 /**
  * Must handle different ideas for what to do...
@@ -121,9 +124,9 @@ else if ($what != "plot"){
 
  pg_close($connection);
   if ($gis == "yes"){
-    echo "station". $d[$delim] ."station_name". $d[$delim] ."lat". $d[$delim] ."lon". $d[$delim] ."day". $d[$delim];
+    echo "station". $d[$delim] ."station_name". $d[$delim] ."lat". $d[$delim] ."lon". $d[$delim] ."day". $d[$delim] ."julianday". $d[$delim];
   } else {
-    echo "station". $d[$delim] ."station_name". $d[$delim] ."day". $d[$delim] ;
+    echo "station". $d[$delim] ."station_name". $d[$delim] ."day". $d[$delim] ."julianday". $d[$delim];
   }
   for ($j=0; $j < $num_vars;$j++){
     echo $vars[$j]. $d[$delim];
@@ -140,7 +143,7 @@ else if ($what != "plot"){
   if ($gis == "yes"){
      echo  $d[$delim] . $cities[$sid]["lat"] . $d[$delim] .  $cities[$sid]["lon"] ;
   } 
-  echo $d[$delim] . $row["dvalid"] . $d[$delim];
+  echo $d[$delim] . $row["dvalid"] . $d[$delim] . $row["doy"] . $d[$delim];
   for ($j=0; $j < $num_vars;$j++){
     echo $row["var".$j]. $d[$delim];
     if ($vars[$j] == "ca1") echo $skycover[$row["var".$j]] . $d[$delim];
