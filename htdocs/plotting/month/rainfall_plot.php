@@ -58,7 +58,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 	$p = $row["precip"];
 	$climate[$i] = $p;
 	$atot += $p;
-	$cdiff[$i] = $aobs[$i] - $atot ;
+	$cdiff[$i] = @$aobs[$i] - $atot ;
 	$aclimate[$i] = $atot;
 	$zeros[$i] = 0;
 }
