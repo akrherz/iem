@@ -62,11 +62,6 @@ $ts2 = adodb_mktime(0, 0, 0, $month2, $day2, $year2) or
 $num_vars = count($vars);
 if ( $num_vars == 0 )  die("You did not specify data");
 
-$sqlStr = "SELECT station, ";
-for ($i=0; $i< $num_vars;$i++){
-  $sqlStr .= $vars[$i] ." as var".$i.", ";
-}
-
 $sqlTS1 = adodb_date("Y-m-d", $ts1);
 $sqlTS2 = adodb_date("Y-m-d", $ts2);
 $table = "alldata";
@@ -74,8 +69,12 @@ $nicedate = adodb_date("Y-m-d", $ts1);
 
 $d = Array("space" => " ", "comma" => "," , "tab" => "\t");
 
-$sqlStr .= "to_char(day, 'YYYY/mm/dd') as dvalid, extract(doy from day) 
- as doy from $table WHERE day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' 
+$sqlStr = "SELECT station, *, to_char(day, 'YYYY/mm/dd') as dvalid, 
+ extract(doy from day) as doy, 
+ round((5.0/9.0 * (high - 32.0))::numeric,1) as highc,
+ round((5.0/9.0 * (high - 32.0))::numeric,1) as lowc, 
+ round((precip * 25.4)::numeric,1) as precipmm
+ from $table WHERE day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' 
  and station IN ". $stationString ." ORDER by day ASC";
 
 /**
@@ -130,9 +129,6 @@ else if ($what != "plot"){
   }
   for ($j=0; $j < $num_vars;$j++){
     echo $vars[$j]. $d[$delim];
-    if ($vars[$j] == "ca1") echo "ca1code". $d[$delim];
-    if ($vars[$j] == "ca2") echo "ca2code". $d[$delim];
-    if ($vars[$j] == "ca3") echo "ca3code". $d[$delim];
   }
   echo "\r\n";
 
@@ -145,10 +141,7 @@ else if ($what != "plot"){
   } 
   echo $d[$delim] . $row["dvalid"] . $d[$delim] . $row["doy"] . $d[$delim];
   for ($j=0; $j < $num_vars;$j++){
-    echo $row["var".$j]. $d[$delim];
-    if ($vars[$j] == "ca1") echo $skycover[$row["var".$j]] . $d[$delim];
-    if ($vars[$j] == "ca2") echo $skycover[$row["var".$j]] . $d[$delim];
-    if ($vars[$j] == "ca3") echo $skycover[$row["var".$j]] . $d[$delim];
+    echo $row[$vars[$j]]. $d[$delim];
   }
   echo "\r\n";
  }
