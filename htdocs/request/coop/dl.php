@@ -72,7 +72,7 @@ $d = Array("space" => " ", "comma" => "," , "tab" => "\t");
 $sqlStr = "SELECT station, *, to_char(day, 'YYYY/mm/dd') as dvalid, 
  extract(doy from day) as doy, 
  round((5.0/9.0 * (high - 32.0))::numeric,1) as highc,
- round((5.0/9.0 * (high - 32.0))::numeric,1) as lowc, 
+ round((5.0/9.0 * (low - 32.0))::numeric,1) as lowc, 
  round((precip * 25.4)::numeric,1) as precipmm
  from $table WHERE day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' 
  and station IN ". $stationString ." ORDER by day ASC";
