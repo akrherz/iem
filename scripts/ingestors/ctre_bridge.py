@@ -1,6 +1,9 @@
-# Need something to ingest the CTRE provided bridge data
-# RSAI4
-# RLRI4
+"""
+ Need something to ingest the CTRE provided bridge data
+  RSAI4
+  RLRI4
+ Run from RUN_1MIN
+"""
 
 import mx.DateTime
 import sys
@@ -14,7 +17,7 @@ import csv
 import access
 import pg
 import secret
-import os
+import subprocess
 accessdb = pg.connect('iem', 'iemdb')
 
 csv = open('/tmp/ctre.txt', 'w')
@@ -27,6 +30,8 @@ try:
 except:
     if now.minute % 15 == 0:
         print 'Download CTRE Bridge Data Failed!!!'
+    sys.exit(0)
+if len(data) < 2:
     sys.exit(0)
 keys = data[0].strip().replace('"', '').split(',')
 vals = data[1].strip().replace('"', '').split(',')
@@ -56,6 +61,8 @@ req = urllib2.Request("ftp://%s:%s@129.186.224.167/Red Rock_Table3Min_current.da
                                                         secret.CTRE_FTPPASS))
 #try:
 data = urllib2.urlopen(req).readlines()
+if len(data) < 2:
+    sys.exit(0)
 #except:
 #  pass
 keys = data[0].strip().replace('"', '').split(',')
@@ -86,4 +93,4 @@ cmd = "/home/ldm/bin/pqinsert -p 'data c 000000000000 csv/ctre.txt bogus txt' /t
 if ((mx.DateTime.now() - ts1).seconds > 3600. and
    (mx.DateTime.now() - ts2).seconds > 3600.):
     sys.exit()
-os.system( cmd )
+subprocess.call( cmd, shell=True )
