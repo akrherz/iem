@@ -32,7 +32,7 @@ def safeP(v):
         return 0.0001
     if v == "NA":
         return -99
-    return v
+    return float(v)
 
 for row in  data[1:]:
     cols = row.split(",")
