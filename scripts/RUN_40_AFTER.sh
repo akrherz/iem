@@ -43,10 +43,10 @@ cd ../madis
 /mesonet/python/bin/python extractMetarQC.py ioc
 
 cd ../cocorahs
-/mesonet/python/bin/python stations.py IA
-/mesonet/python/bin/python stations.py IL
-/mesonet/python/bin/python process.py IL
-/mesonet/python/bin/python process.py IA
+python cocorahs_stations.py IA
+python cocorahs_stations.py IL
+python cocorahs_data_ingest.py IL
+python cocorahs_data_ingest.py IA
 
 # This is intensive...
 cd ../../week

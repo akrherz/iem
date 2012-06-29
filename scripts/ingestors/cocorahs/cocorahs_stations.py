@@ -1,9 +1,9 @@
 # Process CoCoRaHS Stations!
 
 import urllib2, os, sys
-from pyIEM import iemdb
-i = iemdb.iemdb()
-mesosite = i['mesosite']
+import iemdb
+MESOSITE = iemdb.connect('mesosite', bypass=True)
+mcursor = MESOSITE.cursor()
 
 state = sys.argv[1]
 
@@ -13,15 +13,15 @@ data = urllib2.urlopen(req).readlines()
 # Find current stations
 stations = []
 sql = "SELECT id from stations WHERE network = '%sCOCORAHS' and y(geom) > 0" % (state,)
-rs = mesosite.query(sql).dictresult()
-for i in range(len(rs)):
-  stations.append( rs[i]['id'] )
+mcursor.execute( sql )
+for row in mcursor:
+    stations.append( row[0] )
 
 # Process Header
 header = {}
 h = data[0].split(",")
 for i in range(len( h )):
-  header[ h[i] ] = i
+    header[ h[i] ] = i
 
 if not header.has_key('StationNumber'):
     sys.exit(0)
@@ -48,10 +48,12 @@ for row in  data[1:]:
          'SRID=4326;POINT(%s %s)', '%s', '%s')" % (id, name,\
          state, state, lon, lat, cnty, name)
   try:
-    mesosite.query(sql)
+    mcursor.execute(sql)
   except:
     sql = """UPDATE stations SET geom = 'SRID=4326;POINT(%s %s)'
            WHERE id = '%s' and network = '%sCOCORAHS'""" % (lon, lat,
            id, state)
-    mesosite.query( sql )
+    mcursor.execute( sql )
 
+mcursor.close()
+MESOSITE.commit()
