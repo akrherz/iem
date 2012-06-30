@@ -39,7 +39,7 @@ for row in  data[1:]:
     id = cols[ header["StationNumber"] ].strip()
 
     t = "%s %s" % (cols[ header["ObservationDate"] ], cols[ header["ObservationTime"] ].strip())
-    ts = mx.DateTime.strptime(t, "%Y-%m-%d %I:%M %P")
+    ts = mx.DateTime.strptime(t, "%Y-%m-%d %I:%M %p")
     iem = access.Ob(id, "%sCOCORAHS" % (state,))
     iem.setObTime( ts )
     iem.data['pday'] = safeP(cols[ header["TotalPrecipAmt"] ])
