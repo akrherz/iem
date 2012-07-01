@@ -15,7 +15,7 @@ $TITLE = "IEM | Site Locator";
 $THISPAGE = "iem-sites";
 $api = $GOOGLEKEYS[$rooturl]["any"];
 $HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
-<script src='http://www.openlayers.org/api/OpenLayers.js'></script>
+<script src='http://openlayers.org/api/2.11/OpenLayers.js'></script>
 <script src='${rooturl}/js/olselect.php?network=${network}'></script>";
 $BODYEXTRA = "onload=\"init()\"";
 include("$rootpath/include/header.php"); 
