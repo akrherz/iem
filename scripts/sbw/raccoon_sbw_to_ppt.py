@@ -4,7 +4,7 @@ Generate a Powerpoint file for an event.  This script looks for queued jobs
 within the database and runs them sequentially each minute
 
 """
-__REV__ = "14May2012"
+__REV__ = "1Jul2012"
 import os
 os.putenv("DISPLAY", "localhost:1")
 import sys
@@ -60,14 +60,20 @@ def get_warnings(sts, ets, wfo):
     """
     POSTGIS = iemdb.connect('postgis', bypass=True)
     pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    sql = """SELECT phenomena, eventid, 
-    issue at time zone 'UTC' as issue, 
-    expire at time zone 'UTC' as expire,
-    ST_Area(ST_Transform(geom,2163))/1000000.0 as area from warnings_%s WHERE
+    sql = """
+    SELECT phenomena, eventid, 
+    min(issue) at time zone 'UTC' as issue,
+    max(expire) at time zone 'UTC' as expire,
+    sum(case when gtype = 'P' then 
+        ST_Area(ST_Transform(geom,2163))/1000000.0 else 0 end) as polyarea,
+    sum(case when gtype = 'C' then 
+        ST_Area(ST_Transform(geom,2163))/1000000.0 else 0 end) as countyarea
+    from warnings_%s WHERE
     wfo = '%s' and phenomena in ('SV','TO') and significance = 'W' and 
-    gtype = 'P' and issue BETWEEN '%s+00' and '%s+00' ORDER by issue ASC""" % (
-    sts.year, wfo, sts.strftime("%Y-%m-%d %H:%M"), 
-    ets.strftime("%Y-%m-%d %H:%M"))
+    issue BETWEEN '%s+00' and '%s+00' 
+    GROUP by phenomena, eventid ORDER by issue ASC
+    """ % (sts.year, wfo, sts.strftime("%Y-%m-%d %H:%M"), 
+           ets.strftime("%Y-%m-%d %H:%M"))
     pcursor.execute(sql)
     res = []
     for row in pcursor:
@@ -107,7 +113,7 @@ def do_job(job):
     # We set a centered 34pt font with yellowish background
     indexstyle = Style(name="MyMaster-title", family="presentation")
     indexstyle.addElement(ParagraphProperties(textalign="center"))
-    indexstyle.addElement(TextProperties(fontsize="32pt"))
+    indexstyle.addElement(TextProperties(fontsize="28pt"))
     indexstyle.addElement(GraphicProperties(fillcolor="#ffffff",
                                             stroke="none"))
     doc.styles.addElement(indexstyle)
@@ -169,8 +175,11 @@ def do_job(job):
                                     warning['issue'].strftime("%d %b %Y %H:%M"),)))
         textbox.addElement(P(text="Expire: %s UTC" % ( 
                                     warning['expire'].strftime("%d %b %Y %H:%M"),)))
-        textbox.addElement(P(text="Area: %.1f square km (%.1f square miles)" % ( 
-                                    warning['area'], warning['area'] * 0.386102)))
+        textbox.addElement(P(text="Poly Area: %.1f sq km (%.1f sq mi) [%.1f%% vs County]" % ( 
+                                    warning['polyarea'], warning['polyarea'] * 0.386102,
+                                    warning['polyarea'] / warning['countyarea'] * 100.0)))
+        textbox.addElement(P(text="County Area: %.1f square km (%.1f square miles)" % ( 
+                                    warning['countyarea'], warning['countyarea'] * 0.386102)))
         
         url = "http://iem21.local/GIS/radmap.php?"
         url += "layers[]=places&layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw"
