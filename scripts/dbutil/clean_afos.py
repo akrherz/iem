@@ -1,6 +1,5 @@
 """
  Clean up the AFOS database
-$Id: $:
 """
 
 import iemdb, mx.DateTime

@@ -31,11 +31,11 @@ python compute_0000.py
 ./run.sh >& a &
 
 cd ../cache
-/mesonet/python/bin/python warn_cache.py
+python warn_cache.py
 
 cd ../dbutil
 /mesonet/python/bin/python asos2archive.py
-/mesonet/python/bin/python clean_afos.py
+python clean_afos.py
 
 cd ../qc
 /mesonet/python/bin/python check_iem_precip.py
