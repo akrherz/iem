@@ -19,7 +19,7 @@ python stage4_Xhour.py 24
 python stage4_Xhour.py 48
 
 cd ../qc
-/mesonet/python/bin/python checkWebcam.py
+python check_webcams.py
 
 cd ../outgoing
 /mesonet/python/bin/python wxc_iemrivers.py
