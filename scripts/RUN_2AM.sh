@@ -24,7 +24,7 @@ python daily_estimator.py KS
 python daily_estimator.py MO
 
 cd ../iemre
-/mesonet/python/bin/python grid_climodat.py
+python grid_climodat.py
 
 cd ../climodat
 python compute_0000.py

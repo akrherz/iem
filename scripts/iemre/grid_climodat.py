@@ -1,19 +1,21 @@
+"""
+ Grid the climodat data onto a midwest grid for IEMRE
+"""
 import sys
-try:
-    import netCDF4 as netCDF3
-except:
-    import netCDF3
+import netCDF4
 import numpy
 import mx.DateTime
-from pyIEM import iemdb, mesonet
+import iemdb
+import mesonet
 import Ngl
 import iemre
 import network
 import random
 import mesonet
+from psycopg2.extras import DictCursor
 
-i = iemdb.iemdb()
-coop = i['coop']
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor(cursor_factory=DictCursor)
 
 nt = network.Table(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE',
          'OHCLIMATE','MICLIMATE','KYCLIMATE','WICLIMATE','MNCLIMATE',
@@ -27,12 +29,12 @@ def generic_gridder(rs, idx):
     lats = []
     lons = []
     vals = []
-    for i in range(len(rs)):
-        stid = rs[i]['station']
-        if rs[i][idx] is not None and locs.has_key(stid):
+    for row in rs:
+        stid = row['station']
+        if row[idx] is not None and locs.has_key(stid):
             lats.append(  locs[stid]['lat'] + (random.random() * 0.01) )
             lons.append(  locs[stid]['lon'] )
-            vals.append( rs[i][idx]  )
+            vals.append( row[idx]  )
     if len(vals) < 4:
         print "Only %s observations found for %s, won't grid" % (len(vals),
                idx)
@@ -55,15 +57,17 @@ def grid_day(nc, ts):
     sql = """SELECT * from alldata WHERE day = '%s' and
              substr(station,3,4) != '0000' """ % (
          ts.strftime("%Y-%m-%d"), )
-    rs = coop.query( sql ).dictresult()
-    if len(rs) > 4:
-        res = generic_gridder(rs, 'high')
+    ccursor.execute( sql )
+    if ccursor.rowcount > 4:
+        res = generic_gridder(ccursor, 'high')
         if res is not None:
             nc.variables['high_tmpk'][offset] = iemre.f2k(res)
-        res = generic_gridder(rs, 'low')
+        ccursor.scroll(0, mode='absolute')
+        res = generic_gridder(ccursor, 'low')
         if res is not None:
             nc.variables['low_tmpk'][offset] = iemre.f2k(res)
-        res = generic_gridder(rs, 'precip')
+        ccursor.scroll(0, mode='absolute')
+        res = generic_gridder(ccursor, 'precip')
         if res is not None:
             nc.variables['p01d'][offset] = res * 25.4
     else:
@@ -73,9 +77,8 @@ def grid_day(nc, ts):
 def main(ts):
 
     # Load up our netcdf file!
-    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,), 'a')
+    nc = netCDF4.Dataset("/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,), 'a')
     grid_day(nc , ts)
-
     nc.close()
 
 if __name__ == "__main__":
