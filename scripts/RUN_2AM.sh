@@ -1,6 +1,14 @@
 #!/bin/sh
 
-cd climodat
+# First Guess for harry, run on the second of each month
+cd coop
+DD=$(date +%d)
+if [ $DD -eq "02" ]
+	then
+	python first_guess_for_harry.py
+fi
+
+cd ../climodat
 python daily_estimator.py IA
 python daily_estimator.py KY
 python daily_estimator.py IL

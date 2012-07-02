@@ -16,6 +16,11 @@ sys.exit()
 """
 
 import sys
+import os
+import smtplib
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
 import mx.DateTime
 import iemdb
 from xlwt import Workbook
@@ -295,6 +300,7 @@ def print_data(year, month, iemre, nwsli, sheet, data):
 def runner(year, month):
     """
     Actually generate a text file for the given month
+    @return the filename generated
     """
     book = Workbook()
     for label in ordering:
@@ -310,7 +316,33 @@ def runner(year, month):
             sheet.col(col).width = 256*5
         print_data( year, month, METADATA[label]['IEMRE'],
                         METADATA[label]['NWSLI'], sheet, data)
-    book.save("IEM%s%02i.xls" % (year, month))
+    fn = "IEM%s%02i.xls" % (year, month)
+    book.save(fn)
+    return fn
 
 if __name__ == '__main__':
-    runner(int(sys.argv[1]), int(sys.argv[2]))
+    if len(sys.argv) == 1:
+        lastmonth = mx.DateTime.now() - mx.DateTime.RelativeDateTime(months=1)
+        fn = runner( lastmonth.year, lastmonth.month)
+        # Email this out!
+        msg = MIMEMultipart()
+        msg['Subject'] = 'IEM COOP Report for %s' % (lastmonth.strftime("%b %Y"),)
+        msg['From'] = 'akrherz@iastate.edu'
+        msg['To'] = 'Harry.Hillaker@iowaagriculture.gov'
+        msg.preamble = 'COOP Report'
+
+        fp = open(fn, 'rb')
+        b = MIMEBase('Application', 'VND.MS-EXCEL')
+        b.set_payload(fp.read())
+        encoders.encode_base64(b)
+        fp.close()
+        b.add_header('Content-Disposition', 'attachment; filename="%s"' % (fn,))
+        msg.attach(b)
+
+        # Send the email via our own SMTP server.
+        s = smtplib.SMTP('localhost')
+        s.sendmail(msg['From'], msg['To'], msg.as_string())
+        s.quit()
+        os.unlink(fn)
+    else:
+        fn = runner(int(sys.argv[1]), int(sys.argv[2]))
