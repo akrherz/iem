@@ -1,9 +1,9 @@
 #!/bin/sh
 
-# First Guess for harry, run on the second of each month
+# First Guess for harry, run on the first of each month
 cd coop
 DD=$(date +%d)
-if [ $DD -eq "02" ]
+if [ $DD -eq "01" ]
 	then
 	python first_guess_for_harry.py
 fi
