@@ -5,14 +5,14 @@ import iemdb
 import psycopg2.extras
 import sys
 import iemre
-import netCDF3
+import netCDF4
 import mx.DateTime
 import numpy
 ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=-1,hour=0,minute=0,second=0)
 
 
 # Load up netcdf file
-nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),'r')
+nc = netCDF4.Dataset("/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),'r')
 p01d = nc.variables['p01d']
 offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
 
@@ -54,3 +54,5 @@ estimates = numpy.array( estimates )
 print 'OBS BIAS %.2f (%.2f%%) RMSE: %.2f' % (numpy.average( obs - estimates),
    numpy.average( obs - estimates) / numpy.average( estimates ) * 100.0,
    numpy.average(( obs - estimates ) * (obs - estimates))**.5 )
+
+nc.close()
