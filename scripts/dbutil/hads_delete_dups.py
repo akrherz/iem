@@ -1,6 +1,5 @@
 """
 Our HADS database gets loaded up with duplicates, this cleans it up.
-$Id: $:
 """
 import mx.DateTime
 import iemdb

@@ -1,6 +1,5 @@
 """
  Dump ASOS observations into the long term archive...
-$Id: $:
 """
 import mx.DateTime
 import sys

@@ -7,5 +7,5 @@ cd ../outgoing
 python wxc_moon.py
 
 cd ../dbutil 
-/mesonet/python/bin/python ot2archive.py
-/mesonet/python/bin/python hads_delete_dups.py
+python ot2archive.py
+python hads_delete_dups.py
