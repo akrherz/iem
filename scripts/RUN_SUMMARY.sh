@@ -25,7 +25,7 @@ python plot_gdd.py
 python plot_sdd.py
 
 cd ../gs
-/mesonet/python/bin/python plot_gdd.py
+python plot_gdd.py
 
 
 cd ../season
