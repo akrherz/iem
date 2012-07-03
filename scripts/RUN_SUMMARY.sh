@@ -9,13 +9,13 @@ cd ../current
 python plot_hilo.py 1
 
 cd ../climate
-/mesonet/python/bin/python today_hilo.py
-/mesonet/python/bin/python today_rec_hilo.py
-/mesonet/python/bin/python today_rec_minhi.py
+python today_hilo.py
+python today_rec_hilo.py
+python today_rec_minhi.py
 
 cd ../week
-/mesonet/python/bin/python avg_high.py
-/mesonet/python/bin/python avg_low.py
+python avg_high.py
+python avg_low.py
 
 cd ../month
 /mesonet/python/bin/python obs_precip.py

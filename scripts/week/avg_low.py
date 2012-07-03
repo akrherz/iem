@@ -1,15 +1,14 @@
 # Generate mean low temperature for the week
 
 import sys, os
-sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor()
 
 # Compute normal from the climate database
 sql = """
@@ -28,11 +27,11 @@ GROUP by id, lon, lat
 lats = []
 lons = []
 vals = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] )
-  vals.append( rs[i]['min_tmpf'] )
+icursor.execute( sql )
+for row in icursor:
+  lats.append( row[2] )
+  lons.append( row[1] )
+  vals.append( row[3] )
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
