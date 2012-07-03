@@ -4,7 +4,7 @@ cd qc
 python check_vtec_eventids.py
 
 cd ../outgoing
-/mesonet/python/bin/python wxc_moon.py
+python wxc_moon.py
 
 cd ../dbutil 
 /mesonet/python/bin/python ot2archive.py
