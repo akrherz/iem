@@ -1,8 +1,14 @@
-# Generate moon information for Iowa locations
+"""
+ Generate moon information for Iowa locations
+"""
 
-import ephem, mx.DateTime, os, shutil
-import pg
-mesosite = pg.connect("mesosite", "iemdb", user="nobody")
+import ephem
+import mx.DateTime
+import os
+import shutil
+import network
+
+nt = network.Table(("AWOS", "IA_ASOS"))
 
 # P2 is yesterday
 def figurePhase(p1,p2):
@@ -51,14 +57,10 @@ out.write("""Weather Central 001d0300 Surface Data
    2 BOGUS
 """)
 
-# Query for locations
-rs = mesosite.query("""SELECT id, name, x(geom) as lon, y(geom) as lat from 
-     stations WHERE network in ('IA_ASOS', 'AWOS')""").dictresult()
-
-for i in range(len(rs)):
+for station in nt.sts.keys():
     ia = ephem.Observer()
-    ia.lat = `rs[i]['lat']`
-    ia.long = `rs[i]['lon']`
+    ia.lat = `nt.sts[station]['lat']`
+    ia.long = `nt.sts[station]['lon']`
     ia.date = '%s 00:00' % (mx.DateTime.gmt().strftime("%Y/%m/%d"), )
     r1 = mydate(ia.next_rising(m))
     s1 = mydate(ia.next_setting(m))
@@ -80,7 +82,10 @@ for i in range(len(rs)):
     if (s1.strftime("%Y%m%d") == find_d):
         my_set = s1
 
-    out.write("K%s %-30.30s %6.3f %8.3f %8s %8s %30s AA\n" % (rs[i]['id'], rs[i]['name'], rs[i]['lat'], rs[i]['lon'], my_rise.strftime("%-I:%M %P"), my_set.strftime("%-I:%M %P"), mp) )
+    out.write("K%s %-30.30s %6.3f %8.3f %8s %8s %30s AA\n" % (station, 
+                    nt.sts[station]['name'], nt.sts[station]['lat'], 
+                    nt.sts[station]['lon'], my_rise.strftime("%-I:%M %P"), 
+                    my_set.strftime("%-I:%M %P"), mp) )
 
 out.close()
 
