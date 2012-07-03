@@ -18,11 +18,11 @@ python avg_high.py
 python avg_low.py
 
 cd ../month
-/mesonet/python/bin/python obs_precip.py
-/mesonet/python/bin/python obs_precip_coop.py
-/mesonet/python/bin/python plot_avgt.py
-/mesonet/python/bin/python plot_gdd.py
-/mesonet/python/bin/python plot_sdd.py
+python obs_precip.py
+python obs_precip_coop.py
+python plot_avgt.py
+python plot_gdd.py
+python plot_sdd.py
 
 cd ../gs
 /mesonet/python/bin/python plot_gdd.py

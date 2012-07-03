@@ -1,16 +1,14 @@
 # Generate a plot of SDD 
 
 import sys, os
-sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-coop = i['coop']
-mesosite = i['mesosite']
+import iemdb
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor()
 
 import network
 nt = network.Table("IACLIMATE")
@@ -25,11 +23,11 @@ lats = []
 lons = []
 sdd86 = []
 valmask = []
-rs = coop.query(sql).dictresult()
-for row in rs:
-  lats.append( nt.sts[row['station'].upper()]['lat'] )
-  lons.append( nt.sts[row['station'].upper()]['lon'] )
-  sdd86.append( row['sdd'] )
+ccursor.execute( sql )
+for row in ccursor:
+  lats.append( nt.sts[row[0]]['lat'] )
+  lons.append( nt.sts[row[0]]['lon'] )
+  sdd86.append( row[1] )
   valmask.append( True )
 
 cfg = {

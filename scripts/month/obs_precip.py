@@ -1,15 +1,14 @@
 # Generate a map of this month's observed precip
 
 import sys, os
-sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-access = i['iem']
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor()
 
 # Compute normal from the climate database
 sql = """SELECT id,
@@ -24,13 +23,13 @@ lats = []
 lons = []
 precip = []
 labels = []
-rs = access.query(sql).dictresult()
-for i in range(len(rs)):
-  id = rs[i]['id']
+icursor.execute(sql)
+for row in icursor:
+  id = row[0]
   labels.append( id )
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] )
-  precip.append( rs[i]['precip'] )
+  lats.append( row[3] )
+  lons.append( row[2] )
+  precip.append( row[1] )
 
 
 #---------- Plot the points
