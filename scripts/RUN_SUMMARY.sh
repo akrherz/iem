@@ -6,7 +6,7 @@ cd gdd
 python normal_may1.py
 
 cd ../current
-/mesonet/python/bin/python plot_hilo.py 1
+python plot_hilo.py 1
 
 cd ../climate
 /mesonet/python/bin/python today_hilo.py

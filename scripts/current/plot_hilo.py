@@ -1,15 +1,14 @@
 # Plot the High + Low Temperatures
 
 import sys, os
-sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime
 now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=int(sys.argv[1]))
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor()
 
 # Compute normal from the climate database
 sql = """
@@ -29,13 +28,13 @@ lons = []
 highs = []
 lows = []
 labels = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] )
-  highs.append( rs[i]['max_tmpf'] )
-  lows.append( rs[i]['min_tmpf'] )
-  labels.append( rs[i]['station'] )
+icursor.execute(sql)
+for row in icursor:
+  lats.append( row[4] )
+  lons.append( row[3] )
+  highs.append( row[1] )
+  lows.append( row[2] )
+  labels.append( row[0] )
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
