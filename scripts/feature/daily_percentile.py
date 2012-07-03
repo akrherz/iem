@@ -6,7 +6,7 @@ ccursor = COOP.cursor()
 percentile = []
 departure = []
 sts = mx.DateTime.DateTime(2012,1,1)
-ets = mx.DateTime.DateTime(2012,5,12)
+ets = mx.DateTime.DateTime(2012,7,1)
 interval = mx.DateTime.RelativeDateTime(days=1)
 now = sts
 i = 2
@@ -23,7 +23,7 @@ while now < ets:
   ccursor.execute("""
   SELECT year, 
   avg((high+low)/2.) from alldata_ia where station = 'IA2203'
-  and month in (1,2,3,4,5) and day > '1893-11-30'
+  and month in (1,2,3,4,5,6) and day > '1893-11-30'
   and sday <= '%s' 
   GROUP by year ORDER by avg DESC
   """ % (now.strftime("%m%d"),))
@@ -69,7 +69,7 @@ ax.grid(True)
 
 ax2 = fig.add_subplot(212)
 bars = ax2.bar( np.arange(1,len(percentile)+1) -0.4, departure , fc='b', ec='b')
-for i in range(-50,0):
+for i in range(-120,0):
     if departure[i] > 0:
         bars[i].set_facecolor('r')
         bars[i].set_edgecolor('r')
@@ -80,7 +80,7 @@ ax2.set_xticks(xticks)
 ax2.set_ylabel("Difference from warmest $^{\circ}\mathrm{F}$")
 ax2.set_xticklabels(xticklabels)
 ax2.grid(True)
-ax2.set_xlabel("thru 8 May")
+#ax2.set_xlabel("thru 1 Jul")
 
 fig.savefig('test.ps')
 import iemplot
