@@ -9,4 +9,4 @@ php wxc_coop.php
 
 cd ../coop
 ./PREC.csh
-/mesonet/python/bin/python 12z_precip.py
+python 12z_precip.py
