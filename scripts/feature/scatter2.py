@@ -1,44 +1,32 @@
 import numpy
 from matplotlib import pyplot as plt
 import iemdb
-COOP = iemdb.connect('coop', bypass=True)
-ccursor = COOP.cursor()
+from scipy import stats
+ASOS = iemdb.connect('asos', bypass=True)
+acursor = ASOS.cursor()
+import network
+nt = network.Table("IA_ASOS")
 
-
-ccursor.execute("""select foo2.yr, foo.avg, foo2.avg from (select 
-extract(year from day + '1 month'::interval) as yr, avg((high+low)/2.0)
- from alldata_ia where station = 'IA2203' and month in (1,2) and 
- sday > '0109' GROUP by yr) as foo2 JOIN (select 
- extract(year from day + '1 month'::interval) as yr, avg((high+low)/2.0) 
- from alldata_ia where station = 'IA2203' and month in (12,1) and
-  (sday < '0110' or sday > '1130') GROUP by yr) as foo ON (foo2.yr = foo.yr)
-  ORDER by foo2.yr ASC""")
-x = []
-y = []
-for row in ccursor:
-    x.append( float(row[1]))
-    y.append( float(row[2]))
-
-x = numpy.array( x )
-print x[-1]
-y = numpy.array( y )
+sql = """
+ SELECT extract(day from valid) as day, extract(hour from valid) as hr, station,
+ max(p01i) from t2012 where station in %s and valid > '2012-06-01'
+ and p01i > 0 GROUP by day, hr, station
+""" % (str(nt.sts.keys()).replace("[","(").replace("]",")"))
+print sql
+acursor.execute(sql)
+hrs = []
+precip = []
+for row in acursor:
+    hrs.append( row[1] )
+    precip.append( row[3] )
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-ax.scatter(x, y)
-ax.plot([5,35],[5,35])
-ax.plot([5,35],[numpy.average(y), numpy.average(y)], color='r')
-ax.text(5,numpy.average(y)+0.1, "%.1f" % (numpy.average(y),), color='r')
-ax.plot([numpy.average(x), numpy.average(x)],[5,35], color='g')
-ax.text(numpy.average(x)+0.1,33, "%.1f" % (numpy.average(x),), color='g')
-ax.plot([30.97,30.97],[5,35], color='k')
-ax.text(31,7,"31.0\n2012")
-ax.set_xlabel("1 Dec - 8 Jan Average Temperature [F]")
-ax.set_ylabel("8 Jan - 28 Feb Average Temperature [F]")
-ax.set_title("Iowa Average Winter Temperature [Dec,Jan,Feb] (1893-2011)")
-ax.set_xlim(5,40)
-ax.set_ylim(5,40)
+ax.scatter(hrs, precip, c='r')
+ax.set_xlabel("Hour of the day")
+ax.set_ylabel("Precipitation [inch]")
+ax.set_title("Texas Gulf Coast Wind Direction and Iowa Precipitation\nJune 1970-2011, 2012 thru 10 June")
 ax.grid(True)
 
 fig.savefig("test.ps")

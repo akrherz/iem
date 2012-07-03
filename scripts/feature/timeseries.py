@@ -10,14 +10,14 @@ ssknt = []
 sdwpf = []
 pres1 = []
 sgust = []
-sprec = numpy.zeros( (1500,), 'f')
-svalid = numpy.zeros( (1500,), 'f')
+sprec = numpy.zeros( (3000,), 'f')
+svalid = numpy.zeros( (3000,), 'f')
 
 acursor.execute("""
  SELECT extract(epoch from (valid at time zone 'EDT')), tmpf, dwpf, drct, 
   sknt, pres1, gust_sknt, precip,
-  valid at time zone 'EDT' from t2012_1minute WHERE station = 'MIA'
- and valid BETWEEN '2012-05-22 00:00-04' and '2012-05-22 23:59-04' 
+  valid at time zone 'CDT' from t2012_1minute WHERE station = 'DLH'
+ and valid BETWEEN '2012-06-19 00:00-05' and '2012-06-20 23:59-05' 
  ORDER by valid ASC
 """)
 for row in acursor:
@@ -31,24 +31,24 @@ for row in acursor:
         pres1.append( row[5] )
         #sgust.append( row[6] * 1.15)
         offset = row[8].hour * 60 + row[8].minute
-        if row[8].day == 8:
+        if row[8].day == 20:
             offset += 1440
         sprec[offset] = float(row[7] or 0) 
         
 
 sprec = numpy.array( sprec )
-acc = numpy.zeros( (1500,), 'f')
-rate15 = numpy.zeros( (1500,), 'f')
-rate60 = numpy.zeros( (1500,), 'f')
-for i in range(1500):
+acc = numpy.zeros( (3000,), 'f')
+rate15 = numpy.zeros( (3000,), 'f')
+rate60 = numpy.zeros( (3000,), 'f')
+for i in range(3000):
     acc[i] = acc[i-1] + sprec[i]
     rate15[i] = numpy.sum(sprec[i-15:i]) * 4
     rate60[i] = numpy.sum(sprec[i-60:i])
-    svalid[i] =  mx.DateTime.DateTime(2012,5,22, 0) + mx.DateTime.RelativeDateTime(minutes=i)
+    svalid[i] =  mx.DateTime.DateTime(2012,6,19, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 # Figure out ticks
-sts = mx.DateTime.DateTime(2012,5,22, 12,0)
-ets = mx.DateTime.DateTime(2012,5,23, 0,0)
-interval = mx.DateTime.RelativeDateTime(hours=1)
+sts = mx.DateTime.DateTime(2012,6,19, 4,0)
+ets = mx.DateTime.DateTime(2012,6,20, 13,0)
+interval = mx.DateTime.RelativeDateTime(hours=4)
 now = sts
 xticks = []
 xlabels = []
@@ -86,8 +86,8 @@ ax.grid(True)
 ax.set_xlim(min(xticks), max(xticks))
 ax.legend(loc=2, prop=prop, ncol=2)
 ax.set_ylim(0,12)
-ax.set_xlabel("22 May 2012 (EDT)")
-ax.set_title("22 May 2012 Miami, FL (KMIA) One Minute Rainfall\n9.70 inches reported, second highest daily total for May")
+ax.set_xlabel("19-20 June 2012 (CDT)")
+ax.set_title("19-20 June 2012 Duluth, MN (KDLH) One Minute Rainfall")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))

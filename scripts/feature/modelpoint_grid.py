@@ -8,11 +8,11 @@ mcursor = MOS.cursor()
 
 # GFS has 8 days worth of data
 # NAM has 3.5 days
-PLOTDAYS = 3
-sts = datetime.datetime(2012,4,8,0, tzinfo=iemtz.Central)
+PLOTDAYS = 4
+sts = datetime.datetime(2012,6,14,1, tzinfo=iemtz.Central)
 #___________________________
 # No more custom
-MODELDAYS = PLOTDAYS+8-2
+MODELDAYS = PLOTDAYS+8
 msts = sts - datetime.timedelta(days=8)
 ets = sts + datetime.timedelta(days=PLOTDAYS)
 
@@ -26,7 +26,7 @@ xticks = range(-1,PLOTDAYS*8,4)
 for i in range(-1,PLOTDAYS*8,4):
     ts = sts + datetime.timedelta(hours=((i+1)*3))
     fmt = "%-I %p"
-    if ts.hour == 0:
+    if ts.hour == 1:
         fmt += "\n%d %b"
     xlabels.append( ts.strftime(fmt))
 
@@ -40,7 +40,7 @@ for i in range(0,MODELDAYS*4,4):
 
 mcursor.execute("""
 select runtime, ftime, precip from model_gridpoint_2012 
-where station = 'KSUX' and ftime > %s and ftime <= %s and model = 'GFS'
+where station = 'KDSM' and ftime > %s and ftime <= %s and model = 'GFS'
 """, (sts, ets))
 
 for row in mcursor:
@@ -58,7 +58,12 @@ for row in mcursor:
 for y in range(1,PLOTDAYS*8,2):
     for x in range(0,MODELDAYS*4):
         if qpf[x,y] > 0:
-            qpf[x,y] -= qpf[x,y-1]
+            nv = qpf[x,y] - qpf[x,y-1]
+            if nv < 0:
+                print x,y,nv
+                qpf[x,y] = 0.001
+            else:
+                qpf[x,y] = nv
 
 qpf.mask = numpy.where( qpf < 0, True, False)
 #print qpf
@@ -82,13 +87,13 @@ ax.set_ylim(0,MODELDAYS*4)
 fig.colorbar( res )
 ax.grid(True)
 
-ax.set_title("GFS Grid Point Forecast for Ames\n3 Hour Total Precipitation [inch]")
+ax.set_title("GFS Grid Point Forecast for Des Moines\n3 Hour Total Precipitation [inch]")
 
 ax.set_xticks( numpy.array(xticks) + 0.5 )
 ax.set_xticklabels( xlabels )
 ax.set_yticks( yticks )
 ax.set_yticklabels( ylabels )
-
+ax.set_ylim(0,36)
 ax.set_xlabel('Forecast Date')
 ax.set_ylabel('Model Run')
 import iemplot
