@@ -1,5 +1,9 @@
+# Run at 12Z, but needs some manual crontab changing help
 
-cd ingestors
+cd cscap
+python email_daily_changes.py
+
+cd ../ingestors
 /mesonet/python/bin/python flux_ingest.py
 
 # Rerun yesterday and today
