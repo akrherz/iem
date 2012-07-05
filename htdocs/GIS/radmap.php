@@ -3,7 +3,6 @@
  * I am sort of inspired by the old mapblaster days.  Lets create a map of
  * all sorts of data with tons of CGI vars, yippeee
  * 
- * $Id: $:
  */
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
@@ -102,6 +101,8 @@ $width = isset($_GET["width"]) ? intval($_GET["width"]) : 640;
 $height = isset($_GET["height"]) ? intval($_GET["height"]) : 480;
 $lsrbuffer = isset($_GET["lsrbuffer"]) ? intval($_GET["lsrbuffer"]): 15;
 
+
+
 /* Now, maybe we set a VTEC string, lets do all sorts of fun */
 $vtec_limiter = "";
 if (isset($_GET["vtec"]))
@@ -167,7 +168,22 @@ if (isset($_GET["bbox"]))
   $bbox = isset($_GET["bbox"]) ? explode(",",$_GET["bbox"]) : die("No BBOX");
   $sectors["custom"] = Array("epsg"=> 4326, "ext" => $bbox);
 }
-
+/* Fetch bounds based on wfo as being set by bounds */
+if ($sector == "wfo"){
+	$sector_wfo = isset($_REQUEST["sector_wfo"]) ? strtoupper($_REQUEST["sector_wfo"]): "DMX";
+	/* Fetch the bounds */
+	pg_prepare($postgis, "WFOBOUNDS", "SELECT xmax(geom), ymax(geom),
+	    xmin(geom), ymin(geom) from (SELECT ST_Extent(the_geom) as geom from cwa
+		WHERE wfo = $1) as foo");
+	$rs = pg_execute($postgis, "WFOBOUNDS", Array($sector_wfo));
+	if (pg_numrows($rs) > 0){
+		$row = pg_fetch_assoc($rs,0);
+		$buffer = 0.75;
+		$sectors["wfo"] = Array("epsg" => 4326, 
+			"ext" => Array($row["xmin"] - $buffer, $row["ymin"] - $buffer, 
+						$row["xmax"] + $buffer, $row["ymax"] + $buffer));
+	}
+}
 
 /* Lets determine our timestamp.  Our options include
    1.  Specified by URI, $ts
