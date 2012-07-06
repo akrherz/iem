@@ -37,7 +37,7 @@ for row in icursor:
   (row['dwpf'] or "Null"), (row['drct'] or "Null"), (row['sknt'] or "Null"),
   (alti or "Null"), pday, (row['gust'] or "Null") , 
    (row['c1tmpf'] or "Null"), (row['srad'] or "Null"))
-    icursor.execute(sql)
+    ocursor.execute(sql)
 
-icursor.close()
-IEM.commit()
+ocursor.close()
+OTHER.commit()
