@@ -27,7 +27,7 @@ dir = "/home/ldm/data/camera/stills"
 files = os.listdir(dir)
 
 mcursor.execute("""
-    SELECT id, network from webcams where network in ('KELO','KCCI','KCRG')
+    SELECT id, network, name from webcams where network in ('KELO','KCCI','KCRG')
     and online ORDER by id ASC
 """)
 
@@ -46,10 +46,12 @@ for row in mcursor:
 
     if age > 3600 and not offline.has_key(row[0]):
         emails += 1
-        track.doAlert(row[0], {'ts': ts}, network, portfolio, False)
+        track.doAlert(row[0], {'ts': ts, 'sname': row[2]}, 
+                      network, portfolio, False)
     elif age < 3600 and offline.has_key(row[0]):
         emails += 1
-        track.checkStation(row[0], {'ts': ts}, network, portfolio, False)
+        track.checkStation(row[0], {'ts': ts, 'sname': row[2]}, 
+                           network, portfolio, False)
         
 if emails < 5:
     track.send()
