@@ -1,7 +1,7 @@
 """
  Mine grid point extracted values for our good and the good of the IEM
  Use Unidata's motherlode server :)
-$Id: $:
+
 """
 import sys
 import iemdb, network
@@ -39,7 +39,7 @@ VLOOKUP = {
  'precip': {'RAP': None,
             'NAM': 'Total_precipitation',
             'GFS': 'Total_precipitation',
-           },
+           }
 }
 
 def clean(v):

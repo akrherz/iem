@@ -48,7 +48,7 @@ python cocorahs_data_ingest.py IA
 
 # This is intensive...
 cd ../../week
-/mesonet/python/bin/python plot_stage4.py
+python plot_stage4.py
 
 cd ../plots
 ./ruc2.csh
@@ -59,4 +59,4 @@ cd black
 
 
 cd ../../model
-/mesonet/python/bin/python ingest.py
+python ingest.py
