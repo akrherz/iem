@@ -22,7 +22,7 @@ cd ../qc
 python check_webcams.py
 
 cd ../outgoing
-/mesonet/python/bin/python wxc_iemrivers.py
+python wxc_iemrivers.py
 
 cd ../iemplot
 ./RUN.csh
