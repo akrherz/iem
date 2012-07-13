@@ -37,8 +37,8 @@ cd ../raws
 ./download.csh
 
 cd ../madis
-/mesonet/python/bin/python extractMADIS.py
-/mesonet/python/bin/python extractMetarQC.py
+python extractMADIS.py
+python extractMetarQC.py
 
 cd ../cocorahs
 python cocorahs_stations.py IA

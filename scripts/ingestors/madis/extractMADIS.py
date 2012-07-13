@@ -13,7 +13,7 @@ import netCDF4
 import numpy
 
 now = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=-3)
-now = mx.DateTime.DateTime(2012, 5, 25, 12, 0)
+#now = mx.DateTime.DateTime(2012, 5, 25, 12, 0)
 
 fp = "/mesonet/data/madis/mesonet/%s.nc" % (now.strftime("%Y%m%d_%H00"), )
 table = "current_qc"
