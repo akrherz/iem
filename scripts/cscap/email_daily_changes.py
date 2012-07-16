@@ -35,7 +35,8 @@ token.authorize(spr_client)
 docs_client = gdata.docs.client.DocsClient()
 token.authorize(docs_client)
 
-feed = docs_client.get_changes(expand_acl=True, changestamp=config.get('memory', 'changestamp'))
+changestamp = int(config.get('memory', 'changestamp'))
+feed = docs_client.get_changes(expand_acl=True, changestamp=changestamp)
 
 html = """
 <h3>CSCAP Documents/Spreadsheet Changes</h3>
@@ -66,7 +67,6 @@ for entry in feed.entry:
     #    print entry.filename.text
     #print entry.changestamp.value
 
-
 config.set('memory', 'changestamp', changestamp +1)
 config.write( open('mytokens.cfg', 'w'))
 
@@ -76,8 +76,9 @@ html += """</tbody></table>
 
 msg = MIMEMultipart('alternative')
 msg['Subject'] = "CSCAP Data ChangeLog"
-msg['From'] = 'akrherz@localhost'
-msg['To'] = 'akrherz@localhost'
+msg['From'] = 'mesonet@mesonet.agron.iastate.edu'
+msg['To'] = 'labend@iastate.edu,akrherz@iastate.edu'
+
 
 # Create the body of the message (a plain-text and an HTML version).
 text = "See html variant"
@@ -89,6 +90,6 @@ msg.attach(part1)
 msg.attach(part2)
 
 s = smtplib.SMTP('localhost')
-s.sendmail(msg['From'], msg['To'], msg.as_string())
+s.sendmail(msg['From'], ['akrherz@localhost', 'akrherz2@localhost'], msg.as_string())
 s.quit()
 
