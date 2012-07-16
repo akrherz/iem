@@ -89,7 +89,8 @@ part2 = MIMEText(html, 'html')
 msg.attach(part1)
 msg.attach(part2)
 
-s = smtplib.SMTP('localhost')
-s.sendmail(msg['From'], ['akrherz@localhost', 'akrherz2@localhost'], msg.as_string())
+s = smtplib.SMTP('mailhub.iastate.edu')
+s.sendmail(msg['From'], ['labend@iastate.edu','akrherz@iastate.edu'], msg.as_string())
 s.quit()
+
 
