@@ -28,7 +28,7 @@ wget --timeout=60 -q -O ${LOCAL_FILE2} ftp://rwis:${FTPPASS}@165.206.203.34/ExpS
 wget --timeout=60 -q -O /mesonet/data/incoming/iaawos_metar.txt ftp://rwis:${FTPPASS}@165.206.203.34/METAR.txt
 
 # Process AWOS METAR file
-/mesonet/python/bin/python awosMETAR.py
+python awosMETAR.py
 
 # Actually ingest the data
 /mesonet/python/bin/python rawProcess.py

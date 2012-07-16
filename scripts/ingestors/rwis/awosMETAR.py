@@ -1,11 +1,16 @@
-# Process AWOS METAR file 
-
-import re, tempfile, os, mx.DateTime, subprocess
+"""
+ Process AWOS METAR file 
+"""
+import re
+import tempfile
+import os
+import mx.DateTime
+import subprocess
 gmt = mx.DateTime.gmt()
 
 data = {}
 for line in open('/mesonet/data/incoming/iaawos_metar.txt', 'r'):
-    m = re.match("METAR K(?P<id>[A-Z]{3})", line)
+    m = re.match("METAR K(?P<id>[A-Z1-9]{3})", line)
     if not m:
       continue
     d = m.groupdict()
