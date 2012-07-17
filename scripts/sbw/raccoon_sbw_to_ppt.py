@@ -23,14 +23,16 @@ from odf.style import DrawingPageProperties
 from odf.text import P, S
 from odf.draw  import Page, Frame, TextBox, Image
 
+SUPER_RES = datetime.datetime(2010, 3, 1)
+
 def test_job():
     """
     For command line testing, lets provide a dummy job
     """
     jobs = []
-    jobs.append({'wfo': 'OAX', 'radar': 'OAX',
-                 'sts': datetime.datetime(2012,3,28),
-                 'ets': datetime.datetime(2012,3,29,12),
+    jobs.append({'wfo': 'FSD', 'radar': 'FSD',
+                 'sts': datetime.datetime(2003,6,24, 2),
+                 'ets': datetime.datetime(2003,6,25, 4),
                  'jobid': random.randint(1,1000000)})
     return jobs
 
@@ -215,8 +217,13 @@ def do_job(job):
                                     warning['phenomena'],warning['eventid'],
                                     now.strftime("%d %b %Y %H%M"))))
             
+            n0qn0r = 'N0Q'
+            if now < SUPER_RES:
+                n0qn0r = 'N0R'
+            
             url = "http://iem21.local/GIS/radmap.php?"
-            url += "layers[]=ridge&ridge_product=N0Q&ridge_radar=%s&" % (job['radar'],)
+            url += "layers[]=ridge&ridge_product=%s&ridge_radar=%s&" % (n0qn0r, 
+                                                                job['radar'])
             url += "layers[]=sbw&layers[]=sbwh&layers[]=uscounties&"
             url += "layers[]=lsrs&ts2=%s&" % (
                     (now + datetime.timedelta(minutes=15)).strftime("%Y%m%d%H%M"),)
