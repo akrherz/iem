@@ -24,7 +24,7 @@ if (isset($_REQUEST["wfo"])){
 	WHERE wfo = $1 and phenomena in ('SV','TO') and significance = 'W' and
 	issue BETWEEN $2 and $3");
 	$rs = pg_execute($postgis, "SELECT", Array($wfo, 
-		date("Y-m-d H:i", $sts) ."+00", date("Y-m-d H:i", $ets) ."+00"));
+		gmdate("Y-m-d H:i", $sts) ."+00", gmdate("Y-m-d H:i", $ets) ."+00"));
 	pg_close($postgis);
 	if (pg_num_rows($rs) < 1){
 		$err = "Sorry, did not find any warnings for your selected WFO and
