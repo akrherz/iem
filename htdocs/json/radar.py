@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """
 Return JSON metadata for nexrad information
-$Id: $:
 """
 import sys
 sys.path.insert(1, "/mesonet/www/apps/iemwebsite/scripts/lib/")
