@@ -78,7 +78,7 @@ def runner(days):
             print 'NEED entry for %s %s' % (id, ts.strftime("%Y-%m-%d"))
         else:
             row = icursor.fetchone()
-            dbval = row[1]
+            dbval = row[0]
             if row[0] is None or float(row[0]) != val:
                 print "%s - snow diff old: %s new: %s date: %s" % (
                                         id, dbval, val, ts.strftime("%Y-%m-%d"))
