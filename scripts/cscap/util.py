@@ -1,6 +1,6 @@
 """
 Utility Functions that are common to our scripts, I hope
-$Id$:
+$Id: util.py 8231 2012-05-07 20:29:34Z akrherz $:
 """
 
 def build_treatments(feed):

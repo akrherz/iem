@@ -1,6 +1,6 @@
 """
 Need something to get access tokens when my old ones go stale
-$Id$:
+$Id: get_tokens.py 7798 2011-11-04 19:45:55Z akrherz $:
 """
 from gdata import gauth
 import ConfigParser
