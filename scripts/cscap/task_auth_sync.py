@@ -1,6 +1,6 @@
 """
 A script that syncs my google site authentication to a shared folder on google docs
-$Id$:
+$Id: task_auth_sync.py 8231 2012-05-07 20:29:34Z akrherz $:
 """
 from gdata import gauth
 import gdata.sites.client
@@ -24,12 +24,12 @@ token.authorize(spr_client)
 
 site_users = []
 for acl in spr_client.get_acl_feed().entry:
-    #print "IN: ||%s||" % (acl.scope.value,)
+    print "IN: ||%s||" % (acl.scope.value,)
     userid =  acl.scope.value 
     if userid not in site_users:
         site_users.append( acl.scope.value )
-    if userid == 'smzuber@illinois.edu':
-        print acl
+    #if userid == 'smzuber@illinois.edu':
+    #    print acl
     
 docs_client = gdata.docs.client.DocsClient()
 token.authorize(docs_client)

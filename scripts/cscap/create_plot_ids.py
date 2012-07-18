@@ -1,6 +1,6 @@
 """
  This will create spreadsheets based on the metadata table
- $Id$:
+ $Id: create_plot_ids.py 8231 2012-05-07 20:29:34Z akrherz $:
 """
 import gdata.spreadsheets.client
 import gdata.spreadsheets.data
