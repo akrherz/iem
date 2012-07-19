@@ -1,6 +1,6 @@
 <?php
-include("../../../config/settings.inc.php");
-include_once("$rootpath/include/database.inc.php");
+include_once "../../../config/settings.inc.php";
+include_once "$rootpath/include/database.inc.php";
 
 $sqlStr = "SELECT station, ";
 for ($i=0; $i< $num_vars;$i++){
@@ -79,9 +79,9 @@ for ($j=0;$j<$num_vars;$j++){
 }
 
 // Display the graph
-$fp = "/tmp/jpgraph_". $station ."_". time() .".png";
-$graph->Stroke("/mesonet/www/html/". $fp);
+$fp = "jpgraph_". $station ."_". time() .".png";
+$graph->Stroke("/var/webtmp/". $fp);
 
-echo "<p><img src=\"". $fp ."\">\n";
+echo "<p><img src=\"/tmp/". $fp ."\">\n";
 
 ?>
