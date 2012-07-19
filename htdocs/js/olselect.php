@@ -1,7 +1,9 @@
 <?php
 include("../../config/settings.inc.php");
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
-header("Content-type: text/plain");
+header("Content-type: application/javascript");
+$uri = sprintf("%s/geojson/network.php?network=%s&c=%s", BASEURL, $network,
+	time() );
 ?>
 var map, selectedFeature, selectControl;
 
@@ -45,8 +47,8 @@ function init(){
             );
    var styleMap = new OpenLayers.StyleMap({
        'default': {
-           fillColor: 'black',
-           strokeColor: 'yellow',
+           fillColor: 'yellow',
+           strokeColor: 'black',
            strokeWidth: 2,
            pointRadius: 5,
            strokeOpacity: 1
@@ -58,14 +60,15 @@ function init(){
        }
    });
 
-  var geojson = new OpenLayers.Layer.GML("<?php echo $network; ?> Network", 
-    "<?php echo $rooturl; ?>/geojson/network.php?network=<?php echo $network; ?>&c=<?php echo time(); ?>",
-            {
-                projection: new OpenLayers.Projection('EPSG:4326'),
-                format: OpenLayers.Format.GeoJSON, 
-                styleMap: styleMap
-             });
-  //geojson.setVisibility(false);
+  var geojson = new OpenLayers.Layer.Vector("<?php echo $network; ?> Network", {
+		protocol: new OpenLayers.Protocol.HTTP({
+                    url: "<?php echo $uri; ?>",
+                    format: new OpenLayers.Format.GeoJSON()
+    	}),
+    	projection: new OpenLayers.Projection('EPSG:4326'),
+    	styleMap: styleMap,
+    	strategies: [new OpenLayers.Strategy.Fixed()]
+	});
   map.addLayers([googleLayer,geojson]);
    
   // Provide hover capabilities over road_condition layer
