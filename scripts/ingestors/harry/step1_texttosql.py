@@ -6,6 +6,7 @@ import sys, re, mx.DateTime, string
 stconv = {
   'IA6199': 'IA6200', # Oelwein
   'IA3288': 'IA3290', # Glenwood
+  'IA4963': 'IA8266', # Lowden becomes Tipton
 }
 
 year = int(sys.argv[1])
