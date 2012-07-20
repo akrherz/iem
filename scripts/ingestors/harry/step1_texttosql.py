@@ -1,8 +1,17 @@
-# Parse Harry Hillakers data into the database!
+"""
+Harry Hillaker kindly provides a monthly file of his QC'd COOP observations
+This script processes them into something we can insert into the IEM database
+"""
 
-import sys, re, mx.DateTime, string
+import sys
+import re
+import mx.DateTime
+import string
 
-# We need to convert some station IDs to other IDs, somewhat yucky
+"""
+This is not good, but necessary.  We translate some sites into others, so to
+maintain a long term record.
+"""
 stconv = {
   'IA6199': 'IA6200', # Oelwein
   'IA3288': 'IA3290', # Glenwood
@@ -26,12 +35,14 @@ COPY alldata_tmp from STDIN with null as 'Null';
 """)
 
 for line in lines:
-  tokens = re.split(",", line)
-  if len(tokens) == 23 and len(tokens[0]) > 0:
+    tokens = re.split(",", line)
+    if len(tokens) != 23:
+        continue
+    if len(tokens[0]) == 0:
+        continue
     stid = tokens[0]
     dbid = "%s%04.0f" % ("IA", int(stid))
-    if stconv.has_key(dbid):
-      dbid = stconv[dbid]
+    dbid = stconv.get(dbid, dbid)
     yr = int(tokens[2])
     mo = int(tokens[3])
     dy = int(tokens[4])
@@ -57,21 +68,13 @@ for line in lines:
     if (pr == ""): pr = 0
     if (hi == ""): hi = "Null"
     if (lo == ""): lo = "Null"
-    if (len(dbid) > 6): print dbid
 
     ts = mx.DateTime.DateTime(yr, mo, dy)
     day = ts.strftime("%Y-%m-%d")
     sday = ts.strftime("%m%d")
-    # Compute the climate week
-    jday = int( ts.strftime("%j") )
-    if jday < 61:
-      jday += 366
-    jday -= 54
-    cw = jday / 7
  
-    alldata.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\tf\n" % \
-        (dbid, day,  hi, lo, pr, sf, sday, yr, mo,sd) )
-
+    alldata.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\tf\n" % (
+                        dbid, day,  hi, lo, pr, sf, sday, yr, mo,sd) )
 
 alldata.write("""\.
 -- Now we need to clear the old estimates away
