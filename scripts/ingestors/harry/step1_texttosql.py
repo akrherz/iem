@@ -18,6 +18,7 @@ stconv = {
   'IA4963': 'IA8266', # Lowden becomes Tipton
   'IA7892': 'IA4049', # Stanley becomes Independence
   'IA0214': 'IA0213', # Anamosa
+  'IA2041': 'IA3980', # Dakota City becomes Humboldt
 }
 
 year = int(sys.argv[1])
