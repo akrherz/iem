@@ -3,7 +3,7 @@ WEBHOST="iem21.local"
 export PATH=$PATH:/mesonet/local/bin
 
 python process.py /mnt/mesonet/data/agclimate/`date +'D%d%b%y.TXT'`
-cat report.txt | mail -s "ISU AgClimate Data Report" -c krberns@iastate.edu akrherz@iastate.edu
+cat report.txt | mail -s "ISU AgClimate Data Report" -c meyers2@iastate.edu akrherz@iastate.edu
 rm -f report.txt
 
 python fix_precip.py
