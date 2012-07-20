@@ -54,13 +54,13 @@ html = """
 for entry in feed.entry:
     uri = entry.get_html_link().href
     updated = mx.DateTime.strptime(entry.updated.text[:16], '%Y-%m-%dT%H:%M')
+    changestamp = max(int(entry.changestamp.value), changestamp)
     if updated < yesterday:
         continue
     updated = updated.localtime()
     author = "N/A"
     if entry.last_modified_by:
         author = entry.last_modified_by.email.text
-    changestamp = int(entry.changestamp.value)
     html += "<tr><td>%s</td><td>%s</td><td><a href=\"%s\">%s</a></td></tr>" % (
         updated.strftime("%-I:%M %P"), author, uri, entry.title.text)
     #if entry.filename:
@@ -73,7 +73,6 @@ config.write( open('mytokens.cfg', 'w'))
 html += """</tbody></table>
 
 <p>That is all..."""
-
 msg = MIMEMultipart('alternative')
 msg['Subject'] = "CSCAP Data ChangeLog"
 msg['From'] = 'mesonet@mesonet.agron.iastate.edu'
