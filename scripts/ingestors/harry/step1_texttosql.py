@@ -8,6 +8,7 @@ stconv = {
   'IA3288': 'IA3290', # Glenwood
   'IA4963': 'IA8266', # Lowden becomes Tipton
   'IA7892': 'IA4049', # Stanley becomes Independence
+  'IA0214': 'IA0213', # Anamosa
 }
 
 year = int(sys.argv[1])
