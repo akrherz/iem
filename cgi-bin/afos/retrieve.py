@@ -32,8 +32,8 @@ def Main():
     if ( len(pil) < 3):
       print 'Invalid PIL, try again'
       sys.exit(0)
-    if (pil[:3] == "WAR"):
-      for q in ['AWW', 'FLS', 'FFS','AWW','TOR','SVR','FFW','SVS','LSR','SPS','WSW']:
+    if pil[:3] == "WAR":
+      for q in ['FLS', 'FFS','AWW','TOR','SVR','FFW','SVS','LSR','SPS','WSW']:
         pils.append('%s%s' % (q, pil[3:]) )
       continue
     myPils.append("%6s" % (pil + "      ",) )
