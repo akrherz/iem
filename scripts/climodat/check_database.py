@@ -62,5 +62,28 @@ for station in nt.sts.keys():
                                                     now.year, row[0], days)
             fix_year(station, now.year)
         now += interval
+    
+    # Check records database...
+    sts = mx.DateTime.DateTime(2000, 1, 1)
+    ets = mx.DateTime.DateTime(2001, 1, 1)
+    interval = mx.DateTime.RelativeDateTime(days=1)
+    for table in ['climate', 'climate51', 'climate71', 'climate81']:
+        ccursor.execute("""SELECT count(*) from %s WHERE
+            station = '%s'""" % (table, station))
+        row = ccursor.fetchone()
+        if row[0] == 366:
+            continue
+        now = sts
+        while now < ets:
+            ccursor.execute("""SELECT * from %s WHERE station = '%s'
+                and day = '%s'""" % (table, station, now.strftime("%Y-%m-%d")))
+            if ccursor.rowcount == 0:
+                print "Add %s station: %s day: %s" % (table, station, 
+                                                      now.strftime("%Y-%m-%d"))
+                ccursor.execute("""
+                INSERT into %s (station, valid) values ('%s', '%s')
+                """ % (table, station, now.strftime("%Y-%m-%d")))
+            now += interval
+        
 ccursor.close()
 COOP.commit()
