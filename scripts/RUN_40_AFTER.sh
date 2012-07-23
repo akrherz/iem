@@ -1,3 +1,7 @@
+YYYY6=$(date -u --date '6 hours ago' +'%Y')
+MM6=$(date -u --date '6 hours ago' +'%m')
+DD6=$(date -u --date '6 hours ago' +'%d')
+HH6=$(date -u --date '6 hours ago' +'%H')
 
 cd dl
 python ncep_stage4.py
@@ -56,7 +60,5 @@ cd ../plots
 cd black
 ./surfaceContours.csh
 
-
-
 cd ../../model
-python ingest.py
+python ingest.py $YYYY6 $MM6 $DD6 $HH6
