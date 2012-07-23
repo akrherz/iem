@@ -61,7 +61,8 @@ def run(model, station, lon, lat, ts):
     try:
         fp = urllib2.urlopen( url )
     except:
-        print 'HTTP ERROR Station: %s Model: %s' % (station, model)
+        print 'FAIL ts: %s station: %s model: %s' % (ts.strftime("%Y-%m-%d %H"), 
+                                                     station, model)
         return
 
     sql = """DELETE from model_gridpoint_%s WHERE station = '%s' and 
