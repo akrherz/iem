@@ -79,7 +79,7 @@ def runner(days):
         else:
             row = icursor.fetchone()
             dbval = row[0]
-            if row[0] is None or float(row[0]) != val:
+            if val >= 0 and (row[0] is None or float(row[0]) != val):
                 print "%s - snow diff old: %s new: %s date: %s" % (
                                         id, dbval, val, ts.strftime("%Y-%m-%d"))
                 sql = """UPDATE summary_%s s SET snow = %s FROM stations t 
