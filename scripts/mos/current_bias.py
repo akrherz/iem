@@ -1,6 +1,9 @@
-# Analysis of current MOS temperature bias
+"""
+ Analysis of current MOS temperature bias
+"""
 
-import sys, os
+import sys
+import os
 import iemplot
 import iemdb
 
@@ -43,7 +46,7 @@ FROM
 WHERE
   c.iemid = s.iemid and
   (s.network ~* 'ASOS' or s.network = 'AWOS') and 
-  valid + '15 minutes'::interval > now() and
+  valid + '60 minutes'::interval > now() and
   tmpf > -50
     """)
 
@@ -77,9 +80,9 @@ WHERE
  '_valid'             : 'Model Run: %s Forecast Time: %s' % (
                                 runtime.strftime("%d %b %Y %-I %p"), 
                                 now.strftime("%d %b %Y %-I %p")),
- '_showvalues'        : False,
+# '_showvalues'        : True,
  '_format'            : '%.0f',
- '_valuemask'         : valmask,
+# '_valuemask'         : valmask,
  'lbTitleString'      : "[F]",
 }
     # Generates tmp.ps
