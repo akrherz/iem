@@ -42,9 +42,6 @@ cfg = {
  '_title'       : "1 May - %s Average GDD Accumulation" % (
                         now.strftime("%d %b"), ),
  'lbTitleString'      : "[base 50]",
- 'pmLabelBarHeightF'  : 0.6,
- 'pmLabelBarWidthF'   : 0.1,
- 'lbLabelFontHeightF' : 0.025
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(lons, lats, gdd50, cfg)
