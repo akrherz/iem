@@ -1,5 +1,5 @@
 """
-Montly precip something
+Monthly precip something
 """
 import network
 nt = network.Table("IA_COOP")

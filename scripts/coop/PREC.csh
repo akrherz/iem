@@ -220,9 +220,7 @@ if (-e coopMonthPlot.gif ) then
 endif
 
 python monthPrecip.py
+python yearPrecip.py
 
-/mesonet/python/bin/python yearPrecip.py
-/home/ldm/bin/pqinsert -p 'plot c 000000000000 text/IEMNWSYPR.txt bogus txt' IEMNWSYPR.txt >& /dev/null
-
-/mesonet/python/bin/python dayPrecip.py
+python dayPrecip.py
 /home/ldm/bin/pqinsert -p "plot ac $ftime text/IEMNWSDPR.txt coopobs.txt txt" IEMNWSDPR.txt >& /dev/null
