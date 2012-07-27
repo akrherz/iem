@@ -5,7 +5,7 @@ cd current
 python vsby.py
 python today_precip.py
 python today_gust.py
-/mesonet/python/bin/python temperature.py
+python temperature.py
 /mesonet/python/bin/python today_high.py
 /mesonet/python/bin/python rwis_station.py
 

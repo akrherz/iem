@@ -20,6 +20,7 @@ FROM
   current c, stations s
 WHERE
   (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US' and
+  s.state not in ('HI', 'AK') and 
   s.iemid = c.iemid and 
   (valid + '30 minutes'::interval) > now() and
   tmpf >= -50 and tmpf < 140
