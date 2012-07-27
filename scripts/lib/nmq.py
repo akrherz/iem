@@ -51,10 +51,26 @@ def get_precip(sts, ets):
     for file in files:
         img = gdal.Open(file, 0)
         data = img.ReadAsArray() # 3500, 7000 (y,x) staring upper left I think
+        # Convert to mm
+        precip = numpy.zeros( numpy.shape(data), 'f')
+        """
+         255 levels...  wanna do 0 to 20 inches
+         index 255 is missing, index 0 is 0
+         0-1   -> 100 - 0.01 res ||  0 - 25   -> 100 - 0.25 mm  0
+         1-5   -> 80 - 0.05 res  ||  25 - 125 ->  80 - 1.25 mm  100
+         5-20  -> 75 - 0.20 res  || 125 - 500  ->  75 - 5 mm    180
+        """
+        precip = numpy.where( numpy.logical_and(data < 255, data >= 180),
+                              125.0 + ((data - 180) * 5.0), precip )
+        precip = numpy.where( numpy.logical_and(data < 180, data >= 100),
+                              25.0 + ((data - 100) * 1.25), precip )
+        precip = numpy.where( data < 100,
+                              0.0 + ((data - 0) * 0.25), precip )
+
         if total is None:
-            total = numpy.zeros( numpy.shape(data) , 'f')
+            total = precip
         else:
-            total += data
+            total += precip
         del img
         
     return total
