@@ -3,7 +3,7 @@
 
 cd current
 python vsby.py
-/mesonet/python/bin/python today_precip.py >& /dev/null
+python today_precip.py
 /mesonet/python/bin/python today_gust.py
 /mesonet/python/bin/python temperature.py
 /mesonet/python/bin/python today_high.py

@@ -1,7 +1,10 @@
-# Generate analysis of precipitation
+"""
+ Generate analysis of precipitation
+"""
 
-import sys, os, random
-sys.path.append("../lib/")
+import sys
+import os
+import random
 import iemplot
 
 import mx.DateTime
