@@ -36,7 +36,7 @@ if (strrpos($network, "CLIMATE") > 0){
 	alldata_". substr($climate_site,0,2) ."
 		WHERE station = $1 and day between $2 and $3 " .
 				" ORDER by day ASC");
-	$rs = pg_execute($coopdb, "SELECT", Array(strtolower($station), $sdate, $edate));
+	$rs = pg_execute($coopdb, "SELECT", Array($station, $sdate, $edate));
 } else {
 	$rs = pg_prepare($iem, "SELECT", "SELECT pday, day from summary_$year s JOIN stations t
 	ON (t.iemid = s.iemid)
