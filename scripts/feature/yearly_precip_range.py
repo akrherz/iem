@@ -5,19 +5,14 @@ COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
 ccursor.execute("""
- select year, sum(case when high >= 100 then 1 else 0 end), max(high)
- from alldata_ia where station = 'IA2203' GROUP by year ORDER By year ASC
+select extract(year from day) as yr, max(avg) from (select one.day, (one.high + two.high + three.high + one.low + two.low + three.low) / 6.0 as avg from (select day, high, low from alldata_ia where station = 'IA2203') as one, (select day + '1 day'::interval as day, high, low from alldata_ia where station = 'IA2203') as two, (select day + '2 days'::interval as day, high, low from alldata_ia where station = 'IA2203') as three WHERE one.day = two.day and two.day = three.day ORDER by avg DESC) as foo GROUP by yr ORDER by yr ASC
 """)
 years = []
 count = []
 maxv = []
 for row in ccursor:
     years.append( row[0] )
-    count.append( float(row[1])  )
-    maxv.append( float(row[2])  )
-
-count[-1] = 1
-maxv[-1] = 101
+    maxv.append( float(row[1])  )
 
 years = numpy.array(years)
 
@@ -26,27 +21,17 @@ import iemplot
 import matplotlib.font_manager
 prop = matplotlib.font_manager.FontProperties(size=12)
 
-fig, ax = plt.subplots(2,1)
-bars = ax[0].bar( years - 0.4, count, 
-        facecolor='red', ec='red', zorder=1)
-bars[-1].set_facecolor('green')
-bars[-1].set_edgecolor('green')
-ax[0].set_title("Des Moines Days over 100$^{\circ}\mathrm{F}$ [1886-2012]")
-ax[0].grid(True)
-ax[0].set_ylabel('Days')
-ax[0].set_xlim(1885.5,2013.5)
-
-bars = ax[1].bar( years - 0.4, maxv, 
-        facecolor='red', ec='red', zorder=1)
-bars[-1].set_facecolor('green')
-bars[-1].set_edgecolor('green')
-ax[1].set_title("Des Moines Maximum Temperature [1886-2012]")
-ax[1].grid(True)
-ax[1].set_ylabel("Temperature $^{\circ}\mathrm{F}$")
-ax[1].set_xlim(1885.5,2013.5)
-ax[1].set_ylim(90,110)
-ax[1].set_xlabel("* 2012 Data thru 27 June", color='g')
-
+fig, ax = plt.subplots(1,1)
+bars = ax.bar( years - 0.4, maxv, 
+        facecolor='g', ec='g', zorder=1)
+bars[-1].set_facecolor('r')
+bars[-1].set_edgecolor('r')
+ax.set_title("Des Moines Warmest 3 Day Period by Year [1880-2012]\nAverage High Temperature")
+ax.grid(True)
+ax.set_xlabel("thru 6 July 2012")
+ax.set_ylabel('Daily Average High Temp $^{\circ}\mathrm{F}$')
+ax.set_xlim(1879.5,2013.5)
+ax.set_ylim(85,110)
 
 fig.savefig('test.ps')
 iemplot.makefeature('test')
