@@ -43,8 +43,21 @@ include("../../config/settings.inc.php");
 <form method="GET" name="cow">
 <table>
 <tr>
- <th>Start:</th><td><?php echo yearSelect2(2005,$syear,"syear"); ?><?php echo monthSelect($smonth, "smonth"); ?><?php echo daySelect2($sday, "sday"); ?><?php echo gmtHourSelect($shour, "shour"); ?></td>
- <th>End:</th><td><?php echo yearSelect2(2005,$eyear,"eyear"); ?><?php echo monthSelect($emonth, "emonth"); ?><?php echo daySelect2($eday, "eday"); ?><?php echo gmtHourSelect($ehour, "ehour"); ?></td>
+ <th>Start:</th>
+ <td>
+ <?php echo yearSelect2(2005,$syear,"syear"); 
+ echo monthSelect($smonth, "smonth"); 
+ echo daySelect2($sday, "sday"); 
+ echo gmtHourSelect($shour, "shour"); ?>
+ </td>
+ <th>End:</th>
+ <td>
+ <?php 
+ echo yearSelect2(2005,$eyear,"eyear"); 
+ echo monthSelect($emonth, "emonth"); 
+ echo daySelect2($eday, "eday"); 
+ echo gmtHourSelect($ehour, "ehour"); 
+ ?></td>
 </tr>
 </table>
 <table>
@@ -62,10 +75,21 @@ while( list($key, $value) = each($wfos) ){
 </td>
 <th>Warning Type:</th>
 <td>
-<input name="wtype[]" type="checkbox" value="TO" <?php if (in_array("TO", $wtype)) echo "CHECKED"; ?>>Tornado
-<input name="wtype[]" type="checkbox" value="SV" <?php if (in_array("SV", $wtype)) echo "CHECKED"; ?>>Svr T'storm
-<input name="wtype[]" type="checkbox" value="MA" <?php if (in_array("MA", $wtype)) echo "CHECKED"; ?>>Marine
-<input name="wtype[]" type="checkbox" value="FF" <?php if (in_array("FF", $wtype)) echo "CHECKED"; ?>>Flash Flood (2008+)
+<script type="text/javascript">
+function wtypeSelect()
+{
+	document.getElementById("TO").checked = true;
+	document.getElementById("SV").checked = true;
+	document.getElementById("MA").checked = true;
+	document.getElementById("FF").checked = true;
+	return false;
+}
+</script>
+<button onclick="return wtypeSelect()">Select All</button>
+<input name="wtype[]" type="checkbox" id="TO" value="TO" <?php if (in_array("TO", $wtype)) echo "CHECKED"; ?>>Tornado
+<input name="wtype[]" type="checkbox" id="SV" value="SV" <?php if (in_array("SV", $wtype)) echo "CHECKED"; ?>>Svr T'storm
+<input name="wtype[]" type="checkbox" id="MA" value="MA" <?php if (in_array("MA", $wtype)) echo "CHECKED"; ?>>Marine
+<input name="wtype[]" type="checkbox" id="FF" value="FF" <?php if (in_array("FF", $wtype)) echo "CHECKED"; ?>>Flash Flood (2008+)
 </td></tr>
 <tr>
 <th>Hail Size:</th>
@@ -83,12 +107,25 @@ while( list($key, $value) = each($wfos) ){
 </select> km</td>
 <th>LSR Type:</th>
 <td>
-<input name="ltype[]" type="checkbox" value="T" <?php if (in_array("T", $ltype)) echo "CHECKED"; ?>>Tornado
-<input name="ltype[]" type="checkbox" value="D" <?php if (in_array("D", $ltype)) echo "CHECKED"; ?>>Wind Damage
-<input name="ltype[]" type="checkbox" value="H" <?php if (in_array("H", $ltype)) echo "CHECKED"; ?>>Hail
-<input name="ltype[]" type="checkbox" value="G" <?php if (in_array("G", $ltype)) echo "CHECKED"; ?>>Wind Gust
-<br /><input name="ltype[]" type="checkbox" value="MA" <?php if (in_array("MA", $ltype)) echo "CHECKED"; ?>>Marine
-<input name="ltype[]" type="checkbox" value="FF" <?php if (in_array("FF", $ltype)) echo "CHECKED"; ?>>Flash Flood (2008+)
+<script type="text/javascript">
+function ltypeSelect()
+{
+	document.getElementById("T").checked = true;
+	document.getElementById("D").checked = true;
+	document.getElementById("H").checked = true;
+	document.getElementById("G").checked = true;
+	document.getElementById("FF2").checked = true;
+	document.getElementById("MA2").checked = true;
+	return false;
+}
+</script>
+<button onclick="return ltypeSelect()">Select All</button>
+<input name="ltype[]" type="checkbox" id="T" value="T" <?php if (in_array("T", $ltype)) echo "CHECKED"; ?>>Tornado
+<input name="ltype[]" type="checkbox" id="D" value="D" <?php if (in_array("D", $ltype)) echo "CHECKED"; ?>>Wind Damage
+<input name="ltype[]" type="checkbox" id="H" value="H" <?php if (in_array("H", $ltype)) echo "CHECKED"; ?>>Hail
+<input name="ltype[]" type="checkbox" id="G" value="G" <?php if (in_array("G", $ltype)) echo "CHECKED"; ?>>Wind Gust
+<br /><input name="ltype[]" type="checkbox" id="MA2" value="MA" <?php if (in_array("MA", $ltype)) echo "CHECKED"; ?>>Marine
+<input name="ltype[]" type="checkbox" id="FF2" value="FF" <?php if (in_array("FF", $ltype)) echo "CHECKED"; ?>>Flash Flood (2008+)
 </td></tr>
 <tr>
  <th>Wind:</th>
