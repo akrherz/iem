@@ -18,7 +18,7 @@ nt = network.Table("IACLIMATE")
 # Compute normal from the climate database
 sql = """SELECT station,
    sum(gdd50(high, low)) as gdd
-   from alldata WHERE year = %s and month in (5,6,7,8,9,10)
+   from alldata_ia WHERE year = %s and month in (5,6,7,8,9,10)
    GROUP by station""" % (now.year)
 
 lats = []
