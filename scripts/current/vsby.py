@@ -1,15 +1,18 @@
-# Generate current plot of visibility
+"""
+ Generate current plot of visibility
+"""
 
-import sys, os
-sys.path.append("../lib/")
-import iemplot, random
+import sys
+import os
+import iemplot
+import random
 
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor()
 
 # Compute normal from the climate database
 sql = """
@@ -28,12 +31,12 @@ lats = []
 lons = []
 vals = []
 valmask = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] )
-  vals.append( rs[i]['vsby'] )
-  valmask.append(  (rs[i]['network'] in ['AWOS','IA_AWOS']) )
+icursor.execute(sql)
+for row in icursor:
+    lats.append( row[4] )
+    lons.append( row[3] )
+    vals.append( row[2] )
+    valmask.append( row[1] in ['AWOS','IA_AWOS'] )
 
 cfg = {
  'wkColorMap': 'gsdtol',
