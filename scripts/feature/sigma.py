@@ -1,52 +1,88 @@
 import iemdb
 import numpy
+from scipy import stats
 import psycopg2.extras
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+data = {}
+for line in open('/home/akrherz/Downloads/corn_yield.csv'):
+    tokens = line.split(",")
+    if tokens[0] != '"SURVEY"':
+        continue
+    year = tokens[1].replace('"', '')
+    data[int(year)] = float(tokens[-1].replace('"', ''))
+
+years = range(1893,2012)
+yields = []
+for year in years:
+    yields.append( data[year] )
+
+h_slope, intercept, r_value, p_value, std_err = stats.linregress(years, yields)
+departures = []
+for year in years:
+    expected = h_slope * year + intercept
+    departures.append( (data[year] - expected ) / expected * 100.0)
+departures.append( 0 )
+
+# Get current sigmas
 ccursor.execute("""
-  select o.day, o.station, o.high, o.high - foo.chigh, (o.high - foo.chigh) / foo.sh as hsd, 
-  o.low, o.low - foo.clow, (o.low - foo.clow) / foo.sl as lsd from 
-  (select sday, station, avg(high) as chigh, stddev(high) as sh, avg(low) as clow, 
-   stddev(low) as sl from alldata_ia where year < 2012 and station = 'IA5952' 
-   GROUP by sday, station) as foo, alldata_ia o 
-  where o.sday = foo.sday and o.station = 'IA5952' and 
-  month = 3 and year = 2012 ORDER by o.day ASC""")
+ SELECT stddev(sum) as p, avg(sum) as pavg, stddev(avg) as t, avg(avg) as tavg  from 
+ (SELECT year, sum(precip), avg((high+low)/2.0) from alldata_ia
+  where station = 'IA0000' and sday >= '0501' and sday < '0723'
+  GROUP by year) as foo
+""")
+row = ccursor.fetchone()
+pstd = row['p']
+pavg = row['pavg']
+tstd = row['t']
+tavg = row['tavg']
 
-high_sigma = []
-low_sigma = []
-high_departure = []
-low_departure = []
+ccursor.execute("""SELECT year, sum(precip), avg((high+low)/2.0) from alldata_ia
+  where station = 'IA0000' and sday >= '0501' and sday < '0723'
+  GROUP by year ORDER by year ASC""")
 
+tsigma = []
+psigma = []
+years = []
+dist = []
 for row in ccursor:
-  high_sigma.append( row[4] )
-  high_departure.append( row[3] )
-  low_sigma.append( row[7] )
-  low_departure.append( row[6] )
+    t = float((row['avg'] - tavg) / tstd)
+    p = float((row['sum'] - pavg) / pstd)
+    d = ((t * t) + (p * p))**0.5
+    tsigma.append( t )
+    psigma.append( p )
+    dist.append( d )
+    years.append( row['year'] )
 
+tsigma = numpy.array( tsigma )
+psigma = numpy.array( psigma )
+print tsigma[-2], psigma[-2]
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 
-fig = plt.figure()
-ax  = fig.add_subplot(211)
 
-ax.bar( numpy.arange(1,22), high_departure, fc='r', width=0.4, label='High')
-ax.bar(numpy.arange(1,22)-0.4, low_departure, fc='b', width=0.4, label='Low')
-ax.set_xlim(9.5,21.7)
-ax.set_title("New Hampton Daily Temperature Departure\n10-21 March 2012 against 1893-2011 Climatology")
-ax.set_ylabel("Temp Departure [$^{\circ}\mathrm{F}$ over ave]")
+h_slope, intercept, r_value, p_value, std_err = stats.linregress(tsigma, psigma)
+print r_value ** 2
+y1 = -4.0 * h_slope + intercept
+y2 = 4.0 * h_slope + intercept
+(fig, ax) = plt.subplots(1,1)
+
+ax.scatter(tsigma, psigma)
+ax.plot([-4,4], [y1,y2])
+ax.text(-3.8,y1+0.1, 'R$^2$=%.2f' % (r_value ** 2,), rotation=-20)
+ax.set_xlim(-4,4)
+ax.set_ylim(-4,4)
+for i in range(len(years)):
+    if years[i] in [2012,] or dist[i] > (dist[-1] - .4):
+        ax.text( tsigma[i], psigma[i], ' %.2f' % (departures[i],), va='top')
+
+c = Circle((0,0), radius=dist[-1], facecolor='none')
+ax.add_patch(c)
+ax.set_xlabel("Temperature Departure ($\sigma$)")
+ax.set_ylabel("Precipitation Departure ($\sigma$)")
 ax.grid(True)
-ax.set_ylim(0,50)
-ax.legend(loc=2)
-
-ax2  = fig.add_subplot(212)
-ax2.bar( numpy.arange(1,22), high_sigma, fc='r', width=0.4)
-ax2.bar(numpy.arange(1,22)-0.4, low_sigma, fc='b', width=0.4)
-ax2.set_xlim(9.5,21.7)
-ax2.set_ylabel("Temp Departure [$\sigma$]")
-ax2.grid(True)
-ax2.set_ylim(0,5)
-ax2.legend(loc=2)
-ax2.set_xlabel("Day of March, unofficial data")
+ax.set_title("1 May - 22 July Iowa Statewide Temp + Precip Departure\nbased on IEM estimated areal averaged data (1893-2012)")
 
 import iemplot
 fig.savefig('test.ps')
