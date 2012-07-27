@@ -1,7 +1,9 @@
-# Generate analysis of Peak Wind Gust
-
-import sys, os, random
-sys.path.append("../lib/")
+"""
+ Generate analysis of Peak Wind Gust
+"""
+import sys
+import os
+import random
 import iemplot
 
 import mx.DateTime
@@ -20,6 +22,7 @@ sql = """
   WHERE s.iemid = c.iemid and c2.valid > 'TODAY' and c.day = 'TODAY'
   and c2.iemid = s.iemid
   and (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US'
+  and s.state not in ('HI', 'AK')
   ORDER by lon, lat
 """ % (now.year,)
 
