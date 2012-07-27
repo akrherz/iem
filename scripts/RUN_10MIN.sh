@@ -2,7 +2,7 @@
 #set -x
 
 cd current
-/mesonet/python/bin/python vsby.py >& /dev/null
+python vsby.py
 /mesonet/python/bin/python today_precip.py >& /dev/null
 /mesonet/python/bin/python today_gust.py
 /mesonet/python/bin/python temperature.py
