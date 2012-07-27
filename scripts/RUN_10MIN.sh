@@ -6,8 +6,8 @@ python vsby.py
 python today_precip.py
 python today_gust.py
 python temperature.py
-/mesonet/python/bin/python today_high.py
-/mesonet/python/bin/python rwis_station.py
+python today_high.py
+python rwis_station.py
 
 cd ../summary
 /mesonet/python/bin/python updateRain.py

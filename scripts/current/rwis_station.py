@@ -1,15 +1,18 @@
-# Iowa RWIS station plot!
+"""
+ Iowa RWIS station plot!
+"""
 
-import sys, os
-sys.path.append("../lib/")
-import iemplot, synop
+import sys
+import os
+import iemplot
+import synop
 
 import mx.DateTime
 now = mx.DateTime.now()
-
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
+import psycopg2.extras
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 # Compute normal from the climate database
 sql = """
@@ -26,12 +29,12 @@ WHERE
 lats = []
 lons = []
 vals = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] )
-  imdat = synop.ob2synop( rs[i] )
-  vals.append( imdat )
+icursor.execute(sql)
+for row in icursor:
+    lats.append( row['lat'] )
+    lons.append( row['lon'] )
+    imdat = synop.ob2synop( row )
+    vals.append( imdat )
   #vals.append("11206227031102021040300004963056046601517084081470")
 
 
