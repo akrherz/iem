@@ -10,15 +10,13 @@ wget -q http://droughtmonitor.unl.edu/shapefiles_combined/${TS}/usdm${TS2}m.zip
 
 unzip $DATAFILE
 
+ogr2ogr -t_srs EPSG:4326 -f "ESRI Shapefile" dm_current.shp usdm${TS2}.shp
+
 # Combine Coverages
 #/mesonet/python/bin/python combine.py $TS2
 
 # Create combined zipfile
-#zip dm_current.zip dm_$TS2.shp dm_$TS2.shx dm_$TS2.dbf
-mv usdm$TS2.shp dm_current.shp
-mv usdm$TS2.shx dm_current.shx
-mv usdm$TS2.dbf dm_current.dbf
-zip dm_current.zip dm_current.shp dm_current.shx dm_current.dbf
+zip dm_current.zip dm_current.shp dm_current.shx dm_current.dbf dm_current.prj
 
 # Copy it to the archive
 ftime="`date --date 'last tuesday' +'%Y%m%d%H'`00"
@@ -36,7 +34,7 @@ ftime="`date --date 'last tuesday' +'%Y%m%d%H'`00"
 #mv dm_current.zip /mesonet/data/gis/shape/4326/us/usdm/
 
 # Cleanup
-rm dm_current.shp dm_current.shx dm_current.dbf dm_current.zip
+rm dm_current.shp dm_current.shx dm_current.dbf dm_current.zip dm_current.prj
 mv usdm* last/
 
 #ogr2ogr -t_srs EPSG:4326 test.shp Drought_Impacts_US.shp
