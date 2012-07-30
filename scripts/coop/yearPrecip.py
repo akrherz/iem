@@ -50,8 +50,8 @@ for row in icursor:
 	thisPrec = row[2]
 	thisCount = row[1]
 	if nt.sts.has_key(thisStation):
-		d[thisStation] = {'prectot': thisCount,
-						 'cnt': thisPrec }
+		d[thisStation] = {'prectot': thisPrec,
+						 'cnt': thisCount }
 		d[thisStation]["name"] = nt.sts[thisStation]['name']
 		d[thisStation]["crain"] = mrain[ nt.sts[thisStation]['climate_site'] ]
 
