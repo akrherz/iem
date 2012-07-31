@@ -62,7 +62,11 @@ while 1:
     count = 0
     for entry in feed.entry:
         count += 1
-        uri = entry.get_html_link().href
+        link = entry.get_html_link()
+        if link:
+            uri = link.href
+        else:
+            uri = '#'
         updated = mx.DateTime.strptime(entry.updated.text[:16], '%Y-%m-%dT%H:%M')
         changestamp = max(int(entry.changestamp.value) +1, changestamp)
         if updated < yesterday:
