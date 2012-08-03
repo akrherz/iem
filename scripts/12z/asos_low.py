@@ -1,15 +1,14 @@
 # Output the 12z morning low temperature
 
 import sys, os, random
-sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor()
 
 sql = """
 select s.id, 
@@ -25,15 +24,15 @@ lons = []
 vals = []
 valmask = []
 labels = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] )
-  vals.append( rs[i]['low12z'] )
-  labels.append( rs[i]['id'] )
+icursor.execute(sql)
+for row in icursor:
+  lats.append( row[2] )
+  lons.append( row[1] )
+  vals.append( row[3] )
+  labels.append( row[0] )
   valmask.append( True )
 
-if len(rs) < 5:
+if icursor.rowcount < 5:
   sys.exit(0)
 
 cfg = {
