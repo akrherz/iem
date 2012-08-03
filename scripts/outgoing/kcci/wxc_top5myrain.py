@@ -1,24 +1,34 @@
 
-import os, sys, mx.DateTime, pg, tempfile
-iemdb = pg.connect('iem', 'iemdb', user='nobody')
+import os
+import subprocess
+import mx.DateTime
+import sys
+import tempfile
+import tracker
+qc = tracker.loadqc()
+import iemdb
+IEM = iemdb.connect("iem", bypass=True)
+icursor = IEM.cursor()
 
 dy = int(sys.argv[1])
 now = mx.DateTime.now()
 
-sql = "SELECT s.id as station, sum(pday) as rain from summary c, stations s \
-  WHERE s.network = 'KCCI' and s.iemid = c.iemid and \
-  day > '%s' and s.id not in ('SCEI4','SWII4') GROUP by station ORDER by rain DESC" % \
- ( (now - mx.DateTime.RelativeDateTime(days= int(dy) )).strftime("%Y-%m-%d"), )
-
-rs = iemdb.query(sql).dictresult()
+icursor.execute("""SELECT s.id as station, sum(pday) as rain from summary c, stations s 
+  WHERE s.network = 'KCCI' and s.iemid = c.iemid and 
+  day > '%s' and s.id not in ('SCEI4','SWII4') GROUP by station ORDER by rain DESC""" % ( (now - mx.DateTime.RelativeDateTime(days= int(dy) )).strftime("%Y-%m-%d"), ))
 dict = {}
-dict['dy'] = dy
-dict['sid1'] = rs[0]['station']
-dict['sid2'] = rs[1]['station']
-dict['sid3'] = rs[2]['station']
-dict['sid4'] = rs[3]['station']
-dict['sid5'] = rs[4]['station']
+
 dict['timestamp'] = mx.DateTime.now()
+i = 1
+for row in icursor:
+    row = icursor.fetchone()
+    if i == 6:
+        break
+    if qc.get(row[0], {}).get('precip', False):
+        continue
+    dict['sid%s' % (i,)] = row[0]
+    i += 1
+
 dict['q'] = "%Q"
 dict['fn'] = "Last %s Day Precip" % (dy,)
 if dy == 2:
@@ -34,5 +44,6 @@ fd, path = tempfile.mkstemp()
 os.write(fd,  open('top5rainXday.tpl','r').read() % dict )
 os.close(fd)
 
-os.system("/home/ldm/bin/pqinsert -p 'auto_top5rain_%sday.scn' %s" % (dy, path))
+subprocess.call("/home/ldm/bin/pqinsert -p 'auto_top5rain_%sday.scn' %s" % (dy, path),
+                shell=True)
 os.remove(path)
