@@ -1,15 +1,16 @@
-# Generate analysis of precipitation
+"""
+ Generate analysis of precipitation
+"""
 
 import sys, os, random
-sys.path.append("../lib/")
 import iemplot
 
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor()
 
 # Compute normal from the climate database
 sql = """
@@ -28,12 +29,12 @@ lats = []
 lons = []
 vals = []
 valmask = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-  lats.append( rs[i]['lat'] )
-  lons.append( rs[i]['lon'] + (random.random() * 0.01))
-  vals.append( rs[i]['rainfall'] )
-  valmask.append( True )
+icursor.execute(sql)
+for row in icursor:
+    lats.append( row[2] )
+    lons.append( row[1] + (random.random() * 0.01))
+    vals.append( row[3] )
+    valmask.append( True )
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
