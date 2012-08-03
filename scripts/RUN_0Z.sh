@@ -6,7 +6,7 @@ cd ../ingestors
 /mesonet/python/bin/python elnino.py
 
 cd ../summary
-/mesonet/python/bin/python max_reflect.py
+python max_reflect.py
 
 # Rerun today
 cd ../dbutil
