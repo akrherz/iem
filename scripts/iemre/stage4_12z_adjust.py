@@ -9,10 +9,7 @@ import numpy
 import iemre
 import os
 import sys
-try:
-    import netCDF3
-except:
-    import netCDF4 as netCDF3
+import netCDF4
 
 def merge(ts):
     """
@@ -35,7 +32,7 @@ def merge(ts):
     stage4 = numpy.where( stage4 < 0., 0., stage4)
 
     # Open up our RE file
-    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),'a')
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),'a')
     ts0 = ts + mx.DateTime.RelativeDateTime(days=-1)
     jan1 = mx.DateTime.DateTime(ts.year, 1, 1, 0, 0)
     offset0 = int(( ts0 - jan1).hours)
