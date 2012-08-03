@@ -1,26 +1,32 @@
-# Generate a Weather Central Formatted file of ASOS/AWOS Precip
+"""
+ Generate a Weather Central Formatted file of ASOS/AWOS Precip
+"""
 
-import mx.DateTime, os, Ngl, numpy, shutil
-from pyIEM import iemdb
-i = iemdb.iemdb()
-access = i['iem']
-coop = i['coop']
-mesosite = i['mesosite']
+import mx.DateTime
+import os
+import Ngl
+import numpy
+import shutil
+import subprocess
+import iemdb
+import psycopg2.extras
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor( cursor_factory=psycopg2.extras.DictCursor )
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor( cursor_factory=psycopg2.extras.DictCursor )
+import network
+nt = network.Table(("IA_ASOS", "AWOS"))
 
-def build_xref():
-    rs = mesosite.query("SELECT id, climate_site from stations WHERE network in ('IA_ASOS','AWOS')").dictresult()
-    data = {}
-    for i in range(len(rs)):
-        data[rs[i]['id']] = rs[i]['climate_site']
-    return data
 
 def compute_climate(sts, ets):
     sql = """SELECT station, sum(gdd50) as cgdd,
-    sum(precip) as crain from climate WHERE valid >= '2000-%s' and valid < '2000-%s' and gdd50 is not null GROUP by station""" % (sts.strftime("%m-%d"), ets.strftime("%m-%d"))
-    rs = coop.query(sql).dictresult()
+        sum(precip) as crain from climate WHERE valid >= '2000-%s' and 
+        valid < '2000-%s' and gdd50 is not null GROUP by station""" % (
+        sts.strftime("%m-%d"), ets.strftime("%m-%d"))
+    ccursor.execute( sql )
     data = {}
-    for i in range(len(rs)):
-        data[rs[i]['station']] = rs[i]
+    for row in ccursor:
+        data[ row[0] ] = row
     return data
 
 def compute_obs():
@@ -46,10 +52,10 @@ WHERE
   day IN ('TODAY'::date,'YESTERDAY'::date, 'TODAY'::date - '2 days'::interval)
 GROUP by s.id, lon, lat
     """ % (mx.DateTime.now().year,)
-    rs = access.query(sql).dictresult()
+    icursor.execute( sql )
     data = {}
-    for i in range(len(rs)):
-        data[rs[i]['id']] = rs[i]
+    for row in icursor:
+        data[row['id']] = row
     return data
 
 def main():
@@ -69,7 +75,7 @@ def main():
         data[id]['p01'], data[id]['p02'], data[id]['p03'],
         data[id]['lat'], data[id]['lon'] ))
     output.close()
-    os.system("/home/ldm/bin/pqinsert -p \"wxc_airport_precip.txt\" wxc_airport_precip.txt")
+    subprocess.call("/home/ldm/bin/pqinsert -p \"wxc_airport_precip.txt\" wxc_airport_precip.txt", shell=True)
     shutil.copyfile("wxc_airport_precip.txt", "/mesonet/share/pickup/wxc/wxc_airport_precip.txt")
     os.remove("wxc_airport_precip.txt")
 
