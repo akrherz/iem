@@ -25,7 +25,8 @@ def loadqc():
             qdict[row[0]]['precip'] = True
         if row[1].find("tmpf") > -1:
             qdict[row[0]]['tmpf'] = True
-    
+        if row[1].find("drct") > -1 or row[1].find("sknt") > -1 or row[1].find("wind") > -1:
+            qdict[row[0]]['wind'] = True    
     pcursor.close()
     portfolio.close()
     return qdict

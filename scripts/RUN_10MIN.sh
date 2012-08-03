@@ -25,12 +25,12 @@ python wxc_iarwis_traffic.py
 
 cd kcci
 python wxc_top5.py
-/mesonet/python/bin/python wxc_top5month.py
-/mesonet/python/bin/python wxc_top5gusts.py
-/mesonet/python/bin/python wxc_top5highs.py
-/mesonet/python/bin/python wxc_top5lows.py
+python wxc_top5month.py
+python wxc_top5gusts.py
+python wxc_top5highs.py
+python wxc_top5lows.py
 
-/mesonet/python/bin/python wxc_top5myrain.py 2
-/mesonet/python/bin/python wxc_top5myrain.py 3
-/mesonet/python/bin/python wxc_top5myrain.py 7
-/mesonet/python/bin/python wxc_top5myrain.py 14
+python wxc_top5myrain.py 2
+python wxc_top5myrain.py 3
+python wxc_top5myrain.py 7
+python wxc_top5myrain.py 14

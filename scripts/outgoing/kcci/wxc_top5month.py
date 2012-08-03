@@ -1,20 +1,31 @@
+import os
+import subprocess
+import mx.DateTime
+import sys
+import tempfile
+import tracker
+qc = tracker.loadqc()
+import iemdb
+IEM = iemdb.connect("iem", bypass=True)
+icursor = IEM.cursor()
 
-
-import os, mx.DateTime, pg, tempfile
-iemdb = pg.connect('iem', 'iemdb', user='nobody')
-
-rs = iemdb.query("""SELECT s.id as station from summary c, stations s WHERE 
+icursor.execute("""SELECT s.id as station from summary c, stations s WHERE 
   s.network = 'KCCI' and s.iemid = c.iemid and 
-  day = 'TODAY' and s.id not in ('SCEI4','SWII4') ORDER by pmonth DESC
-  """).dictresult()
+  day = 'TODAY'  ORDER by pmonth DESC""")
 dict = {}
-dict['dy'] = 31
+
 dict['timestamp'] = mx.DateTime.now()
-dict['sid1'] = rs[0]['station']
-dict['sid2'] = rs[1]['station']
-dict['sid3'] = rs[2]['station']
-dict['sid4'] = rs[3]['station']
-dict['sid5'] = rs[4]['station']
+i = 1
+for row in icursor:
+    row = icursor.fetchone()
+    if i == 6:
+        break
+    if qc.get(row[0], {}).get('precip', False):
+        continue
+    dict['sid%s' % (i,)] = row[0]
+    i += 1
+
+dict['dy'] = 31
 dict['q'] = "%Q"
 dict['fn'] = "Month Precip"
 dict['title'] = "%s RAINFALL" % (mx.DateTime.now().strftime("%B"),)
@@ -24,5 +35,6 @@ fd, path = tempfile.mkstemp()
 os.write(fd,  open('top5rainXday.tpl','r').read() % dict )
 os.close(fd)
 
-os.system("/home/ldm/bin/pqinsert -p 'auto_top5rain_month.scn' %s" % (path,))
+subprocess.call("/home/ldm/bin/pqinsert -p 'auto_top5rain_month.scn' %s" % (path,),
+                shell=True)
 os.remove(path)
