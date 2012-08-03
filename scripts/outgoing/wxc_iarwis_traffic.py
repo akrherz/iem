@@ -5,6 +5,7 @@ Dump out a file of the current RWIS traffic data for Iowa, please
 import iemdb
 import os
 import shutil
+import subprocess
 from psycopg2.extras import DictCursor
 IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor(cursor_factory=DictCursor)
@@ -41,6 +42,6 @@ for row in icursor:
     out.write("%(id)3s %(nwsli)5.5s %(lat)7.4f %(lon)9.4f %(name)-32.32s %(day)2.0f %(hour)2.0f %(minute)2.0f %(avgspeed)5.1f %(normalvol)4.0f %(longvol)4.0f %(occ)4.0f\n" % row )
 
 out.close()
-os.system("/home/ldm/bin/pqinsert -p \"wxc_iarwis_traffic.txt\" wxc_iarwis_traffic.txt >& /dev/null")
+subprocess.call("/home/ldm/bin/pqinsert -p \"wxc_iarwis_traffic.txt\" wxc_iarwis_traffic.txt >& /dev/null", shell=True)
 shutil.copyfile("wxc_iarwis_traffic.txt", "/mesonet/share/pickup/wxc/wxc_iarwis_traffic.txt")
 os.remove("wxc_iarwis_traffic.txt")
