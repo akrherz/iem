@@ -98,6 +98,17 @@ def drct2dirTxt(dir):
   elif (dir >= 324 and dir < 350):
     return "NNW"
 
+def dwpf(tmpf, relh):
+    """
+    Compute the dewpoint in F given a temperature and relative humidity
+    """
+    if tmpf is None or relh is None:
+        return None
+
+    tmpk = 273.15 + ( 5.00/9.00 * ( tmpf - 32.00) )
+    dwpk = tmpk / (1+ 0.000425 * tmpk * -(math.log10(relh/100.0)) )
+    return int(float( ( dwpk - 273.15 ) * 9.00/5.00 + 32 ))
+
 
 def relh(tmpf, dwpf):
   if (tmpf == None or dwpf == None or tmpf == "M" or dwpf == "M" or tmpf == -99 or dwpf == -99):
