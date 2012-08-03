@@ -24,7 +24,7 @@ php spider.php
 python wxc_iarwis_traffic.py
 
 cd kcci
-/mesonet/python/bin/python wxc_top5.py
+python wxc_top5.py
 /mesonet/python/bin/python wxc_top5month.py
 /mesonet/python/bin/python wxc_top5gusts.py
 /mesonet/python/bin/python wxc_top5highs.py
