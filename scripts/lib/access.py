@@ -136,13 +136,17 @@ class Ob(object):
         """
         self.data['valid'] = ts
         
-    def execQuery(self, sql, db, dbpool):
+    def execQuery(self, sql, db, dbpool, cursor):
         """
-        Helper function for select/update queries
+        Helper function for select/update queries, the complication is that
+        we could have all sorts of db connection objs passed to this
         """
+        if cursor is not None:
+            cursor.execute( sql )
+            return
         if self.txn is not None:
             return self.txn.execute(sql)
-        if dbpool != None:
+        if dbpool is not None:
             dbpool.runOperation( sql )
         else:
             try:
@@ -151,7 +155,7 @@ class Ob(object):
                 print sql
                 traceback.print_exc()
 
-    def updateDatabasePeakWind(self, db, gdata, dbpool=None):
+    def updateDatabasePeakWind(self, db, gdata, dbpool=None, cursor=None):
         table = "summary_%s" % (self.data['valid'].year,)
         sql = """UPDATE """+ table +""" s SET 
      max_gust = 
@@ -163,10 +167,10 @@ class Ob(object):
       FROM stations t
      WHERE t.iemid = s.iemid and t.id = '%(stationID)s' and t.network = '%(network)s' 
      and day = date('%(peak_ts)s'::timestamptz at time zone t.tzname)""" % gdata
-        self.execQuery(sql, db, dbpool)
+        self.execQuery(sql, db, dbpool, cursor)
 
 
-    def updateDatabaseSummaryTemps(self, db=None, dbpool=None):
+    def updateDatabaseSummaryTemps(self, db=None, dbpool=None, cursor=None):
         table = "summary_%s" % (self.data['valid'].year,)
         sql = """UPDATE """+ table +""" s SET 
               max_tmpf = 
@@ -177,9 +181,9 @@ class Ob(object):
       WHERE t.iemid = s.iemid and t.id = %(station)s and 
       day = date('%(valid)s'::timestamptz at time zone t.tzname) 
       and t.network = %(network)s""" % self.data
-        self.execQuery(sql , db, dbpool)
+        self.execQuery(sql , db, dbpool, cursor)
 
-    def update_summary(self, db=None, dbpool=None):
+    def update_summary(self, db=None, dbpool=None, cursor=None):
         table = "summary_%s" % (self.data['valid'].year,)
         sql = """UPDATE """+ table +""" s SET 
 	pday = 
@@ -211,9 +215,9 @@ class Ob(object):
      WHERE t.iemid = s.iemid and t.id = %(station)s 
      and day = date('%(valid)s'::timestamptz at time zone t.tzname) 
      and t.network = %(network)s """ % self.data
-        self.execQuery(sql, db, dbpool)
+        self.execQuery(sql, db, dbpool, cursor)
 
-    def update_current(self, db=None, dbpool=None):
+    def update_current(self, db=None, dbpool=None, cursor=None):
         sql = """UPDATE current c SET tmpf = %(tmpf)s, dwpf = %(dwpf)s, 
 	phour = 
       (CASE WHEN %(phour)s >= -1 THEN %(phour)s ELSE phour END)::numeric, 
@@ -240,9 +244,9 @@ class Ob(object):
           THEN raw ELSE %(raw)s END)
           FROM stations t
        WHERE t.iemid = c.iemid and t.id = %(station)s and t.network = %(network)s """ % self.data
-        self.execQuery(sql, db, dbpool)
+        self.execQuery(sql, db, dbpool, cursor)
         
-    def insert_currentlog(self, db=None, dbpool=None):
+    def insert_currentlog(self, db=None, dbpool=None, cursor=None):
         sql = """INSERT into current_log(iemid, tmpf, dwpf, 
        phour, tsf0, tsf1, tsf2, 
        tsf3, rwis_subf, pres, drct, sknt, pday, 
@@ -272,21 +276,21 @@ class Ob(object):
          %(skyc1)s, %(skyc2)s, %(skyc3)s, %(skyc4)s,
                    %(skyl1)s, %(skyl2)s, %(skyl3)s, %(skyl4)s, 
                    %(pcounter)s, %(discharge)s)  """ % self.data
-        self.execQuery(sql, db, dbpool)
+        self.execQuery(sql, db, dbpool, cursor)
 
 
-    def updateDatabase(self, db=None, dbpool=None):
+    def updateDatabase(self, db=None, dbpool=None, cursor=None):
         """
         Update the Access database with this observation info
         """
         # We can always update the summary database
-        self.update_summary(db, dbpool)
+        self.update_summary(db, dbpool, cursor)
 
         # We can update current if old_ts is not set or ts > old_ts
         if self.data.get('old_valid') is None or self.data.get('valid') >= self.data.get('old_valid'):
-            self.update_current(db, dbpool)
+            self.update_current(db, dbpool, cursor)
         else:
-            self.insert_currentlog(db, dbpool)
+            self.insert_currentlog(db, dbpool, cursor)
 
     def metar(self):
         """
