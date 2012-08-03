@@ -37,12 +37,12 @@ cd ../iemplot
 ./RUN.csh
 
 cd ../dbutil
-/mesonet/python/bin/python asos2archive.py iowa
+python asos2archive.py iowa
 
 
 cd ../iemre
-/mesonet/python/bin/python grid_asos.py
-/mesonet/python/bin/python grid_asos.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
+python grid_asos.py
+python grid_asos.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
 
 cd ../q2
 python make_raster_24h.py $YYYY $MM $DD $HH

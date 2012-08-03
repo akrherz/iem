@@ -1,8 +1,5 @@
 import sys
-try:
-    import netCDF4 as netCDF3
-except:
-    import netCDF3
+import netCDF4
 import numpy
 import mx.DateTime
 import Ngl
@@ -171,7 +168,7 @@ def grid_hour(nc, ts):
 
 def main(ts):
     # Load up our netcdf file!
-    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,), 'a')
+    nc = netCDF4.Dataset("/mnt/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,), 'a')
     grid_hour(nc , ts)
 
     nc.close()
