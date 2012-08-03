@@ -1,9 +1,9 @@
-
+# Jobs run at 00 UTC
 cd 00z
-/mesonet/python/bin/python awos_rtp.py
+python awos_rtp.py
 
 cd ../ingestors
-/mesonet/python/bin/python elnino.py
+python elnino.py
 
 cd ../summary
 python max_reflect.py
