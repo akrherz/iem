@@ -18,7 +18,7 @@ python gen_15min.py
 cd ../outgoing
 php wxc_rwis.php
 php wxc_awos.php
-/mesonet/python/bin/python madis2csv.py
+python madis2csv.py
 /mesonet/python/bin/python wxc_azos_prec.py
 php spider.php
 /mesonet/python/bin/python wxc_iarwis_traffic.py
