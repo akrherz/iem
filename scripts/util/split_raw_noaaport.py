@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 
 import mx.DateTime, os
 from support import TextProduct

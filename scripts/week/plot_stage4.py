@@ -1,9 +1,9 @@
 # Plot an accumulation of stage4 data!
 
 import sys, os
-sys.path.append("../lib/")
 import Nio
-import iemplot, numpy
+import iemplot
+import numpy
 
 import mx.DateTime
 ets = mx.DateTime.now() + mx.DateTime.RelativeDateTime(minute=0)
