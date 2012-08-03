@@ -31,7 +31,7 @@ python hourly_precip.py
 python update_snet_precip.py
 
 cd ../week
-/mesonet/python/bin/python plot_obs.py
+python plot_obs.py
 
 cd ../iemplot
 ./RUN.csh
