@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 
 from Scientific.IO import NetCDF
 import Numeric, mx.DateTime
