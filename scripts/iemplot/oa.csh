@@ -87,7 +87,9 @@ EOF
 #
 #exit
 #EOF
-/mesonet/python/bin/python dump_altm.py
+
+python dump_altm.py
+
 sfedit << EOF > /tmp/oa_sfedit.out
  SFEFIL   = altm.txt
  SFFILE   = surface.gem
