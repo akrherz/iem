@@ -1,6 +1,13 @@
-# Generate the dailyb spam
-
-import smtplib, os, pg, mx.DateTime, time
+"""
+ Generate the dailyb spam
+"""
+import subprocess
+import smtplib
+import os
+import iemdb
+import mx.DateTime
+import time
+import psycopg2.extras
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -8,20 +15,22 @@ import wwa
 
 def cowreport():
     """ Generate something from the Cow, moooo! """
-    si, so = os.popen4('php cowreport.php')
-    data = so.read()
+    proc = subprocess.Popen('php cowreport.php', shell=True, 
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    data = proc.stdout.read()
     html = "<h3>IEM Cow Report</h3><pre>"+ data +"</pre>"
     txt  = '> IEM Cow Report\n'+ data +'\n'
     return txt, html
 
 def feature():
     """ Print the feature for yesterday """
-    mesosite = pg.connect('mesosite', 'iemdb', user='nobody')
+    mesosite = iemdb.connect('mesosite', bypass=True)
+    mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
     lastts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=-1)
     # Query
-    rs = mesosite.query("""
+    mcursor.execute("""
       SELECT *, to_char(valid, 'DD Mon HH:MI AM') as nicedate 
-      from feature WHERE date(valid) = 'YESTERDAY'""").dictresult()
+      from feature WHERE date(valid) = 'YESTERDAY'""")
     textfmt = """
  +----------------------------------------------
 %(link)s
@@ -44,11 +53,12 @@ def feature():
     txt = "> Daily Feature\n"
     html = "<h3>Daily Feature</h3>"
 
-    for i in range(len(rs)):
-        rs[i]['link'] = "http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=%s" % (lastts.strftime("%Y-%m-%d"), )
-        txt  += textfmt % rs[i]
-        html += htmlfmt % rs[i]
-    if len(rs) == 0:
+    for row in mcursor:
+        row2 = row.copy()
+        row2['link']  = "http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=%s" % (lastts.strftime("%Y-%m-%d"),)
+        txt  += textfmt % row2
+        html += htmlfmt % row2
+    if mcursor.rowcount == 0:
         txt += "\n    No feature posted\n\n"
         html += "<strong>No feature posted</strong>"
 
@@ -56,14 +66,15 @@ def feature():
 
 def news():
     """ Print the news that is fit to print """
-    mesosite = pg.connect('mesosite', 'iemdb', user='nobody')
+    mesosite = iemdb.connect('mesosite', bypass=True)
+    mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
     # Last dailyb delivery
     lastts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(hour=11, days=-1)
-    rs = mesosite.query("""
+    mcursor.execute("""
       SELECT *, to_char(entered, 'DD Mon HH:MI AM') as nicedate 
       from news WHERE entered > '%s' 
       ORDER by entered DESC""" % (
-      lastts.strftime("%Y-%m-%d %H:%M"),) ).dictresult()
+      lastts.strftime("%Y-%m-%d %H:%M"),) )
 
     textfmt = """
  +----------------------------------------------
@@ -89,10 +100,10 @@ def news():
     txt = "> News\n"
     html = "<h3>News</h3>"
 
-    for i in range(len(rs)):
-        txt  += textfmt % rs[i]
-        html += htmlfmt % rs[i]
-    if len(rs) == 0:
+    for row in mcursor:
+        txt  += textfmt % row
+        html += htmlfmt % row
+    if mcursor.rowcount == 0:
         txt += "\n    No news is good news\n\n"
         html += "<strong>No news is good news</strong>"
 
@@ -145,9 +156,9 @@ s.quit()
 o = open("tmp.txt", 'w')
 o.write( text )
 o.close()
-os.system("""/home/ldm/bin/pqinsert -p "plot c 000000000000 iemdb.txt bogus txt" tmp.txt""")
+subprocess.call("""/home/ldm/bin/pqinsert -p "plot c 000000000000 iemdb.txt bogus txt" tmp.txt""", shell=True)
 o = open("tmp.txt", 'w')
 o.write( html )
 o.close()
-os.system("""/home/ldm/bin/pqinsert -p "plot c 000000000000 iemdb.html bogus txt" tmp.txt""")
+subprocess.call("""/home/ldm/bin/pqinsert -p "plot c 000000000000 iemdb.html bogus txt" tmp.txt""", shell=True)
 os.unlink("tmp.txt")
