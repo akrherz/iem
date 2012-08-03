@@ -10,7 +10,7 @@ python today_high.py
 python rwis_station.py
 
 cd ../summary
-/mesonet/python/bin/python updateRain.py
+python updateRain.py
 
 cd ../delta
 /mesonet/python/bin/python gen_15min.py
