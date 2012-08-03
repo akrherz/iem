@@ -25,27 +25,27 @@ if not os.path.isfile(fn):
   sys.exit()
 nc = netCDF4.Dataset(fn, 'r')
 
-stations   = nc.variables["stationId"]
-tmpk        = nc.variables["temperature"]
-dwpk = nc.variables["dewpoint"]
-drct = nc.variables["windDir"]
-smps = nc.variables["windSpeed"]
-alti = nc.variables["altimeter"] # in hPa
-vsby = nc.variables["visibility"] # in hPa
-providers  = nc.variables["dataProvider"]
-lat        = nc.variables["latitude"]
-lon        = nc.variables["longitude"]
-ele        = nc.variables["elevation"]
-snames     = nc.variables["stationName"]
-p01m       = nc.variables["precipAccum"]
-ptmp1      = nc.variables["roadTemperature1"]
-ptmp2      = nc.variables["roadTemperature2"]
-ptmp3      = nc.variables["roadTemperature3"]
-ptmp4      = nc.variables["roadTemperature4"]
-subs1      = nc.variables["roadSubsurfaceTemp1"]
-subs2      = nc.variables["roadSubsurfaceTemp2"]
-subs3      = nc.variables["roadSubsurfaceTemp3"]
-subs4      = nc.variables["roadSubsurfaceTemp4"]
+stations   = nc.variables["stationId"][:]
+tmpk        = nc.variables["temperature"][:]
+dwpk = nc.variables["dewpoint"][:]
+drct = nc.variables["windDir"][:]
+smps = nc.variables["windSpeed"][:]
+alti = nc.variables["altimeter"][:] # in hPa
+vsby = nc.variables["visibility"][:] # in hPa
+providers  = nc.variables["dataProvider"][:]
+lat        = nc.variables["latitude"][:]
+lon        = nc.variables["longitude"][:]
+ele        = nc.variables["elevation"][:]
+snames     = nc.variables["stationName"][:]
+p01m       = nc.variables["precipAccum"][:]
+ptmp1      = nc.variables["roadTemperature1"][:]
+ptmp2      = nc.variables["roadTemperature2"][:]
+ptmp3      = nc.variables["roadTemperature3"][:]
+ptmp4      = nc.variables["roadTemperature4"][:]
+subs1      = nc.variables["roadSubsurfaceTemp1"][:]
+subs2      = nc.variables["roadSubsurfaceTemp2"][:]
+subs3      = nc.variables["roadSubsurfaceTemp3"][:]
+subs4      = nc.variables["roadSubsurfaceTemp4"][:]
 
 
 db = {}
