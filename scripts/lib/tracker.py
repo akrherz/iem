@@ -5,6 +5,31 @@ from email.MIMEText import MIMEText
 import iemdb
 IEM = iemdb.connect('iem', bypass=True)
 
+def loadqc():
+    """
+    See which sites have flags against them
+    """
+    qdict = {}
+    portfolio = iemdb.connect('portfolio', dbhost='meteor.geol.iastate.edu',
+                              bypass=True)
+    pcursor = portfolio.cursor()
+    
+    pcursor.execute("""
+    select s_mid, sensor, status from tt_base WHERE sensor is not null 
+    and status != 'CLOSED' and portfolio in ('kccisnet','kelosnet','kimtsnet')
+    """)
+    for row in pcursor:
+        if not qdict.has_key(row[0]):
+            qdict[row[0]] = {}
+        if row[1].find("precip") > -1:
+            qdict[row[0]]['precip'] = True
+        if row[1].find("tmpf") > -1:
+            qdict[row[0]]['tmpf'] = True
+    
+    pcursor.close()
+    portfolio.close()
+    return qdict
+
 class Engine(object):
 
     def __init__(self):
