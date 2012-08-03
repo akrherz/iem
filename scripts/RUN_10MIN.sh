@@ -13,7 +13,7 @@ cd ../summary
 python updateRain.py
 
 cd ../delta
-/mesonet/python/bin/python gen_15min.py
+python gen_15min.py
 
 cd ../outgoing
 php wxc_rwis.php
