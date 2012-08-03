@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 # Process the current RAWS ob for IEM processing
 # Daryl Herzmann 13 Jun 2003
 # 17 Jun 2003	Account for when the file is blank
@@ -7,12 +6,16 @@
 #		using GMT to initialize mx.DateTime
 # 16 Sep 2003	Use iemAccess site stuff
 
-import sys, mx.DateTime, string
-from pyIEM import iemdb, iemAccessOb
-i = iemdb.iemdb()
-mydb = i["other"]
-IEM = i["iem"]
-mydb.query("SET TIME ZONE 'GMT'")
+import sys
+import mx.DateTime
+import string
+import access
+import iemdb
+OTHER = iemdb.connect('other', bypass=True)
+ocursor = OTHER.cursor()
+ocursor.execute("SET TIME ZONE 'GMT'")
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor()
 
 now = mx.DateTime.gmt()
 
@@ -64,16 +67,21 @@ else:
 
 sid = sys.argv[1]
 
-iemob = iemAccessOb.iemAccessOb(sid, 'OT')
+iemob = access.Ob(sid, 'OT')
 iemob.data['tmpf'] = tmpf
 iemob.data['sknt'] = sknt
 iemob.data['dwpf'] = dwpf
 iemob.data['drct'] = drct
 iemob.setObTimeGMT(now)
-iemob.updateDatabase(IEM)
+iemob.updateDatabase(cursor=icursor)
 
 try:
-  mydb.query("INSERT into t%s (station, valid, tmpf, dwpf, sknt, drct) VALUES \
-    ('%s', '%s', %s, %s, %s, %s)" % (now.year, sid, now, tmpf, dwpf, sknt, drct) )
+  ocursor.execute("""INSERT into t%s (station, valid, tmpf, dwpf, sknt, drct) VALUES 
+    ('%s', '%s', %s, %s, %s, %s)""" % (now.year, sid, now, tmpf, dwpf, sknt, drct) )
 except:
   ha = 'ha'
+
+ocursor.close()
+icursor.close()
+OTHER.commit()
+IEM.commit()
