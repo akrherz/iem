@@ -7,8 +7,8 @@ DD=$(date -u +'%d')
 HH=$(date -u +'%H')
 
 cd mos
-/mesonet/python/bin/python current_bias.py NAM
-/mesonet/python/bin/python current_bias.py GFS
+python current_bias.py NAM
+python current_bias.py GFS
 
 cd ../plots
 ./RUN_PLOTS
@@ -17,7 +17,7 @@ cd ../delta
 ./RUN.csh
 
 cd ../ingestors
-/mesonet/python/bin/python beloit.py
+python beloit.py
 
 cd ../outgoing
 php wxc_cocorahs.php
@@ -48,4 +48,4 @@ cd ../q2
 python make_raster_24h.py $YYYY $MM $DD $HH
 
 cd ../smos
-/mesonet/python/bin/python ingest.py
+python ingest.py

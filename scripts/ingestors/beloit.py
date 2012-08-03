@@ -1,10 +1,16 @@
-# Ingest Beloit Data
+"""
+ Ingest Beloit Data
+"""
 
 import mx.DateTime
-from pyIEM import mesonet, iemAccessOb, iemAccess, iemAccessDatabase
-iemdb = iemAccessDatabase.iemAccessDatabase()
+import mesonet
+import access
+import iemdb
+IEM = iemdb.connect('iem')
+icursor = IEM.cursor()
 
-dyfile = open('/mnt/home/mesonet/ot/ot0005/incoming/Beloit/BeloitDaily.dat', 'r').readlines()
+dyfile = open('/mnt/home/mesonet/ot/ot0005/incoming/Beloit/BeloitDaily.dat', 
+              'r').readlines()
 lastline = dyfile[-1]
 tokens = lastline.split(",")
 year = int(tokens[1])
@@ -13,9 +19,13 @@ ts = mx.DateTime.DateTime(year,1,1) + mx.DateTime.RelativeDateTime(days=(doy-1))
 high = mesonet.c2f( float(tokens[3]) )
 low = mesonet.c2f( float(tokens[4]) )
 pday = float(tokens[5]) / 25.4
-iemdb.query("UPDATE summary_%s s SET max_tmpf = %s, min_tmpf = %s, pday = %s FROM stations t WHERE t.id = 'OT0009' and t.iemid = s.iemid and day = '%s'" % (ts.year, high, low, pday, ts.strftime("%Y-%m-%d")))
+icursor.execute("""UPDATE summary_%s s SET max_tmpf = %s, min_tmpf = %s, 
+    pday = %s FROM stations t WHERE t.id = 'OT0009' and 
+    t.iemid = s.iemid and day = '%s'""" % (ts.year, high, low, pday, 
+                                           ts.strftime("%Y-%m-%d")))
 
-hrfile = open('/mnt/home/mesonet/ot/ot0005/incoming/Beloit/BeloitHourly.dat','r').readlines()
+hrfile = open('/mnt/home/mesonet/ot/ot0005/incoming/Beloit/BeloitHourly.dat',
+              'r').readlines()
 
 lastline = hrfile[-1]
 tokens = lastline.split(",")
@@ -40,18 +50,19 @@ voltage = tokens[14]
 
 ts = ts + mx.DateTime.RelativeDateTime(hours=6)
 
-iemob = iemAccessOb.iemAccessOb("OT0009")
+iemob = access.Ob("OT0009", "OT")
 iemob.setObTimeGMT(ts)
 iemob.data['tmpf'] = tmpf
 iemob.data['dwpf'] = mesonet.dwpf(tmpf, relh)
 iemob.data['relh'] = relh
 iemob.data['sknt'] = sknt
-iemob.data['drct'] = drct
+iemob.data['drct'] = float(drct)
 iemob.data['phour'] = phour
 iemob.data['mslp'] = mslp
 iemob.data['c1tmpf'] = c1tmpf
 iemob.data['srad'] = srad
-iemob.updateDatabase(iemdb)
+iemob.updateDatabase(cursor=icursor)
 
-
+icursor.close()
+IEM.commit()
 
