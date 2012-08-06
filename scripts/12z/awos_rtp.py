@@ -72,8 +72,9 @@ icursor.execute("""SELECT id,
 for row in icursor:
 	lows[ row[0] ] = row[1]
 
-
-for s in nt.sts.keys():
+ids = nt.sts.keys()
+ids.sort()
+for s in ids:
 	myP = "M"
 	myH = "M"
 	myL = "M"
