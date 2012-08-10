@@ -33,6 +33,8 @@ for row in icursor:
     lats.append( nt.sts[stid]['lat'] )
     lons.append( nt.sts[stid]['lon'] )
 
+if len(lats) < 5:
+    sys.exit()
 
 def sampler(xaxis, yaxis, vals, x, y):
     i = 0
