@@ -7,10 +7,7 @@
                      GMT Timestamp....
 """
 import sys
-FTP_PASS = None
-if FTP_PASS is None:
-    print "FIX PASSWORD!"
-    sys.exit()
+FTP_PASS = open('/home/mesonet/rwis_ftp_password.txt', 'r').read().strip()
 
 import os, mx.DateTime, glob, re
 from PIL import Image, ImageDraw, ImageFont
@@ -19,7 +16,7 @@ import subprocess
 import iemdb
 import mesonet
 import psycopg2.extras
-MESOSITE = iemdb.connect('mesosite', bypass=True)
+MESOSITE = iemdb.connect('mesosite')
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 gmt = mx.DateTime.gmt()
 
@@ -95,9 +92,13 @@ for line in lines:
     # Insert into LDM
     cmd = "/home/ldm/bin/pqinsert -p 'webcam c %s camera/stills/%s.jpg camera/%s/%s_%s.jpg jpg' %s-320x240.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid)
     subprocess.call(cmd, shell=True)
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
     cmd = "/home/ldm/bin/pqinsert -p 'webcam ac %s camera/640x480/%s.jpg camera/%s/%s_%s.jpg jpg' %s-640x480.jpg" % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid )
-    subprocess.call(cmd, shell=True)
-    
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()    
     
     # Insert into webcam log please
     sql = """INSERT into camera_log (cam, valid, drct) VALUES 
