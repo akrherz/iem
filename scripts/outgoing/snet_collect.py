@@ -13,6 +13,8 @@ import psycopg2.extras
 import subprocess
 import iemdb
 import access
+import tempfile
+
 gmt = mx.DateTime.gmt()
 tstr = gmt.strftime("%Y%m%d%H%M")
 
@@ -101,7 +103,8 @@ def main():
     computeOthers(kelo)
     computeOthers(kimt)
 
-    of = open('kcci.dat', 'w')
+    tmpfp = tempfile.mktemp()
+    of = open(tmpfp, 'w')
     of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,max_srad,\n")
     for sid in kcci.keys():
         try:
@@ -113,8 +116,8 @@ def main():
             sys.exc_traceback = None
 
     of.close()
-    subprocess.call("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci.dat bogus dat' kcci.dat"%(tstr,), shell=True )
-    os.remove("kcci.dat")
+    subprocess.call("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci.dat bogus dat' %s" % (tstr, tmpfp), shell=True )
+    os.remove(tmpfp)
 
     of = open('kcci2.dat', 'w')
     of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,srad,max_srad,online,\n")
