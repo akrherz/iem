@@ -1,7 +1,9 @@
-#!/bin/sh
 # Runs at Midnight
 
-cd qc
+cd webalizer
+sh processlogs.sh &
+
+cd ../qc
 python adjust_snet_precip.py
 python check_hilo.py
 
