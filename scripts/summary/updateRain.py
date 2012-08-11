@@ -24,7 +24,6 @@ icursor.execute(sql)
 for row in icursor:
     sql = """UPDATE summary_%s SET pday = '%s' WHERE iemid = %s 
     and day = '%s'""" % (yyyy, row[2], row[0], row[1]) 
-    print sql
     icursor2.execute( sql )
     
 icursor2.close()
