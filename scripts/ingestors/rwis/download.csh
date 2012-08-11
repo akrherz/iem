@@ -46,9 +46,9 @@ cd /mesonet/data/metar
 
 mv rwis.sao IArwis${TS}.sao
 mv rwis2.sao IA.rwis${TS}.sao
-/home/ldm/bin/pqinsert IArwis${TS}.sao 
+/home/ldm/bin/pqinsert IArwis${TS}.sao >& /dev/null
 #if (`echo ${mm} | cut -c 2` == 6) then
-/home/ldm/bin/pqinsert IA.rwis${TS}.sao 
+/home/ldm/bin/pqinsert IA.rwis${TS}.sao >& /dev/null
 #endif
 rm IArwis${TS}.sao IA.rwis${TS}.sao
 
