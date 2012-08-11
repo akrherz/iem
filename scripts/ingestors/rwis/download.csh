@@ -31,10 +31,10 @@ wget --timeout=60 -q -O /mesonet/data/incoming/iaawos_metar.txt ftp://rwis:${FTP
 python awosMETAR.py
 
 # Actually ingest the data
-/mesonet/python/bin/python rawProcess.py
+python rawProcess.py
 
 # Create a GEMPAK surface file...
-/mesonet/python/bin/python genSFFIL.py
+python genSFFIL.py
 
 # Send Down to LDM
 /home/ldm/bin/pqinsert -l /dev/null rwis.csv
@@ -58,6 +58,6 @@ wget -nd -m -q "ftp://rwis:${FTPPASS}@165.206.203.34/*.csv"
 /home/ldm/bin/pqinsert -p "plot ac $GTS rwis_traffic.txt raw/rwis/${GTS}traffic.txt txt" TrafficFile.csv >& /dev/null
 /home/ldm/bin/pqinsert -p "plot ac $GTS rwis_probe.txt raw/rwis/${GTS}probe.txt txt" DeepTempProbeFile.csv >& /dev/null
 cd /mesonet/www/apps/iemwebsite/scripts/ingestors/rwis
-/mesonet/python/bin/python mini_portable.py
-/mesonet/python/bin/python process_traffic.py
-/mesonet/python/bin/python process_soil.py
+python mini_portable.py
+python process_traffic.py
+python process_soil.py
