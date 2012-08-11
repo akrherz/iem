@@ -54,10 +54,11 @@ def processfile( fp ):
     iem.load_and_compare(cursor=icursor)
 
     # IEM Tracker garbage
+    iem.data['sname'] = nt.sts[nwsli]['name']
     if ts > thres:
-        track.checkStation(nwsli, iem, "IA_RWIS", "iarwis", False)
+        track.checkStation(nwsli, iem.data, "IA_RWIS", "iarwis", False)
     else: 
-        track.doAlert(nwsli, iem, "IA_RWIS", "iarwis", False)
+        track.doAlert(nwsli, iem.data, "IA_RWIS", "iarwis", False)
 
 
     if data.has_key('wind_speed') and data['wind_speed'] != '':
