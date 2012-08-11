@@ -1,8 +1,15 @@
 import sys
-
-import re, mx.DateTime, pg, os, csv
-from pyIEM import  mesonet
-import rwis, access, network
+import re
+import mx.DateTime
+import pg
+import os
+import csv
+import rwis
+import access
+import network
+import mesonet
+import iemdb
+IEM = iemdb.connect('iem', bypass=True)
 
 st = network.Table("IA_RWIS")
 
@@ -34,29 +41,6 @@ class rnetwork:
         """
         Check how many sites are offline, in case we want to avoid emails
         """
-        return False
-        from pyIEM import iemAccess
-        iemaccess = iemAccess.iemAccess()
-        cnt_offline = 0
-        # First, look into the offline database to see how many active tickets
-        rs = iemaccess.query("""SELECT count(*) as c from offline WHERE 
-              network = '%s'""" % (network,) ).dictresult()
-        if (len(rs) > 0):
-            cnt_offline = rs[0]['c']
-        if (cnt_offline > 10):
-            return True
-
-        # Okay, pre-emptive check to iemdb to see how many obs are old
-        lastts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(minutes=thres)
-        rs = iemaccess.query("""SELECT count(*) as c from current WHERE 
-         network = '%s' and valid < '%s' """ % \
-         (network, lastts.strftime('%Y-%m-%d %H:%M') ) ).dictresult()
-        if (len(rs) > 0):
-            cnt_offline = rs[0]['c']
-
-        if (cnt_offline > 10):
-            return True
-
         return False
 
     def iemtracker(self):
@@ -129,9 +113,7 @@ class rnetwork:
         """
         Commit the parsed data to the database, finally!
         """
-        from pyIEM import iemdb
-        i = iemdb.iemdb()
-        accessdb = i['iem']
+        icursor = IEM.cursor()
 
         thres = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=2)
         for id in self.obs.keys():
@@ -158,5 +140,8 @@ class rnetwork:
             iem.data['scond2'] = ob.sfdata[2]['dry']
             iem.data['scond3'] = ob.sfdata[3]['dry']
             iem.data['rwis_subf'] = ob.subT
-            iem.updateDatabase( accessdb )
+            iem.updateDatabase( cursor=icursor )
             del(iem)
+            
+        icursor.close()
+        IEM.commit()

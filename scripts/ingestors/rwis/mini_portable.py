@@ -1,14 +1,17 @@
 """
  Process data from the mini and portables 
-$Id: $:
 """
 
 import mx.DateTime
-from pyIEM import iemAccess
-from pyIEM import iemAccessOb
-from pyIEM import mesonet, tracker, stationTable
-iemaccess = iemAccess.iemAccess()
-st = stationTable.stationTable("/mesonet/TABLES/RWIS.stns")
+import access
+import iemdb
+import psycopg2.extras
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
+import tracker
+track = tracker.Engine()
+import network
+nt = network.Table("IA_RWIS")
 
 lkp = {
 'miniExportM1.csv': 'RAII4',
@@ -37,7 +40,7 @@ def processfile( fp ):
 
     #print data
     nwsli = lkp[ fp ]
-    iem = iemAccessOb.iemAccessOb(nwsli, 'IA_RWIS')
+    iem = access.Ob(nwsli, 'IA_RWIS')
     if fp == 'portableExportP1.csv':
         ts = mx.DateTime.strptime(data['date_time'][:16], '%Y-%m-%d %H:%M')
     else:
@@ -47,13 +50,13 @@ def processfile( fp ):
       return
     iem.setObTime( ts )
     iem.ts = ts
-    iem.load_and_compare(iemaccess)
+    iem.load_and_compare(cursor=icursor)
 
     # IEM Tracker garbage
     if ts > thres:
-        tracker.checkStation(st, nwsli, iem, "IA_RWIS", "iarwis", False)
+        track.checkStation(nwsli, iem, "IA_RWIS", "iarwis", False)
     else: 
-        tracker.doAlert(st, nwsli, iem, "IA_RWIS", "iarwis", False)
+        track.doAlert(nwsli, iem, "IA_RWIS", "iarwis", False)
 
 
     if data.has_key('wind_speed') and data['wind_speed'] != '':
@@ -72,7 +75,10 @@ def processfile( fp ):
         iem.data['dwpf'] = mesonet.dwpf(iem.data['tmpf'], float( data['RH'] ))
     if data.has_key('wind_dir') and data['wind_dir'] != '':
         iem.data['drct'] = float( data['wind_dir'] )
-    iem.updateDatabase(iemaccess)
+    iem.updateDatabase(cursor=icursor)
 
 for k in lkp.keys():
     processfile( k )
+    
+IEM.commit()
+track.send()

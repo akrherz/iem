@@ -1,8 +1,9 @@
 # Process Traffic Data
-import csv, psycopg2
+import csv
+import iemdb
 import psycopg2.extras
 
-DBCONN = psycopg2.connect(database="iem", host="iemdb")
+DBCONN = iemdb.connect('iem')
 #DBCONN = psycopg2.connect(database="iem")
 
 def load_metadata():

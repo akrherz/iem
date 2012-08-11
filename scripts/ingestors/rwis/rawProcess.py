@@ -2,7 +2,10 @@
 #  3 Dec 2002:	Use IEM python2.2
 # 19 Nov 2003	Put this into a Main()
 
-import rnetwork, sys, os
+import rnetwork
+import sys
+import os
+import subprocess
 
 def Main():
   rn = rnetwork.rnetwork("/mesonet/data/incoming/rwis/rwis.txt", \
@@ -23,8 +26,9 @@ def Main():
   g = open("/tmp/rwis.csv",'w')
   rn.currentWriteCDFNWS(g)
   g.close()
-  os.system("/home/ldm/bin/pqinsert -p 'plot c 000000000000 csv/rwis.csv bogus csv' /tmp/rwis.csv")
-
+  p = subprocess.Popen("/home/ldm/bin/pqinsert -p 'plot c 000000000000 csv/rwis.csv bogus csv' /tmp/rwis.csv",
+                  shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  stdout, stderr = p.communicate()
 #  rn.writeNWS()
 
   rn.updateIEMAccess()
