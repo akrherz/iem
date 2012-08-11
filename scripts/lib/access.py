@@ -85,7 +85,7 @@ class Ob(object):
         self.data = mydata({'station': station, 'network': network})
         self.txn = txn
 
-    def load_and_compare(self, db=None):
+    def load_and_compare(self, db=None, cursor=None):
         """
         We want to load up current entry from the database and see what
         we have
@@ -101,7 +101,12 @@ class Ob(object):
             t.id = '%s' and t.network = '%s' """ % ( self.data.get('valid').year, 
           self.data.get('valid').strftime("%Y-%m-%d %H:%M"), self.data.get('station'),
           self.data.get('network') )
-        if self.txn is not None:
+        if cursor is not None:
+            cursor.execute(sql)
+            if cursor.rowcount == 0:
+                return false
+            row = cursor.fetchone()
+        elif self.txn is not None:
             self.txn.execute(sql)
             if self.txn.rowcount == 0:
                 return False
