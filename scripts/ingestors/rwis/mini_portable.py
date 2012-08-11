@@ -51,6 +51,7 @@ def processfile( fp ):
       return
     iem.setObTime( ts )
     iem.ts = ts
+    iem.data['ts'] = ts
     iem.load_and_compare(cursor=icursor)
 
     # IEM Tracker garbage
