@@ -119,7 +119,7 @@ def main():
     subprocess.call("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci.dat bogus dat' %s" % (tstr, tmpfp), shell=True )
     os.remove(tmpfp)
 
-    of = open('kcci2.dat', 'w')
+    of = open(tmpfp, 'w')
     of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,srad,max_srad,online,\n")
     for sid in kcci.keys():
         kcci[sid].data['online'] = 1
@@ -139,10 +139,11 @@ def main():
             sys.exc_traceback = None
 
     of.close()
-    subprocess.call("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci2.dat bogus dat' kcci2.dat"%(tstr,), shell=True)
-    os.remove("kcci2.dat")
+    subprocess.call("/home/ldm/bin/pqinsert -p 'data c %s csv/kcci2.dat bogus dat' %s" % (
+                                                                tstr, tmpfp), shell=True)
+    os.remove(tmpfp)
 
-    of = open('kimt.dat', 'w')
+    of = open(tmpfp, 'w')
     of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,srad,max_srad,\n")
     for sid in kimt.keys():
         try:
@@ -153,8 +154,8 @@ def main():
             sys.exc_traceback = None
 
     of.close()
-    subprocess.call("/home/ldm/bin/pqinsert -p 'data c %s csv/kimt.dat bogus dat' kimt.dat"%(tstr,), shell=True )
-    os.remove("kimt.dat")
+    subprocess.call("/home/ldm/bin/pqinsert -p 'data c %s csv/kimt.dat bogus dat' %s"%(tstr, tmpfp), shell=True )
+    os.remove(tmpfp)
 
     # Do KCCI stuff in WXC format
     of = open('/tmp/wxc_snet8.txt', 'w')
