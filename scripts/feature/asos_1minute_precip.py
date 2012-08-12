@@ -11,57 +11,57 @@ sdwpf = []
 pres1 = []
 sgust = []
 sprec = numpy.zeros( (3000,), 'f')
-svalid = numpy.zeros( (3000,), 'f')
 
 acursor.execute("""
  SELECT extract(epoch from (valid at time zone 'EDT')), tmpf, dwpf, drct, 
   sknt, pres1, gust_sknt, precip,
-  valid at time zone 'CDT' from t2012_1minute WHERE station = 'DLH'
- and valid BETWEEN '2012-06-19 00:00-05' and '2012-06-20 23:59-05' 
+  valid at time zone 'CDT' from t2012_1minute WHERE station = 'DVN'
+ and valid BETWEEN '2012-08-04 00:00-05' and '2012-08-04 23:59-05' 
  ORDER by valid ASC
 """)
 for row in acursor:
-        if row[7] > 0:
-          print row
-        stemps.append( row[1])
-        
-        sdrct.append( row[3])
-        ssknt.append( row[4] * 1.15)
-        sdwpf.append( row[2] )
-        pres1.append( row[5] )
         #sgust.append( row[6] * 1.15)
         offset = row[8].hour * 60 + row[8].minute
-        if row[8].day == 20:
-            offset += 1440
+        if row[7] > 0:
+          print offset, row[8], row[7]
+        #if row[8].day == 20:
+        #    offset += 1440
         sprec[offset] = float(row[7] or 0) 
         
 
-sprec = numpy.array( sprec )
 acc = numpy.zeros( (3000,), 'f')
 rate15 = numpy.zeros( (3000,), 'f')
 rate60 = numpy.zeros( (3000,), 'f')
+svalid = [0]*3000
 for i in range(3000):
     acc[i] = acc[i-1] + sprec[i]
-    rate15[i] = numpy.sum(sprec[i-15:i]) * 4
-    rate60[i] = numpy.sum(sprec[i-60:i])
-    svalid[i] =  mx.DateTime.DateTime(2012,6,19, 0) + mx.DateTime.RelativeDateTime(minutes=i)
+    rate15[i] = numpy.sum(sprec[i-14:i+1]) * 4
+    rate60[i] = numpy.sum(sprec[i-59:i+1])
+    svalid[i] =  mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
+
+print acc[818:843]
+#print rate60[818:912]
+#for i in range(818,912):
+#    print "%s,%.0f,%s" % (i, svalid[i], svalid[i])
+#    print mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
+
 # Figure out ticks
-sts = mx.DateTime.DateTime(2012,6,19, 4,0)
-ets = mx.DateTime.DateTime(2012,6,20, 13,0)
-interval = mx.DateTime.RelativeDateTime(hours=4)
+sts = mx.DateTime.DateTime(2012,8,4, 13, 30)
+ets = mx.DateTime.DateTime(2012,8,4, 14, 30)
+interval = mx.DateTime.RelativeDateTime(minutes=10)
 now = sts
 xticks = []
 xlabels = []
 xlabels2 = []
 while now <= ets:
-    fmt = "%-I %p"
-    if now == sts or now.hour == 0:
-        fmt = "%-I %p\n%-d %B"
+    fmt = "%-I:%M %p"
+    #if now == sts or now.hour == 0:
+    #    fmt = "%-I %p\n%-d %B"
     
-    if now == sts or (now.minute == 0 and now.hour % 1 == 0 ):
-        xticks.append( int(now) )
-        xlabels.append( now.strftime(fmt))
-        xlabels2.append( now.strftime("%-I %p"))
+    #if now == sts or (now.minute == 0 and now.hour % 1 == 0 ):
+    xticks.append( int(now) )
+    xlabels.append( now.strftime(fmt))
+    xlabels2.append( now.strftime(fmt))
     now += interval
 
 import matplotlib.pyplot as plt
@@ -78,7 +78,7 @@ print numpy.max(rate60)
 ax.plot(svalid, acc, color='b', label="Accumulation")
 ax.plot(svalid, sprec * 60, color='black', label="Hourly Rate over 1min")
 ax.plot(svalid, rate15, color='g', label="Hourly Rate over 15min", linewidth=2)
-ax.plot(svalid, rate60, color='r', label="Actual Hourly Rate")
+#ax.plot(svalid, rate60, color='r', label="Actual Hourly Rate")
 ax.set_xticks(xticks)
 ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels2)
@@ -86,8 +86,8 @@ ax.grid(True)
 ax.set_xlim(min(xticks), max(xticks))
 ax.legend(loc=2, prop=prop, ncol=2)
 ax.set_ylim(0,12)
-ax.set_xlabel("19-20 June 2012 (CDT)")
-ax.set_title("19-20 June 2012 Duluth, MN (KDLH) One Minute Rainfall")
+ax.set_xlabel("4 August 2012 (CDT)")
+ax.set_title("4 August 2012 Davenport, IA (KDVN) One Minute Rainfall\n2.38 inches between 1:37 and 2:03 PM")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
