@@ -1,6 +1,6 @@
 #!/bin/csh
 
-/mesonet/python/bin/python gen_1hour.py
+python gen_1hour.py
 
 set fp="/tmp/presdelt_`date -u +'%H'`00.png"
 set ftime="`date -u +'%Y%m%d%H'`00"
