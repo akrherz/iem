@@ -1,18 +1,21 @@
 # Name of the game, figure out 1 hour deltas, dump to netCDF
 
-from pyIEM import iemAccessDatabase
+import iemdb
+import psycopg2.extras
+IEM = iemdb.connect('iem', bypass=True)
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 import mx.DateTime
-iemdb = iemAccessDatabase.iemAccessDatabase()
 
 # First, we get a dict going of our current obs
-rs = iemdb.query("SELECT s.id as station, c.*, x(s.geom) as lon, y(s.geom) as lat \
-	from current c, stations s WHERE \
-	(valid + '1 hour'::interval) > CURRENT_TIMESTAMP and alti is not Null and c.iemid = s.iemid").dictresult()
+icursor.execute("""SELECT s.id as station, c.*, x(s.geom) as lon, 
+ y(s.geom) as lat  from current c, stations s WHERE 
+ (valid + '1 hour'::interval) > CURRENT_TIMESTAMP and 
+ alti is not Null and c.iemid = s.iemid""")
 c = {}
-for i in range(len(rs)):
-	id = rs[i]["station"]
+for row in icursor:
+	id = row["station"]
 	c[id] = {}
-	c[id] = rs[i]
+	c[id] = row
 
 # Now, we get obs from a 20 minute window, one hour ago
 now = mx.DateTime.now()
@@ -21,15 +24,16 @@ w0 = lhour + mx.DateTime.RelativeDateTime(hours=-1,minute=49)
 w1 = lhour + mx.DateTime.RelativeDateTime(minute=11)
 
 
-sql = "SELECT c.*, t.id from current_log c, stations t WHERE t.iemid = c.iemid and \
-	valid BETWEEN '%s' and '%s' and alti is not null" % (w0.strftime("%Y-%m-%d %H:%M"), \
+sql = """SELECT c.*, t.id from current_log c, stations t WHERE 
+	t.iemid = c.iemid and valid BETWEEN '%s' and '%s' and 
+	alti is not null""" % (w0.strftime("%Y-%m-%d %H:%M"), 
 	w1.strftime("%Y-%m-%d %H:%M") ) 
-rs = iemdb.query(sql).dictresult()
+icursor.execute( sql )
 lh = {}
-for i in range(len(rs)):
-	id = rs[i]["id"]
+for row in icursor:
+	id = row["id"]
 	lh[id] = {}
-	lh[id] = rs[i]
+	lh[id] = row
 
 # Now lets run through the obs
 for id in c.keys():
@@ -40,7 +44,8 @@ for id in c.keys():
 
 	if (d < 1 and d > -1):
 		#print id, c[id]["lat"], c[id]["lon"], c[id]["alti"], lh[id]["alti"], d
-		iemdb.query("""UPDATE trend_1h t SET alti_1h = %s, 
+		icursor.execute("""UPDATE trend_1h t SET alti_1h = %s, 
 			updated = CURRENT_TIMESTAMP FROM stations s 
    WHERE s.iemid = t.iemid and s.id = '%s'""" % (d, id) )
 
+IEM.commit()
