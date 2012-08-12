@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 import mx.DateTime
 import sys
 import numpy

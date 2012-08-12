@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 
 import pg
 asos = pg.connect('asos', 'iemdb', user='nobody')

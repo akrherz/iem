@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 import mx.DateTime
 from pyIEM import iemdb
 i = iemdb.iemdb()
