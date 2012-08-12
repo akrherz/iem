@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 
 import pg, mx.DateTime
 mydb = pg.connect('asos', 'iemdb')

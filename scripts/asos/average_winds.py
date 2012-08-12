@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 # Lets compute average v component
 
 import math, sys

@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 
 from pyIEM import iemdb, mesonet
 import mx.DateTime, sys
