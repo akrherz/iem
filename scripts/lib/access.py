@@ -38,7 +38,7 @@ def get_network(network, dbconn, valid=mx.DateTime.now()):
     cursor.execute("""
     SELECT c.*, s.*, t.id, t.name as sname from current c, summary_%s s, stations t WHERE
     t.iemid = s.iemid and s.iemid = c.iemid and t.network = '%s' and
-    s.day = '%s'
+    s.day = '%s' ORDER by random()
     """ % (valid.year, network, valid.strftime("%Y-%m-%d")))
     for row in cursor:
         obs[ row['id'] ] = Ob(row['id'], network)
@@ -61,7 +61,8 @@ def get_network_recent(network, dbconn, valid, window=10):
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cursor.execute("""
     SELECT c.*, t.id from current_log c JOIN stations t ON (t.iemid = c.iemid) WHERE
-    t.network = %s and c.valid BETWEEN %s and %s::timestamptz + '%s minutes'::interval ORDER by valid ASC
+    t.network = %s and c.valid BETWEEN %s and %s::timestamptz + '%s minutes'::interval 
+    ORDER by valid ASC
     """ , (network, valid.strftime("%Y-%m-%d %H:%M"), valid.strftime("%Y-%m-%d %H:%M"), window))
     for row in cursor:
         id = row['id']
