@@ -37,7 +37,8 @@ def dumper():
             t0 = valid + mx.DateTime.RelativeDateTime(minute=0)
         elif network == 'KCCI':
             t0 = valid + mx.DateTime.RelativeDateTime(hour=0,minute=0)
-    
+        if precip is None:
+            continue
         output.write("%s,%.4f,%.4f,%s,%s,%.1f\n" % (row[0], row[1], row[2],
                      t0.strftime("%Y-%m-%d %H:%M"), 
                      valid.strftime("%Y-%m-%d %H:%M"), precip * 25.4))
