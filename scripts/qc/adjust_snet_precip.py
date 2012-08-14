@@ -6,7 +6,6 @@ the summary database
 
 Runs from: RUN_MIDNIGHT.sh
 
-$Id: $:
 """
 import iemdb
 IEM = iemdb.connect('iem')
