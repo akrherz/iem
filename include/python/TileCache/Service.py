@@ -26,7 +26,14 @@ class Request (object):
         self.service = service
     def getLayer(self, layername):    
         #try:
-        if layername.find("::") > 0:
+        if layername.find('idep') == 0:
+            (blah, ltype, date) = layername.split("::", 3)
+            uri = 'date=%s' % (date,)
+            layer = self.service.layers['idep']
+            layer.name = layername
+            layer.layers = ltype
+            layer.url = "%s%s" % (layer.metadata['baseurl'], uri)
+        elif layername.find("::") > 0:
             (sector,prod,tstring) = (layername.split("::")[1]).split('-')
             if len(tstring) == 12:
                 mylayername = 'ridge-t'
