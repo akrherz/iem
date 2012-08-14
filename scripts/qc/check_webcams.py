@@ -39,7 +39,7 @@ for row in mcursor:
         continue
 
     mtime = os.stat(fn)[stat.ST_MTIME]
-    ts = mx.DateTime.DateFromTicks(mtime)
+    ts = mx.DateTime.DateTimeFromTicks(mtime)
     age = float(now) - mtime
     network = row[1]
     portfolio = "%ssnet" % (network.lower(),)
