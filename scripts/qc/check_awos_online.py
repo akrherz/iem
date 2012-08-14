@@ -36,6 +36,5 @@ for sid in obs.keys():
                                  'sname': nt.sts[sid]['name']}, 
                            'AWOS', 'iaawos', False)
 
-print actions
 if actions < 10:
     track.send()
