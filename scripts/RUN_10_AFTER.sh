@@ -49,3 +49,6 @@ python make_raster_24h.py $YYYY $MM $DD $HH
 
 cd ../smos
 python ingest.py
+
+cd ../qc
+python check_awos_online.py
