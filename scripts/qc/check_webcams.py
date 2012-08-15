@@ -46,11 +46,11 @@ for row in mcursor:
 
     if age > 3600 and not offline.has_key(row[0]):
         emails += 1
-        track.doAlert(row[0], {'ts': ts, 'sname': row[2]}, 
+        track.doAlert(row[0], {'ts': ts, 'sname': row[2] +' Webcam'}, 
                       network, portfolio, False)
     elif age < 3600 and offline.has_key(row[0]):
         emails += 1
-        track.checkStation(row[0], {'ts': ts, 'sname': row[2]}, 
+        track.checkStation(row[0], {'ts': ts, 'sname': row[2] +' Webcam'}, 
                            network, portfolio, False)
         
 if emails < 5:
