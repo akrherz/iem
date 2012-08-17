@@ -35,10 +35,23 @@ def do(ts):
            '%s' and '%s'""" % (ts.strftime("%Y_%m"), ts.strftime("%Y-%m-%d"), 
            (ts + mx.DateTime.RelativeDateTime(days=1)).strftime("%Y-%m-%d"))
     query(sql)
-        
+    
+    sql = "DROP index raw%s_idx" % (ts.strftime("%Y_%m"),)
+    query(sql)
+    sql = "DROP index raw%s_valid_idx" % (ts.strftime("%Y_%m"),)
+    query(sql)
+    
     # Insert from special table
     sql = "INSERT into raw%s SELECT * from tmp" % (ts.strftime("%Y_%m"),)
     query(sql)
+
+    sql = "CREATE index raw%s_idx on raw%s(station,valid)" % (
+                            ts.strftime("%Y_%m"), ts.strftime("%Y_%m"))
+    query(sql)
+    sql = "CREATE index raw%s_valid_idx on raw%s(valid)" % (
+                            ts.strftime("%Y_%m"), ts.strftime("%Y_%m"))
+    query(sql)
+
     
     # drop special table!
     query(sql)
