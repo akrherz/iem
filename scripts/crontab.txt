@@ -21,7 +21,6 @@ S=/mesonet/www/apps/iemwebsite/scripts
 40 * * * * cd $S; sh RUN_40_AFTER.sh 
 59 * * * * cd $S; sh RUN_59_AFTER.sh 
 
-12 0 * * * cd $S; sh RUN_ONCE_DAILY.sh
 1 1,7 * * * cd $S; sh RUN_SUMMARY.sh
 10 6,7,8,9,10 * * * cd $S; sh RUN_COOP.sh
 
@@ -61,7 +60,7 @@ S=/mesonet/www/apps/iemwebsite/scripts
 00,15,30,45 * * * * cd $S/GIS/SCRIPTS; ./RUN_RADAR
 03,13,24 * * * * cd $S/plots; ./HOURLY_PLOTS
 
-15 0,4,9,12,17,20 * * * cd $S; php -q driveFX.php
+15 0,4,9,12,17,20 * * * cd /mesonet/www/apps/nwnwebsite/scripts; php -q driveFX.php
 
 #-- GEMPAK
 6,21,36,51 * * * * cd $S/gempak; ./gridPrecip.csh
