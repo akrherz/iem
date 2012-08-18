@@ -9,8 +9,8 @@ d1 = []
 d2 = []
 d3 = []
 d4 = []
-sts = mx.DateTime.DateTime(2011,1,4)
-ets = mx.DateTime.DateTime(2011,12,16)
+sts = mx.DateTime.DateTime(2012,1,3)
+ets = mx.DateTime.DateTime(2012,8,10)
 interval = mx.DateTime.RelativeDateTime(days=7)
 now = sts
 while now < ets:
@@ -35,10 +35,18 @@ while now < ets:
     #"""
 xticks = []
 xticklabels = []
-for yr in range(1,13):
-    xticks.append( float(mx.DateTime.DateTime(2011,yr,1)))
-    xticklabels.append( mx.DateTime.DateTime(2011,yr,1).strftime("%b") )
-
+#for yr in range(1,13):
+#    xticks.append( float(mx.DateTime.DateTime(2011,yr,1)))
+#    fmt = "%b"
+#    if yr == 1:
+#        fmt = "%b\n%Y"
+#    xticklabels.append( mx.DateTime.DateTime(2011,yr,1).strftime(fmt) )
+for yr in range(1,9):
+    xticks.append( float(mx.DateTime.DateTime(2012,yr,1)))
+    fmt = "%b"
+    if yr == 1:
+        fmt = "%b\n%Y"
+    xticklabels.append( mx.DateTime.DateTime(2012,yr,1).strftime(fmt) )
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 prop = matplotlib.font_manager.FontProperties(size=10)
@@ -53,29 +61,29 @@ ax.bar(valid, d2, width=7*86400, fc='#ff9900', ec='#ff9900', label='D2 Severe')
 ax.bar(valid, d3, width=7*86400, fc='#ff3333', ec='#ff3333', label='D3 Extreme')
 ax.bar(valid, d4, width=7*86400, fc='#660000', ec='#660000', label='D4 Exceptional')
 
-ax.annotate("",
-       xytext=(float(mx.DateTime.DateTime(2011,9,1)), 10), xycoords='data',
-       xy=(float(mx.DateTime.DateTime(2011,12,1)), 25), textcoords='data',
-       arrowprops=dict(arrowstyle="->",
-                            connectionstyle="arc3"),
-       )
-ax.annotate("",
-       xy=(float(mx.DateTime.DateTime(2011,12,8)), 65), xycoords='data',
-       xytext=(float(mx.DateTime.DateTime(2011,11,1)), 85), textcoords='data',
-       arrowprops=dict(arrowstyle="->",
-                            connectionstyle="arc3"),
-       )
+#ax.annotate("",
+#       xytext=(float(mx.DateTime.DateTime(2011,9,1)), 10), xycoords='data',
+#       xy=(float(mx.DateTime.DateTime(2011,12,1)), 25), textcoords='data',
+#       arrowprops=dict(arrowstyle="->",
+#                            connectionstyle="arc3"),
+#       )
+#ax.annotate("",
+#       xy=(float(mx.DateTime.DateTime(2011,12,8)), 65), xycoords='data',
+#       xytext=(float(mx.DateTime.DateTime(2011,11,1)), 85), textcoords='data',
+#       arrowprops=dict(arrowstyle="->",
+#                            connectionstyle="arc3"),
+#       )
 
 
 ax.set_xticks( xticks )
 ax.set_ylim(0,100)
-ax.set_xlim( min(xticks), max(valid))
+ax.set_xlim( min(xticks), max(valid)+7*86400+100)
 ax.set_xticklabels( xticklabels)
 ax.set_ylabel("Percentage of Iowa Area [%]")
-ax.set_title("2011 Areal coverage of Drought in Iowa\nfrom US Drought Monitor")
+ax.set_title("2012 Areal coverage of Drought in Iowa\nfrom US Drought Monitor")
 ax.grid(True)
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
-          fancybox=True, shadow=True, ncol=5, prop=prop)
+ax.legend(loc='upper center', bbox_to_anchor=(0.26, 1),
+          fancybox=True, shadow=True, ncol=2, prop=prop)
 fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')

@@ -3,7 +3,7 @@
 
 set hh="$1"
 set yyyymmdd="`date -u +'%Y%m%d'`"
-set mdl="ruc"
+set mdl="rap"
 
 foreach city (aia che crl kalo dvn kbrl kdbq kcid kdsm kfrm kfsd koma klse kmcw kotm krfd krst kstj ksux ktop rdd)
     wget -q -O ${mdl}_${yyyymmdd}${hh}_${city}.buf http://www.crh.noaa.gov/bufkit/dmx/${mdl}_${city}.buf

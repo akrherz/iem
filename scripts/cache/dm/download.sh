@@ -13,7 +13,7 @@ unzip $DATAFILE
 ogr2ogr -t_srs EPSG:4326 -f "ESRI Shapefile" dm_current.shp usdm${TS2}.shp
 
 # Combine Coverages
-#/mesonet/python/bin/python combine.py $TS2
+#python combine.py $TS2
 
 # Create combined zipfile
 zip dm_current.zip dm_current.shp dm_current.shx dm_current.dbf dm_current.prj

@@ -1,4 +1,5 @@
 #!/bin/sh
+#set -x
 # Get and process files from NESDIS
 # channel 5 12.0um
 # channel 4 10.70um
