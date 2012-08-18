@@ -52,7 +52,7 @@ def do(ts):
                             ts.strftime("%Y_%m"), ts.strftime("%Y_%m"))
     query(sql)
 
-    
+    sql = "DROP TABLE tmp"
     # drop special table!
     query(sql)
 
