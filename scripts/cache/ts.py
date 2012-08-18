@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 # Set GIS Satellite data! :)
 
 # 15 after scan produced at 45 after

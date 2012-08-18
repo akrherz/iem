@@ -44,14 +44,14 @@ S=/mesonet/www/apps/iemwebsite/scripts
 00 12 * * *  cd $S/cache; ./downloadGFS.csh 12
 00 18 * * *  cd $S/cache; ./downloadGFS.csh 18
 # RUC
-50 20 * * *  cd $S/cache; ./downloadRUC.csh 00
-50 23  * * * cd $S/cache; ./downloadRUC.csh 03
-50 2  * * *  cd $S/cache; ./downloadRUC.csh 06
-50 5  * * *  cd $S/cache; ./downloadRUC.csh 09
-50 8  * * *  cd $S/cache; ./downloadRUC.csh 12
-50 11  * * * cd $S/cache; ./downloadRUC.csh 15
-50 14  * * * cd $S/cache; ./downloadRUC.csh 18
-50 17  * * * cd $S/cache; ./downloadRUC.csh 21
+50 20 * * *  cd $S/cache; ./downloadRAP.csh 00
+50 23  * * * cd $S/cache; ./downloadRAP.csh 03
+50 2  * * *  cd $S/cache; ./downloadRAP.csh 06
+50 5  * * *  cd $S/cache; ./downloadRAP.csh 09
+50 8  * * *  cd $S/cache; ./downloadRAP.csh 12
+50 11  * * * cd $S/cache; ./downloadRAP.csh 15
+50 14  * * * cd $S/cache; ./downloadRAP.csh 18
+50 17  * * * cd $S/cache; ./downloadRAP.csh 21
 
 # Get GIS Sat Data!
 18 * * * * cd $S/cache; sh nesdis_satellite.sh 45
