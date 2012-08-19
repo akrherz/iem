@@ -2,50 +2,49 @@ import iemdb
 import numpy
 import numpy.ma
 import scipy.stats
+import network
+nt = network.Table("IACLIMATE")
+nt.sts['IA0200']['lon'] += 0.2
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
-monthlyAvgs = numpy.zeros((12,), 'd')
+statewide = []
 ccursor.execute("""
- SELECT month, sum(precip) from alldata 
- where stationid = 'ia0000' and year > 1892 GROUP by month ORDER by month ASC
-""")
-cnt = 0
-for row in ccursor:
-  monthlyAvgs[cnt] = float(row[1])
-  cnt += 1
-
-# Obs
-data = numpy.zeros((2011-1893,12), 'd')
-ccursor.execute("""
- SELECT year, month, sum(precip) from alldata WHERE
- stationid = 'ia0000' and year > 1892 and year < 2011 
- GROUP by year, month 
+ SELECT year, month, sum(precip) from alldata_ia 
+ where station = 'IA0000' and year > 1950 and month in (9,10,11) GROUP by year, month
+ ORDER by year ASC, month ASC
 """)
 for row in ccursor:
-  data[row[0]-1893,row[1]-1] = float(row[2]) - monthlyAvgs[row[1]-1]
+  statewide.append( row[2] )
 
-# Correlations
-cors = numpy.ma.zeros((12,12))
+cors = []
+lats = []
+lons = []
+for stid in nt.sts.keys():
+  if stid == 'IA0000' or stid[2] == 'C' or stid == 'IA0149':
+    continue
+  ccursor.execute("""
+ SELECT year, month, sum(precip) from alldata_ia 
+ where station = '%s' and year > 1950 and month in (9,10,11) GROUP by year, month
+ ORDER by year ASC, month ASC
+  """ % (stid,))
+  data = []
+  for row in ccursor:
+    data.append( row[2] )
 
-for month1 in range(0,12):
-  for month2 in range(0,12):
-    if month1 == month2:
-      continue
-    # Okay, if month2 > month1, then we are in the same year
-    if month2 > month1:
-      R = numpy.corrcoef(data[:,month1], data[:,month2])[0,1]
-    # Need to shift next year
-    else:
-      R = numpy.corrcoef(data[:-1,month1], data[1:,month2])[0,1]
-    cors[month1,month2] = R 
+  R = numpy.corrcoef(data, statewide)
+  print stid, R[0,1], nt.sts[stid]['name']
+  lats.append( nt.sts[stid]['lat'] )
+  lons.append( nt.sts[stid]['lon'] )
+  cors.append( R[0,1] )
 
-cors.mask = numpy.where(cors==0,True,False)
+cfg = {'lbTitleString': ' ',
+  '_title': '1951-2012 SON Monthly Precip Correlation Coefficient',
+  '_valid': 'Local Station Against IEM Computed Statewide Areal Average',
+ '_showvalues': True,
+ '_format': '%.2f'}
 
-import matplotlib.pyplot as plt
-fig = plt.figure()
-ax = fig.add_subplot(111)
-res = ax.imshow( cors , interpolation='nearest')
-fig.colorbar(res)
+import iemplot
+tmpfp = iemplot.simple_contour(lons, lats, cors, cfg)
 
-fig.savefig('test.png')
+iemplot.makefeature(tmpfp)
