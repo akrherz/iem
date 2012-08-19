@@ -29,7 +29,7 @@ departures.append( 0 )
 ccursor.execute("""
  SELECT stddev(sum) as p, avg(sum) as pavg, stddev(avg) as t, avg(avg) as tavg  from 
  (SELECT year, sum(precip), avg((high+low)/2.0) from alldata_ia
-  where station = 'IA0000' and sday >= '0501' and sday < '0723'
+  where station = 'IA0000' and sday >= '0501' and sday < '0814'
   GROUP by year) as foo
 """)
 row = ccursor.fetchone()
@@ -39,7 +39,7 @@ tstd = row['t']
 tavg = row['tavg']
 
 ccursor.execute("""SELECT year, sum(precip), avg((high+low)/2.0) from alldata_ia
-  where station = 'IA0000' and sday >= '0501' and sday < '0723'
+  where station = 'IA0000' and sday >= '0501' and sday < '0814'
   GROUP by year ORDER by year ASC""")
 
 tsigma = []
@@ -54,6 +54,7 @@ for row in ccursor:
     psigma.append( p )
     dist.append( d )
     years.append( row['year'] )
+    print '%s,%.4f,%.4f,%.2f,%.2f' % (row['year'], t, p, row['avg'], row['sum'])
 
 tsigma = numpy.array( tsigma )
 psigma = numpy.array( psigma )
@@ -74,15 +75,17 @@ ax.text(-3.8,y1+0.1, 'R$^2$=%.2f' % (r_value ** 2,), rotation=-20)
 ax.set_xlim(-4,4)
 ax.set_ylim(-4,4)
 for i in range(len(years)):
-    if years[i] in [2012,] or dist[i] > (dist[-1] - .4):
-        ax.text( tsigma[i], psigma[i], ' %.2f' % (departures[i],), va='top')
+    if years[i] in [1988,2011]:
+        ax.text( tsigma[i], psigma[i], ' %.0f' % (years[i],), va='top')
+    elif years[i] in [2012,] or dist[i] > (dist[-1] - .9):
+        ax.text( tsigma[i], psigma[i], ' %.0f' % (years[i],), va='center')
 
 c = Circle((0,0), radius=dist[-1], facecolor='none')
 ax.add_patch(c)
 ax.set_xlabel("Temperature Departure ($\sigma$)")
 ax.set_ylabel("Precipitation Departure ($\sigma$)")
 ax.grid(True)
-ax.set_title("1 May - 22 July Iowa Statewide Temp + Precip Departure\nbased on IEM estimated areal averaged data (1893-2012)")
+ax.set_title("1 May - 14 Aug Iowa Statewide Temp + Precip Departure\nbased on IEM estimated areal averaged data (1893-2012)")
 
 import iemplot
 fig.savefig('test.ps')
