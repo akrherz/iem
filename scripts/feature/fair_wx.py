@@ -134,6 +134,7 @@ FAIRS = [
 [mx.DateTime.DateTime(2009,8,13),mx.DateTime.DateTime(2009,8,23)],
 [mx.DateTime.DateTime(2010,8,12),mx.DateTime.DateTime(2010,8,22)],
 [mx.DateTime.DateTime(2011,8,11),mx.DateTime.DateTime(2011,8,21)],
+[mx.DateTime.DateTime(2012,8,9),mx.DateTime.DateTime(2012,8,19)],
 ]
 
 import numpy
