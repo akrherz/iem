@@ -123,7 +123,7 @@ $graph->xaxis->SetTitle("Day of Month");
 $graph->yscale->SetGrace(5);
 $graph->yaxis->SetTitle("Temperature [F]");
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD);
-$graph->yaxis->SetLabelFormat('%.0d');
+$graph->yaxis->SetLabelFormat('%.0f');
 
 $graph->legend->Pos(0.25, 0.11, "right", "top");
 
@@ -135,7 +135,7 @@ $graph->Add($gbarplot);
 $bplot1->SetFillColor('red');
 $bplot1->SetLegend("High");
 
-$bplot1->value->SetFormat('%d');
+$bplot1->value->SetFormat('%.0f');
 $bplot1->value->SetColor('black');
 $bplot1->value->SetAngle(0);
 $bplot1->value->SetFont(FF_FONT1,FS_BOLD);
@@ -147,7 +147,7 @@ $bplot1->SetWidth(0.7);
 $bplot2->SetFillColor('blue');
 $bplot2->SetLegend("Low");
 $bplot2->value->Show(! $feature);
-$bplot2->value->SetFormat('%d');
+$bplot2->value->SetFormat('%.0f');
 $bplot2->value->SetColor('black');
 $bplot2->value->SetAngle(0);
 $bplot2->value->SetFont(FF_FONT1,FS_BOLD);
