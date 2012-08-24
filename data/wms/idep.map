@@ -34,12 +34,13 @@ END
 LAYER
   VALIDATION
     date                   "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    year                   "^[0-9]{4}$"
   END
     CLASSITEM "da"
     CONNECTION "user=nobody dbname=wepp host=iemdb"
     CONNECTIONTYPE POSTGIS
     DATA "the_geom from (select d.oid as oid, (rainfall / 25.4) as da, 
-     h.the_geom from daily_rainfall_2012 d left join hrap_polygons h 
+     h.the_geom from daily_rainfall_%year% d left join hrap_polygons h 
      using (hrap_i) WHERE d.valid = '%date%') as foo 
      using unique oid using srid=26915"
     NAME "precip-in"
@@ -292,6 +293,272 @@ LAYER
         COLOR 0 0 255
         OFFSET 0 0
         OUTLINECOLOR 0 0 255
+      END # STYLE
+    END # CLASS
+  END # LAYER
+
+LAYER
+  VALIDATION
+    date                   "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+  END
+    CLASSITEM "da"
+    CONNECTION "user=nobody dbname=wepp host=iemdb"
+    CONNECTIONTYPE POSTGIS
+    DATA "the_geom from (select d.oid as oid, 
+   (avg_runoff / 25.4) as da, h.the_geom from 
+   results_by_twp d left join iatwp h using (model_twp) 
+   WHERE d.valid = '%date%' ) as foo 
+   using unique oid using srid=26915"
+    NAME "runoff"
+    PROJECTION
+      "init=epsg:26915"
+    END # PROJECTION
+    STATUS ON
+    TILEITEM "location"
+    TYPE POLYGON
+    UNITS METERS
+    CLASS
+      EXPRESSION ([da] == 0)
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 0.05)
+      STYLE
+        ANGLE 0
+        COLOR 0 0 255
+        OFFSET 0 0
+        OUTLINECOLOR 0 0 255
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 0.1)
+      STYLE
+        ANGLE 0
+        COLOR 0 102 255
+        OFFSET 0 0
+        OUTLINECOLOR 0 102 255
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 0.25)
+      STYLE
+        ANGLE 0
+        COLOR 0 212 255
+        OFFSET 0 0
+        OUTLINECOLOR 0 212 255
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 0.5)
+      STYLE
+        ANGLE 0
+        COLOR 24 255 255
+        OFFSET 0 0
+        OUTLINECOLOR 24 255 255
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 0.75)
+      STYLE
+        ANGLE 0
+        COLOR 102 255 153
+        OFFSET 0 0
+        OUTLINECOLOR 102 255 153
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 1)
+      STYLE
+        ANGLE 0
+        COLOR 51 255 0
+        OFFSET 0 0
+        OUTLINECOLOR 51 255 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 1.5)
+      STYLE
+        ANGLE 0
+        COLOR 204 255 0
+        OFFSET 0 0
+        OUTLINECOLOR 204 255 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 2)
+      STYLE
+        ANGLE 0
+        COLOR 255 255 0
+        OFFSET 0 0
+        OUTLINECOLOR 255 255 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 3)
+      STYLE
+        ANGLE 0
+        COLOR 255 232 0
+        OFFSET 0 0
+        OUTLINECOLOR 255 232 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 5)
+      STYLE
+        ANGLE 0
+        COLOR 255 204 0
+        OFFSET 0 0
+        OUTLINECOLOR 255 204 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 7)
+      STYLE
+        ANGLE 0
+        COLOR 255 153 0
+        OFFSET 0 0
+        OUTLINECOLOR 255 153 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] >= 7)
+      STYLE
+        ANGLE 0
+        COLOR 255 102 0
+        OFFSET 0 0
+        OUTLINECOLOR 255 102 0
+      END # STYLE
+    END # CLASS
+  END # LAYER
+
+  LAYER
+    VALIDATION
+    	date                   "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+  	END
+    CLASSITEM "da"
+    CONNECTION "user=nobody dbname=wepp host=iemdb"
+    CONNECTIONTYPE POSTGIS
+    DATA "the_geom from (select d.oid as oid, 
+   (avg_loss * 4.463) as da, h.the_geom from 
+   results_by_twp d left join iatwp h using (model_twp) 
+   WHERE d.valid = '%date%' ) as foo 
+   using unique oid using srid=26915"
+    NAME "loss"
+    PROJECTION
+      "init=epsg:26915"
+    END # PROJECTION
+    STATUS ON
+    TILEITEM "location"
+    TYPE POLYGON
+    UNITS METERS
+    CLASS
+      EXPRESSION ([da] == 0)
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 0.05)
+      STYLE
+        ANGLE 0
+        COLOR 0 0 255
+        OFFSET 0 0
+        OUTLINECOLOR 0 0 255
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 0.1)
+      STYLE
+        ANGLE 0
+        COLOR 0 102 255
+        OFFSET 0 0
+        OUTLINECOLOR 0 102 255
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 0.25)
+      STYLE
+        ANGLE 0
+        COLOR 0 212 255
+        OFFSET 0 0
+        OUTLINECOLOR 0 212 255
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 0.5)
+      STYLE
+        ANGLE 0
+        COLOR 24 255 255
+        OFFSET 0 0
+        OUTLINECOLOR 24 255 255
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 0.75)
+      STYLE
+        ANGLE 0
+        COLOR 102 255 153
+        OFFSET 0 0
+        OUTLINECOLOR 102 255 153
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 1)
+      STYLE
+        ANGLE 0
+        COLOR 51 255 0
+        OFFSET 0 0
+        OUTLINECOLOR 51 255 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 1.5)
+      STYLE
+        ANGLE 0
+        COLOR 204 255 0
+        OFFSET 0 0
+        OUTLINECOLOR 204 255 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 2)
+      STYLE
+        ANGLE 0
+        COLOR 255 255 0
+        OFFSET 0 0
+        OUTLINECOLOR 255 255 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 3)
+      STYLE
+        ANGLE 0
+        COLOR 255 232 0
+        OFFSET 0 0
+        OUTLINECOLOR 255 232 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 5)
+      STYLE
+        ANGLE 0
+        COLOR 255 204 0
+        OFFSET 0 0
+        OUTLINECOLOR 255 204 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] < 7)
+      STYLE
+        ANGLE 0
+        COLOR 255 153 0
+        OFFSET 0 0
+        OUTLINECOLOR 255 153 0
+      END # STYLE
+    END # CLASS
+    CLASS
+      EXPRESSION ([da] >= 7)
+      STYLE
+        ANGLE 0
+        COLOR 255 102 0
+        OFFSET 0 0
+        OUTLINECOLOR 255 102 0
       END # STYLE
     END # CLASS
   END # LAYER
