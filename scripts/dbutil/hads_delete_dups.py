@@ -12,6 +12,7 @@ def query(sql):
     Do a query and make it atomic
     """
     hcursor = HADS.cursor()
+    hcursor.execute("set work_mem='4GB'")
     hcursor.execute("SET TIME ZONE 'GMT'")
     hcursor.execute(sql)
     hcursor.close()
