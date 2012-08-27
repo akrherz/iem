@@ -178,7 +178,7 @@ $skippedStations = Array();
           echo ">";
    echo "<td><input type=\"checkbox\" name=\"st[]\" 
                value=\"".$key."\"></td>";
-  echo "<td>". $parts["sname"] . "</td><td ";
+  echo "<td><a href='../sites/site.php?network=". $network ."&station=". $key ."'>". $parts["sname"] . "</a></td><td ";
   if ($tdiff > 11900){
     echo 'bgcolor="red"';
     $format = "%b-%d-%y %I:%M %p";
