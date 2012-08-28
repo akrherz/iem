@@ -2,8 +2,8 @@
 include("../../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $connection = iemdb("coop");
-$station1 = isset($_GET["station1"]) ? strtolower($_GET["station1"]) : die("At least 1 station needs to be specified");
-$station2 = isset($_GET["station2"]) ? strtolower($_GET["station2"]) : false;
+$station1 = isset($_GET["station1"]) ? strtoupper($_GET["station1"]) : die("At least 1 station needs to be specified");
+$station2 = isset($_GET["station2"]) ? strtoupper($_GET["station2"]) : false;
 
 $st1_hi = array();
 $st1_lo = array();
