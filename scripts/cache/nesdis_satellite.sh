@@ -46,6 +46,7 @@ then
 	/home/ldm/bin/pqinsert -p "gis ac $ftm gis/images/4326/sat/conus_goes_vis4km.tif GIS/sat/conus_goes_vis4km_$atm.tif tif" vis.tif
   	# Create 1km VIS variant for Google Maps, CONUS
 	gdal_merge.py -q -o vis.tif  -ul_lr -126 50 -66 24 -ps 0.01 0.01 GoesWest1V_latest.tif GoesEast1V_latest.tif
+	rm -f vis_900913.tif
 	gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:3857 -tr 1000.0 1000.0 vis.tif vis_900913.tif
 	/home/ldm/bin/pqinsert -p "gis c $ftm gis/images/900913/sat/conus_goes_vis1km.tif bogus tif" vis_900913.tif
 	# Create full 1km VIS
@@ -61,6 +62,7 @@ then
 	gdal_merge.py -q -o ir.tif  -ul_lr -126 50 -66 24 -ps 0.04 0.04 GoesWest04I4_latest.tif GoesEast04I4_latest.tif
 	/home/ldm/bin/pqinsert -p "gis ac $ftm gis/images/4326/sat/conus_goes_ir4km.tif GIS/sat/conus_goes_ir4km_$atm.tif tif" ir.tif
 	# Create 4km IR variant for Google Maps
+	rm -f ir_900913.tif
 	gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:3857 -tr 4000.0 4000.0 ir.tif ir_900913.tif
 	/home/ldm/bin/pqinsert -p "gis c $ftm gis/images/900913/sat/conus_goes_ir4km.tif bogus tif" ir_900913.tif
     # Full res!
@@ -76,6 +78,7 @@ then
 	gdal_merge.py -q -o wv.tif  -ul_lr -126 50 -66 24 -ps 0.04 0.04 GoesWest04I3_latest.tif GoesEast04I3_latest.tif
 	/home/ldm/bin/pqinsert -p "gis ac $ftm gis/images/4326/sat/conus_goes_wv4km.tif GIS/sat/conus_goes_wv4km_$atm.tif tif" wv.tif
 	# Create 4km WV variant for Google Maps
+	rm -f wv_900913.tif
 	gdalwarp -q -s_srs EPSG:4326 -t_srs EPSG:3857 -tr 4000.0 4000.0 wv.tif wv_900913.tif
 	/home/ldm/bin/pqinsert -p "gis c $ftm gis/images/900913/sat/conus_goes_wv4km.tif bogus tif" wv_900913.tif
     # Full res!
