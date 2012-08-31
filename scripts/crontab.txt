@@ -54,8 +54,8 @@ S=/mesonet/www/apps/iemwebsite/scripts
 50 17  * * * cd $S/cache; ./downloadRAP.csh 21
 
 # Get GIS Sat Data!
-18 * * * * cd $S/cache; sh nesdis_satellite.sh 45
-48 * * * * cd $S/cache; sh nesdis_satellite.sh 15
+27 * * * * cd $S/cache; sh nesdis_satellite.sh 45
+57 * * * * cd $S/cache; sh nesdis_satellite.sh 15
 
 00,15,30,45 * * * * cd $S/GIS/SCRIPTS; ./RUN_RADAR
 03,13,24 * * * * cd $S/plots; ./HOURLY_PLOTS
