@@ -17,22 +17,29 @@ ftm=$(python ts.py $1 %Y%m%d%H%M)
 atm=$(python ts.py $1 %H%M)
 wtm=$(python wdownload.py $1)
 
-BASE="ftp://satepsanone.nesdis.noaa.gov/GIS"
+BASE="http://satepsanone.nesdis.noaa.gov/pub/GIS"
 
-wget --connect-timeout=60 -O GoesWest1V_latest.tif -q $BASE/GOESwest/GoesWest1V${tm}.tif
-wget --connect-timeout=60 -O GoesWest1V_latest.tfw -q $BASE/GOESwest/GoesWest1V${tm}.tfw
-wget --connect-timeout=60 -O GoesEast1V_latest.tif -q $BASE/GOESeast/GoesEast1V${tm}.tif
-wget --connect-timeout=60 -O GoesEast1V_latest.tfw -q $BASE/GOESeast/GoesEast1V${tm}.tfw
+function getter(){
+	for i in {1..10}
+		do
+			wget --connect-timeout=60 -O $1 -q $2 && return
+			sleep 60
+			done	
+}
 
-wget --connect-timeout=60 -O GoesWest04I4_latest.tif -q $BASE/GOESwest/GoesWest04I4${tm}.tif
-wget --connect-timeout=60 -O GoesWest04I4_latest.tfw -q $BASE/GOESwest/GoesWest04I4${tm}.tfw
-wget --connect-timeout=60 -O GoesEast04I4_latest.tif -q $BASE/GOESeast/GoesEast04I4${tm}.tif
-wget --connect-timeout=60 -O GoesEast04I4_latest.tfw -q $BASE/GOESeast/GoesEast04I4${tm}.tfw
+getter GoesEast1V_latest.tif $BASE/GOESeast/GoesEast1V${tm}.tif
+getter GoesEast1V_latest.tfw $BASE/GOESeast/GoesEast1V${tm}.tfw
+getter GoesEast04I3_latest.tif $BASE/GOESeast/GoesEast04I3${tm}.tif
+getter GoesEast04I3_latest.tfw $BASE/GOESeast/GoesEast04I3${tm}.tfw
+getter GoesEast04I4_latest.tif $BASE/GOESeast/GoesEast04I4${tm}.tif
+getter GoesEast04I4_latest.tfw $BASE/GOESeast/GoesEast04I4${tm}.tfw
 
-wget --connect-timeout=60 -O GoesWest04I3_latest.tif -q $BASE/GOESwest/GoesWest04I3${tm}.tif
-wget --connect-timeout=60 -O GoesWest04I3_latest.tfw -q $BASE/GOESwest/GoesWest04I3${tm}.tfw
-wget --connect-timeout=60 -O GoesEast04I3_latest.tif -q $BASE/GOESeast/GoesEast04I3${tm}.tif
-wget --connect-timeout=60 -O GoesEast04I3_latest.tfw -q $BASE/GOESeast/GoesEast04I3${tm}.tfw
+getter GoesWest1V_latest.tif $BASE/GOESwest/GoesWest1V${tm}.tif 
+getter GoesWest1V_latest.tfw $BASE/GOESwest/GoesWest1V${tm}.tfw
+getter GoesWest04I3_latest.tif $BASE/GOESwest/GoesWest04I3${tm}.tif
+getter GoesWest04I3_latest.tfw $BASE/GOESwest/GoesWest04I3${tm}.tfw
+getter GoesWest04I4_latest.tfw $BASE/GOESwest/GoesWest04I4${tm}.tfw
+getter GoesWest04I4_latest.tif $BASE/GOESwest/GoesWest04I4${tm}.tif
 
 ls -l *.tif
 ls -l *.tfw
