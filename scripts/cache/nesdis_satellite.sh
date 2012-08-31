@@ -9,8 +9,8 @@
 # EAST -110 65.5 -29 -15
 # West -180 65.5 -102 -15
 
-rm *.tif >& /dev/null
-rm *.tfw >& /dev/null
+# Verbose for now to check some things
+date
 
 tm=$(python ts.py $1 %j%H%M)
 ftm=$(python ts.py $1 %Y%m%d%H%M)
@@ -19,20 +19,23 @@ wtm=$(python wdownload.py $1)
 
 BASE="ftp://satepsanone.nesdis.noaa.gov/GIS"
 
-wget --timeout=10 -q $BASE/GOESwest/GoesWest1V_latest.tif
-wget --timeout=10 -q $BASE/GOESwest/GoesWest1V_latest.tfw
-wget --timeout=10 -q $BASE/GOESeast/GoesEast1V_latest.tif
-wget --timeout=10 -q $BASE/GOESeast/GoesEast1V_latest.tfw
+wget -O GoesWest1V_latest.tif -q $BASE/GOESwest/GoesWest1V_latest.tif
+wget -O GoesWest1V_latest.tfw -q $BASE/GOESwest/GoesWest1V_latest.tfw
+wget -O GoesEast1V_latest.tif -q $BASE/GOESeast/GoesEast1V_latest.tif
+wget -O GoesEast1V_latest.tfw -q $BASE/GOESeast/GoesEast1V_latest.tfw
 
-wget --timeout=10 -q $BASE/GOESwest/GoesWest04I4_latest.tif
-wget --timeout=10 -q $BASE/GOESwest/GoesWest04I4_latest.tfw
-wget --timeout=10 -q $BASE/GOESeast/GoesEast04I4_latest.tif
-wget --timeout=10 -q $BASE/GOESeast/GoesEast04I4_latest.tfw
+wget -O GoesWest04I4_latest.tif -q $BASE/GOESwest/GoesWest04I4_latest.tif
+wget -O GoesWest04I4_latest.tfw -q $BASE/GOESwest/GoesWest04I4_latest.tfw
+wget -O GoesEast04I4_latest.tif -q $BASE/GOESeast/GoesEast04I4_latest.tif
+wget -O GoesEast04I4_latest.tfw -q $BASE/GOESeast/GoesEast04I4_latest.tfw
 
-wget --timeout=10 -q $BASE/GOESwest/GoesWest04I3_latest.tif
-wget --timeout=10 -q $BASE/GOESwest/GoesWest04I3_latest.tfw
-wget --timeout=10 -q $BASE/GOESeast/GoesEast04I3_latest.tif
-wget --timeout=10 -q $BASE/GOESeast/GoesEast04I3_latest.tfw
+wget -O GoesWest04I3_latest.tif -q $BASE/GOESwest/GoesWest04I3_latest.tif
+wget -O GoesWest04I3_latest.tfw -q $BASE/GOESwest/GoesWest04I3_latest.tfw
+wget -O GoesEast04I3_latest.tif -q $BASE/GOESeast/GoesEast04I3_latest.tif
+wget -O GoesEast04I3_latest.tfw -q $BASE/GOESeast/GoesEast04I3_latest.tfw
+
+ls -l *.tif
+ls -l *.tfw
 
 # Merge Visible, please
 szw=$(stat -c %s GoesWest1V_latest.tif)
@@ -128,4 +131,7 @@ for mach in $(echo "iemvs100.local iemvs101.local iemvs102.local iemvs103.local 
     fi 
 done
 
-#rm -f *.tif
+rm -f *.tif
+rm -f *.tfw
+
+date
