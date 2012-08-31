@@ -19,20 +19,20 @@ wtm=$(python wdownload.py $1)
 
 BASE="ftp://satepsanone.nesdis.noaa.gov/GIS"
 
-wget -O GoesWest1V_latest.tif -q $BASE/GOESwest/GoesWest1V_latest.tif
-wget -O GoesWest1V_latest.tfw -q $BASE/GOESwest/GoesWest1V_latest.tfw
-wget -O GoesEast1V_latest.tif -q $BASE/GOESeast/GoesEast1V_latest.tif
-wget -O GoesEast1V_latest.tfw -q $BASE/GOESeast/GoesEast1V_latest.tfw
+wget --connect-timeout=60 -O GoesWest1V_latest.tif -q $BASE/GOESwest/GoesWest1V_latest.tif
+wget --connect-timeout=60 -O GoesWest1V_latest.tfw -q $BASE/GOESwest/GoesWest1V_latest.tfw
+wget --connect-timeout=60 -O GoesEast1V_latest.tif -q $BASE/GOESeast/GoesEast1V_latest.tif
+wget --connect-timeout=60 -O GoesEast1V_latest.tfw -q $BASE/GOESeast/GoesEast1V_latest.tfw
 
-wget -O GoesWest04I4_latest.tif -q $BASE/GOESwest/GoesWest04I4_latest.tif
-wget -O GoesWest04I4_latest.tfw -q $BASE/GOESwest/GoesWest04I4_latest.tfw
-wget -O GoesEast04I4_latest.tif -q $BASE/GOESeast/GoesEast04I4_latest.tif
-wget -O GoesEast04I4_latest.tfw -q $BASE/GOESeast/GoesEast04I4_latest.tfw
+wget --connect-timeout=60 -O GoesWest04I4_latest.tif -q $BASE/GOESwest/GoesWest04I4_latest.tif
+wget --connect-timeout=60 -O GoesWest04I4_latest.tfw -q $BASE/GOESwest/GoesWest04I4_latest.tfw
+wget --connect-timeout=60 -O GoesEast04I4_latest.tif -q $BASE/GOESeast/GoesEast04I4_latest.tif
+wget --connect-timeout=60 -O GoesEast04I4_latest.tfw -q $BASE/GOESeast/GoesEast04I4_latest.tfw
 
-wget -O GoesWest04I3_latest.tif -q $BASE/GOESwest/GoesWest04I3_latest.tif
-wget -O GoesWest04I3_latest.tfw -q $BASE/GOESwest/GoesWest04I3_latest.tfw
-wget -O GoesEast04I3_latest.tif -q $BASE/GOESeast/GoesEast04I3_latest.tif
-wget -O GoesEast04I3_latest.tfw -q $BASE/GOESeast/GoesEast04I3_latest.tfw
+wget --connect-timeout=60 -O GoesWest04I3_latest.tif -q $BASE/GOESwest/GoesWest04I3_latest.tif
+wget --connect-timeout=60 -O GoesWest04I3_latest.tfw -q $BASE/GOESwest/GoesWest04I3_latest.tfw
+wget --connect-timeout=60 -O GoesEast04I3_latest.tif -q $BASE/GOESeast/GoesEast04I3_latest.tif
+wget --connect-timeout=60 -O GoesEast04I3_latest.tfw -q $BASE/GOESeast/GoesEast04I3_latest.tfw
 
 ls -l *.tif
 ls -l *.tfw
