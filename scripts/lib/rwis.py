@@ -1,12 +1,24 @@
 # Class for RWIS obs
 
-import mx.DateTime, re, os
-from pyIEM import mesonet
+import mx.DateTime
+import re
+import os
+import mesonet
 
 ERROR_VAL = "32767"
 
 RWISconvert = {
-'00' : 'RDAI4', '01' : 'RALI4', '02' : 'RTNI4', '03' : 'RTOI4', '04' : 'RAMI4', '05' : 'RAKI4', '06' : 'RAVI4', '07' : 'RBUI4', '08' : 'RCAI4', '09' : 'RCDI4', '10' : 'RCII4', '11' : 'RCNI4', '12' : 'RCBI4', '13' : 'RCEI4', '14' : 'RDVI4', '15' : 'RDCI4', '16' : 'RDSI4', '17' : 'RDMI4', '18' : 'RDEI4', '19' : 'RDWI4', '20' : 'RDBI4', '21' : 'RFDI4', '22' : 'RGRI4', '23' : 'RIAI4', '24' : 'RIOI4', '25' : 'RJFI4', '26' : 'RLEI4', '27' : 'RMNI4', '28' : 'RMQI4', '29' : 'RMTI4', '30' : 'RMCI4', '31' : 'RMVI4', '32' : 'RMPI4', '33' : 'RNHI4', '34' : 'RONI4', '35' : 'ROSI4', '36' : 'ROTI4', '37' : 'RPLI4', '38' : 'RROI4', '39' : 'RSDI4', '40' : 'RSGI4', '41' : 'RSCI4', '42' : 'RSPI4', '43' : 'RSLI4', '44' : 'RTPI4', '45' : 'RURI4', '46' : 'RWLI4', '47' : 'RWII4', '48' : 'RWBI4', '49' : 'RHAI4', '50' : 'RSBI4', '51' : 'RIGI4', '52' : 'RCRI4', '53' : 'RCFI4', '54' : 'RSYI4',
+'00' : 'RDAI4', '01' : 'RALI4', '02' : 'RTNI4', '03' : 'RTOI4', '04' : 'RAMI4', 
+'05' : 'RAKI4', '06' : 'RAVI4', '07' : 'RBUI4', '08' : 'RCAI4', '09' : 'RCDI4', 
+'10' : 'RCII4', '11' : 'RCNI4', '12' : 'RCBI4', '13' : 'RCEI4', '14' : 'RDVI4', 
+'15' : 'RDCI4', '16' : 'RDSI4', '17' : 'RDMI4', '18' : 'RDEI4', '19' : 'RDWI4', 
+'20' : 'RDBI4', '21' : 'RFDI4', '22' : 'RGRI4', '23' : 'RIAI4', '24' : 'RIOI4', 
+'25' : 'RJFI4', '26' : 'RLEI4', '27' : 'RMNI4', '28' : 'RMQI4', '29' : 'RMTI4', 
+'30' : 'RMCI4', '31' : 'RMVI4', '32' : 'RMPI4', '33' : 'RNHI4', '34' : 'RONI4', 
+'35' : 'ROSI4', '36' : 'ROTI4', '37' : 'RPLI4', '38' : 'RROI4', '39' : 'RSDI4', 
+'40' : 'RSGI4', '41' : 'RSCI4', '42' : 'RSPI4', '43' : 'RSLI4', '44' : 'RTPI4', 
+'45' : 'RURI4', '46' : 'RWLI4', '47' : 'RWII4', '48' : 'RWBI4', '49' : 'RHAI4', 
+'50' : 'RSBI4', '51' : 'RIGI4', '52' : 'RCRI4', '53' : 'RCFI4', '54' : 'RSYI4',
 '55' : 'RBFI4', '56' : 'RDYI4', '57' : 'RTMI4', '58' : 'RPFI4', '59' : 'RCLI4',
 '60' : 'RDNI4', '61' : 'RQCI4', '62' : 'RSMI4',
 }
@@ -114,10 +126,10 @@ class RWISOb(object):
   def windAlert(self):
     if self.stationID in ('RBFI4','RTMI4','RWII4','RDNI4','RCDI4'):
       return
-    from pyIEM import stationTable, iemdb
-    st = stationTable.stationTable("/mesonet/TABLES/RWIS.stns")
+    import network
+    nt = network.Table("IA_RWIS")
     gmtNow = mx.DateTime.gmt()
-    stname = st.sts[self.stationID]["name"]
+    stname = nt.sts[self.stationID]["name"]
     mf = """At %s, a wind gust of %.1f knots was recorded at the %s RWIS station"""
     mailStr = mf % (self.ts.strftime("%d %b %Y - %I:%M %p"), self.gust, stname)
 
