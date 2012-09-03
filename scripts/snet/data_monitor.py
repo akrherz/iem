@@ -1,44 +1,40 @@
-#  Process that would continually monitor for interesting stuff!!
-# Daryl Herzmann 19 Aug 2002
-# 27 Aug 2002:	Use a more efficient Array restacker...
-# 31 May 2005	Use iemaccess...
+"""
+  Process that would continually monitor for interesting stuff!!
+"""
+import network
+nt = network.Table(("KCCI", "KIMT", "KELO"))
+import iemdb
+import os
 
-#  File Template  site.event.duration
-
-from pyIEM import stationTable, iemAccess, sob
-#iemaccess = iemAccess.iemAccess()
-import os, time, sys, pg
-st = stationTable.stationTable("/mesonet/TABLES/snet.stns")
-
+# Write PID
 o = open('data_monitor.pid', 'w')
 o.write("%s" % (os.getpid(),))
 o.close()
 
 db = {}
-for station in st.ids:
+for station in nt.sts.keys():
   db[station] = {"pday": [0]*60 }
 
 # Load up arrays for the first time....
 def preload():
-    iemaccess = pg.connect("iem", 'iemdb')
-    sql = "SELECT pday, t.id from current c, stations t WHERE \
-      t.network in ('KCCI','KELO','KIMT') and c.iemid = t.iemid"
-    rs = iemaccess.query(sql).dictresult()
-    for i in range(len(rs)):
-        sid = rs[i]['id']
-
-        db[sid]["pday"] = [rs[i]['pday']]*60
-    iemaccess.close()
+    IEM = iemdb.connect('iem', bypass=True)
+    icursor = IEM.cursor()
+    icursor.execute("""SELECT pday, t.id from current c, stations t WHERE 
+      t.network in ('KCCI','KELO','KIMT') and c.iemid = t.iemid""")
+    for row in icursor:
+        sid = row[1]
+        db[sid]["pday"] = [row[0]]*60
+    IEM.close()
 
 def process(tv):
-# (station varchar(10), network varchar(10), valid timestamp with time zone, event varchar(10), magnitude real
-    iemaccess = pg.connect("iem", 'iemdb')
-    sql = "SELECT pday, t.id, t.iemid from current c, stations t WHERE \
-      t.network = '%s' and c.iemid = t.iemid" % (tv,)
-    rs = iemaccess.query(sql).dictresult()
-    for i in range(len(rs)):
-        sid = rs[i]['id']
-        pday = rs[i]['pday']
+    IEM = iemdb.connect('iem', bypass=True)
+    icursor = IEM.cursor()
+    icursor2 = IEM.cursor()
+    icursor.execute("""SELECT pday, t.id, t.iemid from current c, stations t WHERE 
+      t.network = '%s' and c.iemid = t.iemid""" % (tv,))
+    for row in icursor:
+        sid = row[1]
+        pday = row[0]
         db[sid]["pday"] = [pday] + db[sid]["pday"][0:-1]
 
         oldTMPF = db[sid]["pday"][14]
@@ -50,17 +46,19 @@ def process(tv):
             #o.close()
             sql = "DELETE from events WHERE station = '%s' and network = '%s'\
                    and event = 'P+'" % (sid, tv)
-            iemaccess.query(sql)
+            icursor2.execute(sql)
             sql = "INSERT into events (station, network, valid, event, magnitude) VALUES ('%s','%s',now(), 'P+', %s)" % (sid, tv, accum)
-            iemaccess.query(sql)
+            icursor2.execute(sql)
 
         d = pday - float(db[sid]["pday"][59])
         if (d < 0):
           d = pday
-        sql = "UPDATE current SET phour = %s WHERE iemid = %s " % (d, rs[i]['iemid'])
+        sql = "UPDATE current SET phour = %s WHERE iemid = %s " % (d, row[2])
         #print sql
-        iemaccess.query(sql)
-    iemaccess.close()
+        icursor2.execute(sql)
+    icursor2.close()
+    IEM.commit()
+    IEM.close()
 
 def Main():
     preload()

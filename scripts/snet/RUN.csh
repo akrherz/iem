@@ -7,7 +7,7 @@
 set yymmdd=`date -u +%y%m%d`
 source /mesonet/nawips/Gemenviron
 
-./buildSF.py
+python buildSF.py
 
 if (! -e /mesonet/data/gempak/snet/${yymmdd}_snet.gem ) then
   cp template.gem /mesonet/data/gempak/snet/${yymmdd}_snet.gem

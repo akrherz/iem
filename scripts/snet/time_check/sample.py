@@ -1,4 +1,3 @@
-#!/mesonet/python-2.4/bin/python
 # Application to save SNET data flow to the IEM Access database!
 # Daryl Herzmann 4 Sept 2003
 # 16 Sep 2003	Must be careful how we import IEMAccessOb

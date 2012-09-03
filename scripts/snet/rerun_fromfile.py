@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 # 
 # Rerun from historical snet data
 # Daryl Herzmann 04 Mar 2002
