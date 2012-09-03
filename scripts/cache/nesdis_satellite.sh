@@ -10,13 +10,14 @@
 # West -180 65.5 -102 -15
 
 # Verbose for now to check some things
-date
+#date
 
 tm=$(python ts.py $1 %j%H%M)
 tm2=$(python ts2.py $1 %j%H%M)
 ftm=$(python ts.py $1 %Y%m%d%H%M)
 atm=$(python ts.py $1 %H%M)
 wtm=$(python wdownload.py $1)
+cd /tmp
 
 BASE="http://satepsanone.nesdis.noaa.gov/pub/GIS"
 
@@ -42,8 +43,8 @@ getter GoesWest04I3${tm}.tfw $BASE/GOESwest/GoesWest04I3${tm2}.tfw
 getter GoesWest04I4${tm}.tfw $BASE/GOESwest/GoesWest04I4${tm2}.tfw
 getter GoesWest04I4${tm}.tif $BASE/GOESwest/GoesWest04I4${tm2}.tif
 
-ls -l *.tif
-ls -l *.tfw
+#ls -l *.tif
+#ls -l *.tfw
 
 # Merge Visible, please
 szw=$(stat -c %s GoesWest1V${tm}.tif)
@@ -142,8 +143,10 @@ for mach in $(echo "iemvs100.local iemvs101.local iemvs102.local iemvs103.local 
     ssh -q ldm@${mach} "mv /tmp/wv_900913_0.tif ~/data/gis/images/900913/goes/wv_0.tif"
     fi 
 done
-
+rm wv_900913.tif wv.tif
+rm ir_900913.tif ir.tif
+rm vis_900913.tif vis.tif
 rm -f *${tm}.tif
 rm -f *${tm}.tfw
 
-date
+#date
