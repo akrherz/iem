@@ -43,7 +43,13 @@ function printWARN($cow, $warn)
   	$windhail = sprintf("<br />H: %s\"<br />W: %s", $warn["hailtag"], $warn["windtag"]);
   }
 
-  $s = sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a>%s</td><td>%s</td><td>%s</td><td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td><td><a href=\"%s\">%s</a></td><td>%.0f sq km</td><td>%.0f sq km</td><td>%.0f %%</td><td>%.0f%% <a href=\"../GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td><td>%.0f%%</td></tr>\n", 
+  $s = sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a>%s</td>
+  		<td>%s</td><td>%s</td>
+  		<td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td>
+  		<td><a href=\"%s\">%s</a></td><td>%.0f sq km</td>
+  		<td>%.0f sq km</td><td>%.0f %%</td>
+  		<td>%.0f%% <a href=\"../GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td>
+  		<td>%.0f%%</td></tr>\n", 
     $background, $uri, $warn["phenomena"], $warn["eventid"], $windhail,
     gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["ets"]), 
     $uri, implode(", ",$counties), $uri, $warn["status"], $warn["parea"], 
@@ -51,7 +57,7 @@ function printWARN($cow, $warn)
     $bratio,
     date("Y", $ts), $warn["wfo"], $warn["phenomena"], $warn["significance"],
     $warn["eventid"], $lsrbuffer,
-    $warn["buffered"] / $warn["area"] * 100.0);
+    $warn["buffered"] / $warn["parea"] * 100.0);
 
   reset($warn["lsrs"]);
   while ( list($k,$lsr) = each($warn["lsrs"])){ $s .= printLSR($cow->lsrs[$lsr]); }
@@ -107,7 +113,7 @@ if (sizeof($wtype) == 0){
  <tr><th>Storm Based Warning Size Reduction:</th>
 <th><?php echo sprintf("%.1f", $cow->computeSizeReduction()); ?> %</th></tr>
  <tr><th>Avg SBW Size (sq km)</th><th><?php echo sprintf("%.0f", $cow->computeAverageSize()); ?></th></tr>
- <tr><th>Warned Area Verified</th><th><?php echo sprintf("%.0f", $cow->computeAreaVerify()); ?> %</th></tr>
+ <tr><th>Areal Verification %:</th><th><?php echo sprintf("%.0f", $cow->computeAreaVerify()); ?> %</th></tr>
  </table>
 </td>
 <td>
@@ -152,11 +158,11 @@ if (sizeof($wtype) == 0){
 <i>County Area:</i> Total size of the counties included in the product in square km,
 <i>Size % (C-P)/C:</i> Size reduction gained by the storm based warning,
 <i>Perimeter Ratio:</i> Estimated percentage of the storm based warning polygon border that was influenced by political boundaries (0% is ideal).
-<i>Verif Area %:</i> Percentage of the polygon warning that received a verifying report (report is buffered <?php echo $lsrbuffer; ?> km).
+<i>Areal Verification %:</i> Percentage of the polygon warning that received a verifying report (report is buffered <?php echo $lsrbuffer; ?> km).
 <br />The second line is for details on any local storm reports.
 <br />
 <table cellspacing="0" cellpadding="2" border="1">
-<tr><td></td><th>Issued:</th><th>Expired:</th><th colspan="2">County:</th><th>Final Status:</th><th>SBW Area: (P)</th><th>County Area: (C)</th><th>Size %<br /> (C-P)/C:</th><th>Perimeter Ratio:</th><th>Verif Area %:</th></tr>
+<tr><td></td><th>Issued:</th><th>Expired:</th><th colspan="2">County:</th><th>Final Status:</th><th>SBW Area: (P)</th><th>County Area: (C)</th><th>Size %<br /> (C-P)/C:</th><th>Perimeter Ratio:</th><th>Areal Verif. %:</th></tr>
 <tr bgcolor="#eee"><th>lsr</th><th>Valid</th><th>Lead Time:</th><th>County</th><th>City</th><th>Type</th><th>Magnitude</th><th colspan="4">Remarks</th></tr>
 <?php
 reset($cow->warnings);

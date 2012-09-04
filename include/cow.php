@@ -344,8 +344,8 @@ function loadWarnings(){
    date("Y/m/d H:i", $this->sts), date("Y/m/d H:i", $this->ets), 
    date("Y/m/d H:i", $this->ets), $this->sqlTypeBuilder(), 
    $this->sqlTagLimiter() );
-
     $rs = $this->callDB($sql);
+    
     for ($i=0;$row = @pg_fetch_array($rs,$i);$i++){
         $key = sprintf("%s-%s-%s-%s", substr($row["issue"],0,4), $row["wfo"], 
                        $row["phenomena"], $row["eventid"]);
@@ -400,9 +400,8 @@ function loadLSRs() {
     $rs = $this->callDB($sql);
     for ($i=0;$row = @pg_fetch_array($rs,$i);$i++)
     {
-        $key = sprintf("%s-%s-%s-%s-%s", 
-          $row["wfo"], $row["valid"], $row["type"],
-          $row["magnitude"], $row["city"]);
+        $key = sprintf("%s-%s-%s-%s-%s", $row["wfo"], $row["valid"], 
+        	$row["type"], $row["magnitude"], $row["city"]);
         $this->lsrs[$key] = $row;
         $this->lsrs[$key]['geom'] = $row["tgeom"];
         $this->lsrs[$key]["ts"] = strtotime($row["valid"]);
@@ -508,7 +507,7 @@ function sbwVerify() {
             	continue;
             }
             if (($verify || $this->lsrs[$key]["tdq"]) &&
-                 ! $this->lsrs[$key]['warned'] ){
+                 ! $this->lsrs[$key]["warned"] ){
                 $this->warnings[$k]["lsrs"][] = $key;
                 $this->lsrs[$key]["warned"] = True;
                 $this->lsrs[$key]["leadtime"] = ($this->lsrs[$key]["ts"] - 
