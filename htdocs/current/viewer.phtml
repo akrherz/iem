@@ -1,12 +1,10 @@
 <?php include("../../config/settings.inc.php");
  include("$rootpath/include/cameras.inc.php"); 
  $id = isset($_GET["id"]) ? $_GET["id"] : "KCCI-001";
- if (isset($_COOKIE['camera']) && ! isset($_GET['id']) )
- {
-   $id = $_COOKIE['camera']; 
- }
+
  $TITLE =  "Live Web Camera Shots";
  $THISPAGE = "webcam-viewer";
+ $BODYEXTRA = " onload='init()'";
  include("$rootpath/include/header.php");
 
 ?>
@@ -60,37 +58,24 @@ function refreshCamera()
  document.camera.src = imgurl;
 
  timeID = setTimeout("refreshCamera()", 60000);
+ window.location.href = '#'+cameraID;
 
-  set_cookie("camera", cameraID,2019,1,1);
+}
+function setCamera(cid){
+	document.getElementById(cid).checked = true;
+	cameraId = cid;	
 }
 function init()
 {
 	timeID = setTimeout("refreshCamera()", 60000);
 
+	var tokens = window.location.href.split('#');
+	if (tokens.length == 2){
+		setCamera(tokens[1]);
+	}
 }
-function set_cookie ( name, value, exp_y, exp_m, exp_d, path, domain, secure )
-{
-  var cookie_string = name + "=" + escape ( value );
 
-  if ( exp_y )
-  {
-    var expires = new Date ( exp_y, exp_m, exp_d );
-    cookie_string += "; expires=" + expires.toGMTString();
-  }
-    
-  if ( path )
-        cookie_string += "; path=" + escape ( path );
 
-  if ( domain )
-        cookie_string += "; domain=" + escape ( domain );
-
-  if ( secure )
-        cookie_string += "; secure";
-
-  document.cookie = cookie_string;
-} 
-
-init();
 // -->
 </script>
 
@@ -113,7 +98,7 @@ $cnt = 0;
 while (list($cid, $v) = each($cameras) ) {
  if ($v["active"] && $v["network"] != "IDOT"){
     if ($cnt % 5 == 0){ echo "<tr>"; }
-	echo "<td><input type=\"radio\" name=\"id\" value=\"$cid\" ";
+	echo "<td><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"$cid\" ";
 	if ($cid == $id) { echo "checked=\"checked\""; }
 	echo " onClick=\"refreshCamera();\">". $v["name"] ."</td>\n";
     $cnt += 1;
