@@ -244,8 +244,9 @@ while (list ($key, $val) = each ($finalA))  {
    } $row .= "</td>";
    $row .= "<td>". drct2txt( $parts["drct"] ) ."</td><td>";
   if (isset($parts["peak_ts"])) $row .=  $parts["peak"] ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ;
+  $text_pday = $parts['pday'] == -99 ? 'M': $parts['pday'];
   $row .= "</td><td>". $parts["phour"] ."</td>
-            <td>". $parts["pday"] ."</td>
+            <td>". $text_pday ."</td>
 <td>". $parts["skyc1"] ." ". $parts["skyl1"] ."</td>
 <td>". $parts["skyc2"] ." ". $parts["skyl2"] ."</td>
 <td>". $parts["skyc3"] ." ". $parts["skyl3"] ."</td>
