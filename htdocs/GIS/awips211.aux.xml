@@ -1,0 +1,3 @@
+<PAMDataset>
+  <SRS>PROJCS[&quot;North_America_Lambert_Conformal_Conic&quot;,GEOGCS[&quot;GCS_North_American_1983&quot;,DATUM[&quot;North_American_Datum_1983&quot;,SPHEROID[&quot;GRS_1980&quot;,6378137.0,298.257222101]],PRIMEM[&quot;Greenwich&quot;,0.0],UNIT[&quot;Degree&quot;,0.0174532925199433]],PROJECTION[&quot;Lambert_Conformal_Conic_2SP&quot;],PARAMETER[&quot;False_Easting&quot;,0.0],PARAMETER[&quot;False_Northing&quot;,0.0],PARAMETER[&quot;Central_Meridian&quot;,-95.0],PARAMETER[&quot;Standard_Parallel_1&quot;,25.0],PARAMETER[&quot;Standard_Parallel_2&quot;,25.0],PARAMETER[&quot;Latitude_Of_Origin&quot;,25.0],UNIT[&quot;Meter&quot;,1.0]]</SRS>
+</PAMDataset>
