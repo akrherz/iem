@@ -24,7 +24,7 @@ if ($me){
   $logouturl = $facebook->getLogoutUrl();
 }else {
   $loginurl = $facebook->getLoginUrl(Array(
-    'req_perms' => 'publish_stream,offline_access,manage_pages'
+    'scope' => 'publish_stream,offline_access,manage_pages'
   ));
 }
 
