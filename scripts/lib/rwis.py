@@ -124,7 +124,7 @@ class RWISOb(object):
 
 
   def windAlert(self):
-    if self.stationID in ('RBFI4','RTMI4','RWII4','RDNI4','RCDI4'):
+    if self.stationID in ('RBFI4','RTMI4','RWII4','RDNI4','RCDI4','RCII4'):
       return
     import network
     nt = network.Table("IA_RWIS")
