@@ -62,7 +62,7 @@ function refreshCamera()
 
 }
 function setCamera(cid){
-	document.getElementById(cid).checked = true;
+	document.getElementById("c"+cid).checked = true;
 	cameraId = cid;	
 }
 function init()
@@ -98,7 +98,7 @@ $cnt = 0;
 while (list($cid, $v) = each($cameras) ) {
  if ($v["active"] && $v["network"] != "IDOT"){
     if ($cnt % 5 == 0){ echo "<tr>"; }
-	echo "<td><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"$cid\" ";
+	echo "<td><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
 	if ($cid == $id) { echo "checked=\"checked\""; }
 	echo " onClick=\"refreshCamera();\">". $v["name"] ."</td>\n";
     $cnt += 1;
