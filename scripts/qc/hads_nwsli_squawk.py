@@ -15,7 +15,7 @@ hcursor.execute("""
  count(distinct product),
  sum(case when substr(nwsli,4,2) = 'I4' then 1 else 0 end) as priority 
  from unknown 
- where nwsli ~ '[A-Z]{4}[0-9]'
+ where nwsli ~ '^[A-Z]{4}[0-9]$'
  GROUP by nwsli ORDER by priority DESC, tot DESC LIMIT 7
 """)
 for row in hcursor:
@@ -33,7 +33,7 @@ hcursor.execute("""
  sum(case when substr(nwsli,4,2) = 'I4' then 1 else 0 end) as priority
  from unknown 
  WHERE network ~* 'COOP'
- and nwsli ~ '[A-Z]{4}[0-9]' GROUP by nwsli ORDER by priority DESC, tot DESC LIMIT 5
+ and nwsli ~ '^[A-Z]{4}[0-9]$' GROUP by nwsli ORDER by priority DESC, tot DESC LIMIT 5
 """)
 for row in hcursor:
     print 'COOP %7s Tot:%4s Days:%2s Products: %s %s' % (row[0], row[1], 
