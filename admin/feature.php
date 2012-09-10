@@ -9,7 +9,6 @@ $facebook = new Facebook(Array(
   'secret' => $fb_feature_secret,
   'cookie' => true,
 ));
-$session = $facebook->getSession();
 $me = null;
 // Session based API call.
 if ($session) {
