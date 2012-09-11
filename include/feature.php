@@ -79,25 +79,26 @@ $s .= "<a class=\"button right\" href=\"$rooturl/onsite/features/tags/\">Tags</a
 
 /* Rate Feature and Past ones too! */
 $s .= "<br clear=\"all\" />";
-$s .= "<div style=\"float: left; margin-bottom: 10px; margin-left: 15px; \">";
 if ($row["voting"] == "f"){
   
-} else if ($voted){
- 	$goodurl = "index.phtml";
-	$badurl = "index.phtml";
-	$msg = "Thanks for voting!";
 } else {
-	$goodurl = "$rooturl/index.phtml?feature_good";
-	$badurl = "$rooturl/index.phtml?feature_bad";
-	$msg = "Rate Feature";
-}
+	$s .= "<div style=\"float: left; margin-bottom: 10px; margin-left: 15px; \">";
+	if ($voted){
+ 		$goodurl = "index.phtml";
+		$badurl = "index.phtml";
+		$msg = "Thanks for voting!";
+	} else {
+		$goodurl = "$rooturl/index.phtml?feature_good";
+		$badurl = "$rooturl/index.phtml?feature_bad";
+		$msg = "Rate Feature";
+	}
 
-//$s .= "<div style=\"float: left; margin-bottom: 5px;\"><strong>$msg</strong> <a class=\"button add\" href=\"$goodurl\">Good ($good votes)</a><a class=\"button delete\" href=\"$badurl\">Bad ($bad votes)</a></div>";
-$s .= "<div id=\"fb-root\"></div><script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>
+	$s .= "<div style=\"float: left; margin-bottom: 5px;\"><strong>$msg</strong> <a class=\"button add\" href=\"$goodurl\">Good ($good votes)</a><a class=\"button delete\" href=\"$badurl\">Bad ($bad votes)</a></div>";
+	$s .= "<div id=\"fb-root\"></div><script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>
 	<fb:comments send_notification_uid=\"16922938\" callback=\"$rooturl/fbcb.php\" title=\"". $row["title"] ."\" \" href=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
 
-$s .= "</div>";
-
+	$s .= "</div>";
+}
 /* Now, lets look for older features! */
 $s .= "<br clear=\"all\" /><strong>Previous Years' Features</strong><table width=\"100%\">";
 $sql = "select *, extract(year from valid) as yr from feature WHERE extract(month from valid) = extract(month from now()) and extract(day from valid) = extract(day from now()) and extract(year from valid) != extract(year from now()) ORDER by yr DESC";
