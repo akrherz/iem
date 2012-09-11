@@ -10,15 +10,10 @@ $facebook = new Facebook(Array(
   'cookie' => true,
 ));
 $me = null;
-// Session based API call.
-if ($session) {
-  try {
-    $uid = $facebook->getUser();
-    $me = $facebook->api('/me');
-  } catch (FacebookApiException $e) {
-    error_log($e);
-  } 
-} 
+$uid = $facebook->getUser();
+if ($uid){    
+	$me = $facebook->api('/me');
+}
 if ($me){
   $logouturl = $facebook->getLogoutUrl();
 }else {
