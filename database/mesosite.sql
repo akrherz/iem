@@ -120,7 +120,7 @@ GRANT select on webcams to apache,nobody;
 CREATE TABLE stations(
 	id varchar(20),
 	synop int,
-	name varchar(40),
+	name varchar(64),
 	state char(2),
 	country char(2),
 	elevation real,
@@ -128,7 +128,7 @@ CREATE TABLE stations(
 	online boolean,
 	params varchar(300),
 	county varchar(50),
-	plot_name varchar(40),
+	plot_name varchar(64),
 	climate_site varchar(6),
 	remote_id int,
 	nwn_id int,
@@ -143,7 +143,7 @@ CREATE TABLE stations(
 CREATE UNIQUE index stations_idx on stations(id, network);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on stations to apache,nobody;
-grant all on stations_iemid_seq to nobody,apache
+grant all on stations_iemid_seq to nobody,apache;
 
 CREATE OR REPLACE FUNCTION update_modified_column()
 	RETURNS TRIGGER AS $$
@@ -170,3 +170,17 @@ create table iemmaps(
 );
 GRANT all on iemmaps to apache,nobody;
 GRANT all on iemmaps_id_seq to apache,nobody;
+
+CREATE table feature(
+  valid timestamp with time zone DEFAULT now(),
+  title varchar(256),
+  story text,
+  caption varchar(256),
+  good smallint,
+  bad smallint,
+  voting boolean,
+  tags varchar(1024),
+  fbid bigint);
+CREATE unique index feature_title_check_idx on feature(title);
+CREATE index feature_valid_idx on feature(valid);
+GRANT all on feature to nobody,apache;
