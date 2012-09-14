@@ -69,7 +69,7 @@ if interval is not None:
     sql = """SELECT model_twp, 
       avg(avg_precip) as avg_precip, 
       avg(avg_loss) as avg_loss, 
-      avg(avg_runoff) as avg_runoff results_by_twp 
+      avg(avg_runoff) as avg_runoff from results_by_twp 
       WHERE valid BETWEEN '%s' and ('%s'::date + '%s days'::interval) 
       GROUP by model_twp""" % (ts.strftime("%Y-%m-%d"), ts.strftime("%Y-%m-%d"),
       interval)
