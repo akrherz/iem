@@ -32,6 +32,9 @@ S=/mesonet/www/apps/iemwebsite/scripts
 # Drought Monitor
 0 8 * * 4 cd /mesonet/www/apps/iemwebsite/scripts/cache/dm; ./download.sh
 
+# Email Harry RR3 data
+14 14 * * 5 cd $S/coop; python email_RR3_to_harry.py
+
 # Archive Bufkit!
 # Eta
 05 0 * * *   cd $S/cache; ./downloadNAM.csh 00
