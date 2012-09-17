@@ -16,7 +16,7 @@
 	<option value="2">Last 2
 	<option value="5">Last 5
 	<option value="10">Last 10
-	<option value="999">All
+	<option value="1500">Last 1500
 </SELECT></td>
 
   <td><input type="submit" value="GET"></td>
