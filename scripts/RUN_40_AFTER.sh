@@ -8,7 +8,9 @@ python ncep_stage4.py
 
 cd ../sbw
 python polygonMosaic.py S
+sleep 2
 python polygonMosaic.py T
+sleep 2
 python polygonMosaic.py W
 
 cd ../iemre
