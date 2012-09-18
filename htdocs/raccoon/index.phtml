@@ -7,6 +7,7 @@ include_once "$rootpath/include/database.inc.php";
 
 $wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'OAX';
 $radar = isset($_REQUEST["radar"]) ? $_REQUEST["radar"] : 'OAX';
+$radar_product = isset($_REQUEST["product"]) ? $_REQUEST["product"] : 'N0Q';
 $year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : date("Y");
 $month1 = isset($_REQUEST["month1"]) ? intval($_REQUEST["month1"]) : date("m");
 $day1= isset($_REQUEST["day1"]) ? intval($_REQUEST["day1"]) : date("d");
@@ -32,9 +33,10 @@ if (isset($_REQUEST["wfo"])){
 	} else {
 		$mesosite = iemdb("mesosite");
 		pg_prepare($mesosite, "INSERT", "INSERT into racoon_jobs(wfo, sts, ets,
-		radar) values ($1,$2,$3,$4) returning jobid");
+		radar, nexrad_product) values ($1,$2,$3,$4,$5) returning jobid");
 		$rs = pg_execute($mesosite, "INSERT", array($wfo, 
-			date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $radar));
+			date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $radar,
+				$radar_product));
 		$row = pg_fetch_assoc($rs,0);
 		pg_close($mesosite);
 		$jobid = $row["jobid"];
@@ -80,7 +82,15 @@ probably back fill imagery for the event.
 	<td colspan="4"><?php echo networkSelect("WFO", $wfo, Array(), "wfo"); ?></td></tr>
 <tr><th>Select RADAR source</th>
 	<td colspan="4"><?php echo networkSelect("NEXRAD", $radar, Array(), "radar"); ?></td></tr>
-  <tr>
+<tr><th>Select Level 3 Product:</th>
+	<td colspan="4">
+	<select name="product">
+		<option value="N0Q">Base Reflectivity (N0Q)</option>
+		<option value="N0U">Base Velocity (N0U)</option>
+	</select>
+	</td></tr>
+	
+	<tr>
     <td></td>
     <th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th>

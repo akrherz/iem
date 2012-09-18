@@ -4,7 +4,7 @@ Generate a Powerpoint file for an event.  This script looks for queued jobs
 within the database and runs them sequentially each minute
 
 """
-__REV__ = "1Jul2012"
+__REV__ = "18Sep2012"
 import os
 os.putenv("DISPLAY", "localhost:1")
 import sys
@@ -32,8 +32,9 @@ def test_job():
     jobs = []
     jobs.append({'wfo': 'FSD', 'radar': 'FSD',
                  'sts': datetime.datetime(2003,6,24, 2),
-                 'ets': datetime.datetime(2003,6,25, 4),
-                 'jobid': random.randint(1,1000000)})
+                 'ets': datetime.datetime(2003,6,24, 4),
+                 'jobid': random.randint(1,1000000),
+                 'nexrad_product': 'N0U'})
     return jobs
 
 def check_for_work():
@@ -45,7 +46,7 @@ def check_for_work():
     mcursor2 = MESOSITE.cursor()
     mcursor.execute("""SELECT jobid, wfo, radar, 
         sts at time zone 'UTC' as sts, 
-        ets at time zone 'UTC' as ets
+        ets at time zone 'UTC' as ets, nexrad_product
         from racoon_jobs WHERE processed = False""")
     jobs = []
     for row in mcursor:
@@ -149,7 +150,7 @@ def do_job(job):
     textbox = TextBox()
     frame.addElement(textbox)
     textbox.addElement(P(text="WFO: %s" % (job['wfo'],)))
-    textbox.addElement(P(text="Radar: %s" % (job['radar'],)))
+    textbox.addElement(P(text="Radar: %s Product: %s" % (job['radar'], job['nexrad_product'])))
     textbox.addElement(P(text="Start Time: %s UTC" % (job['sts'].strftime("%d %b %Y %H"),)))
     textbox.addElement(P(text="End Time: %s UTC" % (job['ets'].strftime("%d %b %Y %H"),)))
     textbox.addElement(P(text=""))
@@ -217,9 +218,16 @@ def do_job(job):
                                     warning['phenomena'],warning['eventid'],
                                     now.strftime("%d %b %Y %H%M"))))
             
-            n0qn0r = 'N0Q'
-            if now < SUPER_RES:
-                n0qn0r = 'N0R'
+            if job['nexrad_product'] == 'N0U':
+                if now < SUPER_RES:
+                    n0qn0r = 'N0V'
+                else:
+                    n0qn0r = 'N0U'
+            else:
+                if now < SUPER_RES:
+                    n0qn0r = 'N0R'
+                else:
+                    n0qn0r = 'N0Q'
             
             url = "http://iem21.local/GIS/radmap.php?"
             url += "layers[]=ridge&ridge_product=%s&ridge_radar=%s&" % (n0qn0r, 
@@ -230,7 +238,7 @@ def do_job(job):
             url += "vtec=%s.O.NEW.K%s.%s.W.%04i&ts=%s" % ( job['sts'].year, job['wfo'],
                                     warning['phenomena'],warning['eventid'],
                                     now.strftime("%Y%m%d%H%M"))
-        
+
             cmd = "wget -q -O %i.png '%s'" % (i, url)
             os.system(cmd)
             photoframe = Frame(stylename=photostyle, width="640pt", 
