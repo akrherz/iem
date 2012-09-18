@@ -292,21 +292,20 @@ function computeSharedBorder(){
       buffer(exteriorring(geometryn(multi(ST_union(n.geom)),1)),0.02),
       exteriorring(geometryn(multi(ST_union(w.geom)),1))
             )  as a
-            from warnings w, nws_ugc n WHERE gtype = 'P' 
+            from warnings_%s w, nws_ugc n WHERE gtype = 'P' 
             and w.wfo = '%s' and phenomena = '%s' and eventid = '%s' 
             and significance = '%s' and n.polygon_class = 'C'
             and n.ugc IN (
-                SELECT ugc from warnings w WHERE
+                SELECT ugc from warnings_%s w WHERE
                 gtype = 'C' and wfo = '%s'
           and phenomena = '%s' and eventid = '%s' and significance = '%s'
        )
          ) as foo
             WHERE not isempty(a) ) as foo
-       ", $v["wfo"], $v["phenomena"],
+       ", $v["year"], $v["wfo"], $v["phenomena"],
             $v["eventid"], $v["significance"],
-          $v["wfo"], $v["phenomena"],
+          $v["year"], $v["wfo"], $v["phenomena"],
             $v["eventid"], $v["significance"] );
-
         $rs = $this->callDB($sql);
         if ($rs && pg_num_rows($rs) > 0){
             $row = pg_fetch_array($rs,0);
@@ -326,7 +325,8 @@ function sqlTagLimiter(){
 
 function loadWarnings(){
     $sql = sprintf("
-    select *, ST_astext(geom) as tgeom from 
+    select *, ST_astext(geom) as tgeom,
+    		extract(year from issue at time zone 'UTC') as year from 
       (SELECT distinct * from 
         (select s.hailtag, s.windtag, 
          w.geom, w.issue, w.expire, w.wfo, w.status, w.significance,
@@ -366,6 +366,7 @@ function loadWarnings(){
         $this->warnings[$key]["sts"] = strtotime($row["issue"]);
         $this->warnings[$key]["ets"] = strtotime($row["expire"]);
         $this->warnings[$key]["eventid"] = $row["eventid"];
+        $this->warnings[$key]["year"] = $row["year"];
         $this->warnings[$key]["lead0"] = -1;
         $this->warnings[$key]["buffered"] = 0;
         $this->warnings[$key]["verify"] = 0;
@@ -460,7 +461,7 @@ function sbwVerify() {
     	}
         /* Look for LSRs! */
         $sql = sprintf("SELECT distinct *
-         from lsrs w WHERE 
+         from lsrs_%s w WHERE 
          geom && ST_Buffer(SetSrid(GeometryFromText('%s'),4326),0.01) and 
          contains(ST_Buffer(SetSrid(GeometryFromText('%s'),4326),0.01), geom) 
          and %s and wfo = '%s' and
@@ -470,7 +471,7 @@ function sbwVerify() {
          or type = 'F')
          and valid >= '%s' and valid <= '%s' 
          ORDER by valid ASC", 
-         $v["geom"], $v["geom"], $this->sqlLSRTypeBuilder(), 
+         $v["year"], $v["geom"], $v["geom"], $this->sqlLSRTypeBuilder(), 
          $v["wfo"], $this->getVerifyHailSize($v), $this->getVerifyWind($v),
          date("Y/m/d H:i", strtotime($v["issue"])),
          date("Y/m/d H:i", strtotime($v["expire"])) );
