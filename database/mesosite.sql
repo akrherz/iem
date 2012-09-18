@@ -7,7 +7,8 @@ CREATE TABLE racoon_jobs(
   sts timestamp with time zone,
   ets timestamp with time zone,
   radar varchar(3),
-  processed boolean default false
+  processed boolean default false,
+  nexrad_product char(3)
 );
 GRANT all on racoon_jobs to apache,nobody;
 
