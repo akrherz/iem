@@ -47,11 +47,16 @@ def computeOthers(d):
     for sid in d.keys():
         ob = d[sid].data
         ob["ticks"] = int(ob["ts"])
-        ob["relh"] = mesonet.relh(ob["tmpf"], ob["dwpf"])
-        if ob.get("relh") == "M":
-            ob["relh"] = -99
+        if ob.get('tmpf') is not None and ob.get('dwpf') is not None:
+            ob["relh"] = mesonet.relh(ob["tmpf"], ob["dwpf"])
+        else:
+            ob['feel'] = -99
+        if (ob.get('tmpf') is not None and ob.get('dwpf') is not None and
+            ob.get('sped') is not None):
+            ob["feel"] = mesonet.feelslike(ob["tmpf"], ob["relh"], ob["sped"])
+        else:
+            ob['feel'] = -99
         ob["sped"] = ob["sknt"] * 1.17
-        ob["feel"] = mesonet.feelslike(ob["tmpf"], ob["relh"], ob["sped"])
         ob["altiTend"] = altiTxt(ob["alti_15m"])
         ob["drctTxt"] = mesonet.drct2dirTxt(ob["drct"])
         if ob["max_drct"] is None:
@@ -108,7 +113,7 @@ def main():
     of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,max_srad,\n")
     for sid in kcci.keys():
         try:
-            s = "%(id)s,%(ticks)s,%(tmpf).0f,%(dwpf).0f,%(relh).0f,%(feel).0f,%(pres).2f,%(altiTend)s,%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f,%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f,%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f,%(max_gust).0f,%(max_drct).0f,%(max_sped).0f,%(max_drctTxt)s,%(max_srad).0f,\n" % kcci[sid].data 
+            s = "%(id)s,%(ticks)s,%(tmpf)s,%(dwpf)s,%(relh)s,%(feel)s,%(pres).2f,%(altiTend)s,%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f,%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f,%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f,%(max_gust).0f,%(max_drct).0f,%(max_sped).0f,%(max_drctTxt)s,%(max_srad).0f,\n" % kcci[sid].data 
             of.write(s.replace("'", ""))
         except:
             print kcci[sid]
@@ -126,8 +131,8 @@ def main():
         if (now - kcci[sid].data['ts']) > 3600:
             kcci[sid].data['online'] = 0
         try:
-            of.write(("%(id)s,%(ticks).0f,%(tmpf).0f,%(dwpf).0f," % kcci[sid].data ).replace("'", ""))
-            of.write(("%(relh).0f,%(feel).0f,%(pres).2f,%(altiTend)s," % kcci[sid].data ).replace("'", "") )
+            of.write(("%(id)s,%(ticks).0f,%(tmpf)s,%(dwpf)s," % kcci[sid].data ).replace("'", ""))
+            of.write(("%(relh)s,%(feel)s,%(pres).2f,%(altiTend)s," % kcci[sid].data ).replace("'", "") )
             of.write(("%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f," % kcci[sid].data ).replace("'", "") )
             of.write(("%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f," % kcci[sid].data  ).replace("'", ""))
             of.write(("%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f," % kcci[sid].data ).replace("'", "") )
@@ -195,8 +200,8 @@ def main():
                 st.sts[sid]['lat'], st.sts[sid]['lon']))
             of.write("%2s %4s %4.0f %4.0f %4.0f %4.0f %4s " % (
                 kcci[sid].data['ts'].day, kcci[sid].data['ts'].hour, 
-                kcci[sid].data['tmpf'], kcci[sid].data['dwpf'], 
-                kcci[sid].data['feel'], kcci[sid].data.get('drct'), 
+                kcci[sid].data.get('tmpf') or -99, kcci[sid].data.get('dwpf') or -99, 
+                kcci[sid].data.get('feel') or -99, kcci[sid].data.get('drct'), 
                 kcci[sid].data.get('drctTxt')))
             of.write("%4.0f %4.0f %4.0f %4.0f %3s " % (
                 kcci[sid].data['sknt'], 
