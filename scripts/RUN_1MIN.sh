@@ -1,7 +1,8 @@
 # Run every minute!
-/mesonet/www/apps/nwnwebsite/scripts/GEN.csh &
+cd /mesonet/www/apps/nwnwebsite/scripts
+php drive_lsd_generation.php &
 
-cd sbw
+cd /mesonet/www/apps/iemwebsite/scripts/sbw
 python raccoon_sbw_to_ppt.py &
 
 cd ../GIS
