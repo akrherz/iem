@@ -1,14 +1,19 @@
 <?php 
+/*
+ * My purpose in life is to produce pics
+ */
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("setup.php");
 
 $dir = isset($_GET["dir"]) ? $_GET["dir"]: "";
 
-$filename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'.jpg';
+$filename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'.jpg'; 
+$puri='pics/'.$station.'/'.$station.'.jpg';
 
 if ($dir != ""){
- $filename='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
+ $filename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
+ $puri='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
 }
 if (! file_exists($filename)){
 	$filename = sprintf('%s/images/nophoto.png', $rooturl);
@@ -24,7 +29,7 @@ include("$rootpath/include/header.php");
 
 function printtd($instr,$selected,$station){
   global $network;
-  $filename='./pics/'.$station.'/'.$station.'_'.$instr.'.jpg'; 
+  $filename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'_'.$instr.'.jpg';
   if (file_exists($filename)){ 
     if ($instr == $selected)
      {
@@ -63,7 +68,7 @@ Iowa...</p>
  	printtd("NE",$dir,$station)?></tr>
  <tr><?php 
  	printtd("W",$dir,$station);
- 	echo '<TD class="hlink"><IMG class="pics" border="3" SRC="'.$filename.'"  
+ 	echo '<TD class="hlink"><IMG class="pics" border="3" SRC="'.$puri.'"  
                     alt="'.$station.' , '.$dir.'" /></td>';
     printtd("E",$dir,$station);?></tr>
   <tr><?php printtd("SW",$dir,$station);
@@ -71,14 +76,16 @@ Iowa...</p>
   	printtd("SE",$dir,$station)?></tr>
 </table>
 <?php
-$filename='./pics/'.$station.'/'.$station.'_span.jpg';
-$lfilename='./pics/'.$station.'/'.$station.'_pan.jpg';
+$filename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'_span.jpg';
+$puri='pics/'.$station.'/'.$station.'_span.jpg';
+$lfilename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'_pan.jpg';
+$pluri='pics/'.$station.'/'.$station.'_pan.jpg';
 if (file_exists($filename))
 {
-  echo "<h3>Panoramic Shot</h3><img src=\"$filename\"><br /><a href=\"$lfilename\">Full resolution version</a>";
+  echo "<h3>Panoramic Shot</h3><img src=\"$puri\"><br /><a href=\"$pluri\">Full resolution version</a>";
 }
-if (file_exists("./pics/$station/HEADER.html")){
-  echo "<p><strong>". file_get_contents("./pics/$station/HEADER.html") ."</strong>";
+if (file_exists("/mnt/mesonet/share/pics/$station/HEADER.html")){
+  echo "<p><strong>". file_get_contents("/mnt/mesonet/share/pics/$station/HEADER.html") ."</strong>";
 }
 
 ?>
