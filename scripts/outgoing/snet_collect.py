@@ -119,7 +119,9 @@ def main():
 
     tmpfp = tempfile.mktemp()
     of = open(tmpfp, 'w')
-    of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,max_srad,\n")
+    of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,")
+    of.write("drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,")
+    of.write("drct_max,max_sped,max_drctTxt,max_srad,\n")
     for sid in kcci.keys():
         v = kcci[sid].data
         try:
@@ -161,6 +163,7 @@ def main():
     os.remove(tmpfp)
 
     of = open(tmpfp, 'w')
+
     of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,")
     of.write("drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,")
     of.write("drct_max,max_sped,max_drctTxt,srad,max_srad,online,\n")
@@ -169,13 +172,34 @@ def main():
         if (now - kcci[sid].data['ts']) > 3600:
             kcci[sid].data['online'] = 0
         try:
-            of.write(("%(id)s,%(ticks).0f,%(tmpf)s,%(dwpf)s," % kcci[sid].data ).replace("'", ""))
-            of.write(("%(relh)s,%(feel)s,%(pres).2f,%(altiTend)s," % kcci[sid].data ).replace("'", "") )
-            of.write(("%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f," % kcci[sid].data ).replace("'", "") )
-            of.write(("%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f," % kcci[sid].data  ).replace("'", ""))
-            of.write(("%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f," % kcci[sid].data ).replace("'", "") )
-            of.write(("%(max_sknt).0f,%(max_drct).0f,%(max_sped).0f," % kcci[sid].data ).replace("'", "") )
-            of.write(("%(max_drctTxt)s,%(srad).0f,%(max_srad).0f,%(online)s,\n" % kcci[sid].data ).replace("'", "") )
+            s = "%s,%s,%s,%s,%s," % (v.get('id'),
+                            v.get('ticks'), formatter(v.get('tmpf'),0), 
+                            formatter(v.get('dwpf'),0),
+                            formatter(v.get('relh'),0) )
+            s += "%s,%s,%s,%s," % (
+                        formatter(v.get('feel'), 0),
+                        formatter(v.get('pres'), 2),
+                        v.get('altiTend'), v.get('drctTxt'))
+            s += "%s,%s,%s,%s," % (
+                        formatter(v.get('sped'), 0),
+                        formatter(v.get('sknt'), 0),
+                        formatter(v.get('drct'), 0),
+                        formatter(v.get('20gu'), 0))
+            s += "%s,%s,%s,%s," % (
+                        formatter(v.get('gmph'), 0),
+                        v.get('gtim'),
+                        formatter(v.get('pday'), 2),
+                        formatter(v.get('pmonth'), 2))
+            s += "%s,%s,%s," % (
+                        formatter(v.get('sknt'), 0),
+                        formatter(v.get('drct'), 0),
+                        formatter(v.get('20gu'), 0))
+            s += "%s,%s,%s,%s,%s,%s\n" % (
+                        formatter(v.get('max_drct'), 0),
+                        formatter(v.get('max_sped'), 0),
+                        v.get('max_drctTxt'), formatter(v.get('srad'), 0),
+                        formatter(v.get('max_srad'), 0),
+                        v.get('online'))
         except:
             print kcci[sid].data
             print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
