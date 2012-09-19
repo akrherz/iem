@@ -145,7 +145,7 @@ def main():
                         formatter(v.get('sknt'), 0),
                         formatter(v.get('drct'), 0),
                         formatter(v.get('20gu'), 0))
-            s += "%s,%s,%s,%s" % (
+            s += "%s,%s,%s,%s\n" % (
                         formatter(v.get('max_drct'), 0),
                         formatter(v.get('max_sped'), 0),
                         v.get('max_drctTxt'),
