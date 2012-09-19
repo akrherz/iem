@@ -168,9 +168,10 @@ def main():
     of.write("drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,")
     of.write("drct_max,max_sped,max_drctTxt,srad,max_srad,online,\n")
     for sid in kcci.keys():
-        kcci[sid].data['online'] = 1
-        if (now - kcci[sid].data['ts']) > 3600:
-            kcci[sid].data['online'] = 0
+        v = kcci[sid].data
+        v['online'] = 1
+        if (now - v['ts']) > 3600:
+            v['online'] = 0
         try:
             s = "%s,%s,%s,%s,%s," % (v.get('id'),
                             v.get('ticks'), formatter(v.get('tmpf'),0), 
@@ -200,6 +201,7 @@ def main():
                         v.get('max_drctTxt'), formatter(v.get('srad'), 0),
                         formatter(v.get('max_srad'), 0),
                         v.get('online'))
+            of.write(s.replace("'", ""))
         except:
             print kcci[sid].data
             print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
@@ -215,18 +217,40 @@ def main():
     of.write("drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,")
     of.write("drct_max,max_sped,max_drctTxt,srad,max_srad,online\n")
     for sid in kimt.keys():
-        if (now - kimt[sid].data['ts']) > 3600:
-            kimt[sid].data['online'] = 0
-  
+        v = kimt[sid].data
+        v['online'] = 1
+        if (now - v['ts']) > 3600:
+            v['online'] = 0
         try:
-            of.write(("%(id)s,%(ticks).0f,%(tmpf)s,%(dwpf)s," % kimt[sid].data ).replace("'", ""))
-            of.write(("%(relh)s,%(feel)s,%(pres).2f,%(altiTend)s," % kimt[sid].data ).replace("'", "") )
-            of.write(("%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f," % kimt[sid].data ).replace("'", "") )
-            of.write(("%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f," % kimt[sid].data  ).replace("'", ""))
-            of.write(("%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f," % kimt[sid].data ).replace("'", "") )
-            of.write(("%(max_sknt).0f,%(max_drct).0f,%(max_sped).0f," % kimt[sid].data ).replace("'", "") )
-            of.write(("%(max_drctTxt)s,%(srad).0f,%(max_srad).0f,%(online)s,\n" % kimt[sid].data ).replace("'", "") )
-  
+            s = "%s,%s,%s,%s,%s," % (v.get('id'),
+                            v.get('ticks'), formatter(v.get('tmpf'),0), 
+                            formatter(v.get('dwpf'),0),
+                            formatter(v.get('relh'),0) )
+            s += "%s,%s,%s,%s," % (
+                        formatter(v.get('feel'), 0),
+                        formatter(v.get('pres'), 2),
+                        v.get('altiTend'), v.get('drctTxt'))
+            s += "%s,%s,%s,%s," % (
+                        formatter(v.get('sped'), 0),
+                        formatter(v.get('sknt'), 0),
+                        formatter(v.get('drct'), 0),
+                        formatter(v.get('20gu'), 0))
+            s += "%s,%s,%s,%s," % (
+                        formatter(v.get('gmph'), 0),
+                        v.get('gtim'),
+                        formatter(v.get('pday'), 2),
+                        formatter(v.get('pmonth'), 2))
+            s += "%s,%s,%s," % (
+                        formatter(v.get('sknt'), 0),
+                        formatter(v.get('drct'), 0),
+                        formatter(v.get('20gu'), 0))
+            s += "%s,%s,%s,%s,%s,%s\n" % (
+                        formatter(v.get('max_drct'), 0),
+                        formatter(v.get('max_sped'), 0),
+                        v.get('max_drctTxt'), formatter(v.get('srad'), 0),
+                        formatter(v.get('max_srad'), 0),
+                        v.get('online'))
+            of.write(s.replace("'", ""))
         except:
             print kimt[sid].data
             print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
