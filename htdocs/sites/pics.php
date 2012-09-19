@@ -5,7 +5,7 @@ include("setup.php");
 
 $dir = isset($_GET["dir"]) ? $_GET["dir"]: "";
 
-$filename='./pics/'.$station.'/'.$station.'.jpg';
+$filename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'.jpg';
 
 if ($dir != ""){
  $filename='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
