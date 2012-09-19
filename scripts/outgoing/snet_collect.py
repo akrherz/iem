@@ -46,19 +46,20 @@ def computeOthers(d):
     for sid in d.keys():
         ob = d[sid].data
         ob["ticks"] = int(ob["ts"])
-        if ob.get('tmpf') is not None:
-            ob['tmpf'] = int(ob['tmpf'])
-        if ob.get('dwpf') is not None:
-            ob['dwpf'] = int(ob['dwpf'])
         if ob.get('tmpf') is not None and ob.get('dwpf') is not None:
             ob["relh"] = mesonet.relh(ob["tmpf"], ob["dwpf"])
         else:
-            ob['feel'] = -99
+            ob['relh'] = None
+        if ob['relh'] == 'M':
+            ob['relh'] = None
+            
         if (ob.get('tmpf') is not None and ob.get('dwpf') is not None and
             ob.get('sped') is not None):
             ob["feel"] = mesonet.feelslike(ob["tmpf"], ob["relh"], ob["sped"])
         else:
-            ob['feel'] = -99
+            ob['feel'] = None
+        if ob['feel'] == 'M':
+            ob['feel'] = None
         ob["sped"] = ob["sknt"] * 1.17
         ob["altiTend"] = altiTxt(ob["alti_15m"])
         ob["drctTxt"] = mesonet.drct2dirTxt(ob["drct"])
@@ -95,6 +96,11 @@ def get_precip_totals(obs, network):
         for row in icursor:
             obs[ row["id"]].data["p%sday" % (dy,)] = row["rain"]
 
+def formatter(val, precision):
+    if val is None or type(val) == type('s'):
+        return 'M'
+    fmt = '%%.%sf' % (precision,)
+    return fmt % val
 
 def main():
     kcci = access.get_network("KCCI", IEM)
@@ -115,8 +121,35 @@ def main():
     of = open(tmpfp, 'w')
     of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,max_srad,\n")
     for sid in kcci.keys():
+        v = kcci[sid].data
         try:
-            s = "%(id)s,%(ticks)s,%(tmpf)s,%(dwpf)s,%(relh)s,%(feel)s,%(pres).2f,%(altiTend)s,%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f,%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f,%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f,%(max_gust).0f,%(max_drct).0f,%(max_sped).0f,%(max_drctTxt)s,%(max_srad).0f,\n" % kcci[sid].data 
+            s = "%s,%s,%s,%s,%s," % (v.get('id'),
+                            v.get('ticks'), formatter(v.get('tmpf'),0), 
+                            formatter(v.get('dwpf'),0),
+                            formatter(v.get('relh'),0) )
+            s += "%s,%s,%s,%s," % (
+                        formatter(v.get('feel'), 0),
+                        formatter(v.get('pres'), 2),
+                        v.get('altiTend'), v.get('drctTxt'))
+            s += "%s,%s,%s,%s," % (
+                        formatter(v.get('sped'), 0),
+                        formatter(v.get('sknt'), 0),
+                        formatter(v.get('drct'), 0),
+                        formatter(v.get('20gu'), 0))
+            s += "%s,%s,%s,%s," % (
+                        formatter(v.get('gmph'), 0),
+                        v.get('gtim'),
+                        formatter(v.get('pday'), 2),
+                        formatter(v.get('pmonth'), 2))
+            s += "%s,%s,%s," % (
+                        formatter(v.get('sknt'), 0),
+                        formatter(v.get('drct'), 0),
+                        formatter(v.get('20gu'), 0))
+            s += "%s,%s,%s,%s" % (
+                        formatter(v.get('max_drct'), 0),
+                        formatter(v.get('max_sped'), 0),
+                        v.get('max_drctTxt'),
+                        formatter(v.get('max_srad'), 0))
             of.write(s.replace("'", ""))
         except:
             print kcci[sid]
@@ -128,7 +161,9 @@ def main():
     os.remove(tmpfp)
 
     of = open(tmpfp, 'w')
-    of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,srad,max_srad,online,\n")
+    of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,")
+    of.write("drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,")
+    of.write("drct_max,max_sped,max_drctTxt,srad,max_srad,online,\n")
     for sid in kcci.keys():
         kcci[sid].data['online'] = 1
         if (now - kcci[sid].data['ts']) > 3600:
@@ -152,13 +187,25 @@ def main():
     os.remove(tmpfp)
 
     of = open(tmpfp, 'w')
-    of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,drct_max,max_sped,max_drctTxt,srad,max_srad,\n")
+    of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,")
+    of.write("drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,")
+    of.write("drct_max,max_sped,max_drctTxt,srad,max_srad,online\n")
     for sid in kimt.keys():
+        if (now - kimt[sid].data['ts']) > 3600:
+            kimt[sid].data['online'] = 0
+  
         try:
-            of.write(("%(id)s,%(ticks).0f,%(tmpf).0f,%(dwpf).0f,%(relh).0f,%(feel).0f,%(pres).2f,%(altiTend)s,%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f,%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f,%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f,%(max_sknt).0f,%(max_drct).0f,%(max_sped).0f,%(max_drctTxt)s,%(srad).0f,%(max_srad).0f,\n" % kimt[sid].data  ).replace("'", ""))
+            of.write(("%(id)s,%(ticks).0f,%(tmpf)s,%(dwpf)s," % kimt[sid].data ).replace("'", ""))
+            of.write(("%(relh)s,%(feel)s,%(pres).2f,%(altiTend)s," % kimt[sid].data ).replace("'", "") )
+            of.write(("%(drctTxt)s,%(sped).0f,%(sknt).0f,%(drct).0f," % kimt[sid].data ).replace("'", "") )
+            of.write(("%(20gu).0f,%(gmph).0f,%(gtim)s,%(pday).2f," % kimt[sid].data  ).replace("'", ""))
+            of.write(("%(pmonth).2f,%(min_tmpf).0f,%(max_tmpf).0f," % kimt[sid].data ).replace("'", "") )
+            of.write(("%(max_sknt).0f,%(max_drct).0f,%(max_sped).0f," % kimt[sid].data ).replace("'", "") )
+            of.write(("%(max_drctTxt)s,%(srad).0f,%(max_srad).0f,%(online)s,\n" % kimt[sid].data ).replace("'", "") )
+  
         except:
             print kimt[sid].data
-            #print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
+            print sys.excepthook(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2] )
             sys.exc_traceback = None
 
     of.close()
