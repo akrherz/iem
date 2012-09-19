@@ -121,7 +121,7 @@ def main():
     of = open(tmpfp, 'w')
     of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,")
     of.write("drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,")
-    of.write("drct_max,max_sped,max_drctTxt,max_srad,\n")
+    of.write("drct_max,max_sped,max_drctTxt,max_srad\n")
     for sid in kcci.keys():
         v = kcci[sid].data
         try:
@@ -166,7 +166,7 @@ def main():
 
     of.write("sid,ts,tmpf,dwpf,relh,feel,alti,altiTend,drctTxt,sped,sknt,")
     of.write("drct,20gu,gmph,gtim,pday,pmonth,tmpf_min,tmpf_max,max_sknt,")
-    of.write("drct_max,max_sped,max_drctTxt,srad,max_srad,online,\n")
+    of.write("drct_max,max_sped,max_drctTxt,srad,max_srad,online\n")
     for sid in kcci.keys():
         v = kcci[sid].data
         v['online'] = 1
