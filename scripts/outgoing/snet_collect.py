@@ -31,7 +31,6 @@ st.sts["SMSI4"]["plot_name"] = "Barnum"
 st.sts["STQI4"]["plot_name"] = "Tama"
 st.sts["SBOI4"]["plot_name"] = "Boone"
 
-
 def altiTxt(d):
     if d == "":
         return "S"
@@ -47,6 +46,10 @@ def computeOthers(d):
     for sid in d.keys():
         ob = d[sid].data
         ob["ticks"] = int(ob["ts"])
+        if ob.get('tmpf') is not None:
+            ob['tmpf'] = int(ob['tmpf'])
+        if ob.get('dwpf') is not None:
+            ob['dwpf'] = int(ob['dwpf'])
         if ob.get('tmpf') is not None and ob.get('dwpf') is not None:
             ob["relh"] = mesonet.relh(ob["tmpf"], ob["dwpf"])
         else:
