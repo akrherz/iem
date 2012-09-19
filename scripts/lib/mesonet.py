@@ -3,6 +3,29 @@ import math
 import os
 import subprocess
 
+txt2drct = {
+ 'N': 360,
+ 'North': 360,
+ 'NNE': 25,
+ 'NE': 45,
+ 'ENE': 70,
+ 'E': 90,
+ 'East': 90,
+ 'ESE': 115,
+ 'SE': 135,
+ 'SSE': 155,
+ 'S': 180,
+ 'South': 180,
+ 'SSW':  205,
+ 'SW':   225,
+ 'WSW':  250,
+ 'W':    270,
+ 'West': 270,
+ 'WNW': 295,
+ 'NW': 315,
+ 'NNW': 335}
+
+
 def bring_me_file(fp):
     """
     Tool to copy a file from the IEM to my local disk for testing purposes
