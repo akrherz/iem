@@ -16,7 +16,7 @@ if ($dir != ""){
  $puri='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
 }
 if (! file_exists($filename)){
-	$filename = sprintf('%s/images/nophoto.png', $rooturl);
+	$puri = sprintf('%s/images/nophoto.png', $rooturl);
 }
 
 $THISPAGE = "iem-sites";
