@@ -8,7 +8,7 @@ import os
 import iemdb
 import psycopg2.extras
 import subprocess
-IEM = iemdb.connect('iem')
+IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 SNET = iemdb.connect('snet')
 scursor = SNET.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -36,6 +36,13 @@ icursor.execute(sql)
  alti    | real                     | 
  gust    | smallint                 | 
 """
+
+def formatter(val, precision):
+    if val is None or type(val) == type('s'):
+        return 'M'
+    fmt = '%%.%sf' % (precision,)
+    return fmt % val
+
 out = open('/tmp/snet_dbinsert.sql', 'w')
 out.write("DELETE from t%s WHERE date(valid) = '%s';\n" % (
                     ts.strftime("%Y_%m"), ts.strftime("%Y-%m-%d") ))
@@ -45,7 +52,12 @@ for row in icursor:
     if (row['pmonth'] is None):
         row['pmonth'] = 0
     try:
-        s = "%(id)s\t%(valid)s\t%(tmpf).0f\t%(dwpf).0f\t%(drct).0f\t%(sknt)s\t%(pday)s\t%(pmonth)s\t%(srad)s\t%(relh)s\t%(pres)s\t%(gust).0f\n" % row
+        s = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (
+                row.get('id'), row.get('valid'), 
+                formatter(row.get('tmpf'), 0), formatter(row.get('dwpf'), 0),
+                formatter(row.get('drct'), 0), row.get('sknt'), row.get('pday'),
+                row.get('pmonth'), row.get('srad'), row.get('relh'),
+                row.get('pres'), formatter(row.get('gust'),0) )
     except:
         print 'Fail', row
     out.write(s.replace("None","null"))
