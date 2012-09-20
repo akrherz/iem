@@ -23,6 +23,8 @@ thres = mx.DateTime.now() - mx.DateTime.RelativeDateTime(hours=1)
 obs = access.get_network("AWOS", IEM)
 actions = 0
 for sid in obs.keys():
+    if sid in ['CWI', 'FOD']:
+        continue
     ob = obs[sid]
     # back online!
     if ob.data['ts'] > thres and offline.has_key(sid):
