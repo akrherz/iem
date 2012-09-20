@@ -46,7 +46,7 @@ def formatter(val, precision):
 out = open('/tmp/snet_dbinsert.sql', 'w')
 out.write("DELETE from t%s WHERE date(valid) = '%s';\n" % (
                     ts.strftime("%Y_%m"), ts.strftime("%Y-%m-%d") ))
-out.write("COPY t%s FROM stdin WITH NULL as 'None';\n" % (ts.strftime("%Y_%m"),) )
+out.write("COPY t%s FROM stdin WITH NULL 'None';\n" % (ts.strftime("%Y_%m"),) )
 i = 0
 for row in icursor:
     if (row['pmonth'] is None):
@@ -62,7 +62,7 @@ for row in icursor:
         print 'Fail', row
     out.write(s)
     if i > 0 and i % 1000 == 0:
-        out.write("\.\nCOPY t%s FROM stdin;\n" % (ts.strftime("%Y_%m"),) )
+        out.write("\.\nCOPY t%s FROM stdin WITH NULL 'None';\n" % (ts.strftime("%Y_%m"),) )
     i += 1
 out.write("\.\n")
 out.close()
