@@ -9,16 +9,17 @@ import mx.DateTime
 import sys
 # Run every 3 minutes
 now = mx.DateTime.now()
-if now.minute % 4 != 0:
+if now.minute % 4 != 0 and len(sys.argv) < 2:
     sys.exit(0)
 
 import urllib2
 import csv
 import access
-import pg
 import secret
 import subprocess
-accessdb = pg.connect('iem', 'iemdb')
+import iemdb
+IEM = iemdb.connect('iem')
+icursor = IEM.cursor()
 
 csv = open('/tmp/ctre.txt', 'w')
 
@@ -49,18 +50,23 @@ sknt = float(d['WS_mph_S_WVT']) / 1.15
 iem.data['sknt'] = sknt
 gust = float(d['WS_mph_Max']) / 1.15
 iem.data['gust'] = gust
-iem.updateDatabase( accessdb )
+iem.updateDatabase( cursor=icursor )
 
 csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RSAI4', 
             ts1.gmtime().strftime("%Y/%m/%d %H:%M:%S"),
       drct, sknt, gust) )
 
 
-# Get Saylorville
-req = urllib2.Request("ftp://%s:%s@129.186.224.167/Red Rock_Table3Min_current.dat" % (secret.CTRE_FTPUSER,
+# Red Rock
+try:
+    req = urllib2.Request("ftp://%s:%s@129.186.224.167/Red Rock_Table3Min_current.dat" % (secret.CTRE_FTPUSER,
                                                         secret.CTRE_FTPPASS))
-#try:
-data = urllib2.urlopen(req).readlines()
+    data = urllib2.urlopen(req, timeout=30).readlines()
+except:
+    if now.minute % 15 == 0:
+        print 'Download CTRE Bridge Data Failed!!!'
+    sys.exit(0)
+
 if len(data) < 2:
     sys.exit(0)
 #except:
@@ -81,7 +87,7 @@ sknt = float(d['WS_mph_S_WVT']) / 1.15
 iem.data['sknt'] = sknt
 gust = float(d['WS_mph_Max']) / 1.15
 iem.data['gust'] = gust
-iem.updateDatabase( accessdb )
+iem.updateDatabase( cursor=icursor)
 
 csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RLRI4', 
             ts2.gmtime().strftime("%Y/%m/%d %H:%M:%S"),
@@ -94,3 +100,7 @@ if ((mx.DateTime.now() - ts1).seconds > 3600. and
    (mx.DateTime.now() - ts2).seconds > 3600.):
     sys.exit()
 subprocess.call( cmd, shell=True )
+
+icursor.close()
+IEM.commit()
+IEM.close()
