@@ -39,7 +39,7 @@ icursor.execute(sql)
 
 def formatter(val, precision):
     if val is None or type(val) == type('s'):
-        return 'M'
+        return 'None'
     fmt = '%%.%sf' % (precision,)
     return fmt % val
 
