@@ -46,6 +46,7 @@ def computeOthers(d):
     for sid in d.keys():
         ob = d[sid].data
         ob["ticks"] = int(ob["ts"])
+        ob["sped"] = ob["sknt"] * 1.17
         if ob.get('tmpf') is not None and ob.get('dwpf') is not None:
             ob["relh"] = mesonet.relh(ob["tmpf"], ob["dwpf"])
         else:
@@ -60,7 +61,7 @@ def computeOthers(d):
             ob['feel'] = None
         if ob['feel'] == 'M':
             ob['feel'] = None
-        ob["sped"] = ob["sknt"] * 1.17
+
         ob["altiTend"] = altiTxt(ob["alti_15m"])
         ob["drctTxt"] = mesonet.drct2dirTxt(ob["drct"])
         if ob["max_drct"] is None:
