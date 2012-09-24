@@ -971,8 +971,11 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
         if row[2] > maxvalid:
             maxvalid = row[2]
         if row[0] is None or row[0] < 0 or row[1] is None or row[1] < 0:
-            sped[i] =  0 
-            drct[i] = 0 
+            sped[i] = 0 
+            drct[i] = 0
+        elif row[0] == 0 or row[1] == 0:
+            sped[i] = 0
+            drct[i] = 0
         else:
             sped[i] =  row[0] * windunits[units]['dbmul'] 
             drct[i] =  row[1] 
