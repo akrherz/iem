@@ -52,6 +52,11 @@ if form["network"].value in ('KCCI','KELO','KIMT'):
 if form["network"].value in ('IA_RWIS'):
     database = 'rwis'
 
+try:
+    nsector = int(form['nsector'].value)
+except:
+    nsector = 36
+
 import iemplot
 iemplot.windrose(form["station"].value, database=database,sts=sts, ets=ets, 
-                 months=months, hours=hours, units=units)
+                 months=months, hours=hours, units=units, nsector=nsector)
