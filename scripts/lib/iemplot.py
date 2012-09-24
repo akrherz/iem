@@ -246,6 +246,7 @@ def simple_valplot(lons, lats, vals, cfg):
     return tmpfp
 
     vpbox(wks)
+    
 def simple_grid_fill(xaxis, yaxis, grid, cfg):
     """
     Generate a simple plot, but we already have the data!
@@ -262,6 +263,8 @@ def simple_grid_fill(xaxis, yaxis, grid, cfg):
         res = conus()
     elif cfg.get("_midwest", False):
         res = midwest()
+    elif cfg.get("_louisiana", False):
+        res = louisiana2()
     else:
         res = iowa2()
 
@@ -296,9 +299,22 @@ def simple_grid_fill(xaxis, yaxis, grid, cfg):
             plres.gsFillColor = -1
             Ngl.add_polygon(wks, contour, lo, la, plres)
 
+
+
+
+    if cfg.get("_showvalues", False):
+        txres              = Ngl.Resources()
+        txres.txFontHeightF = 0.012
+        (rows, cols) = numpy.shape(xaxis)
+        for row in range(rows):
+            for col in range(cols):
+                if xaxis[row,col] > res.mpMinLonF and xaxis[row,col] < res.mpMaxLonF and yaxis[row,col] > res.mpMinLatF and yaxis[row,col] < res.mpMaxLatF:
+                    Ngl.add_text(wks, contour, cfg["_format"] % grid[row, col], 
+                                 xaxis[row, col], yaxis[row, col], txres)
     Ngl.draw(contour)
 
-    watermark(wks)
+    if cfg.get('_watermark', True):
+        watermark(wks)
     manual_title(wks, cfg)
     Ngl.frame(wks)
     del wks
@@ -510,6 +526,44 @@ def iowa2():
 
     return res
 
+def louisiana2():
+    res = louisiana()
+    #_____________ LABEL BAR STUFF __________________________
+    res.lbAutoManage       = False           # Let me drive!
+    res.lbOrientation      = "Vertical"      # Draw it vertically
+    res.lbTitleString      = "lbTitleString" # Default legend
+    res.lbTitlePosition    = "Bottom"          # Place title on the left
+    res.lbTitleOn          = True            # We want a title, please
+    #res.lbTitleAngleF      = 90.0            # Rotate the title?
+    #res.lbTitleDirection   = "Across"        # Make it appear rotated?
+    res.lbPerimOn          = False            # Include a box aroundit
+    res.lbPerimThicknessF  = 1.0             # Thicker line?
+    #res.lbBoxMinorExtentF  = 0.15             # Narrower boxes
+    res.lbTitleFontHeightF = 0.012
+    res.lbLabelFontHeightF = 0.012
+    res.lbRightMarginF    = 0.01
+    res.lbLeftMarginF       = -0.02
+    res.lbTitleExtentF     = 0.1
+
+    #______________ Contour Defaults _______________________
+    res.cnFillOn         = True    # filled contours
+    res.cnInfoLabelOn    = False   # No information label
+    res.cnLineLabelsOn   = False   # No line labels
+    res.cnLinesOn        = False   # No contour lines
+    res.cnFillDrawOrder  = "Predraw"       # Draw contour first!
+
+    res.pmLabelBarHeightF = 0.5
+    res.pmLabelBarWidthF = 0.05
+    res.pmLabelBarKeepAspect = False
+    res.pmLabelBarSide = "Right"
+
+    res.mpFillOn                = True            # Draw map for sure
+    res.mpFillAreaSpecifiers    = ["Conterminous US",]  # Draw the US
+    res.mpSpecifiedFillColors   = [0,]            # Draw in white
+    res.mpAreaMaskingOn         = True            # Mask by Iowa
+    res.mpMaskAreaSpecifiers    = ["Conterminous US : Louisiana",]
+
+    return res
 
 def iowa():
     """ Return Ngl resources for a standard Iowa plot """
@@ -557,6 +611,54 @@ def iowa():
     res.mpShapeMode = "FreeAspect"
 
     return res
+
+def louisiana():
+    """ Return Ngl resources for a standard Louisiana plot """
+
+    res = Ngl.Resources()
+    res.nglFrame              = False        # and this
+    res.nglDraw               = False        # Defaults this
+
+    res.pmTickMarkDisplayMode = "Never"      # Turn off annoying ticks
+
+    # Setup the viewport
+    """
+ 0.1,0.8               0.9,0.8
+    x                     x
+        width : 0.8
+        height: 0.6
+ 0.1,0.2               0.9,0.2
+    x                     x
+    """
+    res.nglMaximize         = False      # Prevent funky things
+    res.vpWidthF            = 0.8       # Default width of map?
+    res.vpHeightF           = 0.6        # Go vertical
+    res.nglPaperOrientation = "landscape" # smile
+    res.vpXF                = 0.1        # Make Math easier
+    res.vpYF                = 0.8        # 
+
+    #____________ MAP STUFF ______________________
+    res.mpProjection = "LambertEqualArea"   # Display projection
+    res.mpCenterLonF = -93.5                # Central Longitude
+    res.mpCenterLatF = 30.0                 # Central Latitude
+    res.mpLimitMode  = "LatLon"             # Display bounds
+    xmin, ymin, xmax, ymax = [-95.0, 28.0, -88.0, 33.5]
+    res.mpMinLonF    = xmin
+    res.mpMaxLonF    = xmax
+    res.mpMinLatF    = ymin
+    res.mpMaxLatF    = ymax
+    res.mpPerimOn    = False               # Draw Border around Map
+    res.mpDataBaseVersion       = "MediumRes"     # Don't need hires coast
+    res.mpDataSetName           = "Earth..2"      # includes counties
+    res.mpGridAndLimbOn         = False           # Annoying
+    res.mpUSStateLineThicknessF = 3               # Outline States
+    res.mpOutlineOn             = True           # Draw map for sure
+    res.mpOutlineBoundarySets   = "NoBoundaries" # What not to draw
+    res.mpOutlineSpecifiers     = ["Conterminous US : Louisiana : Counties",]
+    res.mpShapeMode = "FreeAspect"
+
+    return res
+
 
 def conus():
     """ Return Ngl resources for a standard MidWest plot """
@@ -809,7 +911,7 @@ def postprocess(tmpfp, pqstr, rotate="", thumb=False,
 
 def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     hours=numpy.arange(0,24), sts=datetime.datetime(1900,1,1),
-    ets=datetime.datetime(2050,1,1), units="mph"):
+    ets=datetime.datetime(2050,1,1), units="mph", nsector=36):
     """
     Create a standard windrose plot that we can all happily use
     """
@@ -895,7 +997,7 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     ax = WindroseAxes(fig, rect, axisbg='w')
     fig.add_axes(ax)
     ax.bar(drct, sped, normed=True, bins=windunits[units]['bins'], opening=0.8, 
-           edgecolor='white')
+           edgecolor='white', nsector=nsector)
     handles = []
     for p in ax.patches_list:
         color = p.get_facecolor()
