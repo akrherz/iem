@@ -31,10 +31,10 @@ function database_failure($DBKEY)
 	echo sprintf("<div class='warning'>Unable to contact database: %s</div>", $DBKEY);
 }
 
-function iemdb($DBKEY)
+function iemdb($DBKEY, $force_new=0)
 {
   global $_DATABASES;
-  $db = pg_connect( $_DATABASES[$DBKEY] ) or database_failure($DBKEY);
+  $db = pg_connect( $_DATABASES[$DBKEY] , $force_new) or database_failure($DBKEY);
   return $db;
 }
 ?>
