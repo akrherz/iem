@@ -5,6 +5,7 @@ import network
 nt = network.Table(("KCCI", "KIMT", "KELO"))
 import iemdb
 import os
+import time
 
 # Write PID
 o = open('data_monitor.pid', 'w')
