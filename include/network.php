@@ -8,9 +8,11 @@ class NetworkTable {
   function NetworkTable($a)
   {
     $this->table = Array();
-    $this->dbconn = iemdb("mesosite");
-    $rs = pg_prepare($this->dbconn, "SELECT", "SELECT *, x(geom) as lon, y(geom) as lat from stations WHERE network = $1 ORDER by name ASC");
-    $rs = pg_prepare($this->dbconn, "SELECTST", "SELECT *, x(geom) as lon, y(geom) as lat from stations WHERE id = $1");
+    $this->dbconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW);
+    $rs = pg_prepare($this->dbconn, "SELECT", "SELECT *, x(geom) as lon, 
+    	y(geom) as lat from stations WHERE network = $1 ORDER by name ASC");
+    $rs = pg_prepare($this->dbconn, "SELECTST", "SELECT *, x(geom) as lon, 
+    	y(geom) as lat from stations WHERE id = $1");
     if (is_string($a)) $this->load_network($a);
     else if (is_array($a)) 
     {
