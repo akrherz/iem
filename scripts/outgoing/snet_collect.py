@@ -97,9 +97,9 @@ def get_precip_totals(obs, network):
         for row in icursor:
             obs[ row["id"]].data["p%sday" % (dy,)] = row["rain"]
 
-def formatter(val, precision):
+def formatter(val, precision, mval='M'):
     if val is None or type(val) == type('s'):
-        return 'M'
+        return mval
     fmt = '%%.%sf' % (precision,)
     return fmt % val
 
@@ -127,32 +127,32 @@ def main():
         v = kcci[sid].data
         try:
             s = "%s,%s,%s,%s,%s," % (v.get('id'),
-                            v.get('ticks'), formatter(v.get('tmpf'),0), 
-                            formatter(v.get('dwpf'),0),
-                            formatter(v.get('relh'),0) )
+                            v.get('ticks'), formatter(v.get('tmpf'),0, -99), 
+                            formatter(v.get('dwpf'),0, -99),
+                            formatter(v.get('relh'),0, -99) )
             s += "%s,%s,%s,%s," % (
-                        formatter(v.get('feel'), 0),
-                        formatter(v.get('pres'), 2),
+                        formatter(v.get('feel'), 0, -99),
+                        formatter(v.get('pres'), 2, -99),
                         v.get('altiTend'), v.get('drctTxt'))
             s += "%s,%s,%s,%s," % (
-                        formatter(v.get('sped'), 0),
-                        formatter(v.get('sknt'), 0),
-                        formatter(v.get('drct'), 0),
-                        formatter(v.get('20gu'), 0))
+                        formatter(v.get('sped'), 0, -99),
+                        formatter(v.get('sknt'), 0, -99),
+                        formatter(v.get('drct'), 0, -99),
+                        formatter(v.get('20gu'), 0, -99))
             s += "%s,%s,%s,%s," % (
-                        formatter(v.get('gmph'), 0),
+                        formatter(v.get('gmph'), 0, -99),
                         v.get('gtim'),
-                        formatter(v.get('pday'), 2),
-                        formatter(v.get('pmonth'), 2))
+                        formatter(v.get('pday'), 2, -99),
+                        formatter(v.get('pmonth'), 2, -99))
             s += "%s,%s,%s," % (
-                        formatter(v.get('sknt'), 0),
-                        formatter(v.get('drct'), 0),
-                        formatter(v.get('20gu'), 0))
+                        formatter(v.get('sknt'), 0, -99),
+                        formatter(v.get('drct'), 0, -99),
+                        formatter(v.get('20gu'), 0, -99))
             s += "%s,%s,%s,%s\n" % (
-                        formatter(v.get('max_drct'), 0),
-                        formatter(v.get('max_sped'), 0),
+                        formatter(v.get('max_drct'), 0, -99),
+                        formatter(v.get('max_sped'), 0, -99),
                         v.get('max_drctTxt'),
-                        formatter(v.get('max_srad'), 0))
+                        formatter(v.get('max_srad'), 0, -99))
             of.write(s.replace("'", ""))
         except:
             print kcci[sid]
