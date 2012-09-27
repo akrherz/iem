@@ -16,7 +16,7 @@ import mesonet
 #    tot += grib.variables['APCP_P8_L1_GLC0_acc3h'][:]
 #  grib.close()
 
-grib = Nio.open_file('nam.t00z.conusnest.hiresf21.tm00.grib2', 'r')
+grib = Nio.open_file('nam.t00z.conusnest.hiresf60.tm00.grib2', 'r')
 lats = grib.variables['gridlat_0'][:]
 lons = grib.variables['gridlon_0'][:]
 #CAPE = grib.variables['CAPE_P0_L1_GLC0'][:]
@@ -33,14 +33,14 @@ ts = ts0 + mx.DateTime.RelativeDateTime(hours=RH.forecast_time[0])
 
 cfg = {
  'cnLevelSelectionMode' : 'ManualLevels',
- 'cnLevelSpacingF'      : 2.,
- 'cnMinLevelValF'       : 92,
- 'cnMaxLevelValF'       : 112.0,
+ 'cnLevelSpacingF'      : 1.0,
+ 'cnMinLevelValF'       : 18,
+ 'cnMaxLevelValF'       : 45,
  'nglSpreadColorEnd': -1,
  'nglSpreadColorStart': 2,
 # 'cnFillMode'		: 'CellFill',
  'wkColorMap': 'WhViBlGrYeOrRe',
- '_title'             : "NAM 2 meter AGL Air Temperature",
+ '_title'             : "NAM 2 meter AGL Air Temperature for Sunday Morning",
  '_valid'             : "%s Forecast for %s" % (
       ts0.strftime("%-I %p %-d %B %Y"), ts.strftime("%-I %p %-d %B %Y")),
  'lbTitleString'      : "F",

@@ -24,7 +24,7 @@ august = row[0]
 diff = []
 ccursor.execute("""
  SELECT year, month, avg((high+low)/2.0) from alldata_ia where 
- station = 'IA0000' and year > 2006
+ station = 'IA0000' and year > 2006 and day < '2012-08-16'
  GROUP by year, month ORDER by year, month ASC
 """)
 for row in ccursor:
@@ -50,11 +50,11 @@ for i in range(0, len(diff),6):
   xticklabels.append( ts.strftime(fmt) )
   xticks.append( i )
 
-bars = ax.bar(numpy.arange(0, len(diff))-0.4, diff, fc='b', ec='b')
+bars = ax.bar(numpy.arange(0, len(diff))-0.4, diff, fc='r', ec='r')
 for bar in bars:
   if bar.get_xy()[1] < 0:
-    bar.set_facecolor('r')
-    bar.set_edgecolor('r')
+    bar.set_facecolor('b')
+    bar.set_edgecolor('b')
 ax.set_ylabel("Departure $^{\circ}\mathrm{F}$")
 ax.set_xlabel("* Aug 2012 total thru 15 Aug")
 ax.grid(True)

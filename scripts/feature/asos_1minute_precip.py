@@ -13,21 +13,24 @@ sgust = []
 sprec = numpy.zeros( (3000,), 'f')
 
 acursor.execute("""
- SELECT extract(epoch from (valid at time zone 'EDT')), tmpf, dwpf, drct, 
+ SELECT extract(epoch from (valid at time zone 'CDT')), tmpf, dwpf, drct, 
   sknt, pres1, gust_sknt, precip,
-  valid at time zone 'CDT' from t2012_1minute WHERE station = 'DVN'
- and valid BETWEEN '2012-08-04 00:00-05' and '2012-08-04 23:59-05' 
+  valid at time zone 'CDT' from t2012_1minute WHERE station = 'LWD'
+ and valid BETWEEN '2012-08-25 00:00-05' and '2012-08-26 23:59-05' 
  ORDER by valid ASC
 """)
+tot = 0
 for row in acursor:
         #sgust.append( row[6] * 1.15)
         offset = row[8].hour * 60 + row[8].minute
+        if row[8].day == 26:
+            offset += 1440
         if row[7] > 0:
           print offset, row[8], row[7]
-        #if row[8].day == 20:
-        #    offset += 1440
+          tot += row[7]
         sprec[offset] = float(row[7] or 0) 
         
+print tot
 
 acc = numpy.zeros( (3000,), 'f')
 rate15 = numpy.zeros( (3000,), 'f')
@@ -37,7 +40,7 @@ for i in range(3000):
     acc[i] = acc[i-1] + sprec[i]
     rate15[i] = numpy.sum(sprec[i-14:i+1]) * 4
     rate60[i] = numpy.sum(sprec[i-59:i+1])
-    svalid[i] =  mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
+    svalid[i] =  mx.DateTime.DateTime(2012,8,25, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 
 print acc[818:843]
 #print rate60[818:912]
@@ -46,9 +49,9 @@ print acc[818:843]
 #    print mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 
 # Figure out ticks
-sts = mx.DateTime.DateTime(2012,8,4, 13, 30)
-ets = mx.DateTime.DateTime(2012,8,4, 14, 30)
-interval = mx.DateTime.RelativeDateTime(minutes=10)
+sts = mx.DateTime.DateTime(2012,8,25, 13, 30)
+ets = mx.DateTime.DateTime(2012,8,26, 14, 30)
+interval = mx.DateTime.RelativeDateTime(minutes=240)
 now = sts
 xticks = []
 xlabels = []
@@ -86,8 +89,8 @@ ax.grid(True)
 ax.set_xlim(min(xticks), max(xticks))
 ax.legend(loc=2, prop=prop, ncol=2)
 ax.set_ylim(0,12)
-ax.set_xlabel("4 August 2012 (CDT)")
-ax.set_title("4 August 2012 Davenport, IA (KDVN) One Minute Rainfall\n2.38 inches between 1:37 and 2:03 PM")
+ax.set_xlabel("25-26 August 2012 (CDT)")
+ax.set_title("25-26 August 2012 Lamoni, IA (KLWD) One Minute Rainfall\n8.07 inches total")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
