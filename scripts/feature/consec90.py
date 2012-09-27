@@ -7,21 +7,21 @@ ccursor = COOP.cursor()
 
 
 ccursor.execute("""SELECT year, day, high, low, precip from alldata_ia 
-  WHERe station = 'IA2203' and day > '1880-01-01'
+  WHERe station = 'IA8706' and day > '1880-01-01'
   ORDER by day ASC""")
 
 running = 0
 biggest = numpy.zeros( (2013-1880), 'f')
 for row in ccursor:
   yr = int(row[0])
-  if row[2] < 97:
+  if row[2] < 90:
     if running > biggest[yr-1880]:
       biggest[yr-1880] = running
     running = 0
   else:
     running += 1
 #biggest[2012-1880] += 1
-
+print biggest[1921-1880]
 
 import matplotlib.pyplot as plt
 

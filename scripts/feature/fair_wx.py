@@ -140,8 +140,9 @@ FAIRS = [
 import numpy
 import numpy.ma
 
-#avgT = numpy.ma.zeros( (2012-1880) )
-precip = numpy.ma.zeros( (2012-1880) )
+avgH = numpy.ma.zeros( (2013-1880) )
+avgL = numpy.ma.zeros( (2013-1880) )
+precip = numpy.ma.zeros( (2013-1880) )
 precip[:] = -0.000000001
 #heatcnt = numpy.ma.zeros( (2012-1880) )
 #heatcnt[:] = -1
@@ -157,97 +158,77 @@ for sts, ets in FAIRS:
   #if sts.year < 1933:
   #  continue
   ccursor.execute("""
-  SELECT day, precip from alldata where stationid = 'ia2203' and
-  day >= '%s' and day <= '%s' ORDER by day ASC
+  SELECT avg(high), avg(low) from alldata_ia where station = 'IA2203' and
+  day >= '%s' and day <= '%s' 
   """ % (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
   i = 0
-  for row in ccursor:
-    if row[1] > 0.04:
-      hits[i] += 1
-    if row[1] > 0.00:
-      total[i] += row[1]
-      rains[i] += 1
-      precip[sts.year-1880] += row[1]
-    else:
-      precip[sts.year-1880] += 0.001
-    cnts[i] += 1
-    i += 1
-  #if row[0] > 50:
-  #  avgT[sts.year-1880] = row[0]
+  row = ccursor.fetchone()
+  avgH[sts.year-1880] = row[0]
+  avgL[sts.year-1880] = row[1]
 
   # Heat index
-  if sts.year < 1933:
-    continue
-  acursor.execute("""
-   SELECT date(valid) as d, max(dwpf), min(dwpf) from t%s 
-   WHERE station = 'DSM' and tmpf > 0 and dwpf > 0 and 
-   valid BETWEEN '%s 00:00' and '%s 23:59' GROUP by d ORDER by d ASC
-  """ % (sts.year, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
-  keys = {}
-  cnt = 0
-  data = ['M']*12
-  data2 = ['M']*12
-  cnt = 0
-  for row in acursor:
-    data[cnt] = str(row[1])
-    data2[cnt] = str(row[2])
-    cnt += 1
+#  if sts.year < 1933:
+#    continue
+#  acursor.execute("""
+#   SELECT date(valid) as d, max(dwpf), min(dwpf) from t%s 
+#   WHERE station = 'DSM' and tmpf > 0 and dwpf > 0 and 
+#   valid BETWEEN '%s 00:00' and '%s 23:59' GROUP by d ORDER by d ASC
+#  """ % (sts.year, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
+#  keys = {}
+#  cnt = 0
+#  data = ['M']*12
+#  data2 = ['M']*12
+#  cnt = 0
+#  for row in acursor:
+#    data[cnt] = str(row[1])
+#    data2[cnt] = str(row[2])
+#    cnt += 1
     #h = mesonet.heatidx(row[1], mesonet.relh(row[1], row[2]))
     #if h >= 90:
     #  keys[ row[0].strftime("%Y%m%d%H") ] = 1
  
-  dwpfs.write("%s,%s,%s\n" % (`sts.year`, ",".join(data), ",".join(data2)))
+#  dwpfs.write("%s,%s,%s\n" % (`sts.year`, ",".join(data), ",".join(data2)))
   #if cnt > 50:
   #  heatcnt[sts.year-1880] = len(keys.keys())
 
-dwpfs.close()
+#dwpfs.close()
 
-decades = numpy.ma.zeros( (2012-1880) )
+#decades = numpy.ma.zeros( (2012-1880) )
 
-for decade in range(1880,2020,10):
-  avg = numpy.ma.average( precip[decade-1880:decade-1880+10] )
-  decades[decade-1880:decade-1880+10] = avg
+#for decade in range(1880,2020,10):
+#  avg = numpy.ma.average( precip[decade-1880:decade-1880+10] )
+#  decades[decade-1880:decade-1880+10] = avg
 
 #avgT[2011-1880] = 88
-#avgT.mask = numpy.where(avgT == 0, True, False)
+avgH.mask = numpy.where(avgH == 0, True, False)
+avgL.mask = numpy.where(avgL == 0, True, False)
 #heatcnt.mask = numpy.where(heatcnt == -1, True, False)
-avgP = numpy.ma.average(precip)
-precip = numpy.where(precip < 0, 9, precip)
+avgHH = numpy.ma.average(avgH)
+avgLL = numpy.ma.average(avgL)
+#precip = numpy.where(precip < 0, 9, precip)
 
 import matplotlib.pyplot as plt
 
-fig = plt.figure()
-ax = fig.add_subplot(211)
-bars = ax.bar(numpy.arange(1880,2012)-0.4, precip, edgecolor='r', facecolor='r')
+(fig, ax) = plt.subplots(2,1, sharex=True)
+bars = ax[0].bar(numpy.arange(1880,2013)-0.4, avgH, edgecolor='r', facecolor='r')
 for bar in bars:
-  if bar.get_height() == 9:
-    bar.set_facecolor("#EEEEEE")
-    bar.set_edgecolor("#EEEEEE")
-  elif bar.get_height() > avgP:
-    bar.set_facecolor("b")
-    bar.set_edgecolor("b")
-ax.plot(numpy.arange(1880,2012),decades, color='black', label='Decade Average')
-bars[-1].set_facecolor('blue')
-bars[-1].set_edgecolor('blue')
-ax.set_xlim(1892.5,2011.5)
-#ax.set_ylim(numpy.ma.min(avgT) - 3, numpy.ma.max(avgT) + 3)
-ax.grid(True)
-ax.legend(loc=2)
-ax.set_title("Iowa State Fair Precipitation")
-ax.set_ylabel("Total Precipitation [inch]")
-ax.set_xlabel("*2011 data thru 17 August")
+    if bar.get_height() < avgHH:
+        bar.set_facecolor('b')
+        bar.set_edgecolor('b')
+ax[0].set_xlim(1879.5,2012.5)
+ax[0].set_ylim(70,100)
+ax[0].grid(True)
+ax[0].set_title("Iowa State Fair Average Daily Temps (Des Moines wx site)")
+ax[0].set_ylabel("High Temperature $^{\circ}\mathrm{F}$")
 
-ax2 = fig.add_subplot(212)
-ax2.bar(numpy.arange(1,13)-0.4, hits / cnts * 100. )
-ax2.set_ylabel("Frequency of 0.05+ inches [%]")
-#ax2.bar(numpy.arange(1880,2012)-0.4, heatcnt, edgecolor='r', facecolor='r')
-ax2.set_xlim(0.5,11.5)
-ax2.set_xticks( numpy.arange(1,12) )
-ax2.set_xticklabels( numpy.arange(1,12) )
-#ax2.set_yticks( numpy.arange(0,5*24,24))
-ax2.grid(True)
-#ax2.set_ylabel("Hours with\n Heat Index over 90")
-ax2.set_xlabel("Day of Fair")
+bars = ax[1].bar(numpy.arange(1880,2013)-0.4, avgL, edgecolor='r', facecolor='r')
+for bar in bars:
+    if bar.get_height() < avgLL:
+        bar.set_facecolor('b')
+        bar.set_edgecolor('b')
+ax[1].set_ylim(50,75)
+ax[1].grid(True)
+ax[1].set_ylabel("Low Temperature $^{\circ}\mathrm{F}$")
 
 fig.savefig('test.ps')
 import iemplot

@@ -7,50 +7,47 @@ import iemplot
 import mx.DateTime
 now = mx.DateTime.now()
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-iem = i['iem']
-coop = i['coop']
-
+import iemdb
+IEM = iemdb.connect("iem", bypass=True)
+COOP = iemdb.connect("coop", bypass=True)
+icursor = IEM.cursor()
+ccursor = COOP.cursor()
 
 # Compute normal from the climate database
 sql = """
-SELECT c.name, c.network, station, min(max_tmpf), x(s.geom) as lon, y(s.geom) as lat, c.climate_site from summary_2011 s, stations c where s.station = c.id 
-and s.day in ('2011-06-06','2011-06-07','2011-06-08') and s.network in ('IA_ASOS', 'AWOS') and max_tmpf > 50 and c.network = s.network
-GROUP by c.name, c.network, station, lat, lon, c.climate_site ORDER by station  ASC
+ SELECT c.name, c.network, c.id, max_tmpf - min_tmpf, x(c.geom) as lon, 
+ y(c.geom) as lat, c.climate_site from summary_2012 s, stations c where s.iemid = c.iemid
+ and s.day = '2012-09-24' and c.network in ('IA_ASOS', 'AWOS') 
+ ORDER by id ASC
 """
 
 lats = []
 lons = []
 vals = []
-rs = iem.query(sql).dictresult()
-for i in range(len(rs)):
-    station = rs[i]['station']
-    max_tmpf = rs[i]['min']
-    cid = rs[i]['climate_site']
-    rs2 = coop.query("""
-    SELECT year, high from alldata where stationid = '%s' and day < '2011-06-06' ORDER by day DESC
-    """ % (cid.lower(),)).dictresult()
+icursor.execute( sql )
+for row in icursor:
+    station = row[2]
+    ts = mx.DateTime.strptime('20120924', "%Y%m%d")
+    max_tmpf = row[3]
+    cid = row[6]
+    ccursor.execute("""
+    SELECT max(day) from alldata_ia where station = '%s' 
+    and high - low >= %.0f
+    """ % (cid, max_tmpf))
     running = 0
-    for j in range(len(rs2)):
-      if rs2[j]['high'] >= max_tmpf:
-        running += 1
-      else:
-        running = 0
-      if running > 2:
-        vals.append( rs2[j]['year'] )
-        break
-
-    lats.append( rs[i]['lat'] + (0.0001 * i))
-    lons.append( rs[i]['lon'] )
-    print '%5s %4s %-20s %3i  %s' % (station, rs[i]['network'][-4:], rs[i]['name'], max_tmpf, vals[-1])
+    row2 = ccursor.fetchone()
+    ts2 = mx.DateTime.strptime(row2[0].strftime("%Y%m%d"), "%Y%m%d")
+    vals.append( "%.0f~C~%s" % (max_tmpf, ts2.year,) )
+    lats.append( row[5] )
+    lons.append( row[4] )
+    print '%5s %s' % (station, max_tmpf)
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "Year of Previous Date as Warm as 6 June 2011 (High Temperature)",
- #'_valid'             : "%s" % ( now.strftime("%d %b %Y"), ),
+ '_title'             : "Amount/Year of Previous Date with as Large Hi-Lo Diff",
+ '_valid'             : "since temperature change on 24 September 2012, values in F",
 #'lbTitleString'      : "[days]",
  '_showvalues'        : True,
  '_format'            : '%s',

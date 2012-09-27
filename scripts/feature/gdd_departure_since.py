@@ -21,6 +21,7 @@ import mx.DateTime
 jday = int(mx.DateTime.now().strftime("%j")) - 1
 x = []
 y = []
+maxy = []
 xticks = []
 xticklabels = []
 for i in range(0,jday+1):
@@ -34,13 +35,21 @@ for i in range(0,jday+1):
         xticks.append( i )
         xticklabels.append( ts.strftime("%-d %b"))
 
+    # Compute max accumulation
+    ccursor.execute("""SELECT year, sum(gdd50(high,low)) from alldata_ia 
+    where station = 'IA0200' and sday BETWEEN '%s' and '0905' 
+    GROUP by year ORDER by sum DESC LIMIT 1
+    """ % (ts.strftime("%m%d"),))
+    row = ccursor.fetchone()
+    maxy.append( float(row[1]) - climate_total)
+
 import numpy
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots(1,1)
 ax2 = ax.twinx() 
-ax2.set_ylabel("GDD Departure [Climatology of 15 May days]")
+ax2.set_ylabel("GDD Departure [Climatology of 15 Jul days]")
 def Tc(Tf):
-    return Tf / 11.6
+    return Tf / 23.1
 
 def update_ax2(ax1):
    y1, y2 = ax1.get_ylim()
@@ -51,13 +60,16 @@ def update_ax2(ax1):
 ax.callbacks.connect("ylim_changed", update_ax2)
 
 ax.bar(numpy.array(x)-0.5,y, fc='r', ec='r')
+ax.plot(numpy.array(x),maxy, color='k', label='Maximum Departure')
+
 ax.set_xticks(xticks)
 ax.set_xlim(-0.5,max(x)+0.5)
 ax.set_xticklabels( xticklabels )
-ax.set_xlabel("Period from 14 May back to date")
+ax.set_xlabel("Period from 5 Sep back to date")
 ax.set_ylabel("Growing Degree Days Departure (base=50)")
-ax.set_title("2012 Ames Growing Degree Day Departure (base=50)\nfrom climatology over periods prior to today")
+ax.set_title("2012 Ames Growing Degree Day Departure (base=50)\nfrom climatology over periods prior to today, max 1893-2012")
 ax.grid(True)
+ax.legend(loc='best')
 
 fig.savefig('test.ps')
 import iemplot
