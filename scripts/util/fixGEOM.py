@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 #  Reload a network into the current IEMAccess table
 #  Daryl Herzmann 18 Jun 2003
 # 19 Jun 2003	Also update the name

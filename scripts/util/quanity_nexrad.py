@@ -15,7 +15,7 @@ while (now < ets):
   fp = "/mesonet/ARCHIVE/data/%s/%02i/%02i/comprad/n0r_%s.png" % (now.year, now.month, now.day, now.strftime("%Y%m%d_%H%M") ) 
   if (not os.path.isfile(fp)):
     print 'MISS', fp
-    cmd = "/mesonet/python/bin/python ../dl/radar_composite.py %s" % (
+    cmd = "python ../dl/radar_composite.py %s" % (
          now.strftime("%Y %m %d %H %M") )
     os.system( cmd )
     cnt += 1
