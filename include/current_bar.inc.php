@@ -10,7 +10,7 @@
     "COOP" => Array("url" => "$rooturl/COOP/current.phtml"),
     "DCP" => Array("url" => "$rooturl/DCP/current.phtml"),
     "SchoolNet" => Array("url" => "$rooturl/schoolnet/current.phtml"),
-    "OT" => Array("url" => "$rooturl/other/current.phtml"),
+    "Other" => Array("url" => "$rooturl/other/current.phtml"),
     "SCAN" => Array("url" => "$rooturl/scan/current.phtml"),
     "My Favorites" => Array("url" => "$rooturl/my/current.phtml"),
     "Iowa" => Array("url" => "$rooturl/current/all.phtml") );
