@@ -34,8 +34,13 @@ elevations  = nc.variables["elevation"]
 MY_PROVIDERS = ["MNDOT", "KSDOT", "WIDOT", "INDOT", "NDDOT",
  "NEDOR", "WYDOT", "OHDOT", "MDDOT", "NHDOT", "WVDOT", "NVDOT",
  "AKDOT", "VTDOT", "WIDOT", "MEDOT", "VADOT","CODOT", "FLDOT",
- "GADOT", "KYTC-RWIS"]
+ "GADOT", "KYTC-RWIS", "KYMN"]
 
+def provider2network(p):
+    """ Convert a MADIS network ID to one that I use, here in IEM land"""
+    if p in ['KYMN']:
+        return p
+    return '%s_RWIS' % (p[:2],)
 
 for recnum in range(len(providers)):
     thisProvider = providers[recnum].tostring().replace('\x00','')
@@ -43,7 +48,7 @@ for recnum in range(len(providers)):
         continue
     stid = stations[recnum].tostring().replace('\x00','')
     name = names[recnum].tostring().replace("'", "").replace('\x00','')
-    network = '%s_RWIS' % (thisProvider[:2],)
+    network = provider2network(thisProvider)
     mcursor.execute("""SELECT * from stations where id = %s and network = %s""",
                     (stid, network))
     if mcursor.rowcount > 0:

@@ -1,6 +1,5 @@
 """
 Suck in MADIS data into the iemdb
-$Id: $:
 """
 import netCDF4
 import string, re, mx.DateTime, os, sys
@@ -54,11 +53,14 @@ db = {}
 MY_PROVIDERS = ["MNDOT", "KSDOT", "WIDOT", "INDOT", "NDDOT",
  "NEDOR", "WYDOT", "OHDOT", "MDDOT", "NHDOT", "WVDOT", "NVDOT",
  "AKDOT", "VTDOT", "WIDOT", "MEDOT", "VADOT", "CODOT", "FLDOT",
- "GADOT", "KYTC-RWIS"]
+ "GADOT", "KYTC-RWIS", "KYMN"]
 
 
 def provider2network(p):
-  return '%s_RWIS' % (p[:2],)
+    """ Convert a MADIS network ID to one that I use, here in IEM land"""
+    if p in ['KYMN']:
+        return p
+    return '%s_RWIS' % (p[:2],)
 
 for recnum in range(len(providers)):
   thisProvider =  providers[recnum].tostring().replace('\x00','')
