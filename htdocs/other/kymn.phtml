@@ -3,8 +3,8 @@
 
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "station";
 
- $TITLE = "IEM | Other | Currents";
- $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=current.phtml?sortcol=$sortcol\">";
+ $TITLE = "IEM | Kentucky Mesonet";
+ $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=kymn.phtml?sortcol=$sortcol\">";
  $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
@@ -12,7 +12,6 @@ function new_window(url) {
 } 
 //END Script-->
 </script>';
- $THISPAGE = "current-sort";
  include("$rootpath/include/header.php"); ?>
 <?php include("$rootpath/include/mlib.php"); ?>
 <?php 
@@ -20,7 +19,7 @@ function new_window(url) {
   include("$rootpath/include/iemaccessob.php");
 
 $iem = new IEMAccess();
-$rwis = $iem->getNetwork("OT");
+$rwis = $iem->getNetwork("KYMN");
 
 
 ?>
@@ -29,10 +28,11 @@ $rwis = $iem->getNetwork("OT");
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "sknt" => "Wind Speed [knots]", "wdir" => "Wind Direction [deg]",
-  "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
+  "pday" => "Precip Accum [inches]", "max_gust" => "Wind Gust [knots]",
   "ts" => "Observation Time [local]", "feel" => "Feels Like",
   "min_tmpf" => "Today's Low Temperature", "drct" => "Wind Direction",
-  "max_tmpf" => "Today's High Temperature", "gtim" => "Wind Gust Time",
+  "max_tmpf" => "Today's High Temperature", "dwpf" => "Dew Point",
+  "gtim" => "Wind Gust Time",
   "station" => "Station ID", "relh" => "Relative Humidity");
 
 ?>
@@ -42,9 +42,9 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 <?php $current_network = "Other"; include("$rootpath/include/current_bar.inc.php"); ?>
 
 <p><b>Other Networks:</b>  
- <a href="wtm.phtml">West Texas Mesonet</a> &nbsp; -- &nbsp; 
- <a href="kymn.phtml">Kentucky Mesonet</a> 
- 
+<a href="current.phtml">Misc Stations</a> &nbsp; -- &nbsp; 
+<a href="wtm.phtml">West Texas Mesonet</a> &nbsp; -- &nbsp; 
+
 <br />
 <?php
 echo "Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
@@ -52,31 +52,29 @@ a column to sort it.<br>\n";
 ?>
 
 <form method="GET" action="/my/current.phtml">
-<table style="width: 100%; font-size: 10pt;" class="ruler">
+<table style="font-size: 10pt;" class="ruler">
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
   <th rowspan="2">Station:</th>
-  <th rowspan="2"><a href="current.phtml?sortcol=ts">Ob Time</a></th>
+  <th rowspan="2"><a href="wtm.phtml?sortcol=ts">Ob Time</a></th>
   <th colspan="3">Temps &deg;F</th>
   <th>&nbsp;</th>
   <th colspan="3">Wind [knots]</th>
-  <th colspan=2>Gas [ppm]</th>
 <tr>
   
   <th>
-   <a href="current.phtml?sortcol=tmpf">Air</a>
-   (<a href="current.phtml?sortcol=max_tmpf">Hi</a> /
-   <a href="current.phtml?sortcol=min_tmpf">Lo</a>)
+   <a href="kymn.phtml?sortcol=tmpf">Air</a>
+   (<a href="kymn.phtml?sortcol=max_tmpf">Hi</a> /
+   <a href="kymn.phtml?sortcol=min_tmpf">Lo</a>)
 </th>
-  <th><a href="current.phtml?sortcol=dwpf">DewP</a></th>
-  <th><a href="current.phtml?sortcol=feel">Feels</a></th>
-  <th><a href="current.phtml?sortcol=relh">RH%</a></th>
-  <th><a href="current.phtml?sortcol=sknt">Speed</a></th>
-  <th><a href="current.phtml?sortcol=drct">Direction</a></th>
-  <th><a href="current.phtml?sortcol=max_sknt">Gust</a>
-    @<a href="current.phtml?sortcol=gtim">Time</a></th>
-  <th>Ozone</th><th>CO2</th>
+  <th><a href="kymn.phtml?sortcol=dwpf">DewP</a></th>
+  <th><a href="kymn.phtml?sortcol=feel">Feels</a></th>
+  <th><a href="kymn.phtml?sortcol=relh">RH%</a></th>
+  <th><a href="kymn.phtml?sortcol=sknt">Speed</a></th>
+  <th><a href="kymn.phtml?sortcol=drct">Direction</a></th>
+  <th><a href="kymn.phtml?sortcol=max_gust">Gust</a>
+    @<a href="kymn.phtml?sortcol=gtim">Time</a></th>
 </tr></thead><tbody>
   
 <?php
@@ -157,12 +155,11 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
  <td>". $parts["relh"] ."</td>
  <td>". round($parts["sknt"],0) ;
   if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
-              echo "G". round($parts["gust"],1);
+              echo "G". $parts["gust"];
   } 
   echo "</td>
             <td>". round($parts["drct"],0) ."</td>
-	    <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td><td>". $parts["ozone"] ."</td><td>". $parts["co2"] ."
-	    </tr>\n";
+	    <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td></tr>\n";
    }
 
 ?>
@@ -170,7 +167,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 <tfoot>
 <tr>
  <td colspan=3>&nbsp;</td>
-<?php $c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=OT&var="; ?>
+<?php $c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=KYMN&var="; ?>
  <td><a href="<?php echo $c; ?>tmpf');">Plot</a>
     (<a href="<?php echo $c; ?>max_tmpf');">Plot</a> /
      <a href="<?php echo $c; ?>min_tmpf');">Plot</a>)</td>
@@ -178,8 +175,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
  <td><a href="<?php echo $c; ?>feel');">Plot</a></td>
  <td><a href="<?php echo $c; ?>relh');">Plot</a></td>
  <td colspan=2><a href="<?php echo $c; ?>barb');">Plot</a></td>
- <td><a href="<?php echo $c; ?>max_sknt');">Plot</a></td>
- <td colspan=2>&nbsp;</td>
+ <td><a href="<?php echo $c; ?>max_gust');">Plot</a></td>
 </tr></tfoot>
 </table>
 <input type="submit" value="Add to Favorites">
