@@ -5,7 +5,7 @@ i = iemdb.iemdb()
 mesosite = i['mesosite']
 import glob
 
-os.chdir("work")
+os.chdir("/mesonet/data/dotcams")
 files = glob.glob("*640x480.jpg")
 for file in files:
   cid = file[:11]
