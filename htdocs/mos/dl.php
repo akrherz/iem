@@ -18,8 +18,11 @@ $station = isset($_GET["station"]) ? strtoupper($_GET["station"]): "KAMW";
 $sts = mktime($hour1, 0, 0, $month1, $day1, $year1);
 $ets = mktime($hour2, 0, 0, $month2, $day2, $year2);
 
+$table = "alldata";
+if ($year1 == $year2) $table = sprintf("t%s", $year1);
+
 $rs = pg_prepare($mos, "SELECTOR", "select *, t06_1 ||'/'||t06_2 as t06, 
-                 t12_1 ||'/'|| t12_2 as t12  from alldata WHERE station = $1
+                 t12_1 ||'/'|| t12_2 as t12  from $table WHERE station = $1
                  and runtime >= $2 and runtime <= $3 and 
                  (model = $4 or model = $5)
                  ORDER by runtime,ftime ASC");
