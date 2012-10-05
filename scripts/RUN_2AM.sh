@@ -36,6 +36,8 @@ python warn_cache.py
 cd ../dbutil
 python asos2archive.py
 python clean_afos.py
+# Remove any knowns from the unknowns, before we generate an email to me
+python unknown_hads.py
 
 cd ../qc
 python check_iem_precip.py
