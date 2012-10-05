@@ -23,7 +23,8 @@ include("$rootpath/include/header.php");
 <h3>NWS MOS Download Interface</h3>
 
 <p>This page allows you to download from the IEM's archive of NWS MOS
-data. The archive goes back to 3 May 2007.
+data. The archive goes back to 3 May 2007.  You can set the start and end times
+to the same time to get that particular run.
 
 <form name="selector" action="dl.php" method="GET">
 <table>
@@ -49,7 +50,9 @@ echo "</select>";
   <td><?php echo daySelect2($day1, "day1"); ?></td>
   <td><select name="hour1">
  <option value="0">00 UTC</option>
+ <option value="6">6 UTC</option>
  <option value="12">12 UTC</option>
+ <option value="18">18 UTC</option>
   </select></td></tr>
 
 <tr><th>End Date (inclusive)</th>
@@ -58,7 +61,9 @@ echo "</select>";
   <td><?php echo daySelect2($day2, "day2"); ?></td>
   <td><select name="hour2">
  <option value="0">00 UTC</option>
+ <option value="6">6 UTC</option>
  <option value="12">12 UTC</option>
+ <option value="18">18 UTC</option>
   </select></td></tr>
 </table>
 
