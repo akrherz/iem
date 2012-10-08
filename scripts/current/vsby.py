@@ -38,6 +38,9 @@ for row in icursor:
     vals.append( row[2] )
     valmask.append( row[1] in ['AWOS','IA_AWOS'] )
 
+if len(lats) < 5:
+    sys.exit(0)
+
 cfg = {
  'wkColorMap': 'gsdtol',
  'nglSpreadColorStart': 2,
