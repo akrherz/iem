@@ -5,6 +5,7 @@ import network
 nt = network.Table(("KCCI", "KIMT", "KELO"))
 import iemdb
 import os
+import sys
 import time
 
 # Write PID
