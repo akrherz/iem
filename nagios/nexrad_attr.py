@@ -2,6 +2,8 @@
  Nagios check to make sure we have NEXRAD attribute data
 """
 import sys
+# Since we are not running as mesonet!
+sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
 import os
 import iemdb
 
