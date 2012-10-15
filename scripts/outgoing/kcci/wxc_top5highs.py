@@ -8,10 +8,11 @@ qc = tracker.loadqc()
 import iemdb
 IEM = iemdb.connect("iem", bypass=True)
 icursor = IEM.cursor()
+now = mx.DateTime.now()
 
-icursor.execute("""SELECT s.id as station from summary c, stations s WHERE 
+icursor.execute("""SELECT s.id as station from summary_%s c, stations s WHERE 
   s.network = 'KCCI' and s.iemid = c.iemid and 
-  day = 'TODAY'  ORDER by max_tmpf DESC""")
+  day = 'TODAY'  ORDER by max_tmpf DESC""" % (now.year, ))
 dict = {}
 
 dict['timestamp'] = mx.DateTime.now()

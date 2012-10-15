@@ -13,9 +13,10 @@ icursor = IEM.cursor()
 dy = int(sys.argv[1])
 now = mx.DateTime.now()
 
-icursor.execute("""SELECT s.id as station, sum(pday) as rain from summary c, stations s 
+icursor.execute("""SELECT s.id as station, sum(pday) as rain from summary_%s c, stations s 
   WHERE s.network = 'KCCI' and s.iemid = c.iemid and 
-  day > '%s' and s.id not in ('SCEI4','SWII4') GROUP by station ORDER by rain DESC""" % ( (now - mx.DateTime.RelativeDateTime(days= int(dy) )).strftime("%Y-%m-%d"), ))
+  day > '%s' and s.id not in ('SCEI4','SWII4') GROUP by station ORDER by rain DESC""" % ( 
+            now.year, (now - mx.DateTime.RelativeDateTime(days= int(dy) )).strftime("%Y-%m-%d") ))
 dict = {}
 
 dict['timestamp'] = mx.DateTime.now()
