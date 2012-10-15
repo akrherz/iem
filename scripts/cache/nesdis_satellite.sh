@@ -18,8 +18,8 @@ ftm=$(python ts.py $1 %Y%m%d%H%M)
 atm=$(python ts.py $1 %H%M)
 wtm=$(python wdownload.py $1)
 cd /tmp
-mkdir nesdis.$$
-cd nesdis.$$
+mkdir nesdis.$ftm
+cd nesdis.$ftm
 
 BASE="http://satepsanone.nesdis.noaa.gov/pub/GIS"
 
