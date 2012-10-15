@@ -72,6 +72,7 @@ function init()
 	var tokens = window.location.href.split('#');
 	if (tokens.length == 2){
 		setCamera(tokens[1]);
+		refreshCamera();
 	}
 }
 
