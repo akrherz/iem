@@ -1,13 +1,10 @@
 <?php
+/*
+ * This thing does the work of getting the data from the database and either
+ * plotting it (via plot_1min.php) or displaying it for download
+ */
 include("../../../config/settings.inc.php");
 include_once("$rootpath/include/database.inc.php");
-/**
- * Script that does the processing or hands off to plotter.
- * Must send content-type early, if we want this to work
- * 11 Nov 2002:	Add Delimitation argument
- *  4 Jun 2003	Support for multiple stations
- * 24 Mar 2004	Support AWOS sky coverage codes
- */
 
 include("$rootpath/include/network.php");
 $nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS", "SD_ASOS","KS_ASOS"));
@@ -44,6 +41,7 @@ $hour2 = isset($_GET["hour2"]) ? $_GET["hour2"]: die("No hour2 specified");
 $minute1 = isset($_GET["minute1"]) ? $_GET["minute1"]: die("No minute1 specified");
 $minute2 = isset($_GET["minute2"]) ? $_GET["minute2"]: die("No minute2 specified");
 $vars = isset($_GET["vars"]) ? $_GET["vars"] : die("No vars specified");
+$tz = isset($_REQUEST['tz']) ? $_REQUEST['tz']: 'UTC';
 $station = $_GET["station"];
 $stations = $_GET["station"];
 $stationString = "(";
@@ -82,6 +80,9 @@ for ($i=0; $i< $num_vars;$i++){
 $sqlTS1 = strftime("%Y-%m-%d %H:%M", $ts1);
 $sqlTS2 = strftime("%Y-%m-%d %H:%M", $ts2);
 $table = strftime("alldata_1minute");
+if ($year1 == $year2){
+	$table = "t${year1}_1minute";
+}
 $nicedate = strftime("%Y-%m-%d", $ts1);
 
 $sampleStr = Array("1min" => "1",
@@ -101,54 +102,49 @@ $sqlStr .= " and station IN ". $stationString ." ORDER by valid ASC";
 /**
  * Must handle different ideas for what to do...
  **/
-
 if ($what == "download"){
  header("Content-type: application/octet-stream");
  header("Content-Disposition: attachment; filename=changeme.txt");
 } else if ($what == "plot"){
  include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
- if ($selectAll){
-  foreach ($Wcities as $key => $value){
-   $station = $key;
-   include ("plot_1min.php");
-  }
- } else {
+ include ("$rootpath/include/jpgraph/jpgraph_line.php");
+ include ("$rootpath/include/jpgraph/jpgraph_date.php");
    foreach ($stations as $key => $value){
      $station = $value;
 
      include ("plot_1min.php");
    }
- }
+ exit();
 } else {
  header("Content-type: text/plain");
 }
 
-if ($what != "plot"){
- $connection = iemdb("asos");
+/* Database Connection */
+$dbconn = iemdb("asos");
 
- $query1 = "SET TIME ZONE 'GMT'";
+if ($tz == 'UTC'){
+	pg_exec($dbconn, "SET TIME ZONE 'UTC'");
+}
 
- $result = pg_exec($connection, $query1);
- $rs =  pg_exec($connection, $sqlStr);
+pg_prepare($dbconn, "SELECT", $sqlStr);
+$rs = pg_execute($dbconn, "SELECT", Array());
+pg_close($dbconn);
 
- pg_close($connection);
-  if ($gis == "yes"){
-    echo "station,station_name,lat,lon,valid(GMT),";
-  } else {
-    echo "station,station_name,valid(GMT),";
-  }
-  for ($j=0; $j < $num_vars;$j++){
+if ($gis == "yes"){
+    echo "station,station_name,lat,lon,valid(${tz}),";
+} else {
+    echo "station,station_name,valid(${tz}),";
+}
+for ($j=0; $j < $num_vars;$j++){
     echo $vars[$j]. $d[$delim];
     if ($vars[$j] == "ca1") echo "ca1code". $d[$delim];
     if ($vars[$j] == "ca2") echo "ca2code". $d[$delim];
     if ($vars[$j] == "ca3") echo "ca3code". $d[$delim];
-  }
-  echo "\n";
+}
+echo "\n";
 
- for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
- {
+for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++) 
+{
   $sid = $row["station"];
   echo $sid . $d[$delim] . $cities[$sid]["name"] ;
   if ($gis == "yes"){
@@ -162,7 +158,6 @@ if ($what != "plot"){
     if ($vars[$j] == "ca3") echo $skycover[$row["var".$j]] . $d[$delim];
   }
   echo "\n";
- }
 }
 
 ?>
