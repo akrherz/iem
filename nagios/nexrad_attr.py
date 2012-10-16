@@ -16,11 +16,11 @@ row = pcursor.fetchone()
 count = row[0]
 
 if count > 30:
-    print 'OK - attrs %s |count=%s;15;30;0' % (count, count)
+    print 'OK - attrs %s |count=%s;20;10;0' % (count, count)
     sys.exit(0)
 elif count > 15:
-    print 'OK - attrs %s |count=%s;15;30;0' % (count, count)
+    print 'OK - attrs %s |count=%s;20;10;0' % (count, count)
     sys.exit(1)
 else:
-    print 'CRITICAL - attrs %s |count=%s;15;30;0' % (count, count)
+    print 'CRITICAL - attrs %s |count=%s;20;10;0' % (count, count)
     sys.exit(2)
