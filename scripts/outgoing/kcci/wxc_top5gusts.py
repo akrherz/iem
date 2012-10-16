@@ -25,6 +25,9 @@ for row in icursor:
     dict['sid%s' % (i,)] = row[0]
     i += 1
 
+if i == 1:
+    sys.exit()
+
 fd, path = tempfile.mkstemp()
 os.write(fd,  open('top5gusts.tpl','r').read() % dict )
 os.close(fd)
