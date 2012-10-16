@@ -1,26 +1,30 @@
 <?php 
 include("../../../config/settings.inc.php");
+define("IEM_APPID", 73);
 $TITLE = "IEM | ASOS 1 Minute Data Download";
 $THISPAGE = "networks-asos";
 include("$rootpath/include/header.php"); 
 include("$rootpath/include/iemprop.php");
 $asos_archive_end = strtotime( get_iemprop("asos.1min.end") );
 $bogus = 0;
+include("$rootpath/include/imagemaps.php"); 
+include("$rootpath/include/forms.php");
 ?>
 
 <div class="text">
-<b>Nav:</b> <a href="/ASOS/">ASOS</a> <b> > </b>
-  Download Data
 
-<p><b>Archive complete till:</b> <?php echo date('d M Y', $asos_archive_end); ?></p>
+<h3>Download ASOS 1 minute interval data</h3>
 
-<?php include("$rootpath/include/imagemaps.php"); ?>
-<?php include("$rootpath/include/forms.php"); ?>
+<p>Each month, the National Climatic Data Center provides an archive of one 
+minute interval data from the ASOS sites in the United States.  Unfortunately, 
+the data format of this information is brutal to work with.  Fortunately for 
+you, the IEM processes this information and provides it for download here. The
+archive is complete till:
+<strong><?php echo date('d M Y', $asos_archive_end); ?></strong>.  There is
+a different interface to download the <a href="../download.phtml">routine hourly</a>
+observations from this network and for sites over the entire globe.</p>
 
-<p>
-
-
-<form method="GET" action="1min_dl.php">
+<form method="GET" action="1min_dl.php" name="dl">
 
 <table>
 <tr><td width="50%">
@@ -31,8 +35,18 @@ $bogus = 0;
   <?php echo networkMultiSelect("IA_ASOS", "", Array("FSD","MLI","OMA") ); ?>
 </div>
 
-<p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
-<i>(Times are in UTC)</i>
+<h3 class="subtitle">2. Timezone of Observations:</h3>
+<i>The timestamps used in the downloaded files will be set in the
+timezone you specify.</i>
+<SELECT name="tz">
+	<option value="UTC">GMT (UTC) timestamps</option>
+	<option value="CST6CDT">Central Standard/Daylight Time</option>
+</SELECT>
+
+<p><h3 class="subtitle">3. Select Start/End Time:</h3><br>
+<i>If you select "Central Standard/Daylight Time" in #2 above, then these
+times you select for start and end time will be in CST/CDT as well. Otherwise,
+the default is UTC.</i>
 <table>
   <tr>
     <td></td>
@@ -79,7 +93,7 @@ $bogus = 0;
   </tr>
 </table>
 
-<p><h3 class="subtitle">3. Select Variables:</h3><br>
+<p><h3 class="subtitle">4. Select Variables:</h3><br>
 <select size=5 name="vars[]" MULTIPLE>
   <option value="tmpf">Air Temperature [F]
   <option value="dwpf">Dew Point Temperature [F]
@@ -100,7 +114,7 @@ $bogus = 0;
 
 </td><td valign="TOP">
 
-<p><h3 class="subtitle">4. Data Sampling?</h3><br>
+<p><h3 class="subtitle">5. Data Sampling?</h3><br>
 <i>Data is potentially available every minute, but you don't have to download
 it at that frequency. This setting <b>does not bin</b> the values, but rather
 filters based on your interval of choice.</i>
@@ -112,14 +126,14 @@ filters based on your interval of choice.</i>
     <option value="1hour">Every Hour
   </select>
 
-<p><h3 class="subtitle">5. How to view?</h3><br>
+<p><h3 class="subtitle">6. How to view?</h3><br>
 <select name="what">
   <option value="download">Download to Disk
   <option value="view">View on-line
   <option value="plot">Plot in Chart
 </select>
 
-<p><h3 class="subtitle">6. Data Delimitation:</h3><br>
+<p><h3 class="subtitle">7. Data Delimitation:</h3><br>
 How shall the output values be seperated?
 <br><select name="delim">
     <option value="comma">Comma
@@ -128,7 +142,7 @@ How shall the output values be seperated?
    </select>
 
 <p>
-<h3 class="subtitle">7. Include Station Latitude & Longitude values?</h3><img src="/images/gisready.png"><br>
+<h3 class="subtitle">8. Include Station Latitude & Longitude values?</h3><img src="/images/gisready.png"><br>
 <div class="story">
  <select name="gis">
    <option value="no">No

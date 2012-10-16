@@ -14,9 +14,10 @@ $sqlStr .= " and station = '". $station ."' ORDER by valid ASC";
 
 $connection = iemdb("asos");
 
-$query1 = "SET TIME ZONE 'GMT'";
-
-$result = pg_exec($connection, $query1);
+if ($tz == 'UTC'){
+	$query1 = "SET TIME ZONE 'GMT'";
+	$result = pg_exec($connection, $query1);
+}
 $rs =  pg_exec($connection, $sqlStr);
 
 pg_close($connection);
@@ -54,7 +55,7 @@ $graph->subtitle->Set("Plot valid between: ".$sqlTS1 ." & ". $sqlTS2 );
 $graph->title->SetFont(FF_FONT1,FS_BOLD,16);
 //$graph->yaxis->SetTitle("");
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-$graph->xaxis->SetTitle("Valid GMT");
+$graph->xaxis->SetTitle("Valid $tz");
 $graph->xaxis->SetTitleMargin(70);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 
