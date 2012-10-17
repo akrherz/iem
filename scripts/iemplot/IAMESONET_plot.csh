@@ -16,7 +16,7 @@
 source /mesonet/nawips/Gemenviron
 
 setenv GEMCOLTBL coltbl.xwp
-#setenv DISPLAY localhost:1
+setenv DISPLAY localhost:1
 
 set yy=`date -u --date '1 minute' +'%y'`
 set mm=`date -u --date '1 minute' +'%m'`
