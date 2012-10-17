@@ -16,7 +16,7 @@
 source /mesonet/nawips/Gemenviron
 
 setenv GEMCOLTBL coltbl.xwp
-setenv DISPLAY localhost:1
+#setenv DISPLAY localhost:1
 
 set yy=`date -u --date '1 minute' +'%y'`
 set mm=`date -u --date '1 minute' +'%m'`
@@ -26,7 +26,7 @@ set hh=`date -u --date '1 minute' +'%H'`
 set timestamp=`date -u --date '1 minute' +'%Y%m%d%H00'`
 
 set nicetime=`date -d "20${1}-${2}-${3} ${4}:00" +"%b %d %I %p"`
-
+set generated=`date +"%b %d %I:%M %p"`
 rm mesonet.gif* >& /dev/null
 
 set DEVICE="GF|mesonet.gif|900;700"
@@ -43,7 +43,7 @@ sfmap << EOF > /dev/null
  	DATTIM   =  ${date}/${hh}
  	SFFILE   =  /mesonet/data/gempak/meso/${date}_meso.gem
  	LATLON   =  0
-        TITLE    =  32/-1/GMT: ~ Iowa Mesonet Data
+        TITLE    =  32/-1/GMT: ~ Generated: $generated IEM Plot
         CLEAR    =  yes
         PANEL    =  0
         DEVICE   = ${DEVICE}
@@ -99,9 +99,5 @@ EOF
 
 gpend
 
-if (-e mesonet.gif) then
-#  ~/bin/logo.csh /mesonet/scripts/iemplot/mesonet.gif
-  /home/ldm/bin/pqinsert -p "plot ac ${timestamp} mesonet.gif mesonet_${hh}00.gif gif" mesonet.gif >& /dev/null
-  #cp mesonet.gif ~/archive/mesonet_${hh}00.gif
-  #mv mesonet.gif ~/current
-endif
+/home/ldm/bin/pqinsert -p "plot ac ${timestamp} mesonet.gif mesonet_${hh}00.gif gif" mesonet.gif
+
