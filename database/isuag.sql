@@ -1,3 +1,68 @@
+CREATE TABLE sm_daily (
+  station char(5),
+  valid date,
+  TAir_C_Avg real,
+  TAir_C_Max real,
+  TAir_C_TMx timestamp with time zone,
+  TAir_C_Min real,
+  TAir_C_TMn timestamp with time zone,
+  SlrMJ_Tot real,
+  Rain_mm_Tot real,
+  WS_mps_S_WVT real,
+  WindDir_D1_WVT real,
+  WindDir_SD1_WVT real,
+  WS_mps_Max real,
+  WS_mps_TMx timestamp with time zone,
+  DailyET real,
+  TSoil_C_Avg real,
+  VWC_12_Avg real,
+  VWC_24_Avg real,
+  VWC_50_Avg real,
+  EC12 real,
+  EC24 real,
+  EC50 real,
+  T12_C_Avg real,
+  T24_C_Avg real,
+  T50_C_Avg real,
+  PA real,
+  PA_2 real,
+  PA_3 real
+);
+CREATE UNIQUE index sm_daily_idx on sm_daily(station, valid);
+GRANT SELECT on sm_daily to nobody;
+
+--- Soil Moisture Stations
+CREATE TABLE sm_hourly (
+  station char(5),
+  valid timestamp with time zone,
+  TAir_C_Avg real,
+  RH real,
+  SlrkW_Avg real,
+  SlrMJ_Tot real,
+  Rain_mm_Tot real,
+  WS_mps_S_WVT real,
+  WindDir_D1_WVT real,
+  WindDir_SD1_WVT real,
+  ETAlfalfa real,
+  SolarRadCalc real,
+  TSoil_C_Avg real,
+  VWC_12_Avg real,
+  VWC_24_Avg real,
+  VWC_50_Avg real,
+  EC12 real,
+  EC24 real,
+  EC50 real,
+  T12_C_Avg real,
+  T24_C_Avg real,
+  T50_C_Avg real,
+  PA real,
+  PA_2 real,
+  PA_3 real
+);
+CREATE UNIQUE index sm_hourly_idx on sm_hourly(station, valid);
+GRANT SELECT on sm_hourly to nobody;
+
+
 CREATE TABLE daily (
     station character varying(7),
     valid date,
