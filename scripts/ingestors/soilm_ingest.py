@@ -91,12 +91,12 @@ def hourly_process(nwsli, maxts):
             continue
         valid = datetime.datetime.strptime(tokens[ headers.index('TIMESTAMP')],
                                            '%Y-%m-%d %H:%M:%S')
-        valid = valid.replace(tzinfo=iemtz.CentralDaylight)
+        valid = valid.replace(tzinfo=iemtz.CentralStandard)
         if valid <= maxts:
             break
         # We are ready for dbinserting!
         dbcols = "station,valid," + ",".join(headers[2:])
-        dbvals = "'%s','%s-05'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
+        dbvals = "'%s','%s-06'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
         for v in tokens[2:]:
             dbvals += "%s," % (formatter(v),)
         sql = "INSERT into sm_hourly (%s) values (%s)" % (dbcols, dbvals[:-1])
@@ -107,7 +107,7 @@ def formatter(v):
     if v.find("NAN") > -1:
         return 'Null'
     if v.find(" ") > -1: #Timestamp
-        return "'%s-05'" % (v,)
+        return "'%s-06'" % (v,)
     return v
 
 def daily_process(nwsli, maxts):
@@ -137,7 +137,7 @@ def daily_process(nwsli, maxts):
             station = '%s' """ % (valid.strftime("%Y-%m-%d") ,nwsli))
         # We are ready for dbinserting!
         dbcols = "station,valid," + ",".join(headers[2:])
-        dbvals = "'%s','%s-05'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
+        dbvals = "'%s','%s'," % (nwsli, valid.strftime("%Y-%m-%d"))
         for v in tokens[2:]:
             dbvals += "%s," % (formatter(v),)
         sql = "INSERT into sm_daily (%s) values (%s)" % (dbcols, dbvals[:-1])
@@ -145,7 +145,7 @@ def daily_process(nwsli, maxts):
 
 def get_max_timestamps(nwsli):
     """ Fetch out our max values """
-    data = {'hourly': datetime.datetime(2012,1,1, tzinfo=iemtz.CentralDaylight), 
+    data = {'hourly': datetime.datetime(2012,1,1, tzinfo=iemtz.CentralStandard), 
             'daily': datetime.date(2012,1,1)}
     icursor.execute("""SELECT max(valid) from sm_daily WHERE station = '%s'""" % (
                                                                 nwsli,))
