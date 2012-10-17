@@ -129,7 +129,7 @@ def daily_process(nwsli, maxts):
             continue
         valid = datetime.datetime.strptime(tokens[ headers.index('TIMESTAMP')][:10],
                                            '%Y-%m-%d')
-        valid = valid.date()
+        valid = valid.date() - datetime.timedelta(days=1)
         if valid < maxts:
             break
         if valid == maxts: # Reprocess
