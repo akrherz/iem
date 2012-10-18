@@ -372,7 +372,7 @@ function loadWarnings(){
         $this->warnings[$key]["verify"] = 0;
         if ($row["gtype"] == "P"){
         	$this->warnings[$key]["status"] = $row["status"];
-        	$this->warnings[$key]["expire"] = $row["expire"];
+        	$this->warnings[$key]["expire"] = strtotime($row["expire"]);
             $this->warnings[$key]["geom"] = $row["tgeom"];
             $this->warnings[$key]["perimeter"] = $row["perimeter"];
             $this->warnings[$key]["parea"] = $row["area"];
@@ -509,7 +509,7 @@ function sbwVerify() {
             }
             if (($verify || $this->lsrs[$key]["tdq"]) &&
                  ! $this->lsrs[$key]["warned"] ){
-                $this->warnings[$k]["lsrs"][] = $key;
+            	$this->warnings[$k]["lsrs"][] = $key;
                 $this->lsrs[$key]["warned"] = True;
                 $this->lsrs[$key]["leadtime"] = ($this->lsrs[$key]["ts"] - 
                        $v["sts"]) / 60;
