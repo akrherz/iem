@@ -51,7 +51,7 @@ function printWARN($cow, $warn)
   		<td>%.0f%% <a href=\"../GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td>
   		<td>%.0f%%</td></tr>\n", 
     $background, $uri, $warn["phenomena"], $warn["eventid"], $windhail,
-    gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["ets"]), 
+    gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["expire"]), 
     $uri, implode(", ",$counties), $uri, $warn["status"], $warn["parea"], 
     $carea, ($carea - $warn["parea"])/ $carea  * 100,
     $bratio,
