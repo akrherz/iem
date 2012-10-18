@@ -145,10 +145,10 @@ for mach in $(echo "iemvs100.local iemvs101.local iemvs102.local iemvs103.local 
     ssh -q ldm@${mach} "mv /tmp/wv_900913_0.tif ~/data/gis/images/900913/goes/wv_0.tif"
     fi 
 done
-rm wv_900913.tif wv.tif
-rm ir_900913.tif ir.tif
-rm vis_900913.tif vis.tif
-rm -f *${tm}.tif
-rm -f *${tm}.tfw
+rm wv_900913.tif wv.tif >& /dev/null
+rm ir_900913.tif ir.tif >& /dev/null
+rm vis_900913.tif vis.tif >& /dev/null
+rm -f *${tm}.tif >& /dev/null
+rm -f *${tm}.tfw >& /dev/null
 
 #date
