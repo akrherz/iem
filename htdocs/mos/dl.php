@@ -27,9 +27,8 @@ $rs = pg_prepare($mos, "SELECTOR", "select *, t06_1 ||'/'||t06_2 as t06,
                  (model = $4 or model = $5)
                  ORDER by runtime,ftime ASC");
 
-$model2 = "GFS";
 if ($model == "NAM"){ $model2 = "ETA"; }
-
+if ($model == "GFS"){ $model2 = "AVN"; }
 $rs = pg_execute($mos, "SELECTOR", Array($station, date("Y-m-d H:i",$sts),
       date("Y-m-d H:i",$ets), $model, $model2 ));
 
