@@ -1,5 +1,6 @@
 <?php 
 include("../../config/settings.inc.php");
+define("IEM_APPID", 74);
 $THISPAGE = "archive-mos";
 $TITLE = "IEM | Model Output Statistics";
 include("$rootpath/include/header.php"); ?>
@@ -13,11 +14,19 @@ weather prediction models.  These models produce a gridded forecast that is
 then processed thru a series of equations (Model Output Statistics) to 
 produce a site specific forecast. You can find out more about
 <a href="http://www.weather.gov/mdl/synop/products.php">MOS</a> on the
-NWS's website.  The IEM is building an interactive MOS archive to support
+NWS's website.  The IEM maintains an interactive MOS archive to support
 local research and makes it available for others to use as well.</p>
 
-<p><strong>Archive Status:</strong> NAM and GFS MOS back to 3 May 2007. The
-archive updates in real-time as products are received from the NWS.
+<p><strong>Archive Status:</strong> 
+<table cellpadding='3' cellspacing='0' border='1'>
+<tr><th>Model</th><th>Start</th><th>End</th></tr>
+<tr><th>AVN</th><td>1 June 2000</td><td>16 Dec 2003</td></tr>
+<tr><th>ETA</th><td>24 Feb 2002</td><td>9 Dec 2008</td></tr>
+<tr><th>GFS</th><td>16 Dec 2003</td><td>--Realtime--</td></tr>
+<tr><th>NAM</th><td>9 Dec 2008</td><td>--Realtime--</td></tr>
+</table>
+<br />The MOS products are processed in realtime and immediately available from
+the applications listed below.
 
 <h3>Current Tools:</h3>
 <ul>
