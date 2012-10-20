@@ -474,7 +474,7 @@ function sbwVerify() {
          $v["year"], $v["geom"], $v["geom"], $this->sqlLSRTypeBuilder(), 
          $v["wfo"], $this->getVerifyHailSize($v), $this->getVerifyWind($v),
          date("Y/m/d H:i", strtotime($v["issue"])),
-         date("Y/m/d H:i", strtotime($v["expire"])) );
+         date("Y/m/d H:i", $v["expire"]) );
         $rs = $this->callDB($sql);
         for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
             $key = sprintf("%s-%s-%s-%s-%s", 
