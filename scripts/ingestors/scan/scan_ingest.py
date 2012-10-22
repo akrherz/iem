@@ -113,7 +113,7 @@ def savedata( data , maxts ):
         return
     iem = access.Ob(sid, 'SCAN')
     iem.txn = icursor
-    iem.data['station'] = sid
+    iem.data['station'] = sid[1:]
     iem.data['ts'] = ts
     iem.data['year'] = ts.year
     for key in data.keys():
@@ -142,7 +142,7 @@ def savedata( data , maxts ):
          c5tmpf, 
          c1smv, c2smv, c3smv, c4smv, c5smv, phour) 
         VALUES 
-        (%(id)s, '%(valid)s', %(tmpf)s, %(dwpf)s,
+        (%(station)s, '%(valid)s', %(tmpf)s, %(dwpf)s,
          %(srad)s,%(sknt)s,
         %(drct)s, %(relh)s, %(pres)s, %(c1tmpf)s, 
         %(c2tmpf)s, 
