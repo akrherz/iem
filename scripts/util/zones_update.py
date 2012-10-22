@@ -3,11 +3,18 @@ My purpose in life is to take the NWS AWIPS Geodata Zones Shapefile and
 dump them into the NWSChat PostGIS database!
 """
 from osgeo import ogr
+from osgeo import _ogr
 import pg
 import sys
 import os
 import urllib2
 postgis = pg.connect('postgis', 'iemdb')
+
+def Area(feat, *args):
+    """
+    Backport a feature from the future!
+    """
+    return _ogr.Geometry_GetArea(feat, *args)
 
 # Get the name of the file we wish to download
 if len(sys.argv) == 1:
@@ -62,7 +69,10 @@ while feat is not None:
 
 
   geo = feat.GetGeometryRef()
-  area = geo.Area()
+  if not geo:
+    feat = lyr.GetNextFeature()
+    continue
+  area = Area(geo)
   wkt = geo.ExportToWkt()
 
   ugc = "%s%s%s" % (state, GEO_TYP, zone)
