@@ -11,7 +11,7 @@ import access
 import iemdb
 SCAN = iemdb.connect('scan', bypass=True)
 scursor = SCAN.cursor()
-ACCESS = iemdb.connect('iem')
+ACCESS = iemdb.connect('iem', bypass=True)
 icursor = ACCESS.cursor()
 
 mapping = {
@@ -107,12 +107,13 @@ def savedata( data , maxts ):
     else:
         tstr = "%s %s" % (data['Date'], data['Time (CDT)'])
     ts = mx.DateTime.strptime(tstr, '%Y-%m-%d %H:%M')
-    id = "S%s" % (data['Site Id'],)
+    sid = "S%s" % (data['Site Id'],)
     
-    if maxts[id] > ts:
+    if maxts[sid] > ts:
         return
-    iem = access.Ob(id, 'SCAN')
+    iem = access.Ob(sid, 'SCAN')
     iem.txn = icursor
+    iem.data['station'] = sid
     iem.data['ts'] = ts
     iem.data['year'] = ts.year
     for key in data.keys():
