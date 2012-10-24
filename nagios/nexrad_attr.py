@@ -15,10 +15,10 @@ pcursor.execute("""
 row = pcursor.fetchone()
 count = row[0]
 
-if count > 30:
+if count > 2:
     print 'OK - attrs %s |count=%s;2;1;0' % (count, count)
     sys.exit(0)
-elif count > 15:
+elif count > 1:
     print 'OK - attrs %s |count=%s;2;1;0' % (count, count)
     sys.exit(1)
 else:
