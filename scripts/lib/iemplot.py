@@ -14,10 +14,13 @@ import matplotlib
 matplotlib.use( 'Agg' )
 from windrose.windrose import WindroseAxes
 import matplotlib.image as image
+import matplotlib.colors as mpcolors
+import matplotlib.cm as mpcm
 from matplotlib import pyplot as plt
 from matplotlib.patches import Rectangle
 from matplotlib.colors import rgb2hex
 import iemdb
+import pylab as pl
 
 # Define grid bounds 
 IA_WEST  = -96.7
@@ -41,6 +44,46 @@ CONUS_SOUTH = 20.8
 CONUS_NX    = 140
 CONUS_NY    = 150
 
+def LevelColormap(levels, cmap=None):
+    """Make a colormap based on an increasing sequence of levels"""
+    
+    # Start with an existing colormap
+    if cmap == None:
+        cmap = pl.get_cmap()
+
+    # Spread the colours maximally
+    nlev = len(levels)
+    S = pl.arange(nlev, dtype='float')/(nlev-1)
+    A = cmap(S)
+
+    # Normalize the levels to interval [0,1]
+    levels = pl.array(levels, dtype='float')
+    L = (levels-levels[0])/(levels[-1]-levels[0])
+
+    # Make the colour dictionary
+    R = [(L[i], A[i,0], A[i,0]) for i in xrange(nlev)]
+    G = [(L[i], A[i,1], A[i,1]) for i in xrange(nlev)]
+    B = [(L[i], A[i,2], A[i,2]) for i in xrange(nlev)]
+    cdict = dict(red=tuple(R),green=tuple(G),blue=tuple(B))
+
+    # Use 
+    return matplotlib.colors.LinearSegmentedColormap(
+        '%s_levels' % cmap.name, cdict, 256)
+
+def maue(N=-1):
+    """ Pretty color ramp Dr Ryan Maue uses """
+    cpool = ["#e6e6e6", "#d2d2d2", "#bcbcbc", "#969696", "#646464",
+"#1464d2", "#1e6eeb", "#2882f0", "#3c96f5", "#50a5f5", "#78b9fa", 
+           "#96d2fa", "#b4f0fa", "#e1ffff",
+"#0fa00f", "#1eb41e", "#37d23c", "#50f050", "#78f573", "#96f58c", 
+           "#b4faaa", "#c8ffbe",
+"#ffe878", "#ffc03c", "#ffa000", "#ff6000", "#ff3200", "#e11400", "#c00000", 
+           "#a50000", "#643c32",
+"#785046", "#8c645a", "#b48c82", "#e1beb4", "#f0dcd2", "#ffc8c8", "#f5a0a0", 
+           "#f5a0a0", "#e16464", "#c83c3c"]
+    cmap3 = mpcolors.ListedColormap(cpool[0:N], 'maue', N=N)
+    mpcm.register_cmap(cmap=cmap3)
+    
 def floatRgb(mag, cmin, cmax):
        """
        Return a tuple of floats between 0 and 1 for the red, green and
