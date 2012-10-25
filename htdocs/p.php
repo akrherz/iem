@@ -13,18 +13,12 @@ if ($id == "" && $pid == "") die();
 $conn = iemdb("postgis");
 
 if ($id != "") {
- $rs = pg_prepare($conn, "IDUPDATE", "update text_products 
-                 SET reads = reads + 1 WHERE id = $1");
  $rs = pg_prepare($conn, "IDSELECT", "SELECT product,geom from text_products 
                  WHERE id = $1");
- pg_execute($conn, "IDUPDATE", Array($id));
  $rs = pg_execute($conn, "IDSELECT", Array($id));
 } else {
- $rs = pg_prepare($conn, "PIDUPDATE", "update text_products 
-                 SET reads = reads + 1 WHERE product_id = $1");
  $rs = pg_prepare($conn, "PIDSELECT", "SELECT product,geom from text_products 
                  WHERE product_id = $1");
- pg_execute($conn, "PIDUPDATE", Array($pid));
  $rs = pg_execute($conn, "PIDSELECT", Array($pid));
 }
 
