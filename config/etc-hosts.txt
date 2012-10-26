@@ -1,0 +1,28 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+192.168.0.1      iem-director0 iem-director0.local
+192.168.0.2      iem-director1 iem-director1.local
+192.168.0.4      iemfe         iemfe.local iem-memcached
+192.168.0.10     iem10         iem10.local
+192.168.0.11     iem11         iem11.local iem-syslog
+192.168.0.19     iem19         iem19.local iemdb
+192.168.0.21     iem21         iem21.local
+192.168.0.30     iem30         iem30.local
+192.168.0.40     iem40         iem40.local
+192.168.0.50     iem50         iem50.local iem-mapserver
+192.168.0.60     iem60         iem60.local
+192.168.0.70     iem70         iem70.local
+192.168.0.100    iemvs100      iemvs100.local
+192.168.0.101    iemvs101      iemvs101.local
+192.168.0.102    iemvs102      iemvs102.local
+192.168.0.103    iemvs103      iemvs103.local
+192.168.0.104    iemvs104      iemvs104.local
+192.168.0.105    iemvs105      iemvs105.local
+192.168.0.106    iemvs106      iemvs106.local
+192.168.0.107    iemvs107      iemvs107.local
+192.168.0.108    iemvs108      iemvs108.local
+192.168.0.109    iemvs109      iemvs109.local
+192.168.0.200    iem-idd0      iem-idd0.local
+192.168.0.230    iemdb2
+192.168.0.254    iem-gateway   iem-gateway.local
