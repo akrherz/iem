@@ -44,6 +44,7 @@ function iemdb($dbname, $force_new=0, $rw=FALSE)
 		$dbhost = "meteor.geol.iastate.edu";
 		$dbuser = "mesonet";
 	}
+	if ($dbname == "access"){ $dbname = "iem"; }
 
 	$connstr = sprintf("dbname=%s host=%s user=%s connect_timeout=5",
 			$dbname, $dbhost, $dbuser);
