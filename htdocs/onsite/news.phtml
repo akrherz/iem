@@ -2,7 +2,7 @@
  include("../../config/settings.inc.php");
  define("IEM_APPID", 22);
  include("$rootpath/include/database.inc.php");
- $dbconn = iemdb("mesosite", $rw=TRUE);
+ $dbconn = iemdb("mesosite", TRUE, TRUE);
 
  $id = isset($_GET["id"]) ? intval($_GET["id"]): 0;
  $q = isset($_GET["q"]) ? pg_escape_string($_GET["q"]) : "";

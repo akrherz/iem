@@ -17,7 +17,7 @@ function genFeature()
 {
   global $rooturl;
 
-  $connection = iemdb("mesosite", $rw=TRUE);
+  $connection = iemdb("mesosite", TRUE, TRUE);
   $query1 = "SELECT oid, *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
                 to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
                 to_char(valid, 'YYYY-MM-DD') as permalink from feature
