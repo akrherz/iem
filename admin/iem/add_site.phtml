@@ -16,7 +16,7 @@ $online = isset($_REQUEST["online"]) ? $_REQUEST["online"] : "";
 $latitude = isset($_REQUEST["latitude"]) ? $_REQUEST["latitude"] : "";
 $longitude = isset($_REQUEST["longitude"]) ? $_REQUEST["longitude"] : "";
 
-$pg_conn = iemdb("mesosite");
+$pg_conn = iemdb("mesosite", TRUE, TRUE);
 
 /* Input station Details */
 if (isset($_REQUEST["longitude"]) && isset($_REQUEST["latitude"]))

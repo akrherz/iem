@@ -30,7 +30,7 @@ $tags = isset($_REQUEST["tags"]) ? $_REQUEST["tags"] : null;
 $voting = (isset($_REQUEST["voting"]) && $_REQUEST["voting"] == "yes") ?
           true : false;
 
-$mesosite = iemdb("mesosite");
+$mesosite = iemdb("mesosite", TRUE, TRUE);
 pg_prepare($mesosite, "INJECTOR", "INSERT into feature 
   (title, story, caption, voting, tags, fbid) VALUES 
   ($1   , $2   , $3   , $4     , $5  , $6)");

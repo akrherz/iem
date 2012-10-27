@@ -4,7 +4,7 @@ include("../../../config/settings.inc.php");
 include("$rootpath/include/cameras.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/forms.php");
-$conn = iemdb("mesosite");
+$conn = iemdb("mesosite", TRUE, TRUE);
 
 $id = isset($_GET["id"]) ? $_GET["id"] : "";
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d");

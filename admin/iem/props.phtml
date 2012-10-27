@@ -1,7 +1,7 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-$dbconn = iemdb("mesosite");
+$dbconn = iemdb("mesosite", TRUE, TRUE);
  /* Edit IEM Properties */
 $rs = pg_prepare($dbconn, "DELETE", "DELETE from properties WHERE
       propname = $1");
