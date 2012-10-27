@@ -6,7 +6,7 @@ include("../../config/settings.inc.php");
  */
 include("$rootpath/include/header.php");
 include("$rootpath/include/database.inc.php");
-$mesosite = iemdb('mesosite');
+$mesosite = iemdb('mesosite', TRUE, TRUE);
 $rs = pg_prepare($mesosite, "INSERT", "INSERT into iemmaps" .
 		"(title, description, keywords, ref, category)" .
 		"VALUES ($1, $2, $3, $4, $5)");

@@ -8,7 +8,7 @@ $author = isset($_POST["author"]) ? $_POST["author"]: "";
 $url = isset($_POST["url"]) ? $_POST["url"]: "";
 
 if (strlen($title) > 0) {
- $conn = iemdb("mesosite");
+ $conn = iemdb("mesosite", TRUE, TRUE);
  $rs = pg_prepare($conn, "INJECTOR", "INSERT into 
        news(body, author, title, url) VALUES ($1,$2,$3,$4)");
  pg_execute($conn, "INJECTOR", Array($body, $author, $title, $url));
