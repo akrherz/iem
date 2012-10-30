@@ -52,6 +52,7 @@ st = network.Table("IACLIMATE")
 sql = """SELECT station,
    sum(gddXX(%s, %s, high, low)) as gdd, count(*)
    from alldata_ia WHERE year = %s and day >= '%s' and day < '%s'
+   and substr(station, 2, 1) != 'C' and station != 'IA0000'
    GROUP by station""" % (baseV, maxV, sts.year, sts.strftime("%Y-%m-%d"),
                             ets.strftime("%Y-%m-%d"))
 
@@ -74,6 +75,10 @@ for row in ccursor:
 
 cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
+ #'cnLevelSelectionMode': 'ManualLevels',
+ #  'cnLevelSpacingF'      : 50.0,
+ #'cnMinLevelValF'       : 900.0,
+ #'cnMaxLevelValF'       : 1900.0,
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
  '_showvalues'        : True,
