@@ -47,7 +47,7 @@ rm -f access_log-sustainablecorn.iemvs*
 /usr/bin/webalizer -c sustainablecorn.conf sustainablecorn_access.log
 /usr/bin/webalizer -c wepp.conf wepp_access.log
 
-grep "/agclimate" access.log > agclimate.log
+grep " /agclimate" access.log > agclimate.log
 /home/mesonet/bin/webalizer -c agclimate.conf -T agclimate.log
 rm -f agclimate.log
 
