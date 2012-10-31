@@ -8,6 +8,7 @@ os.environ[ 'USER' ] = 'nobody'
 import datetime
 import numpy
 import sys
+import iemtz
 import cgitb
 cgitb.enable()
 
@@ -89,14 +90,16 @@ if days >= 3:
     ax.xaxis.set_major_locator(
                                mdates.DayLocator(interval=interval)
                                )
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y'))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y', 
+                                                      tz=iemtz.Central))
 else:
     ax.xaxis.set_major_locator(
                                mdates.AutoDateLocator(maxticks=10)
                                )
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-I %p\n%d %b'))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-I %p\n%d %b',
+                                                      tz=iemtz.Central))
 
-ax.set_title("ISUAG Station: %s Timeseries" % (nt.sts[station]['name']
+ax.set_title("ISUAG Station: %s Timeseries" % (nt.sts[station]['name'],
                                             ))
 
 
