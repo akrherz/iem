@@ -85,8 +85,9 @@ ax.set_ylim(miny * 100.0 - 5, maxy * 100.0 + 5)
 ax.set_xlim( min(valid), max(valid))
 days = (ets - sts).days  
 if days >= 3:
+    interval = max(int(days/7), 1)
     ax.xaxis.set_major_locator(
-                               mdates.DayLocator()
+                               mdates.DayLocator(interval=interval)
                                )
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y'))
 else:
