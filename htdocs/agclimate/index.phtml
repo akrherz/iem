@@ -1,6 +1,42 @@
 <?php 
  include("../../config/settings.inc.php");
  define("IEM_APPID", 10);
+ 
+ include "$rootpath/include/database.inc.php";
+ include "$rootpath/include/network.php";
+ include "$rootpath/include/mlib.php";
+ $dbconn = iemdb("isuag");
+ $nt = new NetworkTable("ISUSM");
+ 
+ /* Get the last observation */
+ $rs = pg_query($dbconn, "select * from (select *, 
+ 		rank() over (order by valid DESC) from sm_hourly 
+ 		ORDER by valid DESC LIMIT 1) as foo where rank = 1");
+ $table = "<table><thead><tr><th rowspan='2'>Location</th>
+ 		<th rowspan='2'>Valid</th>
+ 		<th colspan='2'>12 inches</th>
+ 		<th colspan='2'>24 inches</th>
+ 		<th colspan='2'>50 inches</th>
+ 		</tr>
+ 		<tr><th>Temp &deg;F</th><th>Moisture %</th>
+ 		<th>Temp &deg;F</th><th>Moisture %</th>
+ 		<th>Temp &deg;F</th><th>Moisture %</th>
+ 		</tr>
+ 		</thead>";
+ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+ 	$ts = strtotime($row["valid"]);
+ 	$table .= sprintf("<tr><td>%s</td><td>%s</td>
+ 			<td>%.1f</td><td>%.1f</td>
+ 			<td>%.1f</td><td>%.1f</td>
+ 			<td>%.1f</td><td>%.1f</td></tr>", $nt->table[$row["station"]]['name'],
+ 			date("j M g A", $ts), 
+ 			c2f($row["t12_c_avg"]), $row["vwc_12_avg"] * 100.0,
+ 			c2f($row["t24_c_avg"]), $row["vwc_24_avg"] * 100.0,
+ 			c2f($row["t50_c_avg"]), $row["vwc_50_avg"] * 100.0);
+ }
+ 
+ $table .= "</table>";
+ 
  $TITLE = "IEM | ISU Ag Climate"; 
  $THISPAGE = "networks-agclimate";
  include("$rootpath/include/header.php");
@@ -30,7 +66,12 @@ day by the <a href="http://www.hprcc.unl.edu/">High Plains Climate Center</a>,
 who then sends the data to us.  Data for the previous day is available by
 7 AM of the next day.
 
-<p style="border: 1px #000 solid; padding: 5px;"><strong>Quick Download Links:</strong> &nbsp; &nbsp; <a href="hist/hourlyRequest.php">Hourly Data</a> &nbsp; &nbsp; <a href="hist/dailyRequest.php">Daily Summary Data</a></p>
+<div style="border: 1px #000 solid; padding: 5px;">
+<h3>Soil Moisture Data!</h3>
+<?php echo $table; ?>
+
+<p><a href="smts.php">Plot Timeseries</a> of soil moisture and rainfall.
+</div>
 
 <h3 class="subtitle">Information:</h3>
 <ul>

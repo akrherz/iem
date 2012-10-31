@@ -4,3 +4,6 @@ Redirect /agclimate/index.pl http://mesonet.agron.iastate.edu/agclimate/index.ph
 Redirect /agclimate/daily-pics http://mesonet.agron.iastate.edu/agclimate/daily_pics
 Redirect /agclimate/daily_pics http://mesonet.agron.iastate.edu/data/agclimate
 Redirect /agclimate/info.txt http://mesonet.agron.iastate.edu/agclimate/info.phtml
+
+AddHandler cgi-script .py
+Options +ExecCGI
