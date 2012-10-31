@@ -12,7 +12,8 @@
  $rs = pg_query($dbconn, "select * from (select *, 
  		rank() over (order by valid DESC) from sm_hourly 
  		ORDER by valid DESC LIMIT 1) as foo where rank = 1");
- $table = "<table><thead><tr><th rowspan='2'>Location</th>
+ $table = "<table cellspacing='0' cellpadding='2', border='1'>
+ 		<tr><th rowspan='2'>Location</th>
  		<th rowspan='2'>Valid</th>
  		<th colspan='2'>12 inches</th>
  		<th colspan='2'>24 inches</th>
@@ -21,8 +22,7 @@
  		<tr><th>Temp &deg;F</th><th>Moisture %</th>
  		<th>Temp &deg;F</th><th>Moisture %</th>
  		<th>Temp &deg;F</th><th>Moisture %</th>
- 		</tr>
- 		</thead>";
+ 		</tr>";
  for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
  	$ts = strtotime($row["valid"]);
  	$table .= sprintf("<tr><td>%s</td><td>%s</td>
@@ -66,11 +66,14 @@ day by the <a href="http://www.hprcc.unl.edu/">High Plains Climate Center</a>,
 who then sends the data to us.  Data for the previous day is available by
 7 AM of the next day.
 
-<div style="border: 1px #000 solid; padding: 5px;">
-<h3>Soil Moisture Data!</h3>
+<h3>NEW! Soil Moisture Data</h3>
+<p>We are in the process of deploying a network of automated sensors that will
+measure soil temperature and moisture.  Here is the most recent observation 
+collected:
+<br />
 <?php echo $table; ?>
 
-<p><a href="smts.php">Plot Timeseries</a> of soil moisture and rainfall.
+<p>You can also <a href="smts.php">plot timeseries</a> of soil moisture and rainfall.
 </div>
 
 <h3 class="subtitle">Information:</h3>

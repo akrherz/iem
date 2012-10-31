@@ -39,10 +39,11 @@ import psycopg2.extras
 ISUAG = iemdb.connect('isuag', bypass=True)
 icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-icursor.execute("""SELECT * from sm_hourly WHERE 
+sql = """SELECT * from sm_hourly WHERE 
     station = '%s' and valid BETWEEN '%s' and '%s' ORDER by valid ASC""" % (
             station, 
-            sts.strftime("%Y-%m-%d %H:%M"), ets.strftime("%Y-%m-%d %H:%M")))
+            sts.strftime("%Y-%m-%d %H:%M"), ets.strftime("%Y-%m-%d %H:%M"))
+icursor.execute(sql)
 d12sm = []
 d24sm = []
 d50sm = []
@@ -67,7 +68,6 @@ maxy = max( [numpy.max(d12sm), numpy.max(d24sm), numpy.max(d50sm)])
 miny = min( [numpy.min(d12sm), numpy.min(d24sm), numpy.min(d50sm)])
 
 (fig, ax) = plt.subplots(1,1)
-ax.set_title("ISUAG Station: %s Timeseries" % (nt.sts[station]['name'],))
 ax.grid(True)
 ax2 = ax.twinx()
 ax2.set_yticks( numpy.arange(-0.6, 0., 0.1))
@@ -82,7 +82,22 @@ ax.plot(valid, d50sm * 100.0, linewidth=2, color='black', zorder=2, label='50 in
 ax.set_ylabel("Volumetric Soil Water Content [%]")
 ax.legend(loc=(0, 0.01), ncol=3)
 ax.set_ylim(miny * 100.0 - 5, maxy * 100.0 + 5)
-ax.xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y'))
+ax.set_xlim( min(valid), max(valid))
+days = (ets - sts).days  
+if days >= 3:
+    ax.xaxis.set_major_locator(
+                               mdates.DayLocator()
+                               )
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y'))
+else:
+    ax.xaxis.set_major_locator(
+                               mdates.AutoDateLocator(maxticks=10)
+                               )
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-I %p\n%d %b'))
+
+ax.set_title("ISUAG Station: %s Timeseries" % (nt.sts[station]['name']
+                                            ))
+
 
 print "Content-Type: image/png\n"
 plt.savefig( sys.stdout, format='png' )

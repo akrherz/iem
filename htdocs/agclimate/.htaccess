@@ -1,6 +1,7 @@
-Redirect /agclimate/index.html http://mesonet.agron.iastate.edu/agclimate/index.phtml
-Redirect /agclimate/index.php http://mesonet.agron.iastate.edu/agclimate/index.phtml
-Redirect /agclimate/index.pl http://mesonet.agron.iastate.edu/agclimate/index.phtml
+RewriteEngine On
+# Lots of old links out there to bad URIs
+RewriteRule ^index\.(html|pl|php)$ /agclimate/ [R]
+
 Redirect /agclimate/daily-pics http://mesonet.agron.iastate.edu/agclimate/daily_pics
 Redirect /agclimate/daily_pics http://mesonet.agron.iastate.edu/data/agclimate
 Redirect /agclimate/info.txt http://mesonet.agron.iastate.edu/agclimate/info.phtml
