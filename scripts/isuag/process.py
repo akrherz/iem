@@ -156,6 +156,7 @@ def insertData(s, e):
     """
     Actually put the data to the database, gasp!
     """
+    today = mx.DateTime.now().strftime("%Y%m%d")+"0000"
     ds = 0
     hs = 0
     skips = 0
@@ -166,7 +167,7 @@ def insertData(s, e):
                 continue
             d = obs[stid][tstring]
             #print stid, ts.strftime("%Y-%m-%d %H:%M:00-0600"), d.keys()
-            if d.has_key('c11') : # Daily Value
+            if tstring != today and d.has_key('c11') : # Daily Value
                 d['valid'] = tstring
                 d['station'] = stid
                 mydb.query("""DELETE from daily where station = '%s' and
