@@ -31,7 +31,7 @@ if (isset($_REQUEST["wfo"])){
 		$err = "Sorry, did not find any warnings for your selected WFO and
 		time period, please try again!";
 	} else {
-		$mesosite = iemdb("mesosite");
+		$mesosite = iemdb("mesosite", TRUE, TRUE);
 		pg_prepare($mesosite, "INSERT", "INSERT into racoon_jobs(wfo, sts, ets,
 		radar, nexrad_product) values ($1,$2,$3,$4,$5) returning jobid");
 		$rs = pg_execute($mesosite, "INSERT", array($wfo, 
