@@ -103,7 +103,9 @@ CREATE TABLE daily (
     c30h real,
     c30h_f character(1),
     c30l real,
-    c30l_f character(1)
+    c30l_f character(1),
+    c930 real,
+    c930_f character(1)
 );
 CREATE UNIQUE INDEX daily_idx ON daily USING btree (station, valid);
 
