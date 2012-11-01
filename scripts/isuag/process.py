@@ -8,7 +8,7 @@ import string
 import sys
 import traceback
 import network
-nt = network.Table("ISUAG", bypass=False)
+nt = network.Table("ISUAG")
 import pg
 mydb = pg.DB('isuag', 'iemdb')
 mydb.query("SET TIME ZONE 'CST6'")
