@@ -156,7 +156,7 @@ def insertData(s, e):
     """
     Actually put the data to the database, gasp!
     """
-    today = mx.DateTime.now().strftime("%Y%m%d")+"0000"
+    today = mx.DateTime.now().strftime("%Y-%m-%d")+" 00:00"
     ds = 0
     hs = 0
     skips = 0
