@@ -191,6 +191,12 @@ def insertData(s, e):
 
     print 'DB Daily Inserts: %s Hourly Inserts: %s Skips: %s' % (ds, hs, skips)
 
+def pretty_str(val):
+    """ Deal with None """
+    if val is None:
+        return ""
+    return val
+
 def printReport(ts):
     """
     Create a quasi useful report that we can send to folks interested in 
@@ -205,17 +211,17 @@ def printReport(ts):
   ---------------------------------------------
 """ % (now.strftime("%b %d, %Y")) )
 
-    fmt = "%-15s %4s %4s %4s %4s %4s %4s %4s %4s %4s\n"
+    fmt = "%-15s %4s %4s %4s %4s %4s %4s %4s %4s %5s\n"
     output.write(fmt % ('','c11','c12','c20','c30','c40','c80','c90','c70','Rain'))
     ids = obs.keys()
     ids.sort()
     for stid in ids:
         ob = obs[stid][now.strftime("%Y-%m-%d %H:%M")]
-        output.write(fmt % (nt.sts[stid]['name'], ob.get('c11_f', 'NA'), 
-                ob.get('c12_f', 'NA'), ob.get('c20_f', 'NA'), 
-                ob.get('c30_f', 'NA'), ob.get('c40_f', 'NA'), 
-                ob.get('c80_f', 'NA'), ob.get('c90_f', 'NA'), 
-                ob.get('c70_f', 'NA'), ob.get('c90', 'NA') ) )
+        output.write(fmt % (nt.sts[stid]['name'], pretty_str(ob.get('c11_f', 'NA')), 
+                pretty_str(ob.get('c12_f', 'NA')), pretty_str(ob.get('c20_f', 'NA')), 
+                pretty_str(ob.get('c30_f', 'NA')), pretty_str(ob.get('c40_f', 'NA')), 
+                pretty_str(ob.get('c80_f', 'NA')), pretty_str(ob.get('c90_f', 'NA')), 
+                pretty_str(ob.get('c70_f', 'NA')), pretty_str(ob.get('c90', 'NA') )) )
 
 
     output.write("""
