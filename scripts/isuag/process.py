@@ -156,9 +156,13 @@ def insertData(s, e):
     """
     Actually put the data to the database, gasp!
     """
+    ds = 0
+    hs = 0
+    skips = 0
     for stid in obs.keys():
         for tstring in obs[stid].keys():
             if compare_equal(stid, tstring):
+                skips += 1
                 continue
             d = obs[stid][tstring]
             #print stid, ts.strftime("%Y-%m-%d %H:%M:00-0600"), d.keys()
@@ -168,6 +172,7 @@ def insertData(s, e):
                 mydb.query("""DELETE from daily where station = '%s' and
                 valid = '%s' """ % (stid, d['valid']))
                 #try:
+                ds += 1
                 mydb.insert("daily", d)
                 #except:
                 #    continue
@@ -178,9 +183,12 @@ def insertData(s, e):
                 mydb.query("""DELETE from hourly where station = '%s' and
                 valid = '%s' """ % (stid, d['valid']))
                 #try:
+                hs += 1
                 mydb.insert("hourly", d)
                 #except:
                 #    continue
+
+    print 'DB Daily Inserts: %s Hourly Inserts: %s Skips: %s' % (ds, hs, skips)
 
 def printReport(ts):
     """
