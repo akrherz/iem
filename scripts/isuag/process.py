@@ -82,7 +82,7 @@ def prepareDB(s,e):
     sql = "DELETE from daily WHERE valid IN ('%s','%s')" % (dayOne, dayTwo) 
     mydb.query(sql)
 
-    sql = """DELETE from hourly WHERE valid >= '%s' and valid < '%s 23:59' 
+    sql = """DELETE from hourly WHERE valid > '%s' and valid < '%s 23:59' 
     """ % ( dayOne, e.strftime("%Y-%m-%d"))
     mydb.query(sql)
 
