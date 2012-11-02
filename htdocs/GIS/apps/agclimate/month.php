@@ -4,7 +4,8 @@ include_once "$rootpath/include/iemmap.php";
 include("$rootpath/include/database.inc.php");
 $dbconn = iemdb("isuag");
 $dvar = isset($_GET["dvar"]) ? $_GET["dvar"] : "c90";
-$rs = pg_prepare($dbconn, "SELECT", "select station, sum($dvar) as s from daily 
+$rs = pg_prepare($dbconn, "SELECT", "select station, sum($dvar) as s,
+		min(valid), max(valid) from daily 
    WHERE extract(month from valid) = $1 and
          extract(year from valid) = $2 GROUP by station");
 
@@ -21,8 +22,6 @@ $date = isset($_GET["date"]) ? $_GET["date"]: $year ."-". $month ."-". $day;
 $direct = isset($_GET["direct"]) ? $_GET['direct']: "";
 $ets = strtotime($date);
 $sts = mktime(0,0,0,$month,1,$year);
-$sdate = date("d M", $sts);
-$edate = date("d M Y", $ets);
 
 $myStations = $ISUAGcities;
 $height = 480;
@@ -61,10 +60,12 @@ $rs = pg_execute($dbconn, "SELECT", Array($month, $year));
 
 for ($i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
   $key = $row["station"];
-  if ($key == "A133259" or $key == "A130209") continue;
+  if ($key == "A133259" or $key == "A130219") continue;
 
   $val = $row["s"];
-
+  $sdate = strtotime( $row["min"] );
+  $edate = strtotime( $row["max"] );
+  
   // Red Dot... 
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
@@ -89,7 +90,7 @@ if ($i == 0)
 
 $title = Array("c90" => "Rainfall (inches)", "c70" => "Potential Evapotrans. (in)");
 
-iemmap_title($map, $img, $title[$dvar] ." [ $sdate thru ". $edate ." ]");
+iemmap_title($map, $img, $title[$dvar] ." [ ". date("d M", $sdate) ." thru ". date("d M Y", $edate) ." ]");
 $map->drawLabelCache($img);
 
 $url = $img->saveWebImage();

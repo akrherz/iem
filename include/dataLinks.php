@@ -27,8 +27,8 @@
 <tr>
   <td>
 <div style="padding: 5px;">
-      <A HREF="display.php?prod=10">This month evapotranspiration</A><br>
-      <A HREF="display.php?prod=11">This month rainfall</A><br>
+      <A HREF="display.php?prod=10">Monthly evapotranspiration</A><br>
+      <A HREF="display.php?prod=11">Monthly rainfall</A><br>
       <A HREF="display.php?prod=12">Standard Chill Units since 1 Sept</A><br>
 </div>
   </td>

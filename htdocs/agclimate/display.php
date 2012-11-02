@@ -2,9 +2,12 @@
  include("../../config/settings.inc.php");
  $TITLE = "ISU Ag Climate";
  $THISPAGE = "networks-agclimate";
+ include "$rootpath/include/forms.php";
  include("$rootpath/include/header.php"); 
  $prod = isset($_GET["prod"]) ? intval($_GET["prod"]) : 1;
-
+ $year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : date("Y");
+ $month = isset($_REQUEST["month"]) ? intval($_REQUEST["month"]) : date("m");
+ 
 $old2new = Array(
  "/data/agclimate/air-temp-out.png" => 1,
  "/data/agclimate/4in-temp-out.png" => 2,
@@ -73,13 +76,13 @@ often too low.",
  "desc" => "High and low dew points for the day."
 ),
 10 => Array(
- "mapurl" => "$rooturl/data/agclimate/mon-et-out.png",
+ "mapurl" => "$rooturl/GIS/apps/agclimate/month.php?dvar=c70&direct=yes&year=$year&month=$month",
  "desc" => "Monthly total of daily maximum potential evapotranspiration. The
             daily value is calculated via a Penman formulation with a crop
             coefficient of 1.  The value would be a theoretical maximum."
 ),
 11 => Array(
- "mapurl" => "$rooturl/data/agclimate/mon-prec-out.png",
+ "mapurl" => "$rooturl/GIS/apps/agclimate/month.php?dvar=c90&direct=yes&year=$year&month=$month",
  "desc" => "Monthly total of daily reported precipitation. This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
 used with extreme caution.  For various reasons, the reported values are 
 often too low."
@@ -101,6 +104,16 @@ often too low."
 <table style="float: left;" width="100%">
 <TR>
 <TD valign="top">
+<?php 
+if ($prod == 10 || $prod == 11) {
+  echo "<form method='GET' name='ts'>";
+  echo "<input type='hidden' value='$prod' name='prod'>";
+  echo "<strong>Select Year: </strong>". yearSelect(1987, $year);
+  echo "<strong>Select Month: </strong>". monthSelect($month, "month");
+  echo "<input type='submit' value='Update Plot' />";
+  echo '</form>';
+}
+?>
 
 <img src="<?php echo $data[$prod]["mapurl"]; ?>" ALT="ISU Ag Climate" style="border: 1px solid #000; ">
 
