@@ -21,7 +21,7 @@ def make_time( year, month, day, hhmm ):
     hhmm = hhmm.strip()
     ts = mx.DateTime.DateTime(int(year), int(month), int(day))
     if hhmm == '2400':
-        hhmm == '0000'
+        hhmm = '0000'
         ts += mx.DateTime.RelativeDateTime(days=1)
     ts += mx.DateTime.RelativeDateTime(hour=int(hhmm[:-2]))
     return ts
@@ -108,7 +108,6 @@ def process(fn, s, e):
         # If this row is an hourly ob
         if int(dc[0]) == 100:
             ts = make_time( tokens[2], tokens[0], tokens[1], tokens[3])
-           
         if ts < e:
             tstring = ts.strftime("%Y-%m-%d %H:%M")
             for i in range(len(dcols)):
