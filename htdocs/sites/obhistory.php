@@ -79,7 +79,7 @@ $dbconn = iemdb($db);
 pg_query($dbconn, "SET TIME ZONE '". $metadata["tzname"] ."'");
 $rs = pg_prepare($dbconn, "_MYSELECT", $sql);
 $rs = pg_execute($dbconn, "_MYSELECT", Array($station, $network,
-	date("Y-m-d", $date), date("Y-m-d", $date + 86400)));
+	date("Y-m-d", $date), date("Y-m-d", $date + 90400)));
 $table = "";
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 	$table .= formatter($i, $row);
