@@ -42,10 +42,10 @@ for row in  data[1:]:
 
   print "NEW COCORAHS SITE", id, name, cnty, lat, lon
   
-  sql = "INSERT into stations(id, synop, name, state, country, network, online,\
-         geom, county, plot_name \
-         ) VALUES ('%s',99999, '%s', '%s', 'US', '%sCOCORAHS', 't',\
-         'SRID=4326;POINT(%s %s)', '%s', '%s')" % (id, name,\
+  sql = """INSERT into stations(id, synop, name, state, country, network, online,
+         geom, county, plot_name 
+         ) VALUES ('%s',99999, '%s', '%s', 'US', '%sCOCORAHS', 't',
+         'SRID=4326;POINT(%s %s)', '%s', '%s')""" % (id, name,
          state, state, lon, lat, cnty, name)
   try:
     mcursor.execute(sql)
