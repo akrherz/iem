@@ -1,61 +1,62 @@
 import sys
-import pg, mx.DateTime
-from pyIEM import iemdb
-i = iemdb.iemdb()
-mydb = i['coop']
+import pg
+import mx.DateTime
+import iemdb
+import psycopg2.extras
+COOP = iemdb.connect('coop', bypass=True)
+ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
+ccursor2 = COOP.cursor()
 
 sts = mx.DateTime.DateTime( int(sys.argv[1]), int(sys.argv[2]), 1)
 ets = sts + mx.DateTime.RelativeDateTime(months=1)
 
-cnt = {'climate': {'max_high': 0, 'min_high': 0, 'max_low': 0, 'min_low': 0, 'max_precip': 0},
-       'climate51': {'max_high': 0, 'min_high': 0, 'max_low': 0, 'min_low': 0, 'max_precip': 0}
+cnt = {'climate': {'max_high': 0, 'min_high': 0, 'max_low': 0, 
+                   'min_low': 0, 'max_precip': 0},
+       'climate51': {'max_high': 0, 'min_high': 0, 'max_low': 0, 
+                     'min_low': 0, 'max_precip': 0}
       }
 
 def update(tbl, col, val, yr, station, valid):
-  sql = "UPDATE %s SET %s = %s, %s_yr = %s WHERE station = '%s' and \
-       valid = '%s'" % (tbl, col, val, col, yr, station, valid)
-  mydb.query(sql)
-  cnt[tbl][col] += 1
+    sql = """UPDATE %s SET %s = %s, %s_yr = %s WHERE station = '%s' and 
+       valid = '%s'""" % (tbl, col, val, col, yr, station, valid)
+    ccursor2.execute(sql)
+    cnt[tbl][col] += 1
 
 for tbl in ['climate51','climate']:
-  # Load up records
-  sql = "SELECT * from %s" % (tbl,)
-  rs = mydb.query(sql).dictresult()
-  records = {}
-  for i in range(len(rs)):
-    station = rs[i]['station']
-    if (not records.has_key(station)):
-      records[station] = {}
-    records[station][rs[i]['valid']] = rs[i]
+    # Load up records
+    sql = "SELECT * from %s" % (tbl,)
+    ccursor.execute( sql )
+    records = {}
+    for row in ccursor:
+        station = row['station']
+        if (not records.has_key(station)):
+            records[station] = {}
+        records[station][row['valid'].strftime("%Y-%m-%d")] = row
 
-  # Now, load up obs!
-  sql = "SELECT * from alldata_ia WHERE day >= '%s' and day < '%s' and high is not null and low is not null" % \
-        (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d") )
-  rs = mydb.query(sql).dictresult()
-  for i in range(len(rs)):
-    dkey = "2000-%s" % (rs[i]['day'][5:], )
-    stid = rs[i]['station']
-    if (not records.has_key(stid)):
-      continue
-    r = records[stid][dkey]
-    if (float(rs[i]['high']) > r['max_high']):
-      #print "NEW RECORD MAX HIGH [%s,%s] NEW %s OLD %s" % (stid, rs[i]['day'], rs[i]['high'], r['max_high'])
-      update(tbl, 'max_high', rs[i]['high'], rs[i]['day'][:4], stid, dkey)
+    # Now, load up obs!
+    sql = """SELECT * from alldata_ia WHERE day >= '%s' 
+        and day < '%s' and high is not null and low is not null""" % (
+        sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d") )
+    ccursor.execute(sql)
+    for row in ccursor:
+        dkey = "2000-%s" % (row['day'].strftime("%m-%d"), )
+        stid = row['station']
+        if not records.has_key(stid):
+            continue
+        r = records[stid][dkey]
+        if row['high'] > r['max_high']:
+            update(tbl, 'max_high', row['high'], row['day'].year, stid, dkey)
 
-    if (float(rs[i]['high']) < r['min_high']):
-      #print "NEW RECORD MIN HIGH [%s,%s] NEW %s OLD %s" % (stid, rs[i]['day'], rs[i]['high'], r['min_high'])
-      update(tbl, 'min_high', rs[i]['high'], rs[i]['day'][:4], stid, dkey)
+        if row['high'] < r['min_high']:
+            update(tbl, 'min_high', row['high'], row['day'].year, stid, dkey)
 
-    if (float(rs[i]['low']) > r['max_low']):
-      #print "NEW RECORD MAX LOW [%s,%s] NEW %s OLD %s" % (stid, rs[i]['day'], rs[i]['low'], r['max_low'])
-      update(tbl, 'max_low', rs[i]['low'], rs[i]['day'][:4], stid, dkey)
+        if row['low'] > r['max_low']:
+            update(tbl, 'max_low', row['low'], row['day'].year, stid, dkey)
 
-    if (float(rs[i]['low']) < r['min_low']):
-      #print "NEW RECORD MIN LOW [%s,%s] NEW %s OLD %s" % (stid, rs[i]['day'], rs[i]['low'], r['min_low'])
-      update(tbl, 'min_low', rs[i]['low'], rs[i]['day'][:4], stid, dkey)
+        if row['low'] < r['min_low']:
+            update(tbl, 'min_low', row['low'], row['day'].year, stid, dkey)
 
-    if (float(rs[i]['precip']) > r['max_precip']):
-      #print "NEW RECORD MAX RAIN [%s,%s] NEW %s OLD %s" % (stid, rs[i]['day'], rs[i]['precip'], r['max_precip'])
-      update(tbl, 'max_precip', rs[i]['precip'], rs[i]['day'][:4], stid, dkey)
+        if  row['precip'] > r['max_precip']:
+            update(tbl, 'max_precip', row['precip'], row['day'].year, stid, dkey)
 
 print cnt

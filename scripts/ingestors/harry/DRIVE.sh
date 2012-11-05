@@ -17,4 +17,4 @@ echo "Redoing estimates, this will take a bit!"
 # Estimate ia0000
 python ../../climodat/compute_0000.py $1 $2 >& /dev/null
 # Compute new records
-/mesonet/python/bin/python new_records.py $1 $2
+python new_records.py $1 $2
