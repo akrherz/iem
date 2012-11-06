@@ -58,9 +58,11 @@ function genFeature()
 
 
   $fref = "/mesonet/share/features/". $row["imageref"] ."_s.png";
-  list($width, $height, $type, $attr) = @getimagesize($fref);
-  $width += 6;
-
+  $width = 320;
+  $height = 240;
+  if (is_file($fref)){
+	  list($width, $height, $type, $attr) = @getimagesize($fref);
+  }
   $s = "<span style=\"font-size: larger; font-weight: bold;\">". $row["title"] ."</span><br />\n";
   $s .= "<span style=\"font-size: smaller; float: left;\">Posted: " . $row["webdate"] ."</span>";
   $s .= printTags($tags);
@@ -73,7 +75,7 @@ $s .= "<a class=\"button right\" href=\"$rooturl/onsite/features/tags/\">Tags</a
   
   
  /* Feature Image! */
-  $s .= "<div style=\"margin-left: 5px; border: 1px #f3f3f3 solid; float: right; padding: 3px; width: ${width}px;\"><a href=\"$rooturl/onsite/features/". $row["imageref"] .".png\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.png\" alt=\"Feature\" /></a><br />". $row["caption"] ."</div>";
+  $s .= "<div style=\"margin-left: 5px; border: 1px #f3f3f3 solid; float: right; padding: 3px; width: ". ($width + 6) ."px;\"><a href=\"$rooturl/onsite/features/". $row["imageref"] .".png\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.png\" alt=\"Feature\" width=\"$width\" height=\"$height\"/></a><br /><span style=\"font-size: smaller;\">". $row["caption"] ."</span></div>";
 
   $s .= "<br /><div class='story' style=\"text-align: justify;\">". $row["story"] ."</div>";
 
