@@ -1,13 +1,13 @@
-AddHandler cgi-script .py
-Options +ExecCGI
+#AddHandler cgi-script .py
+#Options +ExecCGI
 
-AuthUserFile /mesonet/www/apps/iemwebsite/config/admin.users
-AuthGroupFile /dev/null
-AuthName Administrative
-AuthType Basic
+#AuthUserFile /mesonet/www/apps/iemwebsite/config/admin.users
+#AuthGroupFile /dev/null
+#AuthName Administrative
+#AuthType Basic
 
-<LIMIT GET>
-order deny,allow
-require user akrherz
-</LIMIT>
+#<LIMIT GET>
+#order deny,allow
+#require user akrherz
+#</LIMIT>
 

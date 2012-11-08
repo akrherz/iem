@@ -1,7 +1,7 @@
 #!/usr/bin/python
 """
  1. Connect to google spreadsheets and get me data!
-$Id$:
+
 """
 
 import sys

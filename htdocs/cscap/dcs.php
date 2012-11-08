@@ -24,16 +24,76 @@ xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
 xmlns="http://www.w3.org/TR/REC-html40">
 
 <head>
-  <link rel="stylesheet" type="text/css" media="screen" href="dcs.css" />
+ <title>CSCAP Data Collection Sheet Interface</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+  
+ <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
+ <script src="https://www.google.com/jsapi?key=ABQIAAAArXt77YptylBNPFEy0AgJxBQV4szfgV8zGZZkur1B-B3W8b5AThTSlomZliOt8JQHJGH1m63sgDu1rg" type="text/javascript"></script>
+
+<script type="text/javascript">
+var clientId = '828718626869-s70grf0hkkfhujtf9u53138n6e5vdvc9.apps.googleusercontent.com';
+var apiKey = 'AIzaSyBUkRDnhdnp-AuEgLHtSsn6hK0QHuYJ3m0';
+var scopes = 'https://sites.google.com/feeds/ https://spreadsheets.google.com/feeds/ https://docs.google.com/feeds/ https://docs.googleusercontent.com/';
+
+$(function(){
+	$( "#field-tabs" ).tabs();
+});
+
+function handleClientLoad() {
+	  gapi.client.setApiKey(apiKey);
+	  window.setTimeout(checkAuth,1);
+	}
+
+	function checkAuth() {
+	  gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: true}, handleAuthResult);
+	}
+
+	function handleAuthResult(authResult) {
+	  var authorizeButton = document.getElementById('authorize-button');
+	  if (authResult && !authResult.error) {
+	    authorizeButton.style.visibility = 'hidden';
+
+	    gapi.client.load("drive", "v2", function(){
+
+		    });
+	    gapi.client.load("fusiontables", "v1", function(){
+	    	gapi.client.fusiontables.table.insert({'tableID':"1_rt_nw7XmSic3L7rbA5Ok9BbrVyrYiP9sIZRUj4"}, function(){ console.log('here');})
+	    });
+	    //google.load("jquery", "1.7.1", {callback : function(){} });
+	    //google.load("jqueryui", "1.8.16", {callback : function(){} });
+	   
+
+	  } else {
+	    authorizeButton.style.visibility = '';
+	    authorizeButton.onclick = handleAuthClick;
+	  }
+	}
+
+	function handleAuthClick(event) {
+	  gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
+	  return false;
+	}
+
+function OnLoadCallback(){
+
+}
+function myinit(){
+}
+
+</script>
 </head>
 
-<body lang=EN-US style='tab-interval:.5in'>
+<body onload="javascript: handleClientLoad();">
 
-<div class=WordSection1>
+<input type="button" id="authorize-button" value="Auth!" />
 
 <img src="DataCollectionSheet_files/image001.jpg">
 
 <h3>Data Collection Sheet</h3>
+
+<form method="POST" name="theform">
 
 <div style="border:1px #000 solid;">
 <table>
@@ -102,8 +162,15 @@ xmlns="http://www.w3.org/TR/REC-html40">
 </tr>
 </table>
 
+<div id="field-tabs">
+    <ul>
+        <li><a href="#tabs-1">Field One</a></li>
+        <li><a href="#tabs-2">Field Two</a></li>
+    </ul>
+
 <?php for($field=1;$field<3;$field++){
-  echo "<div style='background:#EEEEEE;'><strong>Field ${field}</strong>
+    echo "<div id='tabs-${field}'>";
+	echo "<div style='background:#EEEEEE;'><strong>Field ${field}</strong>
    <table><tr>". tdgen("Unique Name", "field${field}_name") ."</tr></table>
 		</div>";
   echo "<p>Cropping system for this field ". radio("field${field}_system", Array(
@@ -225,804 +292,78 @@ xmlns="http://www.w3.org/TR/REC-html40">
 	echo "</tr></table>";
   	
   } // End of cover
+  echo "</div>";
 } // End of field loop 
+
+echo "</div>";
+
+$conservation = Array(
+"grassed_waterways" => "Grassed waterways",
+"contour_buffer_strips" => "Contour buffer strips",
+"filter_strips" => "Filter strips along waterways and/or field borders",
+"windbreaks" => "Windbreaks and shelterbelts",
+"terraces" => "Terraces",
+"drainage_structures" => "Drainage/runoff treatment structures (e.g., nutrient removal wetlands, bioreactors)",
+"conversion" => "Whole portions of cropland converted to grass/trees",
+"cover_crops" => "Cover crops",
+"extended_rotations" => "Extended rotations/diversified with other grains/forage",
+"reduced_tillage" => "Reduced tillage (i.e. strip, ridge)",
+"no_till" => "No-till",
+"nutrient" => "Nutrient management (identify practices)", 
+"canopy_sensors" => "Canopy sensors for nitrogen deficiency",
+"ipm" => "IPM (identify practices)", 
+"control_structures" => "Use of control structures to drain and store water depending on crop needs and soil conditions (drainage water management, not just tile)",
+"precision" => "Precision agriculture (identify practices)" 
+);
+
 ?>
 
-<div class=WordSection2>
+<h3>Conservation Questions</h3>
 
+<p>1. What conservation practices are you already implementing on these fields 
+or on your entire farm (See list below)? Please include land that is set aside 
+in CRP or other government programs.
 
+<table>
+<tr><th>Conservation Practices</th><td>Field 1</td><td>Field 2</td><td>On other land you farm</td></tr>
+<?php 
+while (list($k,$v) = each($conservation)){
+  if ($k == 'precision' || $k == 'ipm' || $k == 'nutrient'){
+  }
+  echo sprintf("<tr><th>%s</th>
+	<td><input type='text' name='field1_conserv_${k}'></td>
+	<td><input type='text' name='field2_conserv_${k}'></td>
+	<td><input type='text' name='fieldOther_conserv_${k}'></td>
+	</tr>", $v);
+} // End of conservation
+echo "<tr><th>Other</th>";
+echo "<td><input type='text' name='field1_other_type'></td>";
+echo "<td><input type='text' name='field2_other_type'></td>";
+echo "<td><input type='text' name='fieldOther_other_type'></td>";
+echo "</tr>";
 
+echo "<tr><th>Other</th>";
+echo "<td><input type='text' name='field1_other2_type'></td>";
+echo "<td><input type='text' name='field2_other2_type'></td>";
+echo "<td><input type='text' name='fieldOther_other2_type'></td>";
+echo "</tr>";
+echo "</table>";
+?>
 
-<div class=WordSection10>
+<p>2. Do you have any management challenges on these two fields, which might 
+inspire you to consider new management strategies [identify conservation goals]? 
+(e.g. drainage management, greater erosion control, pests/disease control, 
+nitrogen deficiency, diversified income streams?
 
-<p class=MsoNormal align=center style='margin-bottom:6.0pt;text-align:center'><b
-style='mso-bidi-font-weight:normal'><span style='font-size:16.0pt;mso-bidi-font-size:
-11.0pt;line-height:115%;font-family:"Times New Roman","serif"'>Conservation
-Questions<o:p></o:p></span></b></p>
+<textarea name='challenges'></textarea>
 
-<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
-margin-left:.25in;margin-bottom:.0001pt;text-indent:-.25in'><span
-style='font-size:12.0pt;mso-bidi-font-size:14.0pt;line-height:115%;font-family:
-"Times New Roman","serif";mso-fareast-font-family:Arial;mso-bidi-font-family:
-Arial;position:relative;top:.5pt;mso-text-raise:-.5pt'>1.</span><span
-style='font-size:12.0pt;mso-bidi-font-size:10.0pt;line-height:115%;font-family:
-"Times New Roman","serif";mso-fareast-font-family:"Times New Roman"'><span
-style='mso-tab-count:1'>�� </span>What conservation practices are you already
-implementing on these fields or on your entire farm (<b style='mso-bidi-font-weight:
-normal'>See list below</b>)? Please include land that is set aside in CRP or
-other government programs.</span><span style='font-family:"Times New Roman","serif"'><o:p></o:p></span></p>
+<p>3. Other Notes:
 
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
+<textarea name='notes'></textarea>
 
-<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
- style='margin-left:23.4pt;border-collapse:collapse;border:none;mso-border-alt:
- solid windowtext .5pt;mso-yfti-tbllook:1184;mso-padding-alt:0in 5.4pt 0in 5.4pt'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
-  <td width=337 valign=top style='width:252.9pt;border:solid windowtext 1.0pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><b style='mso-bidi-font-weight:normal'><span style='font-family:"Times New Roman","serif"'>Conservation
-  Practices<o:p></o:p></span></b></p>
-  </td>
-  <td width=110 valign=top style='width:1.15in;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
-  text-align:center;line-height:normal'><b style='mso-bidi-font-weight:normal'><span
-  style='font-family:"Times New Roman","serif"'>Field 1<o:p></o:p></span></b></p>
-  </td>
-  <td width=110 valign=top style='width:1.15in;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
-  text-align:center;line-height:normal'><b style='mso-bidi-font-weight:normal'><span
-  style='font-family:"Times New Roman","serif"'>Field 2<o:p></o:p></span></b></p>
-  </td>
-  <td width=164 valign=top style='width:123.3pt;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><b style='mso-bidi-font-weight:normal'><span style='font-family:"Times New Roman","serif"'>On
-  other land you farm<o:p></o:p></span></b></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:1;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Grassed waterways<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:2;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Contour buffer strips<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:3;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Filter strips along
-  waterways and/or field borders<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:4;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Windbreaks and shelterbelts<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:5;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Terraces<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:6;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  6.0pt;margin-left:0in;line-height:normal'><span style='font-family:"Times New Roman","serif";
-  mso-bidi-font-family:"Times New Roman";mso-bidi-theme-font:minor-bidi'>Drainage/runoff
-  treatment structures (e.g., nutrient removal wetlands, bioreactors)<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  6.0pt;margin-left:0in;line-height:normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  6.0pt;margin-left:0in;line-height:normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  6.0pt;margin-left:0in;line-height:normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:7;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Whole portions of cropland
-  converted to grass/trees<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:8;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Cover crops<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:9;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Extended
-  rotations/diversified with other grains/forage<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:10;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Reduced tillage (i.e.
-  strip, ridge)<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:11;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>No-till<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:12;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Nutrient management (identify
-  practices)<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:13;height:.4in'>
-  <td width=337 valign=top style='width:252.9pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Canopy sensors for nitrogen
-  deficiency<o:p></o:p></span></p>
-  </td>
-  <td width=110 valign=top style='width:1.15in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 valign=top style='width:1.15in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 valign=top style='width:123.3pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:14;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>IPM (identify practices)<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:15;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  6.0pt;margin-left:0in;line-height:normal'><span style='font-family:"Times New Roman","serif";
-  mso-bidi-font-family:"Times New Roman";mso-bidi-theme-font:minor-bidi'>Use of
-  control structures to drain and store water depending on crop needs and soil
-  conditions (�drainage water management,� not just tile)<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  6.0pt;margin-left:0in;line-height:normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  6.0pt;margin-left:0in;line-height:normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  6.0pt;margin-left:0in;line-height:normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:16;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Precision agriculture (identify
-  practices)<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:17;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif";mso-bidi-font-family:
-  "Times New Roman";mso-bidi-theme-font:minor-bidi'>Other:_____________________________________<o:p></o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:18;mso-yfti-lastrow:yes;height:.4in'>
-  <td width=337 style='width:252.9pt;border:solid windowtext 1.0pt;border-top:
-  none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal;tab-stops:right 237.15pt'><span style='font-family:"Times New Roman","serif";
-  mso-bidi-font-family:"Times New Roman";mso-bidi-theme-font:minor-bidi'>Other:
-  <u><span style='mso-tab-count:1'>������������������������������������������������������������������� </span><o:p></o:p></u></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=110 style='width:1.15in;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
-  <td width=164 style='width:123.3pt;border-top:none;border-left:none;
-  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:.4in'>
-  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
-</table>
+<p><input type="submit" value="Save Data!" />
 
-</div>
-
-<span style='font-size:11.0pt;line-height:115%;font-family:"Times New Roman","serif";
-mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;mso-ansi-language:
-EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA'><br clear=all
-style='page-break-before:always;mso-break-type:section-break'>
-</span>
-
-<div class=WordSection11>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
-margin-left:.25in;margin-bottom:.0001pt;text-indent:-.25in'><span
-style='font-size:12.0pt;mso-bidi-font-size:10.0pt;line-height:115%;font-family:
-"Times New Roman","serif";mso-fareast-font-family:"Times New Roman"'>2.<span
-style='mso-tab-count:1'>�� </span>Do you have any management challenges on
-these two fields, which might inspire you to consider new management strategies
-[identify conservation goals]? (<span class=GramE>e.g</span>. drainage
-management,<span style='mso-spacerun:yes'>� </span>greater erosion control,
-pests/disease control, nitrogen deficiency, diversified income streams?</span><span
-style='font-family:"Times New Roman","serif"'><o:p></o:p></span></p>
-
-<table class=MsoTableGrid border=0 cellspacing=0 cellpadding=0
- style='margin-left:23.4pt;border-collapse:collapse;border:none;mso-yfti-tbllook:
- 1184;mso-padding-alt:0in 5.4pt 0in 5.4pt;mso-border-insideh:none;mso-border-insidev:
- none'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:1'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:2'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:3'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:4'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:5;mso-yfti-lastrow:yes'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
-</table>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:6.0pt;line-height:normal'><b
-style='mso-bidi-font-weight:normal'><span style='font-family:"Times New Roman","serif"'>Other
-Notes:<o:p></o:p></span></b></p>
-
-<table class=MsoTableGrid border=0 cellspacing=0 cellpadding=0
- style='margin-left:23.4pt;border-collapse:collapse;border:none;mso-yfti-tbllook:
- 1184;mso-padding-alt:0in 5.4pt 0in 5.4pt;mso-border-insideh:none;mso-border-insidev:
- none'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:1'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:2'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:3'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:4'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:5'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:6'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:7'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:8;mso-yfti-lastrow:yes'>
-  <td width=697 valign=top style='width:522.9pt;border:none;border-bottom:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;
-  mso-border-bottom-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <p class=MsoNormal style='margin-top:6.0pt;margin-right:0in;margin-bottom:
-  0in;margin-left:0in;margin-bottom:.0001pt;line-height:150%'><span
-  style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-  </td>
- </tr>
-</table>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-style='font-family:"Times New Roman","serif"'><o:p>&nbsp;</o:p></span></p>
-
-</div>
+</form>
 
 </body>
 
