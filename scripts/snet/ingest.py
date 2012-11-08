@@ -190,6 +190,9 @@ def sendWindAlert(id, alertSPED, alertDrctTxt, myThreshold):
     if (not locs.has_key(id)):
         logger.info("\nCan't Alert ID: %s\n" % (id,) )
         return
+    # Unreliable....
+    if locs[id]['tv'] == 'KIMT':
+        return
     form = {}
     form["threshold"] = myThreshold
     form["sname"] = locs[id]["name"]
