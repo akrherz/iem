@@ -16,6 +16,7 @@ function getValuesFromForm(){
 	var values = {};
 	/* Get radio's that are checked */
 	$("#theform input[type=radio]:checked").each(function(){
+		//console.log("Found radio "+ this.name);
         values[ this.name.replace(/_/g,"").toLowerCase() ] = $(this).val();
     });
 	
@@ -33,10 +34,10 @@ function getValuesFromForm(){
 
 function updateRow(){
 	if (currentEntry[0] == null){
-		console.log("updateRow aborted due to null");
+		//console.log("updateRow aborted due to null");
 		return;
 	}
-	var values = getVavluesFromForm();
+	var values = getValuesFromForm();
     
    	$(currentEntry).each(function(i,ce){
    		$(ce).children().each(function(j,c){
@@ -45,7 +46,7 @@ function updateRow(){
     		}
 		});
 		uri = $($(ce).find('link[rel=edit]')).attr('href');
-		console.log("looping over i "+ i +" uri is "+ uri);
+		//console.log("looping over i "+ i +" uri is "+ uri);
   		if (uri === undefined || uri == null) return;
 		$.ajax({ // ?sq=farmercode=1
   			url: 'ajax-proxy.php?csurl='+ uri,
@@ -56,8 +57,12 @@ function updateRow(){
   			processData : false,
   			contentType: 'application/atom+xml',
   			type : 'PUT',
+	  		error: function(data, status){
+	  			alert("Encountered error: "+ data);
+	  		},
   			success: function(data, status) {
 				currentEntry[i] = data;
+				if (i == 0) alert("Entry updated!");
   			}
   		});		
    	});
@@ -107,7 +112,10 @@ function addRow(){
 	  		contentType: 'application/atom+xml',
 	  		type : 'POST',
 	  		success: function(data, status) {
-				console.log("added row to i "+ i);
+	  			if (i == 0) alert("Saved Entry, thank you!");
+	  		},
+	  		error: function(data, status){
+	  			alert("Encountered error: "+ data);
 	  		}
 	  	});
     });
@@ -123,7 +131,10 @@ function getSpreadsheets(){
 		  url: spreadkey,
 		  headers: {
 		    'Authorization': 'Bearer ' + access_token
-		  },
+		  },		  
+	  	  error: function(data, status){
+	  			alert("Encountered error: "+ data);
+	  	  }, 
 		  success: function(data, status) {
 			// Save this object back to globals for later use
 		  	spreadsheetDocs[i] = $(data);
@@ -144,14 +155,18 @@ function getSpreadsheets(){
 }
 
 function setFormValue(key, val){
+	//console.log('Setting form key '+ key +' value '+ val);
 	l = $('#theform [name='+key+']');
-	if (l.length == 0) return;
+	if (l.length == 0){
+		console.log("Failed to find form key "+ key);
+		return;
+	}
 	if (l.length == 1){
 		$(l).val( val);
 		return;
 	}
 	/* Trickier radio buttons! */
-	console.log("RADIO "+ key );
+	//console.log("RADIO "+ key );
 	$(l[0]).attr("checked", true);
 	l = $('#theform [name='+key+'][value='+val+']');
 	if (l.length == 1){
@@ -171,20 +186,20 @@ function loadEntryInfoForm(i){
 
 function setFarmer(farmercode){
 	if (farmercode == 'invalid') return;
-	currentEntry = [null, null, null, null];
+	currentEntry = [null, null, null];
 	$(spreadsheetDocs).each(function(i, spreadsheetDoc){
 		var index = i;
 		spreadsheetDoc.find('entry').each(function(i,x){
-    	thisEntry = x;
-    	$(x).children().each(function(j,c){
-    		if (c.nodeName == 'gsx:farmercode'){
-    			if ($(c).text() == farmercode){
-    				currentEntry[index] = thisEntry;
-    				loadEntryInfoForm(i);
+    		thisEntry = x;
+    		$(x).children().each(function(j,c){
+    			if (c.nodeName == 'gsx:farmercode'){
+    				if ($(c).text() == farmercode){
+    					currentEntry[index] = thisEntry;
+    					loadEntryInfoForm(index);
+    				}
     			}
-    		}
+    		});
     	});
-    });
 	});
     editting = true;
 }
@@ -215,7 +230,7 @@ function setSelector(farmercodes){
 }
 
 function handleClientLoad() {
-	console.log("handleClientLoad() called");
+	//console.log("handleClientLoad() called");
 	  gapi.client.setApiKey(apiKey);
 	  window.setTimeout(checkAuth,1);
 	}
@@ -230,23 +245,11 @@ function handleClientLoad() {
 	  if (authResult && !authResult.error) {
 	  	access_token = authResult.access_token;
 	  	getSpreadsheets();
-	  	//service.setHeaders({'Authorization': 'Bearer '+ access_token});
-	  	//service.getFeed('https://spreadsheets.google.com/feeds/list/0AqZGw0coobCxdE9wN2J4aVE1bUthdWFsWjNrYURHWGc/1/private/full', function(){ console.log('here'); }, function(){ console.log('there'); });
 		// Subtract five minutes from expires_in to ensure timely refresh
 		var authTimeout = (authResult.expires_in - 5 * 60) * 1000;
 		setTimeout(checkAuth, authTimeout);
 	    notAuthorizedDiv.style.display = 'none';
-	    authorizedDiv.style.display = 'block';
-
-	    //gapi.client.load("drive", "v2", function(){
-//
-		//    });
-	   //gapi.client.load("fusiontables", "v1", function(){
-	    //	gapi.client.fusiontables.table.insert({'tableID':"1_rt_nw7XmSic3L7rbA5Ok9BbrVyrYiP9sIZRUj4"}, function(){ console.log('here');})
-	    //});
-	    //google.load("jquery", "1.7.1", {callback : function(){} });
-	    //google.load("jqueryui", "1.8.16", {callback : function(){} });
-	   
+	    authorizedDiv.style.display = 'block';	   
 
 	  } else {
 
