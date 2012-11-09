@@ -92,7 +92,7 @@ function addRow(){
     	//console.log("prop "+ prop +" n "+ n);
     	v = values[prop];
     	if (v == '' || v == null ) v = " ";
-    	x[n].push("<gsx:"+ prop +">"+ v +"</gsx:"+ prop +">");
+    	x[n].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");
     }
     $(x).each(function(i,xi){
     	if (i > 0){
