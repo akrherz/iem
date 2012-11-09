@@ -1,9 +1,21 @@
-<?php 
+<?php
+if (isset($_REQUEST["farmcode"])){
+	
+}
+
+function get_field($varname){
+	global $fields;
+	$value = "";
+	if (array_key_exists( $varname, $_REQUEST)){
+		$value = $_REQUEST[$varname];
+	}
+	return $value;
+}
 
 function tdgen($label, $varname, $inputwidth=40){
-  return sprintf("<th>%s:</th>
-  		<td><input type=\"text\" name=\"%s\" size=\"%s\"></td>",
-  		$label, $varname, $inputwidth);
+	return sprintf("<th>%s:</th>
+  		<td><input type=\"text\" name=\"%s\" size=\"%s\" value=\"%s\"></td>",
+  		$label, $varname, $inputwidth, get_field($varname));
 }
 function tdyn($label, $varname){
 	return sprintf("<th>%s</th><td><input type=\"radio\" name=\"%s\" value=\"yes\">Yes <input type=\"radio\" name=\"%s\" value=\"no\">No</td>",
@@ -31,13 +43,16 @@ xmlns="http://www.w3.org/TR/REC-html40">
     <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
     <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
   
- <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
- <script src="https://www.google.com/jsapi?key=ABQIAAAArXt77YptylBNPFEy0AgJxBQV4szfgV8zGZZkur1B-B3W8b5AThTSlomZliOt8JQHJGH1m63sgDu1rg" type="text/javascript"></script>
-
+ 
+ 
 <script type="text/javascript">
 var clientId = '828718626869-s70grf0hkkfhujtf9u53138n6e5vdvc9.apps.googleusercontent.com';
 var apiKey = 'AIzaSyBUkRDnhdnp-AuEgLHtSsn6hK0QHuYJ3m0';
 var scopes = 'https://sites.google.com/feeds/ https://spreadsheets.google.com/feeds/ https://docs.google.com/feeds/ https://docs.googleusercontent.com/';
+var service;
+var access_token;
+var entry;
+var spreadkey = 'https://spreadsheets.google.com/feeds/list/0AqZGw0coobCxdG1HUFk5YXI3TzRlT1FfV0kzWXFEVVE/1/private/full';
 
 $(function(){
 	$( "#field-tabs" ).tabs();
@@ -45,59 +60,37 @@ $(function(){
 	$( "#field2_tabs" ).tabs();
 	$( "#field1_ctabs" ).tabs();
 	$( "#field2_ctabs" ).tabs();
+	google.load("gdata", "2.x", {
+		callback: function() {
+			service = new google.gdata.client.GoogleService('testapp');
+			
+		}});
 });
 
-function handleClientLoad() {
-	  gapi.client.setApiKey(apiKey);
-	  window.setTimeout(checkAuth,1);
-	}
+function init(){
 
-	function checkAuth() {
-	  gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: true}, handleAuthResult);
-	}
-
-	function handleAuthResult(authResult) {
-	  var authorizeButton = document.getElementById('authorize-button');
-	  if (authResult && !authResult.error) {
-	    authorizeButton.style.visibility = 'hidden';
-
-	    gapi.client.load("drive", "v2", function(){
-
-		    });
-	    gapi.client.load("fusiontables", "v1", function(){
-	    	gapi.client.fusiontables.table.insert({'tableID':"1_rt_nw7XmSic3L7rbA5Ok9BbrVyrYiP9sIZRUj4"}, function(){ console.log('here');})
-	    });
-	    //google.load("jquery", "1.7.1", {callback : function(){} });
-	    //google.load("jqueryui", "1.8.16", {callback : function(){} });
-	   
-
-	  } else {
-	    authorizeButton.style.visibility = '';
-	    authorizeButton.onclick = handleAuthClick;
-	  }
-	}
-
-	function handleAuthClick(event) {
-	  gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
-	  return false;
-	}
-
-function OnLoadCallback(){
-
-}
-function myinit(){
+	
 }
 
 </script>
+<script src="https://www.google.com/jsapi?key=ABQIAAAArXt77YptylBNPFEy0AgJxBQV4szfgV8zGZZkur1B-B3W8b5AThTSlomZliOt8JQHJGH1m63sgDu1rg" type="text/javascript"></script>
+
+<script src="oauth2.js"></script>
+<script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
 </head>
 
-<body onload="javascript: handleClientLoad();">
+<body>
 
 <input type="button" id="authorize-button" value="Auth!" />
 
 <img src="DataCollectionSheet_files/image001.jpg">
 
 <h3>Data Collection Sheet</h3>
+
+<form name="blah">
+SELECT FARMER! <select name="farmercode" id='farmerselector'>
+</select>
+</form>
 
 <form method="POST" name="theform">
 
