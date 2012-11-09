@@ -51,8 +51,11 @@ var apiKey = 'AIzaSyBUkRDnhdnp-AuEgLHtSsn6hK0QHuYJ3m0';
 var scopes = 'https://sites.google.com/feeds/ https://spreadsheets.google.com/feeds/ https://docs.google.com/feeds/ https://docs.googleusercontent.com/';
 var service;
 var access_token;
-var entry;
-var spreadkey = 'https://spreadsheets.google.com/feeds/list/0AqZGw0coobCxdG1HUFk5YXI3TzRlT1FfV0kzWXFEVVE/1/private/full';
+var currentEntry = [null, null, null];
+var spreadsheetDocs = [null, null, null];
+b = 'https://spreadsheets.google.com/feeds/list/0AqZGw0coobCxdG1HUFk5YXI3TzRlT1FfV0kzWXFEVVE';
+var spreadkeys = [b+'/1/private/full', b+'/2/private/full', b+'/3/private/full'];
+var editting = false;
 
 $(function(){
 	$( "#field-tabs" ).tabs();
@@ -60,44 +63,42 @@ $(function(){
 	$( "#field2_tabs" ).tabs();
 	$( "#field1_ctabs" ).tabs();
 	$( "#field2_ctabs" ).tabs();
-	google.load("gdata", "2.x", {
-		callback: function() {
-			service = new google.gdata.client.GoogleService('testapp');
-			
-		}});
+
 });
 
-function init(){
-
-	
-}
-
 </script>
-<script src="https://www.google.com/jsapi?key=ABQIAAAArXt77YptylBNPFEy0AgJxBQV4szfgV8zGZZkur1B-B3W8b5AThTSlomZliOt8JQHJGH1m63sgDu1rg" type="text/javascript"></script>
-
 <script src="oauth2.js"></script>
 <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
 </head>
-
 <body>
 
-<input type="button" id="authorize-button" value="Auth!" />
-
 <img src="DataCollectionSheet_files/image001.jpg">
-
 <h3>Data Collection Sheet</h3>
 
+<form name='authform'>
+<div id="needtoauthenticate">
+To use this interface, you need to be authenticated to google.  A popup should
+appear shortly to start that process...
+</div>
+<div id="authenticated" style="display: none;">
+You are authenticated to Google and can use this interface!
+</div>
+</form>
+
 <form name="blah">
-SELECT FARMER! <select name="farmercode" id='farmerselector'>
+Previously entered Farmer Surveys: 
+<select name="farmercode" id='farmerselector' 
+	onChange="javascript: setFarmer(this.options[this.selectedIndex].value);">
+	<option value='invalid'>-- SELECT FROM LIST --</option>
 </select>
 </form>
 
-<form method="POST" name="theform">
+<form method="POST" name="theform" id="theform">
 
 <div style="border:1px #000 solid;">
 <table>
 <tr>
-<?php echo tdgen("Farmer Code", "farmcode", 10); ?>
+<?php echo tdgen("Farmer Code", "farmercode", 10); ?>
 <?php echo tdgen("Interviewer", "interviewer", 40); ?>
 <?php echo tdgen("Date", "date", 12); ?>
 </tr>
@@ -388,7 +389,8 @@ nitrogen deficiency, diversified income streams?
 
 <textarea name='notes' rows='6' cols='72'></textarea>
 
-<p><input type="submit" value="Save Data!" />
+<p><input type="button" value="Save as New Entry" onclick="addNewEntry();" />
+<input type="button" value="Save as Edit to Previous Entry" onclick="updateRow();" />
 
 </form>
 
