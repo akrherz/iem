@@ -69,14 +69,22 @@ $(function(){
 </script>
 <script src="oauth2.js"></script>
 <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
+<style type="text/css">
+.ui-widget{
+  font-size: 1em !important;
+  font: inherit;
+}
+</style>
 </head>
 <body>
 
-<img src="DataCollectionSheet_files/image001.jpg">
+<table><tr><td>
+<img src="http://sustainablecorn.org/img/sustainablecorn-rgb-01.png" />
+</td><td>
 <h3>Data Collection Sheet</h3>
 
 <form name='authform'>
-<div id="needtoauthenticate">
+<div id="needtoauthenticate" style="border: 3px solid #f00" >
 To use this interface, you need to be authenticated to google.  
 <input type="button" value="Click to Authenticate to Google" 
 onclick="handleAuthClick()" />
@@ -85,6 +93,7 @@ onclick="handleAuthClick()" />
 You are authenticated to Google and can use this interface!
 </div>
 </form>
+</td></tr></table>
 
 <form name="blah">
 Previously entered Farmer Surveys: 
@@ -396,7 +405,7 @@ nitrogen deficiency, diversified income streams?
 <ul>
  <li><strong>Save as New Entry</strong>: This saves the data you entered above
   as a new entry in the database. </li>
- <li><strong>Sae as Edit to Previous Entry</strong>: If you loaded a previously
+ <li><strong>Save as Edit to Previous Entry</strong>: If you loaded a previously
  entered survey, this option will save this data overtop the old entry in the
  database.</li>
  <li><strong>Clear Form for New Entry</strong>: Clears all form values allowing
