@@ -97,7 +97,7 @@ Previously entered Farmer Surveys:
 </form>
 
 <form method="POST" name="theform" id="theform">
-
+<input type='hidden' name='updated' />
 <div style="border:1px #000 solid;">
 <table>
 <tr>
