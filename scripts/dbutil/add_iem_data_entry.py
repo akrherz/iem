@@ -6,23 +6,19 @@ import sys
 import mx.DateTime
 import iemdb
 import psycopg2.extras
-MESOSITE = iemdb.connect('mesosite', bypass=True)
-mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
 IEM = iemdb.connect('iem')
-icursor = IEM.cursor()
+icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-# Figure out the highest ID we have from current table
-icursor.execute("""SELECT max(iemid) from current""")
-row = icursor.fetchone()
-maxID = row[0]
+# Find sites that are online and not metasites that are not in the current
+# table!
+icursor.execute("""
+ SELECT iemid, id, network from stations where 
+     iemid not in (select iemid from current)
+     and online and metasite = 'f' ORDER by iemid ASC
+""")
 
-# Figure out new stations
-if len(sys.argv) == 3:
-    mcursor.execute("""SELECT * from stations WHERE id = %s and network = %s""" , (sys.argv[2],sys.argv[1]) )
-else:
-    mcursor.execute("""SELECT * from stations WHERE online and iemid > %s""" % (maxID,) )
-
-for row in mcursor:
+for row in icursor:
     print "Adding station ID: %s NETWORK: %s" % (row['id'], row['network'])
 
     for tbl in ['trend_1h', 'trend_15m']:
