@@ -8,4 +8,4 @@ python set_wfo.py
 python set_timezone.py
 
 python sync_stations.py
-python addSiteMesosite.py
+python add_iem_data_entry.py
