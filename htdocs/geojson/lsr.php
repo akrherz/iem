@@ -91,10 +91,19 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
      }
      if ($products == ""){ $products = "None"; }
   }
-
+  $magnitude = $row["magnitude"];
+  if ($row["type"] == 'S' && is_numeric($row["magnitude"]) &&
+  		floatval($row["magnitude"] > 0)){
+  	$magnitude = sprintf("%.1f", floatval($row["magnitude"]));
+  }
+  if ($row["type"] == 'R' && is_numeric($row["magnitude"]) &&
+  		floatval($row["magnitude"] > 0)){
+  	$magnitude = sprintf("%.2f", floatval($row["magnitude"]));
+  }
+  
   $z = Array("type"=>"Feature", "id"=>$i, 
              "properties"=>Array(
-                "magnitude" => $row["magnitude"],
+                "magnitude" => $magnitude,
                 "wfo"       => $row["wfo"],
                 "valid"     => substr($row["valid"],0,16),
                 "type"      => $row["type"],
