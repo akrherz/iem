@@ -13,6 +13,7 @@ $country = isset($_REQUEST["country"]) ? $_REQUEST["country"] : "";
 $elevation = isset($_REQUEST["elevation"]) ? $_REQUEST["elevation"] : "";
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "";
 $online = isset($_REQUEST["online"]) ? $_REQUEST["online"] : "";
+$metasite = isset($_REQUEST["metasite"]) ? $_REQUEST["metasite"] : "";
 $latitude = isset($_REQUEST["latitude"]) ? $_REQUEST["latitude"] : "";
 $longitude = isset($_REQUEST["longitude"]) ? $_REQUEST["longitude"] : "";
 
@@ -25,12 +26,12 @@ if (isset($_REQUEST["longitude"]) && isset($_REQUEST["latitude"]))
    pg_exec($pg_conn, $sql);
 
    $sql = sprintf("UPDATE stations SET synop = 9999, country = '%s', plot_name = '%s', 
-   name = '%s', state = '%s', elevation = '%s', online = '%s', 
+   name = '%s', state = '%s', elevation = '%s', online = '%s', metasite = '%s',
    geom = 'SRID=4326;POINT(%s %s)' WHERE id = '%s' and network = '%s'", $country, $sname, $sname, 
-   $state, $elevation, $online, $longitude, $latitude,  $station, $network);
+   $state, $elevation, $online, $metasite, $longitude, $latitude,  $station, $network);
    pg_exec($pg_conn, $sql);
    
-   echo "<h2>Updated Station Table!</h2>";
+   echo "<h2>Updated Station Table for $station $network !</h2>";
 }
 
 /* Search for station */
@@ -43,6 +44,7 @@ if (pg_numrows($rs) == 1){
   	$sname = $row["name"];
   	$latitude = $row["y"];
   	$online = $row["online"];
+  	$metasite = $row["metasite"];
   	$longitude = $row["x"];
   	$country = $row["country"];
   	$state = $row["state"];
@@ -69,6 +71,7 @@ and network:<input type="text" name="network"><input type="submit" value="go">
 <tr><th>Elevation (m):</th><td><input type="text" name="elevation" value="<?php echo $elevation; ?>"></td></tr>
 <tr><th>Network:</th><td><input type="text" name="network" value="<?php echo $network; ?>"></td></tr>
 <tr><th>Online (t or f):</th><td><input type="text" name="online" value="<?php echo $online; ?>"></td></tr>
+<tr><th>Metasite (t or f):</th><td><input type="text" name="metasite" value="<?php echo $metasite; ?>"></td></tr>
 <tr><th>Latitude:</th><td><input type="text" name="latitude" value="<?php echo $latitude; ?>"></td></tr>
 <tr><th>Longitude:</th><td><input type="text" name="longitude" value="<?php echo $longitude; ?>"></td></tr>
 
