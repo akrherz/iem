@@ -1,9 +1,9 @@
 """
  Main script that adds a site into the appropriate tables
- $Id: $:
 """
 
-import sys, mx.DateTime
+import sys
+import mx.DateTime
 import iemdb
 import psycopg2.extras
 MESOSITE = iemdb.connect('mesosite', bypass=True)
