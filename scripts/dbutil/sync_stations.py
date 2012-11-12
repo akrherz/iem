@@ -38,7 +38,7 @@ def sync(dbname):
        wfo = %(wfo)s, archive_begin = %(archive_begin)s, 
        archive_end = %(archive_end)s, remote_id = %(remote_id)s, 
        tzname = %(tzname)s, country = %(country)s, 
-       modified = %(modified)s, network = %(network)s
+       modified = %(modified)s, network = %(network)s, metasite = %(metasite)s
        WHERE iemid = %(iemid)s""",
        row)
     print 'Database: %s Modified %s rows TS: %s IEMID: %s' % (dbname, 
