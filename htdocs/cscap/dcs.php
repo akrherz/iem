@@ -40,6 +40,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <head>
  <title>CSCAP Data Collection Sheet Interface</title>
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css" />
+    <link rel='stylesheet' media='print' href='dcs-print.css' />
     <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
     <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
   
@@ -103,6 +104,7 @@ Previously entered Farmer Surveys:
 </select>
 
 <input type="button" value="Refresh List of Surveys" onclick="getSpreadsheets();"/>
+<input type="button" value="Print Form" onclick="print();" />
 </form>
 
 <form method="POST" name="theform" id="theform">
@@ -285,9 +287,9 @@ Previously entered Farmer Surveys:
 	for($fert=1;$fert<5;$fert++){
 		$s = "field${field}rotation${rotation}fert${fert}";
 		echo "<tr>";
-		echo tdgen("Fertilizer #${fert}", "${s}fert", 20);
+		echo tdgen("Fertilizer #${fert}", "${s}fert", 15);
 		echo tdgen("Amount (lbs/acre)", "${s}amount", 5);
-		echo tdgen("Applicator type", "${s}apptype", 15);
+		echo tdgen("Applicator type", "${s}apptype", 10);
 		echo tdgen("Date", "${s}date", 5);
 		echo "</tr>";
 	} // End of fert
