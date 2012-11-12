@@ -1,0 +1,3 @@
+.ui-tabs-nav { display: none; }
+.ui-tabs .ui-tabs-hide { display: block !important; }
+.ui-tabs-panel  { display: block !important; padding-left: 0px; margin-left: -50px;}
