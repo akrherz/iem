@@ -188,6 +188,7 @@ Previously entered Farmer Surveys:
     </ul>
 
 <?php for($field=1;$field<3;$field++){
+	echo "<div class='phidden' style='display: none;'><hr /><h3>Field $field</h3></div>\n";
     echo "<div id='tabs-${field}' style='background: url(DataCollectionSheet_files/field${field}.png) repeat-y;'>";
 	echo "<div style='margin-left: 50px;'>
    <table><tr>". tdgen("Unique Name", "field${field}name") ."</tr></table>
