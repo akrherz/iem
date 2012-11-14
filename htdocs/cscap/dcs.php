@@ -13,7 +13,7 @@ function get_field($varname){
 }
 
 function tdgen($label, $varname, $inputwidth=40){
-	return sprintf("<th>%s:</th>
+	return sprintf("<th style=\"text-align: right\">%s:</th>
   		<td><input type=\"text\" name=\"%s\" size=\"%s\" value=\"%s\"></td>",
   		$label, $varname, $inputwidth, get_field($varname));
 }
@@ -192,13 +192,13 @@ Previously entered Farmer Surveys:
 	echo "<div style='margin-left: 50px;'>
    <table><tr>". tdgen("Unique Name", "field${field}name") ."</tr></table>
 		";
-  echo "<p>Cropping system for this field ". radio("field${field}system", Array(
+  echo "<p><strong>Cropping system for this field:</strong> ". radio("field${field}system", Array(
 		"single"=> "Single crop per rotation year",
 		"multi"=> "Multiple/Double/Cover crops"));
-  echo "<table><tr><th>Field is</th><td>". radio("field${field}tile", Array(
+  echo "<table><tr><th>Field is: </th><td>". radio("field${field}tile", Array(
 		"tiled"=> "Tiled",
 		"not_tiled"=> "Not tiled")) ."</td>";
-  echo "<th>Field is<th><td>". radio("field${field}owned", Array(
+  echo "<th>Field is: <th><td>". radio("field${field}owned", Array(
 		"owned"=> "Owned",
 		"rented"=> "Rented")) ."</td>";
   echo "</tr></table>";
