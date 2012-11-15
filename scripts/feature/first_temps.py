@@ -6,17 +6,24 @@ mins = []
 avgs = []
 maxs = []
 
-for high in range(32,81):
+for low in range(0,32):
     ccursor.execute("""
-    SELECT min(m), avg(m), max(m) from
-     (SELECT year, min(extract(doy from day)) as m from alldata
-    where stationid = 'ia0200' and year < 2011 and
-    high >= %s GROUP by year) as foo 
-    """ , (high,))
-    row = ccursor.fetchone()
-    mins.append( row[0] )
-    avgs.append( row[1] )
-    maxs.append( row[2] )
+    SELECT sday, day, station, low from alldata_ia WHERE low <= %s
+    and month > 7 ORDER by sday ASC LIMIT 10
+    """ , (low,))
+    sday = None
+    years = []
+    stations = []
+    for row in ccursor:
+        if sday is None:
+            sday = row[0]
+        if sday != row[0]:
+            continue
+        if row[1].year not in years:
+            years.append( row[1].year )
+        stations.append( row[2])
+    years.sort()
+    print low, sday, years, stations
     
 d2010 = []
 for high in range(32,81):

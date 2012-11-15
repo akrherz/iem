@@ -1,44 +1,47 @@
 import iemdb
+import numpy
 import mx.DateTime
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
+MESOSITE = iemdb.connect('mesosite', bypass=True)
+mcursor = MESOSITE.cursor()
+
+elnino = []
+mcursor.execute("""SELECT anom_34 from elnino where monthdate >= '2007-01-01'""")
+for row in mcursor:
+    elnino.append( float(row[0]) )
+
+elnino = numpy.array(elnino)
+
 climate = []
 ccursor.execute("""
  SELECT avg(d), month from (SELECT year, month, avg((high+low)/2.0) as d from alldata_ia 
- where station = 'IA0000' and day < '2012-08-01'
+ where station = 'IA2203' and day < '2012-10-01'
  GROUP by year, month) as foo GROUP by month ORDER by month ASC
 """)
 for row in ccursor:
-  climate.append( row[0] )
-
-ccursor.execute("""
- SELECT avg(d), month from (SELECT year, month, avg((high+low)/2.0) as d from alldata_ia 
- where station = 'IA0000' and month = 8 and sday < '0816'
- GROUP by year, month) as foo GROUP by month ORDER by month ASC
-""")
-row = ccursor.fetchone()
-august = row[0]
-
+  climate.append( float(row[0]) )
 
 diff = []
 ccursor.execute("""
  SELECT year, month, avg((high+low)/2.0) from alldata_ia where 
- station = 'IA0000' and year > 2006 and day < '2012-08-16'
+ station = 'IA2203' and year > 2006 
  GROUP by year, month ORDER by year, month ASC
 """)
 for row in ccursor:
-    if row[0] == 2012 and row[1] == 8:
+    if row[0] == 2012 and row[1] == 18:
         diff.append( row[2] - august )
     else:
-        diff.append( row[2] - climate[ row[1] -1] )
+        diff.append( float(row[2]) - climate[ row[1] -1] )
 
-import numpy
+diff = numpy.array(diff)
+
 import matplotlib.pyplot as plt
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.set_title("Iowa Monthly Average Temperature Departure")
-
+ax.set_title("Des Moines Monthly Average Temperature Departure")
+#"""
 xticks = []
 xticklabels = []
 for i in range(0, len(diff),6):
@@ -55,13 +58,22 @@ for bar in bars:
   if bar.get_xy()[1] < 0:
     bar.set_facecolor('b')
     bar.set_edgecolor('b')
+
+#ax.plot(numpy.arange(0, len(elnino)), elnino)
+
 ax.set_ylabel("Departure $^{\circ}\mathrm{F}$")
-ax.set_xlabel("* Aug 2012 total thru 15 Aug")
+ax.set_xlabel("* Oct 2012 total thru 30 Aug")
 ax.grid(True)
 ax.set_xticks( xticks )
 ax.set_xticklabels( xticklabels )
 ax.set_xlim(-0.5, len(diff)+0.5)
-
+"""
+import scipy.stats
+for i in range(0,12):
+    print len(diff[i:-2]), len(elnino[:-(i+1)])
+    print i, numpy.corrcoef(diff[i:-2], elnino[:-(i+1)])[0,1]
+#ax.scatter(diff[2:], elnino[:-1])
+"""
 fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')

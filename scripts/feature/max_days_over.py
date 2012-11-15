@@ -6,7 +6,7 @@ ts = []
 d2012s = []
 ms = []
 ys = []
-for thres in range(70,106):
+for thres in range(60,95):
     ccursor.execute("""
     select year, count(*) from alldata_ia where station = 'IA2203' 
     and high >= %s GROUP by year 
@@ -32,16 +32,16 @@ import numpy
 import matplotlib.pyplot as plt
 (fig, ax) = plt.subplots(1,1, figsize=(9,9))
 
-ax.barh(numpy.arange(70,106)-0.4, ms, height=0.8,  fc='#efbd47', ec='#efbd47', label='Max')
-ax.barh(numpy.arange(70,106)-0.3, d2012s, height=0.6, fc='#c60c30', ec='#c60c30' , label='2012')
-for (yr, val, m) in zip(ys, numpy.arange(70,106), ms):
+ax.barh(numpy.arange(60,95)-0.4, ms, height=0.8,  fc='#efbd47', ec='#efbd47', label='Max')
+ax.barh(numpy.arange(60,95)-0.3, d2012s, height=0.6, fc='#c60c30', ec='#c60c30' , label='2012')
+for (yr, val, m) in zip(ys, numpy.arange(60,95), ms):
     c = '#000000'
     if yr.find("2012") > -1:
         c = "#0000ff"
     ax.text(m+1, val, "%s - %s" % (m, yr), va='center', size=10, color=c)
-ax.set_ylim(69,106)
-ax.set_xlim(0,225)
-ax.set_xlabel("Days per Year, thru 25 Sep 2012")
+ax.set_ylim(59,95)
+ax.set_xlim(0,270)
+ax.set_xlabel("Days per Year, thru 23 Oct 2012")
 ax.set_ylabel("Daily High Temperature $^{\circ}\mathrm{F}$")
 ax.set_title("Des Moines Maximum Number of Days\nAt or Above given High Temperature (1880-2012)")
 ax.legend()

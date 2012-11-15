@@ -22,7 +22,7 @@ for day in range(366):
 
 
 freq = numpy.zeros((366), 'f')
-for dy in range(60,263):
+for dy in range(60,319):
     # Now, we replace each year's 1 Jan - 18 Jul with 2012
     obs2[:,0:dy] = obs[-1,0:dy]
 
@@ -44,7 +44,7 @@ import matplotlib.pyplot as plt
 
 for year in range(1880,2013):
     if year == 2012:
-        ax[0].plot(range(263), ytd[year-1880,:263], c='red', label='2012')
+        ax[0].plot(range(319), ytd[year-1880,:319], c='red', label='2012')
     else:
         ax[0].plot(range(366), ytd[year-1880,:], c='tan')
 
@@ -59,7 +59,7 @@ ax[0].set_xlim(60,364)
 ax[0].set_ylim(20,65)
 ax[0].legend(loc=4)
 
-ax[1].plot(range(263), freq[:263], c='r', label='1931')
+ax[1].plot(range(319), freq[:319], c='r', label='1931')
 ax[1].grid(True)
 ax[1].set_ylabel("Scenario Probability [%]")
 ax[1].set_ylim(0,100)

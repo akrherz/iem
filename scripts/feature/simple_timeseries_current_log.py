@@ -4,24 +4,27 @@ icursor = IEM.cursor()
 ASOS = iemdb.connect('asos', bypass=True)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2012,5,3,0, tzinfo=iemtz.Central)
-ets = datetime.datetime(2012,5,3,12,1, tzinfo=iemtz.Central)
-dt = datetime.timedelta(hours=2)
+sts = datetime.datetime(2012,10,12,0, tzinfo=iemtz.Central)
+ets = datetime.datetime(2012,10,14,6,1, tzinfo=iemtz.Central)
+dt = datetime.timedelta(hours=6)
 now = sts
 xticks = []
 xticklabels = []
 while now < ets:
   xticks.append( now )
-  xticklabels.append( now.strftime("%-I %p") )
+  fmt = '%-I %p'
+  if now.hour == 0:
+      fmt = '%-I %p\n%d %b'
+  xticklabels.append( now.strftime(fmt) )
   now += dt
 
 def get2(station):
   times = []
   vals = []
   acursor.execute("""
-  SELECT valid, tmpf from t2012_1minute WHERE 
-  station = '%s' and valid >= '2012-04-10 00:00' and 
-  valid < '2012-04-10 12:00' ORDER by valid ASC
+  SELECT valid, dwpf from t2012 WHERE 
+  station = '%s' and valid >= '2012-10-12 00:00' and 
+  valid < '2012-10-14 6:00' ORDER by valid ASC
   """ % (station,))
   for row in acursor:
     times.append( row[0])
@@ -54,17 +57,29 @@ ax = fig.add_subplot(111)
 #times, vals = get2("AMW")
 #ax.plot(times, vals, label="Ames Airport (1min) %.0f" % (min(vals),))
 
-times, vals = get("PEA", "AWOS")
-ax.plot(times, vals, label="Pella")
+times, vals = get2("ALO")
+ax.plot(times, vals, label="Waterloo")
+mn = min(vals)
+mx = max(vals)
+z = [mn,mx]
+for x,y in zip(times, vals):
+    if y in z:
+        delta = 1
+        if y < 20:
+            delta = -3
+        ax.text(x, y + delta, "%.0f$^{\circ}\mathrm{F}$, @%s" % (y,
+                                                    x.strftime("%-I:%M %p")),
+                ha='center')
+        z.remove(y)
 
-times, vals = get("RPLI4", "IA_RWIS")
-ax.plot(times, vals, label="Pella RWIS")
-times, vals = get("SBSI4", "KCCI")
-ax.plot(times, vals, label="Bussey School")
-times, vals = get("SPEI4", "KCCI")
-ax.plot(times, vals, label="Pella School")
-times, vals = get("GGI", "AWOS")
-ax.plot(times, vals, label="Grinnell")
+#times, vals = get("RPLI4", "IA_RWIS")
+#ax.plot(times, vals, label="Pella RWIS")
+#times, vals = get("SBSI4", "KCCI")
+#ax.plot(times, vals, label="Bussey School")
+#times, vals = get("SPEI4", "KCCI")
+#ax.plot(times, vals, label="Pella School")
+#times, vals = get("GGI", "AWOS")
+#ax.plot(times, vals, label="Grinnell")
 
 #times, vals = get("OT0002", "OT")
 #ax.plot(times, vals, label="ISU Agronomy Hall %.0f" % (min(vals),))
@@ -77,10 +92,10 @@ ax.plot(times, vals, label="Grinnell")
 ax.set_xticks( xticks )
 ax.set_xticklabels( xticklabels )
 ax.grid(True)
-ax.legend(loc=2, ncol=2, prop=prop)
-ax.set_ylim(35,75)
-ax.set_title("19 April 2012 Temperature Timeseries")
-ax.set_ylabel("Air Temperature $^{\circ}\mathrm{F}$")
+#ax.legend(loc=2, ncol=2, prop=prop)
+#ax.set_ylim(35,75)
+ax.set_title("12-14 October 2012 Waterloo Dew Point Timeseries")
+ax.set_ylabel("Dew Point Temperature $^{\circ}\mathrm{F}$")
 
 fig.savefig('test.ps')
 iemplot.makefeature('test')
