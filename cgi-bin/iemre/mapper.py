@@ -1,7 +1,7 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/env python
 """
 Create a generic mapper of IEMRE data
-$Id$:
+
 """
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
@@ -9,11 +9,7 @@ import os
 os.environ[ 'HOME' ] = '/tmp/'
 os.environ[ 'USER' ] = 'nobody'
 
-try:
-    import netCDF4 as netCDF3
-except:
-    import netCDF3
-
+import netCDF4
 import numpy
 import numpy.ma
 import matplotlib
@@ -84,7 +80,7 @@ def main():
 
     ctx = {}
     
-    nc = netCDF3.Dataset('/mesonet/data/iemre/2010_mw_hourly.nc', 'r')
+    nc = netCDF4.Dataset('/mesonet/data/iemre/2012_mw_daily.nc', 'r')
     lon = nc.variables['lon'][:]
     lat = nc.variables['lat'][:]
     ctx['llcrnrlon'] = numpy.min(lon)
@@ -93,9 +89,9 @@ def main():
     ctx['urcrnrlat'] = numpy.max(lat)
     setup_plot(ctx)
     
-    idx = iemre.hour_idx( mx.DateTime.DateTime(2011,6,1,1,5) )
-    idx2 = iemre.hour_idx( mx.DateTime.DateTime(2011,7,1,1,5) )
-    tmpk = numpy.ma.array( numpy.sum(nc.variables['p01m'][idx:idx2,:,:],0) ) / 25.4
+    idx = iemre.day_idx( mx.DateTime.DateTime(2012,3,1,1,5) )
+    idx2 = iemre.day_idx( mx.DateTime.DateTime(2012,4,1,1,5) )
+    tmpk = numpy.ma.array( numpy.sum(nc.variables['p01d'][idx:idx2,:,:],0) ) / 25.4
     
     #nx = int((ctx['map'].xmax-ctx['map'].xmin)/40000.)+1
     #ny = int((ctx['map'].ymax-ctx['map'].ymin)/40000.)+1
