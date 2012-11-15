@@ -74,7 +74,7 @@ if ($story != null && $title != null &&
 
 include("$rootpath/include/header.php");
 if ($me){ 
-	echo "<a href=\"$logouturl\">Logout</a>";
+	echo "Hello, ". $me["name"] ."!<a href=\"$logouturl\">Logout</a>";
 } else {
 	echo "<a href=\"$loginurl\">Login</a>";
 }
