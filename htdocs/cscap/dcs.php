@@ -21,6 +21,10 @@ function tdyn($label, $varname){
 	return sprintf("<th>%s</th><td><input type=\"radio\" name=\"%s\" value=\"yes\">Yes <input type=\"radio\" name=\"%s\" value=\"no\">No</td>",
 			$label, $varname, $varname);
 }
+function tdyn2( $varname ){
+	return sprintf("<td><input type=\"radio\" name=\"%s\" value=\"yes\">Yes <input type=\"radio\" name=\"%s\" value=\"no\">No</td>",
+			$varname, $varname);
+}
 function radio($varname, $vals){
 	$s = "";
 	while( list($k,$v) = each($vals)){
@@ -374,10 +378,9 @@ while (list($k,$v) = each($conservation)){
  if ($k == 'precision' || $k == 'ipm' || $k == 'nutrient'){
   }
   echo sprintf("<tr style='background: ${color}'><th>%s</th>
-	<td><input type='text' name='field1conserv${k}'></td>
-	<td><input type='text' name='field2conserv${k}'></td>
-	<td><input type='text' name='fieldotherconserv${k}'></td>
-	</tr>", $v);
+    %s %s %s
+	</tr>", $v, tdyn2("field1conserv${k}"),tdyn2("field2conserv${k}"),
+	tdyn2("fieldotherconserv${k}") );
 } // End of conservation
 echo "<tr><th>Other</th>";
 echo "<td><input type='text' name='field1othertype'></td>";
