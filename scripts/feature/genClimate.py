@@ -19,14 +19,14 @@ linesize = 1
 out = Image.new('RGB', (boxsize*7 + linesize, boxsize*7 + linesize + header), color="#fff")
 draw = ImageDraw.Draw(out)
 
-draw.text( (10, 5), "1 May - 13 Jun 2012 Daily Iowa Precipitation" , font=font12, fill="#000")
+draw.text( (10, 5), "1 Sep - 9 Oct 2012 Daily Iowa Precipitation" , font=font12, fill="#000")
 
 s = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
 for k in range(len(s)):
   draw.text( (k * boxsize + 8 , 25), s[k], font=font12, fill="#000")
 
-sts = mx.DateTime.DateTime(2012,5,1)
-ets = mx.DateTime.DateTime(2012,6,14)
+sts = mx.DateTime.DateTime(2012,9,1)
+ets = mx.DateTime.DateTime(2012,10,10)
 interval = mx.DateTime.RelativeDateTime(days=+1)
 now = sts
 (isoyear, startweek, isoday) = now.iso_week
@@ -35,7 +35,7 @@ now = sts
 obs = {}
 ccursor.execute("""
  SELECT day, precip from alldata_ia where station = 'IA0000' and year = 2012
- and month in (5,6)
+ and month in (9,10)
 """)
 for row in ccursor:
     obs[ row[0].strftime("%Y%m%d") ] = float( row[1] )

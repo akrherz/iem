@@ -3,8 +3,9 @@ COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 import mx.DateTime
 
-sts = mx.DateTime.DateTime(2012,1,1)
-ets = mx.DateTime.now()
+sts = mx.DateTime.DateTime(2010,1,1)
+ets = mx.DateTime.DateTime(2011,1,1)
+#ets = mx.DateTime.now()
 interval = mx.DateTime.RelativeDateTime(days=14)
 now = sts
 
@@ -24,6 +25,6 @@ while now < ets:
     
     print '%s-%s %s, %s' % (now.strftime("%d %b"),
                      (now + mx.DateTime.RelativeDateTime(days=14)).strftime("%d %b"),
-                     row2[0].capitalize(), row2[1])
+                     row2[0], row2[1])
     
     now += interval

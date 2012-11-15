@@ -6,19 +6,19 @@ from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 import iemplot
 
-#fig = plt.figure(num=None, figsize=(11.3,7.00))
-fig = plt.figure(num=None, figsize=(3.85,3.1))
+fig = plt.figure(num=None, figsize=(9.3,7.00))
+#fig = plt.figure(num=None, figsize=(3.1,3.5))
 # Set the axes instance
-ax = plt.axes([0.05,0.05,0.9,0.9], axisbg=(0.4471,0.6235,0.8117))
+ax = plt.axes([0.15,0.1,0.75,0.75], axisbg=(0.4471,0.6235,0.8117))
 
 # Set up the map
 #m = Basemap(projection='lcc', urcrnrlat=47.7, llcrnrlat=23.08, urcrnrlon=-62.5,
 #             llcrnrlon=-120, lon_0=-98.7, lat_0=39, lat_1=33, lat_2=45,
 #             resolution='l')
-m = Basemap(projection='lcc',
-             urcrnrlat=34.7, llcrnrlat=16.08, urcrnrlon=-37.5, llcrnrlon=-95, 
-             lon_0=-88.7, lat_0=29, lat_1=23, lat_2=35,
-             resolution='l', ax=ax)
+m = Basemap(projection='merc',
+             urcrnrlat=48.7, llcrnrlat=9.08, urcrnrlon=-51.5, llcrnrlon=-87, 
+             lon_0=-68.7, lat_0=29, lat_1=23, lat_2=35,
+             resolution='l', ax=ax, fix_aspect=False)
 m.fillcontinents(color='0.7',zorder=0)
 m.drawcountries(zorder=1)
 m.drawstates(zorder=1)
@@ -28,8 +28,8 @@ import iemdb
 AFOS = iemdb.connect('afos', bypass=True)
 acursor = AFOS.cursor()
 
-acursor.execute("""SELECT data, entered from products_2012_0712 WHERE pil = 'TCDAT4'
- ORDER by entered ASC""")
+acursor.execute("""SELECT data, entered from products_2012_0712 WHERE pil = 'TCDAT3'
+ and entered > '2012-10-20' ORDER by entered ASC""")
 
 verify_x = []
 verify_y = []
@@ -91,8 +91,8 @@ l4 = Line2D([], [], linewidth=3, color=get_color(110)[0])
 import matplotlib.font_manager
 prop = matplotlib.font_manager.FontProperties(size=10)
 
-ax.set_title("National Hurricane Center\n Forecast Positions & Max Wind (TCD Product)\n for Isaac (2012)", size=10)
-ax.set_xlabel("Forecasts made between 5 AM 21 August 2012\n and 11 AM 27 August 2012, outlined is observation", size=10)
+ax.set_title("National Hurricane Center\n Forecast Positions & Max Wind (TCD Product)\n for Sandy (2012)", size=14)
+ax.set_xlabel("Forecasts made between 11 AM 22 October 2012\n and 11 PM 29 October 2012, outlined is observation", size=14)
 ax.legend([l2, l3, l4], ["Tropical Storm", "Category 1", "Category 2"], prop=prop) 
 
 fig.savefig('test.png')
