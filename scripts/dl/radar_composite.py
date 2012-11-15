@@ -1,9 +1,9 @@
 """
  Cache NEXRAD composites for the website
-$Id: $:
 """
 import urllib2
 import os
+import subprocess
 import mx.DateTime
 import time
 import random
@@ -15,25 +15,27 @@ pcursor = POSTGIS.cursor()
 opener = urllib2.build_opener()
 
 def save(sectorName, file_name, dir_name, tstamp,bbox=None):
-  layers = "layers[]=n0q&layers[]=watch_by_county&layers[]=sbw&layers[]=uscounties"
-  if sectorName == 'conus':
-    layers = "layers[]=n0q&layers[]=watch_by_county&layers[]=uscounties"
-  uri = "http://iem21.local/GIS/radmap.php?sector=%s&ts=%s&%s" % \
-        (sectorName,tstamp, layers)
-  if (bbox is not None):
-    uri = "http://iem21.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % \
-        (bbox,tstamp, layers)
-  try:
-    f = opener.open(uri)
-  except:
-    time.sleep(5)
-    f = opener.open(uri)
-  o = open('tmp.png', 'w')
-  o.write( f.read() )
-  o.close()
+    layers = "layers[]=n0q&layers[]=watch_by_county&layers[]=sbw&layers[]=uscounties"
+    if sectorName == 'conus':
+        layers = "layers[]=n0q&layers[]=watch_by_county&layers[]=uscounties"
+    uri = "http://iem21.local/GIS/radmap.php?sector=%s&ts=%s&%s" % (
+                                            sectorName,tstamp, layers)
+    if (bbox is not None):
+        uri = "http://iem21.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % (
+                                            bbox,tstamp, layers)
+    try:
+        f = opener.open(uri)
+    except:
+        time.sleep(5)
+        f = opener.open(uri)
+    o = open('tmp.png', 'w')
+    o.write( f.read() )
+    o.close()
 
-  cmd = "/home/ldm/bin/pqinsert -p 'plot ac %s %s %s/n0r_%s_%s.png png' tmp.png" % (tstamp, file_name, dir_name, tstamp[:8], tstamp[8:])
-  os.system(cmd)
+    cmd = "/home/ldm/bin/pqinsert -p 'plot ac %s %s %s/n0r_%s_%s.png png' tmp.png" % (tstamp, file_name, dir_name, tstamp[:8], tstamp[8:])
+    subprocess.call(cmd, shell=True)
+    
+    os.unlink('tmp.png')
 
 ts = mx.DateTime.gmt()
 if len(sys.argv) == 6:
@@ -44,16 +46,16 @@ sts = ts.strftime("%Y%m%d%H%M")
 save('conus', 'uscomp.png', 'usrad', sts)
 save('iem', 'mwcomp.png', 'comprad', sts)
 for i in ['lot','ict','sd','hun']:
-  save(i, '%scomp.png'%(i,), '%srad' %(i,), sts)
+    save(i, '%scomp.png'%(i,), '%srad' %(i,), sts)
 
 # Now, we query for watches.
 pcursor.execute("""select sel, xmax(geom), xmin(geom), ymax(geom), ymin(geom)
      from watches_current ORDER by issued DESC""")
 for row in pcursor:
-  xmin = float(row[2]) - 0.75 
-  ymin = float(row[4]) - 0.75 
-  xmax = float(row[1]) + 0.75 
-  ymax = float(row[3]) + 1.5 
-  bbox = "%s,%s,%s,%s" % (xmin,ymin,xmax,ymax)
-  sel = row[0].lower()
-  save('custom', '%scomp.png'%(sel,), '%srad'% (sel,), sts, bbox)
+    xmin = float(row[2]) - 0.75 
+    ymin = float(row[4]) - 0.75 
+    xmax = float(row[1]) + 0.75 
+    ymax = float(row[3]) + 1.5 
+    bbox = "%s,%s,%s,%s" % (xmin,ymin,xmax,ymax)
+    sel = row[0].lower()
+    save('custom', '%scomp.png'%(sel,), '%srad'% (sel,), sts, bbox)
