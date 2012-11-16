@@ -22,9 +22,10 @@ for row in hcursor:
       """ % (network, id))
     row = mcursor.fetchone()
     if row is None:
-        print 'Site %s [%s] is unknown!' % (id, network)
+        continue
     elif row[0] == False:
-        mcursor.execute("""
+        print 'Site %s [%s] was unknown, but is in mesosite' % (id, network)
+        mcursor.execute(""" 
           update stations SET online = 't' where network = '%s' and id = '%s'
         """ % (network, id))
         hcursor2.execute("""DELETE from unknown where nwsli = '%s' and network = '%s'""" % (id, network))
