@@ -18,10 +18,12 @@ for row in hcursor:
     id = row[0]
     network = row[1]
     mcursor.execute("""
-  SELECT * from stations where network = '%s' and id = '%s' and online = 'f'
+  SELECT online from stations where network = '%s' and id = '%s'
       """ % (network, id))
     row = mcursor.fetchone()
-    if row:
+    if row is None:
+        print 'Site %s [%s] is unknown!' % (id, network)
+    elif row[0] == False:
         mcursor.execute("""
           update stations SET online = 't' where network = '%s' and id = '%s'
         """ % (network, id))
