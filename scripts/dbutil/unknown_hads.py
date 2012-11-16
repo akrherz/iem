@@ -31,7 +31,8 @@ for row in hcursor:
         hcursor2.execute("""DELETE from unknown where nwsli = '%s' and network = '%s'""" % (id, network))
     else:
         print 'Site %s [%s] was unknown, but online in DB?' % (id, network)
-
+        hcursor2.execute("""DELETE from unknown where nwsli = '%s' and network = '%s'""" % (id, network))
+ 
 hcursor2.close()
 HADS.commit()
 mcursor.close()
