@@ -258,7 +258,11 @@ def main():
             sys.exc_traceback = None
 
     of.close()
-    subprocess.call("/home/ldm/bin/pqinsert -p 'data c %s csv/kimt.dat bogus dat' %s"%(tstr, tmpfp), shell=True )
+    cmd = "/home/ldm/bin/pqinsert -p 'data c %s csv/kimt.dat bogus dat' %s" % (
+                                                    tstr, tmpfp)
+    p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE)
+    data = p.stdout.read()
     os.remove(tmpfp)
 
     # Do KCCI stuff in WXC format
