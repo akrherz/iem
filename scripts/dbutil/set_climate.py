@@ -1,5 +1,7 @@
-# Assign a site to each site in the mesosite database
-# Daryl Herzmann 5 May 2004
+"""
+ Assign a climate site to each site in the mesosite database, within reason
+ Daryl Herzmann 5 May 2004
+"""
 
 import iemdb
 MESOSITE = iemdb.connect('mesosite')
@@ -7,9 +9,11 @@ mcursor = MESOSITE.cursor()
 mcursor2 = MESOSITE.cursor()
 
 # Query out all sites with a null climate_site
-mcursor.execute("""SELECT id, geom, state from stations 
-	WHERE climate_site IS NULL and country = 'US' and state not in ('PR','DC','GU','PU')
-	""")
+mcursor.execute("""
+	SELECT id, geom, state from stations 
+	WHERE climate_site IS NULL and country = 'US' and 
+	state not in ('PR','DC','GU','PU','P3')
+""")
 
 for row in mcursor:
 	thisID = row[0]
