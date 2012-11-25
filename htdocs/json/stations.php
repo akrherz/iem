@@ -1,13 +1,14 @@
 <?php
 /*
- * JSON Service for station Table changes
+ * JSON Service for station Table changes , limit the result to 1000 in order
+ * to prevent memory overflows...
  */
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
 require_once "$rootpath/include/database.inc.php";
 $dbconn = iemdb('mesosite');
 $rs = pg_prepare($dbconn, "SELECT", "SELECT *, x(geom) as lon, y(geom) as lat " .
-		"from stations WHERE modified >= $1");
+		"from stations WHERE modified >= $1 LIMIT 1000");
 
 $date = isset($_REQUEST["date"]) ? $_REQUEST["date"] : date('Y-m-d');
 
