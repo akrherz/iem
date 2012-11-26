@@ -90,8 +90,7 @@ if days >= 3:
     ax.xaxis.set_major_locator(
                                mdates.DayLocator(interval=interval)
                                )
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y', 
-                                                      tz=iemtz.Central))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y'))
 else:
     ax.xaxis.set_major_locator(
                                mdates.AutoDateLocator(maxticks=10)
