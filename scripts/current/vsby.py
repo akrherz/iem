@@ -23,7 +23,7 @@ FROM
 WHERE
   s.network IN ('AWOS', 'IA_ASOS','IL_ASOS','MN_ASOS','WI_ASOS','SD_ASOS',
               'NE_ASOS','MO_ASOS') and
-  valid + '15 minutes'::interval > now() and
+  valid + '60 minutes'::interval > now() and
   vsby >= 0 and vsby <= 10
 """
 
