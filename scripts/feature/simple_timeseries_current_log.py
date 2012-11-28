@@ -4,8 +4,8 @@ icursor = IEM.cursor()
 ASOS = iemdb.connect('asos', bypass=True)
 acursor = ASOS.cursor()
 
-sts = datetime.datetime(2012,10,12,0, tzinfo=iemtz.Central)
-ets = datetime.datetime(2012,10,14,6,1, tzinfo=iemtz.Central)
+sts = datetime.datetime(2012,11,19,0, tzinfo=iemtz.Central)
+ets = datetime.datetime(2012,11,21,6,1, tzinfo=iemtz.Central)
 dt = datetime.timedelta(hours=6)
 now = sts
 xticks = []
@@ -18,14 +18,14 @@ while now < ets:
   xticklabels.append( now.strftime(fmt) )
   now += dt
 
-def get2(station):
+def get2(station, param):
   times = []
   vals = []
   acursor.execute("""
-  SELECT valid, dwpf from t2012 WHERE 
-  station = '%s' and valid >= '2012-10-12 00:00' and 
-  valid < '2012-10-14 6:00' ORDER by valid ASC
-  """ % (station,))
+  SELECT valid, %s from t2012 WHERE 
+  station = '%s' and valid >= '2012-11-19 00:00' and 
+  valid < '2012-11-21 8:00' ORDER by valid ASC
+  """ % (param, station))
   for row in acursor:
     times.append( row[0])
     vals.append( row[1] )
@@ -37,8 +37,8 @@ def get(station, network):
   vals = []
   icursor.execute("""
   SELECT valid, tmpf from current_log c JOIN stations s on (s.iemid = c.iemid)
-  and s.network = '%s' and s.id = '%s' and valid >= '2012-05-03 00:00' and 
-  valid < '2012-05-03 12:00' ORDER by valid ASC
+  and s.network = '%s' and s.id = '%s' and valid >= '2012-11-19 00:00' and 
+  valid < '2012-11-21 12:00' ORDER by valid ASC
   """ % (network, station))
   for row in icursor:
     times.append( row[0])
@@ -57,23 +57,23 @@ ax = fig.add_subplot(111)
 #times, vals = get2("AMW")
 #ax.plot(times, vals, label="Ames Airport (1min) %.0f" % (min(vals),))
 
-times, vals = get2("ALO")
+times, vals = get2("ALO", 'tmpf')
 ax.plot(times, vals, label="Waterloo")
-mn = min(vals)
-mx = max(vals)
-z = [mn,mx]
-for x,y in zip(times, vals):
-    if y in z:
-        delta = 1
-        if y < 20:
-            delta = -3
-        ax.text(x, y + delta, "%.0f$^{\circ}\mathrm{F}$, @%s" % (y,
-                                                    x.strftime("%-I:%M %p")),
-                ha='center')
-        z.remove(y)
+#mn = min(vals)
+#mx = max(vals)
+#z = [mn,mx]
+#for x,y in zip(times, vals):
+#    if y in z:
+#        delta = 1
+#        if y < 20:
+#            delta = -3
+#        ax.text(x, y + delta, "%.0f$^{\circ}\mathrm{F}$, @%s" % (y,
+#                                                    x.strftime("%-I:%M %p")),
+#                ha='center')
+#        z.remove(y)
 
-#times, vals = get("RPLI4", "IA_RWIS")
-#ax.plot(times, vals, label="Pella RWIS")
+times, vals = get2("DSM", 'tmpf')
+ax.plot(times, vals, label="Des Moines")
 #times, vals = get("SBSI4", "KCCI")
 #ax.plot(times, vals, label="Bussey School")
 #times, vals = get("SPEI4", "KCCI")
@@ -92,7 +92,7 @@ for x,y in zip(times, vals):
 ax.set_xticks( xticks )
 ax.set_xticklabels( xticklabels )
 ax.grid(True)
-#ax.legend(loc=2, ncol=2, prop=prop)
+ax.legend(loc=2, ncol=2, prop=prop)
 #ax.set_ylim(35,75)
 ax.set_title("12-14 October 2012 Waterloo Dew Point Timeseries")
 ax.set_ylabel("Dew Point Temperature $^{\circ}\mathrm{F}$")
