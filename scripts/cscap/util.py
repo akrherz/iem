@@ -1,7 +1,33 @@
 """
 Utility Functions that are common to our scripts, I hope
-$Id: util.py 8231 2012-05-07 20:29:34Z akrherz $:
 """
+import gdata.gauth
+import gdata.spreadsheets.client
+import gdata.docs.client
+
+def get_docs_client(config):
+    """ Return an authorized docs client """
+    token = gdata.gauth.OAuth2Token(client_id=config.get('appauth','client_id'),
+                    client_secret=config.get('appauth', 'app_secret'),
+                    user_agent='daryl.testing',
+                    scope=config.get('googleauth', 'scopes'),
+                    refresh_token=config.get('googleauth', 'refresh_token'))
+
+    docs_client = gdata.docs.client.DocsClient()
+    token.authorize(docs_client)
+    return docs_client
+
+def get_spreadsheet_client(config):
+    """ Return an authorized spreadsheet client """
+    token = gdata.gauth.OAuth2Token(client_id=config.get('appauth','client_id'),
+                    client_secret=config.get('appauth', 'app_secret'),
+                    user_agent='daryl.testing',
+                    scope=config.get('googleauth', 'scopes'),
+                    refresh_token=config.get('googleauth', 'refresh_token'))
+
+    spr_client = gdata.spreadsheets.client.SpreadsheetsClient()
+    token.authorize(spr_client)
+    return spr_client
 
 def build_treatments(feed):
     """
