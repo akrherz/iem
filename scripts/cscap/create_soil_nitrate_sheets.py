@@ -31,13 +31,25 @@ meta_feed = spr_client.get_list_feed(config.get('cscap', 'metamaster'), 'od6')
 sdc_feed = spr_client.get_list_feed(config.get('cscap', 'sdckey'), 'od6')
 treat_feed = spr_client.get_list_feed(config.get('cscap', 'treatkey'), 'od6')
 
+sdc_data, sdc_names = util.build_sdc(sdc_feed)
 
-DONE = ['mar',]
+#DONE = ['NWREC', 'SEPAC', 'DPAC', 'ISUAG', 'GILMORE','SERF', 'KELLOGG',
+#        'MASON', 'SWROC.B', 'SWROC.G', 'SWROC.P', 'BRADFORD.A', 'STJOHNS',
+#        'NAEW.WS109','NAEW.WS111', 'FREEMAN', 'NAEW.WS113','NAEW.WS115',
+#        'NAEW.WS118','NAEW.WS123','NAEW.WS127','WOOSTER.LTR','WOOSTER.COV',
+#        'HOYTVILLE.LTR']
+
+NOTDONE = ['WATERMAN',]
 
 for entry in meta_feed.entry:
     data = entry.to_dict()
     sitekey = data.get('uniqueid').lower()
-    if sitekey not in DONE:
+    soil15 = 'SOIL15' in sdc_data[sitekey]
+    soil16 = 'SOIL16' in sdc_data[sitekey]
+    if not soil15 and not soil16:
+        print 'Skipping', sitekey, 'as they have no entries for SOIL15-16'
+        continue
+    if sitekey.upper() not in NOTDONE:
         print 'skip', sitekey
         continue
     # This is the folder where synced data is stored
@@ -60,12 +72,21 @@ for entry in meta_feed.entry:
         continue
     
     # Figure out our columns
-    columns = ['plotid', 'depth', 'date', 'percent sand', ' percent silt', ' percent clay', 'texture']
-    headers = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
-    depths = ['0-4"', '4-8"', '8-16"', '16-24"']
+    columns = ['plotid', 'depth', 'soil nitrate fall sampling']
+    units = ['', 'cm', 'mg per kg soil', 'mg per kg soil', 'mg per kg soil']
+    if soil15:
+        columns.append('soil nitrate spring sampling')
+        columns.append('soil nitrate summer sampling')
+    depths = ['0 - 30', '30 - 60', '60 - 90']
 
     # Figure out how many 
     rows = []
+    # Units row
+    entry = gdata.spreadsheets.data.ListEntry()
+    for i in range(len(columns)):
+        entry.set_value(columns[i].replace(" ", ''), units[i])
+    rows.append( entry )   
+    # 
     for plot in plots:
         for depth in depths:
             entry = gdata.spreadsheets.data.ListEntry()
@@ -76,12 +97,12 @@ for entry in meta_feed.entry:
             rows.append( entry )
     
     # Okay, now we are ready to create a spreadsheet
-    title = '%s %s Soil Texture Data' % (sitekey.upper(), leadpi)
+    title = '%s %s Soil Nitrate Data' % (sitekey.upper(), leadpi)
     print 'Adding %s Rows: %s' % (title, len(rows))
     doc = gdata.docs.data.Resource(type='spreadsheet', title=title)
     doc = docs_client.CreateResource(doc, collection=collect)
     spreadkey= doc.resource_id.text.split(':')[1]
-    for yr in ['2011',]:        
+    for yr in ['2011','2012','2013','2014','2015']:        
         print 'Adding worksheet for year: %s' % (yr,)
         sheet = spr_client.add_worksheet(spreadkey, yr, 10, len(columns))
         for colnum in range(len(columns)):

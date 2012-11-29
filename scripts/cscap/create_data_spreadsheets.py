@@ -47,7 +47,7 @@ basecolumns = {'A': 'UniqueID', 'B': 'Rep', 'C': 'Tillage', 'D': 'Rotation',
 letters = ['K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
            'AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL']
 
-DONE = ['bradford.b2',]
+DONE = ['mar',]
 
 for entry in meta_feed.entry:
     data = entry.to_dict()
