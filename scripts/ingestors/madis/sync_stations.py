@@ -55,8 +55,8 @@ for recnum in range(len(providers)):
         continue
     print 'Adding network: %s station: %s' % (network, stid)
     sql = """INSERT into stations(id, network, synop, country, plot_name,
-    name, state, elevation, online, geom) VALUES ('%s', '%s', 9999, 'US',
-    '%s', '%s', '%s', %s, 't', 'SRID=4326;POINT(%s %s)')""" % (stid,
+    name, state, elevation, online, geom, metasite) VALUES ('%s', '%s', 9999, 'US',
+    '%s', '%s', '%s', %s, 't', 'SRID=4326;POINT(%s %s)', 'f')""" % (stid,
     network, name, name, network[:2], elevations[recnum], longitudes[recnum],
     latitudes[recnum])
     mcursor.execute(sql)
