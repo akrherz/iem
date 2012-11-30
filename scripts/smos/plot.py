@@ -7,7 +7,7 @@ import mx.DateTime
 SMOS = iemdb.connect('smos', bypass=True)
 scursor = SMOS.cursor()
 
-def makeplot(ts):
+def makeplot(ts, routes='ac'):
     """
     Generate two plots for a given time GMT
     """
@@ -59,14 +59,14 @@ def makeplot(ts):
            'lbTitleString' : '[%]'
            }
     fp = iemplot.simple_grid_fill(lons, lats, sm, cfg)
-    pqstr = "plot ac %s00 smos_midwest_sm%s.png smos_midwest_sm%s.png png" % (
-                ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
+    pqstr = "plot %s %s00 smos_midwest_sm%s.png smos_midwest_sm%s.png png" % (
+                routes, ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
                 ts.strftime("%H"))
     iemplot.postprocess(fp, pqstr)
     del(cfg['_midwest'])
     fp = iemplot.simple_grid_fill(lons, lats, sm, cfg)
-    pqstr = "plot ac %s00 smos_iowa_sm%s.png smos_iowa_sm%s.png png" % (
-                ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
+    pqstr = "plot %s %s00 smos_iowa_sm%s.png smos_iowa_sm%s.png png" % (
+                routes, ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
                 ts.strftime("%H"))
     #iemplot.makefeature(fp)
     iemplot.postprocess(fp, pqstr)
@@ -83,14 +83,14 @@ def makeplot(ts):
            'lbTitleString' : ' '
     }
     fp = iemplot.simple_grid_fill(lons, lats, od, cfg)
-    pqstr = "plot ac %s00 smos_midwest_od%s.png smos_midwest_od%s.png png" % (
-                ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
+    pqstr = "plot %s %s00 smos_midwest_od%s.png smos_midwest_od%s.png png" % (
+                routes, ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
                 ts.strftime("%H"))
     iemplot.postprocess(fp, pqstr)
     del(cfg['_midwest'])
     fp = iemplot.simple_grid_fill(lons, lats, od, cfg)
-    pqstr = "plot ac %s00 smos_iowa_od%s.png smos_iowa_od%s.png png" % (
-                ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
+    pqstr = "plot %s %s00 smos_iowa_od%s.png smos_iowa_od%s.png png" % (
+                routes, ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
                 ts.strftime("%H"))
     iemplot.postprocess(fp, pqstr)
 
@@ -108,6 +108,7 @@ if __name__ == '__main__':
         # Run a day, a week ago ago as well
         for d in [1,5]:
             ts -= mx.DateTime.RelativeDateTime(days=d)
-            makeplot( ts )
+            makeplot( ts , 'a')
     else:
-        makeplot( mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), 0))
+        makeplot( mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), 0),
+                  'a')
