@@ -16,5 +16,6 @@ Copyright &copy; 2001-<?php echo date("Y"); ?>, Iowa State University of Science
  &middot; <a href="<?php echo $rooturl; ?>/disclaimer.php">disclaimer</a>
 </div>
 <?php if (! isset($NOCONTENT)) echo "</div> <!-- End of iem-main -->"; ?>
+<?php if (defined("FBEXTRA")) echo FBEXTRA; ?>
 </body>
 </html>
