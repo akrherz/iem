@@ -40,10 +40,12 @@ d = {}
 for i in range(len(vals)):
     d[ keys[i] ] = vals[i]
 
+# Ob times are always CDT
 ts1 = mx.DateTime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
+gts1 = ts1 + mx.DateTime.RelativeDateTime(hours=5)
 
 iem = access.Ob( 'RSAI4', "OT")
-iem.setObTime( ts1 )
+iem.setObTimeGMT( gts1 )
 drct = d['WindDir']
 iem.data['drct'] = drct
 sknt = float(d['WS_mph_S_WVT']) / 1.15
@@ -53,7 +55,7 @@ iem.data['gust'] = gust
 iem.updateDatabase( cursor=icursor )
 
 csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RSAI4', 
-            ts1.gmtime().strftime("%Y/%m/%d %H:%M:%S"),
+            gts1.strftime("%Y/%m/%d %H:%M:%S"),
       drct, sknt, gust) )
 
 
@@ -78,9 +80,10 @@ for i in range(len(vals)):
     d[ keys[i] ] = vals[i]
 
 ts2 = mx.DateTime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
+gts2 = ts2 + mx.DateTime.RelativeDateTime(hours=5)
 
 iem = access.Ob( 'RLRI4', "OT")
-iem.setObTime( ts2 )
+iem.setObTimeGMT( gts2 )
 drct = d['WindDir']
 iem.data['drct'] = drct
 sknt = float(d['WS_mph_S_WVT']) / 1.15
@@ -90,14 +93,14 @@ iem.data['gust'] = gust
 iem.updateDatabase( cursor=icursor)
 
 csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RLRI4', 
-            ts2.gmtime().strftime("%Y/%m/%d %H:%M:%S"),
+            gts2.strftime("%Y/%m/%d %H:%M:%S"),
       drct, sknt, gust) )
 
 csv.close()
 
 cmd = "/home/ldm/bin/pqinsert -p 'data c 000000000000 csv/ctre.txt bogus txt' /tmp/ctre.txt >& /dev/null"
-if ((mx.DateTime.now() - ts1).seconds > 3600. and
-   (mx.DateTime.now() - ts2).seconds > 3600.):
+if ((mx.DateTime.gmt() - gts1).seconds > 3600. and
+   (mx.DateTime.gmt() - gts2).seconds > 3600.):
     sys.exit()
 subprocess.call( cmd, shell=True )
 
