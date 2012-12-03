@@ -195,7 +195,9 @@ Previously entered Farmer Surveys:
 	echo "<div class='phidden' style='display: none;'><hr /><h3>Field $field</h3></div>\n";
     echo "<div id='tabs-${field}' style='background: url(DataCollectionSheet_files/field${field}.png) repeat-y;'>";
 	echo "<div style='margin-left: 50px;'>
-   <table><tr>". tdgen("Unique Name", "field${field}name") ."</tr></table>
+   <table><tr>". tdgen("Unique Name", "field${field}name") ."
+  			  ". tdgen("Field Number", "field${field}id", 14) ."
+  				</tr></table>
 		";
   echo "<p><strong>Cropping system for this field:</strong> ". radio("field${field}system", Array(
 		"single"=> "Single crop per rotation year",
@@ -277,12 +279,12 @@ Previously entered Farmer Surveys:
 	echo "</tr></table>";
 	
 	echo "<table>";
-	for($weed=1;$weed<5;$weed++){
+	for($weed=1;$weed<7;$weed++){
 		$s = "field${field}rotation${rotation}weed${weed}";
 		echo "<tr>";
 		echo tdgen("Weed Control #${weed}", "${s}control", 20);
 		echo tdgen("Rate", "${s}rate", 10);
-		echo tdgen("# of passes", "${s}passes", 4);
+		//echo tdgen("# of passes", "${s}passes", 4);
 		echo tdgen("Date", "${s}date", 10);
 		echo "</tr>";
 	} // End of weed
