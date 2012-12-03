@@ -36,7 +36,7 @@ for row in icursor:
     lats.append( row[4] )
     lons.append( row[3] )
     vals.append( row[2] )
-    valmask.append( row[1] in ['AWOS','IA_AWOS'] )
+    valmask.append( row[1] in ['AWOS','IA_ASOS'] )
 
 if len(lats) < 5:
     sys.exit(0)
