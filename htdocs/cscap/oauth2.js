@@ -83,23 +83,46 @@ function addRow(){
     ['<entry xmlns="http://www.w3.org/2005/Atom"',
     'xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">'],
     ['<entry xmlns="http://www.w3.org/2005/Atom"',
+    'xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">'],
+    ['<entry xmlns="http://www.w3.org/2005/Atom"',
+    'xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">'],
+    ['<entry xmlns="http://www.w3.org/2005/Atom"',
+    'xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">'],
+    ['<entry xmlns="http://www.w3.org/2005/Atom"',
+    'xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">'],
+    ['<entry xmlns="http://www.w3.org/2005/Atom"',
     'xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">']];
 
     for (var prop in values){
     	var n;
-    	if (prop.search('field1') == 0){
+    	if (prop.search('field1') == 0 || prop.search('f1') == 0){
     		n = 1;
-    	} else if (prop.search('field2') == 0){
+    	} else if (prop.search('field2') == 0 || prop.search('f2') == 0){
     		n = 2;    		
     	} else {
     		n = 0;
     	}
+    	if (prop.search('_r2_') == 2){
+    		n += 2;
+    	}
+    	else if (prop.search('_r3_') == 2){
+    		n += 4;
+    	}
+    
     	//console.log("prop "+ prop +" n "+ n);
     	v = values[prop];
     	if (v == '' || v == null ) {
     		x[n].push("<gsx:"+ prop +"/>");
     	} else {
 	    	x[n].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
+    	}
+    	if (prop == 'field1_name' || prop == 'field1_id'){
+    		x[3].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
+    		x[5].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
+    	}
+    	if (prop == 'field2_name' || prop == 'field2_id'){
+    		x[4].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
+    		x[6].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
     	}
     }
     $(x).each(function(i,xi){
