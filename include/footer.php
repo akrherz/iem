@@ -15,7 +15,12 @@ Copyright &copy; 2001-<?php echo date("Y"); ?>, Iowa State University of Science
  &middot; <a href="https://github.com/akrherz/iem">development</a>
  &middot; <a href="<?php echo $rooturl; ?>/disclaimer.php">disclaimer</a>
 </div>
-<?php if (! isset($NOCONTENT)) echo "</div> <!-- End of iem-main -->"; ?>
-<?php if (defined("FBEXTRA")) echo FBEXTRA; ?>
+<?php 
+if (! isset($NOCONTENT)) echo "</div> <!-- End of iem-main -->"; 
+if (defined("FBEXTRA")) {
+	echo '<script src="/js/jquery.js"></script>';
+	echo '<script src="/js/fbcomments.js"></script>';
+}
+?>
 </body>
 </html>
