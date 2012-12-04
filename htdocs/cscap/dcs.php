@@ -56,10 +56,12 @@ var apiKey = 'AIzaSyBUkRDnhdnp-AuEgLHtSsn6hK0QHuYJ3m0';
 var scopes = 'https://sites.google.com/feeds/ https://spreadsheets.google.com/feeds/ https://docs.google.com/feeds/ https://docs.googleusercontent.com/';
 var service;
 var access_token;
-var currentEntry = [null, null, null];
-var spreadsheetDocs = [null, null, null];
+var currentEntry = [null, null, null, null, null, null, null];
+var spreadsheetDocs = [null, null, null, null, null, null, null];
 b = 'https://spreadsheets.google.com/feeds/list/0AqZGw0coobCxdG1HUFk5YXI3TzRlT1FfV0kzWXFEVVE';
-var spreadkeys = [b+'/1/private/full', b+'/2/private/full', b+'/3/private/full'];
+var spreadkeys = [b+'/1/private/full', b+'/2/private/full', b+'/3/private/full',
+                  b+'/4/private/full', b+'/5/private/full', b+'/6/private/full',
+                  b+'/7/private/full'];
 var editting = false;
 
 $(function(){
@@ -227,31 +229,31 @@ Previously entered Farmer Surveys:
     echo "<div id='field${field}_tabs${rotation}' style='background: url(DataCollectionSheet_files/rotation${rotation}.png) repeat-y;'>";
     echo "<div style='margin-left: 25px;'>";
     echo "<table><tr>";
-    echo tdgen("Crop Type", "field${field}rotation${rotation}croptype", 30);
-    echo tdgen("Year", "field${field}rotation${rotation}year", 6);
+    echo tdgen("Crop Type", "f${field}r${rotation}croptype", 30);
+    echo tdgen("Year", "f${field}r${rotation}year", 6);
     echo "</tr></table>";
 		
 	echo "<table><tr>";
-	echo tdgen("Yield (per acre)", "field${field}rotation${rotation}yield", 10);
-	echo tdyn("Irrigated", "field${field}rotation${rotation}irrigated");
-	echo "<th>Harvest:</th><td>". radio("field${field}rotation${rotation}harvest", Array(
+	echo tdgen("Yield (per acre)", "f${field}r${rotation}yield", 10);
+	echo tdyn("Irrigated", "f${field}r${rotation}irrigated");
+	echo "<th>Harvest:</th><td>". radio("f${field}r${rotation}harvest", Array(
 			"grain_only"=> "Grain only",
 			"grain_and_res"=> "Grain and residue")) ."</td>";
 	echo "</tr></table>";
 	
 	echo "<table><tr>";
-	echo tdgen("Percent residue removed (%)", "field${field}rotation${rotation}resremoved", 5);
-	echo tdyn("Shred cornstalks before tillage", "field${field}rotation${rotation}shredstalks");
+	echo tdgen("Percent residue removed (%)", "f${field}r${rotation}resremoved", 5);
+	echo tdyn("Shred cornstalks before tillage", "f${field}r${rotation}shredstalks");
 	echo "</tr></table>";
 	
 	echo "<table><tr>";
-	echo tdgen("Residue removal: (e.g. bale)", "field${field}rotation${rotation}resremovalmethod", 30);
+	echo tdgen("Residue removal: (e.g. bale)", "f${field}r${rotation}resremovalmethod", 30);
 	echo "</tr></table>";
 	
 	echo "<table>";
 	for ($tillage=1;$tillage<7;$tillage++){
       echo "<tr>";
-      $s = "field${field}rotation${rotation}tillage${tillage}";
+      $s = "f${field}r${rotation}tillage${tillage}";
       echo tdgen("Tillage equipment", "${s}equip", 30);
       echo tdgen("Width", "${s}width", 5);
       echo tdgen("Date", "${s}date", 10);
@@ -260,29 +262,30 @@ Previously entered Farmer Surveys:
 	echo "</table>";
 	
 	echo "<table><tr>";
-	echo tdgen("Seeding rate (per acre)", "field${field}rotation${rotation}seedrate", 10);
-	echo "<th>Units:</th><td>". radio("field${field}rotation${rotation}seedunits", Array(
+	echo tdgen("Seeding rate (per acre)", "f${field}r${rotation}seedrate", 10);
+	echo "<th>Units:</th><td>". radio("f${field}r${rotation}seedunits", Array(
 			"seeds_per_acre"=> "seeds per acre",
 			"lbs_per_acre"=> "lbs. per acre")) ."</td>";
 	echo "</tr></table>";
 	
 	echo "<table><tr>";
-	echo tdgen("Relative maturity", "field${field}rotation${rotation}maturity");
+	echo tdgen("Relative maturity", "f${field}r${rotation}maturity");
 	echo "</tr></table>";
 	
 	echo "<table><tr>";
-	echo tdgen("Planting equipment", "field${field}rotation${rotation}plantequip", 30);
-	echo tdgen("Date", "field${field}rotation${rotation}plantdate", 10);
+	echo tdgen("Planting equipment", "f${field}r${rotation}plantequip", 30);
+	echo tdgen("Date", "f${field}r${rotation}plantdate", 10);
 	echo "</tr><tr>";
-	echo tdgen("Harvest equipment", "field${field}rotation${rotation}harvestequip", 30);
-	echo tdgen("Date", "field${field}rotation${rotation}harvestdate", 10);	
+	echo tdgen("Harvest equipment", "f${field}r${rotation}harvestequip", 30);
+	echo tdgen("Date", "f${field}r${rotation}harvestdate", 10);	
 	echo "</tr></table>";
 	
+	echo "<p style=\"font-size: 1.2em; color: #00f;\"><u>Weed Control</u></p>";
 	echo "<table>";
 	for($weed=1;$weed<7;$weed++){
-		$s = "field${field}rotation${rotation}weed${weed}";
+		$s = "f${field}r${rotation}weed${weed}";
 		echo "<tr>";
-		echo tdgen("Weed Control #${weed}", "${s}control", 20);
+		echo tdgen("#${weed}", "${s}control", 20);
 		echo tdgen("Rate", "${s}rate", 10);
 		//echo tdgen("# of passes", "${s}passes", 4);
 		echo tdgen("Date", "${s}date", 10);
@@ -290,14 +293,28 @@ Previously entered Farmer Surveys:
 	} // End of weed
 	echo "</table>";
 	
+	echo "<p style=\"font-size: 1.2em; color: #00f;\"><u>Pest &amp; Disease Control</u></p>";
 	echo "<table>";
-	for($fert=1;$fert<5;$fert++){
-		$s = "field${field}rotation${rotation}fert${fert}";
+	for($pest=1;$pest<7;$pest++){
+		$s = "f${field}r${rotation}pest${pest}";
 		echo "<tr>";
-		echo tdgen("Fertilizer #${fert}", "${s}fert", 15);
+		echo tdgen("#${pest}", "${s}control", 20);
+		echo tdgen("Rate", "${s}rate", 10);
+		//echo tdgen("# of passes", "${s}passes", 4);
+		echo tdgen("Date", "${s}date", 10);
+		echo "</tr>";
+	} // End of weed
+	echo "</table>";
+	
+	echo "<p style=\"font-size: 1.2em; color: #00f;\"><u>Fertilizer</u></p>";
+	echo "<table>";
+	for($fert=1;$fert<7;$fert++){
+		$s = "f${field}r${rotation}fert${fert}";
+		echo "<tr>";
+		echo tdgen("#${fert}", "${s}fert", 15);
 		echo tdgen("Amount (lbs/acre)", "${s}amount", 5);
 		echo tdgen("Applicator type", "${s}apptype", 10);
-		echo tdgen("Date", "${s}date", 5);
+		echo tdgen("Date", "${s}date", 10);
 		echo "</tr>";
 	} // End of fert
 	echo "</table>";
