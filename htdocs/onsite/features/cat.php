@@ -77,10 +77,10 @@ include("$rootpath/include/header.php");
 ?>
 </div>
 <div id="fb-root"></div>
-<script src="http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1"></script>
-<fb:comments send_notification_uid="16922938" 
- callback="<?php echo $rooturl; ?>/fbcb.php" title="<?php echo $row["title"]; ?>" 
- href="<?php echo $rooturl; ?>/onsite/features/cat.php?day=<?php echo $day; ?>" 
+<?php define("FBEXTRA", True); ?>
+<fb:comments send_notification_uid="16922938" title="<?php echo $row["title"]; ?>" 
+ href="http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=<?php echo $day; ?>" 
  xid="<?php echo $row["fbid"]; ?>" numposts="6" width="600"></fb:comments>
+ 
 
 <?php include("$rootpath/include/footer.php"); ?>
