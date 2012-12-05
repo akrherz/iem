@@ -1,11 +1,10 @@
 """
  Attempt to process the 1 minute archives available from NCDC
-
- $Id: $:
 """
 
 import re
 import os
+import subprocess
 import sys
 import mx.DateTime
 import urllib2
@@ -26,7 +25,7 @@ P1_RE = re.compile(r"""
 \[?\s*((?P<drct>\d+)|(?P<drct_miss>M))\s+
 ((?P<sknt>\d+)|(?P<sknt_miss>M))\s+
 ((?P<gust_drct>\d+)\+?|(?P<gust_drct_miss>M))\s*\]?\s+
-\[?((?P<gust_sknt>\d+)R?\d*\+?|(?P<gust_sknt_miss>M))\s*\]?\s+
+\[?((?P<gust_sknt>\d+)R?F*\d*\+?|(?P<gust_sknt_miss>M))\s*\]?\s+
 (....)\s
 (...)
 """, re.VERBOSE)
@@ -47,6 +46,7 @@ p1_examples = [
 "14933KDSM DSM2010010101380738   0.098 N                             306     9   312    9    31 60+              ",
 "94989KAMW AMW2010012112281828    M    M                              80     6    72    9                        ",
 "94989KAMW AMW2010012112271827  70000.00                                80     6    82    8                      ",
+"14942KOMA OMA2012111704141014   0.191 N                             149    10   151   12    14RFFF              ",
 ]
 
 p1_answers = [
@@ -69,7 +69,7 @@ P2_RE = re.compile(r"""
 \[?((?P<pres2>\d+\.\d*)|(?P<pres2_miss>[M ]))\]?\s?\s?
 \[?((?P<pres3>\d+\.\d*)|(?P<pres3_miss>[M ]))\]?\s+
 \[?\s*((?P<tmpf>\-?\d+)|(?P<tmpf_miss>M))\]?\s+
-((?P<dwpf>\-?\d+)|(?P<dwpf_miss>M))\s+
+\[?\s*((?P<dwpf>\-?\d+)|(?P<dwpf_miss>M))\]?\s+
 """, re.VERBOSE)
 
 
@@ -94,6 +94,7 @@ p2_examples = [
 "14943KSUX SUX2010013123050505  NP    M      0.00             39988   29.013  29.012  29.018    13    6          ",
 "14943KSUX SUX2010013109471547  ?0 [  M   ]  0.00             39988   29.087  29.086  29.092    16   10          ",
 "94989KAMW AMW2010010613201920  S   0000     0.01             40002   29.197  29.191             9    5          ",
+"14944KFSD FSD2012111613061906  NP [0000  ]  0.00             39992   28.806  28.797  28.801    45 [ 25]         ",
 ]
 
 def p2_parser( ln ):
@@ -256,7 +257,7 @@ def runner(station, monthts):
     out.write("\.\n")
     out.close()
 
-    os.system("psql -f %s -h iemdb asos" % (tmpfp,))
+    subprocess.call("psql -f %s -h iemdb asos" % (tmpfp,), shell=True)
     os.unlink( tmpfp )
     print "%s Station: %s processed %s entries" % (mx.DateTime.now(),
            station, len(data.keys()))
