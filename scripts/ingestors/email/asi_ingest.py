@@ -31,7 +31,7 @@ import mx.DateTime
 import email.parser
 import psycopg2
 import time
-OTHER = psycopg2.connect('dbname=other host=127.0.0.1 user=akrherz')
+OTHER = psycopg2.connect('dbname=other host=iemdb user=mesonet')
 ocursor = OTHER.cursor()
 
 SQL = """INSERT into asi_data values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
