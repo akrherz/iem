@@ -19,6 +19,7 @@ cd ../delta
 cd ../ingestors
 python beloit.py
 python soilm_ingest.py
+python flux_ingest.py
 
 cd ../outgoing
 php wxc_cocorahs.php
