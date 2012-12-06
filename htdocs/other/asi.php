@@ -28,10 +28,10 @@ function download_data($sts, $ets){
 
 $syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y", time() - 86400);
 $eyear = isset($_GET["eyear"]) ? $_GET["eyear"] : date("Y", time() - 86400);
-$emonth = isset($_GET["emonth"]) ? $_GET["emonth"] : date("m", time() - 86400);
-$eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d", time() - 86400);
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m", time() );
-$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d", time() );
+$emonth = isset($_GET["emonth"]) ? $_GET["emonth"] : date("m", time());
+$eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d", time() );
+$smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m", time()- 86400 );
+$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d", time() - 86400);
 $ehour = isset($_GET["ehour"]) ? $_GET["ehour"] : 0;
 $shour = isset($_GET["shour"]) ? $_GET["shour"] : 0;
 $station = isset($_REQUEST['station']) ? $_REQUEST['station']: 'ISU4003';
