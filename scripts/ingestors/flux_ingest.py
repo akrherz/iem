@@ -1,5 +1,8 @@
 
-import csv, pg, mx.DateTime, traceback
+import csv
+import pg
+import mx.DateTime
+import traceback
 other = pg.DB('other', 'iemdb')
 
 # Figure out max valid times
@@ -145,5 +148,5 @@ for station in data.keys():
             print station, ts, data[station][ts].keys()
             print traceback.print_exc()
 
-if (cnt < 50):
-  print "Only %s records found!" % (cnt,)
+if cnt < 10:
+  print "NLAE flux inget found only %s records" % (cnt,)
