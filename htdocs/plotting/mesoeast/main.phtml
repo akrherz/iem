@@ -4,21 +4,26 @@ $TITLE = "IEM NE Ames Time Series";
 $THISPAGE = "networks-other";
 include("$rootpath/include/header.php"); 
 include("$rootpath/include/forms.php"); 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$year = isset($_GET["year"]) ? $_GET["year"] : 2011;
+$month = isset($_GET["month"]) ? $_GET["month"] : 6;
+$day = isset($_GET["day"]) ? $_GET["day"] : 30;
 $myTime = mktime(0,0,0,$month,$day,$year);
+if ($myTime > mktime(0,0,0,6,30,2011)){
+	$myTime = mktime(0,0,0,6,30,2011);
+}
 
 $dirRef = strftime("%Y/%m/%d", $myTime);
 $dataurl = "http://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0006.dat";
+$fn = "/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat";
 
 ?>
 
 <div class="text">
 <a href="/other/">Other Networks</a> &nbsp;<b> > </b> &nbsp; Mesonet Northeast Ames
 
-<p>You can plot 1 minute data for this location.  Note that 
-the archive <br> begins 24 Oct 2004.</p>
+<p>This was a personal weather station operated by one of the faculty 
+members here at Iowa State.  This station has a period of record from
+24 Oct 2004 till 30 June 2011.</p>
 
 <table>
 <tr class="even"><td>
@@ -33,24 +38,33 @@ the archive <br> begins 24 Oct 2004.</p>
 
 </td></tr><tr><td>
 
+
+<?php 
+if (file_exists($fn)){
+	include("maxmintemp.php"); 
+	include("windtext.php"); 
+echo <<< EOF
 <BR>
-<a href="<?php echo $dataurl; ?>">View raw data file</a><br />
-<?php include("maxmintemp.php"); ?>
-<?php include("windtext.php"); ?>
-<img src="./1min.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<a href="${dataurl}">View raw data file</a><br />
+<img src="./1min.php?year=${year}&month=${month}&day=${day}" ALT="Time Series">
 <BR>
-<img src="./1min_inside.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<img src="./1min_inside.php?year=${year}&month=${month}&day=${day}" ALT="Time Series">
 <BR>
-<img src="./rh.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<img src="./rh.php?year=${year}&month=${month}&day=${day}" ALT="Time Series">
 <BR>
-<img src="./baro.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<img src="./baro.php?year=${year}&month=${month}&day=${day}" ALT="Time Series">
 <BR>
-<img src="./1min_V.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<img src="./1min_V.php?year=${year}&month=${month}&day=${day}" ALT="Time Series">
 <BR>
-<img src="./dailyrain.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<img src="./dailyrain.php?year=${year}&month=${month}&day=${day}" ALT="Time Series">
 <br />
-<img src="temp_rh.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<img src="temp_rh.php?year=${year}&month=${month}&day=${day}" ALT="Time Series">
 <BR>
+EOF;
+} else {
+	echo "<strong>Data is not available for this date, sorry!</strong>";
+}
+?>
 </td></tr></table>
 </div>
 <?php include("$rootpath/include/footer.php"); ?>
