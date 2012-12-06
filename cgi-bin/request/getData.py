@@ -1,7 +1,6 @@
 #!/usr/bin/python
 """
 Download interface for ASOS/AWOS data from the asos database
-$Id: $:
 """
 
 import cgi, re, string, sys
@@ -114,6 +113,16 @@ def main():
                 val = mesonet.relh( row['tmpf'], row['dwpf'] )
                 if val != "M":
                     sys.stdout.write("%.2f%s" % (val, rD))
+                else:
+                    sys.stdout.write("M%s" % (rD,))
+            elif data1 == 'sped':
+                if row['sknt'] >= 0:
+                    sys.stdout.write("%.1f%s" % (row['sknt'] * 1.14, rD))
+                else:
+                    sys.stdout.write("M%s" % (rD,))
+            elif data1 == 'gust_mph':
+                if row['gust'] >= 0:
+                    sys.stdout.write("%.1f%s" % (row['gust'] * 1.14, rD))
                 else:
                     sys.stdout.write("M%s" % (rD,))
             elif data1 == 'p01m':
