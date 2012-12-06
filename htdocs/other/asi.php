@@ -140,7 +140,7 @@ The archive begins on 1 October 2012.
 
 <h3>Decoder Ring for Data Columns</h3>
 
-<p>Each tower has twelve instruments.  Each instrument reports a five minute
+<p>Each tower has twelve instruments.  Each instrument reports a ten minute
 average, standard deviation, maximum, and minimum value.  Each instrument
 is labelled as a channel within the datafile.
 
