@@ -3,9 +3,6 @@
 cd cscap
 python email_daily_changes.py
 
-cd ../ingestors
-python flux_ingest.py
-
 # Rerun yesterday and today
 cd ../dbutil
 python rwis2archive.py
