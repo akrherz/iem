@@ -30,6 +30,7 @@ import sys
 import mx.DateTime
 import email.parser
 import psycopg2
+import base64
 import time
 OTHER = psycopg2.connect('dbname=other host=iemdb user=mesonet')
 ocursor = OTHER.cursor()
@@ -70,7 +71,7 @@ def email_process():
         if part.get_filename() != None:
             fp = mx.DateTime.now().strftime("/home/colo/asi%Y%m%d%H%M%S.txt")
             o = open(fp, 'a')
-            o.write( part.get_payload() )
+            o.write( base64.b64decode(part.get_payload()).replace("\r\n", "\n") )
             o.close()
             
             try:
