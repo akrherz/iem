@@ -72,7 +72,7 @@ ax[0].plot(valid, data['ch1avg'], linewidth=2, color='r', zorder=2, label='48.5m
 ax[0].plot(valid, data['ch3avg'], linewidth=2, color='purple', zorder=2, label='32m')
 ax[0].plot(valid, data['ch5avg'], linewidth=2, color='black', zorder=2, label='10m')
 ax[0].set_ylabel("Wind Speed [m/s]")
-ax[0].legend(loc=(0, 0.01), ncol=3)
+ax[0].legend(loc=(0.05, -0.15), ncol=3)
 ax[0].set_xlim( min(valid), max(valid))
 days = (max(valid) - min(valid)).days  
 if days >= 3:
@@ -93,8 +93,8 @@ else:
 
 ax[0].set_title("ISUASI Station: %s Timeseries" % (nt.sts[station]['name'],))
 
-ax[1].plot(valid, data['ch10avg'], label='3m')
-ax[1].plot(valid, data['ch11avg'], label='48.5m')
+ax[1].plot(valid, data['ch10avg'], color='b', label='3m')
+ax[1].plot(valid, data['ch11avg'], color='r', label='48.5m')
 ax[1].grid(True)
 ax[1].set_ylabel("Air Temperature [C]")
 ax[1].legend(loc='best')
