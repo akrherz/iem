@@ -2,6 +2,7 @@
 include("../../config/settings.inc.php");
 include ("$rootpath/include/forms.php");
 include "$rootpath/include/database.inc.php";
+include "$rootpath/include/imagemaps.php";
 function download_data($sts, $ets){
 	
 	$dbconn = iemdb('other');
@@ -80,6 +81,8 @@ that outfitted two towers with wind and temperature sensors.
 <h3>Plots of this data</h3>
 <form method="GET" name="plot">
 <input type="hidden" name="action" value="plot" />
+
+<strong>Select station:</strong><?php echo networkSelect("ISUASI", $station);?>
 
 <table>
 <tr><td></td><th>Year:</th>
