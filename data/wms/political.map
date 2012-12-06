@@ -179,4 +179,28 @@ LAYER
   END
 END
 
+#------------------------------------------------------
+#
+LAYER
+  NAME "tribal-900913"
+  STATUS ON
+  DATA "us/tribal.shp"
+  TYPE LINE
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "US Tribal Boundaries"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
+    "wms_extent" "-180 10 -66 89"
+  END
+  CLASS
+    SYMBOL 0
+    COLOR 0 0 0
+    SIZE 3
+  END
+END
+
 END
