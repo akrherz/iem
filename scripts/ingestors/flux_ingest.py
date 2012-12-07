@@ -1,5 +1,6 @@
-
-import csv
+"""
+Ingest files provided by NLAE containing flux information
+"""
 import pg
 import mx.DateTime
 import traceback
@@ -7,12 +8,16 @@ other = pg.DB('other', 'iemdb')
 
 # Figure out max valid times
 maxts = {}
-rs = other.query("SELECT station, max(valid) from flux%s GROUP by station" % (mx.DateTime.now().year - 1, ) ).dictresult()
+rs = other.query("""SELECT station, max(valid) from flux%s 
+    GROUP by station""" % (mx.DateTime.now().year - 1, ) ).dictresult()
 for i in range(len(rs)):
-  maxts[ rs[i]['station'] ] = mx.DateTime.strptime(rs[i]['max'][:16], '%Y-%m-%d %H:%M')
-rs = other.query("SELECT station, max(valid) from flux%s GROUP by station" % (mx.DateTime.now().year, ) ).dictresult()
+    maxts[ rs[i]['station'] ] = mx.DateTime.strptime(rs[i]['max'][:16], 
+                                                     '%Y-%m-%d %H:%M')
+rs = other.query("""SELECT station, max(valid) from flux%s 
+    GROUP by station""" % (mx.DateTime.now().year, ) ).dictresult()
 for i in range(len(rs)):
-  maxts[ rs[i]['station'] ] = mx.DateTime.strptime(rs[i]['max'][:16], '%Y-%m-%d %H:%M')
+    maxts[ rs[i]['station'] ] = mx.DateTime.strptime(rs[i]['max'][:16], 
+                                                     '%Y-%m-%d %H:%M')
 
 DIR = "/mnt/home/mesonet/ot/ot0005/incoming/Fluxdata/"
 fp = {'Flux10_AF.dat': 'nstl10', 
@@ -103,9 +108,9 @@ convert = {
            }
 
 def c(v):
-  if (v == "NAN" or v == "-INF" or v == "INF"):
-    return None
-  return v
+    if (v == "NAN" or v == "-INF" or v == "INF"):
+        return None
+    return v
 
 data = {'nstl10': {},
         'nstl11': {},
@@ -113,9 +118,9 @@ data = {'nstl10': {},
         'nstlnsp': {},
         }
 
-for file in fp.keys():
-    station = fp[file]
-    lines = open("%s%s" % (DIR,file), 'r').readlines()
+for fn in fp.keys():
+    station = fp[fn]
+    lines = open("%s%s" % (DIR, fn), 'r').readlines()
     keys = lines[1].replace('"','').replace("\r\n", '').split(",")
     for obline in lines[3:]:
         tokens = obline.replace('"', '').split(",")
@@ -148,5 +153,5 @@ for station in data.keys():
             print station, ts, data[station][ts].keys()
             print traceback.print_exc()
 
-if cnt < 10:
-  print "NLAE flux inget found only %s records" % (cnt,)
+if cnt == 0:
+    print "NLAE flux inget found no records"
