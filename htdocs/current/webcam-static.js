@@ -12,6 +12,18 @@ Ext.override(Ext.form.ComboBox, {
     beforeBlur: Ext.emptyFn
 });
 
+Ext.override(Date, {
+    toUTC : function() {
+                        // Convert the date to the UTC date
+        return this.add(Date.MINUTE, this.getTimezoneOffset());
+    },
+
+    fromUTC : function() {
+                        // Convert the date from the UTC date
+        return this.add(Date.MINUTE, -this.getTimezoneOffset());
+    }
+});
+
 
 
 var dataFields = [
@@ -19,8 +31,9 @@ var dataFields = [
  'name',
  'county',
  'state',
+ 'network',
  'url'
-]
+];
 
 var disableStore = new Ext.data.Store({
     idProperty  : 'cid',
@@ -170,7 +183,7 @@ new Ext.Viewport({
                      +" "+ Ext.getCmp("timepicker").getValue();
                    var dt = new Date(ts);
                    if (Ext.getCmp("timemode").realtime){ ts = 0; }
-                   else{ ts = dt.format('YmdHi'); }
+                   else{ ts = dt.toUTC().format('YmdHi'); }
                    imagestore.reload({
                      add    : false,
                      params : {'ts': ts,
@@ -220,10 +233,10 @@ new Ext.Viewport({
                   var dt = new Date(ts);
                   imagestore.reload({
                       add    : false,
-                      params : {'ts': dt.format('YmdHi'),
+                      params : {'ts': dt.toUTC().format('YmdHi'),
                         'network': Ext.getCmp("networkSelect").getValue() }
                   });
-                  window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ dt.format('YmdHi');
+                  window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ dt.toUTC().format('YmdHi');
               }
           }
        },{
@@ -243,10 +256,10 @@ new Ext.Viewport({
                   var dt = new Date(ts);
                   imagestore.reload({
                       add    : false,
-                      params : {'ts': dt.format('YmdHi'),
+                      params : {'ts': dt.toUTC().format('YmdHi'),
                           'network': Ext.getCmp("networkSelect").getValue() }
                   });
-                   window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ dt.format('YmdHi');
+                   window.location.href = "#"+ Ext.getCmp("networkSelect").getValue() +"-"+ dt.toUTC().format('YmdHi');
               }
           }
        }
@@ -288,7 +301,7 @@ var task = {
     }
   },
   interval: cfg.refreshint
-}
+};
 Ext.TaskMgr.start(task);
 
 
@@ -301,8 +314,8 @@ app.appSetTime = function(s){
     Ext.getCmp("networkSelect").setValue( network );
     var tstamp = tokens2[1];
     var dt = Date.parseDate(tstamp, 'YmdHi');
-    Ext.getCmp("datepicker").setValue( dt );
-    Ext.getCmp("timepicker").setValue( dt );
+    Ext.getCmp("datepicker").setValue( dt.fromUTC() );
+    Ext.getCmp("timepicker").setValue( dt.fromUTC() );
     Ext.getCmp("datepicker").enable();
     Ext.getCmp("timepicker").enable();
     Ext.getCmp("timemode").setText("Archived Mode");
@@ -324,7 +337,7 @@ app.appSetTime = function(s){
    imagestore.load();
    Ext.getCmp("networkSelect").setValue("KCCI");
 }
-}
+};
 
 
 var tokens = window.location.href.split('#');

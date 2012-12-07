@@ -1,5 +1,8 @@
 <?php
-/* This is gonna be painful */
+/* 
+ * This is an Extjs application that allows historical and current viewing of
+ * webcam images.
+ */
 include("../../config/settings.inc.php");
 define("IEM_APPID", 9);
  include("$rootpath/include/iemprop.php");
@@ -13,9 +16,9 @@ Ext.namespace('cfg');
 cfg.refreshint = ${camera_refresh}000;
 cfg.header = 'myheader';
 cfg.headerHeight = 30;
-cfg.jsonSource = '../json/webcams.php';
+cfg.jsonSource = '/json/webcams.php';
 </script>
-  <script type='text/javascript' src='webcam-static.js?v=3'></script>
+  <script type='text/javascript' src='webcam-static.js?v=4'></script>
 <style>
 #iem-header {
 	display : none;
@@ -29,6 +32,7 @@ cfg.jsonSource = '../json/webcams.php';
     margin: 1px;
     margin-right: 0;
     padding: 5px;
+    width: 325px;
 }
 .x-view-over{
     border:1px solid #dddddd;
@@ -56,15 +60,15 @@ and the application will automatically update to show you the images. The IEM ha
 <br /><br />
 <strong>Cool Archived Images:</strong><br />
 <ul style="margin-left: 5px;">
- <li><a href="javascript: app.appSetTime('KCCI-200406111932')">11 Jun 2004 - 7:32 PM, Webster City Tornado</a></li>
- <li><a href="javascript: app.appSetTime('KCCI-200505261915')">26 May 2005 - 7:15 PM, Pella Double Rainbow</a></li>
- <li><a href="javascript: app.appSetTime('KCCI-200506082055')">8 Jun 2005 - 8:55 PM, All sorts of colours</a></li>
- <li><a href="javascript: app.appSetTime('KCCI-200509081230')">8 Sep 2005 - 12:30 PM, Blurry shot of Ames Tornado</a></li>
- <li><a href="javascript: app.appSetTime('KCCI-200511121638')">12 Nov 2005 - 4:38 PM, Woodward tornado from Madrid</a></li>
- <li><a href="javascript: app.appSetTime('KCCI-200511121700')">12 Nov 2005 - 5:00 PM, Ames tornado</a></li>
- <li><a href="javascript: app.appSetTime('KCCI-200607171650')">17 Jul 2006 - 4:50 PM, Tama possible brief tornado</a></li>
- <li><a href="javascript: app.appSetTime('KCCI-200710021756')">2 Oct 2007 - 5:56 PM, Twin Cedars possible tornado</a></li>
- <li><a href="javascript: app.appSetTime('KCCI-200808302020')">30 Aug 2008 - 8:20 PM, Interesting Sunset Halos</a></li>
+ <li><a href="javascript: app.appSetTime('KCCI-200406120132')">11 Jun 2004 - 7:32 PM, Webster City Tornado</a></li>
+ <li><a href="javascript: app.appSetTime('KCCI-200505270115')">26 May 2005 - 7:15 PM, Pella Double Rainbow</a></li>
+ <li><a href="javascript: app.appSetTime('KCCI-200506090255')">8 Jun 2005 - 8:55 PM, All sorts of colours</a></li>
+ <li><a href="javascript: app.appSetTime('KCCI-200509081730')">8 Sep 2005 - 12:30 PM, Blurry shot of Ames Tornado</a></li>
+ <li><a href="javascript: app.appSetTime('KCCI-200511122238')">12 Nov 2005 - 4:38 PM, Woodward tornado from Madrid</a></li>
+ <li><a href="javascript: app.appSetTime('KCCI-200511122300')">12 Nov 2005 - 5:00 PM, Ames tornado</a></li>
+ <li><a href="javascript: app.appSetTime('KCCI-200607172150')">17 Jul 2006 - 4:50 PM, Tama possible brief tornado</a></li>
+ <li><a href="javascript: app.appSetTime('KCCI-200710022256')">2 Oct 2007 - 5:56 PM, Twin Cedars possible tornado</a></li>
+ <li><a href="javascript: app.appSetTime('KCCI-200808310120')">30 Aug 2008 - 8:20 PM, Interesting Sunset Halos</a></li>
 </ul>
 
 </div>
