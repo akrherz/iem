@@ -1,4 +1,4 @@
-<?php
+<?php header('content-type: application/json; charset=utf-8');
 /* We need a JSON listing of variables this site reports with! */
 require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
@@ -20,5 +20,11 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
   $ar["vars"][] = $z;
 }
 
-echo Zend_Json::encode($ar);
+$json = Zend_Json::encode($ar);
+
+# JSON if no callback
+if( ! isset($_GET['callback']))
+	exit( $json );
+
+exit( "{$_GET['callback']}($json)" );
 ?>

@@ -1,4 +1,4 @@
-<?php
+<?php header('content-type: application/json; charset=utf-8');
 /* Giveme JSON data listing products */
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
@@ -43,6 +43,12 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 }
 
 
-echo Zend_Json::encode($ar);
+$json = Zend_Json::encode($ar);
+
+# JSON if no callback
+if( ! isset($_GET['callback']))
+	exit( $json );
+
+exit( "{$_GET['callback']}($json)" );
 
 ?>

@@ -84,6 +84,7 @@ $_pages = Array(
     "year" => Array("title" => "Year", "url" => "/current/year.phtml"),
     "radar" => Array("title" => "RADAR & Satellite", "url" => "/current/radar.phtml"),
     "placefiles" => Array("title" => "GR Placefiles", "url" => "/request/grx/"),
+ 	"jsonp" => Array("title" => "JSONP Webservices", "url" => "/json/"),
     "afos" => Array("title" => "NWS Text", "url" => "/wx/afos/"),
  ),
  "iem" => Array(

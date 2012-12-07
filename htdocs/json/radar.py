@@ -143,12 +143,17 @@ def main():
     """
     form = cgi.FieldStorage()
     operation = form.getvalue('operation', None)
+    callback = form.getvalue('callback', None)
+    if callback is not None:
+        print "%s(" % (callback,),
     if operation == "list":
-        print json.dumps( list_files(form) )
+        print json.dumps( list_files(form) ),
     elif operation == "available":
-        print json.dumps( available_radars(form) )
+        print json.dumps( available_radars(form) ),
     elif operation == "products":
-        print json.dumps( list_products(form) )
+        print json.dumps( list_products(form) ),
+    if callback is not None:
+        print ')',
 
 if __name__ == "__main__":
     print "Content-type: text/plain\n"

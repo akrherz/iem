@@ -1,4 +1,4 @@
-<?php
+<?php header('content-type: application/json; charset=utf-8');
 /*
  *  Giveme JSON data listing of webcams 
  */
@@ -67,6 +67,11 @@ for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
   	$ar["images"][] = $z;
 }
 
-echo Zend_Json::encode($ar);
+$json = Zend_Json::encode($ar);
 
+# JSON if no callback
+if( ! isset($_GET['callback']))
+	exit( $json );
+
+exit( "{$_GET['callback']}($json)" );
 ?>
