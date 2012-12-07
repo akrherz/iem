@@ -1,4 +1,4 @@
-<?php
+<?php header('content-type: application/json; charset=utf-8');
 /*
  * JSON Service for station Table changes , limit the result to 1000 in order
  * to prevent memory overflows...
@@ -18,5 +18,12 @@ $ar = Array("stations" => Array() );
 for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++){
   $ar["stations"][] = $row;
 }
-echo Zend_Json::encode($ar);
+
+$json = Zend_Json::encode($ar);
+
+# JSON if no callback
+if( ! isset($_GET['callback']))
+	exit( $json );
+
+exit( "{$_GET['callback']}($json)" );
 ?>

@@ -3,3 +3,5 @@ Options +ExecCGI
 
 RewriteEngine On
 RewriteRule ^radar radar.py
+RewriteRule ^qpe/([0-9\.\-]+)/([0-9\.\-]+)/(json) qpe.py?lat=$2&lon=$1&format=$3
+

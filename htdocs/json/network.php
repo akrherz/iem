@@ -1,5 +1,7 @@
-<?php
-/* Generate a KML file of a network locations, yummy */
+<?php header('content-type: application/json; charset=utf-8');
+/* 
+ * JSONP service for IEM Tracked network metadata
+ */
 require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
@@ -19,5 +21,11 @@ while (list($sid,$data) = each($nt->table))
   $ar["stations"][] = $z;
 }
 
-echo Zend_Json::encode($ar);
+$json = Zend_Json::encode($ar);
+
+# JSON if no callback
+if( ! isset($_GET['callback']))
+	exit( $json );
+
+exit( "{$_GET['callback']}($json)" );
 ?>
