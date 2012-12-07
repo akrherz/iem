@@ -43,7 +43,7 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "feel" => "Feels Like [F]", "vsby" => "Visibility [miles]",
   "ts" => "Observation Time", "phour" => "Last Hour Rainfall [inch]",
   "min_tmpf" => "Today's Low Temperature", "sname" => "Station Name",
-  "max_tmpf" => "Today's High Temperature",
+  "max_tmpf" => "Today's High Temperature", "id" => "Station Identifier",
   "skyl1" => "Cloud Level 1",
   "skyl2" => "Cloud Level 2",
   "skyl3" => "Cloud Level 3",
@@ -168,6 +168,7 @@ this network <a href='../request/download.phtml?network=${network}'>here</a>.<br
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
+  <th rowspan="2"><a href="<?php echo $uri; ?>id">ID</a></th>
   <th rowspan="2"><a href="<?php echo $uri; ?>sname">Station</a></th>
   <th rowspan="2"><a href="<?php echo $uri; ?>ts">Ob Time</a></th>
   <th rowspan="2">Present Wx</th>
@@ -214,11 +215,12 @@ while (list ($key, $val) = each ($finalA))  {
   $tdiff = $now - $asos[$key]->ts;
   $url = sprintf("%s/sites/site.php?station=%s&network=%s", $rooturl,
          $key, $network);
-  $row .= "<td>". $cities[$key]["name"] . " (<a href=\"$url\">${key}</a>)</td>";
+  $row .= sprintf("<td><a href='%s'>%s</a></td>", $url, $key);
+  $row .= "<td>". $cities[$key]["name"] . "</td>";
   $row .= "<td ";
   if ($tdiff > 10000){
     $fmt = "%d %b %I:%M %p";
-    $row .= "bgcolor=\"red\">". strftime($fmt, $asos[$key]->lts) ."</td><td colspan=\"16\">Site Offline</td></tr>";
+    $row .= "bgcolor=\"red\">". strftime($fmt, $asos[$key]->lts) ."</td><td colspan=\"18\">Site Offline</td></tr>";
     $old .= $row;
     continue;
   } else if ($tdiff > 7200){
@@ -256,7 +258,7 @@ while (list ($key, $val) = each ($finalA))  {
     $row .= "<tr";
     if ($i % 2 == 0)  $row .= " bgcolor='#eeeeee'";
     $row .= ">";
-    $row .= "<td colspan=\"21\">
+    $row .= "<td colspan=\"22\">
              <font color=\"brown\">". $parts["raw"] ."</font></td>
              </tr>\n";
    }
@@ -270,7 +272,7 @@ echo $old;
 </tbody>
 <tfoot>
 <tr>
- <td colspan="4">&nbsp;</td>
+ <td colspan="5">&nbsp;</td>
  <td><a href="<?php echo $uri; ?>&var=tmpf');">Plot</a></td>
  <td><a href="<?php echo $uri; ?>&var=max_tmpf');">Plot</a></td>
  <td><a href="<?php echo $uri; ?>&var=min_tmpf');">Plot</a></td>
