@@ -2,7 +2,6 @@
 /* Generate GR placefile of webcam stuff */
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/cameras.inc.php");
 $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
@@ -22,23 +21,23 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   </Style>";
 
 $conn = iemdb("mesosite");
-$sql = "SELECT * from camera_current WHERE valid > (now() - '30 minutes'::interval)"; 
-$rs = pg_exec($conn, $sql);
+pg_prepare($conn, "SELECT", "SELECT *, x(geom) as lon, y(geom) as lat
+		from camera_current c JOIN webcams w
+		on (w.id = c.cam) WHERE 
+		valid > (now() - '30 minutes'::interval) and network = $1");
+$rs = pg_execute($conn, "SELECT", Array($network)); 
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
-  $key = $row["cam"];
-  if ($cameras[$key]["network"] != $network){ continue; }
-
   echo "<Placemark>
-    <name>". $cameras[$key]["name"] ."</name>
+    <name>". str_replace('&', '&amp;', $row["name"]) ."</name>
     <description>
 <![CDATA[
-  <p><img src=\"http://mesonet.agron.iastate.edu/data/camera/stills/$key.jpg\" /></p>
+  <p><img src=\"http://mesonet.agron.iastate.edu/data/camera/stills/". $row["cam"] .".jpg\" /></p>
         ]]>
     </description>
     <styleUrl>#iemstyle</styleUrl>
     <Point>
-       <coordinates>". $cameras[$key]["lon"] .",". $cameras[$key]["lat"] .",0</coordinates>
+       <coordinates>". $row["lon"] .",". $row["lat"] .",0</coordinates>
     </Point>
 </Placemark>";
 }
