@@ -7,7 +7,7 @@ os.environ[ 'HOME' ] = '/tmp/'
 os.environ[ 'USER' ] = 'nobody'
 import datetime
 import numpy
-import sys
+import mesonet
 import iemtz
 import cgitb
 cgitb.enable()
@@ -48,6 +48,8 @@ icursor.execute(sql)
 d12sm = []
 d24sm = []
 d50sm = []
+tair = []
+tsoil = []
 valid = []
 rain = []
 for row in icursor:
@@ -56,11 +58,15 @@ for row in icursor:
     d50sm.append( row['vwc_50_avg'] )
     valid.append( row['valid'] )
     rain.append( row['rain_mm_tot'])
+    tair.append( row['tair_c_avg'])
+    tsoil.append( row['tsoil_c_avg'])
 
 rain = numpy.array( rain )
 d12sm = numpy.array( d12sm )
 d24sm = numpy.array( d24sm )
 d50sm = numpy.array( d50sm )
+tair = numpy.array( tair )
+tsoil = numpy.array( tsoil )
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -68,39 +74,45 @@ import matplotlib.dates as mdates
 maxy = max( [numpy.max(d12sm), numpy.max(d24sm), numpy.max(d50sm)])
 miny = min( [numpy.min(d12sm), numpy.min(d24sm), numpy.min(d50sm)])
 
-(fig, ax) = plt.subplots(1,1)
-ax.grid(True)
-ax2 = ax.twinx()
+(fig, ax) = plt.subplots(2,1, sharex=True)
+ax[0].grid(True)
+ax2 = ax[0].twinx()
 ax2.set_yticks( numpy.arange(-0.6, 0., 0.1))
 ax2.set_yticklabels( 0 - numpy.arange(-0.6, 0.01, 0.1))
 ax2.set_ylim(-0.6, 0)
 ax2.set_ylabel("Hourly Precipitation [inch]")
 ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc='b', ec='b', zorder=1)
 
-ax.plot(valid, d12sm * 100.0, linewidth=2, color='r', zorder=2, label='12 inch')
-ax.plot(valid, d24sm * 100.0, linewidth=2, color='purple', zorder=2, label='24 inch')
-ax.plot(valid, d50sm * 100.0, linewidth=2, color='black', zorder=2, label='50 inch')
-ax.set_ylabel("Volumetric Soil Water Content [%]")
-ax.legend(loc=(0, 0.01), ncol=3)
-ax.set_ylim(miny * 100.0 - 5, maxy * 100.0 + 5)
-ax.set_xlim( min(valid), max(valid))
+ax[0].plot(valid, d12sm * 100.0, linewidth=2, color='r', zorder=2, label='12 inch')
+ax[0].plot(valid, d24sm * 100.0, linewidth=2, color='purple', zorder=2, label='24 inch')
+ax[0].plot(valid, d50sm * 100.0, linewidth=2, color='black', zorder=2, label='50 inch')
+ax[0].set_ylabel("Volumetric Soil Water Content [%]")
+ax[0].legend(loc=(0, 0.01), ncol=3)
+ax[0].set_ylim(miny * 100.0 - 5, maxy * 100.0 + 5)
+ax[0].set_xlim( min(valid), max(valid))
 days = (ets - sts).days  
 if days >= 3:
     interval = max(int(days/7), 1)
-    ax.xaxis.set_major_locator(
-                               mdates.DayLocator(interval=interval)
+    ax[0].xaxis.set_major_locator(
+                               mdates.DayLocator(interval=interval, tz=iemtz.Central)
                                )
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y'))
+    ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y', tz=iemtz.Central))
 else:
-    ax.xaxis.set_major_locator(
-                               mdates.AutoDateLocator(maxticks=10)
+    ax[0].xaxis.set_major_locator(
+                               mdates.AutoDateLocator(maxticks=10, tz=iemtz.Central)
                                )
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-I %p\n%d %b',
+    ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-I %p\n%d %b',
                                                       tz=iemtz.Central))
 
-ax.set_title("ISUAG Station: %s Timeseries" % (nt.sts[station]['name'],
+ax[0].set_title("ISUAG Station: %s Timeseries" % (nt.sts[station]['name'],
                                             ))
 
+
+ax[1].plot(valid, mesonet.c2f( tair ), linewidth=2, color='blue', zorder=2, label='Air')
+ax[1].plot(valid, mesonet.c2f( tsoil ), linewidth=2, color='red', zorder=2, label='Soil')
+ax[1].grid(True)
+ax[1].legend(loc='best')
+ax[1].set_ylabel("Temperature [F]")
 
 print "Content-Type: image/png\n"
 plt.savefig( sys.stdout, format='png' )
