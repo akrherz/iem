@@ -22,6 +22,7 @@ python madis2csv.py
 python wxc_azos_prec.py
 php spider.php
 python wxc_iarwis_traffic.py
+python wxc_iemstage.py
 
 cd kcci
 python wxc_top5.py
