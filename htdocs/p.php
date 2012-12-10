@@ -4,31 +4,17 @@
  * app
  */
 include("../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
 
 $id = isset($_GET['id']) ? intval($_GET['id']) : "";
 $pid = isset($_GET['pid']) ? substr($_GET['pid'],0,32) : "";
 if ($id == "" && $pid == "") die();
 
-$conn = iemdb("postgis");
-
 if ($id != "") {
- $rs = pg_prepare($conn, "IDSELECT", "SELECT product,geom from text_products 
-                 WHERE id = $1");
- $rs = pg_execute($conn, "IDSELECT", Array($id));
+  die("Sorry, this interface is no longer available!  Please contact us if you need it back!");
 } else {
- $rs = pg_prepare($conn, "PIDSELECT", "SELECT product,geom from text_products 
-                 WHERE product_id = $1");
- $rs = pg_execute($conn, "PIDSELECT", Array($pid));
+  // 201212100547-KTOP-FXUS63-AFDTOP
+  header(sprintf("Location: %s/wx/afos/p.php?pil=%s&e=%s", ROOTURL, 
+  	substr($pid,25,6), substr($pid,0,12)));
+  exit;
 }
-
-include("$rootpath/include/header.php");
-
-for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
-{
-  echo "<pre>". $row["product"] ."</pre>\n";
-  if ($row["geom"] != ""){  echo "<p><img src=\"GIS/radmap.php?pid=$pid\">"; }
-}
-
-include("$rootpath/include/footer.php");
 ?>
