@@ -52,5 +52,5 @@ for row in icursor:
 o.close()
 
 subprocess.call("/home/ldm/bin/pqinsert wxc_iemstage.txt", shell=True)
-shutil.copyfile("wxc_iemstage.txt", "/mesonet/share/pickup/wxc/wxc_iemrivers.txt")
+shutil.copyfile("wxc_iemstage.txt", "/mesonet/share/pickup/wxc/wxc_iemstage.txt")
 os.remove("wxc_iemstage.txt")
