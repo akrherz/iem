@@ -27,18 +27,22 @@ def sync(dbname):
     cur.execute("""SELECT * from stations WHERE modified > %s or iemid > %s""",
     (maxTS, maxID) )
     for row in cur:
-      if row['iemid'] > maxID:
-        dbcursor.execute("""INSERT into stations(iemid, network, id) 
-         VALUES(%s,%s,%s) """, (row['iemid'], row['network'], row['id']))
-      # insert queried stations
-      dbcursor.execute("""UPDATE stations SET name = %(name)s, 
+        if row['iemid'] > maxID:
+            dbcursor.execute("""INSERT into stations(iemid, network, id) 
+             VALUES(%s,%s,%s) """, (row['iemid'], row['network'], row['id']))
+        # insert queried stations
+        dbcursor.execute("""UPDATE stations SET name = %(name)s, 
        state = %(state)s, elevation = %(elevation)s, online = %(online)s, 
        geom = %(geom)s, params = %(params)s, county = %(county)s, 
        plot_name = %(plot_name)s, climate_site = %(climate_site)s,
        wfo = %(wfo)s, archive_begin = %(archive_begin)s, 
        archive_end = %(archive_end)s, remote_id = %(remote_id)s, 
        tzname = %(tzname)s, country = %(country)s, 
-       modified = %(modified)s, network = %(network)s, metasite = %(metasite)s
+       modified = %(modified)s, network = %(network)s, metasite = %(metasite)s,
+       sigstage_low = %(sigstage_low)s, sigstage_action = %(sigstage_action)s,
+       sigstage_bankfull = %(sigstage_bankfull)s, sigstage_flood = %(sigstage_flood)s,
+       sigstage_moderate = %(sigstage_moderate)s, sigstage_major = %(sigstage_major)s,
+       sigstage_record = %(sigstage_record)s
        WHERE iemid = %(iemid)s""",
        row)
     print 'Database: %s Modified %s rows TS: %s IEMID: %s' % (dbname, 
