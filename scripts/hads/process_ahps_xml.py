@@ -4,6 +4,7 @@
 from twisted.words.xish import xpath, domish
 import urllib2
 import iemdb
+import sys
 mesosite = iemdb.connect('mesosite')
 mcursor = mesosite.cursor()
 mcursor2 = mesosite.cursor()
@@ -20,8 +21,12 @@ def process_site( nwsli, network ):
     elementStream.DocumentEndEvent = lambda: results.append(roots[0])
 
     xml = urllib2.urlopen(url).read()
-    
-    elementStream.parse(xml)
+    try:
+        elementStream.parse(xml)
+    except:
+        print "XML ERROR"
+        print url
+        return
     
     elem = results[0]
     
@@ -46,7 +51,9 @@ def process_site( nwsli, network ):
     sigstage_major = %(sigstage_major)s, sigstage_record = %(sigstage_record)s
     WHERE id = %(id)s and network = %(network)s """, data)
         
-mcursor.execute("""SELECT id, network from stations where network = 'IA_DCP'""")
+network = sys.argv[1]
+mcursor.execute("""SELECT id, network from stations where network = %s""", 
+                (network,))
 for row in mcursor:
     process_site(row[0], row[1])
 mcursor.close()
