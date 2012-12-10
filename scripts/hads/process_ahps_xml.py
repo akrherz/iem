@@ -19,8 +19,12 @@ def process_site( nwsli, network ):
     elementStream.DocumentStartEvent = roots.append
     elementStream.ElementEvent = lambda elem: roots[0].addChild(elem)
     elementStream.DocumentEndEvent = lambda: results.append(roots[0])
-
-    xml = urllib2.urlopen(url).read()
+    try:
+        xml = urllib2.urlopen(url).read()
+    except:
+        print "DOWNLOAD ERROR"
+        print url
+        return
     try:
         elementStream.parse(xml)
     except:
@@ -58,4 +62,5 @@ for row in mcursor:
     process_site(row[0], row[1])
 mcursor.close()
 mcursor2.close()
+mesosite.commit()
 mesosite.close()
