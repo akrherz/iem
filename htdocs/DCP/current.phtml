@@ -1,78 +1,65 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 75);
  include_once "$rootpath/include/database.inc.php";
+ $pgconn = iemdb('iem');
  $mesosite = iemdb('mesosite');
   
- $shef = isset($_GET['shef']) ? $_GET['shef'] : 0;
- $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : "ts";
+ $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : "valid";
  $network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
-  $TITLE = "IEM | DCP Network";
-   $REFRESH = "<meta http-equiv=\"refresh\" content=\"600;\">";
-  $HEADEXTRA = '<script type="text/javascript" src="/js/tableruler.js"></script>
-<script type="text/javascript">
-    window.onload=function(){tableruler();}
-</script>';
+ $shef = isset($_REQUEST['shef']) && $_REQUEST['shef'] == 'yes';
+
+ $TITLE = "IEM | DCP/GOES Current Conditions";
+ $REFRESH = "<meta http-equiv=\"refresh\" content=\"600;\">";
  $THISPAGE = "current-sort";
-  include("$rootpath/include/header.php");
+ include("$rootpath/include/header.php");
 ?>
-<div class="text">
 <a href="/DCP/">DCP Network</a> &nbsp; <b> > </b> &nbsp; Current Conditions
 <?php
- include("$rootpath/include/iemaccess.php");
- include("$rootpath/include/iemaccessob.php");
 
- $iem = new IEMAccess();
- $ntbl = $iem->getNetwork($network);
-
-
-
- $db = Array();
- while (list($site, $iemob) = each($ntbl) ){
-  $db[$site] = Array();
-  $db[$site]['tmpf'] = "";
-  $db[$site]['max_tmpf'] = "";
-  $db[$site]['min_tmpf'] = "";
-  if ($iemob->db["tmpf"] != -99) {
-    $db[$site]['tmpf'] = $iemob->db["tmpf"];
-    $db[$site]['max_tmpf'] = $iemob->db["max_tmpf"];
-    $db[$site]['min_tmpf'] = $iemob->db["min_tmpf"];
-  }
-  $db[$site]['sname'] = $iemob->db["sname"];
-  $db[$site]['phour'] = "";
-  if ($iemob->db["phour"] != -99)
-    $db[$site]['phour'] = $iemob->db["phour"];
-  $db[$site]['ts'] = $iemob->ts;
-  $db[$site]['sid'] = $site;
-  $db[$site]['pday'] = "";
-  if ($iemob->db["pday"] != -99)
-    $db[$site]['pday'] = $iemob->db["pday"];
-  $db[$site]['raw'] = $iemob->db["raw"];
-   $db[$site]['rstage'] = "";
-  if ($iemob->db["rstage"] > 0)
-    $db[$site]['rstage'] = $iemob->db["rstage"];
- }
+$cols = Array(
+	"valid" => "Timestamp",		
+		'station' => "Station ID",
+		'name' => 'Station Name',
+		'HGIZ' => 'Water Stage Height',
+		'TAIZ' => 'Air Temperature',
+		'PPHZ' => '1 Hour Precip',
+		'PPDZ' => 'Today Precip',
+		);
 
 function aSortBySecondIndex($multiArray, $secondIndex) {
-        while (list($firstIndex, ) = each($multiArray))
-                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
-        while (list($firstIndex, ) = each($indexMap))
-                if (is_numeric($firstIndex))
-                        $sortedArray[] = $multiArray[$firstIndex];
-                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-        return $sortedArray;
+	while (list($firstIndex, ) = each($multiArray))
+		$indexMap[$firstIndex] = @$multiArray[$firstIndex][$secondIndex];        arsort($indexMap);
+	while (list($firstIndex, ) = each($indexMap))
+		if (is_numeric($firstIndex))
+		$sortedArray[] = $multiArray[$firstIndex];
+	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+	return $sortedArray;
 }
 
-$db = aSortBySecondIndex($db, $sortcol);
 
-$cols = Array("ts" => "Valid", "sid" => "Site ID", "sname" => "Station Name",
-  "tmpf" => "Air Temperature", "phour" => "Rainfall One Hour", 
-  "rstage" => "Stage", "pday" => "Today's Precip");
+ $rs = pg_prepare($pgconn, "SELECT", "select station, valid, value, 
+ 		physical_code, duration, source, extremum , name from 
+ 		current_shef c JOIN stations s on (c.station = s.id) 
+ 		where s.network = $1");
+ $rs = pg_execute($pgconn, "SELECT", Array($network));
+
+ $obs = Array();
+ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+ 	$datakey = sprintf("%s%s%s", $row["physical_code"], $row["duration"],
+ 			$row["extremum"]);
+ 	$obs[ $row['station'] ][ $datakey ] = $row["value"]; 
+ 	$obs[ $row['station'] ][ 'valid' ] = strtotime($row["valid"]);
+ 	$obs[ $row['station'] ][ 'name' ] = $row["name"];
+ }
+
+ $final = aSortBySecondIndex($obs, $sortcol);
+ 
+ $current_network = "DCP"; include("$rootpath/include/current_bar.inc.php"); 
 ?>
-
-<?php $current_network = "DCP"; include("$rootpath/include/current_bar.inc.php"); ?>
 <form method="GET" action="current.phtml" name="myselector">
 <input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
-Select Network: 
+<strong>Select Network:</strong> 
 <select name="network">
 <?php 
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' ORDER by name ASC");
@@ -87,6 +74,13 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 
 ?>
 </select>
+
+<strong>Show SHEF Codes:</strong>
+<select name="shef">
+	<option value="no" <?php echo ($shef) ? '': 'SELECTED'; ?>>No</option>
+	<option value="yes" <?php echo ($shef) ? 'SELECTED': ''; ?>>Yes</option>
+</select>
+
 <input type="submit" value="Go!">
 </form>
 
@@ -99,51 +93,73 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
 <table style="width: 100%; font-size: 10pt;" cellpadding="2" border="1" cellspacing="0">
 <thead>
 <tr>
-  <th><a href="<?php echo $baseurl2; ?>sid">SiteID:</a></th>
-  <th><a href="<?php echo $baseurl2; ?>sname">Station Name:</a></th>
-  <th><a href="<?php echo $baseurl2; ?>ts">Valid:</a></th>
-  <th><a href="<?php echo $baseurl2; ?>rstage">Stage</a> [ft]</th>
-  <th><a href="<?php echo $baseurl2; ?>tmpf">Temp</a> [F]</th>
-  <th><a href="<?php echo $baseurl2; ?>phour">1h Rain</a> [in]</th>
-  <th><a href="<?php echo $baseurl2; ?>pday">Today Rain</a> [in]</th></tr></thead>
+  <th><a href="<?php echo $baseurl2; ?>station">SiteID:</a></th>
+  <th><a href="<?php echo $baseurl2; ?>name">Station Name:</a></th>
+  <th><a href="<?php echo $baseurl2; ?>valid">Valid:</a></th>
+  <th><a href="<?php echo $baseurl2; ?>HGIZ">Stage</a> [ft]</th>
+  <th><a href="<?php echo $baseurl2; ?>TAIZ">Temp</a> [F]</th>
+  <th><a href="<?php echo $baseurl2; ?>PPHZ">1h Rain</a> [in]</th>
+  <th><a href="<?php echo $baseurl2; ?>PPDZ">Today Rain</a> [in]</th></tr></thead>
 <tbody>
 <?php
  $oddrow = true;
  $now = time();
- while (list($site, $value) = each($db) ){
+ while (list($site, $value) = each($final) ){
    echo "<tr ";
    if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
    $url = sprintf("%s/sites/site.php?station=%s&network=%s", $rooturl,
          $site, $network);
    echo "><td><a href=\"$url\">$site</a></td>
-    <td>". $value["sname"] ."</font></td>";
+    <td>". $value["name"] ."</font></td>";
    echo "<td ";
-   $tdiff = $now - $value["ts"];
+   $tdiff = $now - $value["valid"];
    if ($tdiff > (6*3600) ){
        echo 'bgcolor="red"';
    }
-   echo ">". strftime("%d %b %I:%M %p", $value["ts"]) ."</td>
-    <td>". $value["rstage"] ."</td>";
-   if ($value["tmpf"] != ""){
-   echo "<td>". $value["tmpf"] ." (<font color=\"#ff0000\">". $value["max_tmpf"] ."</font> / <font color=\"#0000ff\">". $value["min_tmpf"] ."</font>)</td>";
-   } else{
-    echo "<td></td>";
+   echo ">". strftime("%d %b %I:%M %p", $value["valid"]) ."</td>";
+   
+   if (array_key_exists('HGIZ', $value)){
+      echo sprintf("<td>%s</td>", $value["HGIZ"]);
+   } else {
+      echo "<td></td>";
    }
-   echo "<td>". $value["phour"] ."</td>
-    <td>". $value["pday"] ."</td>
-    </tr>";
+
+   if (array_key_exists('TAIZ', $value)){
+   	echo sprintf("<td>%s</td>", $value["TAIZ"]);
+   } else {
+   	echo "<td></td>";
+   }
+
+   if (array_key_exists('PPHZ', $value)){
+   	echo sprintf("<td>%s</td>", $value["PPHZ"]);
+   } else {
+   	echo "<td></td>";
+   }
+
+   if (array_key_exists('PPDZ', $value)){
+   	echo sprintf("<td>%s</td>", $value["PPDZ"]);
+   } else {
+   	echo "<td></td>";
+   }
+	echo "</tr>";    
 	if ($shef)
 	{
-		echo "<tr align=\"center\" ";
+		echo "<tr ";
 		if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
-		echo "><td colspan=7><font style=\"color: brown; font-size: smaller;\">". $value["raw"] ."</font></td></tr>";
+		echo "><td colspan=7>";
+		reset($value);
+		while (list($k,$v)=each($value)){
+			if ($k == 'name' || $k == 'valid') continue;
+           echo sprintf("/%s %s ", $k, $v);
+        }
+        echo "</td></tr>";
 	}
    $oddrow = ! $oddrow;
  }
 ?>
 </tbody><tfoot>
 <tr><td colspan=7>&nbsp;</td></tr>
-</tfoot></table></div>
+</tfoot></table>
 
 <?php include("$rootpath/include/footer.php");
 ?>
