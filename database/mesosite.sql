@@ -139,7 +139,15 @@ CREATE TABLE stations(
 	archive_end timestamp with time zone,
 	modified timestamp with time zone,
 	tzname varchar(32),
-	iemid SERIAL
+	iemid SERIAL,
+	metasite boolean,
+	sigstage_low real,
+	sigstage_action real,
+	sigstage_bankfull real,
+	sigstage_flood real,
+	sigstage_moderate real,
+	sigstage_major real,
+	sigstage_record real
 );
 CREATE UNIQUE index stations_idx on stations(id, network);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
