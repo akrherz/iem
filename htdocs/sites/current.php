@@ -8,11 +8,12 @@
  include("$rootpath/include/header.php"); 
  $current = "current"; include("sidebar.php"); 
 
- echo '<p>This application displays the last observation received by the IEM
+ echo '<h3 class="subtitle">Most Recent Observation</h3>
+ 		<p>This application displays the last observation received by the IEM
  	from this site. The time stamp is in 
  		<strong>'. $metadata["tzname"] .'</strong> timezone.</p>';
  
- if (strpos($network, "_DCP") ){
+ if (strpos($network, "_DCP") || strpos($network, "_COOP") ){
  	echo '<p>This station reports observations in SHEF format.  The following
  			is a table of the most recent reports from this site identifier for
  			each reported SHEF variable';
@@ -42,11 +43,12 @@
 			<thead><tr><th>Physical Code</th><th>Duration</th><th>Extremum</th>
 			<th>Valid</th><th>Value</th></thead>";
  	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+ 		$ts = strtotime($row["valid"]);
  		echo sprintf("<tr><td>[%s] %s </td><td>[%s] %s</td><td>[%s] %s</td><td>%s</td><td>%s</td></tr>", 
  				$row["physical_code"], $shefcodes[$row["physical_code"]],
  				$row["duration"], $durationcodes[ $row["duration"] ], 
  				$row["extremum"] == 'Z'? '-': $row['extremum'] , $extremumcodes[ $row["extremum"] ],
- 				$row["valid"], $row["value"]);
+ 				date('d M Y g:i A', $ts), $row["value"]);
  	}
  	echo "</table>";
  } else {
