@@ -12,8 +12,8 @@ $THISPAGE="iem-sites";
 function neighbors($station,$lat,$lon){
    $con = iemdb("mesosite");
    $rs = pg_prepare($con, "_SELECT", "SELECT *,
-         ST_distance(ST_transform(geom,2163), 
-                     ST_transform(GeomFromText('SRID=4326;POINT(".$lon." ".$lat.")'), 2163)) /1000.0 as dist from stations 
+         ST_distance(ST_transform(geom,3857), 
+                     ST_transform(GeomFromText('SRID=4326;POINT(".$lon." ".$lat.")'), 3857)) /1000.0 as dist from stations 
          WHERE point_inside_circle(geom, ".$lon.", ".$lat.", 0.25) 
          and id != $1 ORDER by dist ASC");
    $result = pg_execute($con, "_SELECT", Array($station) );
