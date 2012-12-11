@@ -51,8 +51,10 @@ d50sm = []
 tair = []
 tsoil = []
 valid = []
+slrkw = []
 rain = []
 for row in icursor:
+    slrkw.append( row['slrkw_avg'] )
     d12sm.append( row['vwc_12_avg'] )
     d24sm.append( row['vwc_24_avg'] )
     d50sm.append( row['vwc_50_avg'] )
@@ -61,6 +63,7 @@ for row in icursor:
     tair.append( row['tair_c_avg'])
     tsoil.append( row['tsoil_c_avg'])
 
+slrkw = numpy.array( slrkw )
 rain = numpy.array( rain )
 d12sm = numpy.array( d12sm )
 d24sm = numpy.array( d24sm )
@@ -108,11 +111,17 @@ ax[0].set_title("ISUAG Station: %s Timeseries" % (nt.sts[station]['name'],
                                             ))
 
 
-ax[1].plot(valid, mesonet.c2f( tair ), linewidth=2, color='blue', zorder=2, label='Air')
-ax[1].plot(valid, mesonet.c2f( tsoil ), linewidth=2, color='red', zorder=2, label='Soil')
+ax[1].plot(valid, mesonet.c2f( tair ), linewidth=2, color='blue', zorder=2, 
+           label='Air')
+ax[1].plot(valid, mesonet.c2f( tsoil ), linewidth=2, color='red', zorder=2, 
+           label='4" Soil')
 ax[1].grid(True)
-ax[1].legend(loc='best')
+ax[1].legend(loc=(.1, 1.01), ncol=2)
 ax[1].set_ylabel("Temperature [F]")
+
+ax2 = ax[1].twinx()
+ax2.plot(valid, slrkw * 1000.0, color='g')
+ax2.set_ylabel("Solar Radiation [W/m^2]", color='g')
 
 print "Content-Type: image/png\n"
 plt.savefig( sys.stdout, format='png' )
