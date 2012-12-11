@@ -193,3 +193,19 @@ CREATE table feature(
 CREATE unique index feature_title_check_idx on feature(title);
 CREATE index feature_valid_idx on feature(valid);
 GRANT all on feature to nobody,apache;
+
+CREATE table shef_physical_codes(
+  code char(2),
+  name varchar(128),
+  units varchar(64));
+GRANT select on shef_physical_codes to apache,nobody;
+
+CREATE table shef_duration_codes(
+  code char(1),
+  name varchar(128));
+GRANT select on shef_duration_codes to apache,nobody;
+
+CREATE table shef_extremum_codes(
+  code char(1),
+  name varchar(128));
+GRANT select on shef_extremum_codes to apache,nobody;
