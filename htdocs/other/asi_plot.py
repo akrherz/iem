@@ -8,6 +8,8 @@ os.environ[ 'USER' ] = 'nobody'
 import datetime
 import numpy
 import sys
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import iemtz
 import cgitb
 cgitb.enable()
@@ -61,8 +63,12 @@ for i in range(1,13):
     data['ch%savg' % (i,)] = numpy.array(data['ch%savg' % (i,)])
 
 
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+if len(valid) < 3:
+    (fig, ax) = plt.subplots(1,1)
+    ax.text(0.5, 0.5, "Sorry, no data found!", ha='center')
+    print "Content-Type: image/png\n"
+    plt.savefig( sys.stdout, format='png' )
+    sys.exit(0)
 
 
 (fig, ax) = plt.subplots(2,1, sharex=True)
