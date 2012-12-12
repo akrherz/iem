@@ -12,9 +12,8 @@ function new_window(url) {
 } 
 //END Script-->
 </script>';
- include("$rootpath/include/header.php"); ?>
-<?php include("$rootpath/include/mlib.php"); ?>
-<?php 
+ include("$rootpath/include/header.php");
+ include("$rootpath/include/mlib.php"); 
   include("$rootpath/include/iemaccess.php");
   include("$rootpath/include/iemaccessob.php");
 
@@ -56,7 +55,8 @@ a column to sort it.<br>\n";
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
-  <th rowspan="2">Station:</th>
+  <th rowspan="2"><a href="wtm.phtml?sortcol=station">ID</a></th>
+  <th rowspan="2"><a href="wtm.phtml?sortcol=name">Station</a></th>
   <th rowspan="2"><a href="wtm.phtml?sortcol=ts">Ob Time</a></th>
   <th colspan="3">Temps &deg;F</th>
   <th>&nbsp;</th>
@@ -133,7 +133,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
           echo ">";
    echo "<td><input type=\"checkbox\" name=\"st[]\" 
                value=\"".$key."\"></td>";
-  echo "<td>". $parts["sname"] . "</td><td ";
+  echo "<td><a href='/sites/site.php?station=${key}&network=WTM'>". $key . "</a></td><td>". $parts["sname"] . "</td><td ";
   if ($tdiff > 11900){
     echo 'bgcolor="red"';
     $format = "%b-%d-%y %I:%M %p";
