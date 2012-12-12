@@ -384,7 +384,9 @@ $conservation = Array(
 
 <p>1. What conservation practices are you already implementing on these fields 
 or on your entire farm (See list below)? Please include land that is set aside 
-in CRP or other government programs.
+in CRP or other government programs. <strong>If you do not select yes or no, then
+it will default to no.</strong>
+<br />
 
 <table cellpadding='2' cellspacing='0' border='1'>
 <tr><th>Conservation Practices</th><td>Field 1</td><td>Field 2</td><td>On other land you farm</td></tr>
