@@ -116,11 +116,11 @@ function addRow(){
     	} else {
 	    	x[n].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
     	}
-    	if (prop == 'field1_name' || prop == 'field1_id'){
+    	if (prop == 'field1name' || prop == 'field1id'){
     		x[3].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
     		x[5].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
     	}
-    	if (prop == 'field2_name' || prop == 'field2_id'){
+    	if (prop == 'field2name' || prop == 'field2id'){
     		x[4].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
     		x[6].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
     	}
