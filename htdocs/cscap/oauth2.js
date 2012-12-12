@@ -198,9 +198,9 @@ function setFormValue(key, val){
 		$(l).val( val);
 		return;
 	}
-	/* Trickier radio buttons! */
+	/* Trickier radio buttons! default to no*/
 	//console.log("RADIO "+ key );
-	$(l[0]).attr("checked", true);
+	$(l[1]).attr("checked", true);
 	l = $('#theform [name='+key+'][value='+val+']');
 	if (l.length == 1){
 		$(l[0]).attr("checked", true);
