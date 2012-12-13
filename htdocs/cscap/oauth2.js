@@ -1,3 +1,6 @@
+if (typeof console == "undefined") var console = { log: function() {} }; 
+else if (typeof console.log == "undefined") console.log = function() {};
+
 function xmlescape(text){
         text = text.replace(/\&/g, "&amp;");
         text = text.replace(/</g,  "&lt;");
@@ -55,6 +58,7 @@ function updateRow(){
     			$(c).text( values[c.nodeName.substr(4,1000)] );
     		}
 			if (c.nodeName == 'gsx:updated'){
+				console.log("Setting updated for i"+ i);
 				$(c).text( new Date() );
 			}		
 		});
@@ -81,8 +85,9 @@ function updateRow(){
 	  			alert("Encountered error: "+ msg);
 	  		},
   			success: function(data, status) {
-				currentEntry[i] = data;
-				if (i == 0) alert("Entry updated!");
+				currentEntry[i] = data.childNodes[0];
+				console.log("Entry "+ i+" was saved!");
+				if (i == 6) alert("Entry updated!");
   			}
   		});		
    	});
