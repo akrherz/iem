@@ -45,7 +45,7 @@ function updateRow(){
     		if (c.nodeName.substr(0,3) == 'gsx'){
     			$(c).text( values[c.nodeName.substr(4,1000)] );
     		}
-			if (c.nodeName == 'gsx:updated' && index == 0){
+			if (c.nodeName == 'gsx:updated'){
 				$(c).text( new Date() );
 			}		
 		});
@@ -128,9 +128,8 @@ function addRow(){
     $(x).each(function(i,xi){
     	if (i > 0){
 	    	x[i].push('<gsx:farmercode>'+ values['farmercode'] +'</gsx:farmercode>');
-    	} else {
-    		x[i].push('<gsx:updated>'+ (new Date()) +'</gsx:updated>');
-    	}
+    	}    	
+    	x[i].push('<gsx:updated>'+ (new Date()) +'</gsx:updated>');
 	    x[i].push('</entry>');
     });
     

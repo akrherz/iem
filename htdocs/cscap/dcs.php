@@ -74,7 +74,7 @@ $(function(){
 });
 
 </script>
-<script src="oauth2.js?v=3"></script>
+<script src="oauth2.js?v=4"></script>
 <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
 <style type="text/css">
 .ui-widget{
@@ -439,8 +439,8 @@ nitrogen deficiency, diversified income streams?
  for a new entry to be added.</li>
 </ul>
 
-<p>Please only click the button once and be patient, it may take 10-30 seconds 
-to process!
+<p><span style="color: #f00;">Please only click the button once and be patient, it may take 10-30 seconds 
+to process!</span>
 
 <p><input type="button" value="Save as New Entry" onclick="addNewEntry();" />
 <input type="button" value="Save as Edit to Previous Entry" onclick="updateRow();"/>
