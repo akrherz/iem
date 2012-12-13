@@ -73,7 +73,7 @@ function updateRow(){
   			type : 'PUT',
 	  		error: function(data, status){
 	  			msg = "";
-	  			for (proj in data){
+	  			for (prop in data){
 	  				msg += "property: " + prop + " value: [" + data[prop] + "]\n";
 
 	  			}
@@ -162,7 +162,7 @@ function addRow(){
 	  		},
 	  		error: function(data, status){
 	  			msg = "";
-	  			for (proj in data){
+	  			for (prop in data){
 	  				msg += "property: " + prop + " value: [" + data[prop] + "]\n";
 
 	  			}
@@ -185,7 +185,7 @@ function getSpreadsheets(){
 		  },		  
 	  	  error: function(data, status){
 	  			msg = "";
-	  			for (proj in data){
+	  			for (prop in data){
 	  				msg += "property: " + prop + " value: [" + data[prop] + "]\n";
 
 	  			}
