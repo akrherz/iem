@@ -74,7 +74,7 @@ $(function(){
 });
 
 </script>
-<script src="oauth2.js?v=6"></script>
+<script src="oauth2.js?v=7"></script>
 <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
 <style type="text/css">
 .ui-widget{
