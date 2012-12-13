@@ -72,7 +72,12 @@ function updateRow(){
   			contentType: 'application/atom+xml',
   			type : 'PUT',
 	  		error: function(data, status){
-	  			alert("Encountered error: "+ data);
+	  			msg = "";
+	  			for (proj in data){
+	  				msg += "property: " + prop + " value: [" + data[prop] + "]\n";
+
+	  			}
+	  			alert("Encountered error: "+ msg);
 	  		},
   			success: function(data, status) {
 				currentEntry[i] = data;
@@ -156,7 +161,12 @@ function addRow(){
 	  			if (i == 0) alert("Saved Entry, thank you!");
 	  		},
 	  		error: function(data, status){
-	  			alert("Encountered error: "+ data);
+	  			msg = "";
+	  			for (proj in data){
+	  				msg += "property: " + prop + " value: [" + data[prop] + "]\n";
+
+	  			}
+	  			alert("Encountered error: "+ msg);
 	  		}
 	  	});
     });
@@ -174,7 +184,12 @@ function getSpreadsheets(){
 		    'Authorization': 'Bearer ' + access_token
 		  },		  
 	  	  error: function(data, status){
-	  			alert("Encountered error: "+ data);
+	  			msg = "";
+	  			for (proj in data){
+	  				msg += "property: " + prop + " value: [" + data[prop] + "]\n";
+
+	  			}
+	  			alert("Encountered error: "+ msg);
 	  	  }, 
 		  success: function(data, status) {
 			// Save this object back to globals for later use
