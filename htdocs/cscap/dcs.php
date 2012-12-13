@@ -74,7 +74,7 @@ $(function(){
 });
 
 </script>
-<script src="oauth2.js?v=10"></script>
+<script src="oauth2.js?v=11"></script>
 <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
 <style type="text/css">
 .ui-widget{
@@ -444,7 +444,7 @@ to process!</span>
 
 <p><input type="button" value="Save as New Entry" onclick="addNewEntry();" />
 <input type="button" value="Save as Edit to Previous Entry" onclick="updateRow();"/>
-<input type="reset" value="Clear Form for New Entry" />
+<input type="button" value="Clear form for new entry" onclick="clearForm();" />
 
 </form>
 

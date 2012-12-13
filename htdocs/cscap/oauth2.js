@@ -24,6 +24,12 @@ function xmlToString(xmlData) {
     return xmlString;
 }  
 
+function clearForm(){
+	$("#theform")[0].reset();
+	$('#farmerselector').val('invalid');
+	currentEntry = [null, null, null, null, null, null, null];
+}
+
 function getValuesFromForm(){
 	var values = {};
 	/* Get radio's that are checked */
