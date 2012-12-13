@@ -1,3 +1,12 @@
+function xmlescape(text){
+        text = text.replace(/\&/g, "&amp;");
+        text = text.replace(/</g,  "&lt;");
+        text = text.replace(/>/g,  "&gt;");
+        text = text.replace(/'/g,  "&apos;");
+        text = text.replace(/"/g,  "&quot;");
+        return text;
+}
+
 function xmlToString(xmlData) { 
 
     var xmlString;
@@ -114,20 +123,20 @@ function addRow(){
     	if (v == '' || v == null ) {
     		x[n].push("<gsx:"+ prop +"/>");
     	} else {
-	    	x[n].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
+	    	x[n].push("<gsx:"+ prop +">"+ xmlescape(v) +"</gsx:"+ prop +">");		
     	}
     	if (prop == 'field1name' || prop == 'field1id'){
-    		x[3].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
-    		x[5].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
+    		x[3].push("<gsx:"+ prop +">"+ xmlescape(v) +"</gsx:"+ prop +">");		
+    		x[5].push("<gsx:"+ prop +">"+ xmlescape(v) +"</gsx:"+ prop +">");		
     	}
     	if (prop == 'field2name' || prop == 'field2id'){
-    		x[4].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
-    		x[6].push("<gsx:"+ prop +">"+ v.replace(/>/g,'&gt;').replace(/</g,'&lt;') +"</gsx:"+ prop +">");		
+    		x[4].push("<gsx:"+ prop +">"+ xmlescape(v) +"</gsx:"+ prop +">");		
+    		x[6].push("<gsx:"+ prop +">"+ xmlescape(v) +"</gsx:"+ prop +">");		
     	}
     }
     $(x).each(function(i,xi){
     	if (i > 0){
-	    	x[i].push('<gsx:farmercode>'+ values['farmercode'] +'</gsx:farmercode>');
+	    	x[i].push('<gsx:farmercode>'+ xmlescape(values['farmercode']) +'</gsx:farmercode>');
     	}    	
     	x[i].push('<gsx:updated>'+ (new Date()) +'</gsx:updated>');
 	    x[i].push('</entry>');
