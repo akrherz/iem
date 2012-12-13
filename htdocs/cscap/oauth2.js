@@ -77,6 +77,7 @@ function updateRow(){
 	  				msg += "property: " + prop + " value: [" + data[prop] + "]\n";
 
 	  			}
+	  			console.log(msg);
 	  			alert("Encountered error: "+ msg);
 	  		},
   			success: function(data, status) {
@@ -166,6 +167,7 @@ function addRow(){
 	  				msg += "property: " + prop + " value: [" + data[prop] + "]\n";
 
 	  			}
+	  			console.log(msg);
 	  			alert("Encountered error: "+ msg);
 	  		}
 	  	});
@@ -189,6 +191,7 @@ function getSpreadsheets(){
 	  				msg += "property: " + prop + " value: [" + data[prop] + "]\n";
 
 	  			}
+	  			console.log(msg);
 	  			alert("Encountered error: "+ msg);
 	  	  }, 
 		  success: function(data, status) {
@@ -242,7 +245,7 @@ function loadEntryInfoForm(i){
 
 function setFarmer(farmercode){
 	if (farmercode == 'invalid') return;
-	currentEntry = [null, null, null];
+	currentEntry = [null, null, null, null, null, null, null];
 	$(spreadsheetDocs).each(function(i, spreadsheetDoc){
 		var index = i;
 		spreadsheetDoc.find('entry').each(function(i,x){
