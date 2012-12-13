@@ -122,10 +122,10 @@ function addRow(){
     	} else {
     		n = 0;
     	}
-    	if (prop.search('_r2_') == 2){
+    	if (prop.search('r2') == 2){
     		n += 2;
     	}
-    	else if (prop.search('_r3_') == 2){
+    	else if (prop.search('r3') == 2){
     		n += 4;
     	}
     
