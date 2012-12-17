@@ -4,9 +4,11 @@
 Run from RUN_2AM.sh
 """
 import iemdb
-HADS = iemdb.connect('hads')
+HADS = iemdb.connect('hads', bypass=True)
+ACCESS = iemdb.connect('iem', bypass=True)
 hcursor = HADS.cursor()
 hcursor2 = HADS.cursor()
+acursor = ACCESS.cursor()
 
 print 'Unknown NWSLIs from DCPish sites'
 hcursor.execute("""
@@ -21,6 +23,12 @@ hcursor.execute("""
 for row in hcursor:
     print '%7s Tot:%4s Days:%2s Products: %s %s' % (row[0], row[1], row[3], 
       row[4], row[2])
+    # Get vars reported for this site
+    acursor.execute("""SELECT valid, physical_code || duration || source ||
+    extremum || probability as p, value from current_shef WHERE station = %s
+    ORDER by p ASC""", (row[0],))
+    for row2 in acursor:
+        print '    %s %s %s' % (row2[0], row2[1], row2[2])
     hcursor2.execute("""
     DELETE from unknown where nwsli = %s
     """, (row[0],))
@@ -38,6 +46,12 @@ hcursor.execute("""
 for row in hcursor:
     print 'COOP %7s Tot:%4s Days:%2s Products: %s %s' % (row[0], row[1], 
      row[3], row[4], row[2])
+    # Get vars reported for this site
+    acursor.execute("""SELECT valid, physical_code || duration || source ||
+    extremum || probability as p, value from current_shef WHERE station = %s
+    ORDER by p ASC""", (row[0],))
+    for row2 in acursor:
+        print '    %s %s %s' % (row2[0], row2[1], row2[2])
     hcursor2.execute("""
     DELETE from unknown where nwsli = %s
     """, (row[0],))
