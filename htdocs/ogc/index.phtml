@@ -24,11 +24,17 @@ include("$rootpath/include/header.php"); ?>
    </ol>
    </li>
 </ol>
-<h4>Tile Map Service (TMS)</h4>
+<h3>Tile Map Service (TMS)</h3>
 
 <p>This service makes for easy integration with web mapping applications like 
-OpenLayers and Google Maps.  The following is example code that works
-with version 2 of the Google Maps API:</p>
+Google Maps, OpenLayers, and ESRI JS API.</p>
+
+<h4>ESRI JS API</h4>
+<p>Here is an <a href="arcgis_wtms.html">example</a> using the ESRI JS API. This
+was contributed by Derek Swingley.
+
+<h4>Google Maps</h4>
+<p>The following is example code that works with version 2 of the Google Maps API:</p>
 
 <pre style="border-top: 1px solid #ccc; background: #EEFFCC; border-bottom: 1px solid #ccc; padding-left: 5px;">
 var tileNEX = new GTileLayer(null,null,null); 
@@ -46,8 +52,9 @@ var custommap4 = new GMapType(layer4, G_SATELLITE_MAP.getProjection(), "Nexrad",
 map.addMapType(custommap4);
 </pre>
 
-<p><strong>NEW!</strong> Here is <a href="googlemaps_v3.html">an example for Google Maps v3</a>. 
+<p>Here is <a href="googlemaps_v3.html">an example for Google Maps v3</a>. 
 
+<h4>OpenLayers</h4>
 <p>Here is an example for <a href="http://openlayers.org">OpenLayers</a> and assumes your map projection
 is in spherical mercator.  Or check out this 
 <a href="openlayers_example.html">self contained</a> and fully functional 
@@ -80,7 +87,9 @@ var n0q = new OpenLayers.Layer.TMS(
 /* you'd then add n0q to your map object */
 </pre>
 
-<p><a href="arcgis_wtms.html">ArcGIS JavaScript API v2.5 example.</a> 
+
+
+<h4>Other Tile Map Services</h4>
 
 <p>The <i>nexrad-n0r-900913</i> is the layer name and represents the "current" composite base reflectivity.  
 Here are other TileCache services provided by the IEM.  These are all TMS for spherical mercator.<br />
