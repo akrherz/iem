@@ -1,94 +1,43 @@
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
-
-<html lang="en">
+<!DOCTYPE html>
+<html>
   <head>
+<!-- Credit to Derek Swingley http://jsfiddle.net/MR76J/ -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=7" />
-    <!--The viewport meta tag is used to improve the presentation and behavior of the samples
+    <meta http-equiv="X-UA-Compatible" content="IE=7">
+    <!--The viewport meta tag is used to improve the presentation and behavior of the samples 
       on iOS devices-->
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
-    <title>Testing Mesonet Tiled Map Service</title>
-
-    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.5/js/dojo/dijit/themes/claro/claro.css">
-    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.5"></script>
-
-    <script type="text/javascript">
-      dojo.require("esri.map");
-    
-      function init() {
-        initLayer();
-	var map = new esri.Map("map");
-	var startExtent = new esri.geometry.Extent({"xmin":-11301768,"ymin": 3962510, "xmax":-7052110,"ymax": 6422839,"spatialReference": new esri.SpatialReference({"wkid":102100})});
-        map.setExtent(startExtent);
-        map.addLayer(new MesonetNexTiledMapServiceLayer());
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Nexrad from Iowa Environmental Mesonet</title>
+    <link rel="stylesheet" href="http://servicesbeta.esri.com/jsapi/arcgis/3.3/js/esri/css/esri.css">
+    <style>
+      html, body, #map {
+        height: 100%; width: 100%; margin: 0; padding: 0; 
       }
-      function initLayer(){
-          
-          dojo.declare("MesonetNexTiledMapServiceLayer", esri.layers.TiledMapServiceLayer, {
-            constructor: function() {
-           
-            this.spatialReference = new esri.SpatialReference({ wkid:102100 });
-            this.initialExtent = (this.fullExtent = new esri.geometry.Extent(-20037508.340000,-20037508.340000,20037508.340000,20037508.340000, this.spatialReference));
-           
-            this.tileInfo = new esri.layers.TileInfo({
-              "rows" : 256,
-              "cols" : 256,
-              "dpi" : 96,
-              "format" : "PNG24",
-              "compressionQuality" : 0,
-              "origin" : {
-                "x" : -20037508.340000,
-                "y" : 20037508.340000
-              },
-              "spatialReference" : {
-              "wkid" : 102100
-            },
-              "lods" : [
-	        {"level" : 0, "resolution" : 156543.033928, "scale" : 591657528},
-	        {"level" : 1, "resolution" : 78271.51695000000472646207, "scale" : 295828764},
-                {"level" : 2, "resolution" : 39135.75847500000236323103, "scale" : 147914382},
-                {"level" : 3, "resolution" : 19567.87923750000118161552, "scale" : 73957191},
-                {"level" : 4, "resolution" : 9783.93961875000059080776, "scale" : 36978595},
-                {"level" : 5, "resolution" : 4891.96980937500029540388, "scale" : 18489298},
-                {"level" : 6, "resolution" : 2445.98490468750014770194, "scale" : 9244649},
-                {"level" : 7, "resolution" : 1222.99245234375007385097, "scale" : 4622324},
-                {"level" : 8, "resolution" : 611.49622617187503692548, "scale" : 2311162},
-                {"level" : 9, "resolution" : 305.74811308593751846274, "scale" : 1155581},
-                {"level" : 10, "resolution" : 152.87405654296875923137, "scale" : 577791},
-                {"level" : 11, "resolution" : 76.43702827148437961569, "scale" : 288895},
-                {"level" : 12, "resolution" : 38.21851413574218980784, "scale" : 144448},
-                {"level" : 13, "resolution" : 19.10925706787109490392, "scale" : 72224},
-                {"level" : 14, "resolution" : 9.55462853393554745196, "scale" : 36112},
-		{"level" : 15, "resolution" : 4.77731426696777372598, "scale" : 18056},
-		{"level" : 16, "resolution" : 2.38865713348388686299, "scale" : 9028},
-		{"level" : 17, "resolution" : 1.19432856674194343150, "scale" : 4514},
-		{"level" : 18, "resolution" : 0.59716428337097171575, "scale" : 2257},
-		{"level" : 19, "resolution" : 0.29858214168548585787, "scale" : 1128}
-              ]
-            });
+    </style>
 
-            this.loaded = true;
-            this.onLoad(this);
-          },
-
-           getTileUrl: function(level, col, row) {
-           
-            return "http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/" + level +"/" + row.toString() +"/" + col.toString() +".png?";
-          }
-      });
-    }
-
-      dojo.addOnLoad(init);
-
+    <script src="http://servicesbeta.esri.com/jsapi/arcgis/3.3/"></script>
+    <script>
+      var map;
+    
+      require(["esri/map", "esri/layers/WebTiledLayer"],
+        function() {
+          map = new esri.Map("map", {
+            basemap: "gray",
+            center: [ -100, 40 ],
+            zoom: 4 
+          });
+          var subs = [ "mesonet", "mesonet1", "mesonet2", "mesonet3" ];
+          var nexrad = new esri.layers.WebTiledLayer("http://${subDomain}.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/${level}/${col}/${row}.png", {
+            id: "nexrad",
+            subDomains: subs
+          });
+          map.addLayer(nexrad);
+        }
+      );
     </script>
-
-
   </head>
   <body>
-    <div id="map" class="claro" style="width:768px; height:512px; border:1px solid #000;"></div>
+    <div id="map"></div>
   </body>
 </html>
-
 
