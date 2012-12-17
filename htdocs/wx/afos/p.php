@@ -34,7 +34,7 @@ if ($dir == 'next'){
 $rs = pg_prepare($conn, "_LSELECT", "SELECT data, 
 				entered at time zone 'UTC' as mytime, source from $table
                  WHERE pil = $1 and entered between $2 and $3
-                 ORDER by entered $sortdir LIMIT 10");
+                 ORDER by entered $sortdir LIMIT 100");
 $rs = pg_execute($conn, "_LSELECT", Array($pil, 
 	date("Y-m-d H:i", $ts+$offset0)."+00",
 	date("Y-m-d H:i", $ts+$offset1)."+00"));
