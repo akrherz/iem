@@ -126,7 +126,7 @@ var combo = new Ext.form.ComboBox({
 		'<tpl for=".">',
 		'<tpl if="this.groupname != values.groupname">',
 		'<tpl exec="this.groupname = values.groupname"></tpl>',
-		'<h1>{groupname}</h1>',
+		'<h1 style="color: #00f; margin-top:5px;">{groupname}</h1>',
 		'</tpl>',
 		'<div class="x-combo-list-item">{name}</div>',
 		'</tpl>'
@@ -256,6 +256,7 @@ function updateDT(){
     return; 
   }
   ceiling = (new Date()).add(Date.MINUTE, 0 - meta.data.avail_lag);
+  //console.log("Ceiling is "+ ceiling);
   /* Make sure we aren't in the future! */
   if (appTime.add(Date.MINUTE,-1) > ceiling){
     //console.log("Date is: "+ (new Date()));
@@ -263,7 +264,7 @@ function updateDT(){
     //console.log("Future timestamp: "+ (appTime.add(Date.MINUTE,-1) - (new Date())) +" diff");
     appTime = ceiling; 
     setTime(); 
-    return; 
+    //return; 
   }
 
   /* Make sure we aren't in the past! */
@@ -271,7 +272,7 @@ function updateDT(){
     //console.log("Timestamp too early...");
     appTime = meta.data.sts; 
     setTime(); 
-    return; 
+    //return; 
   }
 
   /* 
