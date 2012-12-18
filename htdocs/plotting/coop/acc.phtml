@@ -4,6 +4,7 @@
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/google_keys.php");
 include("$rootpath/include/imagemaps.php");
+include_once("$rootpath/include/forms.php");
 
  $station = isset($_GET["station"]) ? $_GET["station"]: "";
  $network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IACLIMATE";
@@ -17,14 +18,22 @@ include("$rootpath/include/imagemaps.php");
  $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 6;
  $eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
 $dcgi = "network=$network&syear=$syear&smonth=$smonth&sday=$sday&eyear=$eyear&emonth=$emonth&eday=$eday&";
-?>
-
-<?php 	
+$year2 = null;
+if (isset($_REQUEST['year2']) && isset($_REQUEST['year2on'])){
+	$year2 = intval( $_REQUEST['year2']);
+	$dcgi .= "year2=${year2}&";
+}
+$year3 = null;
+if (isset($_REQUEST['year3']) && isset($_REQUEST['year3on'])){
+	$year3 = intval( $_REQUEST['year3']);
+	$dcgi .= "year3=${year3}&";
+}
+	
 $THISPAGE = "networks-coop";
 $TITLE = "IEM | NWS COOP Accumulated Departures";
 $HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
 <script src='http://openlayers.org/api/2.11/OpenLayers.js'></script>
-<script src='${rooturl}/js/olselect.php?network=${network}&c=". time() ."'></script>";
+<script src='/js/olselect.php?network=${network}&c=". time() ."'></script>";
 $BODYEXTRA = "onload=\"init()\"";
 include("$rootpath/include/header.php"); ?>
 
@@ -38,9 +47,10 @@ include("$rootpath/include/header.php"); ?>
 
 <h3 class="heading">Accumulated Data Traces</h3>
 
-<p>This application plots a graph of accumulated rainfall and growing degree 
-days for a time period of your choice!  If you are looking for the raw 
-data, you can download on the <a href="/request/coop/fe.phtml">COOP data download</a> page.  Your plot time duration can not exceed 5 years.  This page may take a few seconds to load, so please be patient.</p>
+<p>This application plots three graphs of accumulated growing degree days,
+ rainfall, and stress degree days.  You can optionally compare the selected
+ period against two other years of your choice.  If you are looking for the raw 
+ data, you can download on the <a href="/request/coop/fe.phtml">COOP data download</a> page.  Your plot time duration can not exceed 5 years.  This page may take a few seconds to load, so please be patient.</p>
 
 <p>Data is available from the following states: 
 <a href="acc.phtml?network=ILCLIMATE">Illinois</a> ,
@@ -58,7 +68,6 @@ data, you can download on the <a href="/request/coop/fe.phtml">COOP data downloa
 
 <div class="text">
 
-<?php include_once("$rootpath/include/forms.php"); ?>
 <form name="olselect" action="acc.phtml" method="GET">
 <input type="hidden" name="network" value="<?php echo $network; ?>" />
 <table style="padding: 3px; border: 0px; margin: 0px;">
@@ -82,14 +91,20 @@ data, you can download on the <a href="/request/coop/fe.phtml">COOP data downloa
 </tr>
 </tbody>
 </table>
-<input type="submit" value="Make Plot">
+<br /><input type="checkbox" name="year2on" value="yes" 
+<?php if ($year2 != null) echo "CHECKED=CHECKED"; ?>/> Compare with year
+ <?php echo yearSelect2(1893, $year2, "year2"); ?>
+<br /><input type="checkbox" name="year3on" value="yes" 
+<?php if ($year3 != null) echo "CHECKED=CHECKED"; ?>/> Compare with year
+ <?php echo yearSelect2(1893, $year3, "year3"); ?>
+ 
+ <p><input type="submit" value="Make Plot">
 </form>
 
 <?php if (strlen($station) > 0 ) { ?>
 
-<p><img src="acc_gdd_plot.php?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
-<p><img src="acc_rain_plot.php?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
-<p><img src="acc_sdd_plot.php?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
+<p><img src="/cgi-bin/climate/acc.py?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
+
 
 <?php } else {  ?>
 <div id="map"></div>
