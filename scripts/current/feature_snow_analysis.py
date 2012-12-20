@@ -19,7 +19,7 @@ icursor.execute("""
     SELECT id, sum(snow), x(geom) as lon, y(geom) as lat, count(*) from
     summary_2012 t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
-    day in ('2012-03-05') and snow >= 0 and 
+    day in ('2012-12-17') and snow >= 0 and 
     x(geom) BETWEEN %s and %s and
     y(geom) BETWEEN %s and %s  
     GROUP by id, lon, lat
@@ -38,7 +38,7 @@ for row in icursor:
 pcursor.execute("""
     SELECT state, max(magnitude) as val, x(geom) as lon, y(geom) as lat
       from lsrs_2012 WHERE type in ('S') and magnitude > 0 and 
-      valid > '2012-03-04 06:00' and valid < '2012-03-25 12:00'
+      valid > '2012-12-17 00:00' and valid < '2012-12-17 12:00'
       GROUP by state, lon, lat
 """)
 for row in pcursor:
@@ -58,7 +58,7 @@ final_vals = vals
 final_lats = []
 final_lons = []
 final_vals = []
-buffer = 0.65
+buffer = 0.35
 for lat in numpy.arange(iemplot.MW_SOUTH, iemplot.MW_NORTH, buffer):
   for lon in numpy.arange(iemplot.MW_WEST, iemplot.MW_EAST, buffer):
     lvals = []
@@ -86,13 +86,16 @@ cfg = {
  'wkColorMap': 'WhiteBlueGreenYellowRed',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "4 March 2012 - IEM Snowfall Total Analysis",
- '_valid'             : "Snowfall totals up until 8 AM 5 Mar 2012",
+ '_title'             : "16-17 December 2012 - IEM Snowfall Total Analysis",
+ '_valid'             : "Snowfall totals up until 8 AM 17 Dec 2012",
  #'_MaskZero'          : True,
  'lbTitleString'      : "[in]",
   '_showvalues'        : False,
+ 'cnLevelSelectionMode': "ExplicitLevels",
+ 'cnLevels' : [0.01,0.1,0.25,0.5,1,2,3,5,7,9,11,13,15,17],
+
  '_format'            : '%.1f',
-# '_midwest'         : True,
+ '_midwest'         : True,
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(final_lons, final_lats, final_vals, cfg)
