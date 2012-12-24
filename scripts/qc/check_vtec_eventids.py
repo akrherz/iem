@@ -5,7 +5,7 @@ reporting anything he finds after an investigation.
 """
 import mx.DateTime
 import iemdb
-POSTGIS = iemdb.connect('postgis', bypass=True)
+POSTGIS = iemdb.connect('postgis')
 pcursor = POSTGIS.cursor()
 pcursor2 = POSTGIS.cursor()
 
@@ -50,22 +50,24 @@ for row in pcursor:
         polyCount = 0
         cntyCount = 0
         for row2 in pcursor2:
-            if (row2[0] == "P"): polyCount = int(row2[1])
-            if (row2[0] == "C"): cntyCount = int(row2[1])
+            if row2[0] == "P":
+                polyCount = int(row2[1])
+            if row2[0] == "C":
+                cntyCount = int(row2[1])
 
-        if (cntyCount == 0 and polyCount == 0):
+        if cntyCount == 0 and polyCount == 0:
             lookup = "%s.%s.%s.%s" % (wfo, phenomena, sig, eventid)
-        if lookup not in missing:
-            add_missing(wfo, phenomena, sig, eventid)
-            print "Warning Missing WFO: %s PHENOMENA: %s EVENTID: %s" % (wfo, 
+            if lookup not in missing:
+                add_missing(wfo, phenomena, sig, eventid)
+                print "Warning Missing WFO: %s PHENOMENA: %s EVENTID: %s" % (wfo, 
                                                         phenomena, eventid)
-        elif (polyCount == 0):
+        elif polyCount == 0:
             print "SBW Missing     WFO: %s PHENOMENA: %s EVENTID: %s" % (wfo, 
                                                         phenomena, eventid)
-        elif (cntyCount == 0):
+        elif cntyCount == 0:
             print "County Missing  WFO: %s PHENOMENA: %s EVENTID: %s" % (wfo, 
                                                         phenomena, eventid)
-        elif (polyCount > 1):
+        elif polyCount > 1:
             print "Duplicate SBW   WFO: %s PHENOMENA: %s EVENTID: %s" % (wfo, 
                                                         phenomena, eventid)
             sql = """DELETE from warnings_%s WHERE oid IN (
@@ -74,6 +76,7 @@ for row in pcursor:
          and gtype = 'P')""" % (mx.DateTime.now().year, YEAR,
           wfo, phenomena, eventid, sig)
             pcursor2.execute( sql )
+            
             sql = """DELETE from warnings_%s WHERE oid IN (
               select m from (
 select ugc,  max(oid) as m, count(oid) as c from warnings_%s WHERE wfo = '%s' 
