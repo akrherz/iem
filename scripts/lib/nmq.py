@@ -4,7 +4,6 @@ Support the NMQ netCDF files
 import random
 import mx.DateTime
 import os
-import mesonet
 import numpy
 TILES = {
          1: [-130., 55.], # 2001x1501  NW
@@ -18,6 +17,42 @@ TILES = {
 }
 WEST = -130.00
 NORTH = 55.00
+
+def make_colorramp():
+    """
+    Make me a crude color ramp
+    """
+    c = numpy.zeros((256,3), numpy.int)
+    
+    # Ramp blue
+    for b in range(0,37):
+        c[b,2] = 255
+    for b in range(37,77):
+        c[b,2]= (77-b)*6
+    for b in range(160,196):
+        c[b,2]= (b-160)*6
+    for b in range(196,256):
+        c[b,2] = 254
+    # Ramp Green up
+    for g in range(0,37):
+        c[g,1] = g*6
+    for g in range(37,116):
+        c[g,1] = 254
+    for g in range(116,156):
+        c[g,1] = (156-g)*6
+    for g in range(196,256):
+        c[g,1] = (g-196)*4
+    # and Red
+    for r in range(77,117):
+        c[r,0] = (r-77)*6.
+    for r in range(117,256):
+        c[r,0] = 254
+
+    # Gray for missing
+    c[0,:] = [144,144,144]
+    # Black to remove, eventually
+    c[1,:] = [0,0,0]
+    return tuple( c.ravel() )
 
 def get_precip(sts, ets):
     """
