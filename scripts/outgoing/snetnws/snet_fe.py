@@ -293,7 +293,9 @@ def post_process():
     os.unlink(csvfn)
 
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('kelo.csv', kelocsvfn)
-    subprocess.call( cmd, shell=True )
+    p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
+                         stdout=subprocess.PIPE)
+    data = p.stdout.read()
     os.unlink(kelocsvfn)
     
     if SCRIPT_TIME.minute in [15,35]:
