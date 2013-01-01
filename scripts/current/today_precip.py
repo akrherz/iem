@@ -18,7 +18,7 @@ icursor = IEM.cursor()
 sql = """
 select s.id, s.network,
   x(s.geom) as lon, y(s.geom) as lat, 
-  (case when c.pday < 0 then 0 else c.pday end) as rainfall
+  (case when c.pday < 0 or c.day is null then 0 else c.pday end) as rainfall
  from summary_%s c, current c2, stations s
  WHERE s.iemid = c2.iemid and c2.iemid = c.iemid and 
  c2.valid > (now() - '2 hours'::interval)
