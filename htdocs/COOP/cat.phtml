@@ -107,7 +107,8 @@ Select State: <select name="network">
   <th><a href="<?php echo $link; ?>min_tmpf">Min Air Temp</a></th>
   <th><a href="<?php echo $link; ?>pday">Precip</a></th>
   <th><a href="<?php echo $link; ?>snow">Snowfall</a></th>
-  <th><a href="<?php echo $link; ?>snowd">Snow Depth</a></th></tr>
+  <th><a href="<?php echo $link; ?>snowd">Snow Depth</a></th>
+  <th><a href="<?php echo $link; ?>snoww">Snow Water Equiv</a></th></tr>
 
 <?php 
  include("$rootpath/include/iemaccess.php");
@@ -119,7 +120,7 @@ Select State: <select name="network">
 
  $sortdir = "ASC";
  if ($sortvar == "pday" || $sortvar == "snow" || $sortvar == "snowd" ||
-     $sortvar == "max_tmpf") 
+     $sortvar == "max_tmpf" || $sortvar == "snoww") 
    $sortdir = "DESC";
  if (strlen($station) > 0) {
      $rs = pg_prepare($iemdb, "SELECT", "SELECT c.*, s.id as station, 
@@ -168,6 +169,11 @@ Select State: <select name="network">
    if ($snowd == -99 || $snowd == "") $snowd = "M";
    if ($snowd > 1000 || $snowd < 0) $snowd = "M";
 
+   $snoww = $row["snoww"];
+   if ($snoww == 0.0001 || $snoww == 0.001) $snoww = "T";
+   if ($snoww == -99 || $snoww == "") $snoww = "M";
+   if ($snoww > 1000 || $snoww < 0) $snoww = "M";
+   
    echo "<tr";
    if ($hirow) echo " class=\"even\"";
    $hirow = ! $hirow;
@@ -190,7 +196,7 @@ Select State: <select name="network">
       echo "<a href=\"cat.phtml?date=". $row["day"] ."&network=". $network ."\">". $dstring ."</a>";
    }
 
-   echo "</td><td>". $tmpf ."</td><td>". $high ."</td><td>". $low ."</td><td>". $rain ."</td><td>". $snow ."</td><td>". $snowd ."</td></tr>\n";
+   echo "</td><td>". $tmpf ."</td><td>". $high ."</td><td>". $low ."</td><td>". $rain ."</td><td>". $snow ."</td><td>". $snowd ."</td><td>". $snoww ."</td></tr>\n";
  }
 
  
