@@ -13,7 +13,6 @@ $edate = isset($_REQUEST["edate"]) ? strtotime($_REQUEST["edate"]) : time();
 /*
  * We need to optimize some things here, first search the current table
  * and see if we can come up with enough entries.
- * TODO
  */
 $table = sprintf("products_%s_", date("Y"));
 if (intval(date("m")) > 6){

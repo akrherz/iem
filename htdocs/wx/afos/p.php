@@ -13,10 +13,6 @@ $conn = iemdb("afos");
 $ts = mktime( substr($e,8,2), substr($e,10,2), 0, 
       substr($e,4,2), substr($e,6,2), substr($e,0,4) );
 
-$table = sprintf("products_%s_0106",   date("Y", $ts) );
-if (intval(date("m",$ts)) > 6){
-  $table = sprintf("products_%s_0712", date("Y", $ts) );
-}
 if ($dir == 'next'){
 	$sortdir = "ASC";
 	$offset0 = 60;
@@ -32,7 +28,7 @@ if ($dir == 'next'){
 }
 
 $rs = pg_prepare($conn, "_LSELECT", "SELECT data, 
-				entered at time zone 'UTC' as mytime, source from $table
+				entered at time zone 'UTC' as mytime, source from products
                  WHERE pil = $1 and entered between $2 and $3
                  ORDER by entered $sortdir LIMIT 100");
 $rs = pg_execute($conn, "_LSELECT", Array($pil, 
@@ -41,15 +37,6 @@ $rs = pg_execute($conn, "_LSELECT", Array($pil,
 
 
 echo "<h3>National Weather Service Raw Text Product</h3>";
-if (pg_numrows($rs) < 1){
-	$rs = pg_prepare($conn, "_L2SELECT", "SELECT data,
-			entered at time zone 'UTC' as mytime, source from products
-			WHERE pil = $1 and entered between $2 and $3
-			ORDER by entered $sortdir LIMIT 100");
-	$rs = pg_execute($conn, "_L2SELECT", Array($pil,
-			date("Y-m-d H:i", $ts+$offset0)."+00",
-			date("Y-m-d H:i", $ts+$offset1)."+00"));
-}
 if (pg_numrows($rs) < 1){
 	echo "<div class=\"warning\">Sorry, could not find product.</div>";
 }
