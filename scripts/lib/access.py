@@ -1,8 +1,6 @@
 """
  This hacky code is an interface to the iem obs database for current and summary data
- TODO: make it async
- 
- $Id: $:
+
 """
 
 import traceback
@@ -36,10 +34,10 @@ def get_network(network, dbconn, valid=mx.DateTime.now()):
     obs = {}
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cursor.execute("""
-    SELECT c.*, s.*, t.id, t.name as sname from current c, summary_%s s, stations t WHERE
+    SELECT c.*, s.*, t.id, t.name as sname from current c, summary s, stations t WHERE
     t.iemid = s.iemid and s.iemid = c.iemid and t.network = '%s' and
     s.day = '%s' ORDER by random()
-    """ % (valid.year, network, valid.strftime("%Y-%m-%d")))
+    """ % (network, valid.strftime("%Y-%m-%d")))
     for row in cursor:
         obs[ row['id'] ] = Ob(row['id'], network)
         for key in row.keys():
@@ -96,16 +94,16 @@ class Ob(object):
             return False
 
         # This will have some issues around the new year, sigh
-        sql = """SELECT c.*, s.* from current c, summary_%s s, stations t WHERE
+        sql = """SELECT c.*, s.* from current c, summary s, stations t WHERE
             c.iemid = s.iemid and c.iemid = t.iemid and
             s.day = date('%s'::timestamptz at time zone t.tzname) and 
-            t.id = '%s' and t.network = '%s' """ % ( self.data.get('valid').year, 
+            t.id = '%s' and t.network = '%s' """ % (  
           self.data.get('valid').strftime("%Y-%m-%d %H:%M"), self.data.get('station'),
           self.data.get('network') )
         if cursor is not None:
             cursor.execute(sql)
             if cursor.rowcount == 0:
-                return false
+                return False
             row = cursor.fetchone()
         elif self.txn is not None:
             self.txn.execute(sql)
@@ -162,8 +160,7 @@ class Ob(object):
                 traceback.print_exc()
 
     def updateDatabasePeakWind(self, db, gdata, dbpool=None, cursor=None):
-        table = "summary_%s" % (self.data['valid'].year,)
-        sql = """UPDATE """+ table +""" s SET 
+        sql = """UPDATE summary s SET 
      max_gust = 
       (CASE WHEN max_gust < '%(peak_gust)s' THEN '%(peak_gust)s' ELSE max_gust END),
      max_gust_ts = 
@@ -177,8 +174,7 @@ class Ob(object):
 
 
     def updateDatabaseSummaryTemps(self, db=None, dbpool=None, cursor=None):
-        table = "summary_%s" % (self.data['valid'].year,)
-        sql = """UPDATE """+ table +""" s SET 
+        sql = """UPDATE summary s SET 
               max_tmpf = 
        (CASE WHEN max_tmpf < %(max_tmpf)s THEN %(max_tmpf)s ELSE max_tmpf END),
       min_tmpf = 
@@ -190,8 +186,7 @@ class Ob(object):
         self.execQuery(sql , db, dbpool, cursor)
 
     def update_summary(self, db=None, dbpool=None, cursor=None):
-        table = "summary_%s" % (self.data['valid'].year,)
-        sql = """UPDATE """+ table +""" s SET 
+        sql = """UPDATE summary s SET 
 	pday = 
       (CASE WHEN %(pday)s >= -1 THEN %(pday)s ELSE pday END)::numeric, 
      pmonth = 
