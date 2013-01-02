@@ -29,20 +29,15 @@ $day2 = isset($_GET["day2"])? intval($_GET["day2"]) : date("d");
 $ts = mktime(0,0,0, $month, $day, $year);
 $ts2 = $ts + 86400;
 $d2display = "none";
-$table = sprintf("products_%s_0106", $year);
-if ($month > 6){
-  $table = sprintf("products_%s_0712", $year);
-}
 
 if (isset($_REQUEST['drange'])){
 	$ts2 = mktime(0,0,0, $month2, $day2, $year2) + 86400;
-	$table = "products";
 	$d2display = "block";
 }
 
 
 pg_query($afos, "SET TIME ZONE 'GMT'");
-$rs = pg_prepare($afos, "_SELECT", "SELECT pil, entered from $table
+$rs = pg_prepare($afos, "_SELECT", "SELECT pil, entered from products
       WHERE source = $1 and entered BETWEEN $2 and $3 ORDER by entered ASC");
 ?>
 <h3>NWS Text Products by Issuing Center by Date</h3>
@@ -137,10 +132,10 @@ if ($view == "prod"){
     $ts = strtotime($row["entered"]);
     $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
     if (gmdate("H", $ts) != $l){
-      echo sprintf("<hr /><strong>%s UTC</strong>", gmdate("H", $ts));
+     	echo sprintf("<hr /><strong>%s UTC</strong>", gmdate('d M Y : H', $ts));
     }
-      $l = gmdate("H", $ts);
-   echo sprintf("<br /><a href=\"%s\">%s</a> (%s)", $url, $row["pil"],
+    $l = gmdate("H", $ts);
+   	echo sprintf("<br /><a href=\"%s\">%s</a> (%s)", $url, $row["pil"],
        gmdate("H:i", $ts));
  }
 }
