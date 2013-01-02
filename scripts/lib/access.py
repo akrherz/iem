@@ -215,7 +215,9 @@ class Ob(object):
      max_drct = (CASE WHEN %(max_drct)s > 0 THEN %(max_drct)s ELSE max_drct END), 
      max_srad =
       (CASE WHEN max_srad < %(max_srad)s THEN %(max_srad)s ELSE max_srad END), 
-     snow = %(snow)s, snowd = %(snowd)s, snoww = %(snoww)s, coop_tmpf = %(coop_tmpf)s,
+    snoww =
+      (CASE WHEN snoww < %(snoww)s THEN %(snoww)s ELSE snoww END),
+     snow = %(snow)s, snowd = %(snowd)s, coop_tmpf = %(coop_tmpf)s,
      coop_valid = %(coop_valid)s 
      FROM stations t
      WHERE t.iemid = s.iemid and t.id = %(station)s 
