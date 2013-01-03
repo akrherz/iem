@@ -191,7 +191,7 @@ Previously entered Farmer Surveys:
 <?php for($field=1;$field<3;$field++){
 	echo "<div class='phidden' style='display: none;'><hr /><h3>Field $field</h3></div>\n";
     echo "<div id='tabs-${field}' style='width:100%; background: url(DataCollectionSheet_files/field${field}.png) repeat-y;'>";
-	echo "<div style='margin-left: 50px;'>
+	echo "<div style='margin-left: 50px;'><hr style='width:1000px; background-color:#FFFFFF; border:0px;' class='hideme' />
    <table><tr>". tdgen("Unique Name", "field${field}name") ."
   			  ". tdgen("Field Number", "field${field}id", 14) ."
   				</tr></table>
@@ -222,7 +222,7 @@ Previously entered Farmer Surveys:
   
   for ($rotation=1;$rotation<4;$rotation++){
     echo "<div id='field${field}_tabs${rotation}' style='background: url(DataCollectionSheet_files/rotation${rotation}.png) repeat-y;'>";
-    echo "<div style='width:100%; margin-left: 25px;'>";
+    echo "<div style='margin-left: 25px;'><hr style='width:1000px; background-color:#FFFFFF; border:0px;' class='hideme' />";
     echo "<table><tr>";
     echo tdgen("Crop Type", "f${field}r${rotation}croptype", 30);
     echo tdgen("Year", "f${field}r${rotation}year", 6);
@@ -327,7 +327,7 @@ Previously entered Farmer Surveys:
   
   for ($cover=1;$cover<4;$cover++){
 	echo "<div id='field${field}_ctabs${cover}' style='background: url(DataCollectionSheet_files/cover${cover}.png) repeat-y;'>";
-	echo "<div style='width:100%; margin: 25px;'>";
+	echo "<div style='margin: 25px;'><hr style='width:1000px; background-color:#FFFFFF; border:0px;' class='hideme' />";
   	echo "<table><tr>";
   	echo tdgen("Cover Crop Type", "field${field}cover${cover}type",30);
   	echo tdgen("Year", "field${field}cover${cover}year", 6);

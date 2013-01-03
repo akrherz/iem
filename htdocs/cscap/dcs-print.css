@@ -8,3 +8,6 @@ border:none;
 .phidden {
 	display: block !important;
 }
+.hideme {
+	display: none !important;
+}
