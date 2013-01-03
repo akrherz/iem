@@ -74,7 +74,7 @@ $(function(){
 <style type="text/css">
 .ui-widget{
   font-size: 1em !important;
-  font: Arial;
+  font-family: Arial;
 }
 </style>
 </head>
