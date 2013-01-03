@@ -71,10 +71,15 @@ $(function(){
 </script>
 <script src="oauth2.js?v=11"></script>
 <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
+<style type="text/css">
+.ui-widget{
+  font-size: 1em !important;
+}
+</style>
 </head>
 <body>
 
-<table><tr><td>
+<table width="100%"><tr><td>
 <img src="http://sustainablecorn.org/img/sustainablecorn-rgb-01.png" />
 </td><td>
 <h3>Data Collection Sheet</h3>
@@ -105,7 +110,7 @@ Previously entered Farmer Surveys:
 <form method="POST" name="theform" id="theform">
 <input type='hidden' name='updated' />
 <div style="border:1px #000 solid;">
-<table>
+<table width='100%'>
 <tr>
 <?php echo tdgen("Farmer Code", "farmercode", 10); ?>
 <?php echo tdgen("Interviewer", "interviewer", 40); ?>
@@ -115,7 +120,7 @@ Previously entered Farmer Surveys:
 </div>
 <h3>Location/General</h3>
 
-<table>
+<table width='100%'>
 <tr>
 <?php echo tdgen("State", "state", 20); ?>
 <?php echo tdgen("County", "county", 30); ?>
@@ -125,7 +130,7 @@ Previously entered Farmer Surveys:
 <?php echo tdgen("Acres Rented", "tarented", 6); ?>
 </tr>
 </table>
-<table>
+<table width='100%'>
 <tr>
 <?php echo tdgen("Type of operation (sole proprietor/family/etc.)", "optype"); ?>
 </tr>
@@ -134,7 +139,7 @@ Previously entered Farmer Surveys:
 <p><strong>Field location details (Sufficient information for locating on a plat map or Google Earth, e.g. address, Township, Range):</strong>
 <textarea name="fielddetails" rows="4" cols="72"></textarea>
 
-<table>
+<table width='100%'>
 <tr>
 <?php echo tdyn("Farm has livestock:", "livestock"); ?>
 <?php echo tdyn("Manure import from other farms:", "importmanure"); ?>
@@ -143,7 +148,7 @@ Previously entered Farmer Surveys:
 
 <p><strong>Farm labor availability: (3,000 hours = 1 person/year)</strong>
 <br />
-<table><tr><td>
+<table width='100%'><tr><td>
 <?php echo radio("availability", Array(
 		"3000"=> "3,000",
 		"4500"=> "4,500",
@@ -155,7 +160,7 @@ Previously entered Farmer Surveys:
 </table>
 
 <p>
-<table><tr>
+<table width='100%'><tr>
 <?php echo tdgen("Total # of fields", "totalfields", 10); ?>
 <?php echo tdgen("Area of field 1 (acres)", "field1acres", 10); ?>
 <?php echo tdgen("Area of field 2 (acres)", "field2acres", 10); ?>
@@ -163,7 +168,7 @@ Previously entered Farmer Surveys:
 
 <p><strong>Livestock Information</strong>
 
-<table>
+<table width='100%'>
 <?php for($i=1;$i<4;$i++){ 
  echo "<tr>";
  echo tdgen("Type of livestock $i", "livestock${i}type", 30); 
@@ -186,14 +191,14 @@ Previously entered Farmer Surveys:
 	echo "<div class='phidden' style='display: none;'><hr /><h3>Field $field</h3></div>\n";
     echo "<div id='tabs-${field}' style='background: url(DataCollectionSheet_files/field${field}.png) repeat-y;'>";
 	echo "<div style='margin-left: 50px;'>
-   <table><tr>". tdgen("Unique Name", "field${field}name") ."
+   <table width='100%'><tr>". tdgen("Unique Name", "field${field}name") ."
   			  ". tdgen("Field Number", "field${field}id", 14) ."
   				</tr></table>
 		";
   echo "<p><strong>Cropping system for this field:</strong> ". radio("field${field}system", Array(
 		"single"=> "Single crop per rotation year",
 		"multi"=> "Multiple/Double/Cover crops"));
-  echo "<table><tr><th>Field is: </th><td>". radio("field${field}tile", Array(
+  echo "<table width='100%'><tr><th>Field is: </th><td>". radio("field${field}tile", Array(
 		"tiled"=> "Tiled",
 		"not_tiled"=> "Not tiled")) ."</td>";
   echo "<th>Field is: <th><td>". radio("field${field}owned", Array(
@@ -201,7 +206,7 @@ Previously entered Farmer Surveys:
 		"rented"=> "Rented")) ."</td>";
   echo "</tr></table>";
   
-  echo "<table><tr>";
+  echo "<table width='100%'><tr>";
   echo tdgen("Soil type", "field${field}soiltype", 30);
   echo tdgen("Soil test P", "field${field}soiltestp", 10);
   echo tdgen("Soil test type", "field${field}soiltestt", 20);
@@ -217,12 +222,12 @@ Previously entered Farmer Surveys:
   for ($rotation=1;$rotation<4;$rotation++){
     echo "<div id='field${field}_tabs${rotation}' style='background: url(DataCollectionSheet_files/rotation${rotation}.png) repeat-y;'>";
     echo "<div style='margin-left: 25px;'>";
-    echo "<table><tr>";
+    echo "<table width='100%'><tr>";
     echo tdgen("Crop Type", "f${field}r${rotation}croptype", 30);
     echo tdgen("Year", "f${field}r${rotation}year", 6);
     echo "</tr></table>";
 		
-	echo "<table><tr>";
+	echo "<table width='100%'><tr>";
 	echo tdgen("Yield (per acre)", "f${field}r${rotation}yield", 10);
 	echo tdyn("Irrigated", "f${field}r${rotation}irrigated");
 	echo "<th>Harvest:</th><td>". radio("f${field}r${rotation}harvest", Array(
@@ -230,16 +235,16 @@ Previously entered Farmer Surveys:
 			"grain_and_res"=> "Grain and residue")) ."</td>";
 	echo "</tr></table>";
 	
-	echo "<table><tr>";
+	echo "<table width='100%'><tr>";
 	echo tdgen("Percent residue removed (%)", "f${field}r${rotation}resremoved", 5);
 	echo tdyn("Shred cornstalks before tillage", "f${field}r${rotation}shredstalks");
 	echo "</tr></table>";
 	
-	echo "<table><tr>";
+	echo "<table width='100%'><tr>";
 	echo tdgen("Residue removal: (e.g. bale)", "f${field}r${rotation}resremovalmethod", 30);
 	echo "</tr></table>";
 	
-	echo "<table>";
+	echo "<table width='100%'>";
 	for ($tillage=1;$tillage<7;$tillage++){
       echo "<tr>";
       $s = "f${field}r${rotation}tillage${tillage}";
@@ -250,18 +255,18 @@ Previously entered Farmer Surveys:
 	} // End of tillage
 	echo "</table>";
 	
-	echo "<table><tr>";
+	echo "<table width='100%'><tr>";
 	echo tdgen("Seeding rate (per acre)", "f${field}r${rotation}seedrate", 10);
 	echo "<th>Units:</th><td>". radio("f${field}r${rotation}seedunits", Array(
 			"seeds_per_acre"=> "seeds per acre",
 			"lbs_per_acre"=> "lbs. per acre")) ."</td>";
 	echo "</tr></table>";
 	
-	echo "<table><tr>";
+	echo "<table width='100%'><tr>";
 	echo tdgen("Relative maturity", "f${field}r${rotation}maturity");
 	echo "</tr></table>";
 	
-	echo "<table><tr>";
+	echo "<table width='100%'><tr>";
 	echo tdgen("Planting equipment", "f${field}r${rotation}plantequip", 30);
 	echo tdgen("Date", "f${field}r${rotation}plantdate", 10);
 	echo "</tr><tr>";
@@ -270,7 +275,7 @@ Previously entered Farmer Surveys:
 	echo "</tr></table>";
 	
 	echo "<p style=\"font-size: 1.2em; color: #00f;\"><u>Weed Control</u></p>";
-	echo "<table>";
+	echo "<table width='100%'>";
 	for($weed=1;$weed<7;$weed++){
 		$s = "f${field}r${rotation}weed${weed}";
 		echo "<tr>";
@@ -283,7 +288,7 @@ Previously entered Farmer Surveys:
 	echo "</table>";
 	
 	echo "<p style=\"font-size: 1.2em; color: #00f;\"><u>Pest &amp; Disease Control</u></p>";
-	echo "<table>";
+	echo "<table width='100%'>";
 	for($pest=1;$pest<7;$pest++){
 		$s = "f${field}r${rotation}pest${pest}";
 		echo "<tr>";
@@ -296,7 +301,7 @@ Previously entered Farmer Surveys:
 	echo "</table>";
 	
 	echo "<p style=\"font-size: 1.2em; color: #00f;\"><u>Fertilizer</u></p>";
-	echo "<table>";
+	echo "<table width='100%'>";
 	for($fert=1;$fert<7;$fert++){
 		$s = "f${field}r${rotation}fert${fert}";
 		echo "<tr>";
@@ -322,12 +327,12 @@ Previously entered Farmer Surveys:
   for ($cover=1;$cover<4;$cover++){
 	echo "<div id='field${field}_ctabs${cover}' style='background: url(DataCollectionSheet_files/cover${cover}.png) repeat-y;'>";
 	echo "<div style='margin: 25px;'>";
-  	echo "<table><tr>";
+  	echo "<table width='100%'><tr>";
   	echo tdgen("Cover Crop Type", "field${field}cover${cover}type",30);
   	echo tdgen("Year", "field${field}cover${cover}year", 6);
   	echo "</tr></table>";
   
-  	echo "<table><tr>";
+  	echo "<table width='100%'><tr>";
   	echo tdgen("Seeding rate (per acre)", "field${field}cover${cover}seedrate", 10);
   	echo "<th>Units:</th><td>". radio("field${field}cover${cover}seedunits", Array(
   			"seeds_per_acre"=> "seeds per acre",
