@@ -71,12 +71,6 @@ $(function(){
 </script>
 <script src="oauth2.js?v=11"></script>
 <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
-<style type="text/css">
-.ui-widget{
-  font-size: 1em !important;
-  font: inherit;
-}
-</style>
 </head>
 <body>
 
