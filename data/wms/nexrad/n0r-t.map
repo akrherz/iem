@@ -32,7 +32,7 @@ WEB
   MAXSCALE 4650000
   IMAGEPATH "/mesonet/www/html/tmp/"
   IMAGEURL "/tmp/"
-  LOG "/mesonet/www/html/tmp/w0.log"
+  LOG "/tmp/w0.log"
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?"
@@ -43,6 +43,7 @@ WEB
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
       "wms_enable_request" "*"
+      "wms_timeformat" "YYYY-MM-DDTHH:MM:SSZ"
   END
 END
 
@@ -58,11 +59,12 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT"
     "wms_srs"   "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
-    "wms_timeextent" "1995-01-01/2012-12-31/PT5M"
+    "wms_timeextent" "1995-01-01/2013-12-31/PT5M"
     "wms_timeitem" "datetime"
     "wms_timedefault" "2006-06-23T03:10:00Z"
+      "wms_timeformat" "YYYY-MM-DDTHH:MM:SSZ"
   END
-  CONNECTION "dbname=postgis host=iemdb"
+  CONNECTION "dbname=postgis host=iemdb user=nobody"
   CONNECTIONTYPE postgis
 END
 
@@ -80,7 +82,7 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT"
     "wms_srs"   "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
-    "wms_timeextent" "1995-01-01/2012-12-31/PT5M"
+    "wms_timeextent" "1995-01-01/2013-12-31/PT5M"
     "wms_timeitem" "datetime"
     "wms_timedefault" "2006-06-23T03:10:00Z"
   END
