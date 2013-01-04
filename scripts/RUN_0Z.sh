@@ -11,6 +11,7 @@ python max_reflect.py
 # Rerun today
 cd ../dbutil
 python rwis2archive.py 1
+python snet2archive.py
 
 cd ../iemre
 python stage4_12z_adjust.py
