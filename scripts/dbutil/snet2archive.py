@@ -86,4 +86,4 @@ if len(output) > 0:
     print 'Error encountered with dbinsert...'
     print output
 # Clean up after ourself
-#os.unlink('/tmp/snet_dbinsert.sql')
+os.unlink('/tmp/snet_dbinsert.sql')
