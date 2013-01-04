@@ -1,11 +1,15 @@
 """
  Send the current_log history of SNET observations to its long term home
-run from RUN_MIDNIGHT.sh
+
+ The database partitioning is based on monthly tables based on UTC Time, so 
+ this runs at 0z and takes the previous GMT day...
+
 """
 
-import mx.DateTime
+import datetime
 import os
 import iemdb
+import iemtz
 import psycopg2.extras
 import subprocess
 IEM = iemdb.connect('iem', bypass=True)
@@ -13,13 +17,19 @@ icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 SNET = iemdb.connect('snet')
 scursor = SNET.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
+utc = datetime.datetime.utcnow()
+utc = utc.replace(tzinfo=iemtz.UTC())
+# We want 0z today
+ets = utc.replace(hour=0,minute=0,second=0,microsecond=0)
+# 0z yesterday
+sts = ets - datetime.timedelta(days=1)
 
 # Collect obs from iemaccess
 sql = """SELECT c.*, t.id from current_log c JOIN stations t 
-    ON (t.iemid = c.iemid) WHERE date(valid) = '%s' and 
-    t.network IN ('KELO','KCCI','KIMT')""" % (ts.strftime("%Y-%m-%d"),)
-icursor.execute(sql)
+    ON (t.iemid = c.iemid) WHERE valid >= %s and valid < %s and 
+    t.network IN ('KELO','KCCI','KIMT')"""
+args = (sts, ets)
+icursor.execute(sql, args)
 
 # Dump them into snet archive...
 """
@@ -44,9 +54,9 @@ def formatter(val, precision):
     return fmt % val
 
 out = open('/tmp/snet_dbinsert.sql', 'w')
-out.write("DELETE from t%s WHERE date(valid) = '%s';\n" % (
-                    ts.strftime("%Y_%m"), ts.strftime("%Y-%m-%d") ))
-out.write("COPY t%s FROM stdin WITH NULL 'None';\n" % (ts.strftime("%Y_%m"),) )
+out.write("DELETE from t%s WHERE valid >= '%s' and valid < '%s';\n" % (
+                    sts.strftime("%Y_%m"), sts, ets ))
+out.write("COPY t%s FROM stdin WITH NULL 'None';\n" % (sts.strftime("%Y_%m"),) )
 i = 0
 for row in icursor:
     if (row['pmonth'] is None):
@@ -62,7 +72,8 @@ for row in icursor:
         print 'Fail', row
     out.write(s)
     if i > 0 and i % 1000 == 0:
-        out.write("\.\nCOPY t%s FROM stdin WITH NULL 'None';\n" % (ts.strftime("%Y_%m"),) )
+        out.write("\.\nCOPY t%s FROM stdin WITH NULL 'None';\n" % (
+                                                    sts.strftime("%Y_%m"),) )
     i += 1
 out.write("\.\n")
 out.close()
@@ -75,4 +86,4 @@ if len(output) > 0:
     print 'Error encountered with dbinsert...'
     print output
 # Clean up after ourself
-os.unlink('/tmp/snet_dbinsert.sql')
+#os.unlink('/tmp/snet_dbinsert.sql')
