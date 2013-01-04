@@ -1,6 +1,8 @@
 if (typeof console == "undefined") var console = { log: function() {} }; 
 else if (typeof console.log == "undefined") console.log = function() {};
 
+jQuery.support.cors = true;
+
 function xmlescape(text){
         text = text.replace(/\&/g, "&amp;");
         text = text.replace(/</g,  "&lt;");
@@ -191,7 +193,7 @@ function addRow(){
 function getSpreadsheets(){
 	$(spreadkeys).each(function(i,spreadkey){
 		$.ajax({ // ?sq=farmercode=1
-			
+			cache: false,
 		  url: spreadkey,
 		  headers: {
 		    'Authorization': 'Bearer ' + access_token
