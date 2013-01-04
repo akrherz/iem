@@ -10,6 +10,7 @@ python check_hilo.py
 cd ../dbutil
 ./save_snet_raw.csh
 python rwis2archive.py
+python asos2archive.py
 
 cd ../smos
 python plot.py 0
