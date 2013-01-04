@@ -13,16 +13,15 @@ function get_field($varname){
 }
 
 function tdgen($label, $varname, $inputwidth=40){
-	return sprintf("<th style=\"text-align: right\">%s:</th>
-  		<td><input type=\"text\" name=\"%s\" size=\"%s\" value=\"%s\"></td>",
+	return sprintf("<th>%s:</th><td><input type=\"text\" name=\"%s\" width=\"%s\" value=\"%s\"></td>",
   		$label, $varname, $inputwidth, get_field($varname));
 }
 function tdyn($label, $varname){
-	return sprintf("<th>%s</th><td><input type=\"radio\" name=\"%s\" value=\"yes\">Yes <input type=\"radio\" name=\"%s\" value=\"no\">No</td>",
+	return sprintf("<th class='tdnowrap'>%s</th><td><input type=\"radio\" name=\"%s\" value=\"yes\">Yes <input type=\"radio\" name=\"%s\" value=\"no\">No</td>",
 			$label, $varname, $varname);
 }
 function tdyn2( $varname ){
-	return sprintf("<td><input type=\"radio\" name=\"%s\" value=\"yes\">Yes <input type=\"radio\" name=\"%s\" value=\"no\">No</td>",
+	return sprintf("<td><input type=\"radio\" name=\"%s\" value=\"yes\"> Yes <input type=\"radio\" name=\"%s\" value=\"no\"> No </td>",
 			$varname, $varname);
 }
 function radio($varname, $vals){
@@ -34,47 +33,23 @@ function radio($varname, $vals){
 	return $s;
 }
 ?>
-<html>
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
  <title>CSCAP Data Collection Sheet Interface</title>
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
     <link rel='stylesheet' media='print' href='dcs-print.css' />
-    <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
-    <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
   
  
  
-<script type="text/javascript">
-var clientId = '828718626869-s70grf0hkkfhujtf9u53138n6e5vdvc9.apps.googleusercontent.com';
-var apiKey = 'AIzaSyBUkRDnhdnp-AuEgLHtSsn6hK0QHuYJ3m0';
-var scopes = 'https://sites.google.com/feeds/ https://spreadsheets.google.com/feeds/ https://docs.google.com/feeds/ https://docs.googleusercontent.com/';
-var service;
-var access_token;
-var currentEntry = [null, null, null, null, null, null, null];
-var spreadsheetDocs = [null, null, null, null, null, null, null];
-b = 'https://spreadsheets.google.com/feeds/list/0AqZGw0coobCxdG1HUFk5YXI3TzRlT1FfV0kzWXFEVVE';
-var spreadkeys = [b+'/1/private/full', b+'/2/private/full', b+'/3/private/full',
-                  b+'/4/private/full', b+'/5/private/full', b+'/6/private/full',
-                  b+'/7/private/full'];
-var editting = false;
 
-$(function(){
-	$( "#field-tabs" ).tabs();
-	$( "#field1_tabs" ).tabs();
-	$( "#field2_tabs" ).tabs();
-	$( "#field1_ctabs" ).tabs();
-	$( "#field2_ctabs" ).tabs();
-
-});
-
-</script>
 <script src="oauth2.js?v=11"></script>
 <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
 <style type="text/css">
 .ui-widget{
-  font-size: 1em !important;
-  font-family: Arial;
+ font-size: 0.9em !important;
 }
 </style>
 </head>
@@ -443,6 +418,31 @@ to process!</span>
 
 </form>
 
+<script type="text/javascript">
+var clientId = '828718626869-s70grf0hkkfhujtf9u53138n6e5vdvc9.apps.googleusercontent.com';
+var apiKey = 'AIzaSyBUkRDnhdnp-AuEgLHtSsn6hK0QHuYJ3m0';
+var scopes = 'https://sites.google.com/feeds/ https://spreadsheets.google.com/feeds/ https://docs.google.com/feeds/ https://docs.googleusercontent.com/';
+var service;
+var access_token;
+var currentEntry = [null, null, null, null, null, null, null];
+var spreadsheetDocs = [null, null, null, null, null, null, null];
+b = 'https://spreadsheets.google.com/feeds/list/0AqZGw0coobCxdG1HUFk5YXI3TzRlT1FfV0kzWXFEVVE';
+var spreadkeys = [b+'/1/private/full', b+'/2/private/full', b+'/3/private/full',
+                  b+'/4/private/full', b+'/5/private/full', b+'/6/private/full',
+                  b+'/7/private/full'];
+var editting = false;
+
+$(function(){
+
+		$( "#field-tabs" ).tabs();
+		$( "#field1_tabs" ).tabs();
+		$( "#field2_tabs" ).tabs();
+		$( "#field1_ctabs" ).tabs();
+		$( "#field2_ctabs" ).tabs();  
+
+});
+
+</script>
 </body>
 
 </html>
