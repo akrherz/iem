@@ -1,4 +1,4 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/env python
 
 import sys
 sys.path.insert(1, "/mesonet/www/apps/iemwebsite/scripts/lib/")
