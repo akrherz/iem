@@ -10,7 +10,7 @@ try:
 except:
     import netCDF4 as netCDF3
 import mx.DateTime
-import simplejson
+import json
 import numpy
 import shapelib
 import dbflib
@@ -76,7 +76,7 @@ if format == 'json':
     'longitude': "%.4f" % (lon,)
        })
     print 'Content-type: text/plain\n'
-    print simplejson.dumps( res )
+    print json.dumps( res )
 
 if format == 'shp':
     # Time to create the shapefiles

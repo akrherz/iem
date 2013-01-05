@@ -10,7 +10,7 @@ try:
 except:
     import netCDF3
 import mx.DateTime
-import simplejson
+import json
 import mesonet
 
 form = cgi.FormContent()
@@ -50,4 +50,4 @@ if os.path.isfile(fp):
   cnc.close()
 
 print 'Content-type: text/plain\n'
-print simplejson.dumps( res )
+print json.dumps( res )

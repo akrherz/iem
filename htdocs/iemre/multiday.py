@@ -10,7 +10,7 @@ try:
 except:
     import netCDF3
 import mx.DateTime
-import simplejson
+import json
 import mesonet
 
 form = cgi.FormContent()
@@ -18,11 +18,11 @@ ts1 = mx.DateTime.strptime( form["date1"][0], "%Y-%m-%d")
 ts2 = mx.DateTime.strptime( form["date2"][0], "%Y-%m-%d")
 if ts1 >= ts2:
     print 'Content-type: text/plain\n'
-    print simplejson.dumps( {'error': 'Date1 Larger than Date2', } )
+    print json.dumps( {'error': 'Date1 Larger than Date2', } )
     sys.exit()
 if ts1.year != ts2.year:
     print 'Content-type: text/plain\n'
-    print simplejson.dumps( {'error': 'Multi-year query not supported yet...', } )
+    print json.dumps( {'error': 'Multi-year query not supported yet...', } )
     sys.exit()
 # Make sure we aren't in the future
 tsend = mx.DateTime.today()
