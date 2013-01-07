@@ -5,6 +5,7 @@ include("../../include/cameras.inc.php");
 
 $id = isset($_GET["id"]) ? $_GET["id"] : "KCCI-001";
 
+if ($id == 'KCWI-001') die();
 if (! $cameras[$id]["active"]) die();
 
 $ip = $cameras[$id]["ip"];
