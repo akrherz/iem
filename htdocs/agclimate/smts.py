@@ -9,8 +9,8 @@ import datetime
 import numpy
 import mesonet
 import iemtz
-import cgitb
-cgitb.enable()
+#import cgitb
+#cgitb.enable()
 
 import network
 nt = network.Table("ISUSM")
@@ -92,14 +92,14 @@ ax[0].plot(valid, d50sm * 100.0, linewidth=2, color='black', zorder=2, label='50
 ax[0].set_ylabel("Volumetric Soil Water Content [%]")
 ax[0].legend(loc=(0, 0.01), ncol=3)
 ax[0].set_ylim(miny * 100.0 - 5, maxy * 100.0 + 5)
-ax[0].set_xlim( min(valid), max(valid))
+
 days = (ets - sts).days  
 if days >= 3:
     interval = max(int(days/7), 1)
     ax[0].xaxis.set_major_locator(
                                mdates.DayLocator(interval=interval, tz=iemtz.Central)
                                )
-    ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y', tz=iemtz.Central))
+    ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y', tz=iemtz.Central))
 else:
     ax[0].xaxis.set_major_locator(
                                mdates.AutoDateLocator(maxticks=10, tz=iemtz.Central)
@@ -123,5 +123,7 @@ ax2 = ax[1].twinx()
 ax2.plot(valid, slrkw * 1000.0, color='g')
 ax2.set_ylabel("Solar Radiation [W/m^2]", color='g')
 
+# Wow, strange bugs if I did not put this last
+ax[0].set_xlim( min(valid), max(valid))
 print "Content-Type: image/png\n"
 plt.savefig( sys.stdout, format='png' )
