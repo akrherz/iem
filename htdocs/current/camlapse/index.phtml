@@ -3,7 +3,7 @@ include("../../../config/settings.inc.php");
 include("$rootpath/include/cameras.inc.php");
 $TITLE = "IEM | Webcam Lapse Player";
 $HEADEXTRA = '
-<script type="text/javascript" src="flowplayer-3.1.5.min.js"></script>
+<script type="text/javascript" src="flowplayer-3.2.11.min.js"></script>
 ';
 $THISPAGE = "webcam-lapse";
 include("$rootpath/include/header.php"); 
@@ -20,7 +20,7 @@ note the timestamp on the lapses, some of them may be old.</p>
 <div id="player"  style="display:block;width:640px;height:490px;"></div>
 <form name="theform">
 <br /><strong>Select Camera:</strong>
-<select name="mycam" onchange="myloader();">
+<select id="mycam" name="mycam" onchange="myloader();">
 <?php
 reset($cameras);
 while( list($key, $dict) = each($cameras) )
@@ -31,7 +31,7 @@ while( list($key, $dict) = each($cameras) )
 ?>
 </select>
 <strong>Select Lapse:</strong>
-<select name="mylapse" onchange="myloader()">
+<select id="mylapse" name="mylapse" onchange="myloader()">
  <option value="sunrise">Sunrise 
  <option value="morning">Morning (8 AM - 11 AM) 
  <option value="afternoon">Afternoon (1 PM - 4 PM)
@@ -43,7 +43,7 @@ while( list($key, $dict) = each($cameras) )
 
 
 <script>
-flowplayer("player", "flowplayer-3.1.5.swf", {
+flowplayer("player", "flowplayer-3.2.15.swf", {
    clip:{
     baseUrl:"http://mesonet.agron.iastate.edu/onsite/lapses/auto/",
     url:"algona_sunrise.flv"}
@@ -52,9 +52,26 @@ flowplayer("player", "flowplayer-3.1.5.swf", {
 function myloader()
 {
   ts = new Date();
-  var url =  document.theform.mycam.value +"_"+ document.theform.mylapse.value +".flv?"+ ts.getTime();
+  var mycam = document.theform.mycam.value;
+  var mylapse = document.theform.mylapse.value;
+	window.location.href = "#"+mycam+"_"+mylapse;
+  var url =  mycam +"_"+ mylapse +".flv?"+ ts.getTime();
   $f().play(url);
 }
+
+var tokens = window.location.href.split('#');
+if (tokens.length == 2){
+  tokens2 = tokens[1].split('_');
+  if (tokens2.length == 2){
+	mycam = tokens2[0];
+	document.getElementById('mycam').value = mycam;
+	mylapse = tokens2[1];
+	document.getElementById('mylapse').value = mylapse;
+	myloader();
+  }
+} 
+
+
 </script>
 
 <?php include("$rootpath/include/footer.php"); ?>
