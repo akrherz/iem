@@ -5,7 +5,7 @@
 import re
 import iemdb
 MESOSITE = iemdb.connect('mesosite')
-POSTGIS = iemdb.connect('mesosite')
+POSTGIS = iemdb.connect('postgis')
 mcursor = MESOSITE.cursor()
 mcursor2 = MESOSITE.cursor()
 pcursor = POSTGIS.cursor()
