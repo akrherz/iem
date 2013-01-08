@@ -31,7 +31,7 @@ pcursor.execute("""
   and s.country = 'US' and c.polygon_class = 'C' LIMIT 1000
 """)
 
-for row in mcursor:
+for row in pcursor:
     sid = row[2]
     cnty = row[1]
     print 'Assinging ID: %s to ugc_county: %s' % (sid, cnty)
@@ -45,7 +45,7 @@ pcursor.execute("""
   and s.country = 'US' and c.polygon_class = 'Z' LIMIT 1000
 """)
 
-for row in mcursor:
+for row in pcursor:
     sid = row[2]
     cnty = row[1]
     print 'Assinging ID: %s to ugc_zone: %s' % (sid, cnty)
