@@ -2,10 +2,16 @@
  include("../../config/settings.inc.php");
  $wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'DMX';
 $year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]): 2012;
-$rhthres = isset($_REQUEST["relh"]) ? intval($_REQUEST["relh"]): 25;
-$skntthres = isset($_REQUEST["sknt"]) ? intval($_REQUEST["sknt"]): 25;
+$sid = isset($_REQUEST["sid"]) ? intval($_REQUEST["sid"]): 1;
+$eid = isset($_REQUEST["eid"]) ? intval($_REQUEST["eid"]): 999;
+$rhthres = isset($_REQUEST["relh"]) ? floatval($_REQUEST["relh"]): 25;
+$skntthres = isset($_REQUEST["sknt"]) ? floatval($_REQUEST["sknt"]): 25;
+$mode = isset($_REQUEST["mode"])? substr($_REQUEST["mode"],0,4): 'FW.W';
+$ar = explode(".", $mode);
+$phenomena = $ar[0];
+$significance = $ar[1];
 
- $TITLE = "IEM | Red Flag Warning Verifier";
+ $TITLE = "IEM | NWS Watch/Warning/Advisory + ASOS Observations";
 
   include("$rootpath/include/header.php"); 
   include("$rootpath/include/wfoLocs.php");
@@ -14,21 +20,40 @@ $skntthres = isset($_REQUEST["sknt"]) ? intval($_REQUEST["sknt"]): 25;
   include("$rootpath/include/database.inc.php");
   ?>
 
-  <h2>WFO Red Flag Warning Verifier</h2>
+  <h2>NWS Watch/Warning/Advisory + ASOS Observations</h2>
   
-  <p>This app allows you to view an office's Red Flag Warnings for a year and
-  then looks for ASOS/AWOS observations valid for the warning period.
+  <p>This app allows you to view an office's warnings for a year and
+  then looks for ASOS/AWOS observations valid for the warning period. The observations
+  presented are coded like:
+  <br />ID DDHHMI TMPF/DWPF RELH SKNT/GUST
+  <br />Where ID is the station identifier, DDHHMI is the day-hour-minute of the
+  observation in UTC, TMPF is the air temperature in Fahrenheit, DWPF is the
+  dew point temperature in Fahrenheit, RELH is the relative humidity, SKNT is the
+  wind speed in knots and GUST is the wind gust in knots. 
+  
+  <p>A warning event may be listed multiple times, if the UGC zones associated 
+  with the warning had different expiration times.
+    
   <form method="GET">
   
   <p>
   <table cellpadding='3' cellspacing='0' border='1'>
   <tr>
-  	<th>Select WFO:</th>
+    <th>WWA Type:</th>
+    <th>Start Event ID:</th>
+    <th>End Event ID:</th>
+    <th>Select WFO:</th>
   	<th>Select Year:</th>
   	<th>Relative Humidity Threshold (%):</th>
   	<th>Wind Speed Threshold (kts):</th>
   	</tr>
   	<tr>
+  	<td><select name="mode">
+  	<option value="FW.W" <?php if ($mode == "FW.W") echo "SELECTED='SELECTED';"?>>Red Flag Warning FW.W</option>
+  	<option value="HW.W" <?php if ($mode == "HW.W") echo "SELECTED='SELECTED';"?>>High Wind Warning HW.W</option>
+  	</select></td>
+  	<td><input type="text" size="10" name="sid" value="<?php echo $sid; ?>" /></td>
+  	<td><input type="text" size="10" name="eid" value="<?php echo $eid; ?>" /></td>
   	<td><?php echo wfoSelect($wfo); ?></td>
     <td><?php echo yearSelect(2005, $year); ?></td>
     <td><input type="text" size="10" name="relh" value="<?php echo $rhthres; ?>" /></td>
@@ -48,8 +73,9 @@ $skntthres = isset($_REQUEST["sknt"]) ? intval($_REQUEST["sknt"]): 25;
   
   $rs = pg_prepare($postgis, "FIND", "SELECT array_to_string(array_accum(ugc),',')
   		as a, eventid, issue, expire from
-  		warnings_$year WHERE wfo = $1 and phenomena = 'FW' and
-  		significance = 'W' GROUP by issue, expire, eventid ORDER by issue ASC");
+  		warnings_$year WHERE wfo = $1 and phenomena =  $4 and
+  		significance = $5 and eventid >= $2 and eventid < $3 
+  		GROUP by issue, expire, eventid ORDER by issue ASC");
   
   $station2ugc = Array();
   $ugc2station = Array();
@@ -63,7 +89,7 @@ $skntthres = isset($_REQUEST["sknt"]) ? intval($_REQUEST["sknt"]): 25;
   	$ugc2station[$row["ugc_zone"]][] = $row["id"];
   	$station2ugc[$row["id"]] = $row["ugc_zone"];
   }
-  $rs = pg_execute($postgis, "FIND", Array($wfo));
+  $rs = pg_execute($postgis, "FIND", Array($wfo, $sid, $eid, $phenomena, $significance));
 
   function c1($relh){
   	global $rhthres;
