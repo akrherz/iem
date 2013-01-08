@@ -35,6 +35,16 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
 </ul>
 </td>
 <td valign="top" width="50%">
+<h4>Valid Time Extent Code Apps</h4>
+<ul>
+ <li><a href="vtec_obs.php">ASOS/AWOS Obs during WFO WWA</a>
+  <br />Prints out ASOS/AWOS observations during selected VTEC warning types.</li>
+ <li><a href="../vtec/">VTEC Browser</a>
+  <br />Interactive display of VTEC products.</li>
+ <li><a href="../vtec/search.php">VTEC Search by County/Zone</a>
+  <br />Find issued VTEC WWA products by a given zone or county.</li>
+</ul>
+
 <h4>Storm Based Warnings</h4>
 <ul>
  <li><a href="../cow/">IEM Cow</a>

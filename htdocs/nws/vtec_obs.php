@@ -1,11 +1,13 @@
 <?php
  include("../../config/settings.inc.php");
+ define("IEM_APPID", 108);
  $wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'DMX';
 $year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]): 2012;
 $sid = isset($_REQUEST["sid"]) ? intval($_REQUEST["sid"]): 1;
 $eid = isset($_REQUEST["eid"]) ? intval($_REQUEST["eid"]): 999;
 $rhthres = isset($_REQUEST["relh"]) ? floatval($_REQUEST["relh"]): 25;
 $skntthres = isset($_REQUEST["sknt"]) ? floatval($_REQUEST["sknt"]): 25;
+$vsbythres = isset($_REQUEST["vsby"]) ? floatval($_REQUEST["vsby"]): 0.25;
 $mode = isset($_REQUEST["mode"])? substr($_REQUEST["mode"],0,4): 'FW.W';
 $ar = explode(".", $mode);
 $phenomena = $ar[0];
@@ -17,7 +19,6 @@ $significance = $ar[1];
   include("$rootpath/include/wfoLocs.php");
   include("$rootpath/include/forms.php");
   include("$rootpath/include/mlib.php");
-  include("$rootpath/include/database.inc.php");
   ?>
 
   <h2>NWS Watch/Warning/Advisory + ASOS Observations</h2>
@@ -25,11 +26,11 @@ $significance = $ar[1];
   <p>This app allows you to view an office's warnings for a year and
   then looks for ASOS/AWOS observations valid for the warning period. The observations
   presented are coded like:
-  <br />ID DDHHMI TMPF/DWPF RELH SKNT/GUST
+  <br />ID DDHHMI TMPF/DWPF RELH VSBY SKNT/GUST
   <br />Where ID is the station identifier, DDHHMI is the day-hour-minute of the
   observation in UTC, TMPF is the air temperature in Fahrenheit, DWPF is the
-  dew point temperature in Fahrenheit, RELH is the relative humidity, SKNT is the
-  wind speed in knots and GUST is the wind gust in knots. 
+  dew point temperature in Fahrenheit, RELH is the relative humidity, VSBY is
+  the visibility, SKNT is the wind speed in knots and GUST is the wind gust in knots. 
   
   <p>A warning event may be listed multiple times, if the UGC zones associated 
   with the warning had different expiration times.
@@ -44,11 +45,11 @@ $significance = $ar[1];
     <th>End Event ID:</th>
     <th>Select WFO:</th>
   	<th>Select Year:</th>
-  	<th>Relative Humidity Threshold (%):</th>
-  	<th>Wind Speed Threshold (kts):</th>
   	</tr>
   	<tr>
   	<td><select name="mode">
+  	<option value="BZ.W" <?php if ($mode == "BZ.W") echo "SELECTED='SELECTED';"?>>Blizzard Warning BZ.W</option>
+  	<option value="FG.Y" <?php if ($mode == "FG.Y") echo "SELECTED='SELECTED';"?>>Dense Fog Advisory FG.Y</option>
   	<option value="FW.W" <?php if ($mode == "FW.W") echo "SELECTED='SELECTED';"?>>Red Flag Warning FW.W</option>
   	<option value="HW.W" <?php if ($mode == "HW.W") echo "SELECTED='SELECTED';"?>>High Wind Warning HW.W</option>
   	</select></td>
@@ -56,11 +57,22 @@ $significance = $ar[1];
   	<td><input type="text" size="10" name="eid" value="<?php echo $eid; ?>" /></td>
   	<td><?php echo wfoSelect($wfo); ?></td>
     <td><?php echo yearSelect(2005, $year); ?></td>
-    <td><input type="text" size="10" name="relh" value="<?php echo $rhthres; ?>" /></td>
-    <td><input type="text" size="10" name="sknt" value="<?php echo $skntthres; ?>" /></td>
     </tr>
     </table>
-  <input type="submit" value="Generate Report"/>
+  
+  <table cellpadding='3' cellspacing='0' border='1'>
+  <tr>	
+  	<th>Relative Humidity Threshold (%):</th>
+  	<th>Wind Speed Threshold (kts):</th>
+  	<th>Visibility Threshold (mile):</th>
+    </tr>
+    <tr>
+    <td><input type="text" size="10" name="relh" value="<?php echo $rhthres; ?>" /></td>
+    <td><input type="text" size="10" name="sknt" value="<?php echo $skntthres; ?>" /></td>
+    <td><input type="text" size="10" name="vsby" value="<?php echo $vsbythres; ?>" /></td>
+    </tr>
+    </table>
+    <input type="submit" value="Generate Report"/>
   </form>
   
   <?php
@@ -105,6 +117,14 @@ $significance = $ar[1];
   	}
   	return sprintf("<span style='color:#f00;'>%s/%sKT</span>", $sknt, $gust);
   }
+  function c3($vsby){
+	if ($vsby == null) return "MMSM";
+  	global $vsbythres;
+  	if ($vsby <= $vsbythres){
+		return sprintf("<span style='color:#f00;'>%.1fSM</span>", $vsby);
+  	}
+  	return sprintf("%.1fSM", $vsby);		   
+  }
   
   for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
   		$ar = explode(",", $row["a"]);
@@ -130,7 +150,7 @@ $significance = $ar[1];
   		echo str_replace(",'ZZZZZ'", "", $stations);
   		echo "<br />";
   		$rs2 = pg_query($asos, "SELECT station, valid, to_char(valid, 'ddHH24MI') as z,
-  				tmpf, dwpf, sknt, gust from alldata
+  				tmpf, dwpf, sknt, gust, vsby from alldata
   		WHERE valid BETWEEN '$issue' and '$expire' and station in $stations
   				ORDER by station, valid ASC");
   		echo "<table cellpadding='3' cellspacing='0' border='1'>";
@@ -148,10 +168,10 @@ $significance = $ar[1];
   				$stfound += 1;
   				echo sprintf("<u>UGC Code: %s</u><br/>", $station2ugc[$row2["station"]]);
   			}
-  			echo sprintf("%s %sZ %.0f/%.0f %s %s<br>", $row2["station"], 
+  			echo sprintf("%s %sZ %.0f/%.0f %s %s %s<br>", $row2["station"], 
   					$row2["z"],
   				$row2["tmpf"], $row2["dwpf"], c1(relh($row2["tmpf"], $row2["dwpf"])),
-  					c2($row2["sknt"], $row2["gust"]));
+  					c3($row2["vsby"]), c2($row2["sknt"], $row2["gust"]));
   		}
   		echo "</td></tr></table>";
   		
