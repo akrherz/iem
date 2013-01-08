@@ -6,7 +6,7 @@ import datetime
 import psycopg2
 import psycopg2.extras
 MESOSITE = iemdb.connect("mesosite", bypass=True)
-subscribers = ["iem","coop","hads","asos"]
+subscribers = ["iem","coop","hads","asos", "postgis"]
 
 def sync(dbname):
     """
