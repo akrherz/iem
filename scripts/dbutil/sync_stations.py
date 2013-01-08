@@ -42,7 +42,8 @@ def sync(dbname):
        sigstage_low = %(sigstage_low)s, sigstage_action = %(sigstage_action)s,
        sigstage_bankfull = %(sigstage_bankfull)s, sigstage_flood = %(sigstage_flood)s,
        sigstage_moderate = %(sigstage_moderate)s, sigstage_major = %(sigstage_major)s,
-       sigstage_record = %(sigstage_record)s
+       sigstage_record = %(sigstage_record)s, ugc_county = %(ugc_county)s,
+       ugc_zone = %(ugc_zone)s
        WHERE iemid = %(iemid)s""",
        row)
     print 'Database: %s Modified %s rows TS: %s IEMID: %s' % (dbname, 
