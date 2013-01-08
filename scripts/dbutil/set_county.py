@@ -35,6 +35,8 @@ pcursor.execute("""
 for row in pcursor:
     sid = row[0]
     cnty = row[1]
+    if cnty is None:
+        continue
     iemid = row[2]
     print 'Assinging IEMID: %s SID: %s to ugc_county: %s' % (iemid, sid, cnty)
     mcursor2.execute("""UPDATE stations SET ugc_county = %s WHERE iemid = %s""", 
@@ -50,6 +52,8 @@ pcursor.execute("""
 for row in pcursor:
     sid = row[0]
     cnty = row[1]
+    if cnty is None:
+        continue
     iemid = row[2]
     print 'Assinging IEMID: %s SID: %s to ugc_zone: %s' % (iemid, sid, cnty)
     mcursor2.execute("""UPDATE stations SET ugc_zone = %s WHERE iemid = %s""", 
