@@ -36,6 +36,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
   $data[ strtotime(substr($row["valid"],0,16)) ][ $row["key"] ] = $row["value"];  
 }
 $mycols = array_keys($cols);
+sort($mycols);
 
 $TITLE = "IEM | SHEF Data by Site by Day";
 $THISPAGE="networks-dcp";
@@ -82,6 +83,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 </form>
 
 <form method="GET" name="olselect">
+<input type="hidden" name="network" value="<?php echo $network; ?>" />
 <table><tr><th>Station:</th><th>Year</th><th>Month</th><th>Day</th><th></th></tr>
 <tr>
 <td><?php echo networkSelect(iemdb("mesosite"),$network, $station); ?>
@@ -114,8 +116,13 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 </tr>
 <?php
 $times = array_keys($data);
+$colorme = True;
 while(list($k,$ts) = each($times)){
-  echo sprintf("<tr><td>%s</td><td><a href='cat.phtml?year=%s&month=%s&day=%s&hour=%s&minute=%s'>%s</a></td>", $station, date("Y", $ts), date("m", $ts), date("d", $ts), date("H", $ts), date("i", $ts), date("Y-m-d H:i", $ts) );
+  echo sprintf("<tr%s><td>%s</td><td><a href='cat.phtml?year=%s&month=%s&day=%s&hour=%s&minute=%s'>%s</a></td>", 
+	($colorme)? " style='background: #eee;'": "", $station, 
+	date("Y", $ts), date("m", $ts), date("d", $ts), date("H", $ts), 
+	date("i", $ts), date("Y-m-d H:i", $ts) );
+  $colorme = !$colorme;
   reset($mycols);
   while(list($k,$v) = each($mycols)){
     echo sprintf("<td>%s</td>", @$data[$ts][$v]);
