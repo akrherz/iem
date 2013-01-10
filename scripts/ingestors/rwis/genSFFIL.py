@@ -9,7 +9,6 @@ IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor()
 
 def f(v):
-    print v, v is None
     if v is None:
         return '-9999'
     return v
