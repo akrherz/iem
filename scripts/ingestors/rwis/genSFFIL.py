@@ -1,40 +1,50 @@
 """
- 11 Nov 2003	Augh, this never worked for the beginning!
+    Dump RWIS surface data to an intermediate file that GEMPAK can use
 """
-
+import pytz
 import access
 import iemdb
-import mx.DateTime
+import datetime
 IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor()
 
+def f(v):
+    print v, v is None
+    if v is None:
+        return '-9999'
+    return v
 
 def Main():
-  ian = access.get_network("IA_RWIS", IEM)
+    ian = access.get_network("IA_RWIS", IEM)
 
-  out = open("/tmp/rwis_surface.list", "w")
-  out.write(""" PARM = TCS0;TCS1;TCS2;TCS3;SUBC
+    out = open("/tmp/rwis_surface.list", "w")
+    out.write(""" PARM = TCS0;TCS1;TCS2;TCS3;SUBC
 
     STN    YYMMDD/HHMM      TCS0     TCS1     TCS2     TCS3     SUBC
 """)
 
-  thres = mx.DateTime.now() + mx.DateTime.RelativeDateTime(hours=-1)
-  for id in ian.keys():
-    if ian[id].data["valid"] > thres:
-      m = ian[id].data["valid"].minute
-      ian[id].data['ts'] = mx.DateTime.strptime(ian[id].data['valid'].strftime("%Y%m%d%H%M"), "%Y%m%d%H%M")
-      if (m > 45):
-        ts = ian[id].data["ts"] + mx.DateTime.RelativeDateTime(hours=+1, minute=0)
-      elif (m > 25):
-        ts = ian[id].data["ts"] + mx.DateTime.RelativeDateTime(minute=40)
-      elif (m >  5):
-        ts = ian[id].data["ts"] + mx.DateTime.RelativeDateTime(minute=20)
-      else:
-        ts = ian[id].data["ts"] + mx.DateTime.RelativeDateTime(minute=0)
-      out.write("%10s %16s %8s %8s %8s %8s %8s\n" % (
-            id, ts.gmtime().strftime("%y%m%d/%H%M"), ian[id].data["tsf0"], 
-           ian[id].data["tsf1"], ian[id].data["tsf2"], ian[id].data["tsf3"], 
-           ian[id].data["rwis_subf"] ) )
+    now = datetime.datetime.now()
+    now = now.replace(tzinfo=pytz.timezone("America/Chicago"))
+    thres = now - datetime.timedelta(hours=1)
+    for sid in ian.keys():
+        if ian[sid].data["valid"] < thres:
+            continue
+        m = ian[sid].data["valid"].minute
+        if m > 45:
+            ts = ian[sid].data["valid"] + datetime.timedelta(hours=+1)
+            ts = ts.replace(minute=0)
+        elif m > 25:
+            ts = ian[sid].data["valid"].replace(minute=40)
+        elif m >  5:
+            ts = ian[sid].data["valid"].replace(minute=20)
+        else:
+            ts = ian[sid].data["valid"].replace(minute=0)
+        out.write("%10s %16s %8s %8s %8s %8s %8s\n" % (
+            sid, ts.astimezone(pytz.timezone("UTC")).strftime("%y%m%d/%H%M"), 
+            f(ian[sid].data.get("tsf0")), 
+           f(ian[sid].data.get("tsf1")), f(ian[sid].data.get("tsf2")), 
+           f(ian[sid].data.get("tsf3")), 
+           f(ian[sid].data.get("rwis_subf")) ) )
 
-  out.close()
+    out.close()
 Main()
