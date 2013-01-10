@@ -22,6 +22,9 @@ echo "Title: SPC Watch by County\n";
 
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 	$geom = $row["g"];
+	if ($geom == null){
+		continue;
+	}
 	$geom = str_replace("MULTIPOLYGON(((", "", $geom);
 	$geom = str_replace(")))", "", $geom);
 	$tokens = preg_split("/\)\),\(\(/", $geom);
