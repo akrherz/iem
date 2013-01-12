@@ -44,8 +44,12 @@
 			<th>Valid</th><th>Value</th></thead>";
  	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
  		$ts = strtotime($row["valid"]);
- 		echo sprintf("<tr><td>[%s] %s </td><td>[%s] %s</td><td>[%s] %s</td><td>%s</td><td>%s</td></tr>", 
- 				$row["physical_code"], $shefcodes[$row["physical_code"]],
+ 		$depth = "";
+ 		if ($row["depth"] > 0){
+ 			$depth = sprintf("%d inch", $row["depth"]);
+ 		}
+ 		echo sprintf("<tr><td>[%s] %s %s</td><td>[%s] %s</td><td>[%s] %s</td><td>%s</td><td>%s</td></tr>", 
+ 				$row["physical_code"],$shefcodes[$row["physical_code"]], $depth,
  				$row["duration"], $durationcodes[ $row["duration"] ], 
  				$row["extremum"] == 'Z'? '-': $row['extremum'] , $extremumcodes[ $row["extremum"] ],
  				date('d M Y g:i A', $ts), $row["value"]);
