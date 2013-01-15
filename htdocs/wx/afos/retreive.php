@@ -61,7 +61,7 @@ if (pg_numrows($rs) == 0){
 
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 { 
-  echo "<pre>". $row["data"] ."</pre><hr />";
+  echo "<pre>". preg_replace("/\r\r\n/", "\n", $row["data"]) ."</pre><hr />";
 }
 
 ?>
