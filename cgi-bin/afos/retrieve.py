@@ -64,8 +64,9 @@ def Main():
     sql = "SELECT raw from current_log WHERE raw != '' and station = '%s' ORDER by valid DESC LIMIT %s" % (myPils[0][3:].strip(), LIMIT)
     rs = access.query( sql ).dictresult()
     for i in range(len(rs)):
-      print rs[i]['raw']
-      print "\003\001\n"
+      print "\001"
+      print rs[i]['raw'].replace("\r\r\n","\n")
+      print "\n\003"
          
 
 Main()
