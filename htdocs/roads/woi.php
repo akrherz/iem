@@ -18,15 +18,15 @@ $map = ms_newMapObj('roads.map');
 //$map->setProjection("init=epsg:4326");
 $map->setProjection("init=epsg:26915");
 $map->selectOutputFormat("png24");
-$map->setSize(864, 486);
+$map->setSize(1280, 720);
 if ($metroview)
 {
-  $map->setextent(320000, 4540000, 594000, 4710000);
+	$s = 0;
+  $map->setextent(307383 -$s, 4543637 -$s, 606903 +$s, 4712117 +$s);
   //$map->setextent(-95.3,  40.71, -92.3,  43.11);
 } else
 {
-
-  $map->setextent(-60000, 4385000, 980000, 4970000);
+  $map->setextent(23650, 4414952, 919650, 4918952);
   //$map->setextent(-107.9, 40, -88.9,  44.9);
 }
 
@@ -41,7 +41,7 @@ if ($metroview)
 {
   $background = $map->getlayerbyname("woi-iowa");
 }
-$background->set("status", MS_ON);
+$background->set("status", MS_OFF);
 $background->draw($img);
 
 /*
