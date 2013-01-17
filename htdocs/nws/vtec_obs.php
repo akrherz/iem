@@ -52,6 +52,7 @@ $significance = $ar[1];
   	<option value="FG.Y" <?php if ($mode == "FG.Y") echo "SELECTED='SELECTED';"?>>Dense Fog Advisory FG.Y</option>
   	<option value="FW.W" <?php if ($mode == "FW.W") echo "SELECTED='SELECTED';"?>>Red Flag Warning FW.W</option>
   	<option value="HW.W" <?php if ($mode == "HW.W") echo "SELECTED='SELECTED';"?>>High Wind Warning HW.W</option>
+  	<option value="WI.Y" <?php if ($mode == "WI.Y") echo "SELECTED='SELECTED';"?>>Wind Advisory WI.Y</option>
   	</select></td>
   	<td><input type="text" size="10" name="sid" value="<?php echo $sid; ?>" /></td>
   	<td><input type="text" size="10" name="eid" value="<?php echo $eid; ?>" /></td>
