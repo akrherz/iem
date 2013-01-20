@@ -15,9 +15,13 @@ $valid = substr($row["valid"],0,16);
 
 
 $map = ms_newMapObj('roads.map');
+$map->imagecolor->setRGB(-1,-1,-1);
+
 //$map->setProjection("init=epsg:4326");
 $map->setProjection("init=epsg:26915");
 $map->selectOutputFormat("png24");
+$map->outputformat->set('imagemode',MS_IMAGEMODE_RGBA);
+$map->outputformat->set('transparent',MS_ON);
 $map->setSize(1280, 720);
 if ($metroview)
 {

@@ -28,6 +28,9 @@ if ($eightbit)
 {
  $map->selectOutputFormat("png24");
 }
+$map->imagecolor->setRGB(140, 144, 90);
+$map->outputformat->set('imagemode',MS_IMAGEMODE_RGB);
+$map->outputformat->set('transparent',MS_OFF);
 
 $map->setextent(200000,4440000,710000,4940000);
 if ($metroview)
