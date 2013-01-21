@@ -5,7 +5,6 @@ Check to see if there are webcams offline, generate emails and such
 import os
 import mx.DateTime
 import stat
-import access
 import tracker
 track = tracker.Engine()
 import iemdb
@@ -18,22 +17,23 @@ now = mx.DateTime.now()
 # Determine sites offline
 offline = {}
 icursor.execute("""SELECT station, valid from offline 
-    WHERE network IN ('KCCI','KELO','KCRG')""")
+    WHERE network IN ('KCCI','KELO','KCRG', 'KCWI')""")
 for row in icursor:
     offline[ row[0] ] = row[1]
 
 # Now lets check files
-dir = "/home/ldm/data/camera/stills"
-files = os.listdir(dir)
+mydir = "/home/ldm/data/camera/stills"
+files = os.listdir(mydir)
 
 mcursor.execute("""
-    SELECT id, network, name from webcams where network in ('KELO','KCCI','KCRG')
+    SELECT id, network, name from webcams where 
+    network in ('KELO','KCCI','KCRG', 'KCWI')
     and online ORDER by id ASC
 """)
 
 emails = 0
 for row in mcursor:
-    fn = "%s/%s.jpg" % (dir, row[0])
+    fn = "%s/%s.jpg" % (mydir, row[0])
     if not os.path.isfile(fn):
         print 'Missing webcam file: %s' % (fn,)
         continue
