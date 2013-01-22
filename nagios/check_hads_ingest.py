@@ -4,14 +4,14 @@
 import os
 import sys
 import stat
-import iemdb
-HADS = iemdb.connect('iem', bypass=True)
-hcursor = HADS.cursor()
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+icursor = IEM.cursor()
 
 def check():
-    hcursor.execute("""SELECT count(*) from current_shef 
+    icursor.execute("""SELECT count(*) from current_shef 
     WHERE valid > now() - '1 hour'::interval""")
-    row = hcursor.fetchone()
+    row = icursor.fetchone()
 
     return row[0]
     
