@@ -2,11 +2,11 @@
  Generate maps of Average Temperatures
 """
 
-import sys, os
+import sys
 import iemplot
 
-import mx.DateTime
-now = mx.DateTime.now()
+import datetime
+now = datetime.datetime.now()
 
 import network
 nt = network.Table("IACLIMATE")
@@ -19,23 +19,25 @@ ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 def runYear(year):
     sql = """SELECT station, avg(high) as avg_high, avg(low) as avg_low,
-           avg( (high+low)/2 ) as avg_tmp
+           avg( (high+low)/2 ) as avg_tmp, max(day)
            from alldata_ia WHERE year = %s and station != 'IA0000' and 
-           high is not Null and low is not Null GROUP by station""" % (year,)
+           high is not Null and low is not Null and substr(station,3,1) != 'C'
+           GROUP by station""" % (year,)
     ccursor.execute( sql )
-  # Plot Average Highs
+    # Plot Average Highs
     lats = []
     lons = []
     vals = []
     labels = []
     for row in ccursor:
-        id = row['station'].upper()
-        if not nt.sts.has_key(id):
+        sid = row['station'].upper()
+        if not nt.sts.has_key(sid):
             continue
-        labels.append( id[2:] )
-        lats.append( nt.sts[id]['lat'] )
-        lons.append( nt.sts[id]['lon'] )
+        labels.append( sid[2:] )
+        lats.append( nt.sts[sid]['lat'] )
+        lons.append( nt.sts[sid]['lon'] )
         vals.append( row['avg_high'] )
+        maxday   = row['max']
 
     #---------- Plot the points
 
@@ -43,12 +45,13 @@ def runYear(year):
      'wkColorMap': 'gsltod',
      '_format'   : '%.1f',
      '_labels'   : labels,
-     '_valid'    : '1 Jan - %s' % (now.strftime("%d %B"),),
+     '_valid'    : '1 January - %s' % (maxday.strftime("%d %B"),),
      '_title'    : "Average Daily High Temperature [F] (%s)" % (year,),
      }
 
     tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
-    pqstr = "plot m %s/summary/avg_high.png" % (year,)
+    pqstr = "plot m %s bogus %s/summary/avg_high.png png" % (
+                                        now.strftime("%Y%m%d%H%M"), year,)
     iemplot.postprocess(tmpfp, pqstr)
     iemplot.simple_valplot(lons, lats, vals, cfg)
 
@@ -60,12 +63,12 @@ def runYear(year):
     labels = []
     ccursor.execute( sql )
     for row in ccursor:
-        id = row['station'].upper()
-        if not nt.sts.has_key(id):
+        sid = row['station'].upper()
+        if not nt.sts.has_key(sid):
             continue
-        labels.append( id[2:] )
-        lats.append( nt.sts[id]['lat'] )
-        lons.append( nt.sts[id]['lon'] )
+        labels.append( sid[2:] )
+        lats.append( nt.sts[sid]['lat'] )
+        lons.append( nt.sts[sid]['lon'] )
         vals.append( row['avg_low'] )
 
     #---------- Plot the points
@@ -74,12 +77,13 @@ def runYear(year):
      'wkColorMap': 'gsltod',
      '_format'   : '%.1f',
      '_labels'   : labels,
-     '_valid'    : '1 Jan - %s' % (now.strftime("%d %B"),),
+     '_valid'    : '1 January - %s' % (maxday.strftime("%d %B"),),
      '_title'    : "Average Daily Low Temperature [F] (%s)" % (year,),
      }
 
     tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
-    pqstr = "plot m %s/summary/avg_low.png" % (year,)
+    pqstr = "plot m %s bogus %s/summary/avg_low.png png" % (
+                                        now.strftime("%Y%m%d%H%M"), year,)
     iemplot.postprocess(tmpfp, pqstr)
     iemplot.simple_valplot(lons, lats, vals, cfg)
 
@@ -90,12 +94,12 @@ def runYear(year):
     labels = []
     ccursor.execute( sql )
     for row in ccursor:
-        id = row['station'].upper()
-        if not nt.sts.has_key(id):
+        sid = row['station'].upper()
+        if not nt.sts.has_key(sid):
             continue
-        labels.append( id[2:] )
-        lats.append( nt.sts[id]['lat'] )
-        lons.append( nt.sts[id]['lon'] )
+        labels.append( sid[2:] )
+        lats.append( nt.sts[sid]['lat'] )
+        lons.append( nt.sts[sid]['lon'] )
         vals.append( row['avg_tmp'] )
 
     #---------- Plot the points
@@ -104,12 +108,13 @@ def runYear(year):
      'wkColorMap': 'gsltod',
      '_format'   : '%.1f',
      '_labels'   : labels,
-     '_valid'    : '1 Jan - %s' % (now.strftime("%d %B"),),
+     '_valid'    : '1 January - %s' % (now.strftime("%d %B"),),
      '_title'    : "Average Daily Temperature (mean high+low) [F] (%s)" % (year,),
   }
 
     tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
-    pqstr = "plot m %s/summary/avg_temp.png" % (year,)
+    pqstr = "plot m %s bogus %s/summary/avg_temp.png png" % (
+                                        now.strftime("%Y%m%d%H%M"), year,)
     iemplot.postprocess(tmpfp, pqstr)
     iemplot.simple_valplot(lons, lats, vals, cfg)
 
