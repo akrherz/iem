@@ -3,10 +3,9 @@ Generate a map of Yearly Precipitation
 """
 
 import sys
-import os
 import iemplot
-import mx.DateTime
-now = mx.DateTime.now()
+import datetime
+now = datetime.datetime.now()
 
 import network
 nt = network.Table("IACLIMATE")
@@ -18,10 +17,11 @@ COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 def runYear(year):
-  # Grab the data
-    sql = """SELECT station, sum(precip) as total
+    # Grab the data
+    sql = """SELECT station, sum(precip) as total, max(day)
            from alldata_ia WHERE year = %s and
-           station != 'IA0000' GROUP by station""" % (year,)
+           station != 'IA0000' and
+           substr(station,3,1) != 'C' GROUP by station""" % (year,)
 
     lats = []
     lons = []
@@ -29,15 +29,14 @@ def runYear(year):
     labels = []
     ccursor.execute( sql )
     for row in ccursor:
-        if row['total'] < 10: # Arb Threshold
+        sid = row['station']
+        if not nt.sts.has_key(sid):
             continue
-        id = row['station'].upper()
-        if not nt.sts.has_key(id):
-            continue
-        labels.append( id[2:] )
-        lats.append( nt.sts[id]['lat'] )
-        lons.append( nt.sts[id]['lon'] )
+        labels.append( sid[2:] )
+        lats.append( nt.sts[sid]['lat'] )
+        lons.append( nt.sts[sid]['lon'] )
         vals.append( row['total'] )
+        maxday = row['max']
 
     #---------- Plot the points
 
@@ -45,12 +44,13 @@ def runYear(year):
      'wkColorMap': 'gsltod',
      '_format'   : '%.2f',
      '_labels'   : labels,
-     '_valid'    : '1 Jan - %s' % (now.strftime("%d %B"),),
+     '_valid'    : '1 January - %s' % (maxday.strftime("%d %B"),),
      '_title'    : "Total Precipitation [inch] (%s)" % (year,),
      }
 
     tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
-    pqstr = "plot m %s/summary/total_precip.png" % (year,)
+    pqstr = "plot m %s bogus %s/summary/total_precip.png png" % (
+                                        now.strftime("%Y%m%d%H%M"), year,)
     iemplot.postprocess(tmpfp, pqstr)
 
 
