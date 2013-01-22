@@ -2,40 +2,36 @@
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 23);
 $TITLE = "IEM | Past Features";
-$ts = isset($_GET["ts"]) ? $_GET["ts"] : time();
+$year = isset($_REQUEST["year"]) ? intval($_GET["year"]) : date("Y");
+$month = isset($_REQUEST["month"]) ? intval($_GET["month"]) : date("m");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/feature.php");
 $THISPAGE = "iem-feature";
 include("$rootpath/include/header.php"); ?>
 
-<div class="text">
-<br>List all <a href="titles.php">feature titles</a>.
+<h3>Past Features</h3>
+
+<p>This page lists out the IEM Daily Features for a month at a time. Features
+have been posted daily since February 2002. List all 
+<a href="titles.php">feature titles</a>.
 
 <?php 
+ $ts = mktime(0,0,0,$month,1,$year);
+ $prev = $ts - 15*86400;
+ $plink = sprintf("past.php?year=%s&month=%s", date("Y", $prev), date("m", $prev));
+ $next = $ts + 35*86400; 
+ $nlink = sprintf("past.php?year=%s&month=%s", date("Y", $next), date("m", $next));
+
+ $mstr = date("M Y", $ts);
  
-  if (strlen($ts) == 0) {
-    echo "<p>Below you will find past daily features that appeared on the IEM 
-      homepage.  The pictures are orientied to the left of the story, 
-      so references to <i>above</i> are actually to the left :) </p>\n";
-    $ts = date("U");
-  }
-  $woy = date('W', $ts);
-  $yr  = date('Y', $ts);
-  if ($woy == 53){
-    $woy = 1;
-    $yr  = "$yr or extract(year from valid) = ". (intval($yr) + 1);
-  }
-
-  $firstday = date("d M Y", $ts);
-
-  $c = iemdb("mesosite");
+ $c = iemdb("mesosite");
   $q = "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
                 to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
 		to_char(valid, 'Dy Mon DD, YYYY') as calhead,
 		to_char(valid, 'D') as dow from feature
-		WHERE extract(week from valid) = ".$woy."
-                and extract(year from valid) = ".$yr."
-                ORDER by valid ASC LIMIT 7";
+		WHERE extract(year from valid) = $year
+                and extract(month from valid) = $month
+                ORDER by valid ASC";
   $rs = pg_exec($c, $q);
   pg_close($c);
 
@@ -43,9 +39,9 @@ include("$rootpath/include/header.php"); ?>
 
   echo "<div style=\"line-height: 20px; font-size: 14px; font-weight: bold; 
 	align: justify; margin: 4px; \" align=\"center\">
-	<a href=\"past.php?ts=". (intval($ts) - 7 * 86400) ."\"><img src=\"/icons/back.gif\" border=0>Previous Week</a> 
-	&nbsp; &nbsp; <font style=\"font-size: 16pt;\">Week of ". $firstday ."</font> &nbsp; &nbsp;
-	<a href=\"past.php?ts=". (intval($ts) + 7 * 86400) ."\"><img src=\"/icons/forward.gif\" border=0>Next Week</a>
+	<a href=\"$plink\"><img src=\"/icons/back.gif\" border=0>Previous Month</a> 
+	&nbsp; &nbsp; <font style=\"font-size: 16pt;\">Features for ". $mstr ."</font> &nbsp; &nbsp;
+	<a href=\"$nlink\"><img src=\"/icons/forward.gif\" border=0>Next Month</a>
        </div>\n";
   echo "<table><tr>\n";
 
@@ -72,19 +68,18 @@ include("$rootpath/include/header.php"); ?>
   echo "</tr></table>\n";
 
   if ($num == 0){
-    echo "<p>No entries found for this week\n";
+    echo "<p>No entries found for this month\n";
   }
 
-  echo "<div style=\"line-height: 20px; font-size: 14px; font-weight: bold; 
-        align: justify; margin: 4px; \" align=\"center\">
-        <a href=\"past.php?ts=". (intval($ts) - 86400 * 7) ."\"><img src=\"/icons/back.gif\" border=0>Previous Week</a>
-        &nbsp; &nbsp; <font style=\"font-size: 16pt;\">Week of ". $firstday ."</font> &nbsp; &nbsp;
-        <a href=\"past.php?ts=". (intval($ts) + 86400 * 7) ."\"><img src=\"/icons/forward.gif\" border=0>Next Week</a>
-       </div>\n";
-
+  echo "<div style=\"line-height: 20px; font-size: 14px; font-weight: bold;
+  align: justify; margin: 4px; \" align=\"center\">
+  <a href=\"$plink\"><img src=\"/icons/back.gif\" border=0>Previous Month</a>
+  &nbsp; &nbsp; <font style=\"font-size: 16pt;\">Features for ". $mstr ."</font> &nbsp; &nbsp;
+  <a href=\"$nlink\"><img src=\"/icons/forward.gif\" border=0>Next Month</a>
+  </div>\n";
+  
+  
 ?>
-
-<BR><BR></div>
 
 <?php include("$rootpath/include/footer.php"); ?>
 
