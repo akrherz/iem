@@ -1,2 +1,3 @@
 RewriteEngine On
 RewriteRule ^([^\.]+)\.html index.php?vtec=$1 [L]
+RewriteRule ^#(.*)$ /vtec/#$1 [R=301,NE]
