@@ -13,6 +13,10 @@ IMAGECOLOR 0 0 255
 #TRANSPARENT ON
 #INTERLACE off
 
+#CONFIG "MS_ERRORFILE" "/tmp/ms_error.txt"
+#CONFIG "CPL_DEBUG" "ON"
+#DEBUG 5
+
 PROJECTION
   "init=epsg:4326"
 END
@@ -179,16 +183,22 @@ LAYER
   NAME site
   STATUS ON
   CLASS
+   LABEL
+   END
    SYMBOL 'x'
    COLOR 0 0 0
    SIZE 8
   END
   CLASS
+   LABEL
+   END
    SYMBOL 'circle'
    COLOR 255 255 255
    SIZE 8
   END
   CLASS
+   LABEL
+   END
    SYMBOL 'triangle'
    COLOR 250 250 0
    SIZE 8
@@ -219,6 +229,7 @@ LAYER
     PROCESSING "CLOSE_CONNECTION=NORMAL"
   #OFFSITE 0 0 0
 END
+
 LAYER
   NAME goes_east1V
   STATUS OFF
@@ -907,7 +918,7 @@ LAYER
     STYLE
       COLOR -1 -1 -1
       OUTLINECOLOR 255 0 0
-      SIZE    1
+      SIZE    2
       SYMBOL  'circle'
     END
   END
@@ -1028,8 +1039,15 @@ LAYER
   TYPE POINT
   STATUS default
   TRANSFORM FALSE
+  FEATURE
+    WKT "POINT(100 100)"
+  END
   CLASS
-    SYMBOL 'iem_logo'
+    LABEL
+    END
+  	STYLE
+	    SYMBOL 'iem_logo'
+    END
   END
 END
 
@@ -1144,6 +1162,8 @@ LAYER
   TRANSFORM FALSE
   TRANSPARENCY 10
   CLASS
+    LABEL
+    END
     SYMBOL 'n0r-ramp'
     #SIZE 40
         COLOR 0 0 0
@@ -1157,6 +1177,8 @@ LAYER
   TRANSFORM FALSE
   TRANSPARENCY 10
   CLASS
+    LABEL
+    END
     SYMBOL 'n0q-ramp'
     #SIZE 40
         COLOR 0 0 0

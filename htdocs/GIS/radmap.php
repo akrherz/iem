@@ -4,6 +4,7 @@
  * all sorts of data with tons of CGI vars, yippeee
  * 
  */
+
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 include("$rootpath/include/vtec.php");
@@ -178,7 +179,7 @@ if ($sector == "wfo"){
 	$rs = pg_execute($postgis, "WFOBOUNDS", Array($sector_wfo));
 	if (pg_numrows($rs) > 0){
 		$row = pg_fetch_assoc($rs,0);
-		$buffer = 0.75;
+		$buffer = 0.25;
 		$sectors["wfo"] = Array("epsg" => 4326, 
 			"ext" => Array($row["xmin"] - $buffer, $row["ymin"] - $buffer, 
 						$row["xmax"] + $buffer, $row["ymax"] + $buffer));
@@ -297,13 +298,28 @@ $places = $map->getlayerbyname("places2010");
 $places->set("status", in_array("places", $layers) );
 $places->draw($img);
 
+$states = $map->getlayerbyname("states");
+$states->set("status", MS_ON);
+$states->draw($img);
+
+/* All SBWs for a WFO */
+$sbwh = $map->getlayerbyname("allsbw");
+$sbwh->set("status", in_array("allsbw", $layers) );
+$sbwh->set("connection", $_DATABASES["postgis"]);
+//$sbwh->set("maxscale", 10000000);
+$sql = sprintf("geom from (select phenomena, geom, oid from sbw
+    WHERE significance = 'W' and status = 'NEW' and wfo = 'EAX' and
+    phenomena in ('TO') 
+	and issue > '2007-10-01') as foo 
+    using unique oid using SRID=4326");
+$sbwh->set("data", $sql);
+$sbwh->draw($img);
+
 $counties = $map->getlayerbyname("uscounties");
 $counties->set("status", in_array("uscounties", $layers) );
 $counties->draw($img);
 
-$states = $map->getlayerbyname("states");
-$states->set("status", MS_ON);
-$states->draw($img);
+
 
 $cwas = $map->getlayerbyname("cwas");
 $cwas->set("status", in_array("cwas", $layers) );
@@ -426,6 +442,7 @@ $sbwh->set("data", $sql);
 $sbwh->draw($img);
 
 
+
 /* Storm Based Warning */
 $ptext = "phenomena";
 if (in_array("sbw", $layers) && in_array("cbw", $layers))
@@ -543,7 +560,7 @@ if (isset($_REQUEST["tz"])) {
 }
 $d = strftime($tzformat ,  $ts); 
 if (isset($_GET["title"])){
-  $title = substr($_GET["title"],0,50);
+  $title = substr($_GET["title"],0,100);
 } else if ( isset($_GET["vtec"]) ){
   $title = "VTEC ID: ". $_GET["vtec"];
 } else if (in_array("nexrad", $layers)){
@@ -571,7 +588,7 @@ $point->draw($map, $tlayer, $img, 0, $title);
 
 $point = ms_newpointobj();
 $point->setXY(80, 29);
-$point->draw($map, $tlayer, $img, 1,"$d");
+//$point->draw($map, $tlayer, $img, 1,"$d");
 if ($plotmeta["subtitle"] != ""){
 	$point = ms_newpointobj();
 	$point->setXY(80, 46);
@@ -583,7 +600,7 @@ $map->drawLabelCache($img);
 $layer = $map->getLayerByName("logo");
 $point = ms_newpointobj();
 $point->setXY(40, 26);
-$point->draw($map, $layer, $img, 0, "");
+$point->draw($map, $layer, $img, 0, " ");
 
 if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers) ){
   $layer = $map->getLayerByName("n0r-ramp");
@@ -606,4 +623,7 @@ $map->drawLabelCache($img);
 
 header("Content-type: image/png");
 $img->saveImage('');
+
+$map->free();
+unset($map);
 ?>

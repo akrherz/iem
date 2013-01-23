@@ -83,6 +83,64 @@ LAYER
 END
 
 LAYER
+  CONNECTIONTYPE postgis
+  NAME allsbw
+  CONNECTION "dbname=postgis host=iemdb"
+  DATA "geom from (select phenomena, geom, random() as oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
+  STATUS OFF
+  TYPE POLYGON
+  METADATA
+    "wms_title" "Current Polygon Warnings"
+     "wms_srs" "EPSG:4269"  # Specify as Latlong?
+  END
+  TEMPLATE q_template.html
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM 'phenomena'
+  # Tornado
+  CLASS
+    EXPRESSION /TO/
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 0 0
+      SIZE    2
+      SYMBOL  'circle'
+    END
+  END
+  # SVR
+  CLASS
+    EXPRESSION /SV/
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 0
+      SIZE    1
+      SYMBOL  'circle'
+    END
+  END
+  # MA
+  CLASS
+    EXPRESSION /MA/
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 255
+      SIZE    1
+      SYMBOL  'circle'
+    END
+  END
+  CLASS
+    EXPRESSION /ZZ/
+    NAME "Storm Based Warning"
+    STYLE
+      COLOR -1 -1 -1 
+      OUTLINECOLOR 0 0 0
+      SIZE    1
+      SYMBOL  'circle'
+    END
+  END
+END
+
+LAYER
   NAME namerica
   STATUS OFF
   TYPE POLYGON
@@ -458,6 +516,8 @@ LAYER
   TRANSFORM FALSE
   TRANSPARENCY 10
   CLASS
+    LABEL
+    END
     SYMBOL 'n0r-ramp'
     #SIZE 40
         COLOR 0 0 0
@@ -471,6 +531,8 @@ LAYER
   TRANSFORM FALSE
   TRANSPARENCY 10
   CLASS
+    LABEL
+    END
     SYMBOL 'n0q-ramp'
     #SIZE 40
         COLOR 0 0 0
@@ -485,6 +547,8 @@ LAYER
   TRANSPARENCY 10
   CLASS
     SYMBOL 'iem_logo'
+    LABEL
+    END
     #SIZE 40
         COLOR 0 0 0
   END
