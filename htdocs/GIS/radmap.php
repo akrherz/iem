@@ -588,7 +588,7 @@ $point->draw($map, $tlayer, $img, 0, $title);
 
 $point = ms_newpointobj();
 $point->setXY(80, 29);
-//$point->draw($map, $tlayer, $img, 1,"$d");
+$point->draw($map, $tlayer, $img, 1,"$d");
 if ($plotmeta["subtitle"] != ""){
 	$point = ms_newpointobj();
 	$point->setXY(80, 46);
