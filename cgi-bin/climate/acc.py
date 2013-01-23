@@ -163,7 +163,7 @@ def process_cgi(form):
     
         yearlabel = startdt3.year
         if startdt3.year != enddt3.year:
-            yearlabel = "%s-%s" % (startdt2.year, enddt2.year)
+            yearlabel = "%s-%s" % (startdt3.year, enddt3.year)
         sz = len(dates)
         if len(gdd50) >= sz:
             ax[0].plot(dates, gdd50[:sz], label="%s" % (yearlabel,), color='g', lw=2)
