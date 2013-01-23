@@ -61,16 +61,17 @@ $datal->set("type", MS_LAYER_POINT);
 $datal->setProjection("init=epsg:4326");
 
 $datalc0 = ms_newClassObj($datal);
-$datalc0->label->color->setrgb(255,255,0);
-$datalc0->label->set("type", MS_TRUETYPE);
-$datalc0->label->set("font", "liberation");
-$datalc0->label->set("size", 12);
-$datalc0->label->set("force", MS_TRUE);
-$datalc0->label->set("partials", MS_TRUE);
-$datalc0->label->set("antialias", MS_TRUE);
-$datalc0->label->set("position", MS_UR);
-$datalc0->label->set("angle", 0);
-$datalc0->label->set("wrap", 0x57);
+$datalc0->addLabel(new labelObj());
+$datalc0->getLabel(0)->color->setrgb(255,255,0);
+$datalc0->getLabel(0)->set("type", MS_TRUETYPE);
+$datalc0->getLabel(0)->set("font", "liberation");
+$datalc0->getLabel(0)->set("size", 12);
+$datalc0->getLabel(0)->set("force", MS_TRUE);
+$datalc0->getLabel(0)->set("partials", MS_TRUE);
+$datalc0->getLabel(0)->set("antialias", MS_TRUE);
+$datalc0->getLabel(0)->set("position", MS_UR);
+$datalc0->getLabel(0)->set("angle", 0);
+$datalc0->getLabel(0)->set("wrap", 0x57);
 
 $datalc0s0 = ms_newStyleObj($datalc0);
 $datalc0s0->color->setrgb(0,0,0);
