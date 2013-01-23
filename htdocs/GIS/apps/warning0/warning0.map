@@ -5,14 +5,14 @@ MAP
 NAME warning0
 STATUS ON
 SIZE 640 480
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONTSET "/mesonet/www/apps/iemwebsite/data/gis/fonts.list"
 #EXTENT -2223813 -1746393 2207341 1701506
 EXTENT -2110437.902319 -2251067.927455 2548326.285559 1239063.127472
 UNITS METERS
 #EXTENT -126 26 -66 50
 #UNITS DD
 #SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/symbols/stations.sym"
 IMAGECOLOR 0 0 250
 IMAGETYPE PNG
 TRANSPARENT off
@@ -86,7 +86,7 @@ LAYER
   NAME lakes
   STATUS DEFAULT
   TYPE POLYGON
-  DATA /mesonet/data/gis/static/shape/2163/usa/major_lakes.shp
+  DATA /mesonet/data/gis/static/shape/2163/us/major_lakes.shp
   PROJECTION
    "init=epsg:2163"
   END
@@ -156,7 +156,7 @@ LAYER
   NAME states
   STATUS DEFAULT
   TYPE LINE
-  DATA /mesonet/data/gis/static/shape/2163/usa/states.shp
+  DATA /mesonet/data/gis/static/shape/2163/us/states.shp
   PROJECTION
    "init=epsg:2163"
   END
@@ -172,7 +172,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
   DATA "geom from (select report, phenomena as wtype, geom, oid from warnings WHERE significance = 'W' and gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE LINE
@@ -220,7 +220,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_c
-  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
   DATA "geom from (select report, phenomena as wtype, geom, oid from warnings WHERE significance = 'W' and gtype = 'C' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by type ASC) as foo"
   STATUS ON
   STATUS ON
@@ -268,7 +268,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
-  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
   DATA "geom from (select report, phenomena, geom, oid from warnings WHERE significance = 'W' and gtype = 'P' and expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE LINE
@@ -293,7 +293,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_p
-  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb"
   DATA "geom from (select report, type, geom, oid from warnings WHERE gtype = 'P' and significance = 'W' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE POLYGON
@@ -317,7 +317,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
- CONNECTION "user=akrherz dbname=postgis host=iemdb"
+ CONNECTION "user=nobody dbname=postgis host=iemdb"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
@@ -343,7 +343,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches_all
- CONNECTION "user=akrherz dbname=postgis host=iemdb"
+ CONNECTION "user=nobody dbname=postgis host=iemdb"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
@@ -370,7 +370,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches_today
- CONNECTION "user=akrherz dbname=postgis host=iemdb"
+ CONNECTION "user=nobody dbname=postgis host=iemdb"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
