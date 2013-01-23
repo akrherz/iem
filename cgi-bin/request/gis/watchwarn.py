@@ -104,7 +104,8 @@ table = "warnings"
 if sTS.year == eTS.year:
     table = "warnings_%s" % (sTS.year,)
 
-sql = """SELECT *, astext(ST_Simplify(geom,0.0001)) as tgeom,
+sql = """SELECT ST_Simplify(geom,0.0001), phenomena, gtype, significance,
+    wfo, eventid, status, ugc,
     area( transform(geom,2163) ) / 1000000.0 as area2d,
     to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
     to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire
