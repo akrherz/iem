@@ -178,7 +178,8 @@ $cl->set("name", "ccc");
 //$cl->set("color", $green);
 //$cl->set("backgroundcolor", $green);
 
-$lbl = $cl->label;
+$cl->addLabel(new labelObj());
+$lbl = $cl->getLabel(0);
 $lbl->set("type", MS_TRUETYPE);
 $lbl->set("antialias", MS_OFF);
 $lbl->set("font", "liberation");
@@ -211,7 +212,7 @@ foreach($sts as $key => $value){
     $pt = ms_newPointObj();
     $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
     $rotate =  0 - intval($bzz->db["drct"]);
-    $bclass->label->set("angle", doubleval($rotate));
+    $bclass->getLabel(0)->set("angle", doubleval($rotate));
     $pt->draw($map, $barbs, $img, 0, skntChar($bzz->db["sknt"]) );
 
   }
@@ -220,7 +221,7 @@ foreach($sts as $key => $value){
     $pt = ms_newPointObj();
     $pt->setXY($bzz->db["x"], $bzz->db["y"], 0);
     $rotate =  0 - intval($bzz->db["drct"]);
-    $bclass->label->set("angle", doubleval($rotate));
+    $bclass->getLabel(0)->set("angle", doubleval($rotate));
     $pt->draw($map, $barbs, $img, 0, skntChar($bzz->db["sknt"]) );
 
                                                                                 
