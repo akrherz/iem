@@ -1,25 +1,31 @@
-#!/mesonet/python/bin/python
-# Dump LSRs to a shapefile
+#!/usr/bin/python
+"""
+ Dump LSRs to a shapefile
+"""
+import datetime 
+import zipfile
+import os
+import sys
+import shutil
+import cgi
+import cgitb
+cgitb.enable()
+from osgeo import ogr
 
-import shapelib, dbflib, mx.DateTime, zipfile, os, sys, shutil, cgi
-from pyIEM import wellknowntext, iemdb
-i = iemdb.iemdb()
-mydb = i["postgis"]
-#import pg
-#mydb = pg.connect('postgis', 'mesonet-db1.agron.iastate.edu',user='nobody')
+source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody")
 
-mydb.query("SET TIME ZONE 'GMT'")
 # Get CGI vars
 form = cgi.FormContent()
 
 if form.has_key('year'):
-  year1 = int(form["year"][0])
-  year2 = int(form["year"][0])
+    year1 = int(form["year"][0])
+    year2 = int(form["year"][0])
 else:
-  year1 = int(form["year1"][0])
-  year2 = int(form["year2"][0])
+    year1 = int(form["year1"][0])
+    year2 = int(form["year2"][0])
 month1 = int(form["month1"][0])
-if (not form.has_key("month2")):  sys.exit()
+if (not form.has_key("month2")):
+    sys.exit()
 month2 = int(form["month2"][0])
 day1 = int(form["day1"][0])
 day2 = int(form["day2"][0])
@@ -30,66 +36,89 @@ minute2 = int(form["minute2"][0])
 
 wfoLimiter = ""
 if form.has_key('wfo[]'):
-  aWFO = form['wfo[]']
-  aWFO.append('XXX') # Hack to make next section work
-  wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
+    aWFO = form['wfo[]']
+    aWFO.append('XXX') # Hack to make next section work
+    wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
 
-sTS = mx.DateTime.DateTime(year1, month1, day1, hour1, minute1)
-eTS = mx.DateTime.DateTime(year2, month2, day2, hour2, minute2)
+sTS = datetime.datetime(year1, month1, day1, hour1, minute1)
+eTS = datetime.datetime(year2, month2, day2, hour2, minute2)
 
 os.chdir("/tmp/")
 fp = "lsr_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M") )
+for suffix in ['shp', 'shx', 'dbf']:
+    if os.path.isfile("%s.%s" % (fp, suffix)):
+        os.remove("%s.%s" % (fp, suffix))
 
-shp = shapelib.create(fp, shapelib.SHPT_POINT)
+out_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
+out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
+out_layer = out_ds.CreateLayer("point", None, ogr.wkbPoint)
+fd = ogr.FieldDefn('VALID',ogr.OFTString)
+fd.SetWidth(12)
+out_layer.CreateField(fd)
 
-dbf = dbflib.create(fp)
-dbf.add_field("VALID", dbflib.FTString, 12, 0)
-dbf.add_field("MAG", dbflib.FTDouble, 10, 2)
-dbf.add_field("WFO", dbflib.FTString, 3, 0)
-dbf.add_field("TYPECODE", dbflib.FTString, 1, 0)
-dbf.add_field("TYPETEXT", dbflib.FTString, 40, 0)
-dbf.add_field("CITY", dbflib.FTString, 40, 0)
-dbf.add_field("COUNTY", dbflib.FTString, 40, 0)
-dbf.add_field("SOURCE", dbflib.FTString, 40, 0)
-dbf.add_field("REMARK", dbflib.FTString, 400, 0)
+fd = ogr.FieldDefn('MAG',ogr.OFTReal)
+fd.SetPrecision(2)
+out_layer.CreateField(fd)
 
+fd = ogr.FieldDefn('WFO',ogr.OFTString)
+fd.SetWidth(3)
+out_layer.CreateField(fd)
 
-sql = "SELECT distinct *, astext(geom) as tgeom from lsrs WHERE \
-	valid >= '%s' and valid < '%s' %s \
-	ORDER by valid ASC" % (sTS.strftime("%Y-%m-%d %H:%M"), 
+fd = ogr.FieldDefn('TYPECODE',ogr.OFTString)
+fd.SetWidth(1)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('TYPETEXT',ogr.OFTString)
+fd.SetWidth(40)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('CITY',ogr.OFTString)
+fd.SetWidth(40)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('COUNTY',ogr.OFTString)
+fd.SetWidth(40)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('SOURCE',ogr.OFTString)
+fd.SetWidth(40)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('REMARK',ogr.OFTString)
+fd.SetWidth(100)
+out_layer.CreateField(fd)
+
+sql = """SELECT distinct *, 
+    to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime 
+    from lsrs WHERE 
+	valid >= '%s+00' and valid < '%s+00' %s 
+	ORDER by valid ASC""" % (sTS.strftime("%Y-%m-%d %H:%M"), 
     eTS.strftime("%Y-%m-%d %H:%M"), wfoLimiter )
-rs = mydb.query(sql).dictresult()
 
-cnt = 0
-#print 'Content-type: text/plain\n\n'
-for i in range(len(rs)):
-	s = rs[i]["tgeom"]
-	if (s == None or s == ""):
-		continue
-	f = wellknowntext.convert_well_known_text(s)
+data = source.ExecuteSQL(sql)
 
-	issue = mx.DateTime.strptime(rs[i]["valid"][:16], "%Y-%m-%d %H:%M")
-	d = {}
-	d["VALID"] = issue.strftime("%Y%m%d%H%M")
-	d["MAG"] = float(rs[i]['magnitude'] or 0)
-	d["TYPECODE"] = rs[i]['type']
-	d["WFO"] = rs[i]['wfo']
-	d["TYPETEXT"] = rs[i]['typetext']
-	d["CITY"] = rs[i]['city']
-	d["COUNTY"] = rs[i]['county']
-	d["SOURCE"] = rs[i]['source']
-	d["REMARK"] = rs[i]['remark'][:400]
-	#print d
-    
-	obj = shapelib.SHPObject(shapelib.SHPT_POINT, 1, [[f]] )
-	shp.write_object(-1, obj)
-	dbf.write_record(cnt, d)
-	del(obj)
-	cnt += 1
+while True:
+    feat = data.GetNextFeature()
+    if not feat:
+        break
 
+    featDef = ogr.Feature(out_layer.GetLayerDefn())
+    featDef.SetGeometry(feat.GetGeometryRef())
+    featDef.SetField('VALID', feat.GetField("utctime"))
+    featDef.SetField('MAG', feat.GetField("magnitude"))
+    featDef.SetField('TYPECODE', feat.GetField("type"))
+    featDef.SetField('WFO', feat.GetField("wfo"))
+    featDef.SetField('CITY', feat.GetField("city"))
+    featDef.SetField('TYPETEXT', feat.GetField("typetext"))
+    featDef.SetField('COUNTY', feat.GetField("county"))
+    featDef.SetField('SOURCE', feat.GetField("source"))
+    featDef.SetField('REMARK', feat.GetField("remark"))
 
-del(shp)
-del(dbf)
+    out_layer.CreateFeature(featDef)
+    feat.Destroy()
+
+source.Destroy()
+out_ds.Destroy()
 
 # Create zip file, send it back to the clients
 shutil.copyfile("/mesonet/data/gis/meta/4326.prj", fp+".prj")
