@@ -99,25 +99,29 @@ $cp->set("type", MS_SHAPE_POINT);
 $cp->set("status", MS_ON);
 $cp->set("labelcache", MS_OFF);
 $cl = ms_newClassObj($cp);
-$cl->label->set("type", MS_TRUETYPE);
-$cl->label->set("size", 10);
-$cl->label->set("position", MS_CR);
-$cl->label->set("font", "liberation-bold");
-$cl->label->set("force", MS_ON);
-$cl->label->set("offsetx", 6);
-$cl->label->set("offsety", 0);
-$cl->label->outlinecolor->setRGB(255, 255, 255);
-$cl->label->color->setRGB(0, 0, 0);
+$lbl = new labelObj();
+$cl->addLabel($lbl);
+$cl->getLabel(0)->set("type", MS_TRUETYPE);
+$cl->getLabel(0)->set("size", 10);
+$cl->getLabel(0)->set("position", MS_CR);
+$cl->getLabel(0)->set("font", "liberation-bold");
+$cl->getLabel(0)->set("force", MS_ON);
+$cl->getLabel(0)->set("offsetx", 6);
+$cl->getLabel(0)->set("offsety", 0);
+$cl->getLabel(0)->outlinecolor->setRGB(255, 255, 255);
+$cl->getLabel(0)->color->setRGB(0, 0, 0);
 
 $cl2 = ms_newClassObj($cp);
-$cl2->label->set("type", MS_TRUETYPE);
-$cl2->label->set("size", "10");
-$cl2->label->set("font", "esri34");
-$cl2->label->set("position", MS_CC);
-$cl2->label->set("force", MS_ON);
-$cl2->label->set("partials", MS_ON);
-$cl2->label->outlinecolor->setRGB(0, 0, 0);
-$cl2->label->color->setRGB(255, 255, 255);
+$lbl = new labelObj();
+$cl2->addLabel($lbl);
+$cl2->getLabel(0)->set("type", MS_TRUETYPE);
+$cl2->getLabel(0)->set("size", "10");
+$cl2->getLabel(0)->set("font", "esri34");
+$cl2->getLabel(0)->set("position", MS_CC);
+$cl2->getLabel(0)->set("force", MS_ON);
+$cl2->getLabel(0)->set("partials", MS_ON);
+$cl2->getLabel(0)->outlinecolor->setRGB(0, 0, 0);
+$cl2->getLabel(0)->color->setRGB(255, 255, 255);
 
 //$sl = ms_newStyleObj($cl);
 //$sl->set("symbolname", "arrow");
@@ -151,7 +155,7 @@ while (list($key, $drct) = each($cdrct))
    {
      $pt = ms_newPointObj();
      $pt->setXY($lon, $lat, 0);
-     $cl2->label->set("angle",  (0 - $cdrct[$key]) + 90 );
+     $cl2->getLabel(0)->set("angle",  (0 - $cdrct[$key]) + 90 );
      $pt->draw($map, $cp, $img, 1, 'a' );
    }
 }
