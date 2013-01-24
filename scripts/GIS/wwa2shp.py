@@ -1,96 +1,111 @@
 """ 
 Something to dump current warnings to a shapefile
 """
-import shapelib
-import dbflib
-import mx.DateTime
+from osgeo import ogr
 import zipfile
 import os
-import sys
+import datetime
 import shutil
-import wellknowntext
-import iemdb
 import subprocess
-import psycopg2.extras
-POSTGIS = iemdb.connect('postgis', bypass=True)
-if POSTGIS is None: 
-	sys.exit(0)
-pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
-pcursor.execute("SET TIME ZONE 'GMT'")
-# Don't print out annonying errors about ST_IsValid failures
-pcursor.execute("set client_min_messages = ERROR")
+
+now = datetime.datetime.now() + datetime.timedelta(minutes=1)
+table = "warnings_%s" % (now.year, )
 
 os.chdir("/tmp")
+fp = "current_ww"
+for suffix in ['shp', 'shx', 'dbf']:
+	if os.path.isfile("%s.%s" % (fp, suffix)):
+		os.remove("%s.%s" % (fp, suffix))
 
-# We set one minute into the future, so to get expiring warnings
-# out of the shapefile
-eTS = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(minutes=+1)
+source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody tables=%s" % (
+																table,))
 
-shp = shapelib.create("current_ww", shapelib.SHPT_POLYGON)
+out_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
+out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
+out_layer = out_ds.CreateLayer("polygon", None, ogr.wkbPolygon)
 
-dbf = dbflib.create("current_ww")
-dbf.add_field("ISSUED", dbflib.FTString, 12, 0)
-dbf.add_field("EXPIRED", dbflib.FTString, 12, 0)
-dbf.add_field("UPDATED", dbflib.FTString, 12, 0)
-dbf.add_field("TYPE", dbflib.FTString, 2, 0)
-dbf.add_field("GTYPE", dbflib.FTString, 1, 0)
-dbf.add_field("SIG", dbflib.FTString, 1, 0)
-dbf.add_field("WFO", dbflib.FTString, 3, 0)
-dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
-dbf.add_field("STATUS", dbflib.FTString, 3, 0)
-dbf.add_field("NWS_UGC", dbflib.FTString, 6, 0)
+fd = ogr.FieldDefn('ISSUED',ogr.OFTString)
+fd.SetWidth(12)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('EXPIRED',ogr.OFTString)
+fd.SetWidth(12)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('UPDATED',ogr.OFTString)
+fd.SetWidth(12)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('TYPE',ogr.OFTString)
+fd.SetWidth(2)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('GTYPE',ogr.OFTString)
+fd.SetWidth(1)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('SIG',ogr.OFTString)
+fd.SetWidth(1)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('WFO',ogr.OFTString)
+fd.SetWidth(3)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('ETN',ogr.OFTInteger)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('STATUS',ogr.OFTString)
+fd.SetWidth(3)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('NWS_UGC',ogr.OFTString)
+fd.SetWidth(6)
+out_layer.CreateField(fd)
 
 
-sql = """SELECT *, astext(ST_Simplify(geom,0.001)) as tgeom from warnings_%s 
+#pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
+#pcursor.execute("SET TIME ZONE 'GMT'")
+# Don't print out annonying errors about ST_IsValid failures
+#pcursor.execute("set client_min_messages = ERROR")
+
+
+sql = """SELECT gtype, significance, wfo,
+	status, eventid, ugc, phenomena,
+	to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utcexpire,
+	to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utcissue,
+	to_char(updated at time zone 'UTC', 'YYYYMMDDHH24MI') as utcupdated
+	from %s 
 	WHERE expire > '%s' and ((gtype = 'P' and ST_IsValid(geom)) or gtype = 'C') 
-	ORDER by type ASC""" % (eTS.year, eTS.strftime("%Y-%m-%d %H:%M"),)
-pcursor.execute(sql)
+	ORDER by type ASC""" % (table, now.strftime("%Y-%m-%d %H:%M"))
 
-cnt = 0
-for row in pcursor:
-	s = row["tgeom"]
-	if s is None or s == "":
-		continue
-	    #print rs[i]['phenomena'], rs[i]['eventid'], rs[i]['wfo'], rs[i]['ugc']
-	try:
-		f = wellknowntext.convert_well_known_text(s)
-	except:
-		continue
-	
-	g = row["gtype"]
-	t = row["phenomena"]
-	d = {}
-	d["ISSUED"] = row['issue'].strftime("%Y%m%d%H%M")
-	d["EXPIRED"] = row['expire'].strftime("%Y%m%d%H%M")
-	d["UPDATED"] = row['updated'].strftime("%Y%m%d%H%M")
-	d["TYPE"] = t
-	d["GTYPE"] = g
-	d["SIG"] = row["significance"]
-	d["WFO"] = row["wfo"]
-	d["STATUS"] = row["status"]
-	d["ETN"] = row["eventid"]
-	d["NWS_UGC"] = row["ugc"]
-	
-	obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
-	shp.write_object(-1, obj)
-	dbf.write_record(cnt, d)
-	del(obj)
-	cnt += 1
+data = source.ExecuteSQL(sql)
 
-if (cnt == 0):
-	obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, [[(0.1, 0.1), 
-									(0.2, 0.2), (0.3, 0.1), (0.1, 0.1)]])
-	d = {}
-	d["ISSUED"] = "200000000000"
-	d["EXPIRED"] = "200000000000"
-	d["UPDATED"] = "200000000000"
-	d["TYPE"] = "ZZ"
-	d["GTYPE"] = "Z"
-	shp.write_object(-1, obj)
-	dbf.write_record(0, d)
+while True:
+	feat = data.GetNextFeature()
+	if not feat:
+		break
 
-del(shp)
-del(dbf)
+	featDef = ogr.Feature(out_layer.GetLayerDefn())
+	featDef.SetGeometry(feat.GetGeometryRef())
+	featDef.SetField('GTYPE', feat.GetField("gtype"))
+	featDef.SetField('TYPE', feat.GetField("phenomena"))
+	featDef.SetField('ISSUED', feat.GetField("utcissue"))
+	featDef.SetField('EXPIRED', feat.GetField("utcexpire"))
+	featDef.SetField('UPDATED', feat.GetField("utcupdated"))
+	featDef.SetField('SIG', feat.GetField("significance"))
+	featDef.SetField('WFO', feat.GetField("wfo"))
+	featDef.SetField('STATUS', feat.GetField("status"))
+	featDef.SetField('ETN', feat.GetField("eventid"))
+	featDef.SetField('NWS_UGC', feat.GetField("ugc"))
+
+	out_layer.CreateFeature(featDef)
+	feat.Destroy()
+
+source.Destroy()
+out_ds.Destroy()
+
+
 z = zipfile.ZipFile("current_ww.zip", 'w', zipfile.ZIP_DEFLATED)
 z.write("current_ww.shp")
 shutil.copy('/mesonet/www/apps/iemwebsite/scripts/GIS/current_ww.shp.xml', 'current_ww.shp.xml')
@@ -101,7 +116,8 @@ shutil.copy('/mesonet/data/gis/meta/4326.prj', 'current_ww.prj')
 z.write("current_ww.prj")
 z.close()
 
-cmd = "/home/ldm/bin/pqinsert -p \"zip c %s gis/shape/4326/us/current_ww.zip bogus zip\" current_ww.zip" % (eTS.strftime("%Y%m%d%H%M"),)
+cmd = "/home/ldm/bin/pqinsert -p \"zip c %s gis/shape/4326/us/current_ww.zip bogus zip\" current_ww.zip" % (
+										now.strftime("%Y%m%d%H%M"),)
 subprocess.call(cmd, shell=True)
 for suffix in ['shp', 'shp.xml', 'shx', 'dbf', 'prj', 'zip']:
 	os.remove('current_ww.%s' % (suffix,))
