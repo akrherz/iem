@@ -17,7 +17,7 @@ for suffix in ['shp', 'shx', 'dbf']:
 	if os.path.isfile("%s.%s" % (fp, suffix)):
 		os.remove("%s.%s" % (fp, suffix))
 
-source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody tables=%s" % (
+source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody tables=%s(geom)" % (
 																table,))
 
 out_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
@@ -70,7 +70,7 @@ out_layer.CreateField(fd)
 #pcursor.execute("set client_min_messages = ERROR")
 
 
-sql = """SELECT gtype, significance, wfo,
+sql = """SELECT geom, gtype, significance, wfo,
 	status, eventid, ugc, phenomena,
 	to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utcexpire,
 	to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utcissue,
@@ -85,9 +85,11 @@ while True:
 	feat = data.GetNextFeature()
 	if not feat:
 		break
+	geom = feat.GetGeometryRef()
+	geom = geom.Simplify(0.0001)
 
 	featDef = ogr.Feature(out_layer.GetLayerDefn())
-	featDef.SetGeometry(feat.GetGeometryRef())
+	featDef.SetGeometry( geom )
 	featDef.SetField('GTYPE', feat.GetField("gtype"))
 	featDef.SetField('TYPE', feat.GetField("phenomena"))
 	featDef.SetField('ISSUED', feat.GetField("utcissue"))
