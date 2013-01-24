@@ -1,4 +1,4 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/env python
 
 # =======================================================================
 #
@@ -45,8 +45,8 @@ import cgi
 from cgi import parse_qs
 import os, sys, re, time, struct
 import StringIO
-from elementtree import ElementTree
-from elementtree.ElementTree import Element
+from xml.etree import ElementTree
+from xml.etree.ElementTree import Element
 from mapscript import *
 
 # Constants

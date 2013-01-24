@@ -1,94 +1,104 @@
-#!/mesonet/python/bin/python
-# Something to dump current warnings to a shapefile
-# 28 Aug 2004 port to iem40
+#!/usr/bin/env python
 
-import shapelib, dbflib, mx.DateTime, zipfile, os, sys, shutil, cgi
-from pyIEM import wellknowntext, iemdb
-
-i = iemdb.iemdb()
-mydb = i["postgis"]
-
-mydb.query("SET TIME ZONE 'GMT'")
+import zipfile
+import os
+import sys
+import shutil
+import datetime
+import cgi
+from osgeo import ogr
 
 # Get CGI vars
 form = cgi.FormContent()
 if form.has_key("year"):
-  year = int(form["year"][0])
-  month = int(form["month"][0])
-  day = int(form["day"][0])
-  hour = int(form["hour"][0])
-  minute = int(form["minute"][0])
-  ts = mx.DateTime.DateTime(year, month, day, hour, minute)
-  fp = "watch_by_county_%s" % (ts.strftime("%Y%m%d%H%M"),)
+    year = int(form["year"][0])
+    month = int(form["month"][0])
+    day = int(form["day"][0])
+    hour = int(form["hour"][0])
+    minute = int(form["minute"][0])
+    ts = datetime.datetime(year, month, day, hour, minute)
+    fp = "watch_by_county_%s" % (ts.strftime("%Y%m%d%H%M"),)
 else:
-  ts = mx.DateTime.gmt()
-  fp = "watch_by_county"
+    ts = datetime.datetime.utcnow()
+    fp = "watch_by_county"
 
 if form.has_key("etn"):
-  etnLimiter = "and eventid = %s" % ( int(form["etn"][0]), )
-  fp = "watch_by_county_%s_%s" % (ts.strftime("%Y%m%d%H%M"), 
+    etnLimiter = "and eventid = %s" % ( int(form["etn"][0]), )
+    fp = "watch_by_county_%s_%s" % (ts.strftime("%Y%m%d%H%M"), 
                                   int(form["etn"][0]))
 else:
-  etnLimiter = ""
+    etnLimiter = ""
 
 os.chdir("/tmp/")
+for suffix in ['shp', 'shx', 'dbf']:
+    if os.path.isfile("%s.%s" % (fp, suffix)):
+        os.remove("%s.%s" % (fp, suffix))
 
-shp = shapelib.create(fp, shapelib.SHPT_POLYGON)
+table = "warnings_%s" % (ts.year, )
+source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody tables=%s(tgeom)" % (
+                                                                table,))
 
-dbf = dbflib.create(fp)
-dbf.add_field("ISSUED", dbflib.FTString, 12, 0)
-dbf.add_field("EXPIRED", dbflib.FTString, 12, 0)
-dbf.add_field("PHENOM", dbflib.FTString, 2, 0)
-dbf.add_field("SIG", dbflib.FTString, 1, 0)
-dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
+out_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
+out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
+out_layer = out_ds.CreateLayer("polygon", None, ogr.wkbPolygon)
 
-sql = """select phenomena, eventid, astext(multi(ST_union(geom))) as tgeom, 
-       min(issue) as issued, max(expire) as expired 
+fd = ogr.FieldDefn('ISSUED',ogr.OFTString)
+fd.SetWidth(12)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('EXPIRED',ogr.OFTString)
+fd.SetWidth(12)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('PHENOM',ogr.OFTString)
+fd.SetWidth(2)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('SIG',ogr.OFTString)
+fd.SetWidth(1)
+out_layer.CreateField(fd)
+
+fd = ogr.FieldDefn('ETN',ogr.OFTInteger)
+out_layer.CreateField(fd)
+
+sql = """select phenomena, eventid, multi(ST_union(geom)) as tgeom, 
+        max(to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI')) as utcexpire,
+        min(to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI')) as utcissue
        from warnings_%s WHERE significance = 'A' and 
        phenomena IN ('TO','SV') and issue > '%s'::timestamp -'3 days':: interval 
        and issue <= '%s' and 
        expire > '%s' %s GROUP by phenomena, eventid ORDER by phenomena ASC
-       """ % (ts.year, ts.strftime("%Y-%m-%d %H:%I"), 
-              ts.strftime("%Y-%m-%d %H:%I"),
-              ts.strftime("%Y-%m-%d %H:%I"), etnLimiter)
-rs = mydb.query(sql).dictresult()
+       """ % (ts.year, ts.strftime("%Y-%m-%d %H:%M+00"), 
+              ts.strftime("%Y-%m-%d %H:%M+00"),
+              ts.strftime("%Y-%m-%d %H:%M+00"), etnLimiter)
 
-cnt = 0
-for i in range(len(rs)):
-	s = rs[i]["tgeom"]
-	if (s == None or s == ""):
-		continue
-	f = wellknowntext.convert_well_known_text(s)
+#print 'Content-type: text/plain\n'
+#print sql
+#sys.exit()
+data = source.ExecuteSQL(sql)
 
-	t = rs[i]["phenomena"]
-	issue = mx.DateTime.strptime(rs[i]["issued"][:16], "%Y-%m-%d %H:%M")
-	expire = mx.DateTime.strptime(rs[i]["expired"][:16],"%Y-%m-%d %H:%M")
-	d = {}
-	d["ISSUED"] = issue.strftime("%Y%m%d%H%M")
-	d["EXPIRED"] = expire.strftime("%Y%m%d%H%M")
-	d["PHENOM"] = t
-	d["SIG"] = 'A'
-	d["ETN"] = rs[i]["eventid"]
+while True:
+    feat = data.GetNextFeature()
+    if not feat:
+        break
+    geom = feat.GetGeometryRef()
+    #geom = geom.Simplify(0.001)
+    
+    featDef = ogr.Feature(out_layer.GetLayerDefn())
+    featDef.SetGeometry( geom )
+    featDef.SetField('PHENOM', feat.GetField("phenomena"))
+    featDef.SetField('SIG', 'A')
+    featDef.SetField('ETN', feat.GetField("eventid"))
+    featDef.SetField('ISSUED', feat.GetField("utcissue"))
+    featDef.SetField('EXPIRED', feat.GetField("utcexpire"))
 
-	obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, f )
-	shp.write_object(-1, obj)
-	dbf.write_record(cnt, d)
-	del(obj)
-	cnt += 1
+    out_layer.CreateFeature(featDef)
+    feat.Destroy()
 
-if (cnt == 0):
-	obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1, [[(0.1, 0.1), (0.2, 0.2), (0.3, 0.1), (0.1, 0.1)]])
-	d = {}
-	d["PHENOM"] = "ZZ"
-	d["ISSUED"] = "200000000000"
-	d["EXPIRED"] = "200000000000"
+source.Destroy()
+out_ds.Destroy()
 
-	d["ETN"] = 0
-	shp.write_object(-1, obj)
-	dbf.write_record(0, d)
 
-del(shp)
-del(dbf)
 
 # Create zip file, send it back to the clients
 shutil.copyfile("/mesonet/data/gis/meta/4326.prj", fp+".prj")

@@ -1,14 +1,17 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/env python
 # This is my script that will get the data for the birthday and display it
 # Daryl Herzmann 11-8-99
 # 28 Aug 2002:	Coop DB is now on DB1
 # 13 Feb 2003:	Make this actually work with new Python
 
-import pg, cgi, mx.DateTime, re, sys
-from pyIEM import iemdb
-i = iemdb.iemdb()
-mydb = i['coop']
+import psycopg2
+import cgi
+import mx.DateTime
+import re
+import sys
 
+COOP = psycopg2.connect("dbname=coop user=nobody host=iemdb")
+ccursor = COOP.cursor()
 
 def mk_header():
 	print 'Content-type: text/html \n\n'
@@ -85,11 +88,13 @@ def weather_logic(month, high, low, rain, snow):
 
 def get_values(city, dateStr):
 	query_str = """SELECT high, low, precip, snow from alldata_ia 
-	WHERE station = '%s' and day = '%s' """ % (city, dateStr)
-	results =  mydb.query(query_str).getresult()
-	rain = round(float(results[0][2]), 2)
+	WHERE station = %s and day = %s """
+	args = (city, dateStr)
+	ccursor.execute(query_str, args)
+	row = ccursor.fetchone()
+	rain = round(float(row[2]), 2)
 	try:
-		snow = round(float(results[0][3]), 2)
+		snow = round(float(row[3]), 2)
 	except:
 		snow = 0	
 
@@ -98,7 +103,7 @@ def get_values(city, dateStr):
 	if snow < 0:
 		snow = 0
 		
-	return results[0][0], results[0][1], str(rain), str(snow)
+	return row[0], row[1], str(rain), str(snow)
 
 
 
@@ -156,7 +161,7 @@ def Main():
 		cityParts = re.split("__", form["city"][0])
 	except:
 		print "<P><P><B>Invalid Post:</B><BR>"
-		print "Please use this URL <a href='http://mesonet.agron.iastate.edu/onsite/birthday/'>http://mesonet.agron.iastate.edu/onsite/birthday/</a>"
+		print "Please use this URL <a href='/onsite/birthday/'>http://mesonet.agron.iastate.edu/onsite/birthday/</a>"
 		sys.exit(0)	
 
 	city = cityParts[0].upper()
