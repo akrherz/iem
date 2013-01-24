@@ -955,6 +955,8 @@ LAYER
   END
   LABELCACHE ON
   CLASS
+    LABEL
+    END
     STYLE
       SYMBOL 'logokey'
     END
@@ -973,6 +975,8 @@ LAYER
   #TRANSPARENCY 100
   LABELCACHE ON
   CLASS
+    LABEL
+    END
     STYLE
       SYMBOL 'iem_isp'
     END
@@ -991,6 +995,8 @@ LAYER
   #TRANSPARENCY 100
   LABELCACHE ON
   CLASS
+    LABEL
+    END
     STYLE
       SIZE 55
       SYMBOL 'ia511'
