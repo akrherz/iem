@@ -1,5 +1,5 @@
 <?php
-/* Plot watches since SPC's site sometimes gets slow..... */
+
 include("../../../../config/settings.inc.php");
 include("$rootpath/include/forms.php");
 include("$rootpath/include/database.inc.php");
@@ -84,8 +84,9 @@ if (date("Y", $ts) > 2005){
   $begints = $ts + ((60 - intval(date("i", $ts))) * 60);
   $endts = $expires - (intval(date("i", $expires)) * 60);
   while ($begints <= $endts){
-    echo sprintf("<a href=\"/cgi-bin/request/gis/watch_by_county.py?year=%s&month=%s&day=%s&hour=%s&minute=00&etn=%s\">%sZ</a>, ", date("Y", $begints), date("m", $begints), date("d", $begints), date("H", $begints) , $num,
-    date("H", $begints));
+    echo sprintf("<a href=\"/cgi-bin/request/gis/watch_by_county.py?year=%s&month=%s&day=%s&hour=%s&minute=00&etn=%s\">%sZ</a>, ", 
+		gmdate("Y", $begints), gmdate("m", $begints), gmdate("d", $begints), 
+		gmdate("H", $begints) , $num, gmdate("H", $begints));
     $begints += 3600;
   }
   echo "</td>";
