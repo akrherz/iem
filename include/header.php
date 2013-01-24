@@ -32,6 +32,13 @@ document.documentElement.firstChild.appendChild(ga);
 a:active {width: auto;}
 </style>
 <![endif]-->
+<meta name="twitter:image" content="http://mesonet.agron.iastate.edu/images/logo_small.png">
+<meta name="twitter:title" content="Iowa Environmental Mesonet">
+<meta name="twitter:description" content="Iowa Environmental Mesonet">
+<meta name="twitter:url" content="http://mesonet.agron.iastate.edu">
+<meta name="twitter:creator" content="@akrherz">
+<meta name="twitter:image:width" content="85">
+<meta name="twitter:image:height" content="65">
 </head>
 </head>
 <body <?php if (isset($BODYEXTRA)){ echo $BODYEXTRA;} ?> onLoad="P7_ExpMenu()">
