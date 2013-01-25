@@ -54,10 +54,11 @@ for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
 		echo "<br clear=\"both\" />";
 	}
 	if (strtotime($row["mytime"]) != $basets){ continue; }
+	$d = preg_replace("/\r\r\n/", "\n", $row["data"]);
 	if (preg_match('/xml/', $row["data"]) > 0){
-      echo "<pre>". $row["data"] ."</pre>\n";
+      echo "<pre>". $d ."</pre>\n";
 	} else {
-		echo "<pre>". htmlentities($row["data"]) ."</pre>\n";
+		echo "<pre>". htmlentities($d) ."</pre>\n";
 	}
 }
 
