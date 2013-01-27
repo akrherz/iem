@@ -5,7 +5,7 @@ import os
 import sys
 import mesonet
 import psycopg2
-IEM = psycopg2.connect("host=iemdb dbname=iem user=nobody")
+IEM = psycopg2.connect("host=iemdb dbname=iem user=mesonet")
 icursor = IEM.cursor()
 
 now = datetime.datetime.now()
