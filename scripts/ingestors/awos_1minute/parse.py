@@ -1,4 +1,4 @@
-#!/mesonet/python/bin/python
+
 # 10 Oct 2002:	Remove Time Contraint
 # 11 Jul 2003	Use Site python, connect to a DB that works
 
