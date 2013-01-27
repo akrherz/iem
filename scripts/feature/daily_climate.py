@@ -1,45 +1,52 @@
 import iemdb, numpy
+import datetime
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
-ccursor.execute("SELECT valid, max_high from climate where station = 'IA5230' and extract(month from valid) = 3 ORDER by valid ASC")
+ccursor.execute("""select o.station, o.day, o.high, c.high, o.low, c.low from 
+  alldata_ia o JOIN climate c ON 
+  (c.station = o.station and to_char(c.valid, 'mmdd') = o.sday) 
+  and o.station = 'IA0200' and o.day >= '2012-12-01' ORDER by day ASC""")
 
-records = [0]*31
-
+days = []
+days2 = []
+ohighs = []
+olows = []
+chighs = []
+clows = []
 for row in ccursor:
-  records[ row[0].day - 1] = row[1]
-
-records[10] = 64
-records = numpy.array(records)
-
-ccursor.execute("""SELECT day, high from alldata_ia where station = 'IA5230' and day > '2012-02-29' ORDER by day ASC""")
-obs = [0]*20
-for row in ccursor:
-  obs[ row[0].day - 1] = row[1]
-
-obs[14] = 74
-obs[15] = 79
-obs[16] = 77
-obs[17] = 75
-obs[18] = 72
-obs[19] = 68
+    days.append( datetime.datetime(row[1].year, row[1].month, row[1].day, 0) - datetime.timedelta(hours=6) )
+    days2.append( datetime.datetime(row[1].year, row[1].month, row[1].day, 0) )
+    ohighs.append( row[2] )
+    chighs.append( row[3] )
+    olows.append( row[4] )
+    clows.append( row[5] )
 
 import matplotlib.pyplot as plt
-fig = plt.figure()
-ax = fig.add_subplot(111)
+import matplotlib.patheffects as PathEffects
 
-bars = ax.bar( numpy.arange(1,21)-0.4, obs, width=0.8 , fc='skyblue', label='2012')
-ax.bar( numpy.arange(1,32)-0.5, [0.25]*31, bottom=records-0.25, width=1, fc='k', ec='k', label="Record")
-for i in range(-5,0):
-  bars[i].set_facecolor("teal")
+(fig, ax) = plt.subplots(1, 1)
 
-ax.set_xlim(9.5,20.5)
-ax.set_ylim(50,85)
+ax.bar(days, ohighs, width=0.25, fc='r', ec='r', label="High")
+ax.bar(days2, olows, width=0.25, fc='b', ec='b', label="Low")
+
+ax.plot(days, chighs, linewidth=4, zorder=2, color='k')
+ax.plot(days, chighs, linewidth=2, zorder=2, color='r')
+ax.plot(days, clows, linewidth=4, zorder=2, color='k')
+ax.plot(days, clows, linewidth=2, zorder=2, color='b')
+ax.set_xlim(datetime.datetime(2012,11,29,23),datetime.datetime(2013,1,7))
+#ax.set_ylim(50,85)
+ax.annotate("19-20 Dec Snowstorm", xy=(datetime.datetime(2012,12,20), 35), xycoords='data',
+                xytext=(10, 50), textcoords='offset points',
+                bbox=dict(boxstyle="round", fc="0.8"),
+                arrowprops=dict(arrowstyle="->",
+                connectionstyle="angle3,angleA=0,angleB=-90"))
+ 
 ax.grid(True)
-ax.set_title("10-20 March 2012 : Mason City High Temperatures")
-ax.set_xlabel("16-20 Forecasted")
-ax.set_ylabel("High Temperature $^{\circ}\mathrm{F}$")
-ax.legend(loc=2)
+ax.set_title("1 Dec 2012 - 7 Jan 2013 : Ames Daily Temperatures")
+#ax.set_xlabel("16-20 Forecasted")
+ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
+ax.legend()
 fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')

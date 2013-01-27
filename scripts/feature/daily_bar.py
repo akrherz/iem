@@ -2,73 +2,57 @@ import iemdb
 import numpy as np
 import datetime
 import mx.DateTime
-ASOS = iemdb.connect('asos', bypass=True)
+ASOS = iemdb.connect('iem', bypass=True)
 acursor = ASOS.cursor()
 
-cnts = np.zeros( (366,), 'f')
-tots = np.zeros( (366,), 'f')
-cnts30 = np.zeros( (366,), 'f')
-tots30 = np.zeros( (366,), 'f')
+days = []
+diff = []
+diff2 = []
 
-for yr in range(2000,2012):
-  acursor.execute("""
-  select extract(doy from daily.d) as dd, 
-  sum(case when (daily.max - minute.tmpf)  < 3 and (daily.max - daily.min) >= 15 then 1 else 0 end),
-  sum(case when (daily.max - minute.tmpf)  < 3 and (daily.max - daily.min) >= 30 then 1 else 0 end)
-   from (select date(valid) as d, tmpf from t%s_1minute 
-   where station = 'DSM' and tmpf between -50 and 120) as minute, 
-   (select date(valid) as d, max(tmpf), min(tmpf) from t%s_1minute where 
-   station = 'DSM' and tmpf between -50 and 120 GROUP by d) as daily 
-   WHERE daily.d = minute.d GROUP by dd ORDER by dd ASC;
-
-  """ % (yr,yr))
-  for row in acursor:
-      if row[1] > 0:
-          cnts[ int(row[0]) - 1] += 1
-          tots[ int(row[0]) - 1] += row[1]
-      if row[2] > 0:
-          cnts30[ int(row[0]) - 1] += 1
-          tots30[ int(row[0]) - 1] += row[2]
+acursor.execute("""
+ select dsm.day, dsm.min_tmpf - ikv.min_tmpf as d , dsm.max_tmpf - ikv.max_tmpf as d2 from 
+ (select day, min_tmpf, max_tmpf from summary s JOIN stations t on 
+ (t.iemid = s.iemid) WHERE t.id = 'DSM' and day >= '2010-12-14') 
+ as dsm JOIN (select day, min_tmpf, max_tmpf from summary s JOIN stations t 
+ on (t.iemid = s.iemid) WHERE t.id = 'IKV' and day >= '2010-12-14' and day < '2013-01-03'
+ and min_tmpf < 99) 
+ as ikv on (ikv.day = dsm.day)  ORDER by dsm.day ASC
+  """ )
+for row in acursor:
+    days.append( row[0] )
+    diff.append( row[1] )
+    diff2.append( row[2] )
 
 import matplotlib.pyplot as plt
-import mx.DateTime
-fig = plt.figure()
-ax = fig.add_subplot(111)
+(fig, ax) = plt.subplots(2, 1, sharex=True)
 
-ax.plot(np.arange(0,366) - 0.5, tots / cnts / 60.0)
-ax.plot(np.arange(0,366) - 0.5, tots30 / cnts30 / 60.0)
+bars = ax[0].bar(days, diff2, fc='b', ec='b')
+for i in range(len(bars)):
+    if diff2[i] > 0:
+        bars[i].set_facecolor('r')
+        bars[i].set_edgecolor('r')
 
-ax.grid(True)
-ax.set_ylabel("High Temperature $^{\circ}\mathrm{F}$")
-ax.set_title("Ames 95th Percentile High Temperature [1893-2011]")
-ax.set_xlim(-0.4,366)
-#ax.set_ylim(0,100)
-xticks = []
-xticklabels = []
-for i in range(0,366):
-  ts = mx.DateTime.DateTime(2000,1,1) + mx.DateTime.RelativeDateTime(days=i)
-  if ts.day == 1:
-    xticks.append(i)
-    xticklabels.append( ts.strftime("%b") )
-ax.set_xticks(xticks)
-ax.set_xticklabels(xticklabels)
+ax[0].text( days[10], 7, "Des Moines Warmer", color='r')
+ax[0].text( days[10], -7, "Ankeny Warmer", color='b')
 
-#ax.annotate("50s in December are like\n100 degrees in July", xy=(340, 50),  
-#  xycoords='data',
-#                xytext=(-210, -40), textcoords='offset points',
-#                bbox=dict(boxstyle="round", fc="0.8"),
-#                arrowprops=dict(arrowstyle="->",
-#                connectionstyle="angle3,angleA=-90,angleB=0"))
+bars = ax[1].bar(days, diff, fc='b', ec='b')
+for i in range(len(bars)):
+    if diff[i] > 0:
+        bars[i].set_facecolor('r')
+        bars[i].set_edgecolor('r')
 
-#ax.annotate("", xy=(200, 90),
-#  xycoords='data',
-#                xytext=(0, -80), textcoords='offset points',
-#                bbox=dict(boxstyle="round", fc="0.8"),
-#                arrowprops=dict(arrowstyle="->",
-#                connectionstyle="angle3,angleA=-90,angleB=0"))
+ax[1].text( days[10], 11, "Des Moines Warmer", color='r')
+ax[1].text( days[10], -7, "Ankeny Warmer", color='b')
 
 
+ax[0].grid(True)
+ax[0].set_ylabel("High Temperature $^{\circ}\mathrm{F}$")
+ax[0].set_title("Des Moines [DSM] - Ankeny [IKV] Daily Temperature Difference")
 
+ax[1].grid(True)
+ax[1].set_ylabel("Low Temperature $^{\circ}\mathrm{F}$")
+
+fig.tight_layout()
 fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')

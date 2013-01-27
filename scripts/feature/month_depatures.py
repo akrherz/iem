@@ -17,7 +17,7 @@ elnino = numpy.array(elnino)
 climate = []
 ccursor.execute("""
  SELECT avg(d), month from (SELECT year, month, avg((high+low)/2.0) as d from alldata_ia 
- where station = 'IA2203' and day < '2012-10-01'
+ where station = 'IA2203' and day < '2012-12-01'
  GROUP by year, month) as foo GROUP by month ORDER by month ASC
 """)
 for row in ccursor:
@@ -40,7 +40,7 @@ diff = numpy.array(diff)
 import matplotlib.pyplot as plt
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.set_title("Des Moines Monthly Average Temperature Departure")
+ax.set_title("Des Moines Monthly Average Temperature Departure\nEl Nino 3.4 Index")
 #"""
 xticks = []
 xticklabels = []
@@ -59,14 +59,18 @@ for bar in bars:
     bar.set_facecolor('b')
     bar.set_edgecolor('b')
 
-#ax.plot(numpy.arange(0, len(elnino)), elnino)
+ax2 = ax.twinx()
 
-ax.set_ylabel("Departure $^{\circ}\mathrm{F}$")
-ax.set_xlabel("* Oct 2012 total thru 30 Aug")
+ax2.plot(numpy.arange(0, len(elnino)), elnino, zorder=2, color='k')
+ax2.set_ylabel("El Nino 3.4 Index (line)")
+
+ax.set_ylabel("Departure $^{\circ}\mathrm{F}$ (bars)")
+ax.set_xlabel("* Thru 30 November")
 ax.grid(True)
 ax.set_xticks( xticks )
 ax.set_xticklabels( xticklabels )
 ax.set_xlim(-0.5, len(diff)+0.5)
+ax.set_ylim(-20,20)
 """
 import scipy.stats
 for i in range(0,12):

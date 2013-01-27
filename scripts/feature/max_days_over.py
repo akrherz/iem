@@ -41,7 +41,7 @@ for (yr, val, m) in zip(ys, numpy.arange(40,85), ms):
     ax.text(m+1, val, "%s - %s" % (m, yr), va='center', size=10, color=c)
 ax.set_ylim(39,85)
 ax.set_xlim(50,390)
-ax.set_xlabel("Days per Year, thru 24 Nov 2012")
+ax.set_xlabel("Days per Year, thru 12 Dec 2012")
 ax.set_ylabel("Daily High Temperature $^{\circ}\mathrm{F}$")
 ax.set_title("Des Moines Maximum Number of Days\nAt or Above given High Temperature (1880-2012)")
 ax.legend()
