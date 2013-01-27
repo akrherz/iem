@@ -9,7 +9,7 @@ mcursor = MOS.cursor()
 # GFS has 8 days worth of data
 # NAM has 3.5 days
 PLOTDAYS = 4
-sts = datetime.datetime(2012,6,14,1, tzinfo=iemtz.Central)
+sts = datetime.datetime(2013,1,10,0, tzinfo=iemtz.Central)
 #___________________________
 # No more custom
 MODELDAYS = PLOTDAYS+8
@@ -26,7 +26,7 @@ xticks = range(-1,PLOTDAYS*8,4)
 for i in range(-1,PLOTDAYS*8,4):
     ts = sts + datetime.timedelta(hours=((i+1)*3))
     fmt = "%-I %p"
-    if ts.hour == 1:
+    if ts.hour == 0:
         fmt += "\n%d %b"
     xlabels.append( ts.strftime(fmt))
 
@@ -39,7 +39,7 @@ for i in range(0,MODELDAYS*4,4):
 
 
 mcursor.execute("""
-select runtime, ftime, precip from model_gridpoint_2012 
+select runtime, ftime, precip from model_gridpoint_2013 
 where station = 'KDSM' and ftime > %s and ftime <= %s and model = 'GFS'
 """, (sts, ets))
 
@@ -69,6 +69,7 @@ qpf.mask = numpy.where( qpf < 0, True, False)
 #print qpf
 import matplotlib.pyplot as plt
 import matplotlib.mpl as mpl
+import matplotlib.dates as mdates
 
 bounds = [0.01,0.02,0.05,0.07,0.10,0.15,0.20,0.25,0.30,0.40,0.50]
 cmap = mpl.cm.jet

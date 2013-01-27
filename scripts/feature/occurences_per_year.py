@@ -7,28 +7,32 @@ import iemdb
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
-ccursor.execute("""
-  select station, max(year) from alldata_ia
-  where station != 'IA0000' and 
-  station != 'IA7979' and substr(station,2,1) != 'C'
-  and high > 99 GROUP by station
-""")
-
 lats = []
 lons = []
 vals = []
-for row in ccursor:
-    if not nt.sts.has_key(row[0]):
+
+for sid in nt.sts.keys():
+    if sid[2] == 'C' or sid == 'IA0000':
         continue
-    lats.append( nt.sts[row[0]]['lat'] )    
-    lons.append( nt.sts[row[0]]['lon'] )
-    vals.append( row[1] )
+    ccursor.execute("""
+  select year, avg((high+Low)/2.0) from alldata_ia where 
+  station = %s and sday < '1213' GROUP by year ORDER by avg DESC
+    """, (sid,))
+    rank = 1
+    for row in ccursor:
+        if row[0] == 2012:
+            break
+        rank += 1
+
+    lats.append( nt.sts[sid]['lat'] )    
+    lons.append( nt.sts[sid]['lon'] )
+    vals.append( rank )
     
 import iemplot
 
 cfg = {
-       '_title': 'Year of last 100 degree Temperature',
-       '_valid': 'based on long term Iowa Climate sites',
+       '_title': 'Year to Date Average Temperature Rank',
+       '_valid': '12 Dec 2012, #1 would be warmest on record',
        '_showvalues': True,
        '_format': '%.0f',
        'lbTitleString': 'Days/Yr'

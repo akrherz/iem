@@ -1,41 +1,34 @@
 
 import iemdb, math
 import numpy
-from matplotlib import pyplot as plt
 ASOS = iemdb.connect("coop", bypass=True)
 acursor = ASOS.cursor()
 
 
-
-def wchtidx(tmpf, sped):
-  if (sped < 3):
-    return tmpf
-  wci = math.pow(sped,0.16);
-
-  return 35.74 + .6215 * tmpf - 35.75 * wci + \
-     + .4275 * tmpf * wci
-
 acursor.execute("""
-SELECT day, high, snow
-from alldata where stationid = 'ia0200' 
-and year < 2011 ORDER by day ASC
+SELECT foo.day, foo.snow + foo3.s, foo2.high from
+ (SELECT day, high, snow
+ from alldata_ia where station = 'IA2203' 
+ and snow >= 0.1) as foo,
+ (SELECT day - '1 day'::interval as d, high, 
+ case when snow > 0 then snow else 0 end as s
+ from alldata_ia where station = 'IA2203') as foo3,
+  (SELECT day + '1 day'::interval as d, high
+ from alldata_ia where station = 'IA2203' and (snow is null or snow = 0)) as foo2
+ WHERE foo3.d = foo2.d and foo2.d = foo.day ORDER
+ by foo.day ASC
 """)
 snow = []
 highs = []
 takenext = False
 for row in acursor:
-    if takenext:
-        highs.append( float(row[1]) )
-    if row[2] > 0:
-        snow.append( float(row[2]) )
-        takenext = True
-    else:
-        takenext = False
+    highs.append( row[2] )
+    snow.append( row[1] )
+    print row
 
 snow = numpy.array( snow )
 highs = numpy.array( highs )
 
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 
@@ -74,22 +67,22 @@ axScatter.plot([0,20],[32,32], c='r')
 axScatter.set_xlim( (-0.5, 20) )
 axScatter.set_ylim( (-20., 80) )
 axScatter.grid(True)
-axScatter.set_ylabel("Next Day High Temperature $^{\circ}\mathrm{F}$")
-axScatter.set_xlabel("24 Hour Snowfall [in]")
+axScatter.set_ylabel("Previous Day High Temperature $^{\circ}\mathrm{F}$")
+axScatter.set_xlabel("48 Hour Snowfall [in]")
 
 
-xbins = np.arange(-0.5, 20, 1)
+xbins = numpy.arange(-0.5, 20, 1)
 axHistx.hist(snow, bins=xbins)
 #axHistx.set_xticks( (1,31,59,90,120,151,181,212,243,274,303,334) )
 axHistx.set_xlim( (-0.5, 20) )
-axHistx.set_title("Ames Snowfall & Next Day High Temperature")
+axHistx.set_title("Des Moines 48 HR Snowfall & Previous Day High Temperature")
 axHistx.grid(True)
 axHistx.set_ylabel("Events")
 #axHistx.set_yticks( numpy.arange(0,63*14,126))
 #axHistx.set_yticklabels( numpy.arange(0,14,2) )
 
 
-ybins = np.arange(-20,80, 5) 
+ybins = numpy.arange(-20,80, 5) 
 axHisty.hist(highs, bins=ybins, orientation='horizontal')
 axHisty.grid(True)
 axHisty.set_ylim( axScatter.get_ylim() )
