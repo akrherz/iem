@@ -12,6 +12,7 @@ python wwa2shp.py &
 cd ../ingestors
 
 python parse0002.py &
+python parse0007.py &
 
 python ctre_bridge.py &
 

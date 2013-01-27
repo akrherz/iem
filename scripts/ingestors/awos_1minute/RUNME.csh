@@ -50,4 +50,4 @@ psql -h iemdb awos << EOF
 EOF
 
 # Adjust summary data
-/mesonet/python/bin/python update_summary.py ${YEAR} ${MONTH}
+python update_summary.py ${YEAR} ${MONTH}
