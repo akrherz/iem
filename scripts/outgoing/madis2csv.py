@@ -7,6 +7,7 @@ import mx.DateTime
 import re
 import shutil
 import os
+import numpy.ma
 import sys
 import mesonet
 
@@ -22,7 +23,7 @@ format_tokens = fmt.split(",")
 gmt = mx.DateTime.gmt()
 fn = "/mesonet/data/madis/mesonet/%s.nc" % (gmt.strftime("%Y%m%d_%H00"),) 
 if not os.path.isfile(fn):
-  sys.exit()
+    sys.exit()
 nc = netCDF4.Dataset(fn, 'r')
 
 stations   = nc.variables["stationId"][:]
@@ -50,11 +51,12 @@ subs4      = nc.variables["roadSubsurfaceTemp4"][:]
 
 db = {}
 for recnum in range(len(stations)):
-  thisStation  = re.sub('\x00', '', stations[recnum].tostring())
-  if ( nc.variables["observationTime"][recnum] > 2141347600 ):
-    continue
-  ts = mx.DateTime.gmtime( nc.variables["observationTime"][recnum] )
-  db[thisStation] = {'STN': thisStation,
+    thisStation  = re.sub('\x00', '', stations[recnum].tostring())
+    ot = nc.variables["observationTime"][recnum]
+    if  numpy.ma.is_masked(ot) or ot > 2141347600:
+        continue
+    ts = mx.DateTime.gmtime( nc.variables["observationTime"][recnum] )
+    db[thisStation] = {'STN': thisStation,
     'DATE': ts.day,
     'TIME': ts.strftime("%H%M"),
     'T': sanityCheck(mesonet.k2f( tmpk[recnum] ),-100, 150, '%.0f', '') ,
@@ -72,23 +74,23 @@ for recnum in range(len(stations)):
     'PTMP2': sanityCheck(mesonet.k2f( ptmp2[recnum] ),-100, 150, '%.0f', '') ,
     'PTMP3': sanityCheck(mesonet.k2f( ptmp3[recnum] ),-100, 150, '%.0f', '') ,
     'PTMP4': sanityCheck(mesonet.k2f( ptmp4[recnum] ),-100, 150, '%.0f', '') ,
-  }
-  mylat = lat[recnum]
-  mylon = lon[recnum]
-  sname =  re.sub('\x00', '', snames[recnum].tostring())
-  thisProvider = re.sub('\x00', '', providers[recnum].tostring())
-  elev = ele[recnum]
-  #print "%s,%s,%s,%s,%s,%s" % (thisStation, sname, thisProvider, mylat, mylon, elev)
+    }
+    mylat = lat[recnum]
+    mylon = lon[recnum]
+    sname =  re.sub('\x00', '', snames[recnum].tostring())
+    thisProvider = re.sub('\x00', '', providers[recnum].tostring())
+    elev = ele[recnum]
+    #print "%s,%s,%s,%s,%s,%s" % (thisStation, sname, thisProvider, mylat, mylon, elev)
 
 out = open('madis.csv', 'w')
 out.write("%s\n" % (fmt,) )
 for stid in db.keys():
-  for key in format_tokens:
-    if (db[stid].has_key( key )):
-      out.write("%s," % (db[stid][key],)  )
-    else:
-      out.write(",")
-  out.write("\n")
+    for key in format_tokens:
+        if (db[stid].has_key( key )):
+            out.write("%s," % (db[stid][key],)  )
+        else:
+            out.write(",")
+    out.write("\n")
 
 nc.close()
 out.close()
