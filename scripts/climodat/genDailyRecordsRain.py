@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 # Daily Records Printout
 # Daryl Herzmann 3 Mar 2004
 
