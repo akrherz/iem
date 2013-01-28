@@ -23,6 +23,8 @@ class rnetwork:
         csvfile = open(AT_FILENAME)
         for row in csv.DictReader(csvfile):
             id = int( row["Rpuid"] )
+            if id > 62:
+                continue
             self.obs[ id ] = rwis.RWISOb()
             self.obs[ id ].add_atdata( row )
             self.obs[ id ].sname = st.sts[ self.obs[id].stationID ]['name']
