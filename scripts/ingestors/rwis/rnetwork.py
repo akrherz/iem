@@ -33,6 +33,8 @@ class rnetwork:
         csvfile = open(SF_FILENAME)
         for row in csv.DictReader(csvfile):
             id = int( row["Rpuid"] )
+            if id > 62:
+                continue
             if not self.obs.has_key( id ):
                 self.obs[ id ] = rwis.RWISOb()
             self.obs[ id ].add_sfdata( row )
