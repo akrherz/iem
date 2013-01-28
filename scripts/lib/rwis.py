@@ -20,7 +20,7 @@ RWISconvert = {
 '45' : 'RURI4', '46' : 'RWLI4', '47' : 'RWII4', '48' : 'RWBI4', '49' : 'RHAI4', 
 '50' : 'RSBI4', '51' : 'RIGI4', '52' : 'RCRI4', '53' : 'RCFI4', '54' : 'RSYI4',
 '55' : 'RBFI4', '56' : 'RDYI4', '57' : 'RTMI4', '58' : 'RPFI4', '59' : 'RCLI4',
-'60' : 'RDNI4', '61' : 'RQCI4', '62' : 'RSMI4',
+'60' : 'RDNI4', '61' : 'RQCI4', '62' : 'RSMI4', '63' : 'RRWI4',
 }
 
 RWISconvert2 = {
@@ -39,7 +39,7 @@ RWISconvert2 = {
 '48': 'XWBG',   '49': 'XHAN',   '50': 'XSBI',   '51': 'XIGI',
 '52': 'XCRI',   '53': 'XCFI',   '54': 'XSYI',   '55': 'XBFI',
 '56': 'XDYI',   '57': 'XTMI',   '58': 'XPFI',   '59': 'XCTI',
-'60': 'XDNI',   '61': 'XQCI',   '62': 'XSMI'
+'60': 'XDNI',   '61': 'XQCI',   '62': 'XSMI',   '63': 'XRWI',
 }
 
 
