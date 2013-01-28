@@ -75,8 +75,11 @@ class RWISOb(object):
   def add_sfdata(self, dict):
     sensorid = int(dict["Senid"])
     self.stationNum = int( dict["Rpuid"] )
-    self.stationID = RWISconvert["%02i" % (self.stationNum) ]
-    self.metarID = RWISconvert2["%02i" % (self.stationNum) ]
+    lkp = "%02i" % (self.stationNum,)
+    if not RWISconvert.has_key(lkp):
+        return
+    self.stationID = RWISconvert[lkp ]
+    self.metarID = RWISconvert2[lkp ]
     self.parseTime( dict["DtTm"] )
 
     ttempf = dict["sftemp"]
@@ -91,8 +94,11 @@ class RWISOb(object):
 
   def add_atdata(self, dict):
     self.stationNum = int( dict["Rpuid"] )
-    self.stationID = RWISconvert["%02i" % (self.stationNum) ]
-    self.metarID = RWISconvert2["%02i" % (self.stationNum) ]
+    lkp = "%02i" % (self.stationNum,)
+    if not RWISconvert.has_key(lkp):
+        return
+    self.stationID = RWISconvert[ lkp ]
+    self.metarID = RWISconvert2[ lkp ]
 
     self.parseTime( dict["DtTm"] )
     # Air Temperature
