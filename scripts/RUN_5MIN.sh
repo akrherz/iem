@@ -20,9 +20,6 @@ cd ../ingestors/rwis
 cd ../dotcams
 python process.py 
 
-#cd ../awos
-#/mesonet/python/bin/python parse_idot.py 
-
 cd ../../q2
 python make_raster.py 
 

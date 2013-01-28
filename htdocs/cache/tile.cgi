@@ -1,4 +1,4 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/env python
 import sys
 sys.path.append("/mesonet/www/apps/iemwebsite/include/python")
 from TileCache import Service, cgiHandler, cfgfiles

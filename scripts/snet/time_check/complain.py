@@ -1,4 +1,4 @@
-#!/mesonet/python/bin/python
+#!/usr/bin/env python
 
 import re
 from pyIEM import iemdb, mesonet
