@@ -134,7 +134,7 @@ foreach($data as $key => $value){
      $pt = ms_newPointObj();
      $pt->setXY($Scities[$key]["lon"], $Scities[$key]["lat"], 0);
      $rotate =  0 - intval($bzz["drct"]);
-     $bclass->label->set("angle", doubleval($rotate));
+     $bclass->getLabel(0)->set("angle", doubleval($rotate));
      $pt->draw($map, $barbs, $img, 0, skntChar($bzz["sknt"]) );
 
      $pt = ms_newPointObj();
