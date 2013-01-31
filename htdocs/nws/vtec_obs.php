@@ -7,6 +7,7 @@ $sid = isset($_REQUEST["sid"]) ? intval($_REQUEST["sid"]): 1;
 $eid = isset($_REQUEST["eid"]) ? intval($_REQUEST["eid"]): 999;
 $rhthres = isset($_REQUEST["relh"]) ? floatval($_REQUEST["relh"]): 25;
 $skntthres = isset($_REQUEST["sknt"]) ? floatval($_REQUEST["sknt"]): 25;
+$gustthres = isset($_REQUEST["gust"]) ? floatval($_REQUEST["gust"]): 25;
 $vsbythres = isset($_REQUEST["vsby"]) ? floatval($_REQUEST["vsby"]): 0.25;
 $mode = isset($_REQUEST["mode"])? substr($_REQUEST["mode"],0,4): 'FW.W';
 $ar = explode(".", $mode);
@@ -65,11 +66,13 @@ $significance = $ar[1];
   <tr>	
   	<th>Relative Humidity Threshold (%):</th>
   	<th>Wind Speed Threshold (kts):</th>
+  	<th>Wind Gust Threshold (kts):</th>
   	<th>Visibility Threshold (mile):</th>
     </tr>
     <tr>
     <td><input type="text" size="10" name="relh" value="<?php echo $rhthres; ?>" /></td>
     <td><input type="text" size="10" name="sknt" value="<?php echo $skntthres; ?>" /></td>
+    <td><input type="text" size="10" name="gust" value="<?php echo $gustthres; ?>" /></td>
     <td><input type="text" size="10" name="vsby" value="<?php echo $vsbythres; ?>" /></td>
     </tr>
     </table>
@@ -113,10 +116,27 @@ $significance = $ar[1];
   }
   function c2($sknt, $gust){
   	global $skntthres;
+  	global $gustthres;
+  	$s = "";
+  	$a = False;
   	if ($sknt < $skntthres){
-  		return sprintf("%s/%sKT", $sknt, $gust);
+  		$s .= $sknt;
+  	}else{
+		$a = True;
+		$s .= sprintf("<span style='color:#f00;'>%s</span>", $sknt);
   	}
-  	return sprintf("<span style='color:#f00;'>%s/%sKT</span>", $sknt, $gust);
+  	
+  	if ($gust < $gustthres){
+  		$s .= sprintf("/%s", $gust);
+  	}else{
+		$a = True;
+		$s .= sprintf("/<span style='color:#f00;'>%s</span>", $gust);
+  	}
+  	if ($a){
+		return sprintf("%s<span style='color:#f00;'>KT</span>", $s);
+	} else {
+		return sprintf("%sKT", $s);
+    }
   }
   function c3($vsby){
 	if ($vsby == null) return "MMSM";
