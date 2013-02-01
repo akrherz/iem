@@ -71,6 +71,8 @@ $d = Array("space" => " ", "comma" => "," , "tab" => "\t");
 
 $sqlStr = "SELECT station, *, to_char(day, 'YYYY/mm/dd') as dvalid, 
  extract(doy from day) as doy, 
+ gddxx(50, 86, high, low) as gdd_50_86,
+ gddxx(40, 86, high, low) as gdd_40_86,
  round((5.0/9.0 * (high - 32.0))::numeric,1) as highc,
  round((5.0/9.0 * (low - 32.0))::numeric,1) as lowc, 
  round((precip * 25.4)::numeric,1) as precipmm
