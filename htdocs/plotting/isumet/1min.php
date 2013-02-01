@@ -32,8 +32,8 @@ if ($station == null){
 		}
   		$valid[] = $v;
   		$tmpf[] = round (substr($line, 36, 6),2);
-  		$relh[] = intval($parts[7]);
-  		$d = dwpf(round (substr($line, 36, 6),2), intval($parts[7]) );
+  		$relh[] = intval($parts[8]);
+  		$d = dwpf(round (substr($line, 36, 6),2), intval($parts[8]) );
   		$dwpf[] = ($d > -40 && $d < 90)? $d : "";
  	} // End of while
 } else {
@@ -109,10 +109,11 @@ $lineplot2=new LinePlot($dwpf, $valid);
 $lineplot2->SetLegend("Dew Point");
 $lineplot2->SetColor("green");
 
+
 // Create the linear plot
-$lineplot3=new LinePlot($relh, $valid);
-$lineplot3->SetLegend("Rel Humid");
-$lineplot3->SetColor("black");
+//$lineplot3=new LinePlot($relh, $valid);
+//$lineplot3->SetLegend("Rel Humid");
+//$lineplot3->SetColor("black");
 
 // Box for error notations
 //[DMF]$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
