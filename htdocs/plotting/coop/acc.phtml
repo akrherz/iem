@@ -15,14 +15,18 @@ include_once("$rootpath/include/forms.php");
  $sday = isset($_GET['sday']) ? $_GET['sday'] : 1;
 
  $eyear = isset($_GET['eyear']) ? $_GET['eyear'] : date("Y");
- $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : 6;
- $eday = isset($_GET['eday']) ? $_GET['eday'] : 1;
-$dcgi = "network=$network&syear=$syear&smonth=$smonth&sday=$sday&eyear=$eyear&emonth=$emonth&eday=$eday&";
+ $emonth = isset($_GET['emonth']) ? $_GET['emonth'] : date("m");
+ $eday = isset($_GET['eday']) ? $_GET['eday'] : date("d");
+  
+$dcgi = "network=$network&syear=$syear&smonth=$smonth&sday=$sday";
+$dcgi .= "&eyear=$eyear&emonth=$emonth&eday=$eday&";
+
 $year2 = null;
 if (isset($_REQUEST['year2']) && isset($_REQUEST['year2on'])){
 	$year2 = intval( $_REQUEST['year2']);
 	$dcgi .= "year2=${year2}&";
 }
+
 $year3 = null;
 if (isset($_REQUEST['year3']) && isset($_REQUEST['year3on'])){
 	$year3 = intval( $_REQUEST['year3']);
