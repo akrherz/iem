@@ -113,7 +113,7 @@ def process_cgi(form):
     ax2.plot(dates, d_gdd50, color='r', linewidth=2, linestyle='--')
     #spread = max( max(d_gdd50), abs(min(d_gdd50))) * 1.1
     #ax2.set_ylim(0-spread, spread)
-    ax2.set_ylabel("%s minus Climatology (dashed)" % (yearlabel,))
+    ax2.set_ylabel("Actual minus Climatology (dashed)" % (yearlabel,))
     
     ax[1].plot(dates, precip, color='r', lw=2)
     ax[1].plot(dates, c_precip, color='k', lw=2)
