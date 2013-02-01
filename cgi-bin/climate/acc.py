@@ -18,6 +18,7 @@ import matplotlib
 matplotlib.use( 'Agg' )
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.ticker import MaxNLocator
 
 import network
 import iemdb
@@ -92,8 +93,8 @@ def process_cgi(form):
     
     station = form.getvalue('station', 'IA0200')
     nt = network.Table("%sCLIMATE" % (station[:2],))
-    dates, gdd50, d_gdd50, c_gdd50, precip, d_precip, c_precip, sdd86, d_sdd86, c_sdd86 = get_data(station,
-                                                                startdt, enddt)
+    (dates, gdd50, d_gdd50, c_gdd50, precip, d_precip, c_precip, 
+     sdd86, d_sdd86, c_sdd86) = get_data(station, startdt, enddt)
     
     (fig, ax) = plt.subplots(3,1, figsize=(9,12))
     
@@ -107,6 +108,12 @@ def process_cgi(form):
     ax[0].plot(dates, gdd50, color='r', label='%s' % (yearlabel,), lw=2)
     ax[0].plot(dates, c_gdd50, color='k', label='Climatology', lw=2)
     ax[0].set_ylabel("GDD Base 50 $^{\circ}\mathrm{F}$", fontsize=16)
+    
+    ax2 = ax[0].twinx()
+    ax2.plot(dates, d_gdd50, color='r', linewidth=2, linestyle='--')
+    #spread = max( max(d_gdd50), abs(min(d_gdd50))) * 1.1
+    #ax2.set_ylim(0-spread, spread)
+    ax2.set_ylabel("%s minus Climatology (dashed)" % (yearlabel,))
     
     ax[1].plot(dates, precip, color='r', lw=2)
     ax[1].plot(dates, c_precip, color='k', lw=2)
@@ -147,6 +154,8 @@ def process_cgi(form):
             ax[0].plot(dates, gdd50[:sz], label="%s" % (yearlabel,), color='b', lw=2)
             ax[1].plot(dates, precip[:sz], color='b', lw=2)
             ax[2].plot(dates, sdd86[:sz], color='b', lw=2)
+            ax2.plot(dates, d_gdd50[:sz], color='b', linewidth=2, linestyle='--')
+    
     
     if form.getvalue('year3'):
         startdt3 = mx.DateTime.DateTime(int(form.getvalue('year3')),
@@ -169,6 +178,7 @@ def process_cgi(form):
             ax[0].plot(dates, gdd50[:sz], label="%s" % (yearlabel,), color='g', lw=2)
             ax[1].plot(dates, precip[:sz], color='g', lw=2)
             ax[2].plot(dates, sdd86[:sz], color='g', lw=2)
+            ax2.plot(dates, d_gdd50[:sz], color='g', linewidth=2, linestyle='--')
     
     ax[0].legend(loc=2, prop={'size': 14})
 
