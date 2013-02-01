@@ -8,13 +8,15 @@ MACHINES="iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 iemvs10
 BASE="/mesonet/www/logs"
 
 # Step 1, move the log files out of the way and restart apache gracefully
+# 130201 Graceful restarts not working! 
+# https://issues.apache.org/bugzilla/show_bug.cgi?id=48949
 for MACH in $MACHINES
 do
 	ssh root@$MACH "mv -f $BASE/access_log $BASE/access_log.$MACH && \
     mv -f $BASE/access_log-wepp $BASE/access_log-wepp.$MACH && \
     mv -f $BASE/access_log-sustainablecorn $BASE/access_log-sustainablecorn.$MACH && \
    	mv -f $BASE/access_log-cocorahs $BASE/access_log-cocorahs.$MACH && \
-    service httpd graceful"
+    service httpd restart"
 done
 
 # Step 2, bring all these log files back to roost
