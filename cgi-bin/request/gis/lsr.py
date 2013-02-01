@@ -88,7 +88,8 @@ fd = ogr.FieldDefn('REMARK',ogr.OFTString)
 fd.SetWidth(100)
 out_layer.CreateField(fd)
 
-sql = """SELECT distinct *, 
+sql = """SELECT distinct geom, valid, magnitude, type, wfo, city, typetext,
+    county, source, substr(remark,0,100) as tremark, 
     to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime 
     from lsrs WHERE 
 	valid >= '%s+00' and valid < '%s+00' %s 
@@ -112,7 +113,7 @@ while True:
     featDef.SetField('TYPETEXT', feat.GetField("typetext"))
     featDef.SetField('COUNTY', feat.GetField("county"))
     featDef.SetField('SOURCE', feat.GetField("source"))
-    featDef.SetField('REMARK', feat.GetField("remark"))
+    featDef.SetField('REMARK', feat.GetField("tremark"))
 
     out_layer.CreateFeature(featDef)
     feat.Destroy()
