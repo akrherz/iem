@@ -31,12 +31,12 @@ purpose is to monitor for high winds impacting traffic.
 <?php echo sprintf("<tr><td>Saylorville Lake</td><td>%s</td><td>%.1f Gusts: %.1f</td>
 	<td>%.1f @ %s</td><td>%s</td></tr>", $rsai4->db['obtime'], $rsai4->db['sknt'] * 1.15,
 	$rsai4->db['gust'] * 1.15, $rsai4->db['max_gust'] * 1.15, 
-	strftime('%I:%M %p', $rsai4->db['gust_ts']),
+	@strftime('%I:%M %p', $rsai4->db['gust_ts']),
 	drct2txt($rsai4->db['drct']) );?>
 <?php echo sprintf("<tr><td>Lake Red Rock</td><td>%s</td><td>%.1f Gusts: %.1f</td>
 	<td>%.1f @ %s</td><td>%s</td></tr>", $rlri4->db['obtime'], $rlri4->db['sknt'] * 1.15,
 	$rlri4->db['gust'] * 1.15, $rlri4->db['max_gust'] * 1.15, 
-	strftime('%I:%M %p', $rlri4->db['gust_ts']),
+	@strftime('%I:%M %p', $rlri4->db['gust_ts']),
 	drct2txt($rlri4->db['drct']) );?>
 </table>
 
