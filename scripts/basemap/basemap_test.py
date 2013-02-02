@@ -18,13 +18,9 @@ fig = plt.figure(num=None, figsize=(11.3,7.00))
 # Set the axes instance
 ax = plt.axes([0,0,1,1], axisbg=(0.4471,0.6235,0.8117))
 
-# Set up the map
-#m = Basemap(projection='lcc', urcrnrlat=47.7, llcrnrlat=23.08, urcrnrlon=-62.5,
-#             llcrnrlon=-120, lon_0=-98.7, lat_0=39, lat_1=33, lat_2=45,
-#             resolution='l')
-m = Basemap(projection='lcc', urcrnrlat=43.6, llcrnrlat=40.3, urcrnrlon=-89.5,
-             llcrnrlon=-97.2, lon_0=-95.7, lat_0=40, lat_1=42, lat_2=44,
-             resolution='l')
+m = Basemap(projection='lcc', urcrnrlat=47.7, llcrnrlat=23.08, urcrnrlon=-62.5,
+             llcrnrlon=-120, lon_0=-98.7, lat_0=39, lat_1=33, lat_2=45,
+             resolution='l', ax=ax)
 m.fillcontinents(color='0.7',zorder=0)
 
 def clrbar(MAX):
