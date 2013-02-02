@@ -6,7 +6,9 @@ import iemre
 import iemplot
 import iemdb
 import numpy
+import random
 import mx.DateTime
+from iem.plot import MapPlot
 import gdal
 
 IEM = iemdb.connect('iem', bypass=True)
@@ -36,11 +38,11 @@ def init_grid():
     x0, y0 = lalo2pt(lat1, lon0)
     x1, y1 = lalo2pt(lat0, lon1)
 
-    fp = "/home/ldm/data/gis/images/4326/q2/p24h.png"
+    fp = "/home/ldm/data/gis/images/4326/q2/p48h.png"
     q2 = gdal.Open(fp, 0)
     q2d = numpy.flipud( q2.ReadAsArray()[y0:y1:22,x0:x1:25] )
 
-    return q2d / 25.4 * 12.0 # hard code snow ratio!
+    return q2d / 25.4 # hard code snow ratio!
 
 def fetch_lsrs():
     vals = []
@@ -50,14 +52,14 @@ def fetch_lsrs():
     pcursor.execute("""
     SELECT state, max(magnitude) as val, x(geom) as lon, y(geom) as lat
       from lsrs_2012 WHERE type in ('S') and magnitude > 0 and 
-      valid > '2012-01-17 00:00' and valid < '2012-01-18 12:00'
+      valid > '2012-12-09 00:00' and valid < '2012-12-10 12:00'
       and x(geom) BETWEEN %s and %s and
       y(geom) BETWEEN %s and %s 
       GROUP by state, lon, lat
     """,(iemre.WEST, iemre.EAST, iemre.SOUTH, iemre.NORTH))
     for row in pcursor:
         vals.append( row[1] )
-        lats.append( row[3] )
+        lats.append( row[3] + (random.random() * 0.01)) 
         lons.append( row[2] )
     return {'vals': vals, 'lats': lats, 'lons': lons}
 
@@ -69,18 +71,20 @@ def fetch_coop():
     SELECT id, sum(snow), x(geom) as lon, y(geom) as lat, count(*) from
     summary_2012 t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
-    day in ('2012-01-19', '2012-01-20') and snow >= 0 and 
+    day in ('2012-12-09', '2012-12-10') and snow >= 0 and 
     x(geom) BETWEEN %s and %s and
     y(geom) BETWEEN %s and %s  
-    GROUP by id, lon, lat
+    GROUP by id, lon, lat ORDER by sum DESC
     """, (iemre.WEST, iemre.EAST, iemre.SOUTH, iemre.NORTH))
     for row in icursor:
+
         vals.append( row[1] )
         lats.append( row[3] )
         lons.append( row[2] )
     return {'vals': vals, 'lats': lats, 'lons': lons}
 
 snowgrid = init_grid() # inches
+"""
 lsrs = fetch_lsrs()
 coop = fetch_coop()
 
@@ -96,25 +100,9 @@ for i in range(len(lsrs['vals'])):
         lats.append( lsrs['lats'][i] )
         lons.append( lsrs['lons'][i] )
         vals.append( lsrs['vals'][i] )
+"""
 
-# Analysis and plot, please
-cfg = {
- 'wkColorMap': 'WhiteBlueGreenYellowRed',
- 'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- '_title'             : "16-17 January 2012 - IEM Snowfall Total Analysis",
- '_valid'             : "Snowfall totals up until 8 AM 18 Jan 2012",
- #'_MaskZero'          : True,
- 'lbTitleString'      : "[in]",
-  '_showvalues'        : False,
- '_format'            : '%.1f',
- '_midwest'         : True,
-}
-# Generates tmp.ps
 
-tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
-#tmpfp = iemplot.simple_grid_fill(iemre.XAXIS, iemre.YAXIS, snowgrid, cfg)
-pqstr = "plot c 000000000000 lsr_snowfall.png bogus png"
-thumbpqstr = "plot c 000000000000 lsr_snowfall_thumb.png bogus png"
-#iemplot.postprocess(tmpfp,pqstr, thumb=True, thumbpqstr=thumbpqstr)
-iemplot.makefeature(tmpfp)
+mp = MapPlot(sector='midwest')
+mp.contourf(iemre.XAXIS, iemre.YAXIS, snowgrid, range(0,20))
+mp.postprocess(view=True)

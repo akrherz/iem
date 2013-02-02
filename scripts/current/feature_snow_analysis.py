@@ -16,10 +16,12 @@ vals = []
 lats = []
 lons = []
 icursor.execute("""
-    SELECT id, sum(snow), x(geom) as lon, y(geom) as lat, count(*) from
-    summary_2012 t JOIN stations s ON (s.iemid = t.iemid) where 
+    SELECT id, sum(snow), 
+    x(geom) as lon, 
+    y(geom) as lat, count(*) from
+    summary_2013 t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
-    day in ('2012-12-20', '2012-12-21') and snow >= 0 and 
+    day in ('2013-01-30', '2013-01-31') and snow >= 0 and 
     x(geom) BETWEEN %s and %s and
     y(geom) BETWEEN %s and %s  
     GROUP by id, lon, lat
@@ -27,8 +29,10 @@ icursor.execute("""
 for row in icursor:
     #if row[4] < 2:
     #    continue
-    #if row[1] in [2.6,]:
-    #    continue
+    if row[3] in lats and row[2] in lons:
+        continue
+    if row[1] == 0.2:
+        continue
     vals.append( row[1] )
     lats.append( row[3] )
     lons.append( row[2] )
@@ -36,29 +40,30 @@ for row in icursor:
 
 # Query LSR Data...
 pcursor.execute("""
-    SELECT state, max(magnitude) as val, x(geom) as lon, y(geom) as lat
-      from lsrs_2012 WHERE type in ('S') and magnitude > 0 and 
-      valid > '2012-12-19 12:00' and valid < '2012-12-21 23:59'
+    SELECT state, max(magnitude) as val, 
+        x(geom) as lon, 
+       y(geom) as lat
+      from lsrs_2013 WHERE type in ('S') and magnitude > 0 and 
+      valid > '2013-01-30 00:00' and valid < '2013-02-01 23:59'
       GROUP by state, lon, lat
 """)
 for row in pcursor:
     if row[3] in lats and row[2] in lons:
-      continue
+        continue
     vals.append( row[1] )
     lats.append( row[3] )
     lons.append( row[2] )
-    if row[1] in [2.6,]:
-        continue
+
 
 final_lats = lats
 final_lons = lons
 final_vals = vals
-"""
+#"""
 # Loop thru the data and try to figure out what is good and what is bad...
 final_lats = []
 final_lons = []
 final_vals = []
-buffer = 0.35
+buffer = 0.65
 for lat in numpy.arange(iemplot.MW_SOUTH, iemplot.MW_NORTH, buffer):
   for lon in numpy.arange(iemplot.MW_WEST, iemplot.MW_EAST, buffer):
     lvals = []
@@ -80,22 +85,22 @@ for lat in numpy.arange(iemplot.MW_SOUTH, iemplot.MW_NORTH, buffer):
         final_vals.append( max(lvals) )
     final_lats.append( lat )
     final_lons.append( lon )
-"""
+#"""
 # Analysis and plot, please
 cfg = {
  'wkColorMap': 'WhiteBlueGreenYellowRed',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "19-20 December 2012 - IEM Snowfall Total Analysis",
- '_valid'             : "Snowfall totals up until 8 AM 21 Dec 2012",
+ '_title'             : "29-30 January 2013 - IEM Snowfall Total Analysis",
+ '_valid'             : "Snowfall totals up until 8 AM 31 Jan 2013",
  #'_MaskZero'          : True,
  'lbTitleString'      : "[in]",
   '_showvalues'        : False,
  'cnLevelSelectionMode': "ExplicitLevels",
  'cnLevels' : [0.01,0.1,0.25,0.5,1,2,3,5,7,9,11,13,15,17],
 
- '_format'            : '%.1f',
- '_midwest'         : True,
+ '_format'            : '%.0f',
+# '_midwest'         : True,
 }
 # Generates tmp.ps
 tmpfp = iemplot.simple_contour(final_lons, final_lats, final_vals, cfg)

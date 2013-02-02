@@ -2,9 +2,7 @@
  Generate analysis of Peak Wind Gust
 """
 import sys
-import os
-import random
-import iemplot
+import numpy
 
 import mx.DateTime
 now = mx.DateTime.now()
@@ -12,6 +10,8 @@ now = mx.DateTime.now()
 import iemdb
 IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor()
+
+from iem.plot import MapPlot
 
 # Compute normal from the climate database
 sql = """
@@ -22,7 +22,6 @@ sql = """
   WHERE s.iemid = c.iemid and c2.valid > 'TODAY' and c.day = 'TODAY'
   and c2.iemid = s.iemid
   and (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US'
-  and s.state not in ('HI', 'AK')
   ORDER by lon, lat
 """ % (now.year,)
 
@@ -38,25 +37,21 @@ for row in icursor:
     lons.append( row[2] )
     vals.append( row[4] * 1.16 )
     valmask.append(  (row[1] in ['AWOS','IA_ASOS']) )
-
+    
 if len(vals) < 5:
-  sys.exit(0)
+    sys.exit(0)
 
-cfg = {
- 'wkColorMap': 'BlAqGrYeOrRe',
- 'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- '_showvalues'        : True,
- '_format'            : '%.0f',
- '_title'             : "Iowa ASOS/AWOS Peak Wind Speed Reports",
- '_valid'             : "%s" % (now.strftime("%d %b %Y"), ),
- 'lbTitleString'      : "[mph]",
- '_valuemask'         : valmask,
-# '_midwest'	: True,
-}
-# Generates tmp.ps
-tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
+clevs = numpy.arange(0,40,2)
+clevs = numpy.append(clevs, numpy.arange(40, 80, 5))
+clevs = numpy.append(clevs, numpy.arange(80, 120, 10))
 
+# Iowa
 pqstr = "plot ac %s summary/today_gust.png iowa_wind_gust.png png" % (
         now.strftime("%Y%m%d%H%M"), )
-iemplot.postprocess(tmpfp, pqstr)
+m = MapPlot(title="Iowa ASOS/AWOS Peak Wind Speed Reports",
+            subtitle="%s" % (now.strftime("%d %b %Y"), ),
+            pqstr=pqstr, sector='iowa')
+m.contourf(lons, lats, vals, clevs, units='MPH')
+m.plot_values(lons, lats, vals, '%.0f', valmask=valmask)
+m.drawcounties()
+m.postprocess(view=False)
