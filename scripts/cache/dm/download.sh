@@ -35,7 +35,7 @@ ftime="`date --date 'last tuesday' +'%Y%m%d%H'`00"
 
 # Cleanup
 rm dm_current.shp dm_current.shx dm_current.dbf dm_current.zip dm_current.prj
-mv usdm* last/
+mv usdm* /mesonet/data/dm/shape/
 
 #ogr2ogr -t_srs EPSG:4326 test.shp Drought_Impacts_US.shp
 
