@@ -146,7 +146,9 @@ def Main():
                 continue
 
     j = 0
-    for station in nt.sts.keys():
+    ids = nt.sts.keys()
+    ids.sort()
+    for station in ids:
         j += 1
         print "<tr class=\"row"+ str(j % 5) +"\">",
         print "%s%s%s" % ("<td>", nt.sts[station]['name'], "</td>") ,
