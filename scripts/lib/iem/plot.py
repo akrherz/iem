@@ -14,9 +14,11 @@ Like it or not, we care about zorder!
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
+from matplotlib.colors import rgb2hex
 from matplotlib.patches import Polygon
 import matplotlib.cm as cm
 import matplotlib.colors as mpcolors
+import matplotlib.patheffects as PathEffects
 import mx.DateTime
 import numpy
 from scipy.interpolate import griddata
@@ -27,7 +29,9 @@ import Image
 import cStringIO
 import tempfile
 import os
+import sys
 import subprocess
+import shutil
 
 DATADIR = os.sep.join([os.path.dirname(__file__), 'data'])
 
@@ -185,8 +189,12 @@ def maue(N=-1):
            "#a50000", "#643c32",
 "#785046", "#8c645a", "#b48c82", "#e1beb4", "#f0dcd2", "#ffc8c8", "#f5a0a0", 
            "#f5a0a0", "#e16464", "#c83c3c"]
-    cmap3 = mpcolors.ListedColormap(cpool[0:N], 'maue', N=N)
+    if N == 15:
+        cpool = cpool[::2]
+    #cmap3 = mpcolors.ListedColormap(cpool[0:N], 'maue', N=N)
+    cmap3 = mpcolors.ListedColormap(cpool, 'maue')
     cm.register_cmap(cmap=cmap3)
+    return cmap3
 
 def LevelColormap(levels, cmap=None):
     """Make a colormap based on an increasing sequence of levels"""
@@ -216,9 +224,9 @@ def LevelColormap(levels, cmap=None):
 
 class MapPlot:
     
-    def __init__(self, sector='iowa', **kwargs):
+    def __init__(self, sector='iowa', figsize=(10.24,7.68), **kwargs):
         """ Initializer """
-        self.fig = plt.figure(num=None, figsize=(10.24,7.68) )
+        self.fig = plt.figure(num=None, figsize=figsize )
         self.fig.subplots_adjust(bottom=0, left=0, right=1, top=1, wspace=0, 
                                  hspace=0)
         self.ax = plt.axes([0.01,0.05,0.9,0.85], axisbg=(0.4471,0.6235,0.8117))
@@ -232,6 +240,17 @@ class MapPlot:
                            llcrnrlon=constants.IA_WEST, 
                            lat_0=45.,lon_0=-92.,lat_ts=42.,
                            resolution='i', ax=self.ax)
+        if self.sector == 'midwest':
+            """ Standard view for Iowa """
+            self.map = Basemap(projection='merc', fix_aspect=False,
+                           urcrnrlat=constants.MW_NORTH, 
+                           llcrnrlat=constants.MW_SOUTH, 
+                           urcrnrlon=constants.MW_EAST, 
+                           llcrnrlon=constants.MW_WEST, 
+                           lat_0=45.,lon_0=-92.,lat_ts=42.,
+                           resolution='i', ax=self.ax)
+            self.map.drawcountries(linewidth=1.0, zorder=Z_POLITICAL)
+            self.map.drawcoastlines(zorder=Z_POLITICAL)
         elif self.sector == 'conus':
             # lat = 23.47693, 20.74123, 45.43908, 51.61555
             # lon = 118.6713, 82.3469, 64.52023, 131.4471 ;
@@ -242,7 +261,7 @@ class MapPlot:
                             rsphere=6371200.,resolution='l',area_thresh=10000)
             self.map.drawcountries(linewidth=1.0, zorder=Z_POLITICAL)
             self.map.drawcoastlines(zorder=Z_POLITICAL)
-        self.map.fillcontinents(color='1.0', zorder=Z_CF)
+        self.map.fillcontinents(color='1.0', zorder=0) # Read docs on 0 meaning
         self.map.drawstates(linewidth=1.0, zorder=Z_POLITICAL)
         self.iemlogo()
         if kwargs.has_key("title"):
@@ -279,8 +298,12 @@ class MapPlot:
             vals = numpy.array( vals )
         if vals.ndim == 1:
             # We need to grid!
-            xi = numpy.linspace(constants.IA_WEST, constants.IA_EAST, 100)
-            yi = numpy.linspace(constants.IA_SOUTH, constants.IA_NORTH, 100)
+            if self.sector == 'iowa':
+                xi = numpy.linspace(constants.IA_WEST, constants.IA_EAST, 100)
+                yi = numpy.linspace(constants.IA_SOUTH, constants.IA_NORTH, 100)
+            else:
+                xi = numpy.linspace(constants.MW_WEST, constants.MW_EAST, 100)
+                yi = numpy.linspace(constants.MW_SOUTH, constants.MW_NORTH, 100)
             xi, yi = numpy.meshgrid(xi, yi)
             vals = griddata( zip(lons, lats), vals, (xi, yi) , 'cubic')
             lons = xi
@@ -321,14 +344,36 @@ class MapPlot:
                        axisbg=(0.4471,0.6235,0.8117), yticks=[], xticks=[])
         ax3.imshow(logo, origin='upper')
         
+    def make_colorbar(self, bins, colorramp):
+        """ Manual Color Bar """
+        ax = plt.axes([0.92, 0.1, 0.07, 0.8], frameon=False,
+                      yticks=[], xticks=[])
+        colors = []
+        for i in range(len(bins)):
+            colors.append( rgb2hex(colorramp(i)) )
+            txt = ax.text(0.5, i, "%s" % (bins[i],), ha='center', va='center',
+                          color='w')
+            txt.set_path_effects([PathEffects.withStroke(linewidth=2, 
+                                                     foreground="k")])
+        ax.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
+                color=colorramp(range(len(bins))),
+                ec='None')
         
-    def postprocess(self, view=False):
+    def postprocess(self, view=False, filename=None, web=False):
         """ postprocess into a slim and trim PNG """
+        #if web:
+        #    print "Content-Type: image/png\n"
+        #    self.fig.savefig( sys.stdout, format='png' )
+        #    return
         ram = cStringIO.StringIO()
         plt.savefig(ram, format='png')
         ram.seek(0)
         im = Image.open(ram)
         im2 = im.convert('RGB').convert('P', palette=Image.ADAPTIVE)
+        if web:
+            print "Content-Type: image/png\n"
+            im2.save( sys.stdout, format='png' )
+            return
         tmpfp = tempfile.mktemp()
         im2.save( tmpfp , format='PNG')
         
@@ -338,10 +383,12 @@ class MapPlot:
                     shell=True)
         if view:
             subprocess.call("xv %s" % (tmpfp,), shell=True)
+        if filename is not None:
+            shutil.copyfile(tmpfp, filename)
         os.unlink(tmpfp)
         
 if __name__ == '__main__':
     """ Manually test our plot algo """
-    for sector in ['iowa', 'conus']:
+    for sector in ['iowa', 'midwest', 'conus']:
         m = MapPlot(sector=sector)
         m.postprocess(view=True)
