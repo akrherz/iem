@@ -10,7 +10,7 @@ COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 for id in nt.sts.keys():
-    fn = "coop_data/%s.csv" % (nt.sts[id]['name'].replace(" ", "_"), )
+    fn = "/mesonet/share/climodat/coop_data/%s.csv" % (nt.sts[id]['name'].replace(" ", "_"), )
     out = open(fn, 'w')
     out.write("station,station_name,lat,lon,day,high,low,precip,snow,\n")
     sql = "SELECT * from %s WHERE station = '%s' ORDER by day ASC" % (

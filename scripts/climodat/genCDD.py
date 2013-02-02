@@ -2,7 +2,8 @@
 Cooling Degree days
 """
 
-_REPORTID = "19"
+import mx.DateTime
+import constants
 
 def ccdd(high, low, base):
     cdd = 0
@@ -15,10 +16,9 @@ def ccdd(high, low, base):
 
     return cdd  
 
-def go(mydb, rs, stationID, updateAll=False):
-    import mx.DateTime, constants
+def go(mydb, rs, station, updateAll=False):
     if updateAll:
-        s = constants.startts(stationID)
+        s = constants.startts(station)
     else:
         s = constants._ENDTS - mx.DateTime.RelativeDateTime(years=1)
     e = constants._ENDTS
@@ -43,19 +43,16 @@ def go(mydb, rs, stationID, updateAll=False):
     for mo in db.keys():
         mydb.query("""UPDATE r_monthly SET cdd = %s, cdd60 = %s WHERE 
           station = '%s' and monthdate = '%s' """ % (db[mo], db60[mo],
-                                    stationID, mo.strftime("%Y-%m-%d") ) )
+                                    station, mo.strftime("%Y-%m-%d") ) )
 
-def write(mydb, stationID):
-    import mx.DateTime, constants
-    YRCNT = constants.yrcnt(stationID)
-    out = open("reports/%s_%s.txt" % (stationID, _REPORTID), 'w')
-    constants.writeheader(out, stationID)
+def write(mydb, out, station):
+    YRCNT = constants.yrcnt(station)
     out.write("""# THESE ARE THE MONTHLY COOLING DEGREE DAYS (base=65) %s-%s FOR STATION  %s
-YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC\n""" % (
-            constants.startyear(stationID), constants._ENDYEAR, stationID,) )
+YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC
+""" % (constants.startyear(station), constants._ENDYEAR, station) )
 
     rs = mydb.query("""SELECT * from r_monthly WHERE station = '%s'""" % (
-                                        stationID,) ).dictresult()
+                                        station,) ).dictresult()
     db = {}
     db60 = {}
     for i in range(len(rs)):
@@ -71,9 +68,9 @@ YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NO
 
     second = """# THESE ARE THE MONTHLY COOLING DEGREE DAYS (base=60) %s-%s FOR STATION  %s
 YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC\n""" % (
-            constants.startyear(stationID), constants._ENDYEAR, stationID,)
+            constants.startyear(station), constants._ENDYEAR, station)
     yrCnt = 0
-    for yr in range(constants.startyear(stationID), constants._ENDYEAR):
+    for yr in range(constants.startyear(station), constants._ENDYEAR):
         yrCnt += 1
         out.write("%4i" % (yr,) )
         second += "%4i" % (yr,)
@@ -99,5 +96,4 @@ YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NO
     out.write("\n")
     second += "\n"
     out.write(second)
-    out.close()
 

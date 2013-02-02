@@ -39,6 +39,8 @@ def do_month(ts, routes='m'):
      '_valid'    : '%s - %s' % (now.strftime("%d %B %Y"), lastday.strftime("%d %B %Y")),
      '_title'    : "%s Total Precipitation [inch]" % (now.strftime("%B %Y"),),
      'lbTitleString': 'inch',
+     '_showvalues': True,
+     '_format' : '%.2f',
      }
 
     tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)

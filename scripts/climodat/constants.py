@@ -1,12 +1,13 @@
 
-import pg, mx.DateTime
+import pg
+import mx.DateTime
 
 _THISYEAR = 2013
-_ENDYEAR = 2013
+_ENDYEAR = 2014
 #_ENDYEAR = 1951
 
 _ARCHIVEENDTS = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
-_ENDTS = mx.DateTime.DateTime(2013,1,1)
+_ENDTS = mx.DateTime.DateTime(2014,1,1)
 #_YEARS = 58
 #_YRCNT = [0,58,58,58,57,57,57,57,57,57,57,57,57]
 mydb = pg.connect('coop', 'iemdb',user='nobody')
@@ -19,12 +20,12 @@ row = mcursor.fetchone()
 _QCENDTS = mx.DateTime.strptime(row[0], '%Y-%m-%d')
 mcursor.close()
 
-longterm = ['ia1635','ia4063','ia3509','ia3473','ia4389','ia5769','ia1319',
-'ia7147','ia2171','ia1533','ia5952','ia2110','ia6243','ia5131','ia3290',
-'ia8266','ia7979','ia0133','ia1833','ia7161','ia8806',
-'ia4735','ia6327','ia8706','ia4894','ia0200','ia2864','ia0364',
-'ia7842','ia2789','ia8688','ia5198','ia2203','ia2364',
-'ia0000']
+longterm = ['IA1635','IA4063','IA3509','IA3473','IA4389','IA5769','IA1319',
+'IA7147','IA2171','IA1533','IA5952','IA2110','IA6243','IA5131','IA3290',
+'IA8266','IA7979','IA0133','IA1833','IA7161','IA8806',
+'IA4735','IA6327','IA8706','IA4894','IA0200','IA2864','IA0364',
+'IA7842','IA2789','IA8688','IA5198','IA2203','IA2364',
+'IA0000', 'IA4101']
 
 def get_table(sid):
     """
@@ -56,21 +57,20 @@ def startts(sid):
   return mx.DateTime.DateTime(startyear(sid),1,1)
 
 def startyear(sid):
-  if (longterm.__contains__(sid.lower())):
-    return 1893
-  return 1951
+    if sid in longterm:
+        return 1893
+    return 1951
 
-def writeheader(out, stationID):
-  import network
-  import string, mx.DateTime
-  now = mx.DateTime.now()
-  stationID = string.upper(stationID)
-  nt = network.Table("%sCLIMATE" % (stationID[:2].upper(),))
-  out.write("""# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
+def make_output(nt, station, reportid):
+    """ Create and return the output file used for this reportid """
+    fn = "/mesonet/share/climodat/reports/%s_%s.txt" % (station, reportid)
+    fp = open(fn, 'w')
+    fp.write("""# IEM Climodat http://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s 
 # Climate Record: %s -> %s (data after %s is preliminary)
 # Site Information: [%s] %s
-# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978\n""" % \
-  (now.strftime("%d %b %Y"), startts(stationID).strftime("%d %b %Y"), \
-   _ARCHIVEENDTS.strftime("%d %b %Y"), \
-   _QCENDTS.strftime("%d %b %Y"), stationID, nt.sts[stationID]["name"]) )
+# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978\n""" % (
+    mx.DateTime.now().strftime("%d %b %Y"), 
+    startts(station).strftime("%d %b %Y"), _ARCHIVEENDTS.strftime("%d %b %Y"), 
+   _QCENDTS.strftime("%d %b %Y"), station, nt.sts[station]["name"]) )
+    return fp

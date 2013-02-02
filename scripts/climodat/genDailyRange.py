@@ -1,8 +1,7 @@
-
-_REPORTID = "06"
+import constants
+import mx.DateTime
 
 def go(mydb, rs, stationID):
-  import mx.DateTime, constants
   s = mx.DateTime.DateTime(2000, 1, 1)
   e = mx.DateTime.DateTime(2001, 1, 1)
   interval = mx.DateTime.RelativeDateTime(days=+1)
@@ -32,29 +31,27 @@ def go(mydb, rs, stationID):
       r[day]["min"], stationID, day.strftime("%Y-%m-%d") )
     mydb.query(sql)
 
-def write(mydb, stationID):
-  import mx.DateTime, constants
-  r = {}
-  out = open("reports/%s_%s.txt" % (stationID, _REPORTID), 'w')
-  constants.writeheader(out, stationID)
-  out.write("""# RECORD LARGEST AND SMALLEST DAILY RANGES (MAX-MIN) FOR STATION NUMBER  %s
+def write(mydb, out, station):
+    r = {}
+    out.write("""# RECORD LARGEST AND SMALLEST DAILY RANGES (MAX-MIN) FOR STATION NUMBER  %s
      JAN     FEB     MAR     APR     MAY     JUN     JUL     AUG     SEP     OCT     NOV     DEC
- DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN\n""" % (stationID,) )
+ DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN
+""" % (station,) )
 
-  rs = mydb.query("SELECT * from %s WHERE station = '%s'" \
-   % (constants.climatetable(stationID), stationID,) ).dictresult()
-  for i in range(len(rs)):
-    day = mx.DateTime.strptime(rs[i]["valid"], "%Y-%m-%d")
-    r[day] = rs[i]
+    rs = mydb.query("SELECT * from %s WHERE station = '%s'" % (
+                constants.climatetable(station), station) ).dictresult()
+    for i in range(len(rs)):
+        day = mx.DateTime.strptime(rs[i]["valid"], "%Y-%m-%d")
+        r[day] = rs[i]
  
-  for day in range(1,32):
-    out.write("%3i" % (day,) )
-    for mo in range(1,13):
-      try:
-        ts = mx.DateTime.DateTime(2000, mo, day)
-      except:
-        out.write("  **  **")
-        continue
-      out.write("%4i%4i" % (r[ts]["max_range"], r[ts]["min_range"]) )
-    out.write("\n")
+    for day in range(1,32):
+        out.write("%3i" % (day,) )
+        for mo in range(1,13):
+            try:
+                ts = mx.DateTime.DateTime(2000, mo, day)
+            except:
+                out.write("  **  **")
+                continue
+            out.write("%4i%4i" % (r[ts]["max_range"], r[ts]["min_range"]) )
+        out.write("\n")
 
