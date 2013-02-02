@@ -1,7 +1,8 @@
 # GDD module
 # Daryl Herzmann 4 Mar 2004
 
-_REPORTID = "03"
+import mx.DateTime
+import constants
 
 def cgdd(base, high, low):
   gdd = 0
@@ -16,7 +17,6 @@ def go(mydb, rs, stationID, updateAll=False):
     """
     Compute the monthly GDDs, but only do as much work as necessary
     """
-    import mx.DateTime, constants
     if updateAll:
         s = constants.startts(stationID)
     else:
@@ -43,45 +43,40 @@ def go(mydb, rs, stationID, updateAll=False):
           gdd50 = %s, gdd52 = %s WHERE station = '%s' and monthdate = '%s'""" % (
             db[mo][40], db[mo][48], db[mo][50], db[mo][52], stationID, mo.strftime("%Y-%m-%d") ) )
 
-def write(mydb, stationID):
-  import mx.DateTime, constants
-  out = open("reports/%s_%s.txt" % (stationID, _REPORTID), 'w')
-  constants.writeheader(out, stationID)
-  out.write("# GROWING DEGREE DAYS FOR 4 BASE TEMPS FOR STATION ID  %s \n" \
-   % (stationID,) )
+def write(mydb, out, station):
+    out.write("# GROWING DEGREE DAYS FOR 4 BASE TEMPS FOR STATION ID %s\n" % (
+                                                    station,) )
 
-  rs = mydb.query("SELECT * from r_monthly WHERE station = '%s'" \
-   % (stationID,) ).dictresult()
-  db = {}
-  for i in range(len(rs)):
-    mo = mx.DateTime.strptime( rs[i]["monthdate"], "%Y-%m-%d")
-    db[mo] = {40: rs[i]["gdd40"], 48: rs[i]["gdd48"], 50: rs[i]["gdd50"], \
+    rs = mydb.query("SELECT * from r_monthly WHERE station = '%s'" % (
+                                station,) ).dictresult()
+    db = {}
+    for i in range(len(rs)):
+        mo = mx.DateTime.strptime( rs[i]["monthdate"], "%Y-%m-%d")
+        db[mo] = {40: rs[i]["gdd40"], 48: rs[i]["gdd48"], 50: rs[i]["gdd50"], 
               52: rs[i]["gdd52"]}
 
-  rs = mydb.query("SELECT avg(gdd40) as avg_gdd40, stddev(gdd40) as std_gdd40,\
-    avg(gdd48) as avg_gdd48, stddev(gdd48) as std_gdd48, \
-    avg(gdd50) as avg_gdd50, stddev(gdd50) as std_gdd50, \
-    avg(gdd52) as avg_gdd52, stddev(gdd52) as std_gdd52, \
-    extract(month from monthdate) as month from r_monthly \
-    WHERE station = '%s' GROUP by month" % (stationID,) ).dictresult()
-  adb = {}
-  for i in range(len(rs)):
-    month = int(rs[i]["month"])
-    adb[month] = {'a40': rs[i]["avg_gdd40"], 's40': rs[i]["std_gdd40"], \
-     'a48': rs[i]["avg_gdd48"], 's48': rs[i]["std_gdd48"], \
-     'a50': rs[i]["avg_gdd50"], 's50': rs[i]["std_gdd50"], \
+    rs = mydb.query("""SELECT avg(gdd40) as avg_gdd40, stddev(gdd40) as std_gdd40,
+    avg(gdd48) as avg_gdd48, stddev(gdd48) as std_gdd48, 
+    avg(gdd50) as avg_gdd50, stddev(gdd50) as std_gdd50, 
+    avg(gdd52) as avg_gdd52, stddev(gdd52) as std_gdd52, 
+    extract(month from monthdate) as month from r_monthly
+    WHERE station = '%s' GROUP by month""" % (station,) ).dictresult()
+    adb = {}
+    for i in range(len(rs)):
+        month = int(rs[i]["month"])
+        adb[month] = {'a40': rs[i]["avg_gdd40"], 's40': rs[i]["std_gdd40"], 
+     'a48': rs[i]["avg_gdd48"], 's48': rs[i]["std_gdd48"], 
+     'a50': rs[i]["avg_gdd50"], 's50': rs[i]["std_gdd50"], 
      'a52': rs[i]["avg_gdd52"], 's52': rs[i]["std_gdd52"] }
 
 
 
-  modMonth(stationID, out, db, adb, 3, 4, "MARCH", "APRIL")
-  modMonth(stationID, out, db, adb, 5, 6, "MAY", "JUNE")
-  modMonth(stationID, out, db, adb, 7, 8, "JULY", "AUGUST")
-  modMonth(stationID, out, db, adb, 9, 10, "SEPTEMBER", "OCTOBER")
-  out.close()
+    modMonth(station, out, db, adb, 3, 4, "MARCH", "APRIL")
+    modMonth(station, out, db, adb, 5, 6, "MAY", "JUNE")
+    modMonth(station, out, db, adb, 7, 8, "JULY", "AUGUST")
+    modMonth(station, out, db, adb, 9, 10, "SEPTEMBER", "OCTOBER")
 
 def modMonth(stationID, out, db, adb, mo1, mo2, mt1, mt2):
-  import mx.DateTime, constants
   out.write("""\n               %-12s                %-12s
      ****************************  *************************** 
  YEAR  40-86  48-86  50-86  52-86   40-86  48-86  50-86  52-86  

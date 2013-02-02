@@ -9,7 +9,7 @@ nt = network.Table("IACLIMATE")
 
 
 def setupCSV(yr):
-    out = open("ks/%s_monthly.csv" % (yr,), 'w')
+    out = open("/mesonet/share/climodat/ks/%s_monthly.csv" % (yr,), 'w')
     out.write("stationID,stationName,Latitude,Longitude,")
     for i in range(1,13):
         for v in ["MINT","MAXT","PREC"]:
@@ -24,20 +24,20 @@ def metadata(id,csv):
 def process(id, csv,yr):
     for i in range(1,13):
     # Compute Climate
-        sql = "SELECT round(avg(high)::numeric,1) as avg_high,\
-      round(avg(low)::numeric,1) as avg_low, \
-      round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' and \
-      extract(month from valid) = %s" % (constants.climatetable(id), id, i)
+        sql = """SELECT round(avg(high)::numeric,1) as avg_high,
+      round(avg(low)::numeric,1) as avg_low, 
+      round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' and 
+      extract(month from valid) = %s""" % (constants.climatetable(id), id, i)
         rs = constants.mydb.query(sql).dictresult()
         aHigh = rs[0]["avg_high"]
         aLow = rs[0]["avg_low"]
         aRain = rs[0]["rain"]
 
     # Fetch Obs
-        sql = "SELECT round(avg_high::numeric,1) as avg_high, \
-      round(avg_low::numeric,1) as avg_low, \
-      round(rain::numeric,2) as rain from r_monthly WHERE station = '%s' \
-      and monthdate = '%s-%02i-01'" % (id, yr, i)
+        sql = """SELECT round(avg_high::numeric,1) as avg_high, 
+      round(avg_low::numeric,1) as avg_low, 
+      round(rain::numeric,2) as rain from r_monthly WHERE station = '%s' 
+      and monthdate = '%s-%02i-01'""" % (id, yr, i)
         rs = constants.mydb.query(sql).dictresult()
         oHigh = rs[0]["avg_high"]
         oLow = rs[0]["avg_low"]
@@ -47,19 +47,19 @@ def process(id, csv,yr):
 
   # Need to do yearly stuff
   # First, get our obs
-    sql = "SELECT round(avg(high)::numeric,1) as avg_high,\
-      round(avg(low)::numeric,1) as avg_low, \
-      round(sum(precip)::numeric,2) as rain from %s WHERE \
-      station = '%s' and year = %s " % (constants.get_table(id), id, yr)
+    sql = """SELECT round(avg(high)::numeric,1) as avg_high,
+      round(avg(low)::numeric,1) as avg_low, 
+      round(sum(precip)::numeric,2) as rain from %s WHERE 
+      station = '%s' and year = %s """ % (constants.get_table(id), id, yr)
     rs = constants.mydb.query(sql).dictresult()
     oHigh = rs[0]["avg_high"]
     oLow = rs[0]["avg_low"]
     oRain = rs[0]["rain"]
   # Then climate
-    sql = "SELECT round(avg(high)::numeric,1) as avg_high,\
-    round(avg(low)::numeric,1) as avg_low, \
-    round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' " \
-    % (constants.climatetable(id.lower()), id,)
+    sql = """SELECT round(avg(high)::numeric,1) as avg_high,
+    round(avg(low)::numeric,1) as avg_low, 
+    round(sum(precip)::numeric,2) as rain from %s WHERE station = '%s' """ % (
+                            constants.climatetable(id.lower()), id,)
     rs = constants.mydb.query(sql).dictresult()
     aHigh = rs[0]["avg_high"]
     aLow = rs[0]["avg_low"]
@@ -76,7 +76,7 @@ def main(yr):
     #  continue
     #if (not longterm.__contains__(id.lower())):
     #  continue
-        print "%s processing [%s] %s" % (yr, id, nt.sts[id]["name"])
+        #print "%s processing [%s] %s" % (yr, id, nt.sts[id]["name"])
         metadata(id, csv)
         process(id, csv, yr)
 

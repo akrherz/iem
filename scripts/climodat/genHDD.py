@@ -1,8 +1,8 @@
 """
 Heating Degree Days
 """
-
-_REPORTID = "18"
+import constants
+import mx.DateTime
 
 def chdd(high, low, base):
     hdd = 0
@@ -16,7 +16,6 @@ def chdd(high, low, base):
     return hdd  
 
 def go(mydb, rs, stationID, updateAll=False):
-    import mx.DateTime, constants
     if updateAll:
         s = constants.startts(stationID)
     else:
@@ -45,17 +44,14 @@ def go(mydb, rs, stationID, updateAll=False):
           station = '%s' and monthdate = '%s' """ % (db[mo], db60[mo],
                                     stationID, mo.strftime("%Y-%m-%d") ) )
 
-def write(mydb, stationID):
-    import mx.DateTime, constants
-    YRCNT = constants.yrcnt(stationID)
-    out = open("reports/%s_%s.txt" % (stationID, _REPORTID), 'w')
-    constants.writeheader(out, stationID)
+def write(mydb, out, station):
+    YRCNT = constants.yrcnt(station)
     out.write("""# THESE ARE THE MONTHLY HEATING DEGREE DAYS (base=65) %s-%s FOR STATION  %s
-YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC\n""" % (
-            constants.startyear(stationID), constants._ENDYEAR, stationID,) )
+YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC
+""" % (constants.startyear(station), constants._ENDYEAR, station) )
 
     rs = mydb.query("""SELECT * from r_monthly WHERE station = '%s'""" % (
-                                        stationID,) ).dictresult()
+                                        station,) ).dictresult()
     db = {}
     db60 = {}
     for i in range(len(rs)):
@@ -71,9 +67,9 @@ YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NO
 
     second = """# THESE ARE THE MONTHLY HEATING DEGREE DAYS (base=60) %s-%s FOR STATION  %s
 YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC\n""" % (
-            constants.startyear(stationID), constants._ENDYEAR, stationID,)
+            constants.startyear(station), constants._ENDYEAR, station)
     yrCnt = 0
-    for yr in range(constants.startyear(stationID), constants._ENDYEAR):
+    for yr in range(constants.startyear(station), constants._ENDYEAR):
         yrCnt += 1
         out.write("%4i" % (yr,) )
         second += "%4i" % (yr,)
@@ -99,5 +95,4 @@ YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NO
     out.write("\n")
     second += "\n"
     out.write(second)
-    out.close()
 

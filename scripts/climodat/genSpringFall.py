@@ -1,19 +1,17 @@
 """
 Generate the length of a growing season given some base threshold
 """
+import mx.DateTime
+import constants
 
-
-def write(mydb, rs, stationID, base, _REPORTID):
-    import constants, mx.DateTime
+def write(mydb, out, rs, station, base):
     TODAY = mx.DateTime.now()
-    out = open("reports/%s_%s.txt" % (stationID, _REPORTID), 'w')
-    constants.writeheader(out, stationID)
     out.write("""# LENGTH OF SEASON FOR STATION NUMBER  %s   BASE TEMP=%s
 # LAST SPRING OCCURENCE FIRST FALL OCCURENCE 
-   YEAR MONTH DAY DOY         MONTH DAY DOY   LENGTH OF SEASON\n""" \
-   % (stationID, base) )
+   YEAR MONTH DAY DOY         MONTH DAY DOY   LENGTH OF SEASON
+""" % (station, base) )
 
-    s = mx.DateTime.DateTime(constants.startyear(stationID), 1, 1)
+    s = mx.DateTime.DateTime(constants.startyear(station), 1, 1)
     e = constants._ENDTS
     interval = mx.DateTime.RelativeDateTime(years=+1)
 
@@ -41,7 +39,7 @@ def write(mydb, rs, stationID, base, _REPORTID):
     sjdaytot = 0
     ejdaytot = 0
     yrs = 0
-    for yr in range(constants.startyear(stationID), constants._ENDYEAR):
+    for yr in range(constants.startyear(station), constants._ENDYEAR):
         if (yr == constants._THISYEAR):
             continue
         if d[yr]['ets'] > TODAY:
@@ -64,4 +62,3 @@ def write(mydb, rs, stationID, base, _REPORTID):
     out.write("%7s%4i%6i%4i        %4i%6i%4i          %3s\n" % (
             "MEAN", sts.month, sts.day, smean, ets.month, ets.day, 
             emean, emean - smean) )
-    out.close()

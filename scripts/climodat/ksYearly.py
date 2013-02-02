@@ -10,7 +10,7 @@ nt = network.Table(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE',
          'SDCLIMATE','NDCLIMATE','NECLIMATE','KSCLIMATE','MOCLIMATE'))
 
 def setupCSV():
-    out = open("ks/yearly.csv", 'w')
+    out = open("/mesonet/share/climodat/ks/yearly.csv", 'w')
     out.write("stationID,stationName,Latitude,Longitude,")
     for i in range(1893,constants._ENDYEAR):
         for v in ["MINT","MAXT","PREC"]:
@@ -64,7 +64,7 @@ def main():
     for id in keys:
         #if (id == 'IA7844' or id == 'IA4381'):
         #  continue
-        print "processing [%s] %s" % (id, nt.sts[id]["name"])
+        #print "processing [%s] %s" % (id, nt.sts[id]["name"])
         metadata(id, csv)
         process(id, csv)
 

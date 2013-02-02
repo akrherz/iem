@@ -1,4 +1,3 @@
-#!/mesonet/python/bin/python
 # Script to initialize the reports database
 
 import pg, mx.DateTime, string, constants

@@ -1,13 +1,10 @@
 # Compute Frost Probabilities!
 # Daryl Herzmann 1 Sep 2005
 
+import mx.DateTime
+import constants
 
-_REPORTID = "23"
-
-def write(mydb, stationID):
-    import mx.DateTime, constants
-    out = open("reports/%s_%s.txt" % (stationID, _REPORTID), 'w')
-    constants.writeheader(out, stationID)
+def write(mydb, out, station):
 
     # Load up dict of dates..
     cnt = {}
@@ -20,7 +17,7 @@ def write(mydb, stationID):
         sql = "select year, max(extract(doy from day)) as doy from %s \
            WHERE month < 7 and low <= %s and low > -40 and station = '%s' \
            and year >= %s and year < %s and month > 1 \
-         GROUP by year ORDER by doy ASC" % (constants.get_table(stationID), base, stationID, constants.startyear(stationID), constants._ENDYEAR)
+         GROUP by year ORDER by doy ASC" % (constants.get_table(station), base, station, constants.startyear(station), constants._ENDYEAR)
         rs = mydb.query(sql).dictresult()
         cnt_years[base] = len(rs)
         if (len(rs) == 0):
@@ -50,10 +47,3 @@ def write(mydb, stationID):
 
     ar.reverse()
     out.write( "\n".join(ar) )
-    out.close()
-
-if (__name__ == '__main__'):
-    from pyIEM import iemdb
-    i = iemdb.iemdb()
-    coop = i['coop']
-    write(coop, 'ia0112')
