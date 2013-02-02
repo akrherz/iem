@@ -28,7 +28,7 @@ python grid_climodat.py
 
 cd ../climodat
 python compute_0000.py
-./run.sh >& a &
+./run.sh &
 
 cd ../cache
 python warn_cache.py
