@@ -108,16 +108,19 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 <?php } ?>
 <br /><br />
 <table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<th>Site:</th><th>Valid:</th>
-<?php
- while(list($k,$v) = each($mycols)){ echo "<th>$v</th>"; }
-?>
-</tr>
-<?php
-$times = array_keys($data);
+<?php 
+ $theader = "<thead><tr><th>Site:</th><th>Valid:</th>"; 
+ while(list($k,$v) = each($mycols)){ $theader .= "<th>$v</th>"; }
+ $theader .= "</tr></thead>";
+
+ $times = array_keys($data);
 $colorme = True;
+$cnt = 0;
 while(list($k,$ts) = each($times)){
+  if ($cnt % 30 == 0){
+    echo $theader;
+  }
+
   echo sprintf("<tr%s><td>%s</td><td><a href='cat.phtml?year=%s&month=%s&day=%s&hour=%s&minute=%s'>%s</a></td>", 
 	($colorme)? " style='background: #eee;'": "", $station, 
 	date("Y", $ts), date("m", $ts), date("d", $ts), date("H", $ts), 
@@ -128,6 +131,8 @@ while(list($k,$ts) = each($times)){
     echo sprintf("<td>%s</td>", @$data[$ts][$v]);
   }
   echo "</tr>";
+  
+  $cnt += 1;
 }
 
 ?>
