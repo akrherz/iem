@@ -36,6 +36,13 @@ MW_NORTH = 53.51
 MW_SOUTH = 30.37
 MW_NX    = 100
 MW_NY    = 100
+# Define grid bounds, northeast
+NE_WEST  = -86.7
+NE_EAST  = -64.1
+NE_NORTH = 50.51
+NE_SOUTH = 30.37
+NE_NX    = 100
+NE_NY    = 100
 # Define grid bounds, CONUS
 CONUS_WEST  = -126.2
 CONUS_EAST  = -65.9
@@ -83,6 +90,7 @@ def maue(N=-1):
            "#f5a0a0", "#e16464", "#c83c3c"]
     cmap3 = mpcolors.ListedColormap(cpool[0:N], 'maue', N=N)
     mpcm.register_cmap(cmap=cmap3)
+    return cmap3
     
 def floatRgb(mag, cmin, cmax):
        """
@@ -268,7 +276,7 @@ def simple_valplot(lons, lats, vals, cfg):
         txres.txFontHeightF = 0.014
         txres.txJust        = "BottomCenter"
         for i in range(len(lons)):
-            Ngl.add_text(wks, plot, cfg["_format"] % vals[i], 
+            Ngl.add_text(wks, plot, cfg.get("_format",'%s') % vals[i], 
                       lons[i], lats[i],txres)
     if cfg.has_key("_labels"):
         txres               = Ngl.Resources()
@@ -380,6 +388,8 @@ def simple_contour(lons, lats, vals, cfg):
     # Create Analysis
     if cfg.has_key("_conus"):
         analysis, res = grid_conus(lons, lats, vals)
+    elif cfg.get("_northeast", False):
+        analysis, res = grid_northeast(lons, lats, vals)
     elif cfg.get("_midwest", False):
         analysis, res = grid_midwest(lons, lats, vals)
     else:
@@ -482,6 +492,30 @@ def grid_midwest(lons, lats, vals):
     res.sfYCEndV   = max(yaxis)
 
     return analysis, res
+
+def grid_northeast(lons, lats, vals):
+    """
+    Convience routine to do a simple grid for MidWest
+    @return numpy grid of values and plot res
+    """
+    delx = (NE_EAST - NE_WEST) / (NE_NX - 1)
+    dely = (NE_NORTH - NE_SOUTH) / (NE_NY - 1)
+    # Create axis
+    xaxis = NE_WEST + delx * numpy.arange(0, NE_NX)
+    yaxis = NE_SOUTH + dely * numpy.arange(0, NE_NY)
+    # Create the analysis
+    analysis = Ngl.natgrid(lons, lats, vals, xaxis, yaxis)
+
+    # Setup res
+    res = northeast()
+
+    res.sfXCStartV = min(xaxis)
+    res.sfXCEndV   = max(xaxis)
+    res.sfYCStartV = min(yaxis)
+    res.sfYCEndV   = max(yaxis)
+
+    return analysis, res
+
 
 def grid_conus(lons, lats, vals):
     """
@@ -651,6 +685,7 @@ def iowa():
     res.mpOutlineOn             = True           # Draw map for sure
     res.mpOutlineBoundarySets   = "NoBoundaries" # What not to draw
     res.mpOutlineSpecifiers     = ["Conterminous US : Iowa : Counties",]
+    #res.mpOutlineSpecifiers     = ["Conterminous US : Iowa",]
     res.mpShapeMode = "FreeAspect"
 
     return res
@@ -884,6 +919,114 @@ def midwest():
                                    "Conterminous US : Ohio",
                                    "Conterminous US : Kentucky",
                                    ]
+
+
+    return res
+
+def northeast():
+    """ Return Ngl resources for a standard MidWest plot """
+
+    res = Ngl.Resources()
+    res.nglFrame              = False        # and this
+    res.nglDraw               = False        # Defaults this
+
+    res.pmTickMarkDisplayMode = "Never"      # Turn off annoying ticks
+
+    # Setup the view
+    res.nglMaximize         = False      # Prevent funky things
+    res.vpWidthF            = 0.8       # Default width of map?
+    res.vpHeightF           = 0.6        # Go vertical
+    res.nglPaperOrientation = "landscape"
+    res.vpXF                = 0.1        # Make Math easier
+    res.vpYF                = 0.8        # 
+
+    #____________ MAP STUFF ______________________
+    res.mpProjection = "LambertEqualArea"   # Display projection
+    res.mpCenterLonF = -73.5                # Central Longitude
+    res.mpCenterLatF = 42.0                 # Central Latitude
+    res.mpLimitMode  = "LatLon"             # Display bounds 
+    xmin, ymin, xmax, ymax = [-76.5, 37.5, -70.4, 42.5]
+    res.mpMinLonF    = xmin                # West
+    res.mpMaxLonF    = xmax                # East
+    res.mpMinLatF    = ymin                 # South
+    res.mpMaxLatF    = ymax                 # North
+    res.mpPerimOn    = False                # Draw Border around Map
+    res.mpDataBaseVersion       = "MediumRes"     # Don't need hires coast
+    res.mpDataSetName           = "Earth..2"      # includes counties
+    res.mpGridAndLimbOn         = False           # Annoying
+    res.mpUSStateLineThicknessF = 3               # Outline States
+
+    res.mpOutlineOn             = True           # Draw map for sure
+    res.mpOutlineBoundarySets   = "NoBoundaries" # What not to draw
+    res.mpOutlineSpecifiers     = ["Conterminous US : Maine",
+                               "Conterminous US : Vermont",
+                               "Conterminous US : New Hampshire",
+                               "Conterminous US : New York",
+                               "Conterminous US : New Jersey",
+                               "Conterminous US : Massachusetts",
+                               "Conterminous US : Connecticut",
+                               "Conterminous US : Delaware",
+                               "Conterminous US : Maryland",
+                               "Conterminous US : Virginia",
+                               "Conterminous US : Ohio",
+                               "Conterminous US : Pennsylvania",
+                               "Conterminous US : Kentucky",
+                               "Conterminous US : Michigan",
+                               "Conterminous US : Rhode Island",
+                               ]
+    res.mpShapeMode = "FreeAspect"
+
+    #_____________ LABEL BAR STUFF __________________________
+    res.lbAutoManage       = False           # Let me drive!
+    res.lbOrientation      = "Vertical"      # Draw it vertically
+    res.lbTitleString      = "lbTitleString" # Default legend
+    res.lbTitlePosition    = "Bottom"          # Place title on the left
+    res.lbTitleOn          = True            # We want a title, please
+    #res.lbTitleAngleF      = 90.0            # Rotate the title?
+    #res.lbTitleDirection   = "Across"        # Make it appear rotated?
+    res.lbPerimOn          = False            # Include a box aroundit
+    res.lbPerimThicknessF  = 1.0             # Thicker line?
+    res.lbBoxMinorExtentF  = 0.2             # Narrower boxes
+    res.lbTitleFontHeightF = 0.016
+    res.lbLabelFontHeightF = 0.016
+    #res.lbRightMarginF    = -0.3
+    #res.lbLeftMarginF       = -0.3
+    res.lbTitleExtentF     = 0.1
+
+    #______________ Contour Defaults _______________________
+    res.cnFillOn         = True    # filled contours
+    res.cnInfoLabelOn    = False   # No information label
+    res.cnLineLabelsOn   = False   # No line labels
+    res.cnLinesOn        = False   # No contour lines
+    res.cnFillDrawOrder  = "Predraw"       # Draw contour first!
+
+    res.pmLabelBarHeightF = 0.4
+    res.pmLabelBarWidthF = 0.06
+    res.pmLabelBarKeepAspect = True
+    res.pmLabelBarSide = "Right"
+
+    res.mpFillOn                = True            # Draw map for sure
+    res.mpFillAreaSpecifiers    = ["land","water"]  # Draw the US
+    res.mpFillBoundarySets   = "NoBoundaries" # What not to draw
+    res.mpSpecifiedFillColors   = [0,0]            # Draw in white
+    res.mpAreaMaskingOn         = True            # Mask by Iowa
+    res.mpMaskAreaSpecifiers    = ["Conterminous US : Maine",
+                               "Conterminous US : Vermont",
+                               "Conterminous US : New Hampshire",
+                               "Conterminous US : New York",
+                               "Conterminous US : New Jersey",
+                               "Conterminous US : Massachusetts",
+                               "Conterminous US : Connecticut",
+                               "Conterminous US : Delaware",
+                               "Conterminous US : Maryland",
+                               "Conterminous US : Virginia",
+                               "Conterminous US : West Virginia",
+                               "Conterminous US : Ohio",
+                               "Conterminous US : Pennsylvania",
+                               "Conterminous US : Kentucky",
+                               "Conterminous US : Michigan",
+                               "Conterminous US : Rhode Island",
+                               ]
 
 
     return res

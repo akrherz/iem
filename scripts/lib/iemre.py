@@ -2,6 +2,7 @@
 import numpy
 import math
 import mx.DateTime
+import datetime
 
 # Iowa Extents in EPSG:26915
 # 202,054 4,470,570 736,852 4,822,687
@@ -46,7 +47,7 @@ def day_idx(ts):
     @param ts mx.DateTime object
     @return int index value
     """
-    basets = mx.DateTime.DateTime(ts.year,1,1,0,0)
+    basets = datetime.datetime(ts.year,1,1,0,0)
     return int((ts - basets).days)
 
 def k2f(ar):

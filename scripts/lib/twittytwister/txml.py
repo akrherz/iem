@@ -350,6 +350,8 @@ def parseXML(xml):
     return microdom.parseXMLString(xml)
 
 def parseUpdateResponse(xml):
+    if xml is None:
+        return xml
     return parseXML(xml).getElementsByTagName("id")[0].firstChild().data
 
 # vim: set expandtab:
