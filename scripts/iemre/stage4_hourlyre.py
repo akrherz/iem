@@ -7,10 +7,7 @@ import numpy
 import iemre
 import os
 import sys
-try:
-    import netCDF3
-except:
-    import netCDF4 as netCDF3
+import netCDF4
 
 def merge(ts):
     """
@@ -45,7 +42,8 @@ def merge(ts):
     #print '%s MIN: %5.2f AVG: %5.2f MAX: %5.2f' % (ts, numpy.min(res), numpy.average(res),
     #                                               numpy.max(res))
     # Open up our RE file
-    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),'a')
+    nc = netCDF4.Dataset("/mnt/mesonet/data/iemre/%s_mw_hourly.nc" % (
+                                                            ts.year,),'a')
 
     offset = int(( ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours) - 1
     nc.variables["p01m"][offset,:,:] = res.transpose()
