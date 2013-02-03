@@ -4,7 +4,7 @@
 from twisted.python import log
 log.startLogging( open('/mesonet/data/logs/snet_fe.log', 'a') )
 
-import re, mx.DateTime
+import mx.DateTime
 SCRIPT_TIME = mx.DateTime.now()
 import subprocess
 import tempfile
@@ -16,6 +16,7 @@ import tracker
 import mesonet
 iemtracker = tracker.Engine()
 nt = network.Table(("KCCI", "KELO", "KIMT"))
+import psycopg2
 import iemdb
 IEM = iemdb.connect("iem", bypass=True)
 
@@ -82,37 +83,34 @@ def writeHeader():
     FSDRR5.write(":Iowa Environmental Mesonet - KELO WeatherNet\n")
 
  
-#_______________________________________________________________
-#   loadCounters()
-#     - simply loads data from the counter.yr file.
-#
 def loadCounters():
-    o = open("counter.yr").readlines()
-    for i in range(len(o)):
-      tokens = re.split(" ", o[i])
-      sID = tokens[0]
-      MOpcpn = tokens[1]
-      YRpcpn = tokens[2]
-      moCntr[sID] = float(MOpcpn)
-      yrCntr[sID] = float(YRpcpn)
-    if ( len(o) == 0):
-      print "ERROR: counter.yr is null"
-
-#_______________________________________________________________
-#   writeCounter()
-#     - write the counters back to the counter.yr file
-#
+    """ Open the precip_counter.txt """
+    # Default to zero
+    for sid in nt.sts.keys():
+        moCntr[sid] = 0.0
+        yrCntr[sid] = 0.0
+    if not os.path.isfile("precip_counter.txt"):
+        return
+    for line in open('precip_counter.txt'):
+        tokens = line.split()
+        if len(tokens) != 3:
+            continue
+        sid = tokens[0]
+        moCntr[sid] = float(tokens[1])
+        yrCntr[sid] = float(tokens[2])
+    
 def writeCounters():
-  o = open("counter.yr","w")
-  for key in moCntr.keys():
-    MOelem = moCntr[key]
-    if (MOelem < 0):
-      MOelem = 0
-    YRelem = yrCntr[key]
-    if (YRelem < 0):
-      YRelem = 0
-    o.write("%s %.2f %.2f\n" % (key, MOelem, YRelem) )
-  o.close()
+    """ write out the precip counters for the next run! """
+    o = open("precip_counter","w")
+    for key in moCntr.keys():
+        MOelem = moCntr[key]
+        if (MOelem < 0):
+            MOelem = 0
+        YRelem = yrCntr[key]
+        if (YRelem < 0):
+            YRelem = 0
+        o.write("%s %.2f %.2f\n" % (key, MOelem, YRelem) )
+    o.close()
 
 def fetch_pmonth(obs, nwsli):
     if obs.has_key(nwsli):
@@ -243,7 +241,6 @@ def will_email(_network, obs, thres):
     cnt_threshold = 25
     if (_network == 'KIMT'):
         cnt_threshold = 10
-    cnt_offline = 0
     # First, look into the offline database to see how many active tickets
     icursor = IEM.cursor()
     icursor.execute("""SELECT count(*) as c from offline WHERE 
@@ -295,7 +292,7 @@ def post_process():
     cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % ('kelo.csv', kelocsvfn)
     p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
                          stdout=subprocess.PIPE)
-    data = p.stdout.read()
+    p.stdout.read()
     os.unlink(kelocsvfn)
     
     if SCRIPT_TIME.minute in [15,35]:
@@ -316,8 +313,7 @@ def loadQC():
     See which sites have flags against them
     """
     qdict = {}
-    portfolio = iemdb.connect('portfolio', dbhost='meteor.geol.iastate.edu',
-                              bypass=True)
+    portfolio = psycopg2.connect('dbname=portfolio host=meteor.geol.iastate.edu user=mesonet')
     pcursor = portfolio.cursor()
     
     pcursor.execute("""
