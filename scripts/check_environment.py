@@ -8,3 +8,5 @@ import mapscript
 import netCDF4
 import Nio
 import pygrib
+import ephem
+import psycopg2
