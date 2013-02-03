@@ -1,11 +1,11 @@
-import netCDF3 as netCDF4
+import netCDF4
 import numpy
 import mx.DateTime
 
-offset1 = int((mx.DateTime.DateTime(2011,1,1) - mx.DateTime.DateTime(2011,1,1)).days)
-offset2 = int((mx.DateTime.DateTime(2012,1,1) - mx.DateTime.DateTime(2011,1,1)).days)
+offset1 = int((mx.DateTime.DateTime(2012,5,1) - mx.DateTime.DateTime(2012,1,1)).days)
+offset2 = int((mx.DateTime.DateTime(2012,6,6) - mx.DateTime.DateTime(2012,1,1)).days)
 
-nc = netCDF4.Dataset("/mesonet/data/iemre/2011_mw_daily.nc", 'r')
+nc = netCDF4.Dataset("/mesonet/data/iemre/2012_mw_daily.nc", 'r')
 p01d = nc.variables['p01d']
 
 ncc = netCDF4.Dataset("/mesonet/data/iemre/mw_dailyc.nc", 'r')
@@ -18,14 +18,14 @@ diff = (numpy.sum(p01d[offset1:offset2,:,:],0) -  numpy.sum(cp01d[offset1:offset
 print numpy.sum(p01d[offset1:offset2,5,5]), numpy.sum(cp01d[offset1:offset2,5,5])
 print numpy.max(diff), numpy.min(diff)
 
-cfg = {'_title': '2011 Precipitation Departure from Normal',
-       '_valid': '1 Jan - 31 Dec 2011',
+cfg = {'_title': '1 May - 6 June 2012 Precipitation Departure from Normal',
+       '_valid': '1 May - 6 June 2012',
        #'cnFillMode': 'CellFill',
-       #'_midwest': True,
+       '_midwest': True,
  'cnLevelSelectionMode' : 'ManualLevels',
- 'cnLevelSpacingF'      : 2.,
- 'cnMinLevelValF'       : -14.,
- 'cnMaxLevelValF'       : 14.,
+ 'cnLevelSpacingF'      : 1.,
+ 'cnMinLevelValF'       : -7.,
+ 'cnMaxLevelValF'       : 7.,
        'wkColorMap' : 'hotcolr_19lev',
         'nglSpreadColorStart': -1,
         'nglSpreadColorEnd'  : 2,

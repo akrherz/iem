@@ -1,11 +1,8 @@
 # Generate the IEMRE hourly analysis file for a year
 
 import iemre
-try:
-    import netCDF4 as netCDF3
-except:
-    import netCDF3
-import mx.DateTime
+import netCDF4
+import datetime
 import numpy
 import sys
 
@@ -15,7 +12,7 @@ def init_year(ts):
     """
 
     fp = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year, )
-    nc = netCDF3.Dataset(fp, 'w')
+    nc = netCDF4.Dataset(fp, 'w')
     nc.title         = "IEM Hourly Reanalysis %s" % (ts.year,)
     nc.platform      = "Grided Observations"
     nc.description   = "IEM hourly analysis on a ~25 km grid"
@@ -25,7 +22,8 @@ def init_year(ts):
     nc.realization   = 1
     nc.Conventions   = 'CF-1.0'
     nc.contact       = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history       = "%s Generated" % (mx.DateTime.now().strftime("%d %B %Y"),)
+    nc.history       = "%s Generated" % (
+                            datetime.datetime.now().strftime("%d %B %Y"),)
     nc.comment       = "No Comment at this time"
 
 
@@ -33,7 +31,9 @@ def init_year(ts):
     # Setup Dimensions
     nc.createDimension('lat', iemre.NY)
     nc.createDimension('lon', iemre.NX)
-    days = ((ts + mx.DateTime.RelativeDateTime(years=1)) - ts).days
+    ts2 = datetime.datetime( ts.year + 1, 1, 1)
+    days = (ts2 - ts).days
+    print 'Year %s has %s days' % (ts.year, days)
     nc.createDimension('time', int(days) * 24) 
 
     # Setup Coordinate Variables
@@ -100,4 +100,5 @@ def init_year(ts):
 
     nc.close()
 
-init_year(mx.DateTime.DateTime(int(sys.argv[1]),1,1))
+if __name__ == '__main__':
+    init_year(datetime.datetime(int(sys.argv[1]),1,1))
