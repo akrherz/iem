@@ -11,4 +11,5 @@ def connect(dbname, bypass=False, dbhost='iemdb'):
         return psycopg2.connect(database=dbname)
     if dbuser == 'akrherz' and bypass:
         dbuser = 'nobody'
+        dbhost = 'mesonet.agron.iastate.edu'
     return psycopg2.connect(database=dbname, host=dbhost, user=dbuser)
