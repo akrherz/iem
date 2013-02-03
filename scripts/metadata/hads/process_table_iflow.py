@@ -44,7 +44,7 @@ for miss in missing:
   MESOSITE.commit()
 
 
-  cmd = "/mesonet/python/bin/python /mesonet/www/apps/iemwebsite/scripts/util/addSiteMesosite.py %s_DCP %s" % (data['state'], miss)
+  cmd = "python /mesonet/www/apps/iemwebsite/scripts/util/addSiteMesosite.py %s_DCP %s" % (data['state'], miss)
   os.system(cmd)
 
   hcursor2.execute("""

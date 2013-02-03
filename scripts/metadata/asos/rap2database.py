@@ -40,7 +40,7 @@ for line in open('stations.txt'):
     MESOSITE.commit()
 
 
-    cmd = "/mesonet/python/bin/python /mesonet/www/apps/iemwebsite/scripts/util/addSiteMesosite.py %s_ASOS %s" % (data['state'], data['id'])
+    cmd = "python /mesonet/www/apps/iemwebsite/scripts/util/addSiteMesosite.py %s_ASOS %s" % (data['state'], data['id'])
     os.system(cmd)
 
 MESOSITE.close()
