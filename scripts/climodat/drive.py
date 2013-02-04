@@ -154,4 +154,3 @@ for dbid in nt.sts.keys():
     gen_precip_cats.write(mydb, out, rs, dbid)
     out.close()
     
-    print 'Made it'
