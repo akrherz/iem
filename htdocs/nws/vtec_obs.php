@@ -9,6 +9,8 @@ $rhthres = isset($_REQUEST["relh"]) ? floatval($_REQUEST["relh"]): 25;
 $skntthres = isset($_REQUEST["sknt"]) ? floatval($_REQUEST["sknt"]): 25;
 $gustthres = isset($_REQUEST["gust"]) ? floatval($_REQUEST["gust"]): 25;
 $vsbythres = isset($_REQUEST["vsby"]) ? floatval($_REQUEST["vsby"]): 0.25;
+$ltmpfthres = isset($_REQUEST["ltmpf"]) ? floatval($_REQUEST["ltmpf"]): 32;
+$htmpfthres = isset($_REQUEST["htmpf"]) ? floatval($_REQUEST["htmpf"]): 100;
 $mode = isset($_REQUEST["mode"])? substr($_REQUEST["mode"],0,4): 'FW.W';
 $ar = explode(".", $mode);
 $phenomena = $ar[0];
@@ -51,7 +53,10 @@ $significance = $ar[1];
   	<td><select name="mode">
   	<option value="BZ.W" <?php if ($mode == "BZ.W") echo "SELECTED='SELECTED';"?>>Blizzard Warning BZ.W</option>
   	<option value="FG.Y" <?php if ($mode == "FG.Y") echo "SELECTED='SELECTED';"?>>Dense Fog Advisory FG.Y</option>
+  	<option value="FR.Y" <?php if ($mode == "FR.Y") echo "SELECTED='SELECTED';"?>>Frost Advisory FR.Y</option>
+  	<option value="FZ.W" <?php if ($mode == "FZ.W") echo "SELECTED='SELECTED';"?>>Freeze Warning FZ.W</option>
   	<option value="FW.W" <?php if ($mode == "FW.W") echo "SELECTED='SELECTED';"?>>Red Flag Warning FW.W</option>
+  	<option value="HZ.W" <?php if ($mode == "HZ.W") echo "SELECTED='SELECTED';"?>>Hard Freeze Warning HZ.W</option>
   	<option value="HW.W" <?php if ($mode == "HW.W") echo "SELECTED='SELECTED';"?>>High Wind Warning HW.W</option>
   	<option value="WI.Y" <?php if ($mode == "WI.Y") echo "SELECTED='SELECTED';"?>>Wind Advisory WI.Y</option>
   	</select></td>
@@ -74,6 +79,18 @@ $significance = $ar[1];
     <td><input type="text" size="10" name="sknt" value="<?php echo $skntthres; ?>" /></td>
     <td><input type="text" size="10" name="gust" value="<?php echo $gustthres; ?>" /></td>
     <td><input type="text" size="10" name="vsby" value="<?php echo $vsbythres; ?>" /></td>
+    </tr>
+  <tr>
+  	<th>Air Temperatures below... (F):</th>
+  	<th>Air Temperatures above... (F):</th>
+    <td></td>
+    <td></td>
+  </tr>
+    <tr>
+    <td><input type="text" size="10" name="ltmpf" value="<?php echo $ltmpfthres; ?>" /></td>
+    <td><input type="text" size="10" name="htmpf" value="<?php echo $htmpfthres; ?>" /></td>
+    <td></td>
+    <td></td>
     </tr>
     </table>
     <input type="submit" value="Generate Report"/>
@@ -146,6 +163,19 @@ $significance = $ar[1];
   	}
   	return sprintf("%.1fSM", $vsby);		   
   }
+  function c4($tmpf){
+	if ($tmpf == null) return "M";
+	global $ltmpfthres;
+	global $htmpfthres;
+	if ($tmpf <= $ltmpfthres){
+		return sprintf("<span style='color:#00f; font-weight:bold;'>%.0f</span>", $tmpf);
+	}
+	if ($tmpf >= $htmpfthres){
+		return sprintf("<span style='color:#f00;'>%.0f</span>", $tmpf);
+	}
+	return sprintf("%.0f", $tmpf);
+
+  }
   
   for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
   		$ar = explode(",", $row["a"]);
@@ -189,9 +219,9 @@ $significance = $ar[1];
   				$stfound += 1;
   				echo sprintf("<u>UGC Code: %s</u><br/>", $station2ugc[$row2["station"]]);
   			}
-  			echo sprintf("%s %sZ %.0f/%.0f %s %s %s<br>", $row2["station"], 
+  			echo sprintf("%s %sZ %s/%.0f %s %s %s<br>", $row2["station"], 
   					$row2["z"],
-  				$row2["tmpf"], $row2["dwpf"], c1(relh($row2["tmpf"], $row2["dwpf"])),
+  				c4($row2["tmpf"]), $row2["dwpf"], c1(relh($row2["tmpf"], $row2["dwpf"])),
   					c3($row2["vsby"]), c2($row2["sknt"], $row2["gust"]));
   		}
   		echo "</td></tr></table>";
