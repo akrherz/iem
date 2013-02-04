@@ -30,127 +30,138 @@ import genCountSnow
 import genTempThresholds
 import genRecordPeriods
 import gen_precip_cats
-
 import constants
 
-DEBUG = 0
+
+#stdlib
+import datetime
+
+def caller(func, *args):
+    #start = datetime.datetime.now()
+    ret = func(*args)
+    #end = datetime.datetime.now()
+    #print "%s %s took %s" % (func.__name__, args[-1], (end-start))
+    return ret
+
 updateAll= False
 for dbid in nt.sts.keys():
     #print "processing [%s] %s" % (dbid, nt.sts[dbid]["name"])
-    rs = mydb.query("""SELECT d.*, c.climoweek from %s d, climoweek c 
+    sql = """SELECT d.*, c.climoweek from %s d, climoweek c 
     WHERE station = '%s' and day >= '%s-01-01' and d.sday = c.sday 
     ORDER by day ASC""" % (constants.get_table(dbid),
-                dbid, constants.startyear(dbid) ) ).dictresult()
+                dbid, constants.startyear(dbid) ) 
 
-    genPrecipEvents.go(mydb, rs, dbid)
-    out = constants.make_output(nt, dbid, "01")
-    genPrecipEvents.write(mydb, out, dbid)
+    rs = caller(mydb.query, sql).dictresult()
+
+    caller(genPrecipEvents.go, mydb, rs, dbid)
+    out = caller(constants.make_output, nt, dbid, "01")
+    caller(genPrecipEvents.write, mydb, out, dbid)
     out.close()
 
-    out = constants.make_output(nt, dbid, "02")
-    gen30rains.write(mydb, out, dbid)
+    out = caller(constants.make_output, nt, dbid, "02")
+    caller(gen30rains.write, mydb, out, dbid)
     out.close()
     
-    genGDD.go(mydb, rs, dbid, updateAll)
-    out = constants.make_output(nt, dbid, "03")
-    genGDD.write(mydb, out, dbid)
+    caller(genGDD.go, mydb, rs, dbid, updateAll)
+    out = caller(constants.make_output, nt, dbid, "03")
+    caller(genGDD.write, mydb, out, dbid)
     out.close()
 
-    out = constants.make_output(nt, dbid, "04")
-    genDailyRecords.write(mydb, out, dbid)
+    out = caller(constants.make_output, nt, dbid, "04")
+    caller(genDailyRecords.write, mydb, out, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "05")
-    genDailyRecordsRain.write(mydb, out, dbid)
+    out = caller(constants.make_output, nt, dbid, "05")
+    caller(genDailyRecordsRain.write, mydb, out, dbid)
     out.close()
     
     #genDailyRange.go(mydb, rs, dbid)
-    out = constants.make_output(nt, dbid, "06")
-    genDailyRange.write(mydb, out, dbid)
+    out = caller(constants.make_output, nt, dbid, "06")
+    caller(genDailyRange.write, mydb, out, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "07")
-    genDailyMeans.write(mydb, out, dbid)
+    out = caller(constants.make_output, nt, dbid, "07")
+    caller(genDailyMeans.write, mydb, out, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "08")
-    genCountLows32.write(mydb, out, dbid)
+    out = caller(constants.make_output, nt, dbid, "08")
+    caller(genCountLows32.write, mydb, out, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "09")
-    genSpringFall.write(mydb, out, rs, dbid, 32)
+    out = caller(constants.make_output, nt, dbid, "09")
+    caller(genSpringFall.write, mydb, out, rs, dbid, 32)
     out.close()
     
-    out = constants.make_output(nt, dbid, "10")
-    genSpringFall.write(mydb, out, rs, dbid, 30)
+    out = caller(constants.make_output, nt, dbid, "10")
+    caller(genSpringFall.write, mydb, out, rs, dbid, 30)
     out.close()
     
-    out = constants.make_output(nt, dbid, "11")
-    genSpringFall.write(mydb, out, rs, dbid, 28)
+    out = caller(constants.make_output, nt, dbid, "11")
+    caller(genSpringFall.write, mydb, out, rs, dbid, 28)
     out.close()
     
-    out = constants.make_output(nt, dbid, "12")
-    genSpringFall.write(mydb, out, rs, dbid, 26)
+    out = caller(constants.make_output, nt, dbid, "12")
+    caller(genSpringFall.write, mydb, out, rs, dbid, 26)
     out.close()
     
-    out = constants.make_output(nt, dbid, "13")
-    genSpringFall.write(mydb, out, rs, dbid, 24)
+    out = caller(constants.make_output, nt, dbid, "13")
+    caller(genSpringFall.write, mydb, out, rs, dbid, 24)
     out.close()
     
-    genMonthly.go(mydb, dbid, updateAll)
-    out = constants.make_output(nt, dbid, "14")
-    out2 = constants.make_output(nt, dbid, "15")
-    out3 = constants.make_output(nt, dbid, "16")
-    out4 = constants.make_output(nt, dbid, "17")
-    genMonthly.write(mydb, out, out2, out3, out4, dbid)
+    caller(genMonthly.go, mydb, dbid, updateAll)
+    out = caller(constants.make_output, nt, dbid, "14")
+    out2 = caller(constants.make_output, nt, dbid, "15")
+    out3 = caller(constants.make_output, nt, dbid, "16")
+    out4 = caller(constants.make_output, nt, dbid, "17")
+    caller(genMonthly.write,mydb, out, out2, out3, out4, dbid)
     out.close()
     out2.close()
     out3.close()
     out4.close()
     
-    genHDD.go(mydb, rs, dbid, updateAll)
-    out = constants.make_output(nt, dbid, "18")
-    genHDD.write(mydb, out, dbid)
+    caller(genHDD.go, mydb, rs, dbid, updateAll)
+    out = caller(constants.make_output, nt, dbid, "18")
+    caller(genHDD.write, mydb, out, dbid)
     out.close()
     
-    genCDD.go(mydb, rs, dbid, updateAll)
-    out = constants.make_output(nt, dbid, "19")
-    genCDD.write(mydb, out, dbid)
+    caller(genCDD.go, mydb, rs, dbid, updateAll)
+    out = caller(constants.make_output, nt, dbid, "19")
+    caller(genCDD.write, mydb, out, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "20")
+    out = caller(constants.make_output, nt, dbid, "20")
     genHeatStress.write(mydb, out, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "21")
-    genCountRain.write(mydb, out, dbid)
+    out = caller(constants.make_output, nt, dbid, "21")
+    caller(genCountRain.write, mydb, out, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "25")
-    genCountSnow.write(mydb, out, dbid)
+    out = caller(constants.make_output, nt, dbid, "25")
+    caller(genCountSnow.write, mydb, out, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "22")
-    genFrostProbabilities.write(mydb, out, dbid)
+    out = caller(constants.make_output, nt, dbid, "22")
+    caller(genFrostProbabilities.write, mydb, out, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "23")
-    genSpringProbabilities.write(mydb, out, dbid)
+    out = caller(constants.make_output, nt, dbid, "23")
+    caller(genSpringProbabilities.write, mydb, out, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "24")
-    genCycles.write(mydb, out, rs, dbid)
+    out = caller(constants.make_output, nt, dbid, "24")
+    caller(genCycles.write, mydb, out, rs, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "26")
-    genTempThresholds.write(mydb, out, dbid)
+    out = caller(constants.make_output, nt, dbid, "26")
+    caller(genTempThresholds.write, mydb, out, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "27")
-    genRecordPeriods.write(mydb, out, rs, dbid)
+    out = caller(constants.make_output, nt, dbid, "27")
+    caller(genRecordPeriods.write, mydb, out, rs, dbid)
     out.close()
     
-    out = constants.make_output(nt, dbid, "28")
-    gen_precip_cats.write(mydb, out, rs, dbid)
+    out = caller(constants.make_output, nt, dbid, "28")
+    caller(gen_precip_cats.write, mydb, out, rs, dbid)
     out.close()
     

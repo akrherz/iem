@@ -3,11 +3,39 @@
 import mx.DateTime
 import constants
 
+import numpy as np
+
 def wrap(cnt, s=None):
-  if cnt > 0:
-    return s or cnt
-  else:
-    return ""
+    if cnt > 0:
+        return s or cnt
+    else:
+        return ""
+
+# http://stackoverflow.com/questions/4494404
+def contiguous_regions(condition):
+    """Finds contiguous True regions of the boolean array "condition". Returns
+    a 2D array where the first column is the start index of the region and the
+    second column is the end index."""
+
+    # Find the indicies of changes in "condition"
+    d = np.diff(condition)
+    idx, = d.nonzero() 
+
+    # We need to start things after the change in "condition". Therefore, 
+    # we'll shift the index by 1 to the right.
+    idx += 1
+
+    if condition[0]:
+        # If the start of condition is True prepend a 0
+        idx = np.r_[0, idx]
+
+    if condition[-1]:
+        # If the end of condition is True, append the length of the array
+        idx = np.r_[idx, condition.size] # Edit
+
+    # Reshape the result into two columns
+    idx.shape = (-1,2)
+    return idx
 
 def write(mydb, out, rs, station):
     out.write("""# First occurance of record consecutive number of days 
@@ -21,77 +49,48 @@ def write(mydb, out, rs, station):
       'DAYS', 'BEGIN DATE', 'END DATE',
       'DAYS', 'BEGIN DATE', 'END DATE') )
 
-    data = {}
+    highs = np.zeros( (len(rs),), 'f')
+    lows = np.zeros( (len(rs),), 'f')
+    for i in range(len(rs)):
+        highs[i] = rs[i]['high']
+        lows[i] = rs[i]['low']
+
     for thres in range(-20,100,2):
-        max_ah = 0
-        max_bh = 0
-        max_al = 0
+        
+        condition = lows < thres
         max_bl = 0
-        cnt_ah = 0
-        cnt_bh = 0
-        cnt_al = 0
-        cnt_bl = 0
-        max_ah_ts = constants._QCENDTS
-        max_bh_ts = constants._QCENDTS
-        max_al_ts = constants._QCENDTS
-        max_bl_ts = constants._QCENDTS
-        for i in range(len(rs)):
-            # High Above Threshold
-            if rs[i]['high'] > thres :
-                cnt_ah += 1
-      
-            if rs[i]['high'] <= thres and cnt_ah > 0:
-                if cnt_ah > max_ah:
-                    ts = mx.DateTime.strptime(rs[i]['day'], '%Y-%m-%d')
-                    max_ah = cnt_ah
-                    max_ah_ts = ts
-                cnt_ah = 0
-            # Low Above Threshold
-            if rs[i]['low'] > thres :
-                cnt_al += 1
-            if rs[i]['low'] <= thres and cnt_al > 0:
-                if cnt_al > max_al:
-                    ts = mx.DateTime.strptime(rs[i]['day'], '%Y-%m-%d')
-                    max_al = cnt_al
-                    max_al_ts = ts
-                cnt_al = 0
-            # High Below Threshold
-            if rs[i]['high'] < thres :
-                cnt_bh += 1
-            if rs[i]['high'] >= thres and cnt_bh > 0:
-                if cnt_bh > max_bh:
-                    ts = mx.DateTime.strptime(rs[i]['day'], '%Y-%m-%d')
-                    max_bh = cnt_bh
-                    max_bh_ts = ts
-                cnt_bh = 0
-            # Low Below Threshold
-            if rs[i]['low'] < thres :
-                cnt_bl += 1
-            if rs[i]['low'] >= thres and cnt_bl > 0:
-                if cnt_bl > max_bl:
-                    ts = mx.DateTime.strptime(rs[i]['day'], '%Y-%m-%d')
-                    max_bl = cnt_bl
-                    max_bl_ts = ts
-                cnt_bl = 0
+        max_bl_ts = mx.DateTime.now()
+        for start, stop in contiguous_regions(condition):
+            if (stop - start) > max_bl:
+                max_bl = int(stop - start)
+                max_bl_ts = mx.DateTime.DateTime(constants.startyear(station),1,1) + mx.DateTime.RelativeDateTime(days=int(start))
+    
+        condition = lows >= thres
+        max_al = 0
+        max_al_ts = mx.DateTime.now()
+        for start, stop in contiguous_regions(condition):
+            if (stop - start) > max_al:
+                max_al = int(stop - start)
+                max_al_ts = mx.DateTime.DateTime(constants.startyear(station),1,1) + mx.DateTime.RelativeDateTime(days=int(start))
 
-            if cnt_ah > max_ah:
-                ts = mx.DateTime.strptime(rs[i]['day'], '%Y-%m-%d')
-                max_ah = cnt_ah
-                max_ah_ts = ts
-            if cnt_bh > max_bh:
-                ts = mx.DateTime.strptime(rs[i]['day'], '%Y-%m-%d')
-                max_bh = cnt_bh
-                max_bh_ts = ts
-            if cnt_al > max_al:
-                ts = mx.DateTime.strptime(rs[i]['day'], '%Y-%m-%d')
-                max_al = cnt_al
-                max_al_ts = ts
-            if cnt_bh > max_bh:
-                ts = mx.DateTime.strptime(rs[i]['day'], '%Y-%m-%d')
-                max_bh = cnt_bh
-                max_bh_ts = ts
+        condition = highs < thres
+        max_bh = 0
+        max_bh_ts = mx.DateTime.now()
+        for start, stop in contiguous_regions(condition):
+            if (stop - start) > max_bh:
+                max_bh = int(stop - start)
+                max_bh_ts = mx.DateTime.DateTime(constants.startyear(station),1,1) + mx.DateTime.RelativeDateTime(days=int(start))
+    
+        condition = highs >= thres
+        max_ah = 0
+        max_ah_ts = mx.DateTime.now()
+        for start, stop in contiguous_regions(condition):
+            if (stop - start) > max_ah:
+                max_ah = int(stop - start)
+                max_ah_ts = mx.DateTime.DateTime(constants.startyear(station),1,1) + mx.DateTime.RelativeDateTime(days=int(start))
 
-            out.write("%3i %5s %10s %10s %5s %10s %10s  %5s %10s %10s %5s %10s %10s\n" % (
+
+        out.write("%3i %5s %10s %10s %5s %10s %10s  %5s %10s %10s %5s %10s %10s\n" % (
     thres, 
     wrap(max_bl), 
     wrap(max_bl, (max_bl_ts - mx.DateTime.RelativeDateTime(days=max_bl)).strftime("%m/%d/%Y")), 

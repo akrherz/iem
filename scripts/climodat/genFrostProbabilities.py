@@ -1,5 +1,6 @@
-# Compute Frost Probabilities!
-# Daryl Herzmann 1 Sep 2005
+"""
+ Compute Frost Probabilities!
+"""
 
 import mx.DateTime
 import constants
@@ -14,9 +15,10 @@ def write(mydb, out, station):
 
     for base in (32,28,26,22):
         # Query Last doy for each year in archive
-        sql = "select year, min(extract(doy from day)) as doy from %s \
-           WHERE month > 7 and low <= %s and low > -40 and station = '%s' \
-           GROUP by year ORDER by doy ASC" % (constants.get_table(station), base, station,)
+        sql = """select year, min(extract(doy from day)) as doy from %s 
+           WHERE month > 7 and low <= %s and low > -40 and station = '%s' 
+           GROUP by year ORDER by doy ASC""" % (constants.get_table(station), 
+                                                base, station,)
         rs = mydb.query(sql).dictresult()
         cnt_years[base] = len(rs)
         for i in range(len(rs)):
@@ -33,7 +35,7 @@ def write(mydb, out, station):
         ts = sts + mx.DateTime.RelativeDateTime(days=day-1)
         for base in (32,28,26,22):
             running[base] += cnt[day][base]
-        if (day % 2 == 0):
+        if day % 2 == 0:
             out.write(" %3s %s  %3i  %3i  %3i  %3i\n" % (ts.strftime("%-j"),
               ts.strftime("%b %d"), running[32] / cnt_years[base] * 100.0,
               running[28] / cnt_years[base] * 100.0,
