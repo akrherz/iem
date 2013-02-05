@@ -39,7 +39,7 @@ now = sts
 while now < ets:
     # Get GMT rep
     fp = now.strftime("/wepp/data/rainfall/netcdf/daily/%Y/%m/%Y%m%d_rain.nc")
-    if (os.path.isfile(fp)):
+    if os.path.isfile(fp):
         nc = netCDF4.Dataset(fp, 'r')
         p = nc.variables["rainfall_15min"]
     else:
@@ -50,6 +50,6 @@ while now < ets:
                 (now + datetime.timedelta(seconds=minutes*60)).strftime(
                                 "%Y-%m-%d %H:%M"), p[i][gy][gx] )
     del(p)
-    if (os.path.isfile(fp)):
+    if os.path.isfile(fp):
         del(nc)
     now += interval
