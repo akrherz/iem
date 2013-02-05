@@ -9,6 +9,7 @@ import shutil
 import os
 import numpy.ma
 import sys
+import time
 import mesonet
 
 def sanityCheck(val, lower, upper, goodfmt, bv):
@@ -23,8 +24,21 @@ format_tokens = fmt.split(",")
 gmt = mx.DateTime.gmt()
 fn = "/mesonet/data/madis/mesonet/%s.nc" % (gmt.strftime("%Y%m%d_%H00"),) 
 if not os.path.isfile(fn):
+    print '%s does not exist' % (fn,)
     sys.exit()
-nc = netCDF4.Dataset(fn, 'r')
+attempt = 0
+nc = None
+# Loop in case the file is being written while we attempt to open it
+while attempt < 3:
+    try:
+        nc = netCDF4.Dataset(fn, 'r')
+        attempt = 3
+    except:
+        time.sleep(10)
+        attempt += 1
+if nc is None:
+    print 'Numerous attempts to open MADIS netcdf %s failed!' % (fn,)
+    sys.exit(0)
 
 stations   = nc.variables["stationId"][:]
 tmpk        = nc.variables["temperature"][:]
