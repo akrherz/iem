@@ -86,7 +86,8 @@ while True:
 	if not feat:
 		break
 	geom = feat.GetGeometryRef()
-	geom = geom.Simplify(0.001)
+	# at 0.001 we had marine zones disappear!
+	geom = geom.Simplify(0.0001)
 
 	featDef = ogr.Feature(out_layer.GetLayerDefn())
 	featDef.SetGeometry( geom )
