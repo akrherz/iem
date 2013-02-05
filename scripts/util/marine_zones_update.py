@@ -35,9 +35,9 @@ url = urllib2.Request('http://www.weather.gov/geodata/catalog/wsom/data/mz%s.zip
 print 'Downloading....'
 try:
     fp = urllib2.urlopen(url)
-    zip = fp.read()
+    zipdata = fp.read()
     o = open('%s.zip' % (DATESTAMP,), 'wb')
-    o.write(zip)
+    o.write(zipdata)
     o.close()
 except:
     print 'An exception was encountered attempting to download the file.'
