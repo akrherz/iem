@@ -1,10 +1,11 @@
 """
  Look into the ASOS database and figure out the start time of various 
  sites for a given network.
-$Id: $:
 """
 
-import iemdb, network, sys
+import iemdb
+import network
+import sys
 asos = iemdb.connect('asos', bypass=True)
 acursor = asos.cursor()
 mesosite = iemdb.connect('mesosite')
@@ -26,6 +27,8 @@ for row in acursor:
   
     mcursor.execute("""UPDATE stations SET archive_begin = %s 
          WHERE id = %s and network = %s""" , (row[1], station, net) )
+    if mcursor.rowcount == 0:
+        print 'ERROR: No rows updated'
   
 mcursor.close()
 mesosite.commit()
