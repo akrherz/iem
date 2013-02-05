@@ -79,7 +79,7 @@ def write(mydb, out, station):
 #                                     Number of precip events - (% of total)
  CL                MAX         MEAN   0.01-    0.26-    0.51-    1.01-            TOTAL
  WK TIME PERIOD    VAL  YR     RAIN     0.25     0.50     1.00     2.00    >2.01  DAYS
- """)
+""")
 
     rs = mydb.query("SELECT * from r_precipevents WHERE station = '%s'" % (
                 station,) ).dictresult()
