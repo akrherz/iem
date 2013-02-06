@@ -24,7 +24,8 @@ format_tokens = fmt.split(",")
 gmt = mx.DateTime.gmt()
 fn = "/mesonet/data/madis/mesonet/%s.nc" % (gmt.strftime("%Y%m%d_%H00"),) 
 if not os.path.isfile(fn):
-    print '%s does not exist' % (fn,)
+    if gmt.minute > 10:
+        print '%s does not exist' % (fn,)
     sys.exit()
 attempt = 0
 nc = None
