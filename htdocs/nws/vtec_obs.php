@@ -221,7 +221,8 @@ $significance = $ar[1];
   			}
   			echo sprintf("%s %sZ %s/%.0f %s %s %s<br>", $row2["station"], 
   					$row2["z"],
-  				c4($row2["tmpf"]), $row2["dwpf"], c1(relh($row2["tmpf"], $row2["dwpf"])),
+  				c4($row2["tmpf"]), $row2["dwpf"], 
+					c1( relh( f2c($row2["tmpf"]), f2c($row2["dwpf"]) )),
   					c3($row2["vsby"]), c2($row2["sknt"], $row2["gust"]));
   		}
   		echo "</td></tr></table>";
