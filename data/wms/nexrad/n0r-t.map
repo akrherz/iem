@@ -42,8 +42,8 @@ WEB
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
-      "wms_enable_request" "*"
-      "wms_timeformat" "YYYY-MM-DDTHH:MM:SSZ"
+   "wms_enable_request" "*"
+   "wms_timeformat" "YYYY-MM-DDTHH:MM:SSZ"
   END
 END
 
@@ -62,7 +62,6 @@ LAYER
     "wms_timeextent" "1995-01-01/2013-12-31/PT5M"
     "wms_timeitem" "datetime"
     "wms_timedefault" "2006-06-23T03:10:00Z"
-      "wms_timeformat" "YYYY-MM-DDTHH:MM:SSZ"
   END
   CONNECTION "dbname=postgis host=iemdb user=nobody"
   CONNECTIONTYPE postgis
