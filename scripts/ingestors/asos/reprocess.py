@@ -68,8 +68,9 @@ def get_job_list():
         days.append( now )
         now += datetime.timedelta(days=1)
     if options.network is not None:
-        sql = """SELECT id from stations where network = %s ORDER by id ASC"""
-        acursor.execute(sql, (options.network,) )
+        sql = """SELECT id from stations where network = %s and
+        archive_begin < %s ORDER by id ASC"""
+        acursor.execute(sql, (options.network, days[0]) )
         for row in acursor:
             stations.append( row[0] )
     else:
