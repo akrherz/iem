@@ -191,7 +191,7 @@ def process_metar(mstr, now):
         return None
     
     ob = OB()
-    ob.metar = mstr
+    ob.metar = mstr[:254]
     
     gts = datetime.datetime( mtr.time.year, mtr.time.month, 
                 mtr.time.day, mtr.time.hour, mtr.time.minute)
