@@ -124,17 +124,19 @@ def list_products(form):
     #root = {'metaData': {'nexrad': nexrad, 'product': product}, 'scans' : []}
     root = {'products': []}
     if radar == 'USCOMP':
-        for dir in ['N0Q','N0R']:
+        for dirname in ['N0Q','N0R']:
             testfp = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/"+
-                                  dir.lower()+"_%Y%m%d0000.png")
+                                  dirname.lower()+"_%Y%m%d0000.png")
             if os.path.isfile(testfp):
-                root['products'].append({'id': dir, 'name': NIDS.get(dir,dir)})
+                root['products'].append({'id': dirname, 
+                                         'name': NIDS.get(dir,dir)})
     else:
         basedir = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"+radar)
         if os.path.isdir( basedir ):
             os.chdir( basedir )
-            for dir in glob.glob("???"):
-                root['products'].append({'id': dir, 'name': NIDS.get(dir,dir)})
+            for dirname in glob.glob("???"):
+                root['products'].append({'id': dirname, 
+                                         'name': NIDS.get(dir,dir)})
     return root
     
 def main():
@@ -145,7 +147,10 @@ def main():
     operation = form.getvalue('operation', None)
     callback = form.getvalue('callback', None)
     if callback is not None:
+        print "Content-type: application/javascript\n"
         print "%s(" % (callback,),
+    else:
+        print "Content-type: text/plain\n"
     if operation == "list":
         print json.dumps( list_files(form) ),
     elif operation == "available":
@@ -156,5 +161,5 @@ def main():
         print ')',
 
 if __name__ == "__main__":
-    print "Content-type: text/plain\n"
     main()
+#END
