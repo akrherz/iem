@@ -68,7 +68,7 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
 $graph->SetScale("datelin");
-//$graph->SetY2Scale("lin",0,100);
+$graph->SetY2Scale("lin",0,100);
 $graph->img->SetMargin(65,40,55,70);
 
 $graph->xaxis->SetLabelAngle(90);
@@ -83,8 +83,8 @@ $graph->legend->Pos(0.2,0.09);
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
 $graph->xaxis->SetLabelFormatString("h:i A", true);
-//$graph->y2axis->SetTitle("Relative Humidity [%]");
-//$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
+$graph->y2axis->SetTitle("Relative Humidity [%]");
+$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 //$graph->yaxis->SetTitleMargin(48);
@@ -119,7 +119,7 @@ $lineplot3->SetColor("black");
 
 $graph->Add($lineplot);
 $graph->Add($lineplot2);
-//$graph->AddY2($lineplot3);
+$graph->AddY2($lineplot3);
 $graph->Stroke();
 
 ?>
