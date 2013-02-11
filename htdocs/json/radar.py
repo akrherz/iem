@@ -129,14 +129,14 @@ def list_products(form):
                                   dirname.lower()+"_%Y%m%d0000.png")
             if os.path.isfile(testfp):
                 root['products'].append({'id': dirname, 
-                                         'name': NIDS.get(dir,dir)})
+                                         'name': NIDS.get(dirname,dirname)})
     else:
         basedir = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"+radar)
         if os.path.isdir( basedir ):
             os.chdir( basedir )
             for dirname in glob.glob("???"):
                 root['products'].append({'id': dirname, 
-                                         'name': NIDS.get(dir,dir)})
+                                         'name': NIDS.get(dirname,dirname)})
     return root
     
 def main():
