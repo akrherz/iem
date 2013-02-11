@@ -14,8 +14,9 @@ if (isset($_REQUEST["jobid"])){
 	$row = pg_fetch_assoc($rs,0);
 	$sts = strtotime($row["sts"]);
 	$ets = strtotime($row["ets"]);
-	$basefn = sprintf("%s-%s-%s-%s.ppt",  $row["wfo"], $row["radar"],
-		gmdate("YmdH", $sts), gmdate("YmdH", $ets));
+	$basefn = sprintf("%s-%s-%s-%s-%s.ppt",  $row["wfo"], 
+			str_replace(",", "_", $row["wtype"]),
+			$row["radar"], gmdate("YmdH", $sts), gmdate("YmdH", $ets));
 	$fn = sprintf("/mesonet/share/pickup/raccoon/%s",  $basefn);
 	if (is_file($fn)){
 		$status = "DONE!";

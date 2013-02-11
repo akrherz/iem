@@ -4,7 +4,7 @@ Generate a Powerpoint file for an event.  This script looks for queued jobs
 within the database and runs them sequentially each minute
 
 """
-__REV__ = "18Sep2012"
+__REV__ = "11Feb2013"
 import os
 os.putenv("DISPLAY", "localhost:1")
 import sys
@@ -30,7 +30,7 @@ def test_job():
     For command line testing, lets provide a dummy job
     """
     jobs = []
-    jobs.append({'wfo': 'FSD', 'radar': 'FSD',
+    jobs.append({'wfo': 'FSD', 'radar': 'FSD', 'wtype': 'SV,TO',
                  'sts': datetime.datetime(2003,6,24, 2),
                  'ets': datetime.datetime(2003,6,24, 4),
                  'jobid': random.randint(1,1000000),
@@ -46,7 +46,7 @@ def check_for_work():
     mcursor2 = MESOSITE.cursor()
     mcursor.execute("""SELECT jobid, wfo, radar, 
         sts at time zone 'UTC' as sts, 
-        ets at time zone 'UTC' as ets, nexrad_product
+        ets at time zone 'UTC' as ets, nexrad_product, wtype
         from racoon_jobs WHERE processed = False""")
     jobs = []
     for row in mcursor:
@@ -57,10 +57,13 @@ def check_for_work():
     MESOSITE.close()
     return jobs
 
-def get_warnings(sts, ets, wfo):
+def get_warnings(sts, ets, wfo, wtypes):
     """
     Retreive an array of warnings for this time period and WFO
     """
+    tokens = wtypes.split(",")
+    tokens.append("ZZZ")
+    phenomenas = str(tuple(tokens))
     POSTGIS = iemdb.connect('postgis', bypass=True)
     pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sql = """
@@ -72,10 +75,10 @@ def get_warnings(sts, ets, wfo):
     sum(case when gtype = 'C' then 
         ST_Area(ST_Transform(geom,2163))/1000000.0 else 0 end) as countyarea
     from warnings_%s WHERE
-    wfo = '%s' and phenomena in ('SV','TO') and significance = 'W' and 
+    wfo = '%s' and phenomena in %s and significance = 'W' and 
     issue BETWEEN '%s+00' and '%s+00' 
     GROUP by phenomena, eventid ORDER by issue ASC
-    """ % (sts.year, wfo, sts.strftime("%Y-%m-%d %H:%M"), 
+    """ % (sts.year, wfo, phenomenas, sts.strftime("%Y-%m-%d %H:%M"), 
            ets.strftime("%Y-%m-%d %H:%M"))
     pcursor.execute(sql)
     res = []
@@ -86,13 +89,13 @@ def get_warnings(sts, ets, wfo):
 
 def do_job(job):
 
-    warnings = get_warnings(job['sts'], job['ets'], job['wfo'])
+    warnings = get_warnings(job['sts'], job['ets'], job['wfo'], job['wtype'])
 
     os.makedirs("/tmp/%s" % (job['jobid'],))
     os.chdir("/tmp/%s" % (job['jobid'],))
     
-    basefn = "%s-%s-%s-%s" % (job['wfo'], job['radar'],
-                                      job['sts'].strftime("%Y%m%d%H"),
+    basefn = "%s-%s-%s-%s-%s" % (job['wfo'], job['wtype'].replace(",", "_"), 
+                                 job['radar'], job['sts'].strftime("%Y%m%d%H"),
                                       job['ets'].strftime("%Y%m%d%H"))
     outputfile = "%s.odp" % (basefn,)
 
@@ -151,6 +154,7 @@ def do_job(job):
     frame.addElement(textbox)
     textbox.addElement(P(text="WFO: %s" % (job['wfo'],)))
     textbox.addElement(P(text="Radar: %s Product: %s" % (job['radar'], job['nexrad_product'])))
+    textbox.addElement(P(text="Phenomenas: %s" % (job['wtype'], )))
     textbox.addElement(P(text="Start Time: %s UTC" % (job['sts'].strftime("%d %b %Y %H"),)))
     textbox.addElement(P(text="End Time: %s UTC" % (job['ets'].strftime("%d %b %Y %H"),)))
     textbox.addElement(P(text=""))
