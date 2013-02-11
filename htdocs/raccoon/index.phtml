@@ -17,6 +17,8 @@ $day2 = isset($_REQUEST["day2"]) ? intval($_REQUEST["day2"]) : date("d");
 $hour2 = isset($_REQUEST["hour2"]) ? intval($_REQUEST["hour2"]) : 23;
 $sts = gmmktime($hour1, 0, 0, $month1, $day1, $year);
 $ets = gmmktime($hour2, 0, 0, $month2, $day2, $year);
+$wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : Array('TO', 'SV');
+
 
 if (isset($_REQUEST["wfo"])){
 	/* Check to make sure we have warnings first! */
@@ -33,10 +35,11 @@ if (isset($_REQUEST["wfo"])){
 	} else {
 		$mesosite = iemdb("mesosite", TRUE, TRUE);
 		pg_prepare($mesosite, "INSERT", "INSERT into racoon_jobs(wfo, sts, ets,
-		radar, nexrad_product) values ($1,$2,$3,$4,$5) returning jobid");
+				radar, nexrad_product, wtype) values ($1,$2,$3,$4,$5,$6) 
+				returning jobid");
 		$rs = pg_execute($mesosite, "INSERT", array($wfo, 
 			date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets), $radar,
-				$radar_product));
+				$radar_product, implode(",", $wtype)));
 		$row = pg_fetch_assoc($rs,0);
 		pg_close($mesosite);
 		$jobid = $row["jobid"];
@@ -88,6 +91,18 @@ probably back fill imagery for the event.
 		<option value="N0Q">Base Reflectivity (N0Q)</option>
 		<option value="N0U">Base Velocity (N0U)</option>
 	</select>
+	</td></tr>
+<tr><th>View Warning Types:</th>
+	<td colspan="4">
+	<input name="wtype[]" type="checkbox" value="FF" 
+		<?php if (in_array("FF", $wtype)) echo "CHECKED"; ?>>Flash Flood</input>
+	<input name="wtype[]" type="checkbox" value="MA" 
+		<?php if (in_array("MA", $wtype)) echo "CHECKED"; ?>>Marine</input>
+	<input name="wtype[]" type="checkbox" value="SV" 
+		<?php if (in_array("SV", $wtype)) echo "CHECKED"; ?>>Severe Thunderstorm</input>
+	<input name="wtype[]" type="checkbox" value="TO" 
+		<?php if (in_array("TO", $wtype)) echo "CHECKED"; ?>>Tornado</input>
+	
 	</td></tr>
 	
 	<tr>

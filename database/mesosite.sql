@@ -8,7 +8,8 @@ CREATE TABLE racoon_jobs(
   ets timestamp with time zone,
   radar varchar(3),
   processed boolean default false,
-  nexrad_product char(3)
+  nexrad_product char(3),
+  wtypes varchar(32)
 );
 GRANT all on racoon_jobs to apache,nobody;
 
@@ -114,7 +115,9 @@ CREATE TABLE webcams(
 	sponsorurl varchar,
 	removed boolean,
 	state varchar(2),
-	moviebase varchar);
+	moviebase varchar,
+	scrape_url varchar
+	);
 SELECT AddGeometryColumn('webcams', 'geom', 4326, 'POINT', 2);
 GRANT select on webcams to apache,nobody;
 
@@ -135,7 +138,7 @@ CREATE TABLE stations(
 	nwn_id int,
 	spri smallint,
 	wfo varchar(3),
-	archive_begin date,
+	archive_begin timestamptz,
 	archive_end timestamp with time zone,
 	modified timestamp with time zone,
 	tzname varchar(32),
@@ -147,9 +150,12 @@ CREATE TABLE stations(
 	sigstage_flood real,
 	sigstage_moderate real,
 	sigstage_major real,
-	sigstage_record real
+	sigstage_record real,
+	ugc_county char(6),
+	ugc_zone char(6)
 );
 CREATE UNIQUE index stations_idx on stations(id, network);
+create index stations_iemid_idx on stations(iemid);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on stations to apache,nobody;
 grant all on stations_iemid_seq to nobody,apache;
