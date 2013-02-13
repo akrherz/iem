@@ -246,10 +246,8 @@ var gmap = new OpenLayers.Layer.Google(
 }
             );
 
-
-var tc_url = ["http://radarcache.srh.noaa.gov/tilecache/tilecache.py"]; 
-var counties = new OpenLayers.Layer.WMS("Counties", tc_url,
-    {layers      : 'county',
+var counties = new OpenLayers.Layer.WMS("Counties", "http://mesonet.agron.iastate.edu/c/c.py/",
+    {layers      : 'c-900913',
      format      : 'image/png',
      transparent : 'true'},{
      opacity     : 1.0,
