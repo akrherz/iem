@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<scene_file magic="Weather Central, LP Fusion Rundown Scene File" version="1.0" name="Unnamed" app_version="Version 1.4 (Build 29) - 14:06:33 Nov 16 2012" >
+<scene_file magic="Weather Central, LP Fusion Rundown Scene File" version="1.0" name="Unnamed %(timestamp)s" app_version="Version 1.4 (Build 29) - 14:06:33 Nov 16 2012" >
 <scene type="BasicScene" name="School Net Top 5 Wind Gusts" autoadvance="0" audio_file="" use_audio="0" audio_bed_file="" use_audio_bed="0" Skip="0" SevereFlags="0" GpiTrigger="0" EnableForegroundKeyer="0" useVideoInputAudio="0" Updateable="0" crosspoint="0" SegmentStart="-1" SegmentPassThru="0" RouterAdvance="0" ForegroundKeyerAdvance="0" JumpTarget="0" TrafficScene="0" LocalScene="0" NationalScene="0" StopAudio="0" WebImageOutputFile="" WebImagePostProcessScript="" WebImageScriptOutputFile="" ScenePath="E:\live\content\scenes\07_school_net\Top 5 Data\auto_top5gusts.scn" ScriptFontSize="12" socialNetworkingType="2" twitterUsername="" encodedPassword="" rememberCheck="0" token="" security="" ChildrensScene="0" SceneGUID="{3506F144-E306-4224-BDD1-AE55A0C7AD7E}" >
 <Gpi GpiAdvance="0" />
 <Gpi GpiAdvance="0" />
