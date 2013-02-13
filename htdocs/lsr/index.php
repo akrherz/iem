@@ -18,7 +18,7 @@ $HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly
 Ext.namespace("cfg");
 cfg.header = "iem-header";
 </script>
-<script type="text/javascript" src="static.js?v=11"></script>
+<script type="text/javascript" src="static.js?v=12"></script>
 ';
 $TITLE = "IEM Local Storm Report App";
 $NOCONTENT = 1;
