@@ -86,6 +86,8 @@ while True:
 	if not feat:
 		break
 	geom = feat.GetGeometryRef()
+	if geom is None:
+		continue
 	# at 0.001 we had marine zones disappear!
 	geom = geom.Simplify(0.0001)
 
