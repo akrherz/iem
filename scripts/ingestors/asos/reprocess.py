@@ -171,7 +171,10 @@ def process_rawtext(yyyymm):
                 if os.path.isfile(fn) and len(open(fn).read()) > 500:
                     out = open('/dev/null', 'a')
                 else:
-                    out = open(fn, 'w')
+                    try:
+                        out = open(fn, 'w')
+                    except:
+                        continue
                     out.write("FullMetar,\n")
                 
             out.write("%s,\n" % (stdata[station][tm],))
