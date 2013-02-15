@@ -6,6 +6,7 @@
 Arguments
     python wunder_ingest.py --network=IA_ASOS 1978 1979
     python wunder_ingest.py --station=AMW 1978 1979
+    python wunder_ingest.py --monthdate=200003
 
 """
 import urllib2
@@ -14,6 +15,7 @@ import datetime
 import time
 import sys
 import os
+import subprocess
 import pytz
 from optparse import OptionParser
 from metar import Metar
@@ -61,7 +63,12 @@ def get_job_list():
                   help="IEM network", metavar="NETWORK")
     parser.add_option("-s", "--station", dest="station",
                   help="IEM station", metavar="STATION")
+    parser.add_option("-m", "--monthdate", dest="monthdate",
+                  help="Month Date", metavar="MONTHDATE")
     (options, args) = parser.parse_args()
+    if options.monthdate is not None:
+        process_rawtext(options.monthdate)
+        return [], []
     now = datetime.date(int(args[0]),1,1)
     ets = datetime.date(int(args[1]),1,1)
     while now < ets:
@@ -100,6 +107,80 @@ def workflow():
                 time.sleep(0.5)
         print "%s processed %s entries" % (station, total)
             
+def process_rawtext(yyyymm):
+    """ Process the raw SAO files the IEM has """
+    # skip 0z for now
+    sts = datetime.datetime(int(yyyymm[:4]), int(yyyymm[4:]), 1,1)
+    ets = sts + datetime.timedelta(days=32)
+    ets = ets.replace(day=1,hour=0)
+    interval = datetime.timedelta(hours=1)
+    now = sts
+    stdata = {}
+    while now < ets:
+        fn = now.strftime("/mesonet/ARCHIVE/raw/sao/%Y_%m/%y%m%d%H.sao.gz")
+        if not os.path.isfile(fn):
+            now += interval
+            continue
+        p = subprocess.Popen(["zcat", fn], stdout = subprocess.PIPE)
+        data = p.communicate()[0]
+        for product in data.split("\003"):
+                tokens = product.split("=")
+                for metar in tokens:
+                    # Dump METARs that have NIL in them
+                    if metar.find(" NIL") > -1:
+                        continue
+                    elif metar.find("METAR") > -1:
+                        metar = metar[metar.find("METAR")+5:]
+                    elif metar.find("LWIS ") > -1:
+                        metar = metar[metar.find("LWIS ")+5:]
+                    elif metar.find("SPECI") > -1:
+                        metar = metar[metar.find("SPECI")+5:]
+                    metar = " ".join( metar.replace("\r\r\n"," ").strip().split() )
+                    if len(metar.strip()) < 13:
+                        continue
+                    station = metar[:4]
+                    tm = metar[5:11]
+                    if metar[11] != 'Z':
+                        continue
+                    if not stdata.has_key(station):
+                        stdata[station] = {}
+                    if not stdata[station].has_key(tm):
+                        stdata[station][tm] = metar
+                    else:
+                        if len(metar) > len(stdata[station][tm]):
+                            stdata[station][tm] = metar
+        now += interval
+        
+    for station in stdata.keys():
+        if len(station) == 0:
+            continue
+        times = stdata[station].keys()
+        times.sort()
+        day = "00"
+        out = None
+        for tm in times:
+            if tm[:2] != day:
+                if out is not None:
+                    out.close()
+                day = tm[:2]
+                dirname = "/mesonet/ARCHIVE/wunder/%s/%s/" % (
+                                            stup(station), yyyymm[:4])
+                if not os.path.isdir(dirname):
+                    os.makedirs(dirname)
+                fn = "%s/%s%s.txt" % (dirname, yyyymm, day)
+                if os.path.isfile(fn) and len(open(fn).read()) > 500:
+                    out = open('/dev/null', 'a')
+                else:
+                    out = open(fn, 'w')
+                    out.write("IEMMETAR\n")
+                
+            out.write("%s\n" % (stdata[station][tm],))
+        
+def stup(station):
+    if station[0] == 'K':
+        return station[1:]
+    return station
+
 def clear_data(station, sts, ets):
     acursor.execute("""DELETE from alldata WHERE station = %s and
     valid BETWEEN %s and %s""", (station, sts, 
