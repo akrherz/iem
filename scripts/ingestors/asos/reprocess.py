@@ -163,7 +163,7 @@ def process_rawtext(yyyymm):
                 if out is not None:
                     out.close()
                 day = tm[:2]
-                dirname = "/mesonet/ARCHIVE/wunder/%s/%s/" % (
+                dirname = "/mesonet/ARCHIVE/wunder/cache/%s/%s/" % (
                                             stup(station), yyyymm[:4])
                 if not os.path.isdir(dirname):
                     os.makedirs(dirname)
