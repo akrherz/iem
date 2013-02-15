@@ -172,9 +172,9 @@ def process_rawtext(yyyymm):
                     out = open('/dev/null', 'a')
                 else:
                     out = open(fn, 'w')
-                    out.write("IEMMETAR\n")
+                    out.write("FullMetar,\n")
                 
-            out.write("%s\n" % (stdata[station][tm],))
+            out.write("%s,\n" % (stdata[station][tm],))
         
 def stup(station):
     if station[0] == 'K':
