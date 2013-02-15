@@ -220,10 +220,10 @@ def doit(opener, station, now):
             print "Download Fail STID: %s NOW: %s" % (station, now)
             return 0, False
 
-    # Save raw data, since I am an idiot have of the time
-    o = open(fn, 'w')
-    o.write(data)
-    o.close()
+        # Save raw data, since I am an idiot have of the time
+        o = open(fn, 'w')
+        o.write(data)
+        o.close()
   
     lines = data.split("\n")
     headers = None
@@ -232,8 +232,6 @@ def doit(opener, station, now):
         if line.strip() == "":
             continue
         tokens = line.split(",")
-        if len(tokens) < 3:
-            continue
         if headers is None:
             headers = {}
             for i in range(len(tokens)):
