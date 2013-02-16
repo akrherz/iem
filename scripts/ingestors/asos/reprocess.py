@@ -176,7 +176,7 @@ def process_rawtext(yyyymm):
                     except:
                         continue
                     out.write("FullMetar,\n")
-            if out is not None:
+            if out is not None and not out.closed:
                 out.write("%s,\n" % (stdata[station][tm],))
         
 def stup(station):
