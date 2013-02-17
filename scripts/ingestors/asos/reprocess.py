@@ -238,7 +238,7 @@ def doit(opener, station, now):
                 headers[ tokens[i] ] = i
             continue
   
-        if headers.has_key("FullMetar"):
+        if headers.has_key("FullMetar") and len(tokens) >= headers["FullMetar"]:
             mstr = (tokens[headers["FullMetar"]]).strip().replace("'",
                                 "").replace("SPECI ","").replace("METAR ","")
             ob = process_metar(mstr, now)
