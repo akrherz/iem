@@ -27,7 +27,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 	}
 	$geom = str_replace("MULTIPOLYGON(((", "", $geom);
 	$geom = str_replace(")))", "", $geom);
-	$tokens = preg_split("/\)\),\(\(/", $geom);
+	$tokens = preg_split("/\),\(/", $geom);
     foreach ($tokens as $token){
 	    if ($row["phenomena"] == "SV"){
 	    	$c = ", 255, 255, 0, 255";
