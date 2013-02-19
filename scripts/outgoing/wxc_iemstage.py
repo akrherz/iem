@@ -2,16 +2,21 @@
   Produce a WXC formatted file with stage information included! 
 """
 import os
+import sys
 import subprocess
 import shutil
-import mx.DateTime
+import datetime
+import tempfile
 import iemdb
 import psycopg2.extras
 IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+state = sys.argv[1]
+fn = tempfile.mktemp()
+ldmname = "wxc_iemstage_%s.txt" % (state.lower(),)
 
-o = open('wxc_iemstage.txt', 'w')
+o = open(fn, 'w')
 o.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
   15
    5 Station
@@ -29,7 +34,7 @@ o.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
   10 Sig Stage Major
   10 Sig Stage Record
   10 Sig Stage Text
-""" % (mx.DateTime.gmt().strftime("%Y.%m.%d.%H%M"), ) )
+""" % (datetime.datetime.now().strftime("%Y.%m.%d.%H%M"), ) )
 
 def compute_text(row):
     """ Generate text of what this current stage is """
@@ -49,9 +54,9 @@ icursor.execute("""
  case when sigstage_major is null then 'M' else sigstage_major::text end as ss_major,
  case when sigstage_record is null then 'M' else sigstage_record::text end as ss_record
 from current_shef c JOIN stations s on (c.station = s.id) WHERE
- s.network in ('IA_DCP') and c.valid > now() - '4 hours'::interval
+ s.network in ('%s_DCP') and c.valid > now() - '4 hours'::interval
  and c.physical_code in ('HG','HP', 'HT') and c.duration = 'I' and c.extremum = 'Z'   
-""" , () )
+""" % (state,) )
 
 for row in icursor:
     nwsli = row['station']
@@ -64,6 +69,6 @@ for row in icursor:
 
 o.close()
 
-subprocess.call("/home/ldm/bin/pqinsert wxc_iemstage.txt", shell=True)
-shutil.copyfile("wxc_iemstage.txt", "/mesonet/share/pickup/wxc/wxc_iemstage.txt")
-os.remove("wxc_iemstage.txt")
+subprocess.call("/home/ldm/bin/pqinsert -p '%s' %s" % (ldmname, fn), shell=True)
+shutil.copyfile(fn, "/mesonet/share/pickup/wxc/%s" % (ldmname,))
+os.remove( fn )
