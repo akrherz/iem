@@ -17,11 +17,11 @@ from oauth import oauth
 from twisted.internet import defer, reactor
 from twisted.web import client, error, http_headers
 
-from twittytwister import streaming, txml
+from twittytwister import streaming, txml, txjson
 
 SIGNATURE_METHOD = oauth.OAuthSignatureMethod_HMAC_SHA1()
 
-BASE_URL="https://api.twitter.com/1"
+BASE_URL="https://api.twitter.com/1.1"
 SEARCH_URL="http://search.twitter.com/search.atom"
 
 
@@ -312,8 +312,8 @@ class Twitter(object):
         params['status'] = status
         if source:
             params['source'] = source
-        return self.__parsed_post(self.__post('/statuses/update.xml', params),
-            txml.parseUpdateResponse)
+        return self.__parsed_post(self.__post('/statuses/update.json', params),
+            txjson.parseUpdateResponse)
 
     def retweet(self, id, delegate):
         """Retweet a post
@@ -576,7 +576,7 @@ class TwitterFeed(Twitter):
 
         The actual access level determines the portion of the firehose.
         """
-        return self._rtfeed('https://stream.twitter.com/1/statuses/sample.json',
+        return self._rtfeed('http://stream.twitter.com/1/statuses/sample.json',
                             delegate,
                             args)
 
@@ -605,7 +605,7 @@ class TwitterFeed(Twitter):
         """
         Returns all public statuses.
         """
-        return self._rtfeed('https://stream.twitter.com/1/statuses/firehose.json',
+        return self._rtfeed('http://stream.twitter.com/1/statuses/firehose.json',
                             delegate,
                             args)
 
@@ -614,7 +614,7 @@ class TwitterFeed(Twitter):
         """
         Returns public statuses that match one or more filter predicates.
         """
-        return self._rtfeed('https://stream.twitter.com/1/statuses/filter.json',
+        return self._rtfeed('http://stream.twitter.com/1/statuses/filter.json',
                             delegate,
                             args)
 
