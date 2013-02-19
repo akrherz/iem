@@ -1,18 +1,21 @@
-# We are going to process one network per day every day!
+"""
+ Run from the RUN_2AM.sh script, we randomly pick a ASOS network to generate
+ long-term cached windroses of 
+"""
 import iemdb
 import os
 import sys
 import subprocess
 import stat
-import mx.DateTime
+import datetime
+
 MESOSITE = iemdb.connect('mesosite', bypass=True)
 mcursor = MESOSITE.cursor()
-now = mx.DateTime.now()
+now = datetime.datetime.now()
 
 mcursor.execute("""SELECT max(id), network from stations 
     WHERE (network ~* 'ASOS' or network = 'AWOS') 
-    and online = 't' and country = 'US' 
-    GROUP by network ORDER by random()""")
+    and online = 't' GROUP by network ORDER by random()""")
 for row in mcursor:
     network = row[1]
     testfp = "/mesonet/share/windrose/climate/yearly/%s_yearly.png" % (row[0],)
@@ -23,9 +26,9 @@ for row in mcursor:
         sys.exit()
     else:
         mtime = os.stat(testfp)[stat.ST_MTIME]
-        age = float(now) - mtime
-        # 55 days in seconds, enough to cover the number of networks running
-        if age > (55*24*60*60): 
+        age = float(now.strftime("%s")) - mtime
+        # 250 days in seconds, enough to cover the number of networks running
+        if age > (250*24*60*60): 
             print "Driving network %s because of age!" % (network,)
             subprocess.call("python drive_network_windrose.py %s" % (network,),
                             shell=True)

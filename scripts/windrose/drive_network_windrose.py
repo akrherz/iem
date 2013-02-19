@@ -3,7 +3,8 @@ Generate a windrose for each site in the ASOS network, me thinks...
 """
 import network
 import sys
-import os
-nt = network.Table(sys.argv[1])
-for id in nt.sts.keys():
-    os.system("python make_windrose.py %s" % (id,))
+import subprocess
+net = sys.argv[1]
+nt = network.Table( net )
+for sid in nt.sts.keys():
+    subprocess.call("python make_windrose.py %s %s" % (net, sid), shell=True)
