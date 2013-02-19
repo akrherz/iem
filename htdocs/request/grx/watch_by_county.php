@@ -25,10 +25,13 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 	if ($geom == null){
 		continue;
 	}
+	//echo $geom ."\n";
 	$geom = str_replace("MULTIPOLYGON(((", "", $geom);
 	$geom = str_replace(")))", "", $geom);
-	$tokens = preg_split("/\),\(/", $geom);
-    foreach ($tokens as $token){
+	$tokens3 = preg_split("/\)\),\(\(/", $geom);
+    foreach ($tokens3 as $token3){
+	    $tokens = preg_split("/\),\(/", $token3);
+        foreach ($tokens as $token){
 	    if ($row["phenomena"] == "SV"){
 	    	$c = ", 255, 255, 0, 255";
 	    } else { 
@@ -49,7 +52,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 			echo sprintf("%s, %s%s\n", $parts[1], $parts[0], $extra);
 		}
 		echo "End:\n\n";
-    }
+    }}
 	
 }
 
