@@ -22,23 +22,19 @@ class rnetwork:
         self.obs = {}
         csvfile = open(AT_FILENAME)
         for row in csv.DictReader(csvfile):
-            id = int( row["Rpuid"] )
-            if id == 64:
-                continue
-            self.obs[ id ] = rwis.RWISOb()
-            self.obs[ id ].add_atdata( row )
-            self.obs[ id ].sname = st.sts[ self.obs[id].stationID ]['name']
+            sid = int( row["Rpuid"] )
+            self.obs[ sid ] = rwis.RWISOb()
+            self.obs[ sid ].add_atdata( row )
+            self.obs[ sid ].sname = st.sts[ self.obs[sid].stationID ]['name']
         csvfile.close()
 
         csvfile = open(SF_FILENAME)
         for row in csv.DictReader(csvfile):
-            id = int( row["Rpuid"] )
-            if id == 64:
-                continue
-            if not self.obs.has_key( id ):
-                self.obs[ id ] = rwis.RWISOb()
-            self.obs[ id ].add_sfdata( row )
-            self.obs[ id ].sname = st.sts[ self.obs[id].stationID ]['name']
+            sid = int( row["Rpuid"] )
+            if not self.obs.has_key( sid ):
+                self.obs[ sid ] = rwis.RWISOb()
+            self.obs[ sid ].add_sfdata( row )
+            self.obs[ sid ].sname = st.sts[ self.obs[sid].stationID ]['name']
         csvfile.close()
 
     def checkOffline(self, network, thres):
