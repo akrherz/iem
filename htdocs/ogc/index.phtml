@@ -182,13 +182,18 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
  <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n1p.cgi?</code></li>
 <li>CONUS NEXRAD Storm Total Precipitation (ntp) 
  <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ntp.cgi?</code></li>
-<li>NWS Current Warnings
+<li>RIDGE Single NEXRAD Imagery 
+ <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?sector=XXX&amp;prod=XXX&amp;</code>
+  <br />You also need to provide two CGI variables for the NEXRAD identifier
+  and level III product you want. For example, sector=DMX&amp;prod=N0Q 
+ </li>
+ 
+ <hr />
+ <li>NWS Current Warnings
  <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?</code>
 </li>
-
 <li>Iowa Rainfall Estimates
  <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?</code></li>
-
 <li>Iowa Winter Road Conditions 
  <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi?</code>
  <br /><i>Layer:</i> <strong>roadcond-noninterstate</strong> Non Interstate Road Conditions
