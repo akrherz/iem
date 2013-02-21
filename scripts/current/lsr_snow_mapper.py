@@ -2,13 +2,10 @@
 Create an analysis of LSR snowfall reports
 """
 
-import sys
-import os
 import numpy
 import iemplot
 
 import datetime
-import random
 now = datetime.datetime.now()
 import iemdb
 POSTGIS = iemdb.connect('postgis', bypass=True)
@@ -91,8 +88,8 @@ for y in range(iemplot.MW_NY):
             fmask.append( True )
         else:
             # Look around this point
-            maxi = numpy.max( usegrid[max(0,y-3):min(y+5,iemplot.MW_NY),
-                                      max(0,x-3):min(x+5,iemplot.MW_NX)] )
+            maxi = numpy.max( usegrid[max(0,y-3):min(y+3,iemplot.MW_NY),
+                                      max(0,x-3):min(x+3,iemplot.MW_NX)] )
 
             if maxi == -1:
                 lat =  iemplot.MW_SOUTH + (DY * y)
