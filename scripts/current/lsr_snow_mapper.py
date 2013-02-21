@@ -85,7 +85,7 @@ for y in range(iemplot.MW_NY):
             flons.append( lons[idx] )
             flats.append( lats[idx] )
             fvals.append( vals[idx] )
-            fmask.append( True )
+            fmask.append( valmask[idx] )
         else:
             # Look around this point
             maxi = numpy.max( usegrid[max(0,y-3):min(y+3,iemplot.MW_NY),
