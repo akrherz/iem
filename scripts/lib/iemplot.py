@@ -32,8 +32,8 @@ IA_NY    = 20
 # Define grid bounds, midwest
 MW_WEST  = -105.7
 MW_EAST  = -80.1
-MW_NORTH = 53.51
-MW_SOUTH = 30.37
+MW_NORTH = 50.0
+MW_SOUTH = 35.5
 MW_NX    = 100
 MW_NY    = 100
 # Define grid bounds, northeast
