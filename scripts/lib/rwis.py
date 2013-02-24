@@ -132,7 +132,11 @@ class RWISOb(object):
 
   def windAlert(self):
     if self.stationID in ('RBFI4','RTMI4','RWII4','RDNI4','RCDI4','RCII4'):
-      return
+        return
+    if self.gust > 100:
+        print 'Gust of %.1f kts was not relayed, %s' % (self.gust,
+                                                        self.stationID)
+        return
     import network
     nt = network.Table("IA_RWIS")
     gmtNow = mx.DateTime.gmt()
@@ -142,7 +146,7 @@ class RWISOb(object):
 
     fp = "/tmp/%s.%s" % (self.ts.strftime("%Y%m%d%H%M"), self.stationID)
     if (os.path.isfile(fp)):
-      return
+        return
     o = open(fp, 'w')
     o.write(" ")
     o.close()
