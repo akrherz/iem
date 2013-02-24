@@ -152,6 +152,18 @@ National Weather Service to issue warnings for in a given state.",
 );
 
 $services[] = Array(
+		"title" => "NWS Text Product",
+		"url" => "/json/nwstext.py?product_id={product_id}",
+		"desc" => "This service returns the raw text of a NWS Text Product.",
+		"vars" => Array(
+				"product_id" => "String that uniquely (not fully) indentifies a text product.",
+		),
+		"example" => Array(
+				"{product_id}" => '201302241745-KDMX-FXUS63-AFDDMX'
+		)
+);
+
+$services[] = Array(
 		"title" => "IEM Tracked Station Metadata Changes",
 		"url" => "/json/stations.php?date={date}",
 		"desc" => "This service returns metadata for any IEM tracked 
