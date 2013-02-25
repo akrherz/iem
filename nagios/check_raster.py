@@ -11,11 +11,11 @@ count = numpy.sum( numpy.where(data > 0, 1, 0)  )
 sz = data.shape[0] * data.shape[1]
 
 if count > 1000:
-    print 'OK - %s/%s ' % (count, sz)
+    print 'OK - %s/%s|count=%s;100;500;1000' % (count, sz, count)
     sys.exit(0)
 elif count > 500:
-    print 'WARNING - %s/%s' % (count, sz)
+    print 'WARNING - %s/%s|count=%s;100;500;1000' % (count, sz, count)
     sys.exit(1)
 else:
-    print 'CRITICAL - %s/%s' % (count, sz)
+    print 'CRITICAL - %s/%s|count=%s;100;500;1000' % (count, sz, count)
     sys.exit(2)
