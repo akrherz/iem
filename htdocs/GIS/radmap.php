@@ -365,7 +365,7 @@ if (in_array("bufferedlsr", $layers)){
 $wbc = $map->getlayerbyname("watch_by_county");
 $wbc->set("status", in_array("watch_by_county", $layers) );
 $wbc->set("connection", $_DATABASES["postgis"]);
-$sql = sprintf("g from (select phenomena, eventid, ST_multi(ST_union(ST_SnapToGrid(geom,0.0001))) as g from warnings WHERE significance = 'A' and phenomena IN ('TO','SV') and issue <= '%s:00+00' and expire > '%s:00+00' GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena",
+$sql = sprintf("g from (select phenomena, eventid, ST_multi(ST_union( geom )) as g from warnings WHERE substr(ugc,3,1) = 'C' and significance = 'A' and phenomena IN ('TO','SV') and issue <= '%s:00+00' and expire > '%s:00+00' GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena",
   gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts) );
 $wbc->set("data", $sql);
 $wbc->draw($img);
