@@ -39,7 +39,7 @@ sdc_data, sdc_names = util.build_sdc(sdc_feed)
 #        'NAEW.WS118','NAEW.WS123','NAEW.WS127','WOOSTER.LTR','WOOSTER.COV',
 #        'HOYTVILLE.LTR']
 
-NOTDONE = ['WATERMAN',]
+NOTDONE = ['ORR','LAN', 'ARL']
 
 for entry in meta_feed.entry:
     data = entry.to_dict()
