@@ -33,7 +33,7 @@ treat_feed = spr_client.get_list_feed(config.get('cscap', 'treatkey'), 'od6')
 
 sdc_data, sdc_names = util.build_sdc(sdc_feed)
 
-DONE = ['mar']
+DONE = ['arl', 'lan']
 
 for entry in meta_feed.entry:
     data = entry.to_dict()

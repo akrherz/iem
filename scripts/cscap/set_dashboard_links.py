@@ -23,10 +23,20 @@ for entry in cell_feed.entry:
     column_ids[ int(entry.cell.col) ] = text
 
 lookuprefs = {
+              'agr1': 'Agronomic Data',
+              'agr34': 'Agronomic Data',
+              'agr37': 'Agronomic Data',
+              'agr38': 'Agronomic Data',
+              'agr39': 'Agronomic Data',
+              'agr40': 'Agronomic Data',
               'soil2': 'Soil Bulk Density and Water Retention Data',
+              'soil15': 'Soil Nitrate Data',
+              'soil22': 'Soil Nitrate Data',
               }
 varconv = {
            'soil2': 'waterretentionat0bar',
+           'soil15': 'soilnitratespringsampling',
+           'soil22': 'soil22soilammoniumoptional',
            }
 
 
@@ -88,5 +98,5 @@ def do_row(row):
             entry.cell.input_value = '=hyperlink("%s", "Entry")' % (uri,)    
         spr_client.update(entry)
         
-for i in range(40,41):
+for i in range(6,7):
     do_row(i)
