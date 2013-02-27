@@ -48,7 +48,13 @@ while 1:
     feed = docs_client.get_changes(expand_acl=True, changestamp=changestamp)
     count = 0
     for entry in feed.entry:
-        edited = entry.get_elements('edited')[0].text
+        edited = entry.get_elements('edited')
+        if len(edited) > 0:
+            edited = edited[0].text
+        else:
+            print entry
+            count += 1
+            continue
         count += 1
         link = entry.get_html_link()
         title = entry.title.text
