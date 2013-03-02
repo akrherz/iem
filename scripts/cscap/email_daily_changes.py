@@ -8,6 +8,12 @@ import datetime
 import pytz
 import smtplib
 
+rtype_xref = {
+'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'MS Excel',
+'application/vnd.ms-excel': 'MS Excel',
+'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'MS PowerPoint',
+              }
+
 EMAILS = ['labend@iastate.edu','akrherz@iastate.edu']
 if len(sys.argv) == 2:
     EMAILS = ['akrherz@iastate.edu',]
@@ -36,10 +42,10 @@ html = """
 
 <p><table border="1" cellpadding="3" cellspacing="0">
 <thead>
-<tr><th>Time</th><th>Author</th><th>Resource</th></tr>
+<tr><th>Time</th><th>Author</th><th>Type</th><th>Resource</th></tr>
 </thead>
 <tbody>
-""" % (yesterday.strftime("%d %B %Y"), today.strftime("%d %B %Y"))
+""" % (yesterday.strftime("%-d %B %Y"), today.strftime("%-d %B %Y"))
 
 loopcount = 0
 while 1:
@@ -48,35 +54,31 @@ while 1:
     feed = docs_client.get_changes(expand_acl=True, changestamp=changestamp)
     count = 0
     for entry in feed.entry:
-        edited = entry.get_elements('edited')
-        if len(edited) > 0:
-            edited = edited[0].text
-        else:
-            print entry
-            count += 1
-            continue
+        #edited = entry.get_elements('edited')
         count += 1
         link = entry.get_html_link()
+        rtype = entry.get_resource_type()
+        rtype = rtype_xref.get(rtype, rtype)
+        if rtype in ['folder',]:
+            continue
         title = entry.title.text
         if link:
             uri = link.href
         else:
             uri = '#'
-        updated = datetime.datetime.strptime(edited[:19], 
+        updated = datetime.datetime.strptime(entry.updated.text[:19], 
                                              '%Y-%m-%dT%H:%M:%S')
         updated = updated.replace(tzinfo=pytz.timezone("UTC"))
         changestamp = max(int(entry.changestamp.value) +1, changestamp)
         if updated < yesterday:
-            print '%s updated: %s edited: %s lastViewed: %s' % (title, entry.updated.text,
-                                                 edited,
-                                                 entry.last_viewed.text)
+            print '%s %s updated: %s' % (title, rtype, entry.updated.text)
             continue
         updated = updated.astimezone(pytz.timezone("America/Chicago"))
         author = "N/A"
         if entry.last_modified_by:
             author = entry.last_modified_by.email.text
-        html += "<tr><td>%s</td><td>%s</td><td><a href=\"%s\">%s</a></td></tr>\n" % (
-            updated.strftime("%-I:%M %P"), author, uri, title)
+        html += "<tr><td>%s</td><td>%s</td><td>%s</td><td><a href=\"%s\">%s</a></td></tr>\n" % (
+            updated.strftime("%-d %b %-I:%M %P"), author, rtype, uri, title)
         #if entry.filename:
         #    print entry.filename.text
         #print entry.changestamp.value
