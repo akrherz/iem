@@ -71,7 +71,7 @@ while 1:
         updated = updated.replace(tzinfo=pytz.timezone("UTC"))
         changestamp = max(int(entry.changestamp.value) +1, changestamp)
         if updated < yesterday:
-            print '%s %s updated: %s' % (title, rtype, entry.updated.text)
+            #print '%s %s updated: %s' % (title, rtype, entry.updated.text)
             continue
         updated = updated.astimezone(pytz.timezone("America/Chicago"))
         author = "N/A"
