@@ -9,17 +9,24 @@ mcursor = MOS.cursor()
 # GFS has 8 days worth of data
 # NAM has 3.5 days
 PLOTDAYS = 4
-sts = datetime.datetime(2013,1,10,0, tzinfo=iemtz.Central)
+sts = datetime.datetime(2013,2,26,0, tzinfo=iemtz.Central)
 #___________________________
 # No more custom
-MODELDAYS = PLOTDAYS+8
+MODELDAYS = PLOTDAYS+ 6
 msts = sts - datetime.timedelta(days=8)
 ets = sts + datetime.timedelta(days=PLOTDAYS)
 
-qpf = numpy.ma.zeros( (MODELDAYS*4, PLOTDAYS*8), numpy.float)
+qpf = numpy.ma.zeros( (MODELDAYS*4+2, PLOTDAYS*8), numpy.float)
 qpf[:] = -1.
 
+obs = numpy.zeros( (PLOTDAYS*8), numpy.float )
+obs[:] = -1
+obs[:8] = [0,0,0.3, 0.02, 0.02, 0.07, 0.06, 0.05]
+obs[8:16] = [0.07, 0.05, 0.01, 0.05, 0.01, 0, 0, 0]
 
+qpf[-1,:] = obs
+
+print qpf[-1:]
 
 xlabels = []
 xticks = range(-1,PLOTDAYS*8,4)
@@ -36,7 +43,9 @@ for i in range(0,MODELDAYS*4,4):
     ts = msts + datetime.timedelta(hours=(i*6))
     fmt = "%d %b"
     ylabels.append( ts.strftime(fmt))
-
+    
+yticks.append( 41 )
+ylabels.append("Obs")
 
 mcursor.execute("""
 select runtime, ftime, precip from model_gridpoint_2013 
@@ -66,7 +75,7 @@ for y in range(1,PLOTDAYS*8,2):
                 qpf[x,y] = nv
 
 qpf.mask = numpy.where( qpf < 0, True, False)
-#print qpf
+print qpf[-1,:]
 import matplotlib.pyplot as plt
 import matplotlib.mpl as mpl
 import matplotlib.dates as mdates
@@ -77,14 +86,12 @@ cmap = mpl.cm.jet
 cmap.set_under('#F9CCCC')
 norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 
-
-
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
 res = ax.imshow( qpf, aspect='auto', rasterized=True,
         interpolation='nearest', cmap=cmap, norm=norm)
-ax.set_ylim(0,MODELDAYS*4)
+ax.set_ylim(0,MODELDAYS*4+2)
 fig.colorbar( res )
 ax.grid(True)
 
@@ -94,9 +101,13 @@ ax.set_xticks( numpy.array(xticks) + 0.5 )
 ax.set_xticklabels( xlabels )
 ax.set_yticks( yticks )
 ax.set_yticklabels( ylabels )
-ax.set_ylim(0,36)
 ax.set_xlabel('Forecast Date')
 ax.set_ylabel('Model Run')
+
+ax.plot([-0.5,32], [40.5,40.5], color='k')
+#ax.plot([1.5,1.5], [1.5,33.5], color='k')
+#ax.plot([2.5,2.5], [1.5,33.5], color='k')
+
 import iemplot
 fig.savefig('test.ps')
 iemplot.makefeature('test')
