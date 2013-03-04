@@ -2,12 +2,19 @@ import iemdb
 ASOS = iemdb.connect('asos', bypass=True)
 acursor = ASOS.cursor()
 acursor2 = ASOS.cursor()
+acursor3 = ASOS.cursor()
 
 acursor.execute("""
  SELECT id, x(geom), y(geom) from stations where
- network ~* 'ASOS' and country = 'US' 
- and archive_begin < '2007-01-01'
+ (network ~* 'ASOS' or network = 'IA_AWOS') and country = 'US' 
+ and archive_begin < '2007-01-01' 
+ and id = 'SUX' LIMIT 1
 """)
+
+def get(sts, ets):
+    acursor3.execute("""SELECT count(*), max(mslp), min(mslp) from alldata
+    where station = 'FSD' and valid BETWEEN %s and %s""",  (sts, ets))
+    print acursor3.fetchone()
 
 for row in acursor:
     acursor2.execute("""SELECT valid, mslp from alldata WHERE
@@ -36,6 +43,9 @@ for row in acursor:
                 maxval = diff
             lkp = row2[0].strftime("%Y%m%d")
             if True not in hits:
+                print lkp
+                print pmsl
+                get(valid[-1], valid[0])
                 dates.append( lkp )
             hits.insert(0, True)
         else:
