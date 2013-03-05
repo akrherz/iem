@@ -308,7 +308,7 @@ function addTab(tabid, tabname) {
         roomname   : tabid,
         baseParams : {seqnum:0},
         seqnum     : 0,
-        autoLoad   : true,
+        autoLoad   : false,
         proxy      : new Ext.data.HttpProxy({
         url        : jsonurl,
             method : 'GET'
@@ -664,7 +664,7 @@ var task = {
     });
   },
   interval: 7000
-}
+};
 Ext.TaskMgr.start(task);
 
 // End of static.js
