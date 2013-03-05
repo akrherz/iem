@@ -3,6 +3,8 @@ include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
 $conn = iemdb("postgis");
 
+$linewidth = isset($_REQUEST['linewidth']) ? intval($_REQUEST["linewidth"]): 3;
+$linewidth2 = $linewidth + 2;
 $sql = "SELECT max(valid) as valid from roads_current";
 $rs = pg_query($conn, $sql);
 $row = pg_fetch_array($rs, 0);
@@ -35,58 +37,58 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
    <size x=\"0\" y=\"0\" xunits=\"pixels\" yunits=\"pixels\"/>
   </ScreenOverlay>
 <Style id=\"code0\">
-  <LineStyle><width>3</width><color>ffffffff</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>ffffffff</color></LineStyle>
 </Style>
 <Style id=\"code1\">
-  <LineStyle><width>3</width><color>ff00CC00</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>ff00CC00</color></LineStyle>
 </Style>
 <Style id=\"code3\">
-  <LineStyle><width>3</width><color>fff0f000</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>fff0f000</color></LineStyle>
 </Style>
 <Style id=\"code7\">
-  <LineStyle><width>3</width><color>fff0f000</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>fff0f000</color></LineStyle>
 </Style>
 <Style id=\"code11\">
-  <LineStyle><width>3</width><color>fff0f000</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>fff0f000</color></LineStyle>
 </Style>
 <Style id=\"code15\">
-  <LineStyle><width>3</width><color>ffffc5c5</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>ffffc5c5</color></LineStyle>
 </Style>
 <Style id=\"code19\">
-  <LineStyle><width>3</width><color>fffe3299</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>fffe3299</color></LineStyle>
 </Style>
 <Style id=\"code23\">
-  <LineStyle><width>3</width><color>ffb500b5</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>ffb500b5</color></LineStyle>
 </Style>
 <Style id=\"code27\">
-  <LineStyle><width>3</width><color>ffffc5c5</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>ffffc5c5</color></LineStyle>
 </Style>
 <Style id=\"code31\">
-  <LineStyle><width>3</width><color>fffe3399</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>fffe3399</color></LineStyle>
 </Style>
 <Style id=\"code35\">
-  <LineStyle><width>3</width><color>ffb500b5</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>ffb500b5</color></LineStyle>
 </Style>
 <Style id=\"code39\">
-  <LineStyle><width>3</width><color>ffdcdcdc</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>ffdcdcdc</color></LineStyle>
 </Style>
 <Style id=\"code43\">
-  <LineStyle><width>3</width><color>ff0099fe</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>ff0099fe</color></LineStyle>
 </Style>
 <Style id=\"code47\">
-  <LineStyle><width>3</width><color>ff00009E</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>ff00009E</color></LineStyle>
 </Style>
 <Style id=\"code51\">
-  <LineStyle><width>3</width><color>ffe85f01</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>ffe85f01</color></LineStyle>
 </Style>
 <Style id=\"code56\">
-  <LineStyle><width>3</width><color>ffffc5c5</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>ffffc5c5</color></LineStyle>
 </Style>
 <Style id=\"code60\">
-  <LineStyle><width>3</width><color>fffe3399</color></LineStyle>
+  <LineStyle><width>${linewidth}</width><color>fffe3399</color></LineStyle>
 </Style>
 <Style id=\"code86\">
-  <LineStyle><width>5</width><color>ffff0000</color></LineStyle>
+  <LineStyle><width>${linewidth2}</width><color>ffff0000</color></LineStyle>
 </Style>
 ";
 
