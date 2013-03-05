@@ -8,9 +8,9 @@
 192.168.0.11     iem11         iem11.local iem-syslog
 192.168.0.19     iem19         iem19.local iemdb
 192.168.0.21     iem21         iem21.local
-192.168.0.30     iem30         iem30.local
+192.168.0.30     iem30         iem30.local iembot
 192.168.0.40     iem40         iem40.local
-192.168.0.50     iem50         iem50.local iem-mapserver
+192.168.0.50     iem50         iem50.local iem-mapserver openfire-bosh
 192.168.0.60     iem60         iem60.local
 192.168.0.70     iem70         iem70.local
 192.168.0.100    iemvs100      iemvs100.local
