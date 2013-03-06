@@ -24,6 +24,38 @@ for entry in cell_feed.entry:
 
 lookuprefs = {
               'agr1': 'Agronomic Data',
+              'agr2': 'Agronomic Data',
+              'agr3': 'Agronomic Data',
+              'agr4': 'Agronomic Data',
+              'agr5': 'Agronomic Data',
+              'agr6': 'Agronomic Data',
+              'agr7': 'Agronomic Data',
+              'agr8': 'Agronomic Data',
+              'agr9': 'Agronomic Data',
+              'agr10': 'Agronomic Data',
+              'agr11': 'Agronomic Data',
+              'agr12': 'Agronomic Data',
+              'agr13': 'Agronomic Data',
+              'agr14': 'Agronomic Data',
+              'agr15': 'Agronomic Data',
+              'agr16': 'Agronomic Data',
+              'agr17': 'Agronomic Data',
+              'agr18': 'Agronomic Data',
+              'agr19': 'Agronomic Data',
+              'agr20': 'Agronomic Data',
+              'agr21': 'Agronomic Data',
+              'agr22': 'Agronomic Data',
+              'agr23': 'Agronomic Data',
+              'agr24': 'Agronomic Data',
+              'agr25': 'Agronomic Data',
+              'agr26': 'Agronomic Data',
+              'agr27': 'Agronomic Data',
+              'agr28': 'Agronomic Data',
+              'agr29': 'Agronomic Data',
+              'agr30': 'Agronomic Data',
+              'agr31': 'Agronomic Data',
+              'agr32': 'Agronomic Data',
+              'agr33': 'Agronomic Data',
               'agr34': 'Agronomic Data',
               'agr37': 'Agronomic Data',
               'agr38': 'Agronomic Data',
@@ -98,5 +130,5 @@ def do_row(row):
             entry.cell.input_value = '=hyperlink("%s", "Entry")' % (uri,)    
         spr_client.update(entry)
         
-for i in range(6,7):
+for i in range(9,12):
     do_row(i)
