@@ -71,6 +71,7 @@ varconv = {
            'soil22': 'soil22soilammoniumoptional',
            }
 
+CACHE = {}
 
 def do_row(row):
     cell_feed = spr_client.get_cells( config.get('cscap', 'dashboard'), 
@@ -102,10 +103,13 @@ def do_row(row):
                 print siteid, res.title.text, res.get_html_link().href
             continue
     
-        
-        # Get the list feed for this spreadsheet
-        list_feed = spr_client.get_list_feed( 
-                        resources[0].get_id().split("/")[-1][14:], 'od7')
+        skey = resources[0].get_id().split("/")[-1][14:]
+        if CACHE.has_key(skey):
+            list_feed = CACHE[skey]
+        else:
+            # Get the list feed for this spreadsheet
+            list_feed = spr_client.get_list_feed(skey , 'od7')
+            CACHE[skey] = list_feed
         misses = 0
         na = False
         lookupcol = varconv.get(varname, varname)
