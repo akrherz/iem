@@ -61,13 +61,22 @@ lookuprefs = {
               'agr38': 'Agronomic Data',
               'agr39': 'Agronomic Data',
               'agr40': 'Agronomic Data',
+              'soil1': 'Soil Bulk Density and Water Retention Data',
               'soil2': 'Soil Bulk Density and Water Retention Data',
+              'soil6': 'Soil Texture Data',
+              'soil11': 'Soil Texture Data',
+              'soil12': 'Soil Texture Data',
+              'soil13': 'Soil Texture Data',
+              'soil14': 'Soil Texture Data',              
               'soil15': 'Soil Nitrate Data',
+              'soil16': 'Soil Nitrate Data',
               'soil22': 'Soil Nitrate Data',
               }
 varconv = {
-           'soil2': 'waterretentionat0bar',
+           'soil1': 'bulkdensity',
+           'soil2': 'waterretentionat15bar',
            'soil15': 'soilnitratespringsampling',
+           'soil16': 'soilnitratefallsampling',
            'soil22': 'soil22soilammoniumoptional',
            }
 
@@ -127,12 +136,14 @@ def do_row(row):
     
         uri = resources[0].get_html_link().href
         if na:
-            entry.cell.input_value = 'N/A'
+            newvalue = 'N/A'
         elif misses == 0:
-            entry.cell.input_value = 'Complete!'
+            newvalue = 'Complete!'
         else:
-            entry.cell.input_value = '=hyperlink("%s", "Entry")' % (uri,)    
-        spr_client.update(entry)
+            newvalue = '=hyperlink("%s", "Entry")' % (uri,)
+        if newvalue != entry.cell.input_value:
+            entry.cell.input_value = newvalue
+            spr_client.update(entry)
         
-for i in range(9,12):
+for i in range(59,60):
     do_row(i)
