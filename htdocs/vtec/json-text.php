@@ -28,7 +28,7 @@ for( $i=0; $row  = @pg_fetch_array($result,$i); $i++)
 {
   $z = Array();
   $z["id"] = $i +1;
-  $z["report"] = $row["report"];
+  $z["report"] = preg_replace("/\r\r\n/", "\n",$row["report"]);
   $z["svs"] = Array();
   $tokens = @explode('__', $row["svs"]);
   $lsvs = "";
@@ -36,10 +36,10 @@ for( $i=0; $row  = @pg_fetch_array($result,$i); $i++)
   { 
     if ($val == "") continue;
     $lsvs = htmlspecialchars( $val );
-    $z["svs"][] = $lsvs;
+    $z["svs"][] = preg_replace("/\r\r\n/", "\n",$lsvs);
   }
   if ($lastsvs == "y"){
-    $z["svs"] = $lsvs;
+    $z["svs"] = preg_replace("/\r\r\n/", "\n",$lsvs);
   }
   $ar["data"][] = $z;
 }
