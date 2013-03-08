@@ -12,6 +12,7 @@ rtype_xref = {
 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'MS Excel',
 'application/vnd.ms-excel': 'MS Excel',
 'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'MS PowerPoint',
+'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'MS Document',
               }
 
 EMAILS = ['labend@iastate.edu','akrherz@iastate.edu']
