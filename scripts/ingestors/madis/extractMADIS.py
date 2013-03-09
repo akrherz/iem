@@ -56,9 +56,9 @@ for p in range(providers.shape[0]):
     ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds = ticks)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
 
-    (tmpf, tmpf_qc_av, tmpf_qc_sc) = ('Null', 'Null', 'Null')
-    (dwpf, dwpf_qc_av, dwpf_qc_sc) = ('Null', 'Null', 'Null')
-    (alti, alti_qc_av, alti_qc_sc) = ('Null', 'Null', 'Null')
+    (tmpf, tmpf_qc_av, tmpf_qc_sc) = (None, None, None)
+    (dwpf, dwpf_qc_av, dwpf_qc_sc) = (None, None, None)
+    (alti, alti_qc_av, alti_qc_sc) = (None, None, None)
 
     if not numpy.ma.is_masked( nc_tmpk[p] ):
         tmpf = check( mesonet.k2f( nc_tmpk[p] ) )
