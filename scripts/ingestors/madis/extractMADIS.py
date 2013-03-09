@@ -35,17 +35,17 @@ altiQCD = nc.variables["altimeterQCD"][:]
 
 def figure(val, qcval):
     if qcval > 1000:
-        return 'Null'
+        return None
     return float(mesonet.k2f(val + qcval) -  mesonet.k2f(val))
 
 def figureAlti(val, qcval):
     if qcval > 100000.:
-        return 'Null'
+        return None
     return float(qcval / 100.0) 
 
 def check(val):
     if val >  1000000.:
-        return 'Null'
+        return None
     return float(val)
 
 for p in range(providers.shape[0]):
@@ -55,7 +55,6 @@ for p in range(providers.shape[0]):
     ticks = nc.variables["observationTime"][p]
     ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds = ticks)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
-    print ts, ticks
 
     (tmpf, tmpf_qc_av, tmpf_qc_sc) = ('Null', 'Null', 'Null')
     (dwpf, dwpf_qc_av, dwpf_qc_sc) = ('Null', 'Null', 'Null')
