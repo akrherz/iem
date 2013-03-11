@@ -25,15 +25,21 @@ def main():
         sys.exit(2)
     
     downstream = tokens[4]
-    upstream = tokens[5]
+    upstream = int(tokens[5])
     queue_age = tokens[6]
     product_count = tokens[7]
     byte_count = tokens[8]
     
-    print 'OK - Down:%s Up:%s | downstream=%s;; upstream=%s;; queue_age=%s;; product_count=%s;; byte_count=%s' % (downstream, upstream,
+    msg = 'OK'
+    estatus = 0
+    if upstream < 1:
+        msg = 'CRITICAL'
+        estatus = 2
+    print '%s - Down:%s Up:%s | downstream=%s;; upstream=%s;; queue_age=%s;; product_count=%s;; byte_count=%s' % (
+                                    msg, downstream, upstream,
                                     downstream, upstream, queue_age,
                                     product_count, byte_count)
-    sys.exit(0)
+    sys.exit(estatus)
     
 if __name__ == '__main__':
     main()
