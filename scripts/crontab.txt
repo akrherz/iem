@@ -4,7 +4,7 @@ PATH=/home/ldm/bin:/usr/bin:/bin:/sbin:/usr/sbin:/home/mesonet/bin:/usr/local/bi
 PYTHONPATH=/mesonet/www/apps/iemwebsite/scripts/lib
 S=/mesonet/www/apps/iemwebsite/scripts
 #
-* * * * * cd /mesonet/scripts/pyVBCam/scripts; /usr/bin/python acquireRT.py
+* * * * * cd /home/mesonet/pyVBCam/scripts; /usr/bin/python acquireRT.py
 #
 @reboot cd $S/snet; python data_monitor.py
 @reboot cd $S/snet; python ingest.py
@@ -14,7 +14,8 @@ S=/mesonet/www/apps/iemwebsite/scripts
 0 19 * * * cd $S; sh RUN_0Z.sh
 0 0 * * * cd $S; sh RUN_MIDNIGHT.sh
 0 12 * * * cd $S; sh RUN_NOON.sh
-5 2 * * * cd $S; sh RUN_2AM.sh
+# Run at 1:59 to avoid issue with 2AM on DST switch
+59 1 * * * cd $S; sh RUN_2AM.sh
 0 11 * * * cd $S; sh RUN_11AM.sh
 0 7 * * * cd $S; sh RUN_12Z.sh
 
