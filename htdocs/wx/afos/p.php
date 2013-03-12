@@ -10,7 +10,7 @@ $pil = isset($_GET['pil']) ? substr($_GET['pil'],0,6) : "AFDDMX";
 $dir = isset($_REQUEST['dir']) ? $_REQUEST['dir'] : null;
 
 $conn = iemdb("afos");
-$ts = mktime( substr($e,8,2), substr($e,10,2), 0, 
+$ts = gmmktime( substr($e,8,2), substr($e,10,2), 0, 
       substr($e,4,2), substr($e,6,2), substr($e,0,4) );
 
 if ($dir == 'next'){
@@ -32,8 +32,8 @@ $rs = pg_prepare($conn, "_LSELECT", "SELECT data,
                  WHERE pil = $1 and entered between $2 and $3
                  ORDER by entered $sortdir LIMIT 100");
 $rs = pg_execute($conn, "_LSELECT", Array($pil, 
-	date("Y-m-d H:i", $ts+$offset0)."+00",
-	date("Y-m-d H:i", $ts+$offset1)."+00"));
+	date("Y-m-d H:i", $ts+$offset0),
+	date("Y-m-d H:i", $ts+$offset1)));
 
 
 echo "<h3>National Weather Service Raw Text Product</h3>";
