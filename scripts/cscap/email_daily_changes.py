@@ -67,6 +67,8 @@ while 1:
             uri = link.href
         else:
             uri = '#'
+        if entry.removed is not None:
+            continue
         updated = datetime.datetime.strptime(entry.updated.text[:19], 
                                              '%Y-%m-%dT%H:%M:%S')
         updated = updated.replace(tzinfo=pytz.timezone("UTC"))
