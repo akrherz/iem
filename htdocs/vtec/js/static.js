@@ -609,8 +609,10 @@ geoPanel = new Ext.grid.GridPanel({
     });
 geoPanel.on('activate', function(q){
    if (! this.isLoaded){
+   	 p = getVTEC();
+   	 p.sbw = "1";
      this.getStore().load({
-        params:getVTEC()+"&sbw=1"
+        params:p 
      });
      this.isLoaded=true;
    }
