@@ -49,9 +49,9 @@ def make_colorramp():
         c[r,0] = 254
 
     # Gray for missing
-    c[0,:] = [144,144,144]
+    c[255,:] = [144,144,144]
     # Black to remove, eventually
-    c[1,:] = [0,0,0]
+    c[0,:] = [0,0,0]
     return tuple( c.ravel() )
 
 def get_precip(sts, ets):
