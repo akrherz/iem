@@ -91,7 +91,7 @@ def main():
     now = datetime.datetime.utcnow()
     now = now.replace(second=0,microsecond=0)
     # Round back to the nearest 5 minute, plus 10
-    delta = now.minute % 5 + 10
+    delta = now.minute % 5 + 15
     now = now - datetime.timedelta(minutes=delta)
 
     # Fetch file
