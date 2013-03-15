@@ -38,14 +38,15 @@ function selectNetwork($network)
  * Generate a select box that allows multiple selections!
  * @param extra is an array of extra values for this box
  */
-function networkMultiSelect($network, $selected, $extra=Array())
+function networkMultiSelect($network, $selected, $extra=Array(),
+		$label="station")
 {
     global $rootpath;
     $s = "";
     include_once("$rootpath/include/network.php");
     $nt = new NetworkTable($network);
     $cities = $nt->table;
-    $s .= '<select name="station[]" size="5" MULTIPLE >\n';
+    $s .= "<select name=\"${label}[]\" size=\"5\" MULTIPLE >\n";
     
     reset($extra);
     while (list($idx,$sid) = each($extra))
