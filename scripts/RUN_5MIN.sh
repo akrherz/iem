@@ -1,5 +1,8 @@
 # Run every 5 minutes
-cd dl
+cd ingestors/ifc
+python ingest_ifc_precip.py &
+
+cd ../../dl
 python radar_composite.py 
 
 cd ../outgoing
