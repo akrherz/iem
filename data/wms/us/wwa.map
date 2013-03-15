@@ -8,7 +8,7 @@ SIZE 450 350
 EXTENT -126 24 -66 50
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 
 #
@@ -58,21 +58,21 @@ LAYER
         FILTER /P/
         CLASS
                 NAME "Svr T'storm Warn"
-        EXPRESSION ('[type]' = 'SV' and '[sig]' = 'W')
+        EXPRESSION ('[TYPE]' = 'SV' and '[SIG]' = 'W')
                 COLOR   255 255 0
                 SIZE    3
                 SYMBOL  'circle'
         END
         CLASS
                 NAME "Marnine Warn"
-        EXPRESSION ('[type]' = 'MA' and '[sig]' = 'W')
+        EXPRESSION ('[TYPE]' = 'MA' and '[SIG]' = 'W')
                 COLOR   0 255 0
                 SIZE    3
                 SYMBOL  'circle'
         END
         CLASS
                 NAME "Tornado Warn"
-        EXPRESSION ('[type]' = 'TO' and '[sig]' = 'W')
+        EXPRESSION ('[TYPE]' = 'TO' and '[SIG]' = 'W')
                 COLOR   255 0 0
                 SIZE    3
                 SYMBOL  'circle'
@@ -101,28 +101,28 @@ LAYER
         FILTER /C/
         CLASS
                 NAME "Svr T'storm Warn"
-        EXPRESSION ('[type]' = 'SV' and '[sig]' = 'W')
+        		EXPRESSION ('[TYPE]' eq 'SV' and '[SIG]' eq 'W')
                 COLOR   255 255 0
                 SIZE    3
                 SYMBOL  'circle'
         END
         CLASS
                 NAME "Flash Flood Warn"
-        EXPRESSION ('[type]' = 'FF' and '[sig]' = 'W')
+        EXPRESSION ('[TYPE]' eq 'FF' and '[SIG]' eq 'W')
                 COLOR   0 255 0
                 SIZE    3
                 SYMBOL  'circle'
         END
         CLASS
                 NAME "Marnine Warn"
-        EXPRESSION ('[type]' = 'MA' and '[sig]' = 'W')
+        EXPRESSION ('[TYPE]' eq 'MA' and '[SIG]' eq 'W')
                 COLOR   0 255 0
                 SIZE    3
                 SYMBOL  'circle'
         END
         CLASS
                 NAME "Tornado Warn"
-        EXPRESSION ('[type]' = 'TO' and '[sig]' = 'W')
+        EXPRESSION ('[TYPE]' eq 'TO' and '[SIG]' eq 'W')
                 COLOR   255 0 0
                 SIZE    3
                 SYMBOL  'circle'
@@ -130,7 +130,7 @@ LAYER
     # Advisories
     CLASS
         NAME "Winter Advisory"
-        EXPRESSION (('[type]' = 'BZ' or '[type]' = 'SN' or '[type]' = 'WS' or '[type]' = 'BS' or '[type]' = 'SB' or '[type]' = 'IP' or '[type]' = 'HP' or '[type]' = 'ZR' or '[type]' = 'IS') and '[sig]' = 'Y')
+        EXPRESSION (('[TYPE]' eq 'BZ' or '[TYPE]' eq 'SN' or '[TYPE]' eq 'WS' or '[TYPE]' eq 'BS' or '[TYPE]' eq 'SB' or '[TYPE]' eq 'IP' or '[TYPE]' eq 'HP' or '[TYPE]' eq 'ZR' or '[TYPE]' eq 'IS') and '[SIG]' eq 'Y')
         STYLE
                   COLOR 176 224 230
                   SIZE  3
@@ -145,7 +145,7 @@ LAYER
     # Heavy Snow
     CLASS
         NAME "Heavy Snow Warn"
-        EXPRESSION ('[type]' = 'HS' and '[sig]' = 'W')
+        EXPRESSION ('[TYPE]' eq 'HS' and '[SIG]' eq 'W')
         COLOR 138 43 226
         SIZE 3
         SYMBOL 'circle'
@@ -153,15 +153,36 @@ LAYER
     # WW Warning
     CLASS
         NAME "Winter Storm Warn"
-        EXPRESSION (('[type]' = 'WS' or '[type]' = 'WW') and '[sig]' = 'W')
+        EXPRESSION (('[TYPE]' eq 'WS' or '[TYPE]' eq 'WW') and '[SIG]' eq 'W')
                 COLOR   255 105 180
                 SIZE    3
                 SYMBOL  'circle'
         END
+    CLASS
+      NAME "Winter Storm Advisory"
+      EXPRESSION (('[TYPE]' eq 'WS' or '[TYPE]' eq 'WW') and '[SIG]' eq 'Y')
+      COLOR   123 104 238
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    CLASS
+      NAME "Flood Warning"
+      EXPRESSION (('[TYPE]' eq 'FL') and '[SIG]' eq 'W')
+      COLOR   0 255 0
+      SIZE    3
+      SYMBOL  'circle'
+    END
+    CLASS
+      NAME "High Wind Watch"
+      EXPRESSION (('[TYPE]' eq 'HI') and '[SIG]' eq 'A')
+      COLOR   184 134 11
+      SIZE    3
+      SYMBOL  'circle'
+    END
     # Sleet Fz
     CLASS
         NAME "Ice/Frz/Sleet Warn"
-        EXPRESSION (('[type]' = 'IP' or '[type]' = 'HP' or '[type]' = 'ZR' or '[type]' = 'IS') and '[sig]' = 'W')
+        EXPRESSION (('[TYPE]' = 'IP' or '[TYPE]' eq 'HP' or '[TYPE]' eq 'ZR' or '[TYPE]' eq 'IS') and '[SIG]' eq 'W')
                 COLOR   255 20 147
                 SIZE    3
                 SYMBOL  'circle'
@@ -169,7 +190,7 @@ LAYER
     # Blizzard
     CLASS
         NAME "Blizzard Warn"
-        EXPRESSION ('[type]' = 'BZ' and '[sig]' = 'W')
+        EXPRESSION ('[TYPE]' eq 'BZ' and '[SIG]' eq 'W')
                 COLOR   255 0 0
                 SIZE    3
                 SYMBOL  'circle'
