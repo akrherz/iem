@@ -33,6 +33,14 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
  <li><a href="../mos/">Model Output Statistics</a>
  <br />Archive of MOS back to 3 May 2007.</li>
 </ul>
+
+<h4>NEXRAD / RADAR Data</h4>
+<ul>
+ <li><a href="/request/gis/nexrad_storm_attrs.php">Archived NEXRAD Storm Attributes</a>
+ <br />Download shapefiles of NEXRAD storm attribute data.</li>
+</ul>
+
+
 </td>
 <td valign="top" width="50%">
 <h4>Valid Time Extent Code Apps</h4>

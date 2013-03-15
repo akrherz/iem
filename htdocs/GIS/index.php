@@ -111,6 +111,9 @@ This file is updated every minute.</li>
  <li><a href="/data/gis/shape/4326/us/current_nexattr.zip">Current NEXRAD Storm Attributes</a>
   <br />Point shapefile generated every minute containing a summary of
    NEXRAD storm attributes.</li>
+ <li><a href="/request/gis/nexrad_storm_attrs.php">Archived NEXRAD Storm Attributes</a>
+ <br />Generate a shapefile of storm attributes for a RADAR and time period
+ of your choice from the archive.</li>
  <li><a href="/data/gis/shape/4326/iem/coopobs.zip">NWS COOP Observations</a>
    <br>Today's climate reports</li>
  <li><a href="/data/gis/">Browse</a> GIS data stored on the IEM website.</li>
