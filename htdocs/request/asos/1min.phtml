@@ -32,7 +32,8 @@ observations from this network and for sites over the entire globe.</p>
 <p><h3 class="subtitle">1. Select Station:</h3><br>
 <i>Select One or More or All stations in the network.</i><br>
 <div class="story">
-  <?php echo networkMultiSelect("IA_ASOS", "", Array("FSD","MLI","OMA") ); ?>
+  <?php echo networkMultiSelect("IA_ASOS", "", Array("FSD"=>"Sioux Falls, SD",
+  		"MLI" => "Moline, IL", "OMA"=>"Omaha, NE") ); ?>
 </div>
 
 <h3 class="subtitle">2. Timezone of Observations:</h3>
