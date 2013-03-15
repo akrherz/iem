@@ -34,30 +34,29 @@ function selectNetwork($network)
     return $s;
 }
 
+/*
+ * Generate a select box that allows multiple selections!
+ * @param extra is an array of extra values for this box
+ */
 function networkMultiSelect($network, $selected, $extra=Array())
 {
     global $rootpath;
-    $network = strtoupper($network);
     $s = "";
     include_once("$rootpath/include/network.php");
     $nt = new NetworkTable($network);
-    while (list($idx,$sid) = each($extra))
-    {
-      $nt->load_station($sid);
-    }
     $cities = $nt->table;
     $s .= '<select name="station[]" size="5" MULTIPLE >\n';
+    
+    reset($extra);
+    while (list($idx,$sid) = each($extra))
+    {
+    	$s .= "<option value=\"$idx\" ";
+    	if ($selected == $idx) { $s .= "SELECTED"; }
+    	$s .= ">[$idx] $sid </option>\n";
+    }
+    
     while (list($sid, $tbl) = each($cities))
     {
-        if ($tbl["network"] != $network) continue;
-        $s .= "<option value=\"$sid\" ";
-        if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
-   }
-   reset($extra);
-   while (list($idx,$sid) = each($extra))
-   {
-        $tbl = $cities[$sid];
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
         $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
