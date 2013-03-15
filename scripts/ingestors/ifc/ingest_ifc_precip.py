@@ -50,7 +50,7 @@ def to_raster(tmpfn, now):
     254 is 25.4 mm 
     """
     data = numpy.loadtxt(tmpfn, skiprows=10)
-    imgdata = (data * 10.0)
+    imgdata = (data * 10.0 / 12.0) # mm/hr to mm/5min
     imgdata = numpy.where(imgdata < 0, 255, imgdata)
     png = Image.fromarray( numpy.uint8(imgdata) )
     png.putpalette( nmq.make_colorramp() )
