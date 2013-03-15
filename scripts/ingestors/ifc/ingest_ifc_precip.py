@@ -86,14 +86,7 @@ def cleanup(tmpfn):
     for suffix in ['png', 'wld']:
         os.remove("%s.%s" % (tmpfn, suffix))
 
-def main():
-    """ main method """
-    now = datetime.datetime.utcnow()
-    now = now.replace(second=0,microsecond=0)
-    # Round back to the nearest 5 minute, plus 10
-    delta = now.minute % 5 + 15
-    now = now - datetime.timedelta(minutes=delta)
-
+def do_time( now ):
     # Fetch file
     tmpfn = get_file( now )
     if tmpfn is None:
@@ -108,6 +101,22 @@ def main():
     #os.system('xv %s.png' % (tmpfn,))
 
     cleanup( tmpfn )
+
+def main():
+    """ main method """
+    now = datetime.datetime.utcnow()
+    now = now.replace(second=0,microsecond=0)
+    # Round back to the nearest 5 minute, plus 10
+    delta = now.minute % 5 + 15
+    now = now - datetime.timedelta(minutes=delta)
+
+    do_time( now )
+    # Do we need to rerun a previous hour
+    now = now - datetime.timedelta(minutes=60)
+    fn = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ifc/p05m_%Y%m%d%H%M.png")
+    if not os.path.isfile(fn):
+        print "Rerunning %s due to missing file %s" % (now, fn)
+        do_time( now )
 
 if __name__ == '__main__':
     main()
