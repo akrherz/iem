@@ -1,7 +1,7 @@
 <html>
 <head>
   <title>IEM TMS + OpenLayers Example</title>
-  <script src="http://openlayers.org/api/2.11/OpenLayers.js"></script> 
+  <script src="http://openlayers.org/api/2.12/OpenLayers.js"></script> 
   <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script> 
     
 <script type="text/javascript">
@@ -110,7 +110,15 @@ function init(){
             isBaseLayer     : false}
     );
     
-    map.addLayers([gmap, irsat, vissat, hawaiisat, aksat, states, n0q]);
+    var wwa = new OpenLayers.Layer.WMS(
+    		"WWA",
+    		"http://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?",
+    		{layers: "warnings_c", transparent: "TRUE", format: 'image/png'},
+    		{isBaseLayer: false, buffer:0, singleTile: false,
+    		 opacity: 0.5, visibility: false}
+    );
+    
+    map.addLayers([gmap, irsat, vissat, hawaiisat, aksat, states, n0q, wwa]);
     var ls = new OpenLayers.Control.LayerSwitcher();
     map.addControl(ls);
     ls.maximizeControl();
