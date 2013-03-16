@@ -100,7 +100,8 @@ then
 	gdaladdo -q wv_900913.tif 2 4 6 18
 fi
 
-for mach in $(echo "iemvs100.local iemvs101.local iemvs102.local iemvs103.local iemvs104.local iemvs105.local iemvs106.local iemvs107.local iemvs108.local iem21.local iem50.local"); do
+#for mach in $(echo "iemvs100.local iemvs101.local iemvs102.local iemvs103.local iemvs104.local iemvs105.local iemvs106.local iemvs107.local iemvs108.local iem21.local iem50.local"); do
+for mach in $(echo "iem21.local"); do
 
   scp -q GoesWest1V${tm}.tif ldm@${mach}:/tmp/west1V_0.tif
   ssh -q ldm@${mach} "cat /tmp/west1V_0.tif | python ~/pyWWA/rotate.py gis/images/4326/goes/west1V_ tif"
