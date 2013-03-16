@@ -9,7 +9,7 @@ def write(mydb, out, station):
     out.write("""# DAILY RECORD HIGHS AND LOWS OCCURRING DURING %s-%s FOR STATION NUMBER  %s
      JAN     FEB     MAR     APR     MAY     JUN     JUL     AUG     SEP     OCT     NOV     DEC
  DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN
- """ % (constants.startyear(station), constants._ENDYEAR, station) )
+""" % (constants.startyear(station), constants._ENDYEAR, station) )
   
     rs = mydb.query("SELECT * from %s WHERE station = '%s'" % (
             constants.climatetable(station), station) ).dictresult()
