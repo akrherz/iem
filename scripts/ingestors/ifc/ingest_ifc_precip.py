@@ -33,7 +33,7 @@ def get_file( now ):
         req = urllib2.Request(uri)
         data = urllib2.urlopen(req).read()
     except:
-        print "Download %s failed" % (uri,)
+        #print "Download %s failed" % (uri,)
         return None
     tmpfn = tempfile.mktemp()
     o = open(tmpfn, 'w')
@@ -115,7 +115,7 @@ def main():
     now = now - datetime.timedelta(minutes=60)
     fn = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ifc/p05m_%Y%m%d%H%M.png")
     if not os.path.isfile(fn):
-        print "Rerunning %s due to missing file %s" % (now, fn)
+        #print "Rerunning %s due to missing file %s" % (now, fn)
         do_time( now )
 
 if __name__ == '__main__':
