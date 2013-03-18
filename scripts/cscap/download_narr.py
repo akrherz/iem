@@ -23,7 +23,6 @@ while now < ets:
     print now
     uri = now.strftime("http://nomads.ncdc.noaa.gov/thredds/ncss/grid/narr/"+
                        "%Y%m/%Y%m%d/narr-a_221_%Y%m%d_%H00_000.grb?"+
-                       "var=Downward_longwave_radiation_flux&"+
                        "var=Downward_shortwave_radiation_flux&spatial=all"+
                        "&temporal=all")
 
