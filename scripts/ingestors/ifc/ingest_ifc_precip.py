@@ -27,13 +27,20 @@ import os
 
 def get_file( now ):
     """ Download the file, save to /tmp and return fn """
-    fn = now.strftime("H99999999_I0007_G_%d%b%Y_%H%M00").upper()
-    uri = "%s/%s.out" % (BASEURL, fn)
-    try:
-        req = urllib2.Request(uri)
-        data = urllib2.urlopen(req).read()
-    except:
-        #print "Download %s failed" % (uri,)
+    data = None
+    for i in [7,6,5]:
+        if data is not None:
+            break
+        fn = now.strftime("H99999999_I000"+`i`+"_G_%d%b%Y_%H%M00").upper()
+        uri = "%s/%s.out" % (BASEURL, fn)
+        try:
+            req = urllib2.Request(uri)
+            data = urllib2.urlopen(req).read()
+        except:
+            #print "Download %s failed" % (uri,)
+            pass
+            
+    if data is None:
         return None
     tmpfn = tempfile.mktemp()
     o = open(tmpfn, 'w')
