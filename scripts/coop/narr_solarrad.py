@@ -80,7 +80,7 @@ def do( date ):
         val = ((z0/distances[0] + z1/distances[1] + z2/distances[2] 
                 + z3/distances[3]) / (1./distances[0] + 1./distances[1] + 
                                       1./distances[2] + 1./distances[3] ))
-        langleys = val / 41840.0
+        langleys = float(val) / 41840.0
         if langleys < 0:
             print 'WHOA! Negative RAD: %.2f, station: %s' % (langleys, row[0])
             continue
