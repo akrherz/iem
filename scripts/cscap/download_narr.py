@@ -9,35 +9,42 @@ import urllib2
 import subprocess
 import tempfile
 import os
+import sys
 
-sts = datetime.datetime(1979,1,1)
-sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+def do( sts ):
+    """ Run for a given date! """
+    sts = sts.replace(tzinfo=pytz.timezone("UTC"))
 
-ets = datetime.datetime(2013,3,1)
-ets = ets.replace(tzinfo=pytz.timezone("UTC"))
+    ets = sts + datetime.timedelta(days=1)
 
-interval = datetime.timedelta(hours=3)
+    interval = datetime.timedelta(hours=3)
 
-now = sts
-while now < ets:
-    print now
-    uri = now.strftime("http://nomads.ncdc.noaa.gov/thredds/ncss/grid/narr/"+
-                       "%Y%m/%Y%m%d/narr-a_221_%Y%m%d_%H00_000.grb?"+
-                       "var=Downward_shortwave_radiation_flux&spatial=all"+
-                       "&temporal=all")
-
-    req = urllib2.Request(uri)
-    data = urllib2.urlopen(req).read()
+    now = sts
+    while now < ets:
+        uri = now.strftime("http://nomads.ncdc.noaa.gov/thredds/ncss/grid/narr/"+
+                           "%Y%m/%Y%m%d/narr-a_221_%Y%m%d_%H00_000.grb?"+
+                           "var=Downward_shortwave_radiation_flux&spatial=all"+
+                           "&temporal=all")
     
-    tmpfn = tempfile.mktemp()
-    o = open(tmpfn, 'w')
-    o.write( data )
-    o.close()
-
-    cmd = "/home/ldm/bin/pqinsert -p 'data a %s bogus model/NARR/rad_%s.nc nc' %s" % (
-                                            now.strftime("%Y%m%d%H%M"),
-                                            now.strftime("%Y%m%d%H%M"), tmpfn)
-    subprocess.call(cmd, shell=True)
-
-    os.remove(tmpfn)
-    now += interval
+        try:
+            req = urllib2.Request(uri)
+            data = urllib2.urlopen(req).read()
+        except:
+            print 'NARR Download failed for: %s' % (uri,)
+            sys.exit()
+        
+        tmpfn = tempfile.mktemp()
+        o = open(tmpfn, 'w')
+        o.write( data )
+        o.close()
+    
+        cmd = "/home/ldm/bin/pqinsert -p 'data a %s bogus model/NARR/rad_%s.nc nc' %s" % (
+                                                now.strftime("%Y%m%d%H%M"),
+                                                now.strftime("%Y%m%d%H%M"), tmpfn)
+        subprocess.call(cmd, shell=True)
+    
+        os.remove(tmpfn)
+        now += interval
+    
+if __name__ == '__main__':
+    do( datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])) )
