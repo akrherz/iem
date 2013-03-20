@@ -19,12 +19,19 @@ do
     service httpd restart"
 done
 
+# Step 1a, do weather.im
+ssh root@iem30 "mv -f $BASE/access_log-weather.im $BASE/access_log-weather.im.iem30 && \
+	service httpd restart"
+
 # Step 2, bring all these log files back to roost
 for MACH in $MACHINES
 do
 	scp -q root@${MACH}:${BASE}/*${MACH} .
 	ssh root@$MACH "rm -f $BASE/access_log.$MACH"
 done
+
+# Step 2a, do weather.im
+scp -q root@iem30:${BASE}/access_log-weather.im.iem30 weatherim_access.log
 
 # Step 3, merge the log files back into one
 csh -c "(/usr/local/bin/mergelog access_log.iemvs* > access.log) >& /dev/null"
@@ -43,11 +50,15 @@ csh -c "(/usr/local/bin/mergelog access_log-sustainablecorn.iemvs* > sustainable
 wc -l access_log-sustainablecorn.iemvs* sustainablecorn_access.log
 rm -f access_log-sustainablecorn.iemvs*
 
+# Step 3a, do weather.im
+wc -l /tmp/weatherim_access.log
+
 # Step 4, run webalizer against these log files
 /home/mesonet/bin/webalizer -c mesonet.conf -T access.log
 /usr/bin/webalizer -c cocorahs.conf cocorahs_access.log
 /usr/bin/webalizer -c sustainablecorn.conf sustainablecorn_access.log
 /usr/bin/webalizer -c wepp.conf wepp_access.log
+/usr/bin/webalizer -c weatherim.conf weatherim_access.log
 
 grep " /agclimate" access.log > agclimate.log
 /home/mesonet/bin/webalizer -c agclimate.conf -T agclimate.log
@@ -71,4 +82,7 @@ mv sustainablecorn_access.log sustainablecorn_access_log-$dd
 gzip sustainablecorn_access_log-$dd
 mv sustainablecorn_access_log-$dd.gz /mesonet/www/logs/old_logs/$yyyymm/
 
+mv weatherim_access.log weatherim_access_log-$dd
+gzip weatherim_access_log-$dd
+mv weatherim_access_log-$dd.gz /mesonet/www/logs/old_logs/$yyyymm/
 # Done!
