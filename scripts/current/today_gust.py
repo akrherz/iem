@@ -38,7 +38,7 @@ for row in icursor:
     vals.append( row[4] * 1.16 )
     valmask.append(  (row[1] in ['AWOS','IA_ASOS']) )
     
-if len(vals) < 5:
+if len(vals) < 5 or True not in valmask:
     sys.exit(0)
 
 clevs = numpy.arange(0,40,2)
