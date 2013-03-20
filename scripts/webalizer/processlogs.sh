@@ -51,7 +51,7 @@ wc -l access_log-sustainablecorn.iemvs* sustainablecorn_access.log
 rm -f access_log-sustainablecorn.iemvs*
 
 # Step 3a, do weather.im
-wc -l /tmp/weatherim_access.log
+wc -l weatherim_access.log
 
 # Step 4, run webalizer against these log files
 /home/mesonet/bin/webalizer -c mesonet.conf -T access.log
