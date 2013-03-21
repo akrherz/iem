@@ -21,6 +21,7 @@ import urllib2
 import subprocess
 import numpy
 import Image
+from PIL import PngImagePlugin
 import nmq
 import tempfile
 import os
@@ -61,7 +62,9 @@ def to_raster(tmpfn, now):
     imgdata = numpy.where(imgdata < 0, 255, imgdata)
     png = Image.fromarray( numpy.uint8(imgdata) )
     png.putpalette( nmq.make_colorramp() )
-    png.save('%s.png' % (tmpfn,))
+    meta = PngImagePlugin.PngInfo()
+    meta.add_text('title', now.strftime("%Y%m%d%H%M"), 0)
+    png.save('%s.png' % (tmpfn,), pnginfo=meta)
     del png
     # Make worldfile
     o = open("%s.wld" %(tmpfn,), 'w')
