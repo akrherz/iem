@@ -20,4 +20,4 @@ cd ../cscap
 # at 0z, -6 days is available, hopefully!
 python download_narr.py $(date -u --date '6 days ago' +'%Y %m %d')
 cd ../coop
-python narr_solarrad.py $(date -u --date '6 days ago' +'%Y %m %d')
+python narr_solarrad.py $(date -u --date '7 days ago' +'%Y %m %d')

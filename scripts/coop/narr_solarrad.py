@@ -6,6 +6,8 @@
  
  So 1000 W m-2 x 3600 is 3,600,000 W s m-2 is 86 langleys
  
+ 26 Jun 1988 is bad!
+ 
 """
 import netCDF4
 import datetime
@@ -13,6 +15,7 @@ import pyproj
 import numpy
 import iemdb
 import sys
+import os
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 ccursor2 = COOP.cursor()
@@ -51,6 +54,9 @@ def do( date ):
     while now < ets:
         fn = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/model/NARR/"+
                           "rad_%Y%m%d%H00.nc")
+        if not os.path.isfile(fn):
+            print 'MISSING NARR: %s' % (fn,)
+            sys.exit()
         nc = netCDF4.Dataset( fn )
         rad = nc.variables['Downward_shortwave_radiation_flux'][0,:,:]
         if now == sts:
