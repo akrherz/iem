@@ -35,8 +35,8 @@ def main():
     if upstream < 1:
         msg = 'CRITICAL'
         estatus = 2
-    print '%s - Down:%s Up:%s | downstream=%s;; upstream=%s;; queue_age=%s;; product_count=%s;; byte_count=%s' % (
-                                    msg, downstream, upstream,
+    print '%s - Down:%s Up:%s Raw:%s| downstream=%s;; upstream=%s;; queue_age=%s;; product_count=%s;; byte_count=%s' % (
+                                    msg, downstream, upstream, data,
                                     downstream, upstream, queue_age,
                                     product_count, byte_count)
     sys.exit(estatus)
