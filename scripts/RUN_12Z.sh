@@ -2,6 +2,7 @@
 
 cd cscap
 python email_daily_changes.py
+python set_dashboard_links.py
 
 # Rerun yesterday and today
 cd ../dbutil
