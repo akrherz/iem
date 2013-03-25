@@ -81,6 +81,19 @@ varconv = {
            }
 
 CACHE = {}
+QUERY_CACHE = {}
+
+def docs_query(title):
+    if QUERY_CACHE.has_key(title):
+        #print 'QUERY_CACHE HIT'
+        return QUERY_CACHE[ title ]
+    
+    query = gdata.docs.client.DocsQuery(show_collections='true', 
+                                title=title)
+    # We need to go search for the spreadsheet
+    resources = docs_client.GetAllResources(query=query)
+    QUERY_CACHE[title] = resources
+    return resources
 
 def do_row(row):
     cell_feed = spr_client.get_cells( config.get('cscap', 'dashboard'), 
@@ -96,13 +109,9 @@ def do_row(row):
     
     for entry in cell_feed.entry[1:]:
         siteid = column_ids[ int(entry.cell.col) ]
-    
-        query = gdata.docs.client.DocsQuery(show_collections='true', 
-                                title='%s %s' % (siteid, spreadtitle))
-    
-    
-        # We need to go search for the spreadsheet
-        resources = docs_client.GetAllResources(query=query)
+
+        querytitle = '%s %s' % (siteid, spreadtitle)
+        resources = docs_query(querytitle)   
         if len(resources) == 0:
             print 'Can not find spread title: |%s %s|' % (siteid, spreadtitle,)
             continue
@@ -145,5 +154,5 @@ def do_row(row):
             entry.cell.input_value = newvalue
             spr_client.update(entry)
         
-for i in range(59,60):
+for i in range(6,65):
     do_row(i)
