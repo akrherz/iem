@@ -69,7 +69,7 @@ EOF
 if (-e ${rad}_${fp}.gif) then
   convert -compress none ${rad}_${fp}.gif ${rad}_${fp}_tmp.tif
   cp /mesonet/data/gis/images/unproj/$rad/n0r_0.tfw ${rad}_${fp}_tmp.tfw
-  /mesonet/local/bin/gdalwarp -s_srs \"epsg:4326\" -t_srs \"epsg:${epsg}\" ${rad}_${fp}_tmp.tif ${rad}_${fp}.tif
+  /usr/bin/gdalwarp -s_srs \"epsg:4326\" -t_srs \"epsg:${epsg}\" ${rad}_${fp}_tmp.tif ${rad}_${fp}.tif
   cp /mesonet/data/gis/meta/${epsg}.prj ${rad}_${fp}.prj
   if (${frmt} == \"jpeg\") then
     /mesonet/local/bin/gdal_translate  -co \"WORLDFILE=ON\" -of JPEG ${rad}_${fp}.tif $$.jpg
