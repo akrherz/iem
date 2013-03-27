@@ -225,7 +225,7 @@ $mydata = $iem->getNetwork( Array("OH_RWIS","IN_RWIS", "KY_RWIS") );
 
 $rwis = fopen('wxc_oh_in_kydot.txt', 'w');
 fwrite($rwis, "Weather Central 001d0300 Surface Data
-  18
+  22
    6 Station
   52 CityName
    2 State
@@ -244,18 +244,36 @@ fwrite($rwis, "Weather Central 001d0300 Surface Data
    5 P3 Temp
    5 P4 Temp
    5 Pave Ave Temp
+   5 Wind Chill F
+   5 Heat Index F
+   5 Today High Temp F
+   5 Today Low Temp F
 ");
  
 
 $now = time();
 while ( list($key, $val) = each($mydata) ) {
   $tdiff = $now - $val->db["ts"];
+  // Heat index
+  $relh = relh( f2c($val->db['tmpf']), f2c($val->db['dwpf']));
+  $val->db["heat"] = round(heat_idx($val->db['tmpf'], $relh),1);
+  $val->db["wcht"] = round(wcht_idx($val->db['tmpf'], $val->db['sknt'] * 1.15),1);
+  if ($val->db['dwpf'] < -99.0) {
+  	$val->db['dwpf'] = 'M';
+  	$val->db['heat'] = 'M';
+  }
+  else {
+  	$val->db['dwpf'] = round($val->db['dwpf'],1);
+  }
 
-  if ($val->db['dwpf'] < -99.0) $val->db['dwpf'] = 'M';
-  else $val->db['dwpf'] = round($val->db['dwpf'],1);
-
-  if ($val->db['tmpf'] < -99.0) $val->db['tmpf'] = 'M';
-  else $val->db['tmpf'] = round($val->db['tmpf'],1);
+  if ($val->db['tmpf'] < -99.0){
+  	$val->db['tmpf'] = 'M';
+  	$val->db['heat'] = 'M';
+  	$val->db['wcht'] = 'M';
+  }
+  else {
+  	$val->db['tmpf'] = round($val->db['tmpf'],1);
+  }
 
   if ($val->db['tsf0'] == "") $val->db['tsf0'] = -99.99;
   if ($val->db['tsf1'] == "") $val->db['tsf1'] = -99.99;
@@ -264,7 +282,7 @@ while ( list($key, $val) = each($mydata) ) {
   $t = Array($val->db['tsf0'], $val->db['tsf1'],
      $val->db['tsf2'], $val->db['tsf3']);
   arsort($t);
-  //print_r($t);
+
   while (min($t) < -39.99){
     $ba = array_pop($t);
     if (sizeof($t) == 0) break;
@@ -294,7 +312,7 @@ while ( list($key, $val) = each($mydata) ) {
   if (round($val->db['pave_avg'],0) == -100) $val->db['pave_avg'] = 'M';
   else $val->db['pave_avg'] = round($val->db['pave_avg'],0);
 
-  $s = sprintf("%6s %-52s %2s %7s %8s %2s %4s %5.1f %5s %4.0f %4.0f %5.1f %5s %5s %5s %5s %5s %5s\n", $key, 
+  $s = sprintf("%6s %-52s %2s %7s %8s %2s %4s %5.1f %5s %4.0f %4.0f %5.1f %5s %5s %5s %5s %5s %5s %5s %5s %5.1f %5.1f\n", $key, 
     $cities[$key]['name'], $val->db['state'], round($cities[$key]['lat'],2), 
      round($cities[$key]['lon'],2),
      date('d', $val->db['ts'] + (6*3600) ), date('H', $val->db['ts'] + (6*3600)),
@@ -303,7 +321,9 @@ while ( list($key, $val) = each($mydata) ) {
      fancy($val->db['rwis_subf'],-50,180,5),
      fancy($val->db['tsf0'],-50,180,5), fancy($val->db['tsf1'],-50,180,5),
      fancy($val->db['tsf2'],-50,180,5), fancy($val->db['tsf3'],-50,180,5),
-     fancy($val->db['pave_avg'],-50,180,5) ); 
+     fancy($val->db['pave_avg'],-50,180,5),
+  		$val->db["wcht"], $val->db["heat"], $val->db["max_tmpf"],
+  		$val->db["min_tmpf"] ); 
   fwrite($rwis, $s);
   }
 } // End of while
