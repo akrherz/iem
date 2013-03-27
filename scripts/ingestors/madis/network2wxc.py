@@ -20,7 +20,7 @@ utc = utc.replace(tzinfo=pytz.timezone("UTC"))
 
 out = open(wxcfn, 'w')
 out.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
-   10
+   12
    5 Station
    25 Station Name
    8 Lat
@@ -31,6 +31,8 @@ out.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
    5 Dew Point F
    5 Wind Direction deg
    5 Wind Speed mph
+   5 Heat Index F
+   5 Wind Chill F
 """ % (utc.strftime("%Y.%m.%d.%H%M"),))
 
 
@@ -85,17 +87,28 @@ for sid in indices:
     longitude = nc.variables['longitude'][idx]
     tmpf = s( nc.variables['temperature'][idx] )
     dwpf = s( nc.variables['dewpoint'][idx] )
+    heat = "M"
+    if tmpf != "M" and dwpf != "M":
+        relh = mesonet.relh(mesonet.k2f(nc.variables['temperature'][idx]), 
+                            mesonet.k2f(nc.variables['dewpoint'][idx]))
+        heat = "%5.1f" % (mesonet.heatidx(mesonet.k2f(nc.variables['temperature'][idx]), relh),)
     drct = s2( nc.variables['windDir'][idx])
     smps = s2( nc.variables['windSpeed'][idx])
     sped = "M"
     if smps != "M":
         sped = "%5.1f" % (nc.variables['windSpeed'][idx] * 2.23694,)
+        
+    wcht = "M"
+    if tmpf != "M" and sped != "M":
+        wcht = "%5.1f" % (mesonet.wchtidx(mesonet.k2f(nc.variables['temperature'][idx]), 
+                               nc.variables['windSpeed'][idx] * 2.23694),)
+        
     ts = indices[sid]['ts']
     
-    out.write("%5.5s %25.25s %8.4f %10.4f %02i %02i %5s %5s %5s %5s\n" % (sid, name, latitude,
+    out.write("%5.5s %25.25s %8.4f %10.4f %02i %02i %5s %5s %5s %5s %5s %5s\n" % (sid, name, latitude,
                                                    longitude, ts.hour,
                                                    ts.minute, tmpf, dwpf,
-                                                   drct, sped))
+                                                   drct, sped, heat, wcht))
     
 nc.close()
 out.close()
