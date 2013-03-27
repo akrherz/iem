@@ -10,6 +10,7 @@ python process_clarus.py
 
 cd ../madis
 python to_iemaccess.py
+python network2wxc.py APRSWXNET bogus
 
 cd ../../snet
 ./RUN.csh
