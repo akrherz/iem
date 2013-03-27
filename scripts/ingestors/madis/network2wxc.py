@@ -78,6 +78,9 @@ for sid in indices:
     tmpf = s( nc.variables['temperature'][idx] )
     dwpf = s( nc.variables['dewpoint'][idx] )
     drct = s( nc.variables['windDir'][idx])
+    if drct != "M":
+        if nc.variables['windDir'][idx] < 0:
+            drct = "M"
     smps = s( nc.variables['windSpeed'][idx])
     sped = "M"
     if smps != "M":
