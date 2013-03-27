@@ -58,7 +58,7 @@ def do( date ):
     fn2 = ets.strftime("/mesonet/merra/%Y/%Y%m%d.nc")
     nc = netCDF4.Dataset( fn2 )
     rad2 = nc.variables['swgdn'][:7,:,:]
-    cs_rad2 = nc.variables['swgdnclr'][7:,:,:]
+    cs_rad2 = nc.variables['swgdnclr'][:7,:,:]
     nc.close()
 
     # W m-2 -> J m-2 s-1 -> J m-2 dy-1
