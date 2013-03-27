@@ -70,6 +70,14 @@ def s(val):
         pass
     return "%5.1f" % (mesonet.k2f(val),)
 
+def s2(val):
+    try:
+        if val.mask:
+            return 'M'
+    except:
+        pass
+    return "%5.1f" % (val,)
+
 for sid in indices:
     idx = indices[sid]['idx']
     name = nc.variables["stationName"][idx].tostring().replace('\x00','')
@@ -77,11 +85,8 @@ for sid in indices:
     longitude = nc.variables['longitude'][idx]
     tmpf = s( nc.variables['temperature'][idx] )
     dwpf = s( nc.variables['dewpoint'][idx] )
-    drct = s( nc.variables['windDir'][idx])
-    if drct != "M":
-        if nc.variables['windDir'][idx] < 0:
-            drct = "M"
-    smps = s( nc.variables['windSpeed'][idx])
+    drct = s2( nc.variables['windDir'][idx])
+    smps = s2( nc.variables['windSpeed'][idx])
     sped = "M"
     if smps != "M":
         sped = "%5.1f" % (nc.variables['windSpeed'][idx] * 2.23694,)
