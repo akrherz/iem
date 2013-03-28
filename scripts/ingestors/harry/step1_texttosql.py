@@ -74,7 +74,7 @@ for line in lines:
     day = ts.strftime("%Y-%m-%d")
     sday = ts.strftime("%m%d")
  
-    alldata.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\tf\n" % (
+    alldata.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\tf\tNull\tNull\tNull\n" % (
                         dbid, day,  hi, lo, pr, sf, sday, yr, mo,sd) )
 
 alldata.write("""\.
