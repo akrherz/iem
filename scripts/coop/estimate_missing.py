@@ -66,14 +66,14 @@ def do_var(varname):
         mass = sum(weight)
         interp = numpy.sum(numpy.array(weight) * numpy.array(value) / mass)
 
-        format = '%.2f'
+        dataformat = '%.2f'
         if varname in ['high', 'low']:
-            format = '%.0f'
+            dataformat = '%.0f'
         print 'Set station: %s day: %s varname: %s value: %s' % (station,
-                                    day, varname, format % (interp,))
+                                    day, varname, dataformat % (interp,))
         sql = """UPDATE alldata_%s SET estimated = true, %s = %s WHERE 
             station = '%s' and day = '%s'""" % (state.lower(), varname, 
-                                                interp, station, day)
+                                    dataformat % (interp,), station, day)
         ccursor2.execute( sql )
 
 def main():
