@@ -106,7 +106,19 @@ def do( date ):
         """, (rad_mj, cs_rad_mj, date.strftime("%Y-%m-%d"), row[0]))
     
 
-do( datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])) )
-ccursor2.close()
-COOP.commit()
-COOP.close()
+if __name__ == '__main__':
+    if len(sys.argv) == 4:
+        do( datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
+                              int(sys.argv[3])) )
+    if len(sys.argv) == 3:
+        # Run for a given month!
+        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1)
+        ets = sts + datetime.timedelta(days=45)
+        ets = ets.replace(day=1)
+        now = sts
+        while now < ets:
+            do( now )
+            now += datetime.timedelta(days=1)
+    ccursor2.close()
+    COOP.commit()
+    COOP.close()
