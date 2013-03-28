@@ -45,6 +45,8 @@ def feelslike(tmpf, relh, sped):
     return wchtidx(tmpf, sped)
 
 def heatidx(tmpf, relh):
+  if tmpf < 70:
+    return tmpf
   if (tmpf > 140):
     return -99
   if (relh == 0):
@@ -77,7 +79,7 @@ def heatidx(tmpf, relh):
 
 
 def wchtidx(tmpf, sped):
-  if (sped < 3):
+  if sped < 3 or tmpf > 50:
     return tmpf
   import math
   wci = math.pow(sped,0.16);
