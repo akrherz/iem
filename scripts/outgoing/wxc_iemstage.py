@@ -45,7 +45,7 @@ def compute_text(row):
     return 'Normal'
 
 icursor.execute("""
- SELECT c.value, x(geom) as lon, y(geom) as lat, name, station, valid,
+ SELECT c.value, c.source, x(geom) as lon, y(geom) as lat, name, station, valid,
  case when sigstage_low is null then 'M' else sigstage_low::text end as ss_low,
  case when sigstage_action is null then 'M' else sigstage_action::text end as ss_action,
  case when sigstage_bankfull is null then 'M' else sigstage_bankfull::text end as ss_bankfull,
@@ -55,11 +55,15 @@ icursor.execute("""
  case when sigstage_record is null then 'M' else sigstage_record::text end as ss_record
 from current_shef c JOIN stations s on (c.station = s.id) WHERE
  s.network in ('%s_DCP') and c.valid > now() - '4 hours'::interval
- and c.physical_code in ('HG','HP', 'HT') and c.duration = 'I' and c.extremum = 'Z'   
+ and c.physical_code in ('HG','HP', 'HT') and c.duration = 'I' 
+ and c.extremum = 'Z'    
 """ % (state,) )
+
 
 for row in icursor:
     nwsli = row['station']
+    if row['source'] in ['R2','R3', 'R4', 'R5','R6','R7', 'R8', 'R9']:
+        continue
     o.write("%5s %-64.64s %s %s %7.2f %7.2f %10.2f %10.10s %10.10s %10.10s %10.10s %10.10s %10.10s %10.10s %10.10s\n" % (
         row['station'], row['name'], row['valid'].day, row['valid'].strftime("%H%M"),
         row['lat'], row['lon'], row['value'],
