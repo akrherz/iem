@@ -4,9 +4,7 @@ Process the raw file (argument #1) into the IEM database
 import re
 import string
 import mx.DateTime
-import string
 import sys
-import traceback
 import network
 nt = network.Table("ISUAG")
 import pg
@@ -44,15 +42,15 @@ def initdb(fn):
     sts += mx.DateTime.RelativeDateTime(hour=0)
 
     # Initialize the obs database
-    for id in nt.sts.keys():
-        obs[id] = {}
-        current[id] = {}
+    for sid in nt.sts.keys():
+        obs[sid] = {}
+        current[sid] = {}
     now = sts
     interval = mx.DateTime.RelativeDateTime(hours=+1)
     while now <= ets:
-        for id in nt.sts.keys():
-            obs[id][now.strftime("%Y-%m-%d %H:%M")] = {}
-            current[id][now.strftime("%Y-%m-%d %H:%M")] = {}
+        for sid in nt.sts.keys():
+            obs[sid][now.strftime("%Y-%m-%d %H:%M")] = {}
+            current[sid][now.strftime("%Y-%m-%d %H:%M")] = {}
         now = now + interval
 
     return sts, ets
@@ -93,6 +91,8 @@ def process(fn, s, e):
     """
     lines = open(fn, 'r').readlines()
     for line in lines:
+        if line.find(",") > -1:
+            continue
         if (line[0] == "*"):
             stationID = string.upper(line[3:10])
             dc = re.split(",", line)[1:-1]
