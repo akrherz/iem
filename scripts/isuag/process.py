@@ -91,7 +91,7 @@ def process(fn, s, e):
     """
     lines = open(fn, 'r').readlines()
     for line in lines:
-        if line.find(",") > -1:
+        if line.find(",") == -1:
             continue
         if (line[0] == "*"):
             stationID = string.upper(line[3:10])
