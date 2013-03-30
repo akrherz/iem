@@ -18,7 +18,7 @@ cfg.header = 'myheader';
 cfg.headerHeight = 30;
 cfg.jsonSource = '/json/webcams.php';
 </script>
-  <script type='text/javascript' src='webcam-static.js?v=4'></script>
+  <script type='text/javascript' src='webcam-static.js?v=5'></script>
 <style>
 #iem-header {
 	display : none;
