@@ -297,7 +297,10 @@ var task = {
   run: function(){
     if (imagestore.data.length > 0 && Ext.getCmp("timemode") &&
         Ext.getCmp("timemode").realtime){
-      imagestore.fireEvent('datachanged');
+      //imagestore.fireEvent('datachanged');
+      imagestore.reload({
+       add: false, params : {'network': Ext.getCmp("networkSelect").getValue()}
+   		});
     }
   },
   interval: cfg.refreshint
