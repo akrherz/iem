@@ -26,7 +26,7 @@
 <div class="container">
 
 <div class="page-header">
-  <h1>Say hello to your MOM!!! 
+  <h1>Say hello to your new MOM!!! 
   <br /><small>After 12 years, the Iowa Environmental Mesonet
   finally expands to become the Midwest Observational Mesonet (MOM).</small></h1>
     <div class="thumbnail">
@@ -38,7 +38,7 @@
 
   <div class="marketing">
 
-    <h1>Our Moto: Don't say anything bad about your mom.</h1>
+    <h1>Our Moto: Don't say anything bad about your MOM.</h1>
     <p class="marketing-byline">We are not just a new name, we are also
     announcing these new capabilities.</p>
 
