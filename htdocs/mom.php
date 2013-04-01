@@ -31,7 +31,7 @@
   finally expands to become the Midwest Observational Mesonet (MOM).</small></h1>
     <div class="thumbnail">
       <img src="/images/mom.png" alt="">
-      <p>Figure 1: Domain of data collected. Note: <i>Due to a long standing fued between Iowa and Missoura, Missoura is
+      <p>Figure 1: Domain of data collected. Note: <i>Due to a long standing feud between Iowa and Missoura, Missoura is
       not included.</i></p>
     </div>
   </div>
