@@ -119,6 +119,30 @@ if (in_array('daycent', $vars)){
 	}
 	
 }
+else if (in_array('salus', $vars)){
+	/*
+	 * > Daily Weather Data File (use extra weather drivers = 0):
+
+StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, Wind, Par, dbnum
+CTRL, 1981, 1, 5.62203, 2.79032, -3.53361, 5.43766, NaN, NaN, NaN, 2
+CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
+	*/
+	if (sizeof($stations) > 1) die("Sorry, only one station request at a time for daycent option");
+	if ($selectAll) die("Sorry, only one station request at a time for daycent option");
+	pg_prepare($connection, "TBD", "SELECT extract(doy from day) as doy, high,".
+	" low, precip, month, year, extract(day from day) as lday, station, year,".
+	" (case when merra_srad > 0 then merra_srad else -99 end) as srad".
+	" from $table WHERE station IN ". $stationString ." and ".
+	" day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
+	$rs = pg_execute($connection, 'TBD', Array());
+	echo "StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, Wind, Par, dbnum\n";
+	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+		echo sprintf("%s, %s, %s, %.4f, %.2f, %.2f, %.2f, NaN, NaN, NaN, %s\n", $row["station"], $row["year"],
+				$row["lday"], $row["srad"],  f2c($row["high"]), f2c($row["low"]), 
+				$row["precip"] * 25.4, $i + 2);
+	}
+
+}
 else if ($what != "plot"){
  
  $rs =  pg_exec($connection, $sqlStr);
