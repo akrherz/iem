@@ -76,7 +76,7 @@ def doit(gts, varname, prefix):
     # Now we need to generate the world file
     nmq.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/%s.png GIS/q2/%s_%s.wld wld' %s.wld" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/%s.wld GIS/q2/%s_%s.wld wld' %s.wld" % (
                     gts.strftime("%Y%m%d%H%M"), prefix, prefix, 
                     gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
