@@ -30,7 +30,7 @@ SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on stations to nobody,apache;
 
 CREATE TABLE raw2010(
-	station varchar(8),
+	station varchar(11),
 	valid timestamp with time zone,
 	key varchar(8),
 	value real
