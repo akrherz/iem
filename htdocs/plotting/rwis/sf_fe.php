@@ -23,12 +23,10 @@ if (! $subc && ! $dwpf && ! $tmpf && ! $s0 && ! $s1 && ! $s2 && ! $s3 ){
   $_GET["tmpf"] = "on";
 }
 
-include("$rootpath/include/google_keys.php");
 include("$rootpath/include/imagemaps.php");
 include("$rootpath/include/forms.php");
-$api = $GOOGLEKEYS[$rooturl]["any"];
-$HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
-<script src='http://openlayers.org/api/2.11/OpenLayers.js'></script>
+$HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+<script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
 <script src='${rooturl}/js/olselect.php?network=IA_RWIS'></script>";
 $BODYEXTRA = "onload=\"init()\"";
 $TITLE = "IEM | RWIS Timeseries Plots";

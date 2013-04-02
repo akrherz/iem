@@ -14,11 +14,9 @@ $station = isset($_GET['station'] ) ? $_GET['station'] : "";
 
 <?php 
 if (! isset($_GET["station"])){
-  include("$rootpath/include/google_keys.php");
   $network = $tv;
-  $api = $GOOGLEKEYS[$rooturl]["any"];
-  $HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
- <script src='${rooturl}/js/OpenLayers.js'></script>
+  $HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+ <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
  <script src='${rooturl}/js/olselect.php?network=${network}'></script>";
  $BODYEXTRA = "onload=\"init()\"";
 }

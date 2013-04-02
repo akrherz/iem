@@ -17,7 +17,6 @@ $sdate = date("Y-m-d", $sts);
 $edate = date("Y-m-d", $ets);
 $s2date = date("2000-m-d", $sts);
 $e2date = date("2000-m-d", $ets);
-
 $today = time();
 
 include("$rootpath/include/database.inc.php");
@@ -73,6 +72,7 @@ $q = "SELECT gdd50, valid from climate
 		WHERE station = '". $climate_site ."' and valid between '$s2date' and
 		'$e2date'
 		ORDER by valid ASC";
+
 $rs = pg_exec($coopdb, $q);
 $climate = Array();
 $cdiff = Array();
