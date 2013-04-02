@@ -5,7 +5,7 @@
   $phrase = $phrases[$t];
 
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" <?php if (isset($GOOGLEKEYS)){echo "xmlns:v=\"urn:schemas-microsoft-com:vml\"";} if (isset($HTMLEXTRA)){ echo $HTMLEXTRA; }?>>
+<html xmlns="http://www.w3.org/1999/xhtml" <?php if (isset($HTMLEXTRA)){ echo $HTMLEXTRA; }?>>
 <head>
  <title><?php echo isset($TITLE) ? $TITLE: "Iowa Environmental Mesonet"; ?></title>
  <link rel="stylesheet" type="text/css" media="screen" href="/css/main.css?v=5" />
