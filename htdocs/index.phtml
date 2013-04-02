@@ -1,10 +1,4 @@
 <?php
-if (isset($_REQUEST["feature_good"]) || isset($_REQUEST["feature_bad"]) ||
-		isset($_REQUEST["old"])){
-} else {
-	header("Location: /mom.php");
-	die();
-}
 include("../config/settings.inc.php");
 define("IEM_APPID", 1);
 include("$rootpath/include/database.inc.php");
