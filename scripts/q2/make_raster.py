@@ -98,7 +98,7 @@ def doit(gts, varname, prefix):
     j.write( json.dumps(dict(meta=metadata)))
     j.close()
     # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/%s.json GIS/q2/%s_%s.json json' %s.json" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/4326/q2/%s.json GIS/q2/%s_%s.json json' %s.json" % (
                     gts.strftime("%Y%m%d%H%M"),prefix, prefix, gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     for suffix in ['tif', 'json', 'png', 'wld']:
@@ -116,7 +116,7 @@ if __name__ == "__main__":
                                    int(sys.argv[4]), int(sys.argv[5])), 
              "preciprate_hsr", "r5m")
     else:
-        gts = mx.DateTime.gmtime() - mx.DateTime.RelativeDateTime(minutes=10)
+        gts = mx.DateTime.gmtime() - mx.DateTime.RelativeDateTime(minutes=10,second=0)
         offset = gts.minute % 5
         gts -= mx.DateTime.RelativeDateTime(minutes=offset)
         doit( gts, "rad_hsr_1h", "n1p")

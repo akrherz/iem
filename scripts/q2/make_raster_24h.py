@@ -103,7 +103,7 @@ def doit(gts, hr):
     j.write( json.dumps(dict(meta=metadata)))
     j.close()
     # Insert into LDM
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/p%sh.json GIS/q2/p%sh_%s.json json' %s.json" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/4326/q2/p%sh.json GIS/q2/p%sh_%s.json json' %s.json" % (
                     gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     for suffix in ['tif', 'json', 'png', 'wld']:
@@ -116,7 +116,7 @@ if __name__ == "__main__":
         gts = mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
                                    int(sys.argv[4]), 0)
     else:
-        gts = mx.DateTime.gmtime() + mx.DateTime.RelativeDateTime(minute=0)
+        gts = mx.DateTime.gmtime() + mx.DateTime.RelativeDateTime(minute=0,second=0)
     for hr in [24,48,72]:
         doit( gts , hr)
         
