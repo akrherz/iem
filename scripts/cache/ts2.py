@@ -11,9 +11,10 @@ now = mx.DateTime.gmt()
 
 cycle = int(sys.argv[1])
 
-if (cycle == 15):
-  now += mx.DateTime.RelativeDateTime(minute=0)
+if cycle == 15:
+    now += mx.DateTime.RelativeDateTime(minute=0)
 else:
-  now += mx.DateTime.RelativeDateTime(minute=30,hours=-1)
+    # was minute=30
+    now += mx.DateTime.RelativeDateTime(minute=0,hours=-1)
 
 print now.strftime( sys.argv[2] )

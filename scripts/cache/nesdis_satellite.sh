@@ -27,6 +27,7 @@ function getter(){
 	for i in {1..10}
 		do
 			wget --connect-timeout=60 -O $1 -q $2 && return
+			echo "FAIL $2"
 			sleep 60
 			done	
 }
