@@ -1,12 +1,10 @@
 <?php 
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/google_keys.php");
 include("setup.php");
 $THISPAGE="iem-sites";
 $TITLE = sprintf("IEM | Site Info | %s %s", $station, $cities[$station]["name"]);
-$BODYEXTRA = "onload=\"javascript: load();\"";
-$HEADEXTRA = '<script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key='. $GOOGLEKEYS[$rooturl]["any"] .'" type="text/javascript"></script>';
+$HEADEXTRA = '<script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>';
 include("$rootpath/include/header.php");
 ?>
 <?php $current = "base"; include("sidebar.php"); ?>
@@ -35,24 +33,21 @@ include("$rootpath/include/header.php");
 
 </div>
 <script type="text/javascript">
+var map;
 function load(){
- var mapSpecs = [];
- mapSpecs.push(G_NORMAL_MAP);
- mapSpecs.push(G_SATELLITE_MAP);
- mapSpecs.push(G_PHYSICAL_MAP);
+    var mapOptions = {
+            zoom: 15,
+            center: new google.maps.LatLng(<?php echo sprintf("%.5f", $cities[$station]["lat"]); ?>, <?php echo sprintf("%.5f", $cities[$station]["lon"]); ?>),
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+          };
+    map = new google.maps.Map(document.getElementById('mymap'),
+              mapOptions);
+  	
  
- var mapdiv = document.getElementById("mymap");
- var map = new GMap2(mapdiv, { mapTypes: mapSpecs });
- var center = new GLatLng(<?php echo sprintf("%.5f", $cities[$station]["lat"]); ?>, <?php echo sprintf("%.5f", $cities[$station]["lon"]); ?>);
- map.setCenter(center, 17 - 2, G_SATELLITE_MAP);
-
- map.setUIToDefault();
- map.enableDoubleClickZoom();
- map.enableContinuousZoom();
-
- var mysite = new GMarker(center);
- map.addOverlay(mysite);
- 
+ 	var mysite = new google.maps.Marker({position: mapOptions.center,
+ 	 	map: map});
 }
+google.maps.event.addDomListener(window, 'load', load);
+
 </script>
 <?php include("$rootpath/include/footer.php"); ?>
