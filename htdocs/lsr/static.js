@@ -218,7 +218,7 @@ var nexradWMS = new OpenLayers.Layer.WMS("NEXRAD",
 
 var gphy = new OpenLayers.Layer.Google(
     "Google Physical",
-    {type      : G_PHYSICAL_MAP, 
+    {type      : google.maps.MapTypeId.TERRAIN, 
      sphericalMercator: true,
      maxZoomLevel: 15,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
@@ -233,14 +233,14 @@ var gmap = new OpenLayers.Layer.Google(
             );
             var ghyb = new OpenLayers.Layer.Google(
                 "Google Hybrid",
-                {type: G_HYBRID_MAP, numZoomLevels: 20, sphericalMercator: true,
+                {type: google.maps.MapTypeId.HYBRID, numZoomLevels: 20, sphericalMercator: true,
      maxZoomLevel: 15,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 }
             );
             var gsat = new OpenLayers.Layer.Google(
                 "Google Satellite",
-                {type: G_SATELLITE_MAP, numZoomLevels: 20, sphericalMercator: true,
+                {type: google.maps.MapTypeId.SATELLITE, numZoomLevels: 20, sphericalMercator: true,
      maxZoomLevel: 15,
      maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 }
