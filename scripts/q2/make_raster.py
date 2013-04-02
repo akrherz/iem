@@ -35,7 +35,7 @@ def doit(gts, varname, prefix):
     north = 55.
     # Create the image data
     imgdata = numpy.zeros( (szy, szx), 'u1')
-    if 'prefix' == 'r5m':
+    if prefix == 'r5m':
         sts = gts - mx.DateTime.RelativeDateTime(minutes=5)
     else:
         sts = gts - mx.DateTime.RelativeDateTime(minutes=60)
