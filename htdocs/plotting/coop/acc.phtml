@@ -2,7 +2,6 @@
  include("../../../config/settings.inc.php");
  define("IEM_APPID", 34);
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/google_keys.php");
 include("$rootpath/include/imagemaps.php");
 include_once("$rootpath/include/forms.php");
 
@@ -35,8 +34,8 @@ if (isset($_REQUEST['year3']) && isset($_REQUEST['year3on'])){
 	
 $THISPAGE = "networks-coop";
 $TITLE = "IEM | NWS COOP Accumulated Departures";
-$HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
-<script src='http://openlayers.org/api/2.11/OpenLayers.js'></script>
+$HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+<script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
 <script src='/js/olselect.php?network=${network}&c=". time() ."'></script>";
 $BODYEXTRA = "onload=\"init()\"";
 include("$rootpath/include/header.php"); ?>
