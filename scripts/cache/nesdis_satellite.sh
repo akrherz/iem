@@ -71,7 +71,7 @@ fi
 
 sz=$(stat -c %s GoesEast04I4${tm}.tif)
 sz2=$(stat -c %s GoesWest04I4${tm}.tif)
-if [ $sz -gt 1000 && $sz2 -gt 1000 ]
+if [ $sz -gt 1000 -a $sz2 -gt 1000 ]
 then
 	gdal_merge.py -q -o ir.tif  -ul_lr -126 50 -66 24 -ps 0.04 0.04 GoesWest04I4${tm}.tif GoesEast04I4${tm}.tif
 	/home/ldm/bin/pqinsert -p "gis ac $ftm gis/images/4326/sat/conus_goes_ir4km.tif GIS/sat/conus_goes_ir4km_$atm.tif tif" ir.tif
@@ -88,7 +88,7 @@ fi
 
 sz=$(stat -c %s GoesEast04I3${tm}.tif)
 sz2=$(stat -c %s GoesWest04I3${tm}.tif)
-if [ $sz -gt 1000 && $sz2 -gt 1000 ]
+if [ $sz -gt 1000 -a $sz2 -gt 1000 ]
 then
 	gdal_merge.py -q -o wv.tif  -ul_lr -126 50 -66 24 -ps 0.04 0.04 GoesWest04I3${tm}.tif GoesEast04I3${tm}.tif
 	/home/ldm/bin/pqinsert -p "gis ac $ftm gis/images/4326/sat/conus_goes_wv4km.tif GIS/sat/conus_goes_wv4km_$atm.tif tif" wv.tif
