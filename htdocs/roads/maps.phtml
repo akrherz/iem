@@ -1,7 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/google_keys.php");
 
 $con = iemdb("postgis");
 $sql = "SELECT max(valid) as valid from roads_current";
@@ -12,11 +11,10 @@ $valid = substr($row["valid"],0,16);
 $ts = strtotime($valid);
 $valid = strftime("%I:%M %p on %d %b %Y", $ts);
 
-$api = $GOOGLEKEYS[$rooturl]["roads"];
 $THISPAGE = "roads-maps";
 $HEADEXTRA = "
-<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
-<script src=\"http://openlayers.org/api/2.11/OpenLayers.js\"></script>
+<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+<script src=\"http://openlayers.org/api/2.12/OpenLayers.js\"></script>
 <script type=\"text/javascript\">
 /* 'Globals' */
 var map, selectedFeature, selectControl;
@@ -42,7 +40,7 @@ function cb_roadOut(feature){
 function init(){
   // Build Map Object
   map = new OpenLayers.Map( 'map',{
-        projection: new OpenLayers.Projection('EPSG:900913'),
+        projection: new OpenLayers.Projection('EPSG:3857'),
         displayProjection: new OpenLayers.Projection('EPSG:4326'),
         units: 'm',
         wrapDateLine: false,
@@ -95,13 +93,15 @@ function init(){
    styleMap.addUniqueValueRules('default', 'cond_code', roadConditionLookup);
 
    // Road Condition WFS layer
-   var road_condition = new OpenLayers.Layer.WFS( 'Iowa Road Conditions',
-     '".$rootcgi."/wfs/iowa/roadcond-900913.cgi', 
-     {typename: 'roadcond-wfs-900913'
-     },{
-       typename: 'roadcond-wfs-900913',
-       extractAttributes: true,
-       styleMap: styleMap
+   var road_condition = new OpenLayers.Layer.Vector( 'Iowa Road Conditions',
+     		{
+     		strategies: [new OpenLayers.Strategy.BBOX()],
+     		protocol: new OpenLayers.Protocol.WFS({
+                    url: '".$rootcgi."/wfs/iowa/roadcond-900913.cgi',
+                    featureType: 'roadcond-wfs-900913'
+                }),
+       		extractAttributes: true,
+      		styleMap: styleMap
      });
 
    // Provide hover capabilities over road_condition layer
