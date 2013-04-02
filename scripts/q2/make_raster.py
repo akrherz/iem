@@ -14,6 +14,7 @@ import sys
 import tempfile
 import subprocess
 import nmq
+import json
 #import gdal
 
 def make_fp(tile, gts):
@@ -34,6 +35,13 @@ def doit(gts, varname, prefix):
     north = 55.
     # Create the image data
     imgdata = numpy.zeros( (szy, szx), 'u1')
+    if 'prefix' == 'r5m':
+        sts = gts - mx.DateTime.RelativeDateTime(minutes=5)
+    else:
+        sts = gts - mx.DateTime.RelativeDateTime(minutes=60)
+    metadata = {'start_valid': sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                'end_valid': gts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                'product': prefix }
     # Loop over tiles
     for tile in range(1,9):
         fp = make_fp(tile, gts)
@@ -86,9 +94,16 @@ def doit(gts, varname, prefix):
                     gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     
-    os.unlink('%s.tif' % (tmpfn,))
-    os.unlink('%s.png' % (tmpfn,))
-    os.unlink('%s.wld' % (tmpfn,))
+    j = open("%s.json" % (tmpfn,), 'w')
+    j.write( json.dumps(dict(meta=metadata)))
+    j.close()
+    # Insert into LDM
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/%s.json GIS/q2/%s_%s.json json' %s.json" % (
+                    gts.strftime("%Y%m%d%H%M"),prefix, prefix, gts.strftime("%Y%m%d%H%M"), tmpfn )
+    subprocess.call(pqstr, shell=True)
+    for suffix in ['tif', 'json', 'png', 'wld']:
+        os.unlink('%s.%s' % (tmpfn, suffix))
+
     os.close(tmpfp)
     os.unlink(tmpfn)
 
