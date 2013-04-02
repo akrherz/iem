@@ -15,8 +15,8 @@ WEB
   METADATA
     "wfs_title"	"IEM Iowa Road Conditions"
     "wfs_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi"
-    "wms_srs"	"EPSG:900913"
-    "wfs_srs"	"EPSG:900913"
+    "wms_srs"	"EPSG:900913 EPSG:3857"
+    "wfs_srs"	"EPSG:900913 EPSG:3857"
     "wfs_abstract" "Ba Ba Ba"
     "wfs_fees" "None"
     "wfs_keywordlist" "Ba"
@@ -44,13 +44,13 @@ LAYER
   METADATA
     "wfs_title" "Iowa Interstates Conditions"
     "wms_title" "Iowa Interstates Conditions"
-    "wms_srs"   "EPSG:900913"
-    "wfs_srs"   "EPSG:900913"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
+    "wfs_srs"   "EPSG:900913 EPSG:3857"
     "gml_featureid" "SEGID"
     "gml_include_items" "all"
   END
   PROJECTION
-   "init=epsg:900913"
+   "init=epsg:3857"
   END
 END
 
@@ -66,13 +66,13 @@ LAYER
   METADATA
     "wfs_title" "Iowa Interstates Conditions"
     "wms_title" "Iowa Interstates Conditions"
-    "wms_srs"   "EPSG:900913"
-    "wfs_srs"   "EPSG:900913"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
+    "wfs_srs"   "EPSG:900913 EPSG:3857"
     "gml_featureid" "SEGID"
     "gml_include_items" "all"
   END
   PROJECTION
-   "init=epsg:900913"
+   "init=epsg:3857"
   END
 END
 
