@@ -3,7 +3,6 @@ My purpose in life is to take the NWS AWIPS Geodata Zones Shapefile and
 dump them into the NWSChat PostGIS database!
 """
 from osgeo import ogr
-from osgeo import _ogr
 import sys
 import os
 import urllib2
@@ -20,12 +19,6 @@ if len(sys.argv) == 1:
     sys.exit(0)
 
 DATESTAMP = sys.argv[1]
-
-def Area(feat, *args):
-    """
-    Backport a feature from the future!
-    """
-    return _ogr.Geometry_GetArea(feat, *args)
 
 # Change Directory to /tmp, so that we can rw
 os.chdir('/tmp')
@@ -68,12 +61,11 @@ while feat is not None:
         feat = lyr.GetNextFeature()
         continue
 
-
     geo = feat.GetGeometryRef()
     if not geo:
         feat = lyr.GetNextFeature()
         continue
-    area = Area(geo)
+    area = geo.Area()
     wkt = geo.ExportToWkt()
 
     if ugcs.has_key(zone):
@@ -87,11 +79,10 @@ while feat is not None:
         and wfo = '%s' """ % (zone, cwa))
     sql = """INSERT into nws_ugc (polygon_class, ugc, name, state, wfo,
           time_zone, geom, centroid) VALUES ('%s','%s','%s','%s','%s',
-          '%s', ST_Multi(ST_SetSRID(ST_GeomFromEWKT('%s'),4326)),
-          ST_Centroid( ST_SetSRID(ST_GeomFromEWKT('%s'),4326) ) )""" % (
+          '%s', ST_Multi(ST_GeomFromText('%s', 4326)),
+          ST_Centroid( ST_GeomFromText('%s',4326) ) )""" % (
           GEO_TYP, zone, name.replace("'", " "), state, cwa,
-          tz, wkt,
-          wkt )
+          tz, wkt,wkt )
     mcursor.execute(sql)
 
 
