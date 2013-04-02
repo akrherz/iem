@@ -1,4 +1,20 @@
 ---
+--- IEMBot rooms
+---
+CREATE TABLE iembot_room_subscriptions (
+    roomname character varying(64),
+    channel character varying(24)
+);
+GRANT all on iembot_room_subscriptions to nobody,apache;
+---
+--- IEMBot room subscriptions
+---
+CREATE TABLE iembot_rooms (
+    roomname varchar(64)
+);
+GRANT all on iembot_rooms to nobody,apache;
+
+---
 --- Racoon Work Tasks
 ---
 CREATE TABLE racoon_jobs(

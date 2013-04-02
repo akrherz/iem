@@ -1,3 +1,11 @@
+CREATE AGGREGATE array_accum (anyelement)
+(
+    sfunc = array_append,
+    stype = anyarray,
+    initcond = '{}'
+);
+--- array_to_string(array_accum(column),',')
+
 ---
 --- Missing VTEC eventids
 ---
