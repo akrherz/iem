@@ -1,4 +1,12 @@
 ---
+--- IEMBot channels
+---
+CREATE TABLE iembot_channels(
+  id varchar,
+  name varchar);
+GRANT all on iembot_channels to nobody,apache;
+
+---
 --- IEMBot rooms
 ---
 CREATE TABLE iembot_room_subscriptions (
