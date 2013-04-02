@@ -19,6 +19,7 @@ import sys
 import tempfile
 import subprocess
 import nmq
+import json
 
 def make_fp(tile, gts):
     """
@@ -36,6 +37,9 @@ def doit(gts, hr):
     szy = 3500
     west = -130.
     north = 55.
+    sts = gts - mx.DateTime.RelativeDateTime(hours=hr)
+    metadata = {'start_valid': sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                'end_valid': gts.strftime("%Y-%m-%dT%H:%M:%SZ") }
     # Create the image data
     imgdata = numpy.zeros( (szy, szx), 'u1')
     # Loop over tiles
@@ -95,9 +99,15 @@ def doit(gts, hr):
                     gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
     
-    os.unlink('%s.tif' % (tmpfn,))
-    os.unlink('%s.png' % (tmpfn,))
-    os.unlink('%s.wld' % (tmpfn,))
+    j = open("%s.json" % (tmpfn,), 'w')
+    j.write( json.dumps(dict(meta=metadata)))
+    j.close()
+    # Insert into LDM
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot c %s gis/images/900913/q2/p%sh.json GIS/q2/p%sh_%s.json json' %s.json" % (
+                    gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
+    subprocess.call(pqstr, shell=True)
+    for suffix in ['tif', 'json', 'png', 'wld']:
+        os.unlink('%s.%s' % (tmpfn, suffix))
     os.close(tmpfp)
     os.unlink(tmpfn)
 
