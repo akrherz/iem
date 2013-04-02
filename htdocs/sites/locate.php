@@ -7,15 +7,13 @@ if (isset($_GET["station"]) && isset($_GET["network"]))
  include("../../config/settings.inc.php");
  define("IEM_APPID", 5);
  include("$rootpath/include/database.inc.php");
- include("$rootpath/include/google_keys.php");
  include("$rootpath/include/imagemaps.php");
  $network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
 
 $TITLE = "IEM | Site Locator";
 $THISPAGE = "iem-sites";
-$api = $GOOGLEKEYS[$rooturl]["any"];
-$HEADEXTRA = "<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=$api'></script>
-<script src='http://openlayers.org/api/2.11/OpenLayers.js'></script>
+$HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+<script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
 <script src='${rooturl}/js/olselect.php?network=${network}'></script>";
 $BODYEXTRA = "onload=\"init()\"";
 include("$rootpath/include/header.php"); 
