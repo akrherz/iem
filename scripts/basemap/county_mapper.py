@@ -9,13 +9,26 @@ from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 import pylab
 import math
-import Ngl
 import iemplot
 import iemdb
 import Image
 import mx.DateTime
 POSTGIS = iemdb.connect('postgis', bypass=True)
 pcursor = POSTGIS.cursor()
+
+from iem import plot
+maue = plot.maue(15)
+bins = [1,2,3,4,5,7,10,15,20,25,30,35,40,50,75,100]
+
+def get_color(val, minvalue, maxvalue):
+    if val < bins[0]:
+        return "None"
+    for i in range(1,len(bins)):
+        if val < bins[i]:
+            return maue(i-1)
+    return maue(14)
+
+
 
 fig = plt.figure(num=None, figsize=(10.24,7.68))
 #fig = plt.figure(num=None, figsize=(3.55,2.9))
@@ -43,14 +56,27 @@ himap.fillcontinents(color='0.7',zorder=0)
 
 m.drawstates()
 m.drawcountries()
-akmap.drawstates()
+#akmap.drawstates()
 himap.drawstates()
 
 source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody")
 data = source.ExecuteSQL("""
-select n.ugc, foo.data, ST_Simplify(n.geom,0.01) from nws_ugc n LEFT OUTER JOIN (select ugc, count(*) as data from warnings where phenomena in ('TO') and significance = 'W' and gtype = 'C' GROUP by ugc) as foo ON (n.ugc = foo.ugc) WHERE n.polygon_class = 'C' ORDER by data DESC NULLS LAST
+ ---select n.ugc, foo.data, ST_Simplify(n.geom,0.01) from nws_ugc n 
+ ---LEFT OUTER JOIN (select ugc, count(*) as data from warnings 
+ ---                 where phenomena in ('BZ') and significance = 'W' 
+ ---                 and gtype = 'C' GROUP by ugc) as foo 
+ ---ON (n.ugc = foo.ugc) WHERE n.polygon_class = 'Z' 
+ ---ORDER by data DESC NULLS LAST
+ 
+ select n.ugc, foo.data, ST_Simplify(n.geom,0.01) from nws_ugc n 
+ LEFT JOIN (select ugc, count(*) as data from warnings 
+                  where phenomena in ('BZ') and significance = 'W' 
+                  and gtype = 'C' GROUP by ugc) as foo 
+ ON (n.ugc = foo.ugc) 
+ ORDER by data ASC NULLS FIRST
+ 
 """)
-maxV = None
+maxV = 22
 patches = []
 akpatches = []
 hipatches = []
@@ -63,16 +89,15 @@ while 1:
     ugc = feature.GetField('ugc')
     if ugc is None:
         continue
-    if not maxV:
+    if not maxV and cnt and cnt > maxV:
         maxV = int(cnt + 1.0)
         print maxV
     if cnt is None or float(cnt) == 0:
         c = 'w'
     else:
-        c = iemplot.floatRgb(float(cnt),1,maxV)
-        c = rgb2hex(c)
+        c = get_color(cnt, 0,100)
     geom = loads(feature.GetGeometryRef().ExportToWkb())
-    print ugc, cnt
+    print ugc, cnt, c
     for polygon in geom:
         if polygon.exterior is None:
             continue
@@ -82,6 +107,7 @@ while 1:
             a = zip(x,y)
             p = Polygon(a,fc=c,ec=None,zorder=2, lw=.1)
             akpatches.append(p)
+            pass
         elif ugc[:2] == 'HI':
             x,y = himap(a[:,0], a[:,1])
             a = zip(x,y)
@@ -98,9 +124,24 @@ ax.add_collection(PatchCollection(patches,match_original=True))
 ak_ax.add_collection( PatchCollection(akpatches,match_original=True) )
 hi_ax.add_collection( PatchCollection(hipatches,match_original=True) )
 
-ax2 = iemplot.bmap_clrbar(maxV+1,levels=20)
+import numpy
+import matplotlib.patheffects as PathEffects
 
-ax.text(0.17, 1.1, '1986 - 29 May 2012 County Based Tornado Warnings', transform=ax.transAxes,
+axaa = plt.axes([0.92, 0.1, 0.07, 0.8], frameon=False,
+                      yticks=[], xticks=[])
+colors = []
+for i in range(len(bins)):
+    colors.append( rgb2hex(maue(i)) )
+    txt = axaa.text(0.5, i, "%s" % (bins[i],), ha='center', va='center',
+                          color='w')
+    txt.set_path_effects([PathEffects.withStroke(linewidth=2,
+                                                     foreground="k")])
+axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
+                color=maue(range(len(bins))),
+                ec='None')
+
+
+ax.text(0.17, 1.1, '1 Oct 2005 - 10 Feb 2013 Blizzard Warnings', transform=ax.transAxes,
      size=13,
     horizontalalignment='left', verticalalignment='center')
 
@@ -111,14 +152,14 @@ ax.text(0.17, 1.1, '1986 - 29 May 2012 County Based Tornado Warnings', transform
 # Logo!
 logo = Image.open('../../htdocs/images/logo_small.png')
 ax3 = plt.axes([0.05,0.87,0.1,0.1], frameon=False, axisbg=(0.4471,0.6235,0.8117), yticks=[], xticks=[])
-ax3.imshow(logo, origin='lower')
+ax3.imshow(logo)
 
 #plt.text(0.08, 0.035,'Iowa State University', size='small', color='#222d7d',
 #     horizontalalignment='center',
 #     verticalalignment='center',
 #     transform = ax.transAxes)
 
-ax2.text(-2., 0.5, 'Count', transform=ax2.transAxes,
+axaa.text(-2., 0.5, 'Count', transform=axaa.transAxes,
     size='medium', color='k', horizontalalignment='center',
     rotation='vertical', verticalalignment='center')
 

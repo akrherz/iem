@@ -78,7 +78,7 @@ data = source.ExecuteSQL("""
 -- phenomena = 'SV' and (tml_geom is not null or tml_geom_line is not null) 
 -- GROUP by wfo) as foooo WHERE data3 > 0)
 
- (select wfo, percentage  as data from ferree3)
+ (select wfo, col3  as data from ferree3)
 
 --- (select wfo, sum(case when (overlap / perimeter) >= 0.9 then 1 else 0 end) / count(*)::numeric * 100.0 as data from ferree GROUP by wfo)
 
@@ -223,18 +223,18 @@ for i in range(len(xs)):
 
 # Top label
 # bbox=dict(boxstyle='square', facecolor='w', ec='b'),
-ax.text(0.17, 1.1, "Percentage of Time WFO has Active VTEC Watch/Warning/Advisory (9z to 22z day)", transform=ax.transAxes,
+ax.text(0.17, 1.1, "2012 Percent of Average Severe Thunderstorm + Tornado Warnings Jan 1 - May 15", transform=ax.transAxes,
      size=12,
     horizontalalignment='left', verticalalignment='center')
 #ax.text(0.17, 1.05, "Excluded VTEC codes: BH,CF,FA,FF,FL,GL,LO,LS,MA,MF,MS,MH,RB,RP,SC,SE,SI,SU,SV,SW,TO", transform=ax.transAxes,
 #ax.text(0.17, 1.05, "Excluded VTEC codes: CF,FA,FF,FL,LS,SV,TO", transform=ax.transAxes,
-ax.text(0.17, 1.05, "Only VTEC codes: Fog FG, Flood FL, Wind WI and Only Significance: Advisory Y", transform=ax.transAxes,
-     size=12,
-    horizontalalignment='left', verticalalignment='center')
+#ax.text(0.17, 1.05, "Only VTEC codes: Fog FG, Flood FL, Wind WI and Only Significance: Advisory Y", transform=ax.transAxes,
+#     size=12,
+#    horizontalalignment='left', verticalalignment='center')
 
-ax.text(0.17, 1.005, 'Map Generated: %s, Period: 1 Jan 2009 - 31 Dec 2012' % (mx.DateTime.now().strftime("%d %B %Y %I:%M %p %Z"),), transform=ax.transAxes,
-     size=9,
-    horizontalalignment='left', verticalalignment='bottom')
+#ax.text(0.17, 1.005, 'Map Generated: %s, Period: 1 Jan 2009 - 31 Dec 2012' % (mx.DateTime.now().strftime("%d %B %Y %I:%M %p %Z"),), transform=ax.transAxes,
+#     size=9,
+#    horizontalalignment='left', verticalalignment='bottom')
 
 # Logo!
 logo = Image.open('../../htdocs/images/logo_small.png')
