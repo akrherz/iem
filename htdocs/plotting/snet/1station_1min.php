@@ -3,7 +3,6 @@
  include('../../schoolnet/switchtv.php'); 
  include("$rootpath/include/forms.php");
  include("$rootpath/include/imagemaps.php"); 
- include("$rootpath/include/google_keys.php"); 
 
 $year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
 $month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");

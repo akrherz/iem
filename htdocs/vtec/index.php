@@ -1,6 +1,5 @@
 <?php
 include("../../config/settings.inc.php");
-include("$rootpath/include/google_keys.php");
 include("$rootpath/include/mobile_device_detect.php");
 
 /* Mobile business logic */
