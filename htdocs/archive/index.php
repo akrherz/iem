@@ -28,18 +28,18 @@ having difficulty finding something, please let us know. </p>
 
 <h3>NWS Watch/Warnings/Advisories</h3>
 <ul>
- <li><a href="<?php echo $rooturl; ?>"/request/gis/watchwarn.phtml">Download Shapefiles</a>
+ <li><a href="/request/gis/watchwarn.phtml">Download Shapefiles</a>
   <br />Download shapefiles of warning geometries and metadata.</li>
- <li><a href="<?php echo $rooturl; ?>"/vtec/search.php">Search by County/Zone</a>
+ <li><a href="/vtec/search.php">Search by County/Zone</a>
   <br />Find archived warnings by searching for a county or zone.</li>
- <li><a href="<?php echo $rooturl; ?>"/vtec/">VTEC Browser</a>
+ <li><a href="/vtec/">VTEC Browser</a>
   <br />Interactively navigate our archive of warnings.</li>
 </ul>
 
 <h3>RADAR Data</h3>
 <ul>
 
-<li><a href="<?php echo $rooturl; ?>/archive/nexrad/">NIDS NEXRAD Data</a>
+<li><a href="/archive/nexrad/">NIDS NEXRAD Data</a>
  <br>NEXRAD data from the seven sites (DMX,DVN,OAX,FSD,ARX,MPX,EAX) with
 Iowa coverage.  Since mid April 2002, all NIDS products are archived. Before
 then, only base reflectivity was saved.</li>
@@ -79,12 +79,12 @@ then, only base reflectivity was saved.</li>
 don't have this full archive online yet.  NCDC has a <a href="http://has.ncdc.noaa.gov/pls/plhas/HAS.FileAppSelect?datasetname=9957ANX">big archive</a> of
 this data back to 2001.  The IEM's archives can be found:
 <ul>
- <li><a href="<?php echo $rooturl; ?>/wx/afos/">AFOS Product Finder</a>
+ <li><a href="/wx/afos/">AFOS Product Finder</a>
   <br />If you know what you are looking for, this app works great!</li>
- <li><a href="<?php echo $rooturl; ?>/archive/data/<?php echo date("Y/m/d"); ?>/text/noaaport/">Simple directory listing</a>
+ <li><a href="/archive/data/<?php echo date("Y/m/d"); ?>/text/noaaport/">Simple directory listing</a>
   <br />Certain warning type products can be found in the main IEM data archive
   directory structure.</li>
- <li><a href="<?php echo $rooturl; ?>/wx/afos/list.phtml">List Products by WFO by Date</a>
+ <li><a href="/wx/afos/list.phtml">List Products by WFO by Date</a>
   <br />View quick listings of issued products by forecast office and by date.</li>
   <li><a href="/archive/rer/">NWS Record Event Reports</a>
   <br />Daily reports of record temperatures and precipitation for
@@ -102,7 +102,7 @@ this data back to 2001.  The IEM's archives can be found:
   <br />Archive of gempak products taken from the UNIDATA NOAAPORT feed.  This
    archive dates back to 2001 and for some dates even further.</li>
 
- <li><a href="<?php echo $rooturl; ?>/archive/raw/">IEM Network Data</a>
+ <li><a href="/archive/raw/">IEM Network Data</a>
   <br />IEM data in its original unprocessed form.  ASOS/AWOS METAR observation,
    RWIS comma-deliminated data, schoolnet csv data, SCAN site format and COOP
    observations</li>
@@ -117,7 +117,7 @@ this data back to 2001.  The IEM's archives can be found:
 
 <h3>Misc</h3>
 <ul>
-<li><a href="<?php echo $rooturl; ?>/browser/">Archived Data Browser</a>
+<li><a href="/browser/">Archived Data Browser</a>
   <br />Browse the archive of products via this frames based interface.</li> 
 
 <li><a href="http://archive.atmos.colostate.edu/">NWS DIFAX Archive (2000-)</a>
@@ -129,19 +129,19 @@ this data back to 2001.  The IEM's archives can be found:
 <li><a href="http://locust.mmm.ucar.edu/case-selection/">UCAR plot archive</a>
   <br />Assorted RADAR, satellite, and model plots back to 1998.</li>
 
-<li><a href="<?php echo $rooturl; ?>/archive/data/">IEM Generated Plots</a>
+<li><a href="/archive/data/">IEM Generated Plots</a>
   <br>Images and data products mostly displayed in real time on the current
 data page.  Iowa Mesonet plots, hourly precip plots, mesonet stats and 
 COOP precip plots are examples.</li>
 
-<li><a href="<?php echo $rooturl; ?>/archive/gempak/">IEM Data in GEMPAK Format</a>
+<li><a href="/archive/gempak/">IEM Data in GEMPAK Format</a>
   <br />IEM surface data in GEMPAK format.  Data files exist with different
 combinations of IEM networks.</li>
 
 <li><a href="http://www.mdl.nws.noaa.gov/~mos/archives/">Model MOS Archive</a>
 <br>NWS archive of model output statistics (MOS)</li>
 
-<li><a href="<?php echo $rooturl; ?>/mos/">IEM's Model MOS Archive</a>
+<li><a href="/mos/">IEM's Model MOS Archive</a>
 <br>IEM's archive of model output statistics (MOS)</li>
 
 <li><a href="http://www.ncdc.noaa.gov/swdi">NCDC Severe Weather Data Inventory</a>
@@ -176,16 +176,16 @@ surface plots and other plots.</li>
 
 <h3>Data download forms</h3>
 <ul>
-<li><a href="<?php echo $rooturl; ?>/request/awos/1min.php">1 minute AWOS data</a>
+<li><a href="/request/awos/1min.php">1 minute AWOS data</a>
  <br>Download/Plot/View 1 minute AWOS data since 1 Jan 1995.</li>
 
-<li><a href="<?php echo $rooturl; ?>/schoolnet/dl/">1 minute schoolNet data</a><br>Download/View 1 minute schoolNet data since 12 Feb 2002.</li>
+<li><a href="/schoolnet/dl/">1 minute schoolNet data</a><br>Download/View 1 minute schoolNet data since 12 Feb 2002.</li>
 
-<li><a href="<?php echo $rooturl; ?>/cgi-bin/precip/catAZOS.py">Hourly ASOS/AWOS Precip Reports</a>
+<li><a href="/cgi-bin/precip/catAZOS.py">Hourly ASOS/AWOS Precip Reports</a>
  <br>Hourly precipitation HTML grids from the archive.  A useful tool to 
 quickly find precipitation totals.</li>
 
-<li><a href="<?php echo $rooturl; ?>/request/download.phtml">Hourly ASOS/AWOS/RWIS Observations</a>
+<li><a href="/request/download.phtml">Hourly ASOS/AWOS/RWIS Observations</a>
 <br />Quickly query the IEM databases for historical RWIS/ASOS/AWOS observations.
 This dataset contains the raw observations.</li>
 
