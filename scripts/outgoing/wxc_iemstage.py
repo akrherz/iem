@@ -64,7 +64,7 @@ for row in icursor:
     nwsli = row['station']
     if row['source'] in ['R2','R3', 'R4', 'R5','R6','R7', 'R8', 'R9']:
         continue
-    o.write("%5s %-64.64s %s %s %-7.2f %-7.2f %-10.2f %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s\n" % (
+    o.write("%5s %-64.64s %02i %s %-7.2f %-7.2f %-10.2f %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s\n" % (
         row['station'], row['name'], row['valid'].day, row['valid'].strftime("%H%M"),
         row['lat'], row['lon'], row['value'],
         row['ss_low'],row['ss_action'],row['ss_bankfull'],row['ss_flood'],
