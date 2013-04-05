@@ -130,6 +130,7 @@ def do_row(row):
             CACHE[skey] = list_feed
         misses = 0
         na = False
+        dnc = False
         lookupcol = varconv.get(varname, varname)
         for entry2 in list_feed.entry:
             data = entry2.to_dict()
@@ -138,6 +139,8 @@ def do_row(row):
                 break
             if data[lookupcol] is None:
                 misses += 1
+            elif data[lookupcol].lower() == 'did not collect':
+                dnc = True
     
         if na:
             print 'Could not find header: %s in spreadtitle: %s %s' % (lookupcol,
@@ -146,6 +149,8 @@ def do_row(row):
         uri = resources[0].get_html_link().href
         if na:
             newvalue = 'N/A'
+        elif dnc:
+            newvalue = 'Did not collect'
         elif misses == 0:
             newvalue = 'Complete!'
         else:
