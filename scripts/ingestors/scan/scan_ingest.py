@@ -1,6 +1,5 @@
 """
 Download and process the scan dataset
-$Id: $:
 """
 
 import urllib
@@ -93,8 +92,7 @@ postvars = {
     'site_network': 'scan',
     'time_zone': 'CST',
 }
-#URI = 'http://www.wcc.nrcs.usda.gov/nwcc/view'
-URI = 'http://199.156.165.64/nwcc/view'
+URI = 'http://www.wcc.nrcs.usda.gov/nwcc/view'
 
 def savedata( data , maxts ):
     """
@@ -166,14 +164,14 @@ def load_times():
 
 def main():
     maxts = load_times()
-    for id in ['2068', '2031', '2047', '2001', '2004']:
-        postvars['sitenum'] = id
+    for sid in ['2068', '2031', '2047', '2001', '2004']:
+        postvars['sitenum'] = sid
         data = urllib.urlencode(postvars)
         req = urllib2.Request(URI, data)
         try:
             response = urllib2.urlopen(req, timeout=15)
         except:
-            print 'Failed to download: %s %s' % (id, URI)
+            print 'Failed to download: %s %s' % (sid, URI)
             continue
         lines = response.readlines()
         cols = lines[1].split(",")
