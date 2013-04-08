@@ -19,7 +19,7 @@ P1_RE = re.compile(r"""
 (?P<hr>[0-9]{2})(?P<mi>[0-9]{2})
 (?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s+
 \[?\s*((?P<vis1_coef>\-?\d+\.\d*)|(?P<vis1_coef_miss>M))\s+
-(?P<vis1_nd>[0-9A-Za-z\?\$/ ])\]?\s+
+\[?(?P<vis1_nd>[0-9A-Za-z\?\$/ ])\]?\s+
 ((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+(?P<vis2_nd>[A-Za-z\?\$ ])\s+
 ...............\s+
 \[?\s*((?P<drct>\d+)|(?P<drct_miss>M))\s+
@@ -47,6 +47,7 @@ p1_examples = [
 "94989KAMW AMW2010012112281828    M    M                              80     6    72    9                        ",
 "94989KAMW AMW2010012112271827  70000.00                                80     6    82    8                      ",
 "14942KOMA OMA2012111704141014   0.191 N                             149    10   151   12    14RFFF              ",
+"14933KDSM DSM2013030312191819    0.167 [N]                             120   11  121   12   31 60+              ",
 ]
 
 p1_answers = [
