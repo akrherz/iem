@@ -19,6 +19,6 @@ python ../../climodat/compute_0000.py $1 $2 >& /dev/null
 # Compute new records
 python new_records.py $1 $2
 echo "Redoing MERRA Solar Estimates"
-python ../coop/merra_solarrad.py $1 $2
+python ../../coop/merra_solarrad.py $1 $2
 echo "Redoing NARR Solar Estimates"
-python ../coop/narr_solarrad.py $1 $2
+python ../../coop/narr_solarrad.py $1 $2
