@@ -1,6 +1,16 @@
+"""
+ This legacy code has these purposes
+ 1) Ingest data into per station per day text files
+ 2) Send wind alerts
+"""
 
 # Python Imports
-import re, sys, time, telnetlib, string, math, os, shutil
+import re
+import time
+import telnetlib
+import string
+import os
+import shutil
 import traceback
 import logging
 import smtplib, StringIO
@@ -13,9 +23,10 @@ import mx.DateTime
 import nwnOB
 import secret
 
-from pyIEM import iemdb
-i = iemdb.iemdb()
-mesosite = i['mesosite']
+import iemdb
+import psycopg2.extras
+MESOSITE = iemdb.connect('mesosite', bypass=True)
+mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 logging.basicConfig(filename='/mesonet/data/logs/nwn.log',filemode='a')
 logger=logging.getLogger()
@@ -29,19 +40,20 @@ o.close()
 
 # Load up locs
 locs = {}
-rs = mesosite.query("""SELECT *, x(geom) as lon, y(geom) as lat from 
-     stations WHERE network in ('KCCI', 'KELO', 'KIMT')""").dictresult()
-for i in range(len(rs)):
-    locs[ int(rs[i]['nwn_id']) ] = {
-        'nwsli': rs[i]['id'],
-        'lat': rs[i]['lat'],
-        'lon': rs[i]['lon'],
-        'name': rs[i]['name'],
-        'tv' : rs[i]['network'],
-        'routes': [rs[i]['network'], rs[i]['wfo'], 'EMAIL'],
-        'county': rs[i]['county'],
+mcursor.execute("""SELECT nwn_id, id, x(geom) as lon, y(geom) as lat, name,
+    network, wfo, county from stations 
+    WHERE network in ('KCCI', 'KELO', 'KIMT')""")
+for row in mcursor:
+    locs[ int(row['nwn_id']) ] = {
+        'nwsli': row['id'],
+        'lat': row['lat'],
+        'lon': row['lon'],
+        'name': row['name'],
+        'tv' : row['network'],
+        'routes': [row['network'], row['wfo'], 'EMAIL'],
+        'county': row['county'],
     }
-
+MESOSITE.close()
 
 rejects = open("/mesonet/data/logs/rejects.log", 'w')
 
@@ -64,16 +76,16 @@ _MIN_RE = "[A-Z] ([0-9]?[0-9][0-9])\s+(Min)\s+([0-1][0-9]/[0-3][0-9]/[0-9][0-9])
 
 def makeConnect():
     logger.info("\n ------ BEGIN makeConnect ------ \n")
-    notConnected = 0
-    while (notConnected == 0):
+    notConnected = True
+    while notConnected:
         try:
             tn = telnetlib.Telnet('192.168.0.21',14996)
-            #tn = telnetlib.Telnet('129.186.26.186',14998)
+            #tn = telnetlib.Telnet('129.186.185.33',14996)
             tn.read_until("login> ", 10)
             tn.write("%s\r\n" % (secret.cfg['hubuser'],) )
             tn.read_until("password> ", 10)
             tn.write("%s\r\n" % (secret.cfg['hubpass'],) )
-            notConnected = 1
+            notConnected = False
         except:
             logger.exception("Error in makeConnect()")
             time.sleep(58)
@@ -87,7 +99,7 @@ def process(dataStr):
 
     for line in lines:
         tokens = re.findall(_CURRENT_RE, line)
-        if ( len(tokens) == 1):
+        if len(tokens) == 1:
             stationID = int(tokens[0][0])
             if (not db.has_key(stationID)):
                 db[stationID] = nwnOB.nwnOB(stationID)
@@ -137,19 +149,16 @@ def process(dataStr):
             continue
 
         tokens = re.findall(_MIN_RE, line)
-        if ( len(tokens) == 1):
+        if len(tokens) == 1:
             stationID = int(tokens[0][0])
             if (not db.has_key(stationID)):
                 db[stationID] = nwnOB.nwnOB(stationID)
-            if (tokens[0][6][:2] == "0-"):
-                db[stationID].minTMPF = int(tokens[0][6][1:])
-            else:
-                db[stationID].minTMPF = int(tokens[0][6])
-            db[stationID].minALTI = float(tokens[0][8])
             if (tokens[0][7][:2] == "0-"):
-              db[stationID].minRELH = int(tokens[0][7][1:])
+                db[stationID].minTMPF = int(tokens[0][7][1:])
             else:
-              db[stationID].minRELH = int(tokens[0][7])
+                db[stationID].minTMPF = int(tokens[0][7])
+            db[stationID].minALTI = float(tokens[0][9])
+            db[stationID].minRELH = int(tokens[0][8])
             goodLines += line +"\n"
             db[stationID].minLine = line
             continue
@@ -158,21 +167,24 @@ def process(dataStr):
     return goodLines
 
 def archiveWriter():
-    for id in db.keys():
+    for sid in db.keys():
         #logger.write("WRITE ID: %s\n"% (id,) )
         # No obs during this period
-        if (db[id].valid == None): continue
+        if (db[sid].valid == None):
+            continue
 
-        if (db[id].maxSPED == None): db[id].maxSPED = 0
-        dir = "%s/%s" % (_ARCHIVE_BASE, db[id].valid.strftime("%Y_%m/%d") )
-        if (not os.path.isdir(dir)):
-            os.makedirs(dir, 0775)
-        fp = "%s/%s.dat" % (dir, id)
+        if (db[sid].maxSPED == None):
+            db[sid].maxSPED = 0
+        mydir = "%s/%s" % (_ARCHIVE_BASE, db[sid].valid.strftime("%Y_%m/%d") )
+        if not os.path.isdir(mydir):
+            os.makedirs(mydir, 0775)
+        fp = "%s/%s.dat" % (mydir, sid)
         out = open(fp, 'a')
-        out.write("%s,%s,%02iMPH,%03iK,460F,%03iF,%03i%s,%5.2f%s,%05.2f\"D,%05.2f\"M,%05.2f\"R,%s,\n" % ( db[id].valid.strftime("%H:%M,%m/%d/%y"), db[id].drctTxt, \
-        db[id].sped, db[id].srad, \
-        db[id].tmpf, db[id].relh, "%", db[id].alti, db[id].ptend, \
-        db[id].pDay, db[id].pMonth, db[id].pRate, db[id].maxSPED ) )
+        out.write("%s,%s,%02iMPH,%03iK,460F,%03iF,%03i%s,%5.2f%s,%05.2f\"D,%05.2f\"M,%05.2f\"R,%s,\n" % ( 
+                    db[sid].valid.strftime("%H:%M,%m/%d/%y"), db[sid].drctTxt, 
+                    db[sid].sped, db[sid].srad, 
+                    db[sid].tmpf, db[sid].relh, "%", db[sid].alti, db[sid].ptend, 
+                    db[sid].pDay, db[sid].pMonth, db[sid].pRate, db[sid].maxSPED ) )
         out.close()
 
 def test():
@@ -181,8 +193,8 @@ def test():
     print "----"
 
 def averageWinds():
-    for id in db.keys():
-        db[id].avgWinds()
+    for sid in db.keys():
+        db[sid].avgWinds()
 
 def sendWindAlert(id, alertSPED, alertDrctTxt, myThreshold):
     if id in [904, 75, 907, 918, 9, 913,924,610,619, 60]:
