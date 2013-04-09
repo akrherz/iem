@@ -1,5 +1,8 @@
 # Run every 5 minutes
-cd ingestors/ifc
+cd cache 
+sh download_wwa.sh &
+
+cd ../ingestors/ifc
 python ingest_ifc_precip.py &
 
 cd ../../dl
