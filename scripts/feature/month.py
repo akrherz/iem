@@ -1,44 +1,48 @@
-import iemdb
-COOP = iemdb.connect('coop', bypass=True)
-ccursor = COOP.cursor()
-
-march = []
-ccursor.execute("""
- SELECT year, avg((high+low)/2) from alldata where stationid = 'ia0200'
- and month = 3 and year > 1964 GROUP by year ORDER by year ASC
-""")
-for row in ccursor:
-  march.append( float(row[1]) )
-
 import numpy
-cnt = numpy.zeros( (2,28), 'f')
-tot = numpy.zeros( (2,28), 'f')
-ccursor.execute("""
-  SELECT extract(day from day), year, snowd from alldata where stationid = 'ia0200'
-  and month = 2 and year > 1964 and year < 2011 and sday != '0229'
-""")
-for row in ccursor:
-  if row[2] > 0:
-    cnt[0,row[0]-1] += 1
-    tot[0,row[0]-1] += march[row[1]-1965]
-  else:
-    cnt[1,row[0]-1] += 1
-    tot[1,row[0]-1] += march[row[1]-1965]
-
 import matplotlib.pyplot as plt
-fig = plt.figure()
+
+hi2012 = []
+lo2012 = []
+hi2013 = []
+lo2013 = []
+hi_cl = []
+lo_cl = []
+
+for line in open('/tmp/ames.txt').readlines()[1:]:
+    tokens = line.split(",")
+    hi_cl.append( float(tokens[1]))
+    lo_cl.append( float(tokens[2]))
+    hi2012.append( float(tokens[3]))
+    lo2012.append( float(tokens[4]))
+    hi2013.append( float(tokens[5]))
+    lo2013.append( float(tokens[6]))
+
+hi2012 = numpy.array(hi2012)
+lo2012 = numpy.array(lo2012)
+hi2013 = numpy.array(hi2013)
+lo2013 = numpy.array(lo2013)
+hi_cl = numpy.array(hi_cl)
+lo_cl = numpy.array(lo_cl)
+
+fig = plt.figure(figsize=(4,4))
 ax = fig.add_subplot(111)
 
-ax.bar( numpy.arange(1,29), tot[1,:] / cnt[1,:], width=0.4, facecolor='r', label='No Snowcover')
-ax.bar( numpy.arange(1,29)-0.4, tot[0,:] / cnt[0,:], width=0.4, facecolor='b', label='Snowcover')
-ax.set_ylim(30,43)
-ax.set_xlim(0.5,28.5)
-ax.set_xticks((1,4,8,12,16,20,24,28))
+ax.bar( numpy.arange(1,32)-0.4, hi2012 - lo2012, bottom=lo2012, zorder=1, 
+        fc='r', ec='r', label='2012', alpha=0.5)
+ax.bar( numpy.arange(1,32)-0.4, hi2013 - lo2013, bottom=lo2013, zorder=1, 
+        fc='b', ec='b', label='2013', alpha=0.5)
+ax.plot( numpy.arange(1,32), hi_cl, zorder=3, marker='^', linewidth=2, markersize=7,
+         color='k', label="Climate High", linestyle='None')
+ax.plot( numpy.arange(1,32), lo_cl, zorder=3, marker='v', linewidth=2, markersize=7,
+         color='k', label="Climate Low", linestyle='None')
 ax.grid()
-ax.set_title("Ames [1965-2010] February Snow Cover + March Temps")
-ax.set_xlabel("Day of February")
-ax.set_ylabel("Average March Temperature $^{\circ}\mathrm{F}$")
-ax.legend()
-import iemplot
-fig.savefig('test.ps')
-iemplot.makefeature('test')
+ax.set_title("Ames March High + Low Temps")
+ax.set_xlabel("Day of March")
+ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
+ax.legend(ncol=2, fontsize=12)
+ax.set_xlim(0.5, 31.5)
+
+ax.set_ylim(top=100)
+fig.tight_layout()
+fig.savefig('test.png')
+#iemplot.makefeature('test')

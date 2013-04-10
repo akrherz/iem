@@ -15,15 +15,16 @@ ccursor = COOP.cursor()
 
 # Compute normal from the climate database
 sql = """
- SELECT c.name, c.network, c.id, min_tmpf, x(c.geom) as lon, 
+ SELECT c.name, c.network, c.id, max_tmpf, x(c.geom) as lon, 
  y(c.geom) as lat, c.climate_site from summary_2013 s, stations c 
  where s.iemid = c.iemid
- and s.day = '2013-01-21' and c.network in ('IA_ASOS', 'AWOS') 
+ and s.day = '2013-04-08' and c.network in ('IA_ASOS', 'AWOS') 
+ and max_tmpf > 0 and id not in ('IFA')
  ORDER by id ASC
 """
 
 def compute(ts):
-    now = datetime.date(2013,1,21)
+    now = datetime.date(2013,4,8)
     days = (now - ts).days
     years = int(days / 365)
     months = int((days % 365) / 30)
@@ -39,7 +40,7 @@ for row in icursor:
     cid = row[6]
     ccursor.execute("""
     SELECT max(day) from alldata_ia where station = '%s' 
-    and low <= %.0f and day < '2013-01-21'
+    and high >= %.0f and day < '2013-04-08'
     """ % (cid, max_tmpf))
     row2 = ccursor.fetchone()
     lbl, days = compute(row2[0])
@@ -52,8 +53,8 @@ cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "21 Jan 2013 Low Temperature and Days Since as Cold Temperature",
- '_valid'             : "21 Jan 2013, values in F",
+ '_title'             : "8 Apr 2013 High Temperature and Days Since as Warm Temperature",
+ '_valid'             : "8 Apr 2013, values in F",
 #'lbTitleString'      : "[days]",
  '_showvalues'        : True,
  '_format'            : '%s',

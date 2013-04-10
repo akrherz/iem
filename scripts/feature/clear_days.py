@@ -46,8 +46,8 @@ def smooth(x,window_len=11,window='hanning'):
 obs = {}
 rs = coop.query("""
 select o.day, extract(doy from day) as doy, o.high - c.high as diff from alldata o, climate c where 
-    c.station = 'ia2203' and o.stationid = 'ia2203' 
-    and o.sday = to_char(c.valid, 'mmdd') and o.day > '1972-12-31'
+    c.station = 'IA2203' and o.station = 'IA2203' 
+    and o.sday = to_char(c.valid, 'mmdd') and o.day > '1950-12-31'
 """).dictresult()
 for row in rs:
     obs[ row['day'] ] = row['diff']
@@ -58,8 +58,8 @@ for row in rs:
 rs = asos.query("""
   SELECT date(valid) as d, count(*), sum( case when skyc1 in ('BKN','OVC') 
       or skyc2 in ('BKN','OVC') or skyc3 in ('BKN','OVC') then 1 else 0 end ) as clouds,
-    sum( case when sknt >= 7 and (drct > 270 or drct < 90) then 1 else 0 end ) as southwinds
-  ,max(tmpf) as high from alldata WHERE station = 'DSM' and valid > '1973-01-01' and valid < 'TODAY'
+    sum( case when sknt >= 7 and (drct >= 90 and drct < 180) then 1 else 0 end ) as southwinds
+  ,max(tmpf) as high from alldata WHERE station = 'DSM' and valid > '1951-01-01' and valid < 'TODAY'
   and extract(hour from valid) between 7 and 19 GROUP by d
     """).dictresult()
 for row in rs:
@@ -86,15 +86,15 @@ ax = fig.add_subplot(111)
 
 #ax.plot( np.arange(366), clear, label='Coldest')
 ax.plot( np.arange(365), smooth(clear_abovenormal[:365] / abovenormal[:365],14,'hamming') * 100., label='Mostly Clear Skies')
-ax.plot( np.arange(365), smooth(southwinds_abovenormal[:365] / abovenormal[:365],14, 'hamming') * 100., label='North Winds')
-#ax.plot( np.arange(365), smooth(both_abovenormal[:365] / abovenormal[:365],7, 'hamming') * 100., label='Both')
+ax.plot( np.arange(365), smooth(southwinds_abovenormal[:365] / abovenormal[:365],14, 'hamming') * 100., label='SE Winds')
+ax.plot( np.arange(365), smooth(both_abovenormal[:365] / abovenormal[:365],14, 'hamming') * 100., label='Both')
 ax.set_xticks( (1,32,60,91,121,152,182,213,244,274,305,335,365) )
 ax.set_xticklabels( ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec') )
-ax.set_xlabel("Des Moines 8AM-6PM [1973-2011]")
+ax.set_xlabel("Des Moines 8AM-6PM [1951-2012], 14 day smooth applied")
 ax.set_ylabel("Observed Frequency [%]")
 ax.set_ylim(0,100)
 ax.set_yticks([0,20,40,50,60,80,100])
-ax.set_title("When High Temp was at least 5$^{\circ}\mathrm{F}$ Below Average\nwere daytime northerly winds or mostly clear skies observed?")
+ax.set_title("When High Temp was at least 5$^{\circ}\mathrm{F}$ Below Average\nwere daytime southeasterly winds or mostly clear skies observed?")
 ax.grid(True)
 ax.set_xlim(0,360)
 
