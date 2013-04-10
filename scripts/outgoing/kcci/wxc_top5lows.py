@@ -1,33 +1,31 @@
 import os
 import subprocess
-import mx.DateTime
-import sys
+import datetime
 import tempfile
 import tracker
 qc = tracker.loadqc()
 import iemdb
 IEM = iemdb.connect("iem", bypass=True)
 icursor = IEM.cursor()
-now = mx.DateTime.now()
+now = datetime.datetime.now()
 
 icursor.execute("""SELECT s.id as station from summary_%s c, stations s WHERE 
   s.network = 'KCCI' and s.iemid = c.iemid and 
   day = 'TODAY'  ORDER by min_tmpf ASC""" % (now.year, ) )
-dict = {}
+data = {}
 
-dict['timestamp'] = mx.DateTime.now()
+data['timestamp'] = now
 i = 1
 for row in icursor:
-    row = icursor.fetchone()
     if i == 6:
         break
     if qc.get(row[0], {}).get('tmpf', False):
         continue
-    dict['sid%s' % (i,)] = row[0]
+    data['sid%s' % (i,)] = row[0]
     i += 1
     
 fd, path = tempfile.mkstemp()
-os.write(fd,  open('top5lows.tpl','r').read() % dict )
+os.write(fd,  open('top5lows.tpl','r').read() % data )
 os.close(fd)
 
 subprocess.call("/home/ldm/bin/pqinsert -p 'auto_top5lows.scn' %s" % (path,),

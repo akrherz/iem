@@ -2,7 +2,7 @@
 
 import os
 import subprocess
-import mx.DateTime
+import datetime
 import sys
 import tempfile
 import tracker
@@ -14,24 +14,23 @@ icursor = IEM.cursor()
 icursor.execute("""SELECT t.id as station from current c, stations t 
   WHERE t.network = 'KCCI' and 
   t.iemid = c.iemid and valid > 'TODAY' ORDER by pday DESC""")
-dict = {}
+data = {}
 
-dict['timestamp'] = mx.DateTime.now()
+data['timestamp'] = datetime.datetime.now()
 i = 1
 for row in icursor:
-    row = icursor.fetchone()
     if i == 6:
         break
     if qc.get(row[0], {}).get('tmpf', False):
         continue
-    dict['sid%s' % (i,)] = row[0]
+    data['sid%s' % (i,)] = row[0]
     i += 1
 
 if i == 1:
     sys.exit()
 
 fd, path = tempfile.mkstemp()
-os.write(fd,  open('top5rain.tpl','r').read() % dict )
+os.write(fd,  open('top5rain.tpl','r').read() % data )
 os.close(fd)
 
 subprocess.call("/home/ldm/bin/pqinsert -p 'auto_top5rain.scn' %s" % (path,),
