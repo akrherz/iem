@@ -14,7 +14,11 @@ mcursor = mesosite.cursor()
 net = sys.argv[1]
 
 table = network.Table( net )
-ids = `tuple(table.sts.keys())`
+keys = table.sts.keys()
+if len(keys) > 1:
+    ids = `tuple(keys)`
+else:
+    ids = "('%s')" % (keys[0],)
 
 acursor.execute("""SELECT station, min(valid) from alldata 
   WHERE station in %s GROUP by station 
