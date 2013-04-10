@@ -8,10 +8,9 @@ ftp://ftp.nssl.noaa.gov/users/langston/NMQ_UPDATES/April_14_2011/NSSL_National_3
 import numpy
 import mx.DateTime
 import netCDF4
-from PIL import Image
+import Image
 import os
 import sys
-import random
 import subprocess
 import tempfile
 import nmq
@@ -28,8 +27,8 @@ def make_colorramp():
     c[1,:] = [0,0,0]
     i = 2 
     for line in open('gr2ae.txt'):
-      c[i,:] = map(int, line.split()[-3:])
-      i+=1
+        c[i,:] = map(int, line.split()[-3:])
+        i+=1
     return tuple( c.ravel() )
 
 def make_fp(tile, gts):
@@ -103,7 +102,7 @@ def doit(gts):
     nmq.write_worldfile('%s.wld' % (tmpname,))
     
     # Inject WLD file
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot a %s bogus GIS/q2/hsr_%s.wld wld' %s.wld" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/hsr.wld GIS/q2/hsr_%s.wld wld' %s.wld" % (
                     gts.strftime("%Y%m%d%H%M"),gts.strftime("%Y%m%d%H%M"), tmpname )
     subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
