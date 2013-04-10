@@ -1,7 +1,7 @@
 
 import os
 import subprocess
-import mx.DateTime
+import datetime
 import sys
 import tempfile
 import tracker
@@ -11,38 +11,37 @@ IEM = iemdb.connect("iem", bypass=True)
 icursor = IEM.cursor()
 
 dy = int(sys.argv[1])
-now = mx.DateTime.now()
+now = datetime.datetime.now()
 
 icursor.execute("""SELECT s.id as station, sum(pday) as rain from summary_%s c, stations s 
   WHERE s.network = 'KCCI' and s.iemid = c.iemid and 
   day > '%s' and s.id not in ('SCEI4','SWII4') GROUP by station ORDER by rain DESC""" % ( 
-            now.year, (now - mx.DateTime.RelativeDateTime(days= int(dy) )).strftime("%Y-%m-%d") ))
-dict = {}
+            now.year, (now - datetime.timedelta(days= int(dy) )).strftime("%Y-%m-%d") ))
+data = {}
 
-dict['timestamp'] = mx.DateTime.now()
+data['timestamp'] = now
 i = 1
 for row in icursor:
-    row = icursor.fetchone()
     if i == 6:
         break
     if qc.get(row[0], {}).get('precip', False):
         continue
-    dict['sid%s' % (i,)] = row[0]
+    data['sid%s' % (i,)] = row[0]
     i += 1
 
-dict['q'] = "%Q"
-dict['fn'] = "Last %s Day Precip" % (dy,)
+data['q'] = "%Q"
+data['fn'] = "Last %s Day Precip" % (dy,)
 if dy == 2:
-  dict['title'] = "TWO DAY RAINFALL"
-if dy == 3:
-  dict['title'] = "3 DAY RAINFALL"
-if dy == 7:
-  dict['title'] = "7 DAY RAINFALL"
-if dy == 14:
-  dict['title'] = "14 DAY RAINFALL"
+    data['title'] = "TWO DAY RAINFALL"
+elif dy == 3:
+    data['title'] = "3 DAY RAINFALL"
+elif dy == 7:
+    data['title'] = "7 DAY RAINFALL"
+elif dy == 14:
+    data['title'] = "14 DAY RAINFALL"
 
 fd, path = tempfile.mkstemp()
-os.write(fd,  open('top5rainXday.tpl','r').read() % dict )
+os.write(fd,  open('top5rainXday.tpl','r').read() % data )
 os.close(fd)
 
 subprocess.call("/home/ldm/bin/pqinsert -p 'auto_top5rain_%sday.scn' %s" % (dy, path),
