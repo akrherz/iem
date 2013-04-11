@@ -14,6 +14,8 @@ import mesonet
 import warnings
 # prevent core.py:931: RuntimeWarning: overflow encountered in multiply
 warnings.simplefilter("ignore", RuntimeWarning)
+# prevent core.py:3785: UserWarning: Warning: converting a masked element to nan.
+warnings.simplefilter("ignore", UserWarning)
 
 def sanityCheck(val, lower, upper, goodfmt, bv):
     if (val > lower and val < upper):
