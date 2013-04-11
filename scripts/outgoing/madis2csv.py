@@ -11,6 +11,9 @@ import numpy.ma
 import sys
 import time
 import mesonet
+import warnings
+# prevent core.py:931: RuntimeWarning: overflow encountered in multiply
+warnings.simplefilter("ignore", RuntimeWarning)
 
 def sanityCheck(val, lower, upper, goodfmt, bv):
     if (val > lower and val < upper):
@@ -42,66 +45,60 @@ if nc is None:
     sys.exit(0)
 
 stations   = nc.variables["stationId"][:]
-tmpk        = nc.variables["temperature"][:]
-dwpk = nc.variables["dewpoint"][:]
+tmpf        = mesonet.k2f(nc.variables["temperature"][:])
+dwpf = mesonet.k2f(nc.variables["dewpoint"][:])
 drct = nc.variables["windDir"][:]
-smps = nc.variables["windSpeed"][:]
-alti = nc.variables["altimeter"][:] # in hPa
-vsby = nc.variables["visibility"][:] # in hPa
+smps = nc.variables["windSpeed"][:] * 1.94384449
+alti = nc.variables["altimeter"][:] * 29.9196 / 1013.2 # in hPa
+vsby = nc.variables["visibility"][:] * 0.000621371192 # in hPa
 providers  = nc.variables["dataProvider"][:]
 lat        = nc.variables["latitude"][:]
 lon        = nc.variables["longitude"][:]
 ele        = nc.variables["elevation"][:]
-snames     = nc.variables["stationName"][:]
-p01m       = nc.variables["precipAccum"][:]
-ptmp1      = nc.variables["roadTemperature1"][:]
-ptmp2      = nc.variables["roadTemperature2"][:]
-ptmp3      = nc.variables["roadTemperature3"][:]
-ptmp4      = nc.variables["roadTemperature4"][:]
-subs1      = nc.variables["roadSubsurfaceTemp1"][:]
-subs2      = nc.variables["roadSubsurfaceTemp2"][:]
-subs3      = nc.variables["roadSubsurfaceTemp3"][:]
-subs4      = nc.variables["roadSubsurfaceTemp4"][:]
-
+p01m       = nc.variables["precipAccum"][:] * 25.4
+ptmp1      = mesonet.k2f(nc.variables["roadTemperature1"][:])
+ptmp2      = mesonet.k2f(nc.variables["roadTemperature2"][:])
+ptmp3      = mesonet.k2f(nc.variables["roadTemperature3"][:])
+ptmp4      = mesonet.k2f(nc.variables["roadTemperature4"][:])
+subs1      = mesonet.k2f(nc.variables["roadSubsurfaceTemp1"][:])
+subs2      = mesonet.k2f(nc.variables["roadSubsurfaceTemp2"][:])
+subs3      = mesonet.k2f(nc.variables["roadSubsurfaceTemp3"][:])
+subs4      = mesonet.k2f(nc.variables["roadSubsurfaceTemp4"][:])
+times = nc.variables["observationTime"][:]
 
 db = {}
+
 for recnum in range(len(stations)):
     thisStation  = re.sub('\x00', '', stations[recnum].tostring())
-    ot = nc.variables["observationTime"][recnum]
+    ot = times[recnum]
     if  numpy.ma.is_masked(ot) or ot > 2141347600:
         continue
-    ts = mx.DateTime.gmtime( nc.variables["observationTime"][recnum] )
+    ts = mx.DateTime.gmtime( times[recnum] )
     db[thisStation] = {'STN': thisStation,
     'DATE': ts.day,
     'TIME': ts.strftime("%H%M"),
-    'T': sanityCheck(mesonet.k2f( tmpk[recnum] ),-100, 150, '%.0f', '') ,
+    'T': sanityCheck( tmpf[recnum] ,-100, 150, '%.0f', '') ,
     'DIR': sanityCheck(drct[recnum],-1,361, '%.0f', '') ,
-    'TD': sanityCheck(mesonet.k2f( dwpk[recnum] ),-100, 150, '%.0f', '') ,
-    'SPD': sanityCheck(smps[recnum] * 1.94384449, -1, 150, '%.0f', '') ,
-    'ALT': sanityCheck( alti[recnum]  * 29.9196 / 1013.2, 2000, 4000, '%.0f',''),
-    'VIS': sanityCheck( vsby[recnum] * 0.000621371192, -1, 40, '%.0f',''),
-    'PR1': sanityCheck( p01m[recnum] * 25.4, -0.01, 10, '%.0f',''),
-    'SUBS1': sanityCheck(mesonet.k2f( subs1[recnum] ),-100, 150, '%.0f', '') ,
-    'SUBS2': sanityCheck(mesonet.k2f( subs2[recnum] ),-100, 150, '%.0f', '') ,
-    'SUBS3': sanityCheck(mesonet.k2f( subs3[recnum] ),-100, 150, '%.0f', '') ,
-    'SUBS4': sanityCheck(mesonet.k2f( subs4[recnum] ),-100, 150, '%.0f', '') ,
-    'PTMP1': sanityCheck(mesonet.k2f( ptmp1[recnum] ),-100, 150, '%.0f', '') ,
-    'PTMP2': sanityCheck(mesonet.k2f( ptmp2[recnum] ),-100, 150, '%.0f', '') ,
-    'PTMP3': sanityCheck(mesonet.k2f( ptmp3[recnum] ),-100, 150, '%.0f', '') ,
-    'PTMP4': sanityCheck(mesonet.k2f( ptmp4[recnum] ),-100, 150, '%.0f', '') ,
+    'TD': sanityCheck( dwpf[recnum] ,-100, 150, '%.0f', '') ,
+    'SPD': sanityCheck(smps[recnum] , -1, 150, '%.0f', '') ,
+    'ALT': sanityCheck( alti[recnum]  , 2000, 4000, '%.0f',''),
+    'VIS': sanityCheck( vsby[recnum] , -1, 40, '%.0f',''),
+    'PR1': sanityCheck( p01m[recnum] , -0.01, 10, '%.0f',''),
+    'SUBS1': sanityCheck( subs1[recnum],-100, 150, '%.0f', '') ,
+    'SUBS2': sanityCheck( subs2[recnum] ,-100, 150, '%.0f', '') ,
+    'SUBS3': sanityCheck( subs3[recnum] ,-100, 150, '%.0f', '') ,
+    'SUBS4': sanityCheck( subs4[recnum] ,-100, 150, '%.0f', '') ,
+    'PTMP1': sanityCheck( ptmp1[recnum] ,-100, 150, '%.0f', '') ,
+    'PTMP2': sanityCheck( ptmp2[recnum] ,-100, 150, '%.0f', '') ,
+    'PTMP3': sanityCheck( ptmp3[recnum] ,-100, 150, '%.0f', '') ,
+    'PTMP4': sanityCheck( ptmp4[recnum] ,-100, 150, '%.0f', '') ,
     }
-    mylat = lat[recnum]
-    mylon = lon[recnum]
-    sname =  re.sub('\x00', '', snames[recnum].tostring())
-    thisProvider = re.sub('\x00', '', providers[recnum].tostring())
-    elev = ele[recnum]
-    #print "%s,%s,%s,%s,%s,%s" % (thisStation, sname, thisProvider, mylat, mylon, elev)
 
 out = open('madis.csv', 'w')
 out.write("%s\n" % (fmt,) )
 for stid in db.keys():
     for key in format_tokens:
-        if (db[stid].has_key( key )):
+        if db[stid].has_key( key ):
             out.write("%s," % (db[stid][key],)  )
         else:
             out.write(",")
