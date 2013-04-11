@@ -14,7 +14,7 @@ icursor.execute("""SELECT s.id as station from summary_%s c, stations s WHERE
   day = 'TODAY'  ORDER by pmonth DESC""" % (now.year,))
 data = {}
 
-dict['timestamp'] = now
+data['timestamp'] = now
 i = 1
 for row in icursor:
     if i == 6:
