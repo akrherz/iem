@@ -24,15 +24,17 @@ for line in data:
 
 ds = ""
 ks = ["in_handler", "out_handler", "out_rack", "in_rack"]
-for k,d in zip(ks, v):
-    ds += "%s=%s;95;100;105 " % (k, d)
-
-if v[2] < 95:
-    print 'OK - room %s |%s' % (v[0], ds)
+maxes = [80,70,100,75]
+msg = ""
+for k,d,m in zip(ks, v, maxes):
+    ds += "%s=%s;%s;%s;%s " % (k, d, m,m+5,m+10)
+    msg += "%s %s," % (k, d)
+if v[3] < 75:
+    print 'OK - %s |%s' % (msg, ds)
     sys.exit(0)
-elif v[2] < 100:
-    print 'WARNING - room %s |%s' % (v[0], ds)
+elif v[3] < 80:
+    print 'WARNING - %s |%s' % (msg, ds)
     sys.exit(1)
 else:
-    print 'CRITICAL - room %s |%s' % (v[0], ds)
+    print 'CRITICAL - %s |%s' % (msg, ds)
     sys.exit(2)
