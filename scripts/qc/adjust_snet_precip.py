@@ -10,7 +10,6 @@ Runs from: RUN_MIDNIGHT.sh
 import iemdb
 IEM = iemdb.connect('iem')
 icursor = IEM.cursor()
-from pyIEM import mesonet
 import mx.DateTime
 import sys
 import os
