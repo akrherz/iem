@@ -64,6 +64,8 @@ import os
 import iemdb
 import iemtz
 import datetime
+import subprocess
+import tempfile
 ISUAG = iemdb.connect('isuag')
 icursor = ISUAG.cursor()
 
@@ -160,11 +162,66 @@ def get_max_timestamps(nwsli):
         data['hourly'] = row[0]
     return data
 
+def dump_raw_to_ldm(nwsli):
+    """ Send the raw datafile to LDM """
+    fn = STATIONS[nwsli]['daily']
+    if not os.path.isfile(fn):
+        return
+    lines = open(fn).readlines()
+    if len(lines) < 5:
+        return
+    
+    tmpfn = tempfile.mktemp()
+    tmpfp = open(tmpfn, 'w')
+    tmpfp.write(lines[0])
+    tmpfp.write(lines[1])
+    tmpfp.write(lines[2])
+    tmpfp.write(lines[3])
+    tmpfp.write(lines[-3])
+    tmpfp.write(lines[-2])
+    tmpfp.write(lines[-1])
+    tmpfp.close()
+    cmd = "/home/ldm/bin/pqinsert -p 'data c %s csv/isusm/%s_daily.txt bogus txt' %s" % (
+                    datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
+                    tmpfn)
+    p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
+                         stdout=subprocess.PIPE)
+    p.stdout.read()
+    os.remove(tmpfn)
+
+    """ Send the raw datafile to LDM """
+    fn = STATIONS[nwsli]['hourly']
+    if not os.path.isfile(fn):
+        return
+    lines = open(fn).readlines()
+    if len(lines) < 5:
+        return
+    
+    tmpfn = tempfile.mktemp()
+    tmpfp = open(tmpfn, 'w')
+    tmpfp.write(lines[0])
+    tmpfp.write(lines[1])
+    tmpfp.write(lines[2])
+    tmpfp.write(lines[3])
+    tmpfp.write(lines[-3])
+    tmpfp.write(lines[-2])
+    tmpfp.write(lines[-1])
+    tmpfp.close()
+    cmd = "/home/ldm/bin/pqinsert -p 'data c %s csv/isusm/%s_hourly.txt bogus txt' %s" % (
+                    datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
+                    tmpfn)
+    p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
+                         stdout=subprocess.PIPE)
+    p.stdout.read()
+    os.remove(tmpfn)
+
+
 def main():
     for nwsli in STATIONS.keys():
         maxobs = get_max_timestamps(nwsli)
         hourly_process(nwsli, maxobs['hourly'])
         daily_process(nwsli, maxobs['daily'])
+        dump_raw_to_ldm(nwsli)
     
     icursor.close()
     ISUAG.commit()
