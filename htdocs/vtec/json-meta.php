@@ -1,4 +1,5 @@
 <?php
+header('Content-type: application/json');
 /* Giveme JSON data listing products */
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
