@@ -27,8 +27,8 @@ for row in mcursor:
     #  print 'ERROR WITH %s La: %s Lo: %s Res: %s' % (id, lat, lon, r)
     #  continue
     #newelev = float(tokens[0])
-    json = json.loads(r)
-    newelev = json.get('elevation', -999)
+    j = json.loads(r)
+    newelev = j.get('elevation', -999)
     
     print "%7s %s OLD: %s NEW: %.3f" % (sid, network, elev, newelev)
     mcursor2.execute("""UPDATE stations SET elevation = %s WHERE id = %s 
