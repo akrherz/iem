@@ -1,12 +1,12 @@
 from twisted.internet import reactor
 from twisted.web import client
-import urllib, simplejson
+import urllib, json
 
 def test(data):
   print data
 
 #payload = urllib.urlencode({'Mode': 1,\
-payload = simplejson.dumps({'Mode': 1,\
+payload = json.dumps({'Mode': 1,\
                             'SiteID': 357,\
                             'Type': 'Rwis',
                             'CameraID': 1})
