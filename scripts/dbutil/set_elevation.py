@@ -2,7 +2,7 @@
 import urllib2
 import time
 import iemdb
-import simplejson
+import json
 MESOSITE = iemdb.connect('mesosite')
 mcursor = MESOSITE.cursor()
 mcursor2 = MESOSITE.cursor()
@@ -27,7 +27,7 @@ for row in mcursor:
     #  print 'ERROR WITH %s La: %s Lo: %s Res: %s' % (id, lat, lon, r)
     #  continue
     #newelev = float(tokens[0])
-    json = simplejson.loads(r)
+    json = json.loads(r)
     newelev = json.get('elevation', -999)
     
     print "%7s %s OLD: %s NEW: %.3f" % (sid, network, elev, newelev)
