@@ -3,9 +3,12 @@
 export yyyymm="`date --date '1 day ago' +'%Y%m'`"
 export dd="`date --date '1 day ago' +'%d'`"
 
+# Go to temp directory, that hopefully has enough space!
+cd /mesonet/tmp
 
 MACHINES="iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 iemvs107 iemvs108"
 BASE="/mesonet/www/logs"
+CONFBASE="/mesonet/www/apps/iemwebsite/scripts/webalizer"
 
 # Step 1, move the log files out of the way and restart apache gracefully
 # 130201 Graceful restarts not working! 
@@ -57,13 +60,13 @@ wc -l weatherim_access.log
 
 # Step 4, run webalizer against these log files
 /home/mesonet/bin/webalizer -c mesonet.conf -T access.log
-/usr/bin/webalizer -c cocorahs.conf cocorahs_access.log
-/usr/bin/webalizer -c sustainablecorn.conf sustainablecorn_access.log
-/usr/bin/webalizer -c wepp.conf wepp_access.log
-/usr/bin/webalizer -c weatherim.conf weatherim_access.log
+/usr/bin/webalizer -c ${CONFBASE}/cocorahs.conf cocorahs_access.log
+/usr/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf sustainablecorn_access.log
+/usr/bin/webalizer -c ${CONFBASE}/wepp.conf wepp_access.log
+/usr/bin/webalizer -c ${CONFBASE}/weatherim.conf weatherim_access.log
 
 grep " /agclimate" access.log > agclimate.log
-/home/mesonet/bin/webalizer -c agclimate.conf -T agclimate.log
+/home/mesonet/bin/webalizer -c ${CONFBASE}/agclimate.conf -T agclimate.log
 rm -f agclimate.log
 
 # Step 5, archive these files
