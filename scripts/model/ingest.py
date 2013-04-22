@@ -29,7 +29,7 @@ VLOOKUP = {
             'GFS': 'Precipitable_water_entire_atmosphere',
             'RAP': 'Precipitable_water_entire_atmosphere'},
  'precipcon': {'RAP': 'Convective_precipitation_surface_Mixed_intervals_Accumulation',
-            'NAM': 'Convective_precipitation_surface_Mixed_intervals_Accumulation',
+            'NAM': 'Convective_precipitation_surface_3_Hour_Accumulation',
             'GFS': 'Convective_precipitation_surface_Mixed_intervals_Accumulation',
            },
  'precipnon': {'RAP': None,
