@@ -12,7 +12,7 @@ mcursor = MOS.cursor()
 import csv, urllib2
 import mx.DateTime
 
-BASE_URL = "http://motherlode.ucar.edu:9080/thredds/ncss/grid/fmrc/NCEP/"
+BASE_URL = "http://motherlode.ucar.edu:9080/thredds/ncss/grid/grib/NCEP/"
 URLS = {
  'NAM' : "NAM/CONUS_12km/conduit/runs/NCEP-NAM-CONUS_12km-conduit_RUN_%Y-%m-%dT%H:00:00Z",
  'GFS' : "GFS/Global_0p5deg/runs/NCEP-GFS-Global_0p5deg_RUN_%Y-%m-%dT%H:00:00Z",
