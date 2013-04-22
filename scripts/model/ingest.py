@@ -14,8 +14,8 @@ import mx.DateTime
 
 BASE_URL = "http://motherlode.ucar.edu:9080/thredds/ncss/grid/grib/NCEP/"
 URLS = { 
- 'NAM' : "NAM/CONUS_12km/conduit/files/NAM-CONUS_12km-conduit_%Y%m%d_%H00.grib2",
- 'GFS' : "GFS/Global_0p5deg/files/GFS-Global_0p5deg_%Y%m%d_%H00.grib2",
+ 'NAM' : "NAM/CONUS_12km/conduit/files/NAM_CONUS_12km_conduit_%Y%m%d_%H00.grib2",
+ 'GFS' : "GFS/Global_0p5deg/files/GFS_Global_0p5deg_%Y%m%d_%H00.grib2",
  'RAP' : "RAP/CONUS_13km/files/RR_CONUS_13km_%Y%m%d_%H00.grib2",
 }
 VLOOKUP = {
@@ -25,20 +25,20 @@ VLOOKUP = {
  'sbcin': {'NAM': 'Convective_inhibition_surface',
            'GFS': 'Convective_inhibition_surface',
            'RAP': 'Convective_inhibition_surface'},
- 'pwater': {'NAM': 'Precipitable_water',
-            'GFS': 'Precipitable_water',
-            'RAP': 'Precipitable_water'},
- 'precipcon': {'RAP': 'Convective_precipitation',
-            'NAM': 'Convective_precipitation',
-            'GFS': 'Convective_precipitation',
+ 'pwater': {'NAM': 'Precipitable_water_entire_atmosphere',
+            'GFS': 'Precipitable_water_entire_atmosphere',
+            'RAP': 'Precipitable_water_entire_atmosphere'},
+ 'precipcon': {'RAP': 'Convective_precipitation_surface_Mixed_intervals_Accumulation',
+            'NAM': 'Convective_precipitation_surface_Mixed_intervals_Accumulation',
+            'GFS': 'Convective_precipitation_surface_Mixed_intervals_Accumulation',
            },
- 'precipnon': {'RAP': 'Large_scale_precipitation_non-convective',
+ 'precipnon': {'RAP': None,
             'NAM': None,
             'GFS': None
            },
- 'precip': {'RAP': None,
-            'NAM': 'Total_precipitation',
-            'GFS': 'Total_precipitation',
+ 'precip': {'RAP': 'Large-scale_precipitation_non-convective_surface_Mixed_intervals_Accumulation',
+            'NAM': 'Total_precipitation_surface_3_Hour_Accumulation',
+            'GFS': 'Total_precipitation_surface_Mixed_intervals_Accumulation',
            }
 }
 
@@ -60,7 +60,8 @@ def run(model, station, lon, lat, ts):
     url = "%s%s?%slatitude=%s&longitude=%s&temporal=all&vertCoord=&accept=csv&point=true" % (BASE_URL, ts.strftime( URLS[model] ), vstring, lat, lon)
     try:
         fp = urllib2.urlopen( url )
-    except:
+    except Exception, exp:
+        print exp, url
         print 'FAIL ts: %s station: %s model: %s' % (ts.strftime("%Y-%m-%d %H"), 
                                                      station, model)
         return
