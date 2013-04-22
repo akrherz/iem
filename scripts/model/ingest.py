@@ -13,10 +13,10 @@ import csv, urllib2
 import mx.DateTime
 
 BASE_URL = "http://motherlode.ucar.edu:9080/thredds/ncss/grid/grib/NCEP/"
-URLS = {
- 'NAM' : "NAM/CONUS_12km/conduit/runs/NCEP-NAM-CONUS_12km-conduit_RUN_%Y-%m-%dT%H:00:00Z",
- 'GFS' : "GFS/Global_0p5deg/runs/NCEP-GFS-Global_0p5deg_RUN_%Y-%m-%dT%H:00:00Z",
- 'RAP' : "RAP/CONUS_13km/runs/NCEP-RAP-CONUS_13km_RUN_%Y-%m-%dT%H:00:00Z",
+URLS = { 
+ 'NAM' : "NAM/CONUS_12km/conduit/files/NAM-CONUS_12km-conduit_%Y%m%d_%H00.grib2",
+ 'GFS' : "GFS/Global_0p5deg/files/GFS-Global_0p5deg_%Y%m%d_%H00.grib2",
+ 'RAP' : "RAP/CONUS_13km/files/RR_CONUS_13km_%Y%m%d_%H00.grib2",
 }
 VLOOKUP = {
  'sbcape': {'NAM': 'Convective_available_potential_energy_surface',
