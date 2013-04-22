@@ -14,7 +14,7 @@ acursor = ASOS.cursor()
 ADJUSTMENT = 0
 now = datetime.datetime.now()
 e = now.replace(day=17)
-s = (e - datetime.timedelta(days=31)).replace(day=17)
+s = (e - datetime.timedelta(days=31)).replace(day=18)
 
 def averageTemp(db, hi="high", lo="low"):
     highSum, lowSum = 0, 0
@@ -59,7 +59,7 @@ def main():
     icursor.execute("""SELECT day, max_tmpf, min_tmpf from 
         summary s JOIN stations t ON (t.iemid = s.iemid) 
         WHERE t.id = 'SUX' and day >= '%s' and 
-        day < '%s' """ % (s.strftime("%Y-%m-%d"), e.strftime("%Y-%m-%d")) )
+        day <= '%s' """ % (s.strftime("%Y-%m-%d"), e.strftime("%Y-%m-%d")) )
     for row in icursor:
         db[ row[0].strftime("%m%d") ]['high'] = row[1] + ADJUSTMENT
         db[ row[0].strftime("%m%d") ]['low'] = row[2]  + ADJUSTMENT
