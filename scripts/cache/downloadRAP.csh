@@ -1,4 +1,3 @@
-#!/bin/csh
 # Download and save bufkit data
 
 set hh="$1"
