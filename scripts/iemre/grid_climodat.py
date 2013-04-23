@@ -77,7 +77,7 @@ def grid_day(nc, ts):
 def main(ts):
 
     # Load up our netcdf file!
-    nc = netCDF4.Dataset("/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,), 'a')
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,), 'a')
     grid_day(nc , ts)
     nc.close()
 

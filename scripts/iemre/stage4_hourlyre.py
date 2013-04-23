@@ -42,7 +42,7 @@ def merge(ts):
     #print '%s MIN: %5.2f AVG: %5.2f MAX: %5.2f' % (ts, numpy.min(res), numpy.average(res),
     #                                               numpy.max(res))
     # Open up our RE file
-    nc = netCDF4.Dataset("/mnt/mesonet/data/iemre/%s_mw_hourly.nc" % (
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
                                                             ts.year,),'a')
 
     offset = int(( ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours) - 1

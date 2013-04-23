@@ -74,7 +74,7 @@ def runner(runts):
     obs = init_obs()
     for i in range(24):
       # Coming from iem50
-      fp = "/mnt/mesonet/data/madis/metar/%s_%02i00.nc" % (runts.strftime("%Y%m%d"), i)
+      fp = "/mesonet/data/madis/metar/%s_%02i00.nc" % (runts.strftime("%Y%m%d"), i)
       ioc_nc = netCDF3.Dataset(fp, 'r')
       sz = ioc_nc.variables["stationName"].shape[0]
       for idx in range(sz):

@@ -80,7 +80,7 @@ def main(ts):
     load_stationtable()
 
     # Load up our netcdf file!
-    nc = netCDF3.Dataset("/mnt/mesonet/data/iemre/mw_dailyc.nc", 'a')
+    nc = netCDF3.Dataset("/mesonet/data/iemre/mw_dailyc.nc", 'a')
     grid_day(nc , ts)
 
     nc.close()
