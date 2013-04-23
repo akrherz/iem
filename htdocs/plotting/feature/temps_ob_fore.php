@@ -12,24 +12,24 @@ $fdata = Array();
 /* Extract Obs */
 $dbconn = iemdb('asos');
 $sql = "SELECT extract(EPOCH from valid) as epoch, tmpf, dwpf, sknt, vsby
-  , wind_chill(tmpf, sknt) as wcht, alti from t2011 WHERE station = 'AMW' 
-  and dwpf > -99 and sknt >= 0 and valid > '2011-06-01' ORDER by valid ASC";
+  , wind_chill(tmpf, sknt) as wcht, alti from t2012 WHERE station = 'AMW' 
+  and dwpf > -99 and sknt >= 0 and valid > '2012-05-01' ORDER by valid ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $otimes[] = $row["epoch"];
-  $odata[] = $row["tmpf"];
+  $odata[] = $row["dwpf"];
 }
 
 $dbconn = iemdb('mos');
-$sql = "SELECT extract(epoch from ftime) as epoch, dpt, tmp, wsp from t2011
+$sql = "SELECT extract(epoch from ftime) as epoch, dpt, tmp, wsp from t2012
         WHERE station = 'KAMW' and model = 'GFS' and 
-        runtime = '2011-06-20 00:00+00' ORDER by ftime ASC";
+        runtime = '2012-06-18 00:00+00' ORDER by ftime ASC";
 $rs = pg_query($dbconn, $sql);
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $ftimes[] = $row["epoch"];
-  $fdata[] = $row["tmp"];
+  $fdata[] = $row["dpt"];
 }
 
 include ("$rootpath/include/jpgraph/jpgraph.php");
@@ -39,7 +39,7 @@ include ("$rootpath/include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(640,600,"example1");
+$graph = new Graph(320,300,"example1");
 $graph->SetScale("datlin");
 //$graph->SetY2Scale("lin",0,50);
 $graph->img->SetMargin(40,10,50,80);
@@ -61,11 +61,11 @@ $graph->yaxis->title->SetFont(FF_FONT2,FS_BOLD,16);
 $graph->xaxis->title->SetFont(FF_FONT2,FS_BOLD,16);
 //$graph->xaxis->SetTitle("Valid Local Time");
 //$graph->yaxis->SetTitle("Temp [F] or Wind [MPH]");
-$graph->yaxis->SetTitle("Air Temperature [F]");
+$graph->yaxis->SetTitle("Dew Point Temperature [F]");
 //$graph->yaxis->SetColor("red");
 //$graph->yaxis->title->SetColor("red");
 //$graph->tabtitle->Set('Recent Comparison');
-$graph->title->Set('Ames [KAMW] Time Series');
+$graph->title->Set('Ames [KAMW] Time Series 1 May - 19 June 2012');
 
   $graph->tabtitle->SetFont(FF_FONT1,FS_BOLD,16);
   $graph->SetColor('wheat');
