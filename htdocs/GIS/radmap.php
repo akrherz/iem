@@ -35,7 +35,7 @@ function get_goes_fn_and_time($ts, $sector, $product){
 	 * Return a filename or NULL for a requested GOES Product and time
 	 * using a crude search algorithm
 	 */
-	$base = "/mnt/mesonet/ARCHIVE/data/";
+	$base = "/mesonet/ARCHIVE/data/";
 	for($i=0;$i<60;$i++){
 		foreach (array(1,-1) as $mul){
 			$lts = $ts + ($i*60*$mul);
@@ -54,7 +54,7 @@ function get_ridge_fn_and_time($ts, $radar, $product){
 	 * Return a filename or NULL for a requested RIDGE Product and time
 	 * using a crude search algorithm
 	 */
-	$base = "/mnt/mesonet/ARCHIVE/data/";
+	$base = "/mesonet/ARCHIVE/data/";
 	for($i=0;$i<10;$i++){
 		foreach (array(1,-1) as $mul){
 			$lts = $ts + ($i*60*$mul);
