@@ -8,11 +8,11 @@ include("setup.php");
 
 $dir = isset($_GET["dir"]) ? $_GET["dir"]: "";
 
-$filename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'.jpg'; 
+$filename='/mesonet/share/pics/'.$station.'/'.$station.'.jpg'; 
 $puri='pics/'.$station.'/'.$station.'.jpg';
 
 if ($dir != ""){
- $filename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
+ $filename='/mesonet/share/pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
  $puri='pics/'.$station.'/'.$station.'_'.$dir.'.jpg';
 }
 if (! file_exists($filename)){
@@ -29,7 +29,7 @@ include("$rootpath/include/header.php");
 
 function printtd($instr,$selected,$station){
   global $network;
-  $filename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'_'.$instr.'.jpg';
+  $filename='/mesonet/share/pics/'.$station.'/'.$station.'_'.$instr.'.jpg';
   if (file_exists($filename)){ 
     if ($instr == $selected)
      {
@@ -76,16 +76,16 @@ Iowa...</p>
   	printtd("SE",$dir,$station)?></tr>
 </table>
 <?php
-$filename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'_span.jpg';
+$filename='/mesonet/share/pics/'.$station.'/'.$station.'_span.jpg';
 $puri='pics/'.$station.'/'.$station.'_span.jpg';
-$lfilename='/mnt/mesonet/share/pics/'.$station.'/'.$station.'_pan.jpg';
+$lfilename='/mesonet/share/pics/'.$station.'/'.$station.'_pan.jpg';
 $pluri='pics/'.$station.'/'.$station.'_pan.jpg';
 if (file_exists($filename))
 {
   echo "<h3>Panoramic Shot</h3><img src=\"$puri\"><br /><a href=\"$pluri\">Full resolution version</a>";
 }
-if (file_exists("/mnt/mesonet/share/pics/$station/HEADER.html")){
-  echo "<p><strong>". file_get_contents("/mnt/mesonet/share/pics/$station/HEADER.html") ."</strong>";
+if (file_exists("/mesonet/share/pics/$station/HEADER.html")){
+  echo "<p><strong>". file_get_contents("/mesonet/share/pics/$station/HEADER.html") ."</strong>";
 }
 
 ?>

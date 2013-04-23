@@ -21,7 +21,7 @@ def sample(fp, lon, lat):
     o = open( fp[:-4]+".wld", 'r')
     lines = o.readlines()
     o.close()
-    (dx, blah, blah, dy, x0, y0) = map(float, lines)
+    (dx, blah, blah2, dy, x0, y0) = map(float, lines)
     x = int((lon - x0)/dx)
     y = int((lat - y0)/dy)
     image = gdal.Open(fp)
@@ -36,7 +36,7 @@ def five_minute(lon, lat):
     attempt = 0
     realfp = None
     while attempt < 10:
-        fp = gmt.strftime("/mnt/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/q2/r5m_%Y%m%d%H%M.png")
+        fp = gmt.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/q2/r5m_%Y%m%d%H%M.png")
         if os.path.isfile(fp):
             realfp = fp
             break
@@ -44,10 +44,9 @@ def five_minute(lon, lat):
         attempt += 1
     if not realfp:
         return {}
-    data = 
     return {
             'value': sample(realfp, gmt, lon, lat),
-            'start_time': gmt - mx.DateTime.RelativeDateTime(minutes=5)).strftime("")
+            'start_time': (gmt - mx.DateTime.RelativeDateTime(minutes=5)).strftime("")
             }
     
 
@@ -58,8 +57,8 @@ def main():
     form = cgi.FieldStorage()
     lat = float(form.getvalue('lat'))
     lon = float(form.getvalue('lon'))
-    print 'Content-type: text/plain\n'
-    print five_minute(lon, lat)
+    print 'Content-type: application/json\n'
+    print json.dump( five_minute(lon, lat) )
     
     
     

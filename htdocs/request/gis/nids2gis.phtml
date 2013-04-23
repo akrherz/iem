@@ -83,7 +83,7 @@ for ($i=0;$i<10;$i++)
  $prod = substr($_GET['prod'], 0, 3);
  $day = substr($_GET['day'], 0, 8);
 
- $baseref = "/mnt/mesonet/data/nexrad/NIDS/$rad/$prod/";
+ $baseref = "/mesonet/data/nexrad/NIDS/$rad/$prod/";
 
  $files = Array();
  if (is_dir($baseref)){ 
