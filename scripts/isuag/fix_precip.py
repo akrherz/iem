@@ -48,7 +48,7 @@ def fix_hourly(ts):
     """
     Fix the hourly precipitation values, just hard code the stupid IEMRE value
     """
-    nc = netCDF4.Dataset("/mnt/mesonet/data/iemre/%s_mw_hourly.nc" % (
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
                                                             ts.year,),'r')
     p01m = nc.variables['p01m']
     offset = iemre.hour_idx(ts)
