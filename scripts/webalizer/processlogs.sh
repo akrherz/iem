@@ -59,7 +59,7 @@ rm -f access_log-sustainablecorn.iemvs*
 wc -l weatherim_access.log
 
 # Step 4, run webalizer against these log files
-/home/mesonet/bin/webalizer -c mesonet.conf -T access.log
+/home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T access.log
 /usr/bin/webalizer -c ${CONFBASE}/cocorahs.conf cocorahs_access.log
 /usr/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf sustainablecorn_access.log
 /usr/bin/webalizer -c ${CONFBASE}/wepp.conf wepp_access.log
