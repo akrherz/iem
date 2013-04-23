@@ -1,0 +1,7 @@
+.sidebar-nav {
+  padding: 9px 0;
+}
+.navbar .nav > li > a {
+	padding-left: 0px;
+	margin: 0px;
+}
