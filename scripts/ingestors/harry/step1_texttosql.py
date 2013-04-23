@@ -23,7 +23,7 @@ stconv = {
 
 year = int(sys.argv[1])
 month = int(sys.argv[2])
-fp = "/mnt/mesonet/data/harry/%s/SCIA%s%02i.txt" % (year, str(year)[2:], month)
+fp = "/mesonet/data/harry/%s/SCIA%s%02i.txt" % (year, str(year)[2:], month)
 print "Processing File: ", fp
 
 lines = open(fp, 'r').readlines()

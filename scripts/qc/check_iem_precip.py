@@ -12,7 +12,7 @@ ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=-1,hour=0,minute=0,se
 
 
 # Load up netcdf file
-nc = netCDF4.Dataset("/mnt/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),'r')
+nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),'r')
 p01d = nc.variables['p01d']
 offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
 
