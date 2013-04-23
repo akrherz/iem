@@ -80,7 +80,7 @@ def run(model, station, lon, lat, ts):
         sbcin = clean( row[ VLOOKUP['sbcin'][model] ] )
         pwater = clean( row[ VLOOKUP['pwater'][model] ] )
         precipcon = clean( row[ VLOOKUP['precipcon'][model] ] )
-        if model == "RAP":
+        if model == "RAP22":
             precip = float(row[ VLOOKUP['precipcon'][model] ]) + float(row[ VLOOKUP['precipnon'][model] ])
         else:
             precip = clean( row[ VLOOKUP['precip'][model] ] )
