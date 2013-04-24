@@ -32,7 +32,7 @@ def main():
     
     msg = 'OK'
     estatus = 0
-    if upstream < 1:
+    if upstream < 0:
         msg = 'CRITICAL'
         estatus = 2
     print '%s - Down:%s Up:%s Raw:%s| downstream=%s;; upstream=%s;; queue_age=%s;; product_count=%s;; byte_count=%s' % (
