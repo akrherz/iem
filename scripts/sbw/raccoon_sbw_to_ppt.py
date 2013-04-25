@@ -8,9 +8,6 @@ __REV__ = "11Feb2013"
 import os
 os.putenv("DISPLAY", "localhost:1")
 import sys
-import tempfile
-import getopt
-import struct
 import shutil
 import datetime
 import iemdb
@@ -19,8 +16,7 @@ import psycopg2.extras
 from odf.opendocument import OpenDocumentPresentation
 from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties
 from odf.style import TextProperties, GraphicProperties, ParagraphProperties
-from odf.style import DrawingPageProperties
-from odf.text import P, S
+from odf.text import P
 from odf.draw  import Page, Frame, TextBox, Image
 
 SUPER_RES = datetime.datetime(2010, 3, 1)
