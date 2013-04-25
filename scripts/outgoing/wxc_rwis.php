@@ -312,7 +312,7 @@ while ( list($key, $val) = each($mydata) ) {
   if (round($val->db['pave_avg'],0) == -100) $val->db['pave_avg'] = 'M';
   else $val->db['pave_avg'] = round($val->db['pave_avg'],0);
 
-  $s = sprintf("%6s %-52s %2s %7s %8s %2s %4s %5.1f %5s %4.0f %4.0f %5.1f %5s %5s %5s %5s %5s %5s %5s %5s %5.1f %5.1f\n", $key, 
+  $s = sprintf("%6s %-52s %2s %7s %8s %2s %4s %5.1f %5s %4.0f %4.0f %5.1f %5s %5s %5s %5s %5s %5s %5s %5s %5s %5s\n", $key, 
     $cities[$key]['name'], $val->db['state'], round($cities[$key]['lat'],2), 
      round($cities[$key]['lon'],2),
      date('d', $val->db['ts'] + (6*3600) ), date('H', $val->db['ts'] + (6*3600)),
@@ -322,8 +322,9 @@ while ( list($key, $val) = each($mydata) ) {
      fancy($val->db['tsf0'],-50,180,5), fancy($val->db['tsf1'],-50,180,5),
      fancy($val->db['tsf2'],-50,180,5), fancy($val->db['tsf3'],-50,180,5),
      fancy($val->db['pave_avg'],-50,180,5),
-  		$val->db["wcht"], $val->db["heat"], $val->db["max_tmpf"],
-  		$val->db["min_tmpf"] ); 
+  		$val->db["wcht"], $val->db["heat"], 
+  	fancy($val->db["max_tmpf"],-50,120,5), fancy($val->db["min_tmpf"],-50,120,5)
+  		); 
   fwrite($rwis, $s);
   }
 } // End of while
