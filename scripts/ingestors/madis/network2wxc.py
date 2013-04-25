@@ -52,6 +52,7 @@ BOGUS = datetime.datetime(2000,1,1)
 BOGUS = BOGUS.replace(tzinfo=pytz.timezone("UTC"))
     
 nc = netCDF4.Dataset(fn, 'r')
+
 for i,provider in enumerate(nc.variables["dataProvider"][:]):
     if provider.tostring().replace('\x00','') != network:
         continue
@@ -87,6 +88,10 @@ for sid in indices:
     longitude = nc.variables['longitude'][idx]
     tmpf = s( nc.variables['temperature'][idx] )
     dwpf = s( nc.variables['dewpoint'][idx] )
+    qcd = nc.variables['temperatureQCD'][idx][0]
+    if qcd < -10 or qcd > 10:
+        tmpf = "M"
+        dwpf = "M"
     heat = "M"
     if tmpf != "M" and dwpf != "M":
         relh = mesonet.relh(mesonet.k2f(nc.variables['temperature'][idx]), 
