@@ -1,11 +1,4 @@
-#!/bin/csh
-
 # Super Script to backup data to some location
-# 11 Mar 2002:	Don't use /tmp/files, since it is strubbed
-# 12 Apr 2003	Also backup shef data 
-#		mount directories as needed...
-# 19 Aug 2003	Don't worry about SCAN data anymore
-# 20 Mar 2005	Adopt for main mesonet server
 
 set YYYY_mm=`date --date "1 day ago" +"%Y_%m"`
 set yymmdd=`date --date "1 day ago" +"%y%m%d"`
@@ -14,11 +7,11 @@ set dd=`date --date "1 day ago" +"%d"`
 
 set tardate=`date --date "2 days ago" +"%m/%d/%Y"`
 
-cd /tmp
+cd /mesonet/tmp
 
 mkdir ${dd}_backup
 
-set BACKUP_DIR=/tmp/${dd}_backup
+set BACKUP_DIR=/mesonet/tmp/${dd}_backup
 
 #echo "Backup SAO RAW"
 cd /mesonet/data/text/sao
@@ -40,13 +33,12 @@ tar -czf ${BACKUP_DIR}/snet.tgz *.dat
 #cd /mesonet/data/text/RRS/
 #tar -czf ${BACKUP_DIR}/snef.tgz ${yyyymmdd}.rrs
 
-cd /tmp
+cd /mesonet/tmp
 #ls -l ${dd}_backup
 tar -cf ${yyyymmdd}.tar ${dd}_backup/
 rm -Rf ${dd}_backup/
 
-mkdir -p ~/dailydata
-mv ${yyyymmdd}.tar ~/dailydata/
+mv ${yyyymmdd}.tar /mesonet/ARCHIVE/dailydata/
 #echo "Data Backup Done"
 
 #echo "Files in home"

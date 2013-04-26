@@ -14,4 +14,4 @@ python awos_rtp.py
 python asos_low.py
 
 cd ../util
-./BACKUP.csh
+csh BACKUP.csh
