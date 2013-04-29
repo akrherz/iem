@@ -188,7 +188,7 @@ def insertData(s, e):
                 #except:
                 #    continue
 
-    print 'DB Daily Inserts: %s Hourly Inserts: %s Skips: %s' % (ds, hs, skips)
+    #print 'DB Daily Inserts: %s Hourly Inserts: %s Skips: %s' % (ds, hs, skips)
 
 def pretty_str(val):
     """ Deal with None """
