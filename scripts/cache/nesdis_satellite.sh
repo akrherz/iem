@@ -155,5 +155,6 @@ rm ir_900913.tif ir.tif >& /dev/null
 rm vis_900913.tif vis.tif >& /dev/null
 rm -f *${tm}.tif >& /dev/null
 rm -f *${tm}.tfw >& /dev/null
-
+cd ..
+rmdir nesdis.$ftm
 #date
