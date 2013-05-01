@@ -84,3 +84,6 @@ for j in range(ids.shape[0]):
       print sql
 
 nc.close()
+icursor.close()
+IEM.commit()
+IEM.close()
