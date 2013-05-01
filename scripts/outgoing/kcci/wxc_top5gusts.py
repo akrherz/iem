@@ -24,7 +24,7 @@ for row in icursor:
     data['sid%s' % (i,)] = row[0]
     i += 1
 
-if i == 1:
+if not data.has_key('sid5'):
     sys.exit()
 
 fd, path = tempfile.mkstemp()
