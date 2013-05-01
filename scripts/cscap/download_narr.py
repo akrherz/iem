@@ -21,6 +21,10 @@ def do( sts ):
 
     now = sts
     while now < ets:
+        archivefn = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/model/NARR/rad_%Y%m%d%H%M.nc") 
+        if os.path.isfile(archivefn):
+            now += interval
+            continue
         uri = now.strftime("http://nomads.ncdc.noaa.gov/thredds/ncss/grid/narr/"+
                            "%Y%m/%Y%m%d/narr-a_221_%Y%m%d_%H00_000.grb?"+
                            "var=Downward_shortwave_radiation_flux&spatial=all"+
