@@ -12,21 +12,27 @@ icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 fp = None
 for i in range(0,4):
-  ts = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=i)
-  testfp = ts.strftime("/mesonet/data/madis/mesonet/%Y%m%d_%H00.nc")
-  if os.path.isfile(testfp):
-    fp = testfp
-    break
+    ts = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=i)
+    testfp = ts.strftime("/mesonet/data/madis/mesonet/%Y%m%d_%H00.nc")
+    if os.path.isfile(testfp):
+        fp = testfp
+        break
 
 if fp is None:
-  sys.exit()
+    sys.exit()
 
-nc = netCDF4.Dataset(fp)
+try:
+    nc = netCDF4.Dataset(fp)
+except:
+    # File may be in progress of being read, wait a little bit
+    import time
+    time.sleep(20)
+    nc = netCDF4.Dataset(fp)
 
 def sanityCheck(val, lower, upper, rt):
-  if (val > lower and val < upper):
-    return val
-  return rt
+    if val > lower and val < upper:
+        return val
+    return rt
 
 stations   = nc.variables["stationId"]
 providers  = nc.variables["dataProvider"]
