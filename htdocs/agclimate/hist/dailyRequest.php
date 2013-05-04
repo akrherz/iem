@@ -1,23 +1,24 @@
 <?php 
+ /* Daily Data download for the ISUAG Network */ 
  include("../../../config/settings.inc.php");
  define("IEM_APPID", 12);
-  $TITLE = "ISU Agclimate | Data Request";
-$THISPAGE="networks-agclimate";
+ $TITLE = "IEM | ISU Agclimate | Daily Data Request";
+ $THISPAGE="networks-agclimate";
  include("$rootpath/include/header.php"); 
-  include("$rootpath/include/forms.php");
+ include("$rootpath/include/forms.php");
 ?>
 <h3 class="heading">Daily Data Request Form:</h3>
 <div class="text">
-<P><b>Information:</b> This interface accesses the archive of daily and hourly weather data collected from 
+<P><b>Information:</b> This interface accesses the archive of daily weather 
+data collected from 
 the Iowa State Agclimate Automated Weather stations.  Please
 select the appropiate stations and weather variables desired below. 
 
+<P><B>Data Interval:</B>Currently you are selected to download daily data. 
+You may wish to change this to <a href="hourlyRequest.php">hourly data</a>. 
 
-<P><B>Data Interval:</B>Currently you are selected to download daily data. You may wish to change this to <a href="hourlyRequest.php">hourly data</a>. 
 
-
-
-<form method="GET" action="worker.php">
+<form name="dl" method="GET" action="worker.php">
 <input type="hidden" name="timeType" value="daily">
 
 <table width="100%">
@@ -41,17 +42,17 @@ select the appropiate stations and weather variables desired below.
 </td><td valign="top">
 
 <h4 class="subtitle">Select data:</h4>
-  <input type="checkbox" name="vars[]" value="c11">High Temperature<BR>
-  <input type="checkbox" name="vars[]" value="c12">Low Temperature<BR>
-  <input type="checkbox" name="vars[]" value="c30l">Daily Low 4in Soil Temperature<br />
-  <input type="checkbox" name="vars[]" value="c30">Average 4in Soil Temperature<BR>
-  <input type="checkbox" name="vars[]" value="c30h">Daily Max 4in Soil Temperature<br />
-  <input type="checkbox" name="vars[]" value="c40">Average Windspeed<BR>
-  <input type="checkbox" name="vars[]" value="c509">Max Wind Gust -- 1 min<BR>
-  <input type="checkbox" name="vars[]" value="c529">Max Wind Gust -- 5 sec<BR>
-  <input type="checkbox" name="vars[]" value="c90">Daily Precipitation<BR>
-  <input type="checkbox" name="vars[]" value="c20">Average Relative Humidity<BR>
-  <input type="checkbox" name="vars[]" value="c80">Solar Radiation<BR>
+  <input type="checkbox" name="vars[]" value="c11">High Temperature (F)<BR>
+  <input type="checkbox" name="vars[]" value="c12">Low Temperature (F)<BR>
+  <input type="checkbox" name="vars[]" value="c30l">Daily Low 4in Soil Temperature (F)<br />
+  <input type="checkbox" name="vars[]" value="c30">Average 4in Soil Temperature (F)<BR>
+  <input type="checkbox" name="vars[]" value="c30h">Daily Max 4in Soil Temperature (F)<br />
+  <input type="checkbox" name="vars[]" value="c40">Average Windspeed (MPH)<BR>
+  <input type="checkbox" name="vars[]" value="c509">Max Wind Gust -- 1 min (MPH)<BR>
+  <input type="checkbox" name="vars[]" value="c529">Max Wind Gust -- 5 sec (MPH)<BR>
+  <input type="checkbox" name="vars[]" value="c90">Daily Precipitation (inch)<BR>
+  <input type="checkbox" name="vars[]" value="c20">Average Relative Humidity (%)<BR>
+  <input type="checkbox" name="vars[]" value="c80">Solar Radiation (langley)<BR>
   <input type="checkbox" name="vars[]" value="c70">Evapotranspiration (inch)<br />
 
 </td></tr></table>
@@ -64,57 +65,14 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
   <TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
   <TR><TH>Starting On:</TH>
     <TD><?php echo yearSelect2(1986, date("Y"), "startYear"); ?></TD>
-   <td><SELECT name="startMonth">
-      <option value="1">January
-      <option value="2">February
-      <option value="3">March
-      <option value="4">April
-      <option value="5">May
-      <option value="6">June
-      <option value="7">July
-      <option value="8">August
-      <option value="9">September
-      <option value="10">October
-      <option value="11">November
-      <option value="12">December
-  </SELECT></td>
-  <td><SELECT name="startDay">
-     <option value="1">1	<option value="2">2	<option value="3">3	<option value="4">4
-      <option value="5">5	<option value="6">6	<option value="7">7	<option value="8">8
-     <option value="9">9	<option value="10">10	<option value="11">11	<option value="12">12
-	<option value="13">13	<option value="14">14	<option value="15">15	<option value="16">16
-	<option value="17">17	<option value="18">18	<option value="19">19	<option value="20">20
-	<option value="21">21	<option value="22">22	<option value="23">23	<option value="24">24
-	<option value="25">25	<option value="26">26	<option value="27">27	<option value="28">28
-	<option value="29">29	<option value="30">30	<option value="31">31
-</SELECT></td>
+   <td><?php echo monthSelect(date("m"), "startMonth"); ?></td>
+ <td><?php echo daySelect2(date("d"), "startDay"); ?></td>
+ </tr>
 </TR>
 <TR><TH>Ending On:</TH>
-    <TD><?php echo yearSelect2(1986, date("Y"), "endYear"); ?></TD>
-	<td><SELECT name="endMonth">
-<option value="1">January
-<option value="2">Febuary
-<option value="3">March
-<option value="4">April
-<option value="5">May
-<option value="6">June
-<option value="7">July
-<option value="8">August
-<option value="9">September
-<option value="10">October
-<option value="11">November
-<option value="12">December
-</SELECT></td>
-<td><SELECT name="endDay">
-	<option value="1">1	<option value="2">2	<option value="3">3	<option value="4">4
-	<option value="5">5	<option value="6">6	<option value="7">7	<option value="8">8
-	<option value="9">9	<option value="10">10	<option value="11">11	<option value="12">12
-	<option value="13">13	<option value="14">14	<option value="15">15	<option value="16">16
-	<option value="17">17	<option value="18">18	<option value="19">19	<option value="20">20
-	<option value="21">21	<option value="22">22	<option value="23">23	<option value="24">24
-	<option value="25">25	<option value="26">26	<option value="27">27	<option value="28">28
-	<option value="29">29	<option value="30">30	<option value="31">31
-</SELECT></td>
+ <TD><?php echo yearSelect2(1986, date("Y"), "endYear"); ?></TD>
+ <td><?php echo monthSelect(date("m"), "endMonth"); ?></td>
+ <td><?php echo daySelect2(date("d"), "endDay"); ?></td>
 </TR>
 </TABLE>
 
