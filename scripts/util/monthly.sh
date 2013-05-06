@@ -1,9 +1,9 @@
 #  This process copies data around to longer term locations on a monthly basis
 #
 
-set MM="${2}"
-set YY="${1}"
-set YYYY="20${YY}"
+export MM="${2}"
+export YY="${1}"
+export YYYY="20${YY}"
 
 echo "Lets do SAO data!"
 cd /mesonet/data/text/sao/
