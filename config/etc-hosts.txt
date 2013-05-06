@@ -4,6 +4,9 @@
 192.168.0.1      iem-director0 iem-director0.local
 192.168.0.2      iem-director1 iem-director1.local
 192.168.0.4      iemfe         iemfe.local iem-memcached
+192.168.0.7      iemvm2
+192.168.0.8      iemvm0
+192.168.0.9      iemvm1
 192.168.0.10     iem10         iem10.local
 192.168.0.11     iem11         iem11.local iem-syslog
 192.168.0.19     iem19         iem19.local iemdb
@@ -13,6 +16,7 @@
 192.168.0.50     iem50         iem50.local iem-mapserver openfire-bosh
 192.168.0.60     iem60         iem60.local
 192.168.0.70     iem70         iem70.local
+192.168.0.99     iem99
 192.168.0.100    iemvs100      iemvs100.local
 192.168.0.101    iemvs101      iemvs101.local
 192.168.0.102    iemvs102      iemvs102.local
