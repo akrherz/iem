@@ -52,18 +52,22 @@ icursor.execute("""
  case when sigstage_flood is null then 'M' else sigstage_flood::text end as ss_flood,
  case when sigstage_moderate is null then 'M' else sigstage_moderate::text end as ss_moderate,
  case when sigstage_major is null then 'M' else sigstage_major::text end as ss_major,
- case when sigstage_record is null then 'M' else sigstage_record::text end as ss_record
+ case when sigstage_record is null then 'M' else sigstage_record::text end as ss_record,
+ case when physical_code = 'HG' then 1 else 0 end as rank
 from current_shef c JOIN stations s on (c.station = s.id) WHERE
  s.network in ('%s_DCP') and c.valid > now() - '4 hours'::interval
  and c.physical_code in ('HG','HP', 'HT') and c.duration = 'I' 
- and c.extremum = 'Z'    
+ and c.extremum = 'Z' ORDER by rank DESC
 """ % (state,) )
 
-
+used = []
 for row in icursor:
     nwsli = row['station']
     if row['source'] in ['R2','R3', 'R4', 'R5','R6','R7', 'R8', 'R9']:
         continue
+    if nwsli in used:
+        continue
+    used.append( nwsli )
     o.write("%5s %-64.64s %02i %s %-7.2f %-7.2f %-10.2f %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s\n" % (
         row['station'], row['name'], row['valid'].day, row['valid'].strftime("%H%M"),
         row['lat'], row['lon'], row['value'],
