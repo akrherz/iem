@@ -62,7 +62,6 @@ include ("$rootpath/include/jpgraph/jpgraph_plotline.php");
 include("$rootpath/include/network.php");     
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
-$cities["IOWA"] = Array("name" => "Iowa Statewide");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);
@@ -82,7 +81,7 @@ $graph->xaxis->SetTitleMargin(55);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
-$graph->legend->Pos(0.01, 0.07);
+$graph->legend->Pos(0.01, 0.08);
 $graph->legend->SetLayout(LEGEND_HOR);
 
 // Create the linear plot
