@@ -1,9 +1,9 @@
 <?php 
-include("../../config/settings.inc.php");
+ include("../../config/settings.inc.php");
  $page = 'coop';
-   $TITLE = "IEM | NWS COOP Data";
-$THISPAGE = "networks-coop";
-include("$rootpath/include/header.php"); 
+ $TITLE = "IEM | NWS COOP Data";
+ $THISPAGE = "networks-coop";
+ include("$rootpath/include/header.php"); 
 ?>
 <div class="dashboard">
 <ul>
@@ -29,18 +29,18 @@ techniques.
 <td valign="top">
 <h3 class="subtitle">IEM News Items</h3>
 <ul>
- <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=261">Record Cold between 9-15 August, 2004</a></li>
- <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=327">Snowfall reports 5-6 Jan, 2005</a></li>
- <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=375">April 2005 Warmth</a></li>
- <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=419">100+ Degree Temperatures</a></li>
- <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=650">Record Cold on 15 September 2007</a></li>
- <li><a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=881">Estimating near-term COOP Data</a></li>
+ <li><a href="/onsite/news.phtml?id=261">Record Cold between 9-15 August, 2004</a></li>
+ <li><a href="/onsite/news.phtml?id=327">Snowfall reports 5-6 Jan, 2005</a></li>
+ <li><a href="/onsite/news.phtml?id=375">April 2005 Warmth</a></li>
+ <li><a href="/onsite/news.phtml?id=419">100+ Degree Temperatures</a></li>
+ <li><a href="/onsite/news.phtml?id=650">Record Cold on 15 September 2007</a></li>
+ <li><a href="/onsite/news.phtml?id=881">Estimating near-term COOP Data</a></li>
 </ul>
 
 <h3 class="subtitle">Data Plots</h3>
 <ul>
-	<li><a href="<?php echo $rooturl; ?>/timemachine/#37.0">Iowa Precipitation Contour</a></li>
-	<li><a href="<?php echo $rooturl; ?>/timemachine/#38.0">Midwest Precipitation Contour</a></li>
+	<li><a href="/timemachine/#37.0">Iowa Precipitation Contour</a></li>
+	<li><a href="/timemachine/#38.0">Midwest Precipitation Contour</a></li>
 	<li><a href="/data/coopMonthPlot.gif">Rainfall totals for this month</a></li>
 	<li><a href="/data/coopSnowPlot.gif">Snowfall totals this morning</a></li>
 	<li><a href="/data/coopMonthSPlot.gif">Snowfall totals this month</a></li>
@@ -79,7 +79,7 @@ techniques.
 	<br />View all obs from 2004 to <?php echo date("Y"); ?> for one site or pick a date and view all sites!</li>
   <li><a href="/climodat">ClimoDat Interface</a> 
     <br>Handy application to access summary COOP data.</li>
-  <li><a href="<?php echo $rooturl; ?>/GIS/apps/coop/gsplot.phtml">Growing Season Plotter</a>
+  <li><a href="/GIS/apps/coop/gsplot.phtml">Growing Season Plotter</a>
     <br>Plot growing season totals since 1893 for a date span of your choice.
     <br>The resulting data is also available in a GIS Ready! format.
   <li><a href="dl/normals.phtml">Daily Climate Normals</a>
@@ -106,7 +106,6 @@ div.tease img {
 div.tease a {
  font-weight: bold;
  padding: 5px;
- line-height: 3em;
 }
 </style>
 <?php
@@ -196,7 +195,7 @@ Array("img" => "thumb_map.png",
 
 while (list($k,$v) = each($dict))
 {
- echo "<div class=\"tease\"><a href=\"$rooturl/". $v["url"] ."\"><img src=\"$rooturl/images/". $v["img"] ."\" border=\"0\"></a><a href=\"$rooturl/". $v["url"] ."\">". $v["title"] ."</a><br />". $v["desc"] ."</div>\n";
+ echo "<div class=\"tease\"><a href=\"$rooturl/". $v["url"] ."\"><img src=\"$rooturl/images/". $v["img"] ."\" border=\"0\"></a><a href=\"$rooturl/". $v["url"] ."\">". $v["title"] ."</a><br />". $v["desc"] ."<br />&nbsp;</div>\n";
 }
 
 ?>
