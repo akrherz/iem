@@ -114,6 +114,7 @@ rm coopPrecPlot.gif* >& /dev/null
 rm coopSnowPlot.gif* >& /dev/null
 
 $GEMEXE/sfmap << EOF > /tmp/PREC_sfmap.out
+ \$respond=yes
         AREA    = 40.25;-97;43.75;-90
         GAREA    = 40.25;-97;43.75;-90
         SATFIL   =  
