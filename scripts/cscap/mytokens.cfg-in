@@ -1,3 +1,6 @@
+[database]
+host=iemdb
+
 [googlekeys]
 sitename=sustainablecorn
 folderkey=0B6ZGw0coobCxMzFiMzE0NjYtZjgxMS00NzE0LWE4N2ItYmI3M2Q2NjFhNjU4
@@ -5,6 +8,16 @@ metamaster=0AugT6NSY_M5HdGd2cFV2WXBCQlJZNDRoSjZ0Qml4bnc
 sdckey=0AugT6NSY_M5HdFZ3R1Q4SXJqRHFLNFNaZm96OUFTOHc
 treatkey=0AugT6NSY_M5HdDdBU25SU1BrZUxnb2N5WWp0ZlF5Mmc
 syncfolder=0B6ZGw0coobCxMDM4MGYxYmItZTcxYi00NThmLTliMDQtYzZkOTE0YzlhZWNj
+
+[cscap]
+sitename = sustainablecorn
+metamaster = 0AugT6NSY_M5HdGd2cFV2WXBCQlJZNDRoSjZ0Qml4bnc
+treatkey = 0AugT6NSY_M5HdDdBU25SU1BrZUxnb2N5WWp0ZlF5Mmc
+syncfolder = 0B6ZGw0coobCxMDM4MGYxYmItZTcxYi00NThmLTliMDQtYzZkOTE0YzlhZWNj
+dashboard = 0AqZGw0coobCxdHZpY292QVRXN3M3OWZhdy1IWHR1VHc
+folderkey = 0B6ZGw0coobCxMzFiMzE0NjYtZjgxMS00NzE0LWE4N2ItYmI3M2Q2NjFhNjU4
+sdckey = 0AugT6NSY_M5HdFZ3R1Q4SXJqRHFLNFNaZm96OUFTOHc
+xrefrot = 0AqZGw0coobCxdENsWkFlR2JVdFk2RGJsQzJ3cWx1S3c
 
 [appauth]
 client_id=992627006709.apps.googleusercontent.com
