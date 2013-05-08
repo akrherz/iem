@@ -1036,17 +1036,17 @@ def makefeature(tmpfp):
     Helper function to pre generate the feature images based on this 
     generated PS file
     """
-    if not os.path.isfile("%s.ps" % (tmpfp,)):
-        print "File %s.ps is missing!" % (tmpfp,)
+    if not os.path.isfile("%s.svg" % (tmpfp,)):
+        print "File %s.svg is missing!" % (tmpfp,)
         return
     tomorrow = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=1)
     # Step 1. Convert to Big PNG
-    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors 256 +repage %s.ps %s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
+    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 900x700 -density 120 -depth 8 -colors 256 +repage %s.svg %s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
     os.system( cmd )
-    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 320x320 -density 80  +repage -depth 8 -colors 256 %s.ps %s_s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
+    cmd = "convert -trim -border 5 -bordercolor '#fff' -resize 320x420 -density 80  +repage -depth 8 -colors 256 %s.svg %s_s.png" % (tmpfp, tomorrow.strftime("%y%m%d") )
     os.system( cmd )
     # Step 4: Cleanup
-    os.remove("%s.ps" % (tmpfp,) )
+    os.remove("%s.svg" % (tmpfp,) )
 
 def webprocess(tmpfp, rotate=""):
     """
@@ -1156,7 +1156,7 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
             minvalid = row[2]
         if row[2] > maxvalid:
             maxvalid = row[2]
-        if row[0] is None or row[0] < 0 or row[1] is None or row[1] < 0:
+        if row[0] is None or row[0] < 3 or row[1] is None or row[1] < 0:
             sped[i] = 0 
             drct[i] = 0
         elif row[0] == 0 or row[1] == 0:
