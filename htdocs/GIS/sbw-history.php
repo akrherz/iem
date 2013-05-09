@@ -33,8 +33,8 @@ if ($rows < 2)
   $height = 540;
   $twidth = 636;
   $theight = 476;
-  $px = Array(320,);
-  $py = Array(290,);
+  $px = Array(3,);
+  $py = Array(50,);
 } else if ($rows >= 2 && $rows < 5)
 {
   $width = 640;
