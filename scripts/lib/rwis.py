@@ -131,7 +131,8 @@ class RWISOb(object):
 
 
   def windAlert(self):
-    if self.stationID in ('RBFI4','RTMI4','RWII4','RDNI4','RCDI4','RCII4'):
+    if self.stationID in ('RBFI4','RTMI4','RWII4','RDNI4','RCDI4','RCII4',
+                          'RCLI4'):
         return
     if self.gust > 100:
         print 'Gust of %.1f kts was not relayed, %s' % (self.gust,
