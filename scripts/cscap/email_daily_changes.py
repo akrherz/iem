@@ -81,7 +81,8 @@ while 1:
         if entry.last_modified_by:
             author = entry.last_modified_by.email.text
         html += "<tr><td>%s</td><td>%s</td><td>%s</td><td><a href=\"%s\">%s</a></td></tr>\n" % (
-            updated.strftime("%-d %b %-I:%M %P"), author, rtype, uri, title)
+            updated.strftime("%-d %b %-I:%M %P"), author, rtype, uri, 
+            title.encode('ascii', 'ignore'))
         #if entry.filename:
         #    print entry.filename.text
         #print entry.changestamp.value
