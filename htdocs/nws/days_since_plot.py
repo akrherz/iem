@@ -24,7 +24,7 @@ def run(phenomena, significance, mc, key):
     """, (significance, phenomena))
     data = {}
     for row in pcursor:
-        data[ row[0]] = row[1]
+        data[ row[0]] = max([row[1],0])
 
     p = plot.MapPlot(sector='conus',
                  title='Days since Last %s %s by NWS Office' % (
