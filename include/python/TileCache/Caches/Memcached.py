@@ -6,9 +6,9 @@ import time
 class Memcached(Cache):
     def __init__ (self, servers = ['127.0.0.1:11211'], **kwargs):
         Cache.__init__(self, **kwargs)
-        import memcache
+        import iemmemcache
         if type(servers) is str: servers = map(str.strip, servers.split(","))
-        self.cache = memcache.Client(servers, debug=0)
+        self.cache = iemmemcache.Client(servers, debug=0)
         self.timeout = int(kwargs.get('timeout', 0))
   
     def getKey(self, tile):
