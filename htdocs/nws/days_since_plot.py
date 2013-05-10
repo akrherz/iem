@@ -43,7 +43,6 @@ if __name__ == '__main__':
     key = "days_since_%s_%s.png" % (phenomena, significance)
     res = mc.get(key)
     if res:
-        sys.stderr.write("Using memcached: %s" % (key,))
         print 'Content-type: image/png\n'
         sys.stdout.write( res )
     else:
