@@ -41,12 +41,10 @@ if __name__ == '__main__':
     phenomena = form.getfirst('phenomena', 'TO')[:2]
     significance = form.getfirst('significance', 'W')[0]
     key = "days_since_%s_%s.png" % (phenomena, significance)
-    try:
-        res = mc.get(key)
-        if res:
-            print 'Content-type: image/png\n'
-            print res
-            sys.exit()
-    except:
-        pass
-    run(phenomena, significance, mc, key)
+    res = mc.get(key)
+    if res:
+        sys.stderr.write("Using memcached: %s" % (key,))
+        print 'Content-type: image/png\n'
+        sys.stdout.write( res )
+    else:
+        run(phenomena, significance, mc, key)
