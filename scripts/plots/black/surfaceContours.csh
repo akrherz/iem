@@ -37,7 +37,7 @@ $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot1.out
 	DEVICE	= GF|surfaceTW.gif|720;540
 	GLEVEL   = 0
 	GVCORD   = none
-	SKIP     = /4/4
+	SKIP     = /1/1
 	SCALE    = 0
 	GDPFUN	= tmpf ! KNTV(WND)
 	TYPE    = c/f	!B
