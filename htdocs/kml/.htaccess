@@ -1,0 +1,6 @@
+AddHandler cgi-script .py
+Options +ExecCGI
+
+
+RewriteEngine On
+RewriteRule ^shef_4inch.kml shef.py?mode=4inch
