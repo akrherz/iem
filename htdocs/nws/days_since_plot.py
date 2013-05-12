@@ -26,7 +26,7 @@ def run(phenomena, significance, mc, key):
     for row in pcursor:
         data[ row[0]] = max([row[1],0])
 
-    p = plot.MapPlot(sector='conus',
+    p = plot.MapPlot(sector='nws',
                  title='Days since Last %s %s by NWS Office' % (
                         vtec._phenDict.get(phenomena, phenomena),
                         vtec._sigDict.get(significance, significance)),
