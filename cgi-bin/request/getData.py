@@ -1,9 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 Download interface for ASOS/AWOS data from the asos database
 """
 
-import cgi, re, string, sys
+import cgi
+import re
+import string
+# Have to use mx because of pre 1900 dates in the database
 import mx.DateTime
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
@@ -16,10 +19,11 @@ MESOSITE = iemdb.connect('mesosite', bypass=True)
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 def main():
-    print "Content-type: text/plain \n\n",
+    """ Go main Go """
+    sys.stdout.write("Content-type: text/plain \n\n")
     form = cgi.FormContent()
-    if (not form.has_key("station")):
-        print "Station Not defined.  Error"
+    if not form.has_key("station"):
+        print "ERROR: CGI variable station Not defined."
         sys.exit(0)
     station = (string.strip( form["station"][0] )).upper()
     gisextra = []
@@ -32,11 +36,11 @@ def main():
             gisextra.append( "%.4f" % (row['lat'],) )
     dataVars = form["data"]
     if form.has_key("year"):
-      year1 = int(form["year"][0])
-      year2 = int(form["year"][0])
+        year1 = int(form["year"][0])
+        year2 = int(form["year"][0])
     else:
-      year1 = int(form["year1"][0])
-      year2 = int(form["year2"][0])
+        year1 = int(form["year1"][0])
+        year2 = int(form["year2"][0])
     month1 = int(form["month1"][0])
     month2 = int(form["month2"][0])
     day1 = int(form["day1"][0])
