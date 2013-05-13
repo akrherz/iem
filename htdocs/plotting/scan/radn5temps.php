@@ -4,9 +4,9 @@ include("$rootpath/include/database.inc.php");
 
 $connection = iemdb("scan");
  $station = isset($_GET["station"]) ? $_GET["station"] : "2031";
- $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 3*86400);
- $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 3*86400);
- $day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 3*86400);
+ $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", time() - 3*86400);
+ $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time() - 3*86400);
+ $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", time() - 3*86400);
 
 
 $table = "t${year}_hourly";
