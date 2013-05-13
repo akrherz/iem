@@ -18,9 +18,9 @@ $year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
 $month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
 $day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
 $myTime = mktime(0,0,0,$month,$day,$year);
-$today = mktime(0,0,0,date("m"), date("d"), date("Y"));
+$yesterday = mktime(0,0,0,date("m"), date("d"), date("Y")) - 96400;
 
-if ($myTime == $today)
+if ($myTime >= $yesterday)
 {
   /* Look in IEM Access! */
   $dbconn = iemdb("access");
