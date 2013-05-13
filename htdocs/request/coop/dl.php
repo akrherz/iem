@@ -176,7 +176,7 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
 	echo "StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, Wind, Par, dbnum\n";
 	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 		echo sprintf("%s, %s, %s, %.4f, %.2f, %.2f, %.2f, , , , %s\n", 
-				substr($row["station"],2,4), $row["year"],
+				substr($row["station"],0,4), $row["year"],
 				$row["doy"], $row["srad"],  f2c($row["high"]), f2c($row["low"]), 
 				$row["precip"] * 25.4, $i + 2);
 	}
