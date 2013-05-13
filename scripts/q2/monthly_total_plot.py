@@ -25,7 +25,7 @@ def plotdata(data, sts, ets, midwest=False):
     dgd = dg * 100
     sample = data[ul_y:lr_y:dgd, ul_x:lr_x:dgd]
     sample = numpy.flipud(sample)
-    sample = sample  * 2.0 / 25.4
+    sample = sample  / 25.4  # inches
  
     if midwest:
         lats = numpy.arange(iemplot.MW_SOUTH, iemplot.MW_NORTH, dg)
@@ -60,7 +60,7 @@ def plotdata(data, sts, ets, midwest=False):
 if __name__ == '__main__':
     ts = mx.DateTime.now()
     sts = mx.DateTime.DateTime(ts.year, ts.month, 1, 0, 0)
-    ets = sts + mx.DateTime.RelativeDateTime(months=1)
+    ets = sts + mx.DateTime.RelativeDateTime(months=2)
     if ets > mx.DateTime.now():
         ets = mx.DateTime.now()
     data = nmq.get_precip( sts, ets )
