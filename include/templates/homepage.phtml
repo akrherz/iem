@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Bootstrap, from Twitter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="/css/bootstrap-override.css" rel="stylesheet">
+	    
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
+  </head>
+
+  <body>
+
+<?php include 'navbar.phtml'; ?>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+
+        <div class="span9">
+       
+        	<p>The Iowa Environmental Mesonet (IEM) collects environmental data from cooperating members with observing networks. The data are stored and made available on this website.</p>
+<div class="well">
+<?php 
+/*
+ * Template for IEM Daily Feature!
+ */
+$connection = iemdb("mesosite", TRUE, TRUE);
+$query1 = "SELECT oid, *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
+                to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
+                to_char(valid, 'YYYY-MM-DD') as permalink from feature
+                ORDER by valid DESC LIMIT 1";
+$result = pg_exec($connection, $query1);
+$row = pg_fetch_array($result,0);
+$foid = $row["oid"];
+$good = intval($row["good"]);
+$bad = intval($row["bad"]);
+$tags = explode(",", $row["tags"]);
+$fbid = $row["fbid"];
+$fburl = "http://www.facebook.com/pages/IEM/157789644737?v=wall&story_fbid=".$fbid;
+/* Hehe, check for a IEM vote! */
+$voted = 0;
+if (array_key_exists('foid', $_COOKIE) && $_COOKIE["foid"] == $foid)
+{
+	$voted = 1;
+} elseif (getenv("REMOTE_ADDR") == "129.186.142.22" || getenv("REMOTE_ADDR") == "129.186.142.37")
+{
+
+} elseif (isset($_GET["feature_good"]))
+{
+	setcookie("foid", $foid, time()+100600);
+	$voted = 1;
+
+	$isql = "UPDATE feature SET good = good + 1 WHERE oid = $foid";
+	$good += 1;
+	pg_exec($connection, $isql);
+} elseif (isset($_GET["feature_bad"]))
+{
+	setcookie("foid", $foid, time()+100600);
+	$voted = 1;
+
+	$isql = "UPDATE feature SET bad = bad + 1 WHERE oid = $foid";
+	$bad += 1;
+	pg_exec($connection, $isql);
+}
+
+
+$fref = "/mesonet/share/features/". $row["imageref"] ."_s.png";
+$width = 320;
+$height = 240;
+if (is_file($fref)){
+	list($width, $height, $type, $attr) = @getimagesize($fref);
+}
+$imghref = sprintf("%s/onsite/features/%s_s.png", ROOTURL, $row["imageref"]);
+?>
+
+<div class="row-fluid">
+ <div class="span4"><h4><?php echo $row["title"]; ?></h4></div>
+ <div class="span8">
+	<div class="btn-group pull-right">
+<a class="btn btn-small" href="<?php echo $fburl; ?>">Facebook</a>
+<a class="btn btn-small" href="/onsite/features/cat.php?day=<?php echo $row["permalink"]; ?>">Permalink</a>
+<a class="btn btn-small" href="/onsite/features/past.php">Past Features</a>
+<a class="btn btn-small" href="/onsite/features/tags/">Tags</a>
+	</div>
+ 
+ </div>
+</div><!-- end row-fluid -->
+
+
+
+<div class="pull-left clearfix">
+
+
+<?php 
+echo "<small>Posted: ". $row["webdate"] ."</small>";
+echo "<img src=\"$imghref\" alt=\"Feature\" class=\"pull-right\" />";
+echo "<br /><small>Tags: &nbsp; ";
+while (list($k,$v) = each($tags))
+{
+	echo sprintf("<a href=\"/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $v, $v);
+}
+echo "</small>";
+
+echo "<br />". $row["story"] ;
+
+/* Rate Feature and Past ones too! */
+if ($row["voting"] == "f"){
+
+} else {
+	echo "<div style='clear:both;'>";
+	if ($voted){
+		$goodurl = "/";
+		$badurl = "/";
+		$msg = "Thanks for voting!";
+	} else {
+		$goodurl = "/?feature_good";
+		$badurl = "/?feature_bad";
+		$msg = "Rate Feature";
+	}
+
+	echo "<strong>$msg</strong> 
+	<a class=\"btn btn-success\" href=\"$goodurl\">Good ($good votes)</a>
+	<a class=\"btn btn-danger\" href=\"$badurl\">Bad ($bad votes)</a></div>";
+	echo "<div id=\"fb-root\"></div><script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>
+	<fb:comments send_notification_uid=\"16922938\" callback=\"/fbcb.php\" title=\"". $row["title"] ."\" \" href=\"/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
+
+	echo "</div>";
+}
+/* Now, lets look for older features! */
+echo "<br /><strong>Previous Years' Features</strong>";
+$sql = "select *, extract(year from valid) as yr from feature 
+		WHERE extract(month from valid) = extract(month from now()) 
+		and extract(day from valid) = extract(day from now()) and 
+		extract(year from valid) != extract(year from now()) ORDER by yr DESC";
+$result = pg_exec($connection, $sql);
+for($i=0;$row=@pg_fetch_array($result,$i);$i++)
+{
+	// Start a new row
+	if ($i % 2 == 0){ echo "\n<div class=\"row-fluid\">"; }
+	echo "\n<div class=\"span6\">". $row["yr"] .": <a href=\"onsite/features/cat.php?day=". substr($row["valid"], 0, 10) ."\">". $row["title"] ."</a></div>";
+	// End the row
+	if ($i % 2 != 0){ echo "\n</div>\n"; }
+}
+
+if ($i % 2 != 0){ echo "\n<div class=\"span6\">&nbsp;</div>\n</div>"; }
+?>
+
+
+</div><!--  end of well -->
+          <div class="row-fluid pull-left">
+            <div class="span4">
+              <h2>Heading</h2>
+              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+              <p><a class="btn" href="#">View details &raquo;</a></p>
+            </div><!--/span-->
+            <div class="span4">
+              <h2>Heading</h2>
+              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+              <p><a class="btn" href="#">View details &raquo;</a></p>
+            </div><!--/span-->
+            <div class="span4">
+              <h2>Heading</h2>
+              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+              <p><a class="btn" href="#">View details &raquo;</a></p>
+            </div><!--/span-->
+          </div><!--/row-->
+        </div><!--/span-->
+        <div class="span3">
+          <div class="sidebar-nav">
+<?php 
+include_once(ROOTPATH ."/include/cameras.inc.php");
+$rancam = "";
+$loop = 0;
+while ($rancam == "" && $loop < 20)
+{
+  srand ((float) microtime() * 10000000);
+  $t = array_rand($cameras);
+  if (@filemtime("/home/ldm/data/camera/stills/${t}.jpg") > (time() - 1200))
+  {
+    $rancam = $t;
+  }
+  $loop += 1;
+}
+if ($rancam == ""){ $rancam = "KCCI-001";}
+?>
+<h4><?php echo $cameras[$rancam]["name"] .", ". $cameras[$rancam]["state"]; ?> Webcam:</h4>
+<a href="/current/webcam.php#<?php echo  $cameras[$rancam]["network"]; ?>-0"><img src="/data/camera/stills/<?php echo $rancam; ?>.jpg?<?php echo time(); ?>" border="0" alt="Webcam" /></a>
+<a href="/current/webcam.php#<?php echo  $cameras[$rancam]["network"]; ?>-0">View other webcams</a>
+
+<ul class="nav nav-list">
+              <li class="nav-header">Sidebar</li>
+              <li class="active"><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li class="nav-header">Sidebar</li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li class="nav-header">Sidebar</li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+        <p>&copy; Company 2012</p>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery.js"></script>
+    <script src="/js/bootstrap.js"></script>
+
+  </body>
+</html>
