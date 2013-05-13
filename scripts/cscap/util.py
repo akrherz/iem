@@ -21,11 +21,17 @@ class Worksheet(object):
         self.rows = int( self.entry.row_count.text )
         self.cols = int( self.entry.col_count.text )
         self.cell_feed = None
+        self.list_feed = None
         self.data = {}
 
     def refetch_feed(self):
         self.entry = self.spr_client.get_worksheet(self.spread_id, self.id)
         self.set_metadata()
+
+    def get_list_feed(self):
+        if self.list_feed is not None:
+            return
+        self.list_feed = self.spr_client.get_list_feed(self.spread_id, self.id)
 
     def get_cell_feed(self):
         if self.cell_feed is not None:
@@ -185,7 +191,7 @@ def build_treatments(feed):
         if row['key'] is None or row['key'] == '':
             continue
         treatment_key = row['key']
-        treatment_names[treatment_key] = row['name']
+        treatment_names[treatment_key] = row['name'].strip()
         for colkey in row.keys():
             cell = row[colkey]
             if colkey in data.keys(): # Is sitekey
@@ -213,7 +219,6 @@ def build_sdc(feed):
             for key in row.keys():
                 if key in ['uniqueid','name','key'] or key[0] == '_':
                     continue
-                print 'Found Key: %s' % (key,)
                 data[key] = []
         if row['key'] is None or row['key'] == '':
             continue
