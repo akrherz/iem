@@ -5,7 +5,7 @@ import mx.DateTime
 import Ngl
 import iemre
 import iemdb
-import mesonet
+from pyiem import meteorology
 import network
 import psycopg2.extras
 
@@ -30,7 +30,7 @@ def grid_wind(rs):
         if row['sknt'] is None or row['drct'] is None:
             continue
         # mps
-        u,v = mesonet.uv( row['sknt'] / 0.514, row['drct'] )
+        u,v = meteorology.uv( row['sknt'] / 0.514, row['drct'] )
         if v is not None:
             lats.append(  nt.sts[row['station']]['lat'] )
             lons.append(  nt.sts[row['station']]['lon'] )
