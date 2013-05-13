@@ -1,0 +1,161 @@
+<?php 
+$_pages = Array(
+		"archive" => Array(
+				"base" => Array("title" => "Archive", "url" => "/archive/"),
+				"schema" => Array("title" => "Archive Schema", "url" => "/archive/schema.php"),
+				"browse" => Array("title" => "Browse data/", "url" => "/archive/data/"),
+				"birthday" => Array("title" => "Birthday Weather", "url" => "/onsite/birthday/"),
+				"hrain" => Array("title" => "Hourly Precip", "url" => "/rainfall/obhour.phtml"),
+				"iemre" => Array("title" => "IEM Reanalysis", "url" => "/iemre/"),
+				"cases" => Array("title" => "Interesting Cases", "url" => "/cases/"),
+				"mos" => Array("title" => "Model Output Statistics", "url" => "/mos/"),
+				"afos" => Array("title" => "NWS Text Products", "url" => "/wx/afos/list.phtml"),
+				"tm" => Array("title" => "Time Machine", "url" => "/timemachine/"),
+		),
+		"climatology" => Array(
+				"base" => Array("title" => "Climate", "url" => "/climate/"),
+				"extremes" => Array("title" => "Daily Climatology", "url" => "/COOP/extremes.php"),
+				"main" => Array("title" => "Mainpage", "url" => "/climate/"),
+				"climodat" => Array("title" => "Climodat", "url" => "/climodat/"),
+				"drought" => Array("title" => "Drought", "url" => "/dm/"),
+				"today" => Array("title" => "Today", "url" => "/climate/today.phtml"),
+				"yesterday" => Array("title" => "Yesterday", "url" => "/climate/yesterday.phtml"),
+				"week" => Array("title" => "Week", "url" => "/climate/week.phtml"),
+				"month" => Array("title" => "Month", "url" => "/climate/month.phtml"),
+				"gs" => Array("title" => "Growing Season", "url" => "/climate/gs.phtml"),
+				"year" => Array("title" => "Year", "url" => "/climate/year.phtml"),
+		),
+		"current" => Array(
+				"base" => Array("title" => "Current", "url" => "/current/"),
+				"products" => Array("title" => "Products", "url" => "/current/"),
+				"sort" => Array("title" => "Sortable Currents", "url" => "/my/current.phtml"),
+				"month" => Array("title" => "Month", "url" => "/current/month.phtml"),
+				"gs" => Array("title" => "Growing Season", "url" => "/current/gs.phtml"),
+				"year" => Array("title" => "Year", "url" => "/current/year.phtml"),
+				"radar" => Array("title" => "RADAR & Satellite", "url" => "/current/radar.phtml"),
+				"placefiles" => Array("title" => "GR Placefiles", "url" => "/request/grx/"),
+				"afos" => Array("title" => "NWS Text", "url" => "/wx/afos/"),
+		),
+		"iem" => Array(
+				"base" => Array("title" => "Info", "url" => "/sites/locate.php"),
+				"feature" => Array("title" => "Daily Features", "url" => "/onsite/features/past.php"),
+				"sites" => Array("title" => "IEM Sites", "url" => "/sites/locate.php"),
+				"info" => Array("title" => "Info", "url" => "/info.php"),
+				"links" => Array("title" => "Links", "url" => "/info/links.php"),
+				"mailman" => Array("title" => "Mail Lists", "url" => "/mailman/listinfo/"),
+				"news" => Array("title" => "News", "url" => "/onsite/news.phtml"),
+				"networks" => Array("title" => "Network Tables", "url" => "/sites/networks.php"),
+				"present" => Array("title" => "Presentations", "url" => "/present/"),
+				"qc" => Array("title" => "Quality Control", "url" => "/QC/"),
+				"variables" => Array("title" => "Variables", "url" => "/info/variables.phtml"),
+		),
+		"gis" => Array(
+				"base" => Array("title" => "GIS", "url" => "/GIS/"),
+				"browse" => Array("title" => "Browse Data", "url" => "/data/gis/"),
+				"nexrad" => Array("title" => "NEXRAD Composites", "url" => "/docs/nexrad_composites/"),
+				"ogc" => Array("title" => "OGC Webservices", "url" => "/ogc/"),
+				"rainfall" => Array("title" => "Rainfall Data", "url" => "/rainfall/"),
+				"radmap" => Array("title" => "RadMap API", "url" => "/GIS/radmap_api.phtml"),
+				"radview" => Array("title" => "RADAR Services", "url" => "/GIS/radview.phtml"),
+				"satellite" => Array("title" => "Satellite Data", "url" => "/GIS/goes.phtml"),
+				"software" => Array("title" => "Software", "url" => "/GIS/software.php"),
+		),
+		"networks" => Array(
+				"base" => Array("title" => "Networks", "url" => "/"),
+				"asos" => Array("title" => "ASOS", "url" => "/ASOS/"),
+				"awos" => Array("title" => "AWOS", "url" => "/AWOS/"),
+				"coop" => Array("title" => "NWS COOP", "url" => "/COOP/"),
+				"dcp" => Array("title" => "DCP", "url" => "/DCP/"),
+				"agclimate" => Array("title" => "ISU AG", "url" => "/agclimate/"),
+				"flux" => Array("title" => "NLAE Flux", "url" => "/nstl_flux/"),
+				"rwis" => Array("title" => "RWIS", "url" => "/RWIS/"),
+				"scan" => Array("title" => "SCAN", "url" => "/scan/"),
+				"schoolnet" => Array("title" => "SchoolNet", "url" => "/schoolnet/"),
+				"other" => Array("title" => "Other", "url" => "/other/"),
+		),
+		"roads" => Array(
+				"base" => Array("title" => "Roads", "url" => "/roads/"),
+				"main" => Array("title" => "Mainpage", "url" => "/roads/"),
+				"gis" => Array("title" => "GIS Products", "url" => "/roads/gis.phtml"),
+				"history" => Array("title" => "Historical", "url" => "/roads/history.phtml"),
+				"maps" => Array("title" => "Interactive Map", "url" => "/roads/maps.phtml"),
+				"sort" => Array("title" => "Sortable Text", "url" => "/roads/rc.phtml"),
+		),
+		"severe" => Array(
+				"base" => Array("title" => "Severe Weather", "url" => "/current/severe.phtml"),
+				"main" => Array("title" => "Mainpage", "url" => "/current/severe.phtml"),
+				"cow" => Array("title" => "IEM Cow (SBW Verification)", "url" => "/cow/"),
+				"iembot" => Array("title" => "iembot", "url" => "/projects/iembot/"),
+				"interact" => Array("title" => "Interact Radar", "url" => "/GIS/apps/rview/warnings.phtml"),
+				"lsr" => Array("title" => "Local Storm Report App", "url" => "/lsr/"),
+				"raccoon" => Array("title" => "IEM Raccoon (SBW Powerpoints)", "url" => "/raccoon/"),
+				"river" => Array("title" => "River Summary", "url" => "/river/"),
+				"watch" => Array("title" => "SPC Watches", "url" => "/GIS/apps/rview/watch.phtml"),
+				"vtec" => Array("title" => "VTEC Browser", "url" => "/vtec/"),
+		),
+		"webcam" => Array(
+				"base" => Array("title" => "Web Cams", "url" => "/current/webcam.php"),
+				"still" => Array("title" => "Still Images", "url" => "/current/webcam.php"),
+				"viewer" => Array("title" => "Hi-res + Live", "url" => "/current/viewer.phtml"),
+				"loop" => Array("title" => "Loops", "url" => "/current/bloop.phtml"),
+				"lapse" => Array("title" => "Recent Movies", "url" => "/current/camlapse/"),
+				"cool" => Array("title" => "Cool Lapses", "url" => "/cool/"),
+		),
+);
+?>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+	<ul class="nav nav-pills pull-left">
+  <li><a href="/" style="padding:0px 10px 0px 0px;"><img src="images/logo_small.png" style="height: 35px;"/></a></li>
+  <?php 
+
+  
+  
+  $THISPAGE = isset($THISPAGE) ? $THISPAGE : "xxx-xxx";
+  $ar = preg_split('/-/', $THISPAGE);
+while( list($idx, $page) = each($_pages) )
+{
+  	echo sprintf("<li class=\"dropdown%s\">\n<a class=\"dropdown-toggle\" 
+		data-toggle=\"dropdown\" href=\"#\">%s <b class=\"caret\"></b></a>\n", 
+      ($ar[0] == $idx) ? " active" : "", $page["base"]["title"]);
+
+    echo "<ul class=\"dropdown-menu\">\n";
+    while( list($idx2, $page2) = each($page) )
+    {
+       echo sprintf("<li><a%s href=\"%s\">%s</a></li>\n", 
+         ($ar[1] == $idx2 && $ar[0] == $idx) ? " class=\"active\"" : "",
+          ROOTURL . $page[$idx2]["url"],  $page[$idx2]["title"] );
+    }
+    echo "</ul>\n</li>\n";
+}
+
+/* Look for related IEM Apps */
+if (defined('IEM_APPID')){
+	include_once(ROOTPATH ."/include/database.inc.php");
+	$_mesosite = iemdb("mesosite");
+	pg_prepare($_mesosite, "_SELECTOR_", "SELECT * from iemapps where appid in
+		(SELECT appid from iemapps_tags WHERE tag in (SELECT tag from iemapps_tags where appid = $1)
+		and appid != $1) ORDER by name ASC");
+	$_rs = pg_execute($_mesosite, "_SELECTOR_", Array(IEM_APPID));
+	if (pg_numrows($_rs) > 0){
+		echo "<li class=\"dropdown\"><a class=\"dropdown-trigger\" data-toggle=\"dropdown\" href=\"#\">Related <b class=\"icon-star\"></b>";
+		echo "<ul class=\"dropdown-menu\">\n";
+		for ($i=0;$_row=@pg_fetch_assoc($_rs,$i);$i++){
+			$url = ROOTURL . $_row["url"];
+			if (substr($_row["url"],0,1) == "h"){
+				$url = $_row["url"];
+			}
+			echo sprintf("<li><a href=\"%s\">%s</a></li>",
+					$url,  $_row["name"] );
+		}
+		echo "</ul></li>\n";
+	}
+	pg_close($_mesosite);
+}
+
+  ?>
+</ul>
+        </div>
+      </div>
+    </div>
