@@ -34,8 +34,7 @@ from twisted.internet import reactor, base
 reactor.installResolver(base.BlockingResolver())
 
 # Import nwnserver stuff!
-from nwnserver import server, auth, hubclient, proxyserver, pollerserv, filewatcher
-from nwnserver.scripts import mainserver
+from nwnserver import hubclient, proxyserver, pollerserv, filewatcher
 
 import secret
 
@@ -108,31 +107,9 @@ pollerServerPortal = portal.Portal(pollerserv.PollerRealm(pollerServerConfigFile
 pollerServerPortal.registerChecker(checkers.FilePasswordDB(pollerServerPasswdFile))
 
 # set up factory and listen
-pollerServerFactory = pollerserv.PollerServerFactory(pollerServerPortal, hubServerFactory)
+pollerServerFactory = pollerserv.PollerServerFactory(pollerServerPortal,
+                                                    hubServerFactory)
 pollerServer = internet.TCPServer(pollerServerPort, pollerServerFactory)
 pollerServer.setServiceParent(serviceCollection)
 
-import sys
-import types
-
-def get_refcounts():
-    d = {}
-    sys.modules
-    # collect all classes
-    for m in sys.modules.values():
-        for sym in dir(m):
-            o = getattr (m, sym)
-            if type(o) is types.ClassType:
-                d[o] = sys.getrefcount (o)
-    # sort by refcount
-    pairs = map (lambda x: (x[1],x[0]), d.items())
-    pairs.sort()
-    pairs.reverse()
-    return pairs
-
-def print_top_100():
-    for n, c in get_refcounts()[:10]:
-        print '%10d %s' % (n, c.__name__)
-    reactor.callLater(60, print_top_100)
-
-#reactor.callLater(60, print_top_100)
+# END

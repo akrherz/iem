@@ -72,7 +72,7 @@ serviceCollection = service.IServiceCollection(application)
 
 nwn =  NWNClientFactory('sall999', 'sall999')
 
-cli = internet.TCPClient('127.0.0.1', 14996, nwn )
+cli = internet.TCPClient('129.186.185.33', 14996, nwn )
 cli.setServiceParent(serviceCollection)
 reactor.callLater(120, saveData)
 
