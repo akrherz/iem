@@ -14,15 +14,21 @@ from matplotlib.colors import rgb2hex
 import matplotlib.patheffects as PathEffects
 import Image
 import mx.DateTime
+from iem import constants
+
 
 fig = plt.figure(num=None, figsize=(10.24,7.68))
 ax = plt.axes([0.01,0,0.9,1], axisbg=(0.4471,0.6235,0.8117))  
 #ak_ax = plt.axes([0.01,0.0,0.25,0.25], axisbg=(0.4471,0.6235,0.8117), anchor='SW') 
 #hi_ax = plt.axes([0.48,0.0,0.2,0.2], axisbg=(0.4471,0.6235,0.8117), anchor='SW') 
 #pr_ax = plt.axes([0.78,0.05,0.125,0.15], axisbg=(0.4471,0.6235,0.8117), anchor='SW')
-map = Basemap(projection='lcc', urcrnrlat=47.7, llcrnrlat=23.08, urcrnrlon=-62.5,
-             llcrnrlon=-120, lon_0=-98.7, lat_0=39, lat_1=33, lat_2=45,
-             resolution='l', ax=ax)
+map = Basemap(projection='lcc', fix_aspect=False,
+                           urcrnrlat=constants.MW_NORTH,
+                           llcrnrlat=constants.MW_SOUTH,
+                           urcrnrlon=constants.MW_EAST,
+                           llcrnrlon=constants.MW_WEST,
+                           lat_0=45.,lon_0=-92.,lat_ts=42.,
+                           resolution='i', ax=ax)
 map.fillcontinents(color='0.7',zorder=0)
 """
 akmap = Basemap(projection='cyl', urcrnrlat=78.1, llcrnrlat=48.08, urcrnrlon=-129.0,
