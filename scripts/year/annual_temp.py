@@ -16,7 +16,7 @@ for row in ccursor:
         continue
     lats.append( nt.sts[row[0]]['lat'] )
     lons.append( nt.sts[row[0]]['lon'] )
-    vals.append( float(row[1])  )
+    vals.append( mesonet.f2c(float(row[1]))  )
     
 cfg = {
        'wkColorMap': 'BlAqGrYeOrRe',
