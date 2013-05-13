@@ -21,7 +21,7 @@ icursor.execute("""
     y(geom) as lat, county, count(*) from
     summary_2013 t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
-    day in ('2013-04-22', '2013-04-23', '2013-04-24') and snow >= 0 and 
+    day in ('2013-05-01', '2013-05-02', '2013-05-03') and snow >= 0 and 
     x(geom) BETWEEN %s and %s and
     y(geom) BETWEEN %s and %s  
     GROUP by id, lon, lat, county
@@ -46,7 +46,7 @@ pcursor.execute("""
         x(geom) as lon, 
        y(geom) as lat
       from lsrs_2013 WHERE type in ('S') and magnitude > 0 and 
-      valid > '2013-04-22 00:00' and valid < '2013-04-29 23:59'
+      valid > '2013-05-01 00:00' and valid < '2013-05-29 23:59'
       GROUP by state, lon, lat
 """)
 for row in pcursor:
@@ -98,8 +98,8 @@ cfg = {
  'wkColorMap': 'WhiteBlueGreenYellowRed',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "22-23 April 2013 - IEM Snowfall Total Analysis",
- '_valid'             : "Snowfall totals up until 8 AM 24 Apr 2013",
+ '_title'             : "1-3 May 2013 - IEM Snowfall Total Analysis",
+ '_valid'             : "Snowfall totals up until 4 PM 3 May 2013",
  #'_MaskZero'          : True,
  'lbTitleString'      : "[in]",
   '_showvalues'        : False,
