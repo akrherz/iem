@@ -119,6 +119,44 @@ if (in_array('daycent', $vars)){
 	}
 	
 }
+else if (in_array('dndc', $vars)){
+	/*
+	 * One file per year! named StationName / StationName_YYYY.txt
+	 * julian day, tmax C , tmin C, precip cm seperated by space
+	 */
+	$network = sprintf("%sCLIMATE", substr($stations[0], 0, 2));
+	$nt = new NetworkTable($network);
+	$cities = $nt->table;
+	
+	pg_prepare($connection, "TBD", "SELECT extract(doy from day) as doy, high,".
+			" low, precip, month, year, extract(day from day) as lday, station, year,".
+			" (case when merra_srad > 0 then merra_srad else -99 end) as srad".
+			" from $table ".
+			" WHERE station IN ". $stationString ." and ".
+			" day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
+	$rs = pg_execute($connection, 'TBD', Array());
+	$zipfiles = Array();
+	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){		
+		$sname = str_replace(" ", "_", $cities[$row["station"]]["name"]);
+		$fn = sprintf("%s/%s_%s.txt", $sname, $sname, $row["year"]);
+		if (! array_key_exists($fn, $zipfiles)){
+			$zipfiles[$fn] = "";
+		}
+		$zipfiles[$fn] .= sprintf("%s %s %s %s\n", $row["doy"], f2c($row["high"]), 
+			f2c($row["low"]), $row["precip"] * 2.54 );
+	}
+	chdir("/tmp");
+	$zip = new ZipArchive;
+	$res = $zip->open('dndc.zip', ZipArchive::CREATE);
+	while (list($key, $val) = each($zipfiles)){
+		$zip->addFromString($key, $val);
+	}
+	$zip->close();
+	/* Write back to the luser */
+	header("Content-type: application/octet-stream");
+	header("Content-Disposition: attachment; filename=dndc.zip");
+	readfile("dndc.zip");
+}
 else if (in_array('salus', $vars)){
 	/*
 	 * > Daily Weather Data File (use extra weather drivers = 0):
