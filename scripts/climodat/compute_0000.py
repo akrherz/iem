@@ -1,14 +1,11 @@
 """
 Compute the statewide average data based on IEMRE analysis
 """
-try:
-    import netCDF4 as netCDF3
-except:
-    import netCDF3
+import netCDF4
 import iemdb
 import numpy
 import iemre
-import mesonet
+from pyiem import datatypes
 import sys
 import mx.DateTime
 COOP = iemdb.connect("coop", bypass=True)
@@ -17,7 +14,7 @@ POSTGIS = iemdb.connect("postgis", bypass=True)
 pcursor = POSTGIS.cursor()
 
 def do_day(valid):
-    nc = netCDF3.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (valid.year,))
+    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (valid.year,))
     for state in ('NE', 'IA','MN','WI','MI','OH','IN','IL','MO','KS','KY','ND','SD'):
         do_state_day(state, valid, nc)
         do_climdiv_day(state, valid, nc)
@@ -41,10 +38,12 @@ def do_climdiv_day(stabbr, valid, nc):
         tcnt = int((valid - mx.DateTime.DateTime(valid.year,1,1)).days)
     
         high_tmpk = nc.variables['high_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
-        high = mesonet.k2f( numpy.average(high_tmpk) )
+        high = datatypes.temperature( numpy.average(high_tmpk), 'K')
+        high = high.value("F")
     
         low_tmpk = nc.variables['low_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
-        low = mesonet.k2f( numpy.average(low_tmpk) )
+        low = datatypes.temperature( numpy.average(low_tmpk), 'K')
+        low = low.value("F")
     
         p01d = nc.variables['p01d'][tcnt,ll_j:ur_j,ll_i:ur_i]
         precip = numpy.average(p01d) / 25.4
@@ -83,10 +82,12 @@ def do_state_day(stabbr, valid, nc):
     tcnt = int((valid - mx.DateTime.DateTime(valid.year,1,1)).days)
 
     high_tmpk = nc.variables['high_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
-    high = mesonet.k2f( numpy.average(high_tmpk) )
+    high = datatypes.temperature( numpy.average(high_tmpk), 'K')
+    high = high.value("F")
 
     low_tmpk = nc.variables['low_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
-    low = mesonet.k2f( numpy.average(low_tmpk) )
+    low = datatypes.temperature( numpy.average(low_tmpk), 'K')
+    low = low.value("F")
 
     p01d = nc.variables['p01d'][tcnt,ll_j:ur_j,ll_i:ur_i]
     precip = numpy.average(p01d) / 25.4
