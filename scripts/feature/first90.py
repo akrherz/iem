@@ -1,44 +1,52 @@
-import iemdb
 import mx.DateTime
-COOP = iemdb.connect('coop', bypass=True)
+import numpy
+import iemdb, iemplot
+import network
+nt = network.Table("IACLIMATE")
+COOP = iemdb.connect("coop", bypass=True)
 ccursor = COOP.cursor()
 
-jday = []
-
+lats = []
+lons = []
+vals = []
 ccursor.execute("""
- SELECT year, min(extract(doy from day)) from alldata where 
- stationid = 'ia2203' and high > 89 GROUP by year ORDER by year ASC
-    """)
+  SELECT station, avg(extract(doy from minday)) from
+  (SELECT station, year, min(day) as minday from alldata_ia where high > 89
+  and station != 'IA0000' and substr(station,2,1) != 'C'
+  GROUP by station, year) as foo GROUP by station
+""")
 for row in ccursor:
-  jday.append( row[1] )
+    if not nt.sts.has_key(row[0]):
+        continue
+    vals.append( row[1] )
+    lats.append( nt.sts[row[0]]['lat'] )
+    lons.append( nt.sts[row[0]]['lon'] )
 
-jday.append(100)
-print len(jday)
-import matplotlib.pyplot as plt
-import numpy as np
-jday = np.array(jday)
-fig = plt.figure()
-ax = fig.add_subplot(111)
-av = np.average(jday)
-bars = ax.bar(np.arange(1893,2012)-0.4, jday, facecolor='r', edgecolor='r')
-for bar in bars:
-  if bar.get_height() > av:
-    bar.set_facecolor('b')
-    bar.set_edgecolor('b')
-ax.plot([1893,2011], [av, av], color='black')
-ax.grid(True)
-ax.set_ylim(75,210)
-ax.set_xlim(1892,2012)
-yticks = []
-ylabels = []
-for i in range(75,210):
-  ts = mx.DateTime.DateTime(2000,1,1) + mx.DateTime.RelativeDateTime(days=i)
-  if ts.day in [1,8,15,22]:
-    yticks.append(i)
-    ylabels.append( ts.strftime("%d %B") )
-ax.set_yticks(yticks)
-ax.set_yticklabels(ylabels)
-ax.set_title("First 90$^{\circ}\mathrm{F}$ for Des Moines [1893-2011]\n2011 ties 1930 with 10 April, 29 Mar 1986 earliest")
-fig.savefig('test.ps')
-import iemplot
-iemplot.makefeature('test')
+labels = []
+sts = mx.DateTime.DateTime(2000,1,1)
+for i in range(min(vals), max(vals)+4,4):
+    ts = sts + mx.DateTime.RelativeDateTime(days=(i-1))
+    labels.append( ts.strftime("%b %d") )
+    
+print labels
+cfg = {
+    'wkColorMap': 'BlAqGrYeOrRe',
+     'nglSpreadColorStart': -1,
+ 'nglSpreadColorEnd'  : 2,
+ 'cnLevelSelectionMode': 'ManualLevels',
+  'cnLevelSpacingF'      : 4.0,
+ 'cnMinLevelValF'       : min(vals),
+ 'cnMaxLevelValF'       : max(vals),
+ 'lbLabelStride'    : 1,
+ 'lbLabelFontHeightF': 0.0075,
+ '_title'             : "Average Date of First 90 Degree Temperature",
+ '_valid'             : "based on long term climate data",
+  'lbTitleString'      : " ",
+  'cnExplicitLabelBarLabelsOn': True,
+  'lbLabelStrings': labels,
+  
+        }
+
+fp = iemplot.simple_contour(lons, lats, vals, cfg)
+#iemplot.postprocess(fp,"","")
+iemplot.makefeature(fp)
