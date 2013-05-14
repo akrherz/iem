@@ -54,8 +54,9 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
   <br />Map of the number of days since a WFO issued a VTEC Product.</li>
  <li><a href="../vtec/">VTEC Browser</a>
   <br />Interactive display of VTEC products.</li>
- <li><a href="../vtec/search.php">VTEC Search by County/Zone</a>
-  <br />Find issued VTEC WWA products by a given zone or county.</li>
+ <li><a href="../vtec/search.php">VTEC Search by Point or County/Zone</a>
+  <br />Find issued VTEC WWA products by a given zone or county or search
+  for a storm based warning by point.</li>
 </ul>
 
 <h4>Storm Based Warnings</h4>
