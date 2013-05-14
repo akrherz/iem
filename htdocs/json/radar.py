@@ -7,7 +7,7 @@ sys.path.insert(1, "/mesonet/www/apps/iemwebsite/scripts/lib/")
 import cgi
 import json
 import mx.DateTime
-import os
+import os.path
 import iemdb
 import glob
 
@@ -28,7 +28,12 @@ def parse_time(s):
     Convert ISO something into a mx.DateTime
     """
     try:
-        date = mx.DateTime.strptime(s, '%Y-%m-%dT%H:%MZ')
+        if len(s) == 17:
+            date = mx.DateTime.strptime(s, '%Y-%m-%dT%H:%MZ')
+        elif len(s) == 20:
+            date = mx.DateTime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
+        else:
+            date = mx.DateTime.gmt()
     except:
         date = mx.DateTime.gmt()
     return date
@@ -147,18 +152,18 @@ def main():
     operation = form.getvalue('operation', None)
     callback = form.getvalue('callback', None)
     if callback is not None:
-        print "Content-type: application/javascript\n"
-        print "%s(" % (callback,),
+        sys.stdout.write("Content-type: application/javascript\n\n")
+        sys.stdout.write("%s(" % (callback,))
     else:
-        print "Content-type: text/plain\n"
+        sys.stdout.write("Content-type: text/plain\n\n")
     if operation == "list":
-        print json.dumps( list_files(form) ),
+        sys.stdout.write(json.dumps( list_files(form) ))
     elif operation == "available":
-        print json.dumps( available_radars(form) ),
+        sys.stdout.write(json.dumps( available_radars(form) ))
     elif operation == "products":
-        print json.dumps( list_products(form) ),
+        sys.stdout.write(json.dumps( list_products(form) ))
     if callback is not None:
-        print ')',
+        sys.stdout.write(')')
 
 if __name__ == "__main__":
     main()
