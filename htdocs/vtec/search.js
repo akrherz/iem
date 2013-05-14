@@ -1,4 +1,7 @@
 Ext.BLANK_IMAGE_URL = '../ext/resources/images/default/s.gif';
+var warnStore;
+var warntable;
+
 function post_to_url(path, params, method) {
      method = method || "post";
      var form = document.createElement("form");
@@ -303,7 +306,6 @@ Ext.onReady(function() {
 					}
 				}]
 			});
-
 	var gp = new Ext.grid.GridPanel({
 			ugc : '',
 				height : 500,
@@ -380,4 +382,161 @@ Ext.onReady(function() {
 	gp.render('mytable');
 	gp.doLayout();
 
+warnStore = new Ext.data.Store({
+				autoLoad : false,
+				proxy : new Ext.data.HttpProxy({
+							url : '/json/sbw_by_point.py'
+						}),
+				reader : new Ext.data.JsonReader({
+							root : 'sbws',
+							id : 'id'
+						}, [{
+									name : 'id',
+									mapping : 'id'
+								}, {
+									name : 'eventid',
+									type : 'float'
+								}, {name: 'wfo'},
+								{
+									name : 'phenomena'
+								}, {
+			name : 'pstring',
+			convert : function(val, record){
+				rec = pDict.getById(record.phenomena);
+				if (rec) {
+					return rec.data.name;
+				} else {
+					return record.phenomena;
+				}
+			}
+		},{
+			name : 'sig_string',
+			convert : function(val, record){
+				rec = sDict.getById(record.significance);
+				if (rec) {
+					return rec.data.name;
+				} else {
+					return record.phenomena;
+				}
+			}
+		},{
+									name : 'significance'
+								}, {
+									name : 'expire',
+									type : 'date',
+									dateFormat : 'Y-m-d\\TH:i\\Z'
+								}, {
+									name : 'issue',
+									type : 'date',
+									dateFormat : 'Y-m-d\\TH:i\\Z'
+								}])
+			});
+
+	
+warntable = new Ext.grid.GridPanel({
+				height : 500,
+				width : 650,
+				title : 'Drag marker on map to load data...',
+				loadMask : {
+					msg : 'Loading Data...'
+				},
+				store : warnStore,
+				tbar : [{
+        id : 'grid-excel-button',
+        icon : '../lsr/icons/excel.png',
+        text : 'Export to Excel...',
+        handler : function() {
+                var xd = warntable.getExcelXml(true);
+                if (Ext.isIE6 || Ext.isIE7 || Ext.isIE8 || Ext.isIE9 || Ext.isSafari
+                                || Ext.isSafari2 || Ext.isSafari3) {
+                        var dataURL = 'exportexcel.php';
+                        params = [{
+                                                name : 'ex',
+                                                value : xd
+                                        }];
+                        post_to_url(dataURL, params, 'post');
+                } else {
+                        document.location = 'data:application/vnd.ms-excel;base64,'+ Base64.encode(xd);
+                }
+        }
+                                }],
+				columns : [{
+							'header' : 'Event ID',
+							dataIndex : 'eventid',
+							width : 50,
+							renderer : function(value, metaData, record){
+								var url = String.format("/vtec/#{0}-O-NEW-K{1}-{2}-{3}-{4}", record.data.issue.format('Y'),
+									record.data.wfo, record.data.phenomena, record.data.significance,
+									String.leftPad(record.data.eventid,4,'0'));
+								return "<a href='"+url+"' target='_blank'>"+ value +"</a>";
+							}
+						}, {
+							'header' : 'Phenomena',
+							sortable : true,
+							dataIndex : 'pstring',
+							width : 150
+						}, {
+							'header' : 'Significance',
+							sortable : true,
+							dataIndex : 'sig_string'
+						}, {
+	header : 'VTEC Phenomena',
+	hidden : true,
+	dataIndex : 'phenomena'
+},{
+	header : 'VTEC Significance',
+	hidden : true,
+	dataIndex : 'significance'
+},{
+							'header' : 'Issued',
+							sortable : true,
+							dataIndex : 'issue',
+							width : 150,
+							renderer : function(value) {
+								return value.fromUTC().format('M d, Y g:i A');
+							}
+						}, {
+							'header' : 'Expired',
+							sortable : true,
+							dataIndex : 'expire',
+							width : 150,
+							renderer : function(value) {
+								return value.fromUTC().format('M d, Y g:i A');
+							}
+						}]
+			});
+	warntable.render('warntable');
+	warntable.doLayout();
+
 });
+
+function updateMarkerPosition(latLng) {
+	warnStore.load({add: false, params: {
+		lon: latLng.lng(),
+		lat: latLng.lat()
+	}});
+	warntable.setTitle( String.format("SBW Events for Lat: {0} Lon: {1}", 
+		latLng.lat().toFixed(4), latLng.lng().toFixed(4) ));
+	//console.log(latLng.lat() +'-'+ latLng.lng());
+}
+function initialize() {
+	var latLng = new google.maps.LatLng(41.53, -93.653);
+	var map = new google.maps.Map(document.getElementById('map'), {
+	    zoom: 5,
+	    center: latLng,
+	    mapTypeId: google.maps.MapTypeId.ROADMAP
+	});
+	  var marker = new google.maps.Marker({
+	    position: latLng,
+	    title: 'Point A',
+	    map: map,
+	    draggable: true
+	});
+	  
+	  google.maps.event.addListener(marker, 'dragend', function() {
+	    updateMarkerPosition(marker.getPosition());
+	  });
+}
+
+// Onload handler to fire off the app.
+google.maps.event.addDomListener(window, 'load', initialize);
