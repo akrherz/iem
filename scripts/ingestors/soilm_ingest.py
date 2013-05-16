@@ -1,6 +1,8 @@
 """
  Ingest ISU SOILM data!
  
+ Run from RUN_10_AFTER.sh 
+ 
  DailySI
  "TIMESTAMP",
  "RECORD",
@@ -60,23 +62,28 @@
 
 
 """
+# stdlib
 import os
-import iemdb
-import iemtz
+import pytz
 import datetime
 import subprocess
 import tempfile
-ISUAG = iemdb.connect('isuag')
+
+# Third party
+import psycopg2
+ISUAG = psycopg2.connect(database='isuag', user='mesonet', host='iemdb')
 icursor = ISUAG.cursor()
 
-STATIONS = {'CAMI4': dict(daily='/mnt/home/mesonet/sm/Calumet/Calumet_DailySI.dat',
-                          hourly='/mnt/home/mesonet/sm/Calumet/Calumet_HrlySI.dat'),
+BASE = '/mnt/home/mesonet/sm/'
+STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
+                          hourly='Calumet/Calumet_HrlySI.dat'),
+            'BOOI4': dict(daily='AEAFarm/AEAFarm_DailySI.dat',
+                          hourly='AEAFarm/AEAFarm_HrlySI.dat'),
             }
 
 def hourly_process(nwsli, maxts):
     """ Process the hourly file """
-    """ Process the daily file """
-    fn = STATIONS[nwsli]['hourly']
+    fn = "%s%s" % (BASE, STATIONS[nwsli]['hourly'])
     if not os.path.isfile(fn):
         return
     lines = open(fn).readlines()
@@ -87,13 +94,13 @@ def hourly_process(nwsli, maxts):
     for col in lines[1].strip().replace('"', '').split(","):
         headers.append(col)
     # Read data
-    for i in range(len(lines)-1,3,-1):
+    for i in range(len(lines)-1, 3, -1):
         tokens = lines[i].strip().replace('"','').split(",")
         if len(tokens) != len(headers):
             continue
         valid = datetime.datetime.strptime(tokens[ headers.index('TIMESTAMP')],
                                            '%Y-%m-%d %H:%M:%S')
-        valid = valid.replace(tzinfo=iemtz.CentralStandard)
+        valid = valid.replace(tzinfo=pytz.FixedOffset(-360))
         if valid <= maxts:
             break
         # We are ready for dbinserting!
@@ -114,7 +121,7 @@ def formatter(v):
 
 def daily_process(nwsli, maxts):
     """ Process the daily file """
-    fn = STATIONS[nwsli]['daily']
+    fn = "%s%s" % (BASE, STATIONS[nwsli]['daily'])
     if not os.path.isfile(fn):
         return
     lines = open(fn).readlines()
@@ -125,7 +132,7 @@ def daily_process(nwsli, maxts):
     for col in lines[1].strip().replace('"', '').split(","):
         headers.append(col)
     # Read data
-    for i in range(len(lines)-1,3,-1):
+    for i in range(len(lines)-1, 3, -1):
         tokens = lines[i].strip().replace('"','').split(",")
         if len(tokens) != len(headers):
             continue
@@ -136,7 +143,7 @@ def daily_process(nwsli, maxts):
             break
         if valid == maxts: # Reprocess
             icursor.execute("""DELETE from sm_daily WHERE valid = '%s' and
-            station = '%s' """ % (valid.strftime("%Y-%m-%d") ,nwsli))
+            station = '%s' """ % (valid.strftime("%Y-%m-%d"), nwsli))
         # We are ready for dbinserting!
         dbcols = "station,valid," + ",".join(headers[2:])
         dbvals = "'%s','%s'," % (nwsli, valid.strftime("%Y-%m-%d"))
@@ -147,16 +154,17 @@ def daily_process(nwsli, maxts):
 
 def get_max_timestamps(nwsli):
     """ Fetch out our max values """
-    data = {'hourly': datetime.datetime(2012,1,1, tzinfo=iemtz.CentralStandard), 
-            'daily': datetime.date(2012,1,1)}
-    icursor.execute("""SELECT max(valid) from sm_daily WHERE station = '%s'""" % (
-                                                                nwsli,))
+    data = {'hourly': datetime.datetime(2012, 1, 1, 
+                                        tzinfo=pytz.FixedOffset(-360)), 
+            'daily': datetime.date(2012, 1, 1)}
+    icursor.execute("""SELECT max(valid) from sm_daily 
+        WHERE station = '%s'""" % (nwsli, ))
     row = icursor.fetchone()
     if row[0] is not None:
         data['daily'] = row[0]
 
-    icursor.execute("""SELECT max(valid) from sm_hourly WHERE station = '%s'""" % (
-                                                                nwsli,))
+    icursor.execute("""SELECT max(valid) from sm_hourly 
+        WHERE station = '%s'""" % (nwsli, ))
     row = icursor.fetchone()
     if row[0] is not None:
         data['hourly'] = row[0]
@@ -210,13 +218,14 @@ def dump_raw_to_ldm(nwsli):
     cmd = "/home/ldm/bin/pqinsert -p 'data c %s csv/isusm/%s_hourly.txt bogus txt' %s" % (
                     datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
                     tmpfn)
-    p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
+    proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
                          stdout=subprocess.PIPE)
-    p.stdout.read()
+    proc.stdout.read()
     os.remove(tmpfn)
 
 
 def main():
+    """ Go main Go """
     for nwsli in STATIONS.keys():
         maxobs = get_max_timestamps(nwsli)
         hourly_process(nwsli, maxobs['hourly'])
