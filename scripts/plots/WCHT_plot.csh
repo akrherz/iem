@@ -1,12 +1,5 @@
 #!/bin/csh
 # 		WCHT_plot.csh
-# Daryl Herzmann 08 Oct 2001
-# 12 Nov 2001:	Ahhh, renamed WCHT_plot.csh
-#  1 Aug 2002:	Why is this getting archived?
-# 11 Nov 2002:	Why isn't it getting archived?
-# 17 Feb 2003:	Update to the GIF driver
-# 16 Oct 2003	Archive!
-########################################################
 
 source /mesonet/nawips/Gemenviron
 
@@ -54,9 +47,6 @@ EOF
 gpend
 
 if (-e wcht.gif) then
-	#~/bin/slogo.csh ~/plots/wcht.gif
-	#cp wcht.gif ~/current
-	#cp wcht.gif ~/archive/wceq_${hh}00.gif
-	#mv wcht.gif WEB/
   /home/ldm/bin/pqinsert -p "plot ac $ftime wcht.gif wceq_${hh}00.gif gif" wcht.gif >& /dev/null
+rm -f wcht.gif
 endif
