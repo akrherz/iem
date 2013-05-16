@@ -1,6 +1,7 @@
 import iemdb
-import mx.DateTime
+import datetime
 import numpy
+import pytz
 ASOS = iemdb.connect('asos', bypass=True)
 acursor = ASOS.cursor()
 #acursor.execute("SET TIME ZONE 'CDT6CST'")
@@ -14,10 +15,10 @@ svalid = []
 sprec = []
 
 acursor.execute("""
- SELECT extract(epoch from (valid at time zone 'CDT')), tmpf, dwpf,
+ SELECT valid, tmpf, dwpf,
  drct, sknt, pres1, gust_sknt, precip,
-  valid at time zone 'CDT' from t2012_1minute WHERE station = 'SGF'
- and valid BETWEEN '2012-04-25 00:00-05' and '2012-04-25 23:59-05' 
+  valid at time zone 'CDT' from t2013_1minute WHERE station = 'SUX'
+ and valid BETWEEN '2013-05-14 0:00' and '2013-05-14 23:59' 
  ORDER by valid ASC
 """)
 for row in acursor:
@@ -29,13 +30,16 @@ for row in acursor:
         pres1.append( row[5] )
         sgust.append( (row[6] or 0) * 1.15)
         sprec.append( float(row[7] or 0) )
-        svalid.append( row[0] )
+        ts = row[0].replace(tzinfo=pytz.timezone('America/Chicago'))
+        svalid.append( ts )
  
-print sgust
+#print sgust
 
-sts = mx.DateTime.DateTime(2012,4,25, 0,0)
-ets = mx.DateTime.DateTime(2012,4,25, 6,1)
-interval = mx.DateTime.RelativeDateTime(hours=1)
+sts = datetime.datetime(2013,5,14, 0,0)
+sts = sts.replace(tzinfo=pytz.timezone("America/Chicago"))
+ets = datetime.datetime(2013,5,15, 0,1)
+ets = ets.replace(tzinfo=pytz.timezone("America/Chicago"))
+interval = datetime.timedelta(hours=1)
 now = sts
 xticks = []
 xlabels = []
@@ -44,10 +48,11 @@ while now <= ets:
     if now == sts or now.hour == 0:
         fmt = "%-I %p\n%-d %B"
     
-    if now == sts or (now.minute == 0 and now.hour % 1 == 0 ):
-        xticks.append( int(now) )
+    if now == sts or (now.minute == 0 and now.hour % 3 == 0 ):
+        xticks.append( now )
         xlabels.append( now.strftime(fmt))
     now += interval
+print xticks
 
 import matplotlib.pyplot as plt
 import matplotlib.font_manager 
@@ -55,7 +60,7 @@ prop = matplotlib.font_manager.FontProperties(size=12)
 
 #fig = plt.figure()
 #fig = plt.figure(figsize=(7.0,9.3))
-fig, axes = plt.subplots(3,1, sharex=True, figsize=(7.0,9.3))
+fig, axes = plt.subplots(2,1, sharex=True, figsize=(7.0,9.3))
 
 axes[0].plot(svalid, stemps, color='r', label="Temperature")
 axes[0].plot(svalid, sdwpf, color='b', label="Dew Point")
@@ -63,42 +68,43 @@ axes[0].set_xticks(xticks)
 axes[0].set_ylabel("Temperature [F]")
 axes[0].set_xticklabels(xlabels)
 axes[0].grid(True)
-axes[0].set_xlim(min(xticks), max(xticks))
-axes[0].legend(loc=2, prop=prop)
+axes[0].set_xlim(xticks[0], xticks[-1])
+axes[0].legend(loc=2, prop=prop, ncol=1)
 #ax.set_ylim(0,10)
-axes[0].set_title("25 Apr 2012 Springfield, MO (KSGF) One Minute Time Series")
+axes[0].set_title("14 May 2013 Sioux City, IA (KSUX) One Minute Time Series")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
 
-axes[1].scatter(svalid, sdrct, color='k')
-axes[1].set_xticks(xticks)
+print len(sdrct), svalid[0]
+axes[1].plot(svalid, sdrct, color='k', linestyle='None', marker='o')
 axes[1].set_ylabel("Wind Direction")
-axes[1].set_xticklabels(xlabels)
 axes[1].grid(True)
-axes[1].set_xlim(min(xticks), max(xticks))
+#axes[1].set_xlim(min(xticks), max(xticks))
 axes[1].set_ylim(0,361)
 axes[1].set_yticks((0,90,180,270,360))
 axes[1].set_yticklabels(('North','East','South','West','North'))
 
 ax2 = axes[1].twinx()
 ax2.plot(svalid, ssknt, color='b', label='Speed')
-ax2.plot(svalid, sgust, color='r', label='Gust')
+#ax2.plot(svalid, sgust, color='r', label='Gust')
 ax2.set_ylabel("Wind Speed [mph]")
 ax2.legend(loc=2, prop=prop)
 
-
+"""
 axes[2].plot(svalid, pres1, color='k')
 axes[2].set_xticks(xticks)
 axes[2].set_ylabel("Pressure Altimeter [in]")
 axes[2].set_xticklabels(xlabels)
 axes[2].grid(True)
-axes[2].set_xlim(min(xticks), max(xticks))
-axes[2].legend(loc=3,ncol=2)
+#axes[2].set_xlim(min(xticks), max(xticks))
+
+axes[2].set_xlim(xticks[0], xticks[-1])
+axes[2].legend(loc=3,ncol=1)
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
-"""
+
 
 ax2 = fig.add_subplot(413)
 #ax2.scatter(valid, temps)
@@ -125,6 +131,6 @@ ax3.set_xlim(min(xticks), max(xticks))
 ax3.set_ylabel("Pressure [inches]")
 ax3.set_xlabel("EDT")
 """
-fig.savefig('test.ps')
+fig.savefig('test.svg')
 import iemplot
 iemplot.makefeature('test')
