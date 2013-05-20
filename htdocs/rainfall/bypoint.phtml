@@ -128,7 +128,7 @@ while (list($k,$v) = each($d))
 	$data .=  sprintf("%s,%5.2f\n", $k, $d[$k]["rain"]);
   }
 }
-//$data .= sprintf("%s %s%4.2f%9s\n", $year, "Total:", $tot, $otot);
+$data .= sprintf("%s,%4.2f,%9s\n", "Total", $tot, $otot);
 
 if ($view == "download")
 {
