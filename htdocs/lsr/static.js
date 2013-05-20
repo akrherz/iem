@@ -721,8 +721,8 @@ lsrGridPanel = new Ext.grid.GridPanel({
 });
 
 lsrGridPanel.getStore().on("load", function(mystore, records, options){
-    if (records.length > 499){
-        Ext.Msg.alert('Warning', 'Request exceeds 500 size limit, sorry.');
+    if (records.length > 2999){
+        Ext.Msg.alert('Warning', 'Request exceeds 3000 size limit, sorry.');
     }
     if (records.length > 0){ 
         map.zoomToExtent( lsrLayer.getDataExtent() );

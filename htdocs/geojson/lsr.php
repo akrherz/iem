@@ -48,7 +48,7 @@ if (isset($_REQUEST["phenomena"])){
       x(geom) as lon, y(geom) as lat 
       FROM lsrs WHERE
       valid BETWEEN $1 and $2 $str_wfo_list
-      LIMIT 500");
+      LIMIT 3000");
 
 	$rs = pg_execute($postgis, "SELECT", Array(date("Y-m-d H:i", $sts), 
                                            date("Y-m-d H:i", $ets) ) );
