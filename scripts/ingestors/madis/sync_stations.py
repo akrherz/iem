@@ -3,25 +3,13 @@ Extract station data from file and update any new stations we find, please
 """
 
 import netCDF4
-import mx.DateTime
 import iemdb
-import os
+import sys
 MESOSITE = iemdb.connect('mesosite', bypass=True)
 mcursor = MESOSITE.cursor()
 
-fp = None
-for i in range(0,9):
-  ts = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=i)
-  testfp = ts.strftime("/mesonet/data/madis/mesonet/%Y%m%d_%H00.nc")
-  if os.path.isfile(testfp):
-    fp = testfp
-    break
-
-if fp is None:
-  sys.exit()
-
-nc = netCDF4.Dataset(fp)
-
+fn = sys.argv[1]
+nc = netCDF4.Dataset(fn)
 
 stations   = nc.variables["stationId"]
 names   = nc.variables["stationName"]
