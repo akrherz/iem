@@ -12,6 +12,8 @@ IEM = iemdb.connect('iem')
 icursor = IEM.cursor()
 import netCDF4
 import numpy
+import warnings
+warnings.simplefilter("ignore", UserWarning)
 
 utcnow = datetime.datetime.utcnow()
 for i in range(10):
