@@ -74,7 +74,7 @@ def processfile( fp ):
         iem.data['tsf1'] = float( data['pave_temp2'] )
     if data.has_key('press') and data['press'] != '':
         iem.data['alti'] = float( data['press'] )
-    if data.has_key('RH') and data['RH'] != '':
+    if data.has_key('RH') and data['RH'] != '' and float(data['RH']) > 1:
         iem.data['dwpf'] = mesonet.dwpf(iem.data['tmpf'], float( data['RH'] ))
     if data.has_key('wind_dir') and data['wind_dir'] != '':
         iem.data['drct'] = float( data['wind_dir'] )
