@@ -1,4 +1,28 @@
 ---
+--- RASTER metadata
+---
+CREATE TABLE raster_metadata(
+  name varchar(64) UNIQUE,
+  description text,
+  archive_start timestamptz,
+  archive_end timestamptz,
+  units varchar(12),
+  interval int
+);
+GRANT SELECT on raster_metadata to nobody,apache;
+
+---
+--- RASTER Lookup Tables
+---
+CREATE TABLE raster_lookup(
+  name varchar(64),
+  coloridx smallint,
+  value real
+);
+CREATE UNIQUE INDEX raster_lookup_idx on raster_lookup(name,coloridx,value);
+GRANT SELECT on raster_lookup to nobody,apache;
+
+---
 --- IEMBot channels
 ---
 CREATE TABLE iembot_channels(
