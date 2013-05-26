@@ -53,6 +53,7 @@ for row in  data[1:]:
         mcursor.execute(sql)
     except:
         mcursor.close()
+        MESOSITE.commit()
         mcursor = MESOSITE.cursor()
         sql = """UPDATE stations SET geom = 'SRID=4326;POINT(%s %s)',
             name = '%s', plot_name = '%s'
