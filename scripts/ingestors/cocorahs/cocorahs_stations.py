@@ -1,6 +1,7 @@
 # Process CoCoRaHS Stations!
 
-import urllib2, os, sys
+import urllib2
+import sys
 import iemdb
 MESOSITE = iemdb.connect('mesosite', bypass=True)
 mcursor = MESOSITE.cursor()
@@ -12,7 +13,8 @@ data = urllib2.urlopen(req).readlines()
 
 # Find current stations
 stations = []
-sql = "SELECT id from stations WHERE network = '%sCOCORAHS' and y(geom) > 0" % (state,)
+sql = """SELECT id from stations WHERE network = '%sCOCORAHS' and y(geom) > 0
+  and name is not null""" % (state,)
 mcursor.execute( sql )
 for row in mcursor:
     stations.append( row[0] )
@@ -27,33 +29,37 @@ if not header.has_key('StationNumber'):
     sys.exit(0)
 
 for row in  data[1:]:
-  cols = row.split(", ")
-  id = cols[ header["StationNumber"] ]
-  if (id in stations):
-    continue
+    cols = row.split(", ")
+    sid = cols[ header["StationNumber"] ]
+    if sid in stations:
+        continue
 
-  name = cols[ header["StationName"] ].strip().replace("'",' ')
-  cnty = cols[ header["County"] ].strip().replace("'",' ')
-  lat = cols[ header["Latitude"] ].strip()
-  lon = cols[ header["Longitude"] ].strip()
+    name = cols[ header["StationName"] ].strip().replace("'",' ')
+    cnty = cols[ header["County"] ].strip().replace("'",' ')
+    lat = cols[ header["Latitude"] ].strip()
+    lon = cols[ header["Longitude"] ].strip()
 
-  if (lat == "0" or lon == "-0"):
-    continue
+    if lat == "0" or lon == "-0":
+        continue
 
-  print "NEW COCORAHS SITE", id, name, cnty, lat, lon
+    print "NEW COCORAHS SITE", sid, name, cnty, lat, lon
   
-  sql = """INSERT into stations(id, synop, name, state, country, network, online,
+    sql = """INSERT into stations(id, synop, name, state, country, network, online,
          geom, county, plot_name , metasite
          ) VALUES ('%s',99999, '%s', '%s', 'US', '%sCOCORAHS', 't',
-         'SRID=4326;POINT(%s %s)', '%s', '%s', 'f')""" % (id, name,
+         'SRID=4326;POINT(%s %s)', '%s', '%s', 'f')""" % (sid, name,
          state, state, lon, lat, cnty, name)
-  try:
-    mcursor.execute(sql)
-  except:
-    sql = """UPDATE stations SET geom = 'SRID=4326;POINT(%s %s)'
+    try:
+        mcursor.execute(sql)
+    except:
+        mcursor.close()
+        mcursor = MESOSITE.cursor()
+        sql = """UPDATE stations SET geom = 'SRID=4326;POINT(%s %s)',
+            name = '%s', plot_name = '%s'
            WHERE id = '%s' and network = '%sCOCORAHS'""" % (lon, lat,
-           id, state)
-    mcursor.execute( sql )
+           name, name, sid, state)
+        mcursor.execute( sql )
+    MESOSITE.commit()
 
 mcursor.close()
 MESOSITE.commit()
