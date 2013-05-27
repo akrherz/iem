@@ -8,20 +8,15 @@ $id = isset($_GET["id"]) ? $_GET["id"] : "KCCI-001";
 if ($id == 'KCWI-001') die();
 if (! $cameras[$id]["active"]) die();
 
-$ip = $cameras[$id]["ip"];
-$cache = "/tmp/". $id ."_cache.jpg";
-/* Test for a cache file */
-if ( is_file($cache) )
-{
-	$now = time();
-	$c = filectime($cache);
-	if ( ($now - $c) < 15 )
-	{
-		header("Content-type: image/jpeg");
-		readfile($cache);
-		die();
-	}
+$memcache = new Memcache;
+$memcache->connect('iem-memcached', 11211);
+$val = $memcache->get("live_". $id);
+if ($val){
+	header("Content-type: image/jpeg");
+	die($val);
 }
+ob_start();
+$ip = $cameras[$id]["ip"];
 
 $u = $camera_user[ $cameras[$id]['network'] ];
 $p = $camera_pass[ $cameras[$id]['network'] ];
@@ -37,8 +32,6 @@ imagestring($im, 5, 15, 465, date("d M Y h:i:s A, ") . $cameras[$id]["name"] ." 
 
 header("Content-type: image/jpeg");
 imagejpeg($im);
-
-/* Write to cache */
-imagejpeg($im, $cache);
-
+$memcache->set("live_". $id, ob_get_contents(), false, 15);
+ob_end_flush();
 ?>
