@@ -4,13 +4,16 @@
 
  $TITLE =  "Live Web Camera Shots";
  $THISPAGE = "webcam-viewer";
+ $HEADEXTRA = "<script src='http://www.openlayers.org/api/2.12/OpenLayers.js'></script>
+ 		<script src='https://maps.googleapis.com/maps/api/js?sensor=false' type='text/javascript'></script>";
  $BODYEXTRA = " onload='init()'";
  include("$rootpath/include/header.php");
 
 ?>
 <script language="javascript">
 // <!--
-
+var map;
+var n0q;
 timeID = null;
 imgurl = "";
 cameraID = "<?php echo $id; ?>";
@@ -59,7 +62,12 @@ function refreshCamera()
 
  timeID = setTimeout("refreshCamera()", 60000);
  window.location.href = '#'+cameraID;
-
+}
+function refreshRADAR(){
+    if (n0q){
+        n0q.moveTo(n0q.map.getExtent(), true);
+    }
+	
 }
 function setCamera(cid){
 	document.getElementById("c"+cid).checked = true;
@@ -74,19 +82,146 @@ function init()
 		setCamera(tokens[1]);
 		refreshCamera();
 	}
+
+	  // Build Map Object
+	  map = new OpenLayers.Map( 'map',{
+	        projection: new OpenLayers.Projection('EPSG:900913'),
+	        displayProjection: new OpenLayers.Projection('EPSG:4326'),
+	        units: 'm',
+	        wrapDateLine: false,
+	        numZoomLevels: 18,
+	        maxResolution: 156543.0339,
+	        maxExtent: new OpenLayers.Bounds(-20037508, -20037508,
+	                                         20037508, 20037508.34)
+	  });
+
+	   var styleMap = new OpenLayers.StyleMap({
+	       'default': {
+	           fillColor: 'black',
+	           strokeColor: 'yellow',
+	           strokeWidth: 2,
+	           pointRadius: 5,
+	           strokeOpacity: 1
+	       },
+	       'select': {
+	          fillOpacity: 1,
+	          strokeColor: 'white',
+	          fillColor: 'red'
+	       }
+	   });
+	   // Traditional Google Map Layer
+	   var googleLayer = new OpenLayers.Layer.Google(
+	                 'Google Streets',
+	                  {'sphericalMercator': true}
+	             );
+	 	   
+	   
+	   jsonlayer = new OpenLayers.Layer.Vector(" Network", {
+           protocol: new OpenLayers.Protocol.HTTP({
+               url: "/geojson/webcam.php?network=TV",
+               format: new OpenLayers.Format.GeoJSON()
+   			}),
+   			projection: new OpenLayers.Projection('EPSG:4326'),
+   			styleMap: styleMap,
+   			strategies: [new OpenLayers.Strategy.Fixed()]
+   		});
+	   jsonlayer.events.register('loadend', jsonlayer, function() {
+		     var e = jsonlayer.getDataExtent();
+		     map.setCenter( e.getCenterLonLat(), jsonlayer.getZoomForExtent(e,false));
+		   });
+		  		
+	   function get_my_url (bounds) {
+		    var res = this.map.getResolution();
+		    var x = Math.round ((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
+		    var y = Math.round ((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
+		    var z = this.map.getZoom();
+
+		    var path = z + "/" + x + "/" + y + "." + this.type +"?"+ parseInt(Math.random()*9999);
+		    var url = this.url;
+		    if (url instanceof Array) {
+		        url = this.selectUrl(path, url);
+		    }
+		    return url + this.service +"/"+ this.layername +"/"+ path;
+
+		}
+	   n0q = new OpenLayers.Layer.TMS(
+		        'NEXRAD Base Reflectivity',
+		        'http://mesonet.agron.iastate.edu/cache/tile.py/',
+		        {layername      : 'nexrad-n0q-900913',
+		        service         : '1.0.0',
+		        type            : 'png',
+		        visibility      : true,
+		        getURL          : get_my_url,
+		        isBaseLayer     : false}
+		);
+	    map.addLayers([googleLayer, jsonlayer, n0q]);
+
+	    function cb_siteOver(feature){
+	    	  setCamera( feature.data.cid );
+	    	  refreshCamera();
+	    };
+
+	   	function cb_siteOut(feature){
+	    };
+	    		    
+	    
+	    selectControl = new OpenLayers.Control.SelectFeature(jsonlayer, {
+			       onSelect: cb_siteOver, 
+			       onUnselect: cb_siteOut
+	    });
+	    map.addControl(selectControl);
+	    selectControl.activate();
+
+	    map.addControl( new OpenLayers.Control.LayerSwitcher({id:'ls'}) );
+	    map.addControl( new OpenLayers.Control.MousePosition() );
+	 	    
+    window.setInterval(150000, refreshRADAR);
 }
 
-
+function switchRADAR(){
+	for (var i=0; i < document.radar.nexrad.length; i++)
+	{
+		if (document.radar.nexrad[i].checked)
+		{
+			n0q.layername = document.radar.nexrad[i].value;
+			refreshRADAR();
+		}
+	}
+}
 // -->
 </script>
 
-<div style="width: 660px;">
+<table>
+<tr><td valign="top">
 
 <div style="float: left; z-index: 2; border: 10px #000 solid;">
 <img name="camera" src="http://mesonet.agron.iastate.edu/data/camera/640x480/<?php echo $id; ?>.jpg" />
 </div>
 
-</div>
+</td><td valign="top">
+
+<div style="width: 640px; height: 480px;" id="map"></div>
+<br /><form name="radar">
+<input type="radio" name="nexrad" value="nexrad-n0q-900913"
+             onclick="switchRADAR()" checked="checked">US Composite</input>
+<input type="radio" name="nexrad" value="ridge::DVN-N0Q-0"
+             onclick="switchRADAR()">Davenport Reflectivity</input>
+<input type="radio" name="nexrad" value="ridge::DVN-N0U-0"
+             onclick="switchRADAR()">Davenport Velocity</input>
+<input type="radio" name="nexrad" value="ridge::DMX-N0Q-0"
+             onclick="switchRADAR()">Des Moines Reflectivity</input>
+<input type="radio" name="nexrad" value="ridge::DMX-N0U-0"
+             onclick="switchRADAR()">Des Moines Velocity</input>
+<input type="radio" name="nexrad" value="ridge::ARX-N0Q-0"
+             onclick="switchRADAR()">LaCrosse Reflectivity</input>
+<input type="radio" name="nexrad" value="ridge::ARX-N0U-0"
+             onclick="switchRADAR()">LaCrosse Velocity</input>
+<input type="radio" name="nexrad" value="ridge::FSD-N0Q-0"
+             onclick="switchRADAR()">Sioux Falls Reflectivity</input>
+<input type="radio" name="nexrad" value="ridge::FSD-N0U-0"
+             onclick="switchRADAR()">Sioux Falls Velocity</input>
+</form>
+</td></tr></table>
 
 <br clear="all" />
 
