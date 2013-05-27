@@ -16,7 +16,6 @@ var map;
 var n0q;
 var jsonlayer;
 var selectControl;
-imgurl = "";
 cameraID = "<?php echo $id; ?>";
 ts = null;
 aqlive = 0;
@@ -34,17 +33,8 @@ function liveShot()
 {
 	if (aqlive) return;
 	aqlive = true;
- //cameraID = document.main.id[ document.main.id.selectedIndex ].value;
-	for (var i=0; i < document.main.id.length; i++)
-	{
-		if (document.main.id[i].checked)
-		{
-			cameraID = document.main.id[i].value;
-		}
-	}
 	ts = new Date();
-	imgurl = "live.php?id="+ cameraID +"&"+ ts.getTime();
-	document.camera.src = imgurl;
+	document.camera.src = "live.php?id="+ cameraID +"&"+ ts.getTime();
 	aqlive = false;
 }
 function setCameraFromForm(){
