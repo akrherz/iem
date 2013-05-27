@@ -14,6 +14,12 @@ if ($ts > 0){
     from camera_log c, webcams w
     WHERE valid = '%s' and c.cam = w.id and w.network = '%s' ORDER by name ASC", 
     date('Y-m-d H:i', $ts), $network) );
+} else if ($network == 'TV'){
+	$result = pg_exec($connect, "SELECT *, x(geom) as lon, y(geom) as lat
+			from camera_current c, webcams w
+			WHERE valid > (now() - '15 minutes'::interval)
+			and c.cam = w.id and w.network in ('KCCI','KELO','KCRG')
+			ORDER by name ASC");
 } else {
   $result = pg_exec($connect, "SELECT *, x(geom) as lon, y(geom) as lat
   from camera_current c, webcams w 
