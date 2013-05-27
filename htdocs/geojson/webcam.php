@@ -36,7 +36,8 @@ $ar = Array("type"=>"FeatureCollection",
       "features" => Array()
 );
 
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
+
+for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
 {
   if ($ts > 0){
     $url = sprintf("http://mesonet.agron.iastate.edu/archive/data/%s/camera/%s/%s_%s.jpg", gmdate("Y/m/d", $ts), $row["cam"], $row["cam"], gmdate("YmdHi", $ts) );
@@ -49,6 +50,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
                "name" => $row["name"], 
                "county" => $row["county"], 
                "state" => $row["state"], 
+             	"angle" => $row["drct"],
                "url" => $url
               ),
              "geometry"=>Array("type"=>"Point",

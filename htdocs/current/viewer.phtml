@@ -14,22 +14,26 @@
 // <!--
 var map;
 var n0q;
-timeID = null;
+var jsonlayer;
+var selectControl;
 imgurl = "";
 cameraID = "<?php echo $id; ?>";
 ts = null;
 aqlive = 0;
 showlogo = 1;
 
-function stop()
-{
-	clearTimeout(timeID);
+function selectMapFeature(){
+	selectControl.unselectAll();
+	jsonlayer.features.forEach(function(feat){
+		if (feat.data.cid == cameraID){
+			selectControl.select(feat);
+		}
+	});
 }
 function liveShot()
 {
 	if (aqlive) return;
 	aqlive = true;
-	stop();
  //cameraID = document.main.id[ document.main.id.selectedIndex ].value;
 	for (var i=0; i < document.main.id.length; i++)
 	{
@@ -42,46 +46,51 @@ function liveShot()
 	imgurl = "live.php?id="+ cameraID +"&"+ ts.getTime();
 	document.camera.src = imgurl;
 	aqlive = false;
-	timeID = setTimeout("refreshCamera()", 60000);
 }
-
-function refreshCamera()
-{
-	stop();
- //cameraID = document.main.id[ document.main.id.selectedIndex ].value;
+function setCameraFromForm(){
 	for (var i=0; i < document.main.id.length; i++)
 	{
 		if (document.main.id[i].checked)
 		{
-			cameraID = document.main.id[i].value;
+			setCamera( document.main.id[i].value );
 		}
 	}
- ts = new Date();
- imgurl = "http://mesonet.agron.iastate.edu/data/camera/640x480/"+ cameraID +".jpg?"+ ts.getTime();
- document.camera.src = imgurl;
-
- timeID = setTimeout("refreshCamera()", 60000);
- window.location.href = '#'+cameraID;
+	selectMapFeature();
+}
+function updateHREF(){
+	window.location.href = '#'+cameraID;
+}
+function refreshCamera()
+{
+    ts = new Date();
+    imgurl = "http://mesonet.agron.iastate.edu/data/camera/640x480/"+ cameraID +".jpg?"+ ts.getTime();
+    document.camera.src = imgurl;
 }
 function refreshRADAR(){
     if (n0q){
-        n0q.moveTo(n0q.map.getExtent(), true);
+        n0q.redraw(true);
     }
-	
+}
+function refreshJSON(){
+	if (! jsonlayer.firstLoad){
+	    jsonLayer.refresh(true);
+	}
 }
 function setCamera(cid){
+	//console.log("setCamera() called");
 	document.getElementById("c"+cid).checked = true;
-	cameraId = cid;	
+	cameraID = cid;	
+	updateHREF();
+	refreshCamera();
 }
+function cb_siteOver(feature){
+	if (cameraID != feature.data.cid){
+		setCamera( feature.data.cid );  
+	}
+};
 function init()
 {
-	timeID = setTimeout("refreshCamera()", 60000);
 
-	var tokens = window.location.href.split('#');
-	if (tokens.length == 2){
-		setCamera(tokens[1]);
-		refreshCamera();
-	}
 
 	  // Build Map Object
 	  map = new OpenLayers.Map( 'map',{
@@ -97,16 +106,13 @@ function init()
 
 	   var styleMap = new OpenLayers.StyleMap({
 	       'default': {
-	           fillColor: 'black',
-	           strokeColor: 'yellow',
-	           strokeWidth: 2,
-	           pointRadius: 5,
+	    	   externalGraphic: "/images/yellow_arrow.png",
+               graphicHeight: 20,
+               rotation: "${angle}",
 	           strokeOpacity: 1
 	       },
 	       'select': {
-	          fillOpacity: 1,
-	          strokeColor: 'white',
-	          fillColor: 'red'
+	          graphicHeight: 30
 	       }
 	   });
 	   // Traditional Google Map Layer
@@ -123,12 +129,17 @@ function init()
    			}),
    			projection: new OpenLayers.Projection('EPSG:4326'),
    			styleMap: styleMap,
+			firstLoad : true,
    			strategies: [new OpenLayers.Strategy.Fixed()]
    		});
 	   jsonlayer.events.register('loadend', jsonlayer, function() {
-		     var e = jsonlayer.getDataExtent();
-		     map.setCenter( e.getCenterLonLat(), jsonlayer.getZoomForExtent(e,false));
-		   });
+			if (jsonlayer.firstLoad){
+		     	var e = jsonlayer.getDataExtent();
+		     	map.setCenter( e.getCenterLonLat(), jsonlayer.getZoomForExtent(e,false));
+				jsonlayer.firstLoad = false;
+			}
+			selectMapFeature();
+		});
 		  		
 	   function get_my_url (bounds) {
 		    var res = this.map.getResolution();
@@ -156,26 +167,28 @@ function init()
 		);
 	    map.addLayers([googleLayer, jsonlayer, n0q]);
 
-	    function cb_siteOver(feature){
-	    	  setCamera( feature.data.cid );
-	    	  refreshCamera();
-	    };
 
-	   	function cb_siteOut(feature){
-	    };
-	    		    
-	    
+
+
+	    			    
 	    selectControl = new OpenLayers.Control.SelectFeature(jsonlayer, {
-			       onSelect: cb_siteOver, 
-			       onUnselect: cb_siteOut
+			       onSelect: cb_siteOver
 	    });
 	    map.addControl(selectControl);
 	    selectControl.activate();
 
 	    map.addControl( new OpenLayers.Control.LayerSwitcher({id:'ls'}) );
 	    map.addControl( new OpenLayers.Control.MousePosition() );
-	 	    
+
+	var tokens = window.location.href.split('#');
+	if (tokens.length == 2){
+		setCamera(tokens[1]);
+		
+	}
+ 	    
     window.setInterval(150000, refreshRADAR);
+    window.setInterval(60000, refreshCamera);
+    window.setInterval(65000, refreshJSON);
 }
 
 function switchRADAR(){
@@ -200,7 +213,7 @@ function switchRADAR(){
 
 </td><td valign="top">
 
-<div style="width: 640px; height: 480px;" id="map"></div>
+<div style="width: 640px; height: 400px;" id="map"></div>
 <br /><form name="radar">
 <input type="radio" name="nexrad" value="nexrad-n0q-900913"
              onclick="switchRADAR()" checked="checked">US Composite</input>
@@ -236,7 +249,7 @@ while (list($cid, $v) = each($cameras) ) {
     if ($cnt % 5 == 0){ echo "<tr>"; }
 	echo "<td><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
 	if ($cid == $id) { echo "checked=\"checked\""; }
-	echo " onClick=\"refreshCamera();\">". $v["name"] ."</td>\n";
+	echo " onClick=\"setCameraFromForm();\">". $v["name"] ."</td>\n";
     $cnt += 1;
  }
 } 
