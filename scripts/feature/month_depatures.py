@@ -16,8 +16,8 @@ elnino = numpy.array(elnino)
 
 climate = []
 ccursor.execute("""
- SELECT avg(d), month from (SELECT year, month, avg((high+low)/2.0) as d from alldata_ia 
- where station = 'IA2203' and day < '2012-12-01'
+ SELECT avg(d), month from (SELECT year, month, sum(precip) as d from alldata_ia 
+ where station = 'IA0200' and day < '2013-01-01'
  GROUP by year, month) as foo GROUP by month ORDER by month ASC
 """)
 for row in ccursor:
@@ -25,22 +25,19 @@ for row in ccursor:
 
 diff = []
 ccursor.execute("""
- SELECT year, month, avg((high+low)/2.0) from alldata_ia where 
- station = 'IA2203' and year > 2006 
+ SELECT year, month, sum(precip) from alldata_ia where 
+ station = 'IA0200' and year > 2006 
  GROUP by year, month ORDER by year, month ASC
 """)
 for row in ccursor:
-    if row[0] == 2012 and row[1] == 18:
-        diff.append( row[2] - august )
-    else:
-        diff.append( float(row[2]) - climate[ row[1] -1] )
+    diff.append( float(row[2]) - climate[ row[1] -1] )
 
 diff = numpy.array(diff)
 
 import matplotlib.pyplot as plt
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.set_title("Des Moines Monthly Average Temperature Departure\nEl Nino 3.4 Index")
+ax.set_title("Ames Monthly Precipitation Departure\nEl Nino 3.4 Index")
 #"""
 xticks = []
 xticklabels = []
@@ -53,24 +50,24 @@ for i in range(0, len(diff),6):
   xticklabels.append( ts.strftime(fmt) )
   xticks.append( i )
 
-bars = ax.bar(numpy.arange(0, len(diff))-0.4, diff, fc='r', ec='r')
+bars = ax.bar(numpy.arange(0, len(diff))-0.4, diff, fc='b', ec='b')
 for bar in bars:
   if bar.get_xy()[1] < 0:
-    bar.set_facecolor('b')
-    bar.set_edgecolor('b')
+    bar.set_facecolor('r')
+    bar.set_edgecolor('r')
 
 ax2 = ax.twinx()
 
-ax2.plot(numpy.arange(0, len(elnino)), elnino, zorder=2, color='k')
+ax2.plot(numpy.arange(0, len(elnino)), elnino, zorder=2, color='k', lw=2.0)
 ax2.set_ylabel("El Nino 3.4 Index (line)")
 
-ax.set_ylabel("Departure $^{\circ}\mathrm{F}$ (bars)")
-ax.set_xlabel("* Thru 30 November")
+ax.set_ylabel("Precip Departure [inch] (bars)")
+ax.set_xlabel("* Thru 28 May 2013")
 ax.grid(True)
 ax.set_xticks( xticks )
 ax.set_xticklabels( xticklabels )
 ax.set_xlim(-0.5, len(diff)+0.5)
-ax.set_ylim(-20,20)
+ax.set_ylim(-8,8)
 """
 import scipy.stats
 for i in range(0,12):
@@ -78,6 +75,6 @@ for i in range(0,12):
     print i, numpy.corrcoef(diff[i:-2], elnino[:-(i+1)])[0,1]
 #ax.scatter(diff[2:], elnino[:-1])
 """
-fig.savefig('test.ps')
+fig.savefig('test.svg')
 import iemplot
 iemplot.makefeature('test')
