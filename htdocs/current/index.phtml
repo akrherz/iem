@@ -8,9 +8,9 @@ include("../../config/settings.inc.php");
 <table width="800px">
 <tr><th>IEM Station Plot</th><th>Current Temperatures</th><th>Rainfall Today</th></tr>
 <tr>
-<td><a href="/timemachine/#1.0"><img src="../data/mesonet.gif" border="0" width="275"/></a></td>
-<td><a href="/data/iowa_tmpf.png"><img src="../data/iowa_tmpf.png" border="0" width="275"/></a></td>
-<td><a href="/timemachine/#45.0"><img src="../data/iowa_q2_1d.png" border="0" width="275"/></a></td>
+<td><a href="/timemachine/#1.0"><img src="/data/mesonet.gif" border="0" width="275"/></a></td>
+<td><a href="/data/iowa_tmpf.png"><img src="/data/iowa_tmpf.png" border="0" width="275"/></a></td>
+<td><a href="/timemachine/#45.<?php echo sprintf("%s0000", date("Ymd"));?>"><img src="/data/iowa_q2_1d.png" border="0" width="275"/></a></td>
 </tr>
 </table>
 
