@@ -4,7 +4,7 @@ Need something to daily QC the schoolnet precipitation against iemre I guess
 import iemdb
 import psycopg2.extras
 import sys
-import iemre
+from pyiem import iemre
 import netCDF4
 import mx.DateTime
 import numpy

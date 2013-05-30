@@ -1,6 +1,6 @@
 # Generate the IEMRE hourly analysis file for a year
 
-import iemre
+from pyiem import iemre
 import netCDF4
 import datetime
 import numpy

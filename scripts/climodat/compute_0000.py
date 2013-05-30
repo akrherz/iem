@@ -2,20 +2,21 @@
 Compute the statewide average data based on IEMRE analysis
 """
 import netCDF4
-import iemdb
+import psycopg2
 import numpy
-import iemre
-from pyiem import datatypes
+from pyiem import datatypes, iemre
 import sys
-import mx.DateTime
-COOP = iemdb.connect("coop", bypass=True)
+import datetime
+
+COOP = psycopg2.connect(database="coop", host='iemdb', user='nobody')
 ccursor = COOP.cursor()
-POSTGIS = iemdb.connect("postgis", bypass=True)
+POSTGIS = psycopg2.connect(database="postgis", host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor()
 
 def do_day(valid):
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (valid.year,))
-    for state in ('NE', 'IA','MN','WI','MI','OH','IN','IL','MO','KS','KY','ND','SD'):
+    for state in ('IA', 'NE', 'MN', 'WI', 'MI', 'OH', 'IN', 'IL', 'MO',
+                  'KS', 'KY', 'ND', 'SD'):
         do_state_day(state, valid, nc)
         do_climdiv_day(state, valid, nc)
     nc.close()
@@ -24,33 +25,32 @@ def do_climdiv_day(stabbr, valid, nc):
     """
     Compute the virtual climate division data as well
     """
-    pcursor.execute("""
-    SELECT stdiv_, xmin(ST_Extent(the_geom)), xmax(ST_Extent(the_geom)), 
-    ymin(ST_Extent(the_geom)), ymax(ST_Extent(the_geom)) from climate_div
-    where st = %s GROUP by stdiv_
-    """, (stabbr,))
-    for row in pcursor:
-        stid = "%sC0%s" % (stabbr, str(row[0])[-2:])
-        (ll_i, ll_j) = iemre.find_ij(row[1], row[3])
-        (ur_i, ur_j) = iemre.find_ij(row[2], row[4])
-            # Open IEMRE
+    sw_nc = netCDF4.Dataset("/mesonet/data/iemre/climdiv_weights.nc")
+    for varname in sw_nc.variables.keys():
+        if varname in ['lat', 'lon', 'time']:
+            continue
+        if varname[:2] != stabbr:
+            continue
+        stid = varname
+        sw = sw_nc.variables[stid]
         
-        tcnt = int((valid - mx.DateTime.DateTime(valid.year,1,1)).days)
+        tcnt = iemre.hourly_offset(valid)
+        hk = nc.variables['high_tmpk'][tcnt]
+        high_tmpk = hk[sw > 0]
+        high = datatypes.temperature( numpy.average(high_tmpk), 'K').valid("F")
     
-        high_tmpk = nc.variables['high_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
-        high = datatypes.temperature( numpy.average(high_tmpk), 'K')
-        high = high.value("F")
+        lk = nc.variables['low_tmpk'][tcnt]
+        low_tmpk = lk[sw > 0]
+        low = datatypes.temperature( numpy.average(low_tmpk), 'K').value("F")
     
-        low_tmpk = nc.variables['low_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
-        low = datatypes.temperature( numpy.average(low_tmpk), 'K')
-        low = low.value("F")
-    
-        p01d = nc.variables['p01d'][tcnt,ll_j:ur_j,ll_i:ur_i]
+        p01d = nc.variables['p01d'][tcnt]
+        p01d = p01d[sw > 0]
         precip = numpy.average(p01d) / 25.4
         if precip < 0:
             precip = 0
         
-        print '%s %s High: %5.1f Low: %5.1f Precip: %4.2f' % (stid, valid.strftime("%Y-%m-%d"),
+        print '%s %s High: %5.1f Low: %5.1f Precip: %4.2f' % (stid, 
+                                                    valid.strftime("%Y-%m-%d"),
                                                     high, low, precip)
 
         # Now we insert into the proper database!
@@ -63,6 +63,8 @@ def do_climdiv_day(stabbr, valid, nc):
         VALUES ('%s', '%s', %.0f, %.0f, %.2f, %.1f, 0, true, %s, %s, '%s')""" % (
         stabbr, stid, valid.strftime("%Y-%m-%d"), high, low, precip, 
         0, valid.year, valid.month, valid.strftime("%m%d")))
+
+    sw_nc.close()
 
 def do_state_day(stabbr, valid, nc):
     """
@@ -79,15 +81,13 @@ def do_state_day(stabbr, valid, nc):
     (ur_i, ur_j) = iemre.find_ij(row[1], row[3])
 
     # Open IEMRE
-    tcnt = int((valid - mx.DateTime.DateTime(valid.year,1,1)).days)
-
+    tcnt = iemre.daily_offset(valid)
+    
     high_tmpk = nc.variables['high_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
-    high = datatypes.temperature( numpy.average(high_tmpk), 'K')
-    high = high.value("F")
+    high = datatypes.temperature( numpy.average(high_tmpk), 'K').value("F")
 
     low_tmpk = nc.variables['low_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
-    low = datatypes.temperature( numpy.average(low_tmpk), 'K')
-    low = low.value("F")
+    low = datatypes.temperature( numpy.average(low_tmpk), 'K').value("F")
 
     p01d = nc.variables['p01d'][tcnt,ll_j:ur_j,ll_i:ur_i]
     precip = numpy.average(p01d) / 25.4
@@ -95,8 +95,31 @@ def do_state_day(stabbr, valid, nc):
         precip = 0
     
     
-    print '%s %s High: %5.1f Low: %5.1f Precip: %4.2f' % (stabbr, valid.strftime("%Y-%m-%d"),
+    print '%s %s OLD High: %5.1f Low: %5.1f Precip: %4.2f' % (stabbr, 
+                                                    valid.strftime("%Y-%m-%d"),
                                                 high, low, precip)
+    
+    # get state weights
+    sw_nc = netCDF4.Dataset("/mesonet/data/iemre/state_weights.nc")
+    sw = sw_nc.variables[stabbr][:]
+    sw_nc.close()
+    
+    hk = nc.variables['high_tmpk'][tcnt]
+    high_tmpk = hk[sw>0]
+    high = datatypes.temperature( numpy.average(high_tmpk), 'K').value("F")
+
+    lk = nc.variables['low_tmpk'][tcnt]
+    low_tmpk = lk[sw>0]
+    low = datatypes.temperature( numpy.average(low_tmpk), 'K').value("F")
+    
+    pk = nc.variables['p01d'][tcnt]
+    p01d = pk[sw>0]
+    precip = numpy.average(p01d) / 25.4
+
+    print '%s %s NEW High: %5.1f Low: %5.1f Precip: %4.2f' % (stabbr, 
+                                                    valid.strftime("%Y-%m-%d"),
+                                                high, low, precip)
+
     
     # Now we insert into the proper database!
     ccursor.execute("""DELETE from alldata_%s WHERE station = '%s0000' 
@@ -111,16 +134,17 @@ def do_state_day(stabbr, valid, nc):
     
 if __name__ == '__main__':
     if len(sys.argv) == 4:
-        do_day( mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
+        do_day( datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
     elif len(sys.argv) == 3:
-        sts = mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), 1)
-        ets = sts + mx.DateTime.RelativeDateTime(months=1)
+        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1)
+        ets = sts + datetime.timedelta(days=35)
+        ets = ets.replace(day=1)
         now = sts
         while now < ets:
             do_day( now )
-            now += mx.DateTime.RelativeDateTime(days=1)
+            now += datetime.timedelta(days=1)
     else:
-        do_day( mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1))
+        do_day( datetime.datetime.now() - datetime.timedelta(days=1))
     
     ccursor.close()
     COOP.commit()

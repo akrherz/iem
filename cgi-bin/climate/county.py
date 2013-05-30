@@ -13,7 +13,7 @@ import datetime
 from iem import plot 
 
 import iemplot
-import iemre
+from pyiem import iemre
 
 maue = plot.maue(15)
 bins = [0,0.1,0.25,0.5,0.75,1,2,3,4,5,6,7,8,9,10,15]
@@ -51,8 +51,8 @@ def get_xy(mylon, mylat):
     y = int((mylat - lat0) / dy)
     return x,y
     
-idx = iemre.day_idx( datetime.datetime(2012,3,1,1,5) )
-idx2 = iemre.day_idx( datetime.datetime(2012,4,1,1,5) )
+idx = iemre.daily_offset( datetime.datetime(2012,3,1,1,5) )
+idx2 = iemre.daily_offset( datetime.datetime(2012,4,1,1,5) )
 precip = numpy.sum(nc.variables['p01d'][idx:idx2,:,:],0) / 25.4
 maxvalue = numpy.max(precip)
 m = plot.MapPlot() 

@@ -27,7 +27,7 @@ Steps:
  5) Run estimate for Iowa Average Site (ia0000)
 """
 import sys, os
-import iemre
+from pyiem import iemre
 import network
 import iemplot
 import mx.DateTime

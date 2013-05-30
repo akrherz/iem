@@ -1,62 +1,56 @@
 #!/usr/bin/env python
-
 import sys
-sys.path.insert(1, "/mesonet/www/apps/iemwebsite/scripts/lib/")
 import os
 import cgi
-import iemre
-try:
-    import netCDF3
-except:
-    import netCDF4 as netCDF3
-import mx.DateTime
+from pyiem import iemre, datatypes
+import netCDF4
+import datetime
 import json
 import numpy
 import shapelib
 import dbflib
 import shutil
 import zipfile
-import mesonet
+import psycopg2
 
 os.chdir("/tmp")
 
 form = cgi.FormContent()
-ts0 = mx.DateTime.strptime( form["date0"][0], "%Y-%m-%d")
-ts1 = mx.DateTime.strptime( form["date1"][0], "%Y-%m-%d")
+ts0 = datetime.datetime.strptime( form["date0"][0], "%Y-%m-%d")
+ts1 = datetime.datetime.strptime( form["date1"][0], "%Y-%m-%d")
 base = int(form["base"][0])
 ceil = int(form["ceil"][0])
 # Make sure we aren't in the future
-tsend = mx.DateTime.today()
+tsend = datetime.date.today()
 if ts1 >= tsend:
-    ts1 = tsend - mx.DateTime.RelativeDateTime(days=1)
-format = form["format"][0]
+    ts1 = tsend - datetime.timedelta(days=1)
+fmt = form["format"][0]
 
-offset0 = int((ts0 - (ts0 + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
-offset1 = int((ts1 - (ts1 + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
+offset0 = iemre.daily_offset(ts0)
+offset1 = iemre.daily_offset(ts1)
 
 
 fp = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts0.year,)
-nc = netCDF3.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts0.year,), 'r')
+nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts0.year,), 'r')
 
 # 2-D precipitation, inches
 precip = numpy.sum(nc.variables['p01d'][offset0:offset1,:,:] / 25.4, axis=0)
 
 # GDD
-H = mesonet.k2f(nc.variables['high_tmpk'][offset0:offset1])
+H = datatypes.temperature(nc.variables['high_tmpk'][offset0:offset1], 'K').value("F")
 H = numpy.where( H < base, base, H)
 H = numpy.where( H > ceil, ceil, H)
-L = mesonet.k2f(nc.variables['low_tmpk'][offset0:offset1])
+L = datatypes.temperature(nc.variables['low_tmpk'][offset0:offset1], 'K').value("F")
 L = numpy.where( L < base, base, L)
 gdd = numpy.sum((H+L)/2.0 - base, axis=0)
 
 nc.close()
 
-if format == 'json':
+if fmt == 'json':
     # For example: 19013
     ugc = "IAC"+ form["county"][0][2:]
     # Go figure out where this is!
-    import iemdb
-    postgis = iemdb.connect('postgis', bypass=True)
+    postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     pcursor = postgis.cursor()
     pcursor.execute("""
     SELECT x(ST_Centroid(geom)), y(ST_Centroid(geom)) from nws_ugc WHERE
@@ -75,8 +69,8 @@ if format == 'json':
     'latitude': "%.4f" % (lat,),
     'longitude': "%.4f" % (lon,)
        })
-    print 'Content-type: text/plain\n'
-    print json.dumps( res )
+    sys.stdout.write('Content-type: application/json\n\n')
+    sys.stdout.write( json.dumps( res ) )
 
 if format == 'shp':
     # Time to create the shapefiles
@@ -84,11 +78,11 @@ if format == 'shp':
     shp = shapelib.create("%s.shp" % (fp,), shapelib.SHPT_POLYGON)
     
     for x in iemre.XAXIS:
-      for y in iemre.YAXIS:
-        obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1,
+        for y in iemre.YAXIS:
+            obj = shapelib.SHPObject(shapelib.SHPT_POLYGON, 1,
            [[(x,y),(x,y+iemre.DY),(x+iemre.DX,y+iemre.DY),
              (x+iemre.DX,y),(x,y)]])
-        shp.write_object(-1, obj)
+            shp.write_object(-1, obj)
     
     del(shp)
     dbf = dbflib.create(fp)
@@ -97,9 +91,9 @@ if format == 'shp':
     
     cnt = 0
     for i in range(len(iemre.XAXIS)):
-      for j in range(len(iemre.YAXIS)):
-        dbf.write_record(cnt, {'PREC_IN': precip[j,i], 'GDD': gdd[j,i]})
-        cnt += 1
+        for j in range(len(iemre.YAXIS)):
+            dbf.write_record(cnt, {'PREC_IN': precip[j,i], 'GDD': gdd[j,i]})
+            cnt += 1
     
     del(dbf)
     

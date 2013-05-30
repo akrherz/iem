@@ -3,13 +3,13 @@ We need to use the QC'd 24h 12z total to fix the 1h problems :(
 """
 
 import Nio
-import mx.DateTime
+import datetime
 import Ngl
 import numpy
-import iemre
-import os
+from pyiem import iemre
 import sys
 import netCDF4
+import pytz
 
 def merge(ts):
     """
@@ -33,31 +33,32 @@ def merge(ts):
 
     # Open up our RE file
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,),'a')
-    ts0 = ts + mx.DateTime.RelativeDateTime(days=-1)
-    jan1 = mx.DateTime.DateTime(ts.year, 1, 1, 0, 0)
-    offset0 = int(( ts0 - jan1).hours)
-    offset1 = int(( ts -  jan1).hours)
-    if offset0 < 0:
+    ts0 = ts - datetime.timedelta(days=1)
+    offset0 = iemre.hourly_offset(ts0)
+    offset1 = iemre.hourly_offset(ts)
+    # Running at 12 UTC 1 Jan
+    if offset0 > offset1:
         offset0 = 0
-    iemre2 = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
-    
-    iemre2 = numpy.where( iemre2 > 0., iemre2, 0.00024)
-    iemre2 = numpy.where( iemre2 < 10000., iemre2, 0.00024)
+    iemre_total = numpy.sum(nc.variables["p01m"][offset0:offset1,:,:], axis=0)
+    iemre_total = numpy.where( iemre_total > 0., iemre_total, 0.00024)
+    iemre_total = numpy.where( iemre_total < 10000., iemre_total, 0.00024)
     print "Stage IV 24h [Avg %5.2f Max %5.2f]  IEMRE Hourly [Avg %5.2f Max: %5.2f]" % (
                     numpy.average(stage4), numpy.max(stage4), 
-                    numpy.average(iemre2), numpy.max(iemre2) )
-    multiplier = stage4 / iemre2
+                    numpy.average(iemre_total), numpy.max(iemre_total) )
+    multiplier = stage4 / iemre_total
     print "Multiplier MIN: %5.2f  AVG: %5.2f  MAX: %5.2f" % (
                     numpy.min(multiplier), numpy.average(multiplier),numpy.max(multiplier))
     for offset in range(offset0, offset1):
+        # Get the unmasked dadta
         data  = nc.variables["p01m"][offset,:,:]
         
         # Keep data within reason
         data = numpy.where( data > 10000., 0., data)
+        # 0.00024 / 24
         adjust = numpy.where( data > 0, data, 0.00001) * multiplier
         adjust = numpy.where( adjust > 250.0, 0, adjust)
         nc.variables["p01m"][offset,:,:] = numpy.where( adjust < 0.01, 0, adjust)
-        ts = jan1 + mx.DateTime.RelativeDateTime(hours=offset)
+        ts = ts0 + datetime.timedelta(hours=offset-offset0)
         print "%s IEMRE %5.2f %5.2f Adjusted %5.2f %5.2f" % (ts.strftime("%Y-%m-%d %H"), 
                                     numpy.average(data), numpy.max(data),
                                     numpy.average(nc.variables["p01m"][offset]),
@@ -71,9 +72,12 @@ def merge(ts):
 
 if __name__ == "__main__":
     if len(sys.argv) == 4:
-        ts = mx.DateTime.DateTime( int(sys.argv[1]),int(sys.argv[2]),
+        ts = datetime.datetime( int(sys.argv[1]),int(sys.argv[2]),
                            int(sys.argv[3]), 12 )
     else:
-        ts = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(days=-1,hour=12,minute=0,second=0)
+        ts = datetime.datetime.utcnow()
+        ts = ts - datetime.timedelta(days=1) 
+        ts = ts.replace(hour=12,minute=0,second=0, microsecond=0)
+    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     merge(ts)
 

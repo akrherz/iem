@@ -19,9 +19,9 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
-import iemre
+from pyiem import iemre
 import cgi
-import mx.DateTime
+import datetime
 import Image
 
 def setup_plot(ctx):
@@ -89,8 +89,8 @@ def main():
     ctx['urcrnrlat'] = numpy.max(lat)
     setup_plot(ctx)
     
-    idx = iemre.day_idx( mx.DateTime.DateTime(2012,3,1,1,5) )
-    idx2 = iemre.day_idx( mx.DateTime.DateTime(2012,4,1,1,5) )
+    idx = iemre.daily_offset( datetime.datetime(2012,3,1,1,5) )
+    idx2 = iemre.daily_offset( datetime.datetime(2012,4,1,1,5) )
     tmpk = numpy.ma.array( numpy.sum(nc.variables['p01d'][idx:idx2,:,:],0) ) / 25.4
     
     #nx = int((ctx['map'].xmax-ctx['map'].xmin)/40000.)+1
@@ -115,7 +115,7 @@ def main():
                        transform=ctx['plotax'].transAxes)
     
     nc.close()
-    print "Content-Type: image/png\n"
+    sys.stdout.write("Content-Type: image/png\n\n")
     ctx['fig'].savefig(sys.stdout, format='png', edgecolor='k')
     """
     ctx['fig'].canvas.draw()

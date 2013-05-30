@@ -1,13 +1,9 @@
 # Generate the IEMRE climatology file, hmmm
 
-import iemre
-try:
-    import netCDF4 as netCDF3
-except:
-    import netCDF3
-import mx.DateTime
+from pyiem import iemre
+import netCDF4
+import datetime
 import numpy
-import sys
 
 def init_year(ts):
     """
@@ -15,17 +11,17 @@ def init_year(ts):
     """
 
     fp = "/mesonet/data/iemre/mw_dailyc.nc"
-    nc = netCDF3.Dataset(fp, 'w')
+    nc = netCDF4.Dataset(fp, 'w')
     nc.title         = "IEM Daily Reanalysis Climatology %s" % (ts.year,)
     nc.platform      = "Grided Climatology"
-    nc.description   = "IEM daily analysis on a ~25 km grid"
+    nc.description   = "IEM daily analysis on a 0.25 degree grid"
     nc.institution   = "Iowa State University, Ames, IA, USA"
     nc.source        = "Iowa Environmental Mesonet"
     nc.project_id    = "IEM"
     nc.realization   = 1
     nc.Conventions   = 'CF-1.0'
     nc.contact       = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history       = "%s Generated" % (mx.DateTime.now().strftime("%d %B %Y"),)
+    nc.history       = "%s Generated" % (datetime.datetime.now().strftime("%d %B %Y"),)
     nc.comment       = "No Comment at this time"
 
 
@@ -33,7 +29,8 @@ def init_year(ts):
     # Setup Dimensions
     nc.createDimension('lat', iemre.NY)
     nc.createDimension('lon', iemre.NX)
-    days = ((ts + mx.DateTime.RelativeDateTime(years=1)) - ts).days
+    ts2 = datetime.datetime( ts.year + 1, 1, 1)
+    days = (ts2 - ts).days
     nc.createDimension('time', int(days) ) 
 
     # Setup Coordinate Variables
@@ -81,4 +78,4 @@ def init_year(ts):
 
     nc.close()
 
-init_year(mx.DateTime.DateTime(2000,1,1))
+init_year(datetime.datetime(2000,1,1))

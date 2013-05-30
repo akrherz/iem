@@ -4,17 +4,15 @@
 import sys
 import netCDF4
 import numpy
-import mx.DateTime
-import iemdb
-import mesonet
+import datetime
+import psycopg2
+from pyiem import iemre, datatypes
 import Ngl
-import iemre
 import network
 import random
-import mesonet
 from psycopg2.extras import DictCursor
 
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor(cursor_factory=DictCursor)
 
 nt = network.Table(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE',
@@ -51,28 +49,28 @@ def grid_day(nc, ts):
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
-    offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).days)
+    offset = iemre.daily_offset(ts)
 
 
-    sql = """SELECT * from alldata WHERE day = '%s' and
-             substr(station,3,4) != '0000' """ % (
-         ts.strftime("%Y-%m-%d"), )
-    ccursor.execute( sql )
+    sql = """SELECT * from alldata WHERE day = %s and
+             substr(station,3,4) != '0000' """
+    args = (ts, )
+    ccursor.execute( sql, args )
     if ccursor.rowcount > 4:
         res = generic_gridder(ccursor, 'high')
         if res is not None:
-            nc.variables['high_tmpk'][offset] = iemre.f2k(res)
+            nc.variables['high_tmpk'][offset] = datatypes.temperature(res, 'F').value('K')
         ccursor.scroll(0, mode='absolute')
         res = generic_gridder(ccursor, 'low')
         if res is not None:
-            nc.variables['low_tmpk'][offset] = iemre.f2k(res)
+            nc.variables['low_tmpk'][offset] = datatypes.temperature(res, 'F').value('K')
         ccursor.scroll(0, mode='absolute')
         res = generic_gridder(ccursor, 'precip')
         if res is not None:
             nc.variables['p01d'][offset] = res * 25.4
     else:
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d"), 
-            len(rs))
+            ccursor.rowcount)
 
 def main(ts):
 
@@ -83,8 +81,10 @@ def main(ts):
 
 if __name__ == "__main__":
     if len(sys.argv) == 4:
-        ts = mx.DateTime.DateTime( int(sys.argv[1]),int(sys.argv[2]),
+        ts = datetime.datetime( int(sys.argv[1]),int(sys.argv[2]),
                            int(sys.argv[3]) )
     else:
-        ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1,hour=0,minute=0, second=0)
+        ts = datetime.datetime.now() 
+        ts = ts - datetime.timedelta(days=1)
+        ts = ts.replace(hour=0,minute=0, second=0)
     main(ts)

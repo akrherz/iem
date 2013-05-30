@@ -3,7 +3,7 @@
 """
 
 import sys
-import iemre
+from pyiem import iemre
 import datetime
 import netCDF4
 import numpy
@@ -51,7 +51,7 @@ def fix_hourly(ts):
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
                                                             ts.year,),'r')
     p01m = nc.variables['p01m']
-    offset = iemre.hour_idx(ts)
+    offset = iemre.hourly_offset(ts)
     # Find ISUAG Data
     icursor.execute("SELECT * from hourly WHERE valid = '%s+00'" % (
                                                 ts.strftime("%Y-%m-%d"),))

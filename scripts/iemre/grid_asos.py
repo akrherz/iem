@@ -1,13 +1,14 @@
 import sys
 import netCDF4
 import numpy
-import mx.DateTime
+import datetime
 import Ngl
-import iemre
+from pyiem import iemre
 import iemdb
-from pyiem import meteorology
+from pyiem import meteorology, datatypes
 import network
 import psycopg2.extras
+import pytz
 
 nt = network.Table(('IA_ASOS','MO_ASOS','IL_ASOS',
          'WI_ASOS','MN_ASOS', 'SD_ASOS', 'NE_ASOS', 'KS_ASOS', 'AWOS',
@@ -99,13 +100,14 @@ def grid_hour(nc, ts):
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
-    ts0 = ts - mx.DateTime.RelativeDateTime(minutes=10)
-    ts1 = ts + mx.DateTime.RelativeDateTime(minutes=10)
-
-    offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=1))).hours)
+    ts0 = ts - datetime.timedelta(minutes=10)
+    ts1 = ts + datetime.timedelta(minutes=10)
+    offset = iemre.hourly_offset( ts )
+    utcnow = datetime.datetime.utcnow()
+    utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC")) - datetime.timedelta(hours=36)
 
     # If we are near realtime, look in IEMAccess instead of ASOS database
-    if (mx.DateTime.gmt() - ts).hours < 36:
+    if utcnow < ts:
         dbconn = iemdb.connect('iem', bypass=True)
         pcursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         table = "current_log"
@@ -121,13 +123,13 @@ def grid_hour(nc, ts):
          max(case when sknt >= 0 then sknt else 0 end) as sknt, 
          max(case when sknt >= 0 then drct else 0 end) as drct from %s s, stations t
          WHERE t.id in %s and t.iemid = s.iemid and 
-         valid >= '%s+00' and valid < '%s+00' GROUP by station""" % (
+         valid >= '%s' and valid < '%s' GROUP by station""" % (
          pcolumn, pcolumn, pcolumn, table, ids, 
-         ts0.strftime("%Y-%m-%d %H:%M"), ts1.strftime("%Y-%m-%d %H:%M") )
+         ts0, ts1 )
     else:
         dbconn = iemdb.connect('asos', bypass=True)
         pcursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        table = "t%s" % (ts.localtime().year,)
+        table = "t%s" % (ts.year,)
         pcolumn = "p01i"
         sql = """SELECT station,
          max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
@@ -140,9 +142,9 @@ def grid_hour(nc, ts):
          max(case when sknt >= 0 then sknt else 0 end) as sknt, 
          max(case when sknt >= 0 then drct else 0 end) as drct from %s  
          WHERE station in %s and 
-         valid >= '%s+00' and valid < '%s+00' GROUP by station""" % (
+         valid >= '%s' and valid < '%s' GROUP by station""" % (
          pcolumn, pcolumn, pcolumn, table, ids, 
-         ts0.strftime("%Y-%m-%d %H:%M"), ts1.strftime("%Y-%m-%d %H:%M") )
+         ts0, ts1 )
 
     pcursor.execute( sql )
     
@@ -157,14 +159,14 @@ def grid_hour(nc, ts):
             
         res = generic_gridder(rs, 'max_tmpf')
         if res is not None:
-            nc.variables['tmpk'][offset] = iemre.f2k(res)
+            nc.variables['tmpk'][offset] = datatypes.temperature(res, 'F').value('K')
 
         res = grid_skyc(rs)
         if res is not None:
             nc.variables['skyc'][offset] = res
     else:
         print "%s has %02i entries, FAIL" % (ts.strftime("%Y-%m-%d %H:%M"), 
-            len(rs))
+            pcursor.rowcount)
 
 def main(ts):
     # Load up our netcdf file!
@@ -175,8 +177,10 @@ def main(ts):
 
 if __name__ == "__main__":
     if len(sys.argv) == 5:
-        ts = mx.DateTime.DateTime( int(sys.argv[1]),int(sys.argv[2]),
+        ts = datetime.datetime( int(sys.argv[1]),int(sys.argv[2]),
                            int(sys.argv[3]), int(sys.argv[4]) )
     else:
-        ts = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(minute=0,second=0)
+        ts = datetime.datetime.utcnow()
+        ts = ts.replace(second=0,minute=0)
+    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     main(ts)
