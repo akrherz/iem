@@ -1,65 +1,59 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.insert(1, "/mesonet/www/apps/iemwebsite/scripts/lib/")
-import os
 import cgi
-import iemre
-try:
-    import netCDF4 as netCDF3
-except:
-    import netCDF3
-import mx.DateTime
+from pyiem import iemre, datatypes
+import netCDF4
+import datetime
 import json
-import mesonet
 
 form = cgi.FormContent()
-ts1 = mx.DateTime.strptime( form["date1"][0], "%Y-%m-%d")
-ts2 = mx.DateTime.strptime( form["date2"][0], "%Y-%m-%d")
+ts1 = datetime.datetime.strptime( form["date1"][0], "%Y-%m-%d")
+ts2 = datetime.datetime.strptime( form["date2"][0], "%Y-%m-%d")
 if ts1 >= ts2:
-    print 'Content-type: text/plain\n'
-    print json.dumps( {'error': 'Date1 Larger than Date2', } )
+    sys.stdout.write('Content-type: application/json\n\n')
+    sys.stdout.write( json.dumps( {'error': 'Date1 Larger than Date2', } ) )
     sys.exit()
 if ts1.year != ts2.year:
-    print 'Content-type: text/plain\n'
-    print json.dumps( {'error': 'Multi-year query not supported yet...', } )
+    sys.stdout.write('Content-type: application/json\n\n')
+    sys.stdout.write( json.dumps( {'error': 'Multi-year query not supported yet...', } ) )
     sys.exit()
 # Make sure we aren't in the future
-tsend = mx.DateTime.today()
-if ts2 >= tsend:
-    ts2 = tsend - mx.DateTime.RelativeDateTime(days=1)
+tsend = datetime.date.today()
+if ts2.date() >= tsend:
+    ts2 = tsend - datetime.timedelta(days=1)
 
 lat = float( form["lat"][0] )
 lon = float( form["lon"][0] )
-format = form["format"][0]
+fmt = form["format"][0]
 
 i,j = iemre.find_ij(lon, lat)
-offset1 = int((ts1 - (ts1 + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
-offset2 = int((ts2 - (ts2 + mx.DateTime.RelativeDateTime(month=1,day=1))).days) +1
+offset1 = iemre.daily_offset(ts1)
+offset2 = iemre.daily_offset(ts2) +1
 
 # Get our netCDF vars
 fp = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts1.year,)
-nc = netCDF3.Dataset(fp, 'r')
-hightemp = mesonet.k2f(nc.variables['high_tmpk'][offset1:offset2,j,i])
-lowtemp = mesonet.k2f(nc.variables['low_tmpk'][offset1:offset2,j,i])
+nc = netCDF4.Dataset(fp, 'r')
+hightemp = datatypes.temperature(nc.variables['high_tmpk'][offset1:offset2,j,i], 'K').value("F")
+lowtemp = datatypes.temperature(nc.variables['low_tmpk'][offset1:offset2,j,i], 'K').value("F")
 precip = nc.variables['p01d'][offset1:offset2,j,i] / 25.4
 nc.close()
 
 # Get our climatology vars
-c2000 = ts1 + mx.DateTime.RelativeDateTime(year=2000)
-coffset1 = int((c2000 - (mx.DateTime.DateTime(2000,1,1))).days)
-c2000 = ts2 + mx.DateTime.RelativeDateTime(year=2000)
-coffset2 = int((c2000 - (mx.DateTime.DateTime(2000,1,1))).days) +1
-cnc = netCDF3.Dataset("/mesonet/data/iemre/mw_dailyc.nc", 'r')
-chigh = mesonet.k2f(cnc.variables['high_tmpk'][coffset1:coffset2,j,i])
-clow = mesonet.k2f(cnc.variables['low_tmpk'][coffset1:coffset2,j,i])
+c2000 = ts1.replace(year=2000)
+coffset1 = iemre.daily_offset(c2000)
+c2000 = ts2.replace(year=2000)
+coffset2 = iemre.daily_offset(c2000) +1
+cnc = netCDF4.Dataset("/mesonet/data/iemre/mw_dailyc.nc", 'r')
+chigh = datatypes.temperature(cnc.variables['high_tmpk'][coffset1:coffset2,j,i], 'K').value("F")
+clow = datatypes.temperature(cnc.variables['low_tmpk'][coffset1:coffset2,j,i], 'K').value("F")
 cprecip = cnc.variables['p01d'][coffset1:coffset2,j,i] / 25.4
 cnc.close()
 
 res = {'data': [], }
 
 for i in range(0, offset2 - offset1):
-    now = ts1 + mx.DateTime.RelativeDateTime(days=i)
+    now = ts1 + datetime.timedelta(days=i)
     res['data'].append({
                 'date': now.strftime("%Y-%m-%d"),
     'daily_high_f': "%.1f" % (hightemp[i],),
@@ -71,5 +65,5 @@ for i in range(0, offset2 - offset1):
        })
 
 
-print 'Content-type: text/plain\n'
-print json.dumps( res )
+sys.stdout.write('Content-type: application/json\n\n')
+sys.stdout.write( json.dumps( res ) )

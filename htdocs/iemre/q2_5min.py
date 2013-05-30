@@ -2,7 +2,6 @@
 """
  Extract the 5 minute interval data from the Q2 netCDF files
 
-$Id: $:
 """
 
 import cgi
@@ -20,7 +19,7 @@ lat = float( form["lat"][0] )
 lon = float( form["lon"][0] )
 x = int( (lon - -110.) / 0.01 )
 y = int( (55. - lat )/ 0.01 ) 
-format = form["format"][0]
+fmt = form["format"][0]
 
 def make_fp(ts):
     """

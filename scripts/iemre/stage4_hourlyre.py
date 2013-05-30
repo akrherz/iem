@@ -1,12 +1,13 @@
 # Need something to push the stage4 data into the hourly files
 
 import Nio
-import mx.DateTime
+import datetime
 import Ngl
 import numpy
-import iemre
+from pyiem import iemre
 import os
 import sys
+import pytz
 import netCDF4
 
 def merge(ts):
@@ -44,8 +45,7 @@ def merge(ts):
     # Open up our RE file
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (
                                                             ts.year,),'a')
-
-    offset = int(( ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours) - 1
+    offset = iemre.hourly_offset(ts)
     nc.variables["p01m"][offset,:,:] = res.transpose()
 
     nc.close()
@@ -53,9 +53,11 @@ def merge(ts):
 
 if __name__ == "__main__":
     if len(sys.argv) == 5:
-        ts = mx.DateTime.DateTime( int(sys.argv[1]),int(sys.argv[2]),
+        ts = datetime.datetime( int(sys.argv[1]),int(sys.argv[2]),
                            int(sys.argv[3]), int(sys.argv[4]) )
     else:
-        ts = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(minute=0,second=0)
+        ts = datetime.datetime.utcnow() 
+        ts = ts.replace(minute=0,second=0, microsecond=0)
+    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     merge(ts)
 

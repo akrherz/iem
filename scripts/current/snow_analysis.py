@@ -2,7 +2,7 @@
 IEM Snowfall Analysis Engine
 
 """
-import iemre
+from pyiem import iemre
 import iemplot
 import iemdb
 import numpy

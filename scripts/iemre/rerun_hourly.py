@@ -1,15 +1,16 @@
-import mx.DateTime
-import stage4_hourlyre
+import datetime
+import grid_asos
 import sys
+import pytz
 
 yr = int(sys.argv[1])
-mo = int(sys.argv[2])
 
-sts = mx.DateTime.DateTime(yr,mo,1)
-ets = sts + mx.DateTime.RelativeDateTime(months=1)
-interval = mx.DateTime.RelativeDateTime(hours=1)
+sts = datetime.datetime(yr,1,1)
+sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+ets = sts.replace(year=yr+1)
+interval = datetime.timedelta(hours=1)
 now = sts
 while now < ets:
-  print now
-  stage4_hourlyre.merge( now )
-  now += interval
+    print now
+    grid_asos.main( now )
+    now += interval
