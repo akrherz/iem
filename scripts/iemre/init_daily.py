@@ -1,10 +1,7 @@
 # Generate the IEMRE daily analysis file for a year
 
 import iemre
-try:
-    import netCDF4 as netCDF3
-except:
-    import netCDF3
+import netCDF4
 import mx.DateTime
 import numpy
 import sys
@@ -15,7 +12,7 @@ def init_year(ts):
     """
 
     fp = "/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year, )
-    nc = netCDF3.Dataset(fp, 'w')
+    nc = netCDF4.Dataset(fp, 'w')
     nc.title         = "IEM Daily Reanalysis %s" % (ts.year,)
     nc.platform      = "Grided Observations"
     nc.description   = "IEM daily analysis on a ~25 km grid"
