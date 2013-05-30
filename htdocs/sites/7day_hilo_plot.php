@@ -48,7 +48,7 @@ if ($hasclimate){
  		ncdc_climate71 
         WHERE station = $1 and valid <= $2 ORDER by valid DESC LIMIT 7");
 
- $rs = pg_execute($db, "SELECT", Array(strtolower($climate_site), $sqlDate));
+ $rs = pg_execute($db, "SELECT", Array($climate_site, $sqlDate));
 
  $ahighs = Array();
  $alows = Array();

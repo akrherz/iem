@@ -38,7 +38,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
   if ($hasclimate){
     $sqlDate = "2000-". date("m-d", $ts );
     $rs2 = pg_execute($coopdb, "SELECT", 
-                     Array(strtolower($climate_site), $sqlDate));
+                     Array($climate_site, $sqlDate));
     $row2 = pg_fetch_array($rs2,0);
     $ahighs[] = $row2["high"];
     $alows[] = $row2["low"];

@@ -67,7 +67,7 @@ if ($hasclimate){
         WHERE station = $1
         and extract(month from valid) = $2  ORDER by valid ASC");
 
- $rs = pg_execute($db, "SELECT", Array(strtolower($climate_site), $month));
+ $rs = pg_execute($db, "SELECT", Array($climate_site, $month));
 
  $ahighs = Array();
  $alows = Array();
