@@ -1,19 +1,35 @@
 """
 Create a plot of today's total precipitation from the Stage4 estimates
 """
-
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+cursor = IEM.cursor()
 import pygrib
 import mx.DateTime
 import iemplot
 import numpy
 import os, sys
+from pyiem.plot import MapPlot
+
+dlats = []
+dlons = []
+dvals = []
+cursor.execute("""
+  SELECT id, x(geom) as lon, y(geom) as lat, sum(pday) from summary_2013 s
+  JOIN stations t on (t.iemid = s.iemid) WHERE t.network = 'IA_ASOS' and
+  day >= '2013-05-25' and pday > 0 GROUP by id, lon, lat
+""")
+for row in cursor:
+    dlats.append( row[2] )
+    dlons.append( row[1] )
+    dvals.append( row[3] )
 
 def doday():
     """
     Create a plot of precipitation stage4 estimates for some day
     """
-    sts = mx.DateTime.DateTime(2010,4,1,12)
-    ets = mx.DateTime.DateTime(2010,9,22,12)
+    sts = mx.DateTime.DateTime(2013,5,25,12)
+    ets = mx.DateTime.DateTime(2013,5,31,12)
     interval = mx.DateTime.RelativeDateTime(days=1)
     now = sts
     total = None
@@ -27,32 +43,22 @@ def doday():
 
             if total is None:
                 g = grbs[1]
-                total = numpy.where(g["values"] > 25.4, 1., 0.)
+                total = g["values"]
                 lats, lons = g.latlons()
             else:
-                total += numpy.where(grbs[1]["values"] > 25.4, 1., 0.)
+                total += grbs[1]["values"]
             grbs.close()
         now += interval
         
-    # Now we dance
-    cfg = {
-     'wkColorMap': 'BlAqGrYeOrRe',
-     'nglSpreadColorStart': -1,
-     'nglSpreadColorEnd'  : 2,
-     '_MaskZero'          : True,
-     '_midwest'             : True,
-     'lbTitleString'      : "[days]",
-     '_valid'    : 'Number of days between 1 Apr and %s' % (
-        now.strftime("%d %B %Y"),),
-     '_title'    : "NCEP StageIV 24 Hour Rainfall Over 1 inch",
-    }
+    m = MapPlot(sector='iowa', title='NOAA Stage IV & Iowa ASOS Precipitation',
+                subtitle='25-30 May 2013')
+    m.pcolormesh(lons, lats, total / 25.4, numpy.arange(0,14.1,1), latlon=True,
+                 units='inch')
+    m.drawcounties()
+    m.plot_values(dlons, dlats, dvals, '%.02f')
+    m.postprocess(filename='test.svg')
+    import iemplot
+    iemplot.makefeature('test')
 
-
-    
-    # Midwest
-    tmpfp = iemplot.simple_grid_fill(lons, lats, total, cfg)
-    iemplot.makefeature(tmpfp)
-
-    
 if __name__ == "__main__":
     doday()
