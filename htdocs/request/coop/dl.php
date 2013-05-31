@@ -119,6 +119,63 @@ if (in_array('daycent', $vars)){
 	}
 	
 }
+else if (in_array('absim', $vars)){
+	/*
+	 * [weather.met.weather]
+latitude = 42.1 (DECIMAL DEGREES)
+tav = 9.325084 (oC) ! annual average ambient temperature
+amp = 29.57153 (oC) ! annual amplitude in mean monthly temperature
+year          day           radn          maxt          mint          rain
+()            ()            (MJ/m^2)      (oC)          (oC)          (mm)
+ 1986          1             7.38585       0.8938889    -7.295556      0
+	 */
+	$network = sprintf("%sCLIMATE", substr($stations[0], 0, 2));
+	$nt = new NetworkTable($network);
+	$cities = $nt->table;
+	$response = "[weather.met.weather]\n";
+	$response .= sprintf("latitude = %.1f (DECIMAL DEGREES)\n", 
+			$cities[ $stations[0] ]["lat"]);
+	
+	$sql = "SELECT avg((high+low)/2)".
+			" from climate51 ".
+			" WHERE station IN ". $stationString ." ";
+	pg_prepare($connection, "TBD", $sql);
+	$rs = pg_execute($connection, 'TBD', Array());
+	$row = pg_fetch_assoc($rs,0);
+	$response .= sprintf("tav = %.3f (oC) ! annual average ambient temperature\n",
+			f2c($row['avg']));
+
+	pg_prepare($connection, "TBD2", "select max(avg) as h, min(avg) as l from
+			(SELECT extract(month from valid) as month, avg((high+low)/2.)
+			 from climate51 
+			 WHERE station IN ". $stationString ." GROUP by month) as foo ");
+	$rs = pg_execute($connection, 'TBD2', Array());
+	$row = pg_fetch_assoc($rs,0);
+	$response .= sprintf("tav = %.3f (oC) ! annual amplitude in mean monthly temperature\n",
+			f2c($row['h']) - f2c($row['l']));
+	
+	$response .= "year          day           radn          maxt          mint          rain
+()            ()            (MJ/m^2)      (oC)          (oC)          (mm)\n";
+	
+	pg_prepare($connection, "TBD4", "SELECT extract(doy from day) as doy, high,".
+			" low, precip, month, year, extract(day from day) as lday, station, year,".
+			" (case when merra_srad > 0 then merra_srad else -99 end) as srad".
+			" from $table ".
+			" WHERE station IN ". $stationString ." and ".
+			" day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
+	$rs = pg_execute($connection, 'TBD4', Array());
+	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+		$response .= sprintf(" %s         %s        %.4f         %.4f      %.4f     %.2f\n",
+				$row["year"], $row["doy"], $row["srad"], f2c($row["high"]), 
+				f2c($row["low"]), $row["precip"] * 25.4 );
+	}
+	
+	/* Write back to the luser */
+	header("Content-type: application/octet-stream");
+	header("Content-Disposition: attachment; filename=fancypants.met");
+	die($response);
+	
+}
 else if (in_array('dndc', $vars)){
 	/*
 	 * One file per year! named StationName / StationName_YYYY.txt
