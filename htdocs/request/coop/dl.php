@@ -119,7 +119,7 @@ if (in_array('daycent', $vars)){
 	}
 	
 }
-else if (in_array('absim', $vars)){
+else if (in_array('apsim', $vars)){
 	/*
 	 * [weather.met.weather]
 latitude = 42.1 (DECIMAL DEGREES)
