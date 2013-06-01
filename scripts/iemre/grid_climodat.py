@@ -54,7 +54,7 @@ def grid_day(nc, ts):
 
     sql = """SELECT * from alldata WHERE day = %s and
              substr(station,3,4) != '0000' """
-    args = (ts, )
+    args = (ts.date(), )
     ccursor.execute( sql, args )
     if ccursor.rowcount > 4:
         res = generic_gridder(ccursor, 'high')
