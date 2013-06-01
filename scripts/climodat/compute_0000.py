@@ -8,7 +8,7 @@ from pyiem import datatypes, iemre
 import sys
 import datetime
 
-COOP = psycopg2.connect(database="coop", host='iemdb', user='nobody')
+COOP = psycopg2.connect(database="coop", host='iemdb')
 ccursor = COOP.cursor()
 POSTGIS = psycopg2.connect(database="postgis", host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor()
