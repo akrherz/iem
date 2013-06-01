@@ -37,7 +37,7 @@ def do_climdiv_day(stabbr, valid, nc):
         
         hk = nc.variables['high_tmpk'][tcnt]
         high_tmpk = hk[sw > 0]
-        high = datatypes.temperature( numpy.average(high_tmpk), 'K').valid("F")
+        high = datatypes.temperature( numpy.average(high_tmpk), 'K').value("F")
     
         lk = nc.variables['low_tmpk'][tcnt]
         low_tmpk = lk[sw > 0]
