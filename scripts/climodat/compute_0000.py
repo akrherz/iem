@@ -26,6 +26,7 @@ def do_climdiv_day(stabbr, valid, nc):
     Compute the virtual climate division data as well
     """
     sw_nc = netCDF4.Dataset("/mesonet/data/iemre/climdiv_weights.nc")
+    tcnt = iemre.daily_offset(valid)
     for varname in sw_nc.variables.keys():
         if varname in ['lat', 'lon', 'time']:
             continue
@@ -34,7 +35,6 @@ def do_climdiv_day(stabbr, valid, nc):
         stid = varname
         sw = sw_nc.variables[stid]
         
-        tcnt = iemre.hourly_offset(valid)
         hk = nc.variables['high_tmpk'][tcnt]
         high_tmpk = hk[sw > 0]
         high = datatypes.temperature( numpy.average(high_tmpk), 'K').valid("F")
