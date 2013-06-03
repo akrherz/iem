@@ -35,6 +35,7 @@ CREATE TABLE alldata_ky() inherits (alldata);
 CREATE TABLE alldata_in() inherits (alldata);
 CREATE TABLE alldata_oh() inherits (alldata);
 CREATE TABLE alldata_mi() inherits (alldata);
+CREATE TABLE alldata_mo() inherits (alldata);
 
 ---
 --- Quasi synced from mesosite database
