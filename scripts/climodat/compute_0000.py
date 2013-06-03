@@ -10,8 +10,6 @@ import datetime
 
 COOP = psycopg2.connect(database="coop", host='iemdb')
 ccursor = COOP.cursor()
-POSTGIS = psycopg2.connect(database="postgis", host='iemdb', user='nobody')
-pcursor = POSTGIS.cursor()
 
 def do_day(valid):
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (valid.year,))
@@ -33,7 +31,7 @@ def do_climdiv_day(stabbr, valid, nc):
         if varname[:2] != stabbr:
             continue
         stid = varname
-        sw = sw_nc.variables[stid]
+        sw = sw_nc.variables[stid][:]
         
         hk = nc.variables['high_tmpk'][tcnt]
         high_tmpk = hk[sw > 0]
@@ -70,34 +68,7 @@ def do_state_day(stabbr, valid, nc):
     """
     Create the statewide average value based on averages of the IEMRE 
     """
-    # Get the bounds of the state
-    pcursor.execute("""
-    SELECT xmin(ST_Extent(the_geom)), xmax(ST_Extent(the_geom)), 
-    ymin(ST_Extent(the_geom)), ymax(ST_Extent(the_geom)) from states
-    where state_abbr = %s
-    """, (stabbr,))
-    row = pcursor.fetchone()
-    (ll_i, ll_j) = iemre.find_ij(row[0], row[2])
-    (ur_i, ur_j) = iemre.find_ij(row[1], row[3])
-
-    # Open IEMRE
     tcnt = iemre.daily_offset(valid)
-    
-    high_tmpk = nc.variables['high_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
-    high = datatypes.temperature( numpy.average(high_tmpk), 'K').value("F")
-
-    low_tmpk = nc.variables['low_tmpk'][tcnt,ll_j:ur_j,ll_i:ur_i]
-    low = datatypes.temperature( numpy.average(low_tmpk), 'K').value("F")
-
-    p01d = nc.variables['p01d'][tcnt,ll_j:ur_j,ll_i:ur_i]
-    precip = numpy.average(p01d) / 25.4
-    if precip < 0:
-        precip = 0
-    
-    
-    print '%s %s OLD High: %5.1f Low: %5.1f Precip: %4.2f' % (stabbr, 
-                                                    valid.strftime("%Y-%m-%d"),
-                                                high, low, precip)
     
     # get state weights
     sw_nc = netCDF4.Dataset("/mesonet/data/iemre/state_weights.nc")
