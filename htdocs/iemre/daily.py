@@ -26,6 +26,10 @@ if not os.path.isfile(fn):
     sys.stdout.write( json.dumps( res ) )
     sys.exit()
 
+if i is None or j is None:
+    sys.stdout.write( json.dumps({'error': 'Coordinates outside of domain'}) )
+    sys.exit()
+
 nc = netCDF4.Dataset(fn, 'r')
 
 c2000 = ts.replace(year=2000)
