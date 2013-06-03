@@ -3,6 +3,40 @@
 --- $ psql -f /usr/pgsql-9.0/share/contrib/postgis-1.5/spatial_ref_sys.sql coop
 
 ---
+--- Datastorage tables
+---
+CREATE TABLE alldata(
+  station char(6),
+  day date,
+  high int,
+  low int,
+  precip real,
+  snow real,
+  sday char(4),
+  year int,
+  month smallint,
+  snowd real,
+  estimated boolean,
+  narr_srad real,
+  merra_srad real,
+  merra_srad_cs real
+  );
+GRANT select on alldata to nobody,apache;
+
+CREATE TABLE alldata_ia() inherits (alldata);
+CREATE TABLE alldata_il() inherits (alldata);
+CREATE TABLE alldata_wi() inherits (alldata);
+CREATE TABLE alldata_mn() inherits (alldata);
+CREATE TABLE alldata_nd() inherits (alldata);
+CREATE TABLE alldata_sd() inherits (alldata);
+CREATE TABLE alldata_ne() inherits (alldata);
+CREATE TABLE alldata_ks() inherits (alldata);
+CREATE TABLE alldata_ky() inherits (alldata);
+CREATE TABLE alldata_in() inherits (alldata);
+CREATE TABLE alldata_oh() inherits (alldata);
+CREATE TABLE alldata_mi() inherits (alldata);
+
+---
 --- Quasi synced from mesosite database
 ---
 CREATE TABLE stations(
