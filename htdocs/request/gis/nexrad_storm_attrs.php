@@ -35,7 +35,7 @@ include("$rootpath/include/header.php"); ?>
   </tr>
 
   <tr>
-  <td rowspan='2'><?php echo networkMultiSelect(Array("NEXRAD", "TMDR"), 'ALL', 
+  <td rowspan='2'><?php echo networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL', 
   		Array("ALL"=>"ALL"), "radar");?></td>
     <th>Start:</th>
     <td>
