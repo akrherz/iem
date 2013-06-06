@@ -114,7 +114,7 @@ A direction of "west" would represent a storm moving from west to east.
 
 <form id='dyno' name='dyno'>
 
-<p><strong>Select RADAR:</strong> <?php echo networkSelect(Array("NEXRAD", "TMDR"), 
+<p><strong>Select RADAR:</strong> <?php echo networkSelect(Array("NEXRAD", "TWDR"), 
 		'DMX');?>
 <br />
 <img id='histimage' src="/pickup/nexrad_attrs/DMX_histogram.png" alt="Histogram" />
