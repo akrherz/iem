@@ -2,6 +2,7 @@
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 109);
 $THISPAGE = "gis-";
+$HEADEXTRA = "<script src=\"/js/jquery.js\"></script>";
 $TITLE = "IEM | NEXRAD Storm Attributes Shapefiles";
 include("$rootpath/include/forms.php");
 include("$rootpath/include/imagemaps.php");
@@ -20,6 +21,8 @@ include("$rootpath/include/header.php"); ?>
  seven days worth of data.  If you can request a single RADAR, there is no 
  date restriction, but the download will be slow! 
 
+<p><a class="button" href="#histograms">View Histograms</a>
+ 
 <form method="GET" action="/cgi-bin/request/gis/nexrad_storm_attrs.py">
 <h4>Select time interval</h4>
 <i>(Times are in UTC.)</i>
@@ -103,5 +106,26 @@ Field 17: Type=N/Double, Title=`LON', Longitude
  <li>Data is missing November 2008 to March 2009</li>
  </ul>
 
+<p><a name="histograms"></a><h3>Attribute Speed &amp; Direction Histograms</h3>
+
+<p>Based on the archive built by the IEM, the following are 2-D Histograms 
+comparing RADAR storm attribute speed, direction of travel, and day of the year.
+A direction of "west" would represent a storm moving from west to east.
+
+<form id='dyno' name='dyno'>
+
+<p><strong>Select RADAR:</strong> <?php echo networkSelect(Array("NEXRAD", "TMDR"), 
+		'DMX');?>
+<br />
+<img id='histimage' src="/pickup/nexrad_attrs/DMX_histogram.png" alt="Histogram" />
+
+</form>
+<script>
+$('select[name=station]').change( function() {
+	nexrad = $('select[name=station]').val();
+	$('#histimage').attr('src', '/pickup/nexrad_attrs/'+nexrad+'_histogram.png');
+});
+
+</script>
 
 <?php include("$rootpath/include/footer.php"); ?>
