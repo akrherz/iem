@@ -124,8 +124,13 @@ A direction of "west" would represent a storm moving from west to east.
 $('select[name=station]').change( function() {
 	nexrad = $('select[name=station]').val();
 	$('#histimage').attr('src', '/pickup/nexrad_attrs/'+nexrad+'_histogram.png');
+	window.location.href = "#"+ nexrad;
 });
 
+var tokens = window.location.href.split('#');
+if (tokens.length == 2 && tokens[1].length == 3){
+	$('#histimage').attr('src', '/pickup/nexrad_attrs/'+ tokens[1] +'_histogram.png');
+}
 </script>
 
 <?php include("$rootpath/include/footer.php"); ?>
