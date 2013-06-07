@@ -4,3 +4,4 @@ Options +ExecCGI
 
 RewriteEngine On
 RewriteRule ^days_since_([A-Z][A-Z])_([A-Z]).png days_since_plot.py?phenomena=$1&significance=$2
+RewriteRule ^wfo_vtec_count_([0-9][0-9][0-9][0-9])_([A-Z][A-Z])_([A-Z]).png wfo_vtec_count_plot.py?year=$1&phenomena=$2&significance=$3
