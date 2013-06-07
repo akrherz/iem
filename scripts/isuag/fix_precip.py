@@ -53,8 +53,7 @@ def fix_hourly(ts):
     p01m = nc.variables['p01m']
     offset = iemre.hourly_offset(ts)
     # Find ISUAG Data
-    icursor.execute("SELECT * from hourly WHERE valid = '%s+00'" % (
-                                                ts.strftime("%Y-%m-%d"),))
+    icursor.execute("SELECT * from hourly WHERE valid = %s" % (ts,))
     for row in icursor:
         stid = row['station']
         if stid in SKIP:
