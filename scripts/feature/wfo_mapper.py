@@ -10,9 +10,8 @@ pcursor = POSTGIS.cursor()
 
 pcursor.execute("""
 with total as (
-select distinct wfo, 
- date(generate_series(issue, expire, '1 minute'::interval)) from warnings 
- where phenomena = 'FW' and significance = 'W' and issue > '2007-01-01'
+select distinct wfo, eventid from warnings_2013 
+ where phenomena = 'FF' and significance = 'W'
 )
 SELECT wfo, count(*) from total GROUP by wfo
 """)
@@ -25,12 +24,12 @@ SELECT wfo, count(*) from total GROUP by wfo
 #""")
 data = {}
 for row in pcursor:
-    data[ row[0] ] = row[1] / (6.36)
+    data[ row[0] ] = row[1] 
 
 p = plot.MapPlot(sector='nws',
-                 title='Average # Days with a Red Flag Warning per Year',
-                 subtitle='based on VTEC product counts for period: 1 Jan 2007 - 12 May 2013')
-p.fill_cwas(data, bins=bins, lblformat='%.1f')
+                 title='2013 Flash Flood Warnings by NWS Office',
+                 subtitle='based on VTEC (FF.W) products: 1 Jan 2013 - 7 Jun 2013')
+p.fill_cwas(data, bins=bins, lblformat='%.0f')
 p.postprocess(filename='test.png')
-import iemplot
-iemplot.makefeature('test')
+#import iemplot
+#iemplot.makefeature('test')
