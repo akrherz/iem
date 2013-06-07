@@ -90,7 +90,7 @@ if __name__ == "__main__":
     ts = ts.replace(tzinfo=pytz.timezone("America/Chicago"))
     for hr in range(24):
         now = ts.replace(hour=hr)
-        fix_hourly( ts.astimezone( pytz.timezone("UTC") ) )
+        fix_hourly( now.astimezone( pytz.timezone("UTC") ) )
     fix_daily(ts)
     icursor.close()
     icursor2.close()
