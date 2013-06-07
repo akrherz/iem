@@ -7,6 +7,7 @@
 
 include("../../config/settings.inc.php");
 include("$rootpath/include/database.inc.php");
+$_DATABASES["postgis"] = "dbname=postgis host=iemdb2 user=nobody connect_timeout=5";
 include("$rootpath/include/vtec.php");
 $postgis = iemdb("postgis");
 
