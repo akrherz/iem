@@ -11,7 +11,7 @@
 192.168.0.11     iem11         iem11.local iem-syslog
 192.168.0.19     iem19         iem19.local iemdb
 192.168.0.21     iem21         iem21.local
-192.168.0.22     iem22
+192.168.0.22     iem22         iem22.local
 192.168.0.30     iem30         iem30.local iembot
 192.168.0.40     iem40         iem40.local
 192.168.0.50     iem50         iem50.local iem-mapserver openfire-bosh
@@ -31,3 +31,4 @@
 192.168.0.200    iem-idd0      iem-idd0.local
 192.168.0.230    iemdb2
 192.168.0.254    iem-gateway   iem-gateway.local
+
