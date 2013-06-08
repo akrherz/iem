@@ -81,7 +81,7 @@ function gmtHourSelect($selected, $name){
   for ($i=0; $i<24;$i++) {
     echo "<option value='".$i."' ";
     if ($i == intval($selected)) echo "SELECTED";
-    echo ">". $i ." Z</option>";
+    echo ">". $i ." UTC</option>";
   }
   echo "</select>\n";
 }
