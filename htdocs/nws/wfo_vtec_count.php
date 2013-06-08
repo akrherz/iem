@@ -19,9 +19,11 @@
  $month2 = isset($_REQUEST["month2"])? intval($_REQUEST["month2"]): date("m");
  $day1 = isset($_REQUEST["day1"])? intval($_REQUEST["day1"]): 1;
  $day2 = isset($_REQUEST["day2"])? intval($_REQUEST["day2"]): date("d");
+ $hour1 = isset($_REQUEST["hour1"])? intval($_REQUEST["hour1"]): 0;
+ $hour2 = isset($_REQUEST["hour2"])? intval($_REQUEST["hour2"]): 0;
  
- $ts1 = gmmktime(0,0,0, $month1, $day1, $year1);
- $ts2 = gmmktime(0,0,0, $month2, $day2, $year2);
+ $ts1 = gmmktime($hour1,0,0, $month1, $day1, $year1);
+ $ts2 = gmmktime($hour2,0,0, $month2, $day2, $year2);
  
  $imgurl = sprintf("wfo_vtec_count_plot.py?phenomena=%s&significance=%s&",
  	$phenomena, $significance);
@@ -35,8 +37,8 @@
  	$imgurl .= sprintf("phenomena4=%s&significance4=%s&",
 	 	$phenomena4, $significance4);
 
-  $imgurl .= sprintf("sts=%s&ets=%s", gmdate("Ymd", $ts1), 
-  		gmdate("Ymd", $ts2));
+  $imgurl .= sprintf("sts=%s&ets=%s", gmdate("YmdH", $ts1), 
+  		gmdate("YmdH", $ts2));
   
  $TITLE = "IEM | NWS WWA Product Counts by Year";
 
@@ -154,16 +156,18 @@ while (list($key, $value)=each($vtec_significance)){
 </select>
 </td>
 </tr>
-<tr><th colspan='3'>Time Period (UTC Dates)</th></tr>
-<tr><td colspan='3'><strong>Start Date:</strong>
+<tr><th colspan='3'>Time Period (UTC Timestamps)</th></tr>
+<tr><td colspan='3'><strong>Start Time:</strong>
   <?php yearSelect2(2005, $year1, 'year1'); ?>
   <?php monthSelect2($month1, 'month1'); ?>
   <?php echo daySelect2($day1, 'day1'); ?>  
+  <?php gmtHourSelect($hour1, 'hour1'); ?>
   </td></tr>
-<tr><td colspan='3'><strong>End Date:</strong>
+<tr><td colspan='3'><strong>End Time:</strong>
   <?php yearSelect2(2005, $year2, 'year2'); ?>
   <?php monthSelect2($month2, 'month2'); ?>
-  <?php echo daySelect2($day2, 'day2'); ?> (exclusive)  
+  <?php echo daySelect2($day2, 'day2'); ?>   
+  <?php gmtHourSelect($hour2, 'hour2'); ?>
   </td></tr>
   </table>
 
