@@ -352,7 +352,7 @@ if (in_array("bufferedlsr", $layers)){
 	$blsr->set("type", MS_LAYER_POLYGON);
 	$blsr->setProjection("init=epsg:4326");
 	$blc0 = ms_newClassObj($blsr);
-	$blc0->set("name", "Buffered LSRs (15km)");
+	$blc0->set("name", "Buffered LSRs (${lsrbuffer} km)");
 	$blc0s0 = ms_newStyleObj($blc0);
 	$blc0s0->set("symbolname", 'circle');
 	$blc0s0->color->setRGB(0,0,0);
