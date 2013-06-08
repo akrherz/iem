@@ -35,11 +35,11 @@ with total as (
 select distinct wfo, extract(year from issue at time zone 'UTC'), phenomena, 
 significance, eventid from warnings 
  where """+ pstr +""" and 
- issue >= '%s 00:00+00' and issue < '%s 00:00+00'
+ issue >= '%s:00+00' and issue < '%s:00+00'
 )
 SELECT wfo, count(*) from total GROUP by wfo ORDER by count DESC
 
-    """ % (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
+    """ % (sts.strftime("%Y-%m-%d %H"), ets.strftime("%Y-%m-%d %H")))
     data = {}
     first = True
     for row in pcursor:
@@ -53,8 +53,8 @@ SELECT wfo, count(*) from total GROUP by wfo ORDER by count DESC
 
     p = plot.MapPlot(sector='nws',
                  title='%s Counts by NWS Office' % (title,),
-                 subtitle='Valid %s - %s UTC, based on VTEC: %s' % (sts.strftime("%d %b %Y"),
-                                                                    ets.strftime("%d %b %Y"),
+                 subtitle='Valid %s - %s UTC, based on VTEC: %s' % (sts.strftime("%d %b %Y %H:00"),
+                                                                    ets.strftime("%d %b %Y %H:00"),
                                                 subtitle))
     p.fill_cwas(data, bins=bins)
     p.postprocess(web=True, memcache=mc, memcachekey=key, memcacheexpire=1800)
@@ -78,13 +78,13 @@ if __name__ == '__main__':
     while ' ' in significance:
         significance.remove(' ')
     
-    sts = datetime.datetime.strptime(form.getfirst('sts', '20130101'), '%Y%m%d')
-    ets = datetime.datetime.strptime(form.getfirst('ets', '20140101'), '%Y%m%d')
+    sts = datetime.datetime.strptime(form.getfirst('sts', '2013010100'), '%Y%m%d%H')
+    ets = datetime.datetime.strptime(form.getfirst('ets', '2014010100'), '%Y%m%d%H')
     
     key = "wfo_vtec_count_"
     for p,s in zip(phenomena, significance):
         key += "%s.%s_" % (p,s)
-    key += "%s_%s.png" % (sts.strftime("%Y%m%d"), ets.strftime("%Y%m%d"))
+    key += "%s_%s.png" % (sts.strftime("%Y%m%d%H"), ets.strftime("%Y%m%d%H"))
     res = mc.get(key)
     if res:
         print 'Content-type: image/png\n'
