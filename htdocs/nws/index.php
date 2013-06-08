@@ -50,8 +50,8 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
 <ul>
  <li><a href="vtec_obs.php">ASOS/AWOS Obs during WFO WWA</a>
   <br />Prints out ASOS/AWOS observations during selected VTEC warning types.</li>
- <li><a href="wfo_vtec_count.php">Number of VTEC Events by Year by WFO</a>
-  <br />Map of the number of VTEC events by WFO by year.</li>
+ <li><a href="wfo_vtec_count.php">Number of VTEC Events by WFO</a>
+  <br />Map of the number of VTEC events by WFO for a time period of your choice.</li>
   <li><a href="days_since.php">Days Since VTEC Product</a>
   <br />Map of the number of days since a WFO issued a VTEC Product.</li>
  <li><a href="../vtec/">VTEC Browser</a>
