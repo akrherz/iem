@@ -7,7 +7,7 @@ cursor = COOP.cursor()
 precip = numpy.zeros( (2014-1893, 366))
 
 cursor.execute("""SELECT year, extract(doy from day), precip from alldata_ia
- WHERE station = 'IA2364' and precip > 0 and year > 1898""")
+ WHERE station = 'IA8706' and precip > 0 and year > 1898""")
 for row in cursor:
     precip[ row[0] - 1893, row[1] - 1] = row[2]
     
@@ -18,7 +18,7 @@ prev = 0
 for yr in range(1893,2014):
     sums = numpy.cumsum(precip[yr-1893,:])
     idx = numpy.digitize([prev,], sums)
-    if idx < 366:
+    if idx < 200:
         print "%s total: %s prev: %s idx: %s" % (yr, sums[-1], prev, idx)
         years.append( yr )
         jdays.append( idx )
