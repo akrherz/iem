@@ -65,8 +65,8 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
   <TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
   <TR><TH>Starting On:</TH>
     <TD><?php echo yearSelect2(1986, date("Y"), "startYear"); ?></TD>
-   <td><?php echo monthSelect(date("m"), "startMonth"); ?></td>
- <td><?php echo daySelect2(date("d"), "startDay"); ?></td>
+   <td><?php echo monthSelect(1, "startMonth"); ?></td>
+ <td><?php echo daySelect2(1, "startDay"); ?></td>
  </tr>
 </TR>
 <TR><TH>Ending On:</TH>
