@@ -46,6 +46,12 @@ def create_file( fn ):
     lon.axis = "X"
     lon[:] = iemre.XAXIS
 
+    mask = nc.createVariable('domain', numpy.float, ('lat', 'lon'), fill_value=1.e20)
+    mask.units = "1"
+    mask.long_name = "domain weighting" 
+    mask.standard_name = "weighting"
+    mask.coordinates = "lon lat"
+
     for state in ['IA', 'ND', 'SD', 'KS', 'NE', 'MO', 'IN', 'IL', 'OH', 'MI',
                   'WI', 'MN', 'KY' ]:
         st = nc.createVariable(state, numpy.float, ('lat', 'lon'), fill_value=1.e20)
@@ -54,6 +60,16 @@ def create_file( fn ):
         st.standard_name = "weighting"
         st.coordinates = "lon lat"
     
+    nc.close()
+
+def do_mask(fn):
+    """ Use the state masks to compute the overall mask """
+    nc = netCDF4.Dataset(fn, 'a')
+    mask = nc.variables['domain']
+    for state in ['IA', 'ND', 'SD', 'KS', 'NE', 'MO', 'IN', 'IL', 'OH', 'MI',
+                  'WI', 'MN', 'KY' ]:
+        mask[:] = numpy.where(nc.variables[state][:] > 0, 1, mask)
+
     nc.close()
 
 def do_weighting(fn):
@@ -100,3 +116,4 @@ if __name__ == '__main__':
     if not os.path.isfile(fn):
         create_file( fn )
     do_weighting(fn)
+    do_mask(fn)
