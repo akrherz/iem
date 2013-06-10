@@ -61,7 +61,11 @@ if ($mode == "monthly") {
   else
     $str .= "<br>Low: ". $row["min_tmpf"] ;
   if ($row["pday"] >= 0){
-  	$str .= "<br>Rain: ". $row["pday"];
+  	if ($row["pday"] < 0.01){
+  		$str .= "<br>Rain: Trace";
+  	} else {
+  		$str .= "<br>Rain: ". $row["pday"];
+  	}
   }
   if (strlen($row["max_gust"]) > 0 && strlen($row["lmax_gust_ts"]) > 0) {
     $gtim = strtotime(substr($row["lmax_gust_ts"],0,16));
