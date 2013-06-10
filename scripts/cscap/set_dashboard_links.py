@@ -77,7 +77,7 @@ varconv = {
            'soil2': 'waterretentionat15bar',
            'soil15': 'soilnitratespringsampling',
            'soil16': 'soilnitratefallsampling',
-           'soil22': 'soil22soilammoniumoptional',
+           'soil22': 'soil22fallsoilammoniumoptional',
            }
 
 CACHE = {}
