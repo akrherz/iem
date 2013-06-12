@@ -10,8 +10,8 @@
  
  /* Get the last observation */
  $rs = pg_query($dbconn, "select * from (select *, 
- 		rank() over (order by valid DESC) from sm_hourly 
- 		ORDER by valid DESC LIMIT 1) as foo where rank = 1");
+ 		rank() over (partition by station order by valid DESC) from sm_hourly 
+ 		ORDER by valid DESC LIMIT 100) as foo where rank = 1");
  $table = "<table cellspacing='0' cellpadding='2', border='1'>
  		<tr><th rowspan='2'>Location</th>
  		<th rowspan='2'>Valid</th>
