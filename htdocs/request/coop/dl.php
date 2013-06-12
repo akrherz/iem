@@ -151,7 +151,7 @@ year          day           radn          maxt          mint          rain
 			 WHERE station IN ". $stationString ." GROUP by month) as foo ");
 	$rs = pg_execute($connection, 'TBD2', Array());
 	$row = pg_fetch_assoc($rs,0);
-	$response .= sprintf("tav = %.3f (oC) ! annual amplitude in mean monthly temperature\n",
+	$response .= sprintf("amp = %.3f (oC) ! annual amplitude in mean monthly temperature\n",
 			f2c($row['h']) - f2c($row['l']));
 	
 	$response .= "year          day           radn          maxt          mint          rain
