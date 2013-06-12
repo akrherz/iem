@@ -62,6 +62,14 @@
 
 
 """
+
+VARCONV = {
+           'vwc06_avg': 'vwc_06_avg',
+           'vwc12_avg': 'vwc_12_avg',
+           'vwc24_avg': 'vwc_24_avg',
+           'vwc50_avg': 'vwc_50_avg',
+           }
+
 # stdlib
 import os
 import pytz
@@ -92,7 +100,7 @@ def hourly_process(nwsli, maxts):
     # Read header....
     headers = []
     for col in lines[1].strip().replace('"', '').split(","):
-        headers.append(col)
+        headers.append(VARCONV.get(col.lower(), col.lower()))
     # Read data
     for i in range(len(lines)-1, 3, -1):
         tokens = lines[i].strip().replace('"','').split(",")
