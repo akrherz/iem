@@ -28,7 +28,12 @@ CREATE TABLE sm_daily (
   PA_2 real,
   PA_3 real,
   T06_C_Avg real,
-  VMW_06_Avg real
+  VMW_06_Avg real,
+  ec06 real,
+  pa06 real,
+  pa12 real,
+  pa24 real,
+  pa50 real
 );
 CREATE UNIQUE index sm_daily_idx on sm_daily(station, valid);
 GRANT SELECT on sm_daily to nobody;
