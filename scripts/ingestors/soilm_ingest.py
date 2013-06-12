@@ -106,7 +106,7 @@ def hourly_process(nwsli, maxts):
         tokens = lines[i].strip().replace('"','').split(",")
         if len(tokens) != len(headers):
             continue
-        valid = datetime.datetime.strptime(tokens[ headers.index('TIMESTAMP')],
+        valid = datetime.datetime.strptime(tokens[ headers.index('timestamp')],
                                            '%Y-%m-%d %H:%M:%S')
         valid = valid.replace(tzinfo=pytz.FixedOffset(-360))
         if valid <= maxts:
