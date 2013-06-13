@@ -2,26 +2,24 @@
 include("../../../config/settings.inc.php");
 $TITLE = "IEM | COOP Climate Plots";
 $station1 = isset($_GET["station1"]) ? $_GET["station1"] : "IA0000";
-$station2 = isset($_GET["station2"]) ? $_GET["station2"] : "";
+$station2 = isset($_GET["station2"]) ? $_GET["station2"] : null;
 $mode = isset($_GET["mode"]) ? $_GET["mode"]: "";
 $THISPAGE="networks-coop";
 include("$rootpath/include/header.php"); 
-include("$rootpath/include/network.php");     
-$nt = new NetworkTable("IACLIMATE");
-$cities = $nt->table;
+include("$rootpath/include/imagemaps.php");     
+
+$imgurl = sprintf("/cgi-bin/climate/daily.py?station1=%s", $station1);
+if ($mode == 'c'){
+	$imgurl .= sprintf("&station2=%s", $station2);
+}
+
 ?>
 
-<div class="text">
-<B>Navigation:</B>
-<a href="http://mesonet.agron.iastate.edu/">IEM</a> &nbsp;>&nbsp;
-<a href="/climate/">Climatology</a> &nbsp;>&nbsp;
-<B>COOP Station Normals</B>
+<h3>Daily Climatology</h3>
 
-<BR>
-<p>The IEM has a database of daily temperature averages 
-based on a climatology from the COOP stations.  You can interactively generate 
-a plot from this dataset.</p>
-
+<p>This application dynamically generates plots of the daily average high
+and low temperature for climate locations tracked by the IEM.  You can optionally
+plot two stations at once for a visual comparison.</p>
 
 <div style="padding: 3px;">
      <b>Make Plot Selections:</b>
@@ -29,7 +27,7 @@ a plot from this dataset.</p>
 
 <form method="GET" action="climate_fe.php">
 
-<table>
+<table cellpadding='3' border='1' cellspacing='0'>
 <tr>
   <th class="subtitle">Station 1</th>
   <th class="subtitle">Station 2</th>
@@ -39,30 +37,10 @@ a plot from this dataset.</p>
 
 <tr>
 <td>
-<SELECT name="station1">
-<?php
-	for(reset($cities); $key = key($cities); next($cities))
-	{
-		print("<option value=\"" . $cities[$key]["id"] ."\"");
-                if ($cities[$key]["id"] == $station1) print(" SELECTED ");
-
-		print(">" . $cities[$key]["name"] . "\n");
-	}
-?>
-</SELECT>
+<?php echo networkSelect("IACLIMATE", $station1, Array(), "station1"); ?>
 </td>
 <td>
-<SELECT name="station2">
-<?php
-        for(reset($cities); $key = key($cities); next($cities))
-        {
-                print("<option value=\"" . $cities[$key]["id"] ."\"");
-                if ($cities[$key]["id"] == $station2) print(" SELECTED ");
-
-                print(">" . $cities[$key]["name"] . "\n");
-        }
-?>
-</SELECT>
+<?php echo networkSelect("IACLIMATE", $station2, Array(), "station2"); ?>
 </td>
 <td>
   <select name="mode">
@@ -89,13 +67,7 @@ a plot from this dataset.</p>
 </div></div>
 
 <?php
-
-  if ($mode == "c"){
-    echo "<img src=\"climate.php?station1=".$station1."&station2=".$station2."\">\n";
-
-  }else if (strlen($station1) > 0 ){
-    echo "<img src=\"climate.php?station1=". $station1 ."\">\n";
-  }
-?></div>
+echo "<img src=\"$imgurl\">\n";
+?>
 
 <?php include("$rootpath/include/footer.php"); ?>
