@@ -43,9 +43,11 @@ function fetchtimes(findtime){
 
 function getimage(){
 	href = $('select[name=times]').val();
-	fn = href.split('/');
-	window.location.href = '#'+ fn[ fn.length -1];
-	$('#theimage').attr('src', href);
+	if (href){
+		fn = href.split('/');
+		window.location.href = '#'+ fn[ fn.length -1];
+		$('#theimage').attr('src', href);
+	}
 }
 
 $(document).ready(function(){
@@ -67,7 +69,7 @@ $(document).ready(function(){
 			cid = tokens[0];
 			tpart = tokens[1];
 			/* Set camera ID */
-			$('select[name=cid] option[value='+cid+']').attr("selected", "selected")
+			$('select[name=cid] option[value='+cid+']').attr("selected", "selected");
 			dstr = tpart.substr(4,2) +"/"+ tpart.substr(6,2) +"/"+ tpart.substr(0,4);
 			$("#datepicker").datepicker("setDate", new Date(dstr)); // mm/dd/yyyy
 			isotime = tpart.substr(0,4) +'-'+ tpart.substr(4,2) +"-"+ tpart.substr(6,2) +
