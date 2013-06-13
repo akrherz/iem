@@ -17,15 +17,18 @@ sprec = []
 acursor.execute("""
  SELECT valid, tmpf, dwpf,
  drct, sknt, pres1, gust_sknt, precip,
-  valid at time zone 'CDT' from t2013_1minute WHERE station = 'SUX'
- and valid BETWEEN '2013-05-14 0:00' and '2013-05-14 23:59' 
+  valid at time zone 'CDT' from t2013_1minute WHERE station = 'GRI'
+ and valid BETWEEN '2013-06-11 2:00' and '2013-06-11 7:59' 
  ORDER by valid ASC
 """)
 for row in acursor:
         stemps.append( row[1])
         
         sdrct.append( float(row[3] or 0))
-        ssknt.append( (row[4] or 0) * 1.15)
+        if row[4] > 60:
+            ssknt.append( None )
+        else:
+            ssknt.append( (row[4] or 0) * 1.15)
         sdwpf.append( row[2] )
         pres1.append( row[5] )
         sgust.append( (row[6] or 0) * 1.15)
@@ -35,20 +38,21 @@ for row in acursor:
  
 #print sgust
 
-sts = datetime.datetime(2013,5,14, 0,0)
+sts = datetime.datetime(2013,6,11, 2,0)
 sts = sts.replace(tzinfo=pytz.timezone("America/Chicago"))
-ets = datetime.datetime(2013,5,15, 0,1)
+ets = datetime.datetime(2013,6,11, 8,1)
 ets = ets.replace(tzinfo=pytz.timezone("America/Chicago"))
 interval = datetime.timedelta(hours=1)
 now = sts
 xticks = []
 xlabels = []
 while now <= ets:
+    print now
     fmt = "%-I %p"
     if now == sts or now.hour == 0:
         fmt = "%-I %p\n%-d %B"
     
-    if now == sts or (now.minute == 0 and now.hour % 3 == 0 ):
+    if now == sts or (now.minute == 0 and now.hour % 1 == 0 ):
         xticks.append( now )
         xlabels.append( now.strftime(fmt))
     now += interval
@@ -71,12 +75,11 @@ axes[0].grid(True)
 axes[0].set_xlim(xticks[0], xticks[-1])
 axes[0].legend(loc=2, prop=prop, ncol=1)
 #ax.set_ylim(0,10)
-axes[0].set_title("14 May 2013 Sioux City, IA (KSUX) One Minute Time Series")
-#ax.set_ylim(0,361)
+axes[0].set_title("11 June 2013 Grand Island, NE (KGRI) One Minute Time Series")
+axes[0].set_ylim(35,105)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
 
-print len(sdrct), svalid[0]
 axes[1].plot(svalid, sdrct, color='k', linestyle='None', marker='o')
 axes[1].set_ylabel("Wind Direction")
 axes[1].grid(True)
@@ -91,14 +94,14 @@ ax2.plot(svalid, ssknt, color='b', label='Speed')
 ax2.set_ylabel("Wind Speed [mph]")
 ax2.legend(loc=2, prop=prop)
 
-"""
-axes[2].plot(svalid, pres1, color='k')
-axes[2].set_xticks(xticks)
-axes[2].set_ylabel("Pressure Altimeter [in]")
-axes[2].set_xticklabels(xlabels)
-axes[2].grid(True)
+#axes[2].plot(svalid, pres1, color='k')
+#axes[2].set_xticks(xticks)
+#axes[2].set_ylabel("Pressure Altimeter [in]")
+#axes[2].set_xticklabels(xlabels)
+#axes[2].grid(True)
 #axes[2].set_xlim(min(xticks), max(xticks))
 
+"""
 axes[2].set_xlim(xticks[0], xticks[-1])
 axes[2].legend(loc=3,ncol=1)
 #ax.set_ylim(0,361)

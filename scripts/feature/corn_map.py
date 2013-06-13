@@ -4,12 +4,12 @@ import numpy
 data = {}
 d2013 = {}
 
-for linenum, line in enumerate(open('/home/akrherz/Downloads/CA8A1383-B422-399E-A91A-033FE9DE5312.csv')):
+for linenum, line in enumerate(open('/home/akrherz/Downloads/D85CCCC5-A95F-3BFD-B254-3BB0A64F9799.csv')):
     if linenum == 0:
         continue
     tokens = line.split(",")
     day = datetime.datetime.strptime(tokens[3], '%Y-%m-%d')
-    if day.month == 5 and day.day in range(1,8):
+    if day.month == 6 and day.day in range(8,15):
         state = tokens[5]
         val = float(tokens[-1])
         if not data.has_key(state):
@@ -106,7 +106,7 @@ axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
                 color=maue(range(len(bins))),
                 ec='None')
 
-ax.text(0.17, 1.05, "5 May 2013 USDA Percentage of Corn Planted by State\nDeparture from 1979-2012 Average for First week of May", transform=ax.transAxes,
+ax.text(0.17, 1.05, "9 Jun 2013 USDA Percentage of Soybean Planted by State\nDeparture from 1980-2012 Average for Second week of June", transform=ax.transAxes,
      size=14,
     horizontalalignment='left', verticalalignment='center')
 # Logo!
@@ -116,3 +116,5 @@ ax3 = plt.axes([0.05,0.9,0.1,0.1], frameon=False, axisbg=(0.4471,0.6235,0.8117),
 ax3.imshow(logo)
 
 fig.savefig('test.svg')
+import iemplot
+iemplot.makefeature('test')
