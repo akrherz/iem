@@ -49,6 +49,9 @@ def doit(gts, varname, prefix):
             print "q2_raster Missing Tile: %s Time: %s" % (tile, gts)
             continue
         nc = netCDF4.Dataset( fp )
+        if varname not in nc.variables.keys():
+            print '%s missing %s' % (fp, varname)
+            continue
         hsr = nc.variables[varname]
         val = hsr[:] / hsr.Scale # convert to mm
         # Bump up by one, so that we can set missing to color index 0
