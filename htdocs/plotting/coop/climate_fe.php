@@ -8,7 +8,7 @@ $THISPAGE="networks-coop";
 include("$rootpath/include/header.php"); 
 include("$rootpath/include/imagemaps.php");     
 
-$imgurl = sprintf("/cgi-bin/climate/daily.py?station1=%s", $station1);
+$imgurl = sprintf("/cgi-bin/climate/daily.py?p=daily&station1=%s", $station1);
 if ($mode == 'c'){
 	$imgurl .= sprintf("&station2=%s", $station2);
 }
