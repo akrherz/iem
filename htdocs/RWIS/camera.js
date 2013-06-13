@@ -1,13 +1,37 @@
-var updateTimes = false;
+
+//http://stackoverflow.com/questions/5802461/javascript-which-browsers-support-parsing-of-iso-8601-date-string-with-date-par
+(function() {
+  //ISO-8601 Date Matching
+  var reIsoDate = /^(\d{4})-(\d{2})-(\d{2})((T)(\d{2}):(\d{2})(:(\d{2})(\.\d*)?)?)?(Z)?$/;
+  Date.parseISO = function(val) {
+    var m;
+
+    m = typeof val === 'string' && val.match(reIsoDate);
+    if (m) return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[6] || 0, +m[7] || 0, +m[9] || 0, parseInt((+m[10]) * 1000) || 0));
+
+    return null;
+  }
+
+  //MS-Ajax Date Matching
+  var reMsAjaxDate = /^\\?\/Date\((\-?\d+)\)\\?\/$/;
+  Date.parseAjax = function(val) {
+    var m;
+
+    m = typeof val === 'string' && val.match(reMsAjaxDate);
+    if (m) return new Date(+m[1]);
+
+    return null;
+  }
+})();
 
 function fetchtimes(findtime){
-	cid = $('select[name=cid]').val();
-	mydate = $('#realdate').val();
+	var cid = $('select[name=cid]').val();
+	var mydate = $('#realdate').val();
 	$.getJSON('/json/webcam.py?cid='+cid+'&date='+mydate, function(data){
 	    var html = '';
     	var len = data.images.length;
     	for (var i = 0; i< len; i++) {
-    		ts = new Date(data.images[i].valid);
+    		var ts = Date.parseISO(data.images[i].valid);
     		
     		var result = new Array();
 			result[0] = $.datepicker.formatDate('M dd ', ts);
@@ -26,7 +50,7 @@ function fetchtimes(findtime){
     			result[4] = " AM";
 			}
 
-			ts = result.join('');
+			var ts = result.join('');
     		
         	html += '<option ts="'+ data.images[i].valid +'" value="' + data.images[i].href + '">' + ts + '</option>';
     	}
@@ -42,7 +66,7 @@ function fetchtimes(findtime){
 }
 
 function getimage(){
-	href = $('select[name=times]').val();
+	var href = $('select[name=times]').val();
 	if (href){
 		fn = href.split('/');
 		window.location.href = '#'+ fn[ fn.length -1];
@@ -61,13 +85,13 @@ $(document).ready(function(){
 		});
 		
 	// See if we have a anchor HREF already
-	tokens = window.location.href.split("#");
+	var tokens = window.location.href.split("#");
 	if (tokens.length == 2){
 		fn = tokens[1];
 		tokens = fn.split("_");
 		if (tokens.length == 2){
-			cid = tokens[0];
-			tpart = tokens[1];
+			var cid = tokens[0];
+			var tpart = tokens[1];
 			/* Set camera ID */
 			$('select[name=cid] option[value='+cid+']').attr("selected", "selected");
 			dstr = tpart.substr(4,2) +"/"+ tpart.substr(6,2) +"/"+ tpart.substr(0,4);
