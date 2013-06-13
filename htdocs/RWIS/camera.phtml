@@ -1,0 +1,55 @@
+<?php
+include("../../config/settings.inc.php");
+define("IEM_APPID", 145);
+$HEADEXTRA = '<script src="/js/jquery.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+		<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+		<script src="camera.js"></script>';
+include("../../include/database.inc.php");
+$THISPAGE = "networks-rwis";
+include("../../include/header.php");
+
+$conn = iemdb("mesosite");
+$rs = pg_query($conn, "SELECT id, name, date(sts) as s from webcams WHERE network = 'IDOT'
+		ORDER by name ASC");
+$sform = "<select name='cid'>";
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	$sform .= sprintf("<option value='%s'>%s -- (%s)</option>\n", $row["id"], $row["name"],
+			$row["s"]);
+}
+$sform .= "</select>";
+
+
+?>
+
+<h3>Archived Iowa RWIS Webcam Imagery</h3>
+
+<p>The IEM archives imagery provided by the Iowa DOT RWIS network.  Each site
+with a webcam has a number of preset views that are each queried about once
+per 10 minutes.  Please select the webcam view you wish to see and then 
+select a date of interest.  The left hand menu will automatically populate with
+a listing of images available for that date. <strong>Hint:</strong> Once you
+select a time, use the up/down keyboard arrow to create a quasi-timelapse.</p>
+
+<p>Archiving started back on 19 Dec 2009.  The start date of invidual webcams
+is shown in the select menu.
+
+<div style="border: 3px solid #EEE; width: 900px;">
+<div style="background: #eee;">
+ <span>Select Webcam View:</span> <?php echo $sform; ?>
+ <span>Date:</span> <input type="text" id="datepicker" />
+ <input type="hidden" id="realdate" />
+</div>
+<div style="float: left; min-width: 100px; border: 1px solid #000;">
+ <span>Select Time:</span><br />
+ <select size="30" name="times">
+ </select>
+</div>
+<img id="theimage" src="/data/camera/640x480/IDOT-038-02.jpg" style="float: right;"/>
+
+<br clear="all" />
+</div>
+
+<?php 
+include("../../include/footer.php");
+?>
