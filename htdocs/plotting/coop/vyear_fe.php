@@ -4,19 +4,15 @@ $TITLE = "IEM | COOP Data vs Year";
 include("$rootpath/include/header.php"); 
 
 $station = isset($_GET["station"]) ? $_GET["station"] : "";
-$year = isset($_GET["year"]) ? $_GET["year"]: 2004;
-include("$rootpath/include/imagemaps.php");     
+$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
+include("../../../include/forms.php");     
+include("../../../include/imagemaps.php");
 
-
+$imgurl = sprintf("/cgi-bin/climate/daily.py?plot=compare&station1=%s&year=%s",
+		$station, $year);
 ?>
 
-<div class="text">
-<B>Navigation:</B>
-<a href="http://mesonet.agron.iastate.edu/">IEM</a> &nbsp;>&nbsp;
-<a href="/climate/">Climatology</a> &nbsp;>&nbsp;
-<B>COOP Climate vs Year</B>
 
-<BR>
 <p class="intro">With this form, you can interactively plot one year vs 
 climatology for a station.  Please note the first year of record for a 
 station before entering the year you would like to plot against.</p>
@@ -26,8 +22,8 @@ station before entering the year you would like to plot against.</p>
 
 <table>
 <tr>
-  <th class="subtitle">Station (First Climate Year)</th>
-  <th class="subtitle">Input Year ex) 2000</th>
+  <th class="subtitle">Station:</th>
+  <th class="subtitle">Select Year:</th>
   <td></td>
 </tr>
 
@@ -36,7 +32,7 @@ station before entering the year you would like to plot against.</p>
 <?php echo networkSelect("IACLIMATE", $station); ?>
 </td>
 <td>
-<input type="text" name="year" size=5 maxlength=4 value="<?php echo $year; ?>">
+<?php echo yearSelect(1893, $year); ?>
 </td>
 <td>
 <input type="SUBMIT" value="Make Plot">
@@ -47,13 +43,6 @@ station before entering the year you would like to plot against.</p>
 </tr></table>
 
 <?php
-
-  if (strlen($station) > 0 ){
-    echo "<img src=\"vyear.php?year=". $year ."&station=". $station ."\">\n";
-  }
-?></div>
-
-<?php include("$rootpath/include/footer.php"); ?>
-
-</body>
-</HTML>
+    echo "<img src=\"$imgurl\">\n";
+?>
+<?php include("../../../include/footer.php"); ?>
