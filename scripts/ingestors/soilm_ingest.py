@@ -79,7 +79,7 @@ import tempfile
 
 # Third party
 import psycopg2
-ISUAG = psycopg2.connect(database='isuag', user='mesonet', host='iemdb')
+ISUAG = psycopg2.connect(database='isuag',  host='iemdb')
 icursor = ISUAG.cursor()
 
 BASE = '/mnt/home/mesonet/sm/'
@@ -138,13 +138,13 @@ def daily_process(nwsli, maxts):
     # Read header....
     headers = []
     for col in lines[1].strip().replace('"', '').split(","):
-        headers.append(col)
+        headers.append(VARCONV.get(col.lower(), col.lower()))
     # Read data
     for i in range(len(lines)-1, 3, -1):
         tokens = lines[i].strip().replace('"','').split(",")
         if len(tokens) != len(headers):
             continue
-        valid = datetime.datetime.strptime(tokens[ headers.index('TIMESTAMP')][:10],
+        valid = datetime.datetime.strptime(tokens[ headers.index('timestamp')][:10],
                                            '%Y-%m-%d')
         valid = valid.date() - datetime.timedelta(days=1)
         if valid < maxts:

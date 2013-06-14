@@ -64,7 +64,14 @@ CREATE TABLE sm_hourly (
   T50_C_Avg real,
   PA real,
   PA_2 real,
-  PA_3 real
+  PA_3 real,
+  VWC_06_Avg real,
+  T06_C_Avg real,
+  ec06 real,
+  pa06 real,
+  pa12 real,
+  pa24 real,
+  pa50 real
 );
 CREATE UNIQUE index sm_hourly_idx on sm_hourly(station, valid);
 GRANT SELECT on sm_hourly to nobody;
