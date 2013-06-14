@@ -87,6 +87,8 @@ STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
                           hourly='Calumet/Calumet_HrlySI.dat'),
             'BOOI4': dict(daily='AEAFarm/AEAFarm_DailySI.dat',
                           hourly='AEAFarm/AEAFarm_HrlySI.dat'),
+            'SLNI4': dict(daily='Wellman/Wellman_DailySI.dat',
+                          hourly='Wellman/Wellman_HrlySI.dat'),
             }
 
 def hourly_process(nwsli, maxts):
@@ -95,7 +97,7 @@ def hourly_process(nwsli, maxts):
     if not os.path.isfile(fn):
         return
     lines = open(fn).readlines()
-    if len(lines) < 6:
+    if len(lines) < 5:
         return
     # Read header....
     headers = []
