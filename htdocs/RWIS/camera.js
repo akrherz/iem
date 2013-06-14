@@ -28,6 +28,7 @@ function fetchtimes(findtime){
 	var cid = $('select[name=cid]').val();
 	var mydate = $('#realdate').val();
 	$.getJSON('/json/webcam.py?cid='+cid+'&date='+mydate, function(data){
+    	$('select[name=times]').html("<option value='-1'>Loading...</option>");
 	    var html = '';
     	var len = data.images.length;
     	for (var i = 0; i< len; i++) {
@@ -67,7 +68,7 @@ function fetchtimes(findtime){
 
 function getimage(){
 	var href = $('select[name=times]').val();
-	if (href){
+	if (href && href != '-1'){
 		fn = href.split('/');
 		window.location.href = '#'+ fn[ fn.length -1];
 		$('#theimage').attr('src', href);
@@ -99,7 +100,9 @@ $(document).ready(function(){
 			isotime = tpart.substr(0,4) +'-'+ tpart.substr(4,2) +"-"+ tpart.substr(6,2) +
 			          'T'+ tpart.substr(8,2) +':'+ tpart.substr(10,2) +":00Z";
 			fetchtimes(isotime);
-		}
+		} else {
+		    fetchtimes(false);
+                }
 	} else {
 		fetchtimes(false);
 	}

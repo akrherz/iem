@@ -35,17 +35,17 @@ select a time, use the up/down keyboard arrow to create a quasi-timelapse.</p>
 is shown in the select menu.
 
 <div style="border: 3px solid #EEE; width: 900px;">
-<div style="background: #eee;">
- <span>Select Webcam View:</span> <?php echo $sform; ?>
- <span>Date:</span> <input type="text" id="datepicker" />
+<div style="background: #eee; border-bottom: 4px solid #ccc;">
+ <span style="font-weight: bold;">1. Select Webcam View:</span> <?php echo $sform; ?>
+ <span style="font-weight: bold;">2. Date:</span> <input type="text" id="datepicker" />
  <input type="hidden" id="realdate" />
 </div>
-<div style="float: left; min-width: 100px; border: 1px solid #000;">
- <span>Select Time:</span><br />
+<div style="float: left; min-width: 100px; border-right: 4px solid #ccc; padding: 3px; background: #eee;">
+ <span style="font-weight: bold;">3. Select Time:</span><br />
  <select size="30" name="times">
  </select>
 </div>
-<img id="theimage" src="/data/camera/640x480/IDOT-038-02.jpg" style="float: right;"/>
+<img id="theimage" src="camera_instructions.png" style="float: left; margin: 5px;"/>
 
 <br clear="all" />
 </div>
