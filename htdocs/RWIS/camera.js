@@ -27,8 +27,8 @@
 function fetchtimes(findtime){
 	var cid = $('select[name=cid]').val();
 	var mydate = $('#realdate').val();
-	$.getJSON('/json/webcam.py?cid='+cid+'&date='+mydate, function(data){
     	$('select[name=times]').html("<option value='-1'>Loading...</option>");
+	$.getJSON('/json/webcam.py?cid='+cid+'&date='+mydate, function(data){
 	    var html = '';
     	var len = data.images.length;
     	for (var i = 0; i< len; i++) {
