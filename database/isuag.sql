@@ -33,7 +33,10 @@ CREATE TABLE sm_daily (
   pa06 real,
   pa12 real,
   pa24 real,
-  pa50 real
+  pa50 real,
+  t107_1 real,
+  t107_2 real,
+  t107_3 real
 );
 CREATE UNIQUE index sm_daily_idx on sm_daily(station, valid);
 GRANT SELECT on sm_daily to nobody;
