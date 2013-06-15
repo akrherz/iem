@@ -6,7 +6,7 @@ cd current
 #python 24h_change.py
 
 cd ../ingestors/rwis
-python process_clarus.py
+#python process_clarus.py
 
 cd ../madis
 python to_iemaccess.py
