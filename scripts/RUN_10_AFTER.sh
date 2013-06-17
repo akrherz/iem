@@ -10,6 +10,9 @@ cd mos
 python current_bias.py NAM
 python current_bias.py GFS
 
+cd ../rtma
+python wind_power.py &
+
 cd ../plots
 ./RUN_PLOTS
 
