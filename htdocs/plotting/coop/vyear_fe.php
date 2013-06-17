@@ -13,9 +13,8 @@ $imgurl = sprintf("/cgi-bin/climate/daily.py?plot=compare&station1=%s&year=%s",
 ?>
 
 
-<p class="intro">With this form, you can interactively plot one year vs 
-climatology for a station.  Please note the first year of record for a 
-station before entering the year you would like to plot against.</p>
+<p>With this form, you can interactively plot one year vs 
+climatology for a station.</p>
 
 
 <form method="GET" action="vyear_fe.php">
