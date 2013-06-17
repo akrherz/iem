@@ -1,8 +1,8 @@
 <?php 
-include("../../config/settings.inc.php");
-	$THISPAGE = "current-products";
-	$TITLE = "IEM | Current Data";
-	include("$rootpath/include/header.php"); 
+ include("../../config/settings.inc.php");
+ $THISPAGE = "current-products";
+ $TITLE = "IEM | Current Data";
+ include("../../include/header.php"); 
 ?>
 
 <table width="800px">
@@ -16,7 +16,7 @@ include("../../config/settings.inc.php");
 
 
 
-<table border=0 width=780px>
+<table border="1" cellpadding="3" cellspacing="0">
 <tr><td valign="top" width="33%">
 
 <h3 class="subtitle">Mesonet Plots</h3>
@@ -56,8 +56,7 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
   <li><a href="/data/heat.gif">Heat Index</a></li>
   <li><a href="/data/relh.gif">Relative Humidity</a></li>
   <li><a href="/timemachine/#24.0">Visibility</a></li>
-  <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
-  <li><a href="/timemachine/#16.<?php echo date('Ymd');?>0000">Wind Gust Today</a></li>
+
 </ul>
 
 <h3 class="subtitle">Precipitation</h3>
@@ -81,6 +80,13 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
 </ul>
 
 </td><td valign="top" width="33%">
+
+<h3>Wind Plots</h3>
+<ul>
+  <li><a href="/timemachine/#60.<?php echo gmdate("YmdH", time() -3600); ?>00">Wind Power Potential</a></li>
+  <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
+  <li><a href="/timemachine/#16.<?php echo date('Ymd');?>0000">Wind Gust Today</a></li>
+</ul>
 
 
 <h3 class="subtitle">Gridded Surface Plots:</h3>
@@ -113,6 +119,7 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
 <br><a href="http://www.rap.ucar.edu/weather/upper/oax.gif">Omaha</a>
 <br><a href="http://www.rap.ucar.edu/weather/upper/mpx.gif">Minneapolis</a>
 <br><a href="http://www.rap.ucar.edu/weather/upper/top.gif">Topeka</a>
+<br /><a href="http://www.uni.edu/storm/">Profiling Radiometer @UNI</a>
 
 </td></tr>
 </table>
@@ -120,4 +127,4 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
 </div>
 
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../include/footer.php"); ?>
