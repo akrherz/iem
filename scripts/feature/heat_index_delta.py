@@ -26,11 +26,38 @@ orelh = meteorology.relh(otmpf, odwpf)
 
 
 def calc(tmpf, relh):
-    return (-42.379 + 2.04901523 * tmpf + 10.14333127 * relh 
-         - 0.22475541 * tmpf * relh - 0.00683783 * tmpf ** 2
-         - 0.05481717 * relh ** 2 + 0.00122874 * tmpf ** 2 * relh
-         + 0.00085282 * tmpf * relh ** 2 - 0.00000199 * tmpf ** 2 * relh ** 2
-         )
+    """ There is no straightfoward equation, we have approximations to 
+    tables 
+    
+    Stull, Richard (2000). Meteorology for Scientists and Engineers, 
+    Second Edition. Brooks/Cole. p. 60. ISBN 9780534372149.
+    
+    """
+    return (16.923 + 0.185212 * tmpf 
+            + 5.37941 * relh
+            - 0.100254 * tmpf * relh 
+            + 0.00941695 * tmpf ** 2
+            + 0.00728898 * relh ** 2 
+            + 0.000345372 * tmpf ** 2 * relh
+            - 0.000814971 * tmpf * relh**2 
+            + 0.0000102102 * tmpf **2 * relh **2
+            - 0.000038646 * tmpf ** 3 
+            + 0.0000291583 ** relh ** 3
+            + 0.00000142721 * tmpf ** 3 * relh
+            + 0.000000197483 * tmpf * relh ** 3
+            - 0.00000002184429 * tmpf ** 3 * relh ** 2
+            + 0.000000000943296 * tmpf ** 2 * relh ** 3
+            - 0.0000000000418975 * tmpf ** 3 * relh ** 3)
+
+    # Below is more exact for a small range of values, 
+    # The Assessment of Sultriness. Part II: Effects of Wind, Extra Radiation 
+    # and Barometric Pressure on Apparent Temperature Journal of Applied 
+    # Meteorology, R. G. Steadman, July 1979, Vol 18 No7, pp874-885
+#    return (-42.379 + 2.04901523 * tmpf + 10.14333127 * relh 
+#         - 0.22475541 * tmpf * relh - 0.00683783 * tmpf ** 2
+#         - 0.05481717 * relh ** 2 + 0.00122874 * tmpf ** 2 * relh
+#         + 0.00085282 * tmpf * relh ** 2 - 0.00000199 * tmpf ** 2 * relh ** 2
+#         )
     
 tmpf = numpy.arange(80,110)
 relh = numpy.arange(10,101,2)
@@ -70,7 +97,7 @@ ax.set_xlim(80,110)
 ax.set_yticks([10,25,50,75,100])
 ax.set_ylabel("Relative Humidity [%]")
 ax.set_xlabel(r"Air Temperature $^\circ$F")
-ax.set_title("1933-2012 Des Moines Heat Index\ncontour is heat index delta at temp/relh\npixels are observed frequencies at that temperature")
+ax.set_title("1933-2012 Des Moines Heat Index\ncontour is heat index delta at temp/relh\npixels are observed frequencies [%] at that temperature")
 fig.tight_layout()
 #fig.colorbar(cs)
 
