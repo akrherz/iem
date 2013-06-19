@@ -3,10 +3,10 @@
 
 192.168.0.1      iem-director0 iem-director0.local
 192.168.0.2      iem-director1 iem-director1.local
-192.168.0.4      iemfe         iemfe.local iem-memcached
+192.168.0.4      iemfe         iemfe.local
 192.168.0.7      iemvm2
 192.168.0.8      iemvm0
-192.168.0.9      iemvm1
+192.168.0.9      iemvm1        
 192.168.0.10     iem10         iem10.local
 192.168.0.11     iem11         iem11.local iem-syslog
 192.168.0.19     iem19         iem19.local iemdb
@@ -32,3 +32,6 @@
 192.168.0.230    iemdb2
 192.168.0.254    iem-gateway   iem-gateway.local
 
+192.168.$net$.9      iem-memached
+192.168.$net$.4      iem-memached1
+192.168.$net$.21     iem-memached2
