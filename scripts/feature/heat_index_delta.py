@@ -25,14 +25,16 @@ odwpf = dt.temperature(numpy.array(odwpf), 'F')
 orelh = meteorology.relh(otmpf, odwpf)
 
 tmpf = dt.temperature(numpy.arange(80,110), 'F')
-relh = dt.humidity(numpy.arange(10,101,2), '%')
+dwpf = dt.temperature(numpy.arange(40,80), 'F')
 
-(t, r) = numpy.meshgrid(tmpf.value("F"), relh.value("%"))
+(t, d) = numpy.meshgrid(tmpf.value("F"), dwpf.value("F"))
 
-hindex = meteorology.heatindex(dt.temperature(t,'F'), dt.humidity(r, '%'))
+hindex = meteorology.heatindex(dt.temperature(t,'F'), dt.temperature(d, 'F'))
 counts = numpy.zeros( numpy.shape(hindex.value("F")), 'f')
-for otmp, orel in zip(otmpf.value("F"), orelh.value("%")):
-    counts[(int(round(orel)) - 10) /2, int(round(otmp)) - 80 ] += 1.0
+for otmp, odwp in zip(otmpf.value("F"), odwpf.value("F")):
+    if odwp < 40 or odwp >= 79.5:
+        continue
+    counts[(int(round(odwp)) - 40), int(round(otmp)) - 80 ] += 1.0
 
 ttot = numpy.sum(counts,0)
 print ttot
@@ -43,15 +45,15 @@ ratio = numpy.ma.array(counts / ttot * 100.0)
 
 cmap = cm.get_cmap('jet')
 cmap.set_under("tan")
-norm = mpcolors.BoundaryNorm([1,10,20,30,40,50,60,70,80,90,100], 256)
+norm = mpcolors.BoundaryNorm([1,2,3,5,10,15,20,30,40,50,100], 256)
 
-cs = ax.imshow( numpy.flipud(ratio), extent=(80,111, 10, 101), aspect='auto', 
+cs = ax.imshow( numpy.flipud(ratio), extent=(80,111, 40, 80), aspect='auto', 
            cmap=cmap, interpolation='nearest', norm=norm)
 
 fig.colorbar(cs)
 
 cs = ax.contour( hindex.value("F") - t, levels=[-5,-4,-3,-2,-1,0,2,4,6,8,10,14,20], 
-                 extent=(80,110, 10, 101), aspect='auto', colors='white')
+                 extent=(80,110, 40, 80), aspect='auto', colors='white')
 plt.clabel(cs, inline=1, fontsize=14, fmt='%.0f')
 
 #print numpy.shape(otmpf)
@@ -59,10 +61,10 @@ plt.clabel(cs, inline=1, fontsize=14, fmt='%.0f')
 #ax.scatter(otmpf.value("F"), orelh)
 
 ax.set_xlim(80,110)
-ax.set_yticks([10,25,50,75,100])
-ax.set_ylabel("Relative Humidity [%]")
+#ax.set_yticks([10,25,50,75,100])
+ax.set_ylabel("Dew Point Temperature $^\circ$F")
 ax.set_xlabel(r"Air Temperature $^\circ$F")
-ax.set_title("1933-2012 Des Moines Heat Index\ncontour is heat index delta at temp/relh\npixels are observed frequencies [%] at that temperature")
+ax.set_title("1933-2012 Des Moines Heat Index\ncontour is heat index delta at temp/dwp\npixels are observed frequencies [%] at that temperature")
 fig.tight_layout()
 #fig.colorbar(cs)
 
