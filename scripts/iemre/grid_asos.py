@@ -5,7 +5,8 @@ import datetime
 import Ngl
 from pyiem import iemre
 import iemdb
-from pyiem import meteorology, datatypes
+from pyiem import meteorology
+import pyiem.datatypes as dt
 import network
 import psycopg2.extras
 import pytz
@@ -31,12 +32,13 @@ def grid_wind(rs):
         if row['sknt'] is None or row['drct'] is None:
             continue
         # mps
-        u,v = meteorology.uv( row['sknt'] / 0.514, row['drct'] )
+        u,v = meteorology.uv( dt.speed(row['sknt'], 'KT'), 
+                              dt.direction(row['drct'], 'DEG') )
         if v is not None:
             lats.append(  nt.sts[row['station']]['lat'] )
             lons.append(  nt.sts[row['station']]['lon'] )
-            vdata.append( v )
-            udata.append( u )
+            vdata.append( v.value("MPS") )
+            udata.append( u.value("MPS") )
             
     if len(vdata) < 4:
         print "No wind data at all for time: %s" % (ts,)   
@@ -159,7 +161,7 @@ def grid_hour(nc, ts):
             
         res = generic_gridder(rs, 'max_tmpf')
         if res is not None:
-            nc.variables['tmpk'][offset] = datatypes.temperature(res, 'F').value('K')
+            nc.variables['tmpk'][offset] = dt.temperature(res, 'F').value('K')
 
         res = grid_skyc(rs)
         if res is not None:
