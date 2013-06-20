@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mpcolors
 import psycopg2
-from pyiem.datatypes import temperature
+import pyiem.datatypes as dt
 from pyiem import meteorology
 
 dbconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
@@ -20,53 +20,18 @@ for row in cursor:
     otmpf.append( row[0] )
     odwpf.append( row[1] )
     
-otmpf = temperature(numpy.array(otmpf), 'F')
-odwpf = temperature(numpy.array(odwpf), 'F')
+otmpf = dt.temperature(numpy.array(otmpf), 'F')
+odwpf = dt.temperature(numpy.array(odwpf), 'F')
 orelh = meteorology.relh(otmpf, odwpf)
 
+tmpf = dt.temperature(numpy.arange(80,110), 'F')
+relh = dt.humidity(numpy.arange(10,101,2), '%')
 
-def calc(tmpf, relh):
-    """ There is no straightfoward equation, we have approximations to 
-    tables 
-    
-    Stull, Richard (2000). Meteorology for Scientists and Engineers, 
-    Second Edition. Brooks/Cole. p. 60. ISBN 9780534372149.
-    
-    """
-    return (16.923 + 0.185212 * tmpf 
-            + 5.37941 * relh
-            - 0.100254 * tmpf * relh 
-            + 0.00941695 * tmpf ** 2
-            + 0.00728898 * relh ** 2 
-            + 0.000345372 * tmpf ** 2 * relh
-            - 0.000814971 * tmpf * relh**2 
-            + 0.0000102102 * tmpf **2 * relh **2
-            - 0.000038646 * tmpf ** 3 
-            + 0.0000291583 ** relh ** 3
-            + 0.00000142721 * tmpf ** 3 * relh
-            + 0.000000197483 * tmpf * relh ** 3
-            - 0.00000002184429 * tmpf ** 3 * relh ** 2
-            + 0.000000000943296 * tmpf ** 2 * relh ** 3
-            - 0.0000000000418975 * tmpf ** 3 * relh ** 3)
+(t, r) = numpy.meshgrid(tmpf.value("F"), relh.value("%"))
 
-    # Below is more exact for a small range of values, 
-    # The Assessment of Sultriness. Part II: Effects of Wind, Extra Radiation 
-    # and Barometric Pressure on Apparent Temperature Journal of Applied 
-    # Meteorology, R. G. Steadman, July 1979, Vol 18 No7, pp874-885
-#    return (-42.379 + 2.04901523 * tmpf + 10.14333127 * relh 
-#         - 0.22475541 * tmpf * relh - 0.00683783 * tmpf ** 2
-#         - 0.05481717 * relh ** 2 + 0.00122874 * tmpf ** 2 * relh
-#         + 0.00085282 * tmpf * relh ** 2 - 0.00000199 * tmpf ** 2 * relh ** 2
-#         )
-    
-tmpf = numpy.arange(80,110)
-relh = numpy.arange(10,101,2)
-
-(t, r) = numpy.meshgrid(tmpf, relh)
-
-hindex = calc(t, r)
-counts = numpy.zeros( numpy.shape(hindex), 'f')
-for otmp, orel in zip(otmpf.value("F"), orelh):
+hindex = meteorology.heatindex(dt.temperature(t,'F'), dt.humidity(r, '%'))
+counts = numpy.zeros( numpy.shape(hindex.value("F")), 'f')
+for otmp, orel in zip(otmpf.value("F"), orelh.value("%")):
     counts[(int(round(orel)) - 10) /2, int(round(otmp)) - 80 ] += 1.0
 
 ttot = numpy.sum(counts,0)
@@ -85,12 +50,12 @@ cs = ax.imshow( numpy.flipud(ratio), extent=(80,111, 10, 101), aspect='auto',
 
 fig.colorbar(cs)
 
-cs = ax.contour( hindex - t, levels=[-5,-4,-3,-2,-1,0,2,4,6,8,10,14,20], 
+cs = ax.contour( hindex.value("F") - t, levels=[-5,-4,-3,-2,-1,0,2,4,6,8,10,14,20], 
                  extent=(80,110, 10, 101), aspect='auto', colors='white')
 plt.clabel(cs, inline=1, fontsize=14, fmt='%.0f')
 
-print numpy.shape(otmpf)
-print numpy.shape(orelh)
+#print numpy.shape(otmpf)
+#print numpy.shape(orelh)
 #ax.scatter(otmpf.value("F"), orelh)
 
 ax.set_xlim(80,110)
