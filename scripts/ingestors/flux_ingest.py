@@ -122,10 +122,11 @@ for fn in fp.keys():
     station = fp[fn]
     lines = open("%s%s" % (DIR, fn), 'r').readlines()
     keys = lines[1].replace('"','').replace("\r\n", '').split(",")
-    for obline in lines[3:]:
+    for linenum, obline in enumerate(lines[3:]):
         tokens = obline.replace('"', '').split(",")
         if len(tokens) != len(keys):
-            print 'mismatch!'
+            print '%s line: %s has %s tokens, header has %s' % (fn, linenum,
+                                        len(tokens), len(keys))
             continue
         if tokens[0] == '':
             continue
