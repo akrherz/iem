@@ -1,12 +1,11 @@
 <?php
 include("../../../../config/settings.inc.php");
 define("IEM_APPID", 32);
-include("$rootpath/include/database.inc.php");
+include("../../../../include/database.inc.php");
 $coopdb = iemdb("coop");
-include("$rootpath/include/forms.php");
-include("$rootpath/include/network.php");
-$nt = new NetworkTable("IACLIMATE");
-$cities = $nt->table;
+include("../../../../include/forms.php");
+include("../../../../include/network.php");
+
 
 $var = isset($_GET["var"]) ? $_GET["var"]: "gdd50";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400);
@@ -14,11 +13,15 @@ $smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: 5;
 $sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
 $emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: date("m", time() - 86400);
 $eday = isset($_GET["eday"]) ? $_GET["eday"]: date("d", time() - 86400);
+$network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IACLIMATE";
+
+$nt = new NetworkTable($network);
+$cities = $nt->table;
 
 /** Need to use external date lib 
   * http://php.weblogs.com/adodb_date_time_library
   */
-include("$rootpath/include/adodb-time.inc.php");
+include("../../../../include/adodb-time.inc.php");
 
 $sts = adodb_mktime(0,0,0,$smonth, $sday, $year);
 $ets = adodb_mktime(0,0,0,$emonth, $eday, $year);
@@ -26,8 +29,8 @@ $aend = adodb_mktime(0,0,0,date("m", time() - 86400), date('d', time() - 86400),
 						date('Y', time() - 86400));
 if ($ets >= $aend){ $ets = $aend; }
 						
-$imgurl = sprintf("gsplot.php?smonth=%s&sday=%s&var=%s&emonth=%s&eday=%s&year=%s",
-  $smonth, $sday, $var, $emonth, $eday, $year);
+$imgurl = sprintf("gsplot.php?network=%s&smonth=%s&sday=%s&var=%s&emonth=%s&eday=%s&year=%s",
+  $network, $smonth, $sday, $var, $emonth, $eday, $year);
 
 
 $TITLE = "IEM | NWS COOP Growing Season Data";
@@ -40,7 +43,7 @@ function new_window(url) {
 //END Script-->
 </script>';
 $THISPAGE="current-gs";
-include("$rootpath/include/header.php"); ?>
+include("../../../../include/header.php"); ?>
 
 <div class="text">
 
@@ -50,11 +53,12 @@ include("$rootpath/include/header.php"); ?>
 choice over a duration of your choice.  The resulting data is presented 
 graphically as well as textually for use in a GIS. The end date is inclusive to
 the data presented. The raw daily data used for this application can be downloaded
-from <a href="../../../request/coop/fe.phtml">here</a>.
+from <a href="/request/coop/fe.phtml">here</a>.
 
 <form method="GET" action="gsplot.phtml" name="theform">
 <table>
  <tr>
+   <th>Available State:</th>
    <th>Select Parameter:</th>
    <th>Year</th>
    <th>Month</th>
@@ -62,7 +66,21 @@ from <a href="../../../request/coop/fe.phtml">here</a>.
    <td></td>
   </tr>
  <tr>
-  <td rowspan=2><select name="var">
+ <td rowspan="2">
+ <select name="network">
+ <?php 
+ $mesosite = iemdb("mesosite");
+ $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'CLIMATE'
+    and id not in ('MSCLIMATE') ORDER by name ASC");
+ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+    echo sprintf("<option value='%s' %s>%s</option>\n", $row["id"],
+    		($row["id"] == $network)? "selected='selected'": "", $row["name"]);
+ }
+ pg_close($mesosite);
+ ?>
+ </select>
+ </td>
+  <td rowspan="2"><select name="var">
      <option value="gdd50" <?php if($var == "gdd50") echo "SELECTED"; ?>>Growing Degree Days (base=50)</option>
      <option value="prec" <?php if($var == "prec") echo "SELECTED"; ?>>Precipitation</option>
      <option value="sdd86" <?php if($var == "sdd86") echo "SELECTED"; ?>>Stress Degree Days (base=86)</option>
@@ -83,7 +101,7 @@ from <a href="../../../request/coop/fe.phtml">here</a>.
 
 <?php
 
-$tr = sprintf("# Iowa COOP Accumulations (%s - %s)\n", adodb_date("Y-m-d", $sts),
+$tr = sprintf("# IEM Estimated COOP Accumulations (%s - %s)\n", adodb_date("Y-m-d", $sts),
 	adodb_date("Y-m-d", $ets) );
 $tr .= "# Download From: http://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.phtml
 # Download Date: ". strftime("%d %b %Y") ."
@@ -91,7 +109,7 @@ $tr .= "# Download From: http://mesonet.agron.iastate.edu/GIS/apps/coop/gsplot.p
 # Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 #-----------------------snip------------------\n";
 
-
+$state = substr($network,0,2);
 
 /* Query the obs */
 $rs = pg_prepare($coopdb, "SELECT", "SELECT foo.station, s_rainfall,
@@ -100,7 +118,7 @@ $rs = pg_prepare($coopdb, "SELECT", "SELECT foo.station, s_rainfall,
       SELECT station, 
 	  sum(precip) as s_rainfall, sum(gdd50(high,low)) as s_gdd50,
 	  sum(sdd86(high,low)) as s_sdd86, min(low) as s_mintemp,
-	  max(high) as s_maxtemp from alldata_ia 
+	  max(high) as s_maxtemp from alldata_${state} 
 	  WHERE day >= $1 and day < $2 GROUP by station) as foo,
 	 (SELECT station, 
       sum(precip) as c_rainfall, sum(gdd50) as c_gdd50,
@@ -135,7 +153,7 @@ space restrictions.
   </p>
 
 <p>
-<img src="<?php echo $rooturl; ?>/images/gisready.png"><h3 class="heading"> Data Listing</h3>
+<img src="/images/gisready.png"><h3 class="heading"> Data Listing</h3>
 <pre><?php echo $tr; ?></pre>
 
 <p>You should be able to 'copy &amp; paste' this raw data listing into a simple
@@ -144,5 +162,5 @@ then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.</div>
 
 <?php 
-  include("$rootpath/include/footer.php");
+  include("../../../../include/footer.php");
 ?>

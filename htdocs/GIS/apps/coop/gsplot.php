@@ -3,12 +3,10 @@
  * files please
  */
 include("../../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../../../include/database.inc.php");
 $coopdb = iemdb("coop");
-include("$rootpath/include/forms.php");
-include("$rootpath/include/network.php");
-$nt = new NetworkTable("IACLIMATE");
-$cities = $nt->table;
+include("../../../../include/forms.php");
+include("../../../../include/network.php");
 
 $var = isset($_GET["var"]) ? $_GET["var"]: "gdd50";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
@@ -16,11 +14,16 @@ $smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: 5;
 $sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
 $emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: date("m");
 $eday = isset($_GET["eday"]) ? $_GET["eday"]: date("d");
+$network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IACLIMATE";
+
+$nt = new NetworkTable( $network );
+$cities = $nt->table;
+
 
 /** Need to use external date lib 
   * http://php.weblogs.com/adodb_date_time_library
   */
-include("$rootpath/include/adodb-time.inc.php");
+include("../../../../include/adodb-time.inc.php");
 
 $sts = adodb_mktime(0,0,0,$smonth, $sday, $year);
 $ets = adodb_mktime(0,0,0,$emonth, $eday, $year);
@@ -41,10 +44,10 @@ function mktitlelocal($map, $imgObj, $titlet) {
     $titlet ."                                                                                ");
 
      // point feature with text for location
-  $point = ms_newpointobj();
-  $point->setXY( 0, 460);
-  $point->draw($map, $layer, $imgObj, 1,
-    "  Iowa Environmental Mesonet | NWS COOP ");
+//  $point = ms_newpointobj();
+//  $point->setXY( 0, 460);
+//  $point->draw($map, $layer, $imgObj, 1,
+//    "  Iowa Environmental Mesonet | NWS COOP ");
 }
 
 function plotNoData($map, $img){
@@ -81,10 +84,26 @@ $width = 640;
 
 $proj = "init=epsg:26915";
 
-$map = ms_newMapObj("$rootpath/data/gis/base26915.map");
-$map->setsize(640,480);
+$map = ms_newMapObj("../../../../data/gis/base26915.map");
 $map->setProjection($proj);
-$map->setextent(250000, 4450000, 690000, 4880000);
+
+$state = substr($network,0,2);
+$dbconn = iemdb("postgis");
+$rs = pg_query($dbconn, "SELECT xmin(g), xmax(g), ymin(g), ymax(g) from (
+		select ST_Extent(ST_Transform(the_geom,26915)) as g from states 
+		where state_abbr = '${state}'
+		) as foo");
+$row = pg_fetch_array($rs,0);
+$buf = 35000; // 35km
+$xsz = $row[1] - $row[0];
+$ysz = $row[3] - $row[2];
+if (($ysz + 100000) > $xsz){
+	$map->setsize(600,800);
+} else {
+	$map->setsize(800,600);
+}
+$map->setextent($row[0] - $buf, $row[2] - $buf,
+		$row[1] + $buf, $row[3] + $buf);
 
 $counties = $map->getlayerbyname("counties");
 $counties->set("status", MS_ON);
