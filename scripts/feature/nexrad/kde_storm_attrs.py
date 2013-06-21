@@ -11,10 +11,16 @@ cursor = POSTGIS.cursor()
 lons = []
 lats = []
 cursor.execute(""" 
-  SELECT x(geom), y(geom) from nexrad_attributes_2013
-  where nexrad = 'DMX' and tvs != 'NONE'
+  SELECT x(geom), y(geom), valid from nexrad_attributes_log
+  where nexrad in ('DMX','ARX','DVN','OAX','FSD','EAX','MPX') and tvs != 'NONE'
 """)
+minvalid = None
+maxvalid = None
 for row in cursor:
+    if minvalid is None or row[2] < minvalid:
+        minvalid = row[2]
+    if maxvalid is None or row[2] > maxvalid:
+        maxvalid = row[2]
     lons.append( row[0] )
     lats.append( row[1] )
     
@@ -26,20 +32,25 @@ kernel = stats.gaussian_kde(values)
 Z = numpy.reshape(kernel(positions).T, X.shape)
 
 m = MapPlot(sector='iowa',
-            title='DMX NEXRAD Tornado Vortex Signature Kernel Density Estimate',
-            subtitle='Jan 2013- May 2013')
+            title='NEXRAD Tornado Vortex Signature Reports',
+            subtitle='%s - %s, (TVS storm attribute present)' % (minvalid.strftime("%d %b %Y"),
+                                  maxvalid.strftime("%d %b %Y")))
 
-m.pcolormesh(X, Y, Z, numpy.arange(0,1,.1), cmap=plt.cm.gist_earth_r,
-            latlon=True)
+#m.pcolormesh(X, Y, Z, numpy.arange(0,.11,.01), cmap=plt.cm.gist_earth_r,
+#            latlon=True)
 
-xs, ys = m.map(-93.72, 41.72)
-m.ax.scatter(xs, ys, marker='o', zorder=20, s=50, color='k')
+xs, ys = m.map([-93.72,-96.37,-91.18,-90.57,-96.72], [41.72,41.32,43.82,41.6,43.58])
+m.ax.scatter(xs, ys, marker='o', zorder=20, s=100, color='r')
 
-#xs, ys = m.map(lons, lats)
-#m.ax.scatter(xs, ys, marker='+', zorder=20, s=100, color='k')
+xs, ys = m.map(lons, lats)
+m.ax.scatter(xs, ys, marker='+', zorder=20, s=40, color='k')
+
+
 
 m.drawcounties()
-m.postprocess(filename='test.png')
+m.postprocess(filename='test.svg')
+import iemplot
+iemplot.makefeature('test')
 
 """
 
