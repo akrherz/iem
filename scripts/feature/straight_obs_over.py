@@ -1,96 +1,65 @@
-import iemdb
+import psycopg2
 import numpy
 import math
-ASOS = iemdb.connect('asos', bypass=True)
-acursor = ASOS.cursor()
+dbconn = psycopg2.connect(database='asos', host='iemdb', user='nobody')
+cursor = dbconn.cursor()
 
-acursor.execute("""
-   select to_char(valid, 'YYMMDDHH24'), dwpf from alldata where station = 'DSM' 
-   and dwpf >= 50
+cursor.execute("""
+   select valid, dwpf from alldata where station = 'DSM' 
+   and dwpf >= -50 ORDER by valid ASC
 """)
+#"""
+valid = []
+dwpf = []
+for row in cursor:
+    valid.append( row[0] )
+    dwpf.append( row[1] )
 
-obs = {}
-for row in acursor:
-    obs[ row[0] ] = row[1]
+maxes = []
+years = []
+for level in range(50,81):
+    maxduration = 0
+    maxyear = 0
+    running = False
+    for v,d in zip(valid, dwpf):
+        if round(d) >= level:
+            if not running:
+                start = v
+            running = True
+        else:
+            if running: # break
+                delta = (v - start).days * 86400.0 + (v - start).seconds
+                if delta == maxduration:
+                    maxyear += ", %s" % (v.year,)
+                if delta > maxduration:
+                    maxduration = delta
+                    maxyear = "%s" % (v.year,)
+            running = False
 
-import mx.DateTime
-
-sts = mx.DateTime.DateTime(1933,1,1)
-ets = mx.DateTime.DateTime(2011,8,10)
-interval = mx.DateTime.RelativeDateTime(hours=1)
-
-now = sts
-mrun = numpy.zeros((2012-1933))
-mday = numpy.zeros((2012-1933))
-mcnt = numpy.zeros((2012-1933))
-mend = [0]*(2012-1933)
-missing = 0
-running = 0
-while now < ets:
-    if not obs.has_key( now.strftime("%y%m%d%H")):
-        missing += 1
-        if missing > 6:
-            if running > mrun[ now.year - 1933 ]:
-                mrun[ now.year - 1933 ] = running
-                mday[ now.year - 1933 ] = int(now.strftime("%j"))
-                mend[ now.year - 1933 ] = now
-            running = 0
-        if running > 0:
-            running += 1
-        now += interval
-        continue
-    missing = 0
-    dwpf = obs[  now.strftime("%y%m%d%H") ]
-    if dwpf >= 68:
-        running += 1
-        mcnt[ now.year - 1933 ] += 1
-    else:
-        running = 0
-    if running > mrun[ now.year - 1933 ]:
-        mrun[ now.year - 1933 ] = running
-        mday[ now.year - 1933 ] = int(now.strftime("%j"))
-        mend[ now.year - 1933 ] = now
-    now += interval
-
-for yr in range(1933,2012):
-    print yr, mrun[yr-1933], mday[yr-1933], mcnt[yr-1933], mend[yr-1933], mend[yr-1933] - mx.DateTime.RelativeDateTime(hours=mrun[yr-1933])
-
+    maxes.append( maxduration )
+    years.append( maxyear )
+#"""
+#print maxes
+#print years
+maxes = [7477200.0, 7452000.0, 7437600.0, 6494400.0, 6469200.0, 4813200.0, 3956400.0, 3952800.0, 3556800.0, 3549600.0, 3265200.0, 3261600.0, 2242800.0, 1890000.0, 1501200.0, 1400400.0, 1242000.0, 1206000.0, 1191600.0, 810000.0, 810000.0, 806400.0, 806400.0, 799200.0, 273600.0, 183600.0, 172800.0, 86400.0, 46800.0, 25200.0, 14400.0]
+maxes = numpy.array(maxes) / 86400.0
+#years = [1998, 1998, 1998, 1998, 1998, 2010, 2010, 2010, 2011, 2011, 2011, 2011, 2011, 1943, 1999, 1999, 1999, 1999, 1999, 2000, 2000, 2000, 2000, 2000, 2011, 2001, 2001, 2000, 2001, 1939, 1933]
 import matplotlib.pyplot as plt
 
 fig = plt.figure()
-ax = fig.add_subplot(211)
-ax.set_title("Des Moines Dew Points (1933-2011)\nMaximum Consec. Hours at or above 68$^{\circ}\mathrm{F}$")
+ax = fig.add_subplot(111)
+
+ax.bar(numpy.arange(50,81)-0.4, maxes, width=0.8, fc='green', ec='green')
+for i, (d, v) in enumerate(zip(numpy.arange(50,81), maxes)):
+    ax.text(d, v + 0.2, "%s" % (years[i],), rotation=90, va='bottom', ha='center')
+
 ax.set_ylabel("Days")
+ax.set_ylim(0,99)
+ax.set_xlim(49.5, 80.5)
+ax.set_title("1933-2012 Des Moines Maximum Period\nat or above given Dew Point")
+ax.set_xlabel(r"Dew Point $^\circ$F")
 ax.grid(True)
-ax.set_xlim(1932.5,2011.5)
-bar = ax.bar(numpy.arange(1933,2012)-0.4, mrun / 24.0)
-bar[-1].set_facecolor('r')
-#bar[-1].set_edgecolor('r')
 
-ax2 = fig.add_subplot(212)
-ax2.set_title("Day Period over which longest streak occured")
-ax2.set_ylabel("Year")
-#ax2.set_xlabel("*2011 data through 7 August, streak still going")
-ax2.grid(True)
-ax2.set_ylim(2012,1932.5)
-bars = ax2.barh( numpy.arange(1933,2012) - 0.4, (mrun/24.0), left=(mday-(mrun/24.0)), ec='b', fc='b')
-bars[-1].set_facecolor('r')
-bars[-1].set_edgecolor('r')
-ax2.set_xticks( (1,32,60,91,121,152,182,213,244,274,305,335,365) )
-ax2.set_xticklabels( ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec') )
-ax2.set_xlim(numpy.min((mday-(mrun/24.0))) - 5, numpy.max(mday) + 5)
-
-"""
-ax2 = fig.add_subplot(212)
-ax2.set_title("Total Hours at or above 60$^{\circ}\mathrm{F}$")
-ax2.set_ylabel("Hours")
-ax2.set_xlabel("*2011 data through 7 August")
-ax2.grid(True)
-ax2.set_xlim(1932.5,2011.5)
-bar2 = ax2.bar(numpy.arange(1933,2012)-0.4, mcnt)
-bar2[-1].set_facecolor('r')
-#bar2[-1].set_edgecolor('r')
-"""
-fig.savefig('test.png')
-#import iemplot
-#iemplot.makefeature('test')
+fig.savefig('test.svg')
+import iemplot
+iemplot.makefeature('test')
