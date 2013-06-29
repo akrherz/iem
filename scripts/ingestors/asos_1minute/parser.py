@@ -25,7 +25,7 @@ P1_RE = re.compile(r"""
 \[?\s*((?P<drct>\d+)|(?P<drct_miss>M))\s+
 ((?P<sknt>\d+)|(?P<sknt_miss>M))\s+
 ((?P<gust_drct>\d+)\+?|(?P<gust_drct_miss>M))\s*\]?\s+
-\[?((?P<gust_sknt>\d+)R?F*\d*\+?|(?P<gust_sknt_miss>M))\s*\]?\s+
+\[?((?P<gust_sknt>\d+)R?L?F*\d*\+?|(?P<gust_sknt_miss>M))\s*\]?\s+
 (....)\s
 (...)
 """, re.VERBOSE)
@@ -48,6 +48,7 @@ p1_examples = [
 "94989KAMW AMW2010012112271827  70000.00                                80     6    82    8                      ",
 "14942KOMA OMA2012111704141014   0.191 N                             149    10   151   12    14RFFF              ",
 "14933KDSM DSM2013030312191819    0.167 [N]                             120   11  121   12   31 60+              ",
+"03928KICT ICT2013060105471147   0.050 D                             325    14   329   19    01L60+              ",
 ]
 
 p1_answers = [
