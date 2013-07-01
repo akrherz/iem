@@ -45,6 +45,9 @@ icursor.execute(sql)
 d12sm = []
 d24sm = []
 d50sm = []
+d12t = []
+d24t = []
+d50t = []
 tair = []
 tsoil = []
 valid = []
@@ -53,6 +56,9 @@ rain = []
 for row in icursor:
     slrkw.append( row['slrkw_avg'] or numpy.nan)
     d12sm.append( row['vwc_12_avg'] or numpy.nan)
+    d12t.append( row['t12_c_avg'] or numpy.nan)
+    d24t.append( row['t24_c_avg'] or numpy.nan)
+    d50t.append( row['t50_c_avg'] or numpy.nan)
     d24sm.append( row['vwc_24_avg'] or numpy.nan)
     d50sm.append( row['vwc_50_avg'] or numpy.nan)
     valid.append( row['valid'] )
@@ -65,6 +71,9 @@ rain = numpy.array( rain )
 d12sm = numpy.array( d12sm )
 d24sm = numpy.array( d24sm )
 d50sm = numpy.array( d50sm )
+d12t = numpy.array( d12t )
+d24t = numpy.array( d24t )
+d50t = numpy.array( d50t )
 tair = numpy.array( tair )
 tsoil = numpy.array( tsoil )
 
@@ -74,7 +83,7 @@ import matplotlib.dates as mdates
 maxy = max( [numpy.max(d12sm), numpy.max(d24sm), numpy.max(d50sm)])
 miny = min( [numpy.min(d12sm), numpy.min(d24sm), numpy.min(d50sm)])
 
-(fig, ax) = plt.subplots(2,1, sharex=True)
+(fig, ax) = plt.subplots(3,1, sharex=True, figsize=(7,10))
 ax[0].grid(True)
 ax2 = ax[0].twinx()
 ax2.set_yticks( numpy.arange(-0.6, 0., 0.1))
@@ -86,8 +95,8 @@ ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc='b', ec='b', zorder=1)
 ax[0].plot(valid, d12sm * 100.0, linewidth=2, color='r', zorder=2, label='12 inch')
 ax[0].plot(valid, d24sm * 100.0, linewidth=2, color='purple', zorder=2, label='24 inch')
 ax[0].plot(valid, d50sm * 100.0, linewidth=2, color='black', zorder=2, label='50 inch')
-ax[0].set_ylabel("Volumetric Soil Water Content [%]")
-ax[0].legend(loc=(0, 0.01), ncol=3)
+ax[0].set_ylabel("Volumetric Soil Water Content [%]", fontsize=10)
+ax[0].legend(loc=(0, -0.15), ncol=3)
 ax[0].set_ylim(miny * 100.0 - 5, maxy * 100.0 + 5)
 
 days = (ets - sts).days  
@@ -107,16 +116,21 @@ else:
 ax[0].set_title("ISUAG Station: %s Timeseries" % (nt.sts[station]['name'],
                                             ))
 
-
-ax[1].plot(valid, mesonet.c2f( tair ), linewidth=2, color='blue', zorder=2, 
-           label='Air')
-ax[1].plot(valid, mesonet.c2f( tsoil ), linewidth=2, color='red', zorder=2, 
-           label='4" Soil')
+ax[1].plot(valid, mesonet.c2f( d12t), linewidth=2, color='r', label='12in')
+ax[1].plot(valid, mesonet.c2f( d24t), linewidth=2, color='purple', label='24in')
+ax[1].plot(valid, mesonet.c2f( d50t), linewidth=2, color='black', label='50in')
 ax[1].grid(True)
-ax[1].legend(loc=(.1, 1.01), ncol=2)
-ax[1].set_ylabel("Temperature [F]")
+ax[1].set_ylabel(r"Temperature $^\circ$F")
 
-ax2 = ax[1].twinx()
+ax[2].plot(valid, mesonet.c2f( tair ), linewidth=2, color='blue', zorder=2, 
+           label='Air')
+ax[2].plot(valid, mesonet.c2f( tsoil ), linewidth=2, color='red', zorder=2, 
+           label='4" Soil')
+ax[2].grid(True)
+ax[2].legend(loc=(.1, 1.01), ncol=2)
+ax[2].set_ylabel(r"Temperature $^\circ$F")
+
+ax2 = ax[2].twinx()
 ax2.plot(valid, slrkw * 1000.0, color='g')
 ax2.set_ylabel("Solar Radiation [W/m^2]", color='g')
 
