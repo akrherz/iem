@@ -6,8 +6,8 @@ $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
 $ts = mktime(0,0,0,$month, $day, $year);
 $THISPAGE = "networks-other";
-include("$rootpath/include/header.php"); ?>
-<?php include("$rootpath/include/forms.php"); ?>
+include("../../../include/header.php"); ?>
+<?php include("../../../include/forms.php"); ?>
 
 <div class="text">
 
@@ -69,9 +69,11 @@ if ($ts >  mktime(0,0,0,7,24,2003)){ ?>
   <br />ISU Campus takes a power bump knocking out various utilities.</li>
  <li><a href="ot_10min.phtml?year=2010&month=08&day=11">11 Aug 2010</a> 
   <br />Flooding impacts ISU campus and the chilled water is shut off for a while.</li>
+ <li><a href="ot_10min.phtml?year=2013&month=06&day=24">24 Jun 2013</a> 
+  <br />Chilled water is turned off for an hour to check metering.</li>
 </ul>
 
 </div>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../../include/footer.php"); ?>
 
