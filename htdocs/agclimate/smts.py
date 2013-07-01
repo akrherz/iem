@@ -2,9 +2,6 @@
 """ Soil Moisture Timeseries """
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-import os
-os.environ[ 'HOME' ] = '/tmp/'
-os.environ[ 'USER' ] = 'nobody'
 import datetime
 import numpy
 import mesonet
@@ -54,14 +51,14 @@ valid = []
 slrkw = []
 rain = []
 for row in icursor:
-    slrkw.append( row['slrkw_avg'] )
-    d12sm.append( row['vwc_12_avg'] )
-    d24sm.append( row['vwc_24_avg'] )
-    d50sm.append( row['vwc_50_avg'] )
+    slrkw.append( row['slrkw_avg'] or numpy.nan)
+    d12sm.append( row['vwc_12_avg'] or numpy.nan)
+    d24sm.append( row['vwc_24_avg'] or numpy.nan)
+    d50sm.append( row['vwc_50_avg'] or numpy.nan)
     valid.append( row['valid'] )
-    rain.append( row['rain_mm_tot'])
-    tair.append( row['tair_c_avg'])
-    tsoil.append( row['tsoil_c_avg'])
+    rain.append( row['rain_mm_tot'] or numpy.nan)
+    tair.append( row['tair_c_avg'] or numpy.nan)
+    tsoil.append( row['tsoil_c_avg'] or numpy.nan)
 
 slrkw = numpy.array( slrkw )
 rain = numpy.array( rain )
