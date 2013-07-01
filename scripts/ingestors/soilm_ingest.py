@@ -184,7 +184,7 @@ def get_max_timestamps(nwsli):
 
 def dump_raw_to_ldm(nwsli):
     """ Send the raw datafile to LDM """
-    fn = STATIONS[nwsli]['daily']
+    fn = "%s%s" % (BASE, STATIONS[nwsli]['daily'])
     if not os.path.isfile(fn):
         return
     lines = open(fn).readlines()
@@ -210,7 +210,7 @@ def dump_raw_to_ldm(nwsli):
     os.remove(tmpfn)
 
     """ Send the raw datafile to LDM """
-    fn = STATIONS[nwsli]['hourly']
+    fn = "%s%s" % (BASE, STATIONS[nwsli]['hourly'])
     if not os.path.isfile(fn):
         return
     lines = open(fn).readlines()
