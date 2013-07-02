@@ -41,5 +41,6 @@ if __name__ == '__main__':
         res = run(sid)
         sys.stdout.write(res)
         mc.set(mckey, res, 300)
-    sys.stdout.write( res )
+    else:
+        sys.stdout.write( res )
     
