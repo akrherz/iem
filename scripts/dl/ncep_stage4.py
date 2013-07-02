@@ -12,7 +12,7 @@ def download( now ):
     """
     Download a given timestamp from NCEP and inject into LDM
     Example:  ftp://ftpprd.ncep.noaa.gov/pub/data/nccf/com/hourly/prod/
-              nam_pcpn_anal.20090916/ST4.2009091618.01h.Z
+              nam_pcpn_anal.20090916/ST4.2009091618.01h.gz
     """
     hours = [1,]
     if now.hour % 6 == 0:
@@ -20,7 +20,7 @@ def download( now ):
     if now.hour == 12 and offset != 0:
         hours.append( 24 )
     for hr in hours:
-        url = "%s.%02ih.Z" % ( now.strftime("ftp://ftpprd.ncep.noaa.gov/"+
+        url = "%s.%02ih.gz" % ( now.strftime("ftp://ftpprd.ncep.noaa.gov/"+
                                 "pub/data/nccf/com/hourly/prod/"+
                                 "nam_pcpn_anal.%Y%m%d/ST4.%Y%m%d%H"), hr)
         try:
@@ -31,10 +31,10 @@ def download( now ):
                                                                           now)
             continue
         # Same temp file
-        o = open("tmp.grib.Z", 'wb')
+        o = open("tmp.grib.gz", 'wb')
         o.write( data )
         o.close()
-        os.system("gunzip -f tmp.grib.Z")
+        subprocess.call("gunzip -f tmp.grib.gz", shell=True)
         # Inject into LDM
         cmd = "/home/ldm/bin/pqinsert -p 'data a %s blah stage4/ST4.%s.%02ih.grib grib' tmp.grib" % (
                     now.strftime("%Y%m%d%H%M"), now.strftime("%Y%m%d%H"), hr)
