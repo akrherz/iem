@@ -314,7 +314,7 @@ CREATE TABLE spc_outlooks (
   valid timestamp with time zone,
   expire timestamp with time zone,
   threshold varchar(4),
-  category varchar(26),
+  category varchar(64),
   day smallint,
   outlook_type char(1)
 );
