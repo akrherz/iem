@@ -20,7 +20,7 @@ def download( now ):
     if now.hour == 12 and offset != 0:
         hours.append( 24 )
     for hr in hours:
-        url = "%s.%02ih.gz" % ( now.strftime("ftp://ftpprd.ncep.noaa.gov/"+
+        url = "%s.%02ih.Z" % ( now.strftime("ftp://ftpprd.ncep.noaa.gov/"+
                                 "pub/data/nccf/com/hourly/prod/"+
                                 "nam_pcpn_anal.%Y%m%d/ST4.%Y%m%d%H"), hr)
         try:
