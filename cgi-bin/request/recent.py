@@ -13,17 +13,21 @@ def run(sid):
     
     dbconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = dbconn.cursor()
-    cursor.execute("""SELECT valid at time zone 'UTC', tmpf, dwpf, raw 
+    cursor.execute("""SELECT valid at time zone 'UTC', tmpf, dwpf, raw,
+    x(geom), y(geom) , tmpf, dwpf, drct, sknt, phour, alti, mslp, vsby, gust
      from current_log c JOIN
-     stations t on (t.iemid = c.iemid) WHERE t.id = %s
+     stations t on (t.iemid = c.iemid) WHERE t.id = %s and 
+     (t.network ~* 'ASOS' or t.network = 'AWOS')
      ORDER by valid ASC""", (sid,))
     
-    res = "station,valid,raw\n"
+    res = "station,utcvalid,lon,lat,tmpf,dwpf,drct,sknt,p01i,alti,mslp,vsby,gust,raw\n"
     for row in cursor:
-        res += "%s,%s,%s\n" % (sid, row[0].strftime("%Y-%m-%d %H:%M"),
-                                         row[3])
+        res += "%s,%s,%.4f,%.4f,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (sid, row[0].strftime("%Y-%m-%d %H:%M"),
+                                         row[4], row[5], row[6], row[7], row[8],
+                                         row[9], row[10], row[11], row[12],
+                                         row[13], row[14], row[3])
 
-    return res
+    return res.replace("None", "M")
 
 if __name__ == '__main__':
     sys.stdout.write("Content-type: text/plain\n\n")
