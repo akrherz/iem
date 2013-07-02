@@ -16,8 +16,7 @@ def run(sid):
     cursor.execute("""SELECT valid at time zone 'UTC', tmpf, dwpf, raw,
     x(geom), y(geom) , tmpf, dwpf, drct, sknt, phour, alti, mslp, vsby, gust
      from current_log c JOIN
-     stations t on (t.iemid = c.iemid) WHERE t.id = %s and 
-     (t.network ~* 'ASOS' or t.network = 'AWOS')
+     stations t on (t.iemid = c.iemid) WHERE t.id = %s and t.metasite = 'f'
      ORDER by valid ASC""", (sid,))
     
     res = "station,utcvalid,lon,lat,tmpf,dwpf,drct,sknt,p01i,alti,mslp,vsby,gust,raw\n"
