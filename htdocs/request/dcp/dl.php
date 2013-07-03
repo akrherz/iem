@@ -115,13 +115,13 @@ if ($what == "download"){
  while(list($sid,$val)=each($data)){
  	$sname = $cities[$sid]["name"];
  	while(list($key,$val)=each($data[$sid])){
-  echo $sid . $d[$delim] . $sname;
-  echo $d[$delim] . $key ;
-  reset($cols);
-  while(list($vkey,$val)=each($cols)){
- 	echo @$data[$sid][$key][$vkey] . $d[$delim];
-  }
-  echo "\n";
+  		echo $sid . $d[$delim] . $sname;
+  		echo $d[$delim] . $key . $d[$delim];
+  		reset($cols);
+  		while(list($vkey,$val)=each($cols)){
+ 			echo @$data[$sid][$key][$vkey] . $d[$delim];
+  		}
+  		echo "\n";
  	}
  }
 
