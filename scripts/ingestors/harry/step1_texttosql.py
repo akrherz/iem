@@ -37,7 +37,7 @@ COPY alldata_tmp from STDIN with null as 'Null';
 
 for line in lines:
     tokens = re.split(",", line)
-    if len(tokens) != 23:
+    if len(tokens) < 22:
         continue
     if len(tokens[0]) == 0:
         continue
