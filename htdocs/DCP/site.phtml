@@ -1,9 +1,9 @@
 <?php
 define("IEM_APPID", 110);
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/forms.php");
-include("$rootpath/include/stations.php");
+include("../../include/database.inc.php");
+include("../../include/forms.php");
+include("../../include/stations.php");
 
 $day = isset($_GET['day']) ? $_GET["day"] : date("d");
 $month = isset($_GET['month']) ? $_GET["month"] : date("m");
@@ -17,7 +17,15 @@ $hads = iemdb("hads");
 $mesosite = iemdb("mesosite");
 
 if ($station != null){
-	if (preg_match('/_COOP/', $network)){
+	/* Make sure this site is not both a DCP and COOP site, this would cause
+	 * the app to do a yearlong query, which is expensive.
+	 */
+	$rs = pg_prepare($mesosite, "DUPSTATIONS", "SELECT network from stations
+			WHERE id = $1 and (network ~* 'DCP' or network ~* 'COOP')");
+	$rs = pg_execute($mesosite, "DUPSTATIONS", Array($station));
+	$alone = (pg_numrows($rs) == 1) ? TRUE: FALSE;
+	
+	if (preg_match('/_COOP/', $network) && $alone){
 		$table = sprintf("raw%s", date("Y",$ts));
 		$rs = pg_prepare($hads, "QUERY", "SELECT * from $table WHERE 
 				station = $1 ORDER by valid ASC");
@@ -45,7 +53,7 @@ $THISPAGE="networks-dcp";
 if ($station == null){
   $HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
  <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
- <script src='${rooturl}/js/olselect.php?network=${network}'></script>";
+ <script src='/js/olselect.php?network=${network}'></script>";
  $BODYEXTRA = "onload=\"init()\"";
 }
 
@@ -104,7 +112,17 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 <i>Click black dot to select your site:</i><br />
 <div id="map"></div>
 <div id="sname" unselectable="on">No site selected</div>
-<?php } else { ?>
+<?php } else { 
+if (! $alone){
+	echo <<<EOF
+<div class="warning">This site is listed within the IEM database as both a 
+	"COOP" and "DCP" site. This printout below will only include a days 
+	worth of data.</div>
+EOF;
+
+}
+	
+	?>
 
 <br /><br />
 <table border="1" cellpadding="2" cellspacing="0">
@@ -138,4 +156,4 @@ while(list($k,$ts) = each($times)){
 ?>
 </table>
 <?php } ?>
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../include/footer.php"); ?>
