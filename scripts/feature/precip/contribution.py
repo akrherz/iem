@@ -11,8 +11,8 @@ nt = network.Table(("IACLIMATE", "MNCLIMATE", "NDCLIMATE", "SDCLIMATE",
 
 cursor.execute("""
  SELECT station, sum(case when precip >= 2 then precip else 0 end) /
- sum(precip) from alldata WHERE year > 1950 and precip > 0 
- and year < 2013 GROUP by station
+ sum(precip) from alldata WHERE year > 1980 and precip > 0 
+ and year < 2011 GROUP by station
 """)
 
 lats = []
@@ -31,6 +31,6 @@ for row in cursor:
     
 m = MapPlot(sector='midwest',
             title='Contribution of Daily 2+ inch Precip Events to Yearly Total',
-            subtitle='1951-2012 based on IEM archive of NWS COOP Data')
+            subtitle='1981-2010 based on IEM archive of NWS COOP Data')
 m.contourf(lons, lats, vals, np.arange(0,41,2), units='%' )
-m.makefeature()
+m.postprocess(filename='twoinch_1981_2010.png')
