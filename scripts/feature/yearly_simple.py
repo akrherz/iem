@@ -5,43 +5,35 @@ COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
 ccursor.execute("""
-select year, max(high), min(high) from alldata_ia where station = 'IA2203' and 
- month = 6 and sday < '0606' GROUP by year ORDER by year ASC
+select year, sum(precip) from alldata_ia where station = 'IA0000' and month = 7 and sday < '0708' and year > 1899 GROUP by year ORDER by year ASC
 """)
 
 years = []
-highs = []
-lows = []
+precip = []
 for row in ccursor:
   years.append( row[0] )
-  highs.append( row[1] )
-  lows.append( row[2] )
+  precip.append( row[1] )
 
 import matplotlib.pyplot as plt
 import numpy
 
-highs = numpy.array(highs)
-lows = numpy.array(lows)
-avg = numpy.average(highs)
+precip = numpy.array(precip)
+avg = numpy.average(precip)
 
 (fig, ax) = plt.subplots(1,1)
 years = numpy.array(years)
-bars = ax.bar(years - 0.4, highs - lows, bottom=lows, fc='b', ec='b')
-#ax.plot([1893,2013],[avg,avg], lw=2.0, color='k', zorder=2)
+bars = ax.bar(years - 0.4, precip, fc='b', ec='b')
 bars[-1].set_facecolor('r')
 bars[-1].set_edgecolor('r')
-for i, bar in enumerate(bars):
-  if highs[i] <= highs[-1]:
-    bar.set_facecolor('r')
-    bar.set_edgecolor('r')
-    txt= ax.text(years[i], lows[i]-2, "%s\n%.0f" % (years[i],highs[i],), ha='center', va='top') 
-    txt.set_path_effects([PathEffects.withStroke(linewidth=2, foreground="w")])
+ax.plot([1900,2013],[avg,avg], lw=2.0, color='k', zorder=2)
 
 #ax.set_xlabel("*2013 thru 29 May")
-ax.set_xlim(1877.5, 2013.5)
+ax.set_xlim(1899.5, 2013.5)
+ax.text(1980,2.75, "2013 second driest behind 1940", ha='center',
+  bbox=dict(facecolor='#FFFFFF'))
 ax.grid(True)
-ax.set_ylabel(r"High Temperature $^\circ$F")
-ax.set_title("1879-2013 1-5 June Des Moines Daily High Temperature Range")
+ax.set_ylabel(r"Precipitation [inch]")
+ax.set_title("1900-2013 1-7 July Iowa Statewide Precipitation")
 
 fig.savefig('test.svg')
 
