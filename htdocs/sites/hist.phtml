@@ -3,10 +3,10 @@
 
 include("../../config/settings.inc.php");
 include("setup.php");
-include("$rootpath/include/calendar.phtml");
-include("$rootpath/include/imagemaps.php");
-include("$rootpath/include/forms.php");
-include("$rootpath/include/mlib.php");
+include("../../include/calendar.phtml");
+include("../../include/imagemaps.php");
+include("../../include/forms.php");
+include("../../include/mlib.php");
 
 /* Get vars */
 $year = isset($_GET['year']) ? intval($_GET['year']) : date("Y", time() - 86400);
@@ -61,8 +61,8 @@ if ($mode == "monthly") {
   else
     $str .= "<br>Low: ". $row["min_tmpf"] ;
   if ($row["pday"] >= 0){
-  	if ($row["pday"] < 0.01){
-  		$str .= "<br>Rain: Trace";
+  	if ($row["pday"] < 0.01 && $row["pday"] > 0){
+  		$str .= "<br>Rain: Trace ";
   	} else {
   		$str .= "<br>Rain: ". $row["pday"];
   	}
@@ -169,5 +169,5 @@ are not included.</li>
 
 
 <?php
-  include("$rootpath/include/footer.php"); 
+  include("../../include/footer.php"); 
 ?>
