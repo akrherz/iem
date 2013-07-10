@@ -15,12 +15,13 @@ YEAR = sys.argv[1]
 spr_client = util.get_spreadsheet_client(config)
 docs_client = util.get_docs_client(config)
 
-# Go get row 1
-cell_feed = spr_client.get_cells( config.get('cscap', 'dashboard'), 
-                            'od6', query=gdata.spreadsheets.client.CellQuery(
-                                                    min_row=1, max_row=1))
+ss = util.Spreadsheet(docs_client, spr_client, config.get('cscap', 'dashboard'))
+SHEET = ss.worksheets[YEAR]
+SHEET.get_cell_feed()
+
 column_ids = [""] * 100
-for entry in cell_feed.entry:
+for col in range(1, SHEET.cols+1):
+    entry = SHEET.get_cell_entry(1, col)
     pos = entry.title.text
     text = entry.cell.input_value
     column_ids[ int(entry.cell.col) ] = text
@@ -96,13 +97,13 @@ def docs_query(title):
     # We need to go search for the spreadsheet
     resources = docs_client.GetAllResources(query=query)
     QUERY_CACHE[title] = resources
+    if len(resources) == 0:
+        print 'Could not find spreadsheet |%s|' % (title,)
     return resources
 
 def do_row(row):
-    cell_feed = spr_client.get_cells( config.get('cscap', 'dashboard'), 
-                        'od6', query=gdata.spreadsheets.client.CellQuery(
-                                        min_row=row, max_row=row))
-    firstcolumn = cell_feed.entry[0]
+    """ Actually process a row in the SHEET """
+    firstcolumn = SHEET.get_cell_entry(row, 1)
     varname = firstcolumn.cell.input_value.split()[0].lower()
     spreadtitle = lookuprefs.get(varname)
     if spreadtitle is None:
@@ -110,13 +111,15 @@ def do_row(row):
                                                                 varname,)
         return
     
-    for entry in cell_feed.entry[1:]:
+    for col in range(2,SHEET.cols+1):
+        entry = SHEET.get_cell_entry(row, col)
         siteid = column_ids[ int(entry.cell.col) ]
+        if siteid in ['', 'Required (R)']:
+            continue
 
         querytitle = '%s %s' % (siteid, spreadtitle)
         resources = docs_query(querytitle)   
         if len(resources) == 0:
-            print 'Can not find spread title: |%s %s|' % (siteid, spreadtitle,)
             continue
         if len(resources) == 2:
             print 'Duplicate spread title: |%s %s|' % (siteid, spreadtitle,)
@@ -130,7 +133,7 @@ def do_row(row):
         else:
             # Get the list feed for this spreadsheet
             ss = util.Spreadsheet(docs_client, spr_client, resources[0])
-            list_feed = ss.worksheets["2011"].get_list_feed()
+            list_feed = ss.worksheets[YEAR].get_list_feed()
             CACHE[skey] = list_feed
         misses = 0
         na = False
@@ -146,9 +149,9 @@ def do_row(row):
             elif data[lookupcol].lower() == 'did not collect':
                 dnc = True
     
-        if na:
-            print 'Could not find header: %s in spreadtitle: %s %s' % (lookupcol,
-                                                            siteid, spreadtitle)
+        #if na:
+        #    print 'Could not find header: %s in spreadtitle: %s %s' % (lookupcol,
+        #                                                    siteid, spreadtitle)
     
         uri = resources[0].get_html_link().href
         if na:
@@ -160,6 +163,8 @@ def do_row(row):
         else:
             newvalue = '=hyperlink("%s", "Entry")' % (uri,)
         if newvalue != entry.cell.input_value:
+            print '--> New Value: %s [%s] OLD: %s NEW: %s' % (siteid, varname,
+                                            entry.cell.input_value, newvalue)
             entry.cell.input_value = newvalue
             spr_client.update(entry)
         
