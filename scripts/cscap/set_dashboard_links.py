@@ -1,12 +1,15 @@
 """
- Assign links in the dashboard to generated spreadsheets?
+  This script updates the data dashboard
 """
 import util
+import sys
 import ConfigParser
 import gdata.spreadsheets.client
 import gdata.docs.client
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
+
+YEAR = sys.argv[1]
 
 # Get me a client, stat
 spr_client = util.get_spreadsheet_client(config)
@@ -126,7 +129,8 @@ def do_row(row):
             list_feed = CACHE[skey]
         else:
             # Get the list feed for this spreadsheet
-            list_feed = spr_client.get_list_feed(skey , 'od7')
+            ss = util.Spreadsheet(docs_client, spr_client, resources[0])
+            list_feed = ss.worksheets["2011"].get_list_feed()
             CACHE[skey] = list_feed
         misses = 0
         na = False

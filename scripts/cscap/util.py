@@ -30,9 +30,10 @@ class Worksheet(object):
 
     def get_list_feed(self):
         if self.list_feed is not None:
-            return
+            return self.list_feed
         self.list_feed = self.spr_client.get_list_feed(self.spread_id, self.id)
-
+        return self.list_feed
+    
     def get_cell_feed(self):
         if self.cell_feed is not None:
             return
