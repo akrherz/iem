@@ -1,7 +1,7 @@
 # Run at 12Z, but needs some manual crontab changing help
 
 cd cscap
-python email_daily_changes.py
+python email_daily_changes.py 2011
 python set_dashboard_links.py
 
 # Rerun yesterday and today
