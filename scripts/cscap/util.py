@@ -132,6 +132,8 @@ class Spreadsheet(object):
     def __init__(self, docs_client, spr_client, entry):
         self.docs_client = docs_client
         self.spr_client = spr_client
+        if type(entry) == type(''):
+            entry = docs_client.get_resource_by_id( entry )
         self.entry = entry
         self.id = entry.resource_id.text.split(":")[1]
         self.title = entry.title.text

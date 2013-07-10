@@ -8,6 +8,12 @@ config.read('mytokens.cfg')
 spr_client = util.get_spreadsheet_client(config)
 docs_client = util.get_docs_client(config)
 
+ss = util.Spreadsheet(docs_client, spr_client, config.get('cscap', 'dashboard'))
+ss.worksheets["2011"].get_cell_feed()
+
+print ss.worksheets["2011"].get_cell_entry(1,1)
+
+sys.exit()
 query = gdata.docs.client.DocsQuery(show_collections='false', 
                                     title='API Exercise')
 feed = docs_client.GetAllResources(query=query)
