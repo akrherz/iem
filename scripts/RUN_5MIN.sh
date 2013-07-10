@@ -23,8 +23,9 @@ python lsr_snow_mapper.py >& /dev/null
 cd ../ingestors/rwis
 ./download.csh &
 
+# This could take some time, so background it
 cd ../dotcams
-python process.py 
+python process.py &
 
 cd ../../q2
 python make_raster.py 
