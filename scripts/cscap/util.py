@@ -191,7 +191,7 @@ def build_treatments(feed):
                 data[key] = {'TIL': [None,], 'ROT': [None,], 'DWM': [None,], 
                              'NIT': [None,], 
                              'LND': [None,], 'REPS': 1}
-        if row['key'] is None or row['key'] == '':
+        if not row.has_key('key') or row['key'] is None or row['key'] == '':
             continue
         treatment_key = row['key']
         treatment_names[treatment_key] = row['name'].strip()
