@@ -29,7 +29,7 @@ docs_client = gdata.docs.client.DocsClient()
 token.authorize(docs_client)
 
 query = gdata.docs.client.DocsQuery(show_collections='true', 
-                                    title='Data Entry Spreadsheets')
+                                    title='Data Spreadsheets')
 feed = docs_client.GetAllResources(query=query)
 sync_data = feed[0]
 
@@ -48,7 +48,7 @@ headers = ['UniqueID', 'Rep', 'Tillage', 'Rotation', 'Drainage',
 for entry in meta_feed.entry:
     data = entry.to_dict()
     sitekey = data.get('uniqueid').lower()
-    if sitekey is None:
+    if sitekey != 'vicms':
         continue
     leadpi = data.get('leadpi')
     colfolder = data.get('colfolder')
