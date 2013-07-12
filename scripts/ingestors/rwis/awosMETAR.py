@@ -21,7 +21,8 @@ fd, path = tempfile.mkstemp()
 for sid in data.keys():
     os.write(fd, '%s=\r\n' % (data[sid].strip().replace("METAR ", ""),))
 os.close(fd)
-#p = subprocess.Popen("/home/ldm/bin/pqinsert -p 'data c 000000000000 LOCDSMMETAR.dat LOCDSMMETAR.dat txt' %s" % (path,),
-#                     shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) 
-#os.waitpid(p.pid, 0)
+p = subprocess.Popen("/home/ldm/bin/pqinsert -p 'data c 000000000000 LOCDSMMETAR.dat LOCDSMMETAR.dat txt' %s" % (path,),
+                     shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
+                     stderr=subprocess.STDOUT) 
+os.waitpid(p.pid, 0)
 os.remove(path) 
