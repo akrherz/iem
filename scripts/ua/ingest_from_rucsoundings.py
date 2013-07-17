@@ -161,7 +161,8 @@ def parse( raw ):
             continue
         if tokens[0] == '1':
             fl_hhmm = line[44:].strip()
-            rob.release_time = rob.conv_hhmm(fl_hhmm)
+            if len(fl_hhmm) > 2:
+                rob.release_time = rob.conv_hhmm(fl_hhmm)
             continue
         if tokens[0] == '2':
             rob.hydro_level = conv_press(tokens[1])
@@ -226,6 +227,10 @@ def main():
     DBCONN.close()
 
 if __name__ == '__main__':
-    #for rob in parse( open('F30_fail').read()):
-    #    print str(rob)
+    #import glob
+    #files = glob.glob("*fail")
+    #for filename in files:
+    #    print filename
+    #    for rob in parse( open(filename).read()):
+    #        print str(rob)
     main()
