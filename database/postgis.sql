@@ -1,3 +1,58 @@
+---
+--- Rawinsonde data!
+---
+CREATE TABLE raob_flights(
+    fid SERIAL PRIMARY KEY,
+    valid timestamptz,  -- Standard time of ob
+    station varchar(4),
+    hydro_level real,
+    maxwd_level real,
+    tropo_level real,
+    release_time timestamptz -- Time of Release
+);
+create unique index raob_flights_idx on raob_flights(valid, station);
+GRANT SELECT on raob_flights to nobody,apache;
+
+CREATE TABLE raob_profile(
+    fid int REFERENCES raob_flights(fid),
+    ts timestamptz,
+    levelcode smallint,
+    pressure real, -- mb
+    height real, -- m
+    tmpc real, -- C
+    dwpc real, -- C
+    drct real, -- deg
+    smps real, -- wind speed in MPS
+    bearing real, -- deg
+    range_miles real -- miles
+);
+CREATE TABLE raob_profile_1990() inherits (raob_profile);
+CREATE TABLE raob_profile_1991() inherits (raob_profile);
+CREATE TABLE raob_profile_1992() inherits (raob_profile);
+CREATE TABLE raob_profile_1993() inherits (raob_profile);
+CREATE TABLE raob_profile_1994() inherits (raob_profile);
+CREATE TABLE raob_profile_1995() inherits (raob_profile);
+CREATE TABLE raob_profile_1996() inherits (raob_profile);
+CREATE TABLE raob_profile_1997() inherits (raob_profile);
+CREATE TABLE raob_profile_1998() inherits (raob_profile);
+CREATE TABLE raob_profile_1999() inherits (raob_profile);
+CREATE TABLE raob_profile_2000() inherits (raob_profile);
+CREATE TABLE raob_profile_2001() inherits (raob_profile);
+CREATE TABLE raob_profile_2002() inherits (raob_profile);
+CREATE TABLE raob_profile_2003() inherits (raob_profile);
+CREATE TABLE raob_profile_2004() inherits (raob_profile);
+CREATE TABLE raob_profile_2005() inherits (raob_profile);
+CREATE TABLE raob_profile_2006() inherits (raob_profile);
+CREATE TABLE raob_profile_2007() inherits (raob_profile);
+CREATE TABLE raob_profile_2008() inherits (raob_profile);
+CREATE TABLE raob_profile_2009() inherits (raob_profile);
+CREATE TABLE raob_profile_2010() inherits (raob_profile);
+CREATE TABLE raob_profile_2011() inherits (raob_profile);
+CREATE TABLE raob_profile_2012() inherits (raob_profile);
+CREATE TABLE raob_profile_2013() inherits (raob_profile);
+
+GRANT SELECT on raob_profile to nobody,apache;
+
 CREATE AGGREGATE array_accum (anyelement)
 (
     sfunc = array_append,
