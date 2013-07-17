@@ -187,7 +187,7 @@ def parse( raw ):
         yield rob
         
 def main():
-    DBCONN = psycopg2.connect(database='postgis')
+    DBCONN = psycopg2.connect(database='postgis', host='iemdb')
     
     
     valid = datetime.datetime( int(sys.argv[1]), int(sys.argv[2]),
