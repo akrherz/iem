@@ -57,3 +57,13 @@ python ingest.py
 
 cd ../qc
 python check_awos_online.py
+
+cd ../ua
+if [ $HH -eq "02" ]
+then
+	python ingest_from_rucsoundings.py $YYYY $MM $DD 00
+fi
+if [ $HH -eq "14" ]
+then
+	python ingest_from_rucsoundings.py $YYYY $MM $DD 12
+fi
