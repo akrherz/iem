@@ -1,0 +1,105 @@
+<?php 
+include("../../../config/settings.inc.php");
+include("../../../include/imagemaps.php");
+
+define("IEM_APPID", 146);
+$THISPAGE = "archive-raob";
+$HEADEXTRA= <<<EOF
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
+<script src='http://code.jquery.com/jquery-1.10.1.min.js'></script>
+<script src='http://code.jquery.com/ui/1.10.3/jquery-ui.js'></script>
+<script src='timepicker.js'></script>
+<style>
+/* css for timepicker */
+.ui-timepicker-div .ui-widget-header { margin-bottom: 8px; }
+.ui-timepicker-div dl { text-align: left; }
+.ui-timepicker-div dl dt { height: 25px; margin-bottom: -25px; }
+.ui-timepicker-div dl dd { margin: 0 10px 10px 65px; }
+.ui-timepicker-div td { font-size: 90%; }
+.ui-tpicker-grid-label { background: none; border: none; margin: 0; padding: 0; }
+
+.ui-timepicker-rtl{ direction: rtl; }
+.ui-timepicker-rtl dl { text-align: right; }
+.ui-timepicker-rtl dl dd { margin: 0 65px 10px 10px; }
+</style>
+<script type="text/javascript">
+$(function(){
+	$("#startdate").datetimepicker({
+		controlType: 'select',
+		minDate: new Date(1990, 1, 1, 0, 0),
+		showMinute: false
+});
+	$("#enddate").datetimepicker({
+		controlType: 'select',
+		minDate: new Date(1990, 1, 1, 0, 0),
+		showMinute: false
+});
+});
+</script>
+		
+EOF;
+$TITLE = "IEM :: Rawinsonde Data Archive";
+include("../../../include/header.php"); 
+?>
+
+<h3>Rawinsonde (RAOB) Data Archive</h3>
+
+<p>The IEM proceses and archives Rawinsonde (RAOB) data made available on the
+<a href="http://rucsoundings.noaa.gov">rucsoundings.noaa.gov</a> website.  This
+ archive also contains data from other sources to backfill it to the 1940s.  Data
+ for the United States and Canada is available. This
+ data are vertical profiles of the atmosphere taken from weather balloons released
+ twice daily.</p>
+ 
+<h4>Download Data</h4>
+
+<p>This form provides a simple comma delimited file of RAOB data, the columns
+ should be self-explainatory except the 'levelcode' column.  Those values 
+ provide metadata on that level of data.  The start time is inclusive and
+ end time is exclusive.  Special soundings should be in this archive as well.
+
+<table><tr><td valign="top">
+<strong>Level Codes</strong><br />
+<ul>
+   <li>4 = mandatory level</li>
+   <li>5 = significant level</li>
+   <li>6 = wind level (PPBB)</li> 
+   <li>7 = tropopause level</li>
+   <li>8 = maximum wind level</li>
+   <li>9 = surface level</li>
+</ul>
+</td><td>
+<strong>Output Datafile Columns</strong>
+<br /><pre>
+station      3 or 4 character station identifier
+validUTC     RAOB Launch Cycle Time in UTC
+levelcode    Level Code for this observation
+pressure_mb  Pressure of data in millibar
+height_m     Height above sea level m
+tmpc         Air Temperature in C
+dwpc         Dew Point Temperature in C
+drct         Wind Direction in deg from North
+speed_kts    Wind Speed in knots
+bearing      Balloon bearing in degree
+range_sm     Ballon range from launch in statute miles
+</pre>
+</td>
+</table>
+<form method="GET" action="/cgi-bin/request/raob.py">
+<table cellpadding="3" cellspacing="0" border="1">
+<tr><th>Select Site: <?php echo networkSelect("RAOB", "OAX");?></th>
+<td>Start Time: <input type="text" name="sts" id="startdate" width="20"/></td>
+<td>End Time: <input type="text" name="ets" id="enddate" width="20" /></td>
+<td><input type="checkbox" name="dl" />Download to disk</td>
+<td><input type="submit" value="Giveme Data!" /></td>
+</tr>
+</table>
+</form>
+
+<h4>Comments / Suggestions?</h4>
+
+<p><a href="/info/contacts.php">Contact us</a>!
+
+<?php 
+include("../../../include/footer.php"); 
+?>
