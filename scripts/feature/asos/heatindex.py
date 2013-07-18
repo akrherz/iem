@@ -10,35 +10,53 @@ cursor = ASOS.cursor()
 
 cursor.execute("""
   SELECT valid, tmpf, dwpf from alldata where station = 'DSM' and
-  tmpf > 80 and dwpf > 50 and valid > '1935-01-01'
+  tmpf >= 80 and dwpf > -50 and valid > '1935-01-01'
+  and (extract(minute from valid) = 0 or extract(minute from valid) > 52)
 """)
 
-maxv = np.zeros( (2014-1935), 'f')
-maxdoy = np.zeros( (2014-1935), 'f')
+hits3 = np.zeros( (2014-1935), 'f')
+hits5 = np.zeros( (2014-1935), 'f')
+total = np.zeros( (2014-1935), 'f')
 for row in cursor:
     t = dt.temperature(row[1], 'F')
     d = dt.temperature(row[2], 'F')
     hdx = met.heatindex(t, d)
-    if hdx.value("F") > maxv[row[0].year - 1935]:
-        maxv[ row[0].year - 1935 ] = hdx.value("F")
-        maxdoy[ row[0].year - 1935 ] = int( row[0].strftime("%j") )
+    
+    if (hdx.value("F") - 3) >= row[1]:
+        hits3[ row[0].year - 1935 ] += 1.0
+    if (hdx.value("F") - 5) >= row[1]:
+        hits5[ row[0].year - 1935 ] += 1.0
+    total[ row[0].year - 1935 ] += 1.0
 
 
 (fig, ax) = plt.subplots(2,1, sharex=True)
 
-ax[0].bar(np.arange(1935,2014)-0.4, maxv, ec='r', fc='r')
+val = hits3 / total * 100.0
+avg = np.average(val)
+bars = ax[0].bar(np.arange(1935,2014)-0.4, val , ec='b', fc='b')
+ax[0].plot([1933,2013], [avg,avg], c='k')
+for bar in bars:
+    if bar.get_height() > avg:
+        bar.set_facecolor("r")
+        bar.set_edgecolor("r")
 ax[0].grid(True)
-ax[0].set_ylim(95,125)
-ax[0].set_title("1935-2013 Des Moines Heat Index")
-ax[0].set_ylabel(r"Max Heat Index $^\circ$F")
+#ax[0].set_ylim(0, )
+ax[0].set_title("1935-2013 Des Moines Humidity Effect on Heat Index\nWhen Air Temp over 80$^\circ$F, Frequency of Heat Index Change")
+ax[0].set_ylabel(r"Frequency [%] of 3+$\Delta ^\circ$F")
 
-ax[1].scatter(np.arange(1935,2014), maxdoy)
-ax[1].set_xlim(1934.5, 2013.5)
+val = hits5 / total * 100.0
+avg = np.average(val)
+bars = ax[1].bar(np.arange(1935,2014)-0.4, val , ec='b', fc='b')
+ax[1].plot([1933,2013], [avg,avg], c='k')
+for bar in bars:
+    if bar.get_height() > avg:
+        bar.set_facecolor("r")
+        bar.set_edgecolor("r")
 ax[1].grid(True)
-ax[1].set_yticks( (152,182,213,244,274) )
-ax[1].set_yticklabels( ('Jun','Jul','Aug','Sep') )
-ax[1].set_ylabel(r"Date of First Maximum")
-ax[1].set_xlabel("* 2013 thru 8 July")
+#ax[0].set_ylim(0, )
+ax[1].set_ylabel(r"Frequency [%] of 5+ $\Delta ^\circ$F")
+ax[1].set_xlim(1934.5,2013.5)
+ax[1].set_xlabel("*2013 through 18 July, colors are above/below long term avg")
 
 fig.savefig('test.ps')
 import iemplot
