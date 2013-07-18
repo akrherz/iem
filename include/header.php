@@ -68,6 +68,7 @@ $_pages = Array(
 	"mos" => Array("title" => "Model Output Statistics", "url" => "/mos/"),
 	"afos" => Array("title" => "NWS Text Products", "url" => "/wx/afos/list.phtml"),
     "tm" => Array("title" => "Time Machine", "url" => "/timemachine/"),
+ 	"raob" => Array("title" => "Upper Air RAOB Data", "url" => "/archive/raob/"),
  ),
   "climatology" => Array(
     "base" => Array("title" => "Climate", "url" => "/climate/"),
