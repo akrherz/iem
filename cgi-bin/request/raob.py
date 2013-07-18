@@ -25,9 +25,9 @@ def fetcher(station, sts, ets):
     """, (station, sts, ets))
     sys.stdout.write("station,validUTC,levelcode,pressure_mb,height_m,tmpc,dwpc,drct,speed_kts,bearing,range_sm\n")
     for row in cursor:
-        sys.stdout.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (station, m(row[0]),
+        sys.stdout.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (station, m(row[0]),
                         m(row[1]), m(row[2]), m(row[3]), m(row[4]), m(row[5]), m(row[6]), m(row[7]),
-                         m(row[8])))
+                         m(row[8]), m(row[9])))
 if __name__ == '__main__':
     form = cgi.FieldStorage()
     sts = datetime.datetime.strptime( form.getfirst('sts', ''), '%m/%d/%Y %H:%M')
