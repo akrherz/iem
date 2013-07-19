@@ -175,7 +175,7 @@ def parse( raw ):
         if tokens[0] in ['4','5','6','9']:
             rob.profile.append({'levelcode': tokens[0],
                                 'pressure': float(tokens[1]) / 10.0,
-                                'height': float(tokens[2]),
+                                'height': conv_drct(tokens[2]),
                                 'tmpc': conv_temp(tokens[3]),
                                 'dwpc': conv_temp(tokens[4]),
                                 'drct': conv_drct(tokens[5]),
