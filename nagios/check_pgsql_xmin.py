@@ -19,15 +19,15 @@ def check():
     
 if __name__ == '__main__':
     dbname, count = check()
-    if count < 200000000:
-        print 'OK - %s %s |count=%s;200000000;215000000;220000000' % (count, 
+    if count < 201000000:
+        print 'OK - %s %s |count=%s;201000000;215000000;220000000' % (count, 
                                                             dbname, count)
         sys.exit(0)
     elif count < 215000000:
-        print 'WARNING - %s %s |count=%s;200000000;215000000;220000000' % (count, 
+        print 'WARNING - %s %s |count=%s;201000000;215000000;220000000' % (count, 
                                                             dbname, count)
         sys.exit(1)
     else:
-        print 'CRITICAL - %s %s |count=%s;200000000;215000000;220000000' % (count, 
+        print 'CRITICAL - %s %s |count=%s;201000000;215000000;220000000' % (count, 
                                                             dbname, count)
         sys.exit(2)
