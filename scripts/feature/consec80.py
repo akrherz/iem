@@ -1,47 +1,55 @@
-import mx.DateTime
+import datetime
 import sys
-import numpy
+import numpy as np
 import iemdb
 COOP = iemdb.connect("coop", bypass=True)
 ccursor = COOP.cursor()
 
 
-ccursor.execute("""SELECT month, high, year, day from alldata 
-  WHERe station = 'IA2203' and day >= '1893-01-01' and month = 12 
+ccursor.execute("""SELECT day, precip from alldata_ia 
+  WHERe station = 'IA2203' and month in (5,6,7,8) and year > 1879
   ORDER by day ASC"""  )
 
+years = []
+vals = []
 running = 0
 biggest = 0
 for row in ccursor:
-  if row[1] >= 50:
-    running += 1
-    if running >= biggest:
+    if row[0].month == 5 and row[0].day == 1:
+        running = 0
+        biggest = 0
+        years.append(row[0].year)
+    if row[1] < 0.1:
+        running += 1
+    else:
+        running = 0
+    if running > biggest:
         biggest = running
-    if running > 3 and row[3].day > 20:
-        print running, row
-  else:
-    running = 0
+    if row[0].month == 8 and row[0].day == 31:
+        vals.append( biggest )
+
+vals.append( biggest )
+vals = np.array(vals)
 
 import matplotlib.pyplot as plt
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-bars = ax.bar(numpy.arange(1,13) - 0.4, biggest , fc='r', ec='r')
+avgv = np.average(vals)
+bars = ax.bar(np.array(years)-0.4, vals , fc='r', ec='r')
+bars[-1].set_facecolor('g')
+bars[-1].set_edgecolor('g')
+for i, bar in enumerate(bars):
+    if bar.get_height() > 27:
+        ax.text(bar.get_x(), bar.get_height(), "%s" % (years[i],))
+ax.plot([1879,2013.5], [avgv, avgv], c='k', lw=2)
 
-for i in range(len(bars)):
-    bar = bars[i]
-    year = years[i]
-    if bar.get_height() > 0:
-        ax.text(i+1, bar.get_height()+1, "%.0f" % (years[i],),ha='center')
-        ax.text(i+1, bar.get_height()- 1.0, "%.0f" % (biggest[i],), ha='center')
-
-ax.set_xlim(0.5,12.5)
-ax.set_xticks( numpy.arange(1,13))
-ax.set_xticklabels(('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec') )
-ax.set_ylabel("Consecuative Days")
-ax.set_title("Ames Consecuative Days with highs over 80$^{\circ}\mathrm{F}$\nMaximum by month, last year occurred [1893-2011]")
-ax.set_xlabel("*2011 Total thru 3 Oct")
+ax.set_ylim(top=46)
+ax.set_xlim(1879,2014)
+ax.set_ylabel("Longest Period [days]")
+ax.set_title("Des Moines [1 May - 31 Aug] Consec Days Below 0.10\" Precip")
+ax.set_xlabel("*2013 (green bar) Total thru 21 Jul, average %.1f days" % (avgv,))
 ax.grid(True)
 fig.savefig('test.ps')
 import iemplot
