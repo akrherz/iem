@@ -111,7 +111,7 @@ def savedata( data , maxts ):
         return
     iem = access.Ob(sid, 'SCAN')
     iem.txn = icursor
-    iem.data['station'] = sid[1:]
+
     iem.data['ts'] = ts
     iem.data['year'] = ts.year
     for key in data.keys():
@@ -133,7 +133,9 @@ def savedata( data , maxts ):
     iem.data['c5smv'] = float(iem.data.get('c5smv'))
     iem.data['phour'] = float(iem.data.get('phour'))
     iem.updateDatabase()
-
+    
+    # scan db uses different station name, sigh
+    iem.data['station'] = sid[1:]
     sql = """INSERT into t%(year)s_hourly (station, valid, tmpf, 
         dwpf, srad, 
          sknt, drct, relh, pres, c1tmpf, c2tmpf, c3tmpf, c4tmpf, 
@@ -174,9 +176,9 @@ def main():
             print 'Failed to download: %s %s' % (sid, URI)
             continue
         lines = response.readlines()
-        cols = lines[1].split(",")
+        cols = lines[2].split(",")
         data = {}
-        for row in lines[2:]:
+        for row in lines[3:]:
             if row.strip() == "":
                 continue
             tokens = row.replace("'",'').split(",")
