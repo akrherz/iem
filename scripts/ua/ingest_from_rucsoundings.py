@@ -211,7 +211,7 @@ def main():
         try:
             data = urllib2.urlopen(uri).read()
             for rob in parse( data, sid ):
-                print str(rob)
+                nt.sts[sid]['count'] = len(rob.profile)
                 rob.database_save(cursor)
         except Exception, exp:
             print 'RAOB FAIL %s %s %s' % (sid, valid, exp)
@@ -225,6 +225,12 @@ def main():
     
 
     DBCONN.close()
+
+    ''' Loop thru and see which stations we were missing data from '''
+    for sid in nt.sts.keys():
+        if nt.sts[sid]['online']:
+            if nt.sts[sid].get('count', 0) == 0:
+                print 'RAOB dl for station failed: %s' % (sid,)
 
 if __name__ == '__main__':
     #import glob
