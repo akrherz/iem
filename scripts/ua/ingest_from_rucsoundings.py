@@ -141,7 +141,7 @@ def conv_drct( raw):
         return None
     return float(raw) 
 
-def parse( raw ):
+def parse( raw, sid ):
     """ Parse the raw data and yield RAOB objects """
     rob = None
     for line in raw.split("\n"):
@@ -169,7 +169,7 @@ def parse( raw ):
             rob.maxwd_level = conv_press(tokens[2])
             rob.tropo_level = conv_press(tokens[3])
         if tokens[0] == '3':
-            rob.station = tokens[1]
+            rob.station = sid
             rob.wind_units = tokens[3] 
             continue
         if tokens[0] in ['4','5','6','9']:
@@ -210,7 +210,7 @@ def main():
         cursor = DBCONN.cursor()
         try:
             data = urllib2.urlopen(uri).read()
-            for rob in parse( data ):
+            for rob in parse( data, sid ):
                 print str(rob)
                 rob.database_save(cursor)
         except Exception, exp:
