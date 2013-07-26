@@ -68,6 +68,10 @@ VARCONV = {
            'vwc12_avg': 'vwc_12_avg',
            'vwc24_avg': 'vwc_24_avg',
            'vwc50_avg': 'vwc_50_avg',
+           'calcvwc06_avg': 'vwc_06_avg',
+        'calcvwc12_avg': 'vwc_12_avg',
+            'calcvwc24_avg': 'vwc_24_avg',
+            'calcvwc50_avg': 'vwc_50_avg',
            }
 
 # stdlib
