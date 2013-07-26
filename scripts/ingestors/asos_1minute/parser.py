@@ -173,10 +173,10 @@ def p1_parser( ln ):
 
 def test():
     for ex in p1_examples:
-      m = p1_parser( ex )
+        m = p1_parser( ex )
 
     for ex in p2_examples:
-      m = p2_parser( ex )
+        m = p2_parser( ex )
 
 def download(station, monthts):
     """
@@ -209,8 +209,11 @@ def runner(station, monthts):
     fp6 = '%sdata/%s/64060K%s%s%02i.dat' % (BASEDIR, station,
             station, monthts.year, monthts.month)
     if not os.path.isfile( fp5 ):
-        download(station, monthts)
-        if not os.path.isfile( fp5 ):
+        try:
+            download(station, monthts)
+        except Exception, exp:
+            print 'download() error', exp
+        if not os.path.isfile( fp5 ) or not os.path.isfile( fp6 ):
             print "NCDC did not have %s station for %s" % (station,
                                                 monthts.strftime("%b %Y"))
             return
