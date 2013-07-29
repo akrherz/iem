@@ -1,4 +1,26 @@
 ---
+--- Stuart Smith Park Hydrology Learning Lab
+---
+CREATE TABLE stuart_smith_logger_data(
+  id int,
+  site_serial int,
+  valid timestamptz,
+  ch1_data_p real,
+  ch2_data_p real,
+  ch3_data_p real,
+  ch4_data_p real,
+  ch1_data_t real,
+  ch2_data_t real,
+  ch3_data_t real,
+  ch4_data_t real,
+  ch1_data_c real,
+  ch2_data_c real,
+  ch3_data_c real,
+  ch4_data_c real
+);
+GRANT SELECT on stuart_smith_logger_data to nobody,apache;
+
+---
 --- RASTER metadata
 ---
 CREATE TABLE raster_metadata(
@@ -164,7 +186,8 @@ CREATE TABLE webcams(
 	removed boolean,
 	state varchar(2),
 	moviebase varchar,
-	scrape_url varchar
+	scrape_url varchar,
+	is_vapix boolean
 	);
 SELECT AddGeometryColumn('webcams', 'geom', 4326, 'POINT', 2);
 GRANT select on webcams to apache,nobody;
