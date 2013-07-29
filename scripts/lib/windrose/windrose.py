@@ -339,6 +339,7 @@ class WindroseAxes(PolarAxes):
                                                                        **kwargs)
         null = kwargs.pop('facecolor', None)
         edgecolor = kwargs.pop('edgecolor', None)
+        rmax = kwargs.pop('rmax',None)
         if edgecolor is not None:
             if not isinstance(edgecolor, str):
                 raise ValueError('edgecolor must be a string color')
@@ -363,7 +364,10 @@ class WindroseAxes(PolarAxes):
                 if j == 0:
                     self.patches_list.append(patch)
         #self._update()
-        self.set_rmax(rmax=np.max(np.sum(self._info['table'][1:,:], axis=0)))
+        if rmax:
+            self.set_rmax(rmax=rmax)
+        else:
+            self.set_rmax(rmax=np.max(np.sum(self._info['table'][1:,:], axis=0)))
         self.set_radii_angle(angle=self.radii_angle)
 
 
