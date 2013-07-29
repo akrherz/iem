@@ -9,8 +9,8 @@ d1 = []
 d2 = []
 d3 = []
 d4 = []
-sts = mx.DateTime.DateTime(2013,4,2)
-ets = mx.DateTime.DateTime(2013,4,25)
+sts = mx.DateTime.DateTime(2013,1,1)
+ets = mx.DateTime.DateTime(2013,7,25)
 interval = mx.DateTime.RelativeDateTime(days=7)
 now = sts
 while now < ets:
@@ -41,7 +41,7 @@ for yr in range(1,13):
     if yr == 1:
         fmt = "%b\n%Y"
     #xticklabels.append( mx.DateTime.DateTime(2012,yr,1).strftime(fmt) )
-for yr in range(1,5):
+for yr in range(1,8):
     xticks.append( float(mx.DateTime.DateTime(2013,yr,1)))
     fmt = "%b"
     if yr == 1:
@@ -94,7 +94,7 @@ ax.set_title("2013 Areal coverage of Drought in Iowa\nfrom US Drought Monitor")
 ax.grid(True)
 #ax.legend(loc='upper center', bbox_to_anchor=(0.7, 1),
 #          fancybox=True, shadow=True, ncol=1, prop=prop)
-ax.legend(loc=2, ncol=1, prop=prop)
+ax.legend(loc=1, ncol=1, prop=prop)
 fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')
