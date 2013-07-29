@@ -5,6 +5,8 @@ import urllib2
 from ingest_from_rucsoundings import RAOB
 import psycopg2
 
+sys.exit("need to correct station ID use with database using 4 chars")
+
 POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
 
 def conv( raw):
@@ -62,6 +64,8 @@ exit
             tokens = line.strip().split()
             myraob = RAOB()
             myraob.station = tokens[2]
+            sys.exit("another bug")
+
             valid = datetime.datetime.strptime("19"+tokens[-1], '%Y%m%d/%H%M')
             myraob.valid = valid.replace(tzinfo=pytz.timezone("UTC"))
         if line.find(".") > 0 and line.find("=") == -1 and line.find("PRES") == -1:
