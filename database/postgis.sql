@@ -51,7 +51,34 @@ CREATE TABLE raob_profile_2011() inherits (raob_profile);
 CREATE TABLE raob_profile_2012() inherits (raob_profile);
 CREATE TABLE raob_profile_2013() inherits (raob_profile);
 
+
+CREATE INDEX raob_profile_1990_fid_idx on raob_profile_1990(fid);
+CREATE INDEX raob_profile_1991_fid_idx on raob_profile_1991(fid);
+CREATE INDEX raob_profile_1992_fid_idx on raob_profile_1992(fid);
+CREATE INDEX raob_profile_1993_fid_idx on raob_profile_1993(fid);
+CREATE INDEX raob_profile_1994_fid_idx on raob_profile_1994(fid);
+CREATE INDEX raob_profile_1995_fid_idx on raob_profile_1995(fid);
+CREATE INDEX raob_profile_1996_fid_idx on raob_profile_1996(fid);
+CREATE INDEX raob_profile_1997_fid_idx on raob_profile_1997(fid);
+CREATE INDEX raob_profile_1998_fid_idx on raob_profile_1998(fid);
+CREATE INDEX raob_profile_1999_fid_idx on raob_profile_1999(fid);
+CREATE INDEX raob_profile_2000_fid_idx on raob_profile_2000(fid);
+CREATE INDEX raob_profile_2001_fid_idx on raob_profile_2001(fid);
+CREATE INDEX raob_profile_2002_fid_idx on raob_profile_2002(fid);
+CREATE INDEX raob_profile_2003_fid_idx on raob_profile_2003(fid);
+CREATE INDEX raob_profile_2004_fid_idx on raob_profile_2004(fid);
+CREATE INDEX raob_profile_2005_fid_idx on raob_profile_2005(fid);
+CREATE INDEX raob_profile_2006_fid_idx on raob_profile_2006(fid);
+CREATE INDEX raob_profile_2007_fid_idx on raob_profile_2007(fid);
+CREATE INDEX raob_profile_2008_fid_idx on raob_profile_2008(fid);
+CREATE INDEX raob_profile_2009_fid_idx on raob_profile_2009(fid);
+CREATE INDEX raob_profile_2010_fid_idx on raob_profile_2010(fid);
+CREATE INDEX raob_profile_2011_fid_idx on raob_profile_2011(fid);
+CREATE INDEX raob_profile_2012_fid_idx on raob_profile_2012(fid);
+CREATE INDEX raob_profile_2013_fid_idx on raob_profile_2013(fid);
+
 GRANT SELECT on raob_profile to nobody,apache;
+GRANT SELECT on raob_profile_2013 to nobody,apache;
 
 CREATE AGGREGATE array_accum (anyelement)
 (
@@ -373,7 +400,7 @@ CREATE TABLE spc_outlooks (
   day smallint,
   outlook_type char(1)
 );
-SELECT addGeometryColumn('', 'spc_outlooks', 'geom', 4326, 'POLYGON', 2);
+SELECT addGeometryColumn('', 'spc_outlooks', 'geom', 4326, 'MULTIPOLYGON', 2);
 GRANT SELECT on spc_outlooks to apache,nobody;
 CREATE index spc_outlooks_valid_idx on spc_outlooks(valid);
 
