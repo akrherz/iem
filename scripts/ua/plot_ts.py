@@ -9,8 +9,8 @@ times = []
 h = []
 s = []
 cursor.execute("""
- select valid, height, smps from raob_profile p JOIN raob_flights f on 
- (p.fid = f.fid) where f.station = 'OAX'  and 
+ select valid, height, smps from raob_profile_2013 p JOIN raob_flights f on 
+ (p.fid = f.fid) where f.station = 'KOAX'  and 
  p.pressure = 500 and p.height < 7000 ORDER by valid ASC
 """)
 for row in cursor:
