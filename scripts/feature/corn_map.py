@@ -4,12 +4,12 @@ import numpy
 data = {}
 d2013 = {}
 
-for linenum, line in enumerate(open('/home/akrherz/Downloads/D85CCCC5-A95F-3BFD-B254-3BB0A64F9799.csv')):
+for linenum, line in enumerate(open('/home/akrherz/Downloads/6D6EF9EF-6672-3025-BECF-B2B90410558D.csv')):
     if linenum == 0:
         continue
     tokens = line.split(",")
     day = datetime.datetime.strptime(tokens[3], '%Y-%m-%d')
-    if day.month == 6 and day.day in range(8,15):
+    if day.month == 7 and day.day in range(10,18):
         state = tokens[5]
         val = float(tokens[-1])
         if not data.has_key(state):
@@ -20,6 +20,7 @@ for linenum, line in enumerate(open('/home/akrherz/Downloads/D85CCCC5-A95F-3BFD-
             data[state].append( val )
 
 results = {}
+print data['IOWA']
 
 for state in data.keys():
     ar = numpy.array(data[state])
@@ -64,7 +65,6 @@ def get_color(val, minvalue, maxvalue):
         if val < bins[i]:
             return maue(i-1)
     return maue(14)
-
 patches = []
 while 1:
     feature = data.GetNextFeature()
@@ -84,7 +84,7 @@ while 1:
 
     x,y = m(feature.GetField('x'), feature.GetField('y'))
     diff = results[name.upper()]['d2013'] - results[name.upper()]['avg']
-    txt = ax.text(x,y, '%.0f\n%.0f' % (results[name.upper()]['d2013'],
+    txt = ax.text(x,y, '%.0f%%\n%.0f' % (results[name.upper()]['d2013'],
                                        diff), 
                   verticalalignment='center', horizontalalignment='center', 
                   size=20, zorder=5)
@@ -106,7 +106,7 @@ axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
                 color=maue(range(len(bins))),
                 ec='None')
 
-ax.text(0.17, 1.05, "9 Jun 2013 USDA Percentage of Soybean Planted by State\nDeparture from 1980-2012 Average for Second week of June", transform=ax.transAxes,
+ax.text(0.17, 1.05, "14 Jul 2013 USDA Percentage of Corn Silking\nPercentage Points Departure from 1980-2012 Average for 10-17 July", transform=ax.transAxes,
      size=14,
     horizontalalignment='left', verticalalignment='center')
 # Logo!
@@ -115,6 +115,6 @@ logo = Image.open('../../htdocs/images/logo_small.png')
 ax3 = plt.axes([0.05,0.9,0.1,0.1], frameon=False, axisbg=(0.4471,0.6235,0.8117), yticks=[], xticks=[])
 ax3.imshow(logo)
 
-fig.savefig('test.svg')
-import iemplot
-iemplot.makefeature('test')
+fig.savefig('test.png')
+#import iemplot
+#iemplot.makefeature('test')
