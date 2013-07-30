@@ -24,7 +24,7 @@ if (isset($_REQUEST["wfo"])){
 	/* Check to make sure we have warnings first! */
 	$postgis = iemdb("postgis");
 	$rs = pg_prepare($postgis, "SELECT", "SELECT issue from sbw_${year}
-	WHERE wfo = $1 and phenomena in ('SV','TO') and significance = 'W' and
+	WHERE wfo = $1 and phenomena in ('SV','TO','FF') and significance = 'W' and
 	issue BETWEEN $2 and $3");
 	$rs = pg_execute($postgis, "SELECT", Array($wfo, 
 		gmdate("Y-m-d H:i", $sts) ."+00", gmdate("Y-m-d H:i", $ets) ."+00"));
