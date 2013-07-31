@@ -127,11 +127,18 @@ def process_cgi(form):
     ax[1].grid(True)
     ax[2].grid(True)
     
-    ax[0].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+    if (dates[-1] - dates[0]).days < 32:
+        ax[0].xaxis.set_major_locator(mdates.DayLocator(interval=7))
+        ax[1].xaxis.set_major_locator(mdates.DayLocator(interval=7))
+        ax[2].xaxis.set_major_locator(mdates.DayLocator(interval=7))
+        
+    else:
+        ax[0].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+        ax[1].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+        ax[2].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
-    ax[1].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
     ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))
-    ax[2].xaxis.set_major_locator(mdates.MonthLocator(interval=1))
     ax[2].xaxis.set_major_formatter(mdates.DateFormatter('%-d\n%b'))    
     if form.getvalue('year2'):
         startdt2 = mx.DateTime.DateTime(int(form.getvalue('year2')),
