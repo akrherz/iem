@@ -19,5 +19,6 @@ python ctre_bridge.py &
 cd ../outgoing
 python snet_collect.py &
 
-
+cd ../mrms
+python mrms_rainrate_comp.py 
 
