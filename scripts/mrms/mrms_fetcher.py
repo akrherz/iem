@@ -3,6 +3,7 @@ We need to download the data files from MRMS project
 
  http://129.15.110.182/tile4/q3rad/rainrate/PRECIPRATE.20130801.095000.gz
  http://129.15.110.182/tile4/q3rad/lcref/LCREF.20130801.095000.gz
+ http://129.15.110.182:/tile1/q3rad/6h_24h_acc/24HRAD.20130801.130000.gz
 '''
 import urllib2
 import datetime
@@ -14,7 +15,9 @@ def fetch(ts):
     ''' Do the fetching for a given timestamp '''
     basedir = ts.strftime("/mnt/mtarchive/data/%Y/%m/%d/mrms")
     for tile in range(1,5):
-        for varname in ['lcref', 'rainrate']:
+        for varname in ['lcref', 'rainrate', '24hrad']:
+            if varname == '24hrad' and ts.minute != 0:
+                continue
             mydir = "%s/tile%s/%s" % (basedir, tile, varname)
             if not os.path.isdir(mydir):
                 os.makedirs(mydir)
@@ -22,6 +25,8 @@ def fetch(ts):
                 baseuri = 'http://129.15.110.182/tile'+str(tile)+'/lcref/LCREF'
             elif varname == 'rainrate':
                 baseuri = 'http://129.15.110.182/tile'+str(tile)+'/q3rad/rainrate/PRECIPRATE'
+            elif varname == '24hrad':
+                baseuri = 'http://129.15.110.182/tile'+str(tile)+'/q3rad/6h_24h_acc/24HRAD'
             uri = "%s%s" % (baseuri, ts.strftime('.%Y%m%d.%H%M00.gz'))
             fn = "%s/%s%s" % (mydir, varname, ts.strftime('.%Y%m%d.%H%M00.gz'))
             if not os.path.isfile(fn):
