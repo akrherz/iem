@@ -88,7 +88,7 @@ def reader(fn):
 
 def get_fn( now, tile):
     ''' Get the filename for this timestamp and tile '''
-    return now.strftime(('/mnt/mtarchive/data/%Y/%m/%d/mrms/tile'+str(tile)+
+    return now.strftime(('/mnt/a4/data/%Y/%m/%d/mrms/tile'+str(tile)+
                          '/rainrate/rainrate.%Y%m%d.%H%M00.gz'))
 
 def random_zeros():
