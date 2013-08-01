@@ -1,5 +1,6 @@
 '''
-Generate a composite of the MRMS RainRate
+ Generate a composite of the MRMS 24 Hour Precip total, easier than manually 
+ totalling it up myself.
 '''
 import datetime
 import pytz
@@ -13,16 +14,22 @@ import sys
 import util
 
 def do( now ):
-    ''' Generate for this timestep! '''
+    ''' Generate for this timestep! 
+    255 levels...  wanna do 0 to 20 inches
+     index 255 is missing, index 0 is 0
+     0-1   -> 100 - 0.01 res ||  0 - 25   -> 100 - 0.25 mm  0
+     1-5   -> 80 - 0.05 res  ||  25 - 125 ->  80 - 1.25 mm  100
+     5-20  -> 75 - 0.20 res  || 125 - 500  ->  75 - 5 mm    180  
+    '''
     szx = 7000
     szy = 3500
     # Create the image data
     imgdata = np.zeros( (szy, szx), 'u1')
-    sts = now - datetime.timedelta(minutes=2)
+    sts = now - datetime.timedelta(hours=24)
     metadata = {'start_valid': sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'end_valid': now.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                'product': 'a2m',
-                'units': '0.1 mm' }
+                'product': 'lcref',
+                'units': 'mm' }
     ''' 
       Loop over tiles
     Data from tile is SW corner and row , so y, x
@@ -33,16 +40,21 @@ def do( now ):
 
     '''
     for tile in range(1,5):
-        fn = util.get_fn('rainrate', now, tile)
+        fn = util.get_fn('24hrad', now, tile)
         if not os.path.isfile(fn):
-            print "MRMS RRate Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
+            print "MRMS LCREF Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
             continue
         tilemeta, val = util.reader(fn)
-        # Convert into units of 0.1 mm accumulation
-        val = val / 60.0 * 2.0 * 10.0
-        val = np.where(val < 0., 255., val)
+        ''' There is currently a bug with how MRMS computes missing data :( '''
+        image = np.zeros( np.shape(val), 'i')
+        image = np.where(val >= 500, 254, image)
+        image = np.where(np.logical_and(val >= 125, val < 500), 180 + ((val - 125.) / 5.0), image)
+        image = np.where(np.logical_and(val >= 25, val < 125), 100 + ((val - 25.) / 1.25), image)
+        image = np.where(np.logical_and(val >= 0, val < 25), 0 + ((val - 0.) / 0.25), image)
+        image = np.where( val < 0, 255, image)
+        print tile, np.min(image), np.max(image)
         ysz, xsz = np.shape(val)
-        val = np.flipud(val)
+        val = np.flipud(image)
         x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
         y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
         imgdata[y0:(y0+ysz),x0:(x0+xsz)] = val.astype('int')
@@ -56,7 +68,7 @@ def do( now ):
 
     util.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
-    prefix = 'a2m'
+    prefix = 'p24h'
     pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/mrms/%s.wld GIS/mrmq/%s_%s.wld wld' %s.wld" % (
                     now.strftime("%Y%m%d%H%M"), prefix, prefix, 
                     now.strftime("%Y%m%d%H%M"), tmpfn )
@@ -92,17 +104,13 @@ def do( now ):
 if __name__ == '__main__':
     ''' Lets do something '''
     utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
-    if len(sys.argv) == 6:
+    if len(sys.argv) == 5:
         utcnow = datetime.datetime( int(sys.argv[1]),
                                     int(sys.argv[2]),
                                     int(sys.argv[3]),
-                                    int(sys.argv[4]),
-                                    int(sys.argv[5]) ).replace(
+                                    int(sys.argv[4]), 0).replace(
                                                 tzinfo=pytz.timezone("UTC"))
         do( utcnow )
     else:
-        ''' If our time is an odd time, run 3 minutes ago '''
-        utcnow = utcnow.replace(second=0,microsecond=0)
-        if utcnow.minute % 2 == 1:
-            do( utcnow - datetime.timedelta(minutes=3))
-    
+        print 'Usage: python mrms_p24h_comp.py YYYY MM DD HR'
+        sys.exit(1)

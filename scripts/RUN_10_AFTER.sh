@@ -49,8 +49,8 @@ cd ../iemre
 python grid_asos.py
 python grid_asos.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
 
-cd ../q2
-python make_raster_24h.py $YYYY $MM $DD $HH
+cd ../mrms
+python mrms_p24h_comp.py $YYYY $MM $DD $HH
 
 cd ../smos
 python ingest.py

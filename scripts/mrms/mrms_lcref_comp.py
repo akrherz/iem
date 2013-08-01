@@ -12,17 +12,33 @@ import json
 import sys
 import util
 
+def make_colorramp():
+    """
+    Make me a crude color ramp
+    """
+    c = np.zeros((256,3), np.int)
+
+    # Gray for missing
+    c[255,:] = [144,144,144]
+    # Black to remove, eventually
+    c[0,:] = [0,0,0]
+    i = 2
+    for line in open('gr2ae.txt'):
+        c[i,:] = map(int, line.split()[-3:])
+        i+=1
+    return tuple( c.ravel() )
+
+
 def do( now ):
     ''' Generate for this timestep! '''
     szx = 7000
     szy = 3500
     # Create the image data
     imgdata = np.zeros( (szy, szx), 'u1')
-    sts = now - datetime.timedelta(minutes=2)
-    metadata = {'start_valid': sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+    metadata = {'start_valid': now.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'end_valid': now.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                'product': 'a2m',
-                'units': '0.1 mm' }
+                'product': 'lcref',
+                'units': '0.5 dBZ' }
     ''' 
       Loop over tiles
     Data from tile is SW corner and row , so y, x
@@ -33,14 +49,15 @@ def do( now ):
 
     '''
     for tile in range(1,5):
-        fn = util.get_fn('rainrate', now, tile)
+        fn = util.get_fn('lcref', now, tile)
         if not os.path.isfile(fn):
-            print "MRMS RRate Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
+            print "MRMS LCREF Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
             continue
         tilemeta, val = util.reader(fn)
-        # Convert into units of 0.1 mm accumulation
-        val = val / 60.0 * 2.0 * 10.0
+        ''' There is currently a bug with how MRMS computes missing data :( '''
+        val = np.where(val >= -32, (val + 32) * 2.0, val)
         val = np.where(val < 0., 255., val)
+        print np.min(val), np.max(val), val[1000,-200:]
         ysz, xsz = np.shape(val)
         val = np.flipud(val)
         x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
@@ -51,12 +68,12 @@ def do( now ):
     
     # Create Image
     png = Image.fromarray( imgdata )
-    png.putpalette( util.make_colorramp() )
+    png.putpalette( make_colorramp() )
     png.save('%s.png' % (tmpfn,))
 
     util.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
-    prefix = 'a2m'
+    prefix = 'lcref'
     pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/mrms/%s.wld GIS/mrmq/%s_%s.wld wld' %s.wld" % (
                     now.strftime("%Y%m%d%H%M"), prefix, prefix, 
                     now.strftime("%Y%m%d%H%M"), tmpfn )

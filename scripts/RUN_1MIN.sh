@@ -21,4 +21,5 @@ python snet_collect.py &
 
 cd ../mrms
 python mrms_rainrate_comp.py 
+python mrms_lcref_comp.py
 
