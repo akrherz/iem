@@ -32,14 +32,14 @@ def do( now , realtime=False):
     So file has units of 
 
     '''
-    found = False
+    count = 0
     for tile in range(1,5):
         fn = util.get_fn('rainrate', now, tile)
         if not os.path.isfile(fn):
             if not realtime:
                 print "MRMS RRate Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
             continue
-        found = True
+        count += 1
         tilemeta, val = util.reader(fn)
         # Convert into units of 0.1 mm accumulation
         val = val / 60.0 * 2.0 * 10.0
@@ -49,7 +49,7 @@ def do( now , realtime=False):
         x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
         y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
         imgdata[y0:(y0+ysz),x0:(x0+xsz)] = val.astype('int')
-    if not found:
+    if count < 4:
         return
     (tmpfp, tmpfn) = tempfile.mkstemp()
     
