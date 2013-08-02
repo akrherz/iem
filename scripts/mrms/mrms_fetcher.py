@@ -15,8 +15,8 @@ def fetch(ts):
     ''' Do the fetching for a given timestamp '''
     basedir = ts.strftime("/mnt/mtarchive/data/%Y/%m/%d/mrms")
     for tile in range(1,5):
-        for varname in ['lcref', 'rainrate', '24hrad']:
-            if varname == '24hrad' and ts.minute != 0:
+        for varname in ['lcref', 'rainrate', '24hrad', '1hrad']:
+            if varname in ['24hrad', '1hrad'] and ts.minute != 0:
                 continue
             mydir = "%s/tile%s/%s" % (basedir, tile, varname)
             if not os.path.isdir(mydir):
@@ -27,6 +27,8 @@ def fetch(ts):
                 baseuri = 'http://129.15.110.182/tile'+str(tile)+'/q3rad/rainrate/PRECIPRATE'
             elif varname == '24hrad':
                 baseuri = 'http://129.15.110.182/tile'+str(tile)+'/q3rad/6h_24h_acc/24HRAD'
+            elif varname == '1hrad':
+                baseuri = 'http://129.15.110.182/tile'+str(tile)+'/q3rad/1h_acc/1HRAD'
             uri = "%s%s" % (baseuri, ts.strftime('.%Y%m%d.%H%M00.gz'))
             fn = "%s/%s%s" % (mydir, varname, ts.strftime('.%Y%m%d.%H%M00.gz'))
             if not os.path.isfile(fn):
