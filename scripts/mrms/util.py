@@ -9,7 +9,11 @@ import pytz
 import gzip
 
 WEST = -130.
+EAST = -60.
 NORTH = 55.
+SOUTH = 20.
+XAXIS = np.arange(WEST, EAST, 0.01)
+YAXIS = np.arange(SOUTH, NORTH, 0.01)
 
 def make_colorramp():
     """
