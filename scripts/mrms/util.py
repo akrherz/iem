@@ -69,7 +69,7 @@ def reader(fn):
     unit = struct.unpack('6c', fp.read(6))
     var_scale, miss_val, num_radars = struct.unpack('3i', fp.read(12))
     rad_list = struct.unpack('%sc' % (num_radars*4,), fp.read(num_radars*4))
-    print unit, var_scale, miss_val
+    #print unit, var_scale, miss_val
     sz = nx * ny * nz
     data = struct.unpack('%sh' % (sz,), fp.read(sz*2))
     data = np.reshape(np.array(data), (ny,nx)) / float(var_scale)

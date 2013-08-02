@@ -29,7 +29,7 @@ def make_colorramp():
     return tuple( c.ravel() )
 
 
-def do( now ):
+def do( now , realtime=False):
     ''' Generate for this timestep! '''
     szx = 7000
     szy = 3500
@@ -48,11 +48,14 @@ def do( now ):
     So file has units of 
 
     '''
+    found = 0
     for tile in range(1,5):
         fn = util.get_fn('lcref', now, tile)
         if not os.path.isfile(fn):
-            print "MRMS LCREF Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
+            if not realtime:
+                print "MRMS LCREF Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
             continue
+        found += 1
         tilemeta, val = util.reader(fn)
         ''' There is currently a bug with how MRMS computes missing data :( '''
         val = np.where(val >= -32, (val + 32) * 2.0, val)
@@ -64,6 +67,8 @@ def do( now ):
         y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
         imgdata[y0:(y0+ysz),x0:(x0+xsz)] = val.astype('int')
 
+    if found < 4:
+        return
     (tmpfp, tmpfn) = tempfile.mkstemp()
     
     # Create Image
@@ -121,5 +126,5 @@ if __name__ == '__main__':
         ''' If our time is an odd time, run 3 minutes ago '''
         utcnow = utcnow.replace(second=0,microsecond=0)
         if utcnow.minute % 2 == 1:
-            do( utcnow - datetime.timedelta(minutes=3))
+            do( utcnow - datetime.timedelta(minutes=5), True)
     
