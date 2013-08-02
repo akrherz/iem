@@ -19,7 +19,6 @@ def doday(ts):
     """
     # Start at 1 AM
     now = ts.replace(hour=1, minute=0)
-    
     interval = datetime.timedelta(hours=1)
 
     precip = np.zeros( (3500,7000) )
@@ -68,5 +67,5 @@ if __name__ == "__main__":
                                    int(sys.argv[2]), int(sys.argv[3]), 23, 55)
     else:
         ts = datetime.datetime.now()
-    ts = ts.replace(tzinfo=pytz.timezone("America/Chicago"))
+    ts = pytz.timezone("America/Chicago").localize(ts)
     doday(ts)
