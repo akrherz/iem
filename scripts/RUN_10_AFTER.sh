@@ -50,7 +50,7 @@ python grid_asos.py
 python grid_asos.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
 
 cd ../mrms
-python mrms_p24h_comp.py $YYYY $MM $DD $HH
+python mrms_pXXh_comp.py $YYYY $MM $DD $HH
 
 cd ../smos
 python ingest.py

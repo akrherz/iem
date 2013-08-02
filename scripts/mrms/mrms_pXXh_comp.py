@@ -1,5 +1,5 @@
 '''
- Generate a composite of the MRMS 24 Hour Precip total, easier than manually 
+ Generate a composite of the MRMS XX Hour Precip total, easier than manually 
  totalling it up myself.
 '''
 import datetime
@@ -13,7 +13,7 @@ import json
 import sys
 import util
 
-def do( now ):
+def do(now, hr ):
     ''' Generate for this timestep! 
     255 levels...  wanna do 0 to 20 inches
      index 255 is missing, index 0 is 0
@@ -25,7 +25,7 @@ def do( now ):
     szy = 3500
     # Create the image data
     imgdata = np.zeros( (szy, szx), 'u1')
-    sts = now - datetime.timedelta(hours=24)
+    sts = now - datetime.timedelta(hours=hr)
     metadata = {'start_valid': sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'end_valid': now.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'product': 'lcref',
@@ -40,7 +40,7 @@ def do( now ):
 
     '''
     for tile in range(1,5):
-        fn = util.get_fn('24hrad', now, tile)
+        fn = util.get_fn('%shrad' % (hr,), now, tile)
         if not os.path.isfile(fn):
             print "MRMS LCREF Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
             continue
@@ -68,7 +68,7 @@ def do( now ):
 
     util.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
-    prefix = 'p24h'
+    prefix = 'p%sh' % (hr,)
     pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/mrms/%s.wld GIS/mrmq/%s_%s.wld wld' %s.wld" % (
                     now.strftime("%Y%m%d%H%M"), prefix, prefix, 
                     now.strftime("%Y%m%d%H%M"), tmpfn )
@@ -110,7 +110,8 @@ if __name__ == '__main__':
                                     int(sys.argv[3]),
                                     int(sys.argv[4]), 0).replace(
                                                 tzinfo=pytz.timezone("UTC"))
-        do( utcnow )
+        do( utcnow , 24)
+        do( utcnow , 1)
     else:
-        print 'Usage: python mrms_p24h_comp.py YYYY MM DD HR'
+        print 'Usage: python mrms_pXXh_comp.py YYYY MM DD HR'
         sys.exit(1)
