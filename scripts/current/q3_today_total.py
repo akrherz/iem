@@ -25,15 +25,17 @@ def doday(ts):
     precip = np.zeros( (3500,7000) )
     while now < ts:
         gmt = now.astimezone(pytz.timezone("UTC"))
-        for tile in range(1,5):
+        # Only need tile 1 and 2 to sufficiently do Iowa
+        for tile in range(1,3):
             fn = util.get_fn('1hrad', gmt, tile)
-            print fn
             if os.path.isfile(fn):
                 tilemeta, val = util.reader(fn)
                 ysz, xsz = np.shape(val)
                 x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
                 y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
                 precip[y0:(y0+ysz),x0:(x0+xsz)] = val.astype('int')
+            else:
+                print 'Missing 1HRAD MRMS for q3_today_total', fn
         now += interval
     
    
