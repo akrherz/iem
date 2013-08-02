@@ -52,7 +52,7 @@ def do( now ):
         image = np.where(np.logical_and(val >= 25, val < 125), 100 + ((val - 25.) / 1.25), image)
         image = np.where(np.logical_and(val >= 0, val < 25), 0 + ((val - 0.) / 0.25), image)
         image = np.where( val < 0, 255, image)
-        print tile, np.min(image), np.max(image)
+        #print tile, np.min(image), np.max(image)
         ysz, xsz = np.shape(val)
         val = np.flipud(image)
         x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
