@@ -108,5 +108,5 @@ if __name__ == '__main__':
         ''' If our time is an odd time, run 3 minutes ago '''
         utcnow = utcnow.replace(second=0,microsecond=0)
         if utcnow.minute % 2 == 1:
-            do( utcnow - datetime.timedelta(minutes=3), True)
+            do( utcnow - datetime.timedelta(minutes=5), True)
     
