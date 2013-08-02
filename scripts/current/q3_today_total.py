@@ -31,9 +31,13 @@ def doday(ts):
             if os.path.isfile(fn):
                 tilemeta, val = util.reader(fn)
                 ysz, xsz = np.shape(val)
-                x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
-                y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
-                precip[y0:(y0+ysz),x0:(x0+xsz)] = val.astype('int')
+                if tile == 1:
+                    x0 = 0
+                    y0 = 1750
+                if tile == 2:
+                    x0 = 3500
+                    y0 = 1750
+                precip[y0:(y0+ysz),x0:(x0+xsz)] += val
             else:
                 print 'Missing 1HRAD MRMS for q3_today_total', fn
         now += interval
@@ -51,7 +55,7 @@ def doday(ts):
     clevs = np.append(clevs, np.arange(5.0, 10.0, 1.0))
     clevs[0] = 0.01
 
-    m.contourf(util.XAXIS, util.YAXIS, precip / 25.40, clevs)
+    m.contourf(util.XAXIS, util.YAXIS, precip / 24.5, clevs)
 
     #map.drawstates(zorder=2)
     m.drawcounties()
