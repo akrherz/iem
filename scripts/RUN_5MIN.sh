@@ -26,17 +26,3 @@ cd ../ingestors/rwis
 # This could take some time, so background it
 cd ../dotcams
 python process.py &
-
-cd ../../q2
-python make_raster.py 
-
-# Lets wait a bit now
-sleep 60
-python hsr.py
-
-cd ../current
-python q2_5min_rate.py
-python q2_today_total.py
-python q2_Xhour.py 1
-python q2_Xhour.py 3
-python q2_Xhour.py 6
