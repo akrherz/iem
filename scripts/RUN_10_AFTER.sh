@@ -29,6 +29,7 @@ php wxc_cocorahs.php
 
 cd ../current
 python plot_hilo.py 0
+python q3_Xhour.py 6
 python q3_today_total.py &
 
 
