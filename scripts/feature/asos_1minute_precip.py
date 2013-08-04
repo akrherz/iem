@@ -4,7 +4,7 @@ import numpy
 import pytz
 ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
-#acursor.execute("SET TIME ZONE 'CDT6CST'")
+acursor.execute("SET TIME ZONE 'EDT6EST'")
 stemps = []
 sdrct = []
 ssknt = []
@@ -15,8 +15,8 @@ sprec = numpy.zeros( (3000,), 'f')
 
 acursor.execute("""
  SELECT valid, tmpf, dwpf, drct, 
-  sknt, pres1, gust_sknt, precip from t2013_1minute WHERE station = 'OKC'
- and valid BETWEEN '2013-07-26 00:00' and '2013-07-26 23:59' 
+  sknt, pres1, gust_sknt, precip from t2013_1minute WHERE station = 'PHL'
+ and valid BETWEEN '2013-07-28 14:00' and '2013-07-28 23:59' 
  ORDER by valid ASC
 """)
 tot = 0
@@ -35,8 +35,8 @@ acc = numpy.zeros( (3000,), 'f')
 rate15 = numpy.zeros( (3000,), 'f')
 rate60 = numpy.zeros( (3000,), 'f')
 svalid = [0]*3000
-basets = datetime.datetime(2013,7,26)
-basets = basets.replace(tzinfo=pytz.timezone("America/Chicago"))
+basets = datetime.datetime(2013,7,28)
+basets = basets.replace(tzinfo=pytz.timezone("America/New_York"))
 for i in range(3000):
     acc[i] = acc[i-1] + sprec[i]
     rate15[i] = numpy.sum(sprec[i-14:i+1]) * 4
@@ -50,10 +50,10 @@ for i in range(3000):
 #    print mx.DateTime.DateTime(2012,8,4, 0) + mx.DateTime.RelativeDateTime(minutes=i)
 
 # Figure out ticks
-sts = datetime.datetime(2013,7,26, 4, 0)
-sts = sts.replace(tzinfo=pytz.timezone("America/Chicago"))
-ets = sts + datetime.timedelta(minutes=121)
-interval = datetime.timedelta(minutes=10)
+sts = datetime.datetime(2013,7,28, 14, 0)
+sts = sts.replace(tzinfo=pytz.timezone("America/New_York"))
+ets = sts + datetime.timedelta(minutes=601)
+interval = datetime.timedelta(minutes=60)
 now = sts
 xticks = []
 xlabels = []
@@ -68,7 +68,7 @@ while now <= ets:
     xlabels.append( now.strftime(fmt))
     xlabels2.append( now.strftime(fmt))
     now += interval
-
+print xticks
 import matplotlib.pyplot as plt
 import matplotlib.font_manager 
 prop = matplotlib.font_manager.FontProperties(size=12) 
@@ -85,19 +85,19 @@ ax.bar(svalid, sprec * 60, width=1./1440., fc='b', ec='b', label="Hourly Rate ov
 ax.plot(svalid, acc, color='k', label="Accumulation",lw=2, zorder=2)
 ax.plot(svalid, rate15, color='g', label="Hourly Rate over 15min", linewidth=2)
 ax.plot(svalid, rate60, color='r', label="Actual Hourly Rate", lw=2)
-ax.text(xticks[1], 14.6, "Minute Accumulations [inch]", va='bottom')
-for i in range(308,320):
-    ax.text( xticks[1], 14.5 + (308-i)*0.7, "%s %.2f" % (svalid[i].strftime("%-I:%M %p"), sprec[i],),
+ax.text(xticks[7], 7.3, "Minute Accums [inch]", va='bottom')
+for i in range(933,941):
+    ax.text( xticks[7], 7.1 + (933-i)*0.7, "%s %.2f" % (svalid[i].strftime("%-I:%M %p"), sprec[i],),
              va='top')
 ax.set_xticks(xticks)
 ax.set_ylabel("Precipitation [inch or inch/hour]")
 ax.set_xticklabels(xlabels2)
 ax.grid(True)
 ax.set_xlim(min(xticks), max(xticks))
-ax.legend(loc=2, prop=prop, ncol=1)
-ax.set_ylim(0,20)
-ax.set_xlabel("Morning of 26 July 2013 (CDT)")
-ax.set_title("26 July 2013 Oklahoma City, OK (KOKC) One Minute Rainfall\n3.54 inches total")
+ax.legend(loc=1, prop=prop, ncol=1)
+ax.set_ylim(0,12)
+ax.set_xlabel("Evening of 28 July 2013 (EDT)")
+ax.set_title("28 July 2013 Philadelphia (KPHL) One Minute Rainfall\n8.02 inches total")
 #ax.set_ylim(0,361)
 #ax.set_yticks((0,90,180,270,360))
 #ax.set_yticklabels(('North','East','South','West','North'))
