@@ -19,7 +19,7 @@ def doit(ts, routes):
     """
     # Mod the minute down
     remain = ts.minute % 2
-    ts -= datetime.timedelta(minutes=remain+2)
+    ts -= datetime.timedelta(minutes=remain+4)
     
     precip = np.zeros( (3500,7000) )
     for tile in range(1,3):
@@ -35,7 +35,7 @@ def doit(ts, routes):
                 y0 = 1750
             precip[y0:(y0+ysz),x0:(x0+xsz)] += val
         else:
-            print 'Missing 1HRAD MRMS for q3_today_total', fn
+            print 'Missing RAINRATE MRMS for q3_today_total', fn
     
     lts = ts.astimezone(pytz.timezone("America/Chicago"))
 
