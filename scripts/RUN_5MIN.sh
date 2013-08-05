@@ -19,6 +19,7 @@ python 24h_lsr.py
 
 cd ../current
 python lsr_snow_mapper.py >& /dev/null
+python q3_2min_rate.py &
 
 cd ../ingestors/rwis
 ./download.csh &

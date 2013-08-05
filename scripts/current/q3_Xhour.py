@@ -14,14 +14,6 @@ import gzip
 from iem.plot import MapPlot
 
 
-def make_fp(ts):
-    """
-    Return a string for the filename expected for this timestamp
-    """
-    return "/mnt/a4/data/%s/nmq/tile2/data/QPESUMS/grid/q2rad_hsr_nc/short_qpe/%s00.nc" % (
-        ts.strftime("%Y/%m/%d"), 
-        ts.strftime("%Y%m%d-%H%M") )
-
 def doit(ts, hours):
     """
     Create a plot of precipitation stage4 estimates for some day
