@@ -19,11 +19,11 @@ def doit(ts, routes):
     """
     # Mod the minute down
     remain = ts.minute % 2
-    ts -= datetime.timedelta(minutes=remain+4)
+    now = ts - datetime.timedelta(minutes=remain+4)
     
     precip = np.zeros( (3500,7000) )
     for tile in range(1,3):
-        fn = util.get_fn('rainrate', ts, tile)
+        fn = util.get_fn('rainrate', now, tile)
         if os.path.isfile(fn):
             tilemeta, val = util.reader(fn)
             ysz, xsz = np.shape(val)
@@ -37,7 +37,7 @@ def doit(ts, routes):
         else:
             print 'Missing RAINRATE MRMS for q3_today_total', fn
     
-    lts = ts.astimezone(pytz.timezone("America/Chicago"))
+    lts = now.astimezone(pytz.timezone("America/Chicago"))
 
     subtitle = 'Rate at %s' % (lts.strftime("%d %B %Y %I:%M %p %Z"),)
     pqstr = "plot %s %s iowa_q2_5m.png q2/iowa_q2_5m_%s.png png" % (routes,
