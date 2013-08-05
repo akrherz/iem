@@ -6,35 +6,33 @@ $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "ts";
 $expiry = 60*60*24*100; // 100 days
 //setcookie(session_name(), session_id(), time()+$expiry, "/");
 
-if (!isset($_SESSION['stations'])){
-  $_SESSION['stations'] = Array();
-  if (isset($_COOKIE['stations'])){
+$_SESSION['stations'] = Array();
+if (isset($_COOKIE['stations'])){
     $_SESSION['stations'] = explode(",", $_COOKIE['stations']);
-  }
-} 
-
+}
+ 
 $st = isset($_GET["st"]) ? $_GET["st"] : "";
 $str = isset($_GET["str"]) ? $_GET["str"] : "";
 
 if ($st != ""){
-    foreach ($st as $key => $value) {
-      if (strlen($value) > 0 && $value != "ahack") {
+  foreach ($st as $key => $value) {
+    if (strlen($value) > 0 && $value != "ahack") {
         array_push( $_SESSION['stations'], $value);
-      }
     }
   }
-  if ($str != ""){
-   foreach ($str as $key => $value) {
-      if (strlen($value) > 0 && $value != "ahack") {
-        foreach ($_SESSION['stations'] as $key2 => $value2){
-          if ($value2 == $value){
-            unset($_SESSION['stations'][$key2]);
-          }
+}
+if ($str != ""){
+  foreach ($str as $key => $value) {
+    if (strlen($value) > 0 && $value != "ahack") {
+      foreach ($_SESSION['stations'] as $key2 => $value2){
+        if ($value2 == $value){
+          unset($_SESSION['stations'][$key2]);
         }
       }
-    } 
+    }
+  } 
 }
-setcookie("stations", implode(",", $_SESSION['stations']),time()+$expiry, "/");
+setcookie("stations", implode(",", $_SESSION['stations']), time() + $expiry, "/my/");
 
 ?>
 
@@ -55,12 +53,12 @@ function new_window(url) {
     window.onload=function(){tableruler();}
 </script>';
  $THISPAGE = "current-sort";
- include("$rootpath/include/header.php"); ?>
-<?php include("$rootpath/include/mlib.php"); ?>
-<?php include("$rootpath/include/iemaccess.php"); ?>
-<?php include("$rootpath/include/iemaccessob.php"); ?>
+ include("../../include/header.php"); ?>
+<?php include("../../include/mlib.php"); ?>
+<?php include("../../include/iemaccess.php"); ?>
+<?php include("../../include/iemaccessob.php"); ?>
 
-<?php $current_network = "My Favorites"; include("$rootpath/include/current_bar.inc.php"); ?>
+<?php $current_network = "My Favorites"; include("../../include/current_bar.inc.php"); ?>
 <form method="GET" action="current.phtml">
 <input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
 
@@ -263,15 +261,15 @@ while (list ($key, $val) = each ($finalA))  {
  <td></td>
  <td></td>
  <td></td>
- <td><a href="javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?var=tmpf&<?php echo $cgiStr ; ?>');">Plot</a> (<a href="javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?var=max_tmpf&<?php echo $cgiStr ; ?>');">Plot</a> / <a href="javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?var=min_tmpf&<?php echo $cgiStr ; ?>');">Plot</a> )</td>
- <td><a href="javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?var=dwpf&<?php echo $cgiStr ; ?>');">Plot</a></td>
- <td><a href="javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?var=feel&<?php echo $cgiStr ; ?>');">Plot</a></td>
- <td><a href="javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?var=relh&<?php echo $cgiStr ; ?>');">Plot</a></td>
+ <td><a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=tmpf&<?php echo $cgiStr ; ?>');">Plot</a> (<a href="javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?var=max_tmpf&<?php echo $cgiStr ; ?>');">Plot</a> / <a href="javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?var=min_tmpf&<?php echo $cgiStr ; ?>');">Plot</a> )</td>
+ <td><a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=dwpf&<?php echo $cgiStr ; ?>');">Plot</a></td>
+ <td><a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=feel&<?php echo $cgiStr ; ?>');">Plot</a></td>
+ <td><a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=relh&<?php echo $cgiStr ; ?>');">Plot</a></td>
  <td></td>
- <td><a href="javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?var=vsby&<?php echo $cgiStr ; ?>');">Plot</a></td>
+ <td><a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=vsby&<?php echo $cgiStr ; ?>');">Plot</a></td>
  <td></td>
- <td><a href="javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?var=sknt&<?php echo $cgiStr ; ?>');">Plot</a></td>
- <td><a href="javascript:new_window('<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?var=max_sknt&<?php echo $cgiStr ; ?>');">Plot</a></td>
+ <td><a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=sknt&<?php echo $cgiStr ; ?>');">Plot</a></td>
+ <td><a href="javascript:new_window('/GIS/apps/php/currents.phtml?var=max_sknt&<?php echo $cgiStr ; ?>');">Plot</a></td>
  <td colspan="3"></td>
 
 </tr>
@@ -416,4 +414,4 @@ logic to account for sites without 4 sensors or broken sensors.
 
 <br><br></div>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../include/footer.php"); ?>
