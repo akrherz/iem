@@ -22,9 +22,11 @@ def doit(ts, routes):
     now = ts - datetime.timedelta(minutes=remain+4)
     
     precip = np.zeros( (3500,7000) )
+    hits = 0
     for tile in range(1,3):
         fn = util.get_fn('rainrate', now, tile)
         if os.path.isfile(fn):
+            hits += 1
             tilemeta, val = util.reader(fn)
             ysz, xsz = np.shape(val)
             if tile == 1:
@@ -34,8 +36,10 @@ def doit(ts, routes):
                 x0 = 3500
                 y0 = 1750
             precip[y0:(y0+ysz),x0:(x0+xsz)] += val
-        else:
-            print 'Missing RAINRATE MRMS for q3_today_total', fn
+
+    if hits < 2:
+        # Don't bother running
+        return
     
     lts = now.astimezone(pytz.timezone("America/Chicago"))
 
