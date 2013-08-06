@@ -1,10 +1,11 @@
 """
-We need to use the QC'd 24h 12z total to fix the 1h problems :(
+  IEMRE precipitation is based off of the hourly stage IV precipitation
+  Unfortunately, this is not heavily QC'd, so we use it as a function guide
+  to the 12z data, which is of better quality 
 """
 
-import Nio
+import pygrib
 import datetime
-import Ngl
 import numpy
 from pyiem import iemre
 import sys
