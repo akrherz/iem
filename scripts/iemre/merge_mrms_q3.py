@@ -20,7 +20,7 @@ def run( ts ):
     ncprecip = nc.variables['p01d']
 
     mrms = np.zeros( (3500,7000), 'f')
-    
+    ts += datetime.timedelta(hours=24)
     gmtts = ts.astimezone( pytz.timezone("UTC") )
 
     for tile in range(1,5):
