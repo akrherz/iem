@@ -21,7 +21,7 @@ if ts1.year != ts2.year:
 # Make sure we aren't in the future
 tsend = datetime.date.today()
 if ts2.date() >= tsend:
-    ts2 = tsend - datetime.timedelta(days=1)
+    ts2 = datetime.datetime.now() - datetime.timedelta(days=1)
 
 lat = float( form["lat"][0] )
 lon = float( form["lon"][0] )
@@ -50,12 +50,23 @@ clow = datatypes.temperature(cnc.variables['low_tmpk'][coffset1:coffset2,j,i], '
 cprecip = cnc.variables['p01d'][coffset1:coffset2,j,i] / 25.4
 cnc.close()
 
+if ts1.year > 2012:
+    fn = "/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (ts1.year,)
+    nc = netCDF4.Dataset(fn, 'r')
+    j2 = int((lat - iemre.SOUTH) * 100.0)
+    i2 = int((lon - iemre.WEST) * 100.0)
+    mrms_precip = nc.variables['p01d'][offset1:offset2,j2,i2] / 25.4
+    nc.close()
+else:
+    mrms_precip = [-99]*(offset2-offset1)
+
 res = {'data': [], }
 
 for i in range(0, offset2 - offset1):
     now = ts1 + datetime.timedelta(days=i)
     res['data'].append({
                 'date': now.strftime("%Y-%m-%d"),
+    'mrms_precip_in': "%.2f" % (mrms_precip[i],),
     'daily_high_f': "%.1f" % (hightemp[i],),
     'climate_daily_high_f': "%.1f" % (chigh[i],),
     'daily_low_f': "%.1f" % (lowtemp[i],),
