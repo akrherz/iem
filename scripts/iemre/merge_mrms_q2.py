@@ -30,8 +30,10 @@ def run( ts ):
     # Anything over 254 is bad
     res = np.where(data > 254, 0, data)
     res = np.where(np.logical_and(data >= 0, data < 100), data * 0.25, res )
-    res = np.where(np.logical_and(data >= 100, data < 180), data * 1.25, res )
-    res = np.where(np.logical_and(data >= 180, data < 255), data * 5, res )
+    res = np.where(np.logical_and(data >= 100, data < 180), 
+                   25. + ((data - 100) * 1.25), res )
+    res = np.where(np.logical_and(data >= 180, data < 255), 
+                   125. + ((data - 180) * 5.), res )
 
     y1 = (iemre.NORTH - util.SOUTH) * 100.0
     y0 = (iemre.SOUTH - util.SOUTH) * 100.0
