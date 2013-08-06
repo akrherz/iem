@@ -50,7 +50,7 @@ clow = datatypes.temperature(cnc.variables['low_tmpk'][coffset1:coffset2,j,i], '
 cprecip = cnc.variables['p01d'][coffset1:coffset2,j,i] / 25.4
 cnc.close()
 
-if ts1.year > 2012:
+if ts1.year > 2010:
     fn = "/mesonet/data/iemre/%s_mw_mrms_daily.nc" % (ts1.year,)
     nc = netCDF4.Dataset(fn, 'r')
     j2 = int((lat - iemre.SOUTH) * 100.0)
