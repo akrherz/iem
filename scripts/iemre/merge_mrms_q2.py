@@ -1,5 +1,5 @@
 '''
-Merge the 1km Q3 24 hour precip data estimates
+Merge the 1km Q2 24 hour precip data estimates
 '''
 import gzip
 import datetime
@@ -10,6 +10,7 @@ import util
 import os
 import netCDF4
 import numpy as np
+import Image
 from pyiem import iemre
 
 def run( ts ):
@@ -19,27 +20,24 @@ def run( ts ):
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables['p01d']
 
-    mrms = np.zeros( (3500,7000), 'f')
-    
     gmtts = ts.astimezone( pytz.timezone("UTC") )
 
-    for tile in range(1,5):
-        fn = util.get_fn('24hrad', gmtts, tile)
-        if not os.path.isfile(fn):
-            print "24h Tile: %s Time: %s UTC %s" % (tile, 
-                                        gmtts.strftime("%Y-%m-%d %H:%M"), fn)
-            continue
-        tilemeta, val = util.reader(fn)
-        ysz, xsz = np.shape(val)
-        x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
-        y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
-        mrms[y0:(y0+ysz),x0:(x0+xsz)] = val
+    fn = gmtts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/q2/p24h_%Y%m%d%H00.png")
+    img = Image.open(fn)
+    data = np.asarray(img)
+    # data is 3500,7000 , starting at upper L
+    data = np.flipud(data)
+    # Anything over 254 is bad
+    res = np.where(data > 254, 0, data)
+    res = np.where(np.logical_and(data >= 0, data < 100), data * 0.25, res )
+    res = np.where(np.logical_and(data >= 100, data < 180), data * 1.25, res )
+    res = np.where(np.logical_and(data >= 180, data < 255), data * 5, res )
 
     y1 = (iemre.NORTH - util.SOUTH) * 100.0
     y0 = (iemre.SOUTH - util.SOUTH) * 100.0
     x0 = (iemre.WEST - util.WEST) * 100.0
     x1 = (iemre.EAST - util.WEST) * 100.0
-    ncprecip[offset,:,:] = mrms[y0:y1,x0:x1]
+    ncprecip[offset,:,:] = res[y0:y1,x0:x1]
     nc.close()
 
 if __name__ == '__main__':
