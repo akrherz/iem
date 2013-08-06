@@ -19,7 +19,7 @@ def run( ts ):
                          'a')
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables['p01d']
-
+    ts += datetime.timedelta(hours=24)
     gmtts = ts.astimezone( pytz.timezone("UTC") )
 
     fn = gmtts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/q2/p24h_%Y%m%d%H00.png")
