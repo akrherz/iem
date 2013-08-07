@@ -1,24 +1,68 @@
 <?php 
 include("../../config/settings.inc.php");
 define("IEM_APPID", 25);
-include("$rootpath/include/forms.php");
-include("$rootpath/include/imagemaps.php");
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
+include("../../include/forms.php");
+include("../../include/imagemaps.php");
+include("../../include/mlib.php");
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
 $iem = new iemaccess();
 $rsai4 = $iem->getSingleSite('RSAI4');
 $rlri4 = $iem->getSingleSite('RLRI4');
 
-
 $TITLE = "IEM | Other Data Networks";
 $THISPAGE = "networks-other";
-include("$rootpath/include/header.php");  ?>
+include("../../include/header.php");  
+?>
 
 <h3 class="heading">Other Data Networks</h3>
 
 <p>The IEM collects data from a number of stand alone sensors.  This page
 contains links to data from these sites.
+
+<h3>Stuart Smith Park Hydrology Learning Lab, Ames</h3>
+
+<p>These are four ground water monitoring wells and a stream gage located at
+the Start Smith Park in Ames.  These data are used by the Geology 100 class, but
+are freely available to others.
+
+<h4>Download Stream Gage Data ("Bubbler")</h4>
+<form method="GET" action="/cgi-bin/request/ss.py" name="bubbler">
+<input type="hidden" name="opt" value="bubbler" />
+<table>
+ <th>Start Date:</th> 
+  <td><?php echo yearSelect2(2012, 2012, "year1"); ?></td>
+  <td><?php echo monthSelect(8, "month1"); ?></td>
+  <td><?php echo daySelect2(13, "day1"); ?></td></tr>
+
+<tr>
+ <th>End Date:</th>
+  <td><?php echo yearSelect2(2012, date("Y"), "year2"); ?></td>
+  <td><?php echo monthSelect(date("m"), "month2"); ?></td>
+  <td><?php echo daySelect2(date("d"), "day2"); ?></td></tr>
+
+</table>
+<input type="submit" value="Request Data" />
+</form>
+
+<h4>Download Ground Monitoring Well Data</h4>
+<form method="GET" action="/cgi-bin/request/ss.py" name="gage">
+<input type="hidden" name="opt" value="gage" />
+<table>
+ <th>Start Date:</th> 
+  <td><?php echo yearSelect2(2012, 2012, "year1"); ?></td>
+  <td><?php echo monthSelect(8, "month1"); ?></td>
+  <td><?php echo daySelect2(22, "day1"); ?></td></tr>
+
+<tr>
+ <th>End Date:</th>
+  <td><?php echo yearSelect2(2012, date("Y"), "year2"); ?></td>
+  <td><?php echo monthSelect(date("m"), "month2"); ?></td>
+  <td><?php echo daySelect2(date("d"), "day2"); ?></td></tr>
+
+</table>
+<input type="submit" value="Request Data" />
+</form>
 
 <h3><a href="http://www.ctre.iastate.edu">CTRE</a> Provided Iowa DOT Bridge Sensors</h3>
 
@@ -43,21 +87,21 @@ purpose is to monitor for high winds impacting traffic.
 <h3>Agronomy Hall, ISU:</h3>
 
 <ul>
-<li><a href="<?php echo $rooturl; ?>/plotting/mesonorth/ot_10min.phtml">Indoor Temperature for Met Cluster Room</a>, B548 Agronomy Hall.  Outfitted with 4 One-Wire sensors reporting every minute.</li>
-<li><a href="<?php echo $rooturl; ?>/plotting/isumet/1station_1min.phtml">ISU AMS Station</a>, On the roof.  Davis Weather station reporting every minute.</li>
-<li><a href="<?php echo $rooturl; ?>/plotting/isumet/ams2.phtml">ISU AMS Station #2</a>, On the roof.  Davis Vantage Pro 2, installed 8 Sep 2011.</li>
-<li><a href="<?php echo $rooturl; ?>/plotting/iemcc/">IEM Central Command</a>, On the roof.  High quality Campbell Scientific sensors reporting every minute.</li>
+<li><a href="/plotting/mesonorth/ot_10min.phtml">Indoor Temperature for Met Cluster Room</a>, B548 Agronomy Hall.  Outfitted with 4 One-Wire sensors reporting every minute.</li>
+<li><a href="/plotting/isumet/1station_1min.phtml">ISU AMS Station</a>, On the roof.  Davis Weather station reporting every minute.</li>
+<li><a href="/plotting/isumet/ams2.phtml">ISU AMS Station #2</a>, On the roof.  Davis Vantage Pro 2, installed 8 Sep 2011.</li>
+<li><a href="/plotting/iemcc/">IEM Central Command</a>, On the roof.  High quality Campbell Scientific sensors reporting every minute.</li>
 </ul>
 
 <h3>City of Ames</h3>
 <ul>
-<li><a href="<?php echo $rooturl; ?>/plotting/mesoeast/main.phtml">Mesonet Northeast Ames</a>, residence east of Wal-Mart.</li>
+<li><a href="/plotting/mesoeast/main.phtml">Mesonet Northeast Ames</a>, residence east of Wal-Mart.</li>
 <li><a href="daily_plot.phtml?station=OT0008&year=2007&month=2&day=13">Reiman Gardens station</a>, only some limited data from 2007 for the site.</li>
 <li><a href="beloit/">Beloit Weather Station</a> located at a facility on Northwestern Avenue.</li>
 </ul>
 
 <h3>Raw Data Download!</h3>
-<form name="dl" action="<?php echo $rootcgi; ?>/request/other.py">
+<form name="dl" action="/request/other.py">
 <table>
 <tr><th rowspan="2">Select Location: <?php echo networkSelect("OT", ""); ?></th>
  <th>Start Date:</th> 
@@ -76,4 +120,4 @@ purpose is to monitor for high winds impacting traffic.
 </form>
 
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../include/footer.php"); ?>
