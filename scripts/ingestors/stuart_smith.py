@@ -7,7 +7,8 @@ import datetime
 import pytz
 MESOSITE = psycopg2.connect(database='other', host='iemdb')
 mcursor = MESOSITE.cursor()
-maxts = {}
+
+now = datetime.datetime.now()
 
 # Do the bubbler file
 mcursor.execute("""SELECT max(valid) from ss_bubbler""")
@@ -30,6 +31,7 @@ for line in open('/mnt/rootdocs/Bubbler.csv'):
                     (ts, tokens[2], tokens[3], tokens[4]))
 
 # Do the STS_GOLD file
+maxts = {}
 mcursor.execute("""SELECT max(valid), site_serial from ss_logger_data
     GROUP by site_serial""")
 for row in mcursor:
@@ -45,6 +47,8 @@ for linenum, line in enumerate(data.split("\n")):
         continue
     site_serial = int(tokens[1])
     ts = datetime.datetime.strptime(tokens[2], '%m/%d/%y %H:%M:%S')
+    if ts > now:
+        continue
     if maxts.get(site_serial) and ts < maxts.get(site_serial):
         continue
     mcursor.execute("""INSERT into ss_logger_data values (%s, %s, %s, %s, %s,
