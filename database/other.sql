@@ -1,3 +1,38 @@
+---
+--- Stuart Smith Park Hydrology Learning Lab
+---
+CREATE TABLE ss_bubbler(
+  valid timestamptz,
+  field varchar(32),
+  value real,
+  units varchar(32)
+);
+CREATE INDEX ss_bubbler_idx on ss_bubbler(valid);
+GRANT SELECT on ss_bubbler to nobody,apache;
+
+---
+--- Stuart Smith Park Hydrology Learning Lab
+---
+CREATE TABLE ss_logger_data(
+  id int,
+  site_serial int,
+  valid timestamptz,
+  ch1_data_p real,
+  ch2_data_p real,
+  ch3_data_p real,
+  ch4_data_p real,
+  ch1_data_t real,
+  ch2_data_t real,
+  ch3_data_t real,
+  ch4_data_t real,
+  ch1_data_c real,
+  ch2_data_c real,
+  ch3_data_c real,
+  ch4_data_c real
+);
+CREATE INDEX ss_logger_data_idx on ss_logger_data(valid);
+GRANT SELECT on ss_logger_data to nobody,apache;
+
 CREATE TABLE asi_data (
   station char(7),
   valid timestamp with time zone,

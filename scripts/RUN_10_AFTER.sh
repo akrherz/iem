@@ -23,6 +23,7 @@ cd ../ingestors
 python beloit.py
 python soilm_ingest.py
 python flux_ingest.py
+python stuart_smith.py &
 
 cd ../outgoing
 php wxc_cocorahs.php
