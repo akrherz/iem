@@ -1,11 +1,10 @@
 """
-  IEMRE precipitation is based off of the hourly stage IV precipitation
-  Unfortunately, this is not heavily QC'd, so we use it as a function guide
-  to the 12z data, which is of better quality 
+We need to use the QC'd 24h 12z total to fix the 1h problems :(
 """
 
-import pygrib
+import Nio
 import datetime
+import Ngl
 import numpy
 from pyiem import iemre
 import sys
@@ -81,4 +80,3 @@ if __name__ == "__main__":
         ts = ts.replace(hour=12,minute=0,second=0, microsecond=0)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     merge(ts)
-
