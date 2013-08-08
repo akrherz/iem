@@ -23,9 +23,9 @@ Iowa Ag Weather information in a one-stop location.</div>
 
 <tr>
   <th>Growing Degree Days</th>
-  <td></td>
-  <td><a href="../GIS/apps/coop/gsplot.phtml?var=gdd50&year=<?php echo date("Y"); ?>">Map of Totals</a>
-  <br /><a href="../plotting/coop/acc.phtml">Single Site Graphs</a></td>
+  <td><a href="/plotting/coop/gddprobs.phtml">Probabilies + Scenarios</a></td>
+  <td><a href="/GIS/apps/coop/gsplot.phtml?var=gdd50&year=<?php echo date("Y"); ?>">Map of Totals</a>
+  <br /><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></td>
 </tr>
 
 <tr>
