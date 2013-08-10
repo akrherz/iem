@@ -13,14 +13,20 @@ now = datetime.datetime.now()
 # Do the bubbler file
 mcursor.execute("""SELECT max(valid) from ss_bubbler""")
 row = mcursor.fetchone()
-maxts = None if row[0] is None else datetime.datetime.strptime(row[0].strftime('%m/%d/%y %H:%M:%S'), '%m/%d/%y %H:%M:%S')
+maxts = None if row[0] is None else datetime.datetime.strptime(
+                    row[0].strftime('%m/%d/%y %H:%M:%S'), '%m/%d/%y %H:%M:%S')
 
 for line in open('/mnt/rootdocs/Bubbler.csv'):
     tokens = line.strip().split(",")
     if len(tokens) < 2 or line[0] in ['S','G']:
         continue
-    ts = datetime.datetime.strptime("%s %s" % (tokens[0], tokens[1]),
+    try:
+        ts = datetime.datetime.strptime("%s %s" % (tokens[0], tokens[1]),
                                     '%m/%d/%Y %H:%M:%S')
+    except Exception, exp:
+        print exp
+        print repr(line)
+        continue
     if maxts and ts < maxts:
         continue
     if len(tokens) == 3:
