@@ -91,7 +91,7 @@ def doit(gts, hr):
     png = Image.fromarray( imgdata.astype('u1') )
     png.putpalette( util.make_colorramp() )
     png.save('%s.png' % (tmpfn,))
-    os.system("xv %s.png" % (tmpfn,))
+    #os.system("xv %s.png" % (tmpfn,))
     # Now we need to generate the world file
     util.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
