@@ -70,7 +70,7 @@ def reader(fn):
     z_scale = struct.unpack('i', fp.read(4))
     bogus = struct.unpack('10i', fp.read(40))
     varname = struct.unpack('20c', fp.read(20))
-    unit = struct.unpack('6c', fp.read(6))
+    metadata['unit'] = struct.unpack('6c', fp.read(6))
     var_scale, miss_val, num_radars = struct.unpack('3i', fp.read(12))
     rad_list = struct.unpack('%sc' % (num_radars*4,), fp.read(num_radars*4))
     #print unit, var_scale, miss_val
