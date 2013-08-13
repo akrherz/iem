@@ -12,7 +12,6 @@
 
 import numpy as np
 import datetime
-import gzip
 from PIL import Image
 import os
 import sys
@@ -20,7 +19,6 @@ import tempfile
 import subprocess
 import util
 import json
-import matplotlib.pyplot as plt
 
 def doit(gts, hr):
     """
@@ -48,9 +46,6 @@ def doit(gts, hr):
                 continue
         
             tilemeta, val = util.reader(fn)
-            (fig, ax) = plt.subplots(1,1)
-            ax.imshow(val)
-            fig.savefig('%s_%s.png' % (now, tile))
             ysz, xsz = np.shape(val)
             if tile == 1:
                 x0 = 0; y0 = 1750
@@ -69,9 +64,6 @@ def doit(gts, hr):
              1-5   -> 80 - 0.05 res  ||  25 - 125 ->  80 - 1.25 mm  100
              5-20  -> 75 - 0.20 res  || 125 - 500  ->  75 - 5 mm    180
             """
-    (fig, ax) = plt.subplots(1,1)
-    ax.imshow(timestep)
-    fig.savefig('ts.png')
     
     timestep = np.flipud(timestep)
     imgdata = np.where(timestep >= 500, 254, imgdata)
