@@ -18,7 +18,8 @@ maxts = None if row[0] is None else datetime.datetime.strptime(
 
 for line in open('/mnt/rootdocs/Bubbler.csv'):
     tokens = line.strip().split(",")
-    if len(tokens) < 2 or line[0] in ['S','G']:
+    if len(tokens) < 2 or line[0] in ['S','G'] or len(line) > 300:
+        print line
         continue
     try:
         ts = datetime.datetime.strptime("%s %s" % (tokens[0], tokens[1]),
