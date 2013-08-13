@@ -20,6 +20,7 @@ import tempfile
 import subprocess
 import util
 import json
+import matplotlib.pyplot as plt
 
 def doit(gts, hr):
     """
@@ -47,10 +48,19 @@ def doit(gts, hr):
                 continue
         
             tilemeta, val = util.reader(fn)
+            (fig, ax) = plt.subplots(1,1)
+            ax.imshow(val)
+            fig.savefig('%s_%s.png' % (now, tile))
             ysz, xsz = np.shape(val)
-            val = np.flipud(val)
-            x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
-            y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
+            if tile == 1:
+                x0 = 0; y0 = 1750
+            elif tile == 2:
+                x0 = 3500; y0 = 1750
+            elif tile == 3:
+                x0 = 0; y0 = 0
+            elif tile == 4:
+                x0 = 3500; y0 = 0
+            #val = np.flipud(val)
             timestep[y0:(y0+ysz),x0:(x0+xsz)] += val
             """
              255 levels...  wanna do 0 to 20 inches
@@ -59,24 +69,29 @@ def doit(gts, hr):
              1-5   -> 80 - 0.05 res  ||  25 - 125 ->  80 - 1.25 mm  100
              5-20  -> 75 - 0.20 res  || 125 - 500  ->  75 - 5 mm    180
             """
-            
+    (fig, ax) = plt.subplots(1,1)
+    ax.imshow(timestep)
+    fig.savefig('ts.png')
+    
+    timestep = np.flipud(timestep)
     imgdata = np.where(timestep >= 500, 254, imgdata)
     imgdata = np.where(np.logical_and(timestep >= 125, timestep < 500), 
                        180 + ((timestep - 125.) / 5.0), imgdata)
     imgdata = np.where(np.logical_and(timestep >= 25, timestep < 125), 
                        100 + ((timestep - 25.) / 1.25), imgdata)
     imgdata = np.where(np.logical_and(timestep >= 0, timestep < 25), 
-                       0 + ((timestep - 0.) / 0.25), imgdata)
+                        timestep / 0.25, imgdata)
     imgdata = np.where( timestep < 0, 255, imgdata)
-
+ 
     # Stress our color ramp
     #for i in range(256):
-    #    imgdata[i*10:i*10+10,0:100] = i
+    #    imgdata[i*10:i*10+10,0:1000] = i
     (tmpfp, tmpfn) = tempfile.mkstemp()
     # Create Image
-    png = Image.fromarray( imgdata )
+    png = Image.fromarray( imgdata.astype('u1') )
     png.putpalette( util.make_colorramp() )
     png.save('%s.png' % (tmpfn,))
+    os.system("xv %s.png" % (tmpfn,))
     # Now we need to generate the world file
     util.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
@@ -114,7 +129,7 @@ if __name__ == "__main__":
     else:
         gts = datetime.datetime.utcnow()
         gts = gts.replace(minute=0,second=0,microsecond=0)
-    for hr in [24,48,72]:
+    for hr in [24,]:#48,72]:
         doit( gts , hr)
         
     
