@@ -84,8 +84,8 @@ def doit(gts, hr):
     imgdata = np.where( timestep < 0, 255, imgdata)
  
     # Stress our color ramp
-    #for i in range(256):
-    #    imgdata[i*10:i*10+10,0:1000] = i
+    for i in range(26):
+        imgdata[i,0] = i
     (tmpfp, tmpfn) = tempfile.mkstemp()
     # Create Image
     png = Image.fromarray( imgdata.astype('u1') )
