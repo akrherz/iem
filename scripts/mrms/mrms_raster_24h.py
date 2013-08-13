@@ -129,7 +129,7 @@ if __name__ == "__main__":
     else:
         gts = datetime.datetime.utcnow()
         gts = gts.replace(minute=0,second=0,microsecond=0)
-    for hr in [24,]:#48,72]:
+    for hr in [24,48,72]:
         doit( gts , hr)
         
     
