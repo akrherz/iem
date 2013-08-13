@@ -1,5 +1,5 @@
 """
- Generate a raster of 24hour precipitation totals from Q2
+ Generate a raster of 24hour precipitation totals from MRMS
 
  run from RUN_10_AFTER.sh
  
@@ -10,79 +10,75 @@
  5-20  -> 75 - 0.20 res
 """
 
-import numpy
-import mx.DateTime
-import netCDF4
+import numpy as np
+import datetime
+import gzip
 from PIL import Image
 import os
 import sys
 import tempfile
 import subprocess
-import nmq
+import util
 import json
 
-def make_fp(tile, gts):
-    """
-    Return a string for the filename expected for this timestamp
-    """
-    return "/mnt/a4/data/%s/nmq/tile%s/data/QPESUMS/grid/q2rad_hsr_nc/long_qpe/%s00.nc" % (
-        gts.strftime("%Y/%m/%d"), tile, 
-        gts.strftime("%Y%m%d-%H%M") )
-    
 def doit(gts, hr):
     """
     Actually generate a PNG file from the 8 NMQ tiles
     """
     szx = 7000
     szy = 3500
-    west = -130.
-    north = 55.
-    sts = gts - mx.DateTime.RelativeDateTime(hours=hr)
+
+    sts = gts - datetime.timedelta(hours=hr)
+    times = [gts]
+    if hr > 24:
+        times.append(gts - datetime.timedelta(hours=24))
+    if hr == 72:
+        times.append( gts - datetime.timedelta(hours=48) )
     metadata = {'start_valid': sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'end_valid': gts.strftime("%Y-%m-%dT%H:%M:%SZ") }
     # Create the image data
-    imgdata = numpy.zeros( (szy, szx), 'u1')
-    # Loop over tiles
-    for tile in range(1,9):
-        fp = make_fp(tile, gts)
-        if not os.path.isfile(fp):
-            #mesonet.bring_me_file( fp )
-            print "q2_raster_%sh Missing Tile: %s Time: %s" % (hr, tile, gts)
-            continue
-        nc = netCDF4.Dataset( fp )
-        # Our 24h rasters will support ~24 inch rainfalls
-        hsr = nc.variables["rad_hsr_%sh" % (hr,)]
-        val = hsr[:] / hsr.Scale # mm
-        image = numpy.zeros( numpy.shape(val), 'i')
-        """
-         255 levels...  wanna do 0 to 20 inches
-         index 255 is missing, index 0 is 0
-         0-1   -> 100 - 0.01 res ||  0 - 25   -> 100 - 0.25 mm  0
-         1-5   -> 80 - 0.05 res  ||  25 - 125 ->  80 - 1.25 mm  100
-         5-20  -> 75 - 0.20 res  || 125 - 500  ->  75 - 5 mm    180
-        """
-        image = numpy.where(val >= 500, 254, image)
-        image = numpy.where(numpy.logical_and(val >= 125, val < 500), 180 + ((val - 125.) / 5.0), image)
-        image = numpy.where(numpy.logical_and(val >= 25, val < 125), 100 + ((val - 25.) / 1.25), image)
-        image = numpy.where(numpy.logical_and(val >= 0, val < 25), 0 + ((val - 0.) / 0.25), image)
-        image = numpy.where( val < 0, 255, image)
+    imgdata = np.zeros( (szy, szx), 'u1')
+    timestep = np.zeros( (szy, szx), 'f')
+    for now in times:    
+        for tile in range(1,5):
+            fn = util.get_fn('24hrad', now, tile)
+            if not os.path.isfile(fn):
+                print 'MRMS 24h RASTER missing %s' % (fn,)
+                continue
+        
+            tilemeta, val = util.reader(fn)
+            ysz, xsz = np.shape(val)
+            val = np.flipud(val)
+            x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
+            y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
+            timestep[y0:(y0+ysz),x0:(x0+xsz)] += val
+            """
+             255 levels...  wanna do 0 to 20 inches
+             index 255 is missing, index 0 is 0
+             0-1   -> 100 - 0.01 res ||  0 - 25   -> 100 - 0.25 mm  0
+             1-5   -> 80 - 0.05 res  ||  25 - 125 ->  80 - 1.25 mm  100
+             5-20  -> 75 - 0.20 res  || 125 - 500  ->  75 - 5 mm    180
+            """
+            
+    imgdata = np.where(timestep >= 500, 254, imgdata)
+    imgdata = np.where(np.logical_and(timestep >= 125, timestep < 500), 
+                       180 + ((timestep - 125.) / 5.0), imgdata)
+    imgdata = np.where(np.logical_and(timestep >= 25, timestep < 125), 
+                       100 + ((timestep - 25.) / 1.25), imgdata)
+    imgdata = np.where(np.logical_and(timestep >= 0, timestep < 25), 
+                       0 + ((timestep - 0.) / 0.25), imgdata)
+    imgdata = np.where( timestep < 0, 255, imgdata)
 
-        ysz, xsz = numpy.shape(val)
-        x0 = (nmq.TILES[tile][0] - west) * 100.0
-        y0 = (north - nmq.TILES[tile][1]) * 100.0
-        #print tile, x0, xsz, y0, ysz, val[0,0]
-        imgdata[y0:(y0+ysz-1),x0:(x0+xsz-1)] = image[:-1,:-1]
-        nc.close()
     # Stress our color ramp
     #for i in range(256):
     #    imgdata[i*10:i*10+10,0:100] = i
     (tmpfp, tmpfn) = tempfile.mkstemp()
     # Create Image
     png = Image.fromarray( imgdata )
-    png.putpalette( nmq.make_colorramp() )
+    png.putpalette( util.make_colorramp() )
     png.save('%s.png' % (tmpfn,))
     # Now we need to generate the world file
-    nmq.write_worldfile('%s.wld' % (tmpfn,))
+    util.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
     pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/q2/p%sh.wld GIS/q2/p%sh_%s.wld wld' %s.wld" % (
                     gts.strftime("%Y%m%d%H%M"),hr, hr, gts.strftime("%Y%m%d%H%M"), tmpfn )
@@ -113,10 +109,11 @@ def doit(gts, hr):
 
 if __name__ == "__main__":
     if len(sys.argv) == 5:
-        gts = mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
+        gts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]),
                                    int(sys.argv[4]), 0)
     else:
-        gts = mx.DateTime.gmtime() + mx.DateTime.RelativeDateTime(minute=0,second=0)
+        gts = datetime.datetime.utcnow()
+        gts = gts.replace(minute=0,second=0,microsecond=0)
     for hr in [24,48,72]:
         doit( gts , hr)
         
