@@ -72,8 +72,10 @@ nt = network.Table("RAOB")
 
 
 class RAOB:
+    ''' Simple class representing a RAOB profile '''
     
     def __init__(self):
+        ''' constructor'''
         self.station = None
         self.valid = None
         self.release_time = None
@@ -84,6 +86,7 @@ class RAOB:
         self.tropo_level = None
 
     def conv_hhmm(self, raw):
+        ''' Convert string to timestamp '''
         if raw == '99999':
             return None
         ts = self.valid.replace(hour=int(raw[:-2]), minute=int(raw[-2:]))
@@ -92,6 +95,7 @@ class RAOB:
         return ts
 
     def conv_speed(self, raw):
+        ''' convert sped to mps units '''
         if raw == '99999':
             return None
         if self.wind_units == 'kt':
@@ -118,8 +122,9 @@ class RAOB:
         row = txn.fetchone()
         fid = row[0]
         txn.execute("""DELETE from raob_profile where fid = %s""", (fid,))
+        table = "raob_profile_%s" % (self.valid.year,)
         for d in self.profile:
-            txn.execute("""INSERT into raob_profile_""" +`self.valid.year`+"""
+            txn.execute("""INSERT into """ + table +"""
             (fid, ts, levelcode,
             pressure, height, tmpc, dwpc, drct, smps, bearing, range_miles)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (fid, d['ts'],
@@ -127,16 +132,19 @@ class RAOB:
             d['drct'], d['smps'], d['bearing'], d['range']))
         
 def conv_press( raw ):
+    ''' Convert raw string to database value '''
     if raw == '99999':
         return None
     return float(raw) / 10.0
 
 def conv_temp( raw ):
+    ''' Convert raw string to database value '''
     if raw == '99999':
         return None
     return float(raw) / 10.0
 
 def conv_drct( raw):
+    ''' Convert raw string to database value '''
     if raw == '99999':
         return None
     return float(raw) 
@@ -172,7 +180,7 @@ def parse( raw, sid ):
             rob.station = sid
             rob.wind_units = tokens[3] 
             continue
-        if tokens[0] in ['4','5','6','9']:
+        if tokens[0] in ['4', '5', '6', '9']:
             rob.profile.append({'levelcode': tokens[0],
                                 'pressure': float(tokens[1]) / 10.0,
                                 'height': conv_drct(tokens[2]),
@@ -188,6 +196,7 @@ def parse( raw, sid ):
         yield rob
         
 def main():
+    ''' see how we are called '''
     DBCONN = psycopg2.connect(database='postgis', host='iemdb')
     
     
@@ -199,13 +208,15 @@ def main():
     for sid in nt.sts.keys():
         uri = ("http://rucsoundings.noaa.gov/get_raobs.cgi?data_source=RAOB;"
               +"start_year=%s;start_month_name=%s;" % (valid.year,
-                                                                      valid.strftime("%b"))
-              +"start_mday=%s;start_hour=%s;start_min=0;n_hrs=12.0;" % (valid.day,
-                                                                        valid.hour)
+                                                       valid.strftime("%b"))
+              +"start_mday=%s;start_hour=%s;start_min=0;n_hrs=12.0;" % (
+                                                                valid.day,
+                                                            valid.hour)
               +"fcst_len=shortest;airport=%s;" % (sid,)
               +"text=Ascii%20text%20%28GSD%20format%29;"
-              +"hydrometeors=false&startSecs=%s&endSecs=%s" % (v12.strftime("%s"),
-                                                               valid.strftime("%s") ))
+              +"hydrometeors=false&startSecs=%s&endSecs=%s" % (
+                                                        v12.strftime("%s"),
+                                                        valid.strftime("%s") ))
                 
         cursor = DBCONN.cursor()
         try:
@@ -214,8 +225,9 @@ def main():
                 nt.sts[sid]['count'] = len(rob.profile)
                 rob.database_save(cursor)
         except Exception, exp:
-            print 'RAOB FAIL %s %s %s' % (sid, valid, exp)
-            o = open("/tmp/%s_%s_fail" % (sid, valid.strftime("%Y%m%d%H%M")), 'w')
+            print 'RAOB FAIL %s %s %s, check /tmp for data' % (sid, valid, exp)
+            o = open("/tmp/%s_%s_fail" % (sid, valid.strftime("%Y%m%d%H%M")), 
+                     'w')
             o.write( data )
             o.close()
         finally:
@@ -226,11 +238,14 @@ def main():
 
     DBCONN.close()
 
-    ''' Loop thru and see which stations we were missing data from '''
+    # Loop thru and see which stations we were missing data from
+    missing = []
     for sid in nt.sts.keys():
         if nt.sts[sid]['online']:
             if nt.sts[sid].get('count', 0) == 0:
-                print 'RAOB dl for station failed: %s' % (sid,)
+                missing.append('RAOB dl for station failed: %s' % (sid,))
+    if len(missing) > 20:
+        print '\n'.join(missing)
 
 if __name__ == '__main__':
     #import glob
