@@ -50,5 +50,5 @@ if __name__ == '__main__':
         sys.exit(0)
     utcnow -= datetime.timedelta(minutes=1)
     fetch( utcnow )
-    for delay in [2,10,60,120,1440,2880]:
+    for delay in [2,4,10,60,120,1440,2880]:
         fetch( utcnow - datetime.timedelta(minutes=delay) )
