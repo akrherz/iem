@@ -60,7 +60,6 @@ def do( now , realtime=False):
         ''' There is currently a bug with how MRMS computes missing data :( '''
         val = np.where(val >= -32, (val + 32) * 2.0, val)
         val = np.where(val < 0., 255., val)
-        print np.min(val), np.max(val), val[1000,-200:]
         ysz, xsz = np.shape(val)
         val = np.flipud(val)
         x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
