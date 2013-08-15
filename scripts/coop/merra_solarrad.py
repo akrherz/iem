@@ -48,6 +48,14 @@ def do( date ):
     ets = sts + datetime.timedelta(days=1)
         
     fn = sts.strftime("/mesonet/merra/%Y/%Y%m%d.nc")
+    fn2 = ets.strftime("/mesonet/merra/%Y/%Y%m%d.nc")
+    if not os.path.isfile(fn):
+        print 'MISSING MERRA', fn
+        return 
+    if not os.path.isfile(fn2):
+        print 'MISSING MERRA', fn2
+        return
+
     nc = netCDF4.Dataset( fn )
     rad = nc.variables['swgdn'][7:,:,:]
     cs_rad = nc.variables['swgdnclr'][7:,:,:]
@@ -55,7 +63,6 @@ def do( date ):
     yc = nc.variables['latitude'][:] 
     nc.close()
 
-    fn2 = ets.strftime("/mesonet/merra/%Y/%Y%m%d.nc")
     nc = netCDF4.Dataset( fn2 )
     rad2 = nc.variables['swgdn'][:7,:,:]
     cs_rad2 = nc.variables['swgdnclr'][:7,:,:]
@@ -113,6 +120,8 @@ if __name__ == '__main__':
     if len(sys.argv) == 3:
         # Run for a given month!
         sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1)
+        # run for last date of previous month as well
+        sts = sts - datetime.timedelta(days=1)
         ets = sts + datetime.timedelta(days=45)
         ets = ets.replace(day=1)
         now = sts
