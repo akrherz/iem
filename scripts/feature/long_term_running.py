@@ -4,11 +4,12 @@ import datetime
 COOP = iemdb.connect('coop', bypass=True)
 ccursor = COOP.cursor()
 
+station = 'IA0000'
 # Get climatology
 ccursor.execute("""
- SELECT sday, avg(precip) from alldata_ia where station = 'IA0000'
+ SELECT sday, avg(precip) from alldata_ia where station = %s
  GROUP by sday
-""")
+""", (station,))
 climate = {}
 for row in ccursor:
     climate[ row[0] ] = float(row[1])
@@ -23,9 +24,9 @@ running365 = []
 dates = []
 
 ccursor.execute("""
- SELECT day, precip, sday from alldata_ia where station = 'IA0000'
+ SELECT day, precip, sday from alldata_ia where station = %s
  and day > '1900-01-01' ORDER by day ASC
-""")
+""", (station,))
 for row in ccursor:
     d = float(row[1]) - climate[ row[2] ]
     running.append( running[-1] + d )
@@ -62,7 +63,7 @@ ax.set_ylabel("Departure [inch]")
 ax.plot(dates, running30, color='b', label='30 day')
 ax.plot(dates, running90, color='r', label='90 day')
 ax.plot(dates, running365, color='k', label='365 day')
-ax.set_xlim( datetime.date(2012,4,1), datetime.date(2013,7,1))
+ax.set_xlim( datetime.date(2012,4,1), datetime.date(2013,8,6))
 ax.set_ylim(-10,8)
 ax.xaxis.set_major_formatter(mdates.DateFormatter("%b\n%Y"))
 ax.grid(True)
@@ -71,6 +72,6 @@ ax.legend(ncol=3, prop=prop)
 
 #plt.xticks(rotation=90)
 #plt.subplots_adjust(bottom=.15)
-fig.savefig('test.svg')
+fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')
