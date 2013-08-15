@@ -39,8 +39,8 @@ def gage_run(sts, ets):
         res += "%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (row[1].strftime("%Y-%m-%d"),
                                               row[1].strftime("%H:%M"), 
                                               row[0], lookup.get(row[0], "N/A"),
-                                         row[1], row[2], row[3], row[4],
-                                         row[5])
+                                         row[2], row[3], row[4],
+                                         row[5], row[6])
 
     return res.replace("None", "M")
 
