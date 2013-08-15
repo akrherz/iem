@@ -1,4 +1,7 @@
 # Runs at Midnight
+DD=$(date -u +'%d')
+MM=$(date -u +'%m')
+YYYY=$(date -u +'%Y')
 
 cd webalizer
 sh processlogs.sh &
@@ -32,5 +35,9 @@ cd ../dbutil
 python ot2archive.py
 python hads_delete_dups.py
 
-cd ../coop
-python fetch_merra.py
+if [ $DD -eq "21" ]
+then
+	cd ../coop
+	python fetch_merra.py
+	python merra_solarrad.py $YYYY $MM
+fi
