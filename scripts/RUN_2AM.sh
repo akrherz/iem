@@ -30,6 +30,9 @@ cd ../climodat
 python compute_0000.py
 ./run.sh &
 
+cd ../coop
+python hrrr_solarrad.py
+
 cd ../cache
 python warn_cache.py
 
