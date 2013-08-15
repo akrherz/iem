@@ -32,7 +32,10 @@ import numpy as np
 from pyiem.plot import MapPlot
 import matplotlib.cm as cm
 m = MapPlot(sector='iowa', title='Days since last 0.5+ inch calendar day rainfall', subtitle='based on NOAA Stage IV Estimates')
-m.contourf(lons, lats, vals, np.arange(0,61,5), cmap=cm.get_cmap('jet'),
+cmap = cm.get_cmap('jet')
+cmap.set_under('white')
+cmap.set_over('black')
+m.contourf(lons, lats, vals, np.arange(0,71,5), cmap=cmap,
        units='days')
 m.drawcounties()
 m.postprocess(filename='test.ps')
