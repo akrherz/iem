@@ -31,3 +31,6 @@ python merge_mrms_q3.py
 cd ../dbutil 
 python ot2archive.py
 python hads_delete_dups.py
+
+cd ../coop
+python fetch_merra.py
