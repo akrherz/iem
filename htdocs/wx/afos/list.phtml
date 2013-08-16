@@ -4,14 +4,14 @@
  */
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 48);
-include("$rootpath/include/wfoLocs.php");
-include("$rootpath/include/forms.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/imagemaps.php");
+include("../../../include/wfoLocs.php");
+include("../../../include/forms.php");
+include("../../../include/database.inc.php");
+include("../../../include/imagemaps.php");
 $afos = iemdb("afos");
 $TITLE = "NWS Text Product by Issuing Center by Date";
 $THISPAGE ="archive-afos";
-include("$rootpath/include/header.php");
+include("../../../include/header.php");
 
 $wfo = isset($_REQUEST["wfo"])? $_REQUEST["wfo"] : null;
 $source = isset($_REQUEST["source"])? substr($_GET["source"],0,4) : 'DMX';
@@ -141,4 +141,4 @@ if ($view == "prod"){
 }
 ?>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../../include/footer.php"); ?>
