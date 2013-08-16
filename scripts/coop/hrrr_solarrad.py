@@ -34,7 +34,7 @@ def run( ts ):
         grbs = pygrib.open(fn)
         grb = grbs.select(parameterNumber=192)
         if len(grb) == 0:
-            print 'Could not find SWDOWN in HRR% %s' % (fn,)
+            print 'Could not find SWDOWN in HRR %s' % (fn,)
             continue
         g = grb[0]
         if total is None:
