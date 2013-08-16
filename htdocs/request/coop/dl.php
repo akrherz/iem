@@ -159,14 +159,15 @@ year          day           radn          maxt          mint          rain
 	
 	pg_prepare($connection, "TBD4", "SELECT extract(doy from day) as doy, high,".
 			" low, precip, month, year, extract(day from day) as lday, station, year,".
-			" (case when merra_srad > 0 then merra_srad else -99 end) as srad".
+			" coalesce(merra_srad, narr_srad, hrrr_srad) as srad".
 			" from $table ".
 			" WHERE station IN ". $stationString ." and ".
 			" day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
 	$rs = pg_execute($connection, 'TBD4', Array());
 	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 		$response .= sprintf(" %s         %s        %.4f         %.4f      %.4f     %.2f\n",
-				$row["year"], $row["doy"], $row["srad"], f2c($row["high"]), 
+				$row["year"], $row["doy"], 
+				($row["srad"] === null)? -99: $row["srad"], f2c($row["high"]), 
 				f2c($row["low"]), $row["precip"] * 25.4 );
 	}
 	
@@ -186,8 +187,7 @@ else if (in_array('dndc', $vars)){
 	$cities = $nt->table;
 	
 	pg_prepare($connection, "TBD", "SELECT extract(doy from day) as doy, high,".
-			" low, precip, month, year, extract(day from day) as lday, station, year,".
-			" (case when merra_srad > 0 then merra_srad else -99 end) as srad".
+			" low, precip, month, year, extract(day from day) as lday, station, year ".
 			" from $table ".
 			" WHERE station IN ". $stationString ." and ".
 			" day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
@@ -226,7 +226,7 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
 	if ($selectAll) die("Sorry, only one station request at a time for daycent option");
 	pg_prepare($connection, "TBD", "SELECT extract(doy from day) as doy, high,".
 	" low, precip, month, year, extract(day from day) as lday, station, year,".
-	" (case when merra_srad > 0 then merra_srad else -99 end) as srad".
+	" coalesce(merra_srad, narr_srad, hrrr_srad) as srad".
 	" from $table WHERE station IN ". $stationString ." and ".
 	" day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
 	$rs = pg_execute($connection, 'TBD', Array());
@@ -234,7 +234,8 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
 	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 		echo sprintf("%s, %s, %s, %.4f, %.2f, %.2f, %.2f, , , , %s\n", 
 				substr($row["station"],0,4), $row["year"],
-				$row["doy"], $row["srad"],  f2c($row["high"]), f2c($row["low"]), 
+				$row["doy"], ($row["srad"] === null)? -99: $row["srad"],  
+				f2c($row["high"]), f2c($row["low"]), 
 				$row["precip"] * 25.4, $i + 2);
 	}
 
