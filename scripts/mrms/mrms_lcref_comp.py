@@ -55,8 +55,12 @@ def do( now , realtime=False):
             if not realtime:
                 print "MRMS LCREF Tile: %s Time: %s UTC" % (tile, now.strftime("%Y-%m-%d %H:%M"))
             continue
+        try:
+            tilemeta, val = util.reader(fn)
+        except Exception, exp:
+            print 'MRMS LCREF: %s Read Error: %s' % (fn, exp)
+            continue
         found += 1
-        tilemeta, val = util.reader(fn)
         ''' There is currently a bug with how MRMS computes missing data :( '''
         val = np.where(val >= -32, (val + 32) * 2.0, val)
         val = np.where(val < 0., 255., val)
