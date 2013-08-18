@@ -1,11 +1,12 @@
-<?php header('content-type: application/json; charset=utf-8');
+<?php 
 /* 
  * JSONP service for IEM Tracked network metadata
  */
+header('content-type: application/json; charset=utf-8');
 require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
+include("../../include/database.inc.php");
+include("../../include/network.php");
 $network = isset($_REQUEST["network"]) ? $_REQUEST["network"] : "KCCI"; 
 $nt = new NetworkTable($network);
 
@@ -24,8 +25,8 @@ while (list($sid,$data) = each($nt->table))
 $json = Zend_Json::encode($ar);
 
 # JSON if no callback
-if( ! isset($_GET['callback']))
+if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_GET['callback']}($json)" );
+exit( "{$_REQUEST['callback']}($json)" );
 ?>

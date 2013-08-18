@@ -2,15 +2,15 @@
 """
 Provide nws text in JSON format
 """
+# stdlib
 import cgi
 import datetime
-import pytz
 import json
-import sys
-sys.path.insert(1, "/mesonet/www/apps/iemwebsite/scripts/lib/")
 
-import iemdb
-AFOS = iemdb.connect('afos', bypass=True)
+# extras
+import pytz
+import psycopg2
+AFOS = psycopg2.connect(database='afos', host='iemdb', user='nobody')
 acursor = AFOS.cursor()
 
 def main():

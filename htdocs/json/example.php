@@ -1,12 +1,17 @@
-<?php header('content-type: application/json; charset=utf-8');
+<?php 
+/*
+ * This is the example referenced on the /json/ webpage
+ */
+
+header('content-type: application/json; charset=utf-8');
 
 
 $json = '{"Name": "daryl", "Profession": "nerd", "Age": 99}';
 
 # JSON if no callback
-if( ! isset($_GET['callback']))
+if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_GET['callback']}($json)" );
+exit( "{$_REQUEST['callback']}($json)" );
 
 ?>

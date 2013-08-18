@@ -1,10 +1,11 @@
-<?php header('content-type: application/json; charset=utf-8');
+<?php 
 /*
  *  Giveme JSON data listing of webcams 
  */
+header('content-type: application/json; charset=utf-8');
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
-require_once "$rootpath/include/database.inc.php";
+require_once "../../include/database.inc.php";
 
 // This should be a UTC timestamp, gasp!
 $ts = isset($_REQUEST["ts"]) ? strtotime($_REQUEST["ts"]) : 0;
@@ -15,22 +16,30 @@ pg_exec($connect, "SET TIME ZONE 'GMT'");
 
 if ($ts > 0){
 	if ($network != "IDOT"){
-  		$result = pg_exec($connect, sprintf("SELECT * from camera_log c, webcams w
-    		WHERE valid = '%s' and c.cam = w.id and w.network = '%s' ORDER by name ASC", 
-    		date('Y-m-d H:i', $ts), $network) );
+		$rs = pg_prepare($connect, "CAMSEL", "SELECT * from ".
+			"camera_log c, webcams w WHERE valid = $1 and c.cam = w.id ".
+			"and w.network = $2 ORDER by name ASC");
+				
+  		$ar = Array( date('Y-m-d H:i', $ts), 
+  				$network);
 	} else {
-		$result = pg_exec($connect, sprintf("SELECT * from camera_log c, webcams w
-    		WHERE valid BETWEEN '%s'::timestamp - '10 minutes'::interval
-			and '%s'::timestamp + '10 minutes'::interval and c.cam = w.id 
-			and w.network = '%s' ORDER by name ASC, valid ASC",
-			date('Y-m-d H:i', $ts), date('Y-m-d H:i', $ts), $network) );
+		$rs = pg_prepare($connect, "CAMSEL", "SELECT * from ".
+			"camera_log c, webcams w WHERE ".
+			"valid BETWEEN $1 and $2 and c.cam = w.id ". 
+			"and w.network = $3 ORDER by name ASC, valid ASC");
+		$ar = Array(
+				date('Y-m-d H:i', $ts - (10*60)), 
+				date('Y-m-d H:i', $ts + (10*60)), 
+						$network);
 	}
 } else {
-  $result = pg_exec($connect, "SELECT * from camera_current c, webcams w 
-  WHERE valid > (now() - '15 minutes'::interval) 
-  and c.cam = w.id and w.network = '$network'
-  ORDER by name ASC");
+	$rs = pg_prepare($connect, "CAMSEL", "SELECT * from "
+		."camera_current c, webcams w WHERE "
+		."valid > (now() - '30 minutes'::interval) and c.cam = w.id "
+		."and w.network = $1 ORDER by name ASC");
+	$ar = Array($network);
 }
+$result = pg_execute($connect, "CAMSEL", $ar);
 
 
 
@@ -70,8 +79,8 @@ for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
 $json = Zend_Json::encode($ar);
 
 # JSON if no callback
-if( ! isset($_GET['callback']))
+if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_GET['callback']}($json)" );
+exit( "{$_REQUEST['callback']}($json)" );
 ?>
