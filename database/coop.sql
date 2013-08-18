@@ -3,6 +3,50 @@
 --- $ psql -f /usr/pgsql-9.0/share/contrib/postgis-1.5/spatial_ref_sys.sql coop
 
 ---
+--- Quickstats table
+---
+CREATE TABLE quickstats(
+SOURCE_DESC  varchar(60),
+SECTOR_DESC	 varchar(60),
+GROUP_DESC	 varchar(80),
+COMMODITY_DESC varchar(80),
+CLASS_DESC varchar(180),
+PRODN_PRACTICE_DESC varchar(180),
+UTIL_PRACTICE_DESC varchar(180),
+STATISTICCAT_DESC varchar(80),
+UNIT_DESC varchar(60),
+SHORT_DESC varchar(512),
+DOMAIN_DESC varchar(256),
+DOMAINCAT_DESC varchar(512),
+AGG_LEVEL_DESC varchar(40),
+STATE_ANSI varchar(2),
+STATE_FIPS_CODE varchar(2),
+STATE_ALPHA varchar(2),
+STATE_NAME varchar(30),
+ASD_CODE varchar(2),
+ASD_DESC varchar(60),
+COUNTY_ANSI varchar(3),
+COUNTY_CODE varchar(3),
+COUNTY_NAME varchar(30),
+REGION_DESC varchar(80),
+ZIP_5 varchar(5),
+WATERSHED_CODE varchar(8),
+WATERSHED_DESC varchar(120),
+CONGR_DISTRICT_CODE varchar(2),
+COUNTRY_CODE varchar(4),
+COUNTRY_NAME varchar(60),
+LOCATION_DESC varchar(120),
+YEAR varchar(4),
+FREQ_DESC varchar(30),
+BEGIN_CODE varchar(2),
+END_CODE varchar(2),
+REFERENCE_PERIOD_DESC varchar(40),
+WEEK_ENDING varchar(10),
+LOAD_TIME varchar(19),
+VALUE varchar(24)
+);
+
+---
 --- Datastorage tables
 ---
 CREATE TABLE alldata(
@@ -19,7 +63,8 @@ CREATE TABLE alldata(
   estimated boolean,
   narr_srad real,
   merra_srad real,
-  merra_srad_cs real
+  merra_srad_cs real,
+  hrrr_srad real
   );
 GRANT select on alldata to nobody,apache;
 
