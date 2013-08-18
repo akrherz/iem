@@ -1,24 +1,17 @@
 ---
---- Stuart Smith Park Hydrology Learning Lab
+--- Missing table: news
 ---
-CREATE TABLE stuart_smith_logger_data(
-  id int,
-  site_serial int,
-  valid timestamptz,
-  ch1_data_p real,
-  ch2_data_p real,
-  ch3_data_p real,
-  ch4_data_p real,
-  ch1_data_t real,
-  ch2_data_t real,
-  ch3_data_t real,
-  ch4_data_t real,
-  ch1_data_c real,
-  ch2_data_c real,
-  ch3_data_c real,
-  ch4_data_c real
+
+---
+--- IEMBOT Twitter Page subscriptions
+---
+CREATE TABLE iembot_twitter_subs(
+  screen_name varchar(128),
+  channel varchar(64)
 );
-GRANT SELECT on stuart_smith_logger_data to nobody,apache;
+CREATE UNIQUE index iembot_twitter_subs_idx on 
+ iembot_twitter_subs(screen_name, channel);
+GRANT ALL on iembot_twitter_subs to nobody,apache;
 
 ---
 --- RASTER metadata
@@ -163,6 +156,9 @@ CREATE TABLE properties(
 GRANT ALL on properties to apache,nobody;
 CREATE UNIQUE index properties_idx on properties(propname, propvalue);
 
+--- Alias for pyWWA nwschat support
+create view nwschat_properties as select * from properties;
+
 ---
 --- Webcam configurations
 ---
@@ -267,6 +263,7 @@ CREATE table feature(
   voting boolean,
   tags varchar(1024),
   fbid bigint);
+alter table feature SET WITH oids;
 CREATE unique index feature_title_check_idx on feature(title);
 CREATE index feature_valid_idx on feature(valid);
 GRANT all on feature to nobody,apache;
