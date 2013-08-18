@@ -1,8 +1,8 @@
 <?php
 include("../../config/settings.inc.php");
-$TITLE = "IEM | GIS Homepage";
+$TITLE = "IEM :: GIS Homepage";
 $THISPAGE = "gis";
-include("$rootpath/include/header.php"); ?>
+include("../../include/header.php"); ?>
 
 
 <h3 class="heading">IEM GIS Information</h3>
@@ -120,6 +120,5 @@ This file is updated every minute.</li>
 </ul>
 
 </td></tr></table>
-<br><br></div>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../include/footer.php"); ?>
