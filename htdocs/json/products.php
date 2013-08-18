@@ -1,16 +1,21 @@
-<?php header('content-type: application/json; charset=utf-8');
-/* Giveme JSON data listing products */
+<?php 
+/* 
+ * Giveme JSON data listing products  
+ */
+
+header('content-type: application/json; charset=utf-8');
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
-require_once "$rootpath/include/database.inc.php";
+require_once "../../include/database.inc.php";
 
 $connect = iemdb("mesosite");
 
 /* Standard Issue Products :) */
-$result = pg_exec($connect, sprintf("SELECT * from archive_products ORDER by groupname, name"));
+$result = pg_exec($connect, "SELECT * from archive_products 
+		ORDER by groupname, name");
 
 $ar = Array("products" => Array() );
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
+for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
 {
   $z = Array("id" => $row["id"],
         "template" => $row["template"], 
@@ -24,12 +29,13 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 }
 
 /* Now, lets get webcam stuff */
-$result = pg_exec($connect, sprintf("SELECT * from webcams WHERE 
-          network != 'IDOT' ORDER by network, name"));
+$result = pg_exec($connect, "SELECT * from webcams WHERE 
+          network != 'IDOT' ORDER by network, name");
 
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
+for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
 {
-  $tpl = sprintf("http://mesonet.agron.iastate.edu/archive/data/%%Y/%%m/%%d/camera/%s/%s_%%Y%%m%%d%%H%%i.jpg", $row["id"],
+  $tpl = sprintf("http://mesonet.agron.iastate.edu/archive/data/%%Y/%%m/%%d/".
+  		"camera/%s/%s_%%Y%%m%%d%%H%%i.jpg", $row["id"],
          $row["id"]);
   $z = Array("id" => $row["id"],
         "template" => $tpl,
@@ -46,9 +52,9 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 $json = Zend_Json::encode($ar);
 
 # JSON if no callback
-if( ! isset($_GET['callback']))
+if( ! isset($_REQUEST['callback']))
 	exit( $json );
 
-exit( "{$_GET['callback']}($json)" );
+exit( "{$_REQUEST['callback']}($json)" );
 
 ?>
