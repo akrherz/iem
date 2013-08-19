@@ -135,14 +135,15 @@ FAIRS = [
 [mx.DateTime.DateTime(2010,8,12),mx.DateTime.DateTime(2010,8,22)],
 [mx.DateTime.DateTime(2011,8,11),mx.DateTime.DateTime(2011,8,21)],
 [mx.DateTime.DateTime(2012,8,9),mx.DateTime.DateTime(2012,8,19)],
+[mx.DateTime.DateTime(2013,8,8),mx.DateTime.DateTime(2013,8,18)],
 ]
 
 import numpy
 import numpy.ma
 
-avgH = numpy.ma.zeros( (2013-1880) )
-avgL = numpy.ma.zeros( (2013-1880) )
-precip = numpy.ma.zeros( (2013-1880) )
+avgH = numpy.ma.zeros( (2014-1880) )
+avgL = numpy.ma.zeros( (2014-1880) )
+precip = numpy.ma.zeros( (2014-1880) )
 precip[:] = -0.000000001
 #heatcnt = numpy.ma.zeros( (2012-1880) )
 #heatcnt[:] = -1
@@ -158,13 +159,15 @@ for sts, ets in FAIRS:
   #if sts.year < 1933:
   #  continue
   ccursor.execute("""
-  SELECT avg(high), avg(low) from alldata_ia where station = 'IA2203' and
+  SELECT avg(high), avg(low), sum(case when low < 60 then 1 else 0 end) from 
+  alldata_ia where station = 'IA2203' and
   day >= '%s' and day <= '%s' 
   """ % (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
   i = 0
   row = ccursor.fetchone()
   avgH[sts.year-1880] = row[0]
   avgL[sts.year-1880] = row[1]
+  print sts, row[2]
 
   # Heat index
 #  if sts.year < 1933:
@@ -210,18 +213,18 @@ avgLL = numpy.ma.average(avgL)
 import matplotlib.pyplot as plt
 
 (fig, ax) = plt.subplots(2,1, sharex=True)
-bars = ax[0].bar(numpy.arange(1880,2013)-0.4, avgH, edgecolor='r', facecolor='r')
+bars = ax[0].bar(numpy.arange(1880,2014)-0.4, avgH, edgecolor='r', facecolor='r')
 for bar in bars:
     if bar.get_height() < avgHH:
         bar.set_facecolor('b')
         bar.set_edgecolor('b')
-ax[0].set_xlim(1879.5,2012.5)
+ax[0].set_xlim(1879.5,2013.5)
 ax[0].set_ylim(70,100)
 ax[0].grid(True)
 ax[0].set_title("Iowa State Fair Average Daily Temps (Des Moines wx site)")
 ax[0].set_ylabel("High Temperature $^{\circ}\mathrm{F}$")
 
-bars = ax[1].bar(numpy.arange(1880,2013)-0.4, avgL, edgecolor='r', facecolor='r')
+bars = ax[1].bar(numpy.arange(1880,2014)-0.4, avgL, edgecolor='r', facecolor='r')
 for bar in bars:
     if bar.get_height() < avgLL:
         bar.set_facecolor('b')
