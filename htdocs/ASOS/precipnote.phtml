@@ -1,0 +1,92 @@
+<?php 
+ include("../../config/settings.inc.php");
+ $THISPAGE = 'networks-asos'; 
+ $TITLE = "IEM :: Note about ASOS Precipitation Data";
+ include("../../include/header.php"); 
+?>
+
+<div style="width: 800px;">
+
+<h3>Notes about ASOS Precipitation Reports</h3>
+
+<p>The Automated Surface Observation System <a href="/ASOS/">ASOS</a> is the
+primary automated weather observation system in the country.  The network is
+maintained by the Federal Aviation Administration and National Weather Service.
+The IEM processes, archives, and <a href="/request/download.phtml">makes available data</a> from this network.  The
+purpose of this page is to document some interesting aspects of the precipitation
+data from this network.
+
+<p><div class="warning">Please feel free to 
+<a href="/info/contacts.php">report any doubts or concerns</a> you
+have with this documentation.  This information has been pieced together based
+on conversations with the NWS and reviewing the 
+<a href="http://www.nws.noaa.gov/asos/pdfs/aum-toc.pdf">ASOS Users Manual</a>.</div>
+
+<h4>Regarding Time zones...</h4>
+
+<p>Depending on the report type, observations from this network are reported in
+either local standard time or UTC (sometimes called GMT) time.  The internal 
+clocks on the ASOS sites are not updated for daylight time.  This is an important
+consideration when using its local daily precipitation report found in the 
+Daily Summary Message (DSM).  This 24 hour period is between local midnight in
+standard time.  So when the local calendar is in daylight time, the period will
+represent the time between 1 AM and 1 AM.  This 24 hour is not exactly as stated
+and leads to the next section.
+
+<h4>Regarding Exact Timing...</h4>
+
+<p>The ASOS reports time in hours and minutes without seconds.  This creates some
+ambiguity when attempting to ascertain exactly when a reported precipitation rate
+occurred.  When the time hits 00 seconds, the ASOS starts processing its memory of 
+recently saved data.  This processing ends promptly at 23 seconds after and various
+displays are updated, products disseminated, and one minute interval data archived.
+
+<p>The one minute precipitation data is thus some nearly 60 second period between
+when the previous minute's processing got to totaling the precipitation data
+to this minute's processing.  So the one minute total is strictly not from a 
+period between 00 seconds of the previous minute and 00 seconds of the current
+period.  Instead this is approximately the 60 second period between 24 seconds
+after the previous minute to 23 seconds of the current minute.  For example:
+
+<p>For one minute data, the 12:45 UTC observation approximately represents
+a period between 12:44:24 and 12:45:23 UTC.  
+
+<p>For the hourly METAR precipitation, the 12:54 UTC observation represents a
+period between 11:54:24 and 12:54:23 UTC.
+
+<p>For the daily summary message, the observation represents a period between
+11:59:24 PM LST of the previous day to 11:59:23 PM LST of the current day.
+
+<p>For the hourly data in the daily summary message, the observation is a 
+period from (HH-1):59:24 to HH:59:23 LST.
+
+<h4>Heavy Precipitation Rates...</h4>
+
+<p>The ASOS uses a tipping bucket method to measure precipitation.  This means
+that a single tip of the bucket records 0.01 inch of precipitation with the data
+logger.  Under intense rainfall rates, various physical things happen causing
+the tipping mechanism to not be able to keep up with the flowing water rate. The <a href="http://www.nws.noaa.gov/asos/pdfs/aum-toc.pdf">ASOS Users Manual</a>
+notes in section 3.4.2 that a correction is applied to the on a minute by minute basis.
+The equation shown in the manual is as follows:
+
+<br /><blockquote><pre>C = A(1 + 0.60A)</pre><br />where C is the reported
+accumulation and A is the measured about from the tipping bucket.</blockquote>
+
+<p><img src="eqn342.png" />
+
+<p>This means that when the ASOS reports a one minute accumulation of 0.25 
+inches, the actual measured value was around 0.22 inches.  <b>Please note that
+it is not our intention to claim this correction is wrong, but just to document that
+it is there.</b>  Extremely intense rainfall rates such as these are rare, so the 
+typical adjustment is practically zero. 
+
+<h4>In Summary</h4>
+
+<p>The timing and precipitation totals are not exact, but they are conservative
+over time when summed. Please let us know of any corrections or clarifications
+you would like to see made.
+
+</div>
+
+
+<?php include("../../include/footer.php"); ?>
