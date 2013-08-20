@@ -1,18 +1,32 @@
-# Generate a Weather Central Formatted file of Growing Degree Days
-# for our beloved ASOS/AWOS network
-
-import mx.DateTime, os, Ngl, numpy, shutil
+"""
+ Generate a Weather Central Formatted file of Growing Degree Days
+ for our beloved ASOS/AWOS network
+"""
+import datetime
+import os
+import Ngl
+import numpy as np
+import shutil
 import sys
-from pyIEM import iemdb, stationTable
+import psycopg2
+import subprocess
 import network
 nt = network.Table("ISUAG")
-i = iemdb.iemdb()
-access = i['iem']
-coop = i['coop']
-mesosite = i['mesosite']
-isuag = i['isuag']
+
+ACCESS = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+acursor = ACCESS.cursor()
+
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+ccursor = COOP.cursor()
+
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
+mcursor = MESOSITE.cursor()
+
+ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
+icursor = ISUAG.cursor()
 
 def sampler(xaxis, yaxis, vals, x, y):
+    ''' This is lame sampler, should replace '''
     i = 0
     while (xaxis[i] < x):
         i += 1
@@ -26,19 +40,19 @@ def load_soilt(data):
     soil_obs = []
     lats = [] 
     lons = []
-    valid = 'YESTERDAY'
-    if mx.DateTime.now().hour < 7:
-        valid = '%s' % ((mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=2)).strftime("%Y-%m-%d"), )
-    rs = isuag.query("""SELECT station, c30 from daily WHERE 
-         valid = '%s'""" % (valid,) ).dictresult()
-    for i in range(len(rs)):
-        stid = rs[i]['station']
+    valid = datetime.date.today() - datetime.timedelta(days=1)
+    if datetime.datetime.now().hour < 7:
+        valid -= datetime.timedelta(days=1)
+    icursor.execute("""SELECT station, c30 from daily WHERE 
+         valid = %s""", (valid,) )
+    for row in icursor:
+        stid = row[0]
         if not nt.sts.has_key(stid):
             continue
-        soil_obs.append( rs[i]['c30'] )
+        soil_obs.append( row[1] )
         lats.append( nt.sts[stid]['lat'] )
         lons.append( nt.sts[stid]['lon'] )
-    if len(lons) == 0:
+    if len(lons) < 4:
         print 'No ISUAG Data for %s' % (valid,)
         sys.exit()
     numxout = 40
@@ -50,28 +64,32 @@ def load_soilt(data):
     xc      = (xmax-xmin)/(numxout-1)
     yc      = (ymax-ymin)/(numyout-1)
 
-    xo = xmin + xc* numpy.arange(0,numxout)
-    yo = ymin + yc* numpy.arange(0,numyout)
+    xo = xmin + xc* np.arange(0,numxout)
+    yo = ymin + yc* np.arange(0,numyout)
 
     analysis = Ngl.natgrid(lons, lats, soil_obs, list(xo), list(yo))
-    for id in data.keys():
-        data[id]['soilt'] = sampler(xo,yo,analysis, data[id]['lon'], data[id]['lat'])
+    for sid in data.keys():
+        data[sid]['soilt'] = sampler(xo,yo,analysis, data[sid]['lon'], 
+                                     data[sid]['lat'])
 
 
 def build_xref():
-    rs = mesosite.query("SELECT id, climate_site from stations WHERE network in ('IA_ASOS','AWOS')").dictresult()
+    mcursor.execute("""SELECT id, climate_site from stations 
+    WHERE network in ('IA_ASOS','AWOS')""")
     data = {}
-    for i in range(len(rs)):
-        data[rs[i]['id']] = rs[i]['climate_site']
+    for row in mcursor:
+        data[row[0]] = row[1]
     return data
 
 def compute_climate(sts, ets):
     sql = """SELECT station, sum(gdd50) as cgdd,
-    sum(precip) as crain from climate WHERE valid >= '2000-%s' and valid < '2000-%s' and gdd50 is not null GROUP by station""" % (sts.strftime("%m-%d"), ets.strftime("%m-%d"))
-    rs = coop.query(sql).dictresult()
+    sum(precip) as crain from climate WHERE valid >= '2000-%s' and 
+    valid < '2000-%s' and gdd50 is not null GROUP by station""" % (
+                                sts.strftime("%m-%d"), ets.strftime("%m-%d"))
+    ccursor.execute(sql)
     data = {}
-    for i in range(len(rs)):
-        data[rs[i]['station']] = rs[i]
+    for row in ccursor:
+        data[row[0]] = {'cgdd': row[1], 'crain': row[2]}
     return data
 
 def compute_obs(sts, ets):
@@ -91,15 +109,18 @@ WHERE
   c.iemid = s.iemid
 GROUP by s.id, lon, lat
     """ % (sts.year, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d"))
-    rs = access.query(sql).dictresult()
+    acursor.execute(sql)
     data = {}
-    for i in range(len(rs)):
-        data[rs[i]['id']] = rs[i]
+    for row in acursor:
+        data[ row[0] ] = {'id': row[0], 'lon': row[1], 'lat': row[2],
+                          'missing': row[3], 'gdd': row[4], 
+                          'precip': row[5]}
     return data
 
 def main():
-    sts =  mx.DateTime.now() + mx.DateTime.RelativeDateTime(month=5,day=1)
-    ets = mx.DateTime.now()
+    sts = datetime.datetime.now()
+    sts =  sts.replace(month=5,day=1)
+    ets = datetime.datetime.now()
     if sts > ets:
         return
 
@@ -114,22 +135,23 @@ def main():
    5 SOIL_4INCH
    6 Lat
    8 Lon
-""" % (mx.DateTime.now().strftime("%H"),))
+""" % (ets.strftime("%H"),))
     days = (ets - sts).days
     data = compute_obs( sts, ets )
     load_soilt(data)
     cdata = compute_climate( sts, ets )
     xref = build_xref()
-    for id in data.keys():
-        if data[id]['missing'] > (days * 0.1):
+    for sid in data.keys():
+        if data[sid]['missing'] > (days * 0.1):
             continue
-        csite = xref[id]
-        output.write("K%s %4.0f %4.0f %5.2f %5.2f %5.1f %6.3f %8.3f\n" % (id, 
-        data[id]['gdd'], cdata[ csite ]['cgdd'],
-        data[id]['precip'], cdata[ csite ]['crain'], data[id]['soilt'],
-        data[id]['lat'], data[id]['lon'] ))
+        csite = xref[sid]
+        output.write("K%s %4.0f %4.0f %5.2f %5.2f %5.1f %6.3f %8.3f\n" % (sid, 
+                    data[sid]['gdd'], cdata[ csite ]['cgdd'],
+                    data[sid]['precip'], cdata[ csite ]['crain'], data[sid]['soilt'],
+                    data[sid]['lat'], data[sid]['lon'] ))
     output.close()
-    os.system("/home/ldm/bin/pqinsert -p \"wxc_iem_agdata.txt\" wxc_iem_agdata.txt")
+    subprocess.call(("/home/ldm/bin/pqinsert -p \"wxc_iem_agdata.txt\""
+                     +" wxc_iem_agdata.txt"), shell=True)
     shutil.copyfile("wxc_iem_agdata.txt", "/mesonet/share/pickup/wxc/wxc_iem_agdata.txt")
     os.remove("wxc_iem_agdata.txt")
 
