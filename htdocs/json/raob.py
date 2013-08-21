@@ -86,4 +86,3 @@ if __name__ == '__main__':
     else:
         sys.stdout.write("%s(%s)" % (cb, res))
     
-    run()
