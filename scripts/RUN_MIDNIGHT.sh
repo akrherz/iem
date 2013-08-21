@@ -35,7 +35,7 @@ cd ../dbutil
 python ot2archive.py
 python hads_delete_dups.py
 
-if [ $DD -eq "21" ]
+if [ $DD -eq "24" ]
 then
 	cd ../coop
 	python fetch_merra.py
