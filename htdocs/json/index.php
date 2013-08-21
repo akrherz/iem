@@ -49,6 +49,23 @@
 <?php 
 $services = array();
 $services[] = Array(
+		"title" => "RAOB Soundings",
+		"url" => "/json/raob.py?ts={timestamp}&station={station}",
+		"desc" => "Provides a single sounding profile for the given station,
+		either a 3 or 4 character site ID and a UTC timestamp.  Realtime data
+		from this service is typically available within 2 hours of observation
+		time.",
+		"vars" => Array(
+				"sid" => "3 or 4 character site ID used in North America",
+				"timestamp" => "YYYYMMDDHHMI UTC Timestamp"
+		),
+		"example" => Array(
+				"{timestamp}" => "199905031200",
+				"{station}" => "KOUN",
+		)
+);
+
+$services[] = Array(
     "title" => "SHEF Station Variables",
 	"url" => "/json/dcp_vars.php?station={station}",
     "desc" => "Provides SHEF variables provided by this station.",
