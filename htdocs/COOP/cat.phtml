@@ -11,7 +11,7 @@
  include("$rootpath/include/forms.php");
 $TITLE = "IEM | COOP Obs";
 $THISPAGE = "networks-coop";
-include("$rootpath/include/header.php"); ?>
+include("../../include/header.php"); ?>
 
 <div class="text">
 
@@ -111,8 +111,8 @@ Select State: <select name="network">
   <th><a href="<?php echo $link; ?>snoww">Snow Water Equiv</a></th></tr>
 
 <?php 
- include("$rootpath/include/iemaccess.php");
- include("$rootpath/include/network.php");
+ include("../../include/iemaccess.php");
+ include("../../include/network.php");
  
  $nt = new NetworkTable($network);
  $cities = $nt->table;
@@ -141,11 +141,11 @@ Select State: <select name="network">
  $hirow = 1;
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
    $nwsli = $row["station"];
-
    $high = $row["max_tmpf"];
    if ($high == "-99" || $high == "") $high = "M";
    if ($high > 130 || $high < -90) $high = "M";
 
+   
    $tmpf = $row["coop_tmpf"];
    if ($tmpf == "-99" || $tmpf == "") $tmpf = "M";
    if ($tmpf > 130 || $tmpf < -90) $tmpf = "M";
@@ -184,8 +184,19 @@ Select State: <select name="network">
      echo "<a href=\"cat.phtml?station=". $nwsli ."&network=". $network ."\">". $nwsli ."</a>";
    }
 
-   echo "</td><td>". $cities[$nwsli]["name"] ."</td><td>";
+   echo "</td><td>". $cities[$nwsli]["name"] ."</td>";
 	$dstring = $row["day"];
+   
+   if ($tmpf == "M" && $high == "M" && $low == "M" && $rain == "M" 
+   		&& $snow == "M" && $snowd == "M"){
+		$dddd = "<a href=\"cat.phtml?date=". $row["day"] ."&network=". $network ."\">". $dstring ."</a>";
+		echo <<< EOF
+<td colspan="8">No Observation Reported for $dddd</td></tr>
+EOF;
+		continue;
+   }
+   
+   echo "<td>";
    if ($row["cts"]){
 		$dstring = date("j M Y gA", strtotime(substr($row["coop_valid"],0,16)));		
 	}
@@ -195,6 +206,7 @@ Select State: <select name="network">
    } else {
       echo "<a href=\"cat.phtml?date=". $row["day"] ."&network=". $network ."\">". $dstring ."</a>";
    }
+
 
    echo "</td><td>". $tmpf ."</td><td>". $high ."</td><td>". $low ."</td><td>". $rain ."</td><td>". $snow ."</td><td>". $snowd ."</td><td>". $snoww ."</td></tr>\n";
  }
@@ -210,4 +222,4 @@ like.
 <p>Errors exist in this dataset and you should evaluate the observations
 before using...</div>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../include/footer.php"); ?>
