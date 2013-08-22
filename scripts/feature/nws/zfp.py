@@ -5,9 +5,9 @@
 from pyiem.nws.product import TextProduct, ugc
 import datetime
 import numpy
-import iemdb
-#AFOS = iemdb.connect('afos', bypass=True)
-#acursor = AFOS.cursor()
+import psycopg2
+AFOS = psycopg2.connect(database='afos', host='iemdb', user='nobody')
+acursor = AFOS.cursor()
 
 def run(ts, data):
     p = TextProduct( data )
@@ -51,19 +51,19 @@ def run(ts, data):
             
         ids = []
         for section in sections:
-            if section.find("100 PERCENT") > 0:
+            if section.find(" 0 PERCENT") > 0:
                 idexs = find_index( section.split("...",1)[0] )
                 for i in idexs:
                     ids.append( i )
         return ids
-"""
-acursor.execute(""
+#"""
+acursor.execute("""
  select entered, data from products where pil = 'ZFPDMX'
  and extract(hour from entered) in (15,16)
  ORDER by entered DESC
-"")
+""")
 last = None
-import numpy
+
 zeros = numpy.zeros((13,))
 for row in acursor:
     day = row[0].strftime("%Y%m%d")
@@ -79,7 +79,8 @@ for row in acursor:
             zeros[i] += 1.0
         else:
             print 'Missed event', row[0]
-"""
+print zeros
+#"""
 data = numpy.array( [64. , 31.,  27. ,  8. ,  4. ,  2. ,  2. ,  1. ,  0. ,  0. ,  0.  , 0. ,  0.])
 import matplotlib.pyplot as plt
 
