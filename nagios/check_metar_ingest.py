@@ -11,7 +11,7 @@ icursor = IEM.cursor()
 def check():
     icursor.execute("""SELECT count(*) from current c JOIN stations s on
     (s.iemid = c.iemid)
-    WHERE valid > now() - '1 hour'::interval and network ~* 'ASOS'""")
+    WHERE valid > now() - '75 minutes'::interval and network ~* 'ASOS'""")
     row = icursor.fetchone()
 
     return row[0]
