@@ -18,10 +18,10 @@ def check():
     
 if __name__ == '__main__':
     count = check()
-    if count > 10000:
+    if count > 3000:
         print 'OK - %s count |count=%s;1000;5000;10000' % (count, count)
         sys.exit(0)
-    elif count > 5000:
+    elif count > 2000:
         print 'WARNING - %s count |count=%s;1000;5000;10000' % (count, count)
         sys.exit(1)
     else:
