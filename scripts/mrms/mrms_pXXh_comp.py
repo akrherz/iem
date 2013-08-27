@@ -54,15 +54,14 @@ def do(now, hr ):
         image = np.where( val < 0, 255, image)
         #print tile, np.min(image), np.max(image)
         ysz, xsz = np.shape(val)
-        val = np.flipud(image)
         x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
-        y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
+        y0 = round((tilemeta['ll_lat'] - util.SOUTH) * 100.0,0)
         imgdata[y0:(y0+ysz),x0:(x0+xsz)] = val.astype('int')
 
     (tmpfp, tmpfn) = tempfile.mkstemp()
     
     # Create Image
-    png = Image.fromarray( imgdata )
+    png = Image.fromarray( np.flipud( imgdata ) )
     png.putpalette( util.make_colorramp() )
     png.save('%s.png' % (tmpfn,))
 
