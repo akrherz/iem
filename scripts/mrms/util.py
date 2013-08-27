@@ -61,8 +61,21 @@ def reader(fn):
      scale, b,b,b, ul_lon_cc, ul_lat_cc, b, scale_lon, scale_lat,
      grid_scale) = struct.unpack('9i4c10i', fp.read(80))
 
-    metadata['ul_lon'] = ul_lon_cc / float(scale_lon) - 0.005
-    metadata['ul_lat'] = ul_lat_cc / float(scale_lat) + 0.005
+    metadata['ul_lon_cc'] = ul_lon_cc / float(scale_lon)
+    metadata['ul_lat_cc'] = ul_lat_cc / float(scale_lat)
+    # Calculate
+    metadata['ll_lon_cc'] = metadata['ul_lon_cc']
+    metadata['ll_lat_cc'] = metadata['ul_lat_cc'] - (scale_lat / 
+                                               float(grid_scale)) * (ny - 1)
+    metadata['ll_lat'] =  metadata['ll_lat_cc'] - (scale_lat / 
+                                               float(grid_scale)) / 2.0
+    metadata['ul_lat'] =  metadata['ul_lat_cc'] - (scale_lat / 
+                                               float(grid_scale)) / 2.0
+    metadata['ll_lon'] =  metadata['ll_lon_cc'] - (scale_lon / 
+                                               float(grid_scale)) / 2.0
+    metadata['ul_lon'] =  metadata['ul_lon_cc'] - (scale_lon / 
+                                               float(grid_scale)) / 2.0
+
     metadata['valid'] = datetime.datetime(year, month, day, hour, minute,
                                 second).replace(tzinfo=pytz.timezone("UTC"))
 
