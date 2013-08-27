@@ -46,7 +46,7 @@ def do( now , realtime=False):
         val = np.where(val < 0., 255., val)
         ysz, xsz = np.shape(val)
         x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
-        y0 = (tilemeta['ll_lat'] - util.SOUTH) * 100.0
+        y0 = round((tilemeta['ll_lat'] - util.SOUTH) * 100.0,0)
         imgdata[y0:(y0+ysz),x0:(x0+xsz)] = val.astype('int')
     if count < 4:
         return
