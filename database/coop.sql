@@ -82,6 +82,25 @@ CREATE TABLE alldata_oh() inherits (alldata);
 CREATE TABLE alldata_mi() inherits (alldata);
 CREATE TABLE alldata_mo() inherits (alldata);
 
+CREATE TABLE alldata_estimates(
+  station char(6),
+  day date,
+  high int,
+  low int,
+  precip real,
+  snow real,
+  sday char(4),
+  year int,
+  month smallint,
+  snowd real,
+  estimated boolean,
+  narr_srad real,
+  merra_srad real,
+  merra_srad_cs real,
+  hrrr_srad real
+  );
+GRANT select on alldata_estimates to nobody,apache;
+
 ---
 --- Quasi synced from mesosite database
 ---
