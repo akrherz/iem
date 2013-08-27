@@ -22,3 +22,5 @@ echo "Redoing MERRA Solar Estimates"
 python ../../coop/merra_solarrad.py $1 $2
 echo "Redoing NARR Solar Estimates"
 python ../../coop/narr_solarrad.py $1 $2
+echo "Redoing HRRR Solar Estimates"
+python ../../coop/hrrr_solarrad.py $1 $2
