@@ -60,7 +60,7 @@ def do( now , realtime=False):
     util.write_worldfile('%s.wld' % (tmpfn,))
     # Inject WLD file
     prefix = 'a2m'
-    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/mrms/%s.wld GIS/mrmq/%s_%s.wld wld' %s.wld" % (
+    pqstr = "/home/ldm/bin/pqinsert -p 'plot ac %s gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld" % (
                     now.strftime("%Y%m%d%H%M"), prefix, prefix, 
                     now.strftime("%Y%m%d%H%M"), tmpfn )
     subprocess.call(pqstr, shell=True)
