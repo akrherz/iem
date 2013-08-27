@@ -30,10 +30,11 @@ def run( ts ):
                                         gmtts.strftime("%Y-%m-%d %H:%M"), fn)
             continue
         tilemeta, val = util.reader(fn)
+        
         ysz, xsz = np.shape(val)
         x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
         y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
-        mrms[y0:(y0+ysz),x0:(x0+xsz)] = val
+        mrms[y0:(y0+ysz),x0:(x0+xsz)] = np.flipud(val)
 
     y1 = (iemre.NORTH - util.SOUTH) * 100.0
     y0 = (iemre.SOUTH - util.SOUTH) * 100.0
