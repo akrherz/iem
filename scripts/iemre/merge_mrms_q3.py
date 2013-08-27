@@ -11,7 +11,7 @@ import os
 import netCDF4
 import numpy as np
 from pyiem import iemre
-from pyiem.plot import MapPlot
+#from pyiem.plot import MapPlot
 
 def run( ts ):
     ''' Actually do the work, please '''
@@ -34,20 +34,27 @@ def run( ts ):
             continue
         # val is valid at SW corner
         tilemeta, val = util.reader(fn)
-        
         ysz, xsz = np.shape(val)
-        x0 = (tilemeta['ul_lon'] - util.WEST) * 100.0
-        y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
-        mrms[y0:(y0+ysz),x0:(x0+xsz)] = np.flipud(val)
+        # ul_lon is the left edge of the first grid cell. Figure out file offset
+        x0 = round((tilemeta['ul_lon'] - util.WEST) * 100.0,0)
+        #print 'Tile %s has left edge of %s util.WEST is %s, so xoffset %s xsz %s' % (
+        #                tile, tilemeta['ul_lon'], util.WEST, x0, xsz)
+        y0 = round((tilemeta['ll_lat'] - util.SOUTH) * 100.0,0)
+        #print 'Tile %s has south edge of %s util.SOUTH is %s, so yoffset %s, ysz %s' % (
+        #                tile, tilemeta['ll_lat'], util.SOUTH, y0, ysz)
+        mrms[y0:(y0+ysz),x0:(x0+xsz)] = val
 
-    # the MRMS array starts at upper left hand corner
-    # y0 is northmost
-    y0 = (util.NORTH - iemre.NORTH) * 100.0
-    y1 = (util.NORTH - iemre.SOUTH) * 100.0
+    # Figure out what we wish to subsample
+    y0 = (iemre.SOUTH - util.SOUTH) * 100.0
+    y1 = (iemre.NORTH - util.SOUTH) * 100.0
     x0 = (iemre.WEST - util.WEST) * 100.0
     x1 = (iemre.EAST - util.WEST) * 100.0
     #print 'y0:%s y1:%s x0:%s x1:%s' % (y0, y1, x0, x1)
     ncprecip[offset,:,:] = mrms[y0:y1,x0:x1]
+    #m = MapPlot(sector='midwest')
+    #x, y = np.meshgrid(nc.variables['lon'][:], nc.variables['lat'][:])
+    #m.pcolormesh(x, y, ncprecip[offset,:,:], range(10), latlon=True)
+    #m.postprocess(filename='test.png')
     #(fig, ax) = plt.subplots()
     #ax.imshow(mrms)
     #fig.savefig('test.png')
