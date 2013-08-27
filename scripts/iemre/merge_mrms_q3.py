@@ -11,6 +11,7 @@ import os
 import netCDF4
 import numpy as np
 from pyiem import iemre
+#import matplotlib.pyplot as plt
 
 def run( ts ):
     ''' Actually do the work, please '''
@@ -36,11 +37,20 @@ def run( ts ):
         y0 = (util.NORTH - tilemeta['ul_lat']) * 100.0
         mrms[y0:(y0+ysz),x0:(x0+xsz)] = np.flipud(val)
 
-    y1 = (iemre.NORTH - util.SOUTH) * 100.0
-    y0 = (iemre.SOUTH - util.SOUTH) * 100.0
+    # the MRMS array starts at upper left hand corner
+    # y0 is northmost
+    y0 = (util.NORTH - iemre.NORTH) * 100.0
+    y1 = (util.NORTH - iemre.SOUTH) * 100.0
     x0 = (iemre.WEST - util.WEST) * 100.0
     x1 = (iemre.EAST - util.WEST) * 100.0
+    #print 'y0:%s y1:%s x0:%s x1:%s' % (y0, y1, x0, x1)
     ncprecip[offset,:,:] = mrms[y0:y1,x0:x1]
+    #(fig, ax) = plt.subplots()
+    #ax.imshow(mrms)
+    #fig.savefig('test.png')
+    #(fig, ax) = plt.subplots()
+    #ax.imshow(mrms[y0:y1,x0:x1])
+    #fig.savefig('test2.png')
     nc.close()
 
 if __name__ == '__main__':
