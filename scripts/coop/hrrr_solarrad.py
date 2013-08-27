@@ -6,6 +6,7 @@ import pygrib
 import datetime
 import pytz
 import os
+import sys
 import pyproj
 import numpy as np
 
@@ -77,13 +78,24 @@ def run( ts ):
     
 
 if __name__ == '__main__':
-    ts = datetime.datetime.utcnow()
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
-    ts = ts.astimezone(pytz.timezone("America/Chicago"))
-    ts = ts - datetime.timedelta(days=1)
-    ts = ts.replace(hour=0,minute=0,second=0,microsecond=0)
-    
-    run( ts )
+    if len(sys.argv) == 3:
+        # Run for a given month!
+        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1)
+        # run for last date of previous month as well
+        sts = sts - datetime.timedelta(days=1)
+        ets = sts + datetime.timedelta(days=45)
+        ets = ets.replace(day=1)
+        now = sts
+        while now < ets:
+            run( now )
+            now += datetime.timedelta(days=1)
+    else:
+        ts = datetime.datetime.utcnow()
+        ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+        ts = ts.astimezone(pytz.timezone("America/Chicago"))
+        ts = ts - datetime.timedelta(days=1)
+        ts = ts.replace(hour=0,minute=0,second=0,microsecond=0)
+        run( ts )
     cursor.close()
     cursor2.close()
     COOP.commit()
