@@ -49,6 +49,18 @@
 <?php 
 $services = array();
 $services[] = Array(
+		"title" => "Storm Prediction Center Watches",
+		"url" => "/json/spcwatch.py?ts={timestamp}",
+		"desc" => "Provides a geojson format of SPC watches valid at given time
+		or current time if no time specified.",
+		"vars" => Array(
+				"timestamp" => "YYYYMMDDHHMI UTC Timestamp (optional)"
+		),
+		"example" => Array(
+				"{timestamp}" => "201104280000"
+		)
+);
+$services[] = Array(
 		"title" => "RAOB Soundings",
 		"url" => "/json/raob.py?ts={timestamp}&station={station}",
 		"desc" => "Provides a single sounding profile for the given station,
