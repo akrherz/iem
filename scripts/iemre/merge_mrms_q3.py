@@ -11,7 +11,7 @@ import os
 import netCDF4
 import numpy as np
 from pyiem import iemre
-#import matplotlib.pyplot as plt
+from pyiem.plot import MapPlot
 
 def run( ts ):
     ''' Actually do the work, please '''
@@ -20,6 +20,8 @@ def run( ts ):
     offset = iemre.daily_offset(ts)
     ncprecip = nc.variables['p01d']
 
+    # We want this mrms variable to replicate the netcdf file, so the 
+    # origin is the southwestern corner
     mrms = np.zeros( (3500,7000), 'f')
     ts += datetime.timedelta(hours=24)
     gmtts = ts.astimezone( pytz.timezone("UTC") )
@@ -30,6 +32,7 @@ def run( ts ):
             print "24h Tile: %s Time: %s UTC %s" % (tile, 
                                         gmtts.strftime("%Y-%m-%d %H:%M"), fn)
             continue
+        # val is valid at SW corner
         tilemeta, val = util.reader(fn)
         
         ysz, xsz = np.shape(val)
