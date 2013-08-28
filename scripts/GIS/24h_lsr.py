@@ -66,7 +66,7 @@ for row in pcursor:
 
 	d = {}
 	d["VALID"] = row['valid'].strftime("%Y%m%d%H%M")
-	d["MAG"] = float(row['magnitude'])
+	d["MAG"] = float(row['magnitude'] or 0)
 	d["TYPECODE"] = row['type']
 	d["WFO"] = row['wfo']
 	d["TYPETEXT"] = row['typetext']
