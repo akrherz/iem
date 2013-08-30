@@ -44,12 +44,12 @@ def download( now ):
         
         # Do stage2 ml now
         if hr == 1:
-            url = "%s.Grb.gz" % ( now.strftime("http://ftpprd.ncep.noaa.gov/"+
+            url = "%s.Grb.gz" % ( now.strftime("ftp://ftpprd.ncep.noaa.gov/pub/"+
                                 "data/nccf/com/hourly/prod/"+
                                 "nam_pcpn_anal.%Y%m%d/ST2ml%Y%m%d%H"), )
         else:
-            url = "%s.%02ih.gz" % ( now.strftime("http://ftpprd.ncep.noaa.gov/"+
-                                "data/nccf/com/hourly/prod/"+
+            url = "%s.%02ih.gz" % ( now.strftime("ftp://ftpprd.ncep.noaa.gov/"+
+                                "pub/data/nccf/com/hourly/prod/"+
                                 "nam_pcpn_anal.%Y%m%d/ST2ml%Y%m%d%H"), hr)
         try:
             data = urllib2.urlopen( url ).read()
