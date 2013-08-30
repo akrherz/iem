@@ -88,7 +88,7 @@ function sqlLSRTypeBuilder(){
         if ($v == "TO"){ $l[] = "T"; }
         else if ($v == "SV"){ $l[] = "H"; $l[] = "G"; $l[] = "D"; }
         else if ($v == "MA"){ $l[] = "M"; $l[] = "W"; }
-        else if ($v == "FF"){ $l[] = "F"; }
+        else if ($v == "FF"){ $l[] = "F"; $l[] = 'x';}
         else{ $l[] = $v; }
     }   
     $sql = "type IN ('". implode(",", $l) ."')";
@@ -393,7 +393,7 @@ function loadLSRs() {
         ((type = 'M' and magnitude >= 34) or 
          (type = 'H' and magnitude >= %s) or type = 'W' or
          type = 'T' or (type = 'G' and magnitude >= %s) or type = 'D'
-         or type = 'F')
+         or type = 'F' or type = 'x')
         ORDER by valid ASC", $this->lsrbuffer, 
         $this->sqlWFOBuilder(), 
         date("Y/m/d H:i", $this->sts), date("Y/m/d H:i", $this->ets), 
@@ -468,7 +468,7 @@ function sbwVerify() {
         ((type = 'M' and magnitude >= 34) or 
          (type = 'H' and magnitude >= %s) or type = 'W' or
          type = 'T' or (type = 'G' and magnitude >= %s) or type = 'D'
-         or type = 'F')
+         or type = 'F' or type = 'x')
          and valid >= '%s' and valid <= '%s' 
          ORDER by valid ASC", 
          $v["year"], $v["geom"], $v["geom"], $this->sqlLSRTypeBuilder(), 
@@ -482,7 +482,9 @@ function sbwVerify() {
                    $row["magnitude"], $row["city"]);
             $verify = False;
             if ($v["phenomena"] == "FF"){
-                if ($row["type"] == "F") { $verify = True; }
+                if ($row["type"] == "F" || $row["type"] == 'x') { 
+                	$verify = True;
+                }
             }
             else if ($v["phenomena"] == "TO"){
                 if ($row["type"] == "T") { $verify = True; }
