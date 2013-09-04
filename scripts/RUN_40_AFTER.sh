@@ -63,4 +63,4 @@ cd black
 ./surfaceContours.csh
 
 cd ../../model
-python ingest.py $YYYY6 $MM6 $DD6 $HH6
+python motherlode_ingest.py $YYYY6 $MM6 $DD6 $HH6
