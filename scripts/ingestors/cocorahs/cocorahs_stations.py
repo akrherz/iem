@@ -1,14 +1,19 @@
-# Process CoCoRaHS Stations!
+'''
+Hit cocorah's website API for a listing of stations and add entries for anything
+new found
+'''
 
 import urllib2
 import sys
-import iemdb
-MESOSITE = iemdb.connect('mesosite', bypass=True)
+import psycopg2
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = MESOSITE.cursor()
 
 state = sys.argv[1]
 
-req = urllib2.Request("http://data.cocorahs.org/cocorahs/export/exportstations.aspx?State=%s&Format=CSV" % (state,) )
+req = urllib2.Request( ("http://data.cocorahs.org/cocorahs/export/"
+                        +"exportstations.aspx?State=%s&Format=CSV"
+                        +"&country=usa") % (state,) )
 data = urllib2.urlopen(req).readlines()
 
 # Find current stations
@@ -42,13 +47,13 @@ for row in  data[1:]:
     if lat == "0" or lon == "-0":
         continue
 
-    print "NEW COCORAHS SITE", sid, name, cnty, lat, lon
+    print "ADD COCORAHS %s %s %s %.3f %.3f" %  (sid, name, cnty, lat, lon)
   
-    sql = """INSERT into stations(id, synop, name, state, country, network, online,
-         geom, county, plot_name , metasite
-         ) VALUES ('%s',99999, '%s', '%s', 'US', '%sCOCORAHS', 't',
-         'SRID=4326;POINT(%s %s)', '%s', '%s', 'f')""" % (sid, name,
-         state, state, lon, lat, cnty, name)
+    sql = """INSERT into stations(id, synop, name, state, country, network, 
+        online, geom, county, plot_name , metasite) 
+        VALUES ('%s', 99999, '%s', '%s', 'US', '%sCOCORAHS', 't',
+        'SRID=4326;POINT(%s %s)', '%s', '%s', 'f')""" % (sid, name,
+        state, state, lon, lat, cnty, name)
     try:
         mcursor.execute(sql)
     except:
