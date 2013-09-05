@@ -39,5 +39,7 @@ if [ $DD -eq "28" ]
 then
 	cd ../coop
 	python fetch_merra.py
+	MM=$(date -u --date '1 month ago' +'%m')
+	YYYY=$(date -u --date '1 month ago' +'%Y')
 	python merra_solarrad.py $YYYY $MM
 fi
