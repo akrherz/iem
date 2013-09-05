@@ -1,5 +1,8 @@
 """
-Return the maximum xmin in the database 
+  Return the maximum xmin in the database, having too large of a value leads to
+  bad things and eventual database not accepting new writes.  I had to lower
+  the default postgresql setting from 200 mil to 180 mil as the database does
+  lots of writes and autovac sometimes can not keep up.
 """
 import os
 import sys
@@ -19,15 +22,15 @@ def check():
     
 if __name__ == '__main__':
     dbname, count = check()
-    if count < 201000000:
-        print 'OK - %s %s |count=%s;201000000;215000000;220000000' % (count, 
+    if count < 191000000:
+        print 'OK - %s %s |count=%s;191000000;195000000;220000000' % (count, 
                                                             dbname, count)
         sys.exit(0)
-    elif count < 215000000:
-        print 'WARNING - %s %s |count=%s;201000000;215000000;220000000' % (count, 
+    elif count < 195000000:
+        print 'WARNING - %s %s |count=%s;191000000;195000000;220000000' % (count, 
                                                             dbname, count)
         sys.exit(1)
     else:
-        print 'CRITICAL - %s %s |count=%s;201000000;215000000;220000000' % (count, 
+        print 'CRITICAL - %s %s |count=%s;191000000;195000000;220000000' % (count, 
                                                             dbname, count)
         sys.exit(2)
