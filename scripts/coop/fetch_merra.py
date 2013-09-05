@@ -6,6 +6,7 @@
 import datetime
 import urllib2
 import os
+import sys
 import subprocess
 
 def trans(now):
@@ -56,7 +57,9 @@ def do_month( sts ):
 if __name__ == '__main__':
     ''' Run for last month month '''
     now = datetime.datetime.now()
-    if now.day == 21:
+    if len(sys.argv) == 3:
+        now =  datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1)
+    else:
         now = now - datetime.timedelta(days=35)
         now = now.replace(day=1)
-        do_month( now )
+    do_month( now )
