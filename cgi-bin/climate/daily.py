@@ -160,7 +160,7 @@ def main():
         elif plottype == 'compare':
             make_yr_plot(station1, year)
         res = postprocess()
-        mc.set(mckey, res)
+        mc.set(mckey, res, 86400)
     sys.stdout.write( res )
 
 if __name__ == '__main__':
