@@ -72,7 +72,7 @@ if (-e ${rad}_${fp}.gif) then
   /usr/bin/gdalwarp -s_srs \"epsg:4326\" -t_srs \"epsg:${epsg}\" ${rad}_${fp}_tmp.tif ${rad}_${fp}.tif
   cp /mesonet/data/gis/meta/${epsg}.prj ${rad}_${fp}.prj
   if (${frmt} == \"jpeg\") then
-    /mesonet/local/bin/gdal_translate  -co \"WORLDFILE=ON\" -of JPEG ${rad}_${fp}.tif $$.jpg
+    /usr/bin/gdal_translate  -co \"WORLDFILE=ON\" -of JPEG ${rad}_${fp}.tif $$.jpg
     mv $$.wld ${rad}_${fp}.jgw
     convert ${rad}_${fp}.tif ${rad}_${fp}.jpg
     zip ${rad}_${fp}.zip ${rad}_${fp}.jpg ${rad}_${fp}.jgw ${rad}_${fp}.prj
