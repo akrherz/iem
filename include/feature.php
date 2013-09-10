@@ -2,12 +2,12 @@
   // Here is where we start pulling station Information
 function printTags($tokens)
 {
-  global $rooturl;
   if (sizeof($tokens) == 0 || $tokens[0] == ""){ return "";}
   $s = "<br /><span style=\"font-size: smaller; float: left;\">Tags: &nbsp; ";
   while (list($k,$v) = each($tokens))
   {
-    $s .= sprintf("<a href=\"%s/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $rooturl, $v, $v);
+    $s .= sprintf("<a href=\"/onsite/features/tags/%s.html\">%s</a> &nbsp; ", 
+    		$v, $v);
   }
   $s .= "</span>";
   return $s;
@@ -15,8 +15,6 @@ function printTags($tokens)
 
 function genFeature()
 {
-  global $rooturl;
-
   $connection = iemdb("mesosite", TRUE, TRUE);
   $query1 = "SELECT oid, *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
                 to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
@@ -69,13 +67,13 @@ function genFeature()
 
 $s .= "<div style=\"font-size: smaller; float: right; margin: 5px;\">";
 $s .= "<a class=\"button left\" href=\"$fburl\">Facebook</a>"; 
-$s .= "<a class=\"button middle\" href=\"$rooturl/onsite/features/cat.php?day=". $row["permalink"] ."\">Permalink</a>";
-$s .= "<a class=\"button middle\" href=\"$rooturl/onsite/features/past.php\">Past Features</a>";
-$s .= "<a class=\"button right\" href=\"$rooturl/onsite/features/tags/\">Tags</a></div>";
+$s .= "<a class=\"button middle\" href=\"/onsite/features/cat.php?day=". $row["permalink"] ."\">Permalink</a>";
+$s .= "<a class=\"button middle\" href=\"/onsite/features/past.php\">Past Features</a>";
+$s .= "<a class=\"button right\" href=\"/onsite/features/tags/\">Tags</a></div>";
   
   
  /* Feature Image! */
-  $s .= "<div style=\"margin-left: 5px; border: 1px #f3f3f3 solid; float: right; padding: 3px; width: ". ($width + 6) ."px;\"><a href=\"$rooturl/onsite/features/". $row["imageref"] .".png\"><img src=\"$rooturl/onsite/features/". $row["imageref"] ."_s.png\" alt=\"Feature\" width=\"$width\" height=\"$height\"/></a><br /><span style=\"font-size: smaller;\">". $row["caption"] ."</span></div>";
+  $s .= "<div style=\"margin-left: 5px; border: 1px #f3f3f3 solid; float: right; padding: 3px; width: ". ($width + 6) ."px;\"><a href=\"/onsite/features/". $row["imageref"] .".png\"><img src=\"/onsite/features/". $row["imageref"] ."_s.png\" alt=\"Feature\" width=\"$width\" height=\"$height\"/></a><br /><span style=\"font-size: smaller;\">". $row["caption"] ."</span></div>";
 
   $s .= "<br /><div class='story' style=\"text-align: justify;\">". $row["story"] ."</div>";
 
@@ -90,8 +88,8 @@ if ($row["voting"] == "f"){
 		$badurl = "index.phtml";
 		$msg = "Thanks for voting!";
 	} else {
-		$goodurl = "$rooturl/index.phtml?feature_good";
-		$badurl = "$rooturl/index.phtml?feature_bad";
+		$goodurl = "/index.phtml?feature_good";
+		$badurl = "/index.phtml?feature_bad";
 		$msg = "Rate Feature";
 	}
 
