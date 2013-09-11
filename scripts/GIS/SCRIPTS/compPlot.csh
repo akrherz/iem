@@ -62,7 +62,7 @@ EOF
 
 
 if (-e compRADAR.gif) then
-  convert compRADAR.gif compRADAR.png
-  mv compRADAR.png /mesonet/data/gis/images/26915/IOWA_N0R.png
-
+	convert compRADAR.gif compRADAR.png
+	pqinsert -p 'data c 000000000000 gis/images/26915/IOWA_N0R.png bogus png' compRADAR.png
+	rm compRADAR.png compRADAR.gif
 endif
