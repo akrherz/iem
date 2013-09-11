@@ -31,7 +31,7 @@ chdir("/tmp");
 copy($dir."/".$fp.".dbf", $fp.".dbf");
 copy("/mesonet/wepp/GIS/static/hrap_${geometry}_${epsg}.shp", $fp.".shp");
 copy("/mesonet/wepp/GIS/static/hrap_${geometry}_${epsg}.shx", $fp.".shx");
-copy("/mesonet/data/gis/meta/${epsg}.prj", $fp.".prj");
+copy("/mesonet/www/apps/iemwebsite/data/gis/meta/${epsg}.prj", $fp.".prj");
 copy("/mesonet/www/apps/iemwebsite/data/gis/avl/iemrainfall.avl", $fp.".avl");
 `zip ${fp}.zip ${fp}*`;
 
