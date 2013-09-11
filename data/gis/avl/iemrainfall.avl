@@ -1,0 +1,391 @@
+/3.1
+(ODB.1
+	FirstRootClassName:	"Legend"
+	Roots:	2
+	Version:	31
+)
+
+(Legend.2
+	SymType:	0x02
+	LegType:	0x02
+	ClassType:	0x03
+	FieldNames:	3
+	Symbols:	4
+	Class:	49
+	Class:	50
+	Class:	51
+	Class:	52
+	Class:	53
+	Class:	54
+	Class:	55
+	Class:	56
+	Class:	57
+	Class:	58
+	Class:	59
+	StdDevs:	1.00000000000000
+	NullSym:	60
+	NullValues:	64
+	StatValues:	65
+	Precision:	-3
+)
+
+(AVStr.3
+	S:	"Rainfall"
+)
+
+(SymList.4
+	Child:	5
+	Child:	9
+	Child:	13
+	Child:	17
+	Child:	21
+	Child:	25
+	Child:	29
+	Child:	33
+	Child:	37
+	Child:	41
+	Child:	45
+)
+
+(BShSym.5
+	Color:	6
+	OutlineColor:	7
+	OutlineWidth:	0.10000000000000
+	BgColor:	8
+)
+
+(TClr.6
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(TClr.7
+)
+
+(TClr.8
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(BShSym.9
+	Color:	10
+	OutlineColor:	11
+	OutlineWidth:	0.10000000000000
+	BgColor:	12
+)
+
+(TClr.10
+	Red:	0xc3b5
+	Green:	0xff00
+	Blue:	0xc33b
+)
+
+(TClr.11
+)
+
+(TClr.12
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(BShSym.13
+	Color:	14
+	OutlineColor:	15
+	OutlineWidth:	0.10000000000000
+	BgColor:	16
+)
+
+(TClr.14
+	Green:	0xffff
+)
+
+(TClr.15
+)
+
+(TClr.16
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(BShSym.17
+	Color:	18
+	OutlineColor:	19
+	OutlineWidth:	0.10000000000000
+	BgColor:	20
+)
+
+(TClr.18
+	Red:	0x189
+	Green:	0x8200
+	Blue:	0x81
+)
+
+(TClr.19
+)
+
+(TClr.20
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(BShSym.21
+	Color:	22
+	OutlineColor:	23
+	OutlineWidth:	0.10000000000000
+	BgColor:	24
+)
+
+(TClr.22
+	Red:	0xae6d
+	Green:	0xa559
+	Blue:	0xff00
+)
+
+(TClr.23
+)
+
+(TClr.24
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(BShSym.25
+	Color:	26
+	OutlineColor:	27
+	OutlineWidth:	0.10000000000000
+	BgColor:	28
+)
+
+(TClr.26
+	Blue:	0xffff
+)
+
+(TClr.27
+)
+
+(TClr.28
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(BShSym.29
+	Color:	30
+	OutlineColor:	31
+	OutlineWidth:	0.10000000000000
+	BgColor:	32
+)
+
+(TClr.30
+	Red:	0xdc00
+	Green:	0xdb
+	Blue:	0xdb
+)
+
+(TClr.31
+)
+
+(TClr.32
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(BShSym.33
+	Color:	34
+	OutlineColor:	35
+	OutlineWidth:	0.10000000000000
+	BgColor:	36
+)
+
+(TClr.34
+	Red:	0x6400
+	Green:	0x63
+	Blue:	0x6025
+)
+
+(TClr.35
+)
+
+(TClr.36
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(BShSym.37
+	Color:	38
+	OutlineColor:	39
+	OutlineWidth:	0.10000000000000
+	BgColor:	40
+)
+
+(TClr.38
+	Red:	0xae0b
+	Green:	0x13e
+	Blue:	0x313d
+)
+
+(TClr.39
+)
+
+(TClr.40
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(BShSym.41
+	Color:	42
+	OutlineColor:	43
+	OutlineWidth:	0.10000000000000
+	BgColor:	44
+)
+
+(TClr.42
+	Red:	0xfb84
+	Green:	0x6a67
+	Blue:	0xa6ed
+)
+
+(TClr.43
+)
+
+(TClr.44
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(BShSym.45
+	Color:	46
+	Outline:	1
+	OutlineColor:	47
+	OutlineWidth:	0.10000000000000
+	BgColor:	48
+)
+
+(TClr.46
+	Name:	"Transparent"
+)
+
+(TClr.47
+	Name:	"Transparent"
+)
+
+(TClr.48
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(LClass.49
+	Label:	"0 - 0.01"
+	MaxNum:	0.01000000000000
+	Precision:	-3
+)
+
+(LClass.50
+	Label:	"0.02 - 0.04"
+	MinNum:	0.02000000000000
+	MaxNum:	0.04000000000000
+	Precision:	-3
+)
+
+(LClass.51
+	Label:	"0.05 - 0.24"
+	MinNum:	0.05000000000000
+	MaxNum:	0.24000000000000
+	Precision:	-3
+)
+
+(LClass.52
+	Label:	"0.25 - 0.49"
+	MinNum:	0.25000000000000
+	MaxNum:	0.49000000000000
+	Precision:	-3
+)
+
+(LClass.53
+	Label:	"0.5 - 0.74"
+	MinNum:	0.50000000000000
+	MaxNum:	0.74000000000000
+	Precision:	-3
+)
+
+(LClass.54
+	Label:	"0.75 - 0.99"
+	MinNum:	0.75000000000000
+	MaxNum:	0.99000000000000
+	Precision:	-3
+)
+
+(LClass.55
+	Label:	"1 - 1.99"
+	MinNum:	1.00000000000000
+	MaxNum:	1.99000000000000
+	Precision:	-3
+)
+
+(LClass.56
+	Label:	"2 - 3.99"
+	MinNum:	2.00000000000000
+	MaxNum:	3.99000000000000
+	Precision:	-3
+)
+
+(LClass.57
+	Label:	"4 - 5.99"
+	MinNum:	4.00000000000000
+	MaxNum:	5.99000000000000
+	Precision:	-3
+)
+
+(LClass.58
+	Label:	"6 - 12"
+	MinNum:	6.00000000000000
+	MaxNum:	12.00000000000000
+	Precision:	-3
+)
+
+(LClass.59
+	IsNoData:	1
+	Label:	"No Data"
+	MaxNum:	-1.00000000000000
+	Precision:	-3
+)
+
+(BShSym.60
+	Color:	61
+	Outline:	1
+	OutlineColor:	62
+	OutlineWidth:	0.10000000000000
+	BgColor:	63
+)
+
+(TClr.61
+	Name:	"Transparent"
+)
+
+(TClr.62
+	Name:	"Transparent"
+)
+
+(TClr.63
+	Red:	0xffff
+	Green:	0xffff
+	Blue:	0xffff
+)
+
+(NameDict.64
+)
+
+(NameDict.65
+)
+
