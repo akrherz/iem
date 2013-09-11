@@ -85,7 +85,7 @@ WHERE
     pqstr = "plot ac %s00 %s_mos_T_bias.png %s_mos_T_bias_%s.png png" % (
                 now.strftime("%Y%m%d%H"), model.lower(),
                 model.lower(), now.strftime("%H"))
-    m.postprocess(view=True, pqstr=pqstr)
+    m.postprocess(pqstr=pqstr)
     del(m)
 
     m = MapPlot(sector='conus',
@@ -99,7 +99,7 @@ WHERE
     pqstr = "plot ac %s00 conus_%s_mos_T_bias.png conus_%s_mos_T_bias_%s.png png" % (
                 now.strftime("%Y%m%d%H"), model.lower(),
                 model.lower(), now.strftime("%H"))
-    m.postprocess(view=True, pqstr=pqstr)
+    m.postprocess(pqstr=pqstr)
     
 if __name__ == "__main__":
     ''' Go go gadget arm '''
