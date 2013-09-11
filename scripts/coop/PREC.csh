@@ -12,7 +12,7 @@ set ftime="`date +'%Y%m%d'`0000"
 python extract_coop_obs.py
 python today_precip.py
 
-cp /mesonet/data/gis/meta/4326.prj coop_${Date}.prj
+cp /mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj coop_${Date}.prj
 cp data.desc coop_${Date}.txt
 zip -q coop_${Date}.zip coop_${Date}.txt coop_${Date}.prj coop_${Date}.shp coop_${Date}.shx coop_${Date}.dbf 
 
