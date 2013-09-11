@@ -142,7 +142,7 @@ table that you need, please let use know.</p>
     $shpFile->free();
     dbase_close($dbfFile);
     chdir("/var/webtmp/");
-    copy("/mesonet/data/gis/meta/4326.prj", $filePre.".prj");
+    copy("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", $filePre.".prj");
     popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf ".$filePre.".prj", 'r');
     echo "Shapefile Generation Complete.<br>";
     echo "Please download this <a href=\"/tmp/".$filePre.".zip\">zipfile</a>.";

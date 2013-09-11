@@ -98,7 +98,7 @@ if format == 'shp':
     del(dbf)
     
     # Create zip file, send it back to the clients
-    shutil.copyfile("/mesonet/data/gis/meta/4326.prj", fp+".prj")
+    shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", fp+".prj")
     z = zipfile.ZipFile(fp+".zip", 'w', zipfile.ZIP_DEFLATED)
     z.write(fp+".shp")
     z.write(fp+".shx")
