@@ -105,56 +105,39 @@ then
 	gdaladdo -q wv_900913.tif 2 4 6 18
 fi
 
-for mach in $(echo "iemvs100.local iemvs101.local iemvs102.local iemvs103.local iemvs104.local iemvs105.local iemvs106.local iemvs107.local iemvs108.local iem21.local iem50.local"); do
+/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/west1V_ bogus tif' GoesWest1V${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/west1V_0.tfw bogus tfw' GoesWest1V${tm}.tfw >& /dev/null
+/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/east1V_ bogus tif' GoesEast1V${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/east1V_0.tfw bogus tfw' GoesEast1V${tm}.tfw >& /dev/null
+
+/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/west04I4_ bogus tif' GoesWest04I4${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/west04I4_0.tfw bogus tfw' GoesWest04I4${tm}.tfw >& /dev/null
+/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/east04I4_ bogus tif' GoesEast04I4${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/east04I4_0.tfw bogus tfw' GoesEast04I4${tm}.tfw >& /dev/null
  
- $SCP  -q GoesWest1V${tm}.tif ldm@${mach}:/tmp/west1V_0.tif
-  $SSH -q ldm@${mach} "cat /tmp/west1V_0.tif | python ~/pyWWA/rotate.py gis/images/4326/goes/west1V_ tif"
-  $SCP  -q GoesWest1V${tm}.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/west1V_0.tfw
- 
+/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/west04I3_ bogus tif' GoesWest04I3${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/west04I3_0.tfw bogus tfw' GoesWest04I3${tm}.tfw >& /dev/null
+/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/4326/goes/east04I3_ bogus tif' GoesEast04I3${tm}.tif
+/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/east04I3_0.tfw bogus tfw' GoesEast04I3${tm}.tfw >& /dev/null
 
-  $SCP  -q GoesEast1V${tm}.tif ldm@${mach}:/tmp/east1V_0.tif
-  $SSH -q ldm@${mach} "cat /tmp/east1V_0.tif | python ~/pyWWA/rotate.py gis/images/4326/goes/east1V_ tif"
-  $SCP  -q GoesEast1V${tm}.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/east1V_0.tfw
 
-  $SCP  -q GoesWest04I4${tm}.tif ldm@${mach}:/tmp/west04I4_0.tif
-  $SSH -q ldm@${mach} "cat /tmp/west04I4_0.tif | python ~/pyWWA/rotate.py gis/images/4326/goes/west04I4_ tif"
-  $SCP  -q GoesWest04I4${tm}.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/west04I4_0.tfw
-
-  $SCP  -q GoesEast04I4${tm}.tif ldm@${mach}:/tmp/east04I4_0.tif
-  $SSH -q ldm@${mach} "cat /tmp/east04I4_0.tif | python ~/pyWWA/rotate.py gis/images/4326/goes/east04I4_ tif"
-  $SCP  -q GoesEast04I4${tm}.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/east04I4_0.tfw
-
-  $SCP  -q GoesWest04I3${tm}.tif ldm@${mach}:/tmp/west04I3_0.tif
-  $SSH -q ldm@${mach} "cat /tmp/west04I3_0.tif | python ~/pyWWA/rotate.py gis/images/4326/goes/west04I3_ tif"
-  $SCP  -q GoesWest04I3${tm}.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/west04I3_0.tfw
-
-  $SCP  -q GoesEast04I3${tm}.tif ldm@${mach}:/tmp/east04I3_0.tif
-  $SSH -q ldm@${mach} "cat /tmp/east04I3_0.tif | python ~/pyWWA/rotate.py gis/images/4326/goes/east04I3_ tif"
-  $SCP  -q GoesEast04I3${tm}.tfw ldm@${mach}:/mesonet/data/gis/images/4326/goes/east04I3_0.tfw
-
-  if [ -e vis_900913.tif ]
+if [ -e vis_900913.tif ]
   	then
-    $SCP  -q vis_900913.tif ldm@${mach}:/tmp/vis_900913_0.tif
-    $SSH -q ldm@${mach} "mv /tmp/vis_900913_0.tif ~/data/gis/images/900913/goes/vis_0.tif"
+		/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/900913/goes/vis_ bogus tif' vis_900913.tif
     fi
   	
-  if [ -e ir_900913.tif ]
+if [ -e ir_900913.tif ]
   	then
-    $SCP  -q ir_900913.tif ldm@${mach}:/tmp/ir_900913_0.tif
-    $SSH -q ldm@${mach} "mv /tmp/ir_900913_0.tif ~/data/gis/images/900913/goes/ir_0.tif"
+		/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/900913/goes/ir_ bogus tif' ir_900913.tif
     fi
   	
-  if [ -e wv_900913.tif ]
+if [ -e wv_900913.tif ]
   	then
-    $SCP  -q wv_900913.tif ldm@${mach}:/tmp/wv_900913_0.tif
-    $SSH -q ldm@${mach} "mv /tmp/wv_900913_0.tif ~/data/gis/images/900913/goes/wv_0.tif"
+		/home/ldm/bin/pqinsert -p 'gis cr 000000000000 gis/images/900913/goes/wv_ bogus tif' wv_900913.tif
     fi 
-done
-rm wv_900913.tif wv.tif >& /dev/null
-rm ir_900913.tif ir.tif >& /dev/null
-rm vis_900913.tif vis.tif >& /dev/null
-rm -f *${tm}.tif >& /dev/null
-rm -f *${tm}.tfw >& /dev/null
+
+# Cleanup!
 cd ..
-rmdir nesdis.$ftm
-#date
+rm -rf nesdis.$ftm
+
+#DONE
