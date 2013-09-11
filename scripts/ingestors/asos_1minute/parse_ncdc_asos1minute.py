@@ -1,5 +1,10 @@
 """
  Attempt to process the 1 minute archives available from NCDC
+ 
+ NCDC provides monthly tar files for nearly up to the current day here:
+ 
+ http://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
+ 
 """
 
 import re
