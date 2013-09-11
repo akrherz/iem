@@ -117,7 +117,7 @@ shutil.copy('/mesonet/www/apps/iemwebsite/scripts/GIS/current_ww.shp.xml', 'curr
 z.write("current_ww.shp.xml")
 z.write("current_ww.shx")
 z.write("current_ww.dbf")
-shutil.copy('/mesonet/data/gis/meta/4326.prj', 'current_ww.prj')
+shutil.copy('/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj', 'current_ww.prj')
 z.write("current_ww.prj")
 z.close()
 

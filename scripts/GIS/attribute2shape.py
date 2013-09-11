@@ -134,7 +134,7 @@ if (cnt == 0):
 
 del(shp)
 del(dbf)
-shutil.copy("/mesonet/data/gis/meta/4326.prj", "current_nexattr.prj")
+shutil.copy("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", "current_nexattr.prj")
 z = zipfile.ZipFile("current_nexattr.zip", 'w', zipfile.ZIP_DEFLATED)
 z.write("current_nexattr.shp")
 z.write("current_nexattr.shx")
