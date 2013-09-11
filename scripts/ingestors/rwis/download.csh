@@ -42,7 +42,7 @@ python genSFFIL.py
 # Process The sf file as well.
 ./run_rwisSF.csh 
 
-cd /mesonet/data/metar
+cd /tmp
 
 mv rwis.sao IArwis${TS}.sao
 mv rwis2.sao IA.rwis${TS}.sao
