@@ -101,7 +101,7 @@ $shpFile->free();
 dbase_close($dbfFile);
 
 // Generate zip file
-copy("/mnt//mesonet/data/gis/meta/4326.prj", $filePre.".prj");
+copy("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", $filePre.".prj");
 popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf ".$filePre.".prj", 'r');  
 
 header("Content-type: application/octet-stream");
