@@ -1,7 +1,7 @@
 import mx.DateTime
 import constants
 
-def go(mydb, stationID,updateAll=False):
+def go(mydb, stationID, updateAll=False):
     """
     Generate the monthly averages, but only do as much as necessary
     """
@@ -36,11 +36,12 @@ def go(mydb, stationID,updateAll=False):
 
 
 def safePrint(val, cols, prec):
-  fmt = "%%%s.%sf" % (cols, prec)
-  fmt2 = "%%%ss" % (cols,)
-  if (val == "M"):
-    return fmt2 % val
-  return fmt % val
+    ''' Safe print function '''
+    fmt = "%%%s.%sf" % (cols, prec)
+    fmt2 = "%%%ss" % (cols,)
+    if val == "M":
+        return fmt2 % val
+    return fmt % val
 
 def write(mydb, out, out2, out3, out4, station):
     s = constants.startts(station)
