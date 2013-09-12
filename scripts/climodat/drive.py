@@ -1,7 +1,6 @@
 """
  Generate the climodat reports, please!  Run from run.sh
 """
-
 import pg
 import network
 nt = network.Table(('IACLIMATE', 'ILCLIMATE', 'INCLIMATE',
@@ -35,6 +34,7 @@ import constants
 
 #stdlib
 import datetime
+update_all = True if datetime.datetime.today().day == 1 else False
 
 def caller(func, *args):
     #start = datetime.datetime.now()
@@ -43,7 +43,6 @@ def caller(func, *args):
     #print "%s %s took %s" % (func.__name__, args[-1], (end-start))
     return ret
 
-updateAll= False
 for dbid in nt.sts.keys():
     #print "processing [%s] %s" % (dbid, nt.sts[dbid]["name"])
     sql = """SELECT d.*, c.climoweek from %s d, climoweek c 
@@ -62,7 +61,7 @@ for dbid in nt.sts.keys():
     caller(gen30rains.write, mydb, out, dbid)
     out.close()
     
-    caller(genGDD.go, mydb, rs, dbid, updateAll)
+    caller(genGDD.go, mydb, rs, dbid, update_all)
     out = caller(constants.make_output, nt, dbid, "03")
     caller(genGDD.write, mydb, out, dbid)
     out.close()
@@ -108,7 +107,7 @@ for dbid in nt.sts.keys():
     caller(genSpringFall.write, mydb, out, rs, dbid, 24)
     out.close()
     
-    caller(genMonthly.go, mydb, dbid, updateAll)
+    caller(genMonthly.go, mydb, dbid, update_all)
     out = caller(constants.make_output, nt, dbid, "14")
     out2 = caller(constants.make_output, nt, dbid, "15")
     out3 = caller(constants.make_output, nt, dbid, "16")
@@ -119,12 +118,12 @@ for dbid in nt.sts.keys():
     out3.close()
     out4.close()
     
-    caller(genHDD.go, mydb, rs, dbid, updateAll)
+    caller(genHDD.go, mydb, rs, dbid, update_all)
     out = caller(constants.make_output, nt, dbid, "18")
     caller(genHDD.write, mydb, out, dbid)
     out.close()
     
-    caller(genCDD.go, mydb, rs, dbid, updateAll)
+    caller(genCDD.go, mydb, rs, dbid, update_all)
     out = caller(constants.make_output, nt, dbid, "19")
     caller(genCDD.write, mydb, out, dbid)
     out.close()
