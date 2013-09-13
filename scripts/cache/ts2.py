@@ -1,20 +1,20 @@
-# Set GIS Satellite data! :)
+'''
+Fuzzy math to get the right timestamp
 
-# 15 after scan produced at 45 after
-# 45 after scan produced at 15 after
+if 15, we want 00
+if 45, we want 30
+'''
+import datetime
+import sys
 
-import mx.DateTime, sys
-
-#ftp://gp16.ssd.nesdis.noaa.gov/pub/GIS/GOESwest/GoesWest1V3501745.tif
-
-now = mx.DateTime.gmt()
+gmt = datetime.datetime.utcnow()
 
 cycle = int(sys.argv[1])
 
 if cycle == 15:
-    now += mx.DateTime.RelativeDateTime(minute=0)
+    gmt = gmt.replace(minute=0)
 else:
-    # was minute=30
-    now += mx.DateTime.RelativeDateTime(minute=0,hours=-1)
+    gmt -= datetime.timedelta(hours=1)
+    gmt = gmt.replace(minute=30)
 
-print now.strftime( sys.argv[2] )
+print gmt.strftime( sys.argv[2] )
