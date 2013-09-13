@@ -41,8 +41,8 @@ for row in  data[1:]:
 
     name = cols[ header["StationName"] ].strip().replace("'",' ')
     cnty = cols[ header["County"] ].strip().replace("'",' ')
-    lat = cols[ header["Latitude"] ].strip()
-    lon = cols[ header["Longitude"] ].strip()
+    lat = float(cols[ header["Latitude"] ].strip())
+    lon = float(cols[ header["Longitude"] ].strip())
 
     if lat == "0" or lon == "-0":
         continue
