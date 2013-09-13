@@ -44,7 +44,7 @@ for row in  data[1:]:
     lat = float(cols[ header["Latitude"] ].strip())
     lon = float(cols[ header["Longitude"] ].strip())
 
-    if lat == "0" or lon == "-0":
+    if lat < 10 or lon > -60:
         continue
 
     print "ADD COCORAHS %s %s %s %.3f %.3f" %  (sid, name, cnty, lat, lon)
