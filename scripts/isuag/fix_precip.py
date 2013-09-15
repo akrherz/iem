@@ -68,10 +68,10 @@ def fix_hourly(ts):
         if estimate > 100:
             estimate = 0
             print "Missing Estimate", ts
-        if row['c900'] > 0 or estimate > 0:
-            print "%s %s %-20.20s Ob: %5.2f F: %s E: %5.2f" % (
-                  ts.strftime("%m%d/%H"), stid, nt.sts[stid]['name'],
-                  row['c900'], row['c900_f'], estimate)
+        #if row['c900'] > 0 or estimate > 0:
+        #    print "%s %s %-20.20s Ob: %5.2f F: %s E: %5.2f" % (
+        #          ts.strftime("%m%d/%H"), stid, nt.sts[stid]['name'],
+        #          row['c900'], row['c900_f'], estimate)
         # Fix it
         sql = """UPDATE hourly SET c900 = %.2f, c900_f = 'e' 
               WHERE valid = '%s+00'
