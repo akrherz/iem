@@ -9,8 +9,8 @@ from pyiem.plot import MapPlot
 from mpl_toolkits.basemap import maskoceans
 import matplotlib.cm as cm
 
-sts = datetime.datetime(2013,6,1)
-ets = datetime.datetime(2013,7,9)
+sts = datetime.datetime(2013,7,1)
+ets = datetime.datetime(2013,9,16)
 
 offset1 = iemre.daily_offset(sts)
 offset2 = iemre.daily_offset(ets)
@@ -24,7 +24,7 @@ for i in range(offset1,offset2):
     if cp01d[i,5,5] > 20:
         print i, p01d[i,5,5], cp01d[i,5,5]
 
-diff = (numpy.sum(p01d[offset1:offset2,:,:],0) -  numpy.sum(cp01d[offset1:offset2,:,:],0)) / 25.4
+diff = (numpy.sum(p01d[offset1:offset2,:,:],0) /  numpy.sum(cp01d[offset1:offset2,:,:],0)) * 100.0
 print numpy.sum(p01d[offset1:offset2,5,5]), numpy.sum(cp01d[offset1:offset2,5,5])
 print numpy.max(diff), numpy.min(diff)
 
@@ -40,9 +40,9 @@ extra = lats[-1] + (lats[-1] - lats[-2])
 x,y = numpy.meshgrid(lons, lats)
 
 m = MapPlot(sector='iowa',
-            title='1 June - 9 July 2013 Precipitation Departure',
+            title='1 July - 15 September 2013 Precipitation Percent of Average',
             subtitle='2013 vs 1950-2012 Climatology')
-m.contourf(x, y, diff, numpy.arange(-5.,5.1,1.), cmap=cm.get_cmap('RdYlBu'))
+m.contourf(x, y, diff, numpy.arange(0.,101.0,10.), cmap=cm.get_cmap('RdYlBu'), units='%')
 m.drawcounties()
 m.postprocess(filename='test.ps')
 import iemplot
