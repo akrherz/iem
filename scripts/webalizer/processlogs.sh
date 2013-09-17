@@ -19,6 +19,7 @@ for MACH in $MACHINES
 do
 	ssh root@$MACH "mv -f $BASE/access_log $BASE/access_log.$MACH && \
     mv -f $BASE/access_log-wepp $BASE/access_log-wepp.$MACH && \
+    mv -f $BASE/access_log-idep $BASE/access_log-idep.$MACH && \
     mv -f $BASE/access_log-sustainablecorn $BASE/access_log-sustainablecorn.$MACH && \
    	mv -f $BASE/access_log-cocorahs $BASE/access_log-cocorahs.$MACH && \
     service httpd graceful"
@@ -47,6 +48,10 @@ csh -c "(/usr/local/bin/mergelog access_log-wepp.iemvs* > wepp_access.log) >& /d
 wc -l access_log-wepp.iemvs* wepp_access.log 
 rm -f access_log-wepp.iemvs*
 
+csh -c "(/usr/local/bin/mergelog access_log-idep.iemvs* > idep_access.log) >& /dev/null"
+wc -l access_log-idep.iemvs* idep_access.log 
+rm -f access_log-idep.iemvs*
+
 csh -c "(/usr/local/bin/mergelog access_log-cocorahs.iemvs* > cocorahs_access.log) >& /dev/null"
 wc -l access_log-cocorahs.iemvs* cocorahs_access.log
 rm -f access_log-cocorahs.iemvs*
@@ -63,6 +68,7 @@ wc -l weatherim_access.log
 /usr/bin/webalizer -c ${CONFBASE}/cocorahs.conf cocorahs_access.log
 /usr/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf sustainablecorn_access.log
 /usr/bin/webalizer -c ${CONFBASE}/wepp.conf wepp_access.log
+/usr/bin/webalizer -c ${CONFBASE}/idep.conf idep_access.log
 /usr/bin/webalizer -c ${CONFBASE}/weatherim.conf weatherim_access.log
 
 grep " /agclimate" access.log > agclimate.log
@@ -78,6 +84,10 @@ mv access_log-$dd.gz /mesonet/www/logs/old_logs/$yyyymm/
 mv wepp_access.log wepp_access_log-$dd
 gzip wepp_access_log-$dd
 mv wepp_access_log-$dd.gz /mesonet/www/logs/old_logs/$yyyymm/
+
+mv idep_access.log idep_access_log-$dd
+gzip idep_access_log-$dd
+mv idep_access_log-$dd.gz /mesonet/www/logs/old_logs/$yyyymm/
 
 mv cocorahs_access.log cocorahs_access_log-$dd
 gzip cocorahs_access_log-$dd
