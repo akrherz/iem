@@ -1,17 +1,23 @@
 <?php
  /* Make a nice simple plot of monthly  temperatures */
  include('../../config/settings.inc.php');
- include("$rootpath/include/database.inc.php");
+ include("../../include/database.inc.php");
  include('setup.php');
 
 $cnetwork = sprintf("%sCLIMATE", $st->table[$station]["state"]);
-$st->load_station( $st->table[$station]["climate_site"], $cnetwork);
-$cities = $st->table;
+if (substr($network,2) == "CLIMATE"){
+	$st->load_station( $station, $cnetwork);
+	$cities = $st->table;
+	$climate_site = $station;
+} else {
+	$st->load_station( $st->table[$station]["climate_site"], $cnetwork);
+	$cities = $st->table;
+	$climate_site = $cities[$station]["climate_site"];
+}
 
- $climate_site = $cities[$station]["climate_site"];
  $hasclimate = 1;
  if ($climate_site == ""){ $hasclimate = 0; }
- $db = iemdb("access");
+ 
  
 
  /* Call with year and month, if not, then current! */
@@ -21,12 +27,27 @@ $cities = $st->table;
  $rts = mktime(0,0,0,$month,1,$year);
 
  /* Get high and low temps for the past 7 days */
-$rs = pg_prepare($db, "SELECT", "SELECT day, max_tmpf, min_tmpf 
-        from summary_$year s, stations t WHERE 
-        t.id = $1 and t.iemid = s.iemid and extract(month from day) = $2
-        and day <= 'TODAY' and t.network = $3 " .
-        "ORDER by day ASC");
-$rs = pg_execute($db, "SELECT", Array($station,$month, $network));
+ if (substr($network,2) == "CLIMATE"){
+ 	$db = iemdb('coop');
+ 	$table = sprintf("alldata_%s", substr($network,0,2));
+ 	$rs = pg_prepare($db, "SELECT", "SELECT high as max_tmpf, 
+ 			to_char(day, 'YYYYMMDD') as dvalid,
+ 		low as min_tmpf, precip as pday,
+ 		Null as max_tmpf_qc, Null as max_gust,
+ 		null as min_tmpf_qc from $table WHERE
+ 		station = $1 and month = $month and year = $year
+ 		ORDER by day ASC"); 	
+ 	$rs = pg_execute($db, "SELECT", Array($station));
+ 	
+ } else {
+	$db = iemdb("access");
+	$rs = pg_prepare($db, "SELECT", "SELECT day, max_tmpf, min_tmpf 
+	        from summary_$year s, stations t WHERE 
+	        t.id = $1 and t.iemid = s.iemid and extract(month from day) = $2
+	        and day <= 'TODAY' and t.network = $3 " .
+	        "ORDER by day ASC");
+	$rs = pg_execute($db, "SELECT", Array($station,$month, $network));
+ }
 
 $highs = Array();
 $lows = Array();
@@ -66,7 +87,6 @@ if ($hasclimate){
  		ncdc_climate71 
         WHERE station = $1
         and extract(month from valid) = $2  ORDER by valid ASC");
-
  $rs = pg_execute($db, "SELECT", Array($climate_site, $month));
 
  $ahighs = Array();
@@ -88,9 +108,9 @@ if ($hasclimate){
 }
 
 /* Time to plot */
-include("$rootpath/include/jpgraph/jpgraph.php");
-include("$rootpath/include/jpgraph/jpgraph_bar.php");
-include("$rootpath/include/jpgraph/jpgraph_line.php");
+include("../../include/jpgraph/jpgraph.php");
+include("../../include/jpgraph/jpgraph_bar.php");
+include("../../include/jpgraph/jpgraph_line.php");
 
 
 $height = 360;
