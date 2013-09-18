@@ -9,8 +9,8 @@ $ts = mktime(0,0,0, $month, 1, $year);
 
 $today = time();
 
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/station.php");
+include("../../../include/iemaccess.php");
+include("../../../include/station.php");
 $st = new StationData($station, $network);
 $cnetwork = sprintf("%sCLIMATE", $st->table[$station]["state"]);
 $st->load_station( $st->table[$station]['climate_site'], $cnetwork );
@@ -20,14 +20,27 @@ $hasclimate = 1;
 if ($st->table[$station]['climate_site'] == ""){ $hasclimate = 0; }
 
 $coopdb = iemdb("coop");
-$IEM = iemdb('iem');
-$rs = pg_prepare($IEM, "SELECTOR", "SELECT pday, extract(day from day) as day from summary_$year s, stations t
-		WHERE t.id = $1 and t.network = $2 and t.iemid = s.iemid and extract(month from day) = $3 
-		ORDER by day ASC");
+if (substr($network,2) == "CLIMATE"){
+	$db = iemdb('coop');
+	$table = sprintf("alldata_%s", substr($network,0,2));
+	$rs = pg_prepare($db, "SELECT", "SELECT high as max_tmpf,
+			to_char(day, 'YYYYMMDD') as dvalid, extract(day from day) as day,
+			low as min_tmpf, precip as pday,
+			Null as max_tmpf_qc, Null as max_gust,
+			null as min_tmpf_qc from $table WHERE
+			station = $1 and month = $month and year = $year
+			ORDER by day ASC");
+	$rs = pg_execute($db, "SELECT", Array($station));
+	$climate_site = $station;
+} else {
+	$db = iemdb('iem');
+	$rs = pg_prepare($db, "SELECTOR", "SELECT pday, extract(day from day) as day from summary_$year s, stations t
+			WHERE t.id = $1 and t.network = $2 and t.iemid = s.iemid and extract(month from day) = $3 
+			ORDER by day ASC");
+	$climate_site = $cities[$station]["climate_site"];
+	$rs = pg_execute($db, "SELECTOR", Array($station, $network, $month));
+}
 
-$climate_site = $cities[$station]["climate_site"];
-
-$rs = pg_execute($IEM, "SELECTOR", Array($station, $network, $month));
 $obs = Array();
 $aobs = Array();
 $atot = 0;
@@ -43,7 +56,7 @@ for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
 if ($hasclimate){
 /* Now we need the climate data */
 $q = "SELECT precip, extract(day from valid) as day from ncdc_climate71
-		WHERE station = '". strtolower($climate_site) ."' and extract(month from valid) = $month
+		WHERE station = '". $climate_site ."' and extract(month from valid) = $month
 		ORDER by day ASC";
 $rs = pg_exec($coopdb, $q);
 $climate = Array();
@@ -64,11 +77,11 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 }
 }
 pg_close($coopdb);
-pg_close($IEM);
+pg_close($db);
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_bar.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_bar.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,400);
