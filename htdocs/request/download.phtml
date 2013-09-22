@@ -5,12 +5,12 @@ $year = date("Y");
 $network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
 $station = "";
 
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/imagemaps.php");
-include("$rootpath/include/forms.php");
+include("../../include/database.inc.php");
+include("../../include/imagemaps.php");
+include("../../include/forms.php");
 $HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
 <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
-<script src='${rooturl}/js/olselect.php?network=${network}'></script>";
+<script src='/js/olselect.php?network=${network}'></script>";
 $TITLE = "IEM | Download Data";
 $THISPAGE = "networks-asos";
 $BODYEXTRA = "onload=\"init()\"";
@@ -53,13 +53,38 @@ of seconds to process your request and provide the result.</div>
 <TD valign="top">
 <h3 class="subtitle">1) Select Station/Network by clicking on location: </h3>
 
-<form method="GET" action="<?php echo $rootcgi; ?>/request/getData.py" name="olselect">
+<form method="GET" action="/cgi-bin/request/getData.py" name="olselect">
 <div id="map"></div>
 <div id="sname">No site selected</div>
 
-</TD>
+<p><strong>Download Variable Description</strong>
 
-<TD>
+<br /><strong>station:</strong> three or four character site identifier
+<br /><strong>valid:</strong> timestamp of the observation
+<br /><strong>tmpf:</strong> Air Temperature in Fahrenheit, typically @ 2 meters
+<br /><strong>dwpf:</strong> Dew Point Temperature in Fahrenheit, typically @ 2 meters
+<br /><strong>relh:</strong> Relative Humidity in %
+<br /><strong>drct:</strong> Wind Direction in degrees from north
+<br /><strong>sknt:</strong> Wind Speed in knots	
+<br /><strong>p01i:</strong> One hour precipitation for the period from the observation time
+to the time of the previous hourly precipitation reset.  This varies slightly
+by site. Values in inches
+<br /><strong>alti:</strong> Pressure altimeter in inches
+<br /><strong>mslp:</strong> Sea Level Pressure in millibar
+<br /><strong>vsby:</strong> Visibility in miles
+<br /><strong>gust:</strong> Wind Gust in knots
+<br /><strong>skyc1:</strong> Sky Level 1 Coverage
+<br /><strong>skyc2:</strong> Sky Level 2 Coverage
+<br /><strong>skyc3:</strong> Sky Level 3 Coverage
+<br /><strong>skyc4:</strong> Sky Level 4 Coverage
+<br /><strong>skyl1:</strong> Sky Level 1 Altitude in feet
+<br /><strong>skyl2:</strong> Sky Level 2 Altitude in feet
+<br /><strong>skyl3:</strong> Sky Level 3 Altitude in feet
+<br /><strong>skyl4:</strong> Sky Level 4 Altitude in feet
+<br /><strong>metar:</strong> unprocessed reported observation in METAR format
+
+</td>
+<td>
 <P>Selected Station: <?php echo networkSelect($network, $station); ?>
 
 <br><br>
@@ -146,5 +171,5 @@ for all observations, the IEM continues to backfill this information.
 
 
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../include/footer.php"); ?>
 
