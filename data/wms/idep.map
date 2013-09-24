@@ -1382,4 +1382,44 @@ LAYER
     END # CLASS
 END # LAYER
 
+LAYER
+  NAME "iahuc8"
+  CONNECTION "user=nobody dbname=idep host=iemdb"
+  CONNECTIONTYPE POSTGIS
+  DATA "geom from ia_huc8 using srid=26915"
+  PROJECTION
+    "init=epsg:26915"
+  END # PROJECTION
+  STATUS ON
+  TYPE LINE
+  UNITS METERS
+  CLASS
+    STYLE
+      SYMBOL 0
+      SIZE 2.5
+      COLOR 110 110 110
+    END # STYLE
+  END # CLASS
+END # LAYER
+
+LAYER
+  NAME "iahuc12"
+  CONNECTION "user=nobody dbname=idep host=iemdb"
+  CONNECTIONTYPE POSTGIS
+  DATA "geom from ia_huc12 using srid=26915"
+  PROJECTION
+    "init=epsg:26915"
+  END # PROJECTION
+  STATUS ON
+  TYPE LINE
+  UNITS METERS
+  CLASS
+    STYLE
+      SYMBOL 0
+      SIZE 1.5
+      COLOR 180 180 180
+    END # STYLE
+  END # CLASS
+END # LAYER
+
 END
