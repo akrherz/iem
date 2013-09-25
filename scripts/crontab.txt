@@ -22,6 +22,7 @@ S=/mesonet/www/apps/iemwebsite/scripts
 10 * * * * cd $S; sh RUN_10_AFTER.sh 
 20 * * * * cd $S; sh RUN_20_AFTER.sh 
 40 * * * * cd $S; sh RUN_40_AFTER.sh 
+50 * * * * cd $S; sh RUN_50_AFTER.sh 
 59 * * * * cd $S; sh RUN_59_AFTER.sh 
 
 1 1,7 * * * cd $S; sh RUN_SUMMARY.sh
