@@ -1,30 +1,34 @@
 """
-Create a plot of today's total precipitation from the Stage4 estimates
+ Sum up the hourly precipitation from NCEP stage IV and produce maps
 """
 
 import pygrib
-import mx.DateTime
-import iemplot
-import numpy
-import os, sys
+import datetime
+from pyiem.plot import MapPlot
+import os
+import sys
+import pytz
+import numpy as np
 
 def doday(ts):
     """
     Create a plot of precipitation stage4 estimates for some day
+    
+    We should total files from 1 AM to midnight local time
     """
-    sts = ts + mx.DateTime.RelativeDateTime(hour=1, minute=0)
-    ets = ts + mx.DateTime.RelativeDateTime(hour=1, days=1, minute=0)
-    interval = mx.DateTime.RelativeDateTime(hours=1)
+    sts = ts.replace(hour=1)
+    ets = sts + datetime.timedelta(hours=24)
+    interval = datetime.timedelta(hours=1)
     now = sts
     total = None
     lts = None
     while now < ets:
-        fp = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib" % (
-            now.gmtime().strftime("%Y/%m/%d"), 
-            now.gmtime().strftime("%Y%m%d%H") )
-        if os.path.isfile(fp):
+        gmt = now.astimezone(pytz.timezone("UTC"))
+        fn = gmt.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/"
+                           +"stage4/ST4.%Y%m%d%H.01h.grib"))
+        if os.path.isfile(fn):
             lts = now
-            grbs = pygrib.open(fp)
+            grbs = pygrib.open(fn)
 
             if total is None:
                 g = grbs[1]
@@ -39,44 +43,46 @@ def doday(ts):
         print 'Missing StageIV data!'
     if lts is None:
         return
+    lts = lts - datetime.timedelta(minutes=1)
+    subtitle = "Total between 12:00 AM and %s" % (lts.strftime("%H:%M %p %Z"),)
+    for sector in ['iowa', 'midwest', 'conus']:
+        pqstr = "plot ac %s00 %s_stage4_1d.png %s_stage4_1d.png png" % (
+                ts.strftime("%Y%m%d%H"), sector, sector )
+        
+        m = MapPlot(sector=sector,
+                    title="%s NCEP Stage IV Today's Precipitation" % (
+                                                    ts.strftime("%-d %b %Y"),),
+                    subtitle=subtitle)
+            
+        clevs = np.arange(0,0.2,0.05)
+        clevs = np.append(clevs, np.arange(0.2, 1.0, 0.1))
+        clevs = np.append(clevs, np.arange(1.0, 5.0, 0.25))
+        clevs = np.append(clevs, np.arange(5.0, 10.0, 1.0))
+        clevs[0] = 0.01
     
-    # Now we dance
-    cfg = {
-     'wkColorMap': 'BlAqGrYeOrRe',
-     'nglSpreadColorStart': -1,
-     'nglSpreadColorEnd'  : 2,
-     '_MaskZero'          : True,
-      'cnLevelSelectionMode': "ExplicitLevels",
-      'cnLevels' : [0.01,0.1,0.25,0.5,1,2,3,5,8,9.9],
-     'lbTitleString'      : "[inch]",
-     '_valid'    : 'Total up to %s' % (
-        (lts - mx.DateTime.RelativeDateTime(minutes=1)).strftime("%d %B %Y %I:%M %p %Z"),),
-     '_title'    : "NCEP StageIV Today's Precipitation [inch]",
-    }
-
-    tmpfp = iemplot.simple_grid_fill(lons, lats, total / 25.4, cfg)
-    pqstr = "plot ac %s00 iowa_stage4_1d.png iowa_stage4_1d.png png" % (
-            ts.strftime("%Y%m%d%H"), )
-    iemplot.postprocess(tmpfp, pqstr)
+        m.pcolormesh(lons, lats, total / 24.5, clevs, units='inch')
     
-    # Midwest
-    cfg['_midwest'] = True
-    tmpfp = iemplot.simple_grid_fill(lons, lats, total / 25.4, cfg)
-    pqstr = "plot ac %s00 midwest_stage4_1d.png midwest_stage4_1d.png png" % (
-            ts.strftime("%Y%m%d%H"), )
-    iemplot.postprocess(tmpfp, pqstr)
-    del(cfg['_midwest'])
+        #map.drawstates(zorder=2)
+        if sector == 'iowa':
+            m.drawcounties()
+        m.postprocess(pqstr=pqstr)  
     
-    # CONUS
-    cfg['_conus'] = True
-    tmpfp = iemplot.simple_grid_fill(lons, lats, total / 25.4, cfg)
-    pqstr = "plot ac %s00 conus_stage4_1d.png conus_stage4_1d.png png" % (
-            ts.strftime("%Y%m%d%H"), )
-    iemplot.postprocess(tmpfp, pqstr)
-    del(cfg['_conus'])
     
 if __name__ == "__main__":
+    ''' Go Main Go 
+    
+    So the past hour's stage IV is available by about 50 after, so we should 
+    run for a day that is 90 minutes in the past by default
+    
+    '''
     if len(sys.argv) == 4:
-        doday(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
+        date = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
+                                 int(sys.argv[3]), 12, 0)
     else:
-        doday(mx.DateTime.now())
+        date = datetime.datetime.now()
+        date = date - datetime.timedelta(minutes=90)
+        date = date.replace(hour=12, minute=0, second=0, microsecond=0)
+    # Stupid pytz timezone dance
+    date = date.replace(tzinfo=pytz.timezone("UTC"))
+    date = date.astimezone(pytz.timezone("America/Chicago"))
+    doday(date)
