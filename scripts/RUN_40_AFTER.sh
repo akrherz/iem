@@ -3,26 +3,13 @@ MM6=$(date -u --date '6 hours ago' +'%m')
 DD6=$(date -u --date '6 hours ago' +'%d')
 HH6=$(date -u --date '6 hours ago' +'%H')
 
-cd dl
-python ncep_stage4.py
 
-cd ../sbw
+cd sbw
 python polygonMosaic.py S
 sleep 2
 python polygonMosaic.py T
 sleep 2
 python polygonMosaic.py W
-
-cd ../iemre
-python stage4_hourlyre.py
-python stage4_hourlyre.py `date -u --date '3 hours ago' +'%Y %m %d %H'`
-python stage4_hourlyre.py `date -u --date '1 day ago' +'%Y %m %d %H'`
-
-cd ../current
-python stage4_hourly.py
-python stage4_today_total.py
-python stage4_Xhour.py 24
-python stage4_Xhour.py 48
 
 cd ../qc
 python check_webcams.py
