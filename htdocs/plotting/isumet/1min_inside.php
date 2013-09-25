@@ -1,6 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
-include_once "$rootpath/include/mlib.php";
+include_once "../../../include/mlib.php";
 //  1 minute data plotter 
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -61,14 +61,14 @@ if ($station == null){
 }
 
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
 $graph->SetScale("datelin");
-$graph->SetY2Scale("lin",0,100);
+//$graph->SetY2Scale("lin",0,100);
 $graph->img->SetMargin(65,40,55,70);
 
 $graph->xaxis->SetLabelAngle(90);
@@ -83,8 +83,8 @@ $graph->legend->Pos(0.2,0.09);
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
 $graph->xaxis->SetLabelFormatString("h:i A", true);
-$graph->y2axis->SetTitle("Relative Humidity [%]");
-$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
+//$graph->y2axis->SetTitle("Relative Humidity [%]");
+//$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
 //$graph->yaxis->SetTitleMargin(48);
@@ -97,16 +97,18 @@ $graph->xaxis->SetTitleMargin(40);
 $lineplot=new LinePlot($tmpf, $valid);
 $lineplot->SetLegend("Temperature");
 $lineplot->SetColor("red");
+$lineplot->SetWeight(3.0);
 
 // Create the linear plot
 $lineplot2=new LinePlot($dwpf, $valid);
 $lineplot2->SetLegend("Dew Point");
-$lineplot2->SetColor("blue");
+$lineplot2->SetColor("green");
+$lineplot2->SetWeight(3.0);
 
 // Create the linear plot
-$lineplot3=new LinePlot($relh, $valid);
-$lineplot3->SetLegend("Rel Humid");
-$lineplot3->SetColor("black");
+//$lineplot3=new LinePlot($relh, $valid);
+//$lineplot3->SetLegend("Rel Humid");
+//$lineplot3->SetColor("black");
 
 // Box for error notations
 //[DMF]$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
@@ -119,7 +121,7 @@ $lineplot3->SetColor("black");
 
 $graph->Add($lineplot);
 $graph->Add($lineplot2);
-$graph->AddY2($lineplot3);
+//$graph->AddY2($lineplot3);
 $graph->Stroke();
 
 ?>

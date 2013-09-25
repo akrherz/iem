@@ -1,6 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
-include_once "$rootpath/include/mlib.php";
+include_once "../../../include/mlib.php";
 //  1 minute data plotter 
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -63,9 +63,9 @@ if ($station == null){
  	} // End of while
 }
 	
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
@@ -107,12 +107,13 @@ $graph->xaxis->SetPos("min");
 $lineplot=new LinePlot($tmpf, $valid);
 $lineplot->SetLegend("Temperature");
 $lineplot->SetColor("red");
+$lineplot->SetWeight(3.0);
 
 // Create the linear plot
 $lineplot2=new LinePlot($dwpf, $valid);
 $lineplot2->SetLegend("Dew Point");
 $lineplot2->SetColor("green");
-
+$lineplot2->SetWeight(3.0);
 
 // Create the linear plot
 $lineplot3=new LinePlot($relh, $valid);
