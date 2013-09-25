@@ -10,7 +10,7 @@ import sys
 import pytz
 import numpy as np
 
-def doday(ts):
+def doday(ts, realtime):
     """
     Create a plot of precipitation stage4 estimates for some day
     
@@ -45,8 +45,11 @@ def doday(ts):
         return
     lts = lts - datetime.timedelta(minutes=1)
     subtitle = "Total between 12:00 AM and %s" % (lts.strftime("%H:%M %p %Z"),)
+    routes = 'ac'
+    if not realtime:
+        routes = 'a'
     for sector in ['iowa', 'midwest', 'conus']:
-        pqstr = "plot ac %s00 %s_stage4_1d.png %s_stage4_1d.png png" % (
+        pqstr = "plot %s %s00 %s_stage4_1d.png %s_stage4_1d.png png" % (routes,
                 ts.strftime("%Y%m%d%H"), sector, sector )
         
         m = MapPlot(sector=sector,
@@ -78,11 +81,13 @@ if __name__ == "__main__":
     if len(sys.argv) == 4:
         date = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
                                  int(sys.argv[3]), 12, 0)
+        realtime = False
     else:
         date = datetime.datetime.now()
         date = date - datetime.timedelta(minutes=90)
         date = date.replace(hour=12, minute=0, second=0, microsecond=0)
+        realtime = True
     # Stupid pytz timezone dance
     date = date.replace(tzinfo=pytz.timezone("UTC"))
     date = date.astimezone(pytz.timezone("America/Chicago"))
-    doday(date)
+    doday(date, realtime)
