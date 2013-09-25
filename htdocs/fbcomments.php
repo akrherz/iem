@@ -5,7 +5,8 @@
  */
 $admin_email = 'akrherz@iastate.edu';
 
-$commentID = $_REQUEST['id_of_comment_object'];
+$commentID = isset($_REQUEST['id_of_comment_object']) ? 
+		$_REQUEST['id_of_comment_object']: die();
 $page_href = $_REQUEST['url_of_page_comment_leaved_on'];
 $message = "comment #{$commentID} was left on page {$page_href}";
 
