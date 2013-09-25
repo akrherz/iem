@@ -40,8 +40,6 @@ def doday(ts, realtime):
                     x0 = 3500
                     y0 = 1750
                 precip[y0:(y0+ysz),x0:(x0+xsz)] += val
-            else:
-                print 'Missing 1HRAD MRMS for q3_today_total', fn
         now += interval
     
     lastts = lastts - datetime.timedelta(minutes=1)
