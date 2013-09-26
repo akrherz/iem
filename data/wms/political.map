@@ -229,6 +229,7 @@ END
 #
 LAYER
   NAME "iawaterbody-900913"
+  GROUP "iahydrology-900913"
   STATUS ON
   DATA "iowa/IA_NHD_waterbody_general.shp"
   TYPE POLYGON
@@ -249,6 +250,7 @@ END
 #
 LAYER
   NAME "iahshd-900913"
+  GROUP "iahydrology-900913"
   STATUS ON
   DATA "/mesonet/data/gis/static/images/3857/iowa/hshd100m1.tif"
   TYPE RASTER
