@@ -203,4 +203,26 @@ LAYER
   END
 END
 
+#------------------------------------------------------
+#
+LAYER
+  NAME "iarivers-900913"
+  STATUS ON
+  DATA "iowa/IA_NHDplus_General.shp"
+  TYPE LINE
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "Iowa NHDplus Rivers"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
+    "wms_extent" "-110 30 -86 45"
+  END
+  CLASS
+    SYMBOL 0
+    COLOR 0 0 0
+    SIZE 3
+  END
+END
+
 END
