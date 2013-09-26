@@ -253,7 +253,7 @@ LAYER
     STYLE
       SYMBOL 0
       COLOR 0 0 255
-      WIDTH 2.5
+      WIDTH 1.0
 	END
   END
 END
