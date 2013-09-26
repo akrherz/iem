@@ -235,6 +235,7 @@ LAYER
   PROJECTION
     "init=epsg:3857"
   END
+  OFFSITE 0 0 0
   METADATA
     "wms_title" "Iowa HSHD"
     "wms_srs"   "EPSG:900913 EPSG:3857"
