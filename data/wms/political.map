@@ -225,4 +225,21 @@ LAYER
   END
 END
 
+#------------------------------------------------------
+#
+LAYER
+  NAME "iahshd-900913"
+  STATUS ON
+  DATA "/mesonet/data/gis/static/images/3857/iowa/hshd100m1.tif"
+  TYPE RASTER
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "Iowa HSHD"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
+    "wms_extent" "-110 30 -86 45"
+  END
+END
+
 END
