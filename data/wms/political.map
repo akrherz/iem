@@ -77,9 +77,39 @@ LAYER
     "wms_extent" "-126 24 -66 50"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 2
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 0
+      WIDTH 2.0
+    END
+  END
+END
+
+#------------------------------------------------------
+#
+LAYER
+  NAME "iac-900913"
+  STATUS ON
+  DATA "us/counties.shp"
+  TYPE LINE
+  MINSCALE 0
+  MAXSCALE 465000000
+  PROJECTION
+    "init=epsg:3857"
+  END
+  METADATA
+    "wms_title" "Iowa Counties"
+    "wms_srs"   "EPSG:900913 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END
+  CLASS
+    EXPRESSION ('[STATE]' eq 'IA)
+    STYLE
+      COLOR 0 0 0
+      WIDTH 2.0
+      LINECAP butt
+      PATTERN 10 5 5 10 END
+    END
   END
 END
 
@@ -220,9 +250,11 @@ LAYER
     "wms_extent" "-110 30 -86 45"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 3
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 255
+      WIDTH 2.5
+	END
   END
 END
 
