@@ -230,7 +230,7 @@ END
 LAYER
   NAME "iawaterbody-900913"
   STATUS ON
-  DATA "iowa/IA_NHD_waterbody_General.shp"
+  DATA "iowa/IA_NHD_waterbody_general.shp"
   TYPE POLYGON
   PROJECTION
     "init=epsg:3857"
