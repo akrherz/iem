@@ -207,6 +207,7 @@ END
 #
 LAYER
   NAME "iarivers-900913"
+  GROUP "iahydrology-900913"
   STATUS ON
   DATA "iowa/IA_NHDplus_General.shp"
   TYPE LINE
