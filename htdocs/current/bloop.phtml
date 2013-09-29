@@ -5,8 +5,8 @@ $java = isset($_GET["java"]) ? $_GET["java"] : 'applet';
 $cid = isset($_GET['cid']) ? $_GET['cid'] : 'KCCI-001';
 
 $THISPAGE = "webcam-loop";
-include("$rootpath/include/header.php"); 
-include("$rootpath/include/forms.php"); 
+include("../../include/header.php"); 
+include("../../include/forms.php"); 
 
 ?>
 
@@ -37,7 +37,7 @@ if ($nts > $szSwitch){
 
 $now = time();
 if ($nts < $cameras[$cid]["sts"] || $nts > $cameras[$cid]["ets"]){
-  echo "<p><div style=\"background: #ccc;\"><b>Error:</b> Your choice of time and station is outside of the archive available for this site!</div>\n";
+  echo "<p><div class=\"warning\"><b>Error:</b> Your choice of time and station is outside of the archive available for this site!</div>\n";
   $day = date("d", $cameras[$cid]["ets"] - 3600);
   $month = date("m", $cameras[$cid]["ets"] - 3600);
   $hour = date("H", $cameras[$cid]["ets"] - 3600);
@@ -181,4 +181,4 @@ while ( list($key, $value) = each($images) ){
 </div>
 
 <?php
-include("$rootpath/include/footer.php"); ?>
+include("../../include/footer.php"); ?>
