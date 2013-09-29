@@ -16,7 +16,8 @@ $cameras = Array();
 for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	$cameras[ $row["id"] ] = Array(
 			"sts" => strtotime($row["sts"]),
-			"ets" => strtotime(($row["ets"] === NULL) ? time(): $row["ets"]),
+			"ets" => ($row["ets"] === NULL) ? time() + 86400: 
+						strtotime($row["ets"]),
 			"name" => $row["name"],
 			"removed" => ($row["removed"] == 't'),
 			"active"=> ($row["online"] == 't'),
@@ -30,5 +31,5 @@ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 			"port"=>$row["port"],
 	);
 }
-$memcache->set("php/cameras.inc.php", $cameras, false, 86400);
+$memcache->set("php/cameras.inc.php", $cameras, false, 43200);
 ?>
