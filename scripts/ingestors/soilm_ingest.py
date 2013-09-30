@@ -82,9 +82,14 @@ import subprocess
 import tempfile
 
 # Third party
+from pyiem.observation import Observation
+from pyiem.datatypes import temperature
 import psycopg2
 ISUAG = psycopg2.connect(database='isuag',  host='iemdb')
 icursor = ISUAG.cursor()
+
+ACCESS = psycopg2.connect(database='iem', host='iemdb')
+accesstxn = ACCESS.cursor()
 
 BASE = '/mnt/home/mesonet/sm/'
 STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
@@ -125,6 +130,7 @@ def hourly_process(nwsli, maxts):
         valid = valid.replace(tzinfo=pytz.FixedOffset(-360))
         if valid <= maxts:
             break
+        maxts = valid
         # We are ready for dbinserting!
         dbcols = "station,valid," + ",".join(headers[2:])
         dbvals = "'%s','%s-06'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
@@ -132,6 +138,13 @@ def hourly_process(nwsli, maxts):
             dbvals += "%s," % (formatter(v),)
         sql = "INSERT into sm_hourly (%s) values (%s)" % (dbcols, dbvals[:-1])
         icursor.execute(sql)
+
+        # Update IEMAccess
+        ob = Observation(nwsli, 'ISUSM', 
+                         valid.astimezone(pytz.timezone("America/Chicago")))
+        ob.data['tmpf'] = temperature(
+                    float(tokens[headers.index('tair_c_avg')]), 'C').value('F')
+        ob.save(accesstxn)
 
 def formatter(v):
     """ Something to format things nicely for SQL"""
@@ -173,6 +186,14 @@ def daily_process(nwsli, maxts):
             dbvals += "%s," % (formatter(v),)
         sql = "INSERT into sm_daily (%s) values (%s)" % (dbcols, dbvals[:-1])
         icursor.execute(sql)
+
+        # Need a timezone
+        valid = datetime.datetime(valid.year, valid.month, valid.day, 12, 0)
+        valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"))
+        ob = Observation(nwsli, 'ISUSM', valid)
+        ob.data['max_tmpf'] = temperature(
+                    float(tokens[headers.index('tair_c_max')]), 'C').value('F')
+        ob.save(accesstxn)
 
 def get_max_timestamps(nwsli):
     """ Fetch out our max values """
@@ -257,6 +278,10 @@ def main():
     icursor.close()
     ISUAG.commit()
     ISUAG.close()
+    
+    accesstxn.close()
+    ACCESS.commit()
+    ACCESS.close()
     
 if __name__ == '__main__':
     main()
