@@ -28,15 +28,15 @@ CREATE TABLE sm_daily (
   PA_2 real,
   PA_3 real,
   T06_C_Avg real,
-  VMW_06_Avg real,
+  VWC_06_Avg real,
   ec06 real,
   pa06 real,
   pa12 real,
   pa24 real,
   pa50 real,
-  t107_1 real,
-  t107_2 real,
-  t107_3 real,
+  t107_1_avg real,
+  t107_2_avg real,
+  t107_3_avg real,
   battv_min real
 );
 CREATE UNIQUE index sm_daily_idx on sm_daily(station, valid);
@@ -75,7 +75,11 @@ CREATE TABLE sm_hourly (
   pa06 real,
   pa12 real,
   pa24 real,
-  pa50 real
+  pa50 real,
+  p06outofrange real,
+  p12outofrange real,
+  p24outofrange real,
+  p50outofrange real
 );
 CREATE UNIQUE index sm_hourly_idx on sm_hourly(station, valid);
 GRANT SELECT on sm_hourly to nobody;
