@@ -32,7 +32,7 @@ ccursor.execute("""
   """)
 
 out = open('wxdata.txt', 'w')
-out.write('YEAR,MONTH,DAY,RELH,TEMP,SNOW,PRECIP,HEAT,WINDCHILL,CLOUDY\n')
+out.write('YEAR,MONTH,DAY,AVGT,RELH,TEMP,SNOW,PRECIP,HEAT,WINDCHILL,CLOUDY\n')
 
 for row in ccursor:
     day = row[0]
@@ -49,11 +49,12 @@ for row in ccursor:
     for row2 in acursor:
         t = temperature(row2[1], 'F')
         td = temperature(row2[2], 'F')
-        relh.append( met.relh(t,td).value('%') )
-        tmpf.append( row2[1] )
+
         
-        if met.heatindex(t, td) > 90:
+        if met.heatindex(t, td).value('F') > 90:
             heat = 'Y'
+            if t.value('F') < 50:
+                print t.value('F'), td.value('F'), met.heatindex(t, td).value('F')
         if row2[1] < 32 and row2[3] > 10:
             windchill = 'Y' #approx
         
@@ -65,6 +66,8 @@ for row in ccursor:
         elif 'FEW' in [row2[4], row2[5], row2[6]]:
             sky = 'Fair Skies'
         if row2[0].hour > 7 and row2[0].hour < 18:
+            relh.append( met.relh(t,td).value('%') )
+            tmpf.append( row2[1] )
             if sky in ['Overcast', 'Broken']:
                 clcount += 1
 
@@ -89,8 +92,9 @@ for row in ccursor:
     if row[1] > 0:
         precip = "Y"
 
-    out.write("%s,%s,%s,%.1f,%s,%s,%s,%s,%s,%s\n" % (day.year, day.month, day.day, avgrelh,
-                                      T, snow, precip, heat, windchill, cloudy))
+    out.write("%s,%s,%s,%.1f,%.1f,%s,%s,%s,%s,%s,%s\n" % (day.year, day.month, 
+                                    day.day, avgtmpf, avgrelh,
+                                    T, snow, precip, heat, windchill, cloudy))
 
 out.close()
 
