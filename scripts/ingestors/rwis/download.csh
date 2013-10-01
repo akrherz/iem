@@ -3,7 +3,7 @@
 # Assign variables to download the data to
 set INCOMING="/mesonet/data/incoming/rwis/"
 set ARCHIVE="/mesonet/ARCHIVE/raw/rwis/"
-set FTPPASS="`cat /home/mesonet/rwis_ftp_password.txt`"
+set FTPPASS="`python get_rwis_ftp_password.py`"
 
 set LOCAL_FILE="${INCOMING}/rwis.txt"
 set LOCAL_FILE2="${INCOMING}/rwis_sf.txt"

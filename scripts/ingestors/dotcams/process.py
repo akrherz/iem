@@ -6,18 +6,22 @@
                   ViewID
                      GMT Timestamp....
 """
-import sys
-FTP_PASS = open('/home/mesonet/rwis_ftp_password.txt', 'r').read().strip()
 
 import os, mx.DateTime, glob, re
 from PIL import Image, ImageDraw, ImageFont
 font = ImageFont.truetype('veramono.ttf', 10)
 import subprocess
-import iemdb
+import psycopg2
 import mesonet
 import psycopg2.extras
-MESOSITE = iemdb.connect('mesosite')
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+mcursor.execute("""SELECT propvalue from properties 
+    where propname = 'rwis_ftp_password'""")
+row = mcursor.fetchone()
+FTP_PASS = row['propvalue']
+
 gmt = mx.DateTime.gmt()
 
 # we work from here
