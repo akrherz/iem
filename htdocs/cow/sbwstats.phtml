@@ -1,13 +1,15 @@
 <?php
 include("../../config/settings.inc.php");
+define("IEM_APPID", 149);
 $TITLE = "IEM | Storm Based Warning Stats";
 $THISPAGE = "severe-cow";
-include("$rootpath/include/forms.php");
-include("$rootpath/include/wfoLocs.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/forms.php");
+include("../../include/wfoLocs.php");
+include("../../include/database.inc.php");
 $postgis = iemdb("postgis");
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time()-86400);
+$syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y", time()-86400);
+$eyear = isset($_GET["eyear"]) ? $_GET["eyear"] : date("Y", time()-86400);
 $smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m", time()-86400);
 $sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d", time()-86400);
 $shour = isset($_GET["shour"]) ? $_GET["shour"] : 0;
@@ -15,16 +17,18 @@ $emonth = isset($_GET["emonth"]) ? $_GET["emonth"] : date("m");
 $eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d");
 $ehour = isset($_GET["ehour"]) ? $_GET["ehour"] : 0;
 $sortby = isset($_GET["sortby"]) ? $_GET["sortby"] : "wfo";
-$sts = mktime($shour,0,0,$smonth, $sday, $year);
-$ets = mktime($ehour,0,0,$emonth, $eday, $year);
-$gis_url = sprintf("http://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?year=%s&month1=%s&day1=%s&hour1=%s&minute1=0&month2=%s&day2=%s&hour2=%s&minute2=0",  date("Y", $sts), date("m", $sts),date("d", $sts), date("H", $sts), date("m", $ets), date("d", $ets), date("H", $ets) );
+$sts = mktime($shour,0,0,$smonth, $sday, $syear);
+$ets = mktime($ehour,0,0,$emonth, $eday, $eyear);
+$gis_url = sprintf("/cgi-bin/request/gis/watchwarn.py?limit1=yes&year1=%s&month1=%s&day1=%s&hour1=%s&minute1=0&year2=%s&month2=%s&day2=%s&hour2=%s&minute2=0",  
+		  date("Y", $sts), date("m", $sts),date("d", $sts), date("H", $sts), 
+		  date("Y", $ets), date("m", $ets), date("d", $ets), date("H", $ets) );
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT wfo, phenomena, count(*),
   sum( st_area2d( transform(geom,2163) ) ) as sum_polysize,
   avg( st_area2d( transform(geom,2163) ) ) as avg_polysize,
   sum( st_perimeter( transform(geom,2163) ) ) as sum_perimsize,
   avg( st_perimeter( transform(geom,2163) ) ) as avg_perimsize
-  from warnings_$year WHERE gtype = 'P' and 
+  from warnings WHERE gtype = 'P' and 
   phenomena IN ('SV','TO','MA','FF','FA') and significance = 'W'
   and issue BETWEEN $1 and $2 GROUP by wfo, phenomena ORDER by $sortby ASC");
 
@@ -73,15 +77,36 @@ $table = "
 </tr>
 ";
 reset($sorted);
+$totals = Array(
+	"TO_cnt" => 0, "TO_perim" => 0, "TO_area" => 0,
+	"SV_cnt" => 0, "SV_perim" => 0, "SV_area" => 0,
+	"MA_cnt" => 0, "MA_perim" => 0, "MA_area" => 0,
+	"FF_cnt" => 0, "FF_perim" => 0, "FF_area" => 0,	
+	"FA_cnt" => 0, "FA_perim" => 0, "FA_area" => 0,	
+);
+$phenoms = Array("TO", "SV", "MA", "FF", "FA");
 while( list($v,$wfo) = each($sorted) )
 {
-  $cnt = @$data[$wfo]["TO_cnt"] + @$data[$wfo]["SV_cnt"] +@$data[$wfo]["FA_cnt"] +@$data[$wfo]["FF_cnt"] ;
+	reset($phenoms);
+	while( list($idx, $phenom) = each($phenoms)){
+		$totals["${phenom}_cnt"] += @$data[$wfo]["${phenom}_cnt"];
+		$totals["${phenom}_perim"] += @$data[$wfo]["${phenom}_sum_perimsize"];
+		$totals["${phenom}_area"] += @$data[$wfo]["${phenom}_sum_polysize"];
+	}
+	
+  $cnt = @$data[$wfo]["TO_cnt"] + 
+  		@$data[$wfo]["SV_cnt"] +
+  		@$data[$wfo]["MA_cnt"] +
+  		@$data[$wfo]["FA_cnt"] +
+  		@$data[$wfo]["FF_cnt"] ;
   $perim = @$data[$wfo]["TO_sum_perimsize"] + 
            @$data[$wfo]["SV_sum_perimsize"] +
+           @$data[$wfo]["MA_sum_perimsize"] +
            @$data[$wfo]["FA_sum_perimsize"] +
            @$data[$wfo]["FF_sum_perimsize"] ;
   $poly = @$data[$wfo]["TO_sum_polysize"] + 
            @$data[$wfo]["SV_sum_polysize"] +
+           @$data[$wfo]["MA_sum_polysize"] +
            @$data[$wfo]["FA_sum_polysize"] +
            @$data[$wfo]["FF_sum_polysize"] ;
   $table .= @sprintf("<tr><td>%s</td><td>%s</td>
@@ -93,47 +118,85 @@ while( list($v,$wfo) = each($sorted) )
          <td class='fa'>%s</td><td class='fa'>%.1f</td><td class='fa'>%.1f</td>
           </tr>", $wfo, $wfos[$wfo]['city'], 
           $cnt, $perim/$cnt/1000.0, $poly/$cnt/1000000.0,
-$data[$wfo]["TO_cnt"], 
-$data[$wfo]["TO_sum_perimsize"]/$data[$wfo]["TO_cnt"]/1000.0,
-$data[$wfo]["TO_sum_polysize"]/$data[$wfo]["TO_cnt"]/1000000.0,
-$data[$wfo]["SV_cnt"], 
-$data[$wfo]["SV_sum_perimsize"]/$data[$wfo]["SV_cnt"]/1000.0,
-$data[$wfo]["SV_sum_polysize"]/$data[$wfo]["SV_cnt"]/1000000.0,
-$data[$wfo]["MA_cnt"], 
-$data[$wfo]["MA_sum_perimsize"]/$data[$wfo]["MA_cnt"]/1000.0,
-$data[$wfo]["MA_sum_polysize"]/$data[$wfo]["MA_cnt"]/1000000.0,
-$data[$wfo]["FF_cnt"], 
-$data[$wfo]["FF_sum_perimsize"]/$data[$wfo]["FF_cnt"]/1000.0,
-$data[$wfo]["FF_sum_polysize"]/$data[$wfo]["FF_cnt"]/1000000.0,
-$data[$wfo]["FA_cnt"], 
-$data[$wfo]["FA_sum_perimsize"]/$data[$wfo]["FA_cnt"]/1000.0,
-$data[$wfo]["FA_sum_polysize"]/$data[$wfo]["FA_cnt"]/1000000.0
-);
+	$data[$wfo]["TO_cnt"], 
+	$data[$wfo]["TO_sum_perimsize"]/$data[$wfo]["TO_cnt"]/1000.0,
+	$data[$wfo]["TO_sum_polysize"]/$data[$wfo]["TO_cnt"]/1000000.0,
+	$data[$wfo]["SV_cnt"], 
+	$data[$wfo]["SV_sum_perimsize"]/$data[$wfo]["SV_cnt"]/1000.0,
+	$data[$wfo]["SV_sum_polysize"]/$data[$wfo]["SV_cnt"]/1000000.0,
+	$data[$wfo]["MA_cnt"], 
+	$data[$wfo]["MA_sum_perimsize"]/$data[$wfo]["MA_cnt"]/1000.0,
+	$data[$wfo]["MA_sum_polysize"]/$data[$wfo]["MA_cnt"]/1000000.0,
+	$data[$wfo]["FF_cnt"], 
+	$data[$wfo]["FF_sum_perimsize"]/$data[$wfo]["FF_cnt"]/1000.0,
+	$data[$wfo]["FF_sum_polysize"]/$data[$wfo]["FF_cnt"]/1000000.0,
+	$data[$wfo]["FA_cnt"], 
+	$data[$wfo]["FA_sum_perimsize"]/$data[$wfo]["FA_cnt"]/1000.0,
+	$data[$wfo]["FA_sum_polysize"]/$data[$wfo]["FA_cnt"]/1000000.0
+	);
 }
+
+$tcount = $totals["TO_cnt"] + $totals["SV_cnt"] + $totals["MA_cnt"] + $totals["FF_cnt"] + $totals["FA_cnt"];
+$tpoly = $totals["TO_area"] + $totals["SV_area"] + $totals["MA_area"] + $totals["FF_area"] + $totals["FA_area"];
+$tperim = $totals["TO_perim"] + $totals["SV_perim"] + $totals["MA_perim"] + $totals["FF_perim"] + $totals["FA_perim"];
+
+$table .= @sprintf("<tr><th> </th><th>Total/Averages</th>
+         <th>%s</th><th>%.1f</th><th>%.1f</th>
+         <th class='to'>%s</th><th class='to'>%.1f</th><th class='to'>%.1f</th>
+         <th class='sv'>%s</th><th class='sv'>%.1f</th><th class='sv'>%.1f</th>
+         <th class='ma'>%s</th><th class='ma'>%.1f</th><th class='ma'>%.1f</th>
+         <th class='ff'>%s</th><th class='ff'>%.1f</th><th class='ff'>%.1f</th>
+         <th class='fa'>%s</th><th class='fa'>%.1f</th><th class='fa'>%.1f</th>
+          </tr>",
+
+		$tcount, $tperim/$tcount/1000.0, $tpoly/$tcount/1000000.0,
+		$totals["TO_cnt"],
+		$totals["TO_perim"]/$totals["TO_cnt"]/1000.0,
+		$totals["TO_area"]/$totals["TO_cnt"]/1000000.0,
+		$totals["SV_cnt"],
+		$totals["SV_perim"]/$totals["SV_cnt"]/1000.0,
+		$totals["SV_area"]/$totals["SV_cnt"]/1000000.0,
+		$totals["MA_cnt"],
+		$totals["MA_perim"]/$totals["MA_cnt"]/1000.0,
+		$totals["MA_area"]/$totals["MA_cnt"]/1000000.0,
+		$totals["FF_cnt"],
+		$totals["FF_perim"]/$totals["FF_cnt"]/1000.0,
+		$totals["FF_area"]/$totals["FF_cnt"]/1000000.0,
+		$totals["FA_cnt"],
+		$totals["FA_perim"]/$totals["FA_cnt"]/1000.0,
+		$totals["FA_area"]/$totals["FA_cnt"]/1000000.0
+);
+
 $table .= "</table>";
 
 /* BEGIN OUTPUT! */
-include("$rootpath/include/header.php"); 
+include("../../include/header.php"); 
 ?>
 <h3 class="heading">Storm Based Warning Geometry Statistics</h3>
-
+<div style="width: 800px;">
 <p>Pick a time period of your choice and get back a summary table of
 storm based warning polygon statistics. You should be able to highlight 
-this table and paste it into Excel, if you wish.
+this table and paste it into Excel, if you wish.  Please note that prior to
+formal implementation of Storm Based Warnings, the polygons were not the official 
+warning and so their shape may not have been accurately representing the threat.
+<br /><strong>Note:</strong>  Areal flood warning polygons have only been issued
+since summer of 2007.
 <br /><strong>Perimeter values are in kilometers and area values in square kilometers.</strong>
 <br /><b>Links:</b> <a href="<?php echo $gis_url; ?>">Download shapefile of these warnings</a> - <a href="sbwsum.phtml">View visual summaries</a></p>
+</div>
 
 <?php
 echo "<form method=\"GET\">
 <table border=\"1\" cellpadding=\"3\" cellspacing='0'>
  <tr><td></td><th>Year</th><th>Month</th><th>Day</th><th>Hour</th><td></td></tr>
  <tr><td>Start:</td>
-  <td rowspan=\"2\">". yearSelect(2005, $year) ."</td>
+  <td>";  yearSelect2(2002, $syear, "syear"); echo "</td>
   <td>". monthSelect($smonth, "smonth") ."</td>
   <td>". daySelect2($sday, "sday") ."</td>
   <td>". hour24Select($shour, "shour") ."</td>
   <td rowspan='2'><input type='submit' value='Generate Stats'></td>
  <tr><td>End:</td>
+  <td>"; yearSelect2(2002, $eyear, "eyear"); echo "</td>
   <td>". monthSelect($emonth, "emonth") ."</td>
   <td>". daySelect2($eday, "eday") ."</td>
   <td>". hour24Select($ehour, "ehour") ."</td>
@@ -144,4 +207,5 @@ echo "<form method=\"GET\">
 
 echo $table;
 
-include("$rootpath/include/footer.php"); ?>
+include("../../include/footer.php"); 
+?>
