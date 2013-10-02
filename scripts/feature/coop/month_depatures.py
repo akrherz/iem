@@ -62,7 +62,7 @@ ax2.plot(numpy.arange(0, len(elnino)), elnino, zorder=2, color='k', lw=2.0)
 ax2.set_ylabel("El Nino 3.4 Index (line)")
 
 ax.set_ylabel("Precip Departure [inch] (bars)")
-ax.set_xlabel("* Thru 28 May 2013")
+#ax.set_xlabel("* Thru 28 May 2013")
 ax.grid(True)
 ax.set_xticks( xticks )
 ax.set_xticklabels( xticklabels )
@@ -75,6 +75,6 @@ for i in range(0,12):
     print i, numpy.corrcoef(diff[i:-2], elnino[:-(i+1)])[0,1]
 #ax.scatter(diff[2:], elnino[:-1])
 """
-fig.savefig('test.svg')
+fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')
