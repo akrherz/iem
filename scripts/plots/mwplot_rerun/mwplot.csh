@@ -7,6 +7,7 @@ set dd="$3"
 set date=${YYYY}${mm}${dd}
 set hh="$4"
 set timestamp="$1$2$3/${4}00"
+set ldmstamp="$1$2$3${4}00"
 
 set DEVICE="GF|MWmesonet.gif|900;700"
 set AREA="37;-104;48.5;-86"
@@ -116,5 +117,5 @@ EOF
 ${GEMEXE}/gpend
 
 if (-e MWmesonet.gif) then
-  /home/ldm/bin/pqinsert -p "plot a $timestamp MWmesonet.gif MWmesonet_${hh}00.gif gif" MWmesonet.gif
+  /home/ldm/bin/pqinsert -p "plot a $ldmstamp MWmesonet.gif MWmesonet_${hh}00.gif gif" MWmesonet.gif
 endif

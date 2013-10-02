@@ -7,6 +7,7 @@ $Id: $:
 import mx.DateTime
 import subprocess
 import iemdb
+import os
 ASOS = iemdb.connect('asos', bypass=True)
 acursor = ASOS.cursor()
 
@@ -36,6 +37,8 @@ def process_metar( now ):
     """
     Generate the GEMPAK file!
     """
+    if os.path.isfile('metar.gem'):
+        os.unlink('metar.gem')
     cmd = "cat metar.txt | dcmetr -c %s metar.gem" % (
                                         now.strftime("%Y%m%d/%H%M"),)
     subprocess.call(cmd, shell=True)
@@ -48,8 +51,8 @@ def generate_image( now ):
                                         now.strftime("%Y %m %d %H %M"),)
     subprocess.call(cmd, shell=True)
 
-sts = mx.DateTime.DateTime(1955,5,14,21)
-ets = mx.DateTime.DateTime(1955,5,14,22)
+sts = mx.DateTime.DateTime(1966,10,14,18)
+ets = mx.DateTime.DateTime(1966,10,14,19)
 interval = mx.DateTime.RelativeDateTime(hours=1)
 
 now = sts
