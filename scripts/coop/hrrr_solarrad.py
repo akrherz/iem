@@ -78,7 +78,13 @@ def run( ts ):
     
 
 if __name__ == '__main__':
-    if len(sys.argv) == 3:
+    ''' run main() run '''
+    if len(sys.argv) == 4:
+        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
+                                int(sys.argv[3]))
+        run( sts )
+    
+    elif len(sys.argv) == 3:
         # Run for a given month!
         sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1)
         # run for last date of previous month as well
