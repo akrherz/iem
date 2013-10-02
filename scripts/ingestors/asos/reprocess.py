@@ -4,9 +4,9 @@
  if there are any differences.
 
 Arguments
-    python wunder_ingest.py --network=IA_ASOS 1978 1979
-    python wunder_ingest.py --station=AMW 1978 1979
-    python wunder_ingest.py --monthdate=200003
+    python reprocess.py --network=IA_ASOS 1978 1979
+    python reprocess.py --station=AMW 1978 1979
+    python reprocess.py --monthdate=200003
 
 """
 import urllib2
