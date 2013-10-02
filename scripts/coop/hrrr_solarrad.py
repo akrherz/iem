@@ -81,13 +81,17 @@ if __name__ == '__main__':
     ''' run main() run '''
     if len(sys.argv) == 4:
         sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
-                                int(sys.argv[3]))
+                                int(sys.argv[3]), 12, 0)
+        sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+        sts = sts.astimezone(pytz.timezone("America/Chicago"))
         run( sts )
     
     elif len(sys.argv) == 3:
         # Run for a given month!
-        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1)
+        sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 1, 12, 0)
         # run for last date of previous month as well
+        sts = sts.replace(tzinfo=pytz.timezone("UTC"))
+        sts = sts.astimezone(pytz.timezone("America/Chicago"))
         sts = sts - datetime.timedelta(days=1)
         ets = sts + datetime.timedelta(days=45)
         ets = ets.replace(day=1)
