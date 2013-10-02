@@ -1,9 +1,9 @@
 <?php
 include("../../../config/settings.inc.php");
 $network = isset($_GET['network']) ? $_GET["network"] : 'IA_COOP';
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
  $connection = iemdb("iem");
-include("$rootpath/include/network.php");
+include("../../../include/network.php");
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
@@ -57,7 +57,7 @@ $d = Array("space" => " ", "comma" => "," , "tab" => "\t");
 
 $sqlStr = "SELECT s.*,t.id, day from summary s JOIN stations t on (t.iemid = s.iemid)";
 $sqlStr .= " WHERE day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ";
-$sqlStr .= " and id IN ". $stationString ." ORDER by s.day ASC";
+$sqlStr .= " and id IN ". $stationString ." and network = '$network' ORDER by s.day ASC";
 
 if ($what == "download"){
  header("Content-type: application/octet-stream");
@@ -77,7 +77,8 @@ function cleaner($v){
 }
 
  /* Load data into an array, yucky... */
- $data = "nwsli,date,high_F,low_F,precip_inch,snow_inch,snowd_inch\n";
+ $data = sprintf("nwsli%sdate%shigh_F%slow_F%sprecip_inch%ssnow_inch%ssnowd_inch\n",
+ 	$d[$delim],$d[$delim],$d[$delim],$d[$delim],$d[$delim],$d[$delim]);
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
    $data .= sprintf("%s%s%s%s%s%s%s%s%s%s%s%s%s\n", $row["id"],$d[$delim], $row["day"],
