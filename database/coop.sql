@@ -1,7 +1,3 @@
---- $ createdb coop
---- $ psql -f /usr/pgsql-9.0/share/contrib/postgis-1.5/postgis.sql coop
---- $ psql -f /usr/pgsql-9.0/share/contrib/postgis-1.5/spatial_ref_sys.sql coop
-
 ---
 --- Quickstats table
 ---
@@ -68,19 +64,109 @@ CREATE TABLE alldata(
   );
 GRANT select on alldata to nobody,apache;
 
-CREATE TABLE alldata_ia() inherits (alldata);
-CREATE TABLE alldata_il() inherits (alldata);
-CREATE TABLE alldata_wi() inherits (alldata);
-CREATE TABLE alldata_mn() inherits (alldata);
-CREATE TABLE alldata_nd() inherits (alldata);
-CREATE TABLE alldata_sd() inherits (alldata);
-CREATE TABLE alldata_ne() inherits (alldata);
-CREATE TABLE alldata_ks() inherits (alldata);
-CREATE TABLE alldata_ky() inherits (alldata);
-CREATE TABLE alldata_in() inherits (alldata);
-CREATE TABLE alldata_oh() inherits (alldata);
-CREATE TABLE alldata_mi() inherits (alldata);
-CREATE TABLE alldata_mo() inherits (alldata);
+ CREATE TABLE alldata_ak() inherits (alldata); 
+ GRANT SELECT on alldata_ak to nobody,apache;
+ CREATE TABLE alldata_al() inherits (alldata); 
+ GRANT SELECT on alldata_al to nobody,apache;
+ CREATE TABLE alldata_ar() inherits (alldata); 
+ GRANT SELECT on alldata_ar to nobody,apache;
+ CREATE TABLE alldata_az() inherits (alldata); 
+ GRANT SELECT on alldata_az to nobody,apache;
+ CREATE TABLE alldata_ca() inherits (alldata); 
+ GRANT SELECT on alldata_ca to nobody,apache;
+ CREATE TABLE alldata_co() inherits (alldata); 
+ GRANT SELECT on alldata_co to nobody,apache;
+ CREATE TABLE alldata_ct() inherits (alldata); 
+ GRANT SELECT on alldata_ct to nobody,apache;
+ CREATE TABLE alldata_dc() inherits (alldata); 
+ GRANT SELECT on alldata_dc to nobody,apache;
+ CREATE TABLE alldata_de() inherits (alldata); 
+ GRANT SELECT on alldata_de to nobody,apache;
+ CREATE TABLE alldata_fl() inherits (alldata); 
+ GRANT SELECT on alldata_fl to nobody,apache;
+ CREATE TABLE alldata_ga() inherits (alldata); 
+ GRANT SELECT on alldata_ga to nobody,apache;
+ CREATE TABLE alldata_hi() inherits (alldata); 
+ GRANT SELECT on alldata_hi to nobody,apache;
+ CREATE TABLE alldata_ia() inherits (alldata); 
+ GRANT SELECT on alldata_ia to nobody,apache;
+ CREATE TABLE alldata_id() inherits (alldata); 
+ GRANT SELECT on alldata_id to nobody,apache;
+ CREATE TABLE alldata_il() inherits (alldata); 
+ GRANT SELECT on alldata_il to nobody,apache;
+ CREATE TABLE alldata_in() inherits (alldata); 
+ GRANT SELECT on alldata_in to nobody,apache;
+ CREATE TABLE alldata_ks() inherits (alldata); 
+ GRANT SELECT on alldata_ks to nobody,apache;
+ CREATE TABLE alldata_ky() inherits (alldata); 
+ GRANT SELECT on alldata_ky to nobody,apache;
+ CREATE TABLE alldata_la() inherits (alldata); 
+ GRANT SELECT on alldata_la to nobody,apache;
+ CREATE TABLE alldata_ma() inherits (alldata); 
+ GRANT SELECT on alldata_ma to nobody,apache;
+ CREATE TABLE alldata_md() inherits (alldata); 
+ GRANT SELECT on alldata_md to nobody,apache;
+ CREATE TABLE alldata_me() inherits (alldata); 
+ GRANT SELECT on alldata_me to nobody,apache;
+ CREATE TABLE alldata_mi() inherits (alldata); 
+ GRANT SELECT on alldata_mi to nobody,apache;
+ CREATE TABLE alldata_mn() inherits (alldata); 
+ GRANT SELECT on alldata_mn to nobody,apache;
+ CREATE TABLE alldata_mo() inherits (alldata); 
+ GRANT SELECT on alldata_mo to nobody,apache;
+ CREATE TABLE alldata_ms() inherits (alldata); 
+ GRANT SELECT on alldata_ms to nobody,apache;
+ CREATE TABLE alldata_mt() inherits (alldata); 
+ GRANT SELECT on alldata_mt to nobody,apache;
+ CREATE TABLE alldata_nc() inherits (alldata); 
+ GRANT SELECT on alldata_nc to nobody,apache;
+ CREATE TABLE alldata_nd() inherits (alldata); 
+ GRANT SELECT on alldata_nd to nobody,apache;
+ CREATE TABLE alldata_ne() inherits (alldata); 
+ GRANT SELECT on alldata_ne to nobody,apache;
+ CREATE TABLE alldata_nh() inherits (alldata); 
+ GRANT SELECT on alldata_nh to nobody,apache;
+ CREATE TABLE alldata_nj() inherits (alldata); 
+ GRANT SELECT on alldata_nj to nobody,apache;
+ CREATE TABLE alldata_nm() inherits (alldata); 
+ GRANT SELECT on alldata_nm to nobody,apache;
+ CREATE TABLE alldata_nv() inherits (alldata); 
+ GRANT SELECT on alldata_nv to nobody,apache;
+ CREATE TABLE alldata_ny() inherits (alldata); 
+ GRANT SELECT on alldata_ny to nobody,apache;
+ CREATE TABLE alldata_oh() inherits (alldata); 
+ GRANT SELECT on alldata_oh to nobody,apache;
+ CREATE TABLE alldata_ok() inherits (alldata); 
+ GRANT SELECT on alldata_ok to nobody,apache;
+ CREATE TABLE alldata_or() inherits (alldata); 
+ GRANT SELECT on alldata_or to nobody,apache;
+ CREATE TABLE alldata_pa() inherits (alldata); 
+ GRANT SELECT on alldata_pa to nobody,apache;
+ CREATE TABLE alldata_ri() inherits (alldata); 
+ GRANT SELECT on alldata_ri to nobody,apache;
+ CREATE TABLE alldata_sc() inherits (alldata); 
+ GRANT SELECT on alldata_sc to nobody,apache;
+ CREATE TABLE alldata_sd() inherits (alldata); 
+ GRANT SELECT on alldata_sd to nobody,apache;
+ CREATE TABLE alldata_tn() inherits (alldata); 
+ GRANT SELECT on alldata_tn to nobody,apache;
+ CREATE TABLE alldata_tx() inherits (alldata); 
+ GRANT SELECT on alldata_tx to nobody,apache;
+ CREATE TABLE alldata_ut() inherits (alldata); 
+ GRANT SELECT on alldata_ut to nobody,apache;
+ CREATE TABLE alldata_va() inherits (alldata); 
+ GRANT SELECT on alldata_va to nobody,apache;
+ CREATE TABLE alldata_vt() inherits (alldata); 
+ GRANT SELECT on alldata_vt to nobody,apache;
+ CREATE TABLE alldata_wa() inherits (alldata); 
+ GRANT SELECT on alldata_wa to nobody,apache;
+ CREATE TABLE alldata_wi() inherits (alldata); 
+ GRANT SELECT on alldata_wi to nobody,apache;
+ CREATE TABLE alldata_wv() inherits (alldata); 
+ GRANT SELECT on alldata_wv to nobody,apache;
+ CREATE TABLE alldata_wy() inherits (alldata); 
+ GRANT SELECT on alldata_wy to nobody,apache;
+
 
 CREATE TABLE alldata_estimates(
   station char(6),
