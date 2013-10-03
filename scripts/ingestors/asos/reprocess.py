@@ -19,11 +19,12 @@ import subprocess
 import pytz
 from optparse import OptionParser
 from metar import Metar
-import iemdb
-ASOS = iemdb.connect('asos')
+import psycopg2
+ASOS = psycopg2.connect(database='asos', host='iemdb')
 acursor = ASOS.cursor()
 
 class OB(object):
+    ''' hacky representation of the database schema '''
     station = None
     valid = None
     tmpf = None
@@ -93,7 +94,8 @@ def workflow():
     # Set the show metar option
     cj = cookielib.CookieJar()
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-    opener.open("http://www.wunderground.com/cgi-bin/findweather/getForecast?setpref=SHOWMETAR&value=1").read()
+    opener.open(("http://www.wunderground.com/cgi-bin/findweather/"
+                 +"getForecast?setpref=SHOWMETAR&value=1")).read()
 
     # Iterate 
     for station in stations:
@@ -124,31 +126,32 @@ def process_rawtext(yyyymm):
         p = subprocess.Popen(["zcat", fn], stdout = subprocess.PIPE)
         data = p.communicate()[0]
         for product in data.split("\003"):
-                tokens = product.split("=")
-                for metar in tokens:
-                    # Dump METARs that have NIL in them
-                    if metar.find(" NIL") > -1:
-                        continue
-                    elif metar.find("METAR") > -1:
-                        metar = metar[metar.find("METAR")+5:]
-                    elif metar.find("LWIS ") > -1:
-                        metar = metar[metar.find("LWIS ")+5:]
-                    elif metar.find("SPECI") > -1:
-                        metar = metar[metar.find("SPECI")+5:]
-                    metar = " ".join( metar.replace("\r\r\n"," ").strip().split() )
-                    if len(metar.strip()) < 13:
-                        continue
-                    station = metar[:4]
-                    tm = metar[5:11]
-                    if metar[11] != 'Z':
-                        continue
-                    if not stdata.has_key(station):
-                        stdata[station] = {}
-                    if not stdata[station].has_key(tm):
+            tokens = product.split("=")
+            for metar in tokens:
+                # Dump METARs that have NIL in them
+                if metar.find(" NIL") > -1:
+                    continue
+                elif metar.find("METAR") > -1:
+                    metar = metar[metar.find("METAR")+5:]
+                elif metar.find("LWIS ") > -1:
+                    metar = metar[metar.find("LWIS ")+5:]
+                elif metar.find("SPECI") > -1:
+                    metar = metar[metar.find("SPECI")+5:]
+                metar = " ".join( 
+                            metar.replace("\r\r\n"," ").strip().split() )
+                if len(metar.strip()) < 13:
+                    continue
+                station = metar[:4]
+                tm = metar[5:11]
+                if metar[11] != 'Z':
+                    continue
+                if not stdata.has_key(station):
+                    stdata[station] = {}
+                if not stdata[station].has_key(tm):
+                    stdata[station][tm] = metar
+                else:
+                    if len(metar) > len(stdata[station][tm]):
                         stdata[station][tm] = metar
-                    else:
-                        if len(metar) > len(stdata[station][tm]):
-                            stdata[station][tm] = metar
         now += interval
         
     for station in stdata.keys():
@@ -188,6 +191,7 @@ def clear_data(station, sts, ets):
     acursor.execute("""DELETE from alldata WHERE station = %s and
     valid BETWEEN %s and %s""", (station, sts, 
                                  (ets + datetime.timedelta(days=1))))
+    print 'Removed %s rows for station %s' % (acursor.rowcount, station)
     ASOS.commit()
 
 def doit(opener, station, now):
@@ -211,7 +215,10 @@ def doit(opener, station, now):
         if len(data) < 140:
             usedcache = False
     if not usedcache:
-        url = "http://www.wunderground.com/history/airport/%s/%s/%-i/%-i/DailyHistory.html?req_city=NA&req_state=NA&req_statename=NA&format=1" % (faa, now.year, now.month, now.day)
+        url = ("http://www.wunderground.com/history/airport/%s/%s/%-i/%-i/"
+               +"DailyHistory.html?req_city=NA&req_state=NA&"
+               +"req_statename=NA&format=1") % (faa, now.year, now.month, 
+                                                now.day)
         try:
             data = opener.open(url).read()
         except KeyboardInterrupt:
@@ -253,11 +260,13 @@ def doit(opener, station, now):
             values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s, 
             %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s)""" 
             args = (station, ob.valid, ob.tmpf, ob.dwpf, ob.vsby, ob.drct,
-                    ob.sknt, ob.gust, ob.p01i, ob.alti, ob.skyc1, ob.skyc2,
-                    ob.skyc3, ob.skyc4, ob.skyl1, ob.skyl2, ob.skyl3,
-                    ob.skyl4, ob.metar.decode('utf-8','replace').encode('ascii','replace'), ob.mslp, ob.presentwx, ob.p03i,
-                    ob.p06i, ob.p24i, ob.max_tmpf_6hr, ob.max_tmpf_24hr,
-                    ob.min_tmpf_6hr, ob.min_tmpf_24hr) 
+                ob.sknt, ob.gust, ob.p01i, ob.alti, ob.skyc1, ob.skyc2,
+                ob.skyc3, ob.skyc4, ob.skyl1, ob.skyl2, ob.skyl3,
+                ob.skyl4, 
+                ob.metar.decode('utf-8','replace').encode('ascii','replace'), 
+                ob.mslp, ob.presentwx, ob.p03i,
+                ob.p06i, ob.p24i, ob.max_tmpf_6hr, ob.max_tmpf_24hr,
+                ob.min_tmpf_6hr, ob.min_tmpf_24hr) 
 
             acursor.execute(sql, args)
             processed += 1
@@ -314,7 +323,7 @@ def process_metar(mstr, now):
 
     # Do something with sky coverage
     for i in range(len(mtr.sky)):
-        (c,h,b) = mtr.sky[i]
+        (c, h, b) = mtr.sky[i]
         setattr(ob, 'skyc%s' % (i+1), c)
         if h is not None:
             setattr(ob, 'skyl%s' % (i+1), h.value("FT"))
