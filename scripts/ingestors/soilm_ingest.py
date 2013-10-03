@@ -84,6 +84,7 @@ import tempfile
 # Third party
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature
+#import pyiem.meteorology as met
 import psycopg2
 ISUAG = psycopg2.connect(database='isuag',  host='iemdb')
 icursor = ISUAG.cursor()
@@ -144,6 +145,7 @@ def hourly_process(nwsli, maxts):
                          valid.astimezone(pytz.timezone("America/Chicago")))
         ob.data['tmpf'] = temperature(
                     float(tokens[headers.index('tair_c_avg')]), 'C').value('F')
+        ob.data['relh'] = tokens[headers.index('rh')]
         ob.save(accesstxn)
 
 def formatter(v):
