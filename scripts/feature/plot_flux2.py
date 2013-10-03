@@ -8,7 +8,7 @@ ocursor = OTHER.cursor()
 def getsite(station):
     ocursor.execute("""
     SELECT valid, hs, le_wpl from flux2013 where station = %s
-    and le_wpl BETWEEN -100 and 1000 ORDER by valid ASC
+    and le_wpl BETWEEN -100 and 1000 and valid > '2013-08-01' ORDER by valid ASC
     """, (station,))
     valid = []
     soil = []
@@ -36,9 +36,9 @@ ax.plot(v1, s2, label='Latent')
 #ax[0].legend(loc=2, prop={'size': 9})
 ax.set_title("NLAE Flux Site 'NSLT30FT' 1-7 Jan 2013 Latent Heat Flux")
 #ax.legend()
-ax2 = ax.twinx()
-ax2.plot(v1, bowen, color='r')
-ax2.set_ylim(-100,100)
+#ax2 = ax.twinx()
+#ax2.plot(v1, bowen, color='r')
+#ax2.set_ylim(-100,100)
 
 ax.annotate("Evaporation +\nSublimation", xy=(datetime.datetime(2013,1,7,15), 50), xycoords='data',
                 xytext=(-150, 0), textcoords='offset points',
