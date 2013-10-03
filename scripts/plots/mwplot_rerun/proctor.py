@@ -1,8 +1,6 @@
 """
 Drive the reprocessing of the MWcomp plot.  We are doing this since our
 data archives have more data than the stuff I previously got from NSSL
-
-$Id: $:
 """
 import mx.DateTime
 import subprocess
@@ -51,6 +49,14 @@ def generate_image( now ):
                                         now.strftime("%Y %m %d %H %M"),)
     subprocess.call(cmd, shell=True)
 
+def cleanup():
+    ''' delete temp stuff '''
+    for fn in ['MWmesonet.gif', 'dcmetr.log', 'gdcntr.out', 
+            'gddelt.out', 'gemglb.nts', 'last.nts', 'metar.gem',
+            'metar.txt', 'oabsfc.out', 'sfmap.out']:
+        if os.path.isfile(fn):
+            os.remove(fn)
+
 sts = mx.DateTime.DateTime(1966,10,14,18)
 ets = mx.DateTime.DateTime(1966,10,14,19)
 interval = mx.DateTime.RelativeDateTime(hours=1)
@@ -60,4 +66,5 @@ while now < ets:
     metar_extract( now )
     process_metar( now )
     generate_image( now )
+    cleanup()
     now += interval
