@@ -1,5 +1,5 @@
 '''
- Generate the storage netcdf file for 1km MRMS data over the Midwest
+ Generate the storage netcdf file for 0.01deg MRMS data over the Midwest
 '''
 
 
@@ -35,21 +35,33 @@ def init_year(ts):
     nc.createDimension('lon', (iemre.EAST - iemre.WEST) * 100.0)
     days = ((ts.replace(year=ts.year+1)) - ts).days
     nc.createDimension('time', int(days) ) 
+    nc.createDimension('nv', 2)
 
     # Setup Coordinate Variables
     lat = nc.createVariable('lat', np.float, ('lat',) )
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
+    lat.bounds = "lat_bnds"
     lat.axis = "Y"
-    lat[:] = np.arange(iemre.SOUTH, iemre.NORTH, 0.01)
+    # Grid centers
+    lat[:] = np.arange(iemre.SOUTH + 0.005, iemre.NORTH, 0.01)
+
+    lat_bnds = nc.createVariable('lat_bnds', np.float, ('lat', 'nv'))
+    lat_bnds[:,0] = np.arange(iemre.SOUTH, iemre.NORTH, 0.01)
+    lat_bnds[:,1] = np.arange(iemre.SOUTH + 0.01, iemre.NORTH +0.01, 0.01)
 
     lon = nc.createVariable('lon', np.float, ('lon',) )
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
+    lon.bounds = "lon_bnds"
     lon.axis = "X"
     lon[:] = np.arange(iemre.WEST, iemre.EAST, 0.01)
+
+    lon_bnds = nc.createVariable('lon_bnds', np.float, ('lon', 'nv'))
+    lon_bnds[:,0] = np.arange(iemre.WEST, iemre.EAST, 0.01)
+    lon_bnds[:,1] = np.arange(iemre.WEST + 0.01, iemre.EAST +0.01, 0.01)
 
     tm = nc.createVariable('time', np.float, ('time',) )
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
