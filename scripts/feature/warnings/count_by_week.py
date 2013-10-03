@@ -29,11 +29,12 @@ import numpy as np
 
 c = ['r', 'b', 'g', 'k']
 markers = ['s', '+', 'o', 'x']
+states = ['Iowa', 'Oklahoma', 'Alabama', 'Texas']
 for i, state in enumerate(['IA', 'OK', 'AL', 'TX']):
     counts = np.zeros((53,))
     ws, cs = get(state)
     counts[ws] = cs
-    ax.scatter(np.arange(1,54), counts, marker=markers[i], s=75, label=state, c=c[i],
+    ax.scatter(np.arange(1,54), counts, marker=markers[i], s=75, label=states[i], c=c[i],
                zorder=i+1)
 ax.set_title("1986-2012 Percentage of Years with\n 1+ Tornado Warning for the Week of Year")
 ax.set_ylabel("March Total")
