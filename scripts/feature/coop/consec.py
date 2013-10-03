@@ -6,7 +6,7 @@ cursor = COOP.cursor()
 
 maxes = np.zeros((200,))  # -60 to 140
 
-cursor.execute("""SELECT day, high from alldata_ia WHERE 
+cursor.execute("""SELECT day, low from alldata_ia WHERE 
  station = 'IA2203' ORDER by day ASC""")
 
 last = -99
