@@ -24,6 +24,7 @@ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 			"lat"=> $row["lat"],
 			"lon"=> $row["lon"],
 			"state" => $row["state"],
+			"scrape_url" => $row["scrape_url"],
 			"network"=> $row["network"],
 			"moviebase" => $row["moviebase"],
 			"ip" => $row["ip"],
