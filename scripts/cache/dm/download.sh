@@ -2,15 +2,16 @@
 
 DATADIR="`date --date 'last tuesday' +'%Y/%b%-d'`"
 TS="`date --date 'last tuesday' +'%Y'`"
-TS2="`date --date 'last tuesday' +'%y%m%d'`"
+TS2="`date --date 'last tuesday' +'%Y%m%d'`"
 TS3="`date --date 'last tuesday' +'%m%d%y'`"
-DATAFILE="usdm${TS2}m.zip"
+DATAFILE="USDM_${TS2}_M.zip"
 
-wget -q http://droughtmonitor.unl.edu/shapefiles_combined/${TS}/usdm${TS2}m.zip
+#http://droughtmonitor.unl.edu/data/shapefiles_m/USDM_20131001_M.zip
+wget -q http://droughtmonitor.unl.edu/data/shapefiles_m/${DATAFILE}
 
 unzip $DATAFILE
 
-ogr2ogr -t_srs EPSG:4326 -f "ESRI Shapefile" dm_current.shp usdm${TS2}.shp
+ogr2ogr -t_srs EPSG:4326 -f "ESRI Shapefile" dm_current.shp USDM_${TS2}.shp
 
 # Combine Coverages
 #python combine.py $TS2
@@ -35,7 +36,7 @@ ftime="`date --date 'last tuesday' +'%Y%m%d%H'`00"
 
 # Cleanup
 rm dm_current.shp dm_current.shx dm_current.dbf dm_current.zip dm_current.prj
-mv usdm* /mesonet/data/dm/shape/
+mv USDM* /mesonet/data/dm/shape/
 
 #ogr2ogr -t_srs EPSG:4326 test.shp Drought_Impacts_US.shp
 
