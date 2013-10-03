@@ -6,7 +6,7 @@ acursor = ASOS.cursor()
 pabr_data = {}
 acursor.execute("""
     select date(valid) as d, max(tmpf), min(tmpf) from alldata 
-    where station = 'PABR' and tmpf < 120 and tmpf > -90 
+    where station = 'PHX' and tmpf < 120 and tmpf > -90 
     and valid > '1950-01-01' GROUP by d
 """)
 for row in acursor:
