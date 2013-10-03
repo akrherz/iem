@@ -45,8 +45,8 @@ getter GoesWest1V${tm}.tif $BASE/GOESwest/GoesWest1V${tm}.tif
 getter GoesWest1V${tm}.tfw $BASE/GOESwest/GoesWest1V${tm}.tfw
 getter GoesWest04I3${tm}.tif $BASE/GOESwest/GoesWest04I3${tm2}.tif
 getter GoesWest04I3${tm}.tfw $BASE/GOESwest/GoesWest04I3${tm2}.tfw
-getter GoesWest04I4${tm}.tfw $BASE/GOESwest/GoesWest04I4${tm2}.tfw
 getter GoesWest04I4${tm}.tif $BASE/GOESwest/GoesWest04I4${tm2}.tif
+getter GoesWest04I4${tm}.tfw $BASE/GOESwest/GoesWest04I4${tm2}.tfw
 
 #ls -l *.tif
 #ls -l *.tfw
