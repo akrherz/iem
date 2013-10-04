@@ -34,10 +34,10 @@ include("../../config/settings.inc.php");
 
  $TITLE = "IEM Cow";
  $THISPAGE = "severe-cow";
- include("$rootpath/include/header.php");
- include("$rootpath/include/forms.php");
- include("$rootpath/include/wfoLocs.php");
- include("$rootpath/include/database.inc.php");
+ include("../../include/header.php");
+ include("../../include/forms.php");
+ include("../../include/wfoLocs.php");
+ include("../../include/database.inc.php");
 ?>
 <a href="<?php echo $rooturl; ?>/cow/">Reset Application</a> (All timestamps are displayed in UTC)
 <form method="GET" name="cow">
@@ -96,6 +96,7 @@ function wtypeSelect()
 <td><select name="hail">
   <option value="0.75" <?php if ($hail == 0.75) echo "SELECTED"; ?>>0.75
   <option value="1.00" <?php if ($hail == 1.00) echo "SELECTED"; ?>>1.00
+  <option value="1.75" <?php if ($hail == 1.75) echo "SELECTED"; ?>>1.75
   <option value="2.00" <?php if ($hail == 2.00) echo "SELECTED"; ?>>2.00
   <option value="7.00" <?php if ($hail == 7.00) echo "SELECTED"; ?>>7.00
 </select></td>
@@ -207,4 +208,4 @@ with the area of the storm based warning to yield a percentage.</li>
 
 
 
-<?php } include("$rootpath/include/footer.php"); ?>
+<?php } include("../../include/footer.php"); ?>
