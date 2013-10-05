@@ -4,7 +4,7 @@ import matplotlib.patheffects as PathEffects
 
 (fig, ax) = plt.subplots(1,1)
 
-one = [1.02, 0.98, 2.36, 2.30] # 2013
+one = [1.02, 0.98, 2.36, 2.26] # 2013
 two = [0.42, 0.93, 0.72, 1.67] # 1947
 three = [1.24, 2.32, 0.98, 2.09] # 2012
 
