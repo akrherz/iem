@@ -39,7 +39,8 @@ for i, bar in enumerate(bars):
         continue
     ax.text(bar.get_x()+0.1, d2013[i]-0.6, "%.0f" % (d2013[i],), ha='center')
 
-ax.set_title("Iowa Tornado Reports")
+ax.set_title("Iowa Tornado Reports by Month")
+ax.set_ylabel("Count")
 ax.set_xlim(0.5,12.5)
 ax.set_xticks(np.arange(1,13))
 ax.set_xlabel("*2013 preliminary thru 6 October")
