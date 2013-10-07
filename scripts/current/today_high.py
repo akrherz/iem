@@ -1,24 +1,25 @@
 # Output the 12z morning low temperature
 import sys
-import os, random
-import iemdb
-import iemplot
+import matplotlib.cm as cm
+import numpy as np
+import datetime
+from pyiem.plot import MapPlot
 
-import mx.DateTime
-now = mx.DateTime.now()
+now = datetime.datetime.now()
 
-IEM = iemdb.connect('iem', bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
 sql = """
   select s.id, 
   x(s.geom) as lon, y(s.geom) as lat, 
   max_tmpf as high, s.network
-  from summary_%s c, stations s
+  from summary c, stations s
   WHERE c.iemid = s.iemid and day = 'TODAY' and max_tmpf > -40 
   and s.network in ('IA_ASOS', 'AWOS', 'IL_ASOS','MO_ASOS','KS_ASOS',
-  'NE_ASOS','SD_ASOS','MN_ASOS','WI_ASOS')
-""" % (now.year, )
+  'NE_ASOS','SD_ASOS','MN_ASOS','WI_ASOS') ORDER by high ASC
+"""
 
 lats = []
 lons = []
@@ -26,31 +27,34 @@ vals = []
 valmask = []
 labels = []
 icursor.execute(sql)
+dsm = None
 for row in icursor:
-  lats.append( row[2] )
-  lons.append( row[1] )
-  vals.append( row[3] )
-  labels.append( row[0] )
-  valmask.append( row[4] in ['AWOS', 'IA_ASOS'] )
+    if row[0] == 'DSM':
+        dsm = row[3]
+    lats.append( row[2] )
+    lons.append( row[1] )
+    vals.append( row[3] )
+    labels.append( row[0] )
+    valmask.append( row[4] in ['AWOS', 'IA_ASOS'] )
 
 if len(lats) < 4:
     sys.exit()
 
-cfg = {
- 'wkColorMap': 'BlAqGrYeOrRe',
- '_showvalues'        : True,
- '_valuemask'         :   valmask,
- 'lbTitleString'    : 'F',
- '_format'            : '%.0f',
- '_title'             : "Iowa ASOS/AWOS  High Temperature",
- '_valid'             : "%s" % (now.strftime("%d %b %Y %-I:%M %p"), ),
- '_labels'            : labels
-}
-# Generates tmp.ps
-tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
+m = MapPlot(sector='iowa',
+            title='%s Iowa ASOS/AWOS High Temperature' % (
+                                                now.strftime("%-d %b %Y"),),
+            subtitle='map valid: %s' % (now.strftime("%d %b %Y %-I:%M %p"), ))
+
+bottom = int(dsm) - 15
+top = int(dsm) + 15
+bins = np.linspace( bottom, top, 11)
+cmap = cm.get_cmap('jet')
+m.contourf(lons, lats, vals, bins, units='F', cmap=cmap)
+m.plot_values(lons, lats, vals, '%.0f', valmask=valmask, labels=labels)
+m.drawcounties()
 
 pqstr = "plot ac %s summary/iowa_asos_high.png iowa_asos_high.png png" % (
         now.strftime("%Y%m%d%H%M"), )
-iemplot.postprocess(tmpfp, pqstr)
-#iemplot.makefeature(tmpfp)
 
+m.postprocess(view=True, pqstr=pqstr)
+m.close()
