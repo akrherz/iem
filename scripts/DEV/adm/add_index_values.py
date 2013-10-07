@@ -41,7 +41,7 @@ def add_cols(line, addon):
             if addon['ames_precip'] == 0:
                 wxprecip = 0
     
-    o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (line, addon['ames_high'],
+    o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (line.strip(), addon['ames_high'],
                                 addon['ames_precip'], addon['ames_clhigh'],
                                 addon['ames_clprecip'], addon['remote_clhigh'],
                                 addon['remote_clprecip'], wxhigh, wxprecip))
