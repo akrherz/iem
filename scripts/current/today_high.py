@@ -56,5 +56,5 @@ m.drawcounties()
 pqstr = "plot ac %s summary/iowa_asos_high.png iowa_asos_high.png png" % (
         now.strftime("%Y%m%d%H%M"), )
 
-m.postprocess(view=True, pqstr=pqstr)
+m.postprocess(pqstr=pqstr)
 m.close()
