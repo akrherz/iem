@@ -39,7 +39,7 @@ the applications listed below.
   <br />Simple web service provides csv data for a site and for a period
    of ten days forecast.  An example URL call would be:<br />
   <pre>
-csv.php?station=KAMW&ts=2009-01-10%2012:00                  (all data 10 days)
+csv.php?station=KAMW&valid=2009-01-10%2012:00              (all data 10 days)
 csv.php?station=KAMW&runtime=2009-01-10%2012:00&model=GFS  (explicit)
 </pre></li>
  <li><a href="fe.phtml">Download the raw data!</a>
