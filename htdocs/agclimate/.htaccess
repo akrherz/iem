@@ -8,3 +8,6 @@ Redirect /agclimate/info.txt http://mesonet.agron.iastate.edu/agclimate/info.pht
 
 AddHandler cgi-script .py
 Options +ExecCGI
+
+# 
+RewriteRule ^smplot/([0-9]{1,12})/(.*).png$ isusm.py?t=$1&v=$2

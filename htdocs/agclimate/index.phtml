@@ -2,9 +2,9 @@
  include("../../config/settings.inc.php");
  define("IEM_APPID", 10);
  
- include "$rootpath/include/database.inc.php";
- include "$rootpath/include/network.php";
- include "$rootpath/include/mlib.php";
+ include "../../include/database.inc.php";
+ include "../../include/network.php";
+ include "../../include/mlib.php";
  $dbconn = iemdb("isuag");
  $nt = new NetworkTable("ISUSM");
  
@@ -39,32 +39,57 @@
  
  $TITLE = "IEM | ISU Ag Climate"; 
  $THISPAGE = "networks-agclimate";
- include("$rootpath/include/header.php");
+ include("../../include/header.php");
 ?>
 
+<div>
+<img src="images/agclimate.jpg" ALT="ISU Ag Climate" 
+	style="float: left; padding-right: 10px;" height="105" />
+
+<p>The Iowa State University "Ag Climate" network is one of the nation's 
+oldest automated weather observation networks with data dating back to 1986.
+Starting in fall of 2012, these stations are being upgraded to a new sensor 
+package including soil moisture and cell modem communication allowing near
+real-time updates.
+<br /><a href="/sites/locate.php?network=ISUAG">Old Locations</a> &nbsp; - &nbsp; 
+  <a href="/sites/locate.php?network=ISUSM">New Locations</a>
+</div>
+<br clear="all" />
 <div class="dashboard">
 <ul>
- <li><span style="font-size: 1.3em;">ISU Ag Climate<br />Quick Links</span></li>
- <li><a href="hist/hourlyRequest.php"><img src="../images/down.png" /><br />Hourly Data<br />Download</a></li>
- <li><a href="hist/dailyRequest.php"><img src="../images/down.png" /><br />Daily Data<br />Download</a></li>
+ <li><span style="font-size: 1.3em;">ISU Ag Climate<br />Old Stations:</span></li>
+ <li><a href="hist/hourlyRequest.php"><img src="/images/down.png" /><br />Hourly Data<br />Download</a></li>
+ <li><a href="hist/dailyRequest.php"><img src="/images/down.png" /><br />Daily Data<br />Download</a></li>
  <li><a href="../GIS/apps/agclimate/gsplot.phtml"><img src="../images/view_icon.png" /><br />Growing<br />Season</a></li>
  <li><a href="soilt.php"><img src="../images/find.png" /><br />4 inch Soil<br />Temperatures</a></li>
-</ul>
+ <li><span style="font-size: 1.3em;">&nbsp;<br />New Stations:</span></li>
+ <li><a href="hist/hourly.php"><img src="/images/down.png" /><br />Hourly Data<br />Download</a></li>
+ <li><a href="hist/daily.php"><img src="/images/down.png" /><br />Daily Data<br />Download</a></li>
+ </ul>
 </div>
 
+<table>
+<tr>
+<td valign="top">
+<strong>Current Plots:</strong>
+<ul>
+  <li><a href="?v=tmpf">Air Temperature</a></li>
+  <li><a href="?v=high">Today's High Temp</a></li>
+  <li><a href="?v=rh">Relative Humidity</a></li>
+</ul>
+</td>
+<td valign="top">
+<?php 
+$v = isset($_REQUEST["v"]) ? htmlentities($_REQUEST["v"]): 'tmpf';
+?>
+<img src="smplot/0/<?php echo $v; ?>.png" width="800" height="640" />
+</td>
+</table>
 
 <table width="100%">
 <TR>
 <TD valign="top">
 
-<img src="images/agclimate.jpg" ALT="ISU Ag Climate">
-
-<p>The Iowa State University "Ag Climate" network is one of the nation's 
-oldest automated weather observation networks with data dating back to 1986.
-This network of stations, located at <a href="http://www.ag.iastate.edu/farms/">ISU Research Farms</a>, is polled once per 
-day by the <a href="http://www.hprcc.unl.edu/">High Plains Climate Center</a>,
-who then sends the data to us.  Data for the previous day is available by
-7 AM of the next day.
 
 <h3>Iowa Soil Moisture Mesonet Stations</h3>
 <p>We are in the process of deploying a network of automated sensors that will
@@ -78,8 +103,7 @@ collected:
 
 <h3 class="subtitle">Information:</h3>
 <ul>
-<li><a href="<?php echo $rooturl; ?>/sites/locate.php?network=ISUAG">Location</a> of observing stations in Iowa.</li>
-<li><a href="<?php echo $rooturl; ?>/agclimate/info.phtml">Information</a> about network stations.</li>
+<li><a href="/agclimate/info.phtml">Information</a> about network stations.</li>
 <li><a href="http://www.hprcc.unl.edu/awdn/et/">Information on PET</a> calculations done by the High Plains Climate Center.</li>
 </ul>
 
@@ -92,10 +116,10 @@ of human observations.
 </TD>
 <TD valign="TOP" width="250">
 
-	<?php include("$rootpath/include/dataLinks.php"); ?>
+	<?php include("../../include/dataLinks.php"); ?>
 
 
 </TD></TR>
 </table>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../include/footer.php"); ?>
