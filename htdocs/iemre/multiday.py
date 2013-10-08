@@ -6,6 +6,8 @@ from pyiem import iemre, datatypes
 import netCDF4
 import datetime
 import json
+import warnings
+warnings.simplefilter("ignore", UserWarning)
 
 form = cgi.FormContent()
 ts1 = datetime.datetime.strptime( form["date1"][0], "%Y-%m-%d")
