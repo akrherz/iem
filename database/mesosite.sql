@@ -1,6 +1,17 @@
 ---
 --- Missing table: news
 ---
+CREATE TABLE news(
+  id serial not null,
+  entered timestamptz,
+  body text,
+  author varchar(100),
+  title varchar(100),
+  url varchar,
+  views smallint);
+CREATE INDEX news_entered_idx on news(entered);
+GRANT ALL on news to nobody,apache;
+GRANT ALL on news_id_seq to nobody,apache;
 
 ---
 --- IEMBOT Twitter Page subscriptions
