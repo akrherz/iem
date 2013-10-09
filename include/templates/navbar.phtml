@@ -25,7 +25,7 @@ $_pages = Array(
 				"gs" => Array("title" => "Growing Season", "url" => "/climate/gs.phtml"),
 				"year" => Array("title" => "Year", "url" => "/climate/year.phtml"),
 		),
-		"current" => Array(
+/*		"current" => Array(
 				"base" => Array("title" => "Current", "url" => "/current/"),
 				"products" => Array("title" => "Products", "url" => "/current/"),
 				"sort" => Array("title" => "Sortable Currents", "url" => "/my/current.phtml"),
@@ -80,7 +80,7 @@ $_pages = Array(
 				"history" => Array("title" => "Historical", "url" => "/roads/history.phtml"),
 				"maps" => Array("title" => "Interactive Map", "url" => "/roads/maps.phtml"),
 				"sort" => Array("title" => "Sortable Text", "url" => "/roads/rc.phtml"),
-		),
+		), */
 		"severe" => Array(
 				"base" => Array("title" => "Severe Weather", "url" => "/current/severe.phtml"),
 				"main" => Array("title" => "Mainpage", "url" => "/current/severe.phtml"),
@@ -103,15 +103,19 @@ $_pages = Array(
 		),
 );
 ?>
-    <div class="navbar">
-      <div class="navbar-inner">
-        <div class="container-fluid">
-	<ul class="nav nav-pills pull-left">
-  <li><a href="/" style="padding:0px 10px 0px 0px;"><img src="images/logo_small.png" style="height: 35px;"/></a></li>
+<div class="navbar navbar-inverse">
+    <div class="container">
+        <div class="navbar-header">
+             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="/" style="padding:0px 10px 0px 0px;"><img src="images/logo_small.png" style="height: 50px;"/></a>
+        </div>
+    <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
   <?php 
-
-  
-  
   $THISPAGE = isset($THISPAGE) ? $THISPAGE : "xxx-xxx";
   $ar = preg_split('/-/', $THISPAGE);
 while( list($idx, $page) = each($_pages) )
