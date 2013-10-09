@@ -6,7 +6,7 @@ include("../../include/header.php"); ?>
 
 <h3 class="heading">IEM Data for NWS Users</h3><p>
 
-<div class="warning">Please <a href="<?php echo $rooturl; ?>/info/contacts.php">suggest</a> features for this page.  We are looking to collect all relevant
+<div class="warning">Please <a href="/info/contacts.php">suggest</a> features for this page.  We are looking to collect all relevant
 IEM provided archives/applications of NWS data.</div>
 
 <table>
@@ -14,7 +14,7 @@ IEM provided archives/applications of NWS data.</div>
 <h4>IEM Apps</h4>
 <ul>
  <li><a href="obs.php">Sortable Currents by WFO</a></li>
- <li><a href="../DCP/plot.phtml">Archived DCP Data Plotter</a>
+ <li><a href="/DCP/plot.phtml">Archived DCP Data Plotter</a>
  <br />Simple app to plot out current/historical DCP (river gauges) data for a site
  of your choice.</li>
  <li><a href="/timemachine/#59.0">NWS WWA Map Archive</a>
@@ -27,8 +27,8 @@ IEM provided archives/applications of NWS data.</div>
 from the Iowa DOT.  This information is used to produce a more accurate
 first guess at fields the NWS needs for their RTP product.</blockquote>
 <ul>
- <li><a href="../data/awos_rtp_00z.shef">0Z SHEF</a></li>
- <li><a href="../data/awos_rtp.shef">12Z SHEF</a></li>
+ <li><a href="/data/awos_rtp_00z.shef">0Z SHEF</a></li>
+ <li><a href="/data/awos_rtp.shef">12Z SHEF</a></li>
 </ul>
 
 <h4>Model Data</h4>
@@ -58,29 +58,29 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
   <br />Map of the number of VTEC events by WFO for a time period of your choice.</li>
   <li><a href="days_since.php">Days Since VTEC Product</a>
   <br />Map of the number of days since a WFO issued a VTEC Product.</li>
- <li><a href="../vtec/">VTEC Browser</a>
+ <li><a href="/vtec/">VTEC Browser</a>
   <br />Interactive display of VTEC products.</li>
- <li><a href="../vtec/search.php">VTEC Search by Point or County/Zone</a>
+ <li><a href="/vtec/search.php">VTEC Search by Point or County/Zone</a>
   <br />Find issued VTEC WWA products by a given zone or county or search
   for a storm based warning by point.</li>
 </ul>
 
 <h4>Storm Based Warnings</h4>
 <ul>
- <li><a href="../cow/">IEM Cow</a>
+ <li><a href="/cow/">IEM Cow</a>
   <br />Interactive Storm Based Warning verification app</li>
-   <li><a href="../raccoon/">IEM Raccoon</a>
+   <li><a href="/raccoon/">IEM Raccoon</a>
   <br />Generate Microsoft Powerpoint of Storm Based Warnings for a WFO 
   and RADAR site of your choice.</li>
- <li><a href="../request/gis/watchwarn.phtml">GIS Shapefiles</a>
+ <li><a href="/request/gis/watchwarn.phtml">GIS Shapefiles</a>
   <br />of archived Storm Based Warning polygons.</li>
 </ul>
 
 <h4>Text Product Archives</h4>
 <ul>
- <li><a href="../wx/afos/">AFOS Product Viewer</a>
+ <li><a href="/wx/afos/">AFOS Product Viewer</a>
   <br />Web based version of TextDB.</li>
- <li><a href="../wx/afos/list.phtml">View Products by WFO by Date</a>
+ <li><a href="/wx/afos/list.phtml">View Products by WFO by Date</a>
   <br />View quick listings of issued products by forecast office and by 
     date.</li>
 </ul>
