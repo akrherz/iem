@@ -20,11 +20,14 @@ $prec = array();
 $valid = array();
 
 if ($station == null){
+	$firstval = null;
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
 	while (list ($line_num, $line) = each ($fcontents)) {
   		$valid[] = strtotime( substr($line, 0, 26) );
   		$parts = preg_split ("/\s+/", $line);
-  		$prec[] = (real) ((int)($parts[10])/100.);
+  		$val = floatval($parts[10])/100.;
+  		if ($firstval == null) $firstval = $val;
+  		$prec[] = $val - $firstval;
 		
 	} // End of while
 } else {
@@ -53,9 +56,9 @@ if ($station == null){
 }
 
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
