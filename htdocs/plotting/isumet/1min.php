@@ -76,7 +76,7 @@ if (isset($_REQUEST["rh"])){
 	$graph->y2axis->title->SetFont(FF_FONT1,FS_BOLD,12);
 	$graph->title->Set("$titleDate Outside Temperature & Relative Humidity");
 } else {
-	$graph->title->Set("$titleDate Outside Temperature & Dew Point");
+	$graph->title->Set("$titleDate Outside Temperature");
 }
 $graph->img->SetMargin(65,40,55,70);
 //$graph->xaxis->SetFont(FONT1,FS_BOLD);
@@ -133,7 +133,7 @@ $graph->Add($lineplot);
 if (isset($_REQUEST["rh"])){
 	$graph->AddY2($lineplot3);
 } else {
-	$graph->Add($lineplot2);
+	//$graph->Add($lineplot2);
 }
 	
 $graph->Stroke();
