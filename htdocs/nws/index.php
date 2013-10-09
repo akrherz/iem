@@ -2,7 +2,7 @@
 include("../../config/settings.inc.php");
 $TITLE = "IEM | NWS Related Information";
 $THISPAGE = "iem-info";
-include("$rootpath/include/header.php"); ?>
+include("../../include/header.php"); ?>
 
 <h3 class="heading">IEM Data for NWS Users</h3><p>
 
@@ -33,9 +33,13 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
 
 <h4>Model Data</h4>
 <ul>
- <li><a href="../mos/">Model Output Statistics</a>
+ <li><a href="/mos/">Model Output Statistics</a>
  <br />Archive of MOS back to 3 May 2007.</li>
-</ul>
+ <li>HRRR MidWest 1km Reflectivity [animated GIF]
+ <br />Animated GIF of HRRR Forecasted Reflectivity. 
+  <a href="/data/model/hrrr/hrrr_1km_ref.gif">Latest Run</a> or
+  <a href="/timemachine/#61.0">Archived plots</a></li> 
+ </ul>
 
 <h4>NEXRAD / RADAR Data</h4>
 <ul>
@@ -84,4 +88,4 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
 </tr>
 </table>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../include/footer.php"); ?>
