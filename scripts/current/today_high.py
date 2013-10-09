@@ -45,6 +45,9 @@ m = MapPlot(sector='iowa',
                                                 now.strftime("%-d %b %Y"),),
             subtitle='map valid: %s' % (now.strftime("%d %b %Y %-I:%M %p"), ))
 
+if dsm is None:
+    dsm = vals[0]
+
 bottom = int(dsm) - 15
 top = int(dsm) + 15
 bins = np.linspace( bottom, top, 11)
