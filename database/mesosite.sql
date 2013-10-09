@@ -3,7 +3,7 @@
 ---
 CREATE TABLE news(
   id serial not null,
-  entered timestamptz,
+  entered timestamptz default now(),
   body text,
   author varchar(100),
   title varchar(100),
