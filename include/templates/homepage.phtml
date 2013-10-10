@@ -139,18 +139,21 @@ if ($i % 2 != 0){ echo "\n<div class=\"col-md-6\">&nbsp;</div>\n</div>"; }
 </div><!--  end of well -->
           <div class="row pull-left">
             <div class="col-md-4">
-            <img src="/images/nws.png" class="img-responsive" />
-              <h2>Heading</h2>
-              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+              <h3>RADAR Products</h3>
+            <img src="/data/mwcomp.png" class="img-responsive" />
+              <p> The IEM processes National Weather Service NEXRAD information
+              in real-time to produce and archive many products.  This includes... </p>
               <p><a class="btn" href="#">View details &raquo;</a></p>
             </div><!--/span-->
             <div class="col-md-4">
-              <h2>Heading</h2>
-              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+              <h3>Precipitation</h3>
+            <img src="/data/iowa_q2_1d.png" class="img-responsive" />
+              <p>sdfg </p>
               <p><a class="btn" href="#">View details &raquo;</a></p>
             </div><!--/span-->
             <div class="col-md-4">
-              <h2>Heading</h2>
+              <h2>Current Data</h2>
+            <img src="/data/iowa_tmpf.png" class="img-responsive" />
               <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
               <p><a class="btn" href="#">View details &raquo;</a></p>
             </div><!--/span-->
@@ -172,11 +175,17 @@ while ($rancam == "" && $loop < 20)
   }
   $loop += 1;
 }
-if ($rancam == ""){ $rancam = "KCCI-001";}
+if ($rancam == ""){ $rancam = "KCWI-001";}
 ?>
-<h4><?php echo $cameras[$rancam]["name"] .", ". $cameras[$rancam]["state"]; ?> Webcam:</h4>
+<div class="panel panel-default">
+  <div class="panel-heading"><?php echo $cameras[$rancam]["name"] .", ". $cameras[$rancam]["state"]; ?> Webcam:</div>
+  <div class="panel-body">
 <a href="/current/webcam.php#<?php echo  $cameras[$rancam]["network"]; ?>-0"><img src="/data/camera/stills/<?php echo $rancam; ?>.jpg?<?php echo time(); ?>" border="0" alt="Webcam" class="img-responsive"/></a>
 <a href="/current/webcam.php#<?php echo  $cameras[$rancam]["network"]; ?>-0">View other webcams</a>
+  
+  </div>
+</div>
+
 
 <div class="panel panel-default">
   <div class="panel-heading">Most Popular</div>
@@ -194,7 +203,9 @@ if ($rancam == ""){ $rancam = "KCCI-001";}
 
 
 
-<h4>News Items</h4>
+<div class="panel panel-default">
+  <div class="panel-heading">News Items</div>
+  <div class="panel-body">
 <?php 
 $rs = pg_query($connection, "SELECT * from news ORDER by entered DESC LIMIT 5");
 
@@ -208,6 +219,8 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
 }
 
 ?>
+  </div>
+</div>
 
           </div><!--/.well -->
         </div><!--/span-->
