@@ -1,3 +1,45 @@
+---
+--- Quasi synced from mesosite database
+---
+CREATE TABLE stations(
+	id varchar(20),
+	synop int,
+	name varchar(64),
+	state char(2),
+	country char(2),
+	elevation real,
+	network varchar(20),
+	online boolean,
+	params varchar(300),
+	county varchar(50),
+	plot_name varchar(64),
+	climate_site varchar(6),
+	remote_id int,
+	nwn_id int,
+	spri smallint,
+	wfo varchar(3),
+	archive_begin timestamptz,
+	archive_end timestamp with time zone,
+	modified timestamp with time zone,
+	tzname varchar(32),
+	iemid SERIAL,
+	metasite boolean,
+	sigstage_low real,
+	sigstage_action real,
+	sigstage_bankfull real,
+	sigstage_flood real,
+	sigstage_moderate real,
+	sigstage_major real,
+	sigstage_record real,
+	ugc_county char(6),
+	ugc_zone char(6)
+);
+CREATE UNIQUE index stations_idx on stations(id, network);
+create index stations_iemid_idx on stations(iemid);
+SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
+GRANT SELECT on stations to apache,nobody;
+grant all on stations_iemid_seq to nobody,apache;
+
 CREATE TABLE alldata(
  station        character varying(4)  ,    
  valid          timestamp with time zone  ,
