@@ -16,7 +16,7 @@ class Table(object):
         if type(network) == type("A"):
             network = [network,]
         for n in network:
-            cursor.execute("""SELECT *, x(geom) as lon, y(geom) as lat
+            cursor.execute("""SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
                 from stations WHERE network = %s ORDER by name ASC""", (n,))
             for row in cursor:
                 self.sts[ row['id'] ] = {}
