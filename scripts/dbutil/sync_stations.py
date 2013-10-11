@@ -1,12 +1,20 @@
-# My purpose in life is to sync the mesosite stations table to other
-# databases.  This will hopefully remove some hackery
+'''
+ My purpose in life is to sync the mesosite stations table to other
+databases.  This will hopefully remove some hackery
+'''
 
 import iemdb
 import datetime
+import sys
 import psycopg2
 import psycopg2.extras
 MESOSITE = iemdb.connect("mesosite", bypass=True)
 subscribers = ["iem","coop","hads","asos", "postgis"]
+
+if len(sys.argv) == 2:
+    print 'Running laptop syncing from upstream, assume iemdb is localhost!'
+    MESOSITE = psycopg2.connect(database='mesosite', host='mesonet.agron.iastate.edu', user='nobody')
+    subscribers.append('mesosite')
 
 def sync(dbname):
     """
