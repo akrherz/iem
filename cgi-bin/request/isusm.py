@@ -6,7 +6,6 @@ import cgi
 import datetime
 import psycopg2
 import sys
-sys.path.insert(0, '/home/akrherz/projects/pyIEM')
 from pyiem.datatypes import temperature
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 cursor = ISUAG.cursor()
