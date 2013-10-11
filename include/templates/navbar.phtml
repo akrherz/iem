@@ -111,10 +111,19 @@ $_pages = Array(
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="/" style="padding:0px 10px 0px 0px;"><img src="images/logo_small.png" style="height: 50px;"/></a>
+              <a class="logo" href="/" style="padding:0px 10px 0px 0px;"><img src="images/logo_small.png" style="height: 50px;"/></a>
         </div>
     <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav">
+<li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" 
+	href="#"> &nbsp; <b class="caret"></b></a>
+	<ul class="dropdown-menu">
+		<li><a href="http://iowa.cocorahs.org">Iowa CoCoRaHS</a></li>
+		<li><a href="http://wepp.mesonet.agron.iastate.edu">Iowa Daily Erosion Project</a></li>
+		<li><a href="http://schoolnet8.com">SchoolNet8.com</a></li>
+		<li><a href="http://sustainablecorn.org">Sustainable Corn</a></li>
+	</ul></li>
+        
   <?php 
   $THISPAGE = isset($THISPAGE) ? $THISPAGE : "xxx-xxx";
   $ar = preg_split('/-/', $THISPAGE);
@@ -143,7 +152,7 @@ if (defined('IEM_APPID')){
 		and appid != $1) ORDER by name ASC");
 	$_rs = pg_execute($_mesosite, "_SELECTOR_", Array(IEM_APPID));
 	if (pg_numrows($_rs) > 0){
-		echo "<li class=\"dropdown\"><a class=\"dropdown-trigger\" data-toggle=\"dropdown\" href=\"#\">Related <b class=\"icon-star\"></b>";
+		echo "<li class=\"dropdown\"><a class=\"dropdown-trigger\" data-toggle=\"dropdown\" href=\"#\">Related <b class=\"caret\"></b>";
 		echo "<ul class=\"dropdown-menu\">\n";
 		for ($i=0;$_row=@pg_fetch_assoc($_rs,$i);$i++){
 			$url = ROOTURL . $_row["url"];

@@ -1,4 +1,9 @@
+<?php 
+/*
+ * - highlight note <-- Eliminated
+ */
 
+?>
 <?php include 'header.phtml'; ?>
 <?php include 'navbar.phtml'; ?>
 
@@ -7,8 +12,17 @@
 
         <div class="col-md-9">
        
-        	<p>The Iowa Environmental Mesonet (IEM) collects environmental data from cooperating members with observing networks. The data are stored and made available on this website.</p>
-<div class="well">
+ <p>The Iowa Environmental Mesonet (IEM) collects environmental data from 
+ cooperating members with observing networks. The data are stored and made 
+ available on this website.</p>
+
+<div class="btn-group btn-group-justified">
+<a href="/agweather/" class="btn btn-default agweather">Ag Weather</a>
+<a href="/nws/" class="btn btn-default nws">NWS Users</a>
+<a href="/archive/" class="btn btn-default book">Researchers</a>
+</div>
+        	
+        	
 <?php 
 /*
  * Template for IEM Daily Feature!
@@ -62,24 +76,22 @@ if (is_file($fref)){
 $imghref = sprintf("%s/onsite/features/%s_s.png", ROOTURL, $row["imageref"]);
 ?>
 
-<div class="row">
- <div class="col-md-4"><h4><?php echo $row["title"]; ?></h4></div>
- <div class="col-md-8">
-	<div class="btn-group pull-right">
+<div class="panel panel-default top-buffer">
+  <div class="panel-heading">
+  <b>IEM Daily Feature</b> &nbsp; <a href="/feature_rss.php"><img src="/images/rss.gif" /></a>
+  <div class="btn-group pull-right">
 <a class="btn btn-default" href="<?php echo $fburl; ?>">Facebook</a>
 <a class="btn btn-default" href="/onsite/features/cat.php?day=<?php echo $row["permalink"]; ?>">Permalink</a>
 <a class="btn btn-default" href="/onsite/features/past.php">Past Features</a>
 <a class="btn btn-default" href="/onsite/features/tags/">Tags</a>
 	</div>
+	<div class="clearfix"></div>
+  </div>
+  <div class="panel-body">
+
+  <h4 style="display: inline;"><?php echo $row["title"]; ?></h4>
  
- </div>
-</div><!-- end row-fluid -->
-
-
-
-<div class="pull-left clearfix">
-
-
+<div class="pull-left">
 <?php 
 echo "<small>Posted: ". $row["webdate"] ."</small>";
 echo "<img src=\"$imghref\" alt=\"Feature\" class=\"pull-right\" />";
@@ -136,28 +148,8 @@ if ($i % 2 != 0){ echo "\n<div class=\"col-md-6\">&nbsp;</div>\n</div>"; }
 ?>
 
 
-</div><!--  end of well -->
-          <div class="row pull-left">
-            <div class="col-md-4">
-              <h3>RADAR Products</h3>
-            <img src="/data/mwcomp.png" class="img-responsive" />
-              <p> The IEM processes National Weather Service NEXRAD information
-              in real-time to produce and archive many products.  This includes... </p>
-              <p><a class="btn" href="#">View details &raquo;</a></p>
-            </div><!--/span-->
-            <div class="col-md-4">
-              <h3>Precipitation</h3>
-            <img src="/data/iowa_q2_1d.png" class="img-responsive" />
-              <p>sdfg </p>
-              <p><a class="btn" href="#">View details &raquo;</a></p>
-            </div><!--/span-->
-            <div class="col-md-4">
-              <h2>Current Data</h2>
-            <img src="/data/iowa_tmpf.png" class="img-responsive" />
-              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-              <p><a class="btn" href="#">View details &raquo;</a></p>
-            </div><!--/span-->
-          </div><!--/row-->
+</div><!--  end of panel body -->
+</div>
         </div><!--/span-->
         <div class="col-md-3">
           <div class="sidebar-nav">
@@ -204,7 +196,7 @@ if ($rancam == ""){ $rancam = "KCWI-001";}
 
 
 <div class="panel panel-default">
-  <div class="panel-heading">News Items</div>
+  <div class="panel-heading">News Items &nbsp; <a href="/rss.php"><img src="/images/rss.gif" /></a></div>
   <div class="panel-body">
 <?php 
 $rs = pg_query($connection, "SELECT * from news ORDER by entered DESC LIMIT 5");
@@ -219,6 +211,11 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
 }
 
 ?>
+
+<p><b class='glyphicon-envelope'></b>
+<a href="/mailman/listinfo/dailyb">Sign up</a> for the 
+<a href="/data/iemdb.html">Daily Bulletin</a></p>
+
   </div>
 </div>
 
@@ -226,6 +223,59 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
         </div><!--/span-->
       </div><!--/row-->
 
-    </div><!--/.fluid-container-->
+<!-- Three columns highlighting stuff -->
+<div class="row">
+    <div class="col-md-4">
+        <h3>RADAR Products</h3>
+        <img src="/data/mwcomp.png" class="img-responsive" />
+        <p>The IEM processes National Weather Service NEXRAD information
+        in real-time to produce and archive many products. This includes a 
+        generated <a href="/docs/nexrad_composites/">composite</a> produced
+        every five minutes dating back to 1995!</p>
+        <p><a class="btn" href="/current/radar.phtml">View more products &raquo;</a></p>
+    </div>
+    <div class="col-md-4">
+        <h3>Precipitation</h3>
+        <img src="/data/iowa_q2_1d.png" class="img-responsive" />
+        <p>Besides point observations of precipitation, the IEM also processes
+        gridded rainfall products made available by NOAA.  This information
+        is archived and made available in GIS ready formats.</p>
+        <p><a class="btn" href="/rainfall/">Download Precipitation for GIS &raquo;</a></p>
+    </div>
+    <div class="col-md-4">
+        <h3>Current Data</h3>
+        <img src="/data/iowa_tmpf.png" class="img-responsive" />
+        <p>The IEM combines data from participating networks into products
+        like maps shown above and web applications to analyze the data.</p>
+        <p><a class="btn" href="/current/">More current products &raquo;</a></p>
+    </div>
+</div><!--/row-->
+
+<div class="row clearfix well">
+<div class="col-md-1"><h4>Partners:</h4></div>
+<div class='col-md-2'>
+<a href="http://www.agron.iastate.edu/initiatives/default.html"><img
+src="/images/ptfmark.gif" alt="Agronomy Path to the Future" class="img-responsive"></a>
+</div>
+<div class='col-md-2'>
+<a href="http://www.iihr.uiowa.edu"><img src="images/iihrlogo.jpg"
+  alt="IIHR - University of Iowa" class="img-responsive" /></a>
+</div>
+<div class='col-md-3'>
+ <a href="http://www.dot.state.ia.us"><img src="images/doticon.gif"
+ alt="DOT" class="img-responsive" /></a>
+</div>
+<div class='col-md-2'>
+  <a href="http://www.iastate.edu"><img src="images/isuicon.gif" alt="ISU"
+  class="img-responsive" /></a>
+</div>
+<div class='col-md-2'>
+  <a href="http://www.crh.noaa.gov/dmx/"><img src="images/nws.gif"
+  alt="NWS" class="img-responsive" /></a>
+</div>
+
+</div>
+
+</div><!--/.container-->
 
 <?php include 'footer.phtml'; ?>
