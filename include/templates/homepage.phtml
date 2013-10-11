@@ -154,7 +154,7 @@ if ($i % 2 != 0){ echo "\n<div class=\"col-md-6\">&nbsp;</div>\n</div>"; }
         <div class="col-md-3">
           <div class="sidebar-nav">
 <?php 
-include_once(ROOTPATH ."/include/cameras.inc.php");
+include_once(dirname(__FILE__) ."/../cameras.inc.php");
 $rancam = "";
 $loop = 0;
 while ($rancam == "" && $loop < 20)
