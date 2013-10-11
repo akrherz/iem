@@ -37,7 +37,7 @@ END
 
 REFERENCE
   EXTENT -97.500000 38.922000 -89.300000 45.078000
-  IMAGE /mesonet/data/gis/images/unproj/refmap/iowa.png
+  IMAGE /mesonet/data/gis/static/images/unproj/refmap/iowa.png
   OUTLINECOLOR 255 0 0
   COLOR -1 -1 -1
   STATUS ON

@@ -18,7 +18,7 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
 
- $sql = "select round(sum(area(transform(geom,2163)) / 1000000.0)::numeric,0) as area, sumtxt( n.name || ' ['||n.state||'], ') as locations, eventid,
+ $sql = "select round(sum(ST_area(ST_transform(geom,2163)) / 1000000.0)::numeric,0) as area, sumtxt( n.name || ' ['||n.state||'], ') as locations, eventid,
          min(issue) as issued, max(expire) as expired from
         (select distinct ugc, eventid, issue, expire from warnings_$year
          WHERE wfo = '$wfo' and gtype = 'C' and
@@ -34,7 +34,7 @@ if (($phenomena == "SV" || $phenomena == "TO" || $phenomena == "FF" || $phenomen
        significance = '$significance' and phenomena = '$phenomena' and eventid is not null) as foo,
    nws_ugc n WHERE n.ugc = foo.ugc GROUP by eventid ORDER by eventid ASC) as foo2, 
 
-(select area(transform(geom,2163)) / 1000000.0 as area, eventid 
+(select ST_area(ST_transform(geom,2163)) / 1000000.0 as area, eventid 
         from warnings_$year WHERE wfo = '$wfo' and gtype = 'P' and
        significance = '$significance' and phenomena = '$phenomena' and eventid is not null) as foo3  WHERE foo3.eventid = foo2.eventid";
 

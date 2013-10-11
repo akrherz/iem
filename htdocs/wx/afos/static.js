@@ -288,7 +288,7 @@ tp.addListener('click', function(node, e){
                 new Ext.BoxComponent({ // raw
                     region:'north',
                     el: 'iem-header',
-                    height:130
+                    height:70
                 }),
                 new Ext.BoxComponent({ // raw
                     region:'south',

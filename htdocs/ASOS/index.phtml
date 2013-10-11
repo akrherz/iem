@@ -1,34 +1,38 @@
 <?php 
  include("../../config/settings.inc.php");
  define("IEM_APPID", 21);
-  $THISPAGE = 'networks-asos'; 
-  $TITLE = "IEM | ASOS Data";
-include("$rootpath/include/header.php"); 
-?>
 
+include_once('../../include/myview.php');
+
+$t = new MyView();
+$t->thispage = 'networks-asos';
+$t->title = "ASOS/AWOS Network";
+
+
+$t->north = <<< EOF
 <h3 class="heading">ASOS Network</h3><p>
 
-<div class="text">
-<table><tr><td style="width: 650px;" valign="top">
-The Automated Surface Observing System (ASOS) is considered
-to be the flagship automated observing network.  Located at airports, the ASOS
-stations provide essential observations for the National Weather Service (NWS), the Federal Aviation Administration (FAA), and the Department of Defense (DOD).
-The primary function of the ASOS stations are to take minute-by-minute 
-observations and generate basic weather reports.<font class="ref">[1]</font></td><td>
-
-<div class="ninfo">
+<div class="well pull-right">
 <b><u>ASOS</u></b>
 <br>Reports: Hourly
 <br>Stations: 15
 <br><a href="/sites/locate.php?network=IA_ASOS">Locations</a>
-</div></td></tr></table>
+</div>
+		
+The Automated Surface Observing System (ASOS) is considered
+to be the flagship automated observing network.  Located at airports, the ASOS
+stations provide essential observations for the National Weather Service (NWS), the Federal Aviation Administration (FAA), and the Department of Defense (DOD).
+The primary function of the ASOS stations are to take minute-by-minute 
+observations and generate basic weather reports.<font class="ref">[1]</font>
 
+		
 <p class="intro">Observations from the ASOS network are nationally monitored 
 for quality 24 hours per day.  Depending on the trouble, maintenance can
 be performed on the same day.</p>
 
-<table width="100%">
-<tr><td width="50%" valign="top">
+EOF;
+
+$t->west = <<< EOF
 
 <P><h3 class="subtitle">Current ASOS Data:</h3>
 <UL>
@@ -58,8 +62,8 @@ available here for Iowa sites.
  <li><a href="precipnote.phtml">Note about ASOS Precipitation Timing</a></li>
  </ul>
 
-</td><td valign="top" width="50%">
-
+EOF;
+$t->east = <<< EOF
 <p><h3 class="subtitle">Historical Data:</h3>
 <ul>
  <li><a href="../request/download.phtml">Download</a> data from the archive</li>
@@ -92,8 +96,8 @@ available here for Iowa sites.
   <li><a href="/data/snet/P2compare.gif">Pressure vs SchoolNet Network (in)</a></li>
 </ul>
 
-</td></tr></table>
-
+EOF;
+$t->south = <<< EOF
 <p><b>References:</b><br>
 <b>1</b> Adapted from the <a href="http://www.nws.noaa.gov/asos/pdfs/aum-toc.pdf">ASOS User's Guide</a>
 
@@ -101,6 +105,7 @@ available here for Iowa sites.
 <li><a href="http://www.nws.noaa.gov/asos/pdfs/AWPAG_stat.pdf">All Weather Precipitation Gauge</a> install dates.</li>
 </ul>
 
-<br><br></div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+<br><br>
+EOF;
+$t->render('single.phtml');
+?>

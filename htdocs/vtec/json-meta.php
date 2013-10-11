@@ -14,8 +14,8 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : die();
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : die();
 $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : die();
 
-$query1 = "SELECT xmax(geom) as x1, xmin(geom) as x0, 
-                  ymin(geom) as y0, ymax(geom) as y1, *
+$query1 = "SELECT ST_xmax(geom) as x1, ST_xmin(geom) as x0, 
+                  ST_ymin(geom) as y0, ST_ymax(geom) as y1, *
                   from warnings_$year WHERE wfo = '$wfo' and 
                   phenomena = '$phenomena' and eventid = $eventid 
                   and significance = '$significance' and geom is not null 

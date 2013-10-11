@@ -4,7 +4,7 @@ define("IEM_APPID", 6);
 include("$rootpath/include/database.inc.php");
 $pgconn = iemdb("mesosite");
 $rs = pg_prepare($pgconn, "NTSELECT", "SELECT *, 
-            x(geom) as longitude, y(geom) as latitude from stations 
+            ST_x(geom) as longitude, ST_y(geom) as latitude from stations 
             WHERE online = 'y' and 
 			network = $1 ORDER by name");
 include("$rootpath/include/imagemaps.php");
@@ -30,12 +30,12 @@ if (isset($_REQUEST['station'])){
 ?>
 <h3 class="heading">Network Location Tables</h3>
 
-<div style="float: right; width: 150px; border: 1px solid #000; margin: 10px; padding: 5px;">
+<div class="well pull-right">
 <a href="new-rss.php"><img src="../images/rss.gif" style="border: 0px;" alt="RSS" /></a> Feed of newly 
 added stations.
 </div>
 
-<div class="text">
+
 <p>With this form, you can generate a station table for any
 of the networks listed below.  If there is a particular format for a station
 table that you need, please let use know.</p>
@@ -76,7 +76,7 @@ table that you need, please let use know.</p>
 	if (strlen($network) > 0){
 		$result = pg_execute($pgconn, "NTSELECT", Array($network) );
 		if ($format == "html"){
-		  echo "<p><table cellspacing='0' cellpadding='2' border='1'>\n";
+		  echo "<p><table class=\"table table-striped\">\n";
 		  echo "<caption><b>". $network ." Network</b></caption>\n";
 		  echo "<thead><tr><th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
 			<th>Longitude<sup>1</sup></th><th>Elevation [m]</th><th>Archive Begins</th></tr></thead>\n";
@@ -192,7 +192,7 @@ if (! $nohtml) {
 <b>1</b>:  Latitude and Longitude values are in decimal degrees.
 <br />Elevation is expressed in meters above sea level.
 
-<br><br></div>
+
 
 <!-- Begin the bottom of the page-->
 
