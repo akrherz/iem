@@ -1,6 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 
 $con = iemdb("postgis");
 $sql = "SELECT max(valid) as valid from roads_current";
@@ -195,8 +195,12 @@ function myrefresh(layer){
 ";
 $TITLE = "IEM Interactive Road Conditions";
 $BODYEXTRA = "onload=\"init()\"";
-include("$rootpath/include/header.php");
+include("../../include/header.php");
 ?>
+<ol class="breadcrumb">
+  <li><a href="/roads/">Roads</a></li>
+  <li class="active">Interactive Mapping</li>
+</ol>
     <style type="text/css">
         #map {
             width: 800px;
@@ -209,4 +213,4 @@ include("$rootpath/include/header.php");
 <img src="http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi?LAYER=roadcond-noninterstate&FORMAT=image%2Fpng&TRANSPARENT=true&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&STYLES=&EXCEPTIONS=application%2Fvnd.ogc.se_inimage&SRS=EPSG%3A4326&BBOX=-92.8125,36.5625,-90,39.375&WIDTH=256&HEIGHT=256" style="position: absolute; left: 10px; top: 310px; z-index: 777;">
 <img src="http://mesonet.agron.iastate.edu/cgi-bin/wms/us/roadtemps.cgi?LAYER=roadtemps&FORMAT=image%2Fpng&TRANSPARENT=true&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&STYLES=&EXCEPTIONS=application%2Fvnd.ogc.se_inimage&SRS=EPSG%3A4326&BBOX=-92.8125,36.5625,-90,39.375&WIDTH=256&HEIGHT=256" style="position: absolute; left: 55px; top: 180px; z-index: 777;">
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../include/footer.php"); ?>

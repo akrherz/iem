@@ -1,4 +1,9 @@
 <?php 
+if (isset($this)){
+	$THISPAGE = array_key_exists('thispage', $this->vars)? $this->thispage : 'xxx-xxx';
+} else{
+	$THISPAGE = isset($THISPAGE) ? $THISPAGE: 'xxx-xxx';
+}
 $_pages = Array(
 		"archive" => Array(
 				"base" => Array("title" => "Archive", "url" => "/archive/"),
@@ -82,7 +87,7 @@ $_pages = Array(
 				"sort" => Array("title" => "Sortable Text", "url" => "/roads/rc.phtml"),
 		), 
 		"severe" => Array(
-				"base" => Array("title" => "Severe Weather", "url" => "/current/severe.phtml"),
+				"base" => Array("title" => "Svr Wx", "url" => "/current/severe.phtml"),
 				"main" => Array("title" => "Mainpage", "url" => "/current/severe.phtml"),
 				"cow" => Array("title" => "IEM Cow (SBW Verification)", "url" => "/cow/"),
 				"iembot" => Array("title" => "iembot", "url" => "/projects/iembot/"),
@@ -94,7 +99,7 @@ $_pages = Array(
 				"vtec" => Array("title" => "VTEC Browser", "url" => "/vtec/"),
 		),
 		"webcam" => Array(
-				"base" => Array("title" => "Web Cams", "url" => "/current/webcam.php"),
+				"base" => Array("title" => "Webcams", "url" => "/current/webcam.php"),
 				"still" => Array("title" => "Still Images", "url" => "/current/webcam.php"),
 				"viewer" => Array("title" => "Hi-res + Live", "url" => "/current/viewer.phtml"),
 				"loop" => Array("title" => "Loops", "url" => "/current/bloop.phtml"),
@@ -103,34 +108,35 @@ $_pages = Array(
 		),
 );
 ?>
+    <div class="container" id="iem-header">
 <div class="navbar navbar-inverse">
-    <div class="container">
-        <div class="navbar-header">
+    <div class="navbar-header">
              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="logo" href="/" style="padding:0px 10px 0px 0px;"><img src="images/logo_small.png" style="height: 50px;"/></a>
+              <a class="navbar-brand logo-nav" href="/" style="padding:0px 5px 0px 0px;"><img alt="IEM" style="height: 50px;" src="/images/logo_small.png" /></a>
         </div>
-    <div class="collapse navbar-collapse">
+    <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
+        
 <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" 
-	href="#"> &nbsp; <b class="caret"></b></a>
+	href="#"> <span class="glyphicon glyphicon-home"></span> </a>
 	<ul class="dropdown-menu">
-		<li><a href="http://iowa.cocorahs.org">Iowa CoCoRaHS</a></li>
+		<li><a href="http://mesonet.agron.iastate.edu">Iowa Environmental Mesonet</a></li>
+	    <li><a href="http://iowa.cocorahs.org">Iowa CoCoRaHS</a></li>
 		<li><a href="http://wepp.mesonet.agron.iastate.edu">Iowa Daily Erosion Project</a></li>
 		<li><a href="http://schoolnet8.com">SchoolNet8.com</a></li>
 		<li><a href="http://sustainablecorn.org">Sustainable Corn</a></li>
 	</ul></li>
         
   <?php 
-  $THISPAGE = isset($THISPAGE) ? $THISPAGE : "xxx-xxx";
   $ar = preg_split('/-/', $THISPAGE);
 while( list($idx, $page) = each($_pages) )
 {
   	echo sprintf("<li class=\"dropdown%s\">\n<a class=\"dropdown-toggle\" 
-		data-toggle=\"dropdown\" href=\"#\">%s <b class=\"caret\"></b></a>\n", 
+		data-toggle=\"dropdown\" href=\"#\">%s<span class=\"caret\"></span></a>\n", 
       ($ar[0] == $idx) ? " active" : "", $page["base"]["title"]);
 
     echo "<ul class=\"dropdown-menu\">\n";
@@ -138,7 +144,7 @@ while( list($idx, $page) = each($_pages) )
     {
        echo sprintf("<li><a%s href=\"%s\">%s</a></li>\n", 
          ($ar[1] == $idx2 && $ar[0] == $idx) ? " class=\"active\"" : "",
-          ROOTURL . $page[$idx2]["url"],  $page[$idx2]["title"] );
+           $page[$idx2]["url"],  $page[$idx2]["title"] );
     }
     echo "</ul>\n</li>\n";
 }
@@ -152,10 +158,10 @@ if (defined('IEM_APPID')){
 		and appid != $1) ORDER by name ASC");
 	$_rs = pg_execute($_mesosite, "_SELECTOR_", Array(IEM_APPID));
 	if (pg_numrows($_rs) > 0){
-		echo "<li class=\"dropdown\"><a class=\"dropdown-trigger\" data-toggle=\"dropdown\" href=\"#\">Related <b class=\"caret\"></b>";
+		echo "<li class=\"dropdown\"><a class=\"dropdown-trigger\" data-toggle=\"dropdown\" href=\"#\">Related <b class=\"caret\"></b></a>\n";
 		echo "<ul class=\"dropdown-menu\">\n";
 		for ($i=0;$_row=@pg_fetch_assoc($_rs,$i);$i++){
-			$url = ROOTURL . $_row["url"];
+			$url =  $_row["url"];
 			if (substr($_row["url"],0,1) == "h"){
 				$url = $_row["url"];
 			}

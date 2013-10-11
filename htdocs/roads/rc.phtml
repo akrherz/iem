@@ -44,8 +44,10 @@ $vals = Array("number" => "Route #", "type" => "Road Classification",
   "segid" => "Travel Path");
 
 ?>
-
-<div class="text">
+<ol class="breadcrumb">
+  <li><a href="/roads/">Roads</a></li>
+  <li class="active">Sortable Conditions</li>
+</ol>
 
 <h3 class="subtitle"><center>Iowa Road Conditions valid <?php echo $valid; ?></center></h3><p>
 
@@ -55,7 +57,7 @@ a column to sort it or sort by <a href=\"rc.phtml?sortcol=segid\">travel path</a
 ?>
 
 
-<table style="font-size: 10pt; width: 85%;" class="ruler">
+<table class="table table-striped">
 <thead>
 <tr>
   <?php $uri = "rc.phtml?sortcol="; ?>

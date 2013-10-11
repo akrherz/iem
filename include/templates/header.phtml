@@ -1,8 +1,25 @@
+<?php 
+if (isset($this)){
+	$title = array_key_exists('title', $this->vars)? 'IEM :: '. $this->title : 'Iowa Environmental Mesonet';
+	$refresh = array_key_exists('refresh', $this->vars)? $this->refresh : '';
+	$headextra = array_key_exists('headextra', $this->vars)? $this->headextra : '';
+	$bodyextra = array_key_exists('bodyextra', $this->vars)? ' '. $this->bodyextra : '';
+} else{
+	$title = isset($TITLE) ? $TITLE: 'Iowa Environmental Mesonet';
+	$refresh = isset($REFRESH)? $REFRESH: '';
+	$headextra = isset($HEADEXTRA) ? $HEADEXTRA: '';
+	$bodyextra = isset($BODYEXTRA) ? ' '. $BODYEXTRA: '';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <?php 
+    echo $refresh; 
+    echo $headextra; 
+    ?>
     <meta charset="utf-8">
-    <title><?php echo isset($this->vars['title']) ? $this->title: 'Iowa Environmental Mesonet' ; ?></title>
+    <title><?php echo $title; ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Iowa State University, Iowa Environmental Mesonet">
     <meta name="author" content="daryl herzmann akrherz@iastate.edu">
@@ -16,6 +33,13 @@
       <script src="/js/html5shiv.js"></script>
       <script src="/js/respond.min.js"></script>
     <![endif]-->
+	<meta name="twitter:image" content="http://mesonet.agron.iastate.edu/images/logo_small.png">
+	<meta name="twitter:title" content="Iowa Environmental Mesonet">
+	<meta name="twitter:description" content="Iowa Environmental Mesonet">
+	<meta name="twitter:url" content="http://mesonet.agron.iastate.edu">
+	<meta name="twitter:creator" content="@akrherz">
+	<meta name="twitter:image:width" content="85">
+	<meta name="twitter:image:height" content="65">
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="/favicon.ico">
@@ -25,4 +49,4 @@
     <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png">
   </head>
 
-  <body>
+  <body<?php echo $bodyextra; ?>>

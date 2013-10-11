@@ -1,17 +1,19 @@
 <?php
-include("../../config/settings.inc.php");
+require '../../config/settings.inc.php';
 define("IEM_APPID", 58);
-$TITLE = "IEM | Drought Monitoring Products";
-$THISPAGE = "climatology-drought";
-include("$rootpath/include/header.php");
-?>
+include_once('../../include/myview.php');
 
+$t = new MyView();
+$t->title = "Drought Monitoring Products";
+$t->thispage = "climatology-drought";
+
+$t->west = <<<EOF
 <h3 class="heading">Drought Monitoring Products</h3>
 
 <p class="intro">Here is a listing of resources related to drought 
 monitoring.</p>
 
-<table><tr><td>
+
 
 <p><b>Drought Monitors:</b>
 <ul>
@@ -28,7 +30,8 @@ monitoring.</p>
 <ul>
  <li><a href="http://www.cpc.ncep.noaa.gov/soilmst/img/curr.w.anom.daily.gif">Calculated Soil Moisture Anomaloy</a> [CPC]</li>
 </ul>
-
+EOF;
+$t->east = <<<EOF
 <p><b>Ground Water Status:</b>
 <ul>
  <li><a href="http://groundwaterwatch.usgs.gov/">USGS Ground Water Watch</a></li>
@@ -51,12 +54,10 @@ monitoring.</p>
  <li><a href="http://ndmc.unl.edu/">National Drought Mitigation Center, UNL</a></li>
  <li><a href="http://www.wrcc.dri.edu/">Western Regional Climate Center</a></li>
 </ul>
+EOF;
 
-</td><td valign="TOP"> 
-
-
-</td></tr></table>
-
+$t->south = <<<EOF
 <p>Please <a href="/info/contacts.php">contact us</a> if you have links you would like added on this page.
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

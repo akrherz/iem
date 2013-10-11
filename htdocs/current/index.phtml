@@ -1,23 +1,21 @@
 <?php 
- include("../../config/settings.inc.php");
- $THISPAGE = "current-products";
- $TITLE = "IEM | Current Data";
- include("../../include/header.php"); 
-?>
 
-<table width="800px">
-<tr><th>IEM Station Plot</th><th>Current Temperatures</th><th>Rainfall Today</th></tr>
-<tr>
-<td><a href="/timemachine/#1.0"><img src="/data/mesonet.gif" border="0" width="275"/></a></td>
-<td><a href="/data/iowa_tmpf.png"><img src="/data/iowa_tmpf.png" border="0" width="275"/></a></td>
-<td><a href="/timemachine/#45.<?php echo sprintf("%s0000", date("Ymd"));?>"><img src="/data/iowa_q2_1d.png" border="0" width="275"/></a></td>
-</tr>
-</table>
+require '../../config/settings.inc.php';
+include_once('../../include/myview.php');
 
+$t = new MyView();
+$t->thispage = "current-products";
+$t->title = "Current Products";
 
+$daylink = sprintf("%s0000", date("Ymd"));
+$mhourlink = gmdate("YmdH", time() -3600) ."00";
+$t->content = <<<EOF
 
-<table border="1" cellpadding="3" cellspacing="0">
-<tr><td valign="top" width="33%">
+<div class="row">
+<div class="col-md-4">
+
+<h4>IEM Station Plot</h4>
+<a href="/timemachine/#1.0"><img class="img-responsive" src="/data/mesonet.gif" /></a>
 
 <h3 class="subtitle">Mesonet Plots</h3>
 <ul>
@@ -36,8 +34,8 @@
 <p>These plots are from the <a href="http://nmq.ou.edu">National Mosaic QPE</a>
 project providing precipitation estimates at a 5 minute and 1 km interval.
 <ul>
-  <li><a href="/timemachine/#44.<?php echo gmdate("YmdH", time() -360); ?>00">Current Precip Intensity</a></li>
-  <li><a href="/timemachine/#45.<?php echo gmdate("YmdH", time() -360); ?>00">Today's Precip</a></li>
+  <li><a href="/timemachine/#44.{$mhourlink}">Current Precip Intensity</a></li>
+  <li><a href="/timemachine/#45.{$mhourlink}">Today's Precip</a></li>
   <li>1 Hour Total (<a href="../data/iowa_q2_1h.png">Current</a> or <a href="../timemachine/#46.0">Archive</a> )</li>
   <li>3 Hour Total (<a href="../data/iowa_q2_3h.png">Current</a> or <a href="../timemachine/#47.0">Archive</a> )</li>
   <li>6 Hour Total (<a href="../data/iowa_q2_6h.png">Current</a> or <a href="../timemachine/#48.0">Archive</a> )</li>
@@ -48,7 +46,12 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
 <h3 class="subtitle">External Website Resources:</h3>
 <a href="http://www.rap.ucar.edu/weather/surface/">RAP Surface Page</a>
 
-</td><td valign="top" width="33%">
+</div><div class="col-md-4">
+
+		<h4>Current Temperatures</h4>
+<a href="/data/iowa_tmpf.png"><img src="/data/iowa_tmpf.png" class="img-responsive"/></a>
+<br />
+		
 
 <h3 class="subtitle">Single Variable Plots</h3>
 <ul>  <li><a href="/data/mesonet_altm.gif">Altimeter</a></li>
@@ -63,11 +66,11 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
 <ul>
   <li><a href="/timemachine/#37.0">Iowa Precipitation Contour [COOP]</a></li>
   <li><a href="/timemachine/#38.0">Midwest Precipitation Contour [COOP]</a></li>
-  <li><a href="/timemachine/#39.<?php echo gmdate("YmdH", time() -3600); ?>00">Iowa StageIV Hourly Estimate</a></li>
-  <li><a href="/timemachine/#40.<?php echo gmdate("YmdH", time() -3600); ?>00">Midwest StageIV Hourly Estimate</a></li>
-  <li><a href="/timemachine/#41.<?php echo date("Ymd"); ?>0000">Iowa StageIV Daily Estimate</a></li>
-  <li><a href="/timemachine/#42.<?php echo date("Ymd"); ?>0000">Midwest Daily Estimate</a></li>
-  <li><a href="/timemachine/#43.<?php echo date("Ymd"); ?>0000">US StageIV Daily Estimate</a></li>
+  <li><a href="/timemachine/#39.{$mhourlink}">Iowa StageIV Hourly Estimate</a></li>
+  <li><a href="/timemachine/#40.{$mhourlink}">Midwest StageIV Hourly Estimate</a></li>
+  <li><a href="/timemachine/#41.{$daylink}">Iowa StageIV Daily Estimate</a></li>
+  <li><a href="/timemachine/#42.{$daylink}">Midwest Daily Estimate</a></li>
+  <li><a href="/timemachine/#43.{$daylink}">US StageIV Daily Estimate</a></li>
 
   <li><a href="/data/1hprecip.gif">ASOS + AWOS (Last Hour)</a></li>
   <li><a href="/data/summary/today_prec.png">ASOS + AWOS (Today)</a></li>
@@ -79,13 +82,17 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
   <li><a href="/GIS/apps/delta/plot.php">1 hour Pressure Change</a></li>
 </ul>
 
-</td><td valign="top" width="33%">
+</div><div class="col-md-4">
 
+		<h4>Rainfall Today</h4>
+<a href="/timemachine/#45.{$daylink}"><img src="/data/iowa_q2_1d.png" class="img-responsive"/></a>
+<br />
+		
 <h3>Wind Plots</h3>
 <ul>
-  <li><a href="/timemachine/#60.<?php echo gmdate("YmdH", time() -3600); ?>00">Wind Power Potential</a></li>
+  <li><a href="/timemachine/#60.{$mhourlink}">Wind Power Potential</a></li>
   <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
-  <li><a href="/timemachine/#16.<?php echo date('Ymd');?>0000">Wind Gust Today</a></li>
+  <li><a href="/timemachine/#16.{$daylink}">Wind Gust Today</a></li>
 </ul>
 
 
@@ -121,10 +128,8 @@ project providing precipitation estimates at a 5 minute and 1 km interval.
 <br><a href="http://www.rap.ucar.edu/weather/upper/top.gif">Topeka</a>
 <br /><a href="http://www.uni.edu/storm/">Profiling Radiometer @UNI</a>
 
-</td></tr>
-</table>
-
+		</div>
 </div>
-
-
-<?php include("../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+ ?>
