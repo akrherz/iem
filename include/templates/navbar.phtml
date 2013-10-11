@@ -145,7 +145,7 @@ while( list($idx, $page) = each($_pages) )
 
 /* Look for related IEM Apps */
 if (defined('IEM_APPID')){
-	include_once(ROOTPATH ."/include/database.inc.php");
+	include_once(dirname(__FILE__)."/../database.inc.php");
 	$_mesosite = iemdb("mesosite");
 	pg_prepare($_mesosite, "_SELECTOR_", "SELECT * from iemapps where appid in
 		(SELECT appid from iemapps_tags WHERE tag in (SELECT tag from iemapps_tags where appid = $1)
