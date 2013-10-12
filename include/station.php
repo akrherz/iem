@@ -11,10 +11,10 @@ class StationData {
     $this->dbconn = iemdb("mesosite");
 
     $rs = pg_prepare($this->dbconn, "SELECT  ST1", "SELECT *, " .
-    		"x(geom) as lon, y(geom) as lat from stations " .
+    		"ST_x(geom) as lon, ST_y(geom) as lat from stations " .
     		"WHERE id = $1 and network = $2");
     $rs = pg_prepare($this->dbconn, "SELECT  ST2", "SELECT *, " .
-    		"x(geom) as lon, y(geom) as lat from stations " .
+    		"ST_x(geom) as lon, ST_y(geom) as lat from stations " .
     		"WHERE id = $1");
     
     if (is_string($a)) $this->load_station($a,$n);
