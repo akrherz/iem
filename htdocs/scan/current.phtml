@@ -33,8 +33,11 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 
 ?>
 
-<div class="text">
-<b>Nav:</b><a href="/scan/">SCAN</a> <b> > </b> Current Conditions
+<ol class="breadcrumb">
+  <li><a href="/scan/">SCAN</a></li>
+  <li class="active">Sortable Currents</li>
+</ol>
+
 <?php $current_network = "SCAN"; include("$rootpath/include/current_bar.inc.php"); ?>
 
 <p><h3 class="subtitle"><center>Current SCAN Conditions</center></h3><p>
@@ -248,6 +251,5 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 </tr>
 </tfoot>
 </table>
-<br><br></div>
 
 <?php include("$rootpath/include/footer.php"); ?>

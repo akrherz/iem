@@ -5,7 +5,7 @@
  */
 include("../../config/settings.inc.php");
 define("IEM_APPID", 9);
- include("$rootpath/include/iemprop.php");
+ include("../../include/iemprop.php");
  $camera_refresh = get_iemprop("webcam.interval");
 $HEADEXTRA = "
   <link rel='stylesheet' type='text/css' href='http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css'/>
@@ -14,15 +14,15 @@ $HEADEXTRA = "
 <script>
 Ext.namespace('cfg');
 cfg.refreshint = ${camera_refresh}000;
-cfg.header = 'myheader';
-cfg.headerHeight = 30;
+cfg.header = 'iem-header';
+cfg.headerHeight = 60;
 cfg.jsonSource = '/json/webcams.php';
 </script>
-  <script type='text/javascript' src='webcam-static.js?v=5'></script>
+  <script type='text/javascript' src='webcam-static.js?v=6'></script>
 <style>
-#iem-header {
-	display : none;
-}
+#iem-footer {
+	display: none;
+	}
 .webimage {
   height: 240px;
   width : 320px;
@@ -43,12 +43,9 @@ cfg.jsonSource = '/json/webcams.php';
 $NOCONTENT = 1;
 $TITLE = "IEM Webcams";
 $THISPAGE = "webcam-still";
-include("$rootpath/include/header.php");
+include("../../include/header.php");
 ?>
 <div id="main">
-</div>
-<div id="myheader" class="x-hidden">
-<p>&nbsp; Go back to <a href="<?php echo $rooturl; ?>">IEM Homepage</a>.
 </div>
 <div id="help" class="x-hidden">
 <h3 style="margin: 10px;">Web Camera Interactive Viewer</h3>
@@ -72,6 +69,4 @@ and the application will automatically update to show you the images. The IEM ha
 </ul>
 
 </div>
-
-</body>
-</html>
+<?php include("../../include/footer.php"); ?>

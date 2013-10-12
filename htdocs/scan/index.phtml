@@ -1,26 +1,26 @@
 <?php 
 include("../../config/settings.inc.php");
-  $TITLE = "IEM | SCAN Site Data";
-$THISPAGE = 'networks-scan';
-include("$rootpath/include/header.php"); 
-?>
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Soil Climate Analysis Network";
+$t->thispage = "networks-scan";
 
+$t->content = <<<EOF
 <h3 class="heading">SCAN Network</h3><p>
 
-<div class="text">
-<table><tr><td style="width: 650px" valign="top">
+
 This page contains data for the Ames SCAN site
 provided by the National Water & Climate Center (NWCC).  SCAN is
 an acronym for <i>Soil Climate Analysis Network</i>. Although this station
 does provide atmospheric data, its main purpose is to provide soil
 information from five depths.</td><td>
 
-<div class="ninfo">
+<div class="well pull-right">
 <b>SCAN</b>
 <br>Reports: 1x per Hour
 <br>IA Stations: 2
-<br><a href="<?php echo $rooturl; ?>/sites/locate.php?network=SCAN">Locations</a>
-</div></td></tr></table>
+<br><a href="/sites/locate.php?network=SCAN">Locations</a>
+</div>
 
 <h3 class="subtitle">Data Products:</h3>
 
@@ -33,14 +33,16 @@ information from five depths.</td><td>
 
 
 <p><h3 class="subtitle">Station Locations</h3><br>
-<table width="100%">
+<table class="table table-striped">
+		<thead>
 <tr>
   <th>Station</th>
-  <th align="left">Site #</th>
-  <th align="left">Latitude</th>
-  <th align="left">Longitude</th>
-  <th align="left">Elevation</th>
+  <th>Site #</th>
+  <th>Latitude</th>
+  <th>Longitude</th>
+  <th>Elevation</th>
 </tr>
+		</thead>
 
 <tr>
   <th><a href="http://www.wcc.nrcs.usda.gov/scan/site.pl?sitenum=2031&state=ia">Ames, IA</a></th>
@@ -85,6 +87,6 @@ information from five depths.</td><td>
 
 
 </table></div>
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
