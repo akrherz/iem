@@ -112,11 +112,14 @@ var helpWin = new Ext.Window({
 new Ext.Viewport({
   renderTo  : 'main',
   layout    : 'border',
-  items     : [{
+  layoutConfig : {
+	  activeOnTop: false
+  },
+  items     : [new Ext.BoxComponent({
       region      :'north',
       height      : cfg.headerHeight,
       contentEl   : cfg.header
-    },{
+    }),{
       xtype       : 'panel',
        region: 'center',
        autoScroll : true,

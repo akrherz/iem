@@ -23,7 +23,7 @@ class IEMAccess {
   function getSingleSite($sid) {
     $sid = strtoupper($sid);
     $rs = pg_exec($this->dbconn, sprintf("select *, 
-    x(s.geom) as x, y(s.geom) as y, 
+    ST_x(s.geom) as x, ST_y(s.geom) as y, 
     valid at time zone s.tzname as lvalid,
     max_gust_ts at time zone s.tzname as lmax_gust_ts,
     max_sknt_ts at time zone s.tzname as lmax_sknt_ts,
@@ -46,8 +46,8 @@ class IEMAccess {
   		$nstring = sprintf("s.network = '%s'", $network);
   	}
     $ret = Array();
-    $sql = sprintf("select s.id, s.id as station, *, c.pday as ob_pday, x(s.geom) as x, 
-    y(s.geom) as y, valid at time zone s.tzname as lvalid,
+    $sql = sprintf("select s.id, s.id as station, *, c.pday as ob_pday, 
+    		ST_x(s.geom) as x, ST_y(s.geom) as y, valid at time zone s.tzname as lvalid,
     max_gust_ts at time zone s.tzname as lmax_gust_ts,
     max_sknt_ts at time zone s.tzname as lmax_sknt_ts,
     s.name as sname from 
@@ -66,7 +66,7 @@ class IEMAccess {
   function getIowa() {
     $ret = Array();
     $rs = pg_exec($this->dbconn, sprintf("select *, 
-    x(s.geom) as x, y(s.geom) as y, valid at time zone '%s' as lvalid,
+    ST_x(s.geom) as x, ST_y(s.geom) as y, valid at time zone '%s' as lvalid,
     max_gust_ts at time zone '%s' as lmax_gust_ts,
     max_sknt_ts at time zone '%s' as lmax_sknt_ts,
     s.name as sname from 
@@ -84,7 +84,7 @@ class IEMAccess {
   function getWFO($wfo) {
     $ret = Array();
     $rs = pg_exec($this->dbconn, sprintf("select *, 
-    x(s.geom) as x, y(s.geom) as y, valid at time zone s.tzname as lvalid,
+    ST_x(s.geom) as x, ST_y(s.geom) as y, valid at time zone s.tzname as lvalid,
     max_gust_ts at time zone s.tzname as lmax_gust_ts,
     max_sknt_ts at time zone s.tzname as lmax_sknt_ts,
     s.name as sname from 
@@ -102,7 +102,7 @@ class IEMAccess {
   function getWFO_COOP($wfo) {
     $ret = Array();
     $rs = pg_exec($this->dbconn, sprintf("select *, 
-    x(s.geom) as x, y(s.geom) as y, valid at time zone s.tzname as lvalid,
+    ST_x(s.geom) as x, ST_y(s.geom) as y, valid at time zone s.tzname as lvalid,
     max_gust_ts at time zone s.tzname as lmax_gust_ts,
     max_sknt_ts at time zone s.tzname as lmax_sknt_ts,
     s.name as sname from 

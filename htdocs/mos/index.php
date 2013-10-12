@@ -1,13 +1,14 @@
 <?php 
-include("../../config/settings.inc.php");
 define("IEM_APPID", 74);
-$THISPAGE = "archive-mos";
-$TITLE = "IEM | Model Output Statistics";
-include("$rootpath/include/header.php"); ?>
+include("../../config/settings.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Model Output Statistics (MOS)";
+$t->thispage = "archive-mos"; 
 
-<div style="width:640px;">
+$t->content = <<<EOF
 
-<h3 class="heading">Archived Model Output Statistics (MOS)</h3>
+<h3>Archived Model Output Statistics (MOS)</h3>
 
 <p class="story">The National Weather Service operates a number of operational
 weather prediction models.  These models produce a gridded forecast that is
@@ -52,20 +53,22 @@ in the text product, except <strong>wdr</strong> (wind direction) which is
 multiplied by 10 for its true value.
 
 <h3>Current Plots</h3>
- <div style="float:left; margin:5px;">
-<a href="../timemachine/#52.0"><img src="../data/conus_nam_mos_T_bias.png" 
- width="320" border="1"/></a>
+<div class="row">
+	<div class="col-md-6">
+<a href="../timemachine/#52.0"><img src="/data/conus_nam_mos_T_bias.png" 
+ class="img-responsive" border="1"/></a>
  </div>
- 
- <div style="float:left; margin:5px;">
-<a href="../timemachine/#51.0"><img src="../data/conus_gfs_mos_T_bias.png" 
- width="320" border="1"/></a>
+	<div class="col-md-6">
+		
+<a href="../timemachine/#51.0"><img src="/data/conus_gfs_mos_T_bias.png" 
+ class="img-responsive" border="1"/></a>
  </div>
- 
+</div>
+		
 <p>We will probably back fill the archive based on how much interest this
 application generates, so please <a href="../info/contacts.php">let us</a>
 know if you find this page useful. 
 
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
