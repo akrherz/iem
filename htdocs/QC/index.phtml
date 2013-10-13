@@ -1,37 +1,35 @@
 <?php
 include("../../config/settings.inc.php");
-$TITLE = "IEM | Quality Control";
-$THISPAGE = "iem-qc";
-include("$rootpath/include/header.php"); ?>
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Quality Control";
+$t->thispage = "iem-qc";
+$t->west = <<<EOF
+<h3>Quality Control Products</h3>
 
-<h3 class="heading">Quality Control Products</h3><p>
-
-<div class="text">
-This page contains links to Quality Control (QC) products generated on the IEM server.</p>
+<p>This page contains links to Quality Control (QC) products generated on the IEM server.</p>
 
 <UL>
-	<LI>Yesterday's <a href="<?php echo $rooturl; ?>/data/text/IEMRWISTP.txt">RWIS extremes and observation count</a></LI>
+	<LI>Yesterday's <a href="/data/text/IEMRWISTP.txt">RWIS extremes and observation count</a></LI>
  <li>FSL's MADIS <a href="http://www-sdd.fsl.noaa.gov/MSAS/qcms_data/qc20/qchour.txt">QC Messages</a> for this hour.</li>
- <li><a href="<?php echo $rooturl; ?>/QC/madis/network.phtml">MADIS Raw QC</a></li>
- <li><a href="<?php echo $rooturl; ?>/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
+ <li><a href="/QC/madis/network.phtml">MADIS Raw QC</a></li>
+ <li><a href="/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
 </ul>
-
-<table border=0>
-<tr><td width="50%" valign="top">
 
 <p><h3 class="subtitle">IEM Tracker Links:</h3>
 <ul>
-   <li>Sites currently <a href="<?php echo $rooturl; ?>/QC/offline.php">offline</a></li>
-   <li><a href="<?php echo $rooturl; ?>/QC/tickets.phtml">Active Trouble Tickets</a></li>
+   <li>Sites currently <a href="/QC/offline.php">offline</a></li>
+   <li><a href="/QC/tickets.phtml">Active Trouble Tickets</a></li>
 </ul>
-
+EOF;
+$t->east = <<<EOF
 <P><h3 class="subtitle">Data Quantity Charts:</h3>
 <UL>
-	<LI>48 h  <a href="<?php echo $rooturl; ?>/plotting/stats/reports.php?network=IA_ASOS">Plot</a> of saved ASOS obs</a></LI>
-	<LI>48 h  <a href="<?php echo $rooturl; ?>/plotting/stats/reports.php?network=AWOS">Plot</a> of saved AWOS obs</a></LI>
-	<LI>48 h  <a href="<?php echo $rooturl; ?>/plotting/stats/reports.php?network=IA_RWIS">Plot</a> of saved RWIS obs</a></LI>
+	<LI>48 h  <a href="/plotting/stats/reports.php?network=IA_ASOS">Plot</a> of saved ASOS obs</a></LI>
+	<LI>48 h  <a href="/plotting/stats/reports.php?network=AWOS">Plot</a> of saved AWOS obs</a></LI>
+	<LI>48 h  <a href="/plotting/stats/reports.php?network=IA_RWIS">Plot</a> of saved RWIS obs</a></LI>
 <!--
-  <li>Recent <a href="http://mesonet.agron.iastate.edu/plotting/stats/tstncf.php">IDS Product Latencies</a> from the UNIDATA IDD Internet feed.</li>
+  <li>Recent <a href="/plotting/stats/tstncf.php">IDS Product Latencies</a> from the UNIDATA IDD Internet feed.</li>
 -->
 </UL>
 
@@ -39,15 +37,13 @@ This page contains links to Quality Control (QC) products generated on the IEM s
 
 <P><h3 class="subtitle">Data Logs:</h3>
 <UL>
-	<LI><a href="<?php echo $rooturl; ?>/data/asos.log">ASOS/AWOS Recent Data Log</a></LI>
-	<LI><a href="<?php echo $rooturl; ?>/data/awos.log">AWOS Recent Data Log</a></LI>
-	<LI><a href="<?php echo $rooturl; ?>/data/rwis.log">RWIS Recent Data Log</a></LI>
+	<LI><a href="/data/asos.log">ASOS/AWOS Recent Data Log</a></LI>
+	<LI><a href="/data/awos.log">AWOS Recent Data Log</a></LI>
+	<LI><a href="/data/rwis.log">RWIS Recent Data Log</a></LI>
 </UL>
 
 
-</UL>
+EOF;
+$t->render('single.phtml');
+?>
 
-<BR><BR>
-
-</td></tr></table></div>
-<?php include("$rootpath/include/footer.php"); ?>
