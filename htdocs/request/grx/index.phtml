@@ -1,8 +1,10 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | Gibson Ridge Placefiles";
-$THISPAGE="current-placefiles";
-include("$rootpath/include/header.php"); ?>
+include("../../../include/myview.php");
+$t = new MyView();
+$t->title = "Gibson Ridge Placefiles";
+$t->thispage = "current-placefiles";
+$t->content = <<<EOF
 
 <h3>IEM Data in Gibson Ridge Placefile format</h3>
 
@@ -13,7 +15,8 @@ can be freely used for educational use.  Use of the non government data
 provider.</p>
 
 <p>
-<table cellpadding="2" border="1" cellspacing="0">
+<table class="table table-striped">
+		<thead><tr><th>Title</th><th>Description</th></tr></thead>
 <tr>
   <th><a href="roadcond.php">Iowa Winter Road Conditions</a></th>
   <td>http://mesonet.agron.iastate.edu/request/grx/roadcond.php<br />
@@ -108,5 +111,6 @@ may be useful when looking at level2 data.</td>
 
 
 </table>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
