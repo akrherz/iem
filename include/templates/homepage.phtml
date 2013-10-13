@@ -10,7 +10,7 @@
     <div class="container">
       <div class="row">
 
-        <div class="col-md-9">
+        <div class="col-md-8">
        
  <p>The Iowa Environmental Mesonet (IEM) collects environmental data from 
  cooperating members with observing networks. The data are stored and made 
@@ -123,8 +123,8 @@ if ($row["voting"] == "f"){
 	<a class=\"btn btn-success\" href=\"$goodurl\">Good ($good votes)</a>
 	<a class=\"btn btn-danger\" href=\"$badurl\">Bad ($bad votes)</a></div>";
 	
-	echo "<div class=\"container\"><div id=\"fb-root\"></div><script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>
-	<fb:comments send_notification_uid=\"16922938\" callback=\"/fbcb.php\" title=\"". $row["title"] ."\" \" href=\"/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
+	echo "<div class=\"container\" style=\"margin-top: 5px\"><div id=\"fb-root\"></div><script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>
+	<fb:comments send_notification_uid=\"16922938\" callback=\"/fbcb.php\" title=\"". $row["title"] ."\" \" href=\"http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
 
 	echo "</div></div>";
 }
@@ -151,8 +151,8 @@ if ($i % 2 != 0){ echo "\n<div class=\"col-md-6\">&nbsp;</div>\n</div>"; }
 </div><!--  end of panel body -->
 </div>
         </div><!--/span-->
-        <div class="col-md-3">
-          <div class="sidebar-nav">
+        <div class="col-md-4">
+
 <?php 
 include_once(dirname(__FILE__) ."/../cameras.inc.php");
 $rancam = "";
@@ -219,7 +219,7 @@ for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
   </div>
 </div>
 
-          </div><!--/.well -->
+
         </div><!--/span-->
       </div><!--/row-->
 
