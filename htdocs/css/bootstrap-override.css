@@ -1,12 +1,8 @@
 .logo-nav {
 	height: 50px;
 }
-.sidebar-nav {
-  padding: 9px 0;
-}
 .navbar .nav > li > a {
-	padding-left: 6px;
-	padding-right: 6px;
+	padding: 6px 6px 0px 0px;
 	margin: 0px;
 }
 
