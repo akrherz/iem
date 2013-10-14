@@ -73,7 +73,8 @@ $height = 240;
 if (is_file($fref)){
 	list($width, $height, $type, $attr) = @getimagesize($fref);
 }
-$imghref = sprintf("%s/onsite/features/%s_s.png", ROOTURL, $row["imageref"]);
+$imghref = sprintf("/onsite/features/%s_s.png", $row["imageref"]);
+$bigimghref = sprintf("/onsite/features/%s.png", $row["imageref"]);
 ?>
 
 <div class="panel panel-default top-buffer">
@@ -94,7 +95,7 @@ $imghref = sprintf("%s/onsite/features/%s_s.png", ROOTURL, $row["imageref"]);
 <div class="pull-left">
 <?php 
 echo "<small>Posted: ". $row["webdate"] ."</small>";
-echo "<img src=\"$imghref\" alt=\"Feature\" class=\"pull-right\" />";
+echo "<a href=\"$bigimghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"pull-right\" /></a>";
 echo "<br /><small>Tags: &nbsp; ";
 while (list($k,$v) = each($tags))
 {
