@@ -16,7 +16,7 @@ function gen_feature(){
 	$foid = $row["oid"];
 	$good = intval($row["good"]);
 	$bad = intval($row["bad"]);
-	$tags = explode(",", $row["tags"]);
+	$tags = ($row["tags"] != null) ? explode(",", $row["tags"]): Array();
 	$fbid = $row["fbid"];
 	$fburl = "http://www.facebook.com/pages/IEM/157789644737?v=wall&story_fbid=".$fbid;
 	/* Hehe, check for a IEM vote! */
@@ -76,13 +76,14 @@ function gen_feature(){
 EOF;
 	$s .= "<small>Posted: ". $row["webdate"] ."</small>";
 	$s .= "<a href=\"$bigimghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"pull-right\" /></a>";
-	$s .= "<br /><small>Tags: &nbsp; ";
-	while (list($k,$v) = each($tags))
-	{
-		$s .= sprintf("<a href=\"/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $v, $v);
+	if (sizeof($tags) > 0){
+		$s .= "<br /><small>Tags: &nbsp; ";
+		while (list($k,$v) = each($tags))
+		{
+			$s .= sprintf("<a href=\"/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $v, $v);
+		}
+		$s .= "</small>";
 	}
-	$s .= "</small>";
-	
 	$s .= "<br />". $row["story"] ;
 	
 	/* Rate Feature and Past ones too! */
