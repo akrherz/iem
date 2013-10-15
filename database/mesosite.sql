@@ -1,4 +1,14 @@
 ---
+--- networks we process!
+---
+CREATE TABLE networks(
+  id varchar(12) unique,
+  name varchar,
+  tzname varchar(32)
+);
+GRANT SELECT on networks to nobody,apache;
+
+---
 --- Missing table: news
 ---
 CREATE TABLE news(
@@ -269,9 +279,9 @@ CREATE table feature(
   title varchar(256),
   story text,
   caption varchar(256),
-  good smallint,
-  bad smallint,
-  voting boolean,
+  good smallint default 0,
+  bad smallint default 0,
+  voting boolean default true,
   tags varchar(1024),
   fbid bigint);
 alter table feature SET WITH oids;
