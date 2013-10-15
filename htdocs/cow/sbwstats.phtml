@@ -190,13 +190,13 @@ echo "<form method=\"GET\">
 <table border=\"1\" cellpadding=\"3\" cellspacing='0'>
  <tr><td></td><th>Year</th><th>Month</th><th>Day</th><th>Hour</th><td></td></tr>
  <tr><td>Start:</td>
-  <td>";  yearSelect2(2002, $syear, "syear"); echo "</td>
+  <td>".  yearSelect2(2002, $syear, "syear"). "</td>
   <td>". monthSelect($smonth, "smonth") ."</td>
   <td>". daySelect2($sday, "sday") ."</td>
   <td>". hour24Select($shour, "shour") ."</td>
   <td rowspan='2'><input type='submit' value='Generate Stats'></td>
  <tr><td>End:</td>
-  <td>"; yearSelect2(2002, $eyear, "eyear"); echo "</td>
+  <td>". yearSelect2(2002, $eyear, "eyear"). "</td>
   <td>". monthSelect($emonth, "emonth") ."</td>
   <td>". daySelect2($eday, "eday") ."</td>
   <td>". hour24Select($ehour, "ehour") ."</td>

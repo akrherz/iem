@@ -158,13 +158,13 @@ while (list($key, $value)=each($vtec_significance)){
 </tr>
 <tr><th colspan='3'>Time Period (UTC Timestamps)</th></tr>
 <tr><td colspan='3'><strong>Start Time:</strong>
-  <?php yearSelect2(2005, $year1, 'year1'); ?>
+  <?php echo yearSelect2(2005, $year1, 'year1'); ?>
   <?php monthSelect2($month1, 'month1'); ?>
   <?php echo daySelect2($day1, 'day1'); ?>  
   <?php gmtHourSelect($hour1, 'hour1'); ?>
   </td></tr>
 <tr><td colspan='3'><strong>End Time:</strong>
-  <?php yearSelect2(2005, $year2, 'year2'); ?>
+  <?php echo yearSelect2(2005, $year2, 'year2'); ?>
   <?php monthSelect2($month2, 'month2'); ?>
   <?php echo daySelect2($day2, 'day2'); ?>   
   <?php gmtHourSelect($hour2, 'hour2'); ?>

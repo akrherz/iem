@@ -75,7 +75,7 @@ if (strlen($station) > 0 && strlen($month) > 0 ) {
 <TR>
 <td><?php echo networkSelect($network, $station); ?></td>
 <TD>
-<?php yearSelect2(2001, $year, "year"); ?>
+<?php echo yearSelect2(2001, $year, "year"); ?>
 </TD>
 
 <TD><?php echo monthSelect($month); ?></TD>
