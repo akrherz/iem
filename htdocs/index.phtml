@@ -2,7 +2,10 @@
 require '../config/settings.inc.php';
 define("IEM_APPID", 1);
 include_once('../include/myview.php');
+include("../include/generators.php");
+
 
 $t = new MyView();
+$t->feature = gen_feature();
 $t->render('homepage.phtml');
 ?>
