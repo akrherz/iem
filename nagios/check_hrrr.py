@@ -10,7 +10,7 @@ def check():
     ''' Do the chec please '''
     now = datetime.datetime.utcnow()
     diff = None
-    for hr in range(4):
+    for hr in range(8):
         fn = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
                           +"hrrr.t%Hz.3kmf00.grib2"))
         now = now - datetime.timedelta(hours=1)
@@ -19,16 +19,17 @@ def check():
         diff = hr
         break
 
-    return diff
+    return diff, now
     
 if __name__ == '__main__':
-    diff = check()
+    diff, now = check()
+    stats = "|age=%s;4;5;6" % (diff if diff is not None else -1,)
     if diff is not None and diff < 3:
-        print 'OK - %s hr age' % (diff,)
+        print 'OK - %sz found %s' % (now.strftime("%H"), stats)
         sys.exit(0)
     elif diff is not None:
-        print 'WARNING - %s hr age' % (diff)
+        print 'WARNING - %sz found %s' % (now.strftime("%H"), stats)
         sys.exit(1)
     else:
-        print 'CRITICAL - no HRRR found'
+        print 'CRITICAL - no HRRR found %s' % (stats,)
         sys.exit(2)
