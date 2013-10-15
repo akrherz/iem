@@ -39,7 +39,7 @@ every site.</p>
     echo networkSelect($tv, $station); 
 
   ?>
-   <?php yearSelect2(2002, $year, "year"); ?>
+   <?php echo yearSelect2(2002, $year, "year"); ?>
  <?php echo monthSelect($month); ?>
  <?php echo daySelect($day); ?>
 
