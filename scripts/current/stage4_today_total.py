@@ -44,7 +44,7 @@ def doday(ts, realtime):
     if lts is None:
         return
     lts = lts - datetime.timedelta(minutes=1)
-    subtitle = "Total between 12:00 AM and %s" % (lts.strftime("%H:%M %p %Z"),)
+    subtitle = "Total between 12:00 AM and %s" % (lts.strftime("%I:%M %p %Z"),)
     routes = 'ac'
     if not realtime:
         routes = 'a'
