@@ -117,13 +117,14 @@ function yearSelect2($start, $selected, $fname){
   $start = intval($start);
   $now = time();
   $tyear = strftime("%Y", $now);
-  echo "<select name='$fname'>\n";
+  $s = "<select name='$fname'>\n";
   for ($i=$start; $i<=$tyear;$i++) {
-    echo "<option value='".$i ."' ";
-    if ($i == intval($selected)) echo "SELECTED";
-    echo ">". $i ."</option>";
+    $s .= "<option value='".$i ."' ";
+    if ($i == intval($selected)) $s .= "SELECTED";
+    $s .= ">". $i ."</option>";
   }
-  echo "</select>\n";
+  $s .= "</select>\n";
+	return $s;
 }
 
 
