@@ -1,96 +1,87 @@
 <?php 
 include("../../../config/settings.inc.php");
-define("IEM_APPID", 45);
-include_once "$rootpath/include/database.inc.php";
-$mesosite = iemdb('mesosite');
- 
-$network = isset($_GET['network']) ? $_GET["network"] : 'IA_COOP';
-$TITLE = "IEM | NWS COOP Raw Observations Data Download";
-$THISPAGE = "networks-coop";
-include("$rootpath/include/header.php"); 
- include("$rootpath/include/imagemaps.php");
- include("$rootpath/include/forms.php"); 
-?>
+include("../../../include/myview.php");
+include_once "../../../include/database.inc.php";
+include("../../../include/imagemaps.php");
+include("../../../include/forms.php"); 
 
-<h3>NWS COOP Raw Data Download</h3>
+$mesosite = iemdb('mesosite');
+$network = isset($_REQUEST['network']) ? $_REQUEST["network"] : 'IA_COOP';
+
+define("IEM_APPID", 45);
+$t = new MyView();
+$t->title = "NWS COOP Raw Observations Download"; 
+$t->thispage = "networks-coop";
+
+$t->north = <<<EOF
+<ol class="breadcrumb">
+<li><a href="/COOP/">NWS COOP Network</a></li>
+<li class="active">Raw Data Download</li>
+</ol>
 
 <p>This form provides access to the raw observations from the NWS COOP network. The
 high and low temperature values are for the 24 hour period prior to the observation
 on the date! Typically, this is a period ending at 8 AM localtime.</p>
+EOF;
 
+$west = <<<EOF
 <form method="GET" name="chstate">
 <p>Select from State: <select name="network">
-<?php 
-$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'COOP' ORDER by name ASC");
+EOF;
+
+$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'COOP' 
+		ORDER by name ASC");
 for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	$sel = '';
 	if ($network == $row["id"]){
 		$sel = " selected='SELECTED'";
 	}
-	echo sprintf("<option value='%s'%s>%s</option>\n",
+	$west .= sprintf("<option value='%s'%s>%s</option>\n",
 	  $row["id"], $sel, $row["name"]);
 }
 
-?>
+$west .= <<<EOF
 </select>
 <input type="submit" value="Change Network" />
 </form>
 
 
 <form method="GET" action="obs-dl.php" name='dl'>
-<input type='hidden' name='network' value="<?php echo $network; ?>" />
-
-<table>
-<tr><td width="50%">
+<input type='hidden' name='network' value="{$network}" />
 
 <p><h3 class="subtitle">1. Select Station(s):</h3><br>
-<?php echo networkMultiSelect($network, ""); ?>
+EOF;
+$west .= networkMultiSelect($network, ""); 
 
+$y1 = yearSelect2(2010, date("Y"), "year1");
+$m1 = monthSelect("", "month1");
+$d1 = daySelect2("", "day1");
+$y2 = yearSelect2(2010, date("Y"), "year2");
+$m2 = monthSelect("", "month2");
+$d2 = daySelect2("", "day2");
+
+$west .= <<<EOF
 <p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
-<table>
+<table class="table table-striped">
   <tr>
     <td></td>
     <th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th>
   </tr>
 
   <tr>
     <th>Start:</th>
-    <td>
-     <?php echo yearSelect2(2010, date("Y"), "year1"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect("", "month1"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2("", "day1"); ?>
-    </td>
-    <td>
-     <?php echo gmtHourSelect("", "hour1"); ?>
-	<input type="hidden" name="minute1" value="0">
-    </td>
-  </tr>
+    <td>{$y1}</td><td>{$m1}</td><td>{$d1}</td>
+		</tr>
 
   <tr>
     <th>End:</th>
-    <td>
-     <?php echo yearSelect2(2010, date("Y"), "year2"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect("", "month2"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2("", "day2"); ?>
-    </td>
-    <td>
-     <?php echo gmtHourSelect("", "hour2"); ?>
-	<input type="hidden" name="minute2" value="0">
-    </td>
+    <td>{$y2}</td><td>{$m2}</td><td>{$d2}</td>
   </tr>
 </table>
 
-</td><td valign="TOP">
-
+EOF;
+$t->west = $west;
+$t->east = <<<EOF
 <p><h3 class="subtitle">3. How to view?</h3><br>
 <select name="what">
   <option value="download">Download to Disk
@@ -105,11 +96,11 @@ How shall the output values be seperated?
     <option value="tab">Tab
    </select>
 
-</td></tr></table>
-
 <p><h3 class="subtitle">Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
 </form>
+EOF;
 
-<?php include("$rootpath/include/footer.php"); ?>
+$t->render('single.phtml');
+?>
