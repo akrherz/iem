@@ -1,13 +1,13 @@
 <?php
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/mlib.php");
+include("../../include/database.inc.php");
+include("../../include/mlib.php");
 include("setup.php");
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
-include ("$rootpath/include/jpgraph/jpgraph_led.php");
+include ("../../include/jpgraph/jpgraph.php");
+include ("../../include/jpgraph/jpgraph_scatter.php");
+include ("../../include/jpgraph/jpgraph_line.php");
+include ("../../include/jpgraph/jpgraph_date.php");
+include ("../../include/jpgraph/jpgraph_led.php");
 
 $times = Array();
 $dwpf = Array();
@@ -93,7 +93,7 @@ $graph->Add($lineplot2);
 $lineplot3=new LinePlot($dwpf, $times);
 $lineplot3->SetLegend("Dew Point");
 $lineplot3->SetColor("green");
-$lineplot3->SetWeight(3);
+$lineplot3->SetWeight(2);
 $graph->Add($lineplot3);
 
 if ($hasrad){
