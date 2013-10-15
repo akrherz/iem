@@ -1,26 +1,25 @@
 <?php
 include("../../config/settings.inc.php");
-$TITLE = "IEM :: GIS Homepage";
-$THISPAGE = "gis";
-include("../../include/header.php"); ?>
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "GIS Mainpage";
+$t->thispage = "gis-home";
 
+$t->west = <<<EOF
 
-<h3 class="heading">IEM GIS Information</h3>
-<div class="text">
+<h3>IEM GIS Information</h3>
+
 
 <p>Geographic Information System (GIS) is a system for manipulating spatially 
 referenced data.  Since the IEM contains many spatially referenced datasets, it would only seem
 natural to integrate IEM data into GIS applications.<p>
-
-<table border=0 width=100%>
-<tr><td width=350 valign="top">
 
 <h3 class="subtitle">Presentations & Docs:</h3>
 <ul>
  <li><i>28 Jul 2003:</i> <a href="/docs/radmapserver/">NEXRAD + Mapserver HOWTO</a>
 <br />A HowTo on generating NEXRAD composite images with GEMPAK and 
 serving them out with Mapserver.</li>
- <li><a href="<?php echo $rooturl; ?>/present/">IEM Presentation Archive</a>
+ <li><a href="/present/">IEM Presentation Archive</a>
 <br />The IEM has given a number of GIS related talks.  You can browse an
 archive of presentations.</li>
 </ul>
@@ -31,12 +30,12 @@ archive of presentations.</li>
 <!--
   <LI><a href="/cgi-bin/mapserv/mapserv?map=/var/www/htdocs/GIS%2Fapps%2Fiatorn%2Fiatorn.map">Historical Iowa Tornado Database</a></LI>
   <LI><a href="/GIS/apps/precip/">Realtime Precipitation Analysis</a></LI>
-  <LI><a href="<?php echo $rooturl; ?>/GIS/apps/pcs/">2002 NEXRAD vs ASOS Precip Comparison</a></LI>
+  <LI><a href="/GIS/apps/pcs/">2002 NEXRAD vs ASOS Precip Comparison</a></LI>
 -->
-  <li><a href="<?php echo $rooturl; ?>/GIS/apps/rview/warnings.phtml">NEXRAD w/ warnings</a></li>
-  <li><a href="<?php echo $rooturl; ?>/GIS/apps/coop/">COOP Daily Extremes and Averages</a></li>
-  <li><a href="<?php echo $rooturl; ?>/my/current.php">Dynamic Plotting</a></li>
-  <li><a href="<?php echo $rooturl; ?>/sites/locate.php">IEM Site Locator</a></li>
+  <li><a href="/GIS/apps/rview/warnings.phtml">NEXRAD w/ warnings</a></li>
+  <li><a href="/GIS/apps/coop/">COOP Daily Extremes and Averages</a></li>
+  <li><a href="/my/current.php">Dynamic Plotting</a></li>
+  <li><a href="/sites/locate.php">IEM Site Locator</a></li>
 </ul>
 
 
@@ -62,32 +61,32 @@ archive of presentations.</li>
  <li><a href="http://map06.gsfc.nasa.gov/">NASA MAP'06 program</a>
   <br />Has some GIS satellite data.</li>
 </ul>
+EOF;
+$t->east = <<<EOF
 
-</td><td width=350 valign="top">
-
-<img src="<?php echo $rooturl; ?>/images/gisready.png">You may have noticed this image appearing on
+<img src="/images/gisready.png">You may have noticed this image appearing on
 IEM webpages.  It signifies that the data link is ready for most GIS systems.
 
 <p><h3 class="subtitle">IEM GIS Projects</h3>
 <ul>
  <li><a href="goes.phtml">GOES Satellite GIS Products</a>
   <br />Current and archived GIS products from NOAA's GOES satellites</li>
- <li><a href="<?php echo $rooturl; ?>/ogc/">Open GIS Web Services</a>
+ <li><a href="/ogc/">Open GIS Web Services</a>
   <br />A listing of OGC web services offered by the IEM</li>
  <li><a href="/climodat/index.phtml#ks">Iowa Climate Summaries</a>
   <br />GIS ready data files of monthly and yearly climate summaries dating
 back to 1951.</li>
-	<li><a href="<?php echo $rooturl; ?>/GIS/apps/iem/freeze.phtml">IEM Freeze</a>
+	<li><a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a>
 	<br />Web mapping application to support winter weather nowcasting.</li>
-	<li><a href="<?php echo $rooturl; ?>/GIS/radview.phtml">IEM Radview</a>
+	<li><a href="/GIS/radview.phtml">IEM Radview</a>
 	<br />Our effort to provide NEXRAD information in realtime to GIS systems.</li>
- <li><a href="<?php echo $rooturl; ?>/rainfall/">IEM Rainfall</a>
+ <li><a href="/rainfall/">IEM Rainfall</a>
   <br />Gridded rainfall estimates in GIS formats dating back to 2002 for Iowa.</li>
- <li><a href="<?php echo $rooturl; ?>/roads/">IEM Iowa Road Conditions</a>
+ <li><a href="/roads/">IEM Iowa Road Conditions</a>
   <br />Current and archived Iowa road conditions.</li>
- <li><a href="<?php echo $rooturl; ?>/cow/">IEM Cow</a>
+ <li><a href="/cow/">IEM Cow</a>
   <br />Unofficial NWS polygon warning verification.</li>
- <li><a href="<?php echo $rooturl; ?>/docs/nexrad_composites/">NEXRAD Composites on the IEM</a>
+ <li><a href="/docs/nexrad_composites/">NEXRAD Composites on the IEM</a>
   <br />Information about the NEXRAD composites that the IEM generates.</li>
 </ul>
 
@@ -119,6 +118,6 @@ This file is updated every minute.</li>
  <li><a href="/data/gis/">Browse</a> GIS data stored on the IEM website.</li>
 </ul>
 
-</td></tr></table>
-
-<?php include("../../include/footer.php"); ?>
+EOF;
+$t->render("single.phtml");
+?>
