@@ -24,7 +24,7 @@ def check():
 if __name__ == '__main__':
     diff, now = check()
     stats = "|age=%s;4;5;6" % (diff if diff is not None else -1,)
-    if diff is not None and diff < 3:
+    if diff is not None and diff < 6:
         print 'OK - %sz found %s' % (now.strftime("%H"), stats)
         sys.exit(0)
     elif diff is not None:
