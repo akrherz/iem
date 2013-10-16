@@ -19,7 +19,7 @@ def find_climate_site(lon, lat):
         stations.append( row[1].lower() )
     return stations
 
-o = open('visit_history_093013_st12_daryl.csv', 'w')
+o = open('visit_history_093013_st12_daryl_v2.csv', 'w')
 o.write(('"univ_id","apltn_type","actvy_datedb","actvy_type","vis_month",'
     +'"vis_year","entry_ccyy","sem_num","entry_sem_cd","actn_cd","clsfn_yr",'
     +'"entry_year","hs_status","city","st","cntry","zip_5","lat","lon",'
@@ -31,15 +31,24 @@ def add_cols(line, addon):
     wxprecip = 'M'
     wxhigh = 'M'
     if addon['remote_clhigh'] != 'M':
-        wxhigh = float(abs(addon['remote_clhigh'] - addon['ames_high'])) / 5.0
-        wxhigh = '%.0f' % (wxhigh,)
-        if addon['ames_clprecip'] > addon['remote_clprecip']:
-            # Ames is wetter, so if it rains...
-            if addon['ames_precip'] > 0:
-                wxprecip = 1
-        else:
-            if addon['ames_precip'] == 0:
-                wxprecip = 0
+        wxhigh = float(addon['remote_clhigh'] - addon['ames_high']) / 5.0
+        # Regime shift
+        if addon['ames_clhigh'] > 80.0:
+            wxhigh = 0 - wxhigh
+        wxhigh = '%i' % (wxhigh,)
+    if addon['remote_clprecip'] == 'M':
+        wxprecip = 'M'
+    elif abs(addon['ames_precip'] - addon['remote_clprecip']) < 0.1:
+        wxprecip = 0
+    elif addon['ames_clprecip'] > addon['remote_clprecip']:
+        wxprecip = 1
+        # Ames is wetter, so if it rains...
+        if addon['ames_precip'] > 0:
+            wxprecip = 2
+    else:
+        wxprecip = -1
+        if addon['ames_precip'] == 0:
+            wxprecip = -2
     
     o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (line.strip(), addon['ames_high'],
                                 addon['ames_precip'], addon['ames_clhigh'],
