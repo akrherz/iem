@@ -1,8 +1,12 @@
 <?php 
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 55);
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/feature.php");
+define("FBEXTRA", True); 
+include("../../../include/myview.php");
+$t = new MyView();
+
+include("../../../include/database.inc.php");
+include("../../../include/feature.php");
 $day = isset($_GET["day"]) ? substr($_GET["day"],0,10) : null;
 $offset = isset($_GET["offset"]) ? $_GET["offset"] : 0;
 if ($day == null){
@@ -45,42 +49,48 @@ $day = $row["d"];
 $thumb = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s_s.%s", $row["imageref"], $fmt);
 $big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.%s", $row["imageref"], $fmt);
 
-$TITLE = "IEM Past Feature $day - ". $row["title"]; 
-$THISPAGE = "iem-feature";
-include("$rootpath/include/header.php"); 
+$t->title = "$day Feature - ". $row["title"]; 
+$t->thispage = "iem-feature";
 
-?>
-<a class="button down" href="cat.php?day=<?php echo $day; ?>&offset=-1">Previous Feature by Date</a> 
-<strong>IEM Daily Feature for <?php echo $day; ?></strong>
-<a class="button up" href="cat.php?day=<?php echo $day; ?>&offset=+1">Next Feature by Date</a>
-<hr />
+$content = <<<EOF
+<button type="button" class="btn btn-default btn-lg">
+  <span class="glyphicon glyphicon-arrow-left"></span> <a href="cat.php?day={$day}&offset=-1">Previous Feature by Date</a> 
+</button>
+<strong>IEM Daily Feature for {$day}</strong>
+<button type="button" class="btn btn-default btn-lg">
+  <span class="glyphicon glyphicon-arrow-left"></span> <a href="cat.php?day={$day}&offset=1">Next Feature by Date</a> 
+</button>
+
 <!-- Begin Feature Display -->
-<div style="width: 640px;">
 
 <table cellpadding="2" cellspacing="0" border="1">
-<tr><td>Title:</td><td><strong><?php echo $row["title"]; ?></strong></td></tr>
-<tr><td>Posted:</td><td><?php echo $row["webdate"]; ?></td></tr>
+<tr><td>Title:</td><td><strong>{$row["title"]}</strong></td></tr>
+<tr><td>Posted:</td><td>{$row["webdate"]}</td></tr>
 </table>
 
-<div style="float: left; padding: 5px; ">
-<a href="<?php echo $big; ?>"><img src="<?php echo $thumb; ?>" style="margin: 5px; border:0px;"></a>
-<br /><a href="<?php echo $big; ?>">View larger image</a>
-<br /><?php echo $row["caption"]; ?>
+<div class="row">
+<div class="col-md-6">
+<a href="{$big}"><img src="{$thumb}" class="img-responsive"></a>
+<br /><a href="{$big}">View larger image</a>
+<br />{$row["caption"]}
 </div>
-<?php
-  echo "<br><div class='story'>". $row["story"] ;
+<div class='col-md-6 well'>{$row["story"]}
+EOF;
   if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 0))
   {
-    echo "<br /><br /><b>Voting:</b><br />Good = ". $row["good"] ." <br />Bad = ". $row["bad"] ;
+    $content .= "<br /><br /><b>Voting:</b><br />Good = ". $row["good"] ." <br />Bad = ". $row["bad"] ;
   }
-  echo "<br />". printTags(explode(",", $row["tags"]));
-?>
+  $content .= "<br />". printTags(explode(",", $row["tags"]));
+$content .= <<<EOF
 </div>
-<div id="fb-root"></div>
-<?php define("FBEXTRA", True); ?>
-<fb:comments send_notification_uid="16922938" title="<?php echo $row["title"]; ?>" 
- href="http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=<?php echo $day; ?>" 
- xid="<?php echo $row["fbid"]; ?>" numposts="6" width="600"></fb:comments>
- 
-
-<?php include("$rootpath/include/footer.php"); ?>
+ 		</div><!-- ./row -->
+ 		<div class="clearfix">&nbsp;</div>
+<div class="clearfix">&nbsp;</div>
+ 		<div id="fb-root"></div><script src="http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1"></script>
+<fb:comments send_notification_uid="16922938" title="{$row["title"]}" 
+ href="http://mesonet.agron.iastate.edu/onsite/features/cat.php?day={$day}" 
+ xid="{$row["fbid"]}" numposts="6" width="600"></fb:comments>
+EOF;
+$t->content = $content;
+$t->render('single.phtml');
+?>
