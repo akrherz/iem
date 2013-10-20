@@ -19,7 +19,7 @@ $rs = pg_prepare($coop,"SELECT", "SELECT * from alldata_ia WHERE
        station = $1 and sday = $2");
 $ts = mktime(12,0,0,$month, $day, 2000);
 $sday = sprintf("%02d%02d", $month, $day);
-$rs = pg_execute($coop, "SELECT", Array(strtolower($station), $sday));
+$rs = pg_execute($coop, "SELECT", Array($station, $sday));
 for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
 {
   $highs[] = $row["high"];
