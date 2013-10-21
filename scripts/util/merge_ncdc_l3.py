@@ -44,7 +44,7 @@ while now < ets:
             shutil.copyfile(oldncr, newncr)
         # 6. Regenerate the tar file
         os.chdir("/tmp/l3/old")
-        subprocess.call("tar -czf %s ." % (oldfn,), shell=True)
+        subprocess.call("tar -czf %s ???" % (oldfn,), shell=True)
         # 7. Cleanup the new and old folders
         os.chdir("/tmp/l3")
         subprocess.call("rm -rf old new", shell=True)
