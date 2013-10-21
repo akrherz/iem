@@ -2,7 +2,7 @@
  * Static Javascript stuff to support the Time Machine :) 
  * daryl herzmann akrherz@iastate.edu
  */
-Ext.BLANK_IMAGE_URL = '../ext/resources/images/default/s.gif';
+Ext.BLANK_IMAGE_URL = '/ext/resources/images/default/s.gif';
 
 Ext.onReady( function(){
 
@@ -15,7 +15,7 @@ var appDT   = 60;
  * Need a way to prevent missing images from messing up the page!
  */
 Ext.get("imagedisplay").dom.onerror = function(){
-   Ext.get("imagedisplay").dom.src = "../images/missing-320x240.jpg";
+   Ext.get("imagedisplay").dom.src = "/images/missing-320x240.jpg";
 };
 
 /* Provides handy way to convert from local browser time to UTC */
@@ -118,6 +118,8 @@ var combo = new Ext.form.ComboBox({
     autoLoad      : true,
     mode          : 'local',
     editable      : false,
+    matchFieldWidth : false,
+    minListWidth    :300,
     allowBlank    : false,
     forceSelection: true,
     store         : store,
@@ -126,7 +128,7 @@ var combo = new Ext.form.ComboBox({
 		'<tpl for=".">',
 		'<tpl if="this.groupname != values.groupname">',
 		'<tpl exec="this.groupname = values.groupname"></tpl>',
-		'<h1 style="color: #00f; margin-top:5px;">{groupname}</h1>',
+		'<span class="dropdown-header">{groupname}</span>',
 		'</tpl>',
 		'<div class="x-combo-list-item">{name}</div>',
 		'</tpl>'
