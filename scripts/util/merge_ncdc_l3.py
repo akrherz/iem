@@ -13,7 +13,7 @@ ets = datetime.datetime(2011,1,1)
 interval = datetime.timedelta(days=1)
 while now < ets:
     # 2. Loop over nexrads
-    for nexrad in ["FSD", "DMX", "DVN", "ARX", "OAX"]:
+    for nexrad in ["FSD", "DMX", "DVN", "ARX", "OAX", "MPX"]:
         print '+ run %s %s' % (now, nexrad)
         os.chdir("/tmp/l3")
         os.makedirs("old")
