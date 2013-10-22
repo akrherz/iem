@@ -7,7 +7,7 @@ $t = new MyView();
 $t->thispage = 'roads-main';
 $t->title = 'Winter Road Conditions';
 $t->refresh = '<meta http-equiv="refresh" content="600">';
-
+$tm = time();
   $t->content = <<<EOF
 <!--
 <div style="color: #f00;">Road Conditions are not reported till after 15 November...</div>
@@ -48,7 +48,7 @@ South Dakota :  866-697-3511
 
 </div><div class="col-md-8">
 
-<img class="img-responsive" src="http://mesonet.agron.iastate.edu/data/iaroads.png?<?php echo time(); ?>">
+<img class="img-responsive" src="http://mesonet.agron.iastate.edu/data/iaroads.png?{$tm}">
 
 <br />Data shown is provisional and without warranty.
 
