@@ -1,6 +1,10 @@
 <?php 
-$jsextra = array_key_exists('jsextra', $this->vars)? $this->jsextra : '';
-
+if (isset($this)){
+	$jsextra = array_key_exists('jsextra', $this->vars)? $this->jsextra : '';
+} else{
+	$jsextra = "";
+}
+	
 ?>
 <div class="container" id="iem-footer">
 <hr />
