@@ -1,3 +1,8 @@
+<?php 
+global $metadata;
+global $station;
+global $network;
+?>
 <div class="hidden-print">
 <strong><?php echo $metadata["name"]; ?> Links:</strong>
 <p>
@@ -28,15 +33,15 @@ while (list($key,$val) = each($o))
 	}
   	$uri = sprintf("%sstation=%s&network=%s", $val["uri"], $station, $network);
   	echo "<div style=\"";
-  	if ($current == $key) echo "background: #eaf;";
+  	if ($this->sites_current == $key) echo "background: #eaf;";
   	echo "width: 150px; float: left; padding-left: 10px;\"><a href=\"$uri\">". $val["name"] ."</a></div>";
 }
 
 if (preg_match('/ASOS|AWOS/', $network) > 0){
-	$uri = sprintf("%s/request/download.phtml?network=%s", $rooturl, $network);
+	$uri = sprintf("/request/download.phtml?network=%s", $network);
 	echo "<div style=\"width: 150px; float: left; padding-left: 10px; border-left: 4px solid #0F0;\"><a href=\"$uri\">Download</a></div>";
 }elseif (preg_match('/DCP/', $network) > 0){
-	$uri = sprintf("%s/request/dcp/fe.phtml?network=%s", $rooturl, $network);
+	$uri = sprintf("/request/dcp/fe.phtml?network=%s", $network);
 	echo "<div style=\"width: 150px; float: left; padding-left: 10px; border-left: 4px solid #0F0;\"><a href=\"$uri\">Download</a></div>";
 	
 }
@@ -54,7 +59,7 @@ if (isset($savevars)){
 <input type="hidden" name="network" value="<?php echo $network; ?>">
 <p>Other Sites in network:
 <?php 
-include_once("$rootpath/include/imagemaps.php");
+include_once(dirname(__FILE__)."/../imagemaps.php");
 echo networkSelectAuto($network, $station); 
 ?>
  or <a href="locate.php?network=<?php echo $network; ?>">select from map</a>
