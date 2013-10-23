@@ -1,6 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 $con = iemdb("postgis");
 
 $eightbit = isset($_GET["8bit"]);
@@ -86,37 +86,6 @@ $roads_int->draw($img);
 //$roads_lbl = $map->getlayerbyname("roads_label");
 //$roads_lbl->draw($img);
 //$roads_lbl->set("connection", $_DATABASE);
-
-$iemlogo = $map->getlayerbyname("iemlogo");
-$iemlogo->set("status", MS_ON);
-if ($eightbit)
-{
-  $c2 = $iemlogo->getClass(0);
-  $s2 = $c2->getStyle(0);
-  $s2->set("symbolname", "iem_isp-8bit");
-}
-if (! $metroview)
-{
-  $iemlogo->draw($img);
-}
-
-$ia511 = $map->getlayerbyname("ia511");
-$ia511->set("status", MS_ON);
-if ($eightbit)
-{
-  $c0 = $ia511->getClass(0);
-  $s0 = $c0->getStyle(0);
-  $s0->set("symbolname", "ia511-8bit");
-}
-
-if (! $metroview)
-{
-  //$ia511->draw($img);
-  $pt = ms_newPointObj();
-  $pt->setXY(555, 160);
-  $pt->draw($map, $ia511, $img, 0, "");
-
-}
 
 if ($thumbnail) {
   $logokey2 = $map->getlayerbyname("colorkey-small");
