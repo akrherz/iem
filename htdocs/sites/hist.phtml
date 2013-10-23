@@ -7,6 +7,8 @@ include("../../include/calendar.phtml");
 include("../../include/imagemaps.php");
 include("../../include/forms.php");
 include("../../include/mlib.php");
+include("../../include/myview.php");
+$t = new MyView();
 
 /* Get vars */
 $year = isset($_GET['year']) ? intval($_GET['year']) : date("Y", time() - 86400);
@@ -101,11 +103,14 @@ if ($mode == "monthly") {
   }
   $db[ $row["dvalid"] ] = $str ;
 
- $htmlout = printMonth($ts, $db, $rooturl ."/sites/hist.phtml?network=$network&station=$station" , $rooturl ."/sites/hist.phtml?station=$station&network=$network&mode=daily&year=$year&month=$month&day=");
+ $htmlout = printMonth($ts, $db, 
+ 		"/sites/hist.phtml?network=$network&station=$station" , 
+ 		"/sites/hist.phtml?station=$station&network=$network&mode=daily&year=$year&month=$month&day=");
  } /* End of for */
 
  $htmlout .= sprintf('<p><img src="month_hilo_plot.php?month=%s&year=%s&network=%s&station=%s"><br /><strong>Description:</strong> This chart of the monthly temperature data.  The bars are the observations and the dots are climatology.', $month, $year, $network, $station);
- $htmlout .= sprintf('<p><img src="%s/plotting/month/rainfall_plot.php?network=%s&station=%s&month=%s&year=%s"><br /><strong>Description:</strong> Here is a chart of the monthly precipitation data.  The red line would be an average month while the blue line and bars are observations.', $rooturl, $network, $station, $month, $year);
+ $htmlout .= sprintf('<p><img src="/plotting/month/rainfall_plot.php?network=%s&station=%s&month=%s&year=%s"><br /><strong>Description:</strong> Here is a chart of the monthly precipitation data.  The red line would be an average month while the blue line and bars are observations.', 
+ 		$network, $station, $month, $year);
 
 } else {
  $uri = "hist.phtml?year=$year&month=$month&day=$day&mode=daily&station=$station&network=$network&sortvar=";
@@ -148,39 +153,38 @@ if ($mode == "monthly") {
 }
 
 /* Begin Page Output */
-  $TITLE = "Weather Data Calendar";
-  $THISPAGE = "iem-sites";
-  include("$rootpath/include/header.php"); 
-  $current="calendar"; include('sidebar.php');
-?>
-<h2>Data Calendar for <?php echo $st->table[$station]["name"]; ?></h2>
-
-
-<?php
-  echo "<form method=\"GET\">";
-  echo "<input type=\"hidden\" name=\"station\" value=\"$station\">";
-  echo "<input type=\"hidden\" name=\"network\" value=\"$network\">";
+  $t->title = "Weather Data Calendar";
+  $t->thispage = "iem-sites";
+  $t->sites_current="calendar"; 
+  $content = <<<EOF
+<h2>Data Calendar for {$st->table[$station]["name"]}</h2>
+<div class="hidden-print">
+<form method="GET" name="changer" class="form-inline" role="form">
+<input type="hidden" name="station" value="{$station}">
+<input type="hidden" name="network" value="{$network}">
+EOF;
 if ($mode == "monthly"){
-  echo "The calendar chart below shows the daily reported climate variables.  
+  $content .= "The calendar chart below shows the daily reported climate variables.  
   You can click on a date to display the values for all sites for that day. 
   Time stamps are displayed in the <strong>". $metadata["tzname"] ."</strong> 
   timezone. Wind speeds are in mph and temperatures in Fahrenheit.";
-  echo "<p>Year: &nbsp; ". yearSelect(2002, $year, "year");
-  echo "<br />Month: &nbsp; ". monthSelect($month, "month");
-  echo "<br /><input type='submit' value='Change'></form>";
+  $content .= "<p>Year: &nbsp; ". yearSelect(2002, $year, "year");
+  $content .= " &nbsp; Month: &nbsp; ". monthSelect($month, "month");
+  $content .= " &nbsp; <input type='submit' value='Change'></form>";
+	$content .= "</div>";
 } else {
-  echo "The chart below lists out the reported summary values for a particular date.";
-  echo "<p>Switch date shown:<br /><input type=\"hidden\" value=\"daily\" name=\"mode\">";
-  echo yearSelect(2002, $year, "year");
-  echo monthSelect($month, "month");
-  echo daySelect($day);
-  echo "<input type=\"submit\" value=\"Switch Date\"></form>";
-echo "<p>Date show in table: $nicedate";
+  $content .= "The chart below lists out the reported summary values for a particular date.";
+  $content .= "<p>Switch date shown:<br /><input type=\"hidden\" value=\"daily\" name=\"mode\">";
+  $content .= yearSelect(2002, $year, "year");
+  $content .= monthSelect($month, "month");
+  $content .= daySelect($day);
+  $content .= "<input type=\"submit\" value=\"Switch Date\"></form>";
+	$content .= "</div>";
+  $content .= "<p>Date show in table: $nicedate";
 }
-echo "</div>";
-echo $htmlout;
-?>
 
+$content .= $htmlout;
+$content .= <<<EOF
 <br clear="all"/>
 <p><b>Notes:</b>
 <ul>
@@ -190,9 +194,8 @@ are not included.</li>
 <li>Values that are <strike>crossed out</strike> failed a crude quality control routine.</li>
 <li>Peak wind gusts are unavailable prior to 11 July 2002.</li>
 </ul>
+EOF;
+$t->content = $content;
+$t->render('sites.phtml');
 
-
-
-<?php
-  include("../../include/footer.php"); 
 ?>

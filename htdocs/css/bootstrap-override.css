@@ -1,3 +1,8 @@
+@media print {
+  a[href]:after {
+    content: "";
+  }
+}
 .logo-nav {
 	height: 50px;
 }
