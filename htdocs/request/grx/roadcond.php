@@ -1,9 +1,22 @@
 <?php
-include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-$conn = iemdb('postgis');
-
 header("Content-type: text/plain");
+
+/*
+ * Iowa DOT provided state road conditions
+ */
+include("../../../config/settings.inc.php");
+
+// Try to get it from memcached
+$memcache = new Memcache;
+$memcache->connect('iem-memcached', 11211);
+$val = $memcache->get("/request/grx/roadcond.php");
+if ($val){
+	die($val);
+}
+ob_start();
+
+include("../../../include/database.inc.php");
+$conn = iemdb('postgis');
 
 $colors = Array(
    0 => "255 255 255",
@@ -33,7 +46,10 @@ Title: IEM Delivered Iowa Road Conditions
 Refresh: 5
 ";
 
-$rs = pg_query($conn, "SELECT astext(transform(simple_geom,4326)) as t, * from roads_current r, roads_base b, roads_conditions c WHERE r.segid = b.segid and r.cond_code = c.code");
+$rs = pg_query($conn, "SELECT astext(transform(simple_geom,4326)) as t, 
+		* from roads_current r, roads_base b, roads_conditions c 
+		WHERE r.segid = b.segid and r.cond_code = c.code 
+		and b.geom is not null");
 
 for ($i=0;$row= @pg_fetch_array($rs,$i);$i++)
 {
@@ -55,4 +71,6 @@ for ($i=0;$row= @pg_fetch_array($rs,$i);$i++)
 
 }
 
+$memcache->set("/request/grx/roadcond.php", ob_get_contents(), false, 300);
+ob_end_flush();
 ?>
