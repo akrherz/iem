@@ -61,8 +61,6 @@ icursor.execute("""select id as station, sum(precip) from
 for row in icursor:
 	pcpn[ row[0] ] = "%5.2f" % (row[1],)
 
-pcpn["MXO"] = "M"
-
 lows = {}
 icursor.execute("""SELECT t.id as station, 
 	round(min(tmpf)::numeric,0) as min_tmpf, 
