@@ -16,6 +16,7 @@ function gen_feature(){
 	$foid = $row["oid"];
 	$good = intval($row["good"]);
 	$bad = intval($row["bad"]);
+	$abstain = intval($row["abstain"]);
 	$tags = ($row["tags"] != null) ? explode(",", $row["tags"]): Array();
 	$fbid = $row["fbid"];
 	$fburl = "http://www.facebook.com/pages/IEM/157789644737?v=wall&story_fbid=".$fbid;
@@ -43,6 +44,14 @@ function gen_feature(){
 	
 		$isql = "UPDATE feature SET bad = bad + 1 WHERE oid = $foid";
 		$bad += 1;
+		pg_exec($connection, $isql);
+	} elseif (isset($_GET["feature_abstain"]))
+	{
+		setcookie("foid", $foid, time()+100600);
+		$voted = TRUE;
+	
+		$isql = "UPDATE feature SET abstain = abstain + 1 WHERE oid = $foid";
+		$abstain += 1;
 		pg_exec($connection, $isql);
 	}
 	
@@ -92,18 +101,22 @@ EOF;
 	} else {
 		$s .= "<div style='clear:both;'>";
 		if ($voted){
-			$goodurl = "/";
-			$badurl = "/";
+			$goodurl = "#";
+			$badurl = "#";
+			$abstainurl = "#";
 			$msg = "Thanks for voting!";
 		} else {
 			$goodurl = "/?feature_good";
 			$badurl = "/?feature_bad";
+			$abstainurl = "/?feature_abstain";
 			$msg = "Rate Feature";
 		}
 	
 		$s .= "<strong>$msg</strong> 
 		<a class=\"btn btn-success\" href=\"$goodurl\">Good ($good votes)</a>
-		<a class=\"btn btn-danger\" href=\"$badurl\">Bad ($bad votes)</a></div>";
+		<a class=\"btn btn-danger\" href=\"$badurl\">Bad ($bad votes)</a>
+		<a class=\"btn btn-warning\" href=\"$abstainurl\">Abstain ($abstain votes)</a>
+		</div>";
 		
 		$s .= "<div class=\"container\" style=\"margin-top: 5px\"><div id=\"fb-root\"></div><script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>
 		<fb:comments send_notification_uid=\"16922938\" callback=\"/fbcb.php\" title=\"". $row["title"] ."\" \" href=\"http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";

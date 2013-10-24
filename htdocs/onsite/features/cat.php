@@ -78,7 +78,10 @@ $content = <<<EOF
 EOF;
   if ($row["voting"] == 't' && (intval($row["good"]) > 0 || intval($row["bad"]) > 0))
   {
-    $content .= "<br /><br /><b>Voting:</b><br />Good = ". $row["good"] ." <br />Bad = ". $row["bad"] ;
+    $content .= "<br /><br /><b>Voting:</b>
+    		<br />Good = ". $row["good"] 
+    	." <br />Bad = ". $row["bad"] ;
+    if ($row["abstain"] > 0) $content .= " <br />Abstain = ". $row["abstain"] ;
   }
   $content .= "<br />". printTags(explode(",", $row["tags"]));
 $content .= <<<EOF
