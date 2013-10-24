@@ -40,7 +40,10 @@ z = np.array([  100,   200,   300,   400,   500,   600,   700,   800,   900,
        23000, 24000, 25000, 26000, 27000, 28000, 29000, 30000, 31000])
 
 H, yedges, xedges = np.histogram2d(levels, doys, 
-                                   bins=(z, w) )
+                                    bins=(z, w) )
+
+print len(w), w[-1]
+
 print np.max(H)
 H = ma.array(H)
 H.mask = np.where( H < 1, True, False)
@@ -69,7 +72,7 @@ ax.set_yticklabels( z[idx])
 ax.set_title("1973-2013 Des Moines Ceilings Frequency\nLevel at which Overcast Conditions Reported")
 ax.set_ylabel("Overcast Level [ft AGL], irregular scale")
 ax.set_xlabel("Week of the Year")
-ax.set_xticks( np.arange(1,55,7) )
+ax.set_xticks( np.arange(0,55,7) )
 ax.set_xticklabels( ('Jan 1', 'Feb 19', 'Apr 8', 'May 27', 'Jul 15', 'Sep 2', 'Oct 21', 'Dec 9'))
 b = fig.colorbar(c)
 b.set_label("Hourly Obs per week per year")
