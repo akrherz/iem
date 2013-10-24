@@ -281,6 +281,7 @@ CREATE table feature(
   caption varchar(256),
   good smallint default 0,
   bad smallint default 0,
+  abstain smallint default 0,
   voting boolean default true,
   tags varchar(1024),
   fbid bigint);
