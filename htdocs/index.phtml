@@ -6,6 +6,6 @@ include("../include/generators.php");
 
 
 $t = new MyView();
-$t->feature = gen_feature();
+$t->feature = gen_feature($t);
 $t->render('homepage.phtml');
 ?>

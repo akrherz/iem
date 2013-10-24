@@ -3,7 +3,7 @@
  * functions that generate stuff
  */
 include_once dirname(__FILE__) ."/database.inc.php";
-function gen_feature(){
+function gen_feature($t){
 	$s = '';
 	
 	$connection = iemdb("mesosite", TRUE, TRUE);
@@ -118,7 +118,8 @@ EOF;
 		<a class=\"btn btn-warning\" href=\"$abstainurl\">Abstain ($abstain votes)</a>
 		</div>";
 		
-		$s .= "<div class=\"container\" style=\"margin-top: 5px\"><div id=\"fb-root\"></div><script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>
+		$t->jsextra = "<script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>";
+		$s .= "<div class=\"container\" style=\"margin-top: 5px\"><div id=\"fb-root\"></div>
 		<fb:comments send_notification_uid=\"16922938\" callback=\"/fbcb.php\" title=\"". $row["title"] ."\" \" href=\"http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
 	
 		$s .= "</div></div>";
