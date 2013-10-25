@@ -4,12 +4,12 @@ import numpy
 data = {}
 d2013 = {}
 
-for linenum, line in enumerate(open('/home/akrherz/Downloads/6D6EF9EF-6672-3025-BECF-B2B90410558D.csv')):
+for linenum, line in enumerate(open('/home/akrherz/Downloads/404AC2DB-F408-33CF-8CC6-F8F5C6306187.csv')):
     if linenum == 0:
         continue
     tokens = line.split(",")
     day = datetime.datetime.strptime(tokens[3], '%Y-%m-%d')
-    if day.month == 7 and day.day in range(10,18):
+    if day.month == 10 and day.day in range(20,28):
         state = tokens[5]
         val = float(tokens[-1])
         if not data.has_key(state):
@@ -106,7 +106,7 @@ axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
                 color=maue(range(len(bins))),
                 ec='None')
 
-ax.text(0.17, 1.05, "14 Jul 2013 USDA Percentage of Corn Silking\nPercentage Points Departure from 1980-2012 Average for 10-17 July", transform=ax.transAxes,
+ax.text(0.17, 1.05, "20 Oct 2013 USDA Percentage of Corn Harvested\nPercentage Points Departure from 1980-2012 Average for 20-27 Oct", transform=ax.transAxes,
      size=14,
     horizontalalignment='left', verticalalignment='center')
 # Logo!
