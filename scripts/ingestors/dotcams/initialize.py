@@ -17,7 +17,7 @@ for file in files:
   rid = cid[6:8]
   nwsli = mesonet.RWISconvert[ rid ]
 
-  rs = mesosite.query("SELECT name, x(geom) as lon, y(geom) as lat from stations where id = '%s'" % (nwsli,)).dictresult()
+  rs = mesosite.query("SELECT name, ST_x(geom) as lon, ST_y(geom) as lat from stations where id = '%s'" % (nwsli,)).dictresult()
   lon = rs[0]['lon']
   lat = rs[0]['lat']
   name = rs[0]['name']

@@ -33,9 +33,9 @@ thumbpx = 100
 cols = 10
 
 # Find largest polygon either in height or width
-sql = """SELECT *, area2d(transform(geom,2163)) as size, 
-  (xmax(transform(geom,2163)) - xmin(transform(geom,2163))) as width, 
-  (ymax(transform(geom,2163)) - ymin(transform(geom,2163))) as height 
+sql = """SELECT *, ST_area2d(ST_transform(geom,2163)) as size, 
+  (ST_xmax(ST_transform(geom,2163)) - ST_xmin(ST_transform(geom,2163))) as width, 
+  (ST_ymax(ST_transform(geom,2163)) - ST_ymin(ST_transform(geom,2163))) as height 
   from warnings_%s WHERE gtype = 'P' and date(issue) = '%s' and 
   phenomena IN ('TO','SV') """ % (ts.year, ts.strftime("%Y-%m-%d") )
 pcursor.execute( sql )
@@ -63,7 +63,7 @@ for row in pcursor:
 
 #print "Largest Dimension %s m" % (maxDimension,)
 
-sql = """SELECT phenomena, sum( area2d(transform(geom,2163)) ) as size 
+sql = """SELECT phenomena, sum( ST_area2d(ST_transform(geom,2163)) ) as size 
    from warnings_%s WHERE gtype = 'C' and date(issue) = '%s' and 
    significance = 'W' and phenomena IN ('TO','SV') GROUP by phenomena""" % (
                                 ts.year, ts.strftime("%Y-%m-%d") )
@@ -88,9 +88,9 @@ imagemap.write("<!-- %s %s -->\n" % (mx.DateTime.gmt().strftime("%Y-%m-%d %H:%M:
 imagemap.write("<MAP NAME='mymap'>\n")
 
 # Find my polygons
-sql = """SELECT *, area2d(transform(geom,2163)) as size, 
-  (xmax(transform(geom,2163)) + xmin(transform(geom,2163))) /2.0 as xc, 
-  (ymax(transform(geom,2163)) + ymin(transform(geom,2163))) /2.0 as yc 
+sql = """SELECT *, ST_area2d(ST_transform(geom,2163)) as size, 
+  (ST_xmax(ST_transform(geom,2163)) + ST_xmin(ST_transform(geom,2163))) /2.0 as xc, 
+  (ST_ymax(ST_transform(geom,2163)) + ST_ymin(ST_transform(geom,2163))) /2.0 as yc 
   from warnings_%s WHERE gtype = 'P' and date(issue) = '%s' and 
   phenomena IN ('TO','SV') and eventid is not null ORDER by %s""" % (
             ts.year, ts.strftime("%Y-%m-%d"), opts[sortOpt]['sortby'] )
@@ -144,7 +144,7 @@ for row in pcursor:
     os.remove("tmp.png")
 
   # Compute CAR! 
-    sql = """SELECT sum( area2d(transform(geom,2163))) as csize from 
+    sql = """SELECT sum( ST_area2d(ST_transform(geom,2163))) as csize from 
    (select distinct geom from warnings_%s WHERE gtype = 'C' and 
    phenomena = '%s' and significance = '%s' and eventid = %s and wfo = '%s') 
    as foo""" % (ts.year, row['phenomena'], 

@@ -15,7 +15,7 @@ icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 sql = """
 SELECT 
-  s.id as station, s.network, tmpf, drct, sknt, x(s.geom) as lon, y(s.geom) as lat
+  s.id as station, s.network, tmpf, drct, sknt, ST_x(s.geom) as lon, ST_y(s.geom) as lat
 FROM 
   current c, stations s
 WHERE

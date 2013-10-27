@@ -17,7 +17,7 @@ icursor = IEM.cursor()
 # Compute normal from the climate database
 sql = """
 select s.id, s.network,
-  x(s.geom) as lon, y(s.geom) as lat, 
+  ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
   (case when c.pday < 0 or c.day is null then 0 else c.pday end) as rainfall
  from summary_%s c, current c2, stations s
  WHERE s.iemid = c2.iemid and c2.iemid = c.iemid and 

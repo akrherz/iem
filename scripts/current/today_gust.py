@@ -16,7 +16,7 @@ from iem.plot import MapPlot
 # Compute normal from the climate database
 sql = """
   select s.id, s.network,
-  x(s.geom) as lon, y(s.geom) as lat, 
+  ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
   case when c.max_sknt > c.max_gust then c.max_sknt else c.max_gust END  as wind
   from summary_%s c, current c2, stations s
   WHERE s.iemid = c.iemid and c2.valid > 'TODAY' and c.day = 'TODAY'
