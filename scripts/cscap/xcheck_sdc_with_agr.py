@@ -11,6 +11,8 @@ import sys
 import util
 import copy
 
+YEAR = sys.argv[1]
+
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
 
@@ -26,15 +28,17 @@ query = gdata.docs.client.DocsQuery(show_collections='false',
 feed = docs_client.GetAllResources(query=query)
 feed.reverse()
 for entry in feed:
+    if entry.get_resource_type() != 'spreadsheet':
+        continue
     spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
     sitekey = spreadsheet.title.split()[0].lower()
-    print '------------>', sitekey, spreadsheet.title
-    worksheet = spreadsheet.worksheets['2011']
+    print '------------> %s [%s] [%s]' % ( YEAR, sitekey, spreadsheet.title)
+    worksheet = spreadsheet.worksheets[YEAR]
     worksheet.get_list_feed()      
     entry2 = worksheet.list_feed.entry[0]
     data = entry2.to_dict()
     keys = data.keys()
-    shouldhave = copy.deepcopy(sdc[sitekey])
+    shouldhave = copy.deepcopy(sdc[YEAR][sitekey])
     error = False
     for key in keys:
         if key.upper() not in shouldhave:
@@ -47,5 +51,5 @@ for entry in feed:
         if sh.find("AGR") == 0:
             print 'SHOULDHAVE %s' % (sh,)
             error = True
-    if error:
-        sys.exit()
+    #if error:
+    #    sys.exit()

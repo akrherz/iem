@@ -49,7 +49,7 @@ for i in ['lot','ict','sd','hun']:
     save(i, '%scomp.png'%(i,), '%srad' %(i,), sts)
 
 # Now, we query for watches.
-pcursor.execute("""select sel, xmax(geom), xmin(geom), ymax(geom), ymin(geom)
+pcursor.execute("""select sel, ST_xmax(geom), ST_xmin(geom), ST_ymax(geom), ST_ymin(geom)
      from watches_current ORDER by issued DESC""")
 for row in pcursor:
     xmin = float(row[2]) - 0.75 

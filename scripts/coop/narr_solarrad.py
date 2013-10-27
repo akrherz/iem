@@ -74,7 +74,7 @@ def do( date ):
         now += interval
 
     ccursor.execute("""
-        SELECT station, x(geom), y(geom) from alldata a JOIN stations t on 
+        SELECT station, ST_x(geom), ST_y(geom) from alldata a JOIN stations t on 
         (a.station = t.id) where day = %s
         """, (date.strftime("%Y-%m-%d"), ))
     for row in ccursor:

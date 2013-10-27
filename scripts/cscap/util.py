@@ -212,23 +212,36 @@ def build_sdc(feed):
     """
     Process the Site Data Collected spreadsheet
     @param feed the processed spreadsheet feed
+    @return data is a two tier dictionary of years x siteids
     """
     data = None
     sdc_names = {}
+    site_ids = []
     for entry in feed.entry:
+        # Turn the entry into a dictionary with the first row being the keys
         row = entry.to_dict()
         if data is None:
-            data = {}
+            data = {'2011': {}, '2012': {}, '2013': {}, '2014': {}, '2015': {}}
             for key in row.keys():
                 if key in ['uniqueid','name','key'] or key[0] == '_':
                     continue
-                data[key] = []
+                site_ids.append( key )
+                for yr in ['2011', '2012', '2013', '2014', '2015']:
+                    data[yr][key] = []
+        # If the 'KEY' column is blank or has nothing in it, skip it...
         if row['key'] is None or row['key'] == '':
             continue
+        # This is our Site Data Collected Key Identifier
         sdc_key = row['key']
         sdc_names[sdc_key] = {'name': row['name'], 'units': row['units']}
-        for sitekey in row.keys():
-            if sitekey in data.keys():
-                if row[sitekey] is not None and row[sitekey] != '':
-                    data[sitekey].append( sdc_key )
+
+        # Iterate over our site_ids
+        for sitekey in site_ids:
+            if row[sitekey] is None:
+                continue
+            for yr in ['2011', '2012', '2013', '2014', '2015']:
+                if (row[sitekey].strip().lower() == 'x' or 
+                    row[sitekey].find('%s' % (yr[2:],)) > -1):
+                    data[yr][sitekey].append( sdc_key )
+
     return data, sdc_names

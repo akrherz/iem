@@ -57,7 +57,7 @@ def run( ts ):
     total = (total * 3600.0) / 1000000.0
     
     cursor.execute("""
-        SELECT station, x(geom), y(geom) from alldata a JOIN stations t on 
+        SELECT station, ST_x(geom), ST_y(geom) from alldata a JOIN stations t on 
         (a.station = t.id) where day = %s and network ~* 'CLIMATE'
         """, (ts.strftime("%Y-%m-%d"), ))
     for row in cursor:
