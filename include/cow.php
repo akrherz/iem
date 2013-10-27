@@ -286,11 +286,11 @@ function computeSharedBorder(){
     reset($this->warnings);
     while (list($k,$v) = each($this->warnings)){
         $sql = sprintf("SELECT sum(sz) as s from (
-     SELECT length(transform(a,2163)) as sz from (
+     SELECT length(ST_transform(a,2163)) as sz from (
         select 
-           intersection(
-      buffer(exteriorring(geometryn(multi(ST_union(n.geom)),1)),0.02),
-      exteriorring(geometryn(multi(ST_union(w.geom)),1))
+           ST_intersection(
+      ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(ST_union(n.geom)),1)),0.02),
+      ST_exteriorring(ST_geometryn(ST_multi(ST_union(w.geom)),1))
             )  as a
             from warnings_%s w, nws_ugc n WHERE gtype = 'P' 
             and w.wfo = '%s' and phenomena = '%s' and eventid = '%s' 
@@ -301,7 +301,7 @@ function computeSharedBorder(){
           and phenomena = '%s' and eventid = '%s' and significance = '%s'
        )
          ) as foo
-            WHERE not isempty(a) ) as foo
+            WHERE not ST_isempty(a) ) as foo
        ", $v["year"], $v["wfo"], $v["phenomena"],
             $v["eventid"], $v["significance"],
           $v["year"], $v["wfo"], $v["phenomena"],
@@ -333,7 +333,7 @@ function loadWarnings(){
          w.phenomena, w.eventid, w.gtype, w.ugc,
          ST_area(ST_transform(w.geom,2163)) / 1000000.0 as area,
          ST_perimeter(ST_transform(w.geom,2163)) as perimeter,
-         xmax(w.geom) as lon0, ymax(w.geom) as lat0 from 
+         ST_xmax(w.geom) as lon0, ST_ymax(w.geom) as lat0 from 
          warnings w, sbw s WHERE s.wfo = w.wfo and s.phenomena = w.phenomena and
          s.eventid = w.eventid and s.significance = w.significance and 
          s.status = 'NEW' and s.issue = w.issue and 
@@ -385,9 +385,9 @@ function loadWarnings(){
 } /* End of loadWarnings() */
 
 function loadLSRs() {
-    $sql = sprintf("SELECT distinct *, x(geom) as lon0, y(geom) as lat0, 
-        astext(geom) as tgeom,
-        astext(buffer( transform(geom,2163), %s000)) as buffered
+    $sql = sprintf("SELECT distinct *, ST_x(geom) as lon0, ST_y(geom) as lat0, 
+        ST_astext(geom) as tgeom,
+        ST_astext(ST_buffer( ST_transform(geom,2163), %s000)) as buffered
         from lsrs w WHERE %s and 
         valid >= '%s' and valid < '%s' and %s and
         ((type = 'M' and magnitude >= 34) or 
@@ -419,7 +419,7 @@ function areaVerify() {
         if (sizeof($v["lsrs"]) == 0){ continue; }
         $bufferedArray = Array();
         while (list($k2,$v2) = each($v["lsrs"])){
-            $bufferedArray[] = sprintf("SetSRID(GeomFromText('%s'),2163)", 
+            $bufferedArray[] = sprintf("ST_SetSRID(ST_GeomFromText('%s'),2163)", 
               $this->lsrs[$v2]["buffered"]);
         }
         $sql = sprintf("SELECT ST_Area(
@@ -462,8 +462,8 @@ function sbwVerify() {
         /* Look for LSRs! */
         $sql = sprintf("SELECT distinct *
          from lsrs_%s w WHERE 
-         geom && ST_Buffer(SetSrid(GeometryFromText('%s'),4326),0.01) and 
-         contains(ST_Buffer(SetSrid(GeometryFromText('%s'),4326),0.01), geom) 
+         geom && ST_Buffer(ST_SetSrid(ST_GeometryFromText('%s'),4326),0.01) and 
+         ST_contains(ST_Buffer(ST_SetSrid(ST_GeometryFromText('%s'),4326),0.01), geom) 
          and %s and wfo = '%s' and
         ((type = 'M' and magnitude >= 34) or 
          (type = 'H' and magnitude >= %s) or type = 'W' or

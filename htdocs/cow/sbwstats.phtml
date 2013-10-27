@@ -24,10 +24,10 @@ $gis_url = sprintf("/cgi-bin/request/gis/watchwarn.py?limit1=yes&year1=%s&month1
 		  date("Y", $ets), date("m", $ets), date("d", $ets), date("H", $ets) );
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT wfo, phenomena, count(*),
-  sum( st_area2d( transform(geom,2163) ) ) as sum_polysize,
-  avg( st_area2d( transform(geom,2163) ) ) as avg_polysize,
-  sum( st_perimeter( transform(geom,2163) ) ) as sum_perimsize,
-  avg( st_perimeter( transform(geom,2163) ) ) as avg_perimsize
+  sum( st_area2d( ST_transform(geom,2163) ) ) as sum_polysize,
+  avg( st_area2d( ST_transform(geom,2163) ) ) as avg_polysize,
+  sum( st_perimeter( ST_transform(geom,2163) ) ) as sum_perimsize,
+  avg( st_perimeter( ST_transform(geom,2163) ) ) as avg_perimsize
   from warnings WHERE gtype = 'P' and 
   phenomena IN ('SV','TO','MA','FF','FA') and significance = 'W'
   and issue BETWEEN $1 and $2 GROUP by wfo, phenomena ORDER by $sortby ASC");

@@ -11,13 +11,13 @@ $center_lat = isset($_GET["lat"]) ? $_GET["lat"]: 58.1;
 $center_lng = isset($_GET["lon"]) ? $_GET["lon"]: -97.0;
 $radius = isset($_GET["radius"]) ? floatval($_GET["radius"]): 2000.0; # in meters
 
-$rs = pg_prepare($postgis, "SELECT", "SELECT x(geom) as lon, y(geom) as lat,
-     distance(transform(geom,2163), 
-       transform(
-        GeomFromEWKT('SRID=4326;POINT($center_lng $center_lat)'),2163)) as dist,
-      * from nexrad_attributes WHERE distance(transform(geom,2163), 
-       transform(
-        GeomFromEWKT('SRID=4326;POINT($center_lng $center_lat)'),2163)) < $radius");
+$rs = pg_prepare($postgis, "SELECT", "SELECT ST_x(geom) as lon, ST_y(geom) as lat,
+     ST_distance(ST_transform(geom,2163), 
+       ST_transform(
+        sT_GeomFromEWKT('SRID=4326;POINT($center_lng $center_lat)'),2163)) as dist,
+      * from nexrad_attributes WHERE ST_distance(ST_transform(geom,2163), 
+       ST_transform(
+        ST_GeomFromEWKT('SRID=4326;POINT($center_lng $center_lat)'),2163)) < $radius");
 
 //header('Content-type: application/json');
 $rs = pg_execute($postgis, "SELECT", Array());
