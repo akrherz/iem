@@ -17,7 +17,7 @@ icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 # Compute normal from the climate database
 sql = """
 SELECT 
-  s.id, tmpf, dwpf, sknt, drct,  x(s.geom) as lon, y(s.geom) as lat
+  s.id, tmpf, dwpf, sknt, drct,  ST_x(s.geom) as lon, ST_y(s.geom) as lat
 FROM 
   current c, stations s 
 WHERE

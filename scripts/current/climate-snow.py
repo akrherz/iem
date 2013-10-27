@@ -12,7 +12,7 @@ vals = []
 lats = []
 lons = []
 icursor.execute("""
-select id, x(geom), y(geom), s.sum from (select station, sum(snow) from climate51 where station ~* '^IA' and (valid > '2000-10-01' or valid < '2000-05-01') GROUP by station) as s JOIN stations t on (t.id = s.station) WHERE s.sum > 0 and t.network = 'IACLIMATE' and t.id NOT IN ('IA8706', 'IA1354', 'IA2203', 'IA5769','IA3980')
+select id, ST_x(geom), ST_y(geom), s.sum from (select station, sum(snow) from climate51 where station ~* '^IA' and (valid > '2000-10-01' or valid < '2000-05-01') GROUP by station) as s JOIN stations t on (t.id = s.station) WHERE s.sum > 0 and t.network = 'IACLIMATE' and t.id NOT IN ('IA8706', 'IA1354', 'IA2203', 'IA5769','IA3980')
 """)
 for row in icursor:
   vals.append( row[3] )
