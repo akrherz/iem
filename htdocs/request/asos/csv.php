@@ -14,7 +14,7 @@ if (isset($_GET["lat"]) && isset($_GET["lon"]))
 {
   /* Figure out what station(s) fits the bill */
   $sql = sprintf("SELECT id, 
-      ST_distance_sphere(geom, geometryfromtext('POINT(%.4f %.4f)',4326)) as dist from stations
+      ST_distance_sphere(geom, ST_geometryfromtext('POINT(%.4f %.4f)',4326)) as dist from stations
       WHERE (network ~* 'ASOS' or network ~* 'AWOS') ORDER by dist ASC
       LIMIT 5", $_GET["lon"], $_GET["lat"]);
   $rs = pg_exec($mesosite, $sql);
@@ -34,7 +34,7 @@ while(list($k,$id) = each($stations))
 		$prepared = pg_prepare($asos, "SELECT", sprintf("SELECT station as id, valid,
 		max(tmpf) as tmpf, max(dwpf) as dwpf, max(sknt) as sknt, max(drct) as drct,
 		max(p01i) as phour, max(alti) as alti, max(gust) as gust, 
-		max(x(s.geom)) as lon, max(y(s.geom)) as lat from t%s t, stations s
+		max(ST_x(s.geom)) as lon, max(ST_y(s.geom)) as lat from t%s t, stations s
 		where s.id = $1 and (s.network ~* 'ASOS' or s.network ~* 'AWOS')
 		and t.station = s.id and t.valid BETWEEN '%s'::date 
 		and '%s'::date + '9 days'::interval GROUP by station, valid 
@@ -46,7 +46,7 @@ while(list($k,$id) = each($stations))
   $rs = pg_exec($access, "SELECT s.id, valid, max(tmpf) as tmpf, max(dwpf) as dwpf, 
   max(sknt) as sknt, max(drct) as drct,
   max(phour) as phour, max(alti) as alti, max(gust) as gust,
-  max(x(s.geom)) as lon, max(y(s.geom)) as lat from current_log c, stations s
+  max(ST_x(s.geom)) as lon, max(ST_y(s.geom)) as lat from current_log c, stations s
   WHERE s.id = '$id' and s.iemid = c.iemid
         GROUP by id, valid ORDER by valid ASC");
 	}
