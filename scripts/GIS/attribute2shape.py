@@ -67,8 +67,8 @@ sql = """DELETE from nexrad_attributes WHERE valid < '%s+00'""" % (
 							eTS.strftime("%Y-%m-%d %H:%M"), )
 pcursor.execute( sql )
 sql = """SELECT *, valid at time zone 'UTC' as utcvalid, 
-	astext(geom) as tgeom, x(geom) as lon, 
-       y(geom) as lat from nexrad_attributes """
+	ST_astext(geom) as tgeom, ST_x(geom) as lon, 
+       ST_y(geom) as lat from nexrad_attributes """
 pcursor.execute( sql )
 
 cnt = 0
