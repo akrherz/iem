@@ -60,7 +60,7 @@ m = plot.MapPlot()
 source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody tables=nws_ugc(tgeom)")
 data = source.ExecuteSQL("""
   select ugc, ST_Simplify(geom,0.001) as tgeom,
-  x(ST_Centroid(geom)) as lon, y(ST_Centroid(geom)) as lat 
+  ST_x(ST_Centroid(geom)) as lon, ST_y(ST_Centroid(geom)) as lat 
   from nws_ugc WHERE polygon_class = 'C' and state = 'IA'
 """)
 #print 'Content-type: text/plain\n'

@@ -28,7 +28,7 @@ def main():
     station = (string.strip( form["station"][0] )).upper()
     gisextra = []
     if form.has_key("latlon") and form["latlon"][0] == "yes":
-        mcursor.execute("""SELECT x(geom) as lon, y(geom) as lat 
+        mcursor.execute("""SELECT ST_x(geom) as lon, ST_y(geom) as lat 
              from stations WHERE id = '%s'""" % (station,))
         if mcursor.rowcount > 0:
             row = mcursor.fetchone()
