@@ -8,7 +8,7 @@ $db = iemdb("postgis");
 pg_exec($db, "SET TIME ZONE 'GMT'");
 $rs = pg_prepare($db, "CHECK4WATCH", "SELECT *, ST_xmin(geom) as x0, 
       ST_xmax(geom) as x1, ST_ymin(geom) as y0, ST_ymax(geom) as y1,
-      askml(geom) as kml from watches 
+      ST_askml(geom) as kml from watches 
       where extract(year from issued) = $1 and num = $2");
 putenv("TZ=GMT");
 
