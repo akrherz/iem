@@ -18,7 +18,7 @@ data = urllib2.urlopen(req).readlines()
 
 # Find current stations
 stations = []
-sql = """SELECT id from stations WHERE network = '%sCOCORAHS' and y(geom) > 0
+sql = """SELECT id from stations WHERE network = '%sCOCORAHS' and ST_y(geom) > 0
   and name is not null""" % (state,)
 mcursor.execute( sql )
 for row in mcursor:
