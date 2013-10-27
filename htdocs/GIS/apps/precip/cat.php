@@ -20,7 +20,7 @@ header("Content-Disposition: attachment; filename=iemprecip.txt");
  $connection = iemdb("access");
  $var = substr($param, 0, 4);
 
- $query = "SELECT ".$var." as data, station, X(geom) as x, Y(geom) as y 
+ $query = "SELECT ".$var." as data, station, ST_X(geom) as x, ST_Y(geom) as y 
    from current WHERE ".$var." >= 0 and valid > 'TODAY'";
  $rs = pg_exec($connection, $query);
 

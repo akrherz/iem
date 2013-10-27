@@ -6,11 +6,11 @@ $conn = iemdb("postgis");
 pg_exec($conn, "SET TIME ZONE 'GMT'");
 $nexrad = isset($_GET["nexrad"]) ? substr($_GET["nexrad"],1,3) : False; 
 if ($nexrad){
- $rs = pg_prepare($conn, "SELECT", "SELECT *, x(geom) as lon, y(geom) as lat 
+ $rs = pg_prepare($conn, "SELECT", "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat 
  		from nexrad_attributes WHERE nexrad = $1 and valid > now() - '15 minutes'::interval");
   $rs = pg_execute($conn, "SELECT", Array($nexrad) );
 } else {
- $rs = pg_prepare($conn, "SELECT", "SELECT *, x(geom) as lon, y(geom) as lat 
+ $rs = pg_prepare($conn, "SELECT", "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat 
  		from nexrad_attributes WHERE valid > now() - '15 minutes'::interval");
   $rs = pg_execute($conn, "SELECT", Array());
 

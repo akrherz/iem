@@ -17,8 +17,8 @@ $ar = Array("type"=>"FeatureCollection",
 );
 
 $iemdata = Array();
-$rs = pg_query($dbconn, "select *, c.pday as ob_pday, x(c.geom) as x, 
-  y(c.geom) as y from current c LEFT JOIN summary s USING 
+$rs = pg_query($dbconn, "select *, c.pday as ob_pday, ST_x(c.geom) as x, 
+  ST_y(c.geom) as y from current c LEFT JOIN summary s USING 
   (station, network) WHERE c.network in ('KCCI','KIMT','KELO') 
   and s.day = 'TODAY'");
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {

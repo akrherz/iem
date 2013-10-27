@@ -21,7 +21,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   </Style>";
 
 $conn = iemdb("mesosite");
-pg_prepare($conn, "SELECT", "SELECT *, x(geom) as lon, y(geom) as lat
+pg_prepare($conn, "SELECT", "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
 		from camera_current c JOIN webcams w
 		on (w.id = c.cam) WHERE 
 		valid > (now() - '30 minutes'::interval) and network = $1");
