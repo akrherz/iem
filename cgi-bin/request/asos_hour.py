@@ -20,7 +20,7 @@ def main():
     print "Content-type: text/plain \n\n",
     form = cgi.FormContent()
     metadata = {}
-    mcursor.execute("""SELECT id, x(geom) as lon, y(geom) as lat 
+    mcursor.execute("""SELECT id, ST_x(geom) as lon, ST_y(geom) as lat 
          from stations WHERE network ~* 'ASOS' or network = 'AWOS'
          and country = 'US' """)
     for row in mcursor:

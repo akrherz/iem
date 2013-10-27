@@ -14,7 +14,7 @@ def run(sid):
     dbconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
     cursor = dbconn.cursor()
     cursor.execute("""SELECT valid at time zone 'UTC', tmpf, dwpf, raw,
-    x(geom), y(geom) , tmpf, dwpf, drct, sknt, phour, alti, mslp, vsby, gust
+    ST_x(geom), ST_y(geom) , tmpf, dwpf, drct, sknt, phour, alti, mslp, vsby, gust
      from current_log c JOIN
      stations t on (t.iemid = c.iemid) WHERE t.id = %s and t.metasite = 'f'
      ORDER by valid ASC""", (sid,))

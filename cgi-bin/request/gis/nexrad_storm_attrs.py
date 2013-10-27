@@ -136,7 +136,7 @@ out_layer.CreateField(fd)
 
 
 sql = """SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
-    * , x(geom) as lon, y(geom) as lat
+    * , ST_x(geom) as lon, ST_y(geom) as lat
     from nexrad_attributes_log WHERE 
     valid >= '%s' and valid < '%s' %s  ORDER by valid ASC""" % (
                     sTS.strftime("%Y-%m-%d %H:%M+00"), 
