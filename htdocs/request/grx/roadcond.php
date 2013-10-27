@@ -46,7 +46,7 @@ Title: IEM Delivered Iowa Road Conditions
 Refresh: 5
 ";
 
-$rs = pg_query($conn, "SELECT astext(transform(simple_geom,4326)) as t, 
+$rs = pg_query($conn, "SELECT ST_astext(ST_transform(simple_geom,4326)) as t, 
 		* from roads_current r, roads_base b, roads_conditions c 
 		WHERE r.segid = b.segid and r.cond_code = c.code 
 		and b.geom is not null");
