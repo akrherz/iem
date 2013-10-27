@@ -16,7 +16,7 @@ $valid = strftime("%I:%M %p on %d %b %Y", $ts);
 $tbl = "roads_current";
 if (isset($_GET["test"])){ $tbl = "roads_current_test"; }
 
-$sql = "SELECT askml(simple_geom) as kml,
+$sql = "SELECT ST_askml(simple_geom) as kml,
       * from $tbl r, roads_base b, roads_conditions c WHERE
   r.segid = b.segid and r.cond_code = c.code";
 
