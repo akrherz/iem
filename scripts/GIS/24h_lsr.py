@@ -52,7 +52,7 @@ dbf.add_field("REMARK", dbflib.FTString, 200, 0)
 
 
 #sql = "SELECT *, astext(geom) as tgeom from warnings WHERE issue < '%s' and \
-sql = """SELECT distinct *, astext(geom) as tgeom from lsrs_%s WHERE 
+sql = """SELECT distinct *, ST_astext(geom) as tgeom from lsrs_%s WHERE 
 	valid > (now() -'1 day'::interval) """ % (eTS.year,)
 pcursor.execute(sql)
 
