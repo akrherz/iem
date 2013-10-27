@@ -12,7 +12,7 @@ for line in open('UTC_OFFSET.txt'):
     sid = tokens[0]
     state = tokens[3]
     offset = tokens[4].strip()
-    mcursor.execute("""SELECT x(geom), y(geom) from stations where id = %s
+    mcursor.execute("""SELECT ST_x(geom), ST_y(geom) from stations where id = %s
     and network ~* 'ASOS' """ , (sid,))
     if mcursor.rowcount == 1:
         row = mcursor.fetchone()

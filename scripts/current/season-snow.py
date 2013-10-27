@@ -66,7 +66,7 @@ vals2 = []
 lats2 = []
 lons2 = []
 icursor.execute("""
-select id, x(geom), y(geom), s.sum from (select station, sum(snow) from climate51 where station ~* '^IA' and (valid > '2000-10-01' or valid < '2000-02-17') GROUP by station) as s JOIN stations t on (t.id = s.station) WHERE s.sum > 0 and t.network = 'IACLIMATE' and t.id NOT IN ('IA2999','IA7147','IA4705','IA3509','IA6800','IA1233','IA7312','IA3517','IA7678','IA6940','IA4049','IA8706', 'IA1354', 'IA2203', 'IA5769','IA3980') ORDER by sum ASC
+select id, ST_x(geom), ST_y(geom), s.sum from (select station, sum(snow) from climate51 where station ~* '^IA' and (valid > '2000-10-01' or valid < '2000-02-17') GROUP by station) as s JOIN stations t on (t.id = s.station) WHERE s.sum > 0 and t.network = 'IACLIMATE' and t.id NOT IN ('IA2999','IA7147','IA4705','IA3509','IA6800','IA1233','IA7312','IA3517','IA7678','IA6940','IA4049','IA8706', 'IA1354', 'IA2203', 'IA5769','IA3980') ORDER by sum ASC
 """)
 for row in icursor:
   vals2.append( row[3] )

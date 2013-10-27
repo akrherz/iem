@@ -50,7 +50,7 @@ def fetch_lsrs():
     lons = []
     # Query LSR Data...
     pcursor.execute("""
-    SELECT state, max(magnitude) as val, x(geom) as lon, y(geom) as lat
+    SELECT state, max(magnitude) as val, ST_x(geom) as lon, ST_y(geom) as lat
       from lsrs_2012 WHERE type in ('S') and magnitude > 0 and 
       valid > '2012-12-09 00:00' and valid < '2012-12-10 12:00'
       and x(geom) BETWEEN %s and %s and
@@ -68,7 +68,7 @@ def fetch_coop():
     lats = []
     lons = []
     icursor.execute("""
-    SELECT id, sum(snow), x(geom) as lon, y(geom) as lat, count(*) from
+    SELECT id, sum(snow), ST_x(geom) as lon, ST_y(geom) as lat, count(*) from
     summary_2012 t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
     day in ('2012-12-09', '2012-12-10') and snow >= 0 and 

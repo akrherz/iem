@@ -17,8 +17,8 @@ lats = []
 lons = []
 icursor.execute("""
     SELECT id, sum(snow), 
-    x(geom) as lon, 
-    y(geom) as lat, count(*) from
+    ST_x(geom) as lon, 
+    ST_y(geom) as lat, count(*) from
     summary_2013 t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
     day in ('2014-01-30', '2014-01-31') and snow >= 0 and 

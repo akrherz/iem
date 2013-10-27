@@ -110,7 +110,7 @@ def estimate_snow( ts ):
     lats = []
     lons = []
     icursor.execute("""
-       SELECT x(s.geom) as lon, y(s.geom) as lat, snow, snowd
+       SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, snow, snowd
        from summary_%s c, stations s WHERE day = '%s' and 
        s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
         'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
@@ -163,7 +163,7 @@ def estimate_hilo( ts ):
     lats = []
     lons = []
     icursor.execute("""
-       SELECT x(s.geom) as lon, y(s.geom) as lat, max_tmpf, min_tmpf
+       SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, max_tmpf, min_tmpf
        from summary_%s c, stations s WHERE day = '%s' and s.network in ('AWOS','IA_ASOS', 'MN_ASOS', 'WI_ASOS', 
        'IL_ASOS', 'MO_ASOS',
         'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
