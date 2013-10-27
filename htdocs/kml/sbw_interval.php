@@ -26,17 +26,17 @@ if (sizeof($mywfos) > 0){
 } else {
   $wfolimiter = "";
 }
-$rs = pg_prepare($connect, "SELECT-INT", "SELECT *, astext(geom) as t, 
-           askml(geom) as kml,
-           round(area(transform(geom,2163)) / 1000000.0) as psize,
+$rs = pg_prepare($connect, "SELECT-INT", "SELECT *, ST_astext(geom) as t, 
+           ST_askml(geom) as kml,
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
            WHERE $wfolimiter issue >= $1 and issue <= $2
            and gtype = 'P' and eventid > 0
            ORDER by sz DESC, updated DESC, gtype ASC");
 $rs = pg_prepare($connect, "SELECT", "SELECT *, astext(geom) as t, 
-           askml(geom) as kml,
-           round(area(transform(geom,2163)) / 1000000.0) as psize,
+           ST_askml(geom) as kml,
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
            WHERE $wfolimiter issue <= $1 and expire > $2

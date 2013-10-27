@@ -11,9 +11,9 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "SELECT *, astext(geom) as t, 
-           askml(geom) as kml,
-           round(area(transform(geom,2163)) / 1000000.0) as psize,
+$rs = pg_prepare($connect, "SELECT", "SELECT *, ST_astext(geom) as t, 
+           ST_askml(geom) as kml,
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
            WHERE wfo = $1 and phenomena = $2 and 

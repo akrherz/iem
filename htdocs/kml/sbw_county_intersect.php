@@ -10,13 +10,13 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "select askml(setsrid(a,4326)) as kml,
-      length(transform(a,2163)) as sz
+$rs = pg_prepare($connect, "SELECT", "select ST_askml(ST_setsrid(a,4326)) as kml,
+      length(ST_transform(a,2163)) as sz
       from (
 select 
-   intersection(
-      buffer(exteriorring(geometryn(multi(ST_union(n.geom)),1)),0.02),
-      exteriorring(geometryn(multi(ST_union(w.geom)),1))
+   ST_intersection(
+      ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(ST_union(n.geom)),1)),0.02),
+      ST_exteriorring(ST_geometryn(ST_multi(ST_union(w.geom)),1))
    ) as a
    from warnings_$year w, nws_ugc n WHERE gtype = 'P' and w.wfo = '$wfo'
    and phenomena = '$phenomena' and eventid = $eventid 
@@ -28,9 +28,9 @@ select
           and phenomena = '$phenomena' and eventid = $eventid 
           and significance = '$significance'
        )
-   and isvalid(w.geom) and isvalid(n.geom)
+   and ST_isvalid(w.geom) and ST_isvalid(n.geom)
 ) as foo 
-      WHERE not isempty(a)");
+      WHERE not ST_isempty(a)");
 
 $result = pg_execute($connect, "SELECT", 
                      Array() );
