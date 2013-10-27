@@ -53,7 +53,7 @@ if fmt == 'json':
     postgis = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     pcursor = postgis.cursor()
     pcursor.execute("""
-    SELECT x(ST_Centroid(geom)), y(ST_Centroid(geom)) from nws_ugc WHERE
+    SELECT ST_x(ST_Centroid(geom)), ST_y(ST_Centroid(geom)) from nws_ugc WHERE
     ugc = %s
     """, (ugc,))
     row = pcursor.fetchone()

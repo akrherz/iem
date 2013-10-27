@@ -7,8 +7,8 @@ icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 import mx.DateTime
 
 # First, we get a dict going of our current obs
-icursor.execute("""SELECT s.id as station, c.*, x(s.geom) as lon, 
- y(s.geom) as lat  from current c, stations s WHERE 
+icursor.execute("""SELECT s.id as station, c.*, ST_x(s.geom) as lon, 
+ ST_y(s.geom) as lat  from current c, stations s WHERE 
  (valid + '1 hour'::interval) > CURRENT_TIMESTAMP and 
  alti is not Null and c.iemid = s.iemid""")
 c = {}

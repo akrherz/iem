@@ -9,7 +9,7 @@ mcursor2 = MESOSITE.cursor()
 pcursor = POSTGIS.cursor()
 
 mcursor.execute("""
- SELECT id, network, x(geom) as lon, y(geom) as lat from stations 
+ SELECT id, network, ST_x(geom) as lon, ST_y(geom) as lat from stations 
  WHERE tzname is null""")
 
 for row in mcursor:

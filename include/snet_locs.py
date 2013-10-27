@@ -16,7 +16,7 @@ $cities = Array(
 
 for tv in ('KCCI','KELO','KIMT'):
     print "'%s' => Array(" % (tv,)
-    rs = mydb.query("SELECT *, y(geom) as latitude, x(geom) as longitude from stations \
+    rs = mydb.query("SELECT *, ST_y(geom) as latitude, ST_x(geom) as longitude from stations \
       WHERE network = '%s' ORDER by name" % (tv,) ).dictresult()
 
     for i in range(len(rs)):

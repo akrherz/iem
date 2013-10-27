@@ -15,7 +15,7 @@ icursor = IEM.cursor()
 # Compute normal from the climate database
 sql = """
 select s.id, 
-  x(s.geom) as lon, y(s.geom) as lat, 
+  ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
   sum(pday) as rainfall
  from summary_%s c, stations s
  WHERE day > ('TODAY'::date - '7 days'::interval) 
