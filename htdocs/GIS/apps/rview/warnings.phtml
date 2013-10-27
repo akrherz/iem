@@ -236,8 +236,8 @@ if ($cu == 1) $cuextra = " and w.phenomena IN ('SV','TO','MA') ";
 $query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire, 
   w.updated as updated, w.status as status, w.fcster as fcster, 
   w.eventid as eventid, w.significance as significance, 
-  w.issue as issue, u.state as sname, xmax(w.geom) as lon0, 
-  ymax(w.geom) as lat0, w.wfo as wfo
+  w.issue as issue, u.state as sname, ST_xmax(w.geom) as lon0, 
+  ST_ymax(w.geom) as lat0, w.wfo as wfo
   from $wtable w, nws_ugc u
   WHERE w.expire > $tsextra and w.significance != 'A'
    and w.gtype = 'C' and w.ugc = u.ugc $cuextra ORDER by $sortcol $sortdir";
@@ -344,7 +344,7 @@ if ($k == 0){
 </form>
 <div style="clear: both;">
 <?php if (! $isarchive) { ?>
-<img src="<?php echo $rooturl; ?>/images/gisready.png">Download <a href="<?php echo $rooturl; ?>/data/gis/shape/unproj/us/current_ww.zip">GIS shapefile of current warnings</a> and/or <a href="<?php echo $rooturl; ?>/data/gis/images/4326/USCOMP/n0r_0.gtif.Z">GeoTiff of NEXRAD base reflectivity</a>.
+<img src="/images/gisready.png">Download <a href="/data/gis/shape/unproj/us/current_ww.zip">GIS shapefile of current warnings</a> and/or <a href="<?php echo $rooturl; ?>/data/gis/images/4326/USCOMP/n0r_0.gtif.Z">GeoTiff of NEXRAD base reflectivity</a>.
 <?php } ?>
 
 <font size="-1">
