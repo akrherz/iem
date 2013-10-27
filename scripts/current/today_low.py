@@ -12,7 +12,7 @@ icursor = IEM.cursor()
 
 sql = """
 select c.station, 
-  x(s.geom) as lon, y(s.geom) as lat, 
+  ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
   min_tmpf as low, s.network
  from summary_%s c, stations s
  WHERE day = 'TODAY' and min_tmpf < 90 

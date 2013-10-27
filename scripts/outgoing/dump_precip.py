@@ -21,7 +21,7 @@ def dumper():
     """
     output = open('/tmp/ia_precip.txt', 'w')
     output.write("ID,LON,LAT,START_UTC,END_UTC,PRECIP_MM\n")
-    icursor.execute(""" SELECT s.id, x(s.geom), y(s.geom), c.pday, c.phour,
+    icursor.execute(""" SELECT s.id, ST_x(s.geom), ST_y(s.geom), c.pday, c.phour,
         s.network, c.valid at time zone 'UTC' from current c JOIN stations s 
         on (s.iemid = c.iemid)
         WHERE s.network in ('IA_ASOS','AWOS','KCCI','IA_COOP')

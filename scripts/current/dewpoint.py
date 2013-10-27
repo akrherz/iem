@@ -23,7 +23,7 @@ def uv(sped, drct2):
 # Compute normal from the climate database
 sql = """
 SELECT 
-  station, network, dwpf, drct, sknt, x(geom) as lon, y(geom) as lat
+  station, network, dwpf, drct, sknt, ST_x(geom) as lon, ST_y(geom) as lat
 FROM 
   current_log
 WHERE

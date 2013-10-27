@@ -14,7 +14,7 @@ icursor = IEM.cursor()
 # Compute normal from the climate database
 sql = """
 SELECT 
-  id, s.network, pday, x(s.geom) as lon, y(s.geom) as lat
+  id, s.network, pday, ST_x(s.geom) as lon, ST_y(s.geom) as lat
 FROM 
   current c, stations s
 WHERE

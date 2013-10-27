@@ -13,7 +13,7 @@ icursor = IEM.cursor()
 
 sql = """
   select s.id, 
-  x(s.geom) as lon, y(s.geom) as lat, 
+  ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
   max_tmpf as high, s.network
   from summary c, stations s
   WHERE c.iemid = s.iemid and day = 'TODAY' and max_tmpf > -40 

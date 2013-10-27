@@ -17,13 +17,13 @@ lats = []
 lons = []
 icursor.execute("""
     SELECT id, sum(snow), 
-    x(geom) as lon, 
-    y(geom) as lat, county, count(*) from
+    ST_x(geom) as lon, 
+    ST_y(geom) as lat, county, count(*) from
     summary_2013 t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
     day in ('2013-05-01', '2013-05-02', '2013-05-03') and snow >= 0 and 
-    x(geom) BETWEEN %s and %s and
-    y(geom) BETWEEN %s and %s  
+    ST_x(geom) BETWEEN %s and %s and
+    ST_y(geom) BETWEEN %s and %s  
     GROUP by id, lon, lat, county
 """, (iemplot.MW_WEST, iemplot.MW_EAST, iemplot.MW_SOUTH, iemplot.MW_NORTH))
 for row in icursor:

@@ -41,7 +41,7 @@ def doit(now, model):
     # Load up the currents!
     icursor.execute("""
 SELECT 
-  s.id, s.network, tmpf, x(s.geom) as lon, y(s.geom) as lat
+  s.id, s.network, tmpf, ST_x(s.geom) as lon, ST_y(s.geom) as lat
 FROM 
   current c, stations s
 WHERE

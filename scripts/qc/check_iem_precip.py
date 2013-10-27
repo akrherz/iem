@@ -19,7 +19,7 @@ offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
 
 iem = iemdb.connect("iem", bypass=True)
 icursor = iem.cursor(cursor_factory=psycopg2.extras.DictCursor)
-icursor.execute("""SELECT x(geom) as lon, y(geom) as lat, id, pday
+icursor.execute("""SELECT ST_x(geom) as lon, ST_y(geom) as lat, id, pday
   FROM summary_%s s JOIN stations t ON (t.iemid = s.iemid) where t.network in ('KCCI','KIMT','AWOS') and day = 'YESTERDAY'::date
   ORDER by pday DESC""" % (ts.year,))
 obs = []

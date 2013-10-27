@@ -13,7 +13,7 @@ icursor = IEM.cursor()
 
 sql = """
 SELECT 
-  s.id, s.network, snow, x(s.geom) as lon, y(s.geom) as lat
+  s.id, s.network, snow, ST_x(s.geom) as lon, ST_y(s.geom) as lat
 FROM 
   summary_%s c, stations s
 WHERE

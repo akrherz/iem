@@ -65,8 +65,8 @@ nn = NearestNDInterpolator((lons, lats), np.array(soil_obs))
 analysis = nn(xo, yo)
 
 # Query out centroids of counties...
-pcursor.execute("""SELECT x(centroid(the_geom)) as lon, 
-  y(centroid(the_geom)) as lat 
+pcursor.execute("""SELECT ST_x(ST_centroid(the_geom)) as lon, 
+  ST_y(ST_centroid(the_geom)) as lat 
  from uscounties WHERE state_name = 'Iowa'""")
 clons = []
 clats = []

@@ -5,7 +5,7 @@ IEM = iemdb.connect('iem', bypass=True)
 icursor = IEM.cursor()
 
 icursor.execute("""
-	SELECT station, x(geom) as lon, y(geom) as lat, alti from current_log
+	SELECT station, ST_x(geom) as lon, ST_y(geom) as lat, alti from current_log
 	WHERE (network ~* 'ASOS' or network = 'AWOS') and network != 'IQ_ASOS'
 	and valid BETWEEN now() - '1500 minutes'::interval 
                       and now() - '1440 minutes'::interval

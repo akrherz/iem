@@ -40,7 +40,7 @@ o.close()
 
 # Load up locs
 locs = {}
-mcursor.execute("""SELECT nwn_id, id, x(geom) as lon, y(geom) as lat, name,
+mcursor.execute("""SELECT nwn_id, id, ST_x(geom) as lon, ST_y(geom) as lat, name,
     network, wfo, county from stations 
     WHERE network in ('KCCI', 'KELO', 'KIMT')""")
 for row in mcursor:
