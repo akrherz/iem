@@ -5,7 +5,7 @@ include("$rootpath/include/database.inc.php");
 $connect = iemdb("access");
 $year = date("Y");
 /* Now we fetch warning and perhaps polygon */
-$query2 = "SELECT *, askml(t.geom) as kml, t.name as sname
+$query2 = "SELECT *, ST_askml(t.geom) as kml, t.name as sname
            from current c, summary_${year} s, stations t
            WHERE c.iemid = s.iemid and c.iemid = t.iemid and 
            s.day = 'TODAY' and 
