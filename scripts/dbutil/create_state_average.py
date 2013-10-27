@@ -5,8 +5,8 @@ POSTGIS = iemdb.connect('postgis')
 pcursor = POSTGIS.cursor()
 
 # Get the sites
-pcursor.execute("""select state_abbr, state_name, x(ST_Centroid(the_geom)), 
-  y(ST_Centroid(the_geom)) from states where 
+pcursor.execute("""select state_abbr, state_name, ST_x(ST_Centroid(the_geom)), 
+  ST_y(ST_Centroid(the_geom)) from states where 
   state_abbr in ('MN','WI','MI','OH','IL','IN','MO','KS','NE','ND','SD','KY')""")
 for row in pcursor:
   data = {}

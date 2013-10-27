@@ -5,7 +5,7 @@ POSTGIS = iemdb.connect('postgis')
 pcursor = POSTGIS.cursor()
 
 # Get the sites
-pcursor.execute("""select name, st, stdiv_, x(ST_Centroid(ST_Transform(the_geom,4326))), y(ST_Centroid(ST_Transform(the_geom,4326))) , ST_Area(the_geom) as area from climate_div ORDER by area ASC""")
+pcursor.execute("""select name, st, stdiv_, ST_x(ST_Centroid(ST_Transform(the_geom,4326))), ST_y(ST_Centroid(ST_Transform(the_geom,4326))) , ST_Area(the_geom) as area from climate_div ORDER by area ASC""")
 for row in pcursor:
   data = {}
   if row[1] is None:

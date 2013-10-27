@@ -13,7 +13,7 @@ icursor = IEM.cursor()
 # Compute normal from the climate database
 sql = """
 select id, 
-  x(s.geom) as lon, y(s.geom) as lat, 
+  ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
   avg(min_tmpf) as min_tmpf
 from summary_%s c, stations s
 WHERE max_tmpf > -50 

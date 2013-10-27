@@ -8,7 +8,7 @@ mcursor = MESOSITE.cursor()
 mcursor2 = MESOSITE.cursor()
 
 mcursor.execute("""
- SELECT network, x(geom) as lon, y(geom) as lat, elevation, id from stations 
+ SELECT network, ST_x(geom) as lon, ST_y(geom) as lat, elevation, id from stations 
  WHERE (elevation < -990 or elevation is null)""")
 
 for row in mcursor:

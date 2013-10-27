@@ -51,12 +51,12 @@ def available_radars(form):
     if lat is None or lon is None:
         sql = """
         select id, name,
-        x(geom) as lon, y(geom) as lat, network
+        ST_x(geom) as lon, ST_y(geom) as lat, network
         from stations where network in ('NEXRAD','ASR4','ASR11','TWDR') 
         ORDER by id asc"""
     else:
         sql = """
-        select id, name, x(geom) as lon, y(geom) as lat, network, 
+        select id, name, ST_x(geom) as lon, ST_y(geom) as lat, network, 
         ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) as dist 
         from stations where network in ('NEXRAD','ASR4','ASR11','TWDR') 
         and ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) < 3 
