@@ -89,7 +89,7 @@ $map->setProjection($proj);
 
 $state = substr($network,0,2);
 $dbconn = iemdb("postgis");
-$rs = pg_query($dbconn, "SELECT xmin(g), xmax(g), ymin(g), ymax(g) from (
+$rs = pg_query($dbconn, "SELECT ST_xmin(g), ST_xmax(g), ST_ymin(g), ST_ymax(g) from (
 		select ST_Extent(ST_Transform(the_geom,26915)) as g from states 
 		where state_abbr = '${state}'
 		) as foo");
