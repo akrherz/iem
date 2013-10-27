@@ -34,7 +34,7 @@ icursor.execute("""SELECT r.*, l.nwsli, extract(hour from r.valid) as hour,
     (case when long_vol is null then 0 else long_vol end) as longvol,
     (case when normal_vol is null then 0 else normal_vol end) as normalvol,
     (case when occupancy is null then 0 else occupancy end) as occ,
-    x(s.geom) as lon, y(s.geom) as lat
+    ST_x(s.geom) as lon, ST_y(s.geom) as lat
     from rwis_traffic r, rwis_locations l, stations s
     WHERE s.id = l.nwsli and l.id = r.location_id and valid > (now() - '1 hour'::interval)
     ORDER by location_id, lane_id ASC""")
