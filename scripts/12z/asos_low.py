@@ -12,7 +12,7 @@ icursor = IEM.cursor()
 
 sql = """
 select s.id, 
-  x(s.geom) as lon, y(s.geom) as lat, 
+  ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
   min(tmpf) as low12z
  from current_log c, stations s
  WHERE tmpf > -40 and valid > '%s 00:00:00+00' and valid < '%s 12:00:00+00' 

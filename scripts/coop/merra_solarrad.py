@@ -73,7 +73,7 @@ def do( date ):
     cs_total = (numpy.sum(cs_rad, 0) + numpy.sum(cs_rad2, 0)) * 3600.0
 
     ccursor.execute("""
-        SELECT station, x(geom), y(geom) from alldata a JOIN stations t on 
+        SELECT station, ST_x(geom), ST_y(geom) from alldata a JOIN stations t on 
         (a.station = t.id) where day = %s and network ~* 'CLIMATE'
         """, (date.strftime("%Y-%m-%d"), ))
     for row in ccursor:

@@ -12,7 +12,7 @@ def makeplot(ts, routes='ac'):
     Generate two plots for a given time GMT
     """
     sql = """
-    SELECT x(geom), y(geom), 
+    SELECT ST_x(geom), ST_y(geom), 
     CASE WHEN sm is Null THEN 0 ELSE sm END, 
     CASE WHEN od is Null THEN 0 ELSE od END from 
      (SELECT grid_idx, avg(soil_moisture) as sm,

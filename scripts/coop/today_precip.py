@@ -10,7 +10,7 @@ icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 sql = """
 select id, 
-  x(s.geom) as lon, y(s.geom) as lat, 
+  ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
   pday 
 from summary c, stations s
 WHERE day = 'TODAY' and pday >= 0 and pday < 20
