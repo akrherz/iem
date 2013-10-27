@@ -8,7 +8,7 @@ require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
 $dbconn = iemdb('mesosite');
-$rs = pg_prepare($dbconn, "SELECT", "SELECT *, x(geom) as lon, y(geom) as lat ".
+$rs = pg_prepare($dbconn, "SELECT", "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat ".
 		"from stations WHERE modified >= $1 LIMIT 1000");
 
 $date = isset($_REQUEST["date"]) ? $_REQUEST["date"] : date('Y-m-d');

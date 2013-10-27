@@ -9,7 +9,7 @@ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
 $ts = mktime(0,0,0,$month, $day, $year);
 
-$sql = sprintf("SELECT s.id, c.*, x(s.geom) as x, y(s.geom) as y from 
+$sql = sprintf("SELECT s.id, c.*, ST_x(s.geom) as x, ST_y(s.geom) as y from 
  summary_%s c JOIN stations s ON (s.iemid = c.iemid) WHERE s.network = $1 and 
  day = $2
  ORDER by s.id ASC", date("Y", $ts) );

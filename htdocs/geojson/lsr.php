@@ -34,7 +34,7 @@ if (isset($_REQUEST["phenomena"])){
   $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
 /* Now we fetch warning and perhaps polygon */
-  $rs = pg_prepare($postgis, "SELECT", "SELECT l.*, x(l.geom) as lon, y(l.geom) as lat
+  $rs = pg_prepare($postgis, "SELECT", "SELECT l.*, ST_x(l.geom) as lon, ST_y(l.geom) as lat
            from warnings_$year w, lsrs_$year l
            WHERE w.wfo = $1 and w.phenomena = $2 and 
            w.eventid = $3 and w.significance = $4
@@ -45,7 +45,7 @@ if (isset($_REQUEST["phenomena"])){
 	
 } else {
 	$rs = pg_prepare($postgis, "SELECT", "SELECT *, 
-      x(geom) as lon, y(geom) as lat 
+      ST_x(geom) as lon, ST_y(geom) as lat 
       FROM lsrs WHERE
       valid BETWEEN $1 and $2 $str_wfo_list
       LIMIT 3000");
@@ -74,8 +74,8 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
         from warnings_%s
         WHERE wfo = '%s' and issue <= '%s' 
         and issue > '%s'::timestamp - '7 days'::interval and expire > '%s'
-        and GeometryFromText('SRID=4326;POINT(%s %s)') && geom
-        and contains(geom, GeometryFromText('SRID=4326;POINT(%s %s)') )", 
+        and ST_GeometryFromText('SRID=4326;POINT(%s %s)') && geom
+        and ST_contains(geom, ST_GeometryFromText('SRID=4326;POINT(%s %s)') )", 
         substr($row["valid"],0,4), $wfo, $row["valid"], $row['valid'], 
         $row["valid"], $lon, $lat, $lon, $lat );
      $rs2 = pg_query($postgis, $sql);

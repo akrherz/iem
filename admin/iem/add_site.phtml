@@ -35,7 +35,7 @@ if (isset($_REQUEST["longitude"]) && isset($_REQUEST["latitude"]))
 }
 
 /* Search for station */
-$sql = sprintf("SELECT *, y(geom), x(geom) from stations WHERE id = '%s' and network = '%s'", 
+$sql = sprintf("SELECT *, ST_y(geom), ST_x(geom) from stations WHERE id = '%s' and network = '%s'", 
 		$station, $network);
 $rs = pg_exec($pg_conn, $sql);
 if (pg_numrows($rs) == 1){
@@ -54,7 +54,7 @@ if (pg_numrows($rs) == 1){
 
 <h3>Add/Edit a Site to the mesosite database</h3>
 
-<p><a href="<?php echo $rooturl; ?>/admin/">Back to admin</a>
+<p><a href="/admin/">Back to admin</a>
 
 <form method="POST" name="finder">
 <p>Find SiteID:<input type="text" name="station">

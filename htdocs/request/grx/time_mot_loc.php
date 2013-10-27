@@ -8,7 +8,7 @@ include_once "$rootpath/include/database.inc.php";
 $plimit = isset($_GET["all"]) ? "('TO','SV')" : "('TO')";
 $title = isset($_GET["all"]) ? "SVR+TOR" : "TOR";
 $pgconn = iemdb('postgis');
-$rs = pg_query($pgconn, "SELECT x(tml_geom) as lon, y(tml_geom) as lat,
+$rs = pg_query($pgconn, "SELECT ST_x(tml_geom) as lon, ST_y(tml_geom) as lat,
 	ST_AsText(tml_geom_line) as line,
 	tml_valid at time zone 'UTC' as tmlv, tml_direction, tml_sknt, 
 	polygon_end at time zone 'UTC' as pe, eventid, wfo, phenomena

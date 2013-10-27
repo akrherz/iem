@@ -7,8 +7,8 @@ $conn = iemdb("postgis");
 
 header("Content-type: text/plain");
 
-$sql = "SELECT x(transform(centroid(b.geom),4326)) as lon, 
-               y(transform(centroid(b.geom),4326)) as lat,
+$sql = "SELECT ST_x(ST_transform(ST_centroid(b.geom),4326)) as lon, 
+               ST_y(ST_transform(ST_centroid(b.geom),4326)) as lat,
       * from roads_current r, roads_base b, roads_conditions c WHERE
   r.segid = b.segid and r.cond_code = c.code";
 

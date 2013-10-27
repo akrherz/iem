@@ -148,8 +148,8 @@ if (isset($_GET['pid']))
   $dts = gmmktime(substr($_GET["pid"],8,2), substr($_GET["pid"],10,2), 0,
  substr($_GET["pid"],4,2), substr($_GET["pid"],6,2), substr($_GET["pid"],0,4));
   /* First, we query for a bounding box please */
-  $query1 = "SELECT xmax(extent(geom)) as x1, xmin(extent(geom)) as x0, 
-             ymin(extent(geom)) as y0, ymax(extent(geom)) as y1 
+  $query1 = "SELECT ST_xmax(ST_extent(geom)) as x1, ST_xmin(ST_extent(geom)) as x0, 
+             ST_ymin(ST_extent(geom)) as y0, ST_ymax(ST_extent(geom)) as y1 
              from text_products WHERE product_id = '$pid'";
   $result = pg_exec($postgis, $query1);
   $row = pg_fetch_array($result, 0);
@@ -173,8 +173,8 @@ if (isset($_GET["bbox"]))
 if ($sector == "wfo"){
 	$sector_wfo = isset($_REQUEST["sector_wfo"]) ? strtoupper($_REQUEST["sector_wfo"]): "DMX";
 	/* Fetch the bounds */
-	pg_prepare($postgis, "WFOBOUNDS", "SELECT xmax(geom), ymax(geom),
-	    xmin(geom), ymin(geom) from (SELECT ST_Extent(the_geom) as geom from cwa
+	pg_prepare($postgis, "WFOBOUNDS", "SELECT ST_xmax(geom), ST_ymax(geom),
+	    ST_xmin(geom), ST_ymin(geom) from (SELECT ST_Extent(the_geom) as geom from cwa
 		WHERE wfo = $1) as foo");
 	$rs = pg_execute($postgis, "WFOBOUNDS", Array($sector_wfo));
 	if (pg_numrows($rs) > 0){
@@ -230,6 +230,8 @@ $namerica->draw($img);
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", MS_ON);
 $lakes->draw($img);
+
+
 
 if (in_array("goes", $layers) && isset($_REQUEST["goes_sector"]) &&
 	isset($_REQUEST["goes_product"])){
@@ -500,12 +502,12 @@ if (in_array("ci", $layers) ){
 	$ci->setConnectionType( MS_POSTGIS);
 	$ci->set("connection", $_DATABASES["postgis"]);
 	$ci->set("status", in_array("ci", $layers) );
-	$sql = "geo from (select setsrid(a,4326) as geo, random() as k
+	$sql = "geo from (select ST_setsrid(a,4326) as geo, random() as k
 	      from (
 	select 
-	   intersection(
-	      buffer(exteriorring(geometryn(multi(ST_union(n.geom)),1)),0.02),
-	      exteriorring(geometryn(multi(ST_union(w.geom)),1))
+	   ST_intersection(
+	      ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(ST_union(n.geom)),1)),0.02),
+	      ST_exteriorring(ST_geometryn(ST_multi(ST_union(w.geom)),1))
 	   ) as a
 	   from warnings_". date("Y", $ts) ." w, nws_ugc n WHERE gtype = 'P' and w.wfo = '$wfo'
 	   and phenomena = '$phenomena' and eventid = $eventid 
@@ -517,9 +519,9 @@ if (in_array("ci", $layers) ){
 	          and phenomena = '$phenomena' and eventid = $eventid 
 	          and significance = '$significance'
 	       )
-	   and isvalid(w.geom)
+	   and ST_isvalid(w.geom)
 	) as foo 
-	      WHERE not isempty(a)
+	      WHERE not ST_isempty(a)
 	         ) as foo2 
 	  USING unique k USING SRID=4326";
 	$ci->set("data", $sql);
@@ -545,8 +547,6 @@ $roadsint = $map->getlayerbyname("roads-inter");
 $roadsint->set("connection", $_DATABASES["postgis"]);
 $roadsint->set("status", in_array("roads-inter", $layers) );
 $roadsint->draw($img);
-
-
 
 $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();

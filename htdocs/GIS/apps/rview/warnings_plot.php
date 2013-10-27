@@ -255,7 +255,7 @@ if ( isset($hard_code_lsr_time) ){
   $lsr_etime = strftime("%Y-%m-%d %H:%M:00+00", $lsr_ets);
 }
 
-$lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_${year} WHERE valid >= '$lsr_btime' and valid <= '$lsr_etime') as foo USING unique k USING SRID=4326 ");
+$lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k from lsrs_${year} WHERE valid >= '$lsr_btime' and valid <= '$lsr_etime') as foo USING unique k USING SRID=4326 ");
 
 $img = $map->prepareImage();
 
