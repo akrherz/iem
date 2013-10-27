@@ -34,7 +34,7 @@ def compute_obs():
     """
     sql = """
 SELECT
-  s.id, x(s.geom) as lon, y(s.geom) as lat,
+  s.id, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
   sum(CASE WHEN
    day = 'TODAY'::date and pday > 0 
    THEN pday ELSE 0 END) as p01,

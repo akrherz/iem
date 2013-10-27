@@ -30,7 +30,7 @@ o.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
  128 Forecast Text
 """ % (mx.DateTime.gmt().strftime("%Y.%m.%d.%H%M"), ) )
 
-pcursor.execute("""select r.*, h.*, x(h.geom) as lon, y(h.geom) as lat 
+pcursor.execute("""select r.*, h.*, ST_x(h.geom) as lon, ST_y(h.geom) as lat 
    from hvtec_nwsli h, riverpro r,
   (select distinct hvtec_nwsli from warnings_%s WHERE 
    status NOT IN ('EXP','CAN') and phenomena = 'FL' and 

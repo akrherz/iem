@@ -45,7 +45,7 @@ def compute_text(row):
     return 'Normal'
 
 icursor.execute("""
- SELECT c.value, c.source, x(geom) as lon, y(geom) as lat, name, station, valid,
+ SELECT c.value, c.source, ST_x(geom) as lon, ST_y(geom) as lat, name, station, valid,
  case when sigstage_low is null then 'M' else sigstage_low::text end as ss_low,
  case when sigstage_action is null then 'M' else sigstage_action::text end as ss_action,
  case when sigstage_bankfull is null then 'M' else sigstage_bankfull::text end as ss_bankfull,
