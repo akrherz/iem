@@ -91,9 +91,9 @@ if ($longitude > 0)
 	$longitude = 0 - $longitude;
 }
 
-$sql = "select hrap_i, distance( the_geom, 
+$sql = "select hrap_i, ST_distance( the_geom, 
 	ST_transform(ST_geometryfromtext('POINT($longitude $latitude)',4326), 26915) ) 
-	from hrap_utm ORDER by distance ASC LIMIT 1";
+	from hrap_utm ORDER by st_distance ASC LIMIT 1";
 $rs = pg_exec($wepp, $sql);
 $row = pg_fetch_array($rs);
 
