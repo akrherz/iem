@@ -119,8 +119,8 @@ if (isset($_GET["vtec"]))
   $wfo = substr($wfo,1,3);
   /* First, we query for a bounding box please */
   $query1 = "SELECT max(issue) as v, max(expire) as e,
-             ST_xmax(extent(geom)) as x1, ST_xmin(extent(geom)) as x0, 
-             ST_ymin(extent(geom)) as y0, ST_ymax(extent(geom)) as y1 
+             ST_xmax(ST_extent(geom)) as x1, ST_xmin(ST_extent(geom)) as x0, 
+             ST_ymin(ST_extent(geom)) as y0, ST_ymax(ST_extent(geom)) as y1 
              from warnings_$year WHERE wfo = '$wfo' and  
              phenomena = '$phenomena' and eventid = $eventid 
              and significance = '$significance'";
