@@ -14,7 +14,7 @@ icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 # Compute normal from the climate database
 sql = """
-SELECT id, s.network, x(s.geom) as lon, y(s.geom) as lat, 
+SELECT id, s.network, ST_x(s.geom) as lon, ST_y(s.geom) as lat, 
 avg( (max_tmpf + min_tmpf)/2.0 ) as avgt , count(*) as cnt 
 from summary_%s c JOIN stations s ON (s.iemid = c.iemid) 
 WHERE (s.network ~* 'ASOS' or s.network = 'AWOS') and 

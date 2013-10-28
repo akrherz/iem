@@ -13,7 +13,7 @@ icursor = IEM.cursor()
 # Compute normal from the climate database
 sql = """SELECT id,
       sum(CASE WHEN pday < 0 THEN 0 ELSE pday END) as precip,
-      x(geom) as lon, y(geom) as lat from summary_%s s, stations t
+      ST_x(geom) as lon, ST_y(geom) as lat from summary_%s s, stations t
      WHERE t.network in ('IA_ASOS', 'AWOS') and
       extract(month from day) = %s and extract(year from day) = extract(year from now())
      and t.iemid = s.iemid GROUP by id, lat, lon""" % (
