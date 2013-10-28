@@ -55,7 +55,7 @@ def run():
     sql = """
 select phenomena, count(*) as count 
  from warnings_%s w, states s
-WHERE contains(s.the_geom, w.geom) and s.state_name = 'Iowa' 
+WHERE ST_contains(s.the_geom, w.geom) and s.state_name = 'Iowa' 
       and gtype = 'P' 
   and date(issue) = 'YESTERDAY' 
   and phenomena IN ('TO','SV','FF') GROUP by phenomena""" % (
