@@ -265,7 +265,7 @@ function computeUGC(){
             if (array_key_exists($v2, $this->ugcCache)){ continue; }
             /* Else we need to lookup the informations */
             $sql = sprintf("SELECT *, 
-                   area(transform(geom,2163)) / 1000000.0 as area 
+                   ST_area(ST_transform(geom,2163)) / 1000000.0 as area 
                    from nws_ugc WHERE ugc = '%s'", $v2);
             $rs = $this->callDB($sql);
             if (pg_num_rows($rs) > 0){
@@ -286,7 +286,7 @@ function computeSharedBorder(){
     reset($this->warnings);
     while (list($k,$v) = each($this->warnings)){
         $sql = sprintf("SELECT sum(sz) as s from (
-     SELECT length(ST_transform(a,2163)) as sz from (
+     SELECT ST_length(ST_transform(a,2163)) as sz from (
         select 
            ST_intersection(
       ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(ST_union(n.geom)),1)),0.02),
