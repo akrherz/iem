@@ -109,7 +109,7 @@ sql = """SELECT ST_Simplify(geom,0.0001), phenomena, gtype, significance,
     ST_area( ST_transform(geom,2163) ) / 1000000.0 as area2d,
     to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
     to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire
-    from %s WHERE isValid(geom) and 
+    from %s WHERE ST_isValid(geom) and 
 	issue >= '%s+00' and issue < '%s+00' and eventid < 10000 
 	%s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), 
                  eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
