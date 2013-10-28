@@ -14,7 +14,7 @@ icursor = IEM.cursor()
 sql = """SELECT id,
       sum(CASE WHEN pday < 0 THEN 0 ELSE pday END) as precip,
       sum(CASE when pday < 0 THEN 1 ELSE 0 END) as missing,
-      x(s.geom) as lon, y(s.geom) as lat from summary_%s c JOIN  stations s
+      ST_x(s.geom) as lon, ST_y(s.geom) as lat from summary_%s c JOIN  stations s
      ON (s.iemid = c.iemid) 
      WHERE s.network in ('IA_COOP') and s.iemid = c.iemid and 
       extract(month from day) = %s and extract(year from day) = extract(year from now())
