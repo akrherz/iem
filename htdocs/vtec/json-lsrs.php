@@ -18,7 +18,7 @@ $sbw = isset($_GET['sbw']) ? 1 : 0;
 
 if ($sbw){
 $sql = sprintf("SELECT distinct l.* from lsrs_%s l, warnings_%s w WHERE
-         l.geom && w.geom and contains(w.geom, l.geom) and l.wfo = '%s' and
+         l.geom && w.geom and ST_contains(w.geom, l.geom) and l.wfo = '%s' and
          l.valid >= w.issue and l.valid <= w.expire and
          w.wfo = '%s' and w.gtype = 'P' and w.eventid = '%s' and 
          w.significance = '%s' and w.phenomena = '%s'
