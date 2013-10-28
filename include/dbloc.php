@@ -25,8 +25,8 @@ function dbloc26915($c,$sid){
 
   $row = @pg_fetch_array($rs,0);
   $r = Array();
-  $r["x"] = $row["x"];
-  $r["y"] = $row["y"];
+  $r["x"] = $row["st_x"];
+  $r["y"] = $row["st_y"];
   return $r;
 
 } // End of dbloc()
