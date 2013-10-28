@@ -92,7 +92,7 @@ if ($longitude > 0)
 }
 
 $sql = "select hrap_i, distance( the_geom, 
-	transform(geometryfromtext('POINT($longitude $latitude)',4326), 26915) ) 
+	ST_transform(ST_geometryfromtext('POINT($longitude $latitude)',4326), 26915) ) 
 	from hrap_utm ORDER by distance ASC LIMIT 1";
 $rs = pg_exec($wepp, $sql);
 $row = pg_fetch_array($rs);
