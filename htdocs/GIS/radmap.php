@@ -335,7 +335,7 @@ if (in_array("bufferedlsr", $layers)){
 	$blsr->set("status", in_array("bufferedlsr", $layers) );
 	$sql = "geo from (select distinct city, magnitude, valid, 
 	  ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326) as geo, 
-	  type as ltype, city || magnitude || x(geom) || y(geom) as k 
+	  type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k 
 	  from lsrs_". date("Y", $ts) ." WHERE
 	  ST_Overlaps((select geom from warnings_". date("Y", $ts) ." WHERE 
 	           wfo = '$wfo' and phenomena = '$phenomena' and 
@@ -489,9 +489,9 @@ $lsrs = $map->getlayerbyname("lsrs");
 $lsrs->set("connection", $_DATABASES["postgis"]);
 $lsrs->set("status",in_array("lsrs", $layers) );
 if ($ts2 > $ts){
- $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid >= '". gmstrftime("%Y-%m-%d %H:%M", $ts) .":00+00' and valid < '". gmstrftime("%Y-%m-%d %H:%M", $ts2) .":00+00' ORDER by valid DESC) as foo USING unique k USING SRID=4326";
+ $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid >= '". gmstrftime("%Y-%m-%d %H:%M", $ts) .":00+00' and valid < '". gmstrftime("%Y-%m-%d %H:%M", $ts2) .":00+00' ORDER by valid DESC) as foo USING unique k USING SRID=4326";
 } else {
- $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid = '". gmstrftime("%Y-%m-%d %H:%M", $ts) .":00+00') as foo USING unique k USING SRID=4326";
+ $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid = '". gmstrftime("%Y-%m-%d %H:%M", $ts) .":00+00') as foo USING unique k USING SRID=4326";
 }
 $lsrs->set("data", $sql);
 $lsrs->draw($img);
