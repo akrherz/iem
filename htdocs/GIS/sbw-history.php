@@ -16,9 +16,9 @@ $year = intval($year);
 $wfo = substr($wfo,1,3);
 $significance = substr($significance,0,1);
 
-$rs = pg_prepare($postgis, "SELECT", "SELECT xmax(geom), ymax(geom), 
-        xmin(geom), ymin(geom), *, oid,
-        round((area2d(transform(geom,2163))/1000000)::numeric,0 ) as area
+$rs = pg_prepare($postgis, "SELECT", "SELECT ST_xmax(geom), ST_ymax(geom), 
+        ST_xmin(geom), ST_ymin(geom), *, oid,
+        round((ST_area2d(ST_transform(geom,2163))/1000000)::numeric,0 ) as area
         from sbw_$year WHERE phenomena = $1 and 
         eventid = $2 and wfo = $3 and significance = $4
         ORDER by polygon_begin ASC");
@@ -71,10 +71,10 @@ for ($i=0;$row = @pg_fetch_array($rs, $i); $i++)
   if ($i > 8){ continue; }
   if ($i == 0){
    $oid0 = $row["oid"];
-   $xmax = $row["xmax"];
-   $ymax = $row["ymax"];
-   $xmin = $row["xmin"];
-   $ymin = $row["ymin"];
+   $xmax = $row["st_xmax"];
+   $ymax = $row["st_ymax"];
+   $xmin = $row["st_xmin"];
+   $ymin = $row["st_ymin"];
    $xspace = $xmax - $xmin;
    $yspace = ($ymax - $ymin) * 1.5;
    $cross = ($xspace >= $yspace) ? $xspace : $yspace;
