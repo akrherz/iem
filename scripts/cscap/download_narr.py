@@ -25,7 +25,7 @@ def do( sts ):
         if os.path.isfile(archivefn):
             now += interval
             continue
-        uri = now.strftime("http://nomads.ncdc.noaa.gov/thredds/ncss/grid/narr/"+
+        uri = now.strftime("http://nomads.ncdc.noaa.gov/thredds/ncss/grid/narr-a/"+
                            "%Y%m/%Y%m%d/narr-a_221_%Y%m%d_%H00_000.grb?"+
                            "var=Downward_shortwave_radiation_flux&spatial=all"+
                            "&temporal=all")
