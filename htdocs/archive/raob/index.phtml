@@ -1,27 +1,13 @@
 <?php 
 include("../../../config/settings.inc.php");
 include("../../../include/imagemaps.php");
-
+include("../../../include/myview.php");
 define("IEM_APPID", 146);
-$THISPAGE = "archive-raob";
-$HEADEXTRA= <<<EOF
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
-<script src='http://code.jquery.com/jquery-1.10.1.min.js'></script>
+$t = new MyView();
+$t->thispage = "archive-raob";
+$t->jsextra=<<<EOF
 <script src='http://code.jquery.com/ui/1.10.3/jquery-ui.js'></script>
 <script src='timepicker.js'></script>
-<style>
-/* css for timepicker */
-.ui-timepicker-div .ui-widget-header { margin-bottom: 8px; }
-.ui-timepicker-div dl { text-align: left; }
-.ui-timepicker-div dl dt { height: 25px; margin-bottom: -25px; }
-.ui-timepicker-div dl dd { margin: 0 10px 10px 65px; }
-.ui-timepicker-div td { font-size: 90%; }
-.ui-tpicker-grid-label { background: none; border: none; margin: 0; padding: 0; }
-
-.ui-timepicker-rtl{ direction: rtl; }
-.ui-timepicker-rtl dl { text-align: right; }
-.ui-timepicker-rtl dl dd { margin: 0 65px 10px 10px; }
-</style>
 <script type="text/javascript">
 $(function(){
 	$("#startdate").datetimepicker({
@@ -36,12 +22,27 @@ $(function(){
 });
 });
 </script>
+EOF;
+$t->headextra= <<<EOF
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
+<style>
+/* css for timepicker */
+.ui-timepicker-div .ui-widget-header { margin-bottom: 8px; }
+.ui-timepicker-div dl { text-align: left; }
+.ui-timepicker-div dl dt { height: 25px; margin-bottom: -25px; }
+.ui-timepicker-div dl dd { margin: 0 10px 10px 65px; }
+.ui-timepicker-div td { font-size: 90%; }
+.ui-tpicker-grid-label { background: none; border: none; margin: 0; padding: 0; }
+
+.ui-timepicker-rtl{ direction: rtl; }
+.ui-timepicker-rtl dl { text-align: right; }
+.ui-timepicker-rtl dl dd { margin: 0 65px 10px 10px; }
+</style>
+
 		
 EOF;
-$TITLE = "IEM :: Rawinsonde Data Archive";
-include("../../../include/header.php"); 
-?>
-
+$t->title = "Rawinsonde Data Archive";
+$t->content = <<<EOF
 <h3>Rawinsonde (RAOB) Data Archive</h3>
 
 <p>The IEM proceses and archives Rawinsonde (RAOB) data made available on the
@@ -108,7 +109,6 @@ the example URI is:
 <h4>Comments / Suggestions?</h4>
 
 <p><a href="/info/contacts.php">Contact us</a>!
-
-<?php 
-include("../../../include/footer.php"); 
+EOF;
+$t->render('single.phtml');
 ?>
