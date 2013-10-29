@@ -1,3 +1,11 @@
+
+CREATE AGGREGATE sumtxt(text) (
+    SFUNC = textcat,
+    STYPE = text,
+    INITCOND = ''
+);
+
+
 ---
 --- Rawinsonde data!
 ---
@@ -332,6 +340,19 @@ CREATE TABLE lsrs_2011() inherits (lsrs);
 GRANT SELECT on lsrs_2011 to nobody,apache;
 
 ---
+--- NEXRAD N0R Composites 
+---
+CREATE TABLE nexrad_n0r_tindex(
+ datetime timestamp without time zone,
+ filepath varchar
+ );
+SELECT AddGeometryColumn('nexrad_n0r_tindex', 'the_geom', 4326, 'MULTIPOLYGON', 2);
+GRANT SELECT on nexrad_n0r_tindex to nobody,apache;
+CREATE INDEX nexrad_n0r_tindex_idx on nexrad_n0r_tindex(datetime);
+create index nexrad_n0r_tindex_date_trunc on nexrad_n0r_tindex( date_trunc('minute', datetime) );
+
+
+---
 --- NEXRAD N0Q Composites 
 ---
 CREATE TABLE nexrad_n0q_tindex(
@@ -356,7 +377,8 @@ CREATE table roads_base(
 	int1 smallint,
 	type smallint,
 	wfo char(3),
-	tempval numeric);
+	tempval numeric,
+	longname varchar(256));
 
 SELECT AddGeometryColumn('roads_base', 'geom', 26915, 'MULTILINESTRING', 2);
 SELECT AddGeometryColumn('roads_base', 'simple_geom', 26915, 'MULTILINESTRING', 2);
