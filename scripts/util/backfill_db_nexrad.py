@@ -18,7 +18,7 @@ while now < ets:
     if cursor.rowcount == 0:
         print 'Insert %s' % (now,)
         fn = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/"
-                           +"uscomp/"+product+"_%Y%m%d%H%d.png"))
+                           +"uscomp/"+product+"_%Y%m%d%H%I.png"))
         cursor.execute("""
         INSERT into """+table+""" (datetime, filepath, the_geom) VALUES
         (%s, %s, 
