@@ -51,5 +51,6 @@ for entry in feed:
         if sh.find("AGR") == 0:
             print 'SHOULDHAVE %s' % (sh,)
             error = True
+            worksheet.add_column(sh, sdc_names[sh]['name'], sdc_names[sh]['units'])
     #if error:
     #    sys.exit()

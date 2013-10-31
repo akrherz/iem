@@ -59,22 +59,23 @@ class Worksheet(object):
         """
         self.get_cell_feed()
         for col in range(1, int(self.cols)+1):
-            if self.get_cell_value(1, col) == label:
-                print 'Found %s in column %s, deleting column' % (label, col)
-                entry = self.get_cell_entry(1, col)
-                entry.cell.input_value = ""
-                self.spr_client.update(entry)
+            if self.get_cell_value(1, col) != label:
+                continue
+            print 'Found %s in column %s, deleting column' % (label, col)
+            entry = self.get_cell_entry(1, col)
+            entry.cell.input_value = ""
+            self.spr_client.update(entry)
 
-                updateFeed = spdata.build_batch_cells_update(self.spread_id, self.id)
-                for row in range(1, int(self.rows)+1): 
-                    updateFeed.add_set_cell(str(row), str(col), "")
-                self.cell_feed = self.spr_client.batch(updateFeed, force=True)
+            updateFeed = spdata.build_batch_cells_update(self.spread_id, self.id)
+            for row in range(1, int(self.rows)+1): 
+                updateFeed.add_set_cell(str(row), str(col), "")
+            self.cell_feed = self.spr_client.batch(updateFeed, force=True)
 
         self.refetch_feed()
         while self.trim_columns():
             print 'Trimming Columns!'
 
-    def add_column(self, label):
+    def add_column(self, label, row2=None, row3=None):
         """ Add a column, if it does not exist """
         self.get_cell_feed()
         for col in range(1, int(self.cols)+1):
@@ -84,10 +85,17 @@ class Worksheet(object):
         self.cols = self.cols + 1
         self.entry.col_count.text = "%s" % (self.cols,)
         self.entry = self.spr_client.update(self.entry)
-        # Get cell
-        entry = self.spr_client.get_cell(self.spread_id, self.id, "1", str(self.cols))
-        entry.cell.input_value = label
-        self.spr_client.update(entry)
+
+        for i, lbl in enumerate([label, row2, row3]): 
+            if lbl is None:
+                continue
+            entry = self.spr_client.get_cell(self.spread_id, self.id, 
+                                             str(i+1), 
+                                             str(self.cols))
+            entry.cell.input_value = lbl
+            self.spr_client.update(entry)
+            
+        self.refetch_feed()
         self.cell_feed = None
         
     def drop_last_column(self):
