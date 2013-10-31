@@ -58,7 +58,8 @@ $content = <<<EOF
 </button>
 <strong>IEM Daily Feature for {$day}</strong>
 <button type="button" class="btn btn-default btn-lg">
-  <span class="glyphicon glyphicon-arrow-left"></span> <a href="cat.php?day={$day}&offset=1">Next Feature by Date</a> 
+  <a href="cat.php?day={$day}&offset=1">Next Feature by Date</a> 
+  <span class="glyphicon glyphicon-arrow-right"></span> 
 </button>
 
 <!-- Begin Feature Display -->
