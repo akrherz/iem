@@ -16,18 +16,18 @@ WEB
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   METADATA
-    "wfs_title"	"IEM Iowa Road Conditions"
-    "wfs_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi"
-    "wfs_srs"	"EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857 EPSG:102113 EPSG:102100"
-    "wfs_abstract" "Ba Ba Ba"
-    "wfs_fees" "None"
-    "wfs_keywordlist" "Ba"
-    "wfs_accessconstraints" "None"
-    "wfs_contactperson" "Daryl Herzmann"
-    "wfs_contactorganization" "Iowa State University"
-    "wfs_encoding" "ISO-8859-1"
+    "wms_title"	"IEM Iowa Road Conditions"
+    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi"
+    "wms_srs"	"EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857 EPSG:102113 EPSG:102100"
+    "wms_abstract" "Ba Ba Ba"
+    "wms_fees" "None"
+    "wms_keywordlist" "Ba"
+    "wms_accessconstraints" "None"
+    "wms_contactperson" "Daryl Herzmann"
+    "wms_contactorganization" "Iowa State University"
+    "wms_encoding" "ISO-8859-1"
     "ows_schemas_location" "http://ogc.dmsolutions.ca"
-       "wms_enable_request" "*"
+    "wms_enable_request" "*"
   END
 END
  
@@ -88,7 +88,6 @@ LAYER
   TYPE LINE
   DUMP TRUE
   METADATA
-    "wfs_title" "Iowa Non-Interstates Conditions"
     "wms_title" "Iowa Non-Interstates Conditions"
     "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857 EPSG:102113 EPSG:102100"
     "wms_extent" "-97 40 -89 44"
@@ -285,7 +284,6 @@ LAYER
   STATUS ON
   TYPE LINE
   METADATA
-    "wfs_title" "Iowa Interstates Conditions"
     "wms_title" "Iowa Interstates Conditions"
     "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857 EPSG:102113 EPSG:102100"
     "wms_extent" "-97 40 -89 44"
