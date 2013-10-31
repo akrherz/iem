@@ -81,7 +81,7 @@ function gen_feature($t){
 	
 	  <h4 style="display: inline;">{$row["title"]}</h4>
  
-	<div class="pull-left">
+	<div>
 EOF;
 	$s .= "<small>Posted: ". $row["webdate"] ."</small>";
 	$s .= "<a href=\"$bigimghref\"><img src=\"$imghref\" alt=\"Feature\" class=\"pull-right\" /></a>";
