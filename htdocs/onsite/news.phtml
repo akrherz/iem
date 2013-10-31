@@ -1,14 +1,15 @@
 <?php
  include("../../config/settings.inc.php");
  define("IEM_APPID", 22);
+ include("../../include/myview.php");
+ $t = new MyView();
  include("$rootpath/include/database.inc.php");
  $dbconn = iemdb("mesosite", TRUE, TRUE);
 
  $id = isset($_GET["id"]) ? intval($_GET["id"]): 0;
  $q = isset($_GET["q"]) ? pg_escape_string($_GET["q"]) : "";
- $TITLE = "IEM | News & Notes";
- $THISPAGE = "iem-news";
- include("$rootpath/include/header.php");
+ $t->title = "News & Notes";
+ $t->thispage = "iem-news";
 
 $rs = pg_prepare($dbconn, "SELECTONE", "SELECT *, 
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
@@ -20,13 +21,11 @@ $rs = pg_prepare($dbconn, "SEARCH", "SELECT *,
       from news WHERE (title ~* $1 or body ~* $1) 
       ORDER by entered DESC");
 
-?>
-
+$content = <<< EOF
 <p><form method="GET" action="news.phtml" name="searchnews">
-<b>Search Archive:</b> <input type="text" name="q" value="<?php echo $q; ?>" size="20"><input type="submit" value="Go!">
+<b>Search Archive:</b> <input type="text" name="q" value="{$q}" size="20"><input type="submit" value="Go!">
 </form>
-
-<?php
+EOF;
 
   if ($id > 0) {
     pg_execute($dbconn, "READS", Array($id) );
@@ -44,36 +43,38 @@ $rs = pg_prepare($dbconn, "SEARCH", "SELECT *,
 if (pg_numrows($result) == 1 && $id > 0){
   $prev = $id -1;
   $next = $id +1;
-  echo "<a rel=\"nofollow\" href=\"news.phtml?id=$prev\">&lt;&lt; Previous</a> &nbsp; &nbsp; &nbsp;";
-  echo "<a rel=\"nofollow\" href=\"news.phtml?id=$next\">Next &gt;&gt;</a>\n";
+  $content .= "<a rel=\"nofollow\" href=\"news.phtml?id=$prev\">&lt;&lt; Previous</a> &nbsp; &nbsp; &nbsp;";
+  $content .= "<a rel=\"nofollow\" href=\"news.phtml?id=$next\">Next &gt;&gt;</a>\n";
 
 }
 
 for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++) 
 { 
   $id = $row["id"];
-  echo "<h3 style=\"border-top: 2px solid #00f;\">". $row["title"] ."</h3>\n";
-  echo "<i>Posted On:</i> ". $row["webdate"] ." &nbsp; &nbsp; &nbsp;";
-  echo "<i>Author:</i> ". $row["author"] ." &nbsp; &nbsp; &nbsp;";
-  echo "<i>Views:</i> ". $row["views"] ;
+  $content .= "<h3 style=\"border-top: 2px solid #00f;\">". $row["title"] ."</h3>\n";
+  $content .= "<i>Posted On:</i> ". $row["webdate"] ." &nbsp; &nbsp; &nbsp;";
+  $content .= "<i>Author:</i> ". $row["author"] ." &nbsp; &nbsp; &nbsp;";
+  $content .= "<i>Views:</i> ". $row["views"] ;
   if (strlen($row["url"]) > 0) {
-     echo "<br /><i>Link:</i> <a href=\"". $row["url"] ."\">". $row["url"] ."</a>\n";
+     $content .= "<br /><i>Link:</i> <a href=\"". $row["url"] ."\">". $row["url"] ."</a>\n";
   }
   if ($id < 830) {
-    echo "<br /><blockquote><pre>". $row["body"] ."</pre></blockquote>";
+    $content .= "<br /><blockquote><pre>". $row["body"] ."</pre></blockquote>";
   } else {
-    echo "<br /><div style=\"width: 800px;\">". $row["body"] ."</div><br />";
-  }
-  if (pg_numrows($result) == 1){
-   define("FBEXTRA", True);
-   echo "<div id=\"fb-root\"></div>
-	<fb:comments send_notification_uid=\"16922938\" title=\"". $row["title"] ."\" \" href=\"http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $id ."\" xid=\"$id\" numposts=\"6\" width=\"520\"></fb:comments>";
-   echo "</div>";
+    $content .= "<br /><div style=\"width: 800px;\">". $row["body"] ."</div><br />";
   }
 } // End of for
 
+if (pg_numrows($result) == 1){
+	$t->jsextra = "<script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>";
+	$content .= "<div id=\"fb-root\"></div>
+	<fb:comments send_notification_uid=\"16922938\" title=\"". $row["title"] ."\" \" href=\"http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $id ."\" xid=\"$id\" numposts=\"6\" width=\"520\"></fb:comments>";
+	$content .= "</div>";
+}
+
   if (pg_numrows($result) == 0) {
-    echo "<p>Search parameters yielded no results, oopsy!</p>";
+    $content .= "<p>Search parameters yielded no results, oopsy!</p>";
   }
-include("$rootpath/include/footer.php"); 
+$t->content = $content;
+$t->render('single.phtml');
 ?>
