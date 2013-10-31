@@ -1,4 +1,6 @@
 """
+ Generate a RTP product for the weather bureau as my database as more AWOS
+ obs than what they get
 """
 
 import datetime
@@ -6,8 +8,8 @@ import pytz
 import subprocess
 import network
 nt = network.Table("AWOS")
-import iemdb
-IEM = iemdb.connect('iem', bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
 # We run at 12z 
@@ -60,14 +62,14 @@ icursor.execute(sql, args)
 for row in icursor:
 	pcpn[ row[0] ] = "%5.2f" % (row[1],)
 
-# 0z to 12z
+''' 0z to 12z low temperature '''
 lows = {}
 sql = """SELECT id, 
 	round(min(tmpf)::numeric,0) as min_tmpf, 
-	count(tmpf) as obs FROM current_log c, stations t 
-	WHERE t.iemid = c.iemid and t.network = 'AWOS' and valid >= %s
-	and valid < %s and 
-	extract(hour from valid) < 12 and tmpf > -99 GROUP by id"""
+	count(tmpf) as obs FROM 
+	current_log c JOIN stations t on (t.iemid = c.iemid) 
+	WHERE t.network = 'AWOS' and valid >= %s
+	and valid < %s  and tmpf > -99 GROUP by id"""
 args = (today0z, now12z)
 icursor.execute(sql, args)
 for row in icursor:
