@@ -35,7 +35,8 @@ if (isset($_REQUEST["longitude"]) && isset($_REQUEST["latitude"]))
 }
 
 /* Search for station */
-$sql = sprintf("SELECT *, ST_y(geom), ST_x(geom) from stations WHERE id = '%s' and network = '%s'", 
+$sql = sprintf("SELECT *, ST_y(geom) as y, ST_x(geom) as x from stations 
+		WHERE id = '%s' and network = '%s'", 
 		$station, $network);
 $rs = pg_exec($pg_conn, $sql);
 if (pg_numrows($rs) == 1){
