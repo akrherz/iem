@@ -11,7 +11,7 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
 $rs = pg_prepare($connect, "SELECT", "select ST_askml(ST_setsrid(a,4326)) as kml,
-      length(ST_transform(a,2163)) as sz
+      ST_length(ST_transform(a,2163)) as sz
       from (
 select 
    ST_intersection(
