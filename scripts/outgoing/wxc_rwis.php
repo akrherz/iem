@@ -298,7 +298,9 @@ while ( list($key, $val) = each($mydata) ) {
 
 
 
-  if ($tdiff < 3600){
+  if ($tdiff < 7200){
+  	continue;
+  }
   if (round($val->db['rwis_subf'],0) == -100) $val->db['rwis_subf'] = 'M';
   else $val->db['rwis_subf'] = round($val->db['rwis_subf'],0);
   if (round($val->db['tsf0'],0) == -100) $val->db['tsf0'] = 'M';
@@ -313,7 +315,7 @@ while ( list($key, $val) = each($mydata) ) {
   else $val->db['pave_avg'] = round($val->db['pave_avg'],0);
 
   $s = sprintf("%6s %-52s %2s %7s %8s %2s %4s %5.1f %5s %4.0f %4.0f %5.1f %5s %5s %5s %5s %5s %5s %5s %5s %5s %5s\n", $key, 
-    $cities[$key]['name'], $val->db['state'], round($cities[$key]['lat'],2), 
+    strtoupper($cities[$key]['name']), $val->db['state'], round($cities[$key]['lat'],2), 
      round($cities[$key]['lon'],2),
      date('d', $val->db['ts'] + (6*3600) ), date('H', $val->db['ts'] + (6*3600)),
      $val->db['tmpf'], $val->db['dwpf'],
@@ -326,7 +328,7 @@ while ( list($key, $val) = each($mydata) ) {
   	fancy($val->db["max_tmpf"],-50,120,5), fancy($val->db["min_tmpf"],-50,120,5)
   		); 
   fwrite($rwis, $s);
-  }
+
 } // End of while
 
 fclose($rwis);
