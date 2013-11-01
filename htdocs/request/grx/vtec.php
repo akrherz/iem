@@ -14,7 +14,7 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
 $rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g, 
-           round(area(transform(geom,2163)) / 1000000.0) as psize
+           round(ST_area(tST_ransform(geom,2163)) / 1000000.0) as psize
            from warnings_$year 
            WHERE wfo = $1 and phenomena = $2 and 
            eventid = $3 and significance = $4
@@ -24,8 +24,8 @@ $result = pg_execute($connect, "SELECT",
                      Array($wfo, $phenomena, $eventid, $significance) );
 if (pg_num_rows($result) <= 0) {
     $rs = pg_prepare($connect, "SELECT2", "SELECT *, ST_astext(geom) as g, 
-           askml(geom) as kml,
-           round(area(transform(geom,2163)) / 1000000.0) as psize,
+           ST_askml(geom) as kml,
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
            from warnings_$year 
            WHERE wfo = $1 and phenomena = $2 and 
