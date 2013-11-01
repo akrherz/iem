@@ -298,7 +298,7 @@ while ( list($key, $val) = each($mydata) ) {
 
 
 
-  if ($tdiff < 7200){
+  if ($tdiff > 7200){
   	continue;
   }
   if (round($val->db['rwis_subf'],0) == -100) $val->db['rwis_subf'] = 'M';
