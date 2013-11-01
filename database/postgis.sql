@@ -474,6 +474,62 @@ CREATE TABLE nexrad_attributes_log(
 SELECT addGeometryColumn('', 'nexrad_attributes_log', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on nexrad_attributes to apache,nobody;
 
+--- nexrad_attributes_2004
+CREATE TABLE nexrad_attributes_2004() inherits (nexrad_attributes_log);
+GRANT SELECT on nexrad_attributes_2004 to nobody,apache;
+CREATE INDEX nexrad_attributes_2004_nexrad_idx 
+	on nexrad_attributes_2004(nexrad);
+CREATE INDEX nexrad_attributes_2004_valid_idx 
+	on nexrad_attributes_2004(valid);
+alter table nexrad_attributes_2004 add constraint 
+	__nexrad_attributes_2014__constraint CHECK 
+	(valid >= '2004-01-01 00:00+00' and valid < '2005-01-01 00:00+00');
+
+--- nexrad_attributes_2003
+CREATE TABLE nexrad_attributes_2003() inherits (nexrad_attributes_log);
+GRANT SELECT on nexrad_attributes_2003 to nobody,apache;
+CREATE INDEX nexrad_attributes_2003_nexrad_idx 
+	on nexrad_attributes_2003(nexrad);
+CREATE INDEX nexrad_attributes_2003_valid_idx 
+	on nexrad_attributes_2003(valid);
+alter table nexrad_attributes_2003 add constraint 
+	__nexrad_attributes_2013__constraint CHECK 
+	(valid >= '2003-01-01 00:00+00' and valid < '2004-01-01 00:00+00');
+
+--- nexrad_attributes_2002
+CREATE TABLE nexrad_attributes_2002() inherits (nexrad_attributes_log);
+GRANT SELECT on nexrad_attributes_2002 to nobody,apache;
+CREATE INDEX nexrad_attributes_2002_nexrad_idx 
+	on nexrad_attributes_2002(nexrad);
+CREATE INDEX nexrad_attributes_2002_valid_idx 
+	on nexrad_attributes_2002(valid);
+alter table nexrad_attributes_2002 add constraint 
+	__nexrad_attributes_2002__constraint CHECK 
+	(valid >= '2002-01-01 00:00+00' and valid < '2003-01-01 00:00+00');
+
+--- nexrad_attributes_2001
+CREATE TABLE nexrad_attributes_2001() inherits (nexrad_attributes_log);
+GRANT SELECT on nexrad_attributes_2001 to nobody,apache;
+CREATE INDEX nexrad_attributes_2001_nexrad_idx 
+	on nexrad_attributes_2001(nexrad);
+CREATE INDEX nexrad_attributes_2001_valid_idx 
+	on nexrad_attributes_2001(valid);
+alter table nexrad_attributes_2001 add constraint 
+	__nexrad_attributes_2001__constraint CHECK 
+	(valid >= '2001-01-01 00:00+00' and valid < '2002-01-01 00:00+00');
+
+--- nexrad_attributes_2000
+CREATE TABLE nexrad_attributes_2000() inherits (nexrad_attributes_log);
+GRANT SELECT on nexrad_attributes_2000 to nobody,apache;
+CREATE INDEX nexrad_attributes_2000_nexrad_idx 
+	on nexrad_attributes_2000(nexrad);
+CREATE INDEX nexrad_attributes_2000_valid_idx 
+	on nexrad_attributes_2000(valid);
+alter table nexrad_attributes_2000 add constraint 
+	__nexrad_attributes_2000__constraint CHECK 
+	(valid >= '2000-01-01 00:00+00' and valid < '2001-01-01 00:00+00');
+
+
 CREATE TABLE watches (
     sel character(5),
     issued timestamp with time zone,
