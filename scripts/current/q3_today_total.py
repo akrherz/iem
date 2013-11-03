@@ -9,7 +9,6 @@ import sys
 sys.path.insert(0, '../mrms')
 import util
 import pytz
-import gzip
 
 from pyiem.plot import MapPlot
 
@@ -41,7 +40,9 @@ def doday(ts, realtime):
                     y0 = 1750
                 precip[y0:(y0+ysz),x0:(x0+xsz)] += val
         now += interval
-    
+    if lastts is None:
+        print 'No MRMS Q3 Data found for date: %s' % (now.strftime("%d %B %Y"),)
+        return
     lastts = lastts - datetime.timedelta(minutes=1)
     subtitle = "Total between 12:00 AM and %s" % (
                                             lastts.strftime("%I:%M %p %Z"),)
