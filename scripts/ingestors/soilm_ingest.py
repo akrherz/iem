@@ -133,7 +133,6 @@ def hourly_process(nwsli, maxts):
         valid = valid.replace(tzinfo=pytz.FixedOffset(-360))
         if valid <= maxts:
             break
-        maxts = valid
         # We are ready for dbinserting!
         dbcols = "station,valid," + ",".join(headers[2:])
         dbvals = "'%s','%s-06'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
