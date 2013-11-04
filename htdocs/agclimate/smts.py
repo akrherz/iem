@@ -131,7 +131,7 @@ ax[2].legend(loc=(.1, 1.01), ncol=2)
 ax[2].set_ylabel(r"Temperature $^\circ$F")
 
 ax2 = ax[2].twinx()
-ax2.plot(valid, slrkw * 1000.0, color='g')
+ax2.plot(valid, slrkw, color='g')
 ax2.set_ylabel("Solar Radiation [W/m^2]", color='g')
 
 # Wow, strange bugs if I did not put this last
