@@ -43,7 +43,7 @@ def processfile( fp ):
     #print data
     nwsli = lkp[ fp ]
     iem = access.Ob(nwsli, 'IA_RWIS')
-    if fp == 'portableExportP1.csv':
+    if fp in ['portableExportP1.csv', 'miniExportIFB.csv']:
         ts = mx.DateTime.strptime(data['date_time'][:16], '%Y-%m-%d %H:%M')
     else:
         ts = mx.DateTime.strptime(data['date_time'][:-6], '%Y-%m-%d %H:%M')
