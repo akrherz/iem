@@ -22,6 +22,7 @@ lkp = {
 'portableExportP3.csv': 'RLMI4',
 #'portableExportPT.csv': 'ROCI4',
 'portableExportPT.csv': 'RRCI4',
+'miniExportIFB.csv': 'RIFI4',
 }
 
 thres = mx.DateTime.now() - mx.DateTime.RelativeDateTime(minutes=180)
