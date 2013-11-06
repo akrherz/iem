@@ -1,12 +1,13 @@
 <?php
 include("../../config/settings.inc.php");
+include("../../include/myview.php");
 define("IEM_APPID", 53);
 include("$rootpath/include/forms.php");
 
 $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", time());
 $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time());
 $hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : date("H", time());
-$minute = isset($_GET["minute"]) ? intval($_GET["minute"]) : date("i", 0);
+$minute = isset($_GET["minute"]) ? intval($_GET["minute"]) : 0;
 $sz = isset($_GET["sz"]) ? floatval($_GET["sz"]) : 2.5;
 
 /* Do areal extents */
@@ -45,42 +46,55 @@ if ($map_x != 0 && $map_y != 0)
 $ourl = sprintf("rby-overview.php?BBOX=%s,%s,%s,%s",  $extents[0], $extents[1], $extents[2], $extents[3]);
 $image_url = sprintf("rad-by-year.php?month=%s&day=%s&hour=%s&minute=%s&BBOX=%s,%s,%s,%s", $month, $day, $hour, $minute, $extents[0], $extents[1], $extents[2], $extents[3]);
 
-$THISPAGE = "gis-nexrad";
-$TITLE = "IEM NEXRAD by Year";
-include("$rootpath/include/header.php");
-?>
+$t = new MyView();
+$t->thispage = "gis-nexrad";
+$t->title = "IEM NEXRAD by Year";
+$er = implode(",", $extents);
+$content = <<<EOF
 
-<h3 class="heading">IEM NEXRAD Composite by Year</h3>
+<h3>IEM NEXRAD Composite by Year</h3>
 
 <p>This application generates a summary image of IEM generated NEXRAD composites for a given time over the archives duration.  You can click on the map to move the desired location.</p>
 
 <form method="GET" action="rad-by-year-fe.phtml" name="Selector">
-<input type="hidden" name="oextents" value="<?php echo implode(",", $extents); ?>">
-<input type="hidden" name="osz" value="<?php echo $sz; ?>">
+<input type="hidden" name="oextents" value="{$er}">
+<input type="hidden" name="osz" value="{$sz}">
 <table cellpadding="2" border="0" cellspacing="0">
 <tr><th>Select Area</th><th colspan="2">Select Date</th></tr>
 <tr>
 <td rowspan="5">
-  <input type="image" src="<?php echo $ourl; ?>" name="map">
+  <input type="image" src="{$ourl}" name="map">
 <br /><strong>Select Rough Box Size</strong>
-<select name="sz">
- <option value="0.5" <?php if ($sz == 0.5){ echo "SELECTED"; } ?>>100 km 
- <option value="1" <?php if ($sz == 1){ echo "SELECTED"; } ?>>200 km 
- <option value="2.5" <?php if ($sz == 2.5){ echo "SELECTED"; } ?>>500 km 
- <option value="5" <?php if ($sz == 5){ echo "SELECTED"; } ?>>1000 km 
- <option value="20" <?php if ($sz == 20){ echo "SELECTED"; } ?>>4000 km 
-</select>
+EOF;
+$content .= '<select name="sz">';
+$content .= '<option value="0.5" '; 
+if ($sz == 0.5){ $content .= "SELECTED"; } 
+$content .= ">100 km</option>\n";
+
+$content .= '<option value="2.5" ';
+if ($sz == 2.5){ $content .= "SELECTED"; }
+$content .= ">500 km</option>\n";
+
+$content .= '<option value="5" ';
+if ($sz == 5){ $content .= "SELECTED"; }
+$content .= ">1000 km</option>\n";
+
+$content .= '<option value="20" ';
+if ($sz == 20){ $content .= "SELECTED"; }
+$content .= ">4000 km</option>\n";
+
+$content .= "</select>
 </td>
-<td>Month:</td><td><?php echo monthSelect($month, "month"); ?></td></tr>
-<tr><td>Day:</td><td><?php echo daySelect($day, "day"); ?></td></tr>
-<tr><td>Hour:</td><td><?php echo hourSelect($hour, "hour"); ?></td></tr>
-<tr><td>Minute:</td><td><?php echo minuteSelect($minute, "minute", 5); ?></td></tr>
-<tr><td colspan="2"><input type="submit" value="Generate Image"></td></tr>
+<td>Month:</td><td>". monthSelect($month, "month") ."</td></tr>
+<tr><td>Day:</td><td>". daySelect($day, "day") ."</td></tr>
+<tr><td>Hour:</td><td>". hourSelect($hour, "hour") ."</td></tr>
+<tr><td>Minute:</td><td>". minuteSelect($minute, "minute", 5) ."</td></tr>
+<tr><td colspan='2'><input type='submit' value='Generate Image'></td></tr>
 </table>
 </form>
 <p><i>The image below may take a few moments to appear...</i><br />
-<img src="<?php echo $image_url; ?>">
+<img src='$image_url' class='img-responsive'>";
 
-<?php
-include("$rootpath/include/footer.php");
+$t->content = $content;
+$t->render('single.phtml');
 ?>
