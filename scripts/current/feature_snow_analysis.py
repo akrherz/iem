@@ -21,14 +21,14 @@ icursor.execute("""
     ST_y(geom) as lat, county, count(*) from
     summary_2013 t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
-    day in ('2013-05-01', '2013-05-02', '2013-05-03') and snow >= 0 and 
+    day in ('2013-11-06') and snow >= 0 and 
     ST_x(geom) BETWEEN %s and %s and
     ST_y(geom) BETWEEN %s and %s  
     GROUP by id, lon, lat, county
 """, (iemplot.MW_WEST, iemplot.MW_EAST, iemplot.MW_SOUTH, iemplot.MW_NORTH))
 for row in icursor:
-    if row[0] in ['WTRI4',]:
-        continue
+    #if row[0] in ['WTRI4',]:
+    #    continue
     #if row[4] in ['Tama',]:
     #    print row
     #    continue
@@ -43,10 +43,10 @@ for row in icursor:
 # Query LSR Data...
 pcursor.execute("""
     SELECT state, max(magnitude) as val, 
-        x(geom) as lon, 
-       y(geom) as lat
+        ST_x(geom) as lon, 
+       ST_y(geom) as lat
       from lsrs_2013 WHERE type in ('S') and magnitude > 0 and 
-      valid > '2013-05-01 00:00' and valid < '2013-05-29 23:59'
+      valid > '2013-11-05 12:00' and valid < '2013-11-29 23:59'
       GROUP by state, lon, lat
 """)
 for row in pcursor:
@@ -70,7 +70,7 @@ final_vals = vals
 final_lats = []
 final_lons = []
 final_vals = []
-buffer = 0.55
+buffer = 0.25
 for lat in numpy.arange(iemplot.MW_SOUTH, iemplot.MW_NORTH, buffer):
   for lon in numpy.arange(iemplot.MW_WEST, iemplot.MW_EAST, buffer):
     lvals = []
@@ -98,8 +98,8 @@ cfg = {
  'wkColorMap': 'WhiteBlueGreenYellowRed',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "1-3 May 2013 - IEM Snowfall Total Analysis",
- '_valid'             : "Snowfall totals up until 4 PM 3 May 2013",
+ '_title'             : "5-6 Nov 2013 - IEM Snowfall Total Analysis",
+ '_valid'             : "Snowfall totals up until 8 AM 6 Nov 2013",
  #'_MaskZero'          : True,
  'lbTitleString'      : "[in]",
   '_showvalues'        : False,
