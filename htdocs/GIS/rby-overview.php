@@ -1,10 +1,13 @@
 <?php
-/* Draw simple overview image */
-include("../../config/settings.inc.php");
-$extents = isset($_GET["BBOX"]) ? explode(",", $_GET["BBOX"]) : Array(-105,40,-97,47);
+/*
+ * Draw a map of the CONUS with a simple box showing the area of interest
+ */
+require_once "../../config/settings.inc.php";
+$extents = isset($_GET["BBOX"]) ? explode(",", $_GET["BBOX"]) : 
+	Array(-105,40,-97,47);
 
 
-$mapFile = $rootpath."/data/gis/base4326.map";
+$mapFile = "../../data/gis/base4326.map";
 $map = ms_newMapObj($mapFile);
 $map->setSize( 300,130);
 

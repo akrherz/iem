@@ -66,14 +66,14 @@ function hour24Select($selected, $name){
 } 
 
 function hourSelect($selected, $name){
-  echo "<select name='".$name."'>\n";
+  $s = "<select name='".$name."'>\n";
   for ($i=0; $i<24;$i++) {
     $ts = mktime($i,0,0,1,1,0);
-    echo "<option value='".$i."' ";
-    if ($i == intval($selected)) echo "SELECTED";
-    echo ">". strftime("%I %p" ,$ts) ."</option>";
+    $s .= "<option value='".$i."' ";
+    if ($i == intval($selected)) $s .= "SELECTED";
+    $s .= ">". strftime("%I %p" ,$ts) ."</option>";
   }
-  echo "</select>\n";
+  return $s ."</select>\n";
 }
 
 function gmtHourSelect($selected, $name){

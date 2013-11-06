@@ -2,7 +2,7 @@
 /* Generate a plot of a locations RADAR by year */
 include("../../config/settings.inc.php");
 
-$mapFile = $rootpath."/data/gis/base4326.map";
+$mapFile = "../../data/gis/base4326.map";
 
 $beginYear = 1995;
 $endYear = intval( date("Y") );
