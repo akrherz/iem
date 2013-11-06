@@ -452,7 +452,8 @@ if (in_array("sbw", $layers) && in_array("cbw", $layers))
   $ptext = "'ZZ' as phenomena";
 }
 $sbw = $map->getlayerbyname("sbw");
-$sbw->set("status", in_array("sbw", $layers) );
+$sbw->set("status", (in_array("sbw", $layers)  && 
+			intval(gmstrftime("%Y",$ts)) > 2001));
 $sbw->set("connection", $_DATABASES["postgis"]);
 //$sbw->set("maxscale", 10000000);
 $sql = sprintf("geom from (select %s, geom, oid from sbw_%s 
