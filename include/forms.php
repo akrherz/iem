@@ -77,13 +77,13 @@ function hourSelect($selected, $name){
 }
 
 function gmtHourSelect($selected, $name){
-  echo "<select name='".$name."'>\n";
+  $s = "<select name='".$name."'>\n";
   for ($i=0; $i<24;$i++) {
-    echo "<option value='".$i."' ";
-    if ($i == intval($selected)) echo "SELECTED";
-    echo ">". $i ." UTC</option>";
+    $s .= "<option value='".$i."' ";
+    if ($i == intval($selected)) $s .= "SELECTED";
+    $s .= ">". $i ." UTC</option>";
   }
-  echo "</select>\n";
+  return $s . "</select>\n";
 }
 
 
@@ -130,14 +130,14 @@ function yearSelect2($start, $selected, $fname){
 
 
 function monthSelect2($selected, $name){
-  echo "<select name='$name'>\n";
+  $s = "<select name='$name'>\n";
   for ($i=1; $i<=12;$i++) {
     $ts = mktime(0,0,0,$i,1,0);
-    echo "<option value='".$i ."' ";
-    if ($i == intval($selected)) echo "SELECTED";
-    echo ">". strftime("%B" ,$ts) ."</option>";
+    $s .= "<option value='".$i ."' ";
+    if ($i == intval($selected)) $s .= "SELECTED";
+    $s .= ">". strftime("%B" ,$ts) ."</option>";
   }
-  echo "</select>\n";
+  return $s . "</select>\n";
 }
 
 
