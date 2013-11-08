@@ -1,13 +1,28 @@
 <?php 
 include("../../../config/settings.inc.php");
+include("../../../include/myview.php");
+include("../../../include/forms.php");
+include("../../../include/imagemaps.php");
 define("IEM_APPID", 109);
-$THISPAGE = "gis-";
-$HEADEXTRA = "<script src=\"/js/jquery.js\"></script>";
-$TITLE = "IEM | NEXRAD Storm Attributes Shapefiles";
-include("$rootpath/include/forms.php");
-include("$rootpath/include/imagemaps.php");
-include("$rootpath/include/header.php"); ?>
 
+$t = new MyView();
+$t->thispage = "gis-";
+$t->jsextra = <<<EOF
+<script src="/js/jquery.js"></script><script>
+$('select[name=station]').change( function() {
+	nexrad = $('select[name=station]').val();
+	$('#histimage').attr('src', '/pickup/nexrad_attrs/'+nexrad+'_histogram.png');
+	window.location.href = "#"+ nexrad;
+});
+
+var tokens = window.location.href.split('#');
+if (tokens.length == 2 && tokens[1].length == 3){
+	$('#histimage').attr('src', '/pickup/nexrad_attrs/'+ tokens[1] +'_histogram.png');
+}
+</script>
+EOF;
+$t->title = "Download NEXRAD Storm Attributes Shapefile";
+$content = <<<EOF
 <h3 class="heading">Archived NEXRAD Storm Attributes Shapefiles</h3>
 
 <p>The IEM attempts to process and archive the Storm Attribute Table that is
@@ -35,46 +50,49 @@ include("$rootpath/include/header.php"); ?>
   </tr>
 
   <tr>
-  <td rowspan='2'><?php echo networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL', 
-  		Array("ALL"=>"ALL"), "radar");?></td>
+  <td rowspan='2'>
+EOF;
+$content .= networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL', 
+  		Array("ALL"=>"ALL"), "radar") ."</td>
     <th>Start:</th>
     <td>
-     <?php echo yearSelect2(2005, date("Y"), "year1"); ?>
+     ". yearSelect2(2005, date("Y"), "year1") ."
     </td>
     <td>
-     <?php echo monthSelect2(0,"month1"); ?>
+     ". monthSelect2(0,"month1") ."
     </td>
     <td>
-     <?php echo daySelect2(0, "day1"); ?>
+     ". daySelect2(0, "day1") ."
     </td>
     <td>
-     <?php echo gmtHourSelect(0, "hour1"); ?>
+     ". gmtHourSelect(0, "hour1") ."
     </td>
     <td>
-     <?php echo minuteSelect(0, "minute1"); ?>
+     ". minuteSelect(0, "minute1") ."
     </td>
   </tr>
 
   <tr>
     <th>End:</th>
     <td>
-     <?php echo yearSelect2(2005, date("Y"), "year2"); ?>
+     ". yearSelect2(2005, date("Y"), "year2") ."
     </td>
     <td>
-     <?php echo monthSelect2(0,"month2"); ?>
+     ". monthSelect2(0,"month2") ."
     </td>
     <td>
-     <?php echo daySelect2(0, "day2"); ?>
+     ". daySelect2(0, "day2") ."
     </td>
     <td>
-     <?php echo gmtHourSelect(0, "hour2"); ?>
+     ". gmtHourSelect(0, "hour2") ."
     </td>
     <td>
-     <?php echo minuteSelect(0, "minute2"); ?>
+     ". minuteSelect(0, "minute2") ."
     </td>
   </tr>
-</table>
+</table>";
 
+$content .= <<<EOF
 <p><input type="submit" value="Giveme shapefile now!">
 </form>
 
@@ -114,23 +132,16 @@ A direction of "west" would represent a storm moving from west to east.
 
 <form id='dyno' name='dyno'>
 
-<p><strong>Select RADAR:</strong> <?php echo networkSelect(Array("NEXRAD", "TWDR"), 
-		'DMX');?>
+<p><strong>Select RADAR:</strong> 
+EOF;
+$content .= networkSelect(Array("NEXRAD", "TWDR"), 
+		'DMX') ."
 <br />
-<img id='histimage' src="/pickup/nexrad_attrs/DMX_histogram.png" alt="Histogram" />
+<img id='histimage' src='/pickup/nexrad_attrs/DMX_histogram.png' alt='Histogram' />
 
-</form>
-<script>
-$('select[name=station]').change( function() {
-	nexrad = $('select[name=station]').val();
-	$('#histimage').attr('src', '/pickup/nexrad_attrs/'+nexrad+'_histogram.png');
-	window.location.href = "#"+ nexrad;
-});
+</form>";
 
-var tokens = window.location.href.split('#');
-if (tokens.length == 2 && tokens[1].length == 3){
-	$('#histimage').attr('src', '/pickup/nexrad_attrs/'+ tokens[1] +'_histogram.png');
-}
-</script>
+$t->content = $content;
+$t->render('single.phtml');
 
-<?php include("$rootpath/include/footer.php"); ?>
+?>
