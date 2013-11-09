@@ -531,6 +531,7 @@ alter table nexrad_attributes_2000 add constraint
 
 
 CREATE TABLE watches (
+	fid serial,
     sel character(5),
     issued timestamp with time zone,
     expired timestamp with time zone,
