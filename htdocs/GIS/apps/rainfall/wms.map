@@ -36,7 +36,7 @@ WEB
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/mesonet/www/html/GIS/apps/rainfall/wms.map&amp;"
-   "wms_srs" "EPSG:26915"
+   "wms_srs" "EPSG:26915 EPSG:900913 EPSG:3857 EPSG:102113 EPSG:102100 EPSG:4326"
    "wms_abstract" "Ba Ba Ba"
 #   "wms_fees" "None"
    "wms_keywords" "Ba"
