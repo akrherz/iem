@@ -16,13 +16,13 @@ $year2 = isset($_GET["year2"]) ? $_GET["year2"] : die("No year2 specified");
 $ts1 = mktime(0,0,0, $month1, $day1, $year1);
 $ts2 = mktime(0,0,0, $month2, $day2, $year2);
 
-pg_prepare($conn, "FIND", "select idx, distance( geom, geometryfromtext($1, 4326)) 
-		from grid ORDER by distance ASC LIMIT 1");
+pg_prepare($conn, "FIND", "select idx, ST_distance( geom, ST_geometryfromtext($1, 4326)) 
+		from grid ORDER by st_distance ASC LIMIT 1");
 $rs = pg_execute($conn, "FIND", Array("POINT($lon $lat)"));
 
 $row = pg_fetch_assoc($rs, 0);
 $idx = $row["idx"];
-if ($row["distance"] > 1){
+if ($row["st_distance"] > 1){
 	die("Point too far away from our grid!");
 }
 
