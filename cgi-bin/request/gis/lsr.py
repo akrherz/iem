@@ -35,8 +35,8 @@ minute1 = int(form["minute1"][0])
 minute2 = int(form["minute2"][0])
 
 wfoLimiter = ""
-if form.has_key('wfo[]'):
-    aWFO = form['wfo[]']
+if form.has_key('wfos[]'):
+    aWFO = form['wfos[]']
     aWFO.append('XXX') # Hack to make next section work
     if "ALL" not in aWFO:
         wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
@@ -51,7 +51,7 @@ for suffix in ['shp', 'shx', 'dbf', 'csv']:
         os.remove("%s.%s" % (fp, suffix))
 
 csv = open("%s.csv" % (fp,), 'w')
-csv.write("VALID,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,COUNTY,SOURCE,REMARK\n")
+csv.write("VALID,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,COUNTY,STATE,SOURCE,REMARK\n")
 
 out_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
 out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
@@ -84,6 +84,10 @@ fd = ogr.FieldDefn('COUNTY',ogr.OFTString)
 fd.SetWidth(40)
 out_layer.CreateField(fd)
 
+fd = ogr.FieldDefn('STATE',ogr.OFTString)
+fd.SetWidth(2)
+out_layer.CreateField(fd)
+
 fd = ogr.FieldDefn('SOURCE',ogr.OFTString)
 fd.SetWidth(40)
 out_layer.CreateField(fd)
@@ -93,7 +97,7 @@ fd.SetWidth(100)
 out_layer.CreateField(fd)
 
 sql = """SELECT distinct geom, valid, magnitude, type, wfo, city, typetext,
-    county, source, substr(remark,0,100) as tremark, 
+    county, source, substr(remark,0,100) as tremark, state,
     to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime 
     , ST_x(geom), ST_y(geom) from lsrs WHERE 
 	valid >= '%s+00' and valid < '%s+00' %s 
@@ -109,25 +113,37 @@ while True:
 
     featDef = ogr.Feature(out_layer.GetLayerDefn())
     featDef.SetGeometry(feat.GetGeometryRef())
-    featDef.SetField('VALID', feat.GetField("utctime"))
-    featDef.SetField('MAG', feat.GetField("magnitude"))
-    featDef.SetField('TYPECODE', feat.GetField("type"))
-    featDef.SetField('WFO', feat.GetField("wfo"))
-    featDef.SetField('CITY', feat.GetField("city"))
-    featDef.SetField('TYPETEXT', feat.GetField("typetext"))
-    featDef.SetField('COUNTY', feat.GetField("county"))
-    featDef.SetField('SOURCE', feat.GetField("source"))
-    featDef.SetField('REMARK', feat.GetField("tremark"))
+    u = feat.GetField("utctime")
+    featDef.SetField('VALID', u)
+    m = feat.GetField("magnitude")
+    featDef.SetField('MAG', m)
+    t = feat.GetField("type")
+    featDef.SetField('TYPECODE', t)
+    w = feat.GetField("wfo")
+    featDef.SetField('WFO', w)
+    c = feat.GetField("city")
+    featDef.SetField('CITY', c)
+    tt = feat.GetField("typetext")
+    featDef.SetField('TYPETEXT', tt)
+    co = feat.GetField("county")
+    featDef.SetField('COUNTY', co)
+    src = feat.GetField("source")
+    featDef.SetField('SOURCE', src)
+    tr = feat.GetField("tremark")
+    featDef.SetField('REMARK', tr)
+    st = feat.GetField("state")
+    featDef.SetField('STATE', st)
 
     out_layer.CreateFeature(featDef)
     feat.Destroy()
-    csv.write("%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,\"%s\"\n" % (
-            repr(feat.GetFieldAsString("utctime")), feat.GetField("st_y"), 
-            feat.GetField("st_x"), feat.GetFieldAsString("magnitude"),
-            feat.GetFieldAsString("wfo"), feat.GetFieldAsString("type"), 
-            feat.GetFieldAsString("typetext"), feat.GetFieldAsString("city"),
-            feat.GetFieldAsString("county"), feat.GetFieldAsString("source"),
-            feat.GetFieldAsString("tremark")))
+    csv.write("%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (
+            u, feat.GetField("st_y"), 
+            feat.GetField("st_x"), m,
+            w, t, 
+            tt, c,
+            co, st, src,
+            tr.replace(",", "_")))
+
 source.Destroy()
 out_ds.Destroy()
 csv.close()
@@ -143,7 +159,9 @@ z.write(fp+".csv")
 z.close()
 
 if "justcsv" in form:
-    sys.stdout.write("Content-type: text/plain\n\n")
+    sys.stdout.write("Content-type: application/octet-stream\n")
+    sys.stdout.write("Content-Disposition: attachment; filename=%s.csv\n\n" % (
+                                                                        fp,))
     sys.stdout.write( file(fp+".csv", 'r').read() )    
     
 else:
