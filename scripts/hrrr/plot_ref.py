@@ -52,8 +52,9 @@ def run( utc , routes):
         now = utc + datetime.timedelta(minutes=minute)
         now = now.astimezone(pytz.timezone("America/Chicago"))
         grbs.seek(0)
-        gs = grbs.select(level=1000,forecastTime=minute)
-        if len(gs) == 0:
+        try:
+            gs = grbs.select(level=1000,forecastTime=minute)
+        except:
             continue
         g = gs[0]
         if lats is None:
