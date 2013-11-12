@@ -30,8 +30,8 @@ $rosedata_uri = "/cgi-bin/windrose.py?nsector=36&station=$station&network=$netwo
 if (file_exists("/mesonet/share/windrose/climate/yearly/${station}_yearly.png"))
 {
   $content .= "<p><h4>Yearly Climatology:</h4>
-  <div class='row'><div class='col-md-12'>
-  <img src=\"/onsite/windrose/climate/yearly/${station}_yearly.png\" class='img-responsive'>
+  <div class='row'><div class='col-md-12'><a href='{$rosedata_uri}&month1=1' class='btn btn-primary' role='button' rel='nofollow'><i class='glyphicon glyphicon-list'></i> View raw data</a>
+  <br /><br /><img src=\"/onsite/windrose/climate/yearly/${station}_yearly.png\" class='img-responsive'>
   </div></div>";
 
  $content .= "<p><h4>Monthly Climatology:  (click thumbnail)</h4>
