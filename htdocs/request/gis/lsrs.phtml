@@ -20,7 +20,7 @@ If you are looking for a real-time source of lsr shapefiles, you can find that
 
 <form method=\"GET\" action=\"/cgi-bin/request/gis/lsr.py\">
 <h4>Limit Weather Forecast Office (WFO)</h4>
-<select name=\"wfos[]\" MULTIPLE size=\"5\">
+<select name=\"wfo[]\" MULTIPLE size=\"5\">
  <option value=\"ALL\" SELECTED>All Available</option>";
 while( list($key, $value) = each($wfos) ){
   $content .= "<option value='$key'>[$key] ". $wfos[$key]["city"] ."</option>\n";

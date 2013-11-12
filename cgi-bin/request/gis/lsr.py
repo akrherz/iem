@@ -35,8 +35,8 @@ minute1 = int(form["minute1"][0])
 minute2 = int(form["minute2"][0])
 
 wfoLimiter = ""
-if form.has_key('wfos[]'):
-    aWFO = form['wfos[]']
+if form.has_key('wfo[]'):
+    aWFO = form['wfo[]']
     aWFO.append('XXX') # Hack to make next section work
     if "ALL" not in aWFO:
         wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
