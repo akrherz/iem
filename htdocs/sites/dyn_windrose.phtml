@@ -1,6 +1,7 @@
 <?php 
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
+include("../../include/forms.php");  
 include("setup.php");
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : 1;
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : 1;
@@ -17,21 +18,23 @@ $nsector = isset($_GET['nsector']) ? $_GET['nsector']: 36;
 
 
 if (isset($_GET["hour1"])){
+	$rose_uri = "/cgi-bin/windrose.py?nsector=$nsector&station=$station&network=$network&day1=$day1&day2=$day2&month1=$month1&month2=$month2&year1=$year1&year2=$year2&hour1=$hour1&hour2=$hour2&minute1=$minute1&minute2=$minute2&units=$units";
+	if (isset($_GET["hourlimit"])){
+	  $rose_uri .= "&hourlimit=1";
+	}
+	if (isset($_GET["monthlimit"])){
+	  $rose_uri .= "&monthlimit=1";
+	}
+	$rosedata_uri = "{$rose_uri}&justdata=true";
+}
 
-$rose_uri = "/cgi-bin/windrose.py?nsector=$nsector&station=$station&network=$network&day1=$day1&day2=$day2&month1=$month1&month2=$month2&year1=$year1&year2=$year2&hour1=$hour1&hour2=$hour2&minute1=$minute1&minute2=$minute2&units=$units";
-if (isset($_GET["hourlimit"])){
-  $rose_uri .= "&hourlimit=1";
-}
-if (isset($_GET["monthlimit"])){
-  $rose_uri .= "&monthlimit=1";
-}
-}
-$THISPAGE ="iem-sites";
-   $TITLE = "IEM | Custom Wind Roses";
-   include("$rootpath/include/header.php");  
-   include("$rootpath/include/forms.php");  
-   $current="custom_windrose"; include('sidebar.php');
-?>
+include_once "../../include/myview.php";
+$t = new MyView();
+
+$t->thispage ="iem-sites";
+$t->title = "Custom Wind Roses";
+$t->sites_current="custom_windrose"; 
+$content = <<<EOF
 <h3>Custom Wind Rose Plots</h3>
 
 This application attempts to generate a wind rose for a time period of 
@@ -43,8 +46,8 @@ that this application processes.
 hour.
 
 <form method="GET" name="windrose">
-<input type="hidden" name="station" value="<?php echo $station; ?>">
-<input type="hidden" name="network" value="<?php echo $network; ?>">
+<input type="hidden" name="station" value="{$station}">
+<input type="hidden" name="network" value="{$network}">
 <h4>Select Start/End Time:</h4><br>
 <i>(Times are in Central Standard/Daylight Time, sorry)</i>
 <table>
@@ -53,21 +56,31 @@ hour.
     <th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th><th>Minute</th>
 <td rowspan="3">
-<input type="checkbox" name="hourlimit" value="1" <?php if (isset($_GET["hourlimit"])) echo "checked=\"checked\" "; ?>>Limit to Hour of Start Time
-<br /><input type="checkbox" name="monthlimit" value="1" <?php if (isset($_GET["monthlimit"])) echo "checked=\"checked\" "; ?>>Limit to Month of Start Time
+EOF;
+$content .= '<input type="checkbox" name="hourlimit" value="1" ';
+if (isset($_GET["hourlimit"])) $content .= "checked=\"checked\" "; 
+$content .= '>Limit to Hour of Start Time
+<br /><input type="checkbox" name="monthlimit" value="1" ';
+if (isset($_GET["monthlimit"])) $content .= "checked=\"checked\" "; 
+$content .= '>Limit to Month of Start Time
 <br />Display Units: <select name="units">
- <option value="kts" <?php if ($units == "kts"){ echo "SELECTED='SELECTED'"; }?>>Knots
- <option value="mph" <?php if ($units == "mph"){ echo "SELECTED='SELECTED'"; }?>>Miles Per Hour
- <option value="mps" <?php if ($units == "mps"){ echo "SELECTED='SELECTED'"; }?>>Meters Per Second
+ <option value="kts" ';
+if ($units == "kts"){ $content .= "SELECTED='SELECTED'"; } 
+$content .= '>Knots
+ <option value="mph" ';
+if ($units == "mph"){ $content .= "SELECTED='SELECTED'"; }
+$content .= '>Miles Per Hour
+ <option value="mps" ';
+if ($units == "mps"){ $content .= "SELECTED='SELECTED'"; }
+$content .= '>Meters Per Second
 </select>
-<br />Direction Bins: <select name="nsector">
-<?php 
+<br />Direction Bins: <select name="nsector">';
 $opts = Array(8,12,16,20,24,28,32,36);
 while(list($k,$v)=each($opts)){
-	echo sprintf("<option value=\"%s\" %s>%s</option>\n", $v, 
+	$content .= sprintf("<option value=\"%s\" %s>%s</option>\n", $v, 
 			($nsector == $v) ? 'selected="selected"': '',$v);
 }
-?>
+$content .= '
 </select>
 
 <br /><input type="submit"></td>
@@ -76,50 +89,59 @@ while(list($k,$v)=each($opts)){
   <tr>
     <th>Start:</th>
     <td>
-     <?php echo yearSelect2(1995, $year1, "year1"); ?>
+     '. yearSelect2(1995, $year1, "year1") .'
     </td>
     <td>
-     <?php echo monthSelect($month1, "month1"); ?>
+     '. monthSelect($month1, "month1") .'
     </td>
     <td>
-     <?php echo daySelect2($day1, "day1"); ?>
+     '. daySelect2($day1, "day1") .'
     </td>
     <td>
-     <?php echo hourSelect($hour1, "hour1"); ?>
+     '. hourSelect($hour1, "hour1") .'
     </td>
     <td>
-     <?php echo minuteSelect($minute1, "minute1"); ?>
+     '. minuteSelect($minute1, "minute1") .'
     </td>
   </tr>
 
   <tr>
     <th>End:</th>
-    <td><?php echo yearSelect2(1995, $year2, "year2"); ?></td>
+    <td>'. yearSelect2(1995, $year2, "year2") .'</td>
     <td>
-     <?php echo monthSelect($month2, "month2"); ?>
+     '. monthSelect($month2, "month2") .'
     </td>
     <td>
-     <?php echo daySelect2($day2, "day2"); ?>
+     '. daySelect2($day2, "day2").'
     </td>
     <td>
-     <?php echo hourSelect($hour2, "hour2"); ?>
+     '. hourSelect($hour2, "hour2") .'
     </td>
     <td>
-     <?php echo minuteSelect($minute2, "minute2"); ?>
+     '. minuteSelect($minute2, "minute2") .'
     </td>
   </tr>
 </table>
-</form>
+</form>';
 
-<p>
-<?php
- if (isset($rose_uri)){
-  echo "<p>Image is being generated, please be patient...<br />";
-  echo "<img src=\"$rose_uri\" border=\"1\" width=\"600\" height=\"700\">";
- } else {
-  echo "Nothing selected";
- }
-?>
+if (isset($rose_uri)){
+  $content .= "<div class=\"alert alert-info\" id=\"img-loading\">Image will appear below once generated, please be patient...</div>";
+  $content .= "<a href='{$rosedata_uri}' class='btn btn-primary' role='button' rel='nofollow'><i class='glyphicon glyphicon-list'></i> View raw data for chart</a><br />";
+  $content .= "<img src=\"$rose_uri\" class=\"img-responsive\" id=\"windrose-plot\">";
+} else {
+  $content .= "<div class=\"alert alert-info\">Please make your custom plot
+  		selections above</a>";
+}
+$t->jsextra = <<<EOF
+<script>
+  $('#windrose-plot').load(function(){
+	$('#img-loading').css('display', 'none');	
+	});
+		
+</script>
+EOF;
 
-
-<?php include("$rootpath/include/footer.php"); ?>
+$t->content = $content;
+$t->render('sites.phtml');
+ 
+ ?>

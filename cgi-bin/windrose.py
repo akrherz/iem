@@ -59,4 +59,5 @@ except:
 
 import iemplot
 iemplot.windrose(form["station"].value, database=database,sts=sts, ets=ets, 
-                 months=months, hours=hours, units=units, nsector=nsector)
+                 months=months, hours=hours, units=units, nsector=nsector,
+                 justdata=("justdata" in form))

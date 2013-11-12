@@ -1,13 +1,16 @@
 <?php 
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 include("setup.php");
-$THISPAGE="iem-sites";
-$TITLE = "IEM | Site Wind Roses";
-include("$rootpath/include/header.php");  
-$current="windrose"; include('sidebar.php');
-?>
-<h3>Wind Roses</h4>
+
+include("../../include/myview.php");
+$t = new MyView();
+$t->thispage="iem-sites";
+$t->title = "Site Wind Roses";
+$t->sites_current="windrose"; 
+
+$content = <<<EOF
+<h3 class="page-header">Wind Roses</h4>
 
 <div class="alert alert-warning">Scroll down this page for monthly climatologies!</div>
 
@@ -18,28 +21,40 @@ these wind roses based on our archive.  The archive does contain errors and
 non representative data, so please use care when using these plots.  In 
 general, data from the airports is of good quality and representative of the 
 local surrounding area.
+EOF;
 
-<?php // If has yearly plot, it will have monthly too
+$rosedata_uri = "/cgi-bin/windrose.py?nsector=36&station=$station&network=$network"
+		."&day1=1&day2=1&month2=1&minute1=0&minute2=0&units=mph&justdata=true";
+
+
 if (file_exists("/mesonet/share/windrose/climate/yearly/${station}_yearly.png"))
 {
-  echo "<p><strong>Yearly Climatology:</strong><br /><img src=\"$rooturl/onsite/windrose/climate/yearly/${station}_yearly.png\">";
+  $content .= "<p><h4>Yearly Climatology:</h4>
+  <div class='row'><div class='col-md-12'>
+  <img src=\"/onsite/windrose/climate/yearly/${station}_yearly.png\" class='img-responsive'>
+  </div></div>";
 
- echo "<p><strong>Monthly Climatology: </strong> (click thumbnail)<br /><table cellpadding=3 cellspacing=0><tr>";
+ $content .= "<p><h4>Monthly Climatology:  (click thumbnail)</h4>
+ 		<div class='row'>";
  for ($mon=1;$mon<13;$mon++)
  {
   $ts = mktime(0,0,0,$mon,1,2006);
-  $url = sprintf("%s/onsite/windrose/climate/monthly/%02d/%s_%s.png", $rooturl, $mon, $station, strtolower(date("M", $ts)) );
-
-  echo "<td><strong>".date("F", $ts) ."</strong><a href=\"$url\"><img src=\"$url\" style=\"border: 1px; width: 200px;\"></a></td>\n";
-  if ($mon % 4 == 0) echo "</tr>";
-  if ($mon % 4 == 0 && $mon != 12) echo "<tr>";
+  $url = sprintf("/onsite/windrose/climate/monthly/%02d/%s_%s.png",  $mon, 
+  		$station, strtolower(date("M", $ts)) );
+  $rosedata = $rosedata_uri ."&month1={$mon}&monthlimit=1";
+  $content .= "<div class='col-md-4 well'><strong>".date("F", $ts) ."</strong> 
+  <a href='{$rosedata}' class='btn btn-primary' role='button' rel='nofollow'><i class='glyphicon glyphicon-list'></i> View raw data</a>
+  <br /><br /><a href=\"$url\"><img src=\"$url\" class='img-responsive'></a></div>\n";
+  if ($mon % 3 == 0) $content .= "</div>";
+  if ($mon % 3 == 0 && $mon != 12) $content .= "<div class='row'>";
  } 
- echo "</table>";
+ $content .= "</div>";
 }else 
 {
-  echo "<p>Sorry, no wind roses are available for this site.";
+  $content .= "<div class=\"alert alert-danger\">Sorry, no wind roses are available for this site.</div>";
 }
+
+$t->content = $content;
+$t->render('sites.phtml');
+
 ?>
-
-
-<?php include("$rootpath/include/footer.php"); ?>

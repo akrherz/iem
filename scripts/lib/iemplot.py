@@ -12,7 +12,7 @@ import sys
 import math
 import matplotlib
 matplotlib.use( 'Agg' )
-from windrose.windrose import WindroseAxes
+import windrose.windrose as wr
 import matplotlib.image as image
 import matplotlib.colors as mpcolors
 import matplotlib.cm as mpcm
@@ -1097,7 +1097,8 @@ def postprocess(tmpfp, pqstr, rotate="", thumb=False,
 
 def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     hours=numpy.arange(0,24), sts=datetime.datetime(1970,1,1),
-    ets=datetime.datetime(2050,1,1), units="mph", nsector=36):
+    ets=datetime.datetime(2050,1,1), units="mph", nsector=36,
+    justdata=False):
     """
     Create a standard windrose plot that we can all happily use
     """
@@ -1124,15 +1125,27 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
     sname = row[0][0]
     mcursor.close()
     db.close()
-    monthLimiter = "and extract(month from valid) in %s" % (
-                                    (str(tuple(months))).replace("'",""),)
+
+    monthLimiter = ""
+    month_limit_text = "All included"
     if len(months) == 1:
         monthLimiter = "and extract(month from valid) = %s" % (months[0],)
+        month_limit_text = str(tuple(months))
+    elif len(months) < 12:
+        monthLimiter = "and extract(month from valid) in %s" % (
+                                    (str(tuple(months))).replace("'",""),)
+        month_limit_text = str(tuple(months))
 
-    hourLimiter = "and extract(hour from valid) in %s" % (
-                                    (str(tuple(hours))).replace("'",""),)
+
+    hour_limit_text = "All included"
+    hourLimiter = ""
     if len(hours) == 1:
         hourLimiter = "and extract(hour from valid) = %s" % (hours[0],)
+        hour_limit_text = str(tuple(hours))
+    elif len(hours) < 24:
+        hourLimiter = "and extract(hour from valid) in %s" % (
+                                    (str(tuple(hours))).replace("'",""),)
+        hour_limit_text = str(tuple(hours))
 
     # Query observations
     db = iemdb.connect(database, bypass=True)
@@ -1180,10 +1193,39 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
             plt.savefig( sys.stdout, format='png' )
         return
 
+    if justdata:
+        sys.stdout.write('Content-type: text/plain\n\n')
+        dir_edges, var_bins, table = wr.histogram(drct, sped, 
+                                        numpy.asarray(windunits[units]['bins']), 
+                                        nsector, normed=True)
+        sys.stdout.write(("# Windrose Data Table (Percent Frequency) "
+                          +"for %s (%s)\n") % (sname, station))
+        sys.stdout.write("# Observation Count: %s\n" % (len(sped),))
+        sys.stdout.write("# Period: %s - %s\n" % (minvalid.strftime("%-d %b %Y"),
+                                                  maxvalid.strftime("%-d %b %Y")
+                                                  ))
+        sys.stdout.write("# Hour Limiter: %s\n" % (hour_limit_text,))
+        sys.stdout.write("# Month Limiter: %s\n" % (month_limit_text,))
+        sys.stdout.write("# Wind Speed Units: %s\n" % (
+                                                windunits[units]['label'],))
+        sys.stdout.write("# Generated %s UTC, contact: akrherz@iastate.edu\n" % (
+                    datetime.datetime.utcnow().strftime("%d %b %Y %H:%M"),))
+        sys.stdout.write("# First value in table is CALM\n")
+        sys.stdout.write("       ,")
+        for j in range(len(var_bins)-1):
+            sys.stdout.write(" %4.1f-%4.1f," % (var_bins[j], var_bins[j+1]))
+        sys.stdout.write("\n")
+        for i in range(len(dir_edges)-1):
+            sys.stdout.write("%03i-%03i," % (dir_edges[i], dir_edges[i+1]))
+            for j in range(len(var_bins)-1):
+                sys.stdout.write(" %9.2f," % (table[j,i],))
+            sys.stdout.write("\n")
+        return
+
     # Generate figure
     fig = plt.figure(figsize=(6, 7), dpi=80, facecolor='w', edgecolor='w')
     rect = [0.1, 0.1, 0.8, 0.8]
-    ax = WindroseAxes(fig, rect, axisbg='w')
+    ax = wr.WindroseAxes(fig, rect, axisbg='w')
     fig.add_axes(ax)
     ax.bar(drct, sped, normed=True, bins=windunits[units]['bins'], opening=0.8, 
            edgecolor='white', nsector=nsector)
