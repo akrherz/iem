@@ -1,9 +1,11 @@
 <?php
 include("../../../config/settings.inc.php");
+include("../../../include/database.inc.php");
+include("../../../include/myview.php");
+$t = new MyView();
+
 define("IEM_APPID", 47);
-include("$rootpath/include/database.inc.php");
-$THISPAGE = "archive-afos";
-include("$rootpath/include/header.php");
+$t->thispage = "archive-afos";
 
 $e = isset($_GET['e']) ? intval($_GET['e']) : "201112151144";
 $pil = isset($_GET['pil']) ? substr($_GET['pil'],0,6) : "AFDDMX";
@@ -36,31 +38,32 @@ $rs = pg_execute($conn, "_LSELECT", Array($pil,
 	date("Y-m-d H:i", $ts+$offset1)));
 
 
-echo "<h3>National Weather Service Raw Text Product</h3>";
+$content = "<h3>National Weather Service Raw Text Product</h3>";
 if (pg_numrows($rs) < 1){
-	echo "<div class=\"warning\">Sorry, could not find product.</div>";
+	$content .= "<div class=\"alert alert-warning\">Sorry, could not find product.</div>";
 }
 for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
 {
 	if ($i == 0){ 
 		$basets = strtotime($row["mytime"]); 
 		$newe = date("YmdHi", $basets);
-		echo "<p>Displaying AFOS PIL: <strong>$pil</strong> Received: <strong>". date("Y-m-d H:i", $basets) ." UTC</strong>";
-		echo "<div class=\"buttons\"><a class=\"button down\" href=\"p.php?dir=prev&pil=$pil&e=$newe\">Previous in Time</a>";
-		echo sprintf("<a class=\"button save\" href=\"list.phtml?source=%s&day=%s&month=%s&year=%s\">View All %s Products for %s</a>", 
+		$content .= "<p>Displaying AFOS PIL: <strong>$pil</strong> Received: <strong>". date("Y-m-d H:i", $basets) ." UTC</strong>";
+		$content .= "<br /><a class=\"btn btn-primary\" href=\"p.php?dir=prev&pil=$pil&e=$newe\"><i class='glyphicon glyphicon-arrow-left'></i> Previous in Time</a>";
+		$content .= sprintf(" <a class=\"btn btn-primary\" href=\"list.phtml?source=%s&day=%s&month=%s&year=%s\">View All %s Products for %s</a>", 
 		$row["source"], date("d", $basets), date("m", $basets), 
 		date("Y", $basets), $row["source"], date("d M Y", $basets) );
-		echo "<a class=\"button up\" href=\"p.php?dir=next&pil=$pil&e=$newe\">Next in Time</a></div>";
-		echo "<br clear=\"both\" />";
+		$content .= " <a class=\"btn btn-primary\" href=\"p.php?dir=next&pil=$pil&e=$newe\">Next in Time <i class='glyphicon glyphicon-arrow-right'></i></a></div>";
+		$content .= "<br clear=\"both\" />";
 	}
 	if (strtotime($row["mytime"]) != $basets){ continue; }
 	$d = preg_replace("/\r\r\n/", "\n", $row["data"]);
 	if (preg_match('/xml/', $row["data"]) > 0){
-      echo "<pre>". $d ."</pre>\n";
+        $content .= "<pre>". $d ."</pre>\n";
 	} else {
-		echo "<pre>". htmlentities($d) ."</pre>\n";
+		$content .= "<pre>". htmlentities($d) ."</pre>\n";
 	}
 }
 
-include("$rootpath/include/footer.php");
+$t->content = $content;
+$t->render('single.phtml');
 ?>
