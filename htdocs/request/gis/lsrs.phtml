@@ -1,18 +1,32 @@
 <?php 
 include("../../../config/settings.inc.php");
+include("../../../include/forms.php");
+include("../../../include/myview.php");
+include("../../../include/wfoLocs.php");
 define("IEM_APPID", 17);
-$THISPAGE = "gis-";
-$TITLE = "IEM | Local Storm Reports shapefiles";
-include("$rootpath/include/forms.php");
-include("$rootpath/include/header.php"); ?>
 
-<h3 class="heading">Archived Local Storm Reports Shapefiles</h3>
+$t = new MyView();
+
+$t->thispage = "gis-";
+$t->title = "Archived Local Storm Reports";
+$content = "
+<h3 class=\"heading\">Archived Local Storm Reports Shapefiles</h3>
 
 <p>This page allows you to generate a GIS shapefile of NWS issued Local Storm
 Reports for a time period of your choice.  Please be sure to read the
-archive status and dbf schema below. The IEM's archive is certainly not complete or official.  If you are looking for a real-time source of lsr shapefiles, you can find that <a href="http://mesonet.agron.iastate.edu/data/gis/shape/4326/us/lsr_24hour.zip">here.</a></p>
+archive status and dbf schema below. The IEM's archive is certainly not complete or official.  
+If you are looking for a real-time source of lsr shapefiles, you can find that 
+		<a href=\"/data/gis/shape/4326/us/lsr_24hour.zip\">here.</a></p>
 
-<form method="GET" action="/cgi-bin/request/gis/lsr.py">
+<form method=\"GET\" action=\"/cgi-bin/request/gis/lsr.py\">
+<h4>Limit Weather Forecast Office (WFO)</h4>
+<select name=\"wfos[]\" MULTIPLE size=\"5\">
+ <option value=\"ALL\" SELECTED>All Available</option>";
+while( list($key, $value) = each($wfos) ){
+  $content .= "<option value='$key'>[$key] ". $wfos[$key]["city"] ."</option>\n";
+}
+$content .= "
+</select>
 <h4>Select time interval</h4>
 <i>(Times are in UTC.  LSRs <b>issued</b> between these times
 will be included in the output GIS file...)</i>
@@ -26,43 +40,45 @@ will be included in the output GIS file...)</i>
   <tr>
     <th>Start:</th>
     <td>
-     <?php echo yearSelect2(2003, date("Y"), "year1"); ?>
+     ". yearSelect2(2003, date("Y"), "year1") ."
     </td>
     <td>
-     <?php echo monthSelect2(0,"month1"); ?>
+     ". monthSelect2(0,"month1") ."
     </td>
     <td>
-     <?php echo daySelect2(0, "day1"); ?>
+     ". daySelect2(0, "day1") ."
     </td>
     <td>
-     <?php echo gmtHourSelect(0, "hour1"); ?>
+     ". gmtHourSelect(0, "hour1") ."
     </td>
     <td>
-     <?php echo minuteSelect(0, "minute1"); ?>
+     ". minuteSelect(0, "minute1") ."
     </td>
   </tr>
 
   <tr>
     <th>End:</th>
     <td>
-     <?php echo yearSelect2(2003, date("Y"), "year2"); ?>
+     ". yearSelect2(2003, date("Y"), "year2") ."
     </td>
     <td>
-     <?php echo monthSelect2(0,"month2"); ?>
+     ". monthSelect2(0,"month2") ."
     </td>
     <td>
-     <?php echo daySelect2(0, "day2"); ?>
+     ". daySelect2(0, "day2") ."
     </td>
     <td>
-     <?php echo gmtHourSelect(0, "hour2"); ?>
+     ". gmtHourSelect(0, "hour2") ."
     </td>
     <td>
-     <?php echo minuteSelect(0, "minute2"); ?>
+     ". minuteSelect(0, "minute2") ."
     </td>
   </tr>
 </table>
 
-<p><input type="submit" value="Giveme shapefile now!">
+<p><input type='checkbox' name='justcsv' value='true' /> Giveme only a comma delimited file
+     		
+<p><input type=\"submit\" value=\"Giveme shapefile now!\">
 </form>
 
 <h4>Shapefile DBF schema:</h4>
@@ -82,5 +98,7 @@ REMARK   Text summary with the LSR
 <ul>
  <li>Before 1 Dec 2006, there was no differentiation between Snow and Sleet reports.</li>
 </ul>
-
-<?php include("$rootpath/include/footer.php"); ?>
+";
+$t->content = $content;
+$t->render('single.phtml');
+?>
