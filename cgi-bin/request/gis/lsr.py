@@ -38,16 +38,20 @@ wfoLimiter = ""
 if form.has_key('wfo[]'):
     aWFO = form['wfo[]']
     aWFO.append('XXX') # Hack to make next section work
-    wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
+    if "ALL" not in aWFO:
+        wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
 
 sTS = datetime.datetime(year1, month1, day1, hour1, minute1)
 eTS = datetime.datetime(year2, month2, day2, hour2, minute2)
 
 os.chdir("/tmp/")
 fp = "lsr_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M") )
-for suffix in ['shp', 'shx', 'dbf']:
+for suffix in ['shp', 'shx', 'dbf', 'csv']:
     if os.path.isfile("%s.%s" % (fp, suffix)):
         os.remove("%s.%s" % (fp, suffix))
+
+csv = open("%s.csv" % (fp,), 'w')
+csv.write("VALID,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,COUNTY,SOURCE,REMARK\n")
 
 out_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
 out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
@@ -91,7 +95,7 @@ out_layer.CreateField(fd)
 sql = """SELECT distinct geom, valid, magnitude, type, wfo, city, typetext,
     county, source, substr(remark,0,100) as tremark, 
     to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime 
-    from lsrs WHERE 
+    , ST_x(geom), ST_y(geom) from lsrs WHERE 
 	valid >= '%s+00' and valid < '%s+00' %s 
 	ORDER by valid ASC""" % (sTS.strftime("%Y-%m-%d %H:%M"), 
     eTS.strftime("%Y-%m-%d %H:%M"), wfoLimiter )
@@ -117,9 +121,16 @@ while True:
 
     out_layer.CreateFeature(featDef)
     feat.Destroy()
-
+    csv.write("%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,\"%s\"\n" % (
+            repr(feat.GetFieldAsString("utctime")), feat.GetField("st_y"), 
+            feat.GetField("st_x"), feat.GetFieldAsString("magnitude"),
+            feat.GetFieldAsString("wfo"), feat.GetFieldAsString("type"), 
+            feat.GetFieldAsString("typetext"), feat.GetFieldAsString("city"),
+            feat.GetFieldAsString("county"), feat.GetFieldAsString("source"),
+            feat.GetFieldAsString("tremark")))
 source.Destroy()
 out_ds.Destroy()
+csv.close()
 
 # Create zip file, send it back to the clients
 shutil.copyfile("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", fp+".prj")
@@ -128,13 +139,19 @@ z.write(fp+".shp")
 z.write(fp+".shx")
 z.write(fp+".dbf")
 z.write(fp+".prj")
+z.write(fp+".csv")
 z.close()
 
-print "Content-type: application/octet-stream"
-print "Content-Disposition: attachment; filename=%s.zip" % (fp,)
-print
-
-print file(fp+".zip", 'r').read(),
+if "justcsv" in form:
+    sys.stdout.write("Content-type: text/plain\n\n")
+    sys.stdout.write( file(fp+".csv", 'r').read() )    
+    
+else:
+    sys.stdout.write("Content-type: application/octet-stream\n")
+    print "Content-Disposition: attachment; filename=%s.zip" % (fp,)
+    print
+    
+    print file(fp+".zip", 'r').read(),
 
 os.remove(fp+".zip")
 os.remove(fp+".shp")
