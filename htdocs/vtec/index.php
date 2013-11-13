@@ -134,7 +134,7 @@ Ext.onReady(function(){
       cgiWfo = vtectokens[3].substr(1,3);
       cgiPhenomena = vtectokens[4];
       cgiSignificance = vtectokens[5];
-      cgiEventId = vtectokens[6];
+      cgiEventId = vtectokens[6].substr(0,4);
       cgiYear = vtectokens[0];
     }
     if (subtokens.length > 1){
