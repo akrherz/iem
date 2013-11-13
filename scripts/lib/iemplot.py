@@ -1215,10 +1215,12 @@ def windrose(station, database='asos', fp=None, months=numpy.arange(1,13),
         for j in range(len(var_bins)-1):
             sys.stdout.write(" %4.1f-%4.1f," % (var_bins[j], var_bins[j+1]))
         sys.stdout.write("\n")
-        for i in range(len(dir_edges)-1):
-            sys.stdout.write("%03i-%03i," % (dir_edges[i], dir_edges[i+1]))
+        dir_edges2 = numpy.concatenate((numpy.array(dir_edges), 
+                            [dir_edges[-1] + (dir_edges[-1] - dir_edges[-2]),]))
+        for i in range(len(dir_edges2)-1):
+            sys.stdout.write("%03i-%03i," % (dir_edges2[i], dir_edges2[i+1]))
             for j in range(len(var_bins)-1):
-                sys.stdout.write(" %9.2f," % (table[j,i],))
+                sys.stdout.write(" %9.3f," % (table[j,i],))
             sys.stdout.write("\n")
         return
 
