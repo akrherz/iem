@@ -9,7 +9,7 @@ $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
 
-$station = isset($_GET["station"]) ? strtolower(substr($_GET["station"],0,6)) 
+$station = isset($_GET["station"]) ? strtoupper(substr($_GET["station"],0,6)) 
                                    : die("No Station Specified");
 $dloption = isset($_GET["dloption"]) ? $_GET["dloption"]
                                    : die("No download option specified");
@@ -41,8 +41,8 @@ $s = "Source,StationID,Name,Latitude,Longitude,Month,Day,Avg_High,Avg_Low,Avg_Pr
 for($i=0; $row = @pg_fetch_array($rs,$i); $i++){
   $sid = $row["station"];
   $s .= sprintf("%s,%s,%s,%5.2f,%5.2f,%2d,%2d,%4.1f,%4.1f,%4.2f,%.2f,%.0f,%.0f,%.0f,%.0f\n", 
-  	$source, $sid, $cities[strtoupper($sid)]["name"],
-   $cities[strtoupper($sid)]["lat"], $cities[strtoupper($sid)]["lon"] ,
+  	$source, $sid, $cities[$sid]["name"],
+   $cities[$sid]["lat"], $cities[$sid]["lon"] ,
    $row["month"], $row["day"], $row["high"], $row["low"], $row["precip"], $row["max_precip"],
    $row["max_high"], $row["min_high"], $row["max_low"], $row["min_low"]);
 }
