@@ -4,7 +4,6 @@
 import subprocess
 import psycopg2
 import datetime
-import pytz
 MESOSITE = psycopg2.connect(database='other', host='iemdb')
 mcursor = MESOSITE.cursor()
 
@@ -19,6 +18,9 @@ maxts = None if row[0] is None else datetime.datetime.strptime(
 for line in open('/mnt/rootdocs/Bubbler.csv'):
     tokens = line.strip().split(",")
     if len(tokens) < 2 or line[0] in ['S','G'] or len(line) > 300:
+        continue
+    # Sometimes the data is corrupted :(
+    if len(tokens[0]) > 12:
         continue
     try:
         ts = datetime.datetime.strptime("%s %s" % (tokens[0], tokens[1]),
