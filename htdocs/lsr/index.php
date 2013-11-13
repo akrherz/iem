@@ -44,7 +44,7 @@ Ext.onReady(function(){
       utc_start  = Date.parseDate(tokens2[1], 'YmdHi');
       Ext.getCmp("datepicker1").setValue( utc_start.fromUTC() );
       Ext.getCmp("timepicker1").setValue( utc_start.fromUTC() );
-      utc_end    = Date.parseDate(tokens2[2], 'YmdHi');
+      utc_end    = Date.parseDate(tokens2[2].split("?")[0], 'YmdHi');
       Ext.getCmp("datepicker2").setValue( utc_end.fromUTC() );
       Ext.getCmp("timepicker2").setValue( utc_end.fromUTC() );
       Ext.getCmp('refresh').fireEvent('click', {});
