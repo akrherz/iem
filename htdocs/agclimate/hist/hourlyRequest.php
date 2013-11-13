@@ -50,8 +50,8 @@ wish to change this to <a href="dailyRequest.php">daily data</a>.
   <input type="checkbox" name="vars[]" value="c900">Precipitation [inches]<BR>
   <input type="checkbox" name="vars[]" value="c300">4 inch Soil Temperatures [F]<BR>
   <input type="checkbox" name="vars[]" value="c200">Relative Humidity [%]<BR>
-  <input type="checkbox" name="vars[]" value="c400">Wind Speed [MPH]<BR>
-  <input type="checkbox" name="vars[]" value="c600">Wind Direction [deg]<BR>
+  <input type="checkbox" name="vars[]" value="c400">Wind Speed [MPH] (~3 meter height)<BR>
+  <input type="checkbox" name="vars[]" value="c600">Wind Direction [deg] (~3 meter height)<BR>
 
 </td></tr></table>
 

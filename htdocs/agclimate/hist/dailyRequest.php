@@ -47,7 +47,7 @@ You may wish to change this to <a href="hourlyRequest.php">hourly data</a>.
   <input type="checkbox" name="vars[]" value="c30l">Daily Low 4in Soil Temperature (F)<br />
   <input type="checkbox" name="vars[]" value="c30">Average 4in Soil Temperature (F)<BR>
   <input type="checkbox" name="vars[]" value="c30h">Daily Max 4in Soil Temperature (F)<br />
-  <input type="checkbox" name="vars[]" value="c40">Average Windspeed (MPH)<BR>
+  <input type="checkbox" name="vars[]" value="c40">Average Windspeed (MPH) (~3 meter height)<BR>
   <input type="checkbox" name="vars[]" value="c509">Max Wind Gust -- 1 min (MPH)<BR>
   <input type="checkbox" name="vars[]" value="c529">Max Wind Gust -- 5 sec (MPH)<BR>
   <input type="checkbox" name="vars[]" value="c90">Daily Precipitation (inch)<BR>
