@@ -19,7 +19,7 @@ nt = network.Table("%sCLIMATE" % (state.upper(),))
 friends = {}
 weights = {}
 for station in nt.sts.keys():
-    sql = """select id, distance(geom, 'SRID=4326;POINT(%s %s)') from stations
+    sql = """select id, ST_distance(geom, 'SRID=4326;POINT(%s %s)') from stations
          WHERE network = '%sCLIMATE' and id != '%s' 
          and archive_begin < '1951-01-01' and
          substr(id, 3, 1) != 'C' and substr(id, 3,4) != '0000'
