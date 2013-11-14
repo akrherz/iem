@@ -129,10 +129,17 @@ def do_row(row):
     
         skey = resources[0].get_id().split("/")[-1][14:]
         if CACHE.has_key(skey):
+            if CACHE[skey] is False:
+                continue
             list_feed = CACHE[skey]
         else:
             # Get the list feed for this spreadsheet
             ss = util.Spreadsheet(docs_client, spr_client, resources[0])
+            if not ss.worksheets.has_key(YEAR):
+                print 'Year %s not in spread title: |%s %s|' % (YEAR,
+                                                        siteid, spreadtitle)
+                CACHE[skey] = False
+                continue
             list_feed = ss.worksheets[YEAR].get_list_feed()
             CACHE[skey] = list_feed
         misses = 0
