@@ -23,7 +23,7 @@ for station in nt.sts.keys():
          WHERE network = '%sCLIMATE' and id != '%s' 
          and archive_begin < '1951-01-01' and
          substr(id, 3, 1) != 'C' and substr(id, 3,4) != '0000'
-         ORDER by distance
+         ORDER by st_distance
          ASC LIMIT 11""" % (nt.sts[station]['lon'], nt.sts[station]['lat'], 
                             state.upper(), station)
     ccursor.execute( sql )
