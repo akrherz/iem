@@ -47,12 +47,12 @@ basecolumns = {'A': 'UniqueID', 'B': 'Rep', 'C': 'Tillage', 'D': 'Rotation',
 letters = ['K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
            'AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL']
 
-DONE = ['bradford.c',]
+TODO = ['swroc.p','naew.y102', 'naew.y103']
 
 for entry in meta_feed.entry:
     data = entry.to_dict()
     sitekey = data.get('uniqueid').lower()
-    if sitekey not in DONE:
+    if sitekey not in TODO:
         print 'skip', sitekey
         continue
     # This is the folder where synced data is stored
@@ -79,7 +79,7 @@ for entry in meta_feed.entry:
     headers = copy.deepcopy(baseheaders)
     i = 0
     datavars = []
-    for datavar in sdc[sitekey]:
+    for datavar in sdc['2011'][sitekey]:
         if datavar.find("AGR") > -1:
             #hid = '%s %s %s' % (datavar, sdc_names[datavar]['name'], sdc_names[datavar]['units'])
             hid = datavar
