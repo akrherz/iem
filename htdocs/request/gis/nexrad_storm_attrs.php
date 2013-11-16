@@ -30,13 +30,20 @@ $content = <<<EOF
  you to selectively download these attributes from the IEM database in 
  shapefile format. <strong>Holes do exist in this archive!</strong>  If you find
  a data hole and would like it filled, please let us know.
- 
+
+<div class="alert alert-warning">The <a href="http://www.ncdc.noaa.gov">National Climatic Data Center</a> now
+		has a very impressive archive and interface to download these attributes.
+		You can find it on their <a href="http://www.ncdc.noaa.gov/swdi/">Severe
+		Weather Data Inventory</a>.  For programic access, check out their 
+		<a href="http://www.ncdc.noaa.gov/swdiws/">web services</a>.</div>
+		
 <p>The archive behind this application is large, so please be patient after clicking
  the Givme button below.  If you request all RADARs, you can only request up to 
  seven days worth of data.  If you can request a single RADAR, there is no 
  date restriction, but the download will be slow! 
 
-<p><a class="button" href="#histograms">View Histograms</a>
+<p><a class="btn btn-default" href="#histograms" role="button">
+		<i class="glyphicon glyphicon-stats"></i> View Histograms</a>
  
 <form method="GET" action="/cgi-bin/request/gis/nexrad_storm_attrs.py">
 <h4>Select time interval</h4>
