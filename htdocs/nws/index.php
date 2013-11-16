@@ -1,16 +1,18 @@
 <?php
 include("../../config/settings.inc.php");
-$TITLE = "IEM | NWS Related Information";
-$THISPAGE = "iem-info";
-include("../../include/header.php"); ?>
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "NWS Related Information";
+$t->thispage = "iem-info";
 
-<h3 class="heading">IEM Data for NWS Users</h3><p>
+$t->north = <<<EOF
+<h3 class="page-heading">IEM Data for NWS Users</h3><p>
 
 <div class="warning">Please <a href="/info/contacts.php">suggest</a> features for this page.  We are looking to collect all relevant
 IEM provided archives/applications of NWS data.</div>
+EOF;
 
-<table>
-<tr><td valign="top" width="50%">
+$t->west = <<<EOF
 <h4>IEM Apps</h4>
 <ul>
  <li><a href="obs.php">Sortable Currents by WFO</a></li>
@@ -43,13 +45,13 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
 
 <h4>NEXRAD / RADAR Data</h4>
 <ul>
- <li><a href="/request/gis/nexrad_storm_attrs.php">Archived NEXRAD Storm Attributes</a>
- <br />Download shapefiles of NEXRAD storm attribute data.</li>
+ <li><a href="/request/gis/nexrad_storm_attrs.php">NEXRAD Storm Attributes</a>
+ <br />Download shapefiles of NEXRAD storm attribute data and view histogram 
+ summaries.</li>
 </ul>
 
-
-</td>
-<td valign="top" width="50%">
+EOF;
+$t->east = <<<EOF
 <h4>Valid Time Extent Code (VTEC) Apps</h4>
 <ul>
  <li><a href="vtec_obs.php">ASOS/AWOS Obs during WFO WWA</a>
@@ -86,8 +88,6 @@ first guess at fields the NWS needs for their RTP product.</blockquote>
   <br />View quick listings of issued products by forecast office and by 
     date.</li>
 </ul>
-</td>
-</tr>
-</table>
-
-<?php include("../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
