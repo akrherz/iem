@@ -1,4 +1,7 @@
 <?php
+/*
+ * Generate an image used for the COW output
+ */
 $ae = isset($_GET["ae"])? $_GET["ae"] : "AAA";
 $aw = isset($_GET["aw"])? $_GET["aw"] : "AAA";
 $b = isset($_GET["b"])? $_GET["b"] : "BBB";
@@ -6,14 +9,14 @@ $c = isset($_GET["c"])? $_GET["c"] : "CCC";
 $d = isset($_GET["d"])? $_GET["d"] : "DDD";
 
 function ImageRectangleWithRoundedCorners(&$im, $x1, $y1, $x2, $y2, $radius, $color) {
-// draw rectangle without corners
-imagefilledrectangle($im, $x1+$radius, $y1, $x2-$radius, $y2, $color);
-imagefilledrectangle($im, $x1, $y1+$radius, $x2, $y2-$radius, $color);
-// draw circled corners
-imagefilledellipse($im, $x1+$radius, $y1+$radius, $radius*2, $radius*2, $color);
-imagefilledellipse($im, $x2-$radius, $y1+$radius, $radius*2, $radius*2, $color);
-imagefilledellipse($im, $x1+$radius, $y2-$radius, $radius*2, $radius*2, $color);
-imagefilledellipse($im, $x2-$radius, $y2-$radius, $radius*2, $radius*2, $color);
+	// draw rectangle without corners
+	imagefilledrectangle($im, $x1+$radius, $y1, $x2-$radius, $y2, $color);
+	imagefilledrectangle($im, $x1, $y1+$radius, $x2, $y2-$radius, $color);
+	// draw circled corners
+	imagefilledellipse($im, $x1+$radius, $y1+$radius, $radius*2, $radius*2, $color);
+	imagefilledellipse($im, $x2-$radius, $y1+$radius, $radius*2, $radius*2, $color);
+	imagefilledellipse($im, $x1+$radius, $y2-$radius, $radius*2, $radius*2, $color);
+	imagefilledellipse($im, $x2-$radius, $y2-$radius, $radius*2, $radius*2, $color);
 }
 function imagettftextalign($image, $size, $angle, $x, $y, $color, $font, $text, $alignment='L') {
   
@@ -87,9 +90,7 @@ ImageTTFTextAlign($png, 14, 0, $boxcenterx - ($boxwidth/4) , $boxcentery + ($box
 ImageTTFTextAlign($png, 14, 0, $boxcenterx + ($boxwidth/4) , $boxcentery + ($boxheight/4) + 7, $black, $font, $d, 'C');
 
 
-header("content-type: image/png");
+header("Content-type: image/png");
 ImagePng($png);
 ImageDestroy($png);
-
-
 ?>
