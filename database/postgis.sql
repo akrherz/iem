@@ -1,3 +1,55 @@
+---
+--- Store DOT snowplow data
+---
+CREATE TABLE idot_snowplow_current(
+	label varchar(20) UNIQUE not null,
+	valid timestamptz not null,
+	heading real,
+	velocity real,
+	roadtemp real,
+	airtemp real,
+	solidmaterial varchar(256),
+	liquidmaterial varchar(256),
+	prewetmaterial varchar(256),
+	solidsetrate real,
+	liquidsetrate real,
+	prewetsetrate real,
+	leftwingplowstate smallint,
+	rightwingplowstate smallint,
+	frontplowstate smallint,
+	underbellyplowstate smallint,
+	solid_spread_code smallint,
+	road_temp_code smallint
+);
+SELECT AddGeometryColumn('idot_snowplow_current', 'geom', 4326, 'POINT', 2);
+GRANT SELECT on idot_snowplow_current to nobody,apache;
+
+CREATE TABLE idot_snowplow_2013_2014(
+	label varchar(20) not null,
+	valid timestamptz not null,
+	heading real,
+	velocity real,
+	roadtemp real,
+	airtemp real,
+	solidmaterial varchar(256),
+	liquidmaterial varchar(256),
+	prewetmaterial varchar(256),
+	solidsetrate real,
+	liquidsetrate real,
+	prewetsetrate real,
+	leftwingplowstate smallint,
+	rightwingplowstate smallint,
+	frontplowstate smallint,
+	underbellyplowstate smallint,
+	solid_spread_code smallint,
+	road_temp_code smallint
+);
+SELECT AddGeometryColumn('idot_snowplow_2013_2014', 'geom', 4326, 'POINT', 2);
+CREATE INDEX idot_snowplow_2013_2014_label_idx on idot_snowplow_2013_2014(label);
+CREATE INDEX idot_snowplow_2013_2014_valid_idx 
+	on idot_snowplow_2013_2014(valid);
+GRANT SELECT on idot_snowplow_2013_2014 to nobody,apache;
+
 
 CREATE AGGREGATE sumtxt(text) (
     SFUNC = textcat,
