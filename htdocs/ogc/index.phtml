@@ -1,9 +1,11 @@
 <?php
 include("../../config/settings.inc.php");
 define("IEM_APPID", 35);
-$TITLE = "IEM | Open GIS Consortium Web Services";
-$THISPAGE = "gis-ogc";
-include("$rootpath/include/header.php"); ?>
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Open GIS Consortium Web Services";
+$t->thispage = "gis-ogc";
+$t->content = <<<EOF
 
 
 <h3 class="heading">OGC Web Services</h3>
@@ -145,8 +147,11 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
 <ul>
 <li>Iowa Precipitation
  <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?</code></li>
-<li>Q2 1 Hour Precipitation
- <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/q2.cgi?</code></li>
+<li>MRMS Q3 Precipitation
+ <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/us/mrms.cgi?</code>
+ <br /><i>Layer:</i> <strong>mrms_p24h</strong> 24 Hour Precipitation
+ <br /><i>Layer:</i> <strong>mrms_p1h</strong> One Hour Precipitation
+ </li>
 <li>CONUS GOES Infrared Satellite
  <br /><code>http://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?</code></li>
 <hr />
@@ -231,6 +236,6 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
 
 </ul>
 </div>
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
