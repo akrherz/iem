@@ -9,18 +9,20 @@ POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor()
 
 pcursor.execute("""
- select count(*) from idot_snowplow_current WHERE 
- valid > now() - '30 minutes'::interval
+ select sum(case when valid > now() - '30 minutes'::interval then 1 else 0 end),
+ sum(case when valid > now() - '1 day'::interval then 1 else 0 end)
+ from idot_snowplow_current 
 """)
 row = pcursor.fetchone()
 count = row[0]
+daycount = row[1]
 
-if count > 2:
-    print 'OK - snowplows %s |count=%s;2;1;0' % (count, count)
+if daycount > 2:
+    print 'OK - snowplows %s/%s |count=%s;2;1;0 daycount=%s;2;1;0' % (count, daycount, count, daycount)
     sys.exit(0)
-elif count > 1:
-    print 'OK - snowplows %s |count=%s;2;1;0' % (count, count)
+elif daycount > 1:
+    print 'OK - snowplows %s/%s |count=%s;2;1;0 daycount=%s;2;1;0' % (count, daycount, count, daycount)
     sys.exit(1)
 else:
-    print 'CRITICAL - snowplows %s |count=%s;2;1;0' % (count, count)
+    print 'CRITICAL - snowplows %s/%s |count=%s;2;1;0 daycount=%s;2;1;0' % (count, daycount, count, daycount)
     sys.exit(2)
