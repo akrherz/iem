@@ -1,4 +1,16 @@
 
+== Floating IPs
+0.254 ---   iemgateway
+0.150 ---   iemvs100-https
+0.151 ---   iemvs101-https
+0.152 ---   iemvs102-https
+0.153 ---   iemvs103-https
+0.154 ---   iemvs104-https
+0.155 ---   iemvs105-https
+0.156 ---   iemvs106-https
+0.157 ---   iemvs107-https
+0.158 ---   iemvs108-https
+
 == Virtual Machines
 
 0.3   1.3   nagios   (metvm2)
