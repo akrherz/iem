@@ -1,84 +1,38 @@
-import iemdb
-RWIS = iemdb.connect('rwis', bypass=True)
-rcursor = RWIS.cursor()
-import mx.DateTime
+import psycopg2
+RWIS = psycopg2.connect(database='rwis', host='iemdb', user='nobody')
+cursor = RWIS.cursor()
 
-def timeX(valid):
-  xticks = []
-  xticklabels = []
-  ts0 = mx.DateTime.DateTimeFromTicks(valid[0])
-  day0 = ts0 + mx.DateTime.RelativeDateTime(hour=0,minute=0,second=0)
-  ts1 = mx.DateTime.DateTimeFromTicks(valid[-1])
-  day1 = ts1 + mx.DateTime.RelativeDateTime(days=1,hour=0,minute=0,second=0)
-  interval = mx.DateTime.RelativeDateTime(hours=24)
-  now = ts0
-  while now <= ts1:
-     xticks.append( int(now) )
-     fmt = "%I %p"
-     if now.hour == 0:
-         fmt += "\n%d %b"
-     fmt = "%d %b"
-     xticklabels.append( now.strftime(fmt) )
-     now += interval
-
-  return xticks, xticklabels
-
-rcursor.execute("""
-  SELECT extract(epoch from valid), tfs0, tmpf from t2011 where station = 'RCTI4' and valid > '2011-05-12' ORDER by valid ASC
+cursor.execute("""
+  SELECT valid, tfs1, tmpf, dwpf, tfs1_text from t2013 where station = 'RAMI4' 
+  and valid > '2013-11-16' and valid < '2013-11-17' ORDER by valid ASC
   """)
 valid = []
 obs = []
 tmpf = []
-for row in rcursor:
-  valid.append( row[0] )
-  obs.append( row[1] )
-  tmpf.append( row[2] )
+dwpf = []
+for row in cursor:
+    valid.append( row[0] )
+    obs.append( row[1] )
+    tmpf.append( row[2] )
+    dwpf.append( row[3] )
 
-rcursor.execute("""
-  SELECT extract(epoch from valid), s0temp, s1temp, s2temp, s3temp, s4temp, s5temp, s12temp from t2011_soil where station = 'RCTI4' and valid > '2011-05-12' ORDER by valid ASC
-  """)
-svalid = []
-s0 = []
-s1 = []
-s2 = []
-s3 = []
-s4 = []
-s5 = []
-s6 = []
-for row in rcursor:
-  svalid.append( row[0] )
-  s0.append( row[1] )
-  s1.append( row[2] )
-  s2.append( row[3] )
-  s3.append( row[4] )
-  s4.append( row[5] )
-  s5.append( row[6] )
-  s6.append( row[7] )
-
-
+import pytz
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+(fig, ax) = plt.subplots(2,1)
 
-xticks, xticklabels = timeX(valid)
+ax[0].plot(valid, obs, label='Pavement', lw=2, c='brown')
+ax[0].plot(valid, tmpf, label='Air', linestyle='-.', lw=2, c='r')
+ax[0].plot(valid, dwpf, label='Dew Point', linestyle='-.', lw=2, c='b')
+ax[0].grid(True)
+ax[0].legend(loc=2, fontsize=12)
+ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%-I %p',
+                                tz=pytz.timezone('America/Chicago')))
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
+ax[0].set_title("16 Nov 2013: Ames RWIS Timeseries of Temperatures")
+ax[0].set_ylabel('Temperature $^{\circ}\mathrm{F}$')
 
-ax.plot(valid, obs, label='Pavement')
-ax.plot(valid, tmpf, label='Air', linestyle='-.')
-ax.set_xticks(xticks)
-ax.set_xticklabels(xticklabels)
-ax.grid(True)
-
-ax.plot(svalid, s0, label='1 in')
-ax.plot(svalid, s1, label='3 in')
-#ax.plot(svalid, s2, label='6')
-ax.plot(svalid, s3, label='9 in')
-#ax.plot(svalid, s4, label='12')
-ax.plot(svalid, s5, label='18 in')
-ax.plot(svalid, s6, label='60 in', linestyle='--')
-ax.legend(loc=9, ncol=3)
-ax.set_title("Cantril, Iowa RWIS Timeseries\nPavement, Air, and Sub Surface Temperatures")
-ax.set_ylabel('Temperature $^{\circ}\mathrm{F}$')
 fig.savefig('test.ps')
+
 import iemplot
 iemplot.makefeature('test')
