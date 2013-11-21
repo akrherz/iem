@@ -14,7 +14,7 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
 $rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g, 
-           round(ST_area(ST_ransform(geom,2163)) / 1000000.0) as psize
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
            from warnings_$year 
            WHERE wfo = $1 and phenomena = $2 and 
            eventid = $3 and significance = $4
