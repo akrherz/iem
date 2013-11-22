@@ -2,7 +2,7 @@
 /* Giveme JSON data for zones affected by warning */
 require_once 'Zend/Json.php';
 include('../../config/settings.inc.php');
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 
 $connect = iemdb("access");
 $mesosite = iemdb("mesosite");
