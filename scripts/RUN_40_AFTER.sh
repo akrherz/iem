@@ -21,7 +21,7 @@ cd ../iemplot
 ./RUN.csh
 
 cd ../ingestors/squaw
-./ingest.sh
+python ingest_squaw.py
 
 cd ../scan
 python scan_ingest.py
