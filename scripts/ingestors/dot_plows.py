@@ -37,8 +37,7 @@ def workflow():
         valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
                               hour=ts.hour,minute=ts.minute,second=ts.second)
         label = feat['attributes']['LABEL']
-        if label == '30808':
-            continue
+
         if current.get(label, None) is None:
             #print 'New IDOT Snowplow #%s "%s" Valid: %s' % (len(current)+1,
             #                                                label, valid)
