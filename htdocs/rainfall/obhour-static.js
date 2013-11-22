@@ -80,6 +80,7 @@ var network_selector = new Ext.form.ComboBox({
 
 var dateselector = new Ext.form.DateField({
     id: "df",
+    width: 150,
     hideLabel: true,
     minValue: new Date('2008/01/01'),
     maxValue: new Date(),
@@ -241,7 +242,7 @@ var viewport = new Ext.Viewport({
          new Ext.BoxComponent({ // raw
              region:'north',
              el: 'iem-header',
-             height:130
+             height:60
          }),
          new Ext.BoxComponent({ // raw
              region:'south',
