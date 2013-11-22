@@ -1426,6 +1426,40 @@ INCLUDE "inc_roads.map"
 
 LAYER
   CONNECTIONTYPE postgis
+  NAME mintmpf
+  # Connect to a remote spatial database
+  CONNECTION "user=nobody dbname=iem host=iemdb"
+  # Get the lines from the 'geom' column of the 'roads' table
+  DATA "geom from (select geom, round(min_tmpf::numeric,0) as tsf0,
+    c.iemid as oid from summary_2013 c JOIN stations t ON (t.iemid = c.iemid) 
+    WHERE day = '2013-10-17' and network in ('IA_ASOS', 'AWOS')
+    and min_tmpf < 80) as foo using unique oid using srid=4326"
+  STATUS OFF
+  TYPE POINT
+  LABELCACHE ON
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASSITEM "tsf0"
+  CLASS
+    TEXT ([tsf0])
+    LABEL
+      COLOR 255 255 0
+      OUTLINECOLOR 0 0 0
+      TYPE TRUETYPE
+      FONT 'liberation'
+      SIZE 16
+      POSITION CC
+      OFFSET 2 2
+      BUFFER 2
+      PARTIALS FALSE
+      FORCE FALSE
+    END
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
   NAME surface
   # Connect to a remote spatial database
   CONNECTION "user=nobody dbname=iem host=iemdb"
