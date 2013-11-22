@@ -19,10 +19,10 @@ def find_climate_site(lon, lat):
         stations.append( row[1].lower() )
     return stations
 
-o = open('visit_history_093013_st12_daryl_v2.csv', 'w')
-o.write(('"univ_id","apltn_type","actvy_datedb","actvy_type","vis_month",'
-    +'"vis_year","entry_ccyy","sem_num","entry_sem_cd","actn_cd","clsfn_yr",'
-    +'"entry_year","hs_status","city","st","cntry","zip_5","lat","lon",'
+o = open('step3.csv', 'w')
+o.write(('apltn_type,actvy_datedb,actvy_type,vis_month,vis_year,entry_ccyy,'
+    +'sem_num,entry_year,hs_status,city,st,zip_5,lat,lon,apply,offer,accept,'
+    +'enroll,coll,vis_order,female,junior,senior,'
     +'"ames_high","ames_precip","ames_clhigh","ames_clprecip",'
     +'"remote_clhigh","remote_clprecip","wxhigh_score","wxprecip_score"\n'))
 
@@ -55,14 +55,14 @@ def add_cols(line, addon):
                                 addon['ames_clprecip'], addon['remote_clhigh'],
                                 addon['remote_clprecip'], wxhigh, wxprecip))
 
-for line in open('visit_history_093013_st12.csv'):
+for line in open('step2.csv'):
     addon = {'ames_high': 'M', 'ames_precip': 'M', 
              'ames_clhigh': 'M', 'ames_clprecip': 'M',
              'remote_clhigh': 'M', 'remote_clprecip': 'M'}
     tokens = line.strip().split(",")
-    lat = tokens[17]
-    lon = tokens[18]
-    if lon == '"lon"':
+    lat = tokens[12]
+    lon = tokens[13]
+    if lon == 'lon':
         continue
     if lon == '' or lat == '':
         add_cols(line, addon)
@@ -70,7 +70,7 @@ for line in open('visit_history_093013_st12.csv'):
     stations = find_climate_site(lon, lat)
     
     # Figure out date
-    ts = datetime.datetime.strptime(tokens[2], '%m/%d/%Y')
+    ts = datetime.datetime.strptime(tokens[1].replace('"',''), '%m/%d/%Y')
 
     # Get Ames high and precip
     cursor.execute("""SELECT high, precip from alldata_ia where station = 'IA0200'
