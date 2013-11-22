@@ -7,15 +7,15 @@ import datetime
 import pytz
 import urllib2
 
-sts = datetime.datetime(2012,1,1)
+sts = datetime.datetime(2012,8,20)
 sts = sts.replace(tzinfo=pytz.timezone("UTC"))
 ets = datetime.datetime(2013,11,1)
 ets = ets.replace(tzinfo=pytz.timezone("UTC"))
 
 interval = datetime.timedelta(hours=12)
 
-out = open('gfs_ames.csv', 'w')
-out.write("fhour,runtime,validtime,RH,TMPK,UVEL,VVEL\n")
+out = open('gfs_cedarrapids.csv', 'a')
+#out.write("fhour,runtime,validtime,RH,TMPK,UVEL,VVEL\n")
 
 now = sts
 while now < ets:
@@ -30,7 +30,7 @@ while now < ets:
             +'&var=Temperature_height_above_ground'
             +'&var=U-component_of_wind_height_above_ground'
             +'&var=V-component_of_wind_height_above_ground'
-            +'&latitude=41.99&longitude=-93.62&temporal=all'
+            +'&latitude=41.88&longitude=-91.72&temporal=all'
             +'&time_start='+tstr+'&time_end='+tstr+'&time='+tstr+''
             +'&vertCoord=0&accept=csv&point=true'))
         try:
