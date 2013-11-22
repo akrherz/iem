@@ -1,8 +1,8 @@
 # Plot an accumulation of stage4 data!
 
 import sys, os
-import Nio
 import iemplot
+import Nio
 import numpy
 
 import mx.DateTime
