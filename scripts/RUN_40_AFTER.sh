@@ -26,9 +26,6 @@ python ingest_squaw.py
 cd ../scan
 python scan_ingest.py
 
-cd ../raws
-./download.csh
-
 cd ../madis
 python extractMADIS.py
 python extractMetarQC.py
