@@ -1,25 +1,23 @@
 <?php 
 include("../../config/settings.inc.php");
-
-$THISPAGE = "severe-main";
-$TITLE = "IEM | Severe Weather Products";
-include("$rootpath/include/header.php"); 
-?>
-<table width="100%">
-
-<tr>
- <td valign="top" width="33%">
+include("../../include/myview.php");
+$t = new MyView();
+$t->thispage = "severe-main";
+$t->title = "Severe Weather Products";
+$t->content = <<<EOF
+<div class="row">
+<div class="col-md-4"> 
  <h3>Current Severe Weather</h3>
   <ul>
-<li><a href="<?php echo $rooturl; ?>/wx/afos/">NWS Text Product Finder</a>
+<li><a href="/wx/afos/">NWS Text Product Finder</a>
   <br />A quick and easy way to find NWS text products if you know the 
   product identifiers.</li>
 
-<li><a href="<?php echo $rooturl; ?>/iembot/">Web iembot monitor</a>
+<li><a href="/iembot/">Web iembot monitor</a>
   <br />This fancy application allows you to monitor text products coming
   from your local NWS office or the entire nation in realtime!</li>
 
-<li><a href="<?php echo $rooturl; ?>/data/gis/shape/4326/us/current_nexattr.zip">Current NEXRAD Storm Attributes</a>
+<li><a href="/data/gis/shape/4326/us/current_nexattr.zip">Current NEXRAD Storm Attributes</a>
   <br />Point shapefile generated every minute containing a summary of
    NEXRAD storm attributes.</li>
 
@@ -31,11 +29,11 @@ include("$rootpath/include/header.php");
  <h3>GIS Local Storm Reports</h3>
 <ul>
 
-<li><a href="<?php echo $rooturl; ?>/data/gis/shape/4326/us/lsr_24hour.zip">Current Shapefile</a>
+<li><a href="/data/gis/shape/4326/us/lsr_24hour.zip">Current Shapefile</a>
  <br />A shapefile of Local Storm Reports (LSRs) valid for the past 24 hours.
   The file is updated every 5 minutes.</li>
 
-<li><a href="<?php echo $rooturl; ?>/request/gis/lsrs.phtml">Download Archived LSRs</a>
+<li><a href="/request/gis/lsrs.phtml">Download Archived LSRs</a>
  <br />Generate a shapefile of LSRs for a period of your choice dating back 
   to 2003!</li>
 
@@ -44,19 +42,19 @@ include("$rootpath/include/header.php");
  <h3>GIS Watch/Warnings</h3>
 <ul>
 
-<li><a href="<?php echo $rooturl; ?>/data/gis/shape/4326/us/current_ww.zip">Current Shapefile</a>
+<li><a href="/data/gis/shape/4326/us/current_ww.zip">Current Shapefile</a>
  <br />A shapefile of active county based and storm based based weather warnings. This file is updated every 5 minutes.</li>
 
-<li><a href="<?php echo $rooturl; ?>/request/gis/watchwarn.phtml">Download Archived NWS Warnings</a>
+<li><a href="/request/gis/watchwarn.phtml">Download Archived NWS Warnings</a>
  <br />Generate a GIS shapefile of weather warnings for a time period of your
  choice!</li>
 
   </ul>
- </td>
- <td valign="top" width="33%">
+</div>
+<div class="col-md-4">
  <h3>Apps with Statistics</h3>
  <ul>
- <li><a href="<?php echo $rooturl; ?>/cow/sbwstats.phtml">Summary of Polygon Sizes</a>
+ <li><a href="/cow/sbwstats.phtml">Summary of Polygon Sizes</a>
   <br />View storm based warning size summary statistics by WFO for a period of your
   choice.</li>
 <li><a href="/cow/top10.phtml">Top 10 Polygon Sizes</a>
@@ -69,57 +67,55 @@ include("$rootpath/include/header.php");
  
  <h3>Apps with Archives</h3>
 <ul>
-<li><a href="<?php echo $rooturl; ?>/cow/">IEM Cow</a>
+<li><a href="/cow/">IEM Cow</a>
   <br />Unofficial NWS storm-based warning verification.</li>
 
-<li><a href="<?php echo $rooturl; ?>/raccoon/">IEM Raccoon</a>
+<li><a href="/raccoon/">IEM Raccoon</a>
   <br />Generate Microsoft Powerpoint overviews of storm based warnings.</li>
 
 
-<li><a href="<?php echo $rooturl; ?>/vtec/search.php">Search by County/Zone or Point</a>
+<li><a href="/vtec/search.php">Search by County/Zone or Point</a>
   <br />Find archived warnings by searching for a county or zone.  You can
   also search for storm based warnings by a point.</li>
 
 
-<li><a href="<?php echo $rooturl; ?>/GIS/apps/rview/watch.phtml">Storm Prediction Center (SPC) Watches since 1997.</a>
+<li><a href="/GIS/apps/rview/watch.phtml">Storm Prediction Center (SPC) Watches since 1997.</a>
  <br />Maps of SPC issued watches and initial RADAR (since 1997) at watch issuance.</li>
 
-<li><a href="<?php echo $rooturl; ?>/GIS/apps/rview/warnings.phtml">Nationwide Weather Warnings.</a> 
+<li><a href="/GIS/apps/rview/warnings.phtml">Nationwide Weather Warnings.</a> 
  <br />Popular web mapping application showing all sorts of information
   relating to severe weather.  Works great for situational awareness
   displays.</li>
 
-<li><a href="<?php echo $rooturl; ?>/GIS/apps/rview/warnings_cat.phtml">VTEC product browser</a>
+<li><a href="/GIS/apps/rview/warnings_cat.phtml">VTEC product browser</a>
  <br />Popular application that allows you to navigate thru an archive of
   weather warnings.  Full text is displayed along with the maps.</li>
 
   <li><a href="mwcomp.phtml">MidWest Composite w/ warnings</a></li>
   <li><a href="uscomp.phtml">US Composite w/ warnings</a></li>
 
- <li>Storm Based Warnings: <a href="<?php echo $rooturl; ?>/cow/sbwsum.phtml">daily summary images</a>, images displaying sbw for a given date.</li>
+ <li>Storm Based Warnings: <a href="/cow/sbwsum.phtml">daily summary images</a>, images displaying sbw for a given date.</li>
 </ul>
- </td>
- <td valign="top" width="33%">
+</div>
+<div class="col-md-4">
  <h3>Severe Weather Outlooks</h3>
 
 <p><a href="http://www.spc.noaa.gov">Storm Prediction Center</a> convective outlooks:
 
 <p><b>Current Day 1 Outlook</b><br />
- <a href="http://www.spc.noaa.gov/products/outlook/day1otlk.html"><img src="http://www.spc.noaa.gov/products/outlook/day1otlk_sm.gif" height="136" width="190" alt="Day 1 Outlook"></a>
+ <a href="http://www.spc.noaa.gov/products/outlook/day1otlk.html"><img src="http://www.spc.noaa.gov/products/outlook/day1otlk_sm.gif" class="img-responsive" alt="Day 1 Outlook"></a>
 
 <p><b>Current Day 2 Outlook</b><br />
- <a href="http://www.spc.noaa.gov/products/outlook/day2otlk.html"><img src="http://www.spc.noaa.gov/products/outlook/day2otlk_sm.gif" height="136" width="190" alt="Day 2 Outlook"></a>
+ <a href="http://www.spc.noaa.gov/products/outlook/day2otlk.html"><img src="http://www.spc.noaa.gov/products/outlook/day2otlk_sm.gif" class="img-responsive" alt="Day 2 Outlook"></a>
 
 <p><b>Current Day 3 Outlook</b><br />
- <a href="http://www.spc.noaa.gov/products/outlook/day3otlk.html"><img src="http://www.spc.noaa.gov/products/outlook/day3otlk_sm.gif" height="136" width="190" alt="Day 3 Outlook"></a>
+ <a href="http://www.spc.noaa.gov/products/outlook/day3otlk.html"><img src="http://www.spc.noaa.gov/products/outlook/day3otlk_sm.gif" class="img-responsive" alt="Day 3 Outlook"></a>
 
 <p><b>Current Day 4-8 Outlook</b><br />
- <a href="http://www.spc.noaa.gov/products/exper/day4-8/"><img src="http://www.spc.noaa.gov/products/exper/day4-8/day48prob_small.gif" height="136" width="190" alt="Day 4-8 Outlook"></a>
+ <a href="http://www.spc.noaa.gov/products/exper/day4-8/"><img src="http://www.spc.noaa.gov/products/exper/day4-8/day48prob_small.gif" class="img-responsive" alt="Day 4-8 Outlook"></a>
 
- </td>
-</tr>
-
-</table>
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+</div>
+</div><!-- ./row -->
+EOF;
+$t->render('single.phtml');
+?>
