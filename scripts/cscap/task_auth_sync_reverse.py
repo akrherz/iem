@@ -1,6 +1,5 @@
 """
 A script that syncs my google site authentication to a shared folder on google docs
-$Id: task_auth_sync.py 7798 2011-11-04 19:45:55Z akrherz $:
 """
 from gdata import gauth
 import gdata.sites.client
