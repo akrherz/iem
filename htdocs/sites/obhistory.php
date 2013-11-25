@@ -49,8 +49,8 @@ function formatter($i, $row){
 	);
 }
 include("setup.php");
-include_once "$rootpath/include/mlib.php";
-include_once "$rootpath/include/forms.php";
+include_once "../../include/mlib.php";
+include_once "../../include/forms.php";
 $year = isset($_REQUEST["year"])? $_REQUEST["year"]: date("Y");
 $month = isset($_REQUEST["month"])? $_REQUEST["month"]: date("m");
 $day = isset($_REQUEST["day"])? $_REQUEST["day"]: date("d");
@@ -86,13 +86,16 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 }
 pg_close($dbconn);
 
-$THISPAGE="iem-sites";
-$TITLE = "IEM | Observation History";
-include("$rootpath/include/header.php"); 
+include("../../include/myview.php");
+$t = new MyView();
+
+$t->thispage = "iem-sites";
+$t->title = "Observation History";
+$t->sites_current = 'obhistory';
 
 $savevars = Array("year"=>$year,
- "month"=>$month, "day"=>$day); $current = "obhistory"; include("sidebar.php");
-?>
+ "month"=>$month, "day"=>$day); 
+$t->jsextra = <<<EOF
 <script type="text/javascript">
 var hide = false;
 function hideMetars(){
@@ -112,6 +115,13 @@ function hideMetars(){
 	hide = !hide;
 }
 </script>
+EOF;
+$dstr = date("d F Y", $date);
+$tzname =  $metadata["tzname"];
+$ys = yearSelect(1933,$year);
+$ms = monthSelect($month);
+$ds = daySelect($day);
+$content = <<<EOF
 <style>
 .high {
   color: #F00;
@@ -124,29 +134,30 @@ function hideMetars(){
 }
 </style>
 
-<h3><?php echo date("d F Y", $date); ?> Observation History, timezone: <?php echo $metadata["tzname"]; ?></h3>
+<h3>{$dstr} Observation History, timezone: {$tzname}</h3>
 <form method="GET" style="float: left;">
 <strong>Select Date:</strong>
-<input type="hidden" value="<?php echo $station; ?>" name="station" />
-<input type="hidden" value="<?php echo $network; ?>" name="network" />
-<?php echo yearSelect(1933,$year); ?>
-<?php echo monthSelect($month); ?>
-<?php echo daySelect($day); ?>
+<input type="hidden" value="{$station}" name="station" />
+<input type="hidden" value="{$network}" name="network" />
+{$ys}
+{$ms}
+{$ds}
 <input type="submit" value="Change Date" />
 </form>
-<a onclick="javascript:hideMetars();" class="button" id="metar_toggle">Show Metars</a>
-<?php 
-  echo sprintf("<a rel=\"nofollow\" href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" 
-  class=\"button down\">Previous Day</a>", $network, $station, date("Y", $yesterday),
+<a onclick="javascript:hideMetars();" class="btn btn-default" id="metar_toggle">Show Metars</a>
+EOF;
+$content .= sprintf("<a rel=\"nofollow\" href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" 
+  class=\"btn btn-default\">Previous Day</a>", $network, $station, date("Y", $yesterday),
   date("m", $yesterday), date("d", $yesterday));
   
-  if ($tomorrow){
-  echo sprintf("<a rel=\"nofollow\" href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" 
-  class=\"button up\">Next Day</a>", $network, $station, date("Y", $tomorrow),
+if ($tomorrow){
+  $content .= sprintf("<a rel=\"nofollow\" href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" 
+  class=\"btn btn-default\">Next Day</a>", $network, $station, date("Y", $tomorrow),
   date("m", $tomorrow), date("d", $tomorrow));
-  }
-?>
+}
+$content .= <<<EOF
 <table cellspacing="3" cellpadding="2" border="0" id="datatable">
+<thead>
 <tr align="center" bgcolor="#b0c4de">
 <th rowspan="3">Time</th>
 <th rowspan="3">Wind<br>(mph)</th><th rowspan="3">Vis.<br>(mi.)</th>
@@ -156,8 +167,12 @@ function hideMetars(){
 <th rowspan="2">altimeter<br>(in.)</th><th rowspan="2">sea level<br>(mb)</th><th rowspan="2">1 hr</th>
 <th rowspan="2">3 hr</th><th rowspan="2">6 hr</th></tr>
 <tr align="center" bgcolor="#b0c4de"><th>Max.</th><th>Min.</th></tr>
-<?php echo $table; ?>
+</thead>
+<tbody>
+{$table}
+</tbody>
 </table>
-<?php 
-include("$rootpath/include/footer.php");
+EOF;
+$t->content = $content;
+$t->render('sites.phtml');
 ?>
