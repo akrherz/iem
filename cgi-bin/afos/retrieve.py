@@ -1,73 +1,86 @@
 #!/usr/bin/env python
 
-import pg
+import psycopg2
 import cgi
-import string
-import os
 import sys
 
-def Main():
-  print 'Content-type: text/plain; charset=""'
-  print
-  print
-  try:
-    mydb = pg.connect('afos', 'iemdb', user='nobody')
-  except:
-    print 'Error Connecting to Database, please try again!'
-    sys.exit(0)
-  myForm = cgi.FormContent()
-  if (myForm.has_key("pil")):
-    pil0 = string.upper( myForm["pil"][0] )
-  else:
-    print "Bad, you must specify $pil"
-    return
-  if (myForm.has_key("limit")):
-    LIMIT = str( myForm["limit"][0] )
-  else:
-    LIMIT = "1"
+def main():
+    ''' Go main Go '''
+    sys.stdout.write("Content-type: text/plain; charset=""\n\n")
+    form = cgi.FormContent()
+    if form.has_key("pil"):
+        pil0 = form["pil"][0].upper()
+    else:
+        sys.stdout.write("ERROR: No pil specified...")
+        return
 
-  pils = pil0.split(",")
-  myPils = []
-  for pil in pils:
-    if ( len(pil) < 3):
-      print 'Invalid PIL, try again'
-      sys.exit(0)
-    if pil[:3] == "WAR":
-      for q in ['FLS', 'FFS','AWW','TOR','SVR','FFW','SVS','LSR','SPS','WSW', 'FFA']:
-        pils.append('%s%s' % (q, pil[3:]) )
-      continue
-    myPils.append("%6s" % (pil + "      ",) )
 
-  pilAR = "("
-  for pil in myPils:
-    pilAR += "'%s'," % (pil,)
-  pilAR = pilAR[:-1] +")"
+    if form.has_key("limit"):
+        LIMIT = str( form["limit"][0] )
+    else:
+        LIMIT = "1"
+
+    pils = pil0.split(",")
+    myPils = []
+    for pil in pils:
+        if ( len(pil) < 3):
+            print 'Invalid PIL, try again'
+            return
+        if pil[:3] == "WAR":
+            for q in ['FLS', 'FFS','AWW','TOR','SVR','FFW','SVS','LSR','SPS','WSW', 'FFA']:
+                pils.append('%s%s' % (q, pil[3:]) )
+            continue
+        myPils.append("%6s" % (pil + "      ",) )
+
+    pilAR = "("
+    for pil in myPils:
+        pilAR += "'%s'," % (pil,)
+    pilAR = pilAR[:-1] +")"
+
+    if myPils[0][:3] == 'MTR':
+        access = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+        cursor = access.cursor()
+        sql = """SELECT raw from current_log c JOIN stations t on (t.iemid = c.iemid) 
+        WHERE raw != '' and id = '%s' ORDER by valid DESC LIMIT %s""" % (
+                                                myPils[0][3:].strip(), LIMIT)
+        cursor.execute( sql )
+        for row in cursor:
+            sys.stdout.write("\001\n")
+            sys.stdout.write( row[0].replace("\r\r\n","\n") )
+            sys.stdout.write("\n\003")
+        if cursor.rowcount == 0:
+            sys.stdout.write("ERROR: METAR lookup for %s failed" % (
+                                                myPils[0][3:].strip(), ))
+        return
+
+    try:
+        mydb = psycopg2.connect(database='afos', host='iemdb', user='nobody')
+    except:
+        print 'Error Connecting to Database, please try again!'
+        return
   
-  sql = "SELECT * from products WHERE pil IN "+ pilAR +" \
-   ORDER by entered DESC LIMIT "+LIMIT
+    cursor = mydb.cursor()
+    
+    # Do optimized query first, see if we can get our limit right away
+    sql = """SELECT data from products WHERE pil IN """+ pilAR +"""
+   and entered > now() - '2 days'::interval 
+   ORDER by entered DESC LIMIT """+LIMIT
 
-  #mydb.query("set enable_seqscan=no")
-  #print sql
-  rs = mydb.query(sql).dictresult()
-	
-	
-  for i in range(len(rs)):
-    print "\001"
-    print (rs[i]["data"]).replace("\003", "").replace("\001", "").replace("\r\r\n", "\n")
-    print "\n\003"
+    cursor.execute(sql)
+    if cursor.rowcount != int(LIMIT):
+        sql = """SELECT data from products WHERE pil IN """+ pilAR +"""
+   ORDER by entered DESC LIMIT """+LIMIT
+        cursor.execute(sql)
+        
+    for row in cursor:
+        print "\001"
+        print (row[0]).replace("\003", "").replace("\001", "").replace("\r\r\n", "\n")
+        print "\n\003"
 
-  if (len(rs) == 0 and myPils[0][:3] != "MTR"):
-    print "Could not Find: "+pil
+    if cursor.rowcount == 0:
+        print "Could not Find: "+pil
 
-  if (len(rs) == 0 and myPils[0][:3] == "MTR"):
-    #print "%s doesn't exist in AFOS database, looking in IEM's archive\n" % (pil,)
-    access = pg.connect('iem', 'iemdb', user='nobody')
-    sql = "SELECT raw from current_log WHERE raw != '' and station = '%s' ORDER by valid DESC LIMIT %s" % (myPils[0][3:].strip(), LIMIT)
-    rs = access.query( sql ).dictresult()
-    for i in range(len(rs)):
-      print "\001"
-      print rs[i]['raw'].replace("\r\r\n","\n")
-      print "\n\003"
          
 
-Main()
+if __name__ == '__main__':
+    main()
