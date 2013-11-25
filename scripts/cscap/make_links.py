@@ -1,6 +1,6 @@
 """
  Look at the metadata master table and see what our PI table is missing
- $Id: create_plot_ids.py 7800 2011-11-07 17:26:23Z akrherz $:
+
 """
 import gdata.spreadsheets.client
 import gdata.spreadsheets.data
