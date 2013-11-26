@@ -13,6 +13,17 @@ import cgi
 import json
 import sys
 import os
+import decimal
+
+# http://stackoverflow.com/questions/1960516/python-json-serialize-a-decimal-object
+class DecimalEncoder(json.JSONEncoder):
+    def _iterencode(self, o, markers=None):
+        if isinstance(o, decimal.Decimal):
+            # wanted a simple yield str(o) in the next line,
+            # but that would mean a yield on the line with super(...),
+            # which wouldn't work (see my comment below), so...
+            return (str(o) for o in [o])
+        return super(DecimalEncoder, self)._iterencode(o, markers)
 
 def sanitize( sql ):
     ''' Attempt to sanitize the input we get '''
@@ -48,7 +59,7 @@ if __name__ == '__main__':
         try:
             res = main()
             sys.stdout.write("\r\n")
-            sys.stdout.write( json.dumps(res) )
+            sys.stdout.write( json.dumps(res, cls=DecimalEncoder) )
         except Exception, exp:
             sys.stdout.write("Status: 500 Internal Server Error: 500\r\n")
             sys.stdout.write("\r\n")
