@@ -38,7 +38,7 @@ def main():
     cursor.execute( sql )
     res['rows'] = cursor.rowcount
     for row in cursor:
-        res['results'].append( row )
+        res['results'].append( dict(row) )
 
     return res
 
