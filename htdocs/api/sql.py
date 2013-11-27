@@ -19,7 +19,7 @@ import datetime
 # http://stackoverflow.com/questions/1960516/python-json-serialize-a-decimal-object
 class DecimalEncoder(json.JSONEncoder):
     def _iterencode(self, o, markers=None):
-        if isinstance(o, datetime.datetime):
+        if isinstance(o, datetime.datetime) or isinstance(o, datetime.date):
             return o.isoformat()
         elif isinstance(o, decimal.Decimal):
             # wanted a simple yield str(o) in the next line,
