@@ -14,11 +14,14 @@ import json
 import sys
 import os
 import decimal
+import datetime
 
 # http://stackoverflow.com/questions/1960516/python-json-serialize-a-decimal-object
 class DecimalEncoder(json.JSONEncoder):
     def _iterencode(self, o, markers=None):
-        if isinstance(o, decimal.Decimal):
+        if isinstance(o, datetime.datetime):
+            return o.isoformat()
+        elif isinstance(o, decimal.Decimal):
             # wanted a simple yield str(o) in the next line,
             # but that would mean a yield on the line with super(...),
             # which wouldn't work (see my comment below), so...
