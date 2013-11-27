@@ -20,7 +20,7 @@ import datetime
 class DecimalEncoder(json.JSONEncoder):
     def _iterencode(self, o, markers=None):
         if isinstance(o, datetime.datetime) or isinstance(o, datetime.date):
-            return o.isoformat()
+            return str(o.isoformat())
         elif isinstance(o, decimal.Decimal):
             # wanted a simple yield str(o) in the next line,
             # but that would mean a yield on the line with super(...),
