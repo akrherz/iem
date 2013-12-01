@@ -12,26 +12,37 @@ def normalize(ts):
         return mx.DateTime.DateTime(2010,ts.month,ts.day)
     return mx.DateTime.DateTime(2009,ts.month, ts.day)
 
-yearlymax = [0]*(2013-1934)
-maxvalid = [0]*(2013-1934)
+yearlymax = [0]*(2015-1934)
+maxvalid = [0]*(2015-1934)
 acursor.execute("""
-  SELECT valid, tmpf from alldata where station = 'DSM' and tmpf < 40 
+  SELECT valid, tmpf from alldata where station = 'DSM' and tmpf > -40 
   and valid > '1933-06-01' ORDER by valid ASC
 """)
 running = False
 last = None
 for row in acursor:
     ts = mx.DateTime.strptime(row[0].strftime("%Y%m%d%H%M"), "%Y%m%d%H%M")
+    # Case 1: Noop
+    if not running and row[1] >= 32:
+        continue
+    # Case 2: streak continues
     if running and row[1] < 32:
         continue
+    # Case 3: Starting a new streak
     if not running and row[1] < 32:
         last = ts
         running = True
         continue
+    # Case 4: Ending a streak
     if running and row[1] >= 32:
         diff = (ts - last).hours
+        if last.month == 11 and ts.month != 11:
+            ts = last + mx.DateTime.RelativeDateTime(month=12,day=1,hour=0,minute=0)
+            diff = (ts - last).hours
         lmax = yearlymax[getyear(ts)-1934]
-        if diff > lmax:
+        if last.month == 11 and diff > lmax:
+            if ts.month != 11:
+                ts = last + mx.DateTime.RelativeDateTime(month=12,day=1,hour=0,minute=0)
             print 'New', diff, getyear(ts)
             yearlymax[getyear(ts)-1934] = diff
             maxvalid[getyear(ts)-1934] = float(normalize(last))
@@ -42,19 +53,19 @@ import numpy
 yearlymax = numpy.array( yearlymax )
 maxvalid = numpy.array( maxvalid )
 fig = plt.figure()
-ax = fig.add_subplot(211)
-bars = ax.bar(numpy.arange(1934,2013)-0.4, yearlymax / 24.0)
+ax = fig.add_subplot(111)
+bars = ax.bar(numpy.arange(1933,2014)-0.4, yearlymax )
 for bar in bars:
-  if bar.get_height() <= bars[-1].get_height():
-    bar.set_facecolor('r')
-    bar.set_edgecolor('r')
+    if bar.get_height() <= bars[-1].get_height():
+        bar.set_facecolor('r')
+        bar.set_edgecolor('r')
 
-ax.set_xlim(1933,2013)
+ax.set_xlim(1935,2014)
 ax.grid(True)
-ax.set_ylabel("Consec Hours [days]")
-ax.set_title("Des Moines Yearly Max Consecutive Hours Below Freezing [1934-2012]")
-ax.set_xlabel("*2012 thru 1 Feb, red bars less <= 2012")
-
+ax.set_ylabel("Consec Hours")
+ax.set_title("Des Moines Max Consecutive Hours Below Freezing\nPeriod within November [1936-2013]")
+ax.set_xlabel("*blue bars are periods longer than 2013")
+"""
 sts = mx.DateTime.DateTime(2009,11,1)
 ets = mx.DateTime.DateTime(2010,5,1)
 interval = mx.DateTime.RelativeDateTime(months=1)
@@ -65,6 +76,7 @@ while now < ets:
     xticks.append( float(now) )
     xticklabels.append( now.strftime("%-d\n%b") )
     now += interval 
+
 ax2 = fig.add_subplot(212)
 bars = ax2.barh( numpy.arange(1934,2013), yearlymax*60*60, left=maxvalid)
 for bar in bars:
@@ -75,7 +87,7 @@ ax2.set_xticks( xticks )
 ax2.set_ylabel("When Streak Occurred")
 ax2.set_xticklabels( xticklabels )
 ax2.grid(True)
-
+"""
 fig.savefig('test.ps')
 import iemplot
 iemplot.makefeature('test')
