@@ -1674,12 +1674,14 @@ LAYER
   END
   DATA /mesonet/data/gis/static/shape/4326/us/interstates.shp
   CLASS
-    COLOR 255 0 0
-    SYMBOL 'circle'
-    SIZE 4
-    OVERLAYSYMBOL 'circle'
-    OVERLAYSIZE 2
-    OVERLAYCOLOR 0 0 0
+    STYLE
+      COLOR 255 0 0
+      WIDTH 1.5
+    END
+    STYLE
+      COLOR 0 0 0
+      WIDTH 0.5
+    END
   END
 END
 

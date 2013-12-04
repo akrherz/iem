@@ -537,6 +537,11 @@ if (in_array("ci", $layers) ){
 	$ci->draw($img);
 }
 
+/* Interstates */
+$interstates = $map->getlayerbyname("interstates");
+$interstates->set("status", in_array("interstates", $layers) );
+$interstates->draw($img);
+
 /* roads */
 $roads = $map->getlayerbyname("roads");
 $roads->set("connection", $_DATABASES["postgis"]);
