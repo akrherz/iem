@@ -258,21 +258,22 @@ LAYER
 END
 
 LAYER
- NAME interstates
- TYPE LINE
- STATUS OFF
- PROJECTION
-  "init=epsg:4326"
- END
- MAXSCALE 100000
- DATA "shape/4326/us/interstates.shp"
- CLASS
-   COLOR 204 204 204
-   SYMBOL 'circle'
-   SIZE 1
-   #OVERLAYSYMBOL 'circle'
-   #OVERLAYSIZE 1
-   #OVERLAYCOLOR 0 0 0
+  NAME interstates
+  TYPE LINE
+  STATUS OFF
+  PROJECTION
+   "init=epsg:4326"
+  END
+  DATA /mesonet/data/gis/static/shape/4326/us/interstates.shp
+  CLASS
+    STYLE
+      COLOR 255 0 0
+      WIDTH 1.5
+    END
+    STYLE
+      COLOR 0 0 0
+      WIDTH 0.5
+    END
   END
 END
 
