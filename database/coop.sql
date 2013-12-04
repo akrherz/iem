@@ -89,7 +89,7 @@ GRANT select on alldata to nobody,apache;
  CREATE TABLE alldata_hi() inherits (alldata); 
  GRANT SELECT on alldata_hi to nobody,apache;
  CREATE TABLE alldata_ia() inherits (alldata); 
- GRANT SELECT on alldata_ia to nobody,apache;
+ GRANT SELECT on alldata_ia to nobody,apache,apiuser;
  CREATE TABLE alldata_id() inherits (alldata); 
  GRANT SELECT on alldata_id to nobody,apache;
  CREATE TABLE alldata_il() inherits (alldata); 
@@ -212,7 +212,7 @@ CREATE TABLE stations(
 	iemid int PRIMARY KEY
 	);
 SELECT AddGeometryColumn('stations', 'geom', 4326, 'POINT', 2);
-GRANT SELECT on stations to nobody,apache;
+GRANT SELECT on stations to nobody,apache,apiuser;
 
 ---
 --- Store the climate normals
