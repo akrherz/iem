@@ -47,7 +47,8 @@ class IEMAccess {
   	}
     $ret = Array();
     $sql = sprintf("select s.id, s.id as station, *, c.pday as ob_pday, 
-    		ST_x(s.geom) as x, ST_y(s.geom) as y, valid at time zone s.tzname as lvalid,
+    		ST_x(s.geom) as x, ST_y(s.geom) as y, 
+    		valid at time zone s.tzname as lvalid,
     max_gust_ts at time zone s.tzname as lmax_gust_ts,
     max_sknt_ts at time zone s.tzname as lmax_sknt_ts,
     s.name as sname from 
