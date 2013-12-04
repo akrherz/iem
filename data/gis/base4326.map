@@ -817,7 +817,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME sbw
-  CONNECTION "dbname=postgis host=iemdb"
+  CONNECTION "dbname=postgis host=iemdb user=nobody"
   DATA "geom from (select phenomena, geom, random() as oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON

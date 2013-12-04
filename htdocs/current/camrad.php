@@ -1,11 +1,10 @@
 <?php
-/* Require PHP5 
+/* 
    Generate a radar image with camera locs for some time 
-   17 Apr 2008 - Now we are directly callable!  Yippee 
 */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/cameras.inc.php");
+include("../../include/database.inc.php");
+include("../../include/cameras.inc.php");
 $conn = iemdb("mesosite");
 
 /* First, we need some GET vars */
@@ -51,7 +50,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 
 
 /* Finally we get to map rendering */
-$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+$map = ms_newMapObj("../../data/gis/base4326.map");
 
 /* Hard coded extents based on network */
 if ($network == "KCCI")
@@ -74,11 +73,10 @@ $counties = $map->getlayerbyname("uscounties");
 $counties->set("status", 1);
 
 $c0 = $map->getlayerbyname("sbw");
-$c0->set("connection", $_DATABASES["postgis"] );
 $c0->set("status", MS_ON );
-$db_ts = strftime("%Y-%m-%d %H:%M", $ts );
+$db_ts = strftime("%Y-%m-%d %H:%M+00", $ts );
 $year = date("Y", $ts);
-$c0->set("data", "geom from (select significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P' and significance = 'W' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+$c0->set("data", "geom from (select significance, phenomena, geom, random() as oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P' and significance = 'W' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
 
 $radar = $map->getlayerbyname("nexrad_n0q");
 $radar->set("status", MS_ON );
