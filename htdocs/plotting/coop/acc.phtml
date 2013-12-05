@@ -31,6 +31,12 @@ if (isset($_REQUEST['year3']) && isset($_REQUEST['year3on'])){
 	$year3 = intval( $_REQUEST['year3']);
 	$dcgi .= "year3=${year3}&";
 }
+
+$year4 = null;
+if (isset($_REQUEST['year4']) && isset($_REQUEST['year4on'])){
+	$year4 = intval( $_REQUEST['year4']);
+	$dcgi .= "year4=${year4}&";
+}
 	
 $THISPAGE = "networks-coop";
 $TITLE = "IEM | NWS COOP Accumulated Departures";
@@ -100,6 +106,11 @@ include("$rootpath/include/header.php"); ?>
 <br /><input type="checkbox" name="year3on" value="yes" 
 <?php if ($year3 != null) echo "CHECKED=CHECKED"; ?>/> Compare with year
  <?php echo yearSelect2(1893, $year3, "year3"); ?>
+
+<br /><input type="checkbox" name="year4on" value="yes" 
+<?php if ($year4 != null) echo "CHECKED=CHECKED"; ?>/> Compare with year
+ <?php echo yearSelect2(1893, $year4, "year4"); ?>
+ 
  
  <p><input type="submit" value="Make Plot">
 </form>
