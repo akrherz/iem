@@ -9,17 +9,19 @@ import json
 import warnings
 warnings.simplefilter("ignore", UserWarning)
 
+def send_error(msg):
+    """ Send an error when something bad happens(tm)"""
+    sys.stdout.write('Content-type: application/json\n\n')
+    sys.stdout.write( json.dumps( {'error': msg, } ) )
+    sys.exit()
+
 form = cgi.FormContent()
 ts1 = datetime.datetime.strptime( form["date1"][0], "%Y-%m-%d")
 ts2 = datetime.datetime.strptime( form["date2"][0], "%Y-%m-%d")
 if ts1 >= ts2:
-    sys.stdout.write('Content-type: application/json\n\n')
-    sys.stdout.write( json.dumps( {'error': 'Date1 Larger than Date2', } ) )
-    sys.exit()
+    send_error("date1 larger than date2")
 if ts1.year != ts2.year:
-    sys.stdout.write('Content-type: application/json\n\n')
-    sys.stdout.write( json.dumps( {'error': 'Multi-year query not supported yet...', } ) )
-    sys.exit()
+    send_error("multi-year query not supported yet...")
 # Make sure we aren't in the future
 tsend = datetime.date.today()
 if ts2.date() >= tsend:
@@ -27,6 +29,12 @@ if ts2.date() >= tsend:
 
 lat = float( form["lat"][0] )
 lon = float( form["lon"][0] )
+if lon < iemre.WEST or lon > iemre.EAST:
+    send_error("lon value outside of bounds: %s to %s" % (iemre.WEST,
+                                                         iemre.EAST))
+if lat < iemre.SOUTH or lat > iemre.NORTH:
+    send_error("lat value outside of bounds: %s to %s" % (iemre.SOUTH,
+                                                         iemre.NORTH))
 fmt = form["format"][0]
 
 i,j = iemre.find_ij(lon, lat)
