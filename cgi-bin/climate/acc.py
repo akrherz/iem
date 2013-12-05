@@ -186,6 +186,29 @@ def process_cgi(form):
             ax[1].plot(dates, precip[:sz], color='g', lw=2)
             ax[2].plot(dates, sdd86[:sz], color='g', lw=2)
             ax2.plot(dates, d_gdd50[:sz], color='g', linewidth=2, linestyle='--')
+
+    if form.getvalue('year4'):
+        startdt4 = mx.DateTime.DateTime(int(form.getvalue('year4')),
+                                    int(form.getvalue('smonth', 5)),
+                                    int(form.getvalue('sday', 1))
+                                   )
+        enddt4 = mx.DateTime.DateTime(int(form.getvalue('year4')) + (enddt.year - startdt.year),
+                                    int(form.getvalue('emonth', 10)),
+                                    int(form.getvalue('eday', 1))
+                                   )
+        
+        dates4, gdd50, d_gdd50, c_gdd50, precip, d_precip, c_precip, sdd86, d_sdd86, c_sdd86 = get_data(station,
+                                                                startdt4, enddt4)
+    
+        yearlabel = startdt4.year
+        if startdt4.year != enddt4.year:
+            yearlabel = "%s-%s" % (startdt4.year, enddt4.year)
+        sz = len(dates)
+        if len(gdd50) >= sz:
+            ax[0].plot(dates, gdd50[:sz], label="%s" % (yearlabel,), color='tan', lw=2)
+            ax[1].plot(dates, precip[:sz], color='tan', lw=2)
+            ax[2].plot(dates, sdd86[:sz], color='tan', lw=2)
+            ax2.plot(dates, d_gdd50[:sz], color='tan', linewidth=2, linestyle='--')
     
     ax[0].legend(loc=2, prop={'size': 14})
 
