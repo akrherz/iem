@@ -95,6 +95,10 @@ $sectors = Array(
 /* Setup layers */
 $layers = isset($_GET["layers"])? $_GET["layers"]: 
           Array("n0q");
+// Make sure layers is an array...
+if (gettype($layers) == "string"){
+	$layers = Array($layers);
+}
 
 /* Straight CGI Butter */
 $sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
