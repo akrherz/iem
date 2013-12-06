@@ -38,14 +38,17 @@
 0.9   1.9   iemvm1
 0.10  1.10  mtarchive 
 0.19  1.19  iem19   
+0.20        thumper
 0.40  1.40  nrel 
 0.51  1.51  metvm2 
 0.70  1.70  osgood 
 0.80  1.80  howard 
 0.90  1.90  comet 
-0.99  ----  iem99   
+0.99  ----  iem99  
+0.199       metvm1 
 0.200 1.200 metfs1 
 0.204 1.204 stanley 
 0.230 1.230 metvm3 
 0.231 1.231 metvm4
+0.232       updraft
 
