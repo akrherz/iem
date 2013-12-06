@@ -5,6 +5,7 @@ from osgeo import ogr
 from shapely.wkb import loads
 from numpy import asarray
 from matplotlib.colors import rgb2hex
+import matplotlib.colors as mpcolors
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 import pylab
@@ -13,25 +14,22 @@ import iemplot
 import iemdb
 import Image
 import mx.DateTime
+from pyiem.plot import maue
+import numpy as np
 POSTGIS = iemdb.connect('postgis', bypass=True)
 pcursor = POSTGIS.cursor()
 
 from iem import plot
-maue = plot.maue(15)
-bins = [1,2,3,4,5,7,10,15,20,25,30,35,40,50,75,100]
-
-def get_color(val, minvalue, maxvalue):
-    if val < bins[0]:
-        return "None"
-    for i in range(1,len(bins)):
-        if val < bins[i]:
-            return maue(i-1)
-    return maue(14)
+cmap = maue()
+bins = np.arange(12)
+norm = mpcolors.BoundaryNorm(bins, cmap.N)
+#bins = [1,2,3,4,5,7,10,15,20,25,30,35,40,50,75,100]
 
 
 
-fig = plt.figure(num=None, figsize=(10.24,7.68))
-#fig = plt.figure(num=None, figsize=(3.55,2.9))
+
+#fig = plt.figure(num=None, figsize=(10.24,7.68))
+fig = plt.figure(num=None, figsize=(3.55,2.9))
 # Set the axes instance
 ax = plt.axes([0.01,0,0.9,1], axisbg=(0.4471,0.6235,0.8117))
 ak_ax = plt.axes([0.01,0.0,0.25,0.25], axisbg=(0.4471,0.6235,0.8117), anchor='SW')
@@ -70,8 +68,8 @@ data = source.ExecuteSQL("""
  
  select n.ugc, foo.data, ST_Simplify(n.geom,0.01) from nws_ugc n 
  LEFT JOIN (select ugc, count(*) as data from warnings 
-                  where phenomena in ('BZ') and significance = 'W' 
-                  and gtype = 'C' GROUP by ugc) as foo 
+                  where phenomena in ('IS') and significance = 'W' 
+                  and gtype = 'C' and issue > '2005-11-12' GROUP by ugc) as foo 
  ON (n.ugc = foo.ugc) 
  ORDER by data ASC NULLS FIRST
  
@@ -95,7 +93,7 @@ while 1:
     if cnt is None or float(cnt) == 0:
         c = 'w'
     else:
-        c = get_color(cnt, 0,100)
+        c = cmap( norm([cnt,]) )[0]
     geom = loads(feature.GetGeometryRef().ExportToWkb())
     print ugc, cnt, c
     for polygon in geom:
@@ -131,18 +129,18 @@ axaa = plt.axes([0.92, 0.1, 0.07, 0.8], frameon=False,
                       yticks=[], xticks=[])
 colors = []
 for i in range(len(bins)):
-    colors.append( rgb2hex(maue(i)) )
+    colors.append( rgb2hex(cmap(i)) )
     txt = axaa.text(0.5, i, "%s" % (bins[i],), ha='center', va='center',
                           color='w')
     txt.set_path_effects([PathEffects.withStroke(linewidth=2,
                                                      foreground="k")])
 axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
-                color=maue(range(len(bins))),
+                color=cmap(norm(range(len(bins)))),
                 ec='None')
 
 
-ax.text(0.17, 1.1, '1 Oct 2005 - 10 Feb 2013 Blizzard Warnings', transform=ax.transAxes,
-     size=13,
+ax.text(0.17, 1.15, '12 Nov 2005 - 5 Dec 2013 Number of NWS Issued Ice Storm Warnings', transform=ax.transAxes,
+     size=6,
     horizontalalignment='left', verticalalignment='center')
 
 #ax.text(0.17, 1.005, 'Map Generated: %s' % (mx.DateTime.now().strftime("%d %B %Y %H:%M %p %Z"),), transform=ax.transAxes,
@@ -159,9 +157,9 @@ ax3.imshow(logo)
 #     verticalalignment='center',
 #     transform = ax.transAxes)
 
-axaa.text(-2., 0.5, 'Count', transform=axaa.transAxes,
-    size='medium', color='k', horizontalalignment='center',
-    rotation='vertical', verticalalignment='center')
+#axaa.text(-2., 0.5, 'Count', transform=axaa.transAxes,
+#    size='medium', color='k', horizontalalignment='center',
+#    rotation='vertical', verticalalignment='center')
 
 
 
