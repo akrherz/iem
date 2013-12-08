@@ -1,13 +1,15 @@
-# Computes the Climatology and fills out the table!
+''' 
+  Computes the Climatology and fills out the table!
+'''
 import mx.DateTime
-import iemdb
+import psycopg2
 import psycopg2.extras
 import network
 import sys
 nt = network.Table(("IACLIMATE", "MNCLIMATE", "NDCLIMATE", "SDCLIMATE",
   "NECLIMATE", "KSCLIMATE", "MOCLIMATE", "ILCLIMATE", "WICLIMATE",
   "MICLIMATE", "INCLIMATE", "OHCLIMATE", "KYCLIMATE"))
-COOP = iemdb.connect('coop')
+COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
 ccursor2 = COOP.cursor()
 THISYEAR = mx.DateTime.now().year
@@ -35,7 +37,8 @@ def daily_averages(table):
     max(low) as max_low, min(low) as min_low,
     max(precip) as max_precip, avg(precip) as precip,
     avg(snow) as snow, count(*) as years,
-    avg( gdd50(high,low) ) as gdd50, avg( sdd86(high,low) ) as sdd86,
+    avg( gddxx(50,86,high,low) ) as gdd50, avg( sdd86(high,low) ) as sdd86,
+    avg( hdd65(high,low) ) as hdd65,
     max( high - low) as max_range, min(high - low) as min_range
     from alldata_%s WHERE day >= '%s' and day < '%s' 
     GROUP by d, station
@@ -43,17 +46,18 @@ def daily_averages(table):
 		META[table]['ets'].strftime("%Y-%m-%d") )
         ccursor.execute(sql)
         for row in ccursor:
-            id = row['station']
+            sid = row['station']
             if not id.upper() in nt.sts.keys():
                 continue
             sql = """DELETE from %s WHERE station = '%s' and valid = '%s' """ % (
-                        table, id, row['d'])
+                        table, sid, row['d'])
             ccursor2.execute(sql)
             sql = """ INSERT into """+ table +""" (station, valid, high, low, precip, snow,
         max_high, max_low, min_high, min_low, max_precip, years, gdd50, sdd86, max_range,
-        min_range) VALUES ('%(station)s', '%(d)s', %(avg_high)s, %(avg_low)s, %(precip)s,
+        min_range, hdd65) VALUES ('%(station)s', '%(d)s', %(avg_high)s, %(avg_low)s, %(precip)s,
         %(snow)s, %(max_high)s, %(max_low)s, %(min_high)s, %(min_low)s, %(max_precip)s,
-        %(years)s, %(gdd50)s, %(sdd86)s, %(max_range)s, %(min_range)s)""" % row
+        %(years)s, %(gdd50)s, %(sdd86)s, %(max_range)s, %(min_range)s,
+        %(hdd65)s)""" % row
             ccursor2.execute(sql)
 
         COOP.commit()
@@ -65,14 +69,17 @@ def do_date(table, row, col, agg_col):
     ORDER by year ASC
     """ % (row['station'][:2].lower(), row['station'], col, row[agg_col], 
            row['valid'].strftime("%m%d"),
-           META[table]['sts'].strftime("%Y-%m-%d"), 
-           META[table]['ets'].strftime("%Y-%m-%d"))
+           META[table]['sts'], 
+           META[table]['ets'])
     ccursor2.execute(sql)
     row2 = ccursor2.fetchone()
     if row2 is not None:
         sql = """ UPDATE %s SET %s_yr = %s WHERE station = '%s' and valid = '%s' """ % (
                     table, agg_col, row2[0], row['station'], row['valid'])
         ccursor2.execute(sql)
+        if ccursor2.rowcount != 1:
+            print 'Update %s for station %s and date %s failed' % (table,
+                                                row['station'], row['valid'])
 
 def set_daily_extremes(table):
     sql = """
@@ -87,7 +94,7 @@ def set_daily_extremes(table):
         do_date(table, row, 'precip', 'max_precip')
         COOP.commit()
        
-#daily_averages(sys.argv[1])
+daily_averages(sys.argv[1])
 set_daily_extremes(sys.argv[1])
 COOP.commit()
 ccursor.close()
