@@ -47,7 +47,7 @@ def daily_averages(table):
         ccursor.execute(sql)
         for row in ccursor:
             sid = row['station']
-            if not id.upper() in nt.sts.keys():
+            if not sid.upper() in nt.sts.keys():
                 continue
             sql = """DELETE from %s WHERE station = '%s' and valid = '%s' """ % (
                         table, sid, row['d'])
