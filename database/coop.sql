@@ -381,7 +381,10 @@ CREATE UNIQUE INDEX climate81_idx on climate81(station,valid);
 GRANT SELECT on climate81 to nobody,apache;
 
 
-
+CREATE FUNCTION sdd86(real, real) RETURNS numeric
+    LANGUAGE sql
+    AS $_$select ( (CASE WHEN $1 > 86 THEN $1 - 86 ELSE 0 END) )::numeric$_$;
+    
 CREATE FUNCTION gdd48(real, real) RETURNS numeric
     LANGUAGE sql
     AS $_$select (( (CASE WHEN $1 > 48 THEN (case when $1 > 86 THEN 86 ELSE $1 END ) - 48 ELSE 0 END) + (CASE WHEN $2 > 48 THEN $2 - 48 ELSE 0 END) ) / 2.0)::numeric$_$;
