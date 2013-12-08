@@ -1,6 +1,7 @@
 <?php 
 include("../../config/settings.inc.php");
-include("$rootpath/include/cameras.inc.php");
+include("../../include/myview.php");
+include("../../include/cameras.inc.php");
 $camid = isset($_GET["camid"]) ? $_GET["camid"] : "IDOT-000";
 
 $cdict = Array();
@@ -19,48 +20,53 @@ while( list($id,$cam) = each($cameras)){
 }
 $selectform .= "</select>\n";
 
-$THISPAGE = 'networks-rwis';
-$TITLE = "IEM | IaDOT RWIS Data";
-include("$rootpath/include/header.php"); 
-?>
+$t = new MyView();
+$t->thispage = 'networks-rwis';
+$t->title = "Iowa DOT RWIS Data";
 
+$camimgs = "";
+for($i=0;$i<$cdict[$camid];$i++){
+	$camimgs .= sprintf("<img src=\"%s/data/camera/stills/%s-%02d.jpg?%s\" style=\"margin: 2px;\">", $rooturl,
+			$camid, $i, time() );
+}
+
+$t->content = <<<EOF
 <h3 class="heading">Roadway Weather Information System</h3><p>
 
-<div class="text">
-<table><tr><td style="width: 650px" valign="top">
+<div class="row">
+<div class="col-md-8">
+
 The Iowa Department of Transportation maintains a set 
 of observing stations located along major roads in the state.  These stations
 measure pavement temperatures as well as atmospherics.  The DOT has a good
 website called <a href="http://weatherview.iowadot.gov">WeatherView</a>, which contains recent obs and a 
 wealth of other information.  The products on this page are intended to 
-supplement their site.</td><td>
+supplement their site.
+</div>
 
-
-<div class="ninfo">
+<div class="col-md-4">
 <b>RWIS Network</b>
 <br>About 6 obs per hour
 <br>Stations: 62
-<br><a href="<?php echo $rooturl; ?>/sites/locate.php?network=IA_RWIS">Locations</a>
-</div></td></tr></table>
+<br><a href="/sites/locate.php?network=IA_RWIS">Locations</a>
+</div>
 
-<h4>Roadside Webcams <a href="camera.phtml" class="button blue">New! Webcam Archive Viewer</a></h4>
+</div><!-- ./row -->
+
+<h4>Roadside Webcams <a href="camera.phtml" class="btn btn-default">Webcam Archive Viewer</a></h4>
 <div>
 <form method="" action="" name="widget">
-Available sites: <?php echo $selectform; ?>
+Available sites: {$selectform}
 <input type="submit" value="View Webcam">
 </form>
-<?php 
-for($i=0;$i<$cdict[$camid];$i++){
-  echo sprintf("<img src=\"%s/data/camera/stills/%s-%02d.jpg?%s\" style=\"margin: 2px;\">", $rooturl,
-       $camid, $i, time() );
-}
-?>
+
+{$camimgs}
 </div>
 
 
-<table width="100%">
-<tr>
-  <td valign="top" width="50%">
+<div class="row">
+<div class="col-md-6">
+		
 
   <h3 class="subtitle">Current Conditions</h3><ul>
     <li><a href="current.phtml">Atmospherics</a></li>
@@ -68,18 +74,18 @@ for($i=0;$i<$cdict[$camid];$i++){
     <li><a href="soil.phtml">Soil Probes</a></li>
     <li><a href="traffic.phtml">Traffic Data</a></li>
   <LI><a
-  href="<?php echo $rooturl; ?>/GIS/apps/iem/freeze.phtml">IEM
+  href="/GIS/apps/iem/freeze.phtml">IEM
   Freeze</a><br><dd>Combine air and pavement temperatures with current
   RADAR.</dd></LI></ul>
 
   <h3 class="subtitle">Time Series Plots:</h3>
 <ul>
-   <li><a href="<?php echo $rooturl; ?>/plotting/rwis/sf_fe.php">Recent Air/Pavement Temps</a></li>
+   <li><a href="/plotting/rwis/sf_fe.php">Recent Air/Pavement Temps</a></li>
 </ul>
 
   <h3 class="subtitle">Plots with RWIS data</h3><ul>
    <li><a href="/data/mesonet.gif">Combined Mesonet</a></li>
-   <li><a href="<?php echo $rooturl; ?>/data/iowa_rwis.png">RWIS Mesonet</a></li>
+   <li><a href="/data/iowa_rwis.png">RWIS Mesonet</a></li>
    <li><a href="/data/rwis_sf.gif">Pavement Temperatures</a> 
      <a href="/help/imageHelp.php?iod=0"> <img src="/images/ihelp.png" border="0"></a></li>
    <li><a href="../data/heat.gif">Heat Index</a></li>
@@ -87,13 +93,14 @@ for($i=0;$i<$cdict[$camid];$i++){
    <li><a href="/data/rwis.txt">Current RWIS Raw Text File</a></li></ul>
 
 
-</td><td valign="top" width="50%">
+</div>
+<div class="col-md-6">
 
   <h3 class="subtitle">Data Download</h3>
 <ul>
- <li><a href="<?php echo $rooturl; ?>/request/rwis/fe.phtml">Atmosphere &amp; Pavement Data</a></li>
- <li><a href="<?php echo $rooturl; ?>/request/rwis/soil.phtml">Soil Probe Data</a></li>
- <li><a href="<?php echo $rooturl; ?>/request/rwis/traffic.phtml">Traffic Data</a></li>
+ <li><a href="/request/rwis/fe.phtml">Atmosphere &amp; Pavement Data</a></li>
+ <li><a href="/request/rwis/soil.phtml">Soil Probe Data</a></li>
+ <li><a href="/request/rwis/traffic.phtml">Traffic Data</a></li>
 </ul>
 
   <h3 class="subtitle">Station Plot with NEXRAD</h3><ul>
@@ -115,7 +122,7 @@ for($i=0;$i<$cdict[$camid];$i++){
   <h3 class="subtitle">QC Info:</h3>
 <ul>
   <li><a href="/data/text/IEMRWISTP.txt">Yesterday's Totals</a></LI>
-  <li>Sites <a href="/QC/offline.php">offline</a> [<a href="<?php echo $rooturl; ?>/GIS/apps/stations/offline.php?network=rwis">Graphical View</a>]</li>
+  <li>Sites <a href="/QC/offline.php">offline</a> [<a href="/GIS/apps/stations/offline.php?network=rwis">Graphical View</a>]</li>
   <li>Recent data <a href="/plotting/stats/reports.php?network=rwis">quantity</a></li>
   <li>FSL MADIS QC Messages:
   <br /><a href="http://madis-data.noaa.gov/qcms_data/qc17/qchour.txt">Last Hour</a>
@@ -125,7 +132,10 @@ for($i=0;$i<$cdict[$camid];$i++){
 </ul>
 </p>
 
-</td></tr>
-</table></div>
+</div>
+</div><!-- ./row -->
 
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+
+$t->render("single.phtml");
+?>
