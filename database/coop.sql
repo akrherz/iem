@@ -217,6 +217,142 @@ GRANT SELECT on stations to nobody,apache,apiuser;
 ---
 --- Store the climate normals
 ---
+CREATE TABLE climate(
+  station varchar(6),
+  valid date,
+  high real,
+  low real,
+  precip real,
+  snow real,
+  max_high real,
+  max_low real,
+  min_high real,
+  min_low real,
+  max_precip real,
+  years int,
+  gdd50 real,
+  sdd86 real,
+  max_high_yr   int,
+  max_low_yr    int,
+  min_high_yr   int,
+  min_low_yr    int,
+  max_precip_yr int,
+  max_range     smallint,
+  min_range smallint,
+  hdd65 real 
+);
+CREATE UNIQUE INDEX climate_idx on climate(station,valid);
+GRANT SELECT on climate to nobody,apache;
+
+CREATE TABLE climate51(
+  station varchar(6),
+  valid date,
+  high real,
+  low real,
+  precip real,
+  snow real,
+  max_high real,
+  max_low real,
+  min_high real,
+  min_low real,
+  max_precip real,
+  years int,
+  gdd50 real,
+  sdd86 real,
+  max_high_yr   int,
+  max_low_yr    int,
+  min_high_yr   int,
+  min_low_yr    int,
+  max_precip_yr int,
+  max_range     smallint,
+  min_range smallint,
+  hdd65 real 
+);
+CREATE UNIQUE INDEX climate51_idx on climate51(station,valid);
+GRANT SELECT on climate51 to nobody,apache;
+
+CREATE TABLE climate71(
+  station varchar(6),
+  valid date,
+  high real,
+  low real,
+  precip real,
+  snow real,
+  max_high real,
+  max_low real,
+  min_high real,
+  min_low real,
+  max_precip real,
+  years int,
+  gdd50 real,
+  sdd86 real,
+  max_high_yr   int,
+  max_low_yr    int,
+  min_high_yr   int,
+  min_low_yr    int,
+  max_precip_yr int,
+  max_range     smallint,
+  min_range smallint,
+  hdd65 real 
+);
+CREATE UNIQUE INDEX climate71_idx on climate71(station,valid);
+GRANT SELECT on climate71 to nobody,apache;
+
+CREATE TABLE ncdc_climate71(
+  station varchar(6),
+  valid date,
+  high real,
+  low real,
+  precip real,
+  snow real,
+  max_high real,
+  max_low real,
+  min_high real,
+  min_low real,
+  max_precip real,
+  years int,
+  gdd50 real,
+  sdd86 real,
+  max_high_yr   int,
+  max_low_yr    int,
+  min_high_yr   int,
+  min_low_yr    int,
+  max_precip_yr int,
+  max_range     smallint,
+  min_range smallint,
+  hdd65 real 
+);
+CREATE UNIQUE INDEX ncdc_climate71_idx on ncdc_climate71(station,valid);
+GRANT SELECT on ncdc_climate71 to nobody,apache;
+
+CREATE TABLE ncdc_climate81(
+  station varchar(6),
+  valid date,
+  high real,
+  low real,
+  precip real,
+  snow real,
+  max_high real,
+  max_low real,
+  min_high real,
+  min_low real,
+  max_precip real,
+  years int,
+  gdd50 real,
+  sdd86 real,
+  max_high_yr   int,
+  max_low_yr    int,
+  min_high_yr   int,
+  min_low_yr    int,
+  max_precip_yr int,
+  max_range     smallint,
+  min_range smallint,
+  hdd65 real 
+);
+CREATE UNIQUE INDEX ncdc_climate81_idx on ncdc_climate81(station,valid);
+GRANT SELECT on ncdc_climate81 to nobody,apache;
+
+
 CREATE TABLE climate81(
   station varchar(6),
   valid date,
@@ -238,10 +374,13 @@ CREATE TABLE climate81(
   min_low_yr    int,
   max_precip_yr int,
   max_range     smallint,
-  min_range smallint 
+  min_range smallint,
+  hdd65 real 
 );
 CREATE UNIQUE INDEX climate81_idx on climate81(station,valid);
 GRANT SELECT on climate81 to nobody,apache;
+
+
 
 CREATE FUNCTION gdd48(real, real) RETURNS numeric
     LANGUAGE sql
