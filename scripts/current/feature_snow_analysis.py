@@ -21,7 +21,7 @@ icursor.execute("""
     ST_y(geom) as lat, county, count(*) from
     summary_2013 t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
-    day in ('2013-11-25', '2013-11-26') and snow >= 0 and 
+    day in ('2013-12-09', '2013-12-09') and snow >= 0 and 
     ST_x(geom) BETWEEN %s and %s and
     ST_y(geom) BETWEEN %s and %s  
     GROUP by id, lon, lat, county
@@ -46,7 +46,7 @@ pcursor.execute("""
         ST_x(geom) as lon, 
        ST_y(geom) as lat
       from lsrs_2013 WHERE type in ('S') and magnitude > 0 and 
-      valid > '2013-11-25 00:00' and valid < '2013-11-26 23:59'
+      valid > '2013-12-08 00:00' and valid < '2013-12-26 23:59'
       GROUP by state, lon, lat
 """)
 for row in pcursor:
@@ -70,7 +70,7 @@ final_vals = vals
 final_lats = []
 final_lons = []
 final_vals = []
-buffer = 0.25
+buffer = 0.45
 for lat in numpy.arange(iemplot.MW_SOUTH, iemplot.MW_NORTH, buffer):
   for lon in numpy.arange(iemplot.MW_WEST, iemplot.MW_EAST, buffer):
     lvals = []
@@ -98,8 +98,8 @@ cfg = {
  'wkColorMap': 'WhiteBlueGreenYellowRed',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "24-25 Nov 2013 - IEM Snowfall Total Analysis",
- '_valid'             : "Snowfall totals up until 8 AM 26 Nov 2013",
+ '_title'             : "8-9 Dec 2013 - IEM Snowfall Total Analysis",
+ '_valid'             : "Snowfall totals up until 8 AM 9 Dec 2013",
  #'_MaskZero'          : True,
  'lbTitleString'      : "[in]",
   '_showvalues'        : False,
