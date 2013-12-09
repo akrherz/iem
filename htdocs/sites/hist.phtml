@@ -94,6 +94,14 @@ if ($mode == "monthly") {
   		$str .= "<br>Rain: ". $row["pday"];
   	}
   }
+  if ($row["snow"] != null && $row["snow"] >= 0){
+  	if ($row["snow"] < 0.01 && $row["snow"] > 0){
+  		$str .= "<br>Snow: Trace ";
+  	} else {
+  		$str .= "<br>Snow: ". $row["snow"];
+  	}
+  }
+  
   if (strlen($row["max_gust"]) > 0 && strlen($row["lmax_gust_ts"]) > 0) {
     $gtim = strtotime(substr($row["lmax_gust_ts"],0,16));
     $gs = date("h:i a", $gtim);
