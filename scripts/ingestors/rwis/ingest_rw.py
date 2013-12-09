@@ -43,7 +43,6 @@ def process( nwsli , lastts ):
     myuri = "%s&sdate=%s&edate=%s&mac=%s" % (URI, today.strftime("%Y-%m-%d"),
                                              today.strftime("%Y-%m-%d"),
                                              assoc[nwsli])
-    print myuri
     try:
         data = urllib2.urlopen(myuri)
     except Exception, exp:
