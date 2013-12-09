@@ -78,7 +78,9 @@ def process( nwsli , lastts ):
     df['gust'] = df['wih'] / 1.15
     df['max_gust'] = df['wdh'] / 1.15
 
-    for count, row in df.iterrows():
+    sdf = df.sort(['utc'], ascending=[True])
+
+    for count, row in sdf.iterrows():
         utc = datetime.datetime.strptime( row['utc'], '%Y-%m-%d %H:%M:%S')
         utc = utc.replace(tzinfo=pytz.timezone("UTC"))
         
