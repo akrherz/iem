@@ -84,7 +84,7 @@ def process( nwsli , lastts ):
         
         if lastts is not None and utc < lastts:
             continue
-        print nwsli, utc
+        #print nwsli, utc
         iem = Observation(nwsli, 'IA_RWIS', utc)
         for iemvar in conv:
             iem.data[iemvar] = row[ conv[iemvar] ]
