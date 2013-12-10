@@ -39,6 +39,7 @@
 0.10  1.10  mtarchive 
 0.19  1.19  iem19   
 0.20        thumper
+0.34        meteor.geol
 0.40  1.40  nrel 
 0.51  1.51  metvm2 
 0.70  1.70  osgood 
