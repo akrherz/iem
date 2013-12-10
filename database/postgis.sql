@@ -110,6 +110,7 @@ CREATE TABLE raob_profile_2010() inherits (raob_profile);
 CREATE TABLE raob_profile_2011() inherits (raob_profile);
 CREATE TABLE raob_profile_2012() inherits (raob_profile);
 CREATE TABLE raob_profile_2013() inherits (raob_profile);
+CREATE TABLE raob_profile_2014() inherits (raob_profile);
 
 
 CREATE INDEX raob_profile_1990_fid_idx on raob_profile_1990(fid);
@@ -136,9 +137,11 @@ CREATE INDEX raob_profile_2010_fid_idx on raob_profile_2010(fid);
 CREATE INDEX raob_profile_2011_fid_idx on raob_profile_2011(fid);
 CREATE INDEX raob_profile_2012_fid_idx on raob_profile_2012(fid);
 CREATE INDEX raob_profile_2013_fid_idx on raob_profile_2013(fid);
+CREATE INDEX raob_profile_2014_fid_idx on raob_profile_2014(fid);
 
 GRANT SELECT on raob_profile to nobody,apache;
 GRANT SELECT on raob_profile_2013 to nobody,apache;
+GRANT SELECT on raob_profile_2014 to nobody,apache;
 
 CREATE AGGREGATE array_accum (anyelement)
 (
@@ -244,6 +247,16 @@ create index warnings_2011_idx
 
 grant select on warnings_2011 to apache;
 
+CREATE TABLE warnings_2014() inherits (warnings);
+CREATE INDEX warnings_2014_combo_idx on 
+	warnings_2014(wfo, phenomena, eventid, significance);
+CREATE INDEX warnings_2014_expire_idx on warnings_2014(expire);
+CREATE INDEX warnings_2014_gtype_idx on warnings_2014(gtype);
+CREATE INDEX warnings_2014_issue_idx on warnings_2014(issue);
+CREATE INDEX warnings_2014_ugc_idx on warnings_2014(ugc);
+CREATE INDEX warnings_2014_wfo_idx on warnings_2014(wfo);
+
+
 ---
 --- Storm Based Warnings Geo Tables
 ---
@@ -279,7 +292,14 @@ grant select on sbw_2010 to apache;
 
 CREATE table sbw_2011() inherits (sbw);
 create index sbw_2011_idx on sbw_2011(wfo,eventid,significance,phenomena);
-grant select on sbw_2011 to apache;
+grant select on sbw_2011 to apache,nobody;
+
+CREATE table sbw_2014() inherits (sbw);
+create index sbw_2014_idx on sbw_2014(wfo,eventid,significance,phenomena);
+create index sbw_2014_expire_idx on sbw_2014(expire);
+create index sbw_2014_issue_idx on sbw_2014(issue);
+create index sbw_2014_wfo_idx on sbw_2014(wfo);
+grant select on sbw_2014 to apache,nobody;
 
 
 ---
@@ -301,17 +321,14 @@ select addgeometrycolumn('','lsrs','geom',4326,'POINT',2);
 
 grant select on lsrs to apache;
 
-CREATE table lsrs_2010() inherits (lsrs);
-grant select on lsrs_2010 to apache;
-CREATE INDEX lsrs_2010_bogus_idx ON lsrs USING btree (oid);
-CREATE INDEX lsrs_2010_valid_idx ON lsrs USING btree (valid);
-CREATE INDEX lsrs_2010_wfo_idx ON lsrs USING btree (wfo);
-
-CREATE table lsrs_2011() inherits (lsrs);
-grant select on lsrs_2011 to apache;
-CREATE INDEX lsrs_2011_bogus_idx ON lsrs USING btree (oid);
-CREATE INDEX lsrs_2011_valid_idx ON lsrs USING btree (valid);
-CREATE INDEX lsrs_2011_wfo_idx ON lsrs USING btree (wfo);
+create table lsrs_2014( 
+  CONSTRAINT __lsrs_2014_check 
+  CHECK(valid >= '2014-01-01 00:00+00'::timestamptz 
+        and valid < '2015-01-01 00:00+00')) 
+  INHERITS (lsrs);
+CREATE INDEX lsrs_2014_valid_idx on lsrs_2014(valid);
+CREATE INDEX lsrs_2014_wfo_idx on lsrs_2014(wfo);
+GRANT SELECT on lsrs_2014 to nobody,apache;
 
 
 
@@ -370,26 +387,6 @@ CREATE TABLE sigmets_archive(
 SELECT AddGeometryColumn('sigmets_archive', 'geom', 4326, 'MULTIPOLYGON', 2);
 GRANT SELECT on sigmets_archive to nobody,apache;
 
----
---- Local Storm Reports
----
-CREATE TABLE lsrs(
- valid timestamp with time zone,
- type char(1),
- magnitude real,
- city varchar(32),
- county varchar(32),
- state char(2),
- source varchar(32),
- remark text,
- wfo char(3),
- typetext varchar(40)
-);
-SELECT AddGeometryColumn('lsrs', 'geom', 4326, 'POINT', 2);
-GRANT SELECT on lsrs to nobody,apache;
-
-CREATE TABLE lsrs_2011() inherits (lsrs);
-GRANT SELECT on lsrs_2011 to nobody,apache;
 
 ---
 --- NEXRAD N0R Composites 
@@ -525,6 +522,16 @@ CREATE TABLE nexrad_attributes_log(
  );
 SELECT addGeometryColumn('', 'nexrad_attributes_log', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on nexrad_attributes to apache,nobody;
+
+CREATE TABLE nexrad_attributes_2014() inherits (nexrad_attributes_log);
+GRANT SELECT on nexrad_attributes_2014 to nobody,apache;
+CREATE INDEX nexrad_attributes_2014_nexrad_idx 
+	on nexrad_attributes_2014(nexrad);
+CREATE INDEX nexrad_attributes_2014_valid_idx 
+	on nexrad_attributes_2014(valid);
+alter table nexrad_attributes_2014 add constraint 
+	__nexrad_attributes_2014__constraint CHECK 
+	(valid >= '2014-01-01 00:00+00' and valid < '2015-01-01 00:00+00');
 
 --- nexrad_attributes_2004
 CREATE TABLE nexrad_attributes_2004() inherits (nexrad_attributes_log);

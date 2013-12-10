@@ -9,7 +9,15 @@ CREATE TABLE model_gridpoint (
     precipcon real,
     precip real
 );
-CREATE TABLE model_gridpoint_2012 () INHERITS (model_gridpoint);
+
+create table model_gridpoint_2014( 
+  CONSTRAINT __model_gridpoint_2014_check 
+  CHECK(runtime >= '2014-01-01 00:00+00'::timestamptz 
+        and runtime < '2015-01-01 00:00+00')) 
+  INHERITS (model_gridpoint);
+CREATE INDEX model_gridpoint_2014_idx 
+	on model_gridpoint_2014(station, model, runtime);
+GRANT SELECT on model_gridpoint_2014 to nobody,apache;
 
 ---
 --- Not sure why, just something to hold a curiousity of large MOS differences
@@ -51,5 +59,12 @@ CREATE TABLE alldata(
 );
 GRANT SELECT on alldata to nobody,apache;
 
-CREATE TABLE t2011() inherits (alldata);
-GRANT SELECT on t2011 to nobody,apache;
+
+create table t2014( 
+  CONSTRAINT __t2014_check 
+  CHECK(runtime >= '2014-01-01 00:00+00'::timestamptz 
+        and runtime < '2015-01-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2014_idx on t2014(station, model, runtime);
+CREATE INDEX t2014_runtime_idx on t2014(runtime);
+GRANT SELECT on t2014 to nobody,apache;
