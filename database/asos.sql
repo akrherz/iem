@@ -72,3 +72,24 @@ CREATE TABLE alldata(
 );
 
 CREATE TABLE t2012 () inherits (alldata);
+
+---
+---
+---
+create table t2014( 
+  CONSTRAINT __t2014_check 
+  CHECK(valid >= '2014-01-01 00:00+00'::timestamptz 
+        and valid < '2015-01-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2014_station_idx on t2014(station);
+CREATE INDEX t2014_valid_idx on t2014(valid);
+GRANT SELECT on t2014 to nobody,apache;
+
+create table t2014_1minute( 
+  CONSTRAINT __t2014_1minute_check 
+  CHECK(valid >= '2014-01-01 00:00+00'::timestamptz 
+        and valid < '2015-01-01 00:00+00')) 
+  INHERITS (alldata_1minute);
+CREATE INDEX t2014_1minte_station_idx on t2014_1minute(station);
+CREATE INDEX t2014_1minute_valid_idx on t2014_1minute(valid);
+GRANT SELECT on t2014_1minute to nobody,apache;

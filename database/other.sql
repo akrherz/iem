@@ -106,6 +106,19 @@ CREATE TABLE alldata (
     c1tmpf real
 );
 
-CREATE TABLE t2012 (
-)
-INHERITS (alldata);
+create table t2014( 
+  CONSTRAINT __t2014_check 
+  CHECK(valid >= '2014-01-01 00:00+00'::timestamptz 
+        and valid < '2015-01-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2014_idx on t2014(station, valid);
+GRANT SELECT on t2014 to nobody,apache;
+
+create table flux2014( 
+  CONSTRAINT __flux2014_check 
+  CHECK(valid >= '2014-01-01 00:00+00'::timestamptz 
+        and valid < '2015-01-01 00:00+00')) 
+  INHERITS (flux_data);
+CREATE INDEX flux2014_idx on flux2014(station, valid);
+GRANT SELECT on flux2014 to nobody,apache;
+

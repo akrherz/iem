@@ -227,6 +227,50 @@ CREATE TABLE summary (
 
 CREATE TABLE summary_2011() inherits (summary);
 
+---
+---
+create table hourly_2014( 
+  CONSTRAINT __hourly_2014_check 
+  CHECK(valid >= '2014-01-01 00:00+00'::timestamptz 
+        and valid < '2015-01-01 00:00+00')) 
+  INHERITS (hourly);
+CREATE INDEX hourly_2014_idx on hourly_2014(station, network, valid);
+CREATE INDEX hourly_2014_valid_idx on hourly_2014(valid);
+GRANT SELECT on hourly_2014 to nobody,apache;
+CREATE RULE replace_hourly_2014 as 
+    ON INSERT TO hourly_2014
+   WHERE (EXISTS ( SELECT 1
+           FROM hourly_2014
+          WHERE hourly_2014.station::text = new.station::text 
+          AND hourly_2014.network::text = new.network::text 
+          AND hourly_2014.valid = new.valid)) DO INSTEAD  
+         UPDATE hourly_2014 SET phour = new.phour
+  WHERE hourly_2014.station::text = new.station::text AND 
+  hourly_2014.network::text = new.network::text AND 
+  hourly_2014.valid = new.valid;
+
+CREATE RULE replace_hourly_2013 as 
+    ON INSERT TO hourly_2013
+   WHERE (EXISTS ( SELECT 1
+           FROM hourly_2013
+          WHERE hourly_2013.station::text = new.station::text 
+          AND hourly_2013.network::text = new.network::text 
+          AND hourly_2013.valid = new.valid)) DO INSTEAD  
+         UPDATE hourly_2013 SET phour = new.phour
+  WHERE hourly_2013.station::text = new.station::text AND 
+  hourly_2013.network::text = new.network::text AND 
+  hourly_2013.valid = new.valid;
+---
+---
+create table summary_2014( 
+  CONSTRAINT __summary_2014_check 
+  CHECK(day >= '2014-01-01 00:00+00'::timestamptz 
+        and day < '2015-01-01 00:00+00')) 
+  INHERITS (summary);
+CREATE INDEX summary_2014_day_idx on summary_2014(day);
+CREATE INDEX summary_2014_iemid_day_idx on summary_2014(iemid, day);
+GRANT SELECT on summary_2014 to nobody,apache;
+
 CREATE TABLE trend_15m(
 	iemid int REFERENCES stations(iemid),
 	updated timestamp with time zone,
