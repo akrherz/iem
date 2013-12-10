@@ -20,7 +20,7 @@ $o = Array(
   "monthhilo" => Array("name" => "Month High/Low Plot", "uri" => "plot.php?prod=1&"),
   "monthrain" => Array("name" => "Month Rainfall Plot", "uri" => "plot.php?prod=2&"),
   "obhistory" => Array("name" => "Observation History", "uri" => "obhistory.php?",
-	"azos" => True),
+	"azos" => True, "rwis" => True),
   "windrose" => Array("name" => "Wind Roses", "uri" => "windrose.phtml?"),
   "custom_windrose" => Array("name" => "Custom Wind Roses", "uri" => "dyn_windrose.phtml?"),
   "calendar" => Array("name" => "Data Calendar", "uri" => "hist.phtml?"),
@@ -28,7 +28,8 @@ $o = Array(
 
 while (list($key,$val) = each($o))
 {
-	if (array_key_exists("azos", $val) &&  preg_match('/ASOS|AWOS/', $network) <= 0){
+	if ((array_key_exists("azos", $val) &&  preg_match('/ASOS|AWOS/', $network) <= 0) &&
+		(array_key_exists("rwis", $val) &&  preg_match('/RWIS/', $network) <= 0)){
 		continue;
 	}
   	$uri = sprintf("%sstation=%s&network=%s", $val["uri"], $station, $network);

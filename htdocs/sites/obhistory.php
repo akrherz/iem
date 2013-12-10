@@ -69,11 +69,20 @@ if ($date >= $iemarchive){
 	valid  >= $3 and valid  < $4 
 	ORDER by valid DESC");
 } else {
-	$db = "asos";
-	$sql = sprintf("SELECT *, mslp as pres, metar as raw, p01i as phour
-	from t$year where 
-	station = $1  and valid  >= $3 and valid  < $4 
-	and $2 = $2 ORDER by valid DESC");
+	if (preg_match("RWIS", $network)){
+		$db = "rwis";
+		$sql = sprintf("SELECT *, null as pres, null as raw, null as phour
+		from t$year where 
+		station = $1  and valid  >= $3 and valid  < $4 
+		and $2 = $2 ORDER by valid DESC");
+	} else {
+		$db = "asos";
+		$sql = sprintf("SELECT *, mslp as pres, metar as raw, p01i as phour
+				from t$year where
+				station = $1  and valid  >= $3 and valid  < $4
+				and $2 = $2 ORDER by valid DESC");
+		
+	}
 }
 $dbconn = iemdb($db);
 pg_query($dbconn, "SET TIME ZONE '". $metadata["tzname"] ."'");
