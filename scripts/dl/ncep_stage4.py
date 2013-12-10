@@ -24,7 +24,7 @@ def download( now ):
                                 "data/nccf/com/hourly/prod/"+
                                 "nam_pcpn_anal.%Y%m%d/ST4.%Y%m%d%H"), hr)
         try:
-            data = urllib2.urlopen( url ).read()
+            data = urllib2.urlopen( url , timeout=60).read()
         except Exception, exp:
             if hr < 6:
                 print "NCEP stage ST4 dl fail HR: %s TIME: %s %s [%s]" % (hr, 
@@ -52,7 +52,7 @@ def download( now ):
                                 "pub/data/nccf/com/hourly/prod/"+
                                 "nam_pcpn_anal.%Y%m%d/ST2ml%Y%m%d%H"), hr)
         try:
-            data = urllib2.urlopen( url ).read()
+            data = urllib2.urlopen( url , timeout=60).read()
         except Exception, exp:
             if hr < 6:
                 print "NCEP stage 2ml dl fail HR: %s TIME: %s %s [%s]" % (hr, 
