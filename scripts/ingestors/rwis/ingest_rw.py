@@ -43,6 +43,7 @@ def process( nwsli , lastts ):
     myuri = "%s&sdate=%s&edate=%s&mac=%s" % (URI, today.strftime("%Y-%m-%d"),
                                              today.strftime("%Y-%m-%d"),
                                              assoc[nwsli])
+    #print nwsli, myuri
     try:
         data = urllib2.urlopen(myuri)
     except Exception, exp:
@@ -59,24 +60,31 @@ def process( nwsli , lastts ):
     #dtype=object)
 
     conv = {
-            'tmpf': 'tia',
-            'max_tmpf': 'tdh',
-            'min_tmpf': 'tdl',
+            'tmpf': 'tmpf',
+            'max_tmpf': 'max_tmpf',
+            'min_tmpf': 'min_tmpf',
             'relh': 'ria',
-            'pres': 'bia',
+            'pres': 'pres',
             'sknt': 'sknt',
             'drct': 'dia',
             'gust': 'gust', # fix units
             'max_gust': 'max_gust', # fix units
-            'pday': 'rds',
-            'dwpf': 'dewpoint',
-            'tsf0': 't1ia',
-            'tsf1': 't2ia', 
+            'pday': 'pday',
+            'dwpf': 'dwpf',
+            'tsf0': 'tsf0',
+            'tsf1': 'tsf1', 
             }
-
-    df['sknt'] = df['wia'] / 1.15
-    df['gust'] = df['wih'] / 1.15
-    df['max_gust'] = df['wdh'] / 1.15
+    df['dwpf'] = df['dewpoint'] / 10.0
+    df['tmpf'] = df['tia'] / 10.0
+    df['max_tmpf'] = df['tdh'] / 10.0
+    df['min_tmpf'] = df['tdl'] / 10.0
+    df['tsf0'] = df['t1ia'] / 10.0
+    df['tsf1'] = df['t2ia'] / 10.0
+    df['sknt'] = df['wia'] / 10.15 # x10
+    df['gust'] = df['wih'] / 10.15
+    df['pres'] = df['bia'] / 100.0
+    df['pday'] = df['rds'] / 100.0
+    df['max_gust'] = df['wdh'] / 10.15
 
     sdf = df.sort(['utc'], ascending=[True])
 
