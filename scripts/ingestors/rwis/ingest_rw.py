@@ -69,7 +69,6 @@ def process( nwsli , lastts ):
             'drct': 'dia',
             'gust': 'gust', # fix units
             'max_gust': 'max_gust', # fix units
-            'pday': 'pday',
             'dwpf': 'dwpf',
             'tsf0': 'tsf0',
             'tsf1': 'tsf1', 
@@ -83,7 +82,6 @@ def process( nwsli , lastts ):
     df['sknt'] = df['wia'] / 10.15 # x10
     df['gust'] = df['wih'] / 10.15
     df['pres'] = df['bia'] / 100.0
-    df['pday'] = df['rds'] / 100.0
     df['max_gust'] = df['wdh'] / 10.15
 
     sdf = df.sort(['utc'], ascending=[True])
