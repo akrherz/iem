@@ -3,9 +3,9 @@
  * Download COOP observations from the QC'd table
  */
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
 $connection = iemdb("coop");
-include("$rootpath/include/mlib.php");
+include("../../../include/mlib.php");
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
@@ -21,7 +21,7 @@ $sample = isset($_GET["sample"]) ? $_GET["sample"]: "1min";
 $what = isset($_GET["what"]) ? $_GET["what"]: 'dl';
 
 
-include("$rootpath/include/network.php");
+include("../../../include/network.php");
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 include("adodb-time.inc.php");
@@ -118,6 +118,59 @@ if (in_array('daycent', $vars)){
 		$row["doy"], f2c($row["high"]), f2c($row["low"]), $row["precip"] * 25.4);
 	}
 	
+}
+else if (in_array('century', $vars)){
+	/*
+	 * Century format  (precip cm, avg high C, avg low C)
+prec  1980   2.60   6.40   0.90   1.00   0.70   0.00   2.10   1.60   4.60   3.20   5.70   5.90
+tmin  1980  14.66  12.10   7.33  -0.89  -5.45  -7.29 -11.65  -9.12  -7.03  -0.62   5.02  11.18
+tmax  1980  33.24  30.50  27.00  18.37  11.35   9.90   0.39   3.93   6.77  14.92  19.77  28.85
+prec  1981  12.00   7.20   0.60   4.90   1.10   0.30   0.70   0.30   4.50   5.10  11.50   4.10
+tmin  1981  14.32  12.48   8.17   0.92  -3.25  -8.90  -9.47  -9.84  -4.10   2.90   4.84  10.87
+tmax  1981  30.84  28.71  27.02  16.84  12.88   6.82   8.21   7.70  11.90  20.02  18.31  27.98
+	 */
+	$response = "";
+	if (sizeof($stations) > 1) {
+		die("Sorry, only one station request at a time for century option");
+	}
+	if ($selectAll) {
+		die("Sorry, only one station request at a time for century option");
+	}
+	$table = sprintf("alldata_%s", substr($stations[0],0,2));
+	pg_prepare($connection, "TBD", "SELECT year, month, avg(high) as avgh, ".
+			" avg(low) as avgl, sum(precip) as p".
+			" from $table WHERE station IN ". $stationString ." and ".
+			" year >= $1 and year <= $2 GROUP by year, month");
+	$rs = pg_execute($connection, 'TBD', Array($year1, $year2));
+	$monthly = Array();
+	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+		$key = sprintf("%s%02d", $row["year"], $row["month"]);
+		$monthly[$key] = Array(
+			"tmax" => f2c($row["avgh"]),
+			"tmin" => f2c($row["avgl"]),
+			"prec" => $row["p"] * 2.54, // cm
+		);
+	}
+	$idxs = Array("prec", "tmin", "tmax");
+	for ($y=$year1;$y<=$year2;$y++){
+		reset($idxs);
+		while( list($key,$val)= each($idxs)){
+			$response .= sprintf("%s  %s%7.2f%7.2f%7.2f%7.2f%7.2f%7.2f%7.2f".
+					"%7.2f%7.2f%7.2f%7.2f%7.2f\n", $val, $y,
+					$monthly["${y}01"][$val], $monthly["${y}02"][$val],
+					$monthly["${y}03"][$val], $monthly["${y}04"][$val],
+					$monthly["${y}05"][$val], $monthly["${y}06"][$val],
+					$monthly["${y}07"][$val], $monthly["${y}08"][$val],
+					$monthly["${y}09"][$val], $monthly["${y}10"][$val],
+					$monthly["${y}11"][$val], $monthly["${y}12"][$val]
+			);
+		}
+	}
+	/* Write back to the luser */
+	header("Content-type: application/octet-stream");
+	header(sprintf("Content-Disposition: attachment; filename=%s.wth", 
+			$stations[0]));
+	die($response);
 }
 else if (in_array('apsim', $vars)){
 	/*
