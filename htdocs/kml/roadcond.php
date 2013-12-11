@@ -37,6 +37,7 @@ $sql = "SELECT ST_askml(ST_Simplify(simple_geom,100)) as kml,
 
 $rs = pg_query($conn, $sql);
 
+// holy cow, colors are ABGR ! :(
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://www.opengis.net/kml/2.2\">
@@ -46,64 +47,63 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
    <Icon>
        <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=Roads:%20". urlencode($valid) ."</href>
    </Icon>
-   <description>WaterWatch Legend</description>
    <overlayXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
    <screenXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
    <size x=\"0\" y=\"0\" xunits=\"pixels\" yunits=\"pixels\"/>
   </ScreenOverlay>
 <Style id=\"code0\">
-  <LineStyle><width>${linewidth}</width><color>ffffffff</color></LineStyle>
+  <LineStyle><color>ffffffff</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code1\">
-  <LineStyle><width>${linewidth}</width><color>ff00CC00</color></LineStyle>
+  <LineStyle><color>ff00CC00</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code3\">
-  <LineStyle><width>${linewidth}</width><color>fff0f000</color></LineStyle>
+  <LineStyle><color>ff00f0f0</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code7\">
-  <LineStyle><width>${linewidth}</width><color>fff0f000</color></LineStyle>
+  <LineStyle><color>ff00f0f0</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code11\">
-  <LineStyle><width>${linewidth}</width><color>fff0f000</color></LineStyle>
+  <LineStyle><color>ff00f0f0</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code15\">
-  <LineStyle><width>${linewidth}</width><color>ffffc5c5</color></LineStyle>
+  <LineStyle><color>ffc5c5ff</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code19\">
-  <LineStyle><width>${linewidth}</width><color>fffe3299</color></LineStyle>
+  <LineStyle><color>ff9932fe</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code23\">
-  <LineStyle><width>${linewidth}</width><color>ffb500b5</color></LineStyle>
+  <LineStyle><color>ffb500b5</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code27\">
-  <LineStyle><width>${linewidth}</width><color>ffffc5c5</color></LineStyle>
+  <LineStyle><color>ffc5c5ff</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code31\">
-  <LineStyle><width>${linewidth}</width><color>fffe3399</color></LineStyle>
+  <LineStyle><color>ff9933fe</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code35\">
-  <LineStyle><width>${linewidth}</width><color>ffb500b5</color></LineStyle>
+  <LineStyle><color>ffb500b5</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code39\">
-  <LineStyle><width>${linewidth}</width><color>ffdcdcdc</color></LineStyle>
+  <LineStyle><color>ffdcdcdc</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code43\">
-  <LineStyle><width>${linewidth}</width><color>ff0099fe</color></LineStyle>
+  <LineStyle><color>fffe9900</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code47\">
-  <LineStyle><width>${linewidth}</width><color>ff00009E</color></LineStyle>
+  <LineStyle><color>ff9E0000</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code51\">
-  <LineStyle><width>${linewidth}</width><color>ffe85f01</color></LineStyle>
+  <LineStyle><color>ff015ffe</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code56\">
-  <LineStyle><width>${linewidth}</width><color>ffffc5c5</color></LineStyle>
+  <LineStyle><color>ffc5c5ff</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code60\">
-  <LineStyle><width>${linewidth}</width><color>fffe3399</color></LineStyle>
+  <LineStyle><color>ff9933fe</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code86\">
-  <LineStyle><width>${linewidth2}</width><color>ffff0000</color></LineStyle>
+  <LineStyle><color>ff0000ff</color><width>${linewidth}</width></LineStyle>
 </Style>
 ";
 
