@@ -42,15 +42,7 @@ $rs = pg_query($conn, $sql);
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <kml xmlns=\"http://www.opengis.net/kml/2.2\">
  <Document>
- <ScreenOverlay id=\"legend_bar\">
-   <visibility>1</visibility>
-   <Icon>
-       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=Roads:%20". urlencode($valid) ."</href>
-   </Icon>
-   <overlayXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
-   <screenXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
-   <size x=\"0\" y=\"0\" xunits=\"pixels\" yunits=\"pixels\"/>
-  </ScreenOverlay>
+
 <Style id=\"code0\">
   <LineStyle><color>ffffffff</color><width>${linewidth}</width></LineStyle>
 </Style>
@@ -105,6 +97,15 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <Style id=\"code86\">
   <LineStyle><color>ff0000ff</color><width>${linewidth}</width></LineStyle>
 </Style>
+ <ScreenOverlay id=\"legend_bar\">
+   <visibility>1</visibility>
+   <Icon>
+       <href>http://mesonet.agron.iastate.edu/kml/timestamp.php?label=Roads:%20". urlencode($valid) ."</href>
+   </Icon>
+   <overlayXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
+   <screenXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>
+   <size x=\"0\" y=\"0\" xunits=\"pixels\" yunits=\"pixels\"/>
+  </ScreenOverlay>
 ";
 
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
