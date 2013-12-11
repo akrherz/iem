@@ -85,7 +85,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
   <LineStyle><color>ffb500b5</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code39\">
-  <LineStyle><color>ffdcdcdc</color><width>${linewidth}</width></LineStyle>
+  <LineStyle><color>ffffffdc</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code43\">
   <LineStyle><color>fffe9900</color><width>${linewidth}</width></LineStyle>
