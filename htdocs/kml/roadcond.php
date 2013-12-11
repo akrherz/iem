@@ -129,6 +129,6 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 echo "</Document>
 </kml>";
 
-echo $memcache->set("/kml/roadcond.php", ob_get_contents(), false, 300);
+$memcache->set("/kml/roadcond.php", ob_get_contents(), false, 300);
 ob_end_flush();
 ?>
