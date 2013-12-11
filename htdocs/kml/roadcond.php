@@ -1,6 +1,21 @@
 <?php
+/*
+ * Generate KML of the road conditions
+ */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+header("Content-Type: application/vnd.google-earth.kml+xml");
+
+// Try to get it from memcached
+$memcache = new Memcache;
+$memcache->connect('iem-memcached', 11211);
+$val = $memcache->get("/kml/roadcond.php");
+if ($val){
+	die($val);
+}
+// Need to buffer the output so that we can save it to memcached later
+ob_start();
+
+include("../../include/database.inc.php");
 $conn = iemdb("postgis");
 
 $linewidth = isset($_REQUEST['linewidth']) ? intval($_REQUEST["linewidth"]): 3;
@@ -16,15 +31,15 @@ $valid = strftime("%I:%M %p on %d %b %Y", $ts);
 $tbl = "roads_current";
 if (isset($_GET["test"])){ $tbl = "roads_current_test"; }
 
-$sql = "SELECT ST_askml(simple_geom) as kml,
+$sql = "SELECT ST_askml(ST_Simplify(simple_geom,100)) as kml,
       * from $tbl r, roads_base b, roads_conditions c WHERE
   r.segid = b.segid and r.cond_code = c.code";
 
 $rs = pg_query($conn, $sql);
 
-header("Content-Type: application/vnd.google-earth.kml+xml");
+
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<kml xmlns=\"http://earth.google.com/kml/2.2\">
+<kml xmlns=\"http://www.opengis.net/kml/2.2\">
  <Document>
  <ScreenOverlay id=\"legend_bar\">
    <visibility>1</visibility>
@@ -114,5 +129,6 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 echo "</Document>
 </kml>";
 
-
+echo $memcache->set("/kml/roadcond.php", ob_get_contents(), false, 300);
+ob_end_flush();
 ?>
