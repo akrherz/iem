@@ -69,7 +69,7 @@ if ($date >= $iemarchive){
 	valid  >= $3 and valid  < $4 
 	ORDER by valid DESC");
 } else {
-	if (preg_match("RWIS", $network)){
+	if (preg_match("/RWIS/", $network)){
 		$db = "rwis";
 		$sql = sprintf("SELECT *, null as pres, null as raw, null as phour
 		from t$year where 
