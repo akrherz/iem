@@ -114,6 +114,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 
 
   echo "<Placemark>
+<name>$major $minor</name>
     <description>
         <![CDATA[
   <p><font color=\"red\"><i>Road:</i> $major :: $minor</font>
@@ -121,8 +122,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
    </p>
         ]]>
     </description>
-    <styleUrl>#code".$row["cond_code"] ."</styleUrl>
-    <name>$major $minor</name>\n";
+    <styleUrl>#code".$row["cond_code"] ."</styleUrl>";
   echo $row["kml"];
   echo "</Placemark>";
 }
