@@ -18,6 +18,7 @@ $skycover = Array(
  2 => "BROKEN",
  4 => "OVERCAST",
  8 => "OBSCURATION",
+ 16 => "UNKNOWN",
  17 => "OBSCURATION",
  18 => "OBSCURATION",
  20 => "OBSCURATION",
