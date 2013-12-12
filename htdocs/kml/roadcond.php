@@ -3,12 +3,14 @@
  * Generate KML of the road conditions
  */
 include("../../config/settings.inc.php");
+$linewidth = isset($_REQUEST['linewidth']) ? intval($_REQUEST["linewidth"]): 3;
+
 header("Content-Type: application/vnd.google-earth.kml+xml");
 
 // Try to get it from memcached
 $memcache = new Memcache;
 $memcache->connect('iem-memcached', 11211);
-$val = $memcache->get("/kml/roadcond.php");
+$val = $memcache->get("/kml/roadcond.php|$linewidth");
 if ($val){
 	die($val);
 }
@@ -18,7 +20,6 @@ ob_start();
 include("../../include/database.inc.php");
 $conn = iemdb("postgis");
 
-$linewidth = isset($_REQUEST['linewidth']) ? intval($_REQUEST["linewidth"]): 3;
 $linewidth2 = $linewidth + 2;
 $sql = "SELECT max(valid) as valid from roads_current";
 $rs = pg_query($conn, $sql);
@@ -44,7 +45,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <Document>
 
 <Style id=\"code0\">
-  <LineStyle><color>ffffffff</color><width>${linewidth}</width></LineStyle>
+  <LineStyle><color>ff000000</color><width>${linewidth}</width></LineStyle>
 </Style>
 <Style id=\"code1\">
   <LineStyle><color>ff00CC00</color><width>${linewidth}</width></LineStyle>
@@ -130,6 +131,6 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 echo "</Document>
 </kml>";
 
-$memcache->set("/kml/roadcond.php", ob_get_contents(), false, 300);
+$memcache->set("/kml/roadcond.php|$linewidth", ob_get_contents(), false, 300);
 ob_end_flush();
 ?>
