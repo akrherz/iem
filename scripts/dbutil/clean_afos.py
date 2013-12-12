@@ -1,26 +1,21 @@
 """
  Clean up the AFOS database
+    called from RUN_2AM.sh
 """
 
-import iemdb, mx.DateTime
-AFOS = iemdb.connect('afos')
+import psycopg2
+AFOS = psycopg2.connect(database='afos', host='iemdb')
 acursor = AFOS.cursor()
 
-now = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=7)
-table = "products_%s_" % (now.year,)
-if now.month > 6:
-  table += "0712"
-else:
-  table += "0106"
-
-table = "products"
-
-sql = """
- delete from %s WHERE 
-   date(entered) < ('YESTERDAY'::date - '7 days'::interval) and
-   (pil ~* '^(RR[1-9SA]|ROB|TAF|MAV|MET|MTR|MEX|RWR|STO|HML)' 
-    or pil in ('HPTNCF', 'WTSNCF','WRKTTU','TSTNCF', 'HD3RSA')
-   )""" % (table,)
-acursor.execute( sql )
+acursor.execute("""
+ delete from products WHERE 
+   entered < ('YESTERDAY'::date - '7 days'::interval) and
+   entered > ('YESTERDAY'::date - '31 days'::interval) and 
+   (
+    pil ~* '^(RR[1-9SA]|ROB|TAF|MAV|MET|MTR|MEX|RWR|STO|HML)' 
+ or pil in ('HPTNCF', 'WTSNCF','WRKTTU','TSTNCF', 'HD3RSA')
+   )""")
+if acursor.rowcount == 0:
+    print 'clean_afos.py found no products older than 7 days?'
 acursor.close()
 AFOS.commit()

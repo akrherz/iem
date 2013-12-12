@@ -1,28 +1,32 @@
 """
 Copy RWIS data from iem database to its final resting home in 'rwis'
+
+The RWIS data is partitioned by UTC timestamp
+
+Run at 0Z and 12Z, provided with a timestamp to process
 """
 
-import iemdb
+import psycopg2
 import psycopg2.extras
-import mx.DateTime, sys, traceback
+import datetime 
+import pytz
+import sys
 
-IEMDB = iemdb.connect("iem")
-RWISDB = iemdb.connect("rwis")
+IEMDB = psycopg2.connect(database="iem", host='iemdb')
+RWISDB = psycopg2.connect(database="rwis", host='iemdb')
 
-# Figure out what date of data we are interested in
-if (len(sys.argv) > 1):
-  ts = mx.DateTime.now()
-else:
-  ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
-
-# Delete any obs from yesterday
+ts = datetime.datetime( int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+ts = ts.replace(hour=0, second=0, minute=0, microsecond=0,
+                tzinfo=pytz.timezone("UTC"))
+ts2 = ts + datetime.timedelta(hours=24)
 rcursor = RWISDB.cursor()
-rcursor.execute("""DELETE from t%s WHERE date(valid) = '%s'""" % (ts.year, 
-       ts.strftime("%Y-%m-%d") ))
-rcursor.execute("""DELETE from t%s_soil WHERE date(valid) = '%s'""" % (ts.year, 
-       ts.strftime("%Y-%m-%d") ))
-rcursor.execute("""DELETE from t%s_traffic WHERE date(valid) = '%s'""" % (
-       ts.year, ts.strftime("%Y-%m-%d") ))
+# Remove previous entries for this UTC date
+rcursor.execute("""DELETE from t%s WHERE valid >= '%s'
+    and valid < '%s'""" % (ts.year, ts, ts2 ))
+rcursor.execute("""DELETE from t%s_soil WHERE valid >= '%s'
+    and valid < '%s'""" % (ts.year, ts, ts2 ))
+rcursor.execute("""DELETE from t%s_traffic WHERE valid >= '%s'
+    and valid < '%s'""" % (ts.year, ts, ts2 ))
 rcursor.close()
 
 # Always delete stuff 3 or more days old from iemaccess
@@ -37,8 +41,11 @@ icursor.close()
 icursor = IEMDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
 icursor.execute(""" SELECT l.nwsli as station, s.lane_id, d.* from 
    rwis_traffic_data_log d, rwis_locations l, rwis_traffic_sensors s
-   WHERE s.id = d.sensor_id and date(valid) = '%s' and s.location_id = l.id""" % ( ts.strftime("%Y-%m-%d"), ))
+   WHERE s.id = d.sensor_id and valid >= '%s' and valid < '%s'
+   and s.location_id = l.id""" % ( ts, ts2))
 rows = icursor.fetchall()
+if len(rows) == 0:
+    print 'No RWIS traffic found between %s and %s' % (ts, ts2)
 icursor.close()
 
 # Write to archive
@@ -71,11 +78,13 @@ sql = """SELECT l.nwsli as station, d.valid,
      max(case when sensor_id = 13 then temp else null end) as s13temp,
      max(case when sensor_id = 14 then temp else null end) as s14temp
      from rwis_soil_data_log d, rwis_locations l
-     WHERE date(valid) = '%s' and d.location_id = l.id 
+     WHERE valid >= '%s' and valid < '%s' and d.location_id = l.id 
      GROUP by station, valid""" % (
-      ts.strftime("%Y-%m-%d"), )
+      ts, ts2 )
 icursor.execute( sql )
 rows = icursor.fetchall()
+if len(rows) == 0:
+    print 'No RWIS soil obs found between %s and %s' % (ts, ts2)
 icursor.close()
 
 # Write to RWIS Archive
@@ -95,11 +104,13 @@ rcursor.close()
 
 # Get regular obs from Access
 icursor = IEMDB.cursor(cursor_factory=psycopg2.extras.DictCursor)
-sql = """SELECT c.*, t.id as station from current_log c, stations t WHERE date(valid) = '%s' 
-      and t.network ~* 'RWIS' and t.iemid = c.iemid""" % (
-      ts.strftime("%Y-%m-%d"), )
+sql = """SELECT c.*, t.id as station from current_log c, stations t 
+    WHERE valid >= '%s' and valid < '%s' 
+      and t.network ~* 'RWIS' and t.iemid = c.iemid""" % (ts, ts2)
 icursor.execute( sql )
 rows = icursor.fetchall()
+if len(rows) == 0:
+    print 'No RWIS obs found between %s and %s' % (ts, ts2)
 icursor.close()
 
 # Write to RWIS Archive
