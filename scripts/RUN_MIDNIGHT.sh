@@ -11,8 +11,7 @@ python adjust_snet_precip.py
 python check_hilo.py
 
 cd ../dbutil
-./save_snet_raw.csh
-python rwis2archive.py
+sh save_snet_raw.csh
 python asos2archive.py
 
 cd ../smos
@@ -32,7 +31,6 @@ cd ../iemre
 python merge_mrms_q3.py
 
 cd ../dbutil 
-python ot2archive.py
 python hads_delete_dups.py
 
 if [ $DD -eq "28" ]
