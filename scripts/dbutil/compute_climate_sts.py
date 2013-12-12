@@ -4,6 +4,8 @@
 import psycopg2
 import network
 import sys
+import pytz
+import datetime
 asos = psycopg2.connect(database='coop', host='iemdb')
 acursor = asos.cursor()
 mesosite = psycopg2.connect(database='mesosite', host='iemdb')
@@ -17,14 +19,16 @@ acursor.execute("""SELECT station, min(day) from alldata_%s GROUP by station
   ORDER by min ASC""" % (net[:2]))
 for row in acursor:
     station = row[0]
+    ts = datetime.datetime(row[1].year, row[1].month, row[1].day)
+    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     if not nt.sts.has_key(station):
         continue
-    if nt.sts[station]['archive_begin'] != row[1]:
+    if nt.sts[station]['archive_begin'] != ts:
         print 'Updated %s STS WAS: %s NOW: %s' % (station, 
-                    nt.sts[station]['archive_begin'], row[1])
+                    nt.sts[station]['archive_begin'], ts)
   
     mcursor.execute("""UPDATE stations SET archive_begin = %s 
-         WHERE id = %s and network = %s""" , (row[1], station, net) )
+         WHERE id = %s and network = %s""" , (ts, station, net) )
   
 mcursor.close()
 mesosite.commit()
