@@ -1,3 +1,25 @@
+CREATE TABLE alldata(
+  station varchar(6),
+  valid timestamptz,
+  tmpf real,
+  dwpf real,
+  drct smallint,
+  sknt real,
+  tfs0 real,
+  tfs1 real,
+  tfs2 real,
+  tfs3 real,
+  subf real,
+  gust real,
+  tfs0_text varchar(20),
+  tfs1_text varchar(20),
+  tfs2_text varchar(20),
+  tfs3_text varchar(20),
+  pcpn real,
+  vsby real
+);
+GRANT SELECT on alldata to nobody,apache;
+
 CREATE TABLE alldata_traffic(
   station char(5),
   valid timestamp with time zone,
@@ -35,6 +57,15 @@ CREATE TABLE alldata_soil(
 GRANT select on alldata_soil to nobody,apache;
 CREATE TABLE t2010_soil() inherits (alldata_soil);
 GRANT select on t2010_soil to nobody,apache;
+
+create table t2013( 
+  CONSTRAINT __t2013_check 
+  CHECK(valid >= '2013-01-01 00:00+00'::timestamptz 
+        and valid < '2014-01-01 00:00+00')) 
+  INHERITS (alldata);
+CREATE INDEX t2013_station_idx on t2013(station);
+CREATE INDEX t2013_valid_idx on t2013(valid);
+GRANT SELECT on t2013 to nobody,apache;
 
 create table t2014( 
   CONSTRAINT __t2014_check 
