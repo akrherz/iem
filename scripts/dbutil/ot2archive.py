@@ -20,13 +20,13 @@ ts = ts.replace(hour=0, second=0, minute=0, microsecond=0,
 ts2 = ts + datetime.timedelta(hours=24)
 
 # Delete any obs from yesterday
-sql = "DELETE from t%s WHERE valid >= '%s' or valid < '%s'" % (ts.year, 
+sql = "DELETE from t%s WHERE valid >= '%s' and valid < '%s'" % (ts.year, 
       ts, ts2 )
 ocursor.execute(sql)
 
 # Get obs from Access
 sql = """SELECT c.*, t.id from current_log c JOIN stations t on 
-    (t.iemid = c.iemid) WHERE valid >= '%s' or valid < '%s'  
+    (t.iemid = c.iemid) WHERE valid >= '%s' and valid < '%s'  
     and t.network = 'OT'""" % (ts, ts2 )
 icursor.execute( sql )
 
