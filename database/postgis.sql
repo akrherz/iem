@@ -255,7 +255,7 @@ CREATE INDEX warnings_2014_gtype_idx on warnings_2014(gtype);
 CREATE INDEX warnings_2014_issue_idx on warnings_2014(issue);
 CREATE INDEX warnings_2014_ugc_idx on warnings_2014(ugc);
 CREATE INDEX warnings_2014_wfo_idx on warnings_2014(wfo);
-
+grant select on warnings_2014 to nobody,apache;
 
 ---
 --- Storm Based Warnings Geo Tables
