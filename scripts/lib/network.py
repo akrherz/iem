@@ -1,6 +1,6 @@
 # Class to hold metadata about a network
 
-import iemdb
+import psycopg2
 import psycopg2.extras
 
 class Table(object):
@@ -11,7 +11,7 @@ class Table(object):
         """
         self.sts = {}
         
-        dbconn = iemdb.connect('mesosite', bypass=True)
+        dbconn = psycopg2.connect(database='mesosite', host='iemdb')
         cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         if type(network) == type("A"):
             network = [network,]
