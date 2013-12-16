@@ -1,5 +1,5 @@
-import iemdb
-ASOS = iemdb.connect('asos', bypass=True)
+import psycopg2
+ASOS = psycopg2.connect(database="asos", host='iemdb')
 acursor = ASOS.cursor()
 
 acursor.execute("""SELECT valid, precip from alldata_1minute WHERE station = 'DSM' 

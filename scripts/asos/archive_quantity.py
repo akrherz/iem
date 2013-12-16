@@ -6,8 +6,8 @@ counts = numpy.zeros((120,12))
 mslp = numpy.zeros((120,12))
 metar = numpy.zeros((120,12))
 
-import iemdb
-ASOS = iemdb.connect('asos', bypass=True)
+import psycopg2
+ASOS = psycopg2.connect(database='asos', host='iemdb', user='nobody')
 acursor = ASOS.cursor()
 
 import sys
