@@ -31,6 +31,7 @@ def workflow():
     valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"),microsecond=0)
     
     data = json.loads( urllib2.urlopen(URI, timeout=30).read() )
+    newplows = {}
     for feat in data.get('features', []):
         logdt = feat['attributes']['LOGDT']
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
@@ -38,9 +39,10 @@ def workflow():
                               hour=ts.hour,minute=ts.minute,second=ts.second)
         label = feat['attributes']['LABEL']
 
-        if current.get(label, None) is None:
+        if current.get(label, None) is None and not newplows.has_key(label):
             #print 'New IDOT Snowplow #%s "%s" Valid: %s' % (len(current)+1,
             #                                                label, valid)
+            newplows[label] = 1
             cursor.execute("""INSERT into idot_snowplow_current(label, valid)
             VALUES (%s,%s)""", (label, valid))
         if current.get(label, None) is None or current[label] < valid:
