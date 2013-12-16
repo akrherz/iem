@@ -1,7 +1,11 @@
+'''
+ Reprocess RAW METAR data stored in the database, so to include more fields
+'''
 from metar import Metar
-import iemdb, mx.DateTime
+import psycopg2
+import mx.DateTime
 
-IEM = iemdb.connect("asos", bypass=True)
+IEM = psycopg2.connect(database="asos", host='iemdb')
 icursor = IEM.cursor()
 icursor.execute("SET TIME ZONE 'GMT'")
 icursor2 = IEM.cursor()
