@@ -25,6 +25,8 @@ query = gdata.docs.client.DocsQuery(show_collections='false',
 feed = docs_client.GetAllResources(query=query)
 
 for entry in feed:
+    if entry.get_resource_type() != 'spreadsheet':
+        continue
     spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
     spreadsheet.get_worksheets()
     worksheet = spreadsheet.worksheets[YEAR]
@@ -32,6 +34,8 @@ for entry in feed:
     siteid = spreadsheet.title.split()[0]
     for col in range(1, worksheet.cols+1):
         val = worksheet.get_cell_value(1, col)
+        if val is None:
+            continue
         if val.find("PlotID") == 0:
             plotidcol = col
         if val.find("AGR") != 0:
@@ -42,9 +46,6 @@ for entry in feed:
             if plotid is None:
                 continue
             val = worksheet.get_cell_value(row, col)
-            if val is not None and val.lower() in ['.', 'did not collect', 
-                                                   'n/a']:
-                val = None
             try:
                 pcursor.execute("""
                     DELETE from agronomic_data WHERE site = %s and 
