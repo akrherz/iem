@@ -117,6 +117,8 @@ STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
                           hourly='Newell/Newell_HrlySI.dat'),
             'AEEI4': dict(daily='Ames/Ames_DailySI.dat',
                           hourly='Ames/Ames_HrlySI.dat'),
+            'CRFI4': dict(daily='Crawfordsville/Crawfordsville_DailySI.dat',
+                          hourly='Crawfordsville/Crawfordsville_HrlySI.dat'),
             }
 
 def hourly_process(nwsli, maxts):
