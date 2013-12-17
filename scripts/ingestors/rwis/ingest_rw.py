@@ -48,6 +48,7 @@ def process( nwsli , lastts ):
         data = urllib2.urlopen(myuri)
     except Exception, exp:
         print nwsli, exp
+        return
 
     df = pandas.DataFrame.from_csv(data)
     #Index([u'utc', u'mac', u'serial', u'tia', u'til', u'tih', u'tdl', 
