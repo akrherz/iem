@@ -7,7 +7,7 @@ import cgi
 DBCONN = psycopg2.connect(database='sustainablecorn', host='iemdb')
 cursor = DBCONN.cursor()
 
-def get_data():
+def get_data(year):
     ''' Do stuff '''
     data = {' ALL': {} }
     dvars = []
@@ -22,7 +22,7 @@ def get_data():
     -- We have a null
     sum(case when value is null then 1 else 0 end),
     count(*) from agronomic_data
-    WHERE year =2011 GROUP by site, varname""")
+    WHERE year = %s GROUP by site, varname""", (year,))
     for row in cursor:
         if row[1] not in dvars:
             dvars.append( row[1] )
@@ -70,8 +70,9 @@ if __name__ == '__main__':
     sys.stdout.write('Content-type: text/html\n\n')
     
     form = cgi.FieldStorage()
+    year = int(form.getfirst('year', 2011))
     
-    data, dvars = get_data()
+    data, dvars = get_data(year)
     dvars.sort()
     sites = data.keys()
     sites.sort()
@@ -95,7 +96,17 @@ if __name__ == '__main__':
  }
     </style>
     <form method="GET" name='theform'>
+    
+    Select Year; <select name="year">
     """)
+    for yr in range(2011,2016):
+        checked = ''
+        if year == yr:
+            checked = " selected='selected'"
+        sys.stdout.write("""<option value="%s" %s>%s</option>\n""" % (yr, 
+                                                            checked, yr))
+    
+    sys.stdout.write("</select><br />")
     
     ids = form.getlist('ids')
     if len(ids) > 0:
@@ -105,11 +116,16 @@ if __name__ == '__main__':
         if "AGR%s" % (i,) in ids:
             checked = "checked='checked'"
         sys.stdout.write("""<input type='checkbox' name='ids' 
-        value='AGR%s'%s>AGR%s</input>""" % (i, checked, i))
+        value='AGR%s'%s>AGR%s</input> &nbsp; """ % (i, checked, i))
     
     sys.stdout.write("""
-    <input type="submit">
+    <input type="submit" value="Generate Table">
     </form>
+    <span>Key:</span>
+    <span class="btn btn-success">has data</span>
+    <span class="btn btn-info">periods</span>
+    <span class="btn btn-warning">n/a DNC empty</span>
+    <span class="btn btn-danger">no entry</span>
     <table class='table table-striped table-bordered'>
     
     """)
