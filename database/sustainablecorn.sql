@@ -69,3 +69,4 @@ CREATE TRIGGER agronomic_insert_before_T
   
 CREATE UNIQUE index agronomic_data_idx on 
 	agronomic_data(site, plotid, varname, year);
+GRANT SELECT on agronomic_data to nobody,apache;
