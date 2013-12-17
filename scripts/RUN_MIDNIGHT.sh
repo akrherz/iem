@@ -11,7 +11,7 @@ python adjust_snet_precip.py
 python check_hilo.py
 
 cd ../dbutil
-sh save_snet_raw.csh
+sh save_snet_raw.sh
 python asos2archive.py
 
 cd ../smos
