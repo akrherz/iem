@@ -1,5 +1,5 @@
-#AddHandler cgi-script .py
-#Options +ExecCGI
+AddHandler cgi-script .py
+Options +ExecCGI
 
 #AuthUserFile /mesonet/www/apps/iemwebsite/config/admin.users
 #AuthGroupFile /dev/null
