@@ -37,9 +37,11 @@ docs_client = util.get_docs_client(config)
 changestamp = int(config.get('memory', 'changestamp'))
 
 html = """
-<h3>CSCAP Documents/Spreadsheet Changes</h3>
+<h3>CSCAP Cloud Data Changes</h3>
 <br />
 <p>Period: 7 AM %s - 7 AM %s
+
+<h4>Sustainablecorn Google Drive File Changes</h4>
 
 <p><table border="1" cellpadding="3" cellspacing="0">
 <thead>
@@ -89,8 +91,29 @@ while 1:
     if count == 0 or loopcount == 10:
         break
 
+html += """</tbody></table>"""
+
 config.set('memory', 'changestamp', changestamp +1)
 config.write( open('mytokens.cfg', 'w'))
+
+html += """
+<h4>Sustainablecorn Internal Website Changes</h4>
+<table border="1" cellpadding="3" cellspacing="0"><thead><tr><th>Time</th><th>Activity</th></tr></thead>"""
+
+s = util.get_sites_client(config)
+feed = s.get_activity_feed()
+for entry in feed.entry:
+    ts = datetime.datetime.strptime(entry.updated.text, '%Y-%m-%dT%H:%M:%S.%fZ')
+    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    if ts < yesterday:
+        continue
+    updated = ts.astimezone(pytz.timezone("America/Chicago"))
+    elem = entry.summary.html
+    elem.namespace = ''
+    elem.children[0].namespace = ''
+    html += "<tr><td>%s</td><td>%s %s</td></tr>\n" % (
+            updated.strftime("%-d %b %-I:%M %P"), 
+            elem.text, str(elem.children[0]))
 
 html += """</tbody></table><p>That is all...""" 
 msg = MIMEMultipart('alternative')
@@ -100,12 +123,12 @@ msg['To'] = ','.join(EMAILS)
 
 
 # Create the body of the message (a plain-text and an HTML version).
-text = "See html variant"
+#text = "See html variant"
 # Record the MIME types of both parts - text/plain and text/html.
-part1 = MIMEText(text, 'plain')
+#part1 = MIMEText(text, 'plain')
 part2 = MIMEText(html, 'html')
 
-msg.attach(part1)
+#msg.attach(part1)
 msg.attach(part2)
 
 s = smtplib.SMTP('mailhub.iastate.edu')
