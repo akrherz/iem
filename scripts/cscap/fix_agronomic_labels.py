@@ -1,16 +1,14 @@
 """
-Rip and replace
+ Go thru the agronomic data sheets and replace the description label found on
+ row 2 with a new value
 """
-
-import gdata.spreadsheets.client
-import gdata.spreadsheets.data
-import gdata.docs.data
 import gdata.docs.client
-import gdata.gauth
-import re
 import ConfigParser
-import sys
+
 import util
+
+VARID = 'agr2' # lowercase
+NEWVAL = '[2] Soybean final plant population'
 
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
@@ -19,20 +17,27 @@ config.read('mytokens.cfg')
 spr_client = util.get_spreadsheet_client(config)
 docs_client = util.get_docs_client(config)
 
-query = gdata.docs.client.DocsQuery(show_collections='true', title='Agronomic Data')
+query = gdata.docs.client.DocsQuery(show_collections='true', 
+                                    title='Agronomic Data')
 feed = docs_client.GetAllResources(query=query)
 
 for entry in feed:
+    if entry.get_resource_type() != 'spreadsheet':
+        continue
     feed2 = spr_client.GetWorksheets(entry.id.text.split("/")[-1][14:])
     for entry2 in feed2.entry:
         worksheet = entry2.id.text.split("/")[-1]
         print 'Processing %s WRK: %s Title: %s' % (entry.title.text, 
                                                    worksheet, entry2.title.text),
-        feed3 = spr_client.get_list_feed(entry.id.text.split("/")[-1][14:], worksheet)
+        feed3 = spr_client.get_list_feed(entry.id.text.split("/")[-1][14:], 
+                                         worksheet)
+        if len(feed3.entry) == 0:
+            print 'Skipping as there is no data?!?'
+            continue
         row = feed3.entry[0]
         data = row.to_dict()
-        if data.get('agr7', None) is not None:
-            row.set_value('agr7', '[7] Cover crop (rye) biomass at termination (spring) (no significant weeds)')
+        if data.get(VARID, None) is not None:
+            row.set_value(VARID, NEWVAL)
             spr_client.update(row)
             print ' ... updated'
         else:
