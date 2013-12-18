@@ -1,4 +1,8 @@
-import os, network
+'''
+ Generate images used for state brochures
+'''
+import os
+import network
 nt = network.Table(("IACLIMATE", "MNCLIMATE", "NDCLIMATE", "SDCLIMATE",
  "NECLIMATE", "KSCLIMATE", "MOCLIMATE", "KYCLIMATE", "ILCLIMATE", "WICLIMATE",
  "INCLIMATE", "OHCLIMATE", "MICLIMATE"))
@@ -9,18 +13,20 @@ PLOTS = ['summer_avg_high', 'winter_avg_low', 'summer_avg_low', 'winter_avg_low'
 PLOTS = ['summer_avg_high','summer_avg_low']
 #PLOTS = ['rain_days',]
 for plot_type in PLOTS:
-  for station in nt.sts.keys():
-    #if station[2:] != '0000' and station[2] != 'C':
-    if station != 'IA0000':
-        continue
-    first_year = 1951
-    #if station[:3] in ['IAC',]:
-    #    first_year = 1951
-    #else:
-    #    continue
-    for format in ['eps', 'png']:
-      fn = 'plots/%s_%s.%s' % (station, plot_type, format)
-      url = 'http://iem.local/cgi-bin/climate/cplot.py?first_year=%s&station=%s&plot_type=%s&format=%s&linregress=on' % (
-                                first_year, station, plot_type, format)
-      cmd = 'wget -q -O %s "%s"' % (fn, url)
-      os.system(cmd)
+    for station in nt.sts.keys():
+        #if station[2:] != '0000' and station[2] != 'C':
+        if station != 'IA0000':
+            continue
+    
+        first_year = 1951
+        #if station[:3] in ['IAC',]:
+        #    first_year = 1951
+        #else:
+        #    continue
+        for fmt in ['eps', 'png']:
+            fn = 'plots/%s_%s.%s' % (station, plot_type, fmt)
+            url = ('http://iem.local/cgi-bin/climate/cplot.py?first_year'
+                   +'=%s&station=%s&plot_type=%s&format=%s&linregress=on') % (
+                                first_year, station, plot_type, fmt)
+            cmd = 'wget -q -O %s "%s"' % (fn, url)
+            os.system(cmd)

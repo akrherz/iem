@@ -51,14 +51,18 @@ html = """
 """ % (yesterday.strftime("%-d %B %Y"), today.strftime("%-d %B %Y"))
 
 loopcount = 0
+tablerows = []
 while 1:
     loopcount += 1
-    #print '%s Get Feed changestamp: %s' % (loopcount, changestamp)
+    #print 'looping [%s] changestamp [%s]' % (loopcount, changestamp)
     feed = docs_client.get_changes(expand_acl=True, changestamp=changestamp)
     count = 0
     for entry in feed.entry:
         #edited = entry.get_elements('edited')
         count += 1
+        changestamp = max(int(entry.changestamp.value) +1, changestamp)
+        #print '    this changestamp: %s  max: %s' % (entry.changestamp.value,
+        #                                             changestamp)
         link = entry.get_html_link()
         rtype = entry.get_resource_type()
         rtype = rtype_xref.get(rtype, rtype)
@@ -74,7 +78,6 @@ while 1:
         updated = datetime.datetime.strptime(entry.updated.text[:19], 
                                              '%Y-%m-%dT%H:%M:%S')
         updated = updated.replace(tzinfo=pytz.timezone("UTC"))
-        changestamp = max(int(entry.changestamp.value) +1, changestamp)
         if updated < yesterday:
             #print '%s %s updated: %s' % (title, rtype, entry.updated.text)
             continue
@@ -82,15 +85,21 @@ while 1:
         author = "N/A"
         if entry.last_modified_by:
             author = entry.last_modified_by.email.text
-        html += "<tr><td>%s</td><td>%s</td><td>%s</td><td><a href=\"%s\">%s</a></td></tr>\n" % (
+        tablerows.append( "<tr><td>%s</td><td>%s</td><td>%s</td><td><a href=\"%s\">%s</a></td></tr>\n" % (
             updated.strftime("%-d %b %-I:%M %P"), author, rtype, uri, 
-            title.encode('ascii', 'ignore'))
+            title.encode('ascii', 'ignore')))
         #if entry.filename:
         #    print entry.filename.text
         #print entry.changestamp.value
     if count == 0 or loopcount == 10:
+        if loopcount == 10:
+            print '=================> LOOPCOUNT HIT 10!'
         break
 
+if len(tablerows) == 0:
+    tablerows.append("<tr><td colspan='4'>No Changes Found</td></tr>")
+
+html += "".join(tablerows)
 html += """</tbody></table>"""
 
 config.set('memory', 'changestamp', changestamp +1)
@@ -102,22 +111,28 @@ html += """
 
 s = util.get_sites_client(config)
 feed = s.get_activity_feed()
+tablerows = []
 for entry in feed.entry:
     ts = datetime.datetime.strptime(entry.updated.text, '%Y-%m-%dT%H:%M:%S.%fZ')
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    #print 'Sites ts: %s' % (ts,)
     if ts < yesterday:
         continue
     updated = ts.astimezone(pytz.timezone("America/Chicago"))
     elem = entry.summary.html
     elem.namespace = ''
     elem.children[0].namespace = ''
-    html += "<tr><td>%s</td><td>%s %s</td></tr>\n" % (
+    tablerows.append( "<tr><td>%s</td><td>%s %s</td></tr>\n" % (
             updated.strftime("%-d %b %-I:%M %P"), 
-            elem.text, str(elem.children[0]))
+            elem.text, str(elem.children[0])))
 
+if len(tablerows) == 0:
+    tablerows.append("<tr><td colspan='2'>No Changes Found</td></tr>")
+
+html += "".join(tablerows)
 html += """</tbody></table><p>That is all...""" 
 msg = MIMEMultipart('alternative')
-msg['Subject'] = "CSCAP Data ChangeLog"
+msg['Subject'] = "%s CSCAP Data ChangeLog" % (yesterday.strftime("%-d %b"),)
 msg['From'] = 'mesonet@mesonet.agron.iastate.edu'
 msg['To'] = ','.join(EMAILS)
 

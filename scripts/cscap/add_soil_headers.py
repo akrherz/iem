@@ -1,16 +1,11 @@
 """
-Rip and replace
+Modify headers on soil texture sheets
 """
 
 import gdata.spreadsheets.client
-import gdata.spreadsheets.data
-import gdata.docs.data
 import gdata.docs.client
 import gdata.gauth
-import re
 import ConfigParser
-import sys
-import util
 
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')

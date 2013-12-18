@@ -6,11 +6,7 @@ import gdata.spreadsheets.data
 import gdata.docs.data
 import gdata.docs.client
 import gdata.gauth
-import re
 import ConfigParser
-import sys
-import util
-import copy
 
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')

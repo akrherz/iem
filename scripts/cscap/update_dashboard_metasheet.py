@@ -1,7 +1,9 @@
+'''
+ Only update row 5 of the data dashboard
+'''
 import util
 import ConfigParser
 import gdata.spreadsheets.client
-import gdata.docs.client
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
 
