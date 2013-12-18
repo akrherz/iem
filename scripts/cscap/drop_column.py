@@ -1,3 +1,6 @@
+'''
+ Remove a column from all Agronomic Sheets!
+'''
 import util
 import gdata.docs.client
 import ConfigParser

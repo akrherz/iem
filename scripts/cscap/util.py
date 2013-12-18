@@ -156,6 +156,15 @@ class Spreadsheet(object):
                                                             self.spr_client,
                                                              entry )
 
+def get_xref_plotids(spr_client, config):
+    ''' Build the xreference of siteID to plotid spreadsheet keys '''
+    feed = spr_client.get_list_feed(config.get('cscap', 'metamaster'), 'od6')
+    data = {}
+    for entry in feed.entry:
+        d = entry.to_dict()
+        data[ d['uniqueid'] ] = d['keyspread']
+    return data
+
 def get_docs_client(config):
     """ Return an authorized docs client """
     token = gdata.gauth.OAuth2Token(client_id=config.get('appauth','client_id'),
