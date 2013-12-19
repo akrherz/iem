@@ -1,7 +1,8 @@
 <?php 
-  include("../../../../config/settings.inc.php");
+/* Front End to generate plots for a given day */
+include("../../../../config/settings.inc.php");
 define("IEM_APPID", 50);
-  include("$rootpath/include/forms.php");
+include("../../../../include/forms.php");
   $pvar = isset($_GET["pvar"]) ? $_GET["pvar"]: "c11,c12";
   $ar = explode(",", $pvar);
   $_GET["var"] = $pvar;
@@ -9,119 +10,80 @@ define("IEM_APPID", 50);
    $_GET["var"] = $ar[0];
    $_GET["var2"] = $ar[1];
   }
-  $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400 - (7 * 3600) );
-  $month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 86400 - (7 * 3600) );
-  $day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 86400 - (7 * 3600) );
+  $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time() - 86400 - (7 * 3600) );
+  $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m", time() - 86400 - (7 * 3600) );
+  $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d", time() - 86400 - (7 * 3600) );
   $date = $year ."-". $month ."-". $day;
   $ts = mktime(0,0,0, $month, $day, $year);
-
-  $THISPAGE = "networks-agclimate";
-  $TITLE = "IEM | ISUAG Daily Data Plots";
-  include("$rootpath/include/header.php"); 
-?>
+  $network = isset($_REQUEST["network"]) ? strtoupper($_REQUEST["network"]): 'AUTO';
   
-<h3 class="heading">ISU AgClimate Daily Data Plots</h3>
+  $networkopts = Array("AUTO", "ISUAG", "ISUSM");
+  if (! in_array($network, $networkopts)){
+  	die("Invalid network!");
+  }
+  $networkform = '<select name="network">';
+  while( list($key,$val)=each($networkopts)){
+  	$networkform .= sprintf("<option value='%s'%s>%s</option>", $val,
+  			($val == $network)? " SELECTED='SELECTED'": "", $val);
+  }
+  $networkform .= "</select>";
+  
+  
+ $imgurl = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s&network=%s", $pvar, $year,
+	$month, $day, $network);
+  
+  $varDef = Array("c11" => "High Air Temperatures",
+  		"c12" => "Low Air Temperatures [F]",
+  		"c11,c12" => "High and Low Air Temperatures [F]",
+  		"c30" => "Avg 4in Soil Temperatures [F]",
+  		"c40" => "Avg Wind Velocity [MPH]",
+  		"c509" => "Peak 1 Minute Gust [MPH]",
+  		"c529,c530" => "Peak 5 Second Gust [MPH] and Time",
+  		"c90" => "Total Precipitation [inch]",
+  		"c20" => "Avg Relative Humidity",
+  		"c80" => "Solar Radiation [Langleys]",
+  		"c70" => "Evapotranspiration [inch]",
+  		"c300h,c300l" => "High and Low 4in Soil Temps [F]"
+  );
+  
+  $selectform = '<select name="pvar">';
+  while( list($key,$val)=each($varDef)){
+  	$selectform .= sprintf("<option value='%s'%s>%s</option>", $key, 
+  			($key == $pvar)? " SELECTED='SELECTED'": "", $val);
+  }
+  $selectform .= "</select>";
+  
 
-This page will plot a daily value of a variable of your choice.  If you 
-want to plot an accumulated value, check out the <a href="gsplot.phtml">Growing Season Plots</a>.
+include("../../../../include/myview.php");
+$t = new MyView();
+$t->thispage = "networks-agclimate";
+$t->title = "ISUAG Daily Data Plots";
+$ys = yearSelect(1986, $year);
+$ms = monthSelect($month); 
+$ds = daySelect($day);
+$t->content = <<<EOF
+<h3 class="page-heading">ISU AgClimate Daily Data Plots</h3>
+
+<p>This page will generate a plot for a variable and date of your choice.  If you 
+want to plot an accumulated value, check out the 
+<a href="gsplot.phtml">Growing Season Plots</a>.
 
 <p>
   <form method="GET" action="dayplot.phtml">
   <table>
-    <tr><th>Plot Variable:</th><th>Year:</th><th>Month:</th><th>Day:</th><td></td></tr>
+    <tr><th>Network:</th><th>Plot Variable:</th><th>Year:</th><th>Month:</th><th>Day:</th><td></td></tr>
     <tr>
-  <td>
-<select name="pvar">
-  <option value="c11,c12" <?php if($pvar == "c11,c12") echo "SELECTED"; ?>>High & Low Air Temp</option>
-  <option value="c30" <?php if($pvar == "c30") echo "SELECTED"; ?>>Average 4 inch Soil Temp</option>
-  <option value="c300" <?php if($pvar == "c300") echo "SELECTED"; ?>>High & Low Soil Temp</option>
-  <option value="c70" <?php if($pvar == "c70") echo "SELECTED"; ?>>Potential Evapotranspiration</option>
-  <option value="c40" <?php if($pvar == "c40") echo "SELECTED"; ?>>Average Wind Speed</option>
-  <option value="c529,c530" <?php if($pvar == "c529,c530") echo "SELECTED"; ?>>Five Second Wind Gust</option>
-  <option value="c90" <?php if($pvar == "c90") echo "SELECTED"; ?>>Rainfall</option>
-  <option value="c80" <?php if($pvar == "c80") echo "SELECTED"; ?>>Solar Radiation</option>
-  <option value="dwpf" <?php if($pvar == "dwpf") echo "SELECTED"; ?>>High & Low Dew Points</option>
-  <option value="chill" <?php if($pvar == "chill") echo "SELECTED"; ?>>Standard Chill Units</option>
-</select>
-  </td>
-      <td><?php echo yearSelect(1986, $year); ?></td>
-      <td><?php echo monthSelect($month); ?></td>
-      <td><?php echo daySelect($day); ?></td>
+  <td>{$networkform}</td>
+  <td>${selectform}</td>
+      <td>{$ys}</td>
+      <td>{$ms}</td>
+      <td>{$ds}</td>
       <td><input type="submit" value="Make Plot"></td>
     </tr>
   </table>
    </form>
 <p>
-<?php 
-if ($pvar == "chill") {
-  include("chill.php");
-} else {
-  include('plot.php'); 
-}
+<img src="{$imgurl}" class="image-responsive" />
+EOF;
+$t->render('single.phtml');
 ?>
-
-<h3 class="subtitle"> Data Listing</h3>
-<img src="<?php echo $rooturl; ?>/images/gisready.png">
-
-<p><pre>
-<?php
-$varDef = Array("c11" => "High Air Temperatures",
-  "c12" => "Low Air Temperatures [F]",
-  "c11,c12" => "High and Low Air Temperatures [F]",
-  "c30" => "Avg 4in Soil Temperatures [F]",
-  "c40" => "Avg Wind Velocity [MPH]",
-  "c509" => "Peak 1 Minute Gust [MPH]",
-  "c529,c530" => "Peak 5 Second Gust [MPH] and Time",
-  "c930" => "Total Precipitation [inch]",
-  "c90" => "Total Precipitation [inch]",
-  "c20" => "Avg Relative Humidity",
-  "c80" => "Solar Radiation [Langleys]",
-  "c70" => "Evapotranspiration [inch]",
-  "c300" => "High and Low 4in Soil Temps [F]",
-  "dwpf" => "Max and Min Dew Points [F]",
-  "chill" => "Standard Chill Unit"
-);
-
-$cols = Array("c11" => "hi_tmp_f",
-  "c12" => "lo_tmp_f",
-  "c11,c12" => "hi_tmp_f  , lo_tmp_f",
-  "c30" => "soil_t_f",
-  "c40" => "wnd_mph",
-  "c509" => "gst1_mph",
-  "c529,c530" => "gst5_mph  , gst5_tim",
-  "c930" => "rain_in",
-  "c90" => "rain_in",
-  "c20" => "relh_%",
-  "c80" => "srad_lan",
-  "c70" => "et_in",
-  "c300" => "hi_s_tmp  , lo_s_tmp",
-  "dwpf" => "hi_dwp_f  ,lo_dwp_f  ",
-  "chill" => "chill_hr  ,chill_av");
-
- $ndate = strftime("%b %d, %Y", $ts);
- $tr  = "# ".$ndate." ". $varDef[$pvar] ."\n";
- $tr .= "# Iowa Environmental Mesonet - ISU Ag Climate Network\n";
- $tr .= "# -----------------------snip------------------\n";
- $tr .= sprintf("%20s,%10s,%10s,%10s\n", 'StationName', 'Latitude', 'Longitude', $cols[$pvar]);
-
- foreach($data as $key => $value){
-   if ($key == "A133259") continue;
-   if (isset($data[$key]['var2']) ){
-     $tr .= sprintf("%20s,%.4f,%.4f,%10s,%10s\n", $ISUAGcities[$key]['name'],
-  $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], $data[$key]['var'],
-  $data[$key]['var2'] );
-   } else {
-     $tr .= sprintf("%20s,%.4f,%.4f,%10s\n", $ISUAGcities[$key]['name'],
-  $ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], $data[$key]['var'] );
-   }
-
- }
- echo $tr;
-?>
-</pre>
-<p>You should be able to 'copy & paste' this raw data listing into a simple
-text editor and save the data file on your machine.  Most GIS systems can 
-then import this dataset as a layer.  You may have to omit the commented lines
-(#) if your GIS has trouble importing the data.
-
-<?php include("$rootpath/include/footer.php"); ?>
