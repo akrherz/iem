@@ -30,7 +30,7 @@ if ($mode == "monthly"){
 		$sql = "SELECT high as max_tmpf, to_char(day, 'YYYYMMDD') as dvalid,
 				low as min_tmpf, precip as pday,
 				Null as max_tmpf_qc, Null as max_gust,
-				null as min_tmpf_qc from $table WHERE
+				null as min_tmpf_qc, snow from $table WHERE
 				month = $month and year = $year and
 				station = '".$station."' ORDER by day ASC";
 	} else {
@@ -52,7 +52,7 @@ if ($mode == "monthly"){
 		$sql = "SELECT high as max_tmpf, to_char(day, 'YYYYMMDD') as dvalid,
 			low as min_tmpf, precip as pday,
 			Null as max_tmpf_qc, Null as max_gust,
-			null as min_tmpf_qc, station as id from $table WHERE
+			null as min_tmpf_qc, station as id, snow from $table WHERE
 			day = '".$dateStr."' ORDER by $sortvar $sortorder";
 	} else {
 		$sql = "SELECT t.id, s.*, to_char(day, 'YYYYMMDD') as dvalid,
