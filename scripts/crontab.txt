@@ -64,7 +64,6 @@ S=/mesonet/www/apps/iemwebsite/scripts
 27 * * * * cd $S/cache; sh nesdis_satellite.sh 45
 57 * * * * cd $S/cache; sh nesdis_satellite.sh 15
 
-00,15,30,45 * * * * cd $S/GIS/SCRIPTS; ./RUN_RADAR
 03,13,24 * * * * cd $S/plots; ./HOURLY_PLOTS
 
 15 0,4,9,12,17,20 * * * cd /mesonet/www/apps/nwnwebsite/scripts; php -q driveFX.php
