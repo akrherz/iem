@@ -22,7 +22,7 @@ def get_data(year):
     -- We have a null
     sum(case when value is null then 1 else 0 end),
     count(*) from agronomic_data
-    WHERE year = %s GROUP by site, varname""", (year,))
+    WHERE year = %s and lower(value) != 'n/a' GROUP by site, varname""", (year,))
     for row in cursor:
         if row[1] not in dvars:
             dvars.append( row[1] )
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     <span>Key:</span>
     <span class="btn btn-success">has data</span>
     <span class="btn btn-info">periods</span>
-    <span class="btn btn-warning">n/a DNC empty</span>
+    <span class="btn btn-warning">DNC empty</span>
     <span class="btn btn-danger">no entry</span>
     <table class='table table-striped table-bordered'>
     
