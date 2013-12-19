@@ -1,4 +1,62 @@
 ---
+--- Store IDOT dashcam stuff
+---
+CREATE TABLE idot_dashcam_current(
+	label varchar(20) UNIQUE not null,
+	valid timestamptz,
+	idnum int
+);
+SELECT AddGeometryColumn('idot_dashcam_current', 'geom', 4326, 'POINT', 2);
+GRANT SELECT on idot_dashcam_current to nobody,apache;
+
+CREATE TABLE idot_dashcam_log(
+	label varchar(20) not null,
+	valid timestamptz,
+	idnum int
+);
+SELECT AddGeometryColumn('idot_dashcam_log', 'geom', 4326, 'POINT', 2);
+CREATE INDEX idot_dashcam_log_valid_idx on idot_dashcam_log(valid);
+CREATE INDEX idot_dashcam_log_label_idx on idot_dashcam_log(label);
+GRANT SELECT on idot_dashcam_current to nobody,apache;
+
+CREATE OR REPLACE FUNCTION idot_dashcam_insert_before_F()
+RETURNS TRIGGER
+ AS $BODY$
+DECLARE
+    result INTEGER; 
+BEGIN
+    result = (select count(*) from idot_dashcam_current
+                where label = new.label 
+               );
+
+	-- Label exists, update table
+    IF result = 1 THEN
+	    UPDATE idot_dashcam_current SET idnum = new.idnum, geom = new.geom,
+	    valid = new.valid WHERE label = new.label;
+    END IF;
+
+	-- Insert into log
+	INSERT into idot_dashcam_log(label, valid, idnum, geom) VALUES
+	(new.label, new.valid, new.idnum, new.geom);
+	
+	-- Stop insert from happening
+	IF result = 1 THEN
+		RETURN null;
+	END IF;
+	
+    -- Allow insert to happen
+    RETURN new;
+
+END; $BODY$
+LANGUAGE 'plpgsql' SECURITY DEFINER;
+
+CREATE TRIGGER idot_dashcam_current_insert_before_T
+   before insert
+   ON idot_dashcam_current
+   FOR EACH ROW
+   EXECUTE PROCEDURE idot_dashcam_insert_before_F();
+
+---
 --- Store DOT snowplow data
 ---
 CREATE TABLE idot_snowplow_current(
