@@ -9,6 +9,9 @@ python temperature.py
 python today_high.py
 python rwis_station.py
 
+cd ../ingestors
+python dot_truckcams.py &
+
 cd ../summary
 python updateRain.py
 
