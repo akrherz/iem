@@ -1,6 +1,0 @@
-#!/bin/csh
-# 	RUN_RADAR
-# Frontend SCRIPT to generate RADAR images for GIS apps
-
-
-./compPlot.csh
