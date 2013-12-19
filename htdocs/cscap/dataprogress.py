@@ -4,7 +4,7 @@
 import sys
 import psycopg2
 import cgi
-DBCONN = psycopg2.connect(database='sustainablecorn', host='iemdb')
+DBCONN = psycopg2.connect(database='sustainablecorn', host='iemdb', user='nobody')
 cursor = DBCONN.cursor()
 
 def get_data(year):
@@ -51,16 +51,16 @@ def make_progress(row):
     other = row['other'] / float(row['tot']) * 100.0
     nulls = row['nulls'] / float(row['tot']) * 100.0
     return """<div class="progress">
-  <div class="progress-bar progress-bar-success" style="width: %.0f%%">
+  <div class="progress-bar progress-bar-success" style="width: %.1f%%">
     <span>%s</span>
   </div>
-  <div class="progress-bar progress-bar-info" style="width: %.0f%%">
+  <div class="progress-bar progress-bar-info" style="width: %.1f%%">
     <span>%s</span>
   </div>
-  <div class="progress-bar progress-bar-warning" style="width: %.0f%%">
+  <div class="progress-bar progress-bar-warning" style="width: %.1f%%">
     <span>%s</span>
   </div>
-  <div class="progress-bar progress-bar-danger" style="width: %.0f%%">
+  <div class="progress-bar progress-bar-danger" style="width: %.1f%%">
     <span>%s</span>
   </div>
 </div>""" % (hits, row['hits'], dots, row['dots'], other, row['other'], 
