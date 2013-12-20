@@ -7,15 +7,15 @@ import os
 import subprocess
 import shutil
 import mx.DateTime
-import iemdb
+import psycopg2
 import psycopg2.extras
-POSTGIS = iemdb.connect('postgis', bypass=True)
+POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
 pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 svr_dict = {"N": "None", "0": "Aerial", "1": "Minor", "2": "Moderate", 
             "3": "Major", "U": "Unknown"}
 
-o = open('wxc_iemrivers.txt', 'w')
+o = open('/tmp/wxc_iemrivers.txt', 'w')
 o.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
   10
    5 Station
@@ -77,6 +77,7 @@ for row in pcursor:
 
 o.close()
 
-subprocess.call("/home/ldm/bin/pqinsert wxc_iemrivers.txt", shell=True)
-shutil.copyfile("wxc_iemrivers.txt", "/mesonet/share/pickup/wxc/wxc_iemrivers.txt")
-os.remove("wxc_iemrivers.txt")
+pqstr = "data c 000000000000 wxc/wxc_iemrivers.txt bogus text"
+cmd = "/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_iemrivers.txt" % (pqstr,)
+subprocess.call(cmd, shell=True)
+os.remove("/tmp/wxc_iemrivers.txt")

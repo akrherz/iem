@@ -23,7 +23,6 @@ php wxc_rwis.php
 php wxc_awos.php
 python madis2csv.py
 python wxc_azos_prec.py
-php spider.php
 python wxc_iarwis_traffic.py
 python wxc_iemstage.py IA
 python wxc_iemstage.py MN

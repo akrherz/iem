@@ -4,15 +4,12 @@
 
 import mx.DateTime
 import os
-import Ngl
-import numpy
-import shutil
 import subprocess
-import iemdb
+import psycopg2
 import psycopg2.extras
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor( cursor_factory=psycopg2.extras.DictCursor )
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor( cursor_factory=psycopg2.extras.DictCursor )
 import network
 nt = network.Table(("IA_ASOS", "AWOS"))
@@ -59,7 +56,7 @@ GROUP by s.id, lon, lat
     return data
 
 def main():
-    output = open('wxc_airport_precip.txt', 'w')
+    output = open('/tmp/wxc_airport_precip.txt', 'w')
     output.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
    6
    4 Station
@@ -70,14 +67,16 @@ def main():
    8 Lon
 """ % (mx.DateTime.gmt().strftime("%Y.%m.%d.%H%M"),))
     data = compute_obs()
-    for id in data.keys():
-        output.write("K%s %6.2f %6.2f %6.2f %6.3f %8.3f\n" % (id, 
-        data[id]['p01'], data[id]['p02'], data[id]['p03'],
-        data[id]['lat'], data[id]['lon'] ))
+    for sid in data.keys():
+        output.write("K%s %6.2f %6.2f %6.2f %6.3f %8.3f\n" % (sid, 
+        data[sid]['p01'], data[sid]['p02'], data[sid]['p03'],
+        data[sid]['lat'], data[sid]['lon'] ))
     output.close()
-    subprocess.call("/home/ldm/bin/pqinsert -p \"wxc_airport_precip.txt\" wxc_airport_precip.txt", shell=True)
-    shutil.copyfile("wxc_airport_precip.txt", "/mesonet/share/pickup/wxc/wxc_airport_precip.txt")
-    os.remove("wxc_airport_precip.txt")
+    
+    pqstr = "data c 000000000000 wxc/wxc_airport_precip.txt bogus text"
+    cmd = "/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_airport_precip.txt" % (pqstr,)
+    subprocess.call(cmd, shell=True)
+    os.remove("/tmp/wxc_airport_precip.txt")
 
 if __name__ == '__main__':
     main()

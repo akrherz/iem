@@ -1,16 +1,16 @@
 """
- Need something to generate a CSV file for harvey
+ Dump a CSV file of the MADIS data, kind of sad that I do this, but alas
 """
 
 import netCDF4
 import mx.DateTime
 import re
-import shutil
 import os
 import numpy.ma
 import sys
 import time
-import mesonet
+from pyiem.datatypes import temperature
+import subprocess
 import warnings
 # prevent core.py:931: RuntimeWarning: overflow encountered in multiply
 warnings.simplefilter("ignore", RuntimeWarning)
@@ -23,7 +23,12 @@ def sanityCheck(val, lower, upper, goodfmt, bv):
     return bv
 
 
-fmt = "STN,DATE,TIME,T,TD,WCI,RH,THI,DIR,SPD,GST,ALT,SLP,VIS,SKY,CEIL,CLD,SKY,CEIL,CLD,SKY,CEIL,CLD,SKY,CEIL,CLD,SKY,CEIL,CLD,SKY,CEIL,CLD,SKYSUM,PR6,PR24,WX,MINT6,MAXT6,MINT24,MAXT24,AUTO,PR1,PTMP1,PTMP2,PTMP3,PTMP4,SUBS1,SUBS2,SUBS3,SUBS4,"
+# Wow, why did I do it this way... better not change it as I bet the
+# other end is ignoring the headers...
+fmt = ("STN,DATE,TIME,T,TD,WCI,RH,THI,DIR,SPD,GST,ALT,SLP,VIS,SKY,CEIL,"
+       +"CLD,SKY,CEIL,CLD,SKY,CEIL,CLD,SKY,CEIL,CLD,SKY,CEIL,CLD,SKY,CEIL,"
+       +"CLD,SKYSUM,PR6,PR24,WX,MINT6,MAXT6,MINT24,MAXT24,AUTO,PR1,PTMP1,"
+       +"PTMP2,PTMP3,PTMP4,SUBS1,SUBS2,SUBS3,SUBS4,")
 format_tokens = fmt.split(",")
 
 gmt = mx.DateTime.gmt()
@@ -47,8 +52,8 @@ if nc is None:
     sys.exit(0)
 
 stations   = nc.variables["stationId"][:]
-tmpf        = mesonet.k2f(nc.variables["temperature"][:])
-dwpf = mesonet.k2f(nc.variables["dewpoint"][:])
+tmpf        = temperature(nc.variables["temperature"][:],'K').value('F')
+dwpf = temperature(nc.variables["dewpoint"][:],'K').value('F')
 drct = nc.variables["windDir"][:]
 smps = nc.variables["windSpeed"][:] * 1.94384449
 alti = nc.variables["altimeter"][:] * 29.9196 / 1013.2 # in hPa
@@ -58,14 +63,14 @@ lat        = nc.variables["latitude"][:]
 lon        = nc.variables["longitude"][:]
 ele        = nc.variables["elevation"][:]
 p01m       = nc.variables["precipAccum"][:] * 25.4
-ptmp1      = mesonet.k2f(nc.variables["roadTemperature1"][:])
-ptmp2      = mesonet.k2f(nc.variables["roadTemperature2"][:])
-ptmp3      = mesonet.k2f(nc.variables["roadTemperature3"][:])
-ptmp4      = mesonet.k2f(nc.variables["roadTemperature4"][:])
-subs1      = mesonet.k2f(nc.variables["roadSubsurfaceTemp1"][:])
-subs2      = mesonet.k2f(nc.variables["roadSubsurfaceTemp2"][:])
-subs3      = mesonet.k2f(nc.variables["roadSubsurfaceTemp3"][:])
-subs4      = mesonet.k2f(nc.variables["roadSubsurfaceTemp4"][:])
+ptmp1      = temperature(nc.variables["roadTemperature1"][:],'K').value('F')
+ptmp2      = temperature(nc.variables["roadTemperature2"][:],'K').value('F')
+ptmp3      = temperature(nc.variables["roadTemperature3"][:],'K').value('F')
+ptmp4      = temperature(nc.variables["roadTemperature4"][:],'K').value('F')
+subs1      = temperature(nc.variables["roadSubsurfaceTemp1"][:],'K').value('F')
+subs2      = temperature(nc.variables["roadSubsurfaceTemp2"][:],'K').value('F')
+subs3      = temperature(nc.variables["roadSubsurfaceTemp3"][:],'K').value('F')
+subs4      = temperature(nc.variables["roadSubsurfaceTemp4"][:],'K').value('F')
 times = nc.variables["observationTime"][:]
 
 db = {}
@@ -96,7 +101,7 @@ for recnum in range(len(stations)):
     'PTMP4': sanityCheck( ptmp4[recnum] ,-100, 150, '%.0f', '') ,
     }
 
-out = open('madis.csv', 'w')
+out = open('/tmp/madis.csv', 'w')
 out.write("%s\n" % (fmt,) )
 for stid in db.keys():
     for key in format_tokens:
@@ -108,5 +113,8 @@ for stid in db.keys():
 
 nc.close()
 out.close()
-shutil.copy("madis.csv", "/mesonet/share/pickup/fn/")
-os.remove("madis.csv")
+
+pqstr = "data c 000000000000 fn/madis.csv bogus csv"
+cmd = "/home/ldm/bin/pqinsert -p '%s' /tmp/madis.csv" % (pqstr,)
+subprocess.call(cmd, shell=True)
+os.remove("/tmp/madis.csv")

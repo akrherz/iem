@@ -1,11 +1,8 @@
 """
 Collect up schoolnet data into files we have for outgoing...
 """
-
 import mesonet
 import sys
-import time
-import pickle
 import os
 import mx.DateTime
 import network
@@ -325,4 +322,5 @@ def main():
                     shell=True)
     os.remove("/tmp/wxc_snet8.txt")
 
-main()
+if __name__ == '__main__':
+    main()

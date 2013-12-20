@@ -53,7 +53,7 @@ def load_soilt(data):
         lats.append( nt.sts[stid]['lat'] )
         lons.append( nt.sts[stid]['lon'] )
     if len(lons) < 4:
-        print 'No ISUAG Data for %s' % (valid,)
+        print 'outgoing/wxc_azos_gdd.py:: No ISUAG Data for %s' % (valid,)
         sys.exit()
     numxout = 40
     numyout = 40
@@ -99,7 +99,7 @@ def compute_obs(sts, ets):
 SELECT
   id, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
   sum( case when max_tmpf = -99 THEN 1 ELSE 0 END) as missing,
-  sum( gdd50(max_tmpf, min_tmpf) ) as gdd,
+  sum( gddxx(50, 86, max_tmpf, min_tmpf) ) as gdd,
   sum( case when pday > 0 THEN pday ELSE 0 END ) as precip
 FROM 
   summary_%s c, stations s
@@ -124,7 +124,7 @@ def main():
     if sts > ets:
         return
 
-    output = open('wxc_iem_agdata.txt', 'w')
+    output = open('/tmp/wxc_iem_agdata.txt', 'w')
     output.write("""Weather Central 001d%s00 Surface Data
    8
    4 Station
@@ -150,10 +150,12 @@ def main():
                     data[sid]['precip'], cdata[ csite ]['crain'], data[sid]['soilt'],
                     data[sid]['lat'], data[sid]['lon'] ))
     output.close()
-    subprocess.call(("/home/ldm/bin/pqinsert -p \"wxc_iem_agdata.txt\""
-                     +" wxc_iem_agdata.txt"), shell=True)
-    shutil.copyfile("wxc_iem_agdata.txt", "/mesonet/share/pickup/wxc/wxc_iem_agdata.txt")
-    os.remove("wxc_iem_agdata.txt")
+    
+    pqstr = "data c 000000000000 wxc/wxc_iem_agdata.txt bogus text"
+    cmd = "/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_iem_agdata.txt" % (pqstr,)
+    subprocess.call(cmd, shell=True)
+    os.remove("/tmp/wxc_iem_agdata.txt")
+    
 
 if __name__ == '__main__':
     main()

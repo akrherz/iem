@@ -1,8 +1,8 @@
 <?php
 include("../../config/settings.inc.php");
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/currentOb.php");
-include("$rootpath/include/network.php");
+include("../../include/mlib.php");
+include("../../include/currentOb.php");
+include("../../include/network.php");
 $nt = new NetworkTable("IA_RWIS");
 $cities = $nt->table;
 
@@ -11,8 +11,8 @@ function fancy($v, $floor,$ceil, $p){
   return sprintf("%${p}.1f", $v);
 }
 
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
 $iem = new IEMAccess();
 
 /* Lets also get the traffic data, please */
@@ -30,7 +30,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 
 $mydata = $iem->getNetwork("IA_RWIS");
 
-$rwis = fopen('wxc_iadot.txt', 'w');
+$rwis = fopen('/tmp/wxc_iadot.txt', 'w');
 fwrite($rwis, "Weather Central 001d0300 Surface Data
   22
    5 Station
@@ -122,8 +122,11 @@ while ( list($key, $val) = each($mydata) ) {
 
 fclose($rwis);
 
-`/home/ldm/bin/pqinsert wxc_iadot.txt >& /dev/null`;
-`mv wxc_iadot.txt /mesonet/share/pickup/wxc/`;
+$pqstr = "data c 000000000000 wxc/wxc_iadot.txt bogus txt";
+$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_iadot.txt", $pqstr);
+system($cmd);
+unlink("/tmp/wxc_iadot.txt");
+
 
 $nt->table = Array();
 $nt->load_network("IL_RWIS");
@@ -131,7 +134,7 @@ $cities = $nt->table;
 
 $mydata = $iem->getNetwork("IL_RWIS");
 
-$rwis = fopen('wxc_ildot.txt', 'w');
+$rwis = fopen('/tmp/wxc_ildot.txt', 'w');
 fwrite($rwis, "Weather Central 001d0300 Surface Data
   18
    6 Station
@@ -212,8 +215,11 @@ while ( list($key, $val) = each($mydata) ) {
 
 fclose($rwis);
 
-`/home/ldm/bin/pqinsert wxc_ildot.txt >& /dev/null`;
-`mv wxc_ildot.txt /mesonet/share/pickup/wxc/`;
+$pqstr = "data c 000000000000 wxc/wxc_ildot.txt bogus txt";
+$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_ildot.txt", $pqstr);
+system($cmd);
+unlink("/tmp/wxc_ildot.txt");
+
 
 // ------------------------------------------------
 
@@ -223,7 +229,7 @@ $cities = $nt->table;
 
 $mydata = $iem->getNetwork( Array("OH_RWIS","IN_RWIS", "KY_RWIS") );
 
-$rwis = fopen('wxc_oh_in_kydot.txt', 'w');
+$rwis = fopen('/tmp/wxc_oh_in_kydot.txt', 'w');
 fwrite($rwis, "Weather Central 001d0300 Surface Data
   22
    6 Station
@@ -333,6 +339,9 @@ while ( list($key, $val) = each($mydata) ) {
 
 fclose($rwis);
 
-`/home/ldm/bin/pqinsert wxc_oh_in_kydot.txt >& /dev/null`;
-`mv wxc_oh_in_kydot.txt /mesonet/share/pickup/wxc/`;
+$pqstr = "data c 000000000000 wxc/wxc_oh_in_kydot.txt bogus txt";
+$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_oh_in_kydot.txt", $pqstr);
+system($cmd);
+unlink("/tmp/wxc_oh_in_kydot.txt");
+
 ?>

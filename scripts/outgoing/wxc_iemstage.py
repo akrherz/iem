@@ -7,9 +7,9 @@ import subprocess
 import shutil
 import datetime
 import tempfile
-import iemdb
+import psycopg2
 import psycopg2.extras
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 state = sys.argv[1]
@@ -77,6 +77,7 @@ for row in icursor:
 
 o.close()
 
-subprocess.call("/home/ldm/bin/pqinsert -p '%s' %s" % (ldmname, fn), shell=True)
-shutil.copyfile(fn, "/mesonet/share/pickup/wxc/%s" % (ldmname,))
+pqstr = "data c 000000000000 wxc/%s.txt bogus text" % (ldmname,)
+cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, fn)
+subprocess.call(cmd, shell=True)
 os.remove( fn )
