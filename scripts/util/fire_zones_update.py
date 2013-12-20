@@ -98,4 +98,6 @@ while feat is not None:
 
   feat = lyr.GetNextFeature()
 
+postgis.query("""UPDATE nws_ugc SET simple_geom = ST_Simplify(geom, 0.01)""")
+
 print 'Done!'

@@ -100,4 +100,7 @@ while feat is not None:
 mydb.commit()
 mcursor.close()
 mydb.close()
+
+mcursor.execute("""UPDATE nws_ugc SET simple_geom = ST_Simplify(geom, 0.01)""")
+
 print 'Done!'
