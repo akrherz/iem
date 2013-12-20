@@ -55,7 +55,7 @@ def workflow():
         idnum = feat['attributes']['IDNUM']
         if idnum <= current.get(label, 0):
             continue
-        
+
         utc = valid.astimezone(pytz.timezone("UTC"))
         # Go get the URL for saving!
         image = urllib2.urlopen(feat['attributes']['URL'], timeout=15).read()
@@ -74,8 +74,8 @@ def workflow():
                                            feat['geometry']['y'])
         cursor.execute("""INSERT into idot_dashcam_current(label, valid, idnum,
         geom) VALUES (%s, %s, %s, %s)""", (label, valid, idnum, geom))
-        print 'IDNUM: %(IDNUM)s %(URL)s' % feat['attributes'], valid
-        print 'lon: %s lat: %s' % (feat['geometry']['x'], feat['geometry']['y'])
+        #print 'IDNUM: %(IDNUM)s %(URL)s' % feat['attributes'], valid
+        #print 'lon: %s lat: %s' % (feat['geometry']['x'], feat['geometry']['y'])
 
     cursor.close()
     POSTGIS.commit()
