@@ -88,6 +88,8 @@ while feat is not None:
 
     feat = lyr.GetNextFeature()
 
+mcursor.execute("""UPDATE nws_ugc SET simple_geom = ST_Simplify(geom, 0.01)""")
+
 mydb.commit()
 mcursor.close()
 mydb.close()
