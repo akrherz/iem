@@ -40,7 +40,7 @@ cd ../coop
 python hrrr_solarrad.py
 
 cd ../cache
-python warn_cache.py
+python warn_cache.py &
 
 cd ../dbutil
 python clean_afos.py
