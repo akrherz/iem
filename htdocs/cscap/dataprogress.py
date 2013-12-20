@@ -7,9 +7,11 @@ import cgi
 DBCONN = psycopg2.connect(database='sustainablecorn', host='iemdb', user='nobody')
 cursor = DBCONN.cursor()
 
+ALL = " ALL SITES"
+
 def get_data(year):
     ''' Do stuff '''
-    data = {' ALL': {} }
+    data = {ALL: {} }
     dvars = []
     cursor.execute("""SELECT site, varname, 
     -- We have some number
@@ -31,14 +33,14 @@ def get_data(year):
         data[row[0]][row[1]] = {'hits': row[2], 'dots': row[3], 
                                 'other': row[4], 'nulls': row[5],
                                 'tot': row[6]}
-        if not data[' ALL'].has_key(row[1]):
-            data[' ALL'][row[1]] = {'hits': 0, 'dots': 0, 'other': 0,
+        if not data[ALL].has_key(row[1]):
+            data[ALL][row[1]] = {'hits': 0, 'dots': 0, 'other': 0,
                                     'nulls': 0, 'tot': 0}
-        data[' ALL'][row[1]]['hits'] += row[2]
-        data[' ALL'][row[1]]['dots'] += row[3]
-        data[' ALL'][row[1]]['other'] += row[4]
-        data[' ALL'][row[1]]['nulls'] += row[5]
-        data[' ALL'][row[1]]['tot'] += row[6]
+        data[ALL][row[1]]['hits'] += row[2]
+        data[ALL][row[1]]['dots'] += row[3]
+        data[ALL][row[1]]['other'] += row[4]
+        data[ALL][row[1]]['nulls'] += row[5]
+        data[ALL][row[1]]['tot'] += row[6]
     
     return data, dvars
 
@@ -141,4 +143,20 @@ if __name__ == '__main__':
         sys.stdout.write("</tr>\n\n")
     sys.stdout.write("</table>")
     
-    print '</p>'
+    sys.stdout.write("""
+    <h3>Data summary for all sites included</h3>
+    <p>
+    <span>Key:</span>
+    <span class="btn btn-success">has data</span>
+    <span class="btn btn-info">periods</span>
+    <span class="btn btn-warning">DNC empty</span>
+    <span class="btn btn-danger">no entry</span>
+    <table class='table table-striped table-bordered'>
+    <thead><tr><th>Variable</th><th>%s</th></tr>
+    """ % (ALL,))
+    for datavar in dvars:
+        row = data[ALL].get(datavar, None)
+        sys.stdout.write("<tr><th>%s</th><td>%s</td></tr>" % (datavar,
+                                                        make_progress(row)))
+    
+    sys.stdout.write('</table></p>')
