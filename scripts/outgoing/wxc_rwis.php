@@ -27,11 +27,12 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 	$traffic[$row["nwsli"]][sprintf("avgspeed%s", $row["lane_id"])] = round($row["avg_speed"],0);
 }
 
+$tstamp = gmdate("Y-m-d\TH:i:s");
 
 $mydata = $iem->getNetwork("IA_RWIS");
 
 $rwis = fopen('/tmp/wxc_iadot.txt', 'w');
-fwrite($rwis, "Weather Central 001d0300 Surface Data
+fwrite($rwis, "Weather Central 001d0300 Surface Data TimeStamp=$tstamp
   22
    5 Station
   52 CityName
@@ -135,7 +136,7 @@ $cities = $nt->table;
 $mydata = $iem->getNetwork("IL_RWIS");
 
 $rwis = fopen('/tmp/wxc_ildot.txt', 'w');
-fwrite($rwis, "Weather Central 001d0300 Surface Data
+fwrite($rwis, "Weather Central 001d0300 Surface Data TimeStamp=$tstamp
   18
    6 Station
   52 CityName
@@ -230,7 +231,7 @@ $cities = $nt->table;
 $mydata = $iem->getNetwork( Array("OH_RWIS","IN_RWIS", "KY_RWIS") );
 
 $rwis = fopen('/tmp/wxc_oh_in_kydot.txt', 'w');
-fwrite($rwis, "Weather Central 001d0300 Surface Data
+fwrite($rwis, "Weather Central 001d0300 Surface Data TimeStamp=$tstamp
   22
    6 Station
   52 CityName
