@@ -113,8 +113,9 @@ def make_progress(row):
   <div class="progress-bar progress-bar-danger" style="width: %.1f%%">
     <span>%s</span>
   </div>
-</div>""" % (hits, row['hits'], dots, row['dots'], other, row['other'], 
-             nulls, row['nulls'])
+</div>""" % (hits - 0.05, row['hits'], dots - 0.05, row['dots'], 
+             other - 0.05, row['other'], 
+             nulls - 0.05, row['nulls'])
 
 if __name__ == '__main__':
     sys.stdout.write('Content-type: text/html\n\n')
