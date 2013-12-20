@@ -6,6 +6,7 @@
 import subprocess
 import datetime
 import sys
+import shutil
 import os
 
 FINAL = "/mesonet/share/pickup/wwa/"
@@ -33,7 +34,7 @@ def get_files(year):
         cmd = ('wget --timeout=60000 -q -O /tmp/%s_tsmf_sbw.zip'
                +' "%s?%s&limit0=yes&limit1=yes"')  % (year,  URL, common)
         subprocess.call(cmd, shell=True)
-        os.rename("/tmp/%s_tsmf_sbw.zip" % (year,),
+        shutil.move("/tmp/%s_tsmf_sbw.zip" % (year,),
               "%s/%s_tsmf_sbw.zip" % (FINAL, year))
 
 
