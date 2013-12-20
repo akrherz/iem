@@ -1,9 +1,9 @@
 <?php
-  //  coop.php
-  //   Script to generate a weather centralish file of COOP reports
-  //  20 Jan 2003  Daryl Herzmann
-  //  27 Jan 2003  Parkin reported that this wasn't even working, so
-  //               lets try and see if we can make it work.
+/*
+ * Generates a Weather Central formatted station datafile with the IEM 
+ * processed SHEF (COOP) data included.  Why?  This dataset is difficult
+ * to process and I'd like to think I do a great job at it :)
+ */
 
 include('../../config/settings.inc.php');
 include('../../include/network.php');
@@ -55,5 +55,9 @@ while (list($key, $iemob) = each($net) ){
 }
 fclose($coop);
 
-`/home/ldm/bin/pqinsert -p "wxc_coop.txt" /tmp/wxc_coop.txt`;
-copy("/tmp/wxc_coop.txt", "/mesonet/share/pickup/wxc/wxc_coop.txt");
+$pqstr = "data c 000000000000 wxc/wxc_coop.txt bogus txt";
+$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_coop.txt", $pqstr);
+system($cmd);
+unlink("/tmp/wxc_coop.txt");
+
+?>

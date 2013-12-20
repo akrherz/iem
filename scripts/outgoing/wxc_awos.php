@@ -1,8 +1,14 @@
 <?php
+/*
+ * Dump the IEM's processing of Iowa AWOS sites, for a couple of reasons
+ * 1) We process the daily precip correctly, whereas WXC does not (last I knew)
+ * 2) We get a 5 minute datafed and use it to build more accurate daily totals
+ *    not found in the METAR feed.
+ */
 include("../../config/settings.inc.php");
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/currentOb.php");
-include("$rootpath/include/network.php");
+include("../../include/mlib.php");
+include("../../include/currentOb.php");
+include("../../include/network.php");
 $nt = new NetworkTable("AWOS");
 $cities = $nt->table;
 
@@ -11,13 +17,13 @@ function fancy($v, $floor,$ceil, $p){
   return sprintf("%${p}.1f", $v);
 }
 
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
 $iem = new IEMAccess();
 
 $mydata = $iem->getNetwork("AWOS");
 
-$rwis = fopen('wxc_ia_awos.txt', 'w');
+$rwis = fopen('/tmp/wxc_ia_awos.txt', 'w');
 fwrite($rwis, "Weather Central 001d0300 Surface Data
   13
    5 Station
@@ -55,7 +61,9 @@ while ( list($key, $val) = each($mydata) ) {
 
 fclose($rwis);
 
-`/home/ldm/bin/pqinsert wxc_ia_awos.txt >& /dev/null`;
-`mv wxc_ia_awos.txt /mesonet/share/pickup/wxc/`;
+$pqstr = "data c 000000000000 wxc/wxc_ia_awos.txt bogus txt";
+$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_ia_awos.txt", $pqstr);
+system($cmd);
+unlink("/tmp/wxc_ia_awos.txt");
 
 ?>

@@ -1,16 +1,19 @@
 <?php
+/*
+ * Dumps IA and IL CoCoRaHS data to a Weather Central formatted file
+ */
 include("../../config/settings.inc.php");
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/currentOb.php");
+include("../../include/mlib.php");
+include("../../include/currentOb.php");
 
-include("$rootpath/include/network.php");
+include("../../include/network.php");
 $nt = new NetworkTable(Array("IACOCORAHS","ILCOCORAHS") );
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
 $iem = new IEMAccess();
 
 
-$rwis = fopen('wxc_cocorahs.txt', 'w');
+$rwis = fopen('/tmp/wxc_cocorahs.txt', 'w');
 fwrite($rwis, sprintf("Weather Central 001d0300 Surface Data timestamp=%s
   10
   12 Station
@@ -27,35 +30,36 @@ fwrite($rwis, sprintf("Weather Central 001d0300 Surface Data timestamp=%s
  
 $states = Array("IA","IL");
 reset($states);
+$now = time();
 while(list($k,$state) = each($states)){
 
-$mydata = $iem->getNetwork("${state}COCORAHS");
+	$mydata = $iem->getNetwork("${state}COCORAHS");
 
-$now = time();
-while ( list($key, $val) = each($mydata) ) {
-  $tdiff = $now - $val->db["ts"];
+	while ( list($key, $val) = each($mydata) ) {
+  		$tdiff = $now - $val->db["ts"];
+		if ($tdiff > 86400) continue;
+  		
+  		if ($val->db['pday'] < 0) $val->db["pday"] = " ";
+  		if ($val->db['pday'] == 0.0001) $val->db["pday"] = "T";
+  		if ($val->db['snowd'] < 0) $val->db["snowd"] = " ";
+  		if ($val->db['snow'] < 0) $val->db["snow"] = " ";
 
-  if ($tdiff < 86400){
-  if ($val->db['pday'] < 0) $val->db["pday"] = " ";
-  if ($val->db['pday'] == 0.0001) $val->db["pday"] = "T";
-  if ($val->db['snowd'] < 0) $val->db["snowd"] = " ";
-  if ($val->db['snow'] < 0) $val->db["snow"] = " ";
-
-  $s = sprintf("%-12s %-52s %2s %7s %8s %2s %4s %6s %6s %6s\n", $key, 
+  		$s = sprintf("%-12s %-52s %2s %7s %8s %2s %4s %6s %6s %6s\n", $key, 
     $nt->table[$key]['name'], $state, round($nt->table[$key]['lat'],2), 
      round($nt->table[$key]['lon'],2),
      date('d', $val->db['ts'] + (6*3600) ), date('H', $val->db['ts'] + (6*3600)),
      $val->db['pday'], $val->db['snow'],
      $val->db['snowd']);
-  fwrite($rwis, $s);
-  }
-} // End of while
-
+  		fwrite($rwis, $s);
+  		
+	} // End of while
 }
 
 fclose($rwis);
 
-`/home/ldm/bin/pqinsert wxc_cocorahs.txt`;
-`cp wxc_cocorahs.txt /mesonet/share/pickup/wxc/`;
-unlink("wxc_cocorahs.txt");
+$pqstr = "data c 000000000000 wxc/wxc_cocorahs.txt bogus txt";
+$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_cocorahs.txt", $pqstr);
+system($cmd);
+unlink("/tmp/wxc_cocorahs.txt");
+
 ?>

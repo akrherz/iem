@@ -1,19 +1,20 @@
 """
 Dump out precipitation information that we have!
 """
-import iemdb
-import datetime
+import psycopg2
 import subprocess
 import mx.DateTime
-IEM = iemdb.connect('iem', bypass=True)
+import os
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor()
 
 def send_to_ldm():
     """
     Send our file on its happy way
     """
-    cmd = "pqinsert -p 'data c 000000000000 ia_precip.txt ia_precip.txt txt' /tmp/ia_precip.txt"
+    cmd = "/home/ldm/bin/pqinsert -p 'data c 000000000000 ia_precip.txt ia_precip.txt txt' /tmp/ia_precip.txt"
     subprocess.call(cmd, shell=True)
+    os.unlink("/tmp/ia_precip.txt")
 
 def dumper():
     """
