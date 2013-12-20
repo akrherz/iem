@@ -163,6 +163,7 @@ if __name__ == '__main__':
     if len(ids) > 0:
         dvars = ids
     for varid in varorder:
+        checked = ""
         if varid in ids:
             checked = "checked='checked'"
         sys.stdout.write("""<input type='checkbox' name='ids' 
