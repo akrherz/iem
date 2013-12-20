@@ -1,7 +1,7 @@
 <?php 
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 18);
-include("$rootpath/include/wfoLocs.php");
+include("../../../include/wfoLocs.php");
 
 function get_file_size($filename, $size_in = 'MB')
 {
@@ -36,9 +36,9 @@ $size = round($size, $precision);
 }
 
 $TITLE = "IEM | NWS Watch Warning Archive Download";
-include("$rootpath/include/forms.php");
+include("../../../include/forms.php");
 $THISPAGE = "gis-";
-include("$rootpath/include/header.php"); ?>
+include("../../../include/header.php"); ?>
 
 <h3 class="heading">Archived NWS Watch/Warnings</h3>
 
@@ -119,6 +119,10 @@ will be included in the output GIS file...)</i>
 
 <br /><input type="checkbox" name="limit0" value="yes">Limit Output to Tornado, Severe Thunderstorm, Marine, and Flash Flood Warnings
 <br /><input type="checkbox" name="limit1" value="yes">Limit Output to only Storm Based Warnings
+<br /><input type="checkbox" name="simple" value="yes">Use simplified geometries
+instead of the high resolution AWIPS zones database.  This trims the file size
+significantly, but topology is not conserved. If you just want to make maps at
+state level scale, pick this option.
 <script type="text/javascript">
 function kmlsub(f, url){
 	f.action = url;
@@ -202,4 +206,4 @@ for($year=1986;$year<=date("Y");$year++){
 </tr>
 </table>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../../include/footer.php"); ?>

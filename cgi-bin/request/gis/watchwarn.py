@@ -46,13 +46,13 @@ if form.has_key('wfo[]'):
     aWFO = form['wfo[]']
     aWFO.append('XXX') # Hack to make next section work
     if 'ALL' not in aWFO:
-        wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
+        wfoLimiter = " and w.wfo in %s " % ( str( tuple(aWFO) ), )
 
 if form.has_key('wfos[]'):
     aWFO = form['wfos[]']
     aWFO.append('XXX') # Hack to make next section work
     if 'ALL' not in aWFO:
-        wfoLimiter = " and wfo in %s " % ( str( tuple(aWFO) ), )
+        wfoLimiter = " and w.wfo in %s " % ( str( tuple(aWFO) ), )
 
 os.chdir("/tmp/")
 fp = "wwa_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M") )
@@ -104,14 +104,27 @@ table = "warnings"
 if sTS.year == eTS.year:
     table = "warnings_%s" % (sTS.year,)
 
-sql = """SELECT ST_Simplify(geom,0.0001), phenomena, gtype, significance,
-    wfo, eventid, status, ugc,
-    ST_area( ST_transform(geom,2163) ) / 1000000.0 as area2d,
-    to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
-    to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire
-    from %s WHERE ST_isValid(geom) and 
-	issue >= '%s+00' and issue < '%s+00' and eventid < 10000 
-	%s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), 
+if form.has_key('simple') and form['simple'][0] == 'yes':
+    sql = """SELECT 
+        (case when u.simple_geom is null then w.geom else u.simple_geom end), 
+        w.phenomena, w.gtype, w.significance, w.wfo, w.eventid, w.status, w.ugc,
+        ST_area( ST_transform((case when u.simple_geom is null then w.geom else u.simple_geom end),2163) ) / 1000000.0 as area2d,
+        to_char(w.issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
+        to_char(w.expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire
+        from %s w LEFT JOIN nws_ugc u on (w.ugc = u.ugc) 
+        WHERE ST_isValid((case when u.simple_geom is null then w.geom else u.simple_geom end)) and 
+        issue >= '%s+00' and issue < '%s+00' and eventid < 10000 
+        %s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), 
+                eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
+else:
+    sql = """SELECT ST_Simplify(geom,0.0001), phenomena, gtype, significance,
+        wfo, eventid, status, ugc,
+        ST_area( ST_transform(geom,2163) ) / 1000000.0 as area2d,
+        to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
+        to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire
+        from %s w WHERE ST_isValid(geom) and 
+	    issue >= '%s+00' and issue < '%s+00' and eventid < 10000 
+	    %s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), 
                  eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
 
 data = source.ExecuteSQL(sql)

@@ -14,7 +14,7 @@ URL = "http://iem21.local/cgi-bin/request/gis/watchwarn.py"
 
 def get_files(year):
     ''' Go get our files and then cache them! '''
-    common = 'year1=%s&month1=1&day1=1&hour1=0&minute1=0' % (year,)
+    common = 'simple=yes&year1=%s&month1=1&day1=1&hour1=0&minute1=0' % (year,)
     common += '&year2=%s&month2=12&day2=31&hour2=23&minute2=59' % (year,)
     
     cmd = 'wget --timeout=60000 -q -O /tmp/%s_all.zip "%s?%s"' % (year,
