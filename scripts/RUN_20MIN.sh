@@ -10,7 +10,9 @@ cd ../ingestors/rwis
 
 cd ../madis
 python to_iemaccess.py
+
+cd ../../outgoing
 python network2wxc.py APRSWXNET bogus
 
-cd ../../snet
+cd ../snet
 ./RUN.csh
