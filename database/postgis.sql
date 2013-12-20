@@ -420,6 +420,7 @@ CREATE TABLE nws_ugc (
 
 select addgeometrycolumn('','nws_ugc','geom',4326,'MULTIPOLYGON',2);
 select addgeometrycolumn('','nws_ugc','centroid',4326,'POINT',2);
+select addgeometrycolumn('','nws_ugc','simple_geom',4326,'MULTIPOLYGON',2);
 grant select on nws_ugc to apache;
 
 ---
