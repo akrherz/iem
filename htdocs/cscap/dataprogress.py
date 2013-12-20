@@ -9,6 +9,54 @@ cursor = DBCONN.cursor()
 
 ALL = " ALL SITES"
 
+varhack = """   [1] Corn final plant population
+[2] Soybean final plant population
+   [3] Mid-season canopy N sensing
+   [4] Corn vegetative biomass at R6 (dry) 
+[32] Corn cob biomass at R6 (dry)
+[33] Corn grain biomass at R6 (dry)
+[5] Soybean vegetative biomass at R8 (stems and pods only; no leaves)
+[34] Soybean grain biomass at R8 (dry)
+[6] Cover crop (rye) biomass in late fall (no significant weeds)
+[37] Cover crop (rye) and weedy biomass in late fall
+[38] Weedy biomass (only) in late fall
+[7] Cover crop (rye) biomass at termination (spring) (no significant weeds)
+[39] Cover crop (rye) and weedy biomass at termination (spring)
+[40] Weedy biomass (only) at termination (spring)
+   [8] Wheat plant biomass at maturity 
+   [9] Corn vegetative biomass total carbon at R6
+   [10] Corn vegetative biomass total nitrogen at R6 
+[11] Soybean vegetative biomass total carbon at R8
+[12] Soybean vegetative biomass total nitrogen at R8
+   [13] Rye biomass total carbon at fall
+   [14] Rye biomass total nitrogen at fall
+   [15] Rye biomass total carbon at spring
+   [16] Rye biomass total nitrogen at spring
+[41] Red clover (or miscelaneous) cover crop biomass
+[42] Red clover (or miscelaneous) cover crop total nitrogen
+[43] Red clover (or miscelaneous) cover crop total carbon
+   [17] Corn grain yield at 15.5% MB
+   [18] Corn grain moisture
+   [19] Soybean grain yield at 13.0% MB
+   [20] Soybean grain moisture
+   [21] Wheat grain yield at 13.5% MB
+   [22] Wheat grain moisture
+   [23] Corn grain total carbon at R6
+   [24] Corn cob total carbon at R6
+   [25] Corn grain total nitrogen at R6
+   [26] Corn cob total nitrogen at R6
+   [27] Soybean grain total carbon at R8
+   [28] Soybean grain total nitrogen at R8
+   [29] Wheat grain total carbon at maturity
+   [30] Wheat grain total nitrogen at maturity
+   [31] Corn stalk nitrate samples"""
+varorder = []
+varlookup = {}
+for line in varhack.split("\n"):
+    val = line.strip().split()[0].replace("[","").replace("]","")
+    varorder.append( "AGR%s" % (val,))
+    varlookup[ "AGR%s" % (val,) ] = line.strip()
+
 def get_data(year):
     ''' Do stuff '''
     data = {ALL: {} }
@@ -75,7 +123,7 @@ if __name__ == '__main__':
     year = int(form.getfirst('year', 2011))
     
     data, dvars = get_data(year)
-    dvars.sort()
+
     sites = data.keys()
     sites.sort()
     sys.stdout.write("""<!DOCTYPE html>
@@ -111,14 +159,15 @@ if __name__ == '__main__':
     sys.stdout.write("</select><br />")
     
     ids = form.getlist('ids')
+    dvars = varorder
     if len(ids) > 0:
         dvars = ids
-    for i in range(1, 44):
-        checked = ''
-        if "AGR%s" % (i,) in ids:
+    for varid in varorder:
+        if varid in ids:
             checked = "checked='checked'"
         sys.stdout.write("""<input type='checkbox' name='ids' 
-        value='AGR%s'%s>AGR%s</input> &nbsp; """ % (i, checked, i))
+        value='%s'%s><abbr title="%s">%s</abbr></input> &nbsp; """ % (varid, 
+                                            checked, varlookup[varid], varid))
     
     sys.stdout.write("""
     <input type="submit" value="Generate Table">
@@ -133,7 +182,8 @@ if __name__ == '__main__':
     """)
     sys.stdout.write("<thead><tr><th>SiteID</th>")
     for dv in dvars:
-        sys.stdout.write("<th>%s</th>" % (dv,))
+        sys.stdout.write("""<th><abbr title="%s">%s</abbr></th>""" % (
+                                                varlookup[dv], dv))
     sys.stdout.write("</tr></thead>")
     for sid in sites:
         sys.stdout.write("""<tr><th>%s</th>""" % (sid,))
@@ -152,11 +202,12 @@ if __name__ == '__main__':
     <span class="btn btn-warning">DNC empty</span>
     <span class="btn btn-danger">no entry</span>
     <table class='table table-striped table-bordered'>
-    <thead><tr><th>Variable</th><th>%s</th></tr>
+    <thead><tr><th width="33%%">Variable</th><th width="66%%">%s</th></tr>
     """ % (ALL,))
     for datavar in dvars:
         row = data[ALL].get(datavar, None)
-        sys.stdout.write("<tr><th>%s</th><td>%s</td></tr>" % (datavar,
+        sys.stdout.write("<tr><th>%s %s</th><td>%s</td></tr>" % (
+                                                    datavar, varlookup[datavar],
                                                         make_progress(row)))
     
     sys.stdout.write('</table></p>')
