@@ -117,8 +117,7 @@ for sid in indices:
     
 nc.close()
 out.close()
-subprocess.call("/home/ldm/bin/pqinsert -p \"wxc_%s.txt\" %s" % (
-                            network.lower(), wxcfn), shell=True)
-shutil.copyfile(wxcfn, 
-                "/mesonet/share/pickup/wxc/wxc_%s.txt" % (network.lower(),))
+pqstr = "data c 000000000000 wxc/wxc_%s.txt bogus txt" % (network.lower(),)
+subprocess.call("/home/ldm/bin/pqinsert -p '%s' %s" % (
+                            pqstr, wxcfn), shell=True)
 os.remove(wxcfn)
