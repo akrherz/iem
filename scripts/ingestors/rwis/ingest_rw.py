@@ -45,7 +45,7 @@ def process( nwsli , lastts ):
                                              assoc[nwsli])
     #print nwsli, myuri
     try:
-        data = urllib2.urlopen(myuri)
+        data = urllib2.urlopen(myuri, timeout=15)
     except Exception, exp:
         print nwsli, exp
         return
