@@ -3,13 +3,13 @@ Monthly precip something
 """
 import network
 nt = network.Table("IA_COOP")
-import  mx.DateTime
-import iemdb
+import datetime
+import psycopg2
 import subprocess
 import os
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
 o = open('IEMNWSMPR.txt','w')
@@ -18,7 +18,7 @@ o.write("IOWA ENVIRONMENTAL MESONET\n")
 o.write("   NWS COOP STATION MONTH PRECIPITATION TOTALS\n")
 o.write("   AS CALCULATED ON THE IEM SERVER ...NOTE THE OBS COUNT...\n")
 
-now = mx.DateTime.now() 
+now = datetime.datetime.now() 
 goodDay = now.strftime("%Y-%m-%d")
 
 # Now we load climatology

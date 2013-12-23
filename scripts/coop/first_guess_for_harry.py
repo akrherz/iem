@@ -21,14 +21,14 @@ import smtplib
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
-import mx.DateTime
-import iemdb
+import datetime
+import psycopg2
 from xlwt import Workbook
-MESOSITE = iemdb.connect('mesosite', bypass=True)
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = MESOSITE.cursor()
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
 DATA = """IA0112,ALBI4,A
@@ -204,14 +204,15 @@ def get_site(year, month, iemre, nwsli):
     """
     # Create data dictionary to store our wares
     data = [0,]
-    sts = mx.DateTime.DateTime(year, month, 1)
-    ets = sts + mx.DateTime.RelativeDateTime(months=1)
+    sts = datetime.datetime(year, month, 1)
+    ets = sts + datetime.timedelta(days=35)
+    ets = ets.replace(day=1)
     while sts < ets:
         data.append({'coop': {'high': '', 'low': '', 'atob': '', 
                               'prec': '', 'sf': '', 'sog': ''},
                      'iemre': {'high': '', 'low': '', 'atob': '', 
                               'prec': '', 'sf': '', 'sog': ''}})
-        sts += mx.DateTime.RelativeDateTime(days=1)
+        sts += datetime.timedelta(days=1)
 
     # Go fetch COOP obs
     icursor.execute("""
@@ -275,8 +276,9 @@ def print_data(year, month, iemre, nwsli, sheet, data):
     row.write(21, 'H')
     row.write(22, 'W')
 
-    sts = mx.DateTime.DateTime(year, month, 1)
-    ets = sts + mx.DateTime.RelativeDateTime(months=1)
+    sts = datetime.datetime(year, month, 1)
+    ets = sts + datetime.timedelta(days=35)
+    ets = ets.replace(day=1)
     while sts < ets:
         idx = int(sts.day)
         row = sheet.row(idx+1)
@@ -295,7 +297,7 @@ def print_data(year, month, iemre, nwsli, sheet, data):
         row.write(14, data[idx]['coop']['sf'])
         row.write(15, data[idx]['iemre']['sog'])
         row.write(16, data[idx]['coop']['sog'])
-        sts += mx.DateTime.RelativeDateTime(days=1)
+        sts += datetime.timedelta(days=1)
 
 def runner(year, month):
     """
@@ -316,13 +318,13 @@ def runner(year, month):
             sheet.col(col).width = 256*5
         print_data( year, month, METADATA[label]['IEMRE'],
                         METADATA[label]['NWSLI'], sheet, data)
-    fn = "IEM%s%02i.xls" % (year, month)
+    fn = "/tmp/IEM%s%02i.xls" % (year, month)
     book.save(fn)
     return fn
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        lastmonth = mx.DateTime.now() - mx.DateTime.RelativeDateTime(months=1)
+        lastmonth = datetime.datetime.now() - datetime.timedelta(days=15)
         fn = runner( lastmonth.year, lastmonth.month)
         # Email this out!
         msg = MIMEMultipart()

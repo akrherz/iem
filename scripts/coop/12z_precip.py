@@ -1,83 +1,77 @@
-# Plots of 12z precipitation please
-
-import sys, os, random
-sys.path.append("../lib/")
-import iemplot, network
+'''
+ Generate simple plots of 12z COOP preciptiation
+'''
+import sys
+from pyiem.plot import MapPlot
+import datetime
+import psycopg2
+import network
 st = network.Table(["IA_COOP",'MO_COOP','KS_COOP','NE_COOP','SD_COOP',
      'ND_ASOS', 'MN_COOP', 'WI_COOP', 'IL_COOP','IN_COOP','OH_COOP','MI_COOP'])
 
-import mx.DateTime
-import iemdb
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
+clevs = [0,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.75,1,2,3,4,5,10]
+
 def doit(now):
-  """
-  Generate some plots for the COOP data!
-  """
-  # We'll assume all COOP data is 12z, sigh for now
-  sql = """SELECT id, pday, network
-           from summary_%s s JOIN stations t ON (t.iemid = s.iemid) WHERE day = '%s' and
+    """
+      Generate some plots for the COOP data!
+    """
+    # We'll assume all COOP data is 12z, sigh for now
+    sql = """SELECT id, pday, network
+           from summary_%s s JOIN stations t ON (t.iemid = s.iemid) 
+           WHERE day = '%s' and
            t.network ~* 'COOP' and pday >= 0""" % (now.year,
            now.strftime("%Y-%m-%d") )
 
-  lats = []
-  lons = []
-  vals = []
-  #labels = []
-  icursor.execute( sql )
-  iamax = 0.
-  for row in icursor:
-    id = row[0]
-    if not st.sts.has_key(id):
-      continue
-    #labels.append( id[2:] )
-    lats.append( st.sts[id]['lat'] )
-    lons.append( st.sts[id]['lon'] )
-    vals.append( row[1] )
-    if row[2] == 'IA_COOP' and row[1] > iamax:
-        iamax = row[1]
+    lats = []
+    lons = []
+    vals = []
+    icursor.execute( sql )
+    iamax = 0.
+    for row in icursor:
+        sid = row[0]
+        if not st.sts.has_key(sid):
+            continue
+        #labels.append( id[2:] )
+        lats.append( st.sts[sid]['lat'] )
+        lons.append( st.sts[sid]['lon'] )
+        vals.append( row[1] )
+        if row[2] == 'IA_COOP' and row[1] > iamax:
+            iamax = row[1]
 
-
-  if iamax == 0:
-      # Dummy in some bad data to prevent the contouring from going mad
-      lats.append( 42. )
-      lons.append( -96.0 )
-      vals.append( 1. )
+#if iamax == 0:
+# Dummy in some bad data to prevent the contouring from going mad
+#      lats.append( 42. )
+#      lons.append( -96.0 )
+#      vals.append( 1. )
     
-  # Plot Iowa
-  cfg = {
-     'wkColorMap': 'BlAqGrYeOrRe',
-     'nglSpreadColorStart': -1,
-     'nglSpreadColorEnd'  : 2,
-     '_MaskZero'          : True,
-     'lbTitleString'      : "[inch]",
-     '_valid'    : 'Ending %s at roughly 12Z' % (now.strftime("%d %B %Y"),),
-     '_title'    : "24 Hour NWS COOP Precipitation [inch]",
-  }
+    # Plot Iowa
+    m = MapPlot(sector='iowa',
+                title='24 Hour NWS COOP Precipitation [inch]',
+                subtitle='Ending %s at roughly 12Z' % (now.strftime("%d %B %Y"),))
 
-  tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
-  pqstr = "plot ac %s0000 iowa_coop_12z_precip.png iowa_coop_12z_precip.png png" % (ts.strftime("%Y%m%d"),)
-  iemplot.postprocess(tmpfp, pqstr)
+    m.contourf(lons, lats, vals, clevs, units='inch')
 
-  # Plot Midwest
-  cfg = {
-     'wkColorMap': 'BlAqGrYeOrRe',
-     'nglSpreadColorStart': -1,
-     'nglSpreadColorEnd'  : 2,
-     '_MaskZero'          : True,
-     '_midwest'           : True,
-     'lbTitleString'      : "[inch]",
-     '_valid'    : 'Ending %s at roughly 12Z' % (now.strftime("%d %B %Y"),),
-     '_title'    : "24 Hour NWS COOP Precipitation [inch]",
-  }
+    pqstr = "plot ac %s0000 iowa_coop_12z_precip.png iowa_coop_12z_precip.png png" % (ts.strftime("%Y%m%d"),)
+    m.postprocess(pqstr=pqstr)
+    m.close()
 
-  tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
-  pqstr = "plot ac %s0000 midwest_coop_12z_precip.png midwest_coop_12z_precip.png png" % (ts.strftime("%Y%m%d"),)
-  iemplot.postprocess(tmpfp, pqstr)
+    m = MapPlot(sector='midwest',
+                title='24 Hour NWS COOP Precipitation [inch]',
+                subtitle='Ending %s at roughly 12Z' % (now.strftime("%d %B %Y"),))
+
+    m.contourf(lons, lats, vals, clevs, units='inch')
+
+    pqstr = "plot ac %s0000 midwest_coop_12z_precip.png midwest_coop_12z_precip.png png" % (ts.strftime("%Y%m%d"),)
+    m.postprocess(pqstr=pqstr)
+    m.close()
 
 
-ts = mx.DateTime.now()
-if len(sys.argv) == 4:
-    ts = mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]) )
-doit( ts )
+if __name__ == '__main__':
+    ts = datetime.datetime.now()
+    if len(sys.argv) == 4:
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
+                               int(sys.argv[3]) )
+    doit( ts )
