@@ -15,14 +15,15 @@ docs_client = util.get_docs_client(config)
 
 # Get data spreadsheets 
 query = gdata.docs.client.DocsQuery(show_collections='false', 
-                                    title='BRADFORD.B2 Scharf Soil Bulk Density')
+                                    title='BRADFORD.B2 Scharf Soil Texture')
 feed = docs_client.GetAllResources(query=query)
 
 for entry in feed:
     spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
     spreadsheet.get_worksheets()
     
-    for yr in ['2011', ]:
+    #for yr in ['2011', ]:
+    for yr in ['2011', '2012', '2013', '2014', '2015']:
         print '------------>', spreadsheet.title, yr
         worksheet = spreadsheet.worksheets[yr]
         worksheet.get_list_feed()
