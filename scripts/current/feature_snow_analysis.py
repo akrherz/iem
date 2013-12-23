@@ -1,20 +1,23 @@
-# Generate a clean snowfall analysis, please...
+'''
+ Generate an analysis of snowfall reports to be used for daily IEM Feature
+'''
 
+from pyiem.plot import MapPlot
+import psycopg2
+import numpy as np
+from pyiem import iemre
+import pandas as pd
+import matplotlib.cm as cm
 import iemplot
-import iemdb
-import numpy
-import mx.DateTime
 
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
-POSTGIS = iemdb.connect('postgis', bypass=True)
+POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor()
 
 # Query COOP Data...
 (COOP, LSR) = (1,2)
-vals = []
-lats = []
-lons = []
+row_list = []
 icursor.execute("""
     SELECT id, sum(snow), 
     ST_x(geom) as lon, 
@@ -25,20 +28,9 @@ icursor.execute("""
     ST_x(geom) BETWEEN %s and %s and
     ST_y(geom) BETWEEN %s and %s  
     GROUP by id, lon, lat, county
-""", (iemplot.MW_WEST, iemplot.MW_EAST, iemplot.MW_SOUTH, iemplot.MW_NORTH))
+""", (iemre.WEST, iemre.EAST, iemre.SOUTH, iemre.NORTH))
 for row in icursor:
-    #if row[0] in ['WTRI4',]:
-    #    continue
-    #if row[4] in ['Tama',]:
-    #    print row
-    #    continue
-    #if row[1] > 14:
-        #print row
-    #    continue
-    vals.append( row[1] )
-    lats.append( row[3] )
-    lons.append( row[2] )
-
+    row_list.append(dict(val=row[1], lat=row[3], lon=row[2], source=COOP))
 
 # Query LSR Data...
 pcursor.execute("""
@@ -50,68 +42,57 @@ pcursor.execute("""
       GROUP by state, lon, lat
 """)
 for row in pcursor:
-    if row[1] > 14:
-        #print row
-        continue
-    if row[3] in lats:
-        idx = lats.index( row[3] )
-        if lons[idx] == row[2]:
+    row_list.append(dict(val=row[1], lat=row[3], lon=row[2], source=LSR))
+
+df = pd.DataFrame(row_list)
+'''
+ So, we are trying to do some QC here.  Some tenants
+ 1) We need more zeros to help the analysis have sharper cutoffs
+ 2) We'd like to favor COOP data over LSRs
+'''
+
+lats = []
+lons = []
+vals = []
+data = np.ones( (iemre.NY, iemre.NX)) * -99
+# Pass one, create our estimates
+for i, lat in enumerate(iemre.YAXIS):
+    for j, lon in enumerate(iemre.XAXIS):
+        lon1 = lon + 0.25
+        lat1 = lat + 0.25
+        cell_df = df[ ((df['lat'] >= lat) & (df['lat'] < lat1) & 
+                       (df['lon'] >= lon) & (df['lon'] < lon1))]
+        if len(cell_df) > 0:
+            data[i,j] = cell_df.max()['val']
+# Pass two, check our neighbors
+for i, lat in enumerate(iemre.YAXIS):
+    for j, lon in enumerate(iemre.XAXIS):
+        if i == 0 or j == 0 or i == (len(iemre.YAXIS)-1) or j == (len(iemre.XAXIS)-1):
             continue
-    vals.append( row[1] )
-    lats.append( row[3] )
-    lons.append( row[2] )
+        if data[i,j] < 0:
+            continue
+        neighbors = max(data[i-1,j], data[i+1,j], data[i,j-1], data[i,j+1])
+        if neighbors < 0:
+            continue
+        if data[i,j] > neighbors + 2.:
+            print 'Bullseye i:%s j:%s val:%s' % (i,j, data[i,j])
+            continue
+        lats.append( lat + 0.125 )
+        lons.append( lon + 0.125 )
+        vals.append( data[i,j] )
 
+clevs = np.array([0.01,0.1,0.25,0.5,1,2,3,5,7,9,11,13,15,17])
 
-#final_lats = lats
-#final_lons = lons
-#final_vals = vals
-#"""
-# Loop thru the data and try to figure out what is good and what is bad...
-final_lats = []
-final_lons = []
-final_vals = []
-buffer = 0.65
-for lat in numpy.arange(iemplot.MW_SOUTH, iemplot.MW_NORTH, buffer):
-  for lon in numpy.arange(iemplot.MW_WEST, iemplot.MW_EAST, buffer):
-    lvals = []
-    for j in range(len(lats)):
-      if (lats[j] > (lat-(buffer/2.)) and lats[j] < (lat+(buffer/2.)) and
-         lons[j] > (lon-(buffer/2.)) and lons[j] < (lon+(buffer/2.)) ):
-        lvals.append( vals[j] )
-    if len(lvals) == 0:
-        # Loop again, but use 2x buffer search...
-        for j in range(len(lats)):
-            if (lats[j] > (lat-(buffer)) and lats[j] < (lat+(buffer)) and
-                lons[j] > (lon-(buffer)) and lons[j] < (lon+(buffer)) ):
-                lvals.append( vals[j] )
-        if len(lvals) == 0:
-            final_vals.append( 0.0 )
-        else:
-            final_vals.append( max(lvals) )
-    else:
-        final_vals.append( max(lvals) )
-    final_lats.append( lat )
-    final_lons.append( lon )
-#"""
-# Analysis and plot, please
-cfg = {
- 'wkColorMap': 'WhiteBlueGreenYellowRed',
- 'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- '_title'             : "21-22 Dec 2013 - IEM Snowfall Total Analysis",
- '_valid'             : "Snowfall totals up until 12 PM 22 Dec 2013",
- #'_MaskZero'          : True,
- 'lbTitleString'      : "[in]",
-  '_showvalues'        : False,
- 'cnLevelSelectionMode': "ExplicitLevels",
- 'cnLevels' : [0.01,0.1,0.25,0.5,1,2,3,5,7,9,11,13,15,17],
-
- '_format'            : '%.0f',
-# '_midwest'         : False,
-}
-# Generates tmp.ps
-tmpfp = iemplot.simple_contour(final_lons, final_lats, final_vals, cfg)
-pqstr = "plot c 000000000000 lsr_snowfall.png bogus png"
-thumbpqstr = "plot c 000000000000 lsr_snowfall_thumb.png bogus png"
-#iemplot.postprocess(tmpfp,pqstr, thumb=True, thumbpqstr=thumbpqstr)
-iemplot.makefeature(tmpfp)
+m = MapPlot(sector='iowa',
+            title="21-22 Dec 2013 - IEM Snowfall Total Analysis",
+            subtitle="Snowfall totals up until 12 PM 22 Dec 2013")
+xs,ys = np.meshgrid( np.concatenate([iemre.XAXIS, [iemre.XAXIS[-1] + 0.25,]]),
+                     np.concatenate([iemre.YAXIS, [iemre.YAXIS[-1] + 0.25,]]))
+cmap = cm.get_cmap('Spectral_r')
+cmap.set_over('black')
+cmap.set_under('white')
+m.contourf(lons, lats, vals, clevs, cmap=cmap)
+#m.plot_values(lons, lats, vals, '%.1f')
+m.drawcounties()
+m.postprocess(filename='test.ps')
+iemplot.makefeature('test')
