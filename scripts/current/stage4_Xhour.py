@@ -3,29 +3,31 @@ Create a variable X hour plot of stage IV estimates
 """
 
 import pygrib
-import mx.DateTime
-import iemplot
-import numpy
+import datetime
+import pytz
+from pyiem.plot import MapPlot
 import os, sys
+import matplotlib.cm as cm
 
 def do(ts, hours):
     """
     Create a plot of precipitation stage4 estimates for some day
     """
-    sts = ts - mx.DateTime.RelativeDateTime(hours=hours, minute=0)
+    ts = ts.replace(minute=0)
+    sts = ts - datetime.timedelta(hours=hours)
     ets = ts 
-    interval = mx.DateTime.RelativeDateTime(hours=1)
+    interval = datetime.timedelta(hours=1)
     now = sts
     total = None
     lts = None
     while now < ets:
-        fp = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib" % (
-            now.gmtime().strftime("%Y/%m/%d"), 
-            now.gmtime().strftime("%Y%m%d%H") )
+        fn = "/mesonet/ARCHIVE/data/%s/stage4/ST4.%s.01h.grib" % (
+            now.strftime("%Y/%m/%d"), 
+            now.strftime("%Y%m%d%H") )
 
-        if os.path.isfile(fp):
+        if os.path.isfile(fn):
             lts = now
-            grbs = pygrib.open(fp)
+            grbs = pygrib.open(fn)
 
             if total is None:
                 g = grbs[1]
@@ -41,44 +43,34 @@ def do(ts, hours):
     if lts is None:
         return
     
-    # Now we dance
-    cfg = {
-     'wkColorMap': 'BlAqGrYeOrRe',
-     'nglSpreadColorStart': -1,
-     'nglSpreadColorEnd'  : 2,
-     '_MaskZero'          : True,
-      'cnLevelSelectionMode': "ExplicitLevels",
-      'cnLevels' : [0.01,0.1,0.25,0.5,1,2,3,5,8,9.9],
-     'lbTitleString'      : "[inch]",
-     '_valid'    : 'Total up to %s' % (
-        (lts - mx.DateTime.RelativeDateTime(minutes=1)).strftime("%d %B %Y %I:%M %p %Z"),),
-     '_title'    : "NCEP StageIV %s Hour Precipitation [inch]" % (hours,),
-    }
+    cmap = cm.get_cmap("jet")
+    cmap.set_under('white')
+    cmap.set_over('black')
+    clevs = [0.01,0.1,0.25,0.5,1,2,3,5,8,9.9]
+    localtime = (ts - datetime.timedelta(minutes=1)).timezone(
+                                        pytz.timezone("America/Chicago"))
 
-    tmpfp = iemplot.simple_grid_fill(lons, lats, total / 25.4, cfg)
-    pqstr = "plot ac %s00 iowa_stage4_%sh.png iowa_stage4_%sh.png png" % (
-            ts.strftime("%Y%m%d%H"), hours, hours)
-    iemplot.postprocess(tmpfp, pqstr)
-    
-    # Midwest
-    cfg['_midwest'] = True
-    tmpfp = iemplot.simple_grid_fill(lons, lats, total / 25.4, cfg)
-    pqstr = "plot ac %s00 midwest_stage4_%sh.png midwest_stage4_%sh.png png" % (
-            ts.strftime("%Y%m%d%H"), hours, hours)
-    iemplot.postprocess(tmpfp, pqstr)
-    del(cfg['_midwest'])
-    
-    # CONUS
-    cfg['_conus'] = True
-    tmpfp = iemplot.simple_grid_fill(lons, lats, total / 25.4, cfg)
-    pqstr = "plot ac %s00 conus_stage4_%sh.png conus_stage4_%sh.png png" % (
-            ts.strftime("%Y%m%d%H"), hours, hours)
-    iemplot.postprocess(tmpfp, pqstr)
-    del(cfg['_conus'])
+    for sector in ['iowa', 'midwest', 'conus']:
+        m = MapPlot(sector=sector,
+                    title='NCEP Stage IV %s Hour Precipitation' % (hours,),
+                    subtitle='Total up to %s' % (
+                                    localtime.strftime("%d %B %Y %I %p %Z"),))
+        m.pcolormesh(lons, lats, total / 24.5, clevs, units='inch')
+        pqstr = "plot %s %s00 %s_stage4_%sh.png %s_stage4_%sh_%s.png png" % (
+                                'ac', ts.strftime("%Y%m%d%H"), sector, hours,
+                                sector, hours, ts.strftime("%H"))
+        if sector == 'iowa':
+            m.drawcounties()
+        m.postprocess(pqstr=pqstr)
+        m.close()
     
 if __name__ == "__main__":
     if len(sys.argv) == 4:
-        do(mx.DateTime.DateTime(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])),
-              int(sys.argv[4]))
+        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]), 
+                               int(sys.argv[3]), int(sys.argv[4]))
+        hr = int(sys.argv[5])
     else:
-        do(mx.DateTime.now(), int(sys.argv[1]))
+        ts = datetime.datetime.utcnow()
+        hr = int(sys.argv[1])
+    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
+    do(ts, hr)

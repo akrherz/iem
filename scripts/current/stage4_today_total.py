@@ -68,7 +68,8 @@ def doday(ts, realtime):
         #map.drawstates(zorder=2)
         if sector == 'iowa':
             m.drawcounties()
-        m.postprocess(pqstr=pqstr)  
+        m.postprocess(pqstr=pqstr)
+        m.close()
     
     
 if __name__ == "__main__":

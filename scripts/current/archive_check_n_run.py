@@ -1,9 +1,10 @@
 # Look into our archive and make sure we have what we need!
 
+import subprocess
 import os
-import iemdb
+import psycopg2
 import datetime
-MESOSITE = iemdb.connect('mesosite', bypass=True)
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = MESOSITE.cursor()
 
 mcursor.execute("""SELECT sts, template, interval from archive_products
@@ -21,6 +22,6 @@ while now < ets:
     if not os.path.isfile(fp):
         cmd = "python q2_5min_rate.py %s" % (
                 now.strftime("%Y %m %d %H %M"))
-        os.system( cmd )
+        subprocess.call( cmd , shell=True)
         print 'Missing', now
     now += interval
