@@ -6,10 +6,8 @@ import datetime
 import numpy as np
 import os
 import sys
-sys.path.insert(0, '../mrms')
-import util
+import pyiem.mrms as mrms
 import pytz
-import gzip
 
 from iem.plot import MapPlot
 
@@ -27,9 +25,9 @@ def doit(ts, hours):
     while now <= ts:
         # Only need tile 1 and 2 to sufficiently do Iowa
         for tile in range(1,3):
-            fn = util.get_fn('1hrad', now, tile)
+            fn = mrms.get_fn('1hrad', now, tile)
             if os.path.isfile(fn):
-                tilemeta, val = util.reader(fn)
+                tilemeta, val = mrms.reader(fn)
                 ysz, xsz = np.shape(val)
                 if tile == 1:
                     x0 = 0
@@ -61,7 +59,7 @@ def doit(ts, hours):
     clevs = np.append(clevs, np.arange(5.0, 10.0, 1.0))
     clevs[0] = 0.01
 
-    m.contourf(util.XAXIS, util.YAXIS, precip / 24.5, clevs)
+    m.contourf(mrms.XAXIS, mrms.YAXIS, precip / 24.5, clevs)
 
     #map.drawstates(zorder=2)
     m.drawcounties()

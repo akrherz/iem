@@ -5,11 +5,9 @@ Generate a plot of recent rainfall rate
 import datetime
 import numpy as np
 import os
+import pyiem.mrms as mrms
 import sys
-sys.path.insert(0, '../mrms')
-import util
 import pytz
-import gzip
 
 from iem.plot import MapPlot
 
@@ -24,10 +22,10 @@ def doit(ts, routes):
     precip = np.zeros( (3500,7000) )
     hits = 0
     for tile in range(1,3):
-        fn = util.get_fn('rainrate', now, tile)
+        fn = mrms.get_fn('rainrate', now, tile)
         if os.path.isfile(fn):
             hits += 1
-            tilemeta, val = util.reader(fn)
+            tilemeta, val = mrms.reader(fn)
             ysz, xsz = np.shape(val)
             if tile == 1:
                 x0 = 0
@@ -55,7 +53,7 @@ def doit(ts, routes):
     clevs = np.append(clevs, np.arange(5.0, 10.0, 1.0))
     clevs[0] = 0.01
 
-    m.contourf(util.XAXIS, util.YAXIS, precip / 24.5, clevs)
+    m.contourf(mrms.XAXIS, mrms.YAXIS, precip / 24.5, clevs)
 
     #map.drawstates(zorder=2)
     m.drawcounties()
