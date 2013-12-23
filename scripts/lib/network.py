@@ -11,7 +11,7 @@ class Table(object):
         """
         self.sts = {}
         
-        dbconn = psycopg2.connect(database='mesosite', host='iemdb')
+        dbconn = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
         cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         if type(network) == type("A"):
             network = [network,]

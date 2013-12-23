@@ -1,7 +1,10 @@
---- $ createdb iem
---- $ psql -f /usr/pgsql-9.0/share/contrib/postgis-1.5/postgis.sql iem
---- $ psql -f /usr/pgsql-9.0/share/contrib/postgis-1.5/spatial_ref_sys.sql iem
-
+---
+--- Compute GDD 
+-- base, max, high, low
+ CREATE FUNCTION gddxx(real, real, real, real) RETURNS numeric
+    LANGUAGE sql
+    AS $_$select (( (CASE WHEN $3 > $1 THEN (case when $3 > $2 THEN $2 ELSE $3 END ) - $1 ELSE 0 END) + 
+    (CASE WHEN $4 > $1 THEN $4 - $1 ELSE 0 END) ) / 2.0)::numeric$_$;
 
  create table current_shef(
    station varchar(10),
@@ -289,6 +292,7 @@ CREATE TABLE rwis_locations(
   id smallint UNIQUE,
   nwsli char(5)
 );
+grant select on rwis_locations to nobody,apache;
 
 --
 -- RWIS Deep Soil Probe Data

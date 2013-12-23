@@ -1,3 +1,8 @@
+--- Convert celsuis to fahrenheit
+CREATE FUNCTION c2f(real) RETURNS numeric
+	LANGUAGE sql
+	AS $_$ select ($1 * 1.8 + 32.0)::numeric $_$; 
+
 CREATE TABLE sm_daily (
   station char(5),
   valid date,
@@ -130,6 +135,7 @@ CREATE TABLE daily (
     c930_f character(1)
 );
 CREATE UNIQUE INDEX daily_idx ON daily USING btree (station, valid);
+grant select on daily to nobody,apache;
 
 CREATE TABLE hourly (
     station character varying(7),
@@ -154,3 +160,4 @@ CREATE TABLE hourly (
     c900_f character(1)
 );
 CREATE UNIQUE INDEX hourly_idx ON hourly USING btree (station, valid);
+grant select on hourly to nobody,apache;

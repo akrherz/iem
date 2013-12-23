@@ -28,7 +28,7 @@ BEGIN
     result = (select count(*) from agronomic_data
                 where site = new.site and plotid = new.plotid and
                 varname = new.varname and year = new.year and
-                value = new.value
+                (value = new.value or (value is null and new.value is null))
                );
 
 	-- Data is duplication, no-op
