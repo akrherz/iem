@@ -16,10 +16,10 @@ $month1 = isset($_GET["month1"]) ? $_GET["month1"]: die("No month1 specified");
 $month2 = isset($_GET["month2"]) ? $_GET["month2"]: die("No month2 specified");
 $year1 = isset($_GET["year1"]) ? $_GET["year1"] : die("No year1 specified");
 $year2 = isset($_GET["year2"]) ? $_GET["year2"] : die("No year2 specified");
-$hour1 = isset($_GET["hour1"]) ? $_GET["hour1"]: die("No hour1 specified");
-$hour2 = isset($_GET["hour2"]) ? $_GET["hour2"]: die("No hour2 specified");
-$minute1 = isset($_GET["minute1"]) ? $_GET["minute1"]: die("No minute1 specified");
-$minute2 = isset($_GET["minute2"]) ? $_GET["minute2"]: die("No minute2 specified");
+$hour1 = 0;
+$hour2 = 0;
+$minute1 = 0;
+$minute2 = 0;
 
 
 $station = $_GET["station"];
