@@ -27,9 +27,10 @@ xmin, xmax, ymin, ymax, ugcname = row
 
 (fig, axes) = plt.subplots(2,3)
 
-geoms = ["geom", "ST_Simplify(geom,0.1)", "ST_Simplify(geom,0.01)"
-         , "ST_Simplify(geom,0.001)", "ST_SimplifyPreserveTopology(geom,0.01)",
-         "ST_SimplifyPreserveTopology(geom,0.001)"]
+geoms = [ "ST_Simplify(ST_Buffer(ST_Buffer(\ngeom, -0.01),0.01),0.0025)",
+         "ST_Simplify(ST_Buffer(ST_Buffer(\ngeom, -0.001),0.001),0.00025)",
+         "geom", "ST_Simplify(geom,0.1)", "ST_Simplify(geom,0.01)"
+         , "ST_Simplify(geom,0.001)"]
 
 for row in range(2):
     for col in range(3):
@@ -66,6 +67,6 @@ for row in range(2):
                       fontsize=8)
         ax.add_collection(PatchCollection(patches,match_original=True))
 
-fig.suptitle("NWS UGC: %s Name: %s" % (UGC, ugcname))
+#fig.suptitle("NWS UGC: %s Name: %s" % (UGC, ugcname))
 fig.tight_layout()
 fig.savefig('test.png')
