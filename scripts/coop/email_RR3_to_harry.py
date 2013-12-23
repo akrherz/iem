@@ -7,8 +7,8 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 import mx.DateTime
 import os
-import iemdb
-AFOS = iemdb.connect('afos', bypass=True)
+import psycopg2
+AFOS = psycopg2.connect(database='afos', host='iemdb', user='nobody')
 acursor = AFOS.cursor()
 
 now = mx.DateTime.now()
