@@ -1,9 +1,5 @@
 #!/bin/csh
-# Plots the n1p gridded data
-# Daryl Herzmann 28 May 2002
-# 17 Feb 2003:	Use GIF driver
-# 17 Mar 2003	Keep background from being all messed up...
-#############################################
+
 
 source /mesonet/nawips/Gemenviron
 
@@ -71,12 +67,6 @@ gdplot2_gf << EOF > /tmp/plotPrecip_gdplot2.out
  GRDLBL   = 0
  FILTER   = YES
  list
- run
-
- DEVICE   = GF|${gif}2.gif|800;800
- TITLE	= 0
- CLRBAR = 0
- list 
  run
 
  exit

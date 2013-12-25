@@ -1,10 +1,4 @@
 #!/bin/csh
-# 		gridPrecip.csh
-#  Grid RADAR estimates of precip onto a 2km grid
-#  Daryl Herzmann 28 May 2002
-# 05 Jun 2002:	Also do NTP, makes the files a bit larger
-#
-########################################################
 
 source /mesonet/nawips/Gemenviron
 
@@ -53,5 +47,3 @@ gdradr << EOF > /tmp/gdradr_precip.log
 EOF
 
 ./plotPrecip.csh
-./plotPrecipNTP.csh
-#./plotPrecipGIS.csh
