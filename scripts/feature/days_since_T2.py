@@ -15,11 +15,11 @@ ccursor = COOP.cursor()
 
 # Compute normal from the climate database
 sql = """
- SELECT c.name, c.network, c.id, max_tmpf, x(c.geom) as lon, 
- y(c.geom) as lat, c.climate_site from summary_2013 s, stations c 
+ SELECT c.name, c.network, c.id, min_tmpf, ST_x(c.geom) as lon, 
+ ST_y(c.geom) as lat, c.climate_site from summary_2013 s, stations c 
  where s.iemid = c.iemid
- and s.day = '2013-09-09' and c.network in ('IA_ASOS', 'AWOS') 
- and max_tmpf > 0 and id not in ('OTM')
+ and s.day = '2013-12-24' and c.network in ('IA_ASOS', 'AWOS') 
+ and min_tmpf < 10 
  ORDER by id ASC
 """
 
@@ -46,7 +46,7 @@ for row in icursor:
     cid = row[6]
     ccursor.execute("""
     SELECT max(day) from alldata_ia where station = '%s' 
-    and high >= %.0f and day < '2013-09-09' and month = 9
+    and low <= %.0f and day < '2013-12-24'
     """ % (cid, max_tmpf))
     row2 = ccursor.fetchone()
     if row2[0] is None:
@@ -61,8 +61,8 @@ cfg = {
  'wkColorMap': 'BlAqGrYeOrRe',
  'nglSpreadColorStart': 2,
  'nglSpreadColorEnd'  : -1,
- '_title'             : "9 Sep 2013 High Temp and Years Since as Warm High Temp",
- '_valid'             : "9 Sep 2013, values in F",
+ '_title'             : "24 Dec 2013 Low Temp and Years Since as Cold Low Temp",
+ '_valid'             : "24 Dec 2013, values in F",
 #'lbTitleString'      : "[days]",
  '_showvalues'        : True,
  '_format'            : '%s',
