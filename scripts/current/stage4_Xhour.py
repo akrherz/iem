@@ -47,7 +47,7 @@ def do(ts, hours):
     cmap.set_under('white')
     cmap.set_over('black')
     clevs = [0.01,0.1,0.25,0.5,1,2,3,5,8,9.9]
-    localtime = (ts - datetime.timedelta(minutes=1)).timezone(
+    localtime = (ts - datetime.timedelta(minutes=1)).astimezone(
                                         pytz.timezone("America/Chicago"))
 
     for sector in ['iowa', 'midwest', 'conus']:
