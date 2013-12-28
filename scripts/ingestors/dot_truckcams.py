@@ -35,7 +35,10 @@ def workflow():
     valid = datetime.datetime.now()
     valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"),microsecond=0)
     
-    data = json.loads( urllib2.urlopen(URI, timeout=30).read() )
+    try:
+        data = json.loads( urllib2.urlopen(URI, timeout=30).read() )
+    except:
+        return
     if len(data.get('features', [])) == 0:
         return
     POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
