@@ -23,6 +23,6 @@ DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  
             except:
                 out.write(" *** ***")
                 continue
-        out.write("%4i%4i" % (r[ts]["high"], r[ts]["low"]) )
+            out.write("%4i%4i" % (r[ts]["high"], r[ts]["low"]) )
     out.write("\n")
   
