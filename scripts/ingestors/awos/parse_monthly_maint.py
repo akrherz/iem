@@ -26,7 +26,7 @@ import sys
 import re
 import mx.DateTime
 import psycopg2
-PORTFOLIO = psycopg2.connect("dbname=portfolio host=meteor.geol.iastate.edu user=nobody")
+PORTFOLIO = psycopg2.connect("dbname=portfolio host=iemdb user=nobody")
 pcursor = PORTFOLIO.cursor()
 
 CALINFO = re.compile(".*Calibrated? T/DP: AWOS:?\s*([0-9\-\.]+)/([0-9\-\.]+) Std\.? ([0-9\-\.]+)/([0-9\-\.]+)")

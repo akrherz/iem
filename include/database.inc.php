@@ -22,7 +22,7 @@ $_DATABASES = Array(
  'isuag' => "dbname=isuag host=iemdb user=nobody connect_timeout=5",
  'other' => "dbname=other host=iemdb user=nobody connect_timeout=5",
  'postgis' => "dbname=postgis host=iemdb user=nobody connect_timeout=5",
- 'portfolio' => "dbname=portfolio host=meteor.geol.iastate.edu user=mesonet connect_timeout=5",
+ 'portfolio' => "dbname=portfolio host=iemdb user=nobody connect_timeout=5",
  'scan' => "dbname=scan host=iemdb user=nobody connect_timeout=5",
  'squaw' => "dbname=squaw host=iemdb user=nobody connect_timeout=5",
 );
@@ -40,10 +40,6 @@ function iemdb($dbname, $force_new=0, $rw=FALSE)
 	$dbuser = "nobody";
 	$dbhost = "iemdb2"; // read-only host
 	if ($rw) $dbhost = "iemdb"; // rw master
-	if ($dbname == 'portfolio'){
-		$dbhost = "meteor.geol.iastate.edu";
-		$dbuser = "mesonet";
-	}
 	if ($dbname == "access"){ $dbname = "iem"; }
 
 	$connstr = sprintf("dbname=%s host=%s user=%s connect_timeout=5",
