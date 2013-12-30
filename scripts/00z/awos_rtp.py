@@ -5,6 +5,8 @@ Generate a First Guess RTP that the bureau can use for their product
 import datetime
 import pytz
 import subprocess
+from pyiem.tracker import loadqc
+qdict = loadqc()
 import network
 nt = network.Table("AWOS")
 import psycopg2
@@ -46,6 +48,8 @@ sql = """SELECT t.id as station,
 args = (sts6z, ets )
 icursor.execute(sql, args)
 for row in icursor:
+	if qdict.get(row[0], {}).get('tmpf'):
+		continue
 	highs[ row[0] ] = row[1]
 
 
@@ -59,6 +63,8 @@ icursor.execute("""select id as station, sum(precip) from
 		GROUP by t.id, hour) as foo 
 	GROUP by id""", (sts24h, ets))
 for row in icursor:
+	if qdict.get(row[0], {}).get('precip'):
+		continue
 	pcpn[ row[0] ] = "%5.2f" % (row[1],)
 
 lows = {}
@@ -69,22 +75,18 @@ icursor.execute("""SELECT t.id as station,
 	valid < %s and tmpf > -99 GROUP by t,id""", (sts6z, ets) )
 
 for row in icursor:
+	if qdict.get(row[0], {}).get('tmpf'):
+		continue
 	lows[ row[0] ] = row[1]
 
 ids = nt.sts.keys()
 ids.sort()
-for s in ids:
-	myP = "M"
-	myH = "M"
-	myL = "M"
-	if pcpn.has_key(s):
-		myP = pcpn[s]
-	if lows.has_key(s):
-		myL = lows[s]
-	if highs.has_key(s):
-		myH = highs[s]
+for sid in ids:
+	myP = pcpn.get(sid, "M")
+	myH = highs.get(sid, "M")
+	myL = lows.get(sid, "M")
 
-	out.write( fmt % (s, nt.sts[s]["name"], myH, myL, myP, "M", "M") )
+	out.write( fmt % (sid, nt.sts[sid]["name"], myH, myL, myP, "M", "M") )
 
 out.write(".END\n")
 out.close()
