@@ -1,10 +1,11 @@
 # Create a plot of SMOS data for either 0 or 12z
-import iemplot
+from pyiem.plot import MapPlot
 import psycopg2
 import sys
 import numpy as np
 import mx.DateTime
-SMOS = psycopg2.connect(database='smos', host='iemdb', user='nobody')
+import matplotlib.cm as cm
+SMOS = psycopg2.connect(database='smos', host='mesonet.agron.iastate.edu', user='nobody')
 scursor = SMOS.cursor()
 
 def makeplot(ts, routes='ac'):
@@ -13,8 +14,8 @@ def makeplot(ts, routes='ac'):
     """
     sql = """
     SELECT ST_x(geom), ST_y(geom), 
-    CASE WHEN sm is Null THEN 0 ELSE sm END, 
-    CASE WHEN od is Null THEN 0 ELSE od END from 
+    CASE WHEN sm is Null THEN -1 ELSE sm END, 
+    CASE WHEN od is Null THEN -1 ELSE od END from 
      (SELECT grid_idx, avg(soil_moisture) as sm,
      avg(optical_depth) as od
      from data WHERE valid > '%s+00'::timestamptz - '6 hours'::interval
@@ -44,55 +45,37 @@ def makeplot(ts, routes='ac'):
     sm = np.array( sm )
     od = np.array( od )
     
-    cfg = {
-            'wkColorMap': 'BlAqGrYeOrRe',
-            'nglSpreadColorStart': -1,
-            'nglSpreadColorEnd'  : 2,
-           '_title'     : 'SMOS Satellite: Soil Moisture (0-5cm)',
-           '_valid'     : "Satelite passes around %s UTC" % (ts.strftime("%d %B %Y %H"),),
-           '_midwest'   : True,
-           '_MaskZero'  : True,
-           'cnLevelSelectionMode' : 'ManualLevels',
-           'cnLevelSpacingF'      : 5.,
-            'cnMinLevelValF'       : 0.,
-            'cnMaxLevelValF'       : 70.,
-           'lbTitleString' : '[%]'
-           }
-    fp = iemplot.simple_grid_fill(lons, lats, sm, cfg)
-    pqstr = "plot %s %s00 smos_midwest_sm%s.png smos_midwest_sm%s.png png" % (
-                routes, ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
-                ts.strftime("%H"))
-    iemplot.postprocess(fp, pqstr)
-    del(cfg['_midwest'])
-    fp = iemplot.simple_grid_fill(lons, lats, sm, cfg)
-    pqstr = "plot %s %s00 smos_iowa_sm%s.png smos_iowa_sm%s.png png" % (
-                routes, ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
-                ts.strftime("%H"))
-    #iemplot.makefeature(fp)
-    iemplot.postprocess(fp, pqstr)
-    
-    cfg = {
-           '_title': 'SMOS Satellite: Land Cover Optical Depth (microwave L-band)',
-           '_valid'     : "Satelite passes around %s UTC" % (ts.strftime("%d %B %Y %H"),),
-           '_midwest'   : True,
-           '_MaskZero'  : True,
-           'cnLevelSelectionMode' : 'ManualLevels',
-           'cnLevelSpacingF'      : .05,
-            'cnMinLevelValF'       : 0.,
-            'cnMaxLevelValF'       : 1.,
-           'lbTitleString' : ' '
-    }
-    fp = iemplot.simple_grid_fill(lons, lats, od, cfg)
-    pqstr = "plot %s %s00 smos_midwest_od%s.png smos_midwest_od%s.png png" % (
-                routes, ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
-                ts.strftime("%H"))
-    iemplot.postprocess(fp, pqstr)
-    del(cfg['_midwest'])
-    fp = iemplot.simple_grid_fill(lons, lats, od, cfg)
-    pqstr = "plot %s %s00 smos_iowa_od%s.png smos_iowa_od%s.png png" % (
-                routes, ts.strftime("%Y%m%d%H"), ts.strftime("%H"),
-                ts.strftime("%H"))
-    iemplot.postprocess(fp, pqstr)
+    for sector in ['midwest', 'iowa']:
+        clevs = np.arange(0,71,5)
+        m = MapPlot(sector=sector,
+                    title = 'SMOS Satellite: Soil Moisture (0-5cm)',
+                    subtitle="Satelite passes around %s UTC" % (
+                                                ts.strftime("%d %B %Y %H"),))
+        cmap = cm.get_cmap('jet_r')
+        cmap.set_under('#EEEEEE')
+        cmap.set_over("k")
+        m.hexbin(lons,lats,sm,clevs,units='%', cmap=cmap)
+        pqstr = "plot %s %s00 smos_%s_sm%s.png smos_%s_sm%s.png png" % (
+                    routes, ts.strftime("%Y%m%d%H"), sector, ts.strftime("%H"),
+                    sector, ts.strftime("%H"))
+        m.postprocess(view=True, pqstr=pqstr)
+        m.close()
+
+    for sector in ['midwest', 'iowa']:
+        clevs = np.arange(0,1.001,0.05)
+        m = MapPlot(sector=sector,
+                    title = 'SMOS Satellite: Land Cover Optical Depth (microwave L-band)',
+                    subtitle="Satelite passes around %s UTC" % (
+                                                ts.strftime("%d %B %Y %H"),))
+        cmap = cm.get_cmap('jet')
+        cmap.set_under('#EEEEEE')
+        cmap.set_over("k")
+        m.hexbin(lons,lats,od,clevs, cmap=cmap)
+        pqstr = "plot %s %s00 smos_%s_od%s.png smos_%s_od%s.png png" % (
+                    routes, ts.strftime("%Y%m%d%H"), sector, ts.strftime("%H"),
+                    sector, ts.strftime("%H"))
+        m.postprocess(view=True, pqstr=pqstr)
+        m.close()
 
 if __name__ == '__main__':
     # At midnight, we have 12z previous day
