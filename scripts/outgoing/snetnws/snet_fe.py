@@ -313,7 +313,7 @@ def loadQC():
     See which sites have flags against them
     """
     qdict = {}
-    portfolio = psycopg2.connect('dbname=portfolio host=meteor.geol.iastate.edu user=mesonet')
+    portfolio = psycopg2.connect('dbname=portfolio host=iemdb user=mesonet')
     pcursor = portfolio.cursor()
     
     pcursor.execute("""

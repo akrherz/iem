@@ -58,7 +58,7 @@ class Engine(object):
         openTickets = ""
         closedTickets = ""
         try:
-            mydb = pg.connect("portfolio", "meteor.geol.iastate.edu", 
+            mydb = pg.connect("portfolio", "iemdb", 
                    5432, None, None, "mesonet")
 
             sql = """INSERT into tt_base (portfolio, s_mid, subject, 
@@ -189,7 +189,7 @@ class Engine(object):
         offlineDur = (myOb.get('ts') - offlineTS).strftime('%d days %H hours %M minutes')
         try:
             import pg
-            mydb = pg.connect("portfolio", "meteor.geol.iastate.edu", 
+            mydb = pg.connect("portfolio", "iemdb", 
                    5432, None, None, "mesonet")
 
             mydb.query("""INSERT into tt_log(portfolio, s_mid, author, 
