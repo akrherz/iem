@@ -1,12 +1,4 @@
 #! /bin/csh 
-#
-# 30 Jul 2001: 	Overwrite Log Files please
-# 09 Aug 2001:	Avoid problems when file is not created
-# 07 May 2002:  Add surface divergence
-# 09 Jun 2002:	Also archive the DIV plot
-# 17 Feb 2003:	Use GIF driver
-# 18 Feb 2004	Back to GF
-######################################################
 
 source /mesonet/nawips/Gemenviron
 
@@ -17,10 +9,7 @@ set hh=`date -u +%H`
 set hhmm="`date -u +%H`00"
 set ftime="`date -u +'%Y%m%d%H'`00"
 
-set grid=/mesonet/data/gempak/sao/${date}_sao.gem
 set grid1=/mesonet/data/gempak/surface50x50.grd
-
-rm surfaceTW.gif* >& /dev/null
 
 $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot1.out
 	GDFILE	= $grid1
@@ -61,8 +50,6 @@ $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot1.out
 	exit
 EOF
 
-rm surfaceDW.gif* >& /dev/null
-
 $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot2.out
 	GLEVEL	= 0
 	DEVICE	= GF|surfaceDW.gif|720;540
@@ -94,10 +81,6 @@ $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot2.out
 
 	exit
 EOF
-
-
-rm surfaceMD.gif* >& /dev/null
-
 
 $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot3.out
 	GLEVEL	= 0
@@ -132,8 +115,6 @@ FINT=-2;-1.6;-1.2;-0.8;-0.4;-0.3;-0.2;-0.1;0;0.1;0.2;0.3;0.4;0.8;1.2;1.6;2
 	exit
 EOF
 
-rm surfaceDIV.gif* >& /dev/null
-
 $GEMEXE/gdplot2_gf << EOF > /tmp/sf_DIV.out
         GLEVEL  = 0
         DEVICE  = GF|surfaceDIV.gif|720;540
@@ -167,10 +148,6 @@ FINT=-2;-1.6;-1.2;-0.8;-0.4;-0.3;-0.2;-0.1;0;0.1;0.2;0.3;0.4;0.8;1.2;1.6;2
         exit
 EOF
 
-
-rm surfaceTE.gif* >& /dev/null
-
-
 $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot4.out
 	GLEVEL   = 0
 	DEVICE	= GF|surfaceTE.gif|720;540
@@ -203,9 +180,6 @@ $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot4.out
 
 	exit
 EOF
-
-rm surfaceFRNT.gif* >& /dev/null
-
 
 $GEMEXE/gdplot2_gf << EOF > /tmp/sf_gdplot4.out
         GLEVEL   = 0
@@ -242,66 +216,33 @@ EOF
 
 
 if (-e surfaceTW.gif ) then
-  /home/ldm/bin/pqinsert -p "plot ar $ftime surfaceTW surfaceTW_${hhmm}.gif gif" surfaceTW.gif >& /dev/null
-#	cd ~/current
-#	foreach num (9 8 7 6 5 4 3 2 1 0)
-#		mv ${num}surfaceTW.gif `echo ${num} + 1 | bc`surfaceTW.gif
-#	end
-#	cd /mesonet/scripts/plots/BLACK/
-#	mv surfaceTW.gif ~/current/0surfaceTW.gif
+/home/ldm/bin/pqinsert -p "plot ar $ftime surfaceTW surfaceTW_${hhmm}.gif gif" surfaceTW.gif >& /dev/null
+rm surfaceTW.gif
 endif
 
 if (-e surfaceDW.gif ) then
   /home/ldm/bin/pqinsert -p "plot ar $ftime surfaceDW surfaceDW_${hhmm}.gif gif" surfaceDW.gif >& /dev/null
-#	cd ~/current
-#        foreach num (9 8 7 6 5 4 3 2 1 0)
-#                mv ${num}surfaceDW.gif `echo ${num} + 1 | bc`surfaceDW.gif
-#        end
-#        cd /mesonet/scripts/plots/BLACK/
-#	mv surfaceDW.gif ~/current/0surfaceDW.gif
+rm surfaceDW.gif
 endif
 
 if (-e surfaceMD.gif ) then
   /home/ldm/bin/pqinsert -p "plot ar $ftime surfaceMD surfaceMD_${hhmm}.gif gif" surfaceMD.gif >& /dev/null
-#	cd ~/current
-#        foreach num (9 8 7 6 5 4 3 2 1 0)
-#                mv ${num}surfaceMD.gif `echo ${num} + 1 | bc`surfaceMD.gif
-#        end
-#        cd /mesonet/scripts/plots/BLACK/
-#        cp surfaceMD.gif ~/archive/surfaceMD_${hh}00.gif
-#	mv surfaceMD.gif ~/current/0surfaceMD.gif
+rm surfaceMD.gif
 endif
 
 if (-e surfaceTE.gif ) then
   /home/ldm/bin/pqinsert -p "plot ar $ftime surfaceTE surfaceTE_${hhmm}.gif gif" surfaceTE.gif >& /dev/null
-#	cd ~/current
-#        foreach num (9 8 7 6 5 4 3 2 1 0)
-#                mv ${num}surfaceTE.gif `echo ${num} + 1 | bc`surfaceTE.gif
-#        end
-#        cd /mesonet/scripts/plots/BLACK/
-#	mv surfaceTE.gif ~/current/0surfaceTE.gif
+rm surfaceTE.gif
 endif
 
 if (-e surfaceDIV.gif ) then
   /home/ldm/bin/pqinsert -p "plot ar $ftime surfaceDIV surfaceDIV_${hhmm}.gif gif" surfaceDIV.gif >& /dev/null
-#        cd ~/current
-#        foreach num (9 8 7 6 5 4 3 2 1 0)
-#                mv ${num}surfaceDIV.gif `echo ${num} + 1 | bc`surfaceDIV.gif
-#        end
-#        cd /mesonet/scripts/plots/BLACK/
-#	cp surfaceDIV.gif ~/archive/surfaceDIV_${hh}00.gif
-#        mv surfaceDIV.gif ~/current/0surfaceDIV.gif
+rm surfaceDIV.gif
 endif
 
 
 if (-e surfaceFRNT.gif ) then
   /home/ldm/bin/pqinsert -p "plot ar $ftime surfaceFRNT surfaceFRNT_${hhmm}.gif gif" surfaceFRNT.gif >& /dev/null
-#        cd ~/current
-#        foreach num (9 8 7 6 5 4 3 2 1 0)
-#                mv ${num}surfaceFRNT.gif `echo ${num} + 1 | bc`surfaceFRNT.gif
-#        end
-#        cd /mesonet/scripts/plots/BLACK/
-#        cp surfaceFRNT.gif ~/archive/surfaceFRNT_${hh}00.gif
-#        mv surfaceFRNT.gif ~/current/0surfaceFRNT.gif
+rm surfaceFRNT.gif
 endif
 

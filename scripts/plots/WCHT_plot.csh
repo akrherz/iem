@@ -2,7 +2,7 @@
 # 		WCHT_plot.csh
 
 source /mesonet/nawips/Gemenviron
-
+setenv DISPLAY localhost:1
 setenv GEMCOLTBL coltbl.xwp
 
 set yy=`date -u +%y`
@@ -12,11 +12,7 @@ set date=${yy}${mm}${dd}
 set hh=`date -u +%H`
 set ftime="`date -u +'%Y%m%d%H'`00"
 
-rm wceq.gif >& /dev/null
-
 set DEVICE="GIF|wcht.gif|650;500"
-
-setenv DISPLAY localhost:1
 
 $GEMEXE/sfmap << EOF > /tmp/WCHT_plot_sfmap.out
 	AREA	= 40.25;-97;43.75;-90
@@ -48,5 +44,5 @@ gpend
 
 if (-e wcht.gif) then
   /home/ldm/bin/pqinsert -p "plot ac $ftime wcht.gif wceq_${hh}00.gif gif" wcht.gif >& /dev/null
-rm -f wcht.gif
+rm  wcht.gif
 endif

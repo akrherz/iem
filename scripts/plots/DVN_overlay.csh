@@ -1,13 +1,6 @@
 #!/bin/csh
 #		DVN_overlay.csh
 # Script that plots RADAR over the Mesonet data
-# 12 June 2001: Daryl Herzmann
-# 18 Jun 2001:  Updated for mesonet box
-# 20 Jun 2001:  If 00 Radar does not exist, then 05 probably does
-# 10 Jul 2001:	Lets not plot RADAR if in clear air mode
-# 29 Aug 2001:	Use the bigger surface file
-# 17 Feb 2003:	Use GIF driver
-#########################################################
 
 source /mesonet/nawips/Gemenviron
 
@@ -135,7 +128,6 @@ EOF
 gpend
 
 if (-e DVN_radar.gif) then
-	#cp DVN_radar.gif ~/current/
-	#mv DVN_radar.gif WEB/
 /home/ldm/bin/pqinsert -p "plot c 000000000000 DVN_radar.gif bogus gif" DVN_radar.gif >& /dev/null
+rm DVN_radar.gif
 endif

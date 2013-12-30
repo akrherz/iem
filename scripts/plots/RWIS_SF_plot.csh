@@ -1,8 +1,6 @@
 #!/bin/csh
 #	RWIS_SF_plot.csh
 # Plots RWIS SF stuff
-# 17 Feb 2003:	Use GIF driver
-########################################################
 
 source /mesonet/nawips/Gemenviron
 setenv DISPLAY localhost:1

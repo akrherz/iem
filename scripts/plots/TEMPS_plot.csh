@@ -1,9 +1,6 @@
 #!/bin/csh
 # Finally, the script that plots all of this good data
 # Daryl Herzmann 10 November 2000
-# 19 Jun 2001:	Adapted for mesonet box
-# 20 Jun 2001:	Check to see if map can be made differently
-# 17 Feb 2003:	Use GIF driver
 
 source /mesonet/nawips/Gemenviron
 
@@ -63,7 +60,5 @@ EOF
 $GEMEXE/gpend
 
 if (-e temps.gif) then
-	#cp temps.gif ~/current
-	#mv temps.gif WEB/
   /home/ldm/bin/pqinsert -p "plot c 000000000000 temps.gif bogus gif" temps.gif >& /dev/null
 endif

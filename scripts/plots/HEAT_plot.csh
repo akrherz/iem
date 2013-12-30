@@ -1,14 +1,6 @@
 #!/bin/csh
 # 		HEAT_plot.csh
 # Daryl Herzmann 10 November 2000
-# 19 Jun 2001:	Adapted for mesonet box
-# 20 Jun 2001:	Check to see if map can be made differently
-# 30 Jul 2001:	Might as well be archiving this plot
-#  1 Aug 2002:	Why am I not archiving this plot?
-# 11 Nov 2002:	Don't archive this plot...
-# 17 Feb 2003:	Use GIF driver
-# 16 Oct 2003	Dont archive
-########################################################
 
 source /mesonet/nawips/Gemenviron
 setenv DISPLAY localhost:1
@@ -55,9 +47,6 @@ EOF
 
 
 if (-e heat.gif) then
-	#~/bin/logo.csh ~/plots/heat.gif
-	#cp heat.gif ~/current
-	#cp heat.gif ~/archive/heat_${hh}00.gif
-	#mv heat.gif WEB/
   /home/ldm/bin/pqinsert -p "plot ac $ftime heat.gif heat_${hh}00.gif gif" heat.gif >& /dev/null
+rm heat.gif
 endif

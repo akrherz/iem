@@ -1,17 +1,6 @@
 #!/bin/csh
 #		IAMESONET_plot.csh
 # Finally, the script that plots all of this good data
-# Daryl Herzmann 10 November 2000
-# 19 Jun 2001:  Modified for use on the new mesonet box
-#		Changed Smoothing of Pressure Field
-# 02 Jul 2001:  Now we only have 1 GEMPAK file, yeah!
-# 30 Jul 2001:	Lets Archive this plot, Eh?
-#  8 Jan 2003:	Parkin wants every 4 mb
-# 17 Feb 2003:	Use GIF driver
-#  3 Jun 2003	Use F001 for the RUC2 overlay
-# 29 Jul 2003	I loathe the GIF driver!
-#  7 Apr 2005	Investigate this some more...
-##################################################
 
 source /mesonet/nawips/Gemenviron
 

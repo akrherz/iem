@@ -1,10 +1,6 @@
 #!/bin/csh
 #		WINDS_plot.csh
 # Script that plots a wind comparison for the two nets
-# Daryl Herzmann 10 Jul 2001
-# 09 Oct 2001	Update a bit
-# 17 Feb 2003	Use GIF driver
-#		Cleanup more
 
 source /mesonet/nawips/Gemenviron
 
@@ -64,9 +60,6 @@ EOF
 $GEMEXE/gpend
 
 if (-e winds.gif) then
-	#~/bin/slogo.csh ~/plots/winds.gif
-	#cp winds.gif ~/current
-	#mv winds.gif WEB/
   /home/ldm/bin/pqinsert -p "plot c 000000000000 winds.gif bogus gif" winds.gif >& /dev/null
   rm winds.gif
 endif

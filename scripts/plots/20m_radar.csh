@@ -1,13 +1,6 @@
 #!/bin/csh
 #		20m_radar.csh
 # Script that plots RADAR over the Mesonet data
-# 12 June 2001: Daryl Herzmann
-# 18 Jun 2001: Modified for use on the new mesonet server
-# 22 Jun 2001: Changed to also create a small image as well
-# 30 Jan 2002: Try to get late images from a while back
-# 16 Apr 2002: Also do SchoolNet data as well
-# 17 Feb 2003:	Use GIF driver
-###########################################################
 
 source /mesonet/nawips/Gemenviron
 

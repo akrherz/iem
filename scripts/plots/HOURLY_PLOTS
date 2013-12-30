@@ -1,43 +1,26 @@
 #!/bin/csh -f
-
+# Run once hourly, I believe, all of this needs to go at some point.
 
 set ftime="`date -u +'%Y%m%d%H'`00"
 
-./createGrids2.csh
-./createGrids.csh
-#./IAMESONET_plot.csh
-# hack hack
-#./IAMESONET_plot.csh
-./SDMESONET_plot.csh
-./MW_mesonet.csh
-./TEMPS_plot.csh
-./DEWPS_plot.csh
-./WINDS_plot.csh
-./DMX_overlay.csh
-./OAX_overlay.csh
-./DVN_overlay.csh
-./FSD_overlay.csh
-./ARX_overlay.csh
-./EAX_overlay.csh
-./MPX_overlay.csh
-./ABR_overlay.csh
-./UDX_overlay.csh
-#./textReport.py
-./HEAT_plot.csh
-./WCHT_plot.csh
-./VSBY_plot.csh
-./RELH_plot.csh
-# ./meteorgrams.csh
-# ./RWIS_plot.csh
-./ASOS_plot.csh
-# ./20m_radar.csh
-./1h_precip.csh
-
-#set h="`date -u +%H`"
-#/home/ldm/bin/pqinsert -p "plot ac $ftime report.txt report_${h}.txt txt" report.txt
+csh createGrids2.csh
+csh createGrids.csh
+csh MW_mesonet.csh
+csh TEMPS_plot.csh
+csh DEWPS_plot.csh
+csh WINDS_plot.csh
+csh DMX_overlay.csh
+csh OAX_overlay.csh
+csh DVN_overlay.csh
+csh FSD_overlay.csh
+csh ARX_overlay.csh
+csh EAX_overlay.csh
+csh MPX_overlay.csh
+csh HEAT_plot.csh
+csh WCHT_plot.csh
+csh RELH_plot.csh
+csh ASOS_plot.csh
+csh 1h_precip.csh
 
 cd black
-./surfaceContours.csh
-
-# cd ~/compare/SCRIPTS
-# ./RUN_COMPARE
+csh surfaceContours.csh

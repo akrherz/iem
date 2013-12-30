@@ -1,12 +1,6 @@
 #!/bin/csh
 #		MW_overlay.csh
 # Script that overlays RADAR onto of Midwest Obs
-# Daryl Herzmann 1 Sept 2001
-#  5 Nov 2002:	Change the order of plotting, so NEXRAD is on bottom...
-#		Archive this plot.
-# 17 Feb 2003:	Use GIF driver
-# 18 Jul 2003	Make sure everything is okay here...
-####################################################
 
 source /mesonet/nawips/Gemenviron
 setenv DISPLAY localhost:1
@@ -114,18 +108,6 @@ EOF
 gpend
 
 if (-e MWoverlay.gif) then
-	#~/bin/logo.csh ~/plots/MWoverlay.gif
-
-	#cd ~/current
-	#foreach num (8 7 6 5 4 3 2 1 0)
-        #        mv MWoverlay_${num}.gif MWoverlay_`echo ${num} + 1 | bc`.gif
-        #end
-
-	#cd /mesonet/scripts/plots
 	/home/ldm/bin/pqinsert -p "plot acr $timestamp MWoverlay_ MWoverlay_${hh}${mm}.gif gif" MWoverlay.gif >& /dev/null
 	rm MWoverlay.gif
-        #if (${mm} == "00") then
-        #  cp MWoverlay.gif ~/archive/MWoverlay_${hh}00.gif
-        #endif
-	#mv MWoverlay.gif /mesonet/data/website/MWoverlay_0.gif
 endif

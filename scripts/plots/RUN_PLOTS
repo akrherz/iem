@@ -2,8 +2,7 @@
 #	RUN_PLOTS
 # These plots are run every 20 minutes
 
-./meteorgrams.csh
-./AWOS_plot.csh
-./20m_radar.csh
-./MW_overlay.csh
-./RWIS_SF_plot.csh
+csh AWOS_plot.csh
+csh 20m_radar.csh
+csh MW_overlay.csh
+csh RWIS_SF_plot.csh

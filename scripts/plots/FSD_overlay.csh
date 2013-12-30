@@ -1,9 +1,6 @@
 #!/bin/csh
 #		FSD_overlay.csh
 # Script that generates a RADAR image of FSD
-# 26 June 2001: Daryl Herzmann
-# 17 Jul 2001:	Fix for when the RADAR data is not flowing at all.
-# 17 Feb 2003:	Use GIF driver
 
 source /mesonet/nawips/Gemenviron
 
@@ -115,7 +112,6 @@ EOF
 gpend
 
 if (-e FSD_radar.gif) then
-	#cp FSD_radar.gif ~/current/
-	#mv FSD_radar.gif WEB/
 /home/ldm/bin/pqinsert -p "plot c 000000000000 FSD_radar.gif bogus gif" FSD_radar.gif >& /dev/null
+rm FSD_radar.gif
 endif
