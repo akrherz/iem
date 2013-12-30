@@ -17,7 +17,7 @@ set hh=`date -u +%H`
 set hhmm="`date -u +%H`00"
 set ftime="`date -u +'%Y%m%d%H'`00"
 
-set grid=/mesonet/data/gempak/meso/${date}_meso.gem
+set grid=/mesonet/data/gempak/sao/${date}_sao.gem
 set grid1=/mesonet/data/gempak/surface50x50.grd
 
 rm surfaceTW.gif* >& /dev/null
