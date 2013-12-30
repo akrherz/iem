@@ -36,7 +36,7 @@ def lookforfiles():
     os.chdir("/mesonet/data/smos")
     files = glob.glob("*.txt")
     for fn in files:
-        ts = datetime.datetime.strptime(file, '%Y_%m_%d_%H%M.txt')
+        ts = datetime.datetime.strptime(fn, '%Y_%m_%d_%H%M.txt')
         scursor.execute("""SELECT * from obtimes 
         where valid = '%s-06'""" % (ts.strftime("%Y-%m-%d %H:%M"),))
         row = scursor.fetchone()
