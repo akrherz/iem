@@ -41,7 +41,6 @@ cd ../../week
 python plot_stage4.py
 
 cd ../plots
-./ruc2.csh
 ./RUN_PLOTS
 cd black
 ./surfaceContours.csh

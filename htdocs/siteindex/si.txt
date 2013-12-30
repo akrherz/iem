@@ -58,7 +58,6 @@
 ...|Pressure (in)|http://mesonet.agron.iastate.edu/data/snet/snet_alti.gif|||bodyframe
 ..|Altimeter|http://mesonet.agron.iastate.edu/data/mesonet_altm.gif|||bodyframe
 ..|Ceiling|http://mesonet.agron.iastate.edu/data/ceil.gif|||bodyframe
-..|Visibility|http://mesonet.agron.iastate.edu/data/vsby.gif|||bodyframe
 ..|Relative Humidity|http://mesonet.agron.iastate.edu/data/relh.gif|||bodyframe
 .|Gridded Surface Plots
 ..|Stills

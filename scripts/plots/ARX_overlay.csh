@@ -1,10 +1,6 @@
 #!/bin/csh
 #		ARX_overlay.csh
 # Script that generates a RADAR image of ARX
-# 26 June 2001: Daryl Herzmann
-# 17 Jul 2001:	Fix for when the RADAR data is not flowing at all.
-# 29 Aug 2001:	Use surface data from the bigger GEMPAK surface file
-# 17 Feb 2003:	Use GIF driver
 
 source /mesonet/nawips/Gemenviron
 
@@ -117,7 +113,6 @@ EOF
 gpend
 
 if (-e ARX_radar.gif) then
-#	cp ARX_radar.gif ~/current/
-#	mv ARX_radar.gif WEB/
   /home/ldm/bin/pqinsert -p "plot c 000000000000 ARX_radar.gif bogus gif" ARX_radar.gif >& /dev/null
+rm ARX_radar.gif
 endif

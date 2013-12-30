@@ -1,8 +1,6 @@
 #!/bin/csh
 #		1h_precip.csh
 #  Plots up the 1 hour precip values for the area
-# 17 Feb 2003:	Use GIF driver
-##########################################################
 
 source /mesonet/nawips/Gemenviron
 
@@ -48,8 +46,5 @@ EOF
 gpend
 
 if (-e 1hprecip.gif) then
-	#~/bin/logo.csh ~/plots/1hprecip.gif
-	#cp 1hprecip.gif ~/current
-	#mv 1hprecip.gif WEB/
   /home/ldm/bin/pqinsert -p "plot c 000000000000 1hprecip.gif bogus gif" 1hprecip.gif >& /dev/null
 endif

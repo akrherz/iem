@@ -1,7 +1,5 @@
 #!/bin/csh
 # 		RELH_plot.csh
-# Daryl Herzmann 13 Feb 2004
-#########################################################
 
 source /mesonet/nawips/Gemenviron
 
@@ -12,8 +10,6 @@ set mm=`date -u +%m`
 set dd=`date -u +%d`
 set date=${yy}${mm}${dd}
 set hh=`date -u +%H`
-
-rm relh.gif* >& /dev/null
 
 set DEVICE="GF|relh.gif"
 
@@ -47,7 +43,6 @@ $GEMEXE/sfmap_gf << EOF > /tmp/RELH_plot_sfmap.out
 EOF
 
 if (-e relh.gif) then
-	#~/bin/slogo.csh ~/plots/relh.gif
-	#mv relh.gif ~/current
   /home/ldm/bin/pqinsert -p "plot c 000000000000 relh.gif bogus gif" relh.gif >& /dev/null
+rm relh.gif
 endif

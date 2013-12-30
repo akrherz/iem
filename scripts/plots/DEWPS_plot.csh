@@ -1,10 +1,6 @@
 #!/bin/csh
 # Finally, the script that plots all of this good data
 # Daryl Herzmann 10 November 2000
-# 19 Jun 2001:	Adapted for mesonet box
-# 2 Jul 2001:  Make the outline of the state a bit nicer
-# 17 Sep 2001:	Adjust title to fit on screen
-# 17 Feb 2003:	Use GIF driver
 
 source /mesonet/nawips/Gemenviron
 
@@ -62,7 +58,6 @@ EOF
 $GEMEXE/gpend
 
 if (-e dewps.gif) then
-	#cp dewps.gif ~/current
-	#mv dewps.gif WEB/
 /home/ldm/bin/pqinsert -p "plot c 000000000000 dewps.gif dewps.gif gif" dewps.gif >& /dev/null
+rm dewps.gif
 endif

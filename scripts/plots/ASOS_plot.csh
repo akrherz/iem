@@ -1,20 +1,6 @@
 #!/bin/csh
 # Finally, the script that plots all of this good data
 # Daryl Herzmann 10 November 2000
-# 08 June 2001:  Added a bit more logic to the script
-# 18 Jun 2001:	updated for mesonet box
-#		Added QC logic
-# 20 Jun 2001:	Changed how map is displayed
-# 10 Jul 2001:	Lets Append a text QA product
-#		Only plot 00 Stuff
-# 09 Nov 2001:	Change the Date output to only hour for webpage
-#		Plot ALTM  instead of PMSL
-# 04 May 2002:	Update to 50 stations
-#  3 Oct 2002:	Dave did not want Reporting included!!
-# 17 Feb 2003:	Switch to use the GIF driver and hopefully not a Xvfb
-# 11 Feb 2004	Code Audit
-#
-#############################################
 
 source /mesonet/nawips/Gemenviron
 
@@ -60,21 +46,7 @@ $GEMEXE/sfmap_gf << EOF > /tmp/sfmap.out
 	exit
 EOF
 
-
-#@ GOOD_ASOS = `wc -l asos.good | cut -d ' ' -f 1` - 2
-#set TOTAL_ASOS=`wc -l /mesonet/TABLES/iowa.stns | cut -c 6-7`
-
-
-#mv asos.good WEB/
-#echo "[/${hh}${mm}] ${GOOD_ASOS} / ${TOTAL_ASOS} " > ~/current/asos.stat
-#echo "`date -u +%H%M` [${date}/${hh}${mm}] ${GOOD_ASOS} / ${TOTAL_ASOS} Reporting" >> ~/current/asos.log
-#mv ~/current/asos.log /tmp/$$.txt
-#tail -96 /tmp/$$.txt > ~/current/asos.log
-#rm /tmp/$$.txt
-
 if (-e asos.gif ) then
-  #~/bin/logo.csh ~/plots/asos.gif
-  #cp asos.gif ~/current/
-  #mv asos.gif WEB/
   /home/ldm/bin/pqinsert -p "plot c 000000000000 asos.gif bogus gif" asos.gif >& /dev/null
+rm asos.gif
 endif

@@ -1,10 +1,6 @@
 #!/bin/csh
 #		OAX_overlay.csh
 # Script that generates a RADAR image of OAX
-# 26 June 2001: Daryl Herzmann
-# 17 Jul 2001:	Fix for when the RADAR data is not flowing at all.
-# 29 Aug 2001:	Plot using the better surface data source
-# 17 Feb 2003:	Use GIF driver
 
 source /mesonet/nawips/Gemenviron
 
@@ -116,7 +112,6 @@ EOF
 gpend
 
 if (-e OAX_radar.gif) then
-	#cp OAX_radar.gif ~/current/
-	#mv OAX_radar.gif WEB/
 /home/ldm/bin/pqinsert -p "plot c 000000000000 OAX_radar.gif bogus gif" OAX_radar.gif >& /dev/null
+rm OAX_radar.gif
 endif
