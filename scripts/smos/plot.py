@@ -1,10 +1,10 @@
 # Create a plot of SMOS data for either 0 or 12z
 import iemplot
-import iemdb
+import psycopg2
 import sys
 import numpy as np
 import mx.DateTime
-SMOS = iemdb.connect('smos', bypass=True)
+SMOS = psycopg2.connect(database='smos', host='iemdb', user='nobody')
 scursor = SMOS.cursor()
 
 def makeplot(ts, routes='ac'):
