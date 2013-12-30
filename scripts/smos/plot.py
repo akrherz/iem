@@ -5,7 +5,7 @@ import sys
 import numpy as np
 import mx.DateTime
 import matplotlib.cm as cm
-SMOS = psycopg2.connect(database='smos', host='mesonet.agron.iastate.edu', user='nobody')
+SMOS = psycopg2.connect(database='smos', host='iemdb', user='nobody')
 scursor = SMOS.cursor()
 
 def makeplot(ts, routes='ac'):
@@ -58,7 +58,7 @@ def makeplot(ts, routes='ac'):
         pqstr = "plot %s %s00 smos_%s_sm%s.png smos_%s_sm%s.png png" % (
                     routes, ts.strftime("%Y%m%d%H"), sector, ts.strftime("%H"),
                     sector, ts.strftime("%H"))
-        m.postprocess(view=True, pqstr=pqstr)
+        m.postprocess(pqstr=pqstr)
         m.close()
 
     for sector in ['midwest', 'iowa']:
@@ -74,7 +74,7 @@ def makeplot(ts, routes='ac'):
         pqstr = "plot %s %s00 smos_%s_od%s.png smos_%s_od%s.png png" % (
                     routes, ts.strftime("%Y%m%d%H"), sector, ts.strftime("%H"),
                     sector, ts.strftime("%H"))
-        m.postprocess(view=True, pqstr=pqstr)
+        m.postprocess(pqstr=pqstr)
         m.close()
 
 if __name__ == '__main__':
