@@ -11,11 +11,11 @@ import matplotlib.pyplot as plt
 totals = numpy.ma.zeros( (25,), 'f')
 counts = 0
 
-for yr in range(1940,2013):
+for yr in range(1940,2014):
     data = numpy.ma.zeros((366,24), 'f')
     data.mask = numpy.where(data == 0, True, False)
     acursor.execute("""SELECT extract(doy from valid), valid, tmpf 
-        from t%s where station = 'DSM'
+        from t%s where station = 'SUX'
         and tmpf is not null ORDER by valid ASC""" % (yr,))
 
     for row in acursor:
@@ -52,9 +52,17 @@ for yr in range(1940,2013):
         """
         if not numpy.ma.is_masked(departure):
             counts += 1
-            totals += departure 
-            ax.plot( numpy.arange(0,25), departure, color='tan')
-
+            totals += departure
+            print yr, dy, min(departure)
+            if min(departure) < -60:
+                print hrs
+            color = 'tan'
+            if yr == 1982 and dy == 91:
+                color = 'red'
+            if yr == 2013 and dy > 300:
+                color = 'blue'
+            ax.plot( numpy.arange(0,25), departure, color=color)
+            
 print totals
 print counts
 ax.grid(True)
@@ -62,8 +70,10 @@ ax.set_xlim(0,24)
 ax.set_xticks(numpy.arange(0,25,4))
 ax.set_xlabel("Hours After Highest Temperature, %s events with complete data" % (counts,))
 ax.set_ylabel("Temperature Change $^{\circ}\mathrm{F}$")
-ax.set_title("24 Hour - Hourly Temperature Change\nwhen Daily High Drops 30+$^{\circ}\mathrm{F}$ Des Moines 1940-2012")
+ax.set_title("24 Hour - Hourly Temperature Change\nwhen Daily High Drops 30+$^{\circ}\mathrm{F}$ Sioux City 1948-2013")
 ax.plot( numpy.arange(0,25), totals / counts, color='k', linewidth=2, label="Average")
+ax.text(2, -57, "28-29 Dec 2013", color='blue')
+ax.text(2, -54, "2-3 Apr 1982", color='red')
 ax.legend()
 fig.savefig('test.ps')
 import iemplot
