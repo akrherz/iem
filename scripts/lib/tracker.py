@@ -2,16 +2,16 @@ import pg, sys, mx.DateTime
 import smtplib
 from email.MIMEText import MIMEText
 
-import iemdb
-IEM = iemdb.connect('iem', bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb')
 
 def loadqc():
     """
     See which sites have flags against them
     """
     qdict = {}
-    portfolio = iemdb.connect('portfolio', dbhost='meteor.geol.iastate.edu',
-                              bypass=True)
+    portfolio = psycopg2.connect(database='portfolio', host='iemdb', 
+                                 user='nobody')
     pcursor = portfolio.cursor()
     
     pcursor.execute("""
