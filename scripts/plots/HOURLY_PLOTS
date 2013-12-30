@@ -13,7 +13,6 @@ set ftime="`date -u +'%Y%m%d%H'`00"
 ./TEMPS_plot.csh
 ./DEWPS_plot.csh
 ./WINDS_plot.csh
-./TEMPS_contour.csh
 ./DMX_overlay.csh
 ./OAX_overlay.csh
 ./DVN_overlay.csh
