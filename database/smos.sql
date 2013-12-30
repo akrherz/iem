@@ -2,7 +2,9 @@
 --- Store grid point geometries
 ---
 CREATE TABLE grid(
-  idx int UNIQUE
+  idx int UNIQUE,
+  gridx int,
+  gridy int
   );
  
  SELECT AddGeometryColumn('grid', 'geom', 4326, 'POINT', 2);
@@ -47,7 +49,7 @@ GRANT SELECT on data_2014_01 to nobody,apache;
   INHERITS (data);
 CREATE INDEX data_2014_02_grid_idx on data_2014_02(grid_idx);
 CREATE INDEX data_2014_02_valid_idx on data_2014_02(valid);
-GRANT SELECT on data_2014_03 to nobody,apache;
+GRANT SELECT on data_2014_02 to nobody,apache;
 
  create table data_2014_03( 
   CONSTRAINT __data_2014_03_check 
