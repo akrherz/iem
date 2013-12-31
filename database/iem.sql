@@ -273,6 +273,18 @@ create table summary_2014(
 CREATE INDEX summary_2014_day_idx on summary_2014(day);
 CREATE INDEX summary_2014_iemid_day_idx on summary_2014(iemid, day);
 GRANT SELECT on summary_2014 to nobody,apache;
+alter table summary_2014 alter max_tmpf set default -99;
+alter table summary_2014 alter min_tmpf set default 99;
+alter table summary_2014 alter max_sknt set default 0;
+alter table summary_2014 alter max_gust set default 0;
+alter table summary_2014 alter max_dwpf set default -99;
+alter table summary_2014 alter min_dwpf set default 99;
+alter table summary_2014 alter pday set default -99;
+alter table summary_2014 alter pmonth set default -99;
+alter table summary_2014 alter snoww set default -99;
+alter table summary_2014 alter max_drct set default -99;
+alter table summary_2014 add foreign key(iemid) references stations(iemid);
+
 
 CREATE TABLE trend_15m(
 	iemid int REFERENCES stations(iemid),
