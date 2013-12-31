@@ -1,27 +1,27 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
+include("../../../include/network.php");
+$nt = new NetworkTable("SCAN");
 
 $connection = iemdb("scan");
 
- $station = isset($_GET["station"]) ? $_GET["station"] : "2031";
+ $station = isset($_GET["station"]) ? $_GET["station"] : "S2031";
  $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 3*86400);
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 3*86400);
  $day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 3*86400);
 
-$table = "t${year}_hourly";
-
 $y2label = "Volumetric Soil Moisture [%]";
-
-
-$queryData = "c1smv, c2smv, c3smv, c4smv, c5smv, srad";
 
 $date = "$year-$month-$day";
 
-$query2 = "SELECT ". $queryData .", to_char(valid, 'yymmdd/HH24') as tvalid from ". $table ." WHERE 
-	station = '".$station."' and date(valid) >= ('". $date ."')  ORDER by tvalid ASC LIMIT 96";
+$rs = pg_prepare($connection, "SELECT", "SELECT c1smv, c2smv, c3smv, c4smv, c5smv, srad, 
+		to_char(valid, 'mmdd/HH24') as tvalid 
+		from alldata WHERE 
+		station = $1 and date(valid) >= $2  
+		ORDER by tvalid ASC LIMIT 96");
 
-$result = pg_exec($connection, $query2);
+$result = pg_execute($connection, "SELECT", Array($station, $date));
 
 $ydata1 = array();
 $ydata2 = array();
@@ -46,9 +46,8 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 
 pg_close($connection);
 
-include ("$rootpath/include/scanLoc.php");
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(660,450,"example1");
@@ -59,7 +58,7 @@ $graph->xaxis->SetFont(FF_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetPos("min");
-$graph->title->Set("Solar Rad & Soil Moisture for ".$sites[$station]["city"]." SCAN Site");
+$graph->title->Set("Solar Rad & Soil Moisture for ".$nt->table[$station]["name"]." SCAN Site");
 
 $graph->y2axis->scale->ticks->Set(100,25);
 //$graph->y2axis->scale->ticks->SetPrecision(0);
@@ -132,3 +131,5 @@ $graph->AddY2($lineplot);
 
 // Display the graph
 $graph->Stroke();
+
+?>

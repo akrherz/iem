@@ -1,25 +1,30 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
+include("../../../include/network.php");
+$nt = new NetworkTable("SCAN");
 
 $connection = iemdb("scan");
- $station = isset($_GET["station"]) ? $_GET["station"] : "2031";
+ $station = isset($_GET["station"]) ? $_GET["station"] : "S2031";
  $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", time() - 3*86400);
  $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time() - 3*86400);
  $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", time() - 3*86400);
 
 
-$table = "t${year}_hourly";
-
 $y2label = "Temperature [F]";
 
-$queryData = "c1tmpf, c2tmpf, c3tmpf, c4tmpf, c5tmpf, srad";
+$queryData = "";
 
 $date = "$year-$month-$day";
 
-$query2 = "SELECT ". $queryData .", valid from ". $table ." WHERE 
-	station = '".$station."' and date(valid) >= ('". $date ."')  ORDER by valid ASC LIMIT 96";
-$result = pg_exec($connection, $query2);
+$rs = pg_prepare($connection, "SELECT", "SELECT c1tmpf, c2tmpf, c3tmpf, 
+		c4tmpf, c5tmpf, srad, tmpf, valid, 
+		to_char(valid, 'mmdd/HH24') as tvalid 
+		from alldata WHERE 
+		station = $1 and date(valid) >= $2  
+		ORDER by tvalid ASC LIMIT 96");
+
+$result = pg_execute($connection, "SELECT", Array($station, $date));
 
 $ydata1 = array();
 $ydata2 = array();
@@ -43,10 +48,9 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 
 pg_close($connection);
 
-include ("$rootpath/include/scanLoc.php");
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480,"example1");
@@ -58,7 +62,7 @@ $graph->xaxis->SetLabelFormatString("m/d h A", true);
 //$graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
 $graph->xaxis->SetPos("min");
-$graph->title->Set("Solar Rad & Soil Temps for ".$sites[$station]["city"]." SCAN Site");
+$graph->title->Set("Solar Rad & Soil Temps for ".$nt->table[$station]["name"]." SCAN Site");
 
 $graph->y2axis->scale->ticks->Set(100,25);
 //$graph->y2axis->scale->ticks->SetPrecision(0);
@@ -131,3 +135,5 @@ $graph->legend->Pos(0.10, 0.06, "right", "top");
 
 // Display the graph
 $graph->Stroke();
+
+?>
