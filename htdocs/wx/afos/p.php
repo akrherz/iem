@@ -18,6 +18,10 @@ $conn = iemdb("afos");
 $ts = gmmktime( substr($e,8,2), substr($e,10,2), 0, 
       substr($e,4,2), substr($e,6,2), substr($e,0,4) );
 
+$t->twitter_description = sprintf("%s issued by NWS %s at %s UTC", substr($pil,0,3),
+		substr($pil,3,3), gmdate("d M Y H:i", $ts));
+
+
 if ($dir == 'next'){
 	$sortdir = "ASC";
 	$offset0 = 60;

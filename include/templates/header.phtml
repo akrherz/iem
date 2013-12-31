@@ -6,12 +6,15 @@ if (isset($this)){
 	$bodyextra = array_key_exists('bodyextra', $this->vars)? ' '. $this->bodyextra : '';
 	$twimage = array_key_exists('twitter_image', $this->vars) ? 
 				$this->twitter_image : 'http://mesonet.agron.iastate.edu/images/logo_small.png';
+	$twdescription = array_key_exists('twitter_description', $this->vars) ? 
+				$this->twitter_description : 'Iowa Environmental Mesonet of Iowa State University';
 } else{
 	$title = isset($TITLE) ? $TITLE: 'Iowa Environmental Mesonet';
 	$refresh = isset($REFRESH)? $REFRESH: '';
 	$headextra = isset($HEADEXTRA) ? $HEADEXTRA: '';
 	$bodyextra = isset($BODYEXTRA) ? ' '. $BODYEXTRA: '';
 	$twimage = "http://mesonet.agron.iastate.edu/images/logo_small.png";
+	$twdescription = "Iowa Environmental Mesonet of Iowa State University";
 }
 ?>
 <!DOCTYPE html>
@@ -39,7 +42,7 @@ if (isset($this)){
     <meta name="twitter:card" content="summary">
 	<meta name="twitter:image:src" content="<?php echo $twimage; ?>">
 	<meta name="twitter:title" content="<?php echo $title; ?>">
-	<meta name="twitter:description" content="<?php echo $title; ?>">
+	<meta name="twitter:description" content="<?php echo $twdescription; ?>">
 	<meta name="twitter:url" content="http://mesonet.agron.iastate.edu">
 	<meta name="twitter:creator" content="@akrherz">
 	<meta name="twitter:image:width" content="85">
