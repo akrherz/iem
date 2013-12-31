@@ -4,9 +4,9 @@
 
 import mx.DateTime
 import access
-import iemdb
+import psycopg2
 import psycopg2.extras
-IEM = iemdb.connect('iem', bypass=True)
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 import tracker
 track = tracker.Engine()
@@ -48,8 +48,9 @@ def processfile( fp ):
     else:
         ts = mx.DateTime.strptime(data['date_time'][:-6], '%Y-%m-%d %H:%M')
     if ts.year < 2010:
-      print "BAD! timestamp", ts
-      return
+        print "rwis/mini_portable.py file: %s bad timestamp: %s" % (fp,
+                                                            data['date_time'])
+        return
     iem.setObTime( ts )
     iem.ts = ts
     iem.data['ts'] = ts
