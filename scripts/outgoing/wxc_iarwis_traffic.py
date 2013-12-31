@@ -5,13 +5,14 @@ Dump out a file of the current RWIS traffic data for Iowa, please
 import psycopg2
 import os
 import subprocess
+import datetime
 from psycopg2.extras import DictCursor
-IEM = psycopg2.connect(database='iem', host='iemdb')
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor(cursor_factory=DictCursor)
 
 
 out = open('/tmp/wxc_iarwis_traffic.txt', 'w')
-out.write("""Weather Central 001d0300 Surface Data
+out.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
   12
    3 IEM Sensor ID
    5 Station ID
@@ -25,7 +26,7 @@ out.write("""Weather Central 001d0300 Surface Data
    4 Normal Volume
    4 Long Axel Volume
    4 Occupancy
-""")
+""" % (datetime.datetime.now().strftime("%Y.%m.%d.%H%M"),))
 
 icursor.execute("""SELECT r.*, l.nwsli, extract(hour from r.valid) as hour,
     extract(day from r.valid) as day, extract(minute from r.valid) as minute,
