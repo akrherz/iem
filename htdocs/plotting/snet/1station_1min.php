@@ -1,27 +1,24 @@
 <?php 
  include("../../../config/settings.inc.php");
  include('../../schoolnet/switchtv.php'); 
- include("$rootpath/include/forms.php");
- include("$rootpath/include/imagemaps.php"); 
+ include("../../../include/forms.php");
+ include("../../../include/imagemaps.php"); 
 
 $year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
 $month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
 $day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
 $station = isset($_GET['station'] ) ? $_GET['station'] : "";
-
-?>
-
-<?php 
+ 
 if (! isset($_GET["station"])){
   $network = $tv;
   $HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
  <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
- <script src='${rooturl}/js/olselect.php?network=${network}'></script>";
+ <script src='/js/olselect.php?network=${network}'></script>";
  $BODYEXTRA = "onload=\"init()\"";
 }
 $TITLE = "IEM | 1 Minute Time Series";
 $THISPAGE = "networks-schoolnet"; 
-include("$rootpath/include/header.php"); 
+include("../../../include/header.php"); 
 ?>
 <h3>1 minute data interval time series</h3>
 
@@ -80,4 +77,4 @@ echo "<p><b>Note:</b> The wind speeds are indicated every minute by the red line
 </td></tr></table>
 </td></tr></table>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../../include/footer.php"); ?>

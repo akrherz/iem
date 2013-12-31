@@ -40,7 +40,7 @@ $times = Array();
 $lts = 0;
 
 while (list ($line_num, $line) = each ($fcontents)) {
-  $parts = split (",", $line);
+  $parts = preg_split ("/,/", $line);
   $thisGust = 0;
   $timestamp = $parts[0];
  
@@ -67,10 +67,10 @@ while (list ($line_num, $line) = each ($fcontents)) {
 } // End of while
 
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
-include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph_scatter.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480);
