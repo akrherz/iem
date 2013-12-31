@@ -1,16 +1,8 @@
 <?php
-set_time_limit(1000);
 include("../../../config/settings.inc.php");
-include_once("$rootpath/include/database.inc.php");
-/**
- * Script that does the processing or hands off to plotter.
- * Must send content-type early, if we want this to work
- * 11 Nov 2002:	Add Delimitation argument
- *  4 Jun 2003	Support for multiple stations
- * 24 Mar 2004	Support AWOS sky coverage codes
- */
-
-include("$rootpath/include/awosLoc.php");
+include_once("../../../include/database.inc.php");
+include("../../../include/network.php");
+$nt = new NetworkTable("AWOS");
 
 $skycover = Array(
  0 => "NOREPORT",
@@ -58,7 +50,7 @@ foreach ($stations as $key => $value){
 
 if ($selectAll){
   $stationString = "(";
-  foreach ($Wcities as $key => $value){
+  foreach ($nt->table as $key => $value){
     $stationString .= " '". $key ."',";
   }
 }
@@ -115,7 +107,7 @@ if ($what == "download"){
 include ("$rootpath/include/jpgraph/jpgraph_line.php");
 include ("$rootpath/include/jpgraph/jpgraph_date.php");
  if ($selectAll){
-  foreach ($Wcities as $key => $value){
+  foreach ($nt->table as $key => $value){
    $station = $key;
    include ("plot_1min.php");
   }
@@ -160,9 +152,9 @@ if ($tz == "UTC")
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
   $sid = $row["station"];
-  echo $sid . $d[$delim] . $Wcities[$sid]["city"] ;
+  echo $sid . $d[$delim] . $nt->table[$sid]["name"] ;
   if ($gis == "yes"){
-     echo  $d[$delim] . $Wcities[$sid]["lat"] . $d[$delim] .  $Wcities[$sid]["lon"] ;
+     echo  $d[$delim] . $nt->table[$sid]["lat"] . $d[$delim] .  $nt->table[$sid]["lon"] ;
   } 
   echo $d[$delim] . $row["dvalid"] . $d[$delim];
   for ($j=0; $j < $num_vars;$j++){
