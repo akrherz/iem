@@ -1,25 +1,26 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
 $connection = iemdb("scan");
- $station = isset($_GET["station"]) ? $_GET["station"] : "2031";
+include("../../../include/network.php");
+$nt = new NetworkTable("SCAN");
+
+ $station = isset($_GET["station"]) ? $_GET["station"] : "S2031";
  $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 3*86400);
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 3*86400);
  $day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 3*86400);
 
-$table = "t${year}_hourly";
-
 $date = "$year-$month-$day";
-
-
 $var = "phour";
 $accum = 1;
 
+$rs = pg_prepare($connection, "SELECT", "SELECT sknt, drct, phour,
+		to_char(valid, 'mmdd/HH24') as tvalid 
+		from alldata WHERE 
+		station = $1 and date(valid) >= $2  and phour >= 0
+		ORDER by tvalid ASC LIMIT 96");
 
-$query2 = "SELECT ".$var.", to_char(valid, 'mmdd/HH24') as tvalid from ". $table ." WHERE 
-	station = '". $station ."' and date(valid) >= ('". $date ."')  ORDER by tvalid ASC LIMIT 96";
-
-$result = pg_exec($connection, $query2);
+$result = pg_execute($connection, "SELECT", Array($station, $date));
 
 $ydata1 = array();
 
@@ -35,9 +36,8 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 
 pg_close($connection);
 
-include ("$rootpath/include/scanLoc.php");
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_bar.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_bar.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(660,450,"example1");
@@ -46,7 +46,7 @@ $graph->img->SetMargin(45,10,55,90);
 //$graph->xaxis->SetFont(FS_FONT1,FS_BOLD);
 $graph->xaxis->SetTickLabels($xlabel);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set("Hourly Precipitation for ".$sites[$station]["city"]." SCAN Site");
+$graph->title->Set("Hourly Precipitation for ".$nt->table[$station]["name"]." SCAN Site");
 
 $graph->yaxis->scale->ticks->Set(.25,.1);
 //$graph->yaxis->scale->ticks->SetPrecision(2);
@@ -77,3 +77,5 @@ $graph->Add($bar1);
 
 // Display the graph
 $graph->Stroke();
+
+?>
