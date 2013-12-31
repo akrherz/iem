@@ -24,7 +24,7 @@ icursor.execute("""
     ST_y(geom) as lat, county, count(*) from
     summary_2013 t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
-    day in ('2013-12-22', '2013-12-23') and snow >= 0 and 
+    day in ('2013-12-31', '2013-12-31') and snow >= 0 and 
     ST_x(geom) BETWEEN %s and %s and
     ST_y(geom) BETWEEN %s and %s  
     GROUP by id, lon, lat, county
@@ -38,7 +38,7 @@ pcursor.execute("""
         ST_x(geom) as lon, 
        ST_y(geom) as lat
       from lsrs_2013 WHERE type in ('S') and magnitude > 0 and 
-      valid > '2013-12-21 00:00' and valid < '2013-12-26 23:59'
+      valid > '2013-12-30 00:00' and valid < '2013-12-31 23:59'
       GROUP by state, lon, lat
 """)
 for row in pcursor:
@@ -58,8 +58,8 @@ data = np.ones( (iemre.NY, iemre.NX)) * -99
 # Pass one, create our estimates
 for i, lat in enumerate(iemre.YAXIS):
     for j, lon in enumerate(iemre.XAXIS):
-        lon1 = lon + 0.25
-        lat1 = lat + 0.25
+        lon1 = lon + 0.75
+        lat1 = lat + 0.5
         cell_df = df[ ((df['lat'] >= lat) & (df['lat'] < lat1) & 
                        (df['lon'] >= lon) & (df['lon'] < lon1))]
         if len(cell_df) > 0:
@@ -84,8 +84,8 @@ for i, lat in enumerate(iemre.YAXIS):
 clevs = np.array([0.01,0.1,0.25,0.5,1,2,3,5,7,9,11,13,15,17])
 
 m = MapPlot(sector='iowa',
-            title="21-22 Dec 2013 - IEM Snowfall Total Analysis",
-            subtitle="Snowfall totals up until 12 PM 22 Dec 2013")
+            title="30 Dec 2013 - IEM Snowfall Total Analysis",
+            subtitle="Snowfall totals up until 8 AM 31 Dec 2013")
 xs,ys = np.meshgrid( np.concatenate([iemre.XAXIS, [iemre.XAXIS[-1] + 0.25,]]),
                      np.concatenate([iemre.YAXIS, [iemre.YAXIS[-1] + 0.25,]]))
 cmap = cm.get_cmap('Spectral_r')
