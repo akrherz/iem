@@ -4,7 +4,8 @@ define("IEM_APPID", 151);
 include("../../include/database.inc.php");
 include("../../include/myview.php");
 include("../../include/vtec.php");
-include("../../include/wfoLocs.php");
+include("../../include/network.php");
+$nt = new NetworkTable("WFO");
 
 $clobber = isset($_REQUEST["clobber"]);
 $wfo = isset($_REQUEST["wfo"]) ? strtoupper(substr($_REQUEST["wfo"],0,3)): null;
@@ -79,8 +80,8 @@ Limit Numbers by WFO:
 EOF;
 $content .= "<select name=\"wfo\">
  <option value=\"ALL\" SELECTED>All Available</option>";
-while( list($key, $value) = each($wfos) ){
-	$content .= "<option value='$key'>[$key] ". $wfos[$key]["city"] ."</option>\n";
+while( list($key, $value) = each($nt->table) ){
+	$content .= "<option value='$key'>[$key] ". $value["name"] ."</option>\n";
 }
 $content .= "
 </select>";

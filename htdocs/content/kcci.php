@@ -9,11 +9,12 @@ function dwp($tmpf, $relh){
 
 }
 include("../../config/settings.inc.php");
-include("$rootpath/include/snet_locs.php");
-include("$rootpath/include/mlib.php");
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
-$station = isset($_GET["station"]) ? substr($_GET["station"],0,5) : 'SSAS2';
+include("../../include/mlib.php");
+include("../../include/network.php");
+$nt = new NetworkTable("KCCI");
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
+$station = isset($_GET["station"]) ? substr($_GET["station"],0,5) : 'SAMI4';
 $iemdb = new IEMAccess();
 $myOb = $iemdb->getSingleSite($station);
 //print_r($myOb);
@@ -63,7 +64,7 @@ $myOb = $iemdb->getSingleSite($station);
 //imagettftext ( resource image, int size, int angle, int x, int y, int col, string fontfile, string text)
 
 // imagefilledrectangle ( $gif, 167, 25, 264, 36, $black);
- ImageTTFText($gif, 10, 0, 169 , 34, $white, $Font, strtoupper(substr($cities['KCCI'][$station]["short"], 0, 16)) );
+ ImageTTFText($gif, 10, 0, 169 , 34, $white, $Font, strtoupper(substr($nt->table[$station]["name"], 0, 16)) );
 
  // Box to hold current dew Point!
 // imagerectangle ( $gif, 10, 40, 40, 60, $black);
@@ -197,12 +198,6 @@ if ($tmpf > -99){
      $white, $Font, $minTemp );
  ImageTTFText($gif, 10, 0, $leftside - 50 + 1 , $minT_y - $minLineHeight -1 +20 +10, 
      $white, $Font, "MIN");
-
-//	$size = imagettfbbox(12, 0, $Font, $Scities[$site]["city"]);
-//	$dx = abs($size[2] - $size[0]);
-//	$dy = abs($size[5] - $size[3]);
-//	$x_pad = ($width - $dx) / 2 ;
-//  ImageTTFText($gif, 8, 0, 10 , 85, $red, "./kcci.tff",$Scities[$site]["city"] );
 
 	header("content-type: image/png");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");    // Date in the past

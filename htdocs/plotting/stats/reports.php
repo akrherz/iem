@@ -1,6 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
 $connection = iemdb("access");
 
 $network = isset($_GET["network"]) ? $_GET["network"] : "IA_ASOS";
@@ -28,8 +28,8 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 pg_close($connection);
 
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
 
 $goal = Array("awos" => 35, "asos" => 15, "rwis" => 70);
 
@@ -65,4 +65,3 @@ $graph->Add($lineplot);
 // Display the graph
 $graph->Stroke();
 ?>
-

@@ -262,12 +262,6 @@ $tx2->SetPos(0.01,0.11, 'left', 'top');
 $tx2->SetFont(FF_FONT1, FS_NORMAL, 10);
 
 include ("$rootpath/include/mlib.php");
-/*
-include ("$rootpath/include/currentSFOb.php");
-$mySOb = currentSFOb($station);
-include ("$rootpath/include/currentOb.php");
-$myOb = currentOb($station);
-*/
 $mySOb = Array();
 
 

@@ -1,7 +1,8 @@
 <?php 
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 18);
-include("../../../include/wfoLocs.php");
+include("../../../include/network.php");
+$nt = new NetworkTable("WFO");
 
 function get_file_size($filename, $size_in = 'MB')
 {
@@ -62,8 +63,8 @@ request or email <a href="<?php echo $rooturl; ?>/info/contacts.php">us</a> for 
 <select name="wfos[]" MULTIPLE size="5">
  <option value="ALL" SELECTED>All Available</option>
 <?php
-while( list($key, $value) = each($wfos) ){
-  echo "<option value='$key'>[$key] ". $wfos[$key]["city"] ."</option>\n";
+while( list($key, $value) = each($nt->table) ){
+  echo "<option value='$key'>[$key] ". $nt->table[$key]["name"] ."</option>\n";
 }
 ?>
 </select>

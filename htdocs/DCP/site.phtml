@@ -3,7 +3,7 @@ define("IEM_APPID", 110);
 include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 include("../../include/forms.php");
-include("../../include/stations.php");
+include("../../include/imagemaps.php");
 
 $day = isset($_GET['day']) ? $_GET["day"] : date("d");
 $month = isset($_GET['month']) ? $_GET["month"] : date("m");
@@ -93,7 +93,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 <input type="hidden" name="network" value="<?php echo $network; ?>" />
 <table><tr><th>Station:</th><th>Year</th><th>Month</th><th>Day</th><th></th></tr>
 <tr>
-<td><?php echo networkSelect(iemdb("mesosite"),$network, $station); ?>
+<td><?php echo networkSelect($network, $station); ?>
 <br /><a href="site.phtml?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>">Select from map</a></td>
 <td><?php echo yearSelect(2002,$year); ?></td>
 <td><?php echo monthSelect($month); ?></td>

@@ -11,7 +11,7 @@ function dwp($tmpf, $relh){
 include("../../config/settings.inc.php");
 include("$rootpath/include/network.php");
 $nt = new NetworkTable('KIMT');
-$cities = $nt->table;
+
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");
@@ -64,7 +64,7 @@ $myOb = $iemdb->getSingleSite($station);
 
 
  //imagefilledrectangle ( $gif, 120, 22, 320, 36, $white);
- ImageTTFText($gif, 12, 0, 125 , 34, $red, $Font, strtoupper($cities[$station]["name"]) );
+ ImageTTFText($gif, 12, 0, 125 , 34, $red, $Font, strtoupper($nt->table[$station]["name"]) );
 
  // Box to hold current dew Point!
 // imagerectangle ( $gif, 10, 40, 40, 60, $black);
@@ -165,11 +165,6 @@ $windDirs = Array(
  ImageTTFText($gif, 14, 0, 195, 70, $white, $Font, $maxTemp );
  ImageTTFText($gif, 14, 0, 195, 94, $white, $Font, $minTemp );
 
-//	$size = imagettfbbox(12, 0, $Font, $Scities[$site]["city"]);
-//	$dx = abs($size[2] - $size[0]);
-//	$dy = abs($size[5] - $size[3]);
-//	$x_pad = ($width - $dx) / 2 ;
-//  ImageTTFText($gif, 8, 0, 10 , 85, $red, "./kcci.tff",$Scities[$site]["city"] );
 
 	header("content-type: image/png");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");    // Date in the past

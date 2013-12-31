@@ -16,7 +16,6 @@ $height = "450";
 
 
 include("$rootpath/include/mlib.php");
-include("$rootpath/include/currentOb.php");
 include("$rootpath/include/nexlib2.php");
 ?>
 <div class="warning">This app will be discontinued. If you are still using this app, 

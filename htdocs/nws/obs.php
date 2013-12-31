@@ -12,7 +12,8 @@
   $THISPAGE = "current-sort";
   include("$rootpath/include/header.php"); 
   include("$rootpath/include/mlib.php"); 
-  include("$rootpath/include/wfoLocs.php");
+  include("$rootpath/include/network.php");
+  $nt = new NetworkTable("WFO");
   include("$rootpath/include/forms.php");
   include("$rootpath/include/station.php");
   include("$rootpath/include/iemaccess.php");
@@ -41,7 +42,15 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 <input type="hidden" value="<?php echo $sortcol; ?>" name="sortcol">
 <table border=1 cellspacing=0 cellpadding=1>
 <tr>
- <th>Select WFO: <?php echo wfoSelect($wfo); ?></td>
+ <th>Select WFO: <select name="wfo">
+<?php
+while( list($key, $value) = each($nt->table) ){
+  echo "<option value=\"$key\" ";
+  if ($wfo == $key) echo "SELECTED";
+  echo ">[".$key."] ". $nt->table[$key]["name"] ."\n";
+}
+?>
+</select></td>
   <th>View Options:</th>
   <td>Include METARS:
   <input value="no" type="radio" name="metar" <?php if ($metar == "no") echo  "CHECKED"; ?>> No

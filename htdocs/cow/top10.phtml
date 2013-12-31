@@ -1,10 +1,11 @@
 <?php
 
 include("../../config/settings.inc.php");
-include("$rootpath/include/wfoLocs.php");
-$wfos["ALL"] = Array("city" => " --- All ---- ");
 include("$rootpath/include/forms.php");
 include("$rootpath/include/database.inc.php");
+include("../../include/network.php");
+$nt = new NetworkTable("WFO");
+$nt->table["ALL"] = Array("name" => " --- All ---- ");
 include("$rootpath/include/vtec.php");
 $postgis = iemdb('postgis');
 
@@ -70,8 +71,16 @@ experimental at best.</p>
 </tr>
 </head>
 <tbody>
-<tr>
- <td><?php echo wfoSelect($wfo); ?></td>
+<tr><td>
+<select name="wfo">
+ <option value="ALL">All Available</option>
+ <?php 
+while( list($key, $value) = each($nt->table) ){
+  echo "<option value='$key'>[$key] ". $value["name"] ."</option>\n";
+}
+		?>
+</select></td>
+
  <td>
   <select name="limit">
    <option value="TOSV" <?php if ($limit == 'TOSV') echo 'SELECTED'; ?>>Tornado + Severe Thunderstorm</option>
