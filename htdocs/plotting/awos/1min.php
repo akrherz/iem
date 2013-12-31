@@ -2,12 +2,12 @@
 // 1 minute schoolnet data plotter
 // Cool.....
 include("../../../config/settings.inc.php");
-
-include ("$rootpath/include/awosLoc.php");
-include("$rootpath/include/database.inc.php");
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_led.php");
+include("../../../include/database.inc.php");
+include("../../../include/network.php");
+$nt = new NetworkTable("AWOS");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_led.php");
 
 $station = isset($_GET["station"]) ? $_GET["station"] : "ADU";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
@@ -145,7 +145,7 @@ $graph->xaxis->SetTextTickInterval(60);
 
 $graph->xaxis->SetLabelAngle(90);
 $graph->yscale->SetGrace(10);
-$graph->title->Set($Wcities[$station]['city'] ." Time Series");
+$graph->title->Set($nt->table[$station]['name'] ." Time Series");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
@@ -184,9 +184,6 @@ $t1->SetFont(FF_FONT1,FS_BOLD);
 //$t1->SetBox("white","black",true);
 $t1->SetColor("black");
 $graph->AddText($t1);
-
-
-
 
 $graph->Stroke();
 
