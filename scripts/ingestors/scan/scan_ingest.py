@@ -109,8 +109,9 @@ def savedata( data , maxts ):
     ts = datetime.datetime.strptime(tstr, '%Y-%m-%d %H:%M')
     sid = "S%s" % (data['Site Id'],)
     
-    if maxts.has_key(sid) and maxts[sid] > ts:
+    if maxts.has_key(sid) and maxts[sid] >= ts:
         return
+    maxts[sid] = ts
     iem = access.Ob(sid, 'SCAN')
     iem.txn = icursor
 
