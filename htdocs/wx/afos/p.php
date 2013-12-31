@@ -8,8 +8,11 @@ define("IEM_APPID", 47);
 $t->thispage = "archive-afos";
 
 $e = isset($_GET['e']) ? intval($_GET['e']) : "201112151144";
-$pil = isset($_GET['pil']) ? substr($_GET['pil'],0,6) : "AFDDMX";
+$pil = isset($_GET['pil']) ? strtoupper(substr($_GET['pil'],0,6)) : "AFDDMX";
 $dir = isset($_REQUEST['dir']) ? $_REQUEST['dir'] : null;
+
+$t->title = sprintf("%s from NWS %s", substr($pil,0,3), substr($pil,3,3));
+$t->twitter_image = "http://mesonet.agron.iastate.edu/content/pil_${pil}.png";
 
 $conn = iemdb("afos");
 $ts = gmmktime( substr($e,8,2), substr($e,10,2), 0, 
