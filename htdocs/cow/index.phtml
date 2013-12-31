@@ -34,12 +34,13 @@ include("../../config/settings.inc.php");
 
  $TITLE = "IEM Cow";
  $THISPAGE = "severe-cow";
- include("../../include/header.php");
- include("../../include/forms.php");
- include("../../include/wfoLocs.php");
  include("../../include/database.inc.php");
+ include("../../include/header.php");
+ include("../../include/network.php");
+ $nt = new NetworkTable("WFO");
+ include("../../include/forms.php");
 ?>
-<a href="<?php echo $rooturl; ?>/cow/">Reset Application</a> (All timestamps are displayed in UTC)
+<a href="/cow/">Reset Application</a> (All timestamps are displayed in UTC)
 <form method="GET" name="cow">
 <table>
 <tr>
@@ -65,10 +66,10 @@ include("../../config/settings.inc.php");
 <td colspan="3">
 <select name="wfo">
 <?php
-while( list($key, $value) = each($wfos) ){
+while( list($key, $value) = each($nt->table) ){
   echo "<option value=\"$key\" ";
   if ($wfo == $key) echo "SELECTED";
-  echo ">[".$key."] ". $wfos[$key]["city"] ."\n";
+  echo ">[".$key."] ". $nt->table[$key]["name"] ."\n";
 }
 ?>
 </select>

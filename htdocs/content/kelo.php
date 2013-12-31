@@ -9,7 +9,6 @@ function dwp($tmpf, $relh){
   return round( ( $dwpk - 273.15 ) * 9.00/5.00 + 32 , 0);
 
 }
-include("$rootpath/include/snet_locs.php");
 include("$rootpath/include/mlib.php");
 include("$rootpath/include/iemaccess.php");
 include("$rootpath/include/iemaccessob.php");

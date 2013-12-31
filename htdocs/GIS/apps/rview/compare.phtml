@@ -33,8 +33,8 @@ $TITLE = "IEM | GIS RADAR Comparison";
 $THISPAGE = "current-radar";
 include("$rootpath/include/header.php");
 include("lib.php");
-include("$rootpath/include/nexradLoc.php");
-
+include("../../../../include/network.php");
+$nt = new NetworkTable("NEXRAD");
 
 $latlon = ms_newprojectionobj("init=epsg:4326");
 $p26915 = ms_newprojectionobj("init=epsg:26915");
@@ -47,11 +47,11 @@ $cntyMdpoint->setXY( ($extents[0] + $extents[2])/2,
 $cntyMdpoint->project($latlon, $p26915);
 
 $n = Array("DMX", "DVN", "ARX", "MPX", "FSD", "OAX", "EAX", "KCCI");
-$nexrads["KCCI"] = Array("lat"=> 41.8072, "lon"=> -93.6214);
+$nt->table["KCCI"] = Array("lat"=> 41.8072, "lon"=> -93.6214);
 $distances = Array();
 while (list($key, $site) = each($n) ){
   $r = ms_newpointobj();
-  $r->setXY($nexrads[$site]['lon'], $nexrads[$site]['lat']);
+  $r->setXY($nt->table[$site]['lon'], $nt->table[$site]['lat']);
   $r->project($latlon, $p26915);
   $distances[$site] = round( $r->distanceToPoint($cntyMdpoint) / 1000 , 0);
 

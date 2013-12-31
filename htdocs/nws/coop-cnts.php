@@ -5,7 +5,8 @@
 include("../../config/settings.inc.php");
 
 include("$rootpath/include/database.inc.php");
-include("$rootpath/include/wfoLocs.php");
+include("../../include/network.php");
+$nt = new NetworkTable("WFO");
 include("$rootpath/include/forms.php");
 $dbconn = iemdb("iem");
 
@@ -39,7 +40,15 @@ is "missing" data from sites.  Please <a href="../info/contacts.php">let us know
 <form method="GET" name="changeme">
 <table cellpadding="2" border="1" cellspacing="0">
 <tr>
-<td><strong>Select WFO:</strong><?php echo wfoSelect($wfo); ?></td>
+<td><strong>Select WFO:</strong><select name="wfo">
+<?php
+while( list($key, $value) = each($nt->table) ){
+  echo "<option value=\"$key\" ";
+  if ($wfo == $key) echo "SELECTED";
+  echo ">[".$key."] ". $nt->table[$key]["name"] ."\n";
+}
+?>
+</select></td>
 <td><strong>Select Year:</strong><?php echo yearSelect("2010", $year); ?></td>
 <td><strong>Select Month:</strong><?php echo monthSelect($month); ?></td>
 </tr>

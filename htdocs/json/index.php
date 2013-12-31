@@ -13,7 +13,7 @@
   	}
   		</style>";
   $TITLE = "IEM | JSONP Web Services";
-  include("$rootpath/include/header.php"); 
+  include("../../include/header.php"); 
 ?>
 <div style="width: 800px;">
 <h3>IEM Provided JSON-P Webservices</h3>
@@ -246,4 +246,4 @@ for a given network that collects webcams and a UTC timestamp.",
  <p>That is all for now. Enjoy!
  
  </div>
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../../include/footer.php"); ?>

@@ -1,11 +1,12 @@
 <?php
 include("../../config/settings.inc.php");
 define("IEM_APPID", 71);
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 $THISPAGE = "severe-river";
-include("$rootpath/include/header.php");
-include("$rootpath/include/wfoLocs.php");
-include("$rootpath/include/forms.php");
+include("../../include/header.php");
+include("../../include/wfoLocs.php");
+include("../../include/forms.php");
+include("../../include/imagemaps.php");
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3): "DMX";
 $state = isset($_GET["state"]) ? substr($_GET["state"],0,3): "IA";
 
@@ -97,7 +98,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 echo $ptitle;
 echo "<a href=\"?all\">View All</a>";
 echo "<p><form method='GET' name='wfo'>";
-echo 'Select by NWS Forecast Office:'. wfoSelect($wfo);
+echo 'Select by NWS Forecast Office:'. networkSelect("WFO", $wfo);
 echo "<input type='submit' value='Select by WFO'>";
 echo "</form>";
 ?>

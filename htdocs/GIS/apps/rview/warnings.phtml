@@ -92,8 +92,10 @@ if ($isarchive && $basets < $wfo_filter_ts)
   $filter = 0;
 }
 
-include("$rootpath/include/wfoLocs.php");
-$wfos["NHC"] = Array("lat" => 25.75 , "lon" => -80.38 , "city" => "National Hurricane Center");
+include("$rootpath/include/network.php");
+$nt = new NetworkTable("WFO");
+$nt->table["NHC"] = Array("lat" => 25.75 , "lon" => -80.38 , 
+		"name" => "National Hurricane Center");
 include("$rootpath/include/forms.php");
 include('lib.php');
 $uri = "$baseuri?frames=$frames&interval=$interval&site=$site&cu=$cu&archive=$archive&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom&warngeo=$warngeo";
@@ -114,8 +116,8 @@ if (isset($_GET["lat0"]) && isset($_GET["lon0"]) && $osite == $site)
 else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site)
 {
   $osite = $site;
-  $lat0 = $wfos[$site]["lat"];
-  $lon0 = $wfos[$site]["lon"];
+  $lat0 = $nt->table[$site]["lat"];
+  $lon0 = $nt->table[$site]["lon"];
   $uri .= "&lat0=$lat0&lon0=$lon0";
 }
 
@@ -332,7 +334,7 @@ while ( list($key, $val) = each($wA) )
 
 }
 if ($k == 0 && $filter){
- $msg = "<p>No warnings currently valid for ". $wfos[$site]["city"] ;
+ $msg = "<p>No warnings currently valid for ". $nt->table[$site]["name"] ;
 } else if ($k == 0) {
  $msg = "<p>No warnings valid in the United States";
 }

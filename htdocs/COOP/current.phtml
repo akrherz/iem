@@ -5,7 +5,7 @@
 include("../../config/settings.inc.php");
 define("IEM_APPID", 41);
  include("$rootpath/include/network.php");
- include("$rootpath/include/wfoLocs.php");
+ $nt = new NetworkTable("WFO");
  include("$rootpath/include/forms.php");
  include("$rootpath/include/iemaccess.php");
  include("$rootpath/include/iemaccessob.php");
@@ -164,7 +164,15 @@ Option 1: <strong>View by State:</strong> <select name="network">
 
 <form method="GET" action="current.phtml" name="wfoctrl">
 <input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
-Option 2: <strong>View by WFO:</strong> <?php echo wfoSelect($wfo); ?>
+Option 2: <strong>View by WFO:</strong> <select name="wfo">
+<?php
+while( list($key, $value) = each($nt->table) ){
+  echo "<option value=\"$key\" ";
+  if ($wfo == $key) echo "SELECTED";
+  echo ">[".$key."] ". $nt->table[$key]["name"] ."\n";
+}
+?>
+</select>
 <input type="submit" value="Go!">
 </form>
 

@@ -7,7 +7,6 @@
  */
 include("../../config/settings.inc.php");
 include("../../include/mlib.php");
-include("../../include/currentOb.php");
 include("../../include/network.php");
 $nt = new NetworkTable("AWOS");
 $cities = $nt->table;

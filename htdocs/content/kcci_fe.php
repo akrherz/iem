@@ -4,11 +4,12 @@
   include("../../config/settings.inc.php");
   $station = isset($_GET['station']) ? $_GET["station"] : 'SKCI4';
   $min = isset($_GET["min"]) ? $_GET["min"] : 1;
-  include("$rootpath/include/snet_locs.php");
-  include("$rootpath/include/imagemaps.php");
+  include("../../include/imagemaps.php");
+  include("../../include/network.php");
+  $nt = new NetworkTable("KCCI");
  $secs = intval($min) * 60;
 ?>
-  <title>IEM | KCCI SchoolNet | <?php echo $cities["KCCI"][$station]["short"]; ?></title>
+  <title>IEM | KCCI SchoolNet | <?php echo $nt->table[$station]["name"]; ?></title>
   <meta http-equiv="refresh" content="<?php echo $secs; ?>; URL=kcci_fe.php?min=<?php echo $min; ?>&station=<?php echo $station; ?>">
 
 </head>
@@ -21,13 +22,13 @@
   echo "SchoolNet Site: ";
 echo "<select  onChange=\"location=this.form.station.options[this.form.station.selectedIndex].value\" name=\"station\">\n";
 
-$Scities = $cities["KCCI"];
-while( list($key, $val) = each($Scities) ){
-  echo "<option value=\"$rooturl/content/kcci_fe.php?min=".$min."&station=". $key ."\"";
+reset($nt->table);
+while( list($key, $val) = each($nt->table) ){
+  echo "<option value=\"/content/kcci_fe.php?min=".$min."&station=". $key ."\"";
   if ($station == $key){
         echo " SELECTED ";
   }
-  echo " >". $val["city"] ."\n";
+  echo " >". $val["name"] ."\n";
 }
 
 echo "</select>\n";

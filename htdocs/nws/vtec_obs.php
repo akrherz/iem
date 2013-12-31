@@ -19,7 +19,8 @@ $significance = $ar[1];
  $TITLE = "IEM | NWS Watch/Warning/Advisory + ASOS Observations";
 
   include("$rootpath/include/header.php"); 
-  include("$rootpath/include/wfoLocs.php");
+  include("../../include/network.php");
+  $nt = new NetworkTable("WFO");
   include("$rootpath/include/forms.php");
   include("$rootpath/include/mlib.php");
   ?>
@@ -62,7 +63,15 @@ $significance = $ar[1];
   	</select></td>
   	<td><input type="text" size="10" name="sid" value="<?php echo $sid; ?>" /></td>
   	<td><input type="text" size="10" name="eid" value="<?php echo $eid; ?>" /></td>
-  	<td><?php echo wfoSelect($wfo); ?></td>
+  	<td><select name="wfo">
+<?php
+while( list($key, $value) = each($nt->table) ){
+  echo "<option value=\"$key\" ";
+  if ($wfo == $key) echo "SELECTED";
+  echo ">[".$key."] ". $nt->table[$key]["name"] ."\n";
+}
+?>
+</select></td>
     <td><?php echo yearSelect(2005, $year); ?></td>
     </tr>
     </table>

@@ -4,8 +4,9 @@ define("IEM_APPID", 149);
 $TITLE = "IEM | Storm Based Warning Stats";
 $THISPAGE = "severe-cow";
 include("../../include/forms.php");
-include("../../include/wfoLocs.php");
 include("../../include/database.inc.php");
+include("../../include/network.php");
+$nt = new NetworkTable("WFO");
 $postgis = iemdb("postgis");
 
 $syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y", time()-86400);
@@ -116,7 +117,7 @@ while( list($v,$wfo) = each($sorted) )
          <td class='ma'>%s</td><td class='ma'>%.1f</td><td class='ma'>%.1f</td>
          <td class='ff'>%s</td><td class='ff'>%.1f</td><td class='ff'>%.1f</td>
          <td class='fa'>%s</td><td class='fa'>%.1f</td><td class='fa'>%.1f</td>
-          </tr>", $wfo, $wfos[$wfo]['city'], 
+          </tr>", $wfo, $nt->table[$wfo]['name'], 
           $cnt, $perim/$cnt/1000.0, $poly/$cnt/1000000.0,
 	$data[$wfo]["TO_cnt"], 
 	$data[$wfo]["TO_sum_perimsize"]/$data[$wfo]["TO_cnt"]/1000.0,
