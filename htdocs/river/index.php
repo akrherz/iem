@@ -4,7 +4,6 @@ define("IEM_APPID", 71);
 include("../../include/database.inc.php");
 $THISPAGE = "severe-river";
 include("../../include/header.php");
-include("../../include/wfoLocs.php");
 include("../../include/forms.php");
 include("../../include/imagemaps.php");
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3): "DMX";
