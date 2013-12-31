@@ -4,6 +4,7 @@ CREATE TABLE alldata(
 	tmpf real,
 	dwpf real,
 	srad real,
+	drct real,
 	sknt real,
 	relh real,
 	pres real,
