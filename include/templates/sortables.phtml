@@ -1,0 +1,55 @@
+<?php include 'header.phtml'; ?>
+<?php include 'navbar.phtml'; ?>
+<div class="container">
+<table width="100%" border=1 cellspacing=0 cellpadding=1>
+<tr>
+<th colspan="7" bgcolor="#CCCCCC">Select Network</th></tr>
+<tr>
+<?php
+$d = Array(
+		"ASOS" => Array("url" => "/ASOS/current.phtml"),
+		"AWOS" => Array("url" => "/AWOS/current.phtml"),
+		"CoCoRaHS" => Array("url" => "/cocorahs/current.phtml"),
+		"COOP" => Array("url" => "/COOP/current.phtml"),
+		"DCP" => Array("url" => "/DCP/current.phtml"),
+		"SchoolNet" => Array("url" => "/schoolnet/current.phtml"),
+		"Other" => Array("url" => "/other/current.phtml"),
+		"SCAN" => Array("url" => "/scan/current.phtml"),
+		"My Favorites" => Array("url" => "/my/current.phtml"),
+		"Iowa" => Array("url" => "/current/all.phtml") );
+$rwis22 = Array(
+		"RWIS" => Array("url" => "/RWIS/current.phtml"),
+		"RWIS Surface" => Array("url" => "/RWIS/currentSF.phtml"),
+		"RWIS Traffic" => Array("url" => "/RWIS/traffic.phtml"),
+		"RWIS Soil" => Array("url" => "/RWIS/soil.phtml"),
+		"By NWS WFO" => Array("url" => "/nws/obs.php"),
+);
+$i = 0;
+while ( list($key, $value) = each($d) ){
+	echo "<th ";
+	if ($this->current_network == $key)
+		echo "bgcolor=\"#666666\"><font color=\"white\">$key</font></th>";
+		else
+	echo "><a href=\"". $value["url"] ."\">$key</a></th>";
+	if ($i == 4) echo "</tr><tr>";
+	$i++;
+  }
+  echo "</tr><tr>";
+	while ( list($key, $value) = each($rwis22) ){
+	echo "<th ";
+	if ($this->current_network == $key)
+		echo "bgcolor=\"#666666\"><font color=\"white\">$key</font></th>";
+		else
+		echo "><a href=\"". $value["url"] ."\">$key</a></th>";
+	}
+	?>
+</tr></table>
+<?php 
+if (array_key_exists('content', $this->vars)){
+  echo "<div class=\"row\"><div class=\"col-md-12\">\n";
+  echo $this->vars['content'];
+  echo "</div></div>\n";
+}
+?>
+</div><!--/.container-->
+<?php include 'footer.phtml'; ?>
