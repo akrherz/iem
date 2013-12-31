@@ -1,14 +1,13 @@
 <?php
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | School Net Data Format";
-$THISPAGE = "networks-schoolnet";
-include("$rootpath/include/header.php"); ?> 
+include("../../../include/myview.php");
+$t = new MyView();
+$t->title = "School Net Data Format";
+$t->thispage = "networks-schoolnet";
+$t->content = <<<EOF
 
 <h3 class="heading">Data Format</h3><br /><br />
 <div class="text">
-<!--
-<a href="<?php echo getenv("HTTP_REFER"); ?>">Go back...</a>
--->
 
 If you download raw schoolnet data from the IEM server, 
 you are probably curious about the data format.  Well, here is the explaination.</p>
@@ -94,6 +93,6 @@ the end represents the change in pressure. 'S' == Steady.  'R' == Raising.
   <td>Calculated current hourly precipitation rate.</td>
 </tr>
 </table></div>
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

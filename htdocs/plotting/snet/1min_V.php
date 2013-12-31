@@ -1,14 +1,14 @@
 <?php
 /* Generate a 1 minute plot of wind, and peak gust */
 include_once("../../../config/settings.inc.php");
-include_once("$rootpath/include/network.php");
-include_once("$rootpath/include/mlib.php");
-include_once("$rootpath/include/database.inc.php");
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
-include ("$rootpath/include/jpgraph/jpgraph_led.php");
+include_once("../../../include/network.php");
+include_once("../../../include/mlib.php");
+include_once("../../../include/database.inc.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_scatter.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph_led.php");
 
 $nt = new NetworkTable( Array("KCCI","KIMT","KELO") );
 $cities = $nt->table;
