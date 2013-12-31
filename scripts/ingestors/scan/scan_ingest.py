@@ -4,13 +4,15 @@ Download and process the scan dataset
 
 import urllib
 import urllib2
-import mx.DateTime
+import datetime
 import mesonet
 import access
-import iemdb
-SCAN = iemdb.connect('scan', bypass=True)
+import network
+nt = network.Table("SCAN")
+import psycopg2
+SCAN = psycopg2.connect(database='scan', host='iemdb')
 scursor = SCAN.cursor()
-ACCESS = iemdb.connect('iem', bypass=True)
+ACCESS = psycopg2.connect(database='iem', host='iemdb')
 icursor = ACCESS.cursor()
 
 mapping = {
@@ -104,10 +106,10 @@ def savedata( data , maxts ):
         tstr = "%s %s" % (data['Date'], data['Time (CST)'])
     else:
         tstr = "%s %s" % (data['Date'], data['Time (CDT)'])
-    ts = mx.DateTime.strptime(tstr, '%Y-%m-%d %H:%M')
+    ts = datetime.datetime.strptime(tstr, '%Y-%m-%d %H:%M')
     sid = "S%s" % (data['Site Id'],)
     
-    if maxts[sid] > ts:
+    if maxts.has_key(sid) and maxts[sid] > ts:
         return
     iem = access.Ob(sid, 'SCAN')
     iem.txn = icursor
@@ -132,10 +134,10 @@ def savedata( data , maxts ):
     iem.data['c4smv'] = float(iem.data.get('c4smv'))
     iem.data['c5smv'] = float(iem.data.get('c5smv'))
     iem.data['phour'] = float(iem.data.get('phour'))
-    iem.updateDatabase()
-    
-    # scan db uses different station name, sigh
-    iem.data['station'] = sid[1:]
+    if not iem.updateDatabase():
+        print 'scan_ingest.py iemaccess for sid: %s ts: %s updated no rows' % (
+                                                    sid, ts)
+
     sql = """INSERT into t%(year)s_hourly (station, valid, tmpf, 
         dwpf, srad, 
          sknt, drct, relh, pres, c1tmpf, c2tmpf, c3tmpf, c4tmpf, 
@@ -160,20 +162,21 @@ def load_times():
         WHERE t.iemid = c.iemid and t.network = 'SCAN'""")
     d = {}
     for row in icursor:
-        d[ row[0] ] = mx.DateTime.strptime( 
+        d[ row[0] ] = datetime.datetime.strptime( 
                                             str(row[1])[:16], '%Y-%m-%d %H:%M')
     return d
 
 def main():
     maxts = load_times()
-    for sid in ['2068', '2031', '2047', '2001', '2004']:
-        postvars['sitenum'] = sid
+    for sid in nt.sts.keys():
+        # iem uses S<id> and scan site uses just <id>
+        postvars['sitenum'] = sid[1:]
         data = urllib.urlencode(postvars)
         req = urllib2.Request(URI, data)
         try:
             response = urllib2.urlopen(req, timeout=15)
-        except:
-            print 'Failed to download: %s %s' % (sid, URI)
+        except Exception, exp:
+            print 'scan_ingest.py Failed to download: %s %s' % (sid, exp)
             continue
         lines = response.readlines()
         cols = lines[2].split(",")
