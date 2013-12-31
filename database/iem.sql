@@ -267,8 +267,8 @@ CREATE RULE replace_hourly_2013 as
 ---
 create table summary_2014( 
   CONSTRAINT __summary_2014_check 
-  CHECK(day >= '2014-01-01 00:00+00'::timestamptz 
-        and day < '2015-01-01 00:00+00')) 
+  CHECK(day >= '2014-01-01'::date 
+        and day < '2015-01-01'::date)) 
   INHERITS (summary);
 CREATE INDEX summary_2014_day_idx on summary_2014(day);
 CREATE INDEX summary_2014_iemid_day_idx on summary_2014(iemid, day);
