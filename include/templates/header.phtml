@@ -4,11 +4,14 @@ if (isset($this)){
 	$refresh = array_key_exists('refresh', $this->vars)? $this->refresh : '';
 	$headextra = array_key_exists('headextra', $this->vars)? $this->headextra : '';
 	$bodyextra = array_key_exists('bodyextra', $this->vars)? ' '. $this->bodyextra : '';
+	$twimage = array_key_exists('twitter_image', $this->vars) ? 
+				$this->twitter_image : 'http://mesonet.agron.iastate.edu/images/logo_small.png';
 } else{
 	$title = isset($TITLE) ? $TITLE: 'Iowa Environmental Mesonet';
 	$refresh = isset($REFRESH)? $REFRESH: '';
 	$headextra = isset($HEADEXTRA) ? $HEADEXTRA: '';
 	$bodyextra = isset($BODYEXTRA) ? ' '. $BODYEXTRA: '';
+	$twimage = "http://mesonet.agron.iastate.edu/images/logo_small.png";
 }
 ?>
 <!DOCTYPE html>
@@ -33,9 +36,9 @@ if (isset($this)){
       <script src="/js/html5shiv.js"></script>
       <script src="/js/respond.min.js"></script>
     <![endif]-->
-	<meta name="twitter:image" content="http://mesonet.agron.iastate.edu/images/logo_small.png">
-	<meta name="twitter:title" content="Iowa Environmental Mesonet">
-	<meta name="twitter:description" content="Iowa Environmental Mesonet">
+	<meta name="twitter:image" content="<?php echo $twimage; ?>">
+	<meta name="twitter:title" content="<?php echo $title; ?>">
+	<meta name="twitter:description" content="<?php echo $title; ?>">
 	<meta name="twitter:url" content="http://mesonet.agron.iastate.edu">
 	<meta name="twitter:creator" content="@akrherz">
 	<meta name="twitter:image:width" content="85">
