@@ -1,9 +1,9 @@
 <?php 
 include("../../../config/settings.inc.php");
 $TITLE = "IEM | School Network | Download";
-include("$rootpath/include/header.php");
-include("$rootpath/include/forms.php");
- include("$rootpath/include/imagemaps.php"); 
+include("../../../include/header.php");
+include("../../../include/forms.php");
+ include("../../../include/imagemaps.php"); 
 ?>
 
 <h3 class="heading">SchoolNet Data Download</h3>
@@ -22,7 +22,7 @@ recent data is from yesterday.</p>
 <tr>
   <th class="subtitle">Select Station:</th>
   <td>
-<?php echo snetSelectMultiple(" "); ?>
+<?php echo networkMultiSelect(Array("KCCI", "KIMT", "KELO"), ''); ?>
   </td>
 </tr>
 
