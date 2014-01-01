@@ -5,6 +5,7 @@ Download and process the scan dataset
 import urllib
 import urllib2
 import datetime
+import pytz
 import mesonet
 import access
 import network
@@ -107,6 +108,12 @@ def savedata( data , maxts ):
     else:
         tstr = "%s %s" % (data['Date'], data['Time (CDT)'])
     ts = datetime.datetime.strptime(tstr, '%Y-%m-%d %H:%M')
+    utc = datetime.datetime.utcnow()
+    utc = utc.replace(tzinfo=pytz.timezone("UTC"))
+    localts = utc.astimezone(pytz.timezone("America/Chicago"))
+    ts = localts.replace(year=ts.year, month=ts.month, day=ts.day,
+                              hour=ts.hour, minute=ts.minute, second=0,
+                              microsecond=0)
     sid = "S%s" % (data['Site Id'],)
     
     if maxts.has_key(sid) and maxts[sid] >= ts:
@@ -116,7 +123,7 @@ def savedata( data , maxts ):
     iem.txn = icursor
 
     iem.data['ts'] = ts
-    iem.data['year'] = ts.year
+    iem.data['year'] = ts.astimezone(pytz.timezone("UTC")).year
     for key in data.keys():
         if mapping.has_key(key) and mapping[key]['iemvar'] != "" and key != 'Site Id':
             iem.data[ mapping[key]['iemvar'] ] = data[key].strip()
@@ -163,8 +170,7 @@ def load_times():
         WHERE t.iemid = c.iemid and t.network = 'SCAN'""")
     d = {}
     for row in icursor:
-        d[ row[0] ] = datetime.datetime.strptime( 
-                                            str(row[1])[:16], '%Y-%m-%d %H:%M')
+        d[ row[0] ] = row[1]
     return d
 
 def main():
