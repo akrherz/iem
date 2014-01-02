@@ -114,7 +114,7 @@ def process(fn, s, e):
                 if not obs.has_key(stationID) or not obs[stationID].has_key(tstring):
                     continue
                 val = tokens[4+i].strip()
-                if val == "":
+                if val == "" or val.find("*") > -1:
                     val = None
                 try:
                     obs[stationID][tstring][ dcols[i] ] = val
