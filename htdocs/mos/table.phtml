@@ -1,9 +1,11 @@
 <?php
 putenv("TZ=GMT");
-
+define("IEM_APPID", 153);
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/forms.php");
+include("../../include/database.inc.php");
+include("../../include/forms.php");
+include("../../include/myview.php");
+$t = new MyView();
 include("lib.php");
 $mosdb = iemdb("mos");
 pg_exec($mosdb, "SET TIME ZONE 'GMT'");
@@ -42,7 +44,7 @@ $table .= "</tr>\n";
 $sqlSelector = substr($sqlSelector,0,-1) . ")";
 
 $rs = pg_prepare($mosdb, "SELECT", "SELECT *, t06_1 ||'/'||t06_2 as t06, 
-      t12_1 ||'/'|| t12_2 as t12 from t${year} WHERE 
+      t12_1 ||'/'|| t12_2 as t12 from alldata WHERE 
       runtime IN $sqlSelector
       and station = $1 and model = $2");
 $rs = pg_execute($mosdb, "SELECT", Array($station, $model));
@@ -63,38 +65,53 @@ for($now=$sts+(3600*12);$now <= $ets+(2*86400); $now += (3600*3)){
 $table .= "</table>";
 
 // Begin Output
-$THISPAGE = "archive-mos";
-$TITLE = "IEM MOS Tables";
-include("$rootpath/include/header.php");
+$t->thispage = "archive-mos";
+$t->title = "Model Output Statistics Table for $station";
 
-echo "<form>";
-echo "<input type=\"text\" name=\"station\" value=\"$station\">";
-echo "<select name=\"vname\">";
+
+$content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/mos/">Model Output Statistics</a></li>
+ <li class="active">Single Variable Data Table</li>
+</ol>
+
+<p>This page produces a simple table for the combination of a MOS forecast 
+point, MOS variable, and range of dates.  The purpose is to examine how a
+forecast has changed with time.  The first entry box requires that you know
+the four character identifier of the MOS site being forecasted for.  You 
+should use the "K" for United States sites.</p>
+
+<p><form name="updator">
+<input type="text" name="station" value="$station">
+
+<select name="vname">
+EOF;
 while (list($v,$n) = each($mosvars))
 {
-  echo "<option value=\"$v\"";
-  if ($vname == $v) echo " SELECTED";
-  echo ">$n [". strtoupper($v) ."]</option>\n";
+  $content .= "<option value=\"$v\"";
+  if ($vname == $v) $content .= " SELECTED";
+  $content .= ">$n [". strtoupper($v) ."]</option>\n";
 }
-echo "</select>";
+$content .= "</select>";
 
-echo "<select name=\"model\">";
-echo "<option value=\"GFS\" ";
-if ($model == "GFS") echo " SELECTED";
-  echo ">AVN/GFS</option>\n";
-echo "<option value=\"NAM\" ";
-if ($model == "NAM" || $model == "ETA") echo " SELECTED";
-  echo ">Eta/NAM</option>\n";
-echo "</select>";
+$content .= "<select name=\"model\">";
+$content .= "<option value=\"GFS\" ";
+if ($model == "GFS") $content .= " SELECTED";
+$content .= ">AVN/GFS</option>\n";
+$content .= "<option value=\"NAM\" ";
+if ($model == "NAM" || $model == "ETA") $content .= " SELECTED";
+  $content .= ">Eta/NAM</option>\n";
+$content .= "</select>";
 
-echo yearSelect(2000,$year);
-echo monthSelect($month);
-echo daySelect($day);
+$content .= yearSelect(2000,$year);
+$content .= monthSelect($month);
+$content .= daySelect($day);
 
-echo "<input type=\"submit\" value=\"Generate\">";
-echo "</form>";
+$content .= "<input type=\"submit\" value=\"Generate\">";
+$content .= "</form>";
 
 
-echo $table;
-include("$rootpath/include/footer.php");
+$content .= $table;
+$t->content = $content;
+$t->render('single.phtml');
 ?>
