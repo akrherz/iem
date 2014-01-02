@@ -22,14 +22,16 @@ icursor.execute("""
     SELECT id, sum(snow), 
     ST_x(geom) as lon, 
     ST_y(geom) as lat, county, count(*) from
-    summary_2013 t JOIN stations s ON (s.iemid = t.iemid) where 
+    summary t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
-    day in ('2013-12-31', '2013-12-31') and snow >= 0 and 
+    day in ('2014-01-01', '2014-01-01') and snow >= 0 and 
     ST_x(geom) BETWEEN %s and %s and
     ST_y(geom) BETWEEN %s and %s  
     GROUP by id, lon, lat, county
 """, (iemre.WEST, iemre.EAST, iemre.SOUTH, iemre.NORTH))
 for row in icursor:
+    if row[2] < -93.6:
+        continue
     row_list.append(dict(val=row[1], lat=row[3], lon=row[2], source=COOP))
 
 # Query LSR Data...
@@ -37,8 +39,8 @@ pcursor.execute("""
     SELECT state, max(magnitude) as val, 
         ST_x(geom) as lon, 
        ST_y(geom) as lat
-      from lsrs_2013 WHERE type in ('S') and magnitude > 0 and 
-      valid > '2013-12-30 00:00' and valid < '2013-12-31 23:59'
+      from lsrs WHERE type in ('S') and magnitude > 0 and 
+      valid > '2013-12-31 12:00' and valid < '2013-01-31 23:59'
       GROUP by state, lon, lat
 """)
 for row in pcursor:
@@ -58,8 +60,8 @@ data = np.ones( (iemre.NY, iemre.NX)) * -99
 # Pass one, create our estimates
 for i, lat in enumerate(iemre.YAXIS):
     for j, lon in enumerate(iemre.XAXIS):
-        lon1 = lon + 0.75
-        lat1 = lat + 0.5
+        lon1 = lon + 0.25
+        lat1 = lat + 0.25
         cell_df = df[ ((df['lat'] >= lat) & (df['lat'] < lat1) & 
                        (df['lon'] >= lon) & (df['lon'] < lon1))]
         if len(cell_df) > 0:
@@ -73,6 +75,9 @@ for i, lat in enumerate(iemre.YAXIS):
             continue
         neighbors = max(data[i-1,j], data[i+1,j], data[i,j-1], data[i,j+1])
         if neighbors < 0:
+            lats.append( lat + 0.125 )
+            lons.append( lon + 0.125 )
+            vals.append( 0 )
             continue
         if data[i,j] > neighbors + 2.:
             print 'Bullseye i:%s j:%s val:%s' % (i,j, data[i,j])
@@ -84,8 +89,8 @@ for i, lat in enumerate(iemre.YAXIS):
 clevs = np.array([0.01,0.1,0.25,0.5,1,2,3,5,7,9,11,13,15,17])
 
 m = MapPlot(sector='iowa',
-            title="30 Dec 2013 - IEM Snowfall Total Analysis",
-            subtitle="Snowfall totals up until 8 AM 31 Dec 2013")
+            title="31 Dec 2013 - IEM Snowfall Total Analysis",
+            subtitle="Snowfall totals up until 11 PM 31 Dec 2013")
 xs,ys = np.meshgrid( np.concatenate([iemre.XAXIS, [iemre.XAXIS[-1] + 0.25,]]),
                      np.concatenate([iemre.YAXIS, [iemre.YAXIS[-1] + 0.25,]]))
 cmap = cm.get_cmap('Spectral_r')
