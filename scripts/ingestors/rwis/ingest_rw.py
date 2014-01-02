@@ -47,7 +47,7 @@ def process( nwsli , lastts ):
     try:
         data = urllib2.urlopen(myuri, timeout=15)
     except Exception, exp:
-        print nwsli, exp
+        print "ingest_rw.py failed for sid: %s reason: %s" % (nwsli, exp)
         return
 
     df = pandas.DataFrame.from_csv(data)
