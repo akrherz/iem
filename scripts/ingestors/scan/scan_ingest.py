@@ -7,7 +7,7 @@ import urllib2
 import datetime
 import pytz
 import mesonet
-import access
+from pyiem.observation import Observation
 import network
 nt = network.Table("SCAN")
 import psycopg2
@@ -118,15 +118,15 @@ def savedata( data , maxts ):
     
     if maxts.has_key(sid) and maxts[sid] >= ts:
         return
-    maxts[sid] = ts
-    iem = access.Ob(sid, 'SCAN')
-    iem.txn = icursor
+
+    iem = Observation(sid, 'SCAN', ts)
 
     iem.data['ts'] = ts
     iem.data['year'] = ts.astimezone(pytz.timezone("UTC")).year
     for key in data.keys():
-        if mapping.has_key(key) and mapping[key]['iemvar'] != "" and key != 'Site Id':
-            iem.data[ mapping[key]['iemvar'] ] = data[key].strip()
+        if (mapping.has_key(key) and mapping[key]['iemvar'] != "" and 
+            key != 'Site Id'):
+            iem.data[ mapping[key]['iemvar'] ] = float(data[key].strip())
 
     iem.data['valid'] = ts
     iem.data['tmpf'] = mesonet.c2f(float(iem.data.get('tmpc')))
@@ -142,7 +142,7 @@ def savedata( data , maxts ):
     iem.data['c4smv'] = float(iem.data.get('c4smv'))
     iem.data['c5smv'] = float(iem.data.get('c5smv'))
     iem.data['phour'] = float(iem.data.get('phour'))
-    if not iem.updateDatabase():
+    if not iem.save(icursor):
         print 'scan_ingest.py iemaccess for sid: %s ts: %s updated no rows' % (
                                                     sid, ts)
 
@@ -152,7 +152,7 @@ def savedata( data , maxts ):
          c5tmpf, 
          c1smv, c2smv, c3smv, c4smv, c5smv, phour) 
         VALUES 
-        (%(station)s, '%(valid)s', %(tmpf)s, %(dwpf)s,
+        ('%(station)s', '%(valid)s', %(tmpf)s, %(dwpf)s,
          %(srad)s,%(sknt)s,
         %(drct)s, %(relh)s, %(pres)s, %(c1tmpf)s, 
         %(c2tmpf)s, 
@@ -160,7 +160,7 @@ def savedata( data , maxts ):
          %(c2smv)s, 
         %(c3smv)s, %(c4smv)s, %(c5smv)s, %(phour)s)
         """ % iem.data
-    scursor.execute(sql)
+    scursor.execute(sql.replace("None", "null"))
 
 def load_times():
     """
