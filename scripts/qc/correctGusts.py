@@ -1,14 +1,17 @@
-# 11 Feb 2005	Fix update of summary table
+"""
+ Hard reset the schoolnet gust information at a bit after midnight, this is 
+ due to complex clock issues, etc
+"""
 
-import mx.DateTime
-import iemdb
-IEM = iemdb.connect('iem')
+import datetime
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor()
 
-today = mx.DateTime.now()
+today = datetime.datetime.now()
 sql = """update summary_%s s SET max_gust = 0 
-    FROM stations t WHERE t.iemid = s.iemid and day = 'TODAY' and max_gust_ts < '%s 00:05' and
-    t.network in ('KCCI','KIMT','KELO')""" % (
+    FROM stations t WHERE t.iemid = s.iemid and day = 'TODAY' 
+    and max_gust_ts < '%s 00:05' and t.network in ('KCCI','KIMT','KELO')""" % (
     today.year, today.strftime("%Y-%m-%d"),)
 icursor.execute(sql)
 icursor.close()

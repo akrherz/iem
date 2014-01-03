@@ -7,8 +7,8 @@ the summary database
 Runs from: RUN_MIDNIGHT.sh
 
 """
-import iemdb
-IEM = iemdb.connect('iem')
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor()
 import mx.DateTime
 import sys

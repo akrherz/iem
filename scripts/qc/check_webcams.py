@@ -7,10 +7,10 @@ import mx.DateTime
 import stat
 import tracker
 track = tracker.Engine()
-import iemdb
-IEM = iemdb.connect('iem', bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor()
-MESOSITE = iemdb.connect('mesosite', bypass=True)
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = MESOSITE.cursor()
 now = mx.DateTime.now()
 

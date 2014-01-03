@@ -24,3 +24,6 @@ python download_narr.py $(date -u --date '30 days ago' +'%Y %m %d')
 cd ../coop
 python narr_solarrad.py $(date -u --date '7 days ago' +'%Y %m %d')
 python narr_solarrad.py $(date -u --date '31 days ago' +'%Y %m %d')
+
+cd ../qc
+python check_n0q.py

@@ -2,8 +2,8 @@
   Check to make sure the station metadata is reasonable!
 
 """
-import iemdb
-MESOSITE = iemdb.connect('mesosite', bypass=True)
+import psycopg2
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = MESOSITE.cursor()
 
 mcursor.execute("""
@@ -11,4 +11,4 @@ mcursor.execute("""
  ST_x(geom) >= 180 or ST_x(geom) <= -180 or ST_y(geom) > 90 or ST_y(geom) < -90
 """)
 for row in mcursor:
-    print 'LOC QC FAIL', row
+    print 'check_station_geom.py LOC QC FAIL', row
