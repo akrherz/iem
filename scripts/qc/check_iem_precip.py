@@ -1,9 +1,9 @@
 """
 Need something to daily QC the schoolnet precipitation against iemre I guess
 """
-import iemdb
+import psycopg2
+iem = psycopg2.connect(database='iem', host='iemdb')
 import psycopg2.extras
-import sys
 from pyiem import iemre
 import netCDF4
 import mx.DateTime
@@ -16,8 +16,6 @@ nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (ts.year,),'r')
 p01d = nc.variables['p01d']
 offset = int((ts - (ts + mx.DateTime.RelativeDateTime(month=1,day=1))).days)
 
-
-iem = iemdb.connect("iem", bypass=True)
 icursor = iem.cursor(cursor_factory=psycopg2.extras.DictCursor)
 icursor.execute("""SELECT ST_x(geom) as lon, ST_y(geom) as lat, id, pday
   FROM summary_%s s JOIN stations t ON (t.iemid = s.iemid) where t.network in ('KCCI','KIMT','AWOS') and day = 'YESTERDAY'::date

@@ -3,14 +3,14 @@
 
 Run from RUN_2AM.sh
 """
-import iemdb
-HADS = iemdb.connect('hads', bypass=True)
-ACCESS = iemdb.connect('iem', bypass=True)
+import psycopg2
+HADS = psycopg2.connect(database='hads', host='iemdb')
+ACCESS = psycopg2.connect(database='iem', host='iemdb')
 hcursor = HADS.cursor()
 hcursor2 = HADS.cursor()
 acursor = ACCESS.cursor()
 
-print 'Unknown NWSLIs from DCPish sites'
+print '----- Unknown NWSLIs from DCPish sites -----'
 hcursor.execute("""
  select nwsli, count(*) as tot, max(product), 
  count(distinct substr(product,1,8)), 
@@ -33,7 +33,7 @@ for row in hcursor:
     DELETE from unknown where nwsli = %s
     """, (row[0],))
 
-print 'Unknown NWSLIs from COOPish sites'
+print '----- Unknown NWSLIs from COOPish sites -----'
 hcursor.execute("""
  select nwsli, count(*) as tot, max(product), 
  count(distinct substr(product,1,8)), 
@@ -41,7 +41,8 @@ hcursor.execute("""
  sum(case when substr(nwsli,4,2) = 'I4' then 1 else 0 end) as priority
  from unknown 
  WHERE network ~* 'COOP'
- and nwsli ~ '^[A-Z]{4}[0-9]$' GROUP by nwsli ORDER by priority DESC, tot DESC LIMIT 5
+ and nwsli ~ '^[A-Z]{4}[0-9]$' GROUP by nwsli 
+ ORDER by priority DESC, tot DESC LIMIT 5
 """)
 for row in hcursor:
     print 'COOP %7s Tot:%4s Days:%2s Products: %s %s' % (row[0], row[1], 
@@ -59,11 +60,11 @@ for row in hcursor:
    
 HADS.commit()
 
-ASOS = iemdb.connect('asos')
+ASOS = psycopg2.connect(database='asos', host='iemdb')
 acursor = ASOS.cursor()
 acursor2 = ASOS.cursor()
 
-print 'Unknown IDs from ASOSish sites'
+print '----- Unknown IDs from METAR sites -----'
 acursor.execute("""
  select id, count(*), max(valid) from unknown 
  GROUP by id ORDER by count DESC LIMIT 5

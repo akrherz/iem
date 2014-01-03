@@ -22,7 +22,7 @@ for row in j['data']:
                        'mrms_precip_in': float(row['mrms_precip_in'])}
     
 import psycopg2
-COOP = psycopg2.connect(database='coop', host='mesonet.agron.iastate.edu',
+COOP = psycopg2.connect(database='coop', host='iemdb',
                         user='nobody')
 cursor = COOP.cursor()
 
