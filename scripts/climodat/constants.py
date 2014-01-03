@@ -2,12 +2,12 @@
 import pg
 import mx.DateTime
 
-_THISYEAR = 2013
-_ENDYEAR = 2014
+_THISYEAR = mx.DateTime.now().year
+_ENDYEAR = mx.DateTime.now().year +1
 #_ENDYEAR = 1951
 
 _ARCHIVEENDTS = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
-_ENDTS = mx.DateTime.DateTime(2014,1,1)
+_ENDTS = mx.DateTime.DateTime(_ENDYEAR,1,1)
 #_YEARS = 58
 #_YRCNT = [0,58,58,58,57,57,57,57,57,57,57,57,57]
 mydb = pg.connect('coop', 'iemdb',user='nobody')
@@ -34,27 +34,27 @@ def get_table(sid):
     return "alldata_%s" % (sid.lower()[:2],)
 
 def yrcnt(sid):
-  """ Compute the number of years each month will have in the records """
-  sts = startts(sid)
-  r = [0]*13
-  for m in range(1,13):
-    ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(month=m,day=1)
-    if (ts > _ARCHIVEENDTS):
-      r[m] = _ARCHIVEENDTS.year - sts.year
-    else:
-      r[m] = _ARCHIVEENDTS.year - sts.year + 1
+    """ Compute the number of years each month will have in the records """
+    sts = startts(sid)
+    r = [0]*13
+    for m in range(1,13):
+        ts = mx.DateTime.now() + mx.DateTime.RelativeDateTime(month=m,day=1)
+        if (ts > _ARCHIVEENDTS):
+            r[m] = _ARCHIVEENDTS.year - sts.year
+        else:
+            r[m] = _ARCHIVEENDTS.year - sts.year + 1
 
-  return r
+    return r
 
 
 
 def climatetable(sid):
-  if (startyear(sid) == 1951):
-    return "climate51"
-  return "climate"
+    if (startyear(sid) == 1951):
+        return "climate51"
+    return "climate"
 
 def startts(sid):
-  return mx.DateTime.DateTime(startyear(sid),1,1)
+    return mx.DateTime.DateTime(startyear(sid),1,1)
 
 def startyear(sid):
     if sid in longterm:
