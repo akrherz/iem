@@ -2,138 +2,154 @@
  include("../../config/settings.inc.php");
  define("IEM_APPID", 10);
  
+ include "../../include/myview.php";
+ 
  include "../../include/database.inc.php";
  include "../../include/network.php";
  include "../../include/mlib.php";
- $dbconn = iemdb("isuag");
+ include "../../include/iemaccess.php";
+ include "../../include/iemaccessob.php";
  $nt = new NetworkTable("ISUSM");
  
- /* Get the last observation */
- $rs = pg_query($dbconn, "select * from (select *, 
- 		rank() over (partition by station order by valid DESC) from sm_hourly 
- 		ORDER by valid DESC LIMIT 100) as foo where rank = 1");
- $table = "<table cellspacing='0' cellpadding='2', border='1'>
+ $access = new IEMAccess();
+ $obs = $access->getNetwork("ISUSM");
+ 
+
+ $table = "<table class='table table-striped table-bordered'>
  		<tr><th rowspan='2'>Location</th>
  		<th rowspan='2'>Valid</th>
+ 		<th rowspan='2'>Air &deg;F</th>
+ 		<th rowspan='2'>Rain inch</th>
+ 		<th>4 inches</th>
  		<th colspan='2'>12 inches</th>
  		<th colspan='2'>24 inches</th>
  		<th colspan='2'>50 inches</th>
  		</tr>
- 		<tr><th>Temp &deg;F</th><th>Moisture %</th>
+ 		<tr><th>Temp &deg;F</th><th>Temp &deg;F</th><th>Moisture %</th>
  		<th>Temp &deg;F</th><th>Moisture %</th>
  		<th>Temp &deg;F</th><th>Moisture %</th>
  		</tr>";
- for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
- 	$ts = strtotime($row["valid"]);
- 	$table .= sprintf("<tr><td>%s</td><td>%s</td>
+ while (list($sid,$data)=each($obs)) {
+ 	$pday = ($data->db['pday'] < 0) ? 0 : $data->db['pday'];
+ 	$uri = sprintf("/sites/site.php?station=%s&network=ISUSM", $sid);
+ 	$table .= sprintf("<tr><td><a href=\"%s\">%s</a></td><td>%s</td>
+ 			<td>%.1f</td><td>%.2f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td>
  			<td>%.1f</td><td>%.1f</td>
- 			<td>%.1f</td><td>%.1f</td>
- 			<td>%.1f</td><td>%.1f</td></tr>", $nt->table[$row["station"]]['name'],
- 			date("j M g A", $ts), 
- 			c2f($row["t12_c_avg"]), $row["vwc_12_avg"] * 100.0,
- 			c2f($row["t24_c_avg"]), $row["vwc_24_avg"] * 100.0,
- 			c2f($row["t50_c_avg"]), $row["vwc_50_avg"] * 100.0);
+ 			<td>%.1f</td><td>%.1f</td></tr>", $uri, $nt->table[$sid]['name'],
+ 			date("j M g A", $data->ts), $data->db["tmpf"],
+ 			$pday, $data->db["c1tmpf"],
+ 			$data->db["c2tmpf"], $data->db["c2smv"],
+ 			$data->db["c3tmpf"], $data->db["c3smv"],
+ 			$data->db["c4tmpf"], $data->db["c4smv"] );
  }
  
  $table .= "</table>";
+ $v = isset($_REQUEST["v"]) ? htmlentities($_REQUEST["v"]): 'tmpf';
+ $t = new MyView();
+ $t->title = "ISU Ag Climate"; 
+ $t->thispage = "networks-agclimate";
+ $t->content = <<<EOF
+
+<h3 class="page-heading">ISU Soil Moisture Network</h3>
  
- $TITLE = "IEM | ISU Ag Climate"; 
- $THISPAGE = "networks-agclimate";
- include("../../include/header.php");
-?>
+<p>We are in the process of deploying a network of automated sensors that will
+measure soil temperature and moisture.  Here is the most recent observation 
+collected:
+<br />
+{$table}
 
-<div>
-<img src="images/agclimate.jpg" ALT="ISU Ag Climate" 
-	style="float: left; padding-right: 10px;" height="105" />
-
-<p>The Iowa State University "Ag Climate" network is one of the nation's 
-oldest automated weather observation networks with data dating back to 1986.
-Starting in fall of 2012, these stations are being upgraded to a new sensor 
-package including soil moisture and cell modem communication allowing near
-real-time updates.
-<br /><a href="/sites/locate.php?network=ISUAG">Old Locations</a> &nbsp; - &nbsp; 
-  <a href="/sites/locate.php?network=ISUSM">New Locations</a>
+<div class="row">
+	<div class="col-md-3">
+	Available Tools:
+	</div>
+	<div class="col-md-3">
+	<a href="hist/hourly.php"><i class="glyphicon glyphicon-cloud-download"></i> Hourly Data Download</a>
+	</div>
+	<div class="col-md-3">
+	<a href="hist/daily.php"><i class="glyphicon glyphicon-cloud-download"></i>  Daily Data Download</a>
+	</div>
+	<div class="col-md-3">
+	<a href="smts.php"><i class="glyphicon glyphicon-signal"></i>plot timeseries</a>
+	</div>
 </div>
-<br clear="all" />
+
+<h3>Current Plots:</h3>
 <div class="row">
 	<div class="col-md-2">
-	<span style="font-size: 1.3em;">ISU Ag Climate<br />Old Stations:</span>
-	</div>
-	<div class="col-md-1">
-	<a href="hist/hourlyRequest.php"><img src="/images/down.png" /><br />Hourly Data<br />Download</a>
-	</div>
-	<div class="col-md-1">
-	<a href="hist/dailyRequest.php"><img src="/images/down.png" /><br />Daily Data<br />Download</a>
-	</div>
-	<div class="col-md-1">
-	<a href="../GIS/apps/agclimate/gsplot.phtml"><img src="../images/view_icon.png" /><br />Growing<br />Season</a>
-	</div>
-	<div class="col-md-1">
-	<a href="soilt.php"><img src="../images/find.png" /><br />4 inch Soil<br />Temperatures</a>
-	</div>
-	<div class="col-md-1">
-	<span style="font-size: 1.3em;">&nbsp;<br />New Stations:</span>
-	</div>
-	<div class="col-md-1">
-	<a href="hist/hourly.php"><img src="/images/down.png" /><br />Hourly Data<br />Download</a>
-	</div>
-	<div class="col-md-1">
-	<a href="hist/daily.php"><img src="/images/down.png" /><br />Daily Data<br />Download</a>
-	</div>
-</div>
-
-<table>
-<tr>
-<td valign="top">
-<strong>Current Plots:</strong>
 <ul>
   <li><a href="?v=tmpf">Air Temperature</a></li>
   <li><a href="?v=high">Today's High Temp</a></li>
   <li><a href="?v=rh">Relative Humidity</a></li>
 </ul>
-</td>
-<td valign="top">
-<?php 
-$v = isset($_REQUEST["v"]) ? htmlentities($_REQUEST["v"]): 'tmpf';
-?>
-<img src="smplot/0/<?php echo $v; ?>.png" width="800" height="640" />
-</td>
-</table>
+	</div>
+	<div class="col-md-10">
+		<img src="smplot/0/{$v}.png" class="image-responsive" />
+	</div>
+</div>
+		
+		
+<h3 class="page-heading">Legacy ISU AgClimate Network</h3>
 
-<table width="100%">
-<TR>
-<TD valign="top">
+<p>The Iowa State University "Ag Climate" network is one of the nation's 
+oldest automated weather observation networks with data dating back to 1986.
+These stations are scheduled to be removed during the spring of 2014.
 
-
-<h3>Iowa Soil Moisture Mesonet Stations</h3>
-<p>We are in the process of deploying a network of automated sensors that will
-measure soil temperature and moisture.  Here is the most recent observation 
-collected:
-<br />
-<?php echo $table; ?>
-
-<p>You can also <a href="smts.php">plot timeseries</a> of soil moisture and rainfall.
+<br clear="all" />
+<div class="row">
+	<div class="col-md-3">
+	<span style="font-size: 1.3em;">ISU Ag Climate:</span>
+	</div>
+	<div class="col-md-2">
+	<a href="hist/hourlyRequest.php"><img src="/images/down.png" /><br />Hourly Data<br />Download</a>
+	</div>
+	<div class="col-md-2">
+	<a href="hist/dailyRequest.php"><img src="/images/down.png" /><br />Daily Data<br />Download</a>
+	</div>
+	<div class="col-md-2">
+	<a href="../GIS/apps/agclimate/gsplot.phtml"><img src="../images/view_icon.png" /><br />Growing<br />Season</a>
+	</div>
+	<div class="col-md-2">
+	<a href="soilt.php"><img src="../images/find.png" /><br />4 inch Soil<br />Temperatures</a>
+	</div>
 </div>
 
-<h3 class="subtitle">Information:</h3>
+
+<h4>Information:</h4>
 <ul>
 <li><a href="/agclimate/info.phtml">Information</a> about network stations.</li>
 <li><a href="http://www.hprcc.unl.edu/awdn/et/">Information on PET</a> calculations done by the High Plains Climate Center.</li>
 </ul>
 
-<h3 class="subtitle">Rainfall Disclaimer:</h3>
+<h4>Rainfall Disclaimer:</h4>
 <p>The Ag Climate network uses a non-heated tipping bucket rain gage and is
 unable to measure snowfall. If you are interested in higher quality 
-precipitation data, check out the <a href="../COOP/">NWS COOP</a> network
+precipitation data, check out the <a href="/COOP/">NWS COOP</a> network
 of human observations.
 
-</TD>
-<TD valign="TOP" width="250">
+<h4>Plots:</h4>
+  <a HREF="display.php?prod=1">Max/Min Air Temps</a><br>
+  <a HREF="display.php?prod=2">Avg 4in Soil Temps</a><br>
+  <a HREF="display.php?prod=3">Max/Min 4in Soil Temps</a><br>
+  <a href="../data/soilt_day1.png">County-based Soil Temps</a><br />
+  <a HREF="display.php?prod=4">Solar Radiation Values</a><br>
+  <a HREF="/GIS/apps/agclimate/dayplot.phtml?pvar=c90">Precipitation</a><br>
+  <a HREF="display.php?prod=6">Potential E-T</a><br>
+  <a HREF="display.php?prod=7">Peak Wind Gust (5 sec)</a><br>
+  <a HREF="display.php?prod=8">Average Wind Speed</a><br>
+  <a HREF="display.php?prod=9">Max/Min Dew Points</a><br>
 
-	<?php include("../../include/dataLinks.php"); ?>
+<h4>Accumulated values:</h4>
+      <a HREF="display.php?prod=10">Monthly evapotranspiration</a><br>
+      <a HREF="display.php?prod=11">Monthly rainfall</a><br>
+      <a HREF="display.php?prod=12">Standard Chill Units since 1 Sept</a><br>
 
+<h4>Data Applications:</h4>
+  <a href="/GIS/apps/agclimate/gsplot.phtml">Growing Season Maps</a><br>
+  <a href="/plotting/agc/">Time Series Charts</a><br>
+  <a href="soilt-prob.php">4in Soil Temperatures</a><br>
+  <a HREF="/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a><br>
 
-</TD></TR>
-</table>
+EOF;
 
-<?php include("../../include/footer.php"); ?>
+$t->render('single.phtml');
+?>
