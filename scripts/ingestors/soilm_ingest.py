@@ -123,6 +123,7 @@ STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
 
 def hourly_process(nwsli, maxts):
     """ Process the hourly file """
+    #print '-------------- HOURLY PROCESS ---------------'
     fn = "%s%s" % (BASE, STATIONS[nwsli]['hourly'])
     if not os.path.isfile(fn):
         return
@@ -134,6 +135,7 @@ def hourly_process(nwsli, maxts):
     for col in lines[1].strip().replace('"', '').split(","):
         headers.append(VARCONV.get(col.lower(), col.lower()))
     # Read data
+    processed = 0
     for i in range(len(lines)-1, 3, -1):
         tokens = lines[i].strip().replace('"','').split(",")
         if len(tokens) != len(headers):
@@ -157,7 +159,26 @@ def hourly_process(nwsli, maxts):
         ob.data['tmpf'] = temperature(
                     float(tokens[headers.index('tair_c_avg')]), 'C').value('F')
         ob.data['relh'] = tokens[headers.index('rh')]
-        ob.save(accesstxn)
+        ob.data['srad'] = tokens[headers.index('slrkw_avg')]
+        ob.data['phour'] = float(tokens[headers.index('rain_mm_tot')]) / 24.5
+        ob.data['sknt'] = float(tokens[headers.index('ws_mps_s_wvt')]) * 1.94
+        ob.data['drct'] = float(tokens[headers.index('winddir_d1_wvt')])
+        ob.data['c1tmpf'] = temperature(
+                float(tokens[headers.index('tsoil_c_avg')]), 'C').value('F')
+        ob.data['c2tmpf'] = temperature(
+                float(tokens[headers.index('t12_c_avg')]), 'C').value('F')        
+        ob.data['c3tmpf'] = temperature(
+                float(tokens[headers.index('t24_c_avg')]), 'C').value('F')        
+        ob.data['c4tmpf'] = temperature(
+                float(tokens[headers.index('t50_c_avg')]), 'C').value('F')        
+        ob.data['c2smv'] = tokens[headers.index('vwc_12_avg')]
+        ob.data['c3smv'] = tokens[headers.index('vwc_24_avg')]
+        ob.data['c4smv'] = tokens[headers.index('vwc_50_avg')]
+        #if not ob.save(accesstxn):
+        #    print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
+        #                                        nwsli, valid)
+        processed += 1
+    return processed
 
 def formatter(v):
     """ Something to format things nicely for SQL"""
@@ -169,6 +190,7 @@ def formatter(v):
 
 def daily_process(nwsli, maxts):
     """ Process the daily file """
+    #print '-------------- DAILY PROCESS ----------------'
     fn = "%s%s" % (BASE, STATIONS[nwsli]['daily'])
     if not os.path.isfile(fn):
         return
@@ -180,6 +202,7 @@ def daily_process(nwsli, maxts):
     for col in lines[1].strip().replace('"', '').split(","):
         headers.append(VARCONV.get(col.lower(), col.lower()))
     # Read data
+    processed = 0
     for i in range(len(lines)-1, 3, -1):
         tokens = lines[i].strip().replace('"','').split(",")
         if len(tokens) != len(headers):
@@ -206,7 +229,15 @@ def daily_process(nwsli, maxts):
         ob = Observation(nwsli, 'ISUSM', valid)
         ob.data['max_tmpf'] = temperature(
                     float(tokens[headers.index('tair_c_max')]), 'C').value('F')
-        ob.save(accesstxn)
+        ob.data['min_tmpf'] = temperature(
+                    float(tokens[headers.index('tair_c_min')]), 'C').value('F')
+        ob.data['pday'] = float(tokens[headers.index('rain_mm_tot')]) / 24.5
+        ob.data['max_sknt'] = float(tokens[headers.index('ws_mps_max')]) * 1.94
+        #if not ob.save(accesstxn):
+        #    print 'soilm_ingest.py station: %s ts: %s daily updated no data?' % (
+        #                                nwsli, valid.strftime("%Y-%m-%d"))
+        processed += 1
+    return processed
 
 def get_max_timestamps(nwsli):
     """ Fetch out our max values """
@@ -226,7 +257,7 @@ def get_max_timestamps(nwsli):
         data['hourly'] = row[0]
     return data
 
-def dump_raw_to_ldm(nwsli):
+def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     """ Send the raw datafile to LDM """
     fn = "%s%s" % (BASE, STATIONS[nwsli]['daily'])
     if not os.path.isfile(fn):
@@ -241,9 +272,8 @@ def dump_raw_to_ldm(nwsli):
     tmpfp.write(lines[1])
     tmpfp.write(lines[2])
     tmpfp.write(lines[3])
-    tmpfp.write(lines[-3])
-    tmpfp.write(lines[-2])
-    tmpfp.write(lines[-1])
+    for linenum in range(0 - dyprocessed, 0):
+        tmpfp.write(lines[linenum])
     tmpfp.close()
     cmd = "/home/ldm/bin/pqinsert -p 'data c %s csv/isusm/%s_daily.txt bogus txt' %s" % (
                     datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
@@ -267,9 +297,8 @@ def dump_raw_to_ldm(nwsli):
     tmpfp.write(lines[1])
     tmpfp.write(lines[2])
     tmpfp.write(lines[3])
-    tmpfp.write(lines[-3])
-    tmpfp.write(lines[-2])
-    tmpfp.write(lines[-1])
+    for linenum in range(0 - hrprocessed, 0):
+        tmpfp.write(lines[linenum])
     tmpfp.close()
     cmd = "/home/ldm/bin/pqinsert -p 'data c %s csv/isusm/%s_hourly.txt bogus txt' %s" % (
                     datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
@@ -284,9 +313,12 @@ def main():
     """ Go main Go """
     for nwsli in STATIONS.keys():
         maxobs = get_max_timestamps(nwsli)
-        hourly_process(nwsli, maxobs['hourly'])
-        daily_process(nwsli, maxobs['daily'])
-        dump_raw_to_ldm(nwsli)
+        hrprocessed = hourly_process(nwsli, maxobs['hourly'])
+        dyprocessed = daily_process(nwsli, maxobs['daily'])
+        if hrprocessed > 0:
+            dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed)
+        #else:
+        #    print 'No LDM data sent for %s' % (nwsli,)
     
     icursor.close()
     ISUAG.commit()
