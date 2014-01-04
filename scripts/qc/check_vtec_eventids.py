@@ -9,7 +9,7 @@ POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
 pcursor = POSTGIS.cursor()
 pcursor2 = POSTGIS.cursor()
 
-YEAR = datetime.datetime.now().year - 1
+YEAR = datetime.datetime.now().year 
 
 def add_missing(wfo, phenomena, sig, eventid):
     """ Known knowns!"""
