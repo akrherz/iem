@@ -145,6 +145,7 @@ def hourly_process(nwsli, maxts):
         valid = valid.replace(tzinfo=pytz.FixedOffset(-360))
         if valid <= maxts:
             break
+        #print valid, tokens[ headers.index('timestamp')]
         # We are ready for dbinserting!
         dbcols = "station,valid," + ",".join(headers[2:])
         dbvals = "'%s','%s-06'," % (nwsli, valid.strftime("%Y-%m-%d %H:%M:%S"))
@@ -154,6 +155,7 @@ def hourly_process(nwsli, maxts):
         icursor.execute(sql)
 
         # Update IEMAccess
+        #print nwsli, valid
         ob = Observation(nwsli, 'ISUSM', 
                          valid.astimezone(pytz.timezone("America/Chicago")))
         ob.data['tmpf'] = temperature(
@@ -174,7 +176,7 @@ def hourly_process(nwsli, maxts):
         ob.data['c2smv'] = float(tokens[headers.index('vwc_12_avg')]) * 100.0
         ob.data['c3smv'] = float(tokens[headers.index('vwc_24_avg')]) * 100.0
         ob.data['c4smv'] = float(tokens[headers.index('vwc_50_avg')]) * 100.0
-        #if not ob.save(accesstxn):
+        ob.save(accesstxn)
         #    print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
         #                                        nwsli, valid)
         processed += 1
@@ -233,7 +235,7 @@ def daily_process(nwsli, maxts):
                     float(tokens[headers.index('tair_c_min')]), 'C').value('F')
         ob.data['pday'] = float(tokens[headers.index('rain_mm_tot')]) / 24.5
         ob.data['max_sknt'] = float(tokens[headers.index('ws_mps_max')]) * 1.94
-        #if not ob.save(accesstxn):
+        ob.save(accesstxn)
         #    print 'soilm_ingest.py station: %s ts: %s daily updated no data?' % (
         #                                nwsli, valid.strftime("%Y-%m-%d"))
         processed += 1
