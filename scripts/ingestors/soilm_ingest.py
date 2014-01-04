@@ -171,9 +171,9 @@ def hourly_process(nwsli, maxts):
                 float(tokens[headers.index('t24_c_avg')]), 'C').value('F')        
         ob.data['c4tmpf'] = temperature(
                 float(tokens[headers.index('t50_c_avg')]), 'C').value('F')        
-        ob.data['c2smv'] = tokens[headers.index('vwc_12_avg')]
-        ob.data['c3smv'] = tokens[headers.index('vwc_24_avg')]
-        ob.data['c4smv'] = tokens[headers.index('vwc_50_avg')]
+        ob.data['c2smv'] = tokens[headers.index('vwc_12_avg')] * 100.0
+        ob.data['c3smv'] = tokens[headers.index('vwc_24_avg')] * 100.0
+        ob.data['c4smv'] = tokens[headers.index('vwc_50_avg')] * 100.0
         #if not ob.save(accesstxn):
         #    print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
         #                                        nwsli, valid)
