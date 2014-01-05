@@ -29,9 +29,18 @@
  		<th>Temp &deg;F</th><th>Moisture %</th>
  		<th>Temp &deg;F</th><th>Moisture %</th>
  		</tr>";
+ $offline = Array();
+ $threshold = time() - 86400;
  while (list($sid,$data)=each($obs)) {
- 	$pday = ($data->db['pday'] < 0) ? 0 : $data->db['pday'];
  	$uri = sprintf("/sites/site.php?station=%s&network=ISUSM", $sid);
+ 	
+ 	if ($data->ts < $threshold){
+ 		$offline[] = sprintf("<a href=\"%s\">%s</a>", $uri,
+				 $nt->table[$sid]['name']);
+ 		continue;
+ 	}
+ 	
+ 	$pday = ($data->db['pday'] < 0) ? 0 : $data->db['pday'];
  	$table .= sprintf("<tr><td><a href=\"%s\">%s</a></td><td>%s</td>
  			<td>%.1f</td><td>%.2f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td>
  			<td>%.1f</td><td>%.1f</td>
@@ -44,6 +53,9 @@
  }
  
  $table .= "</table>";
+ if (sizeof($offline) > 0){
+ 	$table .= sprintf("<br />Sites Offline: %s", implode($offline, ","));
+ }
  $v = isset($_REQUEST["v"]) ? htmlentities($_REQUEST["v"]): 'tmpf';
  $t = new MyView();
  $t->title = "ISU Ag Climate"; 
