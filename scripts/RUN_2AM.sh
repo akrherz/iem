@@ -34,7 +34,7 @@ python grid_climodat.py
 
 cd ../climodat
 python compute_0000.py
-./run.sh &
+sh run.sh &
 
 cd ../coop
 python hrrr_solarrad.py
