@@ -305,7 +305,8 @@ CREATE TABLE warnings (
     ugc character varying(6),
     phenomena character(2),
     significance character(1),
-    hvtec_nwsli character(5)
+    hvtec_nwsli character(5),
+    gid int references ugcs(gid)
 ) WITH OIDS;
 select addgeometrycolumn('','warnings','geom',4326,'MULTIPOLYGON',2);
 
