@@ -59,6 +59,6 @@ for row in pcursor:
         print "WWA missing WFO: %s phenomena: %s sig: %s eventid: %s" % (wfo, 
                                                             phenomena, sig, e)
       
-#pcursor2.close()
-#POSTGIS.commit()
-#POSTGIS.close()
+pcursor2.close()
+POSTGIS.commit()
+POSTGIS.close()
