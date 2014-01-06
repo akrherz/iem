@@ -17,6 +17,17 @@ SELECT AddGeometryColumn('ugcs', 'centroid', 4326, 'POINT', 2);
 GRANT SELECT on ugcs to nobody,apache;
 CREATE INDEX ugcs_ugc_idx on ugcs(ugc);
 
+---
+--- Helper function to find a GID for a given UGC code and date!
+---
+CREATE OR REPLACE FUNCTION get_gid(text, timestamptz)
+RETURNS int
+LANGUAGE sql
+AS $_$
+  select gid from ugcs WHERE begin_ts <= $2 and
+  (end_ts is null or end_ts > $2) LIMIT 1
+$_$;
+
 
 ---
 --- Store IDOT dashcam stuff
