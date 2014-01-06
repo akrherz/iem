@@ -24,7 +24,7 @@ CREATE OR REPLACE FUNCTION get_gid(text, timestamptz)
 RETURNS int
 LANGUAGE sql
 AS $_$
-  select gid from ugcs WHERE begin_ts <= $2 and
+  select gid from ugcs WHERE ugc = $1 and begin_ts <= $2 and
   (end_ts is null or end_ts > $2) LIMIT 1
 $_$;
 
