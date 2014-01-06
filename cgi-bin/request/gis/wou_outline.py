@@ -1,21 +1,18 @@
 #!/usr/bin/env python
-# Generate a shapefile of the WOU outline.
-# 28 Aug 2004 port to iem40
+""" Generate a Watch Outline for a given SPC convective watch """
 
 import shapelib
 import dbflib
-import mx.DateTime
 import zipfile
 import os
-import sys
 import shutil
 import cgi
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
 import wellknowntext
-import iemdb
+import psycopg2
 import psycopg2.extras
-POSTGIS = iemdb.connect('postgis', bypass=True)
+POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 pcursor.execute("SET TIME ZONE 'GMT'")
@@ -34,13 +31,13 @@ dbf = dbflib.create(fp)
 dbf.add_field("SIG", dbflib.FTString, 1, 0)
 dbf.add_field("ETN", dbflib.FTInteger, 4, 0)
 
-sql = """select astext(multi(ST_union(ST_SnapToGrid(geom,0.0001)))) as tgeom 
-       from warnings_%s WHERE significance = 'A' and 
-       phenomena IN ('TO','SV') and eventid = %s and
-       isvalid(geom) and 
-       issue < ((select issued from watches WHERE num = %s
-                and extract(year from issued) = %s LIMIT 1) + '60 minutes'::interval)
-       """ % (year, etn, etn, year) 
+sql = """select 
+    ST_astext(ST_multi(ST_union(ST_SnapToGrid(u.geom,0.0001)))) as tgeom 
+    from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE significance = 'A' 
+    and phenomena IN ('TO','SV') and eventid = %s and
+    ST_isvalid(u.geom) and issue < ((select issued from watches WHERE num = %s
+        and extract(year from issued) = %s LIMIT 1) + '60 minutes'::interval)
+""" % (year, etn, etn, year) 
 pcursor.execute(sql)
 
 if pcursor.rowcount == 0:
@@ -71,11 +68,10 @@ z.write(fp+".dbf")
 z.write(fp+".prj")
 z.close()
 
-print "Content-type: application/octet-stream"
-print "Content-Disposition: attachment; filename=%s.zip" % (fp,)
-print
+sys.stdout.write("Content-type: application/octet-stream\n")
+sys.stdout.write("Content-Disposition: attachment; filename=%s.zip\n" % (fp,))
 
-print file(fp+".zip", 'r').read(),
+sys.stdout.write( file(fp+".zip", 'r').read() )
 
 os.remove(fp+".zip")
 os.remove(fp+".shp")

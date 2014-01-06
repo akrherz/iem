@@ -61,10 +61,10 @@ out_layer.CreateField(fd)
 fd = ogr.FieldDefn('ETN',ogr.OFTInteger)
 out_layer.CreateField(fd)
 
-sql = """select phenomena, eventid, multi(ST_union(geom)) as tgeom, 
+sql = """select phenomena, eventid, ST_multi(ST_union(u.geom)) as tgeom, 
         max(to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI')) as utcexpire,
         min(to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI')) as utcissue
-       from warnings_%s WHERE significance = 'A' and 
+       from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE significance = 'A' and 
        phenomena IN ('TO','SV') and issue > '%s'::timestamp -'3 days':: interval 
        and issue <= '%s' and 
        expire > '%s' %s GROUP by phenomena, eventid ORDER by phenomena ASC

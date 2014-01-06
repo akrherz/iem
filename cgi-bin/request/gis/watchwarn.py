@@ -111,18 +111,18 @@ if form.has_key('simple') and form['simple'][0] == 'yes':
         ST_area( ST_transform((case when u.simple_geom is null then w.geom else u.simple_geom end),2163) ) / 1000000.0 as area2d,
         to_char(w.issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
         to_char(w.expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire
-        from %s w LEFT JOIN nws_ugc u on (w.ugc = u.ugc) 
+        from %s w LEFT JOIN ugcs u on (w.ugc = u.ugc) 
         WHERE ST_isValid((case when u.simple_geom is null then w.geom else u.simple_geom end)) and 
         issue >= '%s+00' and issue < '%s+00' and eventid < 10000 
         %s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), 
                 eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
 else:
-    sql = """SELECT ST_Simplify(geom,0.0001), phenomena, gtype, significance,
-        wfo, eventid, status, ugc,
-        ST_area( ST_transform(geom,2163) ) / 1000000.0 as area2d,
+    sql = """SELECT ST_Simplify(u.geom,0.0001), phenomena, gtype, significance,
+        w.wfo, eventid, status, w.ugc,
+        ST_area( ST_transform(u.geom,2163) ) / 1000000.0 as area2d,
         to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
         to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire
-        from %s w WHERE ST_isValid(geom) and 
+        from %s w JOIN ugcs u on (u.gid = w.gid) WHERE ST_isValid(u.geom) and 
 	    issue >= '%s+00' and issue < '%s+00' and eventid < 10000 
 	    %s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), 
                  eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
