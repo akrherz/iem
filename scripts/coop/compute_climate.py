@@ -70,14 +70,7 @@ def do_date(ccursor2, table, row, col, agg_col):
            META[table]['ets'])
     ccursor2.execute(sql)
     row2 = ccursor2.fetchone()
-    if row2 is not None:
-        sql = """ 
-            UPDATE %s SET %s_yr = %s WHERE station = '%s' and valid = '%s' 
-            """ % (table, agg_col, row2[0], row['station'], row['valid'])
-        ccursor2.execute(sql)
-        if ccursor2.rowcount != 1:
-            print 'Update %s for station %s and date %s failed' % (table,
-                                                row['station'], row['valid'])
+    return row2[0]
 
 def set_daily_extremes(table):
     sql = """
@@ -89,11 +82,20 @@ def set_daily_extremes(table):
     cnt = 0
     total = ccursor.rowcount
     for row in ccursor:
-        do_date(ccursor2, table, row, 'high', 'max_high')
-        do_date(ccursor2, table, row, 'high', 'min_high')
-        do_date(ccursor2, table, row, 'low', 'max_low')
-        do_date(ccursor2, table, row, 'low', 'min_low')
-        do_date(ccursor2, table, row, 'precip', 'max_precip')
+        data = {}
+        data['max_high_yr'] = do_date(ccursor2, table, row, 'high', 'max_high')
+        data['min_high_yr'] = do_date(ccursor2, table, row, 'high', 'min_high')
+        data['max_low_yr'] = do_date(ccursor2, table, row, 'low', 'max_low')
+        data['min_low_yr'] = do_date(ccursor2, table, row, 'low', 'min_low')
+        data['max_precip_yr'] = do_date(ccursor2, table, row, 
+                                        'precip', 'max_precip')
+        ccursor2.execute("""UPDATE %s SET max_high_yr = %s, min_high_yr = %s,
+        max_low_yr = %s, min_low_yr = %s, max_precip_yr = %s
+        WHERE station = '%s' and valid = '%s'""" % (
+                                    table, data['max_high_yr'],
+                                    data['min_high_yr'], data['max_low_yr'],
+                                    data['min_low_yr'], data['max_precip_yr'],
+                                    row['station'], row['valid']))
         cnt += 1
         if cnt % 1000 == 0:
             print 'set_daily_extremes processed %s/%s' % (cnt,total)
