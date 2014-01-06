@@ -8,5 +8,5 @@ python wxc_azos_gdd.py
 php wxc_coop.php
 
 cd ../coop
-./PREC.csh
+csh PREC.csh
 python 12z_precip.py
