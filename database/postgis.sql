@@ -1,4 +1,24 @@
 ---
+--- NWS Forecast / WWA Zones / Boundaries
+---
+CREATE TABLE ugcs(
+	gid SERIAL UNIQUE NOT NULL,
+	ugc char(6) NOT NULL,
+	name varchar(256),
+	state char(2),
+	tzname varchar(32),
+	wfo varchar(9),
+	begin_ts timestamptz NOT NULL,
+	end_ts timestamptz
+);
+SELECT AddGeometryColumn('ugcs', 'geom', 4326, 'MULTIPOLYGON', 2);
+SELECT AddGeometryColumn('ugcs', 'simple_geom', 4326, 'MULTIPOLYGON', 2);
+SELECT AddGeometryColumn('ugcs', 'centroid', 4326, 'POINT', 2);
+GRANT SELECT on ugcs to nobody,apache;
+CREATE INDEX ugcs_ugc_idx on ugcs(ugc);
+
+
+---
 --- Store IDOT dashcam stuff
 ---
 CREATE TABLE idot_dashcam_current(
