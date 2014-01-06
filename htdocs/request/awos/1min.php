@@ -48,7 +48,7 @@ at a 5-10 minute interval.
 where converted to ASOS in September of 2000.  Data for these sites exists 
 in this archive up until that point.</i><br>
 <div class="story">
-  <?php awosMultiSelect("", 5); ?>
+  <?php echo networkMultiSelect("AWOS", ''); ?>
 </div>
 
 <p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
