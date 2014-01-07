@@ -3,8 +3,8 @@
  * Generate a placefile of SBWs valid at a given time for a given WFO
  */
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/vtec.php");
+include("../../../include/database.inc.php");
+include("../../../include/vtec.php");
 $connect = iemdb("postgis");
 pg_query($connect, "SET TIME ZONE 'UTC'");
 
