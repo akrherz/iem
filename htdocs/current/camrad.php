@@ -76,7 +76,12 @@ $c0 = $map->getlayerbyname("sbw");
 $c0->set("status", MS_ON );
 $db_ts = strftime("%Y-%m-%d %H:%M+00", $ts );
 $year = date("Y", $ts);
-$c0->set("data", "geom from (select significance, phenomena, geom, random() as oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P' and significance = 'W' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+$c0->set("data", "geom from " 
+	." (select significance, phenomena, geom, random() as oid from sbw_$year "
+	." WHERE polygon_end > '$db_ts' and polygon_begin <= '$db_ts' and "
+	." issue <= '$db_ts' "
+	." and significance = 'W' ORDER by phenomena ASC) as foo " 
+	." using unique oid using SRID=4326");
 
 $radar = $map->getlayerbyname("nexrad_n0q");
 $radar->set("status", MS_ON );
