@@ -19,7 +19,6 @@ function cow($dbconn){
     $this->ets = 0;              /* Vertification window end UTC */
     $this->wtype = Array();      /* VTEC Phenomena types to verify */
     $this->ltype = Array();      /* LSR Types to verify with */
-    $this->ugcCache = Array();   /* UGC information */
     $this->hailsize = 0.75;      /* Hail size limitation */
     $this->lsrbuffer = 15;       /* LSR report buffer in km */
     $this->wind = 58;			/* Wind threshold in mph */
@@ -31,7 +30,6 @@ function cow($dbconn){
 function milk(){ 
     $this->loadWarnings();
     $this->loadLSRs();
-    $this->computeUGC();
     $this->computeSharedBorder();
     $this->sbwVerify();
     $this->areaVerify();
@@ -99,7 +97,7 @@ function sqlLSRTypeBuilder(){
 function sqlTypeBuilder(){
     if (sizeof($this->wtype) == 0) return "w.phenomena IN ('ZZ')";
 
-    $sql = "w.phenomena IN ('". implode(",", $this->wtype) ."')";
+    $sql = "phenomena IN ('". implode(",", $this->wtype) ."')";
     $sql = str_replace(",", "','", $sql);
     return $sql;
 }
@@ -120,9 +118,7 @@ function computeSizeReduction(){
     $countysz = 0;
     while (list($k,$v) = each($this->warnings)){
         $polysz += $v["parea"];
-        while (list($k2,$v2) = each($v["ugc"])){
-            $countysz += $this->ugcCache[$v2]["area"];
-        }
+        $countysz += $v["carea"];
     }
     if ($countysz == 0){ return 0; }
     return ($countysz - $polysz) / $countysz * 100.0;
@@ -258,30 +254,6 @@ function computeWarningsUnverified(){
     return sizeof($this->warnings) - $this->computeWarningsVerified();
 }
 
-function computeUGC(){
-    reset($this->warnings);
-    while (list($k,$v) = each($this->warnings)){
-        while (list($k2,$v2) = each($v["ugc"])){
-            if (array_key_exists($v2, $this->ugcCache)){ continue; }
-            /* Else we need to lookup the informations */
-            $sql = sprintf("SELECT *, 
-                   ST_area(ST_transform(geom,2163)) / 1000000.0 as area 
-                   from nws_ugc WHERE ugc = '%s'", $v2);
-            $rs = $this->callDB($sql);
-            if (pg_num_rows($rs) > 0){
-                $row = pg_fetch_array($rs,0);
-                $this->ugcCache[$v2] = Array(
-                     "name" => sprintf("%s,%s ", $row["name"], $row["state"]),
-                     "area" => $row["area"]);
-            } else {
-                $this->ugcCache[$v2] = Array(
-                     "name" => sprintf("(((%s)))", $v2),
-                     "area" => $row["area"]);
-            }
-        }
-    }
-} /* End of computeUGC() */
-
 function computeSharedBorder(){
     reset($this->warnings);
     while (list($k,$v) = each($this->warnings)){
@@ -324,62 +296,81 @@ function sqlTagLimiter(){
 }
 
 function loadWarnings(){
-    $sql = sprintf("
-    select *, ST_astext(geom) as tgeom,
-    		extract(year from issue at time zone 'UTC') as year from 
-      (SELECT distinct * from 
-        (select s.hailtag, s.windtag, 
-         w.geom, w.issue, w.expire, w.wfo, w.status, w.significance,
-         w.phenomena, w.eventid, w.gtype, w.ugc,
-         ST_area(ST_transform(w.geom,2163)) / 1000000.0 as area,
-         ST_perimeter(ST_transform(w.geom,2163)) as perimeter,
-         ST_xmax(w.geom) as lon0, ST_ymax(w.geom) as lat0 from 
-         warnings w, sbw s WHERE s.wfo = w.wfo and s.phenomena = w.phenomena and
-         s.eventid = w.eventid and s.significance = w.significance and 
-         s.status = 'NEW' and s.issue = w.issue and 
-         %s and w.issue >= '%s' and w.issue < '%s' and
-         w.expire < '%s' and %s and w.significance = 'W' %s
-         ORDER by w.issue ASC) as foo) 
-      as foo2 ORDER by issue ASC", $this->sqlWFOBuilder(), 
-   date("Y/m/d H:i", $this->sts), date("Y/m/d H:i", $this->ets), 
-   date("Y/m/d H:i", $this->ets), $this->sqlTypeBuilder(), 
-   $this->sqlTagLimiter() );
-    $rs = $this->callDB($sql);
+	/*
+	 * Load the warnings stored in the database based on our specifications
+	 */
+	$sql = sprintf("
+	WITH stormbased as (
+      SELECT 
+		wfo, phenomena, eventid, hailtag, windtag, issue, expire,
+		ST_AsText(geom) as tgeom, significance,
+		ST_area(ST_transform(geom,2163)) / 1000000.0 as parea,
+		ST_perimeter(ST_transform(geom,2163)) as perimeter,
+		ST_xmax(geom) as lon0, ST_ymax(geom) as lat0,
+		extract(year from issue at time zone 'UTC') as year
+			from sbw w WHERE status = 'NEW' and %s and
+			issue >= '%s' and issue < '%s' and expire < '%s'
+			and %s %s
+                
+    ), countybased as (
+      SELECT  
+		w.wfo, phenomena, eventid, significance, 
+		string_agg(u.ugc, ',') as ar_ugc,
+		string_agg(u.name ||' '||u.state, '|') as ar_ugcname,
+		sum(ST_area(ST_transform(u.geom,2163)) / 1000000.0) as carea,
+		extract(year from issue at time zone 'UTC') as year
+			from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE           
+            w.gid is not null and %s and
+			issue >= '%s' and issue < '%s' and expire < '%s' 
+			and %s %s
+			GROUP by w.wfo, phenomena, eventid, significance, year
+    )
+	SELECT  
+		s.year, s.wfo, s.phenomena, s.eventid, s.tgeom, s.issue, s.expire,
+			s.significance, s.hailtag, s.windtag, s.issue, c.carea, c.ar_ugc,
+			s.lat0, s.lon0, s.perimeter, s.parea, c.ar_ugcname
+			from stormbased s JOIN countybased c on 
+			(c.eventid = s.eventid and c.wfo = s.wfo and c.year = s.year
+			and c.phenomena = s.phenomena and c.significance = s.significance)
+	",  $this->sqlWFOBuilder(), date("Y/m/d H:i", $this->sts), 
+	date("Y/m/d H:i", $this->ets), date("Y/m/d H:i", $this->ets), 
+	$this->sqlTypeBuilder(), $this->sqlTagLimiter(),
+	$this->sqlWFOBuilder(), date("Y/m/d H:i", $this->sts), 
+	date("Y/m/d H:i", $this->ets),  date("Y/m/d H:i", $this->ets),
+    $this->sqlTypeBuilder(), $this->sqlTagLimiter() );
+	
+	$rs = $this->callDB($sql);
     
-    for ($i=0;$row = @pg_fetch_array($rs,$i);$i++){
-        $key = sprintf("%s-%s-%s-%s", substr($row["issue"],0,4), $row["wfo"], 
+    for ($i=0;$row = @pg_fetch_assoc($rs,$i);$i++){
+        $key = sprintf("%s-%s-%s-%s", $row["year"], $row["wfo"], 
                        $row["phenomena"], $row["eventid"]);
-        if ( ! isset($this->warnings[$key]) ){
-            $this->warnings[$key] = Array("ugc"=> Array(), "geom" => "",
-                                          "lsrs" => Array(), "perimeter" => 0,
-                                          "parea" => 0 );
-        }
+
+        $this->warnings[$key] = Array();
+        $this->warnings[$key]["lead0"] = -1;
+        $this->warnings[$key]["buffered"] = 0;
+        $this->warnings[$key]["verify"] = 0;
+        $this->warnings[$key]["status"] = 'UNK';
+        $this->warnings[$key]['lsrs'] = Array();
+        
         $this->warnings[$key]["hailtag"] = $row["hailtag"];
         $this->warnings[$key]["windtag"] = $row["windtag"];
         $this->warnings[$key]["issue"] = $row["issue"];
         $this->warnings[$key]["phenomena"] = $row["phenomena"];
         $this->warnings[$key]["wfo"] = $row["wfo"];
-        $this->warnings[$key]["significance"] = $row["significance"];
-        $this->warnings[$key]["area"] = $row["area"];
+        $this->warnings[$key]["significance"] = $row["significance"];        
+        $this->warnings[$key]["carea"] = $row["carea"];        
         $this->warnings[$key]["lat0"] = $row["lat0"];
         $this->warnings[$key]["lon0"] = $row["lon0"];
         $this->warnings[$key]["sts"] = strtotime($row["issue"]);
         $this->warnings[$key]["ets"] = strtotime($row["expire"]);
+        $this->warnings[$key]["expire"] = strtotime($row["expire"]);
         $this->warnings[$key]["eventid"] = $row["eventid"];
         $this->warnings[$key]["year"] = $row["year"];
-        $this->warnings[$key]["lead0"] = -1;
-        $this->warnings[$key]["buffered"] = 0;
-        $this->warnings[$key]["verify"] = 0;
-        if ($row["gtype"] == "P"){
-        	$this->warnings[$key]["status"] = $row["status"];
-        	$this->warnings[$key]["expire"] = strtotime($row["expire"]);
-            $this->warnings[$key]["geom"] = $row["tgeom"];
-            $this->warnings[$key]["perimeter"] = $row["perimeter"];
-            $this->warnings[$key]["parea"] = $row["area"];
-        } else {
-            $this->warnings[$key]["ugc"][] = $row["ugc"];
-        }
-
+        $this->warnings[$key]["geom"] = $row["tgeom"];
+        $this->warnings[$key]["perimeter"] = $row["perimeter"];
+        $this->warnings[$key]["parea"] = $row["parea"];
+        $this->warnings[$key]["ugc"] = explode(",",$row["ar_ugc"]);
+        $this->warnings[$key]["ugcname"] = explode("|",$row["ar_ugcname"]);
     } /* End of rs for loop */
 
 } /* End of loadWarnings() */
