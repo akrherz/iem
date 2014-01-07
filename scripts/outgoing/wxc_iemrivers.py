@@ -6,10 +6,10 @@ import re
 import os
 import subprocess
 import shutil
-import mx.DateTime
+import datetime
 import psycopg2
 import psycopg2.extras
-POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
+POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 svr_dict = {"N": "None", "0": "Aerial", "1": "Minor", "2": "Moderate", 
@@ -28,7 +28,7 @@ o.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
   12 Severity
   10 Trend
  128 Forecast Text
-""" % (mx.DateTime.gmt().strftime("%Y.%m.%d.%H%M"), ) )
+""" % (datetime.datetime.utcnow().strftime("%Y.%m.%d.%H%M"), ) )
 
 pcursor.execute("""select r.*, h.*, ST_x(h.geom) as lon, ST_y(h.geom) as lat 
    from hvtec_nwsli h, riverpro r,
@@ -36,7 +36,7 @@ pcursor.execute("""select r.*, h.*, ST_x(h.geom) as lon, ST_y(h.geom) as lat
    status NOT IN ('EXP','CAN') and phenomena = 'FL' and 
    significance = 'W') as foo
    WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli""" % (
-   mx.DateTime.now().year,) )
+   datetime.datetime.utcnow().year,) )
 
 for row in pcursor:
     nwsli = row['nwsli']
