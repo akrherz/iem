@@ -5,7 +5,6 @@ in it!
 import re
 import os
 import subprocess
-import shutil
 import datetime
 import psycopg2
 import psycopg2.extras
