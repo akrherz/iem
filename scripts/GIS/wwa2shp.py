@@ -5,11 +5,12 @@ from osgeo import ogr
 import zipfile
 import os
 import datetime
+import pytz
 import shutil
 import subprocess
 
-now = datetime.datetime.now() + datetime.timedelta(minutes=1)
-table = "warnings_%s" % (now.year, )
+utc = datetime.datetime.utcnow()
+utc = utc.replace(tzinfo=pytz.timezone("UTC"),second=0,microsecond=0)
 
 os.chdir("/tmp")
 fp = "current_ww"
@@ -17,8 +18,7 @@ for suffix in ['shp', 'shx', 'dbf']:
 	if os.path.isfile("%s.%s" % (fp, suffix)):
 		os.remove("%s.%s" % (fp, suffix))
 
-source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody tables=%s(geom)" % (
-																table,))
+source = ogr.Open("PG:host=iemdb dbname=postgis user=nobody")
 
 out_driver = ogr.GetDriverByName( 'ESRI Shapefile' )
 out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
@@ -63,21 +63,25 @@ fd = ogr.FieldDefn('NWS_UGC',ogr.OFTString)
 fd.SetWidth(6)
 out_layer.CreateField(fd)
 
+sql = """
+ SELECT geom, 'P' as gtype, significance, wfo, status, eventid, null as ugc,
+ phenomena,
+ to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utcexpire,
+ to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utcissue,
+ to_char(polygon_begin at time zone 'UTC', 'YYYYMMDDHH24MI') as utcupdated
+ from sbw_%s WHERE polygon_begin <= '%s' and expire > '%s' 
 
-#pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
-#pcursor.execute("SET TIME ZONE 'GMT'")
-# Don't print out annonying errors about ST_IsValid failures
-#pcursor.execute("set client_min_messages = ERROR")
+UNION
 
+ SELECT u.simple_geom as geom, gtype, significance, w.wfo, status, eventid, u.ugc,
+ phenomena,
+ to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utcexpire,
+ to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utcissue,
+ to_char(updated at time zone 'UTC', 'YYYYMMDDHH24MI') as utcupdated 
+ from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE
+ expire > '%s' and w.gid is not null
 
-sql = """SELECT geom, gtype, significance, wfo,
-	status, eventid, ugc, phenomena,
-	to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utcexpire,
-	to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utcissue,
-	to_char(updated at time zone 'UTC', 'YYYYMMDDHH24MI') as utcupdated
-	from %s 
-	WHERE expire > '%s' and ((gtype = 'P' and ST_IsValid(geom)) or gtype = 'C') 
-	ORDER by type ASC""" % (table, now.strftime("%Y-%m-%d %H:%M"))
+""" % (utc.year, utc, utc, utc.year, utc)
 
 data = source.ExecuteSQL(sql)
 
@@ -122,7 +126,7 @@ z.write("current_ww.prj")
 z.close()
 
 cmd = "/home/ldm/bin/pqinsert -p \"zip c %s gis/shape/4326/us/current_ww.zip bogus zip\" current_ww.zip" % (
-										now.strftime("%Y%m%d%H%M"),)
+										utc.strftime("%Y%m%d%H%M"),)
 subprocess.call(cmd, shell=True)
 for suffix in ['shp', 'shp.xml', 'shx', 'dbf', 'prj', 'zip']:
 	os.remove('current_ww.%s' % (suffix,))
