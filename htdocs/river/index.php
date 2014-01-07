@@ -2,10 +2,15 @@
 include("../../config/settings.inc.php");
 define("IEM_APPID", 71);
 include("../../include/database.inc.php");
-$THISPAGE = "severe-river";
-include("../../include/header.php");
 include("../../include/forms.php");
 include("../../include/imagemaps.php");
+include("../../include/myview.php");
+
+$t = new MyView();
+$t->thispage = "severe-river";
+$t->title = "River Forecast Point Monitor";
+$content = "";
+
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3): "DMX";
 $state = isset($_GET["state"]) ? substr($_GET["state"],0,3): "IA";
 
@@ -23,7 +28,7 @@ if (isset($_GET["dvn"])){
  $nwsli_limiter = "and r.nwsli IN ('FLTI2', 'CMMI4', 'LECI4', 'RCKI2', 'ILNI2', 
  'MUSI4', 'NBOI2', 'KHBI2', 'DEWI4', 'CNEI4', 'CJTI4', 'WAPI4','LNTI4', 'CMOI2', 
  'JOSI2', 'MLII2','GENI2')";
- echo "<style>
+ $content .= "<style>
 #iem-header {
   display: none;
   visibility: hidden;
@@ -85,7 +90,7 @@ $rivers = Array();
 for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
   $river = $row["river_name"];
-  $uri = sprintf("%s/vtec/#%s-O-%s-K%s-%s-%s-%04d", $rooturl, date("Y"),
+  $uri = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", date("Y"),
         "NEW", $row["wfo"], $row["phenomena"],
         "W", $row["eventid"]);
 
@@ -94,68 +99,23 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
    $row["nwsli"], $uri, $row["counties"], $row["stage_text"], $row["flood_text"], 
    $row["forecast_text"]);
 }
-echo $ptitle;
-echo "<a href=\"?all\">View All</a>";
-echo "<p><form method='GET' name='wfo'>";
-echo 'Select by NWS Forecast Office:'. networkSelect("WFO", $wfo);
-echo "<input type='submit' value='Select by WFO'>";
-echo "</form>";
-?>
+$content .= $ptitle;
+$content .= <<<EOF
+<p>This page produces a summary listing for National Weather Service Flood 
+Forecast Points when the point is currently in a flood warning state.  The IEM
+processes the flood warning products and attempts to extract the important 
+details regarding flood state, severity, and forecasted stage.</p>
+<a href="?all">View All</a>
+<p><form method="GET" name="wfo">
+EOF;
+$content .= 'Select by NWS Forecast Office:'. networkSelect("WFO", $wfo);
+$content .= "<input type='submit' value='Select by WFO'>";
+$content .= "</form>";
+$sselect = stateSelect($state);
+$content .= <<<EOF
 <p><form method='GET' name='state'>
 Select by State: 
-<select name="state">
- <option value="AL" <?php if ($state == "AL") echo "SELECTED"; ?>>Alabama
- <option value="AK" <?php if ($state == "AK") echo "SELECTED"; ?>>Alaska
- <option value="AR" <?php if ($state == "AR") echo "SELECTED"; ?>>Arkansas
- <option value="AZ" <?php if ($state == "AZ") echo "SELECTED"; ?>>Arizona
- <option value="CA" <?php if ($state == "CA") echo "SELECTED"; ?>>California
- <option value="CO" <?php if ($state == "CO") echo "SELECTED"; ?>>Colorado
- <option value="CT" <?php if ($state == "CT") echo "SELECTED"; ?>>Connecticut
- <option value="DE" <?php if ($state == "DE") echo "SELECTED"; ?>>Delaware
- <option value="FL" <?php if ($state == "FL") echo "SELECTED"; ?>>Florida
- <option value="GA" <?php if ($state == "GA") echo "SELECTED"; ?>>Georgia
- <option value="HI" <?php if ($state == "HI") echo "SELECTED"; ?>>Hawaii
- <option value="ID" <?php if ($state == "ID") echo "SELECTED"; ?>>Idaho
- <option value="IL" <?php if ($state == "IL") echo "SELECTED"; ?>>Illinois
- <option value="IN" <?php if ($state == "IN") echo "SELECTED"; ?>>Indiana
- <option value="IA" <?php if ($state == "IA") echo "SELECTED"; ?>>Iowa
- <option value="KS" <?php if ($state == "KS") echo "SELECTED"; ?>>Kansas
- <option value="KY" <?php if ($state == "KY") echo "SELECTED"; ?>>Kentucky
- <option value="LA" <?php if ($state == "LA") echo "SELECTED"; ?>>Louisana
- <option value="MN" <?php if ($state == "MN") echo "SELECTED"; ?>>Maine
- <option value="MD" <?php if ($state == "MD") echo "SELECTED"; ?>>Maryland
- <option value="MA" <?php if ($state == "MA") echo "SELECTED"; ?>>Massachusetts
- <option value="MI" <?php if ($state == "MI") echo "SELECTED"; ?>>Michigan
- <option value="MN" <?php if ($state == "MN") echo "SELECTED"; ?>>Minnesota
- <option value="MS" <?php if ($state == "MS") echo "SELECTED"; ?>>Mississippi
- <option value="MO" <?php if ($state == "MO") echo "SELECTED"; ?>>Missouri
- <option value="MT" <?php if ($state == "MT") echo "SELECTED"; ?>>Montana
- <option value="NE" <?php if ($state == "NE") echo "SELECTED"; ?>>Nebraska
- <option value="NH" <?php if ($state == "NH") echo "SELECTED"; ?>>New Hampshire
- <option value="NC" <?php if ($state == "NC") echo "SELECTED"; ?>>North Carolina
- <option value="ND" <?php if ($state == "ND") echo "SELECTED"; ?>>North Dakota
- <option value="NV" <?php if ($state == "NV") echo "SELECTED"; ?>>Nevada
- <option value="NH" <?php if ($state == "NH") echo "SELECTED"; ?>>New Hampshire
- <option value="NJ" <?php if ($state == "NJ") echo "SELECTED"; ?>>New Jersey
- <option value="NM" <?php if ($state == "NM") echo "SELECTED"; ?>>New Mexico
- <option value="NY" <?php if ($state == "NY") echo "SELECTED"; ?>>New York
- <option value="OH" <?php if ($state == "OH") echo "SELECTED"; ?>>Ohio
- <option value="OK" <?php if ($state == "OK") echo "SELECTED"; ?>>Oklahoma
- <option value="OR" <?php if ($state == "OR") echo "SELECTED"; ?>>Oregon
- <option value="PA" <?php if ($state == "PA") echo "SELECTED"; ?>>Pennsylvania
- <option value="RI" <?php if ($state == "RI") echo "SELECTED"; ?>>Rhode Island
- <option value="SC" <?php if ($state == "SC") echo "SELECTED"; ?>>South Carolina
- <option value="SD" <?php if ($state == "SD") echo "SELECTED"; ?>>South Dakota
- <option value="TN" <?php if ($state == "TN") echo "SELECTED"; ?>>Tennessee
- <option value="TX" <?php if ($state == "TX") echo "SELECTED"; ?>>Texas
- <option value="UT" <?php if ($state == "UT") echo "SELECTED"; ?>>Utah
- <option value="VT" <?php if ($state == "VT") echo "SELECTED"; ?>>Vermont
- <option value="VA" <?php if ($state == "VA") echo "SELECTED"; ?>>Virginia
- <option value="WA" <?php if ($state == "WA") echo "SELECTED"; ?>>Washington
- <option value="WV" <?php if ($state == "WV") echo "SELECTED"; ?>>West Virginia
- <option value="WI" <?php if ($state == "WI") echo "SELECTED"; ?>>Wisconsin
- <option value="WY" <?php if ($state == "WY") echo "SELECTED"; ?>>Wyoming
-</select>
+{$sselect}
 <input type='submit' value="Select by State">
 </form>
 
@@ -167,20 +127,24 @@ Select by State:
  <td style="background: #f00;">Moderate Flooding</td>
  <td style="background: #f0f;">Major Flooding</td>
 </tr></table>
+EOF;
 
-<?php
-echo "<p><table border='1' cellpadding='2' cellspacing='0'>";
+$content .= "<p><table border='1' cellpadding='2' cellspacing='0'>";
 $rvs = array_keys($rivers);
 asort($rvs);
 
 while (list($idx, $key) = each($rvs))
 {
-  echo "<tr><th colspan='5' style='background: #eee; text-align: left;'>$key</th></tr>";
-  echo $rivers[$key];
+  $content .=  "<tr><th colspan='5' style='background: #eee; text-align: left;'>$key</th></tr>";
+  $content .=  $rivers[$key];
 
 }
+if (sizeof($rvs) == 0){
+	$content .= "<tr><td colspan='5'>No Entries Found</td></tr>";
+}
 
-echo "</table>";
+$content .=  "</table>";
 
-include("$rootpath/include/footer.php");
+$t->content = $content;
+$t->render("single.phtml");
 ?>
