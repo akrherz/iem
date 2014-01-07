@@ -70,11 +70,17 @@ def do_date(ccursor2, table, row, col, agg_col):
            META[table]['ets'])
     ccursor2.execute(sql)
     row2 = ccursor2.fetchone()
+    if row2 is None:
+        print 'None?', row, col, agg_col
+        return 'null'
     return row2[0]
 
 def set_daily_extremes(table):
     sql = """
-    SELECT * from %s 
+    SELECT * from %s WHERE max_high_yr is null and max_high is not null
+    and min_high_yr is null and min_high is not null
+    and max_low_yr is null and max_low is not null
+    and min_low_yr is null and min_low is not null
     """ % (table,)
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ccursor.execute(sql)
@@ -99,6 +105,9 @@ def set_daily_extremes(table):
         cnt += 1
         if cnt % 1000 == 0:
             print 'set_daily_extremes processed %s/%s' % (cnt,total)
+            ccursor2.close()
+            COOP.commit()
+            ccursor2 = COOP.cursor()
     ccursor2.close()
     ccursor.close()
     COOP.commit()
