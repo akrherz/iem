@@ -3,8 +3,8 @@
  * Generate a placefile for a given VTEC ID!
  */
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/vtec.php");
+include("../../../include/database.inc.php");
+include("../../../include/vtec.php");
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -23,12 +23,11 @@ $rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g,
 $result = pg_execute($connect, "SELECT", 
                      Array($wfo, $phenomena, $eventid, $significance) );
 if (pg_num_rows($result) <= 0) {
-    $rs = pg_prepare($connect, "SELECT2", "SELECT *, ST_astext(geom) as g, 
-           ST_askml(geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
+    $rs = pg_prepare($connect, "SELECT2", "SELECT *, ST_astext(u.geom) as g, 
+           round(ST_area(ST_transform(u.geom,2163)) / 1000000.0) as psize,
            length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
-           from warnings_$year 
-           WHERE wfo = $1 and phenomena = $2 and 
+           from warnings_$year w JOIN ugcs u on (u.gid = w.gid)
+           WHERE w.wfo = $1 and phenomena = $2 and 
            eventid = $3 and significance = $4
            and gtype = 'C'");
 
@@ -46,7 +45,7 @@ for($i=0;$row=@pg_fetch_array($result,$i);$i++){
 	$geom = $row["g"];
 	$geom = str_replace("MULTIPOLYGON(((", "", $geom);
 	$geom = str_replace(")))", "", $geom);
-	$tokens = split(",", $geom);
+	$tokens = preg_split("/,/", $geom);
 	$phenomena = $row['phenomena'];
 	$significance = $row['significance'];
 	echo "\n;". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] ." ". $row["eventid"] ."\n";
@@ -61,7 +60,7 @@ for($i=0;$row=@pg_fetch_array($result,$i);$i++){
 	$first = true;
 	foreach($tokens as $token){
 	
-		$parts = split(" ", $token);
+		$parts = preg_split("/ /", $token);
 		$extra = "";
 		if ($first){
 			$extra = $c;
