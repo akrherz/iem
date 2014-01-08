@@ -6,8 +6,8 @@
  */
 
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/vtec.php");
+include("../../include/database.inc.php");
+include("../../include/vtec.php");
 $postgis = iemdb("postgis");
 
 $plotmeta = Array("title" => Array(),
@@ -122,12 +122,13 @@ if (isset($_GET["vtec"]))
   $year = intval($year);
   $wfo = substr($wfo,1,3);
   /* First, we query for a bounding box please */
-  $query1 = "SELECT max(issue) as v, max(expire) as e,
-             ST_xmax(ST_extent(geom)) as x1, ST_xmin(ST_extent(geom)) as x0, 
-             ST_ymin(ST_extent(geom)) as y0, ST_ymax(ST_extent(geom)) as y1 
-             from warnings_$year WHERE wfo = '$wfo' and  
-             phenomena = '$phenomena' and eventid = $eventid 
-             and significance = '$significance'";
+  $query1 = "SELECT max(issue) as v, max(expire) as e, "
+        ."ST_xmax(ST_extent(u.geom)) as x1, ST_xmin(ST_extent(u.geom)) as x0, "
+        ."ST_ymin(ST_extent(u.geom)) as y0, ST_ymax(ST_extent(u.geom)) as y1 "
+        ."from warnings_$year w JOIN ugcs u on (u.gid = w.gid) "
+        ."WHERE w.wfo = '$wfo' and "
+        ."phenomena = '$phenomena' and eventid = $eventid "
+        ."and significance = '$significance'";
   $result = pg_exec($postgis, $query1);
   $row = pg_fetch_array($result, 0); 
   $lpad = 0.5;
@@ -143,19 +144,20 @@ if (isset($_GET["vtec"]))
   $dts2 = strtotime( $row["e"] );
 
   $vtec_limiter = sprintf("and phenomena = '%s' and eventid = %s and 
-    significance = '%s' and wfo = '%s'", $phenomena, $eventid, 
+    significance = '%s' and w.wfo = '%s'", $phenomena, $eventid, 
     $significance, $wfo);
 }
-if (isset($_GET['pid']))
+if (isset($_REQUEST['pid']))
 {
-  $pid = $_GET["pid"];
+  $pid = $_REQUEST["pid"];
   $dts = gmmktime(substr($_GET["pid"],8,2), substr($_GET["pid"],10,2), 0,
  substr($_GET["pid"],4,2), substr($_GET["pid"],6,2), substr($_GET["pid"],0,4));
   /* First, we query for a bounding box please */
-  $query1 = "SELECT ST_xmax(ST_extent(geom)) as x1, ST_xmin(ST_extent(geom)) as x0, 
-             ST_ymin(ST_extent(geom)) as y0, ST_ymax(ST_extent(geom)) as y1 
-             from text_products WHERE product_id = '$pid'";
-  $result = pg_exec($postgis, $query1);
+  $rs = pg_prepare($postgis, "SELECTPID", 
+  	"SELECT ST_xmax(ST_extent(geom)) as x1, ST_xmin(ST_extent(geom)) as x0, "
+    ."ST_ymin(ST_extent(geom)) as y0, ST_ymax(ST_extent(geom)) as y1 "
+    ."from text_products WHERE product_id = $1");
+  $result = pg_execute($postgis, "SELECTPID", Array($pid));
   $row = pg_fetch_array($result, 0);
   $lpad = 0.5;
   $y1 = $row["y1"] +$lpad; $y0 = $row["y0"]-$lpad;
@@ -177,9 +179,9 @@ if (isset($_GET["bbox"]))
 if ($sector == "wfo"){
 	$sector_wfo = isset($_REQUEST["sector_wfo"]) ? strtoupper($_REQUEST["sector_wfo"]): "DMX";
 	/* Fetch the bounds */
-	pg_prepare($postgis, "WFOBOUNDS", "SELECT ST_xmax(geom), ST_ymax(geom),
-	    ST_xmin(geom), ST_ymin(geom) from (SELECT ST_Extent(the_geom) as geom from cwa
-		WHERE wfo = $1) as foo");
+	pg_prepare($postgis, "WFOBOUNDS", "SELECT ST_xmax(geom), ST_ymax(geom), "
+	    ."ST_xmin(geom), ST_ymin(geom) from "
+	    ."(SELECT ST_Extent(the_geom) as geom from cwa WHERE wfo = $1) as foo");
 	$rs = pg_execute($postgis, "WFOBOUNDS", Array($sector_wfo));
 	if (pg_numrows($rs) > 0){
 		$row = pg_fetch_assoc($rs,0);
@@ -214,7 +216,7 @@ if (time() - $ts > 300)
 /* Lets Plot stuff already! */
 
 
-$mapFile = $rootpath."/data/gis/base".$sectors[$sector]['epsg'].".map";
+$mapFile = "../../data/gis/base".$sectors[$sector]['epsg'].".map";
 $map = ms_newMapObj($mapFile);
 $map->setSize($width, $height);
 $map->setExtent($sectors[$sector]['ext'][0],
@@ -313,11 +315,11 @@ $sbwh = $map->getlayerbyname("allsbw");
 $sbwh->set("status", in_array("allsbw", $layers) );
 $sbwh->set("connection", $_DATABASES["postgis"]);
 //$sbwh->set("maxscale", 10000000);
-$sql = sprintf("geom from (select phenomena, geom, oid from sbw
-    WHERE significance = 'W' and status = 'NEW' and wfo = 'EAX' and
-    phenomena in ('TO') 
-	and issue > '2007-10-01') as foo 
-    using unique oid using SRID=4326");
+$sql = sprintf("geom from (select phenomena, geom, oid from sbw "
+    ."WHERE significance = 'W' and status = 'NEW' and wfo = 'EAX' and "
+    ."phenomena in ('TO') "
+	."and issue > '2007-10-01') as foo "
+    ."using unique oid using SRID=4326");
 $sbwh->set("data", $sql);
 $sbwh->draw($img);
 
@@ -337,23 +339,23 @@ if (in_array("bufferedlsr", $layers)){
 	$blsr->setConnectionType( MS_POSTGIS);
 	$blsr->set("connection", $_DATABASES["postgis"]);
 	$blsr->set("status", in_array("bufferedlsr", $layers) );
-	$sql = "geo from (select distinct city, magnitude, valid, 
-	  ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326) as geo, 
-	  type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k 
-	  from lsrs_". date("Y", $ts) ." WHERE
-	  ST_Overlaps((select geom from warnings_". date("Y", $ts) ." WHERE 
-	           wfo = '$wfo' and phenomena = '$phenomena' and 
-	           significance = '$significance' and eventid = $eventid 
-	           and gtype = 'P' LIMIT 1), 
-	     ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326)
-	           ) and
-	  valid >= '". date("Y-m-d H:i", $ts) ."' and 
-	  valid < '". date("Y-m-d H:i", $ts2) ."' and
-	  ((type = 'M' and magnitude >= 34) or 
-	         (type = 'H' and magnitude >= 0.75) or type = 'W' or
-	         type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D'
-	         or type = 'F') ORDER by valid DESC) as foo 
-	  USING unique k USING SRID=4326";
+	$sql = "geo from (select distinct city, magnitude, valid, "
+	  ."ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326) as geo, "
+	  ."type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k "
+	  ."from lsrs WHERE "
+	  ."ST_Overlaps((select geom from sbw_". date("Y", $ts) ." WHERE "
+	           ."wfo = '$wfo' and phenomena = '$phenomena' and "
+	           ."significance = '$significance' and eventid = $eventid "
+	           ."and status = 'NEW' LIMIT 1), "
+	     ."ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326) "
+	           .") and "
+	  ."valid >= '". date("Y-m-d H:i", $ts) ."' and "
+	  ."valid < '". date("Y-m-d H:i", $ts2) ."' and "
+	  ."((type = 'M' and magnitude >= 34) or "
+	         ."(type = 'H' and magnitude >= 0.75) or type = 'W' or "
+	         ."type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D' "
+	         ."or type = 'F') ORDER by valid DESC) as foo "
+	  ."USING unique k USING SRID=4326";
 	$blsr->set("data", $sql);
 	$blsr->set("type", MS_LAYER_POLYGON);
 	$blsr->setProjection("init=epsg:4326");
@@ -371,7 +373,13 @@ if (in_array("bufferedlsr", $layers)){
 $wbc = $map->getlayerbyname("watch_by_county");
 $wbc->set("status", in_array("watch_by_county", $layers) );
 $wbc->set("connection", $_DATABASES["postgis"]);
-$sql = sprintf("g from (select phenomena, eventid, ST_buffer(ST_collect( geom ),0) as g from warnings WHERE substr(ugc,3,1) = 'C' and significance = 'A' and phenomena IN ('TO','SV') and issue <= '%s:00+00' and expire > '%s:00+00' GROUP by phenomena, eventid ORDER by phenomena ASC) as foo using SRID=4326 using unique phenomena",
+$sql = sprintf("g from (select phenomena, eventid, "
+		."ST_buffer(ST_collect( u.geom ),0) as g from warnings w JOIN ugcs u "
+		." on (u.gid = w.gid) WHERE substr(u.ugc,3,1) = 'C' and "
+		." significance = 'A' and phenomena IN ('TO','SV') and "
+		." issue <= '%s:00+00' and expire > '%s:00+00' "
+		." GROUP by phenomena, eventid ORDER by phenomena ASC) as foo "
+		." using SRID=4326 using unique phenomena",
   gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts) );
 $wbc->set("data", $sql);
 $wbc->draw($img);
@@ -379,8 +387,9 @@ $wbc->draw($img);
 $watches = $map->getlayerbyname("watches");
 $watches->set("status", in_array("watches", $layers) );
 $watches->set("connection", $_DATABASES["postgis"]);
-$sql = sprintf("geom from (select type as wtype, geom, num from watches 
-       WHERE issued <= '%s:00+00' and expired > '%s:00+00') as foo using SRID=4326 using unique num", 
+$sql = sprintf("geom from (select type as wtype, geom, num from watches "
+       ."WHERE issued <= '%s:00+00' and expired > '%s:00+00') as foo "
+	   ."using SRID=4326 using unique num", 
        gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts));
 $watches->set("data", $sql );
 $watches->draw($img);
@@ -392,7 +401,8 @@ if (isset($_REQEST["pid"]))
   $wc->setConnectionType( MS_POSTGIS );
   $wc->set("connection", $_DATABASES["postgis"]);
   $wc->set("status", MS_ON );
-  $sql = sprintf("geom from (select geom, id from text_products WHERE product_id = '$pid') as foo using unique id using SRID=4326");
+  $sql = sprintf("geom from (select geom, id from text_products "
+  		."WHERE product_id = '$pid') as foo using unique id using SRID=4326");
   $wc->set("data", $sql);
   $wc->set("type", MS_LAYER_LINE);
   $wc->setProjection("init=epsg:4326");
@@ -414,7 +424,12 @@ if (isset($_REQUEST["vtec"]))
   $wc->setConnectionType( MS_POSTGIS);
   $wc->set("connection", $_DATABASES["postgis"]);
   $wc->set("status", in_array("cbw", $layers) );
-  $sql = sprintf("geom from (select gtype, eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
+  $sql = sprintf("geom from (select eventid, w.wfo, significance, "
+  		."phenomena, u.geom, random() as oid from warnings_$year w JOIN ugcs u "
+  		."on (u.gid = w.gid) WHERE w.wfo = '$wfo' "
+  		."and phenomena = '$phenomena' and significance = '$significance' "
+  		."and eventid = $eventid ORDER by phenomena ASC) as foo "
+  		."using unique oid using SRID=4326");
   $wc->set("data", $sql);
   $wc->set("type", MS_LAYER_LINE);
   $wc->setProjection("init=epsg:4326");
@@ -437,10 +452,10 @@ $sbwh = $map->getlayerbyname("sbw");
 $sbwh->set("status", in_array("sbwh", $layers) );
 $sbwh->set("connection", $_DATABASES["postgis"]);
 //$sbwh->set("maxscale", 10000000);
-$sql = sprintf("geom from (select %s, geom, oid from sbw_%s 
-    WHERE significance != 'A' and polygon_begin <= '%s:00+00' and 
-    polygon_end > '%s:00+00'
-    %s) as foo using unique oid using SRID=4326", 
+$sql = sprintf("geom from (select %s, geom, oid from sbw_%s w "
+    ."WHERE significance != 'A' and polygon_begin <= '%s:00+00' and "
+    ."polygon_end > '%s:00+00' "
+    ."%s) as foo using unique oid using SRID=4326", 
     $ptext, gmstrftime("%Y",$ts),
     gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
     $vtec_limiter );
@@ -460,9 +475,10 @@ $sbw->set("status", (in_array("sbw", $layers)  &&
 			intval(gmstrftime("%Y",$ts)) > 2001));
 $sbw->set("connection", $_DATABASES["postgis"]);
 //$sbw->set("maxscale", 10000000);
-$sql = sprintf("geom from (select %s, geom, oid from sbw_%s 
-    WHERE significance != 'A' and polygon_begin <= '%s:00+00' and polygon_end > '%s:00+00'
-    %s) as foo using unique oid using SRID=4326", 
+$sql = sprintf("geom from (select %s, geom, random() as oid from sbw_%s w "
+    ."WHERE significance != 'A' and polygon_begin <= '%s:00+00' "
+	."and polygon_end > '%s:00+00' "
+    ."%s) as foo using unique oid using SRID=4326", 
     $ptext, gmstrftime("%Y",$ts),
     gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
     $vtec_limiter );
@@ -473,30 +489,33 @@ $sbw->draw($img);
 $w0c = $map->getlayerbyname("warnings0_c");
 $w0c->set("connection", $_DATABASES["postgis"]);
 $w0c->set("status", in_array("county_warnings", $layers) );
-$sql = sprintf("geom from (select *, oid from warnings_%s WHERE issue <= '%s:00+00' and expire > '%s:00+00' and gtype = 'C' %s ORDER by phenomena ASC) as foo using unique oid using SRID=4326", 
+$sql = sprintf("geom from (select u.geom, phenomena, significance, "
+		."random() as oid from warnings_%s w JOIN ugcs u on (u.gid = w.gid) "
+		."WHERE issue <= '%s:00+00' and expire > '%s:00+00' %s "
+		."ORDER by phenomena ASC) as foo using unique oid using SRID=4326", 
     gmstrftime("%Y",$ts),
     gmstrftime("%Y-%m-%d %H:%M", $ts), gmstrftime("%Y-%m-%d %H:%M", $ts),
     $vtec_limiter );
 $w0c->set("data", $sql);
 $w0c->draw($img);
 
-$w0c = $map->getlayerbyname("warnings0_c");
-$w0c->set("connection", $_DATABASES["postgis"]);
-$w0c->set("status", in_array("warnings_all", $layers) );
-$sql = sprintf("geom from (select phenomena, significance, geom, oid from warnings WHERE gtype = 'P' and wfo = '%s' and significance = 'W' and phenomena in ('SV','TO') and issue > '2007-10-01') as foo USING unique oid using SRID=4326)", 
-    'OAX');
-$w0c->set("data", $sql);
-$w0c->draw($img);
-
-
 /* Local Storm Reports */
 $lsrs = $map->getlayerbyname("lsrs");
 $lsrs->set("connection", $_DATABASES["postgis"]);
 $lsrs->set("status",in_array("lsrs", $layers) );
 if ($ts2 > $ts){
- $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid >= '". gmstrftime("%Y-%m-%d %H:%M", $ts) .":00+00' and valid < '". gmstrftime("%Y-%m-%d %H:%M", $ts2) .":00+00' ORDER by valid DESC) as foo USING unique k USING SRID=4326";
+ $sql = "geom from (select distinct city, magnitude, valid, geom, "
+ 		."type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k "
+ 		."from lsrs WHERE "
+ 		."valid >= '". gmstrftime("%Y-%m-%d %H:%M", $ts) .":00+00' and "
+ 		."valid < '". gmstrftime("%Y-%m-%d %H:%M", $ts2) .":00+00' "
+ 		."ORDER by valid DESC) as foo USING unique k USING SRID=4326";
 } else {
- $sql = "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k from lsrs_". date("Y", $ts) ." WHERE valid = '". gmstrftime("%Y-%m-%d %H:%M", $ts) .":00+00') as foo USING unique k USING SRID=4326";
+ $sql = "geom from (select distinct city, magnitude, valid, geom, "
+ 		."type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k "
+ 		."from lsrs WHERE "
+ 		."valid = '". gmstrftime("%Y-%m-%d %H:%M", $ts) .":00+00') as foo "
+ 		."USING unique k USING SRID=4326";
 }
 $lsrs->set("data", $sql);
 $lsrs->draw($img);
@@ -507,28 +526,26 @@ if (in_array("ci", $layers) ){
 	$ci->setConnectionType( MS_POSTGIS);
 	$ci->set("connection", $_DATABASES["postgis"]);
 	$ci->set("status", in_array("ci", $layers) );
-	$sql = "geo from (select ST_setsrid(a,4326) as geo, random() as k
-	      from (
-	select 
-	   ST_intersection(
-	      ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(ST_union(n.geom)),1)),0.02),
-	      ST_exteriorring(ST_geometryn(ST_multi(ST_union(w.geom)),1))
-	   ) as a
-	   from warnings_". date("Y", $ts) ." w, nws_ugc n WHERE gtype = 'P' and w.wfo = '$wfo'
-	   and phenomena = '$phenomena' and eventid = $eventid 
-	   and significance = '$significance'
-	   and n.polygon_class = 'C' 
-	   and n.ugc IN (
-	          SELECT ugc from warnings_". date("Y", $ts) ." WHERE
-	          gtype = 'C' and wfo = '$wfo' 
-	          and phenomena = '$phenomena' and eventid = $eventid 
-	          and significance = '$significance'
-	       )
-	   and ST_isvalid(w.geom)
-	) as foo 
-	      WHERE not ST_isempty(a)
-	         ) as foo2 
-	  USING unique k USING SRID=4326";
+	$tblyr = date("Y", $ts);
+	$sql = <<<EOF
+geo from (
+	WITH stormbased as (SELECT geom from sbw_$tblyr where wfo = '$wfo' 
+		and eventid = $eventid and significance = '$significance' 
+		and phenomena = '$phenomena' and status = 'NEW'), 
+	countybased as (SELECT ST_Union(u.geom) as geom from 
+		warnings_$tblyr w JOIN ugcs u on (u.gid = w.gid) 
+		WHERE w.wfo = '$wfo' and eventid = $eventid and 
+		significance = '$significance' and phenomena = '$phenomena') 
+				
+	SELECT ST_SetSRID(ST_intersection(
+	      ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(c.geom),1)),0.02),
+	      ST_exteriorring(ST_geometryn(ST_multi(s.geom),1))
+	   ), 4326) as geo,
+	random() as k
+	from stormbased s, countybased c
+			
+) as foo USING unique k USING SRID=4326
+EOF;
 	$ci->set("data", $sql);
 	$ci->set("type", MS_LAYER_LINE);
 	$ci->setProjection("init=epsg:4326");
