@@ -2,6 +2,17 @@
 /**
  * Library for doing repetetive forms stuff
  */
+function make_select($name, $selected, $ar){
+	// Create a simple HTML select box
+	$s = sprintf("<select name=\"%s\">\n", $name);
+	while( list($key,$val) = each($ar)){
+		$s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $key,
+			($selected == $key)? " SELECTED": "", $val);
+	}
+	$s .= "</select>\n";
+	return $s;
+}
+
 function stateSelect($selected){
 	// Create pull down for selecting a state
 	$states = Array("AL" => "Alabama",
