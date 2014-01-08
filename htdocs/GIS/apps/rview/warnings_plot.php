@@ -26,7 +26,7 @@ if ($isarchive || ($imgi != 0) )
   $ts = $basets + $tzoff - ($imgi * 60 * $interval );
   $radfile = "/mesonet/ARCHIVE/data/". date('Y/m/d/', $ts) ."GIS/uscomp/n0r_". date('YmdHi', $ts) .".png";
   if (! is_file($radfile)) {
-    echo "<br /><i><b>NEXRAD composite not available: $radfile</b></i>";
+    $content .= "<br /><i><b>NEXRAD composite not available: $radfile</b></i>";
   } 
 } else 
 {
@@ -48,7 +48,7 @@ else
 $db_ts = strftime("%Y-%m-%d %H:%M:00+00", $ts );
 
 
-$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+$map = ms_newMapObj("../../../../data/gis/base4326.map");
 $map->setSize($width,$height);
 
 if (isset($x0))
@@ -148,88 +148,50 @@ $watches = $map->getlayerbyname("watches");
 $watches->set("connection", $_DATABASES["postgis"] );
 $watches->set("status", (in_array("watches", $layers)) );
 //$watches->setFilter("expired > '".$db_ts."' and issued <= '".$db_ts."'");
-$watches->set("data", "geom from (select type as wtype, geom, oid from watches where expired > '".$db_ts."' and issued <= '".$db_ts."') as foo using unique oid using srid=4326");
+$watches->set("data", "geom from (select type as wtype, geom, "
+		." random() as oid from watches where expired > '".$db_ts."' and "
+		." issued <= '".$db_ts."') as foo using unique oid using srid=4326");
 
 /* New age custom render only 1 warning! 
  ------------------------------------------------------
 */
-if (isset($singleWarning))
-{
-
-$wc = ms_newLayerObj($map);
-$wc->setConnectionType( MS_POSTGIS );
-$wc->set("connection", "user=nobody dbname=postgis host=iemdb");
-$wc->set("data", "geom from (select gtype, eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
-$wc->set("status", MS_ON);
-$wc->set("type", MS_LAYER_LINE);
-$wc->setProjection("init=epsg:4326");
-
-$wcc0 = ms_newClassObj($wc);
-$wcc0->set("name", $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] );
-if ($warngeo == "both" or $warngeo == "county") {
-  $wcc0->setExpression("('[gtype]' = 'C')");
-} else {
-  $wcc0->setExpression("('[gtype]' = 'P')");
-}
-$wcc0s0 = ms_newStyleObj($wcc0);
-$wcc0s0->color->setRGB(255,0,0);
-$wcc0s0->set("size", 3);
-$wcc0s0->set("symbol", 1);
-
-if ($warngeo == "both")
-{
-  $wcc1 = ms_newClassObj($wc);
-  $wcc1->setExpression("('[gtype]' = 'P')");
-  $wcc1s0 = ms_newStyleObj($wcc1);
-  $wcc1s0->color->setRGB(255,255,255);
-  $wcc1s0->set("size", 2);
-  $wcc1s0->set("symbol", 1);
-}
-
-}
-else {
-
 
 
 if ($warngeo == "both" or $warngeo == "county")
 {
-  $c0 = $map->getlayerbyname("warnings0_c");
-  $c0->set("connection", $_DATABASES["postgis"] );
-  $c0->set("status", in_array("warnings", $layers) );
-  $c0->set("data", "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE expire > '$db_ts' and issue <= '$db_ts' and gtype = 'C' ORDER by phenomena ASC) as foo using unique oid using SRID=4326");
-  if (isset($showOnlyOne)){
-    $c0->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
-  }
-
+    $c0 = $map->getlayerbyname("warnings0_c");
+    $c0->set("connection", $_DATABASES["postgis"] );
+    $c0->set("status", in_array("warnings", $layers) );
+    $c0->set("data", "geom from (select eventid, w.wfo, significance, phenomena, "
+  		." u.geom, random() as oid from warnings_$year w JOIN ugcs u "
+  		." ON (u.gid = w.gid) WHERE expire > '$db_ts' and issue <= '$db_ts' "
+  		." and gtype = 'C' ORDER by phenomena ASC) as foo "
+  		." using unique oid using SRID=4326");
 }
-
 if ($warngeo == "both")
 {
   $p0 = $map->getlayerbyname("warnings0_p");
   $p0->set("connection", $_DATABASES["postgis"] );
   $p0->set("status", in_array("warnings", $layers) );
-  $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
+  $sql = "geom from (select eventid, wfo, significance, phenomena, geom, "
+  		." random() as oid from sbw_$year WHERE polygon_end > '$db_ts' "
+  		." and polygon_begin <= '$db_ts' and issue <= '$db_ts' "
+  		." ) as foo using unique oid using SRID=4326";
   $p0->set("data", $sql);
-  if (isset($showOnlyOne)){
-    $p0->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
-  }
 }
-
+	
 if ($warngeo == "sbw")
 {
   $p0 = $map->getlayerbyname("sbw");
   $p0->set("connection", $_DATABASES["postgis"] );
   $p0->set("status", in_array("warnings", $layers) );
-  $sql = "geom from (select eventid, wfo, significance, phenomena, geom, oid from warnings_$year WHERE significance != 'A' and expire > '$db_ts' and issue <= '$db_ts' and gtype = 'P') as foo using unique oid using SRID=4326";
+  $sql = "geom from (select eventid, wfo, significance, phenomena, geom, "
+  		." random() as oid from sbw_$year WHERE polygon_end > '$db_ts' "
+  		." and polygon_begin <= '$db_ts' and issue < '$db_ts') "
+  		." as foo using unique oid using SRID=4326";
   $p0->set("data", $sql);
-  if (isset($showOnlyOne)){
-    $p0->setFilter("wfo = '$wfo' and phenomena = '$phenomena' and significance = '$significance' and eventid = $eventid");
-  }
-
-
 }
 
-} // ENd of bigger else
 
 $radar = $map->getlayerbyname("nexrad_n0r");
 $radar->set("data", $radfile);
@@ -255,7 +217,10 @@ if ( isset($hard_code_lsr_time) ){
   $lsr_etime = strftime("%Y-%m-%d %H:%M:00+00", $lsr_ets);
 }
 
-$lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k from lsrs_${year} WHERE valid >= '$lsr_btime' and valid <= '$lsr_etime') as foo USING unique k USING SRID=4326 ");
+$lsrs->set("data", "geom from (select distinct city, magnitude, valid, geom, "
+		." type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k "
+		." from lsrs WHERE valid >= '$lsr_btime' and valid <= '$lsr_etime') "
+		." as foo USING unique k USING SRID=4326 ");
 
 $img = $map->prepareImage();
 
@@ -270,7 +235,9 @@ $clayer2->draw( $img );
 $stlayer->draw( $img);
 $lakes->draw($img);
 $interstates->draw($img);
-$radar->draw($img);
+if (is_file($radfile)){
+	$radar->draw($img);
+}
 $cwas->draw( $img);
 $watches->draw($img); 
 $current_barbs->draw($img);
@@ -282,15 +249,8 @@ if ($lsrwindow != 0)
 $surface->draw($img);
 $airtemps->draw($img);
 
-if (isset($singleWarning))
-{
-  $wc->draw($img);
-  $map->embedLegend($img);
-} else
-{
   if ($warngeo == "both" or $warngeo == "county"){ $c0->draw($img); }
   if ($warngeo == "both" or $warngeo == "sbw") { $p0->draw($img); }
-}
 
 if (! isset($_GET["iem"])) {
  $map->embedScalebar($img);

@@ -38,12 +38,15 @@ function handsOff( ) {
   }
 }
 function showControl(layerName){
+  var oldval = document.getElementById(layerName).style.display;
   setLayerDisplay("applet-hack", 'none');
   setLayerDisplay("layers-control", 'none');
   setLayerDisplay("locations-control", 'none');
   setLayerDisplay("time-control", 'none');
   setLayerDisplay("options-control", 'none');
-  setLayerDisplay(layerName, 'block');
+  if (oldval == 'none'){
+	  setLayerDisplay(layerName, 'block');	  
+  }
 }
 function setLayerDisplay( layerName, d ) {
   if ( document.getElementById ) {
