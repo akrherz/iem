@@ -2,7 +2,7 @@
 /* Giveme JSON data for zones affected by warning */
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
-require_once "$rootpath/include/database.inc.php";
+require_once "../../include/database.inc.php";
 
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'GMT'");
@@ -15,16 +15,16 @@ $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1)
 
 
 $sql = "SELECT w.ugc, issue, expire, status, name 
-        from warnings_$year w, nws_ugc u WHERE w.wfo = '$wfo' and 
+        from warnings_$year w JOIN ugcs u on (u.gid = w.gid) 
+        WHERE w.wfo = '$wfo' and 
         w.phenomena = '$phenomena' and w.eventid = $eventid and 
-        w.significance = '$significance' and w.gtype = 'C' and
-        w.ugc = u.ugc";
+        w.significance = '$significance'";
 
 
 $result = pg_exec($connect, $sql);
 
 $ar = Array("ugcs" => Array() );
-for( $i=0; $z = @pg_fetch_array($result,$i); $i++)
+for( $i=0; $z = @pg_fetch_assoc($result,$i); $i++)
 {
   $z["id"] = $i +1;
   $z["issue"] = substr($z["issue"],0,16);
@@ -32,6 +32,7 @@ for( $i=0; $z = @pg_fetch_array($result,$i); $i++)
   $ar["ugcs"][] = $z;
 }
 
+header("Content-type: application/json");
 echo Zend_Json::encode($ar);
 
 ?>
