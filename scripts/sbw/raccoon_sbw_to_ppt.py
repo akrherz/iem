@@ -10,7 +10,7 @@ os.putenv("DISPLAY", "localhost:1")
 import sys
 import shutil
 import datetime
-import iemdb
+import psycopg2
 import random
 import psycopg2.extras
 from odf.opendocument import OpenDocumentPresentation
@@ -37,7 +37,7 @@ def check_for_work():
     """
     See if we have any requests to process!
     """
-    MESOSITE = iemdb.connect('mesosite', bypass=True)
+    MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
     mcursor = MESOSITE.cursor(cursor_factory=psycopg2.extras.DictCursor)
     mcursor2 = MESOSITE.cursor()
     mcursor.execute("""SELECT jobid, wfo, radar, 
@@ -60,22 +60,33 @@ def get_warnings(sts, ets, wfo, wtypes):
     tokens = wtypes.split(",")
     tokens.append("ZZZ")
     phenomenas = str(tuple(tokens))
-    POSTGIS = iemdb.connect('postgis', bypass=True)
+    POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
     pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sql = """
-    SELECT phenomena, eventid, 
-    min(issue) at time zone 'UTC' as issue,
-    max(expire) at time zone 'UTC' as expire,
-    sum(case when gtype = 'P' then 
-        ST_Area(ST_Transform(geom,2163))/1000000.0 else 0 end) as polyarea,
-    sum(case when gtype = 'C' then 
-        ST_Area(ST_Transform(geom,2163))/1000000.0 else 0 end) as countyarea
-    from warnings_%s WHERE
-    wfo = '%s' and phenomena in %s and significance = 'W' and 
-    issue BETWEEN '%s+00' and '%s+00' 
-    GROUP by phenomena, eventid ORDER by issue ASC
-    """ % (sts.year, wfo, phenomenas, sts.strftime("%Y-%m-%d %H:%M"), 
-           ets.strftime("%Y-%m-%d %H:%M"))
+    WITH stormbased as (
+        SELECT phenomena, eventid, issue, expire, 
+        ST_Area(ST_Transform(geom,2163))/1000000.0 as polyarea
+        from sbw_%s WHERE issue BETWEEN '%s+00' and '%s+00' and
+        wfo = '%s' and phenomena in %s and significance = 'W' and status = 'NEW'
+    ), countybased as (
+        SELECT phenomena, eventid, 
+        sum(ST_Area(ST_Transform(u.geom,2163))/1000000.0) as countyarea
+        from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE
+        issue BETWEEN '%s+00' and '%s+00' and
+        w.wfo = '%s' and phenomena in %s and significance = 'W' and gtype = 'C'
+        GROUP by phenomena, eventid
+    )
+    
+    SELECT s.phenomena, s.eventid, 
+    s.issue at time zone 'UTC' as issue, 
+    s.expire at time zone 'UTC' as expire, s.polyarea,
+    c.countyarea from stormbased s JOIN countybased c 
+    on (c.eventid = s.eventid and c.phenomena = s.phenomena)
+    """ % (sts.year, sts.strftime("%Y-%m-%d %H:%M"), 
+           ets.strftime("%Y-%m-%d %H:%M"), wfo, phenomenas,
+           sts.year, sts.strftime("%Y-%m-%d %H:%M"), 
+           ets.strftime("%Y-%m-%d %H:%M"), wfo, phenomenas
+           )
     pcursor.execute(sql)
     res = []
     for row in pcursor:
