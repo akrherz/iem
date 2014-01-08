@@ -9,7 +9,7 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "TO";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
 /* Generate URL for forwarding */
-$uri = sprintf("%s/vtec/%s-O-NEW-K%s-%s-%s-%04d.html", $rooturl, 
+$uri = sprintf("/vtec/%s-O-NEW-K%s-%s-%s-%04d.html",  
   $year, $wfo, $phenomena, $significance, $eventid);
 
 header("Location: $uri");

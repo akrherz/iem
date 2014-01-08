@@ -1,10 +1,13 @@
 <?php
-if (substr($_SERVER["REMOTE_ADDR"], 0, 5) == "65.55"){ die("Go Away"); }
-
 include("../../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/vtec.php");
+include("../../../../include/database.inc.php");
+include("../../../../include/vtec.php");
+include("../../../../include/network.php");
+include("../../../../include/forms.php");
+include("../../../../include/myview.php");
+$t = new MyView();
 include("lib.inc");
+include('lib.php');
 $baseuri = "warnings.phtml";
 putenv("TZ=GMT");
 date_default_timezone_set('UTC');
@@ -30,7 +33,9 @@ $layers = isset($_GET["layers"]) ? $_GET["layers"]: Array("cwas", "warnings", "u
 $cu = isset($_GET["cu"]) ? $_GET["cu"]: 0;
 $loop = isset($_GET["loop"]) ? $_GET["loop"] : 0;
 $tz = isset($_GET["tz"]) ? $_GET["tz"] : "CDT";
-$tzdict = Array("UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000, "CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200, "PST" => 28800);
+$tzdict = Array("UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000, 
+		"CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200, 
+		"PST" => 28800);
 
 $tzoff = $tzdict[$tz];
 $autopilot = isset($_GET["autopilot"]) ? $_GET["autopilot"] : 0;
@@ -92,12 +97,10 @@ if ($isarchive && $basets < $wfo_filter_ts)
   $filter = 0;
 }
 
-include("$rootpath/include/network.php");
 $nt = new NetworkTable("WFO");
 $nt->table["NHC"] = Array("lat" => 25.75 , "lon" => -80.38 , 
 		"name" => "National Hurricane Center");
-include("$rootpath/include/forms.php");
-include('lib.php');
+
 $uri = "$baseuri?frames=$frames&interval=$interval&site=$site&cu=$cu&archive=$archive&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom&warngeo=$warngeo";
 $uri_nowfo = "$baseuri?frames=$frames&interval=$interval&archive=$archive&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&loop=$loop&filter=$filter&sortdir=$sortdir&zoom=$zoom&warngeo=$warngeo";
 
@@ -121,30 +124,154 @@ else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site)
   $uri .= "&lat0=$lat0&lon0=$lon0";
 }
 
-$TITLE = "IEM | RADAR & NWS Warnings";
-$HEADEXTRA = "<script type=\"text/javascript\" src=\"warnings.js\"></script>
+$t->title = "IEM | RADAR & NWS Warnings";
+$headextra = "<script type=\"text/javascript\" src=\"warnings.js\"></script>
 <link rel=\"stylesheet\" type=\"text/css\" href=\"warnings.css\" />
 <script language=\"JavaScript1.2\" type=\"text/javascript\">
 ";
 if (! $isarchive)
-  $HEADEXTRA .= "setTimeout(\"document.myform.submit()\", 300000);\n";
-$HEADEXTRA .= "</script>";
+  $headextra .= "setTimeout(\"document.myform.submit()\", 300000);\n";
+$headextra .= "</script>";
+$t->headextra = $headextra;
 
-if ($autopilot) $BODYEXTRA = "onLoad=\"handsOff2();\"";
-?>
-<?php $THISPAGE = "severe-interact"; include("$rootpath/include/header.php");?>
-<form style="display: inline;" method="GET" name="myform" action="<?php echo $baseuri; ?>">
-<input type="hidden" value="<?php echo $autopilot; ?>" name="autopilot">
-<input type="hidden" value="<?php echo $site; ?>" name="osite">
+if ($autopilot) $t->bodyextra = "onLoad=\"handsOff2();\"";
+
+$t->thispage = "severe-interact"; 
+$content = <<<EOF
+<form style="display: inline;" method="GET" name="myform" action="{$baseuri}">
+<input type="hidden" value="{$autopilot}" name="autopilot">
+<input type="hidden" value="{$site}" name="osite">
 <input type="hidden" name="tzoff" value="0">
-<?php if (isset($_GET["lat0"])) { ?>
-<input type="hidden" value="<?php echo $lat0; ?>" name="lat0">
-<input type="hidden" value="<?php echo $lon0; ?>" name="lon0">
-<?php } ?>
+EOF;
+if (isset($_GET["lat0"])) { 
+$content .= "<input type=\"hidden\" value=\"{$lat0}\" name=\"lat0\">
+	<input type=\"hidden\" value=\"{$lon0}\" name=\"lon0\">";
+} 
 
+$rtl = Array(
+	"usdm" => "US Drought Monitor",
+	"goes_east1V" => "GOES East Visible",
+	"goes_west1V" => "GOES West Visible",
+	"goes_east04I4" => "GOES East IR",
+	"goes_west04I4" => "GOES West IR",
+	"current_barbs" => "Current Wind Barbs",
+	"airtemps" => "Current Air Temps",
+	"current_sites" => "Site Labels",
+);
+$rtlselect = "";
+while (list($key, $val)=each($rtl)){
+	$rtlselect .= sprintf("<br /><input name=\"layers[]\" type=\"checkbox\" "
+			." value=\"%s\"%s>%s\n", $key, 
+			(in_array($key, $layers)) ? ' checked="checked"': '', $val);
+}
 
-<div id="blankspace" style="width: 640px; height: 480px; position: absolute; z-index: 1;">&nbsp;</div>
-<div id="datawindow" style="background: #eee; position: absolute; left: 5px; top: 130px; width: <?php echo ($width + 250); ?>px; z-index: 2;">
+$ll = Array(
+	"nexrad" => "US NEXRAD",
+	"warnings" => "Warnings",
+	"cwas" => "WFO Boundaries",
+	"uscounties" => "US Counties",
+	"interstates" => "US Interstates",
+	"watches" => "Watches",
+);
+$lselect = "";
+while (list($key, $val)=each($ll)){
+	$lselect .= sprintf("<br /><input name=\"layers[]\" type=\"checkbox\" "
+			." value=\"%s\"%s>%s\n", $key,
+			(in_array($key, $layers)) ? ' checked="checked"': '', $val);
+}
+
+$wselect = "<select name=\"site\" style=\"width: 195px;\">";
+while( list($key, $value) = each($nt->table) ){
+	$wselect .= "<option value=\"$key\" ";
+	if ($site == $key) $wselect .= "SELECTED";
+	$wselect .= ">[".$key."] ". $value["name"] ."</option>";
+}
+$wselect .= "</select>";
+
+$ar = Array("UTC"=>"UTC", "EDT"=>"EDT", "EST"=>"EST", 
+		"CDT"=>"CDT", 
+		"CST"=>"CST", 
+		"MDT"=>"MDT", 
+		"MST"=>"MST", "PDT"=>"PDT", 
+		"PST"=>"PST");
+$tzselect = make_select("tz", $tz, $ar);
+
+$ar = Array("both" => "County + Polygon",
+	"county" => "County Only",
+	"sbw" => "Storm Based Warning");
+$wgselect = make_select("warngeo", $warngeo, $ar);
+
+$ar = Array(5 => "5 km", 10 => "10 km", 25 => "25 km", 50 => "50 km",
+	100 => "100 km", 250 => "250 km", 500 => "500 km", 1000 => "1000 km",
+	3000 => "3000 km");
+$zselect = make_select("zoom", $zoom, $ar);
+
+$ar = Array(0 => "Hide", 5 => "5 minutes", 10 => "10 minutes",
+	15 => "15 minutes", 30 => "30 minutes", 60 => "60 minutes");
+$lwselect = make_select("lsrwindow", $lsrwindow, $ar);
+
+$ar = Array("fcster" => "Product Author", "phenomena" => "Product Type",
+	"expire" => "Product Expiration", "issue" => "Product Issued",
+		"sname" => "State Name", "updated" => "Product Updated",
+		"wfo" => "Weather Office", "eventid" => "VTEC Event ID",
+		"status" => "VTEC Status");
+$sselect = make_select("sortcol", $sortcol, $ar);
+
+$ar = Array(
+	"640x480"=>"640x480",
+	"800x600"=>"800x600",
+	"1024x768"=>"1024x768",
+	"1280x1024"=>"1280x1024",
+);
+$igselect = make_select("imgsize", $imgsize, $ar);
+
+$ar = Array(
+	"+" => "+",
+	"-" => "-",
+	"+/-" => "+/-",
+);
+$lrselect = make_select("lsrlook", $lsrlook, $ar);
+
+$ar = Array(
+	"0" => "1 image only",
+		"1" => "Java Script Loop",
+		"2" => "Java Applet Loop",
+);
+$loselect = make_select("loop", $loop, $ar);
+
+$ar = Array(
+	"5" => "5 minutes",
+		"10" => "10 minutes",
+		"15" => "15 minutes",
+		"30" => "30 minutes",
+		"60" => "1 hour",
+		"120" => "2 hours",
+		"1440" => "1 day",
+);
+$ivselect = make_select("interval", $interval, $ar);
+
+$ar = Array("0"=>"No", "1"=>"Yes");
+$wfselect = make_select("filter", $filter, $ar);
+
+$pradio = "<br /><input type=\"radio\" value=\"0\" name=\"cu\" ";
+if ($cu == 0) { $pradio .= "checked"; } 
+$pradio .= ">Show All";
+$pradio .= "<br /><input type=\"radio\" value=\"1\" name=\"cu\" ";
+if ($cu == 1) { $pradio .= "checked"; } $pradio .= ">Convective Only";
+
+$ar = Array("0"=>"DESC", "1"=>"ASC");
+$sdselect = make_select("sortdir", $sortdir, $ar);
+
+$yselect = yearSelect(2003, $year, "year");
+$mselect = monthSelect($month, "month");
+$dselect = daySelect($day, "day");
+$hselect = hourSelect($hour, "hour");
+$miselect = minuteSelect($m, "minute",5);
+
+$achecked = ($isarchive) ? " CHECKED='CHECKED'": "";
+$dwwidth= $width + 250;
+$content .= <<<EOF
+<div id="datawindow" style="background: #eee; width: ${dwwidth}px; z-index: 2;">
 <input type="submit" value="Layers" style="background: #73FA4D;" onClick="javascript: showControl('layers-control'); return false;">
 <input type="submit" value="Locations" style="background: #F2FE5A;" onClick="javascript: showControl('locations-control'); return false;">
 <input type="submit" value="Time" style="background: #FF5EC4;" onClick="javascript: showControl('time-control'); return false;">
@@ -152,12 +279,77 @@ if ($autopilot) $BODYEXTRA = "onLoad=\"handsOff2();\"";
 <input type="submit" value="Update Map">
 <input type="submit" onClick="javascript: handsOff(); return false;" value="Auto Pilot">
 <br />
-<?php 
-  include("inc_layers_control.php");
-  include("inc_locations_control.php"); 
-  include("inc_time_control.php");
-  include("inc_options_control.php"); 
+<div id="layers-control" style="width: 450px; background: #73FA4D; display: none; z-index: 3; position: absolute; padding: 5px; margin: 2px; border: 2px solid #000;">
 
+<strong>Realtime Only Layers</strong>
+{$rtlselect}
+<br /><strong>Layers</strong>
+{$lselect}
+<input type="hidden" name="layers[]" value="blank">
+
+<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('layers-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+</div>
+<div id="locations-control" style="width: 450px; background: #F2FE5A; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
+<strong>NWS Office:</strong><br />
+{$wselect}
+
+<br />Selecting a different office will move the display to that office.
+<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('locations-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+</div>
+<div id="time-control" style="width: 450px; background: #FF5EC4; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
+<p><strong>Select Time Zone</strong><br />
+{$tzselect}
+
+<p><strong>Archive Options</strong><br />
+<input type="checkbox" value="yes" name="archive"{$achecked}>Set Archive Mode</td>
+<table cellpadding="2" cellspacing="0" border="0">
+<tr><th>Year:</th><td>{$yselect}</td></tr>
+<tr><th>Month:</th><td>{$mselect}</td></tr>
+<tr><th>Day:</th><td>{$dselect}</td></tr>
+<tr><th>Time:</th><td>{$hselect}:{$miselect}</td></tr>
+</table>
+
+<p><div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('time-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+</div>
+<div id="options-control" style="width: 450px; background: #2EA7F2; display: none; z-index: 3; position: absolute;  padding: 5px; margin: 2px; border: 2px solid #000;">
+<strong>Warning geography:</strong>
+<br />Short term warnings (SVR,TOR,SMW) have a storm based and county 
+geography associated with them.  You can pick which or both to display:
+<br />{$wgselect}
+
+<p><strong>Map Extent:</strong>
+<br />View Scale: {$zselect}
+
+<br />Image Size:
+{$igselect}
+
+<p><strong>Loop Options</strong>
+<br />{$loselect}
+<br />Loop Frames: 
+<input type="text" value="{$frames}" name="frames" size="3">
+<br />Loop Frame Interval: 
+{$ivselect}
+
+<p><strong>Text Warning Listing</strong>
+<br />Filter by WFO:
+{$wfselect}
+
+<br />Product Filter: 
+{$pradio}
+
+<br />Sort Column:
+{$sselect}
+
+<br />Sort Direction:
+{$sdselect}
+
+<p><strong>Local Storm Reports (LSR)</strong>
+<br />Time window around plot valid time to plot LSRs.
+<br />{$lrselect}
+{$lwselect}
+<div style="float: right;"><input type="submit" onClick="javascript: setLayerDisplay('options-control', 'none'); setLayerDisplay('applet-hack', 'block'); return false;" value="Save Settings"><input type="submit" value="Save + Update Map"> </div>
+</div>
+EOF;
 
 $heightadd = 0;
 $maptitle = "IEM NEXRAD Composite Base Reflectivity";
@@ -174,7 +366,7 @@ if (intval($loop) ==  1){
    fwrite($f, "$rooturl/$url\n");
   }
   fclose($f);
-  echo "<div id=\"applet-hack\"></div><a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
+  $content .= "<div id=\"applet-hack\"></div><a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
   include ("loop.php");
   printHTML($urls);
 } else if (intval($loop) == 2){
@@ -190,32 +382,32 @@ if (intval($loop) ==  1){
    fwrite($f, "$rooturl/$url\n");
   }
   fclose($f);
-  echo "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
-?>
-  <div id="applet-hack"><applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="<?php echo $width; ?>" height="<?php echo $height + 100; ?>" alt="You must enable Java in your browser to view the radar loop" style="float: left;">
+  $content .= "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
+
+$height2 = $height + 100;
+$content .= <<<EOF
+<div id="applet-hack"><applet codebase="/current/class/" code="AniS.class" width="{$width}" height="{$height2}" alt="You must enable Java in your browser to view the radar loop" style="float: left;">
         <param name="bottom_controls" value="startstop, looprock, step, speed, toggle, zoom">
         <param name="rate" value="80">
 	<PARAM name="no_enh" value="true">
     <param name="pause_percent" value="800">
-        <param name="file_of_filenames" value="/tmp/<?php echo $fts; ?>.dat">
+        <param name="file_of_filenames" value="/tmp/{$fts}.dat">
 </applet></div>
-
-<?php
+EOF;
 } else {
   $imgi = 0;
   include("warnings_plot.php");
 
-  echo "<div id=\"applet-hack\"></div><input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\">\n";
+  $content .= "<div id=\"applet-hack\"></div><input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\">\n";
 
 }
-
-?>
+$content .= <<<EOF
 <!-- Warnings Key! -->
 <img src="static/warnings_legend.png">
 </div>
+EOF;
 
-<?php
-echo "<input type=\"hidden\" name=\"extents\" value=\"". $map->extent->minx .",". $map->extent->miny .",". $map->extent->maxx .",". $map->extent->maxy ."\">\n";
+$content .= "<input type=\"hidden\" name=\"extents\" value=\"". $map->extent->minx .",". $map->extent->miny .",". $map->extent->maxx .",". $map->extent->maxy ."\">\n";
 
 $connection = iemdb("postgis");
 
@@ -251,26 +443,25 @@ pg_close($connection);
 $afos = Array("SV" => "Svr Tstorm",
   "TO" => "Tornado",
   "FF" => "Flash Flood");
-?>
-<div style="clear: both; margin-top: <?php echo $height +70 +$heightadd; ?>px;">
-Warnings Valid at: <b><?php 
+$content .= "<div style=\"clear: both;\">
+Warnings Valid at: <b>";
+
 if ($tzoff == 0)
 {
   if ($isarchive)
-  echo strftime("%d %b %Y %H:%M %Z", $basets); 
+  $content .= strftime("%d %b %Y %H:%M %Z", $basets); 
   else
-  echo strftime("%d %b %Y %H:%M %Z"); 
+  $content .= strftime("%d %b %Y %H:%M %Z"); 
 }
 else 
 {
   if ($isarchive)
-  echo strftime("%d %b %Y %I:%M %p ", $basets) . $tz; 
+  $content .= strftime("%d %b %Y %I:%M %p ", $basets) . $tz; 
   else
-  echo strftime("%d %b %Y %I:%M %p ", time() - $tzoff) . $tz; 
+  $content .= strftime("%d %b %Y %I:%M %p ", time() - $tzoff) . $tz; 
 }
-?></b>
-<br clear=\"all\" />
-<?php
+$content .= "</b>
+<br clear=\"all\" />";
 $k = 0;
 if ($tzoff == 0)
 {
@@ -329,7 +520,7 @@ while ( list($key, $val) = each($wA) )
   $updated = strtotime($uA[$key]) - $tzoff;
   $resetApp = "$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo";
 
-  echo "<div class=\"wwa-state\">$sname</div><div class=\"wwa$significance\"><span style=\"font-size: 14pt;\">". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] ."</span> (<a href=\"$warningscat\">View Text</a>) expires ". strftime($dformat, $expire) ." by <a href=\"$resetApp\">$wfo</a> (". $fA[$key] .")<br />". $wA[$key] ."in $sname  <br /><div class=\"vtec\">VTEC# $eventid ($status)</div><div class=\"issued\">Issued: ".strftime($dformat, $issue) ."</div><div class=\"updated\">Updated: ".  strftime($dformat, $updated) ."</div>&nbsp;</div>\n";
+  $content .= "<div class=\"wwa-state\">$sname</div><div class=\"wwa$significance\"><span style=\"font-size: 14pt;\">". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] ."</span> (<a href=\"$warningscat\">View Text</a>) expires ". strftime($dformat, $expire) ." by <a href=\"$resetApp\">$wfo</a> (". $fA[$key] .")<br />". $wA[$key] ."in $sname  <br /><div class=\"vtec\">VTEC# $eventid ($status)</div><div class=\"issued\">Issued: ".strftime($dformat, $issue) ."</div><div class=\"updated\">Updated: ".  strftime($dformat, $updated) ."</div>&nbsp;</div>\n";
 
 
 }
@@ -339,16 +530,14 @@ if ($k == 0 && $filter){
  $msg = "<p>No warnings valid in the United States";
 }
 if ($k == 0){
-  echo "$msg";
+  $content .= $msg;
 }
-?>
-
-</form>
-<div style="clear: both;">
-<?php if (! $isarchive) { ?>
-<img src="/images/gisready.png">Download <a href="/data/gis/shape/unproj/us/current_ww.zip">GIS shapefile of current warnings</a> and/or <a href="<?php echo $rooturl; ?>/data/gis/images/4326/USCOMP/n0r_0.gtif.Z">GeoTiff of NEXRAD base reflectivity</a>.
-<?php } ?>
-
+$content .= "</form>";
+$content .= "<div style=\"clear: both;\">";
+if (! $isarchive) { 
+  $content .= "<img src=\"/images/gisready.png\">Download <a href=\"/data/gis/shape/unproj/us/current_ww.zip\">GIS shapefile of current warnings</a> and/or <a href=\"/data/gis/images/4326/USCOMP/n0r_0.gtif.Z\">GeoTiff of NEXRAD base reflectivity</a>.";
+} 
+$content .= <<<EOF
 <font size="-1">
 <p><b>Notes:</b>
 <ul>
@@ -364,6 +553,7 @@ if ($k == 0){
 </ul>
 </font>
 </div>
-
-
-<?php  include ("$rootpath/include/footer.php");?>
+EOF;
+$t->content = $content;
+$t->render('single.phtml');
+?>
