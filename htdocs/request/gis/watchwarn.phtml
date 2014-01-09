@@ -1,6 +1,11 @@
 <?php 
+/*
+ * Front-end that allows the download of archived WWA metadata
+ */
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 18);
+include("../../../include/myview.php");
+$t = new MyView();
 include("../../../include/network.php");
 $nt = new NetworkTable("WFO");
 
@@ -36,38 +41,66 @@ $size = round($size, $precision);
     return $size.' '.$size_in;
 }
 
-$TITLE = "IEM | NWS Watch Warning Archive Download";
+$t->title = "NWS Watch Warning Archive Download";
 include("../../../include/forms.php");
-$THISPAGE = "gis-";
-include("../../../include/header.php"); ?>
+$t->thispage = "gis-";
 
+$wselect = "<select name=\"wfos[]\" MULTIPLE size=\"5\">";
+$wselect .= "<option value=\"ALL\" SELECTED>All Available</option>";
+while( list($key, $value) = each($nt->table) ){
+  $wselect .= "<option value='$key'>[$key] ". $nt->table[$key]["name"] ."</option>\n";
+}
+$wselect .= "</select>";
+$y1select = yearSelect2(1986, date("Y"), "year1");
+$m1select = monthSelect2(0,"month1");
+$d1select = daySelect2(0, "day1");
+$h1select = gmtHourSelect(0, "hour1");
+$mi1select = minuteSelect(0, "minute1");
+$y2select = yearSelect2(1986, date("Y"), "year2");
+$m2select = monthSelect2(0,"month2");
+$d2select = daySelect2(0, "day2");
+$h2select = gmtHourSelect(0, "hour2");
+$mi2select = minuteSelect(0, "minute2");
+
+$table = "";
+for($year=1986;$year<=date("Y");$year++){
+	$allurl = sprintf("<a href=\"%s/pickup/wwa/%s_all.zip\">Zip</a>", $rooturl, $year);
+	$allfp = "/mesonet/share/pickup/wwa/${year}_all.zip";
+	$tsmfurl = sprintf("<a href=\"%s/pickup/wwa/%s_tsmf.zip\">Zip</a>", $rooturl, $year);
+	$tsmffp = "/mesonet/share/pickup/wwa/${year}_tsmf.zip";
+	$sbwurl = "N/A";
+	$sbwfp = "/dev/zero";
+	if ($year > 2001){
+		$sbwurl = sprintf("<a href=\"%s/pickup/wwa/%s_tsmf_sbw.zip\">Zip</a>", $rooturl, $year);
+		$sbwfp = "/mesonet/share/pickup/wwa/${year}_tsmf_sbw.zip";
+	}
+	$table .= sprintf("<tr><th>%s</th><td>%s (%s)</td><td>%s (%s)</td><td>%s (%s)</td></tr>", $year,
+		$allurl, get_file_size($allfp), $tsmfurl, get_file_size($tsmffp),
+		$sbwurl, get_file_size($sbwfp) );
+}
+
+$content = <<<EOF
 <h3 class="heading">Archived NWS Watch/Warnings</h3>
 
 <p>This page allows you to generate a custom GIS shapefile or Google Earth KML of NWS issued watches
 and warnings for a time period of your choice.  Please be sure to read the
 archive status and dbf schema below. The IEM's archive is certainly not complete or official.  
 If you are looking for a real-time source of warning shapefiles, 
-you can find that <a href="http://mesonet.agron.iastate.edu/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
+you can find that <a href="/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
 
 <div class="warning"> Due to transient server load or other issues, this application sometimes fails to 
 generate output.  You may wish to try shorting the duration of your 
-request or email <a href="<?php echo $rooturl; ?>/info/contacts.php">us</a> for help.
+request or email <a href="/info/contacts.php">us</a> for help.
 </div>
 
-<table><tr><td width="50%" valign="top">
+<div class="row"><div class="col-md-6">
+
 <div style="background: #EEEEEE; border: #000 solid 1px; padding: 5px;">
 
-<form method="GET" action="<?php echo $rootcgi; ?>/request/gis/watchwarn.py">
+<form method="GET" action="/cgi-bin/request/gis/watchwarn.py">
 
 <h4>Limit Weather Forecast Office (WFO)</h4>
-<select name="wfos[]" MULTIPLE size="5">
- <option value="ALL" SELECTED>All Available</option>
-<?php
-while( list($key, $value) = each($nt->table) ){
-  echo "<option value='$key'>[$key] ". $nt->table[$key]["name"] ."</option>\n";
-}
-?>
-</select>
+{$wselect}
 
 <h4>Select time interval</h4>
 <i>(Times are in UTC.  Watches/Warnings <b>issued</b> between these times
@@ -81,42 +114,13 @@ will be included in the output GIS file...)</i>
 
   <tr>
     <th>Start:</th>
-    <td>
-     <?php echo yearSelect2(1986, date("Y"), "year1"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect2(0,"month1"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2(0, "day1"); ?>
-    </td>
-    <td>
-     <?php echo gmtHourSelect(0, "hour1"); ?>
-    </td>
-    <td>
-     <?php echo minuteSelect(0, "minute1"); ?>
-    </td>
-  </tr>
-
+    <td>{$y1select}</td><td>{$m1select}</td><td>{$d1select}</td>
+    <td>{$h1select}</td><td>{$mi1select}</td></tr>
   <tr>
     <th>End:</th>
-    <td>
-     <?php echo yearSelect2(1986, date("Y"), "year2"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect2(0,"month2"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2(0, "day2"); ?>
-    </td>
-    <td>
-     <?php echo gmtHourSelect(0, "hour2"); ?>
-    </td>
-    <td>
-     <?php echo minuteSelect(0, "minute2"); ?>
-    </td>
-  </tr>
-</table>
+    <td>{$y2select}</td><td>{$m2select}</td><td>{$d2select}</td>
+    <td>{$h2select}</td><td>{$mi2select}</td></tr>
+    </table>
 
 <br /><input type="checkbox" name="limit0" value="yes">Limit Output to Tornado, Severe Thunderstorm, Marine, and Flash Flood Warnings
 <br /><input type="checkbox" name="limit1" value="yes">Limit Output to only Storm Based Warnings
@@ -154,40 +158,31 @@ function kmlsub(f, url){
 <tr><th>AREA_KM2 </th><td>Area of the geometry in sq kilometers (Projection: EPSG 2163)</td></tr>
 </table>
 
-</td><td width="50%" valign="top">
+</div><div class="col-md-6">
 <h4>Pre-generated zip files</h4>
 
 <p>These files are same as you could download from the form on the left, just
 you don't have to wait so long! The <?php echo date("Y"); ?> data is current up until
 roughly 2 AM this morning.</p>
 
-<table cellpadding="2" cellspacing="0" border="1">
+<table class="table table-bordered table-striped">
+<thead>
 <tr><th>Year</th><th>All</th><th>Limit Tor,Svr,Mar,FF</th><th>Limit Storm Based<br />Tor,Svr,Mar,FF</th></tr>
-<?php 
-for($year=1986;$year<=date("Y");$year++){
-  $allurl = sprintf("<a href=\"%s/pickup/wwa/%s_all.zip\">Zip</a>", $rooturl, $year);
-  $allfp = "/mesonet/share/pickup/wwa/${year}_all.zip";
-  $tsmfurl = sprintf("<a href=\"%s/pickup/wwa/%s_tsmf.zip\">Zip</a>", $rooturl, $year);
-  $tsmffp = "/mesonet/share/pickup/wwa/${year}_tsmf.zip";
-  $sbwurl = "N/A";
-  $sbwfp = "/dev/zero";
-  if ($year > 2001){
-    $sbwurl = sprintf("<a href=\"%s/pickup/wwa/%s_tsmf_sbw.zip\">Zip</a>", $rooturl, $year);
-    $sbwfp = "/mesonet/share/pickup/wwa/${year}_tsmf_sbw.zip";
-  }
-  echo sprintf("<tr><th>%s</th><td>%s (%s)</td><td>%s (%s)</td><td>%s (%s)</td></tr>", $year,
-   $allurl, get_file_size($allfp), $tsmfurl, get_file_size($tsmffp),
-   $sbwurl, get_file_size($sbwfp) );
-}
-?>
+</thead>
+<tbody>
+{$table}
+</tbody>
 </table>
 
-</td></tr></table>
+</div><!-- ./col -->
+</div><!-- ./row -->
 
 <h4>Archive status:</h4>
-<table border="1" cellpadding="3">
+<table class="table table-bordered table-striped">
+<thead>
 <tr><th>Dataset component</th><th>Start Time</th><th>Notes</th></tr>
-<tr>
+</thead>
+		<tr>
  <td>Tornado<br />Severe T'storm<br /> Flash Flood<br />Special Marine</td>
  <td>1 Jan 2002 (Polygons)
      <br />1 Jan 1986 (Counties)</td>
@@ -206,5 +201,7 @@ for($year=1986;$year<=date("Y");$year++){
  <td></td>
 </tr>
 </table>
-
-<?php include("../../../include/footer.php"); ?>
+EOF;
+$t->content = $content;
+$t->render('single.phtml');
+?>
