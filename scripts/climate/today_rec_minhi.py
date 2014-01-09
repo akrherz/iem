@@ -26,12 +26,14 @@ lows = []
 labels = []
 ccursor.execute(sql)
 for row in ccursor:
-  id = row[0].upper()
-  labels.append( id[2:] )
-  lats.append( nt.sts[id]['lat'] )
-  lons.append( nt.sts[id]['lon'] )
-  highs.append( row[1] )
-  lows.append( row[2] )
+    sid = row[0]
+    if sid[2] == 'C' or sid[2:] == '0000' or not nt.sts.has_key(sid):
+        continue
+    labels.append( sid[2:] )
+    lats.append( nt.sts[sid]['lat'] )
+    lons.append( nt.sts[sid]['lon'] )
+    highs.append( row[1] )
+    lows.append( row[2] )
 
 
 #---------- Plot the points
