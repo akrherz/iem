@@ -1,12 +1,19 @@
 <?php
  include("../../../config/settings.inc.php");
- $TITLE = "IEM Projects | iembot";
  include("../../../include/network.php");
  $nt = new NetworkTable("WFO"); 
- $THISPAGE = "severe-iembot";
- include("$rootpath/include/header.php"); 
-?>
-
+ include("../../../include/myview.php");
+ $t = new MyView();
+ $t->title = "IEMBot Project";
+ $t->thispage = "severe-iembot";
+ 
+ $wselect = "<select name=\"wfo\" onChange=\"javascript: urlChanger(); return false;\">";
+while (list($key, $val) = each($nt->table)){
+  $wselect .= "<option value=\"$key\">[$key] ". $val["name"] ."\n";
+}
+$wselect .= "</select>";
+ 
+ $t->content = <<<EOF
 <h3 class="heading">iembot</h3>
 
 <p><i>iembot</i> is a Jabber chat bot that relays National Weather Service issued
@@ -28,15 +35,9 @@ function urlChanger(){
 }
 </script>
 <form name="myForm">
-<p><img src="<?php echo $rooturl; ?>/images/rss.gif"> Experimental RSS feed of <i>iembot</i> messages per NWS Forecast Office:
-<br /><b>WFO:</b>
-<select name="wfo" onChange="javascript: urlChanger(); return false;">
-<?php 
-while (list($key, $val) = each($nt->table)){
-  echo "<option value=\"$key\">[$key] ". $val["name"] ."\n";
-}
-?>
-</select>
+<p><img src="/images/rss.gif"> Experimental RSS feed of <i>iembot</i> messages per NWS Forecast Office:
+<br /><b>WFO:</b>{$wselect}
+
 <br /><div id="wfolink" style="float: left;"><b>URL: </b><a href="http://mesonet.agron.iastate.edu/iembot-rss/wfo/kabq.xml">http://mesonet.agron.iastate.edu/iembot-rss/wfo/kabq.xml</a></div>
 
 <br />
@@ -153,7 +154,6 @@ issued.  The entire process takes much less than a second.</p>
  <li>There are some other custom local products that are routed based on
   local needs.</li>
 </ul>
-
-<?php 
- include("$rootpath/include/footer.php"); 
-?>
+EOF;
+$t->render('single.phtml');
+ ?>
