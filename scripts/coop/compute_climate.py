@@ -50,7 +50,8 @@ def daily_averages(table):
     avg( gddxx(50,86,high,low) ) as gdd50, avg( sdd86(high,low) ) as sdd86,
     avg( hdd65(high,low) ) as hdd65,
     max( high - low) as max_range, min(high - low) as min_range
-    from alldata_%s WHERE day >= '%s' and day < '%s' 
+    from alldata_%s WHERE day >= '%s' and day < '%s' and
+    precip is not null and high is not null and low is not null
     GROUP by d, station) 
     """ % (table, st, META[table]['sts'].strftime("%Y-%m-%d"), 
 		META[table]['ets'].strftime("%Y-%m-%d") )
