@@ -3,7 +3,7 @@ header('Content-type: application/json');
 /* Giveme JSON data listing products */
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
-require_once "$rootpath/include/database.inc.php";
+require_once "../../include/database.inc.php";
 
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'GMT'");
@@ -14,12 +14,12 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : die();
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : die();
 $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : die();
 
-$query1 = "SELECT ST_xmax(geom) as x1, ST_xmin(geom) as x0, 
-                  ST_ymin(geom) as y0, ST_ymax(geom) as y1, *
-                  from warnings_$year WHERE wfo = '$wfo' and 
+$query1 = "SELECT ST_xmax(u.geom) as x1, ST_xmin(u.geom) as x0, 
+                  ST_ymin(u.geom) as y0, ST_ymax(u.geom) as y1, issue, expire
+                  from warnings_$year w JOIN ugcs u on (u.gid = w.gid)
+                  WHERE w.wfo = '$wfo' and 
                   phenomena = '$phenomena' and eventid = $eventid 
-                  and significance = '$significance' and geom is not null 
-                  ORDER by gtype DESC LIMIT 1";
+                  and significance = '$significance' LIMIT 1";
 $result = pg_exec($connect, "SET TIME ZONE 'GMT'");
 $result = pg_exec($connect, $query1);
 
