@@ -7,6 +7,7 @@ import zipfile
 import os
 import shutil
 import cgi
+import pytz
 #import cgitb
 #cgitb.enable()
 import sys
@@ -39,7 +40,9 @@ minute1 = int(form["minute1"][0])
 minute2 = int(form["minute2"][0])
 
 sTS = datetime.datetime(year1, month1, day1, hour1, minute1)
+sTS = sTS.replace(tzinfo=pytz.timezone("UTC"))
 eTS = datetime.datetime(year2, month2, day2, hour2, minute2)
+eTS = eTS.replace(tzinfo=pytz.timezone("UTC"))
 
 wfoLimiter = ""
 if form.has_key('wfo[]'):
@@ -97,36 +100,48 @@ out_layer.CreateField(fd)
 limiter = ""
 if form.has_key("limit0"):
     limiter += " and phenomena IN ('TO','SV','FF','MA') and significance = 'W' "
-if form.has_key("limit1"):
-    limiter += " and gtype = 'P' "
 
-table = "warnings"
+sbwlimiter = " WHERE gtype = 'P' " if form.has_key("limit1") else ""
+
+table1 = "warnings"
+table2 = "sbw"
 if sTS.year == eTS.year:
-    table = "warnings_%s" % (sTS.year,)
+    table1 = "warnings_%s" % (sTS.year,)
+    table2 = "sbw_%s" % (sTS.year,)
 
+geomcol = "geom"
 if form.has_key('simple') and form['simple'][0] == 'yes':
-    sql = """SELECT 
-        (case when u.simple_geom is null then w.geom else u.simple_geom end), 
-        w.phenomena, w.gtype, w.significance, w.wfo, w.eventid, w.status, w.ugc,
-        ST_area( ST_transform((case when u.simple_geom is null then w.geom else u.simple_geom end),2163) ) / 1000000.0 as area2d,
-        to_char(w.issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
-        to_char(w.expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire
-        from %s w LEFT JOIN ugcs u on (w.ugc = u.ugc) 
-        WHERE ST_isValid((case when u.simple_geom is null then w.geom else u.simple_geom end)) and 
-        issue >= '%s+00' and issue < '%s+00' and eventid < 10000 
-        %s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), 
-                eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
-else:
-    sql = """SELECT ST_Simplify(u.geom,0.0001), phenomena, gtype, significance,
-        w.wfo, eventid, status, w.ugc,
-        ST_area( ST_transform(u.geom,2163) ) / 1000000.0 as area2d,
-        to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
-        to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire
-        from %s w JOIN ugcs u on (u.gid = w.gid) WHERE ST_isValid(u.geom) and 
-	    issue >= '%s+00' and issue < '%s+00' and eventid < 10000 
-	    %s %s""" % ( table, sTS.strftime("%Y-%m-%d %H:%M"), 
-                 eTS.strftime("%Y-%m-%d %H:%M"), limiter , wfoLimiter)
+    geomcol = "simple_geom"
 
+cols = """%s, gtype, significance, wfo, status, eventid, ugc, phenomena,
+ area2d, utc_expire, utc_issue""" % (geomcol,)
+
+sql = """
+WITH stormbased as (
+ SELECT geom, 'P'::text as gtype, significance, wfo, status, eventid, 
+ ''::text as ugc,
+ phenomena, geom as simple_geom,  
+ ST_area( ST_transform(w.geom,2163) ) / 1000000.0 as area2d,
+ to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire,
+ to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue
+ from %s w WHERE status = 'NEW' and issue >= '%s' and issue < '%s' %s %s
+),
+countybased as (
+ SELECT u.simple_geom as simple_geom, u.geom as geom, 'C'::text as gtype, significance, 
+ w.wfo, status, eventid, u.ugc, phenomena,
+ ST_area( ST_transform(u.geom,2163) ) / 1000000.0 as area2d,
+ to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire,
+ to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue
+ from %s w JOIN ugcs u on (u.gid = w.gid) WHERE
+ issue >= '%s' and issue < '%s' %s %s
+ )
+ SELECT %s from stormbased UNION SELECT %s from countybased %s
+""" % ( table2, sTS, eTS, wfoLimiter, limiter,
+        table1, sTS, eTS, wfoLimiter, limiter,
+       cols, cols, sbwlimiter)
+#print 'Content-type: text/plain\n'
+#print sql
+#sys.exit()
 data = source.ExecuteSQL(sql)
 
 while True:
