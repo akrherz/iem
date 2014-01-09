@@ -27,12 +27,14 @@ labels = []
 c = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
 c.execute(sql)
 for row in c:
-  id = row['station']
-  labels.append( id[2:] )
-  lats.append( nt.sts[id]['lat'] )
-  lons.append( nt.sts[id]['lon'] )
-  highs.append( row['max_high'] )
-  lows.append( row['min_low'] )
+    sid = row['station']
+    if sid[2] == 'C' or sid[2:] == '0000' or not nt.sts.has_key(sid):
+        continue
+    labels.append( sid[2:] )
+    lats.append( nt.sts[sid]['lat'] )
+    lons.append( nt.sts[sid]['lon'] )
+    highs.append( row['max_high'] )
+    lows.append( row['min_low'] )
 
 
 #---------- Plot the points
