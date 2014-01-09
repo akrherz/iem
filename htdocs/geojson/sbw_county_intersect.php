@@ -1,8 +1,8 @@
 <?php
-/* Sucks to render a KML */
+header("Content-type: application/json");
 require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -11,30 +11,24 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "select ST_asGeoJson(ST_setsrid(a,4326)) as geojson,
-      ST_length(ST_transform(a,2163)) as sz
-      from (
-select 
-   ST_intersection(
-      ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(ST_union(n.geom)),1)),0.02),
-      ST_exteriorring(ST_geometryn(ST_multi(ST_union(w.geom)),1))
-   ) as a
-   from warnings_$year w, nws_ugc n WHERE gtype = 'P' and w.wfo = '$wfo'
-   and phenomena = '$phenomena' and eventid = $eventid 
-   and significance = '$significance'
-   and n.polygon_class = 'C' and ST_OverLaps(n.geom, w.geom)
-   and n.ugc IN (
-          SELECT ugc from warnings_$year WHERE
-          gtype = 'C' and wfo = '$wfo' 
-          and phenomena = '$phenomena' and eventid = $eventid 
-          and significance = '$significance'
-       )
-   and ST_isvalid(w.geom) and ST_isvalid(n.geom)
-) as foo 
-      WHERE not ST_isempty(a)");
+$sql = <<<EOF
+	WITH stormbased as (SELECT geom from sbw_$year where wfo = '$wfo'
+		and eventid = $eventid and significance = '$significance'
+		and phenomena = '$phenomena' and status = 'NEW'),
+	countybased as (SELECT ST_Union(u.geom) as geom from
+		warnings_$year w JOIN ugcs u on (u.gid = w.gid)
+		WHERE w.wfo = '$wfo' and eventid = $eventid and
+		significance = '$significance' and phenomena = '$phenomena')
 
-$rs = pg_execute($connect, "SELECT", 
-                     Array() );
+	SELECT ST_asgeojson(geo) as geojson, ST_Length(ST_transform(geo,2163)) as sz from
+		(SELECT ST_SetSRID(ST_intersection(
+	      ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(c.geom),1)),0.02),
+	      ST_exteriorring(ST_geometryn(ST_multi(s.geom),1))
+	   	 ), 4326) as geo
+	from stormbased s, countybased c) as foo
+EOF;
+$rs = pg_exec($connect, $sql);
+
 
 $ar = Array("type"=>"FeatureCollection",
       "crs" => Array("type"=>"EPSG", 
@@ -45,7 +39,7 @@ $ar = Array("type"=>"FeatureCollection",
 $reps = Array();
 $subs = Array();
 
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
 {
   
   $reps[] = "\"REPLACEME$i\"";

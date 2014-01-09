@@ -1,8 +1,8 @@
 <?php
 /* Sucks to render a KML */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/vtec.php");
+include("../../include/database.inc.php");
+include("../../include/vtec.php");
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -11,14 +11,12 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "SELECT *, ST_astext(geom) as t, 
-           ST_askml(geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
-           length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
-           from warnings_$year 
+$rs = pg_prepare($connect, "SELECT", "SELECT issue, expire, status, 
+		   ST_askml(geom) as kml,
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
+           from sbw_$year 
            WHERE wfo = $1 and phenomena = $2 and 
-           eventid = $3 and significance = $4
-           and gtype = 'P' ORDER by sz DESC, updated DESC, gtype ASC");
+           eventid = $3 and significance = $4 and status = 'NEW'");
 
 $result = pg_execute($connect, "SELECT", 
                      Array($wfo, $phenomena, $eventid, $significance) );

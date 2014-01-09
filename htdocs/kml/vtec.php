@@ -1,8 +1,8 @@
 <?php
 /* Sucks to render a KML */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/vtec.php");
+include("../../include/database.inc.php");
+include("../../include/vtec.php");
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -11,26 +11,26 @@ $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
-$rs = pg_prepare($connect, "SELECT", "SELECT *, ST_astext(geom) as t, 
-           ST_askml(geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
-           length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
-           from warnings_$year 
+$rs = pg_prepare($connect, "SELECT", "SELECT  
+           ST_askml(geom) as kml, issue, expire, status,
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
+           from sbw_$year 
            WHERE wfo = $1 and phenomena = $2 and 
            eventid = $3 and significance = $4
-           and gtype = 'P' ORDER by sz DESC, updated DESC, gtype ASC");
+           and status = 'NEW'");
 
 $result = pg_execute($connect, "SELECT", 
                      Array($wfo, $phenomena, $eventid, $significance) );
+
 if (pg_num_rows($result) <= 0) {
-    $rs = pg_prepare($connect, "SELECT2", "SELECT *, ST_astext(geom) as t, 
-           ST_askml(geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
-           length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
-           from warnings_$year 
-           WHERE wfo = $1 and phenomena = $2 and 
+    $rs = pg_prepare($connect, "SELECT2", "SELECT 
+    		issue, expire, status,  
+           ST_askml(u.geom) as kml,
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
+           from warnings_$year w JOIN ugcs u on (u.gid = w.gid)
+           WHERE w.wfo = $1 and phenomena = $2 and 
            eventid = $3 and significance = $4
-           and gtype = 'C' ORDER by sz DESC, updated DESC, gtype ASC");
+           and gtype = 'C'");
 
     $result = pg_execute($connect, "SELECT2", 
                Array($wfo, $phenomena, $eventid, $significance) );
@@ -45,7 +45,7 @@ if (pg_num_rows($result) > 0) {
   }
   $label = strftime("%d%%20%B%%20%Y%%20%-I:%M%%20%p%%20%Z", $radarts);
 }
-
+header('Content-disposition: attachment; filename=vtec.kml');
 header("Content-Type: application/vnd.google-earth.kml+xml");
 // abgr
 $color = "7dff0000";
@@ -67,7 +67,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     </Style>
 ";
 
-for($i=0;$row=@pg_fetch_array($result, $i);$i++){
+for($i=0;$row=@pg_fetch_assoc($result, $i);$i++){
   echo "<Placemark>
     <description>
         <![CDATA[

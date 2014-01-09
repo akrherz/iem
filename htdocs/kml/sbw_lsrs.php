@@ -1,9 +1,9 @@
 <?php
 /* Sucks to render a KML */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/vtec.php");
-include("$rootpath/include/lsrs.php");
+include("../../include/database.inc.php");
+include("../../include/vtec.php");
+include("../../include/lsrs.php");
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -14,15 +14,16 @@ $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1)
 
 /* Now we fetch warning and perhaps polygon */
 $query2 = "SELECT l.*, ST_askml(l.geom) as kml
-           from warnings_$year w, lsrs_$year l
+           from sbw_$year w, lsrs_$year l
            WHERE w.wfo = '$wfo' and w.phenomena = '$phenomena' and 
            w.eventid = $eventid and w.significance = '$significance'
            and w.geom && l.geom and l.valid BETWEEN w.issue and w.expire
-           and w.gtype = 'P'";
+           and w.status = 'NEW'";
 
 $result = pg_exec($connect, $query2);
 $row = @pg_fetch_array($result, 0);
 
+header('Content-disposition: attachment; filename=sbw_lsrs.kml');
 header("Content-Type: application/vnd.google-earth.kml+xml");
 // abgr
 $color = "7dff0000";
@@ -42,7 +43,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
         <color>$color</color>
       </PolyStyle>
     </Style>";
-for ($i=0;$row=@pg_fetch_array($result,$i);$i++)
+for ($i=0;$row=@pg_fetch_assoc($result,$i);$i++)
 {
   $ts = strtotime( $row["valid"] );
   echo "<Placemark>
