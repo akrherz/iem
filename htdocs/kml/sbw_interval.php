@@ -1,8 +1,8 @@
 <?php
 /* Sucks to render a KML */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/vtec.php");
+include("../../include/database.inc.php");
+include("../../include/vtec.php");
 $connect = iemdb("postgis");
 
 if (isset($_REQUEST["year1"])){
@@ -26,22 +26,20 @@ if (sizeof($mywfos) > 0){
 } else {
   $wfolimiter = "";
 }
-$rs = pg_prepare($connect, "SELECT-INT", "SELECT *, ST_astext(geom) as t, 
+$rs = pg_prepare($connect, "SELECT-INT", "SELECT 
+		issue, expire, phenomena, significance, eventid, wfo,
            ST_askml(geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
-           length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
-           from warnings_$year 
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
+           from sbw_$year 
            WHERE $wfolimiter issue >= $1 and issue <= $2
-           and gtype = 'P' and eventid > 0
-           ORDER by sz DESC, updated DESC, gtype ASC");
-$rs = pg_prepare($connect, "SELECT", "SELECT *, ST_astext(geom) as t, 
+           and status = 'NEW' and eventid > 0");
+$rs = pg_prepare($connect, "SELECT", "SELECT
+		issue, expire, phenomena, significance, eventid, wfo,
            ST_askml(geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
-           length(CASE WHEN svs IS NULL THEN '' ELSE svs END) as sz 
-           from warnings_$year 
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
+           from sbw_$year 
            WHERE $wfolimiter issue <= $1 and expire > $2
-           and gtype = 'P' and eventid > 0
-           ORDER by sz DESC, updated DESC, gtype ASC");
+           and status = 'NEW' and eventid > 0");
 
 if ($tsSQL != $tsSQL2)
 {
@@ -49,6 +47,7 @@ if ($tsSQL != $tsSQL2)
 } else {
   $result = pg_execute($connect, "SELECT",  Array($tsSQL, $tsSQL) );
 }
+header('Content-disposition: attachment; filename=sbw_interval.kml');
 header("Content-Type: application/vnd.google-earth.kml+xml");
 // abgr
 
