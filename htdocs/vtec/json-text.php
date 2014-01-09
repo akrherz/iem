@@ -2,7 +2,7 @@
 /* Giveme JSON data for zones affected by warning */
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
-require_once "$rootpath/include/database.inc.php";
+require_once "../../include/database.inc.php";
 
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'GMT'");
@@ -44,6 +44,7 @@ for( $i=0; $row  = @pg_fetch_array($result,$i); $i++)
   $ar["data"][] = $z;
 }
 
+header("Content-type: application/json");
 echo Zend_Json::encode($ar);
 
 ?>

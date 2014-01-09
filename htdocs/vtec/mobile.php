@@ -1,10 +1,10 @@
 <?php
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 $conn = iemdb("postgis");
 
 $v = isset($_GET["vtec"]) ? substr($_GET["vtec"],0,25) : "2008-O-NEW-KJAX-TO-W-0048";
-$tokens = split("-", $v);
+$tokens = preg_split("/-/", $v);
 $year = $tokens[0];
 $operation = $tokens[1];
 $vstatus = $tokens[2];
@@ -41,7 +41,7 @@ for( $i=0; $row  = @pg_fetch_array($rs,$i); $i++){
 <body>
 <h3>VTEC Browser for Mobile</h3>
 
-<img src="<?php echo $rooturl; ?>/GIS/radmap.php?layers[]=uscounties&layers[]=sbw&layers[]=nexrad&width=300&height=300&vtec=<?php echo str_replace('-', '.', $v); ?>" />
+<img src="/GIS/radmap.php?layers[]=uscounties&layers[]=sbw&layers[]=nexrad&width=300&height=300&vtec=<?php echo str_replace('-', '.', $v); ?>" />
 
 <pre>
 <?php echo $txtdata; ?>

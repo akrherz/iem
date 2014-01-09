@@ -2,8 +2,8 @@
 /* Giveme JSON data for LSRs inside a polygon */
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
-require_once "$rootpath/include/lsrs.php";
-require_once "$rootpath/include/database.inc.php";
+require_once "../../include/lsrs.php";
+require_once "../../include/database.inc.php";
 
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'GMT'");
@@ -17,20 +17,25 @@ $sbw = isset($_GET['sbw']) ? 1 : 0;
 
 
 if ($sbw){
-$sql = sprintf("SELECT distinct l.* from lsrs_%s l, warnings_%s w WHERE
+$sql = sprintf("SELECT distinct l.* from lsrs_%s l, sbw_%s w WHERE
          l.geom && w.geom and ST_contains(w.geom, l.geom) and l.wfo = '%s' and
          l.valid >= w.issue and l.valid <= w.expire and
-         w.wfo = '%s' and w.gtype = 'P' and w.eventid = '%s' and 
+         w.wfo = '%s' and w.eventid = '%s' and 
          w.significance = '%s' and w.phenomena = '%s'
          ORDER by l.valid ASC", $year, $year, $wfo, $wfo, $eventid, 
          $significance, $phenomena);
 } else {
-$sql = sprintf("SELECT distinct l.* from lsrs_%s l, warnings_%s w WHERE
-         l.valid >= w.issue and l.valid <= w.expire and
-         w.wfo = '%s' and l.wfo = '%s' and w.eventid = '%s' and 
-         w.significance = '%s' and w.phenomena = '%s'
-         ORDER by l.valid ASC", $year, $year, $wfo, $wfo, $eventid, 
-         $significance, $phenomena);
+$sql = <<<EOF
+	WITH countybased as (
+		SELECT min(issue) as issued, max(expire) as expired
+		from warnings_$year w JOIN ugcs u on (u.gid = w.gid)
+		WHERE w.wfo = '$wfo' and w.eventid = $eventid and 
+		w.significance = '$significance' and w.phenomena = '$phenomena')
+		
+	SELECT distinct l.* from lsrs_$year l, countybased c WHERE
+	l.valid >= c.issued and l.valid < c.expired and
+	l.wfo = '$wfo' ORDER by l.valid ASC
+EOF;
 }
 
 $result = pg_exec($connect, $sql);
@@ -49,7 +54,7 @@ for( $i=0; $lsr = @pg_fetch_array($result,$i); $i++)
   $q["remark"] = $lsr["remark"];
   $ar["lsrs"][] = $q;
 }
-
+header("Content-type: application/json");
 echo Zend_Json::encode($ar);
 
 ?>
