@@ -42,7 +42,7 @@ if (isset($_REQUEST["phenomena"])){
   if (pg_num_rows($rs) < 1){
   	$rs = pg_prepare($postgis, "SELECT222", "SELECT 
   			issue, expire, phenomena, status, w.wfo, eventid, significance,
-  			ST_asGeoJson(geom) as geojson
+  			ST_asGeoJson(u.geom) as geojson
   			FROM warnings_$year w JOIN ugcs u on (u.gid = w.gid) WHERE
   			significance = $1 and w.wfo = $2
   			and eventid = $3 and phenomena = $4");
