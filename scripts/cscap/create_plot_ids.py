@@ -47,7 +47,7 @@ headers = ['UniqueID', 'Rep', 'Tillage', 'Rotation', 'Drainage',
 for entry in meta_feed.entry:
     data = entry.to_dict()
     sitekey = data.get('uniqueid').lower()
-    if sitekey != 'vicms':
+    if data.get('keyspread') is not None:
         continue
     leadpi = data.get('leadpi')
     colfolder = data.get('colfolder')
@@ -73,7 +73,7 @@ for entry in meta_feed.entry:
                             entry.set_value('nitrogen', treatment_names.get(nit,''))
                             entry.set_value('landscape', treatment_names.get(lnd,''))
                             entry.set_value('rep', str(rep))
-                            entry.set_value('myid', '')
+                            entry.set_value('plot id', '')
                             rows.append(entry)
     # Create the plots cross reference
     title = '%s %s Plot Identifiers' % (sitekey.upper(), leadpi)
@@ -87,3 +87,7 @@ for entry in meta_feed.entry:
         spr_client.update(cell)
     for row in rows:
         spr_client.add_list_entry(row, spreadkey, sheet)
+
+    print 'Created %s keyspread: %s' % (title, spreadkey)
+    #entry.set_value('keyspread', spreadkey)
+    #spr_client.update(entry)
