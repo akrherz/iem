@@ -1,6 +1,8 @@
 <?php 
 include("../../config/settings.inc.php");
 define("IEM_APPID", 25);
+include("../../include/myview.php");
+$t = new MyView();
 include("../../include/forms.php");
 include("../../include/imagemaps.php");
 include("../../include/mlib.php");
@@ -10,11 +12,30 @@ $iem = new iemaccess();
 $rsai4 = $iem->getSingleSite('RSAI4');
 $rlri4 = $iem->getSingleSite('RLRI4');
 
-$TITLE = "IEM | Other Data Networks";
-$THISPAGE = "networks-other";
-include("../../include/header.php");  
-?>
+$t->title = "Other Data Networks";
+$t->thispage = "networks-other";
 
+$y1select = yearSelect2(2012, 2012, "year1");
+$m1select = monthSelect(8, "month1");
+$d1select = daySelect2(13, "day1");
+$y2select = yearSelect2(2012, date("Y"), "year2");
+$m2select = monthSelect(date("m"), "month2");
+$d2select = daySelect2(date("d"), "day2");
+$y12select = yearSelect2(2003, date("Y"), "year1");
+$y22select = yearSelect2(2003, date("Y"), "year2");
+$nselect = networkSelect("OT", "");
+$table = sprintf("<tr><td>Saylorville Lake</td><td>%s</td><td>%.1f Gusts: %.1f</td>
+	<td>%.1f @ %s</td><td>%s</td></tr>", $rsai4->db['obtime'], $rsai4->db['sknt'] * 1.15,
+		$rsai4->db['gust'] * 1.15, $rsai4->db['max_gust'] * 1.15,
+		@strftime('%I:%M %p', $rsai4->db['gust_ts']),
+	drct2txt($rsai4->db['drct']) );
+$table .= sprintf("<tr><td>Lake Red Rock</td><td>%s</td><td>%.1f Gusts: %.1f</td>
+	<td>%.1f @ %s</td><td>%s</td></tr>", $rlri4->db['obtime'], $rlri4->db['sknt'] * 1.15,
+	$rlri4->db['gust'] * 1.15, $rlri4->db['max_gust'] * 1.15, 
+	@strftime('%I:%M %p', $rlri4->db['gust_ts']),
+	drct2txt($rlri4->db['drct']) );
+
+$t->content = <<<EOF
 <h3 class="heading">Other Data Networks</h3>
 
 <p>The IEM collects data from a number of stand alone sensors.  This page
@@ -31,15 +52,15 @@ are freely available to others.
 <input type="hidden" name="opt" value="bubbler" />
 <table>
  <th>Start Date:</th> 
-  <td><?php echo yearSelect2(2012, 2012, "year1"); ?></td>
-  <td><?php echo monthSelect(8, "month1"); ?></td>
-  <td><?php echo daySelect2(13, "day1"); ?></td></tr>
+  <td>{$y1select}</td>
+  <td>{$m1select}</td>
+  <td>{$d1select}</td></tr>
 
 <tr>
  <th>End Date:</th>
-  <td><?php echo yearSelect2(2012, date("Y"), "year2"); ?></td>
-  <td><?php echo monthSelect(date("m"), "month2"); ?></td>
-  <td><?php echo daySelect2(date("d"), "day2"); ?></td></tr>
+  <td>{$y2select}</td>
+  <td>{$m2select}</td>
+  <td>{$d2select}</td></tr>
 
 </table>
 <input type="submit" value="Request Data" />
@@ -50,15 +71,15 @@ are freely available to others.
 <input type="hidden" name="opt" value="gage" />
 <table>
  <th>Start Date:</th> 
-  <td><?php echo yearSelect2(2012, 2012, "year1"); ?></td>
-  <td><?php echo monthSelect(8, "month1"); ?></td>
-  <td><?php echo daySelect2(22, "day1"); ?></td></tr>
+  <td>{$y1select}</td>
+  <td>{$m1select}</td>
+  <td>{$d1select}</td></tr>
 
 <tr>
  <th>End Date:</th>
-  <td><?php echo yearSelect2(2012, date("Y"), "year2"); ?></td>
-  <td><?php echo monthSelect(date("m"), "month2"); ?></td>
-  <td><?php echo daySelect2(date("d"), "day2"); ?></td></tr>
+  <td>{$y2select}</td>
+  <td>{$m2select}</td>
+  <td>{$d2select}</td></tr>
 
 </table>
 <input type="submit" value="Request Data" />
@@ -72,24 +93,15 @@ purpose is to monitor for high winds impacting traffic.
 <p><table cellpadding='3' border='1' cellspacing='0'>
 <tr><th>Station</th><th>Observation Time</th><th>Wind Speed [mph]</th>
 	<th>Today's Gust [mph]</th><th>Wind Direction</th></tr>
-<?php echo sprintf("<tr><td>Saylorville Lake</td><td>%s</td><td>%.1f Gusts: %.1f</td>
-	<td>%.1f @ %s</td><td>%s</td></tr>", $rsai4->db['obtime'], $rsai4->db['sknt'] * 1.15,
-	$rsai4->db['gust'] * 1.15, $rsai4->db['max_gust'] * 1.15, 
-	@strftime('%I:%M %p', $rsai4->db['gust_ts']),
-	drct2txt($rsai4->db['drct']) );?>
-<?php echo sprintf("<tr><td>Lake Red Rock</td><td>%s</td><td>%.1f Gusts: %.1f</td>
-	<td>%.1f @ %s</td><td>%s</td></tr>", $rlri4->db['obtime'], $rlri4->db['sknt'] * 1.15,
-	$rlri4->db['gust'] * 1.15, $rlri4->db['max_gust'] * 1.15, 
-	@strftime('%I:%M %p', $rlri4->db['gust_ts']),
-	drct2txt($rlri4->db['drct']) );?>
+{$table}
 </table>
 
 <h3>Agronomy Hall, ISU:</h3>
 
 <ul>
+<li><a href="/other/current.phtml">Sortable Currents</a></li>
 <li><a href="/plotting/mesonorth/ot_10min.phtml">Indoor Temperature for Met Cluster Room</a>, B548 Agronomy Hall.  Outfitted with 4 One-Wire sensors reporting every minute.</li>
-<li><a href="/plotting/isumet/1station_1min.phtml">ISU AMS Station</a>, On the roof.  Davis Weather station reporting every minute.</li>
-<li><a href="/plotting/isumet/ams2.phtml">ISU AMS Station #2</a>, On the roof.  Davis Vantage Pro 2, installed 8 Sep 2011.</li>
+<li><a href="/plotting/isumet/ams2.phtml">ISU AMS Station</a>, On the roof.  Davis Vantage Pro 2, installed 8 Sep 2011.</li>
 <li><a href="/plotting/iemcc/">IEM Central Command</a>, On the roof.  High quality Campbell Scientific sensors reporting every minute.</li>
 </ul>
 
@@ -103,21 +115,21 @@ purpose is to monitor for high winds impacting traffic.
 <h3>Raw Data Download!</h3>
 <form name="dl" action="/cgi-bin/request/other.py">
 <table>
-<tr><th rowspan="2">Select Location: <?php echo networkSelect("OT", ""); ?></th>
+<tr><th rowspan="2">Select Location: {$nselect}</th>
  <th>Start Date:</th> 
-  <td><?php echo yearSelect2(2003, date("Y"), "year1"); ?></td>
-  <td><?php echo monthSelect(date("m"), "month1"); ?></td>
-  <td><?php echo daySelect2(date("d"), "day1"); ?></td></tr>
+  <td>{$y12select}</td>
+  <td>{$m1select}</td>
+  <td>{$d1select}</td></tr>
 
 <tr>
  <th>End Date:</th>
-  <td><?php echo yearSelect2(2003, date("Y"), "year2"); ?></td>
-  <td><?php echo monthSelect(date("m"), "month2"); ?></td>
-  <td><?php echo daySelect2(date("d"), "day2"); ?></td></tr>
+  <td>{$y22select}</td>
+  <td>{$m2select}</td>
+  <td>{$d2select}</td></tr>
 
 </table>
 <input type="submit" value="Request Data" />
 </form>
-
-
-<?php include("../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
