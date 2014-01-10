@@ -26,7 +26,7 @@ if (pg_num_rows($result) <= 0) {
     $rs = pg_prepare($connect, "SELECT2", "SELECT 
     		issue, expire, status,  
            ST_askml(u.geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
+           round(ST_area(ST_transform(u.geom,2163)) / 1000000.0) as psize
            from warnings_$year w JOIN ugcs u on (u.gid = w.gid)
            WHERE w.wfo = $1 and phenomena = $2 and 
            eventid = $3 and significance = $4
