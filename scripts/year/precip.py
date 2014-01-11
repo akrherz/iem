@@ -7,9 +7,10 @@ import re, os
 import math
 import mx.DateTime
 import netCDF4
-import iemdb, network
+import psycopg2
+import network
 st = network.Table('IACLIMATE')
-COOP = iemdb.connect('coop', bypass=True)
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor()
 
 ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
@@ -25,7 +26,9 @@ ccursor.execute("""SELECT station, sum(precip) as acc from climate51
     GROUP by station ORDER by acc ASC""" % (ts.strftime("%m-%d"),
     ) )
 for row in ccursor:
-    station = row[0].upper()
+    station = row[0]
+    if not st.sts.has_key(station):
+        continue
     #print station, rs[i]['acc']
     nrain.append( row[1] )
     lats.append(st.sts[station]['lat'])
@@ -59,7 +62,9 @@ ccursor.execute("""select climate.station, norm, obs from
   WHERE obs.station = climate.station""" % (ts.strftime("%m-%d"),
     ts.year) )
 for row in ccursor:
-    station = row[0].upper()
+    station = row[0]
+    if not st.sts.has_key(station):
+        continue
     #print station, rs[i]['acc']
     drain.append( row[2] - row[1] )
     lats.append(st.sts[station]['lat'])
