@@ -18,9 +18,9 @@ $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
 
 $rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g, 
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
-           from warnings_$year 
+           from sbw_$year 
            WHERE wfo = $1 and issue <= $2 and expire > $2
-           and gtype = 'P'");
+           and status = 'NEW'");
 
 $result = pg_execute($connect, "SELECT", 
                      Array($wfo, date("Y-m-d H:i", $ts)) );
