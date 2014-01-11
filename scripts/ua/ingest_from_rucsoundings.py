@@ -235,17 +235,25 @@ def main():
             DBCONN.commit()
             
     
-
-    DBCONN.close()
-
     # Loop thru and see which stations we were missing data from
     missing = []
     for sid in nt.sts.keys():
         if nt.sts[sid]['online']:
             if nt.sts[sid].get('count', 0) == 0:
-                missing.append('RAOB dl for station failed: %s' % (sid,))
+                missing.append(sid)
+    
     if len(missing) > 20:
-        print '\n'.join(missing)
+        cursor = DBCONN.cursor()
+        for sid in missing:
+            # Go find the last ob we have for the site
+            cursor.execute("""SELECT max(valid) from raob_flights where
+            station = %s""", (sid,))
+            row = cursor.fetchone()
+            print 'rucsoundings dl fail ts: %s sid: %s last: %s' % (
+                                                valid.strftime("%Y-%m-%d %H"),
+                                                            sid, row[0])
+
+    DBCONN.close()
 
 if __name__ == '__main__':
     #import glob
