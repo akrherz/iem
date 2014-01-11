@@ -332,6 +332,7 @@ function loadWarnings(){
 			from stormbased s JOIN countybased c on 
 			(c.eventid = s.eventid and c.wfo = s.wfo and c.year = s.year
 			and c.phenomena = s.phenomena and c.significance = s.significance)
+			ORDER by issue ASC
 	",  $this->sqlWFOBuilder(), date("Y/m/d H:i", $this->sts), 
 	date("Y/m/d H:i", $this->ets), date("Y/m/d H:i", $this->ets), 
 	$this->sqlTypeBuilder(), $this->sqlTagLimiter(),
