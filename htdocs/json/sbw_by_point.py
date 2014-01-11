@@ -13,8 +13,8 @@ def get_events(lon, lat):
     cursor = pgconn.cursor()
     cursor.execute("""SET TIME ZONE 'UTC'""")
     cursor.execute("""
-  select wfo, significance, phenomena, issue, expire, eventid from warnings 
-  where gtype = 'P' and 
+  select wfo, significance, phenomena, issue, expire, eventid from sbw 
+  where status = 'NEW' and 
   ST_Contains(geom, ST_SetSRID(ST_GeomFromText('POINT(%s %s)'),4326)) 
   and phenomena in ('SV', 'TO', 'FF', 'FL', 'MA', 'FA') and
   issue > '2005-10-01'
