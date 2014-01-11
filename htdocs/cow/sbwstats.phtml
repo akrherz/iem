@@ -1,8 +1,11 @@
 <?php
 include("../../config/settings.inc.php");
 define("IEM_APPID", 149);
-$TITLE = "IEM | Storm Based Warning Stats";
-$THISPAGE = "severe-cow";
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Storm Based Warning Stats";
+$t->thispage = "severe-cow";
+
 include("../../include/forms.php");
 include("../../include/database.inc.php");
 include("../../include/network.php");
@@ -29,7 +32,7 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT wfo, phenomena, count(*),
   avg( st_area2d( ST_transform(geom,2163) ) ) as avg_polysize,
   sum( st_perimeter( ST_transform(geom,2163) ) ) as sum_perimsize,
   avg( st_perimeter( ST_transform(geom,2163) ) ) as avg_perimsize
-  from warnings WHERE gtype = 'P' and 
+  from sbw WHERE status = 'NEW' and 
   phenomena IN ('SV','TO','MA','FF','FA') and significance = 'W'
   and issue BETWEEN $1 and $2 GROUP by wfo, phenomena ORDER by $sortby ASC");
 
@@ -58,7 +61,7 @@ $table = "
 .ff { background: #FFEC8B;}
 </style>
 <table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">
-<caption>Data valid for warnings issued between ". date('d M Y H:i', $sts) ." and ". date('d M Y H:i', $ets) ." GMT</caption>
+<caption>Data valid for warnings issued between ". date('d M Y H:i', $sts) ." and ". date('d M Y H:i', $ets) ." UTC</caption>
 <tr>
   <th colspan='2'>Weather Forecast Office</th>
   <th colspan='3'>Summary</th>
@@ -170,11 +173,19 @@ $table .= @sprintf("<tr><th> </th><th>Total/Averages</th>
 
 $table .= "</table>";
 
+$y1select = yearSelect2(2002, $syear, "syear");
+$m1select = monthSelect($smonth, "smonth");
+$d1select = daySelect2($sday, "sday");
+$h1select = hour24Select($shour, "shour");
+$y2select = yearSelect2(2002, $eyear, "eyear");
+$m2select = monthSelect($emonth, "emonth");
+$d2select = daySelect2($eday, "eday");
+$h2select = hour24Select($ehour, "ehour");
+
 /* BEGIN OUTPUT! */
-include("../../include/header.php"); 
-?>
-<h3 class="heading">Storm Based Warning Geometry Statistics</h3>
-<div style="width: 800px;">
+$t->content = <<<EOF
+<h3>Storm Based Warning Geometry Statistics</h3>
+
 <p>Pick a time period of your choice and get back a summary table of
 storm based warning polygon statistics. You should be able to highlight 
 this table and paste it into Excel, if you wish.  Please note that prior to
@@ -183,30 +194,34 @@ warning and so their shape may not have been accurately representing the threat.
 <br /><strong>Note:</strong>  Areal flood warning polygons have only been issued
 since summer of 2007.
 <br /><strong>Perimeter values are in kilometers and area values in square kilometers.</strong>
-<br /><b>Links:</b> <a href="<?php echo $gis_url; ?>">Download shapefile of these warnings</a> - <a href="sbwsum.phtml">View visual summaries</a></p>
-</div>
+<br /><b>Links:</b> <a class="btn btn-info" href="{$gis_url}">Download shapefile of these warnings</a> - 
+<a class="btn btn-info" href="sbwsum.phtml">View visual summaries</a></p>
 
-<?php
-echo "<form method=\"GET\">
-<table border=\"1\" cellpadding=\"3\" cellspacing='0'>
+
+<form method="GET" name="a21234">
+<table cellpadding="3" cellspacing="0" border="1">
+<thead>
  <tr><td></td><th>Year</th><th>Month</th><th>Day</th><th>Hour</th><td></td></tr>
+</thead>
+<tbody>
  <tr><td>Start:</td>
-  <td>".  yearSelect2(2002, $syear, "syear"). "</td>
-  <td>". monthSelect($smonth, "smonth") ."</td>
-  <td>". daySelect2($sday, "sday") ."</td>
-  <td>". hour24Select($shour, "shour") ."</td>
+  <td>{$y1select}</td>
+  <td>{$m1select}</td>
+  <td>{$d1select}</td>
+  <td>{$h2select}</td>
   <td rowspan='2'><input type='submit' value='Generate Stats'></td>
  <tr><td>End:</td>
-  <td>". yearSelect2(2002, $eyear, "eyear"). "</td>
-  <td>". monthSelect($emonth, "emonth") ."</td>
-  <td>". daySelect2($eday, "eday") ."</td>
-  <td>". hour24Select($ehour, "ehour") ."</td>
+  <td>{$y1select}</td>
+  <td>{$m1select}</td>
+  <td>{$d1select}</td>
+  <td>{$h2select}</td>
  </tr>
+</tbody>
 </table>
-</form>";
+</form>
 
 
-echo $table;
-
-include("../../include/footer.php"); 
+{$table}
+EOF;
+$t->render('single.phtml');
 ?>
