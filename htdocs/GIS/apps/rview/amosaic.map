@@ -357,7 +357,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
   CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
-  DATA "geom from warnings_2004"
+  DATA "geom from sbw"
   STATUS ON
   TYPE POLYGON
   METADATA
@@ -365,7 +365,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
+  FILTER "expire > CURRENT_TIMESTAMP and status = 'NEW'"
   PROJECTION
    "init=epsg:4326"
   END
@@ -382,7 +382,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_p
   CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
-  DATA "geom from warnings_2004"
+  DATA "geom from sbw"
   STATUS ON
   TYPE POLYGON
   METADATA
@@ -390,7 +390,7 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-  FILTER "issue > 'YESTERDAY'::timestamp and gtype = 'P'"
+  FILTER "issue > 'YESTERDAY'::timestamp and status = 'NEW'"
   PROJECTION
    "init=epsg:4326"
   END

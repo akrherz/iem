@@ -473,7 +473,7 @@ LAYER
   NAME warnings1d_c
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
   #DATA "geom from warnings"
-  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and issue > 'YESTERDAY'::timestamp and gtype = 'P') as foo using unique oid using SRID=4326"
+  DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and issue > 'YESTERDAY'::timestamp and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS ON
   TYPE POLYGON
   METADATA
@@ -499,7 +499,7 @@ LAYER
   NAME warnings0_p
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
   #DATA "geom from warnings"
-  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
+  DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS ON
   TYPE POLYGON
   METADATA

@@ -347,11 +347,11 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
   CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
-  DATA "geom from warnings"
+  DATA "geom from sbw"
   STATUS ON
   TYPE POLYGON
   TEMPLATE q_template.html
-  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
+  FILTER "expire > CURRENT_TIMESTAMP and status = 'NEW'"
   PROJECTION
    "init=epsg:4326"
   END
