@@ -15,10 +15,10 @@ $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1)
 
 $rs = pg_prepare($connect, "SELECT", "SELECT *, ST_AsText(geom) as g, 
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
-           from warnings_$year 
+           from sbw_$year 
            WHERE wfo = $1 and phenomena = $2 and 
            eventid = $3 and significance = $4
-           and gtype = 'P'");
+           and status = 'NEW'");
 
 $result = pg_execute($connect, "SELECT", 
                      Array($wfo, $phenomena, $eventid, $significance) );
