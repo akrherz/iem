@@ -255,30 +255,27 @@ function computeWarningsUnverified(){
 }
 
 function computeSharedBorder(){
+	// Compute the storm based warning intersection with the counties
     reset($this->warnings);
     while (list($k,$v) = each($this->warnings)){
-        $sql = sprintf("SELECT sum(sz) as s from (
-     SELECT ST_length(ST_transform(a,2163)) as sz from (
-        select 
-           ST_intersection(
-      ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(ST_union(n.geom)),1)),0.02),
-      ST_exteriorring(ST_geometryn(ST_multi(ST_union(w.geom)),1))
-            )  as a
-            from warnings_%s w, nws_ugc n WHERE gtype = 'P' 
-            and w.wfo = '%s' and phenomena = '%s' and eventid = '%s' 
-            and significance = '%s' and n.polygon_class = 'C'
-            and n.ugc IN (
-                SELECT ugc from warnings_%s w WHERE
-                gtype = 'C' and wfo = '%s'
-          and phenomena = '%s' and eventid = '%s' and significance = '%s'
-       )
-         ) as foo
-            WHERE not ST_isempty(a) ) as foo
-       ", $v["year"], $v["wfo"], $v["phenomena"],
-            $v["eventid"], $v["significance"],
-          $v["year"], $v["wfo"], $v["phenomena"],
-            $v["eventid"], $v["significance"] );
-        $rs = $this->callDB($sql);
+    	$sql = <<<EOF
+    WITH stormbased as (SELECT geom from sbw_{$v["year"]} 
+    	where wfo = '{$v["wfo"]}' 
+		and eventid = {$v["eventid"]} and significance = '{$v["significance"]}' 
+		and phenomena = '{$v["phenomena"]}' and status = 'NEW'), 
+	countybased as (SELECT ST_Union(u.geom) as geom from 
+		warnings_{$v["year"]} w JOIN ugcs u on (u.gid = w.gid) 
+		WHERE w.wfo = '{$v["wfo"]}' and eventid = {$v["eventid"]} and 
+		significance = '{$v["significance"]}' and phenomena = '{$v["phenomena"]}') 
+				
+	SELECT sum(ST_Length(ST_transform(geo,2163))) as s from
+		(SELECT ST_SetSRID(ST_intersection(
+	      ST_buffer(ST_exteriorring(ST_geometryn(ST_multi(c.geom),1)),0.02),
+	      ST_exteriorring(ST_geometryn(ST_multi(s.geom),1))
+	   	 ), 4326) as geo
+	from stormbased s, countybased c) as foo
+EOF;
+    	$rs = $this->callDB($sql);
         if ($rs && pg_num_rows($rs) > 0){
             $row = pg_fetch_array($rs,0);
             $this->warnings[$k]["sharedborder"] = $row["s"];
