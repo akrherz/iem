@@ -86,7 +86,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME allsbw
   CONNECTION "dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, geom, random() as oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
+  DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
   METADATA
@@ -300,7 +300,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance = 'W' and gtype = 'C' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo using unique oid using srid=4326"
+  DATA "geom from (select phenomena, u.geom, random() as oid from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE significance = 'W' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo using unique oid using srid=4326"
   STATUS OFF
   TYPE POLYGON
   MAXSCALE 100000
@@ -338,7 +338,7 @@ LAYER
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
   #DATA "geom from warnings"
   MAXSCALE 100000
- DATA "geom from (select phenomena, geom, oid from warnings WHERE gtype = 'P' and significance = 'W' and expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo using unique oid using srid=4326"
+ DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE status = 'NEW' and significance = 'W' and expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo using unique oid using srid=4326"
   STATUS OFF
   TYPE POLYGON
   METADATA
@@ -346,7 +346,6 @@ LAYER
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
   END
   TEMPLATE q_template.html
-#  FILTER "expire > CURRENT_TIMESTAMP and gtype = 'P'"
   PROJECTION
    "init=epsg:4326"
   END
@@ -364,7 +363,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME sbw
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
+  DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
   METADATA
