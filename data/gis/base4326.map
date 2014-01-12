@@ -575,7 +575,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, significance, u.geom, random() as  oid from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE  expire > CURRENT_TIMESTAMP and gtype = 'C') as foo using unique oid using SRID=4326"
+  DATA "geom from (select phenomena, significance, u.geom, random() as  oid from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE  expire > CURRENT_TIMESTAMP) as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE LINE
   PROJECTION
@@ -718,7 +718,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME sbw
   CONNECTION "dbname=postgis host=iemdb user=nobody"
-  DATA "geom from (select phenomena, geom, random() as oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
+  DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
   METADATA
@@ -800,7 +800,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME allsbw
   CONNECTION "dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, geom, random() as oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
+  DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
   METADATA
@@ -859,7 +859,7 @@ LAYER
   NAME warnings0_p
   CONNECTION "dbname=postgis host=iemdb"
   #DATA "geom from warnings"
-  DATA "geom from (select phenomena, geom, random() as oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and gtype = 'P') as foo using unique oid using SRID=4326"
+  DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
   METADATA
