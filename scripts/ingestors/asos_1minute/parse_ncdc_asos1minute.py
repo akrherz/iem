@@ -23,7 +23,7 @@ P1_RE = re.compile(r"""
 (?P<year>[0-9]{4})(?P<month>[0-9]{2})(?P<day>[0-9]{2})
 (?P<hr>[0-9]{2})(?P<mi>[0-9]{2})
 (?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s+
-\[?\s*((?P<vis1_coef>\-?\d+\.\d*)|(?P<vis1_coef_miss>M))\s+?\]?
+\[?\s*((?P<vis1_coef>\-?\d+\.\d*)|(?P<vis1_coef_miss>M))\s*\]?
 \[?(?P<vis1_nd>[0-9A-Za-z\?\$/ ])\]?\s+
 ((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+(?P<vis2_nd>[A-Za-z\?\$ ])\s+
 ...............\s+
@@ -55,6 +55,7 @@ p1_examples = [
 "14933KDSM DSM2013030312191819    0.167 [N]                             120   11  121   12   31 60+              ",
 "03928KICT ICT2013060105471147   0.050 D                             325    14   329   19    01L60+              ",
 "14942KOMA OMA2013120308291429  [   M  ][D]                            [ M    M    M    M ] []                   ",
+"14942KOMA OMA2013120309421542  [ 0.265][D]                            [ M    M    M    M ] [14R60+]             ",
 ]
 
 p1_answers = [
@@ -73,11 +74,11 @@ P2_RE = re.compile(r"""
 \[?\s*((?P<precip>\d+\.\d*)|(?P<precip_miss>[M ]))\s*\]?
 ............\s+
 \[?((?P<unk2>\d*)|(?P<unk2_miss>M))\]?\s+
-\[?((?P<pres1>\d+\.\d*)|(?P<pres1_miss>[M ]))\]?\s?\s?
-\[?((?P<pres2>\d+\.\d*)|(?P<pres2_miss>[M ]))\]?\s?\s?
-\[?((?P<pres3>\d+\.\d*)|(?P<pres3_miss>[M ]))\]?\s+
-\[?\s*((?P<tmpf>\-?\d+)|(?P<tmpf_miss>M))\s?\]?\s?
-\[?\s*((?P<dwpf>\-?\d+)|(?P<dwpf_miss>M))\s?\]?\s+
+\[?((?P<pres1>\d+\.\d*)|(?P<pres1_miss>[M ]))\]?\s*
+\[?((?P<pres2>\d+\.\d*)|(?P<pres2_miss>[M ]))\]?\s*
+\[?((?P<pres3>\d+\.\d*)|(?P<pres3_miss>[M ]))\]?\s*
+\[?\s*((?P<tmpf>\-?\d+)|(?P<tmpf_miss>[M ]))\]?\s*
+\[?\s*((?P<dwpf>\-?\d+)|(?P<dwpf_miss>[M ]))\]?\s+
 """, re.VERBOSE)
 
 
@@ -108,6 +109,7 @@ p2_examples = [
 "14944KFSD FSD2013121800080608   NP  0000    0.00              39998   28.456  28.449  28.451 [ 38][ 14]         ",
 "14933KDSM DSM2013121710211621   NP [0000  ] 0.00              40009   29.131  29.125  29.124 [ M ]  25          ",
 "14943KSUX SUX2013122716022202 [ M ] 0000                     [  M  ]  28.854  28.852  28.859 [ M ][ M ]         ",
+"14942KOMA OMA2013120308361436 [ M ][  M   ]                  [  M  ] [  M   ][  M   ][  M   ][ M ][ M ]         ",
 ]
 
 def p2_parser( ln ):
@@ -183,10 +185,10 @@ def p1_parser( ln ):
 
 def test():
     for ex in p1_examples:
-        m = p1_parser( ex )
+        p1_parser( ex )
 
     for ex in p2_examples:
-        m = p2_parser( ex )
+        p2_parser( ex )
 
 def download(station, monthts):
     """
@@ -232,22 +234,22 @@ def runner(station, monthts):
     
     cnt = 60*24*31
     for ln in page1:
-      d = p1_parser( ln )
-      if d is None:
-        continue
-      data[ d['ts'] ] = d
-      cnt -= 1
+        d = p1_parser( ln )
+        if d is None:
+            continue
+        data[ d['ts'] ] = d
+        cnt -= 1
     page1.close()
 
     page2 = open(fp6, 'r')
     for ln in page2:
-      d = p2_parser( ln )
-      if d is None:
-        continue
-      if not data.has_key( d['ts'] ):
-        data[ d['ts'] ] = {}
-      for k in d.keys():
-        data[ d['ts'] ][ k ] = d[k]
+        d = p2_parser( ln )
+        if d is None:
+            continue
+        if not data.has_key( d['ts'] ):
+            data[ d['ts'] ] = {}
+        for k in d.keys():
+            data[ d['ts'] ][ k ] = d[k]
     page2.close()
     
     tmpfp = "/tmp/%s%s-dbinsert.sql" % (station, monthts.strftime("%Y%m"))
