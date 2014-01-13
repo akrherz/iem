@@ -1,42 +1,32 @@
 import iemdb
 import random
-ASOS = iemdb.connect('asos', bypass=True)
-acursor = ASOS.cursor()
-MESOSITE = iemdb.connect('mesosite', bypass=True)
-mcursor = MESOSITE.cursor()
+ASOS = iemdb.connect('iem', bypass=True)
+icursor = ASOS.cursor()
 import iemplot
 
-sts = {}
-mcursor.execute(""" 
-SELECT id, x(geom) as lon, y(geom) as lat, network from stations
-WHERE (network ~* 'ASOS' or network = 'AWOS') 
-and network not in ('IQ_ASOS','AK_ASOS','HI_ASOS','PO_ASOS', 'GU_ASOS')  """)
-for row in mcursor:
-    sts[ row[0] ] = {'lat': row[2], 'lon': row[1], 'network': row[3]}
+icursor.execute(""" 
+ WITH data as 
+ (SELECT iemid,  min(wcht(tmpf::numeric, (sknt*1.15)::numeric)) from current_log WHERE tmpf > -50 and sknt >= 0 GROUP by iemid)
 
-acursor.execute("""
-    SELECT station, min(wcht(tmpf::numeric,sknt::numeric)) from t2011
-    WHERE valid > '2011-02-01' and tmpf > -50 and 
-    sknt >= 0 and station != 'MIS' GROUP by station ORDER by min ASC
-""")
+ SELECT ST_x(geom), ST_y(geom), d.min, t.network, t.id from data d JOIN stations t 
+ ON (t.iemid = d.iemid)
+ WHERE t.state in ('IA','MN','WI','ND','SD','NE','KS','MO','IL','IN','MI','OH','KY') and (t.network = 'AWOS' or t.network ~* 'ASOS')
+ and t.id not in ('DKB', 'M30', 'CIR', 'EKQ', 'SME', 'P58')
+ ORDER by d.min ASC
+ """)
 lats = []
 lons = []
 data = []
-for row in acursor:
-    if not sts.has_key(row[0]):
-        continue
-    #if sts[row[0]]['network'] in ('SD_ASOS','NE_ASOS'):
-    #    print row[1], row[0]
-    if row[1] > 25 and sts[row[0]]['lat'] > 40 and sts[row[0]]['lat'] < 48  and sts[row[0]]['lon'] < -100 and sts[row[0]]['lon'] > -120:
-        print row[1], row[0] 
-    data.append( row[1] )
-    lats.append( sts[row[0]]['lat'] + (random.random() *.01))
-    lons.append( sts[row[0]]['lon'] )
+for row in icursor:
+    print '%s %s %.1f' % (row[3], row[4], row[2])
+    data.append( row[2] )
+    lats.append( row[1] + (random.random()*0.001))
+    lons.append( row[0] )
     
 cfg = {
-       '_conus': True,
+       '_midwest': True,
        'lbTitleString': '[F]',
-       '_title': '1-3 February 2011 Minimum Wind Chill'
+       '_title': '5-6 January 2014 Minimum Wind Chill',
        #'_showvalues': True,
        #'_format': '%.0f',
        }

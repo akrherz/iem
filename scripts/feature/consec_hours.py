@@ -15,37 +15,32 @@ def normalize(ts):
 yearlymax = [0]*(2015-1934)
 maxvalid = [0]*(2015-1934)
 acursor.execute("""
-  SELECT valid, tmpf from alldata where station = 'DSM' and tmpf > -40 
-  and valid > '1933-06-01' ORDER by valid ASC
+  SELECT valid, tmpf from alldata where station = 'CID' and tmpf > -40 
+  and tmpf < 30
+  and valid > '1930-01-01' ORDER by valid ASC
 """)
 running = False
 last = None
+lmax = 0
 for row in acursor:
     ts = mx.DateTime.strptime(row[0].strftime("%Y%m%d%H%M"), "%Y%m%d%H%M")
     # Case 1: Noop
-    if not running and row[1] >= 32:
+    if not running and row[1] >= 0:
         continue
     # Case 2: streak continues
-    if running and row[1] < 32:
+    if running and row[1] < 0:
         continue
     # Case 3: Starting a new streak
-    if not running and row[1] < 32:
+    if not running and row[1] < 0:
         last = ts
         running = True
         continue
     # Case 4: Ending a streak
-    if running and row[1] >= 32:
+    if running and row[1] >= 0:
         diff = (ts - last).hours
-        if last.month == 11 and ts.month != 11:
-            ts = last + mx.DateTime.RelativeDateTime(month=12,day=1,hour=0,minute=0)
-            diff = (ts - last).hours
-        lmax = yearlymax[getyear(ts)-1934]
-        if last.month == 11 and diff > lmax:
-            if ts.month != 11:
-                ts = last + mx.DateTime.RelativeDateTime(month=12,day=1,hour=0,minute=0)
-            print 'New', diff, getyear(ts)
-            yearlymax[getyear(ts)-1934] = diff
-            maxvalid[getyear(ts)-1934] = float(normalize(last))
+        if diff > lmax:
+            lmax = diff
+            print row, last, diff
         running = False
 
 import matplotlib.pyplot as plt
