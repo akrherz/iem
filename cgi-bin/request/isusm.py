@@ -47,9 +47,14 @@ def fetch_daily( form ):
     stations = get_stations( form )
     delim = get_delimiter( form )
     
-    res = delim.join( ["station","valid","high"] ) + "\n"
+    res = delim.join( ["station","valid","high", "low", "solar", "precip",
+                       "sped", "gust", "et", "soil04t", "soil12t", "soil24t", "soil50t",
+                       "soil12vwc", "soil24vwc", "soil50vwc",] ) + "\n"
     
-    sql = """SELECT station, valid, tair_c_max from sm_daily 
+    sql = """SELECT station, valid, tair_c_max, tair_c_min, slrmj_tot,
+    rain_mm_tot, dailyet, tsoil_c_avg, t12_c_avg, t24_c_avg, t50_c_avg,
+    vwc_12_avg, vwc_24_avg, vwc_50_avg, ws_mps_s_wvt, ws_mps_max
+    from sm_daily 
     WHERE valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
     ORDER by valid ASC
     """ % (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d"), 
@@ -57,16 +62,26 @@ def fetch_daily( form ):
     cursor.execute(sql)
     
     for row in cursor:
-        if row[2] is None:
-            tmpf = -99
-        else:
-            tmpf = temperature(row[2], 'C').value('F')
         valid = row[1]
         station = row[0]
+        high = temperature(row[2], 'C').value('F') if row[2] is not None else -99
+        low = temperature(row[3], 'C').value('F') if row[3] is not None else -99
+        precip = row[5] / 24.5 if row[5] > 0 else 0
+        et = row[6] / 24.5 if row[6] > 0 else 0
+        tsoil04t = temperature(row[7], 'C').value('F') if row[7] is not None else -99
+        tsoil12t = temperature(row[8], 'C').value('F') if row[8] is not None else -99
+        tsoil24t = temperature(row[9], 'C').value('F') if row[9] is not None else -99
+        tsoil50t = temperature(row[10], 'C').value('F') if row[10] is not None else -99
+        tsoil12vwc = row[11] if row[11] is not None else -99
+        tsoil24vwc = row[12] if row[12] is not None else -99
+        tsoil50vwc = row[13] if row[13] is not None else -99
+        speed = row[14] * 2.23 if row[14] is not None else -99
+        gust = row[15] * 2.23 if row[15] is not None else -99
         
-        res += "%s%s%s%s%.1f\n" % (station, delim, 
-                                   valid.strftime("%Y-%m-%d %H:%M"), delim, 
-                                   tmpf)
+        values = [station, valid.strftime("%Y-%m-%d"), high, low, row[4],
+                  precip, speed, gust, et, tsoil04t, tsoil12t, tsoil24t, tsoil50t,
+                  tsoil12vwc, tsoil24vwc, tsoil50vwc]
+        res += delim.join(map(str,values)) + "\n"
     
     return res
     
