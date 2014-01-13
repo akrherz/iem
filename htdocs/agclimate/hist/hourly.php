@@ -1,15 +1,33 @@
-<?php
+<?php 
+ /* 
+  * Download front end for daily data from the ISUSM network
+  */
  include("../../../config/settings.inc.php");
- $TITLE = "ISU Agclimate | Data Request";
- $THISPAGE="networks-agclimate";
+ include("../../../include/myview.php");
+ $t = new MyView();
+ $t->title = "ISU Soil Moisture Hourly Data Request";
+ $t->thispage = "networks-agclimate";
+ 
  include("../../../include/network.php");
  $nt = new NetworkTable("ISUSM");
- include("../../../include/header.php");
  include("../../../include/forms.php");
-?>
 
+ $yselect = yearSelect2(2013, date("Y"), "year1");
+ $mselect = monthSelect(date("m"), "month1");
+ $dselect= daySelect2(date("d"), "day1");
+ $yselect2 = yearSelect2(2013, date("Y"), "year2");
+ $mselect2 = monthSelect(date("m"), "month2");
+ $dselect2= daySelect2(date("d"), "day2");
+
+$sselect = "";
+while( list($key,$val) = each($nt->table)){
+	$sselect .= sprintf("<br /><input type=\"checkbox\" name=\"sts\" value=\"%s\">%s (%s)",
+			$key, $val["name"], $key);
+}
+ 
+$t->content = <<<EOF
 <h3 class="heading">Hourly Data Request Form:</h3>
-<div class="text">
+
 <P><b>Information:</b>  This interface accesses the archive of daily and hourly weather
 data collected from the Iowa Agclimate Automated Weather stations.  Please
 select the appropiate stations and weather variables desired below. 
@@ -19,36 +37,33 @@ select the appropiate stations and weather variables desired below.
 wish to change this to <a href="daily.php">daily data</a>. 
 
 
-<table><tr><td valign="top">
+<div class="row">
+<div class="col-md-6">
 
 <form name='dl' method="GET" action="/cgi-bin/request/isusm.py">
 <input type="hidden" name="mode" value="hourly" />
 
 <h4 class="subtitle">Select station(s):</h4>
-<?php 
-while( list($key,$val) = each($nt->table)){
-  echo sprintf("<br /><input type=\"checkbox\" name=\"sts\" value=\"%s\">%s (%s)",
-	$key, $val["name"], $key);
-}
-?>
+{$sselect}
 
 
-<p><b><h4 class="subtitle">Select the time interval:</h4></b>
-		<TABLE>
-				<TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
-				<TR><TH>Starting On:</TH>
- <TD><?php echo yearSelect2(2012, date("Y"), "year1"); ?></TD>
- <td><?php echo monthSelect2(1, "month1"); ?></td>
- <td><?php echo daySelect2(1, "day1"); ?></td>
-				</TR>
-				<TR><TH>Ending On:</TH>
-<TD><?php echo yearSelect2(2012, date("Y"), "year2"); ?></TD>
- <td><?php echo monthSelect2(date("m"), "month2"); ?></td>
- <td><?php echo daySelect2(date("d"), "day2"); ?></td>
-				</TR>
-			</TABLE>
+<h4>Select the time interval:</h4>
+<TABLE>
+  <TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
+  <TR><TH>Starting On:</TH>
+ <TD>{$yselect}</TD>
+ <td>{$mselect}</td>
+ <td>{$dselect}</td>
+ </tr>
+</TR>
+<TR><TH>Ending On:</TH>
+ <TD>{$yselect2}</TD>
+ <td>{$mselect2}</td>
+ <td>{$dselect2}</td>
+</TR>
+</TABLE>
 
-<p><b><h4 class="subtitle">Options:</h4></b>
+<h4>Options:</h4>
 <input type="checkbox" name="todisk" value="yes">Download directly to disk
 <br>Delimination: <select name="delim">
   <option value="comma">Comma Delimited
@@ -59,9 +74,9 @@ while( list($key,$val) = each($nt->table)){
 	<input type="submit" value="Submit Query">
 	<input type="reset">
 
-</form></div>
+</form>
 
-</td><td valign="top">
+</div><div class="col-md-6">
 
 <h4 class="subtitle">Description of variables in download</h4>
 
@@ -69,12 +84,25 @@ while( list($key,$val) = each($nt->table)){
  <dt>station</dt><dd>National Weather Service Location Identifier for the
  site.  This is a five character identifier.</dd>
  <dt>valid</dt><dd>Timestamp of the observation either in CST or CDT</dd>
- <dt>tmpf</dt><dd>Air Temperature</dd>
+ <dt>tmpf</dt><dd>Air Temperature [F]</dd>
+ <dt>relh</dt><dd>Relative Humidity [%]</dd>
+ <dt>solar</dt><dd>Solar Radiation [W/m^2]</dd>
+ <dt>precip</dt><dd>One Hour Precipitation [inch]</dd>
+ <dt>speed</dt><dd>Wind Speed [mph]</dd>
+ <dt>drct</dt><dd>Wind Direction [degrees North]</dd>
+ <dt>et</dt><dd>Potential Evapotranspiration (Alfalfa) [inch]</dd>
+ <dt>soil04t</dt><dd>4 inch Depth Soil Temperature [F]</dd>
+ <dt>soil12t</dt><dd>12 inch Depth Soil Temperature [F]</dd>
+ <dt>soil24t</dt><dd>24 inch Depth Soil Temperature [F]</dd>
+ <dt>soil50t</dt><dd>50 inch Depth Soil Temperature [F]</dd>
+ <dt>soil12vwc</dt><dd>12 inch Depth Soil Volumetric Water Content [%]</dd>
+ <dt>soil24vwc</dt><dd>24 inch Depth Soil Volumetric Water Content [%]</dd>
+ <dt>soil50vwc</dt><dd>50 inch Depth Soil Volumetric Water Content [%]</dd>
+ 
  </dl>
 
-</td></tr>
+ 		</div></div>
 
-</table>
-
-
-<?php include("../../../include/footer.php"); ?>
+EOF;
+$t->render("single.phtml");
+?>
