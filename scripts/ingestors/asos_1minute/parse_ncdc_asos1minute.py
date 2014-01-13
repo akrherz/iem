@@ -23,7 +23,7 @@ P1_RE = re.compile(r"""
 (?P<year>[0-9]{4})(?P<month>[0-9]{2})(?P<day>[0-9]{2})
 (?P<hr>[0-9]{2})(?P<mi>[0-9]{2})
 (?P<gmt_hr>[0-9]{2})(?P<gmt_mi>[0-9]{2})\s+
-\[?\s*((?P<vis1_coef>\-?\d+\.\d*)|(?P<vis1_coef_miss>M))\s*\]?
+\[?\s*((?P<vis1_coef>\-?\d+\.\d*)|(?P<vis1_coef_miss>M))\s*\]?\s*
 \[?(?P<vis1_nd>[0-9A-Za-z\?\$/ ])\]?\s+
 ((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+(?P<vis2_nd>[A-Za-z\?\$ ])\s+
 ...............\s+
@@ -56,6 +56,7 @@ p1_examples = [
 "03928KICT ICT2013060105471147   0.050 D                             325    14   329   19    01L60+              ",
 "14942KOMA OMA2013120308291429  [   M  ][D]                            [ M    M    M    M ] []                   ",
 "14942KOMA OMA2013120309421542  [ 0.265][D]                            [ M    M    M    M ] [14R60+]             ",
+"14942KOMA OMA2013121611251725  [15.300] D                              161    2  189    3   14R60+              ",
 ]
 
 p1_answers = [
