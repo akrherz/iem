@@ -48,7 +48,8 @@ def fetch_daily( form ):
     delim = get_delimiter( form )
     
     res = delim.join( ["station","valid","high", "low", "solar", "precip",
-                       "sped", "gust", "et", "soil04t", "soil12t", "soil24t", "soil50t",
+                       "sped", "gust", "et", "soil04t", "soil12t", "soil24t", 
+                       "soil50t",
                        "soil12vwc", "soil24vwc", "soil50vwc",] ) + "\n"
     
     sql = """SELECT station, valid, tair_c_max, tair_c_min, slrmj_tot,
@@ -91,25 +92,43 @@ def fetch_hourly( form ):
     sts, ets = get_dates( form )
     stations = get_stations( form )
     delim = get_delimiter( form )
-    res = delim.join( ["station","valid","tmpf"] ) + "\n"
+    res = delim.join( ["station","valid","tmpf", "relh", "solar", "precip",
+                       "speed", "drct", "et", "soil04t", "soil12t", "soil24t", 
+                       "soil50t",
+                       "soil12vwc", "soil24vwc", "soil50vwc"] ) + "\n"
     
-    cursor.execute("""SELECT station, valid, tair_c_avg from sm_hourly 
+    cursor.execute("""SELECT station, valid, tair_c_avg, rh, slrkw_avg,
+    rain_mm_tot, ws_mps_s_wvt, winddir_d1_wvt, etalfalfa, tsoil_c_avg,
+    t12_c_avg, t24_c_avg, t50_c_avg, vwc_12_avg, vwc_24_avg, vwc_50_avg
+    from sm_hourly 
     WHERE valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
     ORDER by valid ASC
     """ % (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d"), 
            str(tuple(stations))))
     
     for row in cursor:
-        if row[2] is None:
-            tmpf = -99
-        else:
-            tmpf = temperature(row[2], 'C').value('F')
         valid = row[1]
         station = row[0]
+        tmpf = temperature(row[2], 'C').value('F') if row[2] is not None else -99
+        relh = row[3] if row[3] is not None else -99
+        solar = row[4] if row[4] is not None else -99
+        precip = row[5] / 24.5 if row[5] is not None else -99
+        speed = row[6] * 2.23 if row[6] is not None else -99
+        drct = row[7] if row[7] is not None else -99
+        et = row[8] / 24.5 if row[8] is not None else -99
+        tsoil04t = temperature(row[9], 'C').value('F') if row[9] is not None else -99
+        tsoil12t = temperature(row[10], 'C').value('F') if row[10] is not None else -99
+        tsoil24t = temperature(row[11], 'C').value('F') if row[11] is not None else -99
+        tsoil50t = temperature(row[12], 'C').value('F') if row[12] is not None else -99
+        tsoil12vwc = row[13] if row[13] is not None else -99
+        tsoil24vwc = row[14] if row[14] is not None else -99
+        tsoil50vwc = row[15] if row[15] is not None else -99
         
-        res += "%s%s%s%s%.1f\n" % (station, delim, 
-                                   valid.strftime("%Y-%m-%d %H:%M"), delim, 
-                                   tmpf)
+        values = [station, valid.strftime("%Y-%m-%d %H:%M"), 
+                  tmpf, relh, solar, precip, speed, drct, et,  tsoil04t, 
+                  tsoil12t, tsoil24t, tsoil50t,
+                  tsoil12vwc, tsoil24vwc, tsoil50vwc]
+        res += delim.join(map(str,values)) + "\n"
     
     return res
 
