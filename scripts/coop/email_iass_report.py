@@ -228,7 +228,7 @@ def email_report(report, subject):
     msg['Subject'] = subject
     msg['From'] = 'akrherz@iastate.edu'
     msg['Cc'] = 'akrherz@iastate.edu'
-    msg['To'] = 'NASSRFOUMR@nass.usda.gov'
+    msg['To'] = 'NASSRFOUMR@nass.usda.gov' if len(sys.argv) == 2 else 'akrherz@localhost'
     msg.preamble = 'Report'
 
     fn = "iem.txt" 
