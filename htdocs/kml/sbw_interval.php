@@ -27,14 +27,14 @@ if (sizeof($mywfos) > 0){
   $wfolimiter = "";
 }
 $rs = pg_prepare($connect, "SELECT-INT", "SELECT 
-		issue, expire, phenomena, significance, eventid, wfo,
+		issue, expire, phenomena, significance, eventid, wfo, status,
            ST_askml(geom) as kml,
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
            from sbw_$year 
            WHERE $wfolimiter issue >= $1 and issue <= $2
            and status = 'NEW' and eventid > 0");
 $rs = pg_prepare($connect, "SELECT", "SELECT
-		issue, expire, phenomena, significance, eventid, wfo,
+		issue, expire, phenomena, significance, eventid, wfo, status,
            ST_askml(geom) as kml,
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
            from sbw_$year 
