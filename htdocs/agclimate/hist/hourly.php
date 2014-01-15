@@ -21,12 +21,19 @@
 
 $sselect = "";
 while( list($key,$val) = each($nt->table)){
-	$sselect .= sprintf("<br /><input type=\"checkbox\" name=\"sts\" value=\"%s\">%s (%s)",
-			$key, $val["name"], $key);
+	$sselect .= sprintf("<br /><input type=\"checkbox\" name=\"sts\" value=\"%s\">%s (%s County, %s)",
+			$key, $val["name"], $val["county"], $key);
 }
  
 $t->content = <<<EOF
 <h3 class="heading">Hourly Data Request Form:</h3>
+
+<div class="alert alert-info">
+This download page is for the recently installed (2013) ISU Soil Moisture sites.  
+To download data from the legacy ISU AgClimate network, please visit 
+<a class="alert-link" href="hourlyRequest.php">this page</a>.
+</div>
+
 
 <P><b>Information:</b>  This interface accesses the archive of daily and hourly weather
 data collected from the Iowa Agclimate Automated Weather stations.  Please
@@ -43,7 +50,8 @@ wish to change this to <a href="daily.php">daily data</a>.
 <form name='dl' method="GET" action="/cgi-bin/request/isusm.py">
 <input type="hidden" name="mode" value="hourly" />
 
-<h4 class="subtitle">Select station(s):</h4>
+<h4>Select station(s):</h4>
+<a href="/sites/networks.php?network=ISUSM&format=html">View station metadata</a><br />
 {$sselect}
 
 

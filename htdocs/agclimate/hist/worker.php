@@ -1,10 +1,10 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
  // worker.php
 header("Content-type: text/plain");
 
-include("$rootpath/include/network.php");
+include("../../../include/network.php");
 $nt = new NetworkTable("ISUAG");
 $ISUAGcities = $nt->table;
 

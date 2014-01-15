@@ -1,25 +1,40 @@
-<?php
+<?php 
+ /* Daily Data download for the ISUAG Network */ 
  include("../../../config/settings.inc.php");
+ include("../../../include/forms.php");
  define("IEM_APPID", 13);
- $TITLE = "ISU Agclimate | Data Request";
-$THISPAGE="networks-agclimate";
- include("$rootpath/include/header.php");
- include("$rootpath/include/forms.php");
-?>
+ include("../../../include/myview.php");
+ $t = new MyView();
+ $t->title = "ISU AgClimate Legacy Hourly Data Request";
+ $t->thispage ="networks-agclimate";
 
+ $ys = yearSelect2(1986, date("Y"), "startYear"); 
+ $ms = monthSelect(1, "startMonth"); 
+ $ds = daySelect2(1, "startDay"); 
+ $ys2 = yearSelect2(1986, date("Y"), "endYear"); 
+ $ms2 = monthSelect(date("m"), "endMonth");
+ $ds2 = daySelect2(date("d"), "endDay");
+ 
+ $t->content = <<<EOF
+ <ol class="breadcrumb">
+  <li><a href="/agclimate">ISU AgClimate</a></li>
+  <li class="active">Legacy Network Hourly Download</li>
+ </ol>
 
+<h4>Hourly Data Request Form</h4>
 
-<h3 class="heading">Hourly Data Request Form:</h3>
-<div class="text">
-<P><b>Information:</b>  This interface accesses the archive of daily and hourly weather
-data collected from the Iowa Agclimate Automated Weather stations.  Please
-select the appropiate stations and weather variables desired below. 
+<div class="alert alert-info">
+This download page is for the legacy sites.  To download data from the new
+ISU Soil Moisture network, please visit 
+<a class="alert-link" href="hourly.php">this page</a>.
+</div>
 
-
-<P><B>Data Interval:</B>  Currently you are selected to download hourly data. You may
-wish to change this to <a href="dailyRequest.php">daily data</a>. 
-
-
+<p>This interface allows the download of hourly data from the legacy
+ISU AgClimate Network sites.  Data for some of these sites exists back 
+till 1986 until they all were removed in 2014.  In general, 
+<strong>the precipitation data is of poor quality and should not be used.</strong>
+If you are looking for daily 
+data from this network, see <a href="dailyRequest.php">this page</a>.
 
 <form method="GET" action="worker.php">
 <input type="hidden" name="startHour" value="0">
@@ -59,58 +74,14 @@ wish to change this to <a href="dailyRequest.php">daily data</a>.
 		<TABLE>
 				<TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
 				<TR><TH>Starting On:</TH>
- <TD><?php echo yearSelect2(1986, date("Y"), "startYear"); ?></TD>
-				<td><SELECT name="startMonth">
-					<option value="1">January
-					<option value="2">February
-					<option value="3">March
-					<option value="4">April
-					<option value="5">May
-					<option value="6">June
-					<option value="7">July
-					<option value="8">August
-					<option value="9">September
-					<option value="10">October
-					<option value="11">November
-					<option value="12">December
-				</SELECT></td>
-				<td><SELECT name="startDay">
-					<option value="1">1	<option value="2">2	<option value="3">3	<option value="4">4
-					<option value="5">5	<option value="6">6	<option value="7">7	<option value="8">8
-					<option value="9">9	<option value="10">10	<option value="11">11	<option value="12">12
-					<option value="13">13	<option value="14">14	<option value="15">15	<option value="16">16
-					<option value="17">17	<option value="18">18	<option value="19">19	<option value="20">20
-					<option value="21">21	<option value="22">22	<option value="23">23	<option value="24">24
-					<option value="25">25	<option value="26">26	<option value="27">27	<option value="28">28
-					<option value="29">29	<option value="30">30	<option value="31">31
-				</SELECT></td>
+				<td>${ys}</td>
+				<td>${ms}</td>
+				<td>${ds}</td>
 				</TR>
 				<TR><TH>Ending On:</TH>
-<TD><?php echo yearSelect2(1986, date("Y"), "endYear"); ?></TD>
-				<td><SELECT name="endMonth">
-					<option value="1">January
-					<option value="2">Febuary
-					<option value="3">March
-					<option value="4">April
-					<option value="5">May
-					<option value="6">June
-					<option value="7">July
-					<option value="8">August
-					<option value="9">September
-					<option value="10">October
-					<option value="11">November
-					<option value="12">December
-				</SELECT></td>
-				<td><SELECT name="endDay">
-					<option value="1">1	<option value="2">2	<option value="3">3	<option value="4">4
-					<option value="5">5	<option value="6">6	<option value="7">7	<option value="8">8
-					<option value="9">9	<option value="10">10	<option value="11">11	<option value="12">12
-					<option value="13">13	<option value="14">14	<option value="15">15	<option value="16">16
-					<option value="17">17	<option value="18">18	<option value="19">19	<option value="20">20
-					<option value="21">21	<option value="22">22	<option value="23">23	<option value="24">24
-					<option value="25">25	<option value="26">26	<option value="27">27	<option value="28">28
-					<option value="29">29	<option value="30">30	<option value="31">31
-				</SELECT></td>
+				<td>${ys2}</td>
+				<td>${ms2}</td>
+				<td>${ds2}</td>
 				</TR>
 			</TABLE>
 
@@ -134,6 +105,7 @@ wish to change this to <a href="dailyRequest.php">daily data</a>.
 	<input type="reset">
 
 <BR><BR>
-</form></div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+</form>
+EOF;
+ $t->render('single.phtml');
+?>

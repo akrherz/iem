@@ -1,21 +1,42 @@
 <?php 
  /* Daily Data download for the ISUAG Network */ 
  include("../../../config/settings.inc.php");
+ include("../../../include/forms.php");
  define("IEM_APPID", 12);
- $TITLE = "IEM | ISU Agclimate | Daily Data Request";
- $THISPAGE="networks-agclimate";
- include("$rootpath/include/header.php"); 
- include("$rootpath/include/forms.php");
-?>
-<h3 class="heading">Daily Data Request Form:</h3>
-<div class="text">
-<P><b>Information:</b> This interface accesses the archive of daily weather 
-data collected from 
-the Iowa State Agclimate Automated Weather stations.  Please
-select the appropiate stations and weather variables desired below. 
+ include("../../../include/myview.php");
+ $t = new MyView();
+ $t->title = "ISU AgClimate Legacy Daily Data Request";
+ $t->thispage ="networks-agclimate";
 
-<P><B>Data Interval:</B>Currently you are selected to download daily data. 
-You may wish to change this to <a href="hourlyRequest.php">hourly data</a>. 
+ $ys = yearSelect2(1986, date("Y"), "startYear"); 
+ $ms = monthSelect(1, "startMonth"); 
+ $ds = daySelect2(1, "startDay"); 
+ $ys2 = yearSelect2(1986, date("Y"), "endYear"); 
+ $ms2 = monthSelect(date("m"), "endMonth");
+ $ds2 = daySelect2(date("d"), "endDay");
+ 
+ $t->content = <<<EOF
+ <ol class="breadcrumb">
+  <li><a href="/agclimate">ISU AgClimate</a></li>
+  <li class="active">Legacy Network Daily Download</li>
+ </ol>
+
+<h4>Daily Data Request Form</h4>
+
+<div class="alert alert-info">
+This download page is for the legacy sites.  To download data from the new
+ISU Soil Moisture network, please visit 
+<a class="alert-link" href="daily.php">this page</a>.
+</div>
+
+<p>This interface allows the download of daily summary data from the legacy
+ISU AgClimate Network sites.  Data for some of these sites exists back 
+till 1986 until they all were removed in 2014.  In general, 
+<strong>the precipitation data is of poor quality and should not be used.</strong>
+Please see the 
+<a href="/request/coop/fe.phtml">NWS COOP download page</a> 
+for high quality daily precipitation data.  If you are looking for hourly 
+data from this network, see <a href="hourlyRequest.php">this page</a>.
 
 
 <form name="dl" method="GET" action="worker.php">
@@ -64,16 +85,16 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <TABLE>
   <TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
   <TR><TH>Starting On:</TH>
-    <TD><?php echo yearSelect2(1986, date("Y"), "startYear"); ?></TD>
-   <td><?php echo monthSelect(1, "startMonth"); ?></td>
- <td><?php echo daySelect2(1, "startDay"); ?></td>
+  <td>{$ys}</td>
+  <td>{$ms}</td>
+  <td>{$ds}</td>
  </tr>
 </TR>
 <TR><TH>Ending On:</TH>
- <TD><?php echo yearSelect2(1986, date("Y"), "endYear"); ?></TD>
- <td><?php echo monthSelect(date("m"), "endMonth"); ?></td>
- <td><?php echo daySelect2(date("d"), "endDay"); ?></td>
-</TR>
+  <td>{$ys2}</td>
+  <td>{$ms2}</td>
+  <td>{$ds2}</td>
+ 		</TR>
 </TABLE>
 
 <h4 class="subtitle">Options:</h4>
@@ -97,6 +118,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 	<input type="reset">
 
 <BR>
-</form></div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+</form>
+EOF;
+$t->render('single.phtml');
+?>
