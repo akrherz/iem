@@ -1,6 +1,31 @@
 """
 My purpose in life is to take the NWS AWIPS Geodata Zones Shapefile and 
-dump them into the NWSChat PostGIS database!
+dump them into the PostGIS database!  I was bootstraped like so:
+
+python zones_update.py z_16mr06 2006 03 16
+python zones_update.py z_11mr07 2007 03 11
+python zones_update.py z_31my07 2007 05 31
+python zones_update.py z_01au07 2007 08 01
+python zones_update.py z_5sep07 2007 09 05
+python zones_update.py z_25sep07 2007 09 25
+python zones_update.py z_01ap08 2008 04 01
+python zones_update.py z_09se08 2008 09 09
+python zones_update.py z_03oc08 2008 10 03
+python zones_update.py z_07my09 2009 05 07
+python zones_update.py z_15jl09 2009 07 15
+python zones_update.py z_22jl09 2009 07 22
+python zones_update.py z_04au11 2011 08 04
+python zones_update.py z_13oc11 2011 10 13
+python zones_update.py z_31my11 2011 05 31
+python zones_update.py z_15de11 2011 12 15
+python zones_update.py z_23fe12 2012 02 23
+python zones_update.py z_03ap12 2012 04 03
+python zones_update.py z_12ap12 2012 04 12
+python zones_update.py z_07jn12 2012 06 07
+python zones_update.py z_11oc12 2012 10 11
+python zones_update.py z_03de13a 2013 12 03
+python zones_update.py z_05fe14a 2014 02 05
+
 """
 from osgeo import ogr
 from osgeo import _ogr
