@@ -16,8 +16,8 @@ rcursor = rwis.cursor()
 mesosite = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = mesosite.cursor()
 
-network = sys.argv[1]
-table = network.Table(network)
+net = sys.argv[1]
+table = network.Table(net)
 
 rcursor.execute("""SELECT station, min(valid), max(valid) from alldata 
     GROUP by station ORDER by min ASC""")
@@ -30,7 +30,7 @@ for row in rcursor:
                     table.sts[station]['archive_begin'], row[1])
   
     mcursor.execute("""UPDATE stations SET archive_begin = %s 
-         WHERE id = %s and network = %s""" , (row[1], station, network) )
+         WHERE id = %s and network = %s""" , (row[1], station, net) )
     if mcursor.rowcount == 0:
         print 'ERROR: No rows updated'
     
