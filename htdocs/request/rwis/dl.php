@@ -1,8 +1,10 @@
 <?php
 include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
-$nt = new NetworkTable("IA_RWIS");
+include("../../../include/database.inc.php");
+include("../../../include/network.php");
+$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,7): "IA_RWIS";
+
+$nt = new NetworkTable($network);
 $cities = $nt->table;
 
 $gis = isset($_GET["gis"]) ? $_GET["gis"]: 'no';

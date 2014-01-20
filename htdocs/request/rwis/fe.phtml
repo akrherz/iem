@@ -1,27 +1,70 @@
 <?php 
 include("../../../config/settings.inc.php");
+include("../../../include/myview.php");
+$t = new MyView();
 define("IEM_APPID", 63);
-include("$rootpath/include/imagemaps.php");
-include("$rootpath/include/forms.php");
+include("../../../include/imagemaps.php");
+include("../../../include/forms.php");
+$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,7): "IA_RWIS";
 
-$TITLE = "IEM | RWIS Data Download";
-$THISPAGE = "networks-rwis";
-include("$rootpath/include/header.php"); 
-?>
+$t->title = "RWIS Data Download";
+$t->thispage = "networks-rwis";
 
-<p>Filling out this form will provide you with whatever archive data the
-IEM has from the RWIS network.  The archive has some holes in it around the
-year 2000 and 2001, but it mostly in tack outside of those dates.</p>
+$rselect = networkMultiSelect($network, "", Array("_ALL" => "All Sites"));
+$startyr = ($network == 'IA_RWIS') ? 1995: 2009;
+$ys1 = yearSelect2($startyr, date("Y"), "year1");
+$ms1 = monthSelect("", "month1");
+$ds1 = daySelect2("", "day1");
+$hs1 = gmtHourSelect("", "hour1");
+$ys2 = yearSelect2($startyr, date("Y"), "year2");
+$ms2 = monthSelect("", "month2");
+$ds2 = daySelect2("", "day2");
+$hs2 = gmtHourSelect("", "hour2");
 
+$t->content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/RWIS/">RWIS Homepage</a></li>
+ <li class="active">Download</li>
+</ol>
+<h3>RWIS Atmospheric / Surface Data Download</h3>
 
-<form method="GET" action="dl.php">
+<p>The IEM archives RWIS information for the network in Iowa based on a direct
+feed from the DOT.  We also archive other states based on an archive provided
+by the <a href="http://madis.noaa.gov/">MADIS project</a>. Data for Iowa dates
+back to 1995, whereas we only have data for other states back to 2009. 
+The archive has some holes in it around the year 2000 and 2001, 
+but it mostly in tack outside of those dates.</p>
 
-<table>
-<tr><td width="50%">
+<p>Data is available from the following states: 
+ <a href="fe.phtml?network=AK_RWIS">Alaska</a>,
+ <a href="fe.phtml?network=CO_RWIS">Colorado</a>,
+ <a href="fe.phtml?network=IN_RWIS">Indiana</a>,
+ <a href="fe.phtml?network=IA_RWIS">Iowa</a>,
+ <a href="fe.phtml?network=KS_RWIS">Kansas</a>,
+ <a href="fe.phtml?network=KY_RWIS">Kentucky</a>,
+ <a href="fe.phtml?network=MN_RWIS">Minnesota</a>,
+ <a href="fe.phtml?network=NE_RWIS">Nebraska</a>,
+ <a href="fe.phtml?network=ND_RWIS">North Dakota</a>,
+ <a href="fe.phtml?network=NV_RWIS">Nevada</a>,
+ <a href="fe.phtml?network=NH_RWIS">New Hampshire</a>, 
+ <a href="fe.phtml?network=OH_RWIS">Ohio</a>,
+ <a href="fe.phtml?network=VA_RWIS">Virginia</a>,
+ <a href="fe.phtml?network=WV_RWIS">West Virginia</a>,
+ <a href="fe.phtml?network=WI_RWIS">Wisconsin</a>,
+ and <a href="fe.phtml?network=WY_RWIS">Wyoming</a>.
+ 
+
+<form method="GET" action="dl.php" name='dl'>
+<input type="hidden" name="minute1" value="0">
+<input type="hidden" name="minute2" value="0">
+<input type="hidden" name="network" value="{$network}">
+
+<div class="row">
+<div class="col-md-6">
 
 <p><h3 class="subtitle">1. Select Station:</h3><br>
 <i>Select One or More or All stations in the network.</i><br />
-<?php rwisMultiSelect("", 5); ?>
+{$rselect}
 
 
 <p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
@@ -35,36 +78,18 @@ year 2000 and 2001, but it mostly in tack outside of those dates.</p>
 
   <tr>
     <th>Start:</th>
-    <td>
-     <?php echo yearSelect2(1995, date("Y"), "year1"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect("", "month1"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2("", "day1"); ?>
-    </td>
-    <td>
-     <?php echo gmtHourSelect("", "hour1"); ?>
-	<input type="hidden" name="minute1" value="0">
-    </td>
+    <td>{$ys1}</td>
+    <td>{$ms1}</td>
+   	<td>{$ds1}</td>
+    <td>{$hs1}</td>
   </tr>
 
   <tr>
     <th>End:</th>
-    <td>
-     <?php echo yearSelect2(1995, date("Y"), "year2"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect("", "month2"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2("", "day2"); ?>
-    </td>
-    <td>
-     <?php echo gmtHourSelect("", "hour2"); ?>
-	<input type="hidden" name="minute2" value="0">
-    </td>
+    <td>{$ys2}</td>
+    <td>{$ms2}</td>
+   	<td>{$ds2}</td>
+    <td>{$hs2}</td>
   </tr>
 </table>
 
@@ -86,7 +111,8 @@ year 2000 and 2001, but it mostly in tack outside of those dates.</p>
   <option value="subf">Subsurface Temperature [F]
 </select>
 
-</td><td valign="TOP">
+</div>
+<div class="col-md-6">
 
 <p><h3 class="subtitle">4. How to view?</h3><br>
 <select name="what">
@@ -109,11 +135,12 @@ How shall the output values be seperated?
    <option value="yes">Yes
  </select>
 
-</td></tr></table>
+</div></div>
 
 <p><h3 class="subtitle">Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
 </form>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
