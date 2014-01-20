@@ -6,11 +6,11 @@ import mx.DateTime
 import os
 import sys
 import access
-import iemdb
+import psycopg2
 import mesonet
 import subprocess
 import psycopg2.extras
-IEM = iemdb.connect('iem')
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 fp = None
@@ -59,10 +59,30 @@ subk1       = nc.variables["roadSubsurfaceTemp1"]
 
 db = {}
 
-MY_PROVIDERS = ["MNDOT", "KSDOT", "WIDOT", "INDOT", "NDDOT",
- "NEDOR", "WYDOT", "OHDOT", "MDDOT", "NHDOT", "WVDOT", "NVDOT",
- "AKDOT", "VTDOT", "WIDOT", "MEDOT", "VADOT", "CODOT", "FLDOT",
- "GADOT", "KYTC-RWIS", "KYMN"]
+MY_PROVIDERS = [
+ "AKDOT", 
+ "CODOT", 
+ "DEDOT",
+ "FLDOT",
+ "GADOT", 
+ "INDOT", 
+ "KSDOT", 
+ "KYTC-RWIS", 
+ "KYMN",
+ "MEDOT", 
+ "MDDOT", 
+ "MNDOT", 
+ "NEDOR", 
+ "NHDOT", 
+ "NDDOT",
+ "NVDOT",
+ "OHDOT", 
+ "WIDOT",
+ "WVDOT", 
+ "WYDOT",  
+ "VADOT", 
+ "VTDOT",  
+]
 
 
 def provider2network(p):
