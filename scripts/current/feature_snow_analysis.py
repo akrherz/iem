@@ -24,17 +24,17 @@ icursor.execute("""
     ST_y(geom) as lat, county, count(*) from
     summary t JOIN stations s ON (s.iemid = t.iemid) where 
     (network ~* 'COOP' or network ~* 'COCORAHS') and 
-    day in ('2014-01-02', '2014-01-03') and snow >= 0 and 
+    day in ('2014-01-19', '2014-01-19') and snow >= 0 and 
     ST_x(geom) BETWEEN %s and %s and
     ST_y(geom) BETWEEN %s and %s  
     GROUP by id, lon, lat, county
 """, (iemre.WEST, iemre.EAST, iemre.SOUTH, iemre.NORTH))
 for row in icursor:
-    #if row[2] < -93.6:
-    #    continue
-    if row[0] in ('ESTI4', 'CINI4', 'ALXI4'):
-        print row
+    if row[1] > 1.5 and row[1] < 1.7:
         continue
+    #if row[0] in ('ESTI4', 'CINI4', 'ALXI4'):
+    #    print row
+    #    continue
     row_list.append(dict(val=row[1], lat=row[3], lon=row[2], source=COOP))
 
 # Query LSR Data...
@@ -43,7 +43,7 @@ pcursor.execute("""
         ST_x(geom) as lon, 
        ST_y(geom) as lat
       from lsrs WHERE type in ('S') and magnitude > 0 and 
-      valid > '2014-01-01 12:00' and valid < '2014-01-31 23:59'
+      valid > '2014-01-28 06:00' and valid < '2014-01-31 23:59'
       GROUP by state, lon, lat
 """)
 for row in pcursor:
@@ -78,9 +78,9 @@ for i, lat in enumerate(iemre.YAXIS):
             continue
         neighbors = max(data[i-1,j], data[i+1,j], data[i,j-1], data[i,j+1])
         if neighbors < 0:
-            lats.append( lat + 0.125 )
-            lons.append( lon + 0.125 )
-            vals.append( 0 )
+        #    lats.append( lat + 0.125 )
+        #    lons.append( lon + 0.125 )
+        #    vals.append( 0 )
             continue
         if data[i,j] > neighbors + 2.:
             print 'Bullseye i:%s j:%s val:%s' % (i,j, data[i,j])
@@ -92,8 +92,8 @@ for i, lat in enumerate(iemre.YAXIS):
 clevs = np.array([0.01,0.1,0.25,0.5,1,2,3,5,7,9,11,13,15,17])
 
 m = MapPlot(sector='iowa',
-            title="1 Jan 2013 - IEM Snowfall Total Analysis",
-            subtitle="Snowfall totals up until 8 AM 1 Jan 2014")
+            title="18 Jan 2014 - IEM Snowfall Total Analysis",
+            subtitle="Snowfall totals up until 8 AM 19 Jan 2014")
 xs,ys = np.meshgrid( np.concatenate([iemre.XAXIS, [iemre.XAXIS[-1] + 0.25,]]),
                      np.concatenate([iemre.YAXIS, [iemre.YAXIS[-1] + 0.25,]]))
 cmap = cm.get_cmap('Spectral_r')
