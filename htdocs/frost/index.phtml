@@ -16,10 +16,10 @@
 Products presented here are for educational use only.
 
 <h2 class="subtitle">IEM Useful Links:</h2><ul>
-<li><a href="<?php echo $rooturl; ?>/GIS/apps/iem/freeze.phtml">IEM Freeze</a></li>
-<li><a href="<?php echo $rooturl; ?>/data/mesonet.gif">Mesonet plot</a></li>
-<li><a href="<?php echo $rooturl; ?>/data/rwis_sf.gif">RWIS pavement temps plot</a></li>
-<li><a href="<?php echo $rooturl; ?>/RWIS/current.phtml">RWIS sortable
+<li><a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a></li>
+<li><a href="/data/mesonet.gif">Mesonet plot</a></li>
+<li><a href="/data/rwis_sf.gif">RWIS pavement temps plot</a></li>
+<li><a href="/RWIS/current.phtml">RWIS sortable
 currents</a></li></ul>
 </td></tr></table>
 
@@ -47,51 +47,51 @@ currents</a></li></ul>
 <tr>
  <td>Product:</td>
 <?php
- for($i=1;$i<49;$i++){
+ for($i=1;$i<73;$i++){
    echo "<td>". $i ."</td>";
  }
 ?></tr>
 <tr>
  <th>Frost Depth:</th>
 <?php
- for($i=1;$i<49;$i++){
-   echo "<td><a href=\"/data/model/frost/00/frostd_0_f". $i .".gif\">X</a></td>";
+ for($i=1;$i<73;$i++){
+   echo sprintf("<td><a href=\"/data/model/frost/00/frostd_00_f%03d.png\">X</a></td>", $i);
  }
 ?></tr>
 <tr>
  <th>Frost Present?:</th>
 <?php
- for($i=1;$i<49;$i++){
-   echo "<td><a href=\"/data/model/frost/00/ifrost_0_f". $i .".gif\">X</a></td>";
+ for($i=1;$i<73;$i++){
+   echo sprintf("<td><a href=\"/data/model/frost/00/ifrost_00_f%03d.png\">X</a></td>", $i);
  }
 ?></tr>
 <tr>
  <th>Bridget Deck Temp:</th>
 <?php
- for($i=1;$i<49;$i++){
-   echo "<td><a href=\"/data/model/frost/00/bdeckt_0_f". $i .".gif\">X</a></td>";
+ for($i=1;$i<73;$i++){
+   echo sprintf("<td><a href=\"/data/model/frost/00/bdeckt_00_f%03d.png\">X</a></td>", $i);
  }
 ?></tr>
 <tr><th colspan=49>12Z Output</th></tr>
 <tr>
  <th>Frost Depth:</th>
 <?php
- for($i=1;$i<49;$i++){
-   echo "<td><a href=\"/data/model/frost/12/frostd_12_f". $i .".gif\">X</a></td>";
+ for($i=1;$i<73;$i++){
+   echo sprintf("<td><a href=\"/data/model/frost/12/frostd_12_f%03d.png\">X</a></td>", $i);
  }
 ?></tr>
 <tr>
  <th>Frost Present?:</th>
 <?php
- for($i=1;$i<49;$i++){
-   echo "<td><a href=\"/data/model/frost/12/ifrost_12_f". $i .".gif\">X</a></td>";
+ for($i=1;$i<73;$i++){
+   echo sprintf("<td><a href=\"/data/model/frost/12/ifrost_12_f%03d.png\">X</a></td>", $i);
  }
 ?></tr>
 <tr>
  <th>Bridget Deck Temp:</th>
 <?php
- for($i=1;$i<49;$i++){
-   echo "<td><a href=\"/data/model/frost/12/bdeckt_12_f". $i .".gif\">X</a></td>";
+ for($i=1;$i<73;$i++){
+   echo sprintf("<td><a href=\"/data/model/frost/12/bdeckt_12_f%03d.png\">X</a></td>", $i);
  }
 ?></tr>
 </table>
@@ -116,8 +116,8 @@ currents</a></li></ul>
 
 <!--
 <h3>Time series:</h3>
-<li><a href="<?php echo $rooturl; ?>/plotting/24h/1station.php?station=AMW">Recent Ames ASOS</a></li>
-<li><a href="<?php echo $rooturl; ?>/plotting/scan/radn5temps.php">SCAN site recent soil temps w/ rad</a></li>
+<li><a href="/plotting/24h/1station.php?station=AMW">Recent Ames ASOS</a></li>
+<li><a href="/plotting/scan/radn5temps.php">SCAN site recent soil temps w/ rad</a></li>
 
 <h3>Frost Forecasts:</h3>
 &nbsp; &nbsp; <b>ISU Frost Model</b>
