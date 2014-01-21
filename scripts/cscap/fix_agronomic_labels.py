@@ -7,8 +7,8 @@ import ConfigParser
 
 import util
 
-VARID = 'agr2' # lowercase
-NEWVAL = '[2] Soybean final plant population'
+VARID = 'agr40' # lowercase
+NEWVAL = '[40] Weedy biomass (only) collected in spring (at termination) of spreadsheet year'
 
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
