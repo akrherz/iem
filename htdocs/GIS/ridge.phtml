@@ -1,9 +1,14 @@
 <?php 
 include("../../config/settings.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
+
 define("IEM_APPID", 67);
-$THISPAGE = "gis-ridge";
-$TITLE = "IEM | GIS RADAR Information";
-include("$rootpath/include/header.php"); ?>
+$t->thispage = "gis-ridge";
+$t->title = "GIS RADAR Information";
+
+$d = date("Y/m/d");
+$t->content = <<<EOF
 <style>
 .coded {
 	border-top: 1px solid #ccc; 
@@ -52,15 +57,16 @@ course, this is not correct terminology, but anyway...
 <a href="/data/gis/images/4326/ridge/">here</a>. There is one folder per RADAR
 site given by its three character call identifier.  Data for FAA and DOD RADARs
 is available as well here.  Due to storage and CPU constraints, we are not 
-processing all level3 products at this time.  The current list is:
+processing all level3 products at this time.  The following is a list of 
+processed products, click on the name for a color ramp for that product.
 <ul>
- <li>TR0 - TDWR Base Reflectivity</li>
- <li>TV0 - TDWR Base Velocity</li>
- <li>N0Q - 8bit High Resolution Base Reflectivity</li>
- <li>N0S - Storm Relative Base Velocity</li>
- <li>N0Z - 248nm Base Reflectivity</li>
- <li>N0U - 8bit Base Velocity</li>
- <li>NET - Net Echo Tops</li>
+ <li>TR0 - <a href="legends/TR0.gif">TDWR Base Reflectivity</a></li>
+ <li>TV0 - <a href="legends/TV0.gif">TDWR Base Velocity</a></li>
+ <li>N0Q - <a href="legends/N0Q.gif">8bit High Resolution Base Reflectivity</a></li>
+ <li>N0S - <a href="legends/N0S.gif">Storm Relative Base Velocity</a></li>
+ <li>N0Z - <a href="legends/N0Z.gif">248nm Base Reflectivity</a></li>
+ <li>N0U - <a href="legends/N0U.gif">8bit Base Velocity</a></li>
+ <li>NET - <a href="legends/NET.gif">Net Echo Tops</a></li>
 </ul>
 
 <p><strong>Wait! Why are you not processing XYZ?</strong> Well, perhaps because
@@ -79,7 +85,7 @@ spectacular manner!  This should generate terabytes of data per year and million
 of files!  Anyway, these images are organized like the real-time data, but in
 per-UTC day folders like so:
 <br />
-<a href="/archive/data/<?php echo date("Y/m/d"); ?>/GIS/ridge/"><?php echo $rooturl; ?>/archive/data/<?php echo date("Y/m/d"); ?>/GIS/ridge/</a> 
+<a href="/archive/data/{$d}/GIS/ridge/">http://mesonet.agron.iastate.edu/archive/data/{$d}/GIS/ridge/</a> 
 
 <p>Data appears in the archive at the same time as it does for the realtime data.
 So this is neat, but how can you programically work with this data?
@@ -166,4 +172,6 @@ one!  It comes on the EXP feedtype with easy to use product identifiers.
 with on their RADAR web mapping projects.  It is our hope that many of the services
 developed will find a stable and permanent home with the NWS someday!
 
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
