@@ -49,8 +49,10 @@ else:
 database = 'asos'
 if form["network"].value in ('KCCI','KELO','KIMT'):
     database = 'snet'
-if form["network"].value in ('IA_RWIS'):
+elif form["network"].value in ('IA_RWIS'):
     database = 'rwis'
+elif form["network"].value in ('ISUSM'):
+    database = 'isuag'
 
 try:
     nsector = int(form['nsector'].value)
