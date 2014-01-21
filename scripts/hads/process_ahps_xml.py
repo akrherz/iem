@@ -3,15 +3,16 @@
 """
 from twisted.words.xish import xpath, domish
 import urllib2
-import iemdb
+import psycopg2
 import sys
-mesosite = iemdb.connect('mesosite')
+mesosite = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = mesosite.cursor()
-mcursor2 = mesosite.cursor()
+import network
 
 def process_site( nwsli, network ):
     
-    url = "http://water.weather.gov/ahps2/hydrograph_to_xml.php?gage=%s&output=xml" % (nwsli,)
+    url = ("http://water.weather.gov/ahps2/hydrograph_to_xml.php?"
+           +"gage=%s&output=xml") % (nwsli,)
     
     elementStream = domish.elementStream()
     roots = []
@@ -37,30 +38,40 @@ def process_site( nwsli, network ):
     nodes = xpath.queryForNodes('/site/sigstages', elem)
     
     sigstages = nodes[0]
-    data = {'id': nwsli, 'network': network}
+    data = {'id': nwsli, 'network': network, 'sigstage_low': None,
+            'sigstage_action': None, 'sigstage_bankfull': None,
+            'sigstage_flood': None, 'sigstage_moderate': None,
+            'sigstage_major': None, 'sigstage_record': None}
     for s in sigstages.children:
         val = str(s)
         if val == '':
-            val = None
-        data['sigstage_%s' %(s.name,)] =  val
+            continue
+        data['sigstage_%s' %(s.name,)] =  float(val)
 
     if not data.has_key('sigstage_low'):
         print 'No Data', nwsli, network
         return
 
-    print data
-    mcursor2.execute("""UPDATE stations SET sigstage_low = %(sigstage_low)s,
+    print "%s %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f" % (data['id'], 
+                            data['sigstage_low'] or -99, 
+                            data['sigstage_action'] or -99, 
+                            data['sigstage_bankfull'] or -99, 
+                            data['sigstage_flood'] or -99,
+                            data['sigstage_moderate'] or -99, 
+                            data['sigstage_major'] or -99,
+                            data['sigstage_record'] or -99)
+    mcursor.execute("""UPDATE stations SET sigstage_low = %(sigstage_low)s,
     sigstage_action = %(sigstage_action)s, sigstage_bankfull = %(sigstage_bankfull)s,
     sigstage_flood = %(sigstage_flood)s, sigstage_moderate = %(sigstage_moderate)s,
     sigstage_major = %(sigstage_major)s, sigstage_record = %(sigstage_record)s
     WHERE id = %(id)s and network = %(network)s """, data)
-        
-network = sys.argv[1]
-mcursor.execute("""SELECT id, network from stations where network = %s""", 
-                (network,))
-for row in mcursor:
-    process_site(row[0], row[1])
+
+print '%5s %5s %5s %5s %5s %5s %5s %5s' % ("NWSLI", "LOW", "ACTN", "BANK", 
+                                           "FLOOD", "MOD", "MAJOR", "REC")
+net = sys.argv[1]
+nt = network.Table(net)
+for sid in nt.sts.keys():
+    process_site(sid, net)
 mcursor.close()
-mcursor2.close()
 mesosite.commit()
 mesosite.close()
