@@ -3,12 +3,11 @@
 databases.  This will hopefully remove some hackery
 '''
 
-import iemdb
 import datetime
 import sys
 import psycopg2
 import psycopg2.extras
-MESOSITE = iemdb.connect("mesosite", bypass=True)
+MESOSITE = psycopg2.connect(database="mesosite", host='iemdb')
 subscribers = ["iem","coop","hads","asos", "postgis"]
 
 if len(sys.argv) == 2:
@@ -21,7 +20,7 @@ def sync(dbname):
     Actually do the syncing, please
     """
     # connect to synced database
-    dbconn = iemdb.connect( dbname )
+    dbconn = psycopg2.connect(database=dbname, host='iemdb')
     dbcursor = dbconn.cursor()
     # Figure out our latest revision
     dbcursor.execute("""
@@ -54,8 +53,8 @@ def sync(dbname):
        ugc_zone = %(ugc_zone)s
        WHERE iemid = %(iemid)s""",
        row)
-    print 'Database: %s Modified %s rows TS: %s IEMID: %s' % (dbname, 
-       cur.rowcount, maxTS, maxID)
+    print 'DB: %-7s Mod %4s rows TS: %s IEMID: %s' % (dbname, 
+       cur.rowcount, maxTS.strftime("%Y/%m/%d %H:%M"), maxID)
     # close connection
     dbcursor.close()
     dbconn.commit()
