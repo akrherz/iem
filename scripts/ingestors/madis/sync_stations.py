@@ -19,10 +19,30 @@ longitudes  = nc.variables["longitude"]
 elevations  = nc.variables["elevation"]
 
 
-MY_PROVIDERS = ["MNDOT", "KSDOT", "WIDOT", "INDOT", "NDDOT",
- "NEDOR", "WYDOT", "OHDOT", "MDDOT", "NHDOT", "WVDOT", "NVDOT",
- "AKDOT", "VTDOT", "WIDOT", "MEDOT", "VADOT","CODOT", "FLDOT",
- "GADOT", "KYTC-RWIS", "KYMN"]
+MY_PROVIDERS = [
+ "AKDOT", 
+ "CODOT", 
+ "DEDOT",
+ "FLDOT",
+ "GADOT", 
+ "INDOT", 
+ "KSDOT", 
+ "KYTC-RWIS", 
+ "KYMN",
+ "MEDOT", 
+ "MDDOT", 
+ "MNDOT", 
+ "NEDOR", 
+ "NHDOT", 
+ "NDDOT",
+ "NVDOT",
+ "OHDOT", 
+ "WIDOT",
+ "WVDOT", 
+ "WYDOT",  
+ "VADOT", 
+ "VTDOT",  
+]
 
 def provider2network(p):
     """ Convert a MADIS network ID to one that I use, here in IEM land"""
