@@ -2,14 +2,14 @@
  Generate analysis of precipitation
 """
 
-import sys, os, random
-import iemplot
+import random
+from pyiem.plot import MapPlot
 
-import mx.DateTime
-now = mx.DateTime.now()
+import datetime
+now = datetime.datetime.now()
 
-import iemdb
-IEM = iemdb.connect('iem', bypass=True)
+import psycopg2
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor()
 
 # Compute normal from the climate database
@@ -36,19 +36,13 @@ for row in icursor:
     vals.append( row[3] )
     valmask.append( True )
 
-cfg = {
- 'wkColorMap': 'BlAqGrYeOrRe',
- 'nglSpreadColorStart': 2,
- 'nglSpreadColorEnd'  : -1,
- '_valmask'           : valmask,
- '_format'            : '%.2f',
- '_showvalues'        : True,
- '_title'             : "Iowa Past 7 Days Rainfall",
- '_valid'             : "%s - %s inclusive" % ((now - mx.DateTime.RelativeDateTime(days=6)).strftime("%d %b %Y"), now.strftime("%d %b %Y") ),
- 'lbTitleString'      : "[inch]",
-}
-# Generates tmp.ps
-tmpfp = iemplot.simple_contour(lons, lats, vals, cfg)
-
+m = MapPlot(
+        title='Iowa Past Seven Days Precipitation',
+        subtitle="%s - %s inclusive" % (
+            (now - datetime.timedelta(days=6)).strftime("%d %b %Y"), 
+            now.strftime("%d %b %Y") )
+        )
+m.plot_values(lons, lats, vals, '%.2f')
+m.drawcounties()
 pqstr = "plot c 000000000000 summary/7day/ia_precip.png bogus png"
-iemplot.postprocess(tmpfp, pqstr)
+m.postprocess(pqstr=pqstr)
