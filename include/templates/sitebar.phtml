@@ -56,6 +56,18 @@ if (isset($savevars)){
 		$v, $k);
 	}
 }
+if (isset($_REQUEST["prod"])){
+	echo "<input type='hidden' name='prod' value='". $_REQUEST["prod"] ."'>\n";
+}
+if (isset($_REQUEST["month"])){
+	echo "<input type='hidden' name='month' value='". $_REQUEST["month"] ."'>\n";
+}
+if (isset($_REQUEST["year"])){
+	echo "<input type='hidden' name='year' value='". $_REQUEST["year"] ."'>\n";
+}
+if (isset($_REQUEST["day"])){
+	echo "<input type='hidden' name='day' value='". $_REQUEST["day"] ."'>\n";
+}
 ?>
 <input type="hidden" name="network" value="<?php echo $network; ?>">
 <p>Other Sites in network:
