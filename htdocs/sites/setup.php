@@ -1,7 +1,12 @@
 <?php
+/*
+ * I am sourced by all pages on the "sites" website except the 'locate' 
+ * frontend.  If station or network are not set, I throw a fit and force the
+ * user to the locate page.
+ */
  include_once("../../config/settings.inc.php");
- include_once("$rootpath/include/database.inc.php");
- include_once("$rootpath/include/station.php");
+ include_once("../../include/database.inc.php");
+ include_once("../../include/station.php");
  /* Make sure all is well! */
  $station = isset($_GET["station"]) ? substr($_GET["station"],0,12) : "";
  $network = isset($_GET["network"]) ? $_GET["network"] : "";
