@@ -97,7 +97,10 @@ $rs = pg_prepare($dbconn, "_MYSELECT", $sql);
 $rs = pg_execute($dbconn, "_MYSELECT", Array($station, $network,
 	date("Y-m-d", $date), date("Y-m-d", $date + 90400)));
 $table = "";
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	if ($row['dwpf'] == null && $row['relh'] != null){
+		$row['dwpf'] = dwpf($row["tmpf"], $row["relh"]);
+	}
 	$table .= formatter($i, $row);
 }
 pg_close($dbconn);
@@ -137,6 +140,11 @@ $tzname =  $metadata["tzname"];
 $ys = yearSelect(1933,$year);
 $ms = monthSelect($month);
 $ds = daySelect($day);
+
+$mbutton = (preg_match("/ASOS|AWOS/", $network)) ? 
+"<a onclick=\"javascript:hideMetars();\" class=\"btn btn-default\" id=\"metar_toggle\">Show Metars</a>"
+: "";
+
 $content = <<<EOF
 <style>
 .high {
@@ -160,7 +168,7 @@ $content = <<<EOF
 {$ds}
 <input type="submit" value="Change Date" />
 </form>
-<a onclick="javascript:hideMetars();" class="btn btn-default" id="metar_toggle">Show Metars</a>
+{$mbutton}
 EOF;
 $content .= sprintf("<a rel=\"nofollow\" href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" 
   class=\"btn btn-default\">Previous Day</a>", $network, $station, date("Y", $yesterday),
