@@ -18,8 +18,6 @@ if (substr($network,2) == "CLIMATE"){
  $hasclimate = 1;
  if ($climate_site == ""){ $hasclimate = 0; }
  
- 
-
  /* Call with year and month, if not, then current! */
  $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
  $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
@@ -162,8 +160,6 @@ $bplot1->value->SetFont(FF_FONT1,FS_BOLD);
 $bplot1->SetValuePos('top');
 $bplot1->SetWidth(0.7);
 
-
-
 $bplot2->SetFillColor('blue');
 $bplot2->SetLegend("Low");
 $bplot2->value->Show(! $feature);
@@ -175,7 +171,6 @@ $bplot2->SetValuePos('top');
 $bplot2->SetWidth(0.7);
 $bplot1->value->Show(! $feature);
 $bplot2->value->Show(! $feature);
-
 
 $gbarplot->SetWidth(0.6);
 
@@ -202,9 +197,6 @@ $l2plot->SetWeight(2);
 $l2plot->SetLegend("Avg High");
 $l2plot->SetBarCenter();
 }
-
-
-
 
 $graph->Stroke();
 ?>

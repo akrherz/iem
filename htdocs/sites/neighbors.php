@@ -1,13 +1,13 @@
 <?php 
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 include("setup.php");
 
-$THISPAGE="iem-sites";
-   $TITLE = "IEM | Site Neighbors";
-   include("$rootpath/include/header.php");  
-   $current="neighbors"; include('sidebar.php');
-
+include("../../include/myview.php");
+$t = new MyView();
+$t->thispage="iem-sites";
+$t->title = "Site Neighbors";
+$t->sites_current="neighbors"; 
 
 function neighbors($station,$lat,$lon){
    $con = iemdb("mesosite");
@@ -18,19 +18,23 @@ function neighbors($station,$lat,$lon){
          and id != $1 ORDER by dist ASC");
    $result = pg_execute($con, "_SELECT", Array($station) );
  
-   echo "<table cellpadding=\"3\" cellspacing=\"0\" border=\"1\">
+   $s = "<table class=\"table table-striped\">
    <thead><tr><th>Distance [km]</th><th>Network</th><th>Station Name</th></tr></thead>";
-   for( $i=0; $row = @pg_fetch_array($result,$i); $i++) {
-      echo sprintf("<tr><td>%.3f</td><td>%s</td><td><a href=\"site.php?station=%s&network=%s\">%s</a></td></tr>", 
-      $row["dist"], $row["network"], $row["id"], $row["network"], $row["name"]);
+   for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++) {
+      $s .= sprintf("<tr><td>%.3f</td><td><a href=\"locate.php?network=%s\">%s</a></td><td><a href=\"site.php?station=%s&network=%s\">%s</a></td></tr>", 
+      $row["dist"], $row["network"], $row["network"], $row["id"],  $row["network"], $row["name"]);
      }
-   echo "</table>";
-   }
+   $s .= "</table>";
+	return $s;
+}
 
-?>
+$n = neighbors($station,$metadata["lat"],$metadata["lon"]);
+$t->content = <<<EOF
 <h3 class="subtitle">Neighboring Stations</h3>
 <p>The following is a list of IEM tracked stations within roughly 25 kilometers
 from the site. Click on the site name for more information.</p>
 
-<?php neighbors($station,$metadata["lat"],$metadata["lon"]); ?>
-<?php include("$rootpath/include/footer.php"); ?>
+{$n}
+EOF;
+$t->render('sites.phtml');
+?>

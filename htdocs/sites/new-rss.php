@@ -1,10 +1,10 @@
 <?php 
-/* RSS Feed of new IEM added station tables, default to 25 long?
- * $Id$:
+/* 
+ * RSS Feed of new IEM added station tables, default to 25 long?
  */
  include("../../config/settings.inc.php");
  define("IEM_APPID", 37);
- include("$rootpath/include/database.inc.php");
+ include("../../include/database.inc.php");
  $conn = iemdb("mesosite");
  $rs = pg_exec($conn, "SELECT s.*, ST_x(geom) as lon, ST_y(geom) as lat, t.name as netname from stations s JOIN networks t 
  	ON (t.id = s.network) WHERE s.elevation > -990 ORDER by iemid DESC LIMIT 25");

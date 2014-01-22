@@ -1,24 +1,14 @@
 <?php 
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 include("setup.php");
-$THISPAGE="iem-sites";
-   include("$rootpath/include/header.php");
-?>
-<?php $current = "cal"; include("sidebar.php"); ?>
 
+include("../../include/myview.php");
+$t = new MyView();
+$t->thispage = "iem-sites";
+$t->title = "Site Calibration";
+$t->sites_current = "cal"; 
 
-<table border="1" cellpadding="2" cellspacing="0">
-<thead><tr>
- <th>ID#:</th>
- <th>Station ID:</th>
- <th>Valid:</th>
- <th>Variable:</th>
- <th>Final Value:</th>
- <th>Adjustment:</th>
-</tr></thead>
-
-<?php
 $portfolio = "";
 if ($network == "AWOS") $portfolio = "iaawos";
 if ($network == "KCCI") $portfolio = "kccisnet";
@@ -27,42 +17,53 @@ if ($network == "KIMT") $portfolio = "kimtsnet";
 if ($network == "IA_RWIS") $portfolio = "iarwis";
 
 $varDict = Array("tmpf" => "Air Temperature [F]",
-  "dwpf" => "Dew Point [F]");
-
+		"dwpf" => "Dew Point [F]");
+$table = "";
 if ($portfolio != "")
 {
-  $conn = iemdb("portfolio");
-  $sql = "SELECT * from iem_calibration WHERE portfolio = '$portfolio' and station = '$station' ORDER by valid DESC";
-  $rs = pg_exec($conn, $sql);
+	$conn = iemdb("portfolio");
+	$sql = "SELECT * from iem_calibration WHERE portfolio = '$portfolio' and station = '$station' ORDER by valid DESC";
+	$rs = pg_exec($conn, $sql);
 
- if (pg_numrows($rs) == 0){
-    echo "<tr><th colspan=6>No events found in database.</th></tr>";
- }
+	if (pg_numrows($rs) == 0){
+		$table .= "<tr><th colspan=6>No events found in database.</th></tr>";
+	}
 
- $rowDict = Array();
- for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
- {
-    $param = $row["parameter"];
-    $color = "#00f";
-    $ts = strtotime(substr($row["valid"], 0, 16));
-    $ds = date("d M Y, h:i A", $ts);
-    if (floatval($row["adjustment"]) > 0){ $color = "#f00"; }
-    $rowDict[$param] .= sprintf("<tr style=\"color: $color;\"><th>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", $row["id"], $row["station"], $ds, $row["parameter"], $row["final"], $row["adjustment"]);
-    if (strlen($row["comments"]) > 0){ $rowDict[$param] .= "<tr><td></td><td colspan=5>Comments: ". $row["comments"] ."</td></tr>"; }
- }
+	$rowDict = Array("tmpf"=>"", "dwpf"=>"");
+	for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+	{
+		$param = $row["parameter"];
+		$color = "#00f";
+		$ts = strtotime(substr($row["valid"], 0, 16));
+		$ds = date("d M Y, h:i A", $ts);
+		if (floatval($row["adjustment"]) > 0){ $color = "#f00"; }
+		$rowDict[$param] .= sprintf("<tr style=\"color: $color;\"><th>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", $row["id"], $row["station"], $ds, $row["parameter"], $row["final"], $row["adjustment"]);
+		if (strlen($row["comments"]) > 0){ $rowDict[$param] .= "<tr><td></td><td colspan=5>Comments: ". $row["comments"] ."</td></tr>"; }
+	}
 
 
- while (list($param,$tbl) = each($rowDict)){
-    echo "<tr><th colspan=\"6\" align=\"left\" style=\"background: #eee; border-bottom: 1px solid #000\">". $varDict[$param] ."</th></tr>";
-    echo $tbl;
- }
+	while (list($param,$tbl) = each($rowDict)){
+		$table .= "<tr><th colspan=\"6\" align=\"left\" style=\"background: #eee; border-bottom: 1px solid #000\">". $varDict[$param] ."</th></tr>";
+		$table .= $tbl;
+	}
 
 } else {
-  echo "<tr><td colspan=6>Sorry no calibration information is collected for $network network</td></tr>";
+	$table .= "<tr><td colspan=6>Sorry no calibration information is collected for $network network</td></tr>";
 }
 
-?>
 
+$t->content = <<<EOF
+<table class="table table-striped">
+<thead><tr>
+ <th>ID#:</th>
+ <th>Station ID:</th>
+ <th>Valid:</th>
+ <th>Variable:</th>
+ <th>Final Value:</th>
+ <th>Adjustment:</th>
+</tr></thead>
+{$table}
 </table>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('sites.phtml');
+?>

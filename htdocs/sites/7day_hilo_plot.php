@@ -1,7 +1,7 @@
 <?php
  /* Make a nice simple plot of 7 day temperatures */
  include('../../config/settings.inc.php');
- include("$rootpath/include/database.inc.php");
+ include("../../include/database.inc.php");
  include("setup.php");
 $cnetwork = sprintf("%sCLIMATE", $st->table[$station]["state"]);
 $st->load_station( $st->table[$station]["climate_site"], $cnetwork);
@@ -74,9 +74,9 @@ if (!$hasclimate){
 }
 
 /* Time to plot */
-include("$rootpath/include/jpgraph/jpgraph.php");
-include("$rootpath/include/jpgraph/jpgraph_bar.php");
-include("$rootpath/include/jpgraph/jpgraph_line.php");
+include("../../include/jpgraph/jpgraph.php");
+include("../../include/jpgraph/jpgraph_bar.php");
+include("../../include/jpgraph/jpgraph_line.php");
 
 $a0 = min($lows);
 $a2 = max($highs);

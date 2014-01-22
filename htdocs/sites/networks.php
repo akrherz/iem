@@ -1,33 +1,159 @@
 <?php
 include("../../config/settings.inc.php");
 define("IEM_APPID", 6);
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
+include_once("../../include/myview.php");
+include_once("../../include/forms.php");
 $pgconn = iemdb("mesosite");
 $rs = pg_prepare($pgconn, "NTSELECT", "SELECT *, 
             ST_x(geom) as longitude, ST_y(geom) as latitude from stations 
             WHERE online = 'y' and 
 			network = $1 ORDER by name");
-include("$rootpath/include/imagemaps.php");
+include("../../include/imagemaps.php");
 
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 $format = isset($_GET['format']) ? $_GET['format'] : 'html';
 $nohtml = isset($_GET['nohtml']);
 
-if ($nohtml) header("Content-type: text/plain"); 
+$table = "";
+if (strlen($network) > 0){
+	$result = pg_execute($pgconn, "NTSELECT", Array($network) );
+	if ($format == "html"){
+		$table .= "<p><table class=\"table table-striped\">\n";
+		$table .= "<caption><b>". $network ." Network</b></caption>\n";
+		$table .= "<thead><tr><th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
+			<th>Longitude<sup>1</sup></th><th>Elevation [m]</th><th>Archive Begins</th></tr></thead>\n";
+		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+			$table .= "<tr>\n
+			  <td><a href=\"site.php?station=". $row["id"] ."&network=". $row["network"] ."\">". $row["id"] ."</a></td>\n
+			  <td>". $row["name"] ."</td>\n
+			  <td>". round($row["latitude"],5) . "</td>\n
+			  <td>". round($row["longitude"],5) . "</td>\n
+			  <td>". $row["elevation"]. "</td>\n
+			  <td>". $row["archive_begin"]. "</td>\n
+			  </tr>";
+		}
+		$table .= "</table>\n";
 
-if (! $nohtml) {
-$TITLE = "IEM Station Locations";
-$THISPAGE = "iem-networks";
-include("$rootpath/include/header.php"); ?>
+	} else if ($format == "csv") {
+		if (! $nohtml) $table .= "<p><b>". $network ." Network</b></p>\n";
+		if (! $nohtml) $table .= "<pre>\n";
+		$table .= "stid,station_name,lat,lon,elev,begints\n";
+		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+			$table .= $row["id"] .","
+					. $row["name"] .","
+					. round($row["latitude"],5). ","
+					. round($row["longitude"],5). ","
+					. $row["elevation"]. ","
+					. $row["archive_begin"]. "\n";
+		}
+		if (! $nohtml)  $table .= "</pre>\n";
+	}
+	else if ($format == "shapefile") {
 
+		/* Create SHP,DBF bases */
+		$filePre = "${network}_locs";
+		$shpFname = "/var/webtmp/$filePre";
+		@unlink($shpFname.".shp");
+		@unlink($shpFname.".shx");
+		@unlink($shpFname.".dbf");
+		@unlink($shpFname.".zip");
+		$shpFile = ms_newShapeFileObj($shpFname, MS_SHP_POINT);
+		$dbfFile = dbase_create( $shpFname.".dbf", array(
+				array("ID", "C", 6),
+				array("NAME", "C", 50),
+				array("NETWORK","C",10),
+				array("BEGINTS","C",16),
+		));
 
-<?php 
-if (isset($_REQUEST['station'])){
-	$current = "tables";
-	include("setup.php");
-	include("sidebar.php");
+		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+			$shp = ms_newShapeObj(MS_SHAPE_POINT);
+			$pt = ms_newPointobj();
+			$pt->setXY( $row["longitude"], $row["latitude"], 0);
+			$line = ms_newLineObj();
+			$line->add( $pt );
+			$shp->add($line);
+			$shpFile->addShape($shp);
+			dbase_add_record($dbfFile, array(
+			$row["id"],
+			$row["name"],
+			$row["network"],
+			substr($row["archive_begin"],0,16),
+			));
+		}
+
+		$shpFile->free();
+		dbase_close($dbfFile);
+		chdir("/var/webtmp/");
+		copy("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", $filePre.".prj");
+		popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf ".$filePre.".prj", 'r');
+		$table .= "Shapefile Generation Complete.<br>";
+		$table .= "Please download this <a href=\"/tmp/".$filePre.".zip\">zipfile</a>.";
+		chdir("/mesonet/www/apps/iemwebsite/htdocs/sites/");
 }
-?>
+else if ($format == "awips") {
+	if (! $nohtml) $table .= "<pre>\n";
+	for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+		$table .= sprintf("%s|%s|%-30s|%4.1f|%2.5f|%3.5f|GMT|||1||||\n", $row["id"], $row["id"], $row["name"], $row["elevation"], $row["latitude"], $row["longitude"]);
+	} // End of for
+	if (! $nohtml) $table .= "</pre>\n";
+}
+
+else if ($format == "madis") {
+	if (! $nohtml) $table .= "<pre>\n";
+
+	for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+		if (substr($row["network"],0,4) == "KCCI") $row["network"] = "KCCI-TV";
+		if (substr($row["network"],0,4) == "KELO") $row["network"] = "KELO-TV";
+		if (substr($row["network"],0,4) == "KIMT") $row["network"] = "KIMT-TV";
+		$table .= sprintf("%s|%s|%-39s%-11s|%4.1f|%2.5f|%3.5f|GMT|||1||||\n", $row["id"], $row["id"], $row["name"], $row["network"], $row["elevation"], $row["latitude"], $row["longitude"]);
+	} // End of for
+	if (! $nohtml) $table .= "</pre>\n";
+}
+
+else if ($format == "gempak") {
+	if (! $nohtml) $table .= "<pre>\n";
+	for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+		$table .= str_pad($row["id"], 9)
+		.  str_pad($row["synop"], 7)
+		.  str_pad($row["name"], 33)
+		.  str_pad($row["state"], 3)
+		.  str_pad($row["country"], 2)
+		.  sprintf("%6.0f", $row["latitude"] * 100)
+		.  sprintf("%7.0f", $row["longitude"] * 100)
+		.  sprintf("%6.0f", $row["elevation"])
+		. "\n";
+	}
+	if (! $nohtml) $table .= "</pre>\n";
+}
+}
+
+
+if (! $nohtml || $format == 'shapefile') {
+	$t = new MyView();	
+	$t->title = "Network Station Tables";
+	$t->thispage = "iem-networks";
+	$page = 'single.phtml';
+	$sextra = "";
+	if (isset($_REQUEST['station'])){
+		$t->sites_current = "tables";
+		include("setup.php");
+		$page = 'sites.phtml';
+		$sextra = sprintf("<input type=\"hidden\" value=\"%s\" name=\"station\">",
+			$_REQUEST["station"]);
+	}
+
+	$ar = Array(
+		"html" => "HTML Table",
+		"csv" => "Comma Delimited",
+		"shapefile" => "ESRI Shapefile",
+		"gempak" => "GEMPAK Station Table",
+		"awips" => "AWIPS Station Table",
+		"madis" => "MADIS Station Table"
+	);
+	$fselect = make_select("format", $format, $ar);
+	$nselect = selectNetwork($network);
+	$t->content = <<<EOF
 <h3 class="heading">Network Location Tables</h3>
 
 <div class="well pull-right">
@@ -41,23 +167,16 @@ of the networks listed below.  If there is a particular format for a station
 table that you need, please let use know.</p>
 
 <form method="GET" action="networks.php" name="networkSelect">
+{$sextra}
 <table>
 <tr>
   <th>Select Observing Network:</th>
-  <td><?php echo selectNetwork($network); ?>
-  </td>
+  <td>{$nselect}</td>
 </tr>
 <tr>
   <th>Select Format:</th>
 <td>
-<select name="format">
-  <option value="html" <?php if($format == "html") echo "SELECTED"; ?>>HTML Table
-  <option value="csv" <?php if($format == "csv") echo "SELECTED"; ?>>Comma Delimited
-  <option value="shapefile" <?php if($format == "shapefile") echo "SELECTED"; ?>>ESRI Shapefile
-  <option value="gempak" <?php if($format == "gempak") echo "SELECTED"; ?>>GEMPAK station file
-  <option value="awips" <?php if($format == "awips") echo "SELECTED"; ?>>AWIPS station file
-  <option value="madis" <?php if($format == "madis") echo "SELECTED"; ?>>MADIS station file
-</select>
+{$fselect}
 </td></tr>
 
 <tr>
@@ -69,132 +188,16 @@ table that you need, please let use know.</p>
 </td></tr>
 </table>
 
-<?php
-
+{$table}
+<p><h3>Notes</h3>
+<ol>
+<li>Latitude and Longitude values are in decimal degrees.</li>
+<li>Elevation is expressed in meters above sea level.</li>
+</ol>
+EOF;
+	$t->render($page);
+} else{
+	header("Content-type: text/plain");
+	echo $table;
 }
-
-	if (strlen($network) > 0){
-		$result = pg_execute($pgconn, "NTSELECT", Array($network) );
-		if ($format == "html"){
-		  echo "<p><table class=\"table table-striped\">\n";
-		  echo "<caption><b>". $network ." Network</b></caption>\n";
-		  echo "<thead><tr><th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
-			<th>Longitude<sup>1</sup></th><th>Elevation [m]</th><th>Archive Begins</th></tr></thead>\n";
-		  for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
-			echo "<tr>\n
-			  <td><a href=\"site.php?station=". $row["id"] ."&network=". $row["network"] ."\">". $row["id"] ."</a></td>\n
-			  <td>". $row["name"] ."</td>\n
-			  <td>". round($row["latitude"],5) . "</td>\n
-			  <td>". round($row["longitude"],5) . "</td>\n
-			  <td>". $row["elevation"]. "</td>\n
-			  <td>". $row["archive_begin"]. "</td>\n
-			  </tr>";
-		  }
-		  echo "</table>\n";
-
-		} else if ($format == "csv") {
-		   if (! $nohtml) echo "<p><b>". $network ." Network</b></p>\n";
-		   if (! $nohtml) echo "<pre>\n";
-		  echo "stid,station_name,lat,lon,elev,begints\n";
-		  for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
-                        echo $row["id"] .","
-                          . $row["name"] .","
-                          . round($row["latitude"],5). ","
-                          . round($row["longitude"],5). ","
-                          . $row["elevation"]. ","
-                          . $row["archive_begin"]. "\n";
-                  }
-		  if (! $nohtml)  echo "</pre>\n";
-		}
-  else if ($format == "shapefile") {
- 
-    /* Create SHP,DBF bases */
-    $filePre = "${network}_locs";
-    $shpFname = "/var/webtmp/$filePre";
-    @unlink($shpFname.".shp");
-    @unlink($shpFname.".shx");
-    @unlink($shpFname.".dbf");
-    @unlink($shpFname.".zip");
-    $shpFile = ms_newShapeFileObj($shpFname, MS_SHP_POINT);
-    $dbfFile = dbase_create( $shpFname.".dbf", array(
-      array("ID", "C", 6),
-      array("NAME", "C", 50),
-      array("NETWORK","C",10),
-      array("BEGINTS","C",16),
-     ));
-
-    for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
-      $shp = ms_newShapeObj(MS_SHAPE_POINT);
-      $pt = ms_newPointobj();
-      $pt->setXY( $row["longitude"], $row["latitude"], 0);
-      $line = ms_newLineObj();
-      $line->add( $pt );
-      $shp->add($line);
-      $shpFile->addShape($shp);
-      dbase_add_record($dbfFile, array(
-         $row["id"],
-         $row["name"],
-         $row["network"],
-         substr($row["archive_begin"],0,16),
-      ));
-    }   
-
-    $shpFile->free();
-    dbase_close($dbfFile);
-    chdir("/var/webtmp/");
-    copy("/mesonet/www/apps/iemwebsite/data/gis/meta/4326.prj", $filePre.".prj");
-    popen("zip ".$filePre.".zip ".$filePre.".shp ".$filePre.".shx ".$filePre.".dbf ".$filePre.".prj", 'r');
-    echo "Shapefile Generation Complete.<br>";
-    echo "Please download this <a href=\"/tmp/".$filePre.".zip\">zipfile</a>.";
-  }
-       else if ($format == "awips") {
-         if (! $nohtml) echo "<pre>\n";
-         for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
-           printf("%s|%s|%-30s|%4.1f|%2.5f|%3.5f|GMT|||1||||\n", $row["id"], $row["id"], $row["name"], $row["elevation"], $row["latitude"], $row["longitude"]);
-         } // End of for
-          if (! $nohtml) echo "</pre>\n";
-        }
-
-  else if ($format == "madis") {
-         if (! $nohtml) echo "<pre>\n";
-
-         for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
-         if (substr($row["network"],0,4) == "KCCI") $row["network"] = "KCCI-TV";
-         if (substr($row["network"],0,4) == "KELO") $row["network"] = "KELO-TV";
-         if (substr($row["network"],0,4) == "KIMT") $row["network"] = "KIMT-TV";
-           printf("%s|%s|%-39s%-11s|%4.1f|%2.5f|%3.5f|GMT|||1||||\n", $row["id"], $row["id"], $row["name"], $row["network"], $row["elevation"], $row["latitude"], $row["longitude"]);
-         } // End of for
-          if (! $nohtml) echo "</pre>\n";
-  }
-
-  else if ($format == "gempak") {
-		  if (! $nohtml) echo "<pre>\n";
-		  for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
-                        echo str_pad($row["id"], 9)
-			  .  str_pad($row["synop"], 7)
-                          .  str_pad($row["name"], 33)
-			  .  str_pad($row["state"], 3)
-			  .  str_pad($row["country"], 2) 
-                          .  sprintf("%6.0f", $row["latitude"] * 100)
-                          .  sprintf("%7.0f", $row["longitude"] * 100) 
-			  .  sprintf("%6.0f", $row["elevation"])
-			  . "\n";
-                  }
-		  if (! $nohtml) echo "</pre>\n";
-		}
-	}
-
-if (! $nohtml) {
 ?>
-
-
-<p><h3 class="subtitle">Notes</h3><br>
-<b>1</b>:  Latitude and Longitude values are in decimal degrees.
-<br />Elevation is expressed in meters above sea level.
-
-
-
-<!-- Begin the bottom of the page-->
-
-<?php include("$rootpath/include/footer.php"); ?>
-<?php } ?>

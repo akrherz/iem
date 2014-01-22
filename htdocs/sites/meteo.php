@@ -1,14 +1,17 @@
 <?php 
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/forms.php");
+include("../../include/database.inc.php");
+include("../../include/forms.php");
 include("setup.php");
-$THISPAGE="iem-sites";
- $TITLE = "IEM | Sites";
- include("$rootpath/include/header.php");
+include("../../include/myview.php");
+$t = new MyView();
+$t->thispage = "iem-sites";
+$t->title = "Site Meteorograms";
+$t->sites_current="meteo"; 
 
- $current="meteo"; include("sidebar.php"); 
+$uri = sprintf("meteo_temps.php?network=%s&station=%s",   $network, $station);
+$t->content = <<<EOF
+ <br /><img src="{$uri}">
+EOF;
+$t->render('sites.phtml');
 ?>
- <br /><img src="<?php echo sprintf("meteo_temps.php?network=%s&station=%s",   $network, $station); ?>">
-</div>
-<?php include("$rootpath/include/footer.php"); ?>
