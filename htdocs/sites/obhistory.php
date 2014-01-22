@@ -75,6 +75,13 @@ if ($date >= $iemarchive){
 		from t$year where 
 		station = $1  and valid  >= $3 and valid  < $4 
 		and $2 = $2 ORDER by valid DESC");
+	} else if (preg_match("/ISUSM/", $network)){
+		$db = "isuag";
+		$sql = sprintf("SELECT *, null as pres, null as raw, 
+		rain_mm_tot / 24.5 as phour
+		from alldata where 
+		station = $1  and valid  >= $3 and valid  < $4 
+		and $2 = $2 ORDER by valid DESC");
 	} else {
 		$db = "asos";
 		$sql = sprintf("SELECT *, mslp as pres, metar as raw, p01i as phour
