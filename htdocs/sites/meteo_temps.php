@@ -81,9 +81,6 @@ $graph->title->Set($metadata['name'] ." [$station] Time Series");
   $graph->ygrid->Show();
   $graph->xgrid->Show();
 
-
-
-
 $lineplot2=new LinePlot($tmpf, $times);
 $lineplot2->SetLegend("Air Temp");
 $lineplot2->SetColor("red");
@@ -103,7 +100,6 @@ if ($hasrad){
   $lineplot4->SetWeight(3);
   $graph->AddY2($lineplot4);
 }
-
 
 // Add the plot to the graph
 
