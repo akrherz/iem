@@ -2,8 +2,8 @@
 <head>
 <?php
   include("../../config/settings.inc.php");
-  $station = isset($_GET['station']) ? $_GET["station"] : 'SKCI4';
-  $min = isset($_GET["min"]) ? $_GET["min"] : 1;
+  $station = isset($_GET['station']) ? substr($_GET["station"],0,5) : 'SKCI4';
+  $min = isset($_GET["min"]) ? intval($_GET["min"]) : 1;
   include("../../include/imagemaps.php");
   include("../../include/network.php");
   $nt = new NetworkTable("KCCI");

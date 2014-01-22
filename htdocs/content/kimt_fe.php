@@ -3,7 +3,7 @@
 <?php
   include("../../config/settings.inc.php");
   $station = isset($_GET['station']) ? substr($_GET["station"],0,5) : 'SMYI4';
-  $min = isset($_GET["min"]) ? $_GET["min"] : 1;
+  $min = isset($_GET["min"]) ? intval($_GET["min"]) : 1;
   include("$rootpath/include/network.php");
   $nt = new NetworkTable("KIMT");
   $Scities = $nt->table;
