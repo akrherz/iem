@@ -249,9 +249,10 @@ def main():
             cursor.execute("""SELECT max(valid) from raob_flights where
             station = %s""", (sid,))
             row = cursor.fetchone()
-            print 'rucsoundings dl fail ts: %s sid: %s last: %s' % (
-                                                valid.strftime("%Y-%m-%d %H"),
-                                                            sid, row[0])
+            lastts = row[0].astimezone(pytz.timezone("UTC"))
+            print 'RAOB dl fail ts: %s sid: %s last: %s' % (
+                                valid.strftime("%Y-%m-%d %H"),
+                                sid, lastts.strftime("%Y-%m-%d %H"))
 
     DBCONN.close()
 
