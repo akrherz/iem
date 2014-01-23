@@ -8,54 +8,25 @@ DBCONN = psycopg2.connect(database='sustainablecorn', host='iemdb', user='nobody
 cursor = DBCONN.cursor()
 
 ALL = " ALL SITES"
-
-varhack = """   [1] Corn final plant population
-[2] Soybean final plant population
-   [3] Mid-season canopy N sensing
-   [4] Corn vegetative biomass at R6 (dry) 
-[32] Corn cob biomass at R6 (dry)
-[33] Corn grain biomass at R6 (dry)
-[5] Soybean vegetative biomass at R8 (stems and pods only; no leaves)
-[34] Soybean grain biomass at R8 (dry)
-[6] Cover crop (rye) biomass in late fall (no significant weeds)
-[37] Cover crop (rye) and weedy biomass in late fall
-[38] Weedy biomass (only) in late fall
-[7] Cover crop (rye) biomass at termination (spring) (no significant weeds)
-[39] Cover crop (rye) and weedy biomass at termination (spring)
-[40] Weedy biomass (only) at termination (spring)
-   [8] Wheat plant biomass at maturity 
-   [9] Corn vegetative biomass total carbon at R6
-   [10] Corn vegetative biomass total nitrogen at R6 
-[11] Soybean vegetative biomass total carbon at R8
-[12] Soybean vegetative biomass total nitrogen at R8
-   [13] Rye biomass total carbon at fall
-   [14] Rye biomass total nitrogen at fall
-   [15] Rye biomass total carbon at spring
-   [16] Rye biomass total nitrogen at spring
-[41] Red clover (or miscelaneous) cover crop biomass
-[42] Red clover (or miscelaneous) cover crop total nitrogen
-[43] Red clover (or miscelaneous) cover crop total carbon
-   [17] Corn grain yield at 15.5% MB
-   [18] Corn grain moisture
-   [19] Soybean grain yield at 13.0% MB
-   [20] Soybean grain moisture
-   [21] Wheat grain yield at 13.5% MB
-   [22] Wheat grain moisture
-   [23] Corn grain total carbon at R6
-   [24] Corn cob total carbon at R6
-   [25] Corn grain total nitrogen at R6
-   [26] Corn cob total nitrogen at R6
-   [27] Soybean grain total carbon at R8
-   [28] Soybean grain total nitrogen at R8
-   [29] Wheat grain total carbon at maturity
-   [30] Wheat grain total nitrogen at maturity
-   [31] Corn stalk nitrate samples"""
 varorder = []
 varlookup = {}
-for line in varhack.split("\n"):
-    val = line.strip().split()[0].replace("[","").replace("]","")
-    varorder.append( "AGR%s" % (val,))
-    varlookup[ "AGR%s" % (val,) ] = line.strip()
+
+def build_vars():
+    ''' build vars '''
+    sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/cscap')
+    import util
+    import ConfigParser
+    config = ConfigParser.ConfigParser()
+    config.read('/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.cfg')
+    spr_client = util.get_spreadsheet_client(config)
+    feed = spr_client.get_list_feed(config.get('cscap', 'sdckey'), 'od6')
+    for entry in feed.entry:
+        data = entry.to_dict()
+        if data['key'] is None or data['key'][:3] != 'AGR':
+            continue
+        varorder.append( data['key'].strip() )
+        varlookup[ data['key'].strip() ] = data['name'].strip()
+    
 
 def get_data(year):
     ''' Do stuff '''
@@ -119,7 +90,7 @@ def make_progress(row):
 
 if __name__ == '__main__':
     sys.stdout.write('Content-type: text/html\n\n')
-    
+    build_vars()
     form = cgi.FieldStorage()
     year = int(form.getfirst('year', 2011))
     
