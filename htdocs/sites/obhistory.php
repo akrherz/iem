@@ -31,6 +31,10 @@ function temp_formatter($val){
 	if ($val == null) return "";
 	return sprintf("%.0f", $val);
 }
+function vis_formatter($val){
+	if ($val == null) return "";
+	return round($val, 2);
+}
 function formatter($i, $row){
 	$ts = strtotime(substr($row["valid"],0,16));
 	return sprintf("<tr style=\"background: %s;\"><td>%s</td><td>%s</td><td>%s</td>
@@ -39,7 +43,7 @@ function formatter($i, $row){
 	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
 	<tr style=\"background: %s;\" class=\"metar\"><td colspan=\"15\">%s</td></tr>", 
 	($i % 2 == 0)? "#FFF": "#EEE", 
-	date("g:i A", $ts), wind_formatter($row) , round($row["vsby"],2),
+	date("g:i A", $ts), wind_formatter($row) , vis_formatter($row["vsby"]),
 	sky_formatter($row), $row["presentwx"], temp_formatter($row["tmpf"]), 
 	temp_formatter($row["dwpf"]),
 	temp_formatter($row["max_tmpf_6hr"]), temp_formatter($row["min_tmpf_6hr"]), 
@@ -159,7 +163,7 @@ $content = <<<EOF
 </style>
 
 <h3>{$dstr} Observation History, timezone: {$tzname}</h3>
-<form method="GET" style="float: left;">
+<form name="theform" method="GET">
 <strong>Select Date:</strong>
 <input type="hidden" value="{$station}" name="station" />
 <input type="hidden" value="{$network}" name="network" />
@@ -179,8 +183,13 @@ if ($tomorrow){
   class=\"btn btn-default\">Next Day</a>", $network, $station, date("Y", $tomorrow),
   date("m", $tomorrow), date("d", $tomorrow));
 }
+$notes = '';
+if ($network == "ISUSM"){
+	$notes .= "<li>Wind direction and wind speed are 10 minute averages at 10 feet above the ground.</li>";
+}
+
 $content .= <<<EOF
-<table cellspacing="3" cellpadding="2" border="0" id="datatable">
+<table class="table table-striped table-bordered" id="datatable">
 <thead>
 <tr align="center" bgcolor="#b0c4de">
 <th rowspan="3">Time</th>
@@ -196,6 +205,10 @@ $content .= <<<EOF
 {$table}
 </tbody>
 </table>
+<h4>Data Notes</h4>
+<ul>
+{$notes}
+</ul>
 EOF;
 $t->content = $content;
 $t->render('sites.phtml');
