@@ -1,6 +1,12 @@
 <?php
+/*
+ * Custom Road display for WHO-TV
+ */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
+
+$isnew = isset($_REQUEST["new"]);
+
 $con = iemdb("postgis");
 
 
@@ -17,16 +23,23 @@ $map = ms_newMapObj('roads.map');
 $map->setProjection("init=epsg:26915");
 $map->selectOutputFormat("jpeg");
 
-$map->setextent(117487.560, 4448095.235, 795431.656, 4919662.500);
-$map->set("width", 1280);
-$map->set("height", 720);
-
+if ($isnew){
+	$map->setSize(1920,1080);
+	$map->setextent(26254, 4429290, 894647, 4917732);
+} else{
+	$map->setextent(117487.560, 4448095.235, 795431.656, 4919662.500);
+	$map->setSize(1280,720);
+}
 
 $img = $map->prepareImage();
 
 $background = $map->getlayerbyname("kwwlback");
 $background->set("status", MS_ON);
-$background->set("data", "images/26915/who.tif");
+if ($isnew){
+	$background->set("data", "/mesonet/share/roads/WHO/iowa.png");
+} else {
+	$background->set("data", "images/26915/who.tif");
+}
 $background->draw($img);
 
 //$counties = $map->getlayerbyname("counties");
@@ -124,6 +137,7 @@ $c = $layer->getClass(0);
 $point = ms_newpointobj();
 $point->setXY(1150, 10);
 $point->draw($map, $layer, $img, 0, $valid);
+$map->drawLabelCache($img);
 
 header("Content-type: image/jpeg");
 $img->saveImage('');
