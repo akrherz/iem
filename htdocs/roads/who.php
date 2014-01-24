@@ -51,20 +51,18 @@ $background->draw($img);
 //$states->draw($img);
 
 $roads = $map->getlayerbyname("roads");
-//$roads->set("transparency", MS_GD_ALPHA);
 $roads->set("status", MS_ON);
-
-if (isset($_GET["extreme"]) )
-$roads->set("data", "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_2007_log c WHERE b.segid = c.segid and c.valid = '2007-03-02 00:11' and b.type > 1  ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915");
-
+if ($isnew){
+	$roads->setFilter("rtype < 3");
+}
 for ($k=0;$k<17;$k++)
 {
   $r_c1 = $roads->getClass($k);
   $r_s1 = $r_c1->getStyle(0);
-  $r_s1->set("size", 0);
+  $r_s1->set("width", 0);
 
   $r_s1 = $r_c1->getStyle(1);
-  $r_s1->set("size", 5);
+  $r_s1->set("width", 5);
   if ($k == 0){ $r_s1->color->setRGB(0,0,0); }
 }
 $roads->draw($img);
@@ -77,9 +75,9 @@ for ($k=0;$k<17;$k++)
 {
   $r_c1 = $roads_int->getClass($k);
   $r_s1 = $r_c1->getStyle(0);
-  $r_s1->set("size", 0);
+  $r_s1->set("width", 0);
   $r_s1 = $r_c1->getStyle(1);
-  $r_s1->set("size", 7);
+  $r_s1->set("width", 7);
   if ($k == 0){ $r_s1->color->setRGB(0,0,0); }
 }
 $roads_int->draw($img);
