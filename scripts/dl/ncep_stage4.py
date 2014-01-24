@@ -28,8 +28,8 @@ def download( now ):
         except Exception, exp:
             if hr < 6:
                 print "NCEP stage ST4 dl fail HR: %s TIME: %s %s [%s]" % (hr, 
-                                                            now.strftime("%Y-%m-%d %H"),
-                                                            url, exp)
+                                                now.strftime("%Y-%m-%d %H"),
+                                                url, exp)
             continue
         # Same temp file
         o = open("tmp.grib.gz", 'wb')
@@ -37,15 +37,16 @@ def download( now ):
         o.close()
         subprocess.call("gunzip -f tmp.grib.gz", shell=True)
         # Inject into LDM
-        cmd = "/home/ldm/bin/pqinsert -p 'data a %s blah stage4/ST4.%s.%02ih.grib grib' tmp.grib" % (
+        cmd = ("/home/ldm/bin/pqinsert -p 'data a %s blah "
+               +"stage4/ST4.%s.%02ih.grib grib' tmp.grib") % (
                     now.strftime("%Y%m%d%H%M"), now.strftime("%Y%m%d%H"), hr)
         subprocess.call( cmd, shell=True )
         os.remove('tmp.grib')
         
         # Do stage2 ml now
         if hr == 1:
-            url = "%s.Grb.gz" % ( now.strftime("ftp://ftpprd.ncep.noaa.gov/pub/"+
-                                "data/nccf/com/hourly/prod/"+
+            url = "%s.Grb.gz" % ( now.strftime("ftp://ftpprd.ncep.noaa.gov"+
+                                "/pub/data/nccf/com/hourly/prod/"+
                                 "nam_pcpn_anal.%Y%m%d/ST2ml%Y%m%d%H"), )
         else:
             url = "%s.%02ih.gz" % ( now.strftime("ftp://ftpprd.ncep.noaa.gov/"+
@@ -56,8 +57,8 @@ def download( now ):
         except Exception, exp:
             if hr < 6:
                 print "NCEP stage 2ml dl fail HR: %s TIME: %s %s [%s]" % (hr, 
-                                                            now.strftime("%Y-%m-%d %H"),
-                                                            url, exp)
+                                                now.strftime("%Y-%m-%d %H"),
+                                                url, exp)
             continue
         # Same temp file
         o = open("tmp.grib.gz", 'wb')
@@ -65,7 +66,8 @@ def download( now ):
         o.close()
         subprocess.call("gunzip -f tmp.grib.gz", shell=True)
         # Inject into LDM
-        cmd = "/home/ldm/bin/pqinsert -p 'data a %s blah stage4/ST2ml.%s.%02ih.grib grib' tmp.grib" % (
+        cmd = ("/home/ldm/bin/pqinsert -p 'data a %s blah "
+               +"stage4/ST2ml.%s.%02ih.grib grib' tmp.grib") % (
                     now.strftime("%Y%m%d%H%M"), now.strftime("%Y%m%d%H"), hr)
         subprocess.call( cmd, shell=True )
         os.remove('tmp.grib')        
