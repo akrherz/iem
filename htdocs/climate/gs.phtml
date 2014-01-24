@@ -1,20 +1,30 @@
 <?php 
 include("../../config/settings.inc.php");
-$TITLE = "IEM | Growing Season Data";
-$THISPAGE = "climatology-gs";
-include("$rootpath/include/header.php"); 
-include("$rootpath/include/database.inc.php");
-?>
-<h3 class="heading">Growing Season Information</h3>
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Growing Season Climatology";
+$t->thispage = "climatology-gs";
 
-<b>An improved version of this page is coming....</b>
+$t->content = <<<EOF
 
+<p>This page provides IEM produced plots depicting the growing season 
+climatology.
+
+<h4>Plots</h4>
+
+<div class="row">
+	<div class="col-sm-6 col-md-6"><a href="/pickup/gs/mw_gdd50.png"><img src="/pickup/gs/mw_gdd50.png"
+		class="img img-responsive" /></a></div>
+	<div class="col-sm-6 col-md-6"><a href="/pickup/gs/mw_avgt.png"><img src="/pickup/gs/mw_avgt.png"
+		class="img img-responsive" /></a></div>
+		
+</div>
+		
+		
 <h4>Growing Degree Days</h4>
-
 <ul>
-<li><a href="/plotting/gs/fe.phtml">Growing Season Rainfall/GDD vs Climatology</a></li>
+  <li><a href="/plotting/gs/fe.phtml">Growing Season Rainfall/GDD vs Climatology</a></li>
 </ul>
-
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
