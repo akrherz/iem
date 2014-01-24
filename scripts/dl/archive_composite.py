@@ -1,56 +1,22 @@
-# Cache NEXRAD composites for the website
+'''
+  Regenerate composites to fulfill various reasons
+'''
 
-import urllib2, os, mx.DateTime, time, random
-from pyIEM import iemdb
-i = iemdb.iemdb()
-postgis = i['postgis']
+from radar_composite import save
+import datetime
+import sys
 
-opener = urllib2.build_opener()
-
-def save(sectorName, file_name, dir_name, tstamp,bbox=None):
-  layers = "layers[]=n0q&layers[]=watch_by_county&layers[]=sbw&layers[]=uscounties"
-  #layers = "layers[]=nexrad&layers[]=county_warnings&layers[]=watches&layers[]=uscounties"
-  #layers = "layers[]=nexrad&layers[]=watches&layers[]=uscounties"
-  uri = "http://iem21.local/GIS/radmap.php?sector=%s&ts=%s&%s" % \
-        (sectorName,tstamp, layers)
-  if (bbox is not None):
-    uri = "http://iem21.local/GIS/radmap.php?bbox=%s&ts=%s&%s" % \
-        (bbox,tstamp, layers)
-
-  try:
-    f = opener.open(uri)
-  except:
-    time.sleep(5)
-    f = opener.open(uri)
-  o = open('atmp.png', 'w')
-  o.write( f.read() )
-  o.close()
-
-  cmd = "/home/ldm/bin/pqinsert -p 'plot a %s %s %s/n0r_%s_%s.png png' atmp.png" % (tstamp, file_name, dir_name, tstamp[:8], tstamp[8:])
-  os.system(cmd)
-
-"""
-# 1995 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC
-# 1996 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC
-# 1997 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC
-# 1998 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC
-# 1999 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC
-# 2000 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC
-# 2001 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC
-# 2002 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC
-"""
-
-sts = mx.DateTime.DateTime(2012,4,30,5,30)
-ets = mx.DateTime.DateTime(2012,4,30,5,35)
-interval = mx.DateTime.RelativeDateTime(minutes=5)
+sts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
+            int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]))
+ets = datetime.datetime(int(sys.argv[6]), int(sys.argv[7]),
+            int(sys.argv[8]), int(sys.argv[9]), int(sys.argv[10]))
+interval = datetime.timedelta(minutes=5)
 now = sts
 while (now < ets):
-  #if now.hour == 0 and now.minute == 0:
-  #  time.sleep( 300 )  # 5 minute break
-  print now
-  s = now.strftime("%Y%m%d%H%M")
-  save('conus', 'uscomp.png', 'usrad', s)
-  save('iem', 'mwcomp.png', 'comprad', s)
-  for i in ['lot','ict','sd','hun']:
-    save(i, '%scomp.png'%(i,), '%srad' %(i,), s)
-  now += interval
+    print now
+    s = now.strftime("%Y%m%d%H%M")
+    save('conus', 'uscomp.png', 'usrad', s, routes='a')
+    save('iem', 'mwcomp.png', 'comprad', s, routes='a')
+    for i in ['lot','ict','sd','hun']:
+        save(i, '%scomp.png'%(i,), '%srad' %(i,), s, routes='a')
+    now += interval
