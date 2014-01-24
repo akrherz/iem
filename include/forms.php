@@ -19,7 +19,7 @@ function stateSelect($selected){
 	 "AK" => "Alaska",
 	 "AR" => "Arkansas",
 	 "AZ" => "Arizona",
-	 "CA" => ">California",
+	 "CA" => "California",
 	 "CO" => "Colorado",
 	 "CT" => "Connecticut",
 	 "DE" => "Delaware",
