@@ -41,23 +41,23 @@ scp -q root@iem30:${BASE}/access_log-weather.im.iem30 weatherim_access.log
 
 # Step 3, merge the log files back into one
 csh -c "(/usr/local/bin/mergelog access_log.iemvs* > access.log) >& /dev/null"
-wc -l access_log.iemvs* access.log
+wc -l access_log.iemvs* 
 rm -f access_log.iemvs*
 
 csh -c "(/usr/local/bin/mergelog access_log-wepp.iemvs* > wepp_access.log) >& /dev/null"
-wc -l access_log-wepp.iemvs* wepp_access.log 
+wc -l access_log-wepp.iemvs* 
 rm -f access_log-wepp.iemvs*
 
 csh -c "(/usr/local/bin/mergelog access_log-idep.iemvs* > idep_access.log) >& /dev/null"
-wc -l access_log-idep.iemvs* idep_access.log 
+wc -l access_log-idep.iemvs* 
 rm -f access_log-idep.iemvs*
 
 csh -c "(/usr/local/bin/mergelog access_log-cocorahs.iemvs* > cocorahs_access.log) >& /dev/null"
-wc -l access_log-cocorahs.iemvs* cocorahs_access.log
+wc -l access_log-cocorahs.iemvs*
 rm -f access_log-cocorahs.iemvs*
 
 csh -c "(/usr/local/bin/mergelog access_log-sustainablecorn.iemvs* > sustainablecorn_access.log) >& /dev/null"
-wc -l access_log-sustainablecorn.iemvs* sustainablecorn_access.log
+wc -l access_log-sustainablecorn.iemvs* 
 rm -f access_log-sustainablecorn.iemvs*
 
 # Step 3a, do weather.im
