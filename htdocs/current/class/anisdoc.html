@@ -3,7 +3,7 @@
 <BODY>
 <p><center><h1>Documentation for AniS - the AnimationS
 applet</h1>October 13, 1999
-<br>updated: April, 2007
+<br>updated: May, 2007
 </center>
 <p>
 <hr>
@@ -361,6 +361,20 @@ related to filenames, portals and overlays appear after this section):
    that <u>contains</u> the <i>match-string</i> will have caching
    disabled when it is read.  This can be used, for example, if
    the latest image in a loop always has the same name.
+
+<b><xmp>
+<PARAM name="use_anti_caching" value="false">
+</xmp></b>
+   disables the use of altering the filename requested from a 
+   web server for non-cached images.  Normally, AniS will append
+   "?xxxx" to the request for a file from the http server (where
+   'xxxx' is an ever-changing value).  This will normally not 
+   interfere with the http request for the actual file, but has 
+   the effect of usually preventing any intermediate 
+   "caching servers" from caching images inappropriately.  
+   
+   If you experience any difficulties with this, then set the 
+   value to <i>false</i> to prevent this.
 
 <b><xmp>
 <PARAM name="auto_refresh" value="16">
