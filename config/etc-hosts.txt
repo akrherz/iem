@@ -14,6 +14,7 @@
 192.168.0.19     iem19         iem19.local iemdb iemdb2
 192.168.0.21     iem21         iem21.local
 192.168.0.22     iem22         iem22.local
+192.168.0.23     iem23         iem23.local
 192.168.0.30     iem30         iem30.local iembot iem-geoserver iem-arcgis
 192.168.0.40     iem40         iem40.local
 192.168.0.50     iem50         iem50.local iem-mapserver openfire-bosh
@@ -30,8 +31,10 @@
 192.168.0.107    iemvs107      iemvs107.local
 192.168.0.108    iemvs108      iemvs108.local
 192.168.0.109    iemvs109      iemvs109.local
+
+# IPs that float depending on workload!
 192.168.0.200    iem-idd0      iem-idd0.local
-192.168.0.230    
+192.168.0.201    iemdb3
 192.168.0.231    iemvm4
 192.168.0.254    iem-gateway   iem-gateway.local
 
