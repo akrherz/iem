@@ -1,8 +1,10 @@
 <?php
  include("../../config/settings.inc.php");
+ include("../../include/myview.php");
+ $t = new MyView();
  $uri = 'mcview.phtml';
- include("$rootpath/include/forms.php");
- include("$rootpath/include/database.inc.php");
+ include("../../include/forms.php");
+ include("../../include/database.inc.php");
  $postgis = iemdb("postgis");
 
  $rs = pg_prepare($postgis, "SELECT", "select * from watches 
@@ -45,8 +47,8 @@
          "sel9rad" => mktime(13,35,0,11,2,2004),
          "lotrad" => mktime(0,0,0,1,1,1995) );
 
- $now = mktime() - 60;
- $aend = mktime();
+ $now = time() - 60;
+ $aend = time();
 
 /* Figure when the lapse starts! $ts */
 if ($mode == "realtime"){
@@ -120,19 +122,173 @@ for ($i=0; $i < intval($frames); $i++){
 	if ($fts > time()){
 		continue;
 	}
-  $myuri = "$rooturl/archive/data/". gmdate('Y/m/d/', $fts ) ."$prod/n0r_". 
+  $myuri = "/archive/data/". gmdate('Y/m/d/', $fts ) ."$prod/n0r_". 
   		gmdate('Ymd_Hi', $fts ) .".png";
-  $myhref = "$rooturl/archive/data/". gmdate('Y/m/d/', $fts ) ."GIS/uscomp/n0r_".
+  $myhref = "/archive/data/". gmdate('Y/m/d/', $fts ) ."GIS/uscomp/n0r_".
   	 gmdate('YmdHi', $fts ) .".png";
-  $gisbase = "$rooturl/archive/data/". gmdate('Y/m/d/', $fts ) ."GIS/uscomp/";
+  $gisbase = "/archive/data/". gmdate('Y/m/d/', $fts ) ."GIS/uscomp/";
   $files .= $myuri .",";
   $images[] = $myuri;
   $radtimes[] = $fts;
 }
 
+$ar = Array("comprad" => "A1. Iowa (Default)",
+	"usrad" => "A1. United States",
+	"hunrad" => "A1. Huntsville, AL",
+	"lotrad" => "A1. North Illinois",
+	"sdrad" => "A1. South Dakota",
+	"ictrad" => "A1. Wichita, KS",
+	"sel0rad" => "A3. Watch (SEL0)",
+	"sel1rad" => "A3. Watch (SEL1)",
+	"sel2rad" => "A3. Watch (SEL2)",
+	"sel3rad" => "A3. Watch (SEL3)",
+	"sel4rad" => "A3. Watch (SEL4)",
+	"sel5rad" => "A3. Watch (SEL5)",
+	"sel6rad" => "A3. Watch (SEL6)",
+	"sel7rad" => "A3. Watch (SEL7)",
+	"sel8rad" => "A3. Watch (SEL8)",
+	"sel9rad" => "A3. Watch (SEL9)",
+);
+$prodselect = make_select("prod", $prod, $ar);
+
+$ar = Array(
+	"applet" => "Java Applet",
+	"script" => "Java Script",
+	"none" => "List Images",	
+);
+$loopselect = make_select("java", $java, $ar);
+
+$ar = Array(
+	"realtime" => "Real Time",
+	"archive" => "Archived",
+);
+$modeselect = make_select("mode", $mode, $ar);
+
+$ar = Array(
+	"5" => "5 Min (Default)",
+	"10" => "10 min",
+	"15" => "15 min",
+	"20" => "20 min",
+	"30" => "30 min",
+	"60" => "60 min",
+);
+$intselect = make_select("interval", $interval, $ar);
+
+$start = intval(1995);
+$now = time();
+$tyear = strftime("%Y", $now);
+$dateselect = "<select name='year' onChange=\"javascript: switchToArchiveMode(); \">\n";
+for ($i=$start; $i<=$tyear;$i++) {
+	$dateselect .= "<option value='".$i ."' ";
+	if ($i == intval($year)) $dateselect .= "SELECTED";
+	$dateselect .= ">". $i ."\n";
+}
+$dateselect .= "</select>\n";
+
+$dateselect .= "<select name='month' onChange=\"javascript: switchToArchiveMode(); \">\n";
+for ($i=1; $i<=12;$i++) {
+	$ts = mktime(0,0,0,$i,1,0);
+	$dateselect .= "<option value='".$i ."' ";
+	if ($i == intval($month)) $dateselect .= "SELECTED";
+	$dateselect .= ">". strftime("%b" ,$ts) ."\n";
+}
+$dateselect .= "</select>\n";
+
+$dateselect .= "<select name='day' onChange=\"javascript: switchToArchiveMode(); \">\n";
+for ($k=1;$k<32;$k++){
+	$dateselect .= "<option value=\"".$k."\" ";
+	if ($k == (int)$day){
+		$dateselect .= "SELECTED";
+	}
+	$dateselect .= ">".$k."\n";
+}
+$dateselect .= "</select>\n";
+
+
+$timeselect = "<select name='hour'  onChange=\"javascript: switchToArchiveMode(); \">\n";
+for ($i=0; $i<24;$i++) {
+	$ts = mktime($i,0,0,1,1,0);
+	$timeselect .= "<option value='".$i."' ";
+	if ($i == intval($hour)) $timeselect .= "SELECTED";
+	$timeselect .= ">". strftime("%I %p" ,$ts) ."\n";
+}
+$timeselect .= "</select>\n";
+
+$timeselect .= "<select name='minute' onChange=\"javascript: switchToArchiveMode(); \">\n";
+for ($i=0; $i<60;$i=$i+5) {
+	$timeselect .= "<option value='".$i."' ";
+	if ($i == intval($minute)) $timeselect .= "SELECTED";
+	$timeselect .= sprintf(">%02d\n", $i );
+}
+$timeselect .= "</select>\n";
+
+$autoselected = ($autopilot == "yes") ? " checked=\"checked\"": ""; 
+$rtmessage = ($mode == "realtime")? " &nbsp; <b>REAL-TIME mode:</b> Will refresh in 5 minutes": "";
+
+if ($java == "applet") {
+	$control = <<<EOF
+<applet codebase="/current/class/" code="AniS.class" width="{$lwidth}" height="{$lheight}" alt="You must enable Java in your browser to view the radar loop">
+<param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
+<param name="rate" value="80">
+<PARAM name="no_enh" value="true">
+<param name="pause_percent" value="800">
+<param name="filenames" value="{$files}">
+</applet>
+EOF;
+} else if ($java == 'script'){
+	$i = 0;
+	reset($images);
+	$mi = "";
+	while ( list($key,$val) = each($images) ){
+		$mi .= "modImages[$i] = \"". $images[$i] ."\";\n";
+		$i++;
+	}
+	$sz = sizeof($images);
+	$control = <<<EOF
+	<script LANGUAGE="JavaScript1.2" type="text/javascript">
+	//<!--
+	modImages = new Array();
+	{$mi}
+	first_image = 1;
+	last_image = {$sz};
+	current_image = first_image;
+	-->
+	</script>
+	<script language="JavaScript" src="/js/animation.js"></script>
+	<img NAME="animation" SRC="{$images[0]}" ALT="Image" border="2" />
+	                                                                                
+	  <form METHOD="POST" NAME="control_form">
+	<a HREF="JavaScript: func()" onClick="change_mode(1);reverse()"><img BORDER=0 SRC="/images/rev_button.gif" ALT="REV"></a>
+	<a HREF="JavaScript: func()" onClick="stop()"><img BORDER=0 SRC="/images/stp_button.gif" ALT="STOP"></a>
+	<a HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><img BORDER=0 SRC="/images/fwd_button.gif" ALT="FWD"></a>
+	  <font SIZE=-1 COLOR="#3300CC">Frame No:</font>
+	  <input TYPE="text" NAME="frame_nr" VALUE=9 SIZE="2" onFocus="this.select()" onChange="go2image(this.value)"></input>
+	  </form>
+	<script LANGUAGE="JavaScript1.2" type="text/javascript">
+	//<!--
+	launch();
+	-->
+	</script>
+EOF;
+} else {
+ 	reset($images);
+ 	$control = "";
+ 	while ( list($key,$val) = each($images) ){
+   		$control .= "<p><img src=\"". $val ."\">\n";
+ 	}
+}
+
+$radlinks = "";
+foreach ($radtimes as $value ){
+	$myhref = "/archive/data/". gmdate('Y/m/d/',$value ) ."GIS/uscomp/n0r_". gmdate('YmdHi', $value ) .".png";
+	$myhref2 = "http://mesonet.agron.iastate.edu{$myhref}";
+	$radlinks .= "<li><a href='$myhref'>$myhref2</a> (<a href='/request/gis/n0r2gtiff.php?dstr=". gmdate('YmdHi', $value) ."'>GeoTiff</a>)</li>\n";
+}
+
+
 /* We finally start output */
 
-$HEADEXTRA = "<script LANGUAGE=\"JavaScript1.2\" type=\"text/javascript\">
+$t->headextra = "<script LANGUAGE=\"JavaScript1.2\" type=\"text/javascript\">
 //<!--
 
 function switchToArchiveMode()
@@ -143,7 +299,7 @@ function switchToArchiveMode()
 -->
 </script>";
 if ($autopilot == "yes"){
- $HEADEXTRA .= "<style>
+ $t->headextra .= "<style>
 body{
   background: #fff;
 }
@@ -155,15 +311,19 @@ body{
 }
 </style>";
 }
-  if ($mode == "realtime") $REFRESH = "<meta http-equiv=\"refresh\" content=\"300;\">";
-  $TITLE = "Current & Historical IEM NEXRAD Composite Loop";
-  $THISPAGE = "current-radar";
-  include("$rootpath/include/header.php");
-?>
-<a href="<?php echo $rooturl; ?>/current/">Current Data</a> &nbsp; <b>></b> &nbsp; <b>IEM NEXRAD Composite</b>
-&nbsp; &nbsp; <a href="<?php echo $uri; ?>">Reset Application for a Current Loop</a>
+  if ($mode == "realtime") {
+	$t->refresh = "<meta http-equiv=\"refresh\" content=\"300;\">";
+  }
+  $t->title = "Current & Historical IEM NEXRAD Composite Loop";
+  $t->thispage = "current-radar";
 
-<br><form method="GET" action="<?php echo $uri; ?>" name="controls">
+$t->content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/current/">Current Data</a></li>
+ <li class="active"><b>IEM NEXRAD Composite</b> <a href="{$uri}">Reset Application for a Current Loop</a></li>
+ </ol>
+
+<form method="GET" action="{$uri}" name="controls">
 
 <table cellpadding=2 cellspacing=0>
  <tr><td valign="top">
@@ -171,164 +331,45 @@ body{
 
 <div class="iembox" style="width: 200px;">
 <p><strong>Composite Product:</strong><br />
-<select name="prod">
-  <option value="comprad" <?php if ($prod == "comprad") echo "SELECTED"; ?>>A1. Iowa (Default)</option>
-  <option value="usrad" <?php if ($prod == "usrad") echo "SELECTED"; ?>>A1. United States</option>
-  <option value="hunrad" <?php if ($prod == "hunrad") echo "SELECTED"; ?>>A1. Huntsville, AL</option>
-  <option value="lotrad" <?php if ($prod == "lotrad") echo "SELECTED"; ?>>A1. North Illinois</option>
-  <option value="sdrad" <?php if ($prod == "sdrad") echo "SELECTED"; ?>>A1. South Dakota</option>
-  <option value="ictrad" <?php if ($prod == "ictrad") echo "SELECTED"; ?>>A1. Wichita, KS</option>
-<?php for ($i=0; $i<10; $i++){
-  echo "<option value=\"sel${i}rad\"";
-  if ($prod == "sel${i}rad") echo " SELECTED ";
-  echo ">A3. Watch (SEL${i})</option>"; 
-} ?>
-</select>
+{$prodselect}
 
 <br />(<i>Archive Begins @</i>)
 <br /><b>Al.</b> 1 Jan 1995
 <br /><b>A2.</b> 21 Sep 2005
+<br /><b>A3.</b> 1 Jan 2007
 
 <p><strong>Display Tool:</strong><br />
-<select name="java">
-  <option value="applet" <?php if ($java == "applet") echo "SELECTED"; ?>>Java Applet</option>
-  <option value="script" <?php if ($java == "script") echo "SELECTED"; ?>>Java Script</option>
-  <option value="none" <?php if ($java == "none") echo "SELECTED"; ?>>List Images</option>
-</select>
+{$loopselect}
 
 <p><strong>Mode:</strong></br />
-<select name="mode">
-  <option value="realtime" <?php if ($mode == "realtime") echo "SELECTED"; ?>>RealTime
-  <option value="archive" <?php if ($mode == "archive") echo "SELECTED"; ?>>Archived
-</select>
+{$modeselect}
 
 <p><strong>Frames:</strong><br />
-<input type="text" size="3" name="frames" value="<?php echo $frames; ?>">
+<input type="text" size="3" name="frames" value="{$frames}">
 
 <p><strong>Frame Interval:</strong><br />
-<select name="interval">
-  <option value="5" <?php if ($interval == 5) echo "SELECTED"; ?>>5 min (DEFAULT)
-  <option value="10" <?php if ($interval == 10) echo "SELECTED"; ?>>10 min
-  <option value="15" <?php if ($interval == 15) echo "SELECTED"; ?>>15 min
-  <option value="20" <?php if ($interval == 20) echo "SELECTED"; ?>>20 min
-  <option value="30" <?php if ($interval == 30) echo "SELECTED"; ?>>30 min
-  <option value="60" <?php if ($interval == 60) echo "SELECTED"; ?>>60 min
-</select>
+{$intselect}
 
 <p><strong>Date:</strong><br />
-<?php 
-  $start = intval(1995);
-  $now = time();
-  $tyear = strftime("%Y", $now);
-  echo "<select name='year' onChange=\"javascript: switchToArchiveMode(); \">\n";
-  for ($i=$start; $i<=$tyear;$i++) {
-    echo "<option value='".$i ."' ";
-    if ($i == intval($year)) echo "SELECTED";
-    echo ">". $i ."\n";
-  }
-  echo "</select>\n";
-
-  echo "<select name='month' onChange=\"javascript: switchToArchiveMode(); \">\n";
-  for ($i=1; $i<=12;$i++) {
-    $ts = mktime(0,0,0,$i,1,0);
-    echo "<option value='".$i ."' ";
-    if ($i == intval($month)) echo "SELECTED";
-    echo ">". strftime("%b" ,$ts) ."\n";
-  }
-  echo "</select>\n";
-
-  echo "<select name='day' onChange=\"javascript: switchToArchiveMode(); \">\n";
-  for ($k=1;$k<32;$k++){
-    echo "<option value=\"".$k."\" ";
-    if ($k == (int)$day){
-      echo "SELECTED";
-    }
-    echo ">".$k."\n";
-  }
-  echo "</select>\n";
-
-?>
+{$dateselect}
 <p><strong>Time:</strong><br />
-<?php
+{$timeselect}
 
-  echo "<select name='hour'  onChange=\"javascript: switchToArchiveMode(); \">\n";
-  for ($i=0; $i<24;$i++) {
-    $ts = mktime($i,0,0,1,1,0);
-    echo "<option value='".$i."' ";
-    if ($i == intval($hour)) echo "SELECTED";
-    echo ">". strftime("%I %p" ,$ts) ."\n";
-  }
-  echo "</select>\n";
-
-  echo "<select name='minute' onChange=\"javascript: switchToArchiveMode(); \">\n";
-  for ($i=0; $i<60;$i=$i+5) {
-    echo "<option value='".$i."' ";
-    if ($i == intval($minute)) echo "SELECTED";
-    echo sprintf(">%02d\n", $i );
-  }
-  echo "</select>\n";
-
-?>
-
-<p><input type="checkbox" value="yes" name="autopilot" <?php if ($autopilot == "yes") echo "checked=\"checked\""; ?>>Hide menus + header
+<p><input type="checkbox" value="yes" name="autopilot"{$autoselected}>Hide menus + header
 
 <p><input type="submit" value="Generate Loop"> 
 
 <p><strong>Related Links:</strong><br /> 
-<a href="<?php $rooturl; ?>/GIS/apps/rview/warnings.phtml">Interactive RADAR</a>
-<br /><a href="<?php $rooturl; ?>/cow/">Warning Verification</a>
+<a href="/GIS/apps/rview/warnings.phtml">Interactive RADAR</a>
+<br /><a href="/cow/">Warning Verification</a>
 </div>
 </form>
 </td><td>
-<?php echo $watches; ?>
-<?php if ($mode == "realtime") echo " &nbsp; <b>REAL-TIME mode:</b> Will refresh in 5 minutes"; ?> 
+{$watches}
 
-<?php if ($java == "applet") { ?>
-<applet codebase="<?php echo $rooturl; ?>/current/class/" code="AniS.class" width="<?php echo $lwidth; ?>" height="<?php echo $lheight; ?>" alt="You must enable Java in your browser to view the radar loop">
- <param name="controls" value="startstop, looprock, step, speed, toggle, zoom">
- <param name="rate" value="80">
- <PARAM name="no_enh" value="true">
- <param name="pause_percent" value="800">
- <param name="filenames" value="<?php echo $files; ?>">
-</applet>
-<?php } if ($java == "script") { ?>
-<script LANGUAGE="JavaScript1.2" type="text/javascript">
-//<!--
-modImages = new Array();
-<?php
- $i = 0;
- reset($images);
- while ( list($key,$val) = each($images) ){
-   echo "modImages[$i] = \"". $images[$i] ."\";\n";
-   $i++;
- } ?>
-first_image = 1;
-last_image = <?php echo sizeof($images); ?>;
-current_image = first_image;
--->
-</script>
-<script language="JavaScript" src="/js/animation.js"></script>
-<img NAME="animation" SRC="<?php echo $images[0]; ?>" ALT="Image" border="2" />
-                                                                                
-  <form METHOD="POST" NAME="control_form">
-<a HREF="JavaScript: func()" onClick="change_mode(1);reverse()"><img BORDER=0 SRC="/images/rev_button.gif" ALT="REV"></a>
-<a HREF="JavaScript: func()" onClick="stop()"><img BORDER=0 SRC="/images/stp_button.gif" ALT="STOP"></a>
-<a HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><img BORDER=0 SRC="/images/fwd_button.gif" ALT="FWD"></a>
-  <font SIZE=-1 COLOR="#3300CC">Frame No:</font>
-  <input TYPE="text" NAME="frame_nr" VALUE=9 SIZE="2" onFocus="this.select()" onChange="go2image(this.value)"></input>
-  </form>
-<script LANGUAGE="JavaScript1.2" type="text/javascript">
-//<!--
-launch();
--->
-</script>
-<?php } if ($java == "none") { 
- reset($images);
- while ( list($key,$val) = each($images) ){
-   echo "<p><img src=\"". $val ."\">\n";
- }
-}
-?>
+{$rtmessage}
+
+{$control}
 
 </td></tr></table>
 
@@ -340,12 +381,8 @@ rename the world file to match the filename of the RADAR layer before loading
 into your GIS.
 <br>
 <ul>
-<?php
-foreach ($radtimes as $value ){
-  $myhref = "$rooturl/archive/data/". gmdate('Y/m/d/',$value ) ."GIS/uscomp/n0r_". gmdate('YmdHi', $value ) .".png";
-  echo "<li><a href='$myhref'>$myhref</a> (<a href='$rooturl/request/gis/n0r2gtiff.php?dstr=". gmdate('YmdHi', $value) ."'>GeoTiff</a>)</li>\n";
-}
-?>
+{$radlinks}
 </ul>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

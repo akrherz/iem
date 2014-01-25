@@ -1,13 +1,40 @@
 <?php 
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
 $coopdb = iemdb("coop");
 
-$TITLE = "IEM | Current | Yearly Plots";
-$THISPAGE = "current-year";
-include("$rootpath/include/header.php"); 
-?>
-<h3>Selected Location Summary: 01 Jan thru <?php echo date("d M Y", time() - 86400); ?></h3>
+$t->title = "Yearly Plots";
+$t->thispage = "current-year";
+
+$table = "";
+$lkp = Array("IA0200" => "Ames", "IA2203" => "Des Moines",
+		"IA8706" => "Waterloo", "IA1319" => "Cedar Rapids",
+		"IA2364" => "Dubuque", "IA2110" => "Decorah",
+		"IA5230" => "Mason City", "IA7708" => "Sioux City",
+		"IA7613" => "Shenandoah", "IA4585" => "Lamoni", "IA4705" => "Davenport");
+$rs = pg_query($coopdb, "select o.station,
+   sum(gdd50(o.high, o.low)) as ogdd50, sum(o.precip) as oprecip,
+   sum(gdd50) as cgdd50, sum(c.precip) as cprecip,
+   max(o.high) as maxtmpf, min(o.low) as mintmpf,
+   avg( (o.high + o.low) / 2.0 ) as avgtmpf
+  from alldata o, climate51 c WHERE
+   c.station in ('IA0200', 'IA1319', 'IA2203','IA8706', 'IA2364', 'IA2110',
+    'IA5230', 'IA7708', 'IA7613', 'IA4585', 'IA4705')
+   and c.station = o.station
+   and day >= '".date("Y")."-01-01' and day <= '".date("Y")."-12-31'
+   and extract(doy from day) = extract(doy from valid)  GROUP by o.station
+   ORDER by o.station ASC");
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+	$table .= sprintf("<tr style=\"background: %s;\"><th>%s</th><td>%.0f</td><td>%.0f</td><td>%.2f</td><td>%.2f</td><td>%.0f</td><td>%.0f</td><td>%.0f</td></tr>",
+			($i % 2 == 0) ? "#eee": "#fff;", $lkp[$row["station"]], $row["ogdd50"], $row["cgdd50"], $row["oprecip"], $row["cprecip"],
+			$row["maxtmpf"], $row["mintmpf"], $row["avgtmpf"]);
+}
+
+$ds = date("d M Y", time() - 86400);
+$t->content = <<<EOF
+<h3>Selected Location Summary: 01 Jan thru {$ds}</h3>
 
 <p>These values are estimates based on the IEM's collection of various datasets.
 Climatology is based on observations back to 1951.
@@ -22,44 +49,21 @@ Climatology is based on observations back to 1951.
  <th>Observed</th><th>Climate</th>
  <th>Highest</th><th>Lowest</th><th>Average</th>
  </tr>
-<?php
-$lkp = Array("IA0200" => "Ames", "IA2203" => "Des Moines",
-      "IA8706" => "Waterloo", "IA1319" => "Cedar Rapids",
-      "IA2364" => "Dubuque", "IA2110" => "Decorah",
-      "IA5230" => "Mason City", "IA7708" => "Sioux City",
-      "IA7613" => "Shenandoah", "IA4585" => "Lamoni", "IA4705" => "Davenport");
-$rs = pg_query($coopdb, "select o.station, 
-   sum(gdd50(o.high, o.low)) as ogdd50, sum(o.precip) as oprecip, 
-   sum(gdd50) as cgdd50, sum(c.precip) as cprecip,
-   max(o.high) as maxtmpf, min(o.low) as mintmpf,
-   avg( (o.high + o.low) / 2.0 ) as avgtmpf
-  from alldata o, climate51 c WHERE 
-   c.station in ('IA0200', 'IA1319', 'IA2203','IA8706', 'IA2364', 'IA2110',
-    'IA5230', 'IA7708', 'IA7613', 'IA4585', 'IA4705') 
-   and c.station = o.station 
-   and day >= '".date("Y")."-01-01' and day <= '".date("Y")."-12-31' 
-   and extract(doy from day) = extract(doy from valid)  GROUP by o.station
-   ORDER by o.station ASC");
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
-  echo sprintf("<tr style=\"background: %s;\"><th>%s</th><td>%.0f</td><td>%.0f</td><td>%.2f</td><td>%.2f</td><td>%.0f</td><td>%.0f</td><td>%.0f</td></tr>", 
-  ($i % 2 == 0) ? "#eee": "#fff;", $lkp[$row["station"]], $row["ogdd50"], $row["cgdd50"], $row["oprecip"], $row["cprecip"], 
-  $row["maxtmpf"], $row["mintmpf"], $row["avgtmpf"]);
-}
-?>
+{$table}
 </table>
 
 
 <h4>Precipitation</h4>
 
-<ul class="iem-list">
- <li><a href="../data/summary/year/diff.png">Departure from normal</a></li>
- <li><a href="../data/summary/year/stage4obs.png">Stage4 estimates</a></li>
- <li><a href="../data/summary/year/normals.png">Normal accumulation</a></li>
+<ul>
+ <li><a href="/data/summary/year/diff.png">Departure from normal</a></li>
+ <li><a href="/data/summary/year/stage4obs.png">Stage4 estimates</a></li>
+ <li><a href="/data/summary/year/normals.png">Normal accumulation</a></li>
 </ul>
 
 
 <h4>Temperature</h4>
-<ul class="iem-list">
+<ul>
 <li><a href="/plotting/coop/climate_fe.php">Annual Average Temperatures</a></li>
 <li><a href="/plotting/coop/vyear_fe.php">Yearly Departures from Average</a></li>
 <li><a href="/COOP/freezing.php">Freezing Statistics</a></li>
@@ -69,7 +73,7 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 </ul>
 
 <h4>Past 4 Months</h4>
-<ul class="iem-list">
+<ul>
  <li><a href="/data/summary/4mon_stage4obs.png">Estimated accumulation</a></li>
  <li><a href="/data/summary/4mon_normals.png">Climatology</a></li>
  <li><a href="/data/summary/4mon_diff.png">Departure from normal</a></li>
@@ -77,10 +81,9 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 
 
 <h4>Winds</h4>
-<ul class="iem-list">
-<li><a href="http://mesonet.agron.iastate.edu/sites/windrose.phtml?station=DSM&network=IA_ASOS">Wind Roses</a></li>
+<ul">
+<li><a href="/sites/windrose.phtml?station=DSM&network=IA_ASOS">Wind Roses</a></li>
 </ul>
-
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

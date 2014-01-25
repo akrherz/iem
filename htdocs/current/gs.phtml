@@ -1,14 +1,40 @@
 <?php 
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
+include("../../include/database.inc.php");
 $coopdb = iemdb("coop");
 
-$THISPAGE = "current-gs";
-$TITLE = "IEM | Current | Growing Season Data";
-include("$rootpath/include/header.php"); 
-?>
+$t->thispage = "current-gs";
+$t->title = "Current Growing Season Data";
 
-<h3>Selected Location Summary: 01 May thru <?php echo date("d M Y", time() - 86400); ?></h3>
+$table = "";
+$lkp = Array("IA0200" => "Ames", "IA2203" => "Des Moines",
+		"IA8706" => "Waterloo", "IA1319" => "Cedar Rapids",
+		"IA2364" => "Dubuque", "IA2110" => "Decorah",
+		"IA5230" => "Mason City", "IA7708" => "Sioux City",
+		"IA7613" => "Shenandoah", "IA4585" => "Lamoni", "IA4705" => "Davenport");
+$rs = pg_query($coopdb, "select o.station,
+   sum(gdd50(o.high, o.low)) as ogdd50, sum(o.precip) as oprecip,
+   sum(gdd50) as cgdd50, sum(c.precip) as cprecip,
+   max(o.high) as maxtmpf, min(o.low) as mintmpf,
+   avg( (o.high + o.low) / 2.0 ) as avgtmpf
+  from alldata_ia o, climate51 c WHERE
+   c.station in ('IA0200', 'IA1319', 'IA2203','IA8706', 'IA2364', 'IA2110',
+    'IA5230', 'IA7708', 'IA7613', 'IA4585', 'IA4705')
+   and o.station = c.station
+   and day >= '".date("Y")."-05-01' and day < '".date("Y")."-10-01'
+   and extract(doy from day) = extract(doy from valid)  GROUP by o.station
+   ORDER by o.station ASC");
+for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+	$table .= sprintf("<tr style=\"background: %s;\"><th>%s</th><td>%.0f</td><td>%.0f</td><td>%.2f</td><td>%.2f</td><td>%.0f</td><td>%.0f</td><td>%.0f</td></tr>",
+			($i % 2 == 0) ? "#eee": "#fff;", $lkp[$row["station"]], $row["ogdd50"], $row["cgdd50"], $row["oprecip"], $row["cprecip"],
+			$row["maxtmpf"], $row["mintmpf"], $row["avgtmpf"]);
+}
+
+$d = date("d M Y", time() - 86400);
+$t->content = <<<EOF
+<h3>Selected Location Summary: 01 May thru {$d}</h3>
 
 <p>These values are estimates based on the IEM's collection of various datasets.
 Climatology is based on observations back to 1951.
@@ -23,35 +49,12 @@ Climatology is based on observations back to 1951.
  <th>Observed</th><th>Climate</th>
  <th>Highest</th><th>Lowest</th><th>Average</th>
  </tr>
-<?php
-$lkp = Array("IA0200" => "Ames", "IA2203" => "Des Moines",
-      "IA8706" => "Waterloo", "IA1319" => "Cedar Rapids",
-      "IA2364" => "Dubuque", "IA2110" => "Decorah",
-      "IA5230" => "Mason City", "IA7708" => "Sioux City", 
-      "IA7613" => "Shenandoah", "IA4585" => "Lamoni", "IA4705" => "Davenport");
-$rs = pg_query($coopdb, "select o.station, 
-   sum(gdd50(o.high, o.low)) as ogdd50, sum(o.precip) as oprecip, 
-   sum(gdd50) as cgdd50, sum(c.precip) as cprecip,
-   max(o.high) as maxtmpf, min(o.low) as mintmpf,
-   avg( (o.high + o.low) / 2.0 ) as avgtmpf
-  from alldata_ia o, climate51 c WHERE 
-   c.station in ('IA0200', 'IA1319', 'IA2203','IA8706', 'IA2364', 'IA2110',
-    'IA5230', 'IA7708', 'IA7613', 'IA4585', 'IA4705') 
-   and o.station = c.station 
-   and day >= '".date("Y")."-05-01' and day < '".date("Y")."-10-01' 
-   and extract(doy from day) = extract(doy from valid)  GROUP by o.station
-   ORDER by o.station ASC");
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
-  echo sprintf("<tr style=\"background: %s;\"><th>%s</th><td>%.0f</td><td>%.0f</td><td>%.2f</td><td>%.2f</td><td>%.0f</td><td>%.0f</td><td>%.0f</td></tr>", 
-  ($i % 2 == 0) ? "#eee": "#fff;", $lkp[$row["station"]], $row["ogdd50"], $row["cgdd50"], $row["oprecip"], $row["cprecip"], 
-  $row["maxtmpf"], $row["mintmpf"], $row["avgtmpf"]);
-}
-?>
+{$table}
 </table>
 
 <h3>Data Applications</h3>
 <ul>
-	<li><a href="../GIS/apps/coop/gsplot.phtml">Maps and Data Download</a>
+	<li><a href="/GIS/apps/coop/gsplot.phtml">Maps and Data Download</a>
 	<br />Accumulate Growing Degree Days, Stress Degree Days,
 	and precipitation for any growing season of your choice.</li>
 </ul>
@@ -64,6 +67,6 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
  <li>(base=65) May 1 - Today Observations: <a href="/data/summary/gdd_may1_6586.png">contour plot</a></li>
  <li>May 1 - Today Climatology: <a href="/data/summary/gdd_norm_may1.png">contour plot</a> or <a href="<?php echo $rooturl; ?>/data/summary/gdd_norm_may1_pt.png">value plot</a></li>
 </ul>
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

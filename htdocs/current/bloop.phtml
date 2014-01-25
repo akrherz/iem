@@ -1,22 +1,14 @@
 <?php
 include('../../config/settings.inc.php');
-include("$rootpath/include/cameras.inc.php");
-$java = isset($_GET["java"]) ? $_GET["java"] : 'applet';
-$cid = isset($_GET['cid']) ? $_GET['cid'] : 'KCCI-001';
-
-$THISPAGE = "webcam-loop";
-include("../../include/header.php"); 
+include('../../include/myview.php');
+$t = new MyView();
+include("../../include/cameras.inc.php");
 include("../../include/forms.php"); 
 
-?>
+$java = isset($_GET["java"]) ? $_GET["java"] : 'applet';
+$cid = isset($_GET['cid']) ? $_GET['cid'] : 'KCCI-016';
 
-<div id="justone">
-
-<?php
- /**
-  * bloop.phtml
-  */
-
+$t->thispage = "webcam-loop";
 
 $frames  = isset($_GET['frames']) ? $_GET['frames'] : 12;
 $interval = isset($_GET['interval']) ? $_GET['interval']: 300;
@@ -36,8 +28,9 @@ if ($nts > $szSwitch){
 }
 
 $now = time();
+$wmessage = "";
 if ($nts < $cameras[$cid]["sts"] || $nts > $cameras[$cid]["ets"]){
-  echo "<p><div class=\"warning\"><b>Error:</b> Your choice of time and station is outside of the archive available for this site!</div>\n";
+  $wmessage = "<p><div class=\"warning\"><b>Error:</b> Your choice of time and station is outside of the archive available for this site!</div>\n";
   $day = date("d", $cameras[$cid]["ets"] - 3600);
   $month = date("m", $cameras[$cid]["ets"] - 3600);
   $hour = date("H", $cameras[$cid]["ets"] - 3600);
@@ -57,95 +50,81 @@ for ($i=0; $i < (intval($frames));$i++){
     $frames = $i;
     break;
   }
-  $uri = "http://mesonet.agron.iastate.edu/archive/data/". gmdate('Y/m/d/', $ts) ."camera/$cid/". $cid ."_". gmdate('YmdHi', $ts) .".jpg";
+  $uri = "/archive/data/". gmdate('Y/m/d/', $ts) ."camera/$cid/". $cid ."_". gmdate('YmdHi', $ts) .".jpg";
   $labels[] = date("d M Y H:i a", $ts);
   $images[] = $uri;
   $files .= $uri .",";
 }
-?>
 
-<p>Still images are saved from the SchoolNet8 web cameras every 5 minutes.  
-This page gives you a tool to build animations from this archive of images.
-If your browser does not support java, please try the 'Java Script' loop tool.
-
-<form method="GET" action="bloop.phtml" name="imageform">
-
-<table>
-<tr><th>Camera (Archive Starts / Ends):</th><th>Year:</th><th>Month:</th><th>Day:</th><th>Hour:</th><th>Minute:</th></tr>
- <tr>
-  <td><select name="cid">
-<?php
- while (list($k,$v) = each($cameras)) {
-  if ($v["network"] == "IDOT"){ continue; }
-  $lbl = sprintf("%s (%s)", $v["name"], date("d M Y", $v["sts"]) );
-  echo "<option value=\"$k\"";
-  if ($cid == $k) echo "selected=\"selected\""; 
-  echo ">". $lbl ."\n";
+$cselect = "<select name=\"cid\">";
+while (list($k,$v) = each($cameras)) {
+	if ($v["network"] == "IDOT"){ continue; }
+	$lbl = sprintf("%s (%s)", $v["name"], date("d M Y", $v["sts"]) );
+	$cselect .= "<option value=\"$k\"";
+	if ($cid == $k) $cselect .= "selected=\"selected\"";
+	$cselect .= ">". $lbl ."\n";
 }
-?>
-</select>
-</td>
+$cselect .= "</select>";
+$ys = yearSelect(2003, $year, "year");
+$ms = monthSelect($month);
+$ds = daySelect($day);
+$hs = hourSelect($hour, "hour");
+$mi = minuteSelect($minute, "minute",5);
 
-<td><?php echo yearSelect(2003, $year, "year"); ?></td>
-<td><?php echo monthSelect($month); ?></td>
-<td><?php echo daySelect($day); ?></td>
-<td><?php echo hourSelect($hour, "hour"); ?></td>
-<td><?php echo minuteSelect($minute, "minute",5); ?></td>
-</tr>
-</table>
+$ar = Array(
+		"applet" => "Java Applet",
+		"script" => "Java Script",
+		"none" => "List Images",
+);
+$loopselect = make_select("java", $java, $ar);
 
-<table>
-<tr>
-<th>Frames:</th><td><input type="text" maxsize="2" size="3" name="frames" value="<?php echo $frames; ?>"></td>
-<th>Loop Tool:</th>
-<td>
-<select name="java">
-  <option value="applet" <?php if ($java == "applet") echo "selected=\"selected\""; ?>>Java Applet</option>
-  <option value="script" <?php if ($java == "script") echo "selected=\"selected\""; ?>>Java Script</option>
-  <option value="none" <?php if ($java == "none") echo "selected=\"selected\""; ?>>List Images (None)</option>
-</select>
-<th>Frame Interval:</th><td>
-<select name="interval">
-  <option value="60" <?php if ($interval == 60) echo "selected=\"selected\""; ?>>1 minute</option>
-  <option value="300" <?php if ($interval == 300) echo "selected=\"selected\""; ?>>5 minutes</option>
-  <option value="900" <?php if ($interval == 900) echo "selected=\"selected\""; ?>>15 minutes</option>
-  <option value="3600" <?php if ($interval == 3600) echo "selected=\"selected\""; ?>>1 hour</option>
-  <option value="86400" <?php if ($interval == 86400) echo "selected=\"selected\""; ?>>1 day</option>
-  <option value="604800" <?php if ($interval == 604800) echo "selected=\"selected\""; ?>>1 week</option>
-</select>
-</td></tr></table>
-<input type="submit" value="Gen Loop"></form>
+$ar = Array(
+		"60" => "1 minute",
+		"300" => "5 minutes",
+		"900" => "15 minutes",
+		"3600" => "1 hour",
+		"86400" => "1 day",
+		"604800" => "1 week",
+);
+$intselect = make_select("interval", $interval, $ar);
 
-<div style="text-align: center;">
-<?php if ($java == "applet") { ?>
-<applet codebase="http://mesonet.agron.iastate.edu/current/class/" code="AniS.class" width="<?php echo $width + 60; ?>" 
-	height="<?php echo $height + 80; ?>" alt="You must enable Java in your browser to view the radar loop">
+if ($java == "applet") { 
+	$w = $width + 60;
+	$h = $height + 80;
+	$control = <<<EOF
+<applet codebase="/current/class/" code="AniS.class" width="{$w}" 
+	height="{$h}" alt="You must enable Java in your browser to view the radar loop">
         <param name="controls" value="startstop, looprock, step, speed, toggle,
 zoom">
         <param name="rate" value="80">
  <param name="no_enh" value="true">
         <param name="pause_percent" value="800">
-        <param name="filenames" value="<?php echo $files; ?>">
+        <param name="filenames" value="{$files}">
 </applet>
-<?php } else if ($java == "script") { ?>
+EOF;
+} else if ($java == "script") {
+	$sz = sizeof($images); 
+	$mis = "";
+	$i = 0;
+	while ( list($key,$val) = each($images) ){
+		$mis .= "modImages[$i] = \"". $images[$i] ."\";\n";
+		$i++;
+	}
+	$control = <<<EOF
 <script LANGUAGE="JavaScript1.2" type="text/javascript">
 //<!--
 modImages = new Array();
-<?php
- $i = 0;
- while ( list($key,$val) = each($images) ){ 
-   echo "modImages[$i] = \"". $images[$i] ."\";\n";
-   $i++;
- } ?>
+{$mis}
 first_image = 1;
-last_image = <?php echo sizeof($images); ?>;
+last_image = {$sz};
 current_image = first_image;
 -->
 </script>
-<script language="JavaScript" src="../js/animation.js"></script>
+<script language="JavaScript" src="/js/animation.js"></script>
 
 
-<img NAME="animation" WIDTH="<?php echo $width; ?>" HEIGHT="<?php echo $height; ?>" SRC="../images/pixel.gif" ALT="Image" border="2" />
+<img NAME="animation" WIDTH="{$width}" HEIGHT="{$height}" 
+		SRC="/images/pixel.gif" ALT="Image" border="2" />
 
   <form METHOD="POST" NAME="control_form">
 <a HREF="JavaScript: func()" onClick="change_mode(1);reverse()"><img BORDER=0 SRC="../images/rev_button.gif" ALT="REV"></a>
@@ -159,26 +138,64 @@ current_image = first_image;
 launch();
 -->
 </script>
+EOF;
+} else {
+	$control = "";
+		while ( list($key,$val) = each($images) ){
+			$control .= sprintf("<img src=\"%s\" style=\"margin: 2px;\">", $val);
+		}
+}
 
-<?php 
-}  else {
-while ( list($key,$val) = each($images) ){ 
-  echo sprintf("<img src=\"%s\" style=\"margin: 2px;\">", $val);
+$imglinks = "";
+reset($images);
+while ( list($key, $value) = each($images) ){
+	$imglinks .= "<li><a href=\"". $images[$key] ."\">". $labels[$key] ."</a></li>";
 }
-}
-?>
+
+$t->content = <<<EOF
+<div id="justone">
+{$wmessage}
+
+<p>Still images are saved from the SchoolNet8 web cameras every 5 minutes.  
+This page gives you a tool to build animations from this archive of images.
+If your browser does not support java, please try the 'Java Script' loop tool.
+
+<form method="GET" action="bloop.phtml" name="imageform">
+
+<table>
+<tr><th>Camera (Archive Starts / Ends):</th>
+<th>Year:</th><th>Month:</th><th>Day:</th><th>Hour:</th><th>Minute:</th></tr>
+ <tr>
+  <td>{$cselect}
+</td>
+
+<td>{$ys}</td>
+<td>{$ms}</td>
+<td>{$ds}</td>
+<td>{$hs}</td>
+<td>{$mi}</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<th>Frames:</th><td><input type="text" maxsize="2" size="3" name="frames" value="{$frames}"></td>
+<th>Loop Tool:</th>
+<td>{$loopselect}</td>
+<th>Frame Interval:</th><td>
+{$intselect}
+</td></tr></table>
+<input type="submit" value="Gen Loop"></form>
+
+<div style="text-align: center;">
+{$control}
 </div>
 
 <p>Images used in this loop.<br>
 <ul>
-<?php 
-reset($images);
-while ( list($key, $value) = each($images) ){
-  echo "<li><a href=\"". $images[$key] ."\">". $labels[$key] ."</a></li>";
-}
-?>
+{$imglinks}
 </ul>
 </div>
-
-<?php
-include("../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
