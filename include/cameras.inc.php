@@ -21,6 +21,7 @@ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 			"name" => $row["name"],
 			"removed" => ($row["removed"] == 't'),
 			"active"=> ($row["online"] == 't'),
+			"is_vapix"=> ($row["is_vapix"] == 't'),
 			"lat"=> $row["lat"],
 			"lon"=> $row["lon"],
 			"state" => $row["state"],
