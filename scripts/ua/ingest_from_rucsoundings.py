@@ -221,6 +221,10 @@ def main():
         cursor = DBCONN.cursor()
         try:
             data = urllib2.urlopen(uri).read()
+        except Exception, exp:
+            print 'RAOB dl failed %s %s %s' % (sid, valid, exp)
+            return
+        try:
             for rob in parse( data, sid ):
                 nt.sts[sid]['count'] = len(rob.profile)
                 rob.database_save(cursor)
