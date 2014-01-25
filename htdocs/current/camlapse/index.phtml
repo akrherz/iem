@@ -1,14 +1,24 @@
 <?php 
 include("../../../config/settings.inc.php");
-include("$rootpath/include/cameras.inc.php");
-$TITLE = "IEM | Webcam Lapse Player";
-$HEADEXTRA = '
-<script type="text/javascript" src="flowplayer-3.2.11.min.js"></script>
+include("../../../include/myview.php");
+$t = new MyView();
+include("../../../include/cameras.inc.php");
+$t->title = "Webcam Lapse Player";
+$t->headextra = '
+<script type="text/javascript" src="flowplayer-3.2.13.min.js"></script>
 ';
-$THISPAGE = "webcam-lapse";
-include("$rootpath/include/header.php"); 
-?>
+$t->thispage = "webcam-lapse";
 
+$camselect = "<select id=\"mycam\" name=\"mycam\" onchange=\"myloader();\">";
+reset($cameras);
+while( list($key, $dict) = each($cameras) )
+{
+	if ($dict["removed"] || $dict["network"] == "IDOT"){ continue; }
+	$camselect .= "<option value=\"". $dict["moviebase"] ."\">". $dict["name"] ." \n";
+}
+$camselect .= "</select>";
+
+$t->content = <<<EOF
 <h3>Recent Web Cam Time Lapses</h3>
 
 <p>Each day, the IEM generates five time lapses from each of the web cameras.
@@ -20,16 +30,7 @@ note the timestamp on the lapses, some of them may be old.</p>
 <div id="player"  style="display:block;width:640px;height:490px;"></div>
 <form name="theform">
 <br /><strong>Select Camera:</strong>
-<select id="mycam" name="mycam" onchange="myloader();">
-<?php
-reset($cameras);
-while( list($key, $dict) = each($cameras) )
-{
-  if ($dict["removed"] || $dict["network"] == "IDOT"){ continue; }
-  echo "<option value=\"". $dict["moviebase"] ."\">". $dict["name"] ." \n";
-}
-?>
-</select>
+{$camselect}
 <strong>Select Lapse:</strong>
 <select id="mylapse" name="mylapse" onchange="myloader()">
  <option value="sunrise">Sunrise 
@@ -43,9 +44,9 @@ while( list($key, $dict) = each($cameras) )
 
 
 <script>
-flowplayer("player", "flowplayer-3.2.15.swf", {
+flowplayer("player", "flowplayer-3.2.18.swf", {
    clip:{
-    baseUrl:"http://mesonet.agron.iastate.edu/onsite/lapses/auto/",
+    baseUrl:"/onsite/lapses/auto/",
     url:"algona_sunrise.flv"}
    });
 
@@ -56,7 +57,7 @@ function myloader()
   var mylapse = document.theform.mylapse.value;
 	window.location.href = "#"+mycam+"_"+mylapse;
   var url =  mycam +"_"+ mylapse +".flv?"+ ts.getTime();
-  $f().play(url);
+  \$f().play(url);
 }
 
 var tokens = window.location.href.split('#');
@@ -73,5 +74,6 @@ if (tokens.length == 2){
 
 
 </script>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

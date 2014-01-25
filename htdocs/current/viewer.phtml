@@ -1,22 +1,35 @@
 <?php include("../../config/settings.inc.php");
- include("$rootpath/include/cameras.inc.php"); 
+include("../../include/myview.php");
+$t = new MyView();
+ include("../../include/cameras.inc.php"); 
  $id = isset($_GET["id"]) ? $_GET["id"] : "KCCI-001";
 
- $TITLE =  "Live Web Camera Shots";
- $THISPAGE = "webcam-viewer";
- $HEADEXTRA = "<script src='http://www.openlayers.org/api/2.12/OpenLayers.js'></script>
+ $t->title =  "Current + Live Web Camera Shots";
+ $t->thispage = "webcam-viewer";
+ $t->headextra = "<script src='http://www.openlayers.org/api/2.12/OpenLayers.js'></script>
  		<script src='https://maps.googleapis.com/maps/api/js?sensor=false' type='text/javascript'></script>";
- $BODYEXTRA = " onload='init()'";
- include("$rootpath/include/header.php");
+ $t->bodyextra = " onload='init()'";
 
-?>
+ $camselect = "";
+ $cnt = 0;
+ while (list($cid, $v) = each($cameras) ) {
+ 	if ($v["active"] && $v["network"] != "IDOT"){
+ 		if ($cnt % 5 == 0){ $camselect .= "<tr>"; }
+ 		$camselect .= "<td><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
+ 		if ($cid == $id) { $camselect .= "checked=\"checked\""; }
+ 		$camselect .= " onClick=\"setCameraFromForm();\">". $v["name"] ."</td>\n";
+ 		$cnt += 1;
+ 	}
+ }
+ 
+ $t->content = <<<EOF
 <script language="javascript">
 // <!--
 var map;
 var n0q;
 var jsonlayer;
 var selectControl;
-cameraID = "<?php echo $id; ?>";
+cameraID = "{$id}";
 ts = null;
 aqlive = 0;
 showlogo = 1;
@@ -53,7 +66,7 @@ function updateHREF(){
 function refreshCamera()
 {
     ts = new Date();
-    imgurl = "http://mesonet.agron.iastate.edu/data/camera/640x480/"+ cameraID +".jpg?"+ ts.getTime();
+    imgurl = "/data/camera/640x480/"+ cameraID +".jpg?"+ ts.getTime();
     document.camera.src = imgurl;
 }
 function refreshRADAR(){
@@ -98,7 +111,7 @@ function init()
 	       'default': {
 	    	   externalGraphic: "/images/yellow_arrow.png",
                graphicHeight: 20,
-               rotation: "${angle}",
+               rotation: "\${angle}",
 	           strokeOpacity: 1
 	       },
 	       'select': {
@@ -147,7 +160,7 @@ function init()
 		}
 	   n0q = new OpenLayers.Layer.TMS(
 		        'NEXRAD Base Reflectivity',
-		        'http://mesonet.agron.iastate.edu/cache/tile.py/',
+		        '/cache/tile.py/',
 		        {layername      : 'nexrad-n0q-900913',
 		        service         : '1.0.0',
 		        type            : 'png',
@@ -198,7 +211,7 @@ function switchRADAR(){
 <tr><td valign="top">
 
 <div style="float: left; z-index: 2; border: 10px #000 solid;">
-<img name="camera" src="http://mesonet.agron.iastate.edu/data/camera/640x480/<?php echo $id; ?>.jpg" />
+<img name="camera" src="/data/camera/640x480/{$id}.jpg" />
 </div>
 
 </td><td valign="top">
@@ -232,18 +245,7 @@ function switchRADAR(){
 <div>
 <b>Select Camera:</b>
 <table width="100%" style="text-align: left;">
-<?php
-$cnt = 0;
-while (list($cid, $v) = each($cameras) ) {
- if ($v["active"] && $v["network"] != "IDOT"){
-    if ($cnt % 5 == 0){ echo "<tr>"; }
-	echo "<td><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
-	if ($cid == $id) { echo "checked=\"checked\""; }
-	echo " onClick=\"setCameraFromForm();\">". $v["name"] ."</td>\n";
-    $cnt += 1;
- }
-} 
-?>
+{$camselect}
 </table>
 
 <p><input type="submit" onclick="liveShot(); return false;" value="Live Shot!"></p>
@@ -269,6 +271,6 @@ seconds to contact the camera.  When the display refreshes
 by itself, the image is coming from a cache which may be up to 5 minutes old.
 This is done since bandwidth to the cameras is limited.</p>
 </div>
-
-</body>
-</html>
+EOF;
+$t->render('single.phtml');
+?>

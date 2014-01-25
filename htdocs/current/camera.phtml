@@ -1,7 +1,10 @@
 <?php 
  include("../../config/settings.inc.php");
-include("$rootpath/include/iemprop.php");
-$camera_refresh = get_iemprop("webcam.interval");
+ include("../../include/iemprop.php");
+ $camera_refresh = get_iemprop("webcam.interval");
+ include("../../include/myview.php");
+ include("../../include/forms.php"); 
+ $t = new MyView();
 /* CGI GET Requests */
  $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
  $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
@@ -18,8 +21,8 @@ $camera_refresh = get_iemprop("webcam.interval");
  $radts = time();
  }
  $num = 1;
- include("$rootpath/include/cameras.inc.php");
-if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
+ include("../../include/cameras.inc.php");
+ if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
  while (list($id, $val) = each($cameras))
  {
     if ($cameras[$id]["network"] != $network) continue;
@@ -37,9 +40,9 @@ if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
     $ts5 = mktime($hour, $minute - ($minute % 5), 0, $month, $day, $year);
 
     $fp = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
-    $url = "$rooturl/archive/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
+    $url = "/archive/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
     $fp5 = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
-    $url5 = "http://mesonet.agron.iastate.edu/archive/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
+    $url5 = "/archive/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
 
     if (is_file($fp)) $cameras[$id]["url"] = $url;
     else if (is_file($fp5)) $cameras[$id]["url"] = $url5;
@@ -52,37 +55,95 @@ if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
 
 reset($cameras);
 
-	$TITLE = "IEM | Web Cameras";
+$t->thispage = "webcam-still";
+$t->title = "Web Cameras";
+
 if (! $isarchive)
-	$REFRESH = "<meta http-equiv=\"refresh\" content=\"${camera_refresh};\">";
-    $THISPAGE = "webcam-still";
-	include("$rootpath/include/header.php"); 
-	include("$rootpath/include/forms.php"); 
+	$t->refresh = "<meta http-equiv=\"refresh\" content=\"${camera_refresh};\">";
 
 $selback = Array("KELO" => "#fff", "KCCI" => "#fff", "KCRG" => "#fff");
 $selback[$network] = "#ffcc99";
-?>
 
+$isarchived = ($isarchive) ? " CHECKED=CHECKED": "" ;
+$ys = yearSelect(2003, $year, "year");
+$ms = monthSelect($month, "month");
+$ds = daySelect($day, "day");
+$hs = hourSelect($hour, "hour");
+$ms = minuteSelect($minute, "minute");
+$dd = date("YmdHi", $radts);
+
+
+$misstxt = "Cameras Missing: ";
+reset($cameras);
+$control = "";
+while (list($id, $v) = each($cameras))
+{
+	if ($v["network"] != $network){ continue; }
+	if (! $v["active"] ){
+		$misstxt .= $v["name"] ." , ";
+		continue;
+	}
+	$control .= sprintf("<div style=\"float: left; margin-left: 5px;\"><b>%s. %s, %s</b> (%s County)<br /><img src=\"%s\"></div>", $v["num"], $v["name"], $v["state"], $v["county"], $v["url"]);
+}
+
+$t->content = <<<EOF
 
 <strong>Webcam Networks</strong>
 <div style="width:775px; border: 1px dashed #ccc;">
-<div style="float: left; width: 250px; text-align: center; border: 3px #eee solid; background: <?php echo $selback["KCCI"]; ?>;">
+<div style="float: left; width: 250px; text-align: center; border: 3px #eee solid; background: {$selback["KCCI"]}">
   <a href="camera.phtml?network=KCCI">KCCI-TV<br />Des Moines, IA</a>
 </div>
-<div style="float: left; width: 250px; text-align: center; border: 3px #eee solid; background: <?php echo $selback["KCRG"]; ?>;">
+<div style="float: left; width: 250px; text-align: center; border: 3px #eee solid; background: {$selback["KCRG"]}">
   <a href="camera.phtml?network=KCRG">KCRG-TV<br />Cedar Rapids, IA</a>
 </div>
-<div style="float: left; width: 250px; text-align: center; border: 3px #eee solid; background: <?php echo $selback["KELO"]; ?>;">
+<div style="float: left; width: 250px; text-align: center; border: 3px #eee solid; background: {$selback["KELO"]}">
   <a href="camera.phtml?network=KELO">KELO-TV<br />Sioux Falls, SD</a>
 </div>
 <br clear="all" />
 </div>
 
 
-<?php 
-  if ($network == "KCCI") { include("kccicam.php"); }
-  elseif ($network == "KELO") { include("kelocam.php"); }
-  elseif ($network == "KCRG") { include("kcrgcam.php"); }
-?>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<form method="GET" action="camera.phtml">
+<input type="hidden" value="{$network}" name="network"> 
+<table><caption>Time Settings:</caption>
+<thead><tr><th>&nbsp;</th><th>Year:</th><th>Month:</th><th>Day:</th><th>Hour:</th><th>Minute</th><td></td></tr></thead>
+<tbody>
+<tr>
+<td><input type="checkbox" value="yes" name="archive" {$isarchived}>Archived Images</td>
+<td>{$ys}</td>
+<td>{$ms}</td>
+<td>{$ds}</td>
+<td>{$hs}</td>
+<td>{$ms}</td>
+<td><input type="submit" value="GO!"></td>
+</tr>
+</tbody></table>
+</form>
+
+<div style="float: left; margin-left: 5px;"><b>Radar View</b><br />
+<img src="camrad.php?network={$network}&ts={$dd}"></div>
+
+
+{$control}
+{$misstxt}
+
+
+
+<br style="clear: both;">
+
+<p><b>Cool Shots!</b>
+<ul>
+ <li><a href="camera.phtml?archive=yes&year=2004&month=6&day=11&hour=19&minute=32">11 Jun 2004 - 7:32 PM, Webster City Tornado</a></li>
+ <li><a href="camera.phtml?archive=yes&year=2005&month=5&day=26&hour=19&minute=15">26 May 2005 - 7:15 PM, Pella Double Rainbow</a></li>
+ <li><a href="camera.phtml?archive=yes&year=2005&month=6&day=8&hour=20&minute=55">8 Jun 2005 - 8:55 PM, All sorts of colours</a></li>
+ <li><a href="camera.phtml?archive=yes&year=2005&month=9&day=8&hour=12&minute=30">8 Sep 2005 - 12:30 PM, Blurry shot of Ames Tornado</a></li>
+ <li><a href="camera.phtml?archive=yes&year=2005&month=11&day=12&hour=16&minute=38">12 Nov 2005 - 4:38 PM, Woodward tornado from Madrid</a></li>
+ <li><a href="camera.phtml?archive=yes&year=2005&month=11&day=12&hour=17&minute=00">12 Nov 2005 - 5:00 PM, Ames tornado</a></li>
+ <li><a href="camera.phtml?archive=yes&year=2006&month=07&day=17&hour=16&minute=50">17 Jul 2006 - 4:50 PM, Tama possible brief tornado</a></li>
+ <li><a href="camera.phtml?archive=yes&year=2007&month=10&day=2&hour=17&minute=56">2 Oct 2007 - 5:56 PM, Twin Cedars possible tornado</a></li>
+ <li><a href="camera.phtml?archive=yes&year=2008&month=8&day=30&hour=20&minute=20">30 Aug 2008 - 8:20 PM, Interesting Sunset Halos</a></li>
+</ul>
+EOF;
+$t->render('single.phtml');
+?>

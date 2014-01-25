@@ -40,9 +40,11 @@ $ip = $cameras[$id]["ip"];
 $u = $camera_user[ $cameras[$id]['network'] ];
 $p = $camera_pass[ $cameras[$id]['network'] ];
 $port = $cameras[$id]['port'];
-// TODO: not worky for VAPIX webcams
-$im = @imagecreatefromjpeg("http://${u}:${p}@$ip:${port}/-wvhttp-01-/GetOneShot");
-
+if ($cameras[$id]["is_vapix"]){
+	$im = @imagecreatefromjpeg("http://${u}:${p}@$ip:${port}/axis-cgi/jpg/image.cgi?resolution=640x480");
+} else {
+	$im = @imagecreatefromjpeg("http://${u}:${p}@$ip:${port}/-wvhttp-01-/GetOneShot");
+}
 if (! $im ){
 	fail_image();
 }
