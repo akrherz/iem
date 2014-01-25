@@ -81,7 +81,25 @@ class IEMAccess {
     }
     return $ret;
   }
-
+  function getState($state) {
+  	$ret = Array();
+  	$rs = pg_prepare($this->dbconn, "STATESELECT", sprintf("select *,
+    ST_x(s.geom) as x, ST_y(s.geom) as y, valid at time zone '%s' as lvalid,
+    max_gust_ts at time zone '%s' as lmax_gust_ts,
+    max_sknt_ts at time zone '%s' as lmax_sknt_ts,
+    s.name as sname from
+    current c2, summary_%s c, stations s WHERE
+    s.state = $1 and (s.network ~* 'RWIS' or s.network ~* 'ASOS' or
+  			s.network in ('KCCI','KELO','KIMT')) 
+    and c.day = 'TODAY'
+    and c2.valid > 'TODAY' and c2.iemid = c.iemid and c.iemid = s.iemid",
+  			$this->tzname, $this->tzname, $this->tzname, date("Y")));
+  	$rs = pg_execute($this->dbconn, "STATESELECT", Array($state));
+  	for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+  		$ret[$row["id"]] = new IEMAccessOb($row);
+  	}
+  	return $ret;
+  }
   function getWFO($wfo) {
     $ret = Array();
     $rs = pg_exec($this->dbconn, sprintf("select *, 
