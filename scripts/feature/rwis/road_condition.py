@@ -97,7 +97,7 @@ ax.set_xticklabels(xticklabels)
 ax.set_xlim(min(obvalid), max(obvalid))
 #ax.set_ylim(24,36)
 ax.set_ylim(top=41)
-ax.set_ylabel("Air Temperature $^{\circ}\mathrm{F}$")
+ax.set_ylabel("Temperature $^{\circ}\mathrm{F}$")
 
 ax.text( obvalid[-8], 23.75, "Completely Covered", color='r')
 ax.text( obvalid[-12], 27.25, "Partially Covered", color='y')
