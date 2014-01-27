@@ -14,6 +14,20 @@ import pytz
 import numpy as np
 from pyiem.datatypes import temperature
 
+def get_latest_time():
+    ''' Figure out the latest model runtime '''
+    utc = datetime.datetime.utcnow()
+    utc = utc.replace(tzinfo=pytz.timezone("UTC"))
+    utc = utc.replace(hour=12,minute=0,second=0,microsecond=0)
+    limit = 24
+    while not os.path.isfile(
+                utc.strftime("/mesonet/share/frost/%Y%m%d%H%M_iaoutput.nc")):
+        utc -= datetime.timedelta(hours=12)
+        limit -= 1
+        if limit < 0:
+            return None
+    return utc 
+
 def get_times(nc):
     ''' Return array of datetimes for the time array '''
     tm = nc.variables['time']
@@ -31,11 +45,30 @@ def get_ij(lon, lat, nc):
             (nc.variables['lat'][:] - lat)**2)**.5
     return np.unravel_index(np.argmin(dist), dist.shape)
 
+def get_icond_color(val):
+    if val is None or val == -1:
+        return 'none'
+    colors = ['white', 'tan', 'orange', 'blue', 'purple', 'green']
+    try:
+        return colors[val]
+    except:
+        return 'none'
+
+def get_ifrost_color(val):
+    if val is None or val == -1:
+        return 'none'
+    colors = ['#EEEEEE', 'r']
+    try:
+        return colors[val]
+    except:
+        return 'none'
+
 def process(lon, lat):
     ''' Generate a plot for this given combination '''
     (fig, ax) = plt.subplots(1,1)
-    
-    nc = netCDF4.Dataset("/mesonet/share/frost/201401270000_iaoutput.nc")
+    modelts = get_latest_time()
+    nc = netCDF4.Dataset(
+            modelts.strftime("/mesonet/share/frost/%Y%m%d%H%M_iaoutput.nc"),'r')
     times = get_times(nc)
     i, j = get_ij(lon, lat, nc)
     
@@ -45,16 +78,34 @@ def process(lon, lat):
             color='r', label='Air Temp')
     ax.plot(times, temperature(nc.variables['dwpk'][:,i,j], 'K').value("F"),
             color='g', label='Dew Point')
-    ax.set_ylim(-30,150)
-    ax.set_title("i: %s j:%s" % (i, j))
+    #ax.set_ylim(-30,150)
+    ax.set_title(("ISUMM5 BridgeT Timeseries\n"
+                 +"i: %s j:%s lon: %.2f lat: %.2f Model Run: %s") % (i, j,
+                    nc.variables['lon'][i,j], nc.variables['lat'][i,j],
+                    modelts.astimezone(pytz.timezone("America/Chicago")).strftime(
+                            "%-d %b %Y %-I:%M %p")))
+    
     ax.xaxis.set_major_locator(
                                mdates.DayLocator(interval=1,
                                         tz=pytz.timezone("America/Chicago"))
                                )
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%d %b\n%Y',
                                         tz=pytz.timezone("America/Chicago")))
+    ax.axhline(32, linestyle='-.')
     ax.grid(True)
+    ax.set_ylabel("Temperature $^\circ$F")
     ax.legend(loc='best')
+
+    (ymin, ymax) = ax.get_ylim()
+
+    for i2, ifrost in enumerate(nc.variables['ifrost'][:-1,i,j]):
+        ax.barh(ymax-1, 1.0/24.0/4.0, left=times[i2], 
+                fc=get_ifrost_color(ifrost), ec='none')
+    for i2, icond in enumerate(nc.variables['icond'][:-1,i,j]):
+        ax.barh(ymax-2, 1.0/24.0/4.0, left=times[i2], 
+                fc=get_icond_color(icond), ec='none')
+        
+    
     sys.stdout.write("Content-Type: image/png\n\n")
     fig.savefig( sys.stdout, format="png")
 
