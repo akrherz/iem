@@ -1,11 +1,102 @@
 <?php 
-    include("../../config/settings.inc.php");
-	$title = "IEM | Frost Forecasting";
-	include("$rootpath/include/header.php"); 
-?>
+include("../../config/settings.inc.php");
+include("../../include/myview.php");
 
+$t = new MyView();
+$t->title = "Frost Forecasting";
+$t->headextra = <<<EOF
+<script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+<style>
+  #map {
+    width: 500px;
+    height: 400px;
+    float: left;
+  }
+</style>
+<script type="text/javascript">
+function updateMarkerPosition(latLng) {
+        //console.log(latLng.lat() +'-'+ latLng.lng());
+		$('#frost_ts').attr('src', "frost_ts_"+ latLng.lng() +"_"+ latLng.lat() +".png")
+}
+function initialize() {
+        var latLng = new google.maps.LatLng(41.53, -93.653);
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 5,
+            center: latLng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+          var marker = new google.maps.Marker({
+            position: latLng,
+            title: 'Point A',
+            map: map,
+            draggable: true
+        });
 
-<BR>
+          google.maps.event.addListener(marker, 'dragend', function() {
+            updateMarkerPosition(marker.getPosition());
+          });
+}
+
+// Onload handler to fire off the app.
+google.maps.event.addDomListener(window, 'load', initialize);
+
+</script>
+
+EOF;
+
+$table = "<table border=1 cellspacing=0 cellpadding=2>
+<tr><th colspan=49>00Z Output</th></tr>
+<tr>
+<td>Product:</td>";
+for($i=1;$i<73;$i++){
+	$table .= "<td>". $i ."</td>";
+}
+$table .= "</tr>
+<tr>
+ <th>Frost Depth:</th>";
+ for($i=1;$i<73;$i++){
+   $table .= sprintf("<td><a href=\"/data/model/frost/00/frostd_00_f%03d.png\">X</a></td>", $i);
+ }
+$table .= "</tr>
+<tr>
+ <th>Frost Present?:</th>";
+ for($i=1;$i<73;$i++){
+   $table .= sprintf("<td><a href=\"/data/model/frost/00/ifrost_00_f%03d.png\">X</a></td>", $i);
+ }
+$table ."</tr>
+<tr>
+ <th>Bridget Deck Temp:</th>";
+ for($i=1;$i<73;$i++){
+   $table .= sprintf("<td><a href=\"/data/model/frost/00/bdeckt_00_f%03d.png\">X</a></td>", $i);
+ }
+ $table .= "</tr>
+<tr><th colspan=49>12Z Output</th></tr>
+<tr>
+ <th>Frost Depth:</th>";
+ for($i=1;$i<73;$i++){
+   $table .= sprintf("<td><a href=\"/data/model/frost/12/frostd_12_f%03d.png\">X</a></td>", $i);
+ }
+$table .= "</tr>
+<tr>
+ <th>Frost Present?:</th>";
+ for($i=1;$i<73;$i++){
+   $table .= sprintf("<td><a href=\"/data/model/frost/12/ifrost_12_f%03d.png\">X</a></td>", $i);
+ }
+$table .= "</tr>
+<tr>
+ <th>Bridget Deck Temp:</th>";
+ for($i=1;$i<73;$i++){
+   $table .= sprintf("<td><a href=\"/data/model/frost/12/bdeckt_12_f%03d.png\">X</a></td>", $i);
+ }
+$table .= "</tr>
+</table>";
+
+$t->content = <<<EOF
+
+<div class="row">
+ <div class="col-md-6"><div id="map"></div></div>
+ <div class="col-md-6"><img id="frost_ts" src="frost_ts_-93.5_42.1.png" class="img img-responsive"></div>
+</div>
 
 <table><tr><td valign="top">
 <img align="left" src="images/Station_bridge.jpg"></td><td>
@@ -42,59 +133,7 @@ currents</a></li></ul>
 
 <h2 class="subtitle">Output graphics:</h2>
 
-<table border=1 cellspacing=0 cellpadding=2>
-<tr><th colspan=49>00Z Output</th></tr>
-<tr>
- <td>Product:</td>
-<?php
- for($i=1;$i<73;$i++){
-   echo "<td>". $i ."</td>";
- }
-?></tr>
-<tr>
- <th>Frost Depth:</th>
-<?php
- for($i=1;$i<73;$i++){
-   echo sprintf("<td><a href=\"/data/model/frost/00/frostd_00_f%03d.png\">X</a></td>", $i);
- }
-?></tr>
-<tr>
- <th>Frost Present?:</th>
-<?php
- for($i=1;$i<73;$i++){
-   echo sprintf("<td><a href=\"/data/model/frost/00/ifrost_00_f%03d.png\">X</a></td>", $i);
- }
-?></tr>
-<tr>
- <th>Bridget Deck Temp:</th>
-<?php
- for($i=1;$i<73;$i++){
-   echo sprintf("<td><a href=\"/data/model/frost/00/bdeckt_00_f%03d.png\">X</a></td>", $i);
- }
-?></tr>
-<tr><th colspan=49>12Z Output</th></tr>
-<tr>
- <th>Frost Depth:</th>
-<?php
- for($i=1;$i<73;$i++){
-   echo sprintf("<td><a href=\"/data/model/frost/12/frostd_12_f%03d.png\">X</a></td>", $i);
- }
-?></tr>
-<tr>
- <th>Frost Present?:</th>
-<?php
- for($i=1;$i<73;$i++){
-   echo sprintf("<td><a href=\"/data/model/frost/12/ifrost_12_f%03d.png\">X</a></td>", $i);
- }
-?></tr>
-<tr>
- <th>Bridget Deck Temp:</th>
-<?php
- for($i=1;$i<73;$i++){
-   echo sprintf("<td><a href=\"/data/model/frost/12/bdeckt_12_f%03d.png\">X</a></td>", $i);
- }
-?></tr>
-</table>
+{$table}
 
 <p><b>View a loop!</b> <form name="loop" method="GET" action="loop/index.phtml">
 <select name="prod">
@@ -132,5 +171,6 @@ currents</a></li></ul>
 
 <BR><BR>
 -->
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
