@@ -1,20 +1,20 @@
 <?php 
 include("../../config/settings.inc.php");
+include("../../include/myview.php");
 define("IEM_APPID", 19);
-$THISPAGE = "archive-main";
-$TITLE = "IEM | Archived Data Resources";
-include("$rootpath/include/header.php"); ?>
+$t = new MyView();
+$t->thispage = "archive-main";
+$t->title = "Archived Data Resources";
 
-<div style="width:800px;">
+$t->content = <<<EOF
+<h3>Archived Data & Plots</h3>
 
-<h3 class="heading">Archived Data & Plots</h3>
-
-<p class="story">This page contains a listing of archive resources.  A brief
+<p>This page contains a listing of archive resources.  A brief
 description of each link is included to aid your search.  If you are still
 having difficulty finding something, please let us know. </p>
 
-<div style="width:390px; float:left;">
-
+<div class="row"><div class="col-md-6 col-sm-6">
+		
 <h3>Storm Event Pictures</h3>
 <ul>
  <li><a href="/cases/060413/">13 April 2006</a>
@@ -71,8 +71,7 @@ then, only base reflectivity was saved.</li>
  <li><a href="http://stormtrack.nssl.noaa.gov/">NSSL Storm Tracker</a>
  <br />Current and archived satellite imagery along with some derived products.</li>
 </ul>
-</div>
-<div style="width:390px; float:right;">
+
 
 <h3>NWS Text Products</h3>
 <br />The IEM archives all NWS issued text products.  Unfortunately, the we 
@@ -90,7 +89,9 @@ this data back to 2001.  The IEM's archives can be found:
   <br />Daily reports of record temperatures and precipitation for
    Iowa since November 2001</li>
 </ul>
-
+		
+</div><div class="col-md-6 col-sm-6">
+		
 <h3>Raw Data</h3>
 <ul>
  <li><a href="/archive/data/">Bufkit archive</a>
@@ -187,10 +188,10 @@ quickly find precipitation totals.</li>
 This dataset contains the raw observations.</li>
 
 </ul>
-</div>
+</div></div>
 
 <p style="clear: both;">Are we forgetting something?  Please let us know of other
 archives that are available for Iowa data.</p>
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

@@ -1,10 +1,16 @@
 <?php 
 include("../../config/settings.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
 define("IEM_APPID", 20);
-$THISPAGE = "archive-schema";
-$TITLE = "IEM | Archived Data Schema";
-include("$rootpath/include/header.php"); ?>
+$t->thispage = "archive-schema";
+$t->title = "Archived Data Schema";
 
+$url = sprintf("http://mesonet.agron.iastate.edu/archive/data/%s", gmdate('Y/m/d'));
+$u = sprintf("<a href=\"%s\">%s</a>\n", $url, $url);
+$d = 
+
+$t->content = <<<EOF
 <div style="width:800px;">
 
 <h3 class="heading">Archived Data Schema</h3>
@@ -12,11 +18,8 @@ include("$rootpath/include/header.php"); ?>
 <p class="story">The IEM stores
 most of its archive in a web accessible directory tree structure.  Here is
 the storage schema for today's data:</p>
-<?php
-$url = sprintf("http://mesonet.agron.iastate.edu/archive/data/%s", gmdate('Y/m/d'));
-?>
 <pre>
-ROOT=<?php echo sprintf("<a href=\"%s\">%s</a>\n", $url, $url);?>
+ROOT={$u}
 |- base folder full of various images for the date 
 |- GIS
    |- NWS coop obs shapefile and road conditions shapefile per update
@@ -58,5 +61,6 @@ ROOT=<?php echo sprintf("<a href=\"%s\">%s</a>\n", $url, $url);?>
 </pre>
 
 </div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
