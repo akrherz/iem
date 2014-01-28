@@ -7,6 +7,7 @@ import util
 import datetime
 import pytz
 import smtplib
+import time
 
 rtype_xref = {
 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'MS Excel',
@@ -55,7 +56,12 @@ tablerows = []
 while 1:
     loopcount += 1
     #print 'looping [%s] changestamp [%s]' % (loopcount, changestamp)
-    feed = docs_client.get_changes(expand_acl=True, changestamp=changestamp)
+    try:
+        feed = docs_client.get_changes(expand_acl=True, changestamp=changestamp)
+    except Exception, exp:
+        print 'docs_client.get_changes got error: %s' % (exp,)
+        time.sleep(10)
+        continue
     count = 0
     for entry in feed.entry:
         #edited = entry.get_elements('edited')
