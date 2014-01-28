@@ -130,7 +130,11 @@ for fn in fp.keys():
             continue
         if tokens[0] == '':
             continue
-        ts = mx.DateTime.strptime(tokens[0][:16], '%Y-%m-%d %H:%M')
+        try:
+            ts = mx.DateTime.strptime(tokens[0][:16], '%Y-%m-%d %H:%M')
+        except:
+            print '%s line: %s has invalid time %s' %(fn, linenum, tokens[0])
+            continue
         if ts < maxts.get(station, mx.DateTime.DateTime(2011,1,1)):
             continue
         if not data[station].has_key(ts):
