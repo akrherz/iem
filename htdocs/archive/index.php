@@ -151,9 +151,6 @@ weather.</li>
 <li><a href="http://www.ncdc.noaa.gov/ussc/USSCAppController?action=map">NCDC Snow Climatologies</a>
 <br />Lots of great statistics on snowfall and snow depth.</li>
 
-<li><a href="http://archive.nssl.noaa.gov/">NSSL Archive</a>
-<br>Archive of model, warnings, and some other meteorological data.</li>
-
 <li><a href="http://www.pals.iastate.edu/archivewx/data/">PALS WX Image Archive</a><br />The PALS website generates hourly plots of US weather.  Of interest are
 archives of RUC, ETA, and AVN model plots.  National radar summaries, 
 surface plots and other plots.</li>
