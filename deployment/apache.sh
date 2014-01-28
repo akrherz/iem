@@ -2,7 +2,7 @@
 # Deployment script for apache!
 SVNROOT="/mesonet/www/apps/iemwebsite"
 
-SSLIP=$(ifconfig eth0:1 | awk -F':' '/inet addr/&&!/127.0.0.1/{split($2,_," ");print _[1]}')
+SSLIP=$(ifconfig eth0:0 | awk -F':' '/inet addr/&&!/127.0.0.1/{split($2,_," ");print _[1]}')
 if [ -z "$SSLIP"  ] 
 then
 	SSLIP="*"
