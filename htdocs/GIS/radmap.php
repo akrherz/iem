@@ -114,9 +114,11 @@ if (isset($_GET["vtec"]))
 {
   $tokens = explode(".", $_GET["vtec"]);
   if (sizeof($tokens) == 7){
-    list($year, $pclass, $status, $wfo, $phenomena, $significance, $eventid) = explode(".", $_GET["vtec"]);
+    list($year, $pclass, $status, $wfo, $phenomena, $significance, 
+    		$eventid) = explode(".", strtoupper($_REQUEST["vtec"]));
   } else {
-    list($year, $wfo, $phenomena, $significance, $eventid) = explode(".", $_GET["vtec"]);
+    list($year, $wfo, $phenomena, $significance, 
+    		$eventid) = explode(".", strtoupper($_REQUEST["vtec"]));
   }
   $eventid = intval($eventid);
   $year = intval($year);
