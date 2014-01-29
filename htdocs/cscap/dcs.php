@@ -45,7 +45,7 @@ function radio($varname, $vals){
  
  
 
-<script src="oauth2.js?v=11"></script>
+<script src="oauth2.js?v=12"></script>
 
 <style type="text/css">
 .ui-widget{
