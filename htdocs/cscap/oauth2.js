@@ -307,7 +307,8 @@ function handleClientLoad() {
 	}
 
 	function checkAuth() {
-	  gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: true}, handleAuthResult);
+	  gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: true,
+		  include_granted_scopes:false}, handleAuthResult);
 	}
 
 	function handleAuthResult(authResult) {
@@ -328,7 +329,8 @@ function handleClientLoad() {
 	}
 
 	function handleAuthClick(event) {
-	  gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, 
+	  gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false,
+		  include_granted_scopes:false}, 
 			  handleAuthResult);
 	  return false;
 	}
