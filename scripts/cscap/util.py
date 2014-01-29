@@ -156,6 +156,18 @@ class Spreadsheet(object):
                                                             self.spr_client,
                                                              entry )
 
+def get_xref_siteids_plotids(spr_client, config):
+    ''' Get a dict of site IDs with a list of plot IDs for each '''
+    spreadkeys = get_xref_plotids(spr_client, config)
+    data = {}
+    for uniqueid in spreadkeys.keys():
+        data[uniqueid.lower()] = []
+        feed = spr_client.get_list_feed(spreadkeys[uniqueid], 'od6')
+        for entry in feed.entry:
+            d = entry.to_dict()
+            data[uniqueid.lower()].append( d['plotid'].lower() )
+    return data
+
 def get_xref_plotids(spr_client, config):
     ''' Build the xreference of siteID to plotid spreadsheet keys '''
     feed = spr_client.get_list_feed(config.get('cscap', 'metamaster'), 'od6')
