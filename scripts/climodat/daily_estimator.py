@@ -24,34 +24,33 @@ Steps:
  2) Compute precip
  3) Look for snow obs
  4) Initialize entries in the table
- 5) Run estimate for Iowa Average Site (ia0000)
+ 5) Run estimate for Iowa Average Site (IA0000)
 """
-import sys, os
+import sys
 from pyiem import iemre
 import network
-import iemplot
-import mx.DateTime
+import datetime
+import pytz
 import numpy
 import Ngl
 import netCDF4
-import iemdb
+import os
+import psycopg2
 import psycopg2.extras
-COOP = iemdb.connect('coop')
+COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-IEM = iemdb.connect('iem')
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-
 
 state = sys.argv[1]
 
 nt = network.Table("%sCLIMATE" % (state.upper(),))
-for id in nt.sts.keys():
-    i,j = iemre.find_ij(nt.sts[id]['lon'], nt.sts[id]['lat'])
-    nt.sts[id]['gridi'] = i
-    nt.sts[id]['gridj'] = j
+for sid in nt.sts.keys():
+    i,j = iemre.find_ij(nt.sts[sid]['lon'], nt.sts[sid]['lat'])
+    nt.sts[sid]['gridi'] = i
+    nt.sts[sid]['gridj'] = j
     for key in ['high','low','precip','snow','snowd']:
-        nt.sts[id][key] = None
+        nt.sts[sid][key] = None
 
 
 def hardcode_asos( ts ):
@@ -64,39 +63,47 @@ def hardcode_asos( ts ):
     # Get the ASOS data
     icursor.execute("""
        SELECT id, pday, max_tmpf, min_tmpf
-       from summary_%s s, stations t WHERE t.iemid = s.iemid and day = '%s' and t.network in ('IA_ASOS')
-       and pday >= 0 and min_tmpf < 99 and max_tmpf > -99 ORDER by id ASC""" % (
-       ts.year, ts.strftime("%Y-%m-%d")))
+       from summary s, stations t WHERE t.iemid = s.iemid and day = '%s' 
+       and t.network in ('IA_ASOS') and pday >= 0 and min_tmpf < 99 
+       and max_tmpf > -99 ORDER by id ASC""" % (ts.strftime("%Y-%m-%d")))
     for row in icursor:
         cid = nt2.sts[row['id']]['climate_site']
-        print '%s - Precip: %.2f  DSM: %.2f High: %.1f DSM: %s Low: %.1f DSM: %s' % (row['id'],
+        print ("%s=>P E: %4s Ob: %.2f H E: %4s Ob: %3.0f "
+               +"L E: %4s Ob: %3.0f") % (row['id'],
                nt.sts[cid]['precip'], row['pday'],
                nt.sts[cid]['high'], row['max_tmpf'],
-               nt.sts[cid]['low'], row['min_tmpf']
-        )
-        nt.sts[cid]['precip'] = row['pday']
-        nt.sts[cid]['high'] = row['max_tmpf']
-        nt.sts[cid]['low'] = row['min_tmpf']
+               nt.sts[cid]['low'], row['min_tmpf'])
+        nt.sts[cid]['precip'] = "%.2f" % (row['pday'],)
+        nt.sts[cid]['high'] = "%.0f" % (row['max_tmpf'],)
+        nt.sts[cid]['low'] = "%.0f" % (row['min_tmpf'],)
 
 
 def estimate_precip( ts ):
     """
     Estimate precipitation based on IEMRE, ouch
     """
-    nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,), 'r')
+    fn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,)
+    if not os.path.isfile(fn):
+        print 'Missing netcdf %s analysis!' % (fn,)
+        return
+    nc = netCDF4.Dataset(fn, 'r')
     precip = nc.variables['p01m']
     # Figure out what offsets we care about!
-    ts0 = ts + mx.DateTime.RelativeDateTime(hour=7)
-    offset0 = int(( ts0 - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours) - 1
-    ts1 = ts + mx.DateTime.RelativeDateTime(days=1,hour=6)
-    offset1 = int(( ts1 - (ts + mx.DateTime.RelativeDateTime(month=1,day=1,hour=0))).hours) - 1
+    ts0 = datetime.datetime(ts.year, ts.month, ts.day, 12, 0)
+    ts0 = ts0.replace(tzinfo=pytz.timezone("America/Chicago"))
+    ts0 = ts0.replace(hour=0)
+    ts1 = ts0 + datetime.timedelta(hours=24)
+
+    offset0 = iemre.hourly_offset(ts0)
+    offset1 = iemre.hourly_offset(ts1)
+    
     data = numpy.sum( precip[offset0:offset1], 0 )
     # Gross QC check
     data = numpy.where( data > 1000.0, 0, data)
-    for id in nt.sts.keys():
-        j = nt.sts[id]['gridj']
-        i = nt.sts[id]['gridi']
-        nt.sts[id]['precip'] = data[j,i] / 25.4
+    for sid in nt.sts.keys():
+        j = nt.sts[sid]['gridj']
+        i = nt.sts[sid]['gridi']
+        nt.sts[sid]['precip'] = "%.2f" % (data[j,i] / 25.4,)
 
     nc.close()
 
@@ -123,9 +130,9 @@ def estimate_snow( ts ):
         snowd.append( row['snowd'] )
 
     if len(lats) < 5: # No data!
-        for id in nt.sts.keys():
-            nt.sts[id]['snow'] = 0
-            nt.sts[id]['snowd'] = 0
+        for sid in nt.sts.keys():
+            nt.sts[sid]['snow'] = 0
+            nt.sts[sid]['snowd'] = 0
         return
 
 
@@ -133,25 +140,25 @@ def estimate_snow( ts ):
     snowA = Ngl.natgrid(lons, lats, snow, iemre.XAXIS, iemre.YAXIS)
     snowdA = Ngl.natgrid(lons, lats, snowd, iemre.XAXIS, iemre.YAXIS)
 
-    for id in nt.sts.keys():
-        snowfall = snowA[nt.sts[id]['gridi'], nt.sts[id]['gridj']]
-        snowdepth = snowdA[nt.sts[id]['gridi'], nt.sts[id]['gridj']]
+    for sid in nt.sts.keys():
+        snowfall = snowA[nt.sts[sid]['gridi'], nt.sts[sid]['gridj']]
+        snowdepth = snowdA[nt.sts[sid]['gridi'], nt.sts[sid]['gridj']]
         if snowfall > 0 and snowfall < 0.1:
-          nt.sts[id]['snow'] = 0.0001
+            nt.sts[sid]['snow'] = 0.0001
         elif snowfall < 0:
-          nt.sts[id]['snow'] = 0
+            nt.sts[sid]['snow'] = 0
         elif numpy.isnan(snowfall):
-          nt.sts[id]['snow'] = 0
+            nt.sts[sid]['snow'] = 0
         else:
-          nt.sts[id]['snow'] = snowfall
+            nt.sts[sid]['snow'] = "%.1f" % (snowfall,)
         if snowdepth > 0 and snowdepth < 0.1:
-          nt.sts[id]['snowd'] = 0.0001
+            nt.sts[sid]['snowd'] = 0.0001
         elif snowdepth < 0:
-          nt.sts[id]['snowd'] = 0
+            nt.sts[sid]['snowd'] = 0
         elif numpy.isnan(snowdepth):
-          nt.sts[id]['snowd'] = 0
+            nt.sts[sid]['snowd'] = 0
         else:
-          nt.sts[id]['snowd'] = snowdepth
+            nt.sts[sid]['snowd'] = "%.1f" % (snowdepth,)
 
 def estimate_hilo( ts ):
     """
@@ -164,50 +171,62 @@ def estimate_hilo( ts ):
     lons = []
     icursor.execute("""
        SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, max_tmpf, min_tmpf
-       from summary_%s c, stations s WHERE day = '%s' and s.network in ('AWOS','IA_ASOS', 'MN_ASOS', 'WI_ASOS', 
+       from summary_%s c, stations s WHERE day = '%s' 
+       and s.network in ('AWOS','IA_ASOS', 'MN_ASOS', 'WI_ASOS', 
        'IL_ASOS', 'MO_ASOS',
         'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
         'OH_ASOS') and c.iemid = s.iemid
-       and max_tmpf > -90 and min_tmpf < 90""" % (ts.year, ts.strftime("%Y-%m-%d")))
+       and max_tmpf > -90 and min_tmpf < 90""" % (ts.year, 
+                                                  ts.strftime("%Y-%m-%d")))
     for row in icursor:
         lats.append( row['lat'] )
         lons.append( row['lon'] )
         highs.append( row['max_tmpf'] )
         lows.append( row['min_tmpf'] )
 
+    if len(highs) < 5:
+        print 'estimate_hilo() only found %s observations' % (len(highs),)
+        return
+
     # Create the analysis
     highA = Ngl.natgrid(lons, lats, highs, iemre.XAXIS, iemre.YAXIS)
     lowA = Ngl.natgrid(lons, lats, lows, iemre.XAXIS, iemre.YAXIS)
 
-    for id in nt.sts.keys():
-        nt.sts[id]['high'] = highA[nt.sts[id]['gridi'], nt.sts[id]['gridj']]
-        nt.sts[id]['low'] = lowA[nt.sts[id]['gridi'], nt.sts[id]['gridj']]
+    for sid in nt.sts.keys():
+        nt.sts[sid]['high'] = "%.0f" % (
+                            highA[nt.sts[sid]['gridi'], nt.sts[sid]['gridj']])
+        nt.sts[sid]['low'] = "%.0f" % (
+                            lowA[nt.sts[sid]['gridi'], nt.sts[sid]['gridj']])
 
 def commit( ts ):
     """
     Inject into the database!
     """
     # Remove old entries
-    sql = "DELETE from alldata_%s WHERE day = '%s'" % (state.lower(), ts.strftime("%Y-%m-%d"),)
+    sql = "DELETE from alldata_%s WHERE day = '%s'" % (state.lower(), 
+                                                    ts.strftime("%Y-%m-%d"),)
     ccursor.execute( sql )
+    if ccursor.rowcount > 0:
+        print 'Removed %s rows from alldata_%s table' % (ccursor.rowcount,
+                                                         state.lower())
     # Inject!
-    for id in nt.sts.keys():
-        sql = """INSERT into alldata_%s(station, day, high, low, precip, snow, 
-        sday, year, month, snowd, estimated) values ('%s', '%s', 
-        %.0f, %.0f, %.2f, %.1f, 
-        '%s', %s, %s, %.0f, 't')""" % (state, id, ts.strftime("%Y-%m-%d"), 
-        nt.sts[id]['high'], nt.sts[id]['low'], nt.sts[id]['precip'],
-        nt.sts[id]['snow'],
-        ts.strftime("%m%d"), ts.year, ts.month, nt.sts[id]['snowd'])
-        ccursor.execute( sql )
-       
+    for sid in nt.sts.keys():
+        sql = """INSERT into alldata_"""+state+""" (station, day, high, low, 
+        precip, snow, sday, year, month, snowd, estimated) values (%s, %s, 
+        %s, %s, %s, %s, %s, %s, %s, %s, 't')"""
+        args = (sid, ts, nt.sts[sid]['high'], nt.sts[sid]['low'], 
+                nt.sts[sid]['precip'], nt.sts[sid]['snow'], ts.strftime("%m%d"), 
+                ts.year, ts.month, nt.sts[sid]['snowd'])
+        ccursor.execute( sql, args )
 
 
 if __name__ == '__main__':
+    ''' See how we are called '''
     if len(sys.argv) == 5:
-        ts = mx.DateTime.DateTime( int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
+        ts = datetime.date( int(sys.argv[2]), int(sys.argv[3]), 
+                                   int(sys.argv[4]))
     else:
-        ts = mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1)
+        ts = datetime.date.today() - datetime.timedelta(days=1)
     estimate_hilo( ts )
     estimate_precip(ts )
     estimate_snow(ts )
