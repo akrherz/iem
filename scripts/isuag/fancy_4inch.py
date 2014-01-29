@@ -2,6 +2,7 @@
 Generates the nice 4inch soil temperature plot by county
 """
 from pyiem.plot import MapPlot
+from pyiem.datatypes import temperature
 import numpy as np
 import datetime
 import os
@@ -10,7 +11,7 @@ from scipy.interpolate import NearestNDInterpolator
 import network
 import matplotlib.cm as cm
 import psycopg2.extras
-nt = network.Table("ISUAG")
+nt = network.Table(["ISUAG", "ISUSM"])
 
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 icursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -30,6 +31,16 @@ icursor.execute("""SELECT station, c30 from daily WHERE
 for row in icursor:
     stid = row['station']
     soil_obs.append( row['c30'] )
+    lats.append( nt.sts[stid]['lat'] )
+    lons.append( nt.sts[stid]['lon'] )
+
+icursor.execute("""
+  SELECT station, tsoil_c_avg from sm_daily 
+  where valid = '%s' and tsoil_c_avg > -40 
+""" % (ts.strftime("%Y-%m-%d"), ))
+for row in icursor:
+    stid = row['station']
+    soil_obs.append( temperature(row['tsoil_c_avg'], 'C').value('F') )
     lats.append( nt.sts[stid]['lat'] )
     lons.append( nt.sts[stid]['lon'] )
 
@@ -79,9 +90,9 @@ cobs = nn(clons, clats)
 
 m = MapPlot(sector='iowa',
     title="Iowa 4in Soil Temperatures %s" % (ts.strftime("%b %d %Y"), ),
-    subtitle='Based on gridded analysis of ISUAG network observations'
+    subtitle='Based on gridded analysis of ISUAG, ISUSM network observations'
 )
-m.contourf(xo, yo, analysis, np.arange(10,101,5), cmap=cm.get_cmap('jet'),
+m.contourf(clons, clats, cobs, np.arange(10,101,5), cmap=cm.get_cmap('jet'),
            units=r'$^\circ$F')
 for lo, la, ob in zip(clons, clats, cobs):
 #for lo, la, ob in zip(lons, lats, soil_obs):
