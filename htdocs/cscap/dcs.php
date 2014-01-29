@@ -46,7 +46,7 @@ function radio($varname, $vals){
  
 
 <script src="oauth2.js?v=11"></script>
-<script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
+
 <style type="text/css">
 .ui-widget{
  font-size: 0.9em !important;
@@ -443,6 +443,7 @@ $(function(){
 });
 
 </script>
+<script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
 </body>
 
 </html>
