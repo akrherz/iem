@@ -110,6 +110,7 @@ $_pages = Array(
 	), 
 	"severe" => Array(
 		"title" => "Svr Wx",
+		"icon" => "flash",
 		"subs" => Array(
 			"base" => Array("title" => "Svr Wx Mainpage", "url" => "/current/severe.phtml"),
 			"cow" => Array("title" => "IEM Cow (SBW Verification)", "url" => "/cow/"),
@@ -124,6 +125,7 @@ $_pages = Array(
 	),
 	"webcam" => Array(
 		"title" => "Webcams",
+		"icon" => "camera",
 		"subs" => Array(
 			"base" => Array("title" => "Still Images", "url" => "/current/webcam.php"),
 			"viewer" => Array("title" => "Hi-res + Live", "url" => "/current/viewer.phtml"),
@@ -137,13 +139,13 @@ $_pages = Array(
 <div class="container" id="iem-header">
 <div class="navbar navbar-inverse">
     <div class="navbar-header">
-             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand logo-nav" href="/" style="padding:0px 5px 0px 0px;"><img alt="IEM" style="height: 50px;" src="/images/logo_small.png" /></a>
-        </div>
+        </button>
+        <a class="navbar-brand" href="/" style="padding:0px 5px 0px 0px;"><img alt="IEM" style="height: 50px;" class="img-responsive pull-left" src="/images/logo_small.png" /></a>
+	</div>
     <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
         
@@ -159,11 +161,20 @@ $_pages = Array(
         
 <?php 
 $ar = preg_split('/-/', $THISPAGE);
+function get_title($page){
+	if (array_key_exists("icon", $page)){
+		return sprintf("<div class=\"hidden-sm\">%s<b class=\"caret\"></b></div>"
+				."<span class=\"glyphicon glyphicon-%s visible-sm\"></span>",
+			$page["title"], $page["icon"] );
+	}
+	return sprintf("%s<span class=\"caret\"></span>", $page["title"]);
+}
+
 while( list($idx, $page) = each($_pages) )
 {
   	echo sprintf("<li class=\"dropdown%s\">\n<a class=\"dropdown-toggle\" 
-		data-toggle=\"dropdown\" href=\"#\">%s<span class=\"caret\"></span></a>\n", 
-      ($ar[0] == $idx) ? " active" : "", $page["title"]);
+		data-toggle=\"dropdown\" href=\"#\">%s</a>\n", 
+      ($ar[0] == $idx) ? " active" : "", get_title($page));
 
     echo "<ul class=\"dropdown-menu\">\n";
     while( list($idx2, $page2) = each($page["subs"]) )
@@ -184,7 +195,8 @@ if (defined('IEM_APPID')){
 		and appid != $1) ORDER by name ASC");
 	$_rs = pg_execute($_mesosite, "_SELECTOR_", Array(IEM_APPID));
 	if (pg_numrows($_rs) > 0){
-		echo "<li class=\"dropdown\"><a class=\"dropdown-trigger\" data-toggle=\"dropdown\" href=\"#\">Related <b class=\"caret\"></b></a>\n";
+		echo "<li class=\"dropdown\"><a class=\"dropdown-trigger\" data-toggle=\"dropdown\" href=\"#\"><div class=\"hidden-sm\">Related<b class=\"caret\"></b></div>"
+				."<span class=\"glyphicon glyphicon-plus visible-sm\"></span></a>\n";
 		echo "<ul class=\"dropdown-menu\">\n";
 		for ($i=0;$_row=@pg_fetch_assoc($_rs,$i);$i++){
 			$url =  $_row["url"];
