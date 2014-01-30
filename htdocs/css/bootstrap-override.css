@@ -3,12 +3,9 @@
     content: "";
   }
 }
-.logo-nav {
-	height: 50px;
-}
 .navbar .nav > li > a {
-	padding: 6px 6px 0px 0px;
-	margin: 0px;
+	padding-left: 6px;
+	padding-right: 6px;
 }
 
 a.book{
