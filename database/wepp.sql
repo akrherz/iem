@@ -1,4 +1,93 @@
 ---
+--- Results by township by year
+---
+CREATE TABLE results_twp_year(
+	model_twp varchar(9),
+	valid date,
+	avg_loss real,
+	avg_runoff real,
+	min_loss real,
+	max_loss real,
+	min_runoff real,
+	max_runoff real,
+	ve_runoff real,
+	ve_loss real
+);
+GRANT SELECT on results_twp_year to nobody,apache;
+
+---
+--- Results by township by month
+---
+CREATE TABLE results_twp_month(
+	model_twp varchar(9),
+	valid date,
+	avg_loss real,
+	avg_runoff real,
+	min_loss real,
+	max_loss real,
+	min_runoff real,
+	max_runoff real,
+	ve_runoff real,
+	ve_loss real
+);
+GRANT SELECT on results_twp_month to nobody,apache;
+
+---
+--- Combinations
+---
+CREATE TABLE combos(
+	id SERIAL UNIQUE,
+	nri_id bigint,
+	model_twp varchar(9),
+	hrap_i int,
+	mkrun boolean,
+	erosivity_idx real
+);
+CREATE UNIQUE INDEX combos_idx on combos(nri_id, model_twp, hrap_i);
+CREATE INDEX combos_hrap_i_idx on combos(hrap_i);
+CREATE INDEX combos_model_twp_idx on combos(model_twp);
+CREATE INDEX combos_nri_id_idx on combos(nri_id);
+GRANT SELECT on combos to nobody,apache;
+
+---
+--- Store run results
+---
+CREATE TABLE results(
+	run_id bigint,
+	valid date,
+	runoff real,
+	loss real,
+	precip real
+);
+CREATE INDEX results_run_id_idx on results(run_id);
+CREATE INDEX results_valid_idx on results(valid);
+GRANT SELECT on results to nobody,apache;
+
+---
+--- Store Results by Township
+---
+CREATE TABLE results_by_twp(
+  model_twp varchar(9),
+  valid date,
+  avg_precip real,
+  max_precip real,
+  min_loss real,
+  avg_loss real,
+  max_loss real,
+  min_runoff real,
+  max_runoff real,
+  avg_runoff real,
+  bogus real,
+  run_points int,
+  min_precip real,
+  ve_runoff real,
+  ve_loss real
+);
+CREATE INDEX results_by_twp_model_twp_idx on results_by_twp(model_twp);
+CREATE INDEX results_by_twp_valid_idx on results_by_twp(valid);
+GRANT SELECT on results_by_twp to nobody,apache;
+
+---
 --- Rainfall log
 ---
 CREATE TABLE rainfall_log(
