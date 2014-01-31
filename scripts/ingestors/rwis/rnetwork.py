@@ -25,6 +25,9 @@ class rnetwork:
             sid = int( row["Rpuid"] )
             self.obs[ sid ] = rwis.RWISOb()
             self.obs[ sid ].add_atdata( row )
+            if self.obs[sid].stationID is None:
+                del(self.obs[ sid ])
+                continue
             self.obs[ sid ].sname = st.sts[ self.obs[sid].stationID ]['name']
         csvfile.close()
 
@@ -34,6 +37,9 @@ class rnetwork:
             if not self.obs.has_key( sid ):
                 self.obs[ sid ] = rwis.RWISOb()
             self.obs[ sid ].add_sfdata( row )
+            if self.obs[sid].stationID is None:
+                del(self.obs[ sid ])
+                continue
             self.obs[ sid ].sname = st.sts[ self.obs[sid].stationID ]['name']
         csvfile.close()
 
