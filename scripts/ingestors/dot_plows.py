@@ -30,7 +30,11 @@ def workflow():
     valid = datetime.datetime.now()
     valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"),microsecond=0)
     
-    data = json.loads( urllib2.urlopen(URI, timeout=30).read() )
+    try:
+        data = json.loads( urllib2.urlopen(URI, timeout=30).read() )
+    except Exception, exp:
+        print 'dot_plows download fail %s' % (exp,)
+        data = {}
     newplows = {}
     for feat in data.get('features', []):
         logdt = feat['attributes']['LOGDT']
