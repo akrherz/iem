@@ -11,6 +11,8 @@ def consume(fp, ts):
     """
     Actually process a file noted at fp and for time ts
     """
+    tablets = ts + datetime.timedelta(hours=6)
+    table = "data_%s" % (tablets.strftime("%Y_%m"),)
     for line in open(fp):
         tokens = line.split()
         if len(tokens) != 3:
@@ -23,9 +25,9 @@ def consume(fp, ts):
         if od <= 0 or od > 1:
             od = None
         scursor.execute("""
-        INSERT into data_%s (grid_idx, valid, soil_moisture, 
+        INSERT into """+table+"""(grid_idx, valid, soil_moisture, 
         optical_depth) VALUES (%s, '%s-06', %s, %s)
-        """ % (ts.strftime("%Y_%m"), sid, 
+        """ % (sid, 
                ts.strftime("%Y-%m-%d %H:%M"), sm or 'Null',
                od or 'Null'))
 
