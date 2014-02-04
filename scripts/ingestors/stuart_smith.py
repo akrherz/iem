@@ -26,8 +26,8 @@ for line in open('/mnt/rootdocs/Bubbler.csv'):
         ts = datetime.datetime.strptime("%s %s" % (tokens[0], tokens[1]),
                                     '%m/%d/%Y %H:%M:%S')
     except Exception, exp:
-        print exp
-        print repr(line)
+        #print exp
+        #print repr(line)
         continue
     if maxts and ts < maxts:
         continue
