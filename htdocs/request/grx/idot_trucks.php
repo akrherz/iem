@@ -23,6 +23,7 @@ include("../../../config/settings.inc.php");
 include("../../../include/database.inc.php");
 $dbconn = iemdb("postgis");
 
+/*
 $q = 2;
 $rs = pg_query($dbconn, "SELECT label, ST_x(geom) as lon,
 		ST_y(geom) as lat
@@ -36,7 +37,7 @@ for ($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
 			$row['lat'], $row['lon'], $q);
 	$q += 1;
 }
-
+*/
 
 $rs = pg_query($dbconn, "SELECT airtemp, valid, ST_x(geom) as lon, 
 		ST_y(geom) as lat 
@@ -51,7 +52,7 @@ for ($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
 	."\n", $row["lat"], $row["lon"], $row["airtemp"]);
 }
 
-echo $s3;
+//echo $s3;
 
 $memcache->set("/request/grx/idot_trucks.php", ob_get_contents(), false, 300);
 ob_end_flush();
