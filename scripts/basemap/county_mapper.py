@@ -12,7 +12,7 @@ import pylab
 import math
 import iemplot
 import iemdb
-import Image
+from PIL import Image
 import mx.DateTime
 from pyiem.plot import maue
 import numpy as np
@@ -21,15 +21,17 @@ pcursor = POSTGIS.cursor()
 
 from iem import plot
 cmap = maue()
-bins = np.arange(12)
+cmap.set_under("#ffffff")
+cmap.set_over("#000000")
+#bins = np.arange(0,131,10)
+bins = [1,2,3,5,10,20,30,40,50,75,100,125]
 norm = mpcolors.BoundaryNorm(bins, cmap.N)
 #bins = [1,2,3,4,5,7,10,15,20,25,30,35,40,50,75,100]
 
 
 
-
-#fig = plt.figure(num=None, figsize=(10.24,7.68))
-fig = plt.figure(num=None, figsize=(3.55,2.9))
+fig = plt.figure(num=None, figsize=(10.24,7.68))
+#fig = plt.figure(num=None, figsize=(3.55,2.9))
 # Set the axes instance
 ax = plt.axes([0.01,0,0.9,1], axisbg=(0.4471,0.6235,0.8117))
 ak_ax = plt.axes([0.01,0.0,0.25,0.25], axisbg=(0.4471,0.6235,0.8117), anchor='SW')
@@ -68,7 +70,7 @@ data = source.ExecuteSQL("""
  
  select n.ugc, foo.data, ST_Simplify(n.geom,0.01) from nws_ugc n 
  LEFT JOIN (select ugc, count(*) as data from warnings 
-                  where phenomena in ('IS') and significance = 'W' 
+                  where phenomena in ('WS') and significance = 'W' 
                   and gtype = 'C' and issue > '2005-11-12' GROUP by ugc) as foo 
  ON (n.ugc = foo.ugc) 
  ORDER by data ASC NULLS FIRST
@@ -128,19 +130,19 @@ import matplotlib.patheffects as PathEffects
 axaa = plt.axes([0.92, 0.1, 0.07, 0.8], frameon=False,
                       yticks=[], xticks=[])
 colors = []
-for i in range(len(bins)):
-    colors.append( rgb2hex(cmap(i)) )
-    txt = axaa.text(0.5, i, "%s" % (bins[i],), ha='center', va='center',
+for i, bin in enumerate(bins):
+    colors.append( rgb2hex(cmap( norm([bin,]) )[0]))
+    txt = axaa.text(0.5, i, "%s" % (bin,), ha='center', va='center',
                           color='w')
     txt.set_path_effects([PathEffects.withStroke(linewidth=2,
                                                      foreground="k")])
 axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
-                color=cmap(norm(range(len(bins)))),
+                color=colors,
                 ec='None')
 
 
-ax.text(0.17, 1.15, '12 Nov 2005 - 5 Dec 2013 Number of NWS Issued Ice Storm Warnings', transform=ax.transAxes,
-     size=6,
+ax.text(0.17, 1.09, '12 Nov 2005 - 3 Feb 2014 Number of NWS Issued Winter Storm Warnings', transform=ax.transAxes,
+     size=16,
     horizontalalignment='left', verticalalignment='center')
 
 #ax.text(0.17, 1.005, 'Map Generated: %s' % (mx.DateTime.now().strftime("%d %B %Y %H:%M %p %Z"),), transform=ax.transAxes,
