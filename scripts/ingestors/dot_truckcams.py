@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 import os
 
-URI = ("https://testgeonexusr.iowadot.gov/arcgis/rest/services/Operations/"
+URI = ("https://geonexusr.iowadot.gov/arcgis/rest/services/Operations/"
        +"Truck_Images/MapServer/3/query?outFields=*&outSR=4326&"
        +"f=json&where=IDNUM%3E0&returnGeometry=true&returnIdsOnly=false")
 
