@@ -1,0 +1,95 @@
+<?php 
+include("../../config/settings.inc.php");
+include("../../include/myview.php");
+include_once "../../include/database.inc.php";
+include("../../include/imagemaps.php");
+include("../../include/forms.php");
+
+$mesosite = iemdb('mesosite');
+
+$t = new MyView();
+$t->title = "Download Daily Summary Data";
+
+$network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IA_ASOS";
+
+$nselect = "<select name=\"network\">";
+$rs = pg_query($mesosite, "SELECT id, name from networks ORDER by name ASC");
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	$sel = '';
+	if ($network == $row["id"]){
+		$sel = " selected='SELECTED'";
+	}
+	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
+	  $row["id"], $sel, $row["name"]);
+}
+$nselect .= "</select>";
+
+$sselect = networkMultiSelect($network, "");
+
+$y1 = yearSelect2(2010, date("Y"), "year1");
+$m1 = monthSelect("", "month1");
+$d1 = daySelect2("", "day1");
+$y2 = yearSelect2(2010, date("Y"), "year2");
+$m2 = monthSelect("", "month2");
+$d2 = daySelect2("", "day2");
+
+$t->content = <<<EOF
+<h3>IEM Computed Daily Summary of Observations</h3>
+		
+<p>This page allows you to download the IEM computed daily summary of whatever
+	observations the IEM collected for a given observation site.
+
+<p>Select network to download from:<br />
+<form name="network" action="daily.phtml">
+{$nselect}		
+<input type="submit" value="Switch Network">
+		</form>
+
+<form name="dl" action="/cgi-bin/request/daily.py">
+<input type="hidden" value="{$network}" name="network" />
+
+<div class="row">
+<div class="col-md-6 col-sm-6">
+
+<h4>Select station(s):</h4>
+{$sselect}
+
+<h4>Select period:</h4>
+<table class="table table-striped">
+  <tr>
+    <td></td>
+    <th>Year</th><th>Month</th><th>Day</th>
+  </tr>
+
+  <tr>
+    <th>Start:</th>
+    <td>{$y1}</td><td>{$m1}</td><td>{$d1}</td>
+		</tr>
+
+  <tr>
+    <th>End:</th>
+    <td>{$y2}</td><td>{$m2}</td><td>{$d2}</td>
+  </tr>
+</table>
+
+    		</div>
+    		<div class="col-md-6 col-sm-6">
+
+<dl class="dl-horizontal">
+ <dt>station</dt><dd>Common identifier for the station.</dd>
+ <dt>day</dt><dd>Calendar date of the summary.</dd>
+ <dt>max_temp_f</dt><dd>Maximum Air Temperature [F].</dd>
+ <dt>min_temp_f</dt><dd>Minimum Air Temperature [F].</dd>
+ <dt>max_dewpoint_f</dt><dd>Maximum Dew Point [F].</dd>
+ <dt>min_dewpoint_f</dt><dd>Minimum Dew Point [F].</dd>
+    		</dl>
+    		 		
+		
+</div></div>
+    		<input type="submit" value="Request Data">
+</form>
+
+EOF;
+$t->render('single.phtml');
+
+?>
