@@ -1,7 +1,7 @@
 --- Clever hack to map data around!
 create or replace view alldata as 
 	select station, valid, ws_mps_s_wvt * 1.94 as sknt, 
-	winddir_d1_wvt as drct from sm_hourly;
+	winddir_d1_wvt as drct, rain_mm_tot / 24.5 as phour from sm_hourly;
 grant select on alldata to nobody,apache;
 
 --- Convert celsuis to fahrenheit
