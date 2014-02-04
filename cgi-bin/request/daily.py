@@ -16,7 +16,8 @@ def get_data(network, sts, ets, stations=[]):
         stations.append( 'ZZZZZ' )
     cursor.execute("""SELECT id, day, max_tmpf, min_tmpf, max_dwpf, min_dwpf 
         from summary s JOIN stations t on (t.iemid = s.iemid) WHERE
-        s.day >= %s and s.day < %s and t.network = %s and t.id in %s""",
+        s.day >= %s and s.day < %s and t.network = %s and t.id in %s
+        ORDER by day ASC""",
         (sts, ets, network, tuple(stations)))
     for row in cursor:
         s += "%s,%s,%s,%s,%s,%s\n" % (row[0], row[1], row[2], row[3], row[4],
