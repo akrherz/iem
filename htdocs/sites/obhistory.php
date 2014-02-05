@@ -75,7 +75,8 @@ if ($date >= $iemarchive){
 } else {
 	if (preg_match("/RWIS/", $network)){
 		$db = "rwis";
-		$sql = sprintf("SELECT *, null as pres, null as raw, null as phour
+		$sql = sprintf("SELECT *, null as pres, null as raw, null as phour,
+				null as relh
 		from t$year where 
 		station = $1  and valid  >= $3 and valid  < $4 
 		and $2 = $2 ORDER by valid DESC");
@@ -87,7 +88,8 @@ if ($date >= $iemarchive){
 		and $2 = $2 ORDER by valid DESC");
 	} else {
 		$db = "asos";
-		$sql = sprintf("SELECT *, mslp as pres, metar as raw, p01i as phour
+		$sql = sprintf("SELECT *, mslp as pres, metar as raw, p01i as phour,
+				null as relh
 				from t$year where
 				station = $1  and valid  >= $3 and valid  < $4
 				and $2 = $2 ORDER by valid DESC");
