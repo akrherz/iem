@@ -124,8 +124,9 @@ while feat is not None:
     # OK, lets see if this UGC is new
     cursor.execute("""SELECT ugc from ugcs where ugc = %s
         and end_ts is null and name = %s and 
-        geom = ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326))""", 
-        (ugc, name, wkt))
+        geom = ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)) and
+        wfo = %s""", 
+        (ugc, name, wkt, cwa))
     
     # NOOP
     if cursor.rowcount == 1:
