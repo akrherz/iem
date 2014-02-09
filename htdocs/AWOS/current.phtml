@@ -1,54 +1,56 @@
 <?php 
 include("../../config/settings.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
+
 $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"]: "station";
-  $REFRESH = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?sortcol=$sortcol\">";
-  $TITLE = "IEM | AWOS Network Current Conditions";
-  $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+
+$t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?sortcol=$sortcol\">";
+$t->title = "AWOS Network Current Conditions";
+$t->headextra = <<<EOF
+<script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
  link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
 } 
 //END Script-->
 </script>
-<script type="text/javascript" src="'. $rooturl .'/js/tableruler.js"></script>
-<script type="text/javascript">
-    window.onload=function(){tableruler();}
-</script>';
- $THISPAGE = "current-sort";
-  include("$rootpath/include/header.php"); 
-  include("$rootpath/include/mlib.php"); 
-  include("$rootpath/include/iemaccess.php");
-  include("$rootpath/include/iemaccessob.php");
+EOF;
+$t->current_network = "AWOS";
+$t->thispage = "current-sort";
+  include("../../include/mlib.php"); 
+  include("../../include/iemaccess.php");
+  include("../../include/iemaccessob.php");
 
   $iem = new IEMAccess();
   $awos = $iem->getNetwork("AWOS");
-?>
-<div class="text">
-<b>Nav:</b><a href="/AWOS">AWOS</a> <b> > </b> Current Conditions
 
-<?php $current_network = "AWOS"; include("$rootpath/include/current_bar.inc.php"); ?>
+  $vals = Array("station" => "Station ID", "ts" => "Ob Time",
+  		"relh" => "Relative Humidity", "sname" => "Site Name",
+  		"min_tmpf" => "Today's Low Temperature",
+  		"max_tmpf" => "Today's High Temperature",
+  		"tmpf" => "Temperature", "dwpf" => "Dew Point", "vsby" => "Visibility",
+  		"sknt" => "Speed", "peak" => "Peak Gust [knots]","alti" => "Altimeter",
+  		"peak_ts" => "Gust Time", "phour" => "1 hr Rainfall", "pday" => "Today Rainfall", "feel" => "Feels Like");
+  
+$t->breadcrumbs = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/AWOS/">AWOS Homepage</a></li>
+ <li class="active">Current Conditions</li>
+</ol>
+EOF;
+$table = <<<EOF
 
-<p><h3 class="subtitle"><center>Current AWOS Conditions</center></h3>
+<h3>Current AWOS Conditions</h3>
 
 <p>** This page will automatically refresh every five minutes.
 
-<?php
-$vals = Array("station" => "Station ID", "ts" => "Ob Time", 
-"relh" => "Relative Humidity", "sname" => "Site Name",
-  "min_tmpf" => "Today's Low Temperature",
-  "max_tmpf" => "Today's High Temperature",
-"tmpf" => "Temperature", "dwpf" => "Dew Point", "vsby" => "Visibility",
-"sknt" => "Speed", "peak" => "Peak Gust [knots]","alti" => "Altimeter",
-"peak_ts" => "Gust Time", "phour" => "1 hr Rainfall", "pday" => "Today Rainfall", "feel" => "Feels Like");
+<br>Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; 
+Click on a column to sort it.<br>
 
-echo "<br>Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on a column to sort it.<br>\n";
+<form name="asdf" method="GET" action="/my/current.phtml">
 
-
-?>
-
-<form method="GET" action="/my/current.phtml">
-
-<table style="width: 100%; font-size: 10pt;" class="ruler">
+<table style="width: 100%; font-size: 10pt;">
 <thead>
 <tr>
   <th rowspan=2>Add</th>
@@ -78,8 +80,7 @@ echo "<br>Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on a co
   <th><a href="current.phtml?sortcol=pday">Today</a></th>
 </tr>
 </thead><tbody>
-<?php
-// http://www.php.net/manual/en/function.asort.php
+EOF;
 
 function aSortBySecondIndex($multiArray, $secondIndex) {
 	while (list($firstIndex, ) = each($multiArray))
@@ -129,30 +130,30 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
  $shade = 1;
  while (list ($key, $val) = each ($finalA))  { 
 	$parts = $finalA[$key];
-        echo "<tr ";
-        if ($shade) echo "bgcolor=\"#EEEEEE\"";
+        $table .= "<tr ";
+        if ($shade) $table .= "bgcolor=\"#EEEEEE\"";
         $shade = ! $shade;
-        echo ">\n 
+        $table .= ">\n 
          <td><input type=\"checkbox\" name=\"st[]\" 
             value=\"".$key."\"></td>";
 
          $tdiff = $now - $parts["ts"];
-         echo sprintf("<td>%s (<a href=\"%s/sites/site.php?station=%s&network=AWOS\">%s</a>)</td>", $parts["sname"], $rooturl, $key, $key );
-         echo "<td ";
+         $table .= sprintf("<td>%s (<a href=\"%s/sites/site.php?station=%s&network=AWOS\">%s</a>)</td>", $parts["sname"], $rooturl, $key, $key );
+         $table .= "<td ";
          if ($tdiff > 10000){
            $format = "%d %b %I:%M %p";
-           echo 'bgcolor="red"> '. strftime($format, $parts["ts"]) .'</td><td colspan="12" align="center">Site is Offline</td></tr>';
+           $table .= 'bgcolor="red"> '. strftime($format, $parts["ts"]) .'</td><td colspan="12" align="center">Site is Offline</td></tr>';
            continue;
          } else if ($tdiff > 7200){
-           echo 'bgcolor="orange"';
+           $table .= 'bgcolor="orange"';
            $format = "%d %b %I:%M %p";
          } else if ($tdiff > 3600){
-           echo 'bgcolor="green"';
+           $table .= 'bgcolor="green"';
            $format = "%d %b %I:%M %p";
          } else {
            $format = "%I:%M %p";
          }
-         echo ">" . strftime($format, $parts["ts"]) ."</td>
+         $table .= ">" . strftime($format, $parts["ts"]) ."</td>
  <td align='center'>". $parts["tmpf"] ."(<font color=\"#ff0000\">".
  round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
  round($parts["min_tmpf"],0) ."</font>)</td>
@@ -162,33 +163,31 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
           <td>". $parts["drct"] ."</td>
           <td>". $parts["sknt"] ;
           if (intval($parts["gust"]) > 0){
-            echo "G". $parts["gust"];
-          } echo "</td>";
-          echo "<td>". $parts["peak"] ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ."</td>
+            $table .= "G". $parts["gust"];
+          } $table .= "</td>";
+          $table .= "<td>". $parts["peak"] ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ."</td>
           <td>". $parts["alti"] ."</td>
           <td>". $parts["vsby"] ."</td>
           <td>". $parts["phour"] ."</td>
           <td>". $parts["pday"] ."</td></tr>\n";
 }
-
-
-?>
+$c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=AWOS&var=";
+$table .= <<<EOF
 </tbody><tfoot>
 <tr>
  <td colspan=3></td>
-<?php $c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=AWOS&var="; ?>
- <td><a href="<?php echo $c; ?>tmpf');">Plot</a>
-    (<a href="<?php echo $c; ?>max_tmpf');">Plot</a> /
-     <a href="<?php echo $c; ?>min_tmpf');">Plot</a>)</td>
- <td><a href="<?php echo $c; ?>dwpf');">Plot</a></td>
- <td><a href="<?php echo $c; ?>feel');">Plot</a></td>
- <td><a href="<?php echo $c; ?>relh');">Plot</a></td>
- <td colspan=2><a href="<?php echo $c; ?>barb');">Plot</a></td>
- <td><a href="<?php echo $c; ?>max_sknt');">Plot</a></td>
- <td><a href="<?php echo $c; ?>alti');">Plot</a></td>
- <td><a href="<?php echo $c; ?>vsby');">Plot</a></td>
- <td><a href="<?php echo $c; ?>phour');">Plot</a></td>
- <td><a href="<?php echo $c; ?>pday');">Plot</a></td>
+ <td><a href="{$c}tmpf');">Plot</a>
+    (<a href="{$c}max_tmpf');">Plot</a> /
+     <a href="{$c}min_tmpf');">Plot</a>)</td>
+ <td><a href="{$c}dwpf');">Plot</a></td>
+ <td><a href="{$c}feel');">Plot</a></td>
+ <td><a href="{$c}relh');">Plot</a></td>
+ <td colspan=2><a href="{$c}barb');">Plot</a></td>
+ <td><a href="{$c}max_sknt');">Plot</a></td>
+ <td><a href="{$c}alti');">Plot</a></td>
+ <td><a href="{$c}vsby');">Plot</a></td>
+ <td><a href="{$c}phour');">Plot</a></td>
+ <td><a href="{$c}pday');">Plot</a></td>
 </tr>
 </tfoot>
 
@@ -198,9 +197,7 @@ function aSortBySecondIndex($multiArray, $secondIndex) {
 <input type="reset" value="Reset">
 
 </form>
-
-
-<br><br>
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->content = $table;
+$t->render("sortables.phtml");
+?>

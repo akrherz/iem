@@ -1,5 +1,6 @@
 <?php
  include("../../config/settings.inc.php");
+ include("../../include/myview.php");
  define("IEM_APPID", 7);
  $network = isset($_GET['network']) ? substr($_GET["network"],0,7) : 'IA_ASOS';
  $metar = isset($_GET['metar']) ? $_GET["metar"] : "no";
@@ -10,26 +11,29 @@
  	header("Location: ../geojson/network_obs.php?network=$network&callback=mycallback");
  	die();
  }
- 
-  $TITLE = "IEM | ASOS | Current Conditions";
-  $REFRESH = "<meta http-equiv=\"refresh\" content=\"1200;\">";
-  $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+ $t = new MyView();
+  $t->title = "ASOS Current Conditions";
+  $t->refresh = "<meta http-equiv=\"refresh\" content=\"1200;\">";
+  $t->headextra = <<<EOF
+<script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
  link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
 } 
 //END Script-->
 </script>
-';
- $THISPAGE = "current-sort";
-
-  include("$rootpath/include/mlib.php"); 
-  include("$rootpath/include/network.php");
+EOF;
+ $t->thispage = "current-sort";
+ $t->current_network = "ASOS";
+  
+  include("../../include/mlib.php"); 
+  include("../../include/forms.php");
+  include("../../include/network.php");
   $nt = new NetworkTable($network);
   $cities = $nt->table;
-  include("$rootpath/include/iemaccess.php");
-  include("$rootpath/include/iemaccessob.php");
-  include_once "$rootpath/include/database.inc.php";
+  include("../../include/iemaccess.php");
+  include("../../include/iemaccessob.php");
+  include_once "../../include/database.inc.php";
   $mesosite = iemdb('mesosite');
   pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
   $rs = pg_execute($mesosite, "FINDTZ", Array($network));
@@ -107,70 +111,68 @@ if($format == 'csv'){
 	die();
 }
 
-/* Begin HTML output! */
-  include("$rootpath/include/header.php"); 
-  $current_network = "ASOS"; include("$rootpath/include/current_bar.inc.php"); ?>
-
-<table border=1 cellspacing=0 cellpadding=1>
-<tr>
-  <td>
-<form method="GET" action="current.phtml">
-<input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
-Select Network: 
-<select name="network">
-<?php 
+$nselect = '<select name="network">';
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'ASOS' ORDER by name ASC");
 for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	$sel = '';
 	if ($network == $row["id"]){
 		$sel = " selected='SELECTED'";
 	}
-	echo sprintf("<option value='%s'%s>%s</option>\n",
+	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
 	  $row["id"], $sel, $row["name"]);
 }
+$nselect .= "</select>";
 
-?>
-</select></td>
-  <td>Include METARS:<br />
-  <input value="no" type="radio" name="metar" <?php if ($metar == "no") echo  "CHECKED"; ?>> No
-  <input value="yes" type="radio" name="metar" <?php if ($metar == "yes") echo  "CHECKED"; ?>> Yes
-</td>
-<td>Sort Order:
-<select name="sorder">
-  <option value="asc" <?php if ($sorder == "asc") echo "SELECTED"; ?>>Ascending
-  <option value="desc" <?php if ($sorder == "desc") echo "SELECTED"; ?>>Decending
-</select></td>
-<td>Format:
-<select name="format">
-  <option value="html" <?php if ($format == "html") echo "SELECTED"; ?>>Web Page
-  <option value="csv" <?php if ($format == "csv") echo "SELECTED"; ?>>Comma Delimited
-  <option value="jsonp" <?php if ($format == "jsonp") echo "SELECTED"; ?>>Geo-JSON-P
-</select></td>
+$ar = Array(
+	"no" => "No",
+	"yes" => "Yes"
+);
+$mselect = make_select("metar", $metar, $ar);
+
+$ar = Array(
+		"asc" => "Ascending",
+		"desc" => "Descending"
+);
+$sselect = make_select("sorder", $sorder, $ar);
+
+$ar = Array(
+		"html" => "Web Page",
+		"csv" => "Comma Delimited",
+		"jsonp" => "Geo-JSON-P"
+);
+$fselect = make_select("format", $format, $ar);
+
+$uri = "current.phtml?sorder=$sorder&metar=$metar&network=$network&sortcol=";
+$uri2 = "javascript:new_window('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network";
+
+$table = <<<EOF
+<table border=1 cellspacing=0 cellpadding=1>
+<tr>
+  <td>
+<form method="GET" action="current.phtml">
+<input type="hidden" name="sortcol" value="{$sortcol}">
+Select Network: {$nselect}</td>
+  <td>Include METARS:<br />{$mselect}</td>
+<td>Sort Order: {$sselect}</td>
+<td>Format: {$fselect}</td></td>
 <td><input type="submit" value="Go!"></form></td>
 </tr></table>
-
-
-
-
-<?php
-echo "<br /><strong>Times shown are for timezone: ${tzname}.</strong> The local day summary
-is based on that timezone. <br />Table sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on
+<br /><strong>Times shown are for timezone: ${tzname}.</strong> The local day summary
+is based on that timezone. <br />Table sorted by: <b>({$vals[$sortcol]})</b>  
+&nbsp; &nbsp; Click on
 a column to sort it. Click on site ID for more information. You can download data from 
-this network <a href='../request/download.phtml?network=${network}'>here</a>.<br />\n";
-?>
+this network <a href='../request/download.phtml?network=${network}'>here</a>.<br />
 
-<form method="GET" action="<?php echo $rooturl; ?>/my/current.phtml">
+<form method="GET" action="/my/current.phtml">
 
-
-<?php $uri = "current.phtml?sorder=$sorder&metar=$metar&network=$network&sortcol="; ?>
 
 <table style="width: 100%; font-size: 10pt;" cellspacing=0 cellpadding=1 border=1>
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
-  <th rowspan="2"><a href="<?php echo $uri; ?>id">ID</a></th>
-  <th rowspan="2"><a href="<?php echo $uri; ?>sname">Station</a></th>
-  <th rowspan="2"><a href="<?php echo $uri; ?>ts">Ob Time</a></th>
+  <th rowspan="2"><a href="{$uri}id">ID</a></th>
+  <th rowspan="2"><a href="{$uri}sname">Station</a></th>
+  <th rowspan="2"><a href="{$uri}ts">Ob Time</a></th>
   <th rowspan="2">Present Wx</th>
   <th colspan="5">Temps &deg;F</th>
   <th colspan="3">&nbsp;</th>
@@ -178,27 +180,27 @@ this network <a href='../request/download.phtml?network=${network}'>here</a>.<br
   <th colspan="2">Precip</font></th>
   <th colspan="4">Clouds</font></th>
 <tr>
-  <th><a href="<?php echo $uri; ?>tmpf">Air</a></th>
-  <th><a href="<?php echo $uri; ?>max_tmpf">Hi</a></th>
-  <th><a href="<?php echo $uri; ?>min_tmpf">Lo</a></th>
-  <th><a href="<?php echo $uri; ?>dwpf">Dewp</a></th>
-  <th><a href="<?php echo $uri; ?>feel">Feels</a></th>
-  <th><a href="<?php echo $uri; ?>relh">RH %</a></th>
-  <th><a href="<?php echo $uri; ?>alti">Alti</a></th>
-  <th><a href="<?php echo $uri; ?>vsby">Vsby</a></th>
-  <th><a href="<?php echo $uri; ?>sknt">Speed</a></th>
-  <th><a href="<?php echo $uri; ?>drct">Drct</a></th>
-  <th><a href="<?php echo $uri; ?>peak">Gust</a>
-    @ <a href="<?php echo $uri; ?>peak_ts">Time</a></th>
-  <th><a href="<?php echo $uri; ?>phour">1 Hour</a></th>
-  <th><a href="<?php echo $uri; ?>pday">Today</a></th>
-  <th><a href="<?php echo $uri; ?>skyl1">Level 1</a></th>
-  <th><a href="<?php echo $uri; ?>skyl2">Level 2</a></th>
-  <th><a href="<?php echo $uri; ?>skyl3">Level 3</a></th>
-  <th><a href="<?php echo $uri; ?>skyl4">Level 4</a></th>
+  <th><a href="{$uri}tmpf">Air</a></th>
+  <th><a href="{$uri}max_tmpf">Hi</a></th>
+  <th><a href="{$uri}min_tmpf">Lo</a></th>
+  <th><a href="{$uri}dwpf">Dewp</a></th>
+  <th><a href="{$uri}feel">Feels</a></th>
+  <th><a href="{$uri}relh">RH %</a></th>
+  <th><a href="{$uri}alti">Alti</a></th>
+  <th><a href="{$uri}vsby">Vsby</a></th>
+  <th><a href="{$uri}sknt">Speed</a></th>
+  <th><a href="{$uri}drct">Drct</a></th>
+  <th><a href="{$uri}peak">Gust</a>
+    @ <a href="{$uri}peak_ts">Time</a></th>
+  <th><a href="{$uri}phour">1 Hour</a></th>
+  <th><a href="{$uri}pday">Today</a></th>
+  <th><a href="{$uri}skyl1">Level 1</a></th>
+  <th><a href="{$uri}skyl2">Level 2</a></th>
+  <th><a href="{$uri}skyl3">Level 3</a></th>
+  <th><a href="{$uri}skyl4">Level 4</a></th>
 </tr></thead>
 <tbody>
-<?php
+EOF;
 
 $finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
@@ -262,30 +264,27 @@ while (list ($key, $val) = each ($finalA))  {
              <font color=\"brown\">". $parts["raw"] ."</font></td>
              </tr>\n";
    }
-  echo $row;
+  $table .= $row;
  }
-echo $old;
-
-
- $uri = "javascript:new_window('$rooturl/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network";
-?>
+$table .= $old;
+$table .= <<<EOF
 </tbody>
 <tfoot>
 <tr>
  <td colspan="5">&nbsp;</td>
- <td><a href="<?php echo $uri; ?>&var=tmpf');">Plot</a></td>
- <td><a href="<?php echo $uri; ?>&var=max_tmpf');">Plot</a></td>
- <td><a href="<?php echo $uri; ?>&var=min_tmpf');">Plot</a></td>
- <td><a href="<?php echo $uri; ?>&var=dwpf');">Plot</a></td>
- <td><a href="<?php echo $uri; ?>&var=feel');">Plot</a></td>
- <td><a href="<?php echo $uri; ?>&var=relh');">Plot</a></td>
- <td><a href="<?php echo $uri; ?>&var=alti');">Plot</a></td>
- <td><a href="<?php echo $uri; ?>&var=vsby');">Plot</a></td>
- <td><a href="<?php echo $uri; ?>&var=sknt');">Plot</a></td>
+ <td><a href="{$uri2}&var=tmpf');">Plot</a></td>
+ <td><a href="{$uri2}&var=max_tmpf');">Plot</a></td>
+ <td><a href="{$uri2}&var=min_tmpf');">Plot</a></td>
+ <td><a href="{$uri2}&var=dwpf');">Plot</a></td>
+ <td><a href="{$uri2}&var=feel');">Plot</a></td>
+ <td><a href="{$uri2}&var=relh');">Plot</a></td>
+ <td><a href="{$uri2}&var=alti');">Plot</a></td>
+ <td><a href="{$uri2}&var=vsby');">Plot</a></td>
+ <td><a href="{$uri2}&var=sknt');">Plot</a></td>
  <td>&nbsp;</td>
- <td><a href="<?php echo $uri; ?>&var=max_gust');">Plot</a></td>
- <td><a href="<?php echo $uri; ?>&var=phour');">Plot</a></td>
- <td><a href="<?php echo $uri; ?>&var=pday');">Plot</a></td>
+ <td><a href="{$uri2}&var=max_gust');">Plot</a></td>
+ <td><a href="{$uri2}&var=phour');">Plot</a></td>
+ <td><a href="{$uri2}&var=pday');">Plot</a></td>
  <td></td>
  <td></td>
  <td></td>
@@ -297,6 +296,7 @@ echo $old;
 <input type="reset" value="Reset">
 
 </form>
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->content = $table;
+$t->render('sortables.phtml');
+?>
