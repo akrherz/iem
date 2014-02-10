@@ -1,6 +1,9 @@
 <?php
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
+$t->current_network = "RWIS Traffic";
+include("../../include/database.inc.php");
 $dbconn = iemdb("iem");
 $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'valid';
 
@@ -9,38 +12,42 @@ $rs = pg_prepare($dbconn, "SELECT", "select t.*, s.name as sname from rwis_traff
       where s.remote_id = t.location_id ORDER by $sortcol DESC");
 $rs = pg_execute($dbconn, "SELECT", Array() );
 
- $TITLE = "IEM | RWIS | Current Traffic Data";
- $REFRESH = "<meta http-equiv=\"refresh\" content=\"600;
+ $t->title = "RWIS Current Traffic Data";
+ $t->refresh = "<meta http-equiv=\"refresh\" content=\"600;
  URL=traffic.phtml?sortcol=$sortcol\">";
- $THISPAGE = "current-sort";
- include("$rootpath/include/header.php"); 
+ $t->thispage = "current-sort";
 
- $current_network = "RWIS Traffic"; 
- include("$rootpath/include/current_bar.inc.php"); 
-?>
+
+ function fancytime($strtime){
+ 	$now = time();
+ 	$ts = strtotime($strtime);
+ 	if (($now - $ts) < 600){ return date("h:i A", $ts); }
+ 	else { return date("M d h:i A", $ts); }
+ }
+ $vals = Array(
+ 		"sname" => "Station Name",
+ 		"valid" => "Observation Time",
+ 		"avg_speed" => "Average Speed [mph]",
+ 		"normal_vol" => "2 Axel Volume",
+ 		"long_vol" => "3+ Axel Volume",
+ 		"occupancy" => "Occupancy",
+ );
+
+ $table = "";
+ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+ 	$table .= sprintf("<tr><th>%s</th><th>%s</th><td>%s</td><td>%.1f</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+ 			$row["sname"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
+ 			$row["normal_vol"], $row["long_vol"], $row["occupancy"]);
+ }
+ 
+ 
+$t->content = <<<EOF
 <h3 class="subtitle">Iowa RWIS Traffic Data</h3>
 
 <p>** This page will automatically refresh every 10 minutes.
 <br>Click on a column to sort it.</p>
 
-<?php
-function fancytime($strtime){
-  $now = time();
-  $ts = strtotime($strtime);
-  if (($now - $ts) < 600){ return date("h:i A", $ts); }
-  else { return date("M d h:i A", $ts); }
-}
-$vals = Array(
- "sname" => "Station Name",
- "valid" => "Observation Time",
- "avg_speed" => "Average Speed [mph]",
- "normal_vol" => "2 Axel Volume",
- "long_vol" => "3+ Axel Volume",
- "occupancy" => "Occupancy",
-);
-
-echo "<p>Sorted by: <b>". $vals[$sortcol] ."</b><br>\n";
-?>
+<p>Sorted by: <b>{$vals[$sortcol]}</b><br>
 <table style="width: 100%; font-size: 10pt;" cellspacing="0" cellpadding="1" border="1">
 <thead>
 <tr>
@@ -54,19 +61,13 @@ echo "<p>Sorted by: <b>". $vals[$sortcol] ."</b><br>\n";
 </tr>
 </thead>
 <tbody>
-<?php
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
-   echo sprintf("<tr><th>%s</th><th>%s</th><td>%s</td><td>%.1f</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", 
-   $row["sname"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
-   $row["normal_vol"], $row["long_vol"], $row["occupancy"]);
-}
-?>
+{$table}
 </tbody>
 </table>
 
 </form>
 
 <br><br>
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render("sortables.phtml");
+?>

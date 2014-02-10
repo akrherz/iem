@@ -1,23 +1,26 @@
 <?php
  include("../../config/settings.inc.php");
+ include("../../include/myview.php");
+ $t = new MyView();
+ $t->current_network = 'RWIS';
  $sortcol = isset($_GET["sortcol"]) ? $_GET["sortcol"] : "ts";
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_RWIS';
- $TITLE = "IEM | RWIS | Currents";
- $REFRESH = "<meta http-equiv=\"refresh\" content=\"600; URL=current.phtml?sortcol=$sortcol&network=$network\">";
- $HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+ $t->title = "RWIS Sortable Currents";
+ $t->refresh = "<meta http-equiv=\"refresh\" content=\"600; URL=current.phtml?sortcol=$sortcol&network=$network\">";
+ $t->headextra = <<<EOF
+ <script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
 function new_window(url) {
  link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
 } 
 //END Script-->
-</script>';
- $THISPAGE = "current-sort";
- include("$rootpath/include/header.php"); ?>
-<?php include("$rootpath/include/mlib.php"); ?>
-<?php 
-  include("$rootpath/include/iemaccess.php");
-  include("$rootpath/include/iemaccessob.php");
-  include_once "$rootpath/include/database.inc.php";
+</script>
+EOF;
+ $t->thispage= "current-sort";
+include("../../include/mlib.php"); 
+  include("../../include/iemaccess.php");
+  include("../../include/iemaccessob.php");
+  include_once "../../include/database.inc.php";
   $mesosite = iemdb('mesosite');
   
 $iem = new IEMAccess();
@@ -31,121 +34,77 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "max_tmpf" => "Today's High Temperature", "sname" => "Station Name",
   "sid" => "Station ID", "relh" => "Relative Humidity", "vsby" => "Visibility");
 
-?>
-
-<?php $current_network = "RWIS"; include("$rootpath/include/current_bar.inc.php"); ?>
-<form method="GET" action="current.phtml">
-<select name="network">
-<?php 
+$nselect = "<select name=\"network\">";
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC");
 for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	$sel = '';
 	if ($network == $row["id"]){
 		$sel = " selected='SELECTED'";
 	}
-	echo sprintf("<option value='%s'%s>%s</option>\n",
+	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
 	  $row["id"], $sel, $row["name"]);
 }
+$nselect .= "</select>";
 
-?>
-</select>
-<input type="submit" value="Show State">
-</form>
-
-<?php
-echo "Sorted by: <b>(". $vals[$sortcol] .")</b>  &nbsp; &nbsp; Click on a column to sort it.<br>\n";
 $uri = "current.phtml?network=${network}&sortcol=";
-?>
 
-<form method="GET" action="/my/current.phtml">
-<table style="width: 100%; font-size: 10pt;" border="0" cellpadding="1" cellspacing="0">
-<thead>
-<tr>
-  <th rowspan="2">ADD:</th>
-  <th rowspan="2"><a href="<?php echo $uri; ?>sname">Station:</a></th>
-  <th rowspan="2"><a href="<?php echo $uri; ?>ts">Ob Time</a></th>
-  <th colspan="3" bgcolor="#acdcda">Temps &deg;F</th>
-  <th>&nbsp;</th>
-  <th>&nbsp;</th>
-  <th colspan="3" bgcolor="#EEEEEE">Wind [knots]</th>
-  <th><a href="<?php echo $uri; ?>pday">Precip</a></th>
-</tr>
-<tr>
-  
-  <th>
-   <a href="<?php echo $uri; ?>tmpf">Air</a>
-   (<a href="<?php echo $uri; ?>max_tmpf">Hi</a> /
-   <a href="<?php echo $uri; ?>min_tmpf">Lo</a>)
-</th>
-  <th><a href="<?php echo $uri; ?>dwpf">DewP</a></th>
-  <th><a href="<?php echo $uri; ?>feel">Feels</a></th>
-  <th><a href="<?php echo $uri; ?>relh">RH%</a></th>
-  <th><a href="<?php echo $uri; ?>vsby">Vis</a></th>
-  <th><a href="<?php echo $uri; ?>sknt">Speed</a></th>
-  <th><a href="<?php echo $uri; ?>drct">Direction</a></th>
-  <th><a href="<?php echo $uri; ?>peak">Gust</a>
-    @<a href="<?php echo $uri; ?>peak_ts">Time</a></th>
-  <th><a href="<?php echo $uri; ?>pday">Accum</a> [1]</th>
-</tr></thead>
-<tbody>
-<?php
 function aSortBySecondIndex($multiArray, $secondIndex) {
-        while (list($firstIndex, ) = each($multiArray))
-                $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-        arsort($indexMap);
-        while (list($firstIndex, ) = each($indexMap))
-                if (is_numeric($firstIndex))
-                        $sortedArray[] = $multiArray[$firstIndex];
-                else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-        return $sortedArray;
+	while (list($firstIndex, ) = each($multiArray))
+		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+	arsort($indexMap);
+	while (list($firstIndex, ) = each($indexMap))
+	if (is_numeric($firstIndex))
+		$sortedArray[] = $multiArray[$firstIndex];
+	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+	return $sortedArray;
 }
 
-  $mydata = Array();
+$mydata = Array();
 
-  while (list($key, $iemob) = each($rwis) ){
-    $mydata[$key] = $iemob->db;
-    $mydata[$key]["ts"] = $iemob->ts;
-    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), 
-       f2c($mydata[$key]["dwpf"]) );
-    $mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"], 
-       $mydata[$key]["relh"], $mydata[$key]["sknt"] * 1.15078);
-    if ($mydata[$key]["dwpf"] > $mydata[$key]["tmpf"]){
-       $mydata[$key]["feel"] = "";
-       $mydata[$key]["dwpf"] = "";
-    }
-    if ($mydata[$key]["relh"] > 100 || $mydata[$key]["relh"] < -98 ){ 
-       $mydata[$key]["feel"] = "";
-       $mydata[$key]["dwpf"] = "";
-       $mydata[$key]["relh"] = "";
-    }
-    if ($mydata[$key]["tmpf"] > 120 || $mydata[$key]["tmpf"] < -40){ 
-       $mydata[$key]["feel"] = "";
-       $mydata[$key]["dwpf"] = "";
-       $mydata[$key]["relh"] = "";
-       $mydata[$key]["tmpf"] = "";
-       $mydata[$key]["min_tmpf"] = "";
-       $mydata[$key]["max_tmpf"] = "";
-    }
-    if ($mydata[$key]["vsby"] < 0){ 
-        $mydata[$key]["vsby"] = ""; 
-    }else{
-        $mydata[$key]["vsby"] = round( $mydata[$key]["vsby"], 1); 
-    }
-     $mydata[$key]["peak_ts"] = 0;
-    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
-      $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
-    } else {
-      $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-     if ($mydata[$key]["max_sknt_ts"] > 0) {
-      $mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
-    }
-  }
+while (list($key, $iemob) = each($rwis) ){
+	$mydata[$key] = $iemob->db;
+	$mydata[$key]["ts"] = $iemob->ts;
+	$mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
+			f2c($mydata[$key]["dwpf"]) );
+	$mydata[$key]["feel"] = feels_like($mydata[$key]["tmpf"],
+			$mydata[$key]["relh"], $mydata[$key]["sknt"] * 1.15078);
+	if ($mydata[$key]["dwpf"] > $mydata[$key]["tmpf"]){
+		$mydata[$key]["feel"] = "";
+		$mydata[$key]["dwpf"] = "";
+	}
+	if ($mydata[$key]["relh"] > 100 || $mydata[$key]["relh"] < -98 ){
+		$mydata[$key]["feel"] = "";
+		$mydata[$key]["dwpf"] = "";
+		$mydata[$key]["relh"] = "";
+	}
+	if ($mydata[$key]["tmpf"] > 120 || $mydata[$key]["tmpf"] < -40){
+		$mydata[$key]["feel"] = "";
+		$mydata[$key]["dwpf"] = "";
+		$mydata[$key]["relh"] = "";
+		$mydata[$key]["tmpf"] = "";
+		$mydata[$key]["min_tmpf"] = "";
+		$mydata[$key]["max_tmpf"] = "";
+	}
+	if ($mydata[$key]["vsby"] < 0){
+		$mydata[$key]["vsby"] = "";
+	}else{
+		$mydata[$key]["vsby"] = round( $mydata[$key]["vsby"], 1);
+	}
+	$mydata[$key]["peak_ts"] = 0;
+	if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
+		$mydata[$key]["peak"] = $mydata[$key]["max_gust"];
+		$mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_gust_ts"],0,16) );
+	} else {
+		$mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
+		if ($mydata[$key]["max_sknt_ts"] > 0) {
+			$mydata[$key]["peak_ts"] = strtotime(substr( $mydata[$key]["max_sknt_ts"],0,16) );
+		}
+	}
 
- if ($mydata[$key]["sknt"] < 0){ 
-   $mydata[$key]["sknt"] = ""; 
-   $mydata[$key]["drct"] = ""; 
- }
+	if ($mydata[$key]["sknt"] < 0){
+		$mydata[$key]["sknt"] = "";
+		$mydata[$key]["drct"] = "";
+	}
 
 }
 
@@ -155,43 +114,43 @@ $finalA = aSortBySecondIndex($mydata, $sortcol);
 $i = 0;
 $now = time();
 $skippedStations = Array();
+$table = "";
+// Loop though all data
+while (list ($key, $val) = each ($finalA))  {
+	$parts = $finalA[$key];
+	$tdiff = $now - $parts["ts"];
 
-  // Loop though all data 
-  while (list ($key, $val) = each ($finalA))  {
-    $parts = $finalA[$key];
-    $tdiff = $now - $parts["ts"];
+	// Dont show IAC
+	if ($key == "RIOW"){
+		continue;
+	}
+	if ($tdiff > 6900){
+		$skippedStations[$key] = $parts;
+		continue;
+	}
 
-     // Dont show IAC
-    if ($key == "RIOW"){
-      continue;
-    }
-    if ($tdiff > 6900){
-      $skippedStations[$key] = $parts;
-      continue;
-    }
+	$i++;
 
-    $i++;
+	$table .= "<tr";
+	if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
 
-	  echo "<tr";
-	  if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
-            
-          echo ">";
-   echo "<td><input type=\"checkbox\" name=\"st[]\" 
+	$table .= ">";
+	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
-  echo "<td><a href='../sites/site.php?network=". $network ."&station=". $key ."'>". $parts["sname"] . "</a></td><td ";
-  if ($tdiff > 11900){
-    echo 'bgcolor="red"';
-    $format = "%b-%d-%y %I:%M %p";
-  } else if ($tdiff > 6900){
-    echo 'bgcolor="orange"';
-    $format = "%I:%M %p";
-  } else if ($tdiff > 1800){
-    echo 'bgcolor="green"';
-    $format = "%I:%M %p";
-  } else {
-    $format = "%I:%M %p";
-  }
-  echo ">". strftime($format, $parts["ts"]) ."</td>
+	$table .= "<td><a href='../sites/site.php?network=". $network ."&station=". $key ."'>". $parts["sname"] . "</a></td><td ";
+	if ($tdiff > 11900){
+		$table .= 'bgcolor="red"';
+		$format = "%b-%d-%y %I:%M %p";
+	} else if ($tdiff > 6900){
+		$table .= 'bgcolor="orange"';
+		$format = "%I:%M %p";
+	} else if ($tdiff > 1800){
+		$table .= 'bgcolor="green"';
+		$format = "%I:%M %p";
+	} else {
+		$format = "%I:%M %p";
+	}
+	$table .= ">". strftime($format, $parts["ts"]) ."</td>
   <td align='center'>". $parts["tmpf"] ."(<font color=\"#ff0000\">".
   $parts["max_tmpf"] ."</font>/<font color=\"#0000ff\">".
   $parts["min_tmpf"] ."</font>)</td>
@@ -200,51 +159,91 @@ $skippedStations = Array();
  <td>". $parts["relh"] ."</td>
  <td>". $parts["vsby"] ."</td>
  <td>". round($parts["sknt"],0) ;
-  if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
-              echo "G". round($parts["gust"],0);
-  } 
-  echo "</td>
+	if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
+		$table .= "G". round($parts["gust"],0);
+	}
+	$table .= "</td>
             <td>". $parts["drct"] ."</td>
 	    <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td>
             <td>". round($parts["pday"],2) ."</td>
 	    </tr>\n";
-   }
+}
 
 
 
 
 while (list ($key, $val) = each ($skippedStations) ) {
-  $parts = $finalA[$key];
-  $i++;
+	$parts = $finalA[$key];
+	$i++;
 
-	  echo "<tr";
-	  if ($i % 2 == 0)  echo " bgcolor='#eeeeee'";  
-            
-          echo ">";
-   echo "<td><input type=\"checkbox\" name=\"st[]\" 
+	$table .= "<tr";
+	if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
+
+	$table .= ">";
+	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
-  echo "<td>". $parts["sname"] . "</td><td ";
-  echo 'bgcolor="red"';
-  $format = "%b-%d-%y";
-  echo ">". strftime($format, $parts["ts"]) ."</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
+	$table .= "<td>". $parts["sname"] . "</td><td ";
+	$table .= 'bgcolor="red"';
+	$format = "%b-%d-%y";
+	$table .= ">". strftime($format, $parts["ts"]) ."</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
 }
 
-?>
+$c = "javascript:new_window('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=".$network."&var=";
+
+$content = <<<EOF
+<form method="GET" action="current.phtml">
+{$nselect}
+<input type="submit" value="Show State">
+</form>
+
+Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; Click on a column to sort it.<br>
+
+<form method="GET" action="/my/current.phtml">
+<table style="width: 100%; font-size: 10pt;" border="0" cellpadding="1" cellspacing="0">
+<thead>
+<tr>
+  <th rowspan="2">ADD:</th>
+  <th rowspan="2"><a href="{$uri}sname">Station:</a></th>
+  <th rowspan="2"><a href="{$uri}ts">Ob Time</a></th>
+  <th colspan="3" bgcolor="#acdcda">Temps &deg;F</th>
+  <th>&nbsp;</th>
+  <th>&nbsp;</th>
+  <th colspan="3" bgcolor="#EEEEEE">Wind [knots]</th>
+  <th><a href="{$uri}pday">Precip</a></th>
+</tr>
+<tr>
+  
+  <th>
+   <a href="{$uri}tmpf">Air</a>
+   (<a href="{$uri}max_tmpf">Hi</a> /
+   <a href="{$uri}min_tmpf">Lo</a>)
+</th>
+  <th><a href="{$uri}dwpf">DewP</a></th>
+  <th><a href="{$uri}feel">Feels</a></th>
+  <th><a href="{$uri}relh">RH%</a></th>
+  <th><a href="{$uri}vsby">Vis</a></th>
+  <th><a href="{$uri}sknt">Speed</a></th>
+  <th><a href="{$uri}drct">Direction</a></th>
+  <th><a href="{$uri}peak">Gust</a>
+    @<a href="{$uri}peak_ts">Time</a></th>
+  <th><a href="{$uri}pday">Accum</a> [1]</th>
+</tr></thead>
+<tbody>
+{$table}
 </tbody>
 <tfoot>
 <tr>
  <td colspan=3>&nbsp;</td>
-<?php $c = "javascript:new_window('http://mesonet.agron.iastate.edu/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=".$network."&var="; ?>
- <td><a href="<?php echo $c; ?>tmpf');">Plot</a>
-    (<a href="<?php echo $c; ?>max_tmpf');">Plot</a> /
-     <a href="<?php echo $c; ?>min_tmpf');">Plot</a>)</td>
- <td><a href="<?php echo $c; ?>dwpf');">Plot</a></td>
- <td><a href="<?php echo $c; ?>feel');">Plot</a></td>
- <td><a href="<?php echo $c; ?>vsby');">Plot</a></td>
- <td><a href="<?php echo $c; ?>relh');">Plot</a></td>
- <td colspan=2><a href="<?php echo $c; ?>barb');">Plot</a></td>
- <td><a href="<?php echo $c; ?>max_sknt');">Plot</a></td>
- <td><a href="<?php echo $c; ?>pday');">Plot</a></td>
+ <td><a href="{$c}tmpf');">Plot</a>
+    (<a href="{$c}max_tmpf');">Plot</a> /
+     <a href="{$c}min_tmpf');">Plot</a>)</td>
+ <td><a href="{$c}dwpf');">Plot</a></td>
+ <td><a href="{$c}feel');">Plot</a></td>
+ <td><a href="{$c}vsby');">Plot</a></td>
+ <td><a href="{$c}relh');">Plot</a></td>
+ <td colspan=2><a href="{$c}barb');">Plot</a></td>
+ <td><a href="{$c}max_sknt');">Plot</a></td>
+ <td><a href="{$c}pday');">Plot</a></td>
 
 </tr></tfoot>
 </table>
@@ -260,6 +259,7 @@ while (list ($key, $val) = each ($skippedStations) ) {
 <b>2</b> The Iowa City (I-80) RWIS site does not have atmospheric sensors on it
 , so it is not included on this page.<br>
 
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->content = $content;
+$t->render('sortables.phtml');
+?>
