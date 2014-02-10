@@ -25,7 +25,7 @@ from scipy.interpolate import griddata
 
 from iem import constants
 
-import Image
+from PIL import Image
 import cStringIO
 import tempfile
 import os
