@@ -1,31 +1,31 @@
 <?php 
 include("../../config/settings.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
+
 define("IEM_APPID", 56);
 $network = isset($_GET['network']) ? $_GET['network'] : 'IACOCORAHS'; 
 $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : 'ts';
 
-$TITLE = "IEM | CoCoRaHS | Last Observation";
-$HEADEXTRA = '<script language="JavaScript" type="text/javascript">
+$t->title = "CoCoRaHS Last Observation";
+$t->headextra = <<<EOF
+<script language="JavaScript" type="text/javascript">
 	<!--//BEGIN Script
 	function new_window(url) {
  	link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
 	}
 	//END Script-->
 	</script>
-<script type="text/javascript" src="/js/tableruler.js"></script>
-<script type="text/javascript">
-    window.onload=function(){tableruler();}
-</script>';
- $THISPAGE = "current-sort";
-include("$rootpath/include/header.php"); ?>
-<div class="text">
-<?php
- include("$rootpath/include/network.php");
- $nt = new NetworkTable($network);
+EOF;
+ $t->thispage = "current-sort";
+$t->current_network = "CoCoRaHS";
 
- include("$rootpath/include/iemaccess.php");
- include("$rootpath/include/iemaccessob.php");
- include_once("$rootpath/include/database.inc.php");
+include("../../include/network.php");
+ $nt = new NetworkTable($network);
+ include("../../include/forms.php");
+ include("../../include/iemaccess.php");
+ include("../../include/iemaccessob.php");
+ include_once("../../include/database.inc.php");
 
  /* Compute monthly rainfall totals! */
  $dbconn = iemdb("access");
@@ -89,46 +89,40 @@ $cols = Array("ts" => "Valid", "county" => "County",
   "min_tmpf" => "24 hour Low", "snow" => "24 hour Snowfall",
   "snowd" => "Snowfall Depth", "pday" => "24 hour rainfall",
   "phour" => "Rainfall One Hour", "pmonth" => "Rainfall for Month");
-?>
 
-<?php $current_network = "CoCoRaHS"; include("$rootpath/include/current_bar.inc.php"); ?>
+$ar = Array("IACOCORAHS" => "Iowa",
+"ILCOCORAHS" => "Illinois");
+$nselect = make_select("network", $network, $ar);
 
+$baseurl2 = "current.phtml?network=$network&sortcol=";
+$content = <<<EOF
 <form method="GET" action="current.phtml" name="stctrl">
-<input type="hidden" name="sortcol" value="<?php echo $sortcol; ?>">
-<b>Show State:</b><select name="network">
-  <option value="IACOCORAHS" <?php if ($network == "IACOCORAHS") echo "SELECTED"; ?>>Iowa
-  <option value="ILCOCORAHS" <?php if ($network == "ILCOCORAHS") echo "SELECTED"; ?>>Illinois
-</select>
+<input type="hidden" name="sortcol" value="{$sortcol}">
+<b>Show State:</b>{$nselect}
 <input type="submit" value="Go!">
 </form>
-
-
-<?php
-echo "<p>Sorted by: ". $cols[$sortcol] ;
-
-
- $baseurl2 = "current.phtml?network=$network&sortcol=";
-?> . The number of observations missing for this month is shown in parenthesis.
+<p>Sorted by: {$cols[$sortcol]}. 
+The number of observations missing for this month is shown in parenthesis.
 <form name="st" action="/my/current.phtml" method="GET">
 <table style="width: 100%; font-size: 10pt;" class="ruler" border="1">
 <thead>
 <tr>
   <th rowspan=2>Add:</th>
-  <th rowspan=2><a href="<?php echo $baseurl2; ?>sid">SiteID:</a></th>
-  <th rowspan=2><a href="<?php echo $baseurl2; ?>sname">Station Name:</a></th>
-  <th rowspan=2><a href="<?php echo $baseurl2; ?>county">County:</a></th>
-  <th rowspan=2><a href="<?php echo $baseurl2; ?>ts">Valid:</a></th>
+  <th rowspan=2><a href="{$baseurl2}sid">SiteID:</a></th>
+  <th rowspan=2><a href="{$baseurl2}sname">Station Name:</a></th>
+  <th rowspan=2><a href="{$baseurl2}county">County:</a></th>
+  <th rowspan=2><a href="{$baseurl2}ts">Valid:</a></th>
   <th colspan=5>Hydro</th></tr>
 
 <tr>
-  <th><a href="<?php echo $baseurl2; ?>pday">24hour Rain</a></th>
-  <th><a href="<?php echo $baseurl2; ?>pmonth">Month Rain</a></th>
-  <th><a href="<?php echo $baseurl2; ?>snow">Snowfall</a></th>
-  <th><a href="<?php echo $baseurl2; ?>ratio">Ratio</a></th>
-  <th><a href="<?php echo $baseurl2; ?>snowd">Snow Depth</a></th>
+  <th><a href="{$baseurl2}pday">24hour Rain</a></th>
+  <th><a href="{$baseurl2}pmonth">Month Rain</a></th>
+  <th><a href="{$baseurl2}snow">Snowfall</a></th>
+  <th><a href="{$baseurl2}ratio">Ratio</a></th>
+  <th><a href="{$baseurl2}snowd">Snow Depth</a></th>
 </tr></thead>
 <tbody>
-<?php
+EOF;
  $oddrow = true;
  $now = time();
  while (list($site, $value) = each($db) ){
@@ -136,17 +130,17 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
    if ( intval( date("Y", $value["ts"]) ) < 2003 ) continue;
    $oddrow = ! $oddrow;
 
-   echo "<tr ";
-   if ($oddrow) echo "bgcolor=\"#EEEEEE\"";
-   echo "><th><input type=\"checkbox\" name=\"st[]\"
+   $content .= "<tr ";
+   if ($oddrow) $content .= "bgcolor=\"#EEEEEE\"";
+   $content .= "><th><input type=\"checkbox\" name=\"st[]\"
    value=\"".$site."\"></th><td> $site </td>
     <td>". $value["sname"] ."</td>
     <td>". $value["county"] ."</td>";
-   echo "<td ";
+   $content .= "<td ";
    if ($tdiff > (24*3600) || date("Ymd") != date("Ymd", $value["ts"]) ){
-     echo 'bgcolor="red">'. strftime("%d %b %I:%M %p", $value["ts"]) .'</td>';
+     $content .= 'bgcolor="red">'. strftime("%d %b %I:%M %p", $value["ts"]) .'</td>';
    } else {
-     echo ">". strftime("%I:%M %p", $value["ts"]) ."</td>";
+     $content .= ">". strftime("%I:%M %p", $value["ts"]) ."</td>";
    }
 
    if ($value["pday"] == 0.0001) $value["pday"] = "T";
@@ -156,33 +150,31 @@ echo "<p>Sorted by: ". $cols[$sortcol] ;
    if ($value["snowd"] == 0.0001) $value["snowd"] = "T";
    if ($value["snow"] < 0) $value["snow"] = "M";
 
-   echo "<td>". $value["pday"] ."</td>";
-   echo "<td>". $value["pmonth"];
-   if ($value["pmiss"] > 0) echo " (". $value["pmiss"] .")";
-    echo "</td>";
-    echo "<td>". $value["snow"] ."</td>";
-    if ($value["ratio"] > 0) echo "<td>". $value["ratio"] ."</td>";
-    else echo "<td></td>";
-    echo "<td>". $value["snowd"] ."</td>";
-   echo "</tr>";
+   $content .= "<td>". $value["pday"] ."</td>";
+   $content .= "<td>". $value["pmonth"];
+   if ($value["pmiss"] > 0) $content .= " (". $value["pmiss"] .")";
+    $content .= "</td>";
+    $content .= "<td>". $value["snow"] ."</td>";
+    if ($value["ratio"] > 0) $content .= "<td>". $value["ratio"] ."</td>";
+    else $content .= "<td></td>";
+    $content .= "<td>". $value["snowd"] ."</td>";
+   $content .= "</tr>";
  }
-?>
+$c = "javascript:new_window('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network&var=";
+$content .= <<<EOF
 </tbody><tfoot>
 <tr>
  <td colspan=5>&nbsp;</td>
-<?php $c = "javascript:new_window('$rooturl/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=$network&var="; ?>
- <td><a href="<?php echo $c; ?>pday');">Plot</a></td>
+ <td><a href="{$c}pday');">Plot</a></td>
  <td></td>
- <td><a href="<?php echo $c; ?>snow');">Plot</a></td>
+ <td><a href="{$c}snow');">Plot</a></td>
  <td></td>
- <td><a href="<?php echo $c; ?>snowd');">Plot</a></td>
+ <td><a href="{$c}snowd');">Plot</a></td>
 </tr></tfoot>
-
-<?php
- echo "</table>";
- echo "<input type=\"submit\" value=\"Add to Favorites\">\n</form>";
-?>
-</div>
-
-<?php include("$rootpath/include/footer.php");
+</table>
+<input type="submit" value="Add to Favorites">
+ 		</form>
+EOF;
+$t->content = $content;
+$t->render('sortables.phtml');
 ?>
