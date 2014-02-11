@@ -36,18 +36,18 @@ sdc_data, sdc_names = util.build_sdc(sdc_feed)
 #        'NAEW.WS118','NAEW.WS123','NAEW.WS127','WOOSTER.LTR','WOOSTER.COV',
 #        'HOYTVILLE.LTR']
 
-NOTDONE = ['ORR','LAN', 'ARL']
+NOTDONE = ['BRADFORD.B1','BRADFORD.B2', 'BRADFORD.C']
 
 for entry in meta_feed.entry:
     data = entry.to_dict()
     sitekey = data.get('uniqueid').lower()
-    soil15 = 'SOIL15' in sdc_data[sitekey]
-    soil16 = 'SOIL16' in sdc_data[sitekey]
-    if not soil15 and not soil16:
-        print 'Skipping', sitekey, 'as they have no entries for SOIL15-16'
-        continue
     if sitekey.upper() not in NOTDONE:
         print 'skip', sitekey
+        continue
+    soil15 = 'SOIL15' in sdc_data["2013"][sitekey]
+    soil16 = 'SOIL16' in sdc_data["2013"][sitekey]
+    if not soil15 and not soil16:
+        print 'Skipping', sitekey, 'as they have no entries for SOIL15-16'
         continue
     # This is the folder where synced data is stored
     colfolder = data.get('colfolder')

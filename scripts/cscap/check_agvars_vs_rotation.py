@@ -28,7 +28,7 @@ for entry in xref_feed.entry:
 
 # Get data spreadsheets 
 query = gdata.docs.client.DocsQuery(show_collections='false',
-                                    title='Scharf Agronomic Data')
+                                    title='Agronomic Data')
 feed = docs_client.GetAllResources(query=query)
 
 for entry in feed:
@@ -68,7 +68,12 @@ for entry in feed:
                     print 'Setting to n/a', data['plotid'], crop, col, data[col]
                     entry.set_value(col, 'n/a')
                     dirty = True
-                if (col not in cropmates[crop] and 
+                if data[col] is None:
+                    continue
+                    #print 'Setting to .', data['plotid'], crop, col
+                    #entry.set_value(col, '.')
+                    #dirty = True
+                elif (col not in cropmates[crop] and 
                     data[col].lower() not in ['.', 'did not collect', 'n/a']):
                     print "PlotID: %s crop: %s has data [%s] for %s" % (
                                         data['plotid'], crop, data[col], 

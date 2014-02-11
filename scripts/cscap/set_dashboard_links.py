@@ -113,6 +113,8 @@ def do_row(row):
     
     for col in range(2,SHEET.cols+1):
         entry = SHEET.get_cell_entry(row, col)
+        if entry is None:
+            print 'Found none type entry? row: %s col: %s' % (row, col)
         siteid = column_ids[ int(entry.cell.col) ]
         if siteid in ['', 'Required (R)']:
             continue
