@@ -14,21 +14,31 @@
  include("../../include/iemaccess.php");
  include("../../include/network.php");
  $t = new MyView();
- $t->title = "NWS COOP Observations";
+ $t->title = "NWS COOP Observations by Date by Site";
  $t->thispage = "networks-coop";
 
  $content = <<<EOF
-<div class="text">
-
-<p>This page presents the raw observations of daily high and low temperature along with precipitation
-and snow when available.  The dates shown are the date when the observation was reported.  For observations
-made at 7 AM, this would be a for a 24 hour period up until that time and not for that local date.
-
+ <ol class="breadcrumb">
+  <li><a href="/COOP/">NWS Cooperative Observers</a></li>
+  <li class="active">View Reports by Date or Site</li>		
+ </ol>
+<p>This page presents the raw observations of daily high and low temperature 
+ along with precipitation and snow when available.  The dates shown are the 
+ date when the observation was reported.  For observations made at 7 AM, this 
+ would be a for a 24 hour period up until that time and not for that local date.
+ The timestamps shown are valid for the local timezone of that reporting station.
+ 		
+ <p><div class="alert alert-info"><strong>Hint:</strong> You should be able to 
+ 	highlight the values in the table and then copy + paste these values into a 
+ 	spreadsheet program like Excel. A 
+ 	<a class="alert-link" href="/request/daily.phtml?network={$network}">download interface</a> does exist for these
+    observations.</div>
+ 		
 <form name="switchnwsli" action="cat.phtml" method="GET">
 EOF;
 
 if (strlen($station) > 0) {
-  $link = "cat.phtml?station=".$station."&network=". $network ."&sortvar=";
+  $link = "cat.phtml?year=$year&station=$station&network=$network&sortvar=";
   if ($sortvar == "") $sortvar = "day";
  $content .= <<<EOF
  <h3>COOP obs listed by station</h3>
@@ -42,7 +52,7 @@ EOF;
  
 if (strlen($date) > 0) { 
   $year = substr($date,0,4);
-  $link = "cat.phtml?date=".$date."&network=". $network ."&sortvar=";
+  $link = "cat.phtml?date=$date&network=$network&sortvar=";
   if ($sortvar == "") $sortvar = "station";
 $content .= <<<EOF
 <h3>COOP obs listed by date</h3>
@@ -72,7 +82,7 @@ $content .= <<<EOF
   value="Hide rows without data">
 </form>
 
-<p><table class="table table-striped table-bordered">
+<p><table class="table table-striped table-bordered table-condensed">
 <thead><tr>
   <th><a href="{$link}station">NWSLI:</a></th>
   <th><a href="{$link}sname">Site Name:</a></th>
@@ -183,12 +193,8 @@ EOF;
 $content .= <<<EOF
  </table>
 
-<p>Theoretically, you should be able to highlight the entire table with 
-your cursor and then copy-paste it into a spreadsheet program if you 
-like.
-
 <p>Errors exist in this dataset and you should evaluate the observations
-before using...</div>
+before using...
 EOF;
 $t->content = $content;
 $t->jsextra = <<<EOF
