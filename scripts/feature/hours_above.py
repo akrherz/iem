@@ -2,50 +2,38 @@ import iemdb
 import math
 ASOS = iemdb.connect('asos', bypass=True)
 acursor = ASOS.cursor()
-COOP = iemdb.connect('coop', bypass=True)
-ccursor = COOP.cursor()
 
 
 data = []
-for yr in range(1933,2012):
+years = []
     # Query out obs
-    acursor.execute("""
-    SELECT distinct to_char(valid, 'MMDDHH24') from t%s where station = 'DSM' 
-    and tmpf >= 93 
-    """ % (yr,))
-    multi = 1.
-    if yr > 1964 and yr < 1973:
-        multi = 3.
-    data.append( acursor.rowcount * multi)
-
-data2 = []
-
-for yr in range(1933,2012):
-    ccursor.execute("""
-    SELECT sum(sdd86(high,low)) from alldata_ia where year = %s and station = 'IA2203'
-    """ % (yr))
-    row = ccursor.fetchone()
-    data2.append( row[0] )
-
+acursor.execute("""
+select extract(year from valid + '4 months'::interval) as yr, sum(valid - lag) from (select valid, lag(valid) OVER (ORDER by valid ASC), tmpf from alldata where station = 'DBQ') as foo WHERE tmpf <= 0 GROUP by yr ORDER by yr ASC
+""")
+for row in acursor:
+    data.append( (row[1].days * 86400. + row[1].seconds) / 3600.0 )
+    years.append( float(row[0]) )
 
 import matplotlib.pyplot as plt
-import numpy
+import numpy as np
 
-fig = plt.figure()
-ax = fig.add_subplot(211)
+years = np.array(years)
+data = np.array(data)
 
-ax.set_title("Des Moines Heat Stress [1933-2011]")
+fig, ax = plt.subplots(1,1)
 
-ax.bar( numpy.arange(1933,2012)-0.4, data, facecolor='r', edgecolor='r')
-ax.set_ylabel("Hours Above 93$^{\circ}F$")
-ax.set_xlim(1932.5,2011.5)
+ax.set_title("Dubuque Airport Hours At or Below 0$^\circ$F [1950-2014]")
+ax.set_xlabel("year of spring shown, *2014 thru 10 Feb")
+bars = ax.bar( years-0.4, data / 24.0, facecolor='r', edgecolor='r')
+for i,bar in enumerate(bars):
+    if data[i] >= data[-1]:
+        bar.set_facecolor('b')
+        bar.set_edgecolor('b')
+ax.set_ylabel("Hours AOB 0$^{\circ}F$ (expressed in days)")
+ax.set_xlim(1950.5,2014.5)
+ax.set_ylim(0,21)
 ax.grid(True)
 
-ax2 = fig.add_subplot(212)
-ax2.bar( numpy.arange(1933,2012)-0.4, data2, facecolor='r', edgecolor='r')
-ax2.set_ylabel('Stress Degree Days')
-ax2.grid(True)
-ax2.set_xlim(1932.5,2011.5)
 
 fig.savefig('test.ps')
 import iemplot
