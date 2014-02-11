@@ -45,13 +45,13 @@ panc = np.array(panc)
 
 (fig, ax) = plt.subplots(1,1)
 diff = dsm - panc
-bars = ax.bar( np.arange(1,31)-0.5, diff, ec='b', fc='b')
+bars = ax.bar( np.arange(1,32)-0.5, diff, ec='b', fc='b')
 for i, bar in enumerate(bars):
     if diff[i] > 0:
         bar.set_facecolor('r')
         bar.set_edgecolor('r')
 ax.grid(True)
-ax.set_xlim(0.5,30.5)
+ax.set_xlim(0.5,29.5)
 ax.set_ylabel("High Temperature Difference $^\circ$F")
 ax.set_title("High Temperature Difference\nWaterloo, Iowa minus Nome, Alaska")
 ax.text(22, 25, "Waterloo Warmer", color='r', ha='center')
