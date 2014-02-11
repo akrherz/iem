@@ -5,10 +5,10 @@ var currentdt = new Date(defaultdt);
 function pad(number) {
     var r = String(number);
     if ( r.length === 1 ) {
-      r = '0' + r;
+    	r = '0' + r;
     }
     return r;
-  }
+};
 
 
 Date.prototype.toIEMString = function() {
@@ -44,6 +44,7 @@ function logic( dstring ){
 function updateTitle(){
 	$('#maptitle').text("The map is displaying "
 			+ $('#varpicker :selected').text() + " valid at "+ currentdt);
+	window.location.href = '#'+ varname +'/'+ currentdt.toISOString();
 }
 function updateMap(){
 	if (currentdt && typeof currentdt != "string"){
@@ -190,6 +191,20 @@ function init(){
 		   maxDateTime: (new Date()),
 		   timeFormat: 'h:mm TT'
 	   });
+	   
+	   try{
+		   var tokens = window.location.href.split('#');
+		   if (tokens.length == 2){
+			   var tokens2 = tokens[1].split("/");
+			   varname = tokens2[0];
+			   currentdt = (new Date(Date.parse(tokens2[1])));
+			   gj.redraw();
+		   }
+	   } catch(err) {
+		   varname = 'tmpf';
+		   currentdt = new Date(defaultdt);
+	   }
+		   
 	   setDate();
 	   updateMap();
 }
@@ -209,7 +224,7 @@ $('#plusonehour').click(function(e){
 $('#minusonehour').click(function(e){
 	$(this).removeClass('focus');
 	currentdt = new Date(currentdt - 3600000);
-	   setDate();
+	setDate();
 	updateMap();
 });
 
