@@ -44,8 +44,8 @@ for entry in feed:
         plotids[ row['plotid'] ] = row['rotation'].split()[0].replace("[", 
                                                     "").replace("]", "")
     
-    #for yr in ['2011', '2012', '2013', '2014', '2015']:
-    for yr in ['2011', ]:
+    for yr in ['2011', '2012', '2013', '2014', '2015']:
+    #for yr in ['2011', ]:
         print '------------>', spreadsheet.title, yr
         worksheet = spreadsheet.worksheets[yr]
         worksheet.get_list_feed()
@@ -59,6 +59,9 @@ for entry in feed:
             if plotids[data['plotid']] != code:
                 print 'Plot:%s Rotation PlotIdSheet->%s AgSheet->%s' % (
                         data['plotid'], plotids[data['plotid']], code)
-            #entry.set_value('rotation', newval)
-            #spr_client.update(entry)
+            if newval != data['rotation']:
+                print 'Plot:%s new:%s old:%s' % (data['plotid'], newval,
+                                                 data['rotation'])
+                entry.set_value('rotation', newval)
+                spr_client.update(entry)
             
