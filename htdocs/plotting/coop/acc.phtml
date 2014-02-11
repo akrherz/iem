@@ -1,9 +1,10 @@
 <?php
  include("../../../config/settings.inc.php");
  define("IEM_APPID", 34);
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/imagemaps.php");
-include_once("$rootpath/include/forms.php");
+ include("../../../include/myview.php");
+include("../../../include/database.inc.php");
+include("../../../include/imagemaps.php");
+include_once("../../../include/forms.php");
 
  $station = isset($_GET["station"]) ? $_GET["station"]: "";
  $network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IACLIMATE";
@@ -37,15 +38,24 @@ if (isset($_REQUEST['year4']) && isset($_REQUEST['year4on'])){
 	$year4 = intval( $_REQUEST['year4']);
 	$dcgi .= "year4=${year4}&";
 }
-	
-$THISPAGE = "networks-coop";
-$TITLE = "IEM | NWS COOP Accumulated Departures";
-$HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+$t = new MyView();
+$t->thispage = "networks-coop";
+$t->title = "NWS COOP Accumulated Departures";
+$t->headextra = <<<EOF
+<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
 <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
-<script src='/js/olselect.php?network=${network}&c=". time() ."'></script>";
-$BODYEXTRA = "onload=\"init()\"";
-include("$rootpath/include/header.php"); ?>
+<script src='/js/olselect.php?network=${network}'></script>
+EOF;
+$t->bodyextra = "onload=\"init()\"";
 
+$nselect = networkSelect($network, $station);
+$ysselect = yearSelect2(1893,$syear,"syear");
+$msselect = monthSelect2($smonth,"smonth");
+$dsselect = daySelect2($sday,"sday");
+$yeselect = yearSelect2(1893,$eyear,"eyear");
+$meselect = monthSelect2($emonth,"emonth");
+$deselect = daySelect2($eday,"eday");
+$content = <<<EOF
 <style type="text/css">
         #map {
             width: 450px;
@@ -75,55 +85,55 @@ include("$rootpath/include/header.php"); ?>
 <a href="acc.phtml?network=SDCLIMATE">South Dakota</a> ,
 <a href="acc.phtml?network=WICLIMATE">Wisconsin</a>.
 
-<div class="text">
-
 <form name="olselect" action="acc.phtml" method="GET">
-<input type="hidden" name="network" value="<?php echo $network; ?>" />
+<input type="hidden" name="network" value="{$network}" />
 <table style="padding: 3px; border: 0px; margin: 0px;">
 <thead>
 <tr><th>Climate Site:</th><td></td><th>Year:</th><th>Month:</th><th>Day:</th></tr>
 </thead>
 <tbody>
 <tr>
-  <td rowspan="2"><?php echo networkSelect($network, $station); ?>
-	<br /><a href="acc.phtml?<?php echo $dcgi; ?>">Select via map.</a></td>
+  <td rowspan="2"> {$nselect}
+	<br /><a href="acc.phtml?{$dcgi}">Select via map.</a></td>
   <td>Start Date:</td>
-  <td><?php echo yearSelect2(1893,$syear,"syear"); ?></td>
-  <td><?php echo monthSelect2($smonth,"smonth"); ?></td>
-  <td><?php echo daySelect2($sday,"sday"); ?></td>
+  <td>{$ysselect}</td>
+  <td>{$msselect}</td>
+  <td>{$dsselect}</td>
 </tr>
 <tr>
   <td>End Date:</td>
-  <td><?php echo yearSelect2(1893,$eyear,"eyear"); ?></td>
-  <td><?php echo monthSelect2($emonth,"emonth"); ?></td>
-  <td><?php echo daySelect2($eday,"eday"); ?></td>
-</tr>
+  <td>{$yeselect}</td>
+  <td>{$meselect}</td>
+  <td>{$deselect}</td>
+  </tr>
 </tbody>
 </table>
+<br />
+
 <br /><input type="checkbox" name="year2on" value="yes" 
-<?php if ($year2 != null) echo "CHECKED=CHECKED"; ?>/> Compare with year
- <?php echo yearSelect2(1893, $year2, "year2"); ?>
-<br /><input type="checkbox" name="year3on" value="yes" 
-<?php if ($year3 != null) echo "CHECKED=CHECKED"; ?>/> Compare with year
- <?php echo yearSelect2(1893, $year3, "year3"); ?>
+EOF;
+if ($year2 != null) $content .= "CHECKED=CHECKED"; 
+$content .= "/> Compare with year ". yearSelect2(1893, $year2, "year2"); 
 
-<br /><input type="checkbox" name="year4on" value="yes" 
-<?php if ($year4 != null) echo "CHECKED=CHECKED"; ?>/> Compare with year
- <?php echo yearSelect2(1893, $year4, "year4"); ?>
- 
- 
- <p><input type="submit" value="Make Plot">
-</form>
+$content .= "<br /><input type=\"checkbox\" name=\"year3on\" value=\"yes\" "; 
+if ($year3 != null) $content .= "CHECKED=CHECKED"; 
+$content .= "/> Compare with year ". yearSelect2(1893, $year3, "year3"); 
 
-<?php if (strlen($station) > 0 ) { ?>
+$content .= "<br /><input type=\"checkbox\" name=\"year4on\" value=\"yes\" ";
+if ($year4 != null) $content .= "CHECKED=CHECKED";
+$content .= "/> Compare with year ". yearSelect2(1893, $year4, "year4");
 
-<p><img src="/cgi-bin/climate/acc.py?<?php echo "$dcgi&station=$station"; ?>" ALT="Time Series">
+$content .= " <p><input type=\"submit\" value=\"Make Plot\"></form>";
 
+ if (strlen($station) > 0 ) { 
 
-<?php } else {  ?>
+$content .= "<p><img src=\"/cgi-bin/climate/acc.py?$dcgi&station=$station\" ALT=\"Time Series\">";
+ } else {  
+ 	$content .= <<<EOF
 <div id="map"></div>
 <div id="sname" unselectable="on">No site selected</div>
-<?php } ?>
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+} 
+$t->content = $content;
+$t->render('single.phtml');
+?>
