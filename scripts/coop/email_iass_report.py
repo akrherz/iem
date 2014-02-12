@@ -226,7 +226,7 @@ def email_report(report, subject):
     ''' Actually do the emailing stuff '''
     msg = MIMEMultipart()
     msg['Subject'] = subject
-    msg['From'] = 'akrherz@iastate.edu'
+    msg['From'] = 'mesonet@mesonet.agron.iastate.edu'
     msg['Cc'] = 'akrherz@iastate.edu'
     msg['To'] = 'NASSRFOUMR@nass.usda.gov' if len(sys.argv) != 5 else 'akrherz@localhost'
     msg.preamble = 'Report'
