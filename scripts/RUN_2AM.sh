@@ -1,20 +1,7 @@
 #!/bin/sh
 
-# First Guess for harry, run on the first of each month
-cd coop
-DD=$(date +%d)
-if [ $DD -eq "01" ]
-	then
-	python first_guess_for_harry.py
-	python email_iass_report.py monthly
-fi
-DOY=$(date +%u)
-if [ $DOY -eq "0" ]
-	then
-		python email_iass_report.py weekly	
-fi
-
-cd ../climodat
+# Make sure we run this first as we need the data before producing other things
+cd climodat
 python daily_estimator.py IA
 python daily_estimator.py KY
 python daily_estimator.py IL
@@ -38,6 +25,17 @@ sh run.sh &
 
 cd ../coop
 python hrrr_solarrad.py
+DD=$(date +%d)
+if [ $DD -eq "01" ]
+	then
+	python first_guess_for_harry.py
+	python email_iass_report.py monthly
+fi
+DOY=$(date +%u)
+if [ $DOY -eq "0" ]
+	then
+		python email_iass_report.py weekly	
+fi
 
 cd ../cache
 python warn_cache.py &

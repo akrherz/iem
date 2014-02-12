@@ -228,7 +228,7 @@ def email_report(report, subject):
     msg['Subject'] = subject
     msg['From'] = 'akrherz@iastate.edu'
     msg['Cc'] = 'akrherz@iastate.edu'
-    msg['To'] = 'NASSRFOUMR@nass.usda.gov' if len(sys.argv) == 2 else 'akrherz@localhost'
+    msg['To'] = 'NASSRFOUMR@nass.usda.gov' if len(sys.argv) != 5 else 'akrherz@localhost'
     msg.preamble = 'Report'
 
     fn = "iem.txt" 
@@ -256,8 +256,13 @@ if __name__ == '__main__':
     yesterday = today - datetime.timedelta(days=1)
     rtype = sys.argv[1]
     if rtype == "monthly" and yesterday.month in (11,12,1,2,3):
-        sts = yesterday.replace(day=1) 
-        ets = yesterday
+        if len(sys.argv) >= 4:
+            sts = datetime.date( int(sys.argv[2]), int(sys.argv[3]), 1)
+            ets = sts + datetime.timedelta(days=35)
+            ets = ets.replace(day=1)
+        else:
+            sts = yesterday.replace(day=1) 
+            ets = yesterday
         report = cStringIO.StringIO()
         monthly_header(report, sts, ets)
         compute_monthly(report, sts.year, sts.month)
