@@ -11,7 +11,7 @@ ALL = " ALL SITES"
 varorder = []
 varlookup = {}
 
-def build_vars():
+def build_vars(mode):
     ''' build vars '''
     sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/cscap')
     import util
@@ -20,18 +20,21 @@ def build_vars():
     config.read('/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.cfg')
     spr_client = util.get_spreadsheet_client(config)
     feed = spr_client.get_list_feed(config.get('cscap', 'sdckey'), 'od6')
+    places = 3 if mode != 'nitrate' else 4
+    prefix = 'AGR' if mode != 'nitrate' else 'SOIL'
     for entry in feed.entry:
         data = entry.to_dict()
-        if data['key'] is None or data['key'][:3] != 'AGR':
+        if data['key'] is None or data['key'][:places] != prefix:
             continue
         varorder.append( data['key'].strip() )
         varlookup[ data['key'].strip() ] = data['name'].strip()
     
 
-def get_data(year):
+def get_data(year, mode):
     ''' Do stuff '''
     data = {ALL: {} }
     dvars = []
+    table = 'agronomic_data' if mode == 'agronomic' else 'soil_nitrate_data'
     cursor.execute("""SELECT site, varname, 
     -- We have some number
     sum(case when lower(value) not in ('.','','did not collect','n/a') and
@@ -42,7 +45,7 @@ def get_data(year):
     sum(case when lower(value) in ('did not collect', 'n/a') then 1 else 0 end),
     -- We have a null
     sum(case when value is null then 1 else 0 end),
-    count(*) from agronomic_data
+    count(*) from """+table+"""
     WHERE year = %s and (value is Null or lower(value) != 'n/a') GROUP by site, varname""", (year,))
     for row in cursor:
         if row[1] not in dvars:
@@ -90,11 +93,12 @@ def make_progress(row):
 
 if __name__ == '__main__':
     sys.stdout.write('Content-type: text/html\n\n')
-    build_vars()
     form = cgi.FieldStorage()
     year = int(form.getfirst('year', 2011))
+    mode = form.getfirst('mode', 'agronomic')
+    build_vars(mode)
     
-    data, dvars = get_data(year)
+    data, dvars = get_data(year, mode)
 
     sites = data.keys()
     sites.sort()
@@ -117,10 +121,21 @@ if __name__ == '__main__':
     z-index: 2;
  }
     </style>
-    <form method="GET" name='theform'>
     
+<div class="row well">
+    <div class="col-md-4 col-sm-4">Select Mode:</div>
+    <div class="col-md-4 col-sm-4">
+        <a href="dataprogress.py?mode=agronomic">Agronomic Data</a>
+    </div>
+    <div class="col-md-4 col-sm-4">
+        <a href="dataprogress.py?mode=nitrate">Soil Nitrate Data</a>
+    </div>
+</div>
+    
+    <form method="GET" name='theform'>
+    <input type="hidden" name="mode" value="%s" />
     Select Year; <select name="year">
-    """)
+    """ % (mode,))
     for yr in range(2011,2016):
         checked = ''
         if year == yr:
