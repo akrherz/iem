@@ -1,8 +1,10 @@
 <?php
 include("../../config/settings.inc.php");
 define("IEM_APPID", 26);
-include("$rootpath/include/forms.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
+include("../../include/forms.php");
+include("../../include/database.inc.php");
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 86400);
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 86400);
@@ -36,10 +38,23 @@ function genselect($name, $selected, $ids, $values)
   $s .= "</select>\n";
   return $s;
 }
-$THISPAGE = "networks-flux";
-$TITLE = "IEM | NLAE Flux Sites";
-include("$rootpath/include/header.php"); ?>
-<a href="/nstl_flux/">NLAE Flux Sites</a> <b> &gt; </b> Comparison Plots
+$t->thispage = "networks-flux";
+$t->title = "NLAE Flux Sites";
+
+$ys = yearSelect(2002, $year, "year");
+$ms = monthSelect($month, "month");
+$ds = daySelect($day, "day");
+$spvar1 = genselect("pvar1", $pvar1, $var_names, $var_details);
+$spvar2 = genselect("pvar2", $pvar2, $var_names, $var_details);
+$spvar3 = genselect("pvar3", $pvar3, $var_names, $var_details);
+$spvar4 = genselect("pvar4", $pvar4, $var_names, $var_details);
+
+$u1 =sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar1, $year, $month, $day);
+$u2 =sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar2, $year, $month, $day);
+$u3 =sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar3, $year, $month, $day);
+$u4 =sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar4, $year, $month, $day);
+
+$t->content = <<<EOF
 
 <p>This page generates 4 plots of your choice.  Select the date and variables
 you wish to plot and then click on the 'Generate Plots' button.
@@ -55,25 +70,22 @@ you wish to plot and then click on the 'Generate Plots' button.
 <tbody>
 <tr><th>Year:</th><th>Month:</th><th>Day:</th></tr>
 <tr>
- <td><?php echo yearSelect(2002, $year, "year"); ?></td>
- <td><?php echo monthSelect($month, "month"); ?></td>
- <td><?php echo daySelect($day, "day"); ?></td>
- <td><b>1.</b><?php echo genselect("pvar1", $pvar1, $var_names, $var_details); ?>
- <br /><b>2.</b><?php echo genselect("pvar2", $pvar2, $var_names, $var_details); ?>
- <br /><b>3.</b><?php echo genselect("pvar3", $pvar3, $var_names, $var_details); ?>
- <br /><b>4.</b><?php echo genselect("pvar4", $pvar4, $var_names, $var_details); ?>
+ <td>{$ys}</td>
+ <td>{$ms}</td>
+ <td>{$ds}</td>
+ <td><b>1.</b> {$spvar1}
+ <br /><b>2.</b> {$spvar2}
+ <br /><b>3.</b> {$spvar3}
+ <br /><b>4.</b> {$spvar4}
 </td>
 </tr>
 </table>
 <input type="submit" value="Generate Plots">
 <p>
-<?php $u = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar1, $year, $month, $day); ?>
-<br /><img src="<?php echo $u; ?>">
-<?php $u = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar2, $year, $month, $day); ?>
-<br /><img src="<?php echo $u; ?>">
-<?php $u = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar3, $year, $month, $day); ?>
-<br /><img src="<?php echo $u; ?>">
-<?php $u = sprintf("plot.php?pvar=%s&year=%s&month=%s&day=%s",$pvar4, $year, $month, $day); ?>
-<br /><img src="<?php echo $u; ?>">
-
-<?php include("$rootpath/include/footer.php"); ?>
+<br /><img src="{$u1}">
+<br /><img src="{$u2}">
+<br /><img src="{$u3}">
+<br /><img src="{$u4}">
+EOF;
+$t->render('single.phtml');
+?>

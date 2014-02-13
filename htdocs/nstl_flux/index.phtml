@@ -1,57 +1,62 @@
 <?php
 include("../../config/settings.inc.php");
 define("IEM_APPID", 27);
-include("$rootpath/include/forms.php");
-
-$THISPAGE = "networks-flux";
-$TITLE = "IEM | NLAE Flux Sites";
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/header.php"); ?>
-
-<TR><TD>
-
-<h3 class="heading">USDA-ARS-National Laboratory for Agriculture and the Environment Flux Sites</h3>
-
-<p>The IEM is pleased to host the data from a set of observing platforms operated by the USDA-ARS-National Laboratory for Agriculture and the Environment (NLAE).  These sites directly measure and derive numerous air and soil flux values. 
-
-<p>These raw data have not been subjected to the National Laboratory for Agriculture and the Environment's quality control or quality assurance procedures. The correction factor's are calculated within a Campbell Scientific, Inc (Logan, UT) provided flux program for the CR5000 dataloggers. The WPL corrections are based on the equations found in Webb, E.K., G.I. Pearman, and R. Leuning, 1980. Correction of flux measurements for density effects due to heat and water vapor transfer.
-
-<p>They are released for limited public use as preliminary data to be used only with appropriate caution. <a href="vars.phtml">View variables</a> collected from this network.
-
-<br><br>
-<a href="plots.phtml"><img src="pthumb.png" style="border: 2px solid #000; margin:5px;"></a>
-<a href="plots.phtml">Generate daily time series plots</a>
+include("../../include/forms.php");
+include("../../include/imagemaps.php");
+include("../../include/database.inc.php");
+include("../../include/myview.php");
+include("../../include/network.php");
+$nt = new NetworkTable("NSTLFLUX");
+$t = new MyView();
 
 
-<br clear="left" />
-<p>
-<?php
+$t->thispage = "networks-flux";
+$t->title = "NLAE Flux Sites";
 
-$lats = Array("nstl11" => 41.97482, "nstl10" => 41.9749, 
-   "nspr" => 41.55865, "nstl30ft" => 41.97485, 
-   "nstl110" => 42.1654);
-$lons = Array("nstl11" => -94.69367, "nstl10" => -93.6914, 
-   "nspr" =>-93.29286, "nstl30ft" => -94.6924, "nstl110" => -93.7940);
+$ys = yearSelect(2002, date("Y"), "syear");
+$ms = monthSelect(date("m"), "smonth");
+$ds = daySelect2(date("d"), "sday");
 
-?>
+$ys2 = yearSelect(2002, date("Y"), "eyear");
+$ms2 = monthSelect(date("m"), "emonth");
+$ds2 = daySelect2(date("d"), "eday");
 
-<table width="100%">
-<thead><tr><th colspan="6" align="left">Site Information:</th></tr></thead>
-<tr><th align="left">ID</th><th align="left">Status</th><th align="left">Lat</th><th align="left">Lon</th><th
-align="left">First Observation</th><th align="left">Last Observation</th></tr></thead>
-<tbody>
-<?php
+$rows = "";
 $pg_conn = iemdb("other");
 $sql = "SELECT * from flux_meta ORDER by sts ASC";
 $rs = pg_exec($pg_conn, $sql);
 
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++)
 {
-  echo sprintf("<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", $row["station"], $row["surface"], $lats[$row["station"]], $lons[$row["station"]], substr($row["sts"],0,10), substr($row["ets"],0,10) );
+	$rows .= sprintf("<tr><th>%s</th><td>%s</td><td>%.4f</td>
+			<td>%.4f</td><td>%s</td><td>%s</td></tr>", $row["station"], 
+			$row["surface"], $nt->table[$row["station"]]['lat'], 
+			$nt->table[$row["station"]]['lon'], 
+			substr($row["sts"],0,10), substr($row["ets"],0,10) );
 }
-?>
-</tbody>
-</table><p>
+
+$sselect = networkMultiSelect("NSTLFLUX", Array());
+
+$t->content = <<<EOF
+
+<h3>USDA-ARS-National Laboratory for Agriculture and the Environment Flux Sites</h3>
+
+<p>The IEM is pleased to host the data from a set of observing platforms operated by the USDA-ARS-National Laboratory for Agriculture and the Environment (NLAE).  These sites directly measure and derive numerous air and soil flux values. 
+
+<div class="alert alert-info">These raw data have not been subjected to the 
+<a href="http://www.ars.usda.gov/main/site_main.htm?modecode=36-25-15-00" 
+class="alert-link">National Laboratory for Agriculture and the Environment's</a>
+quality control or quality assurance procedures. The correction factor's are 
+calculated within a <a href="http://www.campbellsci.com/"
+class="alert-link">Campbell Scientific, Inc</a> (Logan, UT) provided flux program 
+for the CR5000 dataloggers. The WPL corrections are based on the equations 
+found in Webb, E.K., G.I. Pearman, and R. Leuning, 1980. Correction of flux 
+measurements for density effects due to heat and water vapor transfer.</div>
+
+<p>They are released for limited public use as preliminary data to be used only with appropriate caution. <a href="vars.phtml">View variables</a> collected from this network.
+
+<p>
+<a href="plots.phtml" class="btn btn-default"><i class="glyphicon glyphicon-signal"></i> Generate daily time series plots</a>
 
 <form method="GET" action="dl.phtml" name="single">
 <h3>Download Data:</h3><br />
@@ -60,24 +65,40 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 <br />Timestamps and date periods are in UTC.
 
 <table>
-<tr><th>Year:</th>
+<tr>
+  <th>Select Station(s):</th>
+  <th>Year:</th>
   <th>Month:</th>
   <th>Day:</th></tr>
 
 <tr>  
-  <td rowspan="2"><?php echo yearSelect(2002, date("Y"), "year"); ?></td>
-  <td><?php echo monthSelect(date("m"), "smonth"); ?></td>
-  <td><?php echo daySelect2(date("d"), "sday"); ?></td></tr>
-
+  <td rowspan='2'>{$sselect}</td>
+  <td>{$ys}</td>
+  <td>{$ms}</td>
+  <td>{$ds}</td>
+</tr>
 <tr>
-  <td><?php echo monthSelect(date("m"), "emonth"); ?></td>
-  <td><?php echo daySelect2(date("d"), "eday"); ?></td></tr>
-
+  <td>{$ys2}</td>
+  <td>{$ms2}</td>
+  <td>{$ds2}</td>
+</tr>
 </table>
-<input type="submit" value="Download Date">
+<input type="submit" value="Download Data">
 </form>
 
-<br>
 
+<br clear="left" />
+<p>
 
-<?php include("$rootpath/include/footer.php"); ?>
+<table class="table table-striped table-condensed">
+<thead><tr><th colspan="6" align="left">Site Information:</th></tr></thead>
+<tr><th align="left">ID</th><th align="left">Status</th><th align="left">Lat</th><th align="left">Lon</th><th
+align="left">First Observation</th><th align="left">Last Observation</th></tr></thead>
+<tbody>
+{$rows}
+</tbody>
+</table><p>
+
+EOF;
+$t->render('single.phtml');
+?>
