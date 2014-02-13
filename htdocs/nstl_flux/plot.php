@@ -1,7 +1,6 @@
 <?php
-putenv("TZ=GMT"); /* Hack around timezone problem */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 /* We need to get some CGI vars! */
 $year = isset($_GET['year']) ? $_GET['year'] : die();
 $month = isset($_GET['month']) ? $_GET['month'] : die();
@@ -19,8 +18,9 @@ for( $i=0; $row = @pg_fetch_array($rows,$i); $i++)
   $vars[ $row["name"] ] = Array("units" => $row["units"], "details" => $row["details"]);
 }
 
-$rs = pg_prepare($pgconn, "SELECT", "SELECT * from flux${year} WHERE
-      date(valid) = $1 and $pvar IS NOT NULL ORDER by valid ASC");
+$rs = pg_prepare($pgconn, "SELECT", "SELECT * from flux_data WHERE
+      valid >= $1 and valid < ($1 + '1 day'::interval) 
+	  and $pvar IS NOT NULL ORDER by valid ASC");
 $rs = pg_prepare($pgconn, "METADATA", "SELECT * from flux_meta WHERE 
       sts < $1 and ets > $1");
 
@@ -61,9 +61,9 @@ $ts_lbl = date("d M Y", $sts);
 
 pg_close($pgconn);
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("../../include/jpgraph/jpgraph.php");
+include ("../../include/jpgraph/jpgraph_line.php");
+include ("../../include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,350);

@@ -1,23 +1,34 @@
 <?php
  /* Download NSTL Data */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 86400);
+$eyear = isset($_GET["eyear"]) ? $_GET["eyear"] : date("Y", time() - 86400);
 $emonth = isset($_GET["emonth"]) ? $_GET["emonth"] : date("m", time() - 86400);
 $eday = isset($_GET["eday"]) ? $_GET["eday"] : date("d", time() - 86400);
 $smonth = isset($_GET["smonth"]) ? $_GET["smonth"] : date("m", time() );
 $sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d", time() );
-$all = isset($_GET["all"]);
+$syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y", time() - 86400);
 
-$sts = mktime(0,0,0,$smonth, $sday, $year);
-$ets = mktime(0,0,0,$emonth, $eday, $year);
+$stations = $_GET["station"];
+$stationString = "(";
+foreach ($stations as $key => $value){
+	$stationString .= " '". $value ."',";
+}
+$stationString = substr($stationString, 0, -1);
+$stationString .= ")";
+
+
+$sts = mktime(0,0,0,$smonth, $sday, $syear);
+$ets = mktime(0,0,0,$emonth, $eday, $eyear);
 
 $pg_conn = iemdb("other");
 pg_exec($pg_conn, "SET TIME ZONE 'GMT'");
 
-if ($all) { $sql = sprintf("SELECT * from flux%s ORDER by valid ASC", $year); }
-else { $sql = sprintf("SELECT * from flux%s WHERE date(valid) >= '%s' and date(valid) <= '%s' ORDER by valid ASC", $year, date("Y-m-d", $sts), date("Y-m-d", $ets) ); }
+$sql = sprintf("SELECT * from flux_data WHERE valid >= '%s 00:00' and 
+		valid < '%s 23:59' and station IN $stationString 
+		ORDER by valid ASC", 
+		date("Y-m-d", $sts), date("Y-m-d", $ets) ); 
 
 $rs = pg_exec($pg_conn, $sql);
 
