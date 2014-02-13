@@ -163,8 +163,8 @@ if __name__ == '__main__':
     <span>Key:</span>
     <span class="btn btn-success">has data</span>
     <span class="btn btn-info">periods</span>
-    <span class="btn btn-warning">DNC empty</span>
-    <span class="btn btn-danger">no entry</span>
+    <span class="btn btn-warning">did not collect</span>
+    <span class="btn btn-danger">no entry / empty</span>
     <table class='table table-striped table-bordered'>
     
     """)
