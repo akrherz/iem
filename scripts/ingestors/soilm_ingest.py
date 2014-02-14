@@ -119,6 +119,8 @@ STATIONS = {'CAMI4': dict(daily='Calumet/Calumet_DailySI.dat',
                           hourly='Ames/Ames_HrlySI.dat'),
             'CNAI4': dict(daily='Castana/Castana_DailySI.dat',
                           hourly='Castana/Castana_HrlySI.dat'),
+            'CHAI4': dict(daily='Chariton/Chariton_DailySI.dat',
+                          hourly='Chariton/Chariton_HrlySI.dat'),
             'CRFI4': dict(daily='Crawfordsville/Crawfordsville_DailySI.dat',
                           hourly='Crawfordsville/Crawfordsville_HrlySI.dat'),
             }
