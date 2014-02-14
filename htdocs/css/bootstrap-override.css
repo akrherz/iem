@@ -22,3 +22,7 @@ a.nws{
 }
 
 .top-buffer { margin-top:20px; }
+
+img.olTileImage {
+    max-width: none;
+}
