@@ -1,6 +1,6 @@
 """
- Go into the various sheets and replace the rotation text with something 
- explicit for the year
+  Look at the Agronomic Sheets and see if the number of rows match between
+  2011 and the rest of the years
 """
 import gdata.spreadsheets.client
 import gdata.spreadsheets.data
@@ -25,23 +25,11 @@ for entry in feed:
     spreadsheet.get_worksheets()
     print '------------>', spreadsheet.title
     worksheet = spreadsheet.worksheets['2011']
-    worksheet.get_list_feed()  
-    match = []
-    for entry in worksheet.list_feed.entry:
-        data = entry.to_dict()
-        match.append( data )
+    rows = worksheet.rows
     for yr in ['2012', '2013', '2014', '2015']:
         worksheet = spreadsheet.worksheets[yr]
-        worksheet.get_list_feed()
-        old = []
-        for entry in worksheet.list_feed.entry:
-            data = entry.to_dict()
-            old.append( data )
-            for key in data.keys():
-                if key.find("AGR") == 0 and data[key] is not None:
-                    print yr, key
-
-        if len(match) != len(old):
-            print 'Would rerun!'
+        if rows != worksheet.rows:
+            print '    Year: %s has row count: %s , 2011 has: %s' % (yr,
+                                            worksheet.rows, rows)
             
             
