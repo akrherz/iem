@@ -47,7 +47,7 @@ basecolumns = {'A': 'UniqueID', 'B': 'Rep', 'C': 'Tillage', 'D': 'Rotation',
 letters = ['K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
            'AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL']
 
-TODO = ['swroc.p','naew.y102', 'naew.y103']
+TODO = ['miami', 'preble',  'logan1',  'logan2', 'franklin']
 
 for entry in meta_feed.entry:
     data = entry.to_dict()
@@ -79,14 +79,15 @@ for entry in meta_feed.entry:
     headers = copy.deepcopy(baseheaders)
     i = 0
     datavars = []
-    for datavar in sdc['2011'][sitekey]:
-        if datavar.find("AGR") > -1:
-            #hid = '%s %s %s' % (datavar, sdc_names[datavar]['name'], sdc_names[datavar]['units'])
-            hid = datavar
-            columns[ letters[i] ] = hid
-            datavars.append( hid )
-            headers.append( hid )
-            i += 1
+    for yr in ['2011','2012','2013','2014','2015']:
+        for datavar in sdc[yr][sitekey]:
+            if datavar.find("AGR") > -1 and datavar not in datavars:
+                #hid = '%s %s %s' % (datavar, sdc_names[datavar]['name'], sdc_names[datavar]['units'])
+                hid = datavar
+                columns[ letters[i] ] = hid
+                datavars.append( hid )
+                headers.append( hid )
+                i += 1
 
     if len(datavars) == 0:
         print 'NO AGR DATA! %s' % (sitekey,)
