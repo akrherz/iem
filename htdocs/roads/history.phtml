@@ -1,8 +1,10 @@
 <?php 
 include("../../config/settings.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
 define("IEM_APPID", 43);
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/forms.php"); 
+include("../../include/database.inc.php");
+include("../../include/forms.php"); 
 $dbconn = iemdb('postgis');
 
 $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
@@ -10,12 +12,21 @@ $season = isset($_GET["season"]) ? intval($_GET["season"]) : date("Y");
 $segid = isset($_GET["segid"]) ? intval($_GET["segid"]) : "";
 $valid = isset($_GET["valid"]) ? substr($_GET["valid"],0,16) : "";
 
-$THISPAGE = "roads-history";
-$TITLE = "Historical Iowa Winter Road Conditions";
-include("$rootpath/include/header.php"); 
-?>
+$t->thispage = "roads-history";
+$t->title = "Historical Iowa Winter Road Conditions";
+$t->jsextra = <<<EOF
+<script src="/js/jquery.table-filter.min.js"></script>
+		<script>
+		$("#table1").addTableFilter({labelText: "Filter Table By: "});
+		</script>
+EOF;
 
-<h3 class="heading">Historical Road Conditions</h3>
+$segselect = segmentSelect($dbconn, $segid);
+$ys = yearSelect2(2006, $season, "season");
+$ms = monthSelect($month);
+
+$content = <<<EOF
+<h3>Historical Road Conditions</h3>
 
 <form method="GET" action="history.phtml">
 <table cellpadding="3" border="1" cellspacing="0">
@@ -27,21 +38,25 @@ include("$rootpath/include/header.php");
 </tr>
 
 <tr>
- <td><?php echo segmentSelect($dbconn, $segid); ?></td>
- <td><?php echo yearSelect2(2006, $season, "season"); ?></td>
- <td><?php echo monthSelect($month); ?></td>
+ <td>{$segselect}</td>
+ <td>{$ys}</td>
+ <td>{$ms}</td>
  <td><input type="submit" value="View History"></td>
 </tr>
 </table>
 </form>
-
-<?php 
+EOF;
 if (isset($_GET["month"]) && isset($_GET["segid"]) )
 {
-  echo "<p>Here is a listing of historical road conditions for the segment you 
-   selected.  Click on the time of the report to get a listing of all road 
-   conditions for that time.";
-  echo "<br /><table border=1 cellpadding=2 cellspacing=0><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th><th>Condition</th></tr>";
+  $content .= "<div class=\"alert-info\">Here is a listing of historical 
+  		road conditions for the segment you selected.  Updates during active
+  		weather can be as frequent as every five minutes, but the following
+  		display only shows when the given segment changed condition.
+  		Click on the time of the report to get a listing of all road 
+  		conditions for that time.</div>";
+  $content .= "<br /><table id='table1' class=\"table table-condensed table-striped\">
+  		<thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
+  		<th>Condition</th></tr></thead><tbody>";
 
   if ($month > 9 and $season == 2011){ $season = 2012;}
    $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor from roads_base b, 
@@ -49,34 +64,53 @@ if (isset($_GET["month"]) && isset($_GET["segid"]) )
    extract(month from l.valid) = $2 and l.cond_code = c.code and b.segid = l.segid ORDER by valid ASC");
   $rs = pg_execute($dbconn, "SELECT", Array($segid, $month));
 
-  for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
-  {
-    $ts = strtotime(substr($row["valid"],0,16));
-    echo "<tr><td>". strftime('%d %b %Y', $ts) ."</td><td><a href=\"history.phtml?valid=". strftime('%Y-%m-%d%%20%H:%M', $ts) ."\">". strftime('%I:%M %p', $ts) ."</a></td><td>". $row["major"] ." -- ". $row["minor"] ."</td><td>". $row["label"] ."</td></tr>";
-  }
-  echo "</table>\n";
+  	$lastcond = "";
+  	for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
+  	{
+  		if ($lastcond == $row["label"]) continue;
+  		$lastcond = $row["label"];
+    	$ts = strtotime(substr($row["valid"],0,16));
+		$content .= sprintf("<tr><td>%s</td>
+    		<td><a href=\"history.phtml?valid=%s\">%s</a></td>
+    		<td>%s -- %s</td><td>%s</td></tr>",
+    		strftime('%d %b %Y', $ts), strftime('%Y-%m-%d%%20%H:%M', $ts),
+  			strftime('%I:%M %p', $ts), $row["major"], $row["minor"],
+			$row["label"]);
+  	}
+  	$content .= "</tbody></table>\n";
 }
 else if ( isset($_GET["valid"]) )
 {
-  echo "<p>Here is a listing of historical road conditions for a particular
+  $content .= "<div class=\"alert-info\">Here is a listing of historical road conditions for a particular
    time for all roads monitored in Iowa.  Click on the segment name to get 
-   a listing of historical conditions for that segment.";
+   a listing of historical conditions for that segment.</div>";
   $ts = strtotime(substr($valid,0,16));
   $gisurl = "http://mesonet.agron.iastate.edu/archive/data/". gmdate('Y/m/d/', $ts) ."/GIS/iaroad_cond_". gmdate('YmdHi', $ts) .".zip";
-  echo "<p>You can download a <a href=\"$gisurl\">gis shapefile</a> for this reporting time.";
-  echo "<br /><table border=1 cellpadding=2 cellspacing=0><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th><th>Condition</th></tr>";
-    $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor, b.segid from roads_base b, roads_${season}_log l, roads_conditions c WHERE l.valid = $1 and l.cond_code = c.code and b.segid = l.segid ORDER by major ASC");
-  $rs = pg_execute($dbconn, "SELECT", Array($valid));
+  $content .= "<p>You can download a <a href=\"$gisurl\">gis shapefile</a> for this reporting time.";
+  $content .= "<br /><table id='table1' class=\"table table-condensed table-striped\">
+  		<thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
+  		<th>Condition</th></tr></thead><tbody>";
+    $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor, 
+    		b.segid from roads_base b, roads_${season}_log l, roads_conditions c 
+    		WHERE l.valid = $1 and l.cond_code = c.code and b.segid = l.segid 
+    		ORDER by major ASC");
+  
+    $rs = pg_execute($dbconn, "SELECT", Array($valid));
 
-  for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
+  for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
   {
-    $ts = strtotime(substr($row["valid"],0,16));
-    echo "<tr><td>". strftime('%d %b %Y', $ts) ."</td><td>". strftime('%I:%M %p', $ts) ."</td><td><a href=\"history.phtml?segid=". $row["segid"] ."&month=". strftime('%m', $ts) ."\">". $row["major"] ." -- ". $row["minor"] ."</a></td><td>". $row["label"] ."</td></tr>";
+    	$ts = strtotime(substr($row["valid"],0,16));
+    	$content .= sprintf("<tr><td>%s</td><td>%s</td>
+    		<td><a href=\"history.phtml?segid=%s&month=%s\">%s -- %s</a></td>
+    		<td>%s</td></tr>"
+  			,strftime('%d %b %Y', $ts), strftime('%I:%M %p', $ts), $row["segid"],
+  			strftime('%m', $ts), $row["major"], $row["minor"],$row["label"]);
   }
-  echo "</table>\n";
+  $content .= "</tbody></table>\n";
 }
 else
-{ ?>
+{ 
+	$content .= <<<EOF
 <p>The Iowa Environmental Mesonet archives the road condition reports as 
 generated by the Iowa State Patrol.  From this page, you can generate a 
 listing of road conditions per road segment for a particular month or a listing
@@ -90,7 +124,8 @@ archive here:
 <p><br />and an archive of the GIS shapefiles per report here:
 <br /><code><a href="http://mesonet.agron.iastate.edu/archive/data/2005/01/30/GIS/">http://mesonet.agron.iastate.edu/archive/data/2005/01/30/GIS/</a></code>
 <br />look for the iaroads_* files.  Again, timestamps are in GMT.
-
-<?php } ?>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+}
+$t->content = $content;
+$t->render('single.phtml');
+?>
