@@ -165,6 +165,8 @@ def get_xref_siteids_plotids(spr_client, config):
         feed = spr_client.get_list_feed(spreadkeys[uniqueid], 'od6')
         for entry in feed.entry:
             d = entry.to_dict()
+            if d['plotid'] is None:
+                continue
             data[uniqueid.lower()].append( d['plotid'].lower() )
     return data
 
