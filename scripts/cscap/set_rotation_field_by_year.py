@@ -35,8 +35,7 @@ for entry in feed:
     spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
     spreadsheet.get_worksheets()
     siteid = spreadsheet.title.split()[0]
-    if siteid in ['VICMS',]:
-        continue
+
     plotid_feed = spr_client.get_list_feed(xref_plotids[siteid], 'od6')
     plotids = {}
     for entry2 in plotid_feed.entry:
