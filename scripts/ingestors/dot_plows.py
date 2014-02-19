@@ -33,7 +33,7 @@ def workflow():
     try:
         data = json.loads( urllib2.urlopen(URI, timeout=30).read() )
     except Exception, exp:
-        print 'dot_plows download fail %s' % (exp,)
+        #print 'dot_plows download fail %s' % (exp,)
         data = {}
     newplows = {}
     for feat in data.get('features', []):
