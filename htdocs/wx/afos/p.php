@@ -55,11 +55,11 @@ for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
 		$basets = strtotime($row["mytime"]); 
 		$newe = date("YmdHi", $basets);
 		$content .= "<p>Displaying AFOS PIL: <strong>$pil</strong> Received: <strong>". date("Y-m-d H:i", $basets) ." UTC</strong>";
-		$content .= "<br /><a class=\"btn btn-primary\" href=\"p.php?dir=prev&pil=$pil&e=$newe\"><i class='glyphicon glyphicon-arrow-left'></i> Previous in Time</a>";
-		$content .= sprintf(" <a class=\"btn btn-primary\" href=\"list.phtml?source=%s&day=%s&month=%s&year=%s\">View All %s Products for %s</a>", 
+		$content .= "<br /><a rel=\"nofollow\" class=\"btn btn-primary\" href=\"p.php?dir=prev&pil=$pil&e=$newe\"><i class='glyphicon glyphicon-arrow-left'></i> Previous in Time</a>";
+		$content .= sprintf(" <a rel=\"nofollow\" class=\"btn btn-primary\" href=\"list.phtml?source=%s&day=%s&month=%s&year=%s\">View All %s Products for %s</a>", 
 		$row["source"], date("d", $basets), date("m", $basets), 
 		date("Y", $basets), $row["source"], date("d M Y", $basets) );
-		$content .= " <a class=\"btn btn-primary\" href=\"p.php?dir=next&pil=$pil&e=$newe\">Next in Time <i class='glyphicon glyphicon-arrow-right'></i></a></div>";
+		$content .= " <a rel=\"nofollow\" class=\"btn btn-primary\" href=\"p.php?dir=next&pil=$pil&e=$newe\">Next in Time <i class='glyphicon glyphicon-arrow-right'></i></a></div>";
 		$content .= "<br clear=\"both\" />";
 	}
 	if (strtotime($row["mytime"]) != $basets){ continue; }
