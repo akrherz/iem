@@ -1,13 +1,13 @@
 """
  Main script that adds a site into the appropriate tables
+ called from SYNC_STATIONS.sh
 """
 
-import sys
-import mx.DateTime
-import iemdb
+import datetime
+import psycopg2
 import psycopg2.extras
 
-IEM = iemdb.connect('iem')
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 icursor2 = IEM.cursor()
 
@@ -19,18 +19,21 @@ icursor.execute("""
      and online and metasite = 'f' ORDER by iemid ASC
 """)
 
+utcnow = datetime.datetime.utcnow()
+
 for row in icursor:
-    print "Adding station ID: %s NETWORK: %s" % (row['id'], row['network'])
+    print "Adding station ID: %10s NETWORK: %s" % (row['id'], row['network'])
 
     for tbl in ['trend_1h', 'trend_15m']:
         icursor2.execute("""INSERT into %s (iemid)
           VALUES ( %s) """ % (tbl,  row['iemid'] ) )
   
-    tbl = 'summary_%s' % (mx.DateTime.now().year,)
+    tbl = 'summary_%s' % (utcnow.year,)
     icursor2.execute("""INSERT into %s ( day, iemid)
           VALUES ('TODAY', %s) """ % (tbl, 
           row['iemid'] ) )
-    tbl = 'summary_%s' % ((mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=1)).year,)
+    
+    tbl = 'summary_%s' % ((utcnow + datetime.timedelta(days=1)).year,)
     icursor2.execute("""INSERT into %s ( day, iemid)
           VALUES ( 'TOMORROW', %s) """ % (tbl,
           row['iemid'] ) )
