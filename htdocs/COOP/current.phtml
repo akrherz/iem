@@ -100,6 +100,24 @@ while (list($site, $iemob) = each($net) ){
 		$db[$site]["ratio"] = intval( $db[$site]["snow"] / $db[$site]["pday"] );
 	}
 }
+
+function aSortBySecondIndex($multiArray, $secondIndex, $sortDir) {
+	while (list($firstIndex, ) = each($multiArray))
+		$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
+	if ($sortDir == "desc"){
+		arsort($indexMap);
+	} else{
+		asort($indexMap);
+	}
+	while (list($firstIndex, ) = each($indexMap))
+	if (is_numeric($firstIndex))
+		$sortedArray[] = $multiArray[$firstIndex];
+	else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+	return $sortedArray;
+}
+
+$db = aSortBySecondIndex($db, $sortcol, $sortdir);
+
 $oddrow = true;
 $firstsection = "";
 $lastsection = "";
@@ -120,9 +138,8 @@ function get_sortdir($baseurl, $column, $sortCol, $sortDir){
 }
 
 
-  
-  $t->title = "NWS COOP Current Sortables";
- $t->headextra = <<<EOF
+$t->title = "NWS COOP Current Sortables";
+$t->headextra = <<<EOF
  <script language="JavaScript" type="text/javascript">
 	<!--//BEGIN Script
 	function new_window(url) {
@@ -131,26 +148,7 @@ function get_sortdir($baseurl, $column, $sortCol, $sortDir){
 	//END Script-->
 	</script>
 EOF;
- $t->thispage = "current-sort";
-
-
-
-function aSortBySecondIndex($multiArray, $secondIndex, $sortDir) {
-	while (list($firstIndex, ) = each($multiArray))
-    	$indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];     
-    if ($sortDir == "desc"){   
-		arsort($indexMap);
-	} else{
-		asort($indexMap);
-	}
-    while (list($firstIndex, ) = each($indexMap))
-    	if (is_numeric($firstIndex))
-        	$sortedArray[] = $multiArray[$firstIndex];
-        else $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-    return $sortedArray;
-}
-
-$db = aSortBySecondIndex($db, $sortcol, $sortdir);
+$t->thispage = "current-sort";
 
 $cols = Array("ts" => "Valid", "county" => "County",
   "sid" => "Site ID", "sname" => "Station Name", 
@@ -232,7 +230,7 @@ again will reverse the sort.
   <th><a href="{$five}">At Ob</a></th>
   <th><a href="{$six}">24h High</a></th>
   <th><a href="{$seven}">24h Low</a></th>
-  <th><a href="{$eight}>">24hour Rain</a></th>
+  <th><a href="{$eight}">24hour Rain</a></th>
   <th><a href="{$nine}">Snowfall</a></th>
   <th><a href="{$ten}">Ratio</a></th>
   <th><a href="{$eleven}">Snow Depth</a></th>
