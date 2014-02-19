@@ -75,7 +75,7 @@ def process( nwsli , lastts ):
             'tsf1': 'tsf1', 
             }
     if not 'dewpoint' in df:
-        print 'RW download for: %s had columns: %s' % (nwsli, df.columns)
+        #print 'RW download for: %s had columns: %s' % (nwsli, df.columns)
         return
     df['dwpf'] = df['dewpoint'] / 10.0
     df['tmpf'] = df['tia'] / 10.0
