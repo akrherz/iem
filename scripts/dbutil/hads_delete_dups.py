@@ -3,66 +3,60 @@
  
  called from RUN_MIDNIGHT.sh
 """
-import mx.DateTime
-import iemdb
-HADS = iemdb.connect('hads')
+import datetime
+import pytz
+import psycopg2
+HADS = psycopg2.connect(database='hads', host='iemdb')
 
-def query(sql):
+def query(sql, args=[]):
     """
     Do a query and make it atomic
     """
     hcursor = HADS.cursor()
     hcursor.execute("set work_mem='4GB'")
-    hcursor.execute("SET TIME ZONE 'GMT'")
-    hcursor.execute(sql)
+    hcursor.execute(sql, args)
     hcursor.close()
     HADS.commit()
 
 def do(ts):
+    ''' Do the work for this date, which is set to 00 UTC '''
     # Delete schoolnet data, since we created it in the first place!
-    sql = """DELETE from raw%s WHERE station IN 
+    tbl = "raw%s" % (ts.strftime("%Y_%m"),)
+    sql = """DELETE from """+tbl+""" WHERE station IN 
               (SELECT id from stations WHERE network in ('KCCI','KELO','KIMT')
-              )""" % (ts.strftime("%Y_%m"),)
+              )"""
     query(sql)
     
     # Extract unique obs to special table
-    sql = """CREATE table tmp as select distinct * from raw%s WHERE valid BETWEEN 
-           '%s' and '%s'""" % (ts.strftime("%Y_%m"), ts.strftime("%Y-%m-%d"), 
-           (ts + mx.DateTime.RelativeDateTime(days=1)).strftime("%Y-%m-%d"))
-    query(sql)
+    sql = """CREATE table tmp as select distinct * from """+tbl+"""
+        WHERE valid BETWEEN %s and %s"""
+    args = (ts, ts + datetime.timedelta(hours=24))
+    query(sql, args)
     
     # Delete them all!
-    sql = """delete from raw%s WHERE valid BETWEEN 
-           '%s' and '%s'""" % (ts.strftime("%Y_%m"), ts.strftime("%Y-%m-%d"), 
-           (ts + mx.DateTime.RelativeDateTime(days=1)).strftime("%Y-%m-%d"))
-    query(sql)
+    sql = """delete from """+tbl+""" WHERE valid BETWEEN %s and %s""" 
+    query(sql, args)
     
-    sql = "DROP index raw%s_idx" % (ts.strftime("%Y_%m"),)
+    sql = "DROP index "+tbl+"_idx"
     query(sql)
-    sql = "DROP index raw%s_valid_idx" % (ts.strftime("%Y_%m"),)
+    sql = "DROP index "+tbl+"_valid_idx"
     query(sql)
     
     # Insert from special table
-    sql = "INSERT into raw%s SELECT * from tmp" % (ts.strftime("%Y_%m"),)
+    sql = "INSERT into "+tbl+" SELECT * from tmp" 
     query(sql)
 
-    sql = "CREATE index raw%s_idx on raw%s(station,valid)" % (
-                            ts.strftime("%Y_%m"), ts.strftime("%Y_%m"))
+    sql = "CREATE index %s_idx on %s(station,valid)" % (tbl,tbl)
     query(sql)
-    sql = "CREATE index raw%s_valid_idx on raw%s(valid)" % (
-                            ts.strftime("%Y_%m"), ts.strftime("%Y_%m"))
+    sql = "CREATE index %s_valid_idx on %s(valid)" % (tbl, tbl)
     query(sql)
 
     sql = "DROP TABLE tmp"
-    # drop special table!
     query(sql)
 
-do( mx.DateTime.now() - mx.DateTime.RelativeDateTime(days=1) )
-
-#sts = mx.DateTime.DateTime(2007,12,1)
-#ets = mx.DateTime.DateTime(2008,1,1)
-#interval = mx.DateTime.RelativeDateTime(days=1)
-#now = sts
-#while (now < ets):
-#  do( now )
-#  now += interval
+if __name__ == '__main__':
+    ''' So how we are called '''
+    utcnow = datetime.datetime.utcnow()
+    utcnow = utcnow.replace(hour=0, minute=0, second=0, microsecond=0,
+                            tzinfo=pytz.timezone("UTC"))
+    do( utcnow - datetime.timedelta(days=1) )
