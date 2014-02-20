@@ -19,9 +19,9 @@ query = gdata.docs.client.DocsQuery(show_collections='false',
                                     title='Soil Nitrate Data')
 feed = docs_client.GetAllResources(query=query)
 
-varconv = {'soil nitrate spring sampling': 'SOIL15',
-           'soil nitrate summer sampling': 'SOIL16',
-           'soil nitrate fall sampling': 'SOIL23'}
+varconv = {'SOIL22 Soil Ammonium (Optional)': 'SOIL23 Spring Soil Ammonium (Optional)',
+           'SOIL22 Fall Soil Ammonium (Optional)': 'SOIL25 Fall Soil Ammonium (Optional)',
+           'SOIL22 Spring Soil Ammonium (Optional)': 'SOIL23 Spring Soil Ammonium (Optional)'}
 
 for entry in feed:
     if entry.get_resource_type() != 'spreadsheet':
@@ -44,7 +44,7 @@ for entry in feed:
                     cols.append(cv)
                 if varconv.has_key(cv):
                     print 'Fixing %s [%s] %s' % (spreadsheet.title, key, cv)
-                    entry.cell.input_value = "%s %s" % (varconv[entry.cell.input_value.strip()],
-                                               entry.cell.input_value)
+                    entry.cell.input_value = "%s" % (
+                                    varconv[entry.cell.input_value.strip()],)
                     spr_client.update(entry)
     print spreadsheet.title, cols

@@ -75,13 +75,13 @@ lookuprefs = {
               'soil15': 'Soil Nitrate Data',
               'soil16': 'Soil Nitrate Data',
               'soil22': 'Soil Nitrate Data',
+              'soil23': 'Soil Nitrate Data',
+              'soil24': 'Soil Nitrate Data',
+              'soil25': 'Soil Nitrate Data',
               }
 varconv = {
            'soil1': 'bulkdensity',
            'soil2': 'waterretentionat15bar',
-           'soil15': 'soilnitratespringsampling',
-           'soil16': 'soilnitratefallsampling',
-           'soil22': 'soil22fallsoilammoniumoptional',
            }
 
 CACHE = {}
@@ -177,5 +177,5 @@ def do_row(row):
             entry.cell.input_value = newvalue
             spr_client.update(entry)
         
-for i in range(6,65):
+for i in range(6,68):
     do_row(i)

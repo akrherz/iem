@@ -37,8 +37,6 @@ for entry in feed:
     spreadsheet = util.Spreadsheet(docs_client, spr_client, entry)
     spreadsheet.get_worksheets()
     siteid = spreadsheet.title.split()[0]
-    if siteid in ['VICMS',]:
-        continue
 
     plotid_feed = spr_client.get_list_feed(xref_plotids[siteid], 'od6')
     plotids = {}
@@ -62,7 +60,7 @@ for entry in feed:
             for col in data.keys():
                 if col[:3] != 'agr':
                     continue
-                if (col not in cropmates[crop] and 
+                if (col not in cropmates.get(crop, []) and 
                     (data[col] is None or 
                     data[col].lower() in ['.', 'did not collect'])):
                     print 'Setting to n/a', data['plotid'], crop, col, data[col]
@@ -73,7 +71,7 @@ for entry in feed:
                     #print 'Setting to .', data['plotid'], crop, col
                     #entry.set_value(col, '.')
                     #dirty = True
-                elif (col not in cropmates[crop] and 
+                elif (col not in cropmates.get(crop, []) and 
                     data[col].lower() not in ['.', 'did not collect', 'n/a']):
                     print "PlotID: %s crop: %s has data [%s] for %s" % (
                                         data['plotid'], crop, data[col], 

@@ -30,12 +30,13 @@ treat_feed = spr_client.get_list_feed(config.get('cscap', 'treatkey'), 'od6')
 
 sdc_data, sdc_names = util.build_sdc(sdc_feed)
 
-DONE = ['arl', 'lan']
+DONE = ['MIAMI', 'SENECA1', 'SENECA2', 'PREBLE', 'AUGLAIZE', 'LOGAN1',
+           'LOGAN2', 'FRANKLIN']
 
 for entry in meta_feed.entry:
     data = entry.to_dict()
     sitekey = data.get('uniqueid').lower()
-    if sitekey not in DONE:
+    if sitekey.upper() not in DONE:
         print 'skip', sitekey
         continue
     # This is the folder where synced data is stored
