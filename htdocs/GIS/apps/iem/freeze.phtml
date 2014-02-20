@@ -1,49 +1,52 @@
 <?php
 include("../../../../config/settings.inc.php");
 define("IEM_APPID", 46);
-include_once "$rootpath/include/iemmap.php";
-include("$rootpath/include/database.inc.php");
+include("../../../../include/myview.php");
+$t = new MyView();
+
+include_once "../../../../include/iemmap.php";
+include("../../../../include/database.inc.php");
+include("../../../../include/forms.php");
 
 $state = isset($_GET['state']) ? $_GET['state'] : '' ;
 $radar = isset($_GET['radar']) ? $_GET['radar'] : 1;
 $refresh = isset($_GET['refresh']) ? $_GET['refresh'] : 0;
-  // freeze.php
 $uri = "freeze.phtml";
 
 if ($state == "MN_N")
-  $sextent = "-96, 44, -91, 49";
+  $sextent = "-96,44,-91,49";
 else if ($state == "MN_S")
-  $sextent = "-96, 42, -91, 47";
+  $sextent = "-96,42,-91,47";
 else if ($state == "ND")
-  $sextent = "-105, 45, -96, 47";
+  $sextent = "-105,45,-96,47";
 else if ($state == "SD")
-  $sextent = "-105, 42, -96, 47";
+  $sextent = "-105,42,-96,47";
 else if ($state == "KS")
-  $sextent = "-102.5, 37, -94.5, 40";
+  $sextent = "-102.5,37,-94.5,40";
 else if ($state == "NE")
-  $sextent = "-104, 40, -95.3, 43";
+  $sextent = "-104,40,-95.3,43";
 else if ($state == "WI")
-  $sextent = "-95, 43, -87, 47";
+  $sextent = "-95,43,-87,47";
 else if ($state == "IL")
-  $sextent = "-93, 37, -87, 43";
+  $sextent = "-93,37,-87,43";
 else if ($state == "MO")
-  $sextent = "-95, 36, -90, 41";
+  $sextent = "-95,36,-90,41";
 else if ($state == "IA_NE")
-  $sextent = "-93.6, 41.9, -90, 43.8";
+  $sextent = "-93.6,41.9,-90,43.8";
 else if ($state == "IA_SE")
-  $sextent = "-93.6, 40.3, -90, 41.9";
+  $sextent = "-93.6,40.3,-90,41.9";
 else if ($state == "IA_SW")
-  $sextent = "-96.6, 40.3, -93.6, 41.9";
+  $sextent = "-96.6,40.3,-93.6,41.9";
 else if ($state == "IA_NW")
-  $sextent = "-96.6, 41.9, -93.6, 43.8";
+  $sextent = "-96.6,41.9,-93.6,43.8";
 else if ($state == "IA")
-  $sextent = "-96, 40, -91, 45";
+  $sextent = "-96,40,-91,45";
 else if ($state == "AK")
-  $sextent = "-178.227822, 51.590982,-130.007704, 71.38269";
+  $sextent = "-178.227822,51.590982,-130.007704,71.38269";
 else if ($state == "HI")
-  $sextent = "-160.249925, 18.913826,-154.809286, 22.23603";
+  $sextent = "-160.249925,18.913826,-154.809286,22.23603";
 else if ($state == "NW")
-  $sextent = "-120.85, 37.983, -101.853, 51.983";
+  $sextent = "-120.85,37.983,-101.853,51.983";
 
  if (isset($sextent))
    $oextents = $sextent;
@@ -53,90 +56,65 @@ else if ($state == "NW")
  $imgwidth = 640;
  $imgheight = 480;
  if ( isset($_GET['img_x']) ){
-   include("$rootpath/include/click2geo.inc.php");
+   include("../../../../include/click2geo.inc.php");
    $extents = click2geo($oextents, $_GET['img_x'], $_GET['img_y'],
      $imgwidth, $imgheight, $zoom);
  } else {
    $extents = $oextents;
  }
 
-$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+$imgurl = "/GIS/radmap.php?layers[]=airtemps&layers[]=uscounties&";
+$imgurl .= sprintf("layers[]=surface&bbox=%s&", $extents);
+if ($radar){
+	$imgurl .= "layers[]=nexrad&";
+}
+$imgurl .= "&title=IEM%20Freeze&";
 
-$arExtents = explode(",", $extents);
-$map->setextent($arExtents[0], $arExtents[1], $arExtents[2], $arExtents[3]);
-
-$namer = $map->getlayerbyname("namerica");
-$namer->set("status", MS_ON);
-
-$lakes = $map->getlayerbyname("lakes");
-$lakes->set("status", MS_ON);
-
-$states = $map->getlayerbyname("states");
-$states->set("status", MS_ON);
-
-$sites = $map->getlayerbyname("airtemps");
-$sites->set("status", MS_ON);
-$sites->set("connection", $_DATABASES["access"] );
-
-$counties = $map->getlayerbyname("uscounties");
-$counties->set("status", MS_ON);
-
-$surface = $map->getlayerbyname("surface");
-$surface->set("status", MS_ON);
-$surface->set("connection", $_DATABASES["access"] );
-
-$n0r = $map->getlayerbyname("nexrad_n0q");
-$n0r->set("status", MS_ON);
-
-$img = $map->prepareImage();
-$namer->draw($img);
-$lakes->draw($img);
-if ($radar)
-  $n0r->draw($img);
-$counties->draw($img);
-$states->draw($img);
-$surface->draw($img);
-$sites->draw($img);
-
-$d = date("d F Y h:i a");
-
-$map->drawLabelCache($img);
-iemmap_title($map, $img, "IEM Freeze valid: ". $d);
-
-$ltmp = $map->drawLegend();
-$legendsrc = $ltmp->saveWebImage();
-
-
-$url = $img->saveWebImage();
-?>
-
-<?php
  if ($refresh > 0){
-  echo "<meta http-equiv=\"refresh\" content=\"". $refresh ."; URL=". $uri ."?refresh=". $refresh ."&extents=". $extents ."&state=". $state ."\">\n";
+  $t->headextra = "<meta http-equiv=\"refresh\" content=\"". $refresh ."; URL=". $uri ."?refresh=". $refresh ."&extents=". $extents ."&state=". $state ."\">\n";
  }
-?>
-
-<?php 
- $TITLE = "IEM Freeze";
- $HEADEXTRA = '<script Language="JavaScript">
+ $t->title = "IEM Freeze";
+ $t->jsextra = <<<EOF
+<script Language="JavaScript">
  function resetButtons(){
    document.panButton.src = "../imagenav/button_pan_off.png";
    document.zoominButton.src = "../imagenav/button_zoomin_off.png";
    document.zoomoutButton.src = "../imagenav/button_zoomout_off.png";
  }
-</script>';
- include("$rootpath/include/header.php"); ?>
+</script>
+EOF;
 
-<h3 class="heading">IEM Freeze (version 1.0)</h3><p><div class="text">
+ $ar = Array("1" => "Show", "0" => "Hide");
+ $rselect = make_select("radar", $radar, $ar);
+ 
+ $ar = Array("0" => "Never", "300" => "5 minutes", "600" => "10 minutes");
+ $reselect = make_select("refresh", $refresh, $ar);
+ 
+ $sselect = "<select name=\"ba\" onChange=\"location=this.form.ba.options[this.form.ba.selectedIndex].value\">";
+ $sselect .= "<option value=\"#\"> -- User Defined -- </option>";
+ $ar = Array("A"=> "Midwest US", "AK" => "Alaska", "HI" => "Hawaii",
+ "IL" => "Illinois", "IA" => "Iowa", "IA_NE" => "Iowa Northeast", 
+ "IA_SE" => "Iowa Southeast", "IA_SW" => "Iowa Southwest", "IA_NW" => "Iowa Northwest",
+ "KS" => "Kansas", "NE" => "Nebraska", "MN_N" => "Minnesota North",
+ "MN_S" => "Minnsota South", "MO" => "Missouri", "ND" => "North Dakota", 
+ "NW" => "Pacific Northwest", "SD" => "South Dakota", "WI" => "Wisconsin");
+ while (list($key,$val)=each($ar)){
+ 	$sselect .= sprintf("<option value=\"%s?state=%s\"%s>%s</option>\n",
+ 			$uri, $key, ($state == $key) ? " SELECTED": "", $val); 
+ }
+ $sselect .= "</select>";
+ 
+ 
+ 
+$t->content = <<<EOF
+<h3 class="heading">IEM Freeze</h3><p>
 
-<form method="GET" action="<?php echo $uri; ?>" name="myform">
+<form method="GET" action="{$uri}" name="myform">
 
-<input type="hidden" name="extents" value="<?php echo $extents; ?>">
-<input type="hidden" name="state" value="<?php echo $state; ?>">
+<input type="hidden" name="extents" value="{$extents}">
+<input type="hidden" name="state" value="{$state}">
 <input type="hidden" name="zoom" value="1">
 
-<table style="width: 790px;" cellspacing="0" cellpadding="0" border=0>
-<tr class="even"><td colspan=2>
 <b>Map Controls:</b>
 <img src="../imagenav/button_zoomin_off.png" name="zoominButton" alt="Zoom In"
   onClick="javascript: resetButtons(); document.zoominButton.src = '../imagenav/button_zoomin_on.png'; document.myform.zoom.value = -2;">
@@ -144,71 +122,42 @@ $url = $img->saveWebImage();
   onClick="javascript: resetButtons(); document.panButton.src = '../imagenav/button_pan_on.png'; document.myform.zoom.value = 1;">
 <img src="../imagenav/button_zoomout_off.png" name="zoomoutButton" alt="Zoom Out"
   onClick="javascript: resetButtons(); document.zoomoutButton.src = '../imagenav/button_zoomout_on.png'; document.myform.zoom.value = 2;">
-<a href="<?php echo $uri; ?>">Reset</a>
+<a href="{$uri}">Reset</a>
 
-&nbsp; &nbsp; <b>Radar Layer? </b>
-<select name="radar">
-  <option value="1" <?php if ($radar) echo "SELECTED"; ?>>Show
-  <option value="0" <?php if (! $radar) echo "SELECTED"; ?>>Hide
-</select>
+&nbsp; &nbsp; <b>Radar Layer? </b> {$rselect}
 
-&nbsp; &nbsp; <b>Map Refresh? </b>
-<select name="refresh">
-  <option value=0 <?php if ($refresh == 0) echo "SELECTED"; ?>>Never
-  <option value=300 <?php if ($refresh == 300) echo "SELECTED"; ?>>5 minutes
-  <option value=600 <?php if ($refresh == 600) echo "SELECTED"; ?>>10 minutes
-</select>
+
+&nbsp; &nbsp; <b>Map Refresh? </b> {$reselect}
 
 <input type="submit" value="View">
 
-</td></tr>
-<tr><td>
-<?php echo "<input type=\"image\" name=\"img\" src=\"$url\">"; ?></form>
-</td><td bgcolor="#000" align="center">
+<div class="row">
+<div class="col-md-8 col-sm-8">
 
-<b><font color="white"><u>Preset Views:</u></font></b>
+<input class="img img-responsive" type="image" name="img" src="{$imgurl}">
+</form>
+</div>
+<div class="col-md-4 col-sm-4 well">
+
+<p><u>Preset Views:</u><br />
 <form name="ba">
-<select name="ba" onChange="location=this.form.ba.options[this.form.ba.selectedIndex].value">
- <option value="#"> -- User Defined --
- <option value="<?php echo $uri; ?>?state=A" <?php if ($state == "A") echo "SELECTED"; ?>>MidWest US
- <option value="<?php echo $uri; ?>?state=AK" <?php if ($state == "AK") echo "SELECTED"; ?>>Alaska
- <option value="<?php echo $uri; ?>?state=HI" <?php if ($state == "HI") echo "SELECTED"; ?>>Hawaii
- <option value="<?php echo $uri; ?>?state=IL" <?php if ($state == "IL") echo "SELECTED"; ?>>Illinois
- <option value="<?php echo $uri; ?>?state=IA" <?php if ($state == "IA") echo "SELECTED"; ?>>Iowa
- <option value="<?php echo $uri; ?>?state=IA_NE" <?php if ($state == "IA_NE") echo "SELECTED"; ?>>Iowa (NE)
- <option value="<?php echo $uri; ?>?state=IA_SE" <?php if ($state == "IA_SE") echo "SELECTED"; ?>>Iowa (SE)
- <option value="<?php echo $uri; ?>?state=IA_SW" <?php if ($state == "IA_SW") echo "SELECTED"; ?>>Iowa (SW)
- <option value="<?php echo $uri; ?>?state=IA_NW" <?php if ($state == "IA_NW") echo "SELECTED"; ?>>Iowa (NW)
- <option value="<?php echo $uri; ?>?state=KS" <?php if ($state == "KS") echo "SELECTED"; ?>>Kansas
- <option value="<?php echo $uri; ?>?state=NE" <?php if ($state == "NE") echo "SELECTED"; ?>>Nebraska
- <option value="<?php echo $uri; ?>?state=MN_N" <?php if ($state == "MN_N") echo "SELECTED"; ?>>Minnesota (North)
- <option value="<?php echo $uri; ?>?state=MN_S" <?php if ($state == "MN_S") echo "SELECTED"; ?>>Minnesota (South)
- <option value="<?php echo $uri; ?>?state=MO" <?php if ($state == "MO") echo "SELECTED"; ?>>Missouri
- <option value="<?php echo $uri; ?>?state=ND" <?php if ($state == "ND") echo "SELECTED"; ?>>North Dakota
- <option value="<?php echo $uri; ?>?state=NW" <?php if ($state == "NW") echo "SELECTED"; ?>>Pacific NW
- <option value="<?php echo $uri; ?>?state=SD" <?php if ($state == "SD") echo "SELECTED"; ?>>South Dakota
- <option value="<?php echo $uri; ?>?state=WI" <?php if ($state == "WI") echo "SELECTED"; ?>>Wisconsin
-</select></form>
-<b><font color="white"><u>Temperature Key:</u></font></b>
+{$sselect}
+</form>
+<p><u>Temperature Key:</u><br />
 
-<img src="<?php echo $legendsrc; ?>">
-<!--
-<br><b><font color="#1e8914"> >= 35 </font></b>
-<br><b><font color="#2ac11d"> >= 34 </font></b>
-<br><b><font color="#35e025"> >= 33 </font></b>
-<br><b><font color="#e840e2"> >= 32 </font></b>
-<br><b><font color="#e872e2"> >= 31 </font></b>
-<br><b><font color="#e8a4e2"> >= 30 </font></b>
-<br><b><font color="#e8d6e2"> < 30 </font></b>
--->
+<img src="freeze_legend.png">
 
-</td></tr>
-</table>
+</div>
+		</div><!-- ./row -->
 
 <br>
-<table width="50%">
-<tr><td></td></tr>
-<tr><td>
+
+<div class="alert alert-info">This application uses the 
+<a class="alert-link" href="/GIS/radmap_api.phtml">IEM RadMap API</a> to generate
+the image you see above.  You could place the above image on your webpage by
+right-clicking the image above and select "Copy Image URL" and then use that
+as your image source on your webpage.</div>
+		
 <p><b>IEM Freeze</b> lets you quickly evaluate air
 and pavement temperatures, along with concurrent radar observations
 of precipitation:<br>
@@ -220,10 +169,8 @@ of precipitation:<br>
 
 <p>This <a href="http://mesonet.agron.iastate.edu/cool/images/freeze_031215.png">historical plot</a> shows how IEM Freeze looks when the winter weather gets interesting.</p>
 
-</td></tr>
-</table>
-<p>Your feedback is needed!  Please let me know how you would like this 
-application to behave.</div>
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+		<p>Your feedback is needed!  Please <a href="/info/contacts.php">let me know</a> how you would like this 
+application to behave.
+EOF;
+$t->render("single.phtml");
+?>

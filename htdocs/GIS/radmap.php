@@ -577,6 +577,17 @@ $roadsint->set("connection", $_DATABASES["postgis"]);
 $roadsint->set("status", in_array("roads-inter", $layers) );
 $roadsint->draw($img);
 
+if (in_array("surface", $layers)){
+	$surface = $map->getlayerbyname("surface");
+	$surface->set("status", MS_ON );
+	$surface->draw($img);
+}
+if (in_array("airtemps", $layers)){
+	$airtemps = $map->getlayerbyname("airtemps");
+	$airtemps->set("status", MS_ON );
+	$airtemps->draw($img);
+}
+
 $tlayer = $map->getLayerByName("bar640t-title");
 $point = ms_newpointobj();
 $point->setXY(80, 12);

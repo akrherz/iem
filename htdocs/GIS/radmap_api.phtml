@@ -1,8 +1,10 @@
 <?php 
 include("../../config/settings.inc.php");
-$THISPAGE = "gis-radmap";
-$TITLE = "IEM | RadMap API";
-include("$rootpath/include/header.php"); ?>
+include("../../include/myview.php");
+$t = new MyView();
+$t->thispage = "gis-radmap";
+$t->title = "RadMap API";
+$t->content = <<<EOF
 <style>
 div.item h4 {
  color: #f00;
@@ -14,11 +16,10 @@ div.desc {
 }
 </style>
 
-<div style="max-width:800px;">
 
 <h3 class="heading">IEM RadMap API</h3>
 
-<div class="warning"><strong>Please note:</strong>  This mapping service is
+<div class="alert alert-danger">Please note: This mapping service is
 provided without warranty.  Please do not use this on a high traffic website.
 If necessary, this application may be disabled to keep the IEM web farm from
 melting!  This API is intended to support local scripts to generate timelapse
@@ -31,9 +32,9 @@ that the API presented here may change in the future.
 
 <h3>Basic HTML example:</h3>
 <pre>
-&lt;img src="<?php echo BASEURL; ?>/GIS/radmap.php?layers[]=nexrad&amp;sector=conus&amp;ts=200806071000" /&gt;
+&lt;img src="http://mesonet.agron.iastate.edu/GIS/radmap.php?layers[]=nexrad&amp;sector=conus&amp;ts=200806071000" /&gt;
 </pre>
-<img src="<?php echo BASEURL; ?>/GIS/radmap.php?layers[]=nexrad&sector=conus&ts=200806071000" 
+<img src="/GIS/radmap.php?layers[]=nexrad&sector=conus&ts=200806071000" 
 width="640" height="480" alt="radmap image"/>
 
 <h3>HTTP GET Parameters</h3>
@@ -42,6 +43,8 @@ width="640" height="480" alt="radmap image"/>
 <div class="desc">
  Layer(s) to draw in the map. Here is a list of available layers:
 <ul>
+	<li><i>airtemps</i> - <strong>Realtime Only</strong> Plot 2 meter air 
+		temperatures in Fahrenheit.</li>
  <li><i>cbw</i> - County/Zone based Watch/Warning/Advisories</li>
  <li><i>county_warnings</i> - County based Warnings</li>
  <li><i>cwas</i> - National Weather Service County Warning Area (CWA)</li>
@@ -69,6 +72,8 @@ width="640" height="480" alt="radmap image"/>
  </li>
  <li><i>roads</i> - Iowa Winter Road Conditions</li>
  <li><i>sbw</i> - Storm based Watch/Warning/Advisories</li>
+	<li><i>surface</i> - <strong>Realtime Only</strong> Plot dots for RWIS
+	pavement temperatures. See <a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a> app.</li>
   <li><i>uscounties</i> - CONUS Counties </li>
  <li><i>watch_by_county</i> - Convective Watch-by-County</li>
  <li><i>watches</i> - Polygon SPC Watch boundaries</li>
@@ -197,6 +202,6 @@ os.system("ffmpeg -y -i %05d.png -b 2000k out.mp4")
  imagery layers as available plotting options.</li>
  <li><strong>4 May 2012:</strong> Add incorporated places as a layer option.</li>
 </ul>
-
-</div>
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
