@@ -70,7 +70,8 @@ def run( utc , routes):
                                             utc.strftime("%-d %b %Y %H"),),
                 subtitle='valid: %s' % (now.strftime("%-d %b %Y %I:%M %p %Z"),))
 
-        m.pcolormesh(lons, lats, ref, np.arange(0,75,5), units='dBZ')
+        m.pcolormesh(lons, lats, ref, np.arange(0,75,5), units='dBZ',
+                     clip_on=False)
         m.postprocess(filename='/tmp/hrrr_ref_%03i.png' % (i,))
         m.close()
     
