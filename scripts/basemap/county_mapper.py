@@ -24,7 +24,7 @@ cmap = maue()
 cmap.set_under("#ffffff")
 cmap.set_over("#000000")
 #bins = np.arange(0,131,10)
-bins = [1,2,3,5,10,20,30,40,50,75,100,125]
+bins = [1,2,3,4,5,6,7,8,9,10,15,20,30,50,100,125]
 norm = mpcolors.BoundaryNorm(bins, cmap.N)
 #bins = [1,2,3,4,5,7,10,15,20,25,30,35,40,50,75,100]
 
@@ -70,9 +70,9 @@ data = source.ExecuteSQL("""
  
  select n.ugc, foo.data, ST_Simplify(n.geom,0.01) from nws_ugc n 
  LEFT JOIN (select ugc, count(*) as data from warnings 
-                  where phenomena in ('WS') and significance = 'W' 
+                  where phenomena in ('BZ') and significance = 'W' 
                   and gtype = 'C' and issue > '2005-11-12' GROUP by ugc) as foo 
- ON (n.ugc = foo.ugc) 
+ ON (n.ugc = foo.ugc) WHERE n.polygon_class = 'Z'
  ORDER by data ASC NULLS FIRST
  
 """)
@@ -141,7 +141,7 @@ axaa.barh(numpy.arange(len(bins)), [1]*len(bins), height=1,
                 ec='None')
 
 
-ax.text(0.17, 1.09, '12 Nov 2005 - 3 Feb 2014 Number of NWS Issued Winter Storm Warnings', transform=ax.transAxes,
+ax.text(0.17, 1.09, '12 Nov 2005 - 19 Feb 2014 Number of NWS Issued Blizzard Warnings', transform=ax.transAxes,
      size=16,
     horizontalalignment='left', verticalalignment='center')
 
