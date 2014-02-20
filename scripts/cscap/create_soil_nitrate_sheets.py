@@ -36,7 +36,8 @@ sdc_data, sdc_names = util.build_sdc(sdc_feed)
 #        'NAEW.WS118','NAEW.WS123','NAEW.WS127','WOOSTER.LTR','WOOSTER.COV',
 #        'HOYTVILLE.LTR']
 
-NOTDONE = ['BRADFORD.B1','BRADFORD.B2', 'BRADFORD.C']
+NOTDONE = ['MIAMI', 'SENECA1', 'SENECA2', 'PREBLE', 'AUGLAIZE', 'LOGAN1',
+           'LOGAN2', 'FRANKLIN']
 
 for entry in meta_feed.entry:
     data = entry.to_dict()
@@ -46,8 +47,9 @@ for entry in meta_feed.entry:
         continue
     soil15 = 'SOIL15' in sdc_data["2013"][sitekey]
     soil16 = 'SOIL16' in sdc_data["2013"][sitekey]
-    if not soil15 and not soil16:
-        print 'Skipping', sitekey, 'as they have no entries for SOIL15-16'
+    soil23 = 'SOIL23' in sdc_data["2013"][sitekey]
+    if not soil15 and not soil16 and not soil23:
+        print 'Skipping', sitekey, 'as they have no entries for SOIL15,16,23'
         continue
     # This is the folder where synced data is stored
     colfolder = data.get('colfolder')
@@ -72,8 +74,11 @@ for entry in meta_feed.entry:
     columns = ['plotid', 'depth', 'soil nitrate fall sampling']
     units = ['', 'cm', 'mg per kg soil', 'mg per kg soil', 'mg per kg soil']
     if soil15:
-        columns.append('soil nitrate spring sampling')
-        columns.append('soil nitrate summer sampling')
+        columns.append('SOIL15 soil nitrate spring sampling')
+    if soil16:
+        columns.append('SOIL16 soil nitrate summer sampling')
+    if soil23:
+        columns.append('SOIL23 soil nitrate fall sampling')
     depths = ['0 - 30', '30 - 60', '60 - 90']
 
     # Figure out how many 
