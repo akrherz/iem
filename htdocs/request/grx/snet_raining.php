@@ -11,7 +11,7 @@ include("../../../config/settings.inc.php");
 include("../../../include/database.inc.php");
 include("../../../include/mlib.php");
 include("../../../include/network.php");
-$nt = new NetworkTable("KCCI");
+$nt = new NetworkTable(array("KCCI","KIMT","KELO"));
 $pgconn = iemdb("access");
 
 $rs = pg_query($pgconn, "select * from events WHERE 
