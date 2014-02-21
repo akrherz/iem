@@ -3,8 +3,8 @@
  * 
  */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
+include("../../include/database.inc.php");
+include("../../include/network.php");
 $nt = new NetworkTable('IA_DCP');
 $pgconn = iemdb("hads");
 
@@ -27,9 +27,9 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 	$data[] = $row["value"];
 }
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("../../include/jpgraph/jpgraph.php");
+include ("../../include/jpgraph/jpgraph_line.php");
+include ("../../include/jpgraph/jpgraph_date.php");
 
 $graph = new Graph(640,480);
 $graph->SetScale("datelin");

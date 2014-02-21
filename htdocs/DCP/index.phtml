@@ -1,10 +1,12 @@
 <?php 
  include("../../config/settings.inc.php");
- $THISPAGE = "networks-dcp";
- $TITLE = "IEM | GOES DCP";
- include("../../include/header.php"); ?>
+ include("../../include/myview.php");
+ $t = new MyView();
+ $t->thispage = "networks-dcp";
+ $t->title = "GOES/HADS/DCP";
 
-<h3 class="heading">GOES DCP</h3>
+ $t->content = <<<EOF
+<h3>GOES DCP</h3>
 
 <p>The Geostationary Operational Environmental Satellites 
 (GOES) Data Collection Platforms (DCPs) are a set of hydrologic and meteorologic
@@ -48,5 +50,6 @@ href="http://www.nws.noaa.gov/oh/hads/dcp_operators.html">http://www.nws.noaa.go
 <br><a href="http://water.usgs.gov/pubs/circ/circ1123/">http://water.usgs.gov/pubs/circ/circ1123/</a>
  , viewed: 21 Jun 2003
 
-
-<?php include("../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

@@ -96,20 +96,29 @@ states = [
  ["WV","West Virginia"],
  ["WI","Wisconsin"],
  ["WY","Wyoming"]
-]
+];
 
-	var varStore = new Ext.data.Store({
-		autoLoad	: false,
-        proxy	: new Ext.data.HttpProxy({
-            url     : '../json/dcp_vars.php'
-        }),
-        reader: new Ext.data.JsonReader({
-            root: 'vars',
-            id: 'id'
-        }, [
-            {name: 'id', mapping: 'id'}
-        ])
-    });
+var varStore = new Ext.data.Store({
+	autoLoad	: false,
+	proxy	: new Ext.data.HttpProxy({
+		url     : '../json/dcp_vars.php'
+	}),
+	reader: new Ext.data.JsonReader({
+		root: 'vars',
+		id: 'id'
+	}, [
+	    {name: 'id', mapping: 'id'}
+	    ]),
+	listeners: {
+		load: function(st, records){
+			if (records.length == 0){
+				Ext.get('msg').update('Sorry, did not find any variables for this site!');
+			} else{
+				Ext.get('msg').update('');
+			}
+		}
+	}
+});
 	
 	var varCB = new Ext.form.ComboBox({
 		store			: varStore,
