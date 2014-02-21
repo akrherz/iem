@@ -1,9 +1,10 @@
 <?php
  include("../../config/settings.inc.php");
  define("IEM_APPID", 15);
-include("$rootpath/include/iemprop.php");
-$coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
- include("$rootpath/include/imagemaps.php");
+ include("../../include/myview.php");
+ include("../../include/iemprop.php");
+ include("../../include/imagemaps.php");
+ include("../../include/forms.php");
  $report = isset($_REQUEST["report"])? substr($_REQUEST["report"],0,2): "01";
  $station = isset($_REQUEST["station"])? substr($_REQUEST["station"],0,6) : "";
  $network = isset($_REQUEST['network']) ? $_REQUEST['network'] : 'IACLIMATE';
@@ -21,33 +22,81 @@ $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
    }
  }
 
-$THISPAGE = "climatology-climodat";
-$TITLE = "IEM Climodat";
+$coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
+$t = new MyView();
+$t->thispage = "climatology-climodat";
+$t->title = "IEM Climodat";
+
 if ($station == "" || ! is_file("/mesonet/share/climodat/reports/${station}_$report.txt")){
-  $HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
- <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
- <script src='${rooturl}/js/olselect.php?network=${network}'></script>";
- $BODYEXTRA = "onload=\"init()\"";
+  	$t->jsextra = <<<EOF
+<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+<script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
+<script src='/js/olselect.php?network=${network}'></script>
+EOF;
+ 	$t->bodyextra = "onload=\"init()\"";
 }
-include("$rootpath/include/header.php"); 
-?>
+$enddate = date('d M Y', $coop_archive_end);
+$nselect = networkSelect($network, $station );
 
+$ar = Array(
+	"Precipitation" => Array(
+		"05" => "Daily Maximum Precipitation",
+		"17" => "Monthly Precipitation Total",
+		"21" => "Monthly Rainy Days",
+		"28" => "Precipitation Events by Month &amp; Year",
+		"01" => "Precipitation Events per Climate Week",
+		"02" => "Top 30 Rainfall Events",
+	),
+	"Temperature" => Array(
+		"04" => "Daily Record Highs and Lows",
+		"06" => "Daily Record High and Low Ranges",
+		"07" => "Daily Mean Highs and Lows",
+		"27" => "High/Low Consecutive Day Streaks",
+		"14" => "Monthly Average Maximum Temperatures",
+		"15" => "Monthly Average Minimum Temperatures",
+		"16" => "Monthly Average Mean Temperatures",
+		"18" => "Monthly Heating Degree Days",
+		"19" => "Monthly Cooling Degree Days",
+		"08" => "Number of Days Each Year Min &gt;= 32",
+		"20" => "Heat Stress Variables",
+		"26" => "Yearly Temperature Exceedance Histograms",
+	),
+	"Growing Season" => Array(
+		"03" => "Growing Degree Days",
+		"09" => "Last Spring / First Fall / Length of Season Base=32",
+		"10" => "Last Spring / First Fall / Length of Season Base=30",
+		"11" => "Last Spring / First Fall / Length of Season Base=28",
+		"12" => "Last Spring / First Fall / Length of Season Base=26",
+		"13" => "Last Spring / First Fall / Length of Season Base=24",
+		"22" => "First Fall Freeze Probabilities",
+		"23" => "Last Spring Freeze Probabilities",
+		"24" => "Freeze/Thaw Cycles",
+	),
+	"Snow" => Array(
+		"25" => "Monthly Snowy Days",
+	)
+);
 
-<h3 class="heading">IEM "Climodat" Reports</h3>
-<?php if ($station == ""){ ?>
+$vselect = make_select("report", $report, $ar);
 
-<div class="text">
-<?php } ?>
+$content = <<<EOF
+<h3>IEM "Climodat" Reports</h3>
 
 <p>These "Climodat" reports provide some answers to the most common climatological
-questions we get routinely asked.  These reports are based on the daily climate observations from the <a href="/COOP/">NWS COOP</a> network.  We also provide <a href="index.phtml#ks">"kitchen sink"</a> data files which contain the much of the raw information used to generate the reports. 
+questions we get routinely asked.  These reports are based on the daily 
+climate observations from the <a href="/COOP/">NWS COOP</a> network.  
+We also provide <a href="index.phtml#ks">"kitchen sink"</a> data files 
+which contain the much of the raw information used to generate the reports. 
 
 <p><strong>Note on data sources:</strong>
-<br />The <a href="http://www.iowaagriculture.gov/climatology.asp">Iowa State Climatologist</a> provides the IEM with a monthly update of
+<br />The <a href="http://www.iowaagriculture.gov/climatology.asp">Iowa State Climatologist</a> 
+provides the IEM with a monthly update of
 quality controlled observational data.  This procedure takes a good deal of 
-time on his behalf. Quality controlled information exists from <b>1 Jan 1951 till <?php echo date('d M Y', $coop_archive_end); ?></b>.  Any months of data
-afterwards are based on preliminary data from <a href="http://www.ncdc.noaa.gov">NCDC</a> and other sources. Some sites have data back to 1893, so their reports 
-contain data dating back to then.
+time on his behalf. Quality controlled information exists from 
+<b>1 Jan 1951 till {$enddate}</b>.  Any months of data
+afterwards are based on preliminary data from 
+<a href="http://www.ncdc.noaa.gov">NCDC</a> and other sources. Some sites have 
+data back to 1893, so their reports contain data dating back to then.
 
 <p>Data is available from the following states: 
 <a href="index.phtml?network=ILCLIMATE">Illinois</a> ,
@@ -64,85 +113,48 @@ contain data dating back to then.
 <a href="index.phtml?network=SDCLIMATE">South Dakota</a> ,
 <a href="index.phtml?network=WICLIMATE">Wisconsin</a>.
 
-<p style="background: #aef;">The daily observations that are used in these summary reports can be downloaded from 
-<a href="<?php echo $rooturl; ?>/request/coop/fe.phtml">here</a>.</p>
+<div class="alert alert-info">The daily observations that are used in these 
+summary reports can be downloaded from 
+<a class="alert-link" href="/request/coop/fe.phtml">here</a>.</div>
 
 
 <div id="iem-form2">
 <form method="GET" action="index.phtml" name="olselect">
-<input type="hidden" name="network" value="<?php echo $network; ?>" />
+<input type="hidden" name="network" value="{$network}" />
 
 <table cellpadding=2 cellspacing=1>
   <tr><th>Select Climate Station:</th><th>Select Report:</th><td></td></tr>
 
-<tr><td><?php echo networkSelect($network, $station ); ?>
-<br /><?php if (strlen($station) > 0){ 
-	echo "<a href=\"index.phtml?report=${report}\">Select from map</a>"; 
-} ?></td>
+<tr><td>{$nselect}
+<br />or <a href="index.phtml?report=${report}">Select from map</a></td>
 
-<td valign="top"><select name="report" size="1">
-<optgroup label="Precipitation">
-<option value="05" <?php if ($report == "05") echo "SELECTED"; ?>>Daily Maximum Precipitation
-<option value="17" <?php if ($report == "17") echo "SELECTED"; ?>>Monthly Precipitation Totals + Averages
-<option value="21" <?php if ($report == "21") echo "SELECTED"; ?>>Monthly Rainy Days
-<option value="28" <?php if ($report == "28") echo "SELECTED"; ?>>Precipitation Events by Month &amp; Year
-<option value="01" <?php if ($report == "01") echo "SELECTED"; ?>>Precipitation Events per Climate Week
-<option value="02" <?php if ($report == "02") echo "SELECTED"; ?>>Top 30 Rainfall Events
-</optgroup>
-<optgroup label="Temperature">
-<option value="04" <?php if ($report == "04") echo "SELECTED"; ?>>Daily Record Highs and Lows
-<option value="06" <?php if ($report == "06") echo "SELECTED"; ?>>Daily Record Hi and Low Ranges
-<option value="07" <?php if ($report == "07") echo "SELECTED"; ?>>Daily Mean Highs and Lows
-<option value="27" <?php if ($report == "27") echo "SELECTED"; ?>>High/Low Consecutive Day Streaks
-<option value="14" <?php if ($report == "14") echo "SELECTED"; ?>>Monthly Average Maximum Temperatures
-<option value="15" <?php if ($report == "15") echo "SELECTED"; ?>>Monthly Average Minimum Temperatures
-<option value="16" <?php if ($report == "16") echo "SELECTED"; ?>>Monthly Average Mean Temperatures
-<option value="18" <?php if ($report == "18") echo "SELECTED"; ?>>Monthly Heating Degree Days
-<option value="19" <?php if ($report == "19") echo "SELECTED"; ?>>Monthly Cooling Degree Days
-<option value="08" <?php if ($report == "08") echo "SELECTED"; ?>>Number of Days Each Year Min &gt;= 32
-<option value="20" <?php if ($report == "20") echo "SELECTED"; ?>>Heat Stress Variables
-<option value="26" <?php if ($report == "26") echo "SELECTED"; ?>>Yearly Temperature Exceedance Histograms
-</optgroup>
-<optgroup label="Growing Season">
-<option value="03" <?php if ($report == "03") echo "SELECTED"; ?>>Growing Degree Days
-<option value="09" <?php if ($report == "09") echo "SELECTED"; ?>>Last Spring/First Fall/Length of Season Base=32
-<option value="10" <?php if ($report == "10") echo "SELECTED"; ?>>Last Spring/First Fall/Length of Season Base=30
-<option value="11" <?php if ($report == "11") echo "SELECTED"; ?>>Last Spring/First Fall/Length of Season Base=28
-<option value="12" <?php if ($report == "12") echo "SELECTED"; ?>>Last Spring/First Fall/Length of Season Base=26
-<option value="13" <?php if ($report == "13") echo "SELECTED"; ?>>Last Spring/First Fall/Length of Season Base=24
-<option value="22" <?php if ($report == "22") echo "SELECTED"; ?>>First Fall Freeze Probabilities
-<option value="23" <?php if ($report == "23") echo "SELECTED"; ?>>Last Spring Freeze Probabilities
-<option value="24" <?php if ($report == "24") echo "SELECTED"; ?>>Freeze/Thaw Cycles
-</optgroup>
-<optgroup label="Snow">
-<option value="25" <?php if ($report == "25") echo "SELECTED"; ?>>Monthly Snowy Days
-</optgroup>
-</select></td>
+<td valign="top">
+{$vselect}</td>
 <td><input type="submit" value="View Report"></td></tr></table>
 </form>
-
 <p>
-<?php 
+EOF;
 
 if (is_file("/mesonet/share/climodat/reports/${station}_$report.txt")){
-echo "<table cellpadding=\"2\"><tr><th>Download Options</th><td><form name=\"dl\" action=\"index.phtml\">
-  <input type=\"hidden\" name=\"dl\" value=\"yes\">
-  <input type=\"hidden\" name=\"station\" value=\"$station\"> 
-  <input type=\"hidden\" name=\"report\" value=\"$report\">
-  <input type=\"submit\" value=\"Download Text Version\">
+$content .= <<<EOF
+<table cellpadding="2"><tr><th>Download Options</th><td><form name="dl" action="index.phtml">
+  <input type="hidden" name="dl" value="yes">
+  <input type="hidden" name="station" value="$station"> 
+  <input type="hidden" name="report" value="$report">
+  <input type="submit" value="Download Text Version">
 </form></td>
-<td><form name=\"excel\" action=\"as-excel.php\">
-  <input type=\"hidden\" name=\"station\" value=\"$station\"> 
-  <input type=\"hidden\" name=\"report\" value=\"$report\">
-  <input type=\"submit\" value=\"Download Excel Version\"></form></td>
-</tr></table>"; 
-
-echo "<pre>\n";
-  include("/mesonet/share/climodat/reports/${station}_$report.txt");
-echo "</pre>\n";
+<td><form name="excel" action="as-excel.php">
+  <input type="hidden" name="station\" value="$station"> 
+  <input type="hidden" name="report\" value="$report">
+  <input type="submit" value="Download Excel Version"></form></td>
+</tr></table>
+<pre>
+EOF;
+  $content .= file_get_contents("/mesonet/share/climodat/reports/${station}_$report.txt");
+$content .= "</pre>\n";
 } else {
-?> 
-<style type="text/css">
+$content .= <<<EOF
+	<style type="text/css">
         #map {
             width: 640px;
             height: 400px;
@@ -182,8 +194,8 @@ if you would like to see other variables in these files or have any other commen
 
 <p><b>Disclaimer:</b> While we use care to provide accurate weather/climatic information, errors may occur because of equipment or other failure. We therefore provide this information without any warranty of accuracy. Users of this weather/climate data do so at their own risk, and are advised to use independent judgement as to whether to verify the data presented.</p>
 </div>
-
-<?php 
+EOF;
 }  
-include("$rootpath/include/footer.php"); 
+$t->content = $content;
+$t->render("single.phtml");
 ?>

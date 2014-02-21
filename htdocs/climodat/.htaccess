@@ -1,4 +1,5 @@
-Redirect /climodat/index.html http://mesonet.agron.iastate.edu/climodat/index.phtml
-Redirect /climodat/default.html http://mesonet.agron.iastate.edu/climodat/index.phtml
-Redirect /climodat/table.html http://mesonet.agron.iastate.edu/climodat/index.phtml
+# Unsure if these are needed anymore, so lets comment out and see what breaks
+#Redirect /climodat/index.html http://mesonet.agron.iastate.edu/climodat/index.phtml
+#Redirect /climodat/default.html http://mesonet.agron.iastate.edu/climodat/index.phtml
+#Redirect /climodat/table.html http://mesonet.agron.iastate.edu/climodat/index.phtml
 

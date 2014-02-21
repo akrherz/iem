@@ -1,6 +1,6 @@
 <?php
 include("../../config/settings.inc.php");
-require_once "$rootpath/include/excel/Writer.php";
+require_once "../../include/excel/Writer.php";
 
 // What is requested of us!
 $report = isset($_GET["report"])? substr($_GET["report"],0,2): "01";
