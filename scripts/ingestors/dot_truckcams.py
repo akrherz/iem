@@ -14,11 +14,11 @@ import os
 
 URI = ("https://geonexusr.iowadot.gov/arcgis/rest/services/Operations/"
        +"Truck_Images/MapServer/3/query?outFields=*&outSR=4326&"
-       +"f=json&where=IDNUM%3E0&returnGeometry=true&returnIdsOnly=false")
+       +"f=json&where=PHOTO_UID%3E0&returnGeometry=true&returnIdsOnly=false")
 
 def get_label(attrs):
     ''' Figure out the site label given the attributes, this will change later'''
-    return attrs['URL'].split("/")[-1].split("_")[0]
+    return attrs['PHOTO_URL'].split("/")[-1].split("_")[0]
 
 def get_current_fn(label):
     ''' Return how this is stored for current data '''
@@ -50,18 +50,18 @@ def workflow():
         current[ row[0] ] = row[1]
 
     for feat in data['features']:
-        logdt = feat['attributes']['JPEG_EXIF_GPSDATESTAMP']
+        logdt = feat['attributes']['PHOTO_FILEDATE']
         ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
         valid = valid.replace(year=ts.year, month=ts.month, day=ts.day,
                               hour=ts.hour,minute=ts.minute,second=ts.second)
         label = get_label(feat['attributes'])
-        idnum = feat['attributes']['IDNUM']
+        idnum = feat['attributes']['PHOTO_UID']
         if idnum <= current.get(label, 0):
             continue
 
         utc = valid.astimezone(pytz.timezone("UTC"))
         # Go get the URL for saving!
-        image = urllib2.urlopen(feat['attributes']['URL'], timeout=15).read()
+        image = urllib2.urlopen(feat['attributes']['PHOTO_URL'], timeout=15).read()
         tmp = tempfile.NamedTemporaryFile(delete=False)
         tmp.write(image)
         tmp.close()
