@@ -1,10 +1,13 @@
 <?php
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
  $network = isset($_GET['network']) ? $_GET["network"] : 'IA_DCP';
 $pgconn = iemdb("hads");
-include("$rootpath/include/forms.php");
-include("$rootpath/include/network.php");
+$mesosite = iemdb("mesosite");
+include("../../include/forms.php");
+include("../../include/network.php");
+include("../../include/myview.php");
+$t = new MyView();
 $nt = new NetworkTable( Array($network) );
 $cities = $nt->table;
 
@@ -16,11 +19,80 @@ $year = isset($_GET['year']) ? $_GET["year"] : date("Y");
 $now = time() - 3600;
 $ts = mktime($hour, $minute, 0, $month, $day, $year);
 
-$THISPAGE = "networks-dcp";
-$TITLE = "IEM | GOES DCP";
-include("$rootpath/include/header.php"); 
-?>
-<h3>DCP Data Report for time: <?php echo date("d M Y h:i a", $ts); ?></h3>
+$t->thispage = "networks-dcp";
+$t->title = "GOES/DCP/HADS Display Observations";
+
+$dstr = date("d M Y h:i a", $ts);
+
+$nselect = "<select name=\"network\">";
+$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' ORDER by name ASC");
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	$sel = '';
+	if ($network == $row["id"]){
+		$sel = " selected='SELECTED'";
+	}
+	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
+			$row["id"], $sel, $row["name"]);
+}
+$nselect .= "</select>";
+$ys = yearSelect(2002, $year, "year");
+$ms = monthSelect($month);
+$ds = daySelect($day);
+$hs = hourSelect($hour, 'hour');
+
+$ar = Array("00"=> "00", "15" => "15", "30" => "30", "45" => "45");
+$mis = make_select("minute", $minute, $ar);
+
+
+$tbl = strftime("raw%Y_%m", $ts);
+$dstr = strftime("%Y-%m-%d %H:%M", $ts);
+$ldate = strftime("%d %b %Y %I:%M %p", $ts);
+
+$rs = pg_prepare($pgconn, "SELECT", "SELECT t.* from $tbl t, stations s WHERE " .
+		"valid = $1 and s.id = t.station and s.network = $2");
+
+$rs = pg_execute($pgconn, "SELECT", Array($dstr, $network) );
+pg_close($pgconn);
+
+/* Load up the data into a big fat array */
+$data = Array();
+$datakeys = Array();
+for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+{
+	$station = $row["station"];
+	if (! array_key_exists($station, $cities)){ continue; }
+	$data[ $row["station"] ][ substr($row["key"],0,3) ] = $row["value"];
+	$datakeys[ substr($row["key"],0,3) ]= 1;
+}
+$stations = array_keys( $data );
+$keys = array_keys( $datakeys );
+asort($stations);
+asort($keys);
+
+$table = "<table class=\"table table-condensed table-striped table-bordered\">";
+$header = "<tr style=\"background: #eee;\">
+ <th>NWS ID</th><th>Station</th>";
+while ( list($k,$v) = each($keys)){
+  $header .= sprintf("<th>%s</th>", $v);
+}
+$header .= "</tr>";
+
+$row = 0;
+while ( list($k,$v) = each($stations)){
+  if ($row % 25 == 0){ $table .= $header; }
+  $row += 1;
+
+  $table .= sprintf("<tr><td><a href='site.phtml?station=%s&year=%s&month=%s&day=%s'>%s</a></td><td>%s</td>", $v, date("Y", $ts), date("m", $ts), date("d", $ts), $v, $cities[$v]['name']);
+  reset($keys);
+  while ( list($k,$key) = each($keys)){
+    $table .= @sprintf("<td>%s</td>", $data[$v][$key]);
+  }
+  $table .= "</tr>";
+}
+$table .= "</table>";
+
+$t->content = <<<EOF
+<h3>DCP Data Report for time: {$dstr}</h3>
 
 <p>This application will display a table of observations valid at a given
 time.  The SHEF encoded variable identifier is used to show which sites
@@ -44,127 +116,22 @@ choice.
 
 <tr>
   <td>
-  Select State:<select name="network">
- <option value="AL_DCP" <?php if ($network == "AL_DCP") echo "SELECTED"; ?>>Alabama
- <option value="AK_DCP" <?php if ($network == "AK_DCP") echo "SELECTED"; ?>>Alaska
- <option value="AR_DCP" <?php if ($network == "AR_DCP") echo "SELECTED"; ?>>Arkansas
- <option value="AZ_DCP" <?php if ($network == "AZ_DCP") echo "SELECTED"; ?>>Arizona
- <option value="CA_DCP" <?php if ($network == "CA_DCP") echo "SELECTED"; ?>>California
- <option value="CO_DCP" <?php if ($network == "CO_DCP") echo "SELECTED"; ?>>Colorado
- <option value="CT_DCP" <?php if ($network == "CT_DCP") echo "SELECTED"; ?>>Connecticut
- <option value="DE_DCP" <?php if ($network == "DE_DCP") echo "SELECTED"; ?>>Delaware
- <option value="FL_DCP" <?php if ($network == "FL_DCP") echo "SELECTED"; ?>>Florida
- <option value="GA_DCP" <?php if ($network == "GA_DCP") echo "SELECTED"; ?>>Georgia
- <option value="HI_DCP" <?php if ($network == "HI_DCP") echo "SELECTED"; ?>>Hawaii
- <option value="ID_DCP" <?php if ($network == "ID_DCP") echo "SELECTED"; ?>>Idaho
- <option value="IL_DCP" <?php if ($network == "IL_DCP") echo "SELECTED"; ?>>Illinois
- <option value="IN_DCP" <?php if ($network == "IN_DCP") echo "SELECTED"; ?>>Indiana
- <option value="IA_DCP" <?php if ($network == "IA_DCP") echo "SELECTED"; ?>>Iowa
- <option value="KS_DCP" <?php if ($network == "KS_DCP") echo "SELECTED"; ?>>Kansas
- <option value="KY_DCP" <?php if ($network == "KY_DCP") echo "SELECTED"; ?>>Kentucky
- <option value="LA_DCP" <?php if ($network == "LA_DCP") echo "SELECTED"; ?>>Louisana
- <option value="ME_DCP" <?php if ($network == "ME_DCP") echo "SELECTED"; ?>>Maine
- <option value="MD_DCP" <?php if ($network == "MD_DCP") echo "SELECTED"; ?>>Maryland
- <option value="MA_DCP" <?php if ($network == "MA_DCP") echo "SELECTED"; ?>>Massachusetts
- <option value="MI_DCP" <?php if ($network == "MI_DCP") echo "SELECTED"; ?>>Michigan
- <option value="MN_DCP" <?php if ($network == "MN_DCP") echo "SELECTED"; ?>>Minnesota
- <option value="MS_DCP" <?php if ($network == "MS_DCP") echo "SELECTED"; ?>>Mississippi
- <option value="MO_DCP" <?php if ($network == "MO_DCP") echo "SELECTED"; ?>>Missouri
- <option value="MT_DCP" <?php if ($network == "MT_DCP") echo "SELECTED"; ?>>Montana
- <option value="NE_DCP" <?php if ($network == "NE_DCP") echo "SELECTED"; ?>>Nebraska
- <option value="NH_DCP" <?php if ($network == "NH_DCP") echo "SELECTED"; ?>>New Hampshire
- <option value="NC_DCP" <?php if ($network == "NC_DCP") echo "SELECTED"; ?>>North Carolina
- <option value="ND_DCP" <?php if ($network == "ND_DCP") echo "SELECTED"; ?>>North Dakota
- <option value="NV_DCP" <?php if ($network == "NV_DCP") echo "SELECTED"; ?>>Nevada
- <option value="NH_DCP" <?php if ($network == "NH_DCP") echo "SELECTED"; ?>>New Hampshire
- <option value="NJ_DCP" <?php if ($network == "NJ_DCP") echo "SELECTED"; ?>>New Jersey
- <option value="NM_DCP" <?php if ($network == "NM_DCP") echo "SELECTED"; ?>>New Mexico
- <option value="NY_DCP" <?php if ($network == "NY_DCP") echo "SELECTED"; ?>>New York
- <option value="OH_DCP" <?php if ($network == "OH_DCP") echo "SELECTED"; ?>>Ohio
- <option value="OK_DCP" <?php if ($network == "OK_DCP") echo "SELECTED"; ?>>Oklahoma
- <option value="OR_DCP" <?php if ($network == "OR_DCP") echo "SELECTED"; ?>>Oregon
- <option value="PA_DCP" <?php if ($network == "PA_DCP") echo "SELECTED"; ?>>Pennsylvania
- <option value="RI_DCP" <?php if ($network == "RI_DCP") echo "SELECTED"; ?>>Rhode Island
- <option value="SC_DCP" <?php if ($network == "SC_DCP") echo "SELECTED"; ?>>South Carolina
- <option value="SD_DCP" <?php if ($network == "SD_DCP") echo "SELECTED"; ?>>South Dakota
- <option value="TN_DCP" <?php if ($network == "TN_DCP") echo "SELECTED"; ?>>Tennessee
- <option value="TX_DCP" <?php if ($network == "TX_DCP") echo "SELECTED"; ?>>Texas
- <option value="UT_DCP" <?php if ($network == "UT_DCP") echo "SELECTED"; ?>>Utah
- <option value="VT_DCP" <?php if ($network == "VT_DCP") echo "SELECTED"; ?>>Vermont
- <option value="VA_DCP" <?php if ($network == "VA_DCP") echo "SELECTED"; ?>>Virginia
- <option value="WA_DCP" <?php if ($network == "WA_DCP") echo "SELECTED"; ?>>Washington
- <option value="WV_DCP" <?php if ($network == "WV_DCP") echo "SELECTED"; ?>>West Virginia
- <option value="WI_DCP" <?php if ($network == "WI_DCP") echo "SELECTED"; ?>>Wisconsin
- <option value="WY_DCP" <?php if ($network == "WY_DCP") echo "SELECTED"; ?>>Wyoming
-</select>
+  Select State: {$nselect}
 </td>
-  <td><?php echo yearSelect(2002, $year, "year"); ?></td>
-  <td><?php echo monthSelect($month); ?></td>
-  <td><?php echo daySelect($day); ?></td>
-  <td><?php echo hourSelect($hour, 'hour'); ?></td>
-  <td><select name="minute">
-    <option value="00" <?php if ($minute == "00") echo "SELECTED"; ?>>00
-    <option value="15" <?php if ($minute == "15") echo "SELECTED"; ?>>15
-    <option value="30" <?php if ($minute == "30") echo "SELECTED"; ?>>30
-    <option value="45" <?php if ($minute == "45") echo "SELECTED"; ?>>45
-   </select></td>
+  <td>{$ys}</td>
+  <td>{$ms}</td>
+  <td>{$ds}</td>
+  <td>{$hs}</td>
+  <td>{$mis}</td>
   <td><input type="Submit" value="View Data"></td>
 </tr>
 
-</table>
+{$table}
 </form>
 
 <b>Legend:</b>  TAI = Air Temp (F), PCI = Rainfall Counter, PPH = Hourly Precip, UDI = Wind Direction, USI = Wind Speed
-<?php
 
-$tbl = strftime("raw%Y_%m", $ts);
-$dstr = strftime("%Y-%m-%d %H:%M", $ts);
-$ldate = strftime("%d %b %Y %I:%M %p", $ts);
-
-$rs = pg_prepare($pgconn, "SELECT", "SELECT t.* from $tbl t, stations s WHERE " .
-		"valid = $1 and s.id = t.station and s.network = $2");
-
-$rs = pg_execute($pgconn, "SELECT", Array($dstr, $network) );
-pg_close($pgconn);
-
-/* Load up the data into a big fat array */
-$data = Array();
-$datakeys = Array();
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
-{
-  $station = $row["station"];
-  if (! array_key_exists($station, $cities)){ continue; }
-  $data[ $row["station"] ][ substr($row["key"],0,3) ] = $row["value"];
-  $datakeys[ substr($row["key"],0,3) ]= 1;
-}
-$stations = array_keys( $data );
-$keys = array_keys( $datakeys );
-asort($stations);
-asort($keys);
-?>
-
-<table cellpadding="1" cellspacing="0" border="1">
-<?php
-$header = "<tr style=\"background: #eee;\">
- <th>NWS ID</th><th>Station</th>";
-while ( list($k,$v) = each($keys)){
-  $header .= sprintf("<th>%s</th>", $v);
-}
-$header .= "</tr>";
-
-$row = 0;
-while ( list($k,$v) = each($stations)){
-  if ($row % 25 == 0){ echo $header; }
-  $row += 1;
-
-  echo sprintf("<tr><td><a href='site.phtml?station=%s&year=%s&month=%s&day=%s'>%s</a></td><td>%s</td>", $v, date("Y", $ts), date("m", $ts), date("d", $ts), $v, $cities[$v]['name']);
-  reset($keys);
-  while ( list($k,$key) = each($keys)){
-    echo @sprintf("<td>%s</td>", $data[$v][$key]);
-  }
-  echo "</tr>";
-}
-?>
 </table>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

@@ -1,6 +1,8 @@
 <?php
-define("IEM_APPID", 110);
 include("../../config/settings.inc.php");
+define("IEM_APPID", 110);
+include("../../include/myview.php");
+$t = new MyView();
 include("../../include/database.inc.php");
 include("../../include/forms.php");
 include("../../include/imagemaps.php");
@@ -48,17 +50,86 @@ if ($station != null){
 	sort($mycols);
 }
 	
-$TITLE = "IEM | SHEF Data by Site by Day";
-$THISPAGE="networks-dcp";
+$t->title = "SHEF Data by Site by Day";
+$t->thispage = "networks-dcp";
 if ($station == null){
-  $HEADEXTRA = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
+  $t->headextra = "<script src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
  <script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
  <script src='/js/olselect.php?network=${network}'></script>";
- $BODYEXTRA = "onload=\"init()\"";
+ $t->bodyextra = "onload=\"init()\"";
 }
 
-include("$rootpath/include/header.php"); 
-?>
+$nselect = "<select name=\"network\">";
+$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' ORDER by name ASC");
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	$sel = '';
+	if ($network == $row["id"]){
+		$sel = " selected='SELECTED'";
+	}
+	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
+			$row["id"], $sel, $row["name"]);
+}
+$nselect .= "</select>";
+$n2select = networkSelect($network, $station);
+
+$ys = yearSelect(2002,$year);
+$ms = monthSelect($month);
+$ds = daySelect($day);
+
+$extra = "";
+if ($station == null){ 
+	$extra = <<<EOF
+<style type="text/css">
+        #map {
+            width: 640px;
+            height: 400px;
+            border: 2px solid black;
+        }
+</style>
+<i>Click black dot to select your site:</i><br />
+<div id="map"></div>
+<div id="sname" unselectable="on">No site selected</div>
+EOF;
+} else { 
+	if (! $alone){
+		$extra = <<<EOF
+<div class="warning">This site is listed within the IEM database as both a 
+	"COOP" and "DCP" site. This printout below will only include a days 
+	worth of data.</div>
+EOF;
+	}
+	$extra .= "<br /><br />
+	<table border=\"1\" cellpadding=\"2\" cellspacing=\"0\">";
+	$theader = "<thead><tr><th>Site:</th><th>Valid:</th>";
+	while(list($k,$v) = each($mycols)){ $theader .= "<th>$v</th>"; }
+	$theader .= "</tr></thead>";
+	
+	$times = array_keys($data);
+	$colorme = True;
+	$cnt = 0;
+	while(list($k,$ts) = each($times)){
+		if ($cnt % 30 == 0){
+			$extra .= $theader;
+		}
+	
+		$extra .= sprintf("<tr%s><td>%s</td><td><a href='cat.phtml?year=%s&month=%s&day=%s&hour=%s&minute=%s'>%s</a></td>",
+				($colorme)? " style='background: #eee;'": "", $station,
+				date("Y", $ts), date("m", $ts), date("d", $ts), date("H", $ts),
+				date("i", $ts), date("Y-m-d H:i", $ts) );
+		$colorme = !$colorme;
+		reset($mycols);
+		while(list($k,$v) = each($mycols)){
+			$extra .= sprintf("<td>%s</td>", @$data[$ts][$v]);
+		}
+		$extra .= "</tr>";
+	
+		$cnt += 1;
+	}
+	
+	$extra .= "</table>";
+}
+	
+$t->content = <<<EOF
 <h3>SHEF Site Observations by Date</h3>
 <ul>
  <li>Timestamps are presented in central standard or daylight time</li>
@@ -75,85 +146,26 @@ include("$rootpath/include/header.php");
  </ul>
 
 <form method="GET" name="chstate">
-<p><strong>Select Network:</strong> <select name="network">
-<?php 
-$rs = pg_query($mesosite, "SELECT * from networks where id ~* '_COOP'
-  or id ~* '_DCP' ORDER by id ASC");
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
-  echo sprintf("<option value='%s'%s>%s</option>", $row["id"],
-  		($row["id"] == $network) ? "SELECTED='SELECTED'": "", $row["name"]);
-}
+<p><strong>Select Network:</strong> {$nselect}
 
-?>
-</select>
 <input type="submit" value="Select Network" />
 </form>
 
 <form method="GET" name="olselect">
-<input type="hidden" name="network" value="<?php echo $network; ?>" />
+<input type="hidden" name="network" value="{$network}" />
 <table><tr><th>Station:</th><th>Year</th><th>Month</th><th>Day</th><th></th></tr>
 <tr>
-<td><?php echo networkSelect($network, $station); ?>
-<br /><a href="site.phtml?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>">Select from map</a></td>
-<td><?php echo yearSelect(2002,$year); ?></td>
-<td><?php echo monthSelect($month); ?></td>
-<td><?php echo daySelect($day); ?></td>
+<td>{$n2select}
+<br /><a href="site.phtml?year={$year}&month={$month}&day={$day}">Select from map</a></td>
+<td>{$ys}</td>
+<td>{$ms}</td>
+<td>{$ds}</td>
 <td><input type="submit" value="View Data"></td>
 </tr></table>
 </form>
-<?php if ($station == null){ ?>
-<style type="text/css">
-        #map {
-            width: 640px;
-            height: 400px;
-            border: 2px solid black;
-        }
-</style>
-<i>Click black dot to select your site:</i><br />
-<div id="map"></div>
-<div id="sname" unselectable="on">No site selected</div>
-<?php } else { 
-if (! $alone){
-	echo <<<EOF
-<div class="warning">This site is listed within the IEM database as both a 
-	"COOP" and "DCP" site. This printout below will only include a days 
-	worth of data.</div>
-EOF;
 
-}
 	
-	?>
-
-<br /><br />
-<table border="1" cellpadding="2" cellspacing="0">
-<?php 
- $theader = "<thead><tr><th>Site:</th><th>Valid:</th>"; 
- while(list($k,$v) = each($mycols)){ $theader .= "<th>$v</th>"; }
- $theader .= "</tr></thead>";
-
- $times = array_keys($data);
-$colorme = True;
-$cnt = 0;
-while(list($k,$ts) = each($times)){
-  if ($cnt % 30 == 0){
-    echo $theader;
-  }
-
-  echo sprintf("<tr%s><td>%s</td><td><a href='cat.phtml?year=%s&month=%s&day=%s&hour=%s&minute=%s'>%s</a></td>", 
-	($colorme)? " style='background: #eee;'": "", $station, 
-	date("Y", $ts), date("m", $ts), date("d", $ts), date("H", $ts), 
-	date("i", $ts), date("Y-m-d H:i", $ts) );
-  $colorme = !$colorme;
-  reset($mycols);
-  while(list($k,$v) = each($mycols)){
-    echo sprintf("<td>%s</td>", @$data[$ts][$v]);
-  }
-  echo "</tr>";
-  
-  $cnt += 1;
-}
-
+$extra
+EOF;
+$t->render('single.phtml');
 ?>
-</table>
-<?php } ?>
-<?php include("../../include/footer.php"); ?>
