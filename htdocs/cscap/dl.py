@@ -1,64 +1,87 @@
 #!/usr/bin/python
 """
- 1. Connect to google spreadsheets and get me data!
 
 """
-
 import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-import gdata.spreadsheets.client
-import gdata.spreadsheets.data
-import gdata.docs.data
-import gdata.docs.client
-import gdata.gauth
+import psycopg2
+import psycopg2.extras
 import ConfigParser
+import cgi
 
-def response(text):
-    """
-    Return the http response
-    """
-    print 'Content-type: text/html\n'
-    print
-    print '<html><head><title>CSCAP Download</title></head>'
-    print '<body>'
-    print text
-    print '</body>'
-    print '</html>'
+config = ConfigParser.ConfigParser()
+config.read('/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.cfg')
+
+def check_auth(form):
+    ''' Make sure request is authorized '''
+    if form.getfirst('hash') != config.get('appauth', 'sharedkey'):
+        sys.exit()
     
-def get_data():
+def get_nitratedata():
+    ''' Fetch some nitrate data, for now '''
+    pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb',
+                              user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    res = "plotid,depth,soil15,soil16,soil23\n"
+    cursor.execute("""SELECT site, plotid, depth, varname, year, value
+    from soil_nitrate_data WHERE value is not null""")
+    data = {}
+    for row in cursor:
+        key = "%s|%s|%s|%s" % (row['site'], row['plotid'], row['year'],
+                                row['depth'])
+        if not data.has_key(key):
+            data[key] = {}
+        data[key][row['varname']] = row["value"]
+
+    for key in data.keys():
+        tokens = key.split("|")
+        res += "%s,%s,%s,%s,%s,%s,%s\n" % (tokens[0], tokens[1],
+                tokens[2], tokens[3],
+                data[key].get('SOIL15', ''), data[key].get('SOIL16', ''),
+                data[key].get('SOIL23', ''))
+    return res
+
+def get_agdata():
     """
     Go to Google and demand my data back!
     """
-    res = ""
-    config = ConfigParser.ConfigParser()
-    config.read('/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.cfg')
+    pgconn = psycopg2.connect(database='sustainablecorn', host='iemdb',
+                              user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    token = gdata.gauth.OAuth2Token(client_id=config.get('appauth','client_id'),
-                    client_secret=config.get('appauth', 'app_secret'),
-                    user_agent='daryl.website',
-                    scope=config.get('googleauth', 'scopes'),
-                    refresh_token=config.get('googleauth', 'refresh_token'))
-    spr_client = gdata.spreadsheets.client.SpreadsheetsClient()
-    token.authorize(spr_client)
-    # Hard Code Nafziger for now
-    datakey = '0AqZGw0coobCxdC1sZ3l0RmFsV0hfekoyc2JYdHBxQ2c'
-    res += "<table border='1' cellspacing='0' cellpadding='2'><tr><th>Year</th><th>Site</th><th>Tillage</th><th>MyID</th><th>AGR1</th></tr>"
+    cursor.execute("""SELECT site, a.plotid, year, varname, value,
+    p.rep, p.tillage, p.rotation 
+    from agronomic_data a JOIN plotids p on (p.uniqueid = a.site and
+    p.plotid = a.plotid) where 
+    varname in ('AGR1', 'AGR2', 'AGR7', 'AGR15', 'AGR16', 'AGR17', 'AGR19')""")
+    data = {}
+    for row in cursor:
+        key = "%s|%s|%s|%s|%s|%s" % (row['site'], row['plotid'], row['year'],
+                                row['rep'], row['tillage'], row['rotation'])
+        if not data.has_key(key):
+            data[key] = {}
+        data[key][row['varname']] = row["value"]
+
+    res = ("uniqueid,plotid,year,rep,tillage,rotation,agr1,agr2,agr7,"
+          +"agr15,agr16,agr17,agr19\n")
+    for key in data.keys():
+        tokens = key.split("|")
+        res += "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (tokens[0], tokens[1],
+                tokens[2], tokens[3], tokens[4], tokens[5], 
+                data[key].get('AGR1', ''), data[key].get('AGR2', ''),
+                data[key].get('AGR7', ''), data[key].get('AGR15', ''),
+                data[key].get('AGR16', ''), data[key].get('AGR16', ''),
+                data[key].get('AGR17', ''), data[key].get('AGR18', ''))
     
-    feed = spr_client.get_worksheets(datakey)
-    for entry in feed.entry:
-        sheetkey = entry.get_worksheet_id() 
-        datafeed = spr_client.get_list_feed(datakey, sheetkey)
-        for dataentry in datafeed.entry:
-            data = dataentry.to_dict()
-            if data.get('tillage') is None:
-                continue
-            res += "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
-                                entry.title, data.get('uniqueid'),
-                                data.get('tillage'), data.get('myid'),
-                                data.get('agr1') or 'M')
-    res += "</table>"
     return res
     
 if __name__ == '__main__':
-    res = get_data()
-    response(res)
+    ''' See how we are called '''
+    form = cgi.FieldStorage()
+    sys.stdout.write("Content-type: text/plain\n\n")
+    check_auth(form)
+    report = form.getfirst('report', 'ag1')
+    if report == 'ag1':
+        sys.stdout.write( get_agdata() )
+    else:
+        sys.stdout.write( get_nitratedata() )
