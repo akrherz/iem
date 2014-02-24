@@ -1,6 +1,12 @@
-<html>
-<head>
-<title>CSCAP Chicago Meeting Stuff</title></head>
-<body>
+<?php
+include("../../config/settings.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "CSCAP Mainpage";
+$t->thispage = "projects-cscap";
 
-</body></html>
+$t->content = <<<EOF
+<p>Nothing here at this point...
+EOF;
+$t->render('single.phtml');
+?>
