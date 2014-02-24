@@ -9,8 +9,8 @@ acursor2 = AFOS.cursor()
 
 
 
-acursor.execute("""SELECT distinct pil from products_2013_0106 where
- substr(pil,1,3) = 'CLI' and entered > '2013-03-01' """)
+acursor.execute("""SELECT distinct pil from products_2014_0106 where
+ substr(pil,1,3) = 'CLI' and entered > '2014-02-23' """)
 
 lats = []
 lons = []
@@ -25,8 +25,8 @@ for row in acursor:
     if nt.sts[stid]['state'] in ['WY', 'CO']:
         continue
     acursor2.execute("""
-    SELECT data from products_2013_0106 WHERE pil = %s 
-    and entered > '2013-03-01' ORDER by entered DESC
+    SELECT data from products_2014_0106 WHERE pil = %s 
+    and entered > '2014-02-23' ORDER by entered DESC
     LIMIT 1
     """, (row[0],))
     row2 = acursor2.fetchone()
@@ -45,12 +45,12 @@ for row in acursor:
                 vals.append( float(tokens[3]) )
             break
         
-import iemplot
+from pyiem.plot import MapPlot
 
-cfg = {'_midwest': True,
-       '_showvalues': True,
-       '_title': 'NWS Total Snowfall (inches) thru 7 March 2013',
-       '_valid': '1 July 2012 - 7 March 2013',
-       '_format': '%.0f'}
-tmpfp = iemplot.simple_valplot(lons, lats, vals, cfg)
-iemplot.makefeature(tmpfp)
+m = MapPlot(sector='midwest',
+       title='NWS Total Snowfall (inches) thru 23 February 2014',
+       subtitle= '1 July 2013 - 23 February 2014')
+m.plot_values(lons, lats, vals, fmt='%.1f')
+m.postprocess(filename='test.ps')
+import iemplot
+iemplot.makefeature('test')
