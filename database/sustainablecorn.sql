@@ -1,4 +1,36 @@
 ---=========================================================================
+--- Storage of Plot Identifiers
+---
+CREATE TABLE plotids(
+	uniqueid varchar,
+	rep varchar,
+	tillage varchar,
+	rotation varchar,
+	drainage varchar,
+	nitrogen varchar,
+	landscape varchar,
+	row varchar,
+	col varchar,
+	soilseriesname2 varchar,
+	soiltextureseries2 varchar,
+	soilseriesname1 varchar,
+	soiltextureseries1 varchar,
+	soilseriesdescription1 varchar,
+	soiltaxonomicclass1 varchar,
+	soilseriesdescription2 varchar,
+	soiltaxonomicclass2 varchar,
+	soiltextureseries3 varchar,
+	soiltaxonomicclass3 varchar,
+	soilseriesdescription3 varchar,
+	soilseriesname3 varchar,
+	north varchar,
+	west varchar,
+	south varchar,
+	plotid varchar
+);
+GRANT SELECT on plotids to nobody,apache;
+
+---=========================================================================
 --- Storage of Management
 ---
 CREATE TABLE management(
