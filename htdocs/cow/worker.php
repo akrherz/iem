@@ -4,6 +4,8 @@
 */
 if (! isset($sts) ) die(); /* Avoid direct calls.... */
 
+if (substr($_SERVER["REMOTE_ADDR"],0,6) == "66.249") die();
+
 function printLSR($lsr)
 {
   $lt = Array("F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg", "H" => "Hail","G" => "Wind Gust", "W" => "Waterspout", "M" => "Marine Tstm Wnd");
