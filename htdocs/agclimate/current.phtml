@@ -40,14 +40,18 @@
  	
  	$pday = ($data->db['pday'] < 0) ? 0 : $data->db['pday'];
  	$table .= sprintf("<tr><td><a href=\"%s\">%s</a></td><td>%s</td>
- 			<td>%.1f</td><td>%.2f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td>
- 			<td>%.1f</td><td>%.1f</td>
- 			<td>%.1f</td><td>%.1f</td></tr>", $uri, $nt->table[$sid]['name'],
+ 			<td>%.1f</td><td>%.2f</td><td>%.1f</td><td>%.1f</td><td>%s</td>
+ 			<td>%.1f</td><td>%s</td>
+ 			<td>%.1f</td><td>%s</td></tr>", $uri, $nt->table[$sid]['name'],
  			date("j M g A", $data->ts), $data->db["tmpf"],
  			$pday, $data->db["c1tmpf"],
- 			$data->db["c2tmpf"], $data->db["c2smv"],
- 			$data->db["c3tmpf"], $data->db["c3smv"],
- 			$data->db["c4tmpf"], $data->db["c4smv"] );
+ 			$data->db["c2tmpf"], 
+			($data->db["c2smv"] < 0) ? "Frozen": round($data->db["c2smv"],1),
+ 			 $data->db["c3tmpf"], 
+ 			($data->db["c3smv"] < 0) ? "Frozen": round($data->db["c3smv"],1),
+ 			$data->db["c4tmpf"], 
+ 			($data->db["c4smv"] < 0) ? "Frozen": round($data->db["c4smv"],1) 
+ 	);
  }
  
  $table .= "</table>";
