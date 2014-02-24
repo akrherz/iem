@@ -48,10 +48,6 @@ for entry in feed:
             val = worksheet.get_cell_value(row, col)
             try:
                 pcursor.execute("""
-                    DELETE from agronomic_data WHERE site = %s and 
-                    plotid = %s and varname = %s and year = %s
-                """, (siteid, plotid, varname, YEAR))
-                pcursor.execute("""
                     INSERT into agronomic_data(site, plotid, varname, year, value)
                     values (%s, %s, %s, %s, %s)
                     """, (siteid, plotid, varname, YEAR, val))
