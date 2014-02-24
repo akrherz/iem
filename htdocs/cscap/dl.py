@@ -22,7 +22,7 @@ def get_nitratedata():
                               user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    res = "plotid,depth,soil15,soil16,soil23\n"
+    res = "uniqueid,plotid,depth,soil15,soil16,soil23\n"
     cursor.execute("""SELECT site, plotid, depth, varname, year, value
     from soil_nitrate_data WHERE value is not null""")
     data = {}
