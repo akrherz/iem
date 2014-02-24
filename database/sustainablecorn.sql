@@ -1,3 +1,115 @@
+---=========================================================================
+--- Storage of Management
+---
+CREATE TABLE management(
+    updated varchar,
+    irrigationmethod varchar,
+    residuebiomassmoisture varchar,
+    organicamendments varchar,
+    cropyear varchar,
+    irrigation varchar,
+    comments varchar,
+    residueplantingpercentage varchar,
+    residueremoval varchar,
+    residuetype varchar,
+    residuehow varchar,
+    uniqueid varchar,
+    residuebiomassweight varchar,
+    limeyear varchar,
+    organicamendmentstext varchar,
+    irrigationamount varchar
+);
+GRANT SELECT on management to nobody,apache;
+
+--- Storage of Pesticides
+---
+CREATE TABLE pesticides(
+    target8 varchar,
+    reference varchar,
+    crop varchar,
+    valid varchar,
+    operation varchar,
+    target6 varchar,
+    comments varchar,
+    target10 varchar,
+    adjuvant varchar,
+    product4 varchar,
+    product3 varchar,
+    product2 varchar,
+    product1 varchar,
+    target1 varchar,
+    method varchar,
+    updated varchar,
+    cropyear varchar,
+    pressure varchar,
+    uniqueid varchar,
+    target9 varchar,
+    timing varchar,
+    target7 varchar,
+    target4 varchar,
+    target5 varchar,
+    target2 varchar,
+    target3 varchar,
+    stage varchar,
+    totalrate varchar,
+    target6_2 varchar,
+    rate4 varchar,
+    rate3 varchar,
+    rate2 varchar,
+    rate1 varchar,
+    rateunit4 varchar,
+    justify varchar,
+    rateunit1 varchar,
+    rateunit3 varchar,
+    rateunit2 varchar
+);
+GRANT SELECT on pesticides to nobody,apache;
+
+--- Storage of Operations
+---
+CREATE TABLE operations(
+    valid date,
+    uniqueid varchar,
+    updated varchar,
+    operation varchar,
+    stabilizername varchar,
+    zinc varchar,
+    stabilizerused varchar,
+    manuremethod varchar,
+    productrate varchar,
+    manurerateunits varchar,
+    fertilizerform varchar,
+    nitrogen varchar,
+    manurerate varchar,
+    currentph varchar,
+    potash varchar,
+    limerate varchar,
+    planthybrid varchar,
+    comments varchar,
+    plantrate varchar,
+    manurecomposition varchar,
+    manuresource varchar,
+    neutralindex varchar,
+    terminatemethod varchar,
+    stabilizer varchar,
+    cropyear int,
+    potassium varchar,
+    fertilizerformulation varchar,
+    sulfur varchar,
+    phosphorus varchar,
+    fertilizerapptype varchar,
+    plantrateunits varchar,
+    targetph varchar,
+    calcium varchar,
+    depth varchar,
+    phosphate varchar,
+    biomassdate2 date,
+    magnesium varchar,
+    iron varchar,
+    biomassdate1 date
+);
+GRANT SELECT on operations to nobody,apache;
+
 --- ========================================================================
 --- Storage of Soil Nitrate Data
 ---
