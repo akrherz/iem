@@ -50,6 +50,11 @@ def drct2txt(val):
     elif (val >= 324 and val < 350):
         return "NNW"
 
+def safe(val):
+    ''' '''
+    if val is None:
+        return 'M'
+    return '%.1f' % (val,)
 
 def get_data( ts ):
     ''' Get the data for this timestamp '''
@@ -65,10 +70,14 @@ def get_data( ts ):
     for i, row in enumerate(cursor):
         lon = nt.sts[row['station']]['lon']
         lat = nt.sts[row['station']]['lat']
+        if row['tair_c_avg'] is not None:
+            t = temperature(row['tair_c_avg'], 'C').value('F')
+        else:
+            t = None
         data['features'].append({"type": "Feature", "id": i,
             "properties": {
                 "rh":  "%.0f%%" % (row["rh"],),
-                "tmpf": "%.1f" % (temperature(row['tair_c_avg'], 'C').value('F')),
+                "tmpf": safe(t),
                 "wind": "%s@%.0f" % (drct2txt(row['winddir_d1_wvt']), 
                                     row['ws_mps_s_wvt'] * 2.23)
             },
