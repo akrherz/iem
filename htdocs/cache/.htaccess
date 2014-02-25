@@ -4,5 +4,4 @@
   PythonHandler TileCache.Service
   PythonOption TileCacheConfig /mesonet/www/apps/iemwebsite/htdocs/cache/tilecache.cfg
 
-  AddHandler cgi-script .cgi
   Options +ExecCGI
