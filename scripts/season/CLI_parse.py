@@ -12,7 +12,7 @@ acursor2 = AFOS.cursor()
 
 
 acursor.execute("""SELECT distinct pil from products where
- substr(pil,1,3) = 'CLI' and entered > 'TODAY' """)
+ substr(pil,1,3) = 'CLI' and entered > 'YESTERDAY' """)
 
 lats = []
 lons = []
@@ -28,7 +28,7 @@ for row in acursor:
         continue
     acursor2.execute("""
     SELECT data from products WHERE pil = %s 
-    and entered > 'TODAY' ORDER by entered DESC
+    and entered > 'YESTERDAY' ORDER by entered DESC
     LIMIT 1
     """, (row[0],))
     row2 = acursor2.fetchone()
