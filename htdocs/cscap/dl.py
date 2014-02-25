@@ -11,6 +11,14 @@ import cgi
 config = ConfigParser.ConfigParser()
 config.read('/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.cfg')
 
+def clean( val ):
+    ''' Clean the value we get '''
+    if val is None:
+        return val
+    if val.strip().lower() == 'did not collect':
+        return 'DNC'
+    return val
+
 def check_auth(form):
     ''' Make sure request is authorized '''
     if form.getfirst('hash') != config.get('appauth', 'sharedkey'):
@@ -31,7 +39,7 @@ def get_nitratedata():
                                 row['depth'])
         if not data.has_key(key):
             data[key] = {}
-        data[key][row['varname']] = row["value"]
+        data[key][row['varname']] = clean(row["value"])
 
     for key in data.keys():
         tokens = key.split("|")
@@ -60,7 +68,7 @@ def get_agdata():
                                 row['rep'], row['tillage'], row['rotation'])
         if not data.has_key(key):
             data[key] = {}
-        data[key][row['varname']] = row["value"]
+        data[key][row['varname']] = clean(row["value"])
 
     res = ("uniqueid,plotid,year,rep,tillage,rotation,agr1,agr2,agr7,"
           +"agr15,agr16,agr17,agr19\n")
