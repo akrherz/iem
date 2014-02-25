@@ -17,6 +17,8 @@ def clean( val ):
         return val
     if val.strip().lower() == 'did not collect':
         return 'DNC'
+    if val.strip().lower() == 'n/a':
+        return 'NA'
     return val
 
 def check_auth(form):
