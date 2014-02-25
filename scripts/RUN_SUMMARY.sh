@@ -30,6 +30,7 @@ python plot_gdd.py
 
 cd ../season
 python plot_4month_stage4.py
+python CLI_parse.py
 
 cd ../year
 python precip.py
