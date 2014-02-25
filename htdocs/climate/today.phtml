@@ -1,10 +1,11 @@
 <?php 
 include("../../config/settings.inc.php");
-$TITLE = "IEM | Climatology Plots for Today";
-$THISPAGE = "climatology-today";
-include("$rootpath/include/header.php"); 
-?>
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Climatology Plots for Today";
+$t->thispage = "climatology-today";
 
+$t->content = <<<EOF
 <h4>Direct Observations of Climate</h4>
 <ul>
 <li>The National Weather Service <a href="../COOP">COOP</a> network is a 
@@ -12,11 +13,11 @@ group of human observers that take once daily observations. These
 observations are made at roughly 7 AM for the past 24 hour period.  
 So the High Temperature reported is often from the previous day.
  <ul>
-   <li><a href="../data/coopHighLow.gif">High + Low Temperature</a></li>
-   <li><a href="../data/iowa_coop_precip.png">Precipitation</a> Frozen precipitation is melted and included in the total.</li>
-   <li><a href="../data/iowa_coop_snow.png">Snowfall</a></li>
-   <li><a href="../data/coopSnowDepth.gif">Snow Depth</a></li>
-   <li><a href="../COOP/current.phtml">Sortable Observations</a> View observations in a table, you can also view data from other states in the MidWest!</li>
+   <li><a href="/data/coopHighLow.gif">High + Low Temperature</a></li>
+   <li><a href="/data/iowa_coop_precip.png">Precipitation</a> Frozen precipitation is melted and included in the total.</li>
+   <li><a href="/data/iowa_coop_snow.png">Snowfall</a></li>
+   <li><a href="/data/coopSnowDepth.gif">Snow Depth</a></li>
+   <li><a href="/COOP/current.phtml">Sortable Observations</a> View observations in a table, you can also view data from other states in the MidWest!</li>
  </ul>
 </li>
 </ul>
@@ -27,11 +28,11 @@ So the High Temperature reported is often from the previous day.
 roughly each hour.  The IEM collects this information and then calculates
 summary values.
   <ul>
-  <li><a href="../data/summary/asos_hilo.png">ASOS High/Low Temperature</a></li>
-  <li><a href="../data/awos_rtp.shef">12Z AWOS RTP First Guess</a> Formatted
+  <li><a href="/data/summary/asos_hilo.png">ASOS High/Low Temperature</a></li>
+  <li><a href="/data/awos_rtp.shef">12Z AWOS RTP First Guess</a> Formatted
 product generated for the National Weather Service for comparison.</li>
-  <li><a href="../data/summary/today_prec.png">Precipitation for today</a></li>
-  <li><a href="../data/summary/today_gust.png">Peak Wind Gust</a></li>
+  <li><a href="/data/summary/today_prec.png">Precipitation for today</a></li>
+  <li><a href="/data/summary/today_gust.png">Peak Wind Gust</a></li>
   </ul>
 </li>
 </ul>
@@ -45,18 +46,17 @@ product generated for the National Weather Service for comparison.</li>
 
 <h4>Today's Climatology</h4>
 <ul>
-  <li><a href="../data/climate/iowa_today_avg_hilo_pt.png">Average Hi/Low Temp</a></li>
-  <li><a href="../data/climate/iowa_today_rec_hilo_pt.png">Record Hi/Low Temp</a></li>
-  <li><a href="<?php echo $rooturl; ?>/COOP/dl/normals.phtml">Download Climatology Data</a></li>
+  <li><a href="/data/climate/iowa_today_avg_hilo_pt.png">Average Hi/Low Temp</a></li>
+  <li><a href="/data/climate/iowa_today_rec_hilo_pt.png">Record Hi/Low Temp</a></li>
+  <li><a href="/COOP/dl/normals.phtml">Download Climatology Data</a></li>
 </ul>
 
 <h4>Climatology data applications</h4>
 <ul>
-  <li><a href="../plotting/coop/extremes_fe.php">Daily Temperature Extremes</a> Tables of daily climate values.</li>
-  <li><a href="../plotting/coop/highlow_scatter.php">High / Low Temperature Scatterplots</a><br /> Scatterplot of high versus low temperature for a given day of the year.</li>
+  <li><a href="/plotting/coop/extremes_fe.php">Daily Temperature Extremes</a> Tables of daily climate values.</li>
+  <li><a href="/plotting/coop/highlow_scatter.php">High / Low Temperature Scatterplots</a><br /> Scatterplot of high versus low temperature for a given day of the year.</li>
   <li><a href="/rainfall/obhour.phtml">Hourly Precip Accumulator</a> Generate precipitation summaries based on the interval of your choice.</li>
 </ul>
-
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

@@ -1,10 +1,11 @@
 <?php 
 include("../../config/settings.inc.php");
-$TITLE = "IEM | Climatology Plots for Past 7 Days";
-$THISPAGE = "climatology-week";
-include("$rootpath/include/header.php"); 
-?>
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Climatology Plots for Past 7 Days";
+$t->thispage = "climatology-week";
 
+$t->content = <<<EOF
 <h4>Temperature</h4>
 <ul class="iem-list">
 <li><a href="/data/summary/7day/iaavg_max_tmpf.png">Avg High</a></li>
@@ -14,10 +15,9 @@ include("$rootpath/include/header.php");
 <h4>Precipitatiom</h4>
 <ul class="iem-list">
 <li><a href="/rainfall/obhour.phtml">Hourly Precip Accumulator</a></li>
-<li><a href="../data/summary/7day/ia_precip.png">Precip Accumulation</a> [ASOS+AWOS]</li>
-<li><a href="../data/summary/7day/stage4.png">NCEP Stage4 Estimate</a></li>
+<li><a href="/data/summary/7day/ia_precip.png">Precip Accumulation</a> [ASOS+AWOS]</li>
+<li><a href="/data/summary/7day/stage4.png">NCEP Stage4 Estimate</a></li>
 </ul>
-
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
