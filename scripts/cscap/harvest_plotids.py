@@ -25,6 +25,12 @@ feed = docs_client.GetAllResources(query=query)
 
 translate = {'column': 'col'}
 
+lookup = {'tillage': 'TIL',
+          'rotation': 'ROT',
+          'drainage': 'DWM',
+          'nitrogen': 'NIT',
+          'landscape': 'LND'}
+
 pcursor.execute("""DELETE from plotids""")
 removed = pcursor.rowcount
 added = 0
@@ -39,7 +45,13 @@ for entry in feed:
         cols = []
         vals = []
         for key in d.keys():
-            vals.append( d[key] )
+            v = None
+            if d[key] is not None:                
+                v = d[key].strip().replace("[", "").replace("]", "").split()[0]
+                v = "%s%s" % (lookup.get(key, ''), v)
+            if key == 'uniqueid':
+                v = v.upper()
+            vals.append( v )
             cols.append( translate.get(key,key) )
         sql = """INSERT into plotids(%s) VALUES (%s)""" % (",".join(cols),
                                                         ','.join(["%s"]*len(cols)))
