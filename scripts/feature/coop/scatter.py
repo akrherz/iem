@@ -12,7 +12,7 @@ WITH one as
  from alldata_ia where station = 'IA2364' GROUP by yr)
 
  SELECT one.yr, one.sum, two.sum from one JOIN two on (one.yr = two.yr)
- WHERE one.sum > 3 and two.sum > 3 ORDER by one.yr ASC
+ WHERE one.sum >= 2 and two.sum > 1 ORDER by one.yr ASC
 
 """)
 years = []
@@ -23,6 +23,7 @@ for row in cursor:
     x.append( row[1])
     y.append( row[2])
 x[-1] = 13
+print years
 
 import matplotlib.pyplot as plt
 
