@@ -1,47 +1,52 @@
-<?php $TITLE = "IEM | Feature Analysis";
-include("../../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/header.php"); ?>
-
-<h3 class="heading">IEM <i>Feature</i> Analysis</h3>
-
-<div class="text">
-<p>Recently, there has been some controversy in the department on the 
-repetitiousness on the IEM <i>Feature</i> of the day.  In order to debunk
-this wild speculation, this application was built to monitor the uniqueness
-of the <i>Feature</i> title.</p>
-
-<p>Listed below are all of the <i>Feature</i> titles in alphabetical order.  As
-you see, none have been repeated.</p>
-
-<table>
-
 <?php 
+include("../../../config/settings.inc.php");
+include("../../../include/myview.php");
+$t = new MyView();
+$t->thispage = "iem-feature";
+$t->title = "List of Daily Feature Titles";
+include("../../../include/database.inc.php");
 
-  $connection = iemdb("mesosite");
-  $query1 = "SELECT count(title), title, 
+$connection = iemdb("mesosite");
+$query1 = "SELECT title, good, bad, abstain,
       to_char(valid, 'YYYY-MM-DD') as href
-      from feature GROUP by title, href ORDER by title ASC";
-  $result = pg_exec($connection, $query1);
+      from feature  ORDER by title ASC";
+$result = pg_exec($connection, $query1);
+$table = "";
+$count = pg_num_rows($result);
+for($i = 0; $row = @pg_fetch_assoc ( $result, $i ); $i ++) {
+	if ($i % 4 == 0) {
+		$table .= "<tr>\n";
+	}
+	$table .= sprintf("<td><a href=\"cat.php?day=%s\">%s</a> 
+			<i class=\"green\">%s</i>/<i class=\"red\">%s</i>/%s</td>",
+	$row["href"], $row["title"], $row["good"], $row["bad"], $row["abstain"]);
+	if (($i+1) % 4 == 0) {
+		$table .= "</tr>\n";
+	}
+}
 
-  for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
-  {
-    if ($i == 0 || $i == 2){
-      echo "<tr>\n";
-    }
-    echo "<td> <b>". $row['count'] ."</b> 
-     <a href=\"cat.php?day=". $row['href'] ."\">".  $row['title'] ."</a></td>"; 
 
-    if ($i % 3 == 0 && $i > 2){
-      echo "</tr>\n";
-    }
-  }
+$t->content = <<<EOF
+<style>
+.green {
+ color: #0f0;
+}
+.red {
+ color: #f00;
+}
+</style>
+<h3>IEM Daily Feature Titles</h3>
 
+<p>The following table lists out all <strong>{$count}</strong> IEM Daily Feature 
+titles.  For some unknown reason, the author of these posts decided to make each title 
+unique.  The uniqueness is case sensitive!  The numbers listed next to the title
+are good votes, bad votes, and abstains.
+
+<table class="table table-condensed table-striped">
+{$table}
+</tr></table>
+
+EOF;
+$t->render('single.phtml');
 ?>
-
-</td></tr></table>
-
-<BR><BR></div>
-
-<?php include("$rootpath/include/footer.php"); ?>
 
