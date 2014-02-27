@@ -63,7 +63,7 @@ for ($i = 0; $i < $num; $i++){
 <tr class="even">
 <td colspan="2" style="text-align: center;">{$row["calhead"]}</td></tr>
 <tr><td valign="top">
-<a href="/onsite/features/{$row["imageref"]}{$fmt}">
+<a href="/onsite/features/{$row["imageref"]}.{$fmt}">
 <img src="/onsite/features/{$row["imageref"]}_s.{$fmt}" BORDER=0 ALT="Feature"></a>
 <br />{$row["caption"]}</td>
 <td><b><a href='cat.php?day={$d}'>{$row["title"]}</a></b>
