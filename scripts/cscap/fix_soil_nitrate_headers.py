@@ -19,9 +19,8 @@ query = gdata.docs.client.DocsQuery(show_collections='false',
                                     title='Soil Nitrate Data')
 feed = docs_client.GetAllResources(query=query)
 
-varconv = {'SOIL22 Soil Ammonium (Optional)': 'SOIL23 Spring Soil Ammonium (Optional)',
-           'SOIL22 Fall Soil Ammonium (Optional)': 'SOIL25 Fall Soil Ammonium (Optional)',
-           'SOIL22 Spring Soil Ammonium (Optional)': 'SOIL23 Spring Soil Ammonium (Optional)'}
+varconv = {'SOIL23 Spring Soil Ammonium (Optional)': 'SOIL22 Spring Soil Ammonium (Optional)',
+}
 
 for entry in feed:
     if entry.get_resource_type() != 'spreadsheet':
