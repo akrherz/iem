@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 """
 Simple web interface to connect to webcams via java applet
-$Id: $:
 """
-
-import cgi
 import sys
-sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-import iemdb
-MESOSITE = iemdb.connect('mesosite', bypass=True)
+import cgi
+import psycopg2
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb', user='nobody')
 mcursor = MESOSITE.cursor()
 cameras = {}
 mcursor.execute("""
-  SELECT id, ip, name, port from webcams where network in ('KELO','KCRG','KCCI')
- ORDER by name ASC
+  SELECT id, ip, name, port from webcams 
+  where network in ('KELO','KCRG','KCCI') 
+  ORDER by name ASC
 """)
 for row in mcursor:
 	cameras[ row[0] ] = {'ip': row[1], 'name': row[2], 'port': row[3]}
@@ -40,16 +38,18 @@ def printForm(selcam):
 	print '</select><input type="submit"></form>'
 
 def printInterface(cam):
-	print "<applet archive=\"LiveApplet.zip\" codebase=\"http://%(ip)s:%(port)s/-wvdoc-01-/LiveApplet/\" \
- code=\"LiveApplet.class\" width=450 height=380>\
-<param name=cabbase	value=\"LiveApplet.cab\">\
-<param name=video_width	value=\"320\">\
-<param name=url		value=\"http://%(ip)s:%(port)s/\">\
-<param name=locale	value=\"english\">\
-</applet>\
-<p><a href=\"http://%(ip)s/admin/\">Admin Interface</a>\
-</body>\
-</html>" % cameras[cam]
+	sys.stdout.write("""
+<applet archive="LiveApplet.zip" codebase="http://%(ip)s:%(port)s/-wvdoc-01-/LiveApplet/" 
+ code="LiveApplet.class" width=450 height=380>
+<param name=cabbase	value="LiveApplet.cab">
+<param name=video_width	value="320">\
+<param name=url		value="http://%(ip)s:%(port)s/">
+<param name=locale	value="english">
+</applet>
+<p><a href="http://%(ip)s/admin/">Admin Interface</a>
+<p>The IP of the webcam is: %(ip)s
+</body>
+</html>""" % cameras[cam])
 
 def main():
 	print 'Content-type: text/html \n\n'
