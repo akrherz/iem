@@ -26,7 +26,8 @@ manstore = 0AqZGw0coobCxdE9wN2J4aVE1bUthdWFsWjNrYURHWGc
 [appauth]
 client_id=992627006709.apps.googleusercontent.com
 app_secret=blah
-  
+sharedkey = blah
+
 [googleauth]
 access_token=blah
 refresh_token=blah
