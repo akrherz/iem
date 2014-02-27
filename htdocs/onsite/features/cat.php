@@ -46,8 +46,8 @@ if ($row["fbid"] == null){
 }
 
 $day = $row["d"];
-$thumb = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s_s.%s", $row["imageref"], $fmt);
-$big = sprintf("http://mesonet.agron.iastate.edu/onsite/features/%s.%s", $row["imageref"], $fmt);
+$thumb = sprintf("/onsite/features/%s_s.%s", $row["imageref"], $fmt);
+$big = sprintf("/onsite/features/%s.%s", $row["imageref"], $fmt);
 
 $t->title = "$day Feature - ". $row["title"]; 
 $t->thispage = "iem-feature";
