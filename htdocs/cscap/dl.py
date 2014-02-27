@@ -32,9 +32,12 @@ def get_nitratedata():
                               user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    res = "uniqueid,plotid,depth,soil15,soil16,soil23\n"
+    res = "uniqueid,plotid,year,depth,soil15,soil16,soil23\n"
     cursor.execute("""SELECT site, plotid, depth, varname, year, value
-    from soil_nitrate_data WHERE value is not null""")
+    from soil_nitrate_data WHERE value is not null
+    and value ~* '[0-9\.]' and value != '.' and value !~* '<'
+    and site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
+    'SEPAC', 'BRADFORD.A', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN')""")
     data = {}
     for row in cursor:
         key = "%s|%s|%s|%s" % (row['site'], row['plotid'], row['year'],
@@ -63,7 +66,10 @@ def get_agdata():
     p.rep, p.tillage, p.rotation 
     from agronomic_data a JOIN plotids p on (p.uniqueid = a.site and
     p.plotid = a.plotid) where 
-    varname in ('AGR1', 'AGR2', 'AGR7', 'AGR15', 'AGR16', 'AGR17', 'AGR19')""")
+    varname in ('AGR1', 'AGR2', 'AGR7', 'AGR15', 'AGR16', 'AGR17', 'AGR19')
+    and value ~* '[0-9\.]' and value != '.' and value !~* '<'
+    and site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
+    'SEPAC', 'BRADFORD.A', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN') """)
     data = {}
     for row in cursor:
         key = "%s|%s|%s|%s|%s|%s" % (row['site'], row['plotid'], row['year'],
@@ -76,12 +82,12 @@ def get_agdata():
           +"agr15,agr16,agr17,agr19\n")
     for key in data.keys():
         tokens = key.split("|")
-        res += "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (tokens[0], tokens[1],
+        res += "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (tokens[0], tokens[1],
                 tokens[2], tokens[3], tokens[4], tokens[5], 
                 data[key].get('AGR1', ''), data[key].get('AGR2', ''),
                 data[key].get('AGR7', ''), data[key].get('AGR15', ''),
-                data[key].get('AGR16', ''), data[key].get('AGR16', ''),
-                data[key].get('AGR17', ''), data[key].get('AGR18', ''))
+                data[key].get('AGR16', ''), data[key].get('AGR17', ''),
+                data[key].get('AGR19', ''))
     
     return res
     
