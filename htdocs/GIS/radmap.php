@@ -181,8 +181,8 @@ if (isset($_GET["bbox"]))
 if ($sector == "wfo"){
 	$sector_wfo = isset($_REQUEST["sector_wfo"]) ? strtoupper($_REQUEST["sector_wfo"]): "DMX";
 	/* Fetch the bounds */
-	pg_prepare($postgis, "WFOBOUNDS", "SELECT ST_xmax(geom), ST_ymax(geom), "
-	    ."ST_xmin(geom), ST_ymin(geom) from "
+	pg_prepare($postgis, "WFOBOUNDS", "SELECT ST_xmax(geom) as xmax, ST_ymax(geom) as ymax, "
+	    ."ST_xmin(geom) as xmin, ST_ymin(geom) as ymin from "
 	    ."(SELECT ST_Extent(the_geom) as geom from cwa WHERE wfo = $1) as foo");
 	$rs = pg_execute($postgis, "WFOBOUNDS", Array($sector_wfo));
 	if (pg_numrows($rs) > 0){
@@ -313,18 +313,19 @@ $states->set("status", MS_ON);
 $states->draw($img);
 
 /* All SBWs for a WFO */
-$sbwh = $map->getlayerbyname("allsbw");
-$sbwh->set("status", in_array("allsbw", $layers) );
-$sbwh->set("connection", $_DATABASES["postgis"]);
-//$sbwh->set("maxscale", 10000000);
-$sql = sprintf("geom from (select phenomena, geom, oid from sbw "
-    ."WHERE significance = 'W' and status = 'NEW' and wfo = 'EAX' and "
-    ."phenomena in ('TO') "
-	."and issue > '2007-10-01') as foo "
-    ."using unique oid using SRID=4326");
-$sbwh->set("data", $sql);
-$sbwh->draw($img);
-
+if (in_array("allsbw", $layers) && isset($_REQUEST["sector_wfo"])){
+	$sbwh = $map->getlayerbyname("allsbw");
+	$sbwh->set("status",  MS_ON);
+	$sbwh->set("connection", $_DATABASES["postgis"]);
+	//$sbwh->set("maxscale", 10000000);
+	$sql = sprintf("geom from (select phenomena, geom, oid from sbw "
+	    ."WHERE significance = 'W' and status = 'NEW' and wfo = '%s' and "
+	    ."phenomena in ('SV') "
+		."and issue > '2007-10-01') as foo "
+	    ."using unique oid using SRID=4326", $sector_wfo);
+	$sbwh->set("data", $sql);
+	$sbwh->draw($img);
+}
 $counties = $map->getlayerbyname("uscounties");
 $counties->set("status", in_array("uscounties", $layers) );
 $counties->draw($img);
