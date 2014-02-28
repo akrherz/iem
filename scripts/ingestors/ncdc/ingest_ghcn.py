@@ -41,6 +41,8 @@ from pyiem.datatypes import temperature
 COOP = psycopg2.connect(database='coop', host='iemdb')
 cursor = COOP.cursor()
 
+TODAY = datetime.date.today()
+
 STCONV = {'WA': '45', 'DE': '07', 'DC': '18', 'WI': '47', 'WV': '46', 
           'HI': '51', 'FL': '08', 'WY': '48', 'NH': '27', 'NJ': '28', 
           'NM': '29', 'TX': '41', 'LA': '16', 'AK': '50', 'NC': '31', 
@@ -154,6 +156,9 @@ def process( station ):
         days = get_days_for_month(day)
         for i in range(1, days+1):
             day = day.replace(day=i)
+            # We don't want data in the future!
+            if day >= TODAY:
+                continue
             if not data.has_key(day):
                 data[day] = {}
             if d['flag%s' % (i,)][1] != " ":
