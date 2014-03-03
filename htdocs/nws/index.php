@@ -6,19 +6,24 @@ $t->title = "NWS Related Information";
 $t->thispage = "iem-info";
 
 $t->north = <<<EOF
-<h3 class="page-heading">IEM Data for NWS Users</h3><p>
+<h3>IEM Data for NWS Users</h3><p>
 
-<div class="warning">Please <a href="/info/contacts.php">suggest</a> features for this page.  We are looking to collect all relevant
-IEM provided archives/applications of NWS data.</div>
+<div class="alert alert-info">
+Please <a href="/info/contacts.php">suggest</a> features for this page.  
+We are looking to collect all relevant IEM provided archives/applications 
+of NWS data.</div>
 EOF;
 
 $t->west = <<<EOF
 <h4>IEM Apps</h4>
 <ul>
- <li><a href="obs.php">Sortable Currents by WFO</a></li>
  <li><a href="/DCP/plot.phtml">Archived DCP Data Plotter</a>
  <br />Simple app to plot out current/historical DCP (river gauges) data for a site
  of your choice.</li>
+ <li><a href="/COOP/current.phtml">Sortable Current COOP Reports</a>
+		<br />View today's COOP reports by WFO or by state.  Includes derived
+		frozen to liquid ratio and SWE reports.</li>
+ <li><a href="obs.php">Sortable Currents by WFO</a></li>
  <li><a href="/timemachine/#59.0">NWS WWA Map Archive</a>
  <br />The IEM saves the national watch, warning, and advisory (WWA) map every
  five minutes.</li>
@@ -65,8 +70,8 @@ $t->east = <<<EOF
  <li><a href="/vtec/">VTEC Browser</a>
   <br />Interactive display of VTEC products.</li>
  <li><a href="/vtec/search.php">VTEC Search by Point or County/Zone</a>
-  <br />Find issued VTEC WWA products by a given zone or county or search
-  for a storm based warning by point.</li>
+  <br />Find issued VTEC WWA products by a given zone or county. Search
+  for a storm based warning by point on a map.</li>
 </ul>
 
 <h4>Storm Based Warnings</h4>
