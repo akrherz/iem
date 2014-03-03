@@ -6,21 +6,20 @@ cursor = COOP.cursor()
 
 maxes = np.zeros((200,))  # -60 to 140
 
-cursor.execute("""SELECT day, low from alldata_ia WHERE 
- station = 'IA2203' ORDER by day ASC""")
+cursor.execute("""SELECT day, high from alldata_ia WHERE 
+ station = 'IA8706' ORDER by day ASC""")
 
 last = -99
+maxs = 0
 running = 1
 for row in cursor:
-    if row[1] == last:
+    if row[1] <= 0:
         running += 1
     else:
-        if running > maxes[last+60]:
-            maxes[last+60] = running
-        if running > 4:
-            print row
-        running = 1
-        last = row[1]
+        if running > maxs:
+            maxs = running
+            print row, running
+        running = 0
 
 import matplotlib.pyplot as plt
 
