@@ -51,14 +51,14 @@ offsetY = []
 #output = open('xy.dat', 'w')
 
 pcursor.execute("""
-  SELECT x(ST_Centroid(ST_Transform(geom,2163))) as center_x,  
-    y(ST_Centroid(ST_Transform(geom,2163))) as center_y, *, ST_AsText(geom) as gtext,
-     x(ST_CEntroid(geom)) as lon, y(ST_Centroid(geom)) as lat,
+  SELECT ST_x(ST_Centroid(ST_Transform(geom,2163))) as center_x,  
+    ST_y(ST_Centroid(ST_Transform(geom,2163))) as center_y, *, ST_AsText(geom) as gtext,
+     ST_x(ST_CEntroid(geom)) as lon, ST_y(ST_Centroid(geom)) as lat,
      ST_AsText(ST_Transform(geom,2163)) as projtext
     from warnings
-    WHERE issue > '2008-01-01' and issue < '2012-01-01' and gtype = 'P' 
+    WHERE issue > '2008-01-01' and issue < '2014-01-01' and gtype = 'P' 
     and significance = 'W' and 
-    phenomena in ('TO') and wfo = 'GID'
+    phenomena in ('TO') and wfo = 'MPX'
 """) # and wfo = 'DMX' and eventid = 13 and phenomena= 'TO' and issue < '2009-01-01'
 i = 0
 for row in pcursor:
@@ -101,7 +101,7 @@ for row in pcursor:
     INSERT into bot_warnings(issue, expire, gtype, wfo,
     geom, eventid, phenomena, significance) VALUES ('%s', '%s',
     'P', '%s', 
-    ST_Transform(GeomFromText('SRID=2163;MULTIPOLYGON(((%s %s, %s %s, %s %s, %s %s, %s %s)))'),4326),
+    ST_Transform(ST_GeomFromText('SRID=2163;MULTIPOLYGON(((%s %s, %s %s, %s %s, %s %s, %s %s)))'),4326),
     %s, '%s', '%s')
     """ % (row['issue'].strftime("%Y-%m-%d %H:%M"), row['expire'].strftime("%Y-%m-%d %H:%M"),
            row['wfo'], llX, llY, ulX, ulY, urX, urY, lrX, lrY, llX, llY,
