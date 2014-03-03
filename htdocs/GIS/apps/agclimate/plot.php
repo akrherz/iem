@@ -37,12 +37,13 @@ $varDef = Array("c11" => "High Air Temperatures",
   "c20" => "Avg Relative Humidity",
   "c80" => "Solar Radiation [Langleys]",
   "c70" => "Evapotranspiration [inch]",
+  "dwpf" => "Dew Point [F]",
   "c300h,c300l" => "High and Low 4in Soil Temps [F]",
   "c529,c530" => "Peak 5 Sec Wind Gust [mph] and Time",
 );
 
 $rnd = Array("c11,c12" => 0, "c11" => 0, "c12" => 0, "c30" => 0,
-		"c300h,c300l" => 0, "c509" => 1, "c20" => 0,
+		"c300h,c300l" => 0, "c509" => 1, "c20" => 0, "dwpf" => 0,
   "c70" => 2, "c40" => 1 ,"c80" => 0, "dwpfl,dwpfh" => 0,
   "c90" => 2, "c529,c530" => 2, "pmonth" => 2, "pday" => 2);
 
@@ -85,8 +86,13 @@ if ($network == 'ISUAG'){
   		$q = "SELECT station, max(c300) as c300h, max(c300_f) as c300h_f,
      min(c300) as c300l, max(c300_f) as c300l_f
      from hourly WHERE date(valid) = '${dstamp}' GROUP by station";
-	} else if ($pvar == 'dwpfh,dwpf') {
-  		$q = "select MAX( k2f( dewpt( f2k(c100), c200)))::numeric(7,2) as dwpfh,
+	} else if ($pvar == 'dwpf') {
+		$q = "select station,
+		avg(k2f( dewpt( f2k(c100), c200))::numeric(7,2)) as dwpf,
+		'' as dwpf_f
+		from hourly WHERE c200 > 0 and date(valid) = '${dstamp}' GROUP by station";
+	} else if ($pvar == 'dwpfh,dwpfl') {
+		$q = "select MAX( k2f( dewpt( f2k(c100), c200)))::numeric(7,2) as dwpfh,
       station, MIN( k2f( dewpt( f2k(c100), c200)))::numeric(7,2) as dwpfl,
       max(c100_f) as dwpfh_f, max(c100_f) as dwpfl_f
       from hourly WHERE c200 > 0 and date(valid) = '${dstamp}' GROUP by station";
