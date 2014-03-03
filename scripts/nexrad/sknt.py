@@ -1,9 +1,6 @@
-from scipy import stats
 import psycopg2
-import numpy
+import numpy as np
 import datetime
-from pyiem import reference
-from pyiem.plot import MapPlot
 import matplotlib.pyplot as plt
 import network
 import pytz
@@ -20,40 +17,36 @@ def run(nexrad):
     drct = []
     sknt = []
     doy = []
-    minvalid = None
-    for yr in range(2005, 2014):
-        if minvalid is None:
-            cursor.execute("""SELECT min(valid) from  nexrad_attributes_"""+`yr`+"""
-            WHERE nexrad = %s 
-            """ , (nexrad,))
-            row = cursor.fetchone()
-            if row[0] is not None:
-                minvalid = row[0]
-        cursor.execute("""
-     SELECT drct, sknt, extract(doy from valid) from nexrad_attributes_"""+`yr`+""" WHERE
-     nexrad = %s and sknt > 0
-    """, (nexrad,))
-        print nexrad, yr, cursor.rowcount
-        for row in cursor:
-            drct.append( row[0] )
-            sknt.append( row[1] )
-            doy.append( row[2] )
+    minvalid = datetime.datetime(2014,1,1)
+    minvalid = minvalid.replace(tzinfo=pytz.timezone("UTC"))
+    cursor.execute("""
+ SELECT drct, sknt, extract(doy from valid), valid from nexrad_attributes_log WHERE
+ nexrad = %s and sknt > 0
+""", (nexrad,))
+    for row in cursor:
+        drct.append( row[0] )
+        sknt.append( row[1] )
+        doy.append( row[2] )
+        if row[3] < minvalid:
+            minvalid = row[3]
+    print nexrad, cursor.rowcount, minvalid
     
     years = (today - minvalid).days / 365.25
     (fig, ax) = plt.subplots(2,1, figsize=(9,7), dpi=100)
     
-    H2, xedges, yedges = numpy.histogram2d(drct, sknt, bins=(36,15), range=[[0,360],[0,70]])
+    H2, xedges, yedges = np.histogram2d(drct, sknt, bins=(36,15), range=[[0,360],[0,70]])
     res = ax[0].pcolormesh(xedges, yedges, H2.transpose() / years, cmap='maue')
     fig.colorbar(res, ax=ax[0])
     ax[0].set_xlim(0,360)
     ax[0].set_ylabel("Storm Speed [kts]")
     ax[0].set_xticks( (0,90,180,270,360) )
     ax[0].set_xticklabels( ('N','E','S','W','N') )
-    ax[0].set_title("%s - 5 Jun 2013 K%s NEXRAD Storm Attributes Histogram\n%s unique attributes + volume scan, units are ~ attributes/year" % (
-                                        minvalid.strftime("%d %b %Y"), nexrad, len(drct),))
+    ax[0].set_title("%s - %s K%s NEXRAD Storm Attributes Histogram\n%s unique attributes + volume scan, units are ~ attrs/year" % (
+                                        minvalid.strftime("%d %b %Y"), 
+                                        today.strftime("%d %b %Y"), nexrad, len(drct),))
     ax[0].grid(True)
     
-    H2, xedges, yedges = numpy.histogram2d(doy, drct, bins=(36,36), range=[[0,365],[0,360]])
+    H2, xedges, yedges = np.histogram2d(doy, drct, bins=(36,36), range=[[0,365],[0,360]])
     res = ax[1].pcolormesh(xedges, yedges, H2.transpose() / years, cmap='maue')
     fig.colorbar(res, ax=ax[1])
     ax[1].set_ylim(0,360)
@@ -65,10 +58,12 @@ def run(nexrad):
     ax[1].set_xlim(0,365)
     ax[1].grid(True)
     
-    ax[1].set_xlabel("Generated 6 June 2013 by Iowa Environmental Mesonet")
+    ax[1].set_xlabel("Generated %s by Iowa Environmental Mesonet" % (today.strftime("%d %b %Y"),))
     
     fig.savefig('%s_histogram.png' % (nexrad,))
-    
-nt = network.Table(("NEXRAD", "TWDR"))
-for sid in nt.sts.keys():
-    run(sid)
+
+if __name__ == '__main__':
+    ''' See how we are called '''
+    nt = network.Table(("NEXRAD", "TWDR"))
+    for sid in nt.sts.keys():
+        run(sid)
