@@ -94,7 +94,7 @@ gifsicle -b -O2 ${fp}.gif
 rm -f ${fp}.jpg ${fp}.png ${fp}.gif
 
 fp="dwpts"
-wget -q http://${WEBHOST}/GIS/apps/agclimate/plot.php\?direct=yes\&pvar=dwpf\&date=${dstr} -O ${fp}.png
+wget -q http://${WEBHOST}/GIS/apps/agclimate/plot.php\?network=ISUAG\&direct=yes\&pvar=dwpf\&date=${dstr} -O ${fp}.png
 convert ${fp}.png ${fp}.jpg
 convert ${fp}.jpg ${fp}.gif
 gifsicle -b -O2 ${fp}.gif
