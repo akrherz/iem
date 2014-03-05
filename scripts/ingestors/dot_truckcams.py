@@ -61,6 +61,7 @@ def workflow():
 
         utc = valid.astimezone(pytz.timezone("UTC"))
         # Go get the URL for saving!
+        #print label, utc, feat['attributes']['PHOTO_URL']
         image = urllib2.urlopen(feat['attributes']['PHOTO_URL'], timeout=15).read()
         tmp = tempfile.NamedTemporaryFile(delete=False)
         tmp.write(image)
@@ -70,7 +71,15 @@ def workflow():
                             get_current_fn(label),
                             get_archive_fn(label, utc),
                                                    tmp.name)
-        subprocess.call(cmd, shell=True)
+        proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
+        output = proc.stderr.read()
+        if output != "":
+            print '-------------------------'
+            print '  dot_truckcams.py pqinsert stderr result:'
+            print output
+            print 'label: %s timestamp: %s' % (label, utc)
+            print 'URI: %s' % (feat['attributes']['PHOTO_URL'],)
+            print '-------------------------\n'
         os.unlink(tmp.name)
         
         geom = 'SRID=4326;POINT(%s %s)' % (feat['geometry']['x'], 
