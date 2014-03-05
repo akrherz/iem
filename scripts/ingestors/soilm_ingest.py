@@ -199,10 +199,10 @@ def daily_process(nwsli, maxts):
     #print '-------------- DAILY PROCESS ----------------'
     fn = "%s%s" % (BASE, STATIONS[nwsli]['daily'])
     if not os.path.isfile(fn):
-        return
+        return 0
     lines = open(fn).readlines()
     if len(lines) < 6:
-        return
+        return 0
     # Read header....
     headers = []
     for col in lines[1].strip().replace('"', '').split(","):
