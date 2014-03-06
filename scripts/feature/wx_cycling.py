@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 (fig, ax) = plt.subplots(1,1)
 
-sts = datetime.datetime(2013,4,22)
-ets = datetime.datetime(2013,9,4)
+sts = datetime.datetime(2013,12,2)
+ets = datetime.datetime(2014,3,4)
 interval = datetime.timedelta(days=7)
 
 lbls = []
@@ -80,10 +80,10 @@ for l,t,p,a in zip(lbls, tsigma, psigma,aligns):
         p = float(p) + -0.2
     ax.text(t,p, l, va=a, zorder=2)
 
-ax.set_xlim(-2,2)
+ax.set_xlim(-3.5,3.5)
 ax.set_ylabel("Precipitation Departure $\sigma$")
 ax.set_xlabel("Temperature Departure $\sigma$")
-ax.set_title("22 Apr 2013 - 3 Sep 2013 Iowa\n 14 Day Trailing Departures plotted every 7 days")
+ax.set_title("2 Dec 2013 - 3 Mar 2014 Iowa\n 14 Day Trailing Departures plotted every 7 days")
 ax.grid(True)
 
 fig.savefig('test.ps')
