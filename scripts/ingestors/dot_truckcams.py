@@ -73,13 +73,13 @@ def workflow():
                                                    tmp.name)
         proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
         output = proc.stderr.read()
-        if output != "":
-            print '-------------------------'
-            print '  dot_truckcams.py pqinsert stderr result:'
-            print output
-            print 'label: %s timestamp: %s' % (label, utc)
-            print 'URI: %s' % (feat['attributes']['PHOTO_URL'],)
-            print '-------------------------\n'
+        #if output != "":
+        #    print '-------------------------'
+        #    print '  dot_truckcams.py pqinsert stderr result:'
+        #    print output
+        #    print 'label: %s timestamp: %s' % (label, utc)
+        #    print 'URI: %s' % (feat['attributes']['PHOTO_URL'],)
+        #    print '-------------------------\n'
         os.unlink(tmp.name)
         
         geom = 'SRID=4326;POINT(%s %s)' % (feat['geometry']['x'], 
