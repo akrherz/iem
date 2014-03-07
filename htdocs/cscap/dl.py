@@ -63,7 +63,7 @@ def get_agdata():
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     cursor.execute("""SELECT site, a.plotid, year, varname, value,
-    p.rep, p.tillage, p.rotation 
+    p.rep, p.tillage, p.rotation , p.nitrogen
     from agronomic_data a JOIN plotids p on (p.uniqueid = a.site and
     p.plotid = a.plotid) where 
     varname in ('AGR1', 'AGR2', 'AGR7', 'AGR15', 'AGR16', 'AGR17', 'AGR19')
@@ -72,18 +72,19 @@ def get_agdata():
     'SEPAC', 'BRADFORD.A', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN') """)
     data = {}
     for row in cursor:
-        key = "%s|%s|%s|%s|%s|%s" % (row['site'], row['plotid'], row['year'],
-                                row['rep'], row['tillage'], row['rotation'])
+        key = "%s|%s|%s|%s|%s|%s|%s" % (row['site'], row['plotid'], row['year'],
+                                row['rep'], row['tillage'], row['rotation'],
+                                row['nitrogen'])
         if not data.has_key(key):
             data[key] = {}
         data[key][row['varname']] = clean(row["value"])
 
-    res = ("uniqueid,plotid,year,rep,tillage,rotation,agr1,agr2,agr7,"
+    res = ("uniqueid,plotid,year,rep,tillage,rotation,nitrogen,agr1,agr2,agr7,"
           +"agr15,agr16,agr17,agr19\n")
     for key in data.keys():
         tokens = key.split("|")
-        res += "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (tokens[0], tokens[1],
-                tokens[2], tokens[3], tokens[4], tokens[5], 
+        res += "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (tokens[0], tokens[1],
+                tokens[2], tokens[3], tokens[4], tokens[5], tokens[6],
                 data[key].get('AGR1', ''), data[key].get('AGR2', ''),
                 data[key].get('AGR7', ''), data[key].get('AGR15', ''),
                 data[key].get('AGR16', ''), data[key].get('AGR17', ''),
