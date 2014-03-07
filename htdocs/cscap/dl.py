@@ -37,7 +37,7 @@ def get_nitratedata():
     from soil_nitrate_data WHERE value is not null
     and value ~* '[0-9\.]' and value != '.' and value !~* '<'
     and site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
-    'SEPAC', 'BRADFORD.A', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN')""")
+    'SEPAC', 'BRADFORD.C', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN')""")
     data = {}
     for row in cursor:
         key = "%s|%s|%s|%s" % (row['site'], row['plotid'], row['year'],
