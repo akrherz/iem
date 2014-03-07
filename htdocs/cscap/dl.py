@@ -69,7 +69,7 @@ def get_agdata():
     varname in ('AGR1', 'AGR2', 'AGR7', 'AGR15', 'AGR16', 'AGR17', 'AGR19')
     and value ~* '[0-9\.]' and value != '.' and value !~* '<'
     and site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
-    'SEPAC', 'BRADFORD.A', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN') """)
+    'SEPAC', 'BRADFORD.C', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN') """)
     data = {}
     for row in cursor:
         key = "%s|%s|%s|%s|%s|%s|%s" % (row['site'], row['plotid'], row['year'],
