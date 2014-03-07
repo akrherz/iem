@@ -79,16 +79,38 @@ def get_agdata():
             data[key] = {}
         data[key][row['varname']] = clean(row["value"])
 
+    # Get the Soil Nitrate data we are going to join with
+    cursor.execute("""
+    SELECT site, plotid, depth, varname, year, avg(value::float)
+    from soil_nitrate_data WHERE value is not null
+    and value ~* '[0-9\.]' and value != '.' and value !~* '<'
+    and site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
+    'SEPAC', 'BRADFORD.C', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN') 
+    and varname = 'SOIL23' GROUP by site, plotid, depth, varname, year
+    """)
+    sndata = {}
+    for row in cursor:
+        key = "%s|%s|%s|%s|%s" % (row['site'], row['plotid'], row['year'],
+                               row['varname'], row['depth'])
+        sndata[key] = row['avg']
+
     res = ("uniqueid,plotid,year,rep,tillage,rotation,nitrogen,agr1,agr2,agr7,"
-          +"agr15,agr16,agr17,agr19\n")
+          +"agr15,agr16,agr17,agr19,agr23_0-30,agr23_30-60,agr23_60-90,agr23_90-120\n")
     for key in data.keys():
         tokens = key.split("|")
-        res += "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (tokens[0], tokens[1],
+        lkp = "%s|%s|%s|%s" % (tokens[0], tokens[1], tokens[2], 'SOIL23')
+        res += "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (
+                tokens[0], tokens[1],
                 tokens[2], tokens[3], tokens[4], tokens[5], tokens[6],
                 data[key].get('AGR1', ''), data[key].get('AGR2', ''),
                 data[key].get('AGR7', ''), data[key].get('AGR15', ''),
                 data[key].get('AGR16', ''), data[key].get('AGR17', ''),
-                data[key].get('AGR19', ''))
+                data[key].get('AGR19', ''),
+                sndata.get(lkp+"|0 - 30", 'M'),
+                sndata.get(lkp+"|30 - 60", 'M'),
+                sndata.get(lkp+"|60 - 90", 'M'),
+                sndata.get(lkp+"|90 - 120", 'M')                
+                )
     
     return res
     
