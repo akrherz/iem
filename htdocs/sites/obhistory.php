@@ -76,7 +76,11 @@ if ($date >= $iemarchive){
 	if (preg_match("/RWIS/", $network)){
 		$db = "rwis";
 		$sql = sprintf("SELECT *, null as pres, null as raw, null as phour,
-				null as relh
+				null as relh, null as skyc1, null as skyl1, 
+				null as skyc2, null as skyl2, null as alti,
+				null as skyc3, null as skyl3, null as presentwx,
+				null as skyc4, null as skyl4, null as max_tmpf_6hr,
+				null as p06i, null as min_tmpf_6hr, null as p03i
 		from t$year where 
 		station = $1  and valid  >= $3 and valid  < $4 
 		and $2 = $2 ORDER by valid DESC");
