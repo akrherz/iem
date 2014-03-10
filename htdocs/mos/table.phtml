@@ -2,6 +2,7 @@
 putenv("TZ=GMT");
 define("IEM_APPID", 153);
 include("../../config/settings.inc.php");
+date_default_timezone_set('UTC');
 include("../../include/database.inc.php");
 include("../../include/forms.php");
 include("../../include/myview.php");
@@ -33,14 +34,14 @@ for($now=$sts;$now <= $ets; $now += (3600*$runsper[$model])){
   $s = date("Y-m-d H:i", $now);
   $runtimes[] = $s;
 }
-$table .= sprintf("<table cellpadding=\"2\" cellspacing=\"0\" border=\"1\"><tr><td></td><td colspan=\"%s\">Model Run Initialized at:</td></tr><tr><th width=\"75\">Valid:</th>", sizeof($runtimes) );
+$table .= sprintf("<table class=\"table table-condensed table-bordered table-striped\"><thead><tr><td></td><th colspan=\"%s\">Model Run Initialized at:</th></tr><tr><th width=\"75\">Valid:</th>", sizeof($runtimes) );
 for($now=$sts;$now <= $ets; $now += (3600*$runsper[$model])){
   $s = date("Y-m-d H:i", $now);
   $sqlSelector .= sprintf("'%s',", $s);
-  $table .= sprintf("<td>%sZ</td>", date('d/H', $now));
+  $table .= sprintf("<th>%sZ</th>", date('d/H', $now));
   $data[$s] = Array();
 }
-$table .= "</tr>\n";
+$table .= "</tr></thead><tbody>\n";
 $sqlSelector = substr($sqlSelector,0,-1) . ")";
 
 $rs = pg_prepare($mosdb, "SELECT", "SELECT *, t06_1 ||'/'||t06_2 as t06, 
@@ -62,7 +63,7 @@ for($now=$sts+(3600*12);$now <= $ets+(2*86400); $now += (3600*3)){
  }
  $table .= "</tr>\n";
 }
-$table .= "</table>";
+$table .= "</tbody></table>";
 
 // Begin Output
 $t->thispage = "archive-mos";
