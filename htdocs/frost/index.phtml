@@ -14,6 +14,9 @@ $t->headextra = <<<EOF
   }
 </style>
 <script type="text/javascript">
+var myv = "bdeckt";
+var myt = '00';
+var myi = '001';
 function updateMarkerPosition(latLng) {
         //console.log(latLng.lat() +'-'+ latLng.lng());
 		$('#frost_ts').attr('src', "frost_ts_"+ latLng.lng() +"_"+ latLng.lat() +".png")
@@ -37,6 +40,21 @@ function initialize() {
           });
 }
 
+function showimg(){
+	$('#modimg').attr('src', '/data/model/frost/'+myt+'/'+myv+'_'+myt+'_f'+myi+'.png');
+}
+function show(i){
+	myi = i;
+	showimg();
+}
+function setv(v){
+	myv = v;		
+	showimg();
+}
+function sett(t){
+	myt = t;		
+	showimg();
+}
 // Onload handler to fire off the app.
 google.maps.event.addDomListener(window, 'load', initialize);
 
@@ -44,52 +62,43 @@ google.maps.event.addDomListener(window, 'load', initialize);
 
 EOF;
 
-$table = "<table border=1 cellspacing=0 cellpadding=2>
-<tr><th colspan=49>00Z Output</th></tr>
-<tr>
-<td>Product:</td>";
-for($i=1;$i<73;$i++){
-	$table .= "<td>". $i ."</td>";
+$table = "<form name='d'><table class=\"table table-striped table-bordered table-condensed\">";
+
+$table .= "<tr><td>Day 1</td>";
+for ($i=1;$i<25;$i++){
+	$table .= sprintf("<td><a href=\"#\" onmouseover=\"show('%03d');\">%s</a></td>", $i, $i);
 }
-$table .= "</tr>
-<tr>
- <th>Frost Depth:</th>";
- for($i=1;$i<73;$i++){
-   $table .= sprintf("<td><a href=\"/data/model/frost/00/frostd_00_f%03d.png\">X</a></td>", $i);
- }
-$table .= "</tr>
-<tr>
- <th>Frost Present?:</th>";
- for($i=1;$i<73;$i++){
-   $table .= sprintf("<td><a href=\"/data/model/frost/00/ifrost_00_f%03d.png\">X</a></td>", $i);
- }
-$table ."</tr>
-<tr>
- <th>Bridget Deck Temp:</th>";
- for($i=1;$i<73;$i++){
-   $table .= sprintf("<td><a href=\"/data/model/frost/00/bdeckt_00_f%03d.png\">X</a></td>", $i);
- }
- $table .= "</tr>
-<tr><th colspan=49>12Z Output</th></tr>
-<tr>
- <th>Frost Depth:</th>";
- for($i=1;$i<73;$i++){
-   $table .= sprintf("<td><a href=\"/data/model/frost/12/frostd_12_f%03d.png\">X</a></td>", $i);
- }
-$table .= "</tr>
-<tr>
- <th>Frost Present?:</th>";
- for($i=1;$i<73;$i++){
-   $table .= sprintf("<td><a href=\"/data/model/frost/12/ifrost_12_f%03d.png\">X</a></td>", $i);
- }
-$table .= "</tr>
-<tr>
- <th>Bridget Deck Temp:</th>";
- for($i=1;$i<73;$i++){
-   $table .= sprintf("<td><a href=\"/data/model/frost/12/bdeckt_12_f%03d.png\">X</a></td>", $i);
- }
-$table .= "</tr>
-</table>";
+$table .= "</tr>";
+
+$table .= "<tr><td>Day 2</td>";
+for ($i=25;$i<49;$i++){
+	$table .= sprintf("<td><a href=\"#\" onmouseover=\"show('%03d');\">%s</a></td>", $i, $i);
+}
+$table .= "</tr>";
+
+$table .= "<tr><td>Day 3</td>";
+for ($i=49;$i<73;$i++){
+	$table .= sprintf("<td><a href=\"#\" onmouseover=\"show('%03d');\">%s</a></td>", $i, $i);
+}
+$table .= "</tr>";
+
+
+$table .= <<<EOF
+</table>
+
+<p>
+<input checked="checked" type="radio" name="v" value="bdeckt" onclick="setv('bdeckt')">Bridge Deck Temperature</input>
+<input type="radio" name="v" value="frostd" onclick="setv('frostd')">Frost Depth</input>
+<input type="radio" name="v" value="ifrost" onclick="setv('ifrost')">Frost Presence</input>
+
+<p>
+<input checked="checked" type="radio" name="t" value="00" onclick="sett('00')">00 UTC</input>
+<input type="radio" name="t" value="12" onclick="sett('12')">12 UTC</input>
+		
+		
+<p><img src="/data/model/frost/00/bdeckt_00_f001.png" id="modimg" />
+</form>
+EOF;
 
 $t->content = <<<EOF
 
@@ -131,27 +140,10 @@ currents</a></li></ul>
  <td>18Z (Noon)</td></tr>
 </table>
 
-<h2 class="subtitle">Output graphics:</h2>
+<h2>Output graphics:</h2>
 
 {$table}
 
-<p><b>View a loop!</b> <form name="loop" method="GET" action="loop/index.phtml">
-<select name="prod">
- <option value="bdeckt_00">00Z Run -- Bridge Deck Temp
- <option value="ifrost_00">00Z Run -- Frost Present
- <option value="frostd_00">00Z Run -- Frost Depth
- <option value="lwdown_00">00Z Run -- Long Wave
- <option value="swdown_00">00Z Run -- Short Wave
- <option value="cflux_00">00Z Run -- Convective Flux Down
- <option value="bdeckt_12">12Z Run -- Bridge Deck Temp
- <option value="ifrost_12">12Z Run -- Frost Present
- <option value="frostd_12">12Z Run -- Frost Depth
- <option value="lwdown_12">12Z Run -- Long Wave
- <option value="swdown_12">12Z Run -- Short Wave
- <option value="cflux_12">12Z Run -- Convective Flux Down
-</select>
-<input type="submit" value="View Loop"> (<i>Requires java</i>)
-</form>
 
 <!--
 <h3>Time series:</h3>
