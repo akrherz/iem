@@ -14,7 +14,7 @@ config.read('/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.cfg')
 def clean( val ):
     ''' Clean the value we get '''
     if val is None:
-        return val
+        return ''
     if val.strip().lower() == 'did not collect':
         return 'DNC'
     if val.strip().lower() == 'n/a':
@@ -68,8 +68,10 @@ def get_agdata():
     p.plotid = a.plotid) where 
     varname in ('AGR1', 'AGR2', 'AGR7', 'AGR15', 'AGR16', 'AGR17', 'AGR19')
     and value ~* '[0-9\.]' and value != '.' and value !~* '<'
-    and site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
-    'SEPAC', 'BRADFORD.C', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN') """)
+    and (site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
+    'SEPAC', 'FREEMAN') or
+    (site in ('BRADFORD.C', 'BRADFORD.B1', 'BRADFORD.B2') and p.nitrogen = 'NIT3')
+    )""")
     data = {}
     for row in cursor:
         key = "%s|%s|%s|%s|%s|%s|%s" % (row['site'], row['plotid'], row['year'],
