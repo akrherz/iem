@@ -59,7 +59,7 @@ def saveData():
             d = db[key].raw[3]
             ts = datetime.datetime.strptime(t +" "+d, "%H:%M %m/%d/%y")
             delta = (now - ts).days * 86400.0 + (now -ts).seconds
-            out.write("%s|%s|%.1f\n" % (id2nwsli[sid], 
+            out.write("%s|%s|%.0f\n" % (id2nwsli[sid], 
                                 nt.sts[ id2nwsli[sid]]["name"], delta ))
         else:
             log.msg("Unknown site ID of: %s" % (sid,))
