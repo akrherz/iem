@@ -37,7 +37,6 @@ PIL       Description             Product ID for Des Moines
 MAVxxx    GFS MOS Guidance         MAVDSM
 METxxx    NAM MOS Guidance         METDSM
 MEXxxx    GFSX MOS Guidance        MEXDSM
-FWCxxx    NGM MOS                  FWCDSM
 
 And model output
 

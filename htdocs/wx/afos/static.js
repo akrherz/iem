@@ -126,7 +126,7 @@ var addTab = function(id, center, cnt, sdate, edate) {
         tbar: [refreshAction,
         {
             text    : 'Print Text',
-            icon    : 'print.png',
+            icon    : '/images/print.png',
             cls     : 'x-btn-text-icon',
             handler : function(){
                 Ext.ux.Printer.print(Ext.getCmp("tabPanel").getActiveTab());

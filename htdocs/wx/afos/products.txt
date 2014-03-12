@@ -37,17 +37,5 @@
             text: 'Davenport',
             leaf: true
         }]
-  },
- {
-  text: 'NGM MOS',
-  children: [{
-            id:'fwcdsm',
-            text: 'Des Moines',
-            leaf: true
-        },{
-            id:'fwcdvn',
-            text: 'Davenport',
-            leaf: true
-        }]
   }
 ]
