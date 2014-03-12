@@ -1,4 +1,13 @@
 ---
+--- Convert Fahrenheit to Celsuis
+---
+CREATE OR REPLACE FUNCTION f2c(real) RETURNS double precision
+	LANGUAGE sql AS $_$
+		SELECT ($1 - 32.0) / 1.8
+	$_$;
+COMMENT on FUNCTION f2c(real) IS 'Convert F to C f2c(temperature)';
+
+---
 --- Compute wind chill
 ---
 CREATE OR REPLACE FUNCTION wcht(real, real) RETURNS double precision
