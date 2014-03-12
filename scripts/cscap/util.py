@@ -289,3 +289,18 @@ def build_sdc(feed):
                     data[yr][sitekey].append( sdc_key )
 
     return data, sdc_names
+
+def get_site_metadata(config, spr_client=None):
+    '''
+    Return a dict of research site metadata
+    '''
+    meta = {}
+    if spr_client is None:
+        spr_client = get_spreadsheet_client(config)
+        
+    lf = spr_client.get_list_feed(config.get('cscap', 'metamaster'), 'od6')
+    for entry in lf.entry:
+        d = entry.to_dict()    
+        meta[d['uniqueid']] = {'climate_site': d['iemclimatesite'].split()[0],
+                               }
+    return meta
