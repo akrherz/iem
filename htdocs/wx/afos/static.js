@@ -192,6 +192,7 @@ tp.addListener('click', function(node, e){
                 	id : 'sdate',
                 	value : new Date('01/01/2009'),
                 	vtype : 'daterange',
+                	width: 120,
                 	endDateField : 'edate',
                 	fieldLabel : 'Start Date'
                 }, {
@@ -200,6 +201,7 @@ tp.addListener('click', function(node, e){
                 	minDate : new Date('12/31/2008'),
                 	name : 'edate',
                 	value : (new Date().add(Date.DAY, 1)),
+                	width: 120,
                 	vtype : 'daterange',
                 	id : 'edate',
                 	startDateField : 'sdate',
