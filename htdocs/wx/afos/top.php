@@ -1,6 +1,10 @@
 <?php
  include("../../../config/settings.inc.php");
 ?>
+<html>
+<head>
+ <title>Top</title>
+</head>
 <body bgcolor="white">
 
 <form method="GET" action="retreive.php" target="display">
@@ -28,3 +32,5 @@
 </tr></table>
 
 </form>
+</body>
+</html>
