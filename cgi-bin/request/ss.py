@@ -20,9 +20,9 @@ import sys
 import datetime
 
 lookup = {9100104: "SSP #6",
-          9100135: "SSP #1",
-          9100131: "SSP #7",
-          9100156: "SSP #2"}
+          9100135: "SSP #8",
+          9100131: "SSP #1",
+          9100156: "SSP #7"}
 
 def gage_run(sts, ets):
     """ run() """
