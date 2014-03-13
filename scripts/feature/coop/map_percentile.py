@@ -8,12 +8,12 @@ cursor = COOP.cursor()
 
 cursor.execute("""
  SELECT station, rank from
-(SELECT station, year, rank() over (PARTITION by station ORDER by avg DESC) from
-(SELECT station, year, avg((high+low)/2.0) from alldata_ia where month = 9
- and sday < '0930' and 
+(SELECT station, year, rank() over (PARTITION by station ORDER by avg ASC) from
+(SELECT station, year, avg((high+low)/2.0) from alldata_ia where sday <= '0312'
+ and 
  station in (select distinct station from alldata_ia where year = 1893)
  GROUP by station, year) as foo 
- ) as foo2 WHERE year = 2013
+ ) as foo2 WHERE year = 2014
 
 """)
 lats = []
@@ -26,9 +26,9 @@ for row in cursor:
     lons.append( nt.sts[row[0]]['lon'] )
     ranks.append( row[1] )
 
-m = MapPlot(title='1-29 September 2013 Average Temperature Rank',
-            subtitle='1 is warmest, for period 1893-2013')
-m.plot_values(lons, lats, ranks, textsize=18)
+m = MapPlot(title='1 Jan - 12 Mar 2014 Average Temperature Rank',
+            subtitle='1 is coldest, for period 1893-2014')
+m.plot_values(lons, lats, ranks, textsize=20)
 m.drawcounties()
 
 m.postprocess(filename='test.ps')
