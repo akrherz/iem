@@ -52,6 +52,10 @@ def run( ts ):
         else:
             total += g.values
     
+    if total is None:
+        print '%s found no HRRR data!' % (ts, )
+        return
+    
     # Total is the sum of the hourly values
     # We want MJ day-1 m-2
     total = (total * 3600.0) / 1000000.0
