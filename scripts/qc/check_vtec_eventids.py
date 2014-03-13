@@ -51,7 +51,7 @@ for row in pcursor:
         (phenomena in ('TO', 'SV') and sig == 'A')):
         continue
     
-    for e in range(eventid - gap, eventid):
+    for e in range(eventid - gap + 1, eventid):
         lookup = "%s.%s.%s.%s" % (wfo, phenomena, sig, e)
         if lookup in missing:
             continue
