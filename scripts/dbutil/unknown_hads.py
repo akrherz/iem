@@ -1,12 +1,15 @@
 """
  I look at the unknown HADS table and see if any of these stations exist
  in the mesosite database, if so, then I set online to true!
+ 
+ Run from RUN_2AM.sh
+ 
 """
 
-import iemdb
+import psycopg2
 
-HADS = iemdb.connect('hads')
-MESOSITE = iemdb.connect('mesosite')
+HADS = psycopg2.connect(database='hads', host='iemdb')
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 hcursor = HADS.cursor()
 hcursor2 = HADS.cursor()
 mcursor = MESOSITE.cursor()
