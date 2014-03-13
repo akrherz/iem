@@ -66,11 +66,12 @@ def get_agdata():
     p.rep, p.tillage, p.rotation , p.nitrogen
     from agronomic_data a JOIN plotids p on (p.uniqueid = a.site and
     p.plotid = a.plotid) where 
-    varname in ('AGR1', 'AGR2', 'AGR7', 'AGR15', 'AGR16', 'AGR17', 'AGR19')
+    varname in ('AGR1', 'AGR2', 'AGR7', 'AGR15', 'AGR16', 'AGR17', 'AGR19',
+    'AGR39', 'AGR40')
     and value ~* '[0-9\.]' and value != '.' and value !~* '<'
     and (site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
-    'SEPAC', 'FREEMAN') or
-    (site in ('BRADFORD.C', 'BRADFORD.B1', 'BRADFORD.B2') and p.nitrogen = 'NIT3')
+    'SEPAC', 'FREEMAN', 'BRADFORD.C') or
+    (site in ('BRADFORD.B1', 'BRADFORD.B2') and p.nitrogen = 'NIT3')
     )""")
     data = {}
     for row in cursor:
@@ -97,17 +98,18 @@ def get_agdata():
         sndata[key] = row['avg']
 
     res = ("uniqueid,plotid,year,rep,tillage,rotation,nitrogen,agr1,agr2,agr7,"
-          +"agr15,agr16,agr17,agr19,agr23_0-30,agr23_30-60,agr23_60-90,agr23_90-120\n")
+          +"agr15,agr16,agr17,agr19,agr39,agr40,agr23_0-30,agr23_30-60,agr23_60-90,agr23_90-120\n")
     for key in data.keys():
         tokens = key.split("|")
         lkp = "%s|%s|%s|%s" % (tokens[0], tokens[1], tokens[2], 'SOIL23')
-        res += "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (
+        res += "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (
                 tokens[0], tokens[1],
                 tokens[2], tokens[3], tokens[4], tokens[5], tokens[6],
                 data[key].get('AGR1', ''), data[key].get('AGR2', ''),
                 data[key].get('AGR7', ''), data[key].get('AGR15', ''),
                 data[key].get('AGR16', ''), data[key].get('AGR17', ''),
-                data[key].get('AGR19', ''),
+                data[key].get('AGR19', ''),data[key].get('AGR39', ''),
+                data[key].get('AGR40', ''),
                 sndata.get(lkp+"|0 - 30", 'M'),
                 sndata.get(lkp+"|30 - 60", 'M'),
                 sndata.get(lkp+"|60 - 90", 'M'),
