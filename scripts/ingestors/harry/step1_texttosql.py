@@ -5,7 +5,7 @@ This script processes them into something we can insert into the IEM database
 
 import sys
 import re
-import mx.DateTime
+import datetime
 import string
 
 """
@@ -23,10 +23,10 @@ stconv = {
 
 year = int(sys.argv[1])
 month = int(sys.argv[2])
-fp = "/mesonet/data/harry/%s/SCIA%s%02i.txt" % (year, str(year)[2:], month)
-print "Processing File: ", fp
+fn = "/mesonet/data/harry/%s/SCIA%s%02i.txt" % (year, str(year)[2:], month)
+print "Processing File: ", fn
 
-lines = open(fp, 'r').readlines()
+lines = open(fn, 'r').readlines()
 
 alldata = open('/tmp/harry.sql', 'w')
 alldata.write("""BEGIN;
@@ -35,11 +35,14 @@ DELETE from alldata_tmp;
 COPY alldata_tmp from STDIN with null as 'Null';
 """)
 
+hits = 0
+misses = 0
 for line in lines:
     tokens = re.split(",", line)
-    if len(tokens) < 22:
+    if len(tokens) < 15 or len(tokens[2]) != 4:
+        misses += 1
         continue
-    if len(tokens[0]) == 0:
+    if len(tokens[0]) == 0 or tokens[2] == 'YR' or tokens[0] == 'YR':
         continue
     stid = tokens[0]
     dbid = "%s%04.0f" % ("IA", int(stid))
@@ -70,12 +73,15 @@ for line in lines:
     if (hi == ""): hi = "Null"
     if (lo == ""): lo = "Null"
 
-    ts = mx.DateTime.DateTime(yr, mo, dy)
+    ts = datetime.datetime(yr, mo, dy)
     day = ts.strftime("%Y-%m-%d")
     sday = ts.strftime("%m%d")
  
     alldata.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\tf\tNull\tNull\tNull\n" % (
                         dbid, day,  hi, lo, pr, sf, sday, yr, mo,sd) )
+    hits += 1
+
+print '    got %s good lines %s bad lines' % (hits, misses)
 
 alldata.write("""\.
 -- Now we need to clear the old estimates away
