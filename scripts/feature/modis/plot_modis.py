@@ -7,7 +7,7 @@ import psycopg2
 import numpy as np
 DBCONN = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
 cursor = DBCONN.cursor()
-
+"""
 (fig, ax) = plt.subplots(1,1)
 
 m = MapPlot(title="27 January 2014 :: Terra MODIS True Color",
@@ -19,8 +19,8 @@ x2,y2=m.map(-88.132,45.15)
 img=mpimg.imread('/tmp/AERONET_Ames.jpg')
 m.ax.imshow(img, extent=(x,x2,y, y2) )
 
-cursor.execute("""select ST_asEWKB(ST_Transform(simple_geom,4326)) from roads_base
- WHERE segid in (select distinct segid from roads_2014_log where cond_code = 51 and valid > '2014-01-26')""")
+cursor.execute('''select ST_asEWKB(ST_Transform(simple_geom,4326)) from roads_base
+ WHERE segid in (select distinct segid from roads_2014_log where cond_code = 51 and valid > '2014-01-26')''')
 for row in cursor:
     if row[0] is None:
         continue
@@ -30,10 +30,10 @@ for row in cursor:
         x,y = m.map(lons, lats)
         m.ax.plot(x,y, color='orange', lw=2)
 
-cursor.execute("""
+cursor.execute('''
 SELECT ST_asEWKB(ST_Buffer(ST_Collect(geom),0)) from warnings_2014 where phenomena = 'BZ'
 and significance = 'W' and issue > '2014-01-26' and wfo in ('DMX','DVN', 'ARX') and substr(ugc, 1,2) = 'IA'
-""")
+''')
 row = cursor.fetchone()
 geom = loads(str(row[0]))
 a = np.asarray(geom.exterior)
@@ -41,29 +41,29 @@ x,y = m.map(a[:,0], a[:,1])
 m.ax.plot(x,y, color='red', lw=2.5, zorder=2)
 
 """
-(fig, ax) = plt.subplots(2,1)
+(fig, ax) = plt.subplots(2,1, figsize=(4,4))
 
 m = Basemap(projection='cea',llcrnrlat=40,urcrnrlat=44,
-            llcrnrlon=-101,urcrnrlon=-87,resolution='i',
+            llcrnrlon=-99,urcrnrlon=-89,resolution='i',
             ax=ax[0], fix_aspect=False)
 m2 = Basemap(projection='cea',llcrnrlat=40,urcrnrlat=44,
-            llcrnrlon=-101,urcrnrlon=-87,resolution='i',
+            llcrnrlon=-99,urcrnrlon=-89,resolution='i',
             ax=ax[1], fix_aspect=False)
 
-x,y= m(-107,40)
-x2,y2=m(-87,50)
+x,y= m(-99.4023, 38.7753)
+x2,y2=m(-88.1321, 45.2504)
 
-img=mpimg.imread('/tmp/FEMA_NorthernPlains.2012267.aqua.1km.jpg')
+img=mpimg.imread('/tmp/065.jpg')
 ax[0].imshow(img, extent=(x,x2,y, y2) )
-ax[0].set_title("23 September 2012 :: Aqua MODIS True Color")
+ax[0].set_title("6 March 2014 :: Aqua MODIS True Color", fontsize=10)
 
-img=mpimg.imread('/tmp/FEMA_NorthernPlains.2013266.aqua.1km.jpg')
+img=mpimg.imread('/tmp/072.jpg')
 ax[1].imshow(img, extent=(x,x2,y, y2) )
-ax[1].set_title("23 September 2013 :: Aqua MODIS True Color")
+ax[1].set_title("13 March 2013 :: Aqua MODIS True Color", fontsize=10)
 
 m.drawstates(linewidth=2.5)
 m2.drawstates(linewidth=2.5)
-"""
+#"""
 plt.savefig('test.png')
 #import iemplot
 #iemplot.makefeature('test')
