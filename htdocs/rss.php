@@ -1,6 +1,6 @@
 <?php
  include("../config/settings.inc.php");
- header("Content-type: text/xml");
+ header("Content-type: text/xml; charset=UTF-8");
  
  $memcache = new Memcache;
  $memcache->connect('iem-memcached', 11211);
