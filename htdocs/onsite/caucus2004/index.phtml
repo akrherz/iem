@@ -1,10 +1,13 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | Iowa Caucus Weather";
-include("$rootpath/include/header.php"); 
-?>
+include("../../../include/myview.php");
+$t = new MyView();
+$t->title = "Iowa Caucus Weather";
 
-<div style="width: 600px;">
+$fx = file_get_contents("fx.txt");
+
+
+$t->content = <<<EOF
 
 <div class="ptitle"><img src="logo.gif">2004 Iowa Caucus Day</div>
 
@@ -17,7 +20,7 @@ educational use only.</p>
 
 <div style="text-align: center; font-size: large; font-color: #0000f0;">Forecast Discussion</div>
 
-<?php include("fx.txt"); ?>
+		{$fx}
 
 <div style="text-align: center; font-size: large; font-color: #0000f0;">Average Temperatures for 19 Jan</div>
 
@@ -34,7 +37,6 @@ educational use only.</p>
 
 </table>
 
-</div>
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
