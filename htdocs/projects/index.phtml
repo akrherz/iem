@@ -1,15 +1,15 @@
 <?php
  include("../../config/settings.inc.php");
- $TITLE = "IEM | Projects";
- include("../../include/header.php"); 
-?>
+ include("../../include/myview.php");
+ $t = new MyView();
+ $t->title = "Projects";
 
+ $t->content = <<<EOF
 <h3>Orphaned page, daryl should update at some point!</h3>
 
 <ul>
  <li><a href="iembot/">IEMBOT</a></li>
 </ul>
-
-<?php 
- include("../../include/footer.php"); 
-?>
+EOF;
+ $t->render('single.phtml');
+ ?>

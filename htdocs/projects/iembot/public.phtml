@@ -2,10 +2,11 @@
 /*
  */ 
  include("../../../config/settings.inc.php");
- $THISPAGE = "severe-iembot";
- include("$rootpath/include/header.php"); ?>
+ include("../../../include/myview.php");
+ $t = new MyView();
+ $t->thispage = "severe-iembot";
 
-<div style="width: 640px;">
+ $t->content = <<<EOF
 
 <h3>Accessing "for public" chat rooms</h3>
 
@@ -38,6 +39,6 @@ configuration page for accessing the chatrooms.
     You will need to setup another jabber account to use with this service.</li>
 </ul>
 
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
