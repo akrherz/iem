@@ -107,7 +107,10 @@ table1 = "warnings"
 table2 = "sbw"
 if sTS.year == eTS.year:
     table1 = "warnings_%s" % (sTS.year,)
-    table2 = "sbw_%s" % (sTS.year,)
+    if sTS.year > 2001:
+        table2 = "sbw_%s" % (sTS.year,)
+    else:
+        table2 = 'sbw_2014'
 
 geomcol = "geom"
 if form.has_key('simple') and form['simple'][0] == 'yes':
