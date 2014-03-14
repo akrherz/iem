@@ -41,7 +41,6 @@ $t->content = <<<EOF
 
 <h3 class="subtitle">Papers/Presentations</h3>
 <ul>
-  <li><a href="/pubs/seniorthesis/">ISU Senior Thesis Presentations</a></li>
   <li><a href="/present/">IEM Presentation Archive</a></li>
   <li><a href="/docs/unidata2006">Unidata Equipment Grant Report</a> (21 Aug 2006)</li>
 </ul>
