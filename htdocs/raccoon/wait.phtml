@@ -1,8 +1,10 @@
 <?php
 include("../../config/settings.inc.php");
-include("$rootpath/include/forms.php");
-include("$rootpath/include/imagemaps.php");
-include_once "$rootpath/include/database.inc.php";
+include("../../include/myview.php");
+$t = new MyView();
+include("../../include/forms.php");
+include("../../include/imagemaps.php");
+include_once "../../include/database.inc.php";
 
 $jobid = $_REQUEST["jobid"];
 $status = "PROCESSING";
@@ -25,25 +27,26 @@ if (isset($_REQUEST["jobid"])){
 	pg_close($mesosite);
 }
 
-$TITLE = "IEM Raccoon | Warnings overview in PowerPoint";
-$THISPAGE = "severe-raccoon";
+$t->title = "Raccoon - Warnings overview in PowerPoint";
+$t->thispage = "severe-raccoon";
 if ($status != "DONE!"){
-  $REFRESH = "<meta http-equiv=\"refresh\" content=\"60\">";
+  $t->headextra = "<meta http-equiv=\"refresh\" content=\"60\">";
 }
-include("$rootpath/include/header.php");
-?>
-<h3 class="heading">IEM Raccoon</h3>
+
+$c = "";
+if ($status == "DONE!"){
+	$c = sprintf("<p>Download your powerpoint <a href=\"%s/pickup/raccoon/%s\">here</a>",
+			BASEURL, $basefn);
+}
+$t->content = <<<EOF
+<h3>IEM Raccoon</h3>
 
 <p>This page will refresh once per minute with the status of your request. It 
 typically takes 1-3 minutes for the powerpoint to be generated!
 
-<p>Current status is: <?php echo $status; ?>
-<?php 
-if ($status == "DONE!"){
-	echo sprintf("<p>Download your powerpoint <a href=\"%s/pickup/raccoon/%s\">here</a>",
-		BASEURL, $basefn);
-}
+<p>Current status is: {$status}
+{$c}
 
+EOF;
+$t->render('single.phtml');
 ?>
-
-<?php include("$rootpath/include/footer.php"); ?>

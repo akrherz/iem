@@ -1,9 +1,11 @@
 <?php
 include("../../config/settings.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
 define("IEM_APPID", 69);
-include("$rootpath/include/forms.php");
-include("$rootpath/include/imagemaps.php");
-include_once "$rootpath/include/database.inc.php";
+include("../../include/forms.php");
+include("../../include/imagemaps.php");
+include_once "../../include/database.inc.php";
 
 $wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'OAX';
 $radar = isset($_REQUEST["radar"]) ? $_REQUEST["radar"] : 'OAX';
@@ -48,43 +50,73 @@ if (isset($_REQUEST["wfo"])){
 	}
 }
 
-$TITLE = "IEM Raccoon | Warnings overview in PowerPoint";
-$THISPAGE = "severe-raccoon";
-$HEADEXTRA = "<meta name='robots' content='index, nofollow'/>";
-include("$rootpath/include/header.php");
+$t->title = "Raccoon - Warnings overview in PowerPoint";
+$t->thispage = "severe-raccoon";
+$t->headextra = "<meta name='robots' content='index, nofollow'/>";
 
+$e = "";
 if (isset($err)){
-	echo sprintf("<div class='warning'>%s</div>", $err);
+	$e = sprintf("<div class='warning'>%s</div>", $err);
 }
-?>
-<h3 class="heading">IEM Raccoon</h3>
+
+$ar = Array("FF" => "Flash Flood",
+"MA" => "Marine",
+"SV" => "Severe Thunderstorm",
+"TO" => "Tornado");
+$wtselect = "";
+while (list($p,$n) = each($ar)){
+	$wtselect .= sprintf("<input name=\"wtype[]\" type=\"checkbox\" 
+			value=\"%s\"%s>%s</input>\n", $p, 
+			in_array($p, $wtype) ? " CHECKED": "", $n);
+}
+
+
+$wselect = networkSelect("WFO", $wfo, Array(), "wfo");
+$nselect = networkSelect("NEXRAD", $radar, Array(), "radar");
+$yselect = yearSelect2(2002, $year, "year");
+$m1select = monthSelect2($month1,"month1");
+$d1select = daySelect2($day1, "day1");
+$h1select = gmtHourSelect($hour1, "hour1");
+$m2select = monthSelect2($month2,"month2");
+$d2select = daySelect2($day2, "day2");
+$h2select = gmtHourSelect($hour2, "hour2");
+$t->content = <<<EOF
+{$e}
+<h3>IEM Raccoon</h3>
 
 <p>IEM Raccoon generates a Microsoft Powerpoint presentation of a National
 Weather Service office's storm based warnings for a time period of your choice.
 The powerpoint contains a number of slides for each warning creating an easy
 way to look back through an event.</p>
 
-<table><tr><td><img src='raccoon.jpg' />
-<br />Yawning Raccoon by <a href="http://www.flickr.com/photos/32541690@N02">Alan Vernon</a></td>
+<div class="row">
+<div class="col-md-4 col-sm-4">
+ <img src='raccoon.jpg' class="img img-responsive" />
+<br />Yawning Raccoon by <a href="http://www.flickr.com/photos/32541690@N02">Alan Vernon</a>
 
-<td><img src="ss1.png" /><br />Overview Stats</td>
-<td><img src="ss2.png" /><br />NEXRAD Snapshots in Time</td>
-</tr></table>
+</div>
+<div class="col-md-4 col-sm-4">
+<img src="ss1.png" class="img img-responsive"/><br />Overview Stats
+</div>
+<div class="col-md-4 col-sm-4">
+<img src="ss2.png" class="img img-responsive"/><br />NEXRAD Snapshots in Time
+</div>
+</div>
 
 <p>Please fill out the form below by selecting the National Weather Service 
 office you are interested in viewing warnings from and the RADAR source to use
 for graphics generated in the Powerpoint.  The RADAR archives are not complete
 prior to February 2012, but have been selectively backfilled.  If there is a 
 case you are really interested in, please 
-<a href="<?php echo $rooturl; ?>/info/contact.php">let us know</a> and we can 
+<a href="/info/contact.php">let us know</a> and we can 
 probably back fill imagery for the event.
 
 <form method="GET" name="raccoon">
 <table>
 <tr><th>Select Weather Office</th>
-	<td colspan="4"><?php echo networkSelect("WFO", $wfo, Array(), "wfo"); ?></td></tr>
+	<td colspan="4">{$wselect}</td></tr>
 <tr><th>Select RADAR source</th>
-	<td colspan="4"><?php echo networkSelect("NEXRAD", $radar, Array(), "radar"); ?></td></tr>
+	<td colspan="4">{$nselect}</td></tr>
 <tr><th>Select Level 3 Product:</th>
 	<td colspan="4">
 	<select name="product">
@@ -94,15 +126,7 @@ probably back fill imagery for the event.
 	</td></tr>
 <tr><th>View Warning Types:</th>
 	<td colspan="4">
-	<input name="wtype[]" type="checkbox" value="FF" 
-		<?php if (in_array("FF", $wtype)) echo "CHECKED"; ?>>Flash Flood</input>
-	<input name="wtype[]" type="checkbox" value="MA" 
-		<?php if (in_array("MA", $wtype)) echo "CHECKED"; ?>>Marine</input>
-	<input name="wtype[]" type="checkbox" value="SV" 
-		<?php if (in_array("SV", $wtype)) echo "CHECKED"; ?>>Severe Thunderstorm</input>
-	<input name="wtype[]" type="checkbox" value="TO" 
-		<?php if (in_array("TO", $wtype)) echo "CHECKED"; ?>>Tornado</input>
-	
+{$wtselect}
 	</td></tr>
 	
 	<tr>
@@ -113,34 +137,21 @@ probably back fill imagery for the event.
 
   <tr>
     <th>Start:</th>
-    <td rowspan="2">
-     <?php echo yearSelect2(2002, date("Y"), "year"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect2($month1,"month1"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2($day1, "day1"); ?>
-    </td>
-    <td>
-     <?php echo gmtHourSelect($hour1, "hour1"); ?>
-    </td>
+    <td rowspan="2">{$yselect}</td>
+    <td>{$m1select}</td>
+    <td>{$d1select}</td>
+    <td>{$h1select}</td>
   </tr>
 
   <tr>
     <th>End Time:</th>
-    <td>
-     <?php echo monthSelect2($month2,"month2"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2($day2, "day2"); ?>
-    </td>
-    <td>
-     <?php echo gmtHourSelect($hour2, "hour2"); ?>
-    </td>
+    <td>{$m2select}</td>
+    <td>{$d2select}</td>
+    <td>{$h2select}</td>
   </tr>
 </table>
 <p><input type="submit" value="Make my powerpoint!" />
 </form>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
