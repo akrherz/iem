@@ -1,7 +1,7 @@
 <?php
 /* Generate JSON of l3 nexrad attributes! */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 require_once 'Zend/Json.php';
 $postgis = iemdb("postgis");
 
@@ -50,7 +50,7 @@ $json = Array("layer"=>"nexradl3attr",
         "errorString"=>"ok", "morePages"=>false, "errorCode"=>0, 
         "nextPageKey"=>null);
 
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
 {
   $lat = sprintf("%.6f", $row["lat"]);
   $lon = sprintf("%.6f", $row["lon"]);
