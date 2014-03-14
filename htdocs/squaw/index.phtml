@@ -1,12 +1,11 @@
 <?php 
   include("../../config/settings.inc.php"); 
+  include("../../include/myview.php");
+  $t = new MyView();
 
-$TITLE = "Squaw Creek Flood Modeling";
-include("$rootpath/include/header.php");
+$t->title = "Squaw Creek Flood Modeling";
 
-?>
-
-<div id="content">
+$t->content = <<<EOF
 
 <p>Welcome to the Squaw Creek Flood Prediction System homepage.  This
 website is currently under active development and links may change in 
@@ -35,6 +34,6 @@ needed for the new version, since I do accounting a bit cleaner than the
 old code.</li> 
 </ul>
 
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
