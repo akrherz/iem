@@ -1,6 +1,6 @@
 <?php
  include("../config/settings.inc.php");
- header("Content-type: text/xml; charset=UTF-8");
+ header("Content-type: text/xml; charset=utf-8");
  
  $memcache = new Memcache;
  $memcache->connect('iem-memcached', 11211);
@@ -17,7 +17,7 @@
  
  $bd = date('D, d M Y H:i:s O');
  echo <<<EOF
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
 <atom:link href="http://mesonet.agron.iastate.edu/rss.php" rel="self" type="application/rss+xml" />
