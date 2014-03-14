@@ -1,4 +1,5 @@
 <?php
+// Used in fe.phtml and lib.php
 
 $mosvars = Array(
  "n_x" => "Max/Min Temp [F]",
