@@ -9,6 +9,9 @@ import cgi
 import mx.DateTime
 import re
 import sys
+sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib/')
+import network
+nt = network.Table("IACLIMATE")
 
 COOP = psycopg2.connect("dbname=coop user=nobody host=iemdb")
 ccursor = COOP.cursor()
@@ -158,14 +161,13 @@ def Main():
 		year = form["year"][0]
 		month = form["month"][0]
 		day = form["day"][0]
-		cityParts = re.split("__", form["city"][0])
+		city = form["city"][0].upper()
 	except:
 		print "<P><P><B>Invalid Post:</B><BR>"
 		print "Please use this URL <a href='/onsite/birthday/'>http://mesonet.agron.iastate.edu/onsite/birthday/</a>"
 		sys.exit(0)	
 
-	city = cityParts[0].upper()
-	cityName = cityParts[1]
+	cityName = nt.sts[city]['name']
 	now = mx.DateTime.DateTime( int(year), int(month), int(day) )
 	nowM2 = now + mx.DateTime.RelativeDateTime(days=-2)
 	nowM1 = now + mx.DateTime.RelativeDateTime(days=-1)
