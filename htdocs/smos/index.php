@@ -1,8 +1,12 @@
 <?php
 include("../../config/settings.inc.php");
-$TITLE = "IEM | SMOS Data";
-$THISPAGE="networks-smos";
-$HEADEXTRA = "<script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
+include("../../include/forms.php");
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "SMOS Data";
+$t->thispage = "networks-smos";
+$t->headextra = <<<EOF
+<script src='http://openlayers.org/api/2.12/OpenLayers.js'></script>
 <link rel='stylesheet' href='http://openlayers.org/api/2.12/theme/default/style.css' type='text/css'>
 <script type='text/javascript'>
 var controls;
@@ -58,12 +62,18 @@ function init(){
             border: 2px solid black;
         }
 </style>
-";
-$BODYEXTRA = "onload=\"init();\"";
-include("$rootpath/include/forms.php");
-include("$rootpath/include/header.php"); 
-?>
+EOF;
+$t->bodyextra = "onload=\"init();\"";
 
+$y1select = yearSelect2(2012, 2010, "year1");
+$m1select = monthSelect2(1, "month1");
+$d1select = daySelect2(1, "day1");
+
+$y2select = yearSelect2(2012, 2010, "year2");
+$m2select = monthSelect2(1, "month2");
+$d2select = daySelect2(1, "day2");
+
+$t->content = <<<EOF
 <h3>Soil Moisture &amp; Ocean Salinity (SMOS) Satellite Data</h3>
 
 <p>The <a href="http://www.esa.int/SPECIALS/smos/">SMOS</a> satellite is a polar
@@ -98,28 +108,16 @@ to request a point outside of the domain.  Data is available since
 
   <tr>
     <th>Start:</th>
-    <td>
-     <?php echo yearSelect2(2012, 2010, "year1"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect2(1, "month1"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2(1, "day1"); ?>
-    </td>
+    <td>{$y1select}</td>
+    <td>{$m1select}</td>
+    <td>{$d1select}</td>
   </tr>
 
   <tr>
     <th>End:</th>
-    <td>
-     <?php echo yearSelect2(2012, 2010, "year2"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect2(date("m"), "month2"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2(1, "day2"); ?>
-    </td>
+    <td>{$y2select}</td>
+    <td>{$m2select}</td>
+    <td>{$d2select}</td>
   </tr>
 </table>
 </td><td>
@@ -143,4 +141,7 @@ to request a point outside of the domain.  Data is available since
 </tr>
 </table>
 <br />
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+
+?>
