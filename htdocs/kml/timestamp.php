@@ -1,6 +1,7 @@
 <?php
- $label = substr($_GET["label"],0,120);
- $font_size = isset($_GET["font_size"]) ? $_GET["font_size"]: 15;
+// dynamic image generation of a timestamp
+ $label = isset($_REQUEST["label"]) ? substr($_GET["label"],0,120): "No \$label set";
+ $font_size = isset($_GET["font_size"]) ? intval($_GET["font_size"]): 15;
 
  $Font = '/mesonet/data/gis/static/fonts/arialbd.ttf';
 

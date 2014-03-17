@@ -1,14 +1,14 @@
 <?php
-/* Generate GR placefile of webcam stuff */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
-echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<kml xmlns=\"http://earth.google.com/kml/2.2\">
+echo <<<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.2">
  <Document>
-   <Style id=\"iemstyle\">
+   <Style id="iemstyle">
      <IconStyle>
       <scale>0.8</scale>
       <Icon>
@@ -18,7 +18,8 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
      <BalloonStyle>
       <bgColor>ffffffff</bgColor>
     </BalloonStyle>
-  </Style>";
+  </Style>
+EOF;
 
 $conn = iemdb("mesosite");
 pg_prepare($conn, "SELECT", "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
@@ -26,7 +27,7 @@ pg_prepare($conn, "SELECT", "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
 		on (w.id = c.cam) WHERE 
 		valid > (now() - '30 minutes'::interval) and network = $1");
 $rs = pg_execute($conn, "SELECT", Array($network)); 
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
 {
   echo "<Placemark>
     <name>". str_replace('&', '&amp;', $row["name"]) ."</name>

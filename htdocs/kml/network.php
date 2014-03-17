@@ -1,15 +1,16 @@
 <?php
 /* Generate a KML file of a network locations, yummy */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
+include("../../include/database.inc.php");
+include("../../include/network.php");
 $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
-echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<kml xmlns=\"http://www.opengis.net/kml/2.2\">
+echo <<<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
  <Document>
-   <Style id=\"iemstyle\">
+   <Style id="iemstyle">
      <IconStyle>
       <scale>0.8</scale>
       <Icon>
@@ -19,7 +20,8 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
      <BalloonStyle>
       <bgColor>ffffffff</bgColor>
     </BalloonStyle>
-  </Style>";
+  </Style>
+EOF;
 
 $nt = new NetworkTable($network);
 
