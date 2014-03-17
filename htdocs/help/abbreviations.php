@@ -1,9 +1,9 @@
 <?php 
 include("../../config/settings.inc.php");
-$TITLE = "IEM | Abbreviations";
-include("$rootpath/include/header.php"); ?>
-
-<div class="text">
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Abbreviations";
+$t->content = <<<EOF
 <p>As you may have already noticed, the IEM website is filled with abbreviations!  This index should help you dechipher them.  If there is an abbreviation that is omitted, please let us know.</p>
 
 <p><b>ASOS</b> -- <font class="subtitle">Automated Surface Observing System</font>
@@ -58,6 +58,7 @@ include("$rootpath/include/header.php"); ?>
   
 <p><b>USGS</b> -- <font class="subtitle">United States Geological Survey</font></p>
 
-<br><br></div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+<br><br>
+EOF;
+$t->render('single.phtml');
+?>
