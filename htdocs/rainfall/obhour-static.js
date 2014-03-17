@@ -246,7 +246,7 @@ var viewport = new Ext.Viewport({
          }),
          new Ext.BoxComponent({ // raw
              region:'south',
-             el: 'footer',
+             el: 'iem-footer',
              height:32
          }),
           { 
