@@ -1,13 +1,16 @@
 <?php
 include("../../config/settings.inc.php");
+include("../../include/myview.php");
+$t = new MyView();
 define("IEM_APPID", 11);
-$TITLE = "IEM | Agricultural Weather/Climate Information";
-$THISPAGE = "iem-info";
-include("$rootpath/include/header.php"); ?>
+$t->title = "Agricultural Weather/Climate Information";
+$t->thispage = "iem-info";
 
+$y = date("Y");
+$t->content = <<<EOF
 <h3 class="heading">IEM Ag Weather/Climate Information</h3><p>
 
-<div class="warning">Please <a href="<?php echo $rooturl; ?>/info/contacts.php">suggest</a> features for this page.  We are looking to collect all relevant
+<div class="warning">Please <a href="/info/contacts.php">suggest</a> features for this page.  We are looking to collect all relevant
 Iowa Ag Weather information in a one-stop location.</div>
 
 <p>
@@ -24,15 +27,15 @@ Iowa Ag Weather information in a one-stop location.</div>
 <tr>
   <th>Growing Degree Days</th>
   <td><a href="/plotting/coop/gddprobs.phtml">Probabilies + Scenarios</a></td>
-  <td><a href="/GIS/apps/coop/gsplot.phtml?var=gdd50&year=<?php echo date("Y"); ?>">Map of Totals</a>
+  <td><a href="/GIS/apps/coop/gsplot.phtml?var=gdd50&year={$y}">Map of Totals</a>
   <br /><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></td>
 </tr>
 
 <tr>
   <th>Precipitation</th>
-  <td><a href="../data/summary/today_prec.png">Today's total</a></td>
-  <td><a href="../GIS/apps/coop/gsplot.phtml?var=prec&smonth=1&sday=1&year=<?php echo date("Y"); ?>">Map of Totals</a>
-  <br /><a href="../plotting/coop/acc.phtml">Single Site Graphs</a></td>
+  <td><a href="/data/summary/today_prec.png">Today's total</a></td>
+  <td><a href="/GIS/apps/coop/gsplot.phtml?var=prec&smonth=1&sday=1&year={$y}">Map of Totals</a>
+  <br /><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></td>
 </tr>
 
 
@@ -44,8 +47,8 @@ Iowa Ag Weather information in a one-stop location.</div>
 
 <tr>
  <th>Soil Temperatures</th>
- <td><a href="../agclimate/soilt.php">County Estimates</a>
-  <br /><a href="../timemachine/#57.0">Archived County Estimates</a>
+ <td><a href="/agclimate/soilt.php">County Estimates</a>
+  <br /><a href="/timemachine/#57.0">Archived County Estimates</a>
  </td>
  <td></td>
 </tr>
@@ -53,8 +56,8 @@ Iowa Ag Weather information in a one-stop location.</div>
 <tr>
   <th>Stress Degree Days</th>
   <td></td>
-  <td><a href="../GIS/apps/coop/gsplot.phtml?var=sdd86&year=<?php echo date("Y"); ?>">Map of Totals</a>
-  <br /><a href="../plotting/coop/acc.phtml">Single Site Graphs</a></td>
+  <td><a href="/GIS/apps/coop/gsplot.phtml?var=sdd86&year=<?php echo date("Y"); ?>">Map of Totals</a>
+  <br /><a href="/plotting/coop/acc.phtml">Single Site Graphs</a></td>
 </tr>
 
 </table>
@@ -63,7 +66,7 @@ Iowa Ag Weather information in a one-stop location.</div>
 
 <blockquote>
  How Temperature and Precipitation have influenced corn by reporting district. 
- <a href="http://www.mesonet.agron.iastate.edu/~windmill/AIpage.html">view here</a>.
+ <a href="/~windmill/AIpage.html">view here</a>.
 </blockquote>
 
 <h4>Historical Freeze Risk</h4>
@@ -74,9 +77,9 @@ less extreme low temperatures. Crop threshold temperatures for plant damage in F
 from Spring thresholds (mainly because of plant size/height).</blockquote>
 
 <ul>
- <li><a href="../COOP/freezing.php">Fall Freezing Dates</a></li>
- <li><a href="../climodat/index.phtml?station=IA0200&report=22">First Fall Freeze Probabilities</a></li>
- <li><a href="../plotting/coop/threshold_histogram_fe.phtml">Winter Minimum Temperature Frequencies</a></li>
+ <li><a href="/COOP/freezing.php">Fall Freezing Dates</a></li>
+ <li><a href="/climodat/index.phtml?station=IA0200&report=22">First Fall Freeze Probabilities</a></li>
+ <li><a href="/plotting/coop/threshold_histogram_fe.phtml">Winter Minimum Temperature Frequencies</a></li>
 </ul>
 
 <h4>External Links</h4>
@@ -87,5 +90,6 @@ from Spring thresholds (mainly because of plant size/height).</blockquote>
  <li><a href="http://planthardiness.ars.usda.gov/PHZMWeb/">USDA Plant Hardiness Map</a> (enter
  your zipcode or click on the map)</li>
 </ul>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
