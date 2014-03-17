@@ -1,9 +1,10 @@
 <?php
  include("../../config/settings.inc.php");
+ include("../../include/myview.php");
+ $t = new MyView();
 
- $TITLE = "IEM Representivity";
- include("$rootpath/include/header.php");
-?>
+ $t->title = "Representivity";
+$t->content = <<<EOF
 <style>
 .figure {
   background: #eee;
@@ -30,7 +31,6 @@ table {
 
 </style>
 
-<div class="ptext" style="width: 800px;">
 
 <h2>IEM Representivity Analysis</h2>
 
@@ -77,11 +77,11 @@ to explore the spatial statistical benefits of the IEM partnership.
 <thead>
 <tr><th>Abbreviation</th><th>Description</th><th>Map</th></tr>
 </thead>
-<tr><th>ASOS</th><td>The <a href="<?php echo $rooturl; ?>/ASOS/">Automated Surface Observing System</a> sites are located at primary airports and are maintained by the National Weather Service.  This network is rigorously checked and
+<tr><th>ASOS</th><td>The <a href="/ASOS/">Automated Surface Observing System</a> sites are located at primary airports and are maintained by the National Weather Service.  This network is rigorously checked and
  quality controlled.  For Iowa, a limitation of the ASOS network is the 
 lack of sites located in Westcentral and Southwest Iowa.</td><td><img src="nni_images/asos_locs.png"></tr>
 
-<tr><th>AWOS</th><td>The <a href="<?php echo $rooturl; ?>/AWOS/">Automated Weather Observing System</a> sites are located at secondary airports and 
+<tr><th>AWOS</th><td>The <a href="/AWOS/">Automated Weather Observing System</a> sites are located at secondary airports and 
 are maintained by state government entities via third 
 party contractors.  Data quality should be comparable with the ASOS network
 since they are using similar instrumentation, but a number of factors 
@@ -90,18 +90,18 @@ siting, maintenance schedules, and network communication.  Most of the significa
 differences between the ASOS and AWOS network show up in the temperature 
 and dew point measurements due to siting. </td><td><img src="nni_images/awos_locs.png"></tr>
 
-<tr><th>RWIS</th><td>The <a href="<?php echo $rooturl; ?>/RWIS/">Roadway Weather Information System</a> sites are located along side interstates and highways.  They are maintained by their respective state department of transportation via a 
+<tr><th>RWIS</th><td>The <a href="/RWIS/">Roadway Weather Information System</a> sites are located along side interstates and highways.  They are maintained by their respective state department of transportation via a 
 third party contractor.  Atmospheric data from this network is of lesser 
 quality than the ASOS or AWOS networks.  The primary purpose of the RWIS network is for automated observation of winter weather. The IEM collects RWIS data
 from Iowa, Minnesota, Wisconsin, Nebraska, and Kansas.  Other states may have
 RWIS networks, but often their data is proprietary.</td><td><img src="nni_images/rwis_locs.png"></td></tr>
 
-<tr><th>SchoolNet</th><td>The IEM collects data from a number of <a href="<?php echo $rooturl; ?>/schoolnet/">SchoolNets</a>.  The IEM collects data from three
+<tr><th>SchoolNet</th><td>The IEM collects data from a number of <a href="/schoolnet/">SchoolNets</a>.  The IEM collects data from three
 SchoolNet data networks operated by KCCI-TV, KIMT-TV, and KELO-TV.  Data 
 quality is close to that of the RWIS network, but siting issues make 
 measurements like wind and precipitation problematic. </td><td><img src="nni_images/snet_locs.png"></td></tr>
 
-<tr><th>ISUAG</th><td>The <a href="<?php echo $rooturl; ?>/agclimate/">ISU Ag Climate</a> sites primarily provide soil temperature and solar radiation readings.
+<tr><th>ISUAG</th><td>The <a href="/agclimate/">ISU Ag Climate</a> sites primarily provide soil temperature and solar radiation readings.
 They are maintained by the Iowa State University Experiment Station.  The main issue with this network is the timing of observations received.  Each station is called daily to download its observation record from the previous day. </td><td><img src="nni_images/isuag_locs.png"></td></tr>
 </table>
 
@@ -543,6 +543,6 @@ of inhomogeneous geophysical measuring networks. <i>Nature</i>, <b>319</b>,
 <li><a href="http://www.eumetnet.eu.org/Textes/WktZurich.htm">Workshop on Methods and Tools for the design of Surface observation networks</a>
 <br />SWS - 2002 held in Zurich, 14-15 May 2002</li>
 
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
