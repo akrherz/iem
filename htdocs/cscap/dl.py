@@ -89,7 +89,8 @@ def get_agdata():
     and value ~* '[0-9\.]' and value != '.' and value !~* '<'
     and site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
     'SEPAC', 'BRADFORD.C', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN') 
-    and varname = 'SOIL23' GROUP by site, plotid, depth, varname, year
+    and varname in ('SOIL13', 'SOIL23', 'SOIL14', 'SOIL27', 'SOIL28', 'SOIL1')
+    GROUP by site, plotid, depth, varname, year
     """)
     sndata = {}
     for row in cursor:
@@ -98,11 +99,18 @@ def get_agdata():
         sndata[key] = row['avg']
 
     res = ("uniqueid,plotid,year,rep,tillage,rotation,nitrogen,agr1,agr2,agr7,"
-          +"agr15,agr16,agr17,agr19,agr39,agr40,agr23_0-30,agr23_30-60,agr23_60-90,agr23_90-120\n")
+          +"agr15,agr16,agr17,agr19,agr39,agr40,"
+          +"soil13_0-10,soil13_10-20,soil13_20-40,soil13_40-60,"
+          +"soil14_0-10,soil14_10-20,soil14_20-40,soil14_40-60,"
+          +"soil27_0-10,soil27_10-20,soil27_20-40,soil27_40-60,"
+          +"soil28_0-10,soil28_10-20,soil28_20-40,soil28_40-60,"
+          +"soil1_0-10,soil1_10-20,soil1_20-40,soil1_40-60,"
+          +"soil23_0-30,soil23_30-60,soil23_60-90,soil23_90-120,\n")
     for key in data.keys():
         tokens = key.split("|")
-        lkp = "%s|%s|%s|%s" % (tokens[0], tokens[1], tokens[2], 'SOIL23')
-        res += "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (
+        lkp = "%s|%s|%s|%s" % (tokens[0], tokens[1], tokens[2], 'SOIL')
+        res += ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+               +"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,\n") % (
                 tokens[0], tokens[1],
                 tokens[2], tokens[3], tokens[4], tokens[5], tokens[6],
                 data[key].get('AGR1', ''), data[key].get('AGR2', ''),
@@ -110,10 +118,30 @@ def get_agdata():
                 data[key].get('AGR16', ''), data[key].get('AGR17', ''),
                 data[key].get('AGR19', ''),data[key].get('AGR39', ''),
                 data[key].get('AGR40', ''),
-                sndata.get(lkp+"|0 - 30", 'M'),
-                sndata.get(lkp+"|30 - 60", 'M'),
-                sndata.get(lkp+"|60 - 90", 'M'),
-                sndata.get(lkp+"|90 - 120", 'M')                
+                sndata.get(lkp+"13|0 - 10", 'M'),
+                sndata.get(lkp+"13|10 - 20", 'M'),
+                sndata.get(lkp+"13|20 - 40", 'M'),
+                sndata.get(lkp+"13|40 - 60", 'M'),
+                sndata.get(lkp+"14|0 - 10", 'M'),
+                sndata.get(lkp+"14|10 - 20", 'M'),
+                sndata.get(lkp+"14|20 - 40", 'M'),
+                sndata.get(lkp+"14|40 - 60", 'M'),
+                sndata.get(lkp+"27|0 - 10", 'M'),
+                sndata.get(lkp+"27|10 - 20", 'M'),
+                sndata.get(lkp+"27|20 - 40", 'M'),
+                sndata.get(lkp+"27|40 - 60", 'M'),
+                sndata.get(lkp+"28|0 - 10", 'M'),
+                sndata.get(lkp+"28|10 - 20", 'M'),
+                sndata.get(lkp+"28|20 - 40", 'M'),
+                sndata.get(lkp+"28|40 - 60", 'M'),
+                sndata.get(lkp+"1|0 - 10", 'M'),
+                sndata.get(lkp+"1|10 - 20", 'M'),
+                sndata.get(lkp+"1|20 - 40", 'M'),
+                sndata.get(lkp+"1|40 - 60", 'M'),
+                sndata.get(lkp+"23|0 - 30", 'M'),
+                sndata.get(lkp+"23|30 - 60", 'M'),
+                sndata.get(lkp+"23|60 - 90", 'M'),
+                sndata.get(lkp+"23|90 - 120", 'M')                
                 )
     
     return res
