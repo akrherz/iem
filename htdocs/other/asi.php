@@ -1,8 +1,8 @@
 <?php 
 include("../../config/settings.inc.php");
-include ("$rootpath/include/forms.php");
-include "$rootpath/include/database.inc.php";
-include "$rootpath/include/imagemaps.php";
+include ("../../include/forms.php");
+include "../../include/database.inc.php";
+include "../../include/imagemaps.php";
 function download_data($sts, $ets){
 	
 	$dbconn = iemdb('other');
@@ -51,10 +51,11 @@ if (isset($_REQUEST["action"])){
 		die();
 	}
 }
+include("../../include/myview.php");
+$t = new MyView();
 
-$TITLE = "IEM | Atmospheric Structure Instrumentation";
-$THISPAGE = "networks-other";
-include("$rootpath/include/header.php");  
+$t->title = "Atmospheric Structure Instrumentation";
+$t->thispage = "networks-other";
 
 $channels = Array(
 	"ch1" => "Wind Speed @48.5m [m/s]",
@@ -71,7 +72,21 @@ $channels = Array(
 	"ch12" => "Barometer @48.5m [mb]"
 				);
 
-?>
+$c="";
+while (list($key,$ch)=each($channels)){
+	$c .= sprintf("<tr><td>%s</td><td>%s</td></tr>", $key, $ch);
+}
+
+$nselect = networkSelect("ISUASI", $station);
+$ys = yearSelect2(2012, $syear, "syear");
+$ms = monthSelect($smonth, "smonth");
+$ds = daySelect2($sday, "sday");
+$hs = hourSelect($shour, "shour");
+$ye = yearSelect2(2012, $eyear, "eyear");
+$me = monthSelect($emonth, "emonth");
+$de = daySelect2($eday, "eday");
+$he = hourSelect($ehour, "ehour");
+$t->content = <<<EOF
 <h3 class="heading">Atmospheric Structure Data</h3>
 
 <p>The IEM is collecting and providing data from an instrumentation project
@@ -82,7 +97,7 @@ that outfitted two towers with wind and temperature sensors.
 <form method="GET" name="plot">
 <input type="hidden" name="action" value="plot" />
 
-<strong>Select station:</strong><?php echo networkSelect("ISUASI", $station);?>
+<strong>Select station:</strong>{$nselect}
 
 <table>
 <tr><td></td><th>Year:</th>
@@ -92,24 +107,24 @@ that outfitted two towers with wind and temperature sensors.
   </tr>
 
 <tr><th>Start Date:</th>
-  <td><?php echo yearSelect(2012, $syear, "syear"); ?></td>
-  <td><?php echo monthSelect($smonth, "smonth"); ?></td>
-  <td><?php echo daySelect2($sday, "sday"); ?></td>
-  <td><?php echo hourSelect($shour, "shour"); ?></td>
+  <td>{$ys}</td>
+  <td>{$ms}</td>
+  <td>{$ds}</td>
+  <td>{$hs}</td>
   </tr>
 
 <tr><th>End Date:</th>
-  <td><?php echo yearSelect(2012, $eyear, "eyear"); ?></td>
-  <td><?php echo monthSelect($emonth, "emonth"); ?></td>
-  <td><?php echo daySelect2($eday, "eday"); ?></td>
-  <td><?php echo hourSelect($ehour, "ehour"); ?></td>
+  <td>{$ye}</td>
+  <td>{$me}</td>
+  <td>{$de}</td>
+  <td>{$he}</td>
   </tr>
   
 </table>
 <input type="submit" value="Generate Plot">
 </form>
 
-<img src="<?php echo $imguri; ?>" />
+<img src="{$imguri}" />
 
 <h3>Download this data</h3>
 <form method="GET" name="dl">
@@ -125,14 +140,14 @@ The archive begins on 1 October 2012.
   <th>Day:</th></tr>
 
 <tr><th>Start Date:</th>
-  <td><?php echo yearSelect(2012, date("Y"), "syear"); ?></td>
-  <td><?php echo monthSelect(date("m"), "smonth"); ?></td>
-  <td><?php echo daySelect2(date("d"), "sday"); ?></td></tr>
+  <td>{$ys}</td>
+  <td>{$ms}</td>
+  <td>{$ds}</td></tr>
 
 <tr><th>End Date:</th>
-  <td><?php echo yearSelect(2012, date("Y"), "eyear"); ?></td>
-  <td><?php echo monthSelect(date("m"), "emonth"); ?></td>
-  <td><?php echo daySelect2(date("d"), "eday"); ?></td></tr>
+  <td>{$ye}</td>
+  <td>{$me}</td>
+  <td>{$de}</td></tr>
 
 </table>
 <input type="submit" value="Download Data">
@@ -146,10 +161,8 @@ is labelled as a channel within the datafile.
 
 <p><table cellpadding="3" cellspacing="0" border="1">
 <tr><th>Channel</th><th>Measurement @heightAGL [units]</th></tr>
-<?php 
-while (list($key,$ch)=each($channels)){
-	echo sprintf("<tr><td>%s</td><td>%s</td></tr>", $key, $ch);
-}
-?>
+{$c}
 </table>
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

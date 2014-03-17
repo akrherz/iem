@@ -7,7 +7,6 @@ os.environ[ 'HOME' ] = '/tmp/'
 os.environ[ 'USER' ] = 'nobody'
 import datetime
 import numpy
-import sys
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import iemtz
