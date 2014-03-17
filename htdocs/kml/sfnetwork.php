@@ -1,7 +1,7 @@
 <?php
 /* Sucks to render a KML */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
 $connect = iemdb("access");
 $year = date("Y");
 /* Now we fetch warning and perhaps polygon */
@@ -14,10 +14,11 @@ $query2 = "SELECT *, ST_askml(t.geom) as kml, t.name as sname
 $result = pg_exec($connect, $query2);
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
-echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<kml xmlns=\"http://earth.google.com/kml/2.2\">
+echo <<<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.2">
  <Document>
-   <Style id=\"iemstyle\">
+   <Style id="iemstyle">
      <IconStyle>
       <scale>0.8</scale>
       <Icon>
@@ -27,8 +28,9 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
      <BalloonStyle>
       <bgColor>ffffffff</bgColor>
     </BalloonStyle>
-  </Style>";
-for ($i=0;$row=@pg_fetch_array($result,$i);$i++)
+  </Style>
+EOF;
+for ($i=0;$row=@pg_fetch_assoc($result,$i);$i++)
 {
   echo "<Placemark>
     <description>
