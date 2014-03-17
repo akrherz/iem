@@ -4,7 +4,6 @@
 import util
 import sys
 import ConfigParser
-import gdata.spreadsheets.client
 import gdata.docs.client
 config = ConfigParser.ConfigParser()
 config.read('mytokens.cfg')
@@ -78,6 +77,9 @@ lookuprefs = {
               'soil23': 'Soil Nitrate Data',
               'soil24': 'Soil Nitrate Data',
               'soil25': 'Soil Nitrate Data',
+              'soil26': 'Soil Texture Data',
+              'soil27': 'Soil Texture Data',
+              'soil28': 'Soil Texture Data',
               }
 varconv = {
            'soil1': 'bulkdensity',
@@ -177,5 +179,5 @@ def do_row(row):
             entry.cell.input_value = newvalue
             spr_client.update(entry)
         
-for i in range(6,68):
+for i in range(6,71):
     do_row(i)
