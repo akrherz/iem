@@ -143,38 +143,40 @@ CREATE TABLE operations(
 GRANT SELECT on operations to nobody,apache;
 
 --- ========================================================================
---- Storage of Soil Nitrate Data
+--- Storage of Soil Data
 ---
-CREATE TABLE soil_nitrate_data(
+CREATE TABLE soil_data(
   site varchar(24),
   plotid varchar(24),
   depth varchar(24),
   varname varchar(24),
   year smallint,
   value varchar(32),
+  subsample varchar(12),
   updated timestamptz default now()
 );
 
-CREATE TABLE soil_nitrate_data_log(
+CREATE TABLE soil_data_log(
   site varchar(24),
   plotid varchar(24),
   depth varchar(24),
   varname varchar(24),
   year smallint,
   value varchar(32),
+  subsample varchar(12),
   updated timestamptz default now()
 );
 
-CREATE OR REPLACE FUNCTION soil_nitrate_insert_before_F()
+CREATE OR REPLACE FUNCTION soil_insert_before_F()
 RETURNS TRIGGER
  AS $BODY$
 DECLARE
     result INTEGER; 
 BEGIN
-    result = (select count(*) from soil_nitrate_data
+    result = (select count(*) from soil_data
                 where site = new.site and plotid = new.plotid and
                 varname = new.varname and year = new.year and
-                depth = new.depth and
+                depth = new.depth and subsample = new.subsample and 
                 (value = new.value or (value is null and new.value is null))
                );
 
@@ -183,25 +185,26 @@ BEGIN
         RETURN null;
     END IF;
 
-    result = (select count(*) from soil_nitrate_data
+    result = (select count(*) from soil_data
                 where site = new.site and plotid = new.plotid and
                 varname = new.varname and year = new.year
-                and depth = new.depth);
+                and depth = new.depth and subsample = new.subsample);
 
 	-- Data is a new value!
     IF result = 1 THEN
-    	UPDATE soil_nitrate_data SET value = new.value, updated = now()
+    	UPDATE soil_data SET value = new.value, updated = now()
     	WHERE site = new.site and plotid = new.plotid and
                 varname = new.varname and year = new.year and
-                depth = new.depth;
-        INSERT into soil_nitrate_data_log SELECT * from soil_nitrate_data WHERE
+                depth = new.depth and subsample = new.subsample;
+        INSERT into soil_data_log SELECT * from soil_data WHERE
         		site = new.site and plotid = new.plotid and
-                varname = new.varname and year = new.year and depth = new.depth;
+                varname = new.varname and year = new.year and depth = new.depth
+                and subsample = new.subsample;
         RETURN null;
     END IF;
 
-    INSERT into soil_nitrate_data_log (site, plotid, varname, year, depth, value)
-    VALUES (new.site, new.plotid, new.varname, new.year, new.depth, new.value);
+    INSERT into soil_data_log (site, plotid, varname, year, depth, subsample, value)
+    VALUES (new.site, new.plotid, new.varname, new.year, new.depth, new.subsample, new.value);
 
     -- The default branch is to return "NEW" which
     -- causes the original INSERT to go forward
@@ -210,15 +213,15 @@ BEGIN
 END; $BODY$
 LANGUAGE 'plpgsql' SECURITY DEFINER;
 
-CREATE TRIGGER soil_nitrate_insert_before_T
+CREATE TRIGGER soil_insert_before_T
    before insert
-   ON soil_nitrate_data
+   ON soil_data
    FOR EACH ROW
-   EXECUTE PROCEDURE soil_nitrate_insert_before_F();
+   EXECUTE PROCEDURE soil_insert_before_F();
   
-CREATE UNIQUE index soil_nitrate_data_idx on 
-	soil_nitrate_data(site, plotid, varname, year, depth);
-GRANT SELECT on soil_nitrate_data to nobody,apache;
+CREATE UNIQUE index soil_data_idx on 
+	soil_data(site, plotid, varname, year, depth, subsample);
+GRANT SELECT on soil_data to nobody,apache;
 
 
 
