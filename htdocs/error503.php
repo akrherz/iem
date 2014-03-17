@@ -1,12 +1,13 @@
 <?php
 include("../config/settings.inc.php");
-include("$rootpath/include/header.php");
-?>
+include("../include/myview.php");
+$t = new MyView();
+$t->title = "Service Unavailable (503)";
+$t->content = <<<EOF
 
-<h3>Requested file was not found</h3>
+<h3>Service is unavailable</h3>
 
-<img src="images/snoopy503.jpg" />
-
-<?php
-include("$rootpath/include/footer.php");
+<img src="/images/snoopy503.jpg" />
+EOF;
+$t->render('single.phtml');
 ?>
