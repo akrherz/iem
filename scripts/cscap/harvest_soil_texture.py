@@ -45,7 +45,7 @@ for entry in feed:
         depth = worksheet.get_cell_value(row, 2)
         if plotid is None or depth is None:
             continue
-        for col in range(3, worksheet.cols+1):
+        for col in range(4, worksheet.cols+1):
             varname = worksheet.get_cell_value(1,col).strip().split()[0]
             if varname[:4] != 'SOIL':
                 print 'Invalid varname: %s site: %s year: %s' % (
