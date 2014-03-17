@@ -1,11 +1,17 @@
 <?php
 include("../../config/settings.inc.php");
-$TITLE = "IEM | Rainfall";
-$THISPAGE = "gis-rainfall";
-include("$rootpath/include/header.php");
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Rainfall";
+$t->thispage = "gis-rainfall";
 include("$rootpath/include/forms.php");
-?>
 
+$mselect = monthSelect( date("m", time() - 86400) );
+$dselect = daySelect( date("d", time() - 86400) );
+$yselect = yearSelect(1997, date("Y", time() - 86400), "year");
+$ys = yearSelect2(1997, date("Y"), "syear");
+$ye = yearSelect2(1997, date("Y"), "eyear");
+$t->content = <<<EOF
 <h3 class="heading">IEM Rainfall</h3>
 
 <p>IEM rainfall is a high resolution depiction of rainfall estimates over
@@ -21,9 +27,9 @@ for a particular year and for a particular point.  This point can be specified
 in a number of ways. <b>Caveat:</b>  Geocoding is not perfect.  Your address may not be found in the database.  If you first attempt fails, try using a popular building address for a location near you.
 
 <p><b>Start Year:</b>
-<?php echo yearSelect2(1997, date("Y"), "syear"); ?>
+{$ys}
  &nbsp; <b>End Year (inclusive):</b>
-<?php echo yearSelect2(1997, date("Y"), "eyear"); ?>
+{$ye}
 <br /><b>View Options:</b>
 <select name="view">
 	<option value="online">Online
@@ -71,9 +77,9 @@ year, the estimates will be current for that period till yesterday.
 </tr></thead>
 <tbody>
 <tr>
-	<td><?php echo monthSelect( date("m", time() - 86400) ); ?></td>
-	<td><?php echo daySelect( date("d", time() - 86400) ); ?></td>
-	<td><?php echo yearSelect(1997, date("Y", time() - 86400), "year"); ?></td>
+	<td>{$mselect}</td>
+	<td>{$dselect}</td>
+	<td>{$yselect}</td>
 	<td><select name="geometry">
 	<option value="point">Point
 	<option value="polygon">Polygon
@@ -134,4 +140,6 @@ better refine the estimates.  If you downloaded data for yesterday at the time,
 you may wish to redownload that dataset again later, since the estimates may 
 be refined then.  Sounds confusing.  Please <a href="/info/contacts.php">contact us</a> if you have questions.</p>
 </div>
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
