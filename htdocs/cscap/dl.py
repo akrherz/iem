@@ -34,7 +34,7 @@ def get_nitratedata():
 
     res = "uniqueid,plotid,year,depth,soil15,soil16,soil23\n"
     cursor.execute("""SELECT site, plotid, depth, varname, year, value
-    from soil_nitrate_data WHERE value is not null
+    from soil_data WHERE value is not null
     and value ~* '[0-9\.]' and value != '.' and value !~* '<'
     and site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
     'SEPAC', 'BRADFORD.C', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN')""")
@@ -85,7 +85,7 @@ def get_agdata():
     # Get the Soil Nitrate data we are going to join with
     cursor.execute("""
     SELECT site, plotid, depth, varname, year, avg(value::float)
-    from soil_nitrate_data WHERE value is not null
+    from soil_data WHERE value is not null
     and value ~* '[0-9\.]' and value != '.' and value !~* '<'
     and site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
     'SEPAC', 'BRADFORD.C', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN') 

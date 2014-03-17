@@ -20,8 +20,8 @@ def build_vars(mode):
     config.read('/mesonet/www/apps/iemwebsite/scripts/cscap/mytokens.cfg')
     spr_client = util.get_spreadsheet_client(config)
     feed = spr_client.get_list_feed(config.get('cscap', 'sdckey'), 'od6')
-    places = 3 if mode != 'nitrate' else 4
-    prefix = 'AGR' if mode != 'nitrate' else 'SOIL'
+    places = 3 if mode != 'soil' else 4
+    prefix = 'AGR' if mode != 'soil' else 'SOIL'
     for entry in feed.entry:
         data = entry.to_dict()
         if data['key'] is None or data['key'][:places] != prefix:
@@ -34,7 +34,7 @@ def get_data(year, mode):
     ''' Do stuff '''
     data = {ALL: {} }
     dvars = []
-    table = 'agronomic_data' if mode == 'agronomic' else 'soil_nitrate_data'
+    table = 'agronomic_data' if mode == 'agronomic' else 'soil_data'
     cursor.execute("""SELECT site, varname, 
     -- We have some number
     sum(case when lower(value) not in ('.','','did not collect','n/a') and
@@ -128,7 +128,7 @@ if __name__ == '__main__':
         <a href="dataprogress.py?mode=agronomic">Agronomic Data</a>
     </div>
     <div class="col-md-4 col-sm-4">
-        <a href="dataprogress.py?mode=nitrate">Soil Nitrate Data</a>
+        <a href="dataprogress.py?mode=soil">Soil Data</a>
     </div>
 </div>
     
