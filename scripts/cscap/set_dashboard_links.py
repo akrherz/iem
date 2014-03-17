@@ -66,7 +66,11 @@ lookuprefs = {
               'agr40': 'Agronomic Data',
               'soil1': 'Soil Bulk Density and Water Retention Data',
               'soil2': 'Soil Bulk Density and Water Retention Data',
-              'soil6': 'Soil Texture Data',
+              'soil29': 'Soil Bulk Density and Water Retention Data',
+              'soil30': 'Soil Bulk Density and Water Retention Data',
+              'soil31': 'Soil Bulk Density and Water Retention Data',
+              'soil32': 'Soil Bulk Density and Water Retention Data',
+              'soil33': 'Soil Bulk Density and Water Retention Data',
               'soil11': 'Soil Texture Data',
               'soil12': 'Soil Texture Data',
               'soil13': 'Soil Texture Data',
@@ -82,8 +86,6 @@ lookuprefs = {
               'soil28': 'Soil Texture Data',
               }
 varconv = {
-           'soil1': 'bulkdensity',
-           'soil2': 'waterretentionat15bar',
            }
 
 CACHE = {}
@@ -179,5 +181,5 @@ def do_row(row):
             entry.cell.input_value = newvalue
             spr_client.update(entry)
         
-for i in range(6,71):
+for i in range(6,77):
     do_row(i)
