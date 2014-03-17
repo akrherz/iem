@@ -1,7 +1,7 @@
 <?php
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
+include("../../include/database.inc.php");
+include("../../include/network.php");
 $nt = new NetworkTable("OT");
 $cities = $nt->table;
 
@@ -33,9 +33,9 @@ for($i=0; $row = @pg_fetch_array($rs,$i); $i++){
 
 } // End of while
 
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
+include ("../../include/jpgraph/jpgraph.php");
+include ("../../include/jpgraph/jpgraph_line.php");
+include ("../../include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300);

@@ -1,9 +1,10 @@
 <?php 
 include("../../config/settings.inc.php");
-$TITLE = "IEM | Other Network";
-include("$rootpath/include/header.php"); 
-include("$rootpath/include/forms.php"); 
-include("$rootpath/include/imagemaps.php"); 
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Other Network";
+include("../../include/forms.php"); 
+include("../../include/imagemaps.php"); 
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
@@ -11,22 +12,30 @@ $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 $myTime = mktime(0,0,0,$month,$day,$year);
 $station = isset($_GET["station"]) ? $_GET["station"]: "OT0002";
 
-?>
+$nselect = networkSelect("OT", $station);
+$yselect = yearSelect(2007, $year);
+$mselect = monthSelect($month);
+$dselect = daySelect($day);
 
-<div class="text">
-<a href="/other/">Other Networks</a> &nbsp;<b> > </b> &nbsp; Mesonet Northeast Ames
+$t->content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/other/">Other Networks</a></li>
+ <li class="active">Mesonet Northeast Ames</li>
+</ol>
 
   <form method="GET" name="control">
-  <?php echo networkSelect("OT", $station); ?>
-  <?php echo yearSelect(2007, $year); ?>
-  <?php echo monthSelect($month); ?>
-  <?php echo daySelect($day); ?>
+  {$nselect}
+  {$yselect}
+  {$mselect}
+  {$dselect}
 
   <input type="submit" value="Make Plot"></form>
 
 <BR>
-<img src="plot_temps.php?station=<?php echo $station; ?>&year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
-<img src="plot_winds.php?station=<?php echo $station; ?>&year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" ALT="Time Series">
+<img src="plot_temps.php?station={$station}&year={$year}&month={$month}&day={$day}" ALT="Time Series">
+<img src="plot_winds.php?station={$station}&year={$year}&month={$month}&day={$day}" ALT="Time Series">
 
 </div>
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

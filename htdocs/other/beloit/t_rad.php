@@ -1,13 +1,13 @@
 <?php
 /* Generate a 1 minute plot of temperature, dew point, and solar rad */
 include_once("../../../config/settings.inc.php");
-include_once("$rootpath/include/mlib.php");
-include_once("$rootpath/include/database.inc.php");
-include ("$rootpath/include/jpgraph/jpgraph.php");
-include ("$rootpath/include/jpgraph/jpgraph_line.php");
-include ("$rootpath/include/jpgraph/jpgraph_scatter.php");
-include ("$rootpath/include/jpgraph/jpgraph_date.php");
-include ("$rootpath/include/jpgraph/jpgraph_led.php");
+include_once("../../../include/mlib.php");
+include_once("../../../include/database.inc.php");
+include ("../../../include/jpgraph/jpgraph.php");
+include ("../../../include/jpgraph/jpgraph_line.php");
+include ("../../../include/jpgraph/jpgraph_scatter.php");
+include ("../../../include/jpgraph/jpgraph_date.php");
+include ("../../../include/jpgraph/jpgraph_led.php");
 
 $station = "OT0009";
 $year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");

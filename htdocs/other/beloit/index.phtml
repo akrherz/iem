@@ -1,16 +1,17 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | Beloit Weather Station";
-$THISPAGE = "networks-other";
-include("$rootpath/include/header.php");  
+include("../../../include/myview.php");
+$t = new MyView();
+$t->title = "Beloit Weather Station";
+$t->thispage = "networks-other";
 
 $year = isset( $_GET["year"] ) ? $_GET["year"] : date("Y");
 $month = isset( $_GET["month"] ) ? $_GET["month"] : date("m");
 $day = isset( $_GET["day"] ) ? $_GET["day"] : date("d");
 
-include ("$rootpath/include/forms.php");
-include ("$rootpath/include/iemaccess.php");
-include ("$rootpath/include/iemaccessob.php");
+include ("../../../include/forms.php");
+include ("../../../include/iemaccess.php");
+include ("../../../include/iemaccessob.php");
 $iem = new IEMAccess();
 $iemob = $iem->getSingleSite("OT0009");
 $rs = $iemob->db;
@@ -22,8 +23,32 @@ $rs = $iemob->db;
    "srad" => "Solar Radiation [W m{-2}]",
    "mslp" => "Pressure [mb]", "phour" => "Hourly Precipitation [inches]",
    "c1tmpf" => "Soil Temperature [F]", "pday" => "Daily Precipitation [inches]");
-?>
 
+ $vselect = "";
+ foreach ( $vardict as $key => $value ) {
+ 	if ($rs[$key] != "") {
+ 		if ($key == "valid") {
+ 			$t2 = date("d M Y, g A", strtotime($rs[$key]));
+ 			$vselect .= '<tr><td><b>'. $value .'</b></td><td>'. $t2 .'</td></tr>';
+ 		} else {
+ 			$vselect .= '<tr><td><b>'. $value .'</b></td><td>'. $rs[$key] .'</td></tr>';
+ 		} // End if
+ 	} // End if
+ }
+ $ys = yearSelect2(2010, $year, "year");
+ $ms = monthSelect($month, "month");
+ $ds = daySelect($day, "day");
+ 
+ $table = "";
+ $rs2 = pg_query($iem->dbconn, "SELECT day, max_tmpf, min_tmpf, pday from summary s JOIN stations t
+  ON (t.iemid = s.iemid)
+  WHERE t.id = 'OT0009' ORDER by day DESC");
+ for($i=0;$row=@pg_fetch_array($rs2,$i);$i++){
+ 	$table .= sprintf("<tr><th>%s</th><td>%.1f</td><td>%.1f</td><td>%.2f</td></tr>",
+ 			$row["day"], $row["max_tmpf"], $row["min_tmpf"], $row["pday"]);
+ }
+ 
+ $t->content = <<<EOF
 
 <h3 class="heading">Beloit Weather Station</h3>
 <div style="float: right; margin: 5px;"><img src="photo.jpg" /></div>
@@ -35,45 +60,27 @@ gardening activities.</p>
 
 <strong>Current Observation</strong><br />
 <table cellpadding="3" cellspacing="0" border="1">
-<?php
-  foreach ( $vardict as $key => $value ) {
-    if ($rs[$key] != "") {
-      if ($key == "valid") {
-        $t = date("d M Y, g A", strtotime($rs[$key]));
-        echo '<tr><td><b>'. $value .'</b></td><td>'. $t .'</td></tr>';
-      } else {
-        echo '<tr><td><b>'. $value .'</b></td><td>'. $rs[$key] .'</td></tr>';
-      } // End if
-    } // End if
-  }
-?>
+{$vselect}
 </table>
 
 <p><strong>Time Series Graph</strong><br />
 Select Date after 14 May 2010:
 <form method="GET" name="formerr">
-<?php echo yearSelect2(2010, $year, "year"); ?>
-<?php echo monthSelect($month, "month"); ?>
-<?php echo daySelect($day, "day"); ?>
+{$ys}
+{$ms}
+{$ds}
 <input type="submit" value="Create Chart">
 </form>
 <br />
 
 
-<img src="t_rad.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>&day=<?php echo $day; ?>" />
+<img src="t_rad.php?year={$year}&month={$month}&day={$day}" />
 
 <p><strong>Daily Totals</strong><br />
 <table cellpadding="2" cellspacing="0" border="1">
 <tr><th>Day</th><th>High Temperature</th><th>Low Temperature</th><th>Rainfall [inch]</th></tr>
-<?php
-$rs2 = pg_query($iem->dbconn, "SELECT day, max_tmpf, min_tmpf, pday from summary s JOIN stations t
-  ON (t.iemid = s.iemid)
-  WHERE t.id = 'OT0009' ORDER by day DESC");
-for($i=0;$row=@pg_fetch_array($rs2,$i);$i++){
-  echo sprintf("<tr><th>%s</th><td>%.1f</td><td>%.1f</td><td>%.2f</td></tr>", 
-   $row["day"], $row["max_tmpf"], $row["min_tmpf"], $row["pday"]);
-}
-?>
+{$table}
 </table>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
