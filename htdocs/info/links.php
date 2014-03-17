@@ -1,13 +1,13 @@
 <?php
 include("../../config/settings.inc.php");
-$TITLE = "IEM | Links";
-$THISPAGE="iem-links";
-include("$rootpath/include/header.php"); ?>
-
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Links";
+$t->thispage = "iem-links";
+$t->content = <<<EOF
 
 <h3 class="heading">Links</h3><p>
 
-<div class="text">
 <h3 class="subtitle">Other State Mesonets:</h3>
 <ul>
  <li><a href="http://www.awis.com/mesonet/index.html">Alabama Mesonet</a></li>
@@ -82,8 +82,7 @@ access this data in the following locations:</p>
 
 <p></p>
 <p></p>
-</div>
 
-<!-- Begin the bottom of the page -->
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

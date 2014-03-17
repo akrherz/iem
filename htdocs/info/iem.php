@@ -1,7 +1,9 @@
 <?php
 include("../../config/settings.inc.php");
-$TITLE = "IEM | Information";
-include("$rootpath/include/header.php"); ?>
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Information";
+$t->content = <<<EOF
 
 <h3 class="heading">Iowa Environmental Mesonet</h3>
 
@@ -104,8 +106,7 @@ most beneficially placed.</li>
 <br>3010 Agronomy Hall
 <br>Iowa State University
 <br>Ames, IA 50010
-</p></div>
-
-<!-- Begin the bottom of the page -->
-
-<?php include("$rootpath/include/footer.php"); ?>
+</p>
+EOF;
+$t->render('single.phtml');
+?>

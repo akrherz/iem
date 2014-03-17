@@ -1,11 +1,10 @@
 <?php 
 include("../../config/settings.inc.php");
-	$TITLE = "IEM | Site Software";
-include("$rootpath/include/header.php"); 
-?>
-
-<div class="text">
-<P>The work of the IEM server is not accomplished magically.  Here is a listing
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Site Software";
+$t->content = <<<EOF
+<P>The work of the IEM server is not accomplished magicly.  Here is a listing
 of some of the software utilized to make the IEM work.<p>
 
 <h3 class="subtitle"><a class="noul" href="http://www.redhat.com">RedHat Linux</a></h3>
@@ -32,7 +31,7 @@ Versatile scripting language used for CGI scripts, DB access scripts, and system
 scripts.<p>
 
 <h3 class="subtitle"><a class="noul" href="http://www.gnu.org/software/mailman/mailman.html">GNU Mailman</a></h3>
-Email list management and archive software.</div>
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+Email list management and archive software.
+EOF;
+$t->render('single.phtml');
+?>
