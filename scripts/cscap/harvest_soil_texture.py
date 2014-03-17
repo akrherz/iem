@@ -1,5 +1,5 @@
 '''
- Scrape out the Soil Nitrate data from Google Drive
+ Scrape out the Soil Texture data from Google Drive
 '''
 import util
 import sys
@@ -21,7 +21,7 @@ spr_client = util.get_spreadsheet_client(config)
 docs_client = util.get_docs_client(config)
 
 query = gdata.docs.client.DocsQuery(show_collections='false', 
-                                    title='Soil Nitrate Data')
+                                    title='Soil Texture Data')
 feed = docs_client.GetAllResources(query=query)
 
 for entry in feed:
@@ -32,7 +32,10 @@ for entry in feed:
     worksheet = spreadsheet.worksheets[YEAR]
     worksheet.get_cell_feed()
     siteid = spreadsheet.title.split()[0]
-    print 'Processing %s Soil Nitrate Year %s' % (siteid, YEAR),
+    if siteid == 'DPAC':
+        print 'ERROR: Skipping DPAC Soil Texture sheet as it has subsamples'
+        continue
+    print 'Processing %s Soil Texture Year %s' % (siteid, YEAR),
     if (worksheet.get_cell_value(1, 1) != 'plotid' or
         worksheet.get_cell_value(1, 2) != 'depth'):
         print 'FATAL site: %s soil nitrate has corrupt headers' % (siteid,)
@@ -58,9 +61,10 @@ for entry in feed:
                     values (%s, %s, %s, %s, %s, %s, %s)
                     """, (siteid, plotid, varname, YEAR, depth, val, subsample))
             except Exception, exp:
-                print 'HARVEST_SOIL_NITRATE TRACEBACK'
+                print 'HARVEST_SOIL_TEXTURE TRACEBACK'
                 print exp
-                print '%s %s %s %s %s' % (siteid, plotid, varname, depth, val)
+                print '%s %s %s %s %s' % (siteid, plotid, varname, depth, val,
+                                          subsample)
                 sys.exit()
     print "...done"
 pcursor.close()

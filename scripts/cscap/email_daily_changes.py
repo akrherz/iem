@@ -97,9 +97,9 @@ while 1:
         #if entry.filename:
         #    print entry.filename.text
         #print entry.changestamp.value
-    if count == 0 or loopcount == 10:
-        if loopcount == 10:
-            print '=================> LOOPCOUNT HIT 10!'
+    if count == 0 or loopcount == 30:
+        if loopcount == 30:
+            print '=================> LOOPCOUNT HIT 30!'
         break
 
 if len(tablerows) == 0:
