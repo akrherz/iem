@@ -1,5 +1,7 @@
 <?php
  include("../../config/settings.inc.php");
+ include("../../include/myview.php");
+ $t = new MyView();
  define("IEM_APPID", 144);
  $phenomena = isset($_GET["phenomena"]) ? $_GET["phenomena"] : "TO";
  $significance = isset($_GET["significance"]) ? $_GET["significance"] : "W";
@@ -40,14 +42,43 @@
   $imgurl .= sprintf("sts=%s&ets=%s", gmdate("YmdH", $ts1), 
   		gmdate("YmdH", $ts2));
   
- $TITLE = "IEM | NWS WWA Product Counts by Year";
+ $t->title = "NWS WWA Product Counts";
 
  include("../../include/vtec.php"); 
  include("../../include/forms.php");
- include("../../include/header.php"); 
- ?>
 
- <h3>WWA Product Counts by WFO by Year</h3>
+ $p1 = make_select("phenomena", $phenomena, $vtec_phenomena);
+ $s1 = make_select("significance", $significance, $vtec_significance);
+ $p2 = make_select("phenomena2", $phenomena2, $vtec_phenomena);
+ $s2 = make_select("significance2", $significance2, $vtec_significance);
+ $p3 = make_select("phenomena3", $phenomena3, $vtec_phenomena);
+ $s3 = make_select("significance3", $significance3, $vtec_significance);
+ $p4 = make_select("phenomena4", $phenomena4, $vtec_phenomena);
+ $s4 = make_select("significance4", $significance4, $vtec_significance);
+ 
+ $e2 = sprintf("<input type='checkbox' name='enabled2'%s>Include</input>",
+ 		($enabled2) ? " checked='checked'": "");
+ $e3 = sprintf("<input type='checkbox' name='enabled3'%s>Include</input>",
+ 		($enabled3) ? " checked='checked'": "");
+ $e4 = sprintf("<input type='checkbox' name='enabled4'%s>Include</input>",
+ 		($enabled4) ? " checked='checked'": "");
+ 
+ $y1 = yearSelect2(2005, $year1, 'year1');
+ $m1 = monthSelect2($month1, 'month1');
+ $d1 = daySelect2($day1, 'day1');
+ $h1 = gmtHourSelect($hour1, 'hour1');
+ $y2 = yearSelect2(2005, $year2, 'year2');
+ $m2 = monthSelect2($month2, 'month2');
+ $d2 = daySelect2($day2, 'day2');
+ $h2 = gmtHourSelect($hour2, 'hour2');
+ 
+ 
+ $t->content = <<<EOF
+ <ol class="breadcrumb">
+ <li><a href="/nws/">NWS Resources</a></li>
+ <li>WWA Product Counts by WFO</li>
+ </ol>
+ <h3>WWA Product Counts by WFO</h3>
  
  <p>This application generates a map of the number of VTEC encoded Watch, Warning, 
  and Advisory (WWA) events by NWS Forecast Office for a time period of your choice.  
@@ -65,116 +96,42 @@
 
 <tr>
 <td></td>
-<td><select name="phenomena">
-<?php 
-reset($vtec_phenomena);
-while (list($key, $value)=each($vtec_phenomena)){
-  echo sprintf("<option value='%s'%s>%s</option>\n", $key,
-  		($key == $phenomena) ? " SELECTED='SELECTED'": '', $value);
-}
-?>
-</select>
-</td>
-<td><select name="significance">
-<?php 
-reset($vtec_significance);
-while (list($key, $value)=each($vtec_significance)){
-  echo sprintf("<option value='%s'%s>%s</option>\n", $key,
-  		($key == $significance) ? " SELECTED='SELECTED'": '', $value);
-}
-?>
-</select>
-</td>
-</tr>
-<tr>
-<td><input type='checkbox' name='enabled2' <?php if ($enabled2) echo "checked='checked'"; ?>>Include</input></td>
-<td><select name="phenomena2">
-<?php 
-reset($vtec_phenomena);
-while (list($key, $value)=each($vtec_phenomena)){
-  echo sprintf("<option value='%s'%s>%s</option>\n", $key,
-  		($key == $phenomena2) ? " SELECTED='SELECTED'": '', $value);
-}
-?>
-</select>
-</td>
-<td><select name="significance2">
-<?php 
-reset($vtec_significance);
-while (list($key, $value)=each($vtec_significance)){
-  echo sprintf("<option value='%s'%s>%s</option>\n", $key,
-  		($key == $significance2) ? " SELECTED='SELECTED'": '', $value);
-}
-?>
-</select>
-</td>
-</tr>
-<tr>
-<td><input type='checkbox' name='enabled3' <?php if ($enabled3) echo "checked='checked'"; ?>>Include</input></td>
-<td><select name="phenomena3">
-<?php 
-reset($vtec_phenomena);
-while (list($key, $value)=each($vtec_phenomena)){
-  echo sprintf("<option value='%s'%s>%s</option>\n", $key,
-  		($key == $phenomena3) ? " SELECTED='SELECTED'": '', $value);
-}
-?>
-</select>
-</td>
-<td><select name="significance3">
-<?php 
-reset($vtec_significance);
-while (list($key, $value)=each($vtec_significance)){
-  echo sprintf("<option value='%s'%s>%s</option>\n", $key,
-  		($key == $significance3) ? " SELECTED='SELECTED'": '', $value);
-}
-?>
-</select>
-</td>
+<td>{$p1}</td>
+<td>{$s1}</td>
 </tr>
 
 <tr>
-<td><input type='checkbox' name='enabled4' <?php if ($enabled4) echo "checked='checked'"; ?>>Include</input></td>
-<td><select name="phenomena4">
-<?php 
-reset($vtec_phenomena);
-while (list($key, $value)=each($vtec_phenomena)){
-  echo sprintf("<option value='%s'%s>%s</option>\n", $key,
-  		($key == $phenomena4) ? " SELECTED='SELECTED'": '', $value);
-}
-?>
-</select>
-</td>
-<td><select name="significance4">
-<?php 
-reset($vtec_significance);
-while (list($key, $value)=each($vtec_significance)){
-  echo sprintf("<option value='%s'%s>%s</option>\n", $key,
-  		($key == $significance4) ? " SELECTED='SELECTED'": '', $value);
-}
-?>
-</select>
-</td>
+<td>{$e2}</td>
+<td>{$p2}</td>
+<td>{$s2}</td>
 </tr>
+
+<tr>
+<td>{$e3}</td>
+<td>{$p3}</td>
+<td>{$s3}</td>
+</tr>
+
+<tr>
+<td>{$e4}</td>
+<td>{$p4}</td>
+<td>{$s4}</td>
+</tr>
+
 <tr><th colspan='3'>Time Period (UTC Timestamps)</th></tr>
 <tr><td colspan='3'><strong>Start Time:</strong>
-  <?php echo yearSelect2(2005, $year1, 'year1'); ?>
-  <?php echo monthSelect2($month1, 'month1'); ?>
-  <?php echo daySelect2($day1, 'day1'); ?>  
-  <?php echo gmtHourSelect($hour1, 'hour1'); ?>
+  {$y1} {$m1} {$d1} {$h1}
   </td></tr>
 <tr><td colspan='3'><strong>End Time:</strong>
-  <?php echo yearSelect2(2005, $year2, 'year2'); ?>
-  <?php echo monthSelect2($month2, 'month2'); ?>
-  <?php echo daySelect2($day2, 'day2'); ?>   
-  <?php echo gmtHourSelect($hour2, 'hour2'); ?>
-  </td></tr>
+  {$y2} {$m2} {$d2} {$h2}
+</td></tr>
   </table>
 
 <p><input type="submit" value="Generate Map" />
 </form>
 
 <p>Once generated, the map will appear below...
-<p><img src="<?php echo $imgurl; ?>" alt="The Map" />
-
-<?php include("../../include/footer.php"); ?>
+<p><img src="{$imgurl}" alt="The Map" class="img img-responsive"/>
+EOF;
+ $t->render('single.phtml');
+ ?>

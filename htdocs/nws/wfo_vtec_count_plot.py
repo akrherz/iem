@@ -53,13 +53,15 @@ SELECT wfo, count(*) from total GROUP by wfo ORDER by count DESC
 
     p = plot.MapPlot(sector='nws',
                  title='%s Counts by NWS Office' % (title,),
-                 subtitle='Valid %s - %s UTC, based on VTEC: %s' % (sts.strftime("%d %b %Y %H:00"),
-                                                                    ets.strftime("%d %b %Y %H:00"),
+                 subtitle='Valid %s - %s UTC, based on VTEC: %s' % (
+                                                sts.strftime("%d %b %Y %H:00"),
+                                                ets.strftime("%d %b %Y %H:00"),
                                                 subtitle))
     p.fill_cwas(data, bins=bins)
     p.postprocess(web=True, memcache=mc, memcachekey=key, memcacheexpire=1800)
 
 if __name__ == '__main__':
+    ''' See how we are called '''
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     
     form = cgi.FieldStorage()
@@ -87,7 +89,7 @@ if __name__ == '__main__':
     key += "%s_%s.png" % (sts.strftime("%Y%m%d%H"), ets.strftime("%Y%m%d%H"))
     res = mc.get(key)
     if res:
-        print 'Content-type: image/png\n'
+        sys.stdout.write('Content-type: image/png\n\n')
         sys.stdout.write( res )
     else:
         run(phenomena, significance, sts, ets, mc, key)
