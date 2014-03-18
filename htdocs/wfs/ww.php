@@ -47,7 +47,7 @@ echo <<<EOF
 <ows:Country>USA</ows:Country>
 <ows:ElectronicMailAddress>akrherz@iastate.edu</ows:ElectronicMailAddress>
 </ows:Address>
-<ows:OnlineResource xlink:type="simple" xlink:href="http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wfs/wwt.map&amp;"/>
+<ows:OnlineResource xlink:type="simple" xlink:href="{$uri}"/>
 <ows:HoursOfService>24x7</ows:HoursOfService>
 <ows:ContactInstructions>email</ows:ContactInstructions>
 </ows:ContactInfo>
