@@ -1,9 +1,10 @@
 <?php 
  include("../../config/settings.inc.php");
- $TITLE = "ISU Ag Climate";
- $THISPAGE = "networks-agclimate";
- include "$rootpath/include/forms.php";
- include("$rootpath/include/header.php"); 
+ include("../../include/myview.php");
+ $t = new MyView();
+ $t->title = "Ag Climate";
+ $t->thispage = "networks-agclimate";
+ include "../../include/forms.php";
  $prod = isset($_GET["prod"]) ? intval($_GET["prod"]) : 1;
  $year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : date("Y");
  $month = isset($_REQUEST["month"]) ? intval($_REQUEST["month"]) : date("m");
@@ -98,27 +99,27 @@ often too low."
 ),
 );
 
-?>
-<div class="text">
+$extra = "";
+if ($prod == 10 || $prod == 11) {
+	$extra .= "<form method='GET' name='ts'>";
+	$extra .= "<input type='hidden' value='$prod' name='prod'>";
+	$extra .= "<strong>Select Year: </strong>". yearSelect(1987, $year);
+	$extra .= "<strong>Select Month: </strong>". monthSelect($month, "month");
+	$extra .= "<input type='submit' value='Update Plot' />";
+	$extra .= '</form>';
+}
+
+$t->content = <<<EOF
 
 <table style="float: left;" width="100%">
 <TR>
 <TD valign="top">
-<?php 
-if ($prod == 10 || $prod == 11) {
-  echo "<form method='GET' name='ts'>";
-  echo "<input type='hidden' value='$prod' name='prod'>";
-  echo "<strong>Select Year: </strong>". yearSelect(1987, $year);
-  echo "<strong>Select Month: </strong>". monthSelect($month, "month");
-  echo "<input type='submit' value='Update Plot' />";
-  echo '</form>';
-}
-?>
+{$extra}
 
-<img src="<?php echo $data[$prod]["mapurl"]; ?>" ALT="ISU Ag Climate" style="border: 1px solid #000; ">
+<img src="{$data[$prod]["mapurl"]}" ALT="ISU Ag Climate" style="border: 1px solid #000; ">
 
 <p><strong>Plot Description:</strong><br />
-<?php echo $data[$prod]["desc"]; ?>
+{$data[$prod]["desc"]}
 
 <p><strong>QC Flags:</strong>
 <table>
@@ -144,12 +145,74 @@ if ($prod == 10 || $prod == 11) {
 </TD>
 <TD valign="TOP" width="250">
 
-	<?php include("$rootpath/include/dataLinks.php"); ?>
+<div id="right">
+<table width="100%" cellspacing="0" cellpadding="1">
+<tr>
+  <td class="heading">
+     <b>Yesterday values:</b></td></tr>
+<tr>
+  <td>
+<div style="padding: 5px;">
+  <A HREF="display.php?prod=1">Max/Min Air Temps</A><br>
+  <A HREF="display.php?prod=2">Avg 4in Soil Temps</A><br>
+  <A HREF="display.php?prod=3">Max/Min 4in Soil Temps</A><br>
+  <a href="/data/soilt_day1.png">County-based Soil Temps</a><br />
+  <A HREF="display.php?prod=4">Solar Radiation Values</A><br>
+  <A HREF="display.php?prod=5">Precipitation</A><br>
+  <A HREF="display.php?prod=6">Potential E-T</A><br>
+  <A HREF="display.php?prod=7">Peak Wind Gust (5 sec)</A><br>
+  <A HREF="display.php?prod=8">Average Wind Speed</A><br>
+  <A HREF="display.php?prod=9">Max/Min Dew Points</A><br>
+</div>
+  </td>
+</tr>
+
+<tr>
+  <td class="heading">
+     <b>Accumulated values:</b></td></tr>
+<tr>
+  <td>
+<div style="padding: 5px;">
+      <A HREF="display.php?prod=10">Monthly evapotranspiration</A><br>
+      <A HREF="display.php?prod=11">Monthly rainfall</A><br>
+      <A HREF="display.php?prod=12">Standard Chill Units since 1 Sept</A><br>
+</div>
+  </td>
+</tr>
+
+<tr>
+  <td class="heading">
+     <b>Data Applications:</b></td></tr>
+<tr><td>
+<div style="padding: 5px;">
+  <a href="/GIS/apps/agclimate/gsplot.phtml">Growing Season Maps</a><br>
+  <a href="/plotting/agc/">Time Series Charts</a><br>
+  <a href="soilt-prob.php">4in Soil Temperatures</a><br>
+  <A HREF="/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a><br>
+</div>
+  </td>
+</tr>
+
+<tr>
+  <td class="heading">
+     <b>Data Request:</b></td></tr>
+<tr>
+  <td>
+<div style="padding: 5px;">
+   <A HREF="/agclimate/hist/hourlyRequest.php">Request Hourly Data</A><br>
+   <A HREF="/agclimate/hist/dailyRequest.php">Request Daily Data</A><br>
+</div>
+  </td>
+</tr>
+
+</table>
+</div>
+		
 
 </TD></TR>
 </table>
 
 <br clear="all" /><p>&nbsp;</p>
-</div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
