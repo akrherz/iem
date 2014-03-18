@@ -157,7 +157,7 @@ if (! $nohtml || $format == 'shapefile') {
 <h3 class="heading">Network Location Tables</h3>
 
 <div class="well pull-right">
-<a href="new-rss.php"><img src="../images/rss.gif" style="border: 0px;" alt="RSS" /></a> Feed of newly 
+<a href="new-rss.php"><img src="/images/rss.gif" style="border: 0px;" alt="RSS" /></a> Feed of newly 
 added stations.
 </div>
 
