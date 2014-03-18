@@ -118,11 +118,33 @@ EOF;
 		<a class=\"btn btn-warning\" href=\"$abstainurl\">Abstain ($abstain votes)</a>
 		</div>";
 		
-		$t->jsextra = "<script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>";
-		$s .= "<div class=\"container\" style=\"margin-top: 5px\"><div id=\"fb-root\"></div>
-		<fb:comments send_notification_uid=\"16922938\" callback=\"/fbcb.php\" title=\"". $row["title"] ."\" \" href=\"http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ."\" xid=\"$fbid\" numposts=\"6\" width=\"520\"></fb:comments>";
-	
-		$s .= "</div></div>";
+		$t->jsextra = <<<EOF
+		<div id="fb-root"></div>
+<script type="text/javascript">
+(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=196492870363354";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+
+window.fbAsyncInit = function() {
+	FB.Event.subscribe('comment.create', function(response){
+	    $.post('/fbcomments.php', {
+	      "action": "comment created",
+	      "url_of_page_comment_leaved_on": response.href,
+	      "id_of_comment_object": response.commentID
+	    });
+	  });
+}
+</script>
+EOF;
+		$huri = "http://mesonet.agron.iastate.edu/onsite/features/cat.php?day=". $row["permalink"] ;
+		$s .= <<<EOF
+<div class="fb-comments" data-href="{$huri}" data-numposts="5" data-colorscheme="light"></div>
+</div>
+EOF;
 	}
 	/* Now, lets look for older features! */
 	$s .= "<br /><strong>Previous Years' Features</strong>";

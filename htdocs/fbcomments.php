@@ -1,6 +1,7 @@
 <?php 
 /*
  * Called back from facebook social app when new comment is made
+ * http://stackoverflow.com/questions/5331165/fb-is-not-defined-problem
  * http://stackoverflow.com/questions/8594048/getting-notification-when-someone-comments-using-comments-plugin
  */
 $admin_email = 'akrherz@iastate.edu';
