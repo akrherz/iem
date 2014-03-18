@@ -10,7 +10,7 @@ FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 EXTENT -155.0 15.0 -30.0 70.0
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/static/"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "/mesonet/www/apps/iemwebsite/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 
 
@@ -30,20 +30,33 @@ WEB
 #  FOOTER ia_footer.html
   MINSCALE 90000
   MAXSCALE 4650000
-  IMAGEPATH "/var/www/htdocs/tmp/"
+  IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/www/htdocs/tmp/w0.log"
+  LOG "/tmp/w0.log"
   METADATA
    "wfs_title" "IEM Weather Warnings"
-   "wfs_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/data/wfs/ww.map&amp;"
+   "ows_service_onlineresource" "http://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/iemwebsite/data/wfs/ww.map&amp;"
    "wfs_srs" "EPSG:4326"
-   "wfs_abstract" "Ba Ba Ba"
-#   "wms_fees" "None"
+   "wfs_abstract" "Archived NWS Watch, Warning, Advisories"
+   "ows_fees" "None"
    "wfs_keywords" "Ba"
+   "ows_keywordlist" "NWS,Warnings"
    "wfs_accessconstraints" "None"
    "wfs_contactperson" "Daryl Herzmann"
+   "ows_contactposition" "Assistant Scientist"
+   "ows_contactvoicetelephone" "515-294-5978"
+   "ows_contactfacsimiletelephone" "515-294-5978"
    "wfs_contactorganization" "Iowa State University"
-      "wms_enable_request" "*"
+   "ows_address" "3015 Agronomy Hall"
+   "ows_city" "Ames"
+   "ows_stateorprovince" "Iowa"
+   "ows_country" "USA"
+   "ows_contactelectronicmailaddress" "akrherz@iastate.edu"
+   "ows_hoursofservice" "24x7"
+   "ows_contactinstructions" "email"
+   "ows_role" "Owner"
+   "ows_postcode" "50014"
+   "ows_enable_request" "*"
   END
 END
 
