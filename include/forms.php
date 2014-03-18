@@ -4,6 +4,7 @@
  */
 function make_select($name, $selected, $ar){
 	// Create a simple HTML select box
+        reset($ar);
 	$s = sprintf("<select name=\"%s\">\n", $name);
 	while( list($key,$val) = each($ar)){
 		if (is_array($val)){
