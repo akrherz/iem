@@ -11,11 +11,10 @@ $u = sprintf("<a href=\"%s\">%s</a>\n", $url, $url);
 $d = 
 
 $t->content = <<<EOF
-<div style="width:800px;">
 
-<h3 class="heading">Archived Data Schema</h3>
+<h3>Archived Data Schema</h3>
 
-<p class="story">The IEM stores
+<p>The IEM stores
 most of its archive in a web accessible directory tree structure.  Here is
 the storage schema for today's data:</p>
 <pre>
@@ -60,7 +59,6 @@ ROOT={$u}
    |- Archive of the NCEP Stage4 Precipitation product in Grib format
 </pre>
 
-</div>
 EOF;
 $t->render('single.phtml');
 ?>
