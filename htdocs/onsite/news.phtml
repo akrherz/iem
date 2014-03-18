@@ -3,7 +3,7 @@
  define("IEM_APPID", 22);
  include("../../include/myview.php");
  $t = new MyView();
- include("$rootpath/include/database.inc.php");
+ include("../../include/database.inc.php");
  $dbconn = iemdb("mesosite", TRUE, TRUE);
 
  $id = isset($_GET["id"]) ? intval($_GET["id"]): 0;
@@ -66,9 +66,32 @@ for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
 } // End of for
 
 if (pg_numrows($result) == 1){
-	$t->jsextra = "<script src=\"http://connect.facebook.net/en_US/all.js#appId=196492870363354&amp;xfbml=1\"></script>";
-	$content .= "<div id=\"fb-root\"></div>
-	<fb:comments send_notification_uid=\"16922938\" title=\"". $row["title"] ."\" \" href=\"http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $id ."\" xid=\"$id\" numposts=\"6\" width=\"520\"></fb:comments>";
+		$t->jsextra = <<<EOF
+		<div id="fb-root"></div>
+<script type="text/javascript">
+(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=196492870363354";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+
+window.fbAsyncInit = function() {
+	FB.Event.subscribe('comment.create', function(response){
+	    $.post('/fbcomments.php', {
+	      "action": "comment created",
+	      "url_of_page_comment_leaved_on": response.href,
+	      "id_of_comment_object": response.commentID
+	    });
+	  });
+}
+</script>
+EOF;
+	$huri = "http://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $id; 
+	$content .= <<<EOF
+<div class="fb-comments" data-href="{$huri}" data-numposts="5" data-colorscheme="light"></div>
+EOF;
 	$content .= "</div>";
 }
 
