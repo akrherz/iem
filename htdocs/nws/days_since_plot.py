@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+'''
+ Generate a plot of the number of days since the last VTEC product issued
+ by the WFO, save this in memcache for 30 minutes before regenerating
+'''
 
 import sys
 import numpy
@@ -35,6 +39,7 @@ def run(phenomena, significance, mc, key):
     p.postprocess(web=True, memcache=mc, memcachekey=key, memcacheexpire=1800)
 
 if __name__ == '__main__':
+    ''' See how we are called '''
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     
     form = cgi.FieldStorage()
@@ -43,7 +48,7 @@ if __name__ == '__main__':
     key = "days_since_%s_%s.png" % (phenomena, significance)
     res = mc.get(key)
     if res:
-        print 'Content-type: image/png\n'
+        sys.stdout.write('Content-type: image/png\n\n')
         sys.stdout.write( res )
     else:
         run(phenomena, significance, mc, key)
