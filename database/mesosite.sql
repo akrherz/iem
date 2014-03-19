@@ -62,7 +62,7 @@ GRANT SELECT on raster_lookup to nobody,apache;
 --- IEMBot channels
 ---
 CREATE TABLE iembot_channels(
-  id varchar,
+  id varchar not null UNIQUE,
   name varchar);
 GRANT all on iembot_channels to nobody,apache;
 
