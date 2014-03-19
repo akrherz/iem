@@ -146,7 +146,12 @@ function hideMetars(){
 EOF;
 $dstr = date("d F Y", $date);
 $tzname =  $metadata["tzname"];
-$ys = yearSelect(1933,$year);
+if ($metadata["archive_begin"]){
+	$startyear = intval(date("Y", time($metadata["archive_begin"])));
+} else {
+	$startyear = 1933;
+}
+$ys = yearSelect($startyear,$year);
 $ms = monthSelect($month);
 $ds = daySelect($day);
 
