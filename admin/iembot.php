@@ -16,11 +16,15 @@ $rs = pg_prepare($dbconn, "DELETEROOM", "DELETE from iembot_rooms WHERE
                  roomname = $1");
 $rs = pg_prepare($dbconn, "DELETESUBS", "DELETE from iembot_room_subscriptions
                  WHERE roomname = $1"); 
+$rs = pg_prepare($dbconn, "ADDCHANNEL", "INSERT into iembot_channels
+                 (id, name) values ($1,$2)");
+
 
 $room = isset($_REQUEST["room"]) ? $_REQUEST["room"]: "";
 $channel = isset($_REQUEST["channel"]) ? $_REQUEST["channel"]: "";
 $action = isset($_REQUEST["action"]) ? $_REQUEST["action"]: "";
 $sub = isset($_REQUEST["sub"]) ? $_REQUEST["sub"]: Array();
+$name = isset($_REQUEST["name"]) ? $_REQUEST["name"]: "";
 
 function reloadbot(){
 	$alertMsg = file_get_contents("http://localhost/iembot-json/reload");
@@ -39,6 +43,11 @@ if ($action == "add" && $room != ""){
   pg_execute($dbconn, "CREATEROOM", Array($room));
   reloadbot();
   $alertMsg = "Created roomname ($room) and reloaded iembot";
+}
+
+if ($action == "addchannel" && $channel != ""){
+	pg_execute($dbconn, "ADDCHANNEL", Array($channel, $name));
+	$alertMsg = "Channel ID: $channel added";
 }
 
 
@@ -73,12 +82,12 @@ App.roomname = "'. $room .'";
 }
 </style>
 ';
-include("$rootpath/include/header.php");
+include("../include/header.php");
 ?>
 <h3>IEMBot Chatroom Configuration Page</h3>
 <?php
 if (isset($alertMsg)){ 
-  echo "<div class=\"warning\">$alertMsg</div>";
+  echo "<div class=\"alert alert-warning\">$alertMsg</div>";
 }
 
 if ($room != "" && $action != "delete"){
@@ -122,36 +131,6 @@ if ($room != "" && $action != "delete"){
   echo "<form name=\"modify\" method=\"POST\">";
   echo "<input type=\"hidden\" name=\"action\" value=\"modify\">";
   echo "<input type=\"hidden\" name=\"room\" value=\"${room}\">";
-  $rs = pg_execute($dbconn, "SELECTROOM", Array($room));
-  $row = pg_fetch_array($rs,0);
-  echo "<p><strong>Email daily logfile to (comma delimited):</strong><br />
-       <input size=\"80\" type=\"text\" name=\"email\" value=\"". $row["logemail"] ."\">";
-
-  echo "<p><strong>Associated Facebook Page ID (numeric):</strong><br />" .
-  		"<input type=\"text\" name=\"fbpage\" value=\"". $row["fbpage"] ."\" />";
-  echo "<p><strong>Associated Twitter Account (string):</strong><br />" .
-  		"<input type=\"text\" name=\"twitter\" value=\"". $row["twitter"] ."\" />";
-
-  echo "<p><strong>Email Log Mode:</strong><br />
-       <select name=\"logmode\">";
-  echo "<option value=\"1\" ";
-  if ($row["logmode"] == 1) echo "SELECTED";
-  echo ">Exclude NWSBot Messages</option>";
-  echo "<option value=\"2\" ";
-  if ($row["logmode"] == 2) echo "SELECTED";
-  echo ">Only NWSBot Messages</option>";
-  echo "<option value=\"3\" ";
-  if ($row["logmode"] == 3) echo "SELECTED";
-  echo ">All Messages</option>";
-
-  echo "</select>";
-
-  echo "<p><strong>Room registration via the web:</strong><br />
-       <input type=\"checkbox\" name=\"webreg\" value=\"yes\" ";
-  if ($webreg == 't') { echo "checked=\"checked\""; } 
-  echo "> Allow this functionality?<br />
-       <a href=\"${rooturl}/my/join_chatroom.php?key=". $row["register_key"] ."\">${rooturl}/my/join_chatroom.php?key=". $row["register_key"] ."</a>";
-
 
   echo "<p><input type=\"submit\" value=\"Update Room Settings\">";
   echo "</form>";
@@ -198,4 +177,4 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 
 
 
-<?php include("$rootpath/include/footer.php"); ?>
+<?php include("../include/footer.php"); ?>
