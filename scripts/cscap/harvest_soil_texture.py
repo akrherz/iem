@@ -20,6 +20,8 @@ pcursor = pgconn.cursor()
 spr_client = util.get_spreadsheet_client(config)
 docs_client = util.get_docs_client(config)
 
+allowed_depths = ['0 - 10', '10 - 20', '20 - 40', '40 - 60']
+
 query = gdata.docs.client.DocsQuery(show_collections='false', 
                                     title='Soil Texture Data')
 feed = docs_client.GetAllResources(query=query)
@@ -32,28 +34,34 @@ for entry in feed:
     worksheet = spreadsheet.worksheets[YEAR]
     worksheet.get_cell_feed()
     siteid = spreadsheet.title.split()[0]
-    if siteid == 'DPAC':
-        print 'ERROR: Skipping DPAC Soil Texture sheet as it has subsamples'
-        continue
     print 'Processing %s Soil Texture Year %s' % (siteid, YEAR),
     if (worksheet.get_cell_value(1, 1) != 'plotid' or
         worksheet.get_cell_value(1, 2) != 'depth'):
         print 'FATAL site: %s soil nitrate has corrupt headers' % (siteid,)
         continue
-    for row in range(3,worksheet.rows+1):
+    for row in range(4,worksheet.rows+1):
         plotid = worksheet.get_cell_value(row, 1)
         depth = worksheet.get_cell_value(row, 2)
+        #if depth not in allowed_depths:
+        #    print 'site: %s year: %s has illegal depth: %s' % (siteid, YEAR,
+        #                                                       depth)
+        #    continue
         if plotid is None or depth is None:
             continue
-        for col in range(4, worksheet.cols+1):
+        subsample = "1"
+        for col in range(3, worksheet.cols+1):
             varname = worksheet.get_cell_value(1,col).strip().split()[0]
-            if varname[:4] != 'SOIL':
+            val = worksheet.get_cell_value(row, col)
+            if varname == 'subsample':
+                subsample = val
+                continue
+            elif varname[:4] != 'SOIL':
                 print 'Invalid varname: %s site: %s year: %s' % (
                                     worksheet.get_cell_value(1,col).strip(),
                                     siteid, YEAR)
                 continue
-            val = worksheet.get_cell_value(row, col)
-            subsample = "1"
+            if subsample != "1":
+                continue
             try:
                 pcursor.execute("""
                     INSERT into soil_data(site, plotid, varname, year, 
