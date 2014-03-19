@@ -3,7 +3,6 @@
 
 include("../../config/settings.inc.php");
 include("setup.php");
-include("../../include/calendar.phtml");
 include("../../include/imagemaps.php");
 include("../../include/forms.php");
 include("../../include/mlib.php");
@@ -23,6 +22,77 @@ $dateStr = strftime("%Y-%m-%d", $ts);
 $nicedate = strftime("%d %B %Y", $ts);
 $htmlout = "";
 
+function printMonth($year, $month, $db, $thisApp, $dailyApp){
+
+	$sts = mktime(8, 0, 0, $month, 1, $year);
+	$ets = mktime(10, 0, 0, $month + 1, 0, $year);  // CST concerns
+
+	$lastMonth = $sts - 5*86400; // 5 days earlier
+	$nextMonth = $ets + 5*86400; // 5 days later
+
+	$lurl = $thisApp . strftime("&year=%Y&month=%m", $lastMonth);
+	$lstr = strftime("%b %Y", $lastMonth);
+	$nurl = $thisApp . strftime("&year=%Y&month=%m", $nextMonth);
+	$nstr = strftime("%b %Y", $nextMonth);
+
+	// Get the day of the week of the first day this month
+	$first_dow = intval(strftime("%w", $sts));
+
+	$title = strftime("%B %Y", $sts);
+	$s = <<<EOF
+<table class="table table-bordered">
+<tr><td><a href="{$lurl}">{$lstr}</a></td><th colspan="5">{$title}</th>
+    <td><a href="{$nurl}">{$nstr}</a></td></tr>
+<tr><th>Sunday</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th>
+    <th>Thursday</th><th>Friday</th><th>Saturday</th></tr>
+EOF;
+
+	// Handle the first week
+	$now = $sts;
+	$s .= "<tr>";
+	for($i=0;$i<$first_dow;$i++){
+		$secs = $now - (86400 * ($first_dow - $i));
+		$s .= '<td valign="top" bgcolor="#EEEEEE">';
+		$s .= "<b>". strftime("%d", $secs) ."</b>";
+		$s .= '</td>';
+	}
+	for($i=$first_dow;$i<7;$i++){
+		$key = strftime("%Y%m%d", $now);
+		 
+		$s .= '<td valign="top">';
+		$s .= "<b><a href=\"". $dailyApp . strftime("%d", $now) ."\">". strftime("%d", $now) ."</a></b>";
+		if (isset($db[$key]["cv"])){
+			$s .= sprintf(" (@%s)", $db[$key]['cv']);
+		}
+		$s .= "<br />". @$db[$key]["content"] ."</td>";
+		$now = $now + 86400;
+	} 
+	$s .= "</tr>";
+
+	// Handle the rest of the weeks
+	while($now <= $ets){
+		$s .= "<tr>\n";
+		for($i=0;$i<7;$i++){
+			$key = strftime("%Y%m%d", $now);
+			if ($now < $ets){
+				$s .= '<td valign="top">';
+				$s .= "<b><a href=\"". $dailyApp . strftime("%d", $now) ."\">". strftime("%d", $now) ."</a></b>";
+			} else {
+				$s .= '<td bgcolor="#EEEEEE" valign="top">';
+				$s .= "<b>". strftime("%d", $now) ."</b>";
+			}
+			if (isset($db[$key]["cv"])){
+				$s .= sprintf(" (@%s)", $db[$key]['cv']);
+			}
+			$s .= "<br />". @$db[$key]["content"] ."</td>";
+			$now = $now + 86400;
+		} // End of week
+		$s .= "</tr>\n";
+	}
+
+	$s .= "</table>";
+	return $s;
+} // End of printMonth
 
 if ($mode == "monthly"){
 	if (substr($network,2) == "CLIMATE"){
@@ -35,6 +105,7 @@ if ($mode == "monthly"){
 				station = '".$station."' ORDER by day ASC";
 	} else {
 		$sql = "SELECT *, to_char(day, 'YYYYMMDD') as dvalid,
+			to_char(coop_valid at time zone '". $metadata["tzname"] ."', 'HH PM') as cv,
 		   max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
 		   from summary_". $year ." s, stations t WHERE t.id = '". $station ."' and
 		   t.iemid = s.iemid and 
@@ -109,9 +180,9 @@ if ($mode == "monthly") {
     $str .= "<br>Gust:<br> ". drct2txt($row["max_drct"]) ." @ ". $g .
          "<br>(". $gs .")";
   }
-  $db[ $row["dvalid"] ] = $str ;
+  $db[ $row["dvalid"] ] = Array("content"=>$str, "cv"=>$row["cv"]);
 
- $htmlout = printMonth($ts, $db, 
+ $htmlout = printMonth($year, $month, $db, 
  		"/sites/hist.phtml?network=$network&station=$station" , 
  		"/sites/hist.phtml?station=$station&network=$network&mode=daily&year=$year&month=$month&day=");
  } /* End of for */
