@@ -1,71 +1,23 @@
 <?php
 include("../../config/settings.inc.php");
 define("IEM_APPID", 30);
-include("$rootpath/include/forms.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
-include("$rootpath/include/iemprop.php");
-$coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
-$nt = new NetworkTable("IACLIMATE");
-$cities = $nt->table;
+include("../../include/myview.php");
+$t = new MyView();
+$t->title = "Removed Page";
+$t->thispage = "networks-coop";
 
-$coopdb = iemdb("coop");
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$station = isset($_GET["station"]) ? $_GET["station"]: "IA0200";
+$t->content = <<<EOF
 
+<h4>NWS COOP Observations by Month</h4>
+		
+<div class="alert alert-info">This page has been removed as it was providing 
+		confusing information.</div>
+		
+<p>The <a href="/sites/locate.php?network=IA_COOP">IEM Station Data and Metadata</a>
+	section has a "Data Calendar" which provides similiar functionality to what
+	was on this page.  For example, here is the calendar for 
+	<a href="/sites/hist.phtml?station=AMSI4&network=IA_COOP">Ames (AMSI4)</a></p>
 
-
-$TITLE = "IEM | COOP Data by Month";
-$THISPAGE="networks-coop";
-include("$rootpath/include/header.php"); 
+EOF;
+$t->render('single.phtml');
 ?>
-<h3>IEM Provided NWS COOP Data by Month</h3>
-
-<p>This page provides a way to view daily NWS COOP observations for a given 
-month.  Values after <strong><?php echo date('d M Y', $coop_archive_end); ?>
-</strong> have been <a href="<?php echo $rooturl; ?>/onsite/news.phtml?id=881">estimated</a> by the IEM.  You can download these observations <a href="<?php echo $rooturl; ?>/request/coop/fe.phtml">here</a>.</p>
-
-<form method="GET" name="myform">
-<table>
-<tr><td>Select Station:</td>
-<td><select name="station">
-<?php
-while (list($id, $meta) = each($cities)){
-  $chk = ($id == $station) ? "SELECTED": "";
-  echo sprintf("<option value=\"%s\" %s>%s [%s]</option>", $id, $chk, $meta["name"], $id);
-}
-?>
-</select></td>
-<td>Year:</td><td><?php echo yearSelect(1893,$year); ?></td>
-<td>Month:</td><td><?php echo monthSelect($month); ?></td>
-<td><input type="submit" value="Generate Table"></td>
-</tr></table>
-</form>
-
-<!-- Time for the data -->
-<p>
-<table cellpadding="2" cellspacing="0" border="1">
-<thead><tr><th>Station ID:</th><th>Date</th><th>High</th><th>Low</th><th>Precip</th><th>Snow</th><th>Snowdepth</th></tr></thead>
-<tbody>
-<?php
-/* Go get it */
-$rs = pg_prepare($coopdb, "MYSELECT", "SELECT * from alldata WHERE
-      station = $1 and year = $2 and month = $3 ORDER by day ASC");
-$rs = pg_execute($coopdb, "MYSELECT", Array($station,  $year, $month) );
-for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
-  echo sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
-       $cities[strtoupper($station)]["name"], $row["day"], $row["high"], 
-       $row["low"], $row["precip"], $row["snow"], $row["snowd"]);
-}
-?>
-</tbody>
-</table>
-<?php
-if (pg_num_rows($rs) == 0){
-  echo "<div class=\"warning\">Sorry, no data found for your query parameters.</div>";
-}
-
-include("$rootpath/include/footer.php"); 
-?>
-
