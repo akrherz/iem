@@ -1,34 +1,132 @@
 <?php 
  include("../../config/settings.inc.php");
- $page = 'coop';
- $TITLE = "IEM | NWS COOP Data";
- $THISPAGE = "networks-coop";
- include("$rootpath/include/header.php"); 
-?>
+ include("../../include/myview.php");
+ $t = new MyView();
+
+ $t->title = "NWS COOP Data";
+ $t->thispage = "networks-coop";
+
+ $yr = date("Y");
+ 
+ $dict = Array(
+ 		Array("img" => "chart_line_t_t.png",
+ 				"url" => "/plotting/coop/highlow_scatter.php",
+ 				"title" => "High / Low Scatterplot",
+ 				"desc" => "Scatterplot of high versus low temperatures for a given date and location."),
+ 
+ 		Array("img" => "chart_line_f_t.png",
+ 				"url" => "/plotting/coop/threshold_histogram_fe.phtml",
+ 				"title" => "Winter Min Low Temp Frequencies",
+ 				"desc" => "Histogram showing the number of years that a certain low temperature threshold is exceeded."),
+ 
+ 		Array("img" => "chart_line_h_t.png",
+ 				"url" => "/plotting/coop/spread_fe.phtml",
+ 				"title" => "Daily Temperature Spread",
+ 				"desc" => "Histogram showing daily high/low temperatures."),
+ 
+ 		Array("img" => "data_table.png",
+ 				"url" => "/COOP/periods.phtml",
+ 				"title" => "Yearly Average Temperatures",
+ 				"desc" => "For a date interval of your choice, get the yearly statewide average temperatures."),
+ 
+ 		Array("img" => "data_table.png",
+ 				"url" => "/sites/hist.phtml?station=AMSI4&network=IA_COOP",
+ 				"title" => "Observations by Month",
+ 				"desc" => "View observations per station and per month basis."),
+ 
+ 		Array("img" => "data_table.png",
+ 				"url" => "/COOP/freezing.php",
+ 				"title" => "Fall Freezing Dates",
+ 				"desc" => "Statistics of dates for significant first fall freezes."),
+ 
+ 		Array("img" => "data_table.png",
+ 				"url" => "/COOP/snowd_duration.phtml",
+ 				"title" => "Snow Depth Duration",
+ 				"desc" => "For a given date, how long will the snow stick around?"),
+ 
+ 		Array("img" => "data_table.png",
+ 				"url" => "/COOP/extremes.php",
+ 				"title" => "Daily Climate in Tables",
+ 				"desc" => "Tables of daily temperature and precipitation climatology."),
+ 
+ 		Array("img" => "thumb_map.png",
+ 				"url" => "/GIS/apps/coop/index.php",
+ 				"title" => "Daily Climate in Maps",
+ 				"desc" => "Plots of daily extremes and averages with a GIS Ready! download of the data presented."),
+ 
+ 		Array("img" => "chart_line_t_d.png",
+ 				"url" => "/plotting/coop/climate_fe.php",
+ 				"title" => "Daily Average Temperatures",
+ 				"desc" => "Dynamically produced chart of average daily temperatures."),
+ 
+ 		Array("img" => "chart_line_t_y.png",
+ 				"url" => "/plotting/coop/yearly_fe.php",
+ 				"title" => "Yearly Average Temperatures",
+ 				"desc" => "Plot average daily temperatures for a season or year of your choice."),
+ 
+ 		Array("img" => "chart_line_d_a.png",
+ 				"url" => "/plotting/coop/precip_cdf_fe.phtml",
+ 				"title" => "Accumulated Precipitation Probabilities",
+ 				"desc" => "Chart of precip probabilities for a time period of your choice."),
+ 
+ 		Array("img" => "chart_line_t_d.png",
+ 				"url" => "/plotting/coop/extremes_fe.php",
+ 				"title" => "Daily Temperatures Extremes",
+ 				"desc" => "Plot average temperatures and extremes throughout a year."),
+ 
+ 		Array("img" => "chart_line_t_d.png",
+ 				"url" => "/plotting/coop/vyear_fe.php",
+ 				"title" => "Yearly Departures from Average",
+ 				"desc" => "Plot average temperatures versus what actually occured during one year."),
+ 
+ 		Array("img" => "chart_line_ac_d.png",
+ 				"url" => "/plotting/coop/acc.phtml",
+ 				"title" => "Accumulated Departures from Average",
+ 				"desc" => "Plot an accumulated departure from average for rainfall and growing degree days for a time period of your choice!"),
+ 
+ 		Array("img" => "thumb_map.png",
+ 				"url" => "/GIS/apps/coop/plot.phtml",
+ 				"title" => "Map Daily Observations",
+ 				"desc" => "Generate maps of daily observations."),
+ 
+ );
+ $content = "";
+ while (list($k,$v) = each($dict))
+ {
+ 	$content .= <<<EOF
+<div class="tease">
+ <a href="{$v["url"]}"><img src="/images/{$v["img"]}" border="0"></a>
+ <a href="{$v["url"]}">{$v["title"]}</a><br />{$v["desc"]}<br />&nbsp;
+</div>
+EOF;
+ }
+ 
+ 
+$t->content = <<<EOF
 <div class="row">
  <div class="col-md-2 col-sm-2">
  <span style="font-size: 1.3em;">NWS COOP<br />Quick Links</span>
  </div>
  <div class="col-md-1 col-sm-1">
- <a href="../climodat/"><img src="../images/fileprint.png" /><br />Climodat</a>
+ <a href="/climodat/"><img src="/images/fileprint.png" /><br />Climodat</a>
  </div>
  <div class="col-md-1 col-sm-1">
- <a href="current.phtml"><img src="../images/view_text.png" /><br />Currents</a>
+ <a href="current.phtml"><img src="/images/view_text.png" /><br />Currents</a>
  </div>
   <div class="col-md-1 col-sm-1">
-  <a href="../request/coop/obs-fe.phtml"><img src="../images/down.png" /><br />Download Raw</a>
+  <a href="/request/coop/obs-fe.phtml"><img src="/images/down.png" /><br />Download Raw</a>
  </div>
   <div class="col-md-1 col-sm-1">
-  <a href="../request/coop/fe.phtml"><img src="../images/down.png" /><br />Download QC</a>
+  <a href="/request/coop/fe.phtml"><img src="/images/down.png" /><br />Download QC</a>
  </div>
   <div class="col-md-2 col-sm-2">
-  <a href="../sites/locate.php?network=IA_COOP"><img src="../images/find.png" /><br />Locate Site</a>
+  <a href="/sites/locate.php?network=IA_COOP"><img src="/images/find.png" /><br />Locate Site</a>
  </div>
   <div class="col-md-2 col-sm-2">
-  <a href="cat.phtml"><img src="../images/misc.png" /><br />2004-<?php echo date("Y"); ?></a>
+  <a href="cat.phtml"><img src="../images/misc.png" /><br />2004-{$yr}</a>
  </div>
   <div class="col-md-2 col-sm-2">
-  <a href="../GIS/apps/coop/gsplot.phtml"><img src="../images/view_icon.png" /><br />Growing Season</a>
+  <a href="/GIS/apps/coop/gsplot.phtml"><img src="/images/view_icon.png" /><br />Growing Season</a>
  </div>
  </div>
 
@@ -39,10 +137,10 @@ volunteers are invaluable in times of severe weather and heavy snowfall.  Their
 observations also provide a 'ground truth' to compare against remote sensing
 techniques.
 
-<table>
-<tr>
-<td valign="top">
-<h3 class="subtitle">IEM News Items</h3>
+<div class="row">
+<div class="col-md-4 col-sm-4">
+
+<h3>Relevant News Items</h3>
 <ul>
  <li><a href="/onsite/news.phtml?id=261">Record Cold between 9-15 August, 2004</a></li>
  <li><a href="/onsite/news.phtml?id=327">Snowfall reports 5-6 Jan, 2005</a></li>
@@ -52,7 +150,7 @@ techniques.
  <li><a href="/onsite/news.phtml?id=881">Estimating near-term COOP Data</a></li>
 </ul>
 
-<h3 class="subtitle">Data Plots</h3>
+<h3>Data Plots</h3>
 <ul>
 	<li><a href="/timemachine/#37.0">Iowa Precipitation Contour</a></li>
 	<li><a href="/timemachine/#38.0">Midwest Precipitation Contour</a></li>
@@ -62,9 +160,10 @@ techniques.
 	<li><a href="/data/coopSnowDepth.gif">Snow depth this morning</a></li>
     <li><a href="/data/coopHighLow.gif">High + Low Temperatures this morning</a></li>
 </ul>
-</td><td valign="top">
 
-<h3 class="subtitle">Data + Summaries</h3>
+</div><div class="col-md-4 col-sm-4">
+
+<h3>Data + Summaries</h3>
 
 
 <ul>
@@ -84,9 +183,10 @@ techniques.
 
 
 
-</td><td valign="top">
+</div><div class="col-md-4 col-sm-4">
 
-<p><h3 class="subtitle">Download Data:</h3><br>
+
+<p><h3>Download Data:</h3><br>
 <ul>
   <li><a href="/request/coop/fe.phtml">Download Daily Oberservations</a>
     <br>Pick your site, pick a time period, and download the data.</li>
@@ -101,9 +201,9 @@ techniques.
     <br>Download daily normal high and low temperatures and average rainfall.</li>
 </ul>
 
-</td></tr></table>
+</div></div>
 
-<p><h3 class="subtitle">COOP Data Applications:</h3><br>
+<p><h3>COOP Data Applications:</h3><br>
 
 <style>
 div.tease {
@@ -123,100 +223,9 @@ div.tease a {
  padding: 5px;
 }
 </style>
-<?php
 
-$dict = Array(
-Array("img" => "chart_line_t_t.png",
-      "url" => "/plotting/coop/highlow_scatter.php",
-      "title" => "High / Low Scatterplot",
-      "desc" => "Scatterplot of high versus low temperatures for a given date and location."),
-
-Array("img" => "chart_line_f_t.png",
-      "url" => "/plotting/coop/threshold_histogram_fe.phtml",
-      "title" => "Winter Min Low Temp Frequencies",
-      "desc" => "Histogram showing the number of years that a certain low temperature threshold is exceeded."),
-
-Array("img" => "chart_line_h_t.png",
-      "url" => "/plotting/coop/spread_fe.phtml",
-      "title" => "Daily Temperature Spread",
-      "desc" => "Histogram showing daily high/low temperatures."),
-
-Array("img" => "data_table.png",
-      "url" => "/COOP/periods.phtml",
-      "title" => "Yearly Average Temperatures",
-      "desc" => "For a date interval of your choice, get the yearly statewide average temperatures."),
-
-Array("img" => "data_table.png",
-      "url" => "/sites/hist.phtml?station=AMSI4&network=IA_COOP",
-      "title" => "Observations by Month",
-      "desc" => "View observations per station and per month basis."),
-
-Array("img" => "data_table.png",
-      "url" => "/COOP/freezing.php",
-      "title" => "Fall Freezing Dates",
-      "desc" => "Statistics of dates for significant first fall freezes."),
-
-Array("img" => "data_table.png",
-      "url" => "/COOP/snowd_duration.phtml",
-      "title" => "Snow Depth Duration",
-      "desc" => "For a given date, how long will the snow stick around?"),
-
-Array("img" => "data_table.png",
-      "url" => "/COOP/extremes.php",
-      "title" => "Daily Climate in Tables",
-      "desc" => "Tables of daily temperature and precipitation climatology."),
-
-Array("img" => "thumb_map.png",
-      "url" => "/GIS/apps/coop/index.php",
-      "title" => "Daily Climate in Maps",
-      "desc" => "Plots of daily extremes and averages with a GIS Ready! download of the data presented."),
-
-Array("img" => "chart_line_t_d.png",
-      "url" => "/plotting/coop/climate_fe.php",
-      "title" => "Daily Average Temperatures",
-      "desc" => "Dynamically produced chart of average daily temperatures."),
-
-Array("img" => "chart_line_t_y.png",
-      "url" => "/plotting/coop/yearly_fe.php",
-      "title" => "Yearly Average Temperatures",
-      "desc" => "Plot average daily temperatures for a season or year of your choice."),
-
-Array("img" => "chart_line_d_a.png",
-      "url" => "/plotting/coop/precip_cdf_fe.phtml",
-      "title" => "Accumulated Precipitation Probabilities",
-      "desc" => "Chart of precip probabilities for a time period of your choice."),
-
-Array("img" => "chart_line_t_d.png",
-      "url" => "/plotting/coop/extremes_fe.php",
-      "title" => "Daily Temperatures Extremes",
-      "desc" => "Plot average temperatures and extremes throughout a year."),
-
-Array("img" => "chart_line_t_d.png",
-      "url" => "/plotting/coop/vyear_fe.php",
-      "title" => "Yearly Departures from Average",
-      "desc" => "Plot average temperatures versus what actually occured during one year."),
-
-Array("img" => "chart_line_ac_d.png",
-      "url" => "/plotting/coop/acc.phtml",
-      "title" => "Accumulated Departures from Average",
-      "desc" => "Plot an accumulated departure from average for rainfall and growing degree days for a time period of your choice!"),
-
-Array("img" => "thumb_map.png",
-      "url" => "/GIS/apps/coop/plot.phtml",
-      "title" => "Map Daily Observations",
-      "desc" => "Generate maps of daily observations."),
-
-);
-
-while (list($k,$v) = each($dict))
-{
- echo "<div class=\"tease\"><a href=\"$rooturl/". $v["url"] ."\"><img src=\"$rooturl/images/". $v["img"] ."\" border=\"0\"></a><a href=\"$rooturl/". $v["url"] ."\">". $v["title"] ."</a><br />". $v["desc"] ."<br />&nbsp;</div>\n";
-}
-
-?>
-
-
+{$content}
 <br clear="all" />
-
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
