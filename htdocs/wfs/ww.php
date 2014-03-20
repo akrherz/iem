@@ -207,6 +207,6 @@ WARNING: Optional WGS84BoundingBox could not be established for this layer.  Con
 <ogc:FID/>
 </ogc:Id_Capabilities>
 </ogc:Filter_Capabilities>
-</wfs:WFS_Cap>
+</wfs:WFS_Capabilities>
 EOF;
 ?>
