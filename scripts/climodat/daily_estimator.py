@@ -9,14 +9,14 @@ Columns to complete:
 
  stationid | character(6)     | OK
  day       | date             | OK
- high      | integer          | Natgrid ASOS+AWOS
- low       | integer          | Natgrid ASOS+AWOS
- precip    | double precision | Use the WEPP dataset
- snow      | double precision | Natgrid the 12z COOP
+ high      | integer          | COOP obs
+ low       | integer          | COOP obs 
+ precip    | double precision | COOP precip
+ snow      | double precision | COOP snow
  sday      | character(4)     | OK
  year      | integer          | OK
  month     | smallint         | OK
- snowd     | real             | Natgrid the 12z COOP
+ snowd     | real             | COOP snowd
  estimated | boolean          | true! :)
 
 Steps:
@@ -30,20 +30,18 @@ import sys
 from pyiem import iemre
 import network
 import datetime
-import pytz
-import numpy
-import Ngl
-import netCDF4
-import os
+import numpy as np
+from scipy.interpolate import NearestNDInterpolator
 import psycopg2
 import psycopg2.extras
-COOP = psycopg2.connect(database='coop', host='iemdb')
+COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-IEM = psycopg2.connect(database='iem', host='iemdb')
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 state = sys.argv[1]
 
+# Pre-compute the grid location of each climate site
 nt = network.Table("%sCLIMATE" % (state.upper(),))
 for sid in nt.sts.keys():
     i,j = iemre.find_ij(nt.sts[sid]['lon'], nt.sts[sid]['lat'])
@@ -52,64 +50,52 @@ for sid in nt.sts.keys():
     for key in ['high','low','precip','snow','snowd']:
         nt.sts[sid][key] = None
 
-
-def hardcode_asos( ts ):
-    """
-    Hard set the ASOS DSM 
-    """
-
-    nt2 = network.Table("IA_ASOS")
-
-    # Get the ASOS data
-    icursor.execute("""
-       SELECT id, pday, max_tmpf, min_tmpf
-       from summary s, stations t WHERE t.iemid = s.iemid and day = '%s' 
-       and t.network in ('IA_ASOS') and pday >= 0 and min_tmpf < 99 
-       and max_tmpf > -99 ORDER by id ASC""" % (ts.strftime("%Y-%m-%d")))
-    for row in icursor:
-        cid = nt2.sts[row['id']]['climate_site']
-        print ("%s=>P E: %4s Ob: %.2f H E: %4s Ob: %3.0f "
-               +"L E: %4s Ob: %3.0f") % (row['id'],
-               nt.sts[cid]['precip'], row['pday'],
-               nt.sts[cid]['high'], row['max_tmpf'],
-               nt.sts[cid]['low'], row['min_tmpf'])
-        nt.sts[cid]['precip'] = "%.2f" % (row['pday'],)
-        nt.sts[cid]['high'] = "%.0f" % (row['max_tmpf'],)
-        nt.sts[cid]['low'] = "%.0f" % (row['min_tmpf'],)
-
-
 def estimate_precip( ts ):
     """
-    Estimate precipitation based on IEMRE, ouch
+    Estimate precipitation based on COOP reports that morning
     """
-    fn = "/mesonet/data/iemre/%s_mw_hourly.nc" % (ts.year,)
-    if not os.path.isfile(fn):
-        print 'Missing netcdf %s analysis!' % (fn,)
+    # Query Obs
+    vals = []
+    lats = []
+    lons = []
+    icursor.execute("""
+       SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, pday
+       from summary_%s c, stations s WHERE day = '%s' and 
+       s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
+        'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
+        'OH_COOP') and c.iemid = s.iemid 
+       and pday >= 0""" % (ts.year, ts.strftime("%Y-%m-%d")))
+    for row in icursor:
+        lats.append( row['lat'] )
+        lons.append( row['lon'] )
+        vals.append( row['pday'] )
+
+    if len(lats) < 5: # No data!
+        print 'WARNING: less than 5 precip obs were found!'
+        for sid in nt.sts.keys():
+            nt.sts[sid]['pday'] = 0
         return
-    nc = netCDF4.Dataset(fn, 'r')
-    precip = nc.variables['p01m']
-    # Figure out what offsets we care about!
-    ts0 = datetime.datetime(ts.year, ts.month, ts.day, 12, 0)
-    ts0 = ts0.replace(tzinfo=pytz.timezone("America/Chicago"))
-    ts0 = ts0.replace(hour=0)
-    ts1 = ts0 + datetime.timedelta(hours=24)
 
-    offset0 = iemre.hourly_offset(ts0)
-    offset1 = iemre.hourly_offset(ts1)
-    
-    data = numpy.sum( precip[offset0:offset1], 0 )
-    # Gross QC check
-    data = numpy.where( data > 1000.0, 0, data)
+    # Create the analysis
+    nn = NearestNDInterpolator((np.array(lons), np.array(lats)), np.array(vals))
+    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    grid = nn(xi, yi)
+
     for sid in nt.sts.keys():
-        j = nt.sts[sid]['gridj']
-        i = nt.sts[sid]['gridi']
-        nt.sts[sid]['precip'] = "%.2f" % (data[j,i] / 25.4,)
-
-    nc.close()
+        precip = grid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        # denote trace
+        if precip > 0 and precip < 0.01:
+            nt.sts[sid]['precip'] = 0.0001
+        elif precip < 0:
+            nt.sts[sid]['precip'] = 0
+        elif np.isnan(precip):
+            nt.sts[sid]['precip'] = 0
+        else:
+            nt.sts[sid]['precip'] = "%.2f" % (precip,)
 
 def estimate_snow( ts ):
     """
-    Estimate the Snow
+    Estimate the Snow based on COOP reports
     """
     # Query Obs
     snowd = []
@@ -137,33 +123,42 @@ def estimate_snow( ts ):
 
 
     # Create the analysis
-    snowA = Ngl.natgrid(lons, lats, snow, iemre.XAXIS, iemre.YAXIS)
-    snowdA = Ngl.natgrid(lons, lats, snowd, iemre.XAXIS, iemre.YAXIS)
+    nn = NearestNDInterpolator((np.array(lons), np.array(lats)), np.array(snow))
+    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    snowgrid = nn(xi, yi)
+    nn = NearestNDInterpolator((np.array(lons), np.array(lats)), np.array(snowd))
+    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    snowdgrid = nn(xi, yi)
 
     for sid in nt.sts.keys():
-        snowfall = snowA[nt.sts[sid]['gridi'], nt.sts[sid]['gridj']]
-        snowdepth = snowdA[nt.sts[sid]['gridi'], nt.sts[sid]['gridj']]
-        if snowfall > 0 and snowfall < 0.1:
+        snow = snowgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        # denote trace
+        if snow > 0 and snow < 0.1:
             nt.sts[sid]['snow'] = 0.0001
-        elif snowfall < 0:
+        elif snow < 0:
             nt.sts[sid]['snow'] = 0
-        elif numpy.isnan(snowfall):
+        elif np.isnan(snow):
             nt.sts[sid]['snow'] = 0
         else:
-            nt.sts[sid]['snow'] = "%.1f" % (snowfall,)
-        if snowdepth > 0 and snowdepth < 0.1:
+            nt.sts[sid]['snow'] = "%.1f" % (snow,)
+
+        snowd = snowdgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        # denote trace
+        if snowd > 0 and snowd < 0.1:
             nt.sts[sid]['snowd'] = 0.0001
-        elif snowdepth < 0:
+        elif snowd < 0:
             nt.sts[sid]['snowd'] = 0
-        elif numpy.isnan(snowdepth):
+        elif np.isnan(snowd):
             nt.sts[sid]['snowd'] = 0
         else:
-            nt.sts[sid]['snowd'] = "%.1f" % (snowdepth,)
+            nt.sts[sid]['snowd'] = "%.1f" % (snowd,)
+
 
 def estimate_hilo( ts ):
     """
     Estimate the High and Low Temperature based on gridded data
     """
+    # Query Obs
     # Query Obs
     highs = []
     lows = []
@@ -171,32 +166,41 @@ def estimate_hilo( ts ):
     lons = []
     icursor.execute("""
        SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, max_tmpf, min_tmpf
-       from summary_%s c, stations s WHERE day = '%s' 
-       and s.network in ('AWOS','IA_ASOS', 'MN_ASOS', 'WI_ASOS', 
-       'IL_ASOS', 'MO_ASOS',
-        'KS_ASOS', 'NE_ASOS', 'SD_ASOS', 'ND_ASOS', 'KY_ASOS', 'MI_ASOS',
-        'OH_ASOS') and c.iemid = s.iemid
-       and max_tmpf > -90 and min_tmpf < 90""" % (ts.year, 
-                                                  ts.strftime("%Y-%m-%d")))
+       from summary_%s c, stations s WHERE day = '%s' and 
+       s.network in ('IA_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP', 'MO_COOP',
+        'KS_COOP', 'NE_COOP', 'SD_COOP', 'ND_COOP', 'KY_COOP', 'MI_COOP',
+        'OH_COOP') and c.iemid = s.iemid 
+       and max_tmpf > -50 and max_tmpf < 130 and 
+       min_tmpf < 90 and min_tmpf > -60""" % (ts.year, ts.strftime("%Y-%m-%d")))
     for row in icursor:
         lats.append( row['lat'] )
         lons.append( row['lon'] )
         highs.append( row['max_tmpf'] )
-        lows.append( row['min_tmpf'] )
+        lows.append( row['min_tmpf'])
 
-    if len(highs) < 5:
-        print 'estimate_hilo() only found %s observations' % (len(highs),)
+    if len(lats) < 5: # No data!
+        print 'WARNING: less than 5 temperature obs were found!'
+        for sid in nt.sts.keys():
+            nt.sts[sid]['high'] = 0
+            nt.sts[sid]['low'] = 0
         return
 
     # Create the analysis
-    highA = Ngl.natgrid(lons, lats, highs, iemre.XAXIS, iemre.YAXIS)
-    lowA = Ngl.natgrid(lons, lats, lows, iemre.XAXIS, iemre.YAXIS)
+    nn = NearestNDInterpolator((np.array(lons), np.array(lats)), np.array(highs))
+    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    highgrid = nn(xi, yi)
+
+    nn = NearestNDInterpolator((np.array(lons), np.array(lats)), np.array(lows))
+    xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    lowgrid = nn(xi, yi)
 
     for sid in nt.sts.keys():
-        nt.sts[sid]['high'] = "%.0f" % (
-                            highA[nt.sts[sid]['gridi'], nt.sts[sid]['gridj']])
-        nt.sts[sid]['low'] = "%.0f" % (
-                            lowA[nt.sts[sid]['gridi'], nt.sts[sid]['gridj']])
+        high = highgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        if not np.isnan(high):
+            nt.sts[sid]['high'] = "%.0f" % (high,)
+        low = lowgrid[nt.sts[sid]['gridj'], nt.sts[sid]['gridi']]
+        if not np.isnan(low):
+            nt.sts[sid]['low'] = "%.0f" % (low,)
 
 def commit( ts ):
     """
@@ -211,6 +215,11 @@ def commit( ts ):
                                                          state.lower())
     # Inject!
     for sid in nt.sts.keys():
+        if sid[2] == 'C' or sid[2:] == '0000':
+            continue
+        #print "%s %6s %3s %3s %6s %6s" % (sid, nt.sts[sid]['precip'], 
+        #                                nt.sts[sid]['high'], nt.sts[sid]['low'],
+        #                            nt.sts[sid]['snow'], nt.sts[sid]['snowd'])
         sql = """INSERT into alldata_"""+state+""" (station, day, high, low, 
         precip, snow, sday, year, month, snowd, estimated) values (%s, %s, 
         %s, %s, %s, %s, %s, %s, %s, %s, 't')"""
@@ -227,11 +236,9 @@ if __name__ == '__main__':
                                    int(sys.argv[4]))
     else:
         ts = datetime.date.today() - datetime.timedelta(days=1)
-    estimate_hilo( ts )
     estimate_precip(ts )
     estimate_snow(ts )
-    if state.upper() == 'IA':
-        hardcode_asos(ts )
+    estimate_hilo(ts )
     commit( ts )
     ccursor.close()
     COOP.commit()
