@@ -13,7 +13,7 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
-nt = network.Table("IACLIMATE")
+nt = network.Table("IA_COOP")
 
 districts = [
 'North West',
@@ -26,24 +26,76 @@ districts = [
 'South Central',
 'South East',             
 ]
-
 stids = [
-['IA2724', 'IA4735', 'IA7844', 'IA5493'],
-['IA0923', 'IA3980', 'IA5230', 'IA6305'],
-['IA2110', 'IA2364', 'IA3517', 'IA2864'],
-['IA1233', 'IA1277', 'IA3509', 'IA3632', 'IA4228', 'IA4894', 'IA7161', 
-    'IA7312', 'IA7708'],
-['IA0200', 'IA2203', 'IA3487', 'IA5198', 'IA5992', 'IA6566', 'IA8296'],
-['IA1319', 'IA4705', 'IA4101', 'IA8266', 'IA5131', 'IA5837'],
-['IA0364', 'IA1533', 'IA3290', 'IA6940', 'IA7669'],
-['IA0112', 'IA5769', 'IA1394', 'IA4063', 'IA4585'],
-['IA0753', 'IA1063', 'IA6389', 'IA8688']         
+[
+'Rock Rapids    RKRI4',
+'Sheldon    SHDI4',
+'Sibley    SIBI4',
+'Sioux Center    SIXI4',
+'Spirit Lake    VICI4',
+'Storm Lake    SLBI4',
+ ],[   
+'Algona    ALGI4',
+'Charles City    CIYI4',
+'Dakota City    DAKI4',
+'Hampton    HPTI4',
+'Mason City    MCWI4',
+'Osage    OSAI4',
+ ],[      
+'Cresco    CRCI4',
+'Decorah    DCRI4',
+'Dubuque    DLDI4',
+'Fayette    FYTI4',
+'Manchester    MHRI4',
+'Tripoli    TRPI4',
+     ],[  
+'Audubon    AUDI4',
+'Carroll    CINI4',
+'Jefferson    JFFI4',
+'Logan    LOGI4',
+'Mapleton    MPTI4',
+'Rockwell City    RKWI4',
+     ],[  
+'Boone    BNWI4',
+'Grinnell    GRII4',
+'Grundy Center    GNDI4',
+'Iowa Falls    IWAI4',
+'Marshalltown    MSHI4',
+'Webster City    WEBI4',
+     ],[  
+'Anamosa    AMOI4',
+'Cedar Rapids    CRPI4',
+'Clinton    CLNI4',
+'Lowden    LWDI4',
+'Maquoketa    MKTI4',
+'Vinton    VNTI4',
+     ],[  
+'Atlantic    ATLI4',
+'Clarinda    CLDI4',
+'Glenwood    GLNI4',
+'Oakland    OAKI4',
+'Red Oak    ROKI4',
+'Sidney    SIDI4',
+     ],[  
+'Allerton    ALRI4',
+'Beaconsfield    BCNI4',
+'Centerville    CNTI4',
+'Indianola    IDAI4',
+'Lamoni    3OI',
+'Osceola    OSEI4',
+     ],[  
+'Bloomfield    BLMI4',
+'Donnellson    DNNI4',
+'Fairfield    FRFI4',
+'Keosauqua    KEQI4',
+'Washington    WSHI4',
+ ]
 ]
 
 def compute_weekly(fp, sts, ets):
     ''' Compute the weekly stats we need '''
-    coop = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     # Max daily high
     # min daily high
@@ -57,21 +109,28 @@ def compute_weekly(fp, sts, ets):
     # since 1 april departure
     sday = sts.strftime("%m%d")
     eday = ets.strftime("%m%d")
+    apr1 = "%s-04-01" % (sts.year,)
+    dec31 = "%s-12-31" % (sts.year,)
     cursor.execute("""
     WITH obs as (
-        SELECT station, 
-        max(high) as hi,
-        min(low)  as lo,
-        avg((high+low)/2.) as avg,
-        sum(precip) as total_p
-        FROM alldata_ia WHERE day >= %s and day <= %s 
-        GROUP by station
+        SELECT id as station , climate_site, 
+        max(max_tmpf) as hi,
+        min(min_tmpf)  as lo,
+        avg((max_tmpf+min_tmpf)/2.) as avg,
+        sum(pday) as total_p
+        FROM summary s JOIN stations t on (t.iemid = s.iemid) 
+        WHERE day >= %s and day <= %s 
+        and t.network = 'IA_COOP' and pday >= 0 and max_tmpf > -90 
+        and min_tmpf < 90
+        GROUP by station, climate_site
     ), april_obs as (
-        SELECT station, 
-        sum(precip) as p, 
-        sum(gddxx(50,86,high,low)) as gdd
-        from alldata_ia WHERE year = %s and month > 3
-        GROUP by station
+        SELECT id as station,  climate_site,
+        sum(pday) as p, 
+        sum(gddxx(50,86,max_tmpf,min_tmpf)) as gdd
+        from summary s JOIN stations t on (t.iemid = s.iemid)
+        WHERE t.network = 'IA_COOP' and 
+        day >= %s and day <= %s
+        and pday >= 0 GROUP by station, climate_site
     ), climo as (
         SELECT station,
         avg((high+low)/2.) as avg,
@@ -97,10 +156,10 @@ def compute_weekly(fp, sts, ets):
     (april_obs.p - april_climo.avg_p) as april_p_dfn,
     april_obs.gdd as april_gdd,
     (april_obs.gdd - april_climo.avg_gdd) as april_gdd_dfn
-    from obs JOIN climo on (obs.station = climo.station)
+    from obs JOIN climo on (obs.climate_site = climo.station)
     JOIN april_obs on (obs.station = april_obs.station)
-    JOIN april_climo on (april_climo.station  = obs.station)
-""", (sts, ets, sts.year, sday, eday, eday))
+    JOIN april_climo on (april_climo.station  = obs.climate_site)
+""", (sts, ets, apr1, dec31, sday, eday, eday))
     data = {}
     for row in cursor:
         data[row['station']] = row
@@ -108,22 +167,24 @@ def compute_weekly(fp, sts, ets):
     for district, sector in zip(districts, stids):
         fp.write("%s District\n" % (district,))
         for sid in sector:
-            fp.write("%-15.15s %3s %3s %3.0f %3.0f  %5.2f  %5.2f   %5.2f %6.2f %7.0f %5.0f\n" % (nt.sts[sid]['name'], 
-                                            data[sid]['hi'], 
-                                            data[sid]['lo'], data[sid]['avg'],
-                                            data[sid]['temp_dfn'],
-                                            data[sid]['total_p'],
-                                            data[sid]['precip_dfn'],
-                                            data[sid]['april_p'],
-                                            data[sid]['april_p_dfn'],
-                                            data[sid]['april_gdd'],
-                                            data[sid]['april_gdd_dfn']))
+            nwsli = sid[-5:].strip()
+            name = sid[:-5].strip()
+            fp.write("%-15.15s %3.0f %3.0f %3.0f %3.0f  %5.2f  %5.2f   %5.2f %6.2f %7.0f %5.0f\n" % (name, 
+                                            data[nwsli]['hi'], 
+                                            data[nwsli]['lo'], data[nwsli]['avg'],
+                                            data[nwsli]['temp_dfn'],
+                                            data[nwsli]['total_p'],
+                                            data[nwsli]['precip_dfn'],
+                                            data[nwsli]['april_p'],
+                                            data[nwsli]['april_p_dfn'],
+                                            data[nwsli]['april_gdd'],
+                                            data[nwsli]['april_gdd_dfn']))
 
 
 def compute_monthly(fp, year, month):
     ''' Compute the monthly data we need to compute '''
-    coop = psycopg2.connect(database='coop', host='iemdb', user='nobody')
-    cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    pgconn = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     # Max daily high
     # min daily high
@@ -136,20 +197,24 @@ def compute_monthly(fp, year, month):
     # heating degree day departure
     # days with temp below 32
     # days with temp below 28
+    sts = datetime.datetime(year, month, 1)
+    ets = sts + datetime.timedelta(days=35)
+    ets = ets.replace(day=1)
     
     cursor.execute("""
     WITH obs as (
-        SELECT station, 
-        max(high) as hi,
-        min(low)  as lo,
-        avg((high+low)/2.) as avg,
-        sum(precip) as total_p,
-        sum(case when precip >= 0.01 then 1 else 0 end) as days,
-        sum(hdd65(high,low)) as hdd,
-        sum(case when low <= 32 then 1 else 0 end) as days32,
-        sum(case when low <= 28 then 1 else 0 end) as days28
-        FROM alldata_ia WHERE year = %s and month = %s
-        GROUP by station
+        SELECT id as station, climate_site,  
+        max(max_tmpf) as hi,
+        min(min_tmpf)  as lo,
+        avg((max_tmpf+min_tmpf)/2.) as avg,
+        sum(case when pday > 0 then pday else 0 end) as total_p,
+        sum(case when pday >= 0.01 then 1 else 0 end) as days,
+        sum(hdd65(max_tmpf,min_tmpf)) as hdd,
+        sum(case when min_tmpf <= 32 then 1 else 0 end) as days32,
+        sum(case when min_tmpf <= 28 then 1 else 0 end) as days28
+        FROM summary s JOIN stations t on (t.iemid = s.iemid) 
+        WHERE t.network = 'IA_COOP' and day >= %s and day < %s
+        GROUP by station, climate_site
     ), climo as (
         SELECT station,
         avg((high+low)/2.) as avg,
@@ -169,8 +234,8 @@ def compute_monthly(fp, year, month):
     (obs.hdd - climo.avg_hdd) as hdd_dfn,
     obs.days32,
     obs.days28
-    from obs JOIN climo on (obs.station = climo.station)
-""", (year, month, month))
+    from obs JOIN climo on (obs.climate_site = climo.station)
+""", (sts, ets, month))
     data = {}
     for row in cursor:
         data[row['station']] = row
@@ -178,17 +243,19 @@ def compute_monthly(fp, year, month):
     for district, sector in zip(districts, stids):
         fp.write("%s District\n" % (district,))
         for sid in sector:
-            fp.write("%-15.15s %3s %3s %3.0f %3.0f  %5.2f  %5.2f   %2s %5.0f %5.0f %3s  %3s\n" % (nt.sts[sid]['name'], 
-                                            data[sid]['hi'], 
-                                            data[sid]['lo'], data[sid]['avg'],
-                                            data[sid]['temp_dfn'],
-                                            data[sid]['total_p'],
-                                            data[sid]['precip_dfn'],
-                                            data[sid]['days'],
-                                            data[sid]['hdd'] or 0,
-                                            data[sid]['hdd_dfn'] or 0,
-                                            data[sid]['days32'],
-                                            data[sid]['days28']))
+            nwsli = sid[-5:].strip()
+            name = sid[:-5].strip()
+            fp.write("%-15.15s %3.0f %3.0f %3.0f %3.0f  %5.2f  %5.2f   %2s %5.0f %5.0f %3s  %3s\n" % (name, 
+                                            data[nwsli]['hi'], 
+                                            data[nwsli]['lo'], data[nwsli]['avg'],
+                                            data[nwsli]['temp_dfn'],
+                                            data[nwsli]['total_p'],
+                                            data[nwsli]['precip_dfn'],
+                                            data[nwsli]['days'],
+                                            data[nwsli]['hdd'] or 0,
+                                            data[nwsli]['hdd_dfn'] or 0,
+                                            data[nwsli]['days32'],
+                                            data[nwsli]['days28']))
     
 
 def monthly_header(fp, sts, ets):
@@ -228,7 +295,8 @@ def email_report(report, subject):
     msg['Subject'] = subject
     msg['From'] = 'mesonet@mesonet.agron.iastate.edu'
     msg['Cc'] = 'akrherz@iastate.edu'
-    msg['To'] = 'NASSRFOUMR@nass.usda.gov' if len(sys.argv) != 5 else 'akrherz@localhost'
+    msg['To'] = 'NASSRFOUMR@nass.usda.gov'
+    #msg['To'] = 'akrherz@localhost'
     msg.preamble = 'Report'
 
     fn = "iem.txt" 
@@ -244,6 +312,7 @@ def email_report(report, subject):
     s = smtplib.SMTP('localhost')
     s.sendmail(msg['From'], msg['To'], msg.as_string())
     s.quit()
+    
 
     
 if __name__ == '__main__':
@@ -267,7 +336,7 @@ if __name__ == '__main__':
         monthly_header(report, sts, ets)
         compute_monthly(report, sts.year, sts.month)
         email_report(report, "IEM Monthly Data Report")
-    if rtype == "daily" and today.month in range(4,11):        
+    if rtype == "weekly" and today.month in range(4,11):        
         sts = today - datetime.timedelta(days=7)
         ets = yesterday
         report = cStringIO.StringIO()
