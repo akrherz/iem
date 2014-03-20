@@ -65,9 +65,9 @@ if ($tomorrow > time()){
 	$tomorrow = null;
 }
 if ($metadata["archive_begin"]){
-	$startyear = intval(date("Y", time($metadata["archive_begin"])));
-	if ($date < time($metadata['archive_begin'])){
-		$date = time($metadata['archive_begin']);
+	$startyear = intval(date("Y", strtotime($metadata["archive_begin"])));
+	if ($date < strtotime($metadata['archive_begin'])){
+		$date = strtotime($metadata['archive_begin']);
 	}
 } else {
 	$startyear = 1933;
@@ -90,7 +90,7 @@ if ($date >= $iemarchive){
 				null as skyc3, null as skyl3, null as presentwx,
 				null as skyc4, null as skyl4, null as max_tmpf_6hr,
 				null as p06i, null as min_tmpf_6hr, null as p03i
-		from t$year where 
+		from t". date("Y", $date) ." where 
 		station = $1  and valid  >= $3 and valid  < $4 
 		and $2 = $2 ORDER by valid DESC");
 	} else if (preg_match("/ISUSM/", $network)){
@@ -103,7 +103,7 @@ if ($date >= $iemarchive){
 		$db = "asos";
 		$sql = sprintf("SELECT *, mslp as pres, metar as raw, p01i as phour,
 				null as relh
-				from t$year where
+				from t". date("Y", $date) ." where
 				station = $1  and valid  >= $3 and valid  < $4
 				and $2 = $2 ORDER by valid DESC");
 		
@@ -130,8 +130,8 @@ $t->thispage = "iem-sites";
 $t->title = "Observation History";
 $t->sites_current = 'obhistory';
 
-$savevars = Array("year"=>$year,
- "month"=>$month, "day"=>$day); 
+$savevars = Array("year"=>date("Y", $date),
+ "month"=>date("m", $date), "day"=>date("d", $date)); 
 $t->jsextra = <<<EOF
 <script type="text/javascript">
 var hide = false;
