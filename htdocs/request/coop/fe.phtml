@@ -1,33 +1,81 @@
 <?php 
 include("../../../config/settings.inc.php");
+include("../../../include/myview.php");
+$t = new MyView();
+
 define("IEM_APPID", 3);
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
-include("$rootpath/include/iemprop.php");
+include("../../../include/iemprop.php");
 $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
-$TITLE = "IEM | COOP Data Download";
-$THISPAGE = "networks-coop";
-include("$rootpath/include/header.php"); 
-include("$rootpath/include/network.php"); 
-include("$rootpath/include/forms.php"); 
+$t->title = "COOP Quality Controlled and Estimated Data Download";
+$t->thispage = "networks-coop";
+include("../../../include/network.php"); 
+include("../../../include/forms.php"); 
 $nt = new NetworkTable($network);
 $cities = $nt->table;
-?>
-<div class="text">
 
-<p>This page allows you to download daily observations for the NWS COOP network.Some items of note:
+$enddate = date('d M Y', $coop_archive_end);
+
+$sselect = "";
+while (list($key,$val) = each($cities)){
+	$sselect .= "<option value=\"$key\">[$key] ". $cities[$key]['name'] ." -- ".
+			substr($cities[$key]["archive_begin"],0,10) ."</option>\n";
+}
+$y1 = yearSelect2(1893, 1893, "year1");
+$m1 = monthSelect2(1, "month1");
+$d1 = daySelect2(1, "day1");
+$y2 = yearSelect2(1893, 1893, "year2");
+$m2 = monthSelect2(1, "month2");
+$d2 = daySelect2(1, "day2");
+
+$t->content = <<<EOF
+<ol class="breadcrumb">
+<li><a href="/COOP/">NWS COOP Network</a></li>
+<li class="active">Download QC and Estimated Data</li>
+</ol>
+
+<p>This page allows you to download observed, sometimes quality controlled, 
+ and sometimes estimated once daily reports from the NWS COOP network.  Please be
+ sure to understand these caveats before using the data:
 <ul>
-	<li>In general, the snowfall data is mostly there.  Some years are missing data.</li>
-	<li>If you are looking to download the entire dataset, please check out <a href="http://mesonet.agron.iastate.edu/pickup/coop_data/">This Directory!</a></li>
+	<li>In general, the snowfall data is mostly there.  
+	Some years are missing data.  Estimating snowfall is very difficult and
+	even the reports of snowfall are questionable.  The same applies for
+	snow depth.</li>
+	<li>If you are looking to download the entire dataset, please check 
+	out <a href="/pickup/coop_data/">this directory!</a></li>
 	<li>If you find errors in the dataset, please let us know!  There are 
-numerous folks working on the data quality of this important dataset 
-and we are always interested in feedback.</li>
+ numerous folks working on the data quality of this important dataset 
+ and we are always interested in feedback.</li>
+    <li>The dates presented are the day on which the observation was reported.
+    The values represent a 24 hour period prior to that observation.  Unfortunately,
+    presenting the time of the observation is not supported yet.  To complicate 
+    things, some of the data is actually on the local calendar day.</li>
+    <li>On this page, you will also find 'stations' called "Average" or 
+    "Climate Division".  These virtual stations represent an areal average over
+    a given state or standard climate district.</li>
+    <li>You will find download options for daily solar radiation data.  Of course,
+    this variable is not observed by this network but is included as a convience.
+    These values were derived from various modelling efforts. This data 
+    represents a local calendar day.  Only the 
+    <a href="http://ruc.noaa.gov/hrrr/">HRRR</a> estimates have data for
+    recent days, it takes a few months for 
+    <a href="http://gmao.gsfc.nasa.gov/merra/">MERRA</a> and 
+    <a href="http://www.esrl.noaa.gov/psd/data/gridded/data.narr.html">NARR</a>
+    estimates to appear.
+    These values are obtained by simple grid point sampling.</li>
 </ul></p>
 
-<p>The quality controlled data <strong>for Iowa</strong> is currently updated 
-to <?php echo date('d M Y', $coop_archive_end); ?>.  While data is available for dates up 
-until yesterday, the values are estimated by the IEM.</p>
+<p>If you are looking for actual observations with no estimating and very little
+ quality control done, check out <a href="obs-fe.phtml">this page</a>.
 
-<p>Data is available from the following states: 
+<p>The quality controlled data <strong>for Iowa</strong> is currently updated 
+ to {$enddate}.  While data is available for dates up 
+ until yesterday, the values are estimated by the IEM.  The quality controlled
+ data is provided to us by the Iowa State Climatology.  News items are posted
+ to the <a href="/">homepage</a> when a month's worth of data is sent to us.</p>
+
+<p>Data is also available from the following states: 
 <a href="fe.phtml?network=ILCLIMATE">Illinois</a> ,
 <a href="fe.phtml?network=INCLIMATE">Indiana</a> ,
 <a href="fe.phtml?network=IACLIMATE">Iowa</a> ,
@@ -40,24 +88,32 @@ until yesterday, the values are estimated by the IEM.</p>
 <a href="fe.phtml?network=OHCLIMATE">Ohio</a> ,
 <a href="fe.phtml?network=NDCLIMATE">North Dakota</a> ,
 <a href="fe.phtml?network=SDCLIMATE">South Dakota</a> ,
-<a href="fe.phtml?network=WICLIMATE">Wisconsin</a>.
+<a href="fe.phtml?network=WICLIMATE">Wisconsin</a>.  This information is mostly
+estimated until <a href="http://www.ncdc.noaa.gov">NCDC</a> provides updated 
+GHCN datafiles, which the IEM then merges into this dataset.  The unfortunate
+side effect is that data changes as new information becomes available.
+
+<p>If you really need calendar day data and other variables like
+ wind speed and relative humidity, check out the <a href="/iemre/">IEM Reanalysis</a>
+ effort. 
+
+<div class="alert alert-warning">The purpose is to provide a dataset that does 
+ not have holes in it for temperature and precipitation and is updated up 
+ until yesterday.  Unfortunately, these
+ values are not on a local calendar day, so please be very careful before
+ use.  Unfortunately, long term observations that are on local calendar 
+ days does not exist!</div>
 
 <form method="GET" action="dl.php" name="dlform">
-<input type="hidden" name="network" value="<?php echo $network; ?>" />
-<table>
-<tr><td width="50%">
+<input type="hidden" name="network" value="{$network}" />
+
+<div class="row"><div class="col-md-6 col-sm-6">
 
 <p><h3 class="subtitle">1. Select Station:</h3>
 <i>Select One or More or All stations in the network.</i><br />
 <select name="station[]" size="5" MULTIPLE>
-	<option value="_ALL">--Select ALL--
-<?php
-while (list($key,$val) = each($cities)){
-    echo "<option value=\"$key\">[$key] ". $cities[$key]['name'] ." -- ". 
-      substr($cities[$key]["archive_begin"],0,10) ."\n";
-}
-
-?>
+<option value="_ALL">--Select ALL--</option>
+{$sselect}
 </select>
 
 
@@ -73,34 +129,22 @@ start and end times to the same value.</i>
 
   <tr>
     <th>Start:</th>
-    <td>
-     <?php echo yearSelect2(1893, 1893, "year1"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect2(1, "month1"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2(1, "day1"); ?>
-    </td>
+    <td>{$y1}</td>
+    <td>{$m1}</td>
+    <td>{$d1}</td>
   </tr>
 
   <tr>
     <th>End:</th>
-    <td>
-     <?php echo yearSelect2(1893, date("Y"), "year2"); ?>
-    </td>
-    <td>
-     <?php echo monthSelect2(date("m"), "month2"); ?>
-    </td>
-    <td>
-     <?php echo daySelect2(1, "day2"); ?>
-    </td>
-  </tr>
+    <td>{$y2}</td>
+    <td>{$m2}</td>
+    <td>{$d2}</td>
+   </tr>
 </table>
 
 <p><h3 class="subtitle">3. Select Variables / Model Input Format:</h3>
 <i>Select either one or more data variables or a predefined format that 
-should work within the specified Model input format.  Please <a href="../../info/contact.php">contact us</a>
+should work within the specified Model input format.  Please <a href="/info/contact.php">contact us</a>
 to have your format added to the list!</i>
 <select size=5 name="vars[]" MULTIPLE>
   <option value="daycent">Model: DailyDayCent (no extra drivers)</option> 
@@ -117,9 +161,12 @@ to have your format added to the list!</i>
   <option value="precipmm">Variable: Precipitation (rain+melted snow) [mm]</option>
   <option value="snow">Variable: Snowfall [inch]</option>
   <option value="snowd">Variable: Snow Depth (since 1991) [inch]</option>
+  <option value="narr_srad">Estimate: NARR Sampled Solar Radiation [MJ/day] (1979-)</option>
+  <option value="merra_srad">Estimate: MERRA Sampled Solar Radiation [MJ/day] (1979-)</option>
+  <option value="hrrr_srad">Estimate: HRRR Sampled Solar Radiation [MJ/day] (2013-)</option>
 </select>
 
-</td><td valign="TOP">
+</div><div class="col-md-6 col-sm-6">
 
 <p><h3 class="subtitle">4. How to view?</h3>
 <select name="what">
@@ -136,7 +183,7 @@ How shall the output values be seperated?
    </select>
 
 <p>
-<h3 class="subtitle">6. Include Lat / Lons?</h3><img src="<?php echo $rooturl; ?>/images/gisready.png">
+<h3 class="subtitle">6. Include Lat / Lons?</h3><img src="/images/gisready.png">
  <select name="gis">
    <option value="no">No
    <option value="yes">Yes
@@ -149,8 +196,9 @@ seconds to get a response.</i><br />
 <input type="submit" value="Process Data Request">
 <input type="reset">
 
-</td></tr></table>
-</form></div>
+</div></div>
 
-
-<?php include("$rootpath/include/footer.php"); ?>
+</form>
+EOF;
+$t->render('single.phtml');
+?>
