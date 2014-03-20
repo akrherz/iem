@@ -89,7 +89,8 @@ def get_agdata():
     and value ~* '[0-9\.]' and value != '.' and value !~* '<'
     and site in ('MASON', 'KELLOGG', 'GILMORE', 'ISUAG', 'WOOSTER.COV',
     'SEPAC', 'BRADFORD.C', 'BRADFORD.B1', 'BRADFORD.B2', 'FREEMAN') 
-    and varname in ('SOIL13', 'SOIL23', 'SOIL14', 'SOIL27', 'SOIL28', 'SOIL1')
+    and varname in ('SOIL13', 'SOIL23', 'SOIL14', 'SOIL27', 'SOIL28', 'SOIL1',
+    'SOIL15')
     GROUP by site, plotid, depth, varname, year
     """)
     sndata = {}
@@ -105,12 +106,14 @@ def get_agdata():
           +"soil27_0-10,soil27_10-20,soil27_20-40,soil27_40-60,"
           +"soil28_0-10,soil28_10-20,soil28_20-40,soil28_40-60,"
           +"soil1_0-10,soil1_10-20,soil1_20-40,soil1_40-60,"
-          +"soil23_0-30,soil23_30-60,soil23_60-90,soil23_90-120,\n")
+          +"soil23_0-30,soil23_30-60,soil23_60-90,soil23_90-120,"
+          +"soil15_0-30,soil15_30-60,soil15_60-90,\n")
     for key in data.keys():
         tokens = key.split("|")
         lkp = "%s|%s|%s|%s" % (tokens[0], tokens[1], tokens[2], 'SOIL')
         res += ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
-               +"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,\n") % (
+               +"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+               +"%s,%s,%s,\n") % (
                 tokens[0], tokens[1],
                 tokens[2], tokens[3], tokens[4], tokens[5], tokens[6],
                 data[key].get('AGR1', ''), data[key].get('AGR2', ''),
@@ -141,7 +144,10 @@ def get_agdata():
                 sndata.get(lkp+"23|0 - 30", 'M'),
                 sndata.get(lkp+"23|30 - 60", 'M'),
                 sndata.get(lkp+"23|60 - 90", 'M'),
-                sndata.get(lkp+"23|90 - 120", 'M')                
+                sndata.get(lkp+"23|90 - 120", 'M'),
+                sndata.get(lkp+"15|0 - 30", 'M'),
+                sndata.get(lkp+"15|30 - 60", 'M'),
+                sndata.get(lkp+"15|60 - 90", 'M'),                
                 )
     
     return res
