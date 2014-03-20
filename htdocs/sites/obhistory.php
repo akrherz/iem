@@ -64,6 +64,15 @@ $tomorrow = $date + 86400;
 if ($tomorrow > time()){
 	$tomorrow = null;
 }
+if ($metadata["archive_begin"]){
+	$startyear = intval(date("Y", time($metadata["archive_begin"])));
+	if ($date < time($metadata['archive_begin'])){
+		$date = time($metadata['archive_begin']);
+	}
+} else {
+	$startyear = 1933;
+}
+
 $iemarchive = mktime(0,0,0,date("m"), date("d"), date("Y")) - 86400;
 if ($date >= $iemarchive){
 	$db = "iem";
@@ -146,14 +155,10 @@ function hideMetars(){
 EOF;
 $dstr = date("d F Y", $date);
 $tzname =  $metadata["tzname"];
-if ($metadata["archive_begin"]){
-	$startyear = intval(date("Y", time($metadata["archive_begin"])));
-} else {
-	$startyear = 1933;
-}
-$ys = yearSelect($startyear,$year);
-$ms = monthSelect($month);
-$ds = daySelect($day);
+
+$ys = yearSelect($startyear,date("Y", $date));
+$ms = monthSelect(date("m", $date));
+$ds = daySelect(date("d", $date));
 
 $mbutton = (preg_match("/ASOS|AWOS/", $network)) ? 
 "<a onclick=\"javascript:hideMetars();\" class=\"btn btn-default\" id=\"metar_toggle\">Show Metars</a>"
