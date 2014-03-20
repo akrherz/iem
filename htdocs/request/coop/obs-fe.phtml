@@ -19,9 +19,11 @@ $t->north = <<<EOF
 <li class="active">Raw Data Download</li>
 </ol>
 
-<p>This form provides access to the raw observations from the NWS COOP network. The
-high and low temperature values are for the 24 hour period prior to the observation
-on the date! Typically, this is a period ending at 8 AM localtime.</p>
+<p>This form provides access to the raw observations from the NWS COOP network.
+<strong>The date presented in the download is the date on which the observation
+		was made!</strong> The observations represent a 24 hour period prior
+		to the timestamp on the observation.  These observations are typically
+		made around 7 AM localtime.</p>
 EOF;
 
 $west = <<<EOF
@@ -49,7 +51,7 @@ $west .= <<<EOF
 <form method="GET" action="obs-dl.php" name='dl'>
 <input type='hidden' name='network' value="{$network}" />
 
-<p><h3 class="subtitle">1. Select Station(s):</h3><br>
+<p><h3>1. Select Station(s):</h3><br>
 EOF;
 $west .= networkMultiSelect($network, ""); 
 
@@ -61,7 +63,9 @@ $m2 = monthSelect("", "month2");
 $d2 = daySelect2("", "day2");
 
 $west .= <<<EOF
-<p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
+<p><h3>2. Select Start/End Date:</h3>
+<p>These dates are the date of the observation and do not always represent
+a local calendar day!.</p>
 <table class="table table-striped">
   <tr>
     <td></td>
@@ -100,6 +104,19 @@ How shall the output values be seperated?
 <input type="submit" value="Process Data Request">
 <input type="reset">
 </form>
+
+<p><h3>Download variable description</h3>
+<pre>
+nwsli National Weather Service Location Identifier
+date  Date the observation was taken
+time  Time (local timezone) the observation was taken
+high_F      24 Hour High Temperature [F]
+low_F       24 Hour Low Temperature [F]
+precip      24 Hour Precipitation [inch]
+snow_inch   24 Hour Snowfall [inch]
+snowd_inch  Snow Depth [inch] at observation
+</pre>
+
 EOF;
 
 $t->render('single.phtml');

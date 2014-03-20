@@ -1,6 +1,6 @@
 <?php
 include("../../../config/settings.inc.php");
-$network = isset($_GET['network']) ? $_GET["network"] : 'IA_COOP';
+$network = isset($_GET['network']) ? substr($_GET["network"],0,30) : 'IA_COOP';
 include("../../../include/database.inc.php");
  $connection = iemdb("iem");
 include("../../../include/network.php");
@@ -55,9 +55,13 @@ $nicedate = strftime("%Y-%m-%d", $ts1);
 
 $d = Array("space" => " ", "comma" => "," , "tab" => "\t");
 
-$sqlStr = "SELECT s.*,t.id, day from summary s JOIN stations t on (t.iemid = s.iemid)";
-$sqlStr .= " WHERE day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ";
-$sqlStr .= " and id IN ". $stationString ." and network = '$network' ORDER by s.day ASC";
+$sqlStr = <<<EOF
+ SELECT s.*,t.id, day, 
+ to_char(coop_valid at time zone t.tzname, 'HH PM') as cv
+ from summary s JOIN stations t on (t.iemid = s.iemid)
+ WHERE day >= '{$sqlTS1}' and day <= '{$sqlTS2}' 
+ and id IN {$stationString} and network = '{$network}' ORDER by s.day ASC
+EOF;
 
 if ($what == "download"){
  header("Content-type: application/octet-stream");
@@ -76,13 +80,16 @@ function cleaner($v){
 	return $v;
 }
 
- /* Load data into an array, yucky... */
- $data = sprintf("nwsli%sdate%shigh_F%slow_F%sprecip_inch%ssnow_inch%ssnowd_inch\n",
- 	$d[$delim],$d[$delim],$d[$delim],$d[$delim],$d[$delim],$d[$delim]);
+ $cols = Array("nwsli", "date", "time", "high_F", "low_F", "precip", 
+ 	"snow_inch", "snowd_inch");
+ $data = implode($d[$delim], $cols) ."\n";
  for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
  {
-   $data .= sprintf("%s%s%s%s%s%s%s%s%s%s%s%s%s\n", $row["id"],$d[$delim], $row["day"],
-   		$d[$delim], cleaner($row["max_tmpf"]), $d[$delim], 
+   $data .= sprintf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n", 
+   		$row["id"], $d[$delim], 
+   		$row["day"], $d[$delim], 
+   		$row["cv"], $d[$delim],
+   		cleaner($row["max_tmpf"]), $d[$delim], 
    		cleaner($row["min_tmpf"]), $d[$delim],
    		cleaner($row["pday"]), $d[$delim], cleaner($row["snow"]),$d[$delim],
    		cleaner($row["snowd"]));
