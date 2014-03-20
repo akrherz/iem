@@ -1,3 +1,7 @@
+'''
+  I produce the hourly analysis used by IEMRE
+'''
+
 import sys
 import netCDF4
 import numpy
@@ -11,7 +15,7 @@ import network
 import psycopg2.extras
 import pytz
 
-nt = network.Table(('IA_ASOS','MO_ASOS','IL_ASOS',
+nt = network.Table(('IA_ASOS','MO_ASOS','IL_ASOS', 'ND_ASOS',
          'WI_ASOS','MN_ASOS', 'SD_ASOS', 'NE_ASOS', 'KS_ASOS', 'AWOS',
          'IN_ASOS','KY_ASOS','OH_ASOS','MI_ASOS'))
 

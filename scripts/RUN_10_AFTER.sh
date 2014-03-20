@@ -46,8 +46,8 @@ python asos2archive.py iowa
 
 
 cd ../iemre
-python grid_asos.py
-python grid_asos.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
+python hourly_analysis.py
+python hourly_analysis.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
 
 cd ../mrms
 python mrms_pXXh_comp.py $YYYY $MM $DD $HH
