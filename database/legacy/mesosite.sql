@@ -18,7 +18,7 @@ CREATE TABLE news(
   author varchar(100),
   title varchar(100),
   url varchar,
-  views smallint);
+  views smallint default 0);
 CREATE INDEX news_entered_idx on news(entered);
 GRANT ALL on news to nobody,apache;
 GRANT ALL on news_id_seq to nobody,apache;

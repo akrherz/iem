@@ -1,42 +1,48 @@
 <?php
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
+include("../../include/database.inc.php");
+
+include("../../include/myview.php");
+$t = new MyView();
 
 $title = isset($_POST["title"]) ? $_POST["title"] : "";
 $body = isset($_POST["body"]) ? $_POST["body"]: "";
 $author = isset($_POST["author"]) ? $_POST["author"]: "";
 $url = isset($_POST["url"]) ? $_POST["url"]: "";
+$tags = isset($_REQUEST["tags"]) ? explode(",", $_REQUEST["tags"]): Array();
 
+$msg = "";
 if (strlen($title) > 0) {
  $conn = iemdb("mesosite", TRUE, TRUE);
  $rs = pg_prepare($conn, "INJECTOR", "INSERT into 
-       news(body, author, title, url) VALUES ($1,$2,$3,$4)");
- pg_execute($conn, "INJECTOR", Array($body, $author, $title, $url));
- echo "<p>Story entered!";
+       news(body, author, title, url, tags) VALUES ($1,$2,$3,$4, $5)");
+ pg_execute($conn, "INJECTOR", Array(str_replace("\r", "", $body), 
+ 	$author, $title, $url, "{". join(",",$tags) ."}"));
+ $msg = "Story entered!";
 }
-?>
-<html>
-<head>
-  <title>IEM Admin | Add News Item</title>
-</head>
-<body>
 
-<p>
-<form method="POST" action="add_news.phtml">
+$t->title = "Add News Item";
+$t->content = <<<EOF
+<form method="POST" action="add_news.phtml" name='news'>
 
 <p>Enter Title:<input type="text" name="title" size="30">
 
 <p>Reference URL?:
 <input type="text" name="url" size="50">
 
-<p>Enter Story (HTML please :) ):
-<textarea NAME='body' wrap="hard" ROWS="20" COLS="70"></textarea>
+<p>Enter Story (HTML please :) ):<br />
+<textarea name='body' rows="20" cols="70"></textarea>
 
 <p>Enter Author:
  <input type="text" name="author" value="Daryl Herzmann">
 
+<p>Tags (comma seperated)
+<input type="text" name="tags" />
+		
 <p>Post Story:
  <input type="submit"><input type="reset">
 
-
 </form>
+EOF;
+$t->render('single.phtml');
+?>
