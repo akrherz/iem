@@ -34,9 +34,9 @@ import numpy as np
 from scipy.interpolate import NearestNDInterpolator
 import psycopg2
 import psycopg2.extras
-COOP = psycopg2.connect(database='coop', host='iemdb', user='nobody')
+COOP = psycopg2.connect(database='coop', host='iemdb')
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+IEM = psycopg2.connect(database='iem', host='iemdb')
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 state = sys.argv[1]
