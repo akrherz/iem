@@ -122,7 +122,7 @@ for fn in fp.keys():
     station = fp[fn]
     lines = open("%s%s" % (DIR, fn), 'r').readlines()
     if len(lines) < 2:
-        print '%s has % lines?' % (fn, len(lines))
+        print 'flux_ingest.py file: %s has %s lines?' % (fn, len(lines))
         continue
     keys = lines[1].replace('"','').replace("\r\n", '').split(",")
     for linenum, obline in enumerate(lines[3:]):
