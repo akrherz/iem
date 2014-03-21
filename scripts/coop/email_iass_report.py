@@ -110,7 +110,6 @@ def compute_weekly(fp, sts, ets):
     sday = sts.strftime("%m%d")
     eday = ets.strftime("%m%d")
     apr1 = "%s-04-01" % (sts.year,)
-    dec31 = "%s-12-31" % (sts.year,)
     cursor.execute("""
     WITH obs as (
         SELECT id as station , climate_site, 
@@ -159,7 +158,7 @@ def compute_weekly(fp, sts, ets):
     from obs JOIN climo on (obs.climate_site = climo.station)
     JOIN april_obs on (obs.station = april_obs.station)
     JOIN april_climo on (april_climo.station  = obs.climate_site)
-""", (sts, ets, apr1, dec31, sday, eday, eday))
+""", (sts, ets, apr1, ets, sday, eday, eday))
     data = {}
     for row in cursor:
         data[row['station']] = row
@@ -169,6 +168,9 @@ def compute_weekly(fp, sts, ets):
         for sid in sector:
             nwsli = sid[-5:].strip()
             name = sid[:-5].strip()
+            if not data.has_key(nwsli):
+                print 'Missing NWSLI: %s' % (nwsli,)
+                continue
             fp.write("%-15.15s %3.0f %3.0f %3.0f %3.0f  %5.2f  %5.2f   %5.2f %6.2f %7.0f %5.0f\n" % (name, 
                                             data[nwsli]['hi'], 
                                             data[nwsli]['lo'], data[nwsli]['avg'],
@@ -324,22 +326,38 @@ if __name__ == '__main__':
     today = datetime.datetime.today()
     yesterday = today - datetime.timedelta(days=1)
     rtype = sys.argv[1]
-    if rtype == "monthly" and yesterday.month in (11,12,1,2,3):
-        if len(sys.argv) >= 4:
-            sts = datetime.date( int(sys.argv[2]), int(sys.argv[3]), 1)
+    # We are testing things
+    if len(sys.argv) >= 4:
+        if rtype == 'monthly':
+            sts = datetime.date(int(sys.argv[2]), int(sys.argv[3]), 1)
             ets = sts + datetime.timedelta(days=35)
             ets = ets.replace(day=1)
-        else:
+            report = cStringIO.StringIO()
+            monthly_header(report, sts, ets)
+            compute_monthly(report, sts.year, sts.month)
+            report.seek(0)
+            print report.read()
+        if rtype == 'weekly':
+            sts = datetime.date(int(sys.argv[2]), int(sys.argv[3]), 
+                                int(sys.argv[4]))
+            ets = sts + datetime.timedelta(days=7)
+            report = cStringIO.StringIO()
+            weekly_header(report, sts, ets)
+            compute_weekly(report, sts, ets)    
+            report.seek(0)
+            print report.read()    
+    else:
+        if rtype == "monthly" and yesterday.month in (11,12,1,2,3):
             sts = yesterday.replace(day=1) 
             ets = yesterday
-        report = cStringIO.StringIO()
-        monthly_header(report, sts, ets)
-        compute_monthly(report, sts.year, sts.month)
-        email_report(report, "IEM Monthly Data Report")
-    if rtype == "weekly" and today.month in range(4,11):        
-        sts = today - datetime.timedelta(days=7)
-        ets = yesterday
-        report = cStringIO.StringIO()
-        weekly_header(report, sts, ets)
-        compute_weekly(report, sts, ets)    
-        email_report(report, "IEM Weekly Data Report")
+            report = cStringIO.StringIO()
+            monthly_header(report, sts, ets)
+            compute_monthly(report, sts.year, sts.month)
+            email_report(report, "IEM Monthly Data Report")
+        if rtype == "weekly" and today.month in range(4,11):        
+            sts = today - datetime.timedelta(days=7)
+            ets = yesterday
+            report = cStringIO.StringIO()
+            weekly_header(report, sts, ets)
+            compute_weekly(report, sts, ets)    
+            email_report(report, "IEM Weekly Data Report")
