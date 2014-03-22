@@ -10,7 +10,7 @@ from pyiem import iemre
 import sys
 import datetime
 
-COOP = psycopg2.connect(database="coop", host='iemdb', user='nobody')
+COOP = psycopg2.connect(database="coop", host='iemdb')
 ccursor = COOP.cursor()
 
 def do_day(valid):
