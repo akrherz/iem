@@ -1,9 +1,9 @@
 <?php
-include("../config/settings.inc.php");
-include("../include/myview.php");
+require_once "../config/settings.inc.php";
+include_once "../include/myview.php";
 $t = new MyView();
 define("IEM_APPID", 39);
-include("../include/database.inc.php");
+include_once "../include/database.inc.php";
 $dbconn = iemdb("mesosite");
  
 $t->title = "Application Listing";
@@ -17,7 +17,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 }
 $rs = pg_exec($dbconn, "SELECT * from iemapps i ORDER by appid ASC");
 for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
-	$table .= sprintf("<tr><th><a href='%s%s'>%s</a></th><td>%s</td><td>%s</td></tr>\n", $rooturl,
+	$table .= sprintf("<tr><th><a href='%s'>%s</a></th><td>%s</td><td>%s</td></tr>\n", 
 			$row["url"],  $row["name"], $row["description"], @$tags[$row["appid"]]);
 }
 

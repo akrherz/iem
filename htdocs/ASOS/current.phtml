@@ -215,8 +215,7 @@ while (list ($key, $val) = each ($finalA))  {
   $row .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
 
   $tdiff = $now - $asos[$key]->ts;
-  $url = sprintf("%s/sites/site.php?station=%s&network=%s", $rooturl,
-         $key, $network);
+  $url = sprintf("/sites/site.php?station=%s&network=%s", $key, $network);
   $row .= sprintf("<td><a href='%s'>%s</a></td>", $url, $key);
   $row .= "<td>". $cities[$key]["name"] . "</td>";
   $row .= "<td ";
