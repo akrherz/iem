@@ -4,9 +4,9 @@
  */
 header('content-type: application/json; charset=utf-8');
 require_once 'Zend/Json.php';
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/network.php");
+include_once "../../config/settings.inc.php";
+include_once "../../include/database.inc.php";
+include_once "../../include/network.php";
 $network = isset($_REQUEST["network"]) ? $_REQUEST["network"] : "KCCI"; 
 $nt = new NetworkTable($network);
 

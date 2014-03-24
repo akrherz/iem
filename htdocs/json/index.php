@@ -1,7 +1,9 @@
 <?php 
-  include("../../config/settings.inc.php");
-  $THISPAGE = "current-jsonp";
-  $HEADEXTRA = "<style>
+  include_once "../../config/settings.inc.php";
+  include_once "../../include/myview.php";
+  $t = new MyView();
+  $t->thispage = "current-jsonp";
+  $t->headextra = "<style>
   .sect {
 	border-top: 1px solid #ccc; 
 	background: #EEFFCC; 
@@ -12,10 +14,205 @@
   		margin-bottom: 10px;
   	}
   		</style>";
-  $TITLE = "IEM | JSONP Web Services";
-  include("../../include/header.php"); 
-?>
-<div style="width: 800px;">
+  $t->title = "JSON(P) Web Services";
+
+
+  $services = array();
+  $services[] = Array(
+  		"title" => "Storm Prediction Center Watches",
+  		"url" => "/json/spcwatch.py?ts={timestamp}",
+  		"desc" => "Provides a geojson format of SPC watches valid at given time
+		or current time if no time specified.",
+  		"vars" => Array(
+  				"timestamp" => "YYYYMMDDHHMI UTC Timestamp (optional)"
+  		),
+  		"example" => Array(
+  				"{timestamp}" => "201104280000"
+  		)
+  );
+  $services[] = Array(
+  		"title" => "RAOB Soundings",
+  		"url" => "/json/raob.py?ts={timestamp}&station={station}",
+  		"desc" => "Provides a single sounding profile for the given station,
+		either a 3 or 4 character site ID and a UTC timestamp.  Realtime data
+		from this service is typically available within 2 hours of observation
+		time.",
+  		"vars" => Array(
+  				"sid" => "3 or 4 character site ID used in North America",
+  				"timestamp" => "YYYYMMDDHHMI UTC Timestamp"
+  		),
+  		"example" => Array(
+  				"{timestamp}" => "199905031200",
+  				"{station}" => "KOUN",
+  		)
+  );
+  
+  $services[] = Array(
+  		"title" => "SHEF Station Variables",
+  		"url" => "/json/dcp_vars.php?station={station}",
+  		"desc" => "Provides SHEF variables provided by this station.",
+  		"vars" => Array(
+  				"station" => "National Weather Service Location Identifier (nwsli)",
+  		),
+  		"example" => Array(
+  				"{station}" => "AMWI4",
+  		)
+  );
+  
+  $services[] = Array(
+  		"title" => "Data Collection Network Details",
+  		"url" => "/json/network.php?network={network}",
+  		"desc" => "The IEM bunches observation stations into networks. This
+service provides metadata for sites within a network.  A listing of networks
+can be found on <a href='/sites/locate.php'>this page.</a>",
+  		"vars" => Array(
+  				"network" => "IEM Network Identifier",
+  		),
+  		"example" => Array(
+  				"{network}" => "IA_ASOS",
+  		)
+  );
+  
+  $services[] = Array(
+  		"title" => "IEM Archived Data Products",
+  		"url" => "/json/products.php?",
+  		"desc" => "The IEM generates and archives a large number of products.
+ This service provides some metadata details necessary to build programic URIs
+ against this archive of data.  This service drives the <a href='/timemachine'>Timemachine</a>
+ application.",
+  		"vars" => Array(
+  		),
+  		"example" => Array(
+  		)
+  );
+  
+  $services[] = Array(
+  		"title" => "RIDGE Single Site Available NEXRADs",
+  		"url" => "/json/radar?operation=available&amp;lat={lat}&amp;lon={lon}&amp;start={start}",
+  		"desc" => "This service returns an estimate of which NEXRAD RADARs have
+imagery available for the timestamp and latitude / longitude location you specify.",
+  		"vars" => Array(
+  				"lat" => "Point location latitude (degrees north)",
+  				"lon" => "Point location longitude (degrees east)",
+  				"start" => "ISO-8601 UTC Timestamp"
+  		),
+  		"example" => Array(
+  				"{lat}" => 41.99,
+  				"{lon}" => 93.50,
+  				"{start}" => "2012-12-01T00:00:00Z",
+  		)
+  );
+  
+  $services[] = Array(
+  		"title" => "RIDGE Single Site Available Products for single NEXRAD",
+  		"url" => "/json/radar?operation=products&amp;radar={radar}&amp;start={start}",
+  		"desc" => "This service returns available NEXRAD level 3 products for
+a given RADAR and date.",
+  		"vars" => Array(
+  				"radar" => "NEXRAD 3 character identifier",
+  				"start" => "ISO-8601 UTC Timestamp"
+  		),
+  		"example" => Array(
+  				"{radar}" => 'DMX',
+  				"{start}" => "2012-12-01T00:00:00Z",
+  		)
+  );
+  
+  $services[] = Array(
+  		"title" => "RIDGE Single Site Available Volume Scan Times",
+  		"url" => "/json/radar?operation=list&amp;radar={radar}&amp;product={product}&amp;start={start}&amp;end={end}",
+  		"desc" => "This service returns NEXRAD volume scan times for a given
+RADAR, level 3 product, and start/end timestamp.",
+  		"vars" => Array(
+  				"radar" => "NEXRAD 3 character identifier",
+  				"product" => "Three character level 3 NEXRAD product identifier.",
+  				"start" => "ISO-8601 UTC Timestamp",
+  				"end" => "ISO-8601 UTC Timestamp"
+  		),
+  		"example" => Array(
+  				"{radar}" => 'DMX',
+  				"{product}" => 'N0Q',
+  				"{start}" => "2012-12-01T00:00:00Z",
+  				"{end}" => "2012-12-01T23:59:59Z",
+  		)
+  );
+  
+  $services[] = Array(
+  		"title" => "NWS State UGC Codes",
+  		"url" => "/json/state_ugc.php?state={state}",
+  		"desc" => "This service returns metadata for UGC codes used by the
+National Weather Service to issue warnings for in a given state.",
+  		"vars" => Array(
+  				"state" => "Two character state identifier",
+  		),
+  		"example" => Array(
+  				"{state}" => 'IA'
+  		)
+  );
+  
+  $services[] = Array(
+  		"title" => "NWS Text Product",
+  		"url" => "/json/nwstext.py?product_id={product_id}",
+  		"desc" => "This service returns the raw text of a NWS Text Product.",
+  		"vars" => Array(
+  				"product_id" => "String that uniquely (not fully) indentifies a text product.",
+  		),
+  		"example" => Array(
+  				"{product_id}" => '201302241745-KDMX-FXUS63-AFDDMX'
+  		)
+  );
+  
+  $services[] = Array(
+  		"title" => "IEM Tracked Station Metadata Changes",
+  		"url" => "/json/stations.php?date={date}",
+  		"desc" => "This service returns metadata for any IEM tracked
+station locations with changed metadata since the given date.  This provides
+a programic mechanism to keep up with metadata updates done on a daily basis.",
+  		"vars" => Array(
+  				"date" => "Request changes since this date",
+  		),
+  		"example" => Array(
+  				"{date}" => date('Y-m-d')
+  		)
+  );
+  
+  $services[] = Array(
+  		"title" => "IEM Webcam Availability",
+  		"url" => "/json/webcams.php?network={network}&amp;ts={ts}",
+  		"desc" => "This service returns metadata on available webcam imagery
+for a given network that collects webcams and a UTC timestamp.",
+  		"vars" => Array(
+  				"network" => "IEM Webcam network (KCCI, KELO, KCRG, IDOT)",
+  				"ts" => "UTC Timestamp that you want images for",
+  		),
+  		"example" => Array(
+  				"{network}" => "KCCI",
+  				"{ts}" => "201212070600",
+  		)
+  );
+  $table = "";
+  while (list($key, $ws) = each($services)){
+  	$table .= sprintf("<div class='sect'><strong>%s</strong>
+	<br /><strong>URI:</strong> %s%s&amp;callback=gotData
+	<br /><strong>Description:</strong> %s
+	<br /><strong>Method GET Parameters:</strong>
+	<br /><table border='1' cellspacing='0' cellpadding='3'>",
+  			$ws["title"], ROOTURL, $ws["url"], $ws["desc"]);
+  	while (list($key2, $vs) = each($ws['vars'])){
+  		$table .= sprintf("<tr><th>%s</th><td>%s</td></tr>", $key2, $vs);
+  	}
+  	$table .= "</table>";
+  	$url = $ws['url'];
+  	while (list($key2, $vs) = each($ws['example'])){
+  		$url = str_replace($key2, $vs, $url);
+  	}
+  	$table .= sprintf("<br /><a href=\"%s%s\">Example JSON</a>
+     	&nbsp; <a href=\"%s%s&callback=gotData\">Example JSONP</a>",
+  			ROOTURL, $url, ROOTURL, $url);
+  	$table .= "</div>\n";
+  }
+  
+  $t->content = <<<EOF
 <h3>IEM Provided JSON-P Webservices</h3>
 
 <p>This page is an attempt to document the various JSON-P web services the
@@ -46,204 +243,10 @@
  </pre>
 
  <p>Okay, so you are all set for documentation on what services are available!
-<?php 
-$services = array();
-$services[] = Array(
-		"title" => "Storm Prediction Center Watches",
-		"url" => "/json/spcwatch.py?ts={timestamp}",
-		"desc" => "Provides a geojson format of SPC watches valid at given time
-		or current time if no time specified.",
-		"vars" => Array(
-				"timestamp" => "YYYYMMDDHHMI UTC Timestamp (optional)"
-		),
-		"example" => Array(
-				"{timestamp}" => "201104280000"
-		)
-);
-$services[] = Array(
-		"title" => "RAOB Soundings",
-		"url" => "/json/raob.py?ts={timestamp}&station={station}",
-		"desc" => "Provides a single sounding profile for the given station,
-		either a 3 or 4 character site ID and a UTC timestamp.  Realtime data
-		from this service is typically available within 2 hours of observation
-		time.",
-		"vars" => Array(
-				"sid" => "3 or 4 character site ID used in North America",
-				"timestamp" => "YYYYMMDDHHMI UTC Timestamp"
-		),
-		"example" => Array(
-				"{timestamp}" => "199905031200",
-				"{station}" => "KOUN",
-		)
-);
-
-$services[] = Array(
-    "title" => "SHEF Station Variables",
-	"url" => "/json/dcp_vars.php?station={station}",
-    "desc" => "Provides SHEF variables provided by this station.",
-	"vars" => Array(
-		"station" => "National Weather Service Location Identifier (nwsli)",
-	),
-	"example" => Array(
-		"{station}" => "AMWI4", 
-	)
-);
-
-$services[] = Array(
-		"title" => "Data Collection Network Details",
-		"url" => "/json/network.php?network={network}",
-		"desc" => "The IEM bunches observation stations into networks. This 
-service provides metadata for sites within a network.  A listing of networks
-can be found on <a href='/sites/locate.php'>this page.</a>",
-		"vars" => Array(
-				"network" => "IEM Network Identifier",
-		),
-		"example" => Array(
-				"{network}" => "IA_ASOS",
-		)
-); 
-
-$services[] = Array(
-		"title" => "IEM Archived Data Products",
-		"url" => "/json/products.php?",
-		"desc" => "The IEM generates and archives a large number of products.
- This service provides some metadata details necessary to build programic URIs
- against this archive of data.  This service drives the <a href='/timemachine'>Timemachine</a>
- application.",
-		"vars" => Array(
-		),
-		"example" => Array(
-		)
-);
-
-$services[] = Array(
-		"title" => "RIDGE Single Site Available NEXRADs",
-		"url" => "/json/radar?operation=available&amp;lat={lat}&amp;lon={lon}&amp;start={start}",
-		"desc" => "This service returns an estimate of which NEXRAD RADARs have
-imagery available for the timestamp and latitude / longitude location you specify.",
-		"vars" => Array(
-			"lat" => "Point location latitude (degrees north)",
-			"lon" => "Point location longitude (degrees east)",
-			"start" => "ISO-8601 UTC Timestamp"
-		),
-		"example" => Array(
-			"{lat}" => 41.99,
-			"{lon}" => 93.50,
-			"{start}" => "2012-12-01T00:00:00Z",
-		)
-);
-
-$services[] = Array(
-		"title" => "RIDGE Single Site Available Products for single NEXRAD",
-		"url" => "/json/radar?operation=products&amp;radar={radar}&amp;start={start}",
-		"desc" => "This service returns available NEXRAD level 3 products for
-a given RADAR and date.",
-		"vars" => Array(
-				"radar" => "NEXRAD 3 character identifier",
-				"start" => "ISO-8601 UTC Timestamp"
-		),
-		"example" => Array(
-				"{radar}" => 'DMX',
-				"{start}" => "2012-12-01T00:00:00Z",
-		)
-);
-
-$services[] = Array(
-		"title" => "RIDGE Single Site Available Volume Scan Times",
-		"url" => "/json/radar?operation=list&amp;radar={radar}&amp;product={product}&amp;start={start}&amp;end={end}",
-		"desc" => "This service returns NEXRAD volume scan times for a given 
-RADAR, level 3 product, and start/end timestamp.",
-		"vars" => Array(
-				"radar" => "NEXRAD 3 character identifier",
-				"product" => "Three character level 3 NEXRAD product identifier.",
-				"start" => "ISO-8601 UTC Timestamp",
-				"end" => "ISO-8601 UTC Timestamp"
-		),
-		"example" => Array(
-				"{radar}" => 'DMX',
-				"{product}" => 'N0Q',
-				"{start}" => "2012-12-01T00:00:00Z",
-				"{end}" => "2012-12-01T23:59:59Z",
-		)
-);
-
-$services[] = Array(
-		"title" => "NWS State UGC Codes",
-		"url" => "/json/state_ugc.php?state={state}",
-		"desc" => "This service returns metadata for UGC codes used by the
-National Weather Service to issue warnings for in a given state.",
-		"vars" => Array(
-				"state" => "Two character state identifier",
-		),
-		"example" => Array(
-				"{state}" => 'IA'
-		)
-);
-
-$services[] = Array(
-		"title" => "NWS Text Product",
-		"url" => "/json/nwstext.py?product_id={product_id}",
-		"desc" => "This service returns the raw text of a NWS Text Product.",
-		"vars" => Array(
-				"product_id" => "String that uniquely (not fully) indentifies a text product.",
-		),
-		"example" => Array(
-				"{product_id}" => '201302241745-KDMX-FXUS63-AFDDMX'
-		)
-);
-
-$services[] = Array(
-		"title" => "IEM Tracked Station Metadata Changes",
-		"url" => "/json/stations.php?date={date}",
-		"desc" => "This service returns metadata for any IEM tracked 
-station locations with changed metadata since the given date.  This provides 
-a programic mechanism to keep up with metadata updates done on a daily basis.",
-		"vars" => Array(
-				"date" => "Request changes since this date",
-		),
-		"example" => Array(
-				"{date}" => date('Y-m-d')
-		)
-);
-
-$services[] = Array(
-		"title" => "IEM Webcam Availability",
-		"url" => "/json/webcams.php?network={network}&amp;ts={ts}",
-		"desc" => "This service returns metadata on available webcam imagery
-for a given network that collects webcams and a UTC timestamp.",
-		"vars" => Array(
-				"network" => "IEM Webcam network (KCCI, KELO, KCRG, IDOT)",
-				"ts" => "UTC Timestamp that you want images for",
-		),
-		"example" => Array(
-				"{network}" => "KCCI",
-				"{ts}" => "201212070600",
-		)
-);
-
- while (list($key, $ws) = each($services)){
-    echo sprintf("<div class='sect'><strong>%s</strong>
-	<br /><strong>URI:</strong> %s%s&amp;callback=gotData
-	<br /><strong>Description:</strong> %s
-	<br /><strong>Method GET Parameters:</strong>
-	<br /><table border='1' cellspacing='0' cellpadding='3'>", 
-		$ws["title"], ROOTURL, $ws["url"], $ws["desc"]);
- 	while (list($key2, $vs) = each($ws['vars'])){
-        echo sprintf("<tr><th>%s</th><td>%s</td></tr>", $key2, $vs);
-    }
-    echo "</table>";
-    $url = $ws['url'];
-    while (list($key2, $vs) = each($ws['example'])){
-		$url = str_replace($key2, $vs, $url);
-    }
-    echo sprintf("<br /><a href=\"%s%s\">Example JSON</a>
-     	&nbsp; <a href=\"%s%s&callback=gotData\">Example JSONP</a>", 
-		ROOTURL, $url, ROOTURL, $url);
-    echo "</div>\n";
-}
- ?>
+{$table}
  
  <p>That is all for now. Enjoy!
  
- </div>
-<?php include("../../include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+ ?>
