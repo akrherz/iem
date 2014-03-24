@@ -7,8 +7,8 @@
 header('content-type: application/json; charset=utf-8');
 
 require_once 'Zend/Json.php';
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+include_once "../../config/settings.inc.php";
+include_once "../../include/database.inc.php";
 $hads = iemdb('hads');
 $table = sprintf("raw%s_%s", date("Y"), date("m"));
 $rs = pg_prepare($hads, "SELECT", "SELECT distinct key from $table " .

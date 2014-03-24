@@ -7,6 +7,7 @@ import json
 import mx.DateTime
 import gdal
 import os
+import sys
 
 def get_5():
     gmt = mx.DateTime.gmt()
@@ -50,16 +51,13 @@ def five_minute(lon, lat):
             }
     
 
-def main():
+if __name__ == '__main__':
     """
     Main
     """
     form = cgi.FieldStorage()
     lat = float(form.getvalue('lat'))
     lon = float(form.getvalue('lon'))
-    print 'Content-type: application/json\n'
-    print json.dump( five_minute(lon, lat) )
-    
-    
-    
-main()
+    sys.stdout.write('Content-type: application/json\n\n')
+    sys.stdout.write(json.dumps({"ERROR": "No data found"}))
+    #sys.stdout.write(json.dump( five_minute(lon, lat) ))

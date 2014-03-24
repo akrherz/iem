@@ -15,9 +15,10 @@ cursor = dbconn.cursor()
 def dance(cid, start_ts, end_ts):
     """ Go get the dictionary of data we need and deserve """
     data = {'images': []}
-    cursor.execute("""SELECT valid at time zone 'UTC', 
-    drct from camera_log where
-    cam = %s and valid >= %s and valid < %s""", (cid, start_ts, end_ts))
+    cursor.execute("""
+        SELECT valid at time zone 'UTC', drct from camera_log where
+        cam = %s and valid >= %s and valid < %s
+    """, (cid, start_ts, end_ts))
     for row in cursor:
         uri = row[0].strftime("http://mesonet.agron.iastate.edu/archive/data/%Y/%m/%d/camera/"+cid+"/"+cid+"_%Y%m%d%H%M.jpg")
         data['images'].append(dict(valid=row[0].strftime("%Y-%m-%dT%H:%M:00Z"), 
