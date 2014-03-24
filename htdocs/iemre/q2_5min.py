@@ -8,6 +8,7 @@ import cgi
 import os
 import netCDF4
 import mx.DateTime
+import sys
 
 form = cgi.FormContent()
 sts = mx.DateTime.strptime( form["date"][0], "%Y-%m-%d")
@@ -31,8 +32,8 @@ def make_fp(ts):
 
 
 # Begin output
-print 'Content-type: text/plain\n'
-print 'DATE,TIME,PRECIP_IN'
+sys.stdout.write('Content-type: text/plain\n\n')
+sys.stdout.write('DATE,TIME,PRECIP_IN\n')
 
 now = sts
 while now <= ets:
@@ -45,8 +46,8 @@ while now <= ets:
         val = "%.3f" % (nc.variables["preciprate_hsr"][y,x] / nc.variables["preciprate_hsr"].Scale / 12.0 / 25.4,)
         nc.close()
     # Lat, Lon
-    print "%s,%s,%s" % (now.strftime("%Y-%m-%d"),
+    sys.stdout.write("%s,%s,%s\n" % (now.strftime("%Y-%m-%d"),
                           now.strftime("%H:%M"),
-                          val)
+                          val))
     
     now += interval

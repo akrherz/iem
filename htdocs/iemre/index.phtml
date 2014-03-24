@@ -1,11 +1,12 @@
 <?php 
  include("../../config/settings.inc.php");
-  $THISPAGE = 'archive-iemre'; 
-  $TITLE = "IEM Reanalysis Data";
-include("$rootpath/include/header.php"); 
-?>
+ include_once "../../include/myview.php";
+ $t = new MyView();
+ $t->thispage = 'archive-iemre'; 
+ $t->title = "Reanalysis Data";
 
-<h3 class="heading">IEM Reanalysis (IEMRE)</h3><p>
+ $t->content = <<<EOF
+<h3>IEM Reanalysis (IEMRE)</h3><p>
 
 <img src="iemre_anim.gif" align="left" style="margin: 5px;"/>
 
@@ -65,8 +66,10 @@ also produce an analysis on sub-hourly timescales.</li>
 <pre>
 MultiDay Request
 ================
-Form: <?php echo $rooturl; ?>/iemre/multiday/{YYYY-MM-DD::date1}/{YYYY-MM-DD::date2}/{LAT}/{LON}/json
-Example: <?php echo $rooturl; ?>/iemre/multiday/2010-05-01/2010-09-30/42.54/-96.40/json
+Form: http://mesonet.agron.iastate.edu/iemre/multiday/{YYYY-MM-DD::date1}/{YYYY-MM-DD::date2}/{LAT}/{LON}/json
+Example: http://mesonet.agron.iastate.edu/iemre/multiday/2010-05-01/2010-09-30/42.54/-96.40/json
 </pre>
 
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
