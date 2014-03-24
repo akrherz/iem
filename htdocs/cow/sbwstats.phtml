@@ -1,14 +1,14 @@
 <?php
-include("../../config/settings.inc.php");
+include_once "../../config/settings.inc.php";
 define("IEM_APPID", 149);
-include("../../include/myview.php");
+include_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Storm Based Warning Stats";
 $t->thispage = "severe-cow";
 
-include("../../include/forms.php");
-include("../../include/database.inc.php");
-include("../../include/network.php");
+include_once "../../include/forms.php";
+include_once "../../include/database.inc.php";
+include_once "../../include/network.php";
 $nt = new NetworkTable("WFO");
 $postgis = iemdb("postgis");
 
@@ -208,12 +208,12 @@ since summer of 2007.
   <td>{$y1select}</td>
   <td>{$m1select}</td>
   <td>{$d1select}</td>
-  <td>{$h2select}</td>
+  <td>{$h1select}</td>
   <td rowspan='2'><input type='submit' value='Generate Stats'></td>
  <tr><td>End:</td>
-  <td>{$y1select}</td>
-  <td>{$m1select}</td>
-  <td>{$d1select}</td>
+  <td>{$y2select}</td>
+  <td>{$m2select}</td>
+  <td>{$d2select}</td>
   <td>{$h2select}</td>
  </tr>
 </tbody>
