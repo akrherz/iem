@@ -9,14 +9,14 @@
 <p><h3 class="subtitle">Current Data</h3>
 <ul>
  <li><a href="current.phtml">Current Conditions</a> (sortable)</li>
- <li><a href="<?php echo $rooturl; ?>/GIS/apps/snet/raining.php">Where's it raining?</a></li>
+ <li><a href="/GIS/apps/snet/raining.php">Where's it raining?</a></li>
 </ul>
 
 <p><h3 class="subtitle">Station Plots</h3>
 <ul>
- <li><a href="<?php echo $rooturl; ?>/GIS/apps/mesoplot/plot.php?network=KELO">Rapid Update</a></li>
- <li><a href="<?php echo $rooturl; ?>/GIS/apps/php/currents.phtml?layers[]=map&network=KELO&layers[]=labels&var=pres">Barometer</a></li>
- <li><a href="http://localhost/iem/GIS/apps/php/currents.phtml?layers[]=map&network=KELO&layers[]=labels&var=pday">Today's Precip Accum</a></li>
+ <li><a href="/GIS/apps/mesoplot/plot.php?network=KELO">Rapid Update</a></li>
+ <li><a href="/GIS/apps/php/currents.phtml?layers[]=map&network=KELO&layers[]=labels&var=pres">Barometer</a></li>
+ <li><a href="/GIS/apps/php/currents.phtml?layers[]=map&network=KELO&layers[]=labels&var=pday">Today's Precip Accum</a></li>
 </ul>
 
 <p><h3 class="subtitle">Historical Data</h3><br><ul>
@@ -26,7 +26,7 @@
 
 <p><h3 class="subtitle">QC Info</h3>
 <ul>
- <li><a href="/QC/offline.php">Stations Offline</a> [<a href="<?php echo $rooturl; ?>/GIS/apps/stations/offline.php?network=snet">Graphical View</a>]</li>
+ <li><a href="/QC/offline.php">Stations Offline</a> [<a href="/GIS/apps/stations/offline.php?network=snet">Graphical View</a>]</li>
  <li><a href="/QC/madis/network.phtml?network=KELO">MADIS QC Values</a></li>
   <li>MADIS QC Messages:
   <br /><a href="http://madis-data.noaa.gov/qcms_data/qc20/qchour.txt">Last Hour</a>
