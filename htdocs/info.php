@@ -15,7 +15,6 @@ $t->content = <<<EOF
 <h3 class="subtitle">Quick Links:</h3></p>
 <ul>
 <li><a href="/info/iem.php">IEM Info/Background</a></li>
-<li><a href="/info/members.php">IEM Partners</a></li>
 <li><a href="/info/links.php">Links</a></li>
 <li><a href="/info/variables.phtml">Variables Collected</a></li></ul>
 
