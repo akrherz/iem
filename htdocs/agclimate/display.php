@@ -31,65 +31,65 @@ $old2new = Array(
 
 $data = Array(
 1 => Array(
- "mapurl" => "$rooturl/data/agclimate/air-temp-out.png",
+ "mapurl" => "/data/agclimate/air-temp-out.png",
  "desc" => "High and low air temperature for a local day. Measurements are 
             made at a 2 meter height.",
 ),
 2 => Array(
- "mapurl" => "$rooturl/data/agclimate/4in-temp-out.png",
+ "mapurl" => "/data/agclimate/4in-temp-out.png",
  "desc" => "Average 4 inch soil depth temperature.  Usually under a 
             bare soil.",
 ),
 3 => Array(
- "mapurl" => "$rooturl/data/agclimate/soil-hilo-out.png",
+ "mapurl" => "/data/agclimate/soil-hilo-out.png",
  "desc" => "High and low 4 inch soil depth temperature.  Usually under a 
             bare soil.",
 ),
 4 => Array(
- "mapurl" => "$rooturl/data/agclimate/rad-out.png",
+ "mapurl" => "/data/agclimate/rad-out.png",
  "desc" => "Daily total (direct + diffuse) solar radiation.",
 ),
 5 => Array(
- "mapurl" => "$rooturl/data/agclimate/prec-out.png",
+ "mapurl" => "/data/agclimate/prec-out.png",
  "desc" => "Daily total precipitation.  This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
 used with extreme caution.  For various reasons, the reported values are 
 often too low.",
 ),
 6 => Array(
- "mapurl" => "$rooturl/data/agclimate/et-out.png",
+ "mapurl" => "/data/agclimate/et-out.png",
  "desc" => "Potential maximum estimated evapotranspiration.  This value uses
             a daily Penman formulation with a crop coefficient of 1.",
 ),
 7 => Array(
- "mapurl" => "$rooturl/data/agclimate/pk-wind-out.png",
+ "mapurl" => "/data/agclimate/pk-wind-out.png",
  "desc" => "Peak 5 second sustained wind gust.  The value is presented along
       with the time using a 24 hour clock.  For example, 18:00 would be 6 PM.
       Values are in local time, either CDT or CST depending on the time of
       year.",
 ),
 8 => Array(
- "mapurl" => "$rooturl/data/agclimate/avewind-out.png",
+ "mapurl" => "/data/agclimate/avewind-out.png",
  "desc" => "Average wind speed for the day as recorded by the data logger
             on the station.",
 ),
 9 => Array(
- "mapurl" => "$rooturl/data/agclimate/dwpts.png",
+ "mapurl" => "/data/agclimate/dwpts.png",
  "desc" => "High and low dew points for the day."
 ),
 10 => Array(
- "mapurl" => "$rooturl/GIS/apps/agclimate/month.php?dvar=c70&direct=yes&year=$year&month=$month",
+ "mapurl" => "/GIS/apps/agclimate/month.php?dvar=c70&direct=yes&year=$year&month=$month",
  "desc" => "Monthly total of daily maximum potential evapotranspiration. The
             daily value is calculated via a Penman formulation with a crop
             coefficient of 1.  The value would be a theoretical maximum."
 ),
 11 => Array(
- "mapurl" => "$rooturl/GIS/apps/agclimate/month.php?dvar=c90&direct=yes&year=$year&month=$month",
+ "mapurl" => "/GIS/apps/agclimate/month.php?dvar=c90&direct=yes&year=$year&month=$month",
  "desc" => "Monthly total of daily reported precipitation. This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
 used with extreme caution.  For various reasons, the reported values are 
 often too low."
 ),
 12 => Array(
- "mapurl" => "$rooturl/data/agclimate/chill-sum.png",
+ "mapurl" => "/data/agclimate/chill-sum.png",
  "desc" => "The Standard Chill Unit map is a summation of hours during 
    which the temperature was between 32 and 45 degrees <b>after</b> 
    1 September.  The value has application for 

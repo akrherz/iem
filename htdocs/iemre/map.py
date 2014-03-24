@@ -9,29 +9,41 @@ import datetime
 import netCDF4
 from pyiem import iemre
 from pyiem import plot
-import numpy
+import numpy as np
+
+PLOT_OPS = {
+    'precip_in' : {
+        'clevs': [0.01,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5,0.75,1.,1.5,2.,3,4,5,10],
+        'ncvar_daily': 'p01d',
+        'title' : 'Precipitation',
+        'units' : 'inch',
+    }
+}
 
 def plot_daily(date, interval, plotvar, mc, mckey):
     """ Generate the plot, please """
+    opts = PLOT_OPS[plotvar]
     offset = iemre.daily_offset(date)
     
     nc = netCDF4.Dataset("/mesonet/data/iemre/%s_mw_daily.nc" % (date.year,))
-    p01d = nc.variables['p01d'][offset] / 25.4 # inches
+    data = nc.variables[opts['ncvar_daily']][offset] / 25.4 # inches
     lons = nc.variables['lon'][:]
     lats = nc.variables['lat'][:]
     extra = lons[-1] + (lons[-1] - lons[-2])
-    lons = numpy.concatenate([lons, [extra,]])
+    lons = np.concatenate([lons, [extra,]])
 
     extra = lats[-1] + (lats[-1] - lats[-2])
-    lats = numpy.concatenate([lats, [extra,]])
-    x,y = numpy.meshgrid(lons, lats)
+    lats = np.concatenate([lats, [extra,]])
+    x,y = np.meshgrid(lons, lats)
 
     nc.close()
 
     p = plot.MapPlot(sector='midwest',
-                 title='%s IEM Reanalysis Precipitation' % (date.strftime("%-d %b %Y"),)
+                 title='%s IEM Reanalysis %s [%s]' % (date.strftime("%-d %b %Y"),
+                                                 opts['title'], opts['units'])
                  )
-    p.pcolormesh(x, y, p01d, numpy.arange(0,10.2,0.5))
+    p.pcolormesh(x, y, data, opts['clevs'],
+                 units=opts['units'])
     p.postprocess(web=True, memcache=mc, memcachekey=mckey, memcacheexpire=0)
 
 def main():
