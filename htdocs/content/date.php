@@ -1,4 +1,5 @@
 <?php
+include_once "../../config/settings.inc.php";
 	$width = 87;
 	$height = 60;
 	$Font = '/mesonet/data/gis/static/fonts/handgotn.ttf';
@@ -36,10 +37,6 @@
 	$x_pad = ($width - $dx) / 2 ;
 	ImageTTFText($gif, 14, 0, $x_pad , 55, $black, $Font, $year);
 
-	
-#	ImageString($gif, 3, 5, 5, $month ,$black);
-#	ImageString($gif, 3, 5, 20, $day ,$black);
-#	ImageString($gif, 3, 5, 35, $year ,$black);
 
 	header("content-type: image/png");
 	ImagePng($gif);

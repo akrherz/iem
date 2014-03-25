@@ -1,7 +1,7 @@
 <?php
 include("../../../config/settings.inc.php");
 // Does the work of processing the download request...
-include("$rootpath/include/database.inc.php");
+include("../../../include/database.inc.php");
 
 $year1 = isset($_GET["year1"])? $_GET["year1"]: die("No year1");
 $year2 = isset($_GET["year2"])? $_GET["year2"]: die("No year2");

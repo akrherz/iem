@@ -2,11 +2,11 @@
 /* Generate a JSON file of network observations */
 require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-  include("$rootpath/include/iemaccess.php");
-  include("$rootpath/include/iemaccessob.php");
-    include("$rootpath/include/network.php");
-     include("$rootpath/include/mlib.php");
+include("../../include/database.inc.php");
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
+include("../../include/network.php");
+include("../../include/mlib.php");
 
 $network = isset($_REQUEST["network"]) ? $_REQUEST["network"] : "IA_ASOS"; 
 $callback = isset($_REQUEST["callback"]) ? $_REQUEST["callback"] : null; 

@@ -2,7 +2,7 @@
 /* Giveme JSON data listing products */
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
-require_once "$rootpath/include/database.inc.php";
+require_once "../../include/database.inc.php";
 
 $ts = isset($_REQUEST["ts"]) ? strtotime($_REQUEST["ts"]) : 0;
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,4): "KCCI";

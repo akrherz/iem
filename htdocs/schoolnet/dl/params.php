@@ -1,8 +1,10 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | School Network | Parameters";
-include("$rootpath/include/header.php");
-include("$rootpath/include/imagemaps.php"); ?>
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "School Network Parameters";
+
+$t->content = <<<EOF
 <h3 class="heading">SchoolNet Data Explanation</h3>
 
 <div class="text">
@@ -46,5 +48,6 @@ capacity of the air.</p>
 
 <p><h3 class="subtitle">Altimeter [alti]</h3>
 <p>Atmospheric pressure expressed in inches of mercury.</p></div>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>
