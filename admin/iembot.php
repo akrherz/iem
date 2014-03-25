@@ -3,7 +3,7 @@ include("../config/settings.inc.php");
 include("Zend/XmlRpc/Client.php");
 include("$rootpath/include/database.inc.php");
 //$dbconn = iemdb("mesosite");
-$dbconn = pg_connect("dbname=mesosite");
+$dbconn = pg_connect("dbname=mesosite host=iemdb");
 
 $rs = pg_prepare($dbconn, "SELECTROOMS", "SELECT * from iembot_rooms 
                  WHERE roomname NOT IN ('allpeopletalk', 'botstalk')
