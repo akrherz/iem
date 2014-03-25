@@ -1,6 +1,5 @@
 /*
  * Static Javascript stuff to support the Time Machine :) 
- * daryl herzmann akrherz@iastate.edu
  */
 Ext.BLANK_IMAGE_URL = '/ext/resources/images/default/s.gif';
 
@@ -21,10 +20,10 @@ Ext.get("imagedisplay").dom.onerror = function(){
 /* Provides handy way to convert from local browser time to UTC */
 Ext.override(Date, {
     toUTC : function() {
-        return this.add(Date.MINUTE, this.getTimezoneOffset());
+        return Ext.Date.add(this, Ext.Date.MINUTE, this.getTimezoneOffset());
     },
     fromUTC : function() {
-        return this.add(Date.MINUTE, -this.getTimezoneOffset());
+        return Ext.Date.add(this, Ext.Date.MINUTE, -this.getTimezoneOffset());
     }
 }); 
 
@@ -42,13 +41,13 @@ var task = {
       } 
   },
   interval: 300000
-}
+};
 
 var ys = new Ext.Slider({
     id       : 'YearSlider',
     width    : 214,
     minValue : 1893,
-    maxValue : (new Date()).format("Y"),
+    maxValue : Ext.Date.format(appTime, "Y"),
     listeners: {
           'drag': function(){ updateDT(); }
     }
@@ -87,21 +86,32 @@ var hs = new Ext.Slider({
     }
  });
 
+Ext.define('Product', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'id', type: 'string'},
+        {name: 'time_offset',  type: 'int'},
+        {name: 'name',       type: 'string'},
+        {name: 'groupname',  type: 'string'},
+        {name: 'template',  type: 'string'},
+        {name: 'sts',  type: 'date', dateFormat: 'Y-m-d'},
+        {name: 'interval',  type: 'int'},
+        {name: 'avail_lag',  type: 'int'}
+    ]
+});
+
 var store = new Ext.data.JsonStore({
     autoLoad  : true,
-    fields    : [
-            'id',
-            {name: 'time_offset', type: 'int'},
-            'name',
-            'groupname',
-            'template',
-            {name: 'sts', type: 'date', dateFormat: 'Y-m-d'},
-            {name: 'interval', type: 'int'},
-            {name: 'avail_lag', type: 'int'}
-    ],
-    idProperty : 'id',
-    root       : 'products',
-    url        : '../json/products.php'
+    model : 'Product',
+    proxy: {
+        type: 'ajax',
+        url: '/json/products.php',
+        reader: {
+            type: 'json',
+            root: 'products',
+            idProperty: 'id'
+        }
+    }
     });
 
 var displayDT = new Ext.Toolbar.TextItem({
@@ -111,45 +121,45 @@ var displayDT = new Ext.Toolbar.TextItem({
     style     : {'font-weight': 'bold'}
 });
 
-var combo = new Ext.form.ComboBox({
+var combo = Ext.create('Ext.form.field.ComboBox', {
     id            : 'cb',
     triggerAction : 'all',
-    lazyRender    : false,
-    autoLoad      : true,
-    mode          : 'local',
+    queryMode     : 'local',
     editable      : false,
     matchFieldWidth : false,
-    minListWidth    :300,
+    listConfig : {
+    	minWidth : 300,
+    	getInnerTpl : function(){
+    		return '<tpl for=".">'+
+    				'<tpl if="this.groupname != values.groupname">' +
+    				'<tpl exec="this.groupname = values.groupname"></tpl>' +
+    				'<span class="dropdown-header">{groupname}</span>' +
+    				'</tpl>' +
+    				'<div class="x-combo-list-item">{name}</div>' +
+    				'</tpl>';
+    	}
+    },
     allowBlank    : false,
     forceSelection: true,
     store         : store,
     valueField    : 'id',
-    tpl           : new Ext.XTemplate(
-		'<tpl for=".">',
-		'<tpl if="this.groupname != values.groupname">',
-		'<tpl exec="this.groupname = values.groupname"></tpl>',
-		'<span class="dropdown-header">{groupname}</span>',
-		'</tpl>',
-		'<div class="x-combo-list-item">{name}</div>',
-		'</tpl>'
-	),
     displayField  : 'name',
     listeners     : {
-      select      : function(cb, record, idx){
-        appDT = record.data.interval ;
+      select      : function(cb, records, idx){
+        appDT = records[0].data.interval ;
 
         /* If we don't have sub hourly data, disable the minute selector */
-        if (record.data.interval >= 60){ 
+        if (records[0].data.interval >= 60){ 
           //console.log("Disabling MS"); 
           ms.disable(); 
         } else { ms.enable(); }
 
         /* If we don't have sub daily data, disable the hour selector */
-        if (record.data.interval >= (60*24)){  hs.disable(); }
+        if (records[0].data.interval >= (60*24)){  hs.disable(); }
         else { hs.enable(); }
 
         /* If we don't have hourly data */
-        if (record.data.interval > 60){  
+        if (records[0].data.interval > 60){  
            Ext.getCmp('plushour').disable();
            Ext.getCmp('minushour').disable();
         }
@@ -158,9 +168,9 @@ var combo = new Ext.form.ComboBox({
            Ext.getCmp('minushour').enable();
         }
 
-        ms.increment = record.data.interval;
+        ms.increment = records[0].data.interval;
         //console.log("Setting MS Increment to "+ ms.increment );
-        ys.minValue = record.data.sts.format("Y");
+        ys.minValue = Ext.Date.format(records[0].data.sts, "Y");
         ys.setValue( ys.getValue()-1 );
         ys.setValue( ys.getValue()+1 );
         updateDT();
@@ -178,11 +188,11 @@ store.on('load', function(){
     var tokens2 = tokens[1].split(".");
     idx = tokens2[0];
     if (tokens2[1] != "0"){
-      gts = Date.parseDate( tokens2[1], "YmdHi" );
+      gts = Ext.Date.parseDate( tokens2[1], "YmdHi" );
       appTime = gts.fromUTC();
     } else {
     	lag = store.getById(idx).data.avail_lag;
-    	appTime = appTime.add(Date.MINUTE, 0 - lag);
+    	appTime = Ext.Date.add(appTime, Ext.Date.MINUTE, 0 - lag);
     }
   } else {
     /* We are going to default to the IEM Plot */
@@ -191,8 +201,8 @@ store.on('load', function(){
   /* Make sure that our form gets reset based on settings for record */
   setTime();
   combo.setValue( idx );
-  combo.fireEvent('select', combo, store.getById(idx), idx);
-  Ext.TaskMgr.start(task);
+  combo.fireEvent('select', combo, [store.getById(idx)], idx);
+  Ext.util.TaskManager.start(task);
 });
 
 
@@ -210,21 +220,22 @@ function dayofyear(d) {   // d is a Date object
 function setTime(){
   now = new Date();
   if (Ext.getCmp("appMode").realtime &&
-      now.add(Date.MINUTE, -3.0 * appDT) > appTime ){
+      Ext.Date.add(now, Ext.Date.MINUTE, -3.0 * appDT) > appTime ){
     Ext.getCmp("appMode").setText("Archive");
     Ext.getCmp("appMode").realtime = false;
   } 
   if (! Ext.getCmp("appMode").realtime &&
-      now.add(Date.MINUTE, -3.0 * appDT) < appTime ){
+      Ext.Date.add(now, Ext.Date.MINUTE, -3.0 * appDT) < appTime ){
     Ext.getCmp("appMode").setText("Realtime");
     Ext.getCmp("appMode").realtime = true;
   }
-  //console.log("setTime() appTime: "+ appTime +" delta3x: "+ now.add(Date.MINUTE, -3.0 * appDT) );
+  //console.log("setTime() appTime: "+ appTime +" delta3x: "+ 
+  //		  Ext.Date.add(now, Ext.Date.MINUTE, -3.0 * appDT) );
   /* Our new values */
-  g = parseInt( appTime.format('G') );
+  g = parseInt( Ext.Date.format(appTime, 'G') );
   z = dayofyear( appTime ) - 1;
-  y = parseInt( appTime.format('Y') );
-  i = parseInt( appTime.format('i') );
+  y = parseInt( Ext.Date.format(appTime, 'Y') );
+  i = parseInt( Ext.Date.format(appTime, 'i') );
 
   hs.setValue( g );
   ds.setValue( z ); 
@@ -242,7 +253,10 @@ function updateDT(){
   i = ms.disabled ? 0:  ms.getValue();
   //console.log("y ["+ y +"] d ["+ d +"] h ["+ h +"] i ["+ i +"]");
   
-  newTime = new Date('01/01/'+y).add(Date.DAY, d).add(Date.HOUR, h).add(Date.MINUTE,i);
+  newTime = new Date('01/01/'+y);
+  newTime = Ext.Date.add(newTime, Ext.Date.DAY, d);
+  newTime = Ext.Date.add(newTime, Ext.Date.HOUR, h);
+  newTime = Ext.Date.add(newTime, Ext.Date.MINUTE, i);
   //console.log("updateDT() newTime is "+ newTime );
   if (newTime == appTime && ! displayDT.isInitial){ 
     //console.log("Shortcircut!");
@@ -257,10 +271,11 @@ function updateDT(){
     //console.log("Couldn't find metadata!");
     return; 
   }
-  ceiling = (new Date()).add(Date.MINUTE, 0 - meta.data.avail_lag);
+  ceiling = (new Date());
+  ceiling = Ext.Date.add(ceiling, Ext.Date.MINUTE, 0 - meta.data.avail_lag);
   //console.log("Ceiling is "+ ceiling);
   /* Make sure we aren't in the future! */
-  if (appTime.add(Date.MINUTE,-1) > ceiling){
+  if (Ext.Date.add(appTime, Ext.Date.MINUTE,-1) > ceiling){
     //console.log("Date is: "+ (new Date()));
     //console.log("appTime is: "+ appTime);
     //console.log("Future timestamp: "+ (appTime.add(Date.MINUTE,-1) - (new Date())) +" diff");
@@ -281,39 +296,47 @@ function updateDT(){
    * We need to make sure that we are lined up with where we have data...
    */
   gdt = appTime.toUTC();
-  min_from_0z = parseInt( gdt.format('G') ) * 60 + parseInt(gdt.format('i')) - meta.data.time_offset;
+  min_from_0z = parseInt( Ext.Date.format(gdt, 'G') ) * 60 + 
+  		parseInt(Ext.Date.format(gdt, 'i')) - meta.data.time_offset;
   offset = min_from_0z % meta.data.interval;
   //console.log("TmCheck gdt= "+ gdt +" offset= "+ offset +", min_from_0z= "+ min_from_0z);
   if (offset != 0){
-    gdt = gdt.add(Date.MINUTE, 0 - offset); 
+    gdt = Ext.Date.add(gdt, Ext.Date.MINUTE, 0 - offset); 
     appTime = gdt.fromUTC();
     setTime();
   }
 
-  displayDT.setText( appTime.format('D M d Y g:i A T') );
+  displayDT.setText( Ext.Date.format(appTime, 'D M d Y g:i A T') );
 
   tpl = meta.data.template.replace(/%Y/g, '{0}').replace(/%m/g, '{1}').replace(/%d/g, '{2}').replace(/%H/g,'{3}').replace(/%i/g,'{4}').replace(/%y/g, '{5}');
 
-  uri = String.format(tpl, gdt.format("Y"), gdt.format("m"), gdt.format("d"), gdt.format("H"), gdt.format("i"), gdt.format("y") );
+  uri = Ext.String.format(tpl, Ext.Date.format(gdt, "Y"), 
+		  Ext.Date.format(gdt, "m"), Ext.Date.format(gdt, "d"), 
+		  Ext.Date.format(gdt, "H"), Ext.Date.format(gdt, "i"), 
+		  Ext.Date.format(gdt, "y") );
   if (uri != currentURI){
     Ext.get("imagedisplay").dom.src = uri;
     currentURI = uri;
   }
-  window.location.href = String.format("#{0}.{1}", combo.getValue(), gdt.format('YmdHi')); 
+  window.location.href = Ext.String.format("#{0}.{1}", combo.getValue(), Ext.Date.format(gdt, 'YmdHi')); 
 }
 
 
 
 
-new Ext.form.FormPanel({
+Ext.create('Ext.form.Panel', {
     renderTo: 'theform',
-    layout  : 'table',
-    layoutConfig: {
-        columns: 8
+    layout  : {
+    	type: 'table',
+    	columns: 8
     },
-    buttonAlign: 'left',
-    fbar: [
-      new Ext.Button({
+    defaults : {
+        bodyStyle: 'border:0px;padding-left:0px;'
+    },
+    fbar: {
+    	pack : 'left',
+    	items : [
+      Ext.create('Ext.Button', {
         id       : 'appMode',
         realtime : true,
         text     : 'RealTime',
@@ -330,76 +353,74 @@ new Ext.form.FormPanel({
           }
         }
       }),
-      new Ext.Button({
+      Ext.create('Ext.Button', {
         text: '<< Year',
         handler: function(){
-            appTime = appTime.add(Date.YEAR, -1);
+            appTime = Ext.Date.add(appTime, Ext.Date.YEAR, -1);
             setTime();
             updateDT();
         }
       }),
-      new Ext.Button({
+      Ext.create('Ext.Button', {
         text: '<< Day',
         handler: function(){
-            appTime = appTime.add(Date.DAY, -1);
+            appTime = Ext.Date.add(appTime, Ext.Date.DAY, -1);
             setTime();
             updateDT();
         }
       }),
-      new Ext.Button({
+      Ext.create('Ext.Button', {
         id      : 'minushour',
         text    : '<< Hour',
         handler : function(){
-            appTime = appTime.add(Date.HOUR, -1);
+            appTime = Ext.Date.add(appTime, Ext.Date.HOUR, -1);
             setTime();
             updateDT();
         }
       }),
-      new Ext.Button({
+      Ext.create('Ext.Button', {
         text    : '<< Prev',
         handler : function(){
-            appTime = appTime.add(Date.MINUTE, - appDT );
+            appTime = Ext.Date.add(appTime, Ext.Date.MINUTE, - appDT );
             setTime();
             updateDT();
         }
       }),
       displayDT,
-      new Ext.Button({
+      Ext.create('Ext.Button', {
         text    : 'Next >>',
         handler : function(){
-            appTime = appTime.add(Date.MINUTE, appDT );
+            appTime = Ext.Date.add(appTime, Ext.Date.MINUTE, appDT );
             setTime();
             updateDT();
         }
       }),
-      new Ext.Button({
+      Ext.create('Ext.Button', {
         id      : 'plushour',
         text: 'Hour >>',
         handler: function(){
-            appTime = appTime.add(Date.HOUR, 1);
+            appTime = Ext.Date.add(appTime, Ext.Date.HOUR, 1);
             setTime();
             updateDT();
         }
       }),
-      new Ext.Button({
+      Ext.create('Ext.Button', {
         text: 'Day >>',
         handler: function(){
-            appTime = appTime.add(Date.DAY, 1);
+            appTime = Ext.Date.add(appTime, Ext.Date.DAY, 1);
             setTime();
             updateDT();
         }
       }),
-      new Ext.Button({
+      Ext.create('Ext.Button', {
         text: 'Year >>',
         handler: function(){
-            appTime = appTime.add(Date.YEAR, 1);
+            appTime = Ext.Date.add(appTime, Ext.Date.YEAR, 1);
             setTime();
             updateDT();
         }
       }),
-      '->'],
-    defaults : {
-      bodyStyle: 'border:0px;padding-left:5px;'
+      '->']
     },
     items: [
       {html: 'Product: '}, combo, {html: 'Year: '}, ys,
