@@ -3,9 +3,9 @@ Extract station data from file and update any new stations we find, please
 """
 
 import netCDF4
-import iemdb
+import psycopg2
 import sys
-MESOSITE = iemdb.connect('mesosite', bypass=True)
+MESOSITE = psycopg2.connect(database='mesosite', host='iemdb')
 mcursor = MESOSITE.cursor()
 
 fn = sys.argv[1]
@@ -55,13 +55,13 @@ for recnum in range(len(providers)):
     if not thisProvider in MY_PROVIDERS:
         continue
     stid = stations[recnum].tostring().replace('\x00','')
-    name = names[recnum].tostring().replace("'", "").replace('\x00','')
+    name = names[recnum].tostring().replace("'", "").replace('\x00','').replace('\xa0', ' ')
     network = provider2network(thisProvider)
     mcursor.execute("""SELECT * from stations where id = %s and network = %s""",
                     (stid, network))
     if mcursor.rowcount > 0:
         continue
-    print 'Adding network: %s station: %s' % (network, stid)
+    print 'Adding network: %s station: %s %s' % (network, stid, name)
     sql = """INSERT into stations(id, network, synop, country, plot_name,
     name, state, elevation, online, geom, metasite) VALUES ('%s', '%s', 9999, 'US',
     '%s', '%s', '%s', %s, 't', 'SRID=4326;POINT(%s %s)', 'f')""" % (stid,
