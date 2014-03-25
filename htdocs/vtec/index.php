@@ -15,6 +15,9 @@ if ($imobile){
   </script></head><body>";
   exit;
 }
+include_once "../../include/myview.php";
+$t = new MyView();
+$t->thispage = "severe-vtec";
 
 /* Pure IEM 2.0 App to do vtec stuff.  Shorter url please as well */
 $v = isset($_GET["vtec"]) ? $_GET["vtec"] : "2012-O-NEW-KBMX-TO-W-0001";
@@ -28,15 +31,17 @@ $phenomena = $tokens[4];
 $significance = $tokens[5];
 $eventid = intval( $tokens[6] );
 
-$HEADEXTRA = '<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css"/>
+$headextra = <<<EOF
+<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css"/>
 <link rel="stylesheet" type="text/css" href="../ext/ux/form/Spinner.css"/>
 <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="http://extjs.cachefly.net/ext-3.4.0/ext-all.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
-<script src="OpenLayers.js"></script>';
+<script src="OpenLayers.js"></script>
+EOF;
 
 if (isset($_REQUEST["devel"])){
-    $HEADEXTRA .= '<script type="text/javascript" src="js/wfos.js"></script>
+    $headextra .= '<script type="text/javascript" src="js/wfos.js"></script>
 <script type="text/javascript" src="js/RowExpander.js"></script>
 <script type="text/javascript" src="js/Printer-all.js"></script>
 <script type="text/javascript" src="../ext/ux/menu/EditableItem.js"></script>
@@ -53,48 +58,25 @@ if (isset($_REQUEST["devel"])){
 <script type="text/javascript" src="js/Ext.ux.SliderTip.js"></script>
 <script type="text/javascript" src="js/static.js"></script>';
 } else {
-	$HEADEXTRA .= '<script src="app.js?v=4"></script>';
+	$headextra .= '<script src="app.js?v=4"></script>';
 }
 
-$HEADEXTRA .= '<script>
-Ext.namespace("App");
-App.server = "'. $rooturl .'";
-
+$headextra .= <<<EOF
+<script>
 Ext.namespace("cfg");
 cfg.startYear = 1986;
 cfg.header = "iem-header";
-</script>';
+cfg.footer = "iem-footer";
+</script>
+EOF;
 
-?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" >
-<head>
- <title>IEM Valid Time Extent Code (VTEC) App</title>
-<?php echo $HEADEXTRA; ?>
-<script type="text/javascript" src="/js/p7exp.js"></script>
-<!--[if lte IE 7]>
+$t->headextra = $headextra;
+$t->title = "Valid Time Extent Code (VTEC) App";
+$t->content = <<<EOF
 <style>
 #menuwrapper, #p7menubar ul a {height: 1%;}
 a:active {width: auto;}
 </style>
-<![endif]-->
-<meta name="twitter:image" content="http://mesonet.agron.iastate.edu/images/logo_small.png">
-<meta name="twitter:title" content="Iowa Environmental Mesonet">
-<meta name="twitter:description" content="Iowa Environmental Mesonet">
-<meta name="twitter:url" content="http://mesonet.agron.iastate.edu">
-<meta name="twitter:creator" content="@akrherz">
-<meta name="twitter:image:width" content="85">
-<meta name="twitter:image:height" content="65">
-</head>
-</head>
-<body>
-<div id="iem-header">
-<a href="/">IEM Homepage</a> &gt;&gt; 
-<a href="/current/severe.phtml">Severe Weather</a> &gt;&gt; 
-<strong>IEM Valid Extent Time Browser</strong>
-</div><!-- End of iem-header -->
-
-
 <div id="help">
  <h2>IEM VTEC Product Browser 3.0</h2>
 
@@ -122,11 +104,11 @@ the tab to show the information.</i>
 Ext.ns("App");
 Ext.onReady(function(){
   var tokens = window.location.href.split('#');
-  cgiWfo = "<?php echo $wfo; ?>";
-  cgiPhenomena = "<?php echo $phenomena; ?>";
-  cgiSignificance = "<?php echo $significance; ?>";
-  cgiEventId = "<?php echo $eventid; ?>";
-  cgiYear = "<?php echo $year; ?>";
+  cgiWfo = "{$wfo}";
+  cgiPhenomena = "{$phenomena}";
+  cgiSignificance = "{$significance}";
+  cgiEventId = "{$eventid}";
+  cgiYear = "{$year}";
   if (tokens.length == 2){
     var subtokens = tokens[1].split("/");
     var vtectokens = subtokens[0].split("-");
@@ -157,4 +139,6 @@ Ext.onReady(function(){
   Ext.getCmp("mainPanel").activate(3);
 });
 </script>
-</body></html>
+EOF;
+$t->render('single.phtml');
+?>
