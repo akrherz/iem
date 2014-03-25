@@ -1,9 +1,9 @@
 <?php 
 require_once 'Zend/Json.php';
 require_once '../config/settings.inc.php';
-include("$rootpath/include/database.inc.php");
+include("../include/database.inc.php");
 //$dbconn = iemdb("mesosite");
-$dbconn = pg_connect("dbname=mesosite");
+$dbconn = pg_connect("dbname=mesosite host=iemdb");
 
 $rs = pg_prepare($dbconn, "ADDSUB", "INSERT into iembot_room_subscriptions
                  (roomname, channel) VALUES ($1,$2)");
