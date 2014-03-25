@@ -1,8 +1,10 @@
 <?php  
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | School Network Wind Gusts";
-include("$rootpath/include/header.php");  ?>
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "School Network Wind Gusts";
 
+$t->content = <<<EOF
 <h3 class="heading">Automated Wind Gust Alerts</h3><p>
 
 <div class="text">
@@ -86,6 +88,8 @@ SchoolNets.  Some choose to subscribe to sites upstream of their CWA (County War
 
 <h3 class="subtitle">Questions?</h3>
 
-<p>Please feel free to <a href="<?php echo $rooturl; ?>/info/contacts.php">contact us</a> if you have any questions!</p>
+<p>Please feel free to <a href="/info/contacts.php">contact us</a> if you have any questions!</p>
 </div>
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+?>

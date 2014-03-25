@@ -2,8 +2,8 @@
 /* Generate a KML file of a network locations, yummy */
 require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/network.php");
+include("../../include/database.inc.php");
+include("../../include/network.php");
 $network = isset($_REQUEST["network"]) ? $_REQUEST["network"] : "KCCI"; 
 $nt = new NetworkTable($network);
 

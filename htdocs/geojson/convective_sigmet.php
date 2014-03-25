@@ -4,8 +4,8 @@
  */
 require_once 'Zend/Json.php';
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-include("$rootpath/include/vtec.php");
+include("../../include/database.inc.php");
+include("../../include/vtec.php");
 $postgis = iemdb("postgis");
 
 $rs = pg_query("SET TIME ZONE 'GMT'");

@@ -2,9 +2,9 @@
 /* Giveme JSON data listing of Sites where it is raining */
 require_once 'Zend/Json.php';
 require_once '../../config/settings.inc.php';
-require_once "$rootpath/include/database.inc.php";
-include("$rootpath/include/iemaccess.php");
-include("$rootpath/include/iemaccessob.php");
+require_once "../../include/database.inc.php";
+include("../../include/iemaccess.php");
+include("../../include/iemaccessob.php");
 $dbconn = iemdb("iem");
 
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,4): "KCCI";

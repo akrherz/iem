@@ -1,17 +1,30 @@
 <?php 
 include("../../../config/settings.inc.php");
-$TITLE = "IEM | School Network | Download";
-include("../../../include/header.php");
+include_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "School Network Data Download";
 include("../../../include/forms.php");
- include("../../../include/imagemaps.php"); 
-?>
+include("../../../include/imagemaps.php");
 
+$nselect = networkMultiSelect(Array("KCCI", "KIMT", "KELO"), '');
+
+$y1 = yearSelect2(2002, date("Y"), "year1");
+$m1 = monthSelect(date("m"), "month1");
+$d1 = daySelect2(date("d"), "day1");
+$h1 = hourSelect(0, "hour1");
+
+$y2 = yearSelect2(2002, date("Y"), "year2");
+$m2 = monthSelect(date("m"), "month2");
+$d2 = daySelect2(date("d"), "day2");
+$h2 = hourSelect(0, "hour2");
+
+$t->content = <<<EOF
 <h3 class="heading">SchoolNet Data Download</h3>
 
-<div class="text">
 <p>With this form, you can download schoolnet data.  The 
 archive starts on <b>12 Feb 2002</b> for stations that were online at that
-time.  You may want to consult a <a href="/schoolnet/history.php">listing</a>
+time.  You may want to consult a 
+<a href="/sites/networks.php?network=KCCI&format=html">listing</a>
 of when the IEM started to archive data from a site.  Data from the current
 day is not dumped into this archive until Midnight.  This means that the most
 recent data is from yesterday.</p>
@@ -21,9 +34,7 @@ recent data is from yesterday.</p>
 <table>
 <tr>
   <th class="subtitle">Select Station:</th>
-  <td>
-<?php echo networkMultiSelect(Array("KCCI", "KIMT", "KELO"), ''); ?>
-  </td>
+  <td>{$nselect}</td>
 </tr>
 
 <tr>
@@ -67,33 +78,17 @@ recent data is from yesterday.</p>
      </tr>
      <tr>
       <th class="subtitle">Start:</th>
-      <th>
-<?php echo yearSelect2(2002, date("Y"), "year1"); ?>
-      </th>
-      <td>
-<?php echo monthSelect(date("m"), "month1"); ?>
-      </td>
-      <td>
-<?php echo daySelect2(date("d"), "day1"); ?>
-</td>
-      <td>
-<?php echo hourSelect(0, "hour1"); ?>
-</td>
+      <th>{$y1}</th>
+      <td>{$m1}</td>
+      <td>{$d1}</td>
+      <td>{$h1}</td>
      </tr>
      <tr>
       <th class="subtitle">End:</th>
-      <th>
-<?php echo yearSelect2(2002, date("Y"), "year2"); ?>
-      </th>
-      <td>
-<?php echo monthSelect(date("m"), "month2"); ?>
-      </td>
-      <td>
-<?php echo daySelect2(date("d"), "day2"); ?>
-</td>
-      <td>
-<?php echo hourSelect(0, "hour2"); ?>
-</td>
+      <th>{$y2}</th>
+      <td>{$m2}</td>
+      <td>{$d2}</td>
+      <td>{$h2}</td>
      </tr>
     </table>
   </td>
@@ -152,5 +147,7 @@ cold season precipitation is not accurately measured.
 <br><b>3. </b> Wind data before 4 August 2002 were instantaneous values.
 Wind data afterwards are 1 minute average values.
 
-<br></div>
-<?php include("$rootpath/include/footer.php"); ?>
+<br>
+EOF;
+$t->render('single.phtml');
+?>
