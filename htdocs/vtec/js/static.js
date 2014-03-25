@@ -768,8 +768,12 @@ var viewport = new Ext.Viewport({
     layout:'border',
     items:[{ 
              region:'north',
-             height:30,
+             height: 70,
              contentEl: cfg.header
+         },{ 
+             region:'south',
+             height: 10,
+             contentEl: cfg.footer
          },{
             region      : 'west',
             width       : 210,
