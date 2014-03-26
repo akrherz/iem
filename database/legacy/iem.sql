@@ -1,4 +1,14 @@
 ---
+--- Offline metadata
+---
+CREATE TABLE offline(
+	station varchar(20),
+	network varchar(10),
+	trackerid int,
+	valid timestamptz);
+GRANT SELECT on offline to nobody,apache;
+
+---
 --- Compute GDD 
 -- base, max, high, low
  CREATE FUNCTION gddxx(real, real, real, real) RETURNS numeric
