@@ -102,7 +102,7 @@ $lat1 = max($lats);
 $lon0 = min($lons);
 $lon1 = max($lons);
 
-$map = ms_newMapObj("$rootpath/data/gis/base4326.map");
+$map = ms_newMapObj("../../../../data/gis/base4326.map");
 
 $pad = 0.6;
 $lpad = 0.6;
@@ -115,7 +115,7 @@ $namer->set("status", 1);
 $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", 1);
 
-$GOESBASE="/mesonet/data/gis/images/4326/goes";
+$GOESBASE="/home/ldm/data/gis/images/4326/goes";
 $goes_east1V = $map->getlayerbyname("goes_east1V");
 $goes_east1V->set("data", "${GOESBASE}/east1V_0.tif");
 $goes_east1V->set("status", in_array("goes_east1V", $layers) );
@@ -251,7 +251,7 @@ foreach($sts as $key => $value){
   }
 }
 
-$ts = strftime("%d %b @ %I:%M %p");
+$ts = strftime("%d %b @ %I:%M %p %Z");
 
 
 
