@@ -11,7 +11,7 @@ $t->jsextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 <script src='http://openlayers.org/api/2.13.1/OpenLayers.js'></script>
 <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-<script src='dataexplorer.js'></script>
+<script src='dataexplorer.js?v=2'></script>
 <script src="/js/jquery.datetimepicker.js"></script>
 EOF;
 
@@ -47,14 +47,19 @@ $t->bodyextra = "onload=\"init()\"";
 <h4>Select Time:</h4> 
 <input type="text" id="datetimepicker" name="dosomething" />
 <br />
- <button type="button" class="btn btn-default" id="minusonehour">-1 Hour</button>
- <button type="button" class="btn btn-default" id="plusonehour">+1 Hour</button>
-
+ <button type="button" class="btn btn-default btn-xs" id="minusoneday">-1 Day</button>
+ <button type="button" class="btn btn-default btn-xs" id="minusonehour">-1 HR</button>
+ <button type="button" class="btn btn-default btn-xs" id="plusonehour">+1 HR</button>
+ <button type="button" class="btn btn-default btn-xs" id="plusoneday">+1 Day</button>
+ 
 <h4>Select Variable:</h4>
 <select name="varname" id="varpicker">
 	<option value="tmpf">Air Temperature [F]</option>
 	<option value="bat">Battery Voltage [V]</option>
 	<option value="et">Evapotranspiration [inch]</option>
+	<option value="high">Daily High Temperature [F]</option>
+	<option value="low">Daily Low Temperature [F]</option>
+	<option value="pday">Daily Precipitation [inch]</option>
 	<option value="hrprecip">Hourly Precipitation [inch]</option>
 	<option value="radmj">Hourly Radiation [MJ]</option>
 	<option value="rh">Relative Humidity [%]</option>
