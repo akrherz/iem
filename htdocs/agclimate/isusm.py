@@ -4,7 +4,6 @@
 '''
 import sys
 sys.path.insert(0, '/mesonet/www/apps/iemwebsite/scripts/lib')
-sys.path.insert(0, '/home/akrherz/projects/pyIEM')
 
 import psycopg2
 import cgi
