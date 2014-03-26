@@ -197,6 +197,7 @@ function init(){
 		   if (tokens.length == 2){
 			   var tokens2 = tokens[1].split("/");
 			   varname = tokens2[0];
+			   $('#varpicker').val(varname);
 			   currentdt = (new Date(Date.parse(tokens2[1])));
 			   gj.redraw();
 		   }
@@ -223,21 +224,21 @@ $('#plusonehour').click(function(e){
 
 $('#minusonehour').click(function(e){
 	$(this).removeClass('focus');
-	currentdt = new Date(currentdt - 3600000);
+	currentdt = new Date(currentdt.valueOf() - 3600000);
 	setDate();
 	updateMap();
 });
 
 $('#minusoneday').click(function(e){
 	$(this).removeClass('focus');
-	currentdt = new Date(currentdt - 24 * 3600000);
+	currentdt = new Date(currentdt.valueOf() - (24 * 3600000));
 	setDate();
 	updateMap();
 });
 
 $('#plusoneday').click(function(e){
 	$(this).removeClass('focus');
-	currentdt = new Date(currentdt + 24 * 3600000);
+	currentdt = new Date(currentdt.valueOf() + (24 * 3600000));
 	setDate();
 	updateMap();
 });
