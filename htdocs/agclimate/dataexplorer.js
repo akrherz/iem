@@ -228,6 +228,20 @@ $('#minusonehour').click(function(e){
 	updateMap();
 });
 
+$('#minusoneday').click(function(e){
+	$(this).removeClass('focus');
+	currentdt = new Date(currentdt - 24 * 3600000);
+	setDate();
+	updateMap();
+});
+
+$('#plusoneday').click(function(e){
+	$(this).removeClass('focus');
+	currentdt = new Date(currentdt + 24 * 3600000);
+	setDate();
+	updateMap();
+});
+
 $('#varpicker').change(function(){
 	varname = $('#varpicker').val();
 	gj.redraw();

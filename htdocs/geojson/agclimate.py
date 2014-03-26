@@ -13,6 +13,10 @@ import json
 ISUAG = psycopg2.connect(database='isuag', host='iemdb', user='nobody')
 cursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+IEM = psycopg2.connect(database='iem', host='iemdb', user='nobody')
+iemcursor = IEM.cursor()
+
+
 def drct2txt(val):
     ''' Convert val to textual '''
     if val is None:
@@ -50,11 +54,11 @@ def drct2txt(val):
     elif (val >= 324 and val < 350):
         return "NNW"
 
-def safe_t(val):
+def safe_t(val, units="C"):
     ''' '''
     if val is None:
         return 'M'
-    return '%.1f' % (temperature(val, 'C').value('F'),)
+    return '%.1f' % (temperature(val, units).value('F'),)
 
 def safe_p(val):
     ''' precipitation '''
@@ -82,6 +86,14 @@ def get_data( ts ):
                     "properties": {"code": 4326,
                                    "coordinate_order": [1,0]}},
             "features": []}
+    # Fetch the daily values
+    iemcursor.execute("""
+    SELECT id, pday, max_tmpf, min_tmpf from summary s JOIN stations t 
+    on (t.iemid = s.iemid) WHERE t.network = 'ISUSM' and day = %s
+    """, (ts.date(),))
+    daily = {}
+    for row in iemcursor:
+        daily[row[0]] = {'pday': row[1], 'max_tmpf': row[2], 'min_tmpf': row[3]}
     cursor.execute("""
     SELECT * from sm_hourly where valid = %s
     """, (ts,))
@@ -96,6 +108,9 @@ def get_data( ts ):
                 "bat": safe(row['battv_min'], 2),
                 "radmj": safe(row['slrmj_tot'], 2),
                 "tmpf": safe_t(row['tair_c_avg']),
+                "high": safe_t(daily.get(row['station'], {}).get('max_tmpf', None), 'F'),
+                "low": safe_t(daily.get(row['station'], {}).get('min_tmpf', None), 'F'),
+                "pday": safe(daily.get(row['station'], {}).get('pday', None), 2),
                 "soil04t": safe_t(row['tsoil_c_avg']),
                 "soil12t": safe_t(row['t12_c_avg']),
                 "soil24t": safe_t(row['t24_c_avg']),
