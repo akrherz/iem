@@ -2,11 +2,11 @@
   include("../../config/settings.inc.php");
 include("../../include/myview.php");
 $t = new MyView();
-  $network = isset($_GET['ntv']) ? $_GET['ntv'] : 'KCCI';
+  $network = isset($_GET['network']) ? $_GET['network'] : 'KCCI';
   $sortcol = isset($_GET['sortcol']) ? $_GET['sortcol'] : "";
 
   $t->title = "School Network";
-  $t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?tv=$tv&sortcol=$sortcol\">";
+  $t->refresh = "<meta http-equiv=\"refresh\" content=\"60; URL=current.phtml?network=$network&sortcol=$sortcol\">";
   $t->headextra = <<<EOF
 <script language="JavaScript" type="text/javascript">
 <!--//BEGIN Script
@@ -26,7 +26,7 @@ EOF;
   include("../../include/iemaccessob.php");
 
   $iem = new IEMAccess();
-  $snet = $iem->getNetwork( strtoupper($tv) );
+  $snet = $iem->getNetwork( strtoupper($network) );
 
 $today = mktime(0,0,0, date("m"), date("d"), date("Y"));
 
@@ -46,11 +46,11 @@ Click on a column to sort it. Perhaps you would like to know
 
 <table cellpadding="0" cellspacing="0" border="0">
 <tr>
-   <td class="kcci" align="center"><a href="{$link}?ntv=KCCI" style="text-decoration: none;"><img src="/schoolnet/images/kcci8.jpg" border="0"><br /><b>SchoolNet8</b></a></td>
+   <td class="kcci" align="center"><a href="{$link}?network=KCCI" style="text-decoration: none;"><img src="/schoolnet/images/kcci8.jpg" border="0"><br /><b>SchoolNet8</b></a></td>
 
-    <td class="kelo" align="center"><a href="{$link}?ntv=KELO" style="text-decoration: none;"><img src="/schoolnet/images/kelo.png" border="0"><br /><b>WeatherNet</b></a></td>
+    <td class="kelo" align="center"><a href="{$link}?network=KELO" style="text-decoration: none;"><img src="/schoolnet/images/kelo.png" border="0"><br /><b>WeatherNet</b></a></td>
 
-    <td class="kimt" align="center"><a href="{$link}?ntv=KIMT" style="text-decoration: none;"><img src="/schoolnet/images/kimt_logo.png" border="0"><br /><b>StormNet</b></a></td>
+    <td class="kimt" align="center"><a href="{$link}?network=KIMT" style="text-decoration: none;"><img src="/schoolnet/images/kimt_logo.png" border="0"><br /><b>StormNet</b></a></td>
 
 </tr>
 
@@ -161,7 +161,7 @@ while (list ($key, $val) = each ($finalA))  {
 	$table .= "<tr>\n ";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
     value=\"".$key."\"></td>";
-	$table .= "<th><a href=\"javascript:new_window('/content/".strtolower($tv)."_fe.php?station=".$key."');\">". $parts["sname"] . "</a></th>";
+	$table .= "<th><a href=\"javascript:new_window('/content/".strtolower($network)."_fe.php?station=".$key."');\">". $parts["sname"] . "</a></th>";
 
 
 	$table .= "<td ";
@@ -197,7 +197,7 @@ while (list ($key, $val) = each ($skippedStations) ) {
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
     value=\"".$key."\"></td>";
 	$table .= "<th><a href=\"javascript:new_window
-('/content/". strtolower($tv) ."_fe.php?station=".$key."');\">". $parts["sname"] . "</a></th>";
+('/content/". strtolower($network) ."_fe.php?station=".$key."');\">". $parts["sname"] . "</a></th>";
 
 	$table .= "<td bgcolor=\"red\">". strftime("%d %b %I:%M %p", $parts['ts']) ."</td>";
 
@@ -220,7 +220,7 @@ while (list ($key, $val) = each ($skippedStations) ) {
           </tr>\n";
 	}
 } 
-$c = "javascript:new_window_big('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=". strtoupper($tv)."&var=";
+$c = "javascript:new_window_big('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=". strtoupper($network)."&var=";
 
 $content .= <<<EOF
 <p>Sorted by: <b>{$vals[$sortcol]}</b><br>
@@ -243,18 +243,18 @@ $content .= <<<EOF
 </tr>
 <tr>
   
-  <th><a href="current.phtml?tv={$tv}&sortcol=tmpf">Temp</a>(<a href="current.phtml?tv={$tv}&sortcol=max_tmpf">Hi</a> /
-   <a href="current.phtml?tv={$tv}&sortcol=min_tmpf">Lo</a>)</th>
-  <th><a href="current.phtml?tv={$tv}&sortcol=dwpf">DewP</a></th>
-  <th><a href="current.phtml?tv={$tv}&sortcol=relh">RH%</a></th>
-  <th><a href="current.phtml?tv={$tv}&sortcol=feel">Feels<br>Like</a></th>
-  <th><a href="current.phtml?tv={$tv}&sortcol=alti">Pres</a></th>
-  <th><a href="current.phtml?tv={$tv}&sortcol=drct">Drct</a></th>
-  <th><a href="current.phtml?tv={$tv}&sortcol=sknt">Speed</a></th>
-  <th><a href="current.phtml?tv={$tv}&sortcol=peak">Today Gust</a> 
-    <a href="current.phtml?tv={$tv}&sortcol=peak_ts">@time</a> [4]</th>
-  <th><a href="current.phtml?tv={$tv}&sortcol=pday">Today</a></th>
-  <th><a href="current.phtml?tv={$tv}&sortcol=pmonth">Month</a></th>
+  <th><a href="current.phtml?network={$network}&sortcol=tmpf">Temp</a>(<a href="current.phtml?network={$network}&sortcol=max_tmpf">Hi</a> /
+   <a href="current.phtml?network={$network}&sortcol=min_tmpf">Lo</a>)</th>
+  <th><a href="current.phtml?network={$network}&sortcol=dwpf">DewP</a></th>
+  <th><a href="current.phtml?network={$network}&sortcol=relh">RH%</a></th>
+  <th><a href="current.phtml?network={$network}&sortcol=feel">Feels<br>Like</a></th>
+  <th><a href="current.phtml?network={$network}&sortcol=alti">Pres</a></th>
+  <th><a href="current.phtml?network={$network}&sortcol=drct">Drct</a></th>
+  <th><a href="current.phtml?network={$network}&sortcol=sknt">Speed</a></th>
+  <th><a href="current.phtml?network={$network}&sortcol=peak">Today Gust</a> 
+    <a href="current.phtml?network={$network}&sortcol=peak_ts">@time</a> [4]</th>
+  <th><a href="current.phtml?network={$network}&sortcol=pday">Today</a></th>
+  <th><a href="current.phtml?network={$network}&sortcol=pmonth">Month</a></th>
 </tr>
 </thead><tbody>
 
