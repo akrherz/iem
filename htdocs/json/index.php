@@ -104,6 +104,19 @@ imagery available for the timestamp and latitude / longitude location you specif
   );
   
   $services[] = Array(
+  		"title" => "RIDGE Current Metadata by Product",
+  		"url" => "/json/ridge_current.py?product={product}",
+  		"desc" => "This service returns a listing of the most recent image for
+  		a given product from all collected RADAR sites.",
+  		"vars" => Array(
+  				"product" => "Level III Product {N0Q, N0S, N0U, N0Z, NET}"
+  		),
+  		"example" => Array(
+  				"{product}" => 'N0Q'
+  		 )
+  );
+  
+  $services[] = Array(
   		"title" => "RIDGE Single Site Available Products for single NEXRAD",
   		"url" => "/json/radar?operation=products&amp;radar={radar}&amp;start={start}",
   		"desc" => "This service returns available NEXRAD level 3 products for
