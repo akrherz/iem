@@ -245,6 +245,22 @@ def daily_process(nwsli, maxts):
         processed += 1
     return processed
 
+def update_pday():
+    ''' Compute today's precip from the current_log archive of data '''
+    accesstxn.execute("""
+    SELECT iemid, sum(case when phour > 0 then phour else 0 end) from 
+    current_log s JOIN stations t on (t.iemid = s.iemid) 
+    WHERE t.network = 'ISUSM' and valid > 'TODAY' GROUP by iemid
+    """)
+    data = {}
+    for row in accesstxn:
+        data[row[0]] = row[1]
+        
+    for iemid in data.keys():
+        accesstxn.execute("""UPDATE summary SET pday = %s
+        WHERE iemid = %s and day = 'TODAY'""", (data[iemid], iemid))
+    
+
 def get_max_timestamps(nwsli):
     """ Fetch out our max values """
     data = {'hourly': datetime.datetime(2012, 1, 1, 
@@ -325,7 +341,7 @@ def main():
             dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed)
         #else:
         #    print 'No LDM data sent for %s' % (nwsli,)
-    
+    update_pday()
     icursor.close()
     ISUAG.commit()
     ISUAG.close()
