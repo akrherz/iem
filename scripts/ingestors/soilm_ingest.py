@@ -248,9 +248,9 @@ def daily_process(nwsli, maxts):
 def update_pday():
     ''' Compute today's precip from the current_log archive of data '''
     accesstxn.execute("""
-    SELECT iemid, sum(case when phour > 0 then phour else 0 end) from 
+    SELECT s.iemid, sum(case when phour > 0 then phour else 0 end) from 
     current_log s JOIN stations t on (t.iemid = s.iemid) 
-    WHERE t.network = 'ISUSM' and valid > 'TODAY' GROUP by iemid
+    WHERE t.network = 'ISUSM' and valid > 'TODAY' GROUP by s.iemid
     """)
     data = {}
     for row in accesstxn:
