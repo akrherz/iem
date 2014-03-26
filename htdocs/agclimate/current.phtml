@@ -16,16 +16,19 @@
  $table = "<table class='table table-striped table-bordered table-condensed'>
  		<tr><th rowspan='2'>Location</th>
  		<th rowspan='2'>Valid</th>
- 		<th rowspan='2'>Air &deg;F</th>
- 		<th rowspan='2'>Rain inch</th>
+ 		<th colspan='3'>Air Temp &deg;F</th>
+ 		<th colspan='2'>Rain inch</th>
  		<th>4 inches</th>
  		<th colspan='2'>12 inches</th>
  		<th colspan='2'>24 inches</th>
  		<th colspan='2'>50 inches</th>
  		</tr>
- 		<tr><th>Temp &deg;F</th><th>Temp &deg;F</th><th>Moisture %</th>
- 		<th>Temp &deg;F</th><th>Moisture %</th>
- 		<th>Temp &deg;F</th><th>Moisture %</th>
+ 		<tr>
+ 		<th>Ob</th><th>High</th><th>Low</th>
+ 		<th>Hour</th><th>Day</th>
+ 		<th>Temp &deg;F</th><th>Temp &deg;F</th><th>Moist %</th>
+ 		<th>Temp &deg;F</th><th>Moist %</th>
+ 		<th>Temp &deg;F</th><th>Moist %</th>
  		</tr>";
  $offline = Array();
  $threshold = time() - 86400;
@@ -40,11 +43,13 @@
  	
  	$pday = ($data->db['pday'] < 0) ? 0 : $data->db['pday'];
  	$table .= sprintf("<tr><td><a href=\"%s\">%s</a></td><td>%s</td>
- 			<td>%.1f</td><td>%.2f</td><td>%.1f</td><td>%.1f</td><td>%s</td>
+ 			<td>%.1f</td><td>%.1f</td><td>%.1f</td>
+ 			<td>%.2f</td><td>%.2f</td><td>%.1f</td><td>%.1f</td><td>%s</td>
  			<td>%.1f</td><td>%s</td>
  			<td>%.1f</td><td>%s</td></tr>", $uri, $nt->table[$sid]['name'],
  			date("j M g A", $data->ts), $data->db["tmpf"],
- 			$pday, $data->db["c1tmpf"],
+ 			$data->db["max_tmpf"], $data->db["min_tmpf"], 
+ 			$data->db['phour'], $pday, $data->db["c1tmpf"],
  			$data->db["c2tmpf"], 
 			($data->db["c2smv"] < 0) ? "Frozen": round($data->db["c2smv"],1),
  			 $data->db["c3tmpf"], 
