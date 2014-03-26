@@ -1,12 +1,39 @@
 <?php
  include("../../config/settings.inc.php");
- $TITLE = "IEM | ISU Ag Climate";
- $THISPAGE = "networks-agclimate";
- include("$rootpath/include/header.php");
-?>
+ include_once "../../include/myview.php";
+ $t = new MyView();
+ 
+ $t->title = "ISU Ag Climate Network Metadata";
+ $t->thispage = "networks-agclimate";
 
-<h3>ISU Agclimate Data information</h3>
+$t->content = <<<EOF
+<ol class="breadcrumb">
+		<li><a href="/agclimate/">ISU Ag Climate</a></li>
+		<li class="active">Network Metadata</li>
+</ol>
 
+<h3>ISU Soil Moisture Network</h3>
+
+<div class="alert alert-info">These stations were installed in 2013-2014 and
+		include soil moisture sensors.</div>
+		
+<h4>Campbell Scientific Sensor Package</h4>
+
+<ul>
+ <li><a href="http://www.campbellsci.com/cr1000">CR1000 Data Logger</a></li>
+ <li><a href="http://www.campbellsci.com/cm106">CM106 Tripod</a> (station mast)</li>
+ <li><a href="http://www.campbellsci.com/cs300-pyranometer">CS300 Pyranometer</a> (solar radiation)</li>
+ <li><a href="http://www.campbellsci.com/03002-wind-sentry">03002 Wind Sentry</a> (wind speed and direction)</li>
+ <li><a href="http://www.campbellsci.com/cs215">CS215 Air Temperature and Relative Humidity</a></li>
+ <li><a href="http://www.campbellsci.com/te525-l">TE525 Rain Gage</a></li>
+ <li><a href="http://www.campbellsci.com/cs655">Campbell CS655 Water Content Reflectometers</a> (Soil Moisture, Temperature)</li>
+</ul>
+		
+
+<h3>Legacy ISU Ag Climate Network</h3>
+
+<div class="alert alert-info">These stations were removed in spring 2014.</div>
+		
 <table>
 <caption>Station Id conversion table</caption>
 <tr><th>StationId:</th><th>Station Name:</th><th>Data Starts At:</th><th>Data Ends At:</th></tr>
@@ -30,7 +57,12 @@
 
 <p>You can get lat/lon information from <a href="/sites/networks.php?network=ISUAG&format=html">this page</a>.
 
-<h4>Units for Data</h4>
+
+
+
+<div class="row">
+		<div class="col-md-6 col-sm-6">
+		<h4>Units for Data</h4>
 
 <table>
 <tr><td>Evapotranspiration</td><td>inches</td></tr>
@@ -41,12 +73,12 @@
 <tr><td>Wind speeds</td><td>MPH</td></tr>
 <tr><td>Time</td><td>local time, either CST or CDT</td></tr>
 </table>
-
+		
+<h4>Hardware Specs</h4>
+		
 <p><strong>Soil Temperature</strong> The soil probe is 4 inches deep underneath
 a one square meter bare patch of soil.
-
-<h4>Hardware Specs</h4>
-
+		
 <p><strong>Temperature:</strong> All of our stations have either the Campbell 
 HMP35 or HMP45.  The 35 was discontinued and replaced with the 45. They are 
 mounted within a radiation grill at 2 meters height.
@@ -54,4 +86,13 @@ mounted within a radiation grill at 2 meters height.
 <p><strong>Solar Radiation:</strong> LI-COR pyranometer, 
 model <a href="http://www.campbellsci.com/li200x-l">LI200X</a>.
 
-<?php include("$rootpath/include/footer.php"); ?>
+</div>
+		<div class="col-md-6 col-sm-6 well">
+		<img src="/agclimate/images/campbell.jpg" class="img img-responsive" />
+		</div>
+		</div>
+
+EOF;
+$t->render('single.phtml');
+?>
+

@@ -1,10 +1,11 @@
 <?php
 /* Create a table of soil temperature probabilities based on obs? */
 include("../../config/settings.inc.php");
-include("$rootpath/include/database.inc.php");
-$THISPAGE="networks-agclimate";
-include("$rootpath/include/header.php");
-include("$rootpath/include/imagemaps.php");
+include_once "../../include/myview.php";
+$t = new MyView();
+include("../../include/database.inc.php");
+$t->thispage = "networks-agclimate";
+include("../../include/imagemaps.php");
 
 $station = isset($_GET["station"]) ? $_GET['station']: "A130209";
 $tstr = isset($_GET["tstr"]) ? $_GET['tstr']: "50,45,40,35,32,28,23";
@@ -82,9 +83,17 @@ for ($i=182;$i<366;$i=$i+5) {
   $fall .= sprintf("<tr><th>%s</th>%s</tr>", date("M d", $ts), $tblrows[$i]);
 }
 $fall .= "</table>";
-?>
 
-<h3>4 inch soil temperature probabilities</h3>
+$sselect = isuagSelect($station);
+
+$t->title = "ISU Ag Climate Soil Temperature Probabilities";
+$t->content = <<<EOF
+<ol class="breadcrumb">
+		<li><a href="/agclimate/">ISU Ag Climate</a></li>
+		<li class="active">Soil Temp Probs</li>
+</ol>
+
+<h3>4 inch Soil Temperature Probabilities</h3>
 
 <p>This application computes soil temperature exceedance based on the
 observation record of a ISU Ag Climate site.  The average daily 4 inch
@@ -96,11 +105,14 @@ below the given threshold was observed <strong>after</strong> a given date.</li>
 below the given threshold was observed <strong>before</strong> a given date.</li>
 </ul>
 
+<div class="alert alert-info">This application uses the legacy ISU Ag Climate 
+network for its computations.  Data from the newer ISU Soil Moisture Network
+is not considered.</div>
 
-
-<form method="GET">
-<p><b>Select Station:</b><?php echo isuagSelect($station); ?>
-<p><b>Thresholds:</b><input type="text" value="<?php echo $tstr; ?>" name="tstr"> <i>Comma Seperated</i>
+<form method="GET" name='soil'>
+<p><b>Select Station:</b>{$sselect}
+<p><b>Thresholds:</b>
+<input type="text" value="{$tstr}" name="tstr"> <i>Comma Seperated</i>
 <br />
 <input type="submit" value="Request">
 </form>
@@ -109,12 +121,13 @@ below the given threshold was observed <strong>before</strong> a given date.</li
 <tr>
 <td valign="top">
  <h3>Spring Probabilities<br />Given date to July 1rst</h3>
- <?php echo $spring; ?>
+ {$spring}
 </td>
 <td valign="top">
  <h3>Fall Probabilities<br />July 1rst to given date</h3>
- <?php echo $fall; ?>
+ {$fall}
 </td>
 </table>
-
-<?php include("$rootpath/include/footer.php"); ?>
+EOF;
+$t->render('single.phtml');
+ ?>
