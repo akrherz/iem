@@ -56,6 +56,24 @@ def safe_t(val):
         return 'M'
     return '%.1f' % (temperature(val, 'C').value('F'),)
 
+def safe_p(val):
+    ''' precipitation '''
+    if val is None or val < 0:
+        return 'M'
+    return '%.2f' % (val / 25.4,)
+
+def safe(val, precision):
+    ''' safe precision formatter '''
+    if val is None or val < 0:
+        return 'M'
+    return round(val,precision)
+
+def safe_m(val):
+    '''  '''
+    if val is None or val < 0:
+        return 'M'
+    return round(val * 100.,0)
+
 def get_data( ts ):
     ''' Get the data for this timestamp '''
     nt = network.Table("ISUSM")
@@ -73,11 +91,18 @@ def get_data( ts ):
         data['features'].append({"type": "Feature", "id": i,
             "properties": {
                 "rh":  "%.0f%%" % (row["rh"],),
+                "hrprecip" : safe_p(row['rain_mm_tot']),
+                "et": safe_p(row['etalfalfa']),
+                "bat": safe(row['battv_min'], 2),
+                "radmj": safe(row['slrmj_tot'], 2),
                 "tmpf": safe_t(row['tair_c_avg']),
                 "soil04t": safe_t(row['tsoil_c_avg']),
                 "soil12t": safe_t(row['t12_c_avg']),
                 "soil24t": safe_t(row['t24_c_avg']),
                 "soil50t": safe_t(row['t50_c_avg']),
+                "soil12m": safe_m(row['vwc_12_avg']),
+                "soil24m": safe_m(row['vwc_24_avg']),
+                "soil50m": safe_m(row['vwc_50_avg']),
                 "wind": "%s@%.0f" % (drct2txt(row['winddir_d1_wvt']), 
                                     row['ws_mps_s_wvt'] * 2.23)
             },

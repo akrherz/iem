@@ -33,26 +33,14 @@ $t->bodyextra = "onload=\"init()\"";
  
  $t->content = <<<EOF
 
+<h3><span class="badge">New!</span> ISU Soil Moisture Network</h3>
+ <div class="alert alert-info">
+ Iowa State University is in the process of deploying a new network of 
+ automated weather equipment with the standard suite of weather instruments 
+ along with soil temperature and moisture sensors.  The soil moisture data is
+ a work-in-progress as a calibration step is yet necessary at many of the sites.
+ </div>
  
-<div class="row">
-	<div class="col-md-2 col-sm-2">
-	Available Tools:
-	</div>
-	<div class="col-md-2 col-sm-2">
-	<a href="current.phtml"><i class="glyphicon glyphicon-refresh"></i> Sortable Currents</a>
-	</div>
- 	<div class="col-md-3 col-sm-3">
-	<a href="hist/hourly.php"><i class="glyphicon glyphicon-cloud-download"></i> Hourly Data Download</a>
-	</div>
-	<div class="col-md-3 col-sm-3">
-	<a href="hist/daily.php"><i class="glyphicon glyphicon-cloud-download"></i>  Daily Data Download</a>
-	</div>
-	<div class="col-md-2 col-sm-2">
-	<a href="smts.php"><i class="glyphicon glyphicon-signal"></i>plot timeseries</a>
-	</div>
-</div>
-
-<h3>ISU Soil Moisture Data Explorer:</h3>
 <form name="mapper">
 <div class="row">
 	<div class="col-md-3 col-sm-5 well">
@@ -65,13 +53,29 @@ $t->bodyextra = "onload=\"init()\"";
 <h4>Select Variable:</h4>
 <select name="varname" id="varpicker">
 	<option value="tmpf">Air Temperature [F]</option>
+	<option value="bat">Battery Voltage [V]</option>
+	<option value="et">Evapotranspiration [inch]</option>
+	<option value="hrprecip">Hourly Precipitation [inch]</option>
+	<option value="radmj">Hourly Radiation [MJ]</option>
 	<option value="rh">Relative Humidity [%]</option>
-	<option value="wind">Wind Direction + Speed [mph]</option>
+	<option value="soil12m">Soil Moisture (12 inch) [%]</option>
+	<option value="soil24m">Soil Moisture (24 inch) [%]</option>
+	<option value="soil50m">Soil Moisture (50 inch) [%]</option>
 	<option value="soil04t">Soil Temperature (4 inch) [F]</option>
 	<option value="soil12t">Soil Temperature (12 inch) [F]</option>
 	<option value="soil24t">Soil Temperature (24 inch) [F]</option>
 	<option value="soil50t">Soil Temperature (50 inch) [F]</option>
+	<option value="wind">Wind Direction + Speed [mph]</option>
 </select>
+
+<h4>Available Tools:</h4>
+<ul>
+<li><a href="current.phtml"><i class="glyphicon glyphicon-refresh"></i> Sortable Currents</a></li>
+<li><a href="hist/hourly.php"><i class="glyphicon glyphicon-cloud-download"></i> Hourly Data Download</a></li>
+<li><a href="hist/daily.php"><i class="glyphicon glyphicon-cloud-download"></i>  Daily Data Download</a></li>
+<li><a href="smts.php"><i class="glyphicon glyphicon-signal"></i> Plot Time Series</a></li>
+</ul>
+
 	</div>
 	<div class="col-md-9 col-sm-7">
  		<span id="maptitle">The map is displaying Air Temperature [F] valid at {$dt}</span>
@@ -80,66 +84,73 @@ $t->bodyextra = "onload=\"init()\"";
 </div>
 </form>
 
-<h3 class="page-heading">Legacy ISU AgClimate Network</h3>
+<h3>Legacy ISU AgClimate Network</h3>
 
-<p>The Iowa State University "Ag Climate" network is one of the nation's 
+<div class="alert alert-info">The Iowa State University "Ag Climate" network is one of the nation's 
 oldest automated weather observation networks with data dating back to 1986.
-These stations are scheduled to be removed during the spring of 2014.
+These stations are scheduled to be removed during the spring of 2014.</div>
 
-<br clear="all" />
 <div class="row">
-	<div class="col-md-3">
-	<span style="font-size: 1.3em;">ISU Ag Climate:</span>
-	</div>
-	<div class="col-md-2">
-	<a href="hist/hourlyRequest.php"><img src="/images/down.png" /><br />Hourly Data<br />Download</a>
-	</div>
-	<div class="col-md-2">
-	<a href="hist/dailyRequest.php"><img src="/images/down.png" /><br />Daily Data<br />Download</a>
-	</div>
-	<div class="col-md-2">
-	<a href="../GIS/apps/agclimate/gsplot.phtml"><img src="../images/view_icon.png" /><br />Growing<br />Season</a>
-	</div>
-	<div class="col-md-2">
-	<a href="soilt.php"><img src="../images/find.png" /><br />4 inch Soil<br />Temperatures</a>
-	</div>
-</div>
-
-
-<h4>Information:</h4>
+ 	<div class="col-md-4 col-sm-4">
+ 		<h4>Available Tools:</h4>
+<ul>
+ <li><a href="hist/hourlyRequest.php">Hourly Data Download</a></li>
+<li><a href="hist/dailyRequest.php">Daily Data Download</a></li>
+<li><a href="/GIS/apps/agclimate/gsplot.phtml">Growing Season</a></li>
+<li><a href="soilt.php">4 inch Soil Temperatures</a></li>
+<li><a href="/GIS/apps/agclimate/gsplot.phtml">Growing Season Maps</a></li>
+<li><a href="/plotting/agc/">Time Series Charts</a></li>
+<li><a href="soilt-prob.php">4in Soil Temperatures</a></li>
+<li><a href="/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a></li>
+</ul>			
+ 	</div>
+ 	<div class="col-md-4 col-sm-4">
+ 	<h4>Information:</h4>
 <ul>
 <li><a href="/agclimate/info.phtml">Information</a> about network stations.</li>
 <li><a href="http://www.hprcc.unl.edu/awdn/et/">Information on PET</a> calculations done by the High Plains Climate Center.</li>
+</ul>		
+ 	<h4>Accumulated values:</h4>
+<ul>
+ 	<li><a href="display.php?prod=10">Monthly evapotranspiration</a></li>
+    <li><a href="display.php?prod=11">Monthly rainfall</a></li>
+    <li><a href="display.php?prod=12">Standard Chill Units since 1 Sept</a></li>
+</ul>	
+ 	</div>
+ 	<div class="col-md-4 col-sm-4">
+ <h4>Plots:</h4>
+<ul>
+  <li><a href="display.php?prod=1">Max/Min Air Temps</a></li>
+  <li><a href="display.php?prod=2">Avg 4in Soil Temps</a></li>
+  <li><a href="display.php?prod=3">Max/Min 4in Soil Temps</a></li>
+  <li><a href="/data/soilt_day1.png">County-based Soil Temps</a></li>
+  <li><a href="display.php?prod=4">Solar Radiation Values</a></li>
+  <li><a href="/GIS/apps/agclimate/dayplot.phtml?pvar=c90">Precipitation</a></li>
+  <li><a href="display.php?prod=6">Potential E-T</a></li>
+  <li><a href="display.php?prod=7">Peak Wind Gust (5 sec)</a></li>
+  <li><a href="display.php?prod=8">Average Wind Speed</a></li>
+  <li><a href="display.php?prod=9">Max/Min Dew Points</a></li>				
 </ul>
-
-<h4>Rainfall Disclaimer:</h4>
+ 	</div>
+</div>
+ 				
+ 				
+<div class="alert alert-danger">
+ <h4>Rainfall Disclaimer:</h4>
 <p>The Ag Climate network uses a non-heated tipping bucket rain gage and is
 unable to measure snowfall. If you are interested in higher quality 
 precipitation data, check out the <a href="/COOP/">NWS COOP</a> network
-of human observations.
+of human observations.</div>
+ 				
+ 				
 
-<h4>Plots:</h4>
-  <a HREF="display.php?prod=1">Max/Min Air Temps</a><br>
-  <a HREF="display.php?prod=2">Avg 4in Soil Temps</a><br>
-  <a HREF="display.php?prod=3">Max/Min 4in Soil Temps</a><br>
-  <a href="../data/soilt_day1.png">County-based Soil Temps</a><br />
-  <a HREF="display.php?prod=4">Solar Radiation Values</a><br>
-  <a HREF="/GIS/apps/agclimate/dayplot.phtml?pvar=c90">Precipitation</a><br>
-  <a HREF="display.php?prod=6">Potential E-T</a><br>
-  <a HREF="display.php?prod=7">Peak Wind Gust (5 sec)</a><br>
-  <a HREF="display.php?prod=8">Average Wind Speed</a><br>
-  <a HREF="display.php?prod=9">Max/Min Dew Points</a><br>
 
-<h4>Accumulated values:</h4>
-      <a HREF="display.php?prod=10">Monthly evapotranspiration</a><br>
-      <a HREF="display.php?prod=11">Monthly rainfall</a><br>
-      <a HREF="display.php?prod=12">Standard Chill Units since 1 Sept</a><br>
 
-<h4>Data Applications:</h4>
-  <a href="/GIS/apps/agclimate/gsplot.phtml">Growing Season Maps</a><br>
-  <a href="/plotting/agc/">Time Series Charts</a><br>
-  <a href="soilt-prob.php">4in Soil Temperatures</a><br>
-  <a HREF="/GIS/apps/agclimate/dayplot.phtml">Daily Data Plotter</a><br>
+
+
+
+
+
 
 EOF;
 
