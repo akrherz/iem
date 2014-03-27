@@ -8,14 +8,14 @@ $t->thispage = "iem-info";
 
 $y = date("Y");
 $t->content = <<<EOF
-<h3 class="heading">IEM Ag Weather/Climate Information</h3><p>
+<h3>IEM Ag Weather/Climate Information</h3><p>
 
 <div class="warning">Please <a href="/info/contacts.php">suggest</a> features for this page.  We are looking to collect all relevant
 Iowa Ag Weather information in a one-stop location.</div>
 
 <p>
 
-<table cellspacing="0" border="1" cellpadding="7">
+<table class="table table-striped">
 <tr>
  <th></th>
  <th>Current</th>
@@ -41,7 +41,10 @@ Iowa Ag Weather information in a one-stop location.</div>
 
 <tr>
  <th>Soil Moisture</th>
- <td><a href="http://wepp.mesonet.agron.iastate.edu/GIS/sm.phtml?pvar=vsm">Modelled Estimates</a></td>
+ <td>
+ <a href="http://wepp.mesonet.agron.iastate.edu/GIS/sm.phtml?pvar=vsm">Modelled Estimates</a>
+ <br /><span class="badge">new!</span> <a href="/agclimate/">ISU Soil Moisture Network</a>
+ </td>
  <td></td>
 </tr>
 
@@ -49,6 +52,7 @@ Iowa Ag Weather information in a one-stop location.</div>
  <th>Soil Temperatures</th>
  <td><a href="/agclimate/soilt.php">County Estimates</a>
   <br /><a href="/timemachine/#57.0">Archived County Estimates</a>
+ <br /><span class="badge">new!</span> <a href="/agclimate/">ISU Soil Moisture Network</a>
  </td>
  <td></td>
 </tr>
