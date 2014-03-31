@@ -121,7 +121,7 @@ def run_model(model, ts):
 def check_and_run(model, ts):
     ''' Check the database for missing data '''
     table = "model_gridpoint_%s" % (ts.year,)
-    mcursor.execute("""SELECT count(*) from """+table+""" WHERE
+    mcursor.execute("""SELECT * from """+table+""" WHERE
     runtime = %s and model = %s""", (ts, model))
     if mcursor.rowcount < 10:
         print 'Rerunning %s [runtime=%s] due to rowcount %s' % (model, ts, 
