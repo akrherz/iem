@@ -110,6 +110,24 @@ def run(model, station, lon, lat, ts):
         count += 1
     return count
 
+def run_model(model, ts):
+    ''' Actually do a model and timestamp '''
+    for sid in table.sts.keys():
+        cnt = run(model, "K"+sid, table.sts[sid]['lon'], 
+                  table.sts[sid]['lat'], ts)
+        if cnt == 0:
+            print 'No data', "K"+sid, ts, model
+
+def check_and_run(model, ts):
+    ''' Check the database for missing data '''
+    table = "model_gridpoint_%s" % (ts.year,)
+    mcursor.execute("""SELECT count(*) from """+table+""" WHERE
+    runtime = %s and model = %s""", (ts, model))
+    if mcursor.rowcount < 10:
+        print 'Rerunning %s [runtime=%s] due to rowcount %s' % (model, ts, 
+                                                      mcursor.rowcount)
+        run_model(model, ts)
+
 if __name__ == '__main__':
     ''' Go Go gadget '''
     gts = datetime.datetime.utcnow()
@@ -121,18 +139,13 @@ if __name__ == '__main__':
 
     if gts.hour % 6 == 0:
         ts = gts - datetime.timedelta(hours=6)
-        for sid in table.sts.keys():
-            cnt = run("GFS", "K"+sid, table.sts[sid]['lon'], 
-                      table.sts[sid]['lat'], ts)
-            if cnt == 0:
-                print 'No data', "K"+sid, ts, 'GFS'
-            cnt = run("NAM", "K"+sid, table.sts[sid]['lon'], 
-                      table.sts[sid]['lat'], ts)
-            if cnt == 0:
-                print 'No data', "K"+sid, ts, 'GFS'
-    for sid in table.sts.keys():
-        ts = gts - datetime.timedelta(hours=2)
-        run("RAP", "K"+sid, table.sts[sid]['lon'], table.sts[sid]['lat'], ts)
+        for model in ['GFS', 'NAM']:
+            run_model(model, ts)
+            check_and_run(model, ts - datetime.timedelta(days=7))
+    
+    ts = gts - datetime.timedelta(hours=2)
+    run_model("RAP", ts)
+    check_and_run('RAP', ts - datetime.timedelta(days=7))
     mcursor.close()
     MOS.commit()
     MOS.close()
