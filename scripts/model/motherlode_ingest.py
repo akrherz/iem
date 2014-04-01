@@ -15,11 +15,11 @@ import urllib2
 import datetime
 import pytz
 
-BASE_URL = "http://thredds.ucar.edu/thredds/ncss/grib/NCEP/"
+BASE_URL = "http://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/"
 URLS = { 
- 'NAM' : "NAM/CONUS_12km/conduit/NAM_CONUS_12km_conduit_%Y%m%d_%H00.grib2/GC",
- 'GFS' : "GFS/Global_0p5deg/GFS_Global_0p5deg_%Y%m%d_%H00.grib2/GC",
- 'RAP' : "RAP/CONUS_13km/RR_CONUS_13km_%Y%m%d_%H00.grib2/GC",
+ 'NAM' : "NAM/CONUS_12km/conduit/files/NAM_CONUS_12km_conduit_%Y%m%d_%H00.grib2",
+ 'GFS' : "GFS/Global_0p5deg/files/GFS_Global_0p5deg_%Y%m%d_%H00.grib2",
+ 'RAP' : "RAP/CONUS_13km/files/RR_CONUS_13km_%Y%m%d_%H00.grib2",
 }
 VLOOKUP = {
  'sbcape': {'NAM': 'Convective_available_potential_energy_surface',
@@ -32,19 +32,19 @@ VLOOKUP = {
             'GFS': 'Precipitable_water_entire_atmosphere',
             'RAP': 'Precipitable_water_entire_atmosphere'},
  'precipcon': {'RAP': 
-               'Convective_precipitation_surface_Mixed_Intervals_Accumulation',
-            'NAM': 'Convective_precipitation_surface_Mixed_Intervals_Accumulation',
+               'Convective_precipitation_surface_Mixed_intervals_Accumulation',
+            'NAM': 'Convective_precipitation_surface_3_Hour_Accumulation',
             'GFS': 
-            'Convective_precipitation_surface_Mixed_Intervals_Accumulation',
+            'Convective_precipitation_surface_Mixed_intervals_Accumulation',
            },
  'precipnon': {'RAP': None,
             'NAM': None,
             'GFS': None
            },
  'precip': {'RAP': 
-'Large-scale_precipitation_non-convective_surface_Mixed_Intervals_Accumulation',
-            'NAM': 'Total_precipitation_surface_Mixed_Intervals_Accumulation',
-            'GFS': 'Total_precipitation_surface_Mixed_Intervals_Accumulation',
+'Large-scale_precipitation_non-convective_surface_Mixed_intervals_Accumulation',
+            'NAM': 'Total_precipitation_surface_3_Hour_Accumulation',
+            'GFS': 'Total_precipitation_surface_Mixed_intervals_Accumulation',
            }
 }
 
