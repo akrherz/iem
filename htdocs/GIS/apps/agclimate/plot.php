@@ -110,8 +110,8 @@ if ($network == 'ISUAG'){
 	if (in_array($pvar, $hourlyvars)){
 		$q = <<<EOF
   SELECT station,
-  max(c2f(t06_c_avg)) as c300h, '' as c300h_f,
-  min(c2f(t06_c_avg)) as c300l, '' as c300l_f,
+  max(c2f(tsoil_c_avg)) as c300h, '' as c300h_f,
+  min(c2f(tsoil_c_avg)) as c300l, '' as c300l_f,
   avg(rh) as c20, '' as c20_f
   from sm_hourly
 	WHERE valid BETWEEN '${dstamp} 00:00' and '${dstamp} 23:59'
