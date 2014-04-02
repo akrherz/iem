@@ -162,7 +162,7 @@ function hour24Select($selected, $name){
   return $s;
 } 
 
-function hourSelect($selected, $name, $jsextra){
+function hourSelect($selected, $name, $jsextra=''){
   $s = "<select name=\"{$name}\" {$jsextra}>\n";
   for ($i=0; $i<24;$i++) {
     $ts = mktime($i,0,0,1,1,0);
